@@ -3837,8 +3837,8 @@ dw2_expand_symtabs_matching_one
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify);
 
-static void
-dw2_map_matching_symbols
+void
+dwarf2_gdb_index::map_matching_symbols
   (struct objfile *objfile,
    const lookup_name_info &name, domain_enum domain,
    int global,
@@ -3893,18 +3893,6 @@ dw2_map_matching_symbols
 					    domain, callback))
 	return;
     }
-}
-
-void
-dwarf2_gdb_index::map_matching_symbols
-  (struct objfile *objfile,
-   const lookup_name_info &name, domain_enum domain,
-   int global,
-   gdb::function_view<symbol_found_callback_ftype> callback,
-   symbol_compare_ftype *ordered_compare)
-{
-  dw2_map_matching_symbols (objfile, name, domain, global, callback,
-			    ordered_compare);
 }
 
 /* Starting from a search name, return the string that finds the upper
@@ -4858,14 +4846,14 @@ dw_expand_symtabs_matching_file_matcher
     }
 }
 
-static void
-dw2_expand_symtabs_matching
-  (struct objfile *objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   const lookup_name_info *lookup_name,
-   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-   enum search_domain kind)
+void
+dwarf2_gdb_index::expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     enum search_domain kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -4897,19 +4885,6 @@ dw2_expand_symtabs_matching
 			     kind);
       return true;
     }, per_objfile);
-}
-
-void
-dwarf2_gdb_index::expand_symtabs_matching
-    (struct objfile *objfile,
-     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-     const lookup_name_info *lookup_name,
-     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-     enum search_domain kind)
-{
-  dw2_expand_symtabs_matching (objfile, file_matcher, lookup_name,
-			       symbol_matcher, expansion_notify, kind);
 }
 
 /* A helper for dw2_find_pc_sect_compunit_symtab which finds the most specific
