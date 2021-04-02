@@ -270,6 +270,23 @@ struct objfile_per_bfd_storage
 
   ~objfile_per_bfd_storage ();
 
+  /* Intern STRING in this object's string cache and return the unique copy.
+     The copy has the same lifetime as this object.
+
+     STRING must be null-terminated.  */
+
+  const char *intern (const char *str)
+  {
+    return (const char *) string_cache.insert (str, strlen (str) + 1);
+  }
+
+  /* Same as the above, but for an std::string.  */
+
+  const char *intern (const std::string &str)
+  {
+    return (const char *) string_cache.insert (str.c_str (), str.size () + 1);
+  }
+
   /* The storage has an obstack of its own.  */
 
   auto_obstack storage_obstack;
@@ -516,15 +533,14 @@ public:
      lifetime as the per-BFD object.  */
   const char *intern (const char *str)
   {
-    return (const char *) per_bfd->string_cache.insert (str, strlen (str) + 1);
+    return per_bfd->intern (str);
   }
 
   /* Intern STRING and return the unique copy.  The copy has the same
      lifetime as the per-BFD object.  */
   const char *intern (const std::string &str)
   {
-    return (const char *) per_bfd->string_cache.insert (str.c_str (),
-							str.size () + 1);
+    return per_bfd->intern (str);
   }
 
   /* Retrieve the gdbarch associated with this objfile.  */

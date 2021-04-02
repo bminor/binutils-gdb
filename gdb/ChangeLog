@@ -1,3 +1,10 @@
+2021-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* objfiles.h (struct objfile_per_bfd_storage) <intern>: New
+	methods.
+	(struct objfile) <intern>: Use
+	objfile::objfile_per_bfd_storage::intern.
+
 2021-04-01  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (TYPE_FLAG_ENUM): Remove, replace all uses
