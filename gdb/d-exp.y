@@ -640,7 +640,7 @@ type_aggregate_p (struct type *type)
 	  || type->code () == TYPE_CODE_UNION
 	  || type->code () == TYPE_CODE_MODULE
 	  || (type->code () == TYPE_CODE_ENUM
-	      && TYPE_DECLARED_CLASS (type)));
+	      && type->is_declared_class ()));
 }
 
 /* Take care of parsing a number (anything that starts with a digit).

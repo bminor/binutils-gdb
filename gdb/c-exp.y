@@ -1879,7 +1879,7 @@ type_aggregate_p (struct type *type)
 	  || type->code () == TYPE_CODE_UNION
 	  || type->code () == TYPE_CODE_NAMESPACE
 	  || (type->code () == TYPE_CODE_ENUM
-	      && TYPE_DECLARED_CLASS (type)));
+	      && type->is_declared_class ()));
 }
 
 /* Validate a parameter typelist.  */

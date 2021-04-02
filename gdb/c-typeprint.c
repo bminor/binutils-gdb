@@ -965,7 +965,7 @@ output_access_specifier (struct ui_file *stream,
 static bool
 need_access_label_p (struct type *type)
 {
-  if (TYPE_DECLARED_CLASS (type))
+  if (type->is_declared_class ())
     {
       QUIT;
       for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
@@ -1061,7 +1061,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
   c_type_print_modifier (type, stream, 0, 1, language);
   if (type->code () == TYPE_CODE_UNION)
     fprintf_filtered (stream, "union ");
-  else if (TYPE_DECLARED_CLASS (type))
+  else if (type->is_declared_class ())
     fprintf_filtered (stream, "class ");
   else
     fprintf_filtered (stream, "struct ");
@@ -1499,7 +1499,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	    fprintf_filtered (stream, "union ");
 	  else if (type->code () == TYPE_CODE_STRUCT)
 	    {
-	      if (TYPE_DECLARED_CLASS (type))
+	      if (type->is_declared_class ())
 		fprintf_filtered (stream, "class ");
 	      else
 		fprintf_filtered (stream, "struct ");
@@ -1552,7 +1552,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
     case TYPE_CODE_ENUM:
       c_type_print_modifier (type, stream, 0, 1, language);
       fprintf_filtered (stream, "enum ");
-      if (TYPE_DECLARED_CLASS (type))
+      if (type->is_declared_class ())
 	fprintf_filtered (stream, "class ");
       /* Print the tag name if it exists.
 	 The aCC compiler emits a spurious 

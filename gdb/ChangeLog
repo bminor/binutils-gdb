@@ -1,5 +1,10 @@
 2021-04-01  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_DECLARED_CLASS): Remove, replace all uses
+	with type::is_declared_class.
+
+2021-04-01  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <is_declared_class,
 	set_is_declared_class>: New methods.
 	(TYPE_DECLARED_CLASS): Use type::is_declared_class, change all

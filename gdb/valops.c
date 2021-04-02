@@ -3313,7 +3313,7 @@ enum_constant_from_type (struct type *type, const char *name)
   int name_len = strlen (name);
 
   gdb_assert (type->code () == TYPE_CODE_ENUM
-	      && TYPE_DECLARED_CLASS (type));
+	      && type->is_declared_class ());
 
   for (i = TYPE_N_BASECLASSES (type); i < type->num_fields (); ++i)
     {

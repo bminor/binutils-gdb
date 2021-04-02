@@ -220,14 +220,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_NOTTEXT(t)	(((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_NOTTEXT)
 
-/* * True if this type was declared using the "class" keyword.  This is
-   only valid for C++ structure and enum types.  If false, a structure
-   was declared as a "struct"; if true it was declared "class".  For
-   enum types, this is true when "enum class" or "enum struct" was
-   used to declare the type..  */
-
-#define TYPE_DECLARED_CLASS(t) ((t)->declared_class ())
-
 /* * True if this type is a "flag" enum.  A flag enum is one where all
    the values are pairwise disjoint when "and"ed together.  This
    affects how enum values are printed.  */

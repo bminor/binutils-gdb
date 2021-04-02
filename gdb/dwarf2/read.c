@@ -23307,7 +23307,7 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
 	return determine_prefix (parent, cu);
       case DW_TAG_enumeration_type:
 	parent_type = read_type_die (parent, cu);
-	if (TYPE_DECLARED_CLASS (parent_type))
+	if (parent_type->is_declared_class ())
 	  {
 	    if (parent_type->name () != NULL)
 	      return parent_type->name ();
