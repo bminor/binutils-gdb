@@ -16147,7 +16147,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   if (cu->language == language_cplus && die->tag == DW_TAG_class_type)
-    TYPE_DECLARED_CLASS (type) = 1;
+    type->set_is_declared_class (true);
 
   /* Store the calling convention in the type if it's available in
      the die.  Otherwise the calling convention remains set to
@@ -16761,7 +16761,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
 	set_type_align (type, TYPE_RAW_ALIGN (underlying_type));
     }
 
-  TYPE_DECLARED_CLASS (type) = dwarf2_flag_true_p (die, DW_AT_enum_class, cu);
+  type->set_is_declared_class (dwarf2_flag_true_p (die, DW_AT_enum_class, cu));
 
   set_die_type (die, type, cu);
 
