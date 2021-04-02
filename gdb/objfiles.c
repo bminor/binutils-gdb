@@ -120,12 +120,10 @@ objfile_per_bfd_storage::~objfile_per_bfd_storage ()
 
 /* Create the per-BFD storage object for OBJFILE.  If ABFD is not
    NULL, and it already has a per-BFD storage object, use that.
-   Otherwise, allocate a new per-BFD storage object.  Note that it is
-   not safe to call this multiple times for a given OBJFILE -- it can
-   only be called when allocating or re-initializing OBJFILE.  */
+   Otherwise, allocate a new per-BFD storage object.  */
 
 static struct objfile_per_bfd_storage *
-get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
+get_objfile_bfd_data (bfd *abfd)
 {
   struct objfile_per_bfd_storage *storage = NULL;
 
@@ -154,7 +152,7 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 void
 set_objfile_per_bfd (struct objfile *objfile)
 {
-  objfile->per_bfd = get_objfile_bfd_data (objfile, objfile->obfd);
+  objfile->per_bfd = get_objfile_bfd_data (objfile->obfd);
 }
 
 /* Set the objfile's per-BFD notion of the "main" name and
@@ -363,7 +361,7 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
       build_objfile_section_table (this);
     }
 
-  per_bfd = get_objfile_bfd_data (this, abfd);
+  per_bfd = get_objfile_bfd_data (abfd);
 }
 
 /* If there is a valid and known entry point, function fills *ENTRY_P with it
