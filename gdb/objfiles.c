@@ -134,7 +134,7 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 
   if (storage == NULL)
     {
-      storage = new objfile_per_bfd_storage;
+      storage = new objfile_per_bfd_storage (abfd);
       /* If the object requires gdb to do relocations, we simply fall
 	 back to not sharing data across users.  These cases are rare
 	 enough that this seems reasonable.  */

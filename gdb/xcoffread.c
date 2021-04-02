@@ -1966,7 +1966,7 @@ xcoff_start_psymtab (psymtab_storage *partial_symtabs,
 {
   /* We fill in textlow later.  */
   legacy_psymtab *result = new legacy_psymtab (filename, partial_symtabs,
-					       objfile, 0);
+					       objfile->per_bfd, 0);
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct symloc);
@@ -2022,7 +2022,7 @@ xcoff_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
   for (i = 0; i < num_includes; i++)
     {
       legacy_psymtab *subpst =
-	new legacy_psymtab (include_list[i], partial_symtabs, objfile);
+	new legacy_psymtab (include_list[i], partial_symtabs, objfile->per_bfd);
 
       subpst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, symloc);
       ((struct symloc *) subpst->read_symtab_private)->first_symnum = 0;

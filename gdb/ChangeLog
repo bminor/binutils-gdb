@@ -1,5 +1,22 @@
 2021-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* psympriv.h (struct partial_symtab) <partial_symtab>: Change
+	objfile parameter for objfile_per_bfd_storage, adjust callers.
+	(struct standard_psymtab) <standard_psymtab>: Likewise.
+	(struct legacy_psymtab) <legacy_psymtab>: Likewise.
+	* psymtab.c (partial_symtab::partial_symtab): Likewise.
+	* ctfread.c (struct ctf_psymtab): Likewise.
+	* dwarf2/read.h (struct dwarf2_psymtab): Likewise.
+	* dwarf2/read.c (struct dwarf2_include_psymtab): Likewise.
+	(dwarf2_create_include_psymtab): Likewise.
+	* objfiles.h (struct objfile_per_bfd_storage)
+	<objfile_per_bfd_storage>: Add bfd parameter, adjust callers.
+	<get_bfd>: New method.
+	<m_bfd>: New field.
+	* objfiles.c (get_objfile_bfd_data): Adjust.
+
+2021-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* psymtab.c (partial_symtab::partial_symtab): Change
 	last_objfile_name to be an std::string.
 	* symfile.c (allocate_symtab): Likewise.

@@ -1917,7 +1917,7 @@ start_psymtab (psymtab_storage *partial_symtabs, struct objfile *objfile,
 	       const char *filename, CORE_ADDR textlow, int ldsymoff)
 {
   legacy_psymtab *result = new legacy_psymtab (filename, partial_symtabs,
-					       objfile, textlow);
+					       objfile->per_bfd, textlow);
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct symloc);
@@ -2040,7 +2040,7 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
   for (i = 0; i < num_includes; i++)
     {
       legacy_psymtab *subpst =
-	new legacy_psymtab (include_list[i], partial_symtabs, objfile);
+	new legacy_psymtab (include_list[i], partial_symtabs, objfile->per_bfd);
 
       subpst->read_symtab_private =
 	XOBNEW (&objfile->objfile_obstack, struct symloc);

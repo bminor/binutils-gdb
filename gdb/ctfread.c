@@ -125,9 +125,9 @@ struct ctf_psymtab : public standard_psymtab
 {
   ctf_psymtab (const char *filename,
 	       psymtab_storage *partial_symtabs,
-	       struct objfile *objfile,
+	       objfile_per_bfd_storage *objfile_per_bfd,
 	       CORE_ADDR addr)
-    : standard_psymtab (filename, partial_symtabs, objfile, addr)
+    : standard_psymtab (filename, partial_symtabs, objfile_per_bfd, addr)
   {
   }
 
@@ -1369,7 +1369,7 @@ create_partial_symtab (const char *name,
   ctf_psymtab *pst;
   struct ctf_context *ccx;
 
-  pst = new ctf_psymtab (name, partial_symtabs, objfile, 0);
+  pst = new ctf_psymtab (name, partial_symtabs, objfile->per_bfd, 0);
 
   ccx = XOBNEW (&objfile->objfile_obstack, struct ctf_context);
   ccx->fp = cfp;

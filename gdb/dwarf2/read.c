@@ -6248,8 +6248,8 @@ struct dwarf2_include_psymtab : public partial_symtab
 {
   dwarf2_include_psymtab (const char *filename,
 			  psymtab_storage *partial_symtabs,
-			  struct objfile *objfile)
-    : partial_symtab (filename, partial_symtabs, objfile)
+			  objfile_per_bfd_storage *objfile_per_bfd)
+    : partial_symtab (filename, partial_symtabs, objfile_per_bfd)
   {
   }
 
@@ -6305,10 +6305,10 @@ dwarf2_create_include_psymtab (dwarf2_per_bfd *per_bfd,
 			       const char *name,
 			       dwarf2_psymtab *pst,
 			       psymtab_storage *partial_symtabs,
-			       struct objfile *objfile)
+			       objfile_per_bfd_storage *objfile_per_bfd)
 {
   dwarf2_include_psymtab *subpst
-    = new dwarf2_include_psymtab (name, partial_symtabs, objfile);
+    = new dwarf2_include_psymtab (name, partial_symtabs, objfile_per_bfd);
 
   if (!IS_ABSOLUTE_PATH (subpst->filename))
     subpst->dirname = pst->dirname;
@@ -7560,11 +7560,9 @@ create_partial_symtab (dwarf2_per_cu_data *per_cu,
 		       dwarf2_per_objfile *per_objfile,
 		       const char *name)
 {
-  struct objfile *objfile = per_objfile->objfile;
-  dwarf2_psymtab *pst;
-
-  pst = new dwarf2_psymtab (name, per_objfile->per_bfd->partial_symtabs.get (),
-			    objfile, per_cu);
+  dwarf2_psymtab *pst
+    = new dwarf2_psymtab (name, per_objfile->per_bfd->partial_symtabs.get (),
+			  per_objfile->objfile->per_bfd, per_cu);
 
   pst->psymtabs_addrmap_supported = true;
 
@@ -22010,7 +22008,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 	      dwarf2_create_include_psymtab
 		(cu->per_objfile->per_bfd, include_name, pst,
 		 cu->per_objfile->per_bfd->partial_symtabs.get (),
-		 objfile);
+		 objfile->per_bfd);
 	  }
     }
   else

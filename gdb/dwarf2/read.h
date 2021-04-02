@@ -408,9 +408,9 @@ struct dwarf2_psymtab : public partial_symtab
 {
   dwarf2_psymtab (const char *filename,
 		  psymtab_storage *partial_symtabs,
-		  struct objfile *objfile,
+		  objfile_per_bfd_storage *objfile_per_bfd,
 		  dwarf2_per_cu_data *per_cu)
-    : partial_symtab (filename, partial_symtabs, objfile, 0),
+    : partial_symtab (filename, partial_symtabs, objfile_per_bfd, 0),
       per_cu_data (per_cu)
   {
   }

@@ -1436,9 +1436,9 @@ psymbol_functions::find_compunit_symtab_by_address (struct objfile *objfile,
 
 partial_symtab::partial_symtab (const char *filename,
 				psymtab_storage *partial_symtabs,
-				struct objfile *objfile,
+				objfile_per_bfd_storage *objfile_per_bfd,
 				CORE_ADDR textlow)
-  : partial_symtab (filename, partial_symtabs, objfile)
+  : partial_symtab (filename, partial_symtabs, objfile_per_bfd)
 {
   set_text_low (textlow);
   set_text_high (raw_text_low ()); /* default */
@@ -1561,28 +1561,29 @@ partial_symtab::add_psymbol (gdb::string_view name, bool copy_name,
 
 partial_symtab::partial_symtab (const char *filename_,
 				psymtab_storage *partial_symtabs,
-				struct objfile *objfile)
+				objfile_per_bfd_storage *objfile_per_bfd)
   : searched_flag (PST_NOT_SEARCHED),
     text_low_valid (0),
     text_high_valid (0)
 {
   partial_symtabs->install_psymtab (this);
 
-  filename = objfile->intern (filename_);
+  filename = objfile_per_bfd->intern (filename_);
 
   if (symtab_create_debug)
     {
       /* Be a bit clever with debugging messages, and don't print objfile
 	 every time, only when it changes.  */
-      static std::string last_objfile_name;
-      const char *this_objfile_name = objfile_name (objfile);
+      static std::string last_bfd_name;
+      const char *this_bfd_name
+	= bfd_get_filename (objfile_per_bfd->get_bfd ());
 
-      if (last_objfile_name.empty () || last_objfile_name != this_objfile_name)
+      if (last_bfd_name.empty () || last_bfd_name != this_bfd_name)
 	{
-	  last_objfile_name = this_objfile_name;
+	  last_bfd_name = this_bfd_name;
 	  fprintf_filtered (gdb_stdlog,
-			    "Creating one or more psymtabs for objfile %s ...\n",
-			    this_objfile_name);
+			    "Creating one or more psymtabs for %s ...\n",
+			    this_bfd_name);
 	}
       fprintf_filtered (gdb_stdlog,
 			"Created psymtab %s for module %s.\n",

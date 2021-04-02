@@ -2605,8 +2605,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	textlow = fh->adr;
       else
 	textlow = 0;
-      pst = new legacy_psymtab (fdr_name (fh), partial_symtabs, objfile,
-				textlow);
+      pst = new legacy_psymtab (fdr_name (fh), partial_symtabs,
+				objfile->per_bfd, textlow);
       pst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, symloc);
       memset (pst->read_symtab_private, 0, sizeof (struct symloc));
 
@@ -4646,7 +4646,7 @@ new_psymtab (const char *name, psymtab_storage *partial_symtabs,
 {
   legacy_psymtab *psymtab;
 
-  psymtab = new legacy_psymtab (name, partial_symtabs, objfile);
+  psymtab = new legacy_psymtab (name, partial_symtabs, objfile->per_bfd);
 
   /* Keep a backpointer to the file's symbols.  */
 
