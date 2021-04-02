@@ -1,5 +1,11 @@
 2021-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* psymtab.c (partial_symtab::partial_symtab): Change
+	last_objfile_name to be an std::string.
+	* symfile.c (allocate_symtab): Likewise.
+
+2021-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* objfiles.h (struct objfile_per_bfd_storage) <intern>: New
 	methods.
 	(struct objfile) <intern>: Use

@@ -1574,16 +1574,15 @@ partial_symtab::partial_symtab (const char *filename_,
     {
       /* Be a bit clever with debugging messages, and don't print objfile
 	 every time, only when it changes.  */
-      static char *last_objfile_name = NULL;
+      static std::string last_objfile_name;
+      const char *this_objfile_name = objfile_name (objfile);
 
-      if (last_objfile_name == NULL
-	  || strcmp (last_objfile_name, objfile_name (objfile)) != 0)
+      if (last_objfile_name.empty () || last_objfile_name != this_objfile_name)
 	{
-	  xfree (last_objfile_name);
-	  last_objfile_name = xstrdup (objfile_name (objfile));
+	  last_objfile_name = this_objfile_name;
 	  fprintf_filtered (gdb_stdlog,
 			    "Creating one or more psymtabs for objfile %s ...\n",
-			    last_objfile_name);
+			    this_objfile_name);
 	}
       fprintf_filtered (gdb_stdlog,
 			"Created psymtab %s for module %s.\n",
