@@ -220,11 +220,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_NOTTEXT(t)	(((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_NOTTEXT)
 
-/* * True if this type is a "flag" enum.  A flag enum is one where all
-   the values are pairwise disjoint when "and"ed together.  This
-   affects how enum values are printed.  */
-
-#define TYPE_FLAG_ENUM(t) (TYPE_MAIN_TYPE (t)->flag_flag_enum)
+#define TYPE_FLAG_ENUM(t) ((t)->is_flag_enum ())
 
 /* * Constant type.  If this is set, the corresponding type has a
    const modifier.  */
@@ -812,7 +808,7 @@ struct main_type
   /* * True if this is an enum type with disjoint values.  This
      affects how the enum is printed.  */
 
-  unsigned int flag_flag_enum : 1;
+  unsigned int m_flag_flag_enum : 1;
 
   /* * A discriminant telling us which field of the type_specific
      union is being used for this type, if any.  */
@@ -1194,6 +1190,20 @@ struct type
   void set_is_declared_class (bool is_declared_class) const
   {
     this->main_type->m_flag_declared_class = is_declared_class;
+  }
+
+  /* True if this type is a "flag" enum.  A flag enum is one where all
+     the values are pairwise disjoint when "and"ed together.  This
+     affects how enum values are printed.  */
+
+  bool is_flag_enum () const
+  {
+    return this->main_type->m_flag_flag_enum;
+  }
+
+  void set_is_flag_enum (bool is_flag_enum)
+  {
+    this->main_type->m_flag_flag_enum = is_flag_enum;
   }
 
   /* * Assuming that THIS is a TYPE_CODE_FIXED_POINT, return a reference

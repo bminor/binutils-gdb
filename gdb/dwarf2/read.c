@@ -16677,7 +16677,7 @@ update_enumeration_type_from_children (struct die_info *die,
     type->set_is_unsigned (true);
 
   if (flag_enum)
-    TYPE_FLAG_ENUM (type) = 1;
+    type->set_is_flag_enum (true);
 }
 
 /* Given a DW_AT_enumeration_type die, set its type.  We do not
