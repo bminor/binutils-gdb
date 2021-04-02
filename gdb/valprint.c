@@ -616,7 +616,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
       fputs_styled (TYPE_FIELD_NAME (type, i), variable_name_style.style (),
 		    stream);
     }
-  else if (TYPE_FLAG_ENUM (type))
+  else if (type->is_flag_enum ())
     {
       int first = 1;
 

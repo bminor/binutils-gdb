@@ -220,8 +220,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_NOTTEXT(t)	(((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_NOTTEXT)
 
-#define TYPE_FLAG_ENUM(t) ((t)->is_flag_enum ())
-
 /* * Constant type.  If this is set, the corresponding type has a
    const modifier.  */
 

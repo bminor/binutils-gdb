@@ -1,5 +1,10 @@
 2021-04-01  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_FLAG_ENUM): Remove, replace all uses
+	with type::is_flag_enum.
+
+2021-04-01  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <is_flag_enum,
 	set_is_flag_enum>: New methods.
 	(TYPE_FLAG_ENUM): Use type::is_flag_enum, change all
