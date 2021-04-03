@@ -232,7 +232,7 @@ $DECK
    IF match_pos <> 0 THEN;
       POSITION(BEGINNING_OF(match_pos));
       ERASE(match_pos);
-      COPY_TEXT('"<http://www.sourceware.org/bugzilla/>"');
+      COPY_TEXT('"<https://www.sourceware.org/bugzilla/>"');
    ENDIF;
    WRITE_FILE(file, GET_INFO(COMMAND_LINE, "output_file"));
    QUIT
