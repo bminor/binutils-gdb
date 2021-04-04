@@ -50,6 +50,7 @@ code on the hardware.
 #include "elf-bfd.h"
 #include "gdb/callback.h"   /* GDB simulator callback interface */
 #include "gdb/remote-sim.h" /* GDB simulator interface */
+#include "sim-syscall.h"   /* Simulator system call support */
 
 char* pr_addr (SIM_ADDR addr);
 char* pr_uword64 (uword64 addr);
@@ -1147,6 +1148,23 @@ Recognized firmware names are: `idt', `pmon', `lsipmon', and `none'.\n",
   return SIM_RC_OK;
 }
 
+/* stat structures from MIPS32/64.  */
+static const char stat32_map[] =
+"st_dev,2:st_ino,2:st_mode,4:st_nlink,2:st_uid,2:st_gid,2"
+":st_rdev,2:st_size,4:st_atime,4:st_spare1,4:st_mtime,4:st_spare2,4"
+":st_ctime,4:st_spare3,4:st_blksize,4:st_blocks,4:st_spare4,8";
+
+static const char stat64_map[] =
+"st_dev,2:st_ino,2:st_mode,4:st_nlink,2:st_uid,2:st_gid,2"
+":st_rdev,2:st_size,8:st_atime,8:st_spare1,8:st_mtime,8:st_spare2,8"
+":st_ctime,8:st_spare3,8:st_blksize,8:st_blocks,8:st_spare4,16";
+
+/* Map for calls using the host struct stat.  */
+static const CB_TARGET_DEFS_MAP CB_stat_map[] =
+{
+  { "stat", CB_SYS_stat, 15 },
+  { 0, -1, -1 }
+};
 
 
 /* Simple monitor interface (currently setup for the IDT and PMON monitors) */
@@ -1167,7 +1185,7 @@ sim_monitor (SIM_DESC sd,
 
   /* The following callback functions are available, however the
      monitor we are simulating does not make use of them: get_errno,
-     isatty, lseek, rename, system, time and unlink */
+     isatty, rename, system and time.  */
   switch (reason)
     {
 
@@ -1238,6 +1256,56 @@ sim_monitor (SIM_DESC sd,
       {
         char tmp = (char)(A0 & 0xFF);
         sim_io_write_stdout (sd, &tmp, sizeof(char));
+	break;
+      }
+
+    case 13: /* int unlink(const char *path) */
+      {
+	char *path = fetch_str (sd, A0);
+	V0 = sim_io_unlink (sd, path);
+	free (path);
+	break;
+      }
+
+    case 14: /* int lseek(int fd, int offset, int whence) */
+      {
+	V0 = sim_io_lseek (sd, A0, A1, A2);
+	break;
+      }
+
+    case 15: /* int stat(const char *path, struct stat *buf); */
+      {
+	/* As long as the infrastructure doesn't cache anything
+	   related to the stat mapping, this trick gets us a dual
+	   "struct stat"-type mapping in the least error-prone way.  */
+	host_callback *cb = STATE_CALLBACK (sd);
+	const char *saved_map = cb->stat_map;
+	CB_TARGET_DEFS_MAP *saved_syscall_map = cb->syscall_map;
+	bfd *prog_bfd = STATE_PROG_BFD (sd);
+	int is_elf32bit = (elf_elfheader(prog_bfd)->e_ident[EI_CLASS] ==
+			   ELFCLASS32);
+	static CB_SYSCALL s;
+	CB_SYSCALL_INIT (&s);
+	s.func = 15;
+	/* Mask out the sign extension part for 64-bit targets because the
+	   MIPS simulator's memory model is still 32-bit.  */
+	s.arg1 = A0 & 0xFFFFFFFF;
+	s.arg2 = A1 & 0xFFFFFFFF;
+	s.p1 = (PTR) sd;
+	s.p2 = (PTR) cpu;
+	s.read_mem = sim_syscall_read_mem;
+	s.write_mem = sim_syscall_write_mem;
+
+	cb->syscall_map = (CB_TARGET_DEFS_MAP *) CB_stat_map;
+	cb->stat_map = is_elf32bit ? stat32_map : stat64_map;
+
+	if (cb_syscall (cb, &s) != CB_RC_OK)
+	  sim_engine_halt (sd, cpu, NULL, mips_pc_get (cpu),
+			   sim_stopped, SIM_SIGILL);
+
+	V0 = s.result;
+	cb->stat_map = saved_map;
+	cb->syscall_map = saved_syscall_map;
 	break;
       }
 
