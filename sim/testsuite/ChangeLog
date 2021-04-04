@@ -1,3 +1,8 @@
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/sim-defs.exp (sim_tool_path): New function.
+	(sim_run): Set sim to [sim_tool_path].
+
 2021-04-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* lib/sim-defs.exp (run_sim_test): Convert examples to binaries.

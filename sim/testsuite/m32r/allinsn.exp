@@ -1,10 +1,6 @@
 # M32R simulator testsuite.
 
 if [istarget m32r*-*-*] {
-    # Used to locate the `run` program.
-    global arch
-    set arch "m32r"
-
     # all machines
     set all_machs "m32r"
 

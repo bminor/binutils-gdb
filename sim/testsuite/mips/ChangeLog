@@ -1,3 +1,7 @@
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* basic.exp (arch): Delete.
+
 2021-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* basic.exp: Define arch.

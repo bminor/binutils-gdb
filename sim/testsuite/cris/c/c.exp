@@ -19,10 +19,6 @@ if ![istarget cris*-*-*] {
     return
 }
 
-# Used to locate the `run` program.
-global arch
-set arch "cris"
-
 set CFLAGS_FOR_TARGET "-O2"
 if [istarget cris-*-*] {
     set mach "crisv10"

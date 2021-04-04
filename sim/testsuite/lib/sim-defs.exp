@@ -48,6 +48,22 @@ proc sim_compile { source dest type options } {
     return $result
 }
 
+# Find the path to the simulator for executing.
+proc sim_tool_path {} {
+    global sim_path
+    set sim "$sim_path"
+    if [string equal "" $sim] {
+	global objdir
+	global subdir
+	set arch "$subdir"
+	while { [file dirname $arch] != "." } {
+	    set arch [file dirname $arch]
+	}
+	return "$objdir/$arch/run"
+    }
+    return "$sim"
+}
+
 # Run a program on the simulator.
 # Required by dejagnu (at least ${tool}_run used to be).
 #
@@ -98,16 +114,7 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 	
     verbose "testcase timeout is set to $testcase_timeout" 1
 
-    set sim [board_info target sim]
-    if [string equal "" $sim] {
-	# Special case the simulator.  These tests are designed to
-	# be run inside of the simulator, not on the native host.
-	# So if the sim target isn't set, default to the target run.
-	# These global variables come from generated site.exp.
-	global objdir
-	global arch
-	set sim "$objdir/$arch/run"
-    }
+    set sim [sim_tool_path]
 
     if [is_remote host] {
 	set prog [remote_download host $prog]

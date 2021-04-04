@@ -13,10 +13,6 @@ foreach opt $board_variant_list {
 }
 
 if [istarget sh-*elf] {
-    # Used to locate the `run` program.
-    global arch
-    set arch "sh"
-
     run_sim_test add.s    $all
     run_sim_test and.s    $all
     run_sim_test bandor.s sh

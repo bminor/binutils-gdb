@@ -42,10 +42,6 @@ proc run_sim_tests { name requested_machs { requested_micromips_machs "" } } {
 
 # Only test mips*-*-elf (e.g., no mips*-*-linux)
 if {[istarget mips*-*-elf]} {
-    # Used to locate the `run` program.
-    global arch
-    set arch "mips"
-
     set dspmodels ""
     set mdmxmodels ""
     set micromipsmodels ""

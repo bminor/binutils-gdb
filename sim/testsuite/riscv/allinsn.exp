@@ -1,10 +1,6 @@
 # RISC-V simulator testsuite.
 
 if [istarget riscv*-*] {
-    # Used to locate the `run` program.
-    global arch
-    set arch "riscv"
-
     # all machines
     set all_machs "riscv"
 

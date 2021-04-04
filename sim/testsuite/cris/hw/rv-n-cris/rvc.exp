@@ -112,10 +112,6 @@ proc slurp_rv { file } {
 # The main test loop.
 
 if [istarget cris*-*-*] {
-    # Used to locate the `run` program.
-    global arch
-    set arch "cris"
-
     global ASFLAGS_FOR_TARGET
     set has_rv_and_cris [sim_has_rv_and_cris]
     global global_as_options
@@ -129,8 +125,7 @@ if [istarget cris*-*-*] {
     set sim [board_info target sim]
     if [string equal "" $sim] {
 	global objdir
-	global arch
-	set rvdummy "$objdir/../$arch/rvdummy"
+	set rvdummy "$objdir/cris/rvdummy"
     } else {
 	set rvdummy "[file dirname [board_info target sim]]/rvdummy"
     }

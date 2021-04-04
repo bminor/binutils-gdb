@@ -1,10 +1,6 @@
 # Miscellaneous FRV simulator testcases.
 
 if [istarget frv*-*] {
-    # Used to locate the `run` program.
-    global arch
-    set arch "frv"
-
     # all machines
     set all_machs "frv fr500 fr550 fr400 fr405 fr450"
     set cpu_option -mcpu

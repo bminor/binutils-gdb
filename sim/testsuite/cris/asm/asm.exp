@@ -16,10 +16,6 @@
 # Miscellaneous CRIS simulator testcases in assembly code.
 
 if [istarget cris*-*-*] {
-    # Used to locate the `run` program.
-    global arch
-    set arch "cris"
-
     global ASFLAGS_FOR_TARGET
     # All machines we test and the corresponding assembler option.  Needs
     # update if we build the simulator for crisv0 crisv3 and crisv8 too.

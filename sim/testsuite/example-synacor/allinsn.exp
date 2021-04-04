@@ -1,10 +1,6 @@
 # Example synacor simulator testsuite.
 
 if [istarget *] {
-    # Used to locate the `run` program.
-    global arch
-    set arch "example-synacor"
-
     # All machines.
     set all_machs "example"
 

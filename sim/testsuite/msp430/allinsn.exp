@@ -1,10 +1,6 @@
 # msp430 simulator testsuite
 
 if [istarget msp430-*] {
-    # Used to locate the `run` program.
-    global arch
-    set arch "msp430"
-
     # all machines
     set all_machs "msp430"
 

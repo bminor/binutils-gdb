@@ -1,10 +1,6 @@
 # Miscellaneous ARM simulator testcases
 
 if { [istarget arm*-*-*] } {
-    # Used to locate the `run` program.
-    global arch
-    set arch "arm"
-
     # all machines
     set all_machs "arm7tdmi"
 

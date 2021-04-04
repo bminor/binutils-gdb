@@ -1,10 +1,6 @@
 # moxie simulator testsuite
 
 if [istarget moxie-*] {
-    # Used to locate the `run` program.
-    global arch
-    set arch "moxie"
-
     # all machines
     set all_machs "moxie"
 

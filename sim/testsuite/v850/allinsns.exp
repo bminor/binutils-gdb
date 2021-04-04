@@ -3,10 +3,6 @@
 if [istarget v850*-*] {
     global opt
 
-    # Used to locate the `run` program.
-    global arch
-    set arch "v850"
-
     # all machines
     switch -regexp -- $opt {
 	.*v850e.* {
