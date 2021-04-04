@@ -1,3 +1,11 @@
+2021-04-08  Alan Modra  <amodra@gmail.com>
+
+	PR 27676
+	* ppc-opc.c (DCBT_EO): Move earlier.
+	(insert_thct, extract_thct, insert_thds, extract_thds): New functions.
+	(powerpc_operands): Add THCT and THDS entries.
+	(powerpc_opcodes): Add dcbtstct, dcbtstds, dcbna, dcbtct, dcbtds.
+
 2021-04-06  Alan Modra  <amodra@gmail.com>
 
 	* dis-buf.c (generic_symbol_at_address): Return symbol* NULL.

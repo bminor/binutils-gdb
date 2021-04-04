@@ -2233,6 +2233,74 @@ extract_sxl (uint64_t insn,
     return 1;
   return (insn >> 11) & 0x1;
 }
+
+/* The list of embedded processors that use the embedded operand ordering
+   for the 3 operand dcbt and dcbtst instructions.  */
+#define DCBT_EO (PPC_OPCODE_E500 | PPC_OPCODE_E500MC | PPC_OPCODE_476 \
+		 | PPC_OPCODE_A2)
+
+/* ISA 2.03 and later specify extended mnemonics dcbtct, dcbtds, and
+   dcbtstct, dcbtstds with a note saying these should be used in new
+   programs rather than the base mnemonics "so that it can be coded
+   with TH as the last operand for all categories".  For that reason
+   the extended mnemonics are enabled in the assembler for the
+   embedded processors, but not for the disassembler so as to display
+   the embedded dcbt or dcbtst expected form with TH first for
+   embedded programmers.  */
+
+static uint64_t
+insert_thct (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg)
+{
+  if ((uint64_t) value > 7)
+    *errmsg = _("invalid TH value");
+  return insn | ((value & 7) << 21);
+}
+
+static int64_t
+extract_thct (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  /* Missing optional operands have a value of 0.  */
+  if (*invalid < 0)
+    return 0;
+
+  int64_t value = (insn >> 21) & 0x1f;
+  if (value > 7 || (dialect & DCBT_EO) != 0)
+    *invalid = 1;
+
+  return value;
+}
+
+static uint64_t
+insert_thds (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg)
+{
+  if (value < 8 || value > 15)
+    *errmsg = _("invalid TH value");
+  return insn | ((value & 0x1f) << 21);
+}
+
+static int64_t
+extract_thds (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  /* Missing optional operands have a value of 8.  */
+  if (*invalid < 0)
+    return 8;
+
+  int64_t value = (insn >> 21) & 0x1f;
+  if (value < 8 || value > 15 || (dialect & DCBT_EO) != 0)
+    *invalid = 1;
+
+  return value;
+}
 
 /* The operands table.
 
@@ -2430,10 +2498,18 @@ const struct powerpc_operand powerpc_operands[] =
 #define MO CT
   { 0x1f, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
+  /* The TH field in dcbtct.  */
+#define THCT CT + 1
+  { 0x1f, 21, insert_thct, extract_thct, PPC_OPERAND_OPTIONAL },
+
+  /* The TH field in dcbtds.  */
+#define THDS THCT + 1
+  { 0x1f, 21, insert_thds, extract_thds, PPC_OPERAND_OPTIONAL },
+
   /* The D field in a D form instruction.  This is a displacement off
      a register, and implies that the next operand is a register in
      parentheses.  */
-#define D CT + 1
+#define D THDS + 1
   { 0xffff, 0, NULL, NULL, PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED },
 
   /* The D8 field in a D form instruction.  This is a displacement off
@@ -4248,12 +4324,6 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define PPCHTM  PPC_OPCODE_POWER8
 #define E200Z4  PPC_OPCODE_E200Z4
 #define PPCLSP  PPC_OPCODE_LSP
-/* The list of embedded processors that use the embedded operand ordering
-   for the 3 operand dcbt and dcbtst instructions.  */
-#define DCBT_EO	(PPC_OPCODE_E500 | PPC_OPCODE_E500MC | PPC_OPCODE_476 \
-		 | PPC_OPCODE_A2)
-
-
 
 /* The opcode table.
 
@@ -6632,6 +6702,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mtvsrwz",	X(31,243),	XX1RB_MASK,   PPCVSX2,	0,		{XT6, RA}},
 
 {"dcbtstt",	XRT(31,246,0x10), XRT_MASK,  POWER7,	0,		{RA0, RB}},
+{"dcbtstct",	X(31,246),	X_MASK,	     POWER4,	0,		{RA0, RB, THCT}},
+{"dcbtstds",	X(31,246),	X_MASK,	     POWER4,	0,		{RA0, RB, THDS}},
 {"dcbtst",	X(31,246),	X_MASK,	     POWER4,	DCBT_EO,	{RA0, RB, CT}},
 {"dcbtst",	X(31,246),	X_MASK,	     DCBT_EO,	0,		{CT, RA0, RB}},
 {"dcbtst",	X(31,246),	X_MASK,	     PPC,	POWER4|DCBT_EO,	{RA0, RB}},
@@ -6683,6 +6755,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lscbx.",	XRC(31,277,1),	X_MASK,	     M601,	0,		{RT, RA, RB}},
 
 {"dcbtt",	XRT(31,278,0x10), XRT_MASK,  POWER7,	0,		{RA0, RB}},
+{"dcbna",	XRT(31,278,0x11), XRT_MASK,  POWER10,	0,		{RA0, RB}},
+{"dcbtct",	X(31,278),	X_MASK,      POWER4,	0,		{RA0, RB, THCT}},
+{"dcbtds",	X(31,278),	X_MASK,      POWER4,	0,		{RA0, RB, THDS}},
 {"dcbt",	X(31,278),	X_MASK,	     POWER4,	DCBT_EO,	{RA0, RB, CT}},
 {"dcbt",	X(31,278),	X_MASK,	     DCBT_EO,	0,		{CT, RA0, RB}},
 {"dcbt",	X(31,278),	X_MASK,	     PPC,	POWER4|DCBT_EO,	{RA0, RB}},

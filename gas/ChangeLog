@@ -1,3 +1,11 @@
+2021-04-08  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/pr27676.d,
+	* testsuite/gas/ppc/pr27676.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+	* testsuite/gas/ppc/dcbt.d: Update.
+	* testsuite/gas/ppc/power4_32.d: Update.
+
 2021-04-07  Alan Modra  <amodra@gmail.com>
 
 	PR 27217
