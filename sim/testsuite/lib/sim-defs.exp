@@ -205,6 +205,11 @@ proc run_sim_test { name requested_machs } {
     global global_cc_options
     global global_sim_options
 
+    if ![file exists [sim_tool_path]] {
+	unsupported "$name: missing simulator [sim_tool_path]"
+	return
+    }
+
     if [string match "*/*" $name] {
 	set file $name
 	set name [file tail $name]
