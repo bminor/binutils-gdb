@@ -1,5 +1,10 @@
 2021-04-08  Mike Frysinger  <vapier@gentoo.org>
 
+	* lib/sim-defs.exp (run_sim_test): Set status to unsupported if
+	$return_code is 77.
+
+2021-04-08  Mike Frysinger  <vapier@gentoo.org>
+
 	* lib/sim-defs.exp (run_sim_test): Return if sim_tool_path does not
 	exist.
 

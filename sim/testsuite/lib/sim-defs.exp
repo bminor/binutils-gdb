@@ -402,7 +402,9 @@ proc run_sim_test { name requested_machs } {
 	set output [lindex $result 1]
 
 	set status fail
-	if { $return_code == $opts(status) } {
+	if { $return_code == 77 } {
+	    set status unsupported
+	} elseif { $return_code == $opts(status) } {
 	    set status pass
 	}
 
