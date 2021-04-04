@@ -1,5 +1,10 @@
 2021-04-08  Alan Modra  <amodra@gmail.com>
 
+	PR 27684
+	* ppc-opc.c (powerpc_opcodes): Correct usprg typos, add mfpir.
+
+2021-04-08  Alan Modra  <amodra@gmail.com>
+
 	PR 27676
 	* ppc-opc.c (DCBT_EO): Move earlier.
 	(insert_thct, extract_thct, insert_thds, extract_thds): New functions.
