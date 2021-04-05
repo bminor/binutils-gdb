@@ -731,7 +731,8 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 EXTRA_DEJAGNU_SITE_CONFIG = site-srcdir.exp
 testsuite_common_CPPFLAGS = \
 	-I$(srcdir)/common \
-	-I$(srcroot)/include
+	-I$(srcroot)/include \
+	-I../bfd
 
 all: all-recursive
 

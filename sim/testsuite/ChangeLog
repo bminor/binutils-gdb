@@ -1,3 +1,7 @@
+2021-05-07  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* local.mk (%C%_CPPFLAGS): Add ../bfd include path.
+
 2021-04-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* lib/sim-defs.exp (run_sim_test): Set status to unsupported if

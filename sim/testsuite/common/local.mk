@@ -29,7 +29,8 @@ check_PROGRAMS += $(TESTS)
 
 %C%_CPPFLAGS = \
 	-I$(srcdir)/common \
-	-I$(srcroot)/include
+	-I$(srcroot)/include \
+	-I../bfd
 
 # These tests are build-time only tools.  Override the default rules for them.
 %D%/%.o: %D%/%.c

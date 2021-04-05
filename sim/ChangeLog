@@ -1,3 +1,7 @@
+2021-05-07  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* Makefile.in: Rebuild.
+
 2021-05-04  Tom Tromey  <tromey@adacore.com>
 
 	* Makefile.in: Rebuild.
