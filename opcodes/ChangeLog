@@ -1,3 +1,15 @@
+2021-04-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Don't check for limits.h, string.h, strings.h or
+	stdlib.h.
+	(AC_ISC_POSIX): Don't invoke.
+	* sysdep.h: Include stdlib.h and string.h unconditionally.
+	* i386-opc.h: Include limits.h unconditionally.
+	* wasm32-dis.c: Likewise.
+	* cgen-opc.c: Don't include alloca-conf.h.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
 	* arm-dis.c (strneq): Remove strneq and use startswith.
