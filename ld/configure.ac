@@ -23,7 +23,6 @@ AC_CONFIG_SRCDIR(ldmain.c)
 
 AC_CANONICAL_TARGET
 AC_CANONICAL_BUILD
-AC_ISC_POSIX
 
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
@@ -231,6 +230,18 @@ case "${enable_default_hash_style}" in
   *) ac_default_emit_gnu_hash=0 ;;
 esac
 
+AC_ARG_ENABLE(initfini-array,
+[  --disable-initfini-array do not use .init_array/.fini_array sections],
+[case "${enableval}" in
+ yes|no) ;;
+ *) AC_MSG_ERROR([invalid --enable-initfini-array argument]) ;;
+ esac], [enable_initfini_array=yes])
+AC_SUBST(enable_initfini_array)
+if test $enable_initfini_array = yes; then
+  AC_DEFINE(HAVE_INITFINI_ARRAY, 1,
+    [Define .init_array/.fini_array sections are available and working.])
+fi
+
 GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])
 if test "${enable_libctf}" = yes; then
     AC_DEFINE(ENABLE_LIBCTF, 1, [Handle .ctf type-info sections])
@@ -280,29 +291,24 @@ ACX_PROG_CMP_IGNORE_INITIAL
 AC_SUBST(HDEFINES)
 AC_SUBST(NATIVE_LIB_DIRS)
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h elf-hints.h limits.h locale.h sys/param.h)
-AC_CHECK_HEADERS(fcntl.h sys/file.h sys/time.h sys/stat.h)
-ACX_HEADER_STRING
-AC_CHECK_FUNCS(glob mkstemp realpath sbrk setlocale waitpid)
-AC_CHECK_FUNCS(open lseek close)
-AC_HEADER_DIRENT
+# We use headers from include/ that check various HAVE_*_H macros, thus
+# should ensure they are set by configure.  This is true even when C99
+# guarantees they are available.
+# sha1.h and md4.h test HAVE_LIMITS_H, HAVE_SYS_TYPES_H and HAVE_STDINT_H
+# plugin-api.h tests HAVE_STDINT_H and HAVE_INTTYPES_H
+# Besides those, we need to check anything used in ld/ not in C99.
+AC_CHECK_HEADERS(fcntl.h elf-hints.h limits.h inttypes.h stdint.h \
+		 sys/file.h sys/mman.h sys/param.h sys/stat.h sys/time.h \
+		 sys/types.h unistd.h)
+AC_CHECK_FUNCS(close glob lseek mkstemp open realpath sbrk waitpid)
 
-dnl AC_CHECK_HEADERS(sys/mman.h)
+BFD_BINARY_FOPEN
+
+AC_CHECK_DECLS([asprintf, environ, sbrk])
+
 AC_FUNC_MMAP
 
 AC_SEARCH_LIBS([dlopen], [dl])
-
-AC_ARG_ENABLE(initfini-array,
-[  --disable-initfini-array do not use .init_array/.fini_array sections],
-[case "${enableval}" in
- yes|no) ;;
- *) AC_MSG_ERROR([invalid --enable-initfini-array argument]) ;;
- esac], [enable_initfini_array=yes])
-AC_SUBST(enable_initfini_array)
-if test $enable_initfini_array = yes; then
-  AC_DEFINE(HAVE_INITFINI_ARRAY, 1,
-    [Define .init_array/.fini_array sections are available and working.])
-fi
 
 AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
 AC_CACHE_VAL(ld_cv_decl_getopt_unistd_h,
@@ -313,10 +319,6 @@ if test $ld_cv_decl_getopt_unistd_h = yes; then
   AC_DEFINE([HAVE_DECL_GETOPT], 1,
 	    [Is the prototype for getopt in <unistd.h> in the expected format?])
 fi
-
-BFD_BINARY_FOPEN
-
-AC_CHECK_DECLS([asprintf, environ, free, getenv, sbrk, strstr])
 
 # Link in zlib if we can.  This allows us to read and write
 # compressed CTF sections.

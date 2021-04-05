@@ -1,3 +1,18 @@
+2021-04-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Move initfini-array arg handling earlier.  Don't
+	check for string.h, strings.h, stdlib.h, or locale.h.  Do check
+	for inttypes.h, stdint.h, sys/types.h.  Don't check for
+	setlocale, free, getev or strstr.
+	(AC_ISC_POSIX): Don't invoke.
+	* sysdep.h: Include string.h and stdlib.h unconditionally.  Test
+	HAVE_SYS_TYPE_H and HAVE_SYS_STAT_H.  Remove strstr, free and
+	getenv fallback declarations.
+	* ld.h: Don't test HAVE_LOCALE_H.
+	* ldmain.c: Don't test HAVE_SETLOCALE.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2021-04-01  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/26659
