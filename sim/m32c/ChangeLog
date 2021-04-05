@@ -1,3 +1,7 @@
+2021-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* opc2c.c (main): Remove vlist variable.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, configure: Regenerate.
