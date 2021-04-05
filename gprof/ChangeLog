@@ -1,3 +1,12 @@
+2021-04-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Check for sys/time.h and setitimer.  Don't invoke
+	AC_ISC_POSIX.  Don't check for setmode.
+	* gprof.c: Don't test HAVE_SETLOCALE.
+	* gprof.h: Include sys/time.h.
+	* configure: Regenerate.
+	* gconfig.in: Regenerate.
+
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
 	* basic_blocks.c: Replace bfd_boolean with bool, FALSE with false,
