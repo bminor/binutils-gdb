@@ -20,7 +20,6 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "alloca-conf.h"
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"

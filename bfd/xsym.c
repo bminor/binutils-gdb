@@ -21,7 +21,6 @@
 /* xSYM is the debugging format used by CodeWarrior on Mac OS classic.  */
 
 #include "sysdep.h"
-#include "alloca-conf.h"
 #include "xsym.h"
 #include "bfd.h"
 #include "libbfd.h"

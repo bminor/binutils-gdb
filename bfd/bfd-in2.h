@@ -85,23 +85,7 @@ typedef BFD_HOST_64_BIT bfd_int64_t;
 typedef BFD_HOST_U_64_BIT bfd_uint64_t;
 #endif
 
-#ifdef HAVE_INTTYPES_H
-# include <inttypes.h>
-#else
-# if BFD_HOST_64BIT_LONG
-#  define BFD_PRI64 "l"
-# elif defined (__MSVCRT__)
-#  define BFD_PRI64 "I64"
-# else
-#  define BFD_PRI64 "ll"
-# endif
-# undef PRId64
-# define PRId64 BFD_PRI64 "d"
-# undef PRIu64
-# define PRIu64 BFD_PRI64 "u"
-# undef PRIx64
-# define PRIx64 BFD_PRI64 "x"
-#endif
+#include <inttypes.h>
 
 #if BFD_ARCH_SIZE >= 64
 #define BFD64

@@ -31,13 +31,7 @@
 
 /* We define here only the symbols differing from their 64-bit variant.  */
 #include <sys/procfs.h>
-
-#ifdef HAVE_STDINT_H
 #include <stdint.h>
-#else
-typedef unsigned int uint32_t;
-typedef unsigned long long int uint64_t;
-#endif
 
 /* Unsigned 64-bit integer aligned to 8 bytes.  */
 typedef uint64_t __attribute__ ((__aligned__ (8))) a8_uint64_t;

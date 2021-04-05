@@ -1,3 +1,35 @@
+2021-04-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Don't check for long long or long double type.
+	Don't check for alloca.h, limits.h, stddef.h, stdlib.h, string.h,
+	strings.h, time.h, wchar.h, wctype.h or sys/time.h.  Don't check
+	for strtoull, free, malloc, realloc, getenv, strstr, snprintf,
+	vsnprintf, strlen or setitimer.  Sort AC_CHECK_DECLS.
+	(AC_ISC_POSIX): Don't invoke.
+	(AC_HEADER_TIME, AC_HEADER_DIRENT, ACX_HEADER_STRING): Likewise.
+	* sysdep.h: Remove many HAVE_*_H checks and fallback declarations.
+	Do test HAVE_SYS_TYPES_H.  Don't include sys/time.h.  Reorder
+	header order as per automake AC_INCLUDES_DEFAULT.
+	* bfd-in.h: Include inttypes.h unconditionally.
+	* bfd.c (_bfd_doprnt, _bfd_doprnt_scan): Assume long long and
+	long double are available.
+	(bfd_scan_vma): Assume long long and strtoull are available.
+	* elflink.c: Include limits.h unconditionally.
+	* elfnn-riscv.c: Likewise.
+	* wasm-module.c: Likewise.
+	* hpux-core.c: Include dirent.h unconditionally.
+	* trad-core.c: Likewise.
+	* hosts/x86-64linux.h: Include stdlib.h unconditionally.
+	* peXXigen.c: Remove HAVE_WCHAR_H and HAVE_WCTYPE_H checks.
+	* elf32-m68hc1x.c: Don't include alloca-conf.h.
+	* elf64-hppa.c: Likewise.
+	* som.c: Likewise.
+	* wasm-module.c: Likewise.
+	* xsym.c: Likewise.
+	* bfd-in2.h: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2021-04-01  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/26659

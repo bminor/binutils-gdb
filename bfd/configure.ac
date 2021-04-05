@@ -22,7 +22,6 @@ AC_INIT([bfd], BFD_VERSION)
 AC_CONFIG_SRCDIR([libbfd.c])
 
 AC_CANONICAL_TARGET
-AC_ISC_POSIX
 
 AM_INIT_AUTOMAKE
 
@@ -205,8 +204,7 @@ BFD_HOST_64_BIT=
 BFD_HOST_U_64_BIT=
 BFD_HOSTPTR_T="unsigned long"
 
-AC_TYPE_LONG_DOUBLE
-AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
+AC_CHECK_SIZEOF(long long)
 AC_CHECK_SIZEOF(void *)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(int)
@@ -243,36 +241,15 @@ AC_SUBST(BFD_HOSTPTR_T)
 
 BFD_CC_FOR_BUILD
 
-AC_CHECK_HEADERS(alloca.h fcntl.h limits.h stddef.h stdlib.h string.h \
-		 strings.h sys/file.h sys/resource.h sys/stat.h sys/time.h \
-		 time.h unistd.h wchar.h wctype.h)
-AC_HEADER_TIME
-AC_HEADER_DIRENT
+AC_CHECK_HEADERS(fcntl.h sys/file.h sys/resource.h sys/stat.h sys/types.h \
+		 unistd.h)
 
-ACX_HEADER_STRING
-AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid fileno fls)
-AC_CHECK_FUNCS(strtoull getrlimit)
+AC_CHECK_FUNCS(fcntl fdopen fileno fls getgid getpagesize getrlimit getuid \
+	       sysconf)
 
-AC_CHECK_DECLS(basename)
-AC_CHECK_DECLS(ftello)
-AC_CHECK_DECLS(ftello64)
-AC_CHECK_DECLS(fseeko)
-AC_CHECK_DECLS(fseeko64)
+AC_CHECK_DECLS([basename, ffs, stpcpy, asprintf, vasprintf])
 
 BFD_BINARY_FOPEN
-
-AC_CHECK_DECLS(ffs)
-AC_CHECK_DECLS(free)
-AC_CHECK_DECLS(getenv)
-AC_CHECK_DECLS(malloc)
-AC_CHECK_DECLS(realloc)
-AC_CHECK_DECLS(stpcpy)
-AC_CHECK_DECLS(strstr)
-AC_CHECK_DECLS(asprintf)
-AC_CHECK_DECLS(vasprintf)
-AC_CHECK_DECLS(snprintf)
-AC_CHECK_DECLS(vsnprintf)
-AC_CHECK_DECLS(strnlen)
 
 # Link in zlib if we can.  This allows us to read compressed debug sections.
 # This is used only by compress.c.
@@ -1089,6 +1066,7 @@ AC_SUBST(lt_cv_dlopen_libs)
 # Hopefully a reasonable assumption since fseeko et.al. should be
 # upward compatible.
 AC_CHECK_FUNCS(ftello ftello64 fseeko fseeko64 fopen64)
+AC_CHECK_DECLS([ftello, ftello64, fseeko, fseeko64, fopen64])
 if test x"$ac_cv_func_ftello" = xyes -a x"$ac_cv_func_fseeko" = xyes; then
     AC_CHECK_SIZEOF(off_t)
 fi

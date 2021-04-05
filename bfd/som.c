@@ -22,7 +22,6 @@
    02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "alloca-conf.h"
 #include "bfd.h"
 #include "libiberty.h"
 #include "libbfd.h"

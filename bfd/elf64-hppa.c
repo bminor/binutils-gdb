@@ -19,7 +19,6 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include "alloca-conf.h"
 #include "bfd.h"
 #include "libbfd.h"
 #include "elf-bfd.h"

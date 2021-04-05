@@ -70,12 +70,8 @@
 #include "coff/internal.h"
 #include "bfdver.h"
 #include "libiberty.h"
-#ifdef HAVE_WCHAR_H
 #include <wchar.h>
-#endif
-#ifdef HAVE_WCTYPE_H
 #include <wctype.h>
-#endif
 
 /* NOTE: it's strange to be including an architecture specific header
    in what's supposed to be general (to PE/PEI) code.  However, that's
@@ -3548,16 +3544,12 @@ rsrc_write_directory (rsrc_write_data * data,
   BFD_ASSERT (nt == next_entry);
 }
 
-#if defined HAVE_WCHAR_H && ! defined __CYGWIN__ && ! defined __MINGW32__
+#if ! defined __CYGWIN__ && ! defined __MINGW32__
 /* Return the length (number of units) of the first character in S,
    putting its 'ucs4_t' representation in *PUC.  */
 
 static unsigned int
-#if defined HAVE_WCTYPE_H
 u16_mbtouc (wint_t * puc, const unsigned short * s, unsigned int n)
-#else
-u16_mbtouc (wchar_t * puc, const unsigned short * s, unsigned int n)
-#endif
 {
   unsigned short c = * s;
 
@@ -3589,7 +3581,7 @@ u16_mbtouc (wchar_t * puc, const unsigned short * s, unsigned int n)
   *puc = 0xfffd;
   return 1;
 }
-#endif /* HAVE_WCHAR_H and not Cygwin/Mingw */
+#endif /* not Cygwin/Mingw */
 
 /* Perform a comparison of two entries.  */
 static signed int
@@ -3626,20 +3618,15 @@ rsrc_cmp (bool is_name, rsrc_entry * a, rsrc_entry * b)
   res = rscpcmp ((const wchar_t *) astring, (const wchar_t *) bstring,
 		 min (alen, blen));
 
-#elif defined HAVE_WCHAR_H
+#else
   {
     unsigned int  i;
 
     res = 0;
     for (i = min (alen, blen); i--; astring += 2, bstring += 2)
       {
-#if defined HAVE_WCTYPE_H
 	wint_t awc;
 	wint_t bwc;
-#else
-	wchar_t awc;
-	wchar_t bwc;
-#endif
 
 	/* Convert UTF-16 unicode characters into wchar_t characters
 	   so that we can then perform a case insensitive comparison.  */
@@ -3649,21 +3636,14 @@ rsrc_cmp (bool is_name, rsrc_entry * a, rsrc_entry * b)
 	if (Alen != Blen)
 	  return Alen - Blen;
 
-#ifdef HAVE_WCTYPE_H
 	awc = towlower (awc);
 	bwc = towlower (bwc);
 
 	res = awc - bwc;
-#else
-	res = wcsncasecmp (& awc, & bwc, 1);
-#endif
 	if (res)
 	  break;
       }
   }
-#else
-  /* Do the best we can - a case sensitive, untranslated comparison.  */
-  res = memcmp (astring, bstring, min (alen, blen) * 2);
 #endif
 
   if (res == 0)

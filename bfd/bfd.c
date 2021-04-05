@@ -1042,12 +1042,7 @@ _bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 			*sptr++ = ptr[-1];
 			*sptr = '\0';
 #endif
-#if defined (__GNUC__) || defined (HAVE_LONG_LONG)
 			PRINT_TYPE (long long, ll);
-#else
-			/* Fake it and hope for the best.  */
-			PRINT_TYPE (long, l);
-#endif
 			break;
 		      }
 		  }
@@ -1062,14 +1057,7 @@ _bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 		if (wide_width == 0)
 		  PRINT_TYPE (double, d);
 		else
-		  {
-#if defined (__GNUC__) || defined (HAVE_LONG_DOUBLE)
-		    PRINT_TYPE (long double, ld);
-#else
-		    /* Fake it and hope for the best.  */
-		    PRINT_TYPE (double, d);
-#endif
-		  }
+		  PRINT_TYPE (long double, ld);
 	      }
 	      break;
 	    case 's':
@@ -1271,11 +1259,7 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 			break;
 		      case 2:
 		      default:
-#if defined (__GNUC__) || defined (HAVE_LONG_LONG)
 			arg_type = LongLong;
-#else
-			arg_type = Long;
-#endif
 			break;
 		      }
 		  }
@@ -1290,13 +1274,7 @@ _bfd_doprnt_scan (const char *format, union _bfd_doprnt_args *args)
 		if (wide_width == 0)
 		  arg_type = Double;
 		else
-		  {
-#if defined (__GNUC__) || defined (HAVE_LONG_DOUBLE)
-		    arg_type = LongDouble;
-#else
-		    arg_type = Double;
-#endif
-		  }
+		  arg_type = LongDouble;
 	      }
 	      break;
 	    case 's':
@@ -1906,10 +1884,8 @@ bfd_scan_vma (const char *string, const char **end, int base)
   if (sizeof (bfd_vma) <= sizeof (unsigned long))
     return strtoul (string, (char **) end, base);
 
-#if defined (HAVE_STRTOULL) && defined (HAVE_LONG_LONG)
   if (sizeof (bfd_vma) <= sizeof (unsigned long long))
     return strtoull (string, (char **) end, base);
-#endif
 
   if (base == 0)
     {
