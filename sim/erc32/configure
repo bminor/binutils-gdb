@@ -12070,7 +12070,7 @@ fi
 # We prefer the in-tree readline.  Top-level dependencies make sure
 # src/readline (if it's there) is configured before src/sim.
 if test -r ../../readline/Makefile; then
-  READLINE=../../readline/libreadline.a
+  READLINE=../../readline/readline/libreadline.a
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for readline in -lreadline" >&5
 $as_echo_n "checking for readline in -lreadline... " >&6; }

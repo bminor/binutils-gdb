@@ -1,3 +1,8 @@
+2021-04-05  Tom Tromey  <tromey@adacore.com>
+
+	* configure: Rebuild.
+	* configure.ac (READLINE): Adjust in-tree value.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, configure: Regenerate.
