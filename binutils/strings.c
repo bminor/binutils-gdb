@@ -149,9 +149,7 @@ main (int argc, char **argv)
   char *s;
   int numeric_opt = 0;
 
-#if defined (HAVE_SETLOCALE)
   setlocale (LC_ALL, "");
-#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
@@ -610,61 +608,42 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
 	switch (address_radix)
 	  {
 	  case 8:
-#ifdef HAVE_LONG_LONG
 	    if (sizeof (start) > sizeof (long))
 	      {
-# ifndef __MSVCRT__
+#ifndef __MSVCRT__
 		printf ("%7llo ", (unsigned long long) start);
-# else
+#else
 		printf ("%7I64o ", (unsigned long long) start);
-# endif
+#endif
 	      }
 	    else
-#elif !BFD_HOST_64BIT_LONG
-	      if (start != (unsigned long) start)
-		printf ("++%7lo ", (unsigned long) start);
-	      else
-#endif
-		printf ("%7lo ", (unsigned long) start);
+	      printf ("%7lo ", (unsigned long) start);
 	    break;
 
 	  case 10:
-#ifdef HAVE_LONG_LONG
 	    if (sizeof (start) > sizeof (long))
 	      {
-# ifndef __MSVCRT__
+#ifndef __MSVCRT__
 		printf ("%7llu ", (unsigned long long) start);
-# else
+#else
 		printf ("%7I64d ", (unsigned long long) start);
-# endif
+#endif
 	      }
 	    else
-#elif !BFD_HOST_64BIT_LONG
-	      if (start != (unsigned long) start)
-		printf ("++%7lu ", (unsigned long) start);
-	      else
-#endif
-		printf ("%7ld ", (long) start);
+	      printf ("%7ld ", (long) start);
 	    break;
 
 	  case 16:
-#ifdef HAVE_LONG_LONG
 	    if (sizeof (start) > sizeof (long))
 	      {
-# ifndef __MSVCRT__
+#ifndef __MSVCRT__
 		printf ("%7llx ", (unsigned long long) start);
-# else
+#else
 		printf ("%7I64x ", (unsigned long long) start);
-# endif
+#endif
 	      }
 	    else
-#elif !BFD_HOST_64BIT_LONG
-	      if (start != (unsigned long) start)
-		printf ("%lx%8.8lx ", (unsigned long) (start >> 32),
-			(unsigned long) (start & 0xffffffff));
-	      else
-#endif
-		printf ("%7lx ", (unsigned long) start);
+	      printf ("%7lx ", (unsigned long) start);
 	    break;
 	  }
 

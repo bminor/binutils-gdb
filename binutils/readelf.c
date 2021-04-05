@@ -44,9 +44,7 @@
 #include <assert.h>
 #include <time.h>
 #include <zlib.h>
-#ifdef HAVE_WCHAR_H
 #include <wchar.h>
-#endif
 
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
@@ -21748,12 +21746,10 @@ main (int argc, char ** argv)
 {
   int err;
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#ifdef HAVE_LC_MESSAGES
   setlocale (LC_MESSAGES, "");
 #endif
-#if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
-#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 

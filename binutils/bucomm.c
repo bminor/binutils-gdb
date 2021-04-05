@@ -25,16 +25,9 @@
 #include "bfd.h"
 #include "libiberty.h"
 #include "filenames.h"
-
-#include <time.h>		/* ctime, maybe time_t */
+#include <time.h>
 #include <assert.h>
 #include "bucomm.h"
-
-#ifndef HAVE_TIME_T_IN_TIME_H
-#ifndef HAVE_TIME_T_IN_TYPES_H
-typedef long time_t;
-#endif
-#endif
 
 /* Error reporting.  */
 

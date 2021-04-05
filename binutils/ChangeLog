@@ -1,3 +1,44 @@
+2021-04-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Assume long long is available.  Don't test for
+	strings.h, stdlib.h, limits.h, locale.h, or wchar.h.  Check
+	inttypes.h, stdint.h, sys/stat.h and sys/types.h. Don't check for
+	strcoll, setlocale, setmode or location of time_t.  Don't check
+	for fprintf, getenv, snprintf, strnlen, strstr or vsnprintf decls.
+	(AC_ISC_POSIX, AXC_HEADER_STRING, AC_FUNC_ALLOCA): Don't invoke.
+	* sysdep.h: Don't include alloca-conf.h, include config.h instead.
+	Test HAVE_SYS_TYPES_H and reorder includes.  Include limits.h,
+	locale.h, string.h and stdlib.h unconditionally.  Remove various
+	fallback declarations.  Assume long long is available.
+	* addr2line.c: Don't test HAVE_SETLOCALE.
+	* ar.c: Likewise.
+	* coffdump.c: Likewise.
+	* dlltool.c: Likewise.
+	* dllwrap.c: Likewise.
+	* elfedit.c: Likewise.
+	* nm.c: Likewise.
+	* objcopy.c: Likewise.
+	* objdump.c: Likewise.
+	* readelf.c: Likewise.
+	* size.c: Likewise.
+	* srconv.c: Likewise.
+	* strings.c: Likewise.
+	* sysdump.c: Likewise.
+	* windmc.c: Likewise.
+	* windres.c: Likewise.
+	* bucomm.c: Don't test HAVE_TIME_T_IN_TIME_H or HAVE_TIME_T_IN_TYPES_H.
+	* dwarf.c: Include limits.h unconditionally.  Assume long long
+	is available.
+	* nm.c: Don't test HAVE_STRCOLL.
+	* readelf.c: Don't test HAVE_WCHAR_H.
+	* strings.c: Assume long long is available.
+	* syslex.l: Include string.h unconditionally.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
 	* elfcomm.h (strneq): Remove strneq and use startswith.

@@ -36,9 +36,7 @@
 #include <elfutils/debuginfod.h>
 #endif
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
 #endif
@@ -215,7 +213,7 @@ get_encoded_value (unsigned char **pdata,
   return val;
 }
 
-#if defined HAVE_LONG_LONG && SIZEOF_LONG_LONG > SIZEOF_LONG
+#if SIZEOF_LONG_LONG > SIZEOF_LONG
 # ifndef __MINGW32__
 #  define DWARF_VMA_FMT		"ll"
 #  define DWARF_VMA_FMT_LONG	"%16.16llx"

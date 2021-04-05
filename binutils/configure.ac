@@ -23,7 +23,6 @@ AC_INIT([binutils], BFD_VERSION)
 AC_CONFIG_SRCDIR(ar.c)
 
 AC_CANONICAL_TARGET
-AC_ISC_POSIX
 
 AM_INIT_AUTOMAKE
 
@@ -162,14 +161,18 @@ esac
 AC_SUBST(DEMANGLER_NAME)
 
 AC_CHECK_SIZEOF([long])
-AC_CHECK_TYPES([long long], [AC_CHECK_SIZEOF(long long)])
+AC_CHECK_SIZEOF([long long])
 
-AC_CHECK_HEADERS(string.h strings.h stdlib.h unistd.h fcntl.h sys/file.h limits.h locale.h sys/param.h wchar.h)
+# We use headers from include/ that check various HAVE_*_H macros, thus
+# should ensure they are set by configure.  This is true even when C99
+# guarantees they are available.
+# plugin-api.h tests HAVE_STDINT_H and HAVE_INTTYPES_H
+# Besides those, we need to check anything used in binutils/ not in C99.
+AC_CHECK_HEADERS(fcntl.h inttypes.h stdint.h sys/file.h sys/param.h \
+		 sys/stat.h sys/types.h unistd.h)
 AC_HEADER_SYS_WAIT
-ACX_HEADER_STRING
-AC_FUNC_ALLOCA
 AC_FUNC_MMAP
-AC_CHECK_FUNCS(sbrk utimes setmode getc_unlocked strcoll setlocale)
+AC_CHECK_FUNCS(getc_unlocked sbrk utimes)
 AC_CHECK_FUNC([mkstemp],
 	      AC_DEFINE([HAVE_MKSTEMP], 1,
 	      [Define to 1 if you have the `mkstemp' function.]))
@@ -189,26 +192,6 @@ AC_CHECK_FUNC([mkdtemp],
 AC_SEARCH_LIBS(frexp, m)
 
 AM_LC_MESSAGES
-
-AC_MSG_CHECKING(for time_t in time.h)
-AC_CACHE_VAL(bu_cv_decl_time_t_time_h,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <time.h>], [time_t i;])],
-bu_cv_decl_time_t_time_h=yes, bu_cv_decl_time_t_time_h=no)])
-AC_MSG_RESULT($bu_cv_decl_time_t_time_h)
-if test $bu_cv_decl_time_t_time_h = yes; then
-  AC_DEFINE([HAVE_TIME_T_IN_TIME_H], 1,
-	    [Is the type time_t defined in <time.h>?])
-fi
-
-AC_MSG_CHECKING(for time_t in sys/types.h)
-AC_CACHE_VAL(bu_cv_decl_time_t_types_h,
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/types.h>], [time_t i;])],
-bu_cv_decl_time_t_types_h=yes, bu_cv_decl_time_t_types_h=no)])
-AC_MSG_RESULT($bu_cv_decl_time_t_types_h)
-if test $bu_cv_decl_time_t_types_h = yes; then
-  AC_DEFINE([HAVE_TIME_T_IN_TYPES_H], 1,
-	    [Is the type time_t defined in <sys/types.h>?])
-fi
 
 AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
 AC_CACHE_VAL(bu_cv_decl_getopt_unistd_h,
@@ -236,8 +219,7 @@ if test $bu_cv_header_utime_h = yes; then
   AC_DEFINE(HAVE_GOOD_UTIME_H, 1, [Does <utime.h> define struct utimbuf?])
 fi
 
-AC_CHECK_DECLS([asprintf, environ, fprintf, getc_unlocked, getenv,
-		sbrk, snprintf, stpcpy, strnlen, strstr, vsnprintf])
+AC_CHECK_DECLS([asprintf, environ, getc_unlocked, sbrk, stpcpy])
 
 # Link in zlib if we can.  This allows us to read compressed debug
 # sections.  This is used only by readelf.c (objdump uses bfd for

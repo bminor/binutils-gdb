@@ -633,7 +633,6 @@ non_numeric_forward (const void *P_x, const void *P_y)
   if (xn == NULL)
     return -1;
 
-#ifdef HAVE_STRCOLL
   /* Solaris 2.5 has a bug in strcoll.
      strcoll returns invalid values when confronted with empty strings.  */
   if (*yn == '\0')
@@ -642,9 +641,6 @@ non_numeric_forward (const void *P_x, const void *P_y)
     return -1;
 
   return strcoll (xn, yn);
-#else
-  return strcmp (xn, yn);
-#endif
 }
 
 static int
@@ -1788,13 +1784,11 @@ main (int argc, char **argv)
   int c;
   int retval;
 
-#if defined (HAVE_SETLOCALE) && defined (HAVE_LC_MESSAGES)
+#ifdef HAVE_LC_MESSAGES
   setlocale (LC_MESSAGES, "");
 #endif
-#if defined (HAVE_SETLOCALE)
   setlocale (LC_CTYPE, "");
   setlocale (LC_COLLATE, "");
-#endif
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 

@@ -5135,12 +5135,10 @@ main (int argc, char **argv)
   char *target = default_target;
   bool seenflag = false;
 
-#if defined (HAVE_SETLOCALE)
-#if defined (HAVE_LC_MESSAGES)
+#ifdef HAVE_LC_MESSAGES
   setlocale (LC_MESSAGES, "");
 #endif
   setlocale (LC_CTYPE, "");
-#endif
 
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
