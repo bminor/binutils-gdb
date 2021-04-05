@@ -2357,7 +2357,7 @@ tic54x_mlib (int ignore ATTRIBUTE_UNUSED)
       fclose (ftmp);
       free (buf);
       input_scrub_insert_file (fname);
-      unlink (fname);
+      remove (fname);
     }
 }
 

@@ -34,29 +34,15 @@
   	COMMON as "".
    If TEST is #defined, then we are testing a module: #define COMMON as "".  */
 
-#include "alloca-conf.h"
+#include "config.h"
 
 /* Now, tend to the rest of the configuration.  */
 
 /* System include files first...  */
 #include <stdio.h>
-
-#ifdef STRING_WITH_STRINGS
 #include <string.h>
-#include <strings.h>
-#else
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#endif
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -65,10 +51,7 @@
 #include <sys/types.h>
 #endif
 
-#ifdef HAVE_ERRNO_H
 #include <errno.h>
-#endif
-
 #include <stdarg.h>
 
 #include "getopt.h"
@@ -101,39 +84,12 @@
 #ifdef NEED_DECLARATION_ENVIRON
 extern char **environ;
 #endif
-#ifdef NEED_DECLARATION_ERRNO
-extern int errno;
-#endif
 #ifdef NEED_DECLARATION_FFS
 extern int ffs (int);
-#endif
-#ifdef NEED_DECLARATION_FREE
-extern void free ();
-#endif
-#ifdef NEED_DECLARATION_MALLOC
-extern void *malloc ();
-extern void *realloc ();
-#endif
-#ifdef NEED_DECLARATION_STRSTR
-extern char *strstr ();
 #endif
 
 #if !HAVE_DECL_MEMPCPY
 void *mempcpy(void *, const void *, size_t);
-#endif
-
-#if !HAVE_DECL_VSNPRINTF
-extern int vsnprintf(char *, size_t, const char *, va_list);
-#endif
-
-/* This is needed for VMS.  */
-#if ! defined (HAVE_UNLINK) && defined (HAVE_REMOVE)
-#define unlink remove
-#endif
-
-/* Hack to make "gcc -Wall" not complain about obstack macros.  */
-#if !defined (memcpy) && !defined (bcopy)
-#define bcopy(src,dest,size)	memcpy (dest, src, size)
 #endif
 
 #ifndef __LINE__

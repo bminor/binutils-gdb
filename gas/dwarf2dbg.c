@@ -30,18 +30,7 @@
 
 #include "as.h"
 #include "safe-ctype.h"
-
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#else
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifndef INT_MAX
-#define INT_MAX (int) (((unsigned) (-1)) >> 1)
-#endif
-#endif
-
 #include "dwarf2dbg.h"
 #include <filenames.h>
 

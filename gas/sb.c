@@ -24,9 +24,7 @@
 #include "as.h"
 #include "sb.h"
 
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
 #endif

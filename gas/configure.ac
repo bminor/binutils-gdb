@@ -29,7 +29,6 @@ dnl we specify this explicitly, automake-1.7 will assume that ylwrap is in
 dnl gas/ instead of gas/../.
 AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_TARGET
-AC_ISC_POSIX
 
 AM_INIT_AUTOMAKE
 
@@ -941,8 +940,7 @@ AM_MAINTAINER_MODE
 AM_CONDITIONAL(GENINSRC_NEVER, false)
 AC_EXEEXT
 
-AC_CHECK_HEADERS(string.h stdlib.h memory.h strings.h unistd.h errno.h sys/types.h limits.h locale.h time.h sys/stat.h)
-ACX_HEADER_STRING
+AC_CHECK_HEADERS(memory.h sys/stat.h sys/types.h unistd.h)
 
 # Put this here so that autoconf's "cross-compiling" message doesn't confuse
 # people who are not cross-compiling but are compiling cross-assemblers.
@@ -955,14 +953,6 @@ else
 fi
 AC_MSG_RESULT($cross_gas)
 
-dnl ansidecl.h will deal with const
-dnl AC_C_CONST
-AC_FUNC_ALLOCA
-AC_C_INLINE
-
-# VMS doesn't have unlink.
-AC_CHECK_FUNCS(unlink remove, break)
-AC_CHECK_FUNCS(sbrk setlocale)
 AC_CHECK_FUNCS(strsignal)
 
 AM_LC_MESSAGES
@@ -987,28 +977,12 @@ gas_test_headers="
 #ifdef HAVE_MEMORY_H
 #include <memory.h>
 #endif
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 "
-
-# Does errno.h declare errno, or do we have to add a separate declaration
-# for it?
-GAS_CHECK_DECL_NEEDED(errno, f, int f, [
-#ifdef HAVE_ERRNO_H
-#include <errno.h>
-#endif
-])
 
 AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
 AC_CACHE_VAL(gas_cv_decl_getopt_unistd_h,
@@ -1022,12 +996,8 @@ fi
 
 GAS_CHECK_DECL_NEEDED(environ, f, char **f, $gas_test_headers)
 GAS_CHECK_DECL_NEEDED(ffs, f, int (*f)(int), $gas_test_headers)
-GAS_CHECK_DECL_NEEDED(free, f, void (*f)(), $gas_test_headers)
-GAS_CHECK_DECL_NEEDED(malloc, f, char *(*f)(), $gas_test_headers)
-GAS_CHECK_DECL_NEEDED(sbrk, f, char *(*f)(), $gas_test_headers)
-GAS_CHECK_DECL_NEEDED(strstr, f, char *(*f)(), $gas_test_headers)
 
-AC_CHECK_DECLS([free, getenv, malloc, mempcpy, realloc, stpcpy, strstr, vsnprintf, asprintf])
+AC_CHECK_DECLS([asprintf, mempcpy, stpcpy])
 
 BFD_BINARY_FOPEN
 

@@ -1,3 +1,30 @@
+2021-04-05  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Don't check for string.h, strings.h, stdlib.h,
+	errno.h, limits.h, locale.h or time.h.  Don't check for unlink,
+	remove, sbrk (unused) or setlocale.  Adjust gas_test_headers.
+	Don't check for errno, free, malloc, realoc, sbrk, strstr, getenv
+	strstr, or vsnprintf declarations.
+	(AC_ISC_POSIX, AC_FUNC_ALLOCA, AC_C_INLINE): Don't invoke.
+	* as.h: Don't include alloca-conf.h, include config.h instead.
+	Include string.h, stdlib.h, errno.h unconditionally.  Remove
+	various fallback declarations.
+	* asintl.h: Don't test HAVE_LOCALE_H.
+	* as.c: Don't test HAVE_SETLOCALE.
+	* dwarf2dbg.c: Include limits.h unconditionally.
+	* expr.c: Likewise.
+	* sb.c: Likewise.
+	* symbols.c: Likewise.
+	* config/tc-cr16.c: Likewise.
+	* config/tc-d30v.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-tic54x.c (tic54x_mlib): Call remove rather than unlink.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
 	* config/obj-coff.c (strneq): Remove strneq and use startswith.

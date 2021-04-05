@@ -51,10 +51,7 @@
 #include "elf/ia64.h"
 #include "bfdver.h"
 #include <time.h>
-
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 
 #define NELEMS(a)	((int) (sizeof (a)/sizeof ((a)[0])))
 
