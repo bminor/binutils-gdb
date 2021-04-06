@@ -521,18 +521,6 @@ linux_nat_target::follow_fork (bool follow_child, bool detach_fork)
 	      ptrace (PTRACE_DETACH, child_pid, 0, signo);
 	    }
 	}
-      else
-	{
-	  /* Switching inferior_ptid is not enough, because then
-	     inferior_thread () would crash by not finding the thread
-	     in the current inferior.  */
-	  scoped_restore_current_thread restore_current_thread;
-	  thread_info *child = find_thread_ptid (this, child_ptid);
-	  switch_to_thread (child);
-
-	  /* Let the thread_db layer learn about this new process.  */
-	  check_for_thread_db ();
-	}
 
       if (has_vforked)
 	{
@@ -609,9 +597,6 @@ linux_nat_target::follow_fork (bool follow_child, bool detach_fork)
       child_lp = add_lwp (inferior_ptid);
       child_lp->stopped = 1;
       child_lp->last_resume_kind = resume_stop;
-
-      /* Let the thread_db layer learn about this new process.  */
-      check_for_thread_db ();
     }
 }
 

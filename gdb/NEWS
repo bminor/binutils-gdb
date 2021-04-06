@@ -145,6 +145,9 @@ maintenance flush dcache
 maintenance info target-sections
   Print GDB's internal target sections table.
 
+maintenance info jit
+  Print the JIT code objects in the inferior known to GDB.
+
 memory-tag show-logical-tag POINTER
   Print the logical tag for POINTER.
 memory-tag with-logical-tag POINTER TAG

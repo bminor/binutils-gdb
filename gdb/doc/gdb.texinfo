@@ -39074,6 +39074,10 @@ buffer.
 Control whether @value{GDBN} will skip PAD packets when computing the
 packet history.
 
+@kindex maint info jit
+@item maint info jit
+Print information about JIT code objects loaded in the current inferior.
+
 @kindex set displaced-stepping
 @kindex show displaced-stepping
 @cindex displaced stepping support

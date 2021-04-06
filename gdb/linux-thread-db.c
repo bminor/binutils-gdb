@@ -1272,7 +1272,7 @@ check_thread_signals (void)
    an inferior is created (or otherwise acquired, e.g. attached to)
    and when new shared libraries are loaded into a running process.  */
 
-void
+static void
 check_for_thread_db (void)
 {
   /* Do nothing if we couldn't load libthread_db.so.1.  */

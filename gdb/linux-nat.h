@@ -294,9 +294,6 @@ extern enum tribool have_ptrace_getregset;
        (LP) != NULL;							\
        (LP) = (LP)->next)
 
-/* Attempt to initialize libthread_db.  */
-void check_for_thread_db (void);
-
 /* Called from the LWP layer to inform the thread_db layer that PARENT
    spawned CHILD.  Both LWPs are currently stopped.  This function
    does whatever is required to have the child LWP under the

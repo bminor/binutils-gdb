@@ -429,6 +429,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       return true;
     }
 
+  thread_info *child_thr = nullptr;
+
   if (!follow_child)
     {
       /* Detach new forked process?  */
@@ -478,8 +480,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  switch_to_no_thread ();
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
 	  child_inf->push_target (parent_inf->process_target ());
-	  thread_info *child_thr
-	    = add_thread_silent (child_inf->process_target (), child_ptid);
+	  child_thr = add_thread_silent (child_inf->process_target (),
+					 child_ptid);
 
 	  /* If this is a vfork child, then the address-space is
 	     shared with the parent.  */
@@ -514,17 +516,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      /* solib_create_inferior_hook relies on the current
 		 thread.  */
 	      switch_to_thread (child_thr);
-
-	      /* Let the shared library layer (e.g., solib-svr4) learn
-		 about this new process, relocate the cloned exec, pull
-		 in shared libraries, and install the solib event
-		 breakpoint.  If a "cloned-VM" event was propagated
-		 better throughout the core, this wouldn't be
-		 required.  */
-	      scoped_restore restore_in_initial_library_scan
-		= make_scoped_restore (&child_inf->in_initial_library_scan,
-				       true);
-	      solib_create_inferior_hook (0);
 	    }
 	}
 
@@ -633,7 +624,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	child_inf->push_target (target);
       }
 
-      thread_info *child_thr = add_thread_silent (target, child_ptid);
+      child_thr = add_thread_silent (target, child_ptid);
 
       /* If this is a vfork child, then the address-space is shared
 	 with the parent.  If we detached from the parent, then we can
@@ -653,21 +644,22 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
 	  set_current_program_space (child_inf->pspace);
 	  clone_program_space (child_inf->pspace, parent_pspace);
-
-	  /* Let the shared library layer (e.g., solib-svr4) learn
-	     about this new process, relocate the cloned exec, pull in
-	     shared libraries, and install the solib event breakpoint.
-	     If a "cloned-VM" event was propagated better throughout
-	     the core, this wouldn't be required.  */
-	  scoped_restore restore_in_initial_library_scan
-	    = make_scoped_restore (&child_inf->in_initial_library_scan, true);
-	  solib_create_inferior_hook (0);
 	}
 
       switch_to_thread (child_thr);
     }
 
   target_follow_fork (follow_child, detach_fork);
+
+  /* If we ended up creating a new inferior, call post_create_inferior to inform
+     the various subcomponents.  */
+  if (child_thr != nullptr)
+    {
+      scoped_restore_current_thread restore;
+      switch_to_thread (child_thr);
+
+      post_create_inferior (0);
+    }
 
   return false;
 }
