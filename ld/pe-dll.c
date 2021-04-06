@@ -1516,7 +1516,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   bfd *b;
   struct bfd_section *s;
 
-  if (reloc_s == NULL)
+  if (reloc_s == NULL || reloc_s->output_section == bfd_abs_section_ptr)
     return;
   total_relocs = 0;
   for (b = info->input_bfds; b; b = b->link.next)
@@ -1626,6 +1626,15 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
 		  reloc_data[total_relocs].vma = sec_vma + relocs[i]->address;
 		  reloc_data[total_relocs].idx = total_relocs;
+
+		  /* Since we're only about to determine .reloc's size,
+		     subsequent output section VMA calculations will shift up
+		     sections at this or higher addresses.  Relocations for
+		     such sections would hence end up not being correct.  */
+		  if (reloc_data[total_relocs].vma
+		      >= reloc_s->output_section->vma)
+		    einfo (_("%P: base relocation for section `%s' above "
+			     ".reloc section\n"), s->output_section->name);
 
 #define BITS_AND_SHIFT(bits, shift) (bits * 1000 | shift)
 

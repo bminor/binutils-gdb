@@ -1,3 +1,8 @@
+2021-04-06  Jan Beulich  <jbeulich@suse.com>
+
+	* pe-dll.c (generate_reloc): Bail immediately when .reloc is
+	being discarded. Warn when relocated entry is above .reloc.
+
 2021-04-05  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Move initfini-array arg handling earlier.  Don't
