@@ -922,7 +922,6 @@ fixup_segment (fixS *fixP, segT this_segment)
 {
   valueT add_number;
   fragS *fragP;
-  segT add_symbol_segment = absolute_section;
 
   if (fixP != NULL && abs_section_sym == NULL)
     abs_section_sym = section_symbol (absolute_section);
@@ -953,6 +952,8 @@ fixup_segment (fixS *fixP, segT this_segment)
 
   for (; fixP; fixP = fixP->fx_next)
     {
+      segT add_symbol_segment = absolute_section;
+
 #ifdef DEBUG5
       fprintf (stderr, "\nprocessing fixup:\n");
       print_fixup (fixP);
