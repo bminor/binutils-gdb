@@ -144,13 +144,13 @@ typedef struct disassemble_info
      some circumstances we want to include the overlay number in the
      address, (normally because there is a symbol associated with
      that address), but sometimes we want to mask out the overlay bits.  */
-  int (* symbol_at_address_func)
+  asymbol * (*symbol_at_address_func)
     (bfd_vma addr, struct disassemble_info *dinfo);
 
   /* Function called to check if a SYMBOL is can be displayed to the user.
      This is used by some ports that want to hide special symbols when
      displaying debugging outout.  */
-  bool (* symbol_is_valid)
+  bool (*symbol_is_valid)
     (asymbol *, struct disassemble_info *dinfo);
 
   /* These are for buffer_read_memory.  */
@@ -376,11 +376,11 @@ extern void perror_memory (int, bfd_vma, struct disassemble_info *);
 extern void generic_print_address
   (bfd_vma, struct disassemble_info *);
 
-/* Always true.  */
-extern int generic_symbol_at_address
+/* Always NULL.  */
+extern asymbol *generic_symbol_at_address
   (bfd_vma, struct disassemble_info *);
 
-/* Also always true.  */
+/* Always true.  */
 extern bool generic_symbol_is_valid
   (asymbol *, struct disassemble_info *);
 

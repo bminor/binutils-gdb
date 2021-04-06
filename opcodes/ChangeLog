@@ -1,3 +1,9 @@
+2021-04-06  Alan Modra  <amodra@gmail.com>
+
+	* dis-buf.c (generic_symbol_at_address): Return symbol* NULL.
+	* s12z-dis.c (decode_possible_symbol): Use symbol returned from
+	symbol_at_address_func.
+
 2021-04-05  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Don't check for limits.h, string.h, strings.h or

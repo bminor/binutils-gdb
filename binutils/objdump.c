@@ -1459,14 +1459,16 @@ objdump_print_address (bfd_vma vma, struct disassemble_info *inf)
 
 /* Determine if the given address has a symbol associated with it.  */
 
-static int
+static asymbol *
 objdump_symbol_at_address (bfd_vma vma, struct disassemble_info * inf)
 {
   asymbol * sym;
 
   sym = find_symbol_for_address (vma, inf, NULL);
+  if (sym != NULL && bfd_asymbol_value (sym) == vma)
+    return sym;
 
-  return (sym != NULL && (bfd_asymbol_value (sym) == vma));
+  return NULL;
 }
 
 /* Hold the last function name and the last line number we displayed

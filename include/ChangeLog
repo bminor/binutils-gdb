@@ -1,3 +1,8 @@
+2021-04-06  Alan Modra  <amodra@gmail.com>
+
+	* dis-asm.h (struct disassemble_info <symbol_at_address_func>):
+	Return asymbol*.
+
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
 	* opcode/cr16.h (strneq): Remove strneq and use startswith.

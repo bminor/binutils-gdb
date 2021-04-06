@@ -1,5 +1,9 @@
 2021-04-06  Alan Modra  <amodra@gmail.com>
 
+	* objdump.c (objdump_symbol_at_address): Return asymbol*.
+
+2021-04-06  Alan Modra  <amodra@gmail.com>
+
 	* NEWS: Mention C99 requirement.
 	* README: Likewise.  Modernise examples and "Reporting bugs".
 

@@ -87,13 +87,13 @@ generic_print_address (bfd_vma addr, struct disassemble_info *info)
   (*info->fprintf_func) (info->stream, "0x%s", buf);
 }
 
-/* Just return true.  */
+/* Just return NULL.  */
 
-int
+asymbol *
 generic_symbol_at_address (bfd_vma addr ATTRIBUTE_UNUSED,
 			   struct disassemble_info *info ATTRIBUTE_UNUSED)
 {
-  return 1;
+  return NULL;
 }
 
 /* Just return TRUE.  */
