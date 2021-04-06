@@ -1013,6 +1013,20 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 				 &tp->control.step_range_start,
 				 &tp->control.step_range_end);
 
+	  /* There's a problem in gcc (PR gcc/98780) that causes missing line
+	     table entries, which results in a too large stepping range.
+	     Use inlined_subroutine info to make the range more narrow.  */
+	  if (inline_skipped_frames (tp) > 0)
+	    {
+	      symbol *sym = inline_skipped_symbol (tp);
+	      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+		{
+		  const block *block = SYMBOL_BLOCK_VALUE (sym);
+		  if (BLOCK_END (block) < tp->control.step_range_end)
+		    tp->control.step_range_end = BLOCK_END (block);
+		}
+	    }
+
 	  tp->control.may_range_step = 1;
 
 	  /* If we have no line info, switch to stepi mode.  */

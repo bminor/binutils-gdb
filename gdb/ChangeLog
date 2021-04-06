@@ -1,5 +1,11 @@
 2021-04-06  Tom de Vries  <tdevries@suse.de>
 
+	PR breakpoints/25884
+	* infcmd.c (prepare_one_step): Using inline frame info to narrow
+	stepping range.
+
+2021-04-06  Tom de Vries  <tdevries@suse.de>
+
 	PR tui/27680
 	* tui/tui-disasm.c (len_without_escapes): Pass ptr pointing at escape
 	to style.parse.
