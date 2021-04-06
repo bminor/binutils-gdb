@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Binutils now requires a C99 compiler and library to build.
+
 * A new format has been added to the nm program.  Specifying
   --format=just-symbols (or just using -j) will tell the program to only
   display symbol names and nothing else.
