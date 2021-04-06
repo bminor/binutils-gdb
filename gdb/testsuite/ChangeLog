@@ -1,3 +1,9 @@
+2021-04-06  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/27691
+	* gdb.threads/gcore-thread.exp: Don't call gdb_core_cmd with core
+	file "".
+
 2021-04-01  Egeyar Bagcioglu  <egeyar@gmail.com>
 
 	* lib/pdtrace.in: Fix obvious typo.

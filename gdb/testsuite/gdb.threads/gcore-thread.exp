@@ -114,11 +114,13 @@ if {"$core0file" != ""} {
 # Now restart gdb and load the corefile.
 clean_restart ${testfile}
 
-foreach name { corefile core0file } { with_test_prefix $name {
-    set core_loaded [gdb_core_cmd [subst $$name] "re-load generated corefile"]
+proc load_core { filename } {
+    global horiz nl
+
+    set core_loaded [gdb_core_cmd $filename "re-load generated corefile"]
     if { $core_loaded == -1 } {
 	# No use proceeding from here.
-	continue
+	return
     }
 
     # FIXME: now what can we test about the thread state?
@@ -139,4 +141,14 @@ foreach name { corefile core0file } { with_test_prefix $name {
 
     gdb_test "info threads" "\\* ${horiz} thread2 .*${nl}" \
 	    "thread2 is current thread in corefile"
-}}
+}
+
+foreach name { corefile core0file } {
+    set filename [subst $$name]
+    if { $filename == "" } {
+	continue
+    }
+    with_test_prefix $name {
+	load_core $filename
+    }
+}
