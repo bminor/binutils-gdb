@@ -1,3 +1,27 @@
+2021-04-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 27217
+	* config/tc-aarch64.c (my_get_expression): Rename to
+	aarch64_get_expression.  Add a fifth argument to enable deferring
+	of expression resolution.
+	(parse_typed_reg): Update calls to my_get_expression.
+	(parse_vector_reg_list): Likewise.
+	(parse_immediate_expression): Likewise.
+	(parse_big_immediate): Likewise.
+	(parse_shift): Likewise.
+	(parse_shifter_operand_imm): Likewise.
+	(parse_operands): Likewise.
+	(parse_shifter_operand_reloc): Update calls to my_get_expression
+	and call aarch64_force_reloc to determine the value of the new
+	fifth argument.
+	(parse_address_main): Likewise.
+	(parse_half): Likewise.
+	(parse_adrp): Likewise.
+	(aarch64_force_reloc): New function.  Contains code extracted from...
+	(aarch64_force_relocation): ... here.
+	* testsuite/gas/aarch64/pr27217.s: New test case.
+	* testsuite/gas/aarch64/pr27217.d: New test driver.
+
 2021-04-06  Jan Beulich  <jbeulich@suse.com>
 
 	* write.c (fixup_segment): Move add_symbol_segment declaration

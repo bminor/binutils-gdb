@@ -548,53 +548,66 @@ skip_past_char (char **str, char c)
 
 /* Arithmetic expressions (possibly involving symbols).	 */
 
-static bool in_my_get_expression_p = false;
+static bool in_aarch64_get_expression = false;
 
-/* Third argument to my_get_expression.	 */
-#define GE_NO_PREFIX 0
-#define GE_OPT_PREFIX 1
+/* Third argument to aarch64_get_expression.  */
+#define GE_NO_PREFIX  false
+#define GE_OPT_PREFIX true
+
+/* Fourth argument to aarch64_get_expression.  */
+#define ALLOW_ABSENT  false
+#define REJECT_ABSENT true
+
+/* Fifth argument to aarch64_get_expression.  */
+#define NORMAL_RESOLUTION false
 
 /* Return TRUE if the string pointed by *STR is successfully parsed
    as an valid expression; *EP will be filled with the information of
-   such an expression.  Otherwise return FALSE.  */
+   such an expression.  Otherwise return FALSE.
+
+   If ALLOW_IMMEDIATE_PREFIX is true then skip a '#' at the start.
+   If REJECT_ABSENT is true then trat missing expressions as an error.
+   If DEFER_RESOLUTION is true, then do not resolve expressions against
+   constant symbols.  Necessary if the expression is part of a fixup
+   that uses a reloc that must be emitted.  */
 
 static bool
-my_get_expression (expressionS * ep, char **str, int prefix_mode,
-		   int reject_absent)
+aarch64_get_expression (expressionS *  ep,
+			char **        str,
+			bool           allow_immediate_prefix,
+			bool           reject_absent,
+			bool           defer_resolution)
 {
   char *save_in;
   segT seg;
-  int prefix_present_p = 0;
+  bool prefix_present = false;
 
-  switch (prefix_mode)
+  if (allow_immediate_prefix)
     {
-    case GE_NO_PREFIX:
-      break;
-    case GE_OPT_PREFIX:
       if (is_immediate_prefix (**str))
 	{
 	  (*str)++;
-	  prefix_present_p = 1;
+	  prefix_present = true;
 	}
-      break;
-    default:
-      abort ();
     }
 
   memset (ep, 0, sizeof (expressionS));
 
   save_in = input_line_pointer;
   input_line_pointer = *str;
-  in_my_get_expression_p = true;
-  seg = expression (ep);
-  in_my_get_expression_p = false;
+  in_aarch64_get_expression = true;
+  if (defer_resolution)
+    seg = deferred_expression (ep);
+  else
+    seg = expression (ep);
+  in_aarch64_get_expression = false;
 
   if (ep->X_op == O_illegal || (reject_absent && ep->X_op == O_absent))
     {
       /* We found a bad expression in md_operand().  */
       *str = input_line_pointer;
       input_line_pointer = save_in;
-      if (prefix_present_p && ! error_p ())
+      if (prefix_present && ! error_p ())
 	set_fatal_syntax_error (_("bad expression"));
       else
 	set_first_syntax_error (_("bad expression"));
@@ -605,7 +618,8 @@ my_get_expression (expressionS * ep, char **str, int prefix_mode,
   if (seg != absolute_section
       && seg != text_section
       && seg != data_section
-      && seg != bss_section && seg != undefined_section)
+      && seg != bss_section
+      && seg != undefined_section)
     {
       set_syntax_error (_("bad segment"));
       *str = input_line_pointer;
@@ -685,7 +699,7 @@ md_atof (int type, char *litP, int *sizeP)
 void
 md_operand (expressionS * exp)
 {
-  if (in_my_get_expression_p)
+  if (in_aarch64_get_expression)
     exp->X_op = O_illegal;
 }
 
@@ -1062,7 +1076,8 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
 
       atype.defined |= NTA_HASINDEX;
 
-      my_get_expression (&exp, &str, GE_NO_PREFIX, 1);
+      aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT,
+			      NORMAL_RESOLUTION);
 
       if (exp.X_op != O_constant)
 	{
@@ -1265,7 +1280,8 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	{
 	  expressionS exp;
 
-	  my_get_expression (&exp, &str, GE_NO_PREFIX, 1);
+	  aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT,
+				  NORMAL_RESOLUTION);
 	  if (exp.X_op != O_constant)
 	    {
 	      set_first_syntax_error (_("constant expression required."));
@@ -2208,7 +2224,8 @@ parse_immediate_expression (char **str, expressionS *exp,
       return false;
     }
 
-  my_get_expression (exp, str, GE_OPT_PREFIX, 1);
+  aarch64_get_expression (exp, str, GE_OPT_PREFIX, REJECT_ABSENT,
+			  NORMAL_RESOLUTION);
 
   if (exp->X_op == O_absent)
     {
@@ -2442,7 +2459,8 @@ parse_big_immediate (char **str, int64_t *imm, aarch64_reg_type reg_type)
       return false;
     }
 
-  my_get_expression (&inst.reloc.exp, &ptr, GE_OPT_PREFIX, 1);
+  aarch64_get_expression (&inst.reloc.exp, &ptr, GE_OPT_PREFIX, REJECT_ABSENT,
+			  NORMAL_RESOLUTION);
 
   if (inst.reloc.exp.X_op == O_constant)
     *imm = inst.reloc.exp.X_add_number;
@@ -2526,7 +2544,8 @@ struct reloc_table_entry
   bfd_reloc_code_real_type ld_literal_type;
 };
 
-static struct reloc_table_entry reloc_table[] = {
+static struct reloc_table_entry reloc_table[] =
+{
   /* Low 12 bits of absolute address: ADD/i and LDR/STR */
   {"lo12", 0,
    0,				/* adr_type */
@@ -3079,6 +3098,114 @@ find_reloc_table_entry (char **str)
   return NULL;
 }
 
+/* Returns 0 if the relocation should never be forced,
+   1 if the relocation must be forced, and -1 if either
+   result is OK.  */
+
+static signed int
+aarch64_force_reloc (unsigned int type)
+{
+  switch (type)
+    {
+    case BFD_RELOC_AARCH64_GAS_INTERNAL_FIXUP:
+      /* Perform these "immediate" internal relocations
+         even if the symbol is extern or weak.  */
+      return 0;
+
+    case BFD_RELOC_AARCH64_LD_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
+      /* Pseudo relocs that need to be fixed up according to
+	 ilp32_p.  */
+      return 0;
+
+    case BFD_RELOC_AARCH64_ADD_LO12:
+    case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
+    case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
+    case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
+    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
+    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LDST128_LO12:
+    case BFD_RELOC_AARCH64_LDST16_LO12:
+    case BFD_RELOC_AARCH64_LDST32_LO12:
+    case BFD_RELOC_AARCH64_LDST64_LO12:
+    case BFD_RELOC_AARCH64_LDST8_LO12:
+    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
+    case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
+    case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
+    case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
+    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
+    case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+    case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
+    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
+    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
+    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
+    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
+      /* Always leave these relocations for the linker.  */
+      return 1;
+
+    default:
+      return -1;
+    }
+}
+
+int
+aarch64_force_relocation (struct fix *fixp)
+{
+  int res = aarch64_force_reloc (fixp->fx_r_type);
+
+  if (res == -1)
+    return generic_force_reloc (fixp);
+  return res;
+}
+
 /* Mode argument to parse_shift and parser_shifter_operand.  */
 enum parse_shift_mode
 {
@@ -3225,7 +3352,8 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	  p++;
 	  exp_has_prefix = 1;
 	}
-      my_get_expression (&exp, &p, GE_NO_PREFIX, 0);
+      (void) aarch64_get_expression (&exp, &p, GE_NO_PREFIX, ALLOW_ABSENT,
+				     NORMAL_RESOLUTION);
     }
   if (kind == AARCH64_MOD_MUL_VL)
     /* For consistency, give MUL VL the same shift amount as an implicit
@@ -3288,7 +3416,8 @@ parse_shifter_operand_imm (char **str, aarch64_opnd_info *operand,
   p = *str;
 
   /* Accept an immediate expression.  */
-  if (! my_get_expression (&inst.reloc.exp, &p, GE_OPT_PREFIX, 1))
+  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_OPT_PREFIX,
+				REJECT_ABSENT, NORMAL_RESOLUTION))
     return false;
 
   /* Accept optional LSL for arithmetic immediate values.  */
@@ -3411,9 +3540,11 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
       p = *str;
 
       /* Next, we parse the expression.  */
-      if (! my_get_expression (&inst.reloc.exp, str, GE_NO_PREFIX, 1))
+      if (! aarch64_get_expression (&inst.reloc.exp, str, GE_NO_PREFIX,
+				    REJECT_ABSENT,
+				    aarch64_force_reloc (entry->add_type) == 1))
 	return false;
-
+      
       /* Record the relocation type (use the ADD variant here).  */
       inst.reloc.type = entry->add_type;
       inst.reloc.pc_rel = entry->pc_rel;
@@ -3557,12 +3688,12 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	    }
 
 	  /* #:<reloc_op>:  */
-	  if (! my_get_expression (exp, &p, GE_NO_PREFIX, 1))
+	  if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+					aarch64_force_reloc (entry->add_type) == 1))
 	    {
 	      set_syntax_error (_("invalid relocation expression"));
 	      return false;
 	    }
-
 	  /* #:<reloc_op>:<expr>  */
 	  /* Record the relocation type.  */
 	  inst.reloc.type = ty;
@@ -3570,12 +3701,12 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	}
       else
 	{
-
 	  if (skip_past_char (&p, '='))
 	    /* =immediate; need to generate the literal in the literal pool. */
 	    inst.gen_lit_pool = 1;
 
-	  if (!my_get_expression (exp, &p, GE_NO_PREFIX, 1))
+	  if (!aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+				       NORMAL_RESOLUTION))
 	    {
 	      set_syntax_error (_("invalid address"));
 	      return false;
@@ -3681,7 +3812,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	      /* We now have the group relocation table entry corresponding to
 	         the name in the assembler source.  Next, we parse the
 	         expression.  */
-	      if (! my_get_expression (exp, &p, GE_NO_PREFIX, 1))
+	      if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+					    aarch64_force_reloc (entry->add_type) == 1))
 		{
 		  set_syntax_error (_("invalid relocation expression"));
 		  return false;
@@ -3694,7 +3826,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	    }
 	  else
 	    {
-	      if (! my_get_expression (exp, &p, GE_OPT_PREFIX, 1))
+	      if (! aarch64_get_expression (exp, &p, GE_OPT_PREFIX, REJECT_ABSENT,
+					    NORMAL_RESOLUTION))
 		{
 		  set_syntax_error (_("invalid expression in the address"));
 		  return false;
@@ -3750,7 +3883,8 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	  operand->addr.offset.regno = reg->number;
 	  operand->addr.offset.is_reg = 1;
 	}
-      else if (! my_get_expression (exp, &p, GE_OPT_PREFIX, 1))
+      else if (! aarch64_get_expression (exp, &p, GE_OPT_PREFIX, REJECT_ABSENT,
+					 NORMAL_RESOLUTION))
 	{
 	  /* [Xn],#expr */
 	  set_syntax_error (_("invalid expression in the address"));
@@ -3843,6 +3977,7 @@ parse_half (char **str, int *internal_fixup_p)
 
       /* Try to parse a relocation.  Anything else is an error.  */
       ++p;
+
       if (!(entry = find_reloc_table_entry (&p)))
 	{
 	  set_syntax_error (_("unknown relocation modifier"));
@@ -3861,7 +3996,8 @@ parse_half (char **str, int *internal_fixup_p)
   else
     *internal_fixup_p = 1;
 
-  if (! my_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, 1))
+  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+				aarch64_force_reloc (inst.reloc.type) == 1))
     return false;
 
   *str = p;
@@ -3903,10 +4039,9 @@ parse_adrp (char **str)
     inst.reloc.type = BFD_RELOC_AARCH64_ADR_HI21_PCREL;
 
   inst.reloc.pc_rel = 1;
-
-  if (! my_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, 1))
+  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
+				aarch64_force_reloc (inst.reloc.type) == 1))
     return false;
-
   *str = p;
   return true;
 }
@@ -6023,8 +6158,9 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 		reg_name_p (str, REG_TYPE_VN))
 	      goto failure;
 	    str = saved;
-	    po_misc_or_fail (my_get_expression (&inst.reloc.exp, &str,
-						GE_OPT_PREFIX, 1));
+	    po_misc_or_fail (aarch64_get_expression (&inst.reloc.exp, &str,
+						     GE_OPT_PREFIX, REJECT_ABSENT,
+						     NORMAL_RESOLUTION));
 	    /* The MOV immediate alias will be fixed up by fix_mov_imm_insn
 	       later.  fix_mov_imm_insn will try to determine a machine
 	       instruction (MOVZ, MOVN or ORR) for it and will issue an error
@@ -8434,102 +8570,6 @@ cons_fix_new_aarch64 (fragS * frag, int where, int size, expressionS * exp)
     }
 
   fix_new_exp (frag, where, (int) size, exp, pcrel, type);
-}
-
-int
-aarch64_force_relocation (struct fix *fixp)
-{
-  switch (fixp->fx_r_type)
-    {
-    case BFD_RELOC_AARCH64_GAS_INTERNAL_FIXUP:
-      /* Perform these "immediate" internal relocations
-         even if the symbol is extern or weak.  */
-      return 0;
-
-    case BFD_RELOC_AARCH64_LD_GOT_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
-      /* Pseudo relocs that need to be fixed up according to
-	 ilp32_p.  */
-      return 0;
-
-    case BFD_RELOC_AARCH64_ADD_LO12:
-    case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
-    case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
-    case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
-    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
-    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
-    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
-    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
-    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
-    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
-    case BFD_RELOC_AARCH64_LDST128_LO12:
-    case BFD_RELOC_AARCH64_LDST16_LO12:
-    case BFD_RELOC_AARCH64_LDST32_LO12:
-    case BFD_RELOC_AARCH64_LDST64_LO12:
-    case BFD_RELOC_AARCH64_LDST8_LO12:
-    case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
-    case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
-    case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
-    case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
-    case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
-    case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
-    case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
-    case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
-    case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
-    case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
-    case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
-    case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
-    case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
-    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
-    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
-   case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_HI12:
-    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_ADD_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
-    case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
-    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_LDST32_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC:
-    case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2:
-    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_LDST32_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
-    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
-    case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
-    case BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2:
-      /* Always leave these relocations for the linker.  */
-      return 1;
-
-    default:
-      break;
-    }
-
-  return generic_force_reloc (fixp);
 }
 
 #ifdef OBJ_ELF
