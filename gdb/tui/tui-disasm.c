@@ -61,7 +61,7 @@ len_without_escapes (const std::string &str)
   const char *ptr = str.c_str ();
   char c;
 
-  while ((c = *ptr++) != '\0')
+  while ((c = *ptr) != '\0')
     {
       if (c == '\033')
 	{
@@ -77,7 +77,10 @@ len_without_escapes (const std::string &str)
 	    }
 	}
       else
-	++len;
+	{
+	  ++len;
+	  ++ptr;
+	}
     }
   return len;
 }
