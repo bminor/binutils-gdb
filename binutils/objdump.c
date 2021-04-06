@@ -153,8 +153,6 @@ struct objdump_disasm_info
 {
   bfd *abfd;
   bool require_sec;
-  arelent **dynrelbuf;
-  long dynrelcount;
   disassembler_ftype disassemble_fn;
   arelent *reloc;
   const char *symbol;
@@ -1270,20 +1268,20 @@ find_symbol_for_address (bfd_vma vma,
      and we have dynamic relocations available, then we can produce
      a better result by matching a relocation to the address and
      using the symbol associated with that relocation.  */
-  rel_count = aux->dynrelcount;
+  rel_count = inf->dynrelcount;
   if (!want_section
       && sorted_syms[thisplace]->value != vma
       && rel_count > 0
-      && aux->dynrelbuf != NULL
-      && aux->dynrelbuf[0]->address <= vma
-      && aux->dynrelbuf[rel_count - 1]->address >= vma
+      && inf->dynrelbuf != NULL
+      && inf->dynrelbuf[0]->address <= vma
+      && inf->dynrelbuf[rel_count - 1]->address >= vma
       /* If we have matched a synthetic symbol, then stick with that.  */
       && (sorted_syms[thisplace]->flags & BSF_SYNTHETIC) == 0)
     {
       arelent **  rel_low;
       arelent **  rel_high;
 
-      rel_low = aux->dynrelbuf;
+      rel_low = inf->dynrelbuf;
       rel_high = rel_low + rel_count - 1;
       while (rel_low <= rel_high)
 	{
@@ -3116,10 +3114,10 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 
   /* Decide which set of relocs to use.  Load them if necessary.  */
   paux = (struct objdump_disasm_info *) pinfo->application_data;
-  if (paux->dynrelbuf && dump_dynamic_reloc_info)
+  if (pinfo->dynrelbuf && dump_dynamic_reloc_info)
     {
-      rel_pp = paux->dynrelbuf;
-      rel_count = paux->dynrelcount;
+      rel_pp = pinfo->dynrelbuf;
+      rel_count = pinfo->dynrelcount;
       /* Dynamic reloc addresses are absolute, non-dynamic are section
 	 relative.  REL_OFFSET specifies the reloc address corresponding
 	 to the start of this section.  */
@@ -3455,8 +3453,8 @@ disassemble_data (bfd *abfd)
   disasm_info.application_data = (void *) &aux;
   aux.abfd = abfd;
   aux.require_sec = false;
-  aux.dynrelbuf = NULL;
-  aux.dynrelcount = 0;
+  disasm_info.dynrelbuf = NULL;
+  disasm_info.dynrelcount = 0;
   aux.reloc = NULL;
   aux.symbol = disasm_sym;
 
@@ -3519,33 +3517,31 @@ disassemble_data (bfd *abfd)
   disassemble_init_for_target (& disasm_info);
 
   /* Pre-load the dynamic relocs as we may need them during the disassembly.  */
-    {
-      long relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
+  long relsize = bfd_get_dynamic_reloc_upper_bound (abfd);
 
-      if (relsize < 0 && dump_dynamic_reloc_info)
+  if (relsize < 0 && dump_dynamic_reloc_info)
+    bfd_fatal (bfd_get_filename (abfd));
+
+  if (relsize > 0)
+    {
+      disasm_info.dynrelbuf = (arelent **) xmalloc (relsize);
+      disasm_info.dynrelcount
+	= bfd_canonicalize_dynamic_reloc (abfd, disasm_info.dynrelbuf, dynsyms);
+      if (disasm_info.dynrelcount < 0)
 	bfd_fatal (bfd_get_filename (abfd));
 
-      if (relsize > 0)
-	{
-	  aux.dynrelbuf = (arelent **) xmalloc (relsize);
-	  aux.dynrelcount = bfd_canonicalize_dynamic_reloc (abfd,
-							    aux.dynrelbuf,
-							    dynsyms);
-	  if (aux.dynrelcount < 0)
-	    bfd_fatal (bfd_get_filename (abfd));
-
-	  /* Sort the relocs by address.  */
-	  qsort (aux.dynrelbuf, aux.dynrelcount, sizeof (arelent *),
-		 compare_relocs);
-	}
+      /* Sort the relocs by address.  */
+      qsort (disasm_info.dynrelbuf, disasm_info.dynrelcount, sizeof (arelent *),
+	     compare_relocs);
     }
+
   disasm_info.symtab = sorted_syms;
   disasm_info.symtab_size = sorted_symcount;
 
   bfd_map_over_sections (abfd, disassemble_section, & disasm_info);
 
-  if (aux.dynrelbuf != NULL)
-    free (aux.dynrelbuf);
+  free (disasm_info.dynrelbuf);
+  disasm_info.dynrelbuf = NULL;
   free (sorted_syms);
   disassemble_free_target (&disasm_info);
 }

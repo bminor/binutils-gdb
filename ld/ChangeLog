@@ -1,3 +1,17 @@
+2021-04-09  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/inlinepcrel-1.d: Update expected output.
+	* testsuite/ld-powerpc/inlinepcrel-2.d: Likewise.
+	* testsuite/ld-powerpc/notoc2.d: Likewise.
+	* testsuite/ld-powerpc/notoc3.d: Likewise.
+	* testsuite/ld-powerpc/pcrelopt.d: Likewise.
+	* testsuite/ld-powerpc/startstop.d: Likewise.
+	* testsuite/ld-powerpc/tlsget.d: Likewise.
+	* testsuite/ld-powerpc/tlsget2.d: Likewise.
+	* testsuite/ld-powerpc/tlsld.d: Likewise.
+	* testsuite/ld-powerpc/weak1.d: Likewise.
+	* testsuite/ld-powerpc/weak1so.d: Likewise.
+
 2021-04-06  Jan Beulich  <jbeulich@suse.com>
 
 	* pe-dll.c (generate_reloc): Bail immediately when .reloc is

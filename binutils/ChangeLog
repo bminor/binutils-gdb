@@ -1,3 +1,10 @@
+2021-04-09  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (struct objdump_disasm_info): Delete dynrelbuf and
+	dynrelcount.
+	(find_symbol_for_address): Adjust for dynrelbuf and dynrelcount move.
+	(disassemble_section, disassemble_data): Likewise.
+
 2021-04-06  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c (objdump_symbol_at_address): Return asymbol*.

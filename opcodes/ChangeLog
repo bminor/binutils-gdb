@@ -1,3 +1,15 @@
+2021-04-09  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (struct dis_private): Add "special".
+	(POWERPC_DIALECT): Delete.  Replace uses with..
+	(private_data): ..this.  New inline function.
+	(disassemble_init_powerpc): Init "special" names.
+	(skip_optional_operands): Add is_pcrel arg, set when detecting R
+	field of prefix instructions.
+	(bsearch_reloc, print_got_plt): New functions.
+	(print_insn_powerpc): For pcrel instructions, print target address
+	and symbol if known, and decode plt and got loads too.
+
 2021-04-08  Alan Modra  <amodra@gmail.com>
 
 	PR 27684

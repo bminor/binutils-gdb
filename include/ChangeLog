@@ -1,3 +1,7 @@
+2021-04-09  Alan Modra  <amodra@gmail.com>
+
+	* dis-asm.h (struct disassemble_info): Add dynrelbuf and dynrelcount.
+
 2021-04-06  Alan Modra  <amodra@gmail.com>
 
 	* dis-asm.h (struct disassemble_info <symbol_at_address_func>):

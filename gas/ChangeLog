@@ -1,3 +1,9 @@
+2021-04-09  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/prefix-pcrel.d: Update expected output.
+	* testsuite/gas/ppc/prefix-reloc.d: Likewise.
+	* gas/testsuite/gas/ppc/vsx_32byte.d: Likewise.
+
 2021-04-08  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/ppc/pr27676.d,

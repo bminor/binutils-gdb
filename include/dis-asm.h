@@ -114,6 +114,10 @@ typedef struct disassemble_info
   /* Set if the user has requested wide output.  */
 #define WIDE_OUTPUT (1u << 28)
 
+  /* Dynamic relocations, if they have been loaded.  */
+  arelent **dynrelbuf;
+  long dynrelcount;
+
   /* Use internally by the target specific disassembly code.  */
   void *private_data;
 
