@@ -682,7 +682,7 @@ public:
 
   const struct btrace_config *btrace_conf (const struct btrace_target_info *) override;
   bool augmented_libraries_svr4_read () override;
-  bool follow_fork (bool, bool) override;
+  void follow_fork (bool, bool) override;
   void follow_exec (struct inferior *, const char *) override;
   int insert_fork_catchpoint (int) override;
   int remove_fork_catchpoint (int) override;
@@ -5895,7 +5895,7 @@ extended_remote_target::detach (inferior *inf, int from_tty)
    it is named remote_follow_fork in anticipation of using it for the
    remote target as well.  */
 
-bool
+void
 remote_target::follow_fork (bool follow_child, bool detach_fork)
 {
   struct remote_state *rs = get_remote_state ();
@@ -5922,8 +5922,6 @@ remote_target::follow_fork (bool follow_child, bool detach_fork)
 	  remote_detach_pid (child_pid);
 	}
     }
-
-  return false;
 }
 
 /* Target follow-exec function for remote targets.  Save EXECD_PATHNAME

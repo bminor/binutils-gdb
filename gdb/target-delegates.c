@@ -56,7 +56,7 @@ struct dummy_target : public target_ops
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
   int remove_vfork_catchpoint (int arg0) override;
-  bool follow_fork (bool arg0, bool arg1) override;
+  void follow_fork (bool arg0, bool arg1) override;
   int insert_exec_catchpoint (int arg0) override;
   int remove_exec_catchpoint (int arg0) override;
   void follow_exec (struct inferior *arg0, const char *arg1) override;
@@ -231,7 +231,7 @@ struct debug_target : public target_ops
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
   int remove_vfork_catchpoint (int arg0) override;
-  bool follow_fork (bool arg0, bool arg1) override;
+  void follow_fork (bool arg0, bool arg1) override;
   int insert_exec_catchpoint (int arg0) override;
   int remove_exec_catchpoint (int arg0) override;
   void follow_exec (struct inferior *arg0, const char *arg1) override;
@@ -1518,32 +1518,28 @@ debug_target::remove_vfork_catchpoint (int arg0)
   return result;
 }
 
-bool
+void
 target_ops::follow_fork (bool arg0, bool arg1)
 {
-  return this->beneath ()->follow_fork (arg0, arg1);
+  this->beneath ()->follow_fork (arg0, arg1);
 }
 
-bool
+void
 dummy_target::follow_fork (bool arg0, bool arg1)
 {
-  return default_follow_fork (this, arg0, arg1);
+  default_follow_fork (this, arg0, arg1);
 }
 
-bool
+void
 debug_target::follow_fork (bool arg0, bool arg1)
 {
-  bool result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->follow_fork (...)\n", this->beneath ()->shortname ());
-  result = this->beneath ()->follow_fork (arg0, arg1);
+  this->beneath ()->follow_fork (arg0, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->follow_fork (", this->beneath ()->shortname ());
   target_debug_print_bool (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_bool (arg1);
-  fputs_unfiltered (") = ", gdb_stdlog);
-  target_debug_print_bool (result);
-  fputs_unfiltered ("\n", gdb_stdlog);
-  return result;
+  fputs_unfiltered (")\n", gdb_stdlog);
 }
 
 int

@@ -426,7 +426,7 @@ follow_fork_inferior (bool follow_child, bool detach_fork)
 Can not resume the parent process over vfork in the foreground while\n\
 holding the child stopped.  Try \"set detach-on-fork\" or \
 \"set schedule-multiple\".\n"));
-      return 1;
+      return true;
     }
 
   if (!follow_child)
@@ -662,7 +662,9 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       switch_to_thread (child_thr);
     }
 
-  return target_follow_fork (follow_child, detach_fork);
+  target_follow_fork (follow_child, detach_fork);
+
+  return false;
 }
 
 /* Tell the target to follow the fork we're stopped at.  Returns true

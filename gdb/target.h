@@ -636,7 +636,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     virtual int remove_vfork_catchpoint (int)
       TARGET_DEFAULT_RETURN (1);
-    virtual bool follow_fork (bool, bool)
+    virtual void follow_fork (bool, bool)
       TARGET_DEFAULT_FUNC (default_follow_fork);
     virtual int insert_exec_catchpoint (int)
       TARGET_DEFAULT_RETURN (1);
@@ -1710,11 +1710,9 @@ extern int target_remove_vfork_catchpoint (int pid);
    the next resume in order to perform any bookkeeping and fiddling
    necessary to continue debugging either the parent or child, as
    requested, and releasing the other.  Information about the fork
-   or vfork event is available via get_last_target_status ().
-   This function returns true if the inferior should not be resumed
-   (i.e. there is another event pending).  */
+   or vfork event is available via get_last_target_status ().  */
 
-bool target_follow_fork (bool follow_child, bool detach_fork);
+void target_follow_fork (bool follow_child, bool detach_fork);
 
 /* Handle the target-specific bookkeeping required when the inferior
    makes an exec call.  INF is the exec'd inferior.  */

@@ -1,3 +1,20 @@
+2021-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target.h (struct target_ops) <follow_fork>: Return void.
+	(target_follow_fork): Likewise.
+	* target.c (default_follow_fork): Likewise.
+	(target_follow_fork): Likewise.
+	* infrun.c (follow_fork_inferior): Adjust.
+	* fbsd-nat.h (class fbsd_nat_target) <follow_fork>: Return void.
+	* fbsd-nat.c (fbsd_nat_target:::follow_fork): Likewise.
+	* linux-nat.h (class linux_nat_target) <follow_fork>: Likewise.
+	* linux-nat.c (linux_nat_target::follow_fork): Return void.
+	* obsd-nat.h (class obsd_nat_target) <follow_fork>: Return void.
+	* obsd-nat.c (obsd_nat_target::follow_fork): Likewise.
+	* remote.c (class remote_target) <follow_fork>: Likewise.
+	(remote_target::follow_fork): Likewise.
+	* target-delegates.c: Re-generate.
+
 2021-04-07  Weimin Pan  <weimin.pan@oracle.com>
 
 	* ctfread.c (fetch_tid_type): New function, use throughout file.

@@ -2699,7 +2699,7 @@ target_program_signals (gdb::array_view<const unsigned char> program_signals)
   current_inferior ()->top_target ()->program_signals (program_signals);
 }
 
-static bool
+static void
 default_follow_fork (struct target_ops *self, bool follow_child,
 		     bool detach_fork)
 {
@@ -2708,10 +2708,9 @@ default_follow_fork (struct target_ops *self, bool follow_child,
 		  _("could not find a target to follow fork"));
 }
 
-/* Look through the list of possible targets for a target that can
-   follow forks.  */
+/* See target.h.  */
 
-bool
+void
 target_follow_fork (bool follow_child, bool detach_fork)
 {
   target_ops *target = current_inferior ()->top_target ();

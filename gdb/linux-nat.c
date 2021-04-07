@@ -446,7 +446,7 @@ typedef std::unique_ptr<struct lwp_info, lwp_deleter> lwp_info_up;
    ptid of the followed inferior.  At return, inferior_ptid will be
    unchanged.  */
 
-bool
+void
 linux_nat_target::follow_fork (bool follow_child, bool detach_fork)
 {
   if (!follow_child)
@@ -611,8 +611,6 @@ linux_nat_target::follow_fork (bool follow_child, bool detach_fork)
       /* Let the thread_db layer learn about this new process.  */
       check_for_thread_db ();
     }
-
-  return false;
 }
 
 

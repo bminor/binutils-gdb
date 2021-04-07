@@ -133,7 +133,7 @@ public:
 
   void post_attach (int) override;
 
-  bool follow_fork (bool, bool) override;
+  void follow_fork (bool, bool) override;
 
   std::vector<static_tracepoint_marker>
     static_tracepoint_markers_by_strid (const char *id) override;
