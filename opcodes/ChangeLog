@@ -1,3 +1,8 @@
+2021-04-23  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-dis.c (print_insn_xtensa): Set info->bytes_per_chunk
+	to 4 for literal disassembly.
+
 2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* aarch64-opc.c: Add new registers (RPAOS, RPALOS, PAALLOS, PAALL) support

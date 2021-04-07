@@ -381,6 +381,7 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
       if (insn_block && (insn_block->flags & XTENSA_PROP_LITERAL)
 	  && (memaddr & 3) == 0 && bytes_fetched >= 4)
 	{
+	  info->bytes_per_chunk = 4;
 	  return 4;
 	}
       else
