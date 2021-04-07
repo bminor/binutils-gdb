@@ -1,3 +1,9 @@
+2021-04-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* gdb.base/ctf-ptype.c: Add struct link containing a forward
+	reference type.
+	* gdb.base/ctf-ptype.exp: Add "ptype struct link".
+
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/dynamic-ptype-whatis.exp: New file.

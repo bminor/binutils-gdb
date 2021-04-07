@@ -1,3 +1,9 @@
+2021-04-07  Weimin Pan  <weimin.pan@oracle.com>
+
+	* ctfread.c (fetch_tid_type): New function, use throughout file.
+	(read_forward_type): New function.
+	(read_type_record): Call read_forward_type.
+
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-exp.h (class fortran_structop_operation): New class.

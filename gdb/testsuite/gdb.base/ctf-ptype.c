@@ -124,6 +124,18 @@ typedef struct {
    a symbol.  */
 t_struct3 v_struct3;
 
+/**** Some misc more complicated things *******/
+
+struct link {
+	struct link *next;
+#ifdef __STDC__
+	struct link *(*linkfunc) (struct link *self, int flags);
+#else
+	struct link *(*linkfunc) ();
+#endif
+	struct t_struct stuff[3];
+} *s_link;
+
 /**** unions *******/
 
 union t_union {

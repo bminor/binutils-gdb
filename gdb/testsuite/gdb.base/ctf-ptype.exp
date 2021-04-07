@@ -76,6 +76,8 @@ if [gdb_test "ptype v_t_struct_p->v_float_member"	"type = float"]<0 then {
     return -1
 }
 
+gdb_test "ptype struct link" "type = struct link \{\[\r\n\]+\[ \t\]+struct link \\*next;\[\r\n\]+\[ \t\]+struct link \\*\\(\\*linkfunc\\)\\((struct link \\*, int|void|)\\);\[\r\n\]+\[ \t\]+struct t_struct stuff.3.;\[\r\n\]+\}.*" "ptype linked list structure"
+
 #
 # test ptype command with unions
 #

@@ -190,6 +190,8 @@ static void process_structure_type (struct ctf_context *cp, ctf_id_t tid);
 static void process_struct_members (struct ctf_context *cp, ctf_id_t tid,
 				    struct type *type);
 
+static struct type *read_forward_type (struct ctf_context *cp, ctf_id_t tid);
+
 static struct symbol *new_symbol (struct ctf_context *cp, struct type *type,
 				  ctf_id_t tid);
 
@@ -271,6 +273,25 @@ get_tid_type (struct objfile *of, ctf_id_t tid)
     return slot->type;
   else
     return nullptr;
+}
+
+/* Fetch the type for TID in CCP OF's tid_and_type hash, add the type to
+ *    context CCP if hash is empty or TID does not have a saved type.  */
+
+static struct type *
+fetch_tid_type (struct ctf_context *ccp, ctf_id_t tid)
+{
+  struct objfile *of = ccp->of;
+  struct type *typ;
+
+  typ = get_tid_type (of, tid);
+  if (typ == nullptr)
+    {
+      ctf_add_type_cb (tid, ccp);
+      typ = get_tid_type (of, tid);
+    }
+
+  return typ;
 }
 
 /* Return the size of storage in bits for INTEGER, FLOAT, or ENUM.  */
@@ -372,7 +393,7 @@ ctf_add_member_cb (const char *name,
   FIELD_NAME (*fp) = name;
 
   kind = ctf_type_kind (ccp->fp, tid);
-  t = get_tid_type (ccp->of, tid);
+  t = fetch_tid_type (ccp, tid);
   if (t == nullptr)
     {
       t = read_type_record (ccp, tid);
@@ -667,7 +688,7 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
 
   type->set_code (TYPE_CODE_FUNC);
   ctf_func_type_info (fp, tid, &cfi);
-  rettype = get_tid_type (of, cfi.ctc_return);
+  rettype = fetch_tid_type (ccp, cfi.ctc_return);
   TYPE_TARGET_TYPE (type) = rettype;
   set_type_align (type, ctf_type_align (fp, tid));
 
@@ -794,11 +815,11 @@ read_array_type (struct ctf_context *ccp, ctf_id_t tid)
       return nullptr;
     }
 
-  element_type = get_tid_type (objfile, ar.ctr_contents);
+  element_type = fetch_tid_type (ccp, ar.ctr_contents);
   if (element_type == nullptr)
     return nullptr;
 
-  idx_type = get_tid_type (objfile, ar.ctr_index);
+  idx_type = fetch_tid_type (ccp, ar.ctr_index);
   if (idx_type == nullptr)
     idx_type = objfile_type (objfile)->builtin_int;
 
@@ -826,7 +847,7 @@ read_const_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
   struct objfile *objfile = ccp->of;
   struct type *base_type, *cv_type;
 
-  base_type = get_tid_type (objfile, btid);
+  base_type = fetch_tid_type (ccp, btid);
   if (base_type == nullptr)
     {
       base_type = read_type_record (ccp, btid);
@@ -850,7 +871,7 @@ read_volatile_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
   ctf_dict_t *fp = ccp->fp;
   struct type *base_type, *cv_type;
 
-  base_type = get_tid_type (objfile, btid);
+  base_type = fetch_tid_type (ccp, btid);
   if (base_type == nullptr)
     {
       base_type = read_type_record (ccp, btid);
@@ -876,7 +897,7 @@ read_restrict_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
   struct objfile *objfile = ccp->of;
   struct type *base_type, *cv_type;
 
-  base_type = get_tid_type (objfile, btid);
+  base_type = fetch_tid_type (ccp, btid);
   if (base_type == nullptr)
     {
       base_type = read_type_record (ccp, btid);
@@ -903,7 +924,7 @@ read_typedef_type (struct ctf_context *ccp, ctf_id_t tid,
   char *aname = obstack_strdup (&objfile->objfile_obstack, name);
   this_type = init_type (objfile, TYPE_CODE_TYPEDEF, 0, aname);
   set_tid_type (objfile, tid, this_type);
-  target_type = get_tid_type (objfile, btid);
+  target_type = fetch_tid_type (ccp, btid);
   if (target_type != this_type)
     TYPE_TARGET_TYPE (this_type) = target_type;
   else
@@ -922,7 +943,7 @@ read_pointer_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
   struct objfile *of = ccp->of;
   struct type *target_type, *type;
 
-  target_type = get_tid_type (of, btid);
+  target_type = fetch_tid_type (ccp, btid);
   if (target_type == nullptr)
     {
       target_type = read_type_record (ccp, btid);
@@ -935,6 +956,34 @@ read_pointer_type (struct ctf_context *ccp, ctf_id_t tid, ctf_id_t btid)
 
   type = lookup_pointer_type (target_type);
   set_type_align (type, ctf_type_align (ccp->fp, tid));
+
+  return set_tid_type (of, tid, type);
+}
+
+/* Read information from a TID of CTF_K_FORWARD.  */
+
+static struct type *
+read_forward_type (struct ctf_context *ccp, ctf_id_t tid)
+{
+  struct objfile *of = ccp->of;
+  ctf_dict_t *fp = ccp->fp;
+  struct type *type;
+  uint32_t kind;
+
+  type = alloc_type (of);
+
+  gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
+  if (name != NULL && strlen (name.get()) != 0)
+    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
+
+  kind = ctf_type_kind_forwarded (fp, tid);
+  if (kind == CTF_K_UNION)
+    type->set_code (TYPE_CODE_UNION);
+  else
+    type->set_code (TYPE_CODE_STRUCT);
+
+  TYPE_LENGTH (type) = 0;
+  type->set_is_stub (true);
 
   return set_tid_type (of, tid, type);
 }
@@ -991,6 +1040,9 @@ read_type_record (struct ctf_context *ccp, ctf_id_t tid)
 	break;
       case CTF_K_ARRAY:
 	type = read_array_type (ccp, tid);
+	break;
+      case CTF_K_FORWARD:
+	type = read_forward_type (ccp, tid);
 	break;
       case CTF_K_UNKNOWN:
 	break;
@@ -1138,7 +1190,7 @@ add_stt_obj (struct ctf_context *ccp, unsigned long idx)
   if ((tid = ctf_lookup_by_symbol (ccp->fp, idx)) == CTF_ERR)
     return nullptr;
 
-  type = get_tid_type (ccp->of, tid);
+  type = fetch_tid_type (ccp, tid);
   if (type == nullptr)
     return nullptr;
 
@@ -1172,7 +1224,7 @@ add_stt_func (struct ctf_context *ccp, unsigned long idx)
     return nullptr;
 
   tid = ctf_lookup_by_symbol (ccp->fp, idx);
-  ftype = get_tid_type (ccp->of, tid);
+  ftype = fetch_tid_type (ccp, tid);
   if ((finfo.ctc_flags & CTF_FUNC_VARARG) != 0)
     ftype->set_has_varargs (true);
   ftype->set_num_fields (argc);
@@ -1186,7 +1238,7 @@ add_stt_func (struct ctf_context *ccp, unsigned long idx)
      to find the argument type.  */
   for (int iparam = 0; iparam < argc; iparam++)
     {
-      atyp = get_tid_type (ccp->of, argv[iparam]);
+      atyp = fetch_tid_type (ccp, argv[iparam]);
       if (atyp)
 	ftype->field (iparam).set_type (atyp);
       else
@@ -1194,7 +1246,7 @@ add_stt_func (struct ctf_context *ccp, unsigned long idx)
     }
 
   sym = new_symbol (ccp, ftype, tid);
-  rettyp = get_tid_type (ccp->of, finfo.ctc_return);
+  rettyp = fetch_tid_type (ccp, finfo.ctc_return);
   if (rettyp != nullptr)
     SYMBOL_TYPE (sym) = rettyp;
   else
