@@ -1,3 +1,31 @@
+2021-04-12  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/gas/riscv/march-fail-order-x-std.d: Renamed from
+	march-fail-porder-x-std.d.
+	* testsuite/gas/riscv/march-fail-order-z-std.d: Renamed from
+	march-fail-porder-z-std.d.
+	* testsuite/gas/riscv/march-fail-order-x-z.d: Renamed from
+	march-fail-porder-x-z.d.
+	* testsuite/gas/riscv/march-fail-order-zx-std.l: Added to replace
+	march-fail-porder.l.
+	* testsuite/gas/riscv/march-fail-order-x-z.l: Likewise.
+	* testsuite/gas/riscv/march-fail-order-x.l: Updated.
+	* testsuite/gas/riscv/march-fail-order-z.l: Likewise.
+	* testsuite/gas/riscv/march-fail-single-prefix-h.d: Renamed from
+	march-fail-single-char-h.d.
+	* testsuite/gas/riscv/march-fail-single-prefix-s.d: Renamed from
+	march-fail-single-char-s.d.
+	* testsuite/gas/riscv/march-fail-single-prefix-x.d: Renamed from
+	march-fail-single-char-x.d.
+	* testsuite/gas/riscv/march-fail-single-prefix-z.d: Renamed from
+	march-fail-single-char-z.d.
+	* testsuite/gas/riscv/march-fail-single-prefix-zmx.d: Added.
+	* testsuite/gas/riscv/march-fail-single-prefix.l: Added to replace
+	march-fail-single-prefix.l.
+	* testsuite/gas/riscv/march-fail-unknown-zxm.d: Added.
+	* testsuite/gas/riscv/march-fail-unknown-std.l: Updated.
+	* testsuite/gas/riscv/march-fail-unknown.l: Likewise.
+
 2021-04-09  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* config/tc-aarch64.c (warn_unpredictable_ldst): Clean-up diagnostic messages

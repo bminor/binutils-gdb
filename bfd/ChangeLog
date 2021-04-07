@@ -1,3 +1,39 @@
+2021-04-12  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfxx-riscv.c (riscv_std_z_ext_strtab): Moved forward.
+	(riscv_std_s_ext_strtab): Likewise.
+	(riscv_std_h_ext_strtab): Likewise.
+	(riscv_std_zxm_ext_strtab): Added for the zxm prefix.
+	(enum riscv_prefix_ext_class): Moved forward and renamed from
+	riscv_isa_ext_class.  Reorder them according to the parsing order,
+	since the enum values are used to check the orders in the
+	riscv_compare_subsets.
+	(struct riscv_parse_prefix_config): Moved forward and renamed from
+	riscv_parse_config_t.  Also removed the ext_valid_p field, the
+	related functions are replaced by riscv_valid_prefixed_ext.
+	(parse_config): Moved forward and updated.  The more letters of the
+	prefix string, the more forward it must be defined.  Otherwise, we
+	will get the wrong mapping when using strncmp in riscv_get_prefix_class.
+	(riscv_get_prefix_class): Moved forward.  Support to parse the
+	multi-letter prefix, like zxm.
+	(riscv_known_prefixed_ext): New function, check if the prefixed
+	extension is supported according to the right riscv_std_*_ext_strtab.
+	(riscv_valid_prefixed_ext): New function, used to replace the
+	riscv_ext_*_valid_p functions.
+	(riscv_init_ext_order): Do not set the values for prefix keywords
+	since they may have multiple letters for now.
+	(riscv_compare_subsets): Set the order values of prefix keywords
+	to negative numbers according to the riscv_prefix_ext_class.
+	(riscv_parse_std_ext): Call riscv_get_prefix_class to see if we
+	have parsed the prefixed extensions.
+	(riscv_parse_prefixed_ext): Updated and removed the parameter config.
+	Report error when the prefix is unknown.
+	(riscv_parse_subset): Do not parse the prefixed extensions according
+	to the orders in the parse_config.  Remove the confused message and
+	let riscv_parse_prefixed_ext to report the details.
+	* elfxx-riscv.h (enum riscv_isa_ext_class): Moved to elfxx-riscv.c.
+	(riscv_get_prefix_class): Removed to static.
+
 2021-04-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (ACX_BUGURL): Use https://.

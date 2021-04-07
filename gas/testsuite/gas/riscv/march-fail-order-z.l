@@ -1,2 +1,2 @@
 .*Assembler messages:
-.*Error: .*z ISA extension `zicsr' is not in alphabetical order.  It must come before `zifencei'
+.*Error: .*prefixed ISA extension `zicsr' is not in expected order.  It must come before `zifencei'
