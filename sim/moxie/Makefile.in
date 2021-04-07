@@ -17,6 +17,8 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+DTC = @DTC@
+
 dtbdir = @datadir@/gdb/dtb
 
 SIM_OBJS = \
@@ -32,9 +34,17 @@ SIM_EXTRA_CFLAGS = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
 
 all: moxie-gdb.dtb
 
-moxie-gdb.dtb: moxie-gdb.dts
-	dtc -O dtb -o moxie-gdb.dtb ${srcdir}/moxie-gdb.dts
+moxie-gdb.dtb: @MAINTAINER_MODE_TRUE@ moxie-gdb.dts
+	@echo Regenerating moxie-gdb.dtb
+	if test "x$(DTC)" != x; then \
+	  $(DTC) -O dtb -o moxie-gdb.dtb ${srcdir}/moxie-gdb.dts || exit 1; \
+	  $(SHELL) $(srcroot)/move-if-change moxie-gdb.dtb ${srcdir}/moxie-gdb.dtb || exit 1; \
+	else \
+	  echo "Could not update the moxie-gdb.dtb file because the device "; \
+	  echo "tree compiler tool (dtc) is missing.  Install the tool to "; \
+	  echo "update the device tree blob."; \
+	fi
 
 install-dtb: moxie-gdb.dtb
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(dtbdir)
-	$(INSTALL_DATA) moxie-gdb.dtb $(DESTDIR)$(dtbdir)/moxie-gdb.dtb
+	$(INSTALL_DATA) $(srcdir)/moxie-gdb.dtb $(DESTDIR)$(dtbdir)/moxie-gdb.dtb
