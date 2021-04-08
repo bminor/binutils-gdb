@@ -133,6 +133,12 @@ IGEN_FLAGS = \
 	$(IGEN_SMP) \
 	$(IGEN_LINE_NR)
 
+# igen/dgen leak memory, and therefore makes AddressSanitizer unhappy.  Disable
+# leak detection while running them.
+
+IGEN = ASAN_OPTIONS=detect_leaks=0 ./igen
+DGEN = ASAN_OPTIONS=detect_leaks=0 ./dgen
+
 .NOEXPORT:
 MAKEOVERRIDES=
 
@@ -666,7 +672,7 @@ ppc-config.h: $(CONFIG_FILE)
 
 
 tmp-dgen: dgen ppc-spr-table $(srcdir)/../../move-if-change
-	./dgen $(DGEN_FLAGS) \
+	$(DGEN) $(DGEN_FLAGS) \
 		-r $(srcdir)/ppc-spr-table \
 		-n spreg.h -hp tmp-spreg.h \
 		-n spreg.c -p  tmp-spreg.c
@@ -675,7 +681,7 @@ tmp-dgen: dgen ppc-spr-table $(srcdir)/../../move-if-change
 	touch tmp-dgen
 
 tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcdir)/../../move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
-	./igen	$(IGEN_FLAGS) \
+	$(IGEN) $(IGEN_FLAGS) \
 		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
 		-I $(srcdir) -i $(srcdir)/ppc-instructions \
 		-n icache.h    -hc tmp-icache.h \

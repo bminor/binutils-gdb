@@ -1,3 +1,7 @@
+2021-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Set ASAN_OPTIONS when running igen.
+
 2021-04-04  Steve Ellcey  <sellcey@mips.com>
 	    Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
