@@ -73,6 +73,18 @@ producer_is_gcc (const char *producer, int *major, int *minor)
   return 0;
 }
 
+/* See producer.h.  */
+
+bool
+producer_is_icc_ge_19 (const char *producer)
+{
+  int major, minor;
+
+  if (! producer_is_icc (producer, &major, &minor))
+    return false;
+
+  return major >= 19;
+}
 
 /* See producer.h.  */
 

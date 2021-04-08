@@ -1,5 +1,13 @@
 2021-04-08  Felix Willgerodt  <felix.willgerodt@intel.com>
 
+	* i386-tdep.c (i386_skip_prologue): Use symbol table to find the
+	prologue end for Intel compilers.
+	* amd64-tdep.c (amd64_skip_prologue): Likewise.
+	* producer.c (producer_is_icc_ge_19): New function.
+	* producer.h (producer_is_icc_ge_19): New declaration.
+
+2021-04-08  Felix Willgerodt  <felix.willgerodt@intel.com>
+
 	* producer.c: (producer_is_icc): Update for new version scheme.
 	(producer_parsing_tests): Update names and expected results.
 	* producer.h: (producer_is_icc): Update comment accordingly.

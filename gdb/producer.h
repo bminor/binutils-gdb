@@ -30,6 +30,9 @@ extern int producer_is_gcc_ge_4 (const char *producer);
    is NULL or it isn't GCC.  */
 extern int producer_is_gcc (const char *producer, int *major, int *minor);
 
+/* Check for Intel compilers >= 19.0.  */
+extern bool producer_is_icc_ge_19 (const char *producer);
+
 /* Returns true if the given PRODUCER string is Intel or false
    otherwise.  Sets the MAJOR and MINOR versions when not NULL.  */
 extern bool producer_is_icc (const char *producer, int *major, int *minor);
