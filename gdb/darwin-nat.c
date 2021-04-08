@@ -903,8 +903,6 @@ darwin_suspend_inferior_threads (struct inferior *inf)
 void
 darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
-  struct target_waitstatus status;
-
   int nsignal;
 
   inferior_debug

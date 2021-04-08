@@ -1,3 +1,8 @@
+2021-04-08  Dominique Quatravaux  <dominique.quatravaux@epfl.ch>
+
+	* darwin-nat.c (darwin_nat_target::resume): Remove status
+	variable.
+
 2021-04-08  Felix Willgerodt  <felix.willgerodt@intel.com>
 
 	* i386-tdep.c (i386_skip_prologue): Use symbol table to find the
