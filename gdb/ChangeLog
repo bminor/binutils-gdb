@@ -1,3 +1,9 @@
+2021-04-08  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* producer.c: (producer_is_icc): Update for new version scheme.
+	(producer_parsing_tests): Update names and expected results.
+	* producer.h: (producer_is_icc): Update comment accordingly.
+
 2021-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target.h (struct target_ops) <follow_fork>: Return void.

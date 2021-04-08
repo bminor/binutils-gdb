@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "producer.h"
 #include "gdbsupport/selftest.h"
+#include <regex>
 
 /* See producer.h.  */
 
@@ -78,50 +79,30 @@ producer_is_gcc (const char *producer, int *major, int *minor)
 bool
 producer_is_icc (const char *producer, int *major, int *minor)
 {
-  if (producer == NULL || !startswith (producer, "Intel(R)"))
+  std::regex i_re ("Intel\\(R\\)");
+  std::cmatch i_m;
+  if ((producer == nullptr) || !std::regex_search (producer, i_m, i_re))
     return false;
 
   /* Prepare the used fields.  */
   int maj, min;
-  if (major == NULL)
+  if (major == nullptr)
     major = &maj;
-  if (minor == NULL)
+  if (minor == nullptr)
     minor = &min;
 
   *minor = 0;
   *major = 0;
 
-  /* Consumes the string till a "Version" is found.  */
-  const char *cs = strstr (producer, "Version");
-  if (cs != NULL)
+  std::regex re ("[0-9]+\\.[0-9]+");
+  std::cmatch version;
+
+  if (std::regex_search (producer, version, re))
     {
-      cs = skip_to_space (cs);
-
-      int intermediate = 0;
-      int nof = sscanf (cs, "%d.%d.%d.%*d", major, &intermediate, minor);
-
-      /* Internal versions are represented only as MAJOR.MINOR, where
-	 minor is usually 0.
-	 Public versions have 3 fields as described with the command
-	 above.  */
-      if (nof == 3)
-	return true;
-
-      if (nof == 2)
-	{
-	  *minor = intermediate;
-	  return true;
-	}
+      sscanf (version.str ().c_str (), "%d.%d", major, minor);
+      return true;
     }
 
-  static bool warning_printed = false;
-  /* Not recognized as Intel, let the user know.  */
-  if (!warning_printed)
-    {
-      warning (_("Could not recognize version of Intel Compiler in: \"%s\""),
-	       producer);
-      warning_printed = true;
-    }
   return false;
 }
 
@@ -152,15 +133,15 @@ producer_parsing_tests ()
   }
 
   {
-    static const char extern_f_14_1[] = "\
+    static const char extern_f_14_0[] = "\
 Intel(R) Fortran Intel(R) 64 Compiler XE for applications running on \
 Intel(R) 64, \
 Version 14.0.1.074 Build 20130716";
 
     int major = 0, minor = 0;
-    SELF_CHECK (producer_is_icc (extern_f_14_1, &major, &minor)
-		&& major == 14 && minor == 1);
-    SELF_CHECK (!producer_is_gcc (extern_f_14_1, &major, &minor));
+    SELF_CHECK (producer_is_icc (extern_f_14_0, &major, &minor)
+		&& major == 14 && minor == 0);
+    SELF_CHECK (!producer_is_gcc (extern_f_14_0, &major, &minor));
   }
 
   {
