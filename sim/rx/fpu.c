@@ -732,7 +732,7 @@ rxfp_itof (long fa, int round_mode)
   int sign = 0;
   unsigned int frac_bits;
   volatile unsigned int whole_bits;
-  FP_Parts a;
+  FP_Parts a = {0};
 
   if (fa == 0)
     return PLUS_ZERO;
