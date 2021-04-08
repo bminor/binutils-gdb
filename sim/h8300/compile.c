@@ -1624,7 +1624,8 @@ init_pointers (SIM_DESC sd)
 	  sim_io_printf
 	    (sd,
 	     "init_pointers: bad memory size %d, defaulting to %d.\n", 
-	     memory_size, memory_size = H8300S_MSIZE);
+	     memory_size, H8300S_MSIZE);
+	  memory_size = H8300S_MSIZE;
 	}
 
       if (h8_get_memory_buf (sd))
