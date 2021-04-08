@@ -205,7 +205,7 @@ bpfbf_breakpoint (SIM_CPU *current_cpu)
    several ISAs.  This should be fixed in CGEN.  */
 
 static void
-bpf_def_model_init ()
+bpf_def_model_init (void)
 {
   /* Do nothing.  */
 }

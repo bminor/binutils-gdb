@@ -465,7 +465,7 @@ lvalue (SIM_DESC sd, int x, int rn, unsigned int *val)
 }
 
 static int
-cmdline_location()
+cmdline_location(void)
 {
   if (h8300smode && !h8300_normal_mode)
     return 0xffff00L;

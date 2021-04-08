@@ -319,9 +319,7 @@ CONVDISI (val)
 #endif /* DI_FN_SUPPORT */
 
 QI
-RORQI (val, shift)
-     QI  val;
-     int shift;
+RORQI (QI val, int shift)
 {
   if (shift != 0)
     {
@@ -336,9 +334,7 @@ RORQI (val, shift)
 }
 
 QI
-ROLQI (val, shift)
-     QI  val;
-     int shift;
+ROLQI (QI val, int shift)
 {
   if (shift != 0)
     {
@@ -353,9 +349,7 @@ ROLQI (val, shift)
 }
 
 HI
-RORHI (val, shift)
-     HI  val;
-     int shift;
+RORHI (HI val, int shift)
 {
   if (shift != 0)
     {
@@ -370,9 +364,7 @@ RORHI (val, shift)
 }
 
 HI
-ROLHI (val, shift)
-     HI  val;
-     int shift;
+ROLHI (HI val, int shift)
 {
   if (shift != 0)
     {
@@ -387,9 +379,7 @@ ROLHI (val, shift)
 }
 
 SI
-RORSI (val, shift)
-     SI  val;
-     int shift;
+RORSI (SI val, int shift)
 {
   if (shift != 0)
     {
@@ -404,9 +394,7 @@ RORSI (val, shift)
 }
 
 SI
-ROLSI (val, shift)
-     SI  val;
-     int shift;
+ROLSI (SI val, int shift)
 {
   if (shift != 0)
     {

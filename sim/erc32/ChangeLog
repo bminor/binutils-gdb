@@ -1,3 +1,33 @@
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
+	* sis.c (run_sim, main): Use new-style declaration.
+	* interf.c (run_sim, sim_open, sim_close, sim_load)
+	(sim_create_inferior, sim_store_register, sim_fetch_register)
+	(sim_info, sim_stop_reason, flush_windows, sim_do_command): Use
+	new-style declaration.
+	* help.c (usage, gen_help): Use new-style declaration.
+	* func.c (batch, set_regi, set_rega, disp_reg, limcalc)
+	(reset_stat, show_stat, init_bpt, int_handler, init_signals)
+	(disp_fpu, disp_regs, disp_ctrl, disp_mem, dis_mem, event)
+	(init_event, set_int, advance_time, now, wait_for_irq, check_bpt)
+	(reset_all, sys_reset, sys_halt): Use new-style declaration.
+	* float.c (get_accex, clear_accex, set_fsr): Use new-style
+	declaration.
+	* exec.c (sub_cc, add_cc, log_cc, dispatch_instruction, fpexec)
+	(chk_asi, execute_trap, check_interrupts, init_regs): Use
+	new-style declaration.
+	* erc32.c (init_sim, reset, decode_ersr, mecparerror)
+	(error_mode, decode_memcfg, decode_wcr, decode_mcr, sim_halt)
+	(close_port, exit_sim, mec_reset, mec_intack, chk_irq, mec_irq)
+	(set_sfsr, mec_read, mec_write, init_stdio, restore_stdio)
+	(port_init, read_uart, write_uart, flush_uart, uarta_tx)
+	(uartb_tx, uart_rx, uart_intr, uart_irq_start, wdog_intr)
+	(wdog_start, rtc_intr, rtc_start, rtc_counter_read)
+	(rtc_scaler_set, rtc_reload_set, gpt_intr, gpt_start)
+	(gpt_counter_read, gpt_scaler_set, gpt_reload_set, timer_ctrl)
+	(memory_read, memory_write, get_mem_ptr, sis_memory_write)
+	(sis_memory_read): Use new-style declaration.
+
 2021-04-05  Tom Tromey  <tromey@adacore.com>
 
 	* configure: Rebuild.

@@ -1,3 +1,8 @@
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
+	* sim-if.c (sim_open, sim_create_inferior): Use new-style
+	declaration.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, configure: Regenerate.

@@ -56,10 +56,7 @@ enum libgloss_syscall
 
 /* Read a null terminated string from memory, return in a buffer */
 static char *
-fetch_str (current_cpu, pc, addr)
-     SIM_CPU *current_cpu;
-     PCADDR pc;
-     DI addr;
+fetch_str (SIM_CPU *current_cpu, PCADDR pc, DI addr)
 {
   char *buf;
   int nr = 0;

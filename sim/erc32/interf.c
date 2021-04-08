@@ -60,10 +60,7 @@ int             sis_gdb_break = 1;
 host_callback *sim_callback;
 
 int
-run_sim(sregs, icount, dis)
-    struct pstate  *sregs;
-    uint64          icount;
-    int             dis;
+run_sim(struct pstate *sregs, uint64 icount, int dis)
 {
     int             mexc, irq;
 
@@ -158,11 +155,8 @@ run_sim(sregs, icount, dis)
 }
 
 SIM_DESC
-sim_open (kind, callback, abfd, argv)
-     SIM_OPEN_KIND kind;
-     struct host_callback_struct *callback;
-     struct bfd *abfd;
-     char * const *argv;
+sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback,
+	  struct bfd *abfd, char * const *argv)
 {
 
     int             argc = 0;
@@ -263,9 +257,7 @@ sim_open (kind, callback, abfd, argv)
 }
 
 void
-sim_close(sd, quitting)
-     SIM_DESC sd;
-     int quitting;
+sim_close(SIM_DESC sd, int quitting)
 {
 
     exit_sim();
@@ -274,22 +266,15 @@ sim_close(sd, quitting)
 };
 
 SIM_RC
-sim_load(sd, prog, abfd, from_tty)
-     SIM_DESC sd;
-     const char *prog;
-     bfd *abfd;
-     int from_tty;
+sim_load(SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
 {
     bfd_load (prog);
     return SIM_RC_OK;
 }
 
 SIM_RC
-sim_create_inferior(sd, abfd, argv, env)
-     SIM_DESC sd;
-     struct bfd *abfd;
-     char * const *argv;
-     char * const *env;
+sim_create_inferior(SIM_DESC sd, bfd *abfd, char * const *argv,
+		    char * const *env)
 {
     bfd_vma start_address = 0;
     if (abfd != NULL)
@@ -304,11 +289,7 @@ sim_create_inferior(sd, abfd, argv, env)
 }
 
 int
-sim_store_register(sd, regno, value, length)
-    SIM_DESC sd;
-    int             regno;
-    unsigned char  *value;
-    int length;
+sim_store_register(SIM_DESC sd, int regno, unsigned char *value, int length)
 {
     int regval;
 
@@ -320,11 +301,7 @@ sim_store_register(sd, regno, value, length)
 
 
 int
-sim_fetch_register(sd, regno, buf, length)
-     SIM_DESC sd;
-    int             regno;
-    unsigned char  *buf;
-     int length;
+sim_fetch_register(SIM_DESC sd, int regno, unsigned char *buf, int length)
 {
     get_regi(&sregs, regno, buf);
     return -1;
@@ -353,9 +330,7 @@ sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 }
 
 void
-sim_info(sd, verbose)
-     SIM_DESC sd;
-     int verbose;
+sim_info(SIM_DESC sd, int verbose)
 {
     show_stat(&sregs);
 }
@@ -363,10 +338,7 @@ sim_info(sd, verbose)
 int             simstat = OK;
 
 void
-sim_stop_reason(sd, reason, sigrc)
-     SIM_DESC sd;
-     enum sim_stop * reason;
-     int *sigrc;
+sim_stop_reason(SIM_DESC sd, enum sim_stop *reason, int *sigrc)
 {
 
     switch (simstat) {
@@ -400,7 +372,7 @@ sim_stop_reason(sd, reason, sigrc)
 */
 
 static void
-flush_windows ()
+flush_windows (void)
 {
   int invwin;
   int cwp;
@@ -452,9 +424,7 @@ sim_resume(SIM_DESC sd, int step, int siggnal)
 }
 
 void
-sim_do_command(sd, cmd)
-     SIM_DESC sd;
-     const char *cmd;
+sim_do_command(SIM_DESC sd, const char *cmd)
 {
     exec_cmd(&sregs, cmd);
 }
