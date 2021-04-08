@@ -1,3 +1,9 @@
+2021-04-07  Jim Wilson  <jimw@sifive.com>
+
+	PR sim/27483
+	* simulator.c (set_flags_for_add32): Compare uresult against
+	itself.  Compare sresult against itself.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, configure: Regenerate.
