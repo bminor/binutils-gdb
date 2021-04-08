@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
 #include "bfd.h"
+#include <stdlib.h>
 
 #define IMPL 1 /* Implemented */
 #define SUP  1 /* Supervisor register */

@@ -23,6 +23,7 @@
 #include "sim-main.h"
 #include "cgen-mem.h"
 #include "cgen-ops.h"
+#include <stdlib.h>
 
 enum
 {

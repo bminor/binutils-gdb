@@ -1,5 +1,9 @@
 2021-04-08  Tom Tromey  <tom@tromey.com>
 
+	* iq2000.c: Include stdlib.h.
+
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
 	* sim-if.c (sim_open, sim_create_inferior): Use new-style
 	declaration.
 	* iq2000.c (fetch_str): Use new-style declaration.

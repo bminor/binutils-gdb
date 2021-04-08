@@ -23,6 +23,7 @@
 #include "sim-main.h"
 #include "cgen-mem.h"
 #include "cgen-ops.h"
+#include <stdlib.h>
 
 /* Return the size of REGNO in bytes.  */
 

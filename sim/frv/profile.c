@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "sim-main.h"
 #include "bfd.h"
+#include <stdlib.h>
 
 #if WITH_PROFILE_MODEL_P
 

@@ -23,6 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-main.h"
 #include "cgen-mem.h"
 #include "bfd.h"
+#include <stdlib.h>
 
 /* Check for alignment and access restrictions.  Return the corrected address.
  */

@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "bfd.h"
 #include "gdb/sim-frv.h"
 #include <math.h>
+#include <stdlib.h>
 
 /* Maintain a flag in order to know when to write the address of the next
    VLIW instruction into the LR register.  Used by JMPL. JMPIL, and CALL

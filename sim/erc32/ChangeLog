@@ -1,5 +1,9 @@
 2021-04-08  Tom Tromey  <tom@tromey.com>
 
+	* func.c: Include sys/time.h.
+
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
 	* sis.c (run_sim, main): Use new-style declaration.
 	* interf.c (run_sim, sim_open, sim_close, sim_load)
 	(sim_create_inferior, sim_store_register, sim_fetch_register)

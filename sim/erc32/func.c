@@ -26,6 +26,7 @@
 #include <dis-asm.h>
 #include "sim-config.h"
 #include <inttypes.h>
+#include <sys/time.h>
 
 #define	VAL(x)	strtoul(x,(char **)NULL,0)
 

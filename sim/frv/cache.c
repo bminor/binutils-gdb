@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-main.h"
 #include "cache.h"
 #include "bfd.h"
+#include <stdlib.h>
 
 void
 frv_cache_init (SIM_CPU *cpu, FRV_CACHE *cache)

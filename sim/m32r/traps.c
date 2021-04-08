@@ -20,6 +20,7 @@
 #include "sim-main.h"
 #include "sim-syscall.h"
 #include "targ-vals.h"
+#include <stdlib.h>
 
 #define TRAP_FLUSH_CACHE 12
 /* The semantic code invokes this for invalid (unrecognized) instructions.  */

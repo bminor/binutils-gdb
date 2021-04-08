@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
 #include "bfd.h"
+#include <stdlib.h>
 
 /* FR-V Interrupt table.
    Describes the interrupts supported by the FR-V.

@@ -1,3 +1,7 @@
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
+	* emul_unix.c: Include time.h.
+
 2021-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Set ASAN_OPTIONS when running igen.

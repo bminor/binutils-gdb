@@ -1,3 +1,8 @@
+2021-04-08  Tom Tromey  <tom@tromey.com>
+
+	* traps.c: Include stdlib.h.
+	* cris-tmpl.c: Include stdlib.h.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, configure: Regenerate.

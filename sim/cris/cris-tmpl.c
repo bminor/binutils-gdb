@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cgen-mem.h"
 #include "cgen-ops.h"
 
+#include <stdlib.h>
+
 #define MY(f) XCONCAT3(crisv,BASENUM,f)
 
 /* Dispatcher for break insn.  */
