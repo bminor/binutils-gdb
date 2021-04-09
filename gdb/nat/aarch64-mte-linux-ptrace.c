@@ -20,12 +20,13 @@
 #include "gdbsupport/common-defs.h"
 #include "gdbsupport/byte-vector.h"
 
+#include "linux-ptrace.h"
+
 #include "arch/aarch64.h"
 #include "arch/aarch64-mte-linux.h"
 #include "nat/aarch64-linux.h"
 #include "nat/aarch64-mte-linux-ptrace.h"
 
-#include "linux-ptrace.h"
 #include <sys/uio.h>
 
 /* Helper function to display various possible errors when reading
