@@ -1,3 +1,7 @@
+2021-04-09  Luis Machado  <luis.machado@linaro.org>
+
+	* fpu.c (rxfp_itof): Initialize structure.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, configure: Regenerate.
