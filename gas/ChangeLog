@@ -1,3 +1,13 @@
+2021-04-09  Tejas Belagod  <tejas.belagod@arm.com>
+
+	Backported from mainline.
+	2021-04-09  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* config/tc-aarch64.c (warn_unpredictable_ldst): Clean-up diagnostic messages
+	for LD/ST Exclusive instructions.
+	* testsuite/gas/aarch64/diagnostic.s: Add a diagnostic test for STLXP.
+	* testsuite/gas/aarch64/diagnostic.l: Fix-up test after message clean-up.
+
 2021-02-19  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* config/tc-s390.c (s390_parse_cpu): New entry for arch14.
