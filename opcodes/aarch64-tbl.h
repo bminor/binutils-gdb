@@ -3646,10 +3646,10 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("ldrsw", 0x98000000, 0xff000000, loadlit, OP_LDRSW_LIT, OP2 (Rt, ADDR_PCREL19),    QL_X_PCREL, 0),
   CORE_INSN ("prfm",  0xd8000000, 0xff000000, loadlit, OP_PRFM_LIT,  OP2 (PRFOP, ADDR_PCREL19), QL_PRFM_PCREL, 0),
   /* Atomic 64-byte load/store in Armv8.7.  */
-  _LS64_INSN ("ld64b",   0xf83fd000, 0xfffffc00, ldstexcl, OP2 (Rt_LS64, ADDR_SIMPLE), QL_X1NIL, 0),
-  _LS64_INSN ("st64b",   0xf83f9000, 0xfffffc00, ldstexcl, OP2 (Rt_LS64, ADDR_SIMPLE), QL_X1NIL, 0),
-  _LS64_INSN ("st64bv",  0xf820b000, 0xffe0fc00, ldstexcl, OP3 (Rs, Rt_LS64, ADDR_SIMPLE), QL_X2NIL, 0),
-  _LS64_INSN ("st64bv0", 0xf820a000, 0xffe0fc00, ldstexcl, OP3 (Rs, Rt_LS64, ADDR_SIMPLE), QL_X2NIL, 0),
+  _LS64_INSN ("ld64b",   0xf83fd000, 0xfffffc00, lse_atomic, OP2 (Rt_LS64, ADDR_SIMPLE), QL_X1NIL, 0),
+  _LS64_INSN ("st64b",   0xf83f9000, 0xfffffc00, lse_atomic, OP2 (Rt_LS64, ADDR_SIMPLE), QL_X1NIL, 0),
+  _LS64_INSN ("st64bv",  0xf820b000, 0xffe0fc00, lse_atomic, OP3 (Rs, Rt_LS64, ADDR_SIMPLE), QL_X2NIL, 0),
+  _LS64_INSN ("st64bv0", 0xf820a000, 0xffe0fc00, lse_atomic, OP3 (Rs, Rt_LS64, ADDR_SIMPLE), QL_X2NIL, 0),
   /* Logical (immediate).  */
   CORE_INSN ("and", 0x12000000, 0x7f800000, log_imm, 0, OP3 (Rd_SP, Rn, LIMM), QL_R2NIL, F_HAS_ALIAS | F_SF),
   CORE_INSN ("bic", 0x12000000, 0x7f800000, log_imm, OP_BIC, OP3 (Rd_SP, Rn, LIMM), QL_R2NIL, F_ALIAS | F_PSEUDO | F_SF),

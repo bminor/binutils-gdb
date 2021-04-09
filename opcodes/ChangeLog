@@ -1,3 +1,8 @@
+2021-04-09  Tejas Belagod  <tejas.belagod@arm.com>
+
+	* aarch64-tbl.h (struct aarch64_opcode aarch64_opcode_table): Reclassify
+	LD64/ST64 instructions to lse_atomic instead of ldstexcl.
+
 2021-04-09  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (struct dis_private): Add "special".
