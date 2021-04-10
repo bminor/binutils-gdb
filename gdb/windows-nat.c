@@ -869,6 +869,8 @@ windows_make_so (const char *name, LPVOID load_addr)
   return so;
 }
 
+static bool windows_add_dll (LPVOID);
+
 /* See nat/windows-nat.h.  */
 
 void
@@ -884,11 +886,21 @@ windows_nat::handle_load_dll ()
      (source: MSDN LOAD_DLL_DEBUG_INFO structure).  */
   dll_name = get_image_name (current_process_handle,
 			     event->lpImageName, event->fUnicode);
-  if (!dll_name)
-    return;
+  /* If the DLL name could not be gleaned via lpImageName, try harder
+     by enumerating all the DLLs loaded into the inferior, looking for
+     one that is loaded at base address = lpBaseOfDll. */
+  if (dll_name != nullptr)
+    {
 
-  solib_end->next = windows_make_so (dll_name, event->lpBaseOfDll);
-  solib_end = solib_end->next;
+      solib_end->next = windows_make_so (dll_name, event->lpBaseOfDll);
+      solib_end = solib_end->next;
+    }
+  else if (event->lpBaseOfDll != nullptr
+	   && windows_add_dll (event->lpBaseOfDll))
+    dll_name = solib_end->so_name;
+
+  if (dll_name == nullptr)
+    return;
 
   lm_info_windows *li = (lm_info_windows *) solib_end->lm_info;
 
@@ -1899,6 +1911,19 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 static void
 windows_add_all_dlls (void)
 {
+  windows_add_dll (NULL);
+}
+
+/* Iterate over all DLLs currently mapped by our inferior, looking for
+   a DLL which is loaded at LOAD_ADDR.  If found, add the DLL to our
+   list of solibs and return 'true'; otherwise do nothing and return
+   'false'.  LOAD_ADDR NULL means add all DLLs to the list of solibs;
+   this is used when the inferior finishes its initialization, and all
+   the DLLs it statically depends on are presumed loaded.  */
+
+static bool
+windows_add_dll (LPVOID load_addr)
+{
   HMODULE dummy_hmodule;
   DWORD cb_needed;
   HMODULE *hmodules;
@@ -1910,18 +1935,18 @@ windows_add_all_dlls (void)
       if (EnumProcessModulesEx (current_process_handle, &dummy_hmodule,
 				sizeof (HMODULE), &cb_needed,
 				LIST_MODULES_32BIT) == 0)
-	return;
+	return false;
     }
   else
 #endif
     {
       if (EnumProcessModules (current_process_handle, &dummy_hmodule,
 			      sizeof (HMODULE), &cb_needed) == 0)
-	return;
+	return false;
     }
 
   if (cb_needed < 1)
-    return;
+    return false;
 
   hmodules = (HMODULE *) alloca (cb_needed);
 #ifdef __x86_64__
@@ -1930,14 +1955,14 @@ windows_add_all_dlls (void)
       if (EnumProcessModulesEx (current_process_handle, hmodules,
 				cb_needed, &cb_needed,
 				LIST_MODULES_32BIT) == 0)
-	return;
+	return false;
     }
   else
 #endif
     {
       if (EnumProcessModules (current_process_handle, hmodules,
 			      cb_needed, &cb_needed) == 0)
-	return;
+	return false;
     }
 
   char system_dir[__PMAX];
@@ -1983,6 +2008,7 @@ windows_add_all_dlls (void)
       if (GetModuleInformation (current_process_handle, hmodules[i],
 				&mi, sizeof (mi)) == 0)
 	continue;
+
       if (GetModuleFileNameEx (current_process_handle, hmodules[i],
 			       dll_name, sizeof (dll_name)) == 0)
 	continue;
@@ -2005,9 +2031,17 @@ windows_add_all_dlls (void)
 	  name = syswow_dll_path.c_str();
 	}
 
-      solib_end->next = windows_make_so (name, mi.lpBaseOfDll);
-      solib_end = solib_end->next;
+      /* Record the DLL if either LOAD_ADDR is NULL or the address
+	 at which the DLL was loaded is equal to LOAD_ADDR.  */
+      if (!(load_addr != nullptr && mi.lpBaseOfDll != load_addr))
+	{
+	  solib_end->next = windows_make_so (name, mi.lpBaseOfDll);
+	  solib_end = solib_end->next;
+	  if (load_addr != nullptr)
+	    return true;
+	}
     }
+  return load_addr == nullptr ? true : false;
 }
 
 void

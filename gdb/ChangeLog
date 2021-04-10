@@ -1,3 +1,14 @@
+2021-04-10  Eli Zaretskii  <eliz@gnu.org>
+
+	* windows-nat.c (windows_nat::handle_load_dll): Call
+	windows_add_dll if get_image_name failed to glean the name of the
+	DLL by using the lpImageName pointer.
+	(windows_add_all_dlls): Now a thin wrapper around windows_add_dll.
+	(windows_add_dll): Now does what windows_add_all_dlls did before,
+	but also accepts an argument LOAD_ADDR, which, if non-NULL,
+	specifies the address where the DLL was loaded into the inferior,
+	and looks for the single DLL loaded at that address.
+
 2021-04-09  Luis Machado  <luis.machado@linaro.org>
 
 	* nat/aarch64-mte-linux-ptrace.c: Update include file order.
