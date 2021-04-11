@@ -119,3 +119,14 @@ prefix:
 	pstxv	13,96(0),1
 	pstxv	63,96(11),0
 	pstxv	63,96(0),1
+
+# test d34 values of interest when bfd_vma is 32-bit
+	pli	1,0x7fffffff
+	pli	2,0x80000000
+	pli	3,0xffffffff
+	pli	4,0
+	pli	5,-1
+	pli	6,-0x7fffffff
+	pli	7,-0x80000000
+	pli	8,~0x7fffffff
+	pli	9,~0x80000000

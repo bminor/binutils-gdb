@@ -1574,7 +1574,7 @@ insn_validate (const struct powerpc_opcode *op)
 	  if (operand->shift == (int) PPC_OPSHIFT_INV)
 	    {
 	      const char *errmsg;
-	      int64_t val;
+	      uint64_t val;
 
 	      errmsg = NULL;
 	      val = -1;
@@ -2197,7 +2197,7 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
       {
 	int reloc = ptr->reloc;
 
-	if (!ppc_obj64 && exp_p->X_add_number != 0)
+	if (!ppc_obj64 && (exp_p->X_op == O_big || exp_p->X_add_number != 0))
 	  {
 	    switch (reloc)
 	      {
@@ -2238,14 +2238,12 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
 
 	    input_line_pointer = str;
 	    expression (&new_exp);
-	    if (new_exp.X_op == O_constant)
+	    if (new_exp.X_op == O_constant && exp_p->X_op != O_big)
 	      {
 		exp_p->X_add_number += new_exp.X_add_number;
 		str = input_line_pointer;
 	      }
-
-	    if (&input_line_pointer != str_p)
-	      input_line_pointer = orig_line;
+	    input_line_pointer = orig_line;
 	  }
 	*str_p = str;
 
@@ -3397,8 +3395,8 @@ md_assemble (char *str)
 	    }
 	  if (--num_optional_provided < 0)
 	    {
-	      int64_t val = ppc_optional_operand_value (operand, insn, ppc_cpu,
-							num_optional_provided);
+	      uint64_t val = ppc_optional_operand_value (operand, insn, ppc_cpu,
+							 num_optional_provided);
 	      if (operand->insert)
 		{
 		  insn = (*operand->insert) (insn, val, ppc_cpu, &errmsg);
@@ -3459,14 +3457,32 @@ md_assemble (char *str)
 	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
 				     ppc_cpu, (char *) NULL, 0);
 	}
-      else if (ex.X_op == O_constant)
+      else if (ex.X_op == O_constant
+	       || (ex.X_op == O_big && ex.X_add_number > 0))
 	{
+	  uint64_t val;
+	  if (ex.X_op == O_constant)
+	    {
+	      val = ex.X_add_number;
+	      if (sizeof (ex.X_add_number) < sizeof (val)
+		  && (ex.X_add_number < 0) != ex.X_extrabit)
+		val = val ^ ((addressT) -1 ^ (uint64_t) -1);
+	    }
+	  else
+	    val = generic_bignum_to_int64 ();
 #ifdef OBJ_ELF
 	  /* Allow @HA, @L, @H on constants.  */
-	  bfd_reloc_code_real_type reloc;
 	  char *orig_str = str;
+	  bfd_reloc_code_real_type reloc = ppc_elf_suffix (&str, &ex);
 
-	  if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_NONE)
+	  if (ex.X_op == O_constant)
+	    {
+	      val = ex.X_add_number;
+	      if (sizeof (ex.X_add_number) < sizeof (val)
+		  && (ex.X_add_number < 0) != ex.X_extrabit)
+		val = val ^ ((addressT) -1 ^ (uint64_t) -1);
+	    }
+	  if (reloc != BFD_RELOC_NONE)
 	    switch (reloc)
 	      {
 	      default:
@@ -3474,81 +3490,77 @@ md_assemble (char *str)
 		break;
 
 	      case BFD_RELOC_LO16:
-		ex.X_add_number &= 0xffff;
+		val &= 0xffff;
 		if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
-		  ex.X_add_number = SEX16 (ex.X_add_number);
+		  val = SEX16 (val);
 		break;
 
 	      case BFD_RELOC_HI16:
 		if (REPORT_OVERFLOW_HI && ppc_obj64)
 		  {
 		    /* PowerPC64 @h is tested for overflow.  */
-		    ex.X_add_number = (addressT) ex.X_add_number >> 16;
+		    val = val >> 16;
 		    if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
 		      {
-			addressT sign = (((addressT) -1 >> 16) + 1) >> 1;
-			ex.X_add_number
-			  = ((addressT) ex.X_add_number ^ sign) - sign;
+			uint64_t sign = (((uint64_t) -1 >> 16) + 1) >> 1;
+			val = (val ^ sign) - sign;
 		      }
 		    break;
 		  }
 		/* Fallthru */
 
 	      case BFD_RELOC_PPC64_ADDR16_HIGH:
-		ex.X_add_number = PPC_HI (ex.X_add_number);
+		val = PPC_HI (val);
 		if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
-		  ex.X_add_number = SEX16 (ex.X_add_number);
+		  val = SEX16 (val);
 		break;
 
 	      case BFD_RELOC_HI16_S:
 		if (REPORT_OVERFLOW_HI && ppc_obj64)
 		  {
 		    /* PowerPC64 @ha is tested for overflow.  */
-		    ex.X_add_number
-		      = ((addressT) ex.X_add_number + 0x8000) >> 16;
+		    val = (val + 0x8000) >> 16;
 		    if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
 		      {
-			addressT sign = (((addressT) -1 >> 16) + 1) >> 1;
-			ex.X_add_number
-			  = ((addressT) ex.X_add_number ^ sign) - sign;
+			uint64_t sign = (((uint64_t) -1 >> 16) + 1) >> 1;
+			val = (val ^ sign) - sign;
 		      }
 		    break;
 		  }
 		/* Fallthru */
 
 	      case BFD_RELOC_PPC64_ADDR16_HIGHA:
-		ex.X_add_number = PPC_HA (ex.X_add_number);
+		val = PPC_HA (val);
 		if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
-		  ex.X_add_number = SEX16 (ex.X_add_number);
+		  val = SEX16 (val);
 		break;
 
 	      case BFD_RELOC_PPC64_HIGHER:
-		ex.X_add_number = PPC_HIGHER (ex.X_add_number);
+		val = PPC_HIGHER (val);
 		if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
-		  ex.X_add_number = SEX16 (ex.X_add_number);
+		  val = SEX16 (val);
 		break;
 
 	      case BFD_RELOC_PPC64_HIGHER_S:
-		ex.X_add_number = PPC_HIGHERA (ex.X_add_number);
+		val = PPC_HIGHERA (val);
 		if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
-		  ex.X_add_number = SEX16 (ex.X_add_number);
+		  val = SEX16 (val);
 		break;
 
 	      case BFD_RELOC_PPC64_HIGHEST:
-		ex.X_add_number = PPC_HIGHEST (ex.X_add_number);
+		val = PPC_HIGHEST (val);
 		if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
-		  ex.X_add_number = SEX16 (ex.X_add_number);
+		  val = SEX16 (val);
 		break;
 
 	      case BFD_RELOC_PPC64_HIGHEST_S:
-		ex.X_add_number = PPC_HIGHESTA (ex.X_add_number);
+		val = PPC_HIGHESTA (val);
 		if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
-		  ex.X_add_number = SEX16 (ex.X_add_number);
+		  val = SEX16 (val);
 		break;
 	      }
 #endif /* OBJ_ELF */
-	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
-				     ppc_cpu, (char *) NULL, 0);
+	  insn = ppc_insert_operand (insn, operand, val, ppc_cpu, NULL, 0);
 	}
       else
 	{
