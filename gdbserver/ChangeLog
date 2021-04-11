@@ -1,3 +1,16 @@
+2021-04-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* win32-low.cc (win32_add_dll): New function, with body almost
+	identical to what win32_add_all_dlls did.  Accepts one argument;
+	if that is non-NULL, returns the file name of the DLL that is
+	loaded at the base address equal to that argument, or NULL if not
+	found.  If the argument is NULL, add all the DLLs loaded by the
+	inferior to the list of solibs and return NULL.
+	(win32_add_all_dlls): Now a thin wrapper around win32_add_dll.
+	(windows_nat::handle_load_dll) [!_WIN32_WCE]: If get_image_name
+	failed to glean the file name of the DLL, call win32_add_dll to
+	try harder using the lpBaseOfDll member of the load-DLL event.
+
 2021-03-30  Luis Machado  <luis.machado@linaro.org>
 
 	* server.cc (handle_general_set, handle_query): Update variable

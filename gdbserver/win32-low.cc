@@ -1165,11 +1165,13 @@ load_psapi (void)
 
 #ifndef _WIN32_WCE
 
-/* Iterate over all DLLs currently mapped by our inferior, and
-   add them to our list of solibs.  */
+/* Iterate over all DLLs currently mapped by our inferior, looking for
+   a DLL loaded at LOAD_ADDR; if found, return its file name,
+   otherwise return NULL.  If LOAD_ADDR is NULL, add all mapped DLLs
+   to our list of solibs.  */
 
-static void
-win32_add_all_dlls (void)
+static char *
+win32_add_dll (LPVOID load_addr)
 {
   size_t i;
   HMODULE dh_buf[1];
@@ -1178,7 +1180,7 @@ win32_add_all_dlls (void)
   BOOL ok;
 
   if (!load_psapi ())
-    return;
+    return NULL;
 
   cbNeeded = 0;
 #ifdef __x86_64__
@@ -1196,11 +1198,11 @@ win32_add_all_dlls (void)
 				      &cbNeeded);
 
   if (!ok || !cbNeeded)
-    return;
+    return NULL;
 
   DllHandle = (HMODULE *) alloca (cbNeeded);
   if (!DllHandle)
-    return;
+    return NULL;
 
 #ifdef __x86_64__
   if (wow64_process)
@@ -1216,7 +1218,7 @@ win32_add_all_dlls (void)
 				      cbNeeded,
 				      &cbNeeded);
   if (!ok)
-    return;
+    return NULL;
 
   char system_dir[MAX_PATH];
   char syswow_dir[MAX_PATH];
@@ -1252,7 +1254,7 @@ win32_add_all_dlls (void)
   for (i = 1; i < ((size_t) cbNeeded / sizeof (HMODULE)); i++)
     {
       MODULEINFO mi;
-      char dll_name[MAX_PATH];
+      static char dll_name[MAX_PATH];
 
       if (!(*win32_GetModuleInformation) (current_process_handle,
 					  DllHandle[i],
@@ -1263,6 +1265,9 @@ win32_add_all_dlls (void)
 					 DllHandle[i],
 					 dll_name,
 					 MAX_PATH) == 0)
+	continue;
+
+      if (load_addr != nullptr && mi.lpBaseOfDll != load_addr)
 	continue;
 
       const char *name = dll_name;
@@ -1279,10 +1284,27 @@ win32_add_all_dlls (void)
 	  name = syswow_dll_path.c_str();
 	}
 
-      win32_add_one_solib (name, (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll);
+      if (load_addr != nullptr)
+	{
+	  if (name != dll_name)
+	    strcpy (dll_name, name);
+	  return dll_name;
+	}
+      else
+	win32_add_one_solib (name, (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll);
     }
+  return NULL;
 }
-#endif
+
+/* Iterate over all DLLs currently mapped by our inferior, and
+   add them to our list of solibs.  */
+
+static void
+win32_add_all_dlls (void)
+{
+  win32_add_dll (NULL);
+}
+#endif	/* !_WIN32_WCE */
 
 typedef HANDLE (WINAPI *winapi_CreateToolhelp32Snapshot) (DWORD, DWORD);
 typedef BOOL (WINAPI *winapi_Module32First) (HANDLE, LPMODULEENTRY32);
@@ -1298,7 +1320,12 @@ windows_nat::handle_load_dll ()
 
   dll_name = get_image_name (current_process_handle,
 			     event->lpImageName, event->fUnicode);
-  if (!dll_name)
+#ifndef _WIN32_WCE
+  if (dll_name == nullptr
+      && event->lpBaseOfDll != nullptr)
+    dll_name = win32_add_dll (event->lpBaseOfDll);
+#endif
+  if (dll_name == nullptr)
     return;
 
   win32_add_one_solib (dll_name, (CORE_ADDR) (uintptr_t) event->lpBaseOfDll);
