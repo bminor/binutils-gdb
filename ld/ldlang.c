@@ -4009,7 +4009,7 @@ lang_mark_undefineds (void)
 {
   ldlang_undef_chain_list_type *ptr;
 
-  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
+  if (is_elf_hash_table (link_info.hash))
     for (ptr = ldlang_undef_chain_list_head; ptr != NULL; ptr = ptr->next)
       {
 	struct elf_link_hash_entry *h = (struct elf_link_hash_entry *)
@@ -6822,7 +6822,7 @@ undef_start_stop (struct bfd_link_hash_entry *h)
 	}
       h->type = bfd_link_hash_undefined;
       h->u.undef.abfd = NULL;
-      if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
+      if (is_elf_hash_table (link_info.hash))
 	{
 	  const struct elf_backend_data *bed;
 	  struct elf_link_hash_entry *eh = (struct elf_link_hash_entry *) h;

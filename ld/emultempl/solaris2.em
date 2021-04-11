@@ -64,7 +64,8 @@ elf_solaris2_before_allocation (void)
   const char **sym;
 
   /* Do this for both executables and shared objects.  */
-  if (!bfd_link_relocatable (&link_info))
+  if (!bfd_link_relocatable (&link_info)
+      && is_elf_hash_table (link_info.hash))
     {
       for (sym = global_syms; *sym != NULL; sym++)
 	{

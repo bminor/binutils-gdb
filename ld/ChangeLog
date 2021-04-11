@@ -1,3 +1,13 @@
+2021-04-12  Alan Modra  <amodra@gmail.com>
+
+	PR 27719
+	* ldlang.c (lang_mark_undefineds, undef_start_stop): Test that
+	the symbol hash table is the correct type before accessing
+	elf_link_hash_entry symbols.
+	* plugin.c (is_visible_from_outside): Likewise.
+	* emultempl/armelf.em (ld${EMULATION_NAME}_finish): Likewise.
+	* emultempl/solaris2.em (elf_solaris2_before_allocation): Likewise.
+
 2021-04-09  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/inlinepcrel-1.d: Update expected output.

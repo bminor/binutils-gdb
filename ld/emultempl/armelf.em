@@ -463,7 +463,7 @@ gld${EMULATION_NAME}_finish (void)
     {
       struct elf_link_hash_entry * eh;
 
-      if (!entry_symbol.name)
+      if (!entry_symbol.name || !is_elf_hash_table (link_info.hash))
 	return;
 
       h = bfd_link_hash_lookup (link_info.hash, entry_symbol.name,

@@ -636,7 +636,7 @@ is_visible_from_outside (struct ld_plugin_symbol *lsym,
 				   blhe->root.string))
 	return false;
       /* Only ELF symbols really have visibility.  */
-      if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
+      if (is_elf_hash_table (link_info.hash))
 	{
 	  struct elf_link_hash_entry *el = (struct elf_link_hash_entry *)blhe;
 	  int vis = ELF_ST_VISIBILITY (el->other);
