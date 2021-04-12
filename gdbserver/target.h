@@ -256,10 +256,6 @@ public:
   virtual int get_tls_address (thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);
 
-  /* Fill BUF with an hostio error packet representing the last hostio
-     error.  */
-  virtual void hostio_last_error (char *buf);
-
   /* Return true if the qxfer_osdata target op is supported.  */
   virtual bool supports_qxfer_osdata ();
 

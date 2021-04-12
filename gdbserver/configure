@@ -10633,7 +10633,7 @@ $as_echo "#define USE_XML 1" >>confdefs.h
   done
 fi
 
-GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the target supports __sync_*_compare_and_swap" >&5

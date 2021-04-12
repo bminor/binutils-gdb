@@ -505,12 +505,6 @@ process_stratum_target::get_tls_address (thread_info *thread,
   gdb_assert_not_reached ("target op get_tls_address not supported");
 }
 
-void
-process_stratum_target::hostio_last_error (char *buf)
-{
-  hostio_last_error_from_errno (buf);
-}
-
 bool
 process_stratum_target::supports_qxfer_osdata ()
 {

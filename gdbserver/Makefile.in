@@ -186,7 +186,6 @@ SFILES = \
 	$(srcdir)/dll.cc \
 	$(srcdir)/gdbreplay.cc \
 	$(srcdir)/hostio.cc \
-	$(srcdir)/hostio-errno.cc \
 	$(srcdir)/i387-fp.cc \
 	$(srcdir)/inferiors.cc \
 	$(srcdir)/linux-aarch64-low.cc \

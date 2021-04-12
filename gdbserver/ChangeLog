@@ -1,3 +1,18 @@
+2021-04-13  Pedro Alves  <pedro@palves.net>
+
+	* Makefile.in (SFILES): Remove hostio-errno.cc.
+	* configure: Regenerate.
+	* configure.ac (GDBSERVER_DEPFILES): No longer add
+	$srv_hostio_err_objs.
+	* configure.srv (srv_hostio_err_objs): Delete.
+	* hostio-errno.cc: Delete.
+	* hostio.cc (hostio_error): Inline hostio_last_error_from_errno
+	here.
+	* hostio.h (hostio_last_error_from_errno): Delete.
+	* target.cc (process_stratum_target::hostio_last_error): Delete.
+	* target.h (class process_stratum_target) <hostio_last_error>:
+	Delete.
+
 2021-04-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* win32-low.cc: Remove all code guarded by _WIN32_WCE.

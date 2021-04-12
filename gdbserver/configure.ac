@@ -379,7 +379,7 @@ if test "$srv_xmlfiles" != ""; then
   done
 fi
 
-GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles"
+GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
 
 dnl Check whether the target supports __sync_*_compare_and_swap.
