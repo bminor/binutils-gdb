@@ -5742,16 +5742,16 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 /* Return the linker hash table entry of a symbol that might be
    satisfied by an archive symbol.  Return -1 on error.  */
 
-struct elf_link_hash_entry *
+struct bfd_link_hash_entry *
 _bfd_elf_archive_symbol_lookup (bfd *abfd,
 				struct bfd_link_info *info,
 				const char *name)
 {
-  struct elf_link_hash_entry *h;
+  struct bfd_link_hash_entry *h;
   char *p, *copy;
   size_t len, first;
 
-  h = elf_link_hash_lookup (elf_hash_table (info), name, false, false, true);
+  h = bfd_link_hash_lookup (info->hash, name, false, false, true);
   if (h != NULL)
     return h;
 
@@ -5768,20 +5768,19 @@ _bfd_elf_archive_symbol_lookup (bfd *abfd,
   len = strlen (name);
   copy = (char *) bfd_alloc (abfd, len);
   if (copy == NULL)
-    return (struct elf_link_hash_entry *) -1;
+    return (struct bfd_link_hash_entry *) -1;
 
   first = p - name + 1;
   memcpy (copy, name, first);
   memcpy (copy + first, name + first + 1, len - first);
 
-  h = elf_link_hash_lookup (elf_hash_table (info), copy, false, false, true);
+  h = bfd_link_hash_lookup (info->hash, copy, false, false, true);
   if (h == NULL)
     {
       /* We also need to check references to the symbol without the
 	 version.  */
       copy[first - 1] = '\0';
-      h = elf_link_hash_lookup (elf_hash_table (info), copy,
-				false, false, true);
+      h = bfd_link_hash_lookup (info->hash, copy, false, false, true);
     }
 
   bfd_release (abfd, copy);
@@ -5810,7 +5809,7 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
   bool loop;
   size_t amt;
   const struct elf_backend_data *bed;
-  struct elf_link_hash_entry * (*archive_symbol_lookup)
+  struct bfd_link_hash_entry * (*archive_symbol_lookup)
     (bfd *, struct bfd_link_info *, const char *);
 
   if (! bfd_has_map (abfd))
@@ -5851,7 +5850,7 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
       symdefend = symdef + c;
       for (i = 0; symdef < symdefend; symdef++, i++)
 	{
-	  struct elf_link_hash_entry *h;
+	  struct bfd_link_hash_entry *h;
 	  bfd *element;
 	  struct bfd_link_hash_entry *undefs_tail;
 	  symindex mark;
@@ -5865,21 +5864,22 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	    }
 
 	  h = archive_symbol_lookup (abfd, info, symdef->name);
-	  if (h == (struct elf_link_hash_entry *) -1)
+	  if (h == (struct bfd_link_hash_entry *) -1)
 	    goto error_return;
 
 	  if (h == NULL)
 	    continue;
 
-	  if (h->root.type == bfd_link_hash_undefined)
+	  if (h->type == bfd_link_hash_undefined)
 	    {
 	      /* If the archive element has already been loaded then one
 		 of the symbols defined by that element might have been
 		 made undefined due to being in a discarded section.  */
-	      if (h->indx == -3)
+	      if (is_elf_hash_table (info->hash)
+		  && ((struct elf_link_hash_entry *) h)->indx == -3)
 		continue;
 	    }
-	  else if (h->root.type == bfd_link_hash_common)
+	  else if (h->type == bfd_link_hash_common)
 	    {
 	      /* We currently have a common symbol.  The archive map contains
 		 a reference to this symbol, so we may want to include it.  We
@@ -5898,7 +5898,7 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	    }
 	  else
 	    {
-	      if (h->root.type != bfd_link_hash_undefweak)
+	      if (h->type != bfd_link_hash_undefweak)
 		/* Symbol must be defined.  Don't check it again.  */
 		included[i] = true;
 	      continue;

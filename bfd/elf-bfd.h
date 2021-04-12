@@ -975,7 +975,7 @@ struct elf_backend_data
 
   /* A function to return the linker hash table entry of a symbol that
      might be satisfied by an archive symbol.  */
-  struct elf_link_hash_entry * (*elf_backend_archive_symbol_lookup)
+  struct bfd_link_hash_entry * (*elf_backend_archive_symbol_lookup)
     (bfd *, struct bfd_link_info *, const char *);
 
   /* Return true if local section symbols should have a non-null st_name.
@@ -2581,7 +2581,7 @@ extern bool _bfd_elf_relocs_compatible
 extern bool _bfd_elf_notice_as_needed
   (bfd *, struct bfd_link_info *, enum notice_asneeded_action);
 
-extern struct elf_link_hash_entry *_bfd_elf_archive_symbol_lookup
+extern struct bfd_link_hash_entry *_bfd_elf_archive_symbol_lookup
   (bfd *, struct bfd_link_info *, const char *);
 extern bool bfd_elf_link_add_symbols
   (bfd *, struct bfd_link_info *);
