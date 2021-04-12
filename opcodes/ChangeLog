@@ -1,3 +1,9 @@
+2021-04-12  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac (--enable-checking): Add support.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2021-04-09  Tejas Belagod  <tejas.belagod@arm.com>
 
 	* aarch64-tbl.h (struct aarch64_opcode aarch64_opcode_table): Reclassify

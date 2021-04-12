@@ -817,6 +817,7 @@ with_gnu_ld
 enable_libtool_lock
 enable_plugins
 enable_largefile
+enable_checking
 enable_targets
 enable_deterministic_archives
 enable_default_strings_all
@@ -1481,6 +1482,7 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-plugins        Enable support for plugins
   --disable-largefile     omit support for large files
+  --enable-checking       enable run-time checks
   --enable-targets        alternative target configurations
   --enable-deterministic-archives
                           ar and ranlib default to -D behavior
@@ -10872,7 +10874,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10875 "configure"
+#line 10877 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10978,7 +10980,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10981 "configure"
+#line 10983 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11582,6 +11584,22 @@ rm -rf conftest*
 fi
 
 
+
+ac_checking=
+. ${srcdir}/../bfd/development.sh
+test "$development" = true && ac_checking=yes
+# Check whether --enable-checking was given.
+if test "${enable_checking+set}" = set; then :
+  enableval=$enable_checking; case "${enableval}" in
+  no|none)  ac_checking= ;;
+  *)	    ac_checking=yes ;;
+esac
+fi
+if test x$ac_checking != x ; then
+
+$as_echo "#define ENABLE_CHECKING 1" >>confdefs.h
+
+fi
 
 # Check whether --enable-targets was given.
 if test "${enable_targets+set}" = set; then :

@@ -19,6 +19,9 @@
 /* Should strings use -a behavior by default? */
 #undef DEFAULT_STRINGS_ALL
 
+/* Define if you want run-time sanity checks. */
+#undef ENABLE_CHECKING
+
 /* Handle .ctf type-info sections */
 #undef ENABLE_LIBCTF
 

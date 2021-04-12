@@ -69,6 +69,19 @@ esac
 
 AM_CONDITIONAL(PLUGINS, test "$plugins" = "yes")
 
+ac_checking=
+. ${srcdir}/development.sh
+test "$development" = true && ac_checking=yes
+AC_ARG_ENABLE(checking,
+[  --enable-checking       enable run-time checks],
+[case "${enableval}" in
+  no|none)  ac_checking= ;;
+  *)	    ac_checking=yes ;;
+esac])dnl
+if test x$ac_checking != x ; then
+  AC_DEFINE(ENABLE_CHECKING, 1, [Define if you want run-time sanity checks.])
+fi
+
 AC_ARG_ENABLE(64-bit-bfd,
 [  --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)],
 [case "${enableval}" in

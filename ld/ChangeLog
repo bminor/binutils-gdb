@@ -1,5 +1,11 @@
 2021-04-12  Alan Modra  <amodra@gmail.com>
 
+	* configure.ac (--enable-checking): Add support.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2021-04-12  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/mipself.em (mips_create_output_section_statements):
 	Pass base type of hash table to is_elf_hash_table.
 	* ldelf.c (ldelf_after_open): Likewise.

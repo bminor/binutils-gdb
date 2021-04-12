@@ -27,6 +27,10 @@
 #include "elf/internal.h"
 #include "bfdlink.h"
 
+#ifndef ENABLE_CHECKING
+#define ENABLE_CHECKING 0
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -721,6 +725,8 @@ static inline struct elf_link_hash_entry *
 elf_link_hash_lookup (struct elf_link_hash_table *table, const char *string,
 		      bool create, bool copy, bool follow)
 {
+  if (ENABLE_CHECKING && !is_elf_hash_table (&table->root))
+    abort ();
   return (struct elf_link_hash_entry *)
     bfd_link_hash_lookup (&table->root, string, create, copy, follow);
 }
@@ -732,6 +738,8 @@ elf_link_hash_traverse (struct elf_link_hash_table *table,
 			bool (*f) (struct elf_link_hash_entry *, void *),
 			void *info)
 {
+  if (ENABLE_CHECKING && !is_elf_hash_table (&table->root))
+    abort ();
   bfd_link_hash_traverse (&table->root,
 			  (bool (*) (struct bfd_link_hash_entry *, void *)) f,
 			  info);

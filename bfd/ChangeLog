@@ -1,5 +1,13 @@
 2021-04-12  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (ENABLE_CHECKING): Define.
+	(elf_link_hash_lookup): Abort if wrong type of hash table.
+	* configure.ac (--enable-checking): Add support.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2021-04-12  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (is_elf_hash_table): Convert macro to inline function.
 	(elf_link_hash_lookup, elf_link_hash_traverse): Likewise.
 	(elf_hash_table, elf_hash_table_id): Likewise.

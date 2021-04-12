@@ -1,3 +1,9 @@
+2021-04-12  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac (--enable-checking): Add support.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2021-04-09  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c (struct objdump_disasm_info): Delete dynrelbuf and
