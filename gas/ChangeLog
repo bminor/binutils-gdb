@@ -1,3 +1,9 @@
+2021-04-13  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/m68hc11/m68hc11.exp (gas_m68hc11_message): Don't
+	write to $srcdir.  Use gas_host_run and read output file rather
+	than gas_start/gas_finish.
+
 2021-04-12  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (insn_validate): Use uint64_t for operand values.
