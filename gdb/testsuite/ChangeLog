@@ -1,5 +1,11 @@
 2021-04-12  Will Schmidt  <will_schmidt@vnet.ibm.com>
 
+	* gdb.arch/powerpc-plxv-nonrel.s:  Testcase using
+	non-relative plxv instructions.
+	* gdb.arch/powerpc-plxv-nonrel.exp: Testcase harness.
+
+2021-03-31  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
 	PR gdb/27525
 	* gdb/testsuite/gdb.arch/powerpc-addpcis.exp:  Testcase harness to
 	exercise single-stepping over subpcis,lnia,addpcis instructions

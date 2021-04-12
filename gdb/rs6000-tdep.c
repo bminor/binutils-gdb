@@ -841,7 +841,7 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
   rs6000_breakpoint;
 
 /* Instruction masks for displaced stepping.  */
-#define BRANCH_MASK 0xfc000000
+#define OP_MASK 0xfc000000
 #define BP_MASK 0xFC0007FE
 #define B_INSN 0x48000000
 #define BC_INSN 0x40000000
@@ -868,6 +868,11 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
 #define ADDPCIS_INSN_MASK       0xfc00003e
 #define ADDPCIS_TARGET_REGISTER 0x03F00000
 #define ADDPCIS_INSN_REGSHIFT   21
+
+#define PNOP_MASK 0xfff3ffff
+#define PNOP_INSN 0x07000000
+#define R_MASK 0x00100000
+#define R_ZERO 0x00000000
 
 /* Check if insn is one of the Load And Reserve instructions used for atomic
    sequences.  */
@@ -901,9 +906,35 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int insn;
 
-  read_memory (from, buf, len);
+  len = target_read (current_inferior()->top_target(), TARGET_OBJECT_MEMORY, NULL,
+		     buf, from, len);
+  if ((ssize_t) len < PPC_INSN_SIZE)
+    memory_error (TARGET_XFER_E_IO, from);
 
   insn = extract_signed_integer (buf, PPC_INSN_SIZE, byte_order);
+
+  /* Check for PNOP and for prefixed instructions with R=0.  Those
+     instructions are safe to displace.  Prefixed instructions with R=1
+     will read/write data to/from locations relative to the current PC.
+     We would not be able to fixup after an instruction has written data
+    into a displaced location, so decline to displace those instructions.  */
+  if ((insn & OP_MASK) == 1 << 26)
+    {
+      if (((insn & PNOP_MASK) != PNOP_INSN)
+	  && ((insn & R_MASK) != R_ZERO))
+	{
+	  displaced_debug_printf ("Not displacing prefixed instruction %08x at %s",
+				  insn, paddress (gdbarch, from));
+	  return NULL;
+	}
+    }
+  else
+    /* Non-prefixed instructions..  */
+    {
+      /* Set the instruction length to 4 to match the actual instruction
+	 length.  */
+      len = 4;
+    }
 
   /* Assume all atomic sequences start with a Load and Reserve instruction.  */
   if (IS_LOAD_AND_RESERVE_INSN (insn))
@@ -918,7 +949,7 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   displaced_debug_printf ("copy %s->%s: %s",
 			  paddress (gdbarch, from), paddress (gdbarch, to),
-			  displaced_step_dump_bytes (buf, len).c_str ());;
+			  displaced_step_dump_bytes (buf, len).c_str ());
 
   /* This is a work around for a problem with g++ 4.8.  */
   return displaced_step_copy_insn_closure_up (closure.release ());
@@ -938,11 +969,17 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
     = (ppc_displaced_step_copy_insn_closure *) closure_;
   ULONGEST insn  = extract_unsigned_integer (closure->buf.data (),
 					     PPC_INSN_SIZE, byte_order);
-  ULONGEST opcode = 0;
+  ULONGEST opcode;
   /* Offset for non PC-relative instructions.  */
-  LONGEST offset = PPC_INSN_SIZE;
+  LONGEST offset;
 
-  opcode = insn & BRANCH_MASK;
+  opcode = insn & OP_MASK;
+
+  /* Set offset to 8 if this is an 8-byte (prefixed) instruction.  */
+  if ((opcode) == 1 << 26)
+    offset = 2 * PPC_INSN_SIZE;
+  else
+    offset = PPC_INSN_SIZE;
 
   displaced_debug_printf ("(ppc) fixup (%s, %s)",
 			  paddress (gdbarch, from), paddress (gdbarch, to));
@@ -1114,13 +1151,16 @@ ppc_deal_with_atomic_sequence (struct regcache *regcache)
      instructions.  */
   for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
     {
-      loc += PPC_INSN_SIZE;
+      if ((insn & OP_MASK) == 1 << 26)
+	loc += 2 * PPC_INSN_SIZE;
+      else
+	loc += PPC_INSN_SIZE;
       insn = read_memory_integer (loc, PPC_INSN_SIZE, byte_order);
 
       /* Assume that there is at most one conditional branch in the atomic
 	 sequence.  If a conditional branch is found, put a breakpoint in 
 	 its destination address.  */
-      if ((insn & BRANCH_MASK) == BC_INSN)
+      if ((insn & OP_MASK) == BC_INSN)
 	{
 	  int immediate = ((insn & 0xfffc) ^ 0x8000) - 0x8000;
 	  int absolute = insn & 2;
@@ -7102,7 +7142,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_restore_all_in_ptid
     (gdbarch, ppc_displaced_step_restore_all_in_ptid);
 
-  set_gdbarch_max_insn_length (gdbarch, PPC_INSN_SIZE);
+  set_gdbarch_max_insn_length (gdbarch, 2 * PPC_INSN_SIZE);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
