@@ -1,5 +1,29 @@
 2021-04-12  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (is_elf_hash_table): Convert macro to inline function.
+	(elf_link_hash_lookup, elf_link_hash_traverse): Likewise.
+	(elf_hash_table, elf_hash_table_id): Likewise.
+	* elf32-arm.c (elf32_arm_setup_section_lists): Delete redundant
+	is_elf_hash_table check.
+	* elf32-csky.c (elf32_csky_setup_section_lists): Likewise.
+	* elf32-hppa.c (clobber_millicode_symbols): Correct param types.
+	* elf64-alpha.c (elf64_alpha_output_extsym): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_global_dyn_info_free: Likewise.
+	(elfNN_ia64_global_dyn_sym_thunk: Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_global_dyn_info_free): Likewise.
+	(elf64_ia64_global_dyn_sym_thunk): Likewise.
+	(elf64_vms_link_add_object_symbols): Pass base type of hash table
+	to is_elf_hash_table.
+	* elflink.c (_bfd_elf_dynamic_symbol_p): Likewise.
+	(_bfd_elf_symbol_refs_local_p, _bfd_elf_add_dynamic_entry): Likewise.
+	(_bfd_elf_strip_zero_sized_dynamic_sections): Likewise.
+	(_bfd_elf_link_check_relocs, elf_link_add_object_symbols): Likewise.
+	(bfd_elf_final_link): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_setup_section_lists): Likewise.
+	* elf64-ppc.c (ppc64_elf_set_toc): Likewise.  Use bfd_link_hash_lookup.
+
+2021-04-12  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (struct elf_backend_data): Return bfd_link_hash_entry*
 	from elf_backend_archive_symbol_lookup.
 	(_bfd_elf_archive_symbol_lookup): Return bfd_link_hash_entry*.

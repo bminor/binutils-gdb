@@ -13955,19 +13955,20 @@ ppc64_elf_set_toc (struct bfd_link_info *info, bfd *obfd)
       struct elf_link_hash_entry *h;
       struct elf_link_hash_table *htab = elf_hash_table (info);
 
-      if (is_elf_hash_table (htab)
+      if (is_elf_hash_table (&htab->root)
 	  && htab->hgot != NULL)
 	h = htab->hgot;
       else
 	{
-	  h = elf_link_hash_lookup (htab, ".TOC.", false, false, true);
-	  if (is_elf_hash_table (htab))
+	  h = (struct elf_link_hash_entry *)
+	    bfd_link_hash_lookup (&htab->root, ".TOC.", false, false, true);
+	  if (is_elf_hash_table (&htab->root))
 	    htab->hgot = h;
 	}
       if (h != NULL
 	  && h->root.type == bfd_link_hash_defined
 	  && !h->root.linker_def
-	  && (!is_elf_hash_table (htab)
+	  && (!is_elf_hash_table (&htab->root)
 	      || h->def_regular))
 	{
 	  TOCstart = defined_sym_val (h) - TOC_BASE_OFF;

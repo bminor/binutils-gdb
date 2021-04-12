@@ -1391,8 +1391,8 @@ elfNN_ia64_local_htab_eq (const void *ptr1, const void *ptr2)
 /* Free the global elfNN_ia64_dyn_sym_info array.  */
 
 static bool
-elfNN_ia64_global_dyn_info_free (void **xentry,
-				 void * unused ATTRIBUTE_UNUSED)
+elfNN_ia64_global_dyn_info_free (struct elf_link_hash_entry *xentry,
+				 void *unused ATTRIBUTE_UNUSED)
 {
   struct elfNN_ia64_link_hash_entry *entry
     = (struct elfNN_ia64_link_hash_entry *) xentry;
@@ -1489,7 +1489,7 @@ struct elfNN_ia64_dyn_sym_traverse_data
 };
 
 static bool
-elfNN_ia64_global_dyn_sym_thunk (struct bfd_hash_entry *xentry,
+elfNN_ia64_global_dyn_sym_thunk (struct elf_link_hash_entry *xentry,
 				 void * xdata)
 {
   struct elfNN_ia64_link_hash_entry *entry

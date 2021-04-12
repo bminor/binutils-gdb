@@ -990,7 +990,7 @@ elf64_ia64_local_htab_eq (const void *ptr1, const void *ptr2)
 /* Free the global elf64_ia64_dyn_sym_info array.  */
 
 static bool
-elf64_ia64_global_dyn_info_free (void **xentry,
+elf64_ia64_global_dyn_info_free (struct elf_link_hash_entry *xentry,
 				 void * unused ATTRIBUTE_UNUSED)
 {
   struct elf64_ia64_link_hash_entry *entry
@@ -1090,7 +1090,7 @@ struct elf64_ia64_dyn_sym_traverse_data
 };
 
 static bool
-elf64_ia64_global_dyn_sym_thunk (struct bfd_hash_entry *xentry,
+elf64_ia64_global_dyn_sym_thunk (struct elf_link_hash_entry *xentry,
 				 void * xdata)
 {
   struct elf64_ia64_link_hash_entry *entry
@@ -4767,7 +4767,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 hope of using a dynamic object which does not exactly match
 	 the format of the output file.  */
       if (bfd_link_relocatable (info)
-	  || !is_elf_hash_table (htab)
+	  || !is_elf_hash_table (&htab->root)
 	  || info->output_bfd->xvec != abfd->xvec)
 	{
 	  if (bfd_link_relocatable (info))
@@ -4786,7 +4786,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 format.  FIXME: If there are no input BFD's of the same
 	 format as the output, we can't make a shared library.  */
       if (bfd_link_pic (info)
-	  && is_elf_hash_table (htab)
+	  && is_elf_hash_table (&htab->root)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
 	{
@@ -4794,7 +4794,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    goto error_return;
 	}
     }
-  else if (!is_elf_hash_table (htab))
+  else if (!is_elf_hash_table (&htab->root))
     goto error_return;
   else
     {
@@ -5034,7 +5034,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
       *sym_hash = h;
 
-      if (is_elf_hash_table (htab))
+      if (is_elf_hash_table (&htab->root))
 	{
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
@@ -5103,7 +5103,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    h->root.u.c.p->alignment_power = old_alignment;
 	}
 
-      if (is_elf_hash_table (htab))
+      if (is_elf_hash_table (&htab->root))
 	{
 	  /* Check the alignment when a common symbol is involved. This
 	     can change when a common symbol is overridden by a normal
@@ -5257,7 +5257,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      I have no idea how to handle linking PIC code into a file of a
      different format.  It probably can't be done.  */
   if (! dynamic
-      && is_elf_hash_table (htab)
+      && is_elf_hash_table (&htab->root)
       && bed->check_relocs != NULL
       && (*bed->relocs_compatible) (abfd->xvec, info->output_bfd->xvec))
     {

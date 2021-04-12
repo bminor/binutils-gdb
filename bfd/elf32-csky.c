@@ -3865,8 +3865,6 @@ elf32_csky_setup_section_lists (bfd *output_bfd,
 
   if (!htab)
     return 0;
-  if (! is_elf_hash_table (htab))
-    return 0;
 
   /* Count the number of input BFDs and find the top input section id.  */
   for (input_bfd = info->input_bfds, bfd_count = 0, top_id = 0;

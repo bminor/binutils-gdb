@@ -3423,7 +3423,7 @@ elfNN_aarch64_setup_section_lists (bfd *output_bfd,
   struct elf_aarch64_link_hash_table *htab =
     elf_aarch64_hash_table (info);
 
-  if (!is_elf_hash_table (htab))
+  if (!is_elf_hash_table (&htab->root.root))
     return 0;
 
   /* Count the number of input BFDs and find the top input section id.  */

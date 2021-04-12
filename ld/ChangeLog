@@ -1,5 +1,11 @@
 2021-04-12  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/mipself.em (mips_create_output_section_statements):
+	Pass base type of hash table to is_elf_hash_table.
+	* ldelf.c (ldelf_after_open): Likewise.
+
+2021-04-12  Alan Modra  <amodra@gmail.com>
+
 	PR 27719
 	* ldlang.c (lang_mark_undefineds, undef_start_stop): Test that
 	the symbol hash table is the correct type before accessing

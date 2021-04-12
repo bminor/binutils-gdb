@@ -1558,8 +1558,9 @@ struct extsym_info
 };
 
 static bool
-elf64_alpha_output_extsym (struct alpha_elf_link_hash_entry *h, void * data)
+elf64_alpha_output_extsym (struct elf_link_hash_entry *x, void * data)
 {
+  struct alpha_elf_link_hash_entry *h = (struct alpha_elf_link_hash_entry *) x;
   struct extsym_info *einfo = (struct extsym_info *) data;
   bool strip;
   asection *sec, *output_section;

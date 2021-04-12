@@ -2031,13 +2031,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 
 static bool
 clobber_millicode_symbols (struct elf_link_hash_entry *eh,
-			   struct bfd_link_info *info)
+			   void *info)
 {
   if (eh->type == STT_PARISC_MILLI
       && !eh->forced_local)
-    {
-      elf32_hppa_hide_symbol (info, eh, true);
-    }
+    elf32_hppa_hide_symbol ((struct bfd_link_info *) info, eh, true);
   return true;
 }
 

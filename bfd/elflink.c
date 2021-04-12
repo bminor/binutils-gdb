@@ -3244,7 +3244,7 @@ _bfd_elf_dynamic_symbol_p (struct elf_link_hash_entry *h,
 
     case STV_PROTECTED:
       hash_table = elf_hash_table (info);
-      if (!is_elf_hash_table (hash_table))
+      if (!is_elf_hash_table (&hash_table->root))
 	return false;
 
       bed = get_elf_backend_data (hash_table->dynobj);
@@ -3328,7 +3328,7 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
     return false;
 
   hash_table = elf_hash_table (info);
-  if (!is_elf_hash_table (hash_table))
+  if (!is_elf_hash_table (&hash_table->root))
     return true;
 
   bed = get_elf_backend_data (hash_table->dynobj);
@@ -3522,7 +3522,7 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
   Elf_Internal_Dyn dyn;
 
   hash_table = elf_hash_table (info);
-  if (! is_elf_hash_table (hash_table))
+  if (! is_elf_hash_table (&hash_table->root))
     return false;
 
   if (tag == DT_RELA || tag == DT_REL)
@@ -3566,7 +3566,7 @@ _bfd_elf_strip_zero_sized_dynamic_sections (struct bfd_link_info *info)
     return true;
 
   hash_table = elf_hash_table (info);
-  if (!is_elf_hash_table (hash_table))
+  if (!is_elf_hash_table (&hash_table->root))
     return false;
 
   if (!hash_table->dynobj)
@@ -3997,7 +3997,7 @@ _bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
      I have no idea how to handle linking PIC code into a file of a
      different format.  It probably can't be done.  */
   if ((abfd->flags & DYNAMIC) == 0
-      && is_elf_hash_table (htab)
+      && is_elf_hash_table (&htab->root)
       && bed->check_relocs != NULL
       && elf_object_id (abfd) == elf_hash_table_id (htab)
       && (*bed->relocs_compatible) (abfd->xvec, info->output_bfd->xvec))
@@ -4094,7 +4094,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 hope of using a dynamic object which does not exactly match
 	 the format of the output file.  */
       if (bfd_link_relocatable (info)
-	  || !is_elf_hash_table (htab)
+	  || !is_elf_hash_table (&htab->root)
 	  || info->output_bfd->xvec != abfd->xvec)
 	{
 	  if (bfd_link_relocatable (info))
@@ -4202,7 +4202,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      || (!bfd_link_relocatable (info)
 		  && info->nointerp
 		  && (info->export_dynamic || info->dynamic)))
-	  && is_elf_hash_table (htab)
+	  && is_elf_hash_table (&htab->root)
 	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
 	{
@@ -4210,7 +4210,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    goto error_return;
 	}
     }
-  else if (!is_elf_hash_table (htab))
+  else if (!is_elf_hash_table (&htab->root))
     goto error_return;
   else
     {
@@ -4794,7 +4794,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       old_bfd = NULL;
       new_sec = sec;
 
-      if (is_elf_hash_table (htab))
+      if (is_elf_hash_table (&htab->root))
 	{
 	  Elf_Internal_Versym iver;
 	  unsigned int vernum = 0;
@@ -4970,7 +4970,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
       /* Setting the index to -3 tells elf_link_output_extsym that
 	 this symbol is defined in a discarded section.  */
-      if (discarded && is_elf_hash_table (htab))
+      if (discarded && is_elf_hash_table (&htab->root))
 	h->indx = -3;
 
       new_weak = (flags & BSF_WEAK) != 0;
@@ -4978,7 +4978,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  && definition
 	  && new_weak
 	  && !bed->is_function_type (ELF_ST_TYPE (isym->st_info))
-	  && is_elf_hash_table (htab)
+	  && is_elf_hash_table (&htab->root)
 	  && h->u.alias == NULL)
 	{
 	  /* Keep a list of all weak defined non function symbols from
@@ -5017,7 +5017,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	    h->root.u.c.p->alignment_power = old_alignment;
 	}
 
-      if (is_elf_hash_table (htab))
+      if (is_elf_hash_table (&htab->root))
 	{
 	  /* Set a flag in the hash table entry indicating the type of
 	     reference or definition we just found.  A dynamic symbol
@@ -5679,7 +5679,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      of the .stab/.stabstr sections.  */
   if (! dynamic
       && ! info->traditional_format
-      && is_elf_hash_table (htab)
+      && is_elf_hash_table (&htab->root)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
       asection *stabstr;
@@ -12074,7 +12074,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   bool sections_removed;
   bool ret;
 
-  if (!is_elf_hash_table (htab))
+  if (!is_elf_hash_table (&htab->root))
     return false;
 
   if (bfd_link_pic (info))

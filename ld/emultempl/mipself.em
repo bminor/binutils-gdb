@@ -197,7 +197,7 @@ mips_create_output_section_statements (void)
   struct elf_link_hash_table *htab;
 
   htab = elf_hash_table (&link_info);
-  if (is_elf_hash_table (htab) && is_mips_elf (link_info.output_bfd))
+  if (is_elf_hash_table (&htab->root) && is_mips_elf (link_info.output_bfd))
     _bfd_mips_elf_linker_flags (&link_info, insn32, ignore_branch_isa,
 				${gnu_target});
 

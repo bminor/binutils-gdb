@@ -1001,7 +1001,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
   after_open_default ();
 
   htab = elf_hash_table (&link_info);
-  if (!is_elf_hash_table (htab))
+  if (!is_elf_hash_table (&htab->root))
     return;
 
   if (command_line.out_implib_filename)
