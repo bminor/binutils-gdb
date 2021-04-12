@@ -1,3 +1,8 @@
+2021-04-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* win32-low.cc: Remove all code guarded by _WIN32_WCE.
+	* win32-low.h: Likewise.
+
 2021-04-12  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* target.h (class process_stratum_target) <pid_to_exec_file>:

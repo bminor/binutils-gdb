@@ -117,11 +117,6 @@ get_image_name (HANDLE h, void *address, int unicode)
   if (address == NULL)
     return NULL;
 
-#ifdef _WIN32_WCE
-  /* Windows CE reports the address of the image name,
-     instead of an address of a pointer into the image name.  */
-  address_ptr = address;
-#else
   /* See if we could read the address of a string, and that the
      address isn't null.  */
   if (!ReadProcessMemory (h, address,  &address_ptr,
@@ -129,7 +124,6 @@ get_image_name (HANDLE h, void *address, int unicode)
       || done != sizeof (address_ptr)
       || !address_ptr)
     return NULL;
-#endif
 
   /* Find the length of the string.  */
   while (ReadProcessMemory (h, address_ptr + len++ * size, &b, size, &done)
@@ -262,11 +256,6 @@ handle_exception (struct target_waitstatus *ourstatus, bool debug_exceptions)
     case STATUS_WX86_BREAKPOINT:
       DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT");
       ourstatus->value.sig = GDB_SIGNAL_TRAP;
-#ifdef _WIN32_WCE
-      /* Remove the initial breakpoint.  */
-      check_breakpoints ((CORE_ADDR) (long) current_event
-			 .u.Exception.ExceptionRecord.ExceptionAddress);
-#endif
       break;
     case DBG_CONTROL_C:
       DEBUG_EXCEPTION_SIMPLE ("DBG_CONTROL_C");
