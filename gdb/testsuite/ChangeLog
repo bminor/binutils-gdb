@@ -1,3 +1,8 @@
+2021-04-12  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
+	* gdb.arch/powerpc-power10.s: New test for instructions.
+	* gdb.arch/powerpc-power10.exp: Harness to run the test.
+
 2021-4-12  Carl Love  <cel@us.ibm.com>
 
 	* gdb.arch/vsx-vsr-float128.c: New test file.
