@@ -19522,7 +19522,6 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
 	      pnote->descdata);
       return true;
 
-#ifdef   NT_NETBSD_PAX
     case NT_NETBSD_PAX:
       if (pnote->descsz < 1)
 	break;
@@ -19535,7 +19534,6 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
 	      ((version & NT_NETBSD_PAX_ASLR) ? "+ASLR" : ""),
 	      ((version & NT_NETBSD_PAX_NOASLR) ? "-ASLR" : ""));
       return true;
-#endif
     }
 
   printf ("  NetBSD\t0x%08lx\tUnknown note type: (0x%08lx)\n",
