@@ -1310,21 +1310,6 @@ riscv_add_implicit_subset (riscv_subset_list_t *subset_list,
     }
 }
 
-/* These extensions are added to the subset list for special purposes,
-   with the explicit versions or the RISCV_UNKNOWN_VERSION versions.
-   Therefore, we won't output them to the output ISA string in the
-   riscv_arch_str1, if the versions are unknown.  */
-
-static bool
-riscv_ext_dont_care_version (const char *subset)
-{
-  if (strcmp (subset, "g") == 0
-      || strcmp (subset, "zicsr") == 0
-      || strcmp (subset, "zifencei") == 0)
-    return true;
-  return false;
-}
-
 /* We have to add all extensions from ISA string first, and then start to
    add their implicit extensions.  The extensions from ISA string must be
    set in order, so we can add them to the last of the subset list
@@ -1349,15 +1334,11 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
       && rps->get_default_version != NULL)
     rps->get_default_version (subset, &major_version, &minor_version);
 
-  if (!riscv_ext_dont_care_version (subset)
+  /* We don't care the versions of the implicit extensions.  */
+  if (!implicit
       && (major_version == RISCV_UNKNOWN_VERSION
 	  || minor_version == RISCV_UNKNOWN_VERSION))
     {
-      /* We only add the implicit extension if it is supported in the
-	 chosen ISA spec.  */
-      if (implicit)
-	return;
-
       if (subset[0] == 'x')
 	rps->error_handler
 	  (_("x ISA extension `%s' must be set with the versions"),
@@ -1518,11 +1499,6 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 	riscv_parse_add_subset (rps, "e",
 				major_version,
 				minor_version, false);
-	/* i-ext must be enabled.  */
-	riscv_parse_add_subset (rps, "i",
-				RISCV_UNKNOWN_VERSION,
-				RISCV_UNKNOWN_VERSION, false);
-
 	if (*rps->xlen > 32)
 	  {
 	    rps->error_handler
@@ -1536,13 +1512,8 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 	p = riscv_parsing_subset_version (rps, march, ++p,
 					  &major_version,
 					  &minor_version, true);
-	/* i-ext must be enabled.  */
+	/* Expand g to imafd.  */
 	riscv_parse_add_subset (rps, "i",
-				RISCV_UNKNOWN_VERSION,
-				RISCV_UNKNOWN_VERSION, false);
-	/* g-ext is used to add the implicit extensions, but will
-	   not be output to the ISA string.  */
-	riscv_parse_add_subset (rps, "g",
 				major_version,
 				minor_version, false);
 	for ( ; *std_exts != 'q'; std_exts++)
@@ -1552,6 +1523,10 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 				    RISCV_UNKNOWN_VERSION,
 				    RISCV_UNKNOWN_VERSION, false);
 	  }
+	/* Add g as an implicit extension.  */
+	riscv_parse_add_subset (rps, "g",
+				RISCV_UNKNOWN_VERSION,
+				RISCV_UNKNOWN_VERSION, true);
 	break;
 
       default:
@@ -1726,8 +1701,13 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
 {
   riscv_subset_t *subset = NULL;
 
+  if (riscv_lookup_subset (rps->subset_list, "e", &subset))
+    riscv_parse_add_subset (rps, "i",
+			    RISCV_UNKNOWN_VERSION,
+			    RISCV_UNKNOWN_VERSION, true);
+
   /* Add the zicsr and zifencei only when the i's version less than 2.1.  */
-  if ((riscv_lookup_subset (rps->subset_list, "i", &subset))
+  if (riscv_lookup_subset (rps->subset_list, "i", &subset)
       && (subset->major_version < 2
 	  || (subset->major_version == 2
 	      && subset->minor_version < 1)))
@@ -1740,7 +1720,7 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
 			      RISCV_UNKNOWN_VERSION, true);
     }
 
-  if ((riscv_lookup_subset (rps->subset_list, "q", &subset)))
+  if (riscv_lookup_subset (rps->subset_list, "q", &subset))
     {
       riscv_parse_add_subset (rps, "d",
 			      RISCV_UNKNOWN_VERSION,
@@ -1752,7 +1732,7 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
 			      RISCV_UNKNOWN_VERSION,
 			      RISCV_UNKNOWN_VERSION, true);
     }
-  else if ((riscv_lookup_subset (rps->subset_list, "d", &subset)))
+  else if (riscv_lookup_subset (rps->subset_list, "d", &subset))
     {
       riscv_parse_add_subset (rps, "f",
 			      RISCV_UNKNOWN_VERSION,
@@ -1761,12 +1741,12 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
 			      RISCV_UNKNOWN_VERSION,
 			      RISCV_UNKNOWN_VERSION, true);
     }
-  else if ((riscv_lookup_subset (rps->subset_list, "f", &subset)))
+  else if (riscv_lookup_subset (rps->subset_list, "f", &subset))
     riscv_parse_add_subset (rps, "zicsr",
 			    RISCV_UNKNOWN_VERSION,
 			    RISCV_UNKNOWN_VERSION, true);
 
-  if ((riscv_lookup_subset (rps->subset_list, "g", &subset)))
+  if (riscv_lookup_subset (rps->subset_list, "g", &subset))
     {
       riscv_parse_add_subset (rps, "zicsr",
 			      RISCV_UNKNOWN_VERSION,
