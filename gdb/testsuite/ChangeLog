@@ -1,5 +1,9 @@
 2021-04-12  Will Schmidt  <will_schmidt@vnet.ibm.com>
 
+	* gdb.arch/powerpc-vsx-regs.exp: Initialize vs* doublewords.
+
+2021-04-12  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
 	* gdb.arch/powerpc-plxv-nonrel.s:  Testcase using
 	non-relative plxv instructions.
 	* gdb.arch/powerpc-plxv-nonrel.exp: Testcase harness.
