@@ -1,3 +1,7 @@
+2021-04-13  Pedro Alves  <pedro@palves.net>
+
+	* gdbreplay.c [__MINGW32CE__] (COUNTOF, errno, strerror): Remove.
+
 2021-04-13  Tom Tromey  <tromey@adacore.com>
 
 	* win32-low.cc (winapi_CreateToolhelp32Snapshot)

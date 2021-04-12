@@ -69,57 +69,6 @@ typedef int socklen_t;
 static int remote_desc_in;
 static int remote_desc_out;
 
-#ifdef __MINGW32CE__
-
-#ifndef COUNTOF
-#define COUNTOF(STR) (sizeof (STR) / sizeof ((STR)[0]))
-#endif
-
-#define errno (GetLastError ())
-
-char *
-strerror (DWORD error)
-{
-  static char buf[1024];
-  WCHAR *msgbuf;
-  DWORD lasterr = GetLastError ();
-  DWORD chars = FormatMessageW (FORMAT_MESSAGE_FROM_SYSTEM
-				| FORMAT_MESSAGE_ALLOCATE_BUFFER,
-				NULL,
-				error,
-				0, /* Default language */
-				(LPVOID)&msgbuf,
-				0,
-				NULL);
-  if (chars != 0)
-    {
-      /* If there is an \r\n appended, zap it.  */
-      if (chars >= 2
-	  && msgbuf[chars - 2] == '\r'
-	  && msgbuf[chars - 1] == '\n')
-	{
-	  chars -= 2;
-	  msgbuf[chars] = 0;
-	}
-
-      if (chars > ((COUNTOF (buf)) - 1))
-	{
-	  chars = COUNTOF (buf) - 1;
-	  msgbuf [chars] = 0;
-	}
-
-      wcstombs (buf, msgbuf, chars + 1);
-      LocalFree (msgbuf);
-    }
-  else
-    sprintf (buf, "unknown win32 error (%ld)", error);
-
-  SetLastError (lasterr);
-  return buf;
-}
-
-#endif /* __MINGW32CE__ */
-
 static void
 sync_error (FILE *fp, const char *desc, int expect, int got)
 {
