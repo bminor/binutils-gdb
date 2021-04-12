@@ -1,5 +1,18 @@
 2021-04-12  Will Schmidt  <will_schmidt@vnet.ibm.com>
 
+	PR gdb/27525
+	* gdb/testsuite/gdb.arch/powerpc-addpcis.exp:  Testcase harness to
+	exercise single-stepping over subpcis,lnia,addpcis instructions
+	with displacement.
+	* gdb/testsuite/gdb.arch/powerpc-addpcis.s: Testcase with stream
+	of addpcis/lnia/subpcis instructions.
+	* gdb/testsuite/gdb.arch/powerpc-lnia.exp: Testcase harness to
+	exercise single-stepping over lnia instructions with displacement.
+	* gdb/testsuite/gdb.arch/powerpc-lnia.s: Testcase with stream of
+	lnia instructions.
+
+2021-03-31  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
 	* gdb.arch/powerpc-power10.s: New test for instructions.
 	* gdb.arch/powerpc-power10.exp: Harness to run the test.
 

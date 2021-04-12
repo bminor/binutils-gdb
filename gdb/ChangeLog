@@ -1,5 +1,11 @@
 2021-04-12  Will Schmidt  <will_schmidt@vnet.ibm.com>
 
+	PR gdb/27525
+	* gdb/rs6000-tdep.c (ppc_displaced_step_fixup): Update to
+	handle the addpcis/lnia instruction.
+
+2021-04-05  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
 	* MAINTAINERS (Write After Approval): Add myself.
 
 2021-4-12  Carl Love  <cel@us.ibm.com>

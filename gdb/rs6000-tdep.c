@@ -863,6 +863,12 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
 #define STHCX_INSTRUCTION 0x7c0005ad
 #define STQCX_INSTRUCTION 0x7c00016d
 
+/* Instruction masks for single-stepping of addpcis/lnia.  */
+#define ADDPCIS_INSN            0x4c000004
+#define ADDPCIS_INSN_MASK       0xfc00003e
+#define ADDPCIS_TARGET_REGISTER 0x03F00000
+#define ADDPCIS_INSN_REGSHIFT   21
+
 /* Check if insn is one of the Load And Reserve instructions used for atomic
    sequences.  */
 #define IS_LOAD_AND_RESERVE_INSN(insn)	((insn & LOAD_AND_RESERVE_MASK) == LWARX_INSTRUCTION \
@@ -941,8 +947,27 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
   displaced_debug_printf ("(ppc) fixup (%s, %s)",
 			  paddress (gdbarch, from), paddress (gdbarch, to));
 
+  /* Handle the addpcis/lnia instruction.  */
+  if ((insn & ADDPCIS_INSN_MASK) == ADDPCIS_INSN)
+    {
+      LONGEST displaced_offset;
+      ULONGEST current_val;
+      /* Measure the displacement.  */
+      displaced_offset = from - to;
+      /* Identify the target register that was updated by the instruction.  */
+      int regnum = (insn & ADDPCIS_TARGET_REGISTER) >> ADDPCIS_INSN_REGSHIFT;
+      /* Read and update the target value.  */
+      regcache_cooked_read_unsigned (regs, regnum , &current_val);
+      displaced_debug_printf ("addpcis target regnum %d was 0x%lx now 0x%lx",
+			regnum, current_val, current_val + displaced_offset );
+      regcache_cooked_write_unsigned (regs, regnum,
+					current_val + displaced_offset);
+      /* point the PC back at the non-displaced instruction.  */
+      regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
+				    from + offset);
+    }
   /* Handle PC-relative branch instructions.  */
-  if (opcode == B_INSN || opcode == BC_INSN || opcode == BXL_INSN)
+  else if (opcode == B_INSN || opcode == BC_INSN || opcode == BXL_INSN)
     {
       ULONGEST current_pc;
 
