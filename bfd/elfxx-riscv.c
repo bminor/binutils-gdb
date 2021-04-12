@@ -1514,8 +1514,8 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 					  &minor_version, true);
 	/* Expand g to imafd.  */
 	riscv_parse_add_subset (rps, "i",
-				major_version,
-				minor_version, false);
+				RISCV_UNKNOWN_VERSION,
+				RISCV_UNKNOWN_VERSION, false);
 	for ( ; *std_exts != 'q'; std_exts++)
 	  {
 	    subset[0] = *std_exts;

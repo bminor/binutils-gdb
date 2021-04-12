@@ -1,5 +1,10 @@
 2021-04-12  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfxx-riscv.c (riscv_parse_std_ext): Fixed the wrong versions of
+	i-ext when expanding g-ext.
+
+2021-04-12  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfxx-riscv.c (riscv_ext_dont_care_version): Removed.
 	(riscv_parse_add_subset): Always add the implicit extensions, even if
 	their versions are RISCV_UNKNOWN_VERSION.
