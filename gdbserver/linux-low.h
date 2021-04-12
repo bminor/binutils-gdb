@@ -292,7 +292,7 @@ public:
 
   bool supports_pid_to_exec_file () override;
 
-  char *pid_to_exec_file (int pid) override;
+  const char *pid_to_exec_file (int pid) override;
 
   bool supports_multifs () override;
 

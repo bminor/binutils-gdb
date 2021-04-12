@@ -1466,7 +1466,6 @@ handle_qxfer_exec_file (const char *annex,
 			gdb_byte *readbuf, const gdb_byte *writebuf,
 			ULONGEST offset, LONGEST len)
 {
-  char *file;
   ULONGEST pid;
   int total_len;
 
@@ -1490,7 +1489,7 @@ handle_qxfer_exec_file (const char *annex,
   if (pid <= 0)
     return -1;
 
-  file = the_target->pid_to_exec_file (pid);
+  const char *file = the_target->pid_to_exec_file (pid);
   if (file == NULL)
     return -1;
 

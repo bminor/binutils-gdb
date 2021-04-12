@@ -6265,7 +6265,7 @@ linux_process_target::supports_pid_to_exec_file ()
   return true;
 }
 
-char *
+const char *
 linux_process_target::pid_to_exec_file (int pid)
 {
   return linux_proc_pid_to_exec_file (pid);

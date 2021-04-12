@@ -1,3 +1,14 @@
+2021-04-12  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* target.h (class process_stratum_target) <pid_to_exec_file>:
+	Constify the return type.  Update the definition/references below.
+	* target.cc (process_stratum_target::pid_to_exec_file)
+	* linux-low.h (class linux_process_target) <pid_to_exec_file>
+	* linux-low.cc (linux_process_target::pid_to_exec_file)
+	* netbsd-low.h (class netbsd_process_target) <pid_to_exec_file>
+	* netbsd-low.cc (netbsd_process_target::pid_to_exec_file)
+	* server.cc (handle_qxfer_exec_file)
+
 2021-04-11  Eli Zaretskii  <eliz@gnu.org>
 
 	* win32-low.cc (win32_add_dll): New function, with body almost

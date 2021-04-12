@@ -440,7 +440,7 @@ public:
      character string containing the pathname is returned.  This
      string should be copied into a buffer by the client if the string
      will not be immediately used, or if it must persist.  */
-  virtual char *pid_to_exec_file (int pid);
+  virtual const char *pid_to_exec_file (int pid);
 
   /* Return true if any of the multifs ops is supported.  */
   virtual bool supports_multifs ();

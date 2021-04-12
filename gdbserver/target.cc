@@ -783,7 +783,7 @@ process_stratum_target::supports_pid_to_exec_file ()
   return false;
 }
 
-char *
+const char *
 process_stratum_target::pid_to_exec_file (int pid)
 {
   gdb_assert_not_reached ("target op pid_to_exec_file not supported");
