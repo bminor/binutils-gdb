@@ -1,3 +1,8 @@
+2021-04-13  Tom de Vries  <tdevries@suse.de>
+
+	* ui-style.c (read_semi_number, extended_color): Change idx parameter
+	type to regoff_t *.
+
 2021-04-13  Luis Machado  <luis.machado@linaro.org>
 
 	* rs6000-tdep.c (ppc_displaced_step_fixup): Use %s to print
