@@ -995,8 +995,10 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
       int regnum = (insn & ADDPCIS_TARGET_REGISTER) >> ADDPCIS_INSN_REGSHIFT;
       /* Read and update the target value.  */
       regcache_cooked_read_unsigned (regs, regnum , &current_val);
-      displaced_debug_printf ("addpcis target regnum %d was 0x%lx now 0x%lx",
-			regnum, current_val, current_val + displaced_offset );
+      displaced_debug_printf ("addpcis target regnum %d was %s now %s",
+			      regnum, paddress (gdbarch, current_val),
+			      paddress (gdbarch, current_val
+					+ displaced_offset));
       regcache_cooked_write_unsigned (regs, regnum,
 					current_val + displaced_offset);
       /* point the PC back at the non-displaced instruction.  */
