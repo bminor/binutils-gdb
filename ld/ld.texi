@@ -1560,6 +1560,11 @@ the library in question do not affect whether the library is seen as
 needed.  This is similar to the rules for extraction of object files
 from archives.  @option{--no-as-needed} restores the default behaviour.
 
+Note: On Linux based systems the @option{--as-needed} option also has
+an affect on the behaviour of the @option{--rpath} and
+@option{--rpath-link} options.  See the description of
+@option{--rpath-link} for more details.
+
 @kindex --add-needed
 @kindex --no-add-needed
 @item --add-needed
@@ -2323,8 +2328,19 @@ Any directories specifed by a @code{SEARCH_DIR} command in the
 linker script being used.
 @end enumerate
 
+Note however on Linux based systems there is an additional caveat:  If
+the @option{--as-needed} option is active @emph{and} a shared library
+is located which would normally satisfy the search @emph{and} this
+library does not have DT_NEEDED tag for @file{libc.so}
+@emph{and} there is a shared library later on in the set of search
+directories which also satisfies the search @emph{and}
+this second shared library does have a DT_NEEDED tag for
+@file{libc.so} @emph{then} the second library will be selected instead
+of the first.
+
 If the required shared library is not found, the linker will issue a
 warning and continue with the link.
+
 @end ifset
 
 @kindex -shared

@@ -1,3 +1,8 @@
+2021-04-13  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texi (Options): Add note about the effect of --as-needed on
+	the --rpath and --rpath-link options on Linux based systems.
+
 2021-04-13  Alan Modra  <amodra@gmail.com>
 
 	PR 27722
