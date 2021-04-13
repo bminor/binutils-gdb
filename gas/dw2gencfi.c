@@ -2043,6 +2043,63 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   symbol_set_value_now (end_address);
 }
 
+/* Allow these insns to be put in the initial sequence of a CIE.
+   If J is non-NULL, then compare I and J insns for a match.  */
+
+static inline bool
+initial_cie_insn (const struct cfi_insn_data *i, const struct cfi_insn_data *j)
+{
+  if (j && i->insn != j->insn)
+    return false;
+  switch (i->insn)
+    {
+    case DW_CFA_offset:
+    case DW_CFA_def_cfa:
+    case DW_CFA_val_offset:
+      if (j)
+	{
+	  if (i->u.ri.reg != j->u.ri.reg)
+	    return false;
+	  if (i->u.ri.offset != j->u.ri.offset)
+	    return false;
+	}
+      break;
+
+    case DW_CFA_register:
+      if (j)
+	{
+	  if (i->u.rr.reg1 != j->u.rr.reg1)
+	    return false;
+	  if (i->u.rr.reg2 != j->u.rr.reg2)
+	    return false;
+	}
+      break;
+
+    case DW_CFA_def_cfa_register:
+    case DW_CFA_restore:
+    case DW_CFA_undefined:
+    case DW_CFA_same_value:
+      if (j)
+	{
+	  if (i->u.r != j->u.r)
+	    return false;
+	}
+      break;
+
+    case DW_CFA_def_cfa_offset:
+      if (j)
+	{
+	  if (i->u.i != j->u.i)
+	    return false;
+	}
+      break;
+
+    default:
+      return false;
+    }
+  return true;
+}
+
 static struct cie_entry *
 select_cie_for_fde (struct fde_entry *fde, bool eh_frame,
 		    struct cfi_insn_data **pfirst, int align)
@@ -2088,75 +2145,15 @@ select_cie_for_fde (struct fde_entry *fde, bool eh_frame,
 	   i != cie->last && j != NULL;
 	   i = i->next, j = j->next)
 	{
-	  if (i->insn != j->insn)
-	    goto fail;
-	  switch (i->insn)
-	    {
-	    case DW_CFA_advance_loc:
-	    case DW_CFA_remember_state:
-	      /* We reached the first advance/remember in the FDE,
-		 but did not reach the end of the CIE list.  */
-	      goto fail;
-
-	    case DW_CFA_offset:
-	    case DW_CFA_def_cfa:
-	    case DW_CFA_val_offset:
-	      if (i->u.ri.reg != j->u.ri.reg)
-		goto fail;
-	      if (i->u.ri.offset != j->u.ri.offset)
-		goto fail;
-	      break;
-
-	    case DW_CFA_register:
-	      if (i->u.rr.reg1 != j->u.rr.reg1)
-		goto fail;
-	      if (i->u.rr.reg2 != j->u.rr.reg2)
-		goto fail;
-	      break;
-
-	    case DW_CFA_def_cfa_register:
-	    case DW_CFA_restore:
-	    case DW_CFA_undefined:
-	    case DW_CFA_same_value:
-	      if (i->u.r != j->u.r)
-		goto fail;
-	      break;
-
-	    case DW_CFA_def_cfa_offset:
-	      if (i->u.i != j->u.i)
-		goto fail;
-	      break;
-
-	    case CFI_escape:
-	    case CFI_val_encoded_addr:
-	    case CFI_label:
-	    case DW_CFA_restore_state:
-	    case DW_CFA_GNU_window_save:
-	      /* Don't bother matching these for now.  */
-	      goto fail;
-
-	    default:
-	      abort ();
-	    }
+	  if (!initial_cie_insn (i, j))
+	    break;
 	}
 
-      /* Success if we reached the end of the CIE list, and we've either
-	 run out of FDE entries or we've encountered an advance,
-	 remember, or escape.  */
-      if (i == cie->last
-	  && (!j
-	      || j->insn == DW_CFA_advance_loc
-	      || j->insn == DW_CFA_remember_state
-	      || j->insn == DW_CFA_GNU_window_save
-	      || j->insn == CFI_escape
-	      || j->insn == CFI_val_encoded_addr
-	      || j->insn == CFI_label))
+      if (i == cie->last)
 	{
 	  *pfirst = j;
 	  return cie;
 	}
-
-    fail:;
     }
 
   cie = XNEW (struct cie_entry);
@@ -2174,11 +2171,7 @@ select_cie_for_fde (struct fde_entry *fde, bool eh_frame,
 #endif
 
   for (i = cie->first; i ; i = i->next)
-    if (i->insn == DW_CFA_advance_loc
-	|| i->insn == DW_CFA_remember_state
-	|| i->insn == CFI_escape
-	|| i->insn == CFI_val_encoded_addr
-	|| i->insn == CFI_label)
+    if (!initial_cie_insn (i, NULL))
       break;
 
   cie->last = i;

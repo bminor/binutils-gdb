@@ -1,6 +1,12 @@
 2021-04-14  Alan Modra  <amodra@gmail.com>
 
 	PR 27723
+	* dw2gencfi.c (initial_cie_insn): New function, extracted from..
+	(select_cie_for_fde): ..here.  Simplify.
+
+2021-04-14  Alan Modra  <amodra@gmail.com>
+
+	PR 27723
 	* dw2gencfi.c (select_cie_for_fde): Handle DW_CFA_val_offset,
 	DW_CFA_GNU_window_save and DW_CFA_restore_state.
 
