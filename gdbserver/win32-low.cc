@@ -1211,10 +1211,6 @@ win32_add_all_dlls (void)
   win32_add_dll (NULL);
 }
 
-typedef HANDLE (WINAPI *winapi_CreateToolhelp32Snapshot) (DWORD, DWORD);
-typedef BOOL (WINAPI *winapi_Module32First) (HANDLE, LPMODULEENTRY32);
-typedef BOOL (WINAPI *winapi_Module32Next) (HANDLE, LPMODULEENTRY32);
-
 /* See nat/windows-nat.h.  */
 
 void

@@ -1,3 +1,8 @@
+2021-04-13  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.cc (winapi_CreateToolhelp32Snapshot)
+	(winapi_Module32First, winapi_Module32Next): Remove typedefs.
+
 2021-04-13  Pedro Alves  <pedro@palves.net>
 
 	* Makefile.in (SFILES): Remove hostio-errno.cc.
