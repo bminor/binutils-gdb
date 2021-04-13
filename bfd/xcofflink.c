@@ -2349,6 +2349,7 @@ xcoff_link_check_ar_symbols (bfd *abfd,
       struct internal_syment sym;
 
       bfd_coff_swap_sym_in (abfd, (void *) esym, (void *) &sym);
+      esym += (sym.n_numaux + 1) * symesz;
 
       if (EXTERN_SYM_P (sym.n_sclass) && sym.n_scnum != N_UNDEF)
 	{
@@ -2382,8 +2383,6 @@ xcoff_link_check_ar_symbols (bfd *abfd,
 	      return true;
 	    }
 	}
-
-      esym += (sym.n_numaux + 1) * symesz;
     }
 
   /* We do not need this object file.  */
