@@ -1,3 +1,12 @@
+2021-04-13  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_version_mismatch): Do not report the warning
+	when the version of input or output is RISCV_UNKNOWN_VERSION, since
+	the extension is added implicitly.
+	* elfxx-riscv.c: Updated the obsolete comments.
+	(RISCV_UNKNOWN_VERSION): Moved to elfxx-riscv.h.
+	* elfxx-riscv.h (RISCV_UNKNOWN_VERSION): Added.
+
 2021-04-12  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (ENABLE_CHECKING): Define.

@@ -3332,15 +3332,25 @@ riscv_version_mismatch (bfd *ibfd,
   if (in->major_version != out->major_version
       || in->minor_version != out->minor_version)
     {
-      _bfd_error_handler
-	(_("warning: %pB: mis-matched ISA version %d.%d for '%s' "
-	   "extension, the output version is %d.%d"),
-	 ibfd,
-	 in->major_version,
-	 in->minor_version,
-	 in->name,
-	 out->major_version,
-	 out->minor_version);
+      if ((in->major_version == RISCV_UNKNOWN_VERSION
+	   && in->minor_version == RISCV_UNKNOWN_VERSION)
+	  || (out->major_version == RISCV_UNKNOWN_VERSION
+	      && out->minor_version == RISCV_UNKNOWN_VERSION))
+	{
+	  /* Do not report the warning when the version of input
+	     or output is RISCV_UNKNOWN_VERSION, since the extension
+	     is added implicitly.  */
+	}
+      else
+	_bfd_error_handler
+	  (_("warning: %pB: mis-matched ISA version %d.%d for '%s' "
+	     "extension, the output version is %d.%d"),
+	   ibfd,
+	   in->major_version,
+	   in->minor_version,
+	   in->name,
+	   out->major_version,
+	   out->minor_version);
 
       /* Update the output ISA versions to the newest ones.  */
       if ((in->major_version > out->major_version)

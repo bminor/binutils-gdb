@@ -1026,8 +1026,6 @@ riscv_elf_add_sub_reloc (bfd *abfd,
   return bfd_reloc_ok;
 }
 
-#define RISCV_UNKNOWN_VERSION -1
-
 /* Lists of prefixed class extensions that binutils should know about.
    Whether or not a particular entry is in these lists will dictate if
    gas/ld will accept its presence in the architecture string.
@@ -1588,9 +1586,7 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
    Arguments:
      `rps`: Hooks and status for parsing extensions.
      `march`: Full ISA string.
-     `p`: Curent parsing position.
-     `config`: What class and predicate function to use for the
-     extension.  */
+     `p`: Curent parsing position.  */
 
 static const char *
 riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
@@ -1640,9 +1636,8 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 
       /* Check if the prefix extension is known.
 	 For 'x', anything goes but it cannot simply be 'x'.
-	 For 's', it must be known from a list and cannot simply be 's'.
-	 For 'h', it must be known from a list and cannot simply be 'h'.
-	 For 'z', it must be known from a list and cannot simply be 'z'.  */
+	 For other prefixed extensions, it must be known from a list
+	 and cannot simply be the prefixed name.  */
 
       /* Check that the extension name is well-formed.  */
       if (!riscv_valid_prefixed_ext (subset))

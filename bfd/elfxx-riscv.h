@@ -24,6 +24,8 @@
 #include "elf/internal.h"
 #include "opcode/riscv.h"
 
+#define RISCV_UNKNOWN_VERSION -1
+
 extern reloc_howto_type *
 riscv_reloc_name_lookup (bfd *, const char *);
 
