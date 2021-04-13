@@ -2100,6 +2100,7 @@ select_cie_for_fde (struct fde_entry *fde, bool eh_frame,
 
 	    case DW_CFA_offset:
 	    case DW_CFA_def_cfa:
+	    case DW_CFA_val_offset:
 	      if (i->u.ri.reg != j->u.ri.reg)
 		goto fail;
 	      if (i->u.ri.offset != j->u.ri.offset)
@@ -2129,6 +2130,8 @@ select_cie_for_fde (struct fde_entry *fde, bool eh_frame,
 	    case CFI_escape:
 	    case CFI_val_encoded_addr:
 	    case CFI_label:
+	    case DW_CFA_restore_state:
+	    case DW_CFA_GNU_window_save:
 	      /* Don't bother matching these for now.  */
 	      goto fail;
 
@@ -2144,6 +2147,7 @@ select_cie_for_fde (struct fde_entry *fde, bool eh_frame,
 	  && (!j
 	      || j->insn == DW_CFA_advance_loc
 	      || j->insn == DW_CFA_remember_state
+	      || j->insn == DW_CFA_GNU_window_save
 	      || j->insn == CFI_escape
 	      || j->insn == CFI_val_encoded_addr
 	      || j->insn == CFI_label))

@@ -1,3 +1,9 @@
+2021-04-14  Alan Modra  <amodra@gmail.com>
+
+	PR 27723
+	* dw2gencfi.c (select_cie_for_fde): Handle DW_CFA_val_offset,
+	DW_CFA_GNU_window_save and DW_CFA_restore_state.
+
 2021-04-13  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/m68hc11/m68hc11.exp (gas_m68hc11_message): Don't
