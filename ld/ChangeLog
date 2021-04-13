@@ -1,3 +1,9 @@
+2021-04-13  Alan Modra  <amodra@gmail.com>
+
+	PR 27722
+	* libdep_plugin.c (str2vec): Don't pass a potentially signed char
+	to isspace.
+
 2021-04-12  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac (--enable-checking): Add support.
