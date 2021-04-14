@@ -1546,8 +1546,8 @@ elf_metag_relocate_section (bfd *output_bfd,
 	  if ((bfd_link_pic (info)
 	       && r_symndx != STN_UNDEF
 	       && (input_section->flags & SEC_ALLOC) != 0
-	       && (r_type != R_METAG_RELBRANCH
-		   || !SYMBOL_CALLS_LOCAL (info, &hh->eh)))
+	       && !(r_type == R_METAG_RELBRANCH
+		    && (hh == NULL || SYMBOL_CALLS_LOCAL (info, &hh->eh))))
 	      || (!bfd_link_pic (info)
 		  && hh != NULL
 		  && hh->eh.dynindx != -1
