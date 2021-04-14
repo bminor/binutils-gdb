@@ -4864,10 +4864,9 @@ strip_main (int argc, char *argv[])
 		 output_target, NULL);
       if (status == 0)
 	{
-	  if (output_file != tmpname)
-	    status = smart_rename (tmpname,
-				   output_file ? output_file : argv[i],
-				   copyfd, &statbuf, preserve_dates) != 0;
+	  const char *oname = output_file ? output_file : argv[i];
+	  status = smart_rename (tmpname, oname, copyfd,
+				 &statbuf, preserve_dates) != 0;
 	  if (status == 0)
 	    status = hold_status;
 	}
@@ -5949,9 +5948,9 @@ copy_main (int argc, char *argv[])
 	     output_target, input_arch);
   if (status == 0)
     {
-      if (tmpname != output_filename)
-	status = smart_rename (tmpname, input_filename, copyfd,
-			       &statbuf, preserve_dates) != 0;
+      const char *oname = output_filename ? output_filename : input_filename;
+      status = smart_rename (tmpname, oname, copyfd,
+			     &statbuf, preserve_dates) != 0;
     }
   else
     {
