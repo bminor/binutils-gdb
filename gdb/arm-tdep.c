@@ -44,6 +44,7 @@
 #include "target-descriptions.h"
 #include "user-regs.h"
 #include "observer.h"
+#include "infcall.h"
 
 #include "arm-tdep.h"
 #include "gdb/sim-arm.h"
@@ -3748,6 +3749,14 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       write_memory (sp, si->data, si->len);
       si = pop_stack_item (si);
     }
+
+  if (gdbarch_tdep (gdbarch)->is_fdpic)
+  {
+    CORE_ADDR func_addr = find_function_addr (function, NULL);
+
+    regcache_cooked_write_unsigned (regcache, 9,
+				    fdpic_find_global_pointer (func_addr));
+  }
 
   /* Finally, update teh SP register.  */
   regcache_cooked_write_unsigned (regcache, ARM_SP_REGNUM, sp);

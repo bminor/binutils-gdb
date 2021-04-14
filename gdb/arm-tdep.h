@@ -359,5 +359,6 @@ extern struct target_desc *tdesc_arm_with_neon;
 /* FDPIC structure and api.  */
 extern struct target_so_ops fdpic_so_ops;
 extern CORE_ADDR fdpic_fetch_objfile_link_map (struct objfile *objfile);
+extern CORE_ADDR fdpic_find_global_pointer (CORE_ADDR addr);
 
 #endif /* arm-tdep.h */

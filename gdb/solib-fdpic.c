@@ -598,6 +598,36 @@ enable_break2 (void)
   return 0;
 }
 
+/* Exported functions.  */
+/* Find the global pointer for the given function address ADDR.  */
+CORE_ADDR
+fdpic_find_global_pointer (CORE_ADDR addr)
+{
+  struct so_list *so;
+
+  so = master_so_list ();
+  while (so)
+    {
+      int seg;
+      struct elf32_fdpic_loadmap *map;
+
+      map = so->lm_info->map;
+
+      for (seg = 0; seg < map->nsegs; seg++)
+	{
+	  if (map->segs[seg].addr <= addr
+	      && addr < map->segs[seg].addr + map->segs[seg].p_memsz)
+	    return so->lm_info->got_value;
+	}
+
+      so = so->next;
+    }
+
+  /* Didn't find it in any of the shared objects.
+     So assume it's in the main executable.  */
+  return main_got ();
+}
+
 /* Shared object operations.  */
 static int
 fdpic_in_dynsym_resolve_code (CORE_ADDR pc)
