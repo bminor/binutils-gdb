@@ -6300,6 +6300,11 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		    {
 		      p->p_filesz = (sect->filepos - m->sections[0]->filepos
 				     + hdr->sh_size);
+		      /* NB: p_memsz of the loadable PT_NOTE segment
+			 should be the same as p_filesz.  */
+		      if (p->p_type == PT_NOTE
+			  && (hdr->sh_flags & SHF_ALLOC) != 0)
+			p->p_memsz = p->p_filesz;
 		      break;
 		    }
 		}
