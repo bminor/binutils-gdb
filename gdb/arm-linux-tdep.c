@@ -251,6 +251,12 @@ static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
 #define ARM_LDR_PC_SP_12		0xe49df00c
 #define ARM_LDR_PC_SP_4			0xe49df004
 
+/* FDPIC specific definition.  */
+#define THUMB2_SET_R7_RT_SIGRETURN	0x07adf04f
+#define FDPIC_LDR_R12_WITH_FUNCDESC	0xe59fc004
+#define FDPIC_LDR_R9_WITH_GOT		0xe59c9004
+#define FDPIC_LDR_PC_WITH_RESTORER	0xe59cf000
+
 static void
 arm_linux_sigtramp_cache (struct frame_info *this_frame,
 			  struct trad_frame_cache *this_cache,
@@ -335,6 +341,34 @@ arm_linux_sigreturn_init (const struct tramp_frame *self,
   else
     arm_linux_sigtramp_cache (this_frame, this_cache, func,
 			      ARM_SIGCONTEXT_R0);
+}
+
+static void
+arm_linux_sigreturn_fdpic_init (const struct tramp_frame *self,
+				struct frame_info *this_frame,
+				struct trad_frame_cache *this_cache,
+				CORE_ADDR func)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+  CORE_ADDR funcdesc = read_memory_unsigned_integer (func + 12, 4, byte_order);
+  CORE_ADDR handler = read_memory_unsigned_integer (funcdesc, 4, byte_order);
+  unsigned int first_handler_instruction
+    = read_memory_unsigned_integer (handler & ~1, 4, byte_order);
+
+  /* We look for either arm or thumb2 code.  */
+  /* This only works well for libc registered handler.  */
+  if (first_handler_instruction == ARM_SET_R7_RT_SIGRETURN
+      || first_handler_instruction == THUMB2_SET_R7_RT_SIGRETURN)
+    arm_linux_sigtramp_cache (this_frame, this_cache, func,
+			      ARM_NEW_RT_SIGFRAME_UCONTEXT
+			      + ARM_UCONTEXT_SIGCONTEXT
+			      + ARM_SIGCONTEXT_R0);
+  else
+    arm_linux_sigtramp_cache (this_frame, this_cache, func,
+			      ARM_UCONTEXT_SIGCONTEXT
+			      + ARM_SIGCONTEXT_R0);
 }
 
 static void
@@ -463,6 +497,18 @@ static struct tramp_frame arm_kernel_linux_restart_syscall_tramp_frame = {
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_restart_syscall_init
+};
+
+static struct tramp_frame arm_linux_sigreturn_tramp_frame_fdpic = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { FDPIC_LDR_R12_WITH_FUNCDESC, -1 },
+    { FDPIC_LDR_R9_WITH_GOT, -1 },
+    { FDPIC_LDR_PC_WITH_RESTORER, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_sigreturn_fdpic_init
 };
 
 /* Core file and register set support.  */
@@ -1264,6 +1310,8 @@ arm_linux_init_abi (struct gdbarch_info info,
 				&arm_linux_restart_syscall_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_kernel_linux_restart_syscall_tramp_frame);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&arm_linux_sigreturn_tramp_frame_fdpic);
 
   /* Core file support.  */
   set_gdbarch_regset_from_core_section (gdbarch,
