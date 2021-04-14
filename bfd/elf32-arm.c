@@ -6582,8 +6582,9 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      && (r_type != (unsigned int) R_ARM_PLT32)
 		      && !((r_type == (unsigned int) R_ARM_TLS_CALL
 			    || r_type == (unsigned int) R_ARM_THM_TLS_CALL)
-			   && r_type == elf32_arm_tls_transition
-			       (info, r_type, &hash->root)
+			   && r_type == (elf32_arm_tls_transition
+					 (info, r_type,
+					  (struct elf_link_hash_entry *) hash))
 			   && ((hash ? hash->tls_type
 				: (elf32_arm_local_got_tls_type
 				   (input_bfd)[r_indx]))
