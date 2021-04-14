@@ -967,6 +967,9 @@ bin_to_res_version (windres_bfd *wrbfd, const bfd_byte *data, rc_uint_type lengt
   if (type != 0)
     fatal (_("unexpected version type %d"), (int) type);
 
+  /* PR 27686: Ignore any padding bytes after the end of the version structure.  */
+  length = verlen;
+
   data += off;
   length -= off;
 

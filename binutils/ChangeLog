@@ -1,3 +1,9 @@
+2021-04-14  Mark Harmstone  <mark@harmstone.com>
+
+	PR 27686
+	* resbin.c (bin_to_res_version): Ignore any trailing bytes at the
+	end of the structure.
+
 2021-04-14  Frederic Cambus  <fred@statdns.com>
 
 	* readelf.c (get_netbsd_elfcore_note_type): Remove unneeded #ifdef
