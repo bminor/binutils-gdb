@@ -257,6 +257,10 @@ static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
 #define FDPIC_LDR_R9_WITH_GOT		0xe59c9004
 #define FDPIC_LDR_PC_WITH_RESTORER	0xe59cf000
 
+#define FDPIC_T2_LDR_R12_WITH_FUNCDESC  0xc008f8df
+#define FDPIC_T2_LDR_R9_WITH_GOT	0x9004f8dc
+#define FDPIC_T2_LDR_PC_WITH_RESTORER   0xf000f8dc
+
 static void
 arm_linux_sigtramp_cache (struct frame_info *this_frame,
 			  struct trad_frame_cache *this_cache,
@@ -506,6 +510,18 @@ static struct tramp_frame arm_linux_sigreturn_tramp_frame_fdpic = {
     { FDPIC_LDR_R12_WITH_FUNCDESC, -1 },
     { FDPIC_LDR_R9_WITH_GOT, -1 },
     { FDPIC_LDR_PC_WITH_RESTORER, -1 },
+    { TRAMP_SENTINEL_INSN }
+  },
+  arm_linux_sigreturn_fdpic_init
+};
+
+static struct tramp_frame arm_linux_thumb2_sigreturn_tramp_frame_fdpic = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { FDPIC_T2_LDR_R12_WITH_FUNCDESC, -1 },
+    { FDPIC_T2_LDR_R9_WITH_GOT, -1 },
+    { FDPIC_T2_LDR_PC_WITH_RESTORER, -1 },
     { TRAMP_SENTINEL_INSN }
   },
   arm_linux_sigreturn_fdpic_init
@@ -1312,6 +1328,8 @@ arm_linux_init_abi (struct gdbarch_info info,
 				&arm_kernel_linux_restart_syscall_tramp_frame);
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_linux_sigreturn_tramp_frame_fdpic);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&arm_linux_thumb2_sigreturn_tramp_frame_fdpic);
 
   /* Core file support.  */
   set_gdbarch_regset_from_core_section (gdbarch,
