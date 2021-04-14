@@ -77,6 +77,7 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 	    return
 	}
 	set xflags "--preserve-dates"
+	sleep 1
     }
 
     set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $xflags $t_tempfile $t_copyfile"]
@@ -102,6 +103,17 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 
 	if [string equal "" $exec_output] then {
 	    pass "objcopy $type ($testname)"
+	    if { $type == "executable" } {
+		set dir [file dirname $t_copyfile]
+		set f2 [file tail $t_copyfile]
+		set status [remote_exec host find "$dir -name $f2 -newer $t_tempfile -print"]
+		set exec_output [lindex $status 1]
+		if [string equal "" $exec_output] then {
+		    pass "objcopy $type ($testname) timestamp"
+		} else {
+		    fail "objcopy $type ($testname) timestamp"
+		}
+	    }
 	} else {
 	    send_log "$exec_output\n"
 	    verbose "$exec_output" 1

@@ -22,10 +22,10 @@
 #include "bfd.h"
 #include "bucomm.h"
 
-#ifdef HAVE_GOOD_UTIME_H
-#include <utime.h>
-#elif defined HAVE_UTIMES
+#if defined HAVE_UTIMES
 #include <sys/time.h>
+#elif defined HAVE_GOOD_UTIME_H
+#include <utime.h>
 #endif
 
 /* The number of bytes to copy at once.  */
@@ -86,6 +86,77 @@ simple_copy (int fromfd, const char *to,
   return 0;
 }
 
+/* The following defines and inline functions are copied from gnulib.
+   FIXME: Use a gnulib import and stat-time.h instead.  */
+#if defined HAVE_STRUCT_STAT_ST_ATIM_TV_NSEC
+# if defined TYPEOF_STRUCT_STAT_ST_ATIM_IS_STRUCT_TIMESPEC
+#  define STAT_TIMESPEC(st, st_xtim) ((st)->st_xtim)
+# else
+#  define STAT_TIMESPEC_NS(st, st_xtim) ((st)->st_xtim.tv_nsec)
+# endif
+#elif defined HAVE_STRUCT_STAT_ST_ATIMESPEC_TV_NSEC
+# define STAT_TIMESPEC(st, st_xtim) ((st)->st_xtim##espec)
+#elif defined HAVE_STRUCT_STAT_ST_ATIMENSEC
+# define STAT_TIMESPEC_NS(st, st_xtim) ((st)->st_xtim##ensec)
+#elif defined HAVE_STRUCT_STAT_ST_ATIM_ST__TIM_TV_NSEC
+# define STAT_TIMESPEC_NS(st, st_xtim) ((st)->st_xtim.st__tim.tv_nsec)
+#endif
+
+/* Return the nanosecond component of *ST's access time.  */
+inline long int
+get_stat_atime_ns (struct stat const *st)
+{
+# if defined STAT_TIMESPEC
+  return STAT_TIMESPEC (st, st_atim).tv_nsec;
+# elif defined STAT_TIMESPEC_NS
+  return STAT_TIMESPEC_NS (st, st_atim);
+# else
+  return 0;
+# endif
+}
+
+/* Return the nanosecond component of *ST's data modification time.  */
+inline long int
+get_stat_mtime_ns (struct stat const *st)
+{
+# if defined STAT_TIMESPEC
+  return STAT_TIMESPEC (st, st_mtim).tv_nsec;
+# elif defined STAT_TIMESPEC_NS
+  return STAT_TIMESPEC_NS (st, st_mtim);
+# else
+  return 0;
+# endif
+}
+
+/* Return *ST's access time.  */
+inline struct timespec
+get_stat_atime (struct stat const *st)
+{
+#ifdef STAT_TIMESPEC
+  return STAT_TIMESPEC (st, st_atim);
+#else
+  struct timespec t;
+  t.tv_sec = st->st_atime;
+  t.tv_nsec = get_stat_atime_ns (st);
+  return t;
+#endif
+}
+
+/* Return *ST's data modification time.  */
+inline struct timespec
+get_stat_mtime (struct stat const *st)
+{
+#ifdef STAT_TIMESPEC
+  return STAT_TIMESPEC (st, st_mtim);
+#else
+  struct timespec t;
+  t.tv_sec = st->st_mtime;
+  t.tv_nsec = get_stat_mtime_ns (st);
+  return t;
+#endif
+}
+/* End FIXME.  */
+
 /* Set the times of the file DESTINATION to be the same as those in
    STATBUF.  */
 
@@ -93,20 +164,25 @@ void
 set_times (const char *destination, const struct stat *statbuf)
 {
   int result;
-#ifdef HAVE_GOOD_UTIME_H
+#if defined HAVE_UTIMENSAT
+  struct timespec times[2];
+  times[0] = get_stat_atime (statbuf);
+  times[1] = get_stat_mtime (statbuf);
+  result = utimensat (AT_FDCWD, destination, times, 0);
+#elif defined HAVE_UTIMES
+  struct timeval tv[2];
+
+  tv[0].tv_sec = statbuf->st_atime;
+  tv[0].tv_usec = get_stat_atime_ns (statbuf) / 1000;
+  tv[1].tv_sec = statbuf->st_mtime;
+  tv[1].tv_usec = get_stat_mtime_ns (statbuf) / 1000;
+  result = utimes (destination, tv);
+#elif defined HAVE_GOOD_UTIME_H
   struct utimbuf tb;
 
   tb.actime = statbuf->st_atime;
   tb.modtime = statbuf->st_mtime;
   result = utime (destination, &tb);
-#elif defined HAVE_UTIMES
-  struct timeval tv[2];
-
-  tv[0].tv_sec = statbuf->st_atime;
-  tv[0].tv_usec = 0;
-  tv[1].tv_sec = statbuf->st_mtime;
-  tv[1].tv_usec = 0;
-  result = utimes (destination, tv);
 #else
   long tb[2];
 

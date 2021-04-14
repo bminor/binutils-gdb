@@ -1,5 +1,22 @@
 2021-04-15  Alan Modra  <amodra@gmail.com>
 
+	PR 27725
+	* configure.ac: Check for sys/time.h and utimensat.  Use standard
+	checks for mkstemp and mkdtemp.  Whitespace.  Check for nanosecond
+	members of struct stat.
+	* rename.c: Prefer sys/time.h for utimes over utime.h for utime.
+	(STAT_TIMESPEC, STAT_TIMESPEC_NS): Define
+	(get_stat_atime_ns, get_stat_mtime_ns): New inline functions.
+	(get_stat_atime, get_stat_mtime): Likewise.
+	(set_times): Choose first available of utimensat, utimes, utime.
+	Use above inline functions to set timespec and timeval values.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* testsuite/binutils-all/objcopy.exp (objcopy_test): Add test of
+	file timestamp when --preserve-dates is used.
+
+2021-04-15  Alan Modra  <amodra@gmail.com>
+
 	PR 27456
 	* rename.c (smart_rename): When TO and FROM are equal, just set
 	file timestamp.
