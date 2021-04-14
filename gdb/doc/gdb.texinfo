@@ -36513,7 +36513,7 @@ and only if there is a corresponding executable file.
 @subheading Example
 
 @smallexample
-@value{GDBP}
+(@value{GDBP})
 -list-thread-groups
 ^done,groups=[@{id="17",type="process",pid="yyy",num_children="2"@}]
 -list-thread-groups 17
@@ -36561,7 +36561,7 @@ When run on a @sc{gnu}/Linux system, the output will look something
 like this:
 
 @smallexample
-@value{GDBP}
+(@value{GDBP})
 -info-os
 ^done,OSDataTable=@{nr_rows="10",nr_cols="3",
 hdr=[@{width="10",alignment="-1",col_name="col0",colhdr="Type"@},
@@ -36587,7 +36587,7 @@ body=[item=@{col0="cpus",col1="Listing of all cpus/cores on the system",
             col2="Sockets"@},
       item=@{col0="threads",col1="Listing of all threads",
             col2="Threads"@}]
-@value{GDBP}
+(@value{GDBP})
 -info-os processes
 ^done,OSDataTable=@{nr_rows="190",nr_cols="4",
 hdr=[@{width="10",alignment="-1",col_name="col0",colhdr="pid"@},
@@ -36600,7 +36600,7 @@ body=[item=@{col0="1",col1="root",col2="/sbin/init",col3="0"@},
       ...
       item=@{col0="26446",col1="stan",col2="bash",col3="0"@},
       item=@{col0="28152",col1="stan",col2="bash",col3="1"@}]@}
-(gdb)
+(@value{GDBP})
 @end smallexample
 
 (Note that the MI output here includes a @code{"Title"} column that
@@ -36628,7 +36628,7 @@ thread group corresponding to the new inferior.
 @subheading Example
 
 @smallexample
-@value{GDBP}
+(@value{GDBP})
 -add-inferior
 ^done,inferior="i3"
 @end smallexample

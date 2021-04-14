@@ -1,3 +1,10 @@
+2021-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Add missing
+	parentheses to GDB prompt in example, and replace '(gdb)' with
+	'(@value{GDBP})' in one example where the latter was already in
+	use.
+
 2021-03-29  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.textinfo (Memory Tagging): Make it a @section.
