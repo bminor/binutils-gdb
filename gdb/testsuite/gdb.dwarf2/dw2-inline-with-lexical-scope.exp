@@ -59,7 +59,7 @@ Dwarf::assemble $asm_file {
 
 	    func_label: subprogram {
 		{name func}
-		{inline 3 data1}
+		{inline @DW_INL_declared_inlined}
 	    } {
 		num_label: DW_TAG_variable {
 		    {name num}

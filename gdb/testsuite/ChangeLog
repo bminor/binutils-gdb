@@ -1,5 +1,10 @@
 2021-04-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* gdb.dwarf2/dw2-inline-with-lexical-scope.exp: Use
+	@DW_INL_declared_inlined for the inline attribute.
+
+2021-04-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* gdb.opt/inline-locals.c (scoped): New function.
 	(main): Call 'scoped'.
 	* gdb.opt/inline-locals.exp: Update with "info locals" tests
