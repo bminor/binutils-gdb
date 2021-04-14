@@ -1,3 +1,10 @@
+2021-04-15  Alan Modra  <amodra@gmail.com>
+
+	PR 27456
+	* rename.c (smart_rename): When TO and FROM are equal, just set
+	file timestamp.
+	* objcopy.c (strip_main, copy_main): Always call smart_rename.
+
 2021-02-26  Alan Modra  <amodra@gmail.com>
 
 	Backport from mainline

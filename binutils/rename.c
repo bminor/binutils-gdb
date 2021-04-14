@@ -129,16 +129,19 @@ int
 smart_rename (const char *from, const char *to, int fromfd,
 	      struct stat *target_stat, bfd_boolean preserve_dates)
 {
-  int ret;
+  int ret = 0;
 
-  ret = simple_copy (fromfd, to, target_stat);
-  if (ret != 0)
-    non_fatal (_("unable to copy file '%s'; reason: %s"),
-	       to, strerror (errno));
+  if (to != from)
+    {
+      ret = simple_copy (fromfd, to, target_stat);
+      if (ret != 0)
+	non_fatal (_("unable to copy file '%s'; reason: %s"),
+		   to, strerror (errno));
+      unlink (from);
+    }
 
   if (preserve_dates)
     set_times (to, target_stat);
-  unlink (from);
 
   return ret;
 }
