@@ -19583,15 +19583,11 @@ get_netbsd_elfcore_note_type (Filedata * filedata, unsigned e_type)
       /* NetBSD core "procinfo" structure.  */
       return _("NetBSD procinfo structure");
 
-#ifdef NT_NETBSDCORE_AUXV
     case NT_NETBSDCORE_AUXV:
       return _("NetBSD ELF auxiliary vector data");
-#endif
 
-#ifdef NT_NETBSDCORE_LWPSTATUS
     case NT_NETBSDCORE_LWPSTATUS:
       return _("PT_LWPSTATUS (ptrace_lwpstatus structure)");
-#endif
 
     default:
       /* As of Jan 2020 there are no other machine-independent notes
