@@ -324,33 +324,33 @@ static reloc_howto_type csky_elf_howto_table[] =
 
   /* 20: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM16BY2,     /* type */
-	 1,                           /* rightshift */
-	 2,                           /* size */
-	 16,                          /* bitsize */
-	 true,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_signed,    /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_IMM16BY2",   /* name */
-	 false,                       /* partial_inplace */
-	 0x0,                         /* src_mask */
-	 0xffff,                      /* dst_mask */
-	 true),                       /* pcrel_offset */
+         1,                           /* rightshift */
+         2,                           /* size */
+         16,                          /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_signed,    /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_IMM16BY2",   /* name */
+         false,                       /* partial_inplace */
+         0x0,                         /* src_mask */
+         0xffff,                      /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 21: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM16BY4,     /* type */
-	 2,                           /* rightshift */
-	 2,                           /* size */
-	 16,                          /* bitsize */
-	 true,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_bitfield,  /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_IMM16BY4",   /* name */
-	 false,                       /* partial_inplace */
-	 0xffff0000,                  /* src_mask */
-	 0xffff,                      /* dst_mask */
-	 true),                       /* pcrel_offset */
+         2,                           /* rightshift */
+         2,                           /* size */
+         16,                          /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_bitfield,  /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_IMM16BY4",   /* name */
+         false,                       /* partial_inplace */
+         0xffff0000,                  /* src_mask */
+         0xffff,                      /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 22: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM10BY2,     /* type */
@@ -369,18 +369,18 @@ static reloc_howto_type csky_elf_howto_table[] =
 
   /* 23: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM10BY4,     /* type */
-	 2,                           /* rightshift */
-	 2,                           /* size */
-	 10,                          /* bitsize */
-	 true,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_bitfield,  /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_IMM10BY4",   /* name */
-	 false,                       /* partial_inplace */
-	 0x0,                         /* src_mask */
-	 0x3ff,                       /* dst_mask */
-	 true),                       /* pcrel_offset */
+         2,                           /* rightshift */
+         2,                           /* size */
+         10,                          /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_bitfield,  /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_IMM10BY4",   /* name */
+         false,                       /* partial_inplace */
+         0x0,                         /* src_mask */
+         0x3ff,                       /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 24: Only for csky v2.  */
   HOWTO (R_CKCORE_ADDR_HI16,          /* type */
@@ -621,18 +621,18 @@ static reloc_howto_type csky_elf_howto_table[] =
 
   /* 43.  */
   HOWTO (R_CKCORE_PCREL_IMM18BY2,     /* type */
-	 1,                           /* rightshift */
-	 2,                           /* size */
-	 18,                          /* bitsize */
-	 true,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_signed,    /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_IMM18BY2",   /* name */
-	 false,                       /* partial_inplace */
-	 0x0,                         /* src_mask */
-	 0x3ffff,                     /* dst_mask */
-	 true),                       /* pcrel_offset */
+         1,                           /* rightshift */
+         2,                           /* size */
+         18,                          /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_signed,    /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_IMM18BY2",   /* name */
+         false,                       /* partial_inplace */
+         0x0,                         /* src_mask */
+         0x3ffff,                     /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 44.  */
   HOWTO (R_CKCORE_DOFFSET_IMM18,      /* type */
@@ -825,18 +825,18 @@ static reloc_howto_type csky_elf_howto_table[] =
 
   /* 59: for ck807f.  */
   HOWTO (R_CKCORE_PCREL_FLRW_IMM8BY4, /* type */
-	 2,                           /* rightshift */
-	 2,                           /* size */
-	 8,                           /* bitsize */
-	 true,                        /* pc_relative */
-	 0,                           /* bitpos */
-	 complain_overflow_bitfield,  /* complain_on_overflow */
-	 NULL,                        /* special_function */
-	 "R_CKCORE_PCREL_FLRW_IMM8BY4", /* name */
-	 false,                       /* partial_inplace */
-	 0xfe1fff0f,                  /* src_mask */
-	 0x1e000f0,                   /* dst_mask */
-	 true),                       /* pcrel_offset */
+         2,                           /* rightshift */
+         2,                           /* size */
+         8,                           /* bitsize */
+         true,                        /* pc_relative */
+         0,                           /* bitpos */
+         complain_overflow_bitfield,  /* complain_on_overflow */
+         bfd_elf_generic_reloc,       /* special_function */
+         "R_CKCORE_PCREL_FLRW_IMM8BY4",/* name */
+         false,                       /* partial_inplace */
+         0xfe1fff0f,                  /* src_mask */
+         0x1e000f0,                   /* dst_mask */
+         true),                       /* pcrel_offset */
 
   /* 60: for 810 not to generate jsri.  */
   HOWTO (R_CKCORE_NOJSRI,             /* type */

@@ -1,3 +1,13 @@
+2021-04-15  Lifang Xia<lifang_xia@c-sky.com>
+
+	* elf32-csky.c (csky_elf_howto_table)
+	<R_CKCORE_PCREL_IMM16BY2>: Set special_function to
+	bfd_elf_generic_reloc.
+	<R_CKCORE_PCREL_IMM16BY4>: Likewise.
+	<R_CKCORE_PCREL_IMM10BY4>: Likewise.
+	<R_CKCORE_PCREL_IMM18BY2>: Likewise.
+	<R_CKCORE_PCREL_FLRW_IMM8BY4>: Likewise.
+
 2021-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/27708
