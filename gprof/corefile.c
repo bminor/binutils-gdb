@@ -781,8 +781,8 @@ core_create_line_syms (void)
 
      Of course, this is rather slow and it would be better if
      BFD would provide an iterator for enumerating all line infos.  */
-  prev_name_len = PATH_MAX;
-  prev_filename_len = PATH_MAX;
+  prev_name_len = 1024;
+  prev_filename_len = 1024;
   prev_name = (char *) xmalloc (prev_name_len);
   prev_filename = (char *) xmalloc (prev_filename_len);
   ltab.len = 0;

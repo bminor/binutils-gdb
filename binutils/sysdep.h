@@ -124,22 +124,7 @@ extern char **environ;
 /* Used by ar.c and objcopy.c.  */
 #define BUFSIZE 8192
 
-/* For PATH_MAX.  */
 #include <limits.h>
-
-#ifndef PATH_MAX
-/* For MAXPATHLEN.  */
-# ifdef HAVE_SYS_PARAM_H
-#  include <sys/param.h>
-# endif
-# ifndef PATH_MAX
-#  ifdef MAXPATHLEN
-#   define PATH_MAX MAXPATHLEN
-#  else
-#   define PATH_MAX 1024
-#  endif
-# endif
-#endif
 
 #if SIZEOF_LONG_LONG > SIZEOF_LONG
 /* We can't use any bfd types here since readelf may define BFD64 and

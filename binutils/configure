@@ -12983,7 +12983,7 @@ _ACEOF
 # guarantees they are available.
 # plugin-api.h tests HAVE_STDINT_H and HAVE_INTTYPES_H
 # Besides those, we need to check anything used in binutils/ not in C99.
-for ac_header in fcntl.h inttypes.h stdint.h sys/file.h sys/param.h \
+for ac_header in fcntl.h inttypes.h stdint.h sys/file.h \
 		 sys/stat.h sys/types.h unistd.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`

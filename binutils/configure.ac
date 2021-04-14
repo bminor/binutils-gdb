@@ -181,7 +181,7 @@ AC_CHECK_SIZEOF([long long])
 # guarantees they are available.
 # plugin-api.h tests HAVE_STDINT_H and HAVE_INTTYPES_H
 # Besides those, we need to check anything used in binutils/ not in C99.
-AC_CHECK_HEADERS(fcntl.h inttypes.h stdint.h sys/file.h sys/param.h \
+AC_CHECK_HEADERS(fcntl.h inttypes.h stdint.h sys/file.h \
 		 sys/stat.h sys/types.h unistd.h)
 AC_HEADER_SYS_WAIT
 AC_FUNC_MMAP

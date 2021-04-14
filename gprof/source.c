@@ -97,14 +97,14 @@ annotate_source (Source_File *sf, unsigned int max_width,
   int i, line_num, nread;
   bool new_line;
   char buf[8192];
-  char fname[PATH_MAX];
+  char *fname;
   char *annotation, *name_only;
   FILE *ifp, *ofp;
   Search_List_Elem *sle = src_search_list.head;
 
   /* Open input file.  If open fails, walk along search-list until
      open succeeds or reaching end of list.  */
-  strcpy (fname, sf->name);
+  fname = (char *) sf->name;
 
   if (IS_ABSOLUTE_PATH (sf->name))
     sle = 0;			/* Don't use search list for absolute paths.  */
@@ -116,6 +116,8 @@ annotate_source (Source_File *sf, unsigned int max_width,
 			     sf->name, fname));
 
       ifp = fopen (fname, FOPEN_RB);
+      if (fname != sf->name)
+	free (fname);
       if (ifp)
 	break;
 
@@ -141,6 +143,8 @@ annotate_source (Source_File *sf, unsigned int max_width,
 
       if (sle)
 	{
+	  fname = xmalloc (strlen (sle->path) + 3
+			   + strlen (name_only ? name_only : sf->name));
 	  strcpy (fname, sle->path);
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
 	  /* d:foo is not the same thing as d:/foo!  */
@@ -191,6 +195,7 @@ annotate_source (Source_File *sf, unsigned int max_width,
       else
 	filename = sf->name;
 
+      fname = xmalloc (strlen (filename) + strlen (EXT_ANNO) + 1);
       strcpy (fname, filename);
       strcat (fname, EXT_ANNO);
 #ifdef __MSDOS__
@@ -205,9 +210,9 @@ annotate_source (Source_File *sf, unsigned int max_width,
 	  {
 	    char *dot = strrchr (fname, '.');
 
-	    if (dot)
-	      *dot = '\0';
-	    strcat (fname, ".ann");
+	    if (!dot)
+	      dot = fname + strlen (filename);
+	    strcpy (dot, ".ann");
 	  }
       }
 #endif
@@ -216,8 +221,10 @@ annotate_source (Source_File *sf, unsigned int max_width,
       if (!ofp)
 	{
 	  perror (fname);
+	  free (fname);
 	  return 0;
 	}
+      free (fname);
     }
 
   /* Print file names if output goes to stdout

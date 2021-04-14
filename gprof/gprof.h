@@ -54,10 +54,6 @@
 /* AIX defines hz as a macro.  */
 #undef hz
 
-#ifndef PATH_MAX
-#define PATH_MAX	1024
-#endif
-
 #define	A_OUTNAME	"a.out"		/* default core filename */
 #define	GMONNAME	"gmon.out"	/* default profile filename */
 #define	GMONSUM		"gmon.sum"	/* profile summary filename */

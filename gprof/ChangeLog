@@ -1,3 +1,13 @@
+2021-04-14  Alan Modra  <amodra@gmail.com>
+
+	PR 27716
+	* gprof.h (PATH_MAX): Don't define.
+	* corefile.c (core_create_line_syms): Don't use PATH_MAX for initial
+	file name size.
+	* source.c (annotate_source): Malloc file name buffer.  Always
+	trim off "-ann" when dos 8.3 annotate file matches original.
+	* utils.c (print_name_only): Malloc file name buffer.
+
 2021-04-05  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Check for sys/time.h and setitimer.  Don't invoke

@@ -292,7 +292,7 @@ typedef struct filedata
   bfd_vma *            gnuchains;
   bfd_vma *            mipsxlat;
   bfd_vma              gnusymidx;
-  char                 program_interpreter[PATH_MAX];
+  char *               program_interpreter;
   bfd_vma              dynamic_info[DT_ENCODING];
   bfd_vma              dynamic_info_DT_GNU_HASH;
   bfd_vma              dynamic_info_DT_MIPS_XHASH;
@@ -5538,22 +5538,21 @@ the .dynamic section is not the same as the dynamic segment\n"));
 	  break;
 
 	case PT_INTERP:
-	  if (fseek (filedata->handle,
-		     filedata->archive_file_offset + (long) segment->p_offset,
-		     SEEK_SET))
+	  if (segment->p_offset >= filedata->file_size
+	      || segment->p_filesz > filedata->file_size - segment->p_offset
+	      || segment->p_filesz - 1 >= (size_t) -2
+	      || fseek (filedata->handle,
+			filedata->archive_file_offset + (long) segment->p_offset,
+			SEEK_SET))
 	    error (_("Unable to find program interpreter name\n"));
 	  else
 	    {
-	      char fmt [32];
-	      int ret = snprintf (fmt, sizeof (fmt), "%%%ds", PATH_MAX - 1);
-
-	      if (ret >= (int) sizeof (fmt) || ret < 0)
-		error (_("Internal error: failed to create format string to display program interpreter\n"));
-
-	      filedata->program_interpreter[0] = 0;
-	      if (fscanf (filedata->handle, fmt,
-			  filedata->program_interpreter) <= 0)
-		error (_("Unable to read program interpreter name\n"));
+	      size_t len = segment->p_filesz;
+	      free (filedata->program_interpreter);
+	      filedata->program_interpreter = xmalloc (len + 1);
+	      len = fread (filedata->program_interpreter, 1, len,
+			   filedata->handle);
+	      filedata->program_interpreter[len] = 0;
 
 	      if (do_segments)
 		printf (_("      [Requesting program interpreter: %s]\n"),
@@ -11094,7 +11093,8 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		    case DT_NEEDED:
 		      printf (_("Shared library: [%s]"), name);
 
-		      if (streq (name, filedata->program_interpreter))
+		      if (filedata->program_interpreter
+			  && streq (name, filedata->program_interpreter))
 			printf (_(" program interpreter"));
 		      break;
 
@@ -21051,6 +21051,70 @@ get_file_header (Filedata * filedata)
 }
 
 static void
+free_filedata (Filedata *filedata)
+{
+  free (filedata->program_interpreter);
+  filedata->program_interpreter = NULL;
+
+  free (filedata->program_headers);
+  filedata->program_headers = NULL;
+
+  free (filedata->section_headers);
+  filedata->section_headers = NULL;
+
+  free (filedata->string_table);
+  filedata->string_table = NULL;
+  filedata->string_table_length = 0;
+
+  free (filedata->dump.dump_sects);
+  filedata->dump.dump_sects = NULL;
+  filedata->dump.num_dump_sects = 0;
+
+  free (filedata->dynamic_strings);
+  filedata->dynamic_strings = NULL;
+  filedata->dynamic_strings_length = 0;
+
+  free (filedata->dynamic_symbols);
+  filedata->dynamic_symbols = NULL;
+  filedata->num_dynamic_syms = 0;
+
+  free (filedata->dynamic_syminfo);
+  filedata->dynamic_syminfo = NULL;
+
+  free (filedata->dynamic_section);
+  filedata->dynamic_section = NULL;
+
+  while (filedata->symtab_shndx_list != NULL)
+    {
+      elf_section_list *next = filedata->symtab_shndx_list->next;
+      free (filedata->symtab_shndx_list);
+      filedata->symtab_shndx_list = next;
+    }
+
+  free (filedata->section_headers_groups);
+  filedata->section_headers_groups = NULL;
+
+  if (filedata->section_groups)
+    {
+      size_t i;
+      struct group_list * g;
+      struct group_list * next;
+
+      for (i = 0; i < filedata->group_count; i++)
+	{
+	  for (g = filedata->section_groups [i].root; g != NULL; g = next)
+	    {
+	      next = g->next;
+	      free (g);
+	    }
+	}
+
+      free (filedata->section_groups);
+      filedata->section_groups = NULL;
+    }
+}
+
+static void
 close_file (Filedata * filedata)
 {
   if (filedata)
@@ -21064,6 +21128,7 @@ close_file (Filedata * filedata)
 void
 close_debug_file (void * data)
 {
+  free_filedata ((Filedata *) data);
   close_file ((Filedata *) data);
 }
 
@@ -21277,61 +21342,7 @@ process_object (Filedata * filedata)
   if (! process_arch_specific (filedata))
     res = false;
 
-  free (filedata->program_headers);
-  filedata->program_headers = NULL;
-
-  free (filedata->section_headers);
-  filedata->section_headers = NULL;
-
-  free (filedata->string_table);
-  filedata->string_table = NULL;
-  filedata->string_table_length = 0;
-
-  free (filedata->dump.dump_sects);
-  filedata->dump.dump_sects = NULL;
-  filedata->dump.num_dump_sects = 0;
-
-  free (filedata->dynamic_strings);
-  filedata->dynamic_strings = NULL;
-  filedata->dynamic_strings_length = 0;
-
-  free (filedata->dynamic_symbols);
-  filedata->dynamic_symbols = NULL;
-  filedata->num_dynamic_syms = 0;
-
-  free (filedata->dynamic_syminfo);
-  filedata->dynamic_syminfo = NULL;
-
-  free (filedata->dynamic_section);
-  filedata->dynamic_section = NULL;
-
-  while (filedata->symtab_shndx_list != NULL)
-    {
-      elf_section_list *next = filedata->symtab_shndx_list->next;
-      free (filedata->symtab_shndx_list);
-      filedata->symtab_shndx_list = next;
-    }
-
-  free (filedata->section_headers_groups);
-  filedata->section_headers_groups = NULL;
-
-  if (filedata->section_groups)
-    {
-      struct group_list * g;
-      struct group_list * next;
-
-      for (i = 0; i < filedata->group_count; i++)
-	{
-	  for (g = filedata->section_groups [i].root; g != NULL; g = next)
-	    {
-	      next = g->next;
-	      free (g);
-	    }
-	}
-
-      free (filedata->section_groups);
-      filedata->section_groups = NULL;
-    }
+  free_filedata (filedata);
 
   free_debug_memory ();
 

@@ -1,3 +1,21 @@
+2021-04-14  Alan Modra  <amodra@gmail.com>
+
+	PR 27716
+	* objdump.c (show_line): Don't limit paths to PATH_MAX.
+	* readelf.c (struct filedata): Change program_interpreter from
+	a char array to a char pointer.
+	(process_program_headers): Sanity check PT_INTERP p_filesz.
+	Malloc program_interpreter using p_filesz and read directly from
+	file.
+	(process_dynamic_section): Check program_interpreter is non-NULL.
+	(free_filedata): New function, split out from..
+	(process_object): ..here.
+	(close_debug_file): Call free_filedata.
+	* sysdep.h: Don't include sys/param.h.
+	(PATH_MAX): Don't define.
+	* configure.ac: Don't check for sys/param.h.
+	* configure: Regenerate.
+
 2021-04-13  Frederic Cambus  <fred@statdns.com>
 
 	* readelf.c (process_netbsd_elf_note): Remove now unneeded #ifdef

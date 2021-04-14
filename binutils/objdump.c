@@ -1739,7 +1739,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
       char *path_up;
       const char *fname = filename;
 
-      path = xmalloc (prefix_length + PATH_MAX + 1);
+      path = xmalloc (prefix_length + 1 + strlen (filename));
 
       if (prefix_length)
 	memcpy (path, prefix, prefix_length);
@@ -1762,8 +1762,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	}
 
       /* Update complete filename.  */
-      strncpy (path_up, fname, PATH_MAX);
-      path_up[PATH_MAX] = '\0';
+      strcpy (path_up, fname);
 
       filename = path;
       reloc = true;
