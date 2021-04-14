@@ -1,3 +1,10 @@
+2021-04-15  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR27584
+	* elfnn-riscv.c (riscv_elf_is_target_special_symbol): Added to
+	omit local and empty symbols since they usually generated to
+	mark the auipc instructions.
+
 2021-04-15  Lifang Xia<lifang_xia@c-sky.com>
 
 	* elf32-csky.c (csky_elf_howto_table)

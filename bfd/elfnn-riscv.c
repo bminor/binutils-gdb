@@ -5094,6 +5094,16 @@ riscv_elf_obj_attrs_arg_type (int tag)
   return (tag & 1) != 0 ? ATTR_TYPE_FLAG_STR_VAL : ATTR_TYPE_FLAG_INT_VAL;
 }
 
+/* PR27584, Omit local and empty symbols since they usually generated
+   for pcrel relocations.  */
+
+static bool
+riscv_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
+{
+  return (!strcmp (sym->name, "")
+	  || _bfd_elf_is_local_label_name (abfd, sym->name));
+}
+
 #define TARGET_LITTLE_SYM			riscv_elfNN_vec
 #define TARGET_LITTLE_NAME			"elfNN-littleriscv"
 #define TARGET_BIG_SYM				riscv_elfNN_be_vec
@@ -5106,6 +5116,7 @@ riscv_elf_obj_attrs_arg_type (int tag)
 #define bfd_elfNN_bfd_reloc_type_lookup		riscv_reloc_type_lookup
 #define bfd_elfNN_bfd_merge_private_bfd_data \
   _bfd_riscv_elf_merge_private_bfd_data
+#define bfd_elfNN_bfd_is_target_special_symbol	riscv_elf_is_target_special_symbol
 
 #define elf_backend_copy_indirect_symbol	riscv_elf_copy_indirect_symbol
 #define elf_backend_create_dynamic_sections	riscv_elf_create_dynamic_sections
