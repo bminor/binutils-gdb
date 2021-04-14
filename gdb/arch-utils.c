@@ -279,7 +279,13 @@ default_floatformat_for_type (struct gdbarch *gdbarch,
 {
   const struct floatformat **format = NULL;
 
-  if (len == gdbarch_half_bit (gdbarch))
+  /* Check if this is a bfloat16 type.  It has the same size as the
+     IEEE half float type, so we use the base type name to tell them
+     apart.  */
+  if (name != nullptr && strcmp (name, "__bf16") == 0
+      && len == gdbarch_bfloat16_bit (gdbarch))
+    format = gdbarch_bfloat16_format (gdbarch);
+  else if (len == gdbarch_half_bit (gdbarch))
     format = gdbarch_half_format (gdbarch);
   else if (len == gdbarch_float_bit (gdbarch))
     format = gdbarch_float_format (gdbarch);
