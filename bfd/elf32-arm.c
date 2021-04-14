@@ -1952,6 +1952,30 @@ elf32_arm_nabi_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	size = 72;
 
 	break;
+
+      case 156:		/* Linux/ARM 32-bit, FDPIC ABI.  */
+	/* pr_cursig */
+	elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+
+	/* pr_pid */
+	elf_tdata (abfd)->core_lwpid = bfd_get_32 (abfd, note->descdata + 24);
+
+	/* pr_reg */
+	offset = 72;
+	size = 72;
+
+	/* Create pseudo sections that embed loadmap addresses.  */
+	if (!_bfd_elfcore_make_pseudosection (abfd,
+					      ".pr_exec_fdpic_loadmap_addr", 4,
+					      note->descpos + offset + size))
+	  return FALSE;
+
+	if (!_bfd_elfcore_make_pseudosection (abfd,
+					      ".pr_interp_fdpic_loadmap_addr", 4,
+					      note->descpos + offset + size + 4))
+	  return FALSE;
+
+	break;
     }
 
   /* Make a ".reg/999" section.  */
