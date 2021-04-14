@@ -1221,11 +1221,9 @@ windows_nat::handle_load_dll ()
 
   dll_name = get_image_name (current_process_handle,
 			     event->lpImageName, event->fUnicode);
-#ifndef _WIN32_WCE
   if (dll_name == nullptr
       && event->lpBaseOfDll != nullptr)
     dll_name = win32_add_dll (event->lpBaseOfDll);
-#endif
   if (dll_name == nullptr)
     return;
 

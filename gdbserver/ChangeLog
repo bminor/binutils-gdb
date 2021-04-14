@@ -1,3 +1,8 @@
+2021-04-14  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.cc (windows_nat::handle_load_dll): Don't check
+	_WIN32_WCE.
+
 2021-04-13  Pedro Alves  <pedro@palves.net>
 
 	* gdbreplay.c [__MINGW32CE__] (COUNTOF, errno, strerror): Remove.
