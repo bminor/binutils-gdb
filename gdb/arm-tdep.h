@@ -170,6 +170,7 @@ struct gdbarch_tdep
   int have_neon;		/* Do we have a NEON unit?  */
 
   int is_m;			/* Does the target follow the "M" profile.  */
+  int is_fdpic;			/* Is the loaded binary a FDPIC one.  */
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */
 
@@ -354,5 +355,9 @@ extern struct target_desc *tdesc_arm_with_iwmmxt;
 extern struct target_desc *tdesc_arm_with_vfpv2;
 extern struct target_desc *tdesc_arm_with_vfpv3;
 extern struct target_desc *tdesc_arm_with_neon;
+
+/* FDPIC structure and api.  */
+extern struct target_so_ops fdpic_so_ops;
+extern CORE_ADDR fdpic_fetch_objfile_link_map (struct objfile *objfile);
 
 #endif /* arm-tdep.h */

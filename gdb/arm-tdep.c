@@ -9726,6 +9726,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum arm_float_model fp_model = arm_fp_model;
   struct tdesc_arch_data *tdesc_data = NULL;
   int i, is_m = 0;
+  int is_fdpic = 0;
   int have_vfp_registers = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
   int have_neon = 0;
   int have_fpa_registers = 1;
@@ -9777,6 +9778,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		case EF_ARM_EABI_VER4:
 		case EF_ARM_EABI_VER5:
 		  arm_abi = ARM_ABI_AAPCS;
+
+		  if (e_flags & EF_ARM_FDPIC)
+		    is_fdpic = 1;
+
 		  /* EABI binaries default to VFP float ordering.
 		     They may also contain build attributes that can
 		     be used to identify if the VFP argument-passing
@@ -10093,6 +10098,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->arm_abi = arm_abi;
   tdep->fp_model = fp_model;
   tdep->is_m = is_m;
+  tdep->is_fdpic = is_fdpic;
   tdep->have_fpa_registers = have_fpa_registers;
   tdep->have_vfp_registers = have_vfp_registers;
   tdep->have_vfp_pseudos = have_vfp_pseudos;
