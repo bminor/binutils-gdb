@@ -53,7 +53,7 @@ struct buffer;
 
 #endif /* PTRACE_EVENT_FORK */
 
-#if (defined __bfin__ || defined __frv__ || defined __sh__) \
+#if (defined __bfin__ || defined __frv__ || defined __sh__ || defined __arm__) \
     && !defined PTRACE_GETFDPIC
 #define PTRACE_GETFDPIC		31
 #define PTRACE_GETFDPIC_EXEC	0

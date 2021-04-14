@@ -42,7 +42,7 @@ srv_amd64_linux_xmlfiles="i386/amd64-linux.xml i386/amd64-avx-linux.xml i386/64b
 # Input is taken from the "${target}" variable.
 
 case "${target}" in
-  arm*-*-linux*)	srv_regobj="reg-arm.o arm-with-iwmmxt.o"
+  arm*-*-linux*|arm*-*-uclinuxfdpiceabi)	srv_regobj="reg-arm.o arm-with-iwmmxt.o"
 			srv_regobj="${srv_regobj} arm-with-vfpv2.o"
 			srv_regobj="${srv_regobj} arm-with-vfpv3.o"
 			srv_regobj="${srv_regobj} arm-with-neon.o"
