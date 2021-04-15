@@ -78,7 +78,8 @@ gdb_test "show data-directory" \
     "check modified data-directory at the CLI"
 
 # Now lets set the data-directory back to what it was initially.
-gdb_test_no_output "set data-directory ${dd}"
+gdb_test_no_output "set data-directory ${dd}" \
+    "set data-directory back to its original value"
 
 # And check we see the restored value at CLI and from Python.
 gdb_test "show data-directory" \

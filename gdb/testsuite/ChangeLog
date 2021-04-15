@@ -1,3 +1,8 @@
+2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-parameter.exp: Give a test a proper name to avoid
+	including a path in the test name.
+
 2021-04-15  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.threads/fork-plus-threads.exp: Use foreach_with_prefix.
