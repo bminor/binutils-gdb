@@ -227,17 +227,16 @@ CONFIG_CFLAGS = \
 	$(SIM_SCACHE) \
 	$(SIM_WARN_CFLAGS) \
 	$(SIM_WERROR_CFLAGS) \
-	$(SIM_HARDWARE) \
-	$(SIM_EXTRA_CFLAGS)
+	$(SIM_HARDWARE)
 CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
   -I../../include -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
   -I../../opcodes -I$(srcroot)/opcodes \
   @INCINTL@
-ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(CFLAGS)
+ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(SIM_EXTRA_CFLAGS) $(CFLAGS)
 BUILD_CFLAGS = $(CFLAGS_FOR_BUILD) $(CSEARCH)
 
-COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH)
+COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(SIM_EXTRA_CFLAGS)
 
 ZLIB = @zlibdir@ -lz
 LIBIBERTY_LIB = ../../libiberty/libiberty.a

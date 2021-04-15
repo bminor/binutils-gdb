@@ -1,3 +1,9 @@
+2021-04-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* Make-common.in (CONFIG_CFLAGS): Remove SIM_EXTRA_CFLAGS.
+	(ALL_CLAGS, COMMON_DEP_CFLAGS): Add SIM_EXTRA_CFLAGS after
+	CSEARCH.
+
 2021-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-cpu.c (sim_cpu_alloc_all): Delete 3rd arg.  Delete 2nd arg to
