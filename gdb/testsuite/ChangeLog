@@ -1,3 +1,7 @@
+2021-04-27  Luis Machado  <luis.machado@arm.com>
+
+	* gdb.dwarf2/dw2-capability.exp: Remove file.
+
 2021-01-15  Luis Machado  <luis.machado@arm.com>
 
 	* gdb.base/options.exp: Add -compact-capabilities option.
