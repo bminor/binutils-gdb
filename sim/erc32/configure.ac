@@ -39,9 +39,12 @@ AC_SUBST(TERMCAP)
 # src/readline (if it's there) is configured before src/sim.
 if test -r ../../readline/Makefile; then
   READLINE=../../readline/readline/libreadline.a
+  READLINE_CFLAGS='-I$(READLINE_SRC)/..'
 else
   AC_CHECK_LIB(readline, readline, READLINE=-lreadline,
 	       AC_ERROR([the required "readline" library is missing]), $TERMCAP)
+  READLINE_CFLAGS=
 fi
 AC_SUBST(READLINE)
+AC_SUBST(READLINE_CFLAGS)
 SIM_AC_OUTPUT

@@ -1,3 +1,10 @@
+2021-04-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in (READLINE_SRC, READLINE_CFLAGS): Add.
+	(SIM_EXTRA_CFLAGS): Add READLINE_CFLAGS.
+	* configure: Rebuild.
+	* configure.ac (READLINE_CFLAGS): Add.
+
 2021-04-08  Tom Tromey  <tom@tromey.com>
 
 	* func.c: Include sys/time.h.
