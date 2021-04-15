@@ -503,6 +503,8 @@ struct psymbol_functions : public quick_symbol_functions
 
   bool has_symbols (struct objfile *objfile) override;
 
+  bool has_unexpanded_symtabs (struct objfile *objfile) override;
+
   struct symtab *find_last_source_symtab (struct objfile *objfile) override;
 
   void forget_cached_source_info (struct objfile *objfile) override;

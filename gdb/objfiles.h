@@ -565,6 +565,12 @@ public:
 
   bool has_partial_symbols ();
 
+  /* Return true if this objfile has any unexpanded symbols.  A return
+     value of false indicates either, that this objfile has all its
+     symbols fully expanded (i.e. fully read in), or that this objfile has
+     no symbols at all (i.e. no debug information).  */
+  bool has_unexpanded_symtabs ();
+
   /* See quick_symbol_functions.  */
   struct symtab *find_last_source_symtab ();
 

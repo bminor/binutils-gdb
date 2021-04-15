@@ -2024,6 +2024,8 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
 {
   bool has_symbols (struct objfile *objfile) override;
 
+  bool has_unexpanded_symtabs (struct objfile *objfile) override;
+
   struct symtab *find_last_source_symtab (struct objfile *objfile) override;
 
   void forget_cached_source_info (struct objfile *objfile) override;
@@ -4468,6 +4470,26 @@ bool
 dwarf2_base_index_functions::has_symbols (struct objfile *objfile)
 {
   return true;
+}
+
+/* See quick_symbol_functions::has_unexpanded_symtabs in quick-symbol.h.  */
+
+bool
+dwarf2_base_index_functions::has_unexpanded_symtabs (struct objfile *objfile)
+{
+  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+
+  for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
+    {
+      /* Is this already expanded?  */
+      if (per_objfile->symtab_set_p (per_cu.get ()))
+	continue;
+
+      /* It has not yet been expanded.  */
+      return true;
+    }
+
+  return false;
 }
 
 /* DWARF-5 debug_names reader.  */

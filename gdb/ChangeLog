@@ -1,5 +1,21 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2/read.c (struct dwarf2_base_index_functions)
+	<has_unexpanded_symtabs>: Declare.
+	(dwarf2_base_index_functions::has_unexpanded_symtabs): Define new
+	function.
+	* objfiles.h (struct objfile) <has_unexpanded_symtabs>: Declare.
+	* psympriv.h (struct psymbol_functions) <has_unexpanded_symtabs>:
+	Declare.
+	* psymtab.c (psymbol_functions::has_unexpanded_symtabs): Define
+	new function.
+	* quick-symbol.h (struct quick_symbol_functions)
+	<has_unexpanded_symtabs>: Declare.
+	* symfile-debug.c (objfile::has_unexpanded_symtabs): Define new
+	function.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* infcall.c (call_function_by_hand_dummy): Add missing 'else' when
 	setting prototyped flag.
 

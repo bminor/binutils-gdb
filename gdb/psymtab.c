@@ -1184,6 +1184,24 @@ psymbol_functions::has_symbols (struct objfile *objfile)
   return m_partial_symtabs->psymtabs != NULL;
 }
 
+/* See quick_symbol_functions::has_unexpanded_symtabs in quick-symbol.h.  */
+
+bool
+psymbol_functions::has_unexpanded_symtabs (struct objfile *objfile)
+{
+  for (partial_symtab *psymtab : require_partial_symbols (objfile))
+    {
+      /* Is this already expanded?  */
+      if (psymtab->readin_p (objfile))
+	continue;
+
+      /* It has not yet been expanded.  */
+      return true;
+    }
+
+  return false;
+}
+
 /* Helper function for psym_find_compunit_symtab_by_address that fills
    in m_psymbol_map for a given range of psymbols.  */
 

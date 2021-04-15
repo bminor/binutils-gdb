@@ -100,6 +100,31 @@ objfile::has_partial_symbols ()
   return retval;
 }
 
+/* See objfiles.h.  */
+bool
+objfile::has_unexpanded_symtabs ()
+{
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->has_unexpanded_symtabs (%s)\n",
+		      objfile_debug_name (this));
+
+  bool result = false;
+  for (const auto &iter : qf)
+    {
+      if (iter->has_unexpanded_symtabs (this))
+	{
+	  result = true;
+	  break;
+	}
+    }
+
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->has_unexpanded_symtabs (%s) = %d\n",
+		      objfile_debug_name (this), (result ? 1 : 0));
+
+  return result;
+}
+
 struct symtab *
 objfile::find_last_source_symtab ()
 {
