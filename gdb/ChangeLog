@@ -1,5 +1,10 @@
 2021-04-15  Tom Tromey  <tromey@adacore.com>
 
+	* ada-valprint.c (ada_value_print_array): Handle optimized-out
+	arrays.
+
+2021-04-15  Tom Tromey  <tromey@adacore.com>
+
 	* printcmd.c (print_variable_and_value): Use
 	common_val_print_checked.
 

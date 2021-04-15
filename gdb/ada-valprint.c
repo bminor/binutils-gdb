@@ -897,7 +897,10 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
 
   fprintf_filtered (stream, "(");
   print_optional_low_bound (stream, type, options);
-  if (TYPE_FIELD_BITSIZE (type, 0) > 0)
+
+  if (value_entirely_optimized_out (val))
+    val_print_optimized_out (val, stream);
+  else if (TYPE_FIELD_BITSIZE (type, 0) > 0)
     {
       const gdb_byte *valaddr = value_contents_for_printing (val);
       int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
