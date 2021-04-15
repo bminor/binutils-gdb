@@ -5,7 +5,7 @@
 	andi a2,a2,0
 	c.andi a3,0
 	addi x0,x0,0
-	# Don't let this compress to a hint.
+	# compress to c.mv.
 	addi a4,a4,0
 	# These are hints.
 	c.addi a5,0
