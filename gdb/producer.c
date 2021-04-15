@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "producer.h"
 #include "gdbsupport/selftest.h"
-#include <regex>
+#include "gdb_regex.h"
 
 /* See producer.h.  */
 
@@ -91,9 +91,8 @@ producer_is_icc_ge_19 (const char *producer)
 bool
 producer_is_icc (const char *producer, int *major, int *minor)
 {
-  std::regex i_re ("Intel\\(R\\)");
-  std::cmatch i_m;
-  if ((producer == nullptr) || !std::regex_search (producer, i_m, i_re))
+  compiled_regex i_re ("Intel(R)", 0, "producer_is_icc");
+  if (producer == nullptr || i_re.exec (producer, 0, nullptr, 0) != 0)
     return false;
 
   /* Prepare the used fields.  */
@@ -106,12 +105,13 @@ producer_is_icc (const char *producer, int *major, int *minor)
   *minor = 0;
   *major = 0;
 
-  std::regex re ("[0-9]+\\.[0-9]+");
-  std::cmatch version;
-
-  if (std::regex_search (producer, version, re))
+  compiled_regex re ("[0-9]+\\.[0-9]+", REG_EXTENDED, "producer_is_icc");
+  regmatch_t version[1];
+  if (re.exec (producer, ARRAY_SIZE (version), version, 0) == 0
+      && version[0].rm_so != -1)
     {
-      sscanf (version.str ().c_str (), "%d.%d", major, minor);
+      const char *version_str = producer + version[0].rm_so;
+      sscanf (version_str, "%d.%d", major, minor);
       return true;
     }
 

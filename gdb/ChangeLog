@@ -1,3 +1,9 @@
+2021-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* producer.c: Replace 'regex' include with 'gdb_regex.h'.
+	(producer_is_icc): Replace use of std::regex with gdb's
+	compiled_regex.
+
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/23743:
