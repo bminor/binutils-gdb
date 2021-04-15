@@ -1,3 +1,12 @@
+2021-04-21  Carl Love  <cel@us.ibm.com>
+
+	* gdb.base/valgrind-bt.exp: Add gdb_test "break main".
+	Update expected string for gdb_test "bt".
+
+	* lib/valgrind.exp: Add set remotetimeout 3.
+	Increase vgdb wait from 1 to 2.
+	Add max-invoke-ms option to vgdb command line.
+
 2021-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.mi/mi-break.exp: Extend with checks for invalid breakpoint

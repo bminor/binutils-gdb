@@ -31,6 +31,8 @@ if { [vgdb_start] == -1 } {
 
 set double_free [gdb_get_line_number "double-free"]
 
+gdb_breakpoint "main"
+
 set test "continue"
 gdb_test_multiple "continue" $test {
     -re "Invalid free\\(\\).*: main \\(${srcfile}:$double_free\\)\r\n.*$gdb_prompt $" {
@@ -57,7 +59,7 @@ gdb_test_multiple "continue" $test {
 gdb_test_no_output "set height 0"
 gdb_test_no_output "set width 0"
 
-gdb_test "bt" "in main \\(.*\\) at .*${srcfile}:$double_free"
+gdb_test "bt" "#\[0-9 ]+main \\(.*\\) at .*${srcfile}.*"
 
 # Explicitly kill the program so it doesn't dump core when we quit->detach.
 gdb_test "kill" "" "kill program" "Kill the program being debugged.*y or n. $" "y"
