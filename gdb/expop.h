@@ -221,7 +221,7 @@ check_objfile (struct objfile *exp_objfile, struct objfile *objfile)
   return exp_objfile == objfile;
 }
 
-static inline bool 
+static inline bool
 check_objfile (struct type *type, struct objfile *objfile)
 {
   struct objfile *ty_objfile = type->objfile_owner ();
@@ -230,16 +230,23 @@ check_objfile (struct type *type, struct objfile *objfile)
   return false;
 }
 
-static inline bool 
+static inline bool
 check_objfile (struct symbol *sym, struct objfile *objfile)
 {
   return check_objfile (symbol_objfile (sym), objfile);
 }
 
-static inline bool 
+static inline bool
 check_objfile (const struct block *block, struct objfile *objfile)
 {
   return check_objfile (block_objfile (block), objfile);
+}
+
+static inline bool
+check_objfile (const block_symbol &sym, struct objfile *objfile)
+{
+  return (check_objfile (sym.symbol, objfile)
+	  || check_objfile (sym.block, objfile));
 }
 
 static inline bool
@@ -260,7 +267,7 @@ check_objfile (const std::string &str, struct objfile *objfile)
   return false;
 }
 
-static inline bool 
+static inline bool
 check_objfile (const operation_up &op, struct objfile *objfile)
 {
   return op->uses_objfile (objfile);
@@ -286,7 +293,7 @@ check_objfile (enum_flags<T> val, struct objfile *objfile)
 }
 
 template<typename T>
-static inline bool 
+static inline bool
 check_objfile (const std::vector<T> &collection, struct objfile *objfile)
 {
   for (const auto &item : collection)
@@ -298,7 +305,7 @@ check_objfile (const std::vector<T> &collection, struct objfile *objfile)
 }
 
 template<typename S, typename T>
-static inline bool 
+static inline bool
 check_objfile (const std::pair<S, T> &item, struct objfile *objfile)
 {
   return (check_objfile (item.first, objfile)
@@ -327,6 +334,8 @@ extern void dump_for_expression (struct ui_file *stream, int depth,
 				 internalvar *ivar);
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 symbol *sym);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 const block_symbol &sym);
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 bound_minimal_symbol msym);
 extern void dump_for_expression (struct ui_file *stream, int depth,
@@ -480,6 +489,14 @@ check_constant (struct symbol *sym)
 	  || sc == LOC_LABEL);
 }
 
+static inline bool
+check_constant (const block_symbol &sym)
+{
+  /* We know the block is constant, so we only need to check the
+     symbol.  */
+  return check_constant (sym.symbol);
+}
+
 template<typename T>
 static inline bool
 check_constant (const std::vector<T> &collection)
@@ -612,7 +629,7 @@ protected:
 
 /* Compute the value of a variable.  */
 class var_value_operation
-  : public maybe_constant_operation<symbol *, const block *>
+  : public maybe_constant_operation<block_symbol>
 {
 public:
 
@@ -646,7 +663,7 @@ public:
   /* Return the symbol referenced by this object.  */
   symbol *get_symbol () const
   {
-    return std::get<0> (m_storage);
+    return std::get<0> (m_storage).symbol;
   }
 
 protected:

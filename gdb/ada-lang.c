@@ -10248,8 +10248,8 @@ ada_var_value_operation::evaluate_for_cast (struct type *expect_type,
 					    enum noside noside)
 {
   value *val = evaluate_var_value (noside,
-				   std::get<1> (m_storage),
-				   std::get<0> (m_storage));
+				   std::get<0> (m_storage).block,
+				   std::get<0> (m_storage).symbol);
 
   val = ada_value_cast (expect_type, val);
 
@@ -10269,7 +10269,7 @@ ada_var_value_operation::evaluate (struct type *expect_type,
 				   struct expression *exp,
 				   enum noside noside)
 {
-  symbol *sym = std::get<0> (m_storage);
+  symbol *sym = std::get<0> (m_storage).symbol;
 
   if (SYMBOL_DOMAIN (sym) == UNDEF_DOMAIN)
     /* Only encountered when an unresolved symbol occurs in a
@@ -10360,19 +10360,19 @@ ada_var_value_operation::resolve (struct expression *exp,
 				  innermost_block_tracker *tracker,
 				  struct type *context_type)
 {
-  symbol *sym = std::get<0> (m_storage);
+  symbol *sym = std::get<0> (m_storage).symbol;
   if (SYMBOL_DOMAIN (sym) == UNDEF_DOMAIN)
     {
       block_symbol resolved
-	= ada_resolve_variable (sym, std::get<1> (m_storage),
+	= ada_resolve_variable (sym, std::get<0> (m_storage).block,
 				context_type, parse_completion,
 				deprocedure_p, tracker);
-      std::get<0> (m_storage) = resolved.symbol;
-      std::get<1> (m_storage) = resolved.block;
+      std::get<0> (m_storage) = resolved;
     }
 
   if (deprocedure_p
-      && SYMBOL_TYPE (std::get<0> (m_storage))->code () == TYPE_CODE_FUNC)
+      && (SYMBOL_TYPE (std::get<0> (m_storage).symbol)->code ()
+	  == TYPE_CODE_FUNC))
     return true;
 
   return false;
@@ -10694,8 +10694,7 @@ ada_funcall_operation::resolve (struct expression *exp,
 			   tracker);
 
   std::get<0> (m_storage)
-    = make_operation<ada_var_value_operation> (resolved.symbol,
-					       resolved.block);
+    = make_operation<ada_var_value_operation> (resolved);
   return false;
 }
 

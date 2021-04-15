@@ -651,8 +651,7 @@ variable:	block COLONCOLON name
 			    error (_("No symbol \"%s\" in specified context."),
 				   copy.c_str ());
 
-			  pstate->push_new<var_value_operation>
-			    (sym.symbol, sym.block);
+			  pstate->push_new<var_value_operation> (sym);
 			}
 	;
 
@@ -690,8 +689,7 @@ variable:	name_not_typename
 			      if (symbol_read_needs_frame (sym.symbol))
 				pstate->block_tracker->update (sym);
 
-			      pstate->push_new<var_value_operation>
-				(sym.symbol, sym.block);
+			      pstate->push_new<var_value_operation> (sym);
 			      current_type = sym.symbol->type; }
 			  else if ($1.is_a_field_of_this)
 			    {

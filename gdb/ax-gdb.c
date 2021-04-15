@@ -1980,16 +1980,16 @@ var_value_operation::do_generate_ax (struct expression *exp,
 				     struct axs_value *value,
 				     struct type *cast_type)
 {
-  gen_var_ref (ax, value, std::get<0> (m_storage));
+  gen_var_ref (ax, value, std::get<0> (m_storage).symbol);
 
   if (value->optimized_out)
     error (_("`%s' has been optimized out, cannot use"),
-	   std::get<0> (m_storage)->print_name ());
+	   std::get<0> (m_storage).symbol->print_name ());
 
   if (value->type->code () == TYPE_CODE_ERROR)
     {
       if (cast_type == nullptr)
-	error_unknown_type (std::get<0> (m_storage)->print_name ());
+	error_unknown_type (std::get<0> (m_storage).symbol->print_name ());
       value->type = cast_type;
     }
 }

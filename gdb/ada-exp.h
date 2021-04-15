@@ -1,6 +1,6 @@
 /* Definitions for Ada expressions
 
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020, 2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -352,7 +352,7 @@ public:
 			    enum noside noside) override;
 
   const block *get_block () const
-  { return std::get<1> (m_storage); }
+  { return std::get<0> (m_storage).block; }
 
   bool resolve (struct expression *exp,
 		bool deprocedure_p,

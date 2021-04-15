@@ -1125,8 +1125,7 @@ variable:	block COLONCOLON name
 			  if (symbol_read_needs_frame (sym.symbol))
 			    pstate->block_tracker->update (sym);
 
-			  pstate->push_new<var_value_operation> (sym.symbol,
-								 sym.block);
+			  pstate->push_new<var_value_operation> (sym);
 			}
 	;
 
@@ -1197,8 +1196,7 @@ variable:	name_not_typename
 				pstate->push_new<var_msym_value_operation>
 				  (resolver);
 			      else
-				pstate->push_new<var_value_operation>
-				  (sym.symbol, sym.block);
+				pstate->push_new<var_value_operation> (sym);
 			    }
 			  else if ($1.is_a_field_of_this)
 			    {
@@ -1239,8 +1237,11 @@ variable:	name_not_typename
 				   ? find_function_alias_target (msymbol)
 				   : NULL);
 			      if (alias_target != NULL)
-				pstate->push_new<var_value_operation>
-				  (alias_target, SYMBOL_BLOCK_VALUE (alias_target));
+				{
+				  block_symbol bsym { alias_target,
+				    SYMBOL_BLOCK_VALUE (alias_target) };
+				  pstate->push_new<var_value_operation> (bsym);
+				}
 			      else
 				pstate->push_new<var_msym_value_operation>
 				  (msymbol);

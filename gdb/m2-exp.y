@@ -517,8 +517,8 @@ fblock	:	block COLONCOLON BLOCKNAME
 /* Useful for assigning to PROCEDURE variables */
 variable:	fblock
 			{
-			  pstate->push_new<var_value_operation>
-			    ($1, nullptr);
+			  block_symbol sym { $1, nullptr };
+			  pstate->push_new<var_value_operation> (sym);
 			}
 	;
 
@@ -539,8 +539,7 @@ variable:	block COLONCOLON NAME
 			  if (symbol_read_needs_frame (sym.symbol))
 			    pstate->block_tracker->update (sym);
 
-			  pstate->push_new<var_value_operation>
-			    (sym.symbol, sym.block);
+			  pstate->push_new<var_value_operation> (sym);
 			}
 	;
 

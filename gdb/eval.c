@@ -579,10 +579,10 @@ var_value_operation::evaluate (struct type *expect_type,
 			       struct expression *exp,
 			       enum noside noside)
 {
-  symbol *var = std::get<0> (m_storage);
+  symbol *var = std::get<0> (m_storage).symbol;
   if (SYMBOL_TYPE (var)->code () == TYPE_CODE_ERROR)
     error_unknown_type (var->print_name ());
-  return evaluate_var_value (noside, std::get<1> (m_storage), var);
+  return evaluate_var_value (noside, std::get<0> (m_storage).block, var);
 }
 
 } /* namespace expr */
@@ -719,12 +719,13 @@ var_value_operation::evaluate_funcall (struct type *expect_type,
 
   struct symbol *symp;
   find_overload_match (argvec, NULL, NON_METHOD,
-		       NULL, std::get<0> (m_storage),
+		       NULL, std::get<0> (m_storage).symbol,
 		       NULL, &symp, NULL, 0, noside);
 
   if (SYMBOL_TYPE (symp)->code () == TYPE_CODE_ERROR)
     error_unknown_type (symp->print_name ());
-  value *callee = evaluate_var_value (noside, std::get<1> (m_storage), symp);
+  value *callee = evaluate_var_value (noside, std::get<0> (m_storage).block,
+				      symp);
 
   return evaluate_subexp_do_call (exp, noside, callee, argvec,
 				  nullptr, expect_type);
@@ -2573,7 +2574,7 @@ value *
 var_value_operation::evaluate_for_address (struct expression *exp,
 					   enum noside noside)
 {
-  symbol *var = std::get<0> (m_storage);
+  symbol *var = std::get<0> (m_storage).symbol;
 
   /* C++: The "address" of a reference should yield the address
    * of the object pointed to.  Let value_addr() deal with it.  */
@@ -2593,20 +2594,21 @@ var_value_operation::evaluate_for_address (struct expression *exp,
       return value_zero (type, not_lval);
     }
   else
-    return address_of_variable (var, std::get<1> (m_storage));
+    return address_of_variable (var, std::get<0> (m_storage).block);
 }
 
 value *
 var_value_operation::evaluate_with_coercion (struct expression *exp,
 					     enum noside noside)
 {
-  struct symbol *var = std::get<0> (m_storage);
+  struct symbol *var = std::get<0> (m_storage).symbol;
   struct type *type = check_typedef (SYMBOL_TYPE (var));
   if (type->code () == TYPE_CODE_ARRAY
       && !type->is_vector ()
       && CAST_IS_CONVERSION (exp->language_defn))
     {
-      struct value *val = address_of_variable (var, std::get<1> (m_storage));
+      struct value *val = address_of_variable (var,
+					       std::get<0> (m_storage).block);
       return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)), val);
     }
   return evaluate (nullptr, exp, noside);
@@ -2730,7 +2732,7 @@ value *
 var_value_operation::evaluate_for_sizeof (struct expression *exp,
 					  enum noside noside)
 {
-  struct type *type = SYMBOL_TYPE (std::get<0> (m_storage));
+  struct type *type = SYMBOL_TYPE (std::get<0> (m_storage).symbol);
   if (is_dynamic_type (type))
     {
       value *val = evaluate (nullptr, exp, EVAL_NORMAL);
@@ -2778,8 +2780,8 @@ var_value_operation::evaluate_for_cast (struct type *to_type,
 					enum noside noside)
 {
   value *val = evaluate_var_value (noside,
-				   std::get<1> (m_storage),
-				   std::get<0> (m_storage));
+				   std::get<0> (m_storage).block,
+				   std::get<0> (m_storage).symbol);
 
   val = value_cast (to_type, val);
 

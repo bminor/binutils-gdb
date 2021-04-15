@@ -2429,7 +2429,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 			     VAR_DOMAIN);
 	operation_up result;
 	if (sym.symbol != NULL && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
-	  result.reset (new var_value_operation (sym.symbol, sym.block));
+	  result.reset (new var_value_operation (sym));
 	else
 	  {
 	    struct type *type = NULL;

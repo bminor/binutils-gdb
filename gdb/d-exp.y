@@ -452,8 +452,7 @@ PrimaryExpression:
 		    {
 		      if (symbol_read_needs_frame (sym.symbol))
 			pstate->block_tracker->update (sym);
-		      pstate->push_new<var_value_operation> (sym.symbol,
-							     sym.block);
+		      pstate->push_new<var_value_operation> (sym);
 		    }
 		  else if (is_a_field_of_this.type != NULL)
 		     {

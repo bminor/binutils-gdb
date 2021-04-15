@@ -224,7 +224,7 @@ parser_state::push_symbol (const char *name, block_symbol sym)
     {
       if (symbol_read_needs_frame (sym.symbol))
 	block_tracker->update (sym);
-      push_new<expr::var_value_operation> (sym.symbol, sym.block);
+      push_new<expr::var_value_operation> (sym);
     }
   else
     {
@@ -301,7 +301,7 @@ parser_state::push_dollar (struct stoken str)
   sym = lookup_symbol (copy.c_str (), NULL, VAR_DOMAIN, NULL);
   if (sym.symbol)
     {
-      push_new<expr::var_value_operation> (sym.symbol, sym.block);
+      push_new<expr::var_value_operation> (sym);
       return;
     }
   msym = lookup_bound_minimal_symbol (copy.c_str ());

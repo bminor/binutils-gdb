@@ -125,6 +125,15 @@ dump_for_expression (struct ui_file *stream, int depth, const block *bl)
 
 void
 dump_for_expression (struct ui_file *stream, int depth,
+		     const block_symbol &sym)
+{
+  fprintf_filtered (stream, _("%*sBlock symbol:\n"), depth, "");
+  dump_for_expression (stream, depth + 1, sym.symbol);
+  dump_for_expression (stream, depth + 1, sym.block);
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth,
 		     type_instance_flags flags)
 {
   fprintf_filtered (stream, _("%*sType flags: "), depth, "");

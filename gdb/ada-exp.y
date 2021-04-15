@@ -194,8 +194,7 @@ maybe_overload (enum exp_opcode op, operation_up &lhs, operation_up &rhs)
 
   if (symbol_read_needs_frame (fn.symbol))
     pstate->block_tracker->update (fn.block, INNERMOST_BLOCK_FOR_SYMBOLS);
-  operation_up callee
-    = make_operation<ada_var_value_operation> (fn.symbol, fn.block);
+  operation_up callee = make_operation<ada_var_value_operation> (fn);
 
   std::vector<operation_up> argvec;
   argvec.push_back (std::move (lhs));
@@ -1124,14 +1123,12 @@ yyerror (const char *msg)
    non-NULL).  */
 
 static void
-write_var_from_sym (struct parser_state *par_state,
-		    const struct block *block,
-		    struct symbol *sym)
+write_var_from_sym (struct parser_state *par_state, block_symbol sym)
 {
-  if (symbol_read_needs_frame (sym))
-    par_state->block_tracker->update (block, INNERMOST_BLOCK_FOR_SYMBOLS);
+  if (symbol_read_needs_frame (sym.symbol))
+    par_state->block_tracker->update (sym.block, INNERMOST_BLOCK_FOR_SYMBOLS);
 
-  par_state->push_new<ada_var_value_operation> (sym, block);
+  par_state->push_new<ada_var_value_operation> (sym);
 }
 
 /* Write integer or boolean constant ARG of type TYPE.  */
@@ -1190,7 +1187,7 @@ write_object_renaming (struct parser_state *par_state,
 				&inner_renaming_expr))
       {
       case ADA_NOT_RENAMING:
-	write_var_from_sym (par_state, sym_info.block, sym_info.symbol);
+	write_var_from_sym (par_state, sym_info);
 	break;
       case ADA_OBJECT_RENAMING:
 	write_object_renaming (par_state, sym_info.block,
@@ -1247,8 +1244,7 @@ write_object_renaming (struct parser_state *par_state,
 	    else if (SYMBOL_CLASS (index_sym_info.symbol) == LOC_TYPEDEF)
 	      /* Index is an old-style renaming symbol.  */
 	      index_sym_info.block = orig_left_context;
-	    write_var_from_sym (par_state, index_sym_info.block,
-				index_sym_info.symbol);
+	    write_var_from_sym (par_state, index_sym_info);
 	  }
 	if (slice_state == SIMPLE_INDEX)
 	  ada_funcall (1);
@@ -1458,7 +1454,8 @@ write_ambiguous_var (struct parser_state *par_state,
   sym->set_linkage_name (obstack_strndup (&temp_parse_space, name, len));
   sym->set_language (language_ada, nullptr);
 
-  par_state->push_new<ada_var_value_operation> (sym, block);
+  block_symbol bsym { sym, block };
+  par_state->push_new<ada_var_value_operation> (bsym);
 }
 
 /* A convenient wrapper around ada_get_field_index that takes
@@ -1637,7 +1634,7 @@ write_var_or_type (struct parser_state *par_state,
 
 	  if (syms.size () == 1)
 	    {
-	      write_var_from_sym (par_state, syms[0].block, syms[0].symbol);
+	      write_var_from_sym (par_state, syms[0]);
 	      write_selectors (par_state, encoded_name + tail_index);
 	      return NULL;
 	    }
@@ -1711,7 +1708,7 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
       if (syms.size () != 1 || SYMBOL_CLASS (syms[0].symbol) == LOC_TYPEDEF)
 	pstate->push_new<ada_string_operation> (copy_name (name));
       else
-	write_var_from_sym (par_state, syms[0].block, syms[0].symbol);
+	write_var_from_sym (par_state, syms[0]);
     }
   else
     if (write_var_or_type (par_state, NULL, name) != NULL)
