@@ -1,3 +1,10 @@
+2021-04-30  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/enum_idx_packed/pck.ads (My_Enum, My_Array_Type)
+	(Confused_Array): New types.
+	* gdb.ada/enum_idx_packed/foo.adb (Confused_Array): New variable.
+	* gdb.ada/enum_idx_packed.exp: Add new tests.
+
 2021-04-30  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.mi/mi-sym-info.exp: Add with_timeout_factor, and increase

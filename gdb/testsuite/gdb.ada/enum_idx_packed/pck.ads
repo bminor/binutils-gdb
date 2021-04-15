@@ -48,5 +48,10 @@ package Pck is
    pragma Pack (Multi_Dimension);
    type Multi_Dimension_Access is access all Multi_Dimension;
 
+   type My_Enum is (Blue, Red, Green);
+
+   type My_Array_Type is array (My_Enum) of Integer;
+   type Confused_Array_Type is array (Color) of My_Array_Type;
+
    procedure Do_Nothing (A : System.Address);
 end Pck;

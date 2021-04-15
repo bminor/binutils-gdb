@@ -2877,8 +2877,11 @@ ada_index_type (struct type *type, int n, const char *name)
       int i;
 
       for (i = 1; i < n; i += 1)
-	type = TYPE_TARGET_TYPE (type);
-      result_type = TYPE_TARGET_TYPE (type->index_type ());
+	{
+	  type = ada_check_typedef (type);
+	  type = TYPE_TARGET_TYPE (type);
+	}
+      result_type = TYPE_TARGET_TYPE (ada_check_typedef (type)->index_type ());
       /* FIXME: The stabs type r(0,0);bound;bound in an array type
 	 has a target type of TYPE_CODE_UNDEF.  We compensate here, but
 	 perhaps stabsread.c would make more sense.  */

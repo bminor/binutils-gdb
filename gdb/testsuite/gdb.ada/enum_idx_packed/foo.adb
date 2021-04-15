@@ -26,6 +26,10 @@ procedure Foo is
      := new Multi_Dimension'(True => (1, 1, 2, 3, 5),
                              False => (8, 13, 21, 34, 55));
 
+   Confused_Array : Confused_Array_Type := (Red => (0, 1, 2),
+                                            Green => (5, 6, 7),
+                                            others => (others => 72));
+
 begin
    Do_Nothing (Full'Address);  -- STOP
    Do_Nothing (Primary'Address);

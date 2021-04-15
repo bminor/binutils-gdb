@@ -1,3 +1,7 @@
+2021-04-30  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_index_type): Use ada_check_typedef.
+
 2021-04-29  Simon Marchi  <simon.marchi@efficios.com>
 
 	* auto-load.h: Split namespace declaration.
