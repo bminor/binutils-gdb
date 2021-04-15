@@ -1,3 +1,8 @@
+2021-04-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in: (tmp-igen) Only pass mn10300.igen to igen.
+	* mn10300.igen: Include am33-2.igen.
+
 2021-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
