@@ -1,3 +1,7 @@
+2021-04-15  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.threads/fork-plus-threads.exp: Use foreach_with_prefix.
+
 2021-04-15  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.dwarf2/arr-stride.exp: Add test.
