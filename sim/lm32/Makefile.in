@@ -43,7 +43,7 @@ lm32.o: lm32.c $(LM32BF_INCLUDE_DEPS)
 # FIXME: Use of `mono' is wip.
 mloop.c eng.h: stamp-mloop
 stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(SHELL) $(srccom)/genmloop.sh \
+	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -fast -pbb -switch sem-switch.c \
 		-cpu lm32bf -infile $(srcdir)/mloop.in
 	$(SHELL) $(srcroot)/move-if-change eng.hin eng.h

@@ -1,3 +1,7 @@
+2021-04-15  John Baldwin  <jhb@FreeBSD.org>
+
+	* Makefile.in: Pass -shell to genmloop.sh.
+
 2021-04-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-if.c (sim_open): Delete 3rd arg to sim_cpu_alloc_all.
