@@ -1,3 +1,7 @@
+2021-04-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* aarch64-opc.c: Add RME system registers.
+
 2021-04-16  Lifang Xia <lifang_xia@c-sky.com>
 
 	* riscv-opc.c (riscv_opcodes): New insn alias for addi. Compress

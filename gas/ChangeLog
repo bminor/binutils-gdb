@@ -1,3 +1,11 @@
+2021-04-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* testsuite/gas/aarch64/rme-invalid.d: New test.
+	* testsuite/gas/aarch64/rme-invalid.l: New test.
+	* testsuite/gas/aarch64/rme-invalid.s: New test.
+	* testsuite/gas/aarch64/rme.d: New test.
+	* testsuite/gas/aarch64/rme.s: New test.
+
 2021-04-16  Nelson Chu  <nelson.chu@sifive.com>
 
 	PR 27436
