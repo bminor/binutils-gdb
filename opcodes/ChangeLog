@@ -1,3 +1,8 @@
+2021-04-16  Lifang Xia <lifang_xia@c-sky.com>
+
+	* riscv-opc.c (riscv_opcodes): New insn alias for addi. Compress
+	"addi d,CV,z" to "c.mv d,CV".
+
 2021-04-12  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac (--enable-checking): Add support.

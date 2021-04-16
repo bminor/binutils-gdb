@@ -1,3 +1,9 @@
+2021-04-16  Lifang Xia <lifang_xia@c-sky.com>
+
+	* testsuite/gas/riscv/c-zero-imm.d: Compress addi a4,a4,0 to
+	c.mv a4,a4.
+	* testsuite/gas/riscv/c-zero-imm.s: Likewise.
+
 2021-04-14  Alan Modra  <amodra@gmail.com>
 
 	PR 27723
@@ -31,8 +37,6 @@
 	(generic_bignum_to_int64): Declare.
 	* testsuite/gas/ppc/prefix-pcrel.s,
 	* testsuite/gas/ppc/prefix-pcrel.d: Add more instructions.
-
-2021-04-09  Tejas Belagod  <tejas.belagod@arm.com>
 
 2021-04-12  Nelson Chu  <nelson.chu@sifive.com>
 
