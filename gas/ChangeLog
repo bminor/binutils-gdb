@@ -1,3 +1,14 @@
+2021-04-16  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27436
+	* config/tc-riscv.c (riscv_ip): make operand C> work the same as >.
+	* testsuite/gas/riscv/shamt-32.d: New testcase.
+	* testsuite/gas/riscv/shamt-32.l: Likewise.
+	* testsuite/gas/riscv/shamt-32.s: Likewise.
+	* testsuite/gas/riscv/shamt-64.d: Likewise.
+	* testsuite/gas/riscv/shamt-64.l: Likewise.
+	* testsuite/gas/riscv/shamt-64.s: Likewise.
+
 2021-04-16  Lifang Xia <lifang_xia@c-sky.com>
 
 	* testsuite/gas/riscv/c-zero-imm.d: Compress addi a4,a4,0 to

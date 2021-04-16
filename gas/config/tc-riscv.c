@@ -2088,11 +2088,10 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      || regno != 0)
 		    break;
 		  continue;
-		case '>':
+		case '>': /* Shift amount, 0 - (XLEN-1).  */
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || imm_expr->X_add_number <= 0
-		      || imm_expr->X_add_number >= 64)
+		      || (unsigned long) imm_expr->X_add_number >= xlen)
 		    break;
 		  ip->insn_opcode |= ENCODE_CITYPE_IMM (imm_expr->X_add_number);
 		rvc_imm_done:
