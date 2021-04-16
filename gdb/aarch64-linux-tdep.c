@@ -560,13 +560,17 @@ static const struct regcache_map_entry aarch64_linux_fpregmap[] =
    placeholders so we can update the numbers later.  */
 static struct regcache_map_entry aarch64_linux_cregmap[] =
   {
-    /* FIXME-Morello: Need to decide if we are reading the whole 16 bytes or
-       just the upper 8 bytes of the capability registers.  */
-    { 31, -1, 8 }, /* c0 ... c30 */
-    { 1, -1, 8 }, /* Stack Pointer Capability */
-    { 1, -1, 8 }, /* Program Counter Capability */
-    { 1, -1, 16 }, /* Default Data Capability */
-    { 1, -1, 8 },
+    { 31, -1, 16 }, /* c0 ... c30 */
+    { 1, -1, 16 }, /* pcc */
+    { 1, -1, 16 }, /* csp */
+    { 1, -1, 16 }, /* ddc */
+    { 1, -1, 16 }, /* ctpidr */
+    { 1, -1, 16 }, /* rcsp */
+    { 1, -1, 16 }, /* rddc */
+    { 1, -1, 16 }, /* rctpidr */
+    { 1, -1, 16 }, /* cid */
+    { 1, -1, 8 },  /* tag_map */
+    { 1, -1, 8 },  /* cctlr */
     { 0 }
   };
 
@@ -866,11 +870,10 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	  "TLS register", cb_data);
     }
 
-  /* FIXME-Morello: We still need to provide a valid check for the presence of
-     capability registers.  */
+  /* Morello capability registers.  */
   if (tdep->has_capability ())
     {
-      cb (".reg-cap", AARCH64_LINUX_CREGS_SIZE,
+      cb (".reg-aarch-morello", AARCH64_LINUX_CREGS_SIZE,
 	  AARCH64_LINUX_CREGS_SIZE, &aarch64_linux_cregset,
 	  NULL, cb_data);
     }
@@ -2395,12 +2398,21 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   if (tdep->has_capability ())
     {
-      /* Initialize the register numbers for the core file register set.  */
-      /* FIXME-Morello: This needs to be updated.  */
+      /* Initialize the register numbers for the core file register set.
+	 Please note the PCC/CSP position in GDB's target description is
+	 the inverse of the position in the Linux Kernel's user_morello_state
+	 data structure.  This can cause some confusion.  */
       aarch64_linux_cregmap[0].regno = tdep->cap_reg_base;
-      aarch64_linux_cregmap[1].regno = tdep->cap_reg_base + 32;
-      aarch64_linux_cregmap[2].regno = tdep->cap_reg_base + 31;
-      aarch64_linux_cregmap[3].regno = tdep->cap_reg_base + 33;
+      aarch64_linux_cregmap[1].regno = tdep->cap_reg_pcc;
+      aarch64_linux_cregmap[2].regno = tdep->cap_reg_csp;
+
+      /* Set the rest of the registers.  */
+      int next_regnum = tdep->cap_reg_base + 33;
+      for (int i = 3; i <= 10; i++)
+	{
+	  aarch64_linux_cregmap[i].regno = next_regnum;
+	  next_regnum++;
+	}
 
       set_gdbarch_report_signal_info (gdbarch,
 				      aarch64_linux_report_signal_info);
