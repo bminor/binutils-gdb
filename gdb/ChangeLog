@@ -1,3 +1,28 @@
+2021-05-24  Luis Machado  <luis.machado@arm.com>
+
+	* aarch64-linux-tdep.c (aarch64_linux_cregmap): Update to match
+	Morello's register layout in the core file.
+	(aarch64_linux_iterate_over_regset_sections): Update to handle
+	Morello's register set.
+	(aarch64_linux_init_abi): Likewise.
+	Register core file hooks.
+	(aarch64_linux_decode_memtag_note)
+	(aarch64_linux_create_memtag_notes_from_range)
+	(morello_get_tag_granules): New functions.
+	(MAX_TAGS_TO_TRANSFER): New constant.
+	* arch/aarch64-cap-linux.h (MORELLO_TAG_GRANULE_SIZE)
+	(MORELLO_TAG_BIT_SIZE): New constants.
+	(tag_dump_header): New struct.
+	* corelow.c (core_target <read_capability>: New method overrides.
+	(core_target::read_capability): New methods.
+	* gdbarch.sh (create_memtag_notes_from_range)
+	(decode_memtag_note): New hooks.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* linux-tdep.c (linux_make_memtag_corefile_notes): New function.
+	(linux_make_corefile_notes): Call linux_make_memtag_corefile_notes.
+	(linux_address_in_memtag_page): Removed.
+
 2021-05-04  Luis Machado  <luis.machado@arm.com>
 
 	Adapted from upstream GDB master commit

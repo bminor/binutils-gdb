@@ -1434,13 +1434,21 @@ parse_smaps_data (const char *data,
   return smaps;
 }
 
-/* See linux-tdep.h.  */
+/* For each memory map entry, create a new core file note that contains all of
+   its memory tags.  Save the data to NOTE_DATA and update NOTE_SIZE
+   accordingly.  */
 
-bool
-linux_address_in_memtag_page (CORE_ADDR address)
+static void
+linux_make_memtag_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
+				  char **note_data, int *note_size)
 {
   if (current_inferior ()->fake_pid_p)
-    return false;
+    return;
+
+  /* If the architecture doesn't have a hook to return memory tag notes,
+     there is nothing left to do.  */
+  if (!gdbarch_create_memtag_notes_from_range_p (gdbarch))
+    return;
 
   pid_t pid = current_inferior ()->pid;
 
@@ -1450,23 +1458,39 @@ linux_address_in_memtag_page (CORE_ADDR address)
     = target_fileio_read_stralloc (NULL, smaps_file.c_str ());
 
   if (data == nullptr)
-    return false;
+    return;
+
+  std::vector<struct smaps_data> smaps;
 
   /* Parse the contents of smaps into a vector.  */
-  std::vector<struct smaps_data> smaps
-    = parse_smaps_data (data.get (), smaps_file);
+  smaps = parse_smaps_data (data.get (), smaps_file);
 
-  for (const smaps_data &map : smaps)
+  if (!smaps.empty ())
     {
-      /* Is the address within [start_address, end_address) in a page
-	 mapped with memory tagging?  */
-      if (address >= map.start_address
-	  && address < map.end_address
-	  && map.vmflags.memory_tagging)
-	return true;
-    }
+      for (struct smaps_data map : smaps)
+	{
+	  /* Ask the architecture to create (one or more) NT_MEMTAG notes for
+	     this particular memory range, including the header.
 
-  return false;
+	     If the notes are too big, we may need to break up the transfer
+	     into smaller chunks.
+
+	     If the architecture returns an empty vector, that means there are
+	     no memory tag notes to write.  */
+	  std::vector<gdb::byte_vector> memory_tag_notes;
+	  memory_tag_notes
+	    = gdbarch_create_memtag_notes_from_range (gdbarch,
+						      map.start_address,
+						      map.end_address);
+	  /* Write notes to the core file.  */
+	  for (gdb::byte_vector note : memory_tag_notes)
+	    {
+	      *note_data = elfcore_write_note (obfd, *note_data, note_size,
+					       "CORE", NT_MEMTAG,
+					       note.data (), note.size ());
+	    }
+	}
+    }
 }
 
 /* List memory regions in the inferior for a corefile.  */
@@ -2157,6 +2181,9 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
       if (!note_data)
 	return NULL;
     }
+
+  /* Dump the memory tags, if any.  */
+  linux_make_memtag_corefile_notes (gdbarch, obfd, &note_data, note_size);
 
   /* File mappings.  */
   note_data = linux_make_mappings_corefile_notes (gdbarch, obfd,

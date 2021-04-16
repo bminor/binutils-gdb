@@ -279,6 +279,8 @@ struct gdbarch
   gdbarch_iterate_over_regset_sections_ftype *iterate_over_regset_sections;
   gdbarch_make_corefile_notes_ftype *make_corefile_notes;
   gdbarch_find_memory_regions_ftype *find_memory_regions;
+  gdbarch_create_memtag_notes_from_range_ftype *create_memtag_notes_from_range;
+  gdbarch_decode_memtag_note_ftype *decode_memtag_note;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix;
   gdbarch_core_pid_to_str_ftype *core_pid_to_str;
@@ -657,6 +659,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of iterate_over_regset_sections, has predicate.  */
   /* Skip verify of make_corefile_notes, has predicate.  */
   /* Skip verify of find_memory_regions, has predicate.  */
+  /* Skip verify of create_memtag_notes_from_range, has predicate.  */
+  /* Skip verify of decode_memtag_note, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries_aix, has predicate.  */
   /* Skip verify of core_pid_to_str, has predicate.  */
@@ -918,6 +922,18 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: core_xfer_siginfo = <%s>\n",
                       host_address_to_string (gdbarch->core_xfer_siginfo));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_create_memtag_notes_from_range_p() = %d\n",
+                      gdbarch_create_memtag_notes_from_range_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: create_memtag_notes_from_range = <%s>\n",
+                      host_address_to_string (gdbarch->create_memtag_notes_from_range));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_decode_memtag_note_p() = %d\n",
+                      gdbarch_decode_memtag_note_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: decode_memtag_note = <%s>\n",
+                      host_address_to_string (gdbarch->decode_memtag_note));
   fprintf_unfiltered (file,
                       "gdbarch_dump: decr_pc_after_break = %s\n",
                       core_addr_to_string_nz (gdbarch->decr_pc_after_break));
@@ -3798,6 +3814,54 @@ set_gdbarch_find_memory_regions (struct gdbarch *gdbarch,
                                  gdbarch_find_memory_regions_ftype find_memory_regions)
 {
   gdbarch->find_memory_regions = find_memory_regions;
+}
+
+int
+gdbarch_create_memtag_notes_from_range_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->create_memtag_notes_from_range != NULL;
+}
+
+std::vector<gdb::byte_vector>
+gdbarch_create_memtag_notes_from_range (struct gdbarch *gdbarch, CORE_ADDR start_address, CORE_ADDR end_address)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->create_memtag_notes_from_range != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_create_memtag_notes_from_range called\n");
+  return gdbarch->create_memtag_notes_from_range (gdbarch, start_address, end_address);
+}
+
+void
+set_gdbarch_create_memtag_notes_from_range (struct gdbarch *gdbarch,
+                                            gdbarch_create_memtag_notes_from_range_ftype create_memtag_notes_from_range)
+{
+  gdbarch->create_memtag_notes_from_range = create_memtag_notes_from_range;
+}
+
+int
+gdbarch_decode_memtag_note_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->decode_memtag_note != NULL;
+}
+
+gdb_byte
+gdbarch_decode_memtag_note (struct gdbarch *gdbarch, gdb::array_view<const gdb_byte> note, CORE_ADDR address)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->decode_memtag_note != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_decode_memtag_note called\n");
+  return gdbarch->decode_memtag_note (gdbarch, note, address);
+}
+
+void
+set_gdbarch_decode_memtag_note (struct gdbarch *gdbarch,
+                                gdbarch_decode_memtag_note_ftype decode_memtag_note)
+{
+  gdbarch->decode_memtag_note = decode_memtag_note;
 }
 
 int

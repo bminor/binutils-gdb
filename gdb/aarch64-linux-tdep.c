@@ -51,6 +51,8 @@
 /* For aarch64_debug.  */
 #include "arch/aarch64-insn.h"
 
+#include "elf/common.h"
+
 /* Signal frame handling.
 
       +------------+  ^
@@ -475,13 +477,17 @@ static const struct regcache_map_entry aarch64_linux_fpregmap[] =
    placeholders so we can update the numbers later.  */
 static struct regcache_map_entry aarch64_linux_cregmap[] =
   {
-    /* FIXME-Morello: Need to decide if we are reading the whole 16 bytes or
-       just the upper 8 bytes of the capability registers.  */
-    { 31, -1, 8 }, /* c0 ... c30 */
-    { 1, -1, 8 }, /* Stack Pointer Capability */
-    { 1, -1, 8 }, /* Program Counter Capability */
-    { 1, -1, 16 }, /* Default Data Capability */
-    { 1, -1, 8 },
+    { 31, -1, 16 }, /* c0 ... c30 */
+    { 1, -1, 16 }, /* pcc */
+    { 1, -1, 16 }, /* csp */
+    { 1, -1, 16 }, /* ddc */
+    { 1, -1, 16 }, /* ctpidr */
+    { 1, -1, 16 }, /* rcsp */
+    { 1, -1, 16 }, /* rddc */
+    { 1, -1, 16 }, /* rctpidr */
+    { 1, -1, 16 }, /* cid */
+    { 1, -1, 8 },  /* tag_map */
+    { 1, -1, 8 },  /* cctlr */
     { 0 }
   };
 
@@ -742,11 +748,10 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	  "pauth registers", cb_data);
     }
 
-  /* FIXME-Morello: We still need to provide a valid check for the presence of
-     capability registers.  */
+  /* Morello capability registers.  */
   if (tdep->has_capability ())
     {
-      cb (".reg-cap", AARCH64_LINUX_CREGS_SIZE,
+      cb (".reg-aarch-morello", AARCH64_LINUX_CREGS_SIZE,
 	  AARCH64_LINUX_CREGS_SIZE, &aarch64_linux_cregset,
 	  NULL, cb_data);
     }
@@ -1629,6 +1634,137 @@ aarch64_linux_get_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr)
   return cap[0] != 0;
 }
 
+/* Return the number of Morello memory tag granules contained in the memory
+   range [addr, addr + len).  */
+
+static size_t
+morello_get_tag_granules (CORE_ADDR addr, size_t len, size_t granule_size)
+{
+  /* An empty range has 0 tag granules.  */
+  if (len == 0)
+    return 0;
+
+  /* Start address */
+  CORE_ADDR s_addr = align_down (addr, granule_size);
+  /* End address */
+  CORE_ADDR e_addr = align_down (addr + len - 1, granule_size);
+
+  /* We always have at least 1 granule because len is non-zero at this
+     point.  */
+  return 1 + (e_addr - s_addr) / granule_size;
+}
+
+/* Maximum number of tags to request.  */
+#define MAX_TAGS_TO_TRANSFER 1024
+
+/* AArch64 Linux implementation of the aarch64_create_memtag_notes_from_range
+   gdbarch hook.  Create core file notes for memory tags.  */
+
+static std::vector<gdb::byte_vector>
+aarch64_linux_create_memtag_notes_from_range (struct gdbarch *gdbarch,
+					      CORE_ADDR start_address,
+					      CORE_ADDR end_address)
+{
+  /* We only handle CHERI capability tags for now.  */
+
+  /* Figure out how many tags we need to store in this memory range.  */
+  int granules = morello_get_tag_granules (start_address,
+					   end_address - start_address,
+					   MORELLO_TAG_GRANULE_SIZE);
+
+  /* A vector to store multiple notes.  */
+  std::vector<gdb::byte_vector> notes;
+
+  /* Add the CHERI note.  */
+  notes.resize (1);
+  /* Resize to the number of bytes the tag granules will take.  */
+  notes[0].resize (sizeof (struct tag_dump_header) + granules);
+
+  /* Retrieve the tags and store them in the vector.  */
+  gdb::byte_vector tags;
+  CORE_ADDR address = start_address;
+  while (granules > 0)
+    {
+      /* Transfer tags in chunks.  */
+      gdb::byte_vector tags_read;
+      size_t xfer_len
+	= (granules >= MAX_TAGS_TO_TRANSFER)? MAX_TAGS_TO_TRANSFER : granules;
+
+      /* First clear the vector of tags.  */
+      tags_read.resize (0);
+
+      /* Copy tags in chunks.  */
+      while (tags_read.size () < xfer_len)
+	{
+	  CORE_ADDR addr
+	    = address + tags_read.size () * MORELLO_TAG_GRANULE_SIZE;
+
+	  /* Always align the address to 16 bytes so we can read the
+	     capability properly.  When we have a request to read only the
+	     capability tags, then we won't need to do this.  */
+	  CORE_ADDR aligned_addr = align_down (addr, MORELLO_TAG_GRANULE_SIZE);
+	  bool tag
+	    = aarch64_linux_get_cap_tag_from_address (gdbarch, aligned_addr);
+	  gdb_byte tag_byte = (tag == false)? 0 : 1;
+	  tags_read.push_back (tag_byte);
+	}
+
+      /* This process may take a while.  Make sure it is interruptible.  */
+      QUIT;
+
+      /* Transfer over the tags that have been read.  */
+      tags.insert (tags.end (), tags_read.begin (), tags_read.end ());
+
+      /* Adjust the remaining granules and starting address.  */
+      granules -= tags_read.size ();
+      address += tags_read.size () * MORELLO_TAG_GRANULE_SIZE;
+    }
+
+  /* Create the header.  Please note we don't yet compress the tag data.
+     We may do so in the future to save space, since a capability tag is only
+     1 bit in size.  */
+  struct tag_dump_header header;
+  header.format = ELF_CORE_TAG_CHERI;
+  header.start_vma = start_address;
+  header.end_vma = end_address;
+  header.u.cheri.granule_byte_size = MORELLO_TAG_GRANULE_SIZE;
+  header.u.cheri.tag_bit_size = MORELLO_TAG_BIT_SIZE;
+  header.u.cheri.__unused = 0;
+
+  /* Copy the tags to the note.  */
+  memcpy (notes[0].data (), &header, sizeof (header));
+  memcpy (notes[0].data () + sizeof (header), tags.data (), tags.size ());
+
+  return notes;
+}
+
+/* AArch64 Linux implementation of the aarch64_decode_memtag_note gdbarch
+   hook.  Decode a memory tag note and return the tag that it contains for
+   a particular address.  */
+
+static gdb_byte
+aarch64_linux_decode_memtag_note (struct gdbarch *gdbarch,
+				  gdb::array_view <const gdb_byte> note,
+				  CORE_ADDR address)
+{
+  /* Read the header.  */
+  struct tag_dump_header header;
+  memcpy (&header, note.data (), sizeof (header));
+
+  /* Align the address to 16 bytes.  We assume the start_vma is already
+     aligned to the proper boundary, otherwise we would have tags dumped
+     into two different memory mappings.  */
+  address = align_down (address, MORELLO_TAG_GRANULE_SIZE);
+  CORE_ADDR offset = address - header.start_vma;
+  gdb_byte tag;
+
+  /* Read the tag.  */
+  memcpy (&tag, note.data () + sizeof (header)
+	  + (offset / header.u.cheri.granule_byte_size), 1);
+
+  return tag;
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1857,17 +1993,37 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   if (tdep->has_capability ())
     {
-      /* Initialize the register numbers for the core file register set.  */
-      /* FIXME-Morello: This needs to be updated.  */
+      /* Initialize the register numbers for the core file register set.
+	 Please note the PCC/CSP position in GDB's target description is
+	 the inverse of the position in the Linux Kernel's user_morello_state
+	 data structure.  This can cause some confusion.  */
       aarch64_linux_cregmap[0].regno = tdep->cap_reg_base;
-      aarch64_linux_cregmap[1].regno = tdep->cap_reg_base + 32;
-      aarch64_linux_cregmap[2].regno = tdep->cap_reg_base + 31;
-      aarch64_linux_cregmap[3].regno = tdep->cap_reg_base + 33;
+      aarch64_linux_cregmap[1].regno = tdep->cap_reg_pcc;
+      aarch64_linux_cregmap[2].regno = tdep->cap_reg_csp;
+
+      /* Set the rest of the registers.  */
+      int next_regnum = tdep->cap_reg_base + 33;
+      for (int i = 3; i <= 10; i++)
+	{
+	  aarch64_linux_cregmap[i].regno = next_regnum;
+	  next_regnum++;
+	}
 
       set_gdbarch_report_signal_info (gdbarch,
 				      aarch64_linux_report_signal_info);
       set_gdbarch_get_cap_tag_from_address (gdbarch,
 					    aarch64_linux_get_cap_tag_from_address);
+
+      /* Core file helpers.  */
+
+      /* Core file helper to create memory tag notes for a particular range of
+	 addresses.  */
+      set_gdbarch_create_memtag_notes_from_range (gdbarch,
+				  aarch64_linux_create_memtag_notes_from_range);
+
+      /* Core file helper to decode a memory tag note.  */
+      set_gdbarch_decode_memtag_note (gdbarch,
+				      aarch64_linux_decode_memtag_note);
     }
   else
     {

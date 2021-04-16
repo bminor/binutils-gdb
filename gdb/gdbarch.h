@@ -938,6 +938,22 @@ typedef int (gdbarch_find_memory_regions_ftype) (struct gdbarch *gdbarch, find_m
 extern int gdbarch_find_memory_regions (struct gdbarch *gdbarch, find_memory_region_ftype func, void *data);
 extern void set_gdbarch_find_memory_regions (struct gdbarch *gdbarch, gdbarch_find_memory_regions_ftype *find_memory_regions);
 
+/* Create memory tag core file notes given a range of addresses. */
+
+extern int gdbarch_create_memtag_notes_from_range_p (struct gdbarch *gdbarch);
+
+typedef std::vector<gdb::byte_vector> (gdbarch_create_memtag_notes_from_range_ftype) (struct gdbarch *gdbarch, CORE_ADDR start_address, CORE_ADDR end_address);
+extern std::vector<gdb::byte_vector> gdbarch_create_memtag_notes_from_range (struct gdbarch *gdbarch, CORE_ADDR start_address, CORE_ADDR end_address);
+extern void set_gdbarch_create_memtag_notes_from_range (struct gdbarch *gdbarch, gdbarch_create_memtag_notes_from_range_ftype *create_memtag_notes_from_range);
+
+/* Decode a memory tag NOTE and return the tag that it contains at ADDRESS */
+
+extern int gdbarch_decode_memtag_note_p (struct gdbarch *gdbarch);
+
+typedef gdb_byte (gdbarch_decode_memtag_note_ftype) (struct gdbarch *gdbarch, gdb::array_view<const gdb_byte> note, CORE_ADDR address);
+extern gdb_byte gdbarch_decode_memtag_note (struct gdbarch *gdbarch, gdb::array_view<const gdb_byte> note, CORE_ADDR address);
+extern void set_gdbarch_decode_memtag_note (struct gdbarch *gdbarch, gdbarch_decode_memtag_note_ftype *decode_memtag_note);
+
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
    core file into buffer READBUF with length LEN.  Return the number of bytes read
    (zero indicates failure).

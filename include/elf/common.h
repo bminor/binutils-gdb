@@ -581,6 +581,7 @@
 #define NT_PRPSINFO	3		/* Contains copy of prpsinfo struct */
 #define NT_TASKSTRUCT	4		/* Contains copy of task struct */
 #define NT_AUXV		6		/* Contains copy of Elfxx_auxv_t */
+#define NT_MEMTAG	7		/* Contains a copy of the memory tags */
 #define NT_PRXFPREG	0x46e62b7f	/* Contains a user_xfpregs_struct; */
 					/*   note name must be "LINUX".  */
 #define NT_PPC_VMX	0x100		/* PowerPC Altivec/VMX registers */
@@ -667,6 +668,10 @@
 					/*   note name must be "LINUX".  */
 #define NT_SIGINFO	0x53494749	/* Fields of siginfo_t.  */
 #define NT_FILE		0x46494c45	/* Description of mapped files.  */
+
+/* NT_MEMTAG record types.  Reuse the same 0x4xx prefix to identify this
+   type as ARM-specific.  */
+#define ELF_CORE_TAG_CHERI	0x401	/* CHERI memory tags for AArch64.  */
 
 /* Note segments for core files on dir-style procfs systems.  */
 

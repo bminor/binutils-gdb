@@ -37,4 +37,28 @@
 #define SEGV_CAPPERMERR	      13  /* Capability permission fault */
 #define SEGV_CAPSTORETAGERR   14  /* Capability tag store fault */
 
+#define MORELLO_TAG_GRANULE_SIZE 16
+#define MORELLO_TAG_BIT_SIZE 1
+
+/* Header for NT_MEMTAG notes.  */
+struct __attribute__ ((packed)) tag_dump_header
+{
+  uint16_t format;
+
+  uint64_t start_vma;
+  uint64_t end_vma;
+
+  union
+  {
+    struct tag_dump_fmt
+    {
+      uint16_t granule_byte_size;
+      uint16_t tag_bit_size;
+      uint16_t __unused;
+    } cheri;
+  } u;
+
+  // Other formats may be added here later.
+};
+
 #endif /* ARCH_AARCH64_CAP_LINUX_H */

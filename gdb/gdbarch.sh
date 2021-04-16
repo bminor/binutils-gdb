@@ -729,6 +729,12 @@ M;char *;make_corefile_notes;bfd *obfd, int *note_size;obfd, note_size
 # Find core file memory regions
 M;int;find_memory_regions;find_memory_region_ftype func, void *data;func, data
 
+# Create memory tag core file notes given a range of addresses.
+M;std::vector<gdb::byte_vector>;create_memtag_notes_from_range;CORE_ADDR start_address, CORE_ADDR end_address;start_address, end_address
+
+# Decode a memory tag NOTE and return the tag that it contains at ADDRESS
+M;gdb_byte;decode_memtag_note;gdb::array_view<const gdb_byte> note, CORE_ADDR address;note, address
+
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
 # core file into buffer READBUF with length LEN.  Return the number of bytes read
 # (zero indicates failure).

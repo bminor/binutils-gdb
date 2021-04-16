@@ -117,6 +117,8 @@ public:
   /* See definition.  */
   void info_proc_mappings (struct gdbarch *gdbarch);
 
+  gdb::byte_vector read_capability (CORE_ADDR addr) override;
+
 private: /* per-core data */
 
   /* The core's section table.  Note that these target sections are
@@ -1139,6 +1141,75 @@ core_target::info_proc_mappings (struct gdbarch *gdbarch)
 			 hex_string (file_ofs),
 			 filename);
     }
+}
+
+/* Implement the read_capability target method.  */
+
+gdb::byte_vector
+core_target::read_capability (CORE_ADDR addr)
+{
+  struct gdbarch *gdbarch = target_gdbarch ();
+
+  gdb::byte_vector cap(0);
+
+  /* Make sure we have a way to decode the memory tag notes.  */
+  if (!gdbarch_decode_memtag_note_p (gdbarch))
+    warning (_("gdbarch_decode_memtag_note not implemented for this "
+	       "architecture."));
+
+  asection *section
+    = bfd_get_section_by_name (core_bfd, ".memtag");
+
+  /* Go through all the memtag sections and figure out if ADDR
+     falls within one of the memory ranges that contain tags.  */
+  while (section != nullptr)
+    {
+      size_t note_size = bfd_section_size (section);
+
+      if (note_size < 2 * sizeof (uint64_t) + sizeof (uint16_t))
+	{
+	  warning (_("malformed core note - too short for header"));
+	  return cap;
+	}
+
+      gdb::byte_vector note (note_size);
+
+      if (!bfd_get_section_contents (core_bfd, section,
+				     note.data (), 0, note_size))
+	{
+	  warning (_("could not get core note contents."));
+	  return cap;
+	}
+
+      uint64_t start_address;
+      memcpy (&start_address, note.data () + sizeof (uint16_t),
+	      sizeof (uint64_t));
+      uint64_t end_address;
+      memcpy (&end_address,
+	      note.data () + sizeof (uint16_t) + sizeof (uint64_t),
+	      sizeof (uint64_t));
+
+      /* Is the address within [start_address, end_address)?  */
+      if (addr >= start_address
+	  && addr < end_address)
+	{
+	  /* Hardcoded to hold Morello capabilities for now.  */
+	  cap.resize (17);
+	  /* Decode the memory tag note and return the tags.  */
+	  cap[0] = gdbarch_decode_memtag_note (gdbarch, note, addr);
+
+	  /* Read the capability.  */
+	  if (target_read_memory (addr, cap.data () + 1, 16) == 0)
+	    return cap;
+	  else
+	    error (_("Could not read capability from core file.\n"));
+	}
+
+      /* Keep looking.  Get the next session.  */
+      section = bfd_get_next_section_by_name (core_bfd, section);
+    }
+
+  return cap;
 }
 
 /* Implement "maintenance print core-file-backed-mappings" command.  

@@ -9557,6 +9557,23 @@ elfcore_make_auxv_note_section (bfd *abfd, Elf_Internal_Note *note,
   return TRUE;
 }
 
+static bfd_boolean
+elfcore_make_memtag_note_section (bfd *abfd, Elf_Internal_Note *note,
+				  size_t offs)
+{
+  asection *sect = bfd_make_section_anyway_with_flags (abfd, ".memtag",
+						       SEC_HAS_CONTENTS);
+
+  if (sect == NULL)
+    return FALSE;
+
+  sect->size = note->descsz - offs;
+  sect->filepos = note->descpos + offs;
+  sect->alignment_power = 1 + bfd_get_arch_size (abfd) / 32;
+
+  return TRUE;
+}
+
 /* prstatus_t exists on:
      solaris 2.5+
      linux 2.[01] + glibc
@@ -9883,6 +9900,12 @@ static bfd_boolean
 elfcore_grok_aarch_pauth (bfd *abfd, Elf_Internal_Note *note)
 {
   return elfcore_make_note_pseudosection (abfd, ".reg-aarch-pauth", note);
+}
+
+static bfd_boolean
+elfcore_grok_aarch_morello (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-aarch-morello", note);
 }
 
 static bfd_boolean
@@ -10548,6 +10571,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       else
 	return TRUE;
 
+    case NT_ARM_MORELLO:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_aarch_morello (abfd, note);
+      else
+	return TRUE;
+
     case NT_PRPSINFO:
     case NT_PSINFO:
       if (bed->elf_backend_grok_psinfo)
@@ -10570,6 +10600,8 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       return elfcore_make_note_pseudosection (abfd, ".note.linuxcore.siginfo",
 					      note);
 
+    case NT_MEMTAG:
+      return elfcore_make_memtag_note_section (abfd, note, 0);
     }
 }
 
@@ -11918,6 +11950,18 @@ elfcore_write_aarch_pauth (bfd *abfd,
 }
 
 char *
+elfcore_write_aarch_morello (bfd *abfd,
+			     char *buf,
+			     int *bufsiz,
+			     const void *aarch_morello,
+			     int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_ARM_MORELLO, aarch_morello, size);
+}
+
+char *
 elfcore_write_arc_v2 (bfd *abfd,
 		      char *buf,
 		      int *bufsiz,
@@ -12011,6 +12055,8 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_aarch_sve (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-aarch-pauth") == 0)
     return elfcore_write_aarch_pauth (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-aarch-morello") == 0)
+    return elfcore_write_aarch_morello (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-arc-v2") == 0)
     return elfcore_write_arc_v2 (abfd, buf, bufsiz, data, size);
   return NULL;
