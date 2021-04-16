@@ -136,6 +136,10 @@ gdb_test "print \[mut 23usize; 4\]" " = \\\[23, 23, 23, 23\\\]"
 # Test lexer corner cases.
 gdb_test "print 0x0 as *mut ()" " = \\\(\\*mut \\\(\\\)\\\) 0x0"
 gdb_test "print 0x0 as fn(i64) -> ()" " = \\\(\\*mut fn \\\(i64\\\) -> \\\(\\\)\\\) 0x0"
-gdb_test "print r#" "syntax error in expression, near `#'\\."
+
+# The lexer doesn't treat this as a failure, but rather as two tokens,
+# and we error out while trying to look up 'r'.  This is fine, though
+# -- what's important is that it isn't accepted.
+gdb_test "print r#" "No symbol 'r' in current context"
 
 gdb_test "printf \"%d %d\\n\", 23+1, 23-1" "24 22"

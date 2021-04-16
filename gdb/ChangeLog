@@ -1,3 +1,11 @@
+2021-04-16  Tom Tromey  <tom@tromey.com>
+
+	* rust-parse.c: New file.
+	* rust-exp.y: Remove.
+	* Makefile.in (COMMON_SFILES): Add rust-parse.c.
+	(SFILES): Remove rust-exp.y.
+	(YYFILES, local-maintainer-clean): Remove rust-exp.c.
+
 2021-04-16  Luis Machado  <luis.machado@linaro.org>
 
 	* arch-utils.c (default_floatformat_for_type): Handle bfloat16.

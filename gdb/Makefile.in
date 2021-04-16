@@ -1134,6 +1134,7 @@ COMMON_SFILES = \
 	reverse.c \
 	run-on-main-thread.c \
 	rust-lang.c \
+	rust-parse.c \
 	sentinel-frame.c \
 	ser-event.c \
 	serial.c \
@@ -1200,7 +1201,6 @@ SFILES = \
 	m2-exp.y \
 	p-exp.y \
 	proc-service.list \
-	rust-exp.y \
 	ser-base.c \
 	ser-unix.c \
 	sol-thread.c \
@@ -1608,8 +1608,7 @@ YYFILES = \
 	f-exp.c \
 	go-exp.c \
 	m2-exp.c \
-	p-exp.c \
-	rust-exp.c
+	p-exp.c
 
 # ada-lex.c is included by another file, so it shouldn't wind up as a
 # .o itself.
@@ -1969,7 +1968,7 @@ local-maintainer-clean:
 	rm -f c-exp.c \
 		cp-name-parser.c \
 		ada-lex.c ada-exp.c \
-		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c rust-exp.c
+		d-exp.c f-exp.c go-exp.c m2-exp.c p-exp.c
 	rm -f TAGS
 	rm -f $(YYFILES)
 	rm -f nm.h config.status

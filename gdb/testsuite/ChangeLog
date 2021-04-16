@@ -1,5 +1,10 @@
 2021-04-16  Tom Tromey  <tom@tromey.com>
 
+	* gdb.rust/simple.exp: Change error text.
+	* gdb.rust/expr.exp: Change error text.
+
+2021-04-16  Tom Tromey  <tom@tromey.com>
+
 	* gdb.rust/simple.exp: Add parens to 'as' test.
 
 2021-04-16  Simon Marchi  <simon.marchi@efficios.com>
