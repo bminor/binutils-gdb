@@ -105,9 +105,12 @@
 #define IMAGE_SCN_ALIGN_8192BYTES	     IMAGE_SCN_ALIGN_POWER_CONST (13)
 
 /* Encode alignment power into IMAGE_SCN_ALIGN bits of s_flags.  */
-#define COFF_ENCODE_ALIGNMENT(SECTION, ALIGNMENT_POWER) \
-  ((SECTION).s_flags |= IMAGE_SCN_ALIGN_POWER_CONST ((ALIGNMENT_POWER) <= 13 \
-						     ? (ALIGNMENT_POWER) : 13))
+#define COFF_ENCODE_ALIGNMENT(ABFD, SECTION, ALIGNMENT_POWER) \
+  (((ABFD)->flags & (EXEC_P | DYNAMIC)) != 0 ? false			\
+   : ((SECTION).s_flags							\
+      |= IMAGE_SCN_ALIGN_POWER_CONST ((ALIGNMENT_POWER) < 13		\
+				      ? (ALIGNMENT_POWER) : 13),	\
+      true))
 #define COFF_DECODE_ALIGNMENT(X)             \
   IMAGE_SCN_ALIGN_POWER_NUM ((X) & IMAGE_SCN_ALIGN_POWER_BIT_MASK)
 

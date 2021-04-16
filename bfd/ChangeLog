@@ -1,3 +1,10 @@
+2021-04-16  Alan Modra  <amodra@gmail.com>
+
+	PR 27567
+	* coffcode.h (styp_to_sec_flags): Use an unsigned long styp_flags.
+	(coff_write_object_contents): Pass bfd to COFF_ENCODE_ALIGNMENT,
+	ignore alignment checks when return is false.  Formatting.
+
 2021-04-15  Nelson Chu  <nelson.chu@sifive.com>
 
 	PR27584

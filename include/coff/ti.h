@@ -88,9 +88,10 @@ struct external_filehdr
 #define COFF_ALIGN_IN_SECTION_HEADER 1
 #define COFF_ALIGN_IN_S_FLAGS 1
 /* requires a power-of-two argument */
-#define COFF_ENCODE_ALIGNMENT(S,X) ((S).s_flags |= (((unsigned)(X)&0xF)<<8))
+#define COFF_ENCODE_ALIGNMENT(B,S,X) \
+  ((S).s_flags |= (((unsigned) (X) & 0xF) << 8), true)
 /* result is a power of two */
-#define COFF_DECODE_ALIGNMENT(X) (((X)>>8)&0xF)
+#define COFF_DECODE_ALIGNMENT(X) (((X) >> 8) & 0xF)
 
 #define COFF0_P(ABFD) (bfd_coff_filhsz(ABFD) == FILHSZ_V0)
 #define COFF2_P(ABFD) (bfd_coff_scnhsz(ABFD) != SCNHSZ_V01)

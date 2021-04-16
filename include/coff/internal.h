@@ -407,7 +407,7 @@ struct internal_scnhdr
   bfd_vma s_lnnoptr;		/* file ptr to line numbers	*/
   unsigned long s_nreloc;	/* number of relocation entries	*/
   unsigned long s_nlnno;	/* number of line number entries*/
-  long s_flags;			/* flags			*/
+  unsigned long s_flags;	/* flags			*/
   unsigned char s_page;         /* TI COFF load page            */
 };
 

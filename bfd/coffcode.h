@@ -737,7 +737,7 @@ styp_to_sec_flags (bfd *abfd,
 		   flagword *flags_ptr)
 {
   struct internal_scnhdr *internal_s = (struct internal_scnhdr *) hdr;
-  long styp_flags = internal_s->s_flags;
+  unsigned long styp_flags = internal_s->s_flags;
   flagword sec_flags = 0;
 
 #ifdef STYP_BLOCK
@@ -3643,18 +3643,18 @@ coff_write_object_contents (bfd * abfd)
 
 
 #ifdef COFF_ENCODE_ALIGNMENT
-      COFF_ENCODE_ALIGNMENT(section, current->alignment_power);
-      if ((unsigned int)COFF_DECODE_ALIGNMENT(section.s_flags)
-	  != current->alignment_power)
+      if (COFF_ENCODE_ALIGNMENT (abfd, section, current->alignment_power)
+	  && (COFF_DECODE_ALIGNMENT (section.s_flags)
+	      != current->alignment_power))
 	{
-	  bool warn = coff_data (abfd)->link_info
-	    && !bfd_link_relocatable (coff_data (abfd)->link_info);
+	  bool warn = (coff_data (abfd)->link_info
+		       && !bfd_link_relocatable (coff_data (abfd)->link_info));
 
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%pB:%s section %s: alignment 2**%u not representable"),
-	    abfd, warn ? " warning:" : "", current->name,
-	    current->alignment_power);
+	     abfd, warn ? " warning:" : "", current->name,
+	     current->alignment_power);
 	  if (!warn)
 	    {
 	      bfd_set_error (bfd_error_nonrepresentable_section);

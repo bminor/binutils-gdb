@@ -35,9 +35,10 @@
 #define COFF_ALIGN_IN_S_FLAGS 1
 #define F_ALGNMASK 0x0F00
 /* requires a power-of-two argument */
-#define COFF_ENCODE_ALIGNMENT(S,X) ((S).s_flags |= (((unsigned)(X)&0xF)<<8))
+#define COFF_ENCODE_ALIGNMENT(B,S,X) \
+  ((S).s_flags |= (((unsigned) (X) & 0xF) << 8), true)
 /* result is a power of two */
-#define COFF_DECODE_ALIGNMENT(X) (((X)>>8)&0xF)
+#define COFF_DECODE_ALIGNMENT(X) (((X) >> 8) & 0xF)
 
 #define	Z80MAGIC   0x805A
 

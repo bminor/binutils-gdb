@@ -1,3 +1,15 @@
+2021-04-16  Alan Modra  <amodra@gmail.com>
+
+	PR 27567
+	* coff/internal.h (struct internal_scnhdr): Make s_flags unsigned long.
+	* coff/pe.h (COFF_ENCODE_ALIGNMENT): Don't set align flags for an
+	executable and return false.  Do so for a relocatable object and
+	evaluate to true.
+	* coff/ti.h (COFF_ENCODE_ALIGNMENT): Add bfd arg and evaluate to true.
+	(COFF_DECODE_ALIGNMENT): Formatting.
+	* coff/z80.h (COFF_ENCODE_ALIGNMENT): Similarly.
+	(COFF_DECODE_ALIGNMENT): Similarly.
+
 2021-04-09  Alan Modra  <amodra@gmail.com>
 
 	* dis-asm.h (struct disassemble_info): Add dynrelbuf and dynrelcount.
