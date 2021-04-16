@@ -103,7 +103,7 @@ simple_copy (int fromfd, const char *to,
 #endif
 
 /* Return the nanosecond component of *ST's access time.  */
-inline long int
+static inline long int
 get_stat_atime_ns (struct stat const *st ATTRIBUTE_UNUSED)
 {
 # if defined STAT_TIMESPEC
@@ -116,7 +116,7 @@ get_stat_atime_ns (struct stat const *st ATTRIBUTE_UNUSED)
 }
 
 /* Return the nanosecond component of *ST's data modification time.  */
-inline long int
+static inline long int
 get_stat_mtime_ns (struct stat const *st ATTRIBUTE_UNUSED)
 {
 # if defined STAT_TIMESPEC
@@ -129,7 +129,7 @@ get_stat_mtime_ns (struct stat const *st ATTRIBUTE_UNUSED)
 }
 
 /* Return *ST's access time.  */
-inline struct timespec
+static inline struct timespec
 get_stat_atime (struct stat const *st)
 {
 #ifdef STAT_TIMESPEC
@@ -143,7 +143,7 @@ get_stat_atime (struct stat const *st)
 }
 
 /* Return *ST's data modification time.  */
-inline struct timespec
+static inline struct timespec
 get_stat_mtime (struct stat const *st)
 {
 #ifdef STAT_TIMESPEC

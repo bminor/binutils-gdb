@@ -1,3 +1,9 @@
+2021-04-16  Alan Modra  <amodra@gmail.com>
+
+	PR 27725
+	* rename.c (get_stat_atime, get_stat_mtime): Make static.
+	(get_stat_atime_ns, get_stat_mtime_ns): Likewise.
+
 2021-04-15  Pekka Seppänen  <pexu@sourceware.mail.kapsi.fi>
 
 	PR 27725
