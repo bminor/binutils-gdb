@@ -1,3 +1,7 @@
+2021-04-16  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Add parens to 'as' test.
+
 2021-04-16  Simon Marchi  <simon.marchi@efficios.com>
 
 	* boards/simavr.exp: Set debug_flags.
