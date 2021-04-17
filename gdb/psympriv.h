@@ -518,9 +518,6 @@ struct psymbol_functions : public quick_symbol_functions
 
   void expand_all_symtabs (struct objfile *objfile) override;
 
-  void expand_symtabs_with_fullname (struct objfile *objfile,
-				     const char *fullname) override;
-
   void map_matching_symbols
     (struct objfile *,
      const lookup_name_info &lookup_name,

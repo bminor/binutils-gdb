@@ -613,7 +613,11 @@ public:
   /* See quick_symbol_functions.  */
   void expand_all_symtabs ();
 
-  /* See quick_symbol_functions.  */
+  /* Read all symbol tables associated with OBJFILE which have
+     symtab_to_fullname equal to FULLNAME.
+     This is for the purposes of examining code only, e.g., expand_line_sal.
+     The routine may ignore debug info that is known to not be useful with
+     code, e.g., DW_TAG_type_unit for dwarf debug info.  */
   void expand_symtabs_with_fullname (const char *fullname);
 
   /* See quick_symbol_functions.  */

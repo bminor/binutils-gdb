@@ -119,14 +119,6 @@ struct quick_symbol_functions
   /* Read all symbol tables associated with OBJFILE.  */
   virtual void expand_all_symtabs (struct objfile *objfile) = 0;
 
-  /* Read all symbol tables associated with OBJFILE which have
-     symtab_to_fullname equal to FULLNAME.
-     This is for the purposes of examining code only, e.g., expand_line_sal.
-     The routine may ignore debug info that is known to not be useful with
-     code, e.g., DW_TAG_type_unit for dwarf debug info.  */
-  virtual void expand_symtabs_with_fullname (struct objfile *objfile,
-					     const char *fullname) = 0;
-
   /* Find global or static symbols in all tables that are in DOMAIN
      and for which MATCH (symbol name, NAME) == 0, passing each to 
      CALLBACK, reading in partial symbol tables as needed.  Look

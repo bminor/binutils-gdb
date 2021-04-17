@@ -334,8 +334,22 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
 		      "qf->expand_symtabs_with_fullname (%s, \"%s\")\n",
 		      objfile_debug_name (this), fullname);
 
+  const char *basename = lbasename (fullname);
+  auto file_matcher = [&] (const char *filename, bool basenames)
+  {
+    return filename_cmp (basenames ? basename : fullname, filename) == 0;
+  };
+
   for (const auto &iter : qf)
-    iter->expand_symtabs_with_fullname (this, fullname);
+    iter->expand_symtabs_matching (this,
+				   file_matcher,
+				   nullptr,
+				   nullptr,
+				   nullptr,
+				   (SEARCH_GLOBAL_BLOCK
+				    | SEARCH_STATIC_BLOCK),
+				   UNDEF_DOMAIN,
+				   ALL_DOMAIN);
 }
 
 void

@@ -2241,9 +2241,6 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
 
   void expand_all_symtabs (struct objfile *objfile) override;
 
-  void expand_symtabs_with_fullname (struct objfile *objfile,
-				     const char *fullname) override;
-
   struct compunit_symtab *find_pc_sect_compunit_symtab
     (struct objfile *objfile, struct bound_minimal_symbol msymbol,
      CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override;
@@ -3522,40 +3519,6 @@ dwarf2_base_index_functions::expand_all_symtabs (struct objfile *objfile)
 	 dw2_instantiate_symtab to skip partial CUs -- any important
 	 partial CU will be read via DW_TAG_imported_unit anyway.  */
       dw2_instantiate_symtab (per_cu, per_objfile, true);
-    }
-}
-
-void
-dwarf2_base_index_functions::expand_symtabs_with_fullname
-     (struct objfile *objfile, const char *fullname)
-{
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-
-  /* We don't need to consider type units here.
-     This is only called for examining code, e.g. expand_line_sal.
-     There can be an order of magnitude (or more) more type units
-     than comp units, and we avoid them if we can.  */
-
-  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
-    {
-      /* We only need to look at symtabs not already expanded.  */
-      if (per_objfile->symtab_set_p (per_cu))
-	continue;
-
-      quick_file_names *file_data = dw2_get_file_names (per_cu, per_objfile);
-      if (file_data == NULL)
-	continue;
-
-      for (int j = 0; j < file_data->num_file_names; ++j)
-	{
-	  const char *this_fullname = file_data->file_names[j];
-
-	  if (filename_cmp (this_fullname, fullname) == 0)
-	    {
-	      dw2_instantiate_symtab (per_cu, per_objfile, false);
-	      break;
-	    }
-	}
     }
 }
 

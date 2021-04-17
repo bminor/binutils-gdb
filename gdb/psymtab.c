@@ -902,28 +902,6 @@ psymbol_functions::expand_all_symtabs (struct objfile *objfile)
     psymtab_to_symtab (objfile, psymtab);
 }
 
-/* Psymtab version of expand_symtabs_with_fullname.  See its definition in
-   the definition of quick_symbol_functions in symfile.h.  */
-
-void
-psymbol_functions::expand_symtabs_with_fullname (struct objfile *objfile,
-						 const char *fullname)
-{
-  for (partial_symtab *p : require_partial_symbols (objfile))
-    {
-      /* Anonymous psymtabs don't have a name of a source file.  */
-      if (p->anonymous)
-	continue;
-
-      /* psymtab_to_fullname tries to open the file which is slow.
-	 Don't call it if we know the basenames don't match.  */
-      if ((basenames_may_differ
-	   || filename_cmp (lbasename (fullname), lbasename (p->filename)) == 0)
-	  && filename_cmp (fullname, psymtab_to_fullname (p)) == 0)
-	psymtab_to_symtab (objfile, p);
-    }
-}
-
 /* Psymtab version of map_symbol_filenames.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 

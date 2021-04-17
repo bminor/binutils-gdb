@@ -1,5 +1,22 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	* quick-symbol.h (struct quick_symbol_functions)
+	<expand_symtabs_with_fullname>: Remove.
+	* psymtab.c (psymbol_functions::expand_symtabs_with_fullname):
+	Remove.
+	* psympriv.h (struct psymbol_functions)
+	<expand_symtabs_with_fullname>: Remove.
+	* dwarf2/read.c (struct dwarf2_base_index_functions)
+	<expand_symtabs_with_fullname>: Remove.
+	(dwarf2_base_index_functions::expand_symtabs_with_fullname):
+	Remove.
+	* objfiles.h (struct objfile) <expand_symtabs_with_fullname>:
+	Update comment.
+	* symfile-debug.c (objfile::expand_symtabs_with_fullname):
+	Rewrite.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* symfile-debug.c (objfile::expand_symtabs_for_function):
 	Rewrite.
 	* quick-symbol.h (struct quick_symbol_functions)
