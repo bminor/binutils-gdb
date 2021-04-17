@@ -603,7 +603,7 @@ public:
      symbol_compare_ftype *ordered_compare);
 
   /* See quick_symbol_functions.  */
-  void expand_symtabs_matching
+  bool expand_symtabs_matching
     (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
      const lookup_name_info *lookup_name,
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,

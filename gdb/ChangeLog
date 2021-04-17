@@ -1,5 +1,33 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (default_collect_symbol_completion_matches_break_on):
+	Update.
+	* symfile.h (expand_symtabs_matching): Return bool.
+	* symfile.c (expand_symtabs_matching): Return bool.
+	* symfile-debug.c (objfile::expand_symtabs_matching): Return
+	bool.
+	* quick-symbol.h (expand_symtabs_exp_notify_ftype): Return bool.
+	(struct quick_symbol_functions) <expand_symtabs_matching>: Return
+	bool.
+	* psymtab.c (psymbol_functions::expand_symtabs_matching): Return
+	bool.
+	* psympriv.h (struct psymbol_functions)
+	<expand_symtabs_matching>: Return bool.
+	* objfiles.h (struct objfile) <expand_symtabs_matching>: Return
+	bool.
+	* dwarf2/read.c (struct dwarf2_gdb_index)
+	<expand_symtabs_matching>: Return bool.
+	(struct dwarf2_debug_names_index) <expand_symtabs_matching>:
+	Return bool.
+	(dw2_expand_symtabs_matching_symbol): Return bool.
+	(dw2_expand_symtabs_matching_one, dw2_expand_marked_cus)
+	(dw2_expand_symtabs_matching)
+	(dwarf2_gdb_index::expand_symtabs_matching)
+	(dwarf2_debug_names_index::expand_symtabs_matching)
+	(dwarf2_debug_names_index::expand_symtabs_matching): Return bool.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* quick-symbol.h (enum block_search_flag_values): New.
 	(block_search_flags): New enum flags type.
 

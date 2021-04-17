@@ -52,9 +52,11 @@ typedef bool (expand_symtabs_file_matcher_ftype) (const char *filename,
 typedef bool (expand_symtabs_symbol_matcher_ftype) (const char *name);
 
 /* Callback for quick_symbol_functions->expand_symtabs_matching
-   to be called after a symtab has been expanded.  */
+   to be called after a symtab has been expanded.  If this returns
+   true, more symtabs are checked; if it returns false, iteration
+   stops.  */
 
-typedef void (expand_symtabs_exp_notify_ftype) (compunit_symtab *symtab);
+typedef bool (expand_symtabs_exp_notify_ftype) (compunit_symtab *symtab);
 
 /* The "quick" symbol functions exist so that symbol readers can
    avoiding an initial read of all the symbols.  For example, symbol
@@ -206,8 +208,12 @@ struct quick_symbol_functions
 
      If SYMBOL_MATCHER returns false, then the symbol is skipped.
 
-     Otherwise, the symbol's symbol table is expanded.  */
-  virtual void expand_symtabs_matching
+     Otherwise, the symbol's symbol table is expanded and the
+     notification function is called.  If the notification function
+     returns false, execution stops and this method returns false.
+     Otherwise, more files are considered.  This method will return
+     true if all calls to the notification function return true.  */
+  virtual bool expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
      const lookup_name_info *lookup_name,

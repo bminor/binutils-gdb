@@ -2283,7 +2283,7 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
      gdb::function_view<symbol_found_callback_ftype> callback,
      symbol_compare_ftype *ordered_compare) override;
 
-  void expand_symtabs_matching
+  bool expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
      const lookup_name_info *lookup_name,
@@ -2312,7 +2312,7 @@ struct dwarf2_debug_names_index : public dwarf2_base_index_functions
      gdb::function_view<symbol_found_callback_ftype> callback,
      symbol_compare_ftype *ordered_compare) override;
 
-  void expand_symtabs_matching
+  bool expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
      const lookup_name_info *lookup_name,
@@ -3822,7 +3822,7 @@ dwarf2_base_index_functions::expand_symtabs_with_fullname
     }
 }
 
-static void
+static bool
 dw2_expand_symtabs_matching_symbol
   (mapped_index_base &index,
    const lookup_name_info &lookup_name_in,
@@ -3830,7 +3830,7 @@ dw2_expand_symtabs_matching_symbol
    gdb::function_view<bool (offset_type)> match_callback,
    dwarf2_per_objfile *per_objfile);
 
-static void
+static bool
 dw2_expand_symtabs_matching_one
   (dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
@@ -4125,7 +4125,7 @@ mapped_index_base::build_name_components (dwarf2_per_objfile *per_objfile)
    symbol name that matches, calls MATCH_CALLBACK, passing it the
    symbol's index in the mapped_index_base symbol table.  */
 
-static void
+static bool
 dw2_expand_symtabs_matching_symbol
   (mapped_index_base &index,
    const lookup_name_info &lookup_name_in,
@@ -4210,12 +4210,16 @@ dw2_expand_symtabs_matching_symbol
 
   /* Finally call the callback, once per match.  */
   ULONGEST prev = -1;
+  bool result = true;
   for (offset_type idx : matches)
     {
       if (prev != idx)
 	{
 	  if (!match_callback (idx))
-	    break;
+	    {
+	      result = false;
+	      break;
+	    }
 	  prev = idx;
 	}
     }
@@ -4223,6 +4227,8 @@ dw2_expand_symtabs_matching_symbol
   /* Above we use a type wider than idx's for 'prev', since 0 and
      (offset_type)-1 are both possible values.  */
   static_assert (sizeof (prev) > sizeof (offset_type), "");
+
+  return result;
 }
 
 #if GDB_SELF_TEST
@@ -4663,7 +4669,7 @@ run_test ()
    dw_expand_symtabs_matching_file_matcher), expand the CU and call
    EXPANSION_NOTIFY on it.  */
 
-static void
+static bool
 dw2_expand_symtabs_matching_one
   (dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
@@ -4679,15 +4685,16 @@ dw2_expand_symtabs_matching_one
       gdb_assert (symtab != nullptr);
 
       if (expansion_notify != NULL && symtab_was_null)
-	expansion_notify (symtab);
+	return expansion_notify (symtab);
     }
+  return true;
 }
 
 /* Helper for dw2_expand_matching symtabs.  Called on each symbol
    matched, to expand corresponding CUs that were marked.  IDX is the
    index of the symbol name that matched.  */
 
-static void
+static bool
 dw2_expand_marked_cus
   (dwarf2_per_objfile *per_objfile, offset_type idx,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -4764,9 +4771,12 @@ dw2_expand_marked_cus
 	}
 
       dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cutu (cu_index);
-      dw2_expand_symtabs_matching_one (per_cu, per_objfile, file_matcher,
-				       expansion_notify);
+      if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile, file_matcher,
+					    expansion_notify))
+	return false;
     }
+
+  return true;
 }
 
 /* If FILE_MATCHER is non-NULL, set all the
@@ -4846,7 +4856,7 @@ dw_expand_symtabs_matching_file_matcher
     }
 }
 
-void
+bool
 dwarf2_gdb_index::expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -4859,7 +4869,7 @@ dwarf2_gdb_index::expand_symtabs_matching
 
   /* index_table is NULL if OBJF_READNOW.  */
   if (!per_objfile->per_bfd->index_table)
-    return;
+    return true;
 
   dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
 
@@ -4869,22 +4879,28 @@ dwarf2_gdb_index::expand_symtabs_matching
 	{
 	  QUIT;
 
-	  dw2_expand_symtabs_matching_one (per_cu, per_objfile,
-					   file_matcher, expansion_notify);
+	  if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile,
+						file_matcher,
+						expansion_notify))
+	    return false;
 	}
-      return;
+      return true;
     }
 
   mapped_index &index = *per_objfile->per_bfd->index_table;
 
-  dw2_expand_symtabs_matching_symbol (index, *lookup_name,
-				      symbol_matcher,
-				      [&] (offset_type idx)
+  bool result
+    = dw2_expand_symtabs_matching_symbol (index, *lookup_name,
+					  symbol_matcher,
+					  [&] (offset_type idx)
     {
-      dw2_expand_marked_cus (per_objfile, idx, file_matcher, expansion_notify,
-			     kind);
+      if (!dw2_expand_marked_cus (per_objfile, idx, file_matcher,
+				  expansion_notify, kind))
+	return false;
       return true;
     }, per_objfile);
+
+  return result;
 }
 
 /* A helper for dw2_find_pc_sect_compunit_symtab which finds the most specific
@@ -5896,7 +5912,7 @@ dwarf2_debug_names_index::map_matching_symbols
     }
 }
 
-void
+bool
 dwarf2_debug_names_index::expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -5909,7 +5925,7 @@ dwarf2_debug_names_index::expand_symtabs_matching
 
   /* debug_names_table is NULL if OBJF_READNOW.  */
   if (!per_objfile->per_bfd->debug_names_table)
-    return;
+    return true;
 
   dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
 
@@ -5919,17 +5935,20 @@ dwarf2_debug_names_index::expand_symtabs_matching
 	{
 	  QUIT;
 
-	  dw2_expand_symtabs_matching_one (per_cu, per_objfile, file_matcher,
-					   expansion_notify);
+	  if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile,
+						file_matcher,
+						expansion_notify))
+	    return false;
 	}
-      return;
+      return true;
     }
 
   mapped_debug_names &map = *per_objfile->per_bfd->debug_names_table;
 
-  dw2_expand_symtabs_matching_symbol (map, *lookup_name,
-				      symbol_matcher,
-				      [&] (offset_type namei)
+  bool result
+    = dw2_expand_symtabs_matching_symbol (map, *lookup_name,
+					  symbol_matcher,
+					  [&] (offset_type namei)
     {
       /* The name was matched, now expand corresponding CUs that were
 	 marked.  */
@@ -5937,10 +5956,14 @@ dwarf2_debug_names_index::expand_symtabs_matching
 
       struct dwarf2_per_cu_data *per_cu;
       while ((per_cu = iter.next ()) != NULL)
-	dw2_expand_symtabs_matching_one (per_cu, per_objfile, file_matcher,
-					 expansion_notify);
+	if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile,
+					      file_matcher,
+					      expansion_notify))
+	  return false;
       return true;
     }, per_objfile);
+
+  return result;
 }
 
 /* Get the content of the .gdb_index section of OBJ.  SECTION_OWNER should point

@@ -265,7 +265,7 @@ objfile::map_matching_symbols
 				callback, ordered_compare);
 }
 
-void
+bool
 objfile::expand_symtabs_matching
   (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    const lookup_name_info *lookup_name,
@@ -283,8 +283,11 @@ objfile::expand_symtabs_matching
 		      search_domain_name (kind));
 
   for (const auto &iter : qf)
-    iter->expand_symtabs_matching (this, file_matcher, lookup_name,
-				   symbol_matcher, expansion_notify, kind);
+    if (!iter->expand_symtabs_matching (this, file_matcher, lookup_name,
+					symbol_matcher, expansion_notify,
+					kind))
+      return false;
+  return true;
 }
 
 struct compunit_symtab *

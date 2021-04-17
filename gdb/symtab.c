@@ -5730,6 +5730,7 @@ default_collect_symbol_completion_matches_break_on
 			       add_symtab_completions (symtab,
 						       tracker, mode, lookup_name,
 						       sym_text, word, code);
+			       return true;
 			     },
 			   ALL_DOMAIN);
 

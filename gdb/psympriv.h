@@ -541,7 +541,7 @@ struct psymbol_functions : public quick_symbol_functions
      gdb::function_view<symbol_found_callback_ftype> callback,
      symbol_compare_ftype *ordered_compare) override;
 
-  void expand_symtabs_matching
+  bool expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
      const lookup_name_info *lookup_name,

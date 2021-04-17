@@ -3716,7 +3716,7 @@ symfile_free_objfile (struct objfile *objfile)
    Expand all symtabs that match the specified criteria.
    See quick_symbol_functions.expand_symtabs_matching for details.  */
 
-void
+bool
 expand_symtabs_matching
   (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    const lookup_name_info &lookup_name,
@@ -3725,10 +3725,12 @@ expand_symtabs_matching
    enum search_domain kind)
 {
   for (objfile *objfile : current_program_space->objfiles ())
-    objfile->expand_symtabs_matching (file_matcher,
-				      &lookup_name,
-				      symbol_matcher,
-				      expansion_notify, kind);
+    if (!objfile->expand_symtabs_matching (file_matcher,
+					   &lookup_name,
+					   symbol_matcher,
+					   expansion_notify, kind))
+      return false;
+  return true;
 }
 
 /* Wrapper around the quick_symbol_functions map_symbol_filenames "method".

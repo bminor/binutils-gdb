@@ -1293,7 +1293,7 @@ recursively_search_psymtabs
 /* Psymtab version of expand_symtabs_matching.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 
-void
+bool
 psymbol_functions::expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
@@ -1346,9 +1346,12 @@ psymbol_functions::expand_symtabs_matching
 	    psymtab_to_symtab (objfile, ps);
 
 	  if (expansion_notify != NULL)
-	    expansion_notify (symtab);
+	    if (!expansion_notify (symtab))
+	      return false;
 	}
     }
+
+  return true;
 }
 
 /* Psymtab version of has_symbols.  See its definition in
