@@ -12516,6 +12516,7 @@ ada_add_global_exceptions (compiled_regex *preg,
 			     return name_matches_regex (decoded.c_str (), preg);
 			   },
 			   NULL,
+			   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
 			   VARIABLES_DOMAIN);
 
   for (objfile *objfile : current_program_space->objfiles ())
@@ -13032,6 +13033,7 @@ public:
 			     lookup_name,
 			     NULL,
 			     NULL,
+			     SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
 			     ALL_DOMAIN);
 
     /* At this point scan through the misc symbol vectors and add each

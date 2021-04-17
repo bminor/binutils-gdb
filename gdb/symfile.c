@@ -3722,13 +3722,16 @@ expand_symtabs_matching
    const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   block_search_flags search_flags,
    enum search_domain kind)
 {
   for (objfile *objfile : current_program_space->objfiles ())
     if (!objfile->expand_symtabs_matching (file_matcher,
 					   &lookup_name,
 					   symbol_matcher,
-					   expansion_notify, kind))
+					   expansion_notify,
+					   search_flags,
+					   kind))
       return false;
   return true;
 }

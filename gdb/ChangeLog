@@ -1,5 +1,47 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (global_symbol_searcher::expand_symtabs)
+	(default_collect_symbol_completion_matches_break_on): Update.
+	* symmisc.c (maintenance_expand_symtabs): Update.
+	* symfile.h (expand_symtabs_matching): Add search_flags
+	parameter.
+	* symfile.c (expand_symtabs_matching): Add search_flags
+	parameter.
+	* symfile-debug.c (objfile::expand_symtabs_matching): Add
+	search_flags parameter.
+	* quick-symbol.h (struct quick_symbol_functions)
+	<expand_symtabs_matching>: Add search_flags parameter.
+	* python/py-symbol.c (gdbpy_lookup_static_symbols): Update.
+	* psymtab.c (recursively_search_psymtabs)
+	(psymbol_functions::expand_symtabs_matching): Add search_flags
+	parameter.
+	* psympriv.h (struct psymbol_functions) <expand_symtabs_matching>:
+	Add search_flags parameter.
+	* objfiles.h (struct objfile) <expand_symtabs_matching>: Add
+	search_flags parameter.
+	* linespec.c (iterate_over_all_matching_symtabs): Update.
+	* dwarf2/read.c (struct dwarf2_gdb_index)
+	<expand_symtabs_matching>: Add search_flags parameter.
+	(struct dwarf2_debug_names_index) <expand_symtabs_matching>: Add
+	search_flags parameter.
+	(dw2_map_matching_symbols): Update.
+	(dw2_expand_marked_cus, dw2_expand_symtabs_matching)
+	(dwarf2_gdb_index::expand_symtabs_matching): Add search_flags
+	parameter.
+	(dw2_debug_names_iterator): Change block_index to search flags.
+	<m_block_index>: Likewise.
+	(dw2_debug_names_iterator::next)
+	(dwarf2_debug_names_index::lookup_symbol)
+	(dwarf2_debug_names_index::expand_symtabs_for_function)
+	(dwarf2_debug_names_index::map_matching_symbols)
+	(dwarf2_debug_names_index::map_matching_symbols): Update.
+	(dwarf2_debug_names_index::expand_symtabs_matching): Add
+	search_flags parameter.
+	* ada-lang.c (ada_add_global_exceptions)
+	(collect_symbol_completion_matches): Update.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (default_collect_symbol_completion_matches_break_on):
 	Update.
 	* symfile.h (expand_symtabs_matching): Return bool.

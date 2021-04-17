@@ -2289,6 +2289,7 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
      const lookup_name_info *lookup_name,
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     block_search_flags search_flags,
      enum search_domain kind) override;
 };
 
@@ -2318,6 +2319,7 @@ struct dwarf2_debug_names_index : public dwarf2_base_index_functions
      const lookup_name_info *lookup_name,
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     block_search_flags search_flags,
      enum search_domain kind) override;
 };
 
@@ -4699,6 +4701,7 @@ dw2_expand_marked_cus
   (dwarf2_per_objfile *per_objfile, offset_type idx,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   block_search_flags search_flags,
    search_domain kind)
 {
   offset_type *vec, vec_len, vec_idx;
@@ -4738,6 +4741,17 @@ dw2_expand_marked_cus
       /* Only check the symbol's kind if it has one.  */
       if (attrs_valid)
 	{
+	  if (is_static)
+	    {
+	      if ((search_flags & SEARCH_STATIC_BLOCK) == 0)
+		continue;
+	    }
+	  else
+	    {
+	      if ((search_flags & SEARCH_GLOBAL_BLOCK) == 0)
+		continue;
+	    }
+
 	  switch (kind)
 	    {
 	    case VARIABLES_DOMAIN:
@@ -4863,6 +4877,7 @@ dwarf2_gdb_index::expand_symtabs_matching
      const lookup_name_info *lookup_name,
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     block_search_flags search_flags,
      enum search_domain kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
@@ -4895,7 +4910,7 @@ dwarf2_gdb_index::expand_symtabs_matching
 					  [&] (offset_type idx)
     {
       if (!dw2_expand_marked_cus (per_objfile, idx, file_matcher,
-				  expansion_notify, kind))
+				  expansion_notify, search_flags, kind))
 	return false;
       return true;
     }, per_objfile);
@@ -5373,7 +5388,7 @@ class dw2_debug_names_iterator
 {
 public:
   dw2_debug_names_iterator (const mapped_debug_names &map,
-			    gdb::optional<block_enum> block_index,
+			    block_search_flags block_index,
 			    domain_enum domain,
 			    const char *name, dwarf2_per_objfile *per_objfile)
     : m_map (map), m_block_index (block_index), m_domain (domain),
@@ -5382,7 +5397,8 @@ public:
   {}
 
   dw2_debug_names_iterator (const mapped_debug_names &map,
-			    search_domain search, uint32_t namei, dwarf2_per_objfile *per_objfile)
+			    search_domain search, uint32_t namei,
+			    dwarf2_per_objfile *per_objfile)
     : m_map (map),
       m_search (search),
       m_addr (find_vec_in_debug_names (map, namei, per_objfile)),
@@ -5390,7 +5406,7 @@ public:
   {}
 
   dw2_debug_names_iterator (const mapped_debug_names &map,
-			    block_enum block_index, domain_enum domain,
+			    block_search_flags block_index, domain_enum domain,
 			    uint32_t namei, dwarf2_per_objfile *per_objfile)
     : m_map (map), m_block_index (block_index), m_domain (domain),
       m_addr (find_vec_in_debug_names (map, namei, per_objfile)),
@@ -5411,9 +5427,9 @@ private:
   /* The internalized form of .debug_names.  */
   const mapped_debug_names &m_map;
 
-  /* If set, only look for symbols that match that block.  Valid values are
-     GLOBAL_BLOCK and STATIC_BLOCK.  */
-  const gdb::optional<block_enum> m_block_index;
+  /* Restrict the search to these blocks.  */
+  block_search_flags m_block_index = (SEARCH_GLOBAL_BLOCK
+				      | SEARCH_STATIC_BLOCK);
 
   /* The kind of symbol we're looking for.  */
   const domain_enum m_domain = UNDEF_DOMAIN;
@@ -5662,13 +5678,18 @@ dw2_debug_names_iterator::next ()
     goto again;
 
   /* Check static vs global.  */
-  if (symbol_linkage_ != symbol_linkage::unknown && m_block_index.has_value ())
+  if (symbol_linkage_ != symbol_linkage::unknown)
     {
-	const bool want_static = *m_block_index == STATIC_BLOCK;
-	const bool symbol_is_static =
-	  symbol_linkage_ == symbol_linkage::static_;
-	if (want_static != symbol_is_static)
-	  goto again;
+      if (symbol_linkage_ == symbol_linkage::static_)
+	{
+	  if ((m_block_index & SEARCH_STATIC_BLOCK) == 0)
+	    goto again;
+	}
+      else
+	{
+	  if ((m_block_index & SEARCH_GLOBAL_BLOCK) == 0)
+	    goto again;
+	}
     }
 
   /* Match dw2_symtab_iter_next, symbol_kind
@@ -5783,7 +5804,11 @@ dwarf2_debug_names_index::lookup_symbol
     }
   const auto &map = *mapp;
 
-  dw2_debug_names_iterator iter (map, block_index, domain, name, per_objfile);
+  dw2_debug_names_iterator iter (map,
+				 block_index == GLOBAL_BLOCK
+				 ? SEARCH_GLOBAL_BLOCK
+				 : SEARCH_STATIC_BLOCK,
+				 domain, name, per_objfile);
 
   struct compunit_symtab *stab_best = NULL;
   struct dwarf2_per_cu_data *per_cu;
@@ -5845,7 +5870,10 @@ dwarf2_debug_names_index::expand_symtabs_for_function
     {
       const mapped_debug_names &map = *per_objfile->per_bfd->debug_names_table;
 
-      dw2_debug_names_iterator iter (map, {}, VAR_DOMAIN, func_name,
+      dw2_debug_names_iterator iter (map,
+				     (SEARCH_GLOBAL_BLOCK
+				      | SEARCH_STATIC_BLOCK),
+				     VAR_DOMAIN, func_name,
 				     per_objfile);
 
       struct dwarf2_per_cu_data *per_cu;
@@ -5870,6 +5898,8 @@ dwarf2_debug_names_index::map_matching_symbols
 
   mapped_debug_names &map = *per_objfile->per_bfd->debug_names_table;
   const block_enum block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
+  const block_search_flags block_flags
+    = global ? SEARCH_GLOBAL_BLOCK : SEARCH_STATIC_BLOCK;
 
   const char *match_name = name.ada ().lookup_name ().c_str ();
   auto matcher = [&] (const char *symname)
@@ -5884,7 +5914,7 @@ dwarf2_debug_names_index::map_matching_symbols
     {
       /* The name was matched, now expand corresponding CUs that were
 	 marked.  */
-      dw2_debug_names_iterator iter (map, block_kind, domain, namei,
+      dw2_debug_names_iterator iter (map, block_flags, domain, namei,
 				     per_objfile);
 
       struct dwarf2_per_cu_data *per_cu;
@@ -5919,6 +5949,7 @@ dwarf2_debug_names_index::expand_symtabs_matching
    const lookup_name_info *lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   block_search_flags search_flags,
    enum search_domain kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);

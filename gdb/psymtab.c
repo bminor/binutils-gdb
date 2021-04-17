@@ -1207,6 +1207,7 @@ static bool
 recursively_search_psymtabs
   (struct partial_symtab *ps,
    struct objfile *objfile,
+   block_search_flags search_flags,
    enum search_domain domain,
    const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> sym_matcher)
@@ -1229,8 +1230,8 @@ recursively_search_psymtabs
 	continue;
 
       r = recursively_search_psymtabs (ps->dependencies[i],
-				       objfile, domain, lookup_name,
-				       sym_matcher);
+				       objfile, search_flags, domain,
+				       lookup_name, sym_matcher);
       if (r != 0)
 	{
 	  ps->searched_flag = PST_SEARCHED_AND_FOUND;
@@ -1247,11 +1248,24 @@ recursively_search_psymtabs
   /* Go through all of the symbols stored in a partial
      symtab in one loop.  */
   partial_symbol **psym = ps->global_psymbols.data ();
+
+  if ((search_flags & SEARCH_GLOBAL_BLOCK) == 0)
+    {
+      if (ps->static_psymbols.empty ())
+	keep_going = 0;
+      else
+	{
+	  psym = ps->static_psymbols.data ();
+	  bound = sbound;
+	}
+    }
+
   while (keep_going)
     {
       if (psym >= bound)
 	{
-	  if (bound == gbound && !ps->static_psymbols.empty ())
+	  if (bound == gbound && !ps->static_psymbols.empty ()
+	      && (search_flags & SEARCH_STATIC_BLOCK) != 0)
 	    {
 	      psym = ps->static_psymbols.data ();
 	      bound = sbound;
@@ -1300,6 +1314,7 @@ psymbol_functions::expand_symtabs_matching
    const lookup_name_info *lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+   block_search_flags search_flags,
    enum search_domain domain)
 {
   /* Clear the search flags.  */
@@ -1338,7 +1353,7 @@ psymbol_functions::expand_symtabs_matching
 	}
 
       if ((symbol_matcher == NULL && lookup_name == NULL)
-	  || recursively_search_psymtabs (ps, objfile, domain,
+	  || recursively_search_psymtabs (ps, objfile, search_flags, domain,
 					  *psym_lookup_name,
 					  symbol_matcher))
 	{
