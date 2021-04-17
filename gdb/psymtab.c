@@ -432,57 +432,6 @@ find_pc_sect_psymbol (struct objfile *objfile,
   return best;
 }
 
-/* Psymtab version of lookup_symbol.  See its definition in
-   the definition of quick_symbol_functions in symfile.h.  */
-
-struct compunit_symtab *
-psymbol_functions::lookup_symbol (struct objfile *objfile,
-				  block_enum block_index, const char *name,
-				  const domain_enum domain)
-{
-  const int psymtab_index = (block_index == GLOBAL_BLOCK ? 1 : 0);
-  struct compunit_symtab *stab_best = NULL;
-
-  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
-
-  lookup_name_info psym_lookup_name = lookup_name.make_ignore_params ();
-
-  for (partial_symtab *ps : require_partial_symbols (objfile))
-    {
-      if (!ps->readin_p (objfile)
-	  && lookup_partial_symbol (objfile, ps, psym_lookup_name,
-				    psymtab_index, domain))
-	{
-	  struct symbol *sym, *with_opaque = NULL;
-	  struct compunit_symtab *stab = psymtab_to_symtab (objfile, ps);
-	  /* Note: While psymtab_to_symtab can return NULL if the
-	     partial symtab is empty, we can assume it won't here
-	     because lookup_partial_symbol succeeded.  */
-	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
-	  const struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
-
-	  sym = block_find_symbol (block, name, domain,
-				   block_find_non_opaque_type_preferred,
-				   &with_opaque);
-
-	  /* Some caution must be observed with overloaded functions
-	     and methods, since the index will not contain any overload
-	     information (but NAME might contain it).  */
-
-	  if (sym != NULL
-	      && SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
-	    return stab;
-	  if (with_opaque != NULL
-	      && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, lookup_name))
-	    stab_best = stab;
-
-	  /* Keep looking through other psymtabs.  */
-	}
-    }
-
-  return stab_best;
-}
-
 /* Psymtab version of lookup_global_symbol_language.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 

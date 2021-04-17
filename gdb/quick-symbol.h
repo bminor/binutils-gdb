@@ -109,21 +109,6 @@ struct quick_symbol_functions
     (struct objfile *objfile, const char *name, const char *real_path,
      gdb::function_view<bool (symtab *)> callback) = 0;
 
-  /* Check to see if the symbol is defined in a "partial" symbol table
-     of OBJFILE.  BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
-     depending on whether we want to search global symbols or static
-     symbols.  NAME is the name of the symbol to look for.  DOMAIN
-     indicates what sort of symbol to search for.
-
-     Returns the newly-expanded compunit in which the symbol is
-     defined, or NULL if no such symbol table exists.  If OBJFILE
-     contains !TYPE_OPAQUE symbol prefer its compunit.  If it contains
-     only TYPE_OPAQUE symbol(s), return at least that compunit.  */
-  virtual struct compunit_symtab *lookup_symbol (struct objfile *objfile,
-						 block_enum block_index,
-						 const char *name,
-						 domain_enum domain) = 0;
-
   /* Check to see if the global symbol is defined in a "partial" symbol table
      of OBJFILE. NAME is the name of the symbol to look for.  DOMAIN
      indicates what sort of symbol to search for.

@@ -1,5 +1,19 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	* symfile-debug.c (objfile::lookup_symbol): Rewrite.
+	* quick-symbol.h (struct quick_symbol_functions) <lookup_symbol>:
+	Remove.
+	* psymtab.c (psymbol_functions::lookup_symbol): Remove.
+	* psympriv.h (struct psymbol_functions) <lookup_symbol>: Remove.
+	* objfiles.h (struct objfile) <lookup_symbol>: Add comment.
+	* dwarf2/read.c (struct dwarf2_gdb_index) <lookup_symbol>:
+	Remove.
+	(struct dwarf2_debug_names_index) <lookup_symbol>: Remove.
+	(dwarf2_gdb_index::lookup_symbol)
+	(dwarf2_debug_names_index::lookup_symbol): Remove.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (global_symbol_searcher::expand_symtabs): Update.
 	* symmisc.c (maintenance_expand_symtabs): Update.
 	* symfile.c (expand_symtabs_matching): Update.

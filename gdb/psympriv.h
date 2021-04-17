@@ -511,11 +511,6 @@ struct psymbol_functions : public quick_symbol_functions
     (struct objfile *objfile, const char *name, const char *real_path,
      gdb::function_view<bool (symtab *)> callback) override;
 
-  struct compunit_symtab *lookup_symbol (struct objfile *objfile,
-					 block_enum block_index,
-					 const char *name,
-					 domain_enum domain) override;
-
   enum language lookup_global_symbol_language (struct objfile *objfile,
 					       const char *name,
 					       domain_enum domain,

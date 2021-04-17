@@ -2265,11 +2265,6 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
 
 struct dwarf2_gdb_index : public dwarf2_base_index_functions
 {
-  struct compunit_symtab *lookup_symbol (struct objfile *objfile,
-					 block_enum block_index,
-					 const char *name,
-					 domain_enum domain) override;
-
   void dump (struct objfile *objfile) override;
 
   void expand_symtabs_for_function (struct objfile *objfile,
@@ -2296,11 +2291,6 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
 
 struct dwarf2_debug_names_index : public dwarf2_base_index_functions
 {
-  struct compunit_symtab *lookup_symbol (struct objfile *objfile,
-					 block_enum block_index,
-					 const char *name,
-					 domain_enum domain) override;
-
   void dump (struct objfile *objfile) override;
 
   void expand_symtabs_for_function (struct objfile *objfile,
@@ -3665,50 +3655,6 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
     }
 
   return NULL;
-}
-
-struct compunit_symtab *
-dwarf2_gdb_index::lookup_symbol (struct objfile *objfile,
-				 block_enum block_index,
-				 const char *name, domain_enum domain)
-{
-  struct compunit_symtab *stab_best = NULL;
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-
-  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
-
-  struct dw2_symtab_iterator iter;
-  struct dwarf2_per_cu_data *per_cu;
-
-  dw2_symtab_iter_init (&iter, per_objfile, block_index, domain, name);
-
-  while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
-    {
-      struct symbol *sym, *with_opaque = NULL;
-      struct compunit_symtab *stab
-	= dw2_instantiate_symtab (per_cu, per_objfile, false);
-      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
-      const struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
-
-      sym = block_find_symbol (block, name, domain,
-			       block_find_non_opaque_type_preferred,
-			       &with_opaque);
-
-      /* Some caution must be observed with overloaded functions
-	 and methods, since the index will not contain any overload
-	 information (but NAME might contain it).  */
-
-      if (sym != NULL
-	  && SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
-	return stab;
-      if (with_opaque != NULL
-	  && SYMBOL_MATCHES_SEARCH_NAME (with_opaque, lookup_name))
-	stab_best = stab;
-
-      /* Keep looking through other CUs.  */
-    }
-
-  return stab_best;
 }
 
 void
@@ -5792,58 +5738,6 @@ dw2_debug_names_iterator::next ()
     }
 
   return per_cu;
-}
-
-struct compunit_symtab *
-dwarf2_debug_names_index::lookup_symbol
-     (struct objfile *objfile, block_enum block_index,
-      const char *name, domain_enum domain)
-{
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-
-  const auto &mapp = per_objfile->per_bfd->debug_names_table;
-  if (!mapp)
-    {
-      /* index is NULL if OBJF_READNOW.  */
-      return NULL;
-    }
-  const auto &map = *mapp;
-
-  dw2_debug_names_iterator iter (map,
-				 block_index == GLOBAL_BLOCK
-				 ? SEARCH_GLOBAL_BLOCK
-				 : SEARCH_STATIC_BLOCK,
-				 domain, name, per_objfile);
-
-  struct compunit_symtab *stab_best = NULL;
-  struct dwarf2_per_cu_data *per_cu;
-  while ((per_cu = iter.next ()) != NULL)
-    {
-      struct symbol *sym, *with_opaque = NULL;
-      compunit_symtab *stab
-	= dw2_instantiate_symtab (per_cu, per_objfile, false);
-      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
-      const struct block *block = BLOCKVECTOR_BLOCK (bv, block_index);
-
-      sym = block_find_symbol (block, name, domain,
-			       block_find_non_opaque_type_preferred,
-			       &with_opaque);
-
-      /* Some caution must be observed with overloaded functions and
-	 methods, since the index will not contain any overload
-	 information (but NAME might contain it).  */
-
-      if (sym != NULL
-	  && strcmp_iw (sym->search_name (), name) == 0)
-	return stab;
-      if (with_opaque != NULL
-	  && strcmp_iw (with_opaque->search_name (), name) == 0)
-	stab_best = stab;
-
-      /* Keep looking through other CUs.  */
-    }
-
-  return stab_best;
 }
 
 /* This dumps minimal information about .debug_names.  It is called

@@ -32,6 +32,7 @@
 #include "source.h"
 #include "symtab.h"
 #include "symfile.h"
+#include "block.h"
 
 /* We need to save a pointer to the real symbol functions.
    Plus, the debug versions are malloc'd because we have to NULL out the
@@ -173,10 +174,49 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
 		      objfile_debug_name (this), kind, name,
 		      domain_name (domain));
 
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+
+  auto search_one_symtab = [&] (compunit_symtab *stab)
+  {
+    struct symbol *sym, *with_opaque = NULL;
+    const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
+    const struct block *block = BLOCKVECTOR_BLOCK (bv, kind);
+
+    sym = block_find_symbol (block, name, domain,
+			     block_find_non_opaque_type_preferred,
+			     &with_opaque);
+
+    /* Some caution must be observed with overloaded functions
+       and methods, since the index will not contain any overload
+       information (but NAME might contain it).  */
+
+    if (sym != NULL
+	&& SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
+      {
+	retval = stab;
+	/* Found it.  */
+	return false;
+      }
+    if (with_opaque != NULL
+	&& SYMBOL_MATCHES_SEARCH_NAME (with_opaque, lookup_name))
+      retval = stab;
+
+    /* Keep looking through other psymtabs.  */
+    return true;
+  };
+
   for (const auto &iter : qf)
     {
-      retval = iter->lookup_symbol (this, kind, name, domain);
-      if (retval != nullptr)
+      if (!iter->expand_symtabs_matching (this,
+					  nullptr,
+					  &lookup_name,
+					  nullptr,
+					  search_one_symtab,
+					  kind == GLOBAL_BLOCK
+					  ? SEARCH_GLOBAL_BLOCK
+					  : SEARCH_STATIC_BLOCK,
+					  domain,
+					  ALL_DOMAIN))
 	break;
     }
 
