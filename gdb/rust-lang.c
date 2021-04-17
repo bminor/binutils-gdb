@@ -1574,7 +1574,7 @@ rust_language::print_type (struct type *type, const char *varstring,
 			   struct ui_file *stream, int show, int level,
 			   const struct type_print_options *flags) const
 {
-  print_offset_data podata;
+  print_offset_data podata (flags);
   rust_internal_print_type (type, varstring, stream, show, level,
 			    flags, false, &podata);
 }

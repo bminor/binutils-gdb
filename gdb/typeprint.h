@@ -40,6 +40,9 @@ struct type_print_options
   /* True means to print offsets, a la 'pahole'.  */
   unsigned int print_offsets : 1;
 
+  /* True means to print offsets in hex, otherwise use decimal.  */
+  unsigned int print_in_hex : 1;
+
   /* The number of nested type definitions to print.  -1 == all.  */
   int print_nested_type_limit;
 
@@ -58,6 +61,10 @@ struct type_print_options
 
 struct print_offset_data
 {
+  /* Indicate if the offset an d size fields should be printed in decimal
+     (default) or hexadecimal.  */
+  bool print_in_hex  = false;
+
   /* The offset to be applied to bitpos when PRINT_OFFSETS is true.
      This is needed for when we are printing nested structs and want
      to make sure that the printed offset for each field carries over
@@ -91,6 +98,8 @@ struct print_offset_data
      amount of whitespaces when no offset info should be printed for a
      certain field.  */
   static const int indentation;
+
+  explicit print_offset_data (const struct type_print_options *flags);
 
 private:
 

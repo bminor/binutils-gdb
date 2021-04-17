@@ -1,3 +1,10 @@
+2021-04-25  Lancelot Six  <lsix@lancelotsix.com>
+
+	PR gdb/22640
+	* gdb.texinfo (Symbols): Describe the 'x' and 'd' flags of the
+	ptype command, describe 'set print type hex' and 'show print
+	type hex' commands.  Update 'ptype/o' examples.
+
 2021-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.texinfo (GDB/MI Breakpoint Information): Update the

@@ -1,5 +1,32 @@
 2021-04-25  Lancelot Six  <lsix@lancelotsix.com>
 
+	PR gdb/22640
+	* typeprint.h (struct type_print_options): Add print_in_hex
+	flag.
+	(struct print_offset_data): Add print_in_hex flag, add a
+	constructor accepting a type_print_options* argument.
+	* typeprint.c (type_print_raw_options, default_ptype_flags): Set
+	default value for print_in_hex.
+	(print_offset_data::indentation): Allow more horizontal space.
+	(print_offset_data::print_offset_data): Add ctor.
+	(print_offset_data::maybe_print_hole, print_offset_data::update):
+	Handle the print_in_hex flag.
+	(whatis_exp): Handle 'x' and 'd' flags.
+	(print_offsets_and_sizes_in_hex): Declare.
+	(set_print_offsets_and_sizes_in_hex): Create.
+	(show_print_offsets_and_sizes_in_hex): Create.
+	(_initialize_typeprint): Update help message for the ptype
+	command, register the 'set print type hex' and 'show print type
+	hex' commands.
+	* c-typeprint.c (c_print_type, c_type_print_base_struct_union)
+	(c_type_print_base): Construct the print_offset_data
+	object using the type_print_optons parameter.
+	* rust-lang.c (rust_language::print_type): Construct the
+	print_offset_data object using the type_print_optons parameter.
+	* NEWS: Mention the new flags of the ptype command.
+
+2021-04-25  Lancelot Six  <lsix@lancelotsix.com>
+
 	* typeprint.h (struct type_print_options): Move before
 	print_offset_data.
 

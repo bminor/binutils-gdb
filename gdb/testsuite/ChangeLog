@@ -1,3 +1,14 @@
+2021-04-25  Lancelot Six  <lsix@lancelotsix.com>
+
+	PR gdb/22640
+	* gdb.base/ptype-offsets.exp: Add tests to verify the behavior
+	of 'ptype/ox' and 'ptype/od'. Check that 'set print type hex'
+	changes the default behavior of 'ptype/o'.  Update to take into
+	account new horizontal layout.
+	* gdb.rust/simple.exp: Update ptype test to check new horizontal
+	layout.
+	* gdb.rust/union.exp: Same.
+
 2021-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/info_sources.exp: Add new tests.

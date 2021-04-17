@@ -101,6 +101,11 @@ show startup-quietly
   initialization file (e.g. ~/.config/gdb/gdbearlyinit) in order to
   affect GDB.
 
+set print type hex on|off
+show print type hex
+  When 'on', the 'ptype' command uses hexadecimal notation to print sizes
+  and offsets of struct members.  When 'off', decimal notation is used.
+
 * Changed commands
 
 break [PROBE_MODIFIER] [LOCATION] [thread THREADNUM]
@@ -144,6 +149,13 @@ maintenance info sections
   The ALLOBJ keyword has been replaced with an -all-objects command
   line flag.  It is now possible to filter which sections are printed
   even when -all-objects is passed.
+
+ptype[/FLAGS] TYPE | EXPRESSION
+  The 'ptype' command has two new flags.  When '/x' is set, hexadecimal
+  notation is used when printing sizes and offsets of struct members.
+  When '/d' is set, decimal notation is used when printing sizes and
+  offsets of struct members.  Default behavior is given by 'show print
+  type hex'.
 
 * Removed targets and native configurations
 

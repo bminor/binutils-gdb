@@ -18885,6 +18885,21 @@ types.
 This command shows the current setting of typedef display when
 printing classes.
 
+@kindex set print type hex
+@item set print type hex
+@itemx set print type hex on
+@itemx set print type hex off
+
+When @value{GDBN} prints sizes and offsets of struct members, it can use
+either the decimal or hexadecimal notation.  You can select one or the
+other either by passing the appropriate flag to @code{ptype}, or by using
+the @command{set print type hex} command.
+
+@kindex show print type hex
+@item show print type hex
+This command shows whether the sizes and offsets of struct members are
+printed in decimal or hexadecimal notation.
+
 @kindex info address
 @cindex address of a symbol
 @item info address @var{symbol}
@@ -18997,6 +19012,14 @@ exists in case you change the default with @command{set print type typedefs}.
 Print the offsets and sizes of fields in a struct, similar to what the
 @command{pahole} tool does.  This option implies the @code{/tm} flags.
 
+@item x
+Use hexadecimal notation when printing offsets and sizes of fields in a
+struct.
+
+@item d
+Use decimal notation when printing offsets and sizes of fields in a
+struct.
+
 For example, given the following declarations:
 
 @smallexample
@@ -19037,14 +19060,14 @@ Issuing a @kbd{ptype /o struct tuv} command would print:
 
 @smallexample
 (@value{GDBP}) ptype /o struct tuv
-/* offset    |  size */  type = struct tuv @{
-/*    0      |     4 */    int a1;
-/* XXX  4-byte hole  */
-/*    8      |     8 */    char *a2;
-/*   16      |     4 */    int a3;
+/* offset      |    size */  type = struct tuv @{
+/*      0      |       4 */    int a1;
+/* XXX  4-byte hole      */
+/*      8      |       8 */    char *a2;
+/*     16      |       4 */    int a3;
 
-                           /* total size (bytes):   24 */
-                         @}
+                               /* total size (bytes):   24 */
+                             @}
 @end smallexample
 
 Notice the format of the first column of comments.  There, you can
@@ -19059,34 +19082,34 @@ It is also possible to print offsets inside an union:
 
 @smallexample
 (@value{GDBP}) ptype /o union qwe
-/* offset    |  size */  type = union qwe @{
-/*                24 */    struct tuv @{
-/*    0      |     4 */        int a1;
-/* XXX  4-byte hole  */
-/*    8      |     8 */        char *a2;
-/*   16      |     4 */        int a3;
-
-                               /* total size (bytes):   24 */
-                           @} fff1;
-/*                40 */    struct xyz @{
-/*    0      |     4 */        int f1;
-/*    4      |     1 */        char f2;
-/* XXX  3-byte hole  */
-/*    8      |     8 */        void *f3;
-/*   16      |    24 */        struct tuv @{
-/*   16      |     4 */            int a1;
-/* XXX  4-byte hole  */
-/*   24      |     8 */            char *a2;
-/*   32      |     4 */            int a3;
+/* offset      |    size */  type = union qwe @{
+/*                    24 */    struct tuv @{
+/*      0      |       4 */        int a1;
+/* XXX  4-byte hole      */
+/*      8      |       8 */        char *a2;
+/*     16      |       4 */        int a3;
 
                                    /* total size (bytes):   24 */
-                               @} f4;
+                               @} fff1;
+/*                    40 */    struct xyz @{
+/*      0      |       4 */        int f1;
+/*      4      |       1 */        char f2;
+/* XXX  3-byte hole      */
+/*      8      |       8 */        void *f3;
+/*     16      |      24 */        struct tuv @{
+/*     16      |       4 */            int a1;
+/* XXX  4-byte hole      */
+/*     24      |       8 */            char *a2;
+/*     32      |       4 */            int a3;
+
+                                       /* total size (bytes):   24 */
+                                   @} f4;
+
+                                   /* total size (bytes):   40 */
+                               @} fff2;
 
                                /* total size (bytes):   40 */
-                           @} fff2;
-
-                           /* total size (bytes):   40 */
-                         @}
+                             @}
 @end smallexample
 
 In this case, since @code{struct tuv} and @code{struct xyz} occupy the
@@ -19099,20 +19122,20 @@ bitfields:
 
 @smallexample
 (@value{GDBP}) ptype /o struct tyu
-/* offset    |  size */  type = struct tyu @{
-/*    0:31   |     4 */    int a1 : 1;
-/*    0:28   |     4 */    int a2 : 3;
-/*    0: 5   |     4 */    int a3 : 23;
-/*    3: 3   |     1 */    signed char a4 : 2;
-/* XXX  3-bit hole   */
-/* XXX  4-byte hole  */
-/*    8      |     8 */    int64_t a5;
-/*   16: 0   |     4 */    int a6 : 5;
-/*   16: 5   |     8 */    int64_t a7 : 3;
-"/* XXX  7-byte padding  */
+/* offset      |    size */  type = struct tyu @{
+/*      0:31   |       4 */    int a1 : 1;
+/*      0:28   |       4 */    int a2 : 3;
+/*      0: 5   |       4 */    int a3 : 23;
+/*      3: 3   |       1 */    signed char a4 : 2;
+/* XXX  3-bit hole       */
+/* XXX  4-byte hole      */
+/*      8      |       8 */    int64_t a5;
+/*     16: 0   |       4 */    int a6 : 5;
+/*     16: 5   |       8 */    int64_t a7 : 3;
+/* XXX  7-byte padding   */
 
-                           /* total size (bytes):   24 */
-                         @}
+                               /* total size (bytes):   24 */
+                             @}
 @end smallexample
 
 Note how the offset information is now extended to also include the
