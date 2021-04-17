@@ -2263,9 +2263,6 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
 {
   void dump (struct objfile *objfile) override;
 
-  void expand_symtabs_for_function (struct objfile *objfile,
-				    const char *func_name) override;
-
   void map_matching_symbols
     (struct objfile *,
      const lookup_name_info &lookup_name,
@@ -2288,9 +2285,6 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
 struct dwarf2_debug_names_index : public dwarf2_base_index_functions
 {
   void dump (struct objfile *objfile) override;
-
-  void expand_symtabs_for_function (struct objfile *objfile,
-				    const char *func_name) override;
 
   void map_matching_symbols
     (struct objfile *,
@@ -2939,68 +2933,6 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 						 &per_bfd->obstack);
 }
 
-/* Find a slot in the mapped index INDEX for the object named NAME.
-   If NAME is found, set *VEC_OUT to point to the CU vector in the
-   constant pool and return true.  If NAME cannot be found, return
-   false.  */
-
-static bool
-find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
-			  offset_type **vec_out)
-{
-  offset_type hash;
-  offset_type slot, step;
-  int (*cmp) (const char *, const char *);
-
-  gdb::unique_xmalloc_ptr<char> without_params;
-  if (current_language->la_language == language_cplus
-      || current_language->la_language == language_fortran
-      || current_language->la_language == language_d)
-    {
-      /* NAME is already canonical.  Drop any qualifiers as .gdb_index does
-	 not contain any.  */
-
-      if (strchr (name, '(') != NULL)
-	{
-	  without_params = cp_remove_params (name);
-
-	  if (without_params != NULL)
-	    name = without_params.get ();
-	}
-    }
-
-  /* Index version 4 did not support case insensitive searches.  But the
-     indices for case insensitive languages are built in lowercase, therefore
-     simulate our NAME being searched is also lowercased.  */
-  hash = mapped_index_string_hash ((index->version == 4
-				    && case_sensitivity == case_sensitive_off
-				    ? 5 : index->version),
-				   name);
-
-  slot = hash & (index->symbol_table.size () - 1);
-  step = ((hash * 17) & (index->symbol_table.size () - 1)) | 1;
-  cmp = (case_sensitivity == case_sensitive_on ? strcmp : strcasecmp);
-
-  for (;;)
-    {
-      const char *str;
-
-      const auto &bucket = index->symbol_table[slot];
-      if (bucket.name == 0 && bucket.vec == 0)
-	return false;
-
-      str = index->constant_pool + MAYBE_SWAP (bucket.name);
-      if (!cmp (name, str))
-	{
-	  *vec_out = (offset_type *) (index->constant_pool
-				      + MAYBE_SWAP (bucket.vec));
-	  return true;
-	}
-
-      slot = (slot + step) & (index->symbol_table.size () - 1);
-    }
-}
-
 /* A helper function that reads the .gdb_index from BUFFER and fills
    in MAP.  FILENAME is the name of the file containing the data;
    it is used for error reporting.  DEPRECATED_OK is true if it is
@@ -3402,43 +3334,6 @@ struct dw2_symtab_iterator
   int global_seen;
 };
 
-/* Initialize the index symtab iterator ITER, common part.  */
-
-static void
-dw2_symtab_iter_init_common (struct dw2_symtab_iterator *iter,
-			     dwarf2_per_objfile *per_objfile,
-			     gdb::optional<block_enum> block_index,
-			     domain_enum domain)
-{
-  iter->per_objfile = per_objfile;
-  iter->block_index = block_index;
-  iter->domain = domain;
-  iter->next = 0;
-  iter->global_seen = 0;
-  iter->vec = NULL;
-  iter->length = 0;
-}
-
-/* Initialize the index symtab iterator ITER, const char *NAME variant.  */
-
-static void
-dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
-		      dwarf2_per_objfile *per_objfile,
-		      gdb::optional<block_enum> block_index,
-		      domain_enum domain,
-		      const char *name)
-{
-  dw2_symtab_iter_init_common (iter, per_objfile, block_index, domain);
-
-  mapped_index *index = per_objfile->per_bfd->index_table.get ();
-  /* index is NULL if OBJF_READNOW.  */
-  if (index == NULL)
-    return;
-
-  if (find_slot_in_mapped_hash (index, name, &iter->vec))
-    iter->length = MAYBE_SWAP (*iter->vec);
-}
-
 /* Initialize the index symtab iterator ITER, offset_type NAMEI variant.  */
 
 static void
@@ -3447,7 +3342,13 @@ dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
 		      gdb::optional<block_enum> block_index,
 		      domain_enum domain, offset_type namei)
 {
-  dw2_symtab_iter_init_common (iter, per_objfile, block_index, domain);
+  iter->per_objfile = per_objfile;
+  iter->block_index = block_index;
+  iter->domain = domain;
+  iter->next = 0;
+  iter->global_seen = 0;
+  iter->vec = NULL;
+  iter->length = 0;
 
   mapped_index *index = per_objfile->per_bfd->index_table.get ();
   /* index is NULL if OBJF_READNOW.  */
@@ -3602,22 +3503,6 @@ dwarf2_gdb_index::dump (struct objfile *objfile)
   else
     printf_filtered (" faked for \"readnow\"\n");
   printf_filtered ("\n");
-}
-
-void
-dwarf2_gdb_index::expand_symtabs_for_function (struct objfile *objfile,
-					       const char *func_name)
-{
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-
-  struct dw2_symtab_iterator iter;
-  struct dwarf2_per_cu_data *per_cu;
-
-  dw2_symtab_iter_init (&iter, per_objfile, {}, VAR_DOMAIN, func_name);
-
-  while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
-    dw2_instantiate_symtab (per_cu, per_objfile, false);
-
 }
 
 void
@@ -5658,29 +5543,6 @@ dwarf2_debug_names_index::dump (struct objfile *objfile)
   else
     printf_filtered (" faked for \"readnow\"\n");
   printf_filtered ("\n");
-}
-
-void
-dwarf2_debug_names_index::expand_symtabs_for_function
-     (struct objfile *objfile, const char *func_name)
-{
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-
-  /* per_objfile->per_bfd->debug_names_table is NULL if OBJF_READNOW.  */
-  if (per_objfile->per_bfd->debug_names_table)
-    {
-      const mapped_debug_names &map = *per_objfile->per_bfd->debug_names_table;
-
-      dw2_debug_names_iterator iter (map,
-				     (SEARCH_GLOBAL_BLOCK
-				      | SEARCH_STATIC_BLOCK),
-				     VAR_DOMAIN, func_name,
-				     per_objfile);
-
-      struct dwarf2_per_cu_data *per_cu;
-      while ((per_cu = iter.next ()) != NULL)
-	dw2_instantiate_symtab (per_cu, per_objfile, false);
-    }
 }
 
 void

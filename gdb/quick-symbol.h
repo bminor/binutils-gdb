@@ -116,11 +116,6 @@ struct quick_symbol_functions
      gdb_stdout.  This is used for "maint print objfiles".  */
   virtual void dump (struct objfile *objfile) = 0;
 
-  /* Find all the symbols in OBJFILE named FUNC_NAME, and ensure that
-     the corresponding symbol tables are loaded.  */
-  virtual void expand_symtabs_for_function (struct objfile *objfile,
-					    const char *func_name) = 0;
-
   /* Read all symbol tables associated with OBJFILE.  */
   virtual void expand_all_symtabs (struct objfile *objfile) = 0;
 

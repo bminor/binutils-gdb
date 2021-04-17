@@ -606,7 +606,8 @@ public:
   /* See quick_symbol_functions.  */
   void dump ();
 
-  /* See quick_symbol_functions.  */
+  /* Find all the symbols in OBJFILE named FUNC_NAME, and ensure that
+     the corresponding symbol tables are loaded.  */
   void expand_symtabs_for_function (const char *func_name);
 
   /* See quick_symbol_functions.  */

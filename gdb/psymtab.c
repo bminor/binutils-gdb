@@ -892,29 +892,6 @@ psymbol_functions::dump (struct objfile *objfile)
     }
 }
 
-/* Psymtab version of expand_symtabs_for_function.  See its definition in
-   the definition of quick_symbol_functions in symfile.h.  */
-
-void
-psymbol_functions::expand_symtabs_for_function (struct objfile *objfile,
-						const char *func_name)
-{
-  lookup_name_info base_lookup (func_name, symbol_name_match_type::FULL);
-  lookup_name_info lookup_name = base_lookup.make_ignore_params ();
-
-  for (partial_symtab *ps : require_partial_symbols (objfile))
-    {
-      if (ps->readin_p (objfile))
-	continue;
-
-      if ((lookup_partial_symbol (objfile, ps, lookup_name, 1, VAR_DOMAIN)
-	   != NULL)
-	  || (lookup_partial_symbol (objfile, ps, lookup_name, 0, VAR_DOMAIN)
-	      != NULL))
-	psymtab_to_symtab (objfile, ps);
-    }
-}
-
 /* Psymtab version of expand_all_symtabs.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 

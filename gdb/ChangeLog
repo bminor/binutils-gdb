@@ -1,5 +1,27 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	* symfile-debug.c (objfile::expand_symtabs_for_function):
+	Rewrite.
+	* quick-symbol.h (struct quick_symbol_functions)
+	<expand_symtabs_for_function>: Remove.
+	* psymtab.c (psymbol_functions::expand_symtabs_for_function):
+	Remove.
+	* psympriv.h (struct psymbol_functions)
+	<expand_symtabs_for_function>: Remove.
+	* objfiles.h (struct objfile) <expand_symtabs_for_function>:
+	Update comment.
+	* dwarf2/read.c (struct dwarf2_gdb_index)
+	<expand_symtabs_for_function>: Remove.
+	(struct dwarf2_debug_names_index) <expand_symtabs_for_function>:
+	Remove.
+	(find_slot_in_mapped_hash): Remove.
+	(dw2_symtab_iter_init_common): Merge with dw2_symtab_iter_init.
+	(dw2_symtab_iter_init): Remove one overload.
+	(dwarf2_gdb_index::expand_symtabs_for_function)
+	(dwarf2_debug_names_index::expand_symtabs_for_function): Remove.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* symfile-debug.c (objfile::map_symtabs_matching_filename):
 	Rewrite.
 	* quick-symbol.h (struct quick_symbol_functions)

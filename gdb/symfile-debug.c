@@ -300,8 +300,19 @@ objfile::expand_symtabs_for_function (const char *func_name)
 		      "qf->expand_symtabs_for_function (%s, \"%s\")\n",
 		      objfile_debug_name (this), func_name);
 
+  lookup_name_info base_lookup (func_name, symbol_name_match_type::FULL);
+  lookup_name_info lookup_name = base_lookup.make_ignore_params ();
+
   for (const auto &iter : qf)
-    iter->expand_symtabs_for_function (this, func_name);
+    iter->expand_symtabs_matching (this,
+				   nullptr,
+				   &lookup_name,
+				   nullptr,
+				   nullptr,
+				   (SEARCH_GLOBAL_BLOCK
+				    | SEARCH_STATIC_BLOCK),
+				   VAR_DOMAIN,
+				   ALL_DOMAIN);
 }
 
 void

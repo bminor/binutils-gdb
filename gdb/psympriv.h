@@ -516,9 +516,6 @@ struct psymbol_functions : public quick_symbol_functions
 
   void dump (struct objfile *objfile) override;
 
-  void expand_symtabs_for_function (struct objfile *objfile,
-				    const char *func_name) override;
-
   void expand_all_symtabs (struct objfile *objfile) override;
 
   void expand_symtabs_with_fullname (struct objfile *objfile,
