@@ -94,13 +94,10 @@ file_write (FILE *file, const std::vector<Elem, Alloc> &vec)
 class data_buf
 {
 public:
-  /* Copy DATA to the end of the buffer.  */
-  template<typename T>
-  void append_data (const T &data)
+  /* Copy ARRAY to the end of the buffer.  */
+  void append_array (gdb::array_view<const gdb_byte> array)
   {
-    std::copy (reinterpret_cast<const gdb_byte *> (&data),
-	       reinterpret_cast<const gdb_byte *> (&data + 1),
-	       grow (sizeof (data)));
+    std::copy (array.begin (), array.end (), grow (array.size ()));
   }
 
   /* Copy CSTR (a zero-terminated string) to the end of buffer.  The
@@ -120,7 +117,7 @@ public:
 	input >>= 7;
 	if (input)
 	  output |= 0x80;
-	append_data (output);
+	m_vec.push_back (output);
 	if (input == 0)
 	  break;
       }
@@ -131,6 +128,12 @@ public:
   void append_uint (size_t len, bfd_endian byte_order, ULONGEST val)
   {
     ::store_unsigned_integer (grow (len), len, byte_order, val);
+  }
+
+  /* Copy VALUE to the end of the buffer, little-endian.  */
+  void append_offset (offset_type value)
+  {
+    append_uint (sizeof (value), BFD_ENDIAN_LITTLE, value);
   }
 
   /* Return the size of the buffer.  */
@@ -371,9 +374,9 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
 
 	symbol_hash_table.emplace (entry.cu_indices, cpool.size ());
 	entry.index_offset = cpool.size ();
-	cpool.append_data (MAYBE_SWAP (entry.cu_indices.size ()));
+	cpool.append_offset (entry.cu_indices.size ());
 	for (const auto index : entry.cu_indices)
-	  cpool.append_data (MAYBE_SWAP (index));
+	  cpool.append_offset (index);
       }
   }
 
@@ -399,8 +402,8 @@ write_hash_table (mapped_symtab *symtab, data_buf &output, data_buf &cpool)
 	  vec_off = 0;
 	}
 
-      output.append_data (MAYBE_SWAP (str_off));
-      output.append_data (MAYBE_SWAP (vec_off));
+      output.append_offset (str_off);
+      output.append_offset (vec_off);
     }
 }
 
@@ -434,7 +437,7 @@ add_address_entry (data_buf &addr_vec,
 {
   addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, start);
   addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, end);
-  addr_vec.append_data (MAYBE_SWAP (cu_index));
+  addr_vec.append_offset (cu_index);
 }
 
 /* Worker function for traversing an addrmap to build the address table.  */
@@ -1374,26 +1377,26 @@ write_gdbindex_1 (FILE *out_file,
   offset_type total_len = size_of_header;
 
   /* The version number.  */
-  contents.append_data (MAYBE_SWAP (8));
+  contents.append_offset (8);
 
   /* The offset of the CU list from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
+  contents.append_offset (total_len);
   total_len += cu_list.size ();
 
   /* The offset of the types CU list from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
+  contents.append_offset (total_len);
   total_len += types_cu_list.size ();
 
   /* The offset of the address table from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
+  contents.append_offset (total_len);
   total_len += addr_vec.size ();
 
   /* The offset of the symbol table from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
+  contents.append_offset (total_len);
   total_len += symtab_vec.size ();
 
   /* The offset of the constant pool from the start of the file.  */
-  contents.append_data (MAYBE_SWAP (total_len));
+  contents.append_offset (total_len);
   total_len += constant_pool.size ();
 
   gdb_assert (contents.size () == size_of_header);
@@ -1611,7 +1614,7 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
      string.  This value is rounded up to a multiple of 4.  */
   static_assert (sizeof (dwarf5_gdb_augmentation) % 4 == 0, "");
   header.append_uint (4, dwarf5_byte_order, sizeof (dwarf5_gdb_augmentation));
-  header.append_data (dwarf5_gdb_augmentation);
+  header.append_array (dwarf5_gdb_augmentation);
 
   gdb_assert (header.size () == bytes_of_header);
 

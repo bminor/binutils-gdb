@@ -29,27 +29,14 @@
    architecture-independent.  */
 typedef uint32_t offset_type;
 
-#if WORDS_BIGENDIAN
-
-/* Convert VALUE between big- and little-endian.  */
+/* Unpack a 32-bit little-endian value.  */
 
 static inline offset_type
-byte_swap (offset_type value)
+gdb_index_unpack (const gdb_byte *value)
 {
-  offset_type result;
-
-  result = (value & 0xff) << 24;
-  result |= (value & 0xff00) << 8;
-  result |= (value & 0xff0000) >> 8;
-  result |= (value & 0xff000000) >> 24;
-  return result;
+  return (offset_type) extract_unsigned_integer (value, sizeof (offset_type),
+						 BFD_ENDIAN_LITTLE);
 }
-
-#define MAYBE_SWAP(V)  byte_swap (V)
-
-#else
-#define MAYBE_SWAP(V) static_cast<offset_type> (V)
-#endif /* WORDS_BIGENDIAN */
 
 /* The hash function for strings in the mapped index.  This is the same as
    SYMBOL_HASH_NEXT, but we keep a separate copy to maintain control over the

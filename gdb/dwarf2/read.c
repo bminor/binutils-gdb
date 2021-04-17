@@ -223,17 +223,50 @@ protected:
   ~mapped_index_base() = default;
 };
 
+/* This is a view into the index that converts from bytes to an
+   offset_type, and allows indexing.  Unaligned bytes are specifically
+   allowed here, and handled via unpacking.  */
+
+class offset_view
+{
+public:
+  offset_view () = default;
+
+  explicit offset_view (gdb::array_view<const gdb_byte> bytes)
+    : m_bytes (bytes)
+  {
+  }
+
+  /* Extract the INDEXth offset_type from the array.  */
+  offset_type operator[] (size_t index) const
+  {
+    const gdb_byte *bytes = &m_bytes[index * sizeof (offset_type)];
+    return (offset_type) extract_unsigned_integer (bytes,
+						   sizeof (offset_type),
+						   BFD_ENDIAN_LITTLE);
+  }
+
+  /* Return the number of offset_types in this array.  */
+  size_t size () const
+  {
+    return m_bytes.size () / sizeof (offset_type);
+  }
+
+  /* Return true if this view is empty.  */
+  bool empty () const
+  {
+    return m_bytes.empty ();
+  }
+
+private:
+  /* The underlying bytes.  */
+  gdb::array_view<const gdb_byte> m_bytes;
+};
+
 /* A description of the mapped index.  The file format is described in
    a comment by the code that writes the index.  */
 struct mapped_index final : public mapped_index_base
 {
-  /* A slot/bucket in the symbol table hash.  */
-  struct symbol_table_slot
-  {
-    const offset_type name;
-    const offset_type vec;
-  };
-
   /* Index data format version.  */
   int version = 0;
 
@@ -241,25 +274,42 @@ struct mapped_index final : public mapped_index_base
   gdb::array_view<const gdb_byte> address_table;
 
   /* The symbol table, implemented as a hash table.  */
-  gdb::array_view<symbol_table_slot> symbol_table;
+  offset_view symbol_table;
 
   /* A pointer to the constant pool.  */
-  const char *constant_pool = nullptr;
+  gdb::array_view<const gdb_byte> constant_pool;
+
+  /* Return the index into the constant pool of the name of the IDXth
+     symbol in the symbol table.  */
+  offset_type symbol_name_index (offset_type idx) const
+  {
+    return symbol_table[2 * idx];
+  }
+
+  /* Return the index into the constant pool of the CU vector of the
+     IDXth symbol in the symbol table.  */
+  offset_type symbol_vec_index (offset_type idx) const
+  {
+    return symbol_table[2 * idx + 1];
+  }
 
   bool symbol_name_slot_invalid (offset_type idx) const override
   {
-    const auto &bucket = this->symbol_table[idx];
-    return bucket.name == 0 && bucket.vec == 0;
+    return (symbol_name_index (idx) == 0
+	    && symbol_vec_index (idx) == 0);
   }
 
   /* Convenience method to get at the name of the symbol at IDX in the
      symbol table.  */
   const char *symbol_name_at
     (offset_type idx, dwarf2_per_objfile *per_objfile) const override
-  { return this->constant_pool + MAYBE_SWAP (this->symbol_table[idx].name); }
+  {
+    return (const char *) (this->constant_pool.data ()
+			   + symbol_name_index (idx));
+  }
 
   size_t symbol_name_count () const override
-  { return this->symbol_table.size (); }
+  { return this->symbol_table.size () / 2; }
 };
 
 /* A description of the mapped .debug_names.
@@ -2950,9 +3000,10 @@ read_gdb_index_from_buffer (const char *filename,
 			    offset_type *types_list_elements)
 {
   const gdb_byte *addr = &buffer[0];
+  offset_view metadata (buffer);
 
   /* Version check.  */
-  offset_type version = MAYBE_SWAP (*(offset_type *) addr);
+  offset_type version = metadata[0];
   /* Versions earlier than 3 emitted every copy of a psymbol.  This
      causes the index to behave very poorly for certain requests.  Version 3
      contained incomplete addrmap.  So, it seems better to just ignore such
@@ -3005,35 +3056,29 @@ to use the section anyway."),
 
   map->version = version;
 
-  offset_type *metadata = (offset_type *) (addr + sizeof (offset_type));
-
-  int i = 0;
-  *cu_list = addr + MAYBE_SWAP (metadata[i]);
-  *cu_list_elements = ((MAYBE_SWAP (metadata[i + 1]) - MAYBE_SWAP (metadata[i]))
-		       / 8);
+  int i = 1;
+  *cu_list = addr + metadata[i];
+  *cu_list_elements = (metadata[i + 1] - metadata[i]) / 8;
   ++i;
 
-  *types_list = addr + MAYBE_SWAP (metadata[i]);
-  *types_list_elements = ((MAYBE_SWAP (metadata[i + 1])
-			   - MAYBE_SWAP (metadata[i]))
-			  / 8);
+  *types_list = addr + metadata[i];
+  *types_list_elements = (metadata[i + 1] - metadata[i]) / 8;
   ++i;
 
-  const gdb_byte *address_table = addr + MAYBE_SWAP (metadata[i]);
-  const gdb_byte *address_table_end = addr + MAYBE_SWAP (metadata[i + 1]);
+  const gdb_byte *address_table = addr + metadata[i];
+  const gdb_byte *address_table_end = addr + metadata[i + 1];
   map->address_table
     = gdb::array_view<const gdb_byte> (address_table, address_table_end);
   ++i;
 
-  const gdb_byte *symbol_table = addr + MAYBE_SWAP (metadata[i]);
-  const gdb_byte *symbol_table_end = addr + MAYBE_SWAP (metadata[i + 1]);
+  const gdb_byte *symbol_table = addr + metadata[i];
+  const gdb_byte *symbol_table_end = addr + metadata[i + 1];
   map->symbol_table
-    = gdb::array_view<mapped_index::symbol_table_slot>
-       ((mapped_index::symbol_table_slot *) symbol_table,
-	(mapped_index::symbol_table_slot *) symbol_table_end);
+    = offset_view (gdb::array_view<const gdb_byte> (symbol_table,
+						    symbol_table_end));
 
   ++i;
-  map->constant_pool = (char *) (addr + MAYBE_SWAP (metadata[i]));
+  map->constant_pool = buffer.slice (metadata[i]);
 
   return 1;
 }
@@ -3317,7 +3362,7 @@ struct dw2_symtab_iterator
   domain_enum domain;
   /* The list of CUs from the index entry of the symbol,
      or NULL if not found.  */
-  offset_type *vec;
+  offset_view vec;
   /* The next element in VEC to look at.  */
   int next;
   /* The number of elements in VEC, or zero if there is no match.  */
@@ -3342,7 +3387,7 @@ dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
   iter->domain = domain;
   iter->next = 0;
   iter->global_seen = 0;
-  iter->vec = NULL;
+  iter->vec = {};
   iter->length = 0;
 
   mapped_index *index = per_objfile->per_bfd->index_table.get ();
@@ -3351,11 +3396,10 @@ dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
     return;
 
   gdb_assert (!index->symbol_name_slot_invalid (namei));
-  const auto &bucket = index->symbol_table[namei];
+  offset_type vec_idx = index->symbol_vec_index (namei);
 
-  iter->vec = (offset_type *) (index->constant_pool
-			       + MAYBE_SWAP (bucket.vec));
-  iter->length = MAYBE_SWAP (*iter->vec);
+  iter->vec = offset_view (index->constant_pool.slice (vec_idx));
+  iter->length = iter->vec[0];
 }
 
 /* Return the next matching CU or NULL if there are no more.  */
@@ -3367,8 +3411,7 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
 
   for ( ; iter->next < iter->length; ++iter->next)
     {
-      offset_type cu_index_and_attrs =
-	MAYBE_SWAP (iter->vec[iter->next + 1]);
+      offset_type cu_index_and_attrs = iter->vec[iter->next + 1];
       offset_type cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
       gdb_index_symbol_kind symbol_kind =
 	GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
@@ -4387,16 +4430,15 @@ dw2_expand_marked_cus
    block_search_flags search_flags,
    search_domain kind)
 {
-  offset_type *vec, vec_len, vec_idx;
+  offset_type vec_len, vec_idx;
   bool global_seen = false;
   mapped_index &index = *per_objfile->per_bfd->index_table;
 
-  vec = (offset_type *) (index.constant_pool
-			 + MAYBE_SWAP (index.symbol_table[idx].vec));
-  vec_len = MAYBE_SWAP (vec[0]);
+  offset_view vec (index.constant_pool.slice (index.symbol_vec_index (idx)));
+  vec_len = vec[0];
   for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
     {
-      offset_type cu_index_and_attrs = MAYBE_SWAP (vec[vec_idx + 1]);
+      offset_type cu_index_and_attrs = vec[vec_idx + 1];
       /* This value is only valid for index versions >= 7.  */
       int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
       gdb_index_symbol_kind symbol_kind =

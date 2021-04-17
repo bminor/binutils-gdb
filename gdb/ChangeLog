@@ -1,5 +1,24 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	PR gdb/23743:
+	* dwarf2/read.c (class offset_view): New.
+	(struct symbol_table_slot): Remove.
+	(struct mapped_index) <symbol_table, constant_pool>: Change type.
+	<symbol_name_index, symbol_vec_index>: New methods.
+	<symbol_name_slot_invalid, symbol_name_at, symbol_name_count>:
+	Rewrite.
+	(read_gdb_index_from_buffer): Update.
+	(struct dw2_symtab_iterator) <vec>: Change type.
+	(dw2_symtab_iter_init_common, dw2_symtab_iter_init)
+	(dw2_symtab_iter_next, dw2_expand_marked_cus): Update.
+	* dwarf2/index-write.c (class data_buf) <append_data>: Remove.
+	<append_array, append_offset>: New methods.
+	(write_hash_table, add_address_entry, write_gdbindex_1)
+	(write_debug_names): Update.
+	* dwarf2/index-common.h (byte_swap, MAYBE_SWAP): Remove.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/index-write.c (write_psymtabs_to_index): Check
 	partial_symtabs.
 
