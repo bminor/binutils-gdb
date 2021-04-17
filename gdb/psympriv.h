@@ -507,10 +507,6 @@ struct psymbol_functions : public quick_symbol_functions
 
   void forget_cached_source_info (struct objfile *objfile) override;
 
-  bool map_symtabs_matching_filename
-    (struct objfile *objfile, const char *name, const char *real_path,
-     gdb::function_view<bool (symtab *)> callback) override;
-
   enum language lookup_global_symbol_language (struct objfile *objfile,
 					       const char *name,
 					       domain_enum domain,

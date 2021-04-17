@@ -2228,10 +2228,6 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
 
   void forget_cached_source_info (struct objfile *objfile) override;
 
-  bool map_symtabs_matching_filename
-    (struct objfile *objfile, const char *name, const char *real_path,
-     gdb::function_view<bool (symtab *)> callback) override;
-
   enum language lookup_global_symbol_language (struct objfile *objfile,
 					       const char *name,
 					       domain_enum domain,
@@ -3379,100 +3375,6 @@ dwarf2_base_index_functions::forget_cached_source_info
 
   htab_traverse_noresize (per_objfile->per_bfd->quick_file_names_table.get (),
 			  dw2_free_cached_file_names, NULL);
-}
-
-/* Helper function for dw2_map_symtabs_matching_filename that expands
-   the symtabs and calls the iterator.  */
-
-static int
-dw2_map_expand_apply (struct objfile *objfile,
-		      struct dwarf2_per_cu_data *per_cu,
-		      const char *name, const char *real_path,
-		      gdb::function_view<bool (symtab *)> callback)
-{
-  struct compunit_symtab *last_made = objfile->compunit_symtabs;
-
-  /* Don't visit already-expanded CUs.  */
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->symtab_set_p (per_cu))
-    return 0;
-
-  /* This may expand more than one symtab, and we want to iterate over
-     all of them.  */
-  dw2_instantiate_symtab (per_cu, per_objfile, false);
-
-  return iterate_over_some_symtabs (name, real_path, objfile->compunit_symtabs,
-				    last_made, callback);
-}
-
-/* Implementation of the map_symtabs_matching_filename method.  */
-
-bool
-dwarf2_base_index_functions::map_symtabs_matching_filename
-  (struct objfile *objfile, const char *name, const char *real_path,
-   gdb::function_view<bool (symtab *)> callback)
-{
-  const char *name_basename = lbasename (name);
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-
-  /* The rule is CUs specify all the files, including those used by
-     any TU, so there's no need to scan TUs here.  */
-
-  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
-    {
-      /* We only need to look at symtabs not already expanded.  */
-      if (per_objfile->symtab_set_p (per_cu))
-	continue;
-
-      quick_file_names *file_data = dw2_get_file_names (per_cu, per_objfile);
-      if (file_data == NULL)
-	continue;
-
-      for (int j = 0; j < file_data->num_file_names; ++j)
-	{
-	  const char *this_name = file_data->file_names[j];
-	  const char *this_real_name;
-
-	  if (compare_filenames_for_search (this_name, name))
-	    {
-	      if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
-					callback))
-		return true;
-	      continue;
-	    }
-
-	  /* Before we invoke realpath, which can get expensive when many
-	     files are involved, do a quick comparison of the basenames.  */
-	  if (! basenames_may_differ
-	      && FILENAME_CMP (lbasename (this_name), name_basename) != 0)
-	    continue;
-
-	  this_real_name = dw2_get_real_path (per_objfile, file_data, j);
-	  if (compare_filenames_for_search (this_real_name, name))
-	    {
-	      if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
-					callback))
-		return true;
-	      continue;
-	    }
-
-	  if (real_path != NULL)
-	    {
-	      gdb_assert (IS_ABSOLUTE_PATH (real_path));
-	      gdb_assert (IS_ABSOLUTE_PATH (name));
-	      if (this_real_name != NULL
-		  && FILENAME_CMP (real_path, this_real_name) == 0)
-		{
-		  if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
-					    callback))
-		    return true;
-		  continue;
-		}
-	    }
-	}
-    }
-
-  return false;
 }
 
 /* Struct used to manage iterating over all CUs looking for a symbol.  */

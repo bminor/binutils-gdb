@@ -93,22 +93,6 @@ struct quick_symbol_functions
   /* Forget all cached full file names for OBJFILE.  */
   virtual void forget_cached_source_info (struct objfile *objfile) = 0;
 
-  /* Expand and iterate over each "partial" symbol table in OBJFILE
-     where the source file is named NAME.
-
-     If NAME is not absolute, a match after a '/' in the symbol table's
-     file name will also work, REAL_PATH is NULL then.  If NAME is
-     absolute then REAL_PATH is non-NULL absolute file name as resolved
-     via gdb_realpath from NAME.
-
-     If a match is found, the "partial" symbol table is expanded.
-     Then, this calls iterate_over_some_symtabs (or equivalent) over
-     all newly-created symbol tables, passing CALLBACK to it.
-     The result of this call is returned.  */
-  virtual bool map_symtabs_matching_filename
-    (struct objfile *objfile, const char *name, const char *real_path,
-     gdb::function_view<bool (symtab *)> callback) = 0;
-
   /* Check to see if the global symbol is defined in a "partial" symbol table
      of OBJFILE. NAME is the name of the symbol to look for.  DOMAIN
      indicates what sort of symbol to search for.

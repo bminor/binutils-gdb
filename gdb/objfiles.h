@@ -571,7 +571,18 @@ public:
   /* See quick_symbol_functions.  */
   void forget_cached_source_info ();
 
-  /* See quick_symbol_functions.  */
+  /* Expand and iterate over each "partial" symbol table in OBJFILE
+     where the source file is named NAME.
+
+     If NAME is not absolute, a match after a '/' in the symbol table's
+     file name will also work, REAL_PATH is NULL then.  If NAME is
+     absolute then REAL_PATH is non-NULL absolute file name as resolved
+     via gdb_realpath from NAME.
+
+     If a match is found, the "partial" symbol table is expanded.
+     Then, this calls iterate_over_some_symtabs (or equivalent) over
+     all newly-created symbol tables, passing CALLBACK to it.
+     The result of this call is returned.  */
   bool map_symtabs_matching_filename
     (const char *name, const char *real_path,
      gdb::function_view<bool (symtab *)> callback);

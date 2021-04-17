@@ -33,6 +33,7 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "block.h"
+#include "filenames.h"
 
 /* We need to save a pointer to the real symbol functions.
    Plus, the debug versions are malloc'd because we have to NULL out the
@@ -146,13 +147,51 @@ objfile::map_symtabs_matching_filename
 		      real_path ? real_path : NULL,
 		      host_address_to_string (&callback));
 
-  bool retval = false;
+  bool retval = true;
+  const char *name_basename = lbasename (name);
+
+  auto match_one_filename = [&] (const char *filename, bool basenames)
+  {
+    if (compare_filenames_for_search (filename, name))
+      return true;
+    if (basenames && FILENAME_CMP (name_basename, filename) == 0)
+      return true;
+    if (real_path != nullptr && IS_ABSOLUTE_PATH (filename)
+	&& IS_ABSOLUTE_PATH (real_path))
+      return filename_cmp (filename, real_path) == 0;
+    return false;
+  };
+
+  compunit_symtab *last_made = this->compunit_symtabs;
+
+  auto on_expansion = [&] (compunit_symtab *symtab)
+  {
+    /* The callback to iterate_over_some_symtabs returns false to keep
+       going and true to continue, so we have to invert the result
+       here, for expand_symtabs_matching.  */
+    bool result = !iterate_over_some_symtabs (name, real_path,
+					      this->compunit_symtabs,
+					      last_made,
+					      callback);
+    last_made = this->compunit_symtabs;
+    return result;
+  };
+
   for (const auto &iter : qf)
     {
-      retval = (iter->map_symtabs_matching_filename
-		(this, name, real_path, callback));
-      if (retval)
-	break;
+      if (!iter->expand_symtabs_matching (this,
+					  match_one_filename,
+					  nullptr,
+					  nullptr,
+					  on_expansion,
+					  (SEARCH_GLOBAL_BLOCK
+					   | SEARCH_STATIC_BLOCK),
+					  UNDEF_DOMAIN,
+					  ALL_DOMAIN))
+	{
+	  retval = false;
+	  break;
+	}
     }
 
   if (debug_symfile)
@@ -160,7 +199,9 @@ objfile::map_symtabs_matching_filename
 		      "qf->map_symtabs_matching_filename (...) = %d\n",
 		      retval);
 
-  return retval;
+  /* We must re-invert the return value here to match the caller's
+     expectations.  */
+  return !retval;
 }
 
 struct compunit_symtab *

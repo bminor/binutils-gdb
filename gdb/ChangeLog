@@ -1,5 +1,23 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	* symfile-debug.c (objfile::map_symtabs_matching_filename):
+	Rewrite.
+	* quick-symbol.h (struct quick_symbol_functions)
+	<map_symtabs_matching_filename>: Remove.
+	* psymtab.c (partial_map_expand_apply)
+	(psymbol_functions::map_symtabs_matching_filename): Remove.
+	* psympriv.h (struct psymbol_functions)
+	<map_symtabs_matching_filename>: Remove.
+	* objfiles.h (struct objfile) <map_symtabs_matching_filename>:
+	Update comment.
+	* dwarf2/read.c (struct dwarf2_base_index_functions)
+	<map_symtabs_matching_filename>: Remove.
+	(dw2_map_expand_apply)
+	(dwarf2_base_index_functions::map_symtabs_matching_filename):
+	Remove.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* symfile-debug.c (objfile::lookup_symbol): Rewrite.
 	* quick-symbol.h (struct quick_symbol_functions) <lookup_symbol>:
 	Remove.
