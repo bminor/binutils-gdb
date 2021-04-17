@@ -4548,6 +4548,7 @@ global_symbol_searcher::expand_symtabs
      },
      NULL,
      SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
+     UNDEF_DOMAIN,
      kind);
 
   /* Here, we search through the minimal symbol tables for functions and

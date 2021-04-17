@@ -1208,7 +1208,8 @@ recursively_search_psymtabs
   (struct partial_symtab *ps,
    struct objfile *objfile,
    block_search_flags search_flags,
-   enum search_domain domain,
+   domain_enum domain,
+   enum search_domain search,
    const lookup_name_info &lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> sym_matcher)
 {
@@ -1230,7 +1231,7 @@ recursively_search_psymtabs
 	continue;
 
       r = recursively_search_psymtabs (ps->dependencies[i],
-				       objfile, search_flags, domain,
+				       objfile, search_flags, domain, search,
 				       lookup_name, sym_matcher);
       if (r != 0)
 	{
@@ -1278,16 +1279,19 @@ recursively_search_psymtabs
 	{
 	  QUIT;
 
-	  if ((domain == ALL_DOMAIN
-	       || (domain == MODULES_DOMAIN
-		   && (*psym)->domain == MODULE_DOMAIN)
-	       || (domain == VARIABLES_DOMAIN
-		   && (*psym)->aclass != LOC_TYPEDEF
-		   && (*psym)->aclass != LOC_BLOCK)
-	       || (domain == FUNCTIONS_DOMAIN
-		   && (*psym)->aclass == LOC_BLOCK)
-	       || (domain == TYPES_DOMAIN
-		   && (*psym)->aclass == LOC_TYPEDEF))
+	  if ((domain == UNDEF_DOMAIN
+	       || symbol_matches_domain ((*psym)->ginfo.language (),
+					 (*psym)->domain, domain))
+	      && (search == ALL_DOMAIN
+		  || (search == MODULES_DOMAIN
+		      && (*psym)->domain == MODULE_DOMAIN)
+		  || (search == VARIABLES_DOMAIN
+		      && (*psym)->aclass != LOC_TYPEDEF
+		      && (*psym)->aclass != LOC_BLOCK)
+		  || (search == FUNCTIONS_DOMAIN
+		      && (*psym)->aclass == LOC_BLOCK)
+		  || (search == TYPES_DOMAIN
+		      && (*psym)->aclass == LOC_TYPEDEF))
 	      && psymbol_name_matches (*psym, lookup_name)
 	      && (sym_matcher == NULL
 		  || sym_matcher ((*psym)->ginfo.search_name ())))
@@ -1315,7 +1319,8 @@ psymbol_functions::expand_symtabs_matching
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
-   enum search_domain domain)
+   domain_enum domain,
+   enum search_domain search)
 {
   /* Clear the search flags.  */
   for (partial_symtab *ps : require_partial_symbols (objfile))
@@ -1353,7 +1358,8 @@ psymbol_functions::expand_symtabs_matching
 	}
 
       if ((symbol_matcher == NULL && lookup_name == NULL)
-	  || recursively_search_psymtabs (ps, objfile, search_flags, domain,
+	  || recursively_search_psymtabs (ps, objfile, search_flags,
+					  domain, search,
 					  *psym_lookup_name,
 					  symbol_matcher))
 	{

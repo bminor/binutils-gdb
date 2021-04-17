@@ -1,5 +1,32 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (global_symbol_searcher::expand_symtabs): Update.
+	* symmisc.c (maintenance_expand_symtabs): Update.
+	* symfile.c (expand_symtabs_matching): Update.
+	* symfile-debug.c (objfile::expand_symtabs_matching): Add 'domain'
+	parameter.
+	* quick-symbol.h (struct quick_symbol_functions)
+	<expand_symtabs_matching>: Add 'domain' parameter.
+	* psymtab.c (recursively_search_psymtabs)
+	(psymbol_functions::expand_symtabs_matching): Add 'domain'
+	parameter.
+	* psympriv.h (struct psymbol_functions) <expand_symtabs_matching>:
+	Add 'domain' parameter.
+	* objfiles.h (struct objfile) <expand_symtabs_matching>: Add
+	'domain' parameter.
+	* linespec.c (iterate_over_all_matching_symtabs): Update.
+	* dwarf2/read.c (struct dwarf2_gdb_index)
+	<expand_symtabs_matching>: Add 'domain' parameter.
+	(struct dwarf2_debug_names_index) <expand_symtabs_matching>: Add
+	'domain' parameter.
+	(dw2_expand_symtabs_matching)
+	(dwarf2_gdb_index::expand_symtabs_matching)
+	(dw2_debug_names_iterator)
+	(dwarf2_debug_names_index::expand_symtabs_matching): Add 'domain'
+	parameter.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (global_symbol_searcher::expand_symtabs)
 	(default_collect_symbol_completion_matches_break_on): Update.
 	* symmisc.c (maintenance_expand_symtabs): Update.

@@ -1172,6 +1172,7 @@ iterate_over_all_matching_symtabs
 	  objfile->expand_symtabs_matching (NULL, &lookup_name, NULL, NULL,
 					    (SEARCH_GLOBAL_BLOCK
 					     | SEARCH_STATIC_BLOCK),
+					    UNDEF_DOMAIN,
 					    search_domain);
 
 	  for (compunit_symtab *cu : objfile->compunits ())

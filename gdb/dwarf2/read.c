@@ -2290,6 +2290,7 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
+     domain_enum domain,
      enum search_domain kind) override;
 };
 
@@ -2320,6 +2321,7 @@ struct dwarf2_debug_names_index : public dwarf2_base_index_functions
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
+     domain_enum domain,
      enum search_domain kind) override;
 };
 
@@ -4878,6 +4880,7 @@ dwarf2_gdb_index::expand_symtabs_matching
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
+     domain_enum domain,
      enum search_domain kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
@@ -5398,8 +5401,10 @@ public:
 
   dw2_debug_names_iterator (const mapped_debug_names &map,
 			    search_domain search, uint32_t namei,
-			    dwarf2_per_objfile *per_objfile)
+			    dwarf2_per_objfile *per_objfile,
+			    domain_enum domain = UNDEF_DOMAIN)
     : m_map (map),
+      m_domain (domain),
       m_search (search),
       m_addr (find_vec_in_debug_names (map, namei, per_objfile)),
       m_per_objfile (per_objfile)
@@ -5950,6 +5955,7 @@ dwarf2_debug_names_index::expand_symtabs_matching
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    block_search_flags search_flags,
+   domain_enum domain,
    enum search_domain kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
@@ -5983,7 +5989,7 @@ dwarf2_debug_names_index::expand_symtabs_matching
     {
       /* The name was matched, now expand corresponding CUs that were
 	 marked.  */
-      dw2_debug_names_iterator iter (map, kind, namei, per_objfile);
+      dw2_debug_names_iterator iter (map, kind, namei, per_objfile, domain);
 
       struct dwarf2_per_cu_data *per_cu;
       while ((per_cu = iter.next ()) != NULL)

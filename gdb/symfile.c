@@ -3731,6 +3731,7 @@ expand_symtabs_matching
 					   symbol_matcher,
 					   expansion_notify,
 					   search_flags,
+					   UNDEF_DOMAIN,
 					   kind))
       return false;
   return true;

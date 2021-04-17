@@ -202,7 +202,8 @@ struct quick_symbol_functions
 
      Otherwise, individual symbols are considered.
 
-     If KIND does not match, the symbol is skipped.
+     If DOMAIN or KIND do not match, the symbol is skipped.
+     If DOMAIN is UNDEF_DOMAIN, that is treated as a wildcard.
 
      If the symbol name does not match LOOKUP_NAME, the symbol is skipped.
 
@@ -220,6 +221,7 @@ struct quick_symbol_functions
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      block_search_flags search_flags,
+     domain_enum domain,
      enum search_domain kind) = 0;
 
   /* Return the comp unit from OBJFILE that contains PC and
