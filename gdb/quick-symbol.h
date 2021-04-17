@@ -20,6 +20,16 @@
 #ifndef GDB_QUICK_SYMBOL_H
 #define GDB_QUICK_SYMBOL_H
 
+/* Like block_enum, but used as flags to pass to lookup functions.  */
+
+enum block_search_flag_values
+{
+  SEARCH_GLOBAL_BLOCK = 1,
+  SEARCH_STATIC_BLOCK = 2
+};
+
+DEF_ENUM_FLAGS_TYPE (enum block_search_flag_values, block_search_flags);
+
 /* Comparison function for symbol look ups.  */
 
 typedef int (symbol_compare_ftype) (const char *string1,

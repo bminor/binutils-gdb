@@ -1,3 +1,8 @@
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
+	* quick-symbol.h (enum block_search_flag_values): New.
+	(block_search_flags): New enum flags type.
+
 2021-04-16  Tom Tromey  <tom@tromey.com>
 
 	* rust-parse.c: New file.
