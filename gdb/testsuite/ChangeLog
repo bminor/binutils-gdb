@@ -1,3 +1,7 @@
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
+	* gdb.dwarf2/gdb-index-nodebug.exp: New file.
+
 2021-04-16  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/simple.exp: Change error text.

@@ -1693,7 +1693,8 @@ write_psymtabs_to_index (dwarf2_per_objfile *per_objfile, const char *dir,
   if (per_objfile->per_bfd->types.size () > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));
 
-  if (!per_bfd->partial_symtabs->psymtabs
+  if (per_bfd->partial_symtabs == nullptr
+      || !per_bfd->partial_symtabs->psymtabs
       || !per_bfd->partial_symtabs->psymtabs_addrmap)
     return;
 

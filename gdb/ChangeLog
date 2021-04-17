@@ -1,5 +1,10 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/index-write.c (write_psymtabs_to_index): Check
+	partial_symtabs.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (psymbol_functions::expand_matching_symbols): Rename
 	from map_matching_symbols.  Change parameters.
 	* psympriv.h (struct psymbol_functions) <expand_matching_symbols>:
