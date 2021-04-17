@@ -1,5 +1,29 @@
 2021-04-17  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (psymbol_functions::expand_matching_symbols): Rename
+	from map_matching_symbols.  Change parameters.
+	* psympriv.h (struct psymbol_functions) <expand_matching_symbols>:
+	Rename from map_matching_symbols.  Change parameters.
+	* dwarf2/read.c (struct dwarf2_gdb_index)
+	<expand_matching_symbols>: Rename from map_matching_symbols.
+	Change parameters.
+	(struct dwarf2_debug_names_index) <expand_matching_symbols>:
+	Rename from map_matching_symbols.  Change parameters.
+	(dwarf2_gdb_index::expand_matching_symbols): Rename from
+	dw2_map_matching_symbols.  Change parameters.
+	(dwarf2_gdb_index::expand_matching_symbols): Remove old
+	implementation.
+	(dwarf2_debug_names_index::expand_matching_symbols): Rename from
+	map_matching_symbols.  Change parameters.
+	* objfiles.h (struct objfile) <expand_matching_symbols>: Rename
+	from map_matching_symbols.  Change parameters.
+	* symfile-debug.c (objfile::expand_matching_symbols): Rename from
+	map_matching_symbols.  Change parameters.
+	* ada-lang.c (map_matching_symbols): New function.
+	(add_nonlocal_symbols): Update.
+
+2021-04-17  Tom Tromey  <tom@tromey.com>
+
 	* quick-symbol.h (struct quick_symbol_functions)
 	<expand_symtabs_with_fullname>: Remove.
 	* psymtab.c (psymbol_functions::expand_symtabs_with_fullname):

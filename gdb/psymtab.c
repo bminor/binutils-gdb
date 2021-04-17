@@ -979,36 +979,23 @@ psymtab_to_fullname (struct partial_symtab *ps)
   return ps->fullname;
 }
 
-/* Psymtab version of map_matching_symbols.  See its definition in
+/* Psymtab version of expand_matching_symbols.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 
 void
-psymbol_functions::map_matching_symbols
+psymbol_functions::expand_matching_symbols
   (struct objfile *objfile,
    const lookup_name_info &name, domain_enum domain,
    int global,
-   gdb::function_view<symbol_found_callback_ftype> callback,
    symbol_compare_ftype *ordered_compare)
 {
-  const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
-
   for (partial_symtab *ps : require_partial_symbols (objfile))
     {
       QUIT;
-      if (ps->readin_p (objfile)
-	  || match_partial_symbol (objfile, ps, global, name, domain,
+      if (!ps->readin_p (objfile)
+	  && match_partial_symbol (objfile, ps, global, name, domain,
 				   ordered_compare))
-	{
-	  struct compunit_symtab *cust = psymtab_to_symtab (objfile, ps);
-	  const struct block *block;
-
-	  if (cust == NULL)
-	    continue;
-	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), block_kind);
-	  if (!iterate_over_symbols_terminated (block, name,
-						domain, callback))
-	    return;
-	}
+	psymtab_to_symtab (objfile, ps);
     }
 }
 

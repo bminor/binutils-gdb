@@ -621,10 +621,9 @@ public:
   void expand_symtabs_with_fullname (const char *fullname);
 
   /* See quick_symbol_functions.  */
-  void map_matching_symbols
+  void expand_matching_symbols
     (const lookup_name_info &name, domain_enum domain,
      int global,
-     gdb::function_view<symbol_found_callback_ftype> callback,
      symbol_compare_ftype *ordered_compare);
 
   /* See quick_symbol_functions.  */

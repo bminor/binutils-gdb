@@ -120,11 +120,10 @@ struct quick_symbol_functions
   virtual void expand_all_symtabs (struct objfile *objfile) = 0;
 
   /* Find global or static symbols in all tables that are in DOMAIN
-     and for which MATCH (symbol name, NAME) == 0, passing each to 
-     CALLBACK, reading in partial symbol tables as needed.  Look
-     through global symbols if GLOBAL and otherwise static symbols.
-     Passes NAME and NAMESPACE to CALLBACK with each symbol
-     found.  After each block is processed, passes NULL to CALLBACK.
+     and for which MATCH (symbol name, NAME) == 0, reading in partial
+     symbol tables as needed.  Look through global symbols if GLOBAL
+     and otherwise static symbols.
+
      MATCH must be weaker than strcmp_iw_ordered in the sense that
      strcmp_iw_ordered(x,y) == 0 --> MATCH(x,y) == 0.  ORDERED_COMPARE,
      if non-null, must be an ordering relation compatible with
@@ -133,15 +132,13 @@ struct quick_symbol_functions
      and 
 	    strcmp_iw_ordered(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
      (allowing strcmp_iw_ordered(x,y) < 0 while ORDERED_COMPARE(x, y) == 0).
-     CALLBACK returns true to indicate that the scan should continue, or
-     false to indicate that the scan should be terminated.  */
+  */
 
-  virtual void map_matching_symbols
+  virtual void expand_matching_symbols
     (struct objfile *,
      const lookup_name_info &lookup_name,
      domain_enum domain,
      int global,
-     gdb::function_view<symbol_found_callback_ftype> callback,
      symbol_compare_ftype *ordered_compare) = 0;
 
   /* Expand all symbol tables in OBJFILE matching some criteria.

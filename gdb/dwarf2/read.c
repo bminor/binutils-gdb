@@ -2260,12 +2260,11 @@ struct dwarf2_gdb_index : public dwarf2_base_index_functions
 {
   void dump (struct objfile *objfile) override;
 
-  void map_matching_symbols
+  void expand_matching_symbols
     (struct objfile *,
      const lookup_name_info &lookup_name,
      domain_enum domain,
      int global,
-     gdb::function_view<symbol_found_callback_ftype> callback,
      symbol_compare_ftype *ordered_compare) override;
 
   bool expand_symtabs_matching
@@ -2283,12 +2282,11 @@ struct dwarf2_debug_names_index : public dwarf2_base_index_functions
 {
   void dump (struct objfile *objfile) override;
 
-  void map_matching_symbols
+  void expand_matching_symbols
     (struct objfile *,
      const lookup_name_info &lookup_name,
      domain_enum domain,
      int global,
-     gdb::function_view<symbol_found_callback_ftype> callback,
      symbol_compare_ftype *ordered_compare) override;
 
   bool expand_symtabs_matching
@@ -3538,11 +3536,10 @@ dw2_expand_symtabs_matching_one
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify);
 
 void
-dwarf2_gdb_index::map_matching_symbols
+dwarf2_gdb_index::expand_matching_symbols
   (struct objfile *objfile,
    const lookup_name_info &name, domain_enum domain,
    int global,
-   gdb::function_view<symbol_found_callback_ftype> callback,
    symbol_compare_ftype *ordered_compare)
 {
   /* Used for Ada.  */
@@ -3580,18 +3577,6 @@ dwarf2_gdb_index::map_matching_symbols
     {
       /* We have -readnow: no .gdb_index, but no partial symtabs either.  So,
 	 proceed assuming all symtabs have been read in.  */
-    }
-
-  for (compunit_symtab *cust : objfile->compunits ())
-    {
-      const struct block *block;
-
-      if (cust == NULL)
-	continue;
-      block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), block_kind);
-      if (!iterate_over_symbols_terminated (block, name,
-					    domain, callback))
-	return;
     }
 }
 
@@ -5509,11 +5494,10 @@ dwarf2_debug_names_index::dump (struct objfile *objfile)
 }
 
 void
-dwarf2_debug_names_index::map_matching_symbols
+dwarf2_debug_names_index::expand_matching_symbols
   (struct objfile *objfile,
    const lookup_name_info &name, domain_enum domain,
    int global,
-   gdb::function_view<symbol_found_callback_ftype> callback,
    symbol_compare_ftype *ordered_compare)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
@@ -5523,7 +5507,6 @@ dwarf2_debug_names_index::map_matching_symbols
     return;
 
   mapped_debug_names &map = *per_objfile->per_bfd->debug_names_table;
-  const block_enum block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
   const block_search_flags block_flags
     = global ? SEARCH_GLOBAL_BLOCK : SEARCH_STATIC_BLOCK;
 
@@ -5549,23 +5532,6 @@ dwarf2_debug_names_index::map_matching_symbols
 					 nullptr);
       return true;
     }, per_objfile);
-
-  /* It's a shame we couldn't do this inside the
-     dw2_expand_symtabs_matching_symbol callback, but that skips CUs
-     that have already been expanded.  Instead, this loop matches what
-     the psymtab code does.  */
-  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
-    {
-      compunit_symtab *symtab = per_objfile->get_symtab (per_cu);
-      if (symtab != nullptr)
-	{
-	  const struct block *block
-	    = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (symtab), block_kind);
-	  if (!iterate_over_symbols_terminated (block, name,
-						domain, callback))
-	    break;
-	}
-    }
 }
 
 bool

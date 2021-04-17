@@ -5175,6 +5175,33 @@ ada_lookup_name (const lookup_name_info &lookup_name)
   return lookup_name.ada ().lookup_name ().c_str ();
 }
 
+/* A helper for add_nonlocal_symbols.  Call expand_matching_symbols
+   for OBJFILE, then walk the objfile's symtabs and update the
+   results.  */
+
+static void
+map_matching_symbols (struct objfile *objfile,
+		      const lookup_name_info &lookup_name,
+		      bool is_wild_match,
+		      domain_enum domain,
+		      int global,
+		      match_data &data)
+{
+  data.objfile = objfile;
+  objfile->expand_matching_symbols (lookup_name, domain, global,
+				    is_wild_match ? nullptr : compare_names);
+
+  const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
+  for (compunit_symtab *symtab : objfile->compunits ())
+    {
+      const struct block *block
+	= BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (symtab), block_kind);
+      if (!iterate_over_symbols_terminated (block, lookup_name,
+					    domain, data))
+	break;
+    }
+}
+
 /* Add to RESULT all non-local symbols whose name and domain match
    LOOKUP_NAME and DOMAIN respectively.  The search is performed on
    GLOBAL_BLOCK symbols if GLOBAL is non-zero, or on STATIC_BLOCK
@@ -5191,10 +5218,8 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      data.objfile = objfile;
-
-      objfile->map_matching_symbols (lookup_name, domain, global, data,
-				     is_wild_match ? NULL : compare_names);
+      map_matching_symbols (objfile, lookup_name, is_wild_match, domain,
+			    global, data);
 
       for (compunit_symtab *cu : objfile->compunits ())
 	{
@@ -5214,12 +5239,8 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
       lookup_name_info name1 (bracket_name, symbol_name_match_type::FULL);
 
       for (objfile *objfile : current_program_space->objfiles ())
-	{
-	  data.objfile = objfile;
-	  objfile->map_matching_symbols (name1, domain, global, data,
-					 compare_names);
-	}
-    }      	
+	map_matching_symbols (objfile, name1, false, domain, global, data);
+    }
 }
 
 /* Find symbols in DOMAIN matching LOOKUP_NAME, in BLOCK and, if
