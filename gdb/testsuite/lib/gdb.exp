@@ -8085,7 +8085,7 @@ proc ensure_gdb_index { binfile {style ""} } {
 	    set has_index 1
 	    gdb_test_lines "" $gdb_test_name ".*"
 	}
-	-re "\r\nPsymtabs:(?=\r\n)" {
+	-re "\r\n(Cooked index in use|Psymtabs)(?=\r\n)" {
 	    gdb_test_lines "" $gdb_test_name ".*"
 	}
 	-re ".gdb_index: faked for \"readnow\"" {
