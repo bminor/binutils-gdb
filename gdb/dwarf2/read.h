@@ -169,7 +169,7 @@ struct dwarf2_per_cu_data
 
   /* True if this CU has been scanned by the indexer; false if
      not.  */
-  bool scanned : 1;
+  std::atomic<bool> scanned;
 
   /* Our index in the unshared "symtabs" vector.  */
   unsigned index = 0;
@@ -457,7 +457,7 @@ public:
   std::unique_ptr<mapped_debug_names> debug_names_table;
 
   /* The cooked index, or NULL if not using one.  */
-  std::unique_ptr<cooked_index> cooked_index_table;
+  std::unique_ptr<cooked_index_vector> cooked_index_table;
 
   /* When using index_table, this keeps track of all quick_file_names entries.
      TUs typically share line table entries with a CU, so we maintain a

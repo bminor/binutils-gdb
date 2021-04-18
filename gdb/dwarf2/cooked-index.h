@@ -30,6 +30,7 @@
 #include "gdbsupport/gdb_obstack.h"
 #include "addrmap.h"
 #include "gdbsupport/iterator-range.h"
+#include "gdbsupport/thread-pool.h"
 
 struct dwarf2_per_cu_data;
 
@@ -155,6 +156,8 @@ private:
   void write_scope (struct obstack *storage, const char *sep) const;
 };
 
+class cooked_index_vector;
+
 /* An index of interesting DIEs.  This is "cooked", in contrast to a
    mapped .debug_names or .gdb_index, which are "raw".  An entry in
    the index is of type cooked_index_entry.
@@ -178,18 +181,22 @@ public:
 				 const cooked_index_entry *parent_entry,
 				 dwarf2_per_cu_data *per_cu);
 
-  /* Return the entry that is believed to represent the program's
-     "main".  This will return NULL if no such entry is available.  */
-  const cooked_index_entry *get_main () const
-  {
-    return m_main;
-  }
-
   /* Install a new fixed addrmap from the given mutable addrmap.  */
   void install_addrmap (addrmap *map)
   {
     gdb_assert (m_addrmap == nullptr);
     m_addrmap = addrmap_create_fixed (map, &m_storage);
+  }
+
+  friend class cooked_index_vector;
+
+private:
+
+  /* Return the entry that is believed to represent the program's
+     "main".  This will return NULL if no such entry is available.  */
+  const cooked_index_entry *get_main () const
+  {
+    return m_main;
   }
 
   /* Look up ADDR in the address map, and return either the
@@ -199,35 +206,6 @@ public:
   {
     return (dwarf2_per_cu_data *) addrmap_find (m_addrmap, addr);
   }
-
-  /* Finalize the index.  This should be called a single time, when
-     the index has been fully populated.  It enters all the entries
-     into the internal hash table.  */
-  void finalize ();
-
-  /* A simple range over part of m_entries.  */
-  typedef iterator_range<std::vector<cooked_index_entry *>::iterator> range;
-
-  /* Look up an entry by name.  Returns a range of all matching
-     results.  If COMPLETING is true, then a larger range, suitable
-     for completion, will be returned.  */
-  range find (gdb::string_view name, bool completing);
-
-  /* Return a range of all the entries.  */
-  range all_entries ()
-  {
-    return { m_entries.begin (), m_entries.end () };
-  }
-
-private:
-
-  /* GNAT only emits mangled ("encoded") names in the DWARF, and does
-     not emit the module structure.  However, we need this structure
-     to do lookups.  This function recreates that structure for an
-     existing entry.  It returns the base name (last element) of the
-     full decoded name.  */
-  gdb::unique_xmalloc_ptr<char> handle_gnat_encoded_entry
-       (cooked_index_entry *entry, htab_t gnat_entries);
 
   /* Create a new cooked_index_entry and register it with this object.
      Entries are owned by this object.  The new item is returned.  */
@@ -250,11 +228,83 @@ private:
   /* If we found "main" or an entry with 'is_main' set, store it
      here.  */
   cooked_index_entry *m_main = nullptr;
-  /* Storage for canonical names.  */
-  std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
+  /* When constructing the index, entries are stored on a linked list.
+     This member points to the head of that list.  Later, they are
+     entered into the hash table, at which point this is no longer
+     used.  */
+  cooked_index_entry *m_start = nullptr;
   /* The addrmap.  This maps address ranges to dwarf2_per_cu_data
      objects.  */
   addrmap *m_addrmap = nullptr;
+};
+
+/* The main index of DIEs.  The parallel DIE indexers create
+   cooked_index objects.  Then, these are all handled to a
+   cooked_index_vector for storage and final indexing.  The index is
+   made by iterating over the entries previously created.  */
+
+class cooked_index_vector
+{
+public:
+
+  /* A convenience typedef for the vector that is contained in this
+     object.  */
+  typedef std::vector<std::unique_ptr<cooked_index>> vec_type;
+
+  explicit cooked_index_vector (vec_type &&vec);
+  DISABLE_COPY_AND_ASSIGN (cooked_index_vector);
+
+  /* A simple range over part of m_entries.  */
+  typedef iterator_range<std::vector<cooked_index_entry *>::iterator> range;
+
+  /* Look up an entry by name.  Returns a range of all matching
+     results.  If COMPLETING is true, then a larger range, suitable
+     for completion, will be returned.  */
+  range find (gdb::string_view name, bool completing);
+
+  /* Return a range of all the entries.  */
+  range all_entries ()
+  {
+    return { m_entries.begin (), m_entries.end () };
+  }
+
+  /* Look up ADDR in the address map, and return either the
+     corresponding CU, or nullptr if the address could not be
+     found.  */
+  dwarf2_per_cu_data *lookup (CORE_ADDR addr);
+
+  /* Return a new vector of all the addrmaps used by all the indexes
+     held by this object.  */
+  std::vector<addrmap *> get_addrmaps ();
+
+  /* Return the entry that is believed to represent the program's
+     "main".  This will return NULL if no such entry is available.  */
+  const cooked_index_entry *get_main () const;
+
+private:
+
+  /* GNAT only emits mangled ("encoded") names in the DWARF, and does
+     not emit the module structure.  However, we need this structure
+     to do lookups.  This function recreates that structure for an
+     existing entry.  It returns the base name (last element) of the
+     full decoded name.  */
+  gdb::unique_xmalloc_ptr<char> handle_gnat_encoded_entry
+       (cooked_index_entry *entry, htab_t gnat_entries);
+
+  /* Finalize the index.  This should be called a single time, when
+     the index has been fully populated.  It enters all the entries
+     into the internal hash table.  */
+  void finalize ();
+
+  /* The vector of cooked_index objects.  This is stored because the
+     entries are stored on the obstacks in those objects.  */
+  vec_type m_vector;
+
+  /* List of all entries.  This is sorted during finalization.  */
+  std::vector<cooked_index_entry *> m_entries;
+
+  /* Storage for canonical names.  */
+  std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
 };
 
 #endif /* GDB_DWARF2_COOKED_INDEX_H */

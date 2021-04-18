@@ -113,10 +113,41 @@ cooked_index::add (sect_offset die_offset, enum dwarf_tag tag,
   return result;
 }
 
+cooked_index_vector::cooked_index_vector (vec_type &&vec)
+  : m_vector (std::move (vec))
+{
+  finalize ();
+}
+
 /* See cooked-index.h.  */
 
-cooked_index::range
-cooked_index::find (gdb::string_view name, bool completing)
+dwarf2_per_cu_data *
+cooked_index_vector::lookup (CORE_ADDR addr)
+{
+  for (const auto &index : m_vector)
+    {
+      dwarf2_per_cu_data *result = index->lookup (addr);
+      if (result != nullptr)
+	return result;
+    }
+  return nullptr;
+}
+
+/* See cooked-index.h.  */
+
+std::vector<addrmap *>
+cooked_index_vector::get_addrmaps ()
+{
+  std::vector<addrmap *> result;
+  for (const auto &index : m_vector)
+    result.push_back (index->m_addrmap);
+  return result;
+}
+
+/* See cooked-index.h.  */
+
+cooked_index_vector::range
+cooked_index_vector::find (gdb::string_view name, bool completing)
 {
   auto lower = std::lower_bound (m_entries.begin (), m_entries.end (),
 				 name,
@@ -146,8 +177,8 @@ cooked_index::find (gdb::string_view name, bool completing)
 /* See cooked-index.h.  */
 
 gdb::unique_xmalloc_ptr<char>
-cooked_index::handle_gnat_encoded_entry (cooked_index_entry *entry,
-					 htab_t gnat_entries)
+cooked_index_vector::handle_gnat_encoded_entry (cooked_index_entry *entry,
+						htab_t gnat_entries)
 {
   std::string canonical = ada_decode (entry->name, false, false);
   if (canonical.empty ())
@@ -170,9 +201,11 @@ cooked_index::handle_gnat_encoded_entry (cooked_index_entry *entry,
 	{
 	  gdb::unique_xmalloc_ptr<char> new_name
 	    = make_unique_xstrndup (name.data (), name.length ());
-	  last = create (entry->die_offset, DW_TAG_namespace,
-			 0, new_name.get (), parent,
-			 entry->per_cu);
+	  /* It doesn't matter which obstack we allocate this on, so
+	     we pick the most convenient one.  */
+	  last = m_vector[0]->create (entry->die_offset, DW_TAG_namespace,
+				      0, new_name.get (), parent,
+				      entry->per_cu);
 	  last->canonical = last->name;
 	  m_names.push_back (std::move (new_name));
 	  *slot = last;
@@ -187,8 +220,28 @@ cooked_index::handle_gnat_encoded_entry (cooked_index_entry *entry,
 
 /* See cooked-index.h.  */
 
+const cooked_index_entry *
+cooked_index_vector::get_main () const
+{
+  const cooked_index_entry *result = nullptr;
+
+  for (const auto &index : m_vector)
+    {
+      const cooked_index_entry *entry = index->get_main ();
+      if (result == nullptr
+	  || ((result->flags & IS_MAIN) == 0
+	      && entry != nullptr
+	      && (entry->flags & IS_MAIN) != 0))
+	result = entry;
+    }
+
+  return result;
+}
+
+/* See cooked-index.h.  */
+
 void
-cooked_index::finalize ()
+cooked_index_vector::finalize ()
 {
   auto hash_name_ptr = [] (const void *p)
     {
@@ -210,38 +263,26 @@ cooked_index::finalize ()
   htab_up seen_names (htab_create_alloc (10, hash_name_ptr, eq_name_ptr,
 					 nullptr, xcalloc, xfree));
 
-  htab_up gnat_entries (htab_create_alloc (10, hash_entry, eq_entry,
-					   nullptr, xcalloc, xfree));
-
-  for (cooked_index_entry *entry : m_entries)
+  for (auto &index : m_vector)
     {
-      gdb_assert (entry->canonical == nullptr);
-      if ((entry->per_cu->lang != language_cplus
-	   && entry->per_cu->lang != language_ada)
-	  || (entry->flags & IS_LINKAGE) != 0)
-	entry->canonical = entry->name;
-      else
+      htab_up gnat_entries (htab_create_alloc (10, hash_entry, eq_entry,
+					       nullptr, xcalloc, xfree));
+
+      std::vector<cooked_index_entry *> entries
+	= std::move (index->m_entries);
+      for (cooked_index_entry *entry : entries)
 	{
-	  if (entry->per_cu->lang == language_ada)
-	    {
-	      gdb::unique_xmalloc_ptr<char> canon_name
-		= handle_gnat_encoded_entry (entry, gnat_entries.get ());
-	      if (canon_name == nullptr)
-		entry->canonical = entry->name;
-	      else
-		{
-		  entry->canonical = canon_name.get ();
-		  m_names.push_back (std::move (canon_name));
-		}
-	    }
+	  gdb_assert (entry->canonical == nullptr);
+	  if ((entry->per_cu->lang != language_cplus
+	       && entry->per_cu->lang != language_ada)
+	      || (entry->flags & IS_LINKAGE) != 0)
+	    entry->canonical = entry->name;
 	  else
 	    {
-	      void **slot = htab_find_slot (seen_names.get (), entry,
-					    INSERT);
-	      if (*slot == nullptr)
+	      if (entry->per_cu->lang == language_ada)
 		{
 		  gdb::unique_xmalloc_ptr<char> canon_name
-		    = cp_canonicalize_string (entry->name);
+		    = handle_gnat_encoded_entry (entry, gnat_entries.get ());
 		  if (canon_name == nullptr)
 		    entry->canonical = entry->name;
 		  else
@@ -252,11 +293,38 @@ cooked_index::finalize ()
 		}
 	      else
 		{
-		  const cooked_index_entry *other
-		    = (const cooked_index_entry *) *slot;
-		  entry->canonical = other->canonical;
+		  void **slot = htab_find_slot (seen_names.get (), entry,
+						INSERT);
+		  if (*slot == nullptr)
+		    {
+		      gdb::unique_xmalloc_ptr<char> canon_name
+			= cp_canonicalize_string (entry->name);
+		      if (canon_name == nullptr)
+			entry->canonical = entry->name;
+		      else
+			{
+			  entry->canonical = canon_name.get ();
+			  m_names.push_back (std::move (canon_name));
+			}
+		    }
+		  else
+		    {
+		      const cooked_index_entry *other
+			= (const cooked_index_entry *) *slot;
+		      entry->canonical = other->canonical;
+		    }
 		}
 	    }
+	}
+
+      if (m_entries.empty ())
+	m_entries = std::move (entries);
+      else
+	{
+	  size_t old_size = m_entries.size ();
+	  m_entries.resize (m_entries.size () + entries.size ());
+	  memcpy (m_entries.data () + old_size,
+		  entries.data (), entries.size () * sizeof (entries[0]));
 	}
     }
 

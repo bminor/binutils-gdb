@@ -92,6 +92,8 @@
 #include "dwarf2/abbrev-cache.h"
 #include "cooked-index.h"
 #include "split-name.h"
+#include "gdbsupport/parallel-for.h"
+#include "gdbsupport/thread-pool.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
@@ -6536,6 +6538,14 @@ lookup_dwo_id (struct dwarf2_cu *cu, struct die_info* comp_unit_die)
 static struct dwo_unit *
 lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die, const char *dwo_name)
 {
+#if CXX_STD_THREAD
+  /* We need a lock here both to handle the DWO hash table, and BFD,
+     which is not thread-safe.  */
+  static std::mutex dwo_lock;
+
+  std::lock_guard<std::mutex> guard (dwo_lock);
+#endif
+
   dwarf2_per_cu_data *per_cu = cu->per_cu;
   struct dwo_unit *dwo_unit;
   const char *comp_dir;
@@ -6683,9 +6693,14 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
     }
   else
     {
-      /* If an existing_cu is provided, a dwarf2_cu must not exist for this_cu
-	 in per_objfile yet.  */
-      gdb_assert (per_objfile->get_cu (this_cu) == nullptr);
+      /* If an existing_cu is provided, a dwarf2_cu must not exist for
+	 this_cu in per_objfile yet.  Here, CACHE doubles as a flag to
+	 let us know that the CU is being scanned using the parallel
+	 indexer.  This assert is avoided in this case because (1) it
+	 is irrelevant, and (2) the get_cu method is not
+	 thread-safe.  */
+      gdb_assert (cache != nullptr
+		  || per_objfile->get_cu (this_cu) == nullptr);
       m_new_cu.reset (new dwarf2_cu (this_cu, per_objfile));
       cu = m_new_cu.get ();
     }
@@ -7499,9 +7514,9 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
     {
       if (per_objfile->per_bfd->using_index)
 	{
-	  if (!this_cu->scanned)
+	  bool nope = false;
+	  if (this_cu->scanned.compare_exchange_strong (nope, true))
 	    {
-	      this_cu->scanned = true;
 	      prepare_one_comp_unit (reader.cu, reader.comp_unit_die,
 				     pretend_language);
 	      gdb_assert (storage != nullptr);
@@ -7869,6 +7884,7 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
     = per_bfd->using_index ? &index_storage : nullptr;
   create_all_comp_units (per_objfile);
   build_type_psymtabs (per_objfile, index_storage_ptr);
+  std::vector<std::unique_ptr<cooked_index>> indexes;
   if (per_bfd->using_index)
     {
       per_bfd->quick_file_names_table
@@ -7877,15 +7893,70 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
       if (!per_bfd->debug_aranges.empty ())
 	read_addrmap_from_aranges (per_objfile, &per_bfd->debug_aranges,
 				   index_storage.get_addrmap ());
-    }
 
-  for (const auto &per_cu : per_bfd->all_comp_units)
+      {
+	/* Ensure that complaints are handled correctly.  */
+	complaint_interceptor complaint_handler;
+
+	using iter_type = typeof (per_bfd->all_comp_units.begin ());
+
+	/* Each thread returns a pair holding a cooked index, and a vector
+	   of errors that should be printed.  The latter is done because
+	   GDB's I/O system is not thread-safe.  run_on_main_thread could be
+	   used, but that would mean the messages are printed after the
+	   prompt, which looks weird.  */
+	using result_type = std::pair<std::unique_ptr<cooked_index>,
+				      std::vector<gdb_exception>>;
+	std::vector<result_type> results
+	  = gdb::parallel_for_each (1, per_bfd->all_comp_units.begin (),
+				    per_bfd->all_comp_units.end (),
+				    [=] (iter_type iter, iter_type end)
+				    {
+				      std::vector<gdb_exception> errors;
+				      cooked_index_storage thread_storage;
+				      for (; iter != end; ++iter)
+					{
+					  dwarf2_per_cu_data *per_cu = iter->get ();
+					  try
+					    {
+					      process_psymtab_comp_unit (per_cu, per_objfile,
+									 false,
+									 language_minimal,
+									 &thread_storage);
+					    }
+					  catch (gdb_exception &except)
+					    {
+					      errors.push_back (std::move (except));
+					    }
+					}
+				      return result_type (thread_storage.release (),
+							  std::move (errors));
+				    });
+
+	/* Only show a given exception a single time.  */
+	std::unordered_set<gdb_exception> seen_exceptions;
+	for (auto &one_result : results)
+	  {
+	    indexes.push_back (std::move (one_result.first));
+	    for (auto &one_exc : one_result.second)
+	      {
+		if (seen_exceptions.insert (one_exc).second)
+		  exception_print (gdb_stderr, one_exc);
+	      }
+	  }
+      }
+    }
+  else
     {
-      if (!per_bfd->using_index && per_cu->v.psymtab != NULL)
-	/* In case a forward DW_TAG_imported_unit has read the CU already.  */
-	continue;
-      process_psymtab_comp_unit (per_cu.get (), per_objfile, false,
-				 language_minimal, index_storage_ptr);
+      for (const auto &per_cu : per_bfd->all_comp_units)
+	{
+	  if (!per_bfd->using_index && per_cu->v.psymtab != NULL)
+	    /* In case a forward DW_TAG_imported_unit has read the CU
+	       already.  */
+	    continue;
+	  process_psymtab_comp_unit (per_cu.get (), per_objfile, false,
+				     language_minimal, nullptr);
+	}
     }
 
   /* This has to wait until we read the CUs, we need the list of DWOs.  */
@@ -7903,8 +7974,20 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
 
   if (per_bfd->using_index)
     {
-      per_bfd->cooked_index_table = index_storage.release ();
-      per_bfd->cooked_index_table->finalize ();
+      indexes.push_back (index_storage.release ());
+      /* Remove any NULL entries.  This might happen if parallel-for
+	 decides to throttle the number of threads that were used.  */
+      indexes.erase
+	(std::remove_if (indexes.begin (),
+			 indexes.end (),
+			 [] (const std::unique_ptr<cooked_index> &entry)
+			 {
+			   return entry == nullptr;
+			 }),
+	 indexes.end ());
+      indexes.shrink_to_fit ();
+      per_bfd->cooked_index_table.reset
+	(new cooked_index_vector (std::move (indexes)));
 
       const cooked_index_entry *main_entry
 	= per_bfd->cooked_index_table->get_main ();
@@ -19463,9 +19546,9 @@ cooked_indexer::ensure_cu_exists (cutu_reader *reader,
      Doing this check here avoids self-imports as well.  */
   if (for_scanning)
     {
-      if (per_cu->scanned)
+      bool nope = false;
+      if (!per_cu->scanned.compare_exchange_strong (nope, true))
 	return nullptr;
-      per_cu->scanned = true;
     }
   if (per_cu == m_per_cu)
     return reader;
