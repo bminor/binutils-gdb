@@ -1,3 +1,9 @@
+2021-04-19  Jan Beulich  <jbeulich@suse.com>
+
+	* aarch64-asm.c (encode_asimd_fcvt): Add initializer for
+	"qualifier".
+	(convert_mov_to_movewide): Add initializer for "value".
+
 2021-04-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* aarch64-opc.c: Add RME system registers.

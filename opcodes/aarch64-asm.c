@@ -1335,7 +1335,7 @@ encode_asimd_fcvt (aarch64_inst *inst)
 {
   aarch64_insn value;
   aarch64_field field = {0, 0};
-  enum aarch64_opnd_qualifier qualifier;
+  enum aarch64_opnd_qualifier qualifier = AARCH64_OPND_QLF_NIL;
 
   switch (inst->opcode->op)
     {
@@ -1893,7 +1893,7 @@ convert_mov_to_movewide (aarch64_inst *inst)
 {
   int is32;
   uint32_t shift_amount;
-  uint64_t value;
+  uint64_t value = ~(uint64_t)0;
 
   switch (inst->opcode->op)
     {
