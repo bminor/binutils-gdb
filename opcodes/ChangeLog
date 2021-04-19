@@ -1,3 +1,8 @@
+2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* aarch64-opc.c: Add new register (CIPAPA, CIGDPAPA) support for
+	DC instruction.
+
 2021-04-19  Jan Beulich  <jbeulich@suse.com>
 
 	* aarch64-asm.c (encode_asimd_fcvt): Add initializer for

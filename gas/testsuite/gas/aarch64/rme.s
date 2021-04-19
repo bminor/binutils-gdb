@@ -8,3 +8,7 @@ mrs x0, gptbr_el3
 /* Write to RME system registers.  */
 msr gpccr_el3, x0
 msr gptbr_el3, x0
+
+/* RME data cache maintenance operations.   */
+dc cipapa, x0
+dc cigdpapa, x0

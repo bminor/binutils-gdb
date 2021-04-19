@@ -4763,6 +4763,8 @@ const aarch64_sys_ins_reg aarch64_sys_regs_dc[] =
     { "cisw",       CPENS (0, C7, C14, 2), F_HASXT },
     { "cigsw",      CPENS (0, C7, C14, 4), F_HASXT | F_ARCHEXT },
     { "cigdsw",     CPENS (0, C7, C14, 6), F_HASXT | F_ARCHEXT },
+    { "cipapa",     CPENS (6, C7, C14, 1), F_HASXT },
+    { "cigdpapa",   CPENS (6, C7, C14, 5), F_HASXT },
     { 0,       CPENS(0,0,0,0), 0 }
 };
 

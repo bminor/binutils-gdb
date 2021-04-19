@@ -12,3 +12,5 @@ Disassembly of section \.text:
    8:	d53e2180 	mrs	x0, gptbr_el3
    c:	d51e21c0 	msr	gpccr_el3, x0
   10:	d51e2180 	msr	gptbr_el3, x0
+  14:	d50e7e20 	dc	cipapa, x0
+  18:	d50e7ea0 	dc	cigdpapa, x0
