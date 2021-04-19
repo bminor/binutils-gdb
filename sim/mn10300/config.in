@@ -10,29 +10,14 @@
    language is requested. */
 #undef ENABLE_NLS
 
-/* Define to 1 if you have the `chmod' function. */
-#undef HAVE_CHMOD
-
-/* Define to 1 if you have the `chown' function. */
-#undef HAVE_CHOWN
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
 /* Define if dv-sockser is usable. */
 #undef HAVE_DV_SOCKSER
 
-/* Define to 1 if you have the `execv' function. */
-#undef HAVE_EXECV
-
-/* Define to 1 if you have the `execve' function. */
-#undef HAVE_EXECVE
-
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
-
-/* Define to 1 if you have the `fork' function. */
-#undef HAVE_FORK
 
 /* Define to 1 if you have the <fpu_control.h> header file. */
 #undef HAVE_FPU_CONTROL_H
@@ -153,12 +138,6 @@
 
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
-
-/* Define to 1 if you have the `utime' function. */
-#undef HAVE_UTIME
-
-/* Define to 1 if you have the <utime.h> header file. */
-#undef HAVE_UTIME_H
 
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H

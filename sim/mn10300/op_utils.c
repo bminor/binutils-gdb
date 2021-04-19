@@ -2,9 +2,6 @@
 #include "sim-syscall.h"
 #include "targ-vals.h"
 
-#ifdef HAVE_UTIME_H
-#include <utime.h>
-#endif
 #include <time.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>

@@ -12266,31 +12266,6 @@ fi
 fi
 
 
-for ac_func in time chmod utime fork execve execv chown
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-for ac_header in utime.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "utime.h" "ac_cv_header_utime_h" "$ac_includes_default"
-if test "x$ac_cv_header_utime_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_UTIME_H 1
-_ACEOF
-
-fi
-
-done
-
-
 
 cgen_breaks=""
 if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
