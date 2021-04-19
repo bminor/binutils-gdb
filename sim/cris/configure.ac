@@ -5,7 +5,11 @@ AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 SIM_AC_COMMON
 
 # For dv-rv and rvdummy.
-AC_CHECK_HEADERS(sys/socket.h sys/select.h sys/param.h)
+AC_CHECK_HEADERS_ONCE(m4_flatten([
+  sys/param.h
+  sys/select.h
+  sys/socket.h
+]))
 
 SIM_AC_OPTION_ENDIAN(LITTLE)
 SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)

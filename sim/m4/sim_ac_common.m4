@@ -52,10 +52,17 @@ ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
 
 # Check for common headers.
 # NB: You can assume C11 headers exist.
-AC_CHECK_HEADERS(unistd.h)
-AC_CHECK_HEADERS(sys/time.h sys/times.h sys/resource.h sys/mman.h)
-AC_CHECK_HEADERS(fcntl.h fpu_control.h)
-AC_CHECK_HEADERS(dlfcn.h sys/stat.h)
+AC_CHECK_HEADERS_ONCE(m4_flatten([
+  dlfcn.h
+  fcntl.h
+  fpu_control.h
+  unistd.h
+  sys/mman.h
+  sys/resource.h
+  sys/time.h
+  sys/times.h
+  sys/stat.h
+]))
 AC_CHECK_FUNCS_ONCE(m4_flatten([
   __setfpucw
   ftruncate

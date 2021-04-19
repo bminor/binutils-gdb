@@ -629,6 +629,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
+ac_header_list=
 ac_func_list=
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
@@ -2290,6 +2291,15 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
+as_fn_append ac_header_list " dlfcn.h"
+as_fn_append ac_header_list " fcntl.h"
+as_fn_append ac_header_list " fpu_control.h"
+as_fn_append ac_header_list " unistd.h"
+as_fn_append ac_header_list " sys/mman.h"
+as_fn_append ac_header_list " sys/resource.h"
+as_fn_append ac_header_list " sys/time.h"
+as_fn_append ac_header_list " sys/times.h"
+as_fn_append ac_header_list " sys/stat.h"
 as_fn_append ac_func_list " __setfpucw"
 as_fn_append ac_func_list " ftruncate"
 as_fn_append ac_func_list " getrusage"
@@ -3873,6 +3883,41 @@ fi
 rmdir .tst 2>/dev/null
 
 DEPDIR="${am__leading_dot}deps"
+
+
+
+
+  for ac_header in $ac_header_list
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -7304,56 +7349,6 @@ fi
 
 # Check for common headers.
 # NB: You can assume C11 headers exist.
-for ac_header in unistd.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "unistd.h" "ac_cv_header_unistd_h" "$ac_includes_default"
-if test "x$ac_cv_header_unistd_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_UNISTD_H 1
-_ACEOF
-
-fi
-
-done
-
-for ac_header in sys/time.h sys/times.h sys/resource.h sys/mman.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-for ac_header in fcntl.h fpu_control.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
-
-for ac_header in dlfcn.h sys/stat.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
 
 
 ac_fn_c_check_member "$LINENO" "struct stat" "st_dev" "ac_cv_member_struct_stat_st_dev" "#ifdef HAVE_SYS_TYPES_H
@@ -11256,7 +11251,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11259 "configure"
+#line 11254 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11362,7 +11357,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11365 "configure"
+#line 11360 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

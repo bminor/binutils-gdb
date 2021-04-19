@@ -1,5 +1,10 @@
 2021-04-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Change AC_CHECK_HEADERS to AC_CHECK_HEADERS_ONCE.
+	* configure: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (NL_TARGET): Define.
 	(syscalls.o): Delete syscall.h.
 	* syscalls.c: Change syscall.h include to targ-vals.h.

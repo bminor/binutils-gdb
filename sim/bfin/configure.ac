@@ -43,14 +43,14 @@ SIM_AC_OPTION_HARDWARE(yes,,\
 )
 
 AC_CHECK_FUNCS_ONCE([getuid getgid geteuid getegid setuid setgid kill pread])
-AC_CHECK_HEADERS([ \
-	linux/if_tun.h \
-	linux/mii.h \
-	linux/types.h \
-	net/if.h \
-	sys/ioctl.h \
-	sys/mman.h \
-])
+AC_CHECK_HEADERS_ONCE(m4_flatten([
+	linux/if_tun.h
+	linux/mii.h
+	linux/types.h
+	net/if.h
+	sys/ioctl.h
+	sys/mman.h
+]))
 
 PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES(SDL, sdl, [
