@@ -688,6 +688,44 @@
 /* end rx sys target macros */
 #endif
 #endif
+#ifdef NL_TARGET_sh
+#ifdef sys_defs
+/* from syscall.h */
+/* begin sh sys target macros */
+ { "SYS_ARG", 24 },
+ { "SYS_argc", 172 },
+ { "SYS_argn", 174 },
+ { "SYS_argnlen", 173 },
+ { "SYS_chdir", 12 },
+ { "SYS_chmod", 15 },
+ { "SYS_chown", 16 },
+ { "SYS_close", 6 },
+ { "SYS_creat", 8 },
+ { "SYS_execv", 11 },
+ { "SYS_execve", 59 },
+ { "SYS_exit", 1 },
+ { "SYS_fork", 2 },
+ { "SYS_fstat", 22 },
+ { "SYS_ftruncate", 130 },
+ { "SYS_getpid", 20 },
+ { "SYS_isatty", 21 },
+ { "SYS_link", 9 },
+ { "SYS_lseek", 19 },
+ { "SYS_mknod", 14 },
+ { "SYS_open", 5 },
+ { "SYS_pipe", 42 },
+ { "SYS_read", 3 },
+ { "SYS_stat", 38 },
+ { "SYS_time", 23 },
+ { "SYS_truncate", 129 },
+ { "SYS_unlink", 10 },
+ { "SYS_utime", 201 },
+ { "SYS_wait", 202 },
+ { "SYS_wait4", 7 },
+ { "SYS_write", 4 },
+/* end sh sys target macros */
+#endif
+#endif
 #ifdef NL_TARGET_sparc
 #ifdef sys_defs
 /* from syscall.h */

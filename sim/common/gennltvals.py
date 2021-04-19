@@ -51,6 +51,7 @@ TARGET_DIRS = {
     'i960': 'libgloss/i960',
     'mcore': 'libgloss/mcore',
     'riscv': 'libgloss/riscv/machine',
+    'sh': 'newlib/libc/sys/sh/sys',
     'v850': 'libgloss/v850/sys',
 }
 TARGETS = {
@@ -71,6 +72,7 @@ TARGETS = {
     'pru',
     'riscv',
     'rx',
+    'sh',
     'sparc',
     'v850',
 }

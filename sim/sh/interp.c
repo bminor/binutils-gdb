@@ -60,8 +60,7 @@
 #include "sim-base.h"
 #include "sim-options.h"
 
-/* This file is local - if newlib changes, then so should this.  */
-#include "syscall.h"
+#include "targ-vals.h"
 
 #include <math.h>
 
@@ -887,21 +886,21 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	  {
 
 #if !defined(__GO32__) && !defined(_WIN32)
-	  case SYS_fork:
+	  case TARGET_SYS_fork:
 	    regs[0] = fork ();
 	    break;
 /* This would work only if endianness matched between host and target.
    Besides, it's quite dangerous.  */
 #if 0
-	  case SYS_execve:
+	  case TARGET_SYS_execve:
 	    regs[0] = execve (ptr (regs[5]), (char **) ptr (regs[6]), 
 			      (char **) ptr (regs[7]));
 	    break;
-	  case SYS_execv:
+	  case TARGET_SYS_execv:
 	    regs[0] = execve (ptr (regs[5]), (char **) ptr (regs[6]), 0);
 	    break;
 #endif
-	  case SYS_pipe:
+	  case TARGET_SYS_pipe:
 	    {
 	      regs[0] = (BUSERROR (regs[5], maskl)
 			 ? -EINVAL
@@ -909,18 +908,18 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	    }
 	    break;
 
-	  case SYS_wait:
+	  case TARGET_SYS_wait:
 	    regs[0] = wait ((int *) ptr (regs[5]));
 	    break;
 #endif /* !defined(__GO32__) && !defined(_WIN32) */
 
-	  case SYS_read:
+	  case TARGET_SYS_read:
 	    strnswap (regs[6], regs[7]);
 	    regs[0]
 	      = callback->read (callback, regs[5], ptr (regs[6]), regs[7]);
 	    strnswap (regs[6], regs[7]);
 	    break;
-	  case SYS_write:
+	  case TARGET_SYS_write:
 	    strnswap (regs[6], regs[7]);
 	    if (regs[5] == 1)
 	      regs[0] = (int) callback->write_stdout (callback, 
@@ -930,13 +929,13 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 					       ptr (regs[6]), regs[7]);
 	    strnswap (regs[6], regs[7]);
 	    break;
-	  case SYS_lseek:
+	  case TARGET_SYS_lseek:
 	    regs[0] = callback->lseek (callback,regs[5], regs[6], regs[7]);
 	    break;
-	  case SYS_close:
+	  case TARGET_SYS_close:
 	    regs[0] = callback->close (callback,regs[5]);
 	    break;
-	  case SYS_open:
+	  case TARGET_SYS_open:
 	    {
 	      int len = strswaplen (regs[5]);
 	      strnswap (regs[5], len);
@@ -944,13 +943,13 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	      strnswap (regs[5], len);
 	      break;
 	    }
-	  case SYS_exit:
+	  case TARGET_SYS_exit:
 	    /* EXIT - caller can look in r5 to work out the reason */
 	    raise_exception (SIGQUIT);
 	    regs[0] = regs[5];
 	    break;
 
-	  case SYS_stat:	/* added at hmsi */
+	  case TARGET_SYS_stat:	/* added at hmsi */
 	    /* stat system call */
 	    {
 	      struct stat host_stat;
@@ -999,7 +998,7 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	    break;
 
 #ifndef _WIN32
-	  case SYS_chown:
+	  case TARGET_SYS_chown:
 	    {
 	      int len = strswaplen (regs[5]);
 
@@ -1009,7 +1008,7 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	      break;
 	    }
 #endif /* _WIN32 */
-	  case SYS_chmod:
+	  case TARGET_SYS_chmod:
 	    {
 	      int len = strswaplen (regs[5]);
 
@@ -1018,7 +1017,7 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	      strnswap (regs[5], len);
 	      break;
 	    }
-	  case SYS_utime:
+	  case TARGET_SYS_utime:
 	    {
 	      /* Cast the second argument to void *, to avoid type mismatch
 		 if a prototype is present.  */
@@ -1029,16 +1028,16 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	      strnswap (regs[5], len);
 	      break;
 	    }
-	  case SYS_argc:
+	  case TARGET_SYS_argc:
 	    regs[0] = countargv (prog_argv);
 	    break;
-	  case SYS_argnlen:
+	  case TARGET_SYS_argnlen:
 	    if (regs[5] < countargv (prog_argv))
 	      regs[0] = strlen (prog_argv[regs[5]]);
 	    else
 	      regs[0] = -1;
 	    break;
-	  case SYS_argn:
+	  case TARGET_SYS_argn:
 	    if (regs[5] < countargv (prog_argv))
 	      {
 		/* Include the termination byte.  */
@@ -1048,13 +1047,13 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	    else
 	      regs[0] = -1;
 	    break;
-	  case SYS_time:
+	  case TARGET_SYS_time:
 	    regs[0] = get_now ();
 	    break;
-	  case SYS_ftruncate:
+	  case TARGET_SYS_ftruncate:
 	    regs[0] = callback->ftruncate (callback, regs[5], regs[6]);
 	    break;
-	  case SYS_truncate:
+	  case TARGET_SYS_truncate:
 	    {
 	      int len = strswaplen (regs[5]);
 	      strnswap (regs[5], len);
