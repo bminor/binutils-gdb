@@ -629,6 +629,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
+ac_func_list=
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 sim_hw
@@ -2294,6 +2295,22 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
+as_fn_append ac_func_list " __setfpucw"
+as_fn_append ac_func_list " ftruncate"
+as_fn_append ac_func_list " getrusage"
+as_fn_append ac_func_list " lstat"
+as_fn_append ac_func_list " mmap"
+as_fn_append ac_func_list " munmap"
+as_fn_append ac_func_list " posix_fallocate"
+as_fn_append ac_func_list " sigaction"
+as_fn_append ac_func_list " time"
+as_fn_append ac_func_list " truncate"
+as_fn_append ac_func_list " chmod"
+as_fn_append ac_func_list " utime"
+as_fn_append ac_func_list " fork"
+as_fn_append ac_func_list " execve"
+as_fn_append ac_func_list " execv"
+as_fn_append ac_func_list " chown"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
@@ -3867,6 +3884,41 @@ fi
 rmdir .tst 2>/dev/null
 
 DEPDIR="${am__leading_dot}deps"
+
+
+
+
+  for ac_func in $ac_func_list
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 case `pwd` in
   *\ * | *\	*)
@@ -7314,29 +7366,6 @@ fi
 
 done
 
-for ac_func in getrusage time sigaction __setfpucw
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
-
-for ac_func in mmap munmap lstat truncate ftruncate posix_fallocate
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
 
 ac_fn_c_check_member "$LINENO" "struct stat" "st_dev" "ac_cv_member_struct_stat_st_dev" "#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -11238,7 +11267,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11241 "configure"
+#line 11270 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11344,7 +11373,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11347 "configure"
+#line 11376 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12059,17 +12088,18 @@ fi
 fi
 
 
-for ac_func in time chmod utime fork execve execv chown
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
 
-fi
-done
+
+
+
+
+
+
+
+
+
+
+
 
 for ac_header in utime.h
 do :

@@ -56,8 +56,18 @@ AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(sys/time.h sys/times.h sys/resource.h sys/mman.h)
 AC_CHECK_HEADERS(fcntl.h fpu_control.h)
 AC_CHECK_HEADERS(dlfcn.h sys/stat.h)
-AC_CHECK_FUNCS(getrusage time sigaction __setfpucw)
-AC_CHECK_FUNCS(mmap munmap lstat truncate ftruncate posix_fallocate)
+AC_CHECK_FUNCS_ONCE(m4_flatten([
+  __setfpucw
+  ftruncate
+  getrusage
+  lstat
+  mmap
+  munmap
+  posix_fallocate
+  sigaction
+  time
+  truncate
+]))
 AC_CHECK_MEMBERS([[struct stat.st_dev], [struct stat.st_ino],
 [struct stat.st_mode], [struct stat.st_nlink], [struct stat.st_uid],
 [struct stat.st_gid], [struct stat.st_rdev], [struct stat.st_size],

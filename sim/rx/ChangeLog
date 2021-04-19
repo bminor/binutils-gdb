@@ -1,3 +1,7 @@
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-04-09  Luis Machado  <luis.machado@linaro.org>
 
 	* fpu.c (rxfp_itof): Initialize structure.
