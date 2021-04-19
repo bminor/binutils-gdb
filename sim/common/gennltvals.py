@@ -68,6 +68,7 @@ TARGETS = {
     'mcore',
     'mn10200',
     'mn10300',
+    'moxie',
     'msp430',
     'pru',
     'riscv',
