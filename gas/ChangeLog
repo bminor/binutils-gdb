@@ -1,5 +1,11 @@
 2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
+	* NEWS: Update news.
+	* testsuite/gas/aarch64/rme.d: Update test.
+	* testsuite/gas/aarch64/rme.s: Update test.
+
+2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
 	* testsuite/gas/aarch64/rme.d: Update test.
 	* testsuite/gas/aarch64/rme.s: Update test.
 

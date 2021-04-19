@@ -2,6 +2,8 @@
 
 * arm-symbianelf support removed.
 
+* Add support for Realm Management Extension (RME) for AArch64.
+
 Changes in 2.36:
 
 * Add support for Intel AVX VNNI instructions.

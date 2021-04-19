@@ -4870,6 +4870,11 @@ const aarch64_sys_ins_reg aarch64_sys_regs_tlbi[] =
     { "rvae3os",    CPENS (6, C8, C5, 1), F_HASXT | F_ARCHEXT },
     { "rvale3os",   CPENS (6, C8, C5, 5), F_HASXT | F_ARCHEXT },
 
+    { "rpaos",      CPENS (6, C8, C4, 3), F_HASXT },
+    { "rpalos",     CPENS (6, C8, C4, 7), F_HASXT },
+    { "paallos",    CPENS (6, C8, C1, 4), 0},
+    { "paall",      CPENS (6, C8, C7, 4), 0},
+
     { 0,       CPENS(0,0,0,0), 0 }
 };
 

@@ -1,5 +1,10 @@
 2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
+	* aarch64-opc.c: Add new registers (RPAOS, RPALOS, PAALLOS, PAALL) support
+	for TLBI instruction.
+
+2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
 	* aarch64-opc.c: Add new register (CIPAPA, CIGDPAPA) support for
 	DC instruction.
 

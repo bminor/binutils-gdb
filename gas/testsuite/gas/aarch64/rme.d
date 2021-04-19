@@ -14,3 +14,7 @@ Disassembly of section \.text:
   10:	d51e2180 	msr	gptbr_el3, x0
   14:	d50e7e20 	dc	cipapa, x0
   18:	d50e7ea0 	dc	cigdpapa, x0
+  1c:	d50e8460 	tlbi	rpaos, x0
+  20:	d50e84e0 	tlbi	rpalos, x0
+  24:	d50e819f 	tlbi	paallos
+  28:	d50e879f 	tlbi	paall
