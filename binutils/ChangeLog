@@ -1,5 +1,10 @@
 2021-04-19  Nick Clifton  <nickc@redhat.com>
 
+	PR 21702
+	* arsup.c (ar_addmod): Enable plugin support, if available.
+
+2021-04-19  Nick Clifton  <nickc@redhat.com>
+
 	* rename.c: (get_stat_atime_ns): Add prototype.
 	(get_stat_mtime_ns): Add prototype.
 
