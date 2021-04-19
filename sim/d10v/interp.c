@@ -678,7 +678,7 @@ xfer_mem (SIM_DESC sd,
     {
       sim_io_printf
 	(sd,
-	 "sim_%s %d bytes: 0x%08lx (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
+	 "sim_%s %d bytes: 0x%08" PRIxTA " (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
 	 write_p ? "write" : "read",
 	 phys_size, virt, last_from,
 	 phys, last_to,
@@ -703,7 +703,9 @@ int
 sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 {
   /* FIXME: this should be performing a virtual transfer */
-  return xfer_mem (sd, addr, buffer, size, 1);
+  /* FIXME: We cast the const away, but it's safe because xfer_mem only reads
+     when write_p==1.  This is still ugly.  */
+  return xfer_mem (sd, addr, (void *) buffer, size, 1);
 }
 
 int
@@ -745,7 +747,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   struct simops *s;
   struct hash_entry *h;
   static int init_p = 0;
-  char **p;
+  char * const *p;
   int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
