@@ -60,6 +60,7 @@ TARGETS = {
     'fr30',
     'frv',
     'i960',
+    'iq2000',
     'lm32',
     'm32r',
     'mcore',
