@@ -88,6 +88,7 @@
 #include "rust-lang.h"
 #include "gdbsupport/pathstuff.h"
 #include "count-one-bits.h"
+#include <unordered_set>
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
@@ -4713,58 +4714,44 @@ dwarf2_base_index_functions::map_symbol_filenames
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  if (!per_objfile->per_bfd->filenames_cache)
+  /* Use caches to ensure we only call FUN once for each filename.  */
+  filename_seen_cache filenames_cache;
+  std::unordered_set<quick_file_names *> qfn_cache;
+
+  /* The rule is CUs specify all the files, including those used by any TU,
+     so there's no need to scan TUs here.  We can ignore file names coming
+     from already-expanded CUs.  It is possible that an expanded CU might
+     reuse the file names data from a currently unexpanded CU, in this
+     case we don't want to report the files from the unexpanded CU.  */
+
+  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
     {
-      per_objfile->per_bfd->filenames_cache.emplace ();
-
-      htab_up visited (htab_create_alloc (10,
-					  htab_hash_pointer, htab_eq_pointer,
-					  NULL, xcalloc, xfree));
-
-      /* The rule is CUs specify all the files, including those used
-	 by any TU, so there's no need to scan TUs here.  We can
-	 ignore file names coming from already-expanded CUs.  */
-
-      for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
+      if (per_objfile->symtab_set_p (per_cu))
 	{
-	  if (per_objfile->symtab_set_p (per_cu))
-	    {
-	      void **slot = htab_find_slot (visited.get (),
-					    per_cu->v.quick->file_names,
-					    INSERT);
-
-	      *slot = per_cu->v.quick->file_names;
-	    }
-	}
-
-      for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
-	{
-	  /* We only need to look at symtabs not already expanded.  */
-	  if (per_objfile->symtab_set_p (per_cu))
-	    continue;
-
-	  quick_file_names *file_data
-	    = dw2_get_file_names (per_cu, per_objfile);
-	  if (file_data == NULL)
-	    continue;
-
-	  void **slot = htab_find_slot (visited.get (), file_data, INSERT);
-	  if (*slot)
-	    {
-	      /* Already visited.  */
-	      continue;
-	    }
-	  *slot = file_data;
-
-	  for (int j = 0; j < file_data->num_file_names; ++j)
-	    {
-	      const char *filename = file_data->file_names[j];
-	      per_objfile->per_bfd->filenames_cache->seen (filename);
-	    }
+	  if (per_cu->v.quick->file_names != nullptr)
+	    qfn_cache.insert (per_cu->v.quick->file_names);
 	}
     }
 
-  per_objfile->per_bfd->filenames_cache->traverse ([&] (const char *filename)
+  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
+    {
+      /* We only need to look at symtabs not already expanded.  */
+      if (per_objfile->symtab_set_p (per_cu))
+	continue;
+
+      quick_file_names *file_data = dw2_get_file_names (per_cu, per_objfile);
+      if (file_data == nullptr
+	  || qfn_cache.find (file_data) != qfn_cache.end ())
+	continue;
+
+      for (int j = 0; j < file_data->num_file_names; ++j)
+	{
+	  const char *filename = file_data->file_names[j];
+	  filenames_cache.seen (filename);
+	}
+    }
+
+  filenames_cache.traverse ([&] (const char *filename)
     {
       gdb::unique_xmalloc_ptr<char> this_real_name;
 

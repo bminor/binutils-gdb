@@ -1,3 +1,7 @@
+2021-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/info_sources.exp: Add new tests.
+
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/ptype-offsets.cc (struct empty_member): New.

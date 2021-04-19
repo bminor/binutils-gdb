@@ -235,10 +235,6 @@ public:
   /* The CUs we recently read.  */
   std::vector<dwarf2_per_cu_data *> just_read_cus;
 
-  /* Table containing all filenames.  This is an optional because the
-     table is lazily constructed on first access.  */
-  gdb::optional<filename_seen_cache> filenames_cache;
-
   /* If we loaded the index from an external file, this contains the
      resources associated to the open file, memory mapping, etc.  */
   std::unique_ptr<index_cache_resource> index_cache_res;

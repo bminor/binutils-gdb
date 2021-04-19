@@ -1,3 +1,12 @@
+2021-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2/read.c: Add 'unordered_set' include.
+	(dwarf2_base_index_functions::map_symbol_filenames): Replace
+	'visited' hash table with 'qfn_cache' unordered_set.  Remove use
+	of per_Bfd->filenames_cache cache, and use function local
+	filenames_cache instead.  Reindent.
+	* dwarf2/read.h (struct dwarf2_per_bfd) <filenames_cache>: Delete.
+
 2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* breakpoint.c (iterate_over_bp_locations): Change callback to
