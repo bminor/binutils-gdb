@@ -330,7 +330,7 @@ do_run (SIM_DESC sd, SIM_CPU *cpu, uint64 mcode)
 
 #ifdef DEBUG
   if ((cr16_debug & DEBUG_INSTRUCTION) != 0)
-    sim_io_printf (sd, "do_long 0x%x\n", mcode);
+    sim_io_printf (sd, "do_long 0x%" PRIx64 "\n", mcode);
 #endif
 
    h = lookup_hash (sd, cpu, mcode, 1);
@@ -543,8 +543,9 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb,
                else 
                  h = &hash_table[hash(s->opcode, 0)];
                break;
+
             default:
-              break;
+              continue;
             }
       
           /* go to the last entry in the chain.  */
