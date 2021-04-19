@@ -356,22 +356,6 @@ signal_init (void)
 
 /* Support routines.  */
 
-void
-sprint_value (char *buf, valueT val)
-{
-  if (sizeof (val) <= sizeof (long))
-    {
-      sprintf (buf, "%ld", (long) val);
-      return;
-    }
-  if (sizeof (val) <= sizeof (bfd_vma))
-    {
-      sprintf_vma (buf, val);
-      return;
-    }
-  abort ();
-}
-
 #define HEX_MAX_THRESHOLD	1024
 #define HEX_MIN_THRESHOLD	-(HEX_MAX_THRESHOLD)
 

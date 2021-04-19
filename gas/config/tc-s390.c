@@ -626,7 +626,7 @@ s390_insert_operand (unsigned char *insn,
 	      min <<= 1;
 	      max <<= 1;
 	    }
-	  sprint_value (buf, val);
+	  bfd_sprintf_vma (stdoutput, buf, val);
 	  if (file == (char *) NULL)
 	    as_bad (err, buf, (int) min, (int) max);
 	  else

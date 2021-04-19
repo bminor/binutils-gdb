@@ -2556,8 +2556,8 @@ offset_in_range (offsetT val, int size)
     {
       char buf1[40], buf2[40];
 
-      sprint_value (buf1, val);
-      sprint_value (buf2, val & mask);
+      bfd_sprintf_vma (stdoutput, buf1, val);
+      bfd_sprintf_vma (stdoutput, buf2, val & mask);
       as_warn (_("%s shortened to %s"), buf1, buf2);
     }
   return val & mask;

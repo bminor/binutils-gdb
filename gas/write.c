@@ -1110,9 +1110,9 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      if ((add_number & mask) != 0 && (add_number & mask) != mask)
 		{
 		  char buf[50], buf2[50];
-		  sprint_value (buf, fragP->fr_address + fixP->fx_where);
+		  bfd_sprintf_vma (stdoutput, buf, fragP->fr_address + fixP->fx_where);
 		  if (add_number > 1000)
-		    sprint_value (buf2, add_number);
+		    bfd_sprintf_vma (stdoutput, buf2, add_number);
 		  else
 		    sprintf (buf2, "%ld", (long) add_number);
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -2866,7 +2866,9 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 			  if (flag_warn_displacement)
 			    {
 			      char buf[50];
-			      sprint_value (buf, (addressT) lie->addnum);
+
+			      bfd_sprintf_vma (stdoutput, buf,
+					       (addressT) lie->addnum);
 			      as_warn_where (fragP->fr_file, fragP->fr_line,
 					     _(".word %s-%s+%s didn't fit"),
 					     S_GET_NAME (lie->add),
