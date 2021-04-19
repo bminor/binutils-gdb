@@ -578,6 +578,10 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
       }
       break;
 
+    case CB_SYS_getpid:
+      result = getpid ();
+      break;
+
     case CB_SYS_time :
       {
 	/* FIXME: May wish to change CB_SYS_time to something else.

@@ -457,10 +457,6 @@ bfin_syscall (SIM_CPU *cpu)
       sc.result = setgid (sc.arg1);
       goto sys_finish;
 
-    case CB_SYS_getpid:
-      tbuf += sprintf (tbuf, "getpid()");
-      sc.result = getpid ();
-      goto sys_finish;
     case CB_SYS_kill:
       tbuf += sprintf (tbuf, "kill(%u, %i)", args[0], args[1]);
       /* Only let the app kill itself.  */
