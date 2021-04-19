@@ -1,5 +1,13 @@
 2021-04-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (NL_TARGET): Define.
+	(syscalls.o): Delete syscall.h.
+	* syscalls.c: Change syscall.h include to targ-vals.h.
+	(rx_syscall): Add TARGET_ prefix to all SYS_ constants.
+	* syscall.h: Removed.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2021-04-09  Luis Machado  <luis.machado@linaro.org>

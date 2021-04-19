@@ -70,6 +70,7 @@ TARGETS = {
     'msp430',
     'pru',
     'riscv',
+    'rx',
     'sparc',
     'v850',
 }

@@ -1,5 +1,10 @@
 2021-04-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* gennltvals.py (TARGETS): Add rx.
+	* nltvals.def: Regenerate.
+
+2021-04-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* gennltvals.py (TARGETS): Add m32c.
 	* nltvals.def: Regenerate.
 

@@ -18,6 +18,9 @@
 ### You should have received a copy of the GNU General Public License
 ### along with the GNU simulators; if not, see <http://www.gnu.org/licenses/>.
 
+# This selects the newlib/libgloss syscall definitions.
+NL_TARGET = -DNL_TARGET_rx
+
 ## COMMON_PRE_CONFIG_FRAG
 
 SIM_EXTRA_CFLAGS = -Wall
@@ -58,5 +61,5 @@ mem.o : mem.h cpu.h syscalls.h misc.h err.h
 misc.o : cpu.h misc.h
 reg.o : cpu.h trace.h
 rx.o : $(srcdir)/../../include/opcode/rx.h cpu.h mem.h syscalls.h fpu.h
-syscalls.o : $(srcdir)/../../include/gdb/callback.h cpu.h mem.h syscalls.h syscall.h
+syscalls.o : $(srcdir)/../../include/gdb/callback.h cpu.h mem.h syscalls.h
 trace.o : ../../bfd/bfd.h $(srcdir)/../../include/dis-asm.h cpu.h mem.h load.h
