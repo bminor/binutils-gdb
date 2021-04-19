@@ -64,8 +64,10 @@ if {    ![istarget alpha*-*-*vms*]
      && ![istarget microblaze-*-*]
      && ![istarget mn10300-*-*]
      && ![istarget msp430*-*-*]
+     && ![istarget powerpc*-*-aix*]
      && ![istarget riscv*-*-*]
      && ![istarget rl78-*-*]
+     && ![istarget rs6000*-*-aix*]
      && ![istarget rx-*-*] } then {
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
 }

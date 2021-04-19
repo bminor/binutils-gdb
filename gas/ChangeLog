@@ -1,3 +1,8 @@
+2021-04-19  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/all/gas.exp: Add rs6000*-*-aix* to the list of
+	targets which should skip the undefined symbols test.
+
 2021-04-19  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* NEWS: Update news.
