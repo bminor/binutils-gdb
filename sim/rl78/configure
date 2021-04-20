@@ -2302,7 +2302,6 @@ as_fn_append ac_func_list " posix_fallocate"
 as_fn_append ac_func_list " sigaction"
 as_fn_append ac_func_list " time"
 as_fn_append ac_func_list " truncate"
-as_fn_append ac_header_list " getopt.h"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
@@ -11244,7 +11243,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11247 "configure"
+#line 11246 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11350,7 +11349,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11353 "configure"
+#line 11352 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11993,10 +11992,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
-
-
-
-
 
 
 

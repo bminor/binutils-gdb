@@ -23,8 +23,6 @@ AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
 SIM_AC_COMMON
 
-AC_CHECK_HEADERS_ONCE(getopt.h)
-
 AC_ARG_ENABLE(cycle-accurate,
 [AS_HELP_STRING([--disable-cycle-accurate],
 		[Disable cycle accurate simulation (faster runtime)])],

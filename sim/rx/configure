@@ -2307,7 +2307,6 @@ as_fn_append ac_func_list " posix_fallocate"
 as_fn_append ac_func_list " sigaction"
 as_fn_append ac_func_list " time"
 as_fn_append ac_func_list " truncate"
-as_fn_append ac_header_list " getopt.h"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
@@ -11249,7 +11248,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11252 "configure"
+#line 11251 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11355,7 +11354,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11358 "configure"
+#line 11357 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11897,10 +11896,6 @@ $as_echo "$ac_cv_type_signal" >&6; }
 cat >>confdefs.h <<_ACEOF
 #define RETSIGTYPE $ac_cv_type_signal
 _ACEOF
-
-
-
-
 
 
 
