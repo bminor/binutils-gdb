@@ -1,3 +1,7 @@
+2021-04-20  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* gdb.base/address_space_qualifier.exp: New file.
+
 2021-04-19  Tom Tromey  <tromey@adacore.com>
 
 	PR gdb/27742:

@@ -1,3 +1,7 @@
+2021-04-20  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* c-exp.y (single_qualifier): Handle UNKNOWN_CPP_NAME.
+
 2021-04-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* producer.c: Replace 'regex' include with 'gdb_regex.h'.
