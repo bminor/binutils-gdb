@@ -1320,7 +1320,21 @@ reloc_howto_type xcoff64_howto_table[] =
 	 MINUS_ONE,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  EMPTY_HOWTO(0x26),
+  /* 0x26: 32 bit relocation, but store negative value.  */
+  HOWTO (R_NEG,			/* type */
+	 0,			/* rightshift */
+	 -2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_NEG_32",		/* name */
+	 true,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
   EMPTY_HOWTO(0x27),
   EMPTY_HOWTO(0x28),
   EMPTY_HOWTO(0x29),
@@ -1386,6 +1400,9 @@ xcoff64_rtype2howto (arelent *relent, struct internal_reloc *internal)
     {
       if (R_POS == internal->r_type)
 	relent->howto = &xcoff64_howto_table[0x1c];
+
+      if (R_NEG == internal->r_type)
+	relent->howto = &xcoff64_howto_table[0x26];
     }
 
   /* The r_size field of an XCOFF reloc encodes the bitsize of the
@@ -1426,6 +1443,8 @@ xcoff64_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &xcoff64_howto_table[0];
     case BFD_RELOC_NONE:
       return &xcoff64_howto_table[0xf];
+    case BFD_RELOC_PPC_NEG:
+      return &xcoff64_howto_table[0x1];
     case BFD_RELOC_PPC64_TLSGD:
       return &xcoff64_howto_table[0x20];
     case BFD_RELOC_PPC64_TLSIE:

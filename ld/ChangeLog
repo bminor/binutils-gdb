@@ -1,3 +1,12 @@
+2021-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	PR binutils/21700
+	* testsuite/ld-powerpc/aix52.exp: Add new test.
+	* testsuite/ld-powerpc/aix-neg-reloc-32.d: New test.
+	* testsuite/ld-powerpc/aix-neg-reloc-64.d: New test.
+	* testsuite/ld-powerpc/aix-neg-reloc.ex: New test.
+	* testsuite/ld-powerpc/aix-neg-reloc.s: New test.
+
 2021-04-13  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texi (Options): Add note about the effect of --as-needed on

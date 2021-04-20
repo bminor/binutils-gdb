@@ -1,3 +1,21 @@
+2021-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	PR binutils/21700
+	* reloc.c (BFD_RELOC_PPC_NEG): New relocation.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* coff-rs6000.c (_bfd_xcoff_reloc_type_lookup): Add
+	BFD_RELOC_PPC_NEG handler.
+	(xcoff_reloc_type_neg): Correctly substract addend.
+	* coff64-rs6000.c (xcoff64_howto_table): Add R_NEG_32
+	howto.
+	(xcoff64_rtype2howto): Add handler for R_NEG_32.
+	(xcoff64_reloc_type_lookup): Add BFD_RELOC_PPC_NEG handler.
+	* xcofflink.c (xcoff_need_ldrel_p): Check output section
+	for R_POS-like relocations. New argument added.
+	(xcoff_mark): Adapt to new xcoff_need_ldrel_p argument.
+	(xcoff_link_input_bfd): Likewise.
+
 2021-04-16  Alan Modra  <amodra@gmail.com>
 
 	PR 27567
