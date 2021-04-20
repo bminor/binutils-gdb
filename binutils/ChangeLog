@@ -1,3 +1,9 @@
+2021-04-20  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* MAINTAINERS: Remove Martin Schwidefsky as s390 maintainer and
+	add him to Past Maintainers.
+	Update my email address.
+
 2021-04-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 21702

@@ -130,8 +130,7 @@ responsibility among the other maintainers.
   RISC-V	   Nelson Chu <nelson.chu@sifive.com>
   RX               Nick Clifton <nickc@redhat.com>
   S12Z		   John Darrington <john@darrington.wattle.id.au>
-  s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
-  s390, s390x	   Andreas Krebbel <krebbel@linux.vnet.ibm.com>
+  s390, s390x	   Andreas Krebbel <krebbel@linux.ibm.com>
   SH		   Alexandre Oliva <aoliva@sourceware.org>
   SPARC		   David S. Miller <davem@davemloft.net>
   SPARC		   Jose E. Marchesi <jose.marchesi@oracle.com>
@@ -168,6 +167,7 @@ goes with them.
   Mark Mitchell
   Bernd Schmidt
   Svein Seldal
+  Martin Schwidefsky
 
       --------- CGEN Maintainers -------------
 
