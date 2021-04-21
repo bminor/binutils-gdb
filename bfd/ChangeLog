@@ -1,3 +1,11 @@
+2021-04-21  Eli Zaretskii  <eliz@gnu.org>
+
+	PR 27760
+	* peXXigen.c (_bfd_XX_print_private_bfd_data_common): Add display
+	of IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP,
+	IMAGE_FILE_NET_RUN_FROM_SWAP and IMAGE_FILE_UP_SYSTEM_ONLY flags.
+	Decode the contents of the DllCharacteristics field.
+
 2021-04-21  Nick Clifton  <nickc@redhat.com>
 
 	PR 27759

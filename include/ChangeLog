@@ -1,3 +1,9 @@
+2021-04-21  Eli Zaretskii  <eliz@gnu.org>
+
+	PR 27760
+	* coff/pe.h (IMAGE_DLLCHARACTERISTICS_APPCONTAINER): Define.
+	(IMAGE_DLLCHARACTERISTICS_GUARD_CF): Define.
+
 2021-04-16  Alan Modra  <amodra@gmail.com>
 
 	PR 27567
