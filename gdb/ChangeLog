@@ -1,3 +1,13 @@
+2021-04-21  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <dwarf_version>: Now
+	unsigned char.
+	(struct dwarf2_per_cu_data): Rearrange.
+	* dwarf2/comp-unit.h (struct comp_unit_head) <version>: Now
+	unsigned char.
+	(struct comp_unit_head): Rearrange.
+	* dwarf2/comp-unit.c (read_comp_unit_head): Update.
+
 2021-04-21  Tom de Vries  <tdevries@suse.de>
 
 	PR build/27681

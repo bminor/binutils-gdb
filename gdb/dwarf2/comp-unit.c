@@ -48,11 +48,12 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   cu_header->initial_length_size = bytes_read;
   cu_header->offset_size = (bytes_read == 4) ? 4 : 8;
   info_ptr += bytes_read;
-  cu_header->version = read_2_bytes (abfd, info_ptr);
-  if (cu_header->version < 2 || cu_header->version > 5)
+  unsigned version = read_2_bytes (abfd, info_ptr);
+  if (version < 2 || version > 5)
     error (_("Dwarf Error: wrong version in compilation unit header "
 	   "(is %d, should be 2, 3, 4 or 5) [in module %s]"),
-	   cu_header->version, filename);
+	   version, filename);
+  cu_header->version = version;
   info_ptr += 2;
   if (cu_header->version < 5)
     switch (section_kind)
