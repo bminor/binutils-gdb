@@ -4788,6 +4788,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-e}|@option{--headers}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
         [@option{--dyn-syms}|@option{--lto-syms}]
+        [@option{--sym-base=[0|8|10|16]}]
         [@option{--demangle@var{=style}}|@option{--no-demangle}]
         [@option{--quiet}]
         [@option{--recurse-limit}|@option{--no-recurse-limit}]
@@ -4916,6 +4917,18 @@ has one.  The output format is the same as the format used by the
 @item --lto-syms
 @cindex LTO symbol table
 Displays the contents of any LTO symbol tables in the file.
+
+@item --sym-base=[0|8|10|16]
+@cindex symbol table size base
+Forces the size field of the symbol table to use the given base.  Any
+unrecognized options will be treated as @samp{0}.  @option{--sym-base=0}
+represents the default and legacy behaviour.  This will output sizes as decimal
+for numbers less than 100000.  For sizes 100000 and greater hexadecimal notation
+will be used with a 0x prefix.
+@option{--sym-base=8} will give the symbol sizes in octal.
+@option{--sym-base=10} will always give the symbol sizes in decimal.
+@option{--sym-base=16} will always give the symbol sizes in hexadecimal with a
+0x prefix.
 
 @item -C
 @itemx --demangle[=@var{style}]

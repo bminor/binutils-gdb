@@ -238,6 +238,7 @@ static bool do_not_show_symbol_truncation = false;
 static bool do_demangle = false;	/* Pretty print C++ symbol names.  */
 static bool process_links = false;
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
+static int sym_base = 0;
 
 static char *dump_ctf_parent_name;
 static char *dump_ctf_symtab_name;
@@ -312,12 +313,17 @@ typedef struct filedata
 typedef enum print_mode
 {
   HEX,
+  HEX_5,
   DEC,
   DEC_5,
   UNSIGNED,
+  UNSIGNED_5,
   PREFIX_HEX,
+  PREFIX_HEX_5,
   FULL_HEX,
-  LONG_HEX
+  LONG_HEX,
+  OCTAL,
+  OCTAL_5
 }
 print_mode;
 
@@ -529,17 +535,33 @@ print_vma (bfd_vma vma, print_mode mode)
     case HEX:
       return nc + printf ("%" BFD_VMA_FMT "x", vma);
 
+    case PREFIX_HEX_5:
+      nc = printf ("0x");
+      /* Fall through.  */
+    case HEX_5:
+      return nc + printf ("%05" BFD_VMA_FMT "x", vma);
+
     case DEC:
       return printf ("%" BFD_VMA_FMT "d", vma);
 
     case UNSIGNED:
       return printf ("%" BFD_VMA_FMT "u", vma);
 
+    case UNSIGNED_5:
+      return printf ("%5" BFD_VMA_FMT "u", vma);
+
+    case OCTAL:
+      return printf ("%" BFD_VMA_FMT "o", vma);
+
+    case OCTAL_5:
+      return printf ("%5" BFD_VMA_FMT "o", vma);
+
     default:
       /* FIXME: Report unrecognised mode ?  */
       return 0;
     }
 }
+
 
 /* Display a symbol on stdout.  Handles the display of control characters and
    multibye characters (assuming the host environment supports them).
@@ -4523,7 +4545,8 @@ enum long_option_values
   OPTION_WITH_SYMBOL_VERSIONS,
   OPTION_RECURSE_LIMIT,
   OPTION_NO_RECURSE_LIMIT,
-  OPTION_NO_DEMANGLING
+  OPTION_NO_DEMANGLING,
+  OPTION_SYM_BASE
 };
 
 static struct option options[] =
@@ -4580,6 +4603,7 @@ static struct option options[] =
   {"ctf-strings",      required_argument, 0, OPTION_CTF_STRINGS},
   {"ctf-parent",       required_argument, 0, OPTION_CTF_PARENT},
 #endif
+  {"sym-base",	       optional_argument, 0, OPTION_SYM_BASE},
 
   {0,		       no_argument, 0, 0}
 };
@@ -4603,6 +4627,9 @@ usage (FILE * stream)
      --symbols           An alias for --syms\n\
      --dyn-syms          Display the dynamic symbol table\n\
      --lto-syms          Display LTO symbol tables\n\
+     --sym-base=[0|8|10|16] \n\
+                         Force base for symbol sizes.  The options are \n\
+                         mixed (the default), octal, decimal, hexadecimal.\n\
   -C --demangle[=STYLE]  Decode low-level symbol names into user-level names\n\
                           The STYLE, if specified, can be `auto' (the default),\n\
                           `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
@@ -4960,6 +4987,26 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  break;
 	case OPTION_WITH_SYMBOL_VERSIONS:
 	  /* Ignored for backward compatibility.  */
+	  break;
+
+	case OPTION_SYM_BASE:
+	  sym_base = 0;
+	  if (optarg != NULL)
+	    {
+	      sym_base = strtoul (optarg, NULL, 0);
+	      switch (sym_base)
+		{
+		  case 0:
+		  case 8:
+		  case 10:
+		  case 16:
+		    break;
+
+		  default:
+		    sym_base = 0;
+		    break;
+		}
+	    }
 	  break;
 
 	default:
@@ -7213,7 +7260,7 @@ process_section_groups (Filedata * filedata)
 
   if (filedata->is_separate)
     printf (_("Section groups in linked file '%s'\n"), filedata->file_name);
-      
+
   for (i = 0, section = filedata->section_headers, group = filedata->section_groups;
        i < filedata->file_header.e_shnum;
        i++, section++)
@@ -7664,7 +7711,6 @@ process_relocs (Filedata * filedata)
 		printf
 		  (_("\n'%s' relocation section at offset 0x%lx contains %ld bytes:\n"),
 		   name, rel_offset, rel_size);
-		
 
 	      dump_relocations (filedata,
 				offset_from_vma (filedata, rel_offset, rel_size),
@@ -11353,7 +11399,7 @@ process_version_sections (Filedata * filedata)
 				section->sh_info),
 		      printable_section_name (filedata, section),
 		      section->sh_info);
-	      
+
 	    printf (_(" Addr: 0x"));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
@@ -11500,7 +11546,7 @@ process_version_sections (Filedata * filedata)
 				section->sh_info),
 		      printable_section_name (filedata, section),
 		      section->sh_info);
-	      
+
 	    printf (_(" Addr: 0x"));
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
@@ -12372,6 +12418,28 @@ get_symbol_version_string (Filedata *                   filedata,
   return NULL;
 }
 
+/* Display a symbol size on stdout.  Format is based on --sym-base setting.  */
+
+static unsigned int
+print_dynamic_symbol_size (bfd_vma vma, int base)
+{
+  switch (base)
+    {
+    case 8:
+      return print_vma (vma, OCTAL_5);
+
+    case 10:
+      return print_vma (vma, UNSIGNED_5);
+
+    case 16:
+      return print_vma (vma, PREFIX_HEX_5);
+
+    case 0:
+    default:
+      return print_vma (vma, DEC_5);
+    }
+}
+
 static void
 print_dynamic_symbol (Filedata *filedata, unsigned long si,
 		      Elf_Internal_Sym *symtab,
@@ -12388,7 +12456,7 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
   printf ("%6ld: ", si);
   print_vma (psym->st_value, LONG_HEX);
   putchar (' ');
-  print_vma (psym->st_size, DEC_5);
+  print_dynamic_symbol_size (psym->st_size, sym_base);
   printf (" %-7s", get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)));
   printf (" %-6s", get_symbol_binding (filedata, ELF_ST_BIND (psym->st_info)));
   if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
@@ -12540,7 +12608,7 @@ display_lto_symtab (Filedata *           filedata,
       else
 	printf (_("\nLTO Symbol table '%s' is empty!\n"),
 		printable_section_name (filedata, section));
-      
+
       return true;
     }
 
@@ -15536,7 +15604,7 @@ process_section_contents (Filedata * filedata)
 
       if (filedata->is_separate && ! process_links)
 	dump &= DEBUG_DUMP;
-      
+
 #ifdef SUPPORT_DISASSEMBLY
       if (dump & DISASS_DUMP)
 	{

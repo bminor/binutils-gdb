@@ -1,3 +1,17 @@
+2021-04-21  Nick Lott  <nick.lott@gmail.com>
+
+	PR 27672
+	* readelf.c (sym_base): New variable.
+	(enum print_mode): Add more modes.
+	(print_vma): Add suport for new modes.
+	(options): Add sym-base.
+	(usage): Add sym-base.
+	(parse_args): Add support for --sym-base.
+	(print_dynamic_symbol_size): New function.
+	(print_dynamic_symbol): Use new function.
+	* doc/binutils.texi: Document the new feature.
+	* NEWS: Mention the new feature.
+
 2021-04-21  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/binutils-all/mips/global-local-symtab-sort-n64t.d:
