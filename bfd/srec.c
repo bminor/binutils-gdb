@@ -733,7 +733,8 @@ srec_read_section (bfd *abfd, asection *section, bfd_byte *contents)
 
       /* This is called after srec_scan has already been called, so we
 	 ought to know the exact format.  */
-      BFD_ASSERT (c == 'S');
+      if (c != 'S')
+	goto error_return;
 
       if (bfd_bread (hdr, (bfd_size_type) 3, abfd) != 3)
 	goto error_return;
@@ -759,7 +760,8 @@ srec_read_section (bfd *abfd, asection *section, bfd_byte *contents)
       switch (hdr[0])
 	{
 	default:
-	  BFD_ASSERT (sofar == section->size);
+	  if (sofar != section->size)
+	    goto error_return;
 	  free (buf);
 	  return true;
 
@@ -783,7 +785,8 @@ srec_read_section (bfd *abfd, asection *section, bfd_byte *contents)
 	  if (address != section->vma + sofar)
 	    {
 	      /* We've come to the end of this section.  */
-	      BFD_ASSERT (sofar == section->size);
+	      if (sofar != section->size)
+		goto error_return;
 	      free (buf);
 	      return true;
 	    }
@@ -805,7 +808,8 @@ srec_read_section (bfd *abfd, asection *section, bfd_byte *contents)
   if (error)
     goto error_return;
 
-  BFD_ASSERT (sofar == section->size);
+  if (sofar != section->size)
+    goto error_return;
 
   free (buf);
   return true;
