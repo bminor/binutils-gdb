@@ -30154,9 +30154,16 @@ number of the parent breakpoint.  The second digit is the number of the
 location within that breakpoint.
 
 @item enabled
-This indicates whether the location is enabled, in which case the
-value is @samp{y}, or disabled, in which case the value is @samp{n}.
-Note that this is not the same as the field @code{enable}.
+There are three possible values, with the following meanings:
+@table @code
+@item y
+The location is enabled.
+@item n
+The location is disabled by the user.
+@item N
+The location is disabled because the breakpoint condition is invalid
+at this location.
+@end table
 
 @item addr
 The address of this location as an hexidecimal number.

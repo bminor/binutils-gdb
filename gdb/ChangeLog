@@ -1,3 +1,10 @@
+2021-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* breakpoint.c (print_one_breakpoint_location): Display "N" for
+	disabled-by-condition locations on MI-like output.
+	(breakpoint_1): Do not display the disabled-by-condition footnote
+	if the output is MI-like.
+
 2021-04-21  Frederic Cambus  <fred@statdns.com>
 
 	* syscalls/update-netbsd.sh: Fix script name display in usage, and

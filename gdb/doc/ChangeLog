@@ -1,3 +1,8 @@
+2021-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.texinfo (GDB/MI Breakpoint Information): Update the
+	description for the 'enabled' field of breakpoint locations.
+
 2021-04-15  Tom Tromey  <tom@tromey.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

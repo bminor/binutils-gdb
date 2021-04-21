@@ -6190,8 +6190,12 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   /* 4 */
   annotate_field (3);
+  /* For locations that are disabled because of an invalid condition,
+     display "N*" on CLI, where "*" refers to a footnote below the
+     table.  For MI, simply display a "N" without a footnote.  */
+  const char *N = (uiout->is_mi_like_p ()) ? "N" : "N*";
   if (part_of_multiple)
-    uiout->field_string ("enabled", (loc->disabled_by_cond ? "N*"
+    uiout->field_string ("enabled", (loc->disabled_by_cond ? N
 				     : (loc->enabled ? "y" : "n")));
   else
     uiout->field_fmt ("enabled", "%c", bpenables[(int) b->enable_state]);
@@ -6716,7 +6720,7 @@ breakpoint_1 (const char *bp_num_list, bool show_internal,
       if (last_loc && !server_command)
 	set_next_address (last_loc->gdbarch, last_loc->address);
 
-      if (has_disabled_by_cond_location)
+      if (has_disabled_by_cond_location && !uiout->is_mi_like_p ())
 	uiout->message (_("(*): Breakpoint condition is invalid at this "
 			  "location.\n"));
     }
