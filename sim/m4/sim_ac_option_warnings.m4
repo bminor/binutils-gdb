@@ -91,7 +91,7 @@ then
 	-Werr*) WERROR_CFLAGS=-Werror ;;
 	*) # Check that GCC accepts it
 	    saved_CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS $w"
+	    CFLAGS="$CFLAGS -Werror $w"
 	    AC_TRY_COMPILE([],[],WARN_CFLAGS="${WARN_CFLAGS} $w",)
 	    CFLAGS="$saved_CFLAGS"
 	esac

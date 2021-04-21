@@ -1,3 +1,7 @@
+2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Regenerate.
+
 2021-04-20  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Delete AC_CHECK_HEADERS_ONCE.
