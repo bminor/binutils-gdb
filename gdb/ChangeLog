@@ -1,3 +1,8 @@
+2021-04-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch-utils.c (default_addressable_memory_unit_size): Return a
+	value based on bfd's bits per byte.
+
 2021-04-21  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.h (struct dwarf2_per_cu_data) <dwarf_version>: Now
