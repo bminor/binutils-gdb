@@ -1,3 +1,8 @@
+2021-04-21  Frederic Cambus  <fred@statdns.com>
+
+	* syscalls/update-netbsd.sh: Fix script name display in usage, and
+	update year range in generated copyright notices.
+
 2021-04-20  Felix Willgerodt  <felix.willgerodt@intel.com>
 
 	* c-exp.y (qualifier_seq_noopt): Replace qualifier_seq with
