@@ -46,7 +46,7 @@ set line_callme_body   [expr $line_callme_head + 2]
 
 set fullname "fullname=\"${fullname_syntax}${srcfile}\""
 
-proc test_tbreak_creation_and_listing {} {
+proc_with_prefix test_tbreak_creation_and_listing {} {
     global srcfile
     global line_callee4_head
     global line_callee4_body
@@ -96,7 +96,7 @@ proc test_tbreak_creation_and_listing {} {
 	    "delete temp breakpoints"
 }
 
-proc test_rbreak_creation_and_listing {} {
+proc_with_prefix test_rbreak_creation_and_listing {} {
     global line_callee4_body
     global line_callee3_body
     global line_callee2_body
@@ -165,7 +165,7 @@ proc test_rbreak_creation_and_listing {} {
 	    "delete temp breakpoints"
 }
 
-proc test_abreak_creation {} {
+proc_with_prefix test_abreak_creation {} {
     mi_create_varobj tpnum \$tpnum "create local variable tpnum"
     # Test that $tpnum is not set before creating a tracepoint.
     mi_gdb_test "521-var-evaluate-expression tpnum" \
@@ -183,7 +183,7 @@ proc test_abreak_creation {} {
 	"524\\^done,value=\"10\"" "eval tpnum after tracepoint"
 }
 
-proc test_ignore_count {} {
+proc_with_prefix test_ignore_count {} {
     global line_callme_body
 
     mi_gdb_test "-break-insert -i 1 callme" \
@@ -196,7 +196,7 @@ proc test_ignore_count {} {
         {"" "disp=\"keep\"" } "run to breakpoint with ignore count"
 }
 
-proc test_error {} {
+proc_with_prefix test_error {} {
     mi_gdb_test "-break-insert function_that_does_not_exist" \
         ".*\\^error,msg=\"Function \\\\\"function_that_does_not_exist\\\\\" not defined.\"" \
         "breakpoint at nonexistent function"
@@ -226,7 +226,7 @@ proc test_error {} {
         "conditional breakpoint with garbage after location"
 }
 
-proc test_disabled_creation {} {
+proc_with_prefix test_disabled_creation {} {
     global line_callee2_body
 
     set bp [mi_make_breakpoint -number 6 -type breakpoint -disp keep \
@@ -241,7 +241,7 @@ proc test_disabled_creation {} {
             "test disabled creation: cleanup"
 }
 
-proc test_breakpoint_commands {} {
+proc_with_prefix test_breakpoint_commands {} {
     global line_callee2_body
 
     set bp_no_script \
@@ -281,7 +281,7 @@ proc test_breakpoint_commands {} {
 
     mi_gdb_test "-break-commands 9 \"bt\" \"set \$i=0\" \"while \$i<10\" \"print \$i\" \"set \$i=\$i+1\" \"end\" \"continue\" " \
         "\\^done" \
-        "breakpoint commands: set commands"
+        "breakpoint commands: set more commands"
 
     mi_send_resuming_command "exec-continue" "breakpoint commands: continue"
 
@@ -318,7 +318,7 @@ proc test_breakpoint_commands {} {
 # code.  In-depth testing of explicit breakpoints is accomplished in
 # gdb.linespec tests.
 
-proc test_explicit_breakpoints {} {
+proc_with_prefix test_explicit_breakpoints {} {
     global srcfile
     global line_callee3_head line_callee4_head
     global line_callee3_body line_callee4_body
