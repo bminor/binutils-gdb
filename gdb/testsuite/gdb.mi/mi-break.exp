@@ -224,6 +224,19 @@ proc_with_prefix test_error {} {
     mi_gdb_test "-break-insert -c i==4 \"callme if i < 4\"" \
         ".*\\^error,msg=\"Garbage 'if i < 4' at end of location\"" \
         "conditional breakpoint with garbage after location"
+
+    # Try using an invalid condition.
+    mi_gdb_test "-break-insert -c bad callme" \
+        ".*\\^error,msg=\"No symbol \\\\\"bad\\\\\" in current context.\"" \
+        "breakpoint with bad condition"
+
+    mi_gdb_test "-dprintf-insert -c bad callme \"Hello\"" \
+        ".*\\^error,msg=\"No symbol \\\\\"bad\\\\\" in current context.\"" \
+        "dprintf with bad condition"
+
+    mi_gdb_test "-break-condition 5 bad" \
+        ".*\\^error,msg=\"No symbol \\\\\"bad\\\\\" in current context.\"" \
+        "invalid condition"
 }
 
 proc_with_prefix test_disabled_creation {} {

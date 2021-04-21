@@ -1409,6 +1409,11 @@ enum breakpoint_create_flags
    the condition, thread, and extra string from EXTRA_STRING, ignoring
    the similarly named parameters.
 
+   If FORCE_CONDITION is true, the condition is accepted even when it is
+   invalid at all of the locations.  However, if PARSE_EXTRA is non-zero,
+   the FORCE_CONDITION parameter is ignored and the corresponding argument
+   is parsed from EXTRA_STRING.
+
    If INTERNAL is non-zero, the breakpoint number will be allocated
    from the internal breakpoint count.
 
@@ -1418,6 +1423,7 @@ extern int create_breakpoint (struct gdbarch *gdbarch,
 			      struct event_location *location,
 			      const char *cond_string, int thread,
 			      const char *extra_string,
+			      bool force_condition,
 			      int parse_extra,
 			      int tempflag, enum bptype wanted_type,
 			      int ignore_count,

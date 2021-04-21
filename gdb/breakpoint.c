@@ -9460,7 +9460,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 		   struct event_location *location,
 		   const char *cond_string,
 		   int thread, const char *extra_string,
-		   int parse_extra,
+		   bool force_condition, int parse_extra,
 		   int tempflag, enum bptype type_wanted,
 		   int ignore_count,
 		   enum auto_boolean pending_break_support,
@@ -9558,6 +9558,33 @@ create_breakpoint (struct gdbarch *gdbarch,
 	      && extra_string != NULL && *extra_string != '\0')
 		error (_("Garbage '%s' at end of location"), extra_string);
 
+	  /* Check the validity of the condition.  We should error out
+	     if the condition is invalid at all of the locations and
+	     if it is not forced.  In the PARSE_EXTRA case above, this
+	     check is done when parsing the EXTRA_STRING.  */
+	  if (cond_string != nullptr && !force_condition)
+	    {
+	      int num_failures = 0;
+	      const linespec_sals &lsal = canonical.lsals[0];
+	      for (const auto &sal : lsal.sals)
+		{
+		  const char *cond = cond_string;
+		  try
+		    {
+		      parse_exp_1 (&cond, sal.pc, block_for_pc (sal.pc), 0);
+		      /* One success is sufficient to keep going.  */
+		      break;
+		    }
+		  catch (const gdb_exception_error &)
+		    {
+		      num_failures++;
+		      /* If this is the last sal, error out.  */
+		      if (num_failures == lsal.sals.size ())
+			throw;
+		    }
+		}
+	    }
+
 	  /* Create a private copy of condition string.  */
 	  if (cond_string)
 	    cond_string_copy.reset (xstrdup (cond_string));
@@ -9636,7 +9663,7 @@ break_command_1 (const char *arg, int flag, int from_tty)
 
   create_breakpoint (get_current_arch (),
 		     location.get (),
-		     NULL, 0, arg, 1 /* parse arg */,
+		     NULL, 0, arg, false, 1 /* parse arg */,
 		     tempflag, type_wanted,
 		     0 /* Ignore count */,
 		     pending_break_support,
@@ -9823,7 +9850,7 @@ dprintf_command (const char *arg, int from_tty)
 
   create_breakpoint (get_current_arch (),
 		     location.get (),
-		     NULL, 0, arg, 1 /* parse arg */,
+		     NULL, 0, arg, false, 1 /* parse arg */,
 		     0, bp_dprintf,
 		     0 /* Ignore count */,
 		     pending_break_support,
@@ -14721,7 +14748,7 @@ trace_command (const char *arg, int from_tty)
 
   create_breakpoint (get_current_arch (),
 		     location.get (),
-		     NULL, 0, arg, 1 /* parse arg */,
+		     NULL, 0, arg, false, 1 /* parse arg */,
 		     0 /* tempflag */,
 		     bp_tracepoint /* type_wanted */,
 		     0 /* Ignore count */,
@@ -14739,7 +14766,7 @@ ftrace_command (const char *arg, int from_tty)
 							 current_language);
   create_breakpoint (get_current_arch (),
 		     location.get (),
-		     NULL, 0, arg, 1 /* parse arg */,
+		     NULL, 0, arg, false, 1 /* parse arg */,
 		     0 /* tempflag */,
 		     bp_fast_tracepoint /* type_wanted */,
 		     0 /* Ignore count */,
@@ -14773,7 +14800,7 @@ strace_command (const char *arg, int from_tty)
 
   create_breakpoint (get_current_arch (),
 		     location.get (),
-		     NULL, 0, arg, 1 /* parse arg */,
+		     NULL, 0, arg, false, 1 /* parse arg */,
 		     0 /* tempflag */,
 		     bp_static_tracepoint /* type_wanted */,
 		     0 /* Ignore count */,
@@ -14843,6 +14870,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
   if (!create_breakpoint (get_current_arch (),
 			  location.get (),
 			  utp->cond_string.get (), -1, addr_str,
+			  false /* force_condition */,
 			  0 /* parse cond/thread */,
 			  0 /* tempflag */,
 			  utp->type /* type_wanted */,

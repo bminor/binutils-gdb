@@ -440,7 +440,7 @@ gdbscm_register_breakpoint_x (SCM self)
 	    const breakpoint_ops *ops =
 	      breakpoint_ops_for_event_location (eloc.get (), false);
 	    create_breakpoint (get_current_arch (),
-			       eloc.get (), NULL, -1, NULL,
+			       eloc.get (), NULL, -1, NULL, false,
 			       0,
 			       0, bp_breakpoint,
 			       0,

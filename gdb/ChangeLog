@@ -1,5 +1,24 @@
 2021-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* breakpoint.h (create_breakpoint): Add a new parameter,
+	'force_condition'.
+	* breakpoint.c (create_breakpoint): Use the 'force_condition'
+	argument when 'parse_extra' is false to check if the condition
+	is invalid at all of the breakpoint locations.
+	Update the users below.
+	(break_command_1)
+	(dprintf_command)
+	(trace_command)
+	(ftrace_command)
+	(strace_command)
+	(create_tracepoint_from_upload): Update.
+	* guile/scm-breakpoint.c (gdbscm_register_breakpoint_x): Update.
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Update.
+	* python/py-breakpoint.c (bppy_init): Update.
+	* python/py-finishbreakpoint.c (bpfinishpy_init): Update.
+
+2021-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* breakpoint.c (print_one_breakpoint_location): Display "N" for
 	disabled-by-condition locations on MI-like output.
 	(breakpoint_1): Do not display the disabled-by-condition footnote

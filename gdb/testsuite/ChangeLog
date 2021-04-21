@@ -1,3 +1,8 @@
+2021-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.mi/mi-break.exp: Extend with checks for invalid breakpoint
+	conditions.
+
 2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
