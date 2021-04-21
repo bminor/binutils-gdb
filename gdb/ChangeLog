@@ -1,3 +1,11 @@
+2021-04-21  Tom de Vries  <tdevries@suse.de>
+
+	PR build/27681
+	* configure.ac: Remove --without-included-regex/--with-included-regex.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* gdb_regex.h: Assume USE_INCLUDED_REGEX is defined.
+
 2021-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* breakpoint.h (create_breakpoint): Add a new parameter,

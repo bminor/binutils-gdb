@@ -19,13 +19,7 @@
 #ifndef GDB_REGEX_H
 #define GDB_REGEX_H 1
 
-#ifdef USE_INCLUDED_REGEX
 # include "xregex.h"
-#else
-/* Request 4.2 BSD regex functions.  */
-# define _REGEX_RE_COMP
-# include <regex.h>
-#endif
 
 /* A compiled regex.  This is mainly a wrapper around regex_t.  The
    the constructor throws on regcomp error and the destructor is

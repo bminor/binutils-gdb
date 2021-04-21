@@ -911,7 +911,6 @@ enable_source_highlight
 with_intel_pt
 with_libipt_prefix
 with_libipt_type
-with_included_regex
 with_sysroot
 with_system_gdbinit
 with_system_gdbinit_dir
@@ -1661,10 +1660,6 @@ Optional Packages:
   --with-libipt-prefix[=DIR]  search for libipt in DIR/include and DIR/lib
   --without-libipt-prefix     don't search for libipt in includedir and libdir
   --with-libipt-type=TYPE     type of library to search for (auto/static/shared)
-  --without-included-regex
-                          don't use included regex; this is the default on
-                          systems with version 2 of the GNU C library (use
-                          with caution on other system)
   --with-sysroot[=DIR]    search for usr/lib et al within DIR
   --with-system-gdbinit=PATH
                           automatically load a system-wide gdbinit file
@@ -15889,60 +15884,6 @@ if test "$ac_cv_func_setpgrp_void" = yes; then
   $as_echo "#define SETPGRP_VOID 1" >>confdefs.h
 
 fi
-fi
-
-# Assume we'll default to using the included libiberty regex.
-gdb_use_included_regex=yes
-
-# However, if the system regex is GNU regex, then default to *not*
-# using the included regex.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for GNU regex" >&5
-$as_echo_n "checking for GNU regex... " >&6; }
-if ${gdb_cv_have_gnu_regex+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <gnu-versions.h>
-int
-main ()
-{
-#define REGEX_INTERFACE_VERSION 1
-	 #if _GNU_REGEX_INTERFACE_VERSION != REGEX_INTERFACE_VERSION
-	 # error "Version mismatch"
-	 #endif
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gdb_cv_have_gnu_regex=yes
-else
-  gdb_cv_have_gnu_regex=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_gnu_regex" >&5
-$as_echo "$gdb_cv_have_gnu_regex" >&6; }
-if test "$gdb_cv_have_gnu_regex" = yes; then
-  gdb_use_included_regex=no
-fi
-
-
-# Check whether --with-included-regex was given.
-if test "${with_included_regex+set}" = set; then :
-  withval=$with_included_regex; gdb_with_regex=$withval
-else
-  gdb_with_regex=$gdb_use_included_regex
-fi
-
-if test "$gdb_with_regex" = yes; then
-
-$as_echo "#define USE_INCLUDED_REGEX 1" >>confdefs.h
-
 fi
 
 # Check if <sys/proc.h> defines `struct thread' with a td_pcb member.

@@ -725,9 +725,6 @@
 /* Define if <thread_db.h> has the TD_VERSION error code. */
 #undef THREAD_DB_HAS_TD_VERSION
 
-/* Define to 1 if the regex included in libiberty should be used. */
-#undef USE_INCLUDED_REGEX
-
 /* Enable extensions on AIX 3, Interix.  */
 #ifndef _ALL_SOURCE
 # undef _ALL_SOURCE
