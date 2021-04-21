@@ -13,10 +13,10 @@ Relocation section '\.rela\.MMIX\.spec_data\.2' at offset 0x[0-9a-f]+ contains 1
 Symbol table '\.symtab' contains 6 entries:
  +Num: +Value +Size +Type +Bind +Vis +Ndx +Name
  +0: 0+ +0 +NOTYPE +LOCAL +DEFAULT +UND 
- +1: 0+ +0 +SECTION +LOCAL +DEFAULT +1 
- +2: 0+ +0 +SECTION +LOCAL +DEFAULT +2 
- +3: 0+ +0 +SECTION +LOCAL +DEFAULT +3 
- +4: 0+ +0 +SECTION +LOCAL +DEFAULT +4 
+ +1: 0+ +0 +SECTION +LOCAL +DEFAULT +1.*
+ +2: 0+ +0 +SECTION +LOCAL +DEFAULT +2.*
+ +3: 0+ +0 +SECTION +LOCAL +DEFAULT +3.*
+ +4: 0+ +0 +SECTION +LOCAL +DEFAULT +4.*
  +5: 0+ +0 +NOTYPE +GLOBAL +DEFAULT +UND forw
 
 Hex dump of section '\.text':

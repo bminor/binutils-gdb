@@ -1,3 +1,40 @@
+2021-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/aarch64/dwarf.d: Adjust expected output to allow
+	for named section symbols.
+	* testsuite/gas/arm/thumbver.d: Likewise.
+	* testsuite/gas/bfin/loop_temps.d: Likewise.
+	* testsuite/gas/elf/section2.e-arc: Likewise.
+	* testsuite/gas/elf/section2.e-arm: Likewise.
+	* testsuite/gas/elf/section2.e-csky: Likewise.
+	* testsuite/gas/elf/section2.e-m32r: Likewise.
+	* testsuite/gas/elf/section2.e-mips: Likewise.
+	* testsuite/gas/elf/section2.e-msp430: Likewise.
+	* testsuite/gas/elf/section2.e-riscv: Likewise.
+	* testsuite/gas/elf/section2.e-rl78: Likewise.
+	* testsuite/gas/elf/section2.e-rx: Likewise.
+	* testsuite/gas/elf/section2.e-score: Likewise.
+	* testsuite/gas/elf/section2.e-tic6x: Likewise.
+	* testsuite/gas/elf/section2.e-unused: Likewise.
+	* testsuite/gas/elf/section2.e-v850: Likewise.
+	* testsuite/gas/elf/section2.e-xtensa: Likewise.
+	* testsuite/gas/ia64/alias-ilp32.d: Likewise.
+	* testsuite/gas/ia64/alias.d: Likewise.
+	* testsuite/gas/ia64/global.d: Likewise.
+	* testsuite/gas/microblaze/relax_size.elf: Likewise.
+	* testsuite/gas/microblaze/relax_size2.elf: Likewise.
+	* testsuite/gas/mips/global-local-symtab-sort-n64t.d: Likewise.
+	* testsuite/gas/mips/global-local-symtab-sort-o32t.d: Likewise.
+	* testsuite/gas/mmix/bspec-1.d: Likewise.
+	* testsuite/gas/mmix/byte-1.d: Likewise.
+	* testsuite/gas/mmix/comment-1.d: Likewise.
+	* testsuite/gas/mmix/loc-1.d: Likewise.
+	* testsuite/gas/mmix/loc-2.d: Likewise.
+	* testsuite/gas/mmix/loc-3.d: Likewise.
+	* testsuite/gas/mmix/loc-4.d: Likewise.
+	* testsuite/gas/mmix/loc-5.d: Likewise.
+	* testsuite/gas/tic6x/scomm-directive-4.d: Likewise.
+
 2021-04-20  Clément Chigot  <clement.chigot@atos.net>
 
 	PR binutils/21700

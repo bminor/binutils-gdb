@@ -12381,6 +12381,8 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
   const char *version_string;
   enum versioned_symbol_info sym_info;
   unsigned short vna_other;
+  bool is_valid;
+  const char * sstr;
   Elf_Internal_Sym *psym = symtab + si;
 
   printf ("%6ld: ", si);
@@ -12404,8 +12406,20 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
     }
   printf (" %4s ", get_symbol_index_type (filedata, psym->st_shndx));
 
-  bool is_valid = VALID_SYMBOL_NAME (strtab, strtab_size, psym->st_name);
-  const char * sstr = is_valid  ? strtab + psym->st_name : _("<corrupt>");
+  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION
+      && psym->st_shndx < filedata->file_header.e_shnum
+      && psym->st_name == 0)
+    {
+      is_valid = SECTION_NAME_VALID (filedata->section_headers + psym->st_shndx);
+      sstr = is_valid ?
+	SECTION_NAME_PRINT (filedata->section_headers + psym->st_shndx)
+	: _("<corrupt>");
+    }
+  else
+    {
+      is_valid = VALID_SYMBOL_NAME (strtab, strtab_size, psym->st_name);
+      sstr = is_valid  ? strtab + psym->st_name : _("<corrupt>");
+    }
 
   version_string
     = get_symbol_version_string (filedata,

@@ -199,7 +199,7 @@ if { ![istarget "d10v-*-*"]
     puts $ofd "  \\\[65280\\\] \\.foo\\.\[0-9\]+ .*"
     puts $ofd "#..."
     if { [is_elf_unused_section_symbols ] } {
-	puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+660.. "
+	puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+660...*"
 	puts $ofd "#..."
 	puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+NOTYPE\[ \]+LOCAL\[ \]+DEFAULT\[ \]+\[0-9\] bar_1$"
 	puts $ofd "#..."

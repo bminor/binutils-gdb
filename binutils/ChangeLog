@@ -1,3 +1,19 @@
+2021-04-21  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/binutils-all/mips/global-local-symtab-sort-n64t.d:
+	Adjust expected output to allow for named section symbols.
+	* testsuite/binutils-all/mips/global-local-symtab-sort-o32t.d:
+	Likewise.
+	* testsuite/binutils-all/readelf.s-64: Likewise.
+	* testsuite/binutils-all/readelf.ss-64-unused: Likewise.
+	* testsuite/binutils-all/readelf.ss-tmips: Likewise.
+	* testsuite/binutils-all/readelf.ss-unused: Likewise.
+
+2021-04-21  Luo Longjun  <luolongjun@huawei.com>
+
+	* readelf.c (print_dynamic_symbol): Print the section name for
+	section symbols without a name of their own.
+
 2021-04-20  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* MAINTAINERS: Remove Martin Schwidefsky as s390 maintainer and
