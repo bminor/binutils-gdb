@@ -1,5 +1,10 @@
 2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb.python/flexible-array-member.exp: Add check for Python
+	support.
+
+2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	PR gdb/27757
 	* gdb.python/flexible-array-member.c: New test.
 	* gdb.python/flexible-array-member.exp: New test.
