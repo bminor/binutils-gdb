@@ -1,5 +1,12 @@
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* extension.c (struct scoped_default_signal): New struct.
+	(scoped_default_sigint): New typedef.
+	(finish_ext_lang_initialization): Make use of
+	scoped_default_sigint.
+
+2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* main.c (captured_main_1): Don't pass argument to gdb_init.
 	* top.c (gdb_init): Remove unused argument, and add header
 	comment.
