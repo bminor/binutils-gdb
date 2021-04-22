@@ -766,7 +766,7 @@ extern struct bfd_strtab_hash *_bfd_stringtab_init
 
 /* Create an XCOFF .debug section style string table.  */
 extern struct bfd_strtab_hash *_bfd_xcoff_stringtab_init
-  (void) ATTRIBUTE_HIDDEN;
+  (bool isxcoff64) ATTRIBUTE_HIDDEN;
 
 /* Free a string table.  */
 extern void _bfd_stringtab_free

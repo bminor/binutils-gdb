@@ -592,6 +592,7 @@ struct bfd_link_hash_table *
 _bfd_xcoff_bfd_link_hash_table_create (bfd *abfd)
 {
   struct xcoff_link_hash_table *ret;
+  bool isxcoff64 = false;
   size_t amt = sizeof (* ret);
 
   ret = bfd_zmalloc (amt);
@@ -604,7 +605,9 @@ _bfd_xcoff_bfd_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->debug_strtab = _bfd_xcoff_stringtab_init ();
+  isxcoff64 = bfd_coff_debug_string_prefix_length (abfd) == 4;
+
+  ret->debug_strtab = _bfd_xcoff_stringtab_init (isxcoff64);
   ret->archive_info = htab_create (37, xcoff_archive_info_hash,
 				   xcoff_archive_info_eq, NULL);
   if (!ret->debug_strtab || !ret->archive_info)

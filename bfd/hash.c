@@ -713,10 +713,11 @@ struct bfd_strtab_hash
   struct strtab_hash_entry *first;
   /* Last string in strtab.  */
   struct strtab_hash_entry *last;
-  /* Whether to precede strings with a two byte length, as in the
-     XCOFF .debug section.  */
-  bool xcoff;
+  /* Whether to precede strings with a two or four byte length,
+     as in the XCOFF .debug section.  */
+  char length_field_size;
 };
+
 
 /* Routine to create an entry in a strtab.  */
 
@@ -777,7 +778,7 @@ _bfd_stringtab_init (void)
   table->size = 0;
   table->first = NULL;
   table->last = NULL;
-  table->xcoff = false;
+  table->length_field_size = 0;
 
   return table;
 }
@@ -787,13 +788,13 @@ _bfd_stringtab_init (void)
    string.  */
 
 struct bfd_strtab_hash *
-_bfd_xcoff_stringtab_init (void)
+_bfd_xcoff_stringtab_init (bool isxcoff64)
 {
   struct bfd_strtab_hash *ret;
 
   ret = _bfd_stringtab_init ();
   if (ret != NULL)
-    ret->xcoff = true;
+    ret->length_field_size = isxcoff64 ? 4 : 2;
   return ret;
 }
 
@@ -852,11 +853,8 @@ _bfd_stringtab_add (struct bfd_strtab_hash *tab,
     {
       entry->index = tab->size;
       tab->size += strlen (str) + 1;
-      if (tab->xcoff)
-	{
-	  entry->index += 2;
-	  tab->size += 2;
-	}
+      entry->index += tab->length_field_size;
+      tab->size += tab->length_field_size;
       if (tab->first == NULL)
 	tab->first = entry;
       else
@@ -881,10 +879,7 @@ _bfd_stringtab_size (struct bfd_strtab_hash *tab)
 bool
 _bfd_stringtab_emit (bfd *abfd, struct bfd_strtab_hash *tab)
 {
-  bool xcoff;
   struct strtab_hash_entry *entry;
-
-  xcoff = tab->xcoff;
 
   for (entry = tab->first; entry != NULL; entry = entry->next)
     {
@@ -894,7 +889,16 @@ _bfd_stringtab_emit (bfd *abfd, struct bfd_strtab_hash *tab)
       str = entry->root.string;
       len = strlen (str) + 1;
 
-      if (xcoff)
+      if (tab->length_field_size == 4)
+	{
+	  bfd_byte buf[4];
+
+	  /* The output length includes the null byte.  */
+	  bfd_put_32 (abfd, (bfd_vma) len, buf);
+	  if (bfd_bwrite ((void *) buf, (bfd_size_type) 4, abfd) != 4)
+	    return false;
+	}
+      else if (tab->length_field_size == 2)
 	{
 	  bfd_byte buf[2];
 

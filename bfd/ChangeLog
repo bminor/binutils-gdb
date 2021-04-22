@@ -1,5 +1,20 @@
 2021-04-22  Clément Chigot  <clement.chigot@atos.net>
 
+	* hash.c (struct bfd_strtab_hash): Remove xcoff field.
+	Add length_field_size field.
+	(_bfd_stringtab_init): Change prototype.
+	Adapt to new length_field_size.
+	(_bfd_xcoff_stringtab_init): Likewise.
+	(_bfd_stringtab_add): Likewise.
+	(_bfd_stringtab_emit): Likewise.
+	* libbfd-in.h (_bfd_xcoff_stringtab_init):
+	Change prototype.
+	* libbfd.h: Regenerate.
+	* xcofflink.c (_bfd_xcoff_bfd_link_hash_table_create):
+	Call _bfd_xcoff_stringtab_init with isxcoff64 value.
+
+2021-04-22  Clément Chigot  <clement.chigot@atos.net>
+
 	* coff-rs6000.c (_bfd_xcoff_swap_aux_in): Add errors for
 	unsupported storage class or auxialiry entries.
 	Improve and adapt to new aux structures.
