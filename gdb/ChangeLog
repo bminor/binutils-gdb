@@ -1,3 +1,17 @@
+2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27757
+	* python/py-type.c (typy_range): Check that bounds are constant
+	before accessing them as such.
+	* guile/scm-type.c (gdbscm_type_range): Likewise.
+
+2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27757
+	* python/py-type.c (typy_range): Check that bounds are constant
+	before accessing them as such.
+	* guile/scm-type.c (gdbscm_type_range): Likewise.
+
 2021-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/27541
