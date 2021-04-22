@@ -153,59 +153,54 @@ struct external_syment
   
 
 union external_auxent {
-	struct {
-		char x_tagndx[4];	/* str, un, or enum tag indx */
-		union {
-			struct {
-			    char  x_lnno[2]; /* declaration line number */
-			    char  x_size[2]; /* str/union/array size */
-			} x_lnsz;
-			char x_fsize[4];	/* size of function */
-		} x_misc;
-		union {
-			struct {		/* if ISFCN, tag, or .bb */
-			    char x_lnnoptr[4];	/* ptr to fcn line # */
-			    char x_endndx[4];	/* entry ndx past block end */
-			} x_fcn;
-			struct {		/* if ISARY, up to 4 dimen. */
-			    char x_dimen[E_DIMNUM][2];
-			} x_ary;
-		} x_fcnary;
-		char x_tvndx[2];		/* tv index */
-	} x_sym;
+  struct {
+    char x_pad1[2];
+    char x_lnno[4]; 	/* Source line number */
+    char x_pad[12];
+  } x_sym;
 
-        struct {
-                union {
-                        char x_fname[E_FILNMLEN];
-                        struct {
-                                char x_zeroes[4];
-                                char x_offset[4];
-                        } x_n;
-                } x_n;
-                char x_ftype[1];
-        } x_file;
+  struct {
+    char x_exptr[4];
+    char x_fsize[4];
+    char x_lnnoptr[4];
+    char x_endndx[4];
+    char x_pad[1];
+  } x_fcn;
 
-	struct {
-		char x_scnlen[4];			/* section length */
-		char x_nreloc[2];	/* # relocation entries */
-		char x_nlinno[2];	/* # line numbers */
-	} x_scn;
+  struct {
+    union {
+      char x_fname[E_FILNMLEN];
+      struct {
+	char x_zeroes[4];
+	char x_offset[4];
+      } x_n;
+    } x_n;
+    char x_ftype[1];
+  } x_file;
 
-        struct {
-		char x_tvfill[4];	/* tv fill value */
-		char x_tvlen[2];	/* length of .tv */
-		char x_tvran[2][2];	/* tv range */
-	} x_tv;		/* info about .tv section (in auxent of symbol .tv)) */
+  struct {
+    char x_scnlen[4];	/* section length */
+    char x_nreloc[2];	/* # relocation entries */
+    char x_nlinno[2];	/* # line numbers */
+    char x_pad[10];
+  } x_scn;
 
-	struct {
-		unsigned char x_scnlen[4];
-		unsigned char x_parmhash[4];
-		unsigned char x_snhash[2];
-		unsigned char x_smtyp[1];
-		unsigned char x_smclas[1];
-		unsigned char x_stab[4];
-		unsigned char x_snstab[2];
-	} x_csect;
+  struct {
+    char x_scnlen[4];
+    char x_parmhash[4];
+    char x_snhash[2];
+    char x_smtyp[1];
+    char x_smclas[1];
+    char x_stab[4];
+    char x_snstab[2];
+  } x_csect;
+
+  struct {
+    char x_scnlen[4];
+    char x_pad1[4];
+    char x_nreloc[4];
+    char x_pad2[6];
+  } x_sect;
 
 };
 

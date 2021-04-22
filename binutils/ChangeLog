@@ -1,3 +1,8 @@
+2021-04-22  Clément Chigot  <clement.chigot@atos.net>
+
+	* od-xcoff.c (dump_xcoff32_symbols): Adapt to new
+	aux structures.
+
 2021-04-21  Nick Lott  <nick.lott@gmail.com>
 
 	PR 27672

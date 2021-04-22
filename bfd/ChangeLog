@@ -1,3 +1,13 @@
+2021-04-22  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff-rs6000.c (_bfd_xcoff_swap_aux_in): Add errors for
+	unsupported storage class or auxialiry entries.
+	Improve and adapt to new aux structures.
+	Add C_DWARF support.
+	(_bfd_xcoff_swap_aux_out): Likewise.
+	* coff64-rs6000.c (_bfd_xcoff64_swap_aux_in): Likewise.
+	(_bfd_xcoff64_swap_aux_out): Likewise.
+
 2021-04-21  Eli Zaretskii  <eliz@gnu.org>
 
 	PR 27760

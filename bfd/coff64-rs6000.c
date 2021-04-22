@@ -362,15 +362,28 @@ _bfd_xcoff64_swap_sym_out (bfd *abfd, void *inp, void *extp)
 }
 
 static void
-_bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type, int in_class,
-			  int indx, int numaux, void *in1)
+_bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type ATTRIBUTE_UNUSED,
+			  int in_class, int indx, int numaux, void *in1)
 {
   union external_auxent *ext = (union external_auxent *) ext1;
   union internal_auxent *in = (union internal_auxent *) in1;
+  unsigned char auxtype;
 
   switch (in_class)
     {
+    default:
+      _bfd_error_handler
+	/* xgettext: c-format */
+	(_("%pB: unsupported swap_aux_in for storage class %#x"),
+	 abfd, (unsigned int) in_class);
+      bfd_set_error (bfd_error_bad_value);
+      break;
+
     case C_FILE:
+      auxtype = H_GET_8 (abfd, ext->x_file.x_auxtype);
+      if (auxtype != _AUX_FILE)
+	goto error;
+
       if (ext->x_file.x_n.x_n.x_zeroes[0] == 0)
 	{
 	  in->x_file.x_n.x_zeroes = 0;
@@ -378,17 +391,25 @@ _bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type, int in_class,
 	    H_GET_32 (abfd, ext->x_file.x_n.x_n.x_offset);
 	}
       else
-	{
-	  memcpy (in->x_file.x_fname, ext->x_file.x_n.x_fname, FILNMLEN);
-	}
-      goto end;
+	memcpy (in->x_file.x_fname, ext->x_file.x_n.x_fname, FILNMLEN);
+      break;
 
-      /* RS/6000 "csect" auxents */
+      /* RS/6000 "csect" auxents.
+         There is always a CSECT auxiliary entry. But functions can
+         have FCN and EXCEPT ones too. In this case, CSECT is always the last
+         one.
+         For now, we only support FCN types.  */
     case C_EXT:
     case C_AIX_WEAKEXT:
     case C_HIDEXT:
       if (indx + 1 == numaux)
 	{
+	  /* C_EXT can have several aux enties. But the _AUX_CSECT is always
+	     the last one.  */
+	  auxtype = H_GET_8 (abfd, ext->x_csect.x_auxtype);
+	  if (auxtype != _AUX_CSECT)
+	    goto error;
+
 	  bfd_signed_vma h = 0;
 	  bfd_vma l = 0;
 
@@ -404,55 +425,67 @@ _bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type, int in_class,
 	     byte orders.  */
 	  in->x_csect.x_smtyp = H_GET_8 (abfd, ext->x_csect.x_smtyp);
 	  in->x_csect.x_smclas = H_GET_8 (abfd, ext->x_csect.x_smclas);
-	  goto end;
+	}
+      else
+	{
+	  /* It can also be a _AUX_EXCEPT entry. But it's not supported
+	     for now. */
+	  auxtype = H_GET_8 (abfd, ext->x_fcn.x_auxtype);
+	  if (auxtype != _AUX_FCN)
+	    goto error;
+
+	  in->x_sym.x_fcnary.x_fcn.x_lnnoptr
+	    = H_GET_64 (abfd, ext->x_fcn.x_lnnoptr);
+	  in->x_sym.x_misc.x_fsize
+	    = H_GET_32 (abfd, ext->x_fcn.x_fsize);
+	  in->x_sym.x_fcnary.x_fcn.x_endndx.l
+	    = H_GET_32 (abfd, ext->x_fcn.x_endndx);
 	}
       break;
 
     case C_STAT:
-    case C_LEAFSTAT:
-    case C_HIDDEN:
-      if (type == T_NULL)
-	{
-	  /* PE defines some extra fields; we zero them out for
-	     safety.  */
-	  in->x_scn.x_checksum = 0;
-	  in->x_scn.x_associated = 0;
-	  in->x_scn.x_comdat = 0;
+      _bfd_error_handler
+	/* xgettext: c-format */
+	(_("%pB: C_STAT isn't supported by XCOFF64"),
+	 abfd);
+      bfd_set_error (bfd_error_bad_value);
+      break;
 
-	  goto end;
-	}
+    case C_BLOCK:
+    case C_FCN:
+      auxtype = H_GET_8 (abfd, ext->x_sym.x_auxtype);
+      if (auxtype != _AUX_SYM)
+	goto error;
+
+      in->x_sym.x_misc.x_lnsz.x_lnno
+	= H_GET_32 (abfd, ext->x_sym.x_lnno);
+      break;
+
+    case C_DWARF:
+      auxtype = H_GET_8 (abfd, ext->x_sect.x_auxtype);
+      if (auxtype != _AUX_SECT)
+	goto error;
+
+      in->x_sect.x_scnlen = H_GET_64 (abfd, ext->x_sect.x_scnlen);
+      in->x_sect.x_nreloc = H_GET_64 (abfd, ext->x_sect.x_nreloc);
       break;
     }
 
-  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
-      || ISTAG (in_class))
-    {
-      in->x_sym.x_fcnary.x_fcn.x_lnnoptr
-	= H_GET_64 (abfd, ext->x_sym.x_fcnary.x_fcn.x_lnnoptr);
-      in->x_sym.x_fcnary.x_fcn.x_endndx.l
-	= H_GET_32 (abfd, ext->x_sym.x_fcnary.x_fcn.x_endndx);
-    }
-  if (ISFCN (type))
-    {
-      in->x_sym.x_misc.x_fsize
-	= H_GET_32 (abfd, ext->x_sym.x_fcnary.x_fcn.x_fsize);
-    }
-  else
-    {
-      in->x_sym.x_misc.x_lnsz.x_lnno
-	= H_GET_32 (abfd, ext->x_sym.x_fcnary.x_lnsz.x_lnno);
-      in->x_sym.x_misc.x_lnsz.x_size
-	= H_GET_16 (abfd, ext->x_sym.x_fcnary.x_lnsz.x_size);
-    }
+  return;
 
- end: ;
+ error:
+  _bfd_error_handler
+    /* xgettext: c-format */
+    (_("%pB: wrong auxtype %#x for storage class %#x"),
+     abfd, auxtype, (unsigned int) in_class);
+  bfd_set_error (bfd_error_bad_value);
+
+
 }
 
 static unsigned int
-_bfd_xcoff64_swap_aux_out (bfd *abfd, void *inp, int type, int in_class,
-			   int indx ATTRIBUTE_UNUSED,
-			   int numaux ATTRIBUTE_UNUSED,
-			   void *extp)
+_bfd_xcoff64_swap_aux_out (bfd *abfd, void *inp, int type ATTRIBUTE_UNUSED,
+			   int in_class, int indx, int numaux, void *extp)
 {
   union internal_auxent *in = (union internal_auxent *) inp;
   union external_auxent *ext = (union external_auxent *) extp;
@@ -460,6 +493,14 @@ _bfd_xcoff64_swap_aux_out (bfd *abfd, void *inp, int type, int in_class,
   memset (ext, 0, bfd_coff_auxesz (abfd));
   switch (in_class)
     {
+    default:
+      _bfd_error_handler
+	/* xgettext: c-format */
+	(_("%pB: unsupported swap_aux_out for storage class %#x"),
+	 abfd, (unsigned int) in_class);
+      bfd_set_error (bfd_error_bad_value);
+      break;
+
     case C_FILE:
       if (in->x_file.x_n.x_zeroes == 0)
 	{
@@ -468,13 +509,15 @@ _bfd_xcoff64_swap_aux_out (bfd *abfd, void *inp, int type, int in_class,
 		    ext->x_file.x_n.x_n.x_offset);
 	}
       else
-	{
-	  memcpy (ext->x_file.x_n.x_fname, in->x_file.x_fname, FILNMLEN);
-	}
-      H_PUT_8 (abfd, _AUX_FILE, ext->x_auxtype.x_auxtype);
-      goto end;
+	memcpy (ext->x_file.x_n.x_fname, in->x_file.x_fname, FILNMLEN);
+      H_PUT_8 (abfd, _AUX_FILE, ext->x_file.x_auxtype);
+      break;
 
-      /* RS/6000 "csect" auxents */
+      /* RS/6000 "csect" auxents.
+         There is always a CSECT auxiliary entry. But functions can
+         have FCN and EXCEPT ones too. In this case, CSECT is always the last
+         one.
+         For now, we only support FCN types.  */
     case C_EXT:
     case C_AIX_WEAKEXT:
     case C_HIDEXT:
@@ -493,45 +536,39 @@ _bfd_xcoff64_swap_aux_out (bfd *abfd, void *inp, int type, int in_class,
 	     byte orders.  */
 	  H_PUT_8 (abfd, in->x_csect.x_smtyp, ext->x_csect.x_smtyp);
 	  H_PUT_8 (abfd, in->x_csect.x_smclas, ext->x_csect.x_smclas);
-	  H_PUT_8 (abfd, _AUX_CSECT, ext->x_auxtype.x_auxtype);
-	  goto end;
+	  H_PUT_8 (abfd, _AUX_CSECT, ext->x_csect.x_auxtype);
+	}
+      else
+	{
+	  H_PUT_64 (abfd, in->x_sym.x_fcnary.x_fcn.x_lnnoptr,
+		    ext->x_fcn.x_lnnoptr);
+	  H_PUT_32 (abfd, in->x_sym.x_misc.x_fsize, ext->x_fcn.x_fsize);
+	  H_PUT_32 (abfd, in->x_sym.x_fcnary.x_fcn.x_endndx.l,
+		    ext->x_fcn.x_endndx);
+	  H_PUT_8 (abfd, _AUX_FCN, ext->x_csect.x_auxtype);
 	}
       break;
 
     case C_STAT:
-    case C_LEAFSTAT:
-    case C_HIDDEN:
-      if (type == T_NULL)
-	{
-	  goto end;
-	}
+      _bfd_error_handler
+	/* xgettext: c-format */
+	(_("%pB: C_STAT isn't supported by XCOFF64"),
+	 abfd);
+      bfd_set_error (bfd_error_bad_value);
+      break;
+
+    case C_BLOCK:
+    case C_FCN:
+      H_PUT_32 (abfd, in->x_sym.x_misc.x_lnsz.x_lnno, ext->x_sym.x_lnno);
+      H_PUT_8 (abfd, _AUX_SYM, ext->x_sym.x_auxtype);
+      break;
+
+    case C_DWARF:
+      H_PUT_64 (abfd, in->x_sect.x_scnlen, ext->x_sect.x_scnlen);
+      H_PUT_64 (abfd, in->x_sect.x_nreloc, ext->x_sect.x_nreloc);
+      H_PUT_8 (abfd, _AUX_SECT, ext->x_sect.x_auxtype);
       break;
     }
-
-  if (in_class == C_BLOCK || in_class == C_FCN || ISFCN (type)
-      || ISTAG (in_class))
-    {
-      H_PUT_64 (abfd, in->x_sym.x_fcnary.x_fcn.x_lnnoptr,
-	       ext->x_sym.x_fcnary.x_fcn.x_lnnoptr);
-      H_PUT_8 (abfd, _AUX_FCN,
-	       ext->x_auxtype.x_auxtype);
-      H_PUT_32 (abfd, in->x_sym.x_fcnary.x_fcn.x_endndx.l,
-	       ext->x_sym.x_fcnary.x_fcn.x_endndx);
-    }
-  if (ISFCN (type))
-    {
-      H_PUT_32 (abfd, in->x_sym.x_misc.x_fsize,
-	       ext->x_sym.x_fcnary.x_fcn.x_fsize);
-    }
-  else
-    {
-      H_PUT_32 (abfd, in->x_sym.x_misc.x_lnsz.x_lnno,
-	       ext->x_sym.x_fcnary.x_lnsz.x_lnno);
-      H_PUT_16 (abfd, in->x_sym.x_misc.x_lnsz.x_size,
-	       ext->x_sym.x_fcnary.x_lnsz.x_size);
-    }
-
- end:
 
   return bfd_coff_auxesz (abfd);
 }

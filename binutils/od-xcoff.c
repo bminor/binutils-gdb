@@ -838,13 +838,13 @@ dump_xcoff32_symbols (bfd *abfd, struct xcoff_dump *data)
                 {
                   /* Function aux entry  (Do not translate).  */
                   printf ("  exptr: %08x fsize: %08x lnnoptr: %08x endndx: %u\n",
-                          (unsigned)bfd_h_get_32 (abfd, aux->x_sym.x_tagndx),
+                          (unsigned)bfd_h_get_32 (abfd, aux->x_fcn.x_exptr),
                           (unsigned)bfd_h_get_32
-                            (abfd, aux->x_sym.x_misc.x_fsize),
+                            (abfd, aux->x_fcn.x_fsize),
                           (unsigned)bfd_h_get_32
-                            (abfd, aux->x_sym.x_fcnary.x_fcn.x_lnnoptr),
+                            (abfd, aux->x_fcn.x_lnnoptr),
                           (unsigned)bfd_h_get_32
-                            (abfd, aux->x_sym.x_fcnary.x_fcn.x_endndx));
+                            (abfd, aux->x_fcn.x_endndx));
                 }
               else if (j == 1 || (j == 0 && s->sym.numaux == 1))
                 {
@@ -899,7 +899,7 @@ dump_xcoff32_symbols (bfd *abfd, struct xcoff_dump *data)
             case C_FCN:
               printf ("  lnno: %u\n",
                       (unsigned)bfd_h_get_16
-                      (abfd, aux->x_sym.x_misc.x_lnsz.x_lnno));
+                      (abfd, aux->x_sym.x_lnno));
               break;
             default:
               /* Do not translate - generic field name.  */

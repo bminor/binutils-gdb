@@ -1,3 +1,12 @@
+2021-04-22  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff/internal.h (union internal_auxent):
+	 Add x_sect structure.
+	* coff/rs6000.h (union external_auxent): Rework to
+	match official documentation.
+	* coff/rs6k64.h (union external_auxent): Likewise.
+	(_AUX_SECT): New define.
+
 2021-04-21  Eli Zaretskii  <eliz@gnu.org>
 
 	PR 27760

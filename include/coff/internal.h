@@ -659,6 +659,12 @@ union internal_auxent
 /* 		14	??? */
 #define	XMC_TC0	15		/* Read-write TOC anchor */
 #define XMC_TD	16		/* Read-write data in TOC */
+
+  struct
+  {
+    long x_scnlen;              /* Section length */
+    long x_nreloc;              /* Number of relocation entries */
+  } x_sect;
 };
 
 /********************** RELOCATION DIRECTIVES **********************/
