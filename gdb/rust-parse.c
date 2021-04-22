@@ -126,7 +126,7 @@ enum token_type : int
 
 struct typed_val_int
 {
-  LONGEST val;
+  ULONGEST val;
   struct type *type;
 };
 
@@ -1447,9 +1447,6 @@ rust_parser::parse_sizeof ()
 {
   assume (KW_SIZEOF);
 
-  if (current_token == KW_MUT)
-    lex ();
-
   require ('(');
   operation_up result = make_operation<unop_sizeof_operation> (parse_expr ());
   require (')');
@@ -1600,9 +1597,7 @@ rust_parser::parse_array_type ()
 
   if (current_token != INTEGER && current_token != DECIMAL_INTEGER)
     error (_("integer expected"));
-  LONGEST val = current_int_val.val;
-  if (val < 0)
-    error (_("Negative array length"));
+  ULONGEST val = current_int_val.val;
   lex ();
   require (']');
 
@@ -2117,7 +2112,7 @@ rust_lex_test_one (rust_parser *parser, const char *input, int expected)
 
 static void
 rust_lex_int_test (rust_parser *parser, const char *input,
-		   LONGEST value, int kind)
+		   ULONGEST value, int kind)
 {
   rust_lex_test_one (parser, input, kind);
   SELF_CHECK (parser->current_int_val.val == value);

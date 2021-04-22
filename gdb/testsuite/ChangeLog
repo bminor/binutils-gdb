@@ -1,3 +1,9 @@
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/modules.exp: Add checks for syntax errors.
+	* gdb.rust/expr.exp: Add checks for syntax errors.
+	* gdb.rust/simple.exp: Add checks for syntax errors.
+
 2021-04-21  Carl Love  <cel@us.ibm.com>
 
 	* gdb.base/valgrind-bt.exp: Add gdb_test "break main".

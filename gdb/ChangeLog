@@ -1,3 +1,10 @@
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* rust-parse.c (rust_parser::parse_sizeof): Remove KW_MUT code.
+	(struct typed_val_int) <val>: Now ULONGEST.
+	(rust_parser::parse_array_type): Remove negative check.
+	(rust_lex_int_test): Change 'value' to ULONGEST.
+
 2021-04-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arch-utils.c (default_addressable_memory_unit_size): Return a

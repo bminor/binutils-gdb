@@ -91,3 +91,7 @@ foreach mod {mod1::inner::innest mod1::inner mod1 {}} {
 }
 
 gdb_test "print ::TWENTY_THREE" " = 23"
+
+gdb_test "print super TWENTY_THREE" "'::' expected"
+gdb_test "print super::23" "identifier expected"
+gdb_test "ptype ::Generic::<::Generic<self::Type" "'>' expected"
