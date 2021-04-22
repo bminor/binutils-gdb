@@ -2467,8 +2467,8 @@ enum attach_post_wait_mode
 };
 
 /* Called after we've attached to a process and we've seen it stop for
-   the first time.  If ASYNC_EXEC is true, re-resume threads that
-   should be running.  Else if ATTACH, */
+   the first time.  Resume, stop, or don't touch the threads according
+   to MODE.  */
 
 static void
 attach_post_wait (int from_tty, enum attach_post_wait_mode mode)
@@ -2486,7 +2486,7 @@ attach_post_wait (int from_tty, enum attach_post_wait_mode mode)
       /* The user requested an `attach&', so be sure to leave threads
 	 that didn't get a signal running.  */
 
-      /* Immediatelly resume all suspended threads of this inferior,
+      /* Immediately resume all suspended threads of this inferior,
 	 and this inferior only.  This should have no effect on
 	 already running threads.  If a thread has been stopped with a
 	 signal, leave it be.  */

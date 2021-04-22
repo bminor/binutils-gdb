@@ -1,5 +1,9 @@
 2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* infcmd.c (attach_post_wait): Update the function comment.
+
+2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* infcmd.c (attach_post_wait): Remove the unused parameter 'args'.
 	Update the references below.
 	(struct attach_command_continuation_args)
