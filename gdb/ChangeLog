@@ -1,5 +1,24 @@
 2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* Makefile.in (COMMON_SFILES): Remove continuations.c.
+	* inferior.c (inferior::add_continuation): New method, adapted
+	from 'add_inferior_continuation'.
+	(inferior::do_all_continuations): New method, adapted from
+	'do_all_inferior_continuations'.
+	(inferior::~inferior): Clear the list of continuations directly.
+	* inferior.h (class inferior) <continuations>: Rename into...
+	<m_continuations>: ...this and make private.
+	* continuations.c: Remove.
+	* continuations.h: Remove.
+	* event-top.c: Don't include "continuations.h".
+
+	Update the users below.
+	* inf-loop.c (inferior_event_handler)
+	* infcmd.c (attach_command)
+	(notice_new_inferior): Update.
+
+2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* inferior.h (class inferior) <continuations>: Change the type
 	to be an std::list of std::function's.
 	Update the references and uses below.

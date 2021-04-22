@@ -31,7 +31,6 @@
 #include "symfile.h"
 #include "gdbsupport/environ.h"
 #include "cli/cli-utils.h"
-#include "continuations.h"
 #include "arch-utils.h"
 #include "target-descriptions.h"
 #include "readline/tilde.h"
@@ -74,7 +73,7 @@ inferior::~inferior ()
 {
   inferior *inf = this;
 
-  discard_all_inferior_continuations (inf);
+  m_continuations.clear ();
   inferior_free_data (inf);
   xfree (inf->args);
   target_desc_info_free (inf->tdesc_info);
@@ -104,6 +103,23 @@ const char *
 inferior::tty ()
 {
   return m_terminal.get ();
+}
+
+void
+inferior::add_continuation (std::function<void ()> &&cont)
+{
+  m_continuations.emplace_front (std::move (cont));
+}
+
+void
+inferior::do_all_continuations ()
+{
+  while (!m_continuations.empty ())
+    {
+      auto iter = m_continuations.begin ();
+      (*iter) ();
+      m_continuations.erase (iter);
+    }
 }
 
 struct inferior *

@@ -1004,7 +1004,6 @@ COMMON_SFILES = \
 	coffread.c \
 	complaints.c \
 	completer.c \
-	continuations.c \
 	copying.c \
 	corefile.c \
 	corelow.c \

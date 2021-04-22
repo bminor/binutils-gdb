@@ -47,7 +47,6 @@
 #include "inline-frame.h"
 #include "tracepoint.h"
 #include "inf-loop.h"
-#include "continuations.h"
 #include "linespec.h"
 #include "thread-fsm.h"
 #include "top.h"
@@ -2645,7 +2644,7 @@ attach_command (const char *args, int from_tty)
       inferior->control.stop_soon = STOP_QUIETLY_NO_SIGSTOP;
 
       /* Wait for stop.  */
-      add_inferior_continuation ([=] ()
+      inferior->add_continuation ([=] ()
 	{
 	  attach_post_wait (from_tty, mode);
 	});
@@ -2702,7 +2701,7 @@ notice_new_inferior (thread_info *thr, int leave_running, int from_tty)
       inferior->control.stop_soon = STOP_QUIETLY_REMOTE;
 
       /* Wait for stop before proceeding.  */
-      add_inferior_continuation ([=] ()
+      inferior->add_continuation ([=] ()
 	{
 	  attach_post_wait (from_tty, mode);
 	});

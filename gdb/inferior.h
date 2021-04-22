@@ -422,6 +422,14 @@ public:
   inline safe_inf_threads_range threads_safe ()
   { return safe_inf_threads_range (this->thread_list); }
 
+  /* Continuations-related methods.  A continuation is an std::function
+     to be called to finish the execution of a command when running
+     GDB asynchronously.  A continuation is executed after any thread
+     of this inferior stops.  Continuations are used by the attach
+     command and the remote target when a new inferior is detected.  */
+  void add_continuation (std::function<void ()> &&cont);
+  void do_all_continuations ();
+
   /* Set/get file name for default use for standard in/out in the
      inferior.  On Unix systems, we try to make TERMINAL_NAME the
      inferior's controlling terminal.  If TERMINAL_NAME is nullptr or
@@ -508,10 +516,6 @@ public:
   /* True if we're in the process of detaching from this inferior.  */
   bool detaching = false;
 
-  /* What is left to do for an execution command after any thread of
-     this inferior stops.  */
-  std::list<std::function<void ()>> continuations;
-
   /* True if setup_inferior wasn't called for this inferior yet.
      Until that is done, we must not access inferior memory or
      registers, as we haven't determined the target
@@ -559,6 +563,9 @@ private:
 
   /* The name of terminal device to use for I/O.  */
   gdb::unique_xmalloc_ptr<char> m_terminal;
+
+  /* The list of continuations.  */
+  std::list<std::function<void ()>> m_continuations;
 };
 
 /* Keep a registry of per-inferior data-pointers required by other GDB

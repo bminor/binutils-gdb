@@ -33,7 +33,6 @@
 #include "main.h"
 #include "gdbthread.h"
 #include "observable.h"
-#include "continuations.h"
 #include "gdbcmd.h"		/* for dont_repeat() */
 #include "annotate.h"
 #include "maint.h"
