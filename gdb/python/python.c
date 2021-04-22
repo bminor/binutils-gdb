@@ -129,8 +129,7 @@ PyObject *gdbpy_gdb_memory_error;
 static script_sourcer_func gdbpy_source_script;
 static objfile_script_sourcer_func gdbpy_source_objfile_script;
 static objfile_script_executor_func gdbpy_execute_objfile_script;
-static void gdbpy_finish_initialization
-  (const struct extension_language_defn *);
+static void gdbpy_initialize (const struct extension_language_defn *);
 static int gdbpy_initialized (const struct extension_language_defn *);
 static void gdbpy_eval_from_control_command
   (const struct extension_language_defn *, struct command_line *cmd);
@@ -162,7 +161,7 @@ const struct extension_language_script_ops python_extension_script_ops =
 
 const struct extension_language_ops python_extension_ops =
 {
-  gdbpy_finish_initialization,
+  gdbpy_initialize,
   gdbpy_initialized,
 
   gdbpy_eval_from_control_command,
@@ -1885,12 +1884,12 @@ message == an error message without a stack will be printed."),
 
 #ifdef HAVE_PYTHON
 
-/* Helper function for gdbpy_finish_initialization.  This does the
-   work and then returns false if an error has occurred and must be
-   displayed, or true on success.  */
+/* Helper function for gdbpy_initialize.  This does the work and then
+   returns false if an error has occurred and must be displayed, or true on
+   success.  */
 
 static bool
-do_finish_initialization (const struct extension_language_defn *extlang)
+do_initialize (const struct extension_language_defn *extlang)
 {
   PyObject *m;
   PyObject *sys_path;
@@ -1948,21 +1947,19 @@ do_finish_initialization (const struct extension_language_defn *extlang)
   return gdb_pymodule_addobject (m, "gdb", gdb_python_module) >= 0;
 }
 
-/* Perform the remaining python initializations.
-   These must be done after GDB is at least mostly initialized.
-   E.g., The "info pretty-printer" command needs the "info" prefix
-   command installed.
-   This is the extension_language_ops.finish_initialization "method".  */
+/* Perform Python initialization.  This will be called after GDB has
+   performed all of its own initialization.  This is the
+   extension_language_ops.initialize "method".  */
 
 static void
-gdbpy_finish_initialization (const struct extension_language_defn *extlang)
+gdbpy_initialize (const struct extension_language_defn *extlang)
 {
   if (!do_start_initialization () && PyErr_Occurred ())
     gdbpy_print_stack ();
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
-  if (!do_finish_initialization (extlang))
+  if (!do_initialize (extlang))
     {
       gdbpy_print_stack ();
       warning (_("internal error: Unhandled Python exception"));

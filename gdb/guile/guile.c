@@ -75,8 +75,7 @@ const char *gdbscm_print_excp = gdbscm_print_excp_message;
 
 #ifdef HAVE_GUILE
 
-static void gdbscm_finish_initialization
-  (const struct extension_language_defn *);
+static void gdbscm_initialize (const struct extension_language_defn *);
 static int gdbscm_initialized (const struct extension_language_defn *);
 static void gdbscm_eval_from_control_command
   (const struct extension_language_defn *, struct command_line *);
@@ -113,7 +112,7 @@ static const struct extension_language_script_ops guile_extension_script_ops =
 
 static const struct extension_language_ops guile_extension_ops =
 {
-  gdbscm_finish_initialization,
+  gdbscm_initialize,
   gdbscm_initialized,
 
   gdbscm_eval_from_control_command,
@@ -638,12 +637,11 @@ call_initialize_gdb_module (void *data)
   return NULL;
 }
 
-/* A callback to finish Guile initialization after gdb has finished all its
-   initialization.
-   This is the extension_language_ops.finish_initialization "method".  */
+/* A callback to initialize Guile after gdb has finished all its
+   initialization.  This is the extension_language_ops.initialize "method".  */
 
 static void
-gdbscm_finish_initialization (const struct extension_language_defn *extlang)
+gdbscm_initialize (const struct extension_language_defn *extlang)
 {
 #if HAVE_GUILE
   /* The Python support puts the C side in module "_gdb", leaving the

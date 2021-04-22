@@ -1053,8 +1053,8 @@ captured_main_1 (struct captured_main_args *context)
   execute_cmdargs (&cmdarg_vec, CMDARG_EARLYINIT_FILE,
 		   CMDARG_EARLYINIT_COMMAND, &ret);
 
-  /* Finish initializing the extension languges.  */
-  finish_ext_lang_initialization ();
+  /* Initialize the extension languages.  */
+  ext_lang_initialization ();
 
   /* Recheck if we're starting up quietly after processing the startup
      scripts and commands.  */

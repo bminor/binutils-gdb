@@ -1,5 +1,26 @@
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* extension-priv.h (struct extension_language_ops): Rename
+	'finish_initialization' to 'initialize'.
+	* extension.c (finish_ext_lang_initialization): Renamed to...
+	(ext_lang_initialization): ...this, update comment, and updated
+	the calls to reflect the change in struct extension_language_ops.
+	* extension.h (finish_ext_lang_initialization): Renamed to...
+	(ext_lang_initialization): ...this.
+	* guile/guile.c (gdbscm_finish_initialization): Renamed to...
+	(gdbscm_initialize): ...this, update comment at definition.
+	(guile_extension_ops): Update.
+	* main.c (captured_main_1): Update call to
+	finish_ext_lang_initialization.
+	* python/python.c (gdbpy_finish_initialization): Rename to...
+	(gdbpy_initialize): ...this, update comment at definition, and
+	update call to do_finish_initialization.
+	(python_extension_ops): Update.
+	(do_finish_initialization): Rename to...
+	(do_initialize): ...this, and update comment.
+
+2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* main.c (captured_main_1): Add a call to
 	finish_ext_lang_initialization.
 	* top.c (gdb_init): Remove call to finish_ext_lang_initialization.
