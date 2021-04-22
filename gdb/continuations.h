@@ -20,29 +20,19 @@
 #ifndef CONTINUATIONS_H
 #define CONTINUATIONS_H
 
+#include <functional>
+
 struct inferior;
 
 /* To continue the execution commands when running gdb asynchronously.
-   A continuation structure contains a pointer to a function to be called
-   to finish the command, once the target has stopped.  Such mechanism is
-   used by the attach command and the remote target when a new inferior
-   is detected.  */
-
-/* Prototype of the continuation callback functions.  ARG is the
-   continuation argument registered in the corresponding
-   add_*_continuation call.  */
-typedef void (continuation_ftype) (void *arg);
-
-/* Prototype of the function responsible for releasing the argument
-   passed to the continuation callback functions, either when the
-   continuation is called, or discarded.  */
-typedef void (continuation_free_arg_ftype) (void *);
+   A continuation is an std::function to be called to finish the
+   command, once the target has stopped.  Such mechanism is used by
+   the attach command and the remote target when a new inferior is
+   detected.  */
 
 /* Inferior specific (any thread) continuations.  */
 
-extern void add_inferior_continuation (continuation_ftype *,
-				       void *,
-				       continuation_free_arg_ftype *);
+extern void add_inferior_continuation (std::function<void ()> &&cont);
 extern void do_all_inferior_continuations ();
 extern void discard_all_inferior_continuations (struct inferior *inf);
 

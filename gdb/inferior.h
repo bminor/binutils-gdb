@@ -22,6 +22,7 @@
 #define INFERIOR_H 1
 
 #include <exception>
+#include <list>
 
 struct target_waitstatus;
 struct frame_info;
@@ -32,7 +33,6 @@ struct regcache;
 struct ui_out;
 struct terminal_info;
 struct target_desc_info;
-struct continuation;
 struct inferior;
 struct thread_info;
 
@@ -510,7 +510,7 @@ public:
 
   /* What is left to do for an execution command after any thread of
      this inferior stops.  */
-  continuation *continuations = NULL;
+  std::list<std::function<void ()>> continuations;
 
   /* True if setup_inferior wasn't called for this inferior yet.
      Until that is done, we must not access inferior memory or

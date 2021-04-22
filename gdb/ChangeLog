@@ -1,5 +1,27 @@
 2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* inferior.h (class inferior) <continuations>: Change the type
+	to be an std::list of std::function's.
+	Update the references and uses below.
+	* continuations.c (struct continuation): Delete.
+	(make_continuation): Delete.
+	(do_my_continuations_1): Delete.
+	(do_my_continuations): Delete.
+	(discard_my_continuations_1): Delete.
+	(discard_my_continuations): Delete.
+	(add_inferior_continuation): Update.
+	(do_all_inferior_continuations): Update.
+	(discard_all_inferior_continuations): Update.
+	* continuations.h (add_inferior_continuation): Update to take
+	an std::function as the parameter.
+	* infcmd.c (struct attach_command_continuation_args): Delete.
+	(attach_command_continuation): Delete.
+	(attach_command_continuation_free_args): Delete.
+	(attach_command): Update.
+	(notice_new_inferior): Update.
+
+2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* continuations.h: Update the general comment.
 	* inferior.h (class inferior) <continuations>: Update the comment.
 	* interps.c: Do not include "continuations.h".
