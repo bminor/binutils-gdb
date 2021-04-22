@@ -1,3 +1,13 @@
+2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27757
+	* gdb.python/flexible-array-member.c: New test.
+	* gdb.python/flexible-array-member.exp: New test.
+	* gdb.guile/scm-type.exp (test_range): Add test for flexible
+	array member.
+	* gdb.guile/scm-type.c (struct flex_member): New.
+	(main): Use it.
+
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
 	* gdb.rust/modules.exp: Add checks for syntax errors.

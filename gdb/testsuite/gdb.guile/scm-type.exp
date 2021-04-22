@@ -261,6 +261,18 @@ proc test_range {} {
 		"ERROR: .*: Wrong type argument in position 1 \\(expecting ranged type\\): .*" \
 		"check range for non ranged type"
 	}
+
+	with_test_prefix "on flexible array member" {
+	    gdb_scm_test_silent_cmd "print f" "print value (f)"
+	    gdb_scm_test_silent_cmd "guile (define f (history-ref 0))" \
+		"get value (f) from history"
+	    gdb_test "guile (print (type-range (field-type (type-field (value-type (value-dereference f)) \"items\"))))" \
+		"= \\(0 0\\)"
+	    gdb_test "guile (print (value-subscript (value-field (value-dereference f) \"items\") 0))" \
+		"= 111"
+	    gdb_test "guile (print (value-subscript (value-field (value-dereference f) \"items\") 1))" \
+		"= 222"
+	}
     }
 }
 
