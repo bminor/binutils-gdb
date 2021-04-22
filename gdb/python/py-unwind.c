@@ -614,12 +614,10 @@ pyuw_on_new_gdbarch (struct gdbarch *newarch)
     }
 }
 
-/* Initialize unwind machinery.  */
-
-int
-gdbpy_initialize_unwind (void)
+void _initialize_py_unwind ();
+void
+_initialize_py_unwind ()
 {
-  int rc;
   add_setshow_zuinteger_cmd
       ("py-unwind", class_maintenance, &pyuw_debug,
 	_("Set Python unwinder debugging."),
@@ -629,15 +627,22 @@ gdbpy_initialize_unwind (void)
 	NULL,
 	&setdebuglist, &showdebuglist);
   pyuw_gdbarch_data
-      = gdbarch_data_register_post_init (pyuw_gdbarch_data_init);
+    = gdbarch_data_register_post_init (pyuw_gdbarch_data_init);
+}
+
+/* Initialize unwind machinery.  */
+
+int
+gdbpy_initialize_unwind (void)
+{
   gdb::observers::architecture_changed.attach (pyuw_on_new_gdbarch,
 					       "py-unwind");
 
   if (PyType_Ready (&pending_frame_object_type) < 0)
     return -1;
-  rc = gdb_pymodule_addobject (gdb_module, "PendingFrame",
-      (PyObject *) &pending_frame_object_type);
-  if (rc)
+  int rc = gdb_pymodule_addobject (gdb_module, "PendingFrame",
+				   (PyObject *) &pending_frame_object_type);
+  if (rc != 0)
     return rc;
 
   if (PyType_Ready (&unwind_info_object_type) < 0)

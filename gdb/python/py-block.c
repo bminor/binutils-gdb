@@ -427,6 +427,17 @@ del_objfile_blocks (struct objfile *objfile, void *datum)
     }
 }
 
+void _initialize_py_block ();
+void
+_initialize_py_block ()
+{
+  /* Register an objfile "free" callback so we can properly
+     invalidate blocks when an object file is about to be
+     deleted.  */
+  blpy_objfile_data_key
+    = register_objfile_data_with_cleanup (NULL, del_objfile_blocks);
+}
+
 int
 gdbpy_initialize_blocks (void)
 {
@@ -437,12 +448,6 @@ gdbpy_initialize_blocks (void)
   block_syms_iterator_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&block_syms_iterator_object_type) < 0)
     return -1;
-
-  /* Register an objfile "free" callback so we can properly
-     invalidate blocks when an object file is about to be
-     deleted.  */
-  blpy_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, del_objfile_blocks);
 
   if (gdb_pymodule_addobject (gdb_module, "Block",
 			      (PyObject *) &block_object_type) < 0)

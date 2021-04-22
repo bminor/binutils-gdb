@@ -1424,13 +1424,18 @@ gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
   return type_to_type_object (type);
 }
 
+void _initialize_py_type ();
+void
+_initialize_py_type ()
+{
+  typy_objfile_data_key
+    = register_objfile_data_with_cleanup (save_objfile_types, NULL);
+}
+
 int
 gdbpy_initialize_types (void)
 {
   int i;
-
-  typy_objfile_data_key
-    = register_objfile_data_with_cleanup (save_objfile_types, NULL);
 
   if (PyType_Ready (&type_object_type) < 0)
     return -1;

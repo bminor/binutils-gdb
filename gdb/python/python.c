@@ -1881,11 +1881,6 @@ message == an error message without a stack will be printed."),
 			NULL, NULL,
 			&user_set_python_list,
 			&user_show_python_list);
-
-#ifdef HAVE_PYTHON
-  if (!do_start_initialization () && PyErr_Occurred ())
-    gdbpy_print_stack ();
-#endif /* HAVE_PYTHON */
 }
 
 #ifdef HAVE_PYTHON
@@ -1962,6 +1957,9 @@ do_finish_initialization (const struct extension_language_defn *extlang)
 static void
 gdbpy_finish_initialization (const struct extension_language_defn *extlang)
 {
+  if (!do_start_initialization () && PyErr_Occurred ())
+    gdbpy_print_stack ();
+
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
   if (!do_finish_initialization (extlang))

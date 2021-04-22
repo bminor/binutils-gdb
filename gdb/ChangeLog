@@ -1,5 +1,33 @@
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/py-arch.c (_initialize_py_arch): New function.
+	(gdbpy_initialize_arch): Move code to _initialize_py_arch.
+	* python/py-block.c (_initialize_py_block): New function.
+	(gdbpy_initialize_blocks): Move code to _initialize_py_block.
+	* python/py-inferior.c (_initialize_py_inferior): New function.
+	(gdbpy_initialize_inferior): Move code to _initialize_py_inferior.
+	* python/py-objfile.c (_initialize_py_objfile): New function.
+	(gdbpy_initialize_objfile): Move code to _initialize_py_objfile.
+	* python/py-progspace.c (_initialize_py_progspace): New function.
+	(gdbpy_initialize_pspace): Move code to _initialize_py_progspace.
+	* python/py-registers.c (_initialize_py_registers): New function.
+	(gdbpy_initialize_registers): Move code to
+	_initialize_py_registers.
+	* python/py-symbol.c (_initialize_py_symbol): New function.
+	(gdbpy_initialize_symbols): Move code to _initialize_py_symbol.
+	* python/py-symtab.c (_initialize_py_symtab): New function.
+	(gdbpy_initialize_symtabs): Move code to _initialize_py_symtab.
+	* python/py-type.c (_initialize_py_type): New function.
+	(gdbpy_initialize_types): Move code to _initialize_py_type.
+	* python/py-unwind.c (_initialize_py_unwind): New function.
+	(gdbpy_initialize_unwind): Move code to _initialize_py_unwind.
+	* python/python.c (_initialize_python): Move call to
+	do_start_initialization to gdbpy_finish_initialization.
+	(gdbpy_finish_initialization): Add call to
+	do_start_initialization.
+
+2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* extension.c (struct scoped_default_signal): New struct.
 	(scoped_default_sigint): New typedef.
 	(finish_ext_lang_initialization): Make use of

@@ -423,14 +423,19 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
   return false;
 }
 
+void _initialize_py_registers ();
+void
+_initialize_py_registers ()
+{
+  gdbpy_register_object_data
+    = gdbarch_data_register_post_init (gdbpy_register_object_data_init);
+}
+
 /* Initializes the new Python classes from this file in the gdb module.  */
 
 int
 gdbpy_initialize_registers ()
 {
-  gdbpy_register_object_data
-    = gdbarch_data_register_post_init (gdbpy_register_object_data_init);
-
   register_descriptor_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&register_descriptor_object_type) < 0)
     return -1;

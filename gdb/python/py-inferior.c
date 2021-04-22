@@ -892,6 +892,14 @@ gdbpy_selected_inferior (PyObject *self, PyObject *args)
 	  inferior_to_inferior_object (current_inferior ()).release ());
 }
 
+void _initialize_py_inferior ();
+void
+_initialize_py_inferior ()
+{
+  infpy_inf_data_key =
+    register_inferior_data_with_cleanup (NULL, py_free_inferior);
+}
+
 int
 gdbpy_initialize_inferior (void)
 {
@@ -901,9 +909,6 @@ gdbpy_initialize_inferior (void)
   if (gdb_pymodule_addobject (gdb_module, "Inferior",
 			      (PyObject *) &inferior_object_type) < 0)
     return -1;
-
-  infpy_inf_data_key =
-    register_inferior_data_with_cleanup (NULL, py_free_inferior);
 
   gdb::observers::new_thread.attach (add_thread_object, "py-inferior");
   gdb::observers::thread_exit.attach (delete_thread_object, "py-inferior");
