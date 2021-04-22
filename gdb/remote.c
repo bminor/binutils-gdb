@@ -14730,6 +14730,17 @@ remote_target::store_memtags (CORE_ADDR address, size_t len,
   return packet_check_result (rs->buf.data ()) == PACKET_OK;
 }
 
+/* Return true if remote target T is non-stop.  */
+
+bool
+remote_target_is_non_stop_p (remote_target *t)
+{
+  scoped_restore_current_thread restore_thread;
+  switch_to_target_no_thread (t);
+
+  return target_is_non_stop_p ();
+}
+
 #if GDB_SELF_TEST
 
 namespace selftests {

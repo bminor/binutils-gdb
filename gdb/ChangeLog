@@ -1,3 +1,12 @@
+2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tom de Vries  <tdevries@suse.de>
+
+	PR remote/27710
+	* remote.c (remote_target_is_non_stop_p): New function.
+	* remote.h (remote_target_is_non_stop_p): Declare.
+	* remote-notif.c (remote_async_get_pending_events_handler): Fix assert
+	to check non-stopness using notif_state->remote rather current target.
+
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
 	* rust-parse.c (rust_parser::parse_sizeof): Remove KW_MUT code.
