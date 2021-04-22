@@ -49,14 +49,14 @@ make_continuation (struct continuation **pmy_chain,
 }
 
 static void
-do_my_continuations_1 (struct continuation **pmy_chain, int err)
+do_my_continuations_1 (struct continuation **pmy_chain)
 {
   struct continuation *ptr;
 
   while ((ptr = *pmy_chain) != NULL)
     {
       *pmy_chain = ptr->next;	/* Do this first in case of recursion.  */
-      (*ptr->function) (ptr->arg, err);
+      (*ptr->function) (ptr->arg);
       if (ptr->free_arg)
 	(*ptr->free_arg) (ptr->arg);
       xfree (ptr);
@@ -64,7 +64,7 @@ do_my_continuations_1 (struct continuation **pmy_chain, int err)
 }
 
 static void
-do_my_continuations (struct continuation **list, int err)
+do_my_continuations (struct continuation **list)
 {
   struct continuation *continuations;
 
@@ -80,7 +80,7 @@ do_my_continuations (struct continuation **list, int err)
   *list = NULL;
 
   /* Work now on the list we have set aside.  */
-  do_my_continuations_1 (&continuations, err);
+  do_my_continuations_1 (&continuations);
 }
 
 static void
@@ -119,10 +119,10 @@ add_inferior_continuation (continuation_ftype *hook, void *args,
 /* Do all continuations of the current inferior.  */
 
 void
-do_all_inferior_continuations (int err)
+do_all_inferior_continuations ()
 {
   struct inferior *inf = current_inferior ();
-  do_my_continuations (&inf->continuations, err);
+  do_my_continuations (&inf->continuations);
 }
 
 /* Get rid of all the inferior-wide continuations of INF.  */

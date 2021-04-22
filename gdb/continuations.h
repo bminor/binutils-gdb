@@ -30,14 +30,8 @@ struct inferior;
 
 /* Prototype of the continuation callback functions.  ARG is the
    continuation argument registered in the corresponding
-   add_*_continuation call.  ERR is true when the command should be
-   cancelled instead of finished normally.  In that case, the
-   continuation should clean up whatever state had been set up for the
-   command in question (e.g., remove momentary breakpoints).  This
-   happens e.g., when an error was thrown while handling a target
-   event, or when the inferior thread the command was being executed
-   on exits.  */
-typedef void (continuation_ftype) (void *arg, int err);
+   add_*_continuation call.  */
+typedef void (continuation_ftype) (void *arg);
 
 /* Prototype of the function responsible for releasing the argument
    passed to the continuation callback functions, either when the
@@ -49,7 +43,7 @@ typedef void (continuation_free_arg_ftype) (void *);
 extern void add_inferior_continuation (continuation_ftype *,
 				       void *,
 				       continuation_free_arg_ftype *);
-extern void do_all_inferior_continuations (int err);
+extern void do_all_inferior_continuations ();
 extern void discard_all_inferior_continuations (struct inferior *inf);
 
 #endif

@@ -55,7 +55,7 @@ inferior_event_handler (enum inferior_event_type event_type)
       /* Do all continuations associated with the whole inferior (not
 	 a particular thread).  */
       if (inferior_ptid != null_ptid)
-	do_all_inferior_continuations (0);
+	do_all_inferior_continuations ();
 
       /* When running a command list (from a user command, say), these
 	 are only run when the command list is all done.  */

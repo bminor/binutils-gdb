@@ -1,5 +1,15 @@
 2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* continuations.h (do_all_inferior_continuations): Remove the 'err'
+	parameter.  Update the references below.
+	* continuations.c (do_my_continuations_1)
+	(do_my_continuations)
+	(do_all_inferior_continuations): Update.
+	* inf-loop.c (inferior_event_handler): Update.
+	* infcmd.c (attach_command_continuation): Update.
+
+2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* infcmd.c (attach_post_wait): Update the function comment.
 
 2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>

@@ -2547,13 +2547,10 @@ struct attach_command_continuation_args
 };
 
 static void
-attach_command_continuation (void *args, int err)
+attach_command_continuation (void *args)
 {
   struct attach_command_continuation_args *a
     = (struct attach_command_continuation_args *) args;
-
-  if (err)
-    return;
 
   attach_post_wait (a->from_tty, a->mode);
 }
