@@ -1,3 +1,8 @@
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* sim-events.c (sim_events_schedule): Use
+	sim_events_schedule_tracef.
+
 2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* callback.c (os_printf_filtered, os_vprintf_filtered,
