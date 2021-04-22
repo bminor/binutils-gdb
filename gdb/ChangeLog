@@ -1,5 +1,11 @@
 2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* continuations.h: Update the general comment.
+	* inferior.h (class inferior) <continuations>: Update the comment.
+	* interps.c: Do not include "continuations.h".
+
+2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* continuations.h (do_all_inferior_continuations): Remove the 'err'
 	parameter.  Update the references below.
 	* continuations.c (do_my_continuations_1)

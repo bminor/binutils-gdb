@@ -25,8 +25,8 @@ struct inferior;
 /* To continue the execution commands when running gdb asynchronously.
    A continuation structure contains a pointer to a function to be called
    to finish the command, once the target has stopped.  Such mechanism is
-   used by the finish and until commands, and in the remote protocol
-   when opening an extended-remote connection.  */
+   used by the attach command and the remote target when a new inferior
+   is detected.  */
 
 /* Prototype of the continuation callback functions.  ARG is the
    continuation argument registered in the corresponding

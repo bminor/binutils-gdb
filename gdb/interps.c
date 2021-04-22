@@ -37,7 +37,6 @@
 #include "interps.h"
 #include "completer.h"
 #include "top.h"		/* For command_loop.  */
-#include "continuations.h"
 #include "main.h"
 
 /* Each UI has its own independent set of interpreters.  */

@@ -509,8 +509,7 @@ public:
   bool detaching = false;
 
   /* What is left to do for an execution command after any thread of
-     this inferior stops.  For continuations associated with a
-     specific thread, see `struct thread_info'.  */
+     this inferior stops.  */
   continuation *continuations = NULL;
 
   /* True if setup_inferior wasn't called for this inferior yet.
