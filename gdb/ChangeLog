@@ -1,3 +1,10 @@
+2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* main.c (captured_main_1): Don't pass argument to gdb_init.
+	* top.c (gdb_init): Remove unused argument, and add header
+	comment.
+	* top.h (gdb_init): Remove argument.
+
 2021-04-27  Luis Machado  <luis.machado@linaro.org>
 
 	* psymtab.c (psymbol_functions::dump): Output newline.

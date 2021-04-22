@@ -2360,8 +2360,10 @@ The second argument is the terminal the UI runs on."), &cmdlist);
   set_cmd_completer (c, interpreter_completer);
 }
 
+/* See top.h.  */
+
 void
-gdb_init (char *argv0)
+gdb_init ()
 {
   saved_command_line = xstrdup ("");
   previous_saved_command_line = xstrdup ("");

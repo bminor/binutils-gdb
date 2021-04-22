@@ -1039,7 +1039,7 @@ captured_main_1 (struct captured_main_args *context)
   gdb::alternate_signal_stack signal_stack;
 
   /* Initialize all files.  */
-  gdb_init (gdb_program_name);
+  gdb_init ();
 
   /* Process early init files and early init options from the command line.  */
   if (!inhibit_gdbinit)
