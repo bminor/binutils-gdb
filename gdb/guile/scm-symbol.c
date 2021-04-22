@@ -817,7 +817,12 @@ gdbscm_initialize_symbols (void)
   block_keyword = scm_from_latin1_keyword ("block");
   domain_keyword = scm_from_latin1_keyword ("domain");
   frame_keyword = scm_from_latin1_keyword ("frame");
+}
 
+void _initialize_scm_symbol ();
+void
+_initialize_scm_symbol ()
+{
   /* Register an objfile "free" callback so we can properly
      invalidate symbols when an object file is about to be deleted.  */
   syscm_objfile_data_key

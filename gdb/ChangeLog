@@ -1,5 +1,36 @@
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* guile/guile.c (gdbscm_set_backtrace): Add declaration.
+	(gdbscm_finish_initialization): Add code moved from
+	_initialize_guile.
+	(_initialize_guile): Move code to gdbscm_finish_initialization.
+	* guile/scm-arch.c (gdbscm_initialize_arches): Move some code into
+	_initialize_scm_arch.
+	(_initialize_scm_arch): New function.
+	* guile/scm-block.c (gdbscm_initialize_blocks): Move some code
+	into _initialize_scm_block.
+	(_initialize_scm_block): New function.
+	* guile/scm-frame.c (gdbscm_initialize_frames): Move some code
+	into _initialize_scm_frame.
+	(_initialize_scm_frame): New function.
+	* guile/scm-objfile.c (gdbscm_initialize_objfiles): Move some code
+	into _initialize_scm_objfile.
+	(_initialize_scm_objfile): New function.
+	* guile/scm-progspace.c (gdbscm_initialize_pspaces): Move some
+	code into _initialize_scm_progspace.
+	(_initialize_scm_progspace): New function.
+	* guile/scm-symbol.c (gdbscm_initialize_symbols): Move some code
+	into _initialize_scm_symbol.
+	(_initialize_scm_symbol): New function.
+	* guile/scm-symtab.c (gdbscm_initialize_symtabs): Move some code
+	into _initialize_scm_symtab.
+	(_initialize_scm_symtab): New function.
+	* guile/scm-type.c (gdbscm_initialize_types): Move some code into
+	_initialize_scm_type.
+	(_initialize_scm_type): New function.
+
+2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python/py-arch.c (_initialize_py_arch): New function.
 	(gdbpy_initialize_arch): Move code to _initialize_py_arch.
 	* python/py-block.c (_initialize_py_block): New function.

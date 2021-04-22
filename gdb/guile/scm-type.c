@@ -1505,11 +1505,16 @@ Internal function to assist the type fields iterator."));
 
   block_keyword = scm_from_latin1_keyword ("block");
 
+  global_types_map = gdbscm_create_eqable_gsmob_ptr_map (tyscm_hash_type_smob,
+							 tyscm_eq_type_smob);
+}
+
+void _initialize_scm_type ();
+void
+_initialize_scm_type ()
+{
   /* Register an objfile "free" callback so we can properly copy types
      associated with the objfile when it's about to be deleted.  */
   tyscm_objfile_data_key
     = register_objfile_data_with_cleanup (save_objfile_types, NULL);
-
-  global_types_map = gdbscm_create_eqable_gsmob_ptr_map (tyscm_hash_type_smob,
-							 tyscm_eq_type_smob);
 }

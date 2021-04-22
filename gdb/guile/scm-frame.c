@@ -1174,7 +1174,12 @@ gdbscm_initialize_frames (void)
   gdbscm_define_functions (frame_functions, 1);
 
   block_keyword = scm_from_latin1_keyword ("block");
+}
 
+void _initialize_scm_frame ();
+void
+_initialize_scm_frame ()
+{
   /* Register an inferior "free" callback so we can properly
      invalidate frames when an inferior file is about to be deleted.  */
   frscm_inferior_data_key

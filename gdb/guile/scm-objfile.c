@@ -428,7 +428,12 @@ gdbscm_initialize_objfiles (void)
   scm_set_smob_print (objfile_smob_tag, ofscm_print_objfile_smob);
 
   gdbscm_define_functions (objfile_functions, 1);
+}
 
+void _initialize_scm_objfile ();
+void
+_initialize_scm_objfile ()
+{
   ofscm_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, ofscm_handle_objfile_deleted);
 }

@@ -799,7 +799,12 @@ gdbscm_initialize_blocks (void)
 				gdbscm_documentation_symbol,
 				gdbscm_scm_from_c_string ("\
 Internal function to assist the block symbols iterator."));
+}
 
+void _initialize_scm_block ();
+void
+_initialize_scm_block ()
+{
   /* Register an objfile "free" callback so we can properly
      invalidate blocks when an object file is about to be deleted.  */
   bkscm_objfile_data_key

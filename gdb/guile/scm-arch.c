@@ -650,7 +650,12 @@ gdbscm_initialize_arches (void)
   scm_set_smob_print (arch_smob_tag, arscm_print_arch_smob);
 
   gdbscm_define_functions (arch_functions, 1);
+}
 
+void _initialize_scm_arch ();
+void
+_initialize_scm_arch ()
+{
   arch_object_data
     = gdbarch_data_register_post_init (arscm_object_data_init);
 }
