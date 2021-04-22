@@ -2471,7 +2471,7 @@ enum attach_post_wait_mode
    should be running.  Else if ATTACH, */
 
 static void
-attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mode)
+attach_post_wait (int from_tty, enum attach_post_wait_mode mode)
 {
   struct inferior *inferior;
 
@@ -2542,7 +2542,6 @@ attach_post_wait (const char *args, int from_tty, enum attach_post_wait_mode mod
 
 struct attach_command_continuation_args
 {
-  char *args;
   int from_tty;
   enum attach_post_wait_mode mode;
 };
@@ -2556,7 +2555,7 @@ attach_command_continuation (void *args, int err)
   if (err)
     return;
 
-  attach_post_wait (a->args, a->from_tty, a->mode);
+  attach_post_wait (a->from_tty, a->mode);
 }
 
 static void
@@ -2565,7 +2564,6 @@ attach_command_continuation_free_args (void *args)
   struct attach_command_continuation_args *a
     = (struct attach_command_continuation_args *) args;
 
-  xfree (a->args);
   xfree (a);
 }
 
@@ -2677,7 +2675,6 @@ attach_command (const char *args, int from_tty)
 
       /* Wait for stop.  */
       a = XNEW (struct attach_command_continuation_args);
-      a->args = xstrdup (args);
       a->from_tty = from_tty;
       a->mode = mode;
       add_inferior_continuation (attach_command_continuation, a,
@@ -2692,7 +2689,7 @@ attach_command (const char *args, int from_tty)
       return;
     }
   else
-    attach_post_wait (args, from_tty, mode);
+    attach_post_wait (from_tty, mode);
 
   disable_commit_resumed.reset_and_commit ();
 }
@@ -2737,7 +2734,6 @@ notice_new_inferior (thread_info *thr, int leave_running, int from_tty)
 
       /* Wait for stop before proceeding.  */
       a = XNEW (struct attach_command_continuation_args);
-      a->args = xstrdup ("");
       a->from_tty = from_tty;
       a->mode = mode;
       add_inferior_continuation (attach_command_continuation, a,
@@ -2746,7 +2742,7 @@ notice_new_inferior (thread_info *thr, int leave_running, int from_tty)
       return;
     }
 
-  attach_post_wait ("" /* args */, from_tty, mode);
+  attach_post_wait (from_tty, mode);
 }
 
 /*

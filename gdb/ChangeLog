@@ -1,3 +1,13 @@
+2021-04-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infcmd.c (attach_post_wait): Remove the unused parameter 'args'.
+	Update the references below.
+	(struct attach_command_continuation_args)
+	(attach_command_continuation)
+	(attach_command_continuation_free_args)
+	(attach_command)
+	(notice_new_inferior): Update to remove the reference to 'args'.
+
 2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Tom de Vries  <tdevries@suse.de>
 
