@@ -639,7 +639,7 @@ os_init (host_callback *p)
 /* DEPRECATED */
 
 /* VARARGS */
-static void
+static void ATTRIBUTE_PRINTF (2, 3)
 os_printf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
 {
   va_list args;
@@ -650,14 +650,14 @@ os_printf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
 }
 
 /* VARARGS */
-static void
+static void ATTRIBUTE_PRINTF (2, 0)
 os_vprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_list args)
 {
   vprintf (format, args);
 }
 
 /* VARARGS */
-static void
+static void ATTRIBUTE_PRINTF (2, 0)
 os_evprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_list args)
 {
   vfprintf (stderr, format, args);
@@ -667,7 +667,7 @@ os_evprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_
 #ifdef __GNUC__
 __attribute__ ((__noreturn__))
 #endif
-static void
+static void ATTRIBUTE_PRINTF (2, 3)
 os_error (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
 {
   va_list args;

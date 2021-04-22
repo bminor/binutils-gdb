@@ -1,3 +1,11 @@
+2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* callback.c (os_printf_filtered, os_vprintf_filtered,
+	os_evprintf_filtered, os_error): Use ATTRIBUTE_PRINTF.
+	* sim-engine.h (sim_engine_abort, sim_engine_vabort): Likewise.
+	* sim-events.h (sim_events_schedule_tracef,
+	sim_events_schedule_vtracef): Use ATTRIBUTE_NULL_PRINTF.
+
 2021-04-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* gennltvals.py (TARGETS): Add moxie.

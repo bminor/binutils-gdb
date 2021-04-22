@@ -115,14 +115,14 @@ extern void sim_engine_abort
  sim_cpu *cpu,
  sim_cia cia,
  const char *fmt,
- ...) __attribute__ ((format (printf, 4, 5))) __attribute__ ((noreturn));
+ ...) ATTRIBUTE_PRINTF (4, 5) __attribute__ ((noreturn));
 
 extern void sim_engine_vabort
 (SIM_DESC sd,
  sim_cpu *cpu,
  sim_cia cia,
  const char *fmt,
- va_list ap) __attribute__ ((noreturn));
+ va_list ap) ATTRIBUTE_PRINTF (4, 0) __attribute__ ((noreturn));
 
 /* No abort hook - when possible this function exits using the
    engine_halt function (and SIM_ENGINE_HALT_HOOK). */

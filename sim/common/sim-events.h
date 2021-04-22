@@ -117,7 +117,7 @@ extern sim_event *sim_events_schedule_tracef
  sim_event_handler *handler,
  void *data,
  const char *fmt,
- ...) __attribute__ ((format (printf, 5, 6)));
+ ...) ATTRIBUTE_NULL_PRINTF (5, 6);
 
 extern sim_event *sim_events_schedule_vtracef
 (SIM_DESC sd,
@@ -125,7 +125,7 @@ extern sim_event *sim_events_schedule_vtracef
  sim_event_handler *handler,
  void *data,
  const char *fmt,
- va_list ap);
+ va_list ap) ATTRIBUTE_NULL_PRINTF (5, 0);
 
 
 extern void sim_events_schedule_after_signal
