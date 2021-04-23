@@ -1,3 +1,9 @@
+2021-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27771
+	* testsuite/ld-bootstrap/bootstrap.exp: Create a symbolic link
+	to tmpdir/ldscripts only if it doesn't exist.
+
 2021-04-22  Jan Beulich  <jbeulich@suse.com>
 
 	PR ld/26659

@@ -62,7 +62,9 @@ if { [istarget "powerpc-*-*"] } {
 
 set gcc_B_opt_save $gcc_B_opt
 
-catch "exec ln -s ../ldscripts tmpdir/ldscripts" status
+if {![file exists tmpdir/ldscripts]} then {
+    catch "exec ln -s ../ldscripts tmpdir/ldscripts" status
+}
 foreach ldexe {ld1 ld2 ld3} {
     if {![file isdirectory tmpdir/gcc$ldexe]} then {
 	catch "exec mkdir tmpdir/gcc$ldexe" status
