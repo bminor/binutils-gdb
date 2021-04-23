@@ -3297,8 +3297,8 @@ static void
 pe (expressionS *e)
 {
   fprintf (stdout, "    operation     %d\n", e->X_op);
-  fprintf (stdout, "    add_number    %ld (%lx)\n",
-	   (long) e->X_add_number, (long) e->X_add_number);
+  fprintf (stdout, "    add_number    %" BFD_VMA_FMT "d (%" BFD_VMA_FMT "x)\n",
+	   e->X_add_number, e->X_add_number);
   if (e->X_add_symbol)
     {
       fprintf (stdout, "    add_symbol    ");
@@ -10922,8 +10922,8 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 	  i.types[this_operand].bitfield.disp32s = 0;
 	  if (i.types[this_operand].bitfield.baseindex)
 	    {
-	      as_bad (_("0x%lx out range of signed 32bit displacement"),
-		      (long) exp->X_add_number);
+	      as_bad (_("0x%" BFD_VMA_FMT "x out of range of signed 32bit displacement"),
+		      exp->X_add_number);
 	      ret = 0;
 	    }
 	}
