@@ -635,15 +635,19 @@ targ-vals.def: $(srcdir)/../common/nltvals.def
 	cat $(srcdir)/../common/nltvals.def > tmp-vals.def
 	$(SHELL) $(srcdir)/../../move-if-change tmp-vals.def targ-vals.def
 
-targ-vals.h: Makefile gentmap $(srcdir)/../../move-if-change
+targ-vals.h: stamp-vals ; @true
+stamp-vals: Makefile gentmap $(srcdir)/../../move-if-change
 	rm -f tmp-vals.h
 	./gentmap -h > tmp-vals.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-vals.h targ-vals.h
+	@echo stamp > stamp-vals
 
-targ-map.c: Makefile gentmap $(srcdir)/../../move-if-change
+targ-map.c: stamp-map; @true
+stamp-map: Makefile gentmap $(srcdir)/../../move-if-change
 	rm -f tmp-map.c
 	./gentmap -c > tmp-map.c
 	$(SHELL) $(srcdir)/../../move-if-change tmp-map.c targ-map.c
+	@echo stamp > stamp-map
 
 callback.o: $(srcdir)/../common/callback.c $(TARG_VALS_H) $(CONFIG_H)
 	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/callback.c
@@ -871,6 +875,7 @@ TAGS: $(BUILT_SRC)
 
 clean mostlyclean:
 	rm -f tmp-* *.[oasi] core psim$(EXEEXT) run$(EXEEXT) igen dgen $(BUILT_SRC_WO_CONFIG) gentmap
+	rm -f stamp-vals targ-vals.h stamp-map targ-map.c
 
 distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log

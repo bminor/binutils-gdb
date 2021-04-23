@@ -1,3 +1,9 @@
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (stamp-vals, stamp-map): New targets.
+	(targ-vals.h, targ-map.c): Update.
+	(clean): Remove files.
+
 2021-04-08  Tom Tromey  <tom@tromey.com>
 
 	* emul_unix.c: Include time.h.
