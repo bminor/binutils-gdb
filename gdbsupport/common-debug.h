@@ -20,6 +20,8 @@
 #ifndef COMMON_COMMON_DEBUG_H
 #define COMMON_COMMON_DEBUG_H
 
+#include "gdbsupport/preprocessor.h"
+
 /* Set to true to enable debugging of hardware breakpoint/
    watchpoint support code.  */
 

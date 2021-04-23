@@ -1,3 +1,7 @@
+2021-04-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common-debug.h: Include preprocessor.h.
+
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
 	* rsp-low.cc (fromhex, hex2bin): Move to ...
