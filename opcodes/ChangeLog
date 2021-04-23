@@ -1,3 +1,8 @@
+2020-04-23  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-dis.c (print_xtensa_operand): For PC-relative operand
+	of l32r fetch and display referenced literal value.
+
 2021-04-23  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* xtensa-dis.c (print_insn_xtensa): Set info->bytes_per_chunk
