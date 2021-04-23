@@ -3555,6 +3555,16 @@ tc_i386_fix_adjustable (fixS *fixP ATTRIBUTE_UNUSED)
   return 1;
 }
 
+static INLINE bool
+want_disp32 (const insn_template *t)
+{
+  return flag_code != CODE_64BIT
+	 || i.prefix[ADDR_PREFIX]
+	 || (t->base_opcode == 0x8d
+	     && t->opcode_modifier.opcodespace == SPACE_BASE
+	     && !i.types[1].bitfield.qword);
+}
+
 static int
 intel_float_operand (const char *mnemonic)
 {
@@ -4740,7 +4750,7 @@ md_assemble (char *line)
   if (i.imm_operands)
     optimize_imm ();
 
-  if (i.disp_operands && flag_code == CODE_64BIT && !i.prefix[ADDR_PREFIX])
+  if (i.disp_operands && !want_disp32 (current_templates->start))
     {
       for (j = 0; j < i.operands; ++j)
 	{
@@ -5748,7 +5758,7 @@ optimize_disp (void)
 #ifdef BFD64
 	    else if (flag_code == CODE_64BIT)
 	      {
-		if (i.prefix[ADDR_PREFIX]
+		if (want_disp32 (current_templates->start)
 		    && fits_in_unsigned_long (op_disp))
 		  i.types[op].bitfield.disp32 = 1;
 
@@ -8108,7 +8118,7 @@ build_modrm_byte (void)
 		  i.types[op].bitfield.disp8 = 0;
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
-		  if (flag_code != CODE_64BIT || i.prefix[ADDR_PREFIX])
+		  if (want_disp32 (&i.tm))
 		    {
 		      /* Must be 32 bit */
 		      i.types[op].bitfield.disp32 = 1;
@@ -8159,7 +8169,7 @@ build_modrm_byte (void)
 		      i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 		      i.sib.base = NO_BASE_REGISTER;
 		      i.sib.index = NO_INDEX_REGISTER;
-		      newdisp = (!i.prefix[ADDR_PREFIX] ? disp32s : disp32);
+		      newdisp = (want_disp32(&i.tm) ? disp32 : disp32s);
 		    }
 		  else if ((flag_code == CODE_16BIT)
 			   ^ (i.prefix[ADDR_PREFIX] != 0))
@@ -8188,7 +8198,7 @@ build_modrm_byte (void)
 		  i.types[op].bitfield.disp8 = 0;
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
-		  if (flag_code != CODE_64BIT || i.prefix[ADDR_PREFIX])
+		  if (want_disp32 (&i.tm))
 		    {
 		      /* Must be 32 bit */
 		      i.types[op].bitfield.disp32 = 1;
@@ -8263,12 +8273,11 @@ build_modrm_byte (void)
 	    }
 	  else /* i.base_reg and 32/64 bit mode  */
 	    {
-	      if (flag_code == CODE_64BIT
-		  && operand_type_check (i.types[op], disp))
+	      if (operand_type_check (i.types[op], disp))
 		{
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
-		  if (i.prefix[ADDR_PREFIX] == 0)
+		  if (!want_disp32 (&i.tm))
 		    {
 		      i.types[op].bitfield.disp32 = 0;
 		      i.types[op].bitfield.disp32s = 1;
