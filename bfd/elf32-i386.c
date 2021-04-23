@@ -130,7 +130,7 @@ static reloc_howto_type elf_howto_table[]=
   HOWTO(R_386_TLS_GOTDESC, 0, 2, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_386_TLS_GOTDESC",
 	true, 0xffffffff, 0xffffffff, false),
-  HOWTO(R_386_TLS_DESC_CALL, 0, 0, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_386_TLS_DESC_CALL, 0, 3, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_386_TLS_DESC_CALL",
 	false, 0, 0, false),
   HOWTO(R_386_TLS_DESC, 0, 2, 32, false, 0, complain_overflow_bitfield,

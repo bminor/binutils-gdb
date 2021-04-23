@@ -146,7 +146,7 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	complain_overflow_bitfield, bfd_elf_generic_reloc,
 	"R_X86_64_GOTPC32_TLSDESC",
 	false, 0xffffffff, 0xffffffff, true),
-  HOWTO(R_X86_64_TLSDESC_CALL, 0, 0, 0, false, 0,
+  HOWTO(R_X86_64_TLSDESC_CALL, 0, 3, 0, false, 0,
 	complain_overflow_dont, bfd_elf_generic_reloc,
 	"R_X86_64_TLSDESC_CALL",
 	false, 0, 0, false),
