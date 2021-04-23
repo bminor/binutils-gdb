@@ -2725,6 +2725,7 @@ static const struct bfd_elf_special_section special_sections_n[] =
 
 static const struct bfd_elf_special_section special_sections_p[] =
 {
+  { STRING_COMMA_LEN (".persistent.bss"), 0, SHT_NOBITS,	SHF_ALLOC + SHF_WRITE },
   { STRING_COMMA_LEN (".persistent"),	 -2, SHT_PROGBITS,	SHF_ALLOC + SHF_WRITE },
   { STRING_COMMA_LEN (".preinit_array"), -2, SHT_PREINIT_ARRAY, SHF_ALLOC + SHF_WRITE },
   { STRING_COMMA_LEN (".plt"),		  0, SHT_PROGBITS,	SHF_ALLOC + SHF_EXECINSTR },

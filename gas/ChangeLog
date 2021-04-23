@@ -1,3 +1,9 @@
+2021-04-23  Eric Botcazou<ebotcazou@adacore.com>
+
+	* testsuite/gas/elf/section25.d: Run it everywhere.
+	* testsuite/gas/elf/section26.d: Likewise.
+	* testsuite/gas/elf/section26.s: Add test for .persistent.bss.
+
 2021-04-23  Jérôme Gardou  <jerome.gardou@gmail.com>
 
 	* config/obj-coff-seh.c (obj_coff_seh_pushframe): Allow an
