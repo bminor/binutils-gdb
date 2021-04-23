@@ -49,8 +49,6 @@ AC_CHECK_HEADERS_ONCE(m4_flatten([
   unistd.h
   sys/mman.h
   sys/resource.h
-  sys/time.h
-  sys/times.h
   sys/stat.h
 ]))
 AC_CHECK_FUNCS_ONCE(m4_flatten([

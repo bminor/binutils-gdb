@@ -1,5 +1,10 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Don't check for sys/time.h
+	or sys/times.h.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Don't check for make.
 
 2021-04-21  Simon Marchi  <simon.marchi@polymtl.ca>

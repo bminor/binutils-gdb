@@ -2326,8 +2326,6 @@ as_fn_append ac_header_list " fpu_control.h"
 as_fn_append ac_header_list " unistd.h"
 as_fn_append ac_header_list " sys/mman.h"
 as_fn_append ac_header_list " sys/resource.h"
-as_fn_append ac_header_list " sys/time.h"
-as_fn_append ac_header_list " sys/times.h"
 as_fn_append ac_header_list " sys/stat.h"
 as_fn_append ac_func_list " __setfpucw"
 as_fn_append ac_func_list " ftruncate"
@@ -3929,10 +3927,6 @@ _ACEOF
 fi
 
 done
-
-
-
-
 
 
 
@@ -11222,7 +11216,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11225 "configure"
+#line 11219 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11328,7 +11322,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11331 "configure"
+#line 11325 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

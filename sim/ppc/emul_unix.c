@@ -53,9 +53,7 @@
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#endif
 
 #ifndef HAVE_TERMIOS_STRUCTURE
 #undef HAVE_SYS_TERMIOS_H
@@ -820,7 +818,7 @@ do_unix_time(os_emul_data *emul,
 }
 #endif
 
-#if !defined(HAVE_GETTIMEOFDAY) || !defined(HAVE_SYS_TIME_H)
+#if !defined(HAVE_GETTIMEOFDAY)
 #define do_unix_gettimeofday 0
 #else
 static void

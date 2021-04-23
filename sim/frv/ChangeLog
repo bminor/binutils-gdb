@@ -1,5 +1,9 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (arch.o, devices.o, frv.o, traps.o, pipeline.o)
 	(interrupts.o, memory.o, cache.o, options.o, reset.o)
 	(registers.o, profile.o, profile-fr400.o, profile-fr450.o)

@@ -1,5 +1,9 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (sim-if.o, arch.o, traps.o, traps-linux.o)
 	(devices.o, m32r.o, mloop.o, cpu.o, decode.o, sem.o, model.o)
 	(m32rx.o, mloopx.o, cpux.o, decodex.o, semx.o, modelx.o)

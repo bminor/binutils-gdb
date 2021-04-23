@@ -1,5 +1,9 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (arch.o, cpu.o, sim-if.o, traps.o): Remove.
 	(mloop-le.o, mloop-be.o, decode-le.o, decode-be.o, sim-le.o)
 	(sim-be.o): Use COMPILE and POSTCOMPILE.

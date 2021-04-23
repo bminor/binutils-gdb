@@ -1,5 +1,11 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* rvdummy.c: Update includes.
+	* dv-rv.c: Update includes.
+	* configure, config.in: Rebuild.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (sim-if.o, dv-cris.o, dv-rv.o, arch.o, traps.o)
 	(devices.o, crisv10f.o, mloopv10f.o, cpuv10.o, decodev10.o)
 	(modelv10.o, crisv32f.o, mloopv32f.o, cpuv32.o, decodev32.o)

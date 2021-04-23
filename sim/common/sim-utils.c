@@ -22,9 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdlib.h>
 #include <time.h>
-#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h> /* needed by sys/resource.h */
-#endif
 
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
