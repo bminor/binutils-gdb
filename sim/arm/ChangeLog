@@ -1,5 +1,10 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (armemu26.o, armemu32.o): Use COMPILE and
+	POSTCOMPILE.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 
 2021-04-21  Mike Frysinger  <vapier@gentoo.org>

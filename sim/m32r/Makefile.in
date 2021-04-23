@@ -37,7 +37,8 @@ SIM_OBJS = \
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \
 	$(CGEN_INCLUDE_DEPS) \
-	arch.h cpuall.h m32r-sim.h $(srcdir)/../../opcodes/m32r-desc.h
+	arch.h cpuall.h m32r-sim.h $(srcdir)/../../opcodes/m32r-desc.h \
+	eng.h engx.h eng2.h
 
 SIM_EXTRA_CFLAGS = @sim_extra_cflags@
 
@@ -50,21 +51,11 @@ NL_TARGET = -DNL_TARGET_m32r
 
 arch = m32r
 
-sim-if.o: sim-if.c $(SIM_MAIN_DEPS) $(srcdir)/../common/sim-core.h
-
-arch.o: arch.c $(SIM_MAIN_DEPS)
-
-traps.o: traps.c targ-vals.h $(SIM_MAIN_DEPS)
-traps-linux.o: traps.c syscall.h targ-vals.h $(SIM_MAIN_DEPS)
-devices.o: devices.c $(SIM_MAIN_DEPS)
-
 # M32R objs
 
 M32RBF_INCLUDE_DEPS = \
 	$(CGEN_MAIN_CPU_DEPS) \
 	cpu.h decode.h eng.h
-
-m32r.o: m32r.c $(M32RBF_INCLUDE_DEPS)
 
 # FIXME: Use of `mono' is wip.
 mloop.c eng.h: stamp-mloop ; @true
@@ -75,20 +66,12 @@ stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 	$(SHELL) $(srcroot)/move-if-change eng.hin eng.h
 	$(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
 	touch stamp-mloop
-mloop.o: mloop.c sem-switch.c $(M32RBF_INCLUDE_DEPS)
-
-cpu.o: cpu.c $(M32RBF_INCLUDE_DEPS)
-decode.o: decode.c $(M32RBF_INCLUDE_DEPS)
-sem.o: sem.c $(M32RBF_INCLUDE_DEPS)
-model.o: model.c $(M32RBF_INCLUDE_DEPS)
 
 # M32RX objs
 
 M32RXF_INCLUDE_DEPS = \
 	$(CGEN_MAIN_CPU_DEPS) \
 	cpux.h decodex.h engx.h
-
-m32rx.o: m32rx.c $(M32RXF_INCLUDE_DEPS)
 
 # FIXME: Use of `mono' is wip.
 mloopx.c engx.h: stamp-xmloop ; @true
@@ -100,20 +83,12 @@ stamp-xmloop: $(srcdir)/../common/genmloop.sh mloopx.in Makefile
 	$(SHELL) $(srcroot)/move-if-change engx.hin engx.h
 	$(SHELL) $(srcroot)/move-if-change mloopx.cin mloopx.c
 	touch stamp-xmloop
-mloopx.o: mloopx.c semx-switch.c $(M32RXF_INCLUDE_DEPS)
-
-cpux.o: cpux.c $(M32RXF_INCLUDE_DEPS)
-decodex.o: decodex.c $(M32RXF_INCLUDE_DEPS)
-semx.o: semx.c $(M32RXF_INCLUDE_DEPS)
-modelx.o: modelx.c $(M32RXF_INCLUDE_DEPS)
 
 # M32R2 objs
 
 M32R2F_INCLUDE_DEPS = \
 	$(CGEN_MAIN_CPU_DEPS) \
 	cpu2.h decode2.h eng2.h
-
-m32r2.o: m32r2.c $(M32R2F_INCLUDE_DEPS)
 
 # FIXME: Use of `mono' is wip.
 mloop2.c eng2.h: stamp-2mloop ; @true
@@ -125,12 +100,6 @@ stamp-2mloop: $(srcdir)/../common/genmloop.sh mloop2.in Makefile
 	$(SHELL) $(srcroot)/move-if-change eng2.hin eng2.h
 	$(SHELL) $(srcroot)/move-if-change mloop2.cin mloop2.c
 	touch stamp-2mloop
-
-mloop2.o: mloop2.c $(srcdir)/sem2-switch.c $(M32R2F_INCLUDE_DEPS)
-cpu2.o: cpu2.c $(M32R2F_INCLUDE_DEPS)
-decode2.o: decode2.c $(M32R2F_INCLUDE_DEPS)
-sem2.o: sem2.c $(M32R2F_INCLUDE_DEPS)
-model2.o: model2.c $(M32R2F_INCLUDE_DEPS)
 
 m32r-clean:
 	rm -f mloop.c eng.h stamp-mloop

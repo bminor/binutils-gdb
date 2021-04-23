@@ -39,8 +39,6 @@ SIM_EXTRA_CFLAGS = -DPOLL_QUIT_INTERVAL=0x20
 
 ## COMMON_POST_CONFIG_FRAG
 
-idecode.o op_utils.o semantics.o: targ-vals.h
-
 BUILT_SRC_FROM_IGEN = \
 	icache.h \
 	icache.c \
@@ -110,5 +108,3 @@ tmp-igen: $(IGEN_INSN) $(IGEN_INSN_INC) $(IGEN_DC) ../igen/igen
 	$(SHELL) $(srcdir)/../../move-if-change tmp-engine.c engine.c
 	$(SHELL) $(srcdir)/../../move-if-change tmp-irun.c irun.c
 	touch tmp-igen
-
-interp.o: interp.c $(INCLUDE)

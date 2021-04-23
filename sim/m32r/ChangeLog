@@ -1,5 +1,13 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (sim-if.o, arch.o, traps.o, traps-linux.o)
+	(devices.o, m32r.o, mloop.o, cpu.o, decode.o, sem.o, model.o)
+	(m32rx.o, mloopx.o, cpux.o, decodex.o, semx.o, modelx.o)
+	(m32r2.o, mloop2.o, cpu2.o, decode2.o, sem2.o, model2.o): Remove.
+	(SIM_EXTRA_DEPS): Add eng.h, engx.h, eng2.h.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 
 2021-04-21  Mike Frysinger  <vapier@gentoo.org>

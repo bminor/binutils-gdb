@@ -1,5 +1,13 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (sim-if.o, dv-cris.o, dv-rv.o, arch.o, traps.o)
+	(devices.o, crisv10f.o, mloopv10f.o, cpuv10.o, decodev10.o)
+	(modelv10.o, crisv32f.o, mloopv32f.o, cpuv32.o, decodev32.o)
+	(modelv32.o): Remove.
+	(SIM_EXTRA_DEPS): Add engv10.h.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 
 2021-04-21  Mike Frysinger  <vapier@gentoo.org>

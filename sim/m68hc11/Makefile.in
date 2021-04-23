@@ -54,7 +54,5 @@ gencode.o: gencode.c
 gencode: gencode.o
 	$(LINK_FOR_BUILD) $^
 
-interp.o: interp.c $(INCLUDE)
-
 clean-extra:
 	rm -f gencode m68hc11int.c

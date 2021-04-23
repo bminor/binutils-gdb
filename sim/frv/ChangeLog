@@ -1,5 +1,14 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (arch.o, devices.o, frv.o, traps.o, pipeline.o)
+	(interrupts.o, memory.o, cache.o, options.o, reset.o)
+	(registers.o, profile.o, profile-fr400.o, profile-fr450.o)
+	(profile-fr500.o, profile-fr550.o, sim-if.o, mloop.o, cpu.o)
+	(decode.o, sem.o, model.o): Remove.
+	(SIM_EXTRA_DEPS): Add eng.h.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 
 2021-04-21  Mike Frysinger  <vapier@gentoo.org>

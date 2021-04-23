@@ -75,16 +75,9 @@ stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 	$(SHELL) $(srcroot)/move-if-change eng.hin eng.h
 	$(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
 	touch stamp-mloop
-mloop.o: mloop.c sem-switch.c $(OR1K32BF_INCLUDE_DEPS)
 or1k.o: or1k.c $(OR1K32BF_INCLUDE_DEPS)
 	$(COMPILE) $<
 	$(POSTCOMPILE)
-arch.o: arch.c $(SIM_MAIN_DEPS)
-cpu.o: cpu.c $(OR1K32BF_INCLUDE_DEPS)
-decode.o: decode.c $(OR1K32BF_INCLUDE_DEPS)
-sem.o: sem.c $(OR1K32BF_INCLUDE_DEPS)
-sem-switch.o: sem-switch.c $(OR1K32BF_INCLUDE_DEPS)
-model.o: model.c $(OR1K32BF_INCLUDE_DEPS)
 
 sim-if.o: sim-if.c $(SIM_MAIN_DEPS) $(srcdir)/../common/sim-core.h eng.h
 	$(COMPILE) $<

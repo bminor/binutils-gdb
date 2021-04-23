@@ -35,6 +35,7 @@ SIM_EXTRA_DEPS = \
 	$(CGEN_INCLUDE_DEPS) \
 	arch.h \
 	bpf-sim.h \
+	eng-le.h eng-be.h \
 	$(srcdir)/../../opcodes/bpf-desc.h \
 	$(srcdir)/../../opcodes/bpf-opc.h
 
@@ -60,33 +61,26 @@ BPF_INCLUDE_DEPS = \
 
 # Dependencies for binaries from CGEN generated source
 
-arch.o: arch.c $(SIM_MAIN_DEPS)
-cpu.o: cpu.c $(BPF_INCLUDE_DEPS)
-decode-le.o: decode-le.c $(BPF_INCLUDE_DEPS)
-decode-be.o: decode-be.c $(BPF_INCLUDE_DEPS)
-
-sim-if.o: sim-if.c $(SIM_MAIN_DEPS) $(srcdir)/../common/sim-core.h eng.h
-	$(COMPILE) $<
+mloop-le.o: mloop-le.c
+	$(COMPILE) -DWANT_ISA_EBPFLE mloop-le.c
+	$(POSTCOMPILE)
+mloop-be.o: mloop-be.c
+	$(COMPILE) -DWANT_ISA_EBPFBE mloop-be.c
 	$(POSTCOMPILE)
 
-traps.o: traps.c $(SIM_MAIN_DEPS) eng.h
-	$(COMPILE) $<
+decode-le.o: decode-le.c
+	$(COMPILE) -DWANT_ISA_EBPFLE $(srcdir)/decode-le.c
+	$(POSTCOMPILE)
+decode-be.o: decode-be.c $(BPF_INCLUDE_DEPS)
+	$(COMPILE) -DWANT_ISA_EBPFBE $(srcdir)/decode-be.c
 	$(POSTCOMPILE)
 
-mloop-le.o: mloop-le.c $(BPF_INCLUDE_DEPS)
-	$(CC) -c mloop-le.c $(ALL_CFLAGS) -DWANT_ISA_EBPFLE
-mloop-be.o: mloop-be.c $(BPF_INCLUDE_DEPS)
-	$(CC) -c mloop-be.c $(ALL_CFLAGS) -DWANT_ISA_EBPFBE
-
-decode-le.o: decode-le.c $(BPF_INCLUDE_DEPS)
-	$(CC) -c $(srcdir)/decode-le.c $(ALL_CFLAGS) -DWANT_ISA_EBPFLE
-decode-be.o: decode-be.c $(BPF_INCLUDE_DEPS)
-	$(CC) -c $(srcdir)/decode-be.c $(ALL_CFLAGS) -DWANT_ISA_EBPFBE
-
-sem-le.o: sem-le.c $(BPF_INCLUDE_DEPS)
-	$(CC) -c $(srcdir)/sem-le.c $(ALL_CFLAGS) -DWANT_ISA_EBPFLE
-sem-be.o: sem-be.c $(BPF_INCLUDE_DEPS)
-	$(CC) -c $(srcdir)/sem-be.c $(ALL_CFLAGS) -DWANT_ISA_EBPFBE
+sem-le.o: sem-le.c
+	$(COMPILE) -DWANT_ISA_EBPFLE $(srcdir)/sem-le.c
+	$(POSTCOMPILE)
+sem-be.o: sem-be.c
+	$(COMPILE) -DWANT_ISA_EBPFBE $(srcdir)/sem-be.c
+	$(POSTCOMPILE)
 
 arch = bpf
 

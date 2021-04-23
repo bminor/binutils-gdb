@@ -29,8 +29,10 @@ SIM_OBJS = \
 
 ## COMMON_POST_CONFIG_FRAG
 
-armemu26.o: armemu.c armdefs.h armemu.h
-	$(CC) -c $(srcdir)/armemu.c -o armemu26.o $(ALL_CFLAGS)
+armemu26.o: armemu.c
+	$(COMPILE) $(srcdir)/armemu.c
+	$(POSTCOMPILE)
 
-armemu32.o: armemu.c armdefs.h armemu.h
-	$(CC) -c $(srcdir)/armemu.c -o armemu32.o -DMODE32 $(ALL_CFLAGS)
+armemu32.o: armemu.c
+	$(COMPILE) -DMODE32 $(srcdir)/armemu.c
+	$(POSTCOMPILE)

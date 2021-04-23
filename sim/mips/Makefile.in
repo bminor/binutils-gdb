@@ -83,17 +83,10 @@ all: $(SIM_@sim_gen@_ALL)
 
 SIM_EXTRA_LIBS = $(MIPS_EXTRA_LIBS)
 
+SIM_EXTRA_DEPS = itable.h
+
 
 ## COMMON_POST_CONFIG_FRAG
-
-interp.o: $(srcdir)/interp.c config.h sim-main.h itable.h
-
-m16run.o: sim-main.h m16_idecode.h m32_idecode.h m16run.c $(SIM_EXTRA_DEPS)
-
-micromipsrun.o: sim-main.h micromips16_idecode.h micromips32_idecode.h \
-		micromips_m32_idecode.h micromipsrun.c $(SIM_EXTRA_DEPS)
-
-multi-run.o: multi-include.h tmp-mach-multi
 
 IGEN_TRACE= # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries # -G trace-all
 IGEN_INSN=$(srcdir)/mips.igen
