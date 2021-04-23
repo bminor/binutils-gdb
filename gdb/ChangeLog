@@ -1,3 +1,7 @@
+2021-04-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* observable.c (observer_debug): Change to bool.
+
 2021-04-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2/read.c: Add 'unordered_set' include.

@@ -30,7 +30,7 @@ namespace gdb
 namespace observers
 {
 
-extern unsigned int observer_debug;
+extern bool observer_debug;
 
 /* An observer is an entity which is interested in being notified
    when GDB reaches certain states, or certain events occur in GDB.

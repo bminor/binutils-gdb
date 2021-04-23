@@ -1,5 +1,9 @@
 2021-04-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* observable.h (observer_debug): Change to bool.
+
+2021-04-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* common-debug.h: Include preprocessor.h.
 
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
