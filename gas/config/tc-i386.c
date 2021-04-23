@@ -4740,6 +4740,34 @@ md_assemble (char *line)
   if (i.imm_operands)
     optimize_imm ();
 
+  if (i.disp_operands && flag_code == CODE_64BIT && !i.prefix[ADDR_PREFIX])
+    {
+      for (j = 0; j < i.operands; ++j)
+	{
+	  const expressionS *exp = i.op[j].disps;
+
+	  if (!operand_type_check (i.types[j], disp))
+	    continue;
+
+	  if (exp->X_op != O_constant)
+	    continue;
+
+	  /* Since displacement is signed extended to 64bit, don't allow
+	     disp32 and turn off disp32s if they are out of range.  */
+	  i.types[j].bitfield.disp32 = 0;
+	  if (fits_in_signed_long (exp->X_add_number))
+	    continue;
+
+	  i.types[j].bitfield.disp32s = 0;
+	  if (i.types[j].bitfield.baseindex)
+	    {
+	      as_bad (_("0x%" BFD_VMA_FMT "x out of range of signed 32bit displacement"),
+		      exp->X_add_number);
+	      return;
+	    }
+	}
+    }
+
   /* Don't optimize displacement for movabs since it only takes 64bit
      displacement.  */
   if (i.disp_operands
@@ -10910,25 +10938,6 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
       as_bad (_("missing or invalid displacement expression `%s'"),
 	      disp_start);
       ret = 0;
-    }
-
-  else if (flag_code == CODE_64BIT
-	   && !i.prefix[ADDR_PREFIX]
-	   && exp->X_op == O_constant)
-    {
-      /* Since displacement is signed extended to 64bit, don't allow
-	 disp32 and turn off disp32s if they are out of range.  */
-      i.types[this_operand].bitfield.disp32 = 0;
-      if (!fits_in_signed_long (exp->X_add_number))
-	{
-	  i.types[this_operand].bitfield.disp32s = 0;
-	  if (i.types[this_operand].bitfield.baseindex)
-	    {
-	      as_bad (_("0x%" BFD_VMA_FMT "x out of range of signed 32bit displacement"),
-		      exp->X_add_number);
-	      ret = 0;
-	    }
-	}
     }
 
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))

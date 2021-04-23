@@ -1,5 +1,11 @@
 2021-04-23  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (i386_finalize_displacement): Move Disp32S
+	check ...
+	(md_assemble): ... here.
+
+2021-04-23  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_disp): Move down BFD64 section.
 	Move up setting of disp32.
 
