@@ -42,8 +42,6 @@ SIM_OBJS = \
 	err.o \
 	$(ENDLIST)
 
-LIBS = $B/bfd/libbfd.a $B/libiberty/libiberty.a
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = rx

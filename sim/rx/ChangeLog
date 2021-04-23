@@ -1,5 +1,9 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (LIBS): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (err.o, fpu.o, gdb-if.o, load.o, main.o, mem.o)
 	(misc.o, reg.o, rx.o, syscalls.o, trace.o): Remove.
 

@@ -43,8 +43,6 @@ SIM_OBJS = \
 	trace.o \
 	$(ENDLIST)
 
-LIBS = $B/bfd/libbfd.a $B/libiberty/libiberty.a
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = m32c
