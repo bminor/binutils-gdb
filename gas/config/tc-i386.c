@@ -5707,19 +5707,6 @@ optimize_disp (void)
 		op_disp = (((op_disp & 0xffff) ^ 0x8000) - 0x8000);
 		i.types[op].bitfield.disp64 = 0;
 	      }
-#ifdef BFD64
-	    /* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
-	    if (i.types[op].bitfield.disp32
-		&& (op_disp & ~(((offsetT) 2 << 31) - 1)) == 0)
-	      {
-		/* If this operand is at most 32 bits, convert
-		   to a signed 32 bit number and don't use 64bit
-		   displacement.  */
-		op_disp &= (((offsetT) 2 << 31) - 1);
-		op_disp = (op_disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
-		i.types[op].bitfield.disp64 = 0;
-	      }
-#endif
 	    if (!op_disp && i.types[op].bitfield.baseindex)
 	      {
 		i.types[op].bitfield.disp8 = 0;
@@ -5730,17 +5717,32 @@ optimize_disp (void)
 		i.op[op].disps = 0;
 		i.disp_operands--;
 	      }
+#ifdef BFD64
 	    else if (flag_code == CODE_64BIT)
 	      {
+		if (i.prefix[ADDR_PREFIX]
+		    && fits_in_unsigned_long (op_disp))
+		  i.types[op].bitfield.disp32 = 1;
+
+		/* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
+		if (i.types[op].bitfield.disp32
+		    && (op_disp & ~(((offsetT) 2 << 31) - 1)) == 0)
+		  {
+		    /* If this operand is at most 32 bits, convert
+		       to a signed 32 bit number and don't use 64bit
+		       displacement.  */
+		    op_disp &= (((offsetT) 2 << 31) - 1);
+		    op_disp = (op_disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
+		    i.types[op].bitfield.disp64 = 0;
+		  }
+
 		if (fits_in_signed_long (op_disp))
 		  {
 		    i.types[op].bitfield.disp64 = 0;
 		    i.types[op].bitfield.disp32s = 1;
 		  }
-		if (i.prefix[ADDR_PREFIX]
-		    && fits_in_unsigned_long (op_disp))
-		  i.types[op].bitfield.disp32 = 1;
 	      }
+#endif
 	    if ((i.types[op].bitfield.disp32
 		 || i.types[op].bitfield.disp32s
 		 || i.types[op].bitfield.disp16)
