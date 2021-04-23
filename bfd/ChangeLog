@@ -1,3 +1,7 @@
+2021-04-23  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* elf.c (special_sections_p): Add .persistent.bss.
+
 2021-04-01  Tamar Christina  <tamar.christina@arm.com>
 
 	Backported from mainline.
