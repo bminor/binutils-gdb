@@ -582,12 +582,31 @@ obj_coff_seh_pushreg (int what ATTRIBUTE_UNUSED)
 static void
 obj_coff_seh_pushframe (int what ATTRIBUTE_UNUSED)
 {
+  int code = 0;
+  
   if (!verify_context_and_target (".seh_pushframe", seh_kind_x64)
       || !seh_validate_seg (".seh_pushframe"))
     return;
+  
+  SKIP_WHITESPACE();
+  
+  if (is_name_beginner (*input_line_pointer))
+    {
+      char* identifier;
+
+      get_symbol_name (&identifier);
+      if (strcmp (identifier, "code") != 0)
+	{
+	  as_bad(_("invalid argument \"%s\" for .seh_pushframe. Expected \"code\" or nothing"),
+		 identifier);
+	  return;
+	}
+      code = 1;
+    }
+  
   demand_empty_rest_of_line ();
 
-  seh_x64_make_prologue_element (UWOP_PUSH_MACHFRAME, 0, 0);
+  seh_x64_make_prologue_element (UWOP_PUSH_MACHFRAME, code, 0);
 }
 
 /* Add a register save-unwind token to current context.  */
