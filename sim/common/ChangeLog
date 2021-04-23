@@ -1,5 +1,9 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* Make-common.in: Require GNU make.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* Make-common.in (stamp-hw): New target.
 	(hw-config.h): Depend on stamp-hw.
 	(mostlyclean): Remove stamp-hw and hw-config.h.

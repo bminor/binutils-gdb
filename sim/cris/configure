@@ -679,9 +679,6 @@ INCINTL
 LIBINTL_DEP
 LIBINTL
 USE_NLS
-GMAKE_FALSE
-GMAKE_TRUE
-MAKE
 CCDEPMODE
 DEPDIR
 am__leading_dot
@@ -7233,64 +7230,6 @@ else CCDEPMODE=depmode=$am_cv_CC_dependencies_compiler_type
 fi
 
 
-# Check for the 'make' the user wants to use.
-for ac_prog in make
-do
-  # Extract the first word of "$ac_prog", so it can be a program name with args.
-set dummy $ac_prog; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_prog_MAKE+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test -n "$MAKE"; then
-  ac_cv_prog_MAKE="$MAKE" # Let the user override the test.
-else
-as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_prog_MAKE="$ac_prog"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-fi
-fi
-MAKE=$ac_cv_prog_MAKE
-if test -n "$MAKE"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $MAKE" >&5
-$as_echo "$MAKE" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  test -n "$MAKE" && break
-done
-
-MAKE_IS_GNU=
-case "`$MAKE --version 2>&1 | sed 1q`" in
-  *GNU*)
-    MAKE_IS_GNU=yes
-    ;;
-esac
- if test "$MAKE_IS_GNU" = yes; then
-  GMAKE_TRUE=
-  GMAKE_FALSE='#'
-else
-  GMAKE_TRUE='#'
-  GMAKE_FALSE=
-fi
-
-
 ALL_LINGUAS=
 # If we haven't got the data from the intl directory,
 # assume NLS is disabled.
@@ -11267,7 +11206,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11270 "configure"
+#line 11209 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11373,7 +11312,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11376 "configure"
+#line 11315 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12434,10 +12373,6 @@ LTLIBOBJS=$ac_ltlibobjs
 
 
 
-if test -z "${GMAKE_TRUE}" && test -z "${GMAKE_FALSE}"; then
-  as_fn_error $? "conditional \"GMAKE\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 if test -z "${PLUGINS_TRUE}" && test -z "${PLUGINS_FALSE}"; then
   as_fn_error $? "conditional \"PLUGINS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
