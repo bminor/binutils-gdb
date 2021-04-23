@@ -1,3 +1,8 @@
+2021-04-23  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/27743:
+	* psymtab.c (partial_map_expand_apply): Expand outermost psymtab.
+
 2021-04-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 10.2.90.DATE-git.

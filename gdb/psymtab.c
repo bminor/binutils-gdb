@@ -127,9 +127,10 @@ partial_map_expand_apply (struct objfile *objfile,
 {
   struct compunit_symtab *last_made = objfile->compunit_symtabs;
 
-  /* Shared psymtabs should never be seen here.  Instead they should
-     be handled properly by the caller.  */
-  gdb_assert (pst->user == NULL);
+  /* We may see a shared psymtab here, but we want to expand the
+     outermost symtab.  */
+  while (pst->user != nullptr)
+    pst = pst->user;
 
   /* Don't visit already-expanded psymtabs.  */
   if (pst->readin_p (objfile))
