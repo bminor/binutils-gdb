@@ -1,5 +1,10 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* Make-common.in (mostlyclean): Now an alias for clean, not
+	distclean.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* sim-events.c (sim_events_schedule): Use
 	sim_events_schedule_tracef.
 

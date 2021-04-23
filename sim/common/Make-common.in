@@ -503,7 +503,7 @@ TAGS: force
 	etags --regex '/^\([[:lower:]_]+\) (/\1/' --regex '/^\/[*] TAGS: .*/' \
 		*.[ch] ../common/*.[ch]
 
-clean: $(SIM_EXTRA_CLEAN)
+mostlyclean clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core
 	rm -f run$(EXEEXT) libsim.a
 	rm -f gentmap targ-map.c targ-vals.h stamp-tvals
@@ -512,7 +512,7 @@ clean: $(SIM_EXTRA_CLEAN)
 	fi
 	rm -f tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
 
-distclean mostlyclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
+distclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
 	rm -f TAGS
 	rm -f Makefile config.cache config.log config.status .gdbinit
 	rm -f config.h stamp-h
