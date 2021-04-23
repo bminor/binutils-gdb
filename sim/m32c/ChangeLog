@@ -1,3 +1,7 @@
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, config.in, configure: Regenerate.
+
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
 	* configure, config.in: Rebuild.

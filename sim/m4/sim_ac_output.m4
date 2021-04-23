@@ -22,6 +22,7 @@ dnl the target's fragment at the appropriate points.
 AC_DEFUN([SIM_AC_OUTPUT],
 [dnl
 AC_REQUIRE([SIM_AC_OPTION_WARNINGS])dnl
+AC_REQUIRE([SIM_AC_OPTION_HARDWARE])dnl
 
 dnl Make @cgen_breaks@ non-null only if the sim uses CGEN.
 cgen_breaks=""

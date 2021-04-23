@@ -19,6 +19,9 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define if dv-sockser is usable. */
+#undef HAVE_DV_SOCKSER
+
 /* Define to 1 if you have the `execv' function. */
 #undef HAVE_EXECV
 
@@ -42,6 +45,9 @@
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `m' library (-lm). */
+#undef HAVE_LIBM
 
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL
