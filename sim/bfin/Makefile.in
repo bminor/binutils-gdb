@@ -29,8 +29,6 @@ SIM_OBJS = \
 	machs.o \
 	sim-resume.o
 
-INCLUDE = bfin-sim.h
-
 SIM_EXTRA_CFLAGS = @SDL_CFLAGS@
 SIM_EXTRA_LIBS = @SDL_LIBS@ -lm
 

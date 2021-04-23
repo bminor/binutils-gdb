@@ -1,5 +1,9 @@
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (INCLUDE): Remove.
+
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (interp.o): Remove.
 
 2021-04-22  Tom Tromey  <tom@tromey.com>
