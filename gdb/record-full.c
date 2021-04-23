@@ -1720,7 +1720,7 @@ struct record_full_breakpoint
 static std::vector<record_full_breakpoint> record_full_breakpoints;
 
 static void
-record_full_sync_record_breakpoints (struct bp_location *loc, void *data)
+record_full_sync_record_breakpoints (struct bp_location *loc)
 {
   if (loc->loc_type != bp_loc_software_breakpoint)
       return;

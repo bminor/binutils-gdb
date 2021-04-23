@@ -1,3 +1,11 @@
+2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (iterate_over_bp_locations): Change callback to
+	function view, remove data parameter.
+	* breakpoint.h (iterate_over_bp_locations): Likewise.
+	* record-full.c (record_full_sync_record_breakpoints): Remove
+	data parameter.
+
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
 	* c-typeprint.c (c_type_print_base_struct_union): Use

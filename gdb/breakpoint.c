@@ -2943,13 +2943,13 @@ insert_breakpoints (void)
 /* Invoke CALLBACK for each of bp_location.  */
 
 void
-iterate_over_bp_locations (walk_bp_location_callback callback)
+iterate_over_bp_locations (gdb::function_view<void (bp_location *)> callback)
 {
   struct bp_location *loc, **loc_tmp;
 
   ALL_BP_LOCATIONS (loc, loc_tmp)
     {
-      callback (loc, NULL);
+      callback (loc);
     }
 }
 
