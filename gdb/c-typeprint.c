@@ -1121,13 +1121,12 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       if (type->num_fields () == 0 && TYPE_NFN_FIELDS (type) == 0
 	  && TYPE_TYPEDEF_FIELD_COUNT (type) == 0)
 	{
+	  print_spaces_filtered_with_print_options (level + 4, stream, flags);
 	  if (type->is_stub ())
-	    fprintf_filtered (stream, _("%*s%p[<incomplete type>%p]\n"),
-			      level + 4, "",
+	    fprintf_filtered (stream, _("%p[<incomplete type>%p]\n"),
 			      metadata_style.style ().ptr (), nullptr);
 	  else
-	    fprintf_filtered (stream, _("%*s%p[<no data fields>%p]\n"),
-			      level + 4, "",
+	    fprintf_filtered (stream, _("%p[<no data fields>%p]\n"),
 			      metadata_style.style ().ptr (), nullptr);
 	}
 

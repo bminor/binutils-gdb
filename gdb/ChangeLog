@@ -1,3 +1,8 @@
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* c-typeprint.c (c_type_print_base_struct_union): Use
+	print_spaces_filtered_with_print_options.
+
 2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/27757

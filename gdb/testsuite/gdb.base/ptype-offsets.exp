@@ -336,7 +336,22 @@ gdb_test "ptype/o static_member" \
     [string_to_regexp [multi_line \
 "/* offset    |  size */  type = struct static_member \{" \
 "                           static static_member Empty;" \
-"\/*    0      |     4 */    int abc;" \
+"/*    0      |     4 */    int abc;" \
 "" \
 "                           /* total size (bytes):    4 */" \
+"                         \}"]]
+
+# Test that the "no data fields" text is indented properly.
+gdb_test "ptype/o empty_member" \
+    [string_to_regexp [multi_line \
+"/* offset    |  size */  type = struct empty_member \{" \
+"/*    0      |     1 */    struct {" \
+"                               <no data fields>" \
+"" \
+"                               /* total size (bytes):    1 */" \
+"                           } empty;" \
+"/* XXX  3-byte hole  */" \
+"/*    4      |     4 */    int an_int;" \
+"" \
+"                           /* total size (bytes):    8 */" \
 "                         \}"]]

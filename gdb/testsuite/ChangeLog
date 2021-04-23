@@ -1,3 +1,9 @@
+2021-04-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/ptype-offsets.cc (struct empty_member): New.
+	(main): Use empty_member.
+	* gdb.base/ptype-offsets.exp: Add new test.
+
 2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.python/flexible-array-member.exp: Add check for Python
