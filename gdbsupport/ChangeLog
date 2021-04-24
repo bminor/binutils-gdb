@@ -1,3 +1,9 @@
+2021-04-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* observable.h (class observable) <struct observer>: New.
+	<detach, notify>: Update.
+	<m_observers>: Change type to vector of observers.
+
 2021-04-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* observable.h (observer_debug): Change to bool.

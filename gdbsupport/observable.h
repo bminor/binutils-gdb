@@ -56,9 +56,20 @@ template<typename... T>
 class observable
 {
 public:
-
   typedef std::function<void (T...)> func_type;
 
+private:
+  struct observer
+  {
+    observer (const struct token *token, func_type func)
+      : token (token), func (func)
+    {}
+
+    const struct token *token;
+    func_type func;
+  };
+
+public:
   explicit observable (const char *name)
     : m_name (name)
   {
@@ -87,10 +98,9 @@ public:
   {
     auto iter = std::remove_if (m_observers.begin (),
 				m_observers.end (),
-				[&] (const std::pair<const token *,
-				     func_type> &e)
+				[&] (const observer &o)
 				{
-				  return e.first == &t;
+				  return o.token == &t;
 				});
 
     m_observers.erase (iter, m_observers.end ());
@@ -103,12 +113,12 @@ public:
       fprintf_unfiltered (gdb_stdlog, "observable %s notify() called\n",
 			  m_name);
     for (auto &&e : m_observers)
-      e.second (args...);
+      e.func (args...);
   }
 
 private:
 
-  std::vector<std::pair<const token *, func_type>> m_observers;
+  std::vector<observer> m_observers;
   const char *m_name;
 };
 
