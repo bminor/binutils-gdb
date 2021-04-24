@@ -1,5 +1,19 @@
 2021-04-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common-debug.h (struct scoped_debug_start_end)
+	<scoped_debug_start_end>: Change start_msg/end_msg for
+	start_prefix/end_prefix.  Add format string parameter and make
+	variadic.
+	<~scoped_debug_start_end>: Adjust.
+	<m_end_msg>: Rename to...
+	<m_end_prefix>: ... this.
+	<m_with_format>: New.
+	<m_msg>: New.
+	(scoped_debug_start_end): Make variadic.
+	(scoped_debug_enter_exit): Adjust.
+
+2021-04-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* observable.h (class observable) <struct observer> <observer>:
 	Add name parameter.
 	<name>: New field.
