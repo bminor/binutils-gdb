@@ -1,3 +1,8 @@
+2021-04-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-options.c (ARG_HASH_SIZE): Increase to 256.
+	(sim_parse_args): Call SIM_ASSERT.
+
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
 	* sim-utils.c: Update includes.

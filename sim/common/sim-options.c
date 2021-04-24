@@ -416,7 +416,7 @@ standard_install (SIM_DESC sd)
 /* Return non-zero if arg is a duplicate argument.
    If ARG is NULL, initialize.  */
 
-#define ARG_HASH_SIZE 97
+#define ARG_HASH_SIZE 256
 #define ARG_HASH(a) ((256 * (unsigned char) a[0] + (unsigned char) a[1]) % ARG_HASH_SIZE)
 
 static int
@@ -477,6 +477,9 @@ sim_parse_args (SIM_DESC sd, char * const *argv)
     for (ol = CPU_OPTIONS (STATE_CPU (sd, i)); ol != NULL; ol = ol->next)
       for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
 	++num_opts;
+
+  /* We build a hash table of all options, so make sure they all fit.  */
+  SIM_ASSERT (num_opts <= ARG_HASH_SIZE);
 
   /* Initialize duplicate argument checker.  */
   (void) dup_arg_p (NULL);
