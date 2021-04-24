@@ -1,3 +1,9 @@
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_OBJS): Change armemu26.o to armemu.o.
+	(armemu26.o, armemu32.o): Delete targets.
+	* armemu32.c: New file.
+
 2021-04-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, config.in, configure: Regenerate.
