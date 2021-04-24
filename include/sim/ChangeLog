@@ -1,5 +1,10 @@
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* callback.h (p1, p2): Change PTR to void*.
+	(cb_host_to_target_stat): Likewise.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.h (error): Replace __attribute__ with ATTRIBUTE_NORETURN.
 
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>

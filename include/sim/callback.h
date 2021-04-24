@@ -249,8 +249,8 @@ typedef struct cb_syscall {
   int errcode;
 
   /* Working space to be used by memory read/write callbacks.  */
-  PTR p1;
-  PTR p2;
+  void *p1;
+  void *p2;
   long x1,x2;
 
   /* Callbacks for reading/writing memory (e.g. for read/write syscalls).
@@ -320,7 +320,7 @@ const char *cb_target_str_signal (host_callback *, int);
 /* Translate host stat struct to target.
    If stat struct ptr is NULL, just compute target stat struct size.
    Result is size of target stat struct or 0 if error.  */
-int cb_host_to_target_stat (host_callback *, const struct stat *, PTR);
+int cb_host_to_target_stat (host_callback *, const struct stat *, void *);
 
 /* Translate a value to target endian.  */
 void cb_store_target_endian (host_callback *, char *, int, long);

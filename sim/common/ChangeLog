@@ -1,5 +1,10 @@
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* callback.c (cb_host_to_target_stat): Change PTR to void*.
+	* sim-syscall.c (sim_syscall_multi): Delete (PTR) casts.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (callback_h, remote_sim_h): Update path.
 	* callback.c: Update include path.
 	* gentmap.c (gen_targ_map_c): Likewise.

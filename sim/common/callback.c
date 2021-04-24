@@ -946,7 +946,7 @@ cb_store_target_endian (host_callback *cb, char *p, int size, long val)
    or zero if an error occurred during the translation.  */
 
 int
-cb_host_to_target_stat (host_callback *cb, const struct stat *hs, PTR ts)
+cb_host_to_target_stat (host_callback *cb, const struct stat *hs, void *ts)
 {
   const char *m = cb->stat_map;
   char *p;
