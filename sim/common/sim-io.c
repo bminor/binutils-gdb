@@ -211,10 +211,10 @@ sim_io_open (SIM_DESC sd,
 }
 
 
-int
+int64_t
 sim_io_lseek (SIM_DESC sd,
 	      int fd,
-	      long off,
+	      int64_t off,
 	      int way)
 {
   return STATE_CALLBACK (sd)->lseek (STATE_CALLBACK (sd), fd, off, way);

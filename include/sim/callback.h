@@ -73,7 +73,7 @@ struct host_callback_struct
   int (*close) (host_callback *,int);
   int (*get_errno) (host_callback *);
   int (*isatty) (host_callback *, int);
-  int (*lseek) (host_callback *, int, long , int);
+  int64_t (*lseek) (host_callback *, int, int64_t, int);
   int (*open) (host_callback *, const char*, int mode);
   int (*read) (host_callback *,int,  char *, int);
   int (*read_stdin) ( host_callback *, char *, int);
@@ -89,8 +89,8 @@ struct host_callback_struct
   int (*to_stat) (host_callback *, const char *, struct stat *);
   int (*to_fstat) (host_callback *, int, struct stat *);
   int (*to_lstat) (host_callback *, const char *, struct stat *);
-  int (*ftruncate) (host_callback *, int, long);
-  int (*truncate) (host_callback *, const char *, long);
+  int (*ftruncate) (host_callback *, int, int64_t);
+  int (*truncate) (host_callback *, const char *, int64_t);
   int (*pipe) (host_callback *, int *);
 
   /* Called by the framework when a read call has emptied a pipe buffer.  */

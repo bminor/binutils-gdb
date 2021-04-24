@@ -53,7 +53,7 @@ int sim_io_read (SIM_DESC sd, int, char *, int);
 
 int sim_io_open (SIM_DESC sd, const char *, int);
 
-int sim_io_lseek (SIM_DESC sd, int, long, int);
+int64_t sim_io_lseek (SIM_DESC sd, int, int64_t, int);
 
 int sim_io_isatty (SIM_DESC sd, int);
 

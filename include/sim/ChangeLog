@@ -1,5 +1,10 @@
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim/callback.h (struct host_callback_struct): Change lseek return and
+	3rd arg to int64_t.  Change truncate & ftruncate 3rd arg to int64_t.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.h: Include stdint.h.
 	(struct host_callback_struct): Change time return to int64_t.  Delete
 	2nd arg.

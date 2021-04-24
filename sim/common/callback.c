@@ -205,10 +205,10 @@ os_isatty (host_callback *p, int fd)
   return result;
 }
 
-static int
-os_lseek (host_callback *p, int fd, long off, int way)
+static int64_t
+os_lseek (host_callback *p, int fd, int64_t off, int way)
 {
-  int result;
+  int64_t result;
 
   result = fdbad (p, fd);
   if (result)
@@ -519,7 +519,7 @@ os_lstat (host_callback *p, const char *file, struct stat *buf)
 }
 
 static int
-os_ftruncate (host_callback *p, int fd, long len)
+os_ftruncate (host_callback *p, int fd, int64_t len)
 {
   int result;
 
@@ -542,7 +542,7 @@ os_ftruncate (host_callback *p, int fd, long len)
 }
 
 static int
-os_truncate (host_callback *p, const char *file, long len)
+os_truncate (host_callback *p, const char *file, int64_t len)
 {
 #ifdef HAVE_TRUNCATE
   int result;
