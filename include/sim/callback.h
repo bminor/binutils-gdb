@@ -121,11 +121,7 @@ struct host_callback_struct
   /* Print an error message and "exit".
      In the case of gdb "exiting" means doing a longjmp back to the main
      command loop.  */
-  void (*error) (host_callback *, const char *, ...)
-#ifdef __GNUC__
-    __attribute__ ((__noreturn__))
-#endif
-    ;
+  void (*error) (host_callback *, const char *, ...) ATTRIBUTE_NORETURN;
 
   int last_errno;		/* host format */
 

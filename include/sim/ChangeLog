@@ -1,5 +1,9 @@
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* callback.h (error): Replace __attribute__ with ATTRIBUTE_NORETURN.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.h: Delete va_start define check.
 
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
