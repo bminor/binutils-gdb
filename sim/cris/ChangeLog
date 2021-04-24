@@ -1,3 +1,8 @@
+2021-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete first two args.
+	* configure: Regenerate.
+
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
 	* rvdummy.c: Update includes.

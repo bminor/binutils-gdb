@@ -14,18 +14,10 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 dnl --enable-sim-hardware is for users of the simulator
-dnl arg[1] Enable sim-hw by default? ("yes" or "no")
-dnl arg[2] is a space separated list of devices that override the defaults
-dnl arg[3] is a space separated list of extra target specific devices.
+dnl arg[1] is a space separated list of extra target specific devices.
 AC_DEFUN([SIM_AC_OPTION_HARDWARE],
 [
-if test "[$2]"; then
-  hardware="[$2]"
-else
-  hardware="cfi core pal glue"
-fi
-hardware="$hardware [$3]"
-
+hardware="cfi core pal glue [$1]"
 sim_hw_cflags="-DWITH_HW=1"
 sim_hw="$hardware"
 sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/dv-\1.o/g'`"
@@ -33,7 +25,7 @@ sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/
 AC_ARG_ENABLE(sim-hardware,
   [AS_HELP_STRING([--enable-sim-hardware=LIST],
                   [Specify the hardware to be included in the build.])],
-  ,[enable_sim_hardware="[$1]"])
+  ,[enable_sim_hardware="yes"])
 case ${enable_sim_hardware} in
   yes|no) ;;
   ,*) hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;

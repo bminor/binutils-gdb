@@ -426,16 +426,15 @@ AC_SUBST(sim_multi_obj)
 #
 # Add simulated hardware devices
 #
-hw_enabled=no
+hw_extra_devices=""
 case "${target}" in
   mips*tx39*)
-	hw_enabled=yes
 	hw_extra_devices="tx3904cpu tx3904irc tx3904tmr tx3904sio" 
 	;;
   *)
 	;;
 esac
-SIM_AC_OPTION_HARDWARE($hw_enabled,$hw_devices,$hw_extra_devices)
+SIM_AC_OPTION_HARDWARE($hw_extra_devices)
 
 
 # Choose simulator engine

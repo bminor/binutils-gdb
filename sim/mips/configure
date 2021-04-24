@@ -12575,23 +12575,16 @@ sim_micromips_flags=" -F ${sim_micromips_filter}  ${sim_micromips_machine}  ${si
 #
 # Add simulated hardware devices
 #
-hw_enabled=no
+hw_extra_devices=""
 case "${target}" in
   mips*tx39*)
-	hw_enabled=yes
 	hw_extra_devices="tx3904cpu tx3904irc tx3904tmr tx3904sio"
 	;;
   *)
 	;;
 esac
 
-if test "$hw_devices"; then
-  hardware="$hw_devices"
-else
-  hardware="cfi core pal glue"
-fi
-hardware="$hardware $hw_extra_devices"
-
+hardware="cfi core pal glue $hw_extra_devices"
 sim_hw_cflags="-DWITH_HW=1"
 sim_hw="$hardware"
 sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\1.o/g'`"
@@ -12600,7 +12593,7 @@ sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\
 if test "${enable_sim_hardware+set}" = set; then :
   enableval=$enable_sim_hardware;
 else
-  enable_sim_hardware="$hw_enabled"
+  enable_sim_hardware="yes"
 fi
 
 case ${enable_sim_hardware} in

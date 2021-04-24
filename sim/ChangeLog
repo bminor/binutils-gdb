@@ -1,3 +1,9 @@
+2021-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING (SIM_AC_OPTION_HARDWARE): Delete first two args.
+	* m4/sim_ac_option_hardware.m4 (SIM_AC_OPTION_HARDWARE): Replace [$1]
+	with yes.  Delete test [$2].  Change [$3] to [$1].  Update comments.
+
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
 	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Don't check for sys/time.h

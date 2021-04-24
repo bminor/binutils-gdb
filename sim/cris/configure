@@ -12071,13 +12071,7 @@ $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
 
 
-if test ""; then
-  hardware=""
-else
-  hardware="cfi core pal glue"
-fi
-hardware="$hardware rv cris cris_900000xx"
-
+hardware="cfi core pal glue rv cris cris_900000xx"
 sim_hw_cflags="-DWITH_HW=1"
 sim_hw="$hardware"
 sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\1.o/g'`"

@@ -396,7 +396,7 @@ Hardware Devices
 
 The simplest simulator doesn't include hardware device support.  Once you're
 ready to move on to the next level, call the common macro in your configure.ac:
-SIM_AC_OPTION_HARDWARE(yes,,devone devtwo devthree)
+SIM_AC_OPTION_HARDWARE(devone devtwo devthree)
 
 The basic hardware API is documented in common/hw-device.h.
 

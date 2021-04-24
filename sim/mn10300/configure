@@ -12110,13 +12110,7 @@ fi
 fi
 
 
-if test ""; then
-  hardware=""
-else
-  hardware="cfi core pal glue"
-fi
-hardware="$hardware mn103cpu mn103int mn103tim mn103ser mn103iop"
-
+hardware="cfi core pal glue mn103cpu mn103int mn103tim mn103ser mn103iop"
 sim_hw_cflags="-DWITH_HW=1"
 sim_hw="$hardware"
 sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\1.o/g'`"
