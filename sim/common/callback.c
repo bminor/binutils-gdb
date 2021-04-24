@@ -58,15 +58,6 @@ extern CB_TARGET_DEFS_MAP cb_init_syscall_map[];
 extern CB_TARGET_DEFS_MAP cb_init_errno_map[];
 extern CB_TARGET_DEFS_MAP cb_init_open_map[];
 
-/* Set the callback copy of errno from what we see now.  */
-
-static int
-wrap (host_callback *p, int val)
-{
-  p->last_errno = errno;
-  return val;
-}
-
 /* Make sure the FD provided is ok.  If not, return non-zero
    and set errno. */
 
@@ -143,7 +134,8 @@ os_close (host_callback *p, int fd)
 	  return 0;
 	}
 
-      result = wrap (p, close (fdmap (p, fd)));
+      result = close (fdmap (p, fd));
+      p->last_errno = errno;
     }
   p->fd_buddy[fd] = -1;
 
@@ -207,8 +199,9 @@ os_isatty (host_callback *p, int fd)
   result = fdbad (p, fd);
   if (result)
     return result;
-  result = wrap (p, isatty (fdmap (p, fd)));
 
+  result = isatty (fdmap (p, fd));
+  p->last_errno = errno;
   return result;
 }
 
@@ -220,7 +213,9 @@ os_lseek (host_callback *p, int fd, long off, int way)
   result = fdbad (p, fd);
   if (result)
     return result;
-  result = wrap (p, lseek (fdmap (p, fd), off, way));
+
+  result = lseek (fdmap (p, fd), off, way);
+  p->last_errno = errno;
   return result;
 }
 
@@ -296,14 +291,19 @@ os_read (host_callback *p, int fd, char *buf, int len)
       return len;
     }
 
-  result = wrap (p, read (fdmap (p, fd), buf, len));
+  result = read (fdmap (p, fd), buf, len);
+  p->last_errno = errno;
   return result;
 }
 
 static int
 os_read_stdin (host_callback *p, char *buf, int len)
 {
-  return wrap (p, read (0, buf, len));
+  int result;
+
+  result = read (0, buf, len);
+  p->last_errno = errno;
+  return result;
 }
 
 static int
@@ -362,7 +362,8 @@ os_write (host_callback *p, int fd, const char *buf, int len)
   switch (real_fd)
     {
     default:
-      result = wrap (p, write (real_fd, buf, len));
+      result = write (real_fd, buf, len);
+      p->last_errno = errno;
       break;
     case 1:
       result = p->write_stdout (p, buf, len);
@@ -401,42 +402,64 @@ os_flush_stderr (host_callback *p ATTRIBUTE_UNUSED)
 static int
 os_rename (host_callback *p, const char *f1, const char *f2)
 {
-  return wrap (p, rename (f1, f2));
+  int result;
+
+  result = rename (f1, f2);
+  p->last_errno = errno;
+  return result;
 }
 
 
 static int
 os_system (host_callback *p, const char *s)
 {
-  return wrap (p, system (s));
+  int result;
+
+  result = system (s);
+  p->last_errno = errno;
+  return result;
 }
 
 static long
 os_time (host_callback *p, long *t)
 {
-  return wrap (p, time (t));
+  long result;
+
+  result = time (t);
+  p->last_errno = errno;
+  return result;
 }
 
 
 static int
 os_unlink (host_callback *p, const char *f1)
 {
-  return wrap (p, unlink (f1));
+  int result;
+
+  result = unlink (f1);
+  p->last_errno = errno;
+  return result;
 }
 
 static int
 os_stat (host_callback *p, const char *file, struct stat *buf)
 {
+  int result;
+
   /* ??? There is an issue of when to translate to the target layout.
      One could do that inside this function, or one could have the
      caller do it.  It's more flexible to let the caller do it, though
      I'm not sure the flexibility will ever be useful.  */
-  return wrap (p, stat (file, buf));
+  result = stat (file, buf);
+  p->last_errno = errno;
+  return result;
 }
 
 static int
 os_fstat (host_callback *p, int fd, struct stat *buf)
 {
+  int result;
+
   if (fdbad (p, fd))
     return -1;
 
@@ -475,18 +498,24 @@ os_fstat (host_callback *p, int fd, struct stat *buf)
      One could do that inside this function, or one could have the
      caller do it.  It's more flexible to let the caller do it, though
      I'm not sure the flexibility will ever be useful.  */
-  return wrap (p, fstat (fdmap (p, fd), buf));
+  result = fstat (fdmap (p, fd), buf);
+  p->last_errno = errno;
+  return result;
 }
 
 static int
 os_lstat (host_callback *p, const char *file, struct stat *buf)
 {
+  int result;
+
   /* NOTE: hpn/2004-12-12: Same issue here as with os_fstat.  */
 #ifdef HAVE_LSTAT
-  return wrap (p, lstat (file, buf));
+  result = lstat (file, buf);
 #else
-  return wrap (p, stat (file, buf));
+  result = stat (file, buf);
 #endif
+  p->last_errno = errno;
+  return result;
 }
 
 static int
@@ -503,7 +532,8 @@ os_ftruncate (host_callback *p, int fd, long len)
   if (result)
     return result;
 #ifdef HAVE_FTRUNCATE
-  result = wrap (p, ftruncate (fdmap (p, fd), len));
+  result = ftruncate (fdmap (p, fd), len);
+  p->last_errno = errno;
 #else
   p->last_errno = EINVAL;
   result = -1;
@@ -515,7 +545,11 @@ static int
 os_truncate (host_callback *p, const char *file, long len)
 {
 #ifdef HAVE_TRUNCATE
-  return wrap (p, truncate (file, len));
+  int result;
+
+  result = truncate (file, len);
+  p->last_errno = errno;
+  return result;
 #else
   p->last_errno = EINVAL;
   return -1;
