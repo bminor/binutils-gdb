@@ -45,12 +45,8 @@
 #ifndef SIM_CALLBACK_H
 #define SIM_CALLBACK_H
 
-/* ??? The reason why we check for va_start here should be documented.  */
-
-#ifndef va_start
 #include <ansidecl.h>
 #include <stdarg.h>
-#endif
 /* Needed for enum bfd_endian.  */
 #include "bfd.h"
 
