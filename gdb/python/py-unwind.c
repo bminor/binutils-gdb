@@ -630,7 +630,8 @@ gdbpy_initialize_unwind (void)
 	&setdebuglist, &showdebuglist);
   pyuw_gdbarch_data
       = gdbarch_data_register_post_init (pyuw_gdbarch_data_init);
-  gdb::observers::architecture_changed.attach (pyuw_on_new_gdbarch);
+  gdb::observers::architecture_changed.attach (pyuw_on_new_gdbarch,
+					       "py-unwind");
 
   if (PyType_Ready (&pending_frame_object_type) < 0)
     return -1;

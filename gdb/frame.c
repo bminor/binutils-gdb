@@ -3179,7 +3179,8 @@ _initialize_frame ()
 
   frame_stash_create ();
 
-  gdb::observers::target_changed.attach (frame_observer_target_changed);
+  gdb::observers::target_changed.attach (frame_observer_target_changed,
+					 "frame");
 
   add_basic_prefix_cmd ("backtrace", class_maintenance, _("\
 Set backtrace specific variables.\n\

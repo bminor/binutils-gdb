@@ -1322,8 +1322,10 @@ gdbscm_initialize_breakpoints (void)
   scm_set_smob_free (breakpoint_smob_tag, bpscm_free_breakpoint_smob);
   scm_set_smob_print (breakpoint_smob_tag, bpscm_print_breakpoint_smob);
 
-  gdb::observers::breakpoint_created.attach (bpscm_breakpoint_created);
-  gdb::observers::breakpoint_deleted.attach (bpscm_breakpoint_deleted);
+  gdb::observers::breakpoint_created.attach (bpscm_breakpoint_created,
+					     "scm-breakpoint");
+  gdb::observers::breakpoint_deleted.attach (bpscm_breakpoint_deleted,
+					     "scm-breakpoint");
 
   gdbscm_define_integer_constants (breakpoint_integer_constants, 1);
   gdbscm_define_functions (breakpoint_functions, 1);

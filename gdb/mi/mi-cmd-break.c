@@ -84,7 +84,8 @@ setup_breakpoint_reporting (void)
 {
   if (! mi_breakpoint_observers_installed)
     {
-      gdb::observers::breakpoint_created.attach (breakpoint_notify);
+      gdb::observers::breakpoint_created.attach (breakpoint_notify,
+						 "mi-cmd-break");
       mi_breakpoint_observers_installed = 1;
     }
 

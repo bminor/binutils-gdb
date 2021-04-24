@@ -3814,7 +3814,7 @@ _initialize_symfile ()
 {
   struct cmd_list_element *c;
 
-  gdb::observers::free_objfile.attach (symfile_free_objfile);
+  gdb::observers::free_objfile.attach (symfile_free_objfile, "symfile");
 
 #define READNOW_READNEVER_HELP \
   "The '-readnow' option will cause GDB to read the entire symbol file\n\

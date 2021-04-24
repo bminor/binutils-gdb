@@ -3296,5 +3296,6 @@ _initialize_svr4_solib ()
   svr4_so_ops.update_breakpoints = svr4_update_solib_event_breakpoints;
   svr4_so_ops.handle_event = svr4_handle_solib_event;
 
-  gdb::observers::free_objfile.attach (svr4_free_objfile_observer);
+  gdb::observers::free_objfile.attach (svr4_free_objfile_observer,
+				       "solib-svr4");
 }

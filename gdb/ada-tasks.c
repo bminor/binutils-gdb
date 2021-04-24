@@ -1478,8 +1478,10 @@ void
 _initialize_tasks ()
 {
   /* Attach various observers.  */
-  gdb::observers::normal_stop.attach (ada_tasks_normal_stop_observer);
-  gdb::observers::new_objfile.attach (ada_tasks_new_objfile_observer);
+  gdb::observers::normal_stop.attach (ada_tasks_normal_stop_observer,
+				      "ada-tasks");
+  gdb::observers::new_objfile.attach (ada_tasks_new_objfile_observer,
+				      "ada-tasks");
 
   /* Some new commands provided by this module.  */
   add_info ("tasks", info_tasks_command,

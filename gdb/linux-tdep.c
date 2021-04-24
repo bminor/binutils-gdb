@@ -2694,9 +2694,12 @@ _initialize_linux_tdep ()
     gdbarch_data_register_pre_init (init_linux_gdbarch_data);
 
   /* Observers used to invalidate the cache when needed.  */
-  gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf);
-  gdb::observers::inferior_appeared.attach (invalidate_linux_cache_inf);
-  gdb::observers::inferior_execd.attach (invalidate_linux_cache_inf);
+  gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf,
+					"linux-tdep");
+  gdb::observers::inferior_appeared.attach (invalidate_linux_cache_inf,
+					    "linux-tdep");
+  gdb::observers::inferior_execd.attach (invalidate_linux_cache_inf,
+					 "linux-tdep");
 
   add_setshow_boolean_cmd ("use-coredump-filter", class_files,
 			   &use_coredump_filter, _("\

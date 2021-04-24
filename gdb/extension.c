@@ -900,5 +900,5 @@ void _initialize_extension ();
 void
 _initialize_extension ()
 {
-  gdb::observers::before_prompt.attach (ext_lang_before_prompt);
+  gdb::observers::before_prompt.attach (ext_lang_before_prompt, "extension");
 }

@@ -429,5 +429,6 @@ _initialize_m68k_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_m68k, 0, GDB_OSABI_LINUX,
 			  m68k_linux_init_abi);
-  gdb::observers::inferior_created.attach (m68k_linux_inferior_created);
+  gdb::observers::inferior_created.attach (m68k_linux_inferior_created,
+					   "m68k-linux-tdep");
 }

@@ -218,5 +218,5 @@ _initialize_symfile_mem ()
 
   /* Want to know of each new inferior so that its vsyscall info can
      be extracted.  */
-  gdb::observers::inferior_created.attach (add_vsyscall_page);
+  gdb::observers::inferior_created.attach (add_vsyscall_page, "symfile-mem");
 }

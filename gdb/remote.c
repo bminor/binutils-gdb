@@ -14842,7 +14842,7 @@ _initialize_remote ()
   add_target (extended_remote_target_info, extended_remote_target::open);
 
   /* Hook into new objfile notification.  */
-  gdb::observers::new_objfile.attach (remote_new_objfile);
+  gdb::observers::new_objfile.attach (remote_new_objfile, "remote");
 
 #if 0
   init_remote_threadtests ();

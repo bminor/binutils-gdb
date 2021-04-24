@@ -1839,11 +1839,12 @@ void
 _initialize_aix_thread ()
 {
   /* Notice when object files get loaded and unloaded.  */
-  gdb::observers::new_objfile.attach (new_objfile);
+  gdb::observers::new_objfile.attach (new_objfile, "aix-thread");
 
   /* Add ourselves to inferior_created event chain.
      This is needed to enable the thread target on "attach".  */
-  gdb::observers::inferior_created.attach (aix_thread_inferior_created);
+  gdb::observers::inferior_created.attach (aix_thread_inferior_created,
+					   "aix-thread");
 
   add_setshow_boolean_cmd ("aix-thread", class_maintenance, &debug_aix_thread,
 			   _("Set debugging of AIX thread module."),

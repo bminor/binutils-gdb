@@ -73,7 +73,7 @@ run_tests ()
   const gdb::observers::token token1 {}, token2 {} , token3 {};
 
   /* Now, attach one observer, and send a notification.  */
-  test_notification.attach (&test_second_notification_function, token2);
+  test_notification.attach (&test_second_notification_function, token2, "test");
   notify_check_counters (0, 1, 0);
 
   /* Remove the observer, and send a notification.  */
@@ -81,15 +81,15 @@ run_tests ()
   notify_check_counters (0, 0, 0);
 
   /* With a new observer.  */
-  test_notification.attach (&test_first_notification_function, token1);
+  test_notification.attach (&test_first_notification_function, token1, "test");
   notify_check_counters (1, 0, 0);
 
   /* With 2 observers.  */
-  test_notification.attach (&test_second_notification_function, token2);
+  test_notification.attach (&test_second_notification_function, token2, "test");
   notify_check_counters (1, 1, 0);
 
   /* With 3 observers.  */
-  test_notification.attach (&test_third_notification_function, token3);
+  test_notification.attach (&test_third_notification_function, token3, "test");
   notify_check_counters (1, 1, 1);
 
   /* Remove middle observer.  */
@@ -106,9 +106,9 @@ run_tests ()
 
   /* Go back to 3 observers, and remove them in a different
      order...  */
-  test_notification.attach (&test_first_notification_function, token1);
-  test_notification.attach (&test_second_notification_function, token2);
-  test_notification.attach (&test_third_notification_function, token3);
+  test_notification.attach (&test_first_notification_function, token1, "test");
+  test_notification.attach (&test_second_notification_function, token2, "test");
+  test_notification.attach (&test_third_notification_function, token3, "test");
   notify_check_counters (1, 1, 1);
 
   /* Remove the third observer.  */

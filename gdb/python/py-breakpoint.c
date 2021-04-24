@@ -1125,9 +1125,12 @@ gdbpy_initialize_breakpoints (void)
 			      (PyObject *) &breakpoint_object_type) < 0)
     return -1;
 
-  gdb::observers::breakpoint_created.attach (gdbpy_breakpoint_created);
-  gdb::observers::breakpoint_deleted.attach (gdbpy_breakpoint_deleted);
-  gdb::observers::breakpoint_modified.attach (gdbpy_breakpoint_modified);
+  gdb::observers::breakpoint_created.attach (gdbpy_breakpoint_created,
+					     "py-breakpoint");
+  gdb::observers::breakpoint_deleted.attach (gdbpy_breakpoint_deleted,
+					     "py-breakpoint");
+  gdb::observers::breakpoint_modified.attach (gdbpy_breakpoint_modified,
+					      "py-breakpoint");
 
   /* Add breakpoint types constants.  */
   for (i = 0; pybp_codes[i].name; ++i)

@@ -607,7 +607,8 @@ _initialize_break_catch_syscall ()
 {
   initialize_syscall_catchpoint_ops ();
 
-  gdb::observers::inferior_exit.attach (clear_syscall_counts);
+  gdb::observers::inferior_exit.attach (clear_syscall_counts,
+					"break-catch-syscall");
 
   add_catch_command ("syscall", _("\
 Catch system calls by their names, groups and/or numbers.\n\

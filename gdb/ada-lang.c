@@ -13494,7 +13494,7 @@ DWARF attribute."),
 					   NULL, xcalloc, xfree);
 
   /* The ada-lang observers.  */
-  gdb::observers::new_objfile.attach (ada_new_objfile_observer);
-  gdb::observers::free_objfile.attach (ada_free_objfile_observer);
-  gdb::observers::inferior_exit.attach (ada_inferior_exit);
+  gdb::observers::new_objfile.attach (ada_new_objfile_observer, "ada-lang");
+  gdb::observers::free_objfile.attach (ada_free_objfile_observer, "ada-lang");
+  gdb::observers::inferior_exit.attach (ada_inferior_exit, "ada-lang");
 }

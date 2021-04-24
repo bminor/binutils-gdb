@@ -2028,10 +2028,11 @@ as they are loaded."),
 			   &maintenance_show_cmdlist);
 
   /* Add ourselves to objfile event chain.  */
-  gdb::observers::new_objfile.attach (thread_db_new_objfile);
+  gdb::observers::new_objfile.attach (thread_db_new_objfile, "linux-thread-db");
 
   /* Add ourselves to inferior_created event chain.
      This is needed to handle debugging statically linked programs where
      the new_objfile observer won't get called for libpthread.  */
-  gdb::observers::inferior_created.attach (thread_db_inferior_created);
+  gdb::observers::inferior_created.attach (thread_db_inferior_created,
+					   "linux-thread-db");
 }

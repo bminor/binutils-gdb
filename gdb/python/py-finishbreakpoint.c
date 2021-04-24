@@ -417,8 +417,10 @@ gdbpy_initialize_finishbreakpoints (void)
 			      (PyObject *) &finish_breakpoint_object_type) < 0)
     return -1;
 
-  gdb::observers::normal_stop.attach (bpfinishpy_handle_stop);
-  gdb::observers::inferior_exit.attach (bpfinishpy_handle_exit);
+  gdb::observers::normal_stop.attach (bpfinishpy_handle_stop,
+				      "py-finishbreakpoint");
+  gdb::observers::inferior_exit.attach (bpfinishpy_handle_exit,
+					"py-finishbreakpoint");
 
   return 0;
 }

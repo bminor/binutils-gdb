@@ -343,14 +343,16 @@ _initialize_tui_interp ()
     }
 
   /* If changing this, remember to update cli-interp.c as well.  */
-  gdb::observers::normal_stop.attach (tui_on_normal_stop);
-  gdb::observers::signal_received.attach (tui_on_signal_received);
-  gdb::observers::end_stepping_range.attach (tui_on_end_stepping_range);
-  gdb::observers::signal_exited.attach (tui_on_signal_exited);
-  gdb::observers::exited.attach (tui_on_exited);
-  gdb::observers::no_history.attach (tui_on_no_history);
-  gdb::observers::sync_execution_done.attach (tui_on_sync_execution_done);
-  gdb::observers::command_error.attach (tui_on_command_error);
+  gdb::observers::normal_stop.attach (tui_on_normal_stop, "tui-interp");
+  gdb::observers::signal_received.attach (tui_on_signal_received, "tui-interp");
+  gdb::observers::end_stepping_range.attach (tui_on_end_stepping_range,
+					     "tui-interp");
+  gdb::observers::signal_exited.attach (tui_on_signal_exited, "tui-interp");
+  gdb::observers::exited.attach (tui_on_exited, "tui-interp");
+  gdb::observers::no_history.attach (tui_on_no_history, "tui-interp");
+  gdb::observers::sync_execution_done.attach (tui_on_sync_execution_done,
+					      "tui-interp");
+  gdb::observers::command_error.attach (tui_on_command_error, "tui-interp");
   gdb::observers::user_selected_context_changed.attach
-    (tui_on_user_selected_context_changed);
+    (tui_on_user_selected_context_changed, "tui-interp");
 }

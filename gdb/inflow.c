@@ -963,5 +963,5 @@ _initialize_inflow ()
   /* OK, figure out whether we have job control.  */
   have_job_control ();
 
-  gdb::observers::inferior_exit.attach (inflow_inferior_exit);
+  gdb::observers::inferior_exit.attach (inflow_inferior_exit, "inflow");
 }

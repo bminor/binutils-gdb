@@ -627,8 +627,8 @@ void _initialize_annotate ();
 void
 _initialize_annotate ()
 {
-  gdb::observers::breakpoint_created.attach (breakpoint_changed);
-  gdb::observers::breakpoint_deleted.attach (breakpoint_changed);
-  gdb::observers::breakpoint_modified.attach (breakpoint_changed);
-  gdb::observers::thread_exit.attach (annotate_thread_exited);
+  gdb::observers::breakpoint_created.attach (breakpoint_changed, "annotate");
+  gdb::observers::breakpoint_deleted.attach (breakpoint_changed, "annotate");
+  gdb::observers::breakpoint_modified.attach (breakpoint_changed, "annotate");
+  gdb::observers::thread_exit.attach (annotate_thread_exited, "annotate");
 }

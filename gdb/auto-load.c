@@ -1503,7 +1503,7 @@ _initialize_auto_load ()
   char *guile_name_help;
   const char *suffix;
 
-  gdb::observers::new_objfile.attach (auto_load_new_objfile);
+  gdb::observers::new_objfile.attach (auto_load_new_objfile, "auto-load");
 
   add_setshow_boolean_cmd ("gdb-scripts", class_support,
 			   &auto_load_gdb_scripts, _("\
@@ -1613,7 +1613,8 @@ This option has security implications for untrusted inferiors."),
 				     show_auto_load_safe_path,
 				     auto_load_set_cmdlist_get (),
 				     auto_load_show_cmdlist_get ());
-  gdb::observers::gdb_datadir_changed.attach (auto_load_gdb_datadir_changed);
+  gdb::observers::gdb_datadir_changed.attach (auto_load_gdb_datadir_changed,
+					      "auto-load");
 
   cmd = add_cmd ("add-auto-load-safe-path", class_support,
 		 add_auto_load_safe_path,

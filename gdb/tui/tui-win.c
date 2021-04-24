@@ -1120,6 +1120,6 @@ the line numbers and uses less horizontal space."),
 			   tui_set_compact_source, tui_show_compact_source,
 			   &tui_setlist, &tui_showlist);
 
-  tui_border_style.changed.attach (tui_rehighlight_all);
-  tui_active_border_style.changed.attach (tui_rehighlight_all);
+  tui_border_style.changed.attach (tui_rehighlight_all, "tui-win");
+  tui_active_border_style.changed.attach (tui_rehighlight_all, "tui-win");
 }

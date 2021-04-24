@@ -550,7 +550,10 @@ _initialize_bsd_uthread ()
 {
   bsd_uthread_data = gdbarch_data_register_pre_init (bsd_uthread_init);
 
-  gdb::observers::inferior_created.attach (bsd_uthread_inferior_created);
-  gdb::observers::solib_loaded.attach (bsd_uthread_solib_loaded);
-  gdb::observers::solib_unloaded.attach (bsd_uthread_solib_unloaded);
+  gdb::observers::inferior_created.attach (bsd_uthread_inferior_created,
+					   "bsd-uthread");
+  gdb::observers::solib_loaded.attach (bsd_uthread_solib_loaded,
+				       "bsd-uthread");
+  gdb::observers::solib_unloaded.attach (bsd_uthread_solib_unloaded,
+					 "bsd-uthread");
 }

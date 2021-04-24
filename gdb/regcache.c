@@ -2084,8 +2084,10 @@ _initialize_regcache ()
   regcache_descr_handle
     = gdbarch_data_register_post_init (init_regcache_descr);
 
-  gdb::observers::target_changed.attach (regcache_observer_target_changed);
-  gdb::observers::thread_ptid_changed.attach (regcache_thread_ptid_changed);
+  gdb::observers::target_changed.attach (regcache_observer_target_changed,
+					 "regcache");
+  gdb::observers::thread_ptid_changed.attach (regcache_thread_ptid_changed,
+					      "regcache");
 
   add_cmd ("register-cache", class_maintenance, reg_flush_command,
 	   _("Force gdb to flush its register and frame cache."),

@@ -15646,9 +15646,12 @@ _initialize_breakpoint ()
 
   initialize_breakpoint_ops ();
 
-  gdb::observers::solib_unloaded.attach (disable_breakpoints_in_unloaded_shlib);
-  gdb::observers::free_objfile.attach (disable_breakpoints_in_freed_objfile);
-  gdb::observers::memory_changed.attach (invalidate_bp_value_on_memory_change);
+  gdb::observers::solib_unloaded.attach (disable_breakpoints_in_unloaded_shlib,
+					 "breakpoint");
+  gdb::observers::free_objfile.attach (disable_breakpoints_in_freed_objfile,
+				       "breakpoint");
+  gdb::observers::memory_changed.attach (invalidate_bp_value_on_memory_change,
+					 "breakpoint");
 
   breakpoint_chain = 0;
   /* Don't bother to call set_breakpoint_count.  $bpnum isn't useful
@@ -16232,6 +16235,8 @@ This is useful for formatted output in user-defined commands."));
 
   automatic_hardware_breakpoints = true;
 
-  gdb::observers::about_to_proceed.attach (breakpoint_about_to_proceed);
-  gdb::observers::thread_exit.attach (remove_threaded_breakpoints);
+  gdb::observers::about_to_proceed.attach (breakpoint_about_to_proceed,
+					   "breakpoint");
+  gdb::observers::thread_exit.attach (remove_threaded_breakpoints,
+				      "breakpoint");
 }

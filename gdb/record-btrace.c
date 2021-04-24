@@ -307,7 +307,8 @@ record_btrace_auto_enable (void)
   DEBUG ("attach thread observer");
 
   gdb::observers::new_thread.attach (record_btrace_enable_warn,
-				     record_btrace_thread_observer_token);
+				     record_btrace_thread_observer_token,
+				     "record-btrace");
 }
 
 /* Disable automatic tracing of new threads.  */

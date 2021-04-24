@@ -600,7 +600,7 @@ _initialize_auxv ()
 This is information provided by the operating system at program startup."));
 
   /* Observers used to invalidate the auxv cache when needed.  */
-  gdb::observers::inferior_exit.attach (invalidate_auxv_cache_inf);
-  gdb::observers::inferior_appeared.attach (invalidate_auxv_cache_inf);
-  gdb::observers::executable_changed.attach (invalidate_auxv_cache);
+  gdb::observers::inferior_exit.attach (invalidate_auxv_cache_inf, "auxv");
+  gdb::observers::inferior_appeared.attach (invalidate_auxv_cache_inf, "auxv");
+  gdb::observers::executable_changed.attach (invalidate_auxv_cache, "auxv");
 }

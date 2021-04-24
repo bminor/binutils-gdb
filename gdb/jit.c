@@ -1243,10 +1243,10 @@ _initialize_jit ()
 			   show_jit_debug,
 			   &setdebuglist, &showdebuglist);
 
-  gdb::observers::inferior_created.attach (jit_inferior_created_hook);
-  gdb::observers::inferior_execd.attach (jit_inferior_created_hook);
-  gdb::observers::inferior_exit.attach (jit_inferior_exit_hook);
-  gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted);
+  gdb::observers::inferior_created.attach (jit_inferior_created_hook, "jit");
+  gdb::observers::inferior_execd.attach (jit_inferior_created_hook, "jit");
+  gdb::observers::inferior_exit.attach (jit_inferior_exit_hook, "jit");
+  gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted, "jit");
 
   jit_gdbarch_data = gdbarch_data_register_pre_init (jit_gdbarch_data_init);
   if (is_dl_available ())

@@ -737,7 +737,8 @@ _initialize_solib_aix ()
     = solib_aix_in_dynsym_resolve_code;
   solib_aix_so_ops.bfd_open = solib_aix_bfd_open;
 
-  gdb::observers::normal_stop.attach (solib_aix_normal_stop_observer);
+  gdb::observers::normal_stop.attach (solib_aix_normal_stop_observer,
+				      "solib-aix");
 
   /* Debug this file's internals.  */
   add_setshow_boolean_cmd ("aix-solib", class_maintenance,

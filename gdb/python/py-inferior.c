@@ -904,18 +904,23 @@ gdbpy_initialize_inferior (void)
   infpy_inf_data_key =
     register_inferior_data_with_cleanup (NULL, py_free_inferior);
 
-  gdb::observers::new_thread.attach (add_thread_object);
-  gdb::observers::thread_exit.attach (delete_thread_object);
-  gdb::observers::normal_stop.attach (python_on_normal_stop);
-  gdb::observers::target_resumed.attach (python_on_resume);
-  gdb::observers::inferior_call_pre.attach (python_on_inferior_call_pre);
-  gdb::observers::inferior_call_post.attach (python_on_inferior_call_post);
-  gdb::observers::memory_changed.attach (python_on_memory_change);
-  gdb::observers::register_changed.attach (python_on_register_change);
-  gdb::observers::inferior_exit.attach (python_inferior_exit);
-  gdb::observers::new_objfile.attach (python_new_objfile);
-  gdb::observers::inferior_added.attach (python_new_inferior);
-  gdb::observers::inferior_removed.attach (python_inferior_deleted);
+  gdb::observers::new_thread.attach (add_thread_object, "py-inferior");
+  gdb::observers::thread_exit.attach (delete_thread_object, "py-inferior");
+  gdb::observers::normal_stop.attach (python_on_normal_stop, "py-inferior");
+  gdb::observers::target_resumed.attach (python_on_resume, "py-inferior");
+  gdb::observers::inferior_call_pre.attach (python_on_inferior_call_pre,
+					    "py-inferior");
+  gdb::observers::inferior_call_post.attach (python_on_inferior_call_post,
+					     "py-inferior");
+  gdb::observers::memory_changed.attach (python_on_memory_change,
+					 "py-inferior");
+  gdb::observers::register_changed.attach (python_on_register_change,
+					   "py-inferior");
+  gdb::observers::inferior_exit.attach (python_inferior_exit, "py-inferior");
+  gdb::observers::new_objfile.attach (python_new_objfile, "py-inferior");
+  gdb::observers::inferior_added.attach (python_new_inferior, "py-inferior");
+  gdb::observers::inferior_removed.attach (python_inferior_deleted,
+					   "py-inferior");
 
   membuf_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&membuf_object_type) < 0)

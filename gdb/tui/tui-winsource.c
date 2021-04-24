@@ -294,7 +294,7 @@ tui_source_window_base::tui_source_window_base ()
 
   gdb::observers::source_styling_changed.attach
     (std::bind (&tui_source_window::style_changed, this),
-     m_observable);
+     m_observable, "tui-winsource");
 }
 
 tui_source_window_base::~tui_source_window_base ()

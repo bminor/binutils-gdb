@@ -3186,7 +3186,8 @@ _initialize_printcmd ()
 
   current_display_number = -1;
 
-  gdb::observers::free_objfile.attach (clear_dangling_display_expressions);
+  gdb::observers::free_objfile.attach (clear_dangling_display_expressions,
+				       "printcmd");
 
   add_info ("address", info_address_command,
 	    _("Describe where symbol SYM is stored.\n\

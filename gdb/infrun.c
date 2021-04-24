@@ -9759,11 +9759,13 @@ enabled by default on some platforms."),
   inferior_ptid = null_ptid;
   target_last_wait_ptid = minus_one_ptid;
 
-  gdb::observers::thread_ptid_changed.attach (infrun_thread_ptid_changed);
-  gdb::observers::thread_stop_requested.attach (infrun_thread_stop_requested);
-  gdb::observers::thread_exit.attach (infrun_thread_thread_exit);
-  gdb::observers::inferior_exit.attach (infrun_inferior_exit);
-  gdb::observers::inferior_execd.attach (infrun_inferior_execd);
+  gdb::observers::thread_ptid_changed.attach (infrun_thread_ptid_changed,
+					      "infrun");
+  gdb::observers::thread_stop_requested.attach (infrun_thread_stop_requested,
+						"infrun");
+  gdb::observers::thread_exit.attach (infrun_thread_thread_exit, "infrun");
+  gdb::observers::inferior_exit.attach (infrun_inferior_exit, "infrun");
+  gdb::observers::inferior_execd.attach (infrun_inferior_execd, "infrun");
 
   /* Explicitly create without lookup, since that tries to create a
      value with a void typed value, and when we get here, gdbarch

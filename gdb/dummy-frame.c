@@ -439,5 +439,5 @@ _initialize_dummy_frame ()
 	   _("Print the contents of the internal dummy-frame stack."),
 	   &maintenanceprintlist);
 
-  gdb::observers::inferior_created.attach (cleanup_dummy_frames);
+  gdb::observers::inferior_created.attach (cleanup_dummy_frames, "dummy-frame");
 }

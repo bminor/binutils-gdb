@@ -1,5 +1,12 @@
 2021-04-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* observable.h (class observable) <struct observer> <observer>:
+	Add name parameter.
+	<name>: New field.
+	<attach>: Add name parameter, update all callers.
+
+2021-04-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* observable.h (class observable) <struct observer>: New.
 	<detach, notify>: Update.
 	<m_observers>: Change type to vector of observers.

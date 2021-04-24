@@ -6906,7 +6906,8 @@ If zero then the symbol cache is disabled."),
 		     class_maintenance, 0, &maintenancelist);
   deprecate_cmd (c, "maintenancelist flush symbol-cache");
 
-  gdb::observers::executable_changed.attach (symtab_observer_executable_changed);
-  gdb::observers::new_objfile.attach (symtab_new_objfile_observer);
-  gdb::observers::free_objfile.attach (symtab_free_objfile_observer);
+  gdb::observers::executable_changed.attach (symtab_observer_executable_changed,
+					     "symtab");
+  gdb::observers::new_objfile.attach (symtab_new_objfile_observer, "symtab");
+  gdb::observers::free_objfile.attach (symtab_free_objfile_observer, "symtab");
 }
