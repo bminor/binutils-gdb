@@ -1,3 +1,10 @@
+2021-04-25  Tom Tromey  <tom@tromey.com>
+
+	* sim-options.c (compare_strings): New function.
+	(ARG_HASH_SIZE, ARG_HASH): Remove.
+	(dup_arg_p): Use htab_t.
+	(sim_parse_args): Remove assert.
+
 2021-04-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-cfi.c (attach_cfi_regs): Change %u to PRIiTC.

@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-io.h"
 #include "sim-assert.h"
 #include "version.h"
+#include "hashtab.h"
 
 #include "bfd.h"
 
@@ -413,37 +414,36 @@ standard_install (SIM_DESC sd)
   return SIM_RC_OK;
 }
 
+/* Equality function for arguments.  */
+
+static int
+compare_strings (const void *a, const void *b)
+{
+  return strcmp (a, b) == 0;
+}
+
 /* Return non-zero if arg is a duplicate argument.
    If ARG is NULL, initialize.  */
-
-#define ARG_HASH_SIZE 256
-#define ARG_HASH(a) ((256 * (unsigned char) a[0] + (unsigned char) a[1]) % ARG_HASH_SIZE)
 
 static int
 dup_arg_p (const char *arg)
 {
-  int hash;
-  static const char **arg_table = NULL;
+  static htab_t arg_table = NULL;
+  void **slot;
 
   if (arg == NULL)
     {
       if (arg_table == NULL)
-	arg_table = (const char **) xmalloc (ARG_HASH_SIZE * sizeof (char *));
-      memset (arg_table, 0, ARG_HASH_SIZE * sizeof (char *));
+	arg_table = htab_create_alloc (10, htab_hash_string,
+				       compare_strings, NULL,
+				       xcalloc, free);
       return 0;
     }
 
-  hash = ARG_HASH (arg);
-  while (arg_table[hash] != NULL)
-    {
-      if (strcmp (arg, arg_table[hash]) == 0)
-	return 1;
-      /* We assume there won't be more than ARG_HASH_SIZE arguments so we
-	 don't check if the table is full.  */
-      if (++hash == ARG_HASH_SIZE)
-	hash = 0;
-    }
-  arg_table[hash] = arg;
+  slot = htab_find_slot (arg_table, arg, INSERT);
+  if (*slot != NULL)
+    return 1;
+  *slot = (void *) arg;
   return 0;
 }
 
@@ -477,9 +477,6 @@ sim_parse_args (SIM_DESC sd, char * const *argv)
     for (ol = CPU_OPTIONS (STATE_CPU (sd, i)); ol != NULL; ol = ol->next)
       for (opt = ol->options; OPTION_VALID_P (opt); ++opt)
 	++num_opts;
-
-  /* We build a hash table of all options, so make sure they all fit.  */
-  SIM_ASSERT (num_opts <= ARG_HASH_SIZE);
 
   /* Initialize duplicate argument checker.  */
   (void) dup_arg_p (NULL);
