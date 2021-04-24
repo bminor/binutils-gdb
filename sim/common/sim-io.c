@@ -68,11 +68,10 @@ sim_io_unlink (SIM_DESC sd,
 }
 
 
-long
-sim_io_time (SIM_DESC sd,
-	     long *t)
+int64_t
+sim_io_time (SIM_DESC sd)
 {
-  return STATE_CALLBACK (sd)->time (STATE_CALLBACK (sd), t);
+  return STATE_CALLBACK (sd)->time (STATE_CALLBACK (sd));
 }
 
 

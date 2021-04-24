@@ -1,5 +1,14 @@
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* callback.c (os_time): Change return to int64_t.  Delete 2nd arg.
+	(os_fstat): Delete 2nd arg to time callback.
+	* sim-io.c (sim_io_time): Change return to int64_t.  Delete 2nd arg
+	to time callback.
+	* sim-io.h (sim_io_time): Change return to int64_t.
+	* syscall.c (cb_syscall): Delete 2nd arg to time callback.
+
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.c (cb_host_to_target_stat): Change PTR to void*.
 	* sim-syscall.c (sim_syscall_multi): Delete (PTR) casts.
 

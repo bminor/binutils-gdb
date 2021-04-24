@@ -47,6 +47,7 @@
 
 #include <ansidecl.h>
 #include <stdarg.h>
+#include <stdint.h>
 /* Needed for enum bfd_endian.  */
 #include "bfd.h"
 
@@ -78,7 +79,7 @@ struct host_callback_struct
   int (*read_stdin) ( host_callback *, char *, int);
   int (*rename) (host_callback *, const char *, const char *);
   int (*system) (host_callback *, const char *);
-  long (*time) (host_callback *, long *);
+  int64_t (*time) (host_callback *);
   int (*unlink) (host_callback *, const char *);
   int (*write) (host_callback *,int, const char *, int);
   int (*write_stdout) (host_callback *, const char *, int);

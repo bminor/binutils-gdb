@@ -31,7 +31,7 @@ int sim_io_shutdown (SIM_DESC sd);
 
 int sim_io_unlink (SIM_DESC sd, const char *);
 
-long sim_io_time (SIM_DESC sd, long *);
+int64_t sim_io_time (SIM_DESC sd);
 
 int sim_io_system (SIM_DESC sd, const char *);
 

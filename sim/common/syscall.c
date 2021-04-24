@@ -588,7 +588,7 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 	   We might also want gettimeofday or times, but if system calls
 	   can be built on others, we can keep the number we have to support
 	   here down.  */
-	time_t t = (*cb->time) (cb, (time_t *) 0);
+	time_t t = (*cb->time) (cb);
 	result = t;
 	/* It is up to target code to process the argument to time().  */
       }

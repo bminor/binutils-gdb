@@ -420,12 +420,12 @@ os_system (host_callback *p, const char *s)
   return result;
 }
 
-static long
-os_time (host_callback *p, long *t)
+static int64_t
+os_time (host_callback *p)
 {
-  long result;
+  int64_t result;
 
-  result = time (t);
+  result = time (NULL);
   p->last_errno = errno;
   return result;
 }
@@ -466,7 +466,7 @@ os_fstat (host_callback *p, int fd, struct stat *buf)
   if (p->ispipe[fd])
     {
 #if defined (HAVE_STRUCT_STAT_ST_ATIME) || defined (HAVE_STRUCT_STAT_ST_CTIME) || defined (HAVE_STRUCT_STAT_ST_MTIME)
-      time_t t = (*p->time) (p, NULL);
+      time_t t = (*p->time) (p);
 #endif
 
       /* We have to fake the struct stat contents, since the pipe is

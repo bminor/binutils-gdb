@@ -437,7 +437,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
     case SWI_Time:
       if (swi_mask & SWI_MASK_DEMON)
 	{
-	  state->Reg[0] = (ARMword) sim_callback->time (sim_callback, NULL);
+	  state->Reg[0] = (ARMword) sim_callback->time (sim_callback);
 	  OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	}
       else
@@ -592,7 +592,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	      break;
 
 	    case AngelSWI_Reason_Time:
-	      state->Reg[0] = (ARMword) sim_callback->time (sim_callback, NULL);
+	      state->Reg[0] = (ARMword) sim_callback->time (sim_callback);
 	      OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	      break;
 
@@ -781,7 +781,7 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	      break;
 
 	    case 17: /* Utime.  */
-	      state->Reg[0] = state->Reg[1] = (ARMword) sim_callback->time (sim_callback, NULL);
+	      state->Reg[0] = state->Reg[1] = (ARMword) sim_callback->time (sim_callback);
 	      OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	      break;
 
