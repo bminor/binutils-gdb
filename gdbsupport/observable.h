@@ -24,6 +24,16 @@
 #include <functional>
 #include <vector>
 
+/* Print an "observer" debug statement.  */
+
+#define observer_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (observer_debug, "observer", fmt, ##__VA_ARGS__)
+
+/* Print "observer" start/end debug statements.  */
+
+#define OBSERVER_SCOPED_DEBUG_START_END(fmt, ...) \
+  scoped_debug_start_end (observer_debug, "observer", fmt, ##__VA_ARGS__)
+
 namespace gdb
 {
 
@@ -85,6 +95,9 @@ public:
      lifetime must be at least as long as the observer is attached.  */
   void attach (const func_type &f, const char *name)
   {
+    observer_debug_printf ("Attaching observable %s to observer %s",
+			   name, m_name);
+
     m_observers.emplace_back (nullptr, f, name);
   }
 
@@ -95,6 +108,9 @@ public:
      lifetime must be at least as long as the observer is attached.  */
   void attach (const func_type &f, const token &t, const char *name)
   {
+    observer_debug_printf ("Attaching observable %s to observer %s",
+			   name, m_name);
+
     m_observers.emplace_back (&t, f, name);
   }
 
@@ -110,17 +126,23 @@ public:
 				  return o.token == &t;
 				});
 
+    observer_debug_printf ("Detaching observable %s from observer %s",
+			   iter->name, m_name);
+
     m_observers.erase (iter, m_observers.end ());
   }
 
   /* Notify all observers that are attached to this observable.  */
   void notify (T... args) const
   {
-    if (observer_debug)
-      fprintf_unfiltered (gdb_stdlog, "observable %s notify() called\n",
-			  m_name);
+    OBSERVER_SCOPED_DEBUG_START_END ("observable %s notify() called", m_name);
+
     for (auto &&e : m_observers)
-      e.func (args...);
+      {
+	OBSERVER_SCOPED_DEBUG_START_END ("calling observer %s of observable %s",
+					 e.name, m_name);
+	e.func (args...);
+      }
   }
 
 private:

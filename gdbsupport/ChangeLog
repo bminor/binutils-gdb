@@ -1,5 +1,11 @@
 2021-04-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* observable.h (observer_debug_printf,
+	OBSERVER_SCOPED_DEBUG_START_END): New.
+	(class observable) <notify, attach>: Use them.
+
+2021-04-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* common-debug.h (struct scoped_debug_start_end)
 	<scoped_debug_start_end>: Change start_msg/end_msg for
 	start_prefix/end_prefix.  Add format string parameter and make
