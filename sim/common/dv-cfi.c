@@ -610,7 +610,7 @@ attach_cfi_regs (struct hw *me, struct cfi *cfi)
     if (cfi_cmdsets[i]->id == ival)
       cfi->cmdset = cfi_cmdsets[i];
   if (cfi->cmdset == NULL)
-    hw_abort (me, "cmdset %u not supported", ival);
+    hw_abort (me, "cmdset %" PRIiTC " not supported", ival);
 
   if (ret == 2)
     {
