@@ -1,3 +1,7 @@
+2021-04-25  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (SIM_EXTRA_DEPS): Add engv32.h.
+
 2021-04-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete first two args.
