@@ -1,3 +1,7 @@
+2021-04-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/default.exp: Change $_gdb_minor to 3.
+
 2021-04-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.python/flexible-array-member.exp: Add check for Python
