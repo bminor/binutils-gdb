@@ -1,3 +1,8 @@
+2021-04-25  Sergei Trofimovich  <siarheit@google.com>
+
+	* sparc-linux-nat.c (sparc_linux_nat_target): fix sparc build
+	by passing `process_stratum_target*` parameter.
+
 2021-04-25  Lancelot Six  <lsix@lancelotsix.com>
 
 	PR gdb/22640
