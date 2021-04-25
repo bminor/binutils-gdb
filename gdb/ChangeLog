@@ -1,3 +1,7 @@
+2021-04-25  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 10.2 released.
+
 2021-04-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* observable.c (observer_debug): Change to bool.
