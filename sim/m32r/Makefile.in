@@ -44,9 +44,6 @@ SIM_EXTRA_CFLAGS = @sim_extra_cflags@
 
 SIM_EXTRA_CLEAN = m32r-clean
 
-# This selects the m32r newlib/libgloss syscall definitions.
-NL_TARGET = -DNL_TARGET_m32r
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = m32r

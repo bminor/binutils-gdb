@@ -1,3 +1,11 @@
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* gennltvals.py (TARGETS): Delete.  Update comment.
+	(gentvals): Unify common code paths.
+	(gen_targets): Change TARGETS to TARGETS_DIRS.  Call gentvals without
+	target argument.
+	* nltvals.def: Regenerate.
+
 2021-04-25  Tom Tromey  <tom@tromey.com>
 
 	* sim-options.c (compare_strings): New function.

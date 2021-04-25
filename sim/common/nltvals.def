@@ -89,6 +89,7 @@
  { "ETXTBSY", 26 },
  { "EWOULDBLOCK", 11 },
  { "EXDEV", 18 },
+#undef errno_defs
 /* end errno target macros */
 #endif
 #ifdef signal_defs
@@ -130,6 +131,7 @@
  { "SIGWINCH", 28 },
  { "SIGXCPU", 24 },
  { "SIGXFSZ", 25 },
+#undef signal_defs
 /* end signal target macros */
 #endif
 #ifdef open_defs
@@ -154,38 +156,8 @@
  { "O_SYNC", 0x2000 },
  { "O_TRUNC", 0x0400 },
  { "O_WRONLY", 1 },
+#undef open_defs
 /* end open target macros */
-#endif
-#ifdef NL_TARGET_bfin
-#ifdef sys_defs
-/* from syscall.h */
-/* begin bfin sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end bfin sys target macros */
-#endif
 #endif
 #ifdef NL_TARGET_cr16
 #ifdef sys_defs
@@ -219,6 +191,7 @@
  { "SYS_wait", 202 },
  { "SYS_wait4", 7 },
  { "SYS_write", 0x404 },
+#undef sys_defs
 /* end cr16 sys target macros */
 #endif
 #endif
@@ -253,69 +226,8 @@
  { "SYS_wait", 202 },
  { "SYS_wait4", 7 },
  { "SYS_write", 4 },
+#undef sys_defs
 /* end d10v sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_fr30
-#ifdef sys_defs
-/* from syscall.h */
-/* begin fr30 sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end fr30 sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_frv
-#ifdef sys_defs
-/* from syscall.h */
-/* begin frv sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end frv sys target macros */
 #endif
 #endif
 #ifdef NL_TARGET_i960
@@ -339,131 +251,8 @@
  { "SYS_unlink", 7 },
  { "SYS_utime", 17 },
  { "SYS_write", 232 },
+#undef sys_defs
 /* end i960 sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_iq2000
-#ifdef sys_defs
-/* from syscall.h */
-/* begin iq2000 sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end iq2000 sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_lm32
-#ifdef sys_defs
-/* from syscall.h */
-/* begin lm32 sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end lm32 sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_m32c
-#ifdef sys_defs
-/* from syscall.h */
-/* begin m32c sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end m32c sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_m32r
-#ifdef sys_defs
-/* from syscall.h */
-/* begin m32r sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end m32r sys target macros */
 #endif
 #endif
 #ifdef NL_TARGET_mcore
@@ -481,162 +270,8 @@
  { "SYS_times", 43 },
  { "SYS_unlink", 10 },
  { "SYS_write", 4 },
+#undef sys_defs
 /* end mcore sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_mn10200
-#ifdef sys_defs
-/* from syscall.h */
-/* begin mn10200 sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end mn10200 sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_mn10300
-#ifdef sys_defs
-/* from syscall.h */
-/* begin mn10300 sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end mn10300 sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_moxie
-#ifdef sys_defs
-/* from syscall.h */
-/* begin moxie sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end moxie sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_msp430
-#ifdef sys_defs
-/* from syscall.h */
-/* begin msp430 sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end msp430 sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_pru
-#ifdef sys_defs
-/* from syscall.h */
-/* begin pru sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end pru sys target macros */
 #endif
 #endif
 #ifdef NL_TARGET_riscv
@@ -685,38 +320,8 @@
  { "SYS_unlink", 1026 },
  { "SYS_write", 64 },
  { "SYS_writev", 66 },
+#undef sys_defs
 /* end riscv sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_rx
-#ifdef sys_defs
-/* from syscall.h */
-/* begin rx sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end rx sys target macros */
 #endif
 #endif
 #ifdef NL_TARGET_sh
@@ -754,38 +359,8 @@
  { "SYS_wait", 202 },
  { "SYS_wait4", 7 },
  { "SYS_write", 4 },
+#undef sys_defs
 /* end sh sys target macros */
-#endif
-#endif
-#ifdef NL_TARGET_sparc
-#ifdef sys_defs
-/* from syscall.h */
-/* begin sparc sys target macros */
- { "SYS_argc", 22 },
- { "SYS_argn", 24 },
- { "SYS_argnlen", 23 },
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 3 },
- { "SYS_exit", 1 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_gettimeofday", 19 },
- { "SYS_kill", 9 },
- { "SYS_link", 21 },
- { "SYS_lseek", 6 },
- { "SYS_open", 2 },
- { "SYS_read", 4 },
- { "SYS_reconfig", 25 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_times", 20 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 5 },
-/* end sparc sys target macros */
 #endif
 #endif
 #ifdef NL_TARGET_v850
@@ -821,6 +396,37 @@
  { "SYS_wait", 202 },
  { "SYS_wait4", 7 },
  { "SYS_write", 4 },
+#undef sys_defs
 /* end v850 sys target macros */
 #endif
+#endif
+#ifdef sys_defs
+/* from syscall.h */
+/* begin sys target macros */
+ { "SYS_argc", 22 },
+ { "SYS_argn", 24 },
+ { "SYS_argnlen", 23 },
+ { "SYS_argv", 13 },
+ { "SYS_argvlen", 12 },
+ { "SYS_chdir", 14 },
+ { "SYS_chmod", 16 },
+ { "SYS_close", 3 },
+ { "SYS_exit", 1 },
+ { "SYS_fstat", 10 },
+ { "SYS_getpid", 8 },
+ { "SYS_gettimeofday", 19 },
+ { "SYS_kill", 9 },
+ { "SYS_link", 21 },
+ { "SYS_lseek", 6 },
+ { "SYS_open", 2 },
+ { "SYS_read", 4 },
+ { "SYS_reconfig", 25 },
+ { "SYS_stat", 15 },
+ { "SYS_time", 18 },
+ { "SYS_times", 20 },
+ { "SYS_unlink", 7 },
+ { "SYS_utime", 17 },
+ { "SYS_write", 5 },
+#undef sys_defs
+/* end sys target macros */
 #endif

@@ -29,9 +29,6 @@ SIM_EXTRA_CLEAN = clean-igen
 # Extra dependencies for "sim-main.h"
 SIM_EXTRA_DEPS = mn10300_sim.h itable.h idecode.h
 
-# Select mn10300 support in nltvals.def.
-NL_TARGET = -DNL_TARGET_mn10300
-
 # List of extra flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS = -DPOLL_QUIT_INTERVAL=0x20
 

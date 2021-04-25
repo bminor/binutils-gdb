@@ -1,5 +1,9 @@
 2021-04-26  Mike Frysinger  <vapier@gentoo.org>
 
+	* README-HACKING (nltvals.def): Update to gennltvals.py.
+
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
 	* m4/sim_ac_output.m4 (SIM_AC_OUTPUT): Require SIM_AC_OPTION_HARDWARE.
 
 2021-04-23  Mike Frysinger  <vapier@gentoo.org>

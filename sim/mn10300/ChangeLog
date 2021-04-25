@@ -1,3 +1,7 @@
+2021-04-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (NL_TARGET): Delete.
+
 2021-04-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete first two args.

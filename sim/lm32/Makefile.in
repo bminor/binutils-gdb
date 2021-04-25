@@ -22,9 +22,6 @@ SIM_EXTRA_DEPS = $(CGEN_INCLUDE_DEPS) $(srcdir)/../../opcodes/lm32-desc.h \
 
 SIM_EXTRA_CLEAN = lm32-clean
 
-# This selects the lm32 newlib/libgloss syscall definitions.
-NL_TARGET = -DNL_TARGET_lm32
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = lm32 

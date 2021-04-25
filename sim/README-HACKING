@@ -180,7 +180,7 @@ got one to hand):
 	$  cd /tmp/$$
 	$  cvs checkout sim-no-testsuite libgloss-no-testsuite newlib-no-testsuite
 
-Configure things for an arbitrary simulator target (I've d10v for
+Configure things for an arbitrary simulator target (d10v is used here for
 convenience):
 
 	$  mkdir /tmp/$$/build
@@ -192,9 +192,10 @@ In the sim/ directory rebuild the headers:
 	$  cd sim/
 	$  make nltvals
 
-To add a new target:
+If the target uses the common syscall table (libgloss/syscall.h), then you're
+all set!  If the target has a custom syscall table, you need to declare it:
 
-	devo/sim/common/gennltvals.sh
+	devo/sim/common/gennltvals.py
 
 		Add your new processor target (you'll need to grub
 		around to find where your syscall.h lives).
