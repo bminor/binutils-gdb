@@ -14212,6 +14212,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	     the symbol plus addend.  */
 	  valueT value = S_GET_SIZE (fixp->fx_addsy) + fixp->fx_offset;
 	  if (fixp->fx_r_type == BFD_RELOC_SIZE32
+	      && object_64bit
 	      && !fits_in_unsigned_long (value))
 	    as_bad_where (fixp->fx_file, fixp->fx_line,
 			  _("symbol size computation overflow"));

@@ -1,5 +1,10 @@
 2021-04-26  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (tc_gen_reloc): Limit BFD_RELOC_SIZE32
+	overflow check to 64-bit objects.
+
+2021-04-26  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (want_disp32): Also check for SIZE32.
 	(optimize_encoding): Handle LEA.
 	* testsuite/gas/i386/lea.s, testsuite/gas/i386/lea.d,
