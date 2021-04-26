@@ -1,3 +1,9 @@
+2021-04-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 22790
+	* armemu.c (Handle_Store_Double): Allow 4 byte alignment when
+	running in v6 mode.
+
 2021-04-22  Tom Tromey  <tom@tromey.com>
 
 	* configure, config.in: Rebuild.
