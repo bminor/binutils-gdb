@@ -82,7 +82,7 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	false),
   HOWTO(R_X86_64_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_16", false, 0xffff, 0xffff, false),
-  HOWTO(R_X86_64_PC16,0, 1, 16, true, 0, complain_overflow_bitfield,
+  HOWTO(R_X86_64_PC16, 0, 1, 16, true, 0, complain_overflow_signed,
 	bfd_elf_generic_reloc, "R_X86_64_PC16", false, 0xffff, 0xffff, true),
   HOWTO(R_X86_64_8, 0, 0, 8, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_8", false, 0xff, 0xff, false),

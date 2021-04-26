@@ -1,3 +1,10 @@
+2021-04-26  Jan Beulich  <jbeulich@suse.com>
+
+	* elf32-i386.c (elf_howto_table): Switch R_386_PC16 to
+	complain_overflow_signed.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Switch R_X86_64_PC16
+	to complain_overflow_signed.
+
 2021-04-23  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* elf.c (special_sections_p): Add .persistent.bss.
