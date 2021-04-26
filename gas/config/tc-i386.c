@@ -3562,7 +3562,8 @@ want_disp32 (const insn_template *t)
 	 || i.prefix[ADDR_PREFIX]
 	 || (t->base_opcode == 0x8d
 	     && t->opcode_modifier.opcodespace == SPACE_BASE
-	     && !i.types[1].bitfield.qword);
+	     && (!i.types[1].bitfield.qword
+		|| t->opcode_modifier.size == SIZE32));
 }
 
 static int
@@ -4068,6 +4069,145 @@ static void
 optimize_encoding (void)
 {
   unsigned int j;
+
+  if (i.tm.opcode_modifier.opcodespace == SPACE_BASE
+      && i.tm.base_opcode == 0x8d)
+    {
+      /* Optimize: -O:
+	   lea symbol, %rN    -> mov $symbol, %rN
+	   lea (%rM), %rN     -> mov %rM, %rN
+	   lea (,%rM,1), %rN  -> mov %rM, %rN
+
+	   and in 32-bit mode for 16-bit addressing
+
+	   lea (%rM), %rN     -> movzx %rM, %rN
+
+	   and in 64-bit mode zap 32-bit addressing in favor of using a
+	   32-bit (or less) destination.
+       */
+      if (flag_code == CODE_64BIT && i.prefix[ADDR_PREFIX])
+	{
+	  if (!i.op[1].regs->reg_type.bitfield.word)
+	    i.tm.opcode_modifier.size = SIZE32;
+	  i.prefix[ADDR_PREFIX] = 0;
+	}
+
+      if (!i.index_reg && !i.base_reg)
+	{
+	  /* Handle:
+	       lea symbol, %rN    -> mov $symbol, %rN
+	   */
+	  if (flag_code == CODE_64BIT)
+	    {
+	      /* Don't transform a relocation to a 16-bit one.  */
+	      if (i.op[0].disps
+		  && i.op[0].disps->X_op != O_constant
+		  && i.op[1].regs->reg_type.bitfield.word)
+		return;
+
+	      if (!i.op[1].regs->reg_type.bitfield.qword
+		  || i.tm.opcode_modifier.size == SIZE32)
+		{
+		  i.tm.base_opcode = 0xb8;
+		  i.tm.opcode_modifier.modrm = 0;
+		  if (!i.op[1].regs->reg_type.bitfield.word)
+		    i.types[0].bitfield.imm32 = 1;
+		  else
+		    {
+		      i.tm.opcode_modifier.size = SIZE16;
+		      i.types[0].bitfield.imm16 = 1;
+		    }
+		}
+	      else
+		{
+		  /* Subject to further optimization below.  */
+		  i.tm.base_opcode = 0xc7;
+		  i.tm.extension_opcode = 0;
+		  i.types[0].bitfield.imm32s = 1;
+		  i.types[0].bitfield.baseindex = 0;
+		}
+	    }
+	  /* Outside of 64-bit mode address and operand sizes have to match if
+	     a relocation is involved, as otherwise we wouldn't (currently) or
+	     even couldn't express the relocation correctly.  */
+	  else if (i.op[0].disps
+		   && i.op[0].disps->X_op != O_constant
+		   && ((!i.prefix[ADDR_PREFIX])
+		       != (flag_code == CODE_32BIT
+			   ? i.op[1].regs->reg_type.bitfield.dword
+			   : i.op[1].regs->reg_type.bitfield.word)))
+	    return;
+	  else
+	    {
+	      i.tm.base_opcode = 0xb8;
+	      i.tm.opcode_modifier.modrm = 0;
+	      if (i.op[1].regs->reg_type.bitfield.dword)
+		i.types[0].bitfield.imm32 = 1;
+	      else
+		i.types[0].bitfield.imm16 = 1;
+
+	      if (i.op[0].disps
+		  && i.op[0].disps->X_op == O_constant
+		  && i.op[1].regs->reg_type.bitfield.dword
+		  && !i.prefix[ADDR_PREFIX] != (flag_code == CODE_32BIT))
+		i.op[0].disps->X_add_number &= 0xffff;
+	    }
+
+	  i.tm.operand_types[0] = i.types[0];
+	  i.imm_operands = 1;
+	  if (!i.op[0].imms)
+	    {
+	      i.op[0].imms = &im_expressions[0];
+	      i.op[0].imms->X_op = O_absent;
+	    }
+	}
+      else if (i.op[0].disps
+		  && (i.op[0].disps->X_op != O_constant
+		      || i.op[0].disps->X_add_number))
+	return;
+      else
+	{
+	  /* Handle:
+	       lea (%rM), %rN     -> mov %rM, %rN
+	       lea (,%rM,1), %rN  -> mov %rM, %rN
+	       lea (%rM), %rN     -> movzx %rM, %rN
+	   */
+	  const reg_entry *addr_reg;
+
+	  if (!i.index_reg && i.base_reg->reg_num != RegIP)
+	    addr_reg = i.base_reg;
+	  else if (!i.base_reg
+		   && i.index_reg->reg_num != RegIZ
+		   && !i.log2_scale_factor)
+	    addr_reg = i.index_reg;
+	  else
+	    return;
+
+	  if (addr_reg->reg_type.bitfield.word
+	      && i.op[1].regs->reg_type.bitfield.dword)
+	    {
+	      if (flag_code != CODE_32BIT)
+		return;
+	      i.tm.opcode_modifier.opcodespace = SPACE_0F;
+	      i.tm.base_opcode = 0xb7;
+	    }
+	  else
+	    i.tm.base_opcode = 0x8b;
+
+	  if (addr_reg->reg_type.bitfield.dword
+	      && i.op[1].regs->reg_type.bitfield.qword)
+	    i.tm.opcode_modifier.size = SIZE32;
+
+	  i.op[0].regs = addr_reg;
+	  i.reg_operands = 2;
+	}
+
+      i.mem_operands = 0;
+      i.disp_operands = 0;
+      i.prefix[ADDR_PREFIX] = 0;
+      i.prefix[SEG_PREFIX] = 0;
+      i.seg[0] = NULL;
+    }
 
   if (optimize_for_space
       && i.tm.opcode_modifier.opcodespace == SPACE_BASE

@@ -228,7 +228,7 @@ out, 0xe6, None, 0, W|No_sSuf|No_qSuf|No_ldSuf, { Imm8 }
 out, 0xee, None, 0, W|No_sSuf|No_qSuf|No_ldSuf, { InOutPortReg }
 
 // Load effective address.
-lea, 0x8d, None, 0, Modrm|Anysize|No_bSuf|No_sSuf|No_ldSuf, { BaseIndex, Reg16|Reg32|Reg64 }
+lea, 0x8d, None, 0, Modrm|Anysize|No_bSuf|No_sSuf|No_ldSuf|Optimize, { BaseIndex, Reg16|Reg32|Reg64 }
 
 // Load segment registers from memory.
 lds, 0xc5, None, CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { DWord|Fword|Unspecified|BaseIndex, Reg16|Reg32 }
