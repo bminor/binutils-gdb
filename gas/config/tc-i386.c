@@ -12576,7 +12576,18 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
   /* Are we finished with this relocation now?  */
   if (fixP->fx_addsy == NULL)
-    fixP->fx_done = 1;
+    {
+      fixP->fx_done = 1;
+      switch (fixP->fx_r_type)
+	{
+	case BFD_RELOC_X86_64_32S:
+	  fixP->fx_signed = 1;
+	  break;
+
+	default:
+	  break;
+	}
+    }
 #if defined (OBJ_COFF) && defined (TE_PE)
   else if (fixP->fx_addsy != NULL && S_IS_WEAK (fixP->fx_addsy))
     {

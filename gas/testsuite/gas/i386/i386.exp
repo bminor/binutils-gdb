@@ -750,6 +750,7 @@ if [gas_64_check] then {
     run_dump_test "x86_64-intel"
     run_dump_test "x86-64-addr32"
     run_dump_test "x86-64-addr32-intel"
+    run_list_test "x86-64-addr32-bad" "-al"
     run_dump_test "x86-64-opcode"
     run_dump_test "x86-64-intel64"
     if { ! [istarget "*-*-*cygwin*"] && ![istarget "*-*-mingw*"] } then {
