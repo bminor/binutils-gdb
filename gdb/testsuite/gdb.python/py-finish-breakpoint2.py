@@ -16,18 +16,19 @@
 # This file is part of the GDB testsuite.  It tests python Finish
 # Breakpoints.
 
+
 class ExceptionFinishBreakpoint(gdb.FinishBreakpoint):
     def __init__(self, frame):
-        gdb.FinishBreakpoint.__init__ (self, frame, internal=1)
+        gdb.FinishBreakpoint.__init__(self, frame, internal=1)
         self.silent = True
-        print ("init ExceptionFinishBreakpoint")
-        
+        print("init ExceptionFinishBreakpoint")
+
     def stop(self):
-        print ("stopped at ExceptionFinishBreakpoint")
-        return True 
-    
+        print("stopped at ExceptionFinishBreakpoint")
+        return True
+
     def out_of_scope(self):
-        print ("exception did not finish ...")
+        print("exception did not finish ...")
 
 
-print ("Python script imported")
+print("Python script imported")

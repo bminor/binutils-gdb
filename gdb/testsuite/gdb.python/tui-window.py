@@ -19,6 +19,7 @@ import gdb
 
 the_window = None
 
+
 class TestWindow:
     def __init__(self, win):
         global the_window
@@ -38,14 +39,17 @@ class TestWindow:
     def remove_title(self):
         del self.win.title
 
+
 gdb.register_window_type("test", TestWindow)
 
 # Call REMOVE_TITLE on the global window object.
-def delete_window_title ():
-    the_window.remove_title ()
+def delete_window_title():
+    the_window.remove_title()
+
 
 # A TUI window "constructor" that always fails.
 def failwin(win):
     raise RuntimeError("Whoops")
+
 
 gdb.register_window_type("fail", failwin)

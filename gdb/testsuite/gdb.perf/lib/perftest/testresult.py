@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 class TestResult(object):
     """Base class to record and report test results.
 
@@ -27,12 +28,13 @@ class TestResult(object):
         """Report the test results by reporter."""
         raise NotImplementedError("Abstract Method:report.")
 
+
 class SingleStatisticTestResult(TestResult):
     """Test results for the test case with a single statistic."""
 
     def __init__(self):
-        super (SingleStatisticTestResult, self).__init__ ()
-        self.results = dict ()
+        super(SingleStatisticTestResult, self).__init__()
+        self.results = dict()
 
     def record(self, parameter, result):
         if parameter in self.results:
@@ -46,12 +48,14 @@ class SingleStatisticTestResult(TestResult):
             reporter.report(name, key, self.results[key])
         reporter.end()
 
+
 class ResultFactory(object):
     """A factory to create an instance of TestResult."""
 
     def create_result(self):
         """Create an instance of TestResult."""
         raise NotImplementedError("Abstract Method:create_result.")
+
 
 class SingleStatisticResultFactory(ResultFactory):
     """A factory to create an instance of SingleStatisticTestResult."""

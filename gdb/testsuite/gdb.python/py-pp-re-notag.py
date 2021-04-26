@@ -28,7 +28,7 @@ class TimePrinter:
 
 def build_pretty_printer():
     pp = gdb.printing.RegexpCollectionPrettyPrinter("pp-notag")
-    pp.add_printer('time_t', 'time_t', TimePrinter)
+    pp.add_printer("time_t", "time_t", TimePrinter)
     return pp
 
 

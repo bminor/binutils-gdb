@@ -22,7 +22,7 @@ class TimeTPrinter:
         self.val = val
 
     def to_string(self):
-        secs = int(self.val['secs'])
+        secs = int(self.val["secs"])
         return "%s (%d)" % (asctime(gmtime(secs)), secs)
 
 

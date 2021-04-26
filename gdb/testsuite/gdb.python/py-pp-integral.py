@@ -27,7 +27,7 @@ class TimePrinter:
 
 
 def time_sniffer(val):
-    if hasattr(val.type, 'name') and val.type.name == "time_t":
+    if hasattr(val.type, "name") and val.type.name == "time_t":
         return TimePrinter(val)
     return None
 
