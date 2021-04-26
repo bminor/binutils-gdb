@@ -1,3 +1,9 @@
+2021-04-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27773
+	* cli/cli-dump.c (dump_binary_file): Check result of
+	gdb_fopen_cloexec.
+
 2021-04-25  Sergei Trofimovich  <siarheit@google.com>
 
 	* sparc-linux-nat.c (sparc_linux_nat_target): fix sparc build

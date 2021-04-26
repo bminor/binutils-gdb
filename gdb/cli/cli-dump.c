@@ -135,6 +135,9 @@ dump_binary_file (const char *filename, const char *mode,
   int status;
 
   gdb_file_up file = gdb_fopen_cloexec (filename, mode);
+  if (file == nullptr)
+    perror_with_name (filename);
+
   status = fwrite (buf, len, 1, file.get ());
   if (status != 1)
     perror_with_name (filename);

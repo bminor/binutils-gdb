@@ -1,3 +1,8 @@
+2021-04-26  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27773
+	* gdb.base/dump.exp: Test dump to non-existent dir.
+
 2021-04-26  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.arch/aarch64-dbreg-contents.c (set_watchpoint): Fix arch level
