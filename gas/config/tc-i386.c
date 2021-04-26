@@ -14205,7 +14205,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
     case BFD_RELOC_SIZE32:
     case BFD_RELOC_SIZE64:
-      if (S_IS_DEFINED (fixp->fx_addsy)
+      if (IS_ELF
+	  && S_IS_DEFINED (fixp->fx_addsy)
 	  && !S_IS_EXTERNAL (fixp->fx_addsy))
 	{
 	  /* Resolve size relocation against local symbol to size of
