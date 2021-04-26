@@ -1,3 +1,10 @@
+2021-04-26  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/27743:
+	* gdb.dwarf2/imported-unit-bp.exp: New file.
+	* gdb.dwarf2/imported-unit-bp-main.c: New file.
+	* gdb.dwarf2/imported-unit-bp-alt.c: New file.
+
 2021-04-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/27773
