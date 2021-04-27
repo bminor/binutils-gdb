@@ -1,3 +1,11 @@
+2021-04-27  Michael Weghorn  <m.weghorn@posteo.de>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* observable.h (class observable): Extend to allow specifying
+	dependencies between observers, keep vector holding observers
+	sorted so that dependencies are notified before observers
+	depending on them.
+
 2021-04-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* observable.h (observer_debug_printf,

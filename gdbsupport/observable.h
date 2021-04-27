@@ -71,13 +71,15 @@ public:
 private:
   struct observer
   {
-    observer (const struct token *token, func_type func, const char *name)
-      : token (token), func (func), name (name)
+    observer (const struct token *token, func_type func, const char *name,
+	      const std::vector<const struct token *> &dependencies)
+      : token (token), func (func), name (name), dependencies (dependencies)
     {}
 
     const struct token *token;
     func_type func;
     const char *name;
+    std::vector<const struct token *> dependencies;
   };
 
 public:
@@ -88,30 +90,34 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (observable);
 
-  /* Attach F as an observer to this observable.  F cannot be
-     detached.
+  /* Attach F as an observer to this observable.  F cannot be detached or
+     specified as a dependency.
+
+     DEPENDENCIES is a list of tokens of observers to be notified before this
+     one.
 
      NAME is the name of the observer, used for debug output purposes.  Its
      lifetime must be at least as long as the observer is attached.  */
-  void attach (const func_type &f, const char *name)
+  void attach (const func_type &f, const char *name,
+	       const std::vector<const struct token *> &dependencies = {})
   {
-    observer_debug_printf ("Attaching observable %s to observer %s",
-			   name, m_name);
-
-    m_observers.emplace_back (nullptr, f, name);
+    attach (f, nullptr, name, dependencies);
   }
 
-  /* Attach F as an observer to this observable.  T is a reference to
-     a token that can be used to later remove F.
+  /* Attach F as an observer to this observable.
+
+     T is a reference to a token that can be used to later remove F or specify F
+     as a dependency of another observer.
+
+     DEPENDENCIES is a list of tokens of observers to be notified before this
+     one.
 
      NAME is the name of the observer, used for debug output purposes.  Its
      lifetime must be at least as long as the observer is attached.  */
-  void attach (const func_type &f, const token &t, const char *name)
+  void attach (const func_type &f, const token &t, const char *name,
+	       const std::vector<const struct token *> &dependencies = {})
   {
-    observer_debug_printf ("Attaching observable %s to observer %s",
-			   name, m_name);
-
-    m_observers.emplace_back (&t, f, name);
+    attach (f, &t, name, dependencies);
   }
 
   /* Remove observers associated with T from this observable.  T is
@@ -149,6 +155,84 @@ private:
 
   std::vector<observer> m_observers;
   const char *m_name;
+
+  /* Use for sorting algorithm, to indicate which observer we have visited.  */
+  enum class visit_state
+  {
+    NOT_VISITED,
+    VISITING,
+    VISITED,
+  };
+
+  /* Helper method for topological sort using depth-first search algorithm.
+
+     Visit all dependencies of observer at INDEX in M_OBSERVERS (later referred
+     to as "the observer").  Then append the observer to SORTED_OBSERVERS.
+
+     If the observer is already visited, do nothing.  */
+  void visit_for_sorting (std::vector<observer> &sorted_observers,
+                          std::vector<visit_state> &visit_states, int index)
+  {
+    if (visit_states[index] == visit_state::VISITED)
+      return;
+
+    /* If we are already visiting this observer, it means there's a cycle.  */
+    gdb_assert (visit_states[index] != visit_state::VISITING);
+
+    visit_states[index] = visit_state::VISITING;
+
+    /* For each dependency of this observer...  */
+    for (const token *dep : m_observers[index].dependencies)
+      {
+	/* ... find the observer that has token DEP.  If found, visit it.  */
+        auto it_dep
+            = std::find_if (m_observers.begin (), m_observers.end (),
+                            [&] (observer o) { return o.token == dep; });
+        if (it_dep != m_observers.end ())
+          {
+            int i = std::distance (m_observers.begin (), it_dep);
+            visit_for_sorting (sorted_observers, visit_states, i);
+          }
+      }
+
+    visit_states[index] = visit_state::VISITED;
+    sorted_observers.push_back (m_observers[index]);
+  }
+
+  /* Sort the observers, so that dependencies come before observers
+     depending on them.
+
+     Uses depth-first search algorithm for topological sorting, see
+     https://en.wikipedia.org/wiki/Topological_sorting#Depth-first_search .  */
+  void sort_observers ()
+  {
+    std::vector<observer> sorted_observers;
+    std::vector<visit_state> visit_states (m_observers.size (),
+					   visit_state::NOT_VISITED);
+
+    for (size_t i = 0; i < m_observers.size (); i++)
+      visit_for_sorting (sorted_observers, visit_states, i);
+
+    m_observers = std::move (sorted_observers);
+  }
+
+  void attach (const func_type &f, const token *t, const char *name,
+               const std::vector<const struct token *> &dependencies)
+  {
+
+    observer_debug_printf ("Attaching observable %s to observer %s",
+                           name, m_name);
+
+    m_observers.emplace_back (t, f, name, dependencies);
+
+    /* The observer has been inserted at the end of the vector, so it will be
+       after any of its potential dependencies attached earlier.  If the
+       observer has a token, it means that other observers can specify it as
+       a dependency, so sorting is necessary to ensure those will be after the
+       newly inserted observer afterwards.  */
+    if (t != nullptr)
+      sort_observers ();
+  };
 };
 
 } /* namespace observers */

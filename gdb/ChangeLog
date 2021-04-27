@@ -1,3 +1,17 @@
+2021-04-27  Michael Weghorn  <m.weghorn@posteo.de>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* unittests/observable-selftests.c (dependency_test_counters):
+	New.
+	(observer_token0, observer_token1, observer_token2,
+	observer_token3, observer_token4, observer_token5): New.
+	(struct dependency_observer_data): New struct.
+	(observer_dependency_test_callback): New function.
+	(test_observers): New.
+	(run_dependency_test): New function.
+	(test_dependency): New.
+	(_initialize_observer_selftest): Register dependency test.
+
 2021-04-26  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/27773
