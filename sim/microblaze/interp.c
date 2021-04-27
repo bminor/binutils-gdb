@@ -168,6 +168,7 @@ sim_engine_run (SIM_DESC sd,
 	{
 	  insts += 1;
 	  bonus_cycles++;
+	  TRACE_INSN (cpu, "HALT (%i)", RETREG);
 	  sim_engine_halt (sd, NULL, NULL, NULL_CIA, sim_exited, RETREG);
 	}
       else
@@ -176,6 +177,7 @@ sim_engine_run (SIM_DESC sd,
 	    {
 #define INSTRUCTION(NAME, OPCODE, TYPE, ACTION)		\
 	    case NAME:					\
+	      TRACE_INSN (cpu, #NAME);			\
 	      ACTION;					\
 	      break;
 #include "microblaze.isa"

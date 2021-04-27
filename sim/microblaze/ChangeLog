@@ -1,5 +1,11 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (sim_engine_run): Call TRACE_INSN.
+	(INSTRUCTION): Likewise.
+	* microblaze.isa (addi): Call TRACE_REGISTER.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c: Include sim-syscall.h.
 	(sim_engine_run): Call sim_syscall for brki instructions.
 
