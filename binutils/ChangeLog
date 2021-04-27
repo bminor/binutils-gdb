@@ -1,3 +1,9 @@
+2021-04-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 27779
+	* dwarf.c (parse_gnu_debuglink): Reject empty names.
+	(parse_gnu_debugaltlink): Likewise.
+
 2021-04-22  Clément Chigot  <clement.chigot@atos.net>
 
 	* od-xcoff.c (dump_xcoff32_symbols): Adapt to new

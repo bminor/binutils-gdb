@@ -10957,6 +10957,8 @@ parse_gnu_debuglink (struct dwarf_section * section, void * data)
   name = (const char *) section->start;
 
   crc_offset = strnlen (name, section->size) + 1;
+  if (crc_offset == 1)
+    return NULL;
   crc_offset = (crc_offset + 3) & ~3;
   if (crc_offset + 4 > section->size)
     return NULL;
@@ -10998,6 +11000,8 @@ parse_gnu_debugaltlink (struct dwarf_section * section, void * data)
 
   name = (const char *) section->start;
   namelen = strnlen (name, section->size) + 1;
+  if (namelen == 1)
+    return NULL;
   if (namelen >= section->size)
     return NULL;
 
