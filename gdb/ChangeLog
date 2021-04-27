@@ -1,3 +1,12 @@
+2021-04-28  Tom Tromey  <tromey@adacore.com>
+
+	* ada-exp.y (primary): Use new type for null pointer.
+	* ada-lang.c (ada_type_match): Remove "may_deref"
+	parameter.  Handle null pointer.
+	(ada_args_match): Update.
+	* ada-valprint.c (ada_value_print_ptr, ada_value_print):
+	Handle null pointer.
+
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention new commands.

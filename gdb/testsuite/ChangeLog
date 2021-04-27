@@ -1,3 +1,8 @@
+2021-04-28  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/null_overload.exp: New file.
+	* gdb.ada/null_overload/foo.adb: New file.
+
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-startup-opt.exp: New file.

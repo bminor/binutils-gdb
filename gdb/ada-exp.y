@@ -891,7 +891,11 @@ primary	:	FLOAT
 	;
 
 primary	:	NULL_PTR
-			{ write_int (pstate, 0, type_int (pstate)); }
+			{
+			  struct type *null_ptr_type
+			    = lookup_pointer_type (parse_type (pstate)->builtin_int0);
+			  write_int (pstate, 0, null_ptr_type);
+			}
 	;
 
 primary	:	STRING

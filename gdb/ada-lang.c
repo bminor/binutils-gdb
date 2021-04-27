@@ -95,8 +95,6 @@ static struct type *desc_index_type (struct type *, int);
 
 static int desc_arity (struct type *);
 
-static int ada_type_match (struct type *, struct type *, int);
-
 static int ada_args_match (struct symbol *, struct value **, int);
 
 static struct value *make_array_descriptor (struct type *, struct value *);
@@ -3492,14 +3490,12 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
   return candidates[i];
 }
 
-/* Return non-zero if formal type FTYPE matches actual type ATYPE.  If
-   MAY_DEREF is non-zero, the formal may be a pointer and the actual
-   a non-pointer.  */
+/* Return non-zero if formal type FTYPE matches actual type ATYPE.  */
 /* The term "match" here is rather loose.  The match is heuristic and
    liberal.  */
 
 static int
-ada_type_match (struct type *ftype, struct type *atype, int may_deref)
+ada_type_match (struct type *ftype, struct type *atype)
 {
   ftype = ada_check_typedef (ftype);
   atype = ada_check_typedef (atype);
@@ -3514,12 +3510,13 @@ ada_type_match (struct type *ftype, struct type *atype, int may_deref)
     default:
       return ftype->code () == atype->code ();
     case TYPE_CODE_PTR:
-      if (atype->code () == TYPE_CODE_PTR)
-	return ada_type_match (TYPE_TARGET_TYPE (ftype),
-			       TYPE_TARGET_TYPE (atype), 0);
-      else
-	return (may_deref
-		&& ada_type_match (TYPE_TARGET_TYPE (ftype), atype, 0));
+      if (atype->code () != TYPE_CODE_PTR)
+	return 0;
+      atype = TYPE_TARGET_TYPE (atype);
+      /* This can only happen if the actual argument is 'null'.  */
+      if (atype->code () == TYPE_CODE_INT && TYPE_LENGTH (atype) == 0)
+	return 1;
+      return ada_type_match (TYPE_TARGET_TYPE (ftype), atype);
     case TYPE_CODE_INT:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_RANGE:
@@ -3580,7 +3577,7 @@ ada_args_match (struct symbol *func, struct value **actuals, int n_actuals)
 	  struct type *ftype = ada_check_typedef (func_type->field (i).type ());
 	  struct type *atype = ada_check_typedef (value_type (actuals[i]));
 
-	  if (!ada_type_match (ftype, atype, 1))
+	  if (!ada_type_match (ftype, atype))
 	    return 0;
 	}
     }
