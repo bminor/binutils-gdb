@@ -1,5 +1,10 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c: Include sim-syscall.h.
+	(sim_engine_run): Call sim_syscall for brki instructions.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
