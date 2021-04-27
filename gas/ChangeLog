@@ -1,3 +1,7 @@
+2021-04-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (optimize_encoding): Add () to silence GCC 5.
+
 2021-04-26  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (tc_gen_reloc): Check IS_ELF for

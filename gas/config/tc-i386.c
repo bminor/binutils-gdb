@@ -4149,7 +4149,9 @@ optimize_encoding (void)
 	      if (i.op[0].disps
 		  && i.op[0].disps->X_op == O_constant
 		  && i.op[1].regs->reg_type.bitfield.dword
-		  && !i.prefix[ADDR_PREFIX] != (flag_code == CODE_32BIT))
+		  /* NB: Add () to !i.prefix[ADDR_PREFIX] to silence
+		     GCC 5. */
+		  && (!i.prefix[ADDR_PREFIX]) != (flag_code == CODE_32BIT))
 		i.op[0].disps->X_add_number &= 0xffff;
 	    }
 
