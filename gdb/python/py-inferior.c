@@ -18,6 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "auto-load.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
 #include "inferior.h"
@@ -917,7 +918,11 @@ gdbpy_initialize_inferior (void)
   gdb::observers::register_changed.attach (python_on_register_change,
 					   "py-inferior");
   gdb::observers::inferior_exit.attach (python_inferior_exit, "py-inferior");
-  gdb::observers::new_objfile.attach (python_new_objfile, "py-inferior");
+  /* Need to run after auto-load's new_objfile observer, so that
+     auto-loaded pretty-printers are available.  */
+  gdb::observers::new_objfile.attach
+    (python_new_objfile, "py-inferior",
+     { &auto_load_new_objfile_observer_token });
   gdb::observers::inferior_added.attach (python_new_inferior, "py-inferior");
   gdb::observers::inferior_removed.attach (python_inferior_deleted,
 					   "py-inferior");

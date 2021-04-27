@@ -1,3 +1,13 @@
+2021-04-27  Michael Weghorn  <m.weghorn@posteo.de>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/libpy-autoloaded-pretty-printers-in-newobjfile-event.so-gdb.py: New test.
+	* gdb.python/py-autoloaded-pretty-printers-in-newobjfile-event-lib.cc: New test.
+	* gdb.python/py-autoloaded-pretty-printers-in-newobjfile-event-lib.h: New test.
+	* gdb.python/py-autoloaded-pretty-printers-in-newobjfile-event-main.cc: New test.
+	* gdb.python/py-autoloaded-pretty-printers-in-newobjfile-event.exp: New test.
+	* gdb.python/py-autoloaded-pretty-printers-in-newobjfile-event.py: New test.
+
 2021-04-26  Tom Tromey  <tromey@adacore.com>
 
 	PR gdb/27743:

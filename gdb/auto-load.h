@@ -25,6 +25,10 @@ struct program_space;
 struct auto_load_pspace_info;
 struct extension_language_defn;
 
+namespace gdb::observers {
+struct token;
+}
+
 /* Value of the 'set debug auto-load' configuration variable.  */
 
 extern bool debug_auto_load;
@@ -39,6 +43,10 @@ extern bool global_auto_load;
 extern bool auto_load_local_gdbinit;
 extern char *auto_load_local_gdbinit_pathname;
 extern bool auto_load_local_gdbinit_loaded;
+
+/* Token used for the auto_load_new_objfile observer, so other observers can
+   specify it as a dependency. */
+extern gdb::observers::token auto_load_new_objfile_observer_token;
 
 extern struct auto_load_pspace_info *
   get_auto_load_pspace_data_for_loading (struct program_space *pspace);

@@ -1,6 +1,19 @@
 2021-04-27  Michael Weghorn  <m.weghorn@posteo.de>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb/auto-load.c (_initialize_auto_load): 'Specify token
+	when attaching the 'auto_load_new_objfile' observer, so
+	other observers can specify it as a dependency.
+	* gdb/auto-load.h (struct token): Declare
+	'auto_load_new_objfile_observer_token' as token to be used
+	for the 'auto_load_new_objfile' observer.
+	* gdb/python/py-inferior.c (gdbpy_initialize_inferior): Make
+	'python_new_objfile' observer depend on 'auto_load_new_objfile'
+	observer, so it gets notified after the latter.
+
+2021-04-27  Michael Weghorn  <m.weghorn@posteo.de>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* unittests/observable-selftests.c (dependency_test_counters):
 	New.
 	(observer_token0, observer_token1, observer_token2,
