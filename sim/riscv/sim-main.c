@@ -789,9 +789,6 @@ execute_m (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
   return pc;
 }
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-
 static sim_cia
 execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 {
@@ -881,19 +878,19 @@ execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
       break;
     case MATCH_AMOMAX_D:
     case MATCH_AMOMAX_W:
-      tmp = MAX ((signed_word) cpu->regs[rd], (signed_word) cpu->regs[rs2]);
+      tmp = max ((signed_word) cpu->regs[rd], (signed_word) cpu->regs[rs2]);
       break;
     case MATCH_AMOMAXU_D:
     case MATCH_AMOMAXU_W:
-      tmp = MAX ((unsigned_word) cpu->regs[rd], (unsigned_word) cpu->regs[rs2]);
+      tmp = max ((unsigned_word) cpu->regs[rd], (unsigned_word) cpu->regs[rs2]);
       break;
     case MATCH_AMOMIN_D:
     case MATCH_AMOMIN_W:
-      tmp = MIN ((signed_word) cpu->regs[rd], (signed_word) cpu->regs[rs2]);
+      tmp = min ((signed_word) cpu->regs[rd], (signed_word) cpu->regs[rs2]);
       break;
     case MATCH_AMOMINU_D:
     case MATCH_AMOMINU_W:
-      tmp = MIN ((unsigned_word) cpu->regs[rd], (unsigned_word) cpu->regs[rs2]);
+      tmp = min ((unsigned_word) cpu->regs[rd], (unsigned_word) cpu->regs[rs2]);
       break;
     case MATCH_AMOOR_D:
     case MATCH_AMOOR_W:
