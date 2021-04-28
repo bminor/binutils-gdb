@@ -1,3 +1,11 @@
+2021-05-12  George Barrett  <bob@bob131.so>
+
+	* guile/scm-type.c (type_integer_constants): Add binding for
+	TYPE_CODE_RVALUE_REF.
+	* guile/scm-value.c (gdbscm_value_referenced_value): Handle
+	dereferencing of rvalue references.
+	* NEWS (Guile API): Note improvements in rvalue reference support.
+
 2021-05-12  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* btrace.c (handle_pt_insn_events): Ignore status update enable

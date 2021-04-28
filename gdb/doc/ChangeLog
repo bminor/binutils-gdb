@@ -1,3 +1,8 @@
+2021-05-12  George Barrett  <bob@bob131.so>
+
+	* guile.texi (Types In Guile): Add documentation for
+	TYPE_CODE_RVALUE_REF.
+
 2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* guile.texinfo (Breakpoints In Guile): Reword sentence.

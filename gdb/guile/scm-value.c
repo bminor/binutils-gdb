@@ -476,6 +476,7 @@ gdbscm_value_referenced_value (SCM self)
 	  res_val = value_ind (value);
 	  break;
 	case TYPE_CODE_REF:
+	case TYPE_CODE_RVALUE_REF:
 	  res_val = coerce_ref (value);
 	  break;
 	default:

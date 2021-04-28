@@ -1318,6 +1318,7 @@ static const scheme_integer_constant type_integer_constants[] =
   X (TYPE_CODE_METHODPTR),
   X (TYPE_CODE_MEMBERPTR),
   X (TYPE_CODE_REF),
+  X (TYPE_CODE_RVALUE_REF),
   X (TYPE_CODE_CHAR),
   X (TYPE_CODE_BOOL),
   X (TYPE_CODE_COMPLEX),

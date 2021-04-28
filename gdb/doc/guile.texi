@@ -1268,6 +1268,9 @@ A pointer-to-member.
 @item TYPE_CODE_REF
 A reference type.
 
+@item TYPE_CODE_RVALUE_REF
+A C@t{++}11 rvalue reference type.
+
 @item TYPE_CODE_CHAR
 A character type.
 
