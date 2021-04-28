@@ -1,5 +1,20 @@
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.texinfo (Initialization Files): Use @env when referencing
+	environment variables.
+	(Shell Commands): Likewise.
+	(Starting): Likewise.
+	(Arguments): Likewise.
+	(Environment): Likewise.
+	(Edit): Likewise.
+	(Compiling and Injecting Code): Likewise.
+	(Files): Likewise.
+	(Command History): Likewise.
+	(Screen Size): Likewise.
+	(Emacs): Likewise.
+
+2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python.texinfo (Python Commands): Mention new commands.
 
 2021-04-25  Lancelot Six  <lsix@lancelotsix.com>

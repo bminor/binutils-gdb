@@ -1449,7 +1449,7 @@ are searched for.
 
 @value{GDBN} initially looks for an early initialization file in the
 users home directory@footnote{On DOS/Windows systems, the home
-directory is the one pointed to by the @code{HOME} environment
+directory is the one pointed to by the @env{HOME} environment
 variable.}.  There are a number of locations that @value{GDBN} will
 search in the home directory, these locations are searched in order
 and @value{GDBN} will load the first file that it finds, and
@@ -1524,7 +1524,7 @@ Options,,Choosing Modes}.
 After loading the system wide initialization files @value{GDBN} will
 look for an initialization file in the users home
 directory@footnote{On DOS/Windows systems, the home directory is the
-one pointed to by the @code{HOME} environment variable.}.  There are a
+one pointed to by the @env{HOME} environment variable.}.  There are a
 number of locations that @value{GDBN} will search in the home
 directory, these locations are searched in order and @value{GDBN} will
 load the first file that it finds, and subsequent locations will not
@@ -1615,7 +1615,7 @@ just use the @code{shell} command.
 @itemx !@var{command-string}
 Invoke a standard shell to execute @var{command-string}.
 Note that no space is needed between @code{!} and @var{command-string}.
-On GNU and Unix systems, the environment variable @code{SHELL}, if it
+On GNU and Unix systems, the environment variable @env{SHELL}, if it
 exists, determines which shell to run.  Otherwise @value{GDBN} uses
 the default shell (@file{/bin/sh} on GNU and Unix systems,
 @file{cmd.exe} on MS-Windows, @file{COMMAND.COM} on MS-DOS, etc.).
@@ -2525,7 +2525,7 @@ is used to pass the arguments, so that you may use normal conventions
 (such as wildcard expansion or variable substitution) in describing
 the arguments.
 In Unix systems, you can control which shell is used with the
-@code{SHELL} environment variable.  If you do not define @code{SHELL},
+@env{SHELL} environment variable.  If you do not define @env{SHELL},
 @value{GDBN} uses the default shell (@file{/bin/sh}).  You can disable
 use of any shell with the @code{set startup-with-shell} command (see
 below for details).
@@ -2671,7 +2671,7 @@ which indicates the shell or the wrapper specified with
 caused by something odd in your shell's non-interactive mode
 initialization file---such as @file{.cshrc} for C-shell,
 $@file{.zshenv} for the Z shell, or the file specified in the
-@samp{BASH_ENV} environment variable for BASH.
+@env{BASH_ENV} environment variable for BASH.
 
 @anchor{set auto-connect-native-target}
 @kindex set auto-connect-native-target
@@ -2786,8 +2786,8 @@ The arguments to your program can be specified by the arguments of the
 @code{run} command.
 They are passed to a shell, which expands wildcard characters and
 performs redirection of I/O, and thence to your program.  Your
-@code{SHELL} environment variable (if it exists) specifies what shell
-@value{GDBN} uses.  If you do not define @code{SHELL}, @value{GDBN} uses
+@env{SHELL} environment variable (if it exists) specifies what shell
+@value{GDBN} uses.  If you do not define @env{SHELL}, @value{GDBN} uses
 the default shell (@file{/bin/sh} on Unix).
 
 On non-Unix systems, the program is usually invoked directly by
@@ -2827,9 +2827,9 @@ environment without having to start @value{GDBN} over again.
 @table @code
 @kindex path
 @item path @var{directory}
-Add @var{directory} to the front of the @code{PATH} environment variable
+Add @var{directory} to the front of the @env{PATH} environment variable
 (the search path for executables) that will be passed to your program.
-The value of @code{PATH} used by @value{GDBN} does not change.
+The value of @env{PATH} used by @value{GDBN} does not change.
 You may specify several directory names, separated by whitespace or by a
 system-dependent separator character (@samp{:} on Unix, @samp{;} on
 MS-DOS and MS-Windows).  If @var{directory} is already in the path, it
@@ -2846,7 +2846,7 @@ use @samp{.} instead, it refers to the directory where you executed the
 
 @kindex show paths
 @item show paths
-Display the list of search paths for executables (the @code{PATH}
+Display the list of search paths for executables (the @env{PATH}
 environment variable).
 
 @kindex show environment
@@ -2904,11 +2904,11 @@ Environment variables that are unset by the user are also unset on
 @end table
 
 @emph{Warning:} On Unix systems, @value{GDBN} runs your program using
-the shell indicated by your @code{SHELL} environment variable if it
-exists (or @code{/bin/sh} if not).  If your @code{SHELL} variable
+the shell indicated by your @env{SHELL} environment variable if it
+exists (or @code{/bin/sh} if not).  If your @env{SHELL} variable
 names a shell that runs an initialization file when started
 non-interactively---such as @file{.cshrc} for C-shell, $@file{.zshenv}
-for the Z shell, or the file specified in the @samp{BASH_ENV}
+for the Z shell, or the file specified in the @env{BASH_ENV}
 environment variable for BASH---any variables you set in that file
 affect your program.  You may wish to move setting of environment
 variables to files that are only run when you sign on, such as
@@ -9267,7 +9267,7 @@ ex +@var{number} file
 The optional numeric value +@var{number} specifies the number of the line in
 the file where to start editing.}.
 By default, it is @file{@value{EDITOR}}, but you can change this
-by setting the environment variable @code{EDITOR} before using
+by setting the environment variable @env{EDITOR} before using
 @value{GDBN}.  For example, to configure @value{GDBN} to use the
 @code{vi} editor, you could use these commands with the @code{sh} shell:
 @smallexample
@@ -20527,15 +20527,15 @@ will print to the console.
 
 @value{GDBN} needs to find @value{NGCC} for the inferior being debugged
 which may not be obvious for remote targets of different architecture
-than where @value{GDBN} is running.  Environment variable @code{PATH} on
+than where @value{GDBN} is running.  Environment variable @env{PATH} on
 @value{GDBN} host is searched for @value{NGCC} binary matching the
 target architecture and operating system.  This search can be overriden
-by @code{set compile-gcc} @value{GDBN} command below.  @code{PATH} is
+by @code{set compile-gcc} @value{GDBN} command below.  @env{PATH} is
 taken from shell that executed @value{GDBN}, it is not the value set by
 @value{GDBN} command @code{set environment}).  @xref{Environment}.
 
 
-Specifically @code{PATH} is searched for binaries matching regular expression
+Specifically @env{PATH} is searched for binaries matching regular expression
 @code{@var{arch}(-[^-]*)?-@var{os}-gcc} according to the inferior target being
 debugged.  @var{arch} is processor name --- multiarch is supported, so for
 example both @code{i386} and @code{x86_64} targets look for pattern
@@ -20546,7 +20546,7 @@ pattern @code{linux(-gnu)?}.
 On Posix hosts the compiler driver @value{GDBN} needs to find also
 shared library @file{libcc1.so} from the compiler.  It is searched in
 default shared library search path (overridable with usual environment
-variable @code{LD_LIBRARY_PATH}), unrelated to @code{PATH} or @code{set
+variable @env{LD_LIBRARY_PATH}), unrelated to @env{PATH} or @code{set
 compile-gcc} settings.  Contrary to it @file{libcc1plugin.so} is found
 according to the installation of the found compiler --- as possibly
 specified by the @code{set compile-gcc} command.
@@ -20609,7 +20609,7 @@ Use @var{filename} as the program to be debugged.  It is read for its
 symbols and for the contents of pure memory.  It is also the program
 executed when you use the @code{run} command.  If you do not specify a
 directory and the file is not found in the @value{GDBN} working directory,
-@value{GDBN} uses the environment variable @code{PATH} as a list of
+@value{GDBN} uses the environment variable @env{PATH} as a list of
 directories to search, just as the shell does when looking for a program
 to run.  You can change the value of this variable, for both @value{GDBN}
 and your program, using the @code{path} command.
@@ -20632,13 +20632,13 @@ has on both executable file and the symbol table.
 @kindex exec-file
 @item exec-file @r{[} @var{filename} @r{]}
 Specify that the program to be run (but not the symbol table) is found
-in @var{filename}.  @value{GDBN} searches the environment variable @code{PATH}
+in @var{filename}.  @value{GDBN} searches the environment variable @env{PATH}
 if necessary to locate your program.  Omitting @var{filename} means to
 discard information on the executable file.
 
 @kindex symbol-file
 @item symbol-file @r{[} @var{filename} @r{[} -o @var{offset} @r{]]}
-Read symbol table information from file @var{filename}.  @code{PATH} is
+Read symbol table information from file @var{filename}.  @env{PATH} is
 searched when necessary.  Use the @code{file} command to get both symbol
 table and program to run from the same file.
 
@@ -25818,16 +25818,16 @@ This is the file where @value{GDBN} reads an initial command history
 list, and where it writes the command history from this session when it
 exits.  You can access this list through history expansion or through
 the history command editing characters listed below.  This file defaults
-to the value of the environment variable @code{GDBHISTFILE}, or to
+to the value of the environment variable @env{GDBHISTFILE}, or to
 @file{./.gdb_history} (@file{./_gdb_history} on MS-DOS) if this variable
 is not set.
 
-The @code{GDBHISTFILE} environment variable is read after processing
+The @env{GDBHISTFILE} environment variable is read after processing
 any @value{GDBN} initialization files (@pxref{Startup}) and after
 processing any commands passed using command line options (for
 example, @code{-ex}).
 
-If the @var{fname} argument is not given, or if the @code{GDBHISTFILE}
+If the @var{fname} argument is not given, or if the @env{GDBHISTFILE}
 is the empty string then @value{GDBN} will neither try to load an
 existing history file, nor will it try to save the history on exit.
 
@@ -25858,7 +25858,7 @@ are ignored.  If @var{size} is @code{unlimited} or if @env{GDBHISTSIZE} is
 either a negative number or the empty string, then the number of commands
 @value{GDBN} keeps in the history list is unlimited.
 
-The @code{GDBHISTSIZE} environment variable is read after processing
+The @env{GDBHISTSIZE} environment variable is read after processing
 any @value{GDBN} initialization files (@pxref{Startup}) and after
 processing any commands passed using command line options (for
 example, @code{-ex}).
@@ -25955,7 +25955,7 @@ following line.
 
 Normally @value{GDBN} knows the size of the screen from the terminal
 driver software.  For example, on Unix @value{GDBN} uses the termcap data base
-together with the value of the @code{TERM} environment variable and the
+together with the value of the @env{TERM} environment variable and the
 @code{stty rows} and @code{stty cols} settings.  If this is not correct,
 you can override it with the @code{set height} and @code{set
 width} commands:
@@ -28972,7 +28972,7 @@ gdb} argument, then Emacs sets your current working directory to where
 your program resides.  If you only specify the file name, then Emacs
 sets your current working directory to the directory associated
 with the previous buffer.  In this case, @value{GDBN} may find your
-program by searching your environment's @code{PATH} variable, but on
+program by searching your environment's @env{PATH} variable, but on
 some operating systems it might not find the source.  So, although the
 @value{GDBN} input and output session proceeds normally, the auxiliary
 buffer does not display the current source and line of execution.
