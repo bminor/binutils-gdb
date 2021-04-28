@@ -207,8 +207,9 @@ QMemTags
      value-referenced-value procedure now handles rvalue reference
      values.
 
-  ** New procedures for obtaining reference values:
-     value-reference-value and value-rvalue-reference-value.
+  ** New procedures for obtaining value variants:
+     value-reference-value, value-rvalue-reference-value and
+     value-const-value.
 
 *** Changes in GDB 10
 

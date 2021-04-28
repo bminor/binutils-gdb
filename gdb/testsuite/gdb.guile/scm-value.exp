@@ -183,6 +183,9 @@ proc test_value_in_inferior {} {
 	"test value-rvalue-reference-value"
     gdb_test "gu (equal? argv (value-referenced-value argv-rref))" "#t"
     gdb_test "gu (eqv? (type-code (value-type argv-rref)) TYPE_CODE_RVALUE_REF)" "#t"
+
+    gdb_test "gu (equal? (value-type (value-const-value argv)) (type-const (value-type argv)))" \
+	"#t"
 }
 
 proc test_strings {} {

@@ -520,6 +520,24 @@ gdbscm_value_rvalue_reference_value (SCM self)
   return gdbscm_reference_value (self, TYPE_CODE_RVALUE_REF);
 }
 
+/* (value-const-value <gdb:value>) -> <gdb:value> */
+
+static SCM
+gdbscm_value_const_value (SCM self)
+{
+  value_smob *v_smob
+    = vlscm_get_value_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
+  struct value *value = v_smob->value;
+
+  return gdbscm_wrap ([=]
+    {
+      scoped_value_mark free_values;
+
+      struct value *res_val = make_cv_value (1, 0, value);
+      return vlscm_scm_from_value (res_val);
+    });
+}
+
 /* (value-type <gdb:value>) -> <gdb:type> */
 
 static SCM
@@ -1393,6 +1411,11 @@ Return a <gdb:value> object which is a reference to the given value." },
     as_a_scm_t_subr (gdbscm_value_rvalue_reference_value),
     "\
 Return a <gdb:value> object which is an rvalue reference to the given value." },
+
+  { "value-const-value", 1, 0, 0,
+    as_a_scm_t_subr (gdbscm_value_const_value),
+    "\
+Return a <gdb:value> object which is a 'const' version of the given value." },
 
   { "value-field", 2, 0, 0, as_a_scm_t_subr (gdbscm_value_field),
     "\

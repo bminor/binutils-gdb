@@ -1,6 +1,11 @@
 2021-05-12  George Barrett  <bob@bob131.so>
 
 	* guile.texi (Values From Inferior In Guile): Add documentation
+	for value-const-value.
+
+2021-05-12  George Barrett  <bob@bob131.so>
+
+	* guile.texi (Values From Inferior In Guile): Add documentation
 	for value-reference-value.  Add documentation for
 	value-rvalue-reference-value.
 

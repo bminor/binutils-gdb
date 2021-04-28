@@ -811,6 +811,11 @@ Return a new @code{<gdb:value>} object which is an rvalue reference to
 the value encapsulated by @code{<gdb:value>} object @var{value}.
 @end deffn
 
+@deffn {Scheme Procedure} value-const-value value
+Return a new @code{<gdb:value>} object which is a @samp{const} version
+of @code{<gdb:value>} object @var{value}.
+@end deffn
+
 @deffn {Scheme Procedure} value-field value field-name
 Return field @var{field-name} from @code{<gdb:value>} object @var{value}.
 @end deffn
