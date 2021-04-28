@@ -1,3 +1,8 @@
+2021-05-12  George Barrett  <bob@bob131.so>
+
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Add test for
+	value-reference-value.  Add test for value-rvalue-reference-value.
+
 2021-05-11  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/watch_thread_num.exp: Fix "set debug infrun 1" FAILs.

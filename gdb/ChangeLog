@@ -1,5 +1,17 @@
 2021-05-12  George Barrett  <bob@bob131.so>
 
+	* NEWS (Guile API): Note the addition of new procedures.
+	* guile/scm-value.c (gdbscm_reference_value): Add helper function
+	for reference value creation.
+	(gdbscm_value_reference_value): Add implementation of
+	value-reference-value procedure.
+	(gdbscm_value_rvalue_reference_value): Add implementation of
+	value-rvalue-reference-value procedure.
+	(value_functions): Add value-reference-value procedure.  Add
+	value-rvalue-reference-value procedure.
+
+2021-05-12  George Barrett  <bob@bob131.so>
+
 	* guile/scm-type.c (type_integer_constants): Add binding for
 	TYPE_CODE_RVALUE_REF.
 	* guile/scm-value.c (gdbscm_value_referenced_value): Handle

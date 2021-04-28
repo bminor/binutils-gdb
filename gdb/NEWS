@@ -207,6 +207,9 @@ QMemTags
      value-referenced-value procedure now handles rvalue reference
      values.
 
+  ** New procedures for obtaining reference values:
+     value-reference-value and value-rvalue-reference-value.
+
 *** Changes in GDB 10
 
 * There are new feature names for ARC targets: "org.gnu.gdb.arc.core"

@@ -173,6 +173,16 @@ proc test_value_in_inferior {} {
 	"get string beyond null"
     gdb_test "gu (print nullst)" \
 	"= divide\\\\000et"
+
+    gdb_scm_test_silent_cmd "gu (define argv-ref (value-reference-value argv))" \
+	"test value-reference-value"
+    gdb_test "gu (equal? argv (value-referenced-value argv-ref))" "#t"
+    gdb_test "gu (eqv? (type-code (value-type argv-ref)) TYPE_CODE_REF)" "#t"
+
+    gdb_scm_test_silent_cmd "gu (define argv-rref (value-rvalue-reference-value argv))" \
+	"test value-rvalue-reference-value"
+    gdb_test "gu (equal? argv (value-referenced-value argv-rref))" "#t"
+    gdb_test "gu (eqv? (type-code (value-type argv-rref)) TYPE_CODE_RVALUE_REF)" "#t"
 }
 
 proc test_strings {} {
