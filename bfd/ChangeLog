@@ -1,3 +1,11 @@
+2021-04-28  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_maybe_function_sym): Do not accept annobin
+	symbols as potential function symbols.
+	* elfnn-aarch64.c (elfNN_aarch64_maybe_function_sym): Likewise.
+	* elf64-ppc.c (ppc64_elf_maybe_function_sym): Likewise.
+	* elf32-arm.c (elf32_arm_maybe_function_sym): Likewise.
+
 2021-04-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* elf-bfd.h: Include stdlib.h.
