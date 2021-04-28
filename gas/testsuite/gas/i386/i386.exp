@@ -760,8 +760,12 @@ if [gas_64_check] then {
     } else {
       run_dump_test "x86-64-w64-pcrel"
     }
+    run_list_test "pcrel64" "-al"
     run_dump_test "x86-64-rip"
     run_dump_test "x86-64-rip-intel"
+    run_dump_test "x86-64-rip-2"
+    run_list_test "x86-64-rip-inval-1" "-al"
+    run_list_test "x86-64-rip-inval-2" "-al"
     run_dump_test "x86-64-stack"
     run_dump_test "x86-64-stack-intel"
     run_dump_test "x86-64-stack-suffix"

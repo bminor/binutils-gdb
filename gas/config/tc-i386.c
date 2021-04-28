@@ -8929,11 +8929,26 @@ output_jump (void)
   fixP = fix_new_exp (frag_now, p - frag_now->fr_literal, size,
 		      i.op[0].disps, 1, jump_reloc);
 
-  /* All jumps handled here are signed, but don't use a signed limit
-     check for 32 and 16 bit jumps as we want to allow wrap around at
-     4G and 64k respectively.  */
-  if (size == 1)
-    fixP->fx_signed = 1;
+  /* All jumps handled here are signed, but don't unconditionally use a
+     signed limit check for 32 and 16 bit jumps as we want to allow wrap
+     around at 4G (outside of 64-bit mode) and 64k (except for XBEGIN)
+     respectively.  */
+  switch (size)
+    {
+    case 1:
+      fixP->fx_signed = 1;
+      break;
+
+    case 2:
+      if (i.tm.base_opcode == 0xc7f8)
+	fixP->fx_signed = 1;
+      break;
+
+    case 4:
+      if (flag_code == CODE_64BIT)
+	fixP->fx_signed = 1;
+      break;
+    }
 }
 
 static void
@@ -10022,6 +10037,11 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	      fixP = fix_new_exp (frag_now, p - frag_now->fr_literal,
 				  size, i.op[n].disps, pcrel,
 				  reloc_type);
+
+	      if (flag_code == CODE_64BIT && size == 4 && pcrel
+		  && !i.prefix[ADDR_PREFIX])
+		fixP->fx_signed = 1;
+
 	      /* Check for "call/jmp *mem", "mov mem, %reg",
 		 "test %reg, mem" and "binop mem, %reg" where binop
 		 is one of adc, add, and, cmp, or, sbb, sub, xor
@@ -12257,6 +12277,7 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
       enum bfd_reloc_code_real reloc_type;
       unsigned char *opcode;
       int old_fr_fix;
+      fixS *fixP = NULL;
 
       if (fragP->fr_var != NO_RELOC)
 	reloc_type = (enum bfd_reloc_code_real) fragP->fr_var;
@@ -12278,10 +12299,10 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	  /* Make jmp (0xeb) a (d)word displacement jump.  */
 	  opcode[0] = 0xe9;
 	  fragP->fr_fix += size;
-	  fix_new (fragP, old_fr_fix, size,
-		   fragP->fr_symbol,
-		   fragP->fr_offset, 1,
-		   reloc_type);
+	  fixP = fix_new (fragP, old_fr_fix, size,
+			  fragP->fr_symbol,
+			  fragP->fr_offset, 1,
+			  reloc_type);
 	  break;
 
 	case COND_JUMP86:
@@ -12308,8 +12329,6 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	case COND_JUMP:
 	  if (no_cond_jump_promotion && fragP->fr_var == NO_RELOC)
 	    {
-	      fixS *fixP;
-
 	      fragP->fr_fix += 1;
 	      fixP = fix_new (fragP, old_fr_fix, 1,
 			      fragP->fr_symbol,
@@ -12325,16 +12344,23 @@ md_estimate_size_before_relax (fragS *fragP, segT segment)
 	  opcode[0] = TWO_BYTE_OPCODE_ESCAPE;
 	  /* We've added an opcode byte.  */
 	  fragP->fr_fix += 1 + size;
-	  fix_new (fragP, old_fr_fix + 1, size,
-		   fragP->fr_symbol,
-		   fragP->fr_offset, 1,
-		   reloc_type);
+	  fixP = fix_new (fragP, old_fr_fix + 1, size,
+			  fragP->fr_symbol,
+			  fragP->fr_offset, 1,
+			  reloc_type);
 	  break;
 
 	default:
 	  BAD_CASE (fragP->fr_subtype);
 	  break;
 	}
+
+      /* All jumps handled here are signed, but don't unconditionally use a
+	 signed limit check for 32 and 16 bit jumps as we want to allow wrap
+	 around at 4G (outside of 64-bit mode) and 64k.  */
+      if (size == 4 && flag_code == CODE_64BIT)
+	fixP->fx_signed = 1;
+
       frag_wane (fragP);
       return fragP->fr_fix - old_fr_fix;
     }
@@ -13966,9 +13992,11 @@ i386_target_format (void)
 # if defined (TE_PE) || defined (TE_PEP)
     case bfd_target_coff_flavour:
       if (flag_code == CODE_64BIT)
-	return use_big_obj ? "pe-bigobj-x86-64" : "pe-x86-64";
-      else
-	return use_big_obj ? "pe-bigobj-i386" : "pe-i386";
+	{
+	  object_64bit = 1;
+	  return use_big_obj ? "pe-bigobj-x86-64" : "pe-x86-64";
+	}
+      return use_big_obj ? "pe-bigobj-i386" : "pe-i386";
 # elif defined (TE_GO32)
     case bfd_target_coff_flavour:
       return "coff-go32";
