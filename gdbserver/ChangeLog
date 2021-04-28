@@ -1,5 +1,12 @@
 2021-05-08  Pedro Alves  <pedro@palves.net>
 
+	* linux-low.cc:
+	(linux_process_target::supports_disable_randomization): Remove
+	reference to HAVE_PERSONALITY.
+	* config.in, configure: Regenerate.
+
+2021-05-08  Pedro Alves  <pedro@palves.net>
+
 	* linux-low.cc: Don't include sys/personality.h or define
 	ADDR_NO_RANDOMIZE.
 

@@ -6224,11 +6224,7 @@ linux_process_target::core_of_thread (ptid_t ptid)
 bool
 linux_process_target::supports_disable_randomization ()
 {
-#ifdef HAVE_PERSONALITY
   return true;
-#else
-  return false;
-#endif
 }
 
 bool

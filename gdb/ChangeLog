@@ -1,3 +1,13 @@
+2021-05-08  Pedro Alves  <pedro@palves.net>
+
+	* linux-nat.c (linux_nat_target::supports_disable_randomization):
+	Remove references to HAVE_PERSONALITY.
+	* nat/linux-personality.c: Remove references to HAVE_PERSONALITY.
+	(maybe_disable_address_space_randomization)
+	(~maybe_disable_address_space_randomizatio): Remove references to
+	HAVE_PERSONALITY.
+	* config.in, configure: Regenerate.
+
 2021-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cli/cli-cmds.c: Add 'gdbsupport/gdb_tilde_expand.h'

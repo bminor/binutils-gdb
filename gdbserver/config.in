@@ -31,10 +31,6 @@
 /* define if the compiler supports basic C++11 syntax */
 #undef HAVE_CXX11
 
-/* Define to 1 if you have the declaration of `ADDR_NO_RANDOMIZE', and to 0 if
-   you don't. */
-#undef HAVE_DECL_ADDR_NO_RANDOMIZE
-
 /* Define to 1 if you have the declaration of `asprintf', and to 0 if you
    don't. */
 #undef HAVE_DECL_ASPRINTF
@@ -181,9 +177,6 @@
 
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #undef HAVE_NETINET_TCP_H
-
-/* Define if you support the personality syscall. */
-#undef HAVE_PERSONALITY
 
 /* Define to 1 if you have the `pipe' function. */
 #undef HAVE_PIPE

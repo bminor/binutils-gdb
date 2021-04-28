@@ -4022,11 +4022,7 @@ linux_nat_target::supports_multi_process ()
 bool
 linux_nat_target::supports_disable_randomization ()
 {
-#ifdef HAVE_PERSONALITY
   return true;
-#else
-  return false;
-#endif
 }
 
 /* SIGCHLD handler that serves two purposes: In non-stop/async mode,
