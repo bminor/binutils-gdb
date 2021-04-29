@@ -1,3 +1,9 @@
+2021-04-29  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/27786
+	* lib/valgrind.exp (vgdb_start): Use set_remotetimeout.  Increase
+	remotetimeout to 4.
+
 2021-04-28  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/null_overload.exp: New file.
