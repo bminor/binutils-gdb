@@ -14241,7 +14241,11 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	{
 	  /* Resolve size relocation against local symbol to size of
 	     the symbol plus addend.  */
-	  valueT value = S_GET_SIZE (fixp->fx_addsy) + fixp->fx_offset;
+	  valueT value = S_GET_SIZE (fixp->fx_addsy);
+
+	  if (symbol_get_bfdsym (fixp->fx_addsy)->flags & BSF_SECTION_SYM)
+	    value = bfd_section_size (S_GET_SEGMENT (fixp->fx_addsy));
+	  value += fixp->fx_offset;
 	  if (fixp->fx_r_type == BFD_RELOC_SIZE32
 	      && object_64bit
 	      && !fits_in_unsigned_long (value))

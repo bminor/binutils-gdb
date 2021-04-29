@@ -1,3 +1,11 @@
+2021-04-29  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (tc_gen_reloc): Use section size for section
+	symbols when resolving BFD_RELOC_SIZE*.
+	* testsuite/gas/i386/size-2.s: Add section size cases.
+	* testsuite/gas/i386/size-2.d,
+	testsuite/gas/i386/x86-64-size-2.d: Adjust expectations.
+
 2021-04-28  Jan Beulich  <jbeulich@suse.com>
             H.J. Lu  <hjl.tools@gmail.com>
 
