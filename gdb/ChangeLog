@@ -1,3 +1,8 @@
+2021-05-13  Luis Machado  <luis.machado@linaro.org>
+
+	* arch/aarch64-mte-linux.c (aarch64_mte_get_tag_granules): Don't
+	include the last address in the range.
+
 2021-05-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* python/python-internal.h (gdbpy_parse_command_name): Return
