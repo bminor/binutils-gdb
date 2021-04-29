@@ -4703,12 +4703,11 @@ save_waitstatus (struct thread_info *tp, const target_waitstatus *ws)
   tp->suspend.waitstatus = *ws;
   tp->suspend.waitstatus_pending_p = 1;
 
-  struct regcache *regcache = get_thread_regcache (tp);
-  const address_space *aspace = regcache->aspace ();
-
   if (ws->kind == TARGET_WAITKIND_STOPPED
       && ws->value.sig == GDB_SIGNAL_TRAP)
     {
+      struct regcache *regcache = get_thread_regcache (tp);
+      const address_space *aspace = regcache->aspace ();
       CORE_ADDR pc = regcache_read_pc (regcache);
 
       adjust_pc_after_break (tp, &tp->suspend.waitstatus);

@@ -1,3 +1,7 @@
+2021-04-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* infrun.c (save_waitstatus): Move variables to inner scope.
+
 2021-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Fix typo and stray full stop.
