@@ -1,5 +1,19 @@
 2021-04-29  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (i386_validate_fix): Change return type to
+	int. Short-circuit BFD_RELOC_SIZE* handling.
+	(tc_gen_reloc): New local variable sym. Extend logic when
+	processing BFD_RELOC_SIZE*.
+	* config/tc-i386.f (i386_validate_fix): Change return type to
+	int.
+	(TC_VALIDATE_FIX): Proceed to SKIP when i386_validate_fix()
+	returns zero.
+	* testsuite/gas/i386/size-5.s, testsuite/gas/i386/size-5a.d,
+	testsuite/gas/i386/size-5b.d: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2021-04-29  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (tc_gen_reloc): Use section size for section
 	symbols when resolving BFD_RELOC_SIZE*.
 	* testsuite/gas/i386/size-2.s: Add section size cases.

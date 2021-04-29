@@ -14173,9 +14173,17 @@ i386_cons_align (int ignore ATTRIBUTE_UNUSED)
     }
 }
 
-void
+int
 i386_validate_fix (fixS *fixp)
 {
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+  if (fixp->fx_r_type == BFD_RELOC_SIZE32
+      || fixp->fx_r_type == BFD_RELOC_SIZE64)
+    return IS_ELF && fixp->fx_addsy
+	   && (!S_IS_DEFINED (fixp->fx_addsy)
+	       || S_IS_EXTERNAL (fixp->fx_addsy));
+#endif
+
   if (fixp->fx_subsy)
     {
       if (fixp->fx_subsy == GOT_symbol)
@@ -14222,6 +14230,8 @@ i386_validate_fix (fixS *fixp)
 	}
     }
 #endif
+
+  return 1;
 }
 
 arelent *
@@ -14233,18 +14243,38 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
   switch (fixp->fx_r_type)
     {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+      symbolS *sym;
+
     case BFD_RELOC_SIZE32:
     case BFD_RELOC_SIZE64:
-      if (IS_ELF
-	  && S_IS_DEFINED (fixp->fx_addsy)
-	  && !S_IS_EXTERNAL (fixp->fx_addsy))
+      if (fixp->fx_addsy
+	  && !bfd_is_abs_section (S_GET_SEGMENT (fixp->fx_addsy))
+	  && (!fixp->fx_subsy
+	      || bfd_is_abs_section (S_GET_SEGMENT (fixp->fx_subsy))))
+	sym = fixp->fx_addsy;
+      else if (fixp->fx_subsy
+	       && !bfd_is_abs_section (S_GET_SEGMENT (fixp->fx_subsy))
+	       && (!fixp->fx_addsy
+		   || bfd_is_abs_section (S_GET_SEGMENT (fixp->fx_addsy))))
+	sym = fixp->fx_subsy;
+      else
+	sym = NULL;
+      if (IS_ELF && sym && S_IS_DEFINED (sym) && !S_IS_EXTERNAL (sym))
 	{
 	  /* Resolve size relocation against local symbol to size of
 	     the symbol plus addend.  */
-	  valueT value = S_GET_SIZE (fixp->fx_addsy);
+	  valueT value = S_GET_SIZE (sym);
 
-	  if (symbol_get_bfdsym (fixp->fx_addsy)->flags & BSF_SECTION_SYM)
-	    value = bfd_section_size (S_GET_SEGMENT (fixp->fx_addsy));
+	  if (symbol_get_bfdsym (sym)->flags & BSF_SECTION_SYM)
+	    value = bfd_section_size (S_GET_SEGMENT (sym));
+	  if (sym == fixp->fx_subsy)
+	    {
+	      value = -value;
+	      if (fixp->fx_addsy)
+	        value += S_GET_VALUE (fixp->fx_addsy);
+	    }
+	  else if (fixp->fx_subsy)
+	    value -= S_GET_VALUE (fixp->fx_subsy);
 	  value += fixp->fx_offset;
 	  if (fixp->fx_r_type == BFD_RELOC_SIZE32
 	      && object_64bit
@@ -14254,6 +14284,12 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 	  fixp->fx_addsy = NULL;
 	  fixp->fx_subsy = NULL;
 	  md_apply_fix (fixp, (valueT *) &value, NULL);
+	  return NULL;
+	}
+      if (!fixp->fx_addsy || fixp->fx_subsy)
+	{
+	  as_bad_where (fixp->fx_file, fixp->fx_line,
+			"unsupported expression involving @size");
 	  return NULL;
 	}
 #endif
