@@ -1,3 +1,7 @@
+2021-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Fix typo and stray full stop.
+
 2021-04-28  Tom Tromey  <tromey@adacore.com>
 
 	* ada-exp.y (primary): Use new type for null pointer.

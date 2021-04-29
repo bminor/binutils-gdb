@@ -109,7 +109,7 @@ show print type hex
 set python ignore-environment on|off
 show python ignore-environment
   When 'on', this causes GDB's builtin Python to ignore any
-  environment variables that would otherwise effect how Python
+  environment variables that would otherwise affect how Python
   behaves.  This command needs to be added to an early initialization
   file (e.g. ~/.config/gdb/gdbearlyinit) in order to affect GDB.
 
@@ -120,7 +120,7 @@ show python dont-write-bytecode
   an early initialization file (e.g. ~/.config/gdb/gdbearlyinit) in
   order to affect GDB.  When 'off' byte-code will always be written.
   When set to 'auto' (the default) Python will check the
-  PYTHONDONTWRITEBYTECODE. environment variable.
+  PYTHONDONTWRITEBYTECODE environment variable.
 
 * Changed commands
 
