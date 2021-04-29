@@ -1,3 +1,11 @@
+2021-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 27792
+	* som.c (som_slurp_string_table): Place a terminating NUL byte at
+	the end of the table.
+	(som_slurp_symbol_table): Check for an over-large offset into the
+	string string table.
+
 2021-04-28  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (_bfd_elf_maybe_function_sym): Do not accept annobin

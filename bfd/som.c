@@ -4576,9 +4576,11 @@ som_slurp_string_table (bfd *abfd)
   if (bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET) != 0)
     return false;
   amt = obj_som_stringtab_size (abfd);
-  stringtab = (char *) _bfd_malloc_and_read (abfd, amt, amt);
+  stringtab = (char *) _bfd_malloc_and_read (abfd, amt + 1, amt);
   if (stringtab == NULL)
     return false;
+  /* Make sure that the strings are zero-terminated.  */
+  stringtab[amt] = 0;
 
   /* Save our results and return success.  */
   obj_som_stringtab (abfd) = stringtab;
@@ -4697,6 +4699,7 @@ som_slurp_symbol_table (bfd *abfd)
 	(flags >> SOM_SYMBOL_TYPE_SH) & SOM_SYMBOL_TYPE_MASK;
       unsigned int symbol_scope =
 	(flags >> SOM_SYMBOL_SCOPE_SH) & SOM_SYMBOL_SCOPE_MASK;
+      bfd_vma offset;
 
       /* I don't think we care about these.  */
       if (symbol_type == ST_SYM_EXT || symbol_type == ST_ARG_EXT)
@@ -4728,7 +4731,14 @@ som_slurp_symbol_table (bfd *abfd)
 
       /* Some reasonable defaults.  */
       sym->symbol.the_bfd = abfd;
-      sym->symbol.name = bfd_getb32 (bufp->name) + stringtab;
+      offset = bfd_getb32 (bufp->name);
+      if (offset < obj_som_stringtab_size (abfd))
+	sym->symbol.name = offset + stringtab;
+      else
+	{
+	  bfd_set_error (bfd_error_bad_value);
+	  goto error_return;
+	}
       sym->symbol.value = bfd_getb32 (bufp->symbol_value);
       sym->symbol.section = 0;
       sym->symbol.flags = 0;
@@ -4795,7 +4805,6 @@ som_slurp_symbol_table (bfd *abfd)
       /* Check for a weak symbol.  */
       if (flags & SOM_SYMBOL_SECONDARY_DEF)
 	sym->symbol.flags |= BSF_WEAK;
-
       /* Mark section symbols and symbols used by the debugger.
 	 Note $START$ is a magic code symbol, NOT a section symbol.  */
       if (sym->symbol.name[0] == '$'
@@ -4809,7 +4818,6 @@ som_slurp_symbol_table (bfd *abfd)
 	}
       else if (startswith (sym->symbol.name, "L$0\001"))
 	sym->symbol.flags |= BSF_DEBUGGING;
-
       /* Note increment at bottom of loop, since we skip some symbols
 	 we can not include it as part of the for statement.  */
       sym++;
