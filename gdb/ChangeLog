@@ -1,3 +1,20 @@
+2021-06-07  Carl Love  <cel@us.ibm.com>
+
+	* ppc-tdep.h (ppc_insn_prefix_dform): Declare.
+	* ppc64-tdep.c(insn_md, insn_x, insn_xo): New macros.
+	(ppc64_plt_pcrel_entry_point, ppc64_pcrel_linkage1_target,
+	ppc64_pcrel_linkage2_target): New functions.
+	(ppc64_standard_linkage9, ppc64_standard_linkage10,
+	ppc64_standard_linkage11, ppc64_standard_linkage12): New ppc
+	instruction patterns.
+	(ppc64_standard_linkage9, ppc64_standard_linkage10,
+	ppc64_standard_linkage11, ppc64_standard_linkage12): New variables
+	in define MAX expression.
+	(ppc64_skip_trampoline_code_1): Handle ppc64_standard_linkage9,
+	ppc64_standard_linkage10, ppc64_standard_linkage11,
+	ppc64_standard_linkage12.
+	* (ppc_insn_prefix_dform): New function.
+
 2021-06-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/27899

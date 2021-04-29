@@ -7371,6 +7371,14 @@ ppc_insn_ds_field (unsigned int insn)
   return ((((CORE_ADDR) insn & 0xfffc) ^ 0x8000) - 0x8000);
 }
 
+CORE_ADDR
+ppc_insn_prefix_dform (unsigned int insn1, unsigned int insn2)
+{
+  /* result is 34-bits  */
+  return (CORE_ADDR) ((((insn1 & 0x3ffff) ^ 0x20000) - 0x20000) << 16)
+    | (CORE_ADDR)(insn2 & 0xffff);
+}
+
 /* Initialization code.  */
 
 void _initialize_rs6000_tdep ();
