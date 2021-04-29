@@ -1,5 +1,13 @@
 2021-04-29  Nick Clifton  <nickc@redhat.com>
 
+	PR 27793
+	* som.c (som_slurp_symbol_table): Assign symbols without any scope
+	to the undefined section.
+	(som_decode_symclass): Check for a missing symbol section.
+	* syms.c (bfd_decode_symclass): Likewise.
+
+2021-04-29  Nick Clifton  <nickc@redhat.com>
+
 	PR 27792
 	* som.c (som_slurp_string_table): Place a terminating NUL byte at
 	the end of the table.

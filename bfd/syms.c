@@ -654,6 +654,10 @@ bfd_decode_symclass (asymbol *symbol)
 {
   char c;
 
+  /* Paranoia...  */
+  if (symbol == NULL || symbol->section == NULL)
+    return '?';
+
   if (symbol->section && bfd_is_com_section (symbol->section))
     {
       if (symbol->section->flags & SEC_SMALL_DATA)

@@ -4740,7 +4740,7 @@ som_slurp_symbol_table (bfd *abfd)
 	  goto error_return;
 	}
       sym->symbol.value = bfd_getb32 (bufp->symbol_value);
-      sym->symbol.section = 0;
+      sym->symbol.section = NULL;
       sym->symbol.flags = 0;
 
       switch (symbol_type)
@@ -4799,6 +4799,10 @@ som_slurp_symbol_table (bfd *abfd)
 	  sym->symbol.flags |= BSF_LOCAL;
 	  sym->symbol.section = bfd_section_from_som_symbol (abfd, bufp);
 	  sym->symbol.value -= sym->symbol.section->vma;
+	  break;
+
+	default:
+	  sym->symbol.section = bfd_und_section_ptr;
 	  break;
 	}
 
@@ -5847,6 +5851,11 @@ static int
 som_decode_symclass (asymbol *symbol)
 {
   char c;
+
+  /* If the symbol did not have a scope specified,
+     then it will not have associated section.  */
+  if (symbol == NULL || symbol->section == NULL)
+    return '?';
 
   if (bfd_is_com_section (symbol->section))
     return 'C';
