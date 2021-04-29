@@ -1,3 +1,10 @@
+2021-05-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR testsuite/27788
+	* gdb.python/py-startup-opt.exp (test_python_settings): Change the
+	expected results when environment variable PYTHONDONTWRITEBYTECODE
+	is set.
+
 2021-04-30  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/enum_idx_packed/pck.ads (My_Enum, My_Array_Type)

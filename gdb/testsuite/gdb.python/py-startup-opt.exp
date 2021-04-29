@@ -62,13 +62,41 @@ proc test_python_settings { exp_state } {
     gdb_test_no_output "python import sys"
 
     foreach_with_prefix attr {ignore_environment dont_write_bytecode} {
+
+	# If we are checking 'dont_write_bytecode', and we are
+	# expecting this attribute to be 'off', then, if the user has
+	# PYTHONDONTWRITEBYTECODE set in their environment, the result
+	# will be 'on' instead of 'off', so override the expected
+	# result here.
+	#
+	# The reason for this is, 'set python dont-write-bytecode' by
+	# default is set to 'auto', which means, so long as 'set
+	# python ignore-environment' is 'off', GDB will check for the
+	# above environment variable.
+	#
+	# We could unset the environment variable, but until Python
+	# 3.8 there was no way to control where .pyc files are placed,
+	# and it feels bad to cause .pyc files to be created within
+	# the users filesystem when they clearly don't want them.
+	#
+	# And so, we adjust the expected results.  Hopefully, between
+	# all GDB developers some will test GDB with this environment
+	# variable unset.
+	if { $attr == "dont_write_bytecode" \
+		 && $exp_state == "off"
+		 && [info exists ::env(PYTHONDONTWRITEBYTECODE)] } {
+	    set answer "on"
+	} else {
+	    set answer $exp_state
+	}
+
 	gdb_test_multiline "testname" \
 	    "python" "" \
 	    "if hasattr(sys, 'flags') and getattr(sys.flags, '${attr}', False):" "" \
 	    "  print (\"${attr} is on\")" "" \
 	    "else:" "" \
 	    "  print (\"${attr} is off\")" "" \
-	    "end" "${attr} is ${exp_state}"
+	    "end" "${attr} is ${answer}"
     }
 
     gdb_exit
