@@ -765,7 +765,6 @@ if [gas_64_check] then {
     run_list_test "pcrel64" "-al"
     run_dump_test "x86-64-rip"
     run_dump_test "x86-64-rip-intel"
-    run_dump_test "x86-64-rip-2"
     run_list_test "x86-64-rip-inval-1" "-al"
     run_list_test "x86-64-rip-inval-2" "-al"
     run_dump_test "x86-64-stack"
@@ -1277,6 +1276,8 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-branch-3"
 	run_list_test "x86-64-branch-4" "-al -mintel64"
 	run_list_test "x86-64-branch-5" "-al"
+
+	run_dump_test "x86-64-rip-2"
 
 	run_dump_test "x86-64-gotpcrel"
 	run_dump_test "x86-64-gotpcrel-no-relax"
