@@ -1,3 +1,7 @@
+2021-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* auto-load.h: Split namespace declaration.
+
 2021-04-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.c (save_waitstatus): Move variables to inner scope.

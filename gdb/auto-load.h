@@ -25,9 +25,11 @@ struct program_space;
 struct auto_load_pspace_info;
 struct extension_language_defn;
 
-namespace gdb::observers {
+namespace gdb {
+namespace observers {
 struct token;
-}
+} /* namespace observers */
+} /* namespace gdb */
 
 /* Value of the 'set debug auto-load' configuration variable.  */
 
