@@ -1,3 +1,9 @@
+2021-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 27594
+	* doc/binutils.texi (windres): Correct the description of the
+	default value of the --preprocessor argument.
+
 2021-04-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 27779
