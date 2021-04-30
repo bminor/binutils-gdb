@@ -1619,6 +1619,8 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
 	return NULL;
 
       GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
+      if (namlen > bfd_get_file_size (abfd))
+	return NULL;
       amt = sizeof (struct areltdata) + SIZEOF_AR_HDR + namlen + 1;
       ret = (struct areltdata *) bfd_malloc (amt);
       if (ret == NULL)
@@ -1646,6 +1648,8 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
 	return NULL;
 
       GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
+      if (namlen > bfd_get_file_size (abfd))
+	return NULL;
       amt = sizeof (struct areltdata) + SIZEOF_AR_HDR_BIG + namlen + 1;
       ret = (struct areltdata *) bfd_malloc (amt);
       if (ret == NULL)

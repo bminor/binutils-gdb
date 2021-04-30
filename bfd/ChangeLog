@@ -1,3 +1,9 @@
+2021-04-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 27795
+	* coff-rs6000.c (_bfd_xcoff_read_ar_hdr): Check for invalid name
+	lengths.
+
 2021-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 27793
