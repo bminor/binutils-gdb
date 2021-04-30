@@ -1,5 +1,11 @@
 2021-04-30  Nick Clifton  <nickc@redhat.com>
 
+	PR 27799
+	* elf32-xtensa.c (elf_xtensa_grok_prstatus): Check for core notes
+	that are too small.
+
+2021-04-30  Nick Clifton  <nickc@redhat.com>
+
 	PR 27797
 	* libbfd.c (bfd_realloc_or_free): Do not free a pointer than has
 	been realloc'ed to size 0.
