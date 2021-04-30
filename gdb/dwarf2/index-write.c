@@ -615,7 +615,7 @@ write_one_signatured_type (void **slot, void *d)
   struct signatured_type_index_data *info
     = (struct signatured_type_index_data *) d;
   struct signatured_type *entry = (struct signatured_type *) *slot;
-  partial_symtab *psymtab = entry->per_cu.v.psymtab;
+  partial_symtab *psymtab = entry->v.psymtab;
 
   if (psymtab == nullptr)
     {
@@ -633,7 +633,7 @@ write_one_signatured_type (void **slot, void *d)
 		  1);
 
   info->types_list.append_uint (8, BFD_ENDIAN_LITTLE,
-				to_underlying (entry->per_cu.sect_off));
+				to_underlying (entry->sect_off));
   info->types_list.append_uint (8, BFD_ENDIAN_LITTLE,
 				to_underlying (entry->type_offset_in_tu));
   info->types_list.append_uint (8, BFD_ENDIAN_LITTLE, entry->signature);
@@ -1259,7 +1259,7 @@ private:
   write_one_signatured_type (struct signatured_type *entry,
 			     struct signatured_type_index_data *info)
   {
-    partial_symtab *psymtab = entry->per_cu.v.psymtab;
+    partial_symtab *psymtab = entry->v.psymtab;
 
     write_psymbols (info->psyms_seen, psymtab->global_psymbols,
 		    info->cu_index, false, unit_kind::tu);
@@ -1267,7 +1267,7 @@ private:
 		    info->cu_index, true, unit_kind::tu);
 
     info->types_list.append_uint (dwarf5_offset_size (), m_dwarf5_byte_order,
-				  to_underlying (entry->per_cu.sect_off));
+				  to_underlying (entry->sect_off));
 
     ++info->cu_index;
   }
@@ -1312,16 +1312,16 @@ private:
 static bool
 check_dwarf64_offsets (dwarf2_per_objfile *per_objfile)
 {
-  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
+  for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
     {
-      if (to_underlying (per_cu->sect_off) >= (static_cast<uint64_t> (1) << 32))
+      if (to_underlying (per_cu->sect_off)
+	  >= (static_cast<uint64_t> (1) << 32))
 	return true;
     }
-  for (const signatured_type *sigtype : per_objfile->per_bfd->all_type_units)
+  for (const auto &sigtype : per_objfile->per_bfd->all_type_units)
     {
-      const dwarf2_per_cu_data &per_cu = sigtype->per_cu;
-
-      if (to_underlying (per_cu.sect_off) >= (static_cast<uint64_t> (1) << 32))
+      if (to_underlying (sigtype->sect_off)
+	  >= (static_cast<uint64_t> (1) << 32))
 	return true;
     }
   return false;
@@ -1337,7 +1337,7 @@ static size_t
 psyms_seen_size (dwarf2_per_objfile *per_objfile)
 {
   size_t psyms_count = 0;
-  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
+  for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
     {
       partial_symtab *psymtab = per_cu->v.psymtab;
 
@@ -1440,7 +1440,8 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
     (psyms_seen_size (per_objfile));
   for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
     {
-      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->all_comp_units[i];
+      dwarf2_per_cu_data *per_cu
+	= per_objfile->per_bfd->all_comp_units[i].get ();
       partial_symtab *psymtab = per_cu->v.psymtab;
 
       if (psymtab != NULL)
@@ -1521,7 +1522,8 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
     psyms_seen (psyms_seen_size (per_objfile));
   for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
     {
-      const dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->all_comp_units[i];
+      const dwarf2_per_cu_data *per_cu
+	= per_objfile->per_bfd->all_comp_units[i].get ();
       partial_symtab *psymtab = per_cu->v.psymtab;
 
       /* CU of a shared file from 'dwz -m' may be unused by this main

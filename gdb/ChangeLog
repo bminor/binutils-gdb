@@ -1,3 +1,49 @@
+2021-04-30  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_bfd) <allocate_per_cu,
+	allocate_signatured_type>: Change return type.
+	<all_comp_units, all_type_units>: Hold unique pointers.
+	(struct dwarf2_per_cu_data): Add constructor and initializers.
+	(struct signatured_type): Derive from dwarf2_per_cu_data.
+	* dwarf2/read.c (type_unit_group): Derive from
+	dwarf2_per_cu_data.
+	(dwarf2_per_bfd::get_cutu, dwarf2_per_bfd::get_cu)
+	(dwarf2_per_bfd::get_tu)
+	(dwarf2_per_bfd::allocate_signatured_type)
+	(dwarf2_per_bfd::allocate_signatured_type)
+	(create_cu_from_index_list, create_cus_from_index_list)
+	(create_signatured_type_table_from_index)
+	(create_signatured_type_table_from_debug_names)
+	(create_addrmap_from_aranges)
+	(dwarf2_base_index_functions::find_last_source_symtab)
+	(dw_expand_symtabs_matching_file_matcher)
+	(dwarf2_gdb_index::expand_symtabs_matching)
+	(dwarf2_base_index_functions::map_symbol_filenames)
+	(create_cus_from_debug_names_list)
+	(dw2_debug_names_iterator::next)
+	(dwarf2_debug_names_index::expand_symtabs_matching)
+	(create_debug_type_hash_table, add_type_unit)
+	(fill_in_sig_entry_from_dwo_entry, lookup_dwo_signatured_type):
+	Update.
+	(allocate_type_unit_groups_table): Use delete.
+	(create_type_unit_group): Change return type.  Use new.
+	(get_type_unit_group, build_type_psymtabs_1)
+	(build_type_psymtab_dependencies)
+	(process_skeletonless_type_unit, set_partial_user)
+	(dwarf2_build_psymtabs_hard, read_comp_units_from_section)
+	(create_cus_hash_table, queue_and_load_dwo_tu, follow_die_sig_1)
+	(read_signatured_type): Update.
+	(dwarf2_find_containing_comp_unit): Change type of
+	'all_comp_units'.
+	(run_test): Update.
+	(dwarf2_per_bfd::allocate_per_cu)
+	(dwarf2_per_bfd::allocate_signatured_type): Change return type.
+	Use new.
+	(add_signatured_type_cu_to_table): Update.
+	* dwarf2/index-write.c (write_one_signatured_type)
+	(check_dwarf64_offsets, psyms_seen_size, write_gdbindex)
+	(write_debug_names): Update.
+
 2021-04-30  Tom Tromey  <tromey@adacore.com>
 
 	* nat/windows-nat.h (get_image_name): Don't declare.
