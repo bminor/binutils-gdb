@@ -42,6 +42,7 @@ struct tu_stats
   int nr_symtab_sharers;
   int nr_stmt_less_type_units;
   int nr_all_type_units_reallocs;
+  int nr_tus;
 };
 
 struct dwarf2_cu;
@@ -93,29 +94,11 @@ struct dwarf2_per_bfd
 
   DISABLE_COPY_AND_ASSIGN (dwarf2_per_bfd);
 
-  /* Return the CU/TU given its index.
-
-     This is intended for loops like:
-
-     for (i = 0; i < (dwarf2_per_bfd->n_comp_units
-		      + dwarf2_per_bfd->n_type_units); ++i)
-       {
-	 dwarf2_per_cu_data *per_cu = dwarf2_per_bfd->get_cutu (i);
-
-	 ...;
-       }
-  */
-  dwarf2_per_cu_data *get_cutu (int index);
-
-  /* Return the CU given its index.
-     This differs from get_cutu in that it's for when you know INDEX refers to a
-     CU.  */
-  dwarf2_per_cu_data *get_cu (int index);
-
-  /* Return the TU given its index.
-     This differs from get_cutu in that it's for when you know INDEX refers to a
-     TU.  */
-  signatured_type *get_tu (int index);
+  /* Return the CU given its index.  */
+  dwarf2_per_cu_data *get_cu (int index) const
+  {
+    return this->all_comp_units[index].get ();
+  }
 
   /* A convenience function to allocate a dwarf2_per_cu_data.  The
      returned object has its "index" field set properly.  The object
@@ -172,9 +155,6 @@ public:
   /* Table of all the compilation units.  This is used to locate
      the target compilation unit of a particular reference.  */
   std::vector<std::unique_ptr<dwarf2_per_cu_data>> all_comp_units;
-
-  /* The .debug_types-related CUs (TUs).  */
-  std::vector<std::unique_ptr<signatured_type>> all_type_units;
 
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */

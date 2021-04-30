@@ -1318,12 +1318,6 @@ check_dwarf64_offsets (dwarf2_per_objfile *per_objfile)
 	  >= (static_cast<uint64_t> (1) << 32))
 	return true;
     }
-  for (const auto &sigtype : per_objfile->per_bfd->all_type_units)
-    {
-      if (to_underlying (sigtype->sect_off)
-	  >= (static_cast<uint64_t> (1) << 32))
-	return true;
-    }
   return false;
 }
 
@@ -1438,10 +1432,14 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
 
   std::unordered_set<partial_symbol *> psyms_seen
     (psyms_seen_size (per_objfile));
+  int counter = 0;
   for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
     {
       dwarf2_per_cu_data *per_cu
 	= per_objfile->per_bfd->all_comp_units[i].get ();
+      if (per_cu->is_debug_types)
+	continue;
+
       partial_symtab *psymtab = per_cu->v.psymtab;
 
       if (psymtab != NULL)
@@ -1450,7 +1448,7 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
 	    recursively_write_psymbols (objfile, psymtab, &symtab,
 					psyms_seen, i);
 
-	  const auto insertpair = cu_index_htab.emplace (psymtab, i);
+	  const auto insertpair = cu_index_htab.emplace (psymtab, counter);
 	  gdb_assert (insertpair.second);
 	}
 
@@ -1461,6 +1459,7 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
       cu_list.append_uint (8, BFD_ENDIAN_LITTLE,
 			   to_underlying (per_cu->sect_off));
       cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length);
+      ++counter;
     }
 
   /* Dump the address map.  */
@@ -1476,7 +1475,8 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
 
       sig_data.objfile = objfile;
       sig_data.symtab = &symtab;
-      sig_data.cu_index = per_objfile->per_bfd->all_comp_units.size ();
+      sig_data.cu_index = (per_objfile->per_bfd->all_comp_units.size ()
+			   - per_objfile->per_bfd->tu_stats.nr_tus);
       htab_traverse_noresize (per_objfile->per_bfd->signatured_types.get (),
 			      write_one_signatured_type, &sig_data);
     }
@@ -1520,10 +1520,14 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
   debug_names nametable (per_objfile, dwarf5_is_dwarf64, dwarf5_byte_order);
   std::unordered_set<partial_symbol *>
     psyms_seen (psyms_seen_size (per_objfile));
+  int counter = 0;
   for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
     {
       const dwarf2_per_cu_data *per_cu
 	= per_objfile->per_bfd->all_comp_units[i].get ();
+      if (per_cu->is_debug_types)
+	continue;
+
       partial_symtab *psymtab = per_cu->v.psymtab;
 
       /* CU of a shared file from 'dwz -m' may be unused by this main
@@ -1533,10 +1537,12 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
 	continue;
 
       if (psymtab->user == NULL)
-	nametable.recursively_write_psymbols (objfile, psymtab, psyms_seen, i);
+	nametable.recursively_write_psymbols (objfile, psymtab, psyms_seen,
+					      counter);
 
       cu_list.append_uint (nametable.dwarf5_offset_size (), dwarf5_byte_order,
 			   to_underlying (per_cu->sect_off));
+      ++counter;
     }
 
   /* Write out the .debug_type entries, if any.  */
@@ -1590,12 +1596,13 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
 
   /* comp_unit_count - The number of CUs in the CU list.  */
   header.append_uint (4, dwarf5_byte_order,
-		      per_objfile->per_bfd->all_comp_units.size ());
+		      per_objfile->per_bfd->all_comp_units.size ()
+		      - per_objfile->per_bfd->tu_stats.nr_tus);
 
   /* local_type_unit_count - The number of TUs in the local TU
      list.  */
   header.append_uint (4, dwarf5_byte_order,
-		      per_objfile->per_bfd->all_type_units.size ());
+		      per_objfile->per_bfd->tu_stats.nr_tus);
 
   /* foreign_type_unit_count - The number of TUs in the foreign TU
      list.  */

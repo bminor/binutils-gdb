@@ -1,5 +1,28 @@
 2021-04-30  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h (struct tu_stats) <nr_tus>: New member.
+	(struct dwarf2_per_bfd) <get_cutu, get_tu>: Remove
+	<get_cu>: Now inline.
+	<all_type_units>: Remove.
+	* dwarf2/read.c (dwarf2_per_bfd::~dwarf2_per_bfd): Update.
+	(dwarf2_per_bfd::get_cutu, dwarf2_per_bfd::get_cu)
+	(dwarf2_per_bfd::get_tu): Remove.
+	(dwarf2_per_bfd::allocate_signatured_type): Update nr_tus.
+	(create_signatured_type_table_from_index)
+	(create_signatured_type_table_from_debug_names)
+	(dw2_symtab_iter_next, dwarf2_base_index_functions::print_stats)
+	(dwarf2_base_index_functions::expand_all_symtabs)
+	(dw2_expand_marked_cus, dw_expand_symtabs_matching_file_matcher)
+	(dwarf2_base_index_functions::map_symbol_filenames)
+	(dw2_debug_names_iterator::next, dwarf2_initialize_objfile)
+	(add_signatured_type_cu_to_table, create_all_type_units)
+	(add_type_unit, build_type_psymtabs_1, print_tu_stats)
+	(create_all_comp_units): Update.
+	* dwarf2/index-write.c (check_dwarf64_offsets, write_gdbindex)
+	(write_debug_names): Update.
+
+2021-04-30  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (struct dwarf2_per_bfd) <allocate_per_cu,
 	allocate_signatured_type>: Change return type.
 	<all_comp_units, all_type_units>: Hold unique pointers.

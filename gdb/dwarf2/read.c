@@ -1900,9 +1900,6 @@ dwarf2_per_bfd::~dwarf2_per_bfd ()
   for (auto &per_cu : all_comp_units)
     per_cu->imported_symtabs_free ();
 
-  for (auto &sig_type : all_type_units)
-    sig_type->imported_symtabs_free ();
-
   /* Everything else should be on this->obstack.  */
 }
 
@@ -2525,41 +2522,6 @@ dw2_instantiate_symtab (dwarf2_per_cu_data *per_cu,
   return per_objfile->get_symtab (per_cu);
 }
 
-/* See declaration.  */
-
-dwarf2_per_cu_data *
-dwarf2_per_bfd::get_cutu (int index)
-{
-  if (index >= this->all_comp_units.size ())
-    {
-      index -= this->all_comp_units.size ();
-      gdb_assert (index < this->all_type_units.size ());
-      return this->all_type_units[index].get ();
-    }
-
-  return this->all_comp_units[index].get ();
-}
-
-/* See declaration.  */
-
-dwarf2_per_cu_data *
-dwarf2_per_bfd::get_cu (int index)
-{
-  gdb_assert (index >= 0 && index < this->all_comp_units.size ());
-
-  return this->all_comp_units[index].get ();
-}
-
-/* See declaration.  */
-
-signatured_type *
-dwarf2_per_bfd::get_tu (int index)
-{
-  gdb_assert (index >= 0 && index < this->all_type_units.size ());
-
-  return this->all_type_units[index].get ();
-}
-
 /* See read.h.  */
 
 std::unique_ptr<dwarf2_per_cu_data>
@@ -2579,6 +2541,7 @@ dwarf2_per_bfd::allocate_signatured_type ()
   std::unique_ptr<signatured_type> result (new signatured_type);
   result->per_bfd = this;
   result->index = m_num_psymtabs++;
+  tu_stats.nr_tus++;
   return result;
 }
 
@@ -2655,9 +2618,6 @@ create_signatured_type_table_from_index
   (dwarf2_per_bfd *per_bfd, struct dwarf2_section_info *section,
    const gdb_byte *bytes, offset_type elements)
 {
-  gdb_assert (per_bfd->all_type_units.empty ());
-  per_bfd->all_type_units.reserve (elements / 3);
-
   htab_up sig_types_hash = allocate_signatured_type_table ();
 
   for (offset_type i = 0; i < elements; i += 3)
@@ -2689,7 +2649,7 @@ create_signatured_type_table_from_index
       slot = htab_find_slot (sig_types_hash.get (), sig_type.get (), INSERT);
       *slot = sig_type.get ();
 
-      per_bfd->all_type_units.push_back (std::move (sig_type));
+      per_bfd->all_comp_units.push_back (std::move (sig_type));
     }
 
   per_bfd->signatured_types = std::move (sig_types_hash);
@@ -2708,9 +2668,6 @@ create_signatured_type_table_from_debug_names
 
   section->read (objfile);
   abbrev_section->read (objfile);
-
-  gdb_assert (per_objfile->per_bfd->all_type_units.empty ());
-  per_objfile->per_bfd->all_type_units.reserve (map.tu_count);
 
   htab_up sig_types_hash = allocate_signatured_type_table ();
 
@@ -2744,7 +2701,7 @@ create_signatured_type_table_from_debug_names
       slot = htab_find_slot (sig_types_hash.get (), sig_type.get (), INSERT);
       *slot = sig_type.get ();
 
-      per_objfile->per_bfd->all_type_units.push_back (std::move (sig_type));
+      per_objfile->per_bfd->all_comp_units.push_back (std::move (sig_type));
     }
 
   per_objfile->per_bfd->signatured_types = std::move (sig_types_hash);
@@ -3421,15 +3378,14 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
 	 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
 
       /* Don't crash on bad data.  */
-      if (cu_index >= (per_objfile->per_bfd->all_comp_units.size ()
-		       + per_objfile->per_bfd->all_type_units.size ()))
+      if (cu_index >= per_objfile->per_bfd->all_comp_units.size ())
 	{
 	  complaint (_(".gdb_index entry has bad CU index"
 		       " [in module %s]"), objfile_name (per_objfile->objfile));
 	  continue;
 	}
 
-      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cutu (cu_index);
+      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cu (cu_index);
 
       /* Skip if already read in.  */
       if (per_objfile->symtab_set_p (per_cu))
@@ -3503,13 +3459,12 @@ dwarf2_base_index_functions::print_stats (struct objfile *objfile,
     return;
 
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  int total = (per_objfile->per_bfd->all_comp_units.size ()
-	       + per_objfile->per_bfd->all_type_units.size ());
+  int total = per_objfile->per_bfd->all_comp_units.size ();
   int count = 0;
 
   for (int i = 0; i < total; ++i)
     {
-      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cutu (i);
+      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cu (i);
 
       if (!per_objfile->symtab_set_p (per_cu))
 	++count;
@@ -3544,12 +3499,11 @@ void
 dwarf2_base_index_functions::expand_all_symtabs (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  int total_units = (per_objfile->per_bfd->all_comp_units.size ()
-		     + per_objfile->per_bfd->all_type_units.size ());
+  int total_units = per_objfile->per_bfd->all_comp_units.size ();
 
   for (int i = 0; i < total_units; ++i)
     {
-      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cutu (i);
+      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cu (i);
 
       /* We don't want to directly expand a partial CU, because if we
 	 read it with the wrong language, then assertion failures can
@@ -4498,15 +4452,14 @@ dw2_expand_marked_cus
 	}
 
       /* Don't crash on bad data.  */
-      if (cu_index >= (per_objfile->per_bfd->all_comp_units.size ()
-		       + per_objfile->per_bfd->all_type_units.size ()))
+      if (cu_index >= per_objfile->per_bfd->all_comp_units.size ())
 	{
 	  complaint (_(".gdb_index entry has bad CU index"
 		       " [in module %s]"), objfile_name (per_objfile->objfile));
 	  continue;
 	}
 
-      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cutu (cu_index);
+      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->get_cu (cu_index);
       if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile, file_matcher,
 					    expansion_notify))
 	return false;
@@ -4541,6 +4494,8 @@ dw_expand_symtabs_matching_file_matcher
     {
       QUIT;
 
+      if (per_cu->is_debug_types)
+	continue;
       per_cu->v.quick->mark = 0;
 
       /* We only need to look at symtabs not already expanded.  */
@@ -5353,11 +5308,11 @@ dw2_debug_names_iterator::next ()
 			 objfile_name (objfile));
 	      continue;
 	    }
-	  per_cu = per_bfd->get_cutu (ull);
+	  per_cu = per_bfd->get_cu (ull);
 	  break;
 	case DW_IDX_type_unit:
 	  /* Don't crash on bad data.  */
-	  if (ull >= per_bfd->all_type_units.size ())
+	  if (ull >= per_bfd->tu_stats.nr_tus)
 	    {
 	      complaint (_(".debug_names entry has bad TU index %s"
 			   " [in module %s]"),
@@ -5365,7 +5320,7 @@ dw2_debug_names_iterator::next ()
 			 objfile_name (objfile));
 	      continue;
 	    }
-	  per_cu = per_bfd->get_tu (ull);
+	  per_cu = per_bfd->get_cu (ull + per_bfd->tu_stats.nr_tus);
 	  break;
 	case DW_IDX_die_offset:
 	  /* In a per-CU index (as opposed to a per-module index), index
@@ -5706,10 +5661,9 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 	= create_quick_file_names_table (per_bfd->all_comp_units.size ());
       per_objfile->resize_symtabs ();
 
-      for (int i = 0; i < (per_bfd->all_comp_units.size ()
-			   + per_bfd->all_type_units.size ()); ++i)
+      for (int i = 0; i < per_bfd->all_comp_units.size (); ++i)
 	{
-	  dwarf2_per_cu_data *per_cu = per_bfd->get_cutu (i);
+	  dwarf2_per_cu_data *per_cu = per_bfd->get_cu (i);
 
 	  per_cu->v.quick = OBSTACK_ZALLOC (&per_bfd->obstack,
 					    struct dwarf2_per_cu_quick_data);
@@ -6054,10 +6008,10 @@ static int
 add_signatured_type_cu_to_table (void **slot, void *datum)
 {
   struct signatured_type *sigt = (struct signatured_type *) *slot;
-  std::vector<std::unique_ptr<signatured_type>> *all_type_units
-    = (std::vector<std::unique_ptr<signatured_type>> *) datum;
+  std::vector<std::unique_ptr<dwarf2_per_cu_data>> *all_comp_units
+    = (std::vector<std::unique_ptr<dwarf2_per_cu_data>> *) datum;
 
-  all_type_units->emplace_back (sigt);
+  all_comp_units->emplace_back (sigt);
 
   return 1;
 }
@@ -6225,7 +6179,7 @@ create_debug_types_hash_table (dwarf2_per_objfile *per_objfile,
 }
 
 /* Create the hash table of all entries in the .debug_types section,
-   and initialize all_type_units.
+   and update all_comp_units.
    The result is zero if there is an error (e.g. missing .debug_types section),
    otherwise non-zero.	*/
 
@@ -6246,13 +6200,9 @@ create_all_type_units (dwarf2_per_objfile *per_objfile)
 
   per_objfile->per_bfd->signatured_types = std::move (types_htab);
 
-  gdb_assert (per_objfile->per_bfd->all_type_units.empty ());
-  per_objfile->per_bfd->all_type_units.reserve
-    (htab_elements (per_objfile->per_bfd->signatured_types.get ()));
-
   htab_traverse_noresize (per_objfile->per_bfd->signatured_types.get (),
 			  add_signatured_type_cu_to_table,
-			  &per_objfile->per_bfd->all_type_units);
+			  &per_objfile->per_bfd->all_comp_units);
 
   return 1;
 }
@@ -6264,8 +6214,8 @@ create_all_type_units (dwarf2_per_objfile *per_objfile)
 static struct signatured_type *
 add_type_unit (dwarf2_per_objfile *per_objfile, ULONGEST sig, void **slot)
 {
-  if (per_objfile->per_bfd->all_type_units.size ()
-      == per_objfile->per_bfd->all_type_units.capacity ())
+  if (per_objfile->per_bfd->all_comp_units.size ()
+      == per_objfile->per_bfd->all_comp_units.capacity ())
     ++per_objfile->per_bfd->tu_stats.nr_all_type_units_reallocs;
 
   std::unique_ptr<signatured_type> sig_type_holder
@@ -6274,7 +6224,7 @@ add_type_unit (dwarf2_per_objfile *per_objfile, ULONGEST sig, void **slot)
 
   per_objfile->resize_symtabs ();
 
-  per_objfile->per_bfd->all_type_units.push_back (std::move (sig_type_holder));
+  per_objfile->per_bfd->all_comp_units.push_back (std::move (sig_type_holder));
   sig_type->signature = sig;
   sig_type->is_debug_types = 1;
   if (per_objfile->per_bfd->using_index)
@@ -7534,7 +7484,7 @@ build_type_psymtabs_1 (dwarf2_per_objfile *per_objfile)
   /* It's up to the caller to not call us multiple times.  */
   gdb_assert (per_objfile->per_bfd->type_unit_groups == NULL);
 
-  if (per_objfile->per_bfd->all_type_units.empty ())
+  if (per_objfile->per_bfd->tu_stats.nr_tus == 0)
     return;
 
   /* TUs typically share abbrev tables, and there can be way more TUs than
@@ -7558,15 +7508,21 @@ build_type_psymtabs_1 (dwarf2_per_objfile *per_objfile)
 
   dwarf_read_debug_printf ("Building type unit groups ...");
 
-  /* Sort in a separate table to maintain the order of all_type_units
+  /* Sort in a separate table to maintain the order of all_comp_units
      for .gdb_index: TU indices directly index all_type_units.  */
   std::vector<tu_abbrev_offset> sorted_by_abbrev;
-  sorted_by_abbrev.reserve (per_objfile->per_bfd->all_type_units.size ());
+  sorted_by_abbrev.reserve (per_objfile->per_bfd->tu_stats.nr_tus);
 
-  for (const auto &sig_type : per_objfile->per_bfd->all_type_units)
-    sorted_by_abbrev.emplace_back
-      (sig_type.get (), read_abbrev_offset (per_objfile, sig_type->section,
-					    sig_type->sect_off));
+  for (const auto &cu : per_objfile->per_bfd->all_comp_units)
+    {
+      if (cu->is_debug_types)
+	{
+	  auto sig_type = static_cast<signatured_type *> (cu.get ());
+	  sorted_by_abbrev.emplace_back
+	    (sig_type, read_abbrev_offset (per_objfile, sig_type->section,
+					   sig_type->sect_off));
+	}
+    }
 
   std::sort (sorted_by_abbrev.begin (), sorted_by_abbrev.end (),
 	     sort_tu_by_abbrev_offset);
@@ -7602,8 +7558,7 @@ print_tu_stats (dwarf2_per_objfile *per_objfile)
   struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
 
   dwarf_read_debug_printf ("Type unit statistics:");
-  dwarf_read_debug_printf ("  %zu TUs",
-			   per_objfile->per_bfd->all_type_units.size ());
+  dwarf_read_debug_printf ("  %d TUs", tu_stats->nr_tus);
   dwarf_read_debug_printf ("  %d uniq abbrev tables",
 			   tu_stats->nr_uniq_abbrev_tables);
   dwarf_read_debug_printf ("  %d symtabs from stmt_list entries",
@@ -7896,7 +7851,6 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 static void
 create_all_comp_units (dwarf2_per_objfile *per_objfile)
 {
-  gdb_assert (per_objfile->per_bfd->all_comp_units.empty ());
   read_comp_units_from_section (per_objfile, &per_objfile->per_bfd->info,
 				&per_objfile->per_bfd->abbrev, 0);
 
