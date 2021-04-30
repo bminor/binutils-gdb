@@ -58,7 +58,7 @@ public:
 
   /* Post a task to the thread pool.  A future is returned, which can
      be used to wait for the result.  */
-  std::future<void> post_task (std::function<void ()> func);
+  std::future<void> post_task (std::function<void ()> &&func);
 
 private:
 

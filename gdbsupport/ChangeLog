@@ -1,3 +1,9 @@
+2021-04-30  Tom Tromey  <tromey@adacore.com>
+
+	* thread-pool.cc (thread_pool::post_task): Update.
+	* thread-pool.h (class thread_pool) <post_task>: Take rvalue
+	reference to function.
+
 2021-04-27  Michael Weghorn  <m.weghorn@posteo.de>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 
