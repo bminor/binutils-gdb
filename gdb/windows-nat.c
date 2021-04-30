@@ -160,7 +160,6 @@ static Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
 # define STARTUPINFO STARTUPINFOA
 # define CreateProcess CreateProcessA
 # define GetModuleFileNameEx_name "GetModuleFileNameExA"
-# define bad_GetModuleFileNameEx bad_GetModuleFileNameExA
 #else
 # define __PMAX	PATH_MAX
 /* The starting and ending address of the cygwin1.dll text segment.  */
@@ -174,7 +173,6 @@ static Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
 #   define STARTUPINFO STARTUPINFOW
 #   define CreateProcess CreateProcessW
 #   define GetModuleFileNameEx_name "GetModuleFileNameExW"
-#   define bad_GetModuleFileNameEx bad_GetModuleFileNameExW
 #endif
 
 static int have_saved_context;	/* True if we've saved context from a
@@ -3534,51 +3532,18 @@ _initialize_check_for_gdb_ini ()
 
 /* Define dummy functions which always return error for the rare cases where
    these functions could not be found.  */
-static BOOL WINAPI
-bad_DebugActiveProcessStop (DWORD w)
-{
-  return FALSE;
-}
-static BOOL WINAPI
-bad_DebugBreakProcess (HANDLE w)
-{
-  return FALSE;
-}
-static BOOL WINAPI
-bad_DebugSetProcessKillOnExit (BOOL w)
-{
-  return FALSE;
-}
-static BOOL WINAPI
-bad_EnumProcessModules (HANDLE w, HMODULE *x, DWORD y, LPDWORD z)
+template<typename... T>
+BOOL WINAPI
+bad (T... args)
 {
   return FALSE;
 }
 
-#ifdef __USEWIDE
-static DWORD WINAPI
-bad_GetModuleFileNameExW (HANDLE w, HMODULE x, LPWSTR y, DWORD z)
+template<typename... T>
+DWORD WINAPI
+bad (T... args)
 {
   return 0;
-}
-#else
-static DWORD WINAPI
-bad_GetModuleFileNameExA (HANDLE w, HMODULE x, LPSTR y, DWORD z)
-{
-  return 0;
-}
-#endif
-
-static BOOL WINAPI
-bad_GetModuleInformation (HANDLE w, HMODULE x, LPMODULEINFO y, DWORD z)
-{
-  return FALSE;
-}
-
-static BOOL WINAPI
-bad_OpenProcessToken (HANDLE w, DWORD x, PHANDLE y)
-{
-  return FALSE;
 }
 
 static BOOL WINAPI
@@ -3587,6 +3552,7 @@ bad_GetCurrentConsoleFont (HANDLE w, BOOL bMaxWindow, CONSOLE_FONT_INFO *f)
   f->nFont = 0;
   return 1;
 }
+
 static COORD WINAPI
 bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
 {
@@ -3628,11 +3594,11 @@ _initialize_loadable ()
   /* Set variables to dummy versions of these processes if the function
      wasn't found in kernel32.dll.  */
   if (!DebugBreakProcess)
-    DebugBreakProcess = bad_DebugBreakProcess;
+    DebugBreakProcess = bad;
   if (!DebugActiveProcessStop || !DebugSetProcessKillOnExit)
     {
-      DebugActiveProcessStop = bad_DebugActiveProcessStop;
-      DebugSetProcessKillOnExit = bad_DebugSetProcessKillOnExit;
+      DebugActiveProcessStop = bad;
+      DebugSetProcessKillOnExit = bad;
     }
   if (!GetConsoleFontSize)
     GetConsoleFontSize = bad_GetConsoleFontSize;
@@ -3657,9 +3623,9 @@ _initialize_loadable ()
     {
       /* Set variables to dummy versions of these processes if the function
 	 wasn't found in psapi.dll.  */
-      EnumProcessModules = bad_EnumProcessModules;
-      GetModuleInformation = bad_GetModuleInformation;
-      GetModuleFileNameEx = bad_GetModuleFileNameEx;
+      EnumProcessModules = bad;
+      GetModuleInformation = bad;
+      GetModuleFileNameEx = bad;
       /* This will probably fail on Windows 9x/Me.  Let the user know
 	 that we're missing some functionality.  */
       warning(_("\
@@ -3677,7 +3643,7 @@ Use \"file\" or \"dll\" command to load executable/libraries directly."));
 	 else is needed.  */
       if (!OpenProcessToken || !LookupPrivilegeValueA
 	  || !AdjustTokenPrivileges)
-	OpenProcessToken = bad_OpenProcessToken;
+	OpenProcessToken = bad;
     }
 
 #undef GPA

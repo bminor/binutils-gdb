@@ -1,5 +1,15 @@
 2021-04-30  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (bad_GetModuleFileNameEx): Remove define.
+	(bad_DebugActiveProcessStop, bad_DebugBreakProcess)
+	(bad_DebugSetProcessKillOnExit, bad_EnumProcessModules)
+	(bad_GetModuleFileNameExW, bad_GetModuleFileNameExA)
+	(bad_GetModuleInformation, bad_OpenProcessToken): Remove.
+	(bad): New template functions.
+	(_initialize_loadable): Update.
+
+2021-04-30  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_index_type): Use ada_check_typedef.
 
 2021-04-29  Simon Marchi  <simon.marchi@efficios.com>
