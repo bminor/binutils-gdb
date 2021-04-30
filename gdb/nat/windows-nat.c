@@ -120,7 +120,13 @@ windows_thread_info::resume ()
   suspended = 0;
 }
 
-const char *
+/* Return the name of the DLL referenced by H at ADDRESS.  UNICODE
+   determines what sort of string is read from the inferior.  Returns
+   the name of the DLL, or NULL on error.  If a name is returned, it
+   is stored in a static buffer which is valid until the next call to
+   get_image_name.  */
+
+static const char *
 get_image_name (HANDLE h, void *address, int unicode)
 {
 #ifdef __CYGWIN__
