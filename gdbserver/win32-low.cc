@@ -62,9 +62,6 @@ using namespace windows_nat;
 #define COUNTOF(STR) (sizeof (STR) / sizeof ((STR)[0]))
 #endif
 
-#define GETPROCADDRESS(DLL, PROC) \
-  ((winapi_ ## PROC) GetProcAddress (DLL, #PROC))
-
 int using_threads = 1;
 
 /* Globals.  */
@@ -92,19 +89,6 @@ const struct target_desc *wow64_win32_tdesc;
 #endif
 
 #define NUM_REGS (the_low_target.num_regs ())
-
-typedef BOOL (WINAPI *winapi_DebugActiveProcessStop) (DWORD dwProcessId);
-typedef BOOL (WINAPI *winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
-typedef BOOL (WINAPI *winapi_DebugBreakProcess) (HANDLE);
-typedef BOOL (WINAPI *winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
-
-#ifdef __x86_64__
-typedef BOOL (WINAPI *winapi_Wow64SetThreadContext) (HANDLE,
-						     const WOW64_CONTEXT *);
-
-winapi_Wow64GetThreadContext win32_Wow64GetThreadContext;
-static winapi_Wow64SetThreadContext win32_Wow64SetThreadContext;
-#endif
 
 static void win32_add_all_dlls (void);
 
@@ -144,7 +128,7 @@ win32_set_thread_context (windows_thread_info *th)
 {
 #ifdef __x86_64__
   if (wow64_process)
-    win32_Wow64SetThreadContext (th->h, &th->wow64_context);
+    Wow64SetThreadContext (th->h, &th->wow64_context);
   else
 #endif
     SetThreadContext (th->h, &th->context);
@@ -372,8 +356,8 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
   wow64_process = wow64;
 
   if (wow64_process
-      && (win32_Wow64GetThreadContext == nullptr
-	  || win32_Wow64SetThreadContext == nullptr))
+      && (Wow64GetThreadContext == nullptr
+	  || Wow64SetThreadContext == nullptr))
     error ("WOW64 debugging is not supported on this system.\n");
 
   ignore_first_breakpoint = !attached && wow64_process;
@@ -704,18 +688,14 @@ int
 win32_process_target::attach (unsigned long pid)
 {
   HANDLE h;
-  winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
   DWORD err;
-  HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
-  DebugSetProcessKillOnExit = GETPROCADDRESS (dll, DebugSetProcessKillOnExit);
 
   h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
   if (h != NULL)
     {
       if (DebugActiveProcess (pid))
 	{
-	  if (DebugSetProcessKillOnExit != NULL)
-	    DebugSetProcessKillOnExit (FALSE);
+	  DebugSetProcessKillOnExit (FALSE);
 
 	  /* win32_wait needs to know we're attaching.  */
 	  attaching = 1;
@@ -822,23 +802,11 @@ win32_process_target::kill (process_info *process)
 int
 win32_process_target::detach (process_info *process)
 {
-  winapi_DebugActiveProcessStop DebugActiveProcessStop = NULL;
-  winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
-  HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
-  DebugActiveProcessStop = GETPROCADDRESS (dll, DebugActiveProcessStop);
-  DebugSetProcessKillOnExit = GETPROCADDRESS (dll, DebugSetProcessKillOnExit);
-
-  if (DebugSetProcessKillOnExit == NULL
-      || DebugActiveProcessStop == NULL)
-    return -1;
-
-  {
-    struct thread_resume resume;
-    resume.thread = minus_one_ptid;
-    resume.kind = resume_continue;
-    resume.sig = 0;
-    this->resume (&resume, 1);
-  }
+  struct thread_resume resume;
+  resume.thread = minus_one_ptid;
+  resume.kind = resume_continue;
+  resume.sig = 0;
+  this->resume (&resume, 1);
 
   if (!DebugActiveProcessStop (current_process_id))
     return -1;
@@ -1019,58 +987,6 @@ win32_add_one_solib (const char *name, CORE_ADDR load_addr)
   loaded_dll (buf2, load_addr);
 }
 
-typedef BOOL (WINAPI *winapi_EnumProcessModules) (HANDLE, HMODULE *,
-						  DWORD, LPDWORD);
-#ifdef __x86_64__
-typedef BOOL (WINAPI *winapi_EnumProcessModulesEx) (HANDLE, HMODULE *, DWORD,
-						    LPDWORD, DWORD);
-#endif
-typedef BOOL (WINAPI *winapi_GetModuleInformation) (HANDLE, HMODULE,
-						    LPMODULEINFO, DWORD);
-typedef DWORD (WINAPI *winapi_GetModuleFileNameExA) (HANDLE, HMODULE,
-						     LPSTR, DWORD);
-
-static winapi_EnumProcessModules win32_EnumProcessModules;
-#ifdef __x86_64__
-static winapi_EnumProcessModulesEx win32_EnumProcessModulesEx;
-#endif
-static winapi_GetModuleInformation win32_GetModuleInformation;
-static winapi_GetModuleFileNameExA win32_GetModuleFileNameExA;
-
-static BOOL
-load_psapi (void)
-{
-  static int psapi_loaded = 0;
-  static HMODULE dll = NULL;
-
-  if (!psapi_loaded)
-    {
-      psapi_loaded = 1;
-      dll = LoadLibrary (TEXT("psapi.dll"));
-      if (!dll)
-	return FALSE;
-      win32_EnumProcessModules =
-	      GETPROCADDRESS (dll, EnumProcessModules);
-#ifdef __x86_64__
-      win32_EnumProcessModulesEx =
-	      GETPROCADDRESS (dll, EnumProcessModulesEx);
-#endif
-      win32_GetModuleInformation =
-	      GETPROCADDRESS (dll, GetModuleInformation);
-      win32_GetModuleFileNameExA =
-	      GETPROCADDRESS (dll, GetModuleFileNameExA);
-    }
-
-#ifdef __x86_64__
-  if (wow64_process && win32_EnumProcessModulesEx == nullptr)
-    return FALSE;
-#endif
-
-  return (win32_EnumProcessModules != NULL
-	  && win32_GetModuleInformation != NULL
-	  && win32_GetModuleFileNameExA != NULL);
-}
-
 /* Iterate over all DLLs currently mapped by our inferior, looking for
    a DLL loaded at LOAD_ADDR; if found, return its file name,
    otherwise return NULL.  If LOAD_ADDR is NULL, add all mapped DLLs
@@ -1085,23 +1001,20 @@ win32_add_dll (LPVOID load_addr)
   DWORD cbNeeded;
   BOOL ok;
 
-  if (!load_psapi ())
-    return NULL;
-
   cbNeeded = 0;
 #ifdef __x86_64__
   if (wow64_process)
-    ok = (*win32_EnumProcessModulesEx) (current_process_handle,
-					DllHandle,
-					sizeof (HMODULE),
-					&cbNeeded,
-					LIST_MODULES_32BIT);
+    ok = EnumProcessModulesEx (current_process_handle,
+			       DllHandle,
+			       sizeof (HMODULE),
+			       &cbNeeded,
+			       LIST_MODULES_32BIT);
   else
 #endif
-    ok = (*win32_EnumProcessModules) (current_process_handle,
-				      DllHandle,
-				      sizeof (HMODULE),
-				      &cbNeeded);
+    ok = EnumProcessModules (current_process_handle,
+			     DllHandle,
+			     sizeof (HMODULE),
+			     &cbNeeded);
 
   if (!ok || !cbNeeded)
     return NULL;
@@ -1112,17 +1025,17 @@ win32_add_dll (LPVOID load_addr)
 
 #ifdef __x86_64__
   if (wow64_process)
-    ok = (*win32_EnumProcessModulesEx) (current_process_handle,
-					DllHandle,
-					cbNeeded,
-					&cbNeeded,
-					LIST_MODULES_32BIT);
+    ok = EnumProcessModulesEx (current_process_handle,
+			       DllHandle,
+			       cbNeeded,
+			       &cbNeeded,
+			       LIST_MODULES_32BIT);
   else
 #endif
-    ok = (*win32_EnumProcessModules) (current_process_handle,
-				      DllHandle,
-				      cbNeeded,
-				      &cbNeeded);
+    ok = EnumProcessModules (current_process_handle,
+			     DllHandle,
+			     cbNeeded,
+			     &cbNeeded);
   if (!ok)
     return NULL;
 
@@ -1162,15 +1075,15 @@ win32_add_dll (LPVOID load_addr)
       MODULEINFO mi;
       static char dll_name[MAX_PATH];
 
-      if (!(*win32_GetModuleInformation) (current_process_handle,
-					  DllHandle[i],
-					  &mi,
-					  sizeof (mi)))
+      if (!GetModuleInformation (current_process_handle,
+				 DllHandle[i],
+				 &mi,
+				 sizeof (mi)))
 	continue;
-      if ((*win32_GetModuleFileNameExA) (current_process_handle,
-					 DllHandle[i],
-					 dll_name,
-					 MAX_PATH) == 0)
+      if (GetModuleFileNameExA (current_process_handle,
+				DllHandle[i],
+				dll_name,
+				MAX_PATH) == 0)
 	continue;
 
       if (load_addr != nullptr && mi.lpBaseOfDll != load_addr)
@@ -1611,15 +1524,7 @@ win32_process_target::write_memory (CORE_ADDR memaddr,
 void
 win32_process_target::request_interrupt ()
 {
-  winapi_DebugBreakProcess DebugBreakProcess;
-  winapi_GenerateConsoleCtrlEvent GenerateConsoleCtrlEvent;
-
-  HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
-
-  GenerateConsoleCtrlEvent = GETPROCADDRESS (dll, GenerateConsoleCtrlEvent);
-
-  if (GenerateConsoleCtrlEvent != NULL
-      && GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, current_process_id))
+  if (GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, current_process_id))
     return;
 
   /* GenerateConsoleCtrlEvent can fail if process id being debugged is
@@ -1627,10 +1532,7 @@ win32_process_target::request_interrupt ()
      Fallback to XP/Vista 'DebugBreakProcess', which generates a
      breakpoint exception in the interior process.  */
 
-  DebugBreakProcess = GETPROCADDRESS (dll, DebugBreakProcess);
-
-  if (DebugBreakProcess != NULL
-      && DebugBreakProcess (current_process_handle))
+  if (DebugBreakProcess (current_process_handle))
     return;
 
   /* Last resort, suspend all threads manually.  */
@@ -1761,11 +1663,5 @@ initialize_low (void)
   set_target_ops (&the_win32_target);
   the_low_target.arch_setup ();
 
-#ifdef __x86_64__
-  /* These functions are loaded dynamically, because they are not available
-     on Windows XP.  */
-  HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
-  win32_Wow64GetThreadContext = GETPROCADDRESS (dll, Wow64GetThreadContext);
-  win32_Wow64SetThreadContext = GETPROCADDRESS (dll, Wow64SetThreadContext);
-#endif
+  initialize_loadable ();
 }

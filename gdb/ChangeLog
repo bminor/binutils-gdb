@@ -1,5 +1,13 @@
 2021-04-30  Tom Tromey  <tromey@adacore.com>
 
+	* nat/windows-nat.h (GenerateConsoleCtrlEvent): New define.
+	(GenerateConsoleCtrlEvent_ftype, GenerateConsoleCtrlEvent):
+	Declare.
+	* nat/windows-nat.c (GenerateConsoleCtrlEvent): Define.
+	(initialize_loadable): Initialize GenerateConsoleCtrlEvent.
+
+2021-04-30  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c: Move code to nat/windows-nat.[ch].
 	(_initialize_windows_nat): Call initialize_loadable.
 	* nat/windows-nat.h (AdjustTokenPrivileges)

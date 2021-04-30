@@ -66,7 +66,7 @@ Wow64GetThreadContext_ftype *Wow64GetThreadContext;
 Wow64SetThreadContext_ftype *Wow64SetThreadContext;
 Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
 #endif
-
+GenerateConsoleCtrlEvent_ftype *GenerateConsoleCtrlEvent;
 
 /* Note that 'debug_events' must be locally defined in the relevant
    functions.  */
@@ -469,6 +469,7 @@ initialize_loadable ()
       GPA (hm, Wow64SetThreadContext);
       GPA (hm, Wow64GetThreadSelectorEntry);
 #endif
+      GPA (hm, GenerateConsoleCtrlEvent);
     }
 
   /* Set variables to dummy versions of these processes if the function

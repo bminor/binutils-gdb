@@ -1,3 +1,23 @@
+2021-04-30  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.cc (GETPROCADDRESS): Remove.
+	(winapi_DebugActiveProcessStop, winapi_DebugSetProcessKillOnExit)
+	(winapi_DebugBreakProcess, winapi_GenerateConsoleCtrlEvent)
+	(winapi_Wow64SetThreadContext, win32_Wow64GetThreadContext)
+	(win32_Wow64SetThreadContext): Remove.
+	(win32_set_thread_context, do_initial_child_stuff)
+	(win32_process_target::attach, win32_process_target::detach):
+	Update.
+	(winapi_EnumProcessModules, winapi_EnumProcessModulesEx)
+	(winapi_GetModuleInformation, winapi_GetModuleInformationA):
+	Remove.
+	(win32_EnumProcessModules, win32_EnumProcessModulesEx)
+	(win32_GetModuleInformation, win32_GetModuleInformationA):
+	Remove.
+	(load_psapi): Remove.
+	(win32_add_dll, win32_process_target::request_interrupt): Update.
+	(initialize_low): Call initialize_loadable.
+
 2021-04-14  Tom Tromey  <tromey@adacore.com>
 
 	* win32-low.cc (windows_nat::handle_load_dll): Don't check
