@@ -1222,6 +1222,9 @@ handle_pt_insn_events (struct btrace_thread_info *btinfo,
 	  break;
 
 	case ptev_enabled:
+	  if (event.status_update != 0)
+	    break;
+
 	  if (event.variant.enabled.resumed == 0 && !btinfo->functions.empty ())
 	    {
 	      bfun = ftrace_new_gap (btinfo, BDE_PT_DISABLED, gaps);
