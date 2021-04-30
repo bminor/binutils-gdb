@@ -156,39 +156,6 @@ with_timeout_factor 2 {
     set state 0
     gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
 	-re "115\\^done,symbols=\{" {
-	    if { $state == 0 } { set state 1 }
-	    exp_continue
-	}
-	-re "debug=\\\[${symtab_re}" {
-	    if { $state == 1 } { set state 2 }
-	    exp_continue
-	}
-	-re ",${symtab_re}" {
-	    exp_continue
-	}
-	-re "\\\],nondebug=\\\[" {
-	    if { $state == 2 } { set state 3 }
-	    exp_continue
-	}
-	-re "\{address=${qstr},name=${qstr}\}," {
-	    exp_continue
-	}
-	-re "\{address=${qstr},name=${qstr}\}\\\]\}\r\n${mi_gdb_prompt}$" {
-	    if { $state == 3 } {
-		pass $gdb_test_name
-	    } else {
-		fail $gdb_test_name
-	    }
-	}
-    }
-}
-
-with_timeout_factor 2 {
-    set testname "List all variables"
-    set cmd "115-symbol-info-variables --include-nondebug"
-    set state 0
-    gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
-	-re "115\\^done,symbols=\{" {
 	    if { $state == 0 } { incr state }
 	    exp_continue
 	}
