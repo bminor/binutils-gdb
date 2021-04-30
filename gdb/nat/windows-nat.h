@@ -20,6 +20,7 @@
 #define NAT_WINDOWS_NAT_H
 
 #include <windows.h>
+#include <psapi.h>
 #include <vector>
 
 #include "gdbsupport/gdb_optional.h"
@@ -256,6 +257,95 @@ extern BOOL continue_last_debug_event (DWORD continue_status,
    'last_wait_event' on success.  */
 
 extern BOOL wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout);
+
+#define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
+#define DebugActiveProcessStop		dyn_DebugActiveProcessStop
+#define DebugBreakProcess		dyn_DebugBreakProcess
+#define DebugSetProcessKillOnExit	dyn_DebugSetProcessKillOnExit
+#define EnumProcessModules		dyn_EnumProcessModules
+#define EnumProcessModulesEx		dyn_EnumProcessModulesEx
+#define GetModuleInformation		dyn_GetModuleInformation
+#define GetModuleFileNameExA		dyn_GetModuleFileNameExA
+#define GetModuleFileNameExW		dyn_GetModuleFileNameExW
+#define LookupPrivilegeValueA		dyn_LookupPrivilegeValueA
+#define OpenProcessToken		dyn_OpenProcessToken
+#define GetConsoleFontSize		dyn_GetConsoleFontSize
+#define GetCurrentConsoleFont		dyn_GetCurrentConsoleFont
+#define Wow64SuspendThread		dyn_Wow64SuspendThread
+#define Wow64GetThreadContext		dyn_Wow64GetThreadContext
+#define Wow64SetThreadContext		dyn_Wow64SetThreadContext
+#define Wow64GetThreadSelectorEntry	dyn_Wow64GetThreadSelectorEntry
+
+typedef BOOL WINAPI (AdjustTokenPrivileges_ftype) (HANDLE, BOOL,
+						   PTOKEN_PRIVILEGES,
+						   DWORD, PTOKEN_PRIVILEGES,
+						   PDWORD);
+extern AdjustTokenPrivileges_ftype *AdjustTokenPrivileges;
+
+typedef BOOL WINAPI (DebugActiveProcessStop_ftype) (DWORD);
+extern DebugActiveProcessStop_ftype *DebugActiveProcessStop;
+
+typedef BOOL WINAPI (DebugBreakProcess_ftype) (HANDLE);
+extern DebugBreakProcess_ftype *DebugBreakProcess;
+
+typedef BOOL WINAPI (DebugSetProcessKillOnExit_ftype) (BOOL);
+extern DebugSetProcessKillOnExit_ftype *DebugSetProcessKillOnExit;
+
+typedef BOOL WINAPI (EnumProcessModules_ftype) (HANDLE, HMODULE *, DWORD,
+						LPDWORD);
+extern EnumProcessModules_ftype *EnumProcessModules;
+
+#ifdef __x86_64__
+typedef BOOL WINAPI (EnumProcessModulesEx_ftype) (HANDLE, HMODULE *, DWORD,
+						  LPDWORD, DWORD);
+extern EnumProcessModulesEx_ftype *EnumProcessModulesEx;
+#endif
+
+typedef BOOL WINAPI (GetModuleInformation_ftype) (HANDLE, HMODULE,
+						  LPMODULEINFO, DWORD);
+extern GetModuleInformation_ftype *GetModuleInformation;
+
+typedef DWORD WINAPI (GetModuleFileNameExA_ftype) (HANDLE, HMODULE, LPSTR,
+						  DWORD);
+extern GetModuleFileNameExA_ftype *GetModuleFileNameExA;
+
+typedef DWORD WINAPI (GetModuleFileNameExW_ftype) (HANDLE, HMODULE,
+						   LPWSTR, DWORD);
+extern GetModuleFileNameExW_ftype *GetModuleFileNameExW;
+
+typedef BOOL WINAPI (LookupPrivilegeValueA_ftype) (LPCSTR, LPCSTR, PLUID);
+extern LookupPrivilegeValueA_ftype *LookupPrivilegeValueA;
+
+typedef BOOL WINAPI (OpenProcessToken_ftype) (HANDLE, DWORD, PHANDLE);
+extern OpenProcessToken_ftype *OpenProcessToken;
+
+typedef BOOL WINAPI (GetCurrentConsoleFont_ftype) (HANDLE, BOOL,
+						   CONSOLE_FONT_INFO *);
+extern GetCurrentConsoleFont_ftype *GetCurrentConsoleFont;
+
+typedef COORD WINAPI (GetConsoleFontSize_ftype) (HANDLE, DWORD);
+extern GetConsoleFontSize_ftype *GetConsoleFontSize;
+
+#ifdef __x86_64__
+typedef DWORD WINAPI (Wow64SuspendThread_ftype) (HANDLE);
+extern Wow64SuspendThread_ftype *Wow64SuspendThread;
+
+typedef BOOL WINAPI (Wow64GetThreadContext_ftype) (HANDLE, PWOW64_CONTEXT);
+extern Wow64GetThreadContext_ftype *Wow64GetThreadContext;
+
+typedef BOOL WINAPI (Wow64SetThreadContext_ftype) (HANDLE,
+						   const WOW64_CONTEXT *);
+extern Wow64SetThreadContext_ftype *Wow64SetThreadContext;
+
+typedef BOOL WINAPI (Wow64GetThreadSelectorEntry_ftype) (HANDLE, DWORD,
+							 PLDT_ENTRY);
+extern Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
+#endif
+
+/* Load any functions which may not be available in ancient versions
+   of Windows.  */
+
+extern bool initialize_loadable ();
 
 }
 

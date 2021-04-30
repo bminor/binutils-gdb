@@ -45,6 +45,29 @@ bool wow64_process = false;
 bool ignore_first_breakpoint = false;
 #endif
 
+AdjustTokenPrivileges_ftype *AdjustTokenPrivileges;
+DebugActiveProcessStop_ftype *DebugActiveProcessStop;
+DebugBreakProcess_ftype *DebugBreakProcess;
+DebugSetProcessKillOnExit_ftype *DebugSetProcessKillOnExit;
+EnumProcessModules_ftype *EnumProcessModules;
+#ifdef __x86_64__
+EnumProcessModulesEx_ftype *EnumProcessModulesEx;
+#endif
+GetModuleInformation_ftype *GetModuleInformation;
+GetModuleFileNameExA_ftype *GetModuleFileNameExA;
+GetModuleFileNameExW_ftype *GetModuleFileNameExW;
+LookupPrivilegeValueA_ftype *LookupPrivilegeValueA;
+OpenProcessToken_ftype *OpenProcessToken;
+GetCurrentConsoleFont_ftype *GetCurrentConsoleFont;
+GetConsoleFontSize_ftype *GetConsoleFontSize;
+#ifdef __x86_64__
+Wow64SuspendThread_ftype *Wow64SuspendThread;
+Wow64GetThreadContext_ftype *Wow64GetThreadContext;
+Wow64SetThreadContext_ftype *Wow64SetThreadContext;
+Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
+#endif
+
+
 /* Note that 'debug_events' must be locally defined in the relevant
    functions.  */
 #define DEBUG_EVENTS(fmt, ...) \
@@ -385,6 +408,125 @@ wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout)
   BOOL result = WaitForDebugEvent (event, timeout);
   if (result)
     last_wait_event = *event;
+  return result;
+}
+
+/* Define dummy functions which always return error for the rare cases where
+   these functions could not be found.  */
+template<typename... T>
+BOOL WINAPI
+bad (T... args)
+{
+  return FALSE;
+}
+
+template<typename... T>
+DWORD WINAPI
+bad (T... args)
+{
+  return 0;
+}
+
+static BOOL WINAPI
+bad_GetCurrentConsoleFont (HANDLE w, BOOL bMaxWindow, CONSOLE_FONT_INFO *f)
+{
+  f->nFont = 0;
+  return 1;
+}
+
+static COORD WINAPI
+bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
+{
+  COORD size;
+  size.X = 8;
+  size.Y = 12;
+  return size;
+}
+ 
+/* See windows-nat.h.  */
+
+bool
+initialize_loadable ()
+{
+  bool result = true;
+  HMODULE hm = NULL;
+
+#define GPA(m, func)					\
+  func = (func ## _ftype *) GetProcAddress (m, #func)
+
+  hm = LoadLibrary (TEXT ("kernel32.dll"));
+  if (hm)
+    {
+      GPA (hm, DebugActiveProcessStop);
+      GPA (hm, DebugBreakProcess);
+      GPA (hm, DebugSetProcessKillOnExit);
+      GPA (hm, GetConsoleFontSize);
+      GPA (hm, DebugActiveProcessStop);
+      GPA (hm, GetCurrentConsoleFont);
+#ifdef __x86_64__
+      GPA (hm, Wow64SuspendThread);
+      GPA (hm, Wow64GetThreadContext);
+      GPA (hm, Wow64SetThreadContext);
+      GPA (hm, Wow64GetThreadSelectorEntry);
+#endif
+    }
+
+  /* Set variables to dummy versions of these processes if the function
+     wasn't found in kernel32.dll.  */
+  if (!DebugBreakProcess)
+    DebugBreakProcess = bad;
+  if (!DebugActiveProcessStop || !DebugSetProcessKillOnExit)
+    {
+      DebugActiveProcessStop = bad;
+      DebugSetProcessKillOnExit = bad;
+    }
+  if (!GetConsoleFontSize)
+    GetConsoleFontSize = bad_GetConsoleFontSize;
+  if (!GetCurrentConsoleFont)
+    GetCurrentConsoleFont = bad_GetCurrentConsoleFont;
+
+  /* Load optional functions used for retrieving filename information
+     associated with the currently debugged process or its dlls.  */
+  hm = LoadLibrary (TEXT ("psapi.dll"));
+  if (hm)
+    {
+      GPA (hm, EnumProcessModules);
+#ifdef __x86_64__
+      GPA (hm, EnumProcessModulesEx);
+#endif
+      GPA (hm, GetModuleInformation);
+      GPA (hm, GetModuleFileNameExA);
+      GPA (hm, GetModuleFileNameExW);
+    }
+
+  if (!EnumProcessModules || !GetModuleInformation
+      || !GetModuleFileNameExA || !GetModuleFileNameExW)
+    {
+      /* Set variables to dummy versions of these processes if the function
+	 wasn't found in psapi.dll.  */
+      EnumProcessModules = bad;
+      GetModuleInformation = bad;
+      GetModuleFileNameExA = bad;
+      GetModuleFileNameExW = bad;
+
+      result = false;
+    }
+
+  hm = LoadLibrary (TEXT ("advapi32.dll"));
+  if (hm)
+    {
+      GPA (hm, OpenProcessToken);
+      GPA (hm, LookupPrivilegeValueA);
+      GPA (hm, AdjustTokenPrivileges);
+      /* Only need to set one of these since if OpenProcessToken fails nothing
+	 else is needed.  */
+      if (!OpenProcessToken || !LookupPrivilegeValueA
+	  || !AdjustTokenPrivileges)
+	OpenProcessToken = bad;
+    }
+
+#undef GPA
+
   return result;
 }
 

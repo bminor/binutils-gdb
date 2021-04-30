@@ -36,7 +36,6 @@
 #include <fcntl.h>
 #include <windows.h>
 #include <imagehlp.h>
-#include <psapi.h>
 #ifdef __CYGWIN__
 #include <wchar.h>
 #include <sys/cygwin.h>
@@ -75,91 +74,15 @@
 
 using namespace windows_nat;
 
-#define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
-#define DebugActiveProcessStop		dyn_DebugActiveProcessStop
-#define DebugBreakProcess		dyn_DebugBreakProcess
-#define DebugSetProcessKillOnExit	dyn_DebugSetProcessKillOnExit
-#define EnumProcessModules		dyn_EnumProcessModules
-#define EnumProcessModulesEx		dyn_EnumProcessModulesEx
-#define GetModuleInformation		dyn_GetModuleInformation
-#define LookupPrivilegeValueA		dyn_LookupPrivilegeValueA
-#define OpenProcessToken		dyn_OpenProcessToken
-#define GetConsoleFontSize		dyn_GetConsoleFontSize
-#define GetCurrentConsoleFont		dyn_GetCurrentConsoleFont
-#define Wow64SuspendThread		dyn_Wow64SuspendThread
-#define Wow64GetThreadContext		dyn_Wow64GetThreadContext
-#define Wow64SetThreadContext		dyn_Wow64SetThreadContext
-#define Wow64GetThreadSelectorEntry	dyn_Wow64GetThreadSelectorEntry
-
-typedef BOOL WINAPI (AdjustTokenPrivileges_ftype) (HANDLE, BOOL,
-						   PTOKEN_PRIVILEGES,
-						   DWORD, PTOKEN_PRIVILEGES,
-						   PDWORD);
-static AdjustTokenPrivileges_ftype *AdjustTokenPrivileges;
-
-typedef BOOL WINAPI (DebugActiveProcessStop_ftype) (DWORD);
-static DebugActiveProcessStop_ftype *DebugActiveProcessStop;
-
-typedef BOOL WINAPI (DebugBreakProcess_ftype) (HANDLE);
-static DebugBreakProcess_ftype *DebugBreakProcess;
-
-typedef BOOL WINAPI (DebugSetProcessKillOnExit_ftype) (BOOL);
-static DebugSetProcessKillOnExit_ftype *DebugSetProcessKillOnExit;
-
-typedef BOOL WINAPI (EnumProcessModules_ftype) (HANDLE, HMODULE *, DWORD,
-						LPDWORD);
-static EnumProcessModules_ftype *EnumProcessModules;
-
-#ifdef __x86_64__
-typedef BOOL WINAPI (EnumProcessModulesEx_ftype) (HANDLE, HMODULE *, DWORD,
-						  LPDWORD, DWORD);
-static EnumProcessModulesEx_ftype *EnumProcessModulesEx;
-#endif
-
-typedef BOOL WINAPI (GetModuleInformation_ftype) (HANDLE, HMODULE,
-						  LPMODULEINFO, DWORD);
-static GetModuleInformation_ftype *GetModuleInformation;
-
-typedef BOOL WINAPI (LookupPrivilegeValueA_ftype) (LPCSTR, LPCSTR, PLUID);
-static LookupPrivilegeValueA_ftype *LookupPrivilegeValueA;
-
-typedef BOOL WINAPI (OpenProcessToken_ftype) (HANDLE, DWORD, PHANDLE);
-static OpenProcessToken_ftype *OpenProcessToken;
-
-typedef BOOL WINAPI (GetCurrentConsoleFont_ftype) (HANDLE, BOOL,
-						   CONSOLE_FONT_INFO *);
-static GetCurrentConsoleFont_ftype *GetCurrentConsoleFont;
-
-typedef COORD WINAPI (GetConsoleFontSize_ftype) (HANDLE, DWORD);
-static GetConsoleFontSize_ftype *GetConsoleFontSize;
-
-#ifdef __x86_64__
-typedef DWORD WINAPI (Wow64SuspendThread_ftype) (HANDLE);
-static Wow64SuspendThread_ftype *Wow64SuspendThread;
-
-typedef BOOL WINAPI (Wow64GetThreadContext_ftype) (HANDLE, PWOW64_CONTEXT);
-static Wow64GetThreadContext_ftype *Wow64GetThreadContext;
-
-typedef BOOL WINAPI (Wow64SetThreadContext_ftype) (HANDLE,
-						   const WOW64_CONTEXT *);
-static Wow64SetThreadContext_ftype *Wow64SetThreadContext;
-
-typedef BOOL WINAPI (Wow64GetThreadSelectorEntry_ftype) (HANDLE, DWORD,
-							 PLDT_ENTRY);
-static Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
-#endif
-
 #undef STARTUPINFO
 #undef CreateProcess
 #undef GetModuleFileNameEx
 
 #ifndef __CYGWIN__
 # define __PMAX	(MAX_PATH + 1)
-  typedef DWORD WINAPI (GetModuleFileNameEx_ftype) (HANDLE, HMODULE, LPSTR, DWORD);
-  static GetModuleFileNameEx_ftype *GetModuleFileNameEx;
+# define GetModuleFileNameEx GetModuleFileNameExA
 # define STARTUPINFO STARTUPINFOA
 # define CreateProcess CreateProcessA
-# define GetModuleFileNameEx_name "GetModuleFileNameExA"
 #else
 # define __PMAX	PATH_MAX
 /* The starting and ending address of the cygwin1.dll text segment.  */
@@ -167,12 +90,9 @@ static Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
   static CORE_ADDR cygwin_load_end;
 #   define __USEWIDE
     typedef wchar_t cygwin_buf_t;
-    typedef DWORD WINAPI (GetModuleFileNameEx_ftype) (HANDLE, HMODULE,
-						      LPWSTR, DWORD);
-    static GetModuleFileNameEx_ftype *GetModuleFileNameEx;
+#   define GetModuleFileNameEx GetModuleFileNameExW
 #   define STARTUPINFO STARTUPINFOW
 #   define CreateProcess CreateProcessW
-#   define GetModuleFileNameEx_name "GetModuleFileNameExW"
 #endif
 
 static int have_saved_context;	/* True if we've saved context from a
@@ -3430,6 +3350,15 @@ Show whether to display kernel exceptions in child process."), NULL,
   add_cmd ("selector", class_info, display_selectors,
 	   _("Display selectors infos."),
 	   &info_w32_cmdlist);
+
+  if (!initialize_loadable ())
+    {
+      /* This will probably fail on Windows 9x/Me.  Let the user know
+	 that we're missing some functionality.  */
+      warning(_("\
+cannot automatically find executable file or library to read symbols.\n\
+Use \"file\" or \"dll\" command to load executable/libraries directly."));
+    }
 }
 
 /* Hardware watchpoint support, adapted from go32-nat.c code.  */
@@ -3528,123 +3457,4 @@ _initialize_check_for_gdb_ini ()
 	  warning (_("obsolete '%s' found. Rename to '%s'."), oldini, newini);
 	}
     }
-}
-
-/* Define dummy functions which always return error for the rare cases where
-   these functions could not be found.  */
-template<typename... T>
-BOOL WINAPI
-bad (T... args)
-{
-  return FALSE;
-}
-
-template<typename... T>
-DWORD WINAPI
-bad (T... args)
-{
-  return 0;
-}
-
-static BOOL WINAPI
-bad_GetCurrentConsoleFont (HANDLE w, BOOL bMaxWindow, CONSOLE_FONT_INFO *f)
-{
-  f->nFont = 0;
-  return 1;
-}
-
-static COORD WINAPI
-bad_GetConsoleFontSize (HANDLE w, DWORD nFont)
-{
-  COORD size;
-  size.X = 8;
-  size.Y = 12;
-  return size;
-}
- 
-/* Load any functions which may not be available in ancient versions
-   of Windows.  */
-
-void _initialize_loadable ();
-void
-_initialize_loadable ()
-{
-  HMODULE hm = NULL;
-
-#define GPA(m, func)					\
-  func = (func ## _ftype *) GetProcAddress (m, #func)
-
-  hm = LoadLibrary ("kernel32.dll");
-  if (hm)
-    {
-      GPA (hm, DebugActiveProcessStop);
-      GPA (hm, DebugBreakProcess);
-      GPA (hm, DebugSetProcessKillOnExit);
-      GPA (hm, GetConsoleFontSize);
-      GPA (hm, DebugActiveProcessStop);
-      GPA (hm, GetCurrentConsoleFont);
-#ifdef __x86_64__
-      GPA (hm, Wow64SuspendThread);
-      GPA (hm, Wow64GetThreadContext);
-      GPA (hm, Wow64SetThreadContext);
-      GPA (hm, Wow64GetThreadSelectorEntry);
-#endif
-    }
-
-  /* Set variables to dummy versions of these processes if the function
-     wasn't found in kernel32.dll.  */
-  if (!DebugBreakProcess)
-    DebugBreakProcess = bad;
-  if (!DebugActiveProcessStop || !DebugSetProcessKillOnExit)
-    {
-      DebugActiveProcessStop = bad;
-      DebugSetProcessKillOnExit = bad;
-    }
-  if (!GetConsoleFontSize)
-    GetConsoleFontSize = bad_GetConsoleFontSize;
-  if (!GetCurrentConsoleFont)
-    GetCurrentConsoleFont = bad_GetCurrentConsoleFont;
-
-  /* Load optional functions used for retrieving filename information
-     associated with the currently debugged process or its dlls.  */
-  hm = LoadLibrary ("psapi.dll");
-  if (hm)
-    {
-      GPA (hm, EnumProcessModules);
-#ifdef __x86_64__
-      GPA (hm, EnumProcessModulesEx);
-#endif
-      GPA (hm, GetModuleInformation);
-      GetModuleFileNameEx = (GetModuleFileNameEx_ftype *)
-	GetProcAddress (hm, GetModuleFileNameEx_name);
-    }
-
-  if (!EnumProcessModules || !GetModuleInformation || !GetModuleFileNameEx)
-    {
-      /* Set variables to dummy versions of these processes if the function
-	 wasn't found in psapi.dll.  */
-      EnumProcessModules = bad;
-      GetModuleInformation = bad;
-      GetModuleFileNameEx = bad;
-      /* This will probably fail on Windows 9x/Me.  Let the user know
-	 that we're missing some functionality.  */
-      warning(_("\
-cannot automatically find executable file or library to read symbols.\n\
-Use \"file\" or \"dll\" command to load executable/libraries directly."));
-    }
-
-  hm = LoadLibrary ("advapi32.dll");
-  if (hm)
-    {
-      GPA (hm, OpenProcessToken);
-      GPA (hm, LookupPrivilegeValueA);
-      GPA (hm, AdjustTokenPrivileges);
-      /* Only need to set one of these since if OpenProcessToken fails nothing
-	 else is needed.  */
-      if (!OpenProcessToken || !LookupPrivilegeValueA
-	  || !AdjustTokenPrivileges)
-	OpenProcessToken = bad;
-    }
-
-#undef GPA
 }

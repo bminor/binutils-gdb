@@ -1,5 +1,41 @@
 2021-04-30  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c: Move code to nat/windows-nat.[ch].
+	(_initialize_windows_nat): Call initialize_loadable.
+	* nat/windows-nat.h (AdjustTokenPrivileges)
+	(DebugActiveProcessStop, DebugBreakProcess)
+	(DebugSetProcessKillOnExit, EnumProcessModules)
+	(EnumProcessModulesEx, GetModuleInformation)
+	(GetModuleFileNameExA, GetModuleFileNameExW)
+	(LookupPrivilegeValueA, OpenProcessToken, GetConsoleFontSize)
+	(GetCurrentConsoleFont, Wow64SuspendThread)
+	(Wow64GetThreadContext, Wow64SetThreadContext)
+	(Wow64GetThreadSelectorEntry): Move from windows-nat.c.
+	(AdjustTokenPrivileges_ftype)
+	(DebugActiveProcessStop_ftype, DebugBreakProcess_ftype)
+	(DebugSetProcessKillOnExit_ftype, EnumProcessModules_ftype)
+	(EnumProcessModulesEx_ftype, GetModuleInformation_ftype)
+	(GetModuleFileNameExA_ftype, GetModuleFileNameExW_ftype)
+	(LookupPrivilegeValueA_ftype, OpenProcessToken_ftype)
+	(GetConsoleFontSize_ftype)
+	(GetCurrentConsoleFont_ftype, Wow64SuspendThread_ftype)
+	(Wow64GetThreadContext_ftype, Wow64SetThreadContext_ftype)
+	(Wow64GetThreadSelectorEntry_ftype): Likewise.
+	(initialize_loadable): Declare.
+	* nat/windows-nat.c (AdjustTokenPrivileges)
+	(DebugActiveProcessStop, DebugBreakProcess)
+	(DebugSetProcessKillOnExit, EnumProcessModules)
+	(EnumProcessModulesEx, GetModuleInformation, GetModuleFileNameExA)
+	(GetModuleFileNameExW, LookupPrivilegeValueA, OpenProcessToken)
+	(GetCurrentConsoleFont, GetConsoleFontSize, Wow64SuspendThread)
+	(Wow64GetThreadContext, Wow64SetThreadContext)
+	(Wow64GetThreadSelectorEntry): Define.
+	(bad, bad_GetCurrentConsoleFont, bad_GetConsoleFontSize): Move
+	from windows-nat.c.
+	(initialize_loadable): Likewise, and rename.
+
+2021-04-30  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (bad_GetModuleFileNameEx): Remove define.
 	(bad_DebugActiveProcessStop, bad_DebugBreakProcess)
 	(bad_DebugSetProcessKillOnExit, bad_EnumProcessModules)
