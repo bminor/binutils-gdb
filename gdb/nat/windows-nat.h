@@ -135,9 +135,12 @@ extern int handle_output_debug_string (struct target_waitstatus *ourstatus);
    This function assumes that the current event did not occur during
    inferior initialization.
 
+   DLL_NAME is the name of the library.  BASE is the base load
+   address.
+
    This function must be supplied by the embedding application.  */
 
-extern void handle_load_dll ();
+extern void handle_load_dll (const char *dll_name, LPVOID base);
 
 /* Handle a DLL unload event.
 
@@ -233,6 +236,15 @@ typedef enum
 
 extern handle_exception_result handle_exception
   (struct target_waitstatus *ourstatus, bool debug_exceptions);
+
+/* Call to indicate that a DLL was loaded.  */
+
+extern void dll_loaded_event ();
+
+/* Iterate over all DLLs currently mapped by our inferior, and
+   add them to our list of solibs.  */
+
+extern void windows_add_all_dlls ();
 
 /* Return true if there is a pending stop matching
    desired_stop_thread_id.  If DEBUG_EVENTS is true, logging will be

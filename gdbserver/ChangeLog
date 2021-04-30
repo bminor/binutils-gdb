@@ -1,5 +1,14 @@
 2021-04-30  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.cc (do_initial_child_stuff): Update.
+	(windows_nat::handle_load_dll): Rename from win32_add_one_solib.
+	Change parameter type.
+	(win32_add_dll, win32_add_all_dlls)
+	(windows_nat::handle_load_dll): Remove.
+	(get_child_debug_event): Call dll_loaded_event.
+
+2021-04-30  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.cc (GETPROCADDRESS): Remove.
 	(winapi_DebugActiveProcessStop, winapi_DebugSetProcessKillOnExit)
 	(winapi_DebugBreakProcess, winapi_GenerateConsoleCtrlEvent)

@@ -333,6 +333,168 @@ handle_exception (struct target_waitstatus *ourstatus, bool debug_exceptions)
 #undef DEBUG_EXCEPTION_SIMPLE
 }
 
+/* Iterate over all DLLs currently mapped by our inferior, looking for
+   a DLL which is loaded at LOAD_ADDR.  If found, add the DLL to our
+   list of solibs; otherwise do nothing.  LOAD_ADDR NULL means add all
+   DLLs to the list of solibs; this is used when the inferior finishes
+   its initialization, and all the DLLs it statically depends on are
+   presumed loaded.  */
+
+static void
+windows_add_dll (LPVOID load_addr)
+{
+  HMODULE dummy_hmodule;
+  DWORD cb_needed;
+  HMODULE *hmodules;
+  int i;
+
+#ifdef __x86_64__
+  if (wow64_process)
+    {
+      if (EnumProcessModulesEx (current_process_handle, &dummy_hmodule,
+				sizeof (HMODULE), &cb_needed,
+				LIST_MODULES_32BIT) == 0)
+	return;
+    }
+  else
+#endif
+    {
+      if (EnumProcessModules (current_process_handle, &dummy_hmodule,
+			      sizeof (HMODULE), &cb_needed) == 0)
+	return;
+    }
+
+  if (cb_needed < 1)
+    return;
+
+  hmodules = (HMODULE *) alloca (cb_needed);
+#ifdef __x86_64__
+  if (wow64_process)
+    {
+      if (EnumProcessModulesEx (current_process_handle, hmodules,
+				cb_needed, &cb_needed,
+				LIST_MODULES_32BIT) == 0)
+	return;
+    }
+  else
+#endif
+    {
+      if (EnumProcessModules (current_process_handle, hmodules,
+			      cb_needed, &cb_needed) == 0)
+	return;
+    }
+
+  char system_dir[MAX_PATH];
+  char syswow_dir[MAX_PATH];
+  size_t system_dir_len = 0;
+  bool convert_syswow_dir = false;
+#ifdef __x86_64__
+  if (wow64_process)
+#endif
+    {
+      /* This fails on 32bit Windows because it has no SysWOW64 directory,
+	 and in this case a path conversion isn't necessary.  */
+      UINT len = GetSystemWow64DirectoryA (syswow_dir, sizeof (syswow_dir));
+      if (len > 0)
+	{
+	  /* Check that we have passed a large enough buffer.  */
+	  gdb_assert (len < sizeof (syswow_dir));
+
+	  len = GetSystemDirectoryA (system_dir, sizeof (system_dir));
+	  /* Error check.  */
+	  gdb_assert (len != 0);
+	  /* Check that we have passed a large enough buffer.  */
+	  gdb_assert (len < sizeof (system_dir));
+
+	  strcat (system_dir, "\\");
+	  strcat (syswow_dir, "\\");
+	  system_dir_len = strlen (system_dir);
+
+	  convert_syswow_dir = true;
+	}
+
+    }
+  for (i = 1; i < (int) (cb_needed / sizeof (HMODULE)); i++)
+    {
+      MODULEINFO mi;
+#ifdef __USEWIDE
+      wchar_t dll_name[MAX_PATH];
+      char dll_name_mb[MAX_PATH];
+#else
+      char dll_name[MAX_PATH];
+#endif
+      const char *name;
+      if (GetModuleInformation (current_process_handle, hmodules[i],
+				&mi, sizeof (mi)) == 0)
+	continue;
+
+      if (GetModuleFileNameEx (current_process_handle, hmodules[i],
+			       dll_name, sizeof (dll_name)) == 0)
+	continue;
+#ifdef __USEWIDE
+      wcstombs (dll_name_mb, dll_name, MAX_PATH);
+      name = dll_name_mb;
+#else
+      name = dll_name;
+#endif
+      /* Convert the DLL path of 32bit processes returned by
+	 GetModuleFileNameEx from the 64bit system directory to the
+	 32bit syswow64 directory if necessary.  */
+      std::string syswow_dll_path;
+      if (convert_syswow_dir
+	  && strncasecmp (name, system_dir, system_dir_len) == 0
+	  && strchr (name + system_dir_len, '\\') == nullptr)
+	{
+	  syswow_dll_path = syswow_dir;
+	  syswow_dll_path += name + system_dir_len;
+	  name = syswow_dll_path.c_str();
+	}
+
+      /* Record the DLL if either LOAD_ADDR is NULL or the address
+	 at which the DLL was loaded is equal to LOAD_ADDR.  */
+      if (!(load_addr != nullptr && mi.lpBaseOfDll != load_addr))
+	{
+	  handle_load_dll (name, mi.lpBaseOfDll);
+	  if (load_addr != nullptr)
+	    return;
+	}
+    }
+}
+
+/* See nat/windows-nat.h.  */
+
+void
+dll_loaded_event ()
+{
+  gdb_assert (current_event.dwDebugEventCode == LOAD_DLL_DEBUG_EVENT);
+
+  LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
+  const char *dll_name;
+
+  /* Try getting the DLL name via the lpImageName field of the event.
+     Note that Microsoft documents this fields as strictly optional,
+     in the sense that it might be NULL.  And the first DLL event in
+     particular is explicitly documented as "likely not pass[ed]"
+     (source: MSDN LOAD_DLL_DEBUG_INFO structure).  */
+  dll_name = get_image_name (current_process_handle,
+			     event->lpImageName, event->fUnicode);
+  /* If the DLL name could not be gleaned via lpImageName, try harder
+     by enumerating all the DLLs loaded into the inferior, looking for
+     one that is loaded at base address = lpBaseOfDll. */
+  if (dll_name != nullptr)
+    handle_load_dll (dll_name, event->lpBaseOfDll);
+  else if (event->lpBaseOfDll != nullptr)
+    windows_add_dll (event->lpBaseOfDll);
+}
+
+/* See nat/windows-nat.h.  */
+
+void
+windows_add_all_dlls ()
+{
+  windows_add_dll (nullptr);
+}
+
 /* See nat/windows-nat.h.  */
 
 bool

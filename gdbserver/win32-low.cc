@@ -90,8 +90,6 @@ const struct target_desc *wow64_win32_tdesc;
 
 #define NUM_REGS (the_low_target.num_regs ())
 
-static void win32_add_all_dlls (void);
-
 /* Get the thread ID from the current selected inferior (the current
    thread).  */
 static ptid_t
@@ -419,7 +417,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
      Rather than try to work around this sort of issue, it is much
      simpler to just ignore DLL load/unload events during the startup
      phase, and then process them all in one batch now.  */
-  win32_add_all_dlls ();
+  windows_add_all_dlls ();
 
   child_initialization_done = 1;
 }
@@ -937,9 +935,13 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
   child_continue (continue_status, tid);
 }
 
-static void
-win32_add_one_solib (const char *name, CORE_ADDR load_addr)
+/* See nat/windows-nat.h.  */
+
+void
+windows_nat::handle_load_dll (const char *name, LPVOID base)
 {
+  CORE_ADDR load_addr = (CORE_ADDR) (uintptr_t) base;
+
   char buf[MAX_PATH + 1];
   char buf2[MAX_PATH + 1];
 
@@ -985,162 +987,6 @@ win32_add_one_solib (const char *name, CORE_ADDR load_addr)
 #endif
 
   loaded_dll (buf2, load_addr);
-}
-
-/* Iterate over all DLLs currently mapped by our inferior, looking for
-   a DLL loaded at LOAD_ADDR; if found, return its file name,
-   otherwise return NULL.  If LOAD_ADDR is NULL, add all mapped DLLs
-   to our list of solibs.  */
-
-static char *
-win32_add_dll (LPVOID load_addr)
-{
-  size_t i;
-  HMODULE dh_buf[1];
-  HMODULE *DllHandle = dh_buf;
-  DWORD cbNeeded;
-  BOOL ok;
-
-  cbNeeded = 0;
-#ifdef __x86_64__
-  if (wow64_process)
-    ok = EnumProcessModulesEx (current_process_handle,
-			       DllHandle,
-			       sizeof (HMODULE),
-			       &cbNeeded,
-			       LIST_MODULES_32BIT);
-  else
-#endif
-    ok = EnumProcessModules (current_process_handle,
-			     DllHandle,
-			     sizeof (HMODULE),
-			     &cbNeeded);
-
-  if (!ok || !cbNeeded)
-    return NULL;
-
-  DllHandle = (HMODULE *) alloca (cbNeeded);
-  if (!DllHandle)
-    return NULL;
-
-#ifdef __x86_64__
-  if (wow64_process)
-    ok = EnumProcessModulesEx (current_process_handle,
-			       DllHandle,
-			       cbNeeded,
-			       &cbNeeded,
-			       LIST_MODULES_32BIT);
-  else
-#endif
-    ok = EnumProcessModules (current_process_handle,
-			     DllHandle,
-			     cbNeeded,
-			     &cbNeeded);
-  if (!ok)
-    return NULL;
-
-  char system_dir[MAX_PATH];
-  char syswow_dir[MAX_PATH];
-  size_t system_dir_len = 0;
-  bool convert_syswow_dir = false;
-#ifdef __x86_64__
-  if (wow64_process)
-#endif
-    {
-      /* This fails on 32bit Windows because it has no SysWOW64 directory,
-	 and in this case a path conversion isn't necessary.  */
-      UINT len = GetSystemWow64DirectoryA (syswow_dir, sizeof (syswow_dir));
-      if (len > 0)
-	{
-	  /* Check that we have passed a large enough buffer.  */
-	  gdb_assert (len < sizeof (syswow_dir));
-
-	  len = GetSystemDirectoryA (system_dir, sizeof (system_dir));
-	  /* Error check.  */
-	  gdb_assert (len != 0);
-	  /* Check that we have passed a large enough buffer.  */
-	  gdb_assert (len < sizeof (system_dir));
-
-	  strcat (system_dir, "\\");
-	  strcat (syswow_dir, "\\");
-	  system_dir_len = strlen (system_dir);
-
-	  convert_syswow_dir = true;
-	}
-
-    }
-
-  for (i = 1; i < ((size_t) cbNeeded / sizeof (HMODULE)); i++)
-    {
-      MODULEINFO mi;
-      static char dll_name[MAX_PATH];
-
-      if (!GetModuleInformation (current_process_handle,
-				 DllHandle[i],
-				 &mi,
-				 sizeof (mi)))
-	continue;
-      if (GetModuleFileNameExA (current_process_handle,
-				DllHandle[i],
-				dll_name,
-				MAX_PATH) == 0)
-	continue;
-
-      if (load_addr != nullptr && mi.lpBaseOfDll != load_addr)
-	continue;
-
-      const char *name = dll_name;
-      /* Convert the DLL path of 32bit processes returned by
-	 GetModuleFileNameEx from the 64bit system directory to the
-	 32bit syswow64 directory if necessary.  */
-      std::string syswow_dll_path;
-      if (convert_syswow_dir
-	  && strncasecmp (dll_name, system_dir, system_dir_len) == 0
-	  && strchr (dll_name + system_dir_len, '\\') == nullptr)
-	{
-	  syswow_dll_path = syswow_dir;
-	  syswow_dll_path += dll_name + system_dir_len;
-	  name = syswow_dll_path.c_str();
-	}
-
-      if (load_addr != nullptr)
-	{
-	  if (name != dll_name)
-	    strcpy (dll_name, name);
-	  return dll_name;
-	}
-      else
-	win32_add_one_solib (name, (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll);
-    }
-  return NULL;
-}
-
-/* Iterate over all DLLs currently mapped by our inferior, and
-   add them to our list of solibs.  */
-
-static void
-win32_add_all_dlls (void)
-{
-  win32_add_dll (NULL);
-}
-
-/* See nat/windows-nat.h.  */
-
-void
-windows_nat::handle_load_dll ()
-{
-  LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
-  const char *dll_name;
-
-  dll_name = get_image_name (current_process_handle,
-			     event->lpImageName, event->fUnicode);
-  if (dll_name == nullptr
-      && event->lpBaseOfDll != nullptr)
-    dll_name = win32_add_dll (event->lpBaseOfDll);
-  if (dll_name == nullptr)
-    return;
-
-  win32_add_one_solib (dll_name, (CORE_ADDR) (uintptr_t) event->lpBaseOfDll);
 }
 
 /* See nat/windows-nat.h.  */
@@ -1367,7 +1213,7 @@ get_child_debug_event (DWORD *continue_status,
       CloseHandle (current_event.u.LoadDll.hFile);
       if (! child_initialization_done)
 	break;
-      handle_load_dll ();
+      dll_loaded_event ();
 
       ourstatus->kind = TARGET_WAITKIND_LOADED;
       ourstatus->value.sig = GDB_SIGNAL_TRAP;
