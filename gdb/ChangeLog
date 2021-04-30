@@ -1,5 +1,21 @@
 2021-04-30  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf2_initialize_objfile): Update.
+	(add_signatured_type_cu_to_table): Remove.
+	(create_debug_type_hash_table): Assume dwo_file is non-null.
+	(create_debug_types_hash_table): Update comment.
+	(create_all_type_units): Remove.
+	(sort_tu_by_abbrev_offset): Update comment.
+	(build_type_psymtabs): Rename from build_type_psymtabs_1.
+	(build_type_psymtabs): Remove.
+	(process_skeletonless_type_unit, dwarf2_build_psymtabs_hard):
+	Update.
+	(read_comp_units_from_section): Add types_htab, section_kind
+	parameters.
+	(create_all_comp_units): Read type units.
+
+2021-04-30  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (struct tu_stats) <nr_tus>: New member.
 	(struct dwarf2_per_bfd) <get_cutu, get_tu>: Remove
 	<get_cu>: Now inline.
