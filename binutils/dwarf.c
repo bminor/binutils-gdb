@@ -11327,6 +11327,7 @@ load_dwo_file (const char * main_filename, const char * name, const char * dir, 
   /* FIXME: We should check the dwo_id.  */
 
   printf (_("%s: Found separate debug object file: %s\n\n"), main_filename, separate_filename);
+
   add_separate_debug_file (separate_filename, separate_handle);
   /* Note - separate_filename will be freed in free_debug_memory().  */
   return separate_handle;
@@ -11361,20 +11362,38 @@ load_debug_sup_file (const char * main_filename, void * file)
   if (filename[0] != '/' && strchr (main_filename, '/'))
     {
       char * new_name;
-      if (asprintf (& new_name, "%.*s/%s",
-		    (int) (strrchr (main_filename, '/') - main_filename),
-		    main_filename,
-		    filename) < 3)
-	warn (_("unable to construct path for supplementary debug file"));
-      else
-	filename = new_name;
+      int new_len;
+
+      new_len = asprintf (& new_name, "%.*s/%s",
+			  (int) (strrchr (main_filename, '/') - main_filename),
+			  main_filename,
+			  filename);
+      if (new_len < 3)
+	{
+	  warn (_("unable to construct path for supplementary debug file"));
+	  if (new_len > -1)
+	    free (new_name);
+	  return;
+	}
+      filename = new_name;
+    }
+  else
+    {
+      /* PR 27796: Make sure that we pass a filename that can be free'd to
+	 add_separate_debug_file().  */
+      filename = strdup (filename);
+      if (filename == NULL)
+	{
+	  warn (_("out of memory constructing filename for .debug_sup link\n"));
+	  return;
+	}
     }
 
-  void * handle;
-  handle = open_debug_file (filename);
+  void * handle = open_debug_file (filename);
   if (handle == NULL)
     {
       warn (_("unable to open file '%s' referenced from .debug_sup section\n"), filename);
+      free ((void *) filename);
       return;
     }
 

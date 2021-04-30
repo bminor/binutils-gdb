@@ -1,3 +1,9 @@
+2021-04-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 27796
+	* dwarf.c (load_debug_sup_file): Allocate memory for filename in
+	.debug_sup section.
+
 2021-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 27594
