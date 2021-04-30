@@ -55,42 +55,46 @@ set type_syms \
 
 # Fetch all functions, variables and types without any non-debug
 # symbols.
-set testname "List all functions from debug information only"
-set cmd "111-symbol-info-functions"
-set state 0
-gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
-    -re "111\\^done,symbols=\{debug=\\\[${symtab_re}" {
-	if { $state == 0 } { incr state }
-	exp_continue
-    }
-    -re ",${symtab_re}" {
-	exp_continue
-    }
-    -re "\\\]\}\r\n${mi_gdb_prompt}$" {
-	if { $state == 1 } {
-	    pass $gdb_test_name
-	} else {
-	    fail $gdb_test_name
+with_timeout_factor 2 {
+    set testname "List all functions from debug information only"
+    set cmd "111-symbol-info-functions"
+    set state 0
+    gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
+	-re "111\\^done,symbols=\{debug=\\\[${symtab_re}" {
+	    if { $state == 0 } { incr state }
+	    exp_continue
+	}
+	-re ",${symtab_re}" {
+	    exp_continue
+	}
+	-re "\\\]\}\r\n${mi_gdb_prompt}$" {
+	    if { $state == 1 } {
+		pass $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
 	}
     }
 }
 
-set testname "List all variables from debug information only"
-set cmd "112-symbol-info-variables"
-set state 0
-gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
-    -re "112\\^done,symbols=\{debug=\\\[${symtab_re}" {
-	if { $state == 0 } { incr state }
-	exp_continue
-    }
-    -re ",${symtab_re}" {
-	exp_continue
-    }
-    -re "\\\]\}\r\n${mi_gdb_prompt}$" {
-	if { $state == 1 } {
-	    pass $gdb_test_name
-	} else {
-	    fail $gdb_test_name
+with_timeout_factor 2 {
+    set testname "List all variables from debug information only"
+    set cmd "112-symbol-info-variables"
+    set state 0
+    gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
+	-re "112\\^done,symbols=\{debug=\\\[${symtab_re}" {
+	    if { $state == 0 } { incr state }
+	    exp_continue
+	}
+	-re ",${symtab_re}" {
+	    exp_continue
+	}
+	-re "\\\]\}\r\n${mi_gdb_prompt}$" {
+	    if { $state == 1 } {
+		pass $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
 	}
     }
 }
@@ -150,7 +154,7 @@ gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
     }
 }
 
-with_timeout_factor 2 {
+with_timeout_factor 4 {
     set testname "List all variables"
     set cmd "115-symbol-info-variables --include-nondebug"
     set state 0

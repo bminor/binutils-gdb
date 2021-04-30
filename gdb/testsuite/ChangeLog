@@ -1,5 +1,10 @@
 2021-04-30  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.mi/mi-sym-info.exp: Add with_timeout_factor, and increase
+	existing timeout factors.
+
+2021-04-30  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.mi/mi-sym-info.exp: Remove duplicate test.
 
 2021-04-29  Tom de Vries  <tdevries@suse.de>
