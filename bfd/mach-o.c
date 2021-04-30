@@ -5931,7 +5931,8 @@ bfd_mach_o_core_fetch_environment (bfd *abfd,
 		{
 		  unsigned long val;
 
-		  val = *((unsigned long *) (buf + size - offset));
+		  val = bfd_get_32(abfd, buf + size - offset);
+
 		  if (! found_nonnull)
 		    {
 		      if (val != 0)

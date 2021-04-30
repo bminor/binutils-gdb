@@ -1,5 +1,11 @@
 2021-04-30  Nick Clifton  <nickc@redhat.com>
 
+	PR 27801
+	* mach-o.c (bfd_mach_o_core_fetch_environment): Use bfd_get_32 to
+	read 32-bit value.
+
+2021-04-30  Nick Clifton  <nickc@redhat.com>
+
 	PR 27799
 	* elf32-xtensa.c (elf_xtensa_grok_prstatus): Check for core notes
 	that are too small.
