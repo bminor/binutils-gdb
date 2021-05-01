@@ -60,6 +60,7 @@ AC_CHECK_FUNCS_ONCE(m4_flatten([
   munmap
   posix_fallocate
   sigaction
+  strsignal
   time
   truncate
 ]))

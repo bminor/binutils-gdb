@@ -2301,6 +2301,7 @@ as_fn_append ac_func_list " mmap"
 as_fn_append ac_func_list " munmap"
 as_fn_append ac_func_list " posix_fallocate"
 as_fn_append ac_func_list " sigaction"
+as_fn_append ac_func_list " strsignal"
 as_fn_append ac_func_list " time"
 as_fn_append ac_func_list " truncate"
 # Check that the precious variables saved in the cache have kept the same
@@ -3922,6 +3923,8 @@ _ACEOF
 
 fi
 done
+
+
 
 
 
@@ -11182,7 +11185,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11185 "configure"
+#line 11188 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11288,7 +11291,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11291 "configure"
+#line 11294 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

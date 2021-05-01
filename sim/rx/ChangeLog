@@ -1,5 +1,9 @@
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* config.in, configure: Regenerate.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* load.c (rx_load): Cast size to long.
 
 2021-04-26  Mike Frysinger  <vapier@gentoo.org>

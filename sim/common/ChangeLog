@@ -1,5 +1,9 @@
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* nrun.c (strsignal): New prototype.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.c (wrap): Delete.
 	(os_close): Replace wrap call with direct call & setting last_errno.
 	(os_isatty, os_lseek, os_read_stdin, os_write, os_rename, os_system,

@@ -28,6 +28,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "bfd.h"
 
+#ifndef HAVE_STRSIGNAL
+/* While libiberty provides a fallback, it doesn't provide a prototype.  */
+extern const char *strsignal (int);
+#endif
+
 #ifdef HAVE_ENVIRON
 extern char **environ;
 #endif

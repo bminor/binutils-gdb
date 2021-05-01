@@ -1,5 +1,9 @@
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* config.in, configure: Regenerate.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* cpustate.c (aarch64_set_FP_float): Change lx to PRIx64.
 	(aarch64_set_FP_double, aarch64_set_FP_long_double,
 	aarch64_set_vec_u64, aarch64_set_vec_s64): Likewise.

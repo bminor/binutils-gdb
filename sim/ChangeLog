@@ -1,3 +1,7 @@
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4 (AC_CHECK_FUNCS_ONCE): Add strsignal.
+
 2021-04-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* README-HACKING (nltvals.def): Update to gennltvals.py.
