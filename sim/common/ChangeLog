@@ -1,3 +1,12 @@
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (GNULIB_BUILDDIR): Define.
+	Include $(GNULIB_BUILDDIR)/Makefile.gnulib.inc.
+	(CSEARCH): Add -I../...
+	(ALL_CFLAGS): Add $(INCGNU).
+	(EXTRA_LIBS): Add $(LIBGNU).
+	* defs.h: Include gnulib/config.h.  Undefine PACKAGE* defines.
+
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-base.h (SIM_HAVE_COMMON_SIM_STATE): Delete.

@@ -40,6 +40,10 @@ srccom = $(srcdir)/../common
 srcroot = $(srcdir)/../..
 srcsim = $(srcdir)/..
 
+# Helper code from gnulib.
+GNULIB_BUILDDIR = ../../gnulib
+include $(GNULIB_BUILDDIR)/Makefile.gnulib.inc
+
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
@@ -232,8 +236,9 @@ CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
   -I../../include -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
   -I../../opcodes -I$(srcroot)/opcodes \
+  -I../.. \
   @INCINTL@
-ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(SIM_EXTRA_CFLAGS) $(CFLAGS)
+ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(INCGNU) $(SIM_EXTRA_CFLAGS) $(CFLAGS)
 BUILD_CFLAGS = $(CFLAGS_FOR_BUILD) $(CSEARCH)
 
 COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(SIM_EXTRA_CFLAGS)
@@ -248,7 +253,7 @@ LIBINTL_DEP = @LIBINTL_DEP@
 CONFIG_LIBS = @LIBS@ $(ZLIB)
 LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB)
 EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
-	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL)
+	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL) $(LIBGNU)
 
 LIB_OBJS = callback.o modules.o syscall.o targ-map.o version.o \
 	$(SIM_OBJS)

@@ -1,3 +1,7 @@
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (INCLUDES): Add -I../..
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (gentmap): Pass -DUSE_CONFIG_H.

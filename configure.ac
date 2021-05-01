@@ -2812,6 +2812,9 @@ case " ${configdirs} " in
   *\ gdbserver\ *)
     configdirs="${configdirs} gnulib gdbsupport"
     ;;
+  *\ sim\ *)
+    configdirs="${configdirs} gnulib"
+    ;;
 esac
 
 # Strip out unwanted targets.
