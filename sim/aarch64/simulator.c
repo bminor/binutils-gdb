@@ -8420,7 +8420,7 @@ do_fcvtzu (sim_cpu *cpu)
 	  uint64_t value = (uint64_t) d;
 
 	  /* Do not raise an exception if we have reached ULONG_MAX.  */
-	  if (value != (1UL << 63))
+	  if (value != (1ULL << 63))
 	    RAISE_EXCEPTIONS (d, value, DOUBLE, ULONG);
 
 	  aarch64_set_reg_u64 (cpu, rd, NO_SP, value);
@@ -8431,7 +8431,7 @@ do_fcvtzu (sim_cpu *cpu)
 	  uint64_t value = (uint64_t) f;
 
 	  /* Do not raise an exception if we have reached ULONG_MAX.  */
-	  if (value != (1UL << 63))
+	  if (value != (1ULL << 63))
 	    RAISE_EXCEPTIONS (f, value, FLOAT, ULONG);
 
 	  aarch64_set_reg_u64 (cpu, rd, NO_SP, value);

@@ -1,3 +1,7 @@
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* simulator.c (do_fcvtzu): Change UL to ULL.
+
 2021-04-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, config.in, configure: Regenerate.
