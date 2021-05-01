@@ -151,7 +151,7 @@ rx_load (bfd *prog, host_callback *callback)
 	}
       if (bfd_bread (buf, size, prog) != size)
 	{
-	  fprintf (stderr, "Failed to read %lx bytes\n", size);
+	  fprintf (stderr, "Failed to read %lx bytes\n", (long) size);
 	  continue;
 	}
 
