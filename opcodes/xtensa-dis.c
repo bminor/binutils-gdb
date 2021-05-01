@@ -412,6 +412,9 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
   if (nslots > 1)
     (*info->fprintf_func) (info->stream, "{ ");
 
+  info->insn_type = dis_nonbranch;
+  info->insn_info_valid = 1;
+
   first_slot = 1;
   for (n = 0; n < nslots; n++)
     {
@@ -424,6 +427,13 @@ print_insn_xtensa (bfd_vma memaddr, struct disassemble_info *info)
       opc = xtensa_opcode_decode (isa, fmt, n, slot_buffer);
       (*info->fprintf_func) (info->stream, "%s",
 			     xtensa_opcode_name (isa, opc));
+
+      if (xtensa_opcode_is_branch (isa, opc))
+	info->insn_type = dis_condbranch;
+      else if (xtensa_opcode_is_jump (isa, opc))
+	info->insn_type = dis_branch;
+      else if (xtensa_opcode_is_call (isa, opc))
+	info->insn_type = dis_jsr;
 
       /* Print the operands (if any).  */
       noperands = xtensa_opcode_num_operands (isa, opc);

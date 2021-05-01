@@ -1,3 +1,8 @@
+2021-05-01  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* xtensa-dis.c (print_insn_xtensa): Fill in info->insn_type and
+	info->insn_info_valid.
+
 2021-04-26  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (lea): Add Optimize.
