@@ -3826,9 +3826,13 @@ process_debug_info (struct dwarf_section * section,
 		  offset_size == 8 ? "64-bit" : "32-bit");
 	  printf (_("   Version:       %d\n"), compunit.cu_version);
 	  if (compunit.cu_version >= 5)
-	    printf (_("   Unit Type:     %s (%x)\n"),
-		    get_DW_UT_name (compunit.cu_unit_type) ?: "???",
-		    compunit.cu_unit_type);
+	    {
+	      const char *name = get_DW_UT_name (compunit.cu_unit_type);
+
+	      printf (_("   Unit Type:     %s (%x)\n"),
+		      name ? name : "???",
+		      compunit.cu_unit_type);
+	    }
 	  printf (_("   Abbrev Offset: 0x%s\n"),
 		  dwarf_vmatoa ("x", compunit.cu_abbrev_offset));
 	  printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
