@@ -1,3 +1,24 @@
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* callback.c: Replace config.h include with defs.h.
+	* cgen-accfp.c, cgen-fpu.c, cgen-par.c, cgen-run.c, cgen-scache.c,
+	dv-core.c, dv-glue.c, genmloop.sh, hw-alloc.c, hw-base.c, hw-device.c,
+	hw-events.c, hw-handles.c, hw-instances.c, hw-ports.c,
+	hw-properties.c, hw-tree.c, sim-abort.c, sim-arange.c, sim-bits.c,
+	sim-close.c, sim-command.c, sim-config.c, sim-core.c, sim-cpu.c,
+	sim-endian.c, sim-engine.c, sim-events.c, sim-fpu.c, sim-hload.c,
+	sim-hrw.c, sim-hw.c, sim-info.c, sim-inline.c, sim-model.c,
+	sim-profile.c, sim-reason.c, sim-reg.c, sim-resume.c, sim-run.c,
+	sim-signal.c, sim-stop.c, sim-trace.c, sim-utils.c: Include defs.h.
+	* cgen-trace.c, cgen-utils.c, dv-cfi.c, dv-pal.c, dv-sockser.c,
+	nrun.c, sim-basics.h, sim-load.c, sim-memopt.c, sim-module.c,
+	sim-options.c, sim-syscall.c, sim-watch.c, syscall.c: Replace
+	config.h include with defs.h.
+	* gentmap.c (gen_targ_map_c): Replace config.h with defs.h.
+	* sim-io.c: Include defs.h.
+	(open): Undefine.
+	* defs.h: New file.
+
 2021-05-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* nrun.c: Include environ.h.

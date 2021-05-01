@@ -33,6 +33,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    When the framework is more modular, this can be.
 */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
 

@@ -1,5 +1,12 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* armcopro.c, armemu.c, arminit.c, armsupp.c, armvirt.c, iwmmxt.c,
+	maverick.c, thumbemu.c: Include defs.h.
+	* armos.c, wrapper.c: Replace config.h include with defs.h.
+	* armdefs.h: Delete config.h include.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>

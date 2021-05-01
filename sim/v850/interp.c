@@ -1,3 +1,6 @@
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-options.h"
 #include "v850_sim.h"

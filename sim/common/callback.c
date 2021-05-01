@@ -20,9 +20,9 @@
 /* This file provides a standard way for targets to talk to the host OS
    level.  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "ansidecl.h"
 #include <stdarg.h>
 #include <stdio.h>

@@ -1,5 +1,12 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-m32r_cache.c, dv-m32r_uart.c: Replace config.h include with
+	defs.h.
+	* m32r.c, m32r2.c, m32rx.c, sim-if.c, traps-linux.c,
+	traps.c: Include defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-04  Tom Tromey  <tromey@adacore.com>

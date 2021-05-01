@@ -5,7 +5,6 @@
 
 #define WITH_TARGET_WORD_MSB 31
 
-#include "config.h"
 #include "sim-basics.h"
 #include "sim-signal.h"
 #include "sim-fpu.h"

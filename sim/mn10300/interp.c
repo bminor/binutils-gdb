@@ -1,4 +1,6 @@
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <signal.h>
 
 #include "sim-main.h"

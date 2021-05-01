@@ -23,9 +23,9 @@
    tree, nor should it live in the gdb source tree.  K&R C must be
    supported.  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "ansidecl.h"
 #include "libiberty.h"
 #include <stdarg.h>

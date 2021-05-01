@@ -22,7 +22,6 @@
 #ifndef _SIMULATOR_H
 #define _SIMULATOR_H
 
-#include "config.h"
 #include <sys/types.h>
 #include <setjmp.h>
 

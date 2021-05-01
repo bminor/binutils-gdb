@@ -1,5 +1,10 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* cpu.c, gdb-if.c, load.c, main.c, mem.c, rl78.c, trace.c: Replace
+	config.h include with defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>

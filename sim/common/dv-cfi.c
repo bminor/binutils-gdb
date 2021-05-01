@@ -22,7 +22,8 @@
 
 /* TODO: support vendor query tables.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include <math.h>
 #include <errno.h>

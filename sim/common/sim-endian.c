@@ -23,6 +23,9 @@
 #ifndef _SIM_ENDIAN_C_
 #define _SIM_ENDIAN_C_
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-basics.h"
 #include "sim-assert.h"
 

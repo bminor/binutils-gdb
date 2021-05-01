@@ -26,6 +26,9 @@
 #undef SIM_INLINE_P
 #define SIM_INLINE_P 1
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-inline.h"
 #include "sim-main.h"
 

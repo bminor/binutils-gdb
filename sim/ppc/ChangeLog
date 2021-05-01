@@ -1,3 +1,10 @@
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gentmap): Pass -DUSE_CONFIG_H.
+	* basics.h, debug.c, filter_filename.c, inline.c, sim-endian.c,
+	words.h: Replace config.h include with defs.h.
+	* defs.h: New file.
+
 2021-05-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (WERROR_CFLAGS): Define.

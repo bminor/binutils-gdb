@@ -18,9 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    as it is used by simulators that don't use it [though that doesn't mean
    to suggest that they shouldn't :-)].  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "ansidecl.h"
 #include <stdio.h> /* for NULL */
 #include <stdarg.h>

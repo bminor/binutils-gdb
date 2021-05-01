@@ -18,7 +18,8 @@
 
 */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include <ctype.h>
 #include <stdio.h>

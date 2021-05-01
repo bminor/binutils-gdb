@@ -1,5 +1,10 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* compile.c: Replace config.h include with defs.h.
+	* sim-main.h: Delete config.h include.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-08  Mike Frysinger  <vapier@gentoo.org>

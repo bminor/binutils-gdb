@@ -1,5 +1,11 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* d10v_sim.h, gencode.c: Delete config.h include.
+	* endian.c: Include defs.h.
+	* interp.c, simops.c: Replace config.h include with defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>

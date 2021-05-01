@@ -22,7 +22,9 @@ code on the hardware.
 
 */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "bfd.h"
 #include "sim-main.h"
 #include "sim-utils.h"
@@ -31,9 +33,6 @@ code on the hardware.
 #include "sim-hw.h"
 
 #include "itable.h"
-
-
-#include "config.h"
 
 #include <stdio.h>
 #include <stdarg.h>

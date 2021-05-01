@@ -22,7 +22,6 @@
 #ifndef _CPU_STATE_H
 #define _CPU_STATE_H
 
-#include "config.h"
 #include <sys/types.h>
 #include <stdint.h>
 #include <inttypes.h>

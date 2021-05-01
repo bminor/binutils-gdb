@@ -21,6 +21,8 @@
 #ifndef _BASICS_H_
 #define _BASICS_H_
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
 /* from Michael Meissner, macro's to handle concating symbols better */
 
@@ -85,7 +87,6 @@ typedef enum {
 
 /* Basic configuration */
 
-#include "config.h"
 #include "ppc-config.h"
 #include "inline.h"
 

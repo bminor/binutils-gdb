@@ -19,10 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Main header for the frv.  */
 
-/* sim-basics.h includes config.h but cgen-types.h must be included before
-   sim-basics.h and cgen-types.h needs config.h.  */
-#include "config.h"
-
 /* This is a global setting.  Different cpu families can't mix-n-match -scache
    and -pbb.  However some cpu families may use -simple while others use
    one of -scache/-pbb. ???? */

@@ -23,6 +23,9 @@
 #ifndef _SIM_BITS_C_
 #define _SIM_BITS_C_
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-basics.h"
 #include "sim-assert.h"
 #include "sim-io.h"

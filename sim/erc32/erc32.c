@@ -18,7 +18,9 @@
 
 /* The control space devices */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>

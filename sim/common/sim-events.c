@@ -23,6 +23,9 @@
 #ifndef _SIM_EVENTS_C_
 #define _SIM_EVENTS_C_
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-cpu.h"

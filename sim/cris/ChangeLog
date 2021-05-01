@@ -1,5 +1,11 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* cris-tmpl.c, crisv10f.c, crisv32f.c, dv-cris.c, dv-cris_900000xx.c,
+	dv-rv.c, traps.c: Include defs.h.
+	* rvdummy.c, sim-if.c: Replace config.h include with defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-15  Mike Frysinger  <vapier@gentoo.org>

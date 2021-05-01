@@ -21,7 +21,9 @@
    fun, and definign VAILDATE will define SWI 1 to enter SVC mode, and SWI
    0x11 to halt the emulator.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "ansidecl.h"
 #include "libiberty.h"
 

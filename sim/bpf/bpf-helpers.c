@@ -21,6 +21,9 @@
    implementation of the helpers, which can be customized by the
    user.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #define WANT_CPU_BPFBF
 #define WANT_CPU bpfbf
 

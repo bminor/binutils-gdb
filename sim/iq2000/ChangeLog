@@ -1,5 +1,10 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* iq2000.c, sim-if.c: Include defs.h.
+	* sim-main.h: Delete config.h include.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-04  Tom Tromey  <tromey@adacore.com>

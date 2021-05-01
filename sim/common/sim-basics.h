@@ -26,9 +26,7 @@
 
 /* Basic configuration */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "defs.h"
 
 /* Basic host dependant mess - hopefully <stdio.h> + <stdarg.h> will
    bring potential conflicts out in the open */

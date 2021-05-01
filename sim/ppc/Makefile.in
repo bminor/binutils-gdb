@@ -629,7 +629,7 @@ mon.o: mon.c $(BASICS_H) $(CPU_H) $(MON_H)
 # As a kludge, build the common stuff here for now.
 gentmap: $(srcdir)/../common/gentmap.c Makefile targ-vals.def
 	$(LINK_FOR_BUILD) -I. -I../common -I$(srcdir)/../common \
-		$(srcdir)/../common/gentmap.c
+		$(srcdir)/../common/gentmap.c -DUSE_CONFIG_H
 
 targ-vals.def: $(srcdir)/../common/nltvals.def
 	rm -f targ-vals.def tmp-def

@@ -1,9 +1,6 @@
-/* Semantics for user defined instructions on the Lattice Mico32.
-   Contributed by Jon Beniston <jon@beniston.com>
+/* The configure generated header settings.
 
-   Copyright (C) 2009-2021 Free Software Foundation, Inc.
-
-   This file is part of GDB.
+   Copyright 2002-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,16 +15,16 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This must come before any other includes.  */
-#include "defs.h"
+/* This file should be included by every .c file before any other header.  */
 
-#include "sim-main.h"
+#ifndef DEFS_H
+#define DEFS_H
 
-/* Handle user defined instructions.  */
+#ifdef HAVE_CONFIG_H
 
-UINT
-lm32bf_user_insn (SIM_CPU * current_cpu, INT r0, INT r1, UINT imm)
-{
-  /* FIXME: Should probably call code in a user supplied library.  */
-  return 0;
-}
+/* Include sim's various configure tests.  */
+#include "config.h"
+
+#endif
+
+#endif

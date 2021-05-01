@@ -1,5 +1,12 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* cache.c, frv.c, interrupts.c, memory.c, options.c, pipeline.c,
+	profile-fr400.c, profile-fr450.c, profile-fr500.c, profile-fr550.c,
+	profile.c, registers.c, reset.c, sim-if.c, traps.c: Include defs.h.
+	* sim-main.h: Delete config.h include.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>

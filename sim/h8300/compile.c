@@ -17,7 +17,9 @@
  * AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <signal.h>
 #include <time.h>
 #include <stdlib.h>

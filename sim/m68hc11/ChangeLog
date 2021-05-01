@@ -1,5 +1,11 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-m68hc11.c, dv-m68hc11eepr.c, dv-m68hc11sio.c, dv-m68hc11spi.c,
+	dv-m68hc11tim.c, dv-nvram.c, emulos.c, gencode.c, interp.c,
+	interrupts.c, m68hc11_sim.c: Include defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>

@@ -1,6 +1,9 @@
 /* If we're being compiled as a .c file, rather than being included in
    d10v_sim.h, then ENDIAN_INLINE won't be defined yet.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #ifndef ENDIAN_INLINE
 #define NO_ENDIAN_INLINE
 #include "sim-main.h"

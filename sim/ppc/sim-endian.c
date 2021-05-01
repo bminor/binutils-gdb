@@ -21,7 +21,9 @@
 #ifndef _SIM_ENDIAN_C_
 #define _SIM_ENDIAN_C_
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "basics.h"
 
 

@@ -25,7 +25,8 @@
    For more specific details on these functions, see the sim/sim.h header
    file.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 #include "sim-options.h"

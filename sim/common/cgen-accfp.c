@@ -11,6 +11,9 @@
    - proper rounding
 */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-fpu.h"
 

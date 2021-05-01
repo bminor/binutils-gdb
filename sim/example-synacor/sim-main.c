@@ -21,7 +21,8 @@
 /* This file contains the main simulator decoding logic.  i.e. everything that
    is architecture specific.  */
 
-#include "config.h"
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "sim-main.h"
 

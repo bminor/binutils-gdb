@@ -1,5 +1,10 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-lm32cpu.c, dv-lm32timer.c, dv-lm32uart.c, lm32.c, sim-if.c,
+	traps.c, user.c: Include defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-04  Tom Tromey  <tromey@adacore.com>

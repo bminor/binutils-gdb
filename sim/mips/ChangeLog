@@ -1,5 +1,12 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c: Replace config.h include with defs.h.
+	* cp1.c, dsp.c, dv-tx3904cpu.c, dv-tx3904irc.c, dv-tx3904sio.c,
+	dv-tx3904tmr.c, m16run.c, mdmx.c, micromipsrun.c, sim-main.c:
+	Include defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>

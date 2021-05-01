@@ -1,5 +1,12 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* cpustate.c: Include defs.h.
+	* interp.c: Replace config.h include with defs.h.
+	* memory.c, simulator.c: Likewise.
+	* cpustate.h, simulator.h: Delete config.h include.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>

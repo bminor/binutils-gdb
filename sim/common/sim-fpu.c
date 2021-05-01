@@ -35,6 +35,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_FPU_C
 #define SIM_FPU_C
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-basics.h"
 #include "sim-fpu.h"
 

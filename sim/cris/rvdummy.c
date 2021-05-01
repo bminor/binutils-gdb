@@ -29,9 +29,8 @@ main (int argc, char *argv[])
 }
 #else
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include "getopt.h"
 #include "libiberty.h"

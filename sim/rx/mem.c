@@ -18,6 +18,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 /* This slows down the simulator and we get some false negatives from
    gcc, like when it uses a long-sized hole to hold a byte-sized
    variable, knowing that it doesn't care about the other bits.  But,
@@ -25,7 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    1.  */
 #define RDCHECK 0
 
-#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -23,6 +23,9 @@
 #ifndef SIM_CORE_C
 #define SIM_CORE_C
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "libiberty.h"

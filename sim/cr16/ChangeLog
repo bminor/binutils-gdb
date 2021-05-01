@@ -1,5 +1,14 @@
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* cr16_sim.h: Delete config.h include.
+	* gencode.c: Replace config.h include with defs.h.
+	(write_template): Output defs.h include.
+	(write_opcodes): Likewise.
+	* interp.c: Replace config.h include with defs.h.
+	* simops.c: Include defs.h.
+
+2021-05-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
