@@ -564,6 +564,7 @@ ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AR = @AR@
+AR_FOR_BUILD = @AR_FOR_BUILD@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -608,6 +609,7 @@ PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
+RANLIB_FOR_BUILD = @RANLIB_FOR_BUILD@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
@@ -809,10 +811,10 @@ igen/gen-engine.$(OBJEXT): igen/$(am__dirstamp) \
 igen/gen.$(OBJEXT): igen/$(am__dirstamp) \
 	igen/$(DEPDIR)/$(am__dirstamp)
 
-igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) igen/$(am__dirstamp)
-	$(AM_V_at)-rm -f igen/libigen.a
-	$(AM_V_AR)$(igen_libigen_a_AR) igen/libigen.a $(igen_libigen_a_OBJECTS) $(igen_libigen_a_LIBADD)
-	$(AM_V_at)$(RANLIB) igen/libigen.a
+@SIM_ENABLE_IGEN_FALSE@igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) igen/$(am__dirstamp)
+@SIM_ENABLE_IGEN_FALSE@	$(AM_V_at)-rm -f igen/libigen.a
+@SIM_ENABLE_IGEN_FALSE@	$(AM_V_AR)$(igen_libigen_a_AR) igen/libigen.a $(igen_libigen_a_OBJECTS) $(igen_libigen_a_LIBADD)
+@SIM_ENABLE_IGEN_FALSE@	$(AM_V_at)$(RANLIB) igen/libigen.a
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
@@ -1404,6 +1406,12 @@ nltvals:
 
 # Alias for developers.
 @SIM_ENABLE_IGEN_TRUE@igen: igen/igen$(EXEEXT)
+
+# These rules are copied from automake, but tweaked to use FOR_BUILD variables.
+@SIM_ENABLE_IGEN_TRUE@igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) igen/$(am__dirstamp)
+@SIM_ENABLE_IGEN_TRUE@	$(AM_V_at)-rm -f $@
+@SIM_ENABLE_IGEN_TRUE@	$(AM_V_AR)$(AR_FOR_BUILD) $(ARFLAGS) $@ $(igen_libigen_a_OBJECTS) $(igen_libigen_a_LIBADD)
+@SIM_ENABLE_IGEN_TRUE@	$(AM_V_at)$(RANLIB_FOR_BUILD) $@
 
 @SIM_ENABLE_IGEN_TRUE@igen/igen$(EXEEXT): $(igen_igen_OBJECTS) $(igen_igen_DEPENDENCIES) igen/$(am__dirstamp)
 @SIM_ENABLE_IGEN_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(igen_igen_OBJECTS) $(igen_igen_LDADD)

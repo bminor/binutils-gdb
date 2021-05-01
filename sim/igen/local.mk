@@ -48,6 +48,12 @@ noinst_LIBRARIES += %D%/libigen.a
 %C%_igen_SOURCES = %D%/igen.c
 %C%_igen_LDADD = %D%/libigen.a
 
+# These rules are copied from automake, but tweaked to use FOR_BUILD variables.
+igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) igen/$(am__dirstamp)
+	$(AM_V_at)-rm -f $@
+	$(AM_V_AR)$(AR_FOR_BUILD) $(ARFLAGS) $@ $(igen_libigen_a_OBJECTS) $(igen_libigen_a_LIBADD)
+	$(AM_V_at)$(RANLIB_FOR_BUILD) $@
+
 %D%/igen$(EXEEXT): $(%C%_igen_OBJECTS) $(%C%_igen_DEPENDENCIES) %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_igen_OBJECTS) $(%C%_igen_LDADD)
 

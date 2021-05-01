@@ -687,7 +687,9 @@ RANLIB
 AR
 LDFLAGS_FOR_BUILD
 CFLAGS_FOR_BUILD
+RANLIB_FOR_BUILD
 CC_FOR_BUILD
+AR_FOR_BUILD
 INSTALL_DATA
 INSTALL_SCRIPT
 INSTALL_PROGRAM
@@ -6852,14 +6854,20 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 
 
 if test "x$cross_compiling" = "xno"; then
+  : "${AR_FOR_BUILD:=\$(AR)}"
   : "${CC_FOR_BUILD:=\$(CC)}"
+  : "${RANLIB_FOR_BUILD:=\$(RANLIB)}"
   : "${CFLAGS_FOR_BUILD:=\$(CFLAGS)}"
   : "${LDFLAGS_FOR_BUILD:=\$(LDFLAGS)}"
 else
+  : "${AR_FOR_BUILD:=ar}"
   : "${CC_FOR_BUILD:=gcc}"
+  : "${RANLIB_FOR_BUILD:=ranlib}"
   : "${CFLAGS_FOR_BUILD:=-g -O}"
   : "${LDLFAGS_FOR_BUILD:=}"
 fi
+
+
 
 
 
@@ -11190,7 +11198,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11193 "configure"
+#line 11201 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11296,7 +11304,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11299 "configure"
+#line 11307 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

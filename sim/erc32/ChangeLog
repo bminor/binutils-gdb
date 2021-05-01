@@ -1,5 +1,9 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* func.c (bfd_load): Use BFD_VMA_FMT.
 
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>

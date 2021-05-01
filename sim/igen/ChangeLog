@@ -1,3 +1,7 @@
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* local.mk (igen/libigen.a): New target.
+
 2021-05-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* lf.h: Include ansidecl.h.
