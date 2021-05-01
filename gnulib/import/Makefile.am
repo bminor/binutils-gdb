@@ -42,6 +42,7 @@
 #  fnmatch-gnu \
 #  frexpl \
 #  getcwd \
+#  getline \
 #  gettimeofday \
 #  gitlog-to-changelog \
 #  glob \
@@ -691,6 +692,15 @@ EXTRA_libgnu_a_SOURCES += getcwd-lgpl.c
 
 ## end   gnulib module getcwd-lgpl
 
+## begin gnulib module getdelim
+
+
+EXTRA_DIST += getdelim.c
+
+EXTRA_libgnu_a_SOURCES += getdelim.c
+
+## end   gnulib module getdelim
+
 ## begin gnulib module getdtablesize
 
 
@@ -699,6 +709,15 @@ EXTRA_DIST += getdtablesize.c
 EXTRA_libgnu_a_SOURCES += getdtablesize.c
 
 ## end   gnulib module getdtablesize
+
+## begin gnulib module getline
+
+
+EXTRA_DIST += getline.c
+
+EXTRA_libgnu_a_SOURCES += getline.c
+
+## end   gnulib module getline
 
 ## begin gnulib module getlogin_r
 

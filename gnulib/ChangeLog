@@ -1,3 +1,12 @@
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add gnulib.
+	* Makefile.in, import/Makefile.am, import/Makefile.in,
+	import/m4/gnulib-cache.m4, import/m4/gnulib-comp.m4, aclocal.m4,
+	config.in, configure: Regenerate.
+	* import/getdelim.c, import/getline.c, import/m4/getdelim.m4,
+	import/m4/getline.m4: New files.
+
 2021-03-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add gitlog-to-changelog.

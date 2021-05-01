@@ -39,6 +39,7 @@ IMPORTED_GNULIB_MODULES="\
     fnmatch-gnu \
     frexpl \
     getcwd \
+    getline \
     gettimeofday \
     gitlog-to-changelog \
     glob \

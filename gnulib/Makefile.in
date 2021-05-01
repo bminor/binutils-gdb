@@ -159,7 +159,9 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/getcwd-abort-bug.m4 \
 	$(top_srcdir)/import/m4/getcwd-path-max.m4 \
 	$(top_srcdir)/import/m4/getcwd.m4 \
+	$(top_srcdir)/import/m4/getdelim.m4 \
 	$(top_srcdir)/import/m4/getdtablesize.m4 \
+	$(top_srcdir)/import/m4/getline.m4 \
 	$(top_srcdir)/import/m4/getlogin.m4 \
 	$(top_srcdir)/import/m4/getlogin_r.m4 \
 	$(top_srcdir)/import/m4/getpagesize.m4 \

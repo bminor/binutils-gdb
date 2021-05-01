@@ -56,6 +56,7 @@
 #  fnmatch-gnu \
 #  frexpl \
 #  getcwd \
+#  getline \
 #  gettimeofday \
 #  gitlog-to-changelog \
 #  glob \
@@ -217,7 +218,9 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/getcwd-abort-bug.m4 \
 	$(top_srcdir)/import/m4/getcwd-path-max.m4 \
 	$(top_srcdir)/import/m4/getcwd.m4 \
+	$(top_srcdir)/import/m4/getdelim.m4 \
 	$(top_srcdir)/import/m4/getdtablesize.m4 \
+	$(top_srcdir)/import/m4/getline.m4 \
 	$(top_srcdir)/import/m4/getlogin.m4 \
 	$(top_srcdir)/import/m4/getlogin_r.m4 \
 	$(top_srcdir)/import/m4/getpagesize.m4 \
@@ -1781,10 +1784,10 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	filenamecat.h flexmember.h float.c float.in.h itold.c \
 	fnmatch.c fnmatch_loop.c fnmatch.c fnmatch.in.h fpucw.h free.c \
 	frexp.c frexp.c frexpl.c fstat.c stat-w32.c stat-w32.h \
-	at-func.c fstatat.c getcwd.c getcwd-lgpl.c getdtablesize.c \
-	getlogin_r.c getrandom.c gettimeofday.c \
-	$(top_srcdir)/import/extra/gitlog-to-changelog glob.c \
-	glob_internal.h glob_pattern_p.c globfree.c glob-libc.h \
+	at-func.c fstatat.c getcwd.c getcwd-lgpl.c getdelim.c \
+	getdtablesize.c getline.c getlogin_r.c getrandom.c \
+	gettimeofday.c $(top_srcdir)/import/extra/gitlog-to-changelog \
+	glob.c glob_internal.h glob_pattern_p.c globfree.c glob-libc.h \
 	glob.in.h hard-locale.h inet_ntop.c intprops.h inttypes.in.h \
 	isblank.c float+.h isnan.c isnand-nolibm.h isnand.c float+.h \
 	isnan.c isnanl-nolibm.h isnanl.c cdefs.h libc-config.h \
@@ -1864,9 +1867,9 @@ EXTRA_libgnu_a_SOURCES = alloca.c btowc.c canonicalize-lgpl.c \
 	fchdir.c fcntl.c fdopendir.c float.c itold.c fnmatch.c \
 	fnmatch_loop.c fnmatch.c free.c frexp.c frexp.c frexpl.c \
 	fstat.c stat-w32.c at-func.c fstatat.c getcwd.c getcwd-lgpl.c \
-	getdtablesize.c getlogin_r.c getrandom.c gettimeofday.c glob.c \
-	glob_pattern_p.c globfree.c inet_ntop.c isblank.c isnan.c \
-	isnand.c isnan.c isnanl.c lstat.c malloc.c \
+	getdelim.c getdtablesize.c getline.c getlogin_r.c getrandom.c \
+	gettimeofday.c glob.c glob_pattern_p.c globfree.c inet_ntop.c \
+	isblank.c isnan.c isnand.c isnan.c isnanl.c lstat.c malloc.c \
 	lc-charset-dispatch.c mbrtowc.c mbtowc-lock.c mbsinit.c \
 	mbsrtowcs-state.c mbsrtowcs.c mbtowc.c memchr.c memmem.c \
 	memmem.c mempcpy.c memrchr.c mkdir.c mkdtemp.c mkostemp.c \
@@ -2023,7 +2026,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fstatat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getcwd-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getcwd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getdelim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getdtablesize.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getline.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getlogin_r.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getprogname.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getrandom.Po@am__quote@
