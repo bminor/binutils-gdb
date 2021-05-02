@@ -416,7 +416,7 @@ cgen_rtx_error (SIM_CPU *cpu, const char * msg)
 {
   SIM_DESC sd = CPU_STATE (cpu);
 
-  sim_io_printf (sd, msg);
+  sim_io_printf (sd, "%s", msg);
   sim_io_printf (sd, "\n");
 
   sim_engine_halt (sd, cpu, NULL, CPU_PC_GET (cpu), sim_stopped, SIM_SIGTRAP);

@@ -1,5 +1,10 @@
 2021-05-08  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-ops.h (cgen_rtx_error): Declare.
+	* cgen-utils.c (cgen_rtx_error): Add %s printf argument.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-utils.c (virtual_insn_entries): Change {0} to {}.
 
 2021-05-08  Mike Frysinger  <vapier@gentoo.org>

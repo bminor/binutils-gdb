@@ -708,4 +708,6 @@ BI SUBOFDI (DI a, DI b, BI c);
 
 #endif
 
+extern void cgen_rtx_error (SIM_CPU *, const char *);
+
 #endif /* CGEN_SEM_OPS_H */
