@@ -288,8 +288,12 @@ hw_option_handler (struct sim_state *sd, sim_cpu *cpu, int opt,
 static MODULE_INIT_FN sim_hw_init;
 static MODULE_UNINSTALL_FN sim_hw_uninstall;
 
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+SIM_RC sim_install_hw (struct sim_state *sd);
+
+/* Establish this object.  */
 SIM_RC
-sim_hw_install (struct sim_state *sd)
+sim_install_hw (struct sim_state *sd)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   sim_add_option_table (sd, NULL, hw_options);

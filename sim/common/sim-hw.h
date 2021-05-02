@@ -21,12 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_HW_H
 
 
-/* Establish this object */
-
-SIM_RC sim_hw_install
-(struct sim_state *sd);
-
-
 /* Parse a hardware definition */
 
 struct hw *sim_hw_parse

@@ -25,10 +25,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-options.h"
 #include "sim-assert.h"
 
-#if WITH_HW
-#include "sim-hw.h"
-#endif
-
 #include "libiberty.h"
 
 #include <stdlib.h>
@@ -51,9 +47,6 @@ static MODULE_INSTALL_FN * const early_modules[] = {
   sim_watchpoint_install,
 #if WITH_SCACHE
   scache_install,
-#endif
-#if WITH_HW
-  sim_hw_install,
 #endif
 };
 static int early_modules_len = ARRAY_SIZE (early_modules);

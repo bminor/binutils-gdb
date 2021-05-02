@@ -1,3 +1,11 @@
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-hw.c (sim_hw_install): Rename to ...
+	(sim_install_hw): ... this.  New prototype.
+	* sim-hw.h (sim_hw_install): Delete.
+	* sim-module.c: Delete sim-hw.h include.
+	(early_modules): Delete sim_hw_install.
+
 2021-05-04  Tom Tromey  <tromey@adacore.com>
 
 	* Make-common.in (generated_files): Add config.h.
