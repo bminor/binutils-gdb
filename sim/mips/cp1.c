@@ -421,7 +421,7 @@ store_fcr(sim_cpu *cpu,
     }
 }
 
-void
+static void
 update_fcsr (sim_cpu *cpu,
 	     address_word cia,
 	     sim_fpu_status status)
