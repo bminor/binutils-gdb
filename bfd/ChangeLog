@@ -1,3 +1,11 @@
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
+	* elf32-csky.c (is_mapping_symbol_name): New function.
+	(csky_elf_is_target_special_symbol): Likewise.
+	(csky_elf_maybe_function_sym): Likewise.
+	(bfd_elf32_bfd_is_target_special_symbol): Define.
+	(elf_backend_maybe_function_sym): Define.
+
 2021-04-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 27801
