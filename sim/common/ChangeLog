@@ -1,3 +1,8 @@
+2021-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* sim-options.c (standard_option_handler): Add default cases to
+	switches.
+
 2021-05-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* callback.c (os_error): Change __attribute__((noreturn)) to
