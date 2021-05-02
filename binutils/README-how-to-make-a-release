@@ -247,7 +247,7 @@ When the time comes to actually make the release....
         make install-gas install-gold install-ld install-binutils
 
         # Needed for step 29...
-        make html
+        make html pdf
 
   26. Tag the branch with the new release number:
 
@@ -296,11 +296,7 @@ When the time comes to actually make the release....
          cd /sourceware/www/sourceware/htdocs/binutils
 	 mkdir docs-2.3x
 	 cd docs-2.3x
-	 mkdir as
-	 mkdir bfd
-	 mkdir binutils
-	 mkdir gprof
-	 mkdir ld
+	 mkdir as bfd binutils gprof ld
 	 cd ../docs-2.3(x-1)
 	 get index.html
 
@@ -316,20 +312,30 @@ When the time comes to actually make the release....
       however, so the directories had to be made by hand, as shown above).
 
          cd as
-	 lcd <build-dir>/gas/doc/as.html
-	 put *      {be patient - this takes a long time...}
+	 lcd <build-dir>/gas/doc/
+	 put -R as                {be patient - this takes a long time...}
+	 put as.html
+	 put as.pdf
 	 cd ../bfd
-	 lcd ../../../bfd/doc/bfd.html
-	 put *
+	 lcd ../../../bfd/doc/
+	 put -R bfd
+	 put bfd.html
+	 put bfd.pdf
 	 cd ../binutils
-	 lcd ../../../binutils/doc/binutils.html
-	 put *
+	 lcd ../../../binutils/doc/
+	 put -R binutils
+	 put binutils.html
+	 put binutils.pdf
 	 cd ../gprof
-	 lcd ../../../gprof/gprof.html
-	 put *
+	 lcd ../../../gprof/
+	 put -R doc/gprof
+	 put gprof.html
+	 put gprof.pdf
 	 cd ../ld
-	 lcd ../../ld/ld.html
-	 put *
+	 lcd ../../ld/
+	 put -R doc/ld
+	 put ld.html
+	 put ld.pdf
 	 
       Edit the top level binutils index.html file to change the links
       to point to the new documentation.
