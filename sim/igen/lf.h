@@ -19,7 +19,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-
+#include "ansidecl.h"
 
 /* LF: Line Numbered Output Stream */
 
@@ -72,7 +72,7 @@ extern int lf_putint (lf *file, int decimal);
 extern int lf_putbin (lf *file, int decimal, int width);
 
 extern int lf_printf
-  (lf *file, const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
+  (lf *file, const char *fmt, ...) ATTRIBUTE_PRINTF (2, 3);
 
 
 /* Indentation control.

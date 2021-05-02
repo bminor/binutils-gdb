@@ -51,15 +51,6 @@
 #endif
 
 
-/* Some versions of GCC include an attribute operator, define it */
-
-#if !defined (__attribute__)
-#if (!defined(__GNUC__) || (__GNUC__ < 2) || (__GNUC__ == 2 && __GNUC_MINOR__ < 6))
-#define __attribute__(arg)
-#endif
-#endif
-
-
 /* Global types that code manipulates */
 
 struct hw;

@@ -1,3 +1,8 @@
+2021-05-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* lf.h: Include ansidecl.h.
+	(lf_printf): Change __attribute__((printf)) to ATTRIBUTE_PRINTF.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* local.mk: New file.

@@ -1,3 +1,26 @@
+2021-05-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* callback.c (os_error): Change __attribute__((noreturn)) to
+	ATTRIBUTE_NORETURN.
+	* hw-device.h (hw_abort, hw_vabort, hw_halthw_trace): Change
+	attributes to ATTRIBUTE_PRINTF and ATTRIBUTE_NORETURN.
+	* hw-events.h (hw_event_queue_schedule_tracef): Likewise.
+	* hw-tree.h (hw_tree_delete): Likewise.
+	* sim-basics.h (__attribute__): Delete.
+	* sim-engine.h (sim_engine_halt): Change __attribute__((noreturn))
+	to ATTRIBUTE_NORETURN.
+	(sim_engine_abort, sim_engine_vabort): Likewise.
+	* sim-hw.h (sim_hw_install, sim_hw_abort): Change
+	__attribute__((printf)) to ATTRIBUTE_PRINTF.
+	* sim-inline.h (NORETURN): Delete.
+	(UNUSED): Change to ATTRIBUTE_UNUSED.
+	* sim-io.h (sim_io_printf): Change attributes to ATTRIBUTE_PRINTF
+	and ATTRIBUTE_NORETURN.
+	(sim_io_eprintf, sim_io_error): Likewise.
+	* sim-profile.c (profile_printf): Likewise.
+	* sim-trace.h (trace_prefix, trace_generic, trace_printf,
+	sim_debug_printf): Likewise.
+
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-options.c (dup_arg_p): Call htab_empty.

@@ -25,6 +25,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "ansidecl.h"
 #include "opcode/bfin.h"
 #include "sim-main.h"
 #include "dv-bfin_cec.h"
@@ -35,7 +36,7 @@
 #define SIGNEXTEND(v, n) \
   (((bs32)(v) << (HOST_LONG_WORD_SIZE - (n))) >> (HOST_LONG_WORD_SIZE - (n)))
 
-static __attribute__ ((noreturn)) void
+static ATTRIBUTE_NORETURN void
 illegal_instruction (SIM_CPU *cpu)
 {
   TRACE_INSN (cpu, "ILLEGAL INSTRUCTION");
@@ -43,7 +44,7 @@ illegal_instruction (SIM_CPU *cpu)
     cec_exception (cpu, VEC_UNDEF_I);
 }
 
-static __attribute__ ((noreturn)) void
+static ATTRIBUTE_NORETURN void
 illegal_instruction_combination (SIM_CPU *cpu)
 {
   TRACE_INSN (cpu, "ILLEGAL INSTRUCTION COMBINATION");
@@ -51,7 +52,7 @@ illegal_instruction_combination (SIM_CPU *cpu)
     cec_exception (cpu, VEC_ILGAL_I);
 }
 
-static __attribute__ ((noreturn)) void
+static ATTRIBUTE_NORETURN void
 illegal_instruction_or_combination (SIM_CPU *cpu)
 {
   if (PARALLEL_GROUP != BFIN_PARALLEL_NONE)
@@ -60,7 +61,7 @@ illegal_instruction_or_combination (SIM_CPU *cpu)
     illegal_instruction (cpu);
 }
 
-static __attribute__ ((noreturn)) void
+static ATTRIBUTE_NORETURN void
 unhandled_instruction (SIM_CPU *cpu, const char *insn)
 {
   SIM_DESC sd = CPU_STATE (cpu);

@@ -63,21 +63,21 @@ int sim_io_close (SIM_DESC sd, int);
 
 void sim_io_printf (SIM_DESC sd,
 		    const char *fmt,
-		    ...) __attribute__ ((format (printf, 2, 3)));
+		    ...) ATTRIBUTE_PRINTF (2, 3);
 
 void sim_io_vprintf (SIM_DESC sd, const char *fmt, va_list ap);
 
 void sim_io_eprintf (SIM_DESC sd,
 		     const char *fmt,
-		     ...) __attribute__ ((format (printf, 2, 3)));
+		     ...) ATTRIBUTE_PRINTF (2, 3);
 
 void sim_io_evprintf (SIM_DESC sd, const char *fmt, va_list ap);
 
 void sim_io_error (SIM_DESC sd,
 		   const char *fmt,
 		   ...)
-  __attribute__ ((format (printf, 2, 3)))
-  __attribute__ ((__noreturn__));
+  ATTRIBUTE_PRINTF (2, 3)
+  ATTRIBUTE_NORETURN;
 
 void sim_io_poll_quit (SIM_DESC sd);
 

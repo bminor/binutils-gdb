@@ -333,8 +333,7 @@ extern void trace_prefix (SIM_DESC sd,
 			  const char *file_name,
 			  int line_nr,
 			  const char *fmt,
-			  ...)
-       __attribute__((format (printf, 8, 9)));
+			  ...) ATTRIBUTE_PRINTF (8, 9);
 
 /* Generic trace print, assumes trace_prefix() has been called */
 
@@ -342,8 +341,7 @@ extern void trace_generic (SIM_DESC sd,
 			   sim_cpu *cpu,
 			   int trace_idx,
 			   const char *fmt,
-			   ...)
-     __attribute__((format (printf, 4, 5)));
+			   ...) ATTRIBUTE_PRINTF (4, 5);
 
 /* Disassemble the specified address.  */
 
@@ -655,7 +653,7 @@ do { \
 
 
 extern void trace_printf (SIM_DESC, sim_cpu *, const char *, ...)
-     __attribute__((format (printf, 3, 4)));
+     ATTRIBUTE_PRINTF (3, 4);
 
 extern void trace_vprintf (SIM_DESC, sim_cpu *, const char *, va_list);
 
@@ -676,6 +674,6 @@ int trace_load_symbols (SIM_DESC);
 bfd_vma trace_sym_value (SIM_DESC, const char *name);
 
 extern void sim_debug_printf (sim_cpu *, const char *, ...)
-     __attribute__((format (printf, 2, 3)));
+    ATTRIBUTE_PRINTF (2, 3);
 
 #endif /* SIM_TRACE_H */

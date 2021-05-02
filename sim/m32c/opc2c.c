@@ -249,13 +249,14 @@ dump_lines (opcode * op, int level, Indirect * ind)
 	      errors++;
 	    }
 	  else if (shift && (mask != 0xff))
-	    printf ("%*s  int %s AU = (op[%d] >> %d) & 0x%02x;\n",
+	    printf ("%*s  int %s ATTRIBUTE_UNUSED = (op[%d] >> %d) & 0x%02x;\n",
 		    level, "", name, byte, shift, mask);
 	  else if (mask != 0xff)
-	    printf ("%*s  int %s AU = op[%d] & 0x%02x;\n",
+	    printf ("%*s  int %s ATTRIBUTE_UNUSED = op[%d] & 0x%02x;\n",
 		    level, "", name, byte, mask);
 	  else
-	    printf ("%*s  int %s AU = op[%d];\n", level, "", name, byte);
+	    printf ("%*s  int %s ATTRIBUTE_UNUSED = op[%d];\n", level, "", name,
+		    byte);
 	}
       else
 	i++;

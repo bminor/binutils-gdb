@@ -698,10 +698,7 @@ os_evprintf_filtered (host_callback *p ATTRIBUTE_UNUSED, const char *format, va_
 }
 
 /* VARARGS */
-#ifdef __GNUC__
-__attribute__ ((__noreturn__))
-#endif
-static void ATTRIBUTE_PRINTF (2, 3)
+static void ATTRIBUTE_PRINTF (2, 3) ATTRIBUTE_NORETURN
 os_error (host_callback *p ATTRIBUTE_UNUSED, const char *format, ...)
 {
   va_list args;

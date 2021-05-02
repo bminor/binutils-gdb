@@ -1,3 +1,11 @@
+2021-05-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* m32c.opc: Include ansidecl.h.
+	(AU): Delete.
+	* opc2c.c (dump_lines): Change AU to ATTRIBUTE_UNUSED.
+	* r8c.opc: Include ansidecl.h.
+	(AU): Delete.
+
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
