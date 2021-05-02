@@ -1,5 +1,10 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-m68hc11.c (struct m68hc11cpu): Change attach_size to unsigned int.
+	* dv-m68hc11sio.c (m68hc11sio_tx_poll): Cast buffer to const char*.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
