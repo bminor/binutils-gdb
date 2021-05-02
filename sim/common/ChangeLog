@@ -1,5 +1,13 @@
 2021-05-08  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-types.h (mode_names): Rename to ...
+	(cgen_mode_names): ... this.
+	(MODE_NAME): Use cgen_mode_names.
+	* cgen-utils.c (mode_names): Rename to ...
+	(cgen_mode_names): ... this.
+
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-ops.h (cgen_rtx_error): Declare.
 	* cgen-utils.c (cgen_rtx_error): Add %s printf argument.
 

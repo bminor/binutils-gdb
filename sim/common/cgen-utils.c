@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SEMOPS_DEFINE_INLINE
 #include "cgen-ops.h"
 
-const char * const mode_names[] = {
+const char * const cgen_mode_names[] = {
   "VOID",
   "BI",
   "QI",
