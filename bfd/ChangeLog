@@ -1,3 +1,8 @@
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* doc/Makefile.am (AM_MAKEINFOFLAGS): Define.
+	* doc/Makefile.in: Regenerate.
+
 2021-05-07  Clément Chigot  <clement.chigot@atos.net>
 
 	* coff-rs6000.c (xcoff_dwsect_names): Add new DWARF

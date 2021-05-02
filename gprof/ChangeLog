@@ -1,3 +1,8 @@
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (AM_MAKEINFOFLAGS): Add --no-split.
+	* Makefile.in: Regenerate.
+
 2021-04-14  Alan Modra  <amodra@gmail.com>
 
 	PR 27716

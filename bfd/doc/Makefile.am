@@ -71,6 +71,8 @@ TEXIDIR = $(srcdir)/../../texinfo/fsf
 info_TEXINFOS = bfd.texi
 bfd_TEXINFOS = $(DOCFILES) bfdsumm.texi
 
+AM_MAKEINFOFLAGS = --no-split
+
 MKDOC = chew$(EXEEXT_FOR_BUILD)
 
 AM_CPPFLAGS = -I.. -I$(srcdir)/.. -I$(srcdir)/../../include \
