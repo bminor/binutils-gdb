@@ -437,6 +437,7 @@ dup_arg_p (const char *arg)
 	arg_table = htab_create_alloc (10, htab_hash_string,
 				       compare_strings, NULL,
 				       xcalloc, free);
+      htab_empty (arg_table);
       return 0;
     }
 

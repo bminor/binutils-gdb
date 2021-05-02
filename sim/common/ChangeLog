@@ -1,5 +1,9 @@
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-options.c (dup_arg_p): Call htab_empty.
+
+2021-05-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-sockser.c (dv_sockser_install): Rename to ...
 	(sim_install_dv_sockser): ... this.
 	* dv-sockser.h (dv_sockser_install): Delete.
