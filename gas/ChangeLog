@@ -1,3 +1,9 @@
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/section25.s: Don't start directives in first
+	column.
+	* testsuite/gas/elf/section26.s: Likewise.
+
 2021-04-29  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/i386.exp: Move x86-64-rip-2 invocation.
