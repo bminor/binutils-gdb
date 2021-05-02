@@ -1093,6 +1093,12 @@ diststuff: info $(EXTRA_DIST)
 # ld.1 to support parallel build.
 info-recursive: ld.1
 
+html-local: doc/ld/index.html
+doc/ld/index.html: ld.texi $(ld_TEXINFOS)
+	$(MKDIR_P) doc
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/ld.texi -o doc/ld
+
 DISTCLEANFILES = site.exp development.exp enablings.exp site.bak stringify.sed
 distclean-local:
 	rm -rf ldscripts

@@ -369,4 +369,9 @@ MAINTAINERCLEANFILES = $(DOCFILES)
 # cygnus option.
 install: install-info
 
+html-local: bfd/index.html
+bfd/index.html: bfd.texi $(bfd_TEXINFOS)
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/bfd.texi
+
 MAINTAINERCLEANFILES += bfd.info

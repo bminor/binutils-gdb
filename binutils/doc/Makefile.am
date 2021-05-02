@@ -175,6 +175,11 @@ $(DEMANGLER_NAME).1: cxxfilt.man Makefile
 	    -e 's/cxxfilt/$(DEMANGLER_NAME)/' < $$man \
 		> $(DEMANGLER_NAME).1
 
+html-local: binutils/index.html
+binutils/index.html: binutils.texi $(binutils_TEXINFOS)
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/binutils.texi
+
 # Maintenance
 
 # We need it for the taz target in ../../Makefile.in.

@@ -133,4 +133,9 @@ as.1: $(srcdir)/as.texi asconfig.texi $(CPU_DOCS)
 	        (rm -f $@.T$$$$ && exit 1)
 	rm -f as.pod
 
+html-local: as/index.html
+as/index.html: as.texi $(as_TEXINFOS)
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/as.texi
+
 MAINTAINERCLEANFILES += as.info

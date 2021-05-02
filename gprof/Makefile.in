@@ -992,7 +992,7 @@ dvi-am: $(DVIS)
 
 html: html-recursive
 
-html-am: $(HTMLS)
+html-am: $(HTMLS) html-local
 
 info: info-recursive
 
@@ -1152,14 +1152,14 @@ uninstall-man: uninstall-man1
 	clean-binPROGRAMS clean-cscope clean-generic clean-libtool \
 	cscope cscopelist-am ctags ctags-am dist-info distclean \
 	distclean-compile distclean-generic distclean-hdr \
-	distclean-libtool distclean-tags dvi dvi-am html html-am info \
-	info-am install install-am install-binPROGRAMS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-man1 install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-aminfo \
+	distclean-libtool distclean-tags dvi dvi-am html html-am \
+	html-local info info-am install install-am install-binPROGRAMS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-man1 \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	installdirs-am maintainer-clean maintainer-clean-aminfo \
 	maintainer-clean-generic mostlyclean mostlyclean-aminfo \
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
@@ -1197,6 +1197,12 @@ gprof.1: $(srcdir)/gprof.texi config.texi
 	       mv -f $@.T$$$$ $@) || \
 	       (rm -f $@.T$$$$ && exit 1)
 	rm -f gprof.pod
+
+html-local: doc/gprof/index.html
+doc/gprof/index.html: gprof.texi $(gprof_TEXINFOS)
+	$(MKDIR_P) doc
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/gprof.texi -o doc/gprof
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

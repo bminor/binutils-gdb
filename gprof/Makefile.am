@@ -103,4 +103,10 @@ gprof.1: $(srcdir)/gprof.texi config.texi
 	       (rm -f $@.T$$$$ && exit 1)
 	rm -f gprof.pod
 
+html-local: doc/gprof/index.html
+doc/gprof/index.html: gprof.texi $(gprof_TEXINFOS)
+	$(MKDIR_P) doc
+	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
+	  --split=node -I$(srcdir) $(srcdir)/gprof.texi -o doc/gprof
+
 MAINTAINERCLEANFILES = gprof.info
