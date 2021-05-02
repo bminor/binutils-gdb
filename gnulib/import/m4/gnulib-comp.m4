@@ -99,6 +99,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module frexpl:
   # Code from module fstat:
   # Code from module fstatat:
+  # Code from module gendocs:
   # Code from module getcwd:
   # Code from module getcwd-lgpl:
   # Code from module getdelim:
@@ -938,8 +939,11 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
+  build-aux/gendocs.sh
   build-aux/gitlog-to-changelog
   build-aux/update-copyright
+  doc/gendocs_template
+  doc/gendocs_template_min
   lib/_Noreturn.h
   lib/alloca.c
   lib/alloca.in.h

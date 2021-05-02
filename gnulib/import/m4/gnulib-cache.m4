@@ -46,6 +46,7 @@
 #  errno \
 #  fnmatch-gnu \
 #  frexpl \
+#  gendocs \
 #  getcwd \
 #  getline \
 #  gettimeofday \
@@ -89,6 +90,7 @@ gl_MODULES([
   errno
   fnmatch-gnu
   frexpl
+  gendocs
   getcwd
   getline
   gettimeofday

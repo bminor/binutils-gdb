@@ -38,6 +38,7 @@ IMPORTED_GNULIB_MODULES="\
     errno \
     fnmatch-gnu \
     frexpl \
+    gendocs \
     getcwd \
     getline \
     gettimeofday \

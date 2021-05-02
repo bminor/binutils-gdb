@@ -55,6 +55,7 @@
 #  errno \
 #  fnmatch-gnu \
 #  frexpl \
+#  gendocs \
 #  getcwd \
 #  getline \
 #  gettimeofday \
@@ -1784,10 +1785,11 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	filenamecat.h flexmember.h float.c float.in.h itold.c \
 	fnmatch.c fnmatch_loop.c fnmatch.c fnmatch.in.h fpucw.h free.c \
 	frexp.c frexp.c frexpl.c fstat.c stat-w32.c stat-w32.h \
-	at-func.c fstatat.c getcwd.c getcwd-lgpl.c getdelim.c \
-	getdtablesize.c getline.c getlogin_r.c getrandom.c \
-	gettimeofday.c $(top_srcdir)/import/extra/gitlog-to-changelog \
-	glob.c glob_internal.h glob_pattern_p.c globfree.c glob-libc.h \
+	at-func.c fstatat.c $(top_srcdir)/import/extra/gendocs.sh \
+	getcwd.c getcwd-lgpl.c getdelim.c getdtablesize.c getline.c \
+	getlogin_r.c getrandom.c gettimeofday.c \
+	$(top_srcdir)/import/extra/gitlog-to-changelog glob.c \
+	glob_internal.h glob_pattern_p.c globfree.c glob-libc.h \
 	glob.in.h hard-locale.h inet_ntop.c intprops.h inttypes.in.h \
 	isblank.c float+.h isnan.c isnand-nolibm.h isnand.c float+.h \
 	isnan.c isnanl-nolibm.h isnanl.c cdefs.h libc-config.h \

@@ -1,5 +1,13 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add gendocs.
+	* import/Makefile.am, import/Makefile.in, import/m4/gnulib-cache.m4,
+	import/m4/gnulib-comp.m4, update-gnulib.sh, configure: Regenerate.
+	* doc/gendocs_template, doc/gendocs_template_min,
+	import/extra/gendocs.sh: New files.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add gnulib.
 	* Makefile.in, import/Makefile.am, import/Makefile.in,
 	import/m4/gnulib-cache.m4, import/m4/gnulib-comp.m4, aclocal.m4,

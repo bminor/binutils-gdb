@@ -41,6 +41,7 @@
 #  errno \
 #  fnmatch-gnu \
 #  frexpl \
+#  gendocs \
 #  getcwd \
 #  getline \
 #  gettimeofday \
@@ -673,6 +674,13 @@ EXTRA_DIST += at-func.c fstatat.c
 EXTRA_libgnu_a_SOURCES += at-func.c fstatat.c
 
 ## end   gnulib module fstatat
+
+## begin gnulib module gendocs
+
+
+EXTRA_DIST += $(top_srcdir)/import/extra/gendocs.sh
+
+## end   gnulib module gendocs
 
 ## begin gnulib module getcwd
 
