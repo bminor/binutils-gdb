@@ -56,22 +56,22 @@ const char * const mode_names[] = {
 static const CGEN_IBASE virtual_insn_entries[] =
 {
   {
-    VIRTUAL_INSN_X_INVALID, "--invalid--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_INVALID, "--invalid--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_BEFORE, "--before--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_BEFORE, "--before--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_AFTER, "--after--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_AFTER, "--after--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_BEGIN, "--begin--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_BEGIN, "--begin--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_CHAIN, "--chain--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_CHAIN, "--chain--", NULL, 0, { V, {} }
   },
   {
-    VIRTUAL_INSN_X_CTI_CHAIN, "--cti-chain--", NULL, 0, { V, { 0 } }
+    VIRTUAL_INSN_X_CTI_CHAIN, "--cti-chain--", NULL, 0, { V, {} }
   }
 };
 
