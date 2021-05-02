@@ -1,3 +1,8 @@
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-s390/tlspic_64.rd: Adjust expected output for
+	named section symbols.
+
 2021-04-28  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-elf/anno-sym.s: New test source file.
