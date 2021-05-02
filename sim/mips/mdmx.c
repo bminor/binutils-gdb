@@ -772,7 +772,7 @@ AccAbsDiffOB(signed24 *a, unsigned8 ts, unsigned8 tt)
 /* Dispatch tables for operations that update a CPR.  */
 
 static const QH_ACC qh_acc[] = {
-  AccAddAQH, AccAddAQH, AccMulAQH, AccMulLQH,
+  AccAddAQH, AccAddLQH, AccMulAQH, AccMulLQH,
   SubMulAQH, SubMulLQH, AccSubAQH, AccSubLQH,
   NULL
 };
