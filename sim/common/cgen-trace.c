@@ -384,7 +384,7 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
 
   if (length != insn_length)
   {
-    sim_io_error (sd, "unable to read address %x", pc);
+    sim_io_error (sd, "unable to read address %" PRIxTA, pc);
   }
 
   /* If the entire insn will fit into an integer, then do it. Otherwise, just
