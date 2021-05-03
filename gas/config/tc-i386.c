@@ -10226,8 +10226,8 @@ x86_address_bytes (void)
   return stdoutput->arch_info->bits_per_address / 8;
 }
 
-#if !(defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O)) \
-    || defined (LEX_AT)
+#if (!(defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O)) \
+     || defined (LEX_AT)) && !defined (TE_PE)
 # define lex_got(reloc, adjust, types) NULL
 #else
 /* Parse operands of the form
@@ -10256,6 +10256,7 @@ lex_got (enum bfd_reloc_code_real *rel,
     const i386_operand_type types64;
     bool need_GOT_symbol;
   } gotrel[] = {
+#ifndef TE_PE
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
     { STRING_COMMA_LEN ("SIZE"),      { BFD_RELOC_SIZE32,
 					BFD_RELOC_SIZE32 },
@@ -10312,11 +10313,16 @@ lex_got (enum bfd_reloc_code_real *rel,
     { STRING_COMMA_LEN ("TLSCALL"),  { BFD_RELOC_386_TLS_DESC_CALL,
 				       BFD_RELOC_X86_64_TLSDESC_CALL },
       OPERAND_TYPE_IMM32_32S_DISP32, true },
+#else /* TE_PE */
+    { STRING_COMMA_LEN ("SECREL32"), { BFD_RELOC_32_SECREL,
+				       BFD_RELOC_32_SECREL },
+      OPERAND_TYPE_IMM32_32S_64_DISP32_64, false },
+#endif
   };
   char *cp;
   unsigned int j;
 
-#if defined (OBJ_MAYBE_ELF)
+#if defined (OBJ_MAYBE_ELF) && !defined (TE_PE)
   if (!IS_ELF)
     return NULL;
 #endif
@@ -10391,109 +10397,6 @@ lex_got (enum bfd_reloc_code_real *rel,
   return NULL;
 }
 #endif
-
-#ifdef TE_PE
-#ifdef lex_got
-#undef lex_got
-#endif
-/* Parse operands of the form
-   <symbol>@SECREL32+<nnn>
-
-   If we find one, set up the correct relocation in RELOC and copy the
-   input string, minus the `@SECREL32' into a malloc'd buffer for
-   parsing by the calling routine.  Return this buffer, and if ADJUST
-   is non-null set it to the length of the string we removed from the
-   input line.  Otherwise return NULL.
-
-   This function is copied from the ELF version above adjusted for PE targets.  */
-
-static char *
-lex_got (enum bfd_reloc_code_real *rel ATTRIBUTE_UNUSED,
-	 int *adjust ATTRIBUTE_UNUSED,
-	 i386_operand_type *types)
-{
-  static const struct
-  {
-    const char *str;
-    int len;
-    const enum bfd_reloc_code_real rel[2];
-    const i386_operand_type types64;
-  }
-  gotrel[] =
-  {
-    { STRING_COMMA_LEN ("SECREL32"),    { BFD_RELOC_32_SECREL,
-					  BFD_RELOC_32_SECREL },
-      OPERAND_TYPE_IMM32_32S_64_DISP32_64 },
-  };
-
-  char *cp;
-  unsigned j;
-
-  for (cp = input_line_pointer; *cp != '@'; cp++)
-    if (is_end_of_line[(unsigned char) *cp] || *cp == ',')
-      return NULL;
-
-  for (j = 0; j < ARRAY_SIZE (gotrel); j++)
-    {
-      int len = gotrel[j].len;
-
-      if (strncasecmp (cp + 1, gotrel[j].str, len) == 0)
-	{
-	  if (gotrel[j].rel[object_64bit] != 0)
-	    {
-	      int first, second;
-	      char *tmpbuf, *past_reloc;
-
-	      *rel = gotrel[j].rel[object_64bit];
-	      if (adjust)
-		*adjust = len;
-
-	      if (types)
-		{
-		  if (flag_code != CODE_64BIT)
-		    {
-		      types->bitfield.imm32 = 1;
-		      types->bitfield.disp32 = 1;
-		    }
-		  else
-		    *types = gotrel[j].types64;
-		}
-
-	      /* The length of the first part of our input line.  */
-	      first = cp - input_line_pointer;
-
-	      /* The second part goes from after the reloc token until
-		 (and including) an end_of_line char or comma.  */
-	      past_reloc = cp + 1 + len;
-	      cp = past_reloc;
-	      while (!is_end_of_line[(unsigned char) *cp] && *cp != ',')
-		++cp;
-	      second = cp + 1 - past_reloc;
-
-	      /* Allocate and copy string.  The trailing NUL shouldn't
-		 be necessary, but be safe.  */
-	      tmpbuf = XNEWVEC (char, first + second + 2);
-	      memcpy (tmpbuf, input_line_pointer, first);
-	      if (second != 0 && *past_reloc != ' ')
-		/* Replace the relocation token with ' ', so that
-		   errors like foo@SECLREL321 will be detected.  */
-		tmpbuf[first++] = ' ';
-	      memcpy (tmpbuf + first, past_reloc, second);
-	      tmpbuf[first + second] = '\0';
-	      return tmpbuf;
-	    }
-
-	  as_bad (_("@%s reloc is not supported with %d-bit output format"),
-		  gotrel[j].str, 1 << (5 + object_64bit));
-	  return NULL;
-	}
-    }
-
-  /* Might be a symbol version string.  Don't as_bad here.  */
-  return NULL;
-}
-
-#endif /* TE_PE */
 
 bfd_reloc_code_real_type
 x86_cons (expressionS *exp, int size)

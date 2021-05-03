@@ -1,3 +1,8 @@
+2021-05-03  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (lex_got): Adjust surrounding #if. Fold TE_PE
+	variant into ELF one.
+
 2021-05-03  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/elf/section25.s: Don't start directives in first
