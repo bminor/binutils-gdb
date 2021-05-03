@@ -1,5 +1,13 @@
 2021-05-03  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (allocate_dynrelocs): Keep dyn_relocs for undefweak
+	symbols when -z dynamic-undefined-weak or when there are no
+	dynamic relocs in read-only sections and -z nodynamic-undefined-weak
+	is not given.
+	* elf64-ppc.c (allocate_dynrelocs): Likewise.
+
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (allocate_dynrelocs): Call ensure_undef_dynamic for
 	weak undefined symols that only appear on PLT relocs.
 	* elf64-ppc.c (allocate_dynrelocs): Likewise.

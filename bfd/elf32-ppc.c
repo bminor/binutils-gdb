@@ -5245,7 +5245,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       /* For the non-pic case, discard space for relocs against
 	 symbols which turn out to need copy relocs or are not
 	 dynamic.  */
-      if (h->dynamic_adjusted
+      if ((h->dynamic_adjusted
+	   || (h->ref_regular
+	       && h->root.type == bfd_link_hash_undefweak
+	       && (info->dynamic_undefined_weak > 0
+		   || !_bfd_elf_readonly_dynrelocs (h))))
 	  && !h->def_regular
 	  && !ELF_COMMON_DEF_P (h)
 	  && !(h->protected_def
