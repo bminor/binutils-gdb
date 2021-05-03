@@ -1,3 +1,8 @@
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
+	PR 27755
+	* elf32-ppc.c (ppc_elf_inline_plt): Do increment rel in loop.
+
 2021-04-23  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* elf.c (special_sections_p): Add .persistent.bss.
