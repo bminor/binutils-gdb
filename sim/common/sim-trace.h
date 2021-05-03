@@ -653,9 +653,10 @@ do { \
 
 
 extern void trace_printf (SIM_DESC, sim_cpu *, const char *, ...)
-     ATTRIBUTE_PRINTF (3, 4);
+    ATTRIBUTE_PRINTF (3, 4);
 
-extern void trace_vprintf (SIM_DESC, sim_cpu *, const char *, va_list);
+extern void trace_vprintf (SIM_DESC, sim_cpu *, const char *, va_list)
+    ATTRIBUTE_PRINTF (3, 0);
 
 /* Debug support.
    This is included here because there isn't enough of it to justify

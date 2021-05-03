@@ -215,9 +215,9 @@ sim_open (SIM_OPEN_KIND    kind,
   /* Allocate core managed memory */
 
   /* "Mirror" the ROM addresses below 1MB. */
-  sim_do_commandf (sd, "memory region 0,0x100000,0x%lx", V850_ROM_SIZE);
+  sim_do_commandf (sd, "memory region 0,0x100000,0x%x", V850_ROM_SIZE);
   /* Chunk of ram adjacent to rom */
-  sim_do_commandf (sd, "memory region 0x100000,0x%lx", V850_LOW_END-0x100000);
+  sim_do_commandf (sd, "memory region 0x100000,0x%x", V850_LOW_END-0x100000);
   /* peripheral I/O region - mirror 1K across 4k (0x1000) */
   sim_do_command (sd, "memory region 0xfff000,0x1000,1024");
   /* similarly if in the internal RAM region */

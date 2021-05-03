@@ -62,8 +62,8 @@ int trace_funcs = 0;
 static struct disassemble_info  info;
 static char opbuf[1000];
 
-static int
-op_printf (char *buf, char *fmt, ...)
+static int ATTRIBUTE_PRINTF (2, 3)
+op_printf (char *buf, const char *fmt, ...)
 {
   int ret;
   va_list ap;

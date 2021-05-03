@@ -39,7 +39,7 @@ struct hw *hw_tree_parse
 struct hw *hw_tree_vparse
 (struct hw *root,
  const char *fmt,
- va_list ap);
+ va_list ap) ATTRIBUTE_PRINTF (2, 0);
 
 
 void hw_tree_finish

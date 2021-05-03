@@ -1,3 +1,8 @@
+2021-05-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* armdefs.h (ARMul_ConsolePrint): Use format attribute.
+	* wrapper.c (op_printf): Likewise.
+
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.

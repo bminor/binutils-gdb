@@ -88,12 +88,7 @@ hw_event_queue_schedule (struct hw *me,
 			 hw_event_callback *callback,
 			 void *data)
 {
-  struct hw_event *event;
-  va_list dummy;
-  memset (&dummy, 0, sizeof dummy);
-  event = hw_event_queue_schedule_vtracef (me, delta_time, callback, data,
-					   NULL, dummy);
-  return event;
+  return hw_event_queue_schedule_tracef (me, delta_time, callback, data, NULL);
 }
 
 struct hw_event *

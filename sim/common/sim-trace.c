@@ -889,7 +889,7 @@ dis_read (bfd_vma memaddr, bfd_byte *myaddr, unsigned int length,
   return 0;
 }
 
-static int
+static int ATTRIBUTE_PRINTF (2, 3)
 dis_printf (SIM_CPU *cpu, const char *fmt, ...)
 {
   SIM_DESC sd = CPU_STATE (cpu);

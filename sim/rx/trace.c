@@ -96,7 +96,7 @@ compare_symbols (const PTR ap, const PTR bp)
 
 static char opbuf[1000];
 
-static int
+static int ATTRIBUTE_PRINTF (2, 3)
 op_printf (char *buf, char *fmt, ...)
 {
   int ret;

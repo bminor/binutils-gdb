@@ -1,3 +1,16 @@
+2021-05-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* hw-events.h (hw_event_queue_schedule_tracef): Use format attribute.
+	(hw_event_queue_schedule_vtracef): Likewise.
+	* hw-tree.h (hw_tree_vparse): Likewise.
+	* sim-profile.c (profile_vprintf): Likewise.
+	* sim-trace.c (dis_printf): Likewise.
+	* sim-trace.h (trace_printf): Likewise.
+	(trace_vprintf): Likewise.
+	* sim-utils.h (sim_do_commandf): Likewise.
+	* hw-events.c (hw_event_queue_schedule): Use
+	hw_event_queue_schedule_tracef.
+
 2021-05-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* sim-options.c (standard_option_handler): Add default cases to

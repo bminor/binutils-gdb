@@ -1,3 +1,7 @@
+2021-05-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* interp.c (sim_open): Adjust format string specifier.
+
 2021-05-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c: Include ansidecl.h.
