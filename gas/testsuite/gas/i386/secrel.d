@@ -4,7 +4,7 @@
 .*: +file format pe-i386
 
 RELOCATION RECORDS FOR \[\.data\]:
-OFFSET[ 	]+TYPE[ 	]+VALUE 
+OFFSET[ 	]+TYPE[ 	]+VALUE *
 0+24 secrel32          \.text
 0+29 secrel32          \.text
 0+2e secrel32          \.text
@@ -37,7 +37,7 @@ Contents of section \.data:
  0070 0000111f 00000011 3c3c3c3c 3c3c3c3c  ........<<<<<<<<
  0080 3e3e3e3e 00000000 11000000 00110000  >>>>............
  0090 00001100 00000011 3c3c3c3c 3c3c3c3c  ........<<<<<<<<
- 00a0 8d902c00 00000000                    ..,.....        
+ 00a0 8d902c00 00000000                    ..,..... *
 Contents of section \.rdata:
  0000 3e3e3e3e 3c3c3c3c 3e3e3e3e 3e3c3c3c  >>>><<<<>>>>><<<
  0010 3e3e3e3e 3e3e3c3c 3e3e3e3e 3e3e3e3c  >>>>>><<>>>>>>><

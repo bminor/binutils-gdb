@@ -1,5 +1,10 @@
 2021-05-03  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/secrel.d, testsuite/gas/i386/secrel.s:
+	Convert Windows to UNIX EOL.
+
+2021-05-03  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (lex_got): Adjust surrounding #if. Fold TE_PE
 	variant into ELF one.
 

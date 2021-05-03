@@ -65,7 +65,7 @@ sam1f:	.ascii "<"
 	.ascii "<<<<<<<<"
 
 	leal	bar@SECREL32+44(%eax), %edx
-	
+
 .section .rdata
 
 	.ascii ">>>>"
