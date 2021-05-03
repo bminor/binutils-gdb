@@ -1,5 +1,10 @@
 2021-05-03  Alan Modra  <amodra@gmail.com>
 
+	PR 27755
+	* elf32-ppc.c (ppc_elf_inline_plt): Do increment rel in loop.
+
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
 	* elf32-csky.c (is_mapping_symbol_name): New function.
 	(csky_elf_is_target_special_symbol): Likewise.
 	(csky_elf_maybe_function_sym): Likewise.
