@@ -1,3 +1,10 @@
+2021-05-03  Jan Beulich  <jbeulich@suse.com>
+
+	* elf32-i386.c (elf_howto_table): Switch all 32-bit relocs to
+	complain_overflow_dont.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Switch all 64-bit
+	relocs to complain_overflow_dont.
+
 2021-05-03  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (allocate_dynrelocs): Keep dyn_relocs for undefweak
