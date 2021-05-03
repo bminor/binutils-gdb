@@ -1,3 +1,9 @@
+2021-05-03  Tom Tromey  <tromey@adacore.com>
+
+	PR build/27807:
+	* win32-i386-low.cc (i386_get_thread_context): Call
+	Wow64GetThreadContext, not win32_Wow64GetThreadContext.
+
 2021-04-30  Tom Tromey  <tromey@adacore.com>
 
 	* win32-low.cc (do_initial_child_stuff): Update.
