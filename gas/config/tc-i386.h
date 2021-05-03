@@ -126,7 +126,8 @@ extern const char *i386_comment_chars;
 #define GLOBAL_OFFSET_TABLE_NAME "_GLOBAL_OFFSET_TABLE_"
 #endif
 
-#if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) && !defined (LEX_AT)
+#if ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)) \
+     && !defined (LEX_AT)) || defined (TE_PE)
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) x86_cons (EXP, NBYTES)
 #endif
 extern bfd_reloc_code_real_type x86_cons (expressionS *, int);

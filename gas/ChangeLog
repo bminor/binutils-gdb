@@ -1,5 +1,13 @@
 2021-05-03  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.h (TC_PARSE_CONS_EXPRESSION): Adjust surrounding
+	#if.
+	* testsuite/gas/i386/secrel.s: Convert some .secrel32 to .long.
+	Add two further .long and an .equ.
+	* testsuite/gas/i386/secrel.d: Adjust expecations.
+
+2021-05-03  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/secrel.d, testsuite/gas/i386/secrel.s:
 	Convert Windows to UNIX EOL.
 
