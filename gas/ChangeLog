@@ -1,3 +1,11 @@
+2021-05-03  Christoph Muellner <cmuellner@gcc.gnu.org>
+
+	PR 27764
+	* testsuite/gas/riscv/a-ext-64.d: New testcase.
+	* testsuite/gas/riscv/a-ext-64.s: Likewise.
+	* testsuite/gas/riscv/a-ext.d: Likewise.
+	* testsuite/gas/riscv/a-ext.s: Likewise.
+
 2021-05-03  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.h (TC_PARSE_CONS_EXPRESSION): Adjust surrounding
