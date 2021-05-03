@@ -1,3 +1,8 @@
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
+	PR 27755
+	* elf32-ppc.c (ppc_elf_inline_plt): Do increment rel in loop.
+
 2020-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26711
