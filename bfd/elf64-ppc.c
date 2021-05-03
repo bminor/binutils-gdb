@@ -9855,6 +9855,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       for (pent = h->plt.plist; pent != NULL; pent = pent->next)
 	if (pent->plt.refcount > 0)
 	  {
+	    if (!ensure_undef_dynamic (info, h))
+	      return false;
+
 	    if (use_local_plt (info, h))
 	      {
 		if (h->type == STT_GNU_IFUNC)

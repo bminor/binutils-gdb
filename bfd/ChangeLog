@@ -1,5 +1,11 @@
 2021-05-03  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (allocate_dynrelocs): Call ensure_undef_dynamic for
+	weak undefined symols that only appear on PLT relocs.
+	* elf64-ppc.c (allocate_dynrelocs): Likewise.
+
+2021-05-03  Alan Modra  <amodra@gmail.com>
+
 	PR 27755
 	* elf32-ppc.c (ppc_elf_inline_plt): Do increment rel in loop.
 
