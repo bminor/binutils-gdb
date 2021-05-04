@@ -1,3 +1,9 @@
+2021-05-04  Tom de Vries  <tdevries@suse.de>
+
+	PR guile/27806
+	* guile/guile.c	(gdbscm_initialize): Don't let guile change libgmp
+	memory functions.
+
 2021-04-30  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (dwarf2_initialize_objfile): Update.
