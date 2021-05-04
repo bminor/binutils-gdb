@@ -76,9 +76,17 @@ gdb_test "python print(zso\['items'\] == zso\['items'\]\[0\].address)" "True"
 gdb_test "python print(zso\['items'\]\[0\].address + 1 == zso\['items'\]\[1\].address)" "True"
 
 # Verify the range attribute.  It looks a bit inconsistent that the high bound
-# is sometimes 0, sometimes -1, but that's what GDB produces today, so that's
-# what we test.
+# is sometimes 0, sometimes -1.  It depends on the way the flexible array
+# member is specified and on the compiler version (the debug info is
+# different).  But that's what GDB produces today, so that's what we test.
 
 gdb_test "python print(ns\['items'\].type.range())" "\\(0, 0\\)"
-gdb_test "python print(zs\['items'\].type.range())" "\\(0, -1\\)"
-gdb_test "python print(zso\['items'\].type.range())" "\\(0, -1\\)"
+gdb_test "python print(zs\['items'\].type.range())" "\\(0, (0|-1)\\)"
+gdb_test "python print(zso\['items'\].type.range())" "\\(0, (0|-1)\\)"
+
+# Test the same thing, but going explicitly through the array index's range
+# type.
+
+gdb_test "python print(ns\['items'\].type.fields()\[0\].type.range())" "\\(0, 0\\)"
+gdb_test "python print(zs\['items'\].type.fields()\[0\].type.range())" "\\(0, (0|-1)\\)"
+gdb_test "python print(zso\['items'\].type.fields()\[0\].type.range())" "\\(0, (0|-1)\\)"

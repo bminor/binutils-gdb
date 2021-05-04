@@ -1,3 +1,9 @@
+2021-05-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.python/flexible-array-member.exp: Adjust expected range
+	value for member declared with 0 size.  Test accessing range
+	tuple through range type.
+
 2021-05-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR testsuite/27788
