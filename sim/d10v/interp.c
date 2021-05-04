@@ -1160,7 +1160,8 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
     start_address = 0xffc0 << 2;
 #ifdef DEBUG
   if (d10v_debug)
-    sim_io_printf (sd, "sim_create_inferior:  PC=0x%lx\n", (long) start_address);
+    sim_io_printf (sd, "sim_create_inferior:  PC=0x%" BFD_VMA_FMT "x\n",
+		   start_address);
 #endif
   {
     SIM_CPU *cpu = STATE_CPU (sd, 0);

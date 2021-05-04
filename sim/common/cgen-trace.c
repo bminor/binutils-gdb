@@ -340,8 +340,8 @@ sim_disasm_perror_memory (int status, bfd_vma memaddr,
     /* Actually, address between memaddr and memaddr + len was
        out of bounds.  */
     info->fprintf_func (info->stream,
-			"Address 0x%x is out of bounds.",
-			(int) memaddr);
+			"Address 0x%" BFD_VMA_FMT "x is out of bounds.",
+			memaddr);
 }
 
 /* Disassemble using the CGEN opcode table.

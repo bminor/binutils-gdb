@@ -257,14 +257,16 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
       buf = xmalloc (phdr[i].p_filesz);
 
       if (verbose)
-	sim_io_printf (sd, "Loading segment at 0x%lx, size 0x%lx\n",
+	sim_io_printf (sd,
+		       "Loading segment at 0x%" BFD_VMA_FMT "x, size 0x%lx\n",
 		       lma, phdr[i].p_filesz);
 
       if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
 	  || (bfd_bread (buf, phdr[i].p_filesz, abfd) != phdr[i].p_filesz))
 	{
 	  sim_io_eprintf (sd,
-			  "%s: could not read segment at 0x%lx, size 0x%lx\n",
+			  "%s: could not read segment at 0x%" BFD_VMA_FMT "x, "
+			  "size 0x%lx\n",
 			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
@@ -273,7 +275,8 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
       if (do_write (sd, lma, buf, phdr[i].p_filesz) != phdr[i].p_filesz)
 	{
 	  sim_io_eprintf (sd,
-			  "%s: could not load segment at 0x%lx, size 0x%lx\n",
+			  "%s: could not load segment at 0x%" BFD_VMA_FMT "x, "
+			  "size 0x%lx\n",
 			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
@@ -495,7 +498,6 @@ static bfd_boolean
 cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 {
   int i, n_hdrs;
-  bfd_vma phaddr;
   bfd_byte buf[4];
   char *interp = NULL;
   struct bfd *ibfd;
@@ -571,7 +573,7 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 	 memory area, so we go via a temporary area.  Luckily, the
 	 interpreter is supposed to be small, less than 0x40000
 	 bytes.  */
-      sim_do_commandf (sd, "memory region 0x%lx,0x%lx",
+      sim_do_commandf (sd, "memory region 0x%" BFD_VMA_FMT "x,0x%lx",
 		       interp_load_addr, interpsiz);
 
       /* Now that memory for the interpreter is defined, load it.  */
@@ -885,8 +887,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   /* Allocate core managed memory if none specified by user.  */
   if (sim_core_read_buffer (sd, NULL, read_map, &c, startmem, 1) == 0)
-    sim_do_commandf (sd, "memory region 0x%lx,0x%lx", startmem,
-		     endmem - startmem);
+    sim_do_commandf (sd, "memory region 0x%" PRIx32 "x,0x%" PRIu32 "x",
+		     startmem, endmem - startmem);
 
   /* Allocate simulator I/O managed memory if none specified by user.  */
   if (cris_have_900000xxif)

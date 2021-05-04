@@ -444,7 +444,6 @@ while (0)
 
 extern uint8 *dmem_addr (SIM_DESC, SIM_CPU *, uint16 offset);
 extern uint8 *imem_addr (SIM_DESC, SIM_CPU *, uint32);
-extern bfd_vma decode_pc (void);
 
 #define	RB(x)	(*(dmem_addr (sd, cpu, x)))
 #define SB(addr,data)	( RB(addr) = (data & 0xff))

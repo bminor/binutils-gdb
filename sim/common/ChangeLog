@@ -1,3 +1,10 @@
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-trace.c (sim_disasm_perror_memory): Use BFD_VMA_FMT and drop
+	cast.
+	* sim-load.c (xprintf_bfd_vma): Delete.
+	(sim_load_file): Delete xprintf_bfd_vma calls.  Use BFD_VMA_FMT.
+
 2021-05-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* hw-events.h (hw_event_queue_schedule_tracef): Use format attribute.

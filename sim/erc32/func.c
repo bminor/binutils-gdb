@@ -1056,7 +1056,7 @@ bfd_load (const char *fname)
 	    section_size = bfd_section_size (section);
 
 	    if (sis_verbose)
-		printf("\nsection %s at 0x%08lx (0x%lx bytes)",
+		printf("\nsection %s at 0x%08" BFD_VMA_FMT "x (0x%lx bytes)",
 		       section_name, section_address, section_size);
 
 	    /* Text, data or lit */

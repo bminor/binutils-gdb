@@ -1,3 +1,9 @@
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (cris_load_elf_file): Use BFD_VMA_FMT
+	(cris_handle_interpreter): Likewise.  Delete phaddr.
+	(sim_open): Use PRIx32.
+
 2021-05-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* config.in, configure: Regenerate.
