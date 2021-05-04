@@ -17,7 +17,7 @@ SIM_IGEN_OBJ = \
 	semantics.o \
 	idecode.o \
 	icache.o \
-	@mips_igen_engine@ \
+	engine.o \
 	irun.o \
 
 
@@ -59,8 +59,6 @@ SIM_MULTI_OBJ = @sim_multi_obj@ \
 		itable.o \
 		multi-run.o \
 
-MIPS_EXTRA_LIBS = @mips_extra_libs@
-
 SIM_OBJS = \
 	interp.o \
 	$(SIM_@sim_gen@_OBJ) \
@@ -80,8 +78,6 @@ SIM_EXTRA_CLEAN = clean-extra
 SIM_EXTRA_DISTCLEAN = distclean-extra
 
 all: $(SIM_@sim_gen@_ALL)
-
-SIM_EXTRA_LIBS = $(MIPS_EXTRA_LIBS)
 
 SIM_EXTRA_DEPS = itable.h
 

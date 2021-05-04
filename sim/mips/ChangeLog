@@ -1,5 +1,12 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_IGEN_OBJ): Change @mips_igen_engine@ to engine.o.
+	(MIPS_EXTRA_LIB, SIM_EXTRA_LIBS): Delete.
+	* configure.ac (mips_igen_engine, mips_extra_libs): Delete.
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* mdmx.c (qh_acc): Change 2nd AccAddAQH to AccAddLQH.
 
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
