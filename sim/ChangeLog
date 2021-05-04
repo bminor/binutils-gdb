@@ -1,3 +1,8 @@
+2021-05-04  Tom Tromey  <tromey@adacore.com>
+
+	* Makefile.in: Rebuild.
+	* Makefile.am (AM_CPPFLAGS): New variable.
+
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* m4/sim_ac_toolchain.m4 (SIM_AC_TOOLCHAIN): Define AR_FOR_BUILD and

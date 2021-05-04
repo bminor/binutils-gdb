@@ -682,6 +682,7 @@ CLEANFILES = testsuite/common/bits-gen testsuite/common/bits32m0.c \
 DISTCLEANFILES = 
 MOSTLYCLEANFILES = core $(am__append_3) site-srcdir.exp testrun.log \
 	testrun.sum
+AM_CPPFLAGS = -I$(srcroot)/include
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 @SIM_ENABLE_IGEN_TRUE@igen_libigen_a_SOURCES = \
