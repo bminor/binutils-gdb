@@ -1,4 +1,4 @@
-# Hitachi H8 testcase 'mov.w'
+# Hitachi H8 testcase 'mov.b'
 # mach(): h8300h h8300s h8sx
 # as(h8300h):	--defsym sim_cpu=1
 # as(h8300s):	--defsym sim_cpu=2
@@ -792,6 +792,16 @@ mov_b_reg8_to_predec:		; pre-decrement from register to mem
 	beq	.Lnext48
 	fail
 .Lnext48:
+	;; Special case in same register
+	;; CCR confirmation omitted
+	mov.l	#byte_dst+1, er1
+	mov.l	er1, er0
+	mov.b	r0l, @-er0
+	mov.b	@byte_dst, r0l
+	cmp.b	r1l, r0l
+	beq	.Lnext47
+	fail
+.Lnext47:
 	mov.b	#0, r0l
 	mov.b	r0l, @byte_dst	; zero it again for the next use.
 
@@ -2218,4 +2228,3 @@ mov_b_abs32_to_abs32:		; 32-bit absolute addr, memory to memory
 
 fail1:
 	fail
-	

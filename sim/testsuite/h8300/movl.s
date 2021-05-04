@@ -1282,6 +1282,16 @@ mov_l_reg32_to_predec:		; pre-decrement from register to mem
 	beq	.Lnext48
 	fail
 .Lnext48:
+	;; Special case in same register
+	;; CCR confirmation omitted
+	mov.l	#long_dst+4, er1
+	mov.l	er1, er0
+	mov.l	er0, @-er0
+	mov.l	@long_dst, er0
+	cmp.l	er1, er0
+	beq	.Lnext47
+	fail
+.Lnext47:
 	mov.l	#0, er0
 	mov.l	er0, @long_dst	; zero it again for the next use.
 

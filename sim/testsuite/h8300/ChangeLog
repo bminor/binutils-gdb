@@ -1,3 +1,9 @@
+2021-05-04  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* movb.s: Add special case predec test.
+	* movw.s: Likewise.
+	* movl.s: Likewise.
+
 2021-04-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* allinsn.exp (arch): Delete.
