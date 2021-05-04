@@ -8,7 +8,6 @@
 #endif
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/times.h>
 #include <sys/time.h>
 
 

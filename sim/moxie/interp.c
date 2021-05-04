@@ -22,7 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/times.h>
 #include <sys/param.h>
 #include <unistd.h>
 #include "bfd.h"
