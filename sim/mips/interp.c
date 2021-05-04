@@ -1014,12 +1014,11 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 	  sim_cpu *cpu = STATE_CPU (sd, cpu_nr);
 	  sim_cia pc = bfd_get_start_address (abfd);
 
-	  /* We need to undo brain-dead bfd behavior where it sign-extends
-	     addresses that are supposed to be unsigned.  See the mips bfd
-	     sign_extend_vma setting.  We have to check the ELF data itself
-	     in order to handle o32 & n32 ABIs.  */
-	  if (abfd->tdata.elf_obj_data->elf_header->e_ident[EI_CLASS] ==
-	      ELFCLASS32)
+	  /* The 64-bit BFD sign-extends MIPS addresses to model
+	     32-bit compatibility segments with 64-bit addressing.
+	     These addresses work as is on 64-bit targets but
+	     can be truncated for 32-bit targets.  */
+	  if (WITH_TARGET_WORD_BITSIZE == 32)
 	    pc = (unsigned32) pc;
 
 	  CPU_PC_SET (cpu, pc);

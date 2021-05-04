@@ -1,3 +1,9 @@
+2021-05-22  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+sim/mips/ChangeLog:
+	* interp.c (sim_create_inferior): Only truncate sign extension
+	bits for 32-bit target models.
+
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.
