@@ -1,6 +1,12 @@
 2021-05-22  Faraz Shahbazker  <fshahbazker@wavecomp.com>
 
 sim/mips/ChangeLog:
+	* interp.c (sim_open): Add shadow mappings from 32-bit
+	address space to 64-bit sign-extended address space.
+
+2021-05-22  Faraz Shahbazker  <fshahbazker@wavecomp.com>
+
+sim/mips/ChangeLog:
 	* interp.c (sim_create_inferior): Only truncate sign extension
 	bits for 32-bit target models.
 

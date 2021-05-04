@@ -438,6 +438,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	  /* memory alias K1BASE@1,K1SIZE%MEMSIZE,K0BASE */
 	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
 			   K1BASE, K1SIZE, (long)mem_size, K0BASE);
+	  if (WITH_TARGET_WORD_BITSIZE == 64)
+	    sim_do_commandf (sd, "memory alias 0x%x,0x%" PRIxTW ",0x%" PRIxTA,
+			     (K0BASE), mem_size, EXTENDED(K0BASE));
 	}
 
       device_init(sd);
@@ -696,11 +699,16 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   if (idt_monitor_base != 0)
     {
       unsigned loop;
-      unsigned idt_monitor_size = 1 << 11;
+      address_word idt_monitor_size = 1 << 11;
 
       /* the default monitor region */
-      sim_do_commandf (sd, "memory region 0x%x,0x%x",
-		       idt_monitor_base, idt_monitor_size);
+      if (WITH_TARGET_WORD_BITSIZE == 64)
+	sim_do_commandf (sd, "memory alias 0x%x,0x%" PRIxTW ",0x%" PRIxTA,
+			 idt_monitor_base, idt_monitor_size,
+			 EXTENDED (idt_monitor_base));
+      else
+	sim_do_commandf (sd, "memory region 0x%x,0x%x",
+			 idt_monitor_base, idt_monitor_size);
 
       /* Entry into the IDT monitor is via fixed address vectors, and
 	 not using machine instructions. To avoid clashing with use of
