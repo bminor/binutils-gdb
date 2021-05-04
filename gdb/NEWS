@@ -78,6 +78,11 @@
   and "-eiex" that allow options (that would normally appear in a
   gdbearlyinit file) to be passed on the command line.
 
+* For RISC-V targets, the target feature "org.gnu.gdb.riscv.vector" is
+  now understood by GDB, and can be used to describe the vector
+  registers of a target.  The precise requirements of this register
+  feature are documented in the GDB manual.
+
 * New commands
 
 set debug event-loop

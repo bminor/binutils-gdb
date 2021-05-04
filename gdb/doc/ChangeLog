@@ -1,5 +1,9 @@
 2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.texinfo (RISC-V Features): Mention vector register feature.
+
+2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python.texi (Unwinding Frames in Python): Mention
 	PendingFrame.level.
 	(Frames In Python): Mention Frame.level.

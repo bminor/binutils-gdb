@@ -1,5 +1,24 @@
 2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention new target feature name.
+	* arch/riscv.c (riscv_create_target_description): GDB doesn't
+	currently create target descriptions containing vector registers.
+	* arch/riscv.h (struct riscv_gdbarch_features) <vlen>: New member
+	variable.
+	<operator==>: Also compare vlen.
+	<hash>: Also include vlen.
+	* riscv-tdep.c (riscv_feature_name_vector): New static global.
+	(struct riscv_vector_feature): New struct.
+	(riscv_vector_feature): New static global.
+	(riscv_register_reggroup_p): Ensure vector registers are part of
+	the 'all' group, and part of the 'vector' group.
+	(riscv_dwarf_reg_to_regnum): Handle vector registers.
+	(riscv_gdbarch_init): Check vector register feature.
+	* riscv-tdep.h: Add vector registers to GDB's internal register
+	numbers, and to the DWARF register numbers.
+
+2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* NEWS: Mention the two new methods.
 	* python/py-frame.c (frapy_level): New function.
 	(frame_object_methods): Register 'level' method.

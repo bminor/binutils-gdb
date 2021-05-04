@@ -99,6 +99,7 @@ const char *riscv_feature_name_csr = "org.gnu.gdb.riscv.csr";
 static const char *riscv_feature_name_cpu = "org.gnu.gdb.riscv.cpu";
 static const char *riscv_feature_name_fpu = "org.gnu.gdb.riscv.fpu";
 static const char *riscv_feature_name_virtual = "org.gnu.gdb.riscv.virtual";
+static const char *riscv_feature_name_vector = "org.gnu.gdb.riscv.vector";
 
 /* Cached information about a frame.  */
 
@@ -574,6 +575,115 @@ private:
 /* An instance of the csr register feature.  */
 
 static const struct riscv_csr_feature riscv_csr_feature;
+
+/* Class representing the v-registers feature set.  */
+
+struct riscv_vector_feature : public riscv_register_feature
+{
+  riscv_vector_feature ()
+    : riscv_register_feature (riscv_feature_name_vector)
+  {
+    m_registers =  {
+      { RISCV_V0_REGNUM + 0, { "v0" } },
+      { RISCV_V0_REGNUM + 1, { "v1" } },
+      { RISCV_V0_REGNUM + 2, { "v2" } },
+      { RISCV_V0_REGNUM + 3, { "v3" } },
+      { RISCV_V0_REGNUM + 4, { "v4" } },
+      { RISCV_V0_REGNUM + 5, { "v5" } },
+      { RISCV_V0_REGNUM + 6, { "v6" } },
+      { RISCV_V0_REGNUM + 7, { "v7" } },
+      { RISCV_V0_REGNUM + 8, { "v8" } },
+      { RISCV_V0_REGNUM + 9, { "v9" } },
+      { RISCV_V0_REGNUM + 10, { "v10" } },
+      { RISCV_V0_REGNUM + 11, { "v11" } },
+      { RISCV_V0_REGNUM + 12, { "v12" } },
+      { RISCV_V0_REGNUM + 13, { "v13" } },
+      { RISCV_V0_REGNUM + 14, { "v14" } },
+      { RISCV_V0_REGNUM + 15, { "v15" } },
+      { RISCV_V0_REGNUM + 16, { "v16" } },
+      { RISCV_V0_REGNUM + 17, { "v17" } },
+      { RISCV_V0_REGNUM + 18, { "v18" } },
+      { RISCV_V0_REGNUM + 19, { "v19" } },
+      { RISCV_V0_REGNUM + 20, { "v20" } },
+      { RISCV_V0_REGNUM + 21, { "v21" } },
+      { RISCV_V0_REGNUM + 22, { "v22" } },
+      { RISCV_V0_REGNUM + 23, { "v23" } },
+      { RISCV_V0_REGNUM + 24, { "v24" } },
+      { RISCV_V0_REGNUM + 25, { "v25" } },
+      { RISCV_V0_REGNUM + 26, { "v26" } },
+      { RISCV_V0_REGNUM + 27, { "v27" } },
+      { RISCV_V0_REGNUM + 28, { "v28" } },
+      { RISCV_V0_REGNUM + 29, { "v29" } },
+      { RISCV_V0_REGNUM + 30, { "v30" } },
+      { RISCV_V0_REGNUM + 31, { "v31" } },
+    };
+  }
+
+  /* Return the preferred name for the register with gdb register number
+     REGNUM, which must be in the inclusive range RISCV_V0_REGNUM to
+     RISCV_V0_REGNUM + 31.  */
+  const char *register_name (int regnum) const
+  {
+    gdb_assert (regnum >= RISCV_V0_REGNUM
+		&& regnum <= RISCV_V0_REGNUM + 31);
+    regnum -= RISCV_V0_REGNUM;
+    return m_registers[regnum].names[0];
+  }
+
+  /* Check this feature within TDESC, record the registers from this
+     feature into TDESC_DATA and update ALIASES and FEATURES.  */
+  bool check (const struct target_desc *tdesc,
+	      struct tdesc_arch_data *tdesc_data,
+	      std::vector<riscv_pending_register_alias> *aliases,
+	      struct riscv_gdbarch_features *features) const
+  {
+    const struct tdesc_feature *feature_vector = tdesc_feature (tdesc);
+
+    /* It's fine if this feature is missing.  Update the architecture
+       feature set and return.  */
+    if (feature_vector == nullptr)
+      {
+	features->vlen = 0;
+	return true;
+      }
+
+    /* Check all of the vector registers are present.  */
+    for (const auto &reg : m_registers)
+      {
+	if (!reg.check (tdesc_data, feature_vector, true, aliases))
+	  return false;
+      }
+
+    /* Look through all of the vector registers and check they all have the
+       same bitsize.  Use this bitsize to update the feature set for this
+       gdbarch.  */
+    int vector_bitsize = -1;
+    for (const auto &reg : m_registers)
+      {
+	int reg_bitsize = -1;
+	for (const char *name : reg.names)
+	  {
+	    if (tdesc_unnumbered_register (feature_vector, name))
+	      {
+		reg_bitsize = tdesc_register_bitsize (feature_vector, name);
+		break;
+	      }
+	  }
+	gdb_assert (reg_bitsize != -1);
+	if (vector_bitsize == -1)
+	  vector_bitsize = reg_bitsize;
+	else if (vector_bitsize != reg_bitsize)
+	  return false;
+      }
+
+    features->vlen = (vector_bitsize / 8);
+    return true;
+  }
+};
+
+/* An instance of the v-register feature set.  */
+
+static const struct riscv_vector_feature riscv_vector_feature;
 
 /* Controls whether we place compressed breakpoints or not.  When in auto
    mode GDB tries to determine if the target supports compressed
@@ -1192,7 +1302,7 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
 
   if (reggroup == all_reggroup)
     {
-      if (regnum < RISCV_FIRST_CSR_REGNUM || regnum == RISCV_PRIV_REGNUM)
+      if (regnum < RISCV_FIRST_CSR_REGNUM || regnum >= RISCV_PRIV_REGNUM)
 	return 1;
       if (riscv_is_regnum_a_named_csr (regnum))
 	return 1;
@@ -1226,7 +1336,7 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
       return 0;
     }
   else if (reggroup == vector_reggroup)
-    return 0;
+    return (regnum >= RISCV_V0_REGNUM && regnum <= RISCV_V31_REGNUM);
   else
     return 0;
 }
@@ -3320,6 +3430,9 @@ riscv_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   else if (reg >= RISCV_DWARF_FIRST_CSR && reg <= RISCV_DWARF_LAST_CSR)
     return RISCV_FIRST_CSR_REGNUM + (reg - RISCV_DWARF_FIRST_CSR);
 
+  else if (reg >= RISCV_DWARF_REGNUM_V0 && reg <= RISCV_DWARF_REGNUM_V31)
+    return RISCV_V0_REGNUM + (reg - RISCV_DWARF_REGNUM_V0);
+
   return -1;
 }
 
@@ -3488,7 +3601,9 @@ riscv_gdbarch_init (struct gdbarch_info info,
 		  && riscv_virtual_feature.check (tdesc, tdesc_data.get (),
 						  &pending_aliases, &features)
 		  && riscv_csr_feature.check (tdesc, tdesc_data.get (),
-					      &pending_aliases, &features));
+					      &pending_aliases, &features)
+		  && riscv_vector_feature.check (tdesc, tdesc_data.get (),
+						 &pending_aliases, &features));
   if (!valid_p)
     {
       if (riscv_debug_gdbarch)

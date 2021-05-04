@@ -46349,6 +46349,14 @@ target has floating point hardware, but can be moved into the csr
 feature if the target has the floating point control registers, but no
 other floating point hardware.
 
+The @samp{org.gnu.gdb.riscv.vector} feature is optional.  If present,
+it should contain registers @samp{v0} through @samp{v31}, all of which
+must be the same size.  These requirements are based on the v0.10
+draft vector extension, as the vector extension is not yet final.  In
+the event that the register set of the vector extension changes for
+the final specification, the requirements given here could change for
+future releases of @value{GDBN}.
+
 @node RX Features
 @subsection RX Features
 @cindex target descriptions, RX Features
