@@ -110,12 +110,6 @@ struct areltdata
 
 extern void *bfd_malloc
   (bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_realloc
-  (void *, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_realloc_or_free
-  (void *, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_zmalloc
-  (bfd_size_type) ATTRIBUTE_HIDDEN;
 
 static inline char *
 bfd_strdup (const char *str)

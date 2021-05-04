@@ -1,3 +1,16 @@
+2021-05-04  Nick Clifton  <nickc@redhat.com>
+
+	* libbfd.c (bfd_malloc): Provide some documenation.  Treat a size
+	of 0 as 1.
+	(bfd_realloc): Likewise.
+	(bfd_zmalloc): Likewise.
+	(bfd_realloc_or_free): Provide some documentation.  Treat a size
+	of 0 as a request to free.
+	* libbfd-in.h (bfd_realloc): Remove prototype.
+	(bfd_realloc_or_free): Remove prototype.
+	(bfd_zmalloc): Remove prototype.
+	* libbfd.h: Regenerate.
+
 2021-05-03  Jan Beulich  <jbeulich@suse.com>
 
 	* elf32-i386.c (elf_howto_table): Switch all 32-bit relocs to

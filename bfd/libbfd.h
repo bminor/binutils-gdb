@@ -115,12 +115,6 @@ struct areltdata
 
 extern void *bfd_malloc
   (bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_realloc
-  (void *, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_realloc_or_free
-  (void *, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_zmalloc
-  (bfd_size_type) ATTRIBUTE_HIDDEN;
 
 static inline char *
 bfd_strdup (const char *str)
@@ -966,6 +960,14 @@ _bfd_malloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
   return NULL;
 }
 /* Extracted from libbfd.c.  */
+extern void * bfd_malloc (bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+
+extern void * bfd_realloc (void * MEM, bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+
+extern void * bfd_realloc_or_free (void * MEM, bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+
+extern void * bfd_zmalloc (bfd_size_type SIZE) ATTRIBUTE_HIDDEN;
+
 bool bfd_write_bigendian_4byte_int (bfd *, unsigned int);
 
 unsigned int bfd_log2 (bfd_vma x);
