@@ -1,5 +1,11 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac (hw_extra_devices): Inline contents into
+	SIM_AC_OPTION_HARDWARE and delete.
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_IGEN_OBJ): Change @mips_igen_engine@ to engine.o.
 	(MIPS_EXTRA_LIB, SIM_EXTRA_LIBS): Delete.
 	* configure.ac (mips_igen_engine, mips_extra_libs): Delete.

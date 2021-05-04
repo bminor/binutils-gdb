@@ -12584,16 +12584,8 @@ sim_micromips_flags=" -F ${sim_micromips_filter}  ${sim_micromips_machine}  ${si
 #
 # Add simulated hardware devices
 #
-hw_extra_devices=""
-case "${target}" in
-  mips*tx39*)
-	hw_extra_devices="tx3904cpu tx3904irc tx3904tmr tx3904sio"
-	;;
-  *)
-	;;
-esac
 
-hardware="cfi core pal glue $hw_extra_devices"
+hardware="cfi core pal glue tx3904cpu tx3904irc tx3904tmr tx3904sio"
 sim_hw_cflags="-DWITH_HW=1"
 sim_hw="$hardware"
 sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\1.o/g'`"
