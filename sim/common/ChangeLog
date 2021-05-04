@@ -1,3 +1,7 @@
+2021-05-04  Tom Tromey  <tromey@adacore.com>
+
+	* Make-common.in (generated_files): Add config.h.
+
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* cgen-trace.c (sim_disasm_perror_memory): Use BFD_VMA_FMT and drop

@@ -420,6 +420,7 @@ endif
 all_object_files = $(LIB_OBJS) $(SIM_RUN_OBJS)
 generated_files = \
 	$(SIM_EXTRA_DEPS) \
+	config.h \
 	hw-config.h \
 	modules.c \
 	targ-map.c \
