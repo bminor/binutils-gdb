@@ -1,5 +1,11 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Delete SIM_AC_OPTION_WARNINGS call.
+	* interp.c (sim_create_inferior): Add const to avp.
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c: Delete sys/times.h include.
 
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>

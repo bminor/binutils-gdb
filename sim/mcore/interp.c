@@ -1417,7 +1417,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *prog_bfd,
 		     char * const *argv, char * const *env)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
-  char ** avp;
+  char * const *avp;
   int nargs = 0;
   int nenv = 0;
   int s_length;
