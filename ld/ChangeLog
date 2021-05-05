@@ -1,3 +1,10 @@
+2021-05-05  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/empty.s: New file.
+	* testsuite/ld-powerpc/undefweak.d,
+	* testsuite/ld-powerpc/undefweak.s: New testcase.
+	* testsuite/ld-powerpc/powerpc.exp: Run it.
+
 2021-05-03  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-s390/tlspic_64.rd: Adjust expected output for
