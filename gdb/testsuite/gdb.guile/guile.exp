@@ -82,3 +82,10 @@ gdb_test_no_output "guile (define a (execute \"help\" #:to-string #t))" \
 
 gdb_test "guile (print a)" "= .*aliases -- User-defined aliases of other commands.*" \
     "verify help to uiout"
+
+# Verify that we can source a guile script using ~ for the HOME directory.
+save_vars { env(HOME) } {
+    set env(HOME) $srcdir/$subdir
+    clean_restart
+    gdb_test "source ~/source2.scm" "yes"
+}

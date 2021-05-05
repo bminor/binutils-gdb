@@ -1,3 +1,9 @@
+2021-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-cmds.c: Add 'gdbsupport/gdb_tilde_expand.h'
+	include.
+	(source_script_with_search): Perform tilde expansion.
+
 2021-05-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target-descriptions.c (struct target_desc_info) <filename>:

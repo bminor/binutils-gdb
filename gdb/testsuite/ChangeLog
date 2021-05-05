@@ -1,5 +1,9 @@
 2021-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.guile/guile.exp: Add an extra test.
+
+2021-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/ptype-offsets.exp: Replace use of send_gdb with
 	gdb_test_no_output.
 
