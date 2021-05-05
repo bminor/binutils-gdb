@@ -51,7 +51,7 @@ typedef struct {
   unsigned char h;
 } RegBank;
 
-static void trace_register_init ();
+static void trace_register_init (void);
 
 /* This maps PSW to a pointer into memory[] */
 static RegBank *regbase_table[256];

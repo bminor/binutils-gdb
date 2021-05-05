@@ -403,7 +403,7 @@ int siggnal;
 /* Given a signal number used by the rl78 bsp (that is, newlib),
    return the corresponding signal numbers.  */
 
-int
+static int
 rl78_signal_to_target (int sig)
 {
   switch (sig)
@@ -442,7 +442,7 @@ rl78_signal_to_target (int sig)
 /* Take a step return code RC and set up the variables consulted by
    sim_stop_reason appropriately.  */
 
-void
+static void
 handle_step (int rc)
 {
   if (RL78_STEPPED (rc) || RL78_HIT_BREAK (rc))
@@ -548,11 +548,6 @@ sim_do_command (SIM_DESC sd, const char *cmd)
       /* Skip leading whitespace.  */
       while (isspace (*p))
 	p++;
-
-      /* Find the extent of the command word.  */
-      for (p = cmd; *p; p++)
-	if (isspace (*p))
-	  break;
 
       /* Null-terminate the command word, and record the start of any
 	 further arguments.  */

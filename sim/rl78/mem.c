@@ -63,9 +63,9 @@ mem_rom_size (int rom_bytes)
   rom_limit = rom_bytes;
 }
 
-int mirror_rom_base = 0x01000;
-int mirror_ram_base = 0xf1000;
-int mirror_length = 0x7000;
+static int mirror_rom_base = 0x01000;
+static int mirror_ram_base = 0xf1000;
+static int mirror_length = 0x7000;
 
 void
 mem_set_mirror (int rom_base, int ram_base, int length)

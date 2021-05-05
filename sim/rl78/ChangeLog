@@ -1,5 +1,19 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* cpu.c (trace_register_init): Add missing (void).
+	* gdb-if.c (rl78_signal_to_target, handle_step): Mark static.
+	(sim_do_command): Delete redundant for loop.
+	* mem.c (mirror_rom_base, mirror_ram_base, mirror_length): Mark static.
+	* mem.h (mem_set_mirror): New prototype.
+	* rl78.c (op_flags): Move psw decl to top of scope.
+	* trace.c: Include trace.h.
+	(load_file_and_line): Move file decl to top of scope.  Declare ret.
+	assign fread to ret and use to index f->data.
+	* configure.ac: Delete SIM_AC_OPTION_WARNINGS call.
+	* configure: Regenerate.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
