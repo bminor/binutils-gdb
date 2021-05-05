@@ -1,3 +1,13 @@
+2021-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* guile/guile-internal.h (gdbscm_safe_source_script): Change
+	function return type.
+	* guile/guile.c (gdbscm_source_script): Update to handle change in
+	gdbscm_safe_source_script.
+	* guile/scm-objfile.c (gdbscm_source_objfile_script): Likewise.
+	* guile/scm-safe-call.c (gdbscm_safe_source_script): Change return
+	type.
+
 2021-05-06  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* inferior.h (class inferior) <args>: Change type to

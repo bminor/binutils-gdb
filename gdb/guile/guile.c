@@ -270,13 +270,10 @@ static void
 gdbscm_source_script (const struct extension_language_defn *extlang,
 		      FILE *file, const char *filename)
 {
-  char *msg = gdbscm_safe_source_script (filename);
+  gdb::unique_xmalloc_ptr<char> msg = gdbscm_safe_source_script (filename);
 
   if (msg != NULL)
-    {
-      fprintf_filtered (gdb_stderr, "%s\n", msg);
-      xfree (msg);
-    }
+    fprintf_filtered (gdb_stderr, "%s\n", msg.get ());
 }
 
 /* (execute string [#:from-tty boolean] [#:to-string boolean])

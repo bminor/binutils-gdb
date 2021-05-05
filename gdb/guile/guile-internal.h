@@ -408,7 +408,8 @@ extern SCM gdbscm_unsafe_call_1 (SCM proc, SCM arg0);
 extern gdb::unique_xmalloc_ptr<char> gdbscm_safe_eval_string
   (const char *string, int display_result);
 
-extern char *gdbscm_safe_source_script (const char *filename);
+extern gdb::unique_xmalloc_ptr<char> gdbscm_safe_source_script
+  (const char *filename);
 
 extern void gdbscm_enter_repl (void);
 
