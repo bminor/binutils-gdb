@@ -1,3 +1,8 @@
+2021-05-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c: Include libiberty.h.
+	(sim_do_command): Rewrite to use buildargv.
+
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* cpu.c (trace_register_init): Add missing (void).
