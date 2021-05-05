@@ -24,6 +24,7 @@
 #include "dv-sockser.h"
 #include "sim-assert.h"
 
+#include <stdlib.h>
 
 /* DEVICE
 

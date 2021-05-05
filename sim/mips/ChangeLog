@@ -1,5 +1,9 @@
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-tx3904sio.c: Include stdlib.h.
+
+2021-05-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (hw_extra_devices): Inline contents into
 	SIM_AC_OPTION_HARDWARE and delete.
 	* configure: Regenerate.
