@@ -5517,6 +5517,13 @@ Hardware assisted read watchpoint.
 @vindex BP_ACCESS_WATCHPOINT
 @item gdb.BP_ACCESS_WATCHPOINT
 Hardware assisted access watchpoint.
+
+@vindex BP_CATCHPOINT
+@item gdb.BP_CATCHPOINT
+Catchpoint.  Currently, this type can't be used when creating
+@code{gdb.Breakpoint} objects, but will be present in
+@code{gdb.Breakpoint} objects reported from
+@code{gdb.BreakpointEvent}s (@pxref{Events In Python}).
 @end vtable
 
 The available watchpoint types are represented by constants defined in the

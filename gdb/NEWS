@@ -231,6 +231,10 @@ QMemTags
   ** New method gdb.PendingFrame.level() which returns the stack level
      of the frame object.
 
+  ** When hitting a catchpoint, the Python API will now emit a
+     gdb.BreakpointEvent rather than a gdb.StopEvent.  The
+     gdb.Breakpoint attached to the event will have type BP_CATCHPOINT.
+
 *** Changes in GDB 10
 
 * There are new feature names for ARC targets: "org.gnu.gdb.arc.core"

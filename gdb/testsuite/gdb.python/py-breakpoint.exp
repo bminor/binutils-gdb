@@ -737,11 +737,71 @@ proc_with_prefix test_bkpt_probe {} {
 	"-probe in spec string"
 }
 
+proc_with_prefix test_catchpoints {} {
+    global srcfile testfile
+    global gdb_prompt decimal
+
+    # Start with a fresh gdb.
+    clean_restart ${testfile}
+
+    if ![runto_main] then {
+	fail "cannot run to main."
+	return 0
+    }
+
+    # Try to create a catchpoint, currently this isn't supported via
+    # the python api.
+    gdb_test "python gdb.Breakpoint (\"syscall\", type=gdb.BP_CATCHPOINT)" \
+	[multi_line \
+	     "gdb.error: BP_CATCHPOINT not supported" \
+	     "Error while executing Python code\\."] \
+	"create a catchpoint via the api"
+
+    # Setup a catchpoint.
+    set num "XXX"
+    gdb_test_multiple "catch throw" "" {
+	-re "The feature \'catch throw\' is not supported.*\r\n$gdb_prompt $" {
+	    unsupported "catch syscall isn't supported"
+	    return -1
+	}
+	-re "Catchpoint ($decimal) \\(throw\\)\r\n$gdb_prompt $" {
+	    set num $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+
+    # Look for the catchpoint in the breakpoint list.
+    gdb_test_multiline "scan breakpoint list for BP_CATCHPOINT" \
+	"python" "" \
+	"def scan_bp_list ():" "" \
+	"  for b in gdb.breakpoints():" "" \
+	"    if b.type == gdb.BP_CATCHPOINT:" "" \
+	"      print(\"breakpoint #%d, type BP_CATCHPOINT\" % b.number)" "" \
+	"end" ""
+    gdb_test "python scan_bp_list ()" \
+	"breakpoint #${num}, type BP_CATCHPOINT" \
+	"scan breakpoint for BP_CATCHPOINT"
+
+    # Arrange to print something when GDB stops, then continue to the
+    # catchpoint and check we get the expected event.
+    gdb_test_multiline "setup stop event handler" \
+	"python" "" \
+	"def stop_handler (event):" "" \
+	"  if (isinstance (event, gdb.BreakpointEvent)" "" \
+	"      and isinstance (event.breakpoint, gdb.Breakpoint)" "" \
+	"      and event.breakpoint.type == gdb.BP_CATCHPOINT):" "" \
+	"    print (\"Stopped at catchpoint event: %d\" % event.breakpoint.number)" "" \
+	"end" "" \
+	"python gdb.events.stop.connect (stop_handler)" ""
+    gdb_test "continue" "Stopped at catchpoint event: ${num}"
+}
+
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
 test_bkpt_invisible
 test_hardware_breakpoints
+test_catchpoints
 test_watchpoints
 test_bkpt_internal
 test_bkpt_eval_funcs

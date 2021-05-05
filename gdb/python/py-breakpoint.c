@@ -86,6 +86,7 @@ static struct pybp_code pybp_codes[] =
   { "BP_HARDWARE_WATCHPOINT", bp_hardware_watchpoint},
   { "BP_READ_WATCHPOINT", bp_read_watchpoint},
   { "BP_ACCESS_WATCHPOINT", bp_access_watchpoint},
+  { "BP_CATCHPOINT", bp_catchpoint},
   {NULL} /* Sentinel.  */
 };
 
@@ -883,6 +884,8 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	      error(_("Cannot understand watchpoint access type."));
 	    break;
 	  }
+	case bp_catchpoint:
+	  error (_("BP_CATCHPOINT not supported"));
 	default:
 	  error(_("Do not understand breakpoint type to set."));
 	}
@@ -1038,7 +1041,8 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
       && bp->type != bp_watchpoint
       && bp->type != bp_hardware_watchpoint
       && bp->type != bp_read_watchpoint
-      && bp->type != bp_access_watchpoint)
+      && bp->type != bp_access_watchpoint
+      && bp->type != bp_catchpoint)
     {
       pybp_debug_printf ("is not a breakpoint or watchpoint");
       return;

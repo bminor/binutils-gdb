@@ -1,5 +1,10 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python.texinfo (Breakpoints In Python): Add BP_CATCHPOINT
+	description.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* guile.texinfo (Breakpoints In Guile): Add BP_CATCHPOINT
 	description.
 

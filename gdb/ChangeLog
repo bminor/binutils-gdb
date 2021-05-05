@@ -1,5 +1,12 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention Python BP_CATCHPOINT feature.
+	* python/py-breakpoint.c (pybp_codes): Add bp_catchpoint support.
+	(bppy_init): Likewise.
+	(gdbpy_breakpoint_created): Likewise.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* guile/scm-breakpoint.c (bpscm_type_to_string): Handle
 	bp_catchpoint.
 	(bpscm_want_scm_wrapper_p): Likewise.

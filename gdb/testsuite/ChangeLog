@@ -1,5 +1,11 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-breakpoint.c (do_throw): New function.
+	(main): Call do_throw.
+	* gdb.python/py-breakpoint.exp (test_catchpoints): New proc.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.guile/scm-breakpoint.exp (test_catchpoints): New proc.
 
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
