@@ -9879,8 +9879,8 @@ The default value is the empty string.
 
 If it is necessary to specify more than one disassembler option, then
 multiple options can be placed together into a comma separated list.
-Currently this command is only supported on targets ARM, MIPS, PowerPC
-and S/390.
+Currently this command is only supported on targets ARC, ARM, MIPS,
+PowerPC and S/390.
 
 @kindex show disassembler-options
 @item show disassembler-options

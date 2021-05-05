@@ -1,3 +1,10 @@
+2021-06-05  Shahab Vahedi  <shahab@synopsys.com>
+
+	* NEWS: Document 'set disassembler-options' support for the ARC
+	target.
+	* arc-tdep.c (arc_gdbarch_init): Set
+	'gdbarch_valid_disassembler_options'.
+
 2021-06-04  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/read.h (dwarf2_fetch_die_type_sect_off): Add 'var_name'

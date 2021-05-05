@@ -2434,10 +2434,12 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      arc_disassembler_options = NULL;
 	      break;
 	    }
-	  set_gdbarch_disassembler_options (gdbarch,
-					    &arc_disassembler_options);
 	}
     }
+
+  set_gdbarch_disassembler_options (gdbarch, &arc_disassembler_options);
+  set_gdbarch_valid_disassembler_options (gdbarch,
+					  disassembler_options_arc ());
 
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 

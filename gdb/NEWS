@@ -3,6 +3,9 @@
 
 *** Changes since GDB 10
 
+* The 'set disassembler-options' command now supports specifying options
+  for the ARC target.
+
 * GDB now supports general memory tagging functionality if the underlying
   architecture supports the proper primitives and hooks.  Currently this is
   enabled only for AArch64 MTE.
