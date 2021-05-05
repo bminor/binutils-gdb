@@ -248,8 +248,13 @@ proc_with_prefix test_watchpoints { } {
 
     gdb_scm_test_silent_cmd  "guile (define wp1 (make-breakpoint \"result\" #:type BP_WATCHPOINT #:wp-class WP_WRITE))" \
 	"create watchpoint"
+    gdb_test "guile (display wp1) (newline)" "#<gdb:breakpoint #-1>" \
+	"print watchpoint before registering"
     gdb_scm_test_silent_cmd "guile (register-breakpoint! wp1)" \
 	"register wp1"
+    gdb_test "guile (display wp1) (newline)" \
+	"#<gdb:breakpoint #${decimal} BP_(?:HARDWARE_)?WATCHPOINT enabled noisy hit:0 ignore:0>" \
+	"print watchpoint after registering"
     gdb_test "continue" \
 	".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*main.*" \
 	"test watchpoint write"

@@ -1,5 +1,10 @@
 2021-05-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.guile/scm-breakpoint.exp (test_watchpoints): Print the
+	watchpoint object before and after registering it with GDB.
+
+2021-05-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.guile/scm-breakpoint.exp (test_bkpt_basic): Convert to
 	'proc_with_prefix', remove use of 'with_test_prefix', and
 	reindent.

@@ -174,8 +174,6 @@ bpscm_print_breakpoint_smob (SCM self, SCM port, scm_print_state *pstate)
   /* Careful, the breakpoint may be invalid.  */
   if (b != NULL)
     {
-      const char *str;
-
       gdbscm_printf (port, " %s %s %s",
 		     bpscm_type_to_string (b->type),
 		     bpscm_enable_state_to_string (b->enable_state),
@@ -184,9 +182,12 @@ bpscm_print_breakpoint_smob (SCM self, SCM port, scm_print_state *pstate)
       gdbscm_printf (port, " hit:%d", b->hit_count);
       gdbscm_printf (port, " ignore:%d", b->ignore_count);
 
-      str = event_location_to_string (b->location.get ());
-      if (str != NULL)
-	gdbscm_printf (port, " @%s", str);
+      if (b->location != nullptr)
+	{
+	  const char *str = event_location_to_string (b->location.get ());
+	  if (str != nullptr)
+	    gdbscm_printf (port, " @%s", str);
+	}
     }
 
   scm_puts (">", port);

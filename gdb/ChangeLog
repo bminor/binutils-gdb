@@ -1,3 +1,8 @@
+2021-05-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* guile/scm-breakpoint.c (bpscm_print_breakpoint_smob): Only print
+	breakpoint locations when the breakpoint actually has a location.
+
 2021-05-06  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* mi/mi-cmd-break.c (mi_cmd_break_condition): New function.
