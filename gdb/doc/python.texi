@@ -1163,12 +1163,32 @@ there is no associated objfile.
 The following methods are provided:
 
 @defun Type.fields ()
-For structure and union types, this method returns the fields.  Range
-types have two fields, the minimum and maximum values.  Enum types
-have one field per enum constant.  Function and method types have one
-field per parameter.  The base types of C@t{++} classes are also
-represented as fields.  If the type has no fields, or does not fit
-into one of these categories, an empty sequence will be returned.
+
+Return the fields of this type.  The behavior depends on the type code:
+
+@itemize @bullet
+
+@item
+For structure and union types, this method returns the fields.
+
+@item
+Range types have two fields, the minimum and maximum values.
+
+@item
+Enum types have one field per enum constant.
+
+@item
+Function and method types have one field per parameter.  The base types of
+C@t{++} classes are also represented as fields.
+
+@item
+Array types have one field representing the array's range.
+
+@item
+If the type does not fit into one of these categories, a @code{TypeError}
+is raised.
+
+@end itemize
 
 Each field is a @code{gdb.Field} object, with some pre-defined attributes:
 @table @code

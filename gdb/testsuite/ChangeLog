@@ -1,3 +1,8 @@
+2021-05-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/py-type.exp (test_fields): Test calling fields on
+	an int type.
+
 2021-05-04  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.python/flexible-array-member.exp: Adjust expected range

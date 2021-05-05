@@ -1,3 +1,9 @@
+2021-05-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python.texi (Types In Python): Re-organize Type.fields doc.
+	Mention handling of array types.  Correct doc for when calling
+	the method on another type.
+
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Initialization Files): Use @env when referencing
