@@ -1,5 +1,16 @@
 2021-05-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/py-breakpoint.c (pybp_debug): New static global.
+	(show_pybp_debug): New function.
+	(pybp_debug_printf): Define.
+	(PYBP_SCOPED_DEBUG_ENTER_EXIT): Define.
+	(gdbpy_breakpoint_created): Add some debugging.
+	(gdbpy_breakpoint_deleted): Likewise.
+	(gdbpy_breakpoint_modified): Likewise.
+	(_initialize_py_breakpoint): New function.
+
+2021-05-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python/py-unwind.c (pyuw_debug): Convert to bool.
 	(show_pyuw_debug): New function.
 	(pyuw_debug_printf): Define.

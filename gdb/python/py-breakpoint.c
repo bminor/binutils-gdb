@@ -34,6 +34,29 @@
 #include "py-event.h"
 #include "linespec.h"
 
+/* Debugging of Python breakpoints.  */
+
+static bool pybp_debug;
+
+/* Implementation of "show debug py-breakpoint".  */
+
+static void
+show_pybp_debug (struct ui_file *file, int from_tty,
+		 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Python breakpoint debugging is %s.\n"), value);
+}
+
+/* Print a "py-breakpoint" debug statement.  */
+
+#define pybp_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (pybp_debug, "py-breakpoint", fmt, ##__VA_ARGS__)
+
+/* Print a "py-breakpoint" enter/exit debug statements.  */
+
+#define PYBP_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (pybp_debug, "py-breakpoint")
+
 /* Number of live breakpoints.  */
 static int bppy_live;
 
@@ -1005,10 +1028,15 @@ gdbpy_breakpoint_has_cond (const struct extension_language_defn *extlang,
 static void
 gdbpy_breakpoint_created (struct breakpoint *bp)
 {
+  PYBP_SCOPED_DEBUG_ENTER_EXIT;
+
   gdbpy_breakpoint_object *newbp;
 
   if (!user_breakpoint_p (bp) && bppy_pending_object == NULL)
-    return;
+    {
+      pybp_debug_printf ("not attaching python object to this breakpoint");
+      return;
+    }
 
   if (bp->type != bp_breakpoint
       && bp->type != bp_hardware_breakpoint
@@ -1016,7 +1044,10 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
       && bp->type != bp_hardware_watchpoint
       && bp->type != bp_read_watchpoint
       && bp->type != bp_access_watchpoint)
-    return;
+    {
+      pybp_debug_printf ("is not a breakpoint or watchpoint");
+      return;
+    }
 
   struct gdbarch *garch = bp->gdbarch ? bp->gdbarch : get_current_arch ();
   gdbpy_enter enter_py (garch, current_language);
@@ -1026,9 +1057,13 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
       newbp = bppy_pending_object;
       Py_INCREF (newbp);
       bppy_pending_object = NULL;
+      pybp_debug_printf ("attaching existing breakpoint object");
     }
   else
-    newbp = PyObject_New (gdbpy_breakpoint_object, &breakpoint_object_type);
+    {
+      newbp = PyObject_New (gdbpy_breakpoint_object, &breakpoint_object_type);
+      pybp_debug_printf ("attaching new breakpoint object");
+    }
   if (newbp)
     {
       newbp->number = bp->number;
@@ -1057,6 +1092,8 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
 static void
 gdbpy_breakpoint_deleted (struct breakpoint *b)
 {
+  PYBP_SCOPED_DEBUG_ENTER_EXIT;
+
   int num = b->number;
   struct breakpoint *bp = NULL;
 
@@ -1087,6 +1124,8 @@ gdbpy_breakpoint_deleted (struct breakpoint *b)
 static void
 gdbpy_breakpoint_modified (struct breakpoint *b)
 {
+  PYBP_SCOPED_DEBUG_ENTER_EXIT;
+
   int num = b->number;
   struct breakpoint *bp = NULL;
 
@@ -1285,3 +1324,17 @@ PyTypeObject breakpoint_object_type =
   bppy_init,			  /* tp_init */
   0,				  /* tp_alloc */
 };
+
+void _initialize_py_breakpoint ();
+void
+_initialize_py_breakpoint ()
+{
+  add_setshow_boolean_cmd
+      ("py-breakpoint", class_maintenance, &pybp_debug,
+	_("Set Python breakpoint debugging."),
+	_("Show Python breakpoint debugging."),
+	_("When on, Python breakpoint debugging is enabled."),
+	NULL,
+	show_pybp_debug,
+	&setdebuglist, &showdebuglist);
+}

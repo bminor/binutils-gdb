@@ -153,6 +153,17 @@ to recognize the script language based on filename extension using
 the @code{script-extension} setting.  @xref{Extending GDB, ,Extending GDB}.
 @end table
 
+The following commands are intended to help debug @value{GDBN} itself:
+
+@table @code
+@kindex set debug py-breakpoint
+@kindex show debug py-breakpoint
+@item set debug py-breakpoint on@r{|}off
+@itemx show debug py-breakpoint
+When @samp{on}, @value{GDBN} prints debug messages related to the
+Python breakpoint API.  This is @samp{off} by default.
+@end table
+
 @node Python API
 @subsection Python API
 @cindex python api
