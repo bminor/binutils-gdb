@@ -1,3 +1,8 @@
+2021-05-05  Alan Modra  <amodra@gmail.com>
+
+	* vms-lib.c (vms_traverse_index): Account for vms_kbn size when
+	sanity checking keylen.
+
 2021-05-04  Nick Clifton  <nickc@redhat.com>
 
 	* libbfd.c (bfd_malloc): Provide some documenation.  Treat a size
