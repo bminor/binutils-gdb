@@ -1,5 +1,11 @@
 2021-05-05  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.threads/detach-step-over.exp: Do exp_continue when encountering
+	"Reading symbols" or "Expanding full symbols" lines.  Using timeout
+	factor of 2 for attach.
+
+2021-05-05  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.threads/fork-plus-threads.exp: Handle "New LWP <n>" and
 	"LWP <n> exited" messages.
 
