@@ -519,10 +519,47 @@ proc_with_prefix test_bkpt_probe {} {
 	"register probe breakpoint"
 }
 
+proc_with_prefix test_catchpoints {} {
+    global srcfile testfile
+    global gdb_prompt decimal
+
+    # Start with a fresh gdb.
+    clean_restart ${testfile}
+
+    if ![gdb_guile_runto_main] {
+	return
+    }
+
+    # Try to create a catchpoint, currently this isn't supported via
+    # the guile api.
+    gdb_test "guile (define cp (make-breakpoint \"syscall\" #:type BP_CATCHPOINT))" \
+	"ERROR: In procedure gdbscm_make_breakpoint: unsupported breakpoint type in position 3: \"BP_CATCHPOINT\"\r\n.*" \
+	"create a catchpoint via the api"
+
+    # Setup a catchpoint.
+    set num "XXX"
+    gdb_test_multiple "catch syscall" "" {
+	-re "The feature \'catch syscall\' is not supported.*\r\n$gdb_prompt $" {
+	    unsupported "catch syscall isn't supported"
+	    return -1
+	}
+	-re "Catchpoint ($decimal) \\(any syscall\\)\r\n$gdb_prompt $" {
+	    set num $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+
+    # Look for the catchpoint in the breakpoint list.
+    gdb_test "guile (for-each (lambda (b) (if (= (breakpoint-type b) BP_CATCHPOINT) (begin (display b) (newline)))) (breakpoints))" \
+	"#<gdb:breakpoint #${num} BP_CATCHPOINT enabled noisy hit:0 ignore:0>" \
+	"look for BP_CATCHPOINT in breakpoint list"
+}
+
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
 test_bkpt_invisible
+test_catchpoints
 test_watchpoints
 test_bkpt_internal
 test_bkpt_eval_funcs

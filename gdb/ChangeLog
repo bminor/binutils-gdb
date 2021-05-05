@@ -1,5 +1,13 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* guile/scm-breakpoint.c (bpscm_type_to_string): Handle
+	bp_catchpoint.
+	(bpscm_want_scm_wrapper_p): Likewise.
+	(gdbscm_make_breakpoint): Likewise.
+	(breakpoint_integer_constants): Likewise.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* guile/scm-breakpoint.c (gdbscm_make_breakpoint): Split the error
 	for invalid breakpoint numbers, and unsupported breakpoint
 	numbers.

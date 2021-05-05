@@ -3019,6 +3019,10 @@ This value cannot be specified when creating the breakpoint.
 @item BP_ACCESS_WATCHPOINT
 Hardware assisted access watchpoint.
 This value cannot be specified when creating the breakpoint.
+
+@item BP_CATCHPOINT
+Catchpoint.
+This value cannot be specified when creating the breakpoint.
 @end vtable
 
 The available watchpoint types are represented by constants defined in the
