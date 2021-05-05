@@ -50,7 +50,7 @@ proc test_bkpt_basic { } {
 
 	set mult_line [gdb_get_line_number "Break at multiply."]
 	gdb_breakpoint ${mult_line}
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply, first time"
 
 	# Check that the Guile breakpoint code noted the addition of a
 	# breakpoint "behind the scenes".
@@ -72,7 +72,7 @@ proc test_bkpt_basic { } {
 	    "= 1" "check multiply breakpoint hit count"
 	gdb_scm_test_silent_cmd "guile (set-breakpoint-ignore-count! mult-bkpt 4)" \
 	    "set multiply breakpoint ignore count"
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply, second time"
 	gdb_test "guile (print (breakpoint-hit-count mult-bkpt))" \
 	    "= 6" "check multiply breakpoint hit count 2"
 	gdb_test "print result" \
@@ -80,15 +80,15 @@ proc test_bkpt_basic { } {
 
 	# Test breakpoint is enabled and disabled correctly.
 	gdb_breakpoint [gdb_get_line_number "Break at add."]
-	gdb_continue_to_breakpoint "Break at add."
+	gdb_continue_to_breakpoint "Break at add, first time"
 	gdb_test "guile (print (breakpoint-enabled? mult-bkpt))" \
 	    "= #t" "check multiply breakpoint enabled"
 	gdb_scm_test_silent_cmd  "guile (set-breakpoint-enabled! mult-bkpt #f)" \
 	    "set multiply breakpoint disabled"
-	gdb_continue_to_breakpoint "Break at add."
+	gdb_continue_to_breakpoint "Break at add, second time"
 	gdb_scm_test_silent_cmd  "guile (set-breakpoint-enabled! mult-bkpt #t)" \
 	    "set multiply breakpoint enabled"
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply, third time"
 
 	# Test other getters and setters.
 	gdb_scm_test_silent_cmd "guile (define blist (breakpoints))" \
@@ -157,19 +157,19 @@ proc test_bkpt_cond_and_cmds { } {
 	    "create multiply breakpoint"
 	gdb_scm_test_silent_cmd "guile (register-breakpoint! bp1)" \
 	    "register bp1"
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply, first time"
 	gdb_scm_test_silent_cmd  "guile (set-breakpoint-condition! bp1 \"i == 5\")" \
 	    "set condition"
 	gdb_test "guile (print (breakpoint-condition bp1))" \
 	    "= i == 5" "test condition has been set"
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply, second time"
 	gdb_test "print i" \
 	    "5" "test conditional breakpoint stopped after five iterations"
 	gdb_scm_test_silent_cmd  "guile (set-breakpoint-condition! bp1 #f)" \
 	    "clear condition"
 	gdb_test "guile (print (breakpoint-condition bp1))" \
 	    "= #f" "test condition has been removed"
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply, third time"
 	gdb_test "print i" "6" "test breakpoint stopped after six iterations"
 
 	# Test commands.
@@ -372,7 +372,8 @@ proc test_bkpt_eval_funcs { } {
 	    "create also-eval-bp1 breakpoint"
 	gdb_scm_test_silent_cmd  "guile (define never-eval-bp1 (make-bp-also-eval \"$end_location\"))" \
 	    "create never-eval-bp1 breakpoint"
-	gdb_continue_to_breakpoint "Break at multiply." ".*$srcfile:$bp_location2.*"
+	gdb_continue_to_breakpoint "Break at multiply, first time" \
+	    ".*$srcfile:$bp_location2.*"
 	gdb_test "print i" "3" "check inferior value matches guile accounting"
 	gdb_test "guile (print (bp-eval-inf-i eval-bp1))" \
 	    "= 3" "check guile accounting matches inferior"
@@ -414,7 +415,8 @@ proc test_bkpt_eval_funcs { } {
 	gdb_test "guile (print (bp-eval-count check-eval))" \
 	    "= 0" \
 	    "test that evaluate function has not been yet executed (ie count = 0)"
-	gdb_continue_to_breakpoint "Break at multiply." ".*$srcfile:$bp_location2.*"
+	gdb_continue_to_breakpoint "Break at multiply, second time" \
+	    ".*$srcfile:$bp_location2.*"
 	gdb_test "guile (print (bp-eval-count check-eval))" \
 	    "= 1" \
 	    "test that evaluate function is run when location also has normal bp"
