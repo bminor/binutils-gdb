@@ -1,3 +1,18 @@
+2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-open.c (init_types): Unknown types may have names.
+	* ctf-types.c (ctf_type_resolve): CTF_K_UNKNOWN is as
+	non-representable as type ID 0.
+	(ctf_type_aname): Print unknown types.
+	* ctf-dedup.c (ctf_dedup_hash_type): Do not early-exit for
+	CTF_K_UNKNOWN types: they have real hash values now.
+	(ctf_dedup_rwalk_one_output_mapping): Treat CTF_K_UNKNOWN types
+	like other types with no referents: call the callback and do not
+	skip them.
+	(ctf_dedup_emit_type): Emit via...
+	* ctf-create.c (ctf_add_unknown): ... this new function.
+	* libctf.ver (LIBCTF_1.2): Add it.
+
 2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure.ac: Check for dlsym, not dlopen.

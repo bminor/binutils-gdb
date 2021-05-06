@@ -10,6 +10,9 @@ Changes in 2.37:
    symbol number is known, like in object files and dynamic dicts created by
    ctf_create.
 
+** libctf supports compilers that encode unrepresentable types via a special
+   kind (CTF_K_UNKNOWN) as well as via type ID 0.
+
 * Bugfixes
 
 ** Avoid duplicating or losing types of data object symbols when

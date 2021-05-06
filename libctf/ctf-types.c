@@ -579,6 +579,8 @@ ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 	  prev = type;
 	  type = tp->ctt_type;
 	  break;
+	case CTF_K_UNKNOWN:
+	  return (ctf_set_errno (ofp, ECTF_NONREPRESENTABLE));
 	default:
 	  return type;
 	}
@@ -807,6 +809,13 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	      break;
 	    case CTF_K_RESTRICT:
 	      ctf_decl_sprintf (&cd, "restrict");
+	      break;
+	    case CTF_K_UNKNOWN:
+	      if (name[0] == '\0')
+		ctf_decl_sprintf (&cd, _("(nonrepresentable type)"));
+	      else
+		ctf_decl_sprintf (&cd, _("(nonrepresentable type %s)"),
+				  name);
 	      break;
 	    }
 

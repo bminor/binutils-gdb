@@ -1,3 +1,9 @@
+2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf.h (CTF_K_UNKNOWN): Document that it can be used for
+	nonrepresentable types, not just padding.
+	* ctf-api.h (ctf_add_unknown): New.
+
 2021-04-22  Clément Chigot  <clement.chigot@atos.net>
 
 	* coff/internal.h (union internal_auxent):
