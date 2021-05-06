@@ -1,3 +1,10 @@
+2021-05-06  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Recognize the
+	'--force-condition' flag to force the condition in the
+	'-break-insert' and '-dprintf-insert' commands.
+	* NEWS: Mention the change.
+
 2021-05-04  Tom de Vries  <tdevries@suse.de>
 
 	PR guile/27806

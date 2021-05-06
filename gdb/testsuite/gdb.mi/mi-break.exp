@@ -408,6 +408,24 @@ proc_with_prefix test_explicit_breakpoints {} {
 	".*Source filename requires function, label, or line offset.*"
 }
 
+# Test forcing an invalid condition.
+
+proc_with_prefix test_forced_conditions {} {
+    set warning ".*warning: failed to validate condition .* disabling.*"
+
+    set loc [mi_make_breakpoint_loc -enabled "N"]
+    set args [list -cond "bad" -locations "\\\[$loc\\\]"]
+    set bp [eval mi_make_breakpoint_multi $args]
+
+    mi_gdb_test "-break-insert -c bad --force-condition callme" \
+	"${warning}\\^done,$bp" \
+	"breakpoint with forced condition"
+
+    mi_gdb_test "-dprintf-insert -c bad --force-condition callme \"Hello\"" \
+        "${warning}\\^done,$bp" \
+        "dprintf with forced condition"
+}
+
 proc test_break {mi_mode} {
     global srcdir subdir binfile
 
@@ -440,6 +458,8 @@ proc test_break {mi_mode} {
     test_abreak_creation
 
     test_explicit_breakpoints
+
+    test_forced_conditions
 }
 
 if [gdb_debug_enabled] {

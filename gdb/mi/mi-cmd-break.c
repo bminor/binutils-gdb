@@ -184,12 +184,14 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   int is_explicit = 0;
   struct explicit_location explicit_loc;
   std::string extra_string;
+  bool force_condition = false;
 
   enum opt
     {
       HARDWARE_OPT, TEMP_OPT, CONDITION_OPT,
       IGNORE_COUNT_OPT, THREAD_OPT, PENDING_OPT, DISABLE_OPT,
       TRACEPOINT_OPT,
+      FORCE_CONDITION_OPT,
       QUALIFIED_OPT,
       EXPLICIT_SOURCE_OPT, EXPLICIT_FUNC_OPT,
       EXPLICIT_LABEL_OPT, EXPLICIT_LINE_OPT
@@ -204,6 +206,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
     {"f", PENDING_OPT, 0},
     {"d", DISABLE_OPT, 0},
     {"a", TRACEPOINT_OPT, 0},
+    {"-force-condition", FORCE_CONDITION_OPT, 0},
     {"-qualified", QUALIFIED_OPT, 0},
     {"-source" , EXPLICIT_SOURCE_OPT, 1},
     {"-function", EXPLICIT_FUNC_OPT, 1},
@@ -269,6 +272,9 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 	case EXPLICIT_LINE_OPT:
 	  is_explicit = 1;
 	  explicit_loc.line_offset = linespec_parse_line_offset (oarg);
+	  break;
+	case FORCE_CONDITION_OPT:
+	  force_condition = true;
 	  break;
 	}
     }
@@ -354,7 +360,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 
   create_breakpoint (get_current_arch (), location.get (), condition, thread,
 		     extra_string.c_str (),
-		     false,
+		     force_condition,
 		     0 /* condition and thread are valid.  */,
 		     temp_p, type_wanted,
 		     ignore_count,

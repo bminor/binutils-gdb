@@ -31,6 +31,14 @@
     equivalent of the CLI's "break -qualified" and "dprintf
     -qualified".
 
+ ** '-break-insert --force-condition' and '-dprintf-insert --force-condition'
+
+    The MI -break-insert and -dprintf-insert commands now support a
+    '--force-condition' flag to forcibly define a condition even when
+    the condition is invalid at all locations of the breakpoint.  This
+    is equivalent to the '-force-condition' flag of the CLI's "break"
+    command.
+
 * GDB now supports core file debugging for x86_64 Cygwin programs.
 
 * GDB will now look for the .gdbinit file in a config directory before
