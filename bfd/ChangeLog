@@ -1,5 +1,21 @@
 2021-05-06  Stafford Horne  <shorne@gmail.com>
 
+	PR 27746
+	* elf32-or1k.c (PLT_ENTRY_SIZE_LARGE, PLT_MAX_INSN_COUNT,
+	OR1K_ADD, OR1K_ORI): New macros to help with plt creation.
+	(elf_or1k_link_hash_table): New field plt_count.
+	(elf_or1k_link_hash_entry): New field plt_index.
+	(elf_or1k_plt_entry_size): New function.
+	(or1k_write_plt_entry): Update to support variable size PLTs.
+	(or1k_elf_finish_dynamic_sections): Use new or1k_write_plt_entry
+	API.
+	(or1k_elf_finish_dynamic_symbol): Update to write large PLTs
+	when needed.
+	(allocate_dynrelocs): Use elf_or1k_plt_entry_size to account for
+	PLT size.
+
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
 	PR 21464
 	* elf32-or1k.c (or1k_elf_relocate_section): Relax R_OR1K_GOT16
 	overflow check if we have R_OR1K_GOT_AHI16 followed by

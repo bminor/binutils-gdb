@@ -1,3 +1,15 @@
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 27746
+	testsuite/ld-or1k/or1k.exp (or1kplttests): Add tests for linking
+	along with gotha() relocations.
+	testsuite/ld-or1k/gotha1.dd: New file.
+	testsuite/ld-or1k/gotha1.s: New file.
+	testsuite/ld-or1k/gotha2.dd: New file.
+	testsuite/ld-or1k/gotha2.s: New file
+	testsuite/ld-or1k/pltlib.s (x): Define size to avoid link
+	failure.
+
 2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/ld-ctf/ctf.exp: Use -gctf, not -gt.
