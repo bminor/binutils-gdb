@@ -2973,8 +2973,8 @@ resume (struct thread_resume *actions, size_t num_actions)
     }
 }
 
-/* Attach to a new program.  Return 1 if successful, 0 if failure.  */
-static int
+/* Attach to a new program.  */
+static void
 handle_v_attach (char *own_buf)
 {
   client_state &cs = get_client_state ();
@@ -2998,18 +2998,13 @@ handle_v_attach (char *own_buf)
 	}
       else
 	prepare_resume_reply (own_buf, cs.last_ptid, &cs.last_status);
-
-      return 1;
     }
   else
-    {
-      write_enn (own_buf);
-      return 0;
-    }
+    write_enn (own_buf);
 }
 
-/* Run a new program.  Return 1 if successful, 0 if failure.  */
-static int
+/* Run a new program.  */
+static void
 handle_v_run (char *own_buf)
 {
   client_state &cs = get_client_state ();
@@ -3106,7 +3101,7 @@ handle_v_run (char *own_buf)
 	{
 	  write_enn (own_buf);
 	  free_vector_argv (new_argv);
-	  return 0;
+	  return;
 	}
     }
   else
@@ -3127,18 +3122,13 @@ handle_v_run (char *own_buf)
 	 query which is the main thread of the new inferior.  */
       if (non_stop)
 	cs.general_thread = cs.last_ptid;
-
-      return 1;
     }
   else
-    {
-      write_enn (own_buf);
-      return 0;
-    }
+    write_enn (own_buf);
 }
 
-/* Kill process.  Return 1 if successful, 0 if failure.  */
-static int
+/* Kill process.  */
+static void
 handle_v_kill (char *own_buf)
 {
   client_state &cs = get_client_state ();
@@ -3158,13 +3148,9 @@ handle_v_kill (char *own_buf)
       cs.last_ptid = ptid_t (pid);
       discard_queued_stop_replies (cs.last_ptid);
       write_ok (own_buf);
-      return 1;
     }
   else
-    {
-      write_enn (own_buf);
-      return 0;
-    }
+    write_enn (own_buf);
 }
 
 /* Handle all of the extended 'v' packets.  */
