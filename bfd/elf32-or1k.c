@@ -2566,11 +2566,10 @@ or1k_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (h->type == STT_FUNC
       || h->needs_plt)
     {
-      if (! bfd_link_pic (info)
-	  && !h->def_dynamic
-	  && !h->ref_dynamic
-	  && h->root.type != bfd_link_hash_undefweak
-	  && h->root.type != bfd_link_hash_undefined)
+      if (h->plt.refcount <= 0
+	  || (SYMBOL_CALLS_LOCAL (info, h)
+	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+	      && h->root.type == bfd_link_hash_undefweak)))
 	{
 	  /* This case can occur if we saw a PLT reloc in an input
 	     file, but the symbol was never referred to by a dynamic

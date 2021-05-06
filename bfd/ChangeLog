@@ -1,3 +1,10 @@
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 27624
+	* elf32-or1k.c (or1k_elf_adjust_dynamic_symbol): Change
+	condition used to cleanup plt entries to cleanup forced local
+	entries.
+
 2021-05-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27825
