@@ -2,8 +2,7 @@
 #source: pr27825-1b.s
 #ld: -e _start --emit-relocs -z unique-symbol
 #nm: --defined-only
-#xfail: [is_generic]
-#xfail: fr30-*-* frv-*-* ft32-*-* iq2000-*-* mn10200-*-* msp*-* mt-*-*
+#xfail: [uses_genelf]
 # These targets don't support -z.
 
 #...
