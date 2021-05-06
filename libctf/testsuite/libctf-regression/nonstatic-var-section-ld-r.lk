@@ -4,4 +4,3 @@
 # link_flags: -Wl,--ctf-variables -r
 foo is of type [0-9a-f]*
 bar is of type [0-9a-f]*
-foo missing from the data object section

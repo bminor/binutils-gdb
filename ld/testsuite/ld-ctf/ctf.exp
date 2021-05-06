@@ -42,7 +42,7 @@ foreach ctf_test $ctf_test_list {
 	}
     }
     verbose [file rootname $ctf_test]
-    run_dump_test [file rootname $ctf_test] { { cc "-gt -fPIC" } }
+    run_dump_test [file rootname $ctf_test] { { cc "-gctf -fPIC" } }
 }
 
 if {[info exists old_lc_all]} {

@@ -1625,7 +1625,7 @@ proc compile_one_cc { src output additional_flags } {
     return [run_host_cmd_yesno "$CC" "$flags $CFLAGS $additional_flags $src -o $output"]
 }
 
-# Returns true if the target compiler supports -gt
+# Returns true if the target compiler supports -gctf
 proc check_ctf_available { } {
     global ctf_available_saved
 
@@ -1639,7 +1639,7 @@ proc check_ctf_available { } {
 	    set f [open $src "w"]
 	    puts $f "int main() { return 0; }"
 	    close $f
-	    set ctf_available_saved [compile_one_cc $src $output "-gt -c"]
+	    set ctf_available_saved [compile_one_cc $src $output "-gctf -c"]
 	    remote_file host delete $src
 	    remote_file host delete $output
 	    file delete $src

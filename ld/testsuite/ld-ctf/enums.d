@@ -14,7 +14,7 @@ Contents of CTF section .ctf:
 #...
     Compilation unit name: .*enums.c
 #...
-    Type section:	.*\(0x114 bytes\)
+    Type section:	.*\(0x134 bytes\)
 #...
   Types:
     0x1: \(kind 8\) enum nine_els \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
@@ -27,7 +27,8 @@ Contents of CTF section .ctf:
          NINE_SEVEN: 260
          NINE_EIGHT: 261
          NINE_NINE: 262
-    0x2: \(kind 8\) enum ten_els \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x2: \(kind 1\) .*int \(format 0x[01]\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]\)
+    0x3: \(kind 8\) enum ten_els \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
          TEN_ONE: 10
          TEN_TWO: 11
          TEN_THREE: -256
@@ -38,7 +39,8 @@ Contents of CTF section .ctf:
          TEN_EIGHT: -251
          TEN_NINE: -250
          TEN_TEN: -249
-    0x3: \(kind 8\) enum eleven_els \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x4: \(kind 1\) .*int \(format 0x[01]\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
+    0x5: \(kind 8\) enum eleven_els \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
          ELEVEN_ONE: 10
          ELEVEN_TWO: 11
          ELEVEN_THREE: -256

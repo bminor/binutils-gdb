@@ -1,5 +1,11 @@
 2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/lib/ctf-lib.exp: Use -gctf, not -gt.
+	* testsuite/libctf-regression/nonstatic-var-section-ld-r.lk:
+	Hidden symbols now get into the symtypetab anyway.
+
+2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open.c (init_types): Unknown types may have names.
 	* ctf-types.c (ctf_type_resolve): CTF_K_UNKNOWN is as
 	non-representable as type ID 0.
