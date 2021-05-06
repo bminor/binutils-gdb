@@ -136,9 +136,9 @@ get_inferior_args (void)
     }
 
   if (current_inferior ()->args == NULL)
-    current_inferior ()->args = xstrdup ("");
+    current_inferior ()->args = make_unique_xstrdup ("");
 
-  return current_inferior ()->args;
+  return current_inferior ()->args.get ();
 }
 
 /* Set the arguments for the current inferior.  Ownership of
@@ -147,8 +147,11 @@ get_inferior_args (void)
 void
 set_inferior_args (const char *newargs)
 {
-  xfree (current_inferior ()->args);
-  current_inferior ()->args = newargs ? xstrdup (newargs) : NULL;
+  if (newargs != nullptr)
+    current_inferior ()->args = make_unique_xstrdup (newargs);
+  else
+    current_inferior ()->args.reset ();
+
   current_inferior ()->argc = 0;
   current_inferior ()->argv = 0;
 }

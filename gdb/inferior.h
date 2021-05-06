@@ -468,7 +468,7 @@ public:
   struct program_space *pspace = NULL;
 
   /* The arguments string to use when running.  */
-  char *args = NULL;
+  gdb::unique_xmalloc_ptr<char> args;
 
   /* The size of elements in argv.  */
   int argc = 0;

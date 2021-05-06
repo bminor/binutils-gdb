@@ -1,3 +1,11 @@
+2021-05-06  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inferior.h (class inferior) <args>: Change type to
+	unique_xmalloc_ptr.
+	* inferior.c (inferior::~inferior): Don't free args.
+	* infcmd.c (get_inferior_args): Adjust.
+	(set_inferior_args): Adjust.
+
 2021-05-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* guile/scm-breakpoint.c (bpscm_print_breakpoint_smob): Only print

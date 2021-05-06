@@ -75,7 +75,6 @@ inferior::~inferior ()
 
   m_continuations.clear ();
   inferior_free_data (inf);
-  xfree (inf->args);
   target_desc_info_free (inf->tdesc_info);
 }
 
