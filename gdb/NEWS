@@ -39,6 +39,13 @@
     is equivalent to the '-force-condition' flag of the CLI's "break"
     command.
 
+ ** '-break-condition --force'
+
+    The MI -break-condition command now supports a '--force' flag to
+    forcibly define a condition even when the condition is invalid at
+    all locations of the selected breakpoint.  This is equivalent to
+    the '-force' flag of the CLI's "cond" command.
+
 * GDB now supports core file debugging for x86_64 Cygwin programs.
 
 * GDB will now look for the .gdbinit file in a config directory before

@@ -424,6 +424,17 @@ proc_with_prefix test_forced_conditions {} {
     mi_gdb_test "-dprintf-insert -c bad --force-condition callme \"Hello\"" \
         "${warning}\\^done,$bp" \
         "dprintf with forced condition"
+
+    # Define a plain breakpoint first, and a condition later.
+    mi_create_breakpoint "callme" "define a bp" ""
+    mi_gdb_test "-break-condition --force 16 bad == 42" \
+        "${warning}\\^done" \
+        "invalid condition is forced"
+    set args [list -cond "bad == 42" -locations "\\\[$loc\\\]"]
+    set bp [eval mi_make_breakpoint_multi $args]
+    mi_gdb_test "-break-info 16" \
+	"\\^done,[mi_make_breakpoint_table [list $bp]]" \
+        "invalid condition is defined"
 }
 
 proc test_break {mi_mode} {

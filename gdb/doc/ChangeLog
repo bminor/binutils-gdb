@@ -1,6 +1,11 @@
 2021-05-06  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.texinfo (GDB/MI Breakpoint Commands): Mention the
+	'--force' flag of the '-break-condition' command.
+
+2021-05-06  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.texinfo (GDB/MI Breakpoint Commands): Mention the
 	'--force-condition' flag of the '-break-insert' and
 	'-dprintf-insert' commands.
 

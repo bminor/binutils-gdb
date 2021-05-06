@@ -1656,6 +1656,14 @@ extern void breakpoint_retire_moribund (void);
 extern void set_breakpoint_condition (struct breakpoint *b, const char *exp,
 				      int from_tty, bool force);
 
+/* Set break condition for the breakpoint with number BPNUM to EXP.
+   Raise an error if no breakpoint with the given number is found.
+   Also raise an error if the breakpoint already has stop conditions.
+   If FORCE, define the condition even if it is invalid in
+   all of the breakpoint locations.  */
+extern void set_breakpoint_condition (int bpnum, const char *exp,
+				      int from_tty, bool force);
+
 /* Checks if we are catching syscalls or not.
    Returns 0 if not, greater than 0 if we are.  */
 extern int catch_syscall_enabled (void);

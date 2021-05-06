@@ -973,6 +973,39 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
   gdb::observers::breakpoint_modified.notify (b);
 }
 
+/* See breakpoint.h.  */
+
+void
+set_breakpoint_condition (int bpnum, const char *exp, int from_tty,
+			  bool force)
+{
+  struct breakpoint *b;
+  ALL_BREAKPOINTS (b)
+    if (b->number == bpnum)
+      {
+	/* Check if this breakpoint has a "stop" method implemented in an
+	   extension language.  This method and conditions entered into GDB
+	   from the CLI are mutually exclusive.  */
+	const struct extension_language_defn *extlang
+	  = get_breakpoint_cond_ext_lang (b, EXT_LANG_NONE);
+
+	if (extlang != NULL)
+	  {
+	    error (_("Only one stop condition allowed.  There is currently"
+		     " a %s stop condition defined for this breakpoint."),
+		   ext_lang_capitalized_name (extlang));
+	  }
+	set_breakpoint_condition (b, exp, from_tty, force);
+
+	if (is_breakpoint (b))
+	  update_global_location_list (UGLL_MAY_INSERT);
+
+	return;
+      }
+
+  error (_("No breakpoint number %d."), bpnum);
+}
+
 /* The options for the "condition" command.  */
 
 struct condition_command_opts
@@ -1066,7 +1099,6 @@ condition_completer (struct cmd_list_element *cmd,
 static void
 condition_command (const char *arg, int from_tty)
 {
-  struct breakpoint *b;
   const char *p;
   int bnum;
 
@@ -1085,30 +1117,7 @@ condition_command (const char *arg, int from_tty)
   if (bnum == 0)
     error (_("Bad breakpoint argument: '%s'"), arg);
 
-  ALL_BREAKPOINTS (b)
-    if (b->number == bnum)
-      {
-	/* Check if this breakpoint has a "stop" method implemented in an
-	   extension language.  This method and conditions entered into GDB
-	   from the CLI are mutually exclusive.  */
-	const struct extension_language_defn *extlang
-	  = get_breakpoint_cond_ext_lang (b, EXT_LANG_NONE);
-
-	if (extlang != NULL)
-	  {
-	    error (_("Only one stop condition allowed.  There is currently"
-		     " a %s stop condition defined for this breakpoint."),
-		   ext_lang_capitalized_name (extlang));
-	  }
-	set_breakpoint_condition (b, p, from_tty, cc_opts.force_condition);
-
-	if (is_breakpoint (b))
-	  update_global_location_list (UGLL_MAY_INSERT);
-
-	return;
-      }
-
-  error (_("No breakpoint number %d."), bnum);
+  set_breakpoint_condition (bnum, p, from_tty, cc_opts.force_condition);
 }
 
 /* Check that COMMAND do not contain commands that are suitable

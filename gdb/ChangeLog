@@ -1,5 +1,18 @@
 2021-05-06  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* mi/mi-cmd-break.c (mi_cmd_break_condition): New function.
+	* mi/mi-cmds.c: Change the binding of "-break-condition" to
+	mi_cmd_break_condition.
+	* mi/mi-cmds.h (mi_cmd_break_condition): Declare.
+	* breakpoint.h (set_breakpoint_condition): Declare a new
+	overload.
+	* breakpoint.c (set_breakpoint_condition): New overloaded function
+	extracted out from ...
+	(condition_command): ... this.
+	* NEWS: Mention the change.
+
+2021-05-06  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Recognize the
 	'--force-condition' flag to force the condition in the
 	'-break-insert' and '-dprintf-insert' commands.

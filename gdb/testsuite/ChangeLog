@@ -1,5 +1,10 @@
 2021-05-06  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* gdb.mi/mi-break.exp (test_forced_conditions): Add a test
+	for the -break-condition command's "--force" flag.
+
+2021-05-06  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* gdb.mi/mi-break.exp (test_forced_conditions): New proc that
 	is called by the test.
 
