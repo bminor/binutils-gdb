@@ -1,6 +1,13 @@
 2021-05-06  Stafford Horne  <shorne@gmail.com>
 
 	PR 21464
+	* elf32-or1k.c (or1k_elf_relocate_section): Relax R_OR1K_GOT16
+	overflow check if we have R_OR1K_GOT_AHI16 followed by
+	R_OR1K_GOT16.
+
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 21464
 	* bfd-in2.h: Add BFD_RELOC_OR1K_GOT_AHI16 relocation.
 	* elf32-or1k.c (or1k_elf_howto_table, or1k_reloc_map): Likewise.
 	(or1k_final_link_relocate, or1k_elf_relocate_section,
