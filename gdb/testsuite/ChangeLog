@@ -1,5 +1,20 @@
 2021-05-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.guile/scm-breakpoint.exp (test_bkpt_basic): Convert to
+	'proc_with_prefix', remove use of 'with_test_prefix', and
+	reindent.
+	(test_bkpt_deletion): Likewise.
+	(test_bkpt_cond_and_cmds): Likewise.
+	(test_bkpt_invisible): Likewise.
+	(test_watchpoints): Likewise.
+	(test_bkpt_internal): Likewise.
+	(test_bkpt_eval_funcs): Likewise.
+	(test_bkpt_registration): Likewise.
+	(test_bkpt_address): Convert to 'proc_with_prefix'.
+	(test_bkpt_probe): Likewise.
+
+2021-05-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.guile/scm-breakpoint.exp (test_bkpt_basic): Extend test
 	names to avoid duplicates.
 	(test_bkpt_cond_and_cmds): Likewise.
