@@ -9830,6 +9830,9 @@ elf_link_output_symstrtab (void *finf,
 	       && ELF_ST_BIND (elfsym->st_info) == STB_LOCAL)
 	{
 	  struct local_hash_entry *lh;
+	  size_t count_len;
+	  size_t base_len;
+	  char buf[30];
 	  switch (ELF_ST_TYPE (elfsym->st_info))
 	    {
 	    case STT_FILE:
@@ -9840,28 +9843,24 @@ elf_link_output_symstrtab (void *finf,
 		     (&flinfo->local_hash_table, name, true, false);
 	      if (lh == NULL)
 		return 0;
-	      if (lh->count)
+	      /* Always append ".COUNT" to local symbols to avoid
+		 potential conflicts with local symbol "XXX.COUNT".  */
+	      sprintf (buf, "%lx", lh->count);
+	      base_len = lh->size;
+	      if (!base_len)
 		{
-		  /* Append ".COUNT" to duplicated local symbols.  */
-		  size_t count_len;
-		  size_t base_len = lh->size;
-		  char buf[30];
-		  sprintf (buf, "%lx", lh->count);
-		  if (!base_len)
-		    {
-		      base_len = strlen (name);
-		      lh->size = base_len;
-		    }
-		  count_len = strlen (buf);
-		  versioned_name = bfd_alloc (flinfo->output_bfd,
-					      base_len + count_len + 2);
-		  if (versioned_name == NULL)
-		    return 0;
-		  memcpy (versioned_name, name, base_len);
-		  versioned_name[base_len] = '.';
-		  memcpy (versioned_name + base_len + 1, buf,
-			  count_len + 1);
+		  base_len = strlen (name);
+		  lh->size = base_len;
 		}
+	      count_len = strlen (buf);
+	      versioned_name = bfd_alloc (flinfo->output_bfd,
+					  base_len + count_len + 2);
+	      if (versioned_name == NULL)
+		return 0;
+	      memcpy (versioned_name, name, base_len);
+	      versioned_name[base_len] = '.';
+	      memcpy (versioned_name + base_len + 1, buf,
+		      count_len + 1);
 	      lh->count++;
 	      break;
 	    }
