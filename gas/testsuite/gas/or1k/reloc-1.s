@@ -74,3 +74,7 @@
 	l.lbz	r5,po(x)(r3)
 	l.lbz	r5,gotpo(x)(r3)
 	l.sb	po(x)(r3),r6
+
+	l.movhi	r4,gotha(x)
+	l.ori	r3,r4,gotha(x)
+	l.addi	r3,r4,gotha(x)

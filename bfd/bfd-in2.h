@@ -5032,6 +5032,7 @@ then it may be truncated to 8 bits.  */
   BFD_RELOC_OR1K_TLS_TPOFF,
   BFD_RELOC_OR1K_TLS_DTPOFF,
   BFD_RELOC_OR1K_TLS_DTPMOD,
+  BFD_RELOC_OR1K_GOT_AHI16,
 
 /* H8 elf Relocations.  */
   BFD_RELOC_H8_DIR16A8,

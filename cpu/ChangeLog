@@ -1,3 +1,9 @@
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 21464
+	* or1k.opc (or1k_imm16_relocs, parse_reloc): Define parse logic
+	for gotha() relocation.
+
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
 	* frv.opc: Replace bfd_boolean with bool, FALSE with false, and

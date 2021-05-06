@@ -808,6 +808,20 @@ static reloc_howto_type or1k_elf_howto_table[] =
 	 0,			/* Source Mask.  */
 	 0x03ffffff,		/* Dest Mask.  */
 	 true),			/* PC relative offset?  */
+
+  HOWTO (R_OR1K_GOT_AHI16,	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 bfd_elf_generic_reloc, /* special_function */
+	 "R_OR1K_GOT_AHI16",	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
 };
 
 /* Map BFD reloc types to Or1k ELF reloc types.  */
@@ -871,6 +885,7 @@ static const struct or1k_reloc_map or1k_reloc_map[] =
   { BFD_RELOC_OR1K_TLS_IE_LO13,	R_OR1K_TLS_IE_LO13 },
   { BFD_RELOC_OR1K_SLO13,	R_OR1K_SLO13 },
   { BFD_RELOC_OR1K_PLTA26,	R_OR1K_PLTA26 },
+  { BFD_RELOC_OR1K_GOT_AHI16,	R_OR1K_GOT_AHI16 },
 };
 
 /* tls_type is a mask used to track how each symbol is accessed,
@@ -1111,6 +1126,7 @@ or1k_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
   switch (howto->type)
     {
     case R_OR1K_AHI16:
+    case R_OR1K_GOT_AHI16:
     case R_OR1K_GOTOFF_AHI16:
     case R_OR1K_TLS_IE_AHI16:
     case R_OR1K_TLS_LE_AHI16:
@@ -1373,6 +1389,7 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    }
 	  break;
 
+	case R_OR1K_GOT_AHI16:
 	case R_OR1K_GOT16:
 	case R_OR1K_GOT_PG21:
 	case R_OR1K_GOT_LO13:
@@ -1464,7 +1481,8 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	    /* The GOT_PG21 and GOT_LO13 relocs are pc-relative,
 	       while the GOT16 reloc is GOT relative.  */
 	    relocation = got_base + off;
-	    if (r_type == R_OR1K_GOT16)
+	    if (r_type == R_OR1K_GOT16
+		|| r_type == R_OR1K_GOT_AHI16)
 	      relocation -= got_sym_value;
 
 	  /* Addend should be zero.  */
@@ -1990,6 +2008,7 @@ or1k_elf_check_relocs (bfd *abfd,
 	    }
 	  break;
 
+	case R_OR1K_GOT_AHI16:
 	case R_OR1K_GOT16:
 	case R_OR1K_GOT_PG21:
 	case R_OR1K_GOT_LO13:

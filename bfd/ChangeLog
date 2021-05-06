@@ -1,5 +1,15 @@
 2021-05-06  Stafford Horne  <shorne@gmail.com>
 
+	PR 21464
+	* bfd-in2.h: Add BFD_RELOC_OR1K_GOT_AHI16 relocation.
+	* elf32-or1k.c (or1k_elf_howto_table, or1k_reloc_map): Likewise.
+	(or1k_final_link_relocate, or1k_elf_relocate_section,
+	or1k_elf_check_relocs): Likewise.
+	* libbfd.h (bfd_reloc_code_real_names): Likewise.
+	* reloc.c: Likewise.
+
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
 	PR 27624
 	* elf32-or1k.c (or1k_elf_adjust_dynamic_symbol): Change
 	condition used to cleanup plt entries to cleanup forced local

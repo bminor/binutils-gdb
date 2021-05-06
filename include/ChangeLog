@@ -1,3 +1,8 @@
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 21464
+	* elf/or1k.h (elf_or1k_reloc_type): Define R_OR1K_GOT_AHI16 number.
+
 2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf.h (CTF_K_UNKNOWN): Document that it can be used for

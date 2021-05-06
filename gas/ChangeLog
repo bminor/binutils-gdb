@@ -1,3 +1,10 @@
+2021-05-06  Stafford Horne  <shorne@gmail.com>
+
+	PR 21464
+	* testsuite/gas/or1k/reloc-1.s: Add test for new relocation.
+	* testsuite/gas/or1k/reloc-1.d: Add test result for new
+	relocation.
+
 2021-05-03  Christoph Muellner <cmuellner@gcc.gnu.org>
 
 	PR 27764
