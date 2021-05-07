@@ -10000,7 +10000,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		    {
 		      reloc_type = BFD_RELOC_386_GOTPC;
 		      i.has_gotpc_tls_reloc = true;
-		      i.op[n].imms->X_add_number +=
+		      i.op[n].disps->X_add_number +=
 			encoding_length (insn_start_frag, insn_start_off, p);
 		    }
 		  else if (reloc_type == BFD_RELOC_64)

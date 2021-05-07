@@ -1,5 +1,10 @@
 2021-05-07  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (output_disp): Use disps field instead of
+	imms one.
+
+2021-05-07  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (i386_finalize_immediate): Move register
 	check ...
 	(i386_immediate): ... here.
