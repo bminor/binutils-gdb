@@ -1,3 +1,14 @@
+2021-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* infcmd.c (notice_new_inferior): Change parameter type.
+	* inferior.h (notice_new_inferior): Change parameter type.
+	* remote.c (remote_notice_new_inferior): Change parameter type to
+	bool.  Also update type of local variable to bool.
+	(remote_target::update_thread_list): Change type of local variable
+	to bool.
+	(remote_target::process_stop_reply): Pass bool instead of int to
+	remote_notice_new_inferior.
+
 2021-05-07  Simon Marchi  <simon.marchi@efficios.com>
 
 	* target.c (target_stack::unpush): Call target_ops::find_beneath

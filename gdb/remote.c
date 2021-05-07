@@ -764,7 +764,7 @@ public: /* Remote specific methods.  */
   ptid_t select_thread_for_ambiguous_stop_reply
     (const struct target_waitstatus *status);
 
-  void remote_notice_new_inferior (ptid_t currthread, int executing);
+  void remote_notice_new_inferior (ptid_t currthread, bool executing);
 
   void process_initial_stop_replies (int from_tty);
 
@@ -2556,12 +2556,12 @@ remote_target::remote_add_thread (ptid_t ptid, bool running, bool executing)
    thread is (internally) executing or stopped.  */
 
 void
-remote_target::remote_notice_new_inferior (ptid_t currthread, int executing)
+remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
 {
   /* In non-stop mode, we assume new found threads are (externally)
      running until proven otherwise with a stop reply.  In all-stop,
      we can only get here if all threads are stopped.  */
-  int running = target_is_non_stop_p () ? 1 : 0;
+  bool running = target_is_non_stop_p ();
 
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
@@ -3955,7 +3955,7 @@ remote_target::update_thread_list ()
 		 executing until proven otherwise with a stop reply.
 		 In all-stop, we can only get here if all threads are
 		 stopped.  */
-	      int executing = target_is_non_stop_p () ? 1 : 0;
+	      bool executing = target_is_non_stop_p ();
 
 	      remote_notice_new_inferior (item.ptid, executing);
 
@@ -8036,7 +8036,7 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
 	  stop_reply->regcache.clear ();
 	}
 
-      remote_notice_new_inferior (ptid, 0);
+      remote_notice_new_inferior (ptid, false);
       remote_thread_info *remote_thr = get_remote_thread_info (this, ptid);
       remote_thr->core = stop_reply->core;
       remote_thr->stop_reason = stop_reply->stop_reason;

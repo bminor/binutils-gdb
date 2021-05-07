@@ -2675,7 +2675,7 @@ attach_command (const char *args, int from_tty)
    as stopped.  */
 
 void
-notice_new_inferior (thread_info *thr, int leave_running, int from_tty)
+notice_new_inferior (thread_info *thr, bool leave_running, int from_tty)
 {
   enum attach_post_wait_mode mode
     = leave_running ? ATTACH_POST_WAIT_RESUME : ATTACH_POST_WAIT_NOTHING;
