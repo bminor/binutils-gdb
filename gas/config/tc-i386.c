@@ -5791,8 +5791,8 @@ optimize_imm (void)
 	    if ((i.types[op].bitfield.imm16)
 		&& (i.op[op].imms->X_add_number & ~(offsetT) 0xffff) == 0)
 	      {
-		i.op[op].imms->X_add_number =
-		  (((i.op[op].imms->X_add_number & 0xffff) ^ 0x8000) - 0x8000);
+		i.op[op].imms->X_add_number = ((i.op[op].imms->X_add_number
+						^ 0x8000) - 0x8000);
 	      }
 #ifdef BFD64
 	    /* Store 32-bit immediate in 64-bit for 64-bit BFD.  */
@@ -5826,17 +5826,15 @@ optimize_imm (void)
 	       than those matching the insn suffix.  */
 	    {
 	      i386_operand_type mask, allowed;
-	      const insn_template *t;
+	      const insn_template *t = current_templates->start;
 
 	      operand_type_set (&mask, 0);
-	      operand_type_set (&allowed, 0);
+	      allowed = t->operand_types[op];
 
-	      for (t = current_templates->start;
-		   t < current_templates->end;
-		   ++t)
+	      while (++t < current_templates->end)
 		{
-		  allowed = operand_type_or (allowed, t->operand_types[op]);
 		  allowed = operand_type_and (allowed, anyimm);
+		  allowed = operand_type_or (allowed, t->operand_types[op]);
 		}
 	      switch (guess_suffix)
 		{
