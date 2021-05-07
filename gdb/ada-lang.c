@@ -13490,7 +13490,8 @@ When enabled, the debugger will stop using the DW_AT_GNAT_descriptive_type\n\
 DWARF attribute."),
      NULL, NULL, &maint_set_ada_cmdlist, &maint_show_ada_cmdlist);
 
-  decoded_names_store = htab_create_alloc (256, htab_hash_string, streq_hash,
+  decoded_names_store = htab_create_alloc (256, htab_hash_string,
+					   htab_eq_string,
 					   NULL, xcalloc, xfree);
 
   /* The ada-lang observers.  */

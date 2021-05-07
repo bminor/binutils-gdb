@@ -1,3 +1,12 @@
+2021-05-07  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (ambiguous_names_p): Use htab_eq_string.
+	* utils.c (streq_hash): Remove.
+	* utils.h (streq_hash): Don't declare.
+	* completer.c (completion_tracker::discard_completions): Update
+	comment.
+	* ada-lang.c (_initialize_ada_language): Use htab_eq_string.
+
 2021-05-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Re-format all Python files using black.

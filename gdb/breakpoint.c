@@ -13471,7 +13471,7 @@ static int
 ambiguous_names_p (struct bp_location *loc)
 {
   struct bp_location *l;
-  htab_up htab (htab_create_alloc (13, htab_hash_string, streq_hash, NULL,
+  htab_up htab (htab_create_alloc (13, htab_hash_string, htab_eq_string, NULL,
 				   xcalloc, xfree));
 
   for (l = loc; l != NULL; l = l->next)

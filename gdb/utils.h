@@ -99,11 +99,6 @@ extern int strcmp_iw_ordered (const char *, const char *);
 
 extern bool streq (const char *, const char *);
 
-/* A variant of streq that is suitable for use as an htab
-   callback.  */
-
-extern int streq_hash (const void *, const void *);
-
 extern int subset_compare (const char *, const char *);
 
 /* Compare C strings for std::sort.  */

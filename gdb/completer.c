@@ -1593,7 +1593,7 @@ completion_tracker::discard_completions ()
   m_entries_hash.reset (nullptr);
 
   /* A callback used by the hash table to compare new entries with existing
-     entries.  We can't use the standard streq_hash function here as the
+     entries.  We can't use the standard htab_eq_string function here as the
      key to our hash is just a single string, while the values we store in
      the hash are a struct containing multiple strings.  */
   static auto entry_eq_func

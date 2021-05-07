@@ -2818,14 +2818,6 @@ streq (const char *lhs, const char *rhs)
   return !strcmp (lhs, rhs);
 }
 
-/* See utils.h.  */
-
-int
-streq_hash (const void *lhs, const void *rhs)
-{
-  return streq ((const char *) lhs, (const char *) rhs);
-}
-
 
 
 /*
