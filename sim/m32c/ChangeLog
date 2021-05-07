@@ -1,3 +1,10 @@
+2021-05-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Delete safe-fgets.
+	* opc2c.c: Delete safe-fgets.h include.
+	(main): Replace safe_fgets with getline.
+	* safe-fgets.c, safe-fgets.h: Removed.
+
 2021-05-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* gdb-if.c: Include libiberty.h.

@@ -24,8 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "safe-fgets.h"
-
 static int errors = 0;
 
 #define MAX_BYTES 10
@@ -504,10 +502,11 @@ log_indirect (Indirect * ind, int byte)
 int
 main (int argc, char **argv)
 {
-  char *line;
+  char *linebuf;
   FILE *in;
   int lineno = 0;
   int i;
+  size_t len;
 
   if (argc > 2 && strcmp (argv[1], "-l") == 0)
     {
@@ -536,8 +535,12 @@ main (int argc, char **argv)
   opcodes = (opcode **) malloc (sizeof (opcode *));
   op = &prefix_text;
   op->lineno = 1;
-  while ((line = safe_fgets (in)) != 0)
+  linebuf = NULL;
+  len = 0;
+  while (getline (&linebuf, &len, in) >= 0)
     {
+      char *line = linebuf;
+
       lineno++;
       if (strncmp (line, "  /** ", 6) == 0
 	  && (isdigit (line[6]) || memcmp (line + 6, "VARY", 4) == 0))
@@ -629,6 +632,7 @@ main (int argc, char **argv)
 	  op->lines[op->nlines - 1] = strdup (line);
 	}
     }
+  free (linebuf);
 
   {
     int i, j;
