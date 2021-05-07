@@ -3734,7 +3734,8 @@ debug_target::info () const
 void
 target_close (struct target_ops *targ)
 {
-  gdb_assert (!current_inferior ()->target_is_pushed (targ));
+  for (inferior *inf : all_inferiors ())
+    gdb_assert (!inf->target_is_pushed (targ));
 
   fileio_handles_invalidate_target (targ);
 
