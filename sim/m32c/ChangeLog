@@ -1,5 +1,10 @@
 2021-05-07  Mike Frysinger  <vapier@gentoo.org>
 
+	* m32c.opc: Add scope braces around a few segments.
+	* r8c.opc: Likewise.
+
+2021-05-07  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in: Delete safe-fgets.
 	* opc2c.c: Delete safe-fgets.h include.
 	(main): Replace safe_fgets with getline.
