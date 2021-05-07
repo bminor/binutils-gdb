@@ -1,5 +1,10 @@
 2021-05-07  Simon Marchi  <simon.marchi@efficios.com>
 
+	* target.c (target_stack::unpush): Call target_ops::find_beneath
+	to get the target beneath `t`.
+
+2021-05-07  Simon Marchi  <simon.marchi@efficios.com>
+
 	* target.c (target_close): Check in all inferiors that the
 	target is not pushed.
 

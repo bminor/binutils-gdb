@@ -1214,7 +1214,7 @@ target_stack::unpush (target_ops *t)
   m_stack[stratum] = NULL;
 
   if (m_top == stratum)
-    m_top = t->beneath ()->stratum ();
+    m_top = this->find_beneath (t)->stratum ();
 
   /* Finally close the target, if there are no inferiors
      referencing this target still.  Note we do this after unchaining,
