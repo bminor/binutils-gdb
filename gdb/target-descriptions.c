@@ -446,7 +446,7 @@ struct target_desc_info
   /* A flag indicating that a description has already been fetched
      from the target, so it should not be queried again.  */
 
-  bool fetched;
+  bool fetched = false;
 
   /* The description fetched from the target, or NULL if the target
      did not supply any description.  Only valid when
@@ -454,12 +454,12 @@ struct target_desc_info
      code should access this; normally, the description should be
      accessed through the gdbarch object.  */
 
-  const struct target_desc *tdesc;
+  const struct target_desc *tdesc = nullptr;
 
   /* The filename to read a target description from, as set by "set
      tdesc filename ..."  */
 
-  char *filename;
+  char *filename = nullptr;
 };
 
 /* Get the inferior INF's target description info, allocating one on
@@ -469,7 +469,8 @@ static struct target_desc_info *
 get_tdesc_info (struct inferior *inf)
 {
   if (inf->tdesc_info == NULL)
-    inf->tdesc_info = XCNEW (struct target_desc_info);
+    inf->tdesc_info = new target_desc_info;
+
   return inf->tdesc_info;
 }
 
@@ -507,7 +508,7 @@ target_desc_info_free (struct target_desc_info *tdesc_info)
   if (tdesc_info != NULL)
     {
       xfree (tdesc_info->filename);
-      xfree (tdesc_info);
+      delete tdesc_info;
     }
 }
 

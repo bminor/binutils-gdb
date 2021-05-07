@@ -1,5 +1,12 @@
 2021-05-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target-descriptions.c (struct target_desc_info): Initialize
+	fields.
+	(get_tdesc_info): Use new.
+	(target_desc_info_free): Use delete.
+
+2021-05-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target-descriptions.c (struct target_desc_info) <fetched>:
 	bool.
 	(target_find_description): Adjust.
