@@ -4265,7 +4265,10 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
   { SSUBTYP_DWARNGE, ".dwarnge",  true },
   { SSUBTYP_DWABREV, ".dwabrev",  false },
   { SSUBTYP_DWSTR,   ".dwstr",    true },
-  { SSUBTYP_DWRNGES, ".dwrnges",  true }
+  { SSUBTYP_DWRNGES, ".dwrnges",  true },
+  { SSUBTYP_DWLOC,   ".dwloc",    true },
+  { SSUBTYP_DWFRAME, ".dwframe",  true },
+  { SSUBTYP_DWMAC,   ".dwmac",    true }
 };
 
 /* For generic entry points.  */

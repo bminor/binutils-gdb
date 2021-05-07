@@ -180,6 +180,13 @@
 #define SA_SET_SCN_NRELOC(s,v)	(SYM_AUXENT (s)->x_scn.x_nreloc = (v))
 #define SA_SET_SCN_NLINNO(s,v)	(SYM_AUXENT (s)->x_scn.x_nlinno = (v))
 
+#ifdef OBJ_XCOFF
+#define SA_GET_SECT_SCNLEN(s)	(SYM_AUXENT (s)->x_sect.x_scnlen)
+#define SA_GET_SECT_NRELOC(s)	(SYM_AUXENT (s)->x_sect.x_nreloc)
+#define SA_SET_SECT_SCNLEN(s,v)	(SYM_AUXENT (s)->x_sect.x_scnlen = (v))
+#define SA_SET_SECT_NRELOC(s,v)	(SYM_AUXENT (s)->x_sect.x_nreloc = (v))
+#endif
+
 /* Internal use only definitions. SF_ stands for symbol flags.
 
    These values can be assigned to sy_symbol.ost_flags field of a symbolS.  */
@@ -294,8 +301,19 @@ extern const pseudo_typeS coff_pseudo_table[];
 #define INIT_STAB_SECTION(seg) obj_coff_init_stab_section (seg)
 
 /* Store the number of relocations in the section aux entry.  */
+#ifdef OBJ_XCOFF
+#define SET_SECTION_RELOCS(sec, relocs, n)		\
+  do {							\
+    symbolS * sectSym = section_symbol (sec);		\
+    if (S_GET_STORAGE_CLASS (sectSym) == C_DWARF)	\
+      SA_SET_SECT_NRELOC (sectSym, n);			\
+    else						\
+      SA_SET_SCN_NRELOC (sectSym, n);			\
+  } while (0)
+#else
 #define SET_SECTION_RELOCS(sec, relocs, n) \
   SA_SET_SCN_NRELOC (section_symbol (sec), n)
+#endif
 
 #define obj_app_file(name, app) c_dot_file_symbol (name, app)
 

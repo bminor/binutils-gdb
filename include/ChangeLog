@@ -1,3 +1,9 @@
+2021-05-07  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff/internal.h (C_DWARF): New define.
+	* coff/xcoff.h (SSUBTYP_DWLOC, SSUBTYP_DWFRAME,
+	SSUBTYP_DWMAC): New defines.
+
 2021-05-06  Stafford Horne  <shorne@gmail.com>
 
 	PR 21464

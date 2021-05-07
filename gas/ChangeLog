@@ -1,3 +1,29 @@
+2021-05-07  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/obj-coff.c (coff_frob_symbol): Don't skip C_DWARF.
+	(coff_adjust_section_syms): Use corrext auxent for C_DWARF.
+	(coff_frob_section): Likewise.
+	* config/obj-coff.h (SA_GET_SECT_SCNLEN,
+	SA_GET_SECT_NRELOC, SA_SET_SECT_SCNLEN,
+	SA_SET_SECT_NRELOC) New defines.
+	(SET_SECTION_RELOCS): Adjust for C_DWARF.
+	* config/tc-ppc.c (ppc_frob_symbol): Don't skip C_DWARF.
+	(ppc_adjust_symtab): Reorder C_DWARF symbols.
+	* testsuite/gas/ppc/aix.exp: New tests.
+	* testsuite/gas/ppc/xcoff-dwsect-2-32.d: New test.
+	* testsuite/gas/ppc/xcoff-dwsect-2-64.d: New test.
+	* testsuite/gas/ppc/xcoff-dwsect-2.s: New test.
+
+	* config/tc-ppc.c (ppc_function): Update comment for
+	fifth argument.
+	(ppc_frob_symbol): Remove ppc_last_function check.
+	Make sure coff_last_function is reset.
+	Correctly set fsize when not provided in .function.
+	* testsuite/gas/ppc/aix.exp: New tests.
+	* testsuite/gas/ppc/xcoff-function-1-32.d: New test.
+	* testsuite/gas/ppc/xcoff-function-1-64.d: New test.
+	* testsuite/gas/ppc/xcoff-function-1.s: New test.
+
 2021-05-07  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/rela.s, testsuite/gas/i386/rela.d: New.

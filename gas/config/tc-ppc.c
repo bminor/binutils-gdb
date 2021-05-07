@@ -5144,7 +5144,9 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
 	  expression (& exp);
 	  if (*input_line_pointer == ',')
 	    {
-	      /* The fifth argument is the function size.  */
+	      /* The fifth argument is the function size.
+	         If it's omitted, the size will be the containing csect.
+	         This will be donce during ppc_frob_symtab.  */
 	      ++input_line_pointer;
 	      symbol_get_tc (ext_sym)->u.size
 		= symbol_new ("L0\001", absolute_section,
@@ -5864,6 +5866,7 @@ ppc_frob_symbol (symbolS *sym)
   /* Discard symbols that should not be included in the output symbol
      table.  */
   if (! symbol_used_in_reloc_p (sym)
+      && S_GET_STORAGE_CLASS (sym) != C_DWARF
       && ((symbol_get_bfdsym (sym)->flags & BSF_SECTION_SYM) != 0
 	  || (! (S_IS_EXTERNAL (sym) || S_IS_WEAK (sym))
 	      && ! symbol_get_tc (sym)->output
@@ -5903,14 +5906,25 @@ ppc_frob_symbol (symbolS *sym)
 
   if (SF_GET_FUNCTION (sym))
     {
-      if (ppc_last_function != (symbolS *) NULL)
-	as_bad (_("two .function pseudo-ops with no intervening .ef"));
+      /* Make sure coff_last_function is reset. Otherwise, we won't create
+         the auxent for the next function.  */
+      coff_last_function = 0;
       ppc_last_function = sym;
       if (symbol_get_tc (sym)->u.size != (symbolS *) NULL)
 	{
 	  resolve_symbol_value (symbol_get_tc (sym)->u.size);
 	  SA_SET_SYM_FSIZE (sym,
 			    (long) S_GET_VALUE (symbol_get_tc (sym)->u.size));
+	}
+      else
+	{
+	  /* Size of containing csect.  */
+	  symbolS* within = symbol_get_tc (sym)->within;
+	  union internal_auxent *csectaux;
+	  csectaux = &coffsymbol (symbol_get_bfdsym (within))
+	    ->native[S_GET_NUMBER_AUXILIARY(within)].u.auxent;
+
+	  SA_SET_SYM_FSIZE (sym, csectaux->x_csect.x_scnlen.l);
 	}
     }
   else if (S_GET_STORAGE_CLASS (sym) == C_FCN
@@ -6126,13 +6140,43 @@ ppc_frob_symbol (symbolS *sym)
   return 0;
 }
 
-/* Adjust the symbol table.  This creates csect symbols for all
-   absolute symbols.  */
+/* Adjust the symbol table.  */
 
 void
 ppc_adjust_symtab (void)
 {
   symbolS *sym;
+  symbolS *anchorSym;
+
+  /* Make sure C_DWARF symbols come right after C_FILE.
+     As the C_FILE might not be defined yet and as C_DWARF
+     might already be ordered, we insert them before the
+     first symbol which isn't a C_FILE or a C_DWARF.  */
+  for (anchorSym = symbol_rootP; anchorSym != NULL;
+       anchorSym = symbol_next (anchorSym))
+    {
+      if (S_GET_STORAGE_CLASS (anchorSym) != C_FILE
+	  && S_GET_STORAGE_CLASS (anchorSym) != C_DWARF)
+	break;
+    }
+
+  sym = anchorSym;
+  while (sym != NULL)
+    {
+      if (S_GET_STORAGE_CLASS (sym) != C_DWARF)
+	{
+	  sym = symbol_next (sym);
+	  continue;
+	}
+
+      symbolS* tsym = sym;
+      sym = symbol_next (sym);
+
+      symbol_remove (tsym, &symbol_rootP, &symbol_lastP);
+      symbol_insert (tsym, anchorSym, &symbol_rootP, &symbol_lastP);
+    }
+
+  /* Create csect symbols for all absolute symbols.  */
 
   if (! ppc_saw_abs)
     return;

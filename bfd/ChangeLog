@@ -1,3 +1,11 @@
+2021-05-07  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff-rs6000.c (xcoff_dwsect_names): Add new DWARF
+	sections.
+	* coffgen.c (coff_pointerize_aux): Handle C_DWARF.
+	(coff_print_symbol): Likewise.
+	* libxcoff.h (XCOFF_DWSECT_NBR_NAMES): Update.
+
 2021-05-07  Jan Beulich  <jbeulich@suse.com>
 
 	* elf64-x86-64.c (x86_64_elf_howto_table): Set src_mask fields

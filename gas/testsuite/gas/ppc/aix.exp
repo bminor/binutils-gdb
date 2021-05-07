@@ -73,4 +73,9 @@ if { [istarget "powerpc*-*-aix*"] || [istarget "rs6000-*-aix*"] } then {
 
     run_dump_test "xcoff-dwsect-1-32"
     run_dump_test "xcoff-dwsect-1-64"
+    run_dump_test "xcoff-dwsect-2-32"
+    run_dump_test "xcoff-dwsect-2-64"
+
+    run_dump_test "xcoff-function-1-32"
+    run_dump_test "xcoff-function-1-64"
 }

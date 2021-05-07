@@ -65,6 +65,9 @@
 #define SSUBTYP_DWABREV 0x60000
 #define SSUBTYP_DWSTR   0x70000
 #define SSUBTYP_DWRNGES 0x80000
+#define SSUBTYP_DWLOC   0x90000
+#define SSUBTYP_DWFRAME 0xA0000
+#define SSUBTYP_DWMAC   0xB0000
 
 /* XCOFF uses a special .loader section with type STYP_LOADER.  */
 #define STYP_LOADER 0x1000

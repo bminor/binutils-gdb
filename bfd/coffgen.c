@@ -1527,6 +1527,8 @@ coff_pointerize_aux (bfd *abfd,
     return;
   if (n_sclass == C_FILE)
     return;
+  if (n_sclass == C_DWARF)
+    return;
 
   BFD_ASSERT (! auxent->is_sym);
   /* Otherwise patch up.  */
@@ -2121,6 +2123,12 @@ coff_print_symbol (bfd *abfd,
 		{
 		case C_FILE:
 		  fprintf (file, "File ");
+		  break;
+
+		case C_DWARF:
+		  fprintf (file, "AUX scnlen 0x%lx nreloc %ld",
+			   (unsigned long) auxp->u.auxent.x_sect.x_scnlen,
+			   auxp->u.auxent.x_sect.x_nreloc);
 		  break;
 
 		case C_STAT:
