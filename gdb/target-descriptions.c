@@ -456,10 +456,12 @@ struct target_desc_info
 
   const struct target_desc *tdesc = nullptr;
 
-  /* The filename to read a target description from, as set by "set
-     tdesc filename ..."  */
+  /* If not empty, the filename to read a target description from, as set by
+     "set tdesc filename ...".
 
-  char *filename = nullptr;
+     If empty, there is not filename specified by the user.  */
+
+  std::string filename;
 };
 
 /* Get the inferior INF's target description info, allocating one on
@@ -484,7 +486,7 @@ static struct gdbarch_data *tdesc_data;
 int
 target_desc_info_from_user_p (struct target_desc_info *info)
 {
-  return info != NULL && info->filename != NULL;
+  return info != nullptr && !info->filename.empty ();
 }
 
 /* See target-descriptions.h.  */
@@ -495,9 +497,7 @@ copy_inferior_target_desc_info (struct inferior *destinf, struct inferior *srcin
   struct target_desc_info *src = get_tdesc_info (srcinf);
   struct target_desc_info *dest = get_tdesc_info (destinf);
 
-  dest->fetched = src->fetched;
-  dest->tdesc = src->tdesc;
-  dest->filename = src->filename != NULL ? xstrdup (src->filename) : NULL;
+  *dest = *src;
 }
 
 /* See target-descriptions.h.  */
@@ -505,11 +505,7 @@ copy_inferior_target_desc_info (struct inferior *destinf, struct inferior *srcin
 void
 target_desc_info_free (struct target_desc_info *tdesc_info)
 {
-  if (tdesc_info != NULL)
-    {
-      xfree (tdesc_info->filename);
-      delete tdesc_info;
-    }
+  delete tdesc_info;
 }
 
 /* The string manipulated by the "set tdesc filename ..." command.  */
@@ -539,8 +535,8 @@ target_find_description (void)
   /* First try to fetch an XML description from the user-specified
      file.  */
   tdesc_info->tdesc = nullptr;
-  if (tdesc_info->filename != nullptr && *tdesc_info->filename != '\0')
-    tdesc_info->tdesc = file_read_description_xml (tdesc_info->filename);
+  if (!tdesc_info->filename.empty ())
+    tdesc_info->tdesc = file_read_description_xml (tdesc_info->filename.data ());
 
   /* Next try to read the description from the current target using
      target objects.  */
@@ -1295,8 +1291,7 @@ set_tdesc_filename_cmd (const char *args, int from_tty,
 {
   target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
 
-  xfree (tdesc_info->filename);
-  tdesc_info->filename = xstrdup (tdesc_filename_cmd_string);
+  tdesc_info->filename = tdesc_filename_cmd_string;
 
   target_clear_description ();
   target_find_description ();
@@ -1307,7 +1302,7 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c,
 			 const char *value)
 {
-  value = get_tdesc_info (current_inferior ())->filename;
+  value = get_tdesc_info (current_inferior ())->filename.data ();
 
   if (value != NULL && *value != '\0')
     printf_filtered (_("The target description will be read from \"%s\".\n"),
@@ -1322,8 +1317,7 @@ unset_tdesc_filename_cmd (const char *args, int from_tty)
 {
   target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
 
-  xfree (tdesc_info->filename);
-  tdesc_info->filename = nullptr;
+  tdesc_info->filename.clear ();
   target_clear_description ();
   target_find_description ();
 }
@@ -1779,7 +1773,7 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
 	 initialization code will reject the new description.  */
       target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
       tdesc = tdesc_info->tdesc;
-      filename = tdesc_info->filename;
+      filename = tdesc_info->filename.data ();
     }
   else
     {
