@@ -446,7 +446,7 @@ struct target_desc_info
   /* A flag indicating that a description has already been fetched
      from the target, so it should not be queried again.  */
 
-  int fetched;
+  bool fetched;
 
   /* The description fetched from the target, or NULL if the target
      did not supply any description.  Only valid when
@@ -577,7 +577,7 @@ target_find_description (void)
 
   /* Now that we know this description is usable, record that we
      fetched it.  */
-  tdesc_info->fetched = 1;
+  tdesc_info->fetched = true;
 }
 
 /* Discard any description fetched from the current target, and switch
@@ -591,7 +591,7 @@ target_clear_description (void)
   if (!tdesc_info->fetched)
     return;
 
-  tdesc_info->fetched = 0;
+  tdesc_info->fetched = false;
   tdesc_info->tdesc = nullptr;
 
   gdbarch_info info;

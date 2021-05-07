@@ -1,5 +1,12 @@
 2021-05-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target-descriptions.c (struct target_desc_info) <fetched>:
+	bool.
+	(target_find_description): Adjust.
+	(target_clear_description): Adjust.
+
+2021-05-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target-descriptions.c (struct target_desc_info) <tdesc>:
 	Adjust doc.
 	(target_desc_fetched): Remove.
