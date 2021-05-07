@@ -1,3 +1,8 @@
+2021-05-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* emulos.c: Include errno.h & stdio.h.
+	(emul_write): Print a warning when the write fails.
+
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-m68hc11.c (struct m68hc11cpu): Change attach_size to unsigned int.

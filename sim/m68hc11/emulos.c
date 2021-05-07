@@ -23,6 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #endif
 
 #ifndef WIN32
+#include <errno.h>
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/time.h>
 
@@ -103,8 +105,9 @@ emul_write (sim_cpu *cpu)
   while (size)
     {
       uint8 val = memory_read8 (cpu, addr);
-        
-      write(0, &val, 1);
+
+      if (write (0, &val, 1) != 1)
+	printf ("write failed: %s\n", strerror (errno));
       addr ++;
       size--;
     }
