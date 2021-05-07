@@ -1246,6 +1246,7 @@ if [gas_64_check] then {
 	run_dump_test "reloc64"
 	run_list_test "reloc64" "--defsym _bad_=1"
 	run_dump_test "mixed-mode-reloc64"
+	run_dump_test "rela"
 	run_dump_test "x86-64-ifunc"
 	run_dump_test "x86-64-opcode-inval"
 	run_dump_test "x86-64-opcode-inval-intel"

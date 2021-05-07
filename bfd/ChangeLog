@@ -1,3 +1,8 @@
+2021-05-07  Jan Beulich  <jbeulich@suse.com>
+
+	* elf64-x86-64.c (x86_64_elf_howto_table): Set src_mask fields
+	to zero.
+
 2021-05-07  Alan Modra  <amodra@gmail.com>
 
 	* bfd-in2.h: Regenerate.

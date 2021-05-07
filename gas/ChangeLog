@@ -1,5 +1,10 @@
 2021-05-07  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/rela.s, testsuite/gas/i386/rela.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-05-07  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (output_disp): Use disps field instead of
 	imms one.
 
