@@ -413,7 +413,7 @@ gdb_test "ptype/o empty_member" \
 
 with_test_prefix "with_hex_default" {
   # Test setting default display to hex
-  send_gdb "set print type hex on\n"
+  gdb_test_no_output "set print type hex on"
   gdb_test "show print type hex" \
            "Display of struct members offsets and sizes in hexadecimal is on"
 
@@ -467,5 +467,5 @@ with_test_prefix "with_hex_default" {
   "                             \}"]]
 
   # restore
-  send_gdb "set print type hex off\n"
+  gdb_test_no_output "set print type hex off"
 }
