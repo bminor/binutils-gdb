@@ -1,5 +1,12 @@
 2021-05-07  Alan Modra  <amodra@gmail.com>
 
+	* ldexp.c (update_definedness): Don't return false for absolute
+	symbols.
+	* ldmain.c (multiple_definition): Print "warning: " in message
+	when not a hard error.
+
+2021-05-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/pr27825-1.d: Correct xfail.
 	* testsuite/ld-elf/pr27825-2.d: Likewise.
 

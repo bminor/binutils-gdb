@@ -1073,10 +1073,12 @@ multiple_definition (struct bfd_link_info *info,
       nval = oval;
       obfd = NULL;
     }
-  if (!info->warn_multiple_definition)
-    einfo ("%X");
-  einfo (_("%P: %C: multiple definition of `%pT'"),
-	 nbfd, nsec, nval, name);
+  if (info->warn_multiple_definition)
+    einfo (_("%P: %C: warning: multiple definition of `%pT'"),
+	   nbfd, nsec, nval, name);
+  else
+    einfo (_("%X%P: %C: multiple definition of `%pT'"),
+	   nbfd, nsec, nval, name);
   if (obfd != NULL)
     einfo (_("; %D: first defined here"), obfd, osec, oval);
   einfo ("\n");
