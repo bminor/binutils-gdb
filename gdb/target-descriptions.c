@@ -450,7 +450,7 @@ struct target_desc_info
 
   /* The description fetched from the target, or NULL if the target
      did not supply any description.  Only valid when
-     target_desc_fetched is set.  Only the description initialization
+     FETCHED is set.  Only the description initialization
      code should access this; normally, the description should be
      accessed through the gdbarch object.  */
 
@@ -511,15 +511,6 @@ target_desc_info_free (struct target_desc_info *tdesc_info)
     }
 }
 
-/* Convenience helper macros.  */
-
-#define target_desc_fetched \
-  get_tdesc_info (current_inferior ())->fetched
-#define current_target_desc \
-  get_tdesc_info (current_inferior ())->tdesc
-#define target_description_filename \
-  get_tdesc_info (current_inferior ())->filename
-
 /* The string manipulated by the "set tdesc filename ..." command.  */
 
 static char *tdesc_filename_cmd_string;
@@ -530,11 +521,13 @@ static char *tdesc_filename_cmd_string;
 void
 target_find_description (void)
 {
+  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+
   /* If we've already fetched a description from the target, don't do
      it again.  This allows a target to fetch the description early,
      during its to_open or to_create_inferior, if it needs extra
      information about the target to initialize.  */
-  if (target_desc_fetched)
+  if (tdesc_info->fetched)
     return;
 
   /* The current architecture should not have any target description
@@ -544,31 +537,29 @@ target_find_description (void)
 
   /* First try to fetch an XML description from the user-specified
      file.  */
-  current_target_desc = NULL;
-  if (target_description_filename != NULL
-      && *target_description_filename != '\0')
-    current_target_desc
-      = file_read_description_xml (target_description_filename);
+  tdesc_info->tdesc = nullptr;
+  if (tdesc_info->filename != nullptr && *tdesc_info->filename != '\0')
+    tdesc_info->tdesc = file_read_description_xml (tdesc_info->filename);
 
   /* Next try to read the description from the current target using
      target objects.  */
-  if (current_target_desc == NULL)
-    current_target_desc = target_read_description_xml
+  if (tdesc_info->tdesc == nullptr)
+    tdesc_info->tdesc = target_read_description_xml
       (current_inferior ()->top_target ());
 
   /* If that failed try a target-specific hook.  */
-  if (current_target_desc == NULL)
-    current_target_desc = target_read_description
+  if (tdesc_info->tdesc == nullptr)
+    tdesc_info->tdesc = target_read_description
       (current_inferior ()->top_target ());
 
   /* If a non-NULL description was returned, then update the current
      architecture.  */
-  if (current_target_desc)
+  if (tdesc_info->tdesc != nullptr)
     {
       struct gdbarch_info info;
 
       gdbarch_info_init (&info);
-      info.target_desc = current_target_desc;
+      info.target_desc = tdesc_info->tdesc;
       if (!gdbarch_update_p (info))
 	warning (_("Architecture rejected target-supplied description"));
       else
@@ -577,7 +568,7 @@ target_find_description (void)
 
 	  data = ((struct tdesc_arch_data *)
 		  gdbarch_data (target_gdbarch (), tdesc_data));
-	  if (tdesc_has_registers (current_target_desc)
+	  if (tdesc_has_registers (tdesc_info->tdesc)
 	      && data->arch_regs.empty ())
 	    warning (_("Target-supplied registers are not supported "
 		       "by the current architecture"));
@@ -586,7 +577,7 @@ target_find_description (void)
 
   /* Now that we know this description is usable, record that we
      fetched it.  */
-  target_desc_fetched = 1;
+  tdesc_info->fetched = 1;
 }
 
 /* Discard any description fetched from the current target, and switch
@@ -595,14 +586,15 @@ target_find_description (void)
 void
 target_clear_description (void)
 {
-  struct gdbarch_info info;
+  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
 
-  if (!target_desc_fetched)
+  if (!tdesc_info->fetched)
     return;
 
-  target_desc_fetched = 0;
-  current_target_desc = NULL;
+  tdesc_info->fetched = 0;
+  tdesc_info->tdesc = nullptr;
 
+  gdbarch_info info;
   gdbarch_info_init (&info);
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__,
@@ -616,8 +608,10 @@ target_clear_description (void)
 const struct target_desc *
 target_current_description (void)
 {
-  if (target_desc_fetched)
-    return current_target_desc;
+  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+
+  if (tdesc_info->fetched)
+    return tdesc_info->tdesc;
 
   return NULL;
 }
@@ -1298,8 +1292,10 @@ static void
 set_tdesc_filename_cmd (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
-  xfree (target_description_filename);
-  target_description_filename = xstrdup (tdesc_filename_cmd_string);
+  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+
+  xfree (tdesc_info->filename);
+  tdesc_info->filename = xstrdup (tdesc_filename_cmd_string);
 
   target_clear_description ();
   target_find_description ();
@@ -1310,7 +1306,7 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c,
 			 const char *value)
 {
-  value = target_description_filename;
+  value = get_tdesc_info (current_inferior ())->filename;
 
   if (value != NULL && *value != '\0')
     printf_filtered (_("The target description will be read from \"%s\".\n"),
@@ -1323,8 +1319,10 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
 static void
 unset_tdesc_filename_cmd (const char *args, int from_tty)
 {
-  xfree (target_description_filename);
-  target_description_filename = NULL;
+  target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+
+  xfree (tdesc_info->filename);
+  tdesc_info->filename = nullptr;
   target_clear_description ();
   target_find_description ();
 }
@@ -1778,8 +1776,9 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
 	 architecture's.  This lets a GDB for one architecture generate C
 	 for another architecture's description, even though the gdbarch
 	 initialization code will reject the new description.  */
-      tdesc = current_target_desc;
-      filename = target_description_filename;
+      target_desc_info *tdesc_info = get_tdesc_info (current_inferior ());
+      tdesc = tdesc_info->tdesc;
+      filename = tdesc_info->filename;
     }
   else
     {
@@ -1850,7 +1849,7 @@ maint_print_xml_tdesc_cmd (const char *args, int from_tty)
 	 architecture's.  This lets a GDB for one architecture generate XML
 	 for another architecture's description, even though the gdbarch
 	 initialization code will reject the new description.  */
-      tdesc = current_target_desc;
+      tdesc = get_tdesc_info (current_inferior ())->tdesc;
     }
   else
     {

@@ -1,3 +1,19 @@
+2021-05-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-descriptions.c (struct target_desc_info) <tdesc>:
+	Adjust doc.
+	(target_desc_fetched): Remove.
+	(current_target_desc): Remove.
+	(target_description_filename): Remove.
+	(target_find_description): Adjust.
+	(target_clear_description): Adjust.
+	(target_current_description): Adjust.
+	(set_tdesc_filename_cmd): Adjust.
+	(show_tdesc_filename_cmd): Adjust.
+	(unset_tdesc_filename_cmd): Adjust.
+	(maint_print_c_tdesc_cmd): Adjust.
+	(maint_print_xml_tdesc_cmd): Adjust.
+
 2021-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* infcmd.c (notice_new_inferior): Change parameter type.
