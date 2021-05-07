@@ -1,3 +1,19 @@
+2021-05-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 3136
+	* config/obj-elf.c (elf_pseudo_table): Add entry for .bss.
+	(obj_elf_bss): New function.  Change to the .bss section.
+	Support an optional subsection number.
+	(obj_elf_change_section): Call obj_elf_section_change_hook.
+	(obj_elf_section): Likewise.
+	(obj_elf_data): Likewise.
+	(obj_elf_text): Likewise.
+	(obj_elf_struct): Likewise.
+	(obj_elf_subsection): Likewise.
+	(obj_elf_previous): Likewise.
+	* config/obj-elf.h (obj_elf_bss): Prototype.
+	* doc/as.texi (Bss): New node.
+
 2021-05-07  Clément Chigot  <clement.chigot@atos.net>
 
 	* config/obj-coff.c (coff_frob_symbol): Don't skip C_DWARF.

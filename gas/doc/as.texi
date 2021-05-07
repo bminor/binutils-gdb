@@ -4365,6 +4365,7 @@ Some machine configurations provide additional directives.
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
 * Attach_to_group::             @code{.attach_to_group @var{name}}
 * Balign::                      @code{.balign [@var{abs-expr}[, @var{abs-expr}]]}
+* Bss::                         @code{.bss @var{subsection}}
 * Bundle directives::           @code{.bundle_align_mode @var{abs-expr}}, etc
 * Byte::                        @code{.byte @var{expressions}}
 * CFI directives::		@code{.cfi_startproc [simple]}, @code{.cfi_endproc}, etc.
@@ -4708,6 +4709,18 @@ fill pattern as a four byte longword value.  For example, @code{.balignw
 filled in with the value 0x368d (the exact placement of the bytes depends upon
 the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
 undefined.
+
+@node Bss
+@section @code{.bss @var{subsection}}
+@cindex @code{bss} directive
+
+@code{.bss} tells @command{@value{AS}} to assemble the following statements
+onto the end of the bss section.
+@ifset ELF
+For ELF based targets an optional @var{subsection} expression (which must
+evaluate to a positive integer) can be provided.  In this case the statements
+are appended to the end of the indicated bss subsection.
+@end ifset
 
 @node Bundle directives
 @section Bundle directives

@@ -131,6 +131,7 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"offset", obj_elf_struct, 0},
   {"struct", obj_elf_struct, 0},
   {"text", obj_elf_text, 0},
+  {"bss", obj_elf_bss, 0},
 
   {"tls_common", obj_elf_tls_common, 0},
 
@@ -603,8 +604,8 @@ obj_elf_change_section (const char *name,
       elt->prev_subseg = previous_subsection;
       section_stack = elt;
     }
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+
+  obj_elf_section_change_hook ();
 
   old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section_by_match,
 					(void *) match_p);
@@ -1125,8 +1126,7 @@ obj_elf_section (int push)
       md_flush_pending_output ();
 #endif
 
-      previous_section = now_seg;
-      previous_subsection = now_subseg;
+      obj_elf_section_change_hook ();
 
       s_mri_sect (&mri_type);
 
@@ -1467,6 +1467,28 @@ obj_elf_section (int push)
     subseg_set (now_seg, new_subsection);
 }
 
+/* Change to the .bss section.  */
+
+void
+obj_elf_bss (int i ATTRIBUTE_UNUSED)
+{
+  int temp;
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  obj_elf_section_change_hook ();
+
+  temp = get_absolute_expression ();
+  subseg_set (bss_section, (subsegT) temp);
+  demand_empty_rest_of_line ();
+
+#ifdef md_elf_section_change_hook
+  md_elf_section_change_hook ();
+#endif
+}
+
 /* Change to the .data section.  */
 
 void
@@ -1476,8 +1498,8 @@ obj_elf_data (int i)
   md_flush_pending_output ();
 #endif
 
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
+
   s_data (i);
 
 #ifdef md_elf_section_change_hook
@@ -1494,8 +1516,8 @@ obj_elf_text (int i)
   md_flush_pending_output ();
 #endif
 
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
+
   s_text (i);
 
 #ifdef md_elf_section_change_hook
@@ -1512,8 +1534,8 @@ obj_elf_struct (int i)
   md_flush_pending_output ();
 #endif
 
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
+
   s_struct (i);
 
 #ifdef md_elf_section_change_hook
@@ -1530,8 +1552,7 @@ obj_elf_subsection (int ignore ATTRIBUTE_UNUSED)
   md_flush_pending_output ();
 #endif
 
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
 
   temp = get_absolute_expression ();
   subseg_set (now_seg, (subsegT) temp);
@@ -1570,8 +1591,8 @@ obj_elf_previous (int ignore ATTRIBUTE_UNUSED)
 
   new_section = previous_section;
   new_subsection = previous_subsection;
-  previous_section = now_seg;
-  previous_subsection = now_subseg;
+  obj_elf_section_change_hook ();
+
   subseg_set (new_section, new_subsection);
 
 #ifdef md_elf_section_change_hook
