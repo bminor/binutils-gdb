@@ -1,3 +1,8 @@
+2021-05-07  Aaron Merey  <amerey@redhat.com>
+
+	* debuginfod-support.c (debuginfod_init): Remove.
+	(get_debuginfod_client): New function.
+
 2021-05-07  Tom Tromey  <tom@tromey.com>
 
 	* breakpoint.c (ambiguous_names_p): Use htab_eq_string.

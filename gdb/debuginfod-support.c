@@ -72,6 +72,7 @@ static int
 progressfn (debuginfod_client *c, long cur, long total)
 {
   user_data *data = static_cast<user_data *> (debuginfod_get_user_data (c));
+  gdb_assert (data != nullptr);
 
   if (check_quit_flag ())
     {
@@ -103,15 +104,20 @@ progressfn (debuginfod_client *c, long cur, long total)
   return 0;
 }
 
-static debuginfod_client_up
-debuginfod_init ()
+static debuginfod_client *
+get_debuginfod_client ()
 {
-  debuginfod_client_up c (debuginfod_begin ());
+  static debuginfod_client_up global_client;
 
-  if (c != nullptr)
-    debuginfod_set_progressfn (c.get (), progressfn);
+  if (global_client == nullptr)
+    {
+      global_client.reset (debuginfod_begin ());
 
-  return c;
+      if (global_client != nullptr)
+	debuginfod_set_progressfn (global_client.get (), progressfn);
+    }
+
+  return global_client.get ();
 }
 
 /* See debuginfod-support.h  */
@@ -126,19 +132,20 @@ debuginfod_source_query (const unsigned char *build_id,
   if (urls_env_var == NULL || urls_env_var[0] == '\0')
     return scoped_fd (-ENOSYS);
 
-  debuginfod_client_up c = debuginfod_init ();
+  debuginfod_client *c = get_debuginfod_client ();
 
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
   user_data data ("source file", srcpath);
 
-  debuginfod_set_user_data (c.get (), &data);
-  scoped_fd fd (debuginfod_find_source (c.get (),
+  debuginfod_set_user_data (c, &data);
+  scoped_fd fd (debuginfod_find_source (c,
 					build_id,
 					build_id_len,
 					srcpath,
 					nullptr));
+  debuginfod_set_user_data (c, nullptr);
 
   /* TODO: Add 'set debug debuginfod' command to control when error messages are shown.  */
   if (fd.get () < 0 && fd.get () != -ENOENT)
@@ -164,7 +171,7 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   if (urls_env_var == NULL || urls_env_var[0] == '\0')
     return scoped_fd (-ENOSYS);
 
-  debuginfod_client_up c = debuginfod_init ();
+  debuginfod_client *c = get_debuginfod_client ();
 
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
@@ -172,9 +179,10 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   char *dname = nullptr;
   user_data data ("separate debug info for", filename);
 
-  debuginfod_set_user_data (c.get (), &data);
-  scoped_fd fd (debuginfod_find_debuginfo (c.get (), build_id, build_id_len,
+  debuginfod_set_user_data (c, &data);
+  scoped_fd fd (debuginfod_find_debuginfo (c, build_id, build_id_len,
 					   &dname));
+  debuginfod_set_user_data (c, nullptr);
 
   if (fd.get () < 0 && fd.get () != -ENOENT)
     printf_filtered (_("Download failed: %s.  Continuing without debug info for %ps.\n"),
