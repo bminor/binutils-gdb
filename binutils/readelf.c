@@ -9831,6 +9831,13 @@ arm_process_unwind (Filedata * filedata)
 }
 
 static bool
+no_processor_specific_unwind (Filedata * filedata ATTRIBUTE_UNUSED)
+{
+  printf (_("No processor specific unwind information to decode\n"));
+  return true;
+}
+
+static bool
 process_unwind (Filedata * filedata)
 {
   struct unwind_handler
@@ -9843,6 +9850,8 @@ process_unwind (Filedata * filedata)
     { EM_IA_64, ia64_process_unwind },
     { EM_PARISC, hppa_process_unwind },
     { EM_TI_C6000, arm_process_unwind },
+    { EM_386, no_processor_specific_unwind },
+    { EM_X86_64, no_processor_specific_unwind },
     { 0, NULL }
   };
   int i;

@@ -1,3 +1,9 @@
+2021-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (no_processor_specific_unwind): New function.
+	(process_unwind): Use no_processor_specific_unwind for X86
+	targets.
+
 2021-05-07  Michael Forney <mforney@mforney.org>
 
 	* dwarf.c: Don't omit second operand of '?' operator.
