@@ -15,24 +15,28 @@
 
 from perftest import perftest
 
+
 class Disassemble(perftest.TestCaseWithBasicMeasurements):
     def __init__(self):
-        super (Disassemble, self).__init__ ("disassemble")
+        super(Disassemble, self).__init__("disassemble")
 
     def warm_up(self):
         do_test_command = "disassemble ada_evaluate_subexp"
-        gdb.execute (do_test_command, False, True)
+        gdb.execute(do_test_command, False, True)
 
     def _do_test(self, c):
-        for func in ["evaluate_subexp_standard", "handle_inferior_event", "c_parse_internal"]:
+        for func in [
+            "evaluate_subexp_standard",
+            "handle_inferior_event",
+            "c_parse_internal",
+        ]:
             do_test_command = "disassemble %s" % func
-            for _ in range(c+1):
-                gdb.execute (do_test_command, False, True)
+            for _ in range(c + 1):
+                gdb.execute(do_test_command, False, True)
 
     def execute_test(self):
         for i in range(3):
             # Flush code cache.
-            gdb.execute("set code-cache off");
-            gdb.execute("set code-cache on");
+            gdb.execute("set code-cache off")
+            gdb.execute("set code-cache on")
             self.measure.measure(lambda: self._do_test(i), i)
-

@@ -26,7 +26,8 @@ elif sys.version_info[0] > 2:
 
 from _gdb import *
 
-class _GdbFile (object):
+
+class _GdbFile(object):
     # These two are needed in Python 3
     encoding = "UTF-8"
     errors = "strict"
@@ -45,15 +46,19 @@ class _GdbFile (object):
     def flush(self):
         flush()
 
-class _GdbOutputFile (_GdbFile):
+
+class _GdbOutputFile(_GdbFile):
     def write(self, s):
         write(s, stream=STDOUT)
 
+
 sys.stdout = _GdbOutputFile()
 
-class _GdbOutputErrorFile (_GdbFile):
+
+class _GdbOutputErrorFile(_GdbFile):
     def write(self, s):
         write(s, stream=STDERR)
+
 
 sys.stderr = _GdbOutputErrorFile()
 
@@ -62,7 +67,7 @@ prompt_hook = None
 
 # Ensure that sys.argv is set to something.
 # We do not use PySys_SetArgvEx because it did not appear until 2.6.6.
-sys.argv = ['']
+sys.argv = [""]
 
 # Initial pretty printers.
 pretty_printers = []
@@ -75,6 +80,7 @@ xmethods = []
 frame_filters = {}
 # Initial frame unwinders.
 frame_unwinders = []
+
 
 def _execute_unwinders(pending_frame):
     """Internal function called from GDB to execute all unwinders.
@@ -108,6 +114,7 @@ def _execute_unwinders(pending_frame):
 
     return None
 
+
 def _execute_file(filepath):
     """This function is used to replace Python 2's PyRun_SimpleFile.
 
@@ -117,22 +124,22 @@ def _execute_file(filepath):
     "Furthermore, any functions and classes defined by the executed code are
     not guaranteed to work correctly after a runpy function has returned."
     """
-    globals = sys.modules['__main__'].__dict__
+    globals = sys.modules["__main__"].__dict__
     set_file = False
     # Set file (if not set) so that the imported file can use it (e.g. to
     # access file-relative paths). This matches what PyRun_SimpleFile does.
-    if not hasattr(globals, '__file__'):
-        globals['__file__'] = filepath
+    if not hasattr(globals, "__file__"):
+        globals["__file__"] = filepath
         set_file = True
     try:
-        with open(filepath, 'rb') as file:
+        with open(filepath, "rb") as file:
             # We pass globals also as locals to match what Python does
             # in PyRun_SimpleFile.
-            compiled = compile(file.read(), filepath, 'exec')
+            compiled = compile(file.read(), filepath, "exec")
             exec(compiled, globals, globals)
     finally:
         if set_file:
-            del globals['__file__']
+            del globals["__file__"]
 
 
 # Convenience variable to GDB's python directory
@@ -142,27 +149,24 @@ PYTHONDIR = os.path.dirname(os.path.dirname(__file__))
 
 # Packages to auto-load.
 
-packages = [
-    'function',
-    'command',
-    'printer'
-]
+packages = ["function", "command", "printer"]
 
 # pkgutil.iter_modules is not available prior to Python 2.6.  Instead,
 # manually iterate the list, collating the Python files in each module
 # path.  Construct the module name, and import.
 
+
 def _auto_load_packages():
     for package in packages:
         location = os.path.join(os.path.dirname(__file__), package)
         if os.path.exists(location):
-            py_files = filter(lambda x: x.endswith('.py')
-                                        and x != '__init__.py',
-                              os.listdir(location))
+            py_files = filter(
+                lambda x: x.endswith(".py") and x != "__init__.py", os.listdir(location)
+            )
 
             for py_file in py_files:
                 # Construct from foo.py, gdb.module.foo
-                modname = "%s.%s.%s" % ( __name__, package, py_file[:-3] )
+                modname = "%s.%s.%s" % (__name__, package, py_file[:-3])
                 try:
                     if modname in sys.modules:
                         # reload modules with duplicate names
@@ -170,9 +174,11 @@ def _auto_load_packages():
                     else:
                         __import__(modname)
                 except:
-                    sys.stderr.write (traceback.format_exc() + "\n")
+                    sys.stderr.write(traceback.format_exc() + "\n")
+
 
 _auto_load_packages()
+
 
 def GdbSetPythonDirectory(dir):
     """Update sys.path, reload gdb and auto-load packages."""
@@ -191,30 +197,37 @@ def GdbSetPythonDirectory(dir):
     reload(__import__(__name__))
     _auto_load_packages()
 
+
 def current_progspace():
     "Return the current Progspace."
     return selected_inferior().progspace
+
 
 def objfiles():
     "Return a sequence of the current program space's objfiles."
     return current_progspace().objfiles()
 
-def solib_name (addr):
+
+def solib_name(addr):
     """solib_name (Long) -> String.\n\
 Return the name of the shared library holding a given address, or None."""
     return current_progspace().solib_name(addr)
+
 
 def block_for_pc(pc):
     "Return the block containing the given pc value, or None."
     return current_progspace().block_for_pc(pc)
 
+
 def find_pc_line(pc):
     """find_pc_line (pc) -> Symtab_and_line.
-Return the gdb.Symtab_and_line object corresponding to the pc value."""
+    Return the gdb.Symtab_and_line object corresponding to the pc value."""
     return current_progspace().find_pc_line(pc)
+
 
 try:
     from pygments import formatters, lexers, highlight
+
     def colorize(filename, contents):
         # Don't want any errors.
         try:
@@ -223,6 +236,9 @@ try:
             return highlight(contents, lexer, formatter)
         except:
             return None
+
+
 except:
+
     def colorize(filename, contents):
         return None

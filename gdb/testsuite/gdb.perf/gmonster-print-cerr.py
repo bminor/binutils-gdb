@@ -29,6 +29,7 @@ from perftest import perftest
 from perftest import measure
 from perftest import utils
 
+
 class PrintCerr(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, name, run_names, binfile):
         super(PrintCerr, self).__init__(name)
@@ -40,8 +41,7 @@ class PrintCerr(perftest.TestCaseWithBasicMeasurements):
 
     def execute_test(self):
         for run in self.run_names:
-            this_run_binfile = "%s-%s" % (self.binfile,
-                                          utils.convert_spaces(run))
+            this_run_binfile = "%s-%s" % (self.binfile, utils.convert_spaces(run))
             utils.select_file(this_run_binfile)
             utils.runto_main()
             iteration = 5

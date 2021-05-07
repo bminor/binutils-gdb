@@ -21,6 +21,7 @@ from perftest import perftest
 from perftest import measure
 from perftest import utils
 
+
 class NullLookup(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, name, run_names, binfile):
         # We want to measure time in this test.
@@ -33,8 +34,7 @@ class NullLookup(perftest.TestCaseWithBasicMeasurements):
 
     def execute_test(self):
         for run in self.run_names:
-            this_run_binfile = "%s-%s" % (self.binfile,
-                                          utils.convert_spaces(run))
+            this_run_binfile = "%s-%s" % (self.binfile, utils.convert_spaces(run))
             utils.select_file(this_run_binfile)
             utils.runto_main()
             utils.safe_execute("mt expand-symtabs")

@@ -17,8 +17,8 @@
 
 import os
 
-if 'ENV_PREFIX' in os.environ:
-    gdb.execute('set sysroot %s' % os.environ['ENV_PREFIX'])
+if "ENV_PREFIX" in os.environ:
+    gdb.execute("set sysroot %s" % os.environ["ENV_PREFIX"])
 
 else:
     print "warning: ENV_PREFIX environment variable missing."

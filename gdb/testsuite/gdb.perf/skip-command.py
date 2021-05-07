@@ -15,9 +15,10 @@
 
 from perftest import perftest
 
-class SkipCommand (perftest.TestCaseWithBasicMeasurements):
+
+class SkipCommand(perftest.TestCaseWithBasicMeasurements):
     def __init__(self, name, step):
-        super (SkipCommand, self).__init__ (name)
+        super(SkipCommand, self).__init__(name)
         self.step = step
 
     def warm_up(self):

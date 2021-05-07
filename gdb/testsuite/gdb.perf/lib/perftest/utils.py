@@ -15,6 +15,7 @@
 
 import gdb
 
+
 def safe_execute(command):
     """Execute command, ignoring any gdb errors."""
     result = None
@@ -37,7 +38,7 @@ def select_file(file_name):
     """
     safe_execute("set confirm off")
     safe_execute("kill")
-    print ("Selecting file %s" % (file_name))
+    print("Selecting file %s" % (file_name))
     if file_name is None:
         gdb.execute("file")
     else:

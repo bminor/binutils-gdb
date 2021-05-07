@@ -79,9 +79,8 @@ def elinos_init():
     if elinos_env["project"] is None:
         warn("Xenomai libraries may not be loaded")
     else:
-        for dir in elinos_env['xenomai']:
-            solib_dirs += ["%s/%s"
-                           % (dir, "xenomai-build/usr/realtime/lib")]
+        for dir in elinos_env["xenomai"]:
+            solib_dirs += ["%s/%s" % (dir, "xenomai-build/usr/realtime/lib")]
 
     if len(solib_dirs) != 0:
         gdb.execute("set solib-search-path %s" % ":".join(solib_dirs))

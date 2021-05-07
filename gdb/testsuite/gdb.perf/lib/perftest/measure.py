@@ -17,6 +17,7 @@ import time
 import os
 import gc
 
+
 class Measure(object):
     """A class that measure and collect the interesting data for a given testcase.
 
@@ -55,6 +56,7 @@ class Measure(object):
         for m in self.measurements:
             m.report(reporter, name)
 
+
 class Measurement(object):
     """A measurement for a certain aspect."""
 
@@ -63,7 +65,7 @@ class Measurement(object):
 
         Attribute result is the TestResult associated with measurement.
         """
-        self.name = name;
+        self.name = name
         self.result = result
 
     def start(self, id):
@@ -82,8 +84,10 @@ class Measurement(object):
         """Report the measured data by argument reporter."""
         self.result.report(reporter, name + " " + self.name)
 
+
 class MeasurementCpuTime(Measurement):
     """Measurement on CPU time."""
+
     # On UNIX, time.clock() measures the amount of CPU time that has
     # been used by the current process.  On Windows it will measure
     # wall-clock seconds elapsed since the first call to the function.
@@ -98,11 +102,12 @@ class MeasurementCpuTime(Measurement):
         self.start_time = time.clock()
 
     def stop(self, id):
-        if os.name == 'nt':
+        if os.name == "nt":
             cpu_time = 0
         else:
             cpu_time = time.clock() - self.start_time
-        self.result.record (id, cpu_time)
+        self.result.record(id, cpu_time)
+
 
 class MeasurementWallTime(Measurement):
     """Measurement on Wall time."""
@@ -116,7 +121,8 @@ class MeasurementWallTime(Measurement):
 
     def stop(self, id):
         wall_time = time.time() - self.start_time
-        self.result.record (id, wall_time)
+        self.result.record(id, wall_time)
+
 
 class MeasurementVmSize(Measurement):
     """Measurement on memory usage represented by VmSize."""
@@ -143,4 +149,4 @@ class MeasurementVmSize(Measurement):
 
     def stop(self, id):
         memory_used = self._compute_process_memory_usage("VmSize:")
-        self.result.record (id, memory_used)
+        self.result.record(id, memory_used)

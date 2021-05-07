@@ -127,7 +127,7 @@ proc run_lang_tests {exefile lang} {
 	[multi_line \
 	     "Traceback\[^\r\n\]+" \
 	     "\\s+File \"\[^\r\n\]+/py-prettyprint.py\", line \[0-9\]+, in display_hint" \
-	     "\\s+raise Exception \[^\r\n\]+" \
+	     "\\s+raise Exception\[^\r\n\]+" \
 	     "Exception: invalid object state found in display_hint"]
     gdb_test "print c" \
 	[multi_line \

@@ -16,7 +16,8 @@
 import re
 import gdb
 
-class pp_s (object):
+
+class pp_s(object):
     def __init__(self, val):
         self.val = val
 
@@ -24,19 +25,20 @@ class pp_s (object):
         m = self.val["m"]
         return "m=<" + str(self.val["m"]) + ">"
 
-class pp_ss (object):
+
+class pp_ss(object):
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
         return "super struct"
 
-    def children (self):
-        yield 'a', self.val['a']
-        yield 'b', self.val['b']
+    def children(self):
+        yield "a", self.val["a"]
+        yield "b", self.val["b"]
 
 
-def lookup_function (val):
+def lookup_function(val):
     "Look-up and return a pretty-printer that can print val."
 
     # Get the type.
@@ -44,12 +46,12 @@ def lookup_function (val):
 
     # If it points to a reference, get the reference.
     if type.code == gdb.TYPE_CODE_REF:
-        type = type.target ()
+        type = type.target()
 
     # Get the unqualified type, stripped of typedefs.
-    type = type.unqualified ().strip_typedefs ()
+    type = type.unqualified().strip_typedefs()
 
-    # Get the type name.    
+    # Get the type name.
     typename = type.tag
     if typename == None:
         return None
@@ -58,18 +60,19 @@ def lookup_function (val):
     # if a printer is registered for that type.  Return an
     # instantiation of the printer if found.
     for function in pretty_printers_dict:
-        if function.match (typename):
-            return pretty_printers_dict[function] (val)
-        
+        if function.match(typename):
+            return pretty_printers_dict[function](val)
+
     # Cannot find a pretty printer.  Return None.
     return None
 
 
-def register_pretty_printers ():
-    pretty_printers_dict[re.compile ('^s$')] = pp_s
-    pretty_printers_dict[re.compile ('^ss$')] = pp_ss
+def register_pretty_printers():
+    pretty_printers_dict[re.compile("^s$")] = pp_s
+    pretty_printers_dict[re.compile("^ss$")] = pp_ss
+
 
 pretty_printers_dict = {}
 
-register_pretty_printers ()
-gdb.pretty_printers.append (lookup_function)
+register_pretty_printers()
+gdb.pretty_printers.append(lookup_function)

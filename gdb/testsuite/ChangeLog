@@ -1,3 +1,8 @@
+2021-05-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Re-format all Python files using black.
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Adjust.
+
 2021-05-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.guile/scm-breakpoint.exp (test_watchpoints): Print the
