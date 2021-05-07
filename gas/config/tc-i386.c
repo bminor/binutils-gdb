@@ -10690,8 +10690,14 @@ i386_immediate (char *imm_start)
     {
       free (gotfree_input_line);
 
-      if (exp->X_op == O_constant || exp->X_op == O_register)
+      if (exp->X_op == O_constant)
 	exp->X_op = O_illegal;
+    }
+
+  if (exp_seg == reg_section)
+    {
+      as_bad (_("illegal immediate register operand %s"), imm_start);
+      return 0;
     }
 
   return i386_finalize_immediate (exp_seg, exp, types, imm_start);
@@ -10731,12 +10737,6 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
       return 0;
     }
 #endif
-  else if (!intel_syntax && exp_seg == reg_section)
-    {
-      if (imm_start)
-	as_bad (_("illegal immediate register operand %s"), imm_start);
-      return 0;
-    }
   else
     {
       /* This is an address.  The size of the address will be

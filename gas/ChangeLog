@@ -1,5 +1,11 @@
 2021-05-07  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (i386_finalize_immediate): Move register
+	check ...
+	(i386_immediate): ... here.
+
+2021-05-07  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_imm): Drop redundant masking.
 	Re-arrange operand type accumulation.
 
