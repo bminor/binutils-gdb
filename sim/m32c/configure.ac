@@ -23,8 +23,6 @@ AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
 SIM_AC_COMMON
 
-SIM_AC_OPTION_WARNINGS(no)
-
 AC_CHECK_HEADERS_ONCE(m4_flatten([
   termios.h
   netinet/in.h

@@ -1,5 +1,17 @@
 2021-05-07  Mike Frysinger  <vapier@gentoo.org>
 
+	* mem.c: Include errno.h.
+	(mem_put_byte): Print a warning when the write call fails.
+	(mem_put_blk): Declare local buf pointer and use it.
+	(mem_get_byte): Return 0 when the read call fails.
+	(mem_get_blk): Declare local buf pointer and use it.
+	* trace.c (load_file_and_line): Declare ret.
+	Assign fread to ret and use to index f->data.
+	* configure.ac: Delete SIM_AC_OPTION_WARNINGS call.
+	* configure: Regenerate.
+
+2021-05-07  Mike Frysinger  <vapier@gentoo.org>
+
 	* m32c.opc: Add scope braces around a few segments.
 	* r8c.opc: Likewise.
 

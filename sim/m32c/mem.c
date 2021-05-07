@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
 #include "config.h"
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -294,7 +295,8 @@ mem_put_byte (int address, unsigned char value)
 	  }
 	else
 	  {
-	    write (m32c_console_ofd, &value, 1);
+	    if (write (m32c_console_ofd, &value, 1) != 1)
+	      printf ("write console failed: %s\n", strerror (errno));
 	  }
       }
       break;
@@ -367,11 +369,13 @@ mem_put_si (int address, unsigned long value)
 void
 mem_put_blk (int address, const void *bufptr, int nbytes)
 {
+  const unsigned char *buf = bufptr;
+
   S ("<=");
   if (enable_counting)
     mem_counters[1][1] += nbytes;
   while (nbytes--)
-    mem_put_byte (address++, *(const unsigned char *) bufptr++);
+    mem_put_byte (address++, *buf++);
   E ();
 }
 
@@ -443,7 +447,8 @@ mem_get_byte (int address)
     case 0x2ee:		/* m32c uart1 rx */
       {
 	char c;
-	read (m32c_console_ifd, &c, 1);
+	if (read (m32c_console_ifd, &c, 1) != 1)
+	  return 0;
 	if (m32c_console_ifd == 0 && c == 3)	/* Ctrl-C */
 	  {
 	    printf ("Ctrl-C!\n");
@@ -535,11 +540,13 @@ mem_get_si (int address)
 void
 mem_get_blk (int address, void *bufptr, int nbytes)
 {
+  char *buf = bufptr;
+
   S ("=>");
   if (enable_counting)
     mem_counters[0][1] += nbytes;
   while (nbytes--)
-    *(char *) bufptr++ = mem_get_byte (address++);
+    *buf++ = mem_get_byte (address++);
   E ();
 }
 
