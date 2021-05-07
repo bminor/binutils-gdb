@@ -172,7 +172,7 @@ sim_hw_configure (SIM_DESC sd)
 	  /* Allocate core managed memory */
 
 	  /* the monitor  */
-	  sim_do_commandf (sd, "memory region 0x%lx@%d,0x%lx",
+	  sim_do_commandf (sd, "memory region 0x%x@%d,0x%x",
 			   /* MONITOR_BASE, MONITOR_SIZE */
 			   0x8000, M6811_RAM_LEVEL, 0x8000);
 	  sim_do_commandf (sd, "memory region 0x000@%d,0x8000",
@@ -180,7 +180,7 @@ sim_hw_configure (SIM_DESC sd)
 	  sim_hw_parse (sd, "/m68hc11/reg 0x1000 0x03F");
           if (cpu->bank_start < cpu->bank_end)
             {
-              sim_do_commandf (sd, "memory region 0x%lx@%d,0x100000",
+              sim_do_commandf (sd, "memory region 0x%x@%d,0x100000",
                                cpu->bank_virtual, M6811_RAM_LEVEL);
               sim_hw_parse (sd, "/m68hc11/use_bank 1");
             }
@@ -234,13 +234,13 @@ sim_hw_configure (SIM_DESC sd)
       if (hw_tree_find_property (device_tree, "/m68hc12/reg") == 0)
 	{
 	  /* Allocate core external memory.  */
-	  sim_do_commandf (sd, "memory region 0x%lx@%d,0x%lx",
+	  sim_do_commandf (sd, "memory region 0x%x@%d,0x%x",
 			   0x8000, M6811_RAM_LEVEL, 0x8000);
 	  sim_do_commandf (sd, "memory region 0x000@%d,0x8000",
 			   M6811_RAM_LEVEL);
           if (cpu->bank_start < cpu->bank_end)
             {
-              sim_do_commandf (sd, "memory region 0x%lx@%d,0x100000",
+              sim_do_commandf (sd, "memory region 0x%x@%d,0x100000",
                                cpu->bank_virtual, M6811_RAM_LEVEL);
               sim_hw_parse (sd, "/m68hc12/use_bank 1");
             }

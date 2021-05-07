@@ -1,5 +1,11 @@
 2021-05-06  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (sim_hw_configure): Change %lx to %x in format strings.
+	* configure.ac: Delete SIM_AC_OPTION_WARNINGS call.
+	* configure: Regenerate.
+
+2021-05-06  Mike Frysinger  <vapier@gentoo.org>
+
 	* emulos.c: Include errno.h & stdio.h.
 	(emul_write): Print a warning when the write fails.
 
