@@ -1,3 +1,8 @@
+2021-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* ldelfgen.c (compare_link_order): Ignore section size when
+	performing a relocateable link.
+
 2021-05-07  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (update_definedness): Don't return false for absolute
