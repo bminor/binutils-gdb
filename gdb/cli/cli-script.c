@@ -1391,7 +1391,7 @@ do_define_command (const char *comname, int from_tty,
       CMD_POST_HOOK
     };
   struct cmd_list_element *c, *newc, *hookc = 0, **list;
-  const char *tem, *comfull;
+  const char *comfull;
   int  hook_type      = CMD_NO_HOOK;
   int  hook_name_size = 0;
    
@@ -1403,11 +1403,7 @@ do_define_command (const char *comname, int from_tty,
   comfull = comname;
   list = validate_comname (&comname);
 
-  /* Look it up, and verify that we got an exact match.  */
-  tem = comname;
-  c = lookup_cmd (&tem, *list, "", NULL, -1, 1);
-  if (c && strcmp (comname, c->name) != 0)
-    c = 0;
+  c = lookup_cmd_exact (comname, *list);
 
   if (c && commands == nullptr)
     {
@@ -1448,11 +1444,9 @@ do_define_command (const char *comname, int from_tty,
 
   if (hook_type != CMD_NO_HOOK)
     {
-      /* Look up cmd it hooks, and verify that we got an exact match.  */
-      tem = comname + hook_name_size;
-      hookc = lookup_cmd (&tem, *list, "", NULL, -1, 0);
-      if (hookc && strcmp (comname + hook_name_size, hookc->name) != 0)
-	hookc = 0;
+      /* Look up cmd it hooks.  */
+      hookc = lookup_cmd_exact (comname + hook_name_size, *list,
+				/* ignore_help_classes = */ false);
       if (!hookc && commands == nullptr)
 	{
 	  warning (_("Your new `%s' command does not "
@@ -1593,17 +1587,12 @@ static void
 define_prefix_command (const char *comname, int from_tty)
 {
   struct cmd_list_element *c, **list;
-  const char *tem;
   const char *comfull;
 
   comfull = comname;
   list = validate_comname (&comname);
 
-  /* Look it up, and verify that we got an exact match.  */
-  tem = comname;
-  c = lookup_cmd (&tem, *list, "", NULL, -1, 1);
-  if (c != nullptr && strcmp (comname, c->name) != 0)
-    c = nullptr;
+  c = lookup_cmd_exact (comname, *list);
 
   if (c != nullptr && c->theclass != class_user)
     error (_("Command \"%s\" is built-in."), comfull);

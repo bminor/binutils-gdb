@@ -1875,6 +1875,21 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
   return 0;
 }
 
+/* See command.h.  */
+
+struct cmd_list_element *
+lookup_cmd_exact (const char *name,
+		  struct cmd_list_element *list,
+		  bool ignore_help_classes)
+{
+  const char *tem = name;
+  struct cmd_list_element *cmd = lookup_cmd (&tem, list, "", NULL, -1,
+					     ignore_help_classes);
+  if (cmd != nullptr && strcmp (name, cmd->name) != 0)
+    cmd = nullptr;
+  return cmd;
+}
+
 /* We are here presumably because an alias or command in TEXT is
    deprecated and a warning message should be generated.  This
    function decodes TEXT and potentially generates a warning message

@@ -326,6 +326,25 @@ extern struct cmd_list_element *lookup_cmd_1
 	 struct cmd_list_element **result_list, std::string *default_args,
 	 int ignore_help_classes, bool lookup_for_completion_p = false);
 
+/* Look up the command called NAME in the command list LIST.
+
+   Unlike LOOKUP_CMD, partial matches are ignored and only exact matches
+   on NAME are considered.
+
+   LIST is a chain of struct cmd_list_element's.
+
+   If IGNORE_HELP_CLASSES is true (the default), ignore any command list
+   elements which are actually help classes rather than commands (i.e.
+   the function field of the struct cmd_list_element is null).
+
+   If found, return the struct cmd_list_element for that command,
+   otherwise return NULLPTR.  */
+
+extern struct cmd_list_element *lookup_cmd_exact
+			(const char *name,
+			 struct cmd_list_element *list,
+			 bool ignore_help_classes = true);
+
 extern struct cmd_list_element *deprecate_cmd (struct cmd_list_element *,
 					       const char * );
 
