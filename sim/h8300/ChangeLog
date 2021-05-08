@@ -1,3 +1,11 @@
+2021-05-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* compile.c (h8_set_macS): Disable with #if 0.
+	(step_once): Set trace & intMask to 0.
+	(set_h8300h): Mark static.
+	* configure.ac: Delete SIM_AC_OPTION_WARNINGS call.
+	* configure: Regenerate.
+
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

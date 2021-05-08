@@ -307,11 +307,13 @@ h8_get_macS (SIM_DESC sd)
   return (STATE_CPU (sd, 0)) -> macS;
 }
 
+#if 0
 static void
 h8_set_macS (SIM_DESC sd, int val)
 {
   (STATE_CPU (sd, 0)) -> macS = (val != 0);
 }
+#endif
 
 /* MAC Zero Flag */
 static int
@@ -1716,7 +1718,8 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
   int bit;
   int pc;
   int c, nz, v, n, u, h, ui, intMaskBit;
-  int trace, intMask;
+  int trace = 0;
+  int intMask = 0;
   int oldmask;
   host_callback *sim_callback = STATE_CALLBACK (sd);
 
@@ -4552,7 +4555,7 @@ sim_info (SIM_DESC sd, int verbose)
 /* Indicate whether the cpu is an H8/300 or H8/300H.
    FLAG is non-zero for the H8/300H.  */
 
-void
+static void
 set_h8300h (unsigned long machine)
 {
   /* FIXME: Much of the code in sim_load can be moved to sim_open.
