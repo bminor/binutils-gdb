@@ -28,8 +28,28 @@
 #include "regcache.h"
 #include "valprint.h"
 
-#define TRACE_PY_UNWIND(level, args...) if (pyuw_debug >= level)  \
-  { fprintf_unfiltered (gdb_stdlog, args); }
+/* Debugging of Python unwinders.  */
+
+static bool pyuw_debug;
+
+/* Implementation of "show debug py-unwind".  */
+
+static void
+show_pyuw_debug (struct ui_file *file, int from_tty,
+		 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Python unwinder debugging is %s.\n"), value);
+}
+
+/* Print a "py-unwind" debug statement.  */
+
+#define pyuw_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (pyuw_debug, "py-unwind", fmt, ##__VA_ARGS__)
+
+/* Print "py-unwind" enter/exit debug statements.  */
+
+#define PYUW_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (pyuw_debug, "py-unwind")
 
 struct pending_frame_object
 {
@@ -95,8 +115,6 @@ extern PyTypeObject pending_frame_object_type
 
 extern PyTypeObject unwind_info_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("unwind_info_object");
-
-static unsigned int pyuw_debug = 0;
 
 static struct gdbarch_data *pyuw_gdbarch_data;
 
@@ -431,9 +449,7 @@ pyuw_this_id (struct frame_info *this_frame, void **cache_ptr,
 	      struct frame_id *this_id)
 {
   *this_id = ((cached_frame_info *) *cache_ptr)->frame_id;
-  if (pyuw_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog, "%s: frame_id: %s\n", __FUNCTION__,
-			this_id->to_string ().c_str ());
+  pyuw_debug_printf ("frame_id: %s", this_id->to_string ().c_str ());
 }
 
 /* frame_unwind.prev_register.  */
@@ -442,12 +458,14 @@ static struct value *
 pyuw_prev_register (struct frame_info *this_frame, void **cache_ptr,
 		    int regnum)
 {
+  PYUW_SCOPED_DEBUG_ENTER_EXIT;
+
   cached_frame_info *cached_frame = (cached_frame_info *) *cache_ptr;
   cached_reg_t *reg_info = cached_frame->reg;
   cached_reg_t *reg_info_end = reg_info + cached_frame->reg_count;
 
-  TRACE_PY_UNWIND (1, "%s (frame=%p,...,reg=%d)\n", __FUNCTION__, this_frame,
-		   regnum);
+  pyuw_debug_printf ("frame=%d, reg=%d",
+		     frame_relative_level (this_frame), regnum);
   for (; reg_info < reg_info_end; ++reg_info)
     {
       if (regnum == reg_info->num)
@@ -463,14 +481,17 @@ static int
 pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
 	      void **cache_ptr)
 {
+  PYUW_SCOPED_DEBUG_ENTER_EXIT;
+
   struct gdbarch *gdbarch = (struct gdbarch *) (self->unwind_data);
   cached_frame_info *cached_frame;
 
   gdbpy_enter enter_py (gdbarch, current_language);
 
-  TRACE_PY_UNWIND (3, "%s (SP=%s, PC=%s)\n", __FUNCTION__,
-		   paddress (gdbarch, get_frame_sp (this_frame)),
-		   paddress (gdbarch, get_frame_pc (this_frame)));
+  pyuw_debug_printf ("frame=%d, sp=%s, pc=%s",
+		     frame_relative_level (this_frame),
+		     paddress (gdbarch, get_frame_sp (this_frame)),
+		     paddress (gdbarch, get_frame_pc (this_frame)));
 
   /* Create PendingFrame instance to pass to sniffers.  */
   pending_frame_object *pfo = PyObject_New (pending_frame_object,
@@ -554,6 +575,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
   }
 
   *cache_ptr = cached_frame;
+  pyuw_debug_printf ("frame claimed");
   return 1;
 }
 
@@ -562,7 +584,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
 static void
 pyuw_dealloc_cache (struct frame_info *this_frame, void *cache)
 {
-  TRACE_PY_UNWIND (3, "%s: enter", __FUNCTION__);
+  PYUW_SCOPED_DEBUG_ENTER_EXIT;
   cached_frame_info *cached_frame = (cached_frame_info *) cache;
 
   for (int i = 0; i < cached_frame->reg_count; i++)
@@ -614,13 +636,13 @@ void _initialize_py_unwind ();
 void
 _initialize_py_unwind ()
 {
-  add_setshow_zuinteger_cmd
+  add_setshow_boolean_cmd
       ("py-unwind", class_maintenance, &pyuw_debug,
 	_("Set Python unwinder debugging."),
 	_("Show Python unwinder debugging."),
-	_("When non-zero, Python unwinder debugging is enabled."),
+	_("When on, Python unwinder debugging is enabled."),
 	NULL,
-	NULL,
+	show_pyuw_debug,
 	&setdebuglist, &showdebuglist);
   pyuw_gdbarch_data
     = gdbarch_data_register_post_init (pyuw_gdbarch_data_init);

@@ -1,5 +1,18 @@
 2021-05-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/py-unwind.c (pyuw_debug): Convert to bool.
+	(show_pyuw_debug): New function.
+	(pyuw_debug_printf): Define.
+	(PYUW_SCOPED_DEBUG_ENTER_EXIT): Define.
+	(pyuw_this_id): Convert to new debug print macros.
+	(pyuw_prev_register): Likewise.
+	(pyuw_sniffer): Likewise.
+	(pyuw_dealloc_cache): Likewise.
+	(_initialize_py_unwind): Update now pyuw_debug is a bool, and add
+	show function when registering.
+
+2021-05-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dummy-frame.c (fprint_dummy_frames): Convert use of
 	fprint_frame_id to use frame_id::to_string.
 	* frame.c (fprint_field): Delete.
