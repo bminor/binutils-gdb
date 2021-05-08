@@ -691,6 +691,9 @@ SER_HARDWIRE = @SER_HARDWIRE@
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS = @SIM_OBS@
 
+# Object files to integrate with GNU poke.
+POKE_OBS = @POKE_OBS@
+
 # Target-dependent object files.
 TARGET_OBS = @TARGET_OBS@
 
@@ -1617,7 +1620,8 @@ HFILES_WITH_SRCDIR = \
 # variables analogous to SER_HARDWIRE which get defaulted in this
 # Makefile.in
 
-DEPFILES = $(TARGET_OBS) $(SER_HARDWIRE) $(NATDEPFILES) $(SIM_OBS)
+DEPFILES = $(TARGET_OBS) $(SER_HARDWIRE) $(NATDEPFILES) $(SIM_OBS) \
+           $(POKE_OBS)
 
 ALLDEPFILES = \
 	arch/aarch32.c \
@@ -2077,6 +2081,10 @@ install-guile:
 
 install-python:
 	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(GDB_DATADIR)/python/gdb
+
+install-poke:
+	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)/$(GDB_DATADIR)/poke
+	$(INSTALL) -m 644 $(srcdir)/poke/gdb.pk $(DESTDIR)/$(GDB_DATADIR)/poke
 
 uninstall: force $(CONFIG_UNINSTALL)
 	transformed_name=`t='$(program_transform_name)'; \

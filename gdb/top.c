@@ -1633,6 +1633,16 @@ This GDB was configured as follows:\n\
 "));
 #endif
 
+#if HAVE_POKE
+  gdb_printf (stream, _("\
+             --with-poke\n\
+"));
+#else
+  gdb_printf (stream, _("\
+             --without-poke\n\
+"));
+#endif
+
 #if HAVE_AMD_DBGAPI
   gdb_printf (stream, _("\
 	     --with-amd-dbgapi\n\

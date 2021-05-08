@@ -259,6 +259,9 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
+/* Define to 1 if you have the `poke' library (-lpoke). */
+#undef HAVE_LIBPOKE
+
 /* Define to 1 if you have the <libunwind-ia64.h> header file. */
 #undef HAVE_LIBUNWIND_IA64_H
 
@@ -315,6 +318,9 @@
 
 /* Define to 1 if you have the `pipe2' function. */
 #undef HAVE_PIPE2
+
+/* Define if building integration with GNU poke. */
+#undef HAVE_POKE
 
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL

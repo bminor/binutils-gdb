@@ -2537,6 +2537,13 @@ proc allow_rust_tests {} {
     return 1
 }
 
+# Return a 1 fo rconfigurations that support GNU poke integration.
+
+proc allow_poke_tests {} {
+    set output [remote_exec host $::GDB "$::INTERNAL_GDBFLAGS --configuration"]
+    return [expr {[string first "--with-poke" $output] != -1}]
+}
+
 # Return a 1 for configurations that support Python scripting.
 
 gdb_caching_proc allow_python_tests {} {

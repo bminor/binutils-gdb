@@ -1,3 +1,4 @@
+<<<<<<< HEAD:gdb/ChangeLog-2021
 2021-07-06  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/read.c (scan_partial_symbols): Skip top-level imports of
@@ -576,6 +577,17 @@
 	* silent-rules.mk (ECHO_CCLD, ECHO_AR, ECHO_RANLIB): New.
 
 2021-06-16  Tom de Vries  <tdevries@suse.de>
+=======
+2021-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure.ac: Support --enable-poke.
+	* configure: Regenerate.
+	* Makefile.in (POKE_OBS): Define based on @POKE_OBS@.
+	(DEPFILES): Add POKE_OBS.
+	* poke.c: New file.
+
+2021-05-07  Tom de Vries  <tdevries@suse.de>
+>>>>>>> Integrate GNU poke in GDB:gdb/ChangeLog
 
 	PR symtab/26327
 	* dwarf2/cu.h (dwarf2_cu::ancestor): Remove.
