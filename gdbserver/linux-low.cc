@@ -60,13 +60,6 @@
 #endif
 #include "nat/linux-namespaces.h"
 
-#ifdef HAVE_PERSONALITY
-# include <sys/personality.h>
-# if !HAVE_DECL_ADDR_NO_RANDOMIZE
-#  define ADDR_NO_RANDOMIZE 0x0040000
-# endif
-#endif
-
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
 #endif
