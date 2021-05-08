@@ -162,6 +162,13 @@ The following commands are intended to help debug @value{GDBN} itself:
 @itemx show debug py-breakpoint
 When @samp{on}, @value{GDBN} prints debug messages related to the
 Python breakpoint API.  This is @samp{off} by default.
+
+@kindex set debug py-unwind
+@kindex show debug py-unwind
+@item set debug py-unwind on@r{|}off
+@itemx show debug py-unwind
+When @samp{on}, @value{GDBN} prints debug messages related to the
+Python unwinder API.  This is @samp{off} by default.
 @end table
 
 @node Python API
