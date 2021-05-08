@@ -79,10 +79,8 @@ frame_object_to_frame_info (PyObject *obj)
 static PyObject *
 frapy_str (PyObject *self)
 {
-  string_file strfile;
-
-  fprint_frame_id (&strfile, ((frame_object *) self)->frame_id);
-  return PyString_FromString (strfile.c_str ());
+  const frame_id &fid = ((frame_object *) self)->frame_id;
+  return PyString_FromString (fid.to_string ().c_str ());
 }
 
 /* Implementation of gdb.Frame.is_valid (self) -> Boolean.

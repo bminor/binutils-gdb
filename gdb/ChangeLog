@@ -1,3 +1,24 @@
+2021-05-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dummy-frame.c (fprint_dummy_frames): Convert use of
+	fprint_frame_id to use frame_id::to_string.
+	* frame.c (fprint_field): Delete.
+	(fprint_frame_id): Moved to...
+	(frame_id::to_string): ...this, rewritten to return a string.
+	(fprint_frame): Convert use of fprint_frame_id to use
+	frame_id::to_string.
+	(compute_frame_id): Likewise.
+	(frame_id_p): Likewise.
+	(frame_id_eq): Likewise.
+	(frame_id_inner): Likewise.
+	* frame.h (struct frame_id) <to_string>: New member function.
+	(fprint_frame_id): Delete declaration.
+	* guile/scm-frame.c (frscm_print_frame_smob): Convert use of
+	fprint_frame_id to use frame_id::to_string.
+	* python/py-frame.c (frame_object_to_frame_info): Likewise.
+	* python/py-unwind.c (unwind_infopy_str): Likewise.
+	(pyuw_this_id): Likewise.
+
 2021-05-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* nat/linux-waitpid.c (status_to_str): Return std::string.

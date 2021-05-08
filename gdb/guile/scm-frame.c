@@ -156,14 +156,9 @@ frscm_print_frame_smob (SCM self, SCM port, scm_print_state *pstate)
 {
   frame_smob *f_smob = (frame_smob *) SCM_SMOB_DATA (self);
 
-  gdbscm_printf (port, "#<%s ", frame_smob_name);
-
-  string_file strfile;
-  fprint_frame_id (&strfile, f_smob->frame_id);
-  gdbscm_printf (port, "%s", strfile.c_str ());
-
-  scm_puts (">", port);
-
+  gdbscm_printf (port, "#<%s %s>",
+		 frame_smob_name,
+		 f_smob->frame_id.to_string ().c_str ());
   scm_remember_upto_here_1 (self);
 
   /* Non-zero means success.  */

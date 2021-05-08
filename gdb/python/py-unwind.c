@@ -163,8 +163,7 @@ unwind_infopy_str (PyObject *self)
   unwind_info_object *unwind_info = (unwind_info_object *) self;
   string_file stb;
 
-  stb.puts ("Frame ID: ");
-  fprint_frame_id (&stb, unwind_info->frame_id);
+  stb.printf ("Frame ID: %s", unwind_info->frame_id.to_string ().c_str ());
   {
     const char *sep = "";
     struct value_print_options opts;
@@ -433,11 +432,8 @@ pyuw_this_id (struct frame_info *this_frame, void **cache_ptr,
 {
   *this_id = ((cached_frame_info *) *cache_ptr)->frame_id;
   if (pyuw_debug >= 1)
-    {
-      fprintf_unfiltered (gdb_stdlog, "%s: frame_id: ", __FUNCTION__);
-      fprint_frame_id (gdb_stdlog, *this_id);
-      fprintf_unfiltered (gdb_stdlog, "\n");
-    }
+    fprintf_unfiltered (gdb_stdlog, "%s: frame_id: %s\n", __FUNCTION__,
+			this_id->to_string ().c_str ());
 }
 
 /* frame_unwind.prev_register.  */

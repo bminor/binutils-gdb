@@ -373,43 +373,44 @@ show_backtrace_limit (struct ui_file *file, int from_tty,
 		    value);
 }
 
+/* See frame.h.  */
 
-static void
-fprint_field (struct ui_file *file, const char *name, int p, CORE_ADDR addr)
+std::string
+frame_id::to_string () const
 {
-  if (p)
-    fprintf_unfiltered (file, "%s=%s", name, hex_string (addr));
-  else
-    fprintf_unfiltered (file, "!%s", name);
-}
+  const struct frame_id &id = *this;
 
-void
-fprint_frame_id (struct ui_file *file, struct frame_id id)
-{
-  fprintf_unfiltered (file, "{");
+  std::string res = "{";
 
   if (id.stack_status == FID_STACK_INVALID)
-    fprintf_unfiltered (file, "!stack");
+    res += "!stack";
   else if (id.stack_status == FID_STACK_UNAVAILABLE)
-    fprintf_unfiltered (file, "stack=<unavailable>");
+    res += "stack=<unavailable>";
   else if (id.stack_status == FID_STACK_SENTINEL)
-    fprintf_unfiltered (file, "stack=<sentinel>");
+    res += "stack=<sentinel>";
   else if (id.stack_status == FID_STACK_OUTER)
-    fprintf_unfiltered (file, "stack=<outer>");
+    res += "stack=<outer>";
   else
-    fprintf_unfiltered (file, "stack=%s", hex_string (id.stack_addr));
+    res += std::string ("stack=") + hex_string (id.stack_addr);
 
-  fprintf_unfiltered (file, ",");
+  /* Helper function to format 'N=A' if P is true, otherwise '!N'.  */
+  auto field_to_string = [] (const char *n, bool p, CORE_ADDR a) -> std::string
+  {
+    if (p)
+      return std::string (n) + "=" + core_addr_to_string (a);
+    else
+      return std::string ("!") + std::string (n);
+  };
 
-  fprint_field (file, "code", id.code_addr_p, id.code_addr);
-  fprintf_unfiltered (file, ",");
-
-  fprint_field (file, "special", id.special_addr_p, id.special_addr);
+  res += (std::string (",")
+	  + field_to_string ("code", id.code_addr_p, id.code_addr)
+	  + std::string (",")
+	  + field_to_string ("special", id.special_addr_p, id.special_addr));
 
   if (id.artificial_depth)
-    fprintf_unfiltered (file, ",artificial=%d", id.artificial_depth);
-
-  fprintf_unfiltered (file, "}");
+    res += ",artificial=" + std::to_string (id.artificial_depth);
+  res += "}";
+  return res;
 }
 
 static void
@@ -492,7 +493,7 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
   else if (fi->this_id.p == frame_id_status::COMPUTING)
     fprintf_unfiltered (file, "<computing>");
   else
-    fprint_frame_id (file, fi->this_id.value);
+    fprintf_unfiltered (file, "%s", fi->this_id.value.to_string ().c_str ());
   fprintf_unfiltered (file, ",");
 
   fprintf_unfiltered (file, "func=");
@@ -592,11 +593,8 @@ compute_frame_id (struct frame_info *fi)
       fi->this_id.p = frame_id_status::COMPUTED;
 
       if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame_id (gdb_stdlog, fi->this_id.value);
-	  fprintf_unfiltered (gdb_stdlog, " }\n");
-	}
+	fprintf_unfiltered (gdb_stdlog, "-> %s }\n",
+			    fi->this_id.value.to_string ().c_str ());
     }
   catch (const gdb_exception &ex)
     {
@@ -748,11 +746,8 @@ frame_id_p (frame_id l)
   bool p = l.stack_status != FID_STACK_INVALID;
 
   if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "{ frame_id_p (l=");
-      fprint_frame_id (gdb_stdlog, l);
-      fprintf_unfiltered (gdb_stdlog, ") -> %d }\n", p);
-    }
+    fprintf_unfiltered (gdb_stdlog, "{ frame_id_p (l=%s) -> %d }\n",
+			l.to_string ().c_str (), p);
 
   return p;
 }
@@ -796,13 +791,8 @@ frame_id_eq (frame_id l, frame_id r)
     eq = true;
 
   if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "{ frame_id_eq (l=");
-      fprint_frame_id (gdb_stdlog, l);
-      fprintf_unfiltered (gdb_stdlog, ",r=");
-      fprint_frame_id (gdb_stdlog, r);
-      fprintf_unfiltered (gdb_stdlog, ") -> %d }\n", eq);
-    }
+    fprintf_unfiltered (gdb_stdlog, "{ frame_id_eq (l=%s,r=%s) -> %d }\n",
+			l.to_string ().c_str (), r.to_string ().c_str (), eq);
 
   return eq;
 }
@@ -879,13 +869,9 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
     inner = gdbarch_inner_than (gdbarch, l.stack_addr, r.stack_addr);
 
   if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "{ frame_id_inner (l=");
-      fprint_frame_id (gdb_stdlog, l);
-      fprintf_unfiltered (gdb_stdlog, ",r=");
-      fprint_frame_id (gdb_stdlog, r);
-      fprintf_unfiltered (gdb_stdlog, ") -> %d }\n", inner);
-    }
+    fprintf_unfiltered (gdb_stdlog, "{ frame_id_inner (l=%s,r=%s) -> %d }\n",
+			l.to_string ().c_str (), r.to_string ().c_str (),
+			inner);
 
   return inner;
 }

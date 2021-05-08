@@ -169,6 +169,9 @@ struct frame_id
      Caller of inlined function will have it zero, each more inner called frame
      will have it increasingly one, two etc.  Similarly for TAILCALL_FRAME.  */
   int artificial_depth;
+
+  /* Return a string representation of this frame id.  */
+  std::string to_string () const;
 };
 
 /* Save and restore the currently selected frame.  */
@@ -257,11 +260,6 @@ extern bool frame_id_artificial_p (frame_id l);
 
 /* Returns true when L and R identify the same frame.  */
 extern bool frame_id_eq (frame_id l, frame_id r);
-
-/* Write the internal representation of a frame ID on the specified
-   stream.  */
-extern void fprint_frame_id (struct ui_file *file, struct frame_id id);
-
 
 /* Frame types.  Some are real, some are signal trampolines, and some
    are completely artificial (dummy).  */
