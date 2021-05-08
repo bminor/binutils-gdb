@@ -138,6 +138,7 @@ GDB_DOC_FILES = \
 	$(srcdir)/gdb.texinfo \
 	$(srcdir)/guile.texi \
 	$(srcdir)/python.texi \
+        $(srcdir)/poke.texi \
 	$(GDB_DOC_SOURCE_INCLUDES) \
 	$(GDB_DOC_BUILD_INCLUDES)
 

@@ -404,6 +404,12 @@ GNU/Linux/OpenRISC		or1k*-*-linux*
      need to focus on the command window for such key combinations to
      work.
 
+* DDB now supports GNU poke, the extensible editor for structured
+  binary data.
+
+  To build GDB with poke support, pass --with-poke to configure (this
+  requires libpoke, the GNU poke library).
+
 * New commands
 
 set debug event-loop
@@ -468,6 +474,18 @@ show python dont-write-bytecode
   order to affect GDB.  When 'off' byte-code will always be written.
   When set to 'auto' (the default) Python will check the
   PYTHONDONTWRITEBYTECODE environment variable.
+
+poke STR
+  Execute a Poke statement or declaration.
+
+poke-add-type EXPR
+  Make Poke aware of a GDB type given an expression.
+
+poke-add-types REGEXP
+  Make Poke aware of GDB types based on a regexp.
+
+poke-dump-types
+  Dump the definition of all the GDB types known to poke.
 
 * Changed commands
 

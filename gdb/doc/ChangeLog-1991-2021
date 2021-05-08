@@ -1,4 +1,14 @@
+<<<<<<< HEAD:gdb/doc/ChangeLog-1991-2021
 2021-07-02  Pedro Alves  <pedro@palves.net>
+=======
+2021-05-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* Makefile.in (GDB_DOC_FILES): Add poke.texi.
+	* poke.texi: New file.
+	* gdb.texinfo (Data): Add meny entry for Poke and @include poke.texi.
+
+2021-05-07  Tom de Vries  <tdevries@suse.de>
+>>>>>>> Integrate GNU poke in GDB:gdb/doc/ChangeLog
 
 	* gdb.texinfo (TUI): <TUI Mouse Support>: New node/section.
 

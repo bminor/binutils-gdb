@@ -682,6 +682,9 @@ SER_HARDWIRE = @SER_HARDWIRE@
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS = @SIM_OBS@
 
+# Object files to integrate with GNU poke.
+POKE_OBS = @POKE_OBS@
+
 # Target-dependent object files.
 TARGET_OBS = @TARGET_OBS@
 
@@ -1588,7 +1591,8 @@ HFILES_WITH_SRCDIR = \
 # variables analogous to SER_HARDWIRE which get defaulted in this
 # Makefile.in
 
-DEPFILES = $(TARGET_OBS) $(SER_HARDWIRE) $(NATDEPFILES) $(SIM_OBS)
+DEPFILES = $(TARGET_OBS) $(SER_HARDWIRE) $(NATDEPFILES) $(SIM_OBS) \
+           $(POKE_OBS)
 
 SOURCES = $(SFILES) $(ALLDEPFILES) $(YYFILES) $(CONFIG_SRCS)
 # Don't include YYFILES (*.c) because we already include *.y in SFILES,

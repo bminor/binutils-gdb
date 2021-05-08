@@ -10292,6 +10292,7 @@ being passed the type of @var{arg} as the argument.
 * Caching Target Data::         Data caching for targets
 * Searching Memory::            Searching memory for a sequence of bytes
 * Value Sizes::                 Managing memory allocated for values
+* Poke::                        Poking at data using GNU poke.
 @end menu
 
 @node Expressions
@@ -13832,6 +13833,9 @@ The default value of @code{max-value-size} is currently 64k.
 Show the maximum size of memory, in bytes, that @value{GDBN} will
 allocate for the contents of a value.
 @end table
+
+@c Poke docs live in a separate file.
+@include poke.texi
 
 @node Optimized Code
 @chapter Debugging Optimized Code

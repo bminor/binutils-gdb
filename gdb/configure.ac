@@ -478,6 +478,21 @@ AC_SEARCH_LIBS(gethostbyname, nsl)
 # Some systems (e.g. Solaris) have `socketpair' in libsocket.
 AC_SEARCH_LIBS(socketpair, socket)
 
+# Integration with GNU poke is done through the libpoke library.
+AC_ARG_WITH([poke],
+            AS_HELP_STRING([--with-poke],
+                           [Build GDB with poke support (default is NO)]),
+            [with_poke=$withval], [with_poke=no])
+if test "x$with_poke" = "xyes"; then
+  # Note that we need a libpoke with support for registering foreign
+  # IO devices, hence the symbol pk_register_iod.
+  AC_CHECK_LIB(poke, pk_register_iod)
+  POKE_OBS="poke.o"
+else
+  POKE_OBS=
+fi
+AC_SUBST(POKE_OBS)
+
 # Link in zlib if we can.  This allows us to read compressed debug sections.
 AM_ZLIB
 

@@ -1,0 +1,375 @@
+@c Copyright (C) 2022 Free Software Foundation, Inc.
+@c Permission is granted to copy, distribute and/or modify this document
+@c under the terms of the GNU Free Documentation License, Version 1.3 or
+@c any later version published by the Free Software Foundation; with the
+@c Invariant Sections being ``Free Software'' and ``Free Software Needs
+@c Free Documentation'', with the Front-Cover Texts being ``A GNU Manual,''
+@c and with the Back-Cover Texts as in (a) below.
+@c
+@c (a) The FSF's Back-Cover Text is: ``You are free to copy and modify
+@c this GNU Manual.  Buying copies from GNU Press supports the FSF in
+@c developing GNU and promoting software freedom.''
+
+@node Poke
+@section Poking at data using GNU @samp{poke}
+@cindex GNU poke
+@cindex poke
+
+@uref{http://jemarch.net/poke.html,GNU poke} is an interactive,
+extensible editor for binary data that implements a full-fledged
+procedural, interactive domain specific language called @dfn{Poke}
+(with capital P) that is specifically designed in order to describe
+the layout of structured binary data and to operate on it.
+
+@value{GDBN} integrates with GNU @samp{poke} by mean of the
+@file{libpoke} library and offers the possibility of executing Poke
+code from within the debugger, to inspect and modify data in the
+target's memory.  This feature is available only if @value{GDBN} was
+configured using @option{--enable-poke}.
+
+As we shall see in the sections below, @value{GDBN} uses the
+integration mechanisms provided by @file{libpoke} in order to make
+certain @value{GDBN} abstractions (such as symbols and types) visible from the
+Poke side, making the integration bidirectional.
+
+Note that this section documents the integration of GNU @samp{poke}
+and @value{GDBN} and how to use it, but it doesn't describe GNU
+@samp{poke} nor the Poke language in detail. @xref{Top,,, poke, The
+GNU poke Manual}, for more information.
+
+@menu
+* The @code{poke} Command::  Executing Poke from @value{GDBN}.
+* Poking the Target Memory::    Accessing the target's memory from Poke.
+* @value{GDBN} Types and Poke::         Accessing @value{GDBN} types from Poke.
+* @value{GDBN} Values and Poke::        Accessing @value{GDBN} values from Poke.
+@end menu
+
+@node The @code{poke} Command
+@subsection The @code{poke} Command
+
+The @code{poke} command allows to execute arbitrary Poke code from the
+@value{GDBN} prompt.
+
+@table @code
+@item poke @var{src}
+@var{src} is either a Poke expression, statement or definition.
+@end table
+
+For example, this executes a simple Poke expression and shows the
+result:
+
+@smallexample
+(@value{GDBP}) poke 2 + 3UL
+0x5UL
+@end smallexample
+
+This declares a couple of Poke types and a variable:
+
+@smallexample
+(@value{GDBP}) type byte = uint<8>
+(@value{GDBP}) type Packet = struct @{ byte magic == 0x4a; byte sz; \
+                                       byte[sz] payload; @}
+(@value{GDBP}) poke Packet @{ sz = 4 @}
+Packet @{
+  magic=0x4aUB,
+  sz=0x4UB,
+  payload=[0x0UB,0x0UB,0x0UB,0x0UB]
+@}
+(@value{GDBP}) var p = Packet @{ sz = 4 @}
+(@value{GDBP}) poke p.payload
+[0x0UB,0x0UB,0x0UB,0x0UB]
+@end smallexample
+
+This executes a Poke statement:
+
+@smallexample
+(@value{GDBP}) poke for (i in [1,2,3]) printf "%v\n", i
+0x00000001
+0x00000002
+0x00000003
+@end smallexample
+
+This shows how the Poke incremental compiler handles and reports
+invalid input:
+
+@smallexample
+(@value{GDBP}) poke 2 + fjsdio
+<stdin>:1:5: error: undefined variable 'fjsdio'
+2 + fjsdio;
+    ^~~~~~
+@end smallexample
+
+The standard @command{load} Poke directive loads a Poke source file
+and executes it in the incremental compiler.  The list of directories
+where @command{load} looks for files is in the variable
+@code{load_path}:
+
+@smallexample
+(@value{GDBP}) poke load_path
+".:/home/jemarch/.local/share/poke:%DATADIR%/pickles:%DATADIR%"
+@end smallexample
+
+This loads a file @file{foo.pk} if it is found in the load path:
+
+@smallexample
+(@value{GDBP}) poke load foo
+@end smallexample
+
+Poke source files often contain definitions that conceptually apply to
+some definite domain, like some given file format or a protocol.  We
+call these files @dfn{pickles}.  For example, @file{elf.pk} is a
+pickle that provides facilities to poke ELF object files.  The GNU
+@samp{poke} editor comes with lots of already written pickles for many
+file formats and other domains.  If you happen to have GNU poke
+installed (and not just @file{libpoke}) you can also use the many
+pickles distributed with the editor.  For example:
+
+@smallexample
+(@value{GDBP}) poke load "std-types.pk"
+(@value{GDBP}) poke load elf
+(@value{GDBP}) poke Elf64_Rela @{@}
+Elf64_Rela @{
+  r_offset=0x0UL#B,
+  r_info=Elf64_RelInfo @{
+    r_sym=0x0U,
+    r_type=0x0U
+  @},
+  r_addend=0x0L
+@}
+@end smallexample
+
+The reason why @file{std-types.pk} has to be loaded before
+@file{elf.pk} is explained later in this manual.
+
+@node Poking the Target Memory
+@subsection Poking the Target Memory
+
+@value{GDBN} configures @file{libpoke} to access the target's memory
+as an IO space device called @code{<gdb>}, which is automatically
+opened when the poke incremental compiler is started.
+
+This means that the default IO space in the running poke will provide
+access to the virtual address space of the current @value{GDBN}
+inferior.
+
+For example, suppose that a string table is at offset 0x5ff0 bytes in
+the target's memory.  We could map an array of Poke strings from it by
+issuing:
+
+@smallexample
+(@value{GDBP}) poke string[3] @@ 0x5ff0#B
+["int", "long", "_pid"]
+@end smallexample
+
+And we can write to the target's memory:
+
+@smallexample
+(@value{GDBP}) poke string[] @@ 0x5ff0#B = ["foo", "bar", "baz"]
+@end smallexample
+
+Note that the fact the current IO space is the @value{GDBN} target memory
+doesn't mean you cannot access other IO spaces.  This is how you would
+write the string table above to a file @file{strtab.out}:
+
+@smallexample
+(@value{GDBP}) poke var f = open ("strtab.out", IOS_F_WRITE | IOS_F_CREATE)
+(@value{GDBP}) poke string[] @@ f : 0#B = string[3] @@ 0x5ff0#B
+(@value{GDBP}) poke close (f)
+@end smallexample
+
+If you close the default IO space you can re-open the @value{GDBN} target space
+with @code{open ("<gdb>")}.
+
+@node @value{GDBN} Types and Poke
+@subsection @value{GDBN} Types and Poke
+
+Maybe the strongest side of the Poke language is that it provides a
+very rich and dynamic mechanism to describe the layout of data
+structures.  This is done by defining @dfn{Poke types}.
+
+For example, this is the definition of a signed 13-bit integral type
+that could be used to poke immediate fields in SPARC instructions:
+
+@smallexample
+type simm13 = int<13>;
+@end smallexample
+
+And this is a simplified version of the structure of a 64-bit ELF file
+showing more advanced Poke capabilities like field constraints, field
+labels, absent fields, and methods:
+
+@smallexample
+type Elf64_File =
+  struct
+  @{
+    Elf64_Ehdr ehdr : ehdr.e_ident.ei-mag == [0x7fUB, 'E', 'L', 'F'];
+
+    Elf64_Shdr[ehdr.e_shnum] shdr @@ ehdr.e_shoff
+      if ehdr.e_shnum > 0;
+
+    Elf64_Phdr[ehdr.e_phnum] phdr @@ ehdr.e_phoff
+      if ehdr.e_phnum > 0;
+
+    /* Given an offset into the ELF file's section string table, return
+       the string.  */
+
+    method get_section_name = (offset<Elf_Word,B> offset) string:
+      @{
+        var strtab = ehdr.e_shstrndx;
+        return string @@ (shdr[strtab].sh_offset + offset);
+      @}
+  @};
+@end smallexample
+
+This is all good and well for GNU @samp{poke} as a standalone binary editor,
+but when it comes to @value{GDBN} we want to poke at data structures
+in the target memory of the debugged program.  These structures are
+described by language-specific types, which @value{GDBN} abstracts as
+@value{GDBN} types, not Poke types.
+
+For example, say we are debugging a C program that contains the
+following type:
+
+@smallexample
+struct person
+@{
+  int age;
+  char *name;
+  char *postal_address;
+@};
+@end smallexample
+
+If we wanted to poke at a struct person from poke, we would need to
+write a Poke struct type that is equivalent to that C type.  This is
+often not trivial, because the physical layout of data structures is
+almost always not well defined in programming languages.
+
+Fortunately, @value{GDBN} provides a few commands to translate
+@value{GDBN} types to Poke types and inspect them.
+
+@table @code
+@item poke-add-type @var{expr}
+@var{expr} is a @value{GDBN} expression that must evaluate to a type.
+
+Translate a @value{GDBN} type to Poke and define it in the running
+poke incremental compiler.  If the given type depends on other types
+that are not known to poke, add these as well.
+
+Types for which @value{GDBN} doesn't know how to create a Poke
+equivalence are simply ignored.
+
+@item poke-add-types @var{regexp}
+@var{regexp} is a regular expression.
+
+Translate all known types whose name matches @var{regexp} to Poke and
+define them in the running poke incremental compiler.  If the matched
+types depend on other types that are not known to poke, add these as
+well.
+
+Types for which @value{GDBN} doesn't know how to create a Poke
+equivalence are simply ignored.
+
+@item poke-dump-types
+Dump the Poke definition of all translated types, one definition per
+line.
+@end table
+
+Using these commands, we can add a type for the @code{struct person} C
+type above like this:
+
+@smallexample
+(@value{GDBN}) poke-add-type struct person
+added type int
+added type struct_person
+@end smallexample
+
+Note how two types are added: the requested @code{struct person} and
+also @code{int}, since the struct contains a field of that basic C
+type.  Let's take a look to the type definitions:
+
+@smallexample
+(@value{GDBN}) poke-dump-types
+type int = int<32>;
+type struct_person = struct @{int age; offset<uint<64>,B> name @@ 8#B; \
+offset<uint<64>,B> postal_address;@};
+@end smallexample
+
+If now we want to access a given variable of type @code{struct person}
+in the current target, we just use the created Poke types:
+
+@smallexample
+(@value{GDBN}) poke struct_person @@ 0xf00e#B
+struct_person @{
+  age=0x28,
+  name=0x5555555547b4UL#B,
+  postal_address=0x5555555547c5UL#B
+@}
+(@value{GDBN}) poke string @@ (struct_person @@ 0xf00e#B).postal_address
+"Foo Street number 13"
+@end smallexample
+
+If we wanted to add all the types known to @value{GDBN} to poke, we could so do
+by:
+
+@smallexample
+(@value{GDBN}) poke-add-types .*
+@end smallexample
+
+The @command{poke-dump-types} is useful to generate Poke files with
+type definitions to be used in GNU @samp{poke}, like this:
+
+@smallexample
+$ gdb -batch -ex poke-add-types .\* -ex poke-dump-types \
+      -ex quit foo.so > foo-types.pk
+@end smallexample
+
+@node @value{GDBN} Values and Poke
+@subsection @value{GDBN} Values and Poke
+
+Poke variables are not the same than @value{GDBN} symbols, and live in
+a separated world of their own.  However, it is possible to refer to
+GDB values by using the @code{$IDENTIFIER} notation in Poke programs.
+
+Consider for example a C program with the following variable:
+
+@smallexample
+short counter;
+@end smallexample
+
+In @value{GDBN} we can access to the value of that variable like this:
+
+@smallexample
+(@value{GDBN}) counter
+$1 = 0
+@end smallexample
+
+And from the poke side:
+
+@smallexample
+(@value{GDBN}) poke $counter
+0x0H
+@end smallexample
+
+Note how the @value{GDBN} value is visible using the right type, in
+the case above a signed 16-bit integer.  If we accessed a C value of a
+pointer type, like @code{char *str;}, we would get an offset with unit
+bytes instead:
+
+@smallexample
+(@value{GDBN}) poke $str
+0x0UL#B
+@end smallexample
+
+Since many @value{GDBN} values are pointers, it is possible to access
+the address of a value by using the @code{$addr::IDENTIFIER} notation.
+For example, given the C @code{struct person} defined above and a
+variable @code{struct person jemarch;}:
+
+@smallexample
+(@value{GDBN}) poke struct_person @@ $addr::jemarch
+struct_person @{
+  age=0x28,
+  name=0x5555555547b4UL#B,
+  postal_address=0x5555555547c5UL#B
+@}
+@end smallexample
