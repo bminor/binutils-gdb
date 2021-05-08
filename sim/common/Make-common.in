@@ -481,6 +481,7 @@ modules.c: Makefile $(SIM_OBJS:.o=.c)
 	) >$@.tmp
 	$(SHELL) $(srcroot)/move-if-change $@.tmp $@
 	@rm -f $@.l-tmp $@.tmp
+	touch $@
 
 # CGEN support.
 
