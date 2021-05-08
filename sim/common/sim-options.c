@@ -416,14 +416,6 @@ standard_install (SIM_DESC sd)
   return SIM_RC_OK;
 }
 
-/* Equality function for arguments.  */
-
-static int
-compare_strings (const void *a, const void *b)
-{
-  return strcmp (a, b) == 0;
-}
-
 /* Return non-zero if arg is a duplicate argument.
    If ARG is NULL, initialize.  */
 
@@ -437,7 +429,7 @@ dup_arg_p (const char *arg)
     {
       if (arg_table == NULL)
 	arg_table = htab_create_alloc (10, htab_hash_string,
-				       compare_strings, NULL,
+				       htab_eq_string, NULL,
 				       xcalloc, free);
       htab_empty (arg_table);
       return 0;
