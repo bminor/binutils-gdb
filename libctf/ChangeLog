@@ -1,3 +1,12 @@
+2021-05-09  Alan Modra  <amodra@gmail.com>
+
+	* ctf-impl.h (ctf_dynset_eq_string): Don't declare.
+	* ctf-hash.c (ctf_dynset_eq_string): Delete function.
+	* ctf-dedup.c (make_set_element): Use htab_eq_string.
+	(ctf_dedup_atoms_init, ADD_CITER, ctf_dedup_init): Likewise.
+	(ctf_dedup_conflictify_unshared): Likewise.
+	(ctf_dedup_walk_output_mapping): Likewise.
+
 2021-05-06  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/lib/ctf-lib.exp: Use -gctf, not -gt.

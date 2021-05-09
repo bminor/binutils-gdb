@@ -352,7 +352,7 @@ make_set_element (ctf_dynhash_t *set, const void *key)
   if ((element = ctf_dynhash_lookup (set, key)) == NULL)
     {
       if ((element = ctf_dynset_create (htab_hash_string,
-					ctf_dynset_eq_string,
+					htab_eq_string,
 					NULL)) == NULL)
 	return NULL;
 
@@ -376,7 +376,7 @@ ctf_dedup_atoms_init (ctf_dict_t *fp)
   if (!fp->ctf_dedup_atoms_alloc)
     {
       if ((fp->ctf_dedup_atoms_alloc
-	   = ctf_dynset_create (htab_hash_string, ctf_dynset_eq_string,
+	   = ctf_dynset_create (htab_hash_string, htab_eq_string,
 				free)) == NULL)
 	return ctf_set_errno (fp, ENOMEM);
     }
@@ -584,8 +584,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
       whaterr = N_("error updating citers");				\
       if (!citers)							\
 	if ((citers = ctf_dynset_create (htab_hash_string,		\
-					  ctf_dynset_eq_string,		\
-					  NULL)) == NULL)		\
+					 htab_eq_string,		\
+					 NULL)) == NULL)		\
 	  goto oom;							\
       if (ctf_dynset_cinsert (citers, hval) < 0)			\
 	goto oom;							\
@@ -1656,7 +1656,7 @@ ctf_dedup_init (ctf_dict_t *fp)
 
   if ((d->cd_conflicting_types
        = ctf_dynset_create (htab_hash_string,
-			    ctf_dynset_eq_string, NULL)) == NULL)
+			    htab_eq_string, NULL)) == NULL)
     goto oom;
 
   return 0;
@@ -1814,7 +1814,7 @@ ctf_dedup_conflictify_unshared (ctf_dict_t *output, ctf_dict_t **inputs)
   const void *k;
   ctf_dynset_t *to_mark = NULL;
 
-  if ((to_mark = ctf_dynset_create (htab_hash_string, ctf_dynset_eq_string,
+  if ((to_mark = ctf_dynset_create (htab_hash_string, htab_eq_string,
 				    NULL)) == NULL)
     goto err_no;
 
@@ -2351,7 +2351,7 @@ ctf_dedup_walk_output_mapping (ctf_dict_t *output, ctf_dict_t **inputs,
   void *k;
 
   if ((already_visited = ctf_dynset_create (htab_hash_string,
-					    ctf_dynset_eq_string,
+					    htab_eq_string,
 					    NULL)) == NULL)
     return ctf_set_errno (output, ENOMEM);
 
