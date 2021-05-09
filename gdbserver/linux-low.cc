@@ -2601,7 +2601,7 @@ linux_process_target::wait_for_event_filtered (ptid_t wait_ptid,
 	  if (debug_threads)
 	    {
 	      debug_printf ("LLW: waitpid %ld received %s\n",
-			    (long) ret, status_to_str (*wstatp));
+			    (long) ret, status_to_str (*wstatp).c_str ());
 	    }
 
 	  /* Filter all events.  IOW, leave all events pending.  We'll

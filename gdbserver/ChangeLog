@@ -1,3 +1,8 @@
+2021-05-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.cc (linux_process_target::wait_for_event_filtered):
+	Adjust to status_to_str returning std::string.
+
 2021-05-08  Pedro Alves  <pedro@palves.net>
 
 	* linux-low.cc:

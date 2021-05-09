@@ -1,5 +1,19 @@
 2021-05-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* nat/linux-waitpid.c (status_to_str): Return std::string.
+	* nat/linux-waitpid.h (status_to_str): Likewise.
+	* linux-nat.c (linux_nat_post_attach_wait): Adjust.
+	(linux_nat_target::attach): Adjust.
+	(linux_handle_extended_wait): Adjust.
+	(wait_lwp): Adjust.
+	(stop_wait_callback): Adjust.
+	(linux_nat_filter_event): Adjust.
+	(linux_nat_wait_1): Adjust.
+	* nat/linux-waitpid.c (status_to_str): Adjust.
+	* nat/linux-waitpid.h (status_to_str): Adjust.
+
+2021-05-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* infrun.h (infrun_debug_printf): Add missing space.
 
 2021-05-08  Pedro Alves  <pedro@palves.net>
