@@ -5500,7 +5500,7 @@ Hardware assisted read watchpoint.
 Hardware assisted access watchpoint.
 @end vtable
 
-The available watchpoint types represented by constants are defined in the
+The available watchpoint types are represented by constants defined in the
 @code{gdb} module:
 
 @vtable @code

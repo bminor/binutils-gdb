@@ -1,3 +1,8 @@
+2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* guile.texinfo (Breakpoints In Guile): Reword sentence.
+	* python.texinfo (Breakpoints In Python): Reword sentence.
+
 2021-05-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python.texinfo (Python Commands): Document 'set debug
