@@ -34,7 +34,7 @@ extern bool debug_infrun;
 /* Print an "infrun" debug statement.  */
 
 #define infrun_debug_printf(fmt, ...) \
-  debug_prefixed_printf_cond (debug_infrun, "infrun",fmt, ##__VA_ARGS__)
+  debug_prefixed_printf_cond (debug_infrun, "infrun", fmt, ##__VA_ARGS__)
 
 /* Print "infrun" start/end debug statements.  */
 
