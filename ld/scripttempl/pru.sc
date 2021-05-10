@@ -5,10 +5,14 @@ OUTPUT_ARCH(${ARCH})
 EOF
 
 test -n "${RELOCATING}" && cat <<EOF
+/* Allow memory sizes to be overridden from command line.  */
+__IMEM_SIZE = DEFINED(__IMEM_SIZE) ? __IMEM_SIZE : $TEXT_LENGTH;
+__DMEM_SIZE = DEFINED(__DMEM_SIZE) ? __DMEM_SIZE : $DATA_LENGTH;
+
 MEMORY
 {
-  imem   (x)   : ORIGIN = $TEXT_ORIGIN, LENGTH = $TEXT_LENGTH
-  dmem   (rw!x) : ORIGIN = $DATA_ORIGIN, LENGTH = $DATA_LENGTH
+  imem   (x)   : ORIGIN = $TEXT_ORIGIN, LENGTH = __IMEM_SIZE
+  dmem   (rw!x) : ORIGIN = $DATA_ORIGIN, LENGTH = __DMEM_SIZE
 }
 
 __HEAP_SIZE = DEFINED(__HEAP_SIZE) ? __HEAP_SIZE : 32;
@@ -149,6 +153,9 @@ SECTIONS
 
   .resource_table ${RELOCATING-0} :
   {
+    /* Linux remoteproc loader requires the resource table address
+       to be aligned to 8 bytes.  */
+    ${RELOCATING+. = ALIGN(8);}
     KEEP (*(.resource_table))
   } ${RELOCATING+ > dmem}
 
