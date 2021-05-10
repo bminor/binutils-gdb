@@ -1,3 +1,9 @@
+2021-05-10  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (SAFE_BYTE_GET): Check bounds by subtracting amount from
+	END rather than adding amount to PTR.
+	(SAFE_SIGNED_BYTE_GET, SAFE_BYTE_GET64): Likewise.
+
 2021-05-09  Alan Modra  <amodra@gmail.com>
 
 	* objcopy.c (eq_string): Delete.

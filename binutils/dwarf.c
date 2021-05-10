@@ -406,7 +406,7 @@ read_leb128 (unsigned char *data,
 		 amount, (int) sizeof (VAL));	\
 	  amount = sizeof (VAL);		\
 	}					\
-      if (((PTR) + amount) >= (END))		\
+      if ((PTR) >= (END) - amount)		\
 	{					\
 	  if ((PTR) < (END))			\
 	    amount = (END) - (PTR);		\
@@ -434,7 +434,7 @@ read_leb128 (unsigned char *data,
   do							\
     {							\
       unsigned int amount = (AMOUNT);			\
-      if (((PTR) + amount) >= (END))			\
+      if ((PTR) >= (END) - amount)			\
 	{						\
 	  if ((PTR) < (END))				\
 	    amount = (END) - (PTR);			\
@@ -460,7 +460,7 @@ read_leb128 (unsigned char *data,
 #define SAFE_BYTE_GET64(PTR, HIGH, LOW, END)		\
   do							\
     {							\
-      if (((PTR) + 8) <= (END))				\
+      if ((PTR) <= (END) - 8)				\
 	{						\
 	  byte_get_64 ((PTR), (HIGH), (LOW));		\
 	}						\
