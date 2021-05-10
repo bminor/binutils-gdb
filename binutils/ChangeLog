@@ -1,3 +1,13 @@
+2021-05-10  Thomas Wolff  <towo@towo.net>
+
+	PR 4356
+	PR 26865
+	PR 27594
+	* windres.c (quot): Revert previous delta.  Do not use double
+	quotes when spaces are detected in options.
+	* doc/binutils.texi (windres): Remove suggestion that the
+	--preprocessor option can take arguments.
+
 2021-05-10  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c (SAFE_BYTE_GET): Check bounds by subtracting amount from

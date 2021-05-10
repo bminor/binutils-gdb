@@ -4278,8 +4278,7 @@ format, which is the first one listed by the @option{--help} option.
 @item --preprocessor @var{program}
 When @command{windres} reads an @code{rc} file, it runs it through the C
 preprocessor first.  This option may be used to specify the preprocessor
-to use, including any leading arguments.  The default preprocessor
-argument is @code{gcc}.
+to use.  The default preprocessor is @code{gcc}.
 
 @item --preprocessor-arg @var{option}
 When @command{windres} reads an @code{rc} file, it runs it through
@@ -4290,8 +4289,8 @@ preprocessor command line.
 If the @option{--preprocessor} option has not been specified then a
 default set of preprocessor arguments will be used, with any
 @option{--preprocessor-arg} options being placed after them on the
-command line.  These default arguments are @code{-E -xc-header
--DRC_INVOKED}.
+command line.  These default arguments are @code{-E},
+@code{-xc-header} and @code{-DRC_INVOKED}.
 
 @item -I @var{directory}
 @itemx --include-dir @var{directory}
