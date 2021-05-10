@@ -1,3 +1,8 @@
+2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.guile/guile.exp: Don't use the source directory as a
+	temporary HOME directory.
+
 2021-05-10  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.arch/amd64-osabi.exp (test_osabi_none): Use the
