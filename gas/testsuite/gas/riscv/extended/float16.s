@@ -18,4 +18,4 @@
 	.float16 -65504
 	.float16 3.0, 12.0, 543.123
 	.float16 0h:7e00	# qNaNh
-	.float16 0h:7e01	# sNaNh
+	.float16 0h:7c01	# sNaNh
