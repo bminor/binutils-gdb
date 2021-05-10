@@ -1,3 +1,8 @@
+2021-05-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.arch/amd64-osabi.exp (test_osabi_none): Use the
+	parameters.
+
 2021-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.guile/guile.exp: Add an extra test.
