@@ -1090,7 +1090,6 @@ proc check_gc_sections_available { } {
 	    || [istarget mep-*-*]
 	    || [istarget mn10200-*-*]
 	    || [istarget pj*-*-*]
-	    || [istarget pru*-*-*]
 	    || [istarget s12z-*-*]
 	    || [istarget xgate-*-*]
 	    || [istarget z80-*-*] } {

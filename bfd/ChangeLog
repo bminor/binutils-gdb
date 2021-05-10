@@ -1,3 +1,7 @@
+2021-05-10  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* elf32-pru.c (elf_backend_can_gc_sections): Define as 1.
+
 2021-05-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* doc/Makefile.am (html-local, bfd/index.html): New targets.

@@ -1,5 +1,16 @@
 2021-05-10  Dimitar Dimitrov  <dimitar@dinux.eu>
 
+	* testsuite/ld-elf/group8a.d: Remove pru from XFAIL list.
+	* testsuite/ld-elf/group8b.d: Ditto.
+	* testsuite/ld-elf/group9a.d: Ditto.
+	* testsuite/ld-elf/group9b.d: Ditto.
+	* testsuite/ld-elf/pr12851.d: Ditto.
+	* testsuite/ld-elf/pr22677.d: Ditto.
+	* testsuite/lib/ld-lib.exp (check_gc_sections_available): Remove
+	pru from list.
+
+2021-05-10  Dimitar Dimitrov  <dimitar@dinux.eu>
+
 	* scripttempl/pru.sc (.resource_table): Add ALIGN directive.
 	Use symbols for memory sizes.
 

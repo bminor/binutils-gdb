@@ -1601,6 +1601,7 @@ pru_elf32_link_hash_table_create (bfd *abfd)
 
 #define elf_backend_relocate_section	pru_elf32_relocate_section
 #define bfd_elf32_bfd_relax_section	pru_elf32_relax_section
+#define elf_backend_can_gc_sections	1
 
 #define TARGET_LITTLE_SYM		pru_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-pru"
