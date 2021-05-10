@@ -1,3 +1,9 @@
+2021-05-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/27839
+	* simple.c (bfd_simple_get_relocated_section_contents): Remove
+	strayed fprintf.
+
 2021-05-10  Nick Clifton  <nickc@redhat.com>
 
 	PR 27839

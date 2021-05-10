@@ -251,7 +251,6 @@ bfd_simple_get_relocated_section_contents (bfd *abfd,
   callbacks.constructor = simple_dummy_constructor;
   callbacks.add_to_set = simple_dummy_add_to_set;
 
-fprintf (stderr, "SIMPLE CALLBACKS %p\n", & callbacks);
   memset (&link_order, 0, sizeof (link_order));
   link_order.next = NULL;
   link_order.type = bfd_indirect_link_order;
