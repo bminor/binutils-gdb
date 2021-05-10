@@ -1177,6 +1177,23 @@ emit_data_val (expressionS * val, int size)
 	    {
 	    case 0: r_type = BFD_RELOC_Z80_WORD0; break;
 	    case 16: r_type = BFD_RELOC_Z80_WORD1; break;
+	    case 8:
+	    case 24: /* add two byte fixups */
+	      val->X_op = O_symbol;
+	      val->X_op_symbol = NULL;
+	      val->X_add_number = 0;
+	      if (shift == 8)
+		{
+		  fix_new_exp (frag_now, p++ - frag_now->fr_literal, 1, val, false,
+			       BFD_RELOC_Z80_BYTE1);
+		  /* prepare to next byte */
+		  r_type = BFD_RELOC_Z80_BYTE2;
+		}
+	      else
+		r_type = BFD_RELOC_Z80_BYTE3; /* high byte will be 0 */
+	      size = 1;
+	      simplify = false;
+	      break;
 	    default: simplify = false;
 	    }
 	}
