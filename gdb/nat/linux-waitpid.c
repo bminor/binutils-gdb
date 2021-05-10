@@ -32,14 +32,16 @@ status_to_str (int status)
   if (WIFSTOPPED (status))
     {
       if (WSTOPSIG (status) == SYSCALL_SIGTRAP)
-	return string_printf ("%s (stopped at syscall)",
-			      strsignal (SIGTRAP));
+	return string_printf ("%s - %s (stopped at syscall)",
+			      strsigno (SIGTRAP), strsignal (SIGTRAP));
       else
-	return string_printf ("%s (stopped)",
+	return string_printf ("%s - %s (stopped)",
+			      strsigno (WSTOPSIG (status)),
 			      strsignal (WSTOPSIG (status)));
     }
   else if (WIFSIGNALED (status))
-    return string_printf ("%s (terminated)",
+    return string_printf ("%s - %s (terminated)",
+			  strsigno (WTERMSIG (status)),
 			  strsignal (WTERMSIG (status)));
   else
     return string_printf ("%d (exited)", WEXITSTATUS (status));

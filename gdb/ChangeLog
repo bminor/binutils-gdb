@@ -1,3 +1,7 @@
+2021-05-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* nat/linux-waitpid.c (status_to_str): Show signal name.
+
 2021-05-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python/py-breakpoint.c (pybp_debug): New static global.
