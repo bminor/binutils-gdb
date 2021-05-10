@@ -387,8 +387,19 @@ gdbscm_make_breakpoint (SCM location_scm, SCM rest)
 				     _("invalid watchpoint class"));
 	}
       break;
+    case bp_none:
+    case bp_hardware_watchpoint:
+    case bp_read_watchpoint:
+    case bp_access_watchpoint:
+      {
+	const char *type_name = bpscm_type_to_string (type);
+	gdbscm_misc_error (FUNC_NAME, type_arg_pos,
+			   gdbscm_scm_from_c_string (type_name),
+			   _("unsupported breakpoint type"));
+      }
+      break;
     default:
-      gdbscm_out_of_range_error (FUNC_NAME, access_type_arg_pos,
+      gdbscm_out_of_range_error (FUNC_NAME, type_arg_pos,
 				 scm_from_int (type),
 				 _("invalid breakpoint type"));
     }

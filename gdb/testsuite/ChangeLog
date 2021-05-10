@@ -1,3 +1,7 @@
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.guile/scm-breakpoint.exp (test_watchpoints): Add new tests.
+
 gdb/testsuite/ChangeLog
 2021-06-25  Carl Love  <cel@us.ibm.com>
 

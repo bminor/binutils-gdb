@@ -258,6 +258,13 @@ proc_with_prefix test_watchpoints { } {
     gdb_test "continue" \
 	".*\[Ww\]atchpoint.*result.*Old value = 0.*New value = 25.*main.*" \
 	"test watchpoint write"
+
+    gdb_test "guile (define wp2 (make-breakpoint \"result\" #:wp-class WP_WRITE #:type 999))" \
+	"ERROR: In procedure gdbscm_make_breakpoint: Out of range: invalid breakpoint type in position 5: 999\r\n.*" \
+	"create a breakpoint with an invalid type number"
+    gdb_test "guile (define wp2 (make-breakpoint \"result\" #:wp-class WP_WRITE #:type BP_NONE))" \
+	"ERROR: In procedure gdbscm_make_breakpoint: unsupported breakpoint type in position 5: \"BP_NONE\"\r\n.*" \
+	"create a breakpoint with an unsupported type"
 }
 
 proc_with_prefix test_bkpt_internal { } {
