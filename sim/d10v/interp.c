@@ -13,6 +13,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
@@ -1142,8 +1143,12 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 {
   bfd_vma start_address;
 
-  /* reset all state information */
-  memset (&State.regs, 0, (uintptr_t)&State.mem - (uintptr_t)&State.regs);
+  /* Make sure we have the right structure for the following memset.  */
+  static_assert ((uintptr_t) &State == (uintptr_t) &State.regs,
+		 "&State != &State.regs");
+
+  /* Reset state from the regs field until the mem field.  */
+  memset (&State, 0, (uintptr_t) &State.mem - (uintptr_t) &State.regs);
 
   /* There was a hack here to copy the values of argc and argv into r0
      and r1.  The values were also saved into some high memory that
