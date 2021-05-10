@@ -1,3 +1,13 @@
+2021-05-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 27839
+	* simple.c (simple_dummy_add_to_set): New function.
+	(simple_dummy_constructor): New function.
+	(simple_dummy_multiple_common): New function.
+	(bfd_simple_get_relocated_section_contents): Zero out the
+	callbacks structure, and then set the add_to_set, constructor and
+	multiple_common fields.
+
 2021-05-10  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* elf32-pru.c (elf_backend_can_gc_sections): Define as 1.
