@@ -10302,20 +10302,20 @@ arm_record_data_proc_misc_ld_str (insn_decode_record *arm_insn_r)
       /* Handle multiply instructions.  */
       /* MLA, MUL, SMLAL, SMULL, UMLAL, UMULL.  */
       if (0 == arm_insn_r->opcode || 1 == arm_insn_r->opcode)
-	  {
-	    /* Handle MLA and MUL.  */
-	    record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
-	    record_buf[1] = ARM_PS_REGNUM;
-	    arm_insn_r->reg_rec_count = 2;
-	  }
-	else if (4 <= arm_insn_r->opcode && 7 >= arm_insn_r->opcode)
-	  {
-	    /* Handle SMLAL, SMULL, UMLAL, UMULL.  */
-	    record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
-	    record_buf[1] = bits (arm_insn_r->arm_insn, 12, 15);
-	    record_buf[2] = ARM_PS_REGNUM;
-	    arm_insn_r->reg_rec_count = 3;
-	  }
+	{
+	  /* Handle MLA and MUL.  */
+	  record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
+	  record_buf[1] = ARM_PS_REGNUM;
+	  arm_insn_r->reg_rec_count = 2;
+	}
+      else if (4 <= arm_insn_r->opcode && 7 >= arm_insn_r->opcode)
+	{
+	  /* Handle SMLAL, SMULL, UMLAL, UMULL.  */
+	  record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
+	  record_buf[1] = bits (arm_insn_r->arm_insn, 12, 15);
+	  record_buf[2] = ARM_PS_REGNUM;
+	  arm_insn_r->reg_rec_count = 3;
+	}
     }
   else if (9 == arm_insn_r->decode  && opcode1 > 0x10)
     {

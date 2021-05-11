@@ -1,5 +1,10 @@
 2021-05-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* arm-tdep.c (arm_record_data_proc_misc_ld_str): Fix
+	indentation.
+
+2021-05-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli/cli-decode.h (struct cmd_list_element): Fix indentation.
 
 2021-05-10  Lancelot Six  <lsix@lancelotsix.com>
