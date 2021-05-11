@@ -1071,7 +1071,7 @@ process_abbrev_set (struct dwarf_section *section,
       /* PR 17531: file:4bcd9ce9.  */
       warn (_("Debug info is corrupted, abbrev size (%lx) is larger than "
 	      "abbrev section size (%lx)\n"),
-	      (unsigned long) abbrev_base + abbrev_size,
+	      (unsigned long) (abbrev_base + abbrev_size),
 	      (unsigned long) section->size);
       return NULL;
     }

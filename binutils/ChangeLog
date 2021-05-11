@@ -1,3 +1,8 @@
+2021-05-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* dwarf.c (process_abbrev_set): Properly parenthesize before
+	casting to unsigned long.
+
 2021-05-11  Alan Modra  <amodra@gmail.com>
 
 	PR 27845
