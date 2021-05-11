@@ -1059,10 +1059,34 @@ add_abbrev_attr (unsigned long   attribute,
    an abbreviation set was found.  */
 
 static unsigned char *
-process_abbrev_set (unsigned char *        start,
-		    const unsigned char *  end,
-		    abbrev_list *          list)
+process_abbrev_set (struct dwarf_section *section,
+		    dwarf_vma abbrev_base,
+		    dwarf_vma abbrev_size,
+		    dwarf_vma abbrev_offset,
+		    abbrev_list *list)
 {
+  if (abbrev_base >= section->size
+      || abbrev_size > section->size - abbrev_base)
+    {
+      /* PR 17531: file:4bcd9ce9.  */
+      warn (_("Debug info is corrupted, abbrev size (%lx) is larger than "
+	      "abbrev section size (%lx)\n"),
+	      (unsigned long) abbrev_base + abbrev_size,
+	      (unsigned long) section->size);
+      return NULL;
+    }
+  if (abbrev_offset >= abbrev_size)
+    {
+      warn (_("Debug info is corrupted, abbrev offset (%lx) is larger than "
+	      "abbrev section size (%lx)\n"),
+	    (unsigned long) abbrev_offset,
+	    (unsigned long) abbrev_size);
+      return NULL;
+    }
+
+  unsigned char *start = section->start + abbrev_base;
+  unsigned char *end = start + abbrev_size;
+  start += abbrev_offset;
   while (start < end)
     {
       unsigned long entry;
@@ -3679,12 +3703,9 @@ process_debug_info (struct dwarf_section * section,
 
 	  list = new_abbrev_list (abbrev_base,
 				  compunit.cu_abbrev_offset);
-	  next = process_abbrev_set
-	    (((unsigned char *) debug_displays [abbrev_sec].section.start
-	      + abbrev_base + compunit.cu_abbrev_offset),
-	     ((unsigned char *) debug_displays [abbrev_sec].section.start
-	      + abbrev_base + abbrev_size),
-	     list);
+	  next = process_abbrev_set (&debug_displays[abbrev_sec].section,
+				     abbrev_base, abbrev_size,
+				     compunit.cu_abbrev_offset, list);
 	  list->start_of_next_abbrevs = next;
 	}
 
@@ -3905,34 +3926,18 @@ process_debug_info (struct dwarf_section * section,
 	}
 
       /* Process the abbrevs used by this compilation unit.  */
-      if (compunit.cu_abbrev_offset >= abbrev_size)
-	warn (_("Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"),
-	      (unsigned long) compunit.cu_abbrev_offset,
-	      (unsigned long) abbrev_size);
-      /* PR 17531: file:4bcd9ce9.  */
-      else if ((abbrev_base + abbrev_size)
-	       > debug_displays [abbrev_sec].section.size)
-	warn (_("Debug info is corrupted, abbrev size (%lx) is larger than abbrev section size (%lx)\n"),
-	      (unsigned long) abbrev_base + abbrev_size,
-	      (unsigned long) debug_displays [abbrev_sec].section.size);
-      else
+      list = find_abbrev_list_by_abbrev_offset (abbrev_base,
+						compunit.cu_abbrev_offset);
+      if (list == NULL)
 	{
-	  list = find_abbrev_list_by_abbrev_offset (abbrev_base,
-						    compunit.cu_abbrev_offset);
-	  if (list == NULL)
-	    {
-	      unsigned char * next;
+	  unsigned char *next;
 
-	      list = new_abbrev_list (abbrev_base,
-				      compunit.cu_abbrev_offset);
-	      next = process_abbrev_set
-		(((unsigned char *) debug_displays [abbrev_sec].section.start
-		  + abbrev_base + compunit.cu_abbrev_offset),
-		 ((unsigned char *) debug_displays [abbrev_sec].section.start
-		  + abbrev_base + abbrev_size),
-		 list);
-	      list->start_of_next_abbrevs = next;
-	    }
+	  list = new_abbrev_list (abbrev_base,
+				  compunit.cu_abbrev_offset);
+	  next = process_abbrev_set (&debug_displays[abbrev_sec].section,
+				     abbrev_base, abbrev_size,
+				     compunit.cu_abbrev_offset, list);
+	  list->start_of_next_abbrevs = next;
 	}
 
       level = 0;
@@ -6326,7 +6331,6 @@ display_debug_abbrev (struct dwarf_section *section,
 {
   abbrev_entry *entry;
   unsigned char *start = section->start;
-  const unsigned char *end = start + section->size;
 
   introduce (section, false);
 
@@ -6340,7 +6344,7 @@ display_debug_abbrev (struct dwarf_section *section,
       if (list == NULL)
 	{
 	  list = new_abbrev_list (0, offset);
-	  start = process_abbrev_set (start, end, list);
+	  start = process_abbrev_set (section, 0, section->size, offset, list);
 	  list->start_of_next_abbrevs = start;
 	}
       else
