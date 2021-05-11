@@ -1,3 +1,12 @@
+2021-05-11  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 27823
+	* config/tc-z80.c (emit_ld_r_m): Report an illegal load
+	instruction.
+	* testsuite/gas/z80/ill_ops.s: New test source file.
+	* testsuite/gas/z80/ill_ops.d: New test driver.
+	* testsuite/gas/z80/ill_ops.l: New test error output.
+
 2021-05-10  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 27415

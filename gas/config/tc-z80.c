@@ -2391,6 +2391,8 @@ emit_ld_r_m (expressionS *dst, expressionS *src)
 	  *q = (ins_ok & INS_GBZ80) ? 0xFA : 0x3A;
           emit_word (src);
         }
+      else
+	ill_op ();
     }
 }
 
