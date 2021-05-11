@@ -247,6 +247,11 @@
 	* btrace.c (handle_pt_insn_events): Ignore status update enable
 	events.
 
+2021-05-11 Alexandra Hájková <ahajkova@redhat.com>
+
+	* inflow.c (new_tty): Do not leak tty.
+
+
 2021-05-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* arm-tdep.c (arm_record_data_proc_misc_ld_str): Fix

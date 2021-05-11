@@ -808,7 +808,7 @@ new_tty (void)
      systems (SVR4 for example), this may cause a SIGTTOU, so temporarily
      ignore SIGTTOU.  */
   tty = open ("/dev/tty", O_RDWR);
-  if (tty > 0)
+  if (tty >= 0)
     {
       scoped_ignore_sigttou ignore_sigttou;
 
