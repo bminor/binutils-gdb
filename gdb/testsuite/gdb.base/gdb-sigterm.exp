@@ -78,7 +78,7 @@ proc do_test { pass } {
 	    verbose -log "$pf_prefix $test: got eof"
 	    set abort 0
 	}
-	-re "infrun: process_event_stop_test: stepping inside range" {
+	-re {\[infrun\] process_event_stop_test: stepping inside range} {
 	    incr stepping
 	    exp_continue
 	}

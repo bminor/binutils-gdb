@@ -1,3 +1,7 @@
+2021-05-11  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/gdb-sigterm.exp: Fix exp_continue regexp.
+
 2021-05-11  Bhuvanendra Kumar  <Bhuvanendra.KumarN@amd.com>
 
 	* gdb.fortran/array-element.exp: Breakpoint location is modified.
