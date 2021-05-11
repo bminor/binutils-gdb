@@ -1,3 +1,7 @@
+2021-05-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* cli/cli-decode.h (struct cmd_list_element): Fix indentation.
+
 2021-05-10  Lancelot Six  <lsix@lancelotsix.com>
 
 	PR gdb/27614
