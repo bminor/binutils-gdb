@@ -1,5 +1,11 @@
 2021-05-12  Alan Modra  <amodra@gmail.com>
 
+	PR 27836
+	* dwarf.c (display_debug_frames): Don't compare pointers derived
+	from user input.  Test offset against bounds instead.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
 	PR 27853
 	* dwarf.c (display_formatted_table): Test for data >= end rather
 	than data == end.

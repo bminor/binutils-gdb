@@ -8810,16 +8810,18 @@ display_debug_frames (struct dwarf_section *section,
 	{
 	  unsigned char *look_for;
 	  unsigned long segment_selector;
+	  dwarf_vma cie_off;
 
+	  cie_off = cie_id;
 	  if (is_eh)
 	    {
 	      dwarf_vma sign = (dwarf_vma) 1 << (offset_size * 8 - 1);
-	      look_for = start - 4 - ((cie_id ^ sign) - sign);
+	      cie_off = (cie_off ^ sign) - sign;
+	      cie_off = start - 4 - section_start - cie_off;
 	    }
-	  else
-	    look_for = section_start + cie_id;
 
-	  if (look_for <= saved_start)
+	  look_for = section_start + cie_off;
+	  if (cie_off <= (dwarf_vma) (saved_start - section_start))
 	    {
 	      for (cie = chunks; cie ; cie = cie->next)
 		if (cie->chunk_start == look_for)
