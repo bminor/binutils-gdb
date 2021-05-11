@@ -745,7 +745,7 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
   dwarf_vma str_offset;
   const char * ret;
   unsigned char *curr = index_section->start;
-  const unsigned char *end = curr + index_section->size;
+  unsigned char *end = curr + index_section->size;
   dwarf_vma length;
 
   if (index_section->start == NULL)
@@ -780,16 +780,31 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
     {
       /* Skip the version and padding bytes.
 	 We assume that they are correct.  */
-      curr += 4;
+      if (end - curr >= 4)
+	curr += 4;
+      else
+	curr = end;
+      if (length >= 4)
+	length -= 4;
+      else
+	length = 0;
 
-      /* FIXME: The code below assumes that there is only one table
-	 in the .debug_str_offsets section, so check that now.  */
-      if ((offset_size == 4 && curr + length < (end - 8))
-	  || (offset_size == 8 && curr + length < (end - 16)))
+      if (this_set != NULL
+	  && this_set->section_sizes[DW_SECT_STR_OFFSETS] < length)
+	length = this_set->section_sizes[DW_SECT_STR_OFFSETS];
+
+      if (length > (dwarf_vma) (end - curr))
 	{
-	  warn (_("index table size is too small %s vs %s\n"),
+	  warn (_("index table size too large for section %s vs %s\n"),
 		dwarf_vmatoa ("x", length),
 		dwarf_vmatoa ("x", index_section->size));
+	  length = end - curr;
+	}
+
+      if (length < offset_size)
+	{
+	  warn (_("index table size %s is too small\n"),
+		dwarf_vmatoa ("x", length));
 	  return _("<table too small>");
 	}
     }
@@ -799,7 +814,8 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
   if (this_set != NULL)
     index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
 
-  if (index_offset >= length)
+  if (index_offset >= length
+      || length - index_offset < offset_size)
     {
       warn (_("DW_FORM_GNU_str_index offset too big: 0x%s vs 0x%s\n"),
 	    dwarf_vmatoa ("x", index_offset),

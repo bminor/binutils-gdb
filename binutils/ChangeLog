@@ -1,3 +1,10 @@
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
+	PR 27849
+	* dwarf.c (fetch_indexed_string): Correct length sanity checks.
+	Sanity check section size for version and padding too.  Correct
+	index sanity check.  Handle multiple tables in .debug_str_offsets.
+
 2021-05-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* dwarf.c (process_abbrev_set): Properly parenthesize before
