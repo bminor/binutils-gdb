@@ -1,3 +1,10 @@
+2021-05-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 27113
+	* Makefile.am (install-data-local): Also delete libdep.dll.a if it
+	is present.
+	* Makefile.in: Regenerate.
+
 2021-05-10  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* testsuite/ld-elf/group8a.d: Remove pru from XFAIL list.

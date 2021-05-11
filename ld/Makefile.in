@@ -2680,6 +2680,7 @@ install-data-local: install-bfdpluginLTLIBRARIES
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	done
 	rm -f $(DESTDIR)$(bfdplugindir)/libdep.la
+	rm -f $(DESTDIR)$(bfdplugindir)/libdep.dll.a
 diststuff: info $(EXTRA_DIST)
 
 # Both info (ld.info) and ld.1 depend on configdoc.texi.

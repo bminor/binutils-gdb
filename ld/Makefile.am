@@ -1081,6 +1081,7 @@ install-data-local: install-bfdpluginLTLIBRARIES
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	done
 	rm -f $(DESTDIR)$(bfdplugindir)/libdep.la
+	rm -f $(DESTDIR)$(bfdplugindir)/libdep.dll.a
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.
