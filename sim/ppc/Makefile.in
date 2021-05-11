@@ -867,6 +867,18 @@ config.status: configure
 
 check:
 
+html:
+clean-html:
+install-html:
+
+info:
+clean-info:
+install-info:
+
+pdf:
+clean-pdf:
+install-pdf:
+
 install: installdirs
 	a=`basename "$$(pwd)"`; \
 	n=`echo run | sed '$(program_transform_name)'`; \
