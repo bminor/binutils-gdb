@@ -3888,9 +3888,11 @@ using_thumb2 (struct elf32_arm_link_hash_table *globals)
   int thumb_isa = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC,
 					    Tag_THUMB_ISA_use);
 
-  if (thumb_isa)
+  /* No use of thumb permitted, or a legacy thumb-1/2 definition.  */
+  if (thumb_isa < 3)
     return thumb_isa == 2;
 
+  /* Variant of thumb is described by the architecture tag.  */
   arch = bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
