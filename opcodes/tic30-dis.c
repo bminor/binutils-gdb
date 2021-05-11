@@ -695,6 +695,9 @@ print_insn_tic30 (bfd_vma pc, disassemble_info *info)
   struct instruction insn = { 0, NULL, NULL };
   bfd_vma bufaddr = pc - info->buffer_vma;
 
+  if (bufaddr + 3 >= info->buffer_length)
+    return -1;
+
   /* Obtain the current instruction word from the buffer.  */
   insn_word = (((unsigned) *(info->buffer + bufaddr) << 24)
 	       | (*(info->buffer + bufaddr + 1) << 16)
