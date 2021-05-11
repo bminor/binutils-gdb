@@ -1,3 +1,10 @@
+2021-05-11  Alan Modra  <amodra@gmail.com>
+
+	PR 27844
+	* pdp11.c (aout_get_external_symbols): Clear first four bytes of
+	strings array, not just the first byte.
+	* aoutx.h (aout_get_external_symbols): Likewise.
+
 2021-05-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/27839

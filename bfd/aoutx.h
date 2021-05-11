@@ -1364,7 +1364,7 @@ aout_get_external_symbols (bfd *abfd)
 	    }
 	}
       /* Ensure that a zero index yields an empty string.  */
-      strings[0] = '\0';
+      memset (strings, 0, BYTES_IN_WORD);
 
       /* Ensure that the string buffer is NUL terminated.  */
       strings[stringsize] = 0;
