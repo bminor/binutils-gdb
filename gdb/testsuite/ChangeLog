@@ -1,5 +1,10 @@
 2021-05-11  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/watch_thread_num.exp: Fix "set debug infrun 1" FAILs.
+	Add "set debug infrun 1" commented out.
+
+2021-05-11  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/gdb-sigterm.exp: Fix exp_continue regexp.
 
 2021-05-11  Bhuvanendra Kumar  <Bhuvanendra.KumarN@amd.com>
