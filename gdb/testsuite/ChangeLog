@@ -1,3 +1,7 @@
+2021-05-11  Bhuvanendra Kumar  <Bhuvanendra.KumarN@amd.com>
+
+	* gdb.fortran/array-element.exp: Breakpoint location is modified.
+
 2021-05-10  Lancelot Six  <lsix@lancelotsix.com>
 
 	PR gdb/27614
