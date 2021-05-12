@@ -508,7 +508,9 @@ process_extended_line_op (unsigned char * data,
 
 	name = data;
 	l = strnlen ((char *) data, end - data);
-	data += l + 1;
+	data += l;
+	if (data < end)
+	  data++;
 	READ_ULEB (val, data, end);
 	printf ("%s\t", dwarf_vmatoa ("u", val));
 	READ_ULEB (val, data, end);
@@ -1612,8 +1614,6 @@ decode_location_expression (unsigned char * data,
 	    need_frame_base = 1;
 	  putchar (')');
 	  data += uvalue;
-	  if (data > end)
-	    data = end;
 	  break;
 	case DW_OP_const_type:
 	case DW_OP_GNU_const_type:
@@ -1913,16 +1913,17 @@ check_uvalue (const unsigned char * start,
 }
 
 static unsigned char *
-skip_attr_bytes (unsigned long          form,
-		 unsigned char *        data,
-		 unsigned const char *  end,
-		 dwarf_vma              pointer_size,
-		 dwarf_vma              offset_size,
-		 int                    dwarf_version,
-		 dwarf_vma *            value_return)
+skip_attr_bytes (unsigned long form,
+		 unsigned char *data,
+		 unsigned char *end,
+		 dwarf_vma pointer_size,
+		 dwarf_vma offset_size,
+		 int dwarf_version,
+		 dwarf_vma *value_return)
 {
   dwarf_signed_vma svalue;
   dwarf_vma uvalue = 0;
+  dwarf_vma inc = 0;
 
   * value_return = 0;
 
@@ -2000,51 +2001,54 @@ skip_attr_bytes (unsigned long          form,
 
     case DW_FORM_data8:
     case DW_FORM_ref_sig8:
-      data += 8;
+      inc = 8;
       break;
 
     case DW_FORM_data16:
-      data += 16;
+      inc = 16;
       break;
 
     case DW_FORM_string:
-      data += strnlen ((char *) data, end - data) + 1;
+      inc = strnlen ((char *) data, end - data) + 1;
       break;
 
     case DW_FORM_block:
     case DW_FORM_exprloc:
       READ_ULEB (uvalue, data, end);
-      data += uvalue;
+      inc = uvalue;
       break;
 
     case DW_FORM_block1:
-      SAFE_BYTE_GET (uvalue, data, 1, end);
-      data += 1 + uvalue;
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 1, end);
+      inc = uvalue;
       break;
 
     case DW_FORM_block2:
-      SAFE_BYTE_GET (uvalue, data, 2, end);
-      data += 2 + uvalue;
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 2, end);
+      inc = uvalue;
       break;
 
     case DW_FORM_block4:
-      SAFE_BYTE_GET (uvalue, data, 4, end);
-      data += 4 + uvalue;
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 4, end);
+      inc = uvalue;
       break;
 
     case DW_FORM_indirect:
       READ_ULEB (form, data, end);
       if (form == DW_FORM_implicit_const)
 	SKIP_ULEB (data, end);
-      return skip_attr_bytes (form, data, end, pointer_size, offset_size, dwarf_version, value_return);
+      return skip_attr_bytes (form, data, end, pointer_size, offset_size,
+			      dwarf_version, value_return);
 
     default:
       return NULL;
     }
 
   * value_return = uvalue;
-  if (data > end)
-    data = (unsigned char *) end;
+  if (inc <= (dwarf_vma) (end - data))
+    data += inc;
+  else
+    data = end;
   return data;
 }
 
@@ -2159,7 +2163,7 @@ static void
 get_type_signedness (abbrev_entry *entry,
 		     const struct dwarf_section *section,
 		     unsigned char *data,
-		     unsigned const char *end,
+		     unsigned char *end,
 		     dwarf_vma cu_offset,
 		     dwarf_vma pointer_size,
 		     dwarf_vma offset_size,
@@ -2578,7 +2582,9 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_string:
       if (!do_loc)
 	printf ("%c%.*s", delimiter, (int) (end - data), data);
-      data += strnlen ((char *) data, end - data) + 1;
+      data += strnlen ((char *) data, end - data);
+      if (data < end)
+	data++;
       break;
 
     case DW_FORM_block:
@@ -4493,7 +4499,9 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		    {
 		      printf ("  %d\t%.*s\n", ++last_dir_entry, (int) (end - data), data);
 
-		      data += strnlen ((char *) data, end - data) + 1;
+		      data += strnlen ((char *) data, end - data);
+		      if (data < end)
+			data++;
 		    }
 
 		  /* PR 17512: file: 002-132094-0.004.  */
@@ -4502,10 +4510,11 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		}
 
 	      /* Skip the NUL at the end of the table.  */
-	      data++;
+	      if (data < end)
+		data++;
 
 	      /* Display the contents of the File Name table.  */
-	      if (*data == 0)
+	      if (data >= end || *data == 0)
 		printf (_("\n The File Name Table is empty.\n"));
 	      else
 		{
@@ -4520,7 +4529,9 @@ display_debug_lines_raw (struct dwarf_section *  section,
 
 		      printf ("  %d\t", ++state_machine_regs.last_file_entry);
 		      name = data;
-		      data += strnlen ((char *) data, end - data) + 1;
+		      data += strnlen ((char *) data, end - data);
+		      if (data < end)
+			data++;
 
 		      READ_ULEB (val, data, end);
 		      printf ("%s\t", dwarf_vmatoa ("u", val));
@@ -4539,7 +4550,8 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		}
 
 	      /* Skip the NUL at the end of the table.  */
-	      data++;
+	      if (data < end)
+		data++;
 	    }
 
 	  putchar ('\n');
@@ -5039,7 +5051,9 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 		  while (data < end && *data != 0)
 		    {
-		      data += strnlen ((char *) data, end - data) + 1;
+		      data += strnlen ((char *) data, end - data);
+		      if (data < end)
+			data++;
 		      n_directories++;
 		    }
 
@@ -5076,7 +5090,9 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		    {
 		      /* Skip Name, directory index, last modification
 			 time and length of file.  */
-		      data += strnlen ((char *) data, end - data) + 1;
+		      data += strnlen ((char *) data, end - data);
+		      if (data < end)
+			data++;
 		      SKIP_ULEB (data, end);
 		      SKIP_ULEB (data, end);
 		      SKIP_ULEB (data, end);
@@ -5704,12 +5720,11 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 	  bfd_size_type maxprint;
 	  dwarf_vma offset;
 
-	  SAFE_BYTE_GET (offset, data, offset_size, end);
+	  SAFE_BYTE_GET_AND_INC (offset, data, offset_size, end);
 
 	  if (offset == 0)
 	    break;
 
-	  data += offset_size;
 	  if (data >= end)
 	    break;
 	  maxprint = (end - data) - 1;
@@ -5721,8 +5736,7 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 	      const char *kind_name;
 	      int is_static;
 
-	      SAFE_BYTE_GET (kind_data, data, 1, end);
-	      data++;
+	      SAFE_BYTE_GET_AND_INC (kind_data, data, 1, end);
 	      maxprint --;
 	      /* GCC computes the kind as the upper byte in the CU index
 		 word, and then right shifts it by the CU index size.
@@ -5740,7 +5754,9 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 	    printf ("    %-6lx\t%.*s\n",
 		    (unsigned long) offset, (int) maxprint, data);
 
-	  data += strnlen ((char *) data, maxprint) + 1;
+	  data += strnlen ((char *) data, maxprint);
+	  if (data < end)
+	    data++;
 	  if (data >= end)
 	    break;
 	}
@@ -7382,7 +7398,7 @@ display_debug_addr (struct dwarf_section *section,
 
 	  SAFE_BYTE_GET_AND_INC (length, curr_header, 4, entry);
 	  if (length == 0xffffffff)
-	    SAFE_BYTE_GET (length, curr_header, 8, entry);
+	    SAFE_BYTE_GET_AND_INC (length, curr_header, 8, entry);
 	  end = curr_header + length;
 
 	  SAFE_BYTE_GET_AND_INC (version, curr_header, 2, entry);
@@ -7451,7 +7467,7 @@ display_debug_str_offsets (struct dwarf_section *section,
       /* FIXME: We assume that this means 64-bit DWARF is being used.  */
       if (length == 0xffffffff)
 	{
-	  SAFE_BYTE_GET (length, curr, 8, end);
+	  SAFE_BYTE_GET_AND_INC (length, curr, 8, end);
 	  entry_length = 8;
 	}
       else
@@ -7493,7 +7509,7 @@ display_debug_str_offsets (struct dwarf_section *section,
 	  dwarf_vma offset;
 	  const unsigned char * string;
 
-	  if (curr + entry_length > entries_end)
+	  if ((dwarf_vma) (entries_end - curr) < entry_length)
 	    /* Not enough space to read one entry_length, give up.  */
 	    return 0;
 

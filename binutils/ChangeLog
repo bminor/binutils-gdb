@@ -1,5 +1,21 @@
 2021-05-12  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (process_extended_line_op): Don't bump data pointer past
+	end when strnlen doesn't find string terminator.
+	(decode_location_expression): Remove dead code.
+	(skip_attr_bytes): Remove const from end param.  Ensure data
+	pointer doesn't pass end.
+	(get_type_signedness): Remove const from end param.
+	(read_and_display_attr_value): Ensure data pointer doesn't pass end.
+	(display_debug_lines_raw, display_debug_lines_decoded): Likewise.
+	(display_debug_pubnames_worker): Likewise.
+	(display_debug_pubnames_worker): Use SAFE_BYTE_GET_AND INC rather
+	than blindly incrementing data pointer.
+	(display_debug_addr, display_debug_str_offsets): Likewise.  Don't
+	compare pointers, compare lengths.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (SAFE_BYTE_GET_INTERNAL): Define.
 	(SAFE_BYTE_GET, SAFE_BYTE_GET_AND_INC): Define using the above.
 	(SAFE_SIGNED_BYTE_GET, SAFE_SIGNED_BYTE_GET_AND_INC): Likewise.
