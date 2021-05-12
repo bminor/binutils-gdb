@@ -209,15 +209,6 @@
 
 	* Re-format all Python files using black.
 
-2021-05-07  Tom de Vries  <tdevries@suse.de>
-
-	PR symtab/26327
-	* dwarf2/read.c (struct dwarf2_cu): Remove ancestor.
-	(dwarf2_cu::get_builder): Remove ancestor-related code.
-	(new_symbol): Remove code supporting pre-4.1 gcc that show arguments
-	of inlined functions as locals.
-	(follow_die_offset, follow_die_sig_1): Remove setting of ancestor.
-
 2021-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* guile/guile-internal.h (gdbscm_safe_source_script): Change

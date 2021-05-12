@@ -29,11 +29,6 @@
 	* python.texinfo (Python Commands): Document 'set debug
 	py-breakpoint' and 'show debug py-breakpoint'.
 
-2021-05-07  Tom de Vries  <tdevries@suse.de>
-
-	PR symtab/26327
-	* gdb.texinfo (Inline Functions): Update.
-
 2021-05-06  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.texinfo (GDB/MI Breakpoint Commands): Mention the

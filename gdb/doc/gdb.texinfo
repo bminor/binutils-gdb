@@ -13842,8 +13842,8 @@ when using @sc{dwarf 2}.  Versions of @value{NGCC} before 4.1
 do not emit two required attributes (@samp{DW_AT_call_file} and
 @samp{DW_AT_call_line}); @value{GDBN} does not display inlined
 function calls with earlier versions of @value{NGCC}.  It instead
-displays local variables of inlined functions as local variables in
-the caller.
+displays the arguments and local variables of inlined functions as
+local variables in the caller.
 
 The body of an inlined function is directly included at its call site;
 unlike a non-inlined function, there are no instructions devoted to
