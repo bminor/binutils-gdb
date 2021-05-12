@@ -1,3 +1,8 @@
+2021-05-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete SIM_AC_OPTION_ENVIRONMENT call.
+	* configure: Regenerate.
+
 2021-05-04  Tom Tromey  <tromey@adacore.com>
 
 	* mloop.in: Include <stdlib.h>.

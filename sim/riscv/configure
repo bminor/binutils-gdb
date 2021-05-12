@@ -11948,28 +11948,6 @@ fi
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking default sim environment setting" >&5
-$as_echo_n "checking default sim environment setting... " >&6; }
-sim_environment="ALL_ENVIRONMENT"
-# Check whether --enable-sim-environment was given.
-if test "${enable_sim_environment+set}" = set; then :
-  enableval=$enable_sim_environment; case "${enableval}" in
-  all | ALL)             sim_environment="ALL_ENVIRONMENT";;
-  user | USER)           sim_environment="USER_ENVIRONMENT";;
-  virtual | VIRTUAL)     sim_environment="VIRTUAL_ENVIRONMENT";;
-  operating | OPERATING) sim_environment="OPERATING_ENVIRONMENT";;
-  *)   as_fn_error $? "Unknown value $enableval passed to --enable-sim-environment" "$LINENO" 5;;
-esac
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define WITH_ENVIRONMENT $sim_environment
-_ACEOF
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_environment" >&5
-$as_echo "$sim_environment" >&6; }
-
-
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror; case "${enableval}" in

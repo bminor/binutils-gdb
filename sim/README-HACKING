@@ -278,8 +278,8 @@ Environment Simulation
 
 The simplest simulator doesn't include environment support -- it merely
 simulates the Instruction Set Architecture (ISA).  Once you're ready to move
-on to the next level, call the common macro in your configure.ac:
-SIM_AC_OPTION_ENVIRONMENT
+on to the next level, it's time to start handling the --env option.  It's
+enabled by default for all ports already.
 
 This will support for the user, virtual, and operating environments.  See the
 sim-config.h header for a more detailed description of them.  The former are
