@@ -1,3 +1,8 @@
+2021-05-12  Richard Earnshaw  <rearnsha@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (farcall test for v8-m.mainline):
+	Correct expected output.
+
 2021-05-11  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/ld-x86-64/rela.d: Fix regexp not to presume a specific
