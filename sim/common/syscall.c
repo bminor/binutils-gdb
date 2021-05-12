@@ -40,7 +40,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "gdb/callback.h"
+#include "sim/callback.h"
 #include "targ-vals.h"
 
 #ifndef ENOSYS

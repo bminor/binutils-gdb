@@ -20,7 +20,7 @@
 
 #include "sim-main.h"
 #include "sim-module.h"
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 
 /* Generic implementation of sim_close that works with simulators that use
    sim-module for all custom runtime options.  */

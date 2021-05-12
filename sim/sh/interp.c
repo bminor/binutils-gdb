@@ -50,8 +50,8 @@
 #endif
 
 #include "bfd.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 #include "gdb/sim-sh.h"
 
 #include "sim-main.h"

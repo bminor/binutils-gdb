@@ -48,8 +48,8 @@ code on the hardware.
 #include "libiberty.h"
 #include "bfd.h"
 #include "elf-bfd.h"
-#include "gdb/callback.h"   /* GDB simulator callback interface */
-#include "gdb/remote-sim.h" /* GDB simulator interface */
+#include "sim/callback.h"   /* GDB simulator callback interface */
+#include "sim/sim.h" /* GDB simulator interface */
 #include "sim-syscall.h"   /* Simulator system call support */
 
 char* pr_addr (SIM_ADDR addr);

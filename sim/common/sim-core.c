@@ -454,7 +454,7 @@ sim_core_translate (sim_core_mapping *mapping,
 
 
 #if EXTERN_SIM_CORE_P
-/* See include/gdb/remote-sim.h.  */
+/* See include/sim/sim.h.  */
 char *
 sim_memory_map (SIM_DESC sd)
 {

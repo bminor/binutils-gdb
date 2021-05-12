@@ -31,8 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "bfd.h"
 #include "sim-utils.h"
 
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 
 static void eprintf (host_callback *, const char *, ...);
 static void xprintf (host_callback *, const char *, ...);

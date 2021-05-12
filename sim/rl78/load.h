@@ -23,7 +23,7 @@
 #define SIM_RL78_LOAD_H_
 
 #include "bfd.h"
-#include "gdb/callback.h"
+#include "sim/callback.h"
 
 void rl78_load (bfd *, host_callback *callbacks, const char * const simname);
 

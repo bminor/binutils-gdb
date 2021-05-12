@@ -294,7 +294,7 @@ Userspace System Calls
 By default, the libgloss userspace is simulated.  That means the system call
 numbers and calling convention matches that of libgloss.  Simulating other
 userspaces (such as Linux) is pretty straightforward, but let's first focus
-on the basics.  The basic API is covered in include/gdb/callback.h.
+on the basics.  The basic API is covered in include/sim/callback.h.
 
 When an instruction is simulated that invokes the system call method (such as
 forcing a hardware trap or exception), your simulator code should set up the

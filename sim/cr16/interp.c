@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "bfd.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 
 #include "sim-main.h"
 #include "sim-options.h"

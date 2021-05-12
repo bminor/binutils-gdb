@@ -1,3 +1,8 @@
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c: Update include path.
+	* syscalls.c: Likewise.
+
 2021-05-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* mem.c: Include errno.h.

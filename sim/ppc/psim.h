@@ -23,7 +23,7 @@
 
 #include "basics.h"
 
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 
 /* the system object */
 /* typedef struct _psim psim; */

@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#if !defined (REMOTE_SIM_H)
-#define REMOTE_SIM_H 1
+#ifndef SIM_SIM_H
+#define SIM_SIM_H 1
 
 #ifdef __cplusplus
 extern "C" {
@@ -296,4 +296,4 @@ char **sim_complete_command (SIM_DESC sd, const char *text, const char *word);
 }
 #endif
 
-#endif /* !defined (REMOTE_SIM_H) */
+#endif /* !defined (SIM_SIM_H) */

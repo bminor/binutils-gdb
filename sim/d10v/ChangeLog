@@ -1,3 +1,9 @@
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Update path.
+	* d10v_sim.h: Update include path.
+	* interp.c: Likewise.
+
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

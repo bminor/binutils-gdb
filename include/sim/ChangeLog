@@ -1,0 +1,4 @@
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* callback.h: Moved from ../gdb/callback.h.
+	* sim.h: Moved from ../gdb/remote-sim.h.

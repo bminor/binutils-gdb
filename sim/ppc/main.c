@@ -30,8 +30,8 @@
 #include "events.h" /* FIXME: psim should provide the interface */
 
 #include "bfd.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H

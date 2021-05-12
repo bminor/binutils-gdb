@@ -28,8 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "ansidecl.h"
 #include "libiberty.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 #include "gdb/signals.h"
 #include "gdb/sim-m32c.h"
 

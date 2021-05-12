@@ -258,8 +258,8 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
 
 RUNTESTFLAGS =
 
-callback_h = $(srcroot)/include/gdb/callback.h
-remote_sim_h = $(srcroot)/include/gdb/remote-sim.h
+callback_h = $(srcroot)/include/sim/callback.h
+remote_sim_h = $(srcroot)/include/sim/sim.h
 
 all: libsim.a run$(EXEEXT) .gdbinit
 

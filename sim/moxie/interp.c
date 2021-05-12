@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <unistd.h>
 #include "bfd.h"
 #include "libiberty.h"
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 
 #include "sim-main.h"
 #include "sim-base.h"

@@ -1,3 +1,15 @@
+2021-05-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (callback_h, remote_sim_h): Update path.
+	* callback.c: Update include path.
+	* gentmap.c (gen_targ_map_c): Likewise.
+	* sim-basics.h: Likewise.
+	* sim-close.c: Likewise.
+	* sim-core.c: Likewise.
+	* sim-load.c: Likewise.
+	* sim-module.h: Likewise.
+	* syscall.c: Likewise.
+
 2021-05-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (modules.c): Touch $@ at the end.

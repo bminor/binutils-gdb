@@ -119,8 +119,8 @@ typedef enum {
 /* Basic definitions - ordered so that nothing calls what comes after it.  */
 
 #include "ansidecl.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 
 #include "sim-config.h"
 

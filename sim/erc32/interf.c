@@ -28,7 +28,7 @@
 #include <dis-asm.h>
 #include "sim-config.h"
 
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 #include "gdb/signals.h"
 
 #define PSR_CWP 0x7

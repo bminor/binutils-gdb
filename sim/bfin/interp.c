@@ -29,7 +29,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-#include "gdb/callback.h"
+#include "sim/callback.h"
 #include "gdb/signals.h"
 #include "sim-main.h"
 #include "sim-syscall.h"

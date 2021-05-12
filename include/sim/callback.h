@@ -42,8 +42,8 @@
    is ENVIRONMENT_OPERATING.
 */
 
-#ifndef CALLBACK_H
-#define CALLBACK_H
+#ifndef SIM_CALLBACK_H
+#define SIM_CALLBACK_H
 
 /* ??? The reason why we check for va_start here should be documented.  */
 

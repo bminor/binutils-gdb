@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 
 /* Symbolic names used to identify general registers which also match
    the registers indices in machine code.

@@ -24,8 +24,8 @@
 
 #include "ansidecl.h"
 #include "sim_callbacks.h"
-#include "gdb/callback.h"
-#include "gdb/remote-sim.h"
+#include "sim/callback.h"
+#include "sim/sim.h"
 #include "gdb/sim-ppc.h"
 
 /* Return the register name for the supplied SPR if any, or NULL if

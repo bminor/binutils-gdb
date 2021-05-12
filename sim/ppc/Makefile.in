@@ -168,8 +168,8 @@ all:	run $(TARGETLIB) $(GDB_OBJ)
 # Headers outside sim/ppc.
 ANSIDECL_H = $(srcroot)/include/ansidecl.h
 BFD_H = ../../bfd/bfd.h
-GDB_CALLBACK_H = $(srcroot)/include/gdb/callback.h
-GDB_REMOTE_SIM_H = $(srcroot)/include/gdb/remote-sim.h
+GDB_CALLBACK_H = $(srcroot)/include/sim/callback.h
+GDB_REMOTE_SIM_H = $(srcroot)/include/sim/sim.h
 GDB_SIM_PPC_H = $(srcroot)/include/gdb/sim-ppc.h
 COMMON_SIM_BASE_H = $(srcroot)/sim/common/sim-base.h
 COMMON_SIM_BASICS_H = $(srcroot)/sim/common/sim-basics.h

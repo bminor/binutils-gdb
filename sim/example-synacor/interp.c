@@ -22,8 +22,8 @@
    specific simulator.  Normally this file will be kept small and the target
    details will live in other files.
 
-   For more specific details on these functions, see the gdb/remote-sim.h
-   header file.  */
+   For more specific details on these functions, see the sim/sim.h header
+   file.  */
 
 #include "config.h"
 

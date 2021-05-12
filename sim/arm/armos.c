@@ -54,7 +54,7 @@
 /* For RDIError_BreakpointReached.  */
 #include "dbg_rdi.h"
 
-#include "gdb/callback.h"
+#include "sim/callback.h"
 extern host_callback *sim_callback;
 
 extern unsigned ARMul_OSInit       (ARMul_State *);

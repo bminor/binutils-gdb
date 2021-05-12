@@ -23,7 +23,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include "ansidecl.h"
-#include "gdb/callback.h"
+#include "sim/callback.h"
 #include "opcode/cr16.h"
 #include "bfd.h"
 
@@ -41,7 +41,7 @@
 
 extern int cr16_debug;
 
-#include "gdb/remote-sim.h"
+#include "sim/sim.h"
 #include "sim-config.h"
 #include "sim-types.h"
 
