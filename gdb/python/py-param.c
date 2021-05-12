@@ -458,7 +458,8 @@ get_show_value (struct ui_file *file, int from_tty,
    function.  */
 static void
 add_setshow_generic (int parmclass, enum command_class cmdclass,
-		     const char *cmd_name, parmpy_object *self,
+		     gdb::unique_xmalloc_ptr<char> cmd_name,
+		     parmpy_object *self,
 		     const char *set_doc, const char *show_doc,
 		     const char *help_doc,
 		     struct cmd_list_element **set_list,
@@ -471,7 +472,7 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
     {
     case var_boolean:
 
-      add_setshow_boolean_cmd (cmd_name, cmdclass,
+      add_setshow_boolean_cmd (cmd_name.get (), cmdclass,
 			       &self->value.boolval, set_doc, show_doc,
 			       help_doc, get_set_value, get_show_value,
 			       set_list, show_list);
@@ -479,7 +480,7 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
       break;
 
     case var_auto_boolean:
-      add_setshow_auto_boolean_cmd (cmd_name, cmdclass,
+      add_setshow_auto_boolean_cmd (cmd_name.get (), cmdclass,
 				    &self->value.autoboolval,
 				    set_doc, show_doc, help_doc,
 				    get_set_value, get_show_value,
@@ -487,26 +488,26 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
       break;
 
     case var_uinteger:
-      add_setshow_uinteger_cmd (cmd_name, cmdclass,
+      add_setshow_uinteger_cmd (cmd_name.get (), cmdclass,
 				&self->value.uintval, set_doc, show_doc,
 				help_doc, get_set_value, get_show_value,
 				set_list, show_list);
       break;
 
     case var_integer:
-      add_setshow_integer_cmd (cmd_name, cmdclass,
+      add_setshow_integer_cmd (cmd_name.get (), cmdclass,
 			       &self->value.intval, set_doc, show_doc,
 			       help_doc, get_set_value, get_show_value,
 			       set_list, show_list); break;
 
     case var_string:
-      add_setshow_string_cmd (cmd_name, cmdclass,
+      add_setshow_string_cmd (cmd_name.get (), cmdclass,
 			      &self->value.stringval, set_doc, show_doc,
 			      help_doc, get_set_value, get_show_value,
 			      set_list, show_list); break;
 
     case var_string_noescape:
-      add_setshow_string_noescape_cmd (cmd_name, cmdclass,
+      add_setshow_string_noescape_cmd (cmd_name.get (), cmdclass,
 				       &self->value.stringval,
 				       set_doc, show_doc, help_doc,
 				       get_set_value, get_show_value,
@@ -515,7 +516,7 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
       break;
 
     case var_optional_filename:
-      add_setshow_optional_filename_cmd (cmd_name, cmdclass,
+      add_setshow_optional_filename_cmd (cmd_name.get (), cmdclass,
 					 &self->value.stringval, set_doc,
 					 show_doc, help_doc, get_set_value,
 					 get_show_value, set_list,
@@ -523,27 +524,27 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
       break;
 
     case var_filename:
-      add_setshow_filename_cmd (cmd_name, cmdclass,
+      add_setshow_filename_cmd (cmd_name.get (), cmdclass,
 				&self->value.stringval, set_doc, show_doc,
 				help_doc, get_set_value, get_show_value,
 				set_list, show_list); break;
 
     case var_zinteger:
-      add_setshow_zinteger_cmd (cmd_name, cmdclass,
+      add_setshow_zinteger_cmd (cmd_name.get (), cmdclass,
 				&self->value.intval, set_doc, show_doc,
 				help_doc, get_set_value, get_show_value,
 				set_list, show_list);
       break;
 
     case var_zuinteger:
-      add_setshow_zuinteger_cmd (cmd_name, cmdclass,
+      add_setshow_zuinteger_cmd (cmd_name.get (), cmdclass,
 				&self->value.uintval, set_doc, show_doc,
 				help_doc, get_set_value, get_show_value,
 				set_list, show_list);
       break;
 
     case var_zuinteger_unlimited:
-      add_setshow_zuinteger_unlimited_cmd (cmd_name, cmdclass,
+      add_setshow_zuinteger_unlimited_cmd (cmd_name.get (), cmdclass,
 					   &self->value.intval, set_doc,
 					   show_doc, help_doc, get_set_value,
 					   get_show_value,
@@ -551,7 +552,7 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
       break;
 
     case var_enum:
-      add_setshow_enum_cmd (cmd_name, cmdclass, self->enumeration,
+      add_setshow_enum_cmd (cmd_name.get (), cmdclass, self->enumeration,
 			    &self->value.cstringval, set_doc, show_doc,
 			    help_doc, get_set_value, get_show_value,
 			    set_list, show_list);
@@ -562,15 +563,18 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
 
   /* Lookup created parameter, and register Python object against the
      parameter context.  Perform this task against both lists.  */
-  tmp_name = cmd_name;
+  tmp_name = cmd_name.get ();
   param = lookup_cmd (&tmp_name, *show_list, "", NULL, 0, 1);
   if (param)
     set_cmd_context (param, self);
 
-  tmp_name = cmd_name;
+  tmp_name = cmd_name.get ();
   param = lookup_cmd (&tmp_name, *set_list, "", NULL, 0, 1);
   if (param)
     set_cmd_context (param, self);
+
+  /* We (unfortunately) currently leak the command name.  */
+  cmd_name.release ();
 }
 
 /* A helper which computes enum values.  Returns 1 on success.  Returns 0 on
@@ -657,7 +661,6 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   parmpy_object *obj = (parmpy_object *) self;
   const char *name;
   gdb::unique_xmalloc_ptr<char> set_doc, show_doc, doc;
-  char *cmd_name;
   int parmclass, cmdtype;
   PyObject *enum_values = NULL;
   struct cmd_list_element **set_list, **show_list;
@@ -706,15 +709,13 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   obj->type = (enum var_types) parmclass;
   memset (&obj->value, 0, sizeof (obj->value));
 
-  cmd_name = gdbpy_parse_command_name (name, &set_list,
-				       &setlist);
-
-  if (! cmd_name)
+  gdb::unique_xmalloc_ptr<char> cmd_name
+    = gdbpy_parse_command_name (name, &set_list, &setlist);
+  if (cmd_name == nullptr)
     return -1;
-  xfree (cmd_name);
-  cmd_name = gdbpy_parse_command_name (name, &show_list,
-				       &showlist);
-  if (! cmd_name)
+
+  cmd_name = gdbpy_parse_command_name (name, &show_list, &showlist);
+  if (cmd_name == nullptr)
     return -1;
 
   set_doc = get_doc_string (self, set_doc_cst);
@@ -726,13 +727,12 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   try
     {
       add_setshow_generic (parmclass, (enum command_class) cmdtype,
-			   cmd_name, obj,
+			   std::move (cmd_name), obj,
 			   set_doc.get (), show_doc.get (),
 			   doc.get (), set_list, show_list);
     }
   catch (const gdb_exception &except)
     {
-      xfree (cmd_name);
       Py_DECREF (self);
       gdbpy_convert_exception (except);
       return -1;

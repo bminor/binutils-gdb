@@ -1,3 +1,13 @@
+2021-05-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/python-internal.h (gdbpy_parse_command_name): Return
+	gdb::unique_xmalloc_ptr.
+	* python/py-cmd.c (gdbpy_parse_command_name): Likewise.
+	(cmdpy_init): Adjust.
+	* python/py-param.c (parmpy_init): Adjust.
+	(add_setshow_generic): Take gdb::unique_xmalloc_ptr, release it
+	when done.
+
 2021-05-12  George Barrett  <bob@bob131.so>
 
 	* NEWS (Guile API): Note the addition of the new procedure.

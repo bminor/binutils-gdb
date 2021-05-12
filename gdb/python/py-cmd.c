@@ -342,10 +342,10 @@ cmdpy_completer (struct cmd_list_element *command,
 
    START_LIST is the list in which the search starts.
 
-   This function returns the xmalloc()d name of the new command.  On
-   error sets the Python error and returns NULL.  */
+   This function returns the name of the new command.  On error sets the Python
+   error and returns NULL.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdbpy_parse_command_name (const char *name,
 			  struct cmd_list_element ***base_list,
 			  struct cmd_list_element **start_list)
@@ -354,7 +354,6 @@ gdbpy_parse_command_name (const char *name,
   int len = strlen (name);
   int i, lastchar;
   const char *prefix_text2;
-  char *result;
 
   /* Skip trailing whitespace.  */
   for (i = len - 1; i >= 0 && (name[i] == ' ' || name[i] == '\t'); --i)
@@ -369,9 +368,10 @@ gdbpy_parse_command_name (const char *name,
   /* Find first character of the final word.  */
   for (; i > 0 && valid_cmd_char_p (name[i - 1]); --i)
     ;
-  result = (char *) xmalloc (lastchar - i + 2);
-  memcpy (result, &name[i], lastchar - i + 1);
-  result[lastchar - i + 1] = '\0';
+
+  gdb::unique_xmalloc_ptr<char> result ((char *) xmalloc (lastchar - i + 2));
+  memcpy (result.get (), &name[i], lastchar - i + 1);
+  result.get ()[lastchar - i + 1] = '\0';
 
   /* Skip whitespace again.  */
   for (--i; i >= 0 && (name[i] == ' ' || name[i] == '\t'); --i)
@@ -390,7 +390,6 @@ gdbpy_parse_command_name (const char *name,
     {
       PyErr_Format (PyExc_RuntimeError, _("Could not find command prefix %s."),
 		    prefix_text.c_str ());
-      xfree (result);
       return NULL;
     }
 
@@ -402,7 +401,6 @@ gdbpy_parse_command_name (const char *name,
 
   PyErr_Format (PyExc_RuntimeError, _("'%s' is not a prefix command."),
 		prefix_text.c_str ());
-  xfree (result);
   return NULL;
 }
 
@@ -435,7 +433,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   int completetype = -1;
   char *docstring = NULL;
   struct cmd_list_element **cmd_list;
-  char *cmd_name;
   static const char *keywords[] = { "name", "command_class", "completer_class",
 				    "prefix", NULL };
   PyObject *is_prefix_obj = NULL;
@@ -474,19 +471,18 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       return -1;
     }
 
-  cmd_name = gdbpy_parse_command_name (name, &cmd_list, &cmdlist);
-  if (! cmd_name)
+  gdb::unique_xmalloc_ptr<char> cmd_name
+    = gdbpy_parse_command_name (name, &cmd_list, &cmdlist);
+  if (cmd_name == nullptr)
     return -1;
 
   if (is_prefix_obj != NULL)
     {
       int cmp = PyObject_IsTrue (is_prefix_obj);
-       if (cmp < 0)
-	{
-	  xfree (cmd_name);
-	  return -1;
-	}
-       is_prefix = cmp > 0;
+      if (cmp < 0)
+	return -1;
+
+      is_prefix = cmp > 0;
     }
 
   if (PyObject_HasAttr (self, gdbpy_doc_cst))
@@ -497,10 +493,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	{
 	  docstring = python_string_to_host_string (ds_obj.get ()).release ();
 	  if (docstring == NULL)
-	    {
-	      xfree (cmd_name);
-	      return -1;
-	    }
+	    return -1;
 	}
     }
   if (! docstring)
@@ -519,13 +512,18 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	  /* If we have our own "invoke" method, then allow unknown
 	     sub-commands.  */
 	  allow_unknown = PyObject_HasAttr (self, invoke_cst);
-	  cmd = add_prefix_cmd (cmd_name, (enum command_class) cmdtype,
+	  cmd = add_prefix_cmd (cmd_name.get (),
+				(enum command_class) cmdtype,
 				NULL, docstring, &obj->sub_list,
 				allow_unknown, cmd_list);
 	}
       else
-	cmd = add_cmd (cmd_name, (enum command_class) cmdtype,
+	cmd = add_cmd (cmd_name.get (), (enum command_class) cmdtype,
 		       docstring, cmd_list);
+
+      /* If successful, the above takes ownership of the name, since we set
+         name_allocated, so release it.  */
+      cmd_name.release ();
 
       /* There appears to be no API to set this.  */
       cmd->func = cmdpy_function;
@@ -543,7 +541,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (const gdb_exception &except)
     {
-      xfree (cmd_name);
       xfree (docstring);
       gdbpy_convert_exception (except);
       return -1;
