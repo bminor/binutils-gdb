@@ -1,3 +1,11 @@
+2021-05-12  Luis Machado  <luis.machado@linaro.org>
+
+	* elf-bfd.h (elfcore_write_aarch_mte): New prototype.
+	* elf.c (elfcore_grok_aarch_mte, elfcore_write_aarch_mte): New
+	functions.
+	(elfcore_grok_note): Handle notes of type NT_ARM_TAGGED_ADDR_CTRL.
+	(elfcore_write_register_note): Handle MTE notes.
+
 2021-05-11  Alan Modra  <amodra@gmail.com>
 
 	PR 27844

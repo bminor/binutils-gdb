@@ -9926,6 +9926,13 @@ elfcore_grok_aarch_pauth (bfd *abfd, Elf_Internal_Note *note)
 }
 
 static bool
+elfcore_grok_aarch_mte (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-aarch-mte",
+					  note);
+}
+
+static bool
 elfcore_grok_arc_v2 (bfd *abfd, Elf_Internal_Note *note)
 {
   return elfcore_make_note_pseudosection (abfd, ".reg-arc-v2", note);
@@ -10604,6 +10611,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 6
 	  && strcmp (note->namedata, "LINUX") == 0)
 	return elfcore_grok_aarch_pauth (abfd, note);
+      else
+	return true;
+
+    case NT_ARM_TAGGED_ADDR_CTRL:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_aarch_mte (abfd, note);
       else
 	return true;
 
@@ -11987,6 +12001,20 @@ elfcore_write_aarch_pauth (bfd *abfd,
 }
 
 char *
+elfcore_write_aarch_mte (bfd *abfd,
+				      char *buf,
+				      int *bufsiz,
+				      const void *aarch_mte,
+				      int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_ARM_TAGGED_ADDR_CTRL,
+			     aarch_mte,
+			     size);
+}
+
+char *
 elfcore_write_arc_v2 (bfd *abfd,
 		      char *buf,
 		      int *bufsiz,
@@ -12114,6 +12142,8 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_aarch_sve (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-aarch-pauth") == 0)
     return elfcore_write_aarch_pauth (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-aarch-mte") == 0)
+    return elfcore_write_aarch_mte (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-arc-v2") == 0)
     return elfcore_write_arc_v2 (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".gdb-tdesc") == 0)
