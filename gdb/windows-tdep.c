@@ -616,7 +616,7 @@ init_w32_command_list (void)
       add_basic_prefix_cmd
 	("w32", class_info,
 	 _("Print information specific to Win32 debugging."),
-	 &info_w32_cmdlist, "info w32 ", 0, &infolist);
+	 &info_w32_cmdlist, 0, &infolist);
       w32_prefix_command_valid = 1;
     }
 }

@@ -318,7 +318,6 @@ add_alias_cmd (const char *name, cmd_list_element *old,
   c->func = old->func;
   c->function = old->function;
   c->prefixlist = old->prefixlist;
-  c->prefixname = old->prefixname;
   c->allow_unknown = old->allow_unknown;
   c->abbrev_flag = abbrev_flag;
   c->cmd_pointer = old;
@@ -383,13 +382,11 @@ struct cmd_list_element *
 add_prefix_cmd (const char *name, enum command_class theclass,
 		cmd_const_cfunc_ftype *fun,
 		const char *doc, struct cmd_list_element **prefixlist,
-		const char *prefixname, int allow_unknown,
-		struct cmd_list_element **list)
+		int allow_unknown, struct cmd_list_element **list)
 {
   struct cmd_list_element *c = add_cmd (name, theclass, fun, doc, list);
 
   c->prefixlist = prefixlist;
-  c->prefixname = prefixname;
   c->allow_unknown = allow_unknown;
 
   /* Now that prefix command C is defined, we need to set the prefix field
@@ -409,7 +406,8 @@ do_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
   while (c->cmd_pointer != nullptr)
     c = c->cmd_pointer;
 
-  help_list (*c->prefixlist, c->prefixname, all_commands, gdb_stdout);
+  help_list (*c->prefixlist, c->prefixname ().c_str (),
+	     all_commands, gdb_stdout);
 }
 
 /* See command.h.  */
@@ -417,11 +415,10 @@ do_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
 struct cmd_list_element *
 add_basic_prefix_cmd (const char *name, enum command_class theclass,
 		      const char *doc, struct cmd_list_element **prefixlist,
-		      const char *prefixname, int allow_unknown,
-		      struct cmd_list_element **list)
+		      int allow_unknown, struct cmd_list_element **list)
 {
   struct cmd_list_element *cmd = add_prefix_cmd (name, theclass, nullptr,
-						 doc, prefixlist, prefixname,
+						 doc, prefixlist,
 						 allow_unknown, list);
   set_cmd_sfunc (cmd, do_prefix_cmd);
   return cmd;
@@ -441,11 +438,10 @@ do_show_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
 struct cmd_list_element *
 add_show_prefix_cmd (const char *name, enum command_class theclass,
 		     const char *doc, struct cmd_list_element **prefixlist,
-		     const char *prefixname, int allow_unknown,
-		     struct cmd_list_element **list)
+		     int allow_unknown, struct cmd_list_element **list)
 {
   struct cmd_list_element *cmd = add_prefix_cmd (name, theclass, nullptr,
-						 doc, prefixlist, prefixname,
+						 doc, prefixlist,
 						 allow_unknown, list);
   set_cmd_sfunc (cmd, do_show_prefix_cmd);
   return cmd;
@@ -459,13 +455,12 @@ add_prefix_cmd_suppress_notification
 	       (const char *name, enum command_class theclass,
 		cmd_const_cfunc_ftype *fun,
 		const char *doc, struct cmd_list_element **prefixlist,
-		const char *prefixname, int allow_unknown,
-		struct cmd_list_element **list,
+		int allow_unknown, struct cmd_list_element **list,
 		int *suppress_notification)
 {
   struct cmd_list_element *element
     = add_prefix_cmd (name, theclass, fun, doc, prefixlist,
-		      prefixname, allow_unknown, list);
+		      allow_unknown, list);
   element->suppress_notification = suppress_notification;
   return element;
 }
@@ -476,13 +471,11 @@ struct cmd_list_element *
 add_abbrev_prefix_cmd (const char *name, enum command_class theclass,
 		       cmd_const_cfunc_ftype *fun, const char *doc,
 		       struct cmd_list_element **prefixlist,
-		       const char *prefixname,
 		       int allow_unknown, struct cmd_list_element **list)
 {
   struct cmd_list_element *c = add_cmd (name, theclass, fun, doc, list);
 
   c->prefixlist = prefixlist;
-  c->prefixname = prefixname;
   c->allow_unknown = allow_unknown;
   c->abbrev_flag = 1;
   return c;
@@ -1034,10 +1027,11 @@ add_com_suppress_notification (const char *name, enum command_class theclass,
 static void
 fput_command_name_styled (struct cmd_list_element *c, struct ui_file *stream)
 {
-  const char *prefixname
-    = c->prefix == nullptr ? "" : c->prefix->prefixname;
+  std::string prefixname
+    = c->prefix == nullptr ? "" : c->prefix->prefixname ();
 
-  fprintf_styled (stream, title_style.style (), "%s%s", prefixname, c->name);
+  fprintf_styled (stream, title_style.style (), "%s%s",
+		  prefixname.c_str (), c->name);
 }
 
 /* Print the definition of alias C using title style for alias
@@ -1192,7 +1186,8 @@ apropos_cmd (struct ui_file *stream,
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
-	  apropos_cmd (stream, *c->prefixlist, verbose, regex, c->prefixname);
+	  apropos_cmd (stream, *c->prefixlist, verbose, regex,
+		       c->prefixname ().c_str ());
 	}
     }
 }
@@ -1258,7 +1253,8 @@ help_cmd (const char *command, struct ui_file *stream)
 
   /* If this is a prefix command, print it's subcommands.  */
   if (c->prefixlist)
-    help_list (*c->prefixlist, c->prefixname, all_commands, stream);
+    help_list (*c->prefixlist, c->prefixname ().c_str (),
+	       all_commands, stream);
 
   /* If this is a class name, print all of the commands in the class.  */
   if (c->func == NULL)
@@ -1812,7 +1808,8 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
 	 values.  */
       int local_allow_unknown = (last_list ? last_list->allow_unknown :
 				 allow_unknown);
-      const char *local_cmdtype = last_list ? last_list->prefixname : cmdtype;
+      std::string local_cmdtype
+	= last_list ? last_list->prefixname () : cmdtype;
       struct cmd_list_element *local_list =
 	(last_list ? *(last_list->prefixlist) : list);
 
@@ -1852,8 +1849,8 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
 		    break;
 		  }
 	      }
-	  error (_("Ambiguous %scommand \"%s\": %s."), local_cmdtype,
-		 *line, ambbuf);
+	  error (_("Ambiguous %scommand \"%s\": %s."),
+		 local_cmdtype.c_str (), *line, ambbuf);
 	}
     }
   else
@@ -1867,7 +1864,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
 	(*line)++;
 
       if (c->prefixlist && **line && !c->allow_unknown)
-	undef_cmd_error (c->prefixname, *line);
+	undef_cmd_error (c->prefixname ().c_str (), *line);
 
       /* Seems to be what he wants.  Return it.  */
       return c;
@@ -1940,7 +1937,7 @@ deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
   /* Join command prefix (if any) and the command name.  */
   std::string tmp_cmd_str;
   if (cmd->prefix != nullptr)
-    tmp_cmd_str += std::string (cmd->prefix->prefixname);
+    tmp_cmd_str += cmd->prefix->prefixname ();
   tmp_cmd_str += std::string (cmd->name);
 
   /* Display the appropriate first line, this warns that the thing the user
@@ -1950,7 +1947,7 @@ deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
       /* Join the alias prefix (if any) and the alias name.  */
       std::string tmp_alias_str;
       if (alias->prefix != nullptr)
-	tmp_alias_str += std::string (alias->prefix->prefixname);
+	tmp_alias_str += alias->prefix->prefixname ();
       tmp_alias_str += std::string (alias->name);
 
       if (cmd->cmd_deprecated)

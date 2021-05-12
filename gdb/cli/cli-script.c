@@ -1472,7 +1472,6 @@ do_define_command (const char *comname, int from_tty,
   {
     struct cmd_list_element **c_prefixlist
       = c == nullptr ? nullptr : c->prefixlist;
-    const char *c_prefixname = c == nullptr ? nullptr : c->prefixname;
 
     newc = add_cmd (comname, class_user, user_defined_command,
 		    (c != nullptr && c->theclass == class_user)
@@ -1484,7 +1483,6 @@ do_define_command (const char *comname, int from_tty,
     if (c_prefixlist != nullptr)
       {
 	newc->prefixlist = c_prefixlist;
-	newc->prefixname = c_prefixname;
 	/* allow_unknown: see explanation in equivalent logic in
 	   define_prefix_command ().  */
 	newc->allow_unknown = newc->user_commands.get () != nullptr;
@@ -1615,7 +1613,6 @@ define_prefix_command (const char *comname, int from_tty)
      command.  */
   c->prefixlist = new struct cmd_list_element*;
   *(c->prefixlist) = nullptr;
-  c->prefixname = xstrprintf ("%s ", comfull);
   /* If the prefix command C is not a command, then it must be followed
      by known subcommands.  Otherwise, if C is also a normal command,
      it can be followed by C args that must not cause a 'subcommand'
@@ -1681,11 +1678,11 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
 
   if (c->prefixlist != NULL)
     {
-      const char *prefixname = c->prefixname;
+      const std::string prefixname = c->prefixname ();
 
       for (c = *c->prefixlist; c != NULL; c = c->next)
 	if (c->theclass == class_user || c->prefixlist != NULL)
-	  show_user_1 (c, prefixname, c->name, gdb_stdout);
+	  show_user_1 (c, prefixname.c_str (), c->name, gdb_stdout);
     }
 
 }

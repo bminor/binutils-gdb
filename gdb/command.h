@@ -188,7 +188,7 @@ extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class
 						cmd_const_cfunc_ftype *fun,
 						const char *,
 						struct cmd_list_element **,
-						const char *, int,
+						int,
 						struct cmd_list_element **);
 
 /* Like add_prefix_cmd, but sets the callback to a function that
@@ -196,20 +196,20 @@ extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class
 
 extern struct cmd_list_element *add_basic_prefix_cmd
   (const char *, enum command_class, const char *, struct cmd_list_element **,
-   const char *, int, struct cmd_list_element **);
+   int, struct cmd_list_element **);
 
 /* Like add_prefix_cmd, but useful for "show" prefixes.  This sets the
    callback to a function that simply calls cmd_show_list.  */
 
 extern struct cmd_list_element *add_show_prefix_cmd
   (const char *, enum command_class, const char *, struct cmd_list_element **,
-   const char *, int, struct cmd_list_element **);
+   int, struct cmd_list_element **);
 
 extern struct cmd_list_element *add_prefix_cmd_suppress_notification
 			(const char *name, enum command_class theclass,
 			 cmd_const_cfunc_ftype *fun,
 			 const char *doc, struct cmd_list_element **prefixlist,
-			 const char *prefixname, int allow_unknown,
+			 int allow_unknown,
 			 struct cmd_list_element **list,
 			 int *suppress_notification);
 
@@ -218,7 +218,7 @@ extern struct cmd_list_element *add_abbrev_prefix_cmd (const char *,
 						       cmd_const_cfunc_ftype *fun,
 						       const char *,
 						       struct cmd_list_element
-						       **, const char *, int,
+						       **, int,
 						       struct cmd_list_element
 						       **);
 

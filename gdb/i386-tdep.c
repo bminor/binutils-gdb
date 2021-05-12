@@ -9031,14 +9031,14 @@ is \"default\"."),
 
   add_basic_prefix_cmd ("mpx", class_support, _("\
 Set Intel Memory Protection Extensions specific variables."),
-			&mpx_set_cmdlist, "set mpx ",
+			&mpx_set_cmdlist,
 			0 /* allow-unknown */, &setlist);
 
   /* Add "mpx" prefix for the show commands.  */
 
   add_show_prefix_cmd ("mpx", class_support, _("\
 Show Intel Memory Protection Extensions specific variables."),
-		       &mpx_show_cmdlist, "show mpx ",
+		       &mpx_show_cmdlist,
 		       0 /* allow-unknown */, &showlist);
 
   /* Add "bound" command for the show mpx commands list.  */

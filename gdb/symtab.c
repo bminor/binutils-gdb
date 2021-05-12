@@ -6799,8 +6799,7 @@ Options:\n\
 
   add_basic_prefix_cmd ("module", class_info, _("\
 Print information about modules."),
-			&info_module_cmdlist, "info module ",
-			0, &infolist);
+			&info_module_cmdlist, 0, &infolist);
 
   c = add_cmd ("functions", class_info, info_module_functions_command, _("\
 Display functions arranged by modules.\n\

@@ -306,7 +306,7 @@ tui_get_cmd_list (void)
   if (tuilist == 0)
     add_basic_prefix_cmd ("tui", class_tui,
 			  _("Text User Interface commands."),
-			  &tuilist, "tui ", 0, &cmdlist);
+			  &tuilist, 0, &cmdlist);
   return &tuilist;
 }
 
@@ -996,12 +996,10 @@ _initialize_tui_win ()
      They will appear in the help list in the reverse of this order.  */
   add_basic_prefix_cmd ("tui", class_tui,
 			_("TUI configuration variables."),
-			&tui_setlist, "set tui ",
-			0 /* allow-unknown */, &setlist);
+			&tui_setlist, 0 /* allow-unknown */, &setlist);
   add_show_prefix_cmd ("tui", class_tui,
 		       _("TUI configuration variables."),
-		       &tui_showlist, "show tui ",
-		       0 /* allow-unknown */, &showlist);
+		       &tui_showlist, 0 /* allow-unknown */, &showlist);
 
   add_com ("refresh", class_tui, tui_refresh_all_command,
 	   _("Refresh the terminal display."));

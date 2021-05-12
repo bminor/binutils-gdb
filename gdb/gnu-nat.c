@@ -3238,10 +3238,10 @@ Show whether exceptions in the inferior process will be trapped."),
 
   add_prefix_cmd ("task", no_class, set_task_cmd,
 		  _("Command prefix for setting task attributes."),
-		  &set_task_cmd_list, "set task ", 0, &setlist);
+		  &set_task_cmd_list, 0, &setlist);
   add_prefix_cmd ("task", no_class, show_task_cmd,
 		  _("Command prefix for showing task attributes."),
-		  &show_task_cmd_list, "show task ", 0, &showlist);
+		  &show_task_cmd_list, 0, &showlist);
 
   add_cmd ("pause", class_run, set_task_pause_cmd, _("\
 Set whether the task is suspended while gdb has control.\n\
@@ -3410,17 +3410,17 @@ add_thread_commands (void)
 {
   add_prefix_cmd ("thread", no_class, set_thread_cmd,
 		  _("Command prefix for setting thread properties."),
-		  &set_thread_cmd_list, "set thread ", 0, &setlist);
+		  &set_thread_cmd_list, 0, &setlist);
   add_prefix_cmd ("default", no_class, show_thread_cmd,
 		  _("Command prefix for setting default thread properties."),
-		  &set_thread_default_cmd_list, "set thread default ", 0,
+		  &set_thread_default_cmd_list, 0,
 		  &set_thread_cmd_list);
   add_prefix_cmd ("thread", no_class, set_thread_default_cmd,
 		  _("Command prefix for showing thread properties."),
-		  &show_thread_cmd_list, "show thread ", 0, &showlist);
+		  &show_thread_cmd_list, 0, &showlist);
   add_prefix_cmd ("default", no_class, show_thread_default_cmd,
 		  _("Command prefix for showing default thread properties."),
-		  &show_thread_default_cmd_list, "show thread default ", 0,
+		  &show_thread_default_cmd_list, 0,
 		  &show_thread_cmd_list);
 
   add_cmd ("pause", class_run, set_thread_pause_cmd, _("\

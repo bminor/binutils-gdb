@@ -2099,7 +2099,7 @@ _initialize_go32_nat ()
 
   add_basic_prefix_cmd ("dos", class_info, _("\
 Print information specific to DJGPP (aka MS-DOS) debugging."),
-			&info_dos_cmdlist, "info dos ", 0, &infolist);
+			&info_dos_cmdlist, 0, &infolist);
 
   add_cmd ("sysinfo", class_info, go32_sysinfo, _("\
 Display information about the target system, including CPU, OS, DPMI, etc."),

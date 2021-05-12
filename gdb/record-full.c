@@ -2794,7 +2794,7 @@ _initialize_record_full ()
 
   add_prefix_cmd ("full", class_obscure, cmd_record_full_start,
 		  _("Start full execution recording."), &record_full_cmdlist,
-		  "record full ", 0, &record_cmdlist);
+		  0, &record_cmdlist);
 
   c = add_cmd ("restore", class_obscure, cmd_record_full_restore,
 	       _("Restore the execution log from a file.\n\
@@ -2810,11 +2810,11 @@ Argument is filename.  File must be created with 'record save'."),
 
   add_basic_prefix_cmd ("full", class_support,
 			_("Set record options."), &set_record_full_cmdlist,
-			"set record full ", 0, &set_record_cmdlist);
+			0, &set_record_cmdlist);
 
   add_show_prefix_cmd ("full", class_support,
 		       _("Show record options."), &show_record_full_cmdlist,
-		       "show record full ", 0, &show_record_cmdlist);
+		       0, &show_record_cmdlist);
 
   /* Record instructions number limit command.  */
   add_setshow_boolean_cmd ("stop-at-limit", no_class,

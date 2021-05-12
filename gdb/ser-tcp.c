@@ -469,12 +469,12 @@ _initialize_ser_tcp ()
   add_basic_prefix_cmd ("tcp", class_maintenance, _("\
 TCP protocol specific variables.\n\
 Configure variables specific to remote TCP connections."),
-			&tcp_set_cmdlist, "set tcp ",
+			&tcp_set_cmdlist,
 			0 /* allow-unknown */, &setlist);
   add_show_prefix_cmd ("tcp", class_maintenance, _("\
 TCP protocol specific variables.\n\
 Configure variables specific to remote TCP connections."),
-		       &tcp_show_cmdlist, "show tcp ",
+		       &tcp_show_cmdlist,
 		       0 /* allow-unknown */, &showlist);
 
   add_setshow_boolean_cmd ("auto-retry", class_obscure,

@@ -847,12 +847,10 @@ Only one level of typedefs is unrolled.  See also \"ptype\"."));
 
   add_show_prefix_cmd ("type", no_class,
 		       _("Generic command for showing type-printing settings."),
-		       &showprinttypelist, "show print type ", 0,
-		       &showprintlist);
+		       &showprinttypelist, 0, &showprintlist);
   add_basic_prefix_cmd ("type", no_class,
 			_("Generic command for setting how types print."),
-			&setprinttypelist, "set print type ", 0,
-			&setprintlist);
+			&setprinttypelist, 0, &setprintlist);
 
   add_setshow_boolean_cmd ("methods", no_class, &print_methods,
 			   _("\

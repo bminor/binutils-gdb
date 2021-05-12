@@ -782,20 +782,17 @@ This command is only a placeholder.")
 
   add_basic_prefix_cmd ("guile", class_obscure,
 			_("Prefix command for Guile preference settings."),
-			&set_guile_list, "set guile ", 0,
-			&setlist);
+			&set_guile_list, 0, &setlist);
   add_alias_cmd ("gu", "guile", class_obscure, 1, &setlist);
 
   add_show_prefix_cmd ("guile", class_obscure,
 		       _("Prefix command for Guile preference settings."),
-		       &show_guile_list, "show guile ", 0,
-		       &showlist);
+		       &show_guile_list, 0, &showlist);
   add_alias_cmd ("gu", "guile", class_obscure, 1, &showlist);
 
   add_basic_prefix_cmd ("guile", class_obscure,
 			_("Prefix command for Guile info displays."),
-			&info_guile_list, "info guile ", 0,
-			&infolist);
+			&info_guile_list, 0, &infolist);
   add_info_alias ("gu", "guile", 1);
 
   /* The name "print-stack" is carried over from Python.

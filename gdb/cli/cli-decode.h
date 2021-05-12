@@ -71,6 +71,25 @@ struct cmd_list_element
 
   DISABLE_COPY_AND_ASSIGN (cmd_list_element);
 
+  /* For prefix commands, return a string containing prefix commands to
+     get here: this one plus any others needed to get to it.  Ends in a
+     space.  It is used before the word "command" in describing the
+     commands reached through this prefix.
+
+     For non-prefix commands, an empty string is returned.  */
+  std::string prefixname ()
+  {
+    if (prefixlist == nullptr)
+      /* Not a prefix command.  */
+      return "";
+
+    std::string prefixname;
+    if (prefix != nullptr)
+      prefixname = prefix->prefixname ();
+    prefixname += name;
+    prefixname += " ";
+    return prefixname;
+  }
 
   /* Points to next command in this list.  */
   struct cmd_list_element *next = nullptr;
@@ -185,13 +204,6 @@ struct cmd_list_element
   /* Nonzero identifies a prefix command.  For them, the address
      of the variable containing the list of subcommands.  */
   struct cmd_list_element **prefixlist = nullptr;
-
-  /* For prefix commands only:
-     String containing prefix commands to get here: this one
-     plus any others needed to get to it.  Should end in a space.
-     It is used before the word "command" in describing the
-     commands reached through this prefix.  */
-  const char *prefixname = nullptr;
 
   /* The prefix command of this command.  */
   struct cmd_list_element *prefix = nullptr;

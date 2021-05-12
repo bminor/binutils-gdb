@@ -3084,7 +3084,7 @@ environment to be given to the program."), &showlist);
 
   add_basic_prefix_cmd ("unset", no_class,
 			_("Complement to certain \"set\" commands."),
-			&unsetlist, "unset ", 0, &cmdlist);
+			&unsetlist, 0, &cmdlist);
 
   c = add_cmd ("environment", class_run, unset_environment_command, _("\
 Cancel environment variable VAR for the program.\n\
@@ -3121,7 +3121,7 @@ needed."),
 
   add_prefix_cmd ("kill", class_run, kill_command,
 		  _("Kill execution of program being debugged."),
-		  &killlist, "kill ", 0, &cmdlist);
+		  &killlist, 0, &cmdlist);
 
   add_com ("attach", class_run, attach_command, _("\
 Attach to a process or file outside of GDB.\n\
@@ -3140,7 +3140,7 @@ to specify the program, and to load its symbol table."));
 Detach a process or file previously attached.\n\
 If a process, it is no longer traced, and it continues its execution.  If\n\
 you were debugging a file, the file is closed and gdb no longer accesses it."),
-		  &detachlist, "detach ", 0, &cmdlist);
+		  &detachlist, 0, &cmdlist);
 
   add_com ("disconnect", class_run, disconnect_command, _("\
 Disconnect from a target.\n\
@@ -3295,7 +3295,7 @@ in the named register groups."));
 		  _("\
 Show additional information about a process.\n\
 Specify any process id, or use the program being debugged by default."),
-		  &info_proc_cmdlist, "info proc ",
+		  &info_proc_cmdlist,
 		  1/*allow-unknown*/, &infolist);
 
   add_cmd ("mappings", class_info, info_proc_cmd_mappings, _("\

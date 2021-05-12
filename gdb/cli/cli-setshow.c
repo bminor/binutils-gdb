@@ -747,7 +747,8 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
       if (list->prefixlist && list->cmd_pointer == nullptr)
 	{
 	  ui_out_emit_tuple optionlist_emitter (uiout, "optionlist");
-	  const char *new_prefix = strstr (list->prefixname, "show ") + 5;
+	  std::string prefixname = list->prefixname ();
+	  const char *new_prefix = strstr (prefixname.c_str (), "show ") + 5;
 
 	  if (uiout->is_mi_like_p ())
 	    uiout->field_string ("prefix", new_prefix);
@@ -757,13 +758,14 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 	{
 	  ui_out_emit_tuple option_emitter (uiout, "option");
 
-	  {
-	    /* If we find a prefix, output it (with "show " skipped).  */
-	    const char *prefixname
-	      = (list->prefix == nullptr ? ""
-		 : strstr (list->prefix->prefixname, "show ") + 5);
-	    uiout->text (prefixname);
-	  }
+	  if (list->prefix != nullptr)
+	    {
+	      /* If we find a prefix, output it (with "show " skipped).  */
+	      std::string prefixname = list->prefix->prefixname ();
+	      prefixname = (list->prefix->prefixlist == nullptr ? ""
+			    : strstr (prefixname.c_str (), "show ") + 5);
+	      uiout->text (prefixname.c_str ());
+	    }
 	  uiout->field_string ("name", list->name);
 	  uiout->text (":  ");
 	  if (list->type == show_cmd)

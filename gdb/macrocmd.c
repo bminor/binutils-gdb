@@ -455,7 +455,7 @@ _initialize_macrocmd ()
      the various commands for working with preprocessor macros.  */
   add_basic_prefix_cmd ("macro", class_info,
 			_("Prefix for commands dealing with C preprocessor macros."),
-			&macrolist, "macro ", 0, &cmdlist);
+			&macrolist, 0, &cmdlist);
 
   add_cmd ("expand", no_class, macro_expand_command, _("\
 Fully expand any C/C++ preprocessor macro invocations in EXPRESSION.\n\

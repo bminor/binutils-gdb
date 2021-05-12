@@ -719,11 +719,11 @@ _initialize_ravenscar ()
 
   add_basic_prefix_cmd ("ravenscar", no_class,
 			_("Prefix command for changing Ravenscar-specific settings."),
-			&set_ravenscar_list, "set ravenscar ", 0, &setlist);
+			&set_ravenscar_list, 0, &setlist);
 
   add_show_prefix_cmd ("ravenscar", no_class,
 		       _("Prefix command for showing Ravenscar-specific settings."),
-		       &show_ravenscar_list, "show ravenscar ", 0, &showlist);
+		       &show_ravenscar_list, 0, &showlist);
 
   add_setshow_boolean_cmd ("task-switching", class_obscure,
 			   &ravenscar_task_support, _("\

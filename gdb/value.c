@@ -4259,7 +4259,7 @@ VARIABLE is already initialized."));
 
   add_prefix_cmd ("function", no_class, function_command, _("\
 Placeholder command for showing help on convenience functions."),
-		  &functionlist, "function ", 0, &cmdlist);
+		  &functionlist, 0, &cmdlist);
 
   add_internal_function ("_isvoid", _("\
 Check whether an expression is void.\n\

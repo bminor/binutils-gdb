@@ -872,7 +872,7 @@ The first argument is the type or protocol of the target machine.\n\
 Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
-			  &targetlist, "target ", 0, &cmdlist);
+			  &targetlist, 0, &cmdlist);
   c = add_cmd (t.shortname, no_class, t.doc, &targetlist);
   set_cmd_context (c, (void *) &t);
   set_cmd_sfunc (c, open_target);

@@ -3111,7 +3111,7 @@ _initialize_record_btrace ()
 {
   add_prefix_cmd ("btrace", class_obscure, cmd_record_btrace_start,
 		  _("Start branch trace recording."), &record_btrace_cmdlist,
-		  "record btrace ", 0, &record_cmdlist);
+		  0, &record_cmdlist);
   add_alias_cmd ("b", "btrace", class_obscure, 1, &record_cmdlist);
 
   add_cmd ("bts", class_obscure, cmd_record_btrace_bts_start,
@@ -3131,11 +3131,11 @@ This format may not be available on all processors."),
 
   add_basic_prefix_cmd ("btrace", class_support,
 			_("Set record options."), &set_record_btrace_cmdlist,
-			"set record btrace ", 0, &set_record_cmdlist);
+			0, &set_record_cmdlist);
 
   add_show_prefix_cmd ("btrace", class_support,
 		       _("Show record options."), &show_record_btrace_cmdlist,
-		       "show record btrace ", 0, &show_record_cmdlist);
+		       0, &show_record_cmdlist);
 
   add_setshow_enum_cmd ("replay-memory-access", no_class,
 			replay_memory_access_types, &replay_memory_access, _("\
@@ -3163,7 +3163,7 @@ When GDB does not support that cpu, this option can be used to enable\n\
 workarounds for a similar cpu that GDB supports.\n\n\
 When set to \"none\", errata workarounds are disabled."),
 		  &set_record_btrace_cpu_cmdlist,
-		  "set record btrace cpu ", 1,
+		  1,
 		  &set_record_btrace_cmdlist);
 
   add_cmd ("auto", class_support, cmd_set_record_btrace_cpu_auto, _("\
@@ -3181,13 +3181,13 @@ Show the cpu to be used for trace decode."),
   add_basic_prefix_cmd ("bts", class_support,
 			_("Set record btrace bts options."),
 			&set_record_btrace_bts_cmdlist,
-			"set record btrace bts ", 0,
+			0,
 			&set_record_btrace_cmdlist);
 
   add_show_prefix_cmd ("bts", class_support,
 		       _("Show record btrace bts options."),
 		       &show_record_btrace_bts_cmdlist,
-		       "show record btrace bts ", 0,
+		       0,
 		       &show_record_btrace_cmdlist);
 
   add_setshow_uinteger_cmd ("buffer-size", no_class,
@@ -3207,13 +3207,13 @@ The trace buffer size may not be changed while recording."), NULL,
   add_basic_prefix_cmd ("pt", class_support,
 			_("Set record btrace pt options."),
 			&set_record_btrace_pt_cmdlist,
-			"set record btrace pt ", 0,
+			0,
 			&set_record_btrace_cmdlist);
 
   add_show_prefix_cmd ("pt", class_support,
 		       _("Show record btrace pt options."),
 		       &show_record_btrace_pt_cmdlist,
-		       "show record btrace pt ", 0,
+		       0,
 		       &show_record_btrace_cmdlist);
 
   add_setshow_uinteger_cmd ("buffer-size", no_class,

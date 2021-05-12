@@ -2495,7 +2495,7 @@ _initialize_arc_tdep ()
   add_show_prefix_cmd ("arc", class_maintenance,
 		       _("ARC-specific maintenance commands for printing GDB "
 			 "internal state."),
-		       &maintenance_print_arc_list, "maintenance print arc ",
+		       &maintenance_print_arc_list,
 		       0, &maintenanceprintlist);
 
   add_cmd ("arc-instruction", class_maintenance,

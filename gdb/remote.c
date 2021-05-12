@@ -14854,13 +14854,13 @@ _initialize_remote ()
 Remote protocol specific variables.\n\
 Configure various remote-protocol specific variables such as\n\
 the packets being used."),
-			&remote_set_cmdlist, "set remote ",
+			&remote_set_cmdlist,
 			0 /* allow-unknown */, &setlist);
   add_prefix_cmd ("remote", class_maintenance, show_remote_cmd, _("\
 Remote protocol specific variables.\n\
 Configure various remote-protocol specific variables such as\n\
 the packets being used."),
-		  &remote_show_cmdlist, "show remote ",
+		  &remote_show_cmdlist,
 		  0 /* allow-unknown */, &showlist);
 
   add_cmd ("compare-sections", class_obscure, compare_sections_command, _("\
@@ -15282,7 +15282,7 @@ packets."),
   add_basic_prefix_cmd ("remote", class_files, _("\
 Manipulate files on the remote system.\n\
 Transfer files to and from the remote target system."),
-			&remote_cmdlist, "remote ",
+			&remote_cmdlist,
 			0 /* allow-unknown */, &cmdlist);
 
   add_cmd ("put", class_files, remote_put_command,

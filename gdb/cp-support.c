@@ -2212,7 +2212,6 @@ _initialize_cp_support ()
   add_basic_prefix_cmd ("cplus", class_maintenance,
 			_("C++ maintenance commands."),
 			&maint_cplus_cmd_list,
-			"maintenance cplus ",
 			0, &maintenancelist);
   add_alias_cmd ("cp", "cplus",
 		 class_maintenance, 1,

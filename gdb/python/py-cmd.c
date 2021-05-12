@@ -95,9 +95,6 @@ cmdpy_destroyer (struct cmd_list_element *self, void *context)
   /* Release our hold on the command object.  */
   gdbpy_ref<cmdpy_object> cmd ((cmdpy_object *) context);
   cmd->command = NULL;
-
-  /* We may have allocated the prefix name.  */
-  xfree ((char *) self->prefixname);
 }
 
 /* Called by gdb to invoke the command.  */
@@ -114,7 +111,7 @@ cmdpy_function (struct cmd_list_element *command,
     error (_("Invalid invocation of Python command object."));
   if (! PyObject_HasAttr ((PyObject *) obj, invoke_cst))
     {
-      if (obj->command->prefixname)
+      if (obj->command->prefixlist != nullptr)
 	{
 	  /* A prefix command does not need an invoke method.  */
 	  return;
@@ -438,11 +435,11 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   int completetype = -1;
   char *docstring = NULL;
   struct cmd_list_element **cmd_list;
-  char *cmd_name, *pfx_name;
+  char *cmd_name;
   static const char *keywords[] = { "name", "command_class", "completer_class",
 				    "prefix", NULL };
-  PyObject *is_prefix = NULL;
-  int cmp;
+  PyObject *is_prefix_obj = NULL;
+  bool is_prefix = false;
 
   if (obj->command)
     {
@@ -455,7 +452,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "si|iO",
 					keywords, &name, &cmdtype,
-					&completetype, &is_prefix))
+					&completetype, &is_prefix_obj))
     return -1;
 
   if (cmdtype != no_class && cmdtype != class_run
@@ -481,39 +478,17 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   if (! cmd_name)
     return -1;
 
-  pfx_name = NULL;
-  if (is_prefix != NULL)
+  if (is_prefix_obj != NULL)
     {
-      cmp = PyObject_IsTrue (is_prefix);
-      if (cmp == 1)
-	{
-	  int i, out;
-	
-	  /* Make a normalized form of the command name.  */
-	  pfx_name = (char *) xmalloc (strlen (name) + 2);
-	
-	  i = 0;
-	  out = 0;
-	  while (name[i])
-	    {
-	      /* Skip whitespace.  */
-	      while (name[i] == ' ' || name[i] == '\t')
-		++i;
-	      /* Copy non-whitespace characters.  */
-	      while (name[i] && name[i] != ' ' && name[i] != '\t')
-		pfx_name[out++] = name[i++];
-	      /* Add a single space after each word -- including the final
-		 word.  */
-	      pfx_name[out++] = ' ';
-	    }
-	  pfx_name[out] = '\0';
-	}
-      else if (cmp < 0)
+      int cmp = PyObject_IsTrue (is_prefix_obj);
+       if (cmp < 0)
 	{
 	  xfree (cmd_name);
 	  return -1;
 	}
+       is_prefix = cmp > 0;
     }
+
   if (PyObject_HasAttr (self, gdbpy_doc_cst))
     {
       gdbpy_ref<> ds_obj (PyObject_GetAttr (self, gdbpy_doc_cst));
@@ -524,7 +499,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	  if (docstring == NULL)
 	    {
 	      xfree (cmd_name);
-	      xfree (pfx_name);
 	      return -1;
 	    }
 	}
@@ -538,7 +512,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
     {
       struct cmd_list_element *cmd;
 
-      if (pfx_name)
+      if (is_prefix)
 	{
 	  int allow_unknown;
 
@@ -547,7 +521,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	  allow_unknown = PyObject_HasAttr (self, invoke_cst);
 	  cmd = add_prefix_cmd (cmd_name, (enum command_class) cmdtype,
 				NULL, docstring, &obj->sub_list,
-				pfx_name, allow_unknown, cmd_list);
+				allow_unknown, cmd_list);
 	}
       else
 	cmd = add_cmd (cmd_name, (enum command_class) cmdtype,
@@ -571,7 +545,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
     {
       xfree (cmd_name);
       xfree (docstring);
-      xfree (pfx_name);
       gdbpy_convert_exception (except);
       return -1;
     }

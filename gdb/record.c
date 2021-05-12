@@ -787,21 +787,21 @@ A size of \"unlimited\" means unlimited lines.  The default is 10."),
 
   c = add_prefix_cmd ("record", class_obscure, cmd_record_start,
 		      _("Start recording."),
-		      &record_cmdlist, "record ", 0, &cmdlist);
+		      &record_cmdlist, 0, &cmdlist);
   set_cmd_completer (c, filename_completer);
 
   add_com_alias ("rec", "record", class_obscure, 1);
   add_basic_prefix_cmd ("record", class_support,
 			_("Set record options."), &set_record_cmdlist,
-			"set record ", 0, &setlist);
+			0, &setlist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &setlist);
   add_show_prefix_cmd ("record", class_support,
 		       _("Show record options."), &show_record_cmdlist,
-		       "show record ", 0, &showlist);
+		       0, &showlist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &showlist);
   add_prefix_cmd ("record", class_support, info_record_command,
 		  _("Info record options."), &info_record_cmdlist,
-		  "info record ", 0, &infolist);
+		  0, &infolist);
   add_alias_cmd ("rec", "record", class_obscure, 1, &infolist);
 
   c = add_cmd ("save", class_obscure, cmd_record_save,
@@ -825,7 +825,7 @@ Default filename is 'gdb_record.PROCESS_ID'."),
   add_prefix_cmd ("goto", class_obscure, cmd_record_goto, _("\
 Restore the program to its state at instruction number N.\n\
 Argument is instruction number, as shown by 'info record'."),
-		  &record_goto_cmdlist, "record goto ", 1, &record_cmdlist);
+		  &record_goto_cmdlist, 1, &record_cmdlist);
 
   add_cmd ("begin", class_obscure, cmd_record_goto_begin,
 	   _("Go to the beginning of the execution log."),

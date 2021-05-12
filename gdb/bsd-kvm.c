@@ -388,7 +388,7 @@ bsd_kvm_add_target (int (*supply_pcb)(struct regcache *, struct pcb *))
   
   add_prefix_cmd ("kvm", class_obscure, bsd_kvm_cmd, _("\
 Generic command for manipulating the kernel memory interface."),
-		  &bsd_kvm_cmdlist, "kvm ", 0, &cmdlist);
+		  &bsd_kvm_cmdlist, 0, &cmdlist);
 
 #ifndef HAVE_STRUCT_THREAD_TD_PCB
   add_cmd ("proc", class_obscure, bsd_kvm_proc_cmd,

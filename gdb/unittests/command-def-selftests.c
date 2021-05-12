@@ -87,7 +87,7 @@ check_doc (struct cmd_list_element *commandlist, const char *prefix)
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
-	  check_doc (*c->prefixlist, c->prefixname);
+	  check_doc (*c->prefixlist, c->prefixname ().c_str ());
 	}
     }
 }
@@ -159,7 +159,7 @@ traverse_command_structure (struct cmd_list_element **list,
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
-	  traverse_command_structure (c->prefixlist, c->prefixname);
+	  traverse_command_structure (c->prefixlist, c->prefixname ().c_str ());
 	}
       if (prefixcmd != c->prefix
 	  || (prefixcmd == nullptr && *list != cmdlist))

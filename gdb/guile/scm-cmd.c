@@ -766,7 +766,7 @@ gdbscm_register_command_x (SCM self)
 
 	  cmd = add_prefix_cmd (c_smob->cmd_name, c_smob->cmd_class,
 				NULL, c_smob->doc, &c_smob->sub_list,
-				c_smob->name, allow_unknown, cmd_list);
+				allow_unknown, cmd_list);
 	}
       else
 	{

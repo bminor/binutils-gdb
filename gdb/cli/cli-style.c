@@ -225,13 +225,10 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
 					struct cmd_list_element **show_list,
 					bool skip_intensity)
 {
-  m_set_prefix = std::string ("set style ") + m_name + " ";
-  m_show_prefix = std::string ("show style ") + m_name + " ";
-
   add_basic_prefix_cmd (m_name, no_class, prefix_doc, &m_set_list,
-			m_set_prefix.c_str (), 0, set_list);
+			0, set_list);
   add_show_prefix_cmd (m_name, no_class, prefix_doc, &m_show_list,
-		       m_show_prefix.c_str (), 0, show_list);
+		       0, show_list);
 
   add_setshow_enum_cmd ("foreground", theclass, cli_colors,
 			&m_foreground,
@@ -297,11 +294,11 @@ _initialize_cli_style ()
   add_basic_prefix_cmd ("style", no_class, _("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
-		  &style_set_list, "set style ", 0, &setlist);
+		  &style_set_list, 0, &setlist);
   add_show_prefix_cmd ("style", no_class, _("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
-		  &style_show_list, "show style ", 0, &showlist);
+		  &style_show_list, 0, &showlist);
 
   add_setshow_boolean_cmd ("enabled", no_class, &cli_styling, _("\
 Set whether CLI styling is enabled."), _("\

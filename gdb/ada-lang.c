@@ -13389,11 +13389,11 @@ _initialize_ada_language ()
 
   add_basic_prefix_cmd ("ada", no_class,
 			_("Prefix command for changing Ada-specific settings."),
-			&set_ada_list, "set ada ", 0, &setlist);
+			&set_ada_list, 0, &setlist);
 
   add_show_prefix_cmd ("ada", no_class,
 		       _("Generic command for showing Ada-specific settings."),
-		       &show_ada_list, "show ada ", 0, &showlist);
+		       &show_ada_list, 0, &showlist);
 
   add_setshow_boolean_cmd ("trust-PAD-over-XVS", class_obscure,
 			   &trust_pad_over_xvs, _("\
@@ -13472,12 +13472,12 @@ the regular expression are listed."));
 
   add_basic_prefix_cmd ("ada", class_maintenance,
 			_("Set Ada maintenance-related variables."),
-			&maint_set_ada_cmdlist, "maintenance set ada ",
+			&maint_set_ada_cmdlist,
 			0/*allow-unknown*/, &maintenance_set_cmdlist);
 
   add_show_prefix_cmd ("ada", class_maintenance,
 		       _("Show Ada maintenance-related variables."),
-		       &maint_show_ada_cmdlist, "maintenance show ada ",
+		       &maint_show_ada_cmdlist,
 		       0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   add_setshow_boolean_cmd

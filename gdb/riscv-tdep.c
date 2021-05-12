@@ -3850,12 +3850,12 @@ _initialize_riscv_tdep ()
      riscv" commands.  */
   add_basic_prefix_cmd ("riscv", no_class,
 			_("RISC-V specific debug commands."),
-			&setdebugriscvcmdlist, "set debug riscv ", 0,
+			&setdebugriscvcmdlist, 0,
 			&setdebuglist);
 
   add_show_prefix_cmd ("riscv", no_class,
 		       _("RISC-V specific debug commands."),
-		       &showdebugriscvcmdlist, "show debug riscv ", 0,
+		       &showdebugriscvcmdlist, 0,
 		       &showdebuglist);
 
   add_setshow_zuinteger_cmd ("breakpoints", class_maintenance,
@@ -3901,11 +3901,11 @@ initialisation process."),
   /* Add root prefix command for all "set riscv" and "show riscv" commands.  */
   add_basic_prefix_cmd ("riscv", no_class,
 			_("RISC-V specific commands."),
-			&setriscvcmdlist, "set riscv ", 0, &setlist);
+			&setriscvcmdlist, 0, &setlist);
 
   add_show_prefix_cmd ("riscv", no_class,
 		       _("RISC-V specific commands."),
-		       &showriscvcmdlist, "show riscv ", 0, &showlist);
+		       &showriscvcmdlist, 0, &showlist);
 
 
   use_compressed_breakpoints = AUTO_BOOLEAN_AUTO;

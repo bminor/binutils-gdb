@@ -3171,12 +3171,12 @@ _initialize_frame ()
   add_basic_prefix_cmd ("backtrace", class_maintenance, _("\
 Set backtrace specific variables.\n\
 Configure backtrace variables such as the backtrace limit"),
-			&set_backtrace_cmdlist, "set backtrace ",
+			&set_backtrace_cmdlist,
 			0/*allow-unknown*/, &setlist);
   add_show_prefix_cmd ("backtrace", class_maintenance, _("\
 Show backtrace specific variables.\n\
 Show backtrace variables such as the backtrace limit."),
-		       &show_backtrace_cmdlist, "show backtrace ",
+		       &show_backtrace_cmdlist,
 		       0/*allow-unknown*/, &showlist);
 
   add_setshow_uinteger_cmd ("limit", class_obscure,

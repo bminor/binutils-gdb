@@ -3145,28 +3145,26 @@ _initialize_valprint ()
 
   add_basic_prefix_cmd ("print", no_class,
 			_("Generic command for setting how things print."),
-			&setprintlist, "set print ", 0, &setlist);
+			&setprintlist, 0, &setlist);
   add_alias_cmd ("p", "print", no_class, 1, &setlist);
   /* Prefer set print to set prompt.  */
   add_alias_cmd ("pr", "print", no_class, 1, &setlist);
 
   add_show_prefix_cmd ("print", no_class,
 		       _("Generic command for showing print settings."),
-		       &showprintlist, "show print ", 0, &showlist);
+		       &showprintlist, 0, &showlist);
   add_alias_cmd ("p", "print", no_class, 1, &showlist);
   add_alias_cmd ("pr", "print", no_class, 1, &showlist);
 
   cmd = add_basic_prefix_cmd ("raw", no_class,
 			      _("\
 Generic command for setting what things to print in \"raw\" mode."),
-			      &setprintrawlist, "set print raw ", 0,
-			      &setprintlist);
+			      &setprintrawlist, 0, &setprintlist);
   deprecate_cmd (cmd, nullptr);
 
   cmd = add_show_prefix_cmd ("raw", no_class,
 			     _("Generic command for showing \"print raw\" settings."),
-			     &showprintrawlist, "show print raw ", 0,
-			     &showprintlist);
+			     &showprintrawlist, 0, &showprintlist);
   deprecate_cmd (cmd, nullptr);
 
   gdb::option::add_setshow_cmds_for_options

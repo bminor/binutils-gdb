@@ -1022,7 +1022,7 @@ _initialize_tui_layout ()
   add_basic_prefix_cmd ("layout", class_tui, _("\
 Change the layout of windows.\n\
 Usage: layout prev | next | LAYOUT-NAME"),
-			&layout_list, "layout ", 0, &cmdlist);
+			&layout_list, 0, &cmdlist);
 
   add_cmd ("next", class_tui, tui_next_layout_command,
 	   _("Apply the next TUI layout."),

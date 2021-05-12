@@ -1936,13 +1936,11 @@ This command is only a placeholder.")
   /* Add set/show python print-stack.  */
   add_basic_prefix_cmd ("python", no_class,
 			_("Prefix command for python preference settings."),
-			&user_show_python_list, "show python ", 0,
-			&showlist);
+			&user_show_python_list, 0, &showlist);
 
   add_show_prefix_cmd ("python", no_class,
 		       _("Prefix command for python preference settings."),
-		       &user_set_python_list, "set python ", 0,
-		       &setlist);
+		       &user_set_python_list, 0, &setlist);
 
   add_setshow_enum_cmd ("print-stack", no_class, python_excp_enums,
 			&gdbpy_should_print_stack, _("\

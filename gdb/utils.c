@@ -506,14 +506,10 @@ add_internal_problem_command (struct internal_problem *problem)
 
   add_basic_prefix_cmd (problem->name, class_maintenance, set_doc,
 			set_cmd_list,
-			concat ("maintenance set ", problem->name, " ",
-				(char *) NULL),
 			0/*allow-unknown*/, &maintenance_set_cmdlist);
 
   add_show_prefix_cmd (problem->name, class_maintenance, show_doc,
 		       show_cmd_list,
-		       concat ("maintenance show ", problem->name, " ",
-			       (char *) NULL),
 		       0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   if (problem->user_settable_should_quit)

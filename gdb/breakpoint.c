@@ -15731,7 +15731,7 @@ Give breakpoint numbers (separated by spaces) as arguments.\n\
 With no subcommand, breakpoints are enabled until you command otherwise.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
 With a subcommand you can enable temporarily."),
-		  &enablelist, "enable ", 1, &cmdlist);
+		  &enablelist, 1, &cmdlist);
 
   add_com_alias ("en", "enable", class_breakpoint, 1);
 
@@ -15741,7 +15741,7 @@ Usage: enable breakpoints [BREAKPOINTNUM]...\n\
 Give breakpoint numbers (separated by spaces) as arguments.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
 May be abbreviated to simply \"enable\"."),
-		   &enablebreaklist, "enable breakpoints ", 1, &enablelist);
+		   &enablebreaklist, 1, &enablelist);
 
   add_cmd ("once", no_class, enable_once_command, _("\
 Enable some breakpoints for one hit.\n\
@@ -15787,7 +15787,7 @@ Usage: disable [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
 A disabled breakpoint is not forgotten, but has no effect until re-enabled."),
-		  &disablelist, "disable ", 1, &cmdlist);
+		  &disablelist, 1, &cmdlist);
   add_com_alias ("dis", "disable", class_breakpoint, 1);
   add_com_alias ("disa", "disable", class_breakpoint, 1);
 
@@ -15807,7 +15807,7 @@ Arguments are breakpoint numbers with spaces in between.\n\
 To delete all breakpoints, give no argument.\n\
 \n\
 Also a prefix command for deletion of other GDB objects."),
-		  &deletelist, "delete ", 1, &cmdlist);
+		  &deletelist, 1, &cmdlist);
   add_com_alias ("d", "delete", class_breakpoint, 1);
   add_com_alias ("del", "delete", class_breakpoint, 1);
 
@@ -15843,7 +15843,7 @@ BREAK_ARGS_HELP ("break")));
     {
       add_abbrev_prefix_cmd ("stop", class_breakpoint, stop_command, _("\
 Break in function/address or break at a line in the current file."),
-			     &stoplist, "stop ", 1, &cmdlist);
+			     &stoplist, 1, &cmdlist);
       add_cmd ("in", class_breakpoint, stopin_command,
 	       _("Break in function or address."), &stoplist);
       add_cmd ("at", class_breakpoint, stopat_command,
@@ -15906,12 +15906,12 @@ breakpoint set."),
 
   add_basic_prefix_cmd ("catch", class_breakpoint, _("\
 Set catchpoints to catch events."),
-			&catch_cmdlist, "catch ",
+			&catch_cmdlist,
 			0/*allow-unknown*/, &cmdlist);
 
   add_basic_prefix_cmd ("tcatch", class_breakpoint, _("\
 Set temporary catchpoints to catch events."),
-			&tcatch_cmdlist, "tcatch ",
+			&tcatch_cmdlist,
 			0/*allow-unknown*/, &cmdlist);
 
   add_catch_command ("fork", _("Catch calls to fork."),
@@ -16083,7 +16083,7 @@ if TPNUM is omitted, passcount refers to the last tracepoint defined."));
 
   add_basic_prefix_cmd ("save", class_breakpoint,
 			_("Save breakpoint definitions as a script."),
-			&save_cmdlist, "save ",
+			&save_cmdlist,
 			0/*allow-unknown*/, &cmdlist);
 
   c = add_cmd ("breakpoints", class_breakpoint, save_breakpoints_command, _("\
@@ -16107,13 +16107,13 @@ Use the 'source' command in another debug session to restore them."),
 Breakpoint specific settings.\n\
 Configure various breakpoint-specific variables such as\n\
 pending breakpoint behavior."),
-			&breakpoint_set_cmdlist, "set breakpoint ",
+			&breakpoint_set_cmdlist,
 			0/*allow-unknown*/, &setlist);
   add_show_prefix_cmd ("breakpoint", class_maintenance, _("\
 Breakpoint specific settings.\n\
 Configure various breakpoint-specific variables such as\n\
 pending breakpoint behavior."),
-		       &breakpoint_show_cmdlist, "show breakpoint ",
+		       &breakpoint_show_cmdlist,
 		       0/*allow-unknown*/, &showlist);
 
   add_setshow_auto_boolean_cmd ("pending", no_class,

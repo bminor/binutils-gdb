@@ -4046,7 +4046,7 @@ List target static tracepoints markers."));
   add_prefix_cmd ("tfind", class_trace, tfind_command, _("\
 Select a trace frame.\n\
 No argument means forward by one frame; '-' means backward by one frame."),
-		  &tfindlist, "tfind ", 1, &cmdlist);
+		  &tfindlist, 1, &cmdlist);
 
   add_cmd ("outside", class_trace, tfind_outside_command, _("\
 Select a trace frame whose PC is outside the given range (exclusive).\n\

@@ -1166,13 +1166,13 @@ _initialize_language ()
 
   add_basic_prefix_cmd ("check", no_class,
 			_("Set the status of the type/range checker."),
-			&setchecklist, "set check ", 0, &setlist);
+			&setchecklist, 0, &setlist);
   add_alias_cmd ("c", "check", no_class, 1, &setlist);
   add_alias_cmd ("ch", "check", no_class, 1, &setlist);
 
   add_show_prefix_cmd ("check", no_class,
 		       _("Show the status of the type/range checker."),
-		       &showchecklist, "show check ", 0, &showlist);
+		       &showchecklist, 0, &showlist);
   add_alias_cmd ("c", "check", no_class, 1, &showlist);
   add_alias_cmd ("ch", "check", no_class, 1, &showlist);
 

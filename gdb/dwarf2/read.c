@@ -25079,13 +25079,13 @@ _initialize_dwarf2_read ()
   add_basic_prefix_cmd ("dwarf", class_maintenance, _("\
 Set DWARF specific variables.\n\
 Configure DWARF variables such as the cache size."),
-			&set_dwarf_cmdlist, "maintenance set dwarf ",
+			&set_dwarf_cmdlist,
 			0/*allow-unknown*/, &maintenance_set_cmdlist);
 
   add_show_prefix_cmd ("dwarf", class_maintenance, _("\
 Show DWARF specific variables.\n\
 Show DWARF variables such as the cache size."),
-		       &show_dwarf_cmdlist, "maintenance show dwarf ",
+		       &show_dwarf_cmdlist,
 		       0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   add_setshow_zinteger_cmd ("max-cache-age", class_obscure,

@@ -8945,11 +8945,11 @@ _initialize_mips_tdep ()
   /* Add root prefix command for all "set mips"/"show mips" commands.  */
   add_basic_prefix_cmd ("mips", no_class,
 			_("Various MIPS specific commands."),
-			&setmipscmdlist, "set mips ", 0, &setlist);
+			&setmipscmdlist, 0, &setlist);
 
   add_show_prefix_cmd ("mips", no_class,
 		       _("Various MIPS specific commands."),
-		       &showmipscmdlist, "show mips ", 0, &showlist);
+		       &showmipscmdlist, 0, &showlist);
 
   /* Allow the user to override the ABI.  */
   add_setshow_enum_cmd ("abi", class_obscure, mips_abi_strings,
@@ -8990,7 +8990,7 @@ and is updated automatically from ELF file flags if available."),
 
   add_basic_prefix_cmd ("mipsfpu", class_support,
 			_("Set use of MIPS floating-point coprocessor."),
-			&mipsfpulist, "set mipsfpu ", 0, &setlist);
+			&mipsfpulist, 0, &setlist);
   add_cmd ("single", class_support, set_mipsfpu_single_command,
 	   _("Select single-precision MIPS floating-point coprocessor."),
 	   &mipsfpulist);

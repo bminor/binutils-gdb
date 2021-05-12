@@ -3343,7 +3343,7 @@ This is useful in command scripts."));
 Select and print a stack frame.\n\
 With no argument, print the selected stack frame.  (See also \"info frame\").\n\
 A single numerical argument specifies the frame to select."),
-		  &frame_cmd_list, "frame ", 1, &cmdlist);
+		  &frame_cmd_list, 1, &cmdlist);
   add_com_alias ("f", "frame", class_stack, 1);
 
 #define FRAME_APPLY_OPTION_HELP "\
@@ -3367,7 +3367,7 @@ With a negative COUNT argument, applies the command on outermost -COUNT frames.\
 
   cmd = add_prefix_cmd ("apply", class_stack, frame_apply_command,
 			frame_apply_cmd_help.c_str (),
-			&frame_apply_cmd_list, "frame apply ", 1,
+			&frame_apply_cmd_list, 1,
 			&frame_cmd_list);
   set_cmd_completer_handle_brkchars (cmd, frame_apply_cmd_completer);
 
@@ -3440,7 +3440,7 @@ Usage: frame level LEVEL"),
 		      &select_frame_cmd.base_command, _("\
 Select a stack frame without printing anything.\n\
 A single numerical argument specifies the frame to select."),
-		      &select_frame_cmd_list, "select-frame ", 1, &cmdlist,
+		      &select_frame_cmd_list, 1, &cmdlist,
 		      &cli_suppress_notification.user_selected_context);
 
   add_cmd_suppress_notification ("address", class_stack,
@@ -3515,7 +3515,7 @@ With a negative COUNT, print outermost -COUNT frames."),
 With no arguments, displays information about the currently selected stack\n\
 frame.  Alternatively a frame specification may be provided (See \"frame\")\n\
 the information is then printed about the specified frame."),
-		  &info_frame_cmd_list, "info frame ", 1, &infolist);
+		  &info_frame_cmd_list, 1, &infolist);
   add_info_alias ("f", "frame", 1);
 
   add_cmd ("address", class_stack, &info_frame_cmd.address,

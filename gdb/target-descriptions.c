@@ -1966,15 +1966,15 @@ _initialize_target_descriptions ()
 
   add_basic_prefix_cmd ("tdesc", class_maintenance, _("\
 Set target description specific variables."),
-			&tdesc_set_cmdlist, "set tdesc ",
+			&tdesc_set_cmdlist,
 			0 /* allow-unknown */, &setlist);
   add_show_prefix_cmd ("tdesc", class_maintenance, _("\
 Show target description specific variables."),
-		       &tdesc_show_cmdlist, "show tdesc ",
+		       &tdesc_show_cmdlist,
 		       0 /* allow-unknown */, &showlist);
   add_basic_prefix_cmd ("tdesc", class_maintenance, _("\
 Unset target description specific variables."),
-			&tdesc_unset_cmdlist, "unset tdesc ",
+			&tdesc_unset_cmdlist,
 			0 /* allow-unknown */, &unsetlist);
 
   add_setshow_filename_cmd ("filename", class_obscure,

@@ -3865,7 +3865,7 @@ on its own."), &cmdlist);
 
   add_basic_prefix_cmd ("overlay", class_support,
 			_("Commands for debugging overlays."), &overlaylist,
-			"overlay ", 0, &cmdlist);
+			0, &cmdlist);
 
   add_com_alias ("ovly", "overlay", class_support, 1);
   add_com_alias ("ov", "overlay", class_support, 1);

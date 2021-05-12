@@ -9563,11 +9563,11 @@ _initialize_arm_tdep ()
   /* Add root prefix command for all "set arm"/"show arm" commands.  */
   add_basic_prefix_cmd ("arm", no_class,
 			_("Various ARM-specific commands."),
-			&setarmcmdlist, "set arm ", 0, &setlist);
+			&setarmcmdlist, 0, &setlist);
 
   add_show_prefix_cmd ("arm", no_class,
 		       _("Various ARM-specific commands."),
-		       &showarmcmdlist, "show arm ", 0, &showlist);
+		       &showarmcmdlist, 0, &showlist);
 
 
   arm_disassembler_options = xstrdup ("reg-names-std");

@@ -3281,7 +3281,7 @@ Use \"set variable\" for variables with names identical to set subcommands.\n\
 \n\
 With a subcommand, this command modifies parts of the gdb environment.\n\
 You can see these environment settings with the \"show\" command."),
-		  &setlist, "set ", 1, &cmdlist);
+		  &setlist, 1, &cmdlist);
   if (dbx_commands)
     add_com ("assign", class_vars, set_command, _("\
 Evaluate expression EXP and assign result to variable VAR.\n\
@@ -3385,7 +3385,7 @@ treat this string as a command line, and evaluate it."));
   /* Memory tagging commands.  */
   add_prefix_cmd ("memory-tag", class_vars, memory_tag_command, _("\
 Generic command for printing and manipulating memory tag properties."),
-		  &memory_tag_list, "memory-tag ", 0, &cmdlist);
+		  &memory_tag_list, 0, &cmdlist);
   add_cmd ("print-logical-tag", class_vars,
 	   memory_tag_print_logical_tag_command,
 	   ("Print the logical tag from POINTER.\n\

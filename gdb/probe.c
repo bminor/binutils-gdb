@@ -788,8 +788,7 @@ If you specify TYPE, there may be additional arguments needed by the\n\
 subcommand.\n\
 If you do not specify any argument, or specify `all', then the command\n\
 will show information about all types of probes."),
-		    &info_probes_cmdlist, "info probes ",
-		    0/*allow-unknown*/, &infolist);
+		    &info_probes_cmdlist, 0/*allow-unknown*/, &infolist);
 
   return &info_probes_cmdlist;
 }
