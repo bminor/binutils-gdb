@@ -1,3 +1,9 @@
+2021-06-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/27847
+	* amd64-tdep.c (amd64_has_unaligned_fields): Move call to
+	type_align, and spot case where the alignment is unknown.
+
 2021-06-07  Carl Love  <cel@us.ibm.com>
 
 	* ppc-tdep.h (ppc_insn_prefix_dform): Declare.

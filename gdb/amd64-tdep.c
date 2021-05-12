@@ -554,7 +554,6 @@ amd64_has_unaligned_fields (struct type *type)
 	{
 	  struct type *subtype = check_typedef (type->field (i).type ());
 	  int bitpos = TYPE_FIELD_BITPOS (type, i);
-	  int align = type_align(subtype);
 
 	  /* Ignore static fields, empty fields (for example nested
 	     empty structures), and bitfields (these are handled by
@@ -567,6 +566,10 @@ amd64_has_unaligned_fields (struct type *type)
 
 	  if (bitpos % 8 != 0)
 	    return true;
+
+	  int align = type_align (subtype);
+	  if (align == 0)
+	    error (_("could not determine alignment of type"));
 
 	  int bytepos = bitpos / 8;
 	  if (bytepos % align != 0)

@@ -1,3 +1,9 @@
+2021-06-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/27847
+	* gdb.dwarf2/dw2-weird-type-len.c: New file.
+	* gdb.dwarf2/dw2-weird-type-len.exp: New file.
+
 2021-06-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/attach.exp (test_command_line_attach_run): Use
