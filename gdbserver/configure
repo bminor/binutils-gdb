@@ -7139,6 +7139,22 @@ fi
 done
 
 
+  # This is needed for RHEL 5 and uclibc-ng < 1.0.39.
+  # These did not define ADDR_NO_RANDOMIZE in sys/personality.h,
+  # only in linux/personality.h.
+  ac_fn_c_check_decl "$LINENO" "ADDR_NO_RANDOMIZE" "ac_cv_have_decl_ADDR_NO_RANDOMIZE" "#include <sys/personality.h>
+"
+if test "x$ac_cv_have_decl_ADDR_NO_RANDOMIZE" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_ADDR_NO_RANDOMIZE $ac_have_decl
+_ACEOF
+
+
   ac_fn_c_check_decl "$LINENO" "strstr" "ac_cv_have_decl_strstr" "$ac_includes_default"
 if test "x$ac_cv_have_decl_strstr" = xyes; then :
   ac_have_decl=1
