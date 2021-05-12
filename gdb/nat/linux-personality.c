@@ -22,6 +22,10 @@
 
 #include <sys/personality.h>
 
+# if !HAVE_DECL_ADDR_NO_RANDOMIZE
+#  define ADDR_NO_RANDOMIZE 0x0040000
+# endif /* ! HAVE_DECL_ADDR_NO_RANDOMIZE */
+
 /* See comment on nat/linux-personality.h.  */
 
 maybe_disable_address_space_randomization::
