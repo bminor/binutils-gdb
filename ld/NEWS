@@ -8,6 +8,8 @@
 * Add -z start-stop-gc to disable special treatment of __start_*/__stop_*
   references when --gc-sections.
 
+* Add -Bno-symbolic to cancel -Bsymbolic and -Bsymbolic-functions.
+
 Changes in 2.36:
 
 * Add libdep plugin, for linking dependencies of static libraries that

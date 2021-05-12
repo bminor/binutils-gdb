@@ -1,3 +1,13 @@
+2021-05-13  Fangrui Song  <maskray@google.com>
+
+	PR 27834
+	* ldlex.h (enum option_values): Add OPTION_NO_SYMBOLIC.
+	* lexsup.c (ld_options): Add -Bno-symbolic.
+	(parse_args): Handle -Bno-symbolic.
+	* ld.texi: Document -Bno-symbolic.
+	* NEWS: Mention -Bno-symbolic.
+	* testsuite/ld-elf/shared.exp: Add a test.
+
 2021-05-12  Richard Earnshaw  <rearnsha@arm.com>
 
 	* testsuite/ld-arm/arm-elf.exp (farcall test for v8-m.mainline):

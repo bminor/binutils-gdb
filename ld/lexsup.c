@@ -302,6 +302,8 @@ static const struct ld_option ld_options[] =
     '\0', NULL, NULL, ONE_DASH },
   { {"static", no_argument, NULL, OPTION_NON_SHARED},
     '\0', NULL, NULL, ONE_DASH },
+  { {"Bno-symbolic", no_argument, NULL, OPTION_NO_SYMBOLIC},
+    '\0', NULL, N_("Don't bind global references locally"), ONE_DASH },
   { {"Bsymbolic", no_argument, NULL, OPTION_SYMBOLIC},
     '\0', NULL, N_("Bind global references locally"), ONE_DASH },
   { {"Bsymbolic-functions", no_argument, NULL, OPTION_SYMBOLIC_FUNCTIONS},
@@ -1300,6 +1302,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_STATS:
 	  config.stats = true;
+	  break;
+	case OPTION_NO_SYMBOLIC:
+	  opt_symbolic = symbolic_unset;
 	  break;
 	case OPTION_SYMBOLIC:
 	  opt_symbolic = symbolic;

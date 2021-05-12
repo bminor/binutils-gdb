@@ -1633,6 +1633,11 @@ symbols to the definition within the shared library, if any.
 This option is only meaningful on ELF platforms which support shared
 libraries.
 
+@kindex -Bno-symbolic
+@item -Bno-symbolic
+This option can cancel previously specified @samp{-Bsymbolic} and
+@samp{-Bsymbolic-functions}.
+
 @kindex --dynamic-list=@var{dynamic-list-file}
 @item --dynamic-list=@var{dynamic-list-file}
 Specify the name of a dynamic list file to the linker.  This is
