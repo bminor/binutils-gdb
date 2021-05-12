@@ -1,5 +1,14 @@
 2021-05-12  Alan Modra  <amodra@gmail.com>
 
+	PR 27853
+	* dwarf.c (display_formatted_table): Test for data >= end rather
+	than data == end.
+	(process_extended_line_op): Likewise.
+	(display_debug_lines_raw): Likewise.
+	(display_debug_lines_decoded): Likewise.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
 	PR 27849
 	* dwarf.c (fetch_indexed_string): Correct length sanity checks.
 	Sanity check section size for version and padding too.  Correct

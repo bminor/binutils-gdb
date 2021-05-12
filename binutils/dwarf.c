@@ -521,7 +521,7 @@ process_extended_line_op (unsigned char * data,
   READ_ULEB (len, data, end);
   header_len = data - orig_data;
 
-  if (len == 0 || data == end || len > (size_t) (end - data))
+  if (len == 0 || data >= end || len > (size_t) (end - data))
     {
       warn (_("Badly formed extended line op encountered!\n"));
       return header_len;
@@ -574,7 +574,7 @@ process_extended_line_op (unsigned char * data,
 	printf ("%.*s\n\n", (int) l, name);
       }
 
-      if (((size_t) (data - orig_data) != len + header_len) || data == end)
+      if (((size_t) (data - orig_data) != len + header_len) || data >= end)
 	warn (_("DW_LNE_define_file: Bad opcode length\n"));
       break;
 
@@ -4327,7 +4327,7 @@ display_formatted_table (unsigned char *data,
     {
       SKIP_ULEB (data, end);
       SKIP_ULEB (data, end);
-      if (data == end)
+      if (data >= end)
 	{
 	  warn (_("%s: Corrupt format description entry\n"), table_name);
 	  return data;
@@ -4340,7 +4340,7 @@ display_formatted_table (unsigned char *data,
       printf (_("\n The %s is empty.\n"), table_name);
       return data;
     }
-  else if (data == end)
+  else if (data >= end)
     {
       warn (_("%s: Corrupt entry count - expected %s but none found\n"),
 	    table_name, dwarf_vmatoa ("x", data_count));
@@ -4419,7 +4419,7 @@ display_formatted_table (unsigned char *data,
 	    }
 	}
 
-      if (data == end && (datai < data_count - 1))
+      if (data >= end && (datai < data_count - 1))
 	{
 	  warn (_("\n%s: Corrupt entries list\n"), table_name);
 	  return data;
@@ -4665,7 +4665,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		      printf ("%s\t", dwarf_vmatoa ("u", val));
 		      printf ("%.*s\n", (int)(end - name), name);
 
-		      if (data == end)
+		      if (data >= end)
 			{
 			  warn (_("Corrupt file name table entry\n"));
 			  break;
@@ -5013,7 +5013,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		}
 
 	      READ_ULEB (n_directories, data, end);
-	      if (data == end)
+	      if (data >= end)
 		{
 		  warn (_("Corrupt directories list\n"));
 		  break;
@@ -5037,7 +5037,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 		      READ_ULEB (content_type, format, end);
 		      READ_ULEB (form, format, end);
-		      if (data == end)
+		      if (data >= end)
 			{
 			  warn (_("Corrupt directories list\n"));
 			  break;
@@ -5067,7 +5067,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 							  NULL, 1, section,
 							  NULL, '\t', -1);
 		    }
-		  if (data == end)
+		  if (data >= end)
 		    {
 		      warn (_("Corrupt directories list\n"));
 		      break;
@@ -5087,7 +5087,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		}
 
 	      READ_ULEB (n_files, data, end);
-	      if (data == end && n_files > 0)
+	      if (data >= end && n_files > 0)
 		{
 		  warn (_("Corrupt file name list\n"));
 		  break;
@@ -5112,7 +5112,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 		      READ_ULEB (content_type, format, end);
 		      READ_ULEB (form, format, end);
-		      if (data == end)
+		      if (data >= end)
 			{
 			  warn (_("Corrupt file name list\n"));
 			  break;
@@ -5159,7 +5159,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 							  NULL, 1, section,
 							  NULL, '\t', -1);
 		    }
-		  if (data == end)
+		  if (data >= end)
 		    {
 		      warn (_("Corrupt file name list\n"));
 		      break;
