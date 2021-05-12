@@ -1,3 +1,8 @@
+2021-05-11  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/ld-x86-64/rela.d: Fix regexp not to presume a specific
+	address layout, so it works for e.g. --target=x86-64-elf.
+
 2021-05-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 27113
