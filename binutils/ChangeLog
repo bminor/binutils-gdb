@@ -1,5 +1,17 @@
 2021-05-12  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (SAFE_BYTE_GET_INTERNAL): Define.
+	(SAFE_BYTE_GET, SAFE_BYTE_GET_AND_INC): Define using the above.
+	(SAFE_SIGNED_BYTE_GET, SAFE_SIGNED_BYTE_GET_AND_INC): Likewise.
+	(display_discr_list): Use SAFE_BYTE_GET_AND_INC rather than
+	SAFE_BYTE_GET followed by increment.
+	(process_debug_info): Likewise, and test bytes remaining before
+	incrementing section_begin rather than using pointer comparison.
+	(display_debug_names): Pass lvalue as SAFE_BYTE_GET PTR.
+	(process_cu_tu_index): Likewise for SAFE_BYTE_GET_AND_INC.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (dwarf_vmatoa64, SAFE_BYTE_GET64, add64): Delete.
 	(skip_attr_bytes): Replace use of SAFE_BYTE_GET64 with
 	SAFE_BYTE_GET_AND_INC.

@@ -368,73 +368,52 @@ read_leb128 (unsigned char *data,
   return result;
 }
 
-/* Read AMOUNT bytes from PTR and store them in VAL as an unsigned value.
-   Checks to make sure that the read will not reach or pass END
-   and that VAL is big enough to hold AMOUNT bytes.  */
-#define SAFE_BYTE_GET(VAL, PTR, AMOUNT, END)	\
-  do						\
-    {						\
-      unsigned int amount = (AMOUNT);		\
-      if (sizeof (VAL) < amount)		\
-	{					\
+/* Read AMOUNT bytes from PTR and store them in VAL.
+   Checks to make sure that the read will not reach or pass END.
+   FUNC chooses whether the value read is unsigned or signed, and may
+   be either byte_get or byte_get_signed.  If INC is true, PTR is
+   incremented after reading the value.
+   This macro cannot protect against PTR values derived from user input.
+   The C standard sections 6.5.6 and 6.5.8 say attempts to do so using
+   pointers is undefined behaviour.  */
+#define SAFE_BYTE_GET_INTERNAL(VAL, PTR, AMOUNT, END, FUNC, INC)	\
+  do									\
+    {									\
+      size_t amount = (AMOUNT);						\
+      if (sizeof (VAL) < amount)					\
+	{								\
 	  error (ngettext ("internal error: attempt to read %d byte "	\
 			   "of data in to %d sized variable",		\
 			   "internal error: attempt to read %d bytes "	\
 			   "of data in to %d sized variable",		\
 			   amount),					\
-		 amount, (int) sizeof (VAL));	\
-	  amount = sizeof (VAL);		\
-	}					\
-      if ((PTR) >= (END) - amount)		\
-	{					\
-	  if ((PTR) < (END))			\
-	    amount = (END) - (PTR);		\
-	  else					\
-	    amount = 0;				\
-	}					\
-      if (amount == 0 || amount > 8)		\
-	VAL = 0;				\
-      else					\
-	VAL = byte_get ((PTR), amount);		\
-    }						\
+		 (int) amount, (int) sizeof (VAL));			\
+	  amount = sizeof (VAL);					\
+	}								\
+      assert ((PTR) <= (END));						\
+      size_t avail = (END) - (PTR);					\
+      if (amount > avail)						\
+	amount = avail;							\
+      if (amount == 0)							\
+	(VAL) = 0;							\
+      else								\
+	(VAL) = (FUNC) ((PTR), amount);					\
+      if (INC)								\
+	(PTR) += amount;						\
+    }									\
   while (0)
 
-/* Like SAFE_BYTE_GET, but also increments PTR by AMOUNT.  */
+#define SAFE_BYTE_GET(VAL, PTR, AMOUNT, END)	\
+  SAFE_BYTE_GET_INTERNAL (VAL, PTR, AMOUNT, END, byte_get, false)
+
 #define SAFE_BYTE_GET_AND_INC(VAL, PTR, AMOUNT, END)	\
-  do							\
-    {							\
-      SAFE_BYTE_GET (VAL, PTR, AMOUNT, END);		\
-      PTR += AMOUNT;					\
-    }							\
-  while (0)
+  SAFE_BYTE_GET_INTERNAL (VAL, PTR, AMOUNT, END, byte_get, true)
 
-/* Like SAFE_BYTE_GET, but reads a signed value.  */
 #define SAFE_SIGNED_BYTE_GET(VAL, PTR, AMOUNT, END)	\
-  do							\
-    {							\
-      unsigned int amount = (AMOUNT);			\
-      if ((PTR) >= (END) - amount)			\
-	{						\
-	  if ((PTR) < (END))				\
-	    amount = (END) - (PTR);			\
-	  else						\
-	    amount = 0;					\
-	}						\
-      if (amount)					\
-	VAL = byte_get_signed ((PTR), amount);		\
-      else						\
-	VAL = 0;					\
-    }							\
-  while (0)
+  SAFE_BYTE_GET_INTERNAL (VAL, PTR, AMOUNT, END, byte_get_signed, false)
 
-/* Like SAFE_SIGNED_BYTE_GET, but also increments PTR by AMOUNT.  */
 #define SAFE_SIGNED_BYTE_GET_AND_INC(VAL, PTR, AMOUNT, END)	\
-  do								\
-    {								\
-      SAFE_SIGNED_BYTE_GET (VAL, PTR, AMOUNT, END);		\
-      PTR += AMOUNT;						\
-    }								\
-  while (0)
+  SAFE_BYTE_GET_INTERNAL (VAL, PTR, AMOUNT, END, byte_get_signed, true)
 
 typedef struct State_Machine_Registers
 {
@@ -2336,9 +2315,8 @@ display_discr_list (unsigned long          form,
       unsigned char     discriminant;
       unsigned int      bytes_read;
 
-      SAFE_BYTE_GET (discriminant, data, 1, end);
+      SAFE_BYTE_GET_AND_INC (discriminant, data, 1, end);
       -- uvalue;
-      data ++;
 
       assert (uvalue > 0);
       switch (discriminant)
@@ -3455,31 +3433,27 @@ process_debug_info (struct dwarf_section * section,
 	  /* Read the first 4 bytes.  For a 32-bit DWARF section, this
 	     will be the length.  For a 64-bit DWARF section, it'll be
 	     the escape code 0xffffffff followed by an 8 byte length.  */
-	  SAFE_BYTE_GET (length, section_begin, 4, end);
+	  SAFE_BYTE_GET_AND_INC (length, section_begin, 4, end);
 
 	  if (length == 0xffffffff)
-	    {
-	      SAFE_BYTE_GET (length, section_begin + 4, 8, end);
-	      section_begin += length + 12;
-	    }
+	    SAFE_BYTE_GET_AND_INC (length, section_begin, 8, end);
 	  else if (length >= 0xfffffff0 && length < 0xffffffff)
 	    {
 	      warn (_("Reserved length value (0x%s) found in section %s\n"),
 		    dwarf_vmatoa ("x", length), section->name);
 	      return false;
 	    }
-	  else
-	    section_begin += length + 4;
 
 	  /* Negative values are illegal, they may even cause infinite
 	     looping.  This can happen if we can't accurately apply
 	     relocations to an object file, or if the file is corrupt.  */
-	  if ((signed long) length <= 0 || section_begin < start)
+	  if (length > (size_t) (end - section_begin))
 	    {
 	      warn (_("Corrupt unit length (0x%s) found in section %s\n"),
 		    dwarf_vmatoa ("x", length), section->name);
 	      return false;
 	    }
+	  section_begin += length;
 	}
 
       if (num_units == 0)
@@ -9829,13 +9803,12 @@ display_debug_names (struct dwarf_section *section, void *file)
       for (namei = 0; namei < name_count; ++namei)
 	{
 	  uint64_t string_offset, entry_offset;
+	  unsigned char *p;
 
-	  SAFE_BYTE_GET (string_offset,
-			 name_table_string_offsets + namei * offset_size,
-			 offset_size, unit_end);
-	  SAFE_BYTE_GET (entry_offset,
-			 name_table_entry_offsets + namei * offset_size,
-			 offset_size, unit_end);
+	  p = name_table_string_offsets + namei * offset_size;
+	  SAFE_BYTE_GET (string_offset, p, offset_size, unit_end);
+	  p = name_table_entry_offsets + namei * offset_size;
+	  SAFE_BYTE_GET (entry_offset, p, offset_size, unit_end);
 
 	  printf ("[%3u] #%08x %s:", namei, hash_table_hashes[namei],
 		  fetch_indirect_string (string_offset));
@@ -10333,13 +10306,13 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       return 0;
     }
 
-  SAFE_BYTE_GET (version, phdr, 4, limit);
+  phash = phdr;
+  SAFE_BYTE_GET_AND_INC (version, phash, 4, limit);
   if (version >= 2)
-    SAFE_BYTE_GET (ncols, phdr + 4, 4, limit);
-  SAFE_BYTE_GET (nused, phdr + 8, 4, limit);
-  SAFE_BYTE_GET (nslots, phdr + 12, 4, limit);
+    SAFE_BYTE_GET_AND_INC (ncols, phash, 4, limit);
+  SAFE_BYTE_GET_AND_INC (nused, phash, 4, limit);
+  SAFE_BYTE_GET_AND_INC (nslots, phash, 4, limit);
 
-  phash = phdr + 16;
   pindex = phash + (size_t) nslots * 8;
   ppool = pindex + (size_t) nslots * 4;
 
@@ -10474,7 +10447,8 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	{
 	  for (j = 0; j < ncols; j++)
 	    {
-	      SAFE_BYTE_GET (dw_sect, ppool + j * 4, 4, limit);
+	      unsigned char *p = ppool + j * 4;
+	      SAFE_BYTE_GET (dw_sect, p, 4, limit);
 	      printf (" %8s", get_DW_SECT_short_name (dw_sect));
 	    }
 	  printf ("\n");
@@ -10523,12 +10497,14 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 			i, dwarf_vmatoa ("x", signature));
 	      for (j = 0; j < ncols; j++)
 		{
-		  SAFE_BYTE_GET (val, prow + j * 4, 4, limit);
+		  unsigned char *p = prow + j * 4;
+		  SAFE_BYTE_GET (val, p, 4, limit);
 		  if (do_display)
 		    printf (" %8d", val);
 		  else
 		    {
-		      SAFE_BYTE_GET (dw_sect, ppool + j * 4, 4, limit);
+		      p = ppool + j * 4;
+		      SAFE_BYTE_GET (dw_sect, p, 4, limit);
 
 		      /* PR 17531: file: 10796eb3.  */
 		      if (dw_sect >= DW_SECT_MAX)
@@ -10557,7 +10533,8 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
       for (j = 0; j < ncols; j++)
 	{
-	  SAFE_BYTE_GET (val, ppool + j * 4, 4, limit);
+	  unsigned char *p = ppool + j * 4;
+	  SAFE_BYTE_GET (val, p, 4, limit);
 	  if (do_display)
 	    printf (" %8s", get_DW_SECT_short_name (val));
 	}
@@ -10580,12 +10557,14 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
 	      for (j = 0; j < ncols; j++)
 		{
-		  SAFE_BYTE_GET (val, prow + j * 4, 4, limit);
+		  unsigned char *p = prow + j * 4;
+		  SAFE_BYTE_GET (val, p, 4, limit);
 		  if (do_display)
 		    printf (" %8d", val);
 		  else
 		    {
-		      SAFE_BYTE_GET (dw_sect, ppool + j * 4, 4, limit);
+		      p = ppool + j * 4;
+		      SAFE_BYTE_GET (dw_sect, p, 4, limit);
 		      if (dw_sect >= DW_SECT_MAX)
 			warn (_("Overlarge Dwarf section index detected: %u\n"), dw_sect);
 		      else
