@@ -307,27 +307,6 @@ print_dwarf_view (dwarf_vma value, unsigned num_bytes, int force)
     printf ("%*s", len + 1, "");
 }
 
-/* Format a 64-bit value, given as two 32-bit values, in hex.
-   For reentrancy, this uses a buffer provided by the caller.  */
-
-static const char *
-dwarf_vmatoa64 (dwarf_vma hvalue, dwarf_vma lvalue, char *buf,
-		unsigned int buf_len)
-{
-  int len = 0;
-
-  if (hvalue == 0)
-    snprintf (buf, buf_len, "%" DWARF_VMA_FMT "x", lvalue);
-  else
-    {
-      len = snprintf (buf, buf_len, "%" DWARF_VMA_FMT "x", hvalue);
-      snprintf (buf + len, buf_len - len,
-		"%08" DWARF_VMA_FMT "x", lvalue);
-    }
-
-  return buf;
-}
-
 /* Read in a LEB128 encoded value starting at address DATA.
    If SIGN is true, return a signed LEB128 value.
    If LENGTH_RETURN is not NULL, return in it the number of bytes read.
@@ -455,20 +434,6 @@ read_leb128 (unsigned char *data,
       SAFE_SIGNED_BYTE_GET (VAL, PTR, AMOUNT, END);		\
       PTR += AMOUNT;						\
     }								\
-  while (0)
-
-#define SAFE_BYTE_GET64(PTR, HIGH, LOW, END)		\
-  do							\
-    {							\
-      if ((PTR) <= (END) - 8)				\
-	{						\
-	  byte_get_64 ((PTR), (HIGH), (LOW));		\
-	}						\
-      else						\
-	{						\
-	  * (LOW) = * (HIGH) = 0;			\
-	}						\
-    }							\
   while (0)
 
 typedef struct State_Machine_Registers
@@ -1834,34 +1799,6 @@ find_cu_tu_set_v2 (dwarf_vma cu_offset, int do_types)
   return NULL;
 }
 
-/* Add INC to HIGH_BITS:LOW_BITS.  */
-static void
-add64 (dwarf_vma * high_bits, dwarf_vma * low_bits, dwarf_vma inc)
-{
-  dwarf_vma tmp = * low_bits;
-
-  tmp += inc;
-
-  /* FIXME: There is probably a better way of handling this:
-
-     We need to cope with dwarf_vma being a 32-bit or 64-bit
-     type.  Plus regardless of its size LOW_BITS is meant to
-     only hold 32-bits, so if there is overflow or wrap around
-     we must propagate into HIGH_BITS.  */
-  if (tmp < * low_bits)
-    {
-      ++ * high_bits;
-    }
-  else if (sizeof (tmp) > 8
-	   && (tmp >> 31) > 1)
-    {
-      ++ * high_bits;
-      tmp &= 0xFFFFFFFF;
-    }
-
-  * low_bits = tmp;
-}
-
 static const char *
 fetch_alt_indirect_string (dwarf_vma offset)
 {
@@ -2079,20 +2016,8 @@ skip_attr_bytes (unsigned long          form,
       break;
 
     case DW_FORM_ref8:
-      {
-	dwarf_vma high_bits;
-
-	SAFE_BYTE_GET64 (data, &high_bits, &uvalue, end);
-	data += 8;
-	if (sizeof (uvalue) > 4)
-	  uvalue += high_bits << 32;
-	else if (high_bits != 0)
-	  {
-	    /* FIXME: What to do ?  */
-	    return NULL;
-	  }
-	break;
-      }
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 8, end);
+      break;
 
     case DW_FORM_data8:
     case DW_FORM_ref_sig8:
@@ -2476,9 +2401,10 @@ read_and_display_attr_value (unsigned long           attribute,
 			     int                     level)
 {
   dwarf_signed_vma svalue;
-  dwarf_vma        uvalue = 0;
-  unsigned char *  block_start = NULL;
-  unsigned char *  orig_data = data;
+  dwarf_vma uvalue = 0;
+  dwarf_vma uvalue_hi = 0;
+  unsigned char *block_start = NULL;
+  unsigned char *orig_data = data;
 
   if (data > end || (data == end && form != DW_FORM_flag_present))
     {
@@ -2554,6 +2480,24 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_strx4:
     case DW_FORM_addrx4:
       SAFE_BYTE_GET_AND_INC (uvalue, data, 4, end);
+      break;
+
+    case DW_FORM_ref_sup8:
+    case DW_FORM_ref8:
+    case DW_FORM_data8:
+    case DW_FORM_ref_sig8:
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 8, end);
+      break;
+
+    case DW_FORM_data16:
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 8, end);
+      SAFE_BYTE_GET_AND_INC (uvalue_hi, data, 8, end);
+      if (byte_get != byte_get_little_endian)
+	{
+	  dwarf_vma utmp = uvalue;
+	  uvalue = uvalue_hi;
+	  uvalue_hi = utmp;
+	}
       break;
 
     case DW_FORM_sdata:
@@ -2639,54 +2583,18 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_data8:
       if (!do_loc)
 	{
-	  dwarf_vma high_bits;
-	  dwarf_vma utmp;
-	  char buf[64];
-
-	  SAFE_BYTE_GET64 (data, &high_bits, &uvalue, end);
-	  utmp = uvalue;
+	  dwarf_vma utmp = uvalue;
 	  if (form == DW_FORM_ref8)
-	    add64 (& high_bits, & utmp, cu_offset);
-	  printf ("%c0x%s", delimiter,
-		  dwarf_vmatoa64 (high_bits, utmp, buf, sizeof (buf)));
+	    utmp += cu_offset;
+	  printf ("%c0x%s", delimiter, dwarf_vmatoa ("x", utmp));
 	}
-
-      if ((do_loc || do_debug_loc || do_debug_ranges)
-	  && num_debug_info_entries == 0)
-	{
-	  if (sizeof (uvalue) == 8)
-	    SAFE_BYTE_GET (uvalue, data, 8, end);
-	  else
-	    error (_("DW_FORM_data8 is unsupported when sizeof (dwarf_vma) != 8\n"));
-	}
-
-      data += 8;
       break;
 
     case DW_FORM_data16:
       if (!do_loc)
-	{
-	  dwarf_vma left_high_bits, left_low_bits;
-	  dwarf_vma right_high_bits, right_low_bits;
-
-	  SAFE_BYTE_GET64 (data, &left_high_bits, &left_low_bits, end);
-	  SAFE_BYTE_GET64 (data + 8, &right_high_bits, &right_low_bits, end);
-	  if (byte_get == byte_get_little_endian)
-	    {
-	      /* Swap them.  */
-	      left_high_bits ^= right_high_bits;
-	      right_high_bits ^= left_high_bits;
-	      left_high_bits ^= right_high_bits;
-	      left_low_bits ^= right_low_bits;
-	      right_low_bits ^= left_low_bits;
-	      left_low_bits ^= right_low_bits;
-	    }
-	  printf (" 0x%08" DWARF_VMA_FMT "x%08" DWARF_VMA_FMT "x"
-		  "%08" DWARF_VMA_FMT "x%08" DWARF_VMA_FMT "x",
-		  left_high_bits, left_low_bits, right_high_bits,
-		  right_low_bits);
-	}
-      data += 16;
+	printf (" 0x%s%s",
+		uvalue_hi == 0 ? "" : dwarf_vmatoa ("x", uvalue_hi),
+		dwarf_vmatoa_1 ("x", uvalue, uvalue_hi == 0 ? 0 : 8));
       break;
 
     case DW_FORM_string:
@@ -2801,20 +2709,8 @@ read_and_display_attr_value (unsigned long           attribute,
 
     case DW_FORM_ref_sig8:
       if (!do_loc)
-	{
-	  dwarf_vma high_bits;
-	  char buf[64];
-
-	  SAFE_BYTE_GET64 (data, &high_bits, &uvalue, end);
-	  if (do_wide)
-	    /* We have already displayed the form name.  */
-	    printf ("%c: 0x%s", delimiter,
-		    dwarf_vmatoa64 (high_bits, uvalue, buf, sizeof (buf)));
-	  else
-	    printf ("%csignature: 0x%s", delimiter,
-		    dwarf_vmatoa64 (high_bits, uvalue, buf, sizeof (buf)));
-	}
-      data += 8;
+	printf ("%c%s: 0x%s", delimiter, do_wide ? "" : "signature",
+		dwarf_vmatoa ("x", uvalue));
       break;
 
     case DW_FORM_GNU_addr_index:
@@ -3740,8 +3636,7 @@ process_debug_info (struct dwarf_section * section,
       unsigned long sec_off;
       unsigned int offset_size;
       unsigned int initial_length_size;
-      dwarf_vma signature_high = 0;
-      dwarf_vma signature_low = 0;
+      dwarf_vma signature = 0;
       dwarf_vma type_offset = 0;
       struct cu_tu_set *this_set;
       dwarf_vma abbrev_base;
@@ -3819,8 +3714,7 @@ process_debug_info (struct dwarf_section * section,
 
       if (do_types)
 	{
-	  SAFE_BYTE_GET64 (hdrptr, &signature_high, &signature_low, end);
-	  hdrptr += 8;
+	  SAFE_BYTE_GET_AND_INC (signature, hdrptr, 8, end);
 	  SAFE_BYTE_GET_AND_INC (type_offset, hdrptr, offset_size, end);
 	}
 
@@ -3875,11 +3769,8 @@ process_debug_info (struct dwarf_section * section,
 	  printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
 	  if (do_types)
 	    {
-	      char buf[64];
-
 	      printf (_("   Signature:     0x%s\n"),
-		      dwarf_vmatoa64 (signature_high, signature_low,
-				      buf, sizeof (buf)));
+		      dwarf_vmatoa ("x", signature));
 	      printf (_("   Type Offset:   0x%s\n"),
 		      dwarf_vmatoa ("x", type_offset));
 	    }
@@ -10426,9 +10317,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   unsigned int nslots;
   unsigned int i;
   unsigned int j;
-  dwarf_vma signature_high;
-  dwarf_vma signature_low;
-  char buf[64];
+  dwarf_vma signature;
 
   /* PR 17512: file: 002-168123-0.004.  */
   if (phdr == NULL)
@@ -10487,8 +10376,8 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	  unsigned char *shndx_list;
 	  unsigned int shndx;
 
-	  SAFE_BYTE_GET64 (phash, &signature_high, &signature_low, limit);
-	  if (signature_high != 0 || signature_low != 0)
+	  SAFE_BYTE_GET (signature, phash, 8, limit);
+	  if (signature != 0)
 	    {
 	      SAFE_BYTE_GET (j, pindex, 4, limit);
 	      shndx_list = ppool + j * 4;
@@ -10501,8 +10390,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
 	      if (do_display)
 		printf (_("  [%3d] Signature:  0x%s  Sections: "),
-			i, dwarf_vmatoa64 (signature_high, signature_low,
-					   buf, sizeof (buf)));
+			i, dwarf_vmatoa ("x", signature));
 	      for (;;)
 		{
 		  if (shndx_list >= limit)
@@ -10594,7 +10482,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
       for (i = 0; i < nslots; i++)
 	{
-	  SAFE_BYTE_GET64 (ph, &signature_high, &signature_low, limit);
+	  SAFE_BYTE_GET (signature, ph, 8, limit);
 
 	  SAFE_BYTE_GET (row, pi, 4, limit);
 	  if (row != 0)
@@ -10632,8 +10520,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
 	      if (do_display)
 		printf (_("  [%3d] 0x%s"),
-			i, dwarf_vmatoa64 (signature_high, signature_low,
-					   buf, sizeof (buf)));
+			i, dwarf_vmatoa ("x", signature));
 	      for (j = 0; j < ncols; j++)
 		{
 		  SAFE_BYTE_GET (val, prow + j * 4, 4, limit);
@@ -10680,7 +10567,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
       for (i = 0; i < nslots; i++)
 	{
-	  SAFE_BYTE_GET64 (ph, &signature_high, &signature_low, limit);
+	  SAFE_BYTE_GET (signature, ph, 8, limit);
 
 	  SAFE_BYTE_GET (row, pi, 4, limit);
 	  if (row != 0)
@@ -10689,8 +10576,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
 	      if (do_display)
 		printf (_("  [%3d] 0x%s"),
-			i, dwarf_vmatoa64 (signature_high, signature_low,
-					   buf, sizeof (buf)));
+			i, dwarf_vmatoa ("x", signature));
 
 	      for (j = 0; j < ncols; j++)
 		{

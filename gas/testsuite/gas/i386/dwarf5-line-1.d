@@ -39,7 +39,7 @@ Raw dump of debug contents of section \.z?debug_line:
  The File Name Table \(offset 0x.*, lines 2, columns 3\):
   Entry	Dir	MD5				Name
   0	0 0xbbd69fc03ce253b2dbaab2522dd519ae	\(indirect line string, offset: 0x.*\): core.c
-  1	0 0x00000000000000000000000000000000	\(indirect line string, offset: 0x.*\): types.h
+  1	0 0x0	\(indirect line string, offset: 0x.*\): types.h
 
  Line Number Statements:
   \[0x.*\]  Extended opcode 2: set Address to 0x0

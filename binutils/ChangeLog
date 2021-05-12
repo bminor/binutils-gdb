@@ -1,5 +1,22 @@
 2021-05-12  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (dwarf_vmatoa64, SAFE_BYTE_GET64, add64): Delete.
+	(skip_attr_bytes): Replace use of SAFE_BYTE_GET64 with
+	SAFE_BYTE_GET_AND_INC.
+	(read_and_display_attr_value): Likewise.  Print using dwarf_vmatoa.
+	(process_debug_info, process_cu_tu_index): Likewise.
+	* elfcomm.c (byte_put, byte_put_little_endian, byte_put_big_endian),
+	(byte_get, byte_get_little_endian, byte_get_big_endian),
+	(byte_get_signed): Make size param unsigned.  Remove code dealing
+	with 4-byte elf_vma.
+	(byte_get_64): Delete.
+	* elfcomm.h  (byte_put, byte_put_little_endian, byte_put_big_endian),
+	(byte_get, byte_get_little_endian, byte_get_big_endian),
+	(byte_get_signed): Update prototypes.
+	(byte_get_64): Delete.
+
+2021-05-12  Alan Modra  <amodra@gmail.com>
+
 	PR 27836
 	* dwarf.c (display_debug_frames): Don't compare pointers derived
 	from user input.  Test offset against bounds instead.
