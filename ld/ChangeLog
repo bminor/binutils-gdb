@@ -1,3 +1,15 @@
+2021-05-31  Nelson Chu  <nelson.chu@sifive.com>
+	    Lifang Xia  <lifang_xia@c-sky.com>
+
+	PR 27566
+	* emultempl/riscvelf.em (after_allocation): Call
+	riscv_set_data_segment_info to set data segment phase before relaxing.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Updated.
+	* testsuite/ld-riscv-elf/relro-relax-lui.d: New testcase.
+	* testsuite/ld-riscv-elf/relro-relax-lui.s: Likewise.
+	* testsuite/ld-riscv-elf/relro-relax-pcrel.d: Likewise.
+	* testsuite/ld-riscv-elf/relro-relax-pcrel.s: Likewise.
+
 2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27905

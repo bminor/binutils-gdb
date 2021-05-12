@@ -132,6 +132,10 @@ struct riscv_elf_link_hash_table
 
   /* Re-run the relaxations from relax pass 0 if TRUE.  */
   bool restart_relax;
+
+  /* The data segment phase, don't relax the section
+     when it is exp_seg_relro_adjust.  */
+  int *data_segment_phase;
 };
 
 /* Instruction access functions. */
@@ -4620,6 +4624,17 @@ _bfd_riscv_relax_delete (bfd *abfd,
   return true;
 }
 
+/* Called by after_allocation to set the information of data segment
+   before relaxing.  */
+
+void
+bfd_elfNN_riscv_set_data_segment_info (struct bfd_link_info *info,
+                                       int *data_segment_phase)
+{
+  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
+  htab->data_segment_phase = data_segment_phase;
+}
+
 /* Called by after_allocation to check if we need to run the whole
    relaxations again.  */
 
@@ -4672,7 +4687,10 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       || (info->disable_target_specific_optimizations
 	  && info->relax_pass < 2)
       || (htab->restart_relax
-	  && info->relax_pass == 3))
+	  && info->relax_pass == 3)
+      /* The exp_seg_relro_adjust is enum phase_enum (0x4),
+	 and defined in ld/ldexp.h.  */
+      || *(htab->data_segment_phase) == 4)
     return true;
 
   riscv_init_pcgp_relocs (&pcgp_relocs);

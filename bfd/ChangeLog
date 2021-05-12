@@ -1,3 +1,16 @@
+2021-05-31  Nelson Chu  <nelson.chu@sifive.com>
+	    Lifang Xia  <lifang_xia@c-sky.com>
+
+	PR 27566
+	* elfnn-riscv.c (struct riscv_elf_link_hash_table): New integer pointer
+	to monitor the data segment phase.
+	(bfd_elfNN_riscv_set_data_segment_info): New function called by
+	after_allocation, to set the data_segment_phase from expld.dataseg.
+	(_bfd_riscv_relax_section): Don't relax when data_segment_phase is
+	exp_seg_relro_adjust (0x4).
+	* elfxx-riscv.h (bfd_elf32_riscv_set_data_segment_info): New extern.
+	(bfd_elf64_riscv_set_data_segment_info): Likewise
+
 2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27905

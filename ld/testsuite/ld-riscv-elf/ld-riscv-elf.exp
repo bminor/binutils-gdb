@@ -122,6 +122,9 @@ if [istarget "riscv*-*-*"] {
 	return
     }
 
+    run_dump_test "relro-relax-lui"
+    run_dump_test "relro-relax-pcrel"
+
     set abis [list rv32gc ilp32 [riscv_choose_ilp32_emul] rv64gc lp64 [riscv_choose_lp64_emul]]
     foreach { arch abi emul } $abis {
 	# This checks whether our linker scripts handle __global_pointer$

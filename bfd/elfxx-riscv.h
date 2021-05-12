@@ -98,6 +98,10 @@ riscv_compare_subsets (const char *, const char *);
 
 extern bool
 bfd_elf32_riscv_restart_relax_sections (struct bfd_link_info *);
-
 extern bool
 bfd_elf64_riscv_restart_relax_sections (struct bfd_link_info *);
+
+extern void
+bfd_elf32_riscv_set_data_segment_info (struct bfd_link_info *, int *);
+extern void
+bfd_elf64_riscv_set_data_segment_info (struct bfd_link_info *, int *);
