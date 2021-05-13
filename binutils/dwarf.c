@@ -8708,6 +8708,8 @@ display_debug_frames (struct dwarf_section *section,
 		if (cie->chunk_start == look_for)
 		  break;
 	    }
+	  else if (cie_off >= section->size)
+	    cie = NULL;
 	  else
 	    {
 	      for (cie = forward_refs; cie ; cie = cie->next)

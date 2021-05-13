@@ -1,3 +1,9 @@
+2021-05-13  Alan Modra  <amodra@gmail.com>
+
+	PR 27860
+	* dwarf.c (display_debug_frames): Sanity check cie_off before
+	attempting to read cie.
+
 2021-05-12  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c (process_extended_line_op): Don't bump data pointer past
