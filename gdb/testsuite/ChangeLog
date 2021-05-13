@@ -1,9 +1,9 @@
-2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+2021-05-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.guile/scm-pretty-print.exp (run_lang_tests): Give some tests
 	unique names, also wrap proc body in with_test_prefix.
 
-2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+2021-05-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.guile/scm-frame-args.exp: Add with_test_prefix to resolve
 	duplicate test names.
@@ -19,7 +19,7 @@
 	(test_inferior_function_call): Likewise.
 	(test_subscript_regression): Likewise.
 
-2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+2021-05-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/guile.exp (gdb_scm_load_file): Use empty test name to
 	silence PASS lines.
