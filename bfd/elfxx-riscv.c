@@ -1026,6 +1026,47 @@ riscv_elf_add_sub_reloc (bfd *abfd,
   return bfd_reloc_ok;
 }
 
+/* Always add the IMPLICIT for the SUBSET.  */
+
+static bool
+check_implicit_always (const char *implicit ATTRIBUTE_UNUSED,
+		       riscv_subset_t *subset ATTRIBUTE_UNUSED)
+{
+  return true;
+}
+
+/* Add the IMPLICIT only when the version of SUBSET less than 2.1.  */
+
+static bool
+check_implicit_for_i (const char *implicit ATTRIBUTE_UNUSED,
+		      riscv_subset_t *subset)
+{
+  return (subset->major_version < 2
+	  || (subset->major_version == 2
+	      && subset->minor_version < 1));
+}
+
+/* Record all implicit information for the subsets.  */
+struct riscv_implicit_subset
+{
+  const char *subset_name;
+  const char *implicit_name;
+  /* A function to determine if we need to add the implicit subset.  */
+  bool (*check_func) (const char *, riscv_subset_t *);
+};
+static struct riscv_implicit_subset riscv_implicit_subsets[] =
+{
+  {"e", "i",		check_implicit_always},
+  {"i", "zicsr",	check_implicit_for_i},
+  {"i", "zifencei",	check_implicit_for_i},
+  {"g", "zicsr",	check_implicit_always},
+  {"g", "zifencei",	check_implicit_always},
+  {"q", "d",		check_implicit_always},
+  {"d", "f",		check_implicit_always},
+  {"f", "zicsr",	check_implicit_always},
+  {NULL, NULL, NULL}
+};
+
 /* Lists of prefixed class extensions that binutils should know about.
    Whether or not a particular entry is in these lists will dictate if
    gas/ld will accept its presence in the architecture string.
@@ -1694,61 +1735,15 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 static void
 riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
 {
-  riscv_subset_t *subset = NULL;
-
-  if (riscv_lookup_subset (rps->subset_list, "e", &subset))
-    riscv_parse_add_subset (rps, "i",
-			    RISCV_UNKNOWN_VERSION,
-			    RISCV_UNKNOWN_VERSION, true);
-
-  /* Add the zicsr and zifencei only when the i's version less than 2.1.  */
-  if (riscv_lookup_subset (rps->subset_list, "i", &subset)
-      && (subset->major_version < 2
-	  || (subset->major_version == 2
-	      && subset->minor_version < 1)))
+  struct riscv_implicit_subset *t = riscv_implicit_subsets;
+  for (; t->subset_name; t++)
     {
-      riscv_parse_add_subset (rps, "zicsr",
-			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, true);
-      riscv_parse_add_subset (rps, "zifencei",
-			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, true);
-    }
-
-  if (riscv_lookup_subset (rps->subset_list, "q", &subset))
-    {
-      riscv_parse_add_subset (rps, "d",
-			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, true);
-      riscv_parse_add_subset (rps, "f",
-			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, true);
-      riscv_parse_add_subset (rps, "zicsr",
-			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, true);
-    }
-  else if (riscv_lookup_subset (rps->subset_list, "d", &subset))
-    {
-      riscv_parse_add_subset (rps, "f",
-			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, true);
-      riscv_parse_add_subset (rps, "zicsr",
-			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, true);
-    }
-  else if (riscv_lookup_subset (rps->subset_list, "f", &subset))
-    riscv_parse_add_subset (rps, "zicsr",
-			    RISCV_UNKNOWN_VERSION,
-			    RISCV_UNKNOWN_VERSION, true);
-
-  if (riscv_lookup_subset (rps->subset_list, "g", &subset))
-    {
-      riscv_parse_add_subset (rps, "zicsr",
-			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, true);
-      riscv_parse_add_subset (rps, "zifencei",
-			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, true);
+      riscv_subset_t *subset = NULL;
+      if (riscv_lookup_subset (rps->subset_list, t->subset_name, &subset)
+	  && t->check_func (t->implicit_name, subset))
+	riscv_parse_add_subset (rps, t->implicit_name,
+				RISCV_UNKNOWN_VERSION,
+				RISCV_UNKNOWN_VERSION, true);
     }
 }
 

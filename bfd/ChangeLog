@@ -1,3 +1,15 @@
+2021-05-13  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfxx-riscv.c (check_implicit_always): The check_func, always add
+	the implicit subset without checking.
+	(check_implicit_for_i): The check_func for i, only add zicsr and
+	zifencei when the version of i less than 2.1.
+	(struct riscv_implicit_subset): Record the subsets and their
+	corresponding implicit subsets.
+	(riscv_implicit_subsets): Table records all implicit informations.
+	(riscv_parse_add_implicit_subsets): Updated and add implicit subsets
+	according to riscv_implicit_subsets.  Remove the redundant codes.
+
 2021-05-13  Alan Modra  <amodra@gmail.com>
 
 	PR 27858
