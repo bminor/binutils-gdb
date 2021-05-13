@@ -1,3 +1,12 @@
+2021-05-14  Kent Cheung  <kent.cheung@arm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-format-string.c: Added a variable to test.
+	* gdb.python/py-format-string.exp: Check string representation is
+	printed at appropriate max_depth settings.
+	* gdb.python/py-nested-maps.exp: Likewise.
+	* gdb.guile/scm-pretty-print.exp: Add additional tests.
+
 2021-05-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.guile/scm-pretty-print.exp (run_lang_tests): Give some tests

@@ -126,6 +126,7 @@ set default_regexp_dict [dict create \
   "a_point_t_pointer"		$default_pointer_regexp \
   "a_point_t_ref"		"Pretty Point \\(42, 12\\)" \
   "another_point"		"Pretty Point \\(123, 456\\)" \
+  "a_struct_with_point"		"\\{the_point = Pretty Point \\(42, 12\\)\\}" \
   "a_struct_with_union"		"\\{the_union = \\{an_int = 707406378, a_char = 42 '\\*'\\}\\}" \
   "an_enum"			"ENUM_BAR" \
   "a_string"			"${default_pointer_regexp} \"hello world\"" \
@@ -722,18 +723,26 @@ proc_with_prefix test_max_depth {} {
     set opts "max_depth=-1"
     with_test_prefix $opts {
 	check_format_string "a_struct_with_union" $opts
+	check_format_string "a_point_t" $opts "Pretty Point \\(42, 12\\)"
+	check_format_string "a_struct_with_point" $opts
     }
     set opts "max_depth=0"
     with_test_prefix $opts {
 	check_format_string "a_struct_with_union" $opts "\\{\.\.\.\\}"
+	check_format_string "a_point_t" $opts "Pretty Point \\(42, 12\\)"
+	check_format_string "a_struct_with_point" $opts "\\{\.\.\.\\}"
     }
     set opts "max_depth=1"
     with_test_prefix $opts {
 	check_format_string "a_struct_with_union" $opts "\\{the_union = \\{\.\.\.\\}\\}"
+	check_format_string "a_point_t" $opts "Pretty Point \\(42, 12\\)"
+	check_format_string "a_struct_with_point" $opts
     }
     set opts "max_depth=2"
     with_test_prefix $opts {
 	check_format_string "a_struct_with_union" $opts
+	check_format_string "a_point_t" $opts "Pretty Point \\(42, 12\\)"
+	check_format_string "a_struct_with_point" $opts
     }
 }
 

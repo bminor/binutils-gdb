@@ -92,6 +92,10 @@ proc run_lang_tests {exefile lang} {
 	gdb_test "print x" " = \"this is x\""
 	gdb_test "print cstring" " = \"const string\""
 
+	gdb_test_no_output "set print max-depth 0"
+	gdb_test "print cstring" " = \"const string\""
+	gdb_test_no_output "set print max-depth unlimited"
+
 	gdb_test "print estring" " = \"embedded x\\\\201\\\\202\\\\203\\\\204\""
 
 	gdb_test_no_output "guile (set! *pp-ls-encoding* \"UTF-8\")"

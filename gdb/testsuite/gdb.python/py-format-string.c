@@ -23,6 +23,11 @@ typedef struct point
   int y;
 } point_t;
 
+typedef struct
+{
+  point_t the_point;
+} struct_point_t;
+
 typedef union
 {
   int an_int;
@@ -84,6 +89,7 @@ main ()
   point_t &a_point_t_ref = a_point_t;
 #endif
   struct point another_point = { 123, 456 };
+  struct_point_t a_struct_with_point = { a_point_t };
 
   struct_union_t a_struct_with_union;
   /* Fill the union in an endianness-independent way.  */

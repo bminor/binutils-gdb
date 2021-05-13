@@ -495,14 +495,8 @@ cp_print_value (struct value *val, struct ui_file *stream,
 	{
 	  int result = 0;
 
-	  if (options->max_depth > -1
-	      && recurse >= options->max_depth)
-	    {
-	      const struct language_defn *language = current_language;
-	      gdb_assert (language->struct_too_deep_ellipsis () != NULL);
-	      fputs_filtered (language->struct_too_deep_ellipsis (), stream);
-	    }
-	  else
+	  if (!val_print_check_max_depth (stream, recurse, options,
+					  current_language))
 	    {
 	      struct value *baseclass_val = value_primitive_field (val, 0,
 								   i, type);

@@ -1,3 +1,15 @@
+2021-05-14  Kent Cheung  <kent.cheung@arm.com>
+
+	* cp-valprint.c (cp_print_value): Replaced duplicate code.
+	* guile/scm-pretty-print.c (ppscm_print_children): Check max_depth
+	just before printing child values.
+	(gdbscm_apply_val_pretty_printer): Don't check max_depth before
+	printing string representation.
+	* python/py-prettyprint.c (print_children): Check max_depth just
+	before printing child values.
+	(gdbpy_apply_val_pretty_printer): Don't check max_depth before
+	printing string representation.
+
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* remote-sim.c: Change gdb/callback.h & gdb/remote-sim.h includes to
