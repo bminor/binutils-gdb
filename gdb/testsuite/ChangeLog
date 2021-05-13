@@ -1,3 +1,9 @@
+2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/guile.exp (gdb_scm_load_file): Use empty test name to
+	silence PASS lines.
+	(gdb_install_guile_module): Likewise.
+
 2021-05-12  George Barrett  <bob@bob131.so>
 
 	* gdb.guile/scm-value.exp (test_value_in_inferior): Add test for
