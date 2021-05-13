@@ -7509,13 +7509,6 @@ display_debug_str_offsets (struct dwarf_section *section,
 	  printf (_("    Length: %#lx\n"), (unsigned long) length);
 	  printf (_("    Version: %#lx\n"), (unsigned long) version);
 	  printf (_("       Index   Offset [String]\n"));
-
-	  if (entries_end > end)
-	    {
-	      warn (_("Length value (0x%s) > data remaining in the section (0x%lx)\n"),
-		    dwarf_vmatoa ("x", length), (long)(end - curr));
-	      entries_end = end;
-	    }	  
 	}
 
       for (idx = 0; curr < entries_end; idx++)
