@@ -1,3 +1,9 @@
+2021-05-13  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.c (follow_exec): Call target_follow_fork when
+	follow-exec-mode is same.
+	* target.h (target_follow_fork): Improve doc.
+
 2021-05-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* cli/cli-decode.h (struct cmd_list_element) <pre_show_hook>:

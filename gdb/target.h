@@ -1714,8 +1714,11 @@ extern int target_remove_vfork_catchpoint (int pid);
 
 void target_follow_fork (bool follow_child, bool detach_fork);
 
-/* Handle the target-specific bookkeeping required when the inferior
-   makes an exec call.  INF is the exec'd inferior.  */
+/* Handle the target-specific bookkeeping required when the inferior makes an
+   exec call.  The current inferior is the inferior that has executed the exec
+   call.  INF is the inferior in which execution continues post-exec.  It is the
+   same inferior as the current one if "follow-exec-mode" is "same" but is a new
+   one if "follow-exec-mode" is "new".  */
 
 void target_follow_exec (struct inferior *inf, const char *execd_pathname);
 

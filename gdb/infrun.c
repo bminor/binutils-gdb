@@ -1198,6 +1198,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
 	 around (its description is later cleared/refetched on
 	 restart).  */
       target_clear_description ();
+      target_follow_exec (inf, exec_file_target);
     }
 
   gdb_assert (current_program_space == inf->pspace);
