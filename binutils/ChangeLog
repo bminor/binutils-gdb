@@ -1,5 +1,11 @@
 2021-05-13  Alan Modra  <amodra@gmail.com>
 
+	PR 27861
+	* dwarf.c (display_debug_str_offsets): Sanity check dwarf5
+	header length.
+
+2021-05-13  Alan Modra  <amodra@gmail.com>
+
 	PR 27860
 	* dwarf.c (display_debug_frames): Sanity check cie_off before
 	attempting to read cie.

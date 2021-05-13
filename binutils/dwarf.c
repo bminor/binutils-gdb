@@ -7487,7 +7487,14 @@ display_debug_str_offsets (struct dwarf_section *section,
 	}
       else
 	{
-	  entries_end = curr + length;
+	  if (length <= (dwarf_vma) (end - curr))
+	    entries_end = curr + length;
+	  else
+	    {
+	      warn (_("Section %s is too small %#lx\n"),
+		    section->name, (unsigned long) section->size);
+	      entries_end = end;
+	    }
 
 	  int version;
 	  SAFE_BYTE_GET_AND_INC (version, curr, 2, end);
