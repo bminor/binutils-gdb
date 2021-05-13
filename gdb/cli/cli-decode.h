@@ -187,10 +187,6 @@ struct cmd_list_element
   /* If this command is deprecated, this is the replacement name.  */
   const char *replacement = nullptr;
 
-  /* If this command represents a show command, then this function
-     is called before the variable's value is examined.  */
-  void (*pre_show_hook) (struct cmd_list_element *c) = nullptr;
-
   /* Hook for another command to be executed before this command.  */
   struct cmd_list_element *hook_pre = nullptr;
 

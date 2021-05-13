@@ -708,10 +708,6 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
 
   gdb_assert (c->type == show_cmd);
 
-  /* Possibly call the pre hook.  */
-  if (c->pre_show_hook)
-    (c->pre_show_hook) (c);
-
   std::string val = get_setshow_command_value_string (c);
 
   /* FIXME: cagney/2005-02-10: There should be MI and CLI specific

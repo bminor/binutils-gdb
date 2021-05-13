@@ -1,3 +1,9 @@
+2021-05-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* cli/cli-decode.h (struct cmd_list_element) <pre_show_hook>:
+	Remove.
+	* cli/cli-setshow.c (do_show_command): Adjust.
+
 2021-05-13  Luis Machado  <luis.machado@linaro.org>
 
 	* arch/aarch64-mte-linux.c (aarch64_mte_get_tag_granules): Don't
