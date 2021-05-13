@@ -794,6 +794,7 @@ static sim_cia
 execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 {
   SIM_DESC sd = CPU_STATE (cpu);
+  struct riscv_sim_state *state = RISCV_SIM_STATE (sd);
   int rd = (iw >> OP_SH_RD) & OP_MASK_RD;
   int rs1 = (iw >> OP_SH_RS1) & OP_MASK_RS1;
   int rs2 = (iw >> OP_SH_RS2) & OP_MASK_RS2;
@@ -813,7 +814,7 @@ execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	sim_core_read_unaligned_4 (cpu, cpu->pc, read_map, cpu->regs[rs1]));
 
       /* Walk the reservation list to find an existing match.  */
-      amo_curr = sd->amo_reserved_list;
+      amo_curr = state->amo_reserved_list;
       while (amo_curr)
 	{
 	  if (amo_curr->addr == cpu->regs[rs1])
@@ -824,15 +825,15 @@ execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
       /* No reservation exists, so add one.  */
       amo_curr = xmalloc (sizeof (*amo_curr));
       amo_curr->addr = cpu->regs[rs1];
-      amo_curr->next = sd->amo_reserved_list;
-      sd->amo_reserved_list = amo_curr;
+      amo_curr->next = state->amo_reserved_list;
+      state->amo_reserved_list = amo_curr;
       goto done;
     case MATCH_SC_W:
       TRACE_INSN (cpu, "%s %s, %s, (%s);", op->name, rd_name, rs2_name,
 		  rs1_name);
 
       /* Walk the reservation list to find a match.  */
-      amo_curr = amo_prev = sd->amo_reserved_list;
+      amo_curr = amo_prev = state->amo_reserved_list;
       while (amo_curr)
 	{
 	  if (amo_curr->addr == cpu->regs[rs1])
@@ -841,8 +842,8 @@ execute_a (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 	      sim_core_write_unaligned_4 (cpu, cpu->pc, write_map,
 					  cpu->regs[rs1], cpu->regs[rs2]);
 	      store_rd (cpu, rd, 0);
-	      if (amo_curr == sd->amo_reserved_list)
-		sd->amo_reserved_list = amo_curr->next;
+	      if (amo_curr == state->amo_reserved_list)
+		state->amo_reserved_list = amo_curr->next;
 	      else
 		amo_prev->next = amo_curr->next;
 	      free (amo_curr);

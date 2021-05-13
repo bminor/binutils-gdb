@@ -21,6 +21,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_STATE
+
 #include "sim-basics.h"
 #include "machs.h"
 #include "sim-base.h"
@@ -66,13 +68,10 @@ struct atomic_mem_reserved_list {
   address_word addr;
 };
 
-struct sim_state {
-  sim_cpu *cpu[MAX_NR_PROCESSORS];
+struct riscv_sim_state {
   struct atomic_mem_reserved_list *amo_reserved_list;
-
-  /* ... simulator specific members ... */
-  sim_state_base base;
 };
+#define RISCV_SIM_STATE(sd) ((struct riscv_sim_state *) STATE_ARCH_DATA (sd))
 
 extern void step_once (SIM_CPU *);
 extern void initialize_cpu (SIM_DESC, SIM_CPU *, int);
