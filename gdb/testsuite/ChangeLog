@@ -1,5 +1,10 @@
 2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.guile/scm-pretty-print.exp (run_lang_tests): Give some tests
+	unique names, also wrap proc body in with_test_prefix.
+
+2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.guile/scm-frame-args.exp: Add with_test_prefix to resolve
 	duplicate test names.
 	* gdb.guile/scm-parameter.exp: Provide test names to avoid
