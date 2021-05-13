@@ -409,6 +409,24 @@ inf_child_target::can_use_agent ()
   return agent_loaded_p ();
 }
 
+void
+inf_child_target::follow_exec (inferior *follow_inf, ptid_t ptid,
+			       const char *execd_pathname)
+{
+  inferior *orig_inf = current_inferior ();
+
+  process_stratum_target::follow_exec (follow_inf, ptid, execd_pathname);
+
+  if (orig_inf != follow_inf)
+    {
+      /* If the target was implicitly push in the original inferior, unpush
+         it.  */
+      scoped_restore_current_thread restore_thread;
+      switch_to_inferior_no_thread (orig_inf);
+      maybe_unpush_target ();
+    }
+}
+
 /* See inf-child.h.  */
 
 void

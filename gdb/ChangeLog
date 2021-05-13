@@ -1,5 +1,10 @@
 2021-05-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* inf-child.h (inf_child_target) <follow_exec>: New.
+	* inf-child.c (inf_child_target::follow_exec): New.
+
+2021-05-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* target.h (struct target_ops) <follow_exec>: Add ptid_t
 	parameter.
 	(target_follow_exec): Likewise.

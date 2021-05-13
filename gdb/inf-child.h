@@ -57,6 +57,9 @@ public:
 
   void post_startup_inferior (ptid_t) override;
 
+  void follow_exec (inferior *follow_inf, ptid_t ptid,
+		    const char *execd_pathname) override;
+
   void mourn_inferior () override;
 
   bool can_run () override;
