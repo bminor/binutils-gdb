@@ -161,11 +161,14 @@ gdb_test_multiline "restricted gdb parameter" \
     "end"
 
 with_test_prefix "test-restricted-param" {
-    gdb_test "show test-restricted-param" "The value of the restricted parameter is 2."
+    gdb_test "show test-restricted-param" "The value of the restricted parameter is 2." \
+	"test-restricted-param is initially 2"
     gdb_test_no_output "set test-restricted-param 10"
-    gdb_test "show test-restricted-param" "The value of the restricted parameter is 10."
+    gdb_test "show test-restricted-param" "The value of the restricted parameter is 10." \
+	"test-restricted-param is now 10"
     gdb_test "set test-restricted-param 42" "Error: Range of parameter is 0-10."
-    gdb_test "show test-restricted-param" "The value of the restricted parameter is 2."
+    gdb_test "show test-restricted-param" "The value of the restricted parameter is 2." \
+	"test-restricted-param is back to 2 again"
 }
 
 # Test registering a parameter that already exists.

@@ -1,5 +1,21 @@
 2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.guile/scm-frame-args.exp: Add with_test_prefix to resolve
+	duplicate test names.
+	* gdb.guile/scm-parameter.exp: Provide test names to avoid
+	duplicate names based on the command being run.
+	* gdb.guile/scm-symbol.exp: Extend test name to make it unique.
+	* gdb.guile/scm-type.exp (restart_gdb): Don't print PASS line when
+	loading a support module.
+	(test_equality): Update test name to match the actual test, making
+	the name unique in the process.
+	* gdb.guile/scm-value.exp (test_value_in_inferior): Add test names
+	to resolve duplicate tests.
+	(test_inferior_function_call): Likewise.
+	(test_subscript_regression): Likewise.
+
+2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/guile.exp (gdb_scm_load_file): Use empty test name to
 	silence PASS lines.
 	(gdb_install_guile_module): Likewise.

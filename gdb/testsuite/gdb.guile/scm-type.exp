@@ -55,7 +55,7 @@ proc restart_gdb {exefile} {
 	return 0
     }
     gdb_scm_test_silent_cmd "guile (use-modules (gdb iterator))" \
-	"load iterator module"
+	"load iterator module" 0
 
     return 1
 }
@@ -176,9 +176,9 @@ proc test_equality {lang} {
 	gdb_test "guile (print (eq? (value-type st) (value-type ar)))" \
 	    "= #f" "test type eq? on not-equal types"
 	gdb_test "guile (print (equal? (value-type st) (value-type st)))" \
-	    "= #t" "test type eq? on equal types"
+	    "= #t" "test type equal? on equal types"
 	gdb_test "guile (print (equal? (value-type st) (value-type ar)))" \
-	    "= #f" "test type eq? on not-equal types"
+	    "= #f" "test type equal? on not-equal types"
 
 	if {$lang == "c++"} {
 	    gdb_scm_test_silent_cmd "guile (define c (parse-and-eval \"c\"))" \
