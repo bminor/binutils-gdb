@@ -683,7 +683,7 @@ public:
   const struct btrace_config *btrace_conf (const struct btrace_target_info *) override;
   bool augmented_libraries_svr4_read () override;
   void follow_fork (bool, bool) override;
-  void follow_exec (struct inferior *, const char *) override;
+  void follow_exec (inferior *, ptid_t, const char *) override;
   int insert_fork_catchpoint (int) override;
   int remove_fork_catchpoint (int) override;
   int insert_vfork_catchpoint (int) override;
@@ -5925,20 +5925,20 @@ remote_target::follow_fork (bool follow_child, bool detach_fork)
 }
 
 /* Target follow-exec function for remote targets.  Save EXECD_PATHNAME
-   in the program space of the new inferior.  On entry and at return the
-   current inferior is the exec'ing inferior.  INF is the new exec'd
-   inferior, which may be the same as the exec'ing inferior unless
-   follow-exec-mode is "new".  */
+   in the program space of the new inferior.  */
 
 void
-remote_target::follow_exec (struct inferior *inf, const char *execd_pathname)
+remote_target::follow_exec (inferior *follow_inf, ptid_t ptid,
+			    const char *execd_pathname)
 {
+  process_stratum_target::follow_exec (follow_inf, ptid, execd_pathname);
+
   /* We know that this is a target file name, so if it has the "target:"
      prefix we strip it off before saving it in the program space.  */
   if (is_target_filename (execd_pathname))
     execd_pathname += strlen (TARGET_SYSROOT_PREFIX);
 
-  set_pspace_remote_exec_file (inf->pspace, execd_pathname);
+  set_pspace_remote_exec_file (follow_inf->pspace, execd_pathname);
 }
 
 /* Same as remote_detach, but don't send the "D" packet; just disconnect.  */

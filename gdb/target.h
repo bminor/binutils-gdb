@@ -642,7 +642,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     virtual int remove_exec_catchpoint (int)
       TARGET_DEFAULT_RETURN (1);
-    virtual void follow_exec (struct inferior *, const char *)
+    virtual void follow_exec (inferior *, ptid_t, const char *)
       TARGET_DEFAULT_IGNORE ();
     virtual int set_syscall_catchpoint (int, bool, int,
 					gdb::array_view<const int>)
@@ -1715,12 +1715,19 @@ extern int target_remove_vfork_catchpoint (int pid);
 void target_follow_fork (bool follow_child, bool detach_fork);
 
 /* Handle the target-specific bookkeeping required when the inferior makes an
-   exec call.  The current inferior is the inferior that has executed the exec
-   call.  INF is the inferior in which execution continues post-exec.  It is the
-   same inferior as the current one if "follow-exec-mode" is "same" but is a new
-   one if "follow-exec-mode" is "new".  */
+   exec call.
 
-void target_follow_exec (struct inferior *inf, const char *execd_pathname);
+   The current inferior at the time of the call is the inferior that did the
+   exec.  FOLLOW_INF is the inferior in which execution continues post-exec.
+   If "follow-exec-mode" is "same", FOLLOW_INF is the same as the current
+   inferior, meaning that execution continues with the same inferior.  If
+   "follow-exec-mode" is "new", FOLLOW_INF is a different inferior, meaning
+   that execution continues in a new inferior.
+
+   On exit, the target must leave FOLLOW_INF as the current inferior.  */
+
+void target_follow_exec (inferior *follow_inf, ptid_t ptid,
+			 const char *execd_pathname);
 
 /* On some targets, we can catch an inferior exec event when it
    occurs.  These functions insert/remove an already-created

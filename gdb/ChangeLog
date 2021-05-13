@@ -1,5 +1,21 @@
 2021-05-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* target.h (struct target_ops) <follow_exec>: Add ptid_t
+	parameter.
+	(target_follow_exec): Likewise.
+	* target.c (target_follow_exec): Add ptid_t parameter.
+	* infrun.c (follow_exec): Adjust call to target_follow_exec,
+	don't push target nor create thread.
+	* linux-thread-db.c (class thread_db_target) <follow_exec>: New.
+	(thread_db_target::wait): Just return on TARGET_WAITKIND_EXECD.
+	(thread_db_target::follow_exec): New.
+	* remote.c (class remote_target) <follow_exec>: Add ptid_t parameter.
+	(remote_target::follow_exec): Call
+	process_stratum_target::follow_exec.
+	* target-delegates.c: Re-generate.
+
+2021-05-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* infrun.c (follow_exec): Call target_follow_fork when
 	follow-exec-mode is same.
 	* target.h (target_follow_fork): Improve doc.
