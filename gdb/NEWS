@@ -211,6 +211,12 @@ QMemTags
      value-reference-value, value-rvalue-reference-value and
      value-const-value.
 
+* Python API
+
+  ** Inferior objects now contain a read-only 'connection_num' attribute that
+     gives the connection number as seen in 'info connections' and
+     'info inferiors'.
+
 *** Changes in GDB 10
 
 * There are new feature names for ARC targets: "org.gnu.gdb.arc.core"

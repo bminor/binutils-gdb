@@ -1,3 +1,8 @@
+2021-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* python.texi (Inferiors In Python): Mention the 'connection_num'
+	attribute.
+
 2021-05-12  George Barrett  <bob@bob131.so>
 
 	* guile.texi (Values From Inferior In Guile): Add documentation

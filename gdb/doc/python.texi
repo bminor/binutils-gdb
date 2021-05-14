@@ -3065,6 +3065,12 @@ A @code{gdb.Inferior} object has the following attributes:
 ID of inferior, as assigned by GDB.
 @end defvar
 
+@defvar Inferior.connection_num
+ID of inferior's connection as assigned by @value{GDBN}, or None if
+the inferior is not connected to a target.
+@xref{Inferiors Connections and Programs}.
+@end defvar
+
 @defvar Inferior.pid
 Process ID of the inferior, as assigned by the underlying operating
 system.

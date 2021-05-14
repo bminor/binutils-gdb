@@ -1,3 +1,7 @@
+2021-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.python/py-inferior.exp: Add test cases for 'connection_num'.
+
 2021-05-14  Kent Cheung  <kent.cheung@arm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

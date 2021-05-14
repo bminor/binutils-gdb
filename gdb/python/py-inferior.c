@@ -427,6 +427,23 @@ infpy_get_num (PyObject *self, void *closure)
   return gdb_py_object_from_longest (inf->inferior->num).release ();
 }
 
+/* Return the connection number of the given inferior, or None if a
+   connection does not exist.  */
+
+static PyObject *
+infpy_get_connection_num (PyObject *self, void *closure)
+{
+  inferior_object *inf = (inferior_object *) self;
+
+  INFPY_REQUIRE_VALID (inf);
+
+  process_stratum_target *target = inf->inferior->process_target ();
+  if (target == nullptr)
+    Py_RETURN_NONE;
+
+  return PyLong_FromLong (target->connection_number);
+}
+
 static PyObject *
 infpy_get_pid (PyObject *self, void *closure)
 {
@@ -943,6 +960,8 @@ gdbpy_initialize_inferior (void)
 static gdb_PyGetSetDef inferior_object_getset[] =
 {
   { "num", infpy_get_num, NULL, "ID of inferior, as assigned by GDB.", NULL },
+  { "connection_num", infpy_get_connection_num, NULL,
+    "ID of inferior's connection, as assigned by GDB.", NULL },
   { "pid", infpy_get_pid, NULL, "PID of inferior, as assigned by the OS.",
     NULL },
   { "was_attached", infpy_get_was_attached, NULL,
