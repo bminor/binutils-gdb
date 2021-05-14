@@ -740,7 +740,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 
       /* If we find a prefix, run its list, prefixing our output by its
 	 prefix (with "show " skipped).  */
-      if (list->subcommands && !list->is_alias ())
+      if (list->is_prefix () && !list->is_alias ())
 	{
 	  ui_out_emit_tuple optionlist_emitter (uiout, "optionlist");
 	  std::string prefixname = list->prefixname ();
@@ -758,7 +758,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 	    {
 	      /* If we find a prefix, output it (with "show " skipped).  */
 	      std::string prefixname = list->prefix->prefixname ();
-	      prefixname = (list->prefix->subcommands == nullptr ? ""
+	      prefixname = (!list->prefix->is_prefix () ? ""
 			    : strstr (prefixname.c_str (), "show ") + 5);
 	      uiout->text (prefixname.c_str ());
 	    }

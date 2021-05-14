@@ -647,7 +647,7 @@ execute_command (const char *p, int from_tty)
       if (c->theclass == class_user && c->user_commands)
 	execute_user_command (c, arg);
       else if (c->theclass == class_user
-	       && c->subcommands && !c->allow_unknown)
+	       && c->is_prefix () && !c->allow_unknown)
 	/* If this is a user defined prefix that does not allow unknown
 	   (in other words, C is a prefix command and not a command
 	   that can be followed by its args), report the list of

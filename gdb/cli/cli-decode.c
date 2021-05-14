@@ -69,8 +69,9 @@ lookup_cmd_with_subcommands (cmd_list_element **subcommands,
     {
       struct cmd_list_element *q;
 
-      if (p->subcommands == NULL)
+      if (!p->is_prefix ())
 	continue;
+
       else if (p->subcommands == subcommands)
 	{
 	  /* If we found an alias, we must return the aliased
@@ -163,7 +164,7 @@ set_cmd_completer_handle_brkchars (struct cmd_list_element *cmd,
 std::string
 cmd_list_element::prefixname () const
 {
-  if (this->subcommands == nullptr)
+  if (!this->is_prefix ())
     /* Not a prefix command.  */
     return "";
 
@@ -369,7 +370,7 @@ update_prefix_field_of_prefixed_commands (struct cmd_list_element *c)
 	 'auto-load' command was not yet reachable by
 	    lookup_cmd_for_subcommands (list, cmdlist)
 	    that searches from the top level 'cmdlist'.  */
-      if (p->subcommands != nullptr)
+      if (p->is_prefix ())
 	update_prefix_field_of_prefixed_commands (p);
     }
 }
@@ -1184,7 +1185,7 @@ apropos_cmd (struct ui_file *stream,
 	    print_doc_of_command (c, prefix, verbose, regex, stream);
 	}
       /* Check if this command has subcommands.  */
-      if (c->subcommands != NULL)
+      if (c->is_prefix ())
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
@@ -1249,12 +1250,13 @@ help_cmd (const char *command, struct ui_file *stream)
   fputs_filtered (c->doc, stream);
   fputs_filtered ("\n", stream);
 
-  if (c->subcommands == 0 && c->func != NULL)
+  if (!c->is_prefix () && c->func != NULL)
     return;
+
   fprintf_filtered (stream, "\n");
 
   /* If this is a prefix command, print it's subcommands.  */
-  if (c->subcommands)
+  if (c->is_prefix ())
     help_list (*c->subcommands, c->prefixname ().c_str (),
 	       all_commands, stream);
 
@@ -1446,7 +1448,7 @@ print_help_for_command (struct cmd_list_element *c,
   fput_aliases_definition_styled (c, stream);
 
   if (recurse
-      && c->subcommands != 0
+      && c->is_prefix ()
       && c->abbrev_flag == 0)
     /* Subcommands of a prefix command typically have 'all_commands'
        as class.  If we pass CLASS to recursive invocation,
@@ -1516,7 +1518,7 @@ help_cmd_list (struct cmd_list_element *list, enum command_class theclass,
 
       if (recurse
 	  && (theclass == class_user || theclass == class_alias)
-	  && c->subcommands != NULL)
+	  && c->is_prefix ())
 	{
 	  /* User-defined commands or aliases may be subcommands.  */
 	  help_cmd_list (*c->subcommands, theclass, recurse, stream);
@@ -1694,7 +1696,7 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
     }
   /* If we found a prefix command, keep looking.  */
 
-  if (found->subcommands)
+  if (found->is_prefix ())
     {
       c = lookup_cmd_1 (text, *found->subcommands, result_list, default_args,
 			ignore_help_classes, lookup_for_completion_p);
@@ -1865,7 +1867,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
       while (**line == ' ' || **line == '\t')
 	(*line)++;
 
-      if (c->subcommands && **line && !c->allow_unknown)
+      if (c->is_prefix () && **line && !c->allow_unknown)
 	undef_cmd_error (c->prefixname ().c_str (), *line);
 
       /* Seems to be what he wants.  Return it.  */
@@ -2056,7 +2058,7 @@ lookup_cmd_composition_1 (const char *text,
       text += len;
       text = skip_spaces (text);
 
-      if ((*cmd)->subcommands != nullptr && *text != '\0')
+      if ((*cmd)->is_prefix () && *text != '\0')
 	{
 	  cur_list = *(*cmd)->subcommands;
 	  *prefix_cmd = *cmd;
@@ -2123,7 +2125,7 @@ complete_on_cmdlist (struct cmd_list_element *list,
 	if (!strncmp (ptr->name, text, textlen)
 	    && !ptr->abbrev_flag
 	    && (!ignore_help_classes || ptr->func
-		|| ptr->subcommands))
+		|| ptr->is_prefix ()))
 	  {
 	    if (pass == 0)
 	      {

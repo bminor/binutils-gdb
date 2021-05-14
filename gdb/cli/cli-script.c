@@ -1350,7 +1350,7 @@ validate_comname (const char **comname)
       const char *tem = prefix.c_str ();
 
       c = lookup_cmd (&tem, cmdlist, "", NULL, 0, 1);
-      if (c->subcommands == NULL)
+      if (!c->is_prefix ())
 	error (_("\"%s\" is not a prefix command."), prefix.c_str ());
 
       list = c->subcommands;
@@ -1414,7 +1414,7 @@ do_define_command (const char *comname, int from_tty,
 	  /* if C is a prefix command that was previously defined,
 	     tell the user its subcommands will be kept, and ask
 	     if ok to redefine the command.  */
-	  if (c->subcommands != nullptr)
+	  if (c->is_prefix ())
 	    q = (c->user_commands.get () == nullptr
 		 || query (_("Keeping subcommands of prefix command \"%s\".\n"
 			     "Redefine command \"%s\"? "), c->name, c->name));
@@ -1595,7 +1595,7 @@ define_prefix_command (const char *comname, int from_tty)
   if (c != nullptr && c->theclass != class_user)
     error (_("Command \"%s\" is built-in."), comfull);
 
-  if (c != nullptr && c->subcommands != nullptr)
+  if (c != nullptr && c->is_prefix ())
     {
       /* c is already a user defined prefix command.  */
       return;
@@ -1665,7 +1665,7 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
       struct command_line *cmdlines = c->user_commands.get ();
 
       fprintf_filtered (stream, "User %scommand \"",
-			c->subcommands == NULL ? "" : "prefix ");
+			c->is_prefix () ? "prefix" : "");
       fprintf_styled (stream, title_style.style (), "%s%s",
 		      prefix, name);
       fprintf_filtered (stream, "\":\n");
@@ -1676,12 +1676,12 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
 	}
     }
 
-  if (c->subcommands != NULL)
+  if (c->is_prefix ())
     {
       const std::string prefixname = c->prefixname ();
 
       for (c = *c->subcommands; c != NULL; c = c->next)
-	if (c->theclass == class_user || c->subcommands != NULL)
+	if (c->theclass == class_user || c->is_prefix ())
 	  show_user_1 (c, prefixname.c_str (), c->name, gdb_stdout);
     }
 

@@ -1456,7 +1456,7 @@ complete_line_internal_1 (completion_tracker &tracker,
 	    {
 	      /* The command is followed by whitespace; we need to
 		 complete on whatever comes after command.  */
-	      if (c->subcommands)
+	      if (c->is_prefix ())
 		{
 		  /* It is a prefix command; what comes after it is
 		     a subcommand (e.g. "info ").  */
@@ -1524,7 +1524,7 @@ complete_line_internal_1 (completion_tracker &tracker,
 	{
 	  /* There is non-whitespace beyond the command.  */
 
-	  if (c->subcommands && !c->allow_unknown)
+	  if (c->is_prefix () && !c->allow_unknown)
 	    {
 	      /* It is an unrecognized subcommand of a prefix command,
 		 e.g. "info adsfkdj".  */

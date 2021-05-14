@@ -83,6 +83,10 @@ struct cmd_list_element
   bool is_alias () const
   { return this->alias_target != nullptr; }
 
+  /* Return true if this command is a prefix command.  */
+  bool is_prefix () const
+  { return this->subcommands != nullptr; }
+
   /* Points to next command in this list.  */
   struct cmd_list_element *next = nullptr;
 

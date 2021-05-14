@@ -83,7 +83,7 @@ check_doc (struct cmd_list_element *commandlist, const char *prefix)
       /* Check if this command has subcommands and is not an
 	 abbreviation.  We skip checking subcommands of abbreviations
 	 in order to avoid duplicates in the output.  */
-      if (c->subcommands != NULL && !c->abbrev_flag)
+      if (c->is_prefix () && !c->abbrev_flag)
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
@@ -155,7 +155,7 @@ traverse_command_structure (struct cmd_list_element **list,
     {
       /* If this command has subcommands and is not an alias,
 	 traverse the subcommands.  */
-      if (c->subcommands != NULL && !c->is_alias ())
+      if (c->is_prefix () && !c->is_alias ())
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */

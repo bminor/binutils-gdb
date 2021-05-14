@@ -524,7 +524,7 @@ gdbscm_parse_command_name (const char *name,
 				 gdbscm_scm_from_c_string (name), msg);
     }
 
-  if (elt->subcommands)
+  if (elt->is_prefix ())
     {
       xfree (prefix_text);
       *base_list = elt->subcommands;

@@ -1465,7 +1465,7 @@ info_auto_load_cmd (const char *args, int from_tty)
     {
       ui_out_emit_tuple option_emitter (uiout, "option");
 
-      gdb_assert (!list->subcommands);
+      gdb_assert (!list->is_prefix ());
       gdb_assert (list->type == not_set_cmd);
 
       uiout->field_string ("name", list->name);

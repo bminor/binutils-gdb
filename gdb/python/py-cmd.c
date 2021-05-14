@@ -111,7 +111,7 @@ cmdpy_function (struct cmd_list_element *command,
     error (_("Invalid invocation of Python command object."));
   if (! PyObject_HasAttr ((PyObject *) obj, invoke_cst))
     {
-      if (obj->command->subcommands != nullptr)
+      if (obj->command->is_prefix ())
 	{
 	  /* A prefix command does not need an invoke method.  */
 	  return;
@@ -393,7 +393,7 @@ gdbpy_parse_command_name (const char *name,
       return NULL;
     }
 
-  if (elt->subcommands)
+  if (elt->is_prefix ())
     {
       *base_list = elt->subcommands;
       return result;
