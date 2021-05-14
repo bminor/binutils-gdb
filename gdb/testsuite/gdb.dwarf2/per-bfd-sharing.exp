@@ -91,3 +91,15 @@ foreach_with_prefix first $methods {
 	}
     }
 }
+
+lassign [remote_exec host sh "-c \"rm $cache_dir/*.gdb-index\""] ret
+if { $ret != 0 } {
+    fail "couldn't remove files in temporary cache dir"
+    return
+}
+
+lassign [remote_exec host rmdir "$cache_dir"] ret
+if { $ret != 0 } {
+    fail "couldn't remove temporary cache dir"
+    return
+}
