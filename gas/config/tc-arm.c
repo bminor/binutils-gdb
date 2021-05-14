@@ -26305,6 +26305,7 @@ static const struct asm_opcode insns[] =
  /* Armv8.1-M Mainline instructions.  */
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8_1m_main
+ ToU("bti",   f3af800f, 0, (), noargs),
  toU("cinc",  _cinc,  3, (RRnpcsp, RR_ZR, COND),	t_cond),
  toU("cinv",  _cinv,  3, (RRnpcsp, RR_ZR, COND),	t_cond),
  toU("cneg",  _cneg,  3, (RRnpcsp, RR_ZR, COND),	t_cond),

@@ -4652,6 +4652,11 @@ static const struct opcode16 thumb_opcodes[] =
    makes heavy use of special-case bit patterns.  */
 static const struct opcode32 thumb32_opcodes[] =
 {
+  /* Arm v8.1-M Mainline Pointer Authentication and Branch Target
+     Identification Extension.  */
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   0xf3af800f, 0xffffffff, "bti"},
+
   /* Armv8.1-M Mainline and Armv8.1-M Mainline Security Extensions
      instructions.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
