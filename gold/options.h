@@ -747,11 +747,20 @@ class General_options
   DEFINE_bool(Bshareable, options::ONE_DASH, '\0', false,
 	      N_("Generate shared library (alias for -G/-shared)"), NULL);
 
-  DEFINE_bool(Bsymbolic, options::ONE_DASH, '\0', false,
-	      N_("Bind defined symbols locally"), NULL);
+  DEFINE_special (Bno_symbolic, options::ONE_DASH, '\0',
+		  N_ ("Don't bind default visibility defined symbols locally "
+		      "for -shared (default)"),
+		  NULL);
 
-  DEFINE_bool(Bsymbolic_functions, options::ONE_DASH, '\0', false,
-	      N_("Bind defined function symbols locally"), NULL);
+  DEFINE_special (Bsymbolic_functions, options::ONE_DASH, '\0',
+		  N_ ("Bind default visibility defined function symbols "
+		      "locally for -shared"),
+		  NULL);
+
+  DEFINE_special (
+      Bsymbolic, options::ONE_DASH, '\0',
+      N_ ("Bind default visibility defined symbols locally for -shared"),
+      NULL);
 
   // c
 
@@ -1740,6 +1749,21 @@ class General_options
   endianness() const
   { return this->endianness_; }
 
+  enum Bsymbolic_kind
+  {
+    BSYMBOLIC_NONE,
+    BSYMBOLIC_FUNCTIONS,
+    BSYMBOLIC_ALL,
+  };
+
+  bool
+  Bsymbolic() const
+  { return this->bsymbolic_ == BSYMBOLIC_ALL; }
+
+  bool
+  Bsymbolic_functions() const
+  { return this->bsymbolic_ == BSYMBOLIC_FUNCTIONS; }
+
   bool
   discard_all() const
   { return this->discard_locals_ == DISCARD_ALL; }
@@ -1873,6 +1897,8 @@ class General_options
   void
   copy_from_posdep_options(const Position_dependent_options&);
 
+  // Whether we bind default visibility defined symbols locally for -shared.
+  Bsymbolic_kind bsymbolic_;
   // Whether we printed version information.
   bool printed_version_;
   // Whether to mark the stack as executable.
