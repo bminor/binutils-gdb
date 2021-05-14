@@ -255,8 +255,9 @@ LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB)
 EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
 	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
-LIB_OBJS = callback.o modules.o syscall.o targ-map.o version.o \
-	$(SIM_OBJS)
+COMMON_OBJS = ../common/version.o
+
+LIB_OBJS = callback.o modules.o syscall.o targ-map.o $(COMMON_OBJS) $(SIM_OBJS)
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
@@ -296,11 +297,6 @@ stamp-tvals: gentmap
 	./gentmap -c >tmp-tmap.c
 	$(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
 	touch stamp-tvals
-
-version.c: Makefile $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(srcroot)/sim/common/create-version.sh
-	$(SHELL) $(srcroot)/sim/common/create-version.sh $(srcroot)/gdb $@.tmp
-	$(SHELL) $(srcroot)/move-if-change $@.tmp $@
-	touch $@
 
 #
 # Rules for building sim-* components.  Triggered by listing the corresponding
@@ -429,8 +425,7 @@ generated_files = \
 	hw-config.h \
 	modules.c \
 	targ-map.c \
-	targ-vals.h \
-	version.c
+	targ-vals.h
 
 # Ensure that generated files are created early.  Use order-only
 # dependencies if available.  They require GNU make 3.80 or newer,

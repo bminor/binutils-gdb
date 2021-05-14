@@ -21,7 +21,7 @@
 
 # This makes sure igen is available before building the arch-subdirs which
 # need to run the igen tool.
-all-recursive: igen/igen$(EXEEXT)
+SIM_ALL_RECURSIVE_DEPS += igen/igen$(EXEEXT)
 
 # Alias for developers.
 igen: %D%/igen$(EXEEXT)

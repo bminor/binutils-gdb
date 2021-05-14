@@ -40,6 +40,10 @@ AM_CPPFLAGS = -I$(srcroot)/include
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 
+# Deps to add to the all-recursive target.  These are built before descending
+# into any subdirs.
+SIM_ALL_RECURSIVE_DEPS =
+
 # Generate nltvals.def for newlib/libgloss using devo and build tree.
 # This file is shipped with distributions so we build in the source dir.
 # Use `make nltvals' to rebuild.
@@ -55,7 +59,10 @@ pkginclude_HEADERS = \
 	$(srcroot)/include/sim/callback.h \
 	$(srcroot)/include/sim/sim.h
 
+include common/local.mk
 if SIM_ENABLE_IGEN
 include igen/local.mk
 endif
 include testsuite/local.mk
+
+all-recursive: $(SIM_ALL_RECURSIVE_DEPS)

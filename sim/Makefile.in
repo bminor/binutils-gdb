@@ -30,6 +30,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#
+# Copyright (C) 1997-2021 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Parts of the common/ sim code that have been unified.
+# Most still lives in common/Make-common.in.
+
 # The IGEN simulator generator for GDB, the GNU Debugger.
 #
 # Copyright 2002-2021 Free Software Foundation, Inc.
@@ -161,9 +180,13 @@ target_triplet = @target@
 check_PROGRAMS = $(am__EXEEXT_3)
 EXTRA_PROGRAMS = $(am__EXEEXT_2) testsuite/common/bits-gen$(EXEEXT) \
 	testsuite/common/fpu-tst$(EXEEXT)
-@SIM_ENABLE_IGEN_TRUE@am__append_1 = igen/libigen.a
-@SIM_ENABLE_IGEN_TRUE@am__append_2 = $(igen_IGEN_TOOLS)
+
+# This makes sure igen is available before building the arch-subdirs which
+# need to run the igen tool.
+@SIM_ENABLE_IGEN_TRUE@am__append_1 = igen/igen$(EXEEXT)
+@SIM_ENABLE_IGEN_TRUE@am__append_2 = igen/libigen.a
 @SIM_ENABLE_IGEN_TRUE@am__append_3 = $(igen_IGEN_TOOLS)
+@SIM_ENABLE_IGEN_TRUE@am__append_4 = $(igen_IGEN_TOOLS)
 TESTS = testsuite/common/bits32m0$(EXEEXT) \
 	testsuite/common/bits32m31$(EXEEXT) \
 	testsuite/common/bits64m0$(EXEEXT) \
@@ -191,9 +214,13 @@ AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
+common_libcommon_a_AR = $(AR) $(ARFLAGS)
+common_libcommon_a_LIBADD =
+am__dirstamp = $(am__leading_dot)dirstamp
+am_common_libcommon_a_OBJECTS = common/version.$(OBJEXT)
+common_libcommon_a_OBJECTS = $(am_common_libcommon_a_OBJECTS)
 igen_libigen_a_AR = $(AR) $(ARFLAGS)
 igen_libigen_a_LIBADD =
-am__dirstamp = $(am__leading_dot)dirstamp
 @SIM_ENABLE_IGEN_TRUE@am_igen_libigen_a_OBJECTS =  \
 @SIM_ENABLE_IGEN_TRUE@	igen/table.$(OBJEXT) igen/lf.$(OBJEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/misc.$(OBJEXT) \
@@ -304,14 +331,14 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(igen_libigen_a_SOURCES) $(igen_filter_SOURCES) \
-	$(igen_gen_SOURCES) $(igen_igen_SOURCES) \
-	$(igen_ld_cache_SOURCES) $(igen_ld_decode_SOURCES) \
-	$(igen_ld_insn_SOURCES) $(igen_table_SOURCES) \
-	testsuite/common/alu-tst.c testsuite/common/bits-gen.c \
-	testsuite/common/bits32m0.c testsuite/common/bits32m31.c \
-	testsuite/common/bits64m0.c testsuite/common/bits64m63.c \
-	testsuite/common/fpu-tst.c
+SOURCES = $(common_libcommon_a_SOURCES) $(igen_libigen_a_SOURCES) \
+	$(igen_filter_SOURCES) $(igen_gen_SOURCES) \
+	$(igen_igen_SOURCES) $(igen_ld_cache_SOURCES) \
+	$(igen_ld_decode_SOURCES) $(igen_ld_insn_SOURCES) \
+	$(igen_table_SOURCES) testsuite/common/alu-tst.c \
+	testsuite/common/bits-gen.c testsuite/common/bits32m0.c \
+	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
+	testsuite/common/bits64m63.c testsuite/common/fpu-tst.c
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -678,19 +705,32 @@ ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 srcroot = $(srcdir)/..
 SUBDIRS = @subdirs@
 AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
-noinst_LIBRARIES = $(am__append_1)
+
+# NB: libcommon.a isn't used directly by ports.  We need a target for common
+# objects to be a part of, and ports use the individual objects directly.
+noinst_LIBRARIES = common/libcommon.a $(am__append_2)
 CLEANFILES = testsuite/common/bits-gen testsuite/common/bits32m0.c \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
 	testsuite/common/bits64m63.c
 DISTCLEANFILES = 
-MOSTLYCLEANFILES = core $(am__append_3) site-srcdir.exp testrun.log \
+MOSTLYCLEANFILES = core $(am__append_4) site-srcdir.exp testrun.log \
 	testrun.sum
-AM_CPPFLAGS = -I$(srcroot)/include
+AM_CPPFLAGS = -I$(srcroot)/include -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
+
+# Deps to add to the all-recursive target.  These are built before descending
+# into any subdirs.
+
+# This makes sure common parts are available before building the arch-subdirs
+# which will refer to these.
+SIM_ALL_RECURSIVE_DEPS = common/libcommon.a $(am__append_1)
 pkginclude_HEADERS = \
 	$(srcroot)/include/sim/callback.h \
 	$(srcroot)/include/sim/sim.h
+
+common_libcommon_a_SOURCES = \
+	common/version.c
 
 @SIM_ENABLE_IGEN_TRUE@igen_libigen_a_SOURCES = \
 @SIM_ENABLE_IGEN_TRUE@	igen/table.c \
@@ -747,7 +787,7 @@ all: all-recursive
 .SUFFIXES: .c .log .o .obj .test .test$(EXEEXT) .trs
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -769,7 +809,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__empty):
+$(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -782,6 +822,19 @@ $(am__aclocal_m4_deps):
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+common/$(am__dirstamp):
+	@$(MKDIR_P) common
+	@: > common/$(am__dirstamp)
+common/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) common/$(DEPDIR)
+	@: > common/$(DEPDIR)/$(am__dirstamp)
+common/version.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+
+common/libcommon.a: $(common_libcommon_a_OBJECTS) $(common_libcommon_a_DEPENDENCIES) $(EXTRA_common_libcommon_a_DEPENDENCIES) common/$(am__dirstamp)
+	$(AM_V_at)-rm -f common/libcommon.a
+	$(AM_V_AR)$(common_libcommon_a_AR) common/libcommon.a $(common_libcommon_a_OBJECTS) $(common_libcommon_a_LIBADD)
+	$(AM_V_at)$(RANLIB) common/libcommon.a
 igen/$(am__dirstamp):
 	@$(MKDIR_P) igen
 	@: > igen/$(am__dirstamp)
@@ -882,12 +935,14 @@ testsuite/common/fpu-tst.$(OBJEXT): testsuite/common/$(am__dirstamp) \
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
+	-rm -f common/*.$(OBJEXT)
 	-rm -f igen/*.$(OBJEXT)
 	-rm -f testsuite/common/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/filter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/filter_host.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/gen-engine.Po@am__quote@
@@ -1319,6 +1374,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f common/$(DEPDIR)/$(am__dirstamp)
+	-rm -f common/$(am__dirstamp)
 	-rm -f igen/$(DEPDIR)/$(am__dirstamp)
 	-rm -f igen/$(am__dirstamp)
 	-rm -f testsuite/common/$(DEPDIR)/$(am__dirstamp)
@@ -1335,7 +1392,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-noinstLIBRARIES \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf igen/$(DEPDIR) testsuite/common/$(DEPDIR)
+	-rm -rf common/$(DEPDIR) igen/$(DEPDIR) testsuite/common/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-DEJAGNU distclean-compile \
 	distclean-generic distclean-tags
@@ -1383,7 +1440,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf igen/$(DEPDIR) testsuite/common/$(DEPDIR)
+	-rm -rf common/$(DEPDIR) igen/$(DEPDIR) testsuite/common/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1434,9 +1491,10 @@ nltvals:
 	$(abs_srcdir)/common/gennltvals.py --cpp "$(CPP)" --output nltvals.def --srcroot $(srcroot)
 	$(SHELL) $(srcroot)/move-if-change nltvals.def $(abs_srcdir)/common/nltvals.def
 
-# This makes sure igen is available before building the arch-subdirs which
-# need to run the igen tool.
-@SIM_ENABLE_IGEN_TRUE@all-recursive: igen/igen$(EXEEXT)
+common/version.c: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(srcdir)/common/create-version.sh
+	$(SHELL) $(srcdir)/common/create-version.sh $(srcroot)/gdb $@.tmp
+	$(SHELL) $(srcroot)/move-if-change $@.tmp $@
+	touch $@
 
 # Alias for developers.
 @SIM_ENABLE_IGEN_TRUE@igen: igen/igen$(EXEEXT)
@@ -1514,6 +1572,8 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen testsuite/common/bits-ts
 	$< 64 63 little > $@.tmp
 	cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
 	mv $@.tmp $@
+
+all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
