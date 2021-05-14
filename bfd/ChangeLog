@@ -1,3 +1,9 @@
+2021-05-14  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_resolve_pcrel_lo_relocs): Check the values
+	of %pcrel_hi, before and after adding the addend.  Make sure the
+	value won't be changed, otherwise, report dangerous error.
+
 2021-05-13  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfxx-riscv.c (check_implicit_always): The check_func, always add

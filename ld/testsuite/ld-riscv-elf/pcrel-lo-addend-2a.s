@@ -5,7 +5,7 @@ _start:
 	nop
 	.LA0: auipc	a5,%pcrel_hi(ll)
 	lw	a0,%pcrel_lo(.LA0)(a5)
-	lw	a0,%pcrel_lo(.LA0+4)(a5)
+	lw	a0,%pcrel_lo(.LA0+0x4)(a5)
 	ret
 	.globl ll
 	.data

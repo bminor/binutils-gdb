@@ -1883,13 +1883,23 @@ riscv_resolve_pcrel_lo_relocs (riscv_pcrel_relocs *p)
       riscv_pcrel_hi_reloc search = {r->addr, 0};
       riscv_pcrel_hi_reloc *entry = htab_find (p->hi_relocs, &search);
       if (entry == NULL
-	  /* Check for overflow into bit 11 when adding reloc addend.  */
-	  || (!(entry->value & 0x800)
-	      && ((entry->value + r->reloc->r_addend) & 0x800)))
+	  /* Check the overflow when adding reloc addend.  */
+	  || (RISCV_CONST_HIGH_PART (entry->value)
+	      != RISCV_CONST_HIGH_PART (entry->value + r->reloc->r_addend)))
 	{
-	  char *string = (entry == NULL
-			  ? "%pcrel_lo missing matching %pcrel_hi"
-			  : "%pcrel_lo overflow with an addend");
+	  char *string;
+	  if (entry == NULL)
+	    string = _("%pcrel_lo missing matching %pcrel_hi");
+	  else if (asprintf (&string,
+			     _("%%pcrel_lo overflow with an addend, the "
+			       "value of %%pcrel_hi is 0x%" PRIx64 " without "
+			       "any addend, but may be 0x%" PRIx64 " after "
+			       "adding the %%pcrel_lo addend"),
+			     (int64_t) RISCV_CONST_HIGH_PART (entry->value),
+			     (int64_t) RISCV_CONST_HIGH_PART
+				(entry->value + r->reloc->r_addend)) == -1)
+	    string = _("%pcrel_lo overflow with an addend");
+
 	  (*r->info->callbacks->reloc_dangerous)
 	    (r->info, string, input_bfd, r->input_section, r->reloc->r_offset);
 	  return true;
