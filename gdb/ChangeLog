@@ -1,5 +1,13 @@
 2021-06-28  Luis Machado  <luis.machado@linaro.org>
 
+	* aarch64-linux-tdep.c (aarch64_linux_memtag_matches_p): Remove the top
+	byte.
+	(aarch64_linux_set_memtags): Likewise.
+	(aarch64_linux_get_memtag): Likewise.
+	(aarch64_linux_report_signal_info): Likewise.
+
+2021-06-28  Luis Machado  <luis.machado@linaro.org>
+
 	* aarch64-linux-tdep.c
 	(aarch64_linux_iterate_over_regset_sections): Fix FFR register size.
 

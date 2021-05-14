@@ -1587,7 +1587,8 @@ aarch64_linux_memtag_matches_p (struct gdbarch *gdbarch,
   CORE_ADDR addr = value_as_address (address);
 
   /* Fetch the allocation tag for ADDRESS.  */
-  gdb::optional<CORE_ADDR> atag = aarch64_mte_get_atag (addr);
+  gdb::optional<CORE_ADDR> atag
+    = aarch64_mte_get_atag (address_significant (gdbarch, addr));
 
   if (!atag.has_value ())
     return true;
@@ -1625,6 +1626,9 @@ aarch64_linux_set_memtags (struct gdbarch *gdbarch, struct value *address,
     }
   else
     {
+      /* Remove the top byte.  */
+      addr = address_significant (gdbarch, addr);
+
       /* Make sure we are dealing with a tagged address to begin with.  */
       if (!aarch64_linux_tagged_address_p (gdbarch, address))
 	return false;
@@ -1679,6 +1683,8 @@ aarch64_linux_get_memtag (struct gdbarch *gdbarch, struct value *address,
       if (!aarch64_linux_tagged_address_p (gdbarch, address))
 	return nullptr;
 
+      /* Remove the top byte.  */
+      addr = address_significant (gdbarch, addr);
       gdb::optional<CORE_ADDR> atag = aarch64_mte_get_atag (addr);
 
       if (!atag.has_value ())
@@ -1751,7 +1757,8 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
       uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
       uiout->text ("\n");
 
-      gdb::optional<CORE_ADDR> atag = aarch64_mte_get_atag (fault_addr);
+      gdb::optional<CORE_ADDR> atag
+	= aarch64_mte_get_atag (address_significant (gdbarch, fault_addr));
       gdb_byte ltag = aarch64_mte_get_ltag (fault_addr);
 
       if (!atag.has_value ())
