@@ -51,6 +51,10 @@ nltvals:
 	$(abs_srcdir)/common/gennltvals.py --cpp "$(CPP)" --output nltvals.def --srcroot $(srcroot)
 	$(SHELL) $(srcroot)/move-if-change nltvals.def $(abs_srcdir)/common/nltvals.def
 
+pkginclude_HEADERS = \
+	$(srcroot)/include/sim/callback.h \
+	$(srcroot)/include/sim/sim.h
+
 if SIM_ENABLE_IGEN
 include igen/local.mk
 endif
