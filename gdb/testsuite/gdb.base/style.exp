@@ -197,6 +197,24 @@ proc run_style_tests { } {
 	gdb_test "print struct_value" \
 	    "\{$ifield = 23,.*$sfield = .*,.*$efield = $evalue.*"
 
+	set ffield [limited_style field variable]
+	set cstart [string_to_regexp "/* XXX "]
+	set cend [string_to_regexp " */"]
+	set p1field [limited_style "$cstart.*$decimal.*-bit.*padding.*$cend" \
+			 highlight]
+	set p2field [limited_style "$cstart.*$decimal.*-byte.*padding.*$cend" \
+			 highlight]
+
+	gdb_test "ptype/o just_bitfield_value" \
+	    [multi_line \
+		 ".* type = struct just_bitfield {" \
+		 ".* unsigned int $ffield : 3;" \
+		 "$p1field" \
+		 "$p2field" \
+		 "" \
+		 ".* total size.*: *$decimal *$cend" \
+		 " *}.*"]
+
 	set address_style_expr [limited_style ".*\".*address.*\".*style.*" address]
 	set color "blue"
 	if { $currently_disabled_style == "address" } {

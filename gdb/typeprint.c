@@ -104,12 +104,18 @@ print_offset_data::maybe_print_hole (struct ui_file *stream,
       unsigned int hole_bit = hole % TARGET_CHAR_BIT;
 
       if (hole_bit > 0)
-	fprintf_filtered (stream, "/* XXX %2u-bit %-7s    */\n", hole_bit,
-			  for_what);
+	{
+	  fprintf_styled (stream, highlight_style.style (),
+			  "/* XXX %2u-bit %-7s    */", hole_bit, for_what);
+	  fputs_filtered ("\n", stream);
+	}
 
       if (hole_byte > 0)
-	fprintf_filtered (stream, "/* XXX %2u-byte %-7s   */\n", hole_byte,
-			  for_what);
+	{
+	  fprintf_styled (stream, highlight_style.style (),
+			  "/* XXX %2u-byte %-7s   */", hole_byte, for_what);
+	  fputs_filtered ("\n", stream);
+	}
     }
 }
 

@@ -34,6 +34,13 @@ struct some_struct
 
 struct some_struct struct_value = { 23, "skidoo", VALUE_TWO };
 
+struct just_bitfield
+{
+  unsigned int field : 3;
+};
+
+struct just_bitfield just_bitfield_value = { 4 };
+
 int some_called_function (void)
 {
   return 0;
