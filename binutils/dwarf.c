@@ -9571,12 +9571,12 @@ display_debug_names (struct dwarf_section *section, void *file)
       unsigned int offset_size;
       uint16_t dwarf_version, padding;
       uint32_t comp_unit_count, local_type_unit_count, foreign_type_unit_count;
-      uint32_t bucket_count, name_count, abbrev_table_size;
+      uint64_t bucket_count, name_count, abbrev_table_size;
       uint32_t augmentation_string_size;
       unsigned int i;
-      unsigned long sec_off;
       bool augmentation_printable;
       const char *augmentation_string;
+      size_t total;
 
       unit_start = hdrptr;
 
@@ -9591,18 +9591,18 @@ display_debug_names (struct dwarf_section *section, void *file)
 	}
       else
 	offset_size = 4;
-      unit_end = hdrptr + unit_length;
 
-      sec_off = hdrptr - section->start;
-      if (sec_off + unit_length < sec_off
-	  || sec_off + unit_length > section->size)
+      if (unit_length > (size_t) (section_end - hdrptr)
+	  || unit_length < 2 + 2 + 4 * 7)
 	{
+	too_short:
 	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
 		section->name,
 		(unsigned long) (unit_start - section->start),
 		dwarf_vmatoa ("x", unit_length));
 	  return 0;
 	}
+      unit_end = hdrptr + unit_length;
 
       /* Get and check the version number.  */
       SAFE_BYTE_GET_AND_INC (dwarf_version, hdrptr, 2, unit_end);
@@ -9640,6 +9640,8 @@ display_debug_names (struct dwarf_section *section, void *file)
 		augmentation_string_size);
 	  augmentation_string_size += (-augmentation_string_size) & 3;
 	}
+      if (augmentation_string_size > (size_t) (unit_end - hdrptr))
+	goto too_short;
 
       printf (_("Augmentation string:"));
 
@@ -9669,6 +9671,9 @@ display_debug_names (struct dwarf_section *section, void *file)
       putchar ('\n');
 
       printf (_("CU table:\n"));
+      if (_mul_overflow (comp_unit_count, offset_size, &total)
+	  || total > (size_t) (unit_end - hdrptr))
+	goto too_short;
       for (i = 0; i < comp_unit_count; i++)
 	{
 	  uint64_t cu_offset;
@@ -9679,6 +9684,9 @@ display_debug_names (struct dwarf_section *section, void *file)
       putchar ('\n');
 
       printf (_("TU table:\n"));
+      if (_mul_overflow (local_type_unit_count, offset_size, &total)
+	  || total > (size_t) (unit_end - hdrptr))
+	goto too_short;
       for (i = 0; i < local_type_unit_count; i++)
 	{
 	  uint64_t tu_offset;
@@ -9689,6 +9697,9 @@ display_debug_names (struct dwarf_section *section, void *file)
       putchar ('\n');
 
       printf (_("Foreign TU table:\n"));
+      if (_mul_overflow (foreign_type_unit_count, 8, &total)
+	  || total > (size_t) (unit_end - hdrptr))
+	goto too_short;
       for (i = 0; i < foreign_type_unit_count; i++)
 	{
 	  uint64_t signature;
@@ -9700,6 +9711,18 @@ display_debug_names (struct dwarf_section *section, void *file)
 	}
       putchar ('\n');
 
+      uint64_t xtra = (bucket_count * sizeof (uint32_t)
+		       + name_count * (sizeof (uint32_t) + 2 * offset_size)
+		       + abbrev_table_size);
+      if (xtra > (size_t) (unit_end - hdrptr))
+	{
+	  warn (_("Entry pool offset (0x%lx) exceeds unit size 0x%lx "
+		  "for unit 0x%lx in the debug_names\n"),
+		(long) xtra,
+		(long) (unit_end - unit_start),
+		(long) (unit_start - section->start));
+	  return 0;
+	}
       const uint32_t *const hash_table_buckets = (uint32_t *) hdrptr;
       hdrptr += bucket_count * sizeof (uint32_t);
       const uint32_t *const hash_table_hashes = (uint32_t *) hdrptr;
@@ -9712,15 +9735,6 @@ display_debug_names (struct dwarf_section *section, void *file)
       hdrptr += abbrev_table_size;
       const unsigned char *const abbrev_table_end = hdrptr;
       unsigned char *const entry_pool = hdrptr;
-      if (hdrptr > unit_end)
-	{
-	  warn (_("Entry pool offset (0x%lx) exceeds unit size 0x%lx "
-		  "for unit 0x%lx in the debug_names\n"),
-		(long) (hdrptr - section->start),
-		(long) (unit_end - section->start),
-		(long) (unit_start - section->start));
-	  return 0;
-	}
 
       size_t buckets_filled = 0;
       size_t bucketi;

@@ -1,5 +1,11 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (display_debug_names): Complain when header length is
+	too small.  Avoid pointer UB.  Sanity check augmentation string,
+	CU table, TU table and foreign TU table sizes.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_debug_frames): Delete initial_length_size.
 	Avoid pointer UB.  Constrain data reads to length given in header.
 	Sanity check cie header length.  Only skip up to next FDE on
