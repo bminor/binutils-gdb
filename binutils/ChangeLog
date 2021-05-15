@@ -1,5 +1,11 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (display_debug_aranges): Delete initial_length_size.
+	Use end_ranges to constrain data reads to header length.  Avoid
+	pointer UB.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_loc_list): Avoid pointer UB.  Correct check
 	before reading uleb length.  Warn on excess length.
 

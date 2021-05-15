@@ -7187,36 +7187,33 @@ display_debug_aranges (struct dwarf_section *section,
       unsigned char address_size;
       int excess;
       unsigned int offset_size;
-      unsigned int initial_length_size;
+      unsigned char *end_ranges;
 
       hdrptr = start;
+      sec_off = hdrptr - section->start;
 
       SAFE_BYTE_GET_AND_INC (arange.ar_length, hdrptr, 4, end);
       if (arange.ar_length == 0xffffffff)
 	{
 	  SAFE_BYTE_GET_AND_INC (arange.ar_length, hdrptr, 8, end);
 	  offset_size = 8;
-	  initial_length_size = 12;
 	}
       else
-	{
-	  offset_size = 4;
-	  initial_length_size = 4;
-	}
+	offset_size = 4;
 
-      sec_off = hdrptr - section->start;
-      if (sec_off + arange.ar_length < sec_off
-	  || sec_off + arange.ar_length > section->size)
+      if (arange.ar_length > (size_t) (end - hdrptr))
 	{
 	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
 		section->name,
-		sec_off - initial_length_size,
+		sec_off,
 		dwarf_vmatoa ("x", arange.ar_length));
 	  break;
 	}
+      end_ranges = hdrptr + arange.ar_length;
 
-      SAFE_BYTE_GET_AND_INC (arange.ar_version, hdrptr, 2, end);
-      SAFE_BYTE_GET_AND_INC (arange.ar_info_offset, hdrptr, offset_size, end);
+      SAFE_BYTE_GET_AND_INC (arange.ar_version, hdrptr, 2, end_ranges);
+      SAFE_BYTE_GET_AND_INC (arange.ar_info_offset, hdrptr, offset_size,
+			     end_ranges);
 
       if (num_debug_info_entries != DEBUG_INFO_UNAVAILABLE
 	  && num_debug_info_entries > 0
@@ -7224,8 +7221,8 @@ display_debug_aranges (struct dwarf_section *section,
 	warn (_(".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"),
 	      (unsigned long) arange.ar_info_offset, section->name);
 
-      SAFE_BYTE_GET_AND_INC (arange.ar_pointer_size, hdrptr, 1, end);
-      SAFE_BYTE_GET_AND_INC (arange.ar_segment_size, hdrptr, 1, end);
+      SAFE_BYTE_GET_AND_INC (arange.ar_pointer_size, hdrptr, 1, end_ranges);
+      SAFE_BYTE_GET_AND_INC (arange.ar_segment_size, hdrptr, 1, end_ranges);
 
       if (arange.ar_version != 2 && arange.ar_version != 3)
 	{
@@ -7277,12 +7274,12 @@ display_debug_aranges (struct dwarf_section *section,
       if (excess)
 	addr_ranges += (2 * address_size) - excess;
 
-      start += arange.ar_length + initial_length_size;
+      start = end_ranges;
 
-      while (addr_ranges + 2 * address_size <= start)
+      while (2 * address_size <= (size_t) (start - addr_ranges))
 	{
-	  SAFE_BYTE_GET_AND_INC (address, addr_ranges, address_size, end);
-	  SAFE_BYTE_GET_AND_INC (length, addr_ranges, address_size, end);
+	  SAFE_BYTE_GET_AND_INC (address, addr_ranges, address_size, start);
+	  SAFE_BYTE_GET_AND_INC (length, addr_ranges, address_size, start);
 
 	  printf ("    ");
 	  print_dwarf_vma (address, address_size);
