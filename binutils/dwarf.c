@@ -10105,7 +10105,7 @@ display_gdb_index (struct dwarf_section *section,
   symbol_table = start + symbol_table_offset;
   constant_pool = start + constant_pool_offset;
 
-  if (address_table + address_table_size > section->start + section->size)
+  if (address_table_offset + address_table_size > section->size)
     {
       warn (_("Address table extends beyond end of section.\n"));
       return 0;
@@ -10160,11 +10160,9 @@ display_gdb_index (struct dwarf_section *section,
 	  || cu_vector_offset != 0)
 	{
 	  unsigned int j;
-	  unsigned char * adr;
 
-	  adr = constant_pool + name_offset;
 	  /* PR 17531: file: 5b7b07ad.  */
-	  if (adr < constant_pool || adr >= section->start + section->size)
+	  if (name_offset >= section->size - constant_pool_offset)
 	    {
 	      printf (_("[%3u] <corrupt offset: %x>"), i, name_offset);
 	      warn (_("Corrupt name offset of 0x%x found for symbol table slot %d\n"),
@@ -10175,8 +10173,8 @@ display_gdb_index (struct dwarf_section *section,
 		    (int) (section->size - (constant_pool_offset + name_offset)),
 		    constant_pool + name_offset);
 
-	  adr = constant_pool + cu_vector_offset;
-	  if (adr < constant_pool || adr >= section->start + section->size - 3)
+	  if (section->size - constant_pool_offset < 4
+	      || cu_vector_offset > section->size - constant_pool_offset - 4)
 	    {
 	      printf (_("<invalid CU vector offset: %x>\n"), cu_vector_offset);
 	      warn (_("Corrupt CU vector offset of 0x%x found for symbol table slot %d\n"),
@@ -10184,12 +10182,10 @@ display_gdb_index (struct dwarf_section *section,
 	      continue;
 	    }
 
-	  num_cus = byte_get_little_endian (adr, 4);
+	  num_cus = byte_get_little_endian (constant_pool + cu_vector_offset, 4);
 
-	  adr = constant_pool + cu_vector_offset + 4 + num_cus * 4;
-	  if (num_cus * 4 < num_cus
-	      || adr >= section->start + section->size
-	      || adr < constant_pool)
+	  if ((uint64_t) num_cus * 4 > section->size - (constant_pool_offset
+							+ cu_vector_offset + 4))
 	    {
 	      printf ("<invalid number of CUs: %d>\n", num_cus);
 	      warn (_("Invalid number of CUs (0x%x) for symbol table slot %d\n"),
