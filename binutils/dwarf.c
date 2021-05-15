@@ -8409,10 +8409,16 @@ read_cie (unsigned char *start, unsigned char *end,
     }
 
   if (strcmp (fc->augmentation, "eh") == 0)
-    start += eh_addr_size;
+    {
+      if (eh_addr_size > (size_t) (end - start))
+	goto fail;
+      start += eh_addr_size;
+    }
 
   if (version >= 4)
     {
+      if (2 > (size_t) (end - start))
+	goto fail;
       GET (fc->ptr_size, 1);
       if (fc->ptr_size < 1 || fc->ptr_size > 8)
 	{
@@ -8439,6 +8445,9 @@ read_cie (unsigned char *start, unsigned char *end,
   READ_ULEB (fc->code_factor, start, end);
   READ_SLEB (fc->data_factor, start, end);
 
+  if (start >= end)
+    goto fail;
+
   if (version == 1)
     {
       GET (fc->ra, 1);
@@ -8450,6 +8459,8 @@ read_cie (unsigned char *start, unsigned char *end,
 
   if (fc->augmentation[0] == 'z')
     {
+      if (start >= end)
+	goto fail;
       READ_ULEB (augmentation_data_len, start, end);
       augmentation_data = start;
       /* PR 17512: file: 11042-2589-0.004.  */
