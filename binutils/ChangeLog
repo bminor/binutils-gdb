@@ -1,5 +1,10 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (display_debug_macinfo): Print strings that might not
+	be zero terminated with %*s.  Don't bump curr if unterminated.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_debug_pubnames_worker): Delete initial_length_size.
 	Simplify length check.  Constrain reads to length given by header.
 

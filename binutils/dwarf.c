@@ -5780,17 +5780,21 @@ display_debug_macinfo (struct dwarf_section *section,
 	case DW_MACINFO_define:
 	  READ_ULEB (lineno, curr, end);
 	  string = curr;
-	  curr += strnlen ((char *) string, end - string) + 1;
-	  printf (_(" DW_MACINFO_define - lineno : %d macro : %s\n"),
-		  lineno, string);
+	  curr += strnlen ((char *) string, end - string);
+	  printf (_(" DW_MACINFO_define - lineno : %d macro : %*s\n"),
+		  lineno, (int) (curr - string), string);
+	  if (curr < end)
+	    curr++;
 	  break;
 
 	case DW_MACINFO_undef:
 	  READ_ULEB (lineno, curr, end);
 	  string = curr;
-	  curr += strnlen ((char *) string, end - string) + 1;
-	  printf (_(" DW_MACINFO_undef - lineno : %d macro : %s\n"),
-		  lineno, string);
+	  curr += strnlen ((char *) string, end - string);
+	  printf (_(" DW_MACINFO_undef - lineno : %d macro : %*s\n"),
+		  lineno, (int) (curr - string), string);
+	  if (curr < end)
+	    curr++;
 	  break;
 
 	case DW_MACINFO_vendor_ext:
@@ -5799,9 +5803,11 @@ display_debug_macinfo (struct dwarf_section *section,
 
 	    READ_ULEB (constant, curr, end);
 	    string = curr;
-	    curr += strnlen ((char *) string, end - string) + 1;
-	    printf (_(" DW_MACINFO_vendor_ext - constant : %d string : %s\n"),
-		    constant, string);
+	    curr += strnlen ((char *) string, end - string);
+	    printf (_(" DW_MACINFO_vendor_ext - constant : %d string : %*s\n"),
+		    constant, (int) (curr - string), string);
+	    if (curr < end)
+	      curr++;
 	  }
 	  break;
 	}
