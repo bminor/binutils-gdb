@@ -1,5 +1,10 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (display_debug_str_offsets): Constrain reads to length
+	given in header.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_debug_aranges): Delete initial_length_size.
 	Use end_ranges to constrain data reads to header length.  Avoid
 	pointer UB.

@@ -7480,12 +7480,12 @@ display_debug_str_offsets (struct dwarf_section *section,
 	    }
 
 	  int version;
-	  SAFE_BYTE_GET_AND_INC (version, curr, 2, end);
+	  SAFE_BYTE_GET_AND_INC (version, curr, 2, entries_end);
 	  if (version != 5)
 	    warn (_("Unexpected version number in str_offset header: %#x\n"), version);
 
 	  int padding;
-	  SAFE_BYTE_GET_AND_INC (padding, curr, 2, end);
+	  SAFE_BYTE_GET_AND_INC (padding, curr, 2, entries_end);
 	  if (padding != 0)
 	    warn (_("Unexpected value in str_offset header's padding field: %#x\n"), padding);
 
