@@ -178,7 +178,7 @@ get_encoded_value (unsigned char **pdata,
   unsigned int size = size_of_encoded_value (encoding);
   dwarf_vma val;
 
-  if (data + size >= end)
+  if (data >= end || size > (size_t) (end - data))
     {
       warn (_("Encoded value extends past end of section\n"));
       * pdata = end;
