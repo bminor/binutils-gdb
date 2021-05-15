@@ -5616,29 +5616,23 @@ display_debug_pubnames_worker (struct dwarf_section *section,
   while (start < end)
     {
       unsigned char *data;
-      unsigned long sec_off;
-      unsigned int offset_size, initial_length_size;
+      unsigned long sec_off = start - section->start;
+      unsigned int offset_size;
 
       SAFE_BYTE_GET_AND_INC (names.pn_length, start, 4, end);
       if (names.pn_length == 0xffffffff)
 	{
 	  SAFE_BYTE_GET_AND_INC (names.pn_length, start, 8, end);
 	  offset_size = 8;
-	  initial_length_size = 12;
 	}
       else
-	{
-	  offset_size = 4;
-	  initial_length_size = 4;
-	}
+	offset_size = 4;
 
-      sec_off = start - section->start;
-      if (sec_off + names.pn_length < sec_off
-	  || sec_off + names.pn_length > section->size)
+      if (names.pn_length > (size_t) (end - start))
 	{
 	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
 		section->name,
-		sec_off - initial_length_size,
+		sec_off,
 		dwarf_vmatoa ("x", names.pn_length));
 	  break;
 	}
@@ -5646,8 +5640,8 @@ display_debug_pubnames_worker (struct dwarf_section *section,
       data = start;
       start += names.pn_length;
 
-      SAFE_BYTE_GET_AND_INC (names.pn_version, data, 2, end);
-      SAFE_BYTE_GET_AND_INC (names.pn_offset, data, offset_size, end);
+      SAFE_BYTE_GET_AND_INC (names.pn_version, data, 2, start);
+      SAFE_BYTE_GET_AND_INC (names.pn_offset, data, offset_size, start);
 
       if (num_debug_info_entries != DEBUG_INFO_UNAVAILABLE
 	  && num_debug_info_entries > 0
@@ -5655,7 +5649,7 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 	warn (_(".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"),
 	      (unsigned long) names.pn_offset, section->name);
 
-      SAFE_BYTE_GET_AND_INC (names.pn_size, data, offset_size, end);
+      SAFE_BYTE_GET_AND_INC (names.pn_size, data, offset_size, start);
 
       printf (_("  Length:                              %ld\n"),
 	      (long) names.pn_length);
@@ -5689,14 +5683,14 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 	  bfd_size_type maxprint;
 	  dwarf_vma offset;
 
-	  SAFE_BYTE_GET_AND_INC (offset, data, offset_size, end);
+	  SAFE_BYTE_GET_AND_INC (offset, data, offset_size, start);
 
 	  if (offset == 0)
 	    break;
 
-	  if (data >= end)
+	  if (data >= start)
 	    break;
-	  maxprint = (end - data) - 1;
+	  maxprint = (start - data) - 1;
 
 	  if (is_gnu)
 	    {
@@ -5705,7 +5699,7 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 	      const char *kind_name;
 	      int is_static;
 
-	      SAFE_BYTE_GET_AND_INC (kind_data, data, 1, end);
+	      SAFE_BYTE_GET_AND_INC (kind_data, data, 1, start);
 	      maxprint --;
 	      /* GCC computes the kind as the upper byte in the CU index
 		 word, and then right shifts it by the CU index size.
@@ -5724,9 +5718,9 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 		    (unsigned long) offset, (int) maxprint, data);
 
 	  data += strnlen ((char *) data, maxprint);
-	  if (data < end)
+	  if (data < start)
 	    data++;
-	  if (data >= end)
+	  if (data >= start)
 	    break;
 	}
     }
