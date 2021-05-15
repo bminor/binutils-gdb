@@ -1,5 +1,9 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (SAFE_BYTE_GET_INTERNAL): Assert only when ENABLE_CHECKING.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* bucomm.h (_mul_overflow): Define.
 	* dwarf.c (get_encoded_value): Avoid pointer UB.
 

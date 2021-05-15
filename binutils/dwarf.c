@@ -390,8 +390,11 @@ read_leb128 (unsigned char *data,
 		 (int) amount, (int) sizeof (VAL));			\
 	  amount = sizeof (VAL);					\
 	}								\
-      assert ((PTR) <= (END));						\
+      if (ENABLE_CHECKING)						\
+	assert ((PTR) <= (END));					\
       size_t avail = (END) - (PTR);					\
+      if ((PTR) > (END))						\
+	avail = 0;							\
       if (amount > avail)						\
 	amount = avail;							\
       if (amount == 0)							\
