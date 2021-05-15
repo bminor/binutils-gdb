@@ -386,7 +386,8 @@ rust_language::val_print_struct
 	  fputs_filtered (": ", stream);
 	}
 
-      value_print_inner (value_field (val, i), stream, recurse + 1, &opts);
+      common_val_print (value_field (val, i), stream, recurse + 1, &opts,
+			this);
     }
 
   if (options->prettyformat)
@@ -464,7 +465,8 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
 			  styled_string (variable_name_style.style (),
 					 TYPE_FIELD_NAME (variant_type, j)));
 
-      value_print_inner (value_field (val, j), stream, recurse + 1, &opts);
+      common_val_print (value_field (val, j), stream, recurse + 1, &opts,
+			this);
     }
 
   if (is_tuple)
