@@ -7691,7 +7691,6 @@ display_debug_ranges (struct dwarf_section *section,
   if (is_rnglists)
     {
       dwarf_vma initial_length;
-      unsigned int initial_length_size;
       unsigned char segment_selector_size;
       unsigned int offset_size, offset_entry_count;
       unsigned short version;
@@ -7704,22 +7703,18 @@ display_debug_ranges (struct dwarf_section *section,
 	  /* This section is 64-bit DWARF 3.  */
 	  SAFE_BYTE_GET_AND_INC (initial_length, start, 8, finish);
 	  offset_size = 8;
-	  initial_length_size = 12;
 	}
       else
-	{
-	  offset_size = 4;
-	  initial_length_size = 4;
-	}
+	offset_size = 4;
 
-      if (initial_length + initial_length_size > section->size)
+      if (initial_length > (size_t) (finish - start))
 	{
 	  /* If the length field has a relocation against it, then we should
 	     not complain if it is inaccurate (and probably negative).
 	     It is copied from .debug_line handling code.  */
 	  if (reloc_at (section, (start - section->start) - offset_size))
 	    {
-	      initial_length = (finish - start) - initial_length_size;
+	      initial_length = finish - start;
 	    }
 	  else
 	    {
@@ -7728,6 +7723,7 @@ display_debug_ranges (struct dwarf_section *section,
 	      return 0;
 	    }
 	}
+      finish = start + initial_length;
 
       /* Get and check the version number.  */
       SAFE_BYTE_GET_AND_INC (version, start, 2, finish);
@@ -7833,7 +7829,6 @@ display_debug_ranges (struct dwarf_section *section,
 
       pointer_size = (is_rnglists ? address_size : debug_info_p->pointer_size);
       offset = range_entry->ranges_offset;
-      next = section_begin + offset;
       base_address = debug_info_p->base_address;
 
       /* PR 17512: file: 001-101485-0.001:0.1.  */
@@ -7844,12 +7839,13 @@ display_debug_ranges (struct dwarf_section *section,
 	  continue;
 	}
 
-      if (next < section_begin || next >= finish)
+      if (offset > (size_t) (finish - section_begin))
 	{
 	  warn (_("Corrupt offset (%#8.8lx) in range entry %u\n"),
 		(unsigned long) offset, i);
 	  continue;
 	}
+      next = section_begin + offset;
 
       /* If multiple DWARF entities reference the same range then we will
          have multiple entries in the `range_entries' list for the same

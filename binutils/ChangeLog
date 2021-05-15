@@ -1,5 +1,11 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (display_debug_ranges): Delete initial_length_size.
+	Correct fallback size calculated on finding a reloc.  Constrain
+	data reads to length given in header.  Avoid pointer UB.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_debug_rnglists_list): Avoid pointer UB.
 
 2021-05-15  Alan Modra  <amodra@gmail.com>
