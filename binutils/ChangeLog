@@ -1,5 +1,10 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (display_loc_list): Avoid pointer UB.  Correct check
+	before reading uleb length.  Warn on excess length.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_debug_macro): Print strings that might not
 	be zero terminated with %*s.  Don't bump curr if unterminated.
 

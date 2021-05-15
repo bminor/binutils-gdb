@@ -6355,7 +6355,7 @@ display_loc_list (struct dwarf_section *section,
       dwarf_vma off = offset + (start - *start_ptr);
       dwarf_vma vbegin = vm1, vend = vm1;
 
-      if (start + 2 * pointer_size > section_end)
+      if (2 * pointer_size > (size_t) (section_end - start))
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
 		(unsigned long) offset);
@@ -6408,7 +6408,7 @@ display_loc_list (struct dwarf_section *section,
 		  (unsigned long) off, 8, "");
 	}
 
-      if (start + 2 > section_end)
+      if (2 > (size_t) (section_end - start))
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
 		(unsigned long) offset);
@@ -6417,7 +6417,7 @@ display_loc_list (struct dwarf_section *section,
 
       SAFE_BYTE_GET_AND_INC (length, start, 2, section_end);
 
-      if (start + length > section_end)
+      if (length > (size_t) (section_end - start))
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
 		(unsigned long) offset);
@@ -6579,14 +6579,20 @@ display_loclists_list (struct dwarf_section *section,
 	  && llet != DW_LLE_start_length)
 	continue;
 
-      if (start + 2 > section_end)
+      if (start == section_end)
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
 		(unsigned long) offset);
 	  break;
 	}
-
       READ_ULEB (length, start, section_end);
+
+      if (length > (size_t) (section_end - start))
+	{
+	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
+		(unsigned long) offset);
+	  break;
+	}
 
       print_dwarf_vma (begin, pointer_size);
       print_dwarf_vma (end, pointer_size);
@@ -6751,7 +6757,7 @@ display_loc_list_dwo (struct dwarf_section *section,
 	  return;
 	}
 
-      if (start + 2 > section_end)
+      if (2 > (size_t) (section_end - start))
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
 		(unsigned long) offset);
@@ -6759,7 +6765,7 @@ display_loc_list_dwo (struct dwarf_section *section,
 	}
 
       SAFE_BYTE_GET_AND_INC (length, start, 2, section_end);
-      if (start + length > section_end)
+      if (length > (size_t) (section_end - start))
 	{
 	  warn (_("Location list starting at offset 0x%lx is not terminated.\n"),
 		(unsigned long) offset);
