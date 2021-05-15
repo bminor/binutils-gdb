@@ -218,6 +218,7 @@ gen_semantics_c(insn_table *table,
     lf_printf(file, "#include \"cpu.h\"\n");
     lf_printf(file, "#include \"idecode.h\"\n");
     lf_printf(file, "#include \"semantics.h\"\n");
+    lf_printf(file, "#include \"tree.h\"\n");
     lf_printf(file, "#ifdef HAVE_COMMON_FPU\n");
     lf_printf(file, "#include \"sim-inline.h\"\n");
     lf_printf(file, "#include \"sim-fpu.h\"\n");

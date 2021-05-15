@@ -233,7 +233,7 @@ print_options (void)
 		       (((i == ARRAY_SIZE (defines) - 1)
 			 || (((i + 1) % cols) == 0))
 			? 0
-			: max_len + 4 - strlen (defines[i])),
+			: max_len + 4 - (int)strlen (defines[i])),
 		       "");
     }
     printf_filtered ("\n");

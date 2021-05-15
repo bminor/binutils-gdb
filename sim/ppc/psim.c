@@ -93,10 +93,10 @@ psim_tree(void)
 }
 
 STATIC_INLINE_PSIM\
-(char *)
-find_arg(char *err_msg,
+(const char *)
+find_arg(const char *err_msg,
 	 int *ptr_to_argp,
-	 char **argv)
+	 char * const *argv)
 {
   *ptr_to_argp += 1;
   if (argv[*ptr_to_argp] == NULL)
@@ -216,7 +216,7 @@ psim_usage (int verbose, int help, SIM_OPEN_KIND kind)
 /* Test "string" for containing a string of digits that form a number
 between "min" and "max".  The return value is the number or "err". */
 static
-int is_num( char *string, int min, int max, int err)
+int is_num(const char *string, int min, int max, int err)
 {
   int result = 0;
 
@@ -236,9 +236,9 @@ int is_num( char *string, int min, int max, int err)
 }
 
 INLINE_PSIM\
-(char **)
+(char * const *)
 psim_options(device *root,
-	     char **argv,
+	     char * const *argv,
 	     SIM_OPEN_KIND kind)
 {
   device *current = root;
@@ -247,8 +247,8 @@ psim_options(device *root,
     return NULL;
   argp = 0;
   while (argv[argp] != NULL && argv[argp][0] == '-') {
-    char *p = argv[argp] + 1;
-    char *param;
+    const char *p = argv[argp] + 1;
+    const char *param;
     while (*p != '\0') {
       switch (*p) {
       default:
@@ -395,7 +395,7 @@ psim_options(device *root,
 INLINE_PSIM\
 (void)
 psim_command(device *root,
-	     char **argv)
+	     char * const *argv)
 {
   int argp = 0;
   if (argv[argp] == NULL) {
@@ -409,8 +409,8 @@ psim_command(device *root,
       trace_option(opt, 1);
   }
   else if (strcmp(*argv, "change-media") == 0) {
-    char *device = find_arg("Missing device name", &argp, argv);
-    char *media = argv[++argp];
+    const char *device = find_arg("Missing device name", &argp, argv);
+    const char *media = argv[++argp];
     device_ioctl(tree_find_device(root, device), NULL, 0,
 		 device_ioctl_change_media, media);
   }
@@ -738,8 +738,8 @@ psim_init(psim *system)
 INLINE_PSIM\
 (void)
 psim_stack(psim *system,
-	   char **argv,
-	   char **envp)
+	   char * const *argv,
+	   char * const *envp)
 {
   /* pass the stack device the argv/envp and let it work out what to
      do with it */

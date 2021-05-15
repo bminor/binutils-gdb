@@ -251,7 +251,7 @@ cntrl_c(int sig)
 
 
 int
-main(int argc, char **argv)
+main(int argc, char * const *argv)
 {
   const char *name_of_file;
   char *arg_;

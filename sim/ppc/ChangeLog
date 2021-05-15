@@ -1,3 +1,39 @@
+2021-05-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (WERROR_CFLAGS): Define.
+	(STD_CFLAGS): Add $(WERROR_CFLAGS).
+	* configure.ac: Add --enable-werror.
+	* device.c (device_full_name): Delete full_name variable.
+	(device_clean): Delete system variable.
+	* emul_chirp.c (chirp_emul_getprop): Cast vars to unsigned long.
+	(chirp_emul_seek): Likewise.
+	* hw_glue.c (hw_glue_init_address): Use %zu format.
+	* hw_ide.c (hw_ide_io_read_buffer): Cast vars to unsigned long.
+	(hw_ide_io_write_buffer): Likewise.
+	* hw_init.c (update_for_binary_section): Cast vars to unsigned long.
+	* hw_phb.c (hw_phb_dma_read_buffer): Likewise.
+	(hw_phb_dma_write_buffer): Likewise.
+	* hw_shm.c (hw_shm_init_data): Delete d variable.
+	(hw_shm_attach_address_callback): Delete shm variable.
+	* igen.c (gen_semantics_c): Include tree.h.
+	* interrupts.c (alignment_interrupt): Cast vars to unsigned long.
+	* ld-insn.c (dump_insn_field): Cast vars to unsigned long.
+	* main.c (main): Add const to argv.
+	* options.c (print_options): Cast var to int.
+	* ppc-instructions: Add %s to format.  Delete shifted variable.  Add
+	parenthesis to binary operations.
+	* psim.c (find_arg): Add const to return and argv.
+	(is_num): Add const to string.
+	(psim_options): Add const to return and argv, and p & param.
+	(psim_command): Add const to argv, device, and media.
+	(psim_stack): Add const to argv and envp.
+	* psim.h: Add const to psim_options, psim_command, and psim_stack.
+	* tree.c (parse_reg_property): Delete & from sizeof.
+	* vm.c (om_virtual_to_real): Const vars to long.
+	* vm_n.h (vm_data_map_read_N): Change format to %zu.
+	(vm_data_map_write_N): Likewise.
+	* configure: Regenerate.
+
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in: Update path.

@@ -678,6 +678,7 @@ build
 REPORT_BUGS_TEXI
 REPORT_BUGS_TO
 PKGVERSION
+WERROR_CFLAGS
 EGREP
 GREP
 CPP
@@ -773,6 +774,7 @@ enable_sim_stdio
 enable_sim_switch
 enable_sim_timebase
 enable_sim_trace
+enable_werror
 enable_sim_warnings
 enable_sim_xor_endian
 with_pkgversion
@@ -1435,6 +1437,7 @@ Optional Features:
   --enable-sim-switch			Use a switch instead of a table for instruction call.
   --enable-sim-timebase			Specify whether the PPC timebase is supported.
   --enable-sim-trace			Specify whether tracing is supported.
+  --enable-werror         treat compile warnings as errors
   --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o
   --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).
   --enable-plugins        Enable support for plugins
@@ -4756,6 +4759,25 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_trace" >&5
 $as_echo "$sim_trace" >&6; }
+
+
+# Check whether --enable-werror was given.
+if test "${enable_werror+set}" = set; then :
+  enableval=$enable_werror; case "${enableval}" in
+     yes | y) ERROR_ON_WARNING="yes" ;;
+     no | n)  ERROR_ON_WARNING="no" ;;
+     *) as_fn_error $? "bad value ${enableval} for --enable-werror" "$LINENO" 5 ;;
+   esac
+fi
+
+# Enable -Werror by default when using gcc
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+  ERROR_ON_WARNING=yes
+fi
+WERROR_CFLAGS=""
+if test "${ERROR_ON_WARNING}" = yes ; then
+  WERROR_CFLAGS="-Werror"
+fi
 
 
 # Check whether --enable-sim-warnings was given.

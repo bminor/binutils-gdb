@@ -967,7 +967,7 @@ hw_phb_dma_read_buffer(device *me,
     device_error(me, "Do not support DMA into own bus");
   /* do it */
   DTRACE(phb, ("dma read - %s:0x%lx (%d bytes)\n",
-	       pci_space->name, addr, nr_bytes));
+	       pci_space->name, (unsigned long)addr, nr_bytes));
   return device_dma_read_buffer(device_parent(me),
 				dest, pci_space->parent_space,
 				addr, nr_bytes);
@@ -996,7 +996,7 @@ hw_phb_dma_write_buffer(device *me,
     device_error(me, "Do not support DMA into own bus");
   /* do it */
   DTRACE(phb, ("dma write - %s:0x%lx (%d bytes)\n",
-	       pci_space->name, addr, nr_bytes));
+	       pci_space->name, (unsigned long)addr, nr_bytes));
   return device_dma_write_buffer(device_parent(me),
 				 source, pci_space->parent_space,
 				 addr, nr_bytes,

@@ -627,9 +627,9 @@ om_virtual_to_real(om_map *map,
       TRACE(trace_vm,
 	    ("ea=0x%lx - htab search %d - htab=0x%lx hash=0x%lx mask=0x%lx pteg=0x%lx\n",
 	     (long)ea, current_hash,
-	     map->real_address_of_page_table,
-	     page_hash,
-	     map->page_table_hash_mask,
+	     (long)map->real_address_of_page_table,
+	     (long)page_hash,
+	     (long)map->page_table_hash_mask,
 	     (long)real_address_of_pte_group));
       for (real_address_of_pte_0 = real_address_of_pte_group;
 	   real_address_of_pte_0 < (real_address_of_pte_group
