@@ -1,5 +1,10 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (process_cu_tu_index): Avoid pointer UB.  Use _mul_overflow.
+	Delete dead code.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_gdb_index): Avoid pointer UB and overflow in
 	length calculations.
 

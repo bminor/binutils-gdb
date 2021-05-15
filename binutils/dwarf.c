@@ -10320,6 +10320,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   unsigned int i;
   unsigned int j;
   dwarf_vma signature;
+  size_t total;
 
   /* PR 17512: file: 002-168123-0.004.  */
   if (phdr == NULL)
@@ -10357,10 +10358,8 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
     }
 
   /* PR 17531: file: 45d69832.  */
-  if ((size_t) nslots * 8 / 8 != nslots
-      || phash < phdr || phash > limit
-      || pindex < phash || pindex > limit
-      || ppool < pindex || ppool > limit)
+  if (_mul_overflow ((size_t) nslots, 12, &total)
+      || total > (size_t) (limit - phash))
     {
       warn (ngettext ("Section %s is too small for %u slot\n",
 		      "Section %s is too small for %u slots\n",
@@ -10427,23 +10426,21 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       unsigned char *pi = pindex;
       unsigned char *poffsets = ppool + (size_t) ncols * 4;
       unsigned char *psizes = poffsets + (size_t) nused * ncols * 4;
-      unsigned char *pend = psizes + (size_t) nused * ncols * 4;
       bool is_tu_index;
       struct cu_tu_set *this_set = NULL;
       unsigned int row;
       unsigned char *prow;
+      size_t temp;
 
       is_tu_index = strcmp (section->name, ".debug_tu_index") == 0;
 
       /* PR 17531: file: 0dd159bf.
 	 Check for integer overflow (can occur when size_t is 32-bit)
 	 with overlarge ncols or nused values.  */
-      if (ncols > 0
-	  && ((size_t) ncols * 4 / 4 != ncols
-	      || (size_t) nused * ncols * 4 / ((size_t) ncols * 4) != nused
-	      || poffsets < ppool || poffsets > limit
-	      || psizes < poffsets || psizes > limit
-	      || pend < psizes || pend > limit))
+      if (nused == -1u
+	  || _mul_overflow ((size_t) ncols, 4, &temp)
+	  || _mul_overflow ((size_t) nused + 1, temp, &total)
+	  || total > (size_t) (limit - ppool))
 	{
 	  warn (_("Section %s too small for offset and size tables\n"),
 		section->name);
@@ -10502,25 +10499,10 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 		{
 		  size_t num_copy = sizeof (uint64_t);
 
-		  /* PR 23064: Beware of buffer overflow.  */
-		  if (ph + num_copy < limit)
-		    memcpy (&this_set[row - 1].signature, ph, num_copy);
-		  else
-		    {
-		      warn (_("Signature (%p) extends beyond end of space in section\n"), ph);
-		      return 0;
-		    }
+		  memcpy (&this_set[row - 1].signature, ph, num_copy);
 		}
 
 	      prow = poffsets + (row - 1) * ncols * 4;
-	      /* PR 17531: file: b8ce60a8.  */
-	      if (prow < poffsets || prow > limit)
-		{
-		  warn (_("Row index (%u) * num columns (%u) > space remaining in section\n"),
-			row, ncols);
-		  return 0;
-		}
-
 	      if (do_display)
 		printf (_("  [%3d] 0x%s"),
 			i, dwarf_vmatoa ("x", signature));
