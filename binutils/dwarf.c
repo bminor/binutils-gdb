@@ -7603,7 +7603,7 @@ display_debug_rnglists_list (unsigned char *start, unsigned char *finish,
       /* Initialize it due to a false compiler warning.  */
       dwarf_vma begin = -1, length, end = -1;
 
-      if (start + 1 > finish)
+      if (start >= finish)
 	{
 	  warn (_("Range list starting at offset 0x%lx is not terminated.\n"),
 		offset);

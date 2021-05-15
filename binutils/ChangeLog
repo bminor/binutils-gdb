@@ -1,5 +1,9 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (display_debug_rnglists_list): Avoid pointer UB.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_debug_str_offsets): Constrain reads to length
 	given in header.
 
