@@ -1,5 +1,11 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (get_line_filename_and_dirname): Delete initial_length_size.
+	Simplify length sanity check, and check for too small lengths.
+	Constrain data reads to header length.  Avoid pointer UB.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (display_debug_macinfo): Print strings that might not
 	be zero terminated with %*s.  Don't bump curr if unterminated.
 
