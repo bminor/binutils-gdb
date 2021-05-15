@@ -1,5 +1,11 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (read_debug_line_header): Delete initial_length_size.
+	Avoid pointer UB.  Keep within length specified by header.
+	Delete dead code.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (process_debug_info): Always do the first CU length
 	scan for sanity checks.  Remove initial_length_size var and
 	instead calculate end_cu.  Use end_cu to limit data reads.

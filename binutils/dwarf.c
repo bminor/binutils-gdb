@@ -4053,7 +4053,6 @@ read_debug_line_header (struct dwarf_section * section,
 			unsigned char ** end_of_sequence)
 {
   unsigned char *hdrptr;
-  unsigned int initial_length_size;
 
   /* Extract information from the Line Number Program Header.
      (section 6.2.4 in the Dwarf3 doc).  */
@@ -4067,15 +4066,11 @@ read_debug_line_header (struct dwarf_section * section,
       /* This section is 64-bit DWARF 3.  */
       SAFE_BYTE_GET_AND_INC (linfo->li_length, hdrptr, 8, end);
       linfo->li_offset_size = 8;
-      initial_length_size = 12;
     }
   else
-    {
-      linfo->li_offset_size = 4;
-      initial_length_size = 4;
-    }
+    linfo->li_offset_size = 4;
 
-  if (linfo->li_length + initial_length_size > section->size)
+  if (linfo->li_length > (size_t) (end - hdrptr))
     {
       /* If the length field has a relocation against it, then we should
 	 not complain if it is inaccurate (and probably negative).  This
@@ -4085,7 +4080,7 @@ read_debug_line_header (struct dwarf_section * section,
 	 is used to compute the correct length once that is done.  */
       if (reloc_at (section, (hdrptr - section->start) - linfo->li_offset_size))
 	{
-	  linfo->li_length = (end - data) - initial_length_size;
+	  linfo->li_length = end - hdrptr;
 	}
       else
 	{
@@ -4094,6 +4089,7 @@ read_debug_line_header (struct dwarf_section * section,
 	  return NULL;
 	}
     }
+  end = hdrptr + linfo->li_length;
 
   /* Get and check the version number.  */
   SAFE_BYTE_GET_AND_INC (linfo->li_version, hdrptr, 2, end);
@@ -4144,16 +4140,7 @@ read_debug_line_header (struct dwarf_section * section,
   SAFE_BYTE_GET_AND_INC (linfo->li_line_range, hdrptr, 1, end);
   SAFE_BYTE_GET_AND_INC (linfo->li_opcode_base, hdrptr, 1, end);
 
-  * end_of_sequence = data + linfo->li_length + initial_length_size;
-  /* PR 17512: file:002-117414-0.004.  */
-  if (* end_of_sequence > end)
-    {
-      warn (_("Line length %s extends beyond end of section\n"),
-	    dwarf_vmatoa ("u", linfo->li_length));
-      * end_of_sequence = end;
-      return NULL;
-    }
-
+  *end_of_sequence = end;
   return hdrptr;
 }
 
