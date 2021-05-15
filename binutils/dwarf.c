@@ -5042,8 +5042,8 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  while (*ptr_directory_table != 0)
 		    {
 		      directory_table[i] = ptr_directory_table;
-		      ptr_directory_table += strnlen ((char *) ptr_directory_table,
-						      ptr_directory_table - end) + 1;
+		      ptr_directory_table
+			+= strlen ((char *) ptr_directory_table) + 1;
 		      i++;
 		    }
 		}
@@ -5082,8 +5082,8 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  while (*ptr_file_name_table != 0)
 		    {
 		      file_table[i].name = ptr_file_name_table;
-		      ptr_file_name_table += strnlen ((char *) ptr_file_name_table,
-						      end - ptr_file_name_table) + 1;
+		      ptr_file_name_table
+			+= strlen ((char *) ptr_file_name_table) + 1;
 
 		      /* We are not interested in directory, time or size.  */
 		      READ_ULEB (file_table[i].directory_index,

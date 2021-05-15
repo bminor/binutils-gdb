@@ -1,5 +1,10 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (display_debug_lines_decoded): Don't use strnlen when
+	we have already checked for NUL termination.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (read_debug_line_header): Delete initial_length_size.
 	Avoid pointer UB.  Keep within length specified by header.
 	Delete dead code.
