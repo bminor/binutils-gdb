@@ -1,5 +1,12 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (process_debug_info): Always do the first CU length
+	scan for sanity checks.  Remove initial_length_size var and
+	instead calculate end_cu.  Use end_cu to limit data reads.
+	Delete now dead code checking length.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (SAFE_BYTE_GET_INTERNAL): Assert only when ENABLE_CHECKING.
 
 2021-05-15  Alan Modra  <amodra@gmail.com>

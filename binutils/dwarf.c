@@ -3429,47 +3429,49 @@ process_debug_info (struct dwarf_section * section,
   unsigned int unit;
   unsigned int num_units = 0;
 
+  /* First scan the section to get the number of comp units.
+     Length sanity checks are done here.  */
+  for (section_begin = start, num_units = 0; section_begin < end;
+       num_units ++)
+    {
+      dwarf_vma length;
+
+      /* Read the first 4 bytes.  For a 32-bit DWARF section, this
+	 will be the length.  For a 64-bit DWARF section, it'll be
+	 the escape code 0xffffffff followed by an 8 byte length.  */
+      SAFE_BYTE_GET_AND_INC (length, section_begin, 4, end);
+
+      if (length == 0xffffffff)
+	SAFE_BYTE_GET_AND_INC (length, section_begin, 8, end);
+      else if (length >= 0xfffffff0 && length < 0xffffffff)
+	{
+	  warn (_("Reserved length value (0x%s) found in section %s\n"),
+		dwarf_vmatoa ("x", length), section->name);
+	  return false;
+	}
+
+      /* Negative values are illegal, they may even cause infinite
+	 looping.  This can happen if we can't accurately apply
+	 relocations to an object file, or if the file is corrupt.  */
+      if (length > (size_t) (end - section_begin))
+	{
+	  warn (_("Corrupt unit length (0x%s) found in section %s\n"),
+		dwarf_vmatoa ("x", length), section->name);
+	  return false;
+	}
+      section_begin += length;
+    }
+
+  if (num_units == 0)
+    {
+      error (_("No comp units in %s section ?\n"), section->name);
+      return false;
+    }
+
   if ((do_loc || do_debug_loc || do_debug_ranges)
       && num_debug_info_entries == 0
       && ! do_types)
     {
-      dwarf_vma length;
-
-      /* First scan the section to get the number of comp units.  */
-      for (section_begin = start, num_units = 0; section_begin < end;
-	   num_units ++)
-	{
-	  /* Read the first 4 bytes.  For a 32-bit DWARF section, this
-	     will be the length.  For a 64-bit DWARF section, it'll be
-	     the escape code 0xffffffff followed by an 8 byte length.  */
-	  SAFE_BYTE_GET_AND_INC (length, section_begin, 4, end);
-
-	  if (length == 0xffffffff)
-	    SAFE_BYTE_GET_AND_INC (length, section_begin, 8, end);
-	  else if (length >= 0xfffffff0 && length < 0xffffffff)
-	    {
-	      warn (_("Reserved length value (0x%s) found in section %s\n"),
-		    dwarf_vmatoa ("x", length), section->name);
-	      return false;
-	    }
-
-	  /* Negative values are illegal, they may even cause infinite
-	     looping.  This can happen if we can't accurately apply
-	     relocations to an object file, or if the file is corrupt.  */
-	  if (length > (size_t) (end - section_begin))
-	    {
-	      warn (_("Corrupt unit length (0x%s) found in section %s\n"),
-		    dwarf_vmatoa ("x", length), section->name);
-	      return false;
-	    }
-	  section_begin += length;
-	}
-
-      if (num_units == 0)
-	{
-	  error (_("No comp units in %s section ?\n"), section->name);
-	  return false;
-	}
 
       /* Then allocate an array to hold the information.  */
       debug_information = (debug_info *) cmalloc (num_units,
@@ -3530,11 +3532,12 @@ process_debug_info (struct dwarf_section * section,
       size_t                    abbrev_size;
       dwarf_vma                 cu_offset;
       unsigned int              offset_size;
-      unsigned int              initial_length_size;
       struct cu_tu_set *        this_set;
       abbrev_list *             list;
+      unsigned char *end_cu;
 
       hdrptr = start;
+      cu_offset = start - section_begin;
 
       SAFE_BYTE_GET_AND_INC (compunit.cu_length, hdrptr, 4, end);
 
@@ -3542,17 +3545,12 @@ process_debug_info (struct dwarf_section * section,
 	{
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_length, hdrptr, 8, end);
 	  offset_size = 8;
-	  initial_length_size = 12;
 	}
       else
-	{
-	  offset_size = 4;
-	  initial_length_size = 4;
-	}
+	offset_size = 4;
+      end_cu = hdrptr + compunit.cu_length;
 
-      SAFE_BYTE_GET_AND_INC (compunit.cu_version, hdrptr, 2, end);
-
-      cu_offset = start - section_begin;
+      SAFE_BYTE_GET_AND_INC (compunit.cu_version, hdrptr, 2, end_cu);
 
       this_set = find_cu_tu_set_v2 (cu_offset, do_types);
 
@@ -3564,19 +3562,20 @@ process_debug_info (struct dwarf_section * section,
 	}
       else
 	{
-	  SAFE_BYTE_GET_AND_INC (compunit.cu_unit_type, hdrptr, 1, end);
+	  SAFE_BYTE_GET_AND_INC (compunit.cu_unit_type, hdrptr, 1, end_cu);
 	  do_types = (compunit.cu_unit_type == DW_UT_type);
 
-	  SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end);
+	  SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end_cu);
 	}
 
-      SAFE_BYTE_GET_AND_INC (compunit.cu_abbrev_offset, hdrptr, offset_size, end);
+      SAFE_BYTE_GET_AND_INC (compunit.cu_abbrev_offset, hdrptr, offset_size,
+			     end_cu);
 
       if (compunit.cu_unit_type == DW_UT_split_compile
 	  || compunit.cu_unit_type == DW_UT_skeleton)
 	{
 	  uint64_t dwo_id;
-	  SAFE_BYTE_GET_AND_INC (dwo_id, hdrptr, 8, end);
+	  SAFE_BYTE_GET_AND_INC (dwo_id, hdrptr, 8, end_cu);
 	}
 
       if (this_set == NULL)
@@ -3604,8 +3603,7 @@ process_debug_info (struct dwarf_section * section,
 	  list->start_of_next_abbrevs = next;
 	}
 
-      start = section_begin + cu_offset + compunit.cu_length
-	+ initial_length_size;
+      start = end_cu;
       record_abbrev_list_for_cu (cu_offset, start - section_begin, list);
     }
 
@@ -3616,17 +3614,17 @@ process_debug_info (struct dwarf_section * section,
       unsigned char *tags;
       int level, last_level, saved_level;
       dwarf_vma cu_offset;
-      unsigned long sec_off;
       unsigned int offset_size;
-      unsigned int initial_length_size;
       dwarf_vma signature = 0;
       dwarf_vma type_offset = 0;
       struct cu_tu_set *this_set;
       dwarf_vma abbrev_base;
       size_t abbrev_size;
       abbrev_list * list = NULL;
+      unsigned char *end_cu;
 
       hdrptr = start;
+      cu_offset = start - section_begin;
 
       SAFE_BYTE_GET_AND_INC (compunit.cu_length, hdrptr, 4, end);
 
@@ -3634,17 +3632,12 @@ process_debug_info (struct dwarf_section * section,
 	{
 	  SAFE_BYTE_GET_AND_INC (compunit.cu_length, hdrptr, 8, end);
 	  offset_size = 8;
-	  initial_length_size = 12;
 	}
       else
-	{
-	  offset_size = 4;
-	  initial_length_size = 4;
-	}
+	offset_size = 4;
+      end_cu = hdrptr + compunit.cu_length;
 
-      SAFE_BYTE_GET_AND_INC (compunit.cu_version, hdrptr, 2, end);
-
-      cu_offset = start - section_begin;
+      SAFE_BYTE_GET_AND_INC (compunit.cu_version, hdrptr, 2, end_cu);
 
       this_set = find_cu_tu_set_v2 (cu_offset, do_types);
 
@@ -3656,13 +3649,13 @@ process_debug_info (struct dwarf_section * section,
 	}
       else
 	{
-	  SAFE_BYTE_GET_AND_INC (compunit.cu_unit_type, hdrptr, 1, end);
+	  SAFE_BYTE_GET_AND_INC (compunit.cu_unit_type, hdrptr, 1, end_cu);
 	  do_types = (compunit.cu_unit_type == DW_UT_type);
 
-	  SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end);
+	  SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end_cu);
 	}
 
-      SAFE_BYTE_GET_AND_INC (compunit.cu_abbrev_offset, hdrptr, offset_size, end);
+      SAFE_BYTE_GET_AND_INC (compunit.cu_abbrev_offset, hdrptr, offset_size, end_cu);
 
       if (this_set == NULL)
 	{
@@ -3676,14 +3669,14 @@ process_debug_info (struct dwarf_section * section,
 	}
 
       if (compunit.cu_version < 5)
-	SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end);
+	SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end_cu);
 
       bool do_dwo_id = false;
       uint64_t dwo_id = 0;
       if (compunit.cu_unit_type == DW_UT_split_compile
 	  || compunit.cu_unit_type == DW_UT_skeleton)
 	{
-	  SAFE_BYTE_GET_AND_INC (dwo_id, hdrptr, 8, end);
+	  SAFE_BYTE_GET_AND_INC (dwo_id, hdrptr, 8, end_cu);
 	  do_dwo_id = true;
 	}
 
@@ -3697,15 +3690,13 @@ process_debug_info (struct dwarf_section * section,
 
       if (do_types)
 	{
-	  SAFE_BYTE_GET_AND_INC (signature, hdrptr, 8, end);
-	  SAFE_BYTE_GET_AND_INC (type_offset, hdrptr, offset_size, end);
+	  SAFE_BYTE_GET_AND_INC (signature, hdrptr, 8, end_cu);
+	  SAFE_BYTE_GET_AND_INC (type_offset, hdrptr, offset_size, end_cu);
 	}
 
-      if (dwarf_start_die > (cu_offset + compunit.cu_length
-			     + initial_length_size))
+      if (dwarf_start_die >= (size_t) (end_cu - section_begin))
 	{
-	  start = section_begin + cu_offset + compunit.cu_length
-	    + initial_length_size;
+	  start = end_cu;
 	  continue;
 	}
 
@@ -3780,20 +3771,8 @@ process_debug_info (struct dwarf_section * section,
 	    }
 	}
 
-      sec_off = cu_offset + initial_length_size;
-      if (sec_off + compunit.cu_length < sec_off
-	  || sec_off + compunit.cu_length > section->size)
-	{
-	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
-		section->name,
-		(unsigned long) cu_offset,
-		dwarf_vmatoa ("x", compunit.cu_length));
-	  num_units = unit;
-	  break;
-	}
-
       tags = hdrptr;
-      start += compunit.cu_length + initial_length_size;
+      start = end_cu;
 
       if (compunit.cu_version < 2 || compunit.cu_version > 5)
 	{
@@ -3967,7 +3946,7 @@ process_debug_info (struct dwarf_section * section,
 					    attr->implicit_const,
 					    section_begin,
 					    tags,
-					    end,
+					    start,
 					    cu_offset,
 					    compunit.cu_pointer_size,
 					    offset_size,
