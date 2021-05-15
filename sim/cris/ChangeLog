@@ -1,3 +1,9 @@
+2021-05-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c: Include environ.h.
+	(environ, GET_ENVIRON): Delete.
+	(sim_open): Replace my_environ with environ.
+
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* traps.c (cris_break_13_handler): Delete 2nd arg to time callback.

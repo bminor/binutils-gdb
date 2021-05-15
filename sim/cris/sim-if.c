@@ -30,16 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <errno.h>
 #include "sim-options.h"
 #include "dis-asm.h"
-
-/* Apparently the autoconf bits are missing (though HAVE_ENVIRON is used
-   in other dirs; also lacking there).  Patch around it for major systems.  */
-#if defined (HAVE_ENVIRON) || defined (__GLIBC__)
-extern char **environ;
-#define GET_ENVIRON() environ
-#else
-char *missing_environ[] = { "SHELL=/bin/sh", "PATH=/bin:/usr/bin", NULL };
-#define GET_ENVIRON() missing_environ
-#endif
+#include "environ.h"
 
 /* Used with get_progbounds to find out how much memory is needed for the
    program.  We don't want to allocate more, since that could mask
@@ -747,7 +738,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   if (abfd != NULL && !cris_bare_iron)
     {
       const char *name = bfd_get_filename (abfd);
-      char **my_environ = GET_ENVIRON ();
       /* We use these maps to give the same behavior as the old xsim
 	 simulator.  */
       USI envtop = 0x40000000;
@@ -764,8 +754,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
       bfd_byte buf[4];
 
       /* Count in the environment as well. */
-      for (envc = 0; my_environ[envc] != NULL; envc++)
-	len += strlen (my_environ[envc]) + 1;
+      for (envc = 0; environ[envc] != NULL; envc++)
+	len += strlen (environ[envc]) + 1;
 
       for (i = 0; prog_argv[i] != NULL; my_argc++, i++)
 	len += strlen (prog_argv[i]) + 1;
@@ -849,10 +839,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
       for (i = 0; i < envc; i++, csp += 4)
 	{
-	  unsigned int strln = strlen (my_environ[i]) + 1;
+	  unsigned int strln = strlen (environ[i]) + 1;
 
-	  if (sim_core_write_buffer (sd, NULL, NULL_CIA, my_environ[i], epp,
-				     strln)
+	  if (sim_core_write_buffer (sd, NULL, NULL_CIA, environ[i], epp, strln)
 	      != strln)
 	    goto abandon_chip;
 

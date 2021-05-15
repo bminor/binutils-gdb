@@ -27,14 +27,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-main.h"
 
 #include "bfd.h"
+#include "environ.h"
 
 #ifndef HAVE_STRSIGNAL
 /* While libiberty provides a fallback, it doesn't provide a prototype.  */
 extern const char *strsignal (int);
-#endif
-
-#ifdef HAVE_ENVIRON
-extern char **environ;
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -133,11 +130,7 @@ main (int argc, char **argv)
     exit (1);
 
   /* Prepare the program for execution.  */
-#ifdef HAVE_ENVIRON
   sim_create_inferior (sd, prog_bfd, prog_argv, environ);
-#else
-  sim_create_inferior (sd, prog_bfd, prog_argv, NULL);
-#endif
 
   /* To accommodate relative file paths, chdir to sysroot now.  We
      mustn't do this until BFD has opened the program, else we wouldn't

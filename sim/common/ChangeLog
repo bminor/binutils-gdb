@@ -1,3 +1,9 @@
+2021-05-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* nrun.c: Include environ.h.
+	(environ): Delete prototype.
+	(main): Delete HAVE_ENVIRON check.
+
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* callback.c (os_lseek): Change return and 3rd arg to int64_t.
