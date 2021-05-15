@@ -1008,7 +1008,8 @@ namespace gold
 {
 
 General_options::General_options()
-  : printed_version_(false),
+  : bsymbolic_(BSYMBOLIC_NONE),
+    printed_version_(false),
     execstack_status_(EXECSTACK_FROM_INPUT),
     icf_status_(ICF_NONE),
     static_(false),
