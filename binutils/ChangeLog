@@ -1,5 +1,12 @@
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
+	* dwarf.c (display_debug_frames): Delete initial_length_size.
+	Avoid pointer UB.  Constrain data reads to length given in header.
+	Sanity check cie header length.  Only skip up to next FDE on
+	finding augmentation data too long.
+
+2021-05-15  Alan Modra  <amodra@gmail.com>
+
 	* dwarf.c (read_cie): Add more sanity checks to ensure data
 	pointer is not bumped past end.
 
