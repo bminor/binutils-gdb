@@ -1,3 +1,9 @@
+2021-05-16  Weimin Pan  <weimin.pan@oracle.com>
+
+	* ctfread.c (new_symbol): Set function address.
+	(read_func_kind_type): Remove incorrect type name setting.
+	Don't copy name returned from ctf_type_ame_raw throughout file.
+
 2021-05-14  Tom Tromey  <tom@tromey.com>
 
 	* rust-lang.c (rust_language::val_print_struct)
