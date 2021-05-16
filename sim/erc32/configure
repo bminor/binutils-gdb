@@ -7489,6 +7489,16 @@ _ACEOF
 
 fi
 
+ac_fn_c_check_type "$LINENO" "__int128" "ac_cv_type___int128" "$ac_includes_default"
+if test "x$ac_cv_type___int128" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE___INT128 1
+_ACEOF
+
+
+fi
+
 ac_fn_c_check_type "$LINENO" "socklen_t" "ac_cv_type_socklen_t" "#include <sys/types.h>
 #include <sys/socket.h>
 
@@ -11193,7 +11203,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11196 "configure"
+#line 11206 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11299,7 +11309,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11302 "configure"
+#line 11312 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

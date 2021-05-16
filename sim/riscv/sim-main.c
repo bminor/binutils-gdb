@@ -603,7 +603,7 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
 static unsigned64
 mulhu (unsigned64 a, unsigned64 b)
 {
-#if defined(__GNUC__) && defined(__SIZEOF_INT128__)
+#ifdef HAVE___INT128
   return ((__int128)a * b) >> 64;
 #else
   uint64_t t;

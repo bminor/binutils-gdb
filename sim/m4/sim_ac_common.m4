@@ -75,6 +75,7 @@ AC_CHECK_MEMBERS([[struct stat.st_dev], [struct stat.st_ino],
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif]])
+AC_CHECK_TYPES([__int128])
 AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
 #include <sys/socket.h>

@@ -1,3 +1,7 @@
+2021-05-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4: Check for __int128 type.
+
 2021-05-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* README-HACKING: Update callback.h path.

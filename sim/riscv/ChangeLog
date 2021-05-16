@@ -1,3 +1,8 @@
+2021-05-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-main.c (mulhu): Change check to HAVE___INT128.
+	* config.in, configure: Regenerate.
+
 2021-05-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Delete SIM_AC_OPTION_ENVIRONMENT call.
