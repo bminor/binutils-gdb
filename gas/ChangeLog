@@ -1,3 +1,11 @@
+2021-05-17  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-arm.c (do_mve_mov): Only reject vmov if we're moving
+	into the same GPR twice.
+	* testsuite/gas/arm/mve-vmov-bad-2.l: Tweak error message.
+	* testsuite/gas/arm/mve-vmov-3.d: New test.
+	* testsuite/gas/arm/mve-vmov-3.s: New test.
+
 2021-05-12  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/elf/dwarf-5-file0.d: Update.

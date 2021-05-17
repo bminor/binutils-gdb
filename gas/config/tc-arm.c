@@ -20013,8 +20013,8 @@ do_mve_mov (int toQ)
   constraint (inst.operands[Q0].reg != inst.operands[Q1].reg + 2,
 	      _("Index one must be [2,3] and index two must be two less than"
 		" index one."));
-  constraint (inst.operands[Rt].reg == inst.operands[Rt2].reg,
-	      _("General purpose registers may not be the same"));
+  constraint (!toQ && inst.operands[Rt].reg == inst.operands[Rt2].reg,
+	      _("Destination registers may not be the same"));
   constraint (inst.operands[Rt].reg == REG_SP
 	      || inst.operands[Rt2].reg == REG_SP,
 	      BAD_SP);

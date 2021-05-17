@@ -2954,7 +2954,7 @@ static const struct mopcode32 mve_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE),
    MVE_VMOV2_GP_TO_VEC_LANE,
    0xec100f10, 0xffb01ff0,
-   "vmov%c\t%13-15,22Q[2], %13-15,22Q[0], %0-3r, %16-19r"},
+   "vmov%c\t%13-15,22Q[3], %13-15,22Q[1], %0-3r, %16-19r"},
 
   /* Vector VMOV Vector lane to gpr.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP),
@@ -5722,6 +5722,9 @@ is_mve_encoding_conflict (unsigned long given,
       else
 	return false;
 
+    case MVE_VLDRB_T1:
+    case MVE_VLDRH_T2:
+    case MVE_VLDRW_T7:
     case MVE_VSTRB_T5:
     case MVE_VSTRH_T6:
     case MVE_VSTRW_T7:
@@ -6656,7 +6659,7 @@ is_mve_unpredictable (unsigned long given, enum mve_instructions matched_insn,
 	    *unpredictable_code = UNPRED_R15;
 	    return true;
 	  }
-	else if (rt == rt2)
+	else if (rt == rt2 && matched_insn != MVE_VMOV2_GP_TO_VEC_LANE)
 	  {
 	    *unpredictable_code = UNPRED_GP_REGS_EQUAL;
 	    return true;
