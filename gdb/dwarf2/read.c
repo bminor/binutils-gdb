@@ -32,7 +32,7 @@
 #include "dwarf2/read.h"
 #include "dwarf2/abbrev.h"
 #include "dwarf2/attribute.h"
-#include "dwarf2/comp-unit.h"
+#include "dwarf2/comp-unit-head.h"
 #include "dwarf2/cu.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/index-common.h"

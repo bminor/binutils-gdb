@@ -21,7 +21,7 @@
 #define GDB_DWARF2_CU_H
 
 #include "buildsym.h"
-#include "dwarf2/comp-unit.h"
+#include "dwarf2/comp-unit-head.h"
 #include "gdbsupport/gdb_optional.h"
 
 /* Type used for delaying computation of method physnames.

@@ -1,5 +1,15 @@
 2021-05-17  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h: Update include.
+	* dwarf2/read.c: Update include.
+	* dwarf2/line-header.c: Update include.
+	* dwarf2/cu.h: Update include.
+	* dwarf2/comp-unit-head.h: Rename from comp-unit.h.
+	* dwarf2/comp-unit-head.c: Rename from comp-unit.c.
+	* Makefile.in (COMMON_SFILES): Update.
+
+2021-05-17  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (maybe_queue_comp_unit)
 	(dwarf2_per_objfile::age_comp_units): Update.
 	(dwarf2_add_dependence, dwarf2_mark_helper, dwarf2_mark): Move to

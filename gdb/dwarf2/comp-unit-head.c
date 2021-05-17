@@ -25,13 +25,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "dwarf2/comp-unit.h"
+#include "dwarf2/comp-unit-head.h"
 #include "dwarf2/leb.h"
 #include "dwarf2/read.h"
 #include "dwarf2/section.h"
 #include "dwarf2/stringify.h"
 
-/* See comp-unit.h.  */
+/* See comp-unit-head.h.  */
 
 const gdb_byte *
 read_comp_unit_head (struct comp_unit_head *cu_header,
@@ -172,7 +172,7 @@ error_check_comp_unit_head (dwarf2_per_objfile *per_objfile,
 	   filename);
 }
 
-/* See comp-unit.h.  */
+/* See comp-unit-head.h.  */
 
 const gdb_byte *
 read_and_check_comp_unit_head (dwarf2_per_objfile *per_objfile,
