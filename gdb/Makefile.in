@@ -1272,6 +1272,7 @@ HFILES_NO_SRCDIR = \
 	dictionary.h \
 	disasm.h \
 	dummy-frame.h \
+	dwarf2/cu.h \
 	dwarf2/frame-tailcall.h \
 	dwarf2/frame.h \
 	dwarf2/expr.h \

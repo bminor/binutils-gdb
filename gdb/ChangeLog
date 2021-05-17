@@ -1,3 +1,10 @@
+2021-05-17  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add dwarf2/cu.h.
+	* dwarf2/read.c (struct delayed_method_info, struct dwarf2_cu):
+	Move to cu.h.
+	* dwarf2/cu.h: New file.
+
 2021-05-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* .dir-locals.el: Set sentence-end-double-space for all modes, and
