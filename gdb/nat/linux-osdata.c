@@ -212,7 +212,7 @@ user_from_uid (char *user, int maxlen, uid_t uid)
 
   if (pwentry)
     {
-      strncpy (user, pwentry->pw_name, maxlen);
+      strncpy (user, pwentry->pw_name, maxlen - 1);
       /* Ensure that the user name is null-terminated.  */
       user[maxlen - 1] = '\0';
     }
@@ -920,7 +920,7 @@ time_from_time_t (char *time, int maxlen, TIME_T seconds)
 	 characters long.  */
       char buf[30];
       const char *time_str = ctime_r (&t, buf);
-      strncpy (time, time_str, maxlen);
+      strncpy (time, time_str, maxlen - 1);
       time[maxlen - 1] = '\0';
     }
 }
@@ -935,7 +935,7 @@ group_from_gid (char *group, int maxlen, gid_t gid)
 
   if (grentry)
     {
-      strncpy (group, grentry->gr_name, maxlen);
+      strncpy (group, grentry->gr_name, maxlen - 1);
       /* Ensure that the group name is null-terminated.  */
       group[maxlen - 1] = '\0';
     }
