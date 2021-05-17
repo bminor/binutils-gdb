@@ -154,7 +154,22 @@ private: /* per-core data */
 
 core_target::core_target ()
 {
+  /* Find a first arch based on the BFD.  We need the initial gdbarch so
+     we can setup the hooks to find a target description.  */
   m_core_gdbarch = gdbarch_from_bfd (core_bfd);
+
+  /* If the arch is able to read a target description from the core, it
+     could yield a more specific gdbarch.  */
+  const struct target_desc *tdesc = read_description ();
+
+  if (tdesc != nullptr)
+    {
+      struct gdbarch_info info;
+      gdbarch_info_init (&info);
+      info.abfd = core_bfd;
+      info.target_desc = tdesc;
+      m_core_gdbarch = gdbarch_find_by_info (info);
+    }
 
   if (!m_core_gdbarch
       || !gdbarch_iterate_over_regset_sections_p (m_core_gdbarch))
