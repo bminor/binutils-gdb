@@ -1,5 +1,13 @@
 2021-05-17  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf2_cu::addr_sized_int_type)
+	(dwarf2_cu::start_symtab, dwarf2_cu::addr_type)
+	(dwarf2_cu::dwarf2_cu): Move to cu.c.
+	* dwarf2/cu.c: New file.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/cu.c.
+
+2021-05-17  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Add dwarf2/cu.h.
 	* dwarf2/read.c (struct delayed_method_info, struct dwarf2_cu):
 	Move to cu.h.
