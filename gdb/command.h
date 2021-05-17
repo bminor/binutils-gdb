@@ -595,9 +595,6 @@ extern void save_command_line (const char *cmd);
 
 extern void not_just_help_class_command (const char *, int);
 
-/* Check function pointer.  */
-extern int cmd_func_p (struct cmd_list_element *cmd);
-
 /* Call the command function.  */
 extern void cmd_func (struct cmd_list_element *cmd,
 		      const char *args, int from_tty);

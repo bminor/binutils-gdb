@@ -87,6 +87,12 @@ struct cmd_list_element
   bool is_prefix () const
   { return this->subcommands != nullptr; }
 
+  /* Return true if this command is a "command class help" command.  For
+     instance, a "stack" dummy command is registered so that one can do
+     "help stack" and show help for all commands of the "stack" class.  */
+  bool is_command_class_help () const
+  { return this->func == nullptr; }
+
   /* Points to next command in this list.  */
   struct cmd_list_element *next = nullptr;
 

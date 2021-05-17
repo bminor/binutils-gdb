@@ -666,7 +666,7 @@ execute_command (const char *p, int from_tty)
 	do_set_command (arg, from_tty, c);
       else if (c->type == show_cmd)
 	do_show_command (arg, from_tty, c);
-      else if (!cmd_func_p (c))
+      else if (c->is_command_class_help ())
 	error (_("That is not a command, just a help topic."));
       else if (deprecated_call_command_hook)
 	deprecated_call_command_hook (c, arg, from_tty);

@@ -1250,7 +1250,7 @@ help_cmd (const char *command, struct ui_file *stream)
   fputs_filtered (c->doc, stream);
   fputs_filtered ("\n", stream);
 
-  if (!c->is_prefix () && c->func != NULL)
+  if (!c->is_prefix () && !c->is_command_class_help ())
     return;
 
   fprintf_filtered (stream, "\n");
@@ -1261,7 +1261,7 @@ help_cmd (const char *command, struct ui_file *stream)
 	       all_commands, stream);
 
   /* If this is a class name, print all of the commands in the class.  */
-  if (c->func == NULL)
+  if (c->is_command_class_help ())
     help_list (cmdlist, "", c->theclass, stream);
 
   if (c->hook_pre || c->hook_post)
@@ -1362,7 +1362,7 @@ help_all (struct ui_file *stream)
       /* If this is a class name, print all of the commands in the
 	 class.  */
 
-      if (c->func == NULL)
+      if (c->is_command_class_help ())
 	{
 	  fprintf_filtered (stream, "\nCommand class: %s\n\n", c->name);
 	  help_cmd_list (cmdlist, c->theclass, true, stream);
@@ -1498,8 +1498,8 @@ help_cmd_list (struct cmd_list_element *list, enum command_class theclass,
 	}
 
       if (theclass == all_commands
-	  || (theclass == all_classes && c->func == NULL)
-	  || (theclass == c->theclass && c->func != NULL))
+	  || (theclass == all_classes && c->is_command_class_help ())
+	  || (theclass == c->theclass && !c->is_command_class_help ()))
 	{
 	  /* show C when
 	     - showing all commands
@@ -1545,7 +1545,7 @@ find_cmd (const char *command, int len, struct cmd_list_element *clist,
   *nfound = 0;
   for (c = clist; c; c = c->next)
     if (!strncmp (command, c->name, len)
-	&& (!ignore_help_classes || c->func))
+	&& (!ignore_help_classes || !c->is_command_class_help ()))
       {
 	found = c;
 	(*nfound)++;
@@ -2124,7 +2124,7 @@ complete_on_cmdlist (struct cmd_list_element *list,
       for (ptr = list; ptr; ptr = ptr->next)
 	if (!strncmp (ptr->name, text, textlen)
 	    && !ptr->abbrev_flag
-	    && (!ignore_help_classes || ptr->func
+	    && (!ignore_help_classes || !ptr->is_command_class_help ()
 		|| ptr->is_prefix ()))
 	  {
 	    if (pass == 0)
@@ -2174,20 +2174,11 @@ complete_on_enum (completion_tracker &tracker,
       tracker.add_completion (make_completion_match_str (name, text, word));
 }
 
-
-/* Check function pointer.  */
-int
-cmd_func_p (struct cmd_list_element *cmd)
-{
-  return (cmd->func != NULL);
-}
-
-
 /* Call the command function.  */
 void
 cmd_func (struct cmd_list_element *cmd, const char *args, int from_tty)
 {
-  if (cmd_func_p (cmd))
+  if (!cmd->is_command_class_help ())
     {
       gdb::optional<scoped_restore_tmpl<int>> restore_suppress;
 
