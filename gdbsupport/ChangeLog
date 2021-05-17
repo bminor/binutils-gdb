@@ -1,3 +1,8 @@
+2021-05-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* .dir-locals.el: Set sentence-end-double-space for all modes, and
+	set brace-list-open to 0 for C and C++ modes.
+
 2021-05-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Re-generate.
