@@ -160,6 +160,23 @@ set_cmd_completer_handle_brkchars (struct cmd_list_element *cmd,
   cmd->completer_handle_brkchars = func;
 }
 
+std::string
+cmd_list_element::prefixname () const
+{
+  if (this->prefixlist == nullptr)
+    /* Not a prefix command.  */
+    return "";
+
+  std::string prefixname;
+  if (this->prefix != nullptr)
+    prefixname = this->prefix->prefixname ();
+
+  prefixname += this->name;
+  prefixname += " ";
+
+  return prefixname;
+}
+
 /* Add element named NAME.
    Space for NAME and DOC must be allocated by the caller.
    CLASS is the top level category into which commands are broken down

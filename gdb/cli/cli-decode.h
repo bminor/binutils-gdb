@@ -76,20 +76,8 @@ struct cmd_list_element
      space.  It is used before the word "command" in describing the
      commands reached through this prefix.
 
-     For non-prefix commands, an empty string is returned.  */
-  std::string prefixname ()
-  {
-    if (prefixlist == nullptr)
-      /* Not a prefix command.  */
-      return "";
-
-    std::string prefixname;
-    if (prefix != nullptr)
-      prefixname = prefix->prefixname ();
-    prefixname += name;
-    prefixname += " ";
-    return prefixname;
-  }
+     For non-prefix commands, return an empty string.  */
+  std::string prefixname () const;
 
   /* Points to next command in this list.  */
   struct cmd_list_element *next = nullptr;
