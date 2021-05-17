@@ -1,3 +1,7 @@
+2021-05-17  Bhuvanendra Kumar N  <Bhuvanendra.KumarN@amd.com>
+
+	* gdb.base/class-allocatable-array.exp: Modified test for clang.
+
 2021-05-16  Weimin Pan  <weimin.pan@oracle.com>
 
 	* gdb.ctf/funcreturn.exp: New file.
