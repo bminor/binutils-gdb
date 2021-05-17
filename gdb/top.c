@@ -647,7 +647,7 @@ execute_command (const char *p, int from_tty)
       if (c->theclass == class_user && c->user_commands)
 	execute_user_command (c, arg);
       else if (c->theclass == class_user
-	       && c->prefixlist && !c->allow_unknown)
+	       && c->subcommands && !c->allow_unknown)
 	/* If this is a user defined prefix that does not allow unknown
 	   (in other words, C is a prefix command and not a command
 	   that can be followed by its args), report the list of
@@ -659,7 +659,7 @@ execute_command (const char *p, int from_tty)
 	  printf_unfiltered
 	    ("\"%s\" must be followed by the name of a subcommand.\n",
 	     prefixname_no_space.c_str ());
-	  help_list (*c->prefixlist, prefixname.c_str (), all_commands,
+	  help_list (*c->subcommands, prefixname.c_str (), all_commands,
 		     gdb_stdout);
 	}
       else if (c->type == set_cmd)

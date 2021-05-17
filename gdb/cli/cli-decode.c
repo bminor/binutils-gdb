@@ -56,12 +56,12 @@ static int lookup_cmd_composition_1 (const char *text,
 				     struct cmd_list_element **cmd,
 				     struct cmd_list_element *cur_list);
 
-/* Look up a command whose 'prefixlist' is KEY.  Return the command if found,
-   otherwise return NULL.  */
+/* Look up a command whose 'subcommands' field is SUBCOMMANDS.  Return the
+   command if found, otherwise return NULL.  */
 
 static struct cmd_list_element *
-lookup_cmd_for_prefixlist (struct cmd_list_element **key,
-			   struct cmd_list_element *list)
+lookup_cmd_with_subcommands (cmd_list_element **subcommands,
+			     cmd_list_element *list)
 {
   struct cmd_list_element *p = NULL;
 
@@ -69,16 +69,16 @@ lookup_cmd_for_prefixlist (struct cmd_list_element **key,
     {
       struct cmd_list_element *q;
 
-      if (p->prefixlist == NULL)
+      if (p->subcommands == NULL)
 	continue;
-      else if (p->prefixlist == key)
+      else if (p->subcommands == subcommands)
 	{
 	  /* If we found an alias, we must return the aliased
 	     command.  */
 	  return p->cmd_pointer ? p->cmd_pointer : p;
 	}
 
-      q = lookup_cmd_for_prefixlist (key, *(p->prefixlist));
+      q = lookup_cmd_with_subcommands (subcommands, *(p->subcommands));
       if (q != NULL)
 	return q;
     }
@@ -163,7 +163,7 @@ set_cmd_completer_handle_brkchars (struct cmd_list_element *cmd,
 std::string
 cmd_list_element::prefixname () const
 {
-  if (this->prefixlist == nullptr)
+  if (this->subcommands == nullptr)
     /* Not a prefix command.  */
     return "";
 
@@ -236,8 +236,7 @@ do_add_cmd (const char *name, enum command_class theclass,
 
   /* Search the prefix cmd of C, and assigns it to C->prefix.
      See also add_prefix_cmd and update_prefix_field_of_prefixed_commands.  */
-  struct cmd_list_element *prefixcmd = lookup_cmd_for_prefixlist (list,
-								  cmdlist);
+  cmd_list_element *prefixcmd = lookup_cmd_with_subcommands (list, cmdlist);
   c->prefix = prefixcmd;
 
 
@@ -323,7 +322,7 @@ add_alias_cmd (const char *name, cmd_list_element *old,
   /* NOTE: Both FUNC and all the FUNCTIONs need to be copied.  */
   c->func = old->func;
   c->function = old->function;
-  c->prefixlist = old->prefixlist;
+  c->subcommands = old->subcommands;
   c->allow_unknown = old->allow_unknown;
   c->abbrev_flag = abbrev_flag;
   c->cmd_pointer = old;
@@ -358,7 +357,7 @@ add_alias_cmd (const char *name, const char *oldname,
 static void
 update_prefix_field_of_prefixed_commands (struct cmd_list_element *c)
 {
-  for (cmd_list_element *p = *c->prefixlist; p != NULL; p = p->next)
+  for (cmd_list_element *p = *c->subcommands; p != NULL; p = p->next)
     {
       p->prefix = c;
 
@@ -371,9 +370,9 @@ update_prefix_field_of_prefixed_commands (struct cmd_list_element *c)
 	 In such a case, when 'auto-load' was created by do_add_cmd,
 	 the 'libthread-db' prefix field could not be updated, as the
 	 'auto-load' command was not yet reachable by
-	    lookup_cmd_for_prefixlist (list, cmdlist)
+	    lookup_cmd_for_subcommands (list, cmdlist)
 	    that searches from the top level 'cmdlist'.  */
-      if (p->prefixlist != nullptr)
+      if (p->subcommands != nullptr)
 	update_prefix_field_of_prefixed_commands (p);
     }
 }
@@ -381,18 +380,18 @@ update_prefix_field_of_prefixed_commands (struct cmd_list_element *c)
 
 /* Like add_cmd but adds an element for a command prefix: a name that
    should be followed by a subcommand to be looked up in another
-   command list.  PREFIXLIST should be the address of the variable
+   command list.  SUBCOMMANDS should be the address of the variable
    containing that list.  */
 
 struct cmd_list_element *
 add_prefix_cmd (const char *name, enum command_class theclass,
 		cmd_const_cfunc_ftype *fun,
-		const char *doc, struct cmd_list_element **prefixlist,
+		const char *doc, struct cmd_list_element **subcommands,
 		int allow_unknown, struct cmd_list_element **list)
 {
   struct cmd_list_element *c = add_cmd (name, theclass, fun, doc, list);
 
-  c->prefixlist = prefixlist;
+  c->subcommands = subcommands;
   c->allow_unknown = allow_unknown;
 
   /* Now that prefix command C is defined, we need to set the prefix field
@@ -412,7 +411,7 @@ do_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
   while (c->cmd_pointer != nullptr)
     c = c->cmd_pointer;
 
-  help_list (*c->prefixlist, c->prefixname ().c_str (),
+  help_list (*c->subcommands, c->prefixname ().c_str (),
 	     all_commands, gdb_stdout);
 }
 
@@ -420,11 +419,11 @@ do_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
 
 struct cmd_list_element *
 add_basic_prefix_cmd (const char *name, enum command_class theclass,
-		      const char *doc, struct cmd_list_element **prefixlist,
+		      const char *doc, struct cmd_list_element **subcommands,
 		      int allow_unknown, struct cmd_list_element **list)
 {
   struct cmd_list_element *cmd = add_prefix_cmd (name, theclass, nullptr,
-						 doc, prefixlist,
+						 doc, subcommands,
 						 allow_unknown, list);
   set_cmd_sfunc (cmd, do_prefix_cmd);
   return cmd;
@@ -436,18 +435,18 @@ add_basic_prefix_cmd (const char *name, enum command_class theclass,
 static void
 do_show_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  cmd_show_list (*c->prefixlist, from_tty);
+  cmd_show_list (*c->subcommands, from_tty);
 }
 
 /* See command.h.  */
 
 struct cmd_list_element *
 add_show_prefix_cmd (const char *name, enum command_class theclass,
-		     const char *doc, struct cmd_list_element **prefixlist,
+		     const char *doc, struct cmd_list_element **subcommands,
 		     int allow_unknown, struct cmd_list_element **list)
 {
   struct cmd_list_element *cmd = add_prefix_cmd (name, theclass, nullptr,
-						 doc, prefixlist,
+						 doc, subcommands,
 						 allow_unknown, list);
   set_cmd_sfunc (cmd, do_show_prefix_cmd);
   return cmd;
@@ -460,12 +459,12 @@ struct cmd_list_element *
 add_prefix_cmd_suppress_notification
 	       (const char *name, enum command_class theclass,
 		cmd_const_cfunc_ftype *fun,
-		const char *doc, struct cmd_list_element **prefixlist,
+		const char *doc, struct cmd_list_element **subcommands,
 		int allow_unknown, struct cmd_list_element **list,
 		int *suppress_notification)
 {
   struct cmd_list_element *element
-    = add_prefix_cmd (name, theclass, fun, doc, prefixlist,
+    = add_prefix_cmd (name, theclass, fun, doc, subcommands,
 		      allow_unknown, list);
   element->suppress_notification = suppress_notification;
   return element;
@@ -476,12 +475,12 @@ add_prefix_cmd_suppress_notification
 struct cmd_list_element *
 add_abbrev_prefix_cmd (const char *name, enum command_class theclass,
 		       cmd_const_cfunc_ftype *fun, const char *doc,
-		       struct cmd_list_element **prefixlist,
+		       struct cmd_list_element **subcommands,
 		       int allow_unknown, struct cmd_list_element **list)
 {
   struct cmd_list_element *c = add_cmd (name, theclass, fun, doc, list);
 
-  c->prefixlist = prefixlist;
+  c->subcommands = subcommands;
   c->allow_unknown = allow_unknown;
   c->abbrev_flag = 1;
   return c;
@@ -1188,11 +1187,11 @@ apropos_cmd (struct ui_file *stream,
 	    print_doc_of_command (c, prefix, verbose, regex, stream);
 	}
       /* Check if this command has subcommands.  */
-      if (c->prefixlist != NULL)
+      if (c->subcommands != NULL)
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
-	  apropos_cmd (stream, *c->prefixlist, verbose, regex,
+	  apropos_cmd (stream, *c->subcommands, verbose, regex,
 		       c->prefixname ().c_str ());
 	}
     }
@@ -1235,7 +1234,7 @@ help_cmd (const char *command, struct ui_file *stream)
   lookup_cmd_composition (orig_command, &alias, &prefix_cmd, &c_cmd);
 
   /* There are three cases here.
-     If c->prefixlist is nonzero, we have a prefix command.
+     If c->subcommands is nonzero, we have a prefix command.
      Print its documentation, then list its subcommands.
 
      If c->func is non NULL, we really have a command.  Print its
@@ -1253,13 +1252,13 @@ help_cmd (const char *command, struct ui_file *stream)
   fputs_filtered (c->doc, stream);
   fputs_filtered ("\n", stream);
 
-  if (c->prefixlist == 0 && c->func != NULL)
+  if (c->subcommands == 0 && c->func != NULL)
     return;
   fprintf_filtered (stream, "\n");
 
   /* If this is a prefix command, print it's subcommands.  */
-  if (c->prefixlist)
-    help_list (*c->prefixlist, c->prefixname ().c_str (),
+  if (c->subcommands)
+    help_list (*c->subcommands, c->prefixname ().c_str (),
 	       all_commands, stream);
 
   /* If this is a class name, print all of the commands in the class.  */
@@ -1450,12 +1449,12 @@ print_help_for_command (struct cmd_list_element *c,
   fput_aliases_definition_styled (c, stream);
 
   if (recurse
-      && c->prefixlist != 0
+      && c->subcommands != 0
       && c->abbrev_flag == 0)
     /* Subcommands of a prefix command typically have 'all_commands'
        as class.  If we pass CLASS to recursive invocation,
        most often we won't see anything.  */
-    help_cmd_list (*c->prefixlist, all_commands, true, stream);
+    help_cmd_list (*c->subcommands, all_commands, true, stream);
 }
 
 /*
@@ -1520,10 +1519,10 @@ help_cmd_list (struct cmd_list_element *list, enum command_class theclass,
 
       if (recurse
 	  && (theclass == class_user || theclass == class_alias)
-	  && c->prefixlist != NULL)
+	  && c->subcommands != NULL)
 	{
 	  /* User-defined commands or aliases may be subcommands.  */
-	  help_cmd_list (*c->prefixlist, theclass, recurse, stream);
+	  help_cmd_list (*c->subcommands, theclass, recurse, stream);
 	  continue;
 	}
 
@@ -1698,9 +1697,9 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
     }
   /* If we found a prefix command, keep looking.  */
 
-  if (found->prefixlist)
+  if (found->subcommands)
     {
-      c = lookup_cmd_1 (text, *found->prefixlist, result_list, default_args,
+      c = lookup_cmd_1 (text, *found->subcommands, result_list, default_args,
 			ignore_help_classes, lookup_for_completion_p);
       if (!c)
 	{
@@ -1718,7 +1717,7 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 	     we've found (if an inferior hasn't already set it).  */
 	  if (result_list != nullptr)
 	    if (!*result_list)
-	      /* This used to say *result_list = *found->prefixlist.
+	      /* This used to say *result_list = *found->subcommands.
 		 If that was correct, need to modify the documentation
 		 at the top of this function to clarify what is
 		 supposed to be going on.  */
@@ -1810,14 +1809,14 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
     }
   else if (c == CMD_LIST_AMBIGUOUS)
     {
-      /* Ambigous.  Local values should be off prefixlist or called
+      /* Ambigous.  Local values should be off subcommands or called
 	 values.  */
       int local_allow_unknown = (last_list ? last_list->allow_unknown :
 				 allow_unknown);
       std::string local_cmdtype
 	= last_list ? last_list->prefixname () : cmdtype;
       struct cmd_list_element *local_list =
-	(last_list ? *(last_list->prefixlist) : list);
+	(last_list ? *(last_list->subcommands) : list);
 
       if (local_allow_unknown < 0)
 	{
@@ -1869,7 +1868,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
       while (**line == ' ' || **line == '\t')
 	(*line)++;
 
-      if (c->prefixlist && **line && !c->allow_unknown)
+      if (c->subcommands && **line && !c->allow_unknown)
 	undef_cmd_error (c->prefixname ().c_str (), *line);
 
       /* Seems to be what he wants.  Return it.  */
@@ -2060,9 +2059,9 @@ lookup_cmd_composition_1 (const char *text,
       text += len;
       text = skip_spaces (text);
 
-      if ((*cmd)->prefixlist != nullptr && *text != '\0')
+      if ((*cmd)->subcommands != nullptr && *text != '\0')
 	{
-	  cur_list = *(*cmd)->prefixlist;
+	  cur_list = *(*cmd)->subcommands;
 	  *prefix_cmd = *cmd;
 	}
       else
@@ -2127,7 +2126,7 @@ complete_on_cmdlist (struct cmd_list_element *list,
 	if (!strncmp (ptr->name, text, textlen)
 	    && !ptr->abbrev_flag
 	    && (!ignore_help_classes || ptr->func
-		|| ptr->prefixlist))
+		|| ptr->subcommands))
 	  {
 	    if (pass == 0)
 	      {

@@ -208,7 +208,7 @@ extern struct cmd_list_element *add_show_prefix_cmd
 extern struct cmd_list_element *add_prefix_cmd_suppress_notification
 			(const char *name, enum command_class theclass,
 			 cmd_const_cfunc_ftype *fun,
-			 const char *doc, struct cmd_list_element **prefixlist,
+			 const char *doc, struct cmd_list_element **subcommands,
 			 int allow_unknown,
 			 struct cmd_list_element **list,
 			 int *suppress_notification);

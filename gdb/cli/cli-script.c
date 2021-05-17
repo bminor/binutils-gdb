@@ -1350,10 +1350,10 @@ validate_comname (const char **comname)
       const char *tem = prefix.c_str ();
 
       c = lookup_cmd (&tem, cmdlist, "", NULL, 0, 1);
-      if (c->prefixlist == NULL)
+      if (c->subcommands == NULL)
 	error (_("\"%s\" is not a prefix command."), prefix.c_str ());
 
-      list = c->prefixlist;
+      list = c->subcommands;
       *comname = last_word;
     }
 
@@ -1414,7 +1414,7 @@ do_define_command (const char *comname, int from_tty,
 	  /* if C is a prefix command that was previously defined,
 	     tell the user its subcommands will be kept, and ask
 	     if ok to redefine the command.  */
-	  if (c->prefixlist != nullptr)
+	  if (c->subcommands != nullptr)
 	    q = (c->user_commands.get () == nullptr
 		 || query (_("Keeping subcommands of prefix command \"%s\".\n"
 			     "Redefine command \"%s\"? "), c->name, c->name));
@@ -1470,8 +1470,8 @@ do_define_command (const char *comname, int from_tty,
     cmds = *commands;
 
   {
-    struct cmd_list_element **c_prefixlist
-      = c == nullptr ? nullptr : c->prefixlist;
+    struct cmd_list_element **c_subcommands
+      = c == nullptr ? nullptr : c->subcommands;
 
     newc = add_cmd (comname, class_user, user_defined_command,
 		    (c != nullptr && c->theclass == class_user)
@@ -1480,9 +1480,9 @@ do_define_command (const char *comname, int from_tty,
 
     /* If we define or re-define a command that was previously defined
        as a prefix, keep the prefix information.  */
-    if (c_prefixlist != nullptr)
+    if (c_subcommands != nullptr)
       {
-	newc->prefixlist = c_prefixlist;
+	newc->subcommands = c_subcommands;
 	/* allow_unknown: see explanation in equivalent logic in
 	   define_prefix_command ().  */
 	newc->allow_unknown = newc->user_commands.get () != nullptr;
@@ -1595,7 +1595,7 @@ define_prefix_command (const char *comname, int from_tty)
   if (c != nullptr && c->theclass != class_user)
     error (_("Command \"%s\" is built-in."), comfull);
 
-  if (c != nullptr && c->prefixlist != nullptr)
+  if (c != nullptr && c->subcommands != nullptr)
     {
       /* c is already a user defined prefix command.  */
       return;
@@ -1609,10 +1609,10 @@ define_prefix_command (const char *comname, int from_tty)
 		   xstrdup ("User-defined."), list);
     }
 
-  /* Allocate the c->prefixlist, which marks the command as a prefix
+  /* Allocate the c->subcommands, which marks the command as a prefix
      command.  */
-  c->prefixlist = new struct cmd_list_element*;
-  *(c->prefixlist) = nullptr;
+  c->subcommands = new struct cmd_list_element*;
+  *(c->subcommands) = nullptr;
   /* If the prefix command C is not a command, then it must be followed
      by known subcommands.  Otherwise, if C is also a normal command,
      it can be followed by C args that must not cause a 'subcommand'
@@ -1665,7 +1665,7 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
       struct command_line *cmdlines = c->user_commands.get ();
 
       fprintf_filtered (stream, "User %scommand \"",
-			c->prefixlist == NULL ? "" : "prefix ");
+			c->subcommands == NULL ? "" : "prefix ");
       fprintf_styled (stream, title_style.style (), "%s%s",
 		      prefix, name);
       fprintf_filtered (stream, "\":\n");
@@ -1676,12 +1676,12 @@ show_user_1 (struct cmd_list_element *c, const char *prefix, const char *name,
 	}
     }
 
-  if (c->prefixlist != NULL)
+  if (c->subcommands != NULL)
     {
       const std::string prefixname = c->prefixname ();
 
-      for (c = *c->prefixlist; c != NULL; c = c->next)
-	if (c->theclass == class_user || c->prefixlist != NULL)
+      for (c = *c->subcommands; c != NULL; c = c->next)
+	if (c->theclass == class_user || c->subcommands != NULL)
 	  show_user_1 (c, prefixname.c_str (), c->name, gdb_stdout);
     }
 

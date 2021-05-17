@@ -1625,7 +1625,7 @@ show_user (const char *args, int from_tty)
     {
       for (c = cmdlist; c; c = c->next)
 	{
-	  if (cli_user_command_p (c) || c->prefixlist != NULL)
+	  if (cli_user_command_p (c) || c->subcommands != NULL)
 	    show_user_1 (c, "", c->name, gdb_stdout);
 	}
     }
@@ -1900,7 +1900,7 @@ alias_command (const char *args, int from_tty)
       /* We've already tried to look up COMMAND.  */
       gdb_assert (c_command != NULL
 		  && c_command != (struct cmd_list_element *) -1);
-      gdb_assert (c_command->prefixlist != NULL);
+      gdb_assert (c_command->subcommands != NULL);
       c_alias = lookup_cmd_1 (& alias_prefix, cmdlist, NULL, NULL, 1);
       if (c_alias != c_command)
 	error (_("ALIAS and COMMAND prefixes do not match."));
@@ -1909,7 +1909,7 @@ alias_command (const char *args, int from_tty)
       alias_cmd = add_alias_cmd (xstrdup (alias_argv[alias_argc - 1]),
 				 command_argv[command_argc - 1],
 				 class_alias, a_opts.abbrev_flag,
-				 c_command->prefixlist);
+				 c_command->subcommands);
     }
 
   gdb_assert (alias_cmd != nullptr);

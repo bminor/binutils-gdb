@@ -187,7 +187,7 @@ struct cmd_list_element
 
   /* Nonzero identifies a prefix command.  For them, the address
      of the variable containing the list of subcommands.  */
-  struct cmd_list_element **prefixlist = nullptr;
+  struct cmd_list_element **subcommands = nullptr;
 
   /* The prefix command of this command.  */
   struct cmd_list_element *prefix = nullptr;

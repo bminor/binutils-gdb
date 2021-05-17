@@ -550,10 +550,10 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	  p = p->prefix;
 	}
 
-      /* Don't trigger any observer notification if prefixlist is not
+      /* Don't trigger any observer notification if subcommands is not
 	 setlist.  */
       i--;
-      if (cmds[i]->prefixlist != &setlist)
+      if (cmds[i]->subcommands != &setlist)
 	{
 	  xfree (cmds);
 	  xfree (name);
@@ -740,7 +740,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 
       /* If we find a prefix, run its list, prefixing our output by its
 	 prefix (with "show " skipped).  */
-      if (list->prefixlist && list->cmd_pointer == nullptr)
+      if (list->subcommands && list->cmd_pointer == nullptr)
 	{
 	  ui_out_emit_tuple optionlist_emitter (uiout, "optionlist");
 	  std::string prefixname = list->prefixname ();
@@ -748,7 +748,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 
 	  if (uiout->is_mi_like_p ())
 	    uiout->field_string ("prefix", new_prefix);
-	  cmd_show_list (*list->prefixlist, from_tty);
+	  cmd_show_list (*list->subcommands, from_tty);
 	}
       else if (list->theclass != no_set_class && list->cmd_pointer == nullptr)
 	{
@@ -758,7 +758,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 	    {
 	      /* If we find a prefix, output it (with "show " skipped).  */
 	      std::string prefixname = list->prefix->prefixname ();
-	      prefixname = (list->prefix->prefixlist == nullptr ? ""
+	      prefixname = (list->prefix->subcommands == nullptr ? ""
 			    : strstr (prefixname.c_str (), "show ") + 5);
 	      uiout->text (prefixname.c_str ());
 	    }

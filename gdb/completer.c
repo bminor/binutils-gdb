@@ -1428,7 +1428,7 @@ complete_line_internal_1 (completion_tracker &tracker,
 	  if (result_list)
 	    {
 	      if (reason != handle_brkchars)
-		complete_on_cmdlist (*result_list->prefixlist, tracker, p,
+		complete_on_cmdlist (*result_list->subcommands, tracker, p,
 				     word, ignore_help_classes);
 	    }
 	  else
@@ -1456,12 +1456,12 @@ complete_line_internal_1 (completion_tracker &tracker,
 	    {
 	      /* The command is followed by whitespace; we need to
 		 complete on whatever comes after command.  */
-	      if (c->prefixlist)
+	      if (c->subcommands)
 		{
 		  /* It is a prefix command; what comes after it is
 		     a subcommand (e.g. "info ").  */
 		  if (reason != handle_brkchars)
-		    complete_on_cmdlist (*c->prefixlist, tracker, p, word,
+		    complete_on_cmdlist (*c->subcommands, tracker, p, word,
 					 ignore_help_classes);
 
 		  /* Ensure that readline does the right thing
@@ -1524,7 +1524,7 @@ complete_line_internal_1 (completion_tracker &tracker,
 	{
 	  /* There is non-whitespace beyond the command.  */
 
-	  if (c->prefixlist && !c->allow_unknown)
+	  if (c->subcommands && !c->allow_unknown)
 	    {
 	      /* It is an unrecognized subcommand of a prefix command,
 		 e.g. "info adsfkdj".  */

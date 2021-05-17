@@ -1,5 +1,13 @@
 2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Rename "prefixlist" parameters to "subcommands" throughout.
+	* cli/cli-decode.h (cmd_list_element) <prefixlist>: Rename to...
+	<subcommands>: ... this.
+	* cli/cli-decode.c (lookup_cmd_for_prefixlist): Rename to...
+	(lookup_cmd_with_subcommands): ... this.
+
+2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli/cli-decode.c (add_alias_cmd): Don't handle old == 0.
 
 2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
