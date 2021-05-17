@@ -1,5 +1,10 @@
 2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* py-project.toml: New.
+	* gdb-gdb.py.in: Re-format.
+
+2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli/cli-decode.h (cmd_list_element) <is_command_class_help>:
 	New, use it.
 	* command.h (cmd_func_p): Remove.
