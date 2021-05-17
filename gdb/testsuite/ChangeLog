@@ -1,5 +1,12 @@
 2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb.python/py-framefilter-gdb.py.in: Rename to:
+	* gdb.python/py-framefilter-gdb.py: ... this.
+	* gdb.python/py-framefilter-invalidarg-gdb.py.in: Rename to:
+	* gdb.python/py-framefilter-invalidarg-gdb.py: ... this.
+
+2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdb.python/py-framefilter-gdb.py.in: Re-format.
 	* gdb.python/py-framefilter-invalidarg-gdb.py.in: Re-format.
 
