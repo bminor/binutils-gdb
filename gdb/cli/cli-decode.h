@@ -79,6 +79,10 @@ struct cmd_list_element
      For non-prefix commands, return an empty string.  */
   std::string prefixname () const;
 
+  /* Return true if this command is an alias of another command.  */
+  bool is_alias () const
+  { return this->alias_target != nullptr; }
+
   /* Points to next command in this list.  */
   struct cmd_list_element *next = nullptr;
 

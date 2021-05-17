@@ -75,7 +75,7 @@ lookup_cmd_with_subcommands (cmd_list_element **subcommands,
 	{
 	  /* If we found an alias, we must return the aliased
 	     command.  */
-	  return p->alias_target ? p->alias_target : p;
+	  return p->is_alias () ? p->alias_target : p;
 	}
 
       q = lookup_cmd_with_subcommands (subcommands, *(p->subcommands));
@@ -405,7 +405,7 @@ static void
 do_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
 {
   /* Look past all aliases.  */
-  while (c->alias_target != nullptr)
+  while (c->is_alias ())
     c = c->alias_target;
 
   help_list (*c->subcommands, c->prefixname ().c_str (),
@@ -948,7 +948,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 
 	  /* If this command was an alias, remove it from the list of
 	     aliases.  */
-	  if (iter->alias_target)
+	  if (iter->is_alias ())
 	    {
 	      struct cmd_list_element **prevp = &iter->alias_target->aliases;
 	      struct cmd_list_element *a = *prevp;
@@ -1043,7 +1043,7 @@ static void
 fput_alias_definition_styled (struct cmd_list_element *c,
 			      struct ui_file *stream)
 {
-  gdb_assert (c->alias_target != nullptr);
+  gdb_assert (c->is_alias ());
   fputs_filtered ("  alias ", stream);
   fput_command_name_styled (c, stream);
   fprintf_filtered (stream, " = ");
@@ -1146,7 +1146,7 @@ apropos_cmd (struct ui_file *stream,
   /* Walk through the commands.  */
   for (c=commandlist;c;c=c->next)
     {
-      if (c->alias_target != nullptr)
+      if (c->is_alias ())
 	{
 	  /* Command aliases/abbreviations are skipped to ensure we print the
 	     doc of a command only once, when encountering the aliased
@@ -1487,7 +1487,7 @@ help_cmd_list (struct cmd_list_element *list, enum command_class theclass,
 	  continue;
 	}
 
-      if (c->alias_target != nullptr && theclass != class_alias)
+      if (c->is_alias () && theclass != class_alias)
 	{
 	  /* Do not show an alias, unless specifically showing the
 	     list of aliases:  for all other classes, an alias is
@@ -1509,7 +1509,7 @@ help_cmd_list (struct cmd_list_element *list, enum command_class theclass,
 	     list of sub-commands of the aliased command.  */
 	  print_help_for_command
 	    (c,
-	     recurse && (theclass != class_alias || c->alias_target == nullptr),
+	     recurse && (theclass != class_alias || !c->is_alias ()),
 	     stream);
 	  continue;
 	}
@@ -1672,7 +1672,7 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 
   *text += len;
 
-  if (found->alias_target)
+  if (found->is_alias ())
     {
       /* We drop the alias (abbreviation) in favor of the command it
        is pointing to.  If the alias is deprecated, though, we need to
@@ -2044,7 +2044,7 @@ lookup_cmd_composition_1 (const char *text,
 	return 0;
       else
 	{
-	  if ((*cmd)->alias_target)
+	  if ((*cmd)->is_alias ())
 	    {
 	      /* If the command was actually an alias, we note that an
 		 alias was used (by assigning *ALIAS) and we set *CMD.  */

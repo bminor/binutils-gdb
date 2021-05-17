@@ -1,5 +1,9 @@
 2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* cli/cli-decode.h (cmd_list_element) <is_alias>: New, use it.
+
+2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli/cli-decode.h (cmd_list_element) <cmd_pointer>: Rename
 	to...
 	<alias_target>: ... this.
