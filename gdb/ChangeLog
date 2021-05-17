@@ -1,3 +1,9 @@
+2021-05-17  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (tu_abbrev_offset::operator<): New method.
+	(sort_tu_by_abbrev_offset): Remove.
+	(build_type_psymtabs): Update.
+
 2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* py-project.toml: New.

@@ -7351,18 +7351,15 @@ struct tu_abbrev_offset
   : sig_type (sig_type_), abbrev_offset (abbrev_offset_)
   {}
 
+  /* This is used when sorting.  */
+  bool operator< (const tu_abbrev_offset &other)
+  {
+    return abbrev_offset < other.abbrev_offset;
+  }
+
   signatured_type *sig_type;
   sect_offset abbrev_offset;
 };
-
-/* Helper routine for build_type_psymtabs, passed to std::sort.  */
-
-static bool
-sort_tu_by_abbrev_offset (const struct tu_abbrev_offset &a,
-			  const struct tu_abbrev_offset &b)
-{
-  return a.abbrev_offset < b.abbrev_offset;
-}
 
 /* Efficiently read all the type units.
 
@@ -7431,8 +7428,7 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile)
 	}
     }
 
-  std::sort (sorted_by_abbrev.begin (), sorted_by_abbrev.end (),
-	     sort_tu_by_abbrev_offset);
+  std::sort (sorted_by_abbrev.begin (), sorted_by_abbrev.end ());
 
   abbrev_offset = (sect_offset) ~(unsigned) 0;
 
