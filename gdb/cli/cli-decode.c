@@ -310,18 +310,7 @@ add_alias_cmd (const char *name, cmd_list_element *old,
 	       enum command_class theclass, int abbrev_flag,
 	       struct cmd_list_element **list)
 {
-  if (old == 0)
-    {
-      struct cmd_list_element *prehook, *prehookee, *posthook, *posthookee;
-      struct cmd_list_element *aliases = delete_cmd (name, list,
-						     &prehook, &prehookee,
-						     &posthook, &posthookee);
-
-      /* If this happens, it means a programmer error somewhere.  */
-      gdb_assert (!aliases && !prehook && !prehookee
-		  && !posthook && ! posthookee);
-      return 0;
-    }
+  gdb_assert (old != nullptr);
 
   struct cmd_list_element *c = add_cmd (name, theclass, old->doc, list);
 

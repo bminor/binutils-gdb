@@ -1,5 +1,9 @@
 2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* cli/cli-decode.c (add_alias_cmd): Don't handle old == 0.
+
+2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli/cli-decode.h (prefixname): Make const, move implementation
 	to cli/cli-decode.c.
 	* cli/cli-decode.c (cmd_list_element::prefixname): New.
