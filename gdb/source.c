@@ -537,6 +537,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
       /* On MS-DOS and MS-Windows, h:\ is different from h: */
 	     && !(p == name + 3 && name[1] == ':')		/* "d:/" */
 #endif
+	     && p > name
 	     && IS_DIR_SEPARATOR (p[-1]))
 	/* Sigh.  "foo/" => "foo" */
 	--p;

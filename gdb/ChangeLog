@@ -1,5 +1,9 @@
 2021-05-17  Tom Tromey  <tromey@adacore.com>
 
+	* source.c (add_path): Check 'p' before using 'p[-1]'.
+
+2021-05-17  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.h (struct dwarf2_per_cu_data_deleter: New.
 	(dwarf2_per_cu_data_up): New typedef.
 	(struct dwarf2_per_bfd) <allocate_per_cu>: Change return type.
