@@ -1,5 +1,19 @@
 2021-05-17  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (maybe_queue_comp_unit)
+	(dwarf2_per_objfile::age_comp_units): Update.
+	(dwarf2_add_dependence, dwarf2_mark_helper, dwarf2_mark): Move to
+	dwarf2_cu methods.
+	* dwarf2/cu.h (struct dwarf2_cu) <mark, clear_mark, is_marked,
+	add_dependence>: New methods.
+	<m_dependencies>: Add "m_" prefix.  Now private.
+	<m_mark>: Add "m_" prefix.
+	* dwarf2/cu.c (dwarf2_cu::dwarf2_cu): Update.
+	(dwarf2_mark_helper): New function.
+	(dwarf2_cu::mark, dwarf2_cu::add_dependence): New methods.
+
+2021-05-17  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_cu::addr_sized_int_type)
 	(dwarf2_cu::start_symtab, dwarf2_cu::addr_type)
 	(dwarf2_cu::dwarf2_cu): Move to cu.c.

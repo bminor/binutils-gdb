@@ -78,6 +78,24 @@ struct dwarf2_cu
      the integer is unsigned or not.  */
   struct type *addr_sized_int_type (bool unsigned_p) const;
 
+  /* Mark this CU as used.  */
+  void mark ();
+
+  /* Clear the mark on this CU.  */
+  void clear_mark ()
+  {
+    m_mark = false;
+  }
+
+  /* True if this CU has been marked.  */
+  bool is_marked () const
+  {
+    return m_mark;
+  }
+
+  /* Add a dependence relationship from this cu to REF_PER_CU.  */
+  void add_dependence (struct dwarf2_per_cu_data *ref_per_cu);
+
   /* The header of the compilation unit.  */
   struct comp_unit_head header {};
 
@@ -94,6 +112,11 @@ private:
   /* The symtab builder for this CU.  This is only non-NULL when full
      symbols are being read.  */
   std::unique_ptr<buildsym_compunit> m_builder;
+
+  /* A set of pointers to dwarf2_per_cu_data objects for compilation
+     units referenced by this one.  Only set during full symbol processing;
+     partial symbol tables do not have dependencies.  */
+  htab_t m_dependencies = nullptr;
 
 public:
   /* The generic symbol table building routines have separate lists for
@@ -130,11 +153,6 @@ public:
 
   /* Full DIEs if read in.  */
   struct die_info *dies = nullptr;
-
-  /* A set of pointers to dwarf2_per_cu_data objects for compilation
-     units referenced by this one.  Only set during full symbol processing;
-     partial symbol tables do not have dependencies.  */
-  htab_t dependencies = nullptr;
 
   /* Header data from the line table, during full symbol processing.  */
   struct line_header *line_header = nullptr;
@@ -221,7 +239,7 @@ public:
   gdb::optional<ULONGEST> str_offsets_base;
 
   /* Mark used when releasing cached dies.  */
-  bool mark : 1;
+  bool m_mark : 1;
 
   /* This CU references .debug_loc.  See the symtab->locations_valid field.
      This test is imperfect as there may exist optimized debug code not using

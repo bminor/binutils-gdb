@@ -1458,11 +1458,6 @@ static void process_full_comp_unit (dwarf2_cu *cu,
 static void process_full_type_unit (dwarf2_cu *cu,
 				    enum language pretend_language);
 
-static void dwarf2_add_dependence (struct dwarf2_cu *,
-				   struct dwarf2_per_cu_data *);
-
-static void dwarf2_mark (struct dwarf2_cu *);
-
 static struct type *get_die_type_at_offset (sect_offset,
 					    dwarf2_per_cu_data *per_cu,
 					    dwarf2_per_objfile *per_objfile);
@@ -8453,7 +8448,7 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
   /* Mark the dependence relation so that we don't flush PER_CU
      too early.  */
   if (dependent_cu != NULL)
-    dwarf2_add_dependence (dependent_cu, per_cu);
+    dependent_cu->add_dependence (per_cu);
 
   /* If it's already on the queue, we have nothing to do.  */
   if (per_cu->queued)
@@ -24469,7 +24464,7 @@ dwarf2_per_objfile::age_comp_units ()
 
   /* Start by clearing all marks.  */
   for (auto pair : m_dwarf2_cus)
-    pair.second->mark = false;
+    pair.second->clear_mark ();
 
   /* Traverse all CUs, mark them and their dependencies if used recently
      enough.  */
@@ -24479,7 +24474,7 @@ dwarf2_per_objfile::age_comp_units ()
 
       cu->last_used++;
       if (cu->last_used <= dwarf_max_cache_age)
-	dwarf2_mark (cu);
+	cu->mark ();
     }
 
   /* Delete all CUs still not marked.  */
@@ -24487,7 +24482,7 @@ dwarf2_per_objfile::age_comp_units ()
     {
       dwarf2_cu *cu = it->second;
 
-      if (!cu->mark)
+      if (!cu->is_marked ())
 	{
 	  dwarf_read_debug_printf_v ("deleting old CU %s",
 				     sect_offset_str (cu->per_cu->sect_off));
@@ -24686,71 +24681,6 @@ static struct type *
 get_die_type (struct die_info *die, struct dwarf2_cu *cu)
 {
   return get_die_type_at_offset (die->sect_off, cu->per_cu, cu->per_objfile);
-}
-
-/* Add a dependence relationship from CU to REF_PER_CU.  */
-
-static void
-dwarf2_add_dependence (struct dwarf2_cu *cu,
-		       struct dwarf2_per_cu_data *ref_per_cu)
-{
-  void **slot;
-
-  if (cu->dependencies == NULL)
-    cu->dependencies
-      = htab_create_alloc_ex (5, htab_hash_pointer, htab_eq_pointer,
-			      NULL, &cu->comp_unit_obstack,
-			      hashtab_obstack_allocate,
-			      dummy_obstack_deallocate);
-
-  slot = htab_find_slot (cu->dependencies, ref_per_cu, INSERT);
-  if (*slot == NULL)
-    *slot = ref_per_cu;
-}
-
-/* Subroutine of dwarf2_mark to pass to htab_traverse.
-   Set the mark field in every compilation unit in the
-   cache that we must keep because we are keeping CU.
-
-   DATA is the dwarf2_per_objfile object in which to look up CUs.  */
-
-static int
-dwarf2_mark_helper (void **slot, void *data)
-{
-  dwarf2_per_cu_data *per_cu = (dwarf2_per_cu_data *) *slot;
-  dwarf2_per_objfile *per_objfile = (dwarf2_per_objfile *) data;
-  dwarf2_cu *cu = per_objfile->get_cu (per_cu);
-
-  /* cu->dependencies references may not yet have been ever read if QUIT aborts
-     reading of the chain.  As such dependencies remain valid it is not much
-     useful to track and undo them during QUIT cleanups.  */
-  if (cu == nullptr)
-    return 1;
-
-  if (cu->mark)
-    return 1;
-
-  cu->mark = true;
-
-  if (cu->dependencies != nullptr)
-    htab_traverse (cu->dependencies, dwarf2_mark_helper, per_objfile);
-
-  return 1;
-}
-
-/* Set the mark field in CU and in every other compilation unit in the
-   cache that we must keep because we are keeping CU.  */
-
-static void
-dwarf2_mark (struct dwarf2_cu *cu)
-{
-  if (cu->mark)
-    return;
-
-  cu->mark = true;
-
-  if (cu->dependencies != nullptr)
-    htab_traverse (cu->dependencies, dwarf2_mark_helper, cu->per_objfile);
 }
 
 /* Trivial hash function for partial_die_info: the hash value of a DIE
