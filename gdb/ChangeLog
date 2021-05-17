@@ -1,5 +1,14 @@
 2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* cli/cli-decode.h (cmd_list_element) <cmd_pointer>: Rename
+	to...
+	<alias_target>: ... this.
+	(add_alias_cmd): Rename old to target.
+	(add_info_alias): Rename old_name to target_name.
+	(add_com_alias): Likewise.
+
+2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Rename "prefixlist" parameters to "subcommands" throughout.
 	* cli/cli-decode.h (cmd_list_element) <prefixlist>: Rename to...
 	<subcommands>: ... this.

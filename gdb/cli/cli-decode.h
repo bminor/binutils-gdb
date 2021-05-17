@@ -229,7 +229,7 @@ struct cmd_list_element
 
   /* Pointer to command that is aliased by this one, so the
      aliased command can be located in case it has been hooked.  */
-  struct cmd_list_element *cmd_pointer = nullptr;
+  struct cmd_list_element *alias_target = nullptr;
 
   /* Start of a linked list of all aliases of this command.  */
   struct cmd_list_element *aliases = nullptr;

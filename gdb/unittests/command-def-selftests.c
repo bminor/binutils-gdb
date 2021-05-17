@@ -155,7 +155,7 @@ traverse_command_structure (struct cmd_list_element **list,
     {
       /* If this command has subcommands and is not an alias,
 	 traverse the subcommands.  */
-      if (c->subcommands != NULL && c->cmd_pointer == nullptr)
+      if (c->subcommands != NULL && c->alias_target == nullptr)
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
