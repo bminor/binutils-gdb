@@ -1,3 +1,18 @@
+2021-05-17  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data_deleter: New.
+	(dwarf2_per_cu_data_up): New typedef.
+	(struct dwarf2_per_bfd) <allocate_per_cu>: Change return type.
+	<all_comp_units>: Use dwarf2_per_cu_data_up.
+	* dwarf2/read.c (dwarf2_per_cu_data::operator()): New function.
+	(dwarf2_per_bfd::allocate_per_cu): Return dwarf2_per_cu_data_up.
+	(create_cu_from_index_list): Likewise.
+	(create_signatured_type_table_from_index)
+	(create_cus_from_debug_names_list, add_type_unit)
+	(read_comp_units_from_section): Update.
+	(dwarf2_find_containing_comp_unit): Change type of all_comp_units.
+	(run_test): Update.
+
 2021-05-17  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (tu_abbrev_offset::operator<): New method.

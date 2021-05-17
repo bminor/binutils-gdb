@@ -1760,6 +1760,17 @@ dwarf2_queue_item::~dwarf2_queue_item ()
     }
 }
 
+/* See dwarf2/read.h.  */
+
+void
+dwarf2_per_cu_data_deleter::operator() (dwarf2_per_cu_data *data)
+{
+  if (data->is_debug_types)
+    delete static_cast<signatured_type *> (data);
+  else
+    delete data;
+}
+
 /* The return type of find_file_and_directory.  Note, the enclosed
    string pointers are only valid while this object is valid.  */
 
@@ -2522,10 +2533,10 @@ dw2_instantiate_symtab (dwarf2_per_cu_data *per_cu,
 
 /* See read.h.  */
 
-std::unique_ptr<dwarf2_per_cu_data>
+dwarf2_per_cu_data_up
 dwarf2_per_bfd::allocate_per_cu ()
 {
-  std::unique_ptr<dwarf2_per_cu_data> result (new dwarf2_per_cu_data);
+  dwarf2_per_cu_data_up result (new dwarf2_per_cu_data);
   result->per_bfd = this;
   result->index = m_num_psymtabs++;
   return result;
@@ -2546,13 +2557,13 @@ dwarf2_per_bfd::allocate_signatured_type ()
 /* Return a new dwarf2_per_cu_data allocated on the per-bfd
    obstack, and constructed with the specified field values.  */
 
-static std::unique_ptr<dwarf2_per_cu_data>
+static dwarf2_per_cu_data_up
 create_cu_from_index_list (dwarf2_per_bfd *per_bfd,
 			   struct dwarf2_section_info *section,
 			   int is_dwz,
 			   sect_offset sect_off, ULONGEST length)
 {
-  std::unique_ptr<dwarf2_per_cu_data> the_cu = per_bfd->allocate_per_cu ();
+  dwarf2_per_cu_data_up the_cu = per_bfd->allocate_per_cu ();
   the_cu->sect_off = sect_off;
   the_cu->length = length;
   the_cu->section = section;
@@ -2580,7 +2591,7 @@ create_cus_from_index_list (dwarf2_per_bfd *per_bfd,
       ULONGEST length = extract_unsigned_integer (cu_list + 8, 8, BFD_ENDIAN_LITTLE);
       cu_list += 2 * 8;
 
-      std::unique_ptr<dwarf2_per_cu_data> per_cu
+      dwarf2_per_cu_data_up per_cu
 	= create_cu_from_index_list (per_bfd, section, is_dwz, sect_off,
 				     length);
       per_bfd->all_comp_units.push_back (std::move (per_cu));
@@ -2647,7 +2658,7 @@ create_signatured_type_table_from_index
       slot = htab_find_slot (sig_types_hash.get (), sig_type.get (), INSERT);
       *slot = sig_type.get ();
 
-      per_bfd->all_comp_units.push_back (std::move (sig_type));
+      per_bfd->all_comp_units.emplace_back (sig_type.release ());
     }
 
   per_bfd->signatured_types = std::move (sig_types_hash);
@@ -2699,7 +2710,7 @@ create_signatured_type_table_from_debug_names
       slot = htab_find_slot (sig_types_hash.get (), sig_type.get (), INSERT);
       *slot = sig_type.get ();
 
-      per_objfile->per_bfd->all_comp_units.push_back (std::move (sig_type));
+      per_objfile->per_bfd->all_comp_units.emplace_back (sig_type.release ());
     }
 
   per_objfile->per_bfd->signatured_types = std::move (sig_types_hash);
@@ -4930,7 +4941,7 @@ create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 	     of the next CU as end of this CU.  We create the CUs here with
 	     length 0, and in cutu_reader::cutu_reader we'll fill in the
 	     actual length.  */
-	  std::unique_ptr<dwarf2_per_cu_data> per_cu
+	  dwarf2_per_cu_data_up per_cu
 	    = create_cu_from_index_list (per_bfd, &section, is_dwz,
 					 sect_off, 0);
 	  per_bfd->all_comp_units.push_back (std::move (per_cu));
@@ -4955,7 +4966,7 @@ create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
       if (i >= 1)
 	{
 	  const ULONGEST length = sect_off_next - sect_off_prev;
-	  std::unique_ptr<dwarf2_per_cu_data> per_cu
+	  dwarf2_per_cu_data_up per_cu
 	    = create_cu_from_index_list (per_bfd, &section, is_dwz,
 					 sect_off_prev, length);
 	  per_bfd->all_comp_units.push_back (std::move (per_cu));
@@ -6132,7 +6143,8 @@ add_type_unit (dwarf2_per_objfile *per_objfile, ULONGEST sig, void **slot)
 
   per_objfile->resize_symtabs ();
 
-  per_objfile->per_bfd->all_comp_units.push_back (std::move (sig_type_holder));
+  per_objfile->per_bfd->all_comp_units.emplace_back
+    (sig_type_holder.release ());
   sig_type->signature = sig;
   sig_type->is_debug_types = 1;
   if (per_objfile->per_bfd->using_index)
@@ -7707,7 +7719,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 
   while (info_ptr < section->buffer + section->size)
     {
-      std::unique_ptr<dwarf2_per_cu_data> this_cu;
+      dwarf2_per_cu_data_up this_cu;
 
       sect_offset sect_off = (sect_offset) (info_ptr - section->buffer);
 
@@ -7728,7 +7740,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 	  signatured_type *sig_ptr = sig_type.get ();
 	  sig_type->signature = cu_header.signature;
 	  sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
-	  this_cu = std::move (sig_type);
+	  this_cu.reset (sig_type.release ());
 
 	  void **slot = htab_find_slot (types_htab.get (), sig_ptr, INSERT);
 	  gdb_assert (slot != nullptr);
@@ -24577,7 +24589,7 @@ static int
 dwarf2_find_containing_comp_unit
   (sect_offset sect_off,
    unsigned int offset_in_dwz,
-   const std::vector<std::unique_ptr<dwarf2_per_cu_data>> &all_comp_units)
+   const std::vector<dwarf2_per_cu_data_up> &all_comp_units)
 {
   int low, high;
 
@@ -24643,13 +24655,13 @@ namespace find_containing_comp_unit {
 static void
 run_test ()
 {
-  std::unique_ptr<dwarf2_per_cu_data> one (new dwarf2_per_cu_data);
+  dwarf2_per_cu_data_up one (new dwarf2_per_cu_data);
   dwarf2_per_cu_data *one_ptr = one.get ();
-  std::unique_ptr<dwarf2_per_cu_data> two (new dwarf2_per_cu_data);
+  dwarf2_per_cu_data_up two (new dwarf2_per_cu_data);
   dwarf2_per_cu_data *two_ptr = two.get ();
-  std::unique_ptr<dwarf2_per_cu_data> three (new dwarf2_per_cu_data);
+  dwarf2_per_cu_data_up three (new dwarf2_per_cu_data);
   dwarf2_per_cu_data *three_ptr = three.get ();
-  std::unique_ptr<dwarf2_per_cu_data> four (new dwarf2_per_cu_data);
+  dwarf2_per_cu_data_up four (new dwarf2_per_cu_data);
   dwarf2_per_cu_data *four_ptr = four.get ();
 
   one->length = 5;
@@ -24662,7 +24674,7 @@ run_test ()
   four->length = 7;
   four->is_dwz = 1;
 
-  std::vector<std::unique_ptr<dwarf2_per_cu_data>> units;
+  std::vector<dwarf2_per_cu_data_up> units;
   units.push_back (std::move (one));
   units.push_back (std::move (two));
   units.push_back (std::move (three));

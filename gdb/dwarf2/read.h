@@ -74,6 +74,20 @@ struct dwarf2_queue_item
   enum language pretend_language;
 };
 
+/* A deleter for dwarf2_per_cu_data that knows to downcast to
+   signatured_type as appropriate.  This approach lets us avoid a
+   virtual destructor, which saves a bit of space.  */
+
+struct dwarf2_per_cu_data_deleter
+{
+  void operator() (dwarf2_per_cu_data *data);
+};
+
+/* A specialization of unique_ptr for dwarf2_per_cu_data and
+   subclasses.  */
+typedef std::unique_ptr<dwarf2_per_cu_data, dwarf2_per_cu_data_deleter>
+    dwarf2_per_cu_data_up;
+
 /* Some DWARF data can be shared across objfiles who share the same BFD,
    this data is stored in this object.
 
@@ -103,7 +117,7 @@ struct dwarf2_per_bfd
   /* A convenience function to allocate a dwarf2_per_cu_data.  The
      returned object has its "index" field set properly.  The object
      is allocated on the dwarf2_per_bfd obstack.  */
-  std::unique_ptr<dwarf2_per_cu_data> allocate_per_cu ();
+  dwarf2_per_cu_data_up allocate_per_cu ();
 
   /* A convenience function to allocate a signatured_type.  The
      returned object has its "index" field set properly.  The object
@@ -154,7 +168,7 @@ public:
 
   /* Table of all the compilation units.  This is used to locate
      the target compilation unit of a particular reference.  */
-  std::vector<std::unique_ptr<dwarf2_per_cu_data>> all_comp_units;
+  std::vector<dwarf2_per_cu_data_up> all_comp_units;
 
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */
