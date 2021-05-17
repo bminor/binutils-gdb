@@ -785,6 +785,9 @@ public:
      its length in LENGTH.  */
   void get_frame_base (const gdb_byte **start, size_t * length) override
   {
+    if (frame == nullptr)
+      error (_("frame address is not available."));
+
     /* FIXME: cagney/2003-03-26: This code should be using
        get_frame_base_address(), and then implement a dwarf2 specific
        this_base method.  */

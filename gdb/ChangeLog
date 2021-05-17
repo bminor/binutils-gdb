@@ -1,5 +1,10 @@
 2021-05-17  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/loc.c (dwarf2_evaluate_loc_desc::get_frame_base): Throw
+	if frame is null.
+
+2021-05-17  Tom Tromey  <tromey@adacore.com>
+
 	* nat/linux-osdata.c (user_from_uid, time_from_time_t)
 	(group_from_gid): Subtract one from strncpy length.
 
