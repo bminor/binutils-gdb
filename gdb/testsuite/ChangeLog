@@ -1,5 +1,13 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.dwarf2/dw2-filename.exp: Update expected results.
+	* gdb.mi/mi-file.exp: Likewise.
+	* gdb.mi/mi-info-sources-base.c: New file.
+	* gdb.mi/mi-info-sources.c: New file.
+	* gdb.mi/mi-info-sources.exp: New file.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.cp/method-call-in-c.cc (struct foo_type): Add static member
 	function static_method.
 	(global_var): New global.

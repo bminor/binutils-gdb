@@ -4200,58 +4200,6 @@ operator_chars (const char *p, const char **end)
 }
 
 
-/* Class used to encapsulate the filename filtering for the "info sources"
-   command.  */
-struct info_sources_filter
-{
-  /* If filename filtering is being used (see M_C_REGEXP) then which part
-     of the filename is being filtered against?  */
-  enum class match_on
-  {
-    /* Match against the full filename.  */
-    FULLNAME,
-
-    /* Match only against the directory part of the full filename.  */
-    DIRNAME,
-
-    /* Match only against the basename part of the full filename.  */
-    BASENAME
-  };
-
-  /* Create a filter of MATCH_TYPE using regular expression REGEXP.  If
-     REGEXP is nullptr then all files will match the filter and MATCH_TYPE
-     is ignored.
-
-     The string pointed too by REGEXP must remain live and unchanged for
-     this lifetime of this object as the object only retains a copy of the
-     pointer.  */
-  info_sources_filter (match_on match_type, const char *regexp);
-
-  DISABLE_COPY_AND_ASSIGN (info_sources_filter);
-
-  /* Does FULLNAME match the filter defined by this object, return true if
-     it does, otherwise, return false.  If there is no filtering defined
-     then this function will always return true.  */
-  bool matches (const char *fullname) const;
-
-  /* Print a single line describing this filter, used as part of the "info
-     sources" command output.  If there is no filter in place then nothing
-     is printed.  */
-  void print () const;
-
-private:
-
-  /* The type of filtering in place.  */
-  match_on m_match_type;
-
-  /* Points to the original regexp used to create this filter.  */
-  const char *m_regexp;
-
-  /* A compiled version of M_REGEXP.  This object is only given a value if
-     M_REGEXP is not nullptr and is not the empty string.  */
-  gdb::optional<compiled_regex> m_c_regexp;
-};
-
 /* See class declaration.  */
 
 info_sources_filter::info_sources_filter (match_on match_type,
@@ -4307,7 +4255,7 @@ info_sources_filter::matches (const char *fullname) const
 /* See class declaration.  */
 
 void
-info_sources_filter::print () const
+info_sources_filter::print (struct ui_out *uiout) const
 {
   if (m_c_regexp.has_value ())
     {
@@ -4316,12 +4264,12 @@ info_sources_filter::print () const
       switch (m_match_type)
 	{
 	case match_on::DIRNAME:
-	  printf_filtered (_("(dirname matching regular expression \"%s\")"),
-			   m_regexp);
+	  uiout->message (_("(dirname matching regular expression \"%s\")"),
+			  m_regexp);
 	  break;
 	case match_on::BASENAME:
-	  printf_filtered (_("(basename matching regular expression \"%s\")"),
-			   m_regexp);
+	  uiout->message (_("(basename matching regular expression \"%s\")"),
+			  m_regexp);
 	  break;
 	case match_on::FULLNAME:
 	  printf_filtered (_("(filename matching regular expression \"%s\")"),
@@ -4337,10 +4285,12 @@ info_sources_filter::print () const
 struct output_source_filename_data
 {
   /* Create an object for displaying the results of the 'info sources'
-     command.  FILTER must remain valid and unchanged for the lifetime of
-     this object as this object retains a reference to FILTER.  */
-  output_source_filename_data (const info_sources_filter &filter)
-    : m_filter (filter)
+     command to UIOUT.  FILTER must remain valid and unchanged for the
+     lifetime of this object as this object retains a reference to FILTER.  */
+  output_source_filename_data (struct ui_out *uiout,
+			       const info_sources_filter &filter)
+    : m_filter (filter),
+      m_uiout (uiout)
   { /* Nothing.  */ }
 
   DISABLE_COPY_AND_ASSIGN (output_source_filename_data);
@@ -4353,9 +4303,14 @@ struct output_source_filename_data
     m_filename_seen_cache.clear ();
   }
 
-  /* Worker for sources_info.  Force line breaks at ,'s.  NAME is the name
-     to print.  */
-  void output (const char *name);
+  /* Worker for sources_info, outputs the file name formatted for either
+     cli or mi (based on the current_uiout).  In cli mode displays
+     FULLNAME with a comma separating this name from any previously
+     printed name (line breaks are added at the comma).  In MI mode
+     outputs a tuple containing DISP_NAME (the files display name),
+     FULLNAME, and EXPANDED_P (true when this file is from a fully
+     expanded symtab, otherwise false).  */
+  void output (const char *disp_name, const char *fullname, bool expanded_p);
 
   /* Prints the header messages for the source files that will be printed
      with the matching info present in the current object state.
@@ -4367,7 +4322,9 @@ struct output_source_filename_data
      quick_symbol_functions::map_symbol_filenames.  */
   void operator() (const char *filename, const char *fullname)
   {
-    output (fullname != nullptr ? fullname : filename);
+    /* The false here indicates that this file is from an unexpanded
+       symtab.  */
+    output (filename, fullname, false);
   }
 
 private:
@@ -4380,12 +4337,17 @@ private:
 
   /* How source filename should be filtered.  */
   const info_sources_filter &m_filter;
+
+  /* The object to which output is sent.  */
+  struct ui_out *m_uiout;
 };
 
 /* See comment in class declaration above.  */
 
 void
-output_source_filename_data::output (const char *name)
+output_source_filename_data::output (const char *disp_name,
+				     const char *fullname,
+				     bool expanded_p)
 {
   /* Since a single source file can result in several partial symbol
      tables, we need to avoid printing it more than once.  Note: if
@@ -4397,20 +4359,37 @@ output_source_filename_data::output (const char *name)
      symtabs; it doesn't hurt to check.  */
 
   /* Was NAME already seen?  If so, then don't print it again.  */
-  if (m_filename_seen_cache.seen (name))
+  if (m_filename_seen_cache.seen (fullname))
     return;
 
   /* If the filter rejects this file then don't print it.  */
-  if (!m_filter.matches (name))
+  if (!m_filter.matches (fullname))
     return;
+
+  ui_out_emit_tuple ui_emitter (m_uiout, nullptr);
 
   /* Print it and reset *FIRST.  */
   if (!m_first)
-    printf_filtered (", ");
+    m_uiout->text (", ");
   m_first = false;
 
   wrap_here ("");
-  fputs_styled (name, file_name_style.style (), gdb_stdout);
+  if (m_uiout->is_mi_like_p ())
+    {
+      m_uiout->field_string ("file", disp_name, file_name_style.style ());
+      if (fullname != nullptr)
+	m_uiout->field_string ("fullname", fullname,
+			       file_name_style.style ());
+      m_uiout->field_string ("debug-fully-read",
+			     (expanded_p ? "true" : "false"));
+    }
+  else
+    {
+      if (fullname == nullptr)
+	fullname = disp_name;
+      m_uiout->field_string ("fullname", fullname,
+			     file_name_style.style ());
+    }
 }
 
 /* See comment is class declaration above.  */
@@ -4418,9 +4397,9 @@ output_source_filename_data::output (const char *name)
 void
 output_source_filename_data::print_header (const char *symbol_msg)
 {
-  puts_filtered (symbol_msg);
-  m_filter.print ();
-  puts_filtered ("\n");
+  m_uiout->text (symbol_msg);
+  m_filter.print (m_uiout);
+  m_uiout->text ("\n");
 }
 
 /* For the 'info sources' command, what part of the file names should we be
@@ -4476,6 +4455,42 @@ info_sources_command_completer (cmd_list_element *ignore,
     return;
 }
 
+/* See symtab.h.  */
+
+void
+info_sources_worker (struct ui_out *uiout,
+		     const info_sources_filter &filter)
+{
+  output_source_filename_data data (uiout, filter);
+
+  ui_out_emit_list results_emitter (uiout, "files");
+  gdb::optional<ui_out_emit_tuple> output_tuple;
+  gdb::optional<ui_out_emit_list> sources_list;
+
+  if (!uiout->is_mi_like_p ())
+    data.print_header (_("Source files for which symbols have been read in:\n"));
+
+  for (objfile *objfile : current_program_space->objfiles ())
+    {
+      for (compunit_symtab *cu : objfile->compunits ())
+	{
+	  for (symtab *s : compunit_filetabs (cu))
+	    {
+	      const char *file = symtab_to_filename_for_display (s);
+	      const char *fullname = symtab_to_fullname (s);
+	      data.output (file, fullname, true);
+	    }
+	}
+    }
+
+  uiout->text ("\n\n");
+  if (!uiout->is_mi_like_p ())
+    data.print_header (_("Source files for which symbols will be read in on demand:\n"));
+  data.reset_output ();
+  map_symbol_filenames (data, true /*need_fullname*/);
+  uiout->text ("\n");
+}
+
 /* Implement the 'info sources' command.  */
 
 static void
@@ -4493,7 +4508,7 @@ info_sources_command (const char *args, int from_tty)
     error (_("You cannot give both -basename and -dirname to 'info sources'."));
 
   const char *regex = nullptr;
-  if (args != nullptr && *args != '\000')
+  if (args != NULL && *args != '\000')
     regex = args;
 
   if ((match_opts.dirname || match_opts.basename) && regex == nullptr)
@@ -4508,29 +4523,7 @@ info_sources_command (const char *args, int from_tty)
     match_type = info_sources_filter::match_on::FULLNAME;
 
   info_sources_filter filter (match_type, regex);
-  output_source_filename_data data (filter);
-
-  data.print_header (_("Source files for which symbols have been read in:\n"));
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      for (compunit_symtab *cu : objfile->compunits ())
-	{
-	  for (symtab *s : compunit_filetabs (cu))
-	    {
-	      const char *fullname = symtab_to_fullname (s);
-
-	      data.output (fullname);
-	    }
-	}
-    }
-  printf_filtered ("\n\n");
-
-  data.print_header (_("Source files for which symbols will be read in on demand:\n"));
-
-  data.reset_output ();
-  map_symbol_filenames (data, true /*need_fullname*/);
-  printf_filtered ("\n");
+  info_sources_worker (current_uiout, filter);
 }
 
 /* Compare FILE against all the entries of FILENAMES.  If BASENAMES is
@@ -6890,7 +6883,8 @@ Print information about all types matching REGEXP, or all types if no\n\
 REGEXP is given.  The optional flag -q disables printing of headers."));
   set_cmd_completer_handle_brkchars (c, info_types_command_completer);
 
-  const auto info_sources_opts = make_info_sources_options_def_group (nullptr);
+  const auto info_sources_opts
+    = make_info_sources_options_def_group (nullptr);
 
   static std::string info_sources_help
     = gdb::option::build_help (_("\

@@ -1,5 +1,32 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention additions to -file-list-exec-source-files.
+	* mi/mi-cmd-file.c (print_partial_file_name): Delete.
+	(mi_cmd_file_list_exec_source_files): Rewrite to handle command
+	options, and make use of info_sources_worker.
+	* symtab.c (struct info_sources_filter): Moved to symtab.h.
+	(info_sources_filter::print): Take uiout argument, produce output
+	through uiout.
+	(struct output_source_filename_data)
+	<output_source_filename_data>: Take uiout argument, store into
+	m_uiout.  <output>: Rewrite comment, add additional arguments to
+	declaration.  <operator()>: Send more arguments to
+	output. <m_uiout>: New member variable.
+	(output_source_filename_data::output): Take extra arguments,
+	produce output through m_uiout, and structure for MI.
+	(output_source_filename_data::print_header): Produce output
+	through m_uiout.
+	(info_sources_worker): New function, the implementation is taken
+	from info_sources_command, but modified so produce output through
+	a ui_out.
+	(info_sources_command): The second half of this function has gone
+	to become info_sources_worker.
+	* symtab.h (struct info_sources_filter): Moved from symtab.c, add
+	extra parameter to print member function.
+	(info_sources_worker): Declare.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* symtab.c (struct info_sources_filter): New.
 	(info_sources_filter::info_sources_filter): New function.
 	(info_sources_filter::matches): New function.

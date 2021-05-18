@@ -35623,18 +35623,49 @@ The @value{GDBN} equivalent is @samp{info source}
 
 
 @subheading The @code{-file-list-exec-source-files} Command
+@kindex info sources
 @findex -file-list-exec-source-files
 
 @subsubheading Synopsis
 
 @smallexample
- -file-list-exec-source-files
+ -file-list-exec-source-files @r{[} @var{--dirname} @r{|} @var{--basename} @r{]}
+                              @r{[} -- @r{]}
+                              @r{[} @var{regexp} @r{]}
 @end smallexample
 
-List the source files for the current executable.
+This command returns information about the source files @value{GDBN}
+knows about, it will output both the filename and fullname (absolute
+file name) of a source file, though the fullname can be elided if this
+information is not known to @value{GDBN}.
 
-It will always output both the filename and fullname (absolute file
-name) of a source file.
+With no arguments this command returns a list of source files.  Each
+source file is represented by a tuple with the fields; @var{file},
+@var{fullname}, and @var{debug-fully-read}.  The @var{file} is the
+display name for the file, while @var{fullname} is the absolute name
+of the file.  The @var{fullname} field can be elided if the absolute
+name of the source file can't be computed.  The field
+@var{debug-fully-read} will be a string, either @code{true} or
+@code{false}.  When @code{true}, this indicates the full debug
+information for the compilation unit describing this file has been
+read in.  When @code{false}, the full debug information has not yet
+been read in.  While reading in the full debug information it is
+possible that @value{GDBN} could become aware of additional source
+files.
+
+The optional @var{regexp} can be used to filter the list of source
+files returned.  The @var{regexp} will be matched against the full
+source file name.  The matching is case-sensitive, except on operating
+systems that have case-insensitive filesystem (e.g.,
+MS-Windows).  @samp{--} can be used before @var{regexp} to prevent
+@value{GDBN} interpreting @var{regexp} as a command option (e.g.@: if
+@var{regexp} starts with @samp{-}).
+
+If @code{--dirname} is provided, then @var{regexp} is matched only
+against the directory name of each source file.  If @code{--basename}
+is provided, then @var{regexp} is matched against the basename of each
+source file.  Only one of @code{--dirname} or @code{--basename} may be
+given, and if either is given then @var{regexp} is required.
 
 @subsubheading @value{GDBN} Command
 
@@ -35643,13 +35674,34 @@ The @value{GDBN} equivalent is @samp{info sources}.
 
 @subsubheading Example
 @smallexample
-(gdb)
+(@value{GDBP})
 -file-list-exec-source-files
-^done,files=[
-@{file=foo.c,fullname=/home/foo.c@},
-@{file=/home/bar.c,fullname=/home/bar.c@},
-@{file=gdb_could_not_find_fullpath.c@}]
-(gdb)
+^done,files=[@{file="foo.c",fullname="/home/foo.c",debug-fully-read="true"@},
+             @{file="/home/bar.c",fullname="/home/bar.c",debug-fully-read="true"@},
+             @{file="gdb_could_not_find_fullpath.c",debug-fully-read="true"@}]
+(@value{GDBP})
+-file-list-exec-source-files
+^done,files=[@{file="test.c",
+              fullname="/tmp/info-sources/test.c",
+              debug-fully-read="true"@},
+             @{file="/usr/include/stdc-predef.h",
+              fullname="/usr/include/stdc-predef.h",
+              debug-fully-read="true"@},
+             @{file="header.h",
+              fullname="/tmp/info-sources/header.h",
+              debug-fully-read="true"@},
+             @{file="helper.c",
+              fullname="/tmp/info-sources/helper.c",
+              debug-fully-read="true"@}]
+(@value{GDBP})
+-file-list-exec-source-files -- \\.c
+^done,files=[@{file="test.c",
+              fullname="/tmp/info-sources/test.c",
+              debug-fully-read="true"@},
+             @{file="helper.c",
+              fullname="/tmp/info-sources/helper.c",
+              debug-fully-read="true"@}]
+(@value{GDBP})
 @end smallexample
 
 @subheading The @code{-file-list-shared-libraries} Command

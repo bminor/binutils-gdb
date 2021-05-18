@@ -2385,4 +2385,67 @@ private:
   std::vector<bound_minimal_symbol> m_minimal_symbols;
 };
 
+/* Class used to encapsulate the filename filtering for the "info sources"
+   command.  */
+
+struct info_sources_filter
+{
+  /* If filename filtering is being used (see M_C_REGEXP) then which part
+     of the filename is being filtered against?  */
+  enum class match_on
+  {
+    /* Match against the full filename.  */
+    FULLNAME,
+
+    /* Match only against the directory part of the full filename.  */
+    DIRNAME,
+
+    /* Match only against the basename part of the full filename.  */
+    BASENAME
+  };
+
+  /* Create a filter of MATCH_TYPE using regular expression REGEXP.  If
+     REGEXP is nullptr then all files will match the filter and MATCH_TYPE
+     is ignored.
+
+     The string pointed too by REGEXP must remain live and unchanged for
+     this lifetime of this object as the object only retains a copy of the
+     pointer.  */
+  info_sources_filter (match_on match_type, const char *regexp);
+
+  DISABLE_COPY_AND_ASSIGN (info_sources_filter);
+
+  /* Does FULLNAME match the filter defined by this object, return true if
+     it does, otherwise, return false.  If there is no filtering defined
+     then this function will always return true.  */
+  bool matches (const char *fullname) const;
+
+  /* Print a single line describing this filter to UIOUT, used as part of
+     the "info sources" command output.  If there is no filter in place
+     then nothing is printed.  */
+  void print (struct ui_out *uiout) const;
+
+private:
+
+  /* The type of filtering in place.  */
+  match_on m_match_type;
+
+  /* Points to the original regexp used to create this filter.  */
+  const char *m_regexp;
+
+  /* A compiled version of M_REGEXP.  This object is only given a value if
+     M_REGEXP is not nullptr and is not the empty string.  */
+  gdb::optional<compiled_regex> m_c_regexp;
+};
+
+/* Perform the core of the 'info sources' command.
+
+   FILTER is used to perform regular expression based filtering on the
+   source files that will be displayed.
+
+   Output is written to UIOUT in CLI or MI style as appropriate.  */
+
+extern void info_sources_worker (struct ui_out *uiout,
+				 const info_sources_filter &filter);
+
 #endif /* !defined(SYMTAB_H) */

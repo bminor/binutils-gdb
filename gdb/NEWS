@@ -49,6 +49,24 @@
     all locations of the selected breakpoint.  This is equivalent to
     the '-force' flag of the CLI's "cond" command.
 
+ ** '-file-list-exec-source-files [--basename | --dirname] [--] [REGEXP]'
+
+    The existing -file-list-exec-source-files command now takes an
+    optional REGEXP which is used to filter the source files that are
+    included in the results.
+
+    By default REGEXP is matched against the full filename of the
+    source file. When one of --basename or --dirname is given then
+    REGEXP is only matched against the specified part of the full
+    source filename.
+
+    The results from -file-list-exec-source-files now include a
+    'debug-fully-read' field which takes the value 'true' or 'false'.
+    A 'true' value indicates the source file is from a compilation
+    unit that has had its debug information fully read in by GDB, a
+    value of 'false' indicates GDB has only performed a partial scan
+    of the debug information so far.
+
 * GDB now supports core file debugging for x86_64 Cygwin programs.
 
 * GDB will now look for the .gdbinit file in a config directory before
