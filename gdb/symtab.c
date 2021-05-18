@@ -4459,6 +4459,7 @@ info_sources_command_completer (cmd_list_element *ignore,
 
 void
 info_sources_worker (struct ui_out *uiout,
+		     bool group_by_objfile,
 		     const info_sources_filter &filter)
 {
   output_source_filename_data data (uiout, filter);
@@ -4467,11 +4468,35 @@ info_sources_worker (struct ui_out *uiout,
   gdb::optional<ui_out_emit_tuple> output_tuple;
   gdb::optional<ui_out_emit_list> sources_list;
 
-  if (!uiout->is_mi_like_p ())
-    data.print_header (_("Source files for which symbols have been read in:\n"));
+  gdb_assert (!group_by_objfile || uiout->is_mi_like_p ());
+
+  if (!group_by_objfile)
+    {
+      if (!uiout->is_mi_like_p ())
+	data.print_header (_("Source files for which symbols have been read in:\n"));
+    }
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
+      if (group_by_objfile)
+	{
+	  output_tuple.emplace (uiout, nullptr);
+	  uiout->field_string ("filename", objfile_name (objfile));
+	  bool debug_fully_readin = !objfile->has_unexpanded_symtabs ();
+	  const char *debug_info_state;
+	  if (objfile_has_symbols (objfile))
+	    {
+	      if (debug_fully_readin)
+		debug_info_state = "fully-read";
+	      else
+		debug_info_state = "partially-read";
+	    }
+	  else
+	    debug_info_state = "none";
+	  current_uiout->field_string ("debug-info", debug_info_state);
+	  sources_list.emplace (uiout, "sources");
+	}
+
       for (compunit_symtab *cu : objfile->compunits ())
 	{
 	  for (symtab *s : compunit_filetabs (cu))
@@ -4481,14 +4506,25 @@ info_sources_worker (struct ui_out *uiout,
 	      data.output (file, fullname, true);
 	    }
 	}
+
+      if (group_by_objfile)
+	{
+	  objfile->map_symbol_filenames (data, true /* need_fullname */);
+	  data.reset_output ();
+	  sources_list.reset ();
+	  output_tuple.reset ();
+	}
     }
 
-  uiout->text ("\n\n");
-  if (!uiout->is_mi_like_p ())
-    data.print_header (_("Source files for which symbols will be read in on demand:\n"));
-  data.reset_output ();
-  map_symbol_filenames (data, true /*need_fullname*/);
-  uiout->text ("\n");
+  if (!group_by_objfile)
+    {
+      uiout->text ("\n\n");
+      if (!uiout->is_mi_like_p ())
+	data.print_header (_("Source files for which symbols will be read in on demand:\n"));
+      data.reset_output ();
+      map_symbol_filenames (data, true /*need_fullname*/);
+      uiout->text ("\n");
+    }
 }
 
 /* Implement the 'info sources' command.  */
@@ -4523,7 +4559,7 @@ info_sources_command (const char *args, int from_tty)
     match_type = info_sources_filter::match_on::FULLNAME;
 
   info_sources_filter filter (match_type, regex);
-  info_sources_worker (current_uiout, filter);
+  info_sources_worker (current_uiout, false, filter);
 }
 
 /* Compare FILE against all the entries of FILENAMES.  If BASENAMES is

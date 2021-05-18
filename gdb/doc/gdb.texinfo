@@ -35629,7 +35629,8 @@ The @value{GDBN} equivalent is @samp{info source}
 @subsubheading Synopsis
 
 @smallexample
- -file-list-exec-source-files @r{[} @var{--dirname} @r{|} @var{--basename} @r{]}
+ -file-list-exec-source-files @r{[} @var{--group-by-objfile} @r{]}
+                              @r{[} @var{--dirname} @r{|} @var{--basename} @r{]}
                               @r{[} -- @r{]}
                               @r{[} @var{regexp} @r{]}
 @end smallexample
@@ -35667,6 +35668,31 @@ is provided, then @var{regexp} is matched against the basename of each
 source file.  Only one of @code{--dirname} or @code{--basename} may be
 given, and if either is given then @var{regexp} is required.
 
+If @code{--group-by-objfile} is used then the format of the results is
+changed.  The results will now be a list of tuples, with each tuple
+representing an object file (executable or shared library) loaded into
+@value{GDBN}.  The fields of these tuples are; @var{filename},
+@var{debug-info}, and @var{sources}.  The @var{filename} is the
+absolute name of the object file, @var{debug-info} is a string with
+one of the following values:
+
+@table @code
+@item none
+This object file has no debug information.
+@item partially-read
+This object file has debug information, but it is not fully read in
+yet.  When it is read in later, GDB might become aware of additional
+source files.
+@item fully-read
+This object file has debug information, and this information is fully
+read into GDB.  The list of source files is complete.
+@end table
+
+The @var{sources} is a list or tuples, with each tuple describing a
+single source file with the same fields as described previously.  The
+@var{sources} list can be empty for object files that have no debug
+information.
+
 @subsubheading @value{GDBN} Command
 
 The @value{GDBN} equivalent is @samp{info sources}.
@@ -35702,6 +35728,38 @@ The @value{GDBN} equivalent is @samp{info sources}.
               fullname="/tmp/info-sources/helper.c",
               debug-fully-read="true"@}]
 (@value{GDBP})
+-file-list-exec-source-files --group-by-objfile
+^done,files=[@{filename="/tmp/info-sources/test.x",
+              debug-info="fully-read",
+              sources=[@{file="test.c",
+                        fullname="/tmp/info-sources/test.c",
+                        debug-fully-read="true"@},
+                       @{file="/usr/include/stdc-predef.h",
+                        fullname="/usr/include/stdc-predef.h",
+                        debug-fully-read="true"@},
+                       @{file="header.h",
+                        fullname="/tmp/info-sources/header.h",
+                        debug-fully-read="true"@}]@},
+             @{filename="/lib64/ld-linux-x86-64.so.2",
+              debug-info="none",
+              sources=[]@},
+             @{filename="system-supplied DSO at 0x7ffff7fcf000",
+              debug-info="none",
+              sources=[]@},
+             @{filename="/tmp/info-sources/libhelper.so",
+              debug-info="fully-read",
+              sources=[@{file="helper.c",
+                        fullname="/tmp/info-sources/helper.c",
+                        debug-fully-read="true"@},
+                       @{file="/usr/include/stdc-predef.h",
+                        fullname="/usr/include/stdc-predef.h",
+                        debug-fully-read="true"@},
+                       @{file="header.h",
+                        fullname="/tmp/info-sources/header.h",
+                        debug-fully-read="true"@}]@},
+             @{filename="/lib64/libc.so.6",
+              debug-info="none",
+              sources=[]@}]
 @end smallexample
 
 @subheading The @code{-file-list-shared-libraries} Command

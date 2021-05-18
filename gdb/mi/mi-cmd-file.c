@@ -69,11 +69,13 @@ mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
 {
   enum opt
     {
+      GROUP_BY_OBJFILE_OPT,
       MATCH_BASENAME_OPT,
       MATCH_DIRNAME_OPT
     };
   static const struct mi_opt opts[] =
   {
+    {"-group-by-objfile", GROUP_BY_OBJFILE_OPT, 0},
     {"-basename", MATCH_BASENAME_OPT, 0},
     {"-dirname", MATCH_DIRNAME_OPT, 0},
     { 0, 0, 0 }
@@ -83,6 +85,7 @@ mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
   int oind = 0;
   char *oarg;
 
+  bool group_by_objfile = false;
   bool match_on_basename = false;
   bool match_on_dirname = false;
 
@@ -94,6 +97,9 @@ mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
 	break;
       switch ((enum opt) opt)
 	{
+	case GROUP_BY_OBJFILE_OPT:
+	  group_by_objfile = true;
+	  break;
 	case MATCH_BASENAME_OPT:
 	  match_on_basename = true;
 	  break;
@@ -104,7 +110,7 @@ mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
     }
 
   if ((argc - oind > 1) || (match_on_basename && match_on_dirname))
-    error (_("-file-list-exec-source-files: Usage: [--basename | --dirname] [--] REGEXP"));
+    error (_("-file-list-exec-source-files: Usage: [--group-by-objfile] [--basename | --dirname] [--] REGEXP"));
 
   const char *regexp = nullptr;
   if (argc - oind == 1)
@@ -119,7 +125,7 @@ mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
     match_type = info_sources_filter::match_on::FULLNAME;
 
   info_sources_filter filter (match_type, regexp);
-  info_sources_worker (current_uiout, filter);
+  info_sources_worker (current_uiout, group_by_objfile, filter);
 }
 
 /* See mi-cmds.h.  */

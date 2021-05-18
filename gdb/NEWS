@@ -49,7 +49,9 @@
     all locations of the selected breakpoint.  This is equivalent to
     the '-force' flag of the CLI's "cond" command.
 
- ** '-file-list-exec-source-files [--basename | --dirname] [--] [REGEXP]'
+ ** '-file-list-exec-source-files [--group-by-objfile]
+ 	                          [--basename | --dirname]
+                                  [--] [REGEXP]'
 
     The existing -file-list-exec-source-files command now takes an
     optional REGEXP which is used to filter the source files that are
@@ -59,6 +61,11 @@
     source file. When one of --basename or --dirname is given then
     REGEXP is only matched against the specified part of the full
     source filename.
+
+    When the optional --group-by-objfile flag is used the output
+    format is changed, the results are now a list of object files
+    (executable and libraries) with the source files that are
+    associated with each object file.
 
     The results from -file-list-exec-source-files now include a
     'debug-fully-read' field which takes the value 'true' or 'false'.

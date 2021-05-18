@@ -1,5 +1,9 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.mi/mi-info-sources.exp: Add additional tests.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.dwarf2/dw2-filename.exp: Update expected results.
 	* gdb.mi/mi-file.exp: Likewise.
 	* gdb.mi/mi-info-sources-base.c: New file.

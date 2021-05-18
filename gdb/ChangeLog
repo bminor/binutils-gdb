@@ -1,6 +1,31 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention additions to -file-list-exec-source-files.
+	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_files): Add
+	--group-by-objfile option.
+	* symtab.c (isrc_flag_option_def): Rename to...
+	(isrc_match_flag_option_def): ...this.
+	(info_sources_option_defs): Rename to...
+	(info_sources_match_option_defs): ...this, and update to rename of
+	isrc_flag_option_def.
+	(struct filename_grouping_opts): New struct.
+	(isrc_grouping_flag_option_def): New type.
+	(info_sources_grouping_option_defs): New static global.
+	(make_info_sources_options_def_group): Update to return two option
+	groups.
+	(info_sources_command_completer): Update for changes to
+	make_info_sources_options_def_group.
+	(info_sources_worker): Add extra parameter, use this to display
+	alternative output format.
+	(info_sources_command): Pass extra parameter to
+	info_sources_worker.
+	(_initialize_symtab): Update for changes to
+	make_info_sources_options_def_group.
+	* symtab.h (info_sources_worker): Add extra parameter.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention additions to -file-list-exec-source-files.
 	* mi/mi-cmd-file.c (print_partial_file_name): Delete.
 	(mi_cmd_file_list_exec_source_files): Rewrite to handle command
 	options, and make use of info_sources_worker.

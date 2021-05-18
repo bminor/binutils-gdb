@@ -137,6 +137,43 @@ proc check_info_sources { debug_fully_read } {
 			[mi_field "debug-fully-read" "${debug_fully_read}"]]]
 	mi_gdb_test "-file-list-exec-source-files --basename -- base" ".*\\^done,${p}" \
 	    "-file-list-exec-source-files --basename -- base"
+
+	# Figure out the value for the 'debug-info' field.
+	if {${debug_fully_read} == "true"} {
+	    set debug_info "fully-read"
+	} else {
+	    set debug_info "partially-read"
+	}
+
+	set p [mi_list "files" \
+		   [mi_tuple "" \
+			[mi_field "filename" "\[^\"\]+/mi-info-sources"] \
+			[mi_field "debug-info" "${debug_info}"] \
+			[mi_list "sources" \
+			     ".*" \
+			     [mi_tuple "" \
+				  [mi_field "file" "\[^\"\]+/mi-info-sources\\.c"] \
+				  [mi_field "fullname" "\[^\"\]+/mi-info-sources\\.c"] \
+				  [mi_field "debug-fully-read" "true"]] \
+			     ".*"]]]
+	mi_gdb_test "-file-list-exec-source-files --group-by-objfile" \
+	    ".*\\^done,${p}" \
+	    "-file-list-exec-source-files --group-by-objfile, look for mi-info-sources.c"
+
+	set p [mi_list "files" \
+		   [mi_tuple "" \
+			[mi_field "filename" "\[^\"\]+/mi-info-sources"] \
+			[mi_field "debug-info" "${debug_info}"] \
+			[mi_list "sources" \
+			     ".*" \
+			     [mi_tuple "" \
+				  [mi_field "file" "\[^\"\]+/mi-info-sources-base\\.c"] \
+				  [mi_field "fullname" "\[^\"\]+/mi-info-sources-base\\.c"] \
+				  [mi_field "debug-fully-read" "${debug_fully_read}"]] \
+			     ".*"]]]
+	mi_gdb_test "-file-list-exec-source-files --group-by-objfile" \
+	    ".*\\^done,${p}" \
+	    "-file-list-exec-source-files --group-by-objfile, look for mi-info-sources-base.c"
     }
 }
 

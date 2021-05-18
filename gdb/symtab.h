@@ -2446,6 +2446,7 @@ private:
    Output is written to UIOUT in CLI or MI style as appropriate.  */
 
 extern void info_sources_worker (struct ui_out *uiout,
+				 bool group_by_objfile,
 				 const info_sources_filter &filter);
 
 #endif /* !defined(SYMTAB_H) */
