@@ -2059,13 +2059,13 @@ skip_attr_bytes (unsigned long form,
    associated with it.  */
 
 static abbrev_entry *
-get_type_abbrev_from_form (unsigned long                 form,
-			   unsigned long                 uvalue,
-			   dwarf_vma                     cu_offset,
-			   const struct dwarf_section *  section,
-			   unsigned long *               abbrev_num_return,
-			   unsigned char **              data_return,
-			   unsigned long *               cu_offset_return)
+get_type_abbrev_from_form (unsigned long form,
+			   unsigned long uvalue,
+			   dwarf_vma cu_offset,
+			   const struct dwarf_section *section,
+			   unsigned long *abbrev_num_return,
+			   unsigned char **data_return,
+			   abbrev_map **map_return)
 {
   unsigned long   abbrev_number;
   abbrev_map *    map;
@@ -2132,12 +2132,12 @@ get_type_abbrev_from_form (unsigned long                 form,
       return NULL;
     }
 
-  if (cu_offset_return != NULL)
+  if (map_return != NULL)
     {
       if (form == DW_FORM_ref_addr)
-	* cu_offset_return = map->start;
+	*map_return = map;
       else
-	* cu_offset_return = cu_offset;
+	*map_return = NULL;
     }
 	
   READ_ULEB (abbrev_number, data, section->start + section->size);
@@ -2214,21 +2214,23 @@ get_type_signedness (abbrev_entry *entry,
 	case DW_AT_type:
 	  /* Recurse.  */
 	  {
-	    abbrev_entry *  type_abbrev;
-	    unsigned char * type_data;
-	    unsigned long   type_cu_offset;
+	    abbrev_entry *type_abbrev;
+	    unsigned char *type_data;
+	    abbrev_map *map;
 
 	    type_abbrev = get_type_abbrev_from_form (attr->form,
 						     uvalue,
 						     cu_offset,
 						     section,
 						     NULL /* abbrev num return */,
-						     & type_data,
-						     & type_cu_offset);
+						     &type_data,
+						     &map);
 	    if (type_abbrev == NULL)
 	      break;
 
-	    get_type_signedness (type_abbrev, section, type_data, end, type_cu_offset,
+	    get_type_signedness (type_abbrev, section, type_data,
+				 map ? section->start + map->end : end,
+				 map ? map->start : cu_offset,
 				 pointer_size, offset_size, dwarf_version,
 				 is_signed, nesting + 1);
 	  }
@@ -2951,13 +2953,15 @@ read_and_display_attr_value (unsigned long           attribute,
 	  bool is_signed = false;
 	  abbrev_entry *type_abbrev;
 	  unsigned char *type_data;
-	  unsigned long type_cu_offset;
+	  abbrev_map *map;
 
 	  type_abbrev = get_type_abbrev_from_form (form, uvalue, cu_offset,
-						   section, NULL, & type_data, & type_cu_offset);
+						   section, NULL, &type_data, &map);
 	  if (type_abbrev != NULL)
 	    {
-	      get_type_signedness (type_abbrev, section, type_data, end, type_cu_offset,
+	      get_type_signedness (type_abbrev, section, type_data,
+				   map ? section->start + map->end : end,
+				   map ? map->start : cu_offset,
 				   pointer_size, offset_size, dwarf_version,
 				   & is_signed, 0);
 	    }

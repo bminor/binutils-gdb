@@ -1,5 +1,14 @@
 2021-05-19  Alan Modra  <amodra@gmail.com>
 
+	PR 27884
+	* dwarf.c (get_type_abbrev_from_form): Replace cu_offset_return
+	param with map_return, and return map for DW_FORM_ref_addr.
+	(get_type_signedness): Adjust calls to get_type_abbrev_from_form.
+	Pass returned cu map start and end to recursive call.
+	(read_and_display_attr_value): Similarly.
+
+2021-05-19  Alan Modra  <amodra@gmail.com>
+
 	PR 27879
 	* sysdump.c (getBARRAY): Sanity check size against max.
 	(getINT): Avoid UB shift left.
