@@ -36,10 +36,6 @@ extern const char *get_exec_file (int err);
    been set, then return NULL.  */
 extern const char *get_inferior_cwd ();
 
-/* Set the inferior current working directory.  If CWD is NULL, unset
-   the directory.  */
-extern void set_inferior_cwd (const char *cwd);
-
 /* Whether to start up the debuggee under a shell.
 
    If startup-with-shell is set, GDB's "run" will attempt to start up

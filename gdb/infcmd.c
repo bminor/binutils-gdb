@@ -184,9 +184,10 @@ show_args_command (struct ui_file *file, int from_tty,
   deprecated_show_value_hack (file, from_tty, c, get_inferior_args ());
 }
 
-/* See gdbsupport/common-inferior.h.  */
+/* Set the inferior current working directory.  If CWD is NULL, unset
+   the directory.  */
 
-void
+static void
 set_inferior_cwd (const char *cwd)
 {
   struct inferior *inf = current_inferior ();

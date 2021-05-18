@@ -241,7 +241,7 @@ get_inferior_cwd ()
   return current_inferior_cwd;
 }
 
-/* See gdbsupport/common-inferior.h.  */
+/* See inferiors.h.  */
 
 void
 set_inferior_cwd (const char *cwd)

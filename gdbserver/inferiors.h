@@ -154,4 +154,8 @@ void *thread_target_data (struct thread_info *);
 struct regcache *thread_regcache_data (struct thread_info *);
 void set_thread_regcache_data (struct thread_info *, struct regcache *);
 
+/* Set the inferior current working directory.  If CWD is NULL, unset
+   the directory.  */
+void set_inferior_cwd (const char *cwd);
+
 #endif /* GDBSERVER_INFERIORS_H */
