@@ -19,78 +19,84 @@
 load_lib gdb-python.exp
 
 # Start with a fresh gdb.
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
+clean_restart
 
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
-# We use "." here instead of ":" so that this works on win32 too.
-if { [is_remote host] } {
-    # Don't match $srcdir/$subdir because proc gdb_reinitialize_dir
-    # doesn't set search directories on remote host.
-    set directories ".*\\\$cdir.\\\$cwd"
-} else {
-    set escaped_directory [string_to_regexp "$srcdir/$subdir"]
-    set directories "$escaped_directory.\\\$cdir.\\\$cwd"
-}
-gdb_test "python print (gdb.parameter ('directories'))" $directories
-
-# Check we can correctly read the data-directory parameter.  First,
-# grab the value as read directly from the GDB CLI.
-set dd ""
-gdb_test_multiple "show data-directory" \
-    "find the initial data-directory value" {
-	-re -wrap "GDB's data directory is \"(\[^\r\n\]+)\"\\." {
-	    set dd $expect_out(1,string)
-	    pass $gdb_test_name
-	}
+proc_with_prefix test_directories { } {
+    # We use "." here instead of ":" so that this works on win32 too.
+    if { [is_remote host] } {
+	# Don't match $srcdir/$subdir because proc gdb_reinitialize_dir
+	# doesn't set search directories on remote host.
+	set directories ".*\\\$cdir.\\\$cwd"
+    } else {
+	set escaped_directory [string_to_regexp "$::srcdir/$::subdir"]
+	set directories "$escaped_directory.\\\$cdir.\\\$cwd"
     }
+    gdb_test "python print (gdb.parameter ('directories'))" $directories
+}
 
-# Now print the data-directory from Python.
-gdb_test "python print (gdb.parameter ('data-directory'))" $dd
+proc_with_prefix test_data_directory { } {
+    clean_restart
 
-# Next change the data-directory to a relative path.  Internally GDB
-# will resolve this to an absolute path, which Python should then see.
-#
-# GDB is currently running in '...../build/gdb/testsuite/' and the
-# test output is being written to:
-#   ...../build/gdb/testsuite/outputs/gdb.python/py-parameter/
-#
-# So create the relative path './outputs/gdb.python/py-parameter/' and
-# set the data-directory to that, we should then see the absolute path.
+    # Check we can correctly read the data-directory parameter.  First,
+    # grab the value as read directly from the GDB CLI.
+    set dd ""
+    gdb_test_multiple "show data-directory" \
+	"find the initial data-directory value" {
+	    -re -wrap "GDB's data directory is \"(\[^\r\n\]+)\"\\." {
+		set dd $expect_out(1,string)
+		pass $gdb_test_name
+	    }
+	}
 
-set abs_path_to_output_dir [standard_output_file ""]
-set abs_path_to_cwd $objdir
-set rel_path_to_output_dir \
-    [file join "." [string replace ${abs_path_to_output_dir} 0 \
-			[string length ${abs_path_to_cwd}] ""]]
-gdb_test_no_output "set data-directory ${rel_path_to_output_dir}"
+    # Now print the data-directory from Python.
+    gdb_test "python print (gdb.parameter ('data-directory'))" $dd
 
-gdb_test "python print (gdb.parameter ('data-directory'))" \
-    ${abs_path_to_output_dir} \
-    "python sees absolute version of data-directory path"
+    # Next change the data-directory to a relative path.  Internally GDB
+    # will resolve this to an absolute path, which Python should then see.
+    #
+    # GDB is currently running in '...../build/gdb/testsuite/' and the
+    # test output is being written to:
+    #   ...../build/gdb/testsuite/outputs/gdb.python/py-parameter/
+    #
+    # So create the relative path './outputs/gdb.python/py-parameter/' and
+    # set the data-directory to that, we should then see the absolute path.
 
-# While we're here, check we see the correct path at GDB's CLI.
-gdb_test "show data-directory" \
-    "GDB's data directory is \"${abs_path_to_output_dir}\"\\." \
-    "check modified data-directory at the CLI"
+    set abs_path_to_output_dir [standard_output_file ""]
+    set abs_path_to_cwd $::objdir
+    set rel_path_to_output_dir \
+	[file join "." [string replace ${abs_path_to_output_dir} 0 \
+			    [string length ${abs_path_to_cwd}] ""]]
+    gdb_test_no_output "set data-directory ${rel_path_to_output_dir}"
 
-# Now lets set the data-directory back to what it was initially.
-gdb_test_no_output "set data-directory ${dd}" \
-    "set data-directory back to its original value"
+    gdb_test "python print (gdb.parameter ('data-directory'))" \
+	${abs_path_to_output_dir} \
+	"python sees absolute version of data-directory path"
 
-# And check we see the restored value at CLI and from Python.
-gdb_test "show data-directory" \
-    "GDB's data directory is \"${dd}\"\\." \
-    "check original data-directory was restored at the CLI"
+    # While we're here, check we see the correct path at GDB's CLI.
+    gdb_test "show data-directory" \
+	"GDB's data directory is \"${abs_path_to_output_dir}\"\\." \
+	"check modified data-directory at the CLI"
 
-gdb_test "python print (gdb.parameter ('data-directory'))" ${dd} \
-    "python sees restored data-directory value"
+    # Now lets set the data-directory back to what it was initially.
+    gdb_test_no_output "set data-directory ${dd}" \
+	"set data-directory back to its original value"
+
+    # And check we see the restored value at CLI and from Python.
+    gdb_test "show data-directory" \
+	"GDB's data directory is \"${dd}\"\\." \
+	"check original data-directory was restored at the CLI"
+
+    gdb_test "python print (gdb.parameter ('data-directory'))" ${dd} \
+	"python sees restored data-directory value"
+}
 
 # Test a simple boolean parameter.
-with_test_prefix "boolean parameter" {
+proc_with_prefix test_boolean_parameter { } {
+    clean_restart
+
     gdb_test_multiline "Simple gdb booleanparameter" \
 	"python" "" \
 	"class TestParam (gdb.Parameter):" "" \
@@ -130,7 +136,9 @@ with_test_prefix "boolean parameter" {
 }
 
 # Test an enum parameter.
-with_test_prefix "enum parameter" {
+proc_with_prefix test_enum_parameter { } {
+    clean_restart
+
     gdb_test_multiline "enum gdb parameter" \
 	"python" "" \
 	"class TestEnumParam (gdb.Parameter):" "" \
@@ -163,7 +171,9 @@ with_test_prefix "enum parameter" {
 }
 
 # Test a file parameter.
-with_test_prefix "file parameter" {
+proc_with_prefix test_file_parameter { } {
+    clean_restart
+
     gdb_test_multiline "file gdb parameter" \
 	"python" "" \
 	"class TestFileParam (gdb.Parameter):" "" \
@@ -195,7 +205,9 @@ with_test_prefix "file parameter" {
 }
 
 # Test a parameter that is not documented.
-with_test_prefix "undocumented parameter" {
+proc_with_prefix test_undocumented_parameter { } {
+    clean_restart
+
     gdb_test_multiline "Simple gdb booleanparameter" \
 	"python" "" \
 	"class TestUndocParam (gdb.Parameter):" "" \
@@ -230,7 +242,9 @@ with_test_prefix "undocumented parameter" {
 }
 
 # Test a parameter that is not documented in any way..
-with_test_prefix "really undocumented parameter" {
+proc_with_prefix test_really_undocumented_parameter { } {
+    clean_restart
+
     gdb_test_multiline "Simple gdb booleanparameter" \
 	"python" "" \
 	"class TestNodocParam (gdb.Parameter):" "" \
@@ -258,7 +272,9 @@ with_test_prefix "really undocumented parameter" {
 }
 
 # Test deprecated API. Do not use in your own implementations.
-with_test_prefix "deprecated API parameter" {
+proc_with_prefix test_deprecated_api_parameter { } {
+    clean_restart
+
     gdb_test_multiline "Simple gdb booleanparameter" \
 	"python" "" \
 	"class TestParam (gdb.Parameter):" "" \
@@ -289,41 +305,62 @@ with_test_prefix "deprecated API parameter" {
 	"test general help"
 }
 
-foreach kind {PARAM_ZUINTEGER PARAM_ZUINTEGER_UNLIMITED} {
-    gdb_test_multiline "Simple gdb $kind" \
-	"python" "" \
-	"class TestNodocParam (gdb.Parameter):" "" \
-	"   def __init__ (self, name):" "" \
-	"      super (TestNodocParam, self).__init__ (name, gdb.COMMAND_DATA, gdb.$kind)" "" \
-	"      self.value = 0" "" \
-	"test_param_$kind = TestNodocParam ('test-$kind')" "" \
-	"end"
+proc_with_prefix test_integer_parameter { } {
+    foreach_with_prefix kind {PARAM_ZUINTEGER PARAM_ZUINTEGER_UNLIMITED} {
+	clean_restart
 
-    gdb_test "python print(gdb.parameter('test-$kind'))" "0"
+	gdb_test_multiline "create parameter" \
+	    "python" "" \
+	    "class TestNodocParam (gdb.Parameter):" "" \
+	    "   def __init__ (self, name):" "" \
+	    "      super (TestNodocParam, self).__init__ (name, gdb.COMMAND_DATA, gdb.$kind)" "" \
+	    "      self.value = 0" "" \
+	    "test_param_$kind = TestNodocParam ('test-$kind')" "" \
+	    "end"
 
-    gdb_test "python test_param_$kind.value = -5" "RuntimeError: Range exceeded.*"
+	gdb_test "python print(gdb.parameter('test-$kind'))" "0"
 
-    if {$kind == "PARAM_ZUINTEGER"} {
-	gdb_test "python test_param_$kind.value = -1" "RuntimeError: Range exceeded.*"
-    } else {
-	gdb_test_no_output "python test_param_$kind.value = -1" \
-	    "check that PARAM_ZUINTEGER value can be set to -1"
-	gdb_test "python print(gdb.parameter('test-$kind'))" "-1" \
-	    "check that PARAM_ZUINTEGER value is -1 after setting"
+	gdb_test "python test_param_$kind.value = -5" "RuntimeError: Range exceeded.*"
+
+	if {$kind == "PARAM_ZUINTEGER"} {
+	    gdb_test "python test_param_$kind.value = -1" "RuntimeError: Range exceeded.*"
+	} elseif {$kind == "PARAM_ZUINTEGER_UNLIMITED"} {
+	    gdb_test_no_output "python test_param_$kind.value = -1" \
+		"check that PARAM_ZUINTEGER value can be set to -1"
+	    gdb_test "python print(gdb.parameter('test-$kind'))" "-1" \
+		"check that PARAM_ZUINTEGER value is -1 after setting"
+	} else {
+	    error "invalid kind: $kind"
+	}
     }
 }
 
-gdb_test_multiline "Throwing gdb parameter" \
-    "python" "" \
-    "class TestThrowParam (gdb.Parameter):" "" \
-    "   def __init__ (self, name):" "" \
-    "      super (TestThrowParam, self).__init__ (name, gdb.COMMAND_DATA, gdb.PARAM_STRING)" "" \
-    "      self.value = True" "" \
-    "   def get_set_string (self):" "" \
-    "      raise gdb.GdbError('Ordinary gdb error')" "" \
-    "test_throw_param = TestThrowParam ('print test-throw-param')" ""\
-    "end"
+proc_with_prefix test_throwing_parameter { } {
+    clean_restart
 
-gdb_test "set print test-throw-param whoops" \
-    "Ordinary gdb error" \
-    "gdb.GdbError does not show Python stack"
+    gdb_test_multiline "Throwing gdb parameter" \
+	"python" "" \
+	"class TestThrowParam (gdb.Parameter):" "" \
+	"   def __init__ (self, name):" "" \
+	"      super (TestThrowParam, self).__init__ (name, gdb.COMMAND_DATA, gdb.PARAM_STRING)" "" \
+	"      self.value = True" "" \
+	"   def get_set_string (self):" "" \
+	"      raise gdb.GdbError('Ordinary gdb error')" "" \
+	"test_throw_param = TestThrowParam ('print test-throw-param')" ""\
+	"end"
+
+    gdb_test "set print test-throw-param whoops" \
+	"Ordinary gdb error" \
+	"gdb.GdbError does not show Python stack"
+}
+
+test_directories
+test_data_directory
+test_boolean_parameter
+test_enum_parameter
+test_file_parameter
+test_undocumented_parameter
+test_really_undocumented_parameter
+test_deprecated_api_parameter
+test_integer_parameter
+test_throwing_parameter
