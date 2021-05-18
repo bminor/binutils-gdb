@@ -3,3 +3,4 @@
 	.thumb
 .Lstart:
 	bti
+	pacbti	r12, lr, sp

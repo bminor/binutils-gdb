@@ -7115,6 +7115,8 @@ enum operand_parse_code
 
   /* New operands for Armv8.1-M Mainline.  */
   OP_LR,	/* ARM LR register */
+  OP_SP,	/* ARM SP register */
+  OP_R12,
   OP_RRe,	/* ARM register, only even numbered.  */
   OP_RRo,	/* ARM register, only odd numbered, not r13 or r15.  */
   OP_RRnpcsp_I32, /* ARM register (no BadReg) or literal 1 .. 32 */
@@ -7425,6 +7427,8 @@ parse_operands (char *str, const unsigned int *pattern, bool thumb)
 	case OP_RRo:
 	case OP_LR:
 	case OP_oLR:
+	case OP_SP:
+	case OP_R12:
 	case OP_RR:    po_reg_or_fail (REG_TYPE_RN);	  break;
 	case OP_RCP:   po_reg_or_fail (REG_TYPE_CP);	  break;
 	case OP_RCN:   po_reg_or_fail (REG_TYPE_CN);	  break;
@@ -8120,6 +8124,16 @@ parse_operands (char *str, const unsigned int *pattern, bool thumb)
 	case OP_oLR:
 	  if (inst.operands[i].reg != REG_LR)
 	    inst.error = _("operand must be LR register");
+	  break;
+
+	case OP_SP:
+	  if (inst.operands[i].reg != REG_SP)
+	    inst.error = _("operand must be SP register");
+	  break;
+
+	case OP_R12:
+	  if (inst.operands[i].reg != REG_R12)
+	    inst.error = _("operand must be r12");
 	  break;
 
 	case OP_RMQRZ:
@@ -11491,6 +11505,7 @@ encode_thumb32_addr_mode (int i, bool is_t, bool is_d)
   X(_negs,  4240, f1d00000), /* rsbs #0 */	\
   X(_orr,   4300, ea400000),			\
   X(_orrs,  4300, ea500000),			\
+  X(_pacbti, 0000, f3af800d),			\
   X(_pop,   bc00, e8bd0000), /* ldmia sp!,... */	\
   X(_push,  b400, e92d0000), /* stmdb sp!,... */	\
   X(_rev,   ba00, fa90f080),			\
@@ -22317,6 +22332,12 @@ do_vmmla (void)
   neon_three_args (1);
 }
 
+static void
+do_t_pacbti (void)
+{
+  inst.instruction = THUMB_OP32 (inst.instruction);
+}
+
 
 /* Overall per-instruction processing.	*/
 
@@ -26306,6 +26327,7 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8_1m_main
  ToU("bti",   f3af800f, 0, (), noargs),
+ toU("pacbti", _pacbti, 3, (R12, LR, SP), t_pacbti),
  toU("cinc",  _cinc,  3, (RRnpcsp, RR_ZR, COND),	t_cond),
  toU("cinv",  _cinv,  3, (RRnpcsp, RR_ZR, COND),	t_cond),
  toU("cneg",  _cneg,  3, (RRnpcsp, RR_ZR, COND),	t_cond),
