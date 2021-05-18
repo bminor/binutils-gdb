@@ -1,3 +1,8 @@
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete call to AC_CHECK_HEADERS_ONCE.
+	* config.in, configure: Regenerate.
+
 2021-05-28  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* sim-main.h (h8_typecodes): Add operand type OP_REG_DEC, OP_REG_INC.

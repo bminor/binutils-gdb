@@ -5,7 +5,10 @@ AC_INIT([sim], [0],
   [https://sourceware.org/bugzilla/enter_bug.cgi?product=gdb&component=sim],
   [], [https://sourceware.org/gdb/wiki/Sim/])
 
+AC_CONFIG_HEADERS([config.h])
+
 SIM_AC_TOOLCHAIN
+SIM_AC_PLATFORM
 
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE

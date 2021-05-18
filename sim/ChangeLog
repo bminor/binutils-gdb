@@ -1,3 +1,13 @@
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call AC_CONFIG_HEADERS and SIM_AC_PLATFORM.
+	* m4/sim_ac_common.m4: Delete calls to AC_CHECK_HEADERS_ONCE,
+	AC_CHECK_FUNCS_ONCE, AC_CHECK_MEMBERS, AC_CHECK_TYPES, and
+	AC_TYPE_SIGNAL.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+	* config.h.in: New file.
+	* m4/sim_ac_platform.m4: New file.
+
 2021-06-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.am: Include common/local.mk.

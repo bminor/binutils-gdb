@@ -1,3 +1,7 @@
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* defs.h: Include ../config.h.  Undefine PACKAGE* defines.
+
 2021-06-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-basics.h (NULL): Delete.

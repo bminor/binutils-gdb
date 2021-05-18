@@ -22,18 +22,6 @@
 /* Define if dv-sockser is usable. */
 #undef HAVE_DV_SOCKSER
 
-/* Define to 1 if you have the <fcntl.h> header file. */
-#undef HAVE_FCNTL_H
-
-/* Define to 1 if you have the <fpu_control.h> header file. */
-#undef HAVE_FPU_CONTROL_H
-
-/* Define to 1 if you have the `ftruncate' function. */
-#undef HAVE_FTRUNCATE
-
-/* Define to 1 if you have the `getrusage' function. */
-#undef HAVE_GETRUSAGE
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -46,26 +34,8 @@
 /* Define to 1 if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
 
-/* Define to 1 if you have the `lstat' function. */
-#undef HAVE_LSTAT
-
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
-
-/* Define to 1 if you have the `mmap' function. */
-#undef HAVE_MMAP
-
-/* Define to 1 if you have the `munmap' function. */
-#undef HAVE_MUNMAP
-
-/* Define to 1 if you have the `posix_fallocate' function. */
-#undef HAVE_POSIX_FALLOCATE
-
-/* Define to 1 if you have the `sigaction' function. */
-#undef HAVE_SIGACTION
-
-/* Define to 1 if the system has the type `socklen_t'. */
-#undef HAVE_SOCKLEN_T
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -79,77 +49,17 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* Define to 1 if you have the `strsignal' function. */
-#undef HAVE_STRSIGNAL
-
-/* Define to 1 if `st_atime' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_ATIME
-
-/* Define to 1 if `st_blksize' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_BLKSIZE
-
-/* Define to 1 if `st_blocks' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_BLOCKS
-
-/* Define to 1 if `st_ctime' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_CTIME
-
-/* Define to 1 if `st_dev' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_DEV
-
-/* Define to 1 if `st_gid' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_GID
-
-/* Define to 1 if `st_ino' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_INO
-
-/* Define to 1 if `st_mode' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_MODE
-
-/* Define to 1 if `st_mtime' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_MTIME
-
-/* Define to 1 if `st_nlink' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_NLINK
-
-/* Define to 1 if `st_rdev' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_RDEV
-
-/* Define to 1 if `st_size' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_SIZE
-
-/* Define to 1 if `st_uid' is a member of `struct stat'. */
-#undef HAVE_STRUCT_STAT_ST_UID
-
-/* Define to 1 if you have the <sys/mman.h> header file. */
-#undef HAVE_SYS_MMAN_H
-
-/* Define to 1 if you have the <sys/resource.h> header file. */
-#undef HAVE_SYS_RESOURCE_H
-
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
 
-/* Define to 1 if you have the `time' function. */
-#undef HAVE_TIME
-
-/* Define to 1 if you have the `truncate' function. */
-#undef HAVE_TRUNCATE
-
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
-
-/* Define to 1 if the system has the type `__int128'. */
-#undef HAVE___INT128
-
-/* Define to 1 if you have the `__setfpucw' function. */
-#undef HAVE___SETFPUCW
 
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
@@ -184,9 +94,6 @@
 
 /* Bug reporting address */
 #undef REPORT_BUGS_TO
-
-/* Define as the return type of signal handlers (`int' or `void'). */
-#undef RETSIGTYPE
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

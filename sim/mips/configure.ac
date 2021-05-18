@@ -432,6 +432,5 @@ SIM_AC_OPTION_HARDWARE(tx3904cpu tx3904irc tx3904tmr tx3904sio)
 AC_PATH_X
 
 AC_CHECK_LIB(m, fabs)
-AC_CHECK_FUNCS(aint anint sqrt)
 
 SIM_AC_OUTPUT

@@ -1,3 +1,9 @@
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete calls to AC_CHECK_FUNCS_ONCE and
+	AC_CHECK_HEADERS_ONCE.
+	* config.in, configure: Regenerate.
+
 2021-05-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_otp.c (bfin_otp_write_page): Shift data1 & data3 by 32-bits.
