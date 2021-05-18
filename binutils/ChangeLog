@@ -1,3 +1,9 @@
+2021-05-19  Alan Modra  <amodra@gmail.com>
+
+	PR 27879
+	* sysdump.c (getBARRAY): Sanity check size against max.
+	(getINT): Avoid UB shift left.
+
 2021-05-15  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c (process_cu_tu_index): Avoid pointer UB.  Use _mul_overflow.
