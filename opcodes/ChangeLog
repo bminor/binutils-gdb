@@ -1,3 +1,9 @@
+2021-05-18  Job Noorman  <mtvec@pm.me>
+
+	PR 27814
+	* riscv-dis.c (riscv_get_disassembler): Get elf attributes only for
+	the elf objects.
+
 2021-05-17  Alex Coplan  <alex.coplan@arm.com>
 
 	* arm-dis.c (mve_opcodes): Fix disassembly of
