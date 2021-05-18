@@ -2420,11 +2420,6 @@ struct info_sources_filter
      then this function will always return true.  */
   bool matches (const char *fullname) const;
 
-  /* Print a single line describing this filter to UIOUT, used as part of
-     the "info sources" command output.  If there is no filter in place
-     then nothing is printed.  */
-  void print (struct ui_out *uiout) const;
-
 private:
 
   /* The type of filtering in place.  */

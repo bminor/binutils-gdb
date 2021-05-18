@@ -1,5 +1,19 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention changes to 'info sources'.
+	* symtab.c (info_sources_filter::print): Delete.
+	(struct output_source_filename_data) <print_header>: Delete
+	declaration.  <printed_filename_p>: New member function.
+	(output_source_filename_data::print_header): Delete.
+	(info_sources_worker): Update group-by-objfile style output to
+	make it CLI suitable, simplify non-group-by-objfile now this is
+	only used from the MI.
+	(info_sources_command): Make group-by-objfile be the default for
+	CLI info sources command.
+	* symtab.h (struct info_sources_filter) <print>: Delete.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* NEWS: Mention additions to -file-list-exec-source-files.
 	* mi/mi-cmd-file.c (mi_cmd_file_list_exec_source_files): Add
 	--group-by-objfile option.

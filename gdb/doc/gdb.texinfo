@@ -19334,20 +19334,36 @@ preprocessor macros.
 
 
 @kindex info sources
-@item info sources
-Print the names of all source files in your program for which there is
-debugging information, organized into two lists: files whose symbols
-have already been read, and files whose symbols will be read when needed.
+@item info sources @r{[}-dirname | -basename@r{]} @r{[}--@r{]} @r{[}@var{regexp}@r{]}
 
-@item info sources [-dirname | -basename] [--] [@var{regexp}]
-Like @samp{info sources}, but only print the names of the files
-matching the provided @var{regexp}.
-By default, the @var{regexp} is used to match anywhere in the filename.
-If @code{-dirname}, only files having a dirname matching @var{regexp} are shown.
-If  @code{-basename}, only files having a basename matching @var{regexp}
-are shown.
-The matching is case-sensitive, except on operating systems that
-have case-insensitive filesystem (e.g., MS-Windows).
+
+With no options @samp{info sources} prints the names of all source
+files in your program for which there is debugging information.  The
+source files are presented based on a list of object files
+(executables and libraries) currently loaded into @value{GDBN}.  For
+each object file all of the associated source files are listed.
+
+Each source file will only be printed once for each object file, but a
+single source file can be repeated in the output if it is part of
+multiple object files.
+
+If the optional @var{regexp} is provided, then only source files that
+match the regular expression will be printed.  The matching is
+case-sensitive, except on operating systems that have case-insensitive
+filesystem (e.g., MS-Windows). @samp{--} can be used before
+@var{regexp} to prevent @value{GDBN} interpreting @var{regexp} as a
+command option (e.g. if @var{regexp} starts with @samp{-}).
+
+By default, the @var{regexp} is used to match anywhere in the
+filename.  If @code{-dirname}, only files having a dirname matching
+@var{regexp} are shown.  If @code{-basename}, only files having a
+basename matching @var{regexp} are shown.
+
+It is possible that an object file may be printed in the list with no
+associated source files.  This can happen when either no source files
+match @var{regexp}, or, the object file was compiled without debug
+information and so @value{GDBN} is unable to find any source file
+names.
 
 @kindex info functions
 @item info functions [-q] [-n]

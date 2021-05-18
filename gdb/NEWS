@@ -221,6 +221,12 @@ ptype[/FLAGS] TYPE | EXPRESSION
   offsets of struct members.  Default behavior is given by 'show print
   type hex'.
 
+info sources
+  The info sources command output has been restructured.  The results
+  are now based around a list of objfiles (executable and libraries),
+  and for each objfile the source files that are part of that objfile
+  are listed.
+
 * Removed targets and native configurations
 
 ARM Symbian			arm*-*-symbianelf*

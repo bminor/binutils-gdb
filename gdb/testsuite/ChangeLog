@@ -1,5 +1,12 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/info_sources_2-header.h: New file.
+	* gdb.base/info_sources_2-lib.c: New file.
+	* gdb.base/info_sources_2-test.c: New file.
+	* gdb.base/info_sources_2.exp: New file.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.mi/mi-info-sources.exp: Add additional tests.
 
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
