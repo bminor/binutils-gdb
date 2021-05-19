@@ -6887,8 +6887,17 @@ emit_one_bundle (void)
 
       for (j = 0; j < md.slot[curr].num_fixups; ++j)
 	{
+	  unsigned long where;
+
 	  ifix = md.slot[curr].fixup + j;
-	  fix = fix_new_exp (frag_now, frag_now_fix () - 16 + i, 8,
+	  where = frag_now_fix () - 16 + i;
+#ifdef TE_HPUX
+	  /* Fix offset for PCREL60B relocation on HP-UX.  */
+	  if (ifix->code == BFD_RELOC_IA64_PCREL60B)
+	    ++where;
+#endif
+
+	  fix = fix_new_exp (frag_now, where, 8,
 			     &ifix->expr, ifix->is_pcrel, ifix->code);
 	  fix->tc_fix_data.opnd = ifix->opnd;
 	  fix->fx_file = md.slot[curr].src_file;
