@@ -478,15 +478,6 @@ public:
   /* The arguments string to use when running.  */
   gdb::unique_xmalloc_ptr<char> args;
 
-  /* The size of elements in argv.  */
-  int argc = 0;
-
-  /* The vector version of arguments.  If ARGC is nonzero,
-     then we must compute ARGS from this (via the target).
-     This is always coming from main's argv and therefore
-     should never be freed.  */
-  char **argv = NULL;
-
   /* The current working directory that will be used when starting
      this inferior.  */
   gdb::unique_xmalloc_ptr<char> cwd;

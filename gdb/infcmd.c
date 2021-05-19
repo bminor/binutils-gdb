@@ -127,16 +127,8 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
 const char *
 get_inferior_args (void)
 {
-  if (current_inferior ()->argc != 0)
-    {
-      gdb::array_view<char * const> args (current_inferior ()->argv,
-					  current_inferior ()->argc);
-      std::string n = construct_inferior_arguments (args);
-      set_inferior_args (n.c_str ());
-    }
-
-  if (current_inferior ()->args == NULL)
-    current_inferior ()->args = make_unique_xstrdup ("");
+  if (current_inferior ()->args == nullptr)
+    return "";
 
   return current_inferior ()->args.get ();
 }
@@ -151,16 +143,14 @@ set_inferior_args (const char *newargs)
     current_inferior ()->args = make_unique_xstrdup (newargs);
   else
     current_inferior ()->args.reset ();
-
-  current_inferior ()->argc = 0;
-  current_inferior ()->argv = 0;
 }
 
 void
 set_inferior_args_vector (int argc, char **argv)
 {
-  current_inferior ()->argc = argc;
-  current_inferior ()->argv = argv;
+  gdb::array_view<char * const> args (argv, argc);
+  std::string n = construct_inferior_arguments (args);
+  set_inferior_args (n.c_str ());
 }
 
 /* Notice when `set args' is run.  */
@@ -490,15 +480,11 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
       if (exec_file)
 	uiout->field_string ("execfile", exec_file);
       uiout->spaces (1);
-      /* We call get_inferior_args() because we might need to compute
-	 the value now.  */
       uiout->field_string ("infargs", get_inferior_args ());
       uiout->text ("\n");
       uiout->flush ();
     }
 
-  /* We call get_inferior_args() because we might need to compute
-     the value now.  */
   run_target->create_inferior (exec_file,
 			       std::string (get_inferior_args ()),
 			       current_inferior ()->environment.envp (),
