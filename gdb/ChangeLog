@@ -1,3 +1,7 @@
+2021-05-19  John Baldwin  <jhb@FreeBSD.org>
+
+	* dwarf2/read.c (tu_abbrev_offset::operator<): Mark const.
+
 2021-05-17  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.h: Update include.

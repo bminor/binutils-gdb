@@ -7116,7 +7116,7 @@ struct tu_abbrev_offset
   {}
 
   /* This is used when sorting.  */
-  bool operator< (const tu_abbrev_offset &other)
+  bool operator< (const tu_abbrev_offset &other) const
   {
     return abbrev_offset < other.abbrev_offset;
   }
