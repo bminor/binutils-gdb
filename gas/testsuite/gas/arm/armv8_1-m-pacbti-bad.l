@@ -5,3 +5,6 @@
 .*:9: Error: operand must be r12 -- `aut r11,lr,sp'
 .*:10: Error: operand must be LR register -- `aut r12,r10,sp'
 .*:11: Error: operand must be SP register -- `aut r12,lr,r10'
+.*:12: Error: operand must be r12 -- `pac r11,lr,sp'
+.*:13: Error: operand must be LR register -- `pac r12,r10,sp'
+.*:14: Error: operand must be SP register -- `pac r12,lr,r10'

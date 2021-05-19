@@ -4659,6 +4659,8 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
    0xf3af800f, 0xffffffff, "bti"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   0xf3af801d, 0xffffffff, "pac\tr12, lr, sp"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
    0xf3af800d, 0xffffffff, "pacbti\tr12, lr, sp"},
 
   /* Armv8.1-M Mainline and Armv8.1-M Mainline Security Extensions
