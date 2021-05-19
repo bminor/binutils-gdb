@@ -3486,7 +3486,7 @@ sim_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
 -Wmissing-declarations
 -Wmissing-prototypes
 -Wdeclaration-after-statement -Wmissing-parameter-type
--Wno-pointer-sign
+-Wpointer-sign
 -Wold-style-declaration -Wold-style-definition
 "
 # Enable -Wno-format by default when using gcc on mingw since many
