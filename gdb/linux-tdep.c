@@ -1804,7 +1804,6 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   char filename[100];
   /* The basename of the executable.  */
   const char *basename;
-  const char *infargs;
   /* Temporary buffer.  */
   char *tmpstr;
   /* The valid states of a process, according to the Linux kernel.  */
@@ -1848,7 +1847,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   strncpy (p->pr_fname, basename, sizeof (p->pr_fname) - 1);
   p->pr_fname[sizeof (p->pr_fname) - 1] = '\0';
 
-  infargs = get_inferior_args ();
+  const char *infargs = current_inferior ()->args ();
 
   /* The arguments of the program.  */
   std::string psargs = fname.get ();

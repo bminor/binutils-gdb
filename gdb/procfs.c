@@ -3613,7 +3613,7 @@ procfs_target::make_corefile_notes (bfd *obfd, int *note_size)
       strncpy (psargs, get_exec_file (0), sizeof (psargs));
       psargs[sizeof (psargs) - 1] = 0;
 
-      inf_args = get_inferior_args ();
+      inf_args = current_inferior ()->args ();
       if (inf_args && *inf_args
 	  && (strlen (inf_args)
 	      < ((int) sizeof (psargs) - (int) strlen (psargs))))

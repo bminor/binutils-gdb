@@ -204,10 +204,6 @@ extern void post_create_inferior (int from_tty);
 
 extern void attach_command (const char *, int);
 
-extern const char *get_inferior_args (void);
-
-extern void set_inferior_args (const char *);
-
 extern void set_inferior_args_vector (int, char **);
 
 extern void registers_info (const char *, int);
@@ -446,6 +442,30 @@ public:
   void set_tty (const char *terminal_name);
   const char *tty ();
 
+  /* Set the argument string to use when running this inferior.
+
+     Either nullptr or an empty string can be used to represent "no
+     arguments".  */
+  void set_args (const char *args)
+  {
+    if (args != nullptr && args[0] != '\0')
+      m_args = make_unique_xstrdup (args);
+    else
+      m_args.reset ();
+  };
+
+  /* Get the argument string to use when running this inferior.
+
+     The return value is always non-nullptr.  No arguments is represented by
+     an empty string.  */
+  const char *args () const
+  {
+    if (m_args == nullptr)
+      return "";
+
+    return m_args.get ();
+  }
+
   /* Convenient handle (GDB inferior id).  Unique across all
      inferiors.  */
   int num = 0;
@@ -474,9 +494,6 @@ public:
 
   /* The program space bound to this inferior.  */
   struct program_space *pspace = NULL;
-
-  /* The arguments string to use when running.  */
-  gdb::unique_xmalloc_ptr<char> args;
 
   /* The current working directory that will be used when starting
      this inferior.  */
@@ -569,6 +586,11 @@ private:
 
   /* The list of continuations.  */
   std::list<std::function<void ()>> m_continuations;
+
+  /* The arguments string to use when running.
+
+     This is nullptr when there are not args.  */
+  gdb::unique_xmalloc_ptr<char> m_args;
 };
 
 /* Keep a registry of per-inferior data-pointers required by other GDB

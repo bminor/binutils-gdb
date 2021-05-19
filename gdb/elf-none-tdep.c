@@ -49,7 +49,7 @@ elf_none_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
       fname = lbasename (exe);
       psargs = std::string (exe);
 
-      const char *infargs = get_inferior_args ();
+      const char *infargs = current_inferior ()->args ();
       if (infargs != nullptr)
 	psargs += " " + std::string (infargs);
 
