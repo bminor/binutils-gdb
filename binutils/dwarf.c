@@ -41,6 +41,10 @@
 #define CHAR_BIT 8
 #endif
 
+#ifndef ENABLE_CHECKING
+#define ENABLE_CHECKING 0
+#endif
+
 #undef MAX
 #undef MIN
 #define MAX(a, b) ((a) > (b) ? (a) : (b))

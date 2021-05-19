@@ -1,3 +1,7 @@
+2021-05-19  Eli Schwartz  <eschwartz@archlinux.org>
+
+	* dwarf.c (ENABLE_CHECKING): Define to 0 if not previously set.
+
 2021-05-19  Alan Modra  <amodra@gmail.com>
 
 	PR 27884
