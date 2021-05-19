@@ -784,12 +784,12 @@ INLINE_DEVICE\
  device_event_handler *handler,
  void *data);
 
-INLINE_EVENTS\
+INLINE_DEVICE\
 (void) device_event_queue_deschedule
 (device *me,
  event_entry_tag event_to_remove);
 
-INLINE_EVENTS\
+INLINE_DEVICE\
 (signed64) device_event_queue_time
 (device *me);
 
