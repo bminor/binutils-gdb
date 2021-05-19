@@ -1,3 +1,14 @@
+2021-05-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (HFILES): Add cris-desc.h & cris-opc.h.
+	(TARGET_LIBOPCODES_CFILES): Add cris-desc.c.
+	(CGEN_CPUS): Add cris.
+	(CRIS_DEPS): Define.
+	(stamp-cris): New rule.
+	* cgen.sh: Handle desc action.
+	* configure.ac (bfd_cris_arch): Add cris-desc.lo.
+	* Makefile.in, configure: Regenerate.
+
 2021-05-18  Job Noorman  <mtvec@pm.me>
 
 	PR 27814

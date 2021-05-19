@@ -1,3 +1,12 @@
+2021-05-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* cris-desc.c, cris-desc.h, cris-opc.h: Moved to opcodes/.
+	* Makefile.in (SIM_OBJS): Delete cris-desc.o.
+	(SIM_EXTRA_DEPS): Delete cris-desc.h.
+	(cris-clean): Delete stamp-desc.
+	(stamps): Likewise.
+	(stamp-desc): Delete rule.
+
 2021-05-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-if.c (sim_open): Delete "x" after PRI macros.

@@ -29,14 +29,13 @@ SIM_OBJS = \
 	sim-if.o arch.o \
 	$(CRISV10F_OBJS) \
 	$(CRISV32F_OBJS) \
-	traps.o \
-	cris-desc.o
+	traps.o
 
 # Extra headers included by sim-main.h.
 # FIXME: $(srccom)/cgen-ops.h should be in CGEN_INCLUDE_DEPS.
 SIM_EXTRA_DEPS = \
 	$(CGEN_INCLUDE_DEPS) $(srccom)/cgen-ops.h \
-	arch.h cpuall.h cris-sim.h cris-desc.h engv10.h engv32.h
+	arch.h cpuall.h cris-sim.h engv10.h engv32.h
 
 SIM_EXTRA_CLEAN = cris-clean
 
@@ -97,7 +96,7 @@ cris-clean:
 	  rm -f mloopv$${v}f.c engv$${v}.h stamp-v$${v}fmloop; \
 	  rm -f stamp-v$${v}fcpu; \
 	done
-	-rm -f stamp-arch stamp-desc
+	-rm -f stamp-arch
 	-rm -f tmp-*
 
 # cgen support, enable with --enable-cgen-maint
@@ -106,7 +105,7 @@ CGEN_MAINT = ; @true
 @CGEN_MAINT@CGEN_MAINT =
 
 # Useful when making CGEN-generated files manually, without --enable-cgen-maint.
-stamps: stamp-v10fmloop stamp-v32fmloop stamp-arch stamp-v10fcpu stamp-v32fcpu stamp-desc
+stamps: stamp-v10fmloop stamp-v32fmloop stamp-arch stamp-v10fcpu stamp-v32fcpu
 
 stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CPU_DIR)/cris.cpu Makefile
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=crisv10,crisv32 \
@@ -135,10 +134,3 @@ stamp-v32fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/cr
 	mv decodev32.c.tmp $(srcdir)/decodev32.c
 	touch stamp-v32fcpu
 cpuv32.h cpuv32.c semcrisv32f-switch.c modelv32.c decodev32.c decodev32.h: $(CGEN_MAINT) stamp-v32fcpu
-
-stamp-desc: $(CGEN_READ_SCM) $(CGEN_DESC_SCM) $(CPU_DIR)/cris.cpu Makefile
-	$(MAKE) cgen-desc $(CGEN_FLAGS_TO_PASS) \
-		archfile=$(CPU_DIR)/cris.cpu \
-		cpu=cris mach=all
-	touch stamp-desc
-cris-desc.c cris-desc.h cris-opc.h: $(CGEN_MAINT) stamp-desc
