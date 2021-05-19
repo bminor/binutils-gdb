@@ -44,6 +44,7 @@
 #  dirent \
 #  dirfd \
 #  errno \
+#  ffs \
 #  fnmatch-gnu \
 #  frexpl \
 #  gendocs \
@@ -88,6 +89,7 @@ gl_MODULES([
   dirent
   dirfd
   errno
+  ffs
   fnmatch-gnu
   frexpl
   gendocs

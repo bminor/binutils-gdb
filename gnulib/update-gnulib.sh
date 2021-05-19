@@ -36,6 +36,7 @@ IMPORTED_GNULIB_MODULES="\
     dirent \
     dirfd \
     errno \
+    ffs \
     fnmatch-gnu \
     frexpl \
     gendocs \

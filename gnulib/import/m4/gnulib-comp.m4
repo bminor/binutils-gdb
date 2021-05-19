@@ -84,6 +84,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module fd-hook:
   # Code from module fd-safer-flag:
   # Code from module fdopendir:
+  # Code from module ffs:
   # Code from module filename:
   # Code from module filenamecat-lgpl:
   # Code from module flexmember:
@@ -194,6 +195,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module strerror-override:
   # Code from module strerror_r-posix:
   # Code from module string:
+  # Code from module strings:
   # Code from module strnlen:
   # Code from module strnlen1:
   # Code from module strstr:
@@ -329,6 +331,11 @@ AC_DEFUN([gl_INIT],
   fi
   gl_DIRENT_MODULE_INDICATOR([fdopendir])
   gl_MODULE_INDICATOR([fdopendir])
+  gl_FUNC_FFS
+  if test $HAVE_FFS = 0; then
+    AC_LIBOBJ([ffs])
+  fi
+  gl_STRINGS_MODULE_INDICATOR([ffs])
   gl_FILE_NAME_CONCAT_LGPL
   AC_C_FLEXIBLE_ARRAY_MEMBER
   gl_FLOAT_H
@@ -712,6 +719,7 @@ AC_DEFUN([gl_INIT],
   dnl For the modules argp, error.
   gl_MODULE_INDICATOR([strerror_r-posix])
   gl_HEADER_STRING_H
+  gl_HEADER_STRINGS_H
   gl_FUNC_STRNLEN
   if test $HAVE_DECL_STRNLEN = 0 || test $REPLACE_STRNLEN = 1; then
     AC_LIBOBJ([strnlen])
@@ -990,6 +998,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/fd-safer-flag.c
   lib/fd-safer.c
   lib/fdopendir.c
+  lib/ffs.c
   lib/filename.h
   lib/filenamecat-lgpl.c
   lib/filenamecat.h
@@ -1130,6 +1139,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strerror.c
   lib/strerror_r.c
   lib/string.in.h
+  lib/strings.in.h
   lib/stripslash.c
   lib/strnlen.c
   lib/strnlen1.c
@@ -1204,6 +1214,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/fcntl.m4
   m4/fcntl_h.m4
   m4/fdopendir.m4
+  m4/ffs.m4
   m4/filenamecat.m4
   m4/flexmember.m4
   m4/float_h.m4
@@ -1306,6 +1317,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/strerror.m4
   m4/strerror_r.m4
   m4/string_h.m4
+  m4/strings_h.m4
   m4/strnlen.m4
   m4/strstr.m4
   m4/strtok_r.m4

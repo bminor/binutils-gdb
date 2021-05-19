@@ -1,3 +1,12 @@
+2021-05-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add ffs.
+	* aclocal.m4, configure, Makefile.in, import/Makefile.am,
+	import/Makefile.in, import/m4/gnulib-cache.m4,
+	import/m4/gnulib-comp.m4: Regenerate.
+	* import/ffs.c, import/m4/ffs.m4, import/m4/strings_h.m4,
+	import/strings.in.h: New files.
+
 2021-05-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add gendocs.
