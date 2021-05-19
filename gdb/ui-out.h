@@ -203,6 +203,7 @@ class ui_out
 
   void spaces (int numspaces);
   void text (const char *string);
+  void text (const std::string &string);
 
   /* Output a printf-style formatted string.  In addition to the usual
      printf format specs, this supports a few GDB-specific

@@ -760,7 +760,7 @@ cmd_show_list (struct cmd_list_element *list, int from_tty)
 	      std::string prefixname = list->prefix->prefixname ();
 	      prefixname = (!list->prefix->is_prefix () ? ""
 			    : strstr (prefixname.c_str (), "show ") + 5);
-	      uiout->text (prefixname.c_str ());
+	      uiout->text (prefixname);
 	    }
 	  uiout->field_string ("name", list->name);
 	  uiout->text (":  ");

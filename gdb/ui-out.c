@@ -582,6 +582,12 @@ ui_out::text (const char *string)
 }
 
 void
+ui_out::text (const std::string &string)
+{
+  text (string.c_str ());
+}
+
+void
 ui_out::call_do_message (const ui_file_style &style, const char *format,
 			 ...)
 {

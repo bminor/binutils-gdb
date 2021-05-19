@@ -1394,7 +1394,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	  if (iter > start)
 	    {
 	      std::string text (start, iter);
-	      uiout->text (text.c_str ());
+	      uiout->text (text);
 	    }
 	  if (*iter == '\r')
 	    {
