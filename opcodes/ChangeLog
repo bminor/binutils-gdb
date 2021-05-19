@@ -1,3 +1,12 @@
+2021-05-19  Alex Coplan  <alex.coplan@arm.com>
+
+	* arm-dis.c (mve_opcodes): Fix disassembly of
+	MVE_VMOV2_GP_TO_VEC_LANE when idx == 1.
+	(is_mve_encoding_conflict): MVE vector loads should not match
+	when P = W = 0.
+	(is_mve_unpredictable): It's not unpredictable to use the same
+	source register twice (for MVE_VMOV2_GP_TO_VEC_LANE).
+
 2021-04-09  Tejas Belagod  <tejas.belagod@arm.com>
 
 	Backported from mainline.
