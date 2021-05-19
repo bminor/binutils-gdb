@@ -16,6 +16,57 @@
 # Check that 'info types' produces the expected output for an inferior
 # containing a number of different types.
 
+# Match LINE against regexp OUTPUT_LINES[IDX].
+proc match_line { line output_lines idx_name } {
+    upvar $idx_name idx
+
+    while { 1 } {
+	if { $idx == [llength $output_lines] } {
+	    # Ran out of regexps, bail out.
+	    return -1
+	}
+
+	set re [lindex $output_lines $idx]
+	if { $re == "--optional" } {
+	    # Optional, get actual regexp.
+	    set opt 1
+	    incr idx
+	    set re [lindex $output_lines $idx]
+	} else {
+	    # Not optional.
+	    set opt 0
+	}
+
+	if { [regexp $re $line] } {
+	    # Match.
+	    incr idx
+	    if { $idx == [llength $output_lines] } {
+		# Last match, we're done.
+		return 1
+	    }
+	    # Match found, keep looking for next match.
+	    return 0
+	} else {
+	    # No match.
+	    if { $idx == 0 } {
+		# First match not found, just keep looking for first match.
+		return 0
+	    } elseif { $opt } {
+		# Try next regexp on same line.
+		incr idx
+		continue
+	    } else {
+		# Mismatch, bail out.
+		return -1
+	    }
+	}
+	break
+    }
+
+    # Keep going.
+    return 0
+}
+
 # Run 'info types' test, compiling the test file for language LANG,
 # which should be either 'c' or 'c++'.
 proc run_test { lang } {
@@ -39,8 +90,8 @@ proc run_test { lang } {
     }
 
     if { $lang == "c++" } {
-	set output_re \
-	    [multi_line \
+	set output_lines \
+	    [list \
 		 "98:\[\t \]+CL;" \
 		 "42:\[\t \]+anon_struct_t;" \
 		 "65:\[\t \]+anon_union_t;" \
@@ -69,11 +120,12 @@ proc run_test { lang } {
 		 "39:\[\t \]+typedef enum_t nested_enum_t;" \
 		 "19:\[\t \]+typedef float nested_float_t;" \
 		 "18:\[\t \]+typedef int nested_int_t;" \
-		 "62:\[\t \]+typedef union_t nested_union_t;(" \
-		 "\[\t \]+unsigned int)?"]
+		 "62:\[\t \]+typedef union_t nested_union_t;" \
+		 "--optional" "\[\t \]+unsigned int" \
+		 ""]
     } else {
-	set output_re \
-	    [multi_line \
+	set output_lines \
+	    [list \
 		 "52:\[\t \]+typedef enum {\\.\\.\\.} anon_enum_t;" \
 		 "45:\[\t \]+typedef struct {\\.\\.\\.} anon_struct_t;" \
 		 "68:\[\t \]+typedef union {\\.\\.\\.} anon_union_t;" \
@@ -96,33 +148,44 @@ proc run_test { lang } {
 		 "19:\[\t \]+typedef float nested_float_t;" \
 		 "18:\[\t \]+typedef int nested_int_t;" \
 		 "62:\[\t \]+typedef union union_t nested_union_t;" \
-		 "56:\[\t \]+union union_t;(" \
-		 "\[\t \]+unsigned int)?"]
+		 "56:\[\t \]+union union_t;" \
+		 "--optional" "\[\t \]+unsigned int" \
+		 ""]
     }
 
     set state 0
+    set idx 0
     gdb_test_multiple "info types" "" {
 	-re "\r\nAll defined types:" {
-	    if { $state == 0 } { set state 1 }
+	    if { $state == 0 } { set state 1 } else { set state -1 }
 	    exp_continue
 	}
-	-re "\r\n\r\nFile .*[string_to_regexp $srcfile]:" {
-	    if { $state == 1 } { set state 2 }
+	-re "^\r\nFile .*[string_to_regexp $srcfile]:" {
+	    if { $state == 1 } { set state 2 } else { set state -2 }
 	    exp_continue
 	}
-	-re $output_re {
-	    if { $state == 2 } { set state 3 }
-	    exp_continue
-	}
-	-re "\r\n\r\nFile \[^\r\n\]*:" {
+	-re "^\r\nFile \[^\r\n\]*:" {
+	    if { $state == 2 } { set state -4 }
 	    exp_continue
 	}
 	-re -wrap "" {
 	    if { $state == 3} {
 		pass $gdb_test_name
 	    } else {
-		fail $gdb_test_name
+		fail "$gdb_test_name (state == $state)"
 	    }
+	}
+	-re "^\r\n(\[^\r\n\]*)(?=\r\n)" {
+	    if { $state == 2 } {
+		set line $expect_out(1,string)
+		set res [match_line $line $output_lines idx]
+		if { $res == 1 } {
+		    set state 3
+		} elseif { $res == -1 } {
+		    set state -3
+		}
+	    }
+	    exp_continue
 	}
     }
 }

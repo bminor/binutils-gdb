@@ -1,3 +1,7 @@
+2021-05-19  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/info-types.exp.tcl: Scan info types output line-by-line.
+
 2021-05-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.python/py-framefilter-gdb.py.in: Rename to:
