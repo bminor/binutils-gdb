@@ -8,4 +8,5 @@
 Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f3af 800f 	bti
 0[0-9a-f]+ <[^>]+> f3af 800d 	pacbti	r12, lr, sp
+0[0-9a-f]+ <[^>]+> f3af 802d 	aut	r12, lr, sp
 #...

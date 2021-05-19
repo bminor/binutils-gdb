@@ -4655,6 +4655,8 @@ static const struct opcode32 thumb32_opcodes[] =
   /* Arm v8.1-M Mainline Pointer Authentication and Branch Target
      Identification Extension.  */
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
+   0xf3af802d, 0xffffffff, "aut\tr12, lr, sp"},
+  {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
    0xf3af800f, 0xffffffff, "bti"},
   {ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8_1M_MAIN),
    0xf3af800d, 0xffffffff, "pacbti\tr12, lr, sp"},
