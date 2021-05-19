@@ -1,3 +1,9 @@
+2021-05-19  Nick Clifton  <nickc@redhat.com>
+
+	* plugin.c (bfd_plugin_open_input): Inform the user if the limit
+	on the number of open files is reached.  If possible, try to
+	increase this limit before failing.
+
 2021-05-14  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_resolve_pcrel_lo_relocs): Check the values

@@ -209,7 +209,35 @@ bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
      the same underlying file descriptor.  */
   file->fd = open (file->name, O_RDONLY | O_BINARY);
   if (file->fd < 0)
-    return 0;
+    {
+#ifndef EMFILE
+      return 0;
+#else
+      if (errno != EMFILE)
+	return 0;
+
+#ifdef HAVE_GETRLIMIT
+      struct rlimit lim;
+
+      /* Complicated links involving lots of files and/or large archives
+	 can exhaust the number of file descriptors available to us.
+	 If possible, try to allocate more descriptors.  */
+      if (getrlimit (RLIMIT_NOFILE, & lim) == 0
+	  && lim.rlim_cur < lim.rlim_max)
+	{
+	  lim.rlim_cur = lim.rlim_max;
+	  if (setrlimit (RLIMIT_NOFILE, &lim) == 0)
+	    file->fd = open (file->name, O_RDONLY | O_BINARY);
+	}
+
+      if (file->fd < 0)
+#endif
+	{
+	  _bfd_error_handler (_("plugin framework: out of file descriptors. Try using fewer objects/archives\n"));
+	  return 0;
+	} 
+#endif
+   }
 
   if (iobfd == ibfd)
     {
