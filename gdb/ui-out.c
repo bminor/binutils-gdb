@@ -527,13 +527,6 @@ ui_out::field_string (const char *fldname, const char *string,
   do_field_string (fldno, width, align, fldname, string, style);
 }
 
-void
-ui_out::field_string (const char *fldname, const std::string &string,
-		      const ui_file_style &style)
-{
-  field_string (fldname, string.c_str (), style);
-}
-
 /* VARARGS */
 void
 ui_out::field_fmt (const char *fldname, const char *format, ...)
@@ -580,12 +573,6 @@ void
 ui_out::text (const char *string)
 {
   do_text (string);
-}
-
-void
-ui_out::text (const std::string &string)
-{
-  text (string.c_str ());
 }
 
 void
