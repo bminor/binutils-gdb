@@ -11463,6 +11463,7 @@ encode_thumb32_addr_mode (int i, bool is_t, bool is_d)
   X(_bflx,  0000, f070e001),			\
   X(_bic,   4380, ea200000),			\
   X(_bics,  4380, ea300000),			\
+  X(_bxaut, 0000, fb500f10),			\
   X(_cinc,  0000, ea509000),			\
   X(_cinv,  0000, ea50a000),			\
   X(_cmn,   42c0, eb100f00),			\
@@ -22343,6 +22344,18 @@ do_t_pacbti (void)
   inst.instruction = THUMB_OP32 (inst.instruction);
 }
 
+static void
+do_t_pacbti_nonop (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, pacbti_ext),
+	      _(BAD_PACBTI));
+
+  inst.instruction = THUMB_OP32 (inst.instruction);
+  inst.instruction |= inst.operands[0].reg << 12;
+  inst.instruction |= inst.operands[1].reg << 16;
+  inst.instruction |= inst.operands[2].reg;
+}
+
 
 /* Overall per-instruction processing.	*/
 
@@ -26333,6 +26346,7 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT & arm_ext_v8_1m_main
  toU("aut",   _aut, 3, (R12, LR, SP), t_pacbti),
  ToU("bti",   f3af800f, 0, (), noargs),
+ toU("bxaut", _bxaut, 3, (RR, RR, RR), t_pacbti_nonop),
  toU("pac",   _pac,   3, (R12, LR, SP), t_pacbti),
  toU("pacbti", _pacbti, 3, (R12, LR, SP), t_pacbti),
  toU("cinc",  _cinc,  3, (RRnpcsp, RR_ZR, COND),	t_cond),
