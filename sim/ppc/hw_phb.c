@@ -312,8 +312,8 @@ hw_phb_attach_address(device *me,
       || addr < pci_space->my_base)
     device_error(me, "attach addr (0x%lx) specified by %s outside of bus address range",
 		 (unsigned long)addr, device_path(client));
-  if (type != hw_phb_normal_decode
-      && type != hw_phb_subtractive_decode)
+  if ((hw_phb_decode)type != hw_phb_normal_decode
+      && (hw_phb_decode)type != hw_phb_subtractive_decode)
     device_error(me, "attach type (%d) specified by %s invalid",
 		 type, device_path(client));
   /* attach it to the relevent bus */
