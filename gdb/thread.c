@@ -1184,8 +1184,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	    }
 	  else
 	    {
-	      uiout->field_string ("target-id",
-				   thread_target_id_str (tp).c_str ());
+	      uiout->field_string ("target-id", thread_target_id_str (tp));
 	    }
 
 	  if (tp->state == THREAD_RUNNING)

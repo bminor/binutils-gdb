@@ -1935,7 +1935,7 @@ info_auto_load_libthread_db (const char *args, int from_tty)
 	    i++;
 	  }
 
-	uiout->field_string ("pids", pids.c_str ());
+	uiout->field_string ("pids", pids);
 
 	uiout->text ("\n");
       }

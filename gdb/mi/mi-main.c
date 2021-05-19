@@ -738,12 +738,12 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 
       ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-      uiout->field_string ("id", pid->c_str ());
+      uiout->field_string ("id", *pid);
       uiout->field_string ("type", "process");
       if (cmd)
-	uiout->field_string ("description", cmd->c_str ());
+	uiout->field_string ("description", *cmd);
       if (user)
-	uiout->field_string ("user", user->c_str ());
+	uiout->field_string ("user", *user);
       if (cores)
 	output_cores (uiout, "cores", cores->c_str ());
 
@@ -762,9 +762,9 @@ list_available_thread_groups (const std::set<int> &ids, int recurse)
 		  const std::string *tid = get_osdata_column (child, "tid");
 		  const std::string *tcore = get_osdata_column (child, "core");
 
-		  uiout->field_string ("id", tid->c_str ());
+		  uiout->field_string ("id", *tid);
 		  if (tcore)
-		    uiout->field_string ("core", tcore->c_str ());
+		    uiout->field_string ("core", *tcore);
 		}
 	    }
 	}
@@ -1470,7 +1470,7 @@ mi_cmd_data_read_memory_bytes (const char *command, char **argv, int argc)
       std::string data = bin2hex (read_result.data.get (),
 				  (read_result.end - read_result.begin)
 				  * unit_size);
-      uiout->field_string ("contents", data.c_str ());
+      uiout->field_string ("contents", data);
     }
 }
 
@@ -2670,7 +2670,7 @@ mi_cmd_trace_frame_collected (const char *command, char **argv, int argc)
 	    if (target_read_memory (r.start, data.data (), r.length) == 0)
 	      {
 		std::string data_str = bin2hex (data.data (), r.length);
-		uiout->field_string ("contents", data_str.c_str ());
+		uiout->field_string ("contents", data_str);
 	      }
 	    else
 	      uiout->field_skip ("contents");

@@ -529,7 +529,7 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
       uiout->field_string ("target-id", inferior_pid_to_str (inf->pid));
 
       std::string conn = uiout_field_connection (inf->process_target ());
-      uiout->field_string ("connection-id", conn.c_str ());
+      uiout->field_string ("connection-id", conn);
 
       if (inf->pspace->exec_filename != nullptr)
 	uiout->field_string ("exec", inf->pspace->exec_filename.get ());

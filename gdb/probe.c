@@ -571,9 +571,8 @@ info_probes_for_spops (const char *arg, int from_tty,
 	ui_out_emit_tuple tuple_emitter (current_uiout, "probe");
 
 	current_uiout->field_string ("type", probe_type);
-	current_uiout->field_string ("provider",
-				     probe.prob->get_provider ().c_str ());
-	current_uiout->field_string ("name", probe.prob->get_name ().c_str ());
+	current_uiout->field_string ("provider", probe.prob->get_provider ());
+	current_uiout->field_string ("name", probe.prob->get_name ());
 	current_uiout->field_core_addr ("addr", probe.prob->get_gdbarch (),
 					probe.prob->get_relocated_address
 					(probe.objfile));

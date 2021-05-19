@@ -1539,7 +1539,7 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
     {
       std::string type_name = type_to_string (rv->type);
       uiout->text ("Value returned has type: ");
-      uiout->field_string ("return-type", type_name.c_str ());
+      uiout->field_string ("return-type", type_name);
       uiout->text (".");
       uiout->text (" Cannot determine contents\n");
     }

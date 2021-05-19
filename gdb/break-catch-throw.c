@@ -300,7 +300,7 @@ print_one_detail_exception_catchpoint (const struct breakpoint *b,
   if (!cp->exception_rx.empty ())
     {
       uiout->text (_("\tmatching: "));
-      uiout->field_string ("regexp", cp->exception_rx.c_str ());
+      uiout->field_string ("regexp", cp->exception_rx);
       uiout->text ("\n");
     }
 }

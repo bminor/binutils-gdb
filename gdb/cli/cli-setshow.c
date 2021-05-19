@@ -714,7 +714,7 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
      versions of code to print the value out.  */
 
   if (uiout->is_mi_like_p ())
-    uiout->field_string ("value", val.c_str ());
+    uiout->field_string ("value", val);
   else
     {
       if (c->show_value_func != NULL)

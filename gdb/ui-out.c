@@ -528,9 +528,10 @@ ui_out::field_string (const char *fldname, const char *string,
 }
 
 void
-ui_out::field_string (const char *fldname, const std::string &string)
+ui_out::field_string (const char *fldname, const std::string &string,
+		      const ui_file_style &style)
 {
-  field_string (fldname, string.c_str ());
+  field_string (fldname, string.c_str (), style);
 }
 
 /* VARARGS */

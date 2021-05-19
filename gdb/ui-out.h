@@ -191,7 +191,8 @@ class ui_out
 			CORE_ADDR address);
   void field_string (const char *fldname, const char *string,
 		     const ui_file_style &style = ui_file_style ());
-  void field_string (const char *fldname, const std::string &string);
+  void field_string (const char *fldname, const std::string &string,
+		     const ui_file_style &style = ui_file_style ());
   void field_stream (const char *fldname, string_file &stream,
 		     const ui_file_style &style = ui_file_style ());
   void field_skip (const char *fldname);

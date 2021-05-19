@@ -237,7 +237,7 @@ signal_catchpoint_print_one (struct breakpoint *b,
 
 	  text += name;
 	}
-      uiout->field_string ("what", text.c_str ());
+      uiout->field_string ("what", text);
     }
   else
     uiout->field_string ("what",

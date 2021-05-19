@@ -133,7 +133,7 @@ print_connection (struct ui_out *uiout, const char *requested_connections)
 
       uiout->field_signed ("number", t->connection_number);
 
-      uiout->field_string ("what", make_target_connection_string (t).c_str ());
+      uiout->field_string ("what", make_target_connection_string (t));
 
       uiout->field_string ("description", t->longname ());
 

@@ -273,8 +273,7 @@ info_osdata (const char *type)
 		 continue;
 
 	       snprintf (col_name, 32, "col%d", ix_cols);
-	       uiout->field_string (col_name,
-				    item.columns[ix_cols].value.c_str ());
+	       uiout->field_string (col_name, item.columns[ix_cols].value);
 	     }
 	 }
 

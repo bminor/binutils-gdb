@@ -3678,7 +3678,7 @@ print_one_static_tracepoint_marker (int count,
      identifier!  */
   uiout->field_signed ("count", count);
 
-  uiout->field_string ("marker-id", marker.str_id.c_str ());
+  uiout->field_string ("marker-id", marker.str_id);
 
   uiout->field_fmt ("enabled", "%c",
 		    !tracepoints.empty () ? 'y' : 'n');
@@ -3735,7 +3735,7 @@ print_one_static_tracepoint_marker (int count,
   uiout->text ("\n");
   uiout->text (extra_field_indent);
   uiout->text (_("Data: \""));
-  uiout->field_string ("extra-data", marker.extra.c_str ());
+  uiout->field_string ("extra-data", marker.extra);
   uiout->text ("\"\n");
 
   if (!tracepoints.empty ())
