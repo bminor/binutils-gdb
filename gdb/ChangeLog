@@ -1,3 +1,8 @@
+2021-05-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linespec.c (linespec_p): Remove.  Replace all uses with
+	"linespec *".
+
 2021-05-20  Alexandra Hájková  <ahajkova@redhat.com>
 	    Pedro Alves  <pedro@palves.net>
 
