@@ -1,3 +1,10 @@
+2021-05-20  Nicolas Boulenguez  <nicolas@debian.org>
+
+	PR 27888
+	* Makefile.am (ZLIB): Define.
+	(as_new_LDADD): Add it.
+	* Makefile.in: Regenerate.
+
 2021-05-17  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-arm.c (do_mve_mov): Only reject vmov if we're moving
