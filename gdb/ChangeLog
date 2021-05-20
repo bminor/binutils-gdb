@@ -2,6 +2,10 @@
 
 	* dwarf2/read.c (tu_abbrev_offset::operator<): Mark const.
 
+2021-05-18  Alexandra Hájková  <ahajkova@redhat.com>
+
+	* inflow.c (new_tty): Do not leak tty.
+
 2021-05-17  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.h: Update include.
@@ -250,11 +254,6 @@
 
 	* btrace.c (handle_pt_insn_events): Ignore status update enable
 	events.
-
-2021-05-11 Alexandra Hájková <ahajkova@redhat.com>
-
-	* inflow.c (new_tty): Do not leak tty.
-
 
 2021-05-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
