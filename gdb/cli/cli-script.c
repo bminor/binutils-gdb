@@ -155,7 +155,7 @@ multi_line_command_p (enum command_control_type type)
 /* Allocate, initialize a new command line structure for one of the
    control commands (if/while).  */
 
-static struct command_line *
+static command_line_up
 build_command_line (enum command_control_type type, const char *args)
 {
   if (args == NULL || *args == '\0')
@@ -171,7 +171,7 @@ build_command_line (enum command_control_type type, const char *args)
     }
   gdb_assert (args != NULL);
 
-  return new struct command_line (type, xstrdup (args));
+  return command_line_up (new command_line (type, xstrdup (args)));
 }
 
 /* Build and return a new command structure for the control commands
@@ -181,7 +181,7 @@ counted_command_line
 get_command_line (enum command_control_type type, const char *arg)
 {
   /* Allocate and build a new command line structure.  */
-  counted_command_line cmd (build_command_line (type, arg),
+  counted_command_line cmd (build_command_line (type, arg).release (),
 			    command_lines_deleter ());
 
   /* Read in the body of this command.  */
@@ -957,7 +957,7 @@ line_first_arg (const char *p)
    Otherwise, only "end" is recognized.  */
 
 static enum misc_command_type
-process_next_line (const char *p, struct command_line **command,
+process_next_line (const char *p, command_line_up *command,
 		   int parse_commands,
 		   gdb::function_view<void (const char *)> validator)
 
@@ -1055,9 +1055,9 @@ process_next_line (const char *p, struct command_line **command,
 	  *command = build_command_line (guile_control, "");
 	}
       else if (p_end - p == 10 && startswith (p, "loop_break"))
-	*command = new struct command_line (break_control);
+	*command = command_line_up (new command_line (break_control));
       else if (p_end - p == 13 && startswith (p, "loop_continue"))
-	*command = new struct command_line (continue_control);
+	*command = command_line_up (new command_line (continue_control));
       else
 	not_handled = 1;
     }
@@ -1065,22 +1065,12 @@ process_next_line (const char *p, struct command_line **command,
   if (!parse_commands || not_handled)
     {
       /* A normal command.  */
-      *command = new struct command_line (simple_control,
-					  savestring (p, p_end - p));
+      *command = command_line_up (new command_line (simple_control,
+						    savestring (p, p_end - p)));
     }
 
   if (validator)
-    {
-      try
-	{
-	  validator ((*command)->line);
-	}
-      catch (const gdb_exception &ex)
-	{
-	  free_command_lines (command);
-	  throw;
-	}
-    }
+    validator ((*command)->line);
 
   /* Nothing special.  */
   return ok_command;
@@ -1097,10 +1087,11 @@ recurse_read_control_structure (gdb::function_view<const char * ()> read_next_li
 {
   enum misc_command_type val;
   enum command_control_type ret;
-  struct command_line *child_tail, *next;
+  struct command_line *child_tail;
   counted_command_line *current_body = &current_cmd->body_list_0;
+  command_line_up next;
 
-  child_tail = NULL;
+  child_tail = nullptr;
 
   /* Sanity checks.  */
   if (current_cmd->control_type == simple_control)
@@ -1111,8 +1102,8 @@ recurse_read_control_structure (gdb::function_view<const char * ()> read_next_li
     {
       dont_repeat ();
 
-      next = NULL;
-      val = process_next_line (read_next_line_func (), &next, 
+      next = nullptr;
+      val = process_next_line (read_next_line_func (), &next,
 			       current_cmd->control_type != python_control
 			       && current_cmd->control_type != guile_control
 			       && current_cmd->control_type != compile_control,
@@ -1144,7 +1135,7 @@ recurse_read_control_structure (gdb::function_view<const char * ()> read_next_li
 	      && current_body == &current_cmd->body_list_0)
 	    {
 	      current_body = &current_cmd->body_list_1;
-	      child_tail = NULL;
+	      child_tail = nullptr;
 	      continue;
 	    }
 	  else
@@ -1154,21 +1145,26 @@ recurse_read_control_structure (gdb::function_view<const char * ()> read_next_li
 	    }
 	}
 
-      if (child_tail)
+      /* Transfer ownership of NEXT to the command's body list.  */
+      if (child_tail != nullptr)
 	{
-	  child_tail->next = next;
+	  child_tail->next = next.release ();
+	  child_tail = child_tail->next;
 	}
       else
-	*current_body = counted_command_line (next, command_lines_deleter ());
-
-      child_tail = next;
+	{
+	  child_tail = next.get ();
+	  *current_body = counted_command_line (next.release (),
+						command_lines_deleter ());
+	}
 
       /* If the latest line is another control structure, then recurse
 	 on it.  */
-      if (multi_line_command_p (next->control_type))
+      if (multi_line_command_p (child_tail->control_type))
 	{
 	  control_level++;
-	  ret = recurse_read_control_structure (read_next_line_func, next,
+	  ret = recurse_read_control_structure (read_next_line_func,
+						child_tail,
 						validator);
 	  control_level--;
 
@@ -1240,10 +1236,11 @@ read_command_lines_1 (gdb::function_view<const char * ()> read_next_line_func,
 		      int parse_commands,
 		      gdb::function_view<void (const char *)> validator)
 {
-  struct command_line *tail, *next;
+  struct command_line *tail;
   counted_command_line head (nullptr, command_lines_deleter ());
   enum command_control_type ret;
   enum misc_command_type val;
+  command_line_up next;
 
   control_level = 0;
   tail = NULL;
@@ -1273,7 +1270,7 @@ read_command_lines_1 (gdb::function_view<const char * ()> read_next_line_func,
       if (multi_line_command_p (next->control_type))
 	{
 	  control_level++;
-	  ret = recurse_read_control_structure (read_next_line_func, next,
+	  ret = recurse_read_control_structure (read_next_line_func, next.get (),
 						validator);
 	  control_level--;
 
@@ -1281,15 +1278,18 @@ read_command_lines_1 (gdb::function_view<const char * ()> read_next_line_func,
 	    break;
 	}
 
+      /* Transfer ownership of NEXT to the HEAD list.  */
       if (tail)
 	{
-	  tail->next = next;
+	  tail->next = next.release ();
+	  tail = tail->next;
 	}
       else
 	{
-	  head = counted_command_line (next, command_lines_deleter ());
+	  tail = next.get ();
+	  head = counted_command_line (next.release (),
+				       command_lines_deleter ());
 	}
-      tail = next;
     }
 
   dont_repeat ();

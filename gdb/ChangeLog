@@ -1,4 +1,20 @@
 2021-05-20  Alexandra Hájková  <ahajkova@redhat.com>
+	    Pedro Alves  <pedro@palves.net>
+
+	* cli/cli-script.h (command_line_up): New unique_ptr typedef.
+	* cli/cli-script.c (multi_line_command_p): Use unique_ptr
+	command_line_up instead of struct command_line.
+	(build_command_line): Likewise.
+	(get_command_line): Update the cmd function call parameter.
+	(process_next_line):  Use unique_ptr command_line_up instead
+	of struct command_line.
+	(recurse_read_control_structure): Change the the type of
+	next to command_line_up.
+	(read_command_lines_1): Change type of `next' to be
+	command_line_up and update all references of `next'
+	accordingly.
+
+2021-05-20  Alexandra Hájková  <ahajkova@redhat.com>
 
 	* MAINTAINERS (Write After Approval): Add myself.
 

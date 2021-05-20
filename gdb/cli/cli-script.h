@@ -66,6 +66,9 @@ struct command_lines_deleter
 /* A reference-counted struct command_line.  */
 typedef std::shared_ptr<command_line> counted_command_line;
 
+/* A unique_ptr specialization for command_line.  */
+typedef std::unique_ptr<command_line, command_lines_deleter> command_line_up;
+
 /* * Structure for saved commands lines (for breakpoints, defined
    commands, etc).  */
 
