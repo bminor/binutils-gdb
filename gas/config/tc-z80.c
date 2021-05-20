@@ -175,6 +175,11 @@ match_ext_table [] =
   {"xdcb",    INS_ROT_II_LD, 0, 0, "instructions like RL (IX+d),R (DD/FD CB dd oo)" }
 };
 
+
+static int signed_overflow (signed long value, unsigned bitsize);
+static int unsigned_overflow (unsigned long value, unsigned bitsize);
+static int is_overflow (long value, unsigned bitsize);
+
 static void
 setup_march (const char *name, int *ok, int *err, int *mode)
 {
@@ -1129,6 +1134,8 @@ emit_data_val (expressionS * val, int size)
   if (val->X_op == O_constant)
     {
       int i;
+      if (is_overflow (val->X_add_number, size*8))
+	as_warn ( _("%d-bit overflow (%+ld)"), size*8, val->X_add_number);
       for (i = 0; i < size; ++i)
 	p[i] = (char)(val->X_add_number >> (i*8));
       return;
@@ -3694,15 +3701,24 @@ md_assemble (char *str)
 }
 
 static int
+signed_overflow (signed long value, unsigned bitsize)
+{
+  signed long max = (signed long)(1UL << (bitsize-1));
+  return value < -max || value >= max;
+}
+
+static int
+unsigned_overflow (unsigned long value, unsigned bitsize)
+{
+  return (value >> bitsize) != 0;
+}
+
+static int
 is_overflow (long value, unsigned bitsize)
 {
-  long fieldmask = (2UL << (bitsize - 1)) - 1;
-  long signmask = ~fieldmask;
-  long a = value & fieldmask;
-  long ss = a & signmask;
-  if (ss != 0 && ss != (signmask & fieldmask))
-    return 1;
-  return 0;
+  if (value < 0)
+    return signed_overflow (value, bitsize);
+  return unsigned_overflow ((unsigned long)value, bitsize);
 }
 
 void
@@ -3743,7 +3759,7 @@ md_apply_fix (fixS * fixP, valueT* valP, segT seg)
     {
     case BFD_RELOC_8_PCREL:
     case BFD_RELOC_Z80_DISP8:
-      if (fixP->fx_done && (val < -0x80 || val > 0x7f))
+      if (fixP->fx_done && signed_overflow (val, 8))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("8-bit signed offset out of range (%+ld)"), val);
       *p_lit++ = val;

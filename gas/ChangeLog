@@ -1,3 +1,14 @@
+2021-05-20  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	* config/tc-z80.c (emit_data_val): Warn on constant overflow.
+	(signed_overflow): New function.
+	(unsigned_overflow): New function.
+	(is_overflow): Use new functions.
+	(md_apply_fix): Use signed_overflow.
+	* testsuite/gas/z80/ez80_adl_suf.d: Fix test.
+	* testsuite/gas/z80/ez80_isuf.s: Likewise.
+	* testsuite/gas/z80/ez80_z80_suf.d: Likewise.
+
 2021-05-20  Nicolas Boulenguez  <nicolas@debian.org>
 
 	PR 27888
