@@ -1,3 +1,9 @@
+2021-05-19  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
+	* gdb.arch/powerpc64-prologue.c: New test to exercise prologues
+	for the powerpc64 LE target.
+	* gdb.arch/powerpc-prologue.exp: Test Harness.
+
 2021-05-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.guile/scm-pretty-print.exp: Add test names to resolve
