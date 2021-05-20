@@ -1,3 +1,7 @@
+2021-05-20  Alexandra Hájková  <ahajkova@redhat.com>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2021-05-19  John Baldwin  <jhb@FreeBSD.org>
 
 	* dwarf2/read.c (tu_abbrev_offset::operator<): Mark const.
