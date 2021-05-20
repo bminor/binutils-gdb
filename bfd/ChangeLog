@@ -1,3 +1,11 @@
+2021-05-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* section.c (bfd_get_section_by_name): Return NULL if name is
+	NULL.
+	(bfd_get_section_by_name_if): Likewise.
+	* dwarf2.c (read_section): Remove unneeded NULL check.
+	(find_debug_info): Likewise.
+
 2021-05-19  Nick Clifton  <nickc@redhat.com>
 
 	* plugin.c (bfd_plugin_open_input): Inform the user if the limit

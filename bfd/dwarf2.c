@@ -545,8 +545,7 @@ read_section (bfd *	      abfd,
       if (msec == NULL)
 	{
 	  section_name = sec->compressed_name;
-	  if (section_name != NULL)
-	    msec = bfd_get_section_by_name (abfd, section_name);
+          msec = bfd_get_section_by_name (abfd, section_name);
 	}
       if (msec == NULL)
 	{
@@ -4226,12 +4225,9 @@ find_debug_info (bfd *abfd, const struct dwarf_debug_section *debug_sections,
 	return msec;
 
       look = debug_sections[debug_info].compressed_name;
-      if (look != NULL)
-	{
-	  msec = bfd_get_section_by_name (abfd, look);
-	  if (msec != NULL)
-	    return msec;
-	}
+      msec = bfd_get_section_by_name (abfd, look);
+      if (msec != NULL)
+        return msec;
 
       for (msec = abfd->sections; msec != NULL; msec = msec->next)
 	if (startswith (msec->name, GNU_LINKONCE_INFO))

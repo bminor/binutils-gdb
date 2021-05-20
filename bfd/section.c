@@ -898,6 +898,9 @@ bfd_get_section_by_name (bfd *abfd, const char *name)
 {
   struct section_hash_entry *sh;
 
+  if (name == NULL)
+    return NULL;
+
   sh = section_hash_lookup (&abfd->section_htab, name, false, false);
   if (sh != NULL)
     return &sh->section;
@@ -1005,6 +1008,9 @@ bfd_get_section_by_name_if (bfd *abfd, const char *name,
 {
   struct section_hash_entry *sh;
   unsigned long hash;
+
+  if (name == NULL)
+    return NULL;
 
   sh = section_hash_lookup (&abfd->section_htab, name, false, false);
   if (sh == NULL)
