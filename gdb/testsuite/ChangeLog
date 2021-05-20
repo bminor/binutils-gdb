@@ -1,5 +1,11 @@
 2021-06-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.gdb/unittest.c: New file.
+	* gdb.gdb/unittest.exp: Run with and without a binary file loaded
+	into GDB.
+
+2021-06-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/premature-dummy-frame-removal.c: New file.
 	* gdb.base/premature-dummy-frame-removal.exp: New file.
 	* gdb.base/premature-dummy-frame-removal.py: New file.
