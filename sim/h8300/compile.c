@@ -1100,6 +1100,35 @@ decode (SIM_DESC sd, int addr, unsigned char *data, decoded_inst *dst)
 		      /* End of Processing for system calls.  */
 		    }
 
+		  /* Use same register is specified for source
+		     and destination.
+		     The value of source will be the value after
+		     address calculation.  */
+		  if (OP_KIND (dst->opcode) != O_CMP &&
+		      OP_KIND (dst->src.type) == OP_REG &&
+		      (dst->src.reg & 7) == dst->dst.reg) {
+		    switch (OP_KIND (dst->dst.type))
+		      {
+		      case OP_POSTDEC:
+			dst->src.type = X (OP_REG_DEC,
+					   OP_SIZE (dst->dst.type));
+			break;
+		      case OP_POSTINC:
+			dst->src.type = X (OP_REG_INC,
+					   OP_SIZE (dst->dst.type));
+			break;
+		      case OP_PREINC:
+			if (OP_KIND (dst->opcode) == O_MOV)
+			  dst->src.type = X (OP_REG_INC,
+					     OP_SIZE (dst->dst.type));
+			break;
+		      case OP_PREDEC:
+			if (OP_KIND (dst->opcode) == O_MOV)
+			  dst->src.type = X (OP_REG_DEC,
+					     OP_SIZE (dst->dst.type));
+			break;
+		      }
+		  }
 		  dst->next_pc = addr + len / 2;
 		  return;
 		}
@@ -1368,6 +1397,25 @@ fetch_1 (SIM_DESC sd, ea_type *arg, int *val, int twice)
     case X (OP_PCREL, SL):
     case X (OP_PCREL, SN):
       *val = abs;
+      break;
+
+    case X (OP_REG_DEC, SB):	/* Register direct, affected decrement byte.  */
+      *val = GET_B_REG (rn) - 1;
+      break;
+    case X (OP_REG_DEC, SW):	/* Register direct, affected decrement word.  */
+      *val = GET_W_REG (rn) - 2;
+      break;
+    case X (OP_REG_DEC, SL):	/* Register direct, affected decrement long.  */
+      *val = GET_L_REG (rn) - 4;
+      break;
+    case X (OP_REG_INC, SB):	/* Register direct, affected increment byte.  */
+      *val = GET_B_REG (rn) + 1;
+      break;
+    case X (OP_REG_INC, SW):	/* Register direct, affected increment word.  */
+      *val = GET_W_REG (rn) + 2;
+      break;
+    case X (OP_REG_INC, SL):	/* Register direct, affected increment long.  */
+      *val = GET_L_REG (rn) + 4;
       break;
 
     case X (OP_MEM, SB):	/* Why isn't this implemented?  */
@@ -1981,7 +2029,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 
 	case O (O_AND, SB):		/* and.b */
 	  /* Fetch rd and ea.  */
-	  if (fetch (sd, &code->src, &ea) || fetch2 (sd, &code->dst, &rd)) 
+	  if (fetch2 (sd, &code->dst, &rd) || fetch (sd, &code->src, &ea))
 	    goto end;
 	  res = rd & ea;
 	  goto log8;
@@ -2002,7 +2050,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 
 	case O (O_OR, SB):		/* or.b */
 	  /* Fetch rd and ea.  */
-	  if (fetch (sd, &code->src, &ea) || fetch2 (sd, &code->dst, &rd)) 
+	  if (fetch2 (sd, &code->dst, &rd) || fetch (sd, &code->src, &ea))
 	    goto end;
 	  res = rd | ea;
 	  goto log8;

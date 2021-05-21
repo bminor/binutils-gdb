@@ -1,3 +1,10 @@
+2021-05-28  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* sim-main.h (h8_typecodes): Add operand type OP_REG_DEC, OP_REG_INC.
+	* compile.c (decode): Rewrite oprand type for specific case.
+	(fetch_1): Add handling OP_REG_DEC and OP_REG_INC.
+	(step_once): Fix operand fetch order.
+
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.

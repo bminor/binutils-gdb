@@ -82,7 +82,9 @@ enum h8_typecodes {
   /* FIXME: memory indirect?  */
   OP_INDEXB,		/* Byte index mode */
   OP_INDEXW,		/* Word index mode */
-  OP_INDEXL		/* Long index mode */
+  OP_INDEXL,		/* Long index mode */
+  OP_REG_DEC,		/* Register direct. affect address decrement. */
+  OP_REG_INC,		/* Register direct. affect address increment. */
 };
 
 #include "sim-basics.h"
