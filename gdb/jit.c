@@ -807,6 +807,10 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
 {
   for (objfile *the_objfile : pspace->objfiles ())
     {
+      /* Skip separate debug objects.  */
+      if (the_objfile->separate_debug_objfile_backlink != nullptr)
+	continue;
+
       if (the_objfile->skip_jit_symbol_lookup)
 	continue;
 
@@ -833,7 +837,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
 	}
 
       jiter_objfile_data *objf_data
-	= get_jiter_objfile_data (reg_symbol.objfile);
+	= get_jiter_objfile_data (the_objfile);
       objf_data->register_code = reg_symbol.minsym;
       objf_data->descriptor = desc_symbol.minsym;
 
