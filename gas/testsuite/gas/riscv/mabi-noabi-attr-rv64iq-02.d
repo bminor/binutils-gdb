@@ -1,6 +1,6 @@
 #as: -march-attr -march=rv32i
 #objdump: -d
-#source: mabi-attr-03.s
+#source: mabi-attr-rv64iq.s
 
 .*:[ 	]+file format elf64.*
 

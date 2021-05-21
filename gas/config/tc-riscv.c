@@ -441,6 +441,8 @@ riscv_set_abi_by_arch (void)
 	riscv_set_abi (xlen, FLOAT_ABI_QUAD, false);
       else if (riscv_subset_supports ("d"))
 	riscv_set_abi (xlen, FLOAT_ABI_DOUBLE, false);
+      else if (riscv_subset_supports ("e"))
+	riscv_set_abi (xlen, FLOAT_ABI_SOFT, true);
       else
 	riscv_set_abi (xlen, FLOAT_ABI_SOFT, false);
     }
@@ -451,6 +453,22 @@ riscv_set_abi_by_arch (void)
 	as_bad ("can't have %d-bit ABI on %d-bit ISA", abi_xlen, xlen);
       else if (abi_xlen < xlen)
 	as_bad ("%d-bit ABI not yet supported on %d-bit ISA", abi_xlen, xlen);
+
+      if (riscv_subset_supports ("e") && !rve_abi)
+	as_bad ("only the ilp32e ABI is supported for e extension");
+
+      if (float_abi == FLOAT_ABI_SINGLE
+	  && !riscv_subset_supports ("f"))
+	as_bad ("ilp32f/lp64f ABI can't be used when f extension "
+		"isn't supported");
+      else if (float_abi == FLOAT_ABI_DOUBLE
+	       && !riscv_subset_supports ("d"))
+	as_bad ("ilp32d/lp64d ABI can't be used when d extension "
+		"isn't supported");
+      else if (float_abi == FLOAT_ABI_QUAD
+	       && !riscv_subset_supports ("q"))
+	as_bad ("ilp32q/lp64q ABI can't be used when q extension "
+		"isn't supported");
     }
 
   /* Update the EF_RISCV_FLOAT_ABI field of elf_flags.  */

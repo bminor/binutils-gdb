@@ -1,3 +1,19 @@
+2021-05-24  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 25212
+	* config/tc-riscv.c (riscv_set_abi_by_arch): If -mabi isn't set, we
+	will choose ilp32e abi for rv32e.  Besides, report errors for the
+	invalid march and mabi combinations.
+	* testsuite/gas/riscv/mabi-attr-rv32e.s: New testcase.  Only accept
+	ilp32e abi for rve extension.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64f.d: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64f.l: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64d.d: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64d.l: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64d.q: Likewise.
+	* testsuite/gas/riscv/mabi-fail-rv32e-lp64d.q: Likewise.
+	Renamed all mabi testcases to their march-mabi settings.
+
 2021-05-22  Alan Modra  <amodra@gmail.com>
 
 	PR 25599

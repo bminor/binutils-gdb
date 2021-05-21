@@ -1,4 +1,4 @@
-#as: -march=rv64ifdq
+#as: -march=rv64iq
 #readelf: -h
 #source: empty.s
 

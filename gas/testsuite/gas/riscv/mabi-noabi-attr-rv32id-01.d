@@ -1,6 +1,6 @@
-#as: -march=rv32ifd
+#as: -march-attr -march=rv64i
 #readelf: -h
-#source: empty.s
+#source: mabi-attr-rv32id.s
 
 ELF Header:
 #...
