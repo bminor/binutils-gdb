@@ -18676,6 +18676,12 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("NT_ARM_HW_BREAK (AArch hardware breakpoint registers)");
       case NT_ARM_HW_WATCH:
 	return _("NT_ARM_HW_WATCH (AArch hardware watchpoint registers)");
+      case NT_ARM_SVE:
+	return _("NT_ARM_SVE (AArch SVE registers)");
+      case NT_ARM_PAC_MASK:
+	return _("NT_ARM_PAC_MASK (AArch pointer authentication code masks)");
+      case NT_ARM_TAGGED_ADDR_CTRL:
+	return _("NT_ARM_TAGGED_ADDR_CTRL (AArch tagged address control)");
       case NT_ARC_V2:
 	return _("NT_ARC_V2 (ARC HS accumulator/extra registers)");
       case NT_RISCV_CSR:
