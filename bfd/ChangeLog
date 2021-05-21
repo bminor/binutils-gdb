@@ -1,3 +1,31 @@
+2021-05-22  Alan Modra  <amodra@gmail.com>
+
+	* libbfd.c (_bfd_safe_read_leb128): Remove length_return parameter.
+	Replace data pointer with pointer to pointer.  Increment pointer
+	over bytes read.
+	* libbfd-in.h (_bfd_safe_read_leb128): Update prototype.
+	* elf-attrs.c (_bfd_elf_parse_attributes): Adjust to suit.  Be
+	careful not to increment data pointer past end.  Remove now
+	redundant pr17512 check.
+	* wasm-module.c (READ_LEB128): Adjust to suit changes to
+	_bfd_safe_read_leb128.
+	* dwarf2.c (read_n_bytes): New inline function, old one renamed to..
+	(read_blk): ..this.  Allocate and return block.  Increment bfd_byte**
+	arg.
+	(read_3_bytes): New function.
+	(read_1_byte, read_1_signed_byte, read_2_bytes, read_4_bytes),
+	(read_8_bytes, read_string, read_indirect_string),
+	(read_indirect_line_string, read_alt_indirect_string): Take a
+	byte_byte** arg which is incremented over bytes read.  Remove any
+	bytes_read return.  Rewrite limit checks to compare lengths
+	rather than pointers.
+	(read_abbrevs, read_attribute_value, read_formatted_entries),
+	(decode_line_info, find_abstract_instance, read_ranges),
+	(read_rnglists, scan_unit_for_symbols, parse_comp_unit),
+	(stash_comp_unit): Adjust to suit.  Rewrite limit checks to
+	compare lengths rather than pointers.
+	* libbfd.h: Regenerate.
+
 2021-05-21  Luis Machado  <luis.machado@linaro.org>
 
 	* elf.c (elfcore_make_memtag_note_section): New function.

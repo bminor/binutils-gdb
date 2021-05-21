@@ -471,7 +471,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
     {
       len = hdr->sh_size - 1;
 
-      while (len > 0 && p < p_end - 4)
+      while (len > 0 && p_end - p >= 4)
 	{
 	  unsigned namelen;
 	  bfd_vma section_len;
@@ -511,28 +511,28 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	  while (section_len > 0 && p < p_end)
 	    {
 	      unsigned int tag;
-	      unsigned int n;
 	      unsigned int val;
 	      bfd_vma subsection_len;
-	      bfd_byte *end;
+	      bfd_byte *end, *orig_p;
 
-	      tag = _bfd_safe_read_leb128 (abfd, p, &n, false, p_end);
-	      p += n;
-	      if (p < p_end - 4)
-		subsection_len = bfd_get_32 (abfd, p);
+	      orig_p = p;
+	      tag = _bfd_safe_read_leb128 (abfd, &p, false, p_end);
+	      if (p_end - p >= 4)
+		{
+		  subsection_len = bfd_get_32 (abfd, p);
+		  p += 4;
+		}
 	      else
-		subsection_len = 0;
-	      p += 4;
+		{
+		  subsection_len = 0;
+		  p = p_end;
+		}
 	      if (subsection_len == 0)
 		break;
 	      if (subsection_len > section_len)
 		subsection_len = section_len;
 	      section_len -= subsection_len;
-	      subsection_len -= n + 4;
-	      end = p + subsection_len;
-	      /* PR 17512: file: 0e8c0c90.  */
-	      if (end > p_end)
-		end = p_end;
+	      end = orig_p + subsection_len;
 	      switch (tag)
 		{
 		case Tag_File:
@@ -540,14 +540,12 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 		    {
 		      int type;
 
-		      tag = _bfd_safe_read_leb128 (abfd, p, &n, false, end);
-		      p += n;
+		      tag = _bfd_safe_read_leb128 (abfd, &p, false, end);
 		      type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
 		      switch (type & (ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL))
 			{
 			case ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL:
-			  val = _bfd_safe_read_leb128 (abfd, p, &n, false, end);
-			  p += n;
+			  val = _bfd_safe_read_leb128 (abfd, &p, false, end);
 			  bfd_elf_add_obj_attr_int_string (abfd, vendor, tag,
 							   val, (char *) p);
 			  p += strlen ((char *)p) + 1;
@@ -558,8 +556,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 			  p += strlen ((char *)p) + 1;
 			  break;
 			case ATTR_TYPE_FLAG_INT_VAL:
-			  val = _bfd_safe_read_leb128 (abfd, p, &n, false, end);
-			  p += n;
+			  val = _bfd_safe_read_leb128 (abfd, &p, false, end);
 			  bfd_elf_add_obj_attr_int (abfd, vendor, tag, val);
 			  break;
 			default:
@@ -572,8 +569,8 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 		  /* Don't have anywhere convenient to attach these.
 		     Fall through for now.  */
 		default:
-		  /* Ignore things we don't kow about.  */
-		  p += subsection_len;
+		  /* Ignore things we don't know about.  */
+		  p = end;
 		  subsection_len = 0;
 		  break;
 		}

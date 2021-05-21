@@ -182,12 +182,9 @@ wasm_write_uleb128 (bfd *abfd, bfd_vma v)
 #define READ_LEB128(x, p, end)						\
   do									\
     {									\
-      unsigned int length_read;						\
-      (x) = _bfd_safe_read_leb128 (abfd, (p), &length_read,		\
-				   false, (end));			\
-      (p) += length_read;						\
-      if (length_read == 0)						\
+      if ((p) >= (end))							\
 	goto error_return;						\
+      (x) = _bfd_safe_read_leb128 (abfd, &(p), false, (end));		\
     }									\
   while (0)
 
