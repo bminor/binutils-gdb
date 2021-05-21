@@ -13,6 +13,8 @@
 
 	.data
 	.align	4
+byte_dst_dec:
+	.byte	0
 byte_src:
 	.byte	0x77
 byte_dst:
@@ -695,6 +697,16 @@ mov_b_reg8_to_postinc:		; post-increment from register to mem
 	beq	.Lnext49
 	fail
 .Lnext49:
+	;; special case same register
+	mov.l	#byte_dst, er0
+	mov.b	r0l, r1l
+	inc.b	r1l
+	mov.b	r0l, @er0+
+	mov.b	@byte_dst, r0l
+	cmp.b	r0l, r1l
+	beq	.Lnext53
+	fail
+.Lnext53:
 	mov.b	#0, @byte_dst	; zero it again for the next use.
 
 mov_b_reg8_to_postdec:		; post-decrement from register to mem
@@ -727,6 +739,16 @@ mov_b_reg8_to_postdec:		; post-decrement from register to mem
 	beq	.Lnext50
 	fail
 .Lnext50:
+	;; special case same register
+	mov.l	#byte_dst, er0
+	mov.b	r0l, r1l
+	dec.b	r1l
+	mov.b	r0l, @er0-
+	mov.b	@byte_dst, r0l
+	cmp.b	r0l, r1l
+	beq	.Lnext54
+	fail
+.Lnext54:
 	mov.b	#0, @byte_dst	; zero it again for the next use.
 
 mov_b_reg8_to_preinc:		; pre-increment from register to mem
@@ -759,6 +781,16 @@ mov_b_reg8_to_preinc:		; pre-increment from register to mem
 	beq	.Lnext51
 	fail
 .Lnext51:
+	;; special case same register
+	mov.l	#byte_dst-1, er0
+	mov.b	r0l, r1l
+	inc.b	r1l
+	mov.b	r0l, @+er0
+	mov.b	@byte_dst, r0l
+	cmp.b	r0l, r1l
+	beq	.Lnext55
+	fail
+.Lnext55:
 	mov.b	#0, @byte_dst	; zero it again for the next use.
 .endif
 
@@ -796,6 +828,7 @@ mov_b_reg8_to_predec:		; pre-decrement from register to mem
 	;; CCR confirmation omitted
 	mov.l	#byte_dst+1, er1
 	mov.l	er1, er0
+	dec.b	r1l
 	mov.b	r0l, @-er0
 	mov.b	@byte_dst, r0l
 	cmp.b	r1l, r0l
@@ -1641,15 +1674,15 @@ mov_b_indirect_to_indirect:	; reg indirect, memory to memory
 
 	;; Now check the result of the move to memory.
 	cmp.b	@byte_src, @byte_dst
-	beq	.Lnext55
+	beq	.Lnext56
 	fail
-.Lnext55:
+.Lnext56:
 	;; Now clear the destination location, and verify that.
 	mov.b	#0, @byte_dst
 	cmp.b	@byte_src, @byte_dst
-	bne	.Lnext56
+	bne	.Lnext57
 	fail
-.Lnext56:			; OK, pass on.
+.Lnext57:			; OK, pass on.
 
 mov_b_postinc_to_postinc:	; reg post-increment, memory to memory
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -1691,6 +1724,20 @@ mov_b_postinc_to_postinc:	; reg post-increment, memory to memory
 	bne	.Lnext66
 	fail
 .Lnext66:			; OK, pass on.
+	;; special case same register
+	mov.l	#byte_src, er0
+	mov.b	@er0+, @er0+	; copying byte_src to byte_dst
+	test_h_gr32  byte_src+2 er0
+	cmp.b	@byte_src, @byte_dst
+	beq	.Lnext67
+	fail
+.Lnext67:
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst
+	cmp.b	@byte_src, @byte_dst
+	bne	.Lnext68
+	fail
+.Lnext68:
 
 mov_b_postdec_to_postdec:	; reg post-decrement, memory to memory
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -1732,6 +1779,20 @@ mov_b_postdec_to_postdec:	; reg post-decrement, memory to memory
 	bne	.Lnext76
 	fail
 .Lnext76:			; OK, pass on.
+	;; special case same register
+	mov.l	#byte_src, er0
+	mov.b	@er0-, @er0-	; copying byte_src to byte_dst_dec
+	test_h_gr32  byte_src-2 er0
+	cmp.b	@byte_src, @byte_dst_dec
+	beq	.Lnext77
+	fail
+.Lnext77:
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst_dec
+	cmp.b	@byte_src, @byte_dst_dec
+	bne	.Lnext78
+	fail
+.Lnext78:
 
 mov_b_preinc_to_preinc:		; reg pre-increment, memory to memory
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -1773,6 +1834,20 @@ mov_b_preinc_to_preinc:		; reg pre-increment, memory to memory
 	bne	.Lnext86
 	fail
 .Lnext86:				; OK, pass on.
+	;; special case same register
+	mov.l	#byte_src-1, er0
+	mov.b	@+er0, @+er0	; copying byte_src to byte_dst
+	test_h_gr32  byte_src+1 er0
+	cmp.b	@byte_src, @byte_dst
+	beq	.Lnext87
+	fail
+.Lnext87:
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst
+	cmp.b	@byte_src, @byte_dst
+	bne	.Lnext88
+	fail
+.Lnext88:
 
 mov_b_predec_to_predec:		; reg pre-decrement, memory to memory
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -1814,6 +1889,20 @@ mov_b_predec_to_predec:		; reg pre-decrement, memory to memory
 	bne	.Lnext96
 	fail
 .Lnext96:			; OK, pass on.
+	;; special case same register
+	mov.l	#byte_src+1, er0
+	mov.b	@-er0, @-er0	; copying byte_src to byte_dst_dec
+	test_h_gr32  byte_src-1 er0
+	cmp.b	@byte_src, @byte_dst_dec
+	beq	.Lnext97
+	fail
+.Lnext97:
+	;; Now clear the destination location, and verify that.
+	mov.b	#0, @byte_dst_dec
+	cmp.b	@byte_src, @byte_dst_dec
+	bne	.Lnext98
+	fail
+.Lnext98:
 
 mov_b_disp2_to_disp2:		; reg 2-bit disp, memory to memory
 	set_grs_a5a5		; Fill all general regs with a fixed pattern

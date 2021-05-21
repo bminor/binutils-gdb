@@ -155,8 +155,6 @@ xor_b_imm8_rdpostdec:
 	beq	.L3
 	fail
 .L3:
-
-
 .endif
 
 xor_b_reg8_reg8:
@@ -248,6 +246,19 @@ xor_b_reg8_rdpostinc:
 	beq	.L5
 	fail
 .L5:
+	;; special case same register
+	mov.l	#byte_dest, er0
+	mov.b	r0l, r1l
+	mov.b	@er0, r1h
+	xor.b	r0l, @er0+
+	inc.b	r1l
+	xor.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L25
+	fail
+.L25:
+	mov.b	r1h, @byte_dest
 
 xor_b_reg8_rdpostdec:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -282,6 +293,18 @@ xor_b_reg8_rdpostdec:
 	beq	.L6
 	fail
 .L6:
+	;; special case same register
+	mov.l	#byte_dest, er0
+	mov.b	r0l, r1l
+	mov.b	@er0, r1h
+	xor.b	r0l, @er0-
+	dec.b	r1l
+	xor.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L26
+	fail
+.L26:
 
 .endif				; h8sx
 

@@ -46,7 +46,7 @@ byte_dest:	.byte 0
 post_byte:	.byte 0
 
 	start
-	
+
 add_b_imm8_reg:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
 	;;  fixme set ccr
@@ -493,6 +493,20 @@ add_b_reg8_rdpostinc:
 	beq	.L12
 	fail
 .L12:
+	;; special case same register
+	mov.l	#byte_dest, er0
+	mov.b	@er0, r1h
+	mov.b	r0l, r1l
+	add.b	r0l, @er0+
+	inc.b	r1l
+	add.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L22
+	fail
+.L22:
+	;; restore previous value
+	mov.b	r1h, @byte_dest
 
 add_b_reg8_rdpostdec:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -527,6 +541,20 @@ add_b_reg8_rdpostdec:
 	beq	.L13
 	fail
 .L13:
+	;; special case same register
+	mov.l	#byte_dest, er0
+	mov.b	@er0, r1h
+	mov.b	r0l, r1l
+	add.b	r0l, @er0-
+	dec.b	r1l
+	add.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L23
+	fail
+.L23:
+	;; restore previous value
+	mov.b	r1h, @byte_dest
 
 add_b_reg8_rdpreinc:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -561,6 +589,20 @@ add_b_reg8_rdpreinc:
 	beq	.L14
 	fail
 .L14:
+	;; special case same register
+	mov.b	@byte_dest, r1h
+	mov.l	#pre_byte, er0
+	mov.b	r0l, r1l
+	add.b	r0l, @+er0
+	inc.b	r1l
+	add.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L24
+	fail
+.L24:
+	;; restore previous value
+	mov.b	r1h, @byte_dest
 
 add_b_reg8_rdpredec:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
@@ -595,6 +637,20 @@ add_b_reg8_rdpredec:
 	beq	.L15
 	fail
 .L15:
+	;; special case same register
+	mov.l	#post_byte, er0
+	mov.b	@byte_dest, r1h
+	mov.b	r0l, r1l
+	add.b	r0l, @-er0
+	dec.b	r1l
+	add.b	r1h, r1l
+	mov.b	@byte_dest, r0l
+	cmp.b	r1l, r0l
+	beq	.L25
+	fail
+.L25:
+	;; restore previous value
+	mov.b	r1h, @byte_dest
 
 add_b_reg8_disp16:
 	set_grs_a5a5		; Fill all general regs with a fixed pattern
