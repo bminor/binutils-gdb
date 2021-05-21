@@ -45,6 +45,7 @@
 # -i make an index (.gdb_index)
 # -n make a dwarf5 index (.debug_names)
 # -p create .dwp files (Fission), you need to also use gcc option -gsplit-dwarf
+# -l creates separate debuginfo files linked to using .gnu_debuglink
 # If nothing is given, no changes are made
 
 myname=cc-with-tweaks.sh
@@ -83,6 +84,7 @@ want_dwz=false
 want_multi=false
 want_dwp=false
 want_objcopy_compress=false
+want_gnu_debuglink=false
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -92,6 +94,7 @@ while [ $# -gt 0 ]; do
 	-n) want_index=true; index_options=-dwarf-5;;
 	-m) want_multi=true ;;
 	-p) want_dwp=true ;;
+	-l) want_gnu_debuglink=true ;;
 	*) break ;;
     esac
     shift
@@ -158,7 +161,12 @@ fi
 
 get_tmpdir ()
 {
-    tmpdir=$(dirname "$output_file")/.tmp
+    subdir="$1"
+    if [ "$subdir" = "" ]; then
+	subdir=.tmp
+    fi
+
+    tmpdir=$(dirname "$output_file")/"$subdir"
     mkdir -p "$tmpdir"
 }
 
@@ -232,6 +240,42 @@ if [ "$want_dwp" = true ]; then
 	[ $rc != 0 ] && exit $rc
 	rm -f ${dwo_files}
     fi
+fi
+
+if [ "$want_gnu_debuglink" = true ]; then
+    # Based on gdb_gnu_strip_debug.
+
+    # Gdb looks for the .gnu_debuglink file in the .debug subdirectory
+    # of the directory of the executable.
+    get_tmpdir .debug
+
+    stripped_file="$tmpdir"/$(basename "$output_file").stripped
+    debug_file="$tmpdir"/$(basename "$output_file").debug
+
+    # Create stripped and debug versions of output_file.
+    strip --strip-debug "${output_file}" \
+	  -o "${stripped_file}"
+    rc=$?
+    [ $rc != 0 ] && exit $rc
+    strip --only-keep-debug "${output_file}" \
+	  -o "${debug_file}"
+    rc=$?
+    [ $rc != 0 ] && exit $rc
+
+    # The .gnu_debuglink is supposed to contain no leading directories.
+    link=$(basename "${debug_file}")
+
+    (
+	# Temporarily cd to tmpdir to allow objcopy to find $link
+	cd "$tmpdir" || exit 1
+
+	# Overwrite output_file with stripped version containing
+	# .gnu_debuglink to debug_file.
+	objcopy --add-gnu-debuglink="$link" "${stripped_file}" \
+		"${output_file}"
+	rc=$?
+	[ $rc != 0 ] && exit $rc
+    )
 fi
 
 exit $rc
