@@ -1438,7 +1438,7 @@ being discussed.
 
 As the system wide and home directory initialization files are
 processed before most command line options, changes to settings
-(e.g. @samp{set complaints}) can affect subsequent processing of
+(e.g.@: @samp{set complaints}) can affect subsequent processing of
 command line options and operands.
 
 The following sections describe where @value{GDBN} looks for the early
@@ -9414,7 +9414,7 @@ first look up would not have occurred, but all of the remaining steps
 would be similar.
 
 When searching for source files on MS-DOS and MS-Windows, where
-absolute paths start with a drive letter (e.g.
+absolute paths start with a drive letter (e.g.@:
 @file{C:/project/foo.c}), @value{GDBN} will remove the drive letter
 from the file name before appending it to a search directory from
 @dfn{source path}; for instance if the executable references the
@@ -29656,7 +29656,7 @@ to keep using them until they are modified to use the latest MI version.
 
 Since @code{--interpreter=mi} always points to the latest MI version, it is
 recommended that front ends request a specific version of MI when launching
-@value{GDBN} (e.g. @code{--interpreter=mi2}) to make sure they get an
+@value{GDBN} (e.g.@: @code{--interpreter=mi2}) to make sure they get an
 interpreter with the MI version they expect.
 
 The following table gives a summary of the released versions of the MI
@@ -45987,7 +45987,7 @@ ARM targets.
 It should contain registers @samp{r0} through @samp{r13}, @samp{sp},
 @samp{lr}, @samp{pc}, and @samp{cpsr}.
 
-For M-profile targets (e.g. Cortex-M3), the @samp{org.gnu.gdb.arm.core}
+For M-profile targets (e.g.@: Cortex-M3), the @samp{org.gnu.gdb.arm.core}
 feature is replaced by @samp{org.gnu.gdb.arm.m-profile}.  It should contain
 registers @samp{r0} through @samp{r13}, @samp{sp}, @samp{lr}, @samp{pc},
 and @samp{xpsr}.
@@ -46935,7 +46935,7 @@ Backtrace: display the program stack.
 Display the value of an expression.
 
 @item c
-Continue running your program (after stopping, e.g. at a breakpoint).
+Continue running your program (after stopping, e.g.@: at a breakpoint).
 
 @item next
 Execute next program line (after stopping); step @emph{over} any

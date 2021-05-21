@@ -1,3 +1,11 @@
+2021-05-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texi (Initialization Files): Add '@:' after 'e.g.'.
+	(Source Path): Likewise.
+	(GDB/MI Development and Front Ends): Likewise.
+	(ARM Features): Likewise.
+	(gdb man): Likewise.
+
 2021-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* python.texi (Inferiors In Python): Mention the 'connection_num'
