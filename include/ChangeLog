@@ -1,3 +1,8 @@
+2021-05-21  Luis Machado  <luis.machado@linaro.org>
+
+	* elf/common.h (NT_MEMTAG): New constant.
+	(NT_MEMTAG_TYPE_AARCH_MTE): New constant.
+
 2021-05-07  Clément Chigot  <clement.chigot@atos.net>
 
 	* coff/internal.h (C_DWARF): New define.

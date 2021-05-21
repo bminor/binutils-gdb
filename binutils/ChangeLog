@@ -1,3 +1,7 @@
+2021-05-21  Luis Machado  <luis.machado@linaro.org>
+
+	* readelf.c (get_note_type): Handle NT_MEMTAG note types.
+
 2021-05-19  Eli Schwartz  <eschwartz@archlinux.org>
 
 	* dwarf.c (ENABLE_CHECKING): Define to 0 if not previously set.
