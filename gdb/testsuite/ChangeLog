@@ -1,3 +1,9 @@
+2021-05-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.dwarf2/dw2-inline-with-lexical-scope.c (func): Replace
+	a dead code with an assignment to a global var.  Fix a
+	whitespacing problem around an assignment operator.
+
 2021-05-19  Will Schmidt  <will_schmidt@vnet.ibm.com>
 
 	* gdb.arch/powerpc64-prologue.c: New test to exercise prologues

@@ -30,14 +30,14 @@ static void
 func ()
 { /* func prologue */
   global_num = 42;
-  int num= 42;
+  int num = 42;
   if (num > 2)
     {
       asm ("scope_label1: .globl scope_label1");
       global_value = num;
       int value = num;
       asm ("breakpoint_label: .globl breakpoint_label");
-      value += 10;
+      global_value += value;
       asm ("scope_label2: .globl scope_label2");
     }
 } /* func end */
