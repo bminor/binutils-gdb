@@ -23,6 +23,7 @@
 #include <queue>
 #include <unordered_map>
 #include "dwarf2/comp-unit-head.h"
+#include "dwarf2/cooked-index.h"
 #include "dwarf2/file-and-dir.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/section.h"
@@ -450,6 +451,9 @@ public:
 
   /* The mapped index, or NULL if .debug_names is missing or not being used.  */
   std::unique_ptr<mapped_debug_names> debug_names_table;
+
+  /* The cooked index, or NULL if not using one.  */
+  std::unique_ptr<cooked_index> cooked_index_table;
 
   /* When using index_table, this keeps track of all quick_file_names entries.
      TUs typically share line table entries with a CU, so we maintain a

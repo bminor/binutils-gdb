@@ -91,6 +91,7 @@
 #include <unordered_set>
 #include "dwarf2/abbrev-cache.h"
 #include "cooked-index.h"
+#include "split-name.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
@@ -5567,6 +5568,8 @@ get_gdb_index_contents_from_cache_dwz (objfile *obj, dwz_file *dwz)
   return global_index_cache.lookup_gdb_index (build_id, &dwz->index_cache_res);
 }
 
+static quick_symbol_functions_up make_cooked_index_funcs ();
+
 /* See dwarf2/public.h.  */
 
 void
@@ -5641,6 +5644,13 @@ dwarf2_initialize_objfile (struct objfile *objfile)
     {
       dwarf_read_debug_printf ("re-using shared partial symtabs");
       objfile->qf.push_front (make_lazy_dwarf_reader ());
+      return;
+    }
+
+  if (per_bfd->cooked_index_table != nullptr)
+    {
+      dwarf_read_debug_printf ("re-using cooked index table");
+      objfile->qf.push_front (make_cooked_index_funcs ());
       return;
     }
 
@@ -19879,6 +19889,273 @@ cooked_indexer::make_index (cutu_reader *reader)
 			    entry.name, parent, m_per_cu);
     }
 }
+
+/* An implementation of quick_symbol_functions for the cooked DWARF
+   index.  */
+
+struct cooked_index_functions : public dwarf2_base_index_functions
+{
+  struct compunit_symtab *find_pc_sect_compunit_symtab
+    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
+     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override;
+
+  struct compunit_symtab *find_compunit_symtab_by_address
+    (struct objfile *objfile, CORE_ADDR address) override;
+
+  void dump (struct objfile *objfile) override
+  {
+    gdb_printf ("Cooked index in use\n");
+  }
+
+  void expand_matching_symbols
+    (struct objfile *,
+     const lookup_name_info &lookup_name,
+     domain_enum domain,
+     int global,
+     symbol_compare_ftype *ordered_compare) override;
+
+  bool expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     block_search_flags search_flags,
+     domain_enum domain,
+     enum search_domain kind) override;
+
+  bool can_lazily_read_symbols () override
+  {
+    return true;
+  }
+
+  void read_partial_symbols (struct objfile *objfile) override
+  {
+    if (dwarf2_has_info (objfile, nullptr))
+      dwarf2_build_psymtabs (objfile);
+  }
+};
+
+struct compunit_symtab *
+cooked_index_functions::find_pc_sect_compunit_symtab
+     (struct objfile *objfile,
+      struct bound_minimal_symbol msymbol,
+      CORE_ADDR pc,
+      struct obj_section *section,
+      int warn_if_readin)
+{
+  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  if (per_objfile->per_bfd->cooked_index_table == nullptr)
+    return nullptr;
+
+  CORE_ADDR baseaddr = objfile->text_section_offset ();
+  dwarf2_per_cu_data *per_cu
+    = per_objfile->per_bfd->cooked_index_table->lookup (pc - baseaddr);
+  if (per_cu == nullptr)
+    return nullptr;
+
+  if (warn_if_readin && per_objfile->symtab_set_p (per_cu))
+    warning (_("(Internal error: pc %s in read in CU, but not in symtab.)"),
+	     paddress (objfile->arch (), pc));
+
+  compunit_symtab *result = (recursively_find_pc_sect_compunit_symtab
+			     (dw2_instantiate_symtab (per_cu, per_objfile,
+						      false),
+			      pc));
+  gdb_assert (result != nullptr);
+  return result;
+}
+
+struct compunit_symtab *
+cooked_index_functions::find_compunit_symtab_by_address
+     (struct objfile *objfile, CORE_ADDR address)
+{
+  if (objfile->sect_index_data == -1)
+    return nullptr;
+
+  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  if (per_objfile->per_bfd->cooked_index_table == nullptr)
+    return nullptr;
+
+  CORE_ADDR baseaddr = objfile->data_section_offset ();
+  dwarf2_per_cu_data *per_cu
+    = per_objfile->per_bfd->cooked_index_table->lookup (address - baseaddr);
+  if (per_cu == nullptr)
+    return nullptr;
+
+  return dw2_instantiate_symtab (per_cu, per_objfile, false);
+}
+
+void
+cooked_index_functions::expand_matching_symbols
+     (struct objfile *objfile,
+      const lookup_name_info &lookup_name,
+      domain_enum domain,
+      int global,
+      symbol_compare_ftype *ordered_compare)
+{
+  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  if (per_objfile->per_bfd->cooked_index_table == nullptr)
+    return;
+  const block_search_flags search_flags = (global
+					   ? SEARCH_GLOBAL_BLOCK
+					   : SEARCH_STATIC_BLOCK);
+  const language_defn *lang = language_def (language_ada);
+  symbol_name_matcher_ftype *name_match
+    = lang->get_symbol_name_matcher (lookup_name);
+
+  for (const cooked_index_entry *entry
+	 : per_objfile->per_bfd->cooked_index_table->all_entries ())
+    {
+      if (entry->parent_entry != nullptr)
+	continue;
+
+      if (!entry->matches (search_flags)
+	  || !entry->matches (domain))
+	continue;
+
+      if (name_match (entry->canonical, lookup_name, nullptr))
+	dw2_instantiate_symtab (entry->per_cu, per_objfile, false);
+    }
+}
+
+bool
+cooked_index_functions::expand_symtabs_matching
+     (struct objfile *objfile,
+      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+      const lookup_name_info *lookup_name,
+      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+      block_search_flags search_flags,
+      domain_enum domain,
+      enum search_domain kind)
+{
+  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  if (per_objfile->per_bfd->cooked_index_table == nullptr)
+    return true;
+
+  dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
+
+  /* This invariant is documented in quick-functions.h.  */
+  gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
+  if (lookup_name == nullptr)
+    {
+      for (dwarf2_per_cu_data *per_cu
+	     : all_comp_units_range (per_objfile->per_bfd))
+	{
+	  QUIT;
+
+	  if (!dw2_expand_symtabs_matching_one (per_cu, per_objfile,
+						file_matcher,
+						expansion_notify))
+	    return false;
+	}
+      return true;
+    }
+
+  lookup_name_info lookup_name_without_params
+    = lookup_name->make_ignore_params ();
+  bool completing = lookup_name->completion_mode ();
+
+  /* Unique styles of language splitting.  */
+  static const enum language unique_styles[] =
+  {
+    /* No splitting is also a style.  */
+    language_c,
+    /* This includes Rust.  */
+    language_cplus,
+    /* This includes Go.  */
+    language_d,
+    language_ada
+  };
+
+  for (enum language lang : unique_styles)
+    {
+      std::vector<gdb::string_view> name_vec
+	= lookup_name_without_params.split_name (lang);
+
+      for (const cooked_index_entry *entry
+	   : per_objfile->per_bfd->cooked_index_table->find (name_vec.back (),
+							     completing))
+	{
+	  /* No need to consider symbols from expanded CUs.  */
+	  if (per_objfile->symtab_set_p (entry->per_cu))
+	    continue;
+
+	  /* If file-matching was done, we don't need to consider
+	     symbols from unmarked CUs.  */
+	  if (file_matcher != nullptr && !entry->per_cu->v.quick->mark)
+	    continue;
+
+	  /* See if the symbol matches the type filter.  */
+	  if (!entry->matches (search_flags)
+	      || !entry->matches (domain)
+	      || !entry->matches (kind))
+	    continue;
+
+	  /* We've found the base name of the symbol; now walk its
+	     parentage chain, ensuring that each component
+	     matches.  */
+	  bool found = true;
+
+	  const cooked_index_entry *parent = entry->parent_entry;
+	  for (int i = name_vec.size () - 1; i > 0; --i)
+	    {
+	      /* If we ran out of entries, or if this segment doesn't
+		 match, this did not match.  */
+	      if (parent == nullptr
+		  || strncmp (parent->name, name_vec[i - 1].data (),
+			      name_vec[i - 1].length ()) != 0)
+		{
+		  found = false;
+		  break;
+		}
+
+	      parent = parent->parent_entry;
+	    }
+
+	  if (!found)
+	    continue;
+
+	  /* Might have been looking for "a::b" and found
+	     "x::a::b".  */
+	  if (symbol_matcher == nullptr)
+	    {
+	      symbol_name_match_type match_type
+		= lookup_name_without_params.match_type ();
+	      if ((match_type == symbol_name_match_type::FULL
+		   || (lang != language_ada
+		       && match_type == symbol_name_match_type::EXPRESSION))
+		  && parent != nullptr)
+		continue;
+	    }
+	  else
+	    {
+	      auto_obstack temp_storage;
+	      const char *full_name = entry->full_name (&temp_storage);
+	      if (!symbol_matcher (full_name))
+		continue;
+	    }
+
+	  if (!dw2_expand_symtabs_matching_one (entry->per_cu, per_objfile,
+						file_matcher,
+						expansion_notify))
+	    return false;
+	}
+    }
+
+  return true;
+}
+
+/* Return a new cooked_index_functions object.  */
+
+static quick_symbol_functions_up
+make_cooked_index_funcs ()
+{
+  return quick_symbol_functions_up (new cooked_index_functions);
+}
+
+
 
 /* Returns nonzero if TAG represents a type that we might generate a partial
    symbol for.  */
