@@ -106,7 +106,8 @@ struct dwarf2_per_cu_data
       m_header_read_in (false),
       addresses_seen (false),
       unit_type {},
-      lang (language_unknown)
+      lang (language_unknown),
+      scanned (false)
   {
   }
 
@@ -164,6 +165,10 @@ struct dwarf2_per_cu_data
 
   /* The language of this CU.  */
   ENUM_BITFIELD (language) lang : LANGUAGE_BITS;
+
+  /* True if this CU has been scanned by the indexer; false if
+     not.  */
+  bool scanned : 1;
 
   /* Our index in the unshared "symtabs" vector.  */
   unsigned index = 0;
