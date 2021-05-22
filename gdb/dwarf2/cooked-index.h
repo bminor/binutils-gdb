@@ -254,6 +254,17 @@ public:
   explicit cooked_index_vector (vec_type &&vec);
   DISABLE_COPY_AND_ASSIGN (cooked_index_vector);
 
+  ~cooked_index_vector ()
+  {
+    /* The 'finalize' method may be run in a different thread.  If
+       this object is destroyed before this completes, then the method
+       will end up writing to freed memory.  Waiting for this to
+       complete avoids this problem; and the cost seems ignorable
+       because creating and immediately destroying the debug info is a
+       relatively rare thing to do.  */
+    m_future.wait ();
+  }
+
   /* A simple range over part of m_entries.  */
   typedef iterator_range<std::vector<cooked_index_entry *>::iterator> range;
 
@@ -265,6 +276,7 @@ public:
   /* Return a range of all the entries.  */
   range all_entries ()
   {
+    m_future.wait ();
     return { m_entries.begin (), m_entries.end () };
   }
 
@@ -305,6 +317,11 @@ private:
 
   /* Storage for canonical names.  */
   std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
+
+  /* A future that tracks when the 'finalize' method is done.  Note
+     that the 'get' method is never called on this future, only
+     'wait'.  */
+  std::future<void> m_future;
 };
 
 #endif /* GDB_DWARF2_COOKED_INDEX_H */
