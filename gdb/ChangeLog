@@ -1,3 +1,8 @@
+2021-05-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* main.c (enum cmdarg_kind): Fix option type comments for
+	CMDARG_EARLYINIT_FILE and CMDARG_EARLYINIT_COMMAND.
+
 2021-05-21  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/25047

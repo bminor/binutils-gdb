@@ -574,14 +574,14 @@ enum cmdarg_kind
 
   /* Option type -ix.  */
   CMDARG_INIT_FILE,
-    
+
   /* Option type -iex.  */
   CMDARG_INIT_COMMAND,
 
-  /* Option type -sx.  */
+  /* Option type -eix.  */
   CMDARG_EARLYINIT_FILE,
 
-  /* Option type -sex.  */
+  /* Option type -eiex.  */
   CMDARG_EARLYINIT_COMMAND
 };
 
