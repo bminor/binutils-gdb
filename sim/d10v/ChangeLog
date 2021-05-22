@@ -1,3 +1,8 @@
+2021-05-22  John Baldwin  <jhb@FreeBSD.org>
+
+	* interp.c (sim_create_inferior): Use offsetof in static
+	assertion.
+
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.

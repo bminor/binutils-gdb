@@ -1146,8 +1146,8 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   bfd_vma start_address;
 
   /* Make sure we have the right structure for the following memset.  */
-  static_assert ((uintptr_t) &State == (uintptr_t) &State.regs,
-		 "&State != &State.regs");
+  static_assert (offsetof (struct _state, regs) == 0,
+		 "State.regs is not at offset 0");
 
   /* Reset state from the regs field until the mem field.  */
   memset (&State, 0, (uintptr_t) &State.mem - (uintptr_t) &State.regs);
