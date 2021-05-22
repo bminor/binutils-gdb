@@ -1,3 +1,11 @@
+2021-05-22  Alan Modra  <amodra@gmail.com>
+
+	PR 25599
+	* config/tc-ia64.c (emit_one_bundle): Expand comment for HP-UX
+	adjustment.  Add assertion.
+	* testsuite/gas/ia64/reloc-mlx.d: Pass when slot 2 specified
+	for PCREL60B.
+
 2021-05-20  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	* config/tc-z80.c (emit_data_val): Warn on constant overflow.

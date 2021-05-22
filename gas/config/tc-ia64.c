@@ -6892,9 +6892,15 @@ emit_one_bundle (void)
 	  ifix = md.slot[curr].fixup + j;
 	  where = frag_now_fix () - 16 + i;
 #ifdef TE_HPUX
-	  /* Fix offset for PCREL60B relocation on HP-UX.  */
+	  /* Relocations for instructions specify the slot in the
+	     bottom two bits of r_offset.  The IA64 HP-UX linker
+	     expects PCREL60B relocations to specify slot 2 of an
+	     instruction.  gas generates PCREL60B against slot 1.  */
 	  if (ifix->code == BFD_RELOC_IA64_PCREL60B)
-	    ++where;
+	    {
+	      know (i == 1);
+	      ++where;
+	    }
 #endif
 
 	  fix = fix_new_exp (frag_now, where, 8,
