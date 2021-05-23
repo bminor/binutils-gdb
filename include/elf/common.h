@@ -352,7 +352,7 @@
 #define EM_ARC_COMPACT3	255	/* Synopsys ARCv2.3 32-bit */
 #define EM_KVX		256	/* Kalray VLIW core of the MPPA processor family */
 #define EM_65816	257	/* WDC 65816/65C816 */
-#define EM_LOONGARCH	258	/* Loongson Loongarch */
+#define EM_LOONGARCH	258	/* LoongArch */
 #define EM_KF32		259	/* ChipON KungFu32 */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
