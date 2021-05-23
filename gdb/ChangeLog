@@ -1,3 +1,19 @@
+2021-05-23  Tom de Vries  <tdevries@suse.de>
+
+	PR tdep/27822
+	* target.h (struct target_ops): Mention target_thread_architecture in
+	read_description comment.
+	* x86-linux-nat.c (x86_linux_nat_target::read_description): Use
+	pid to determine if process is 64-bit or 32-bit.
+	* aarch64-linux-nat.c (aarch64_linux_nat_target::read_description):
+	Same.
+	* ppc-linux-nat.c (ppc_linux_nat_target::read_description): Same.
+        * riscv-linux-nat.c (riscv_linux_nat_target::read_description): Same.
+	* s390-linux-nat.c (s390_linux_nat_target::read_description): Same.
+	* arm-linux-nat.c (arm_linux_nat_target::read_description): Same.
+	Likewise, use pid to determine if kernel supports reading VFP
+	registers.
+
 2021-05-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* main.c (enum cmdarg_kind): Fix option type comments for

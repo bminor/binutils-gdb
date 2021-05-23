@@ -537,7 +537,7 @@ arm_linux_nat_target::read_description ()
     {
       elf_gregset_t gpregs;
       struct iovec iov;
-      int tid = inferior_ptid.lwp ();
+      int tid = inferior_ptid.pid ();
 
       iov.iov_base = &gpregs;
       iov.iov_len = sizeof (gpregs);
@@ -556,7 +556,7 @@ arm_linux_nat_target::read_description ()
     {
       /* Make sure that the kernel supports reading VFP registers.  Support was
 	 added in 2.6.30.  */
-      int pid = inferior_ptid.lwp ();
+      int pid = inferior_ptid.pid ();
       errno = 0;
       char *buf = (char *) alloca (ARM_VFP3_REGS_SIZE);
       if (ptrace (PTRACE_GETVFPREGS, pid, 0, buf) < 0 && errno == EIO)

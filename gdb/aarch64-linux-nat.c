@@ -723,7 +723,7 @@ aarch64_linux_nat_target::read_description ()
   gdb_byte regbuf[ARM_VFP3_REGS_SIZE];
   struct iovec iovec;
 
-  tid = inferior_ptid.lwp ();
+  tid = inferior_ptid.pid ();
 
   iovec.iov_base = regbuf;
   iovec.iov_len = ARM_VFP3_REGS_SIZE;

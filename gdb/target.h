@@ -838,10 +838,17 @@ struct target_ops
     virtual void flash_done ()
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
-    /* Describe the architecture-specific features of this target.  If
-       OPS doesn't have a description, this should delegate to the
-       "beneath" target.  Returns the description found, or NULL if no
-       description was available.  */
+    /* Describe the architecture-specific features of the current
+       inferior.
+
+       Returns the description found, or nullptr if no description was
+       available.
+
+       If some target features differ between threads, the description
+       returned by read_description (and the resulting gdbarch) won't
+       accurately describe all threads.  In this case, the
+       thread_architecture method can be used to obtain gdbarches that
+       accurately describe each thread.  */
     virtual const struct target_desc *read_description ()
 	 TARGET_DEFAULT_RETURN (NULL);
 

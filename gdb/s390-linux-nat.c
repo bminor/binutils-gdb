@@ -988,7 +988,7 @@ s390_linux_nat_target::auxv_parse (gdb_byte **readptr,
 const struct target_desc *
 s390_linux_nat_target::read_description ()
 {
-  int tid = s390_inferior_tid ();
+  int tid = inferior_ptid.pid ();
 
   have_regset_last_break
     = check_regset (tid, NT_S390_LAST_BREAK, 8);
