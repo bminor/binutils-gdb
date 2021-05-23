@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-main.h"
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 #include "sim-options.h"
 #include "dis-asm.h"
 #include "environ.h"
