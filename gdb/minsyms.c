@@ -1460,8 +1460,8 @@ minimal_symbol_reader::install ()
       std::vector<computed_hash_values> hash_values (mcount);
 
       msymbols = m_objfile->per_bfd->msymbols.get ();
-      gdb::parallel_for_each
-	(&msymbols[0], &msymbols[mcount],
+      /* Arbitrarily require at least 10 elements in a thread.  */
+      gdb::parallel_for_each (10, &msymbols[0], &msymbols[mcount],
 	 [&] (minimal_symbol *start, minimal_symbol *end)
 	 {
 	   for (minimal_symbol *msym = start; msym < end; ++msym)
