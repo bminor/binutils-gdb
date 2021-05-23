@@ -1,3 +1,7 @@
+2021-05-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_cec.c: Include strings.h.
+
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.

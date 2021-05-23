@@ -21,6 +21,8 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <strings.h>
+
 #include "sim-main.h"
 #include "devices.h"
 #include "dv-bfin_cec.h"
