@@ -1,5 +1,10 @@
 2021-05-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-bfin_otp.c (bfin_otp_write_page): Fix args to
+	bfin_otp_write_page_val2.
+
+2021-05-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-bfin_otp.c (bfin_otp_write_page): Call bfin_otp_write_page_val2.
 
 2021-05-23  Mike Frysinger  <vapier@gentoo.org>

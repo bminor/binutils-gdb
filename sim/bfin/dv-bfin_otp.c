@@ -91,7 +91,8 @@ bfin_otp_write_page_val2 (struct bfin_otp *otp, bu16 page, bu64 lo, bu64 hi)
 static void
 bfin_otp_write_page (struct bfin_otp *otp, bu16 page)
 {
-  bfin_otp_write_page_val2 (otp, page, otp->data0, otp->data1);
+  bfin_otp_write_page_val2 (otp, page, (bu64)otp->data1 | otp->data0,
+			    (bu64)otp->data3 | otp->data2);
 }
 
 static unsigned
