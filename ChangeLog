@@ -1,5 +1,9 @@
 2021-05-24  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* MAINTAINERS: Update path to readline config.{sub,guess} files.
+
+2021-05-24  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* config.guess: Import from upstream.
 	* config.sub: Likewise.
 
