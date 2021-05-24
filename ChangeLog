@@ -1,3 +1,8 @@
+2021-05-24  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* config.guess: Import from upstream.
+	* config.sub: Likewise.
+
 2021-05-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.def: Add configure-sim dependency on all-gnulib.
