@@ -1,5 +1,9 @@
 2021-05-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-if.c (sim_open): Delete "x" after PRI macros.
+
+2021-05-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-if.c: Include unistd.h.
 
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
