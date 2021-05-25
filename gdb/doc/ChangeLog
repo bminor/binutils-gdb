@@ -1,3 +1,7 @@
+2021-05-25  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python.texi (Symbols In Python): Fix gdb.SYMBOL_LOC_COMMON_BLOCK.
+
 2021-05-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texi (Initialization Files): Add '@:' after 'e.g.'.

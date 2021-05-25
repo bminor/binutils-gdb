@@ -5236,8 +5236,8 @@ The value does not actually exist in the program.
 @item gdb.SYMBOL_LOC_COMPUTED
 The value's address is a computed location.
 
-@vindex SYMBOL_LOC_COMPUTED
-@item gdb.SYMBOL_LOC_COMPUTED
+@vindex SYMBOL_LOC_COMMON_BLOCK
+@item gdb.SYMBOL_LOC_COMMON_BLOCK
 The value's address is a symbol.  This is only used for Fortran common
 blocks.
 @end vtable
