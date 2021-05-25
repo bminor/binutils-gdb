@@ -1,3 +1,14 @@
+2021-05-25  Tamar Christina  <tamar.christina@arm.com>
+
+	Backported from mainline.
+	2021-05-25  Tamar Christina  <tamar.christina@arm.com>
+
+	PR gas/25235
+	* config/tc-arm.c (md_convert_frag): Set LSB when Thumb symbol.
+	(relax_adr): Thumb symbols 4 bytes.
+	* testsuite/gas/arm/pr25235.d: New test.
+	* testsuite/gas/arm/pr25235.s: New test.
+
 2021-05-19  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-arm.c (do_mve_mov): Only reject vmov if we're moving
