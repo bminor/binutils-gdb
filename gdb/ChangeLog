@@ -1,3 +1,8 @@
+2021-06-03  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python/py-symbol.c (gdbpy_initialize_symbols): Restore
+	gdb.SYMBOL_LABEL_DOMAIN constant.
+
 2021-06-01  John Baldwin  <jhb@FreeBSD.org>
 
 	* infrun.c (handle_inferior_event): Only call
