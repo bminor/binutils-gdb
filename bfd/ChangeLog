@@ -1,3 +1,7 @@
+2021-05-25  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c: Fix formatting.
+
 2021-05-25  Alan Modra  <amodra@gmail.com>
 
 	* elf-attrs.c (elf_attr_strdup): New function.
