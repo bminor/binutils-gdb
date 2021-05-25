@@ -1,5 +1,19 @@
 2021-05-25  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-arn.c (struct elf_arm_obj_tdata): Add num_entries field.
+	(elf32_arm_num_entries): New macro.
+	(elf32_arm_allocate_local_sym_info): Initialise the new field.
+	Allocate arrays individually so that buffer overruns can be
+	detected by memory checkers.
+	(elf32_arm_create_local_iplt): Check num_entries.
+	(elf32_arm_get_plt_info): Likewise.
+	(elf32_arm_final_link_relocate): Likewise.
+	(elf32_arm_check_relocs): Likewise.
+	(elf32_arm_size_dynamic_sections): Likewise.
+	(elf32_arm_output_arch_local_syms): Likewise.
+
+2021-05-25  Nick Clifton  <nickc@redhat.com>
+
 	* elf32-arm.c: Fix formatting.
 
 2021-05-25  Alan Modra  <amodra@gmail.com>

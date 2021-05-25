@@ -3152,6 +3152,10 @@ struct elf_arm_obj_tdata
   /* Zero to warn when linking objects with incompatible wchar_t sizes.  */
   int no_wchar_size_warning;
 
+  /* The number of entries in each of the arrays in this strcuture.
+     Used to avoid buffer overruns.  */
+  bfd_size_type num_entries;
+
   /* tls_type for each local got entry.  */
   char *local_got_tls_type;
 
@@ -3167,6 +3171,9 @@ struct elf_arm_obj_tdata
 
 #define elf_arm_tdata(bfd) \
   ((struct elf_arm_obj_tdata *) (bfd)->tdata.any)
+
+#define elf32_arm_num_entries(bfd) \
+  (elf_arm_tdata (bfd)->num_entries)
 
 #define elf32_arm_local_got_tls_type(bfd) \
   (elf_arm_tdata (bfd)->local_got_tls_type)
@@ -3581,35 +3588,48 @@ elf32_arm_allocate_local_sym_info (bfd *abfd)
   if (elf_local_got_refcounts (abfd) == NULL)
     {
       bfd_size_type num_syms;
-      bfd_size_type size;
-      char *data;
+
+      elf32_arm_num_entries (abfd) = 0;
+
+      /* Whilst it might be tempting to allocate a single block of memory and
+	 then divide it up amoungst the arrays in the elf_arm_obj_tdata
+	 structure, this interferes with the work of memory checkers looking
+	 for buffer overruns.  So allocate each array individually.  */
 
       num_syms = elf_tdata (abfd)->symtab_hdr.sh_info;
-      size = num_syms * (sizeof (bfd_signed_vma)
-			 + sizeof (bfd_vma)
-			 + sizeof (struct arm_local_iplt_info *)
-			 + sizeof (struct fdpic_local)
-			 + sizeof (char));
-      data = bfd_zalloc (abfd, size);
-      if (data == NULL)
+
+      elf_local_got_refcounts (abfd) = bfd_zalloc
+	(abfd, num_syms * sizeof (* elf_local_got_refcounts (abfd)));
+
+      if (elf_local_got_refcounts (abfd) == NULL)
 	return false;
 
-      /* It is important that these all be allocated in descending
-	 order of required alignment, so that arrays allocated later
-	 will be sufficiently aligned.  */
-      elf_local_got_refcounts (abfd) = (bfd_signed_vma *) data;
-      data += num_syms * sizeof (bfd_signed_vma);
+      elf32_arm_local_tlsdesc_gotent (abfd) = bfd_zalloc
+	(abfd, num_syms * sizeof (* elf32_arm_local_tlsdesc_gotent (abfd)));
 
-      elf32_arm_local_tlsdesc_gotent (abfd) = (bfd_vma *) data;
-      data += num_syms * sizeof (bfd_vma);
+      if (elf32_arm_local_tlsdesc_gotent (abfd) == NULL)
+	return false;
 
-      elf32_arm_local_iplt (abfd) = (struct arm_local_iplt_info **) data;
-      data += num_syms * sizeof (struct arm_local_iplt_info *);
+      elf32_arm_local_iplt (abfd) = bfd_zalloc
+	(abfd, num_syms * sizeof (* elf32_arm_local_iplt (abfd)));
 
-      elf32_arm_local_fdpic_cnts (abfd) = (struct fdpic_local *) data;
-      data += num_syms * sizeof (struct fdpic_local);
+      if (elf32_arm_local_iplt (abfd) == NULL)
+	return false;
 
-      elf32_arm_local_got_tls_type (abfd) = data;
+      elf32_arm_local_fdpic_cnts (abfd) = bfd_zalloc
+	(abfd, num_syms * sizeof (* elf32_arm_local_fdpic_cnts (abfd)));
+
+      if (elf32_arm_local_fdpic_cnts (abfd) == NULL)
+	return false;
+
+      elf32_arm_local_got_tls_type (abfd) = bfd_zalloc
+	(abfd, num_syms * sizeof (* elf32_arm_local_got_tls_type (abfd)));
+
+      if (elf32_arm_local_got_tls_type (abfd) == NULL)
+	return false;
+
+      elf32_arm_num_entries (abfd) = num_syms;
+
 #if GCC_VERSION >= 3000
       BFD_ASSERT (__alignof__ (*elf32_arm_local_tlsdesc_gotent (abfd))
 		  <= __alignof__ (*elf_local_got_refcounts (abfd)));
@@ -3637,6 +3657,7 @@ elf32_arm_create_local_iplt (bfd *abfd, unsigned long r_symndx)
     return NULL;
 
   BFD_ASSERT (r_symndx < elf_tdata (abfd)->symtab_hdr.sh_info);
+  BFD_ASSERT (r_symndx < elf32_arm_num_entries (abfd));
   ptr = &elf32_arm_local_iplt (abfd)[r_symndx];
   if (*ptr == NULL)
     *ptr = bfd_zalloc (abfd, sizeof (**ptr));
@@ -3670,6 +3691,9 @@ elf32_arm_get_plt_info (bfd *abfd, struct elf32_arm_link_hash_table *globals,
     }
 
   if (elf32_arm_local_iplt (abfd) == NULL)
+    return false;
+
+  if (r_symndx >= elf32_arm_num_entries (abfd))
     return false;
 
   local_iplt = elf32_arm_local_iplt (abfd)[r_symndx];
@@ -11649,6 +11673,15 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    BFD_ASSERT (local_got_offsets != NULL);
 
+	    if (r_symndx >= elf32_arm_num_entries (input_bfd))
+	      {
+		_bfd_error_handler (_("\
+%pB: expected symbol index in range 0..%lu but found local symbol with index %lu"),
+				    input_bfd,
+				    (unsigned long) elf32_arm_num_entries (input_bfd),
+				    r_symndx);
+		return false;
+	      }
 	    off = local_got_offsets[r_symndx];
 	    offplt = local_tlsdesc_gotents[r_symndx];
 	    tls_type = elf32_arm_local_got_tls_type (input_bfd)[r_symndx];
@@ -12569,6 +12602,13 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	  {
 	    struct fdpic_local *local_fdpic_cnts = elf32_arm_local_fdpic_cnts (input_bfd);
 	    int dynindx = elf_section_data (sym_sec->output_section)->dynindx;
+
+	    if (r_symndx >= elf32_arm_num_entries (input_bfd))
+	      {
+		* error_message = _("local symbol index too big");
+		return bfd_reloc_dangerous;
+	      }
+
 	    int offset = local_fdpic_cnts[r_symndx].funcdesc_offset & ~1;
 	    bfd_vma addr = dynreloc_value - sym_sec->output_section->vma;
 	    bfd_vma seg = -1;
@@ -12721,6 +12761,13 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	    struct fdpic_local *local_fdpic_cnts = elf32_arm_local_fdpic_cnts (input_bfd);
 	    Elf_Internal_Rela outrel;
 	    int dynindx = elf_section_data (sym_sec->output_section)->dynindx;
+
+	    if (r_symndx >= elf32_arm_num_entries (input_bfd))
+	      {
+		* error_message = _("local symbol index too big");
+		return bfd_reloc_dangerous;
+	      }
+
 	    int offset = local_fdpic_cnts[r_symndx].funcdesc_offset & ~1;
 	    bfd_vma addr = dynreloc_value - sym_sec->output_section->vma;
 	    bfd_vma seg = -1;
@@ -15277,6 +15324,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      {
 		if (!elf32_arm_allocate_local_sym_info (abfd))
 		  return false;
+		if (r_symndx >= elf32_arm_num_entries (abfd))
+		  return false;
 		elf32_arm_local_fdpic_cnts (abfd) [r_symndx].gotofffuncdesc_cnt += 1;
 		elf32_arm_local_fdpic_cnts (abfd) [r_symndx].funcdesc_offset = -1;
 	      }
@@ -15308,6 +15357,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    if (h == NULL)
 	      {
 		if (!elf32_arm_allocate_local_sym_info (abfd))
+		  return false;
+		if (r_symndx >= elf32_arm_num_entries (abfd))
 		  return false;
 		elf32_arm_local_fdpic_cnts (abfd) [r_symndx].funcdesc_cnt += 1;
 		elf32_arm_local_fdpic_cnts (abfd) [r_symndx].funcdesc_offset = -1;
@@ -15363,6 +15414,13 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  /* This is a global offset table entry for a local symbol.  */
 		  if (!elf32_arm_allocate_local_sym_info (abfd))
 		    return false;
+		  if (r_symndx >= elf32_arm_num_entries (abfd))
+		    {
+		      _bfd_error_handler (_("%pB: bad symbol index: %d"), abfd,
+					  r_symndx);
+		      return false;
+		    }
+
 		  elf_local_got_refcounts (abfd)[r_symndx] += 1;
 		  old_tls_type = elf32_arm_local_got_tls_type (abfd) [r_symndx];
 		}
@@ -16703,6 +16761,9 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	   ++local_got, ++local_iplt_ptr, ++local_tls_type,
 	   ++local_tlsdesc_gotent, ++symndx, ++local_fdpic_cnts)
 	{
+	  if (symndx >= elf32_arm_num_entries (ibfd))
+	    return false;
+
 	  *local_tlsdesc_gotent = (bfd_vma) -1;
 	  local_iplt = *local_iplt_ptr;
 
@@ -18164,6 +18225,15 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 	  if (local_iplt != NULL)
 	    {
 	      num_syms = elf_symtab_hdr (input_bfd).sh_info;
+	      if (num_syms > elf32_arm_num_entries (input_bfd))
+		{
+		  _bfd_error_handler (_("\
+%pB: Number of symbols in input file has increased from %lu to %u\n"),
+				      input_bfd,
+				      (unsigned long) elf32_arm_num_entries (input_bfd),
+				      num_syms);
+		  return false;
+		}
 	      for (i = 0; i < num_syms; i++)
 		if (local_iplt[i] != NULL
 		    && !elf32_arm_output_plt_map_1 (&osi, true,
