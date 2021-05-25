@@ -303,40 +303,69 @@ bfd_elf_add_obj_attr_int (bfd *abfd, int vendor, unsigned int tag, unsigned int 
 }
 
 /* Duplicate an object attribute string value.  */
-char *
-_bfd_elf_attr_strdup (bfd *abfd, const char * s)
+static char *
+elf_attr_strdup (bfd *abfd, const char *s, const char *end)
 {
-  char * p;
-  int len;
+  char *p;
+  size_t len;
 
-  len = strlen (s) + 1;
-  p = (char *) bfd_alloc (abfd, len);
-  return (char *) memcpy (p, s, len);
+  if (end)
+    len = strnlen (s, end - s);
+  else
+    len = strlen (s);
+
+  p = (char *) bfd_alloc (abfd, len + 1);
+  if (p != NULL)
+    {
+      memcpy (p, s, len);
+      p[len] = 0;
+    }
+  return p;
+}
+
+char *
+_bfd_elf_attr_strdup (bfd *abfd, const char *s)
+{
+  return elf_attr_strdup (abfd, s, NULL);
 }
 
 /* Add a string object attribute.  */
-void
-bfd_elf_add_obj_attr_string (bfd *abfd, int vendor, unsigned int tag, const char *s)
+static void
+elf_add_obj_attr_string (bfd *abfd, int vendor, unsigned int tag,
+			 const char *s, const char *end)
 {
   obj_attribute *attr;
 
   attr = elf_new_obj_attr (abfd, vendor, tag);
   attr->type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
-  attr->s = _bfd_elf_attr_strdup (abfd, s);
+  attr->s = elf_attr_strdup (abfd, s, end);
+}
+
+void
+bfd_elf_add_obj_attr_string (bfd *abfd, int vendor, unsigned int tag,
+			     const char *s)
+{
+  elf_add_obj_attr_string (abfd, vendor, tag, s, NULL);
 }
 
 /* Add a int+string object attribute.  */
-void
-bfd_elf_add_obj_attr_int_string (bfd *abfd, int vendor,
-				 unsigned int tag,
-				 unsigned int i, const char *s)
+static void
+elf_add_obj_attr_int_string (bfd *abfd, int vendor, unsigned int tag,
+			     unsigned int i, const char *s, const char *end)
 {
   obj_attribute *attr;
 
   attr = elf_new_obj_attr (abfd, vendor, tag);
   attr->type = _bfd_elf_obj_attrs_arg_type (abfd, vendor, tag);
   attr->i = i;
-  attr->s = _bfd_elf_attr_strdup (abfd, s);
+  attr->s = elf_attr_strdup (abfd, s, end);
+}
+
+void
+bfd_elf_add_obj_attr_int_string (bfd *abfd, int vendor, unsigned int tag,
+				 unsigned int i, const char *s)
+{
+  elf_add_obj_attr_int_string (abfd, vendor, tag, i, s, NULL);
 }
 
 /* Copy the object attributes from IBFD to OBFD.  */
@@ -434,7 +463,6 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
   bfd_byte *contents;
   bfd_byte *p;
   bfd_byte *p_end;
-  bfd_vma len;
   const char *std_sec;
   ufile_ptr filesize;
 
@@ -452,7 +480,7 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
       return;
     }
 
-  contents = (bfd_byte *) bfd_malloc (hdr->sh_size + 1);
+  contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
   if (!contents)
     return;
   if (!bfd_get_section_contents (abfd, hdr->bfd_section, contents, 0,
@@ -461,20 +489,17 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
       free (contents);
       return;
     }
-  /* Ensure that the buffer is NUL terminated.  */
-  contents[hdr->sh_size] = 0;
   p = contents;
   p_end = p + hdr->sh_size;
   std_sec = get_elf_backend_data (abfd)->obj_attrs_vendor;
 
-  if (*(p++) == 'A')
+  if (*p++ == 'A')
     {
-      len = hdr->sh_size - 1;
-
-      while (len > 0 && p_end - p >= 4)
+      while (p_end - p >= 4)
 	{
-	  unsigned namelen;
-	  bfd_vma section_len;
+	  size_t len = p_end - p;
+	  size_t namelen;
+	  size_t section_len;
 	  int vendor;
 
 	  section_len = bfd_get_32 (abfd, p);
@@ -483,19 +508,17 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	    break;
 	  if (section_len > len)
 	    section_len = len;
-	  len -= section_len;
 	  if (section_len <= 4)
 	    {
 	      _bfd_error_handler
-		(_("%pB: error: attribute section length too small: %" PRId64),
-		 abfd, (int64_t) section_len);
+		(_("%pB: error: attribute section length too small: %ld"),
+		 abfd, (long) section_len);
 	      break;
 	    }
 	  section_len -= 4;
 	  namelen = strnlen ((char *) p, section_len) + 1;
-	  if (namelen == 0 || namelen >= section_len)
+	  if (namelen >= section_len)
 	    break;
-	  section_len -= namelen;
 	  if (std_sec && strcmp ((char *) p, std_sec) == 0)
 	    vendor = OBJ_ATTR_PROC;
 	  else if (strcmp ((char *) p, "gnu") == 0)
@@ -503,16 +526,17 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 	  else
 	    {
 	      /* Other vendor section.  Ignore it.  */
-	      p += namelen + section_len;
+	      p += section_len;
 	      continue;
 	    }
 
 	  p += namelen;
-	  while (section_len > 0 && p < p_end)
+	  section_len -= namelen;
+	  while (section_len > 0)
 	    {
 	      unsigned int tag;
 	      unsigned int val;
-	      bfd_vma subsection_len;
+	      size_t subsection_len;
 	      bfd_byte *end, *orig_p;
 
 	      orig_p = p;
@@ -546,14 +570,20 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 			{
 			case ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_STR_VAL:
 			  val = _bfd_safe_read_leb128 (abfd, &p, false, end);
-			  bfd_elf_add_obj_attr_int_string (abfd, vendor, tag,
-							   val, (char *) p);
-			  p += strlen ((char *)p) + 1;
+			  elf_add_obj_attr_int_string (abfd, vendor, tag, val,
+						       (char *) p,
+						       (char *) end);
+			  p += strnlen ((char *) p, end - p);
+			  if (p < end)
+			    p++;
 			  break;
 			case ATTR_TYPE_FLAG_STR_VAL:
-			  bfd_elf_add_obj_attr_string (abfd, vendor, tag,
-						       (char *) p);
-			  p += strlen ((char *)p) + 1;
+			  elf_add_obj_attr_string (abfd, vendor, tag,
+						   (char *) p,
+						   (char *) end);
+			  p += strnlen ((char *) p, end - p);
+			  if (p < end)
+			    p++;
 			  break;
 			case ATTR_TYPE_FLAG_INT_VAL:
 			  val = _bfd_safe_read_leb128 (abfd, &p, false, end);
@@ -571,7 +601,6 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 		default:
 		  /* Ignore things we don't know about.  */
 		  p = end;
-		  subsection_len = 0;
 		  break;
 		}
 	    }

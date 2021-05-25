@@ -1,3 +1,15 @@
+2021-05-25  Alan Modra  <amodra@gmail.com>
+
+	* elf-attrs.c (elf_attr_strdup): New function.
+	(_bfd_elf_attr_strdup): Use it here.
+	(elf_add_obj_attr_string): New function, extracted from..
+	(bfd_elf_add_obj_attr_string): ..here.
+	(elf_add_obj_attr_int_string): New function, extracted from..
+	(bfd_elf_add_obj_attr_int_string): ..here.
+	(_bfd_elf_parse_attributes): Don't allocate an extra byte for a
+	string terminator.  Instead ensure parsing doesn't go past
+	end of sub-section.  Use size_t variables for lengths.
+
 2021-05-22  Alan Modra  <amodra@gmail.com>
 
 	* libbfd.c (_bfd_safe_read_leb128): Remove length_return parameter.
