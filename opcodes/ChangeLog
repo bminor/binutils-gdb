@@ -1,3 +1,10 @@
+2021-05-25  Alan Modra  <amodra@gmail.com>
+
+	* cris-desc.c: Regenerate.
+	* cris-desc.h: Regenerate.
+	* cris-opc.h: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2021-05-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.am (HFILES): Add cris-desc.h & cris-opc.h.
