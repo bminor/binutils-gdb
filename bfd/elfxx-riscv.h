@@ -74,6 +74,7 @@ typedef struct
   void (*get_default_version) (const char *,
 			       int *,
 			       int *);
+  bool check_unknown_prefixed_ext;
 } riscv_parse_subset_t;
 
 extern bool

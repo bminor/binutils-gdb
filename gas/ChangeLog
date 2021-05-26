@@ -1,3 +1,8 @@
+2021-05-26  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (riscv_set_arch): Set
+	check_unknown_prefixed_ext to true for assembler.
+
 2021-05-25  Tamar Christina  <tamar.christina@arm.com>
 
 	PR gas/25235

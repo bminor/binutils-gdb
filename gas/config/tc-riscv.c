@@ -410,6 +410,7 @@ riscv_set_arch (const char *s)
   rps.error_handler = as_bad;
   rps.xlen = &xlen;
   rps.get_default_version = riscv_get_default_ext_version;
+  rps.check_unknown_prefixed_ext = true;
 
   if (s == NULL)
     return;

@@ -1,3 +1,11 @@
+2021-05-26  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfxx-riscv.h (check_unknown_prefixed_ext): New bool.
+	* elfxx-riscv.c (riscv_parse_prefixed_ext): Do not check the
+	prefixed extension name if check_unknown_prefixed_ext is false.
+	* elfnn-riscv.c (riscv_merge_arch_attr_info): Set
+	check_unknown_prefixed_ext to false for linker.
+
 2021-05-25  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arn.c (struct elf_arm_obj_tdata): Add num_entries field.

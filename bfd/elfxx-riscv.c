@@ -1681,7 +1681,8 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 	 and cannot simply be the prefixed name.  */
 
       /* Check that the extension name is well-formed.  */
-      if (!riscv_valid_prefixed_ext (subset))
+      if (rps->check_unknown_prefixed_ext
+	  && !riscv_valid_prefixed_ext (subset))
 	{
 	  rps->error_handler
 	    (_("-march=%s: unknown prefixed ISA extension `%s'"),

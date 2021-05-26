@@ -3558,11 +3558,13 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
   rpe_in.error_handler = _bfd_error_handler;
   rpe_in.xlen = &xlen_in;
   rpe_in.get_default_version = NULL;
+  rpe_in.check_unknown_prefixed_ext = false;
 
   rpe_out.subset_list = &out_subsets;
   rpe_out.error_handler = _bfd_error_handler;
   rpe_out.xlen = &xlen_out;
   rpe_out.get_default_version = NULL;
+  rpe_out.check_unknown_prefixed_ext = false;
 
   if (in_arch == NULL && out_arch == NULL)
     return NULL;
