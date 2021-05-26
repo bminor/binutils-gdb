@@ -5214,6 +5214,10 @@ Value is a local variable.
 Value not used.  Symbols in the domain @code{SYMBOL_STRUCT_DOMAIN} all
 have this class.
 
+@vindex SYMBOL_LOC_LABEL
+@item gdb.SYMBOL_LOC_LABEL
+Value is a label.
+
 @vindex SYMBOL_LOC_BLOCK
 @item gdb.SYMBOL_LOC_BLOCK
 Value is a block.
