@@ -2121,8 +2121,13 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
   /* Only try to do the unwind once.  */
   if (this_frame->prev_p)
     {
-      frame_debug_printf ("  -> %s // cached",
-			  this_frame->prev->to_string ().c_str ());
+      if (this_frame->prev != nullptr)
+	frame_debug_printf ("  -> %s // cached",
+			    this_frame->prev->to_string ().c_str ());
+      else
+	frame_debug_printf
+	  ("  -> nullptr // %s // cached",
+	   frame_stop_reason_symbol_string (this_frame->stop_reason));
       return this_frame->prev;
     }
 
@@ -2513,22 +2518,6 @@ get_prev_frame (struct frame_info *this_frame)
     }
 
   return get_prev_frame_always (this_frame);
-}
-
-struct frame_id
-get_prev_frame_id_by_id (struct frame_id id)
-{
-  struct frame_id prev_id;
-  struct frame_info *frame;
-
-  frame = frame_find_by_id (id);
-
-  if (frame != NULL)
-    prev_id = get_frame_id (get_prev_frame (frame));
-  else
-    prev_id = null_frame_id;
-
-  return prev_id;
 }
 
 CORE_ADDR

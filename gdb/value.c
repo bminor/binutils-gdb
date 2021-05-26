@@ -3950,9 +3950,8 @@ value_fetch_lazy_register (struct value *val)
     {
       struct gdbarch *gdbarch;
       struct frame_info *frame;
-      /* VALUE_FRAME_ID is used here, instead of VALUE_NEXT_FRAME_ID,
-	 so that the frame level will be shown correctly.  */
-      frame = frame_find_by_id (VALUE_FRAME_ID (val));
+      frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (val));
+      frame = get_prev_frame_always (frame);
       regnum = VALUE_REGNUM (val);
       gdbarch = get_frame_arch (frame);
 

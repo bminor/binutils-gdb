@@ -51,3 +51,22 @@ set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 gdb_test_no_output "source ${pyfile}" "load python file"
 
 gdb_test "p some_func ()" " = 0"
+
+# When frame debugging is turned on, this test has (previously)
+# revealed some crashes due to the Python frame unwinder trying to
+# read registers.
+#
+# Enable frame debug and rerun the test.  We don't bother checking the
+# output of calling 'p some_func ()' as the output will be full of
+# debug, to format of which isn't fixed.  All we care about is that
+# GDB is still running afterwards.
+#
+# All of the debug output makes this really slow when testing with the
+# special read1 version of expect, hence the timeout factor.
+with_read1_timeout_factor 10 {
+    gdb_test_no_output "set debug frame on"
+    gdb_test "p some_func ()" ".*" \
+	"repeat p some_func () with frame debug on"
+    gdb_test_no_output "set debug frame off"
+}
+gdb_test "p 1 + 2 + 3" " = 6"

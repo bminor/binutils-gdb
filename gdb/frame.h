@@ -394,10 +394,6 @@ extern struct frame_info *get_prev_frame_always (struct frame_info *);
    is not found.  */
 extern struct frame_info *frame_find_by_id (struct frame_id id);
 
-/* Given a frame's ID, find the previous frame's ID.  Returns null_frame_id
-   if the frame is not found.  */
-extern struct frame_id get_prev_frame_id_by_id (struct frame_id id);
-
 /* Base attributes of a frame: */
 
 /* The frame's `resume' address.  Where the program will resume in

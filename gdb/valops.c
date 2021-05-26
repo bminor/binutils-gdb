@@ -1197,14 +1197,15 @@ value_assign (struct value *toval, struct value *fromval)
 	struct gdbarch *gdbarch;
 	int value_reg;
 
-	/* Figure out which frame this is in currently.
-	
-	   We use VALUE_FRAME_ID for obtaining the value's frame id instead of
-	   VALUE_NEXT_FRAME_ID due to requiring a frame which may be passed to
-	   put_frame_register_bytes() below.  That function will (eventually)
-	   perform the necessary unwind operation by first obtaining the next
-	   frame.  */
-	frame = frame_find_by_id (VALUE_FRAME_ID (toval));
+	/* Figure out which frame this register value is in.  The value
+	   holds the frame_id for the next frame, that is the frame this
+	   register value was unwound from.
+
+	   Below we will call put_frame_register_bytes which requires that
+	   we pass it the actual frame in which the register value is
+	   valid, i.e. not the next frame.  */
+	frame = frame_find_by_id (VALUE_NEXT_FRAME_ID (toval));
+	frame = get_prev_frame_always (frame);
 
 	value_reg = VALUE_REGNUM (toval);
 
