@@ -2367,7 +2367,7 @@ class InlinedFrameDecorator(FrameDecorator):
         super(InlinedFrameDecorator, self).__init__(fobj)
 
     def function(self):
-        frame = fobj.inferior_frame()
+        frame = self.inferior_frame()
         name = str(frame.name())
 
         if frame.type() == gdb.INLINE_FRAME:

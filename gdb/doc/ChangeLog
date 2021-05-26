@@ -1,3 +1,7 @@
+2021-05-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python.texi (Writing a Frame Filter): Fix example.
+
 2021-05-27  Hannes Domani  <ssbssa@yahoo.de>
 
 	* python.texi (TUI Windows In Python): Document "full_window"
