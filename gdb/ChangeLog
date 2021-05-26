@@ -1,3 +1,14 @@
+2021-05-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (allocate_type_unit_groups_table)
+	(handle_DW_AT_stmt_list, allocate_dwo_file_hash_table): Use
+	htab_delete_entry.
+	(free_line_header_voidp): Remove.
+	* completer.c
+	(completion_tracker::completion_hash_entry::deleter): Remove.
+	(completion_tracker::discard_completions): Use htab_delete_entry.
+	* utils.h (htab_delete_entry): New template function.
+
 2021-05-24  Hannes Domani  <ssbssa@yahoo.de>
 
 	* python/py-tui.c (tui_py_window::refresh_window):

@@ -88,14 +88,6 @@ public:
     return htab_hash_string (m_name.get ());
   }
 
-  /* A static function that can be passed to the htab hash system to be
-     used as a callback that deletes an item from the hash.  */
-  static void deleter (void *arg)
-  {
-    completion_hash_entry *entry = (completion_hash_entry *) arg;
-    delete entry;
-  }
-
 private:
 
   /* The symbol name stored in this hash entry.  */
@@ -1618,10 +1610,11 @@ completion_tracker::discard_completions ()
 	return entry->hash_name ();
       };
 
-  m_entries_hash.reset (htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-					   entry_hash_func, entry_eq_func,
-					   completion_hash_entry::deleter,
-					   xcalloc, xfree));
+  m_entries_hash.reset
+    (htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
+			entry_hash_func, entry_eq_func,
+			htab_delete_entry<completion_hash_entry>,
+			xcalloc, xfree));
 }
 
 /* See completer.h.  */
