@@ -1,3 +1,8 @@
+2021-05-27  Alan Modra  <amodra@gmail.com>
+
+	* readelf (usage): Order -w letters to match --debug-dump= and
+	move common '=' for --debug-dump out of brackets.
+
 2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27905
