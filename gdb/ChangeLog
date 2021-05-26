@@ -1,5 +1,10 @@
 2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/py-inferior.c (infpy_get_connection_num): Call
+	gdb_py_object_from_longest instead of PyLong_FromLong directly.
+
+2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python/py-unwind.c (unwind_infopy_add_saved_register): Handle
 	saving user registers.
 

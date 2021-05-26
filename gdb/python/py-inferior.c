@@ -441,7 +441,7 @@ infpy_get_connection_num (PyObject *self, void *closure)
   if (target == nullptr)
     Py_RETURN_NONE;
 
-  return PyLong_FromLong (target->connection_number);
+  return gdb_py_object_from_longest (target->connection_number).release ();
 }
 
 static PyObject *
