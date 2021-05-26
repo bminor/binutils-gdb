@@ -1,3 +1,9 @@
+2021-05-26  Sebastien Villemot  <sebastien@debian.org>
+
+	PR gas/27906
+	* doc/c-i386.texi: Replace movsb with movsxb as an alias for
+	movsbq.
+
 2021-05-26  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (riscv_set_arch): Set

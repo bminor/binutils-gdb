@@ -952,7 +952,7 @@ The Intel-syntax extension instructions
 
 @noindent
 are called @samp{movsbw/movsxb/movsx}, @samp{movsbl/movsxb/movsx},
-@samp{movsbq/movsb/movsx}, @samp{movswl/movsxw}, @samp{movswq/movsxw},
+@samp{movsbq/movsxb/movsx}, @samp{movswl/movsxw}, @samp{movswq/movsxw},
 @samp{movslq/movsxl}, @samp{movzbw/movzxb/movzx},
 @samp{movzbl/movzxb/movzx}, @samp{movzbq/movzxb/movzx},
 @samp{movzwl/movzxw} and @samp{movzwq/movzxw} in AT&T syntax.
