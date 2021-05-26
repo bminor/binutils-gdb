@@ -1,3 +1,24 @@
+2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* elf32-i386.c: Include "libiberty.h".
+	(elf_howto_table): Add 16-bit R_386_PC16 entry.
+	(elf_i386_rtype_to_howto): Add a BFD argument.  Use 16-bit
+	R_386_PC16 if input has 16-bit mode instructions.
+	(elf_i386_info_to_howto_rel): Update elf_i386_rtype_to_howto
+	call.
+	(elf_i386_tls_transition): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Add 16-bit
+	R_X86_64_PC16 entry.
+	(elf_x86_64_rtype_to_howto): Use 16-bit R_X86_64_PC16 if input
+	has 16-bit mode instructions.
+	* elfxx-x86.c (_bfd_x86_elf_parse_gnu_properties): Set
+	elf_x86_has_code16 if relocatable input is marked with
+	GNU_PROPERTY_X86_FEATURE_2_CODE16.
+	* elfxx-x86.h (elf_x86_obj_tdata): Add has_code16.
+	(elf_x86_has_code16): New.
+
 2021-05-26  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfxx-riscv.h (check_unknown_prefixed_ext): New bool.

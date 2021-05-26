@@ -1,5 +1,15 @@
 2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/27905
+	* testsuite/ld-i386/code16.d: New file.
+	* testsuite/ld-i386/code16.t: Likewise.
+	* testsuite/ld-x86-64/code16.d: Likewise.
+	* testsuite/ld-x86-64/code16.t: Likewise.
+	* testsuite/ld-i386/i386.exp: Run code16.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
+2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/ilp32-12.d: New file.
 	* testsuite/ld-x86-64/ilp32-12.s: Likewise.
 	* testsuite/ld-x86-64/x86-64.exp: Run ilp32-12.

@@ -1,3 +1,8 @@
+2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_2_CODE16): New.
+
 2021-05-23  Tiezhu Yang  <yangtiezhu@loongson.cn>
 
 	* elf/common.h (EM_LOONGARCH): Change Loongson Loongarch to

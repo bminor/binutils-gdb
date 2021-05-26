@@ -734,6 +734,7 @@ if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
     run_dump_test "property-ldmxcsr"
     run_dump_test "property-vldmxcsr"
     run_dump_test "property-vzeroall"
+    run_dump_test "code16-2"
 
     if {![istarget "*-*-dragonfly*"]
 	&& ![istarget "*-*-gnu*"]
@@ -1298,6 +1299,7 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-property-8"
 	run_dump_test "x86-64-property-9"
 	run_dump_test "x86-64-property-14"
+	run_dump_test "x86-64-code16-2"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "x86-64-align-branch-3"

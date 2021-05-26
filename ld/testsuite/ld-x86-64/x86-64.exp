@@ -474,6 +474,7 @@ run_dump_test "property-x86-isa3"
 run_dump_test "property-x86-isa3-x32"
 run_dump_test "property-x86-isa4"
 run_dump_test "property-x86-isa4-x32"
+run_dump_test "code16"
 
 if ![istarget "x86_64-*-linux*"] {
     return
