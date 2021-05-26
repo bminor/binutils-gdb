@@ -2605,6 +2605,11 @@ for this @code{gdb.PendingFrame}.  This represents the architecture of
 the particular frame being unwound.
 @end defun
 
+@defun PendingFrame.level ()
+Return an integer, the stack frame level for this frame.
+@xref{Frames, ,Stack Frames}.
+@end defun
+
 @subheading Unwinder Output: UnwindInfo
 
 Use @code{PendingFrame.create_unwind_info} method described above to
@@ -4811,6 +4816,10 @@ argument must be a string or a @code{gdb.Symbol} object; @var{block} must be a
 @defun Frame.select ()
 Set this frame to be the selected frame.  @xref{Stack, ,Examining the
 Stack}.
+@end defun
+
+@defun Frame.level ()
+Return an integer, the stack frame level for this frame.  @xref{Frames, ,Stack Frames}.
 @end defun
 
 @node Blocks In Python

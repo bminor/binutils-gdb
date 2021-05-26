@@ -1,5 +1,12 @@
 2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-frame.exp: Add Frame.level tests.
+	* gdb.python/py-pending-frame-level.c: New file.
+	* gdb.python/py-pending-frame-level.exp: New file.
+	* gdb.python/py-pending-frame-level.py: New file.
+
+2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-unwind-user-regs.c: New file.
 	* gdb.python/py-unwind-user-regs.exp: New file.
 	* gdb.python/py-unwind-user-regs.py: New file.

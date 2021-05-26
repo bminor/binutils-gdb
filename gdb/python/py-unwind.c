@@ -463,6 +463,23 @@ pending_framepy_architecture (PyObject *self, PyObject *args)
   return gdbarch_to_arch_object (pending_frame->gdbarch);
 }
 
+/* Implementation of PendingFrame.level (self) -> Integer.  */
+
+static PyObject *
+pending_framepy_level (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  if (pending_frame->frame_info == NULL)
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       "Attempting to read stack level from stale PendingFrame");
+      return NULL;
+    }
+  int level = frame_relative_level (pending_frame->frame_info);
+  return gdb_py_object_from_longest (level).release ();
+}
+
 /* frame_unwind.this_id method.  */
 
 static void
@@ -704,6 +721,8 @@ static PyMethodDef pending_frame_object_methods[] =
     pending_framepy_architecture, METH_NOARGS,
     "architecture () -> gdb.Architecture\n"
     "The architecture for this PendingFrame." },
+  { "level", pending_framepy_level, METH_NOARGS,
+    "The stack level of this frame." },
   {NULL}  /* Sentinel */
 };
 

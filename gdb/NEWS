@@ -220,6 +220,12 @@ QMemTags
      gives the connection number as seen in 'info connections' and
      'info inferiors'.
 
+  ** New method gdb.Frame.level() which returns the stack level of the
+     frame object.
+
+  ** New method gdb.PendingFrame.level() which returns the stack level
+     of the frame object.
+
 *** Changes in GDB 10
 
 * There are new feature names for ARC targets: "org.gnu.gdb.arc.core"

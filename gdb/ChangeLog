@@ -1,5 +1,13 @@
 2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention the two new methods.
+	* python/py-frame.c (frapy_level): New function.
+	(frame_object_methods): Register 'level' method.
+	* python/py-unwind.c (pending_framepy_level): New function.
+	(pending_frame_object_methods): Register 'level' method.
+
+2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python/py-inferior.c (infpy_get_connection_num): Call
 	gdb_py_object_from_longest instead of PyLong_FromLong directly.
 

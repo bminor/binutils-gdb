@@ -70,6 +70,17 @@ gdb_test "up" ".*" ""
 
 gdb_py_test_silent_cmd "python f1 = gdb.selected_frame ()" "get second frame" 0
 gdb_py_test_silent_cmd "python f0 = f1.newer ()" "get first frame" 0
+gdb_py_test_silent_cmd "python f2 = f1.older ()" "get last frame" 0
+
+# Check the Frame.level method.
+gdb_test "python print ('bframe.level = %d' % bframe.level ())" \
+    "bframe\\.level = 0"
+gdb_test "python print ('f0.level = %d' % f0.level ())" \
+    "f0\\.level = 0"
+gdb_test "python print ('f1.level = %d' % f1.level ())" \
+    "f1\\.level = 1"
+gdb_test "python print ('f2.level = %d' % f2.level ())" \
+    "f2\\.level = 2"
 
 gdb_test "python print (f1 == gdb.newest_frame())" False \
     "selected frame -vs- newest frame"
