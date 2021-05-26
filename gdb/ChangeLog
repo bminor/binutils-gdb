@@ -1,3 +1,8 @@
+2021-05-26  Simon Marchi  <simon.marchi@efficios.com>
+
+	* regcache.c (reg_buffer::reg_buffer): Default-initialize
+	m_registers array.
+
 2021-05-26  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (allocate_type_unit_groups_table)

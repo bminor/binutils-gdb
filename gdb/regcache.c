@@ -184,15 +184,18 @@ reg_buffer::reg_buffer (gdbarch *gdbarch, bool has_pseudo)
   gdb_assert (gdbarch != NULL);
   m_descr = regcache_descr (gdbarch);
 
+  /* We don't zero-initialize the M_REGISTERS array, as the bytes it contains
+     aren't meaningful as long as the corresponding register status is not
+     REG_VALID.  */
   if (has_pseudo)
     {
-      m_registers.reset (new gdb_byte[m_descr->sizeof_cooked_registers] ());
+      m_registers.reset (new gdb_byte[m_descr->sizeof_cooked_registers]);
       m_register_status.reset
 	(new register_status[m_descr->nr_cooked_registers] ());
     }
   else
     {
-      m_registers.reset (new gdb_byte[m_descr->sizeof_raw_registers] ());
+      m_registers.reset (new gdb_byte[m_descr->sizeof_raw_registers]);
       m_register_status.reset
 	(new register_status[gdbarch_num_regs (gdbarch)] ());
     }
