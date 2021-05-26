@@ -27,6 +27,7 @@
 #include "python-internal.h"
 #include "regcache.h"
 #include "valprint.h"
+#include "user-regs.h"
 
 /* Debugging of Python unwinders.  */
 
@@ -265,6 +266,26 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
       PyErr_SetString (PyExc_ValueError, "Bad register");
       return NULL;
     }
+
+  /* If REGNUM identifies a user register then *maybe* we can convert this
+     to a real (i.e. non-user) register.  The maybe qualifier is because we
+     don't know what user registers each target might add, however, the
+     following logic should work for the usual style of user registers,
+     where the read function just forwards the register read on to some
+     other register with no adjusting the value.  */
+  if (regnum >= gdbarch_num_cooked_regs (pending_frame->gdbarch))
+    {
+      struct value *user_reg_value
+	= value_of_user_reg (regnum, pending_frame->frame_info);
+      if (VALUE_LVAL (user_reg_value) == lval_register)
+	regnum = VALUE_REGNUM (user_reg_value);
+      if (regnum >= gdbarch_num_cooked_regs (pending_frame->gdbarch))
+	{
+	  PyErr_SetString (PyExc_ValueError, "Bad register");
+	  return NULL;
+	}
+    }
+
   {
     struct value *value;
     size_t data_size;

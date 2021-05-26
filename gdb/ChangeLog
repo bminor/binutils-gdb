@@ -1,3 +1,8 @@
+2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-unwind.c (unwind_infopy_add_saved_register): Handle
+	saving user registers.
+
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4: Delete most m4_include's of ../config files.
