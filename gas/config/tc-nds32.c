@@ -3255,8 +3255,8 @@ do_pseudo_push_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[],
 
   if (argc == 2)
     {
-      strncpy (location, argv[1], 8);
-      location[7] = '\0';
+      strncpy (location, argv[1], sizeof (location) - 1);
+      location[sizeof (location) - 1] = '\0';
     }
 
   md_assemblef ("l.%c $ta,%s", size, argv[0]);
@@ -3287,8 +3287,8 @@ do_pseudo_pop_bhwd (int argc ATTRIBUTE_UNUSED, char *argv[],
 
   if (argc == 3)
     {
-      strncpy (location, argv[2], 8);
-      location[7] = '\0';
+      strncpy (location, argv[2], sizeof (location) - 1);
+      location[sizeof (location) - 1] = '\0';
     }
 
   if ((pv & 0x3) == 0x3) /* double-word */
@@ -3310,8 +3310,8 @@ do_pseudo_pusha (int argc ATTRIBUTE_UNUSED, char *argv[],
 
   if (argc == 2)
     {
-      strncpy (location, argv[1], 8);
-      location[7] = '\0';
+      strncpy (location, argv[1], sizeof (location) - 1);
+      location[sizeof (location) - 1] = '\0';
     }
 
   md_assemblef ("la $ta,%s", argv[0]);
@@ -3327,8 +3327,8 @@ do_pseudo_pushi (int argc ATTRIBUTE_UNUSED, char *argv[],
 
   if (argc == 2)
     {
-      strncpy (location, argv[1], 8);
-      location[7] = '\0';
+      strncpy (location, argv[1], sizeof (location) - 1);
+      location[sizeof (location) - 1] = '\0';
     }
 
   md_assemblef ("li $ta,%s", argv[0]);
