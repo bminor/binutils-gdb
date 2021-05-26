@@ -163,7 +163,10 @@ inline_frame_this_id (struct frame_info *this_frame,
      function, there must be previous frames, so this is safe - as
      long as we're careful not to create any cycles.  See related
      comments in get_prev_frame_always_1.  */
-  *this_id = get_frame_id (get_prev_frame_always (this_frame));
+  frame_info *prev_frame = get_prev_frame_always (this_frame);
+  if (prev_frame == nullptr)
+    error (_("failed to find previous frame when computing inline frame id"));
+  *this_id = get_frame_id (prev_frame);
 
   /* We need a valid frame ID, so we need to be based on a valid
      frame.  FSF submission NOTE: this would be a good assertion to
