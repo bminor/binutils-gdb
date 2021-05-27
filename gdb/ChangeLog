@@ -1,8 +1,3 @@
-2021-05-26  Simon Marchi  <simon.marchi@polymtl.ca>
-
-	* dwarf2/read.c (dwarf_die_debug): Change type to bool.
-	(_initialize_dwarf2_read): Update.
-
 2021-05-26  Simon Marchi  <simon.marchi@efficios.com>
 
 	* regcache.c (reg_buffer::reg_buffer): Default-initialize
