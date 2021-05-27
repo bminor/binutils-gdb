@@ -421,7 +421,6 @@ struct dwarf2_per_cu_data
 {
   dwarf2_per_cu_data ()
     : queued (false),
-      load_all_dies (false),
       is_debug_types (false),
       is_dwz (false),
       reading_dwo_directly (false),
@@ -446,12 +445,6 @@ struct dwarf2_per_cu_data
   /* Flag indicating this compilation unit will be read in before
      any of the current compilation units are processed.  */
   unsigned int queued : 1;
-
-  /* This flag will be set when reading partial DIEs if we need to load
-     absolutely all DIEs for this compilation unit, instead of just the ones
-     we think are interesting.  It gets set if we look for a DIE in the
-     hash table and don't find it.  */
-  unsigned int load_all_dies : 1;
 
   /* Non-zero if this CU is from .debug_types.
      Struct dwarf2_per_cu_data is contained in struct signatured_type iff

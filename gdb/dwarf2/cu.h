@@ -264,6 +264,12 @@ public:
 
   bool processing_has_namespace_info : 1;
 
+  /* This flag will be set when reading partial DIEs if we need to load
+     absolutely all DIEs for this compilation unit, instead of just the ones
+     we think are interesting.  It gets set if we look for a DIE in the
+     hash table and don't find it.  */
+  bool load_all_dies : 1;
+
   struct partial_die_info *find_partial_die (sect_offset sect_off);
 
   /* If this CU was inherited by another CU (via specification,

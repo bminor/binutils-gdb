@@ -18817,7 +18817,7 @@ load_partial_dies (const struct die_reader_specs *reader,
   last_die = NULL;
 
   gdb_assert (cu->per_cu != NULL);
-  if (cu->per_cu->load_all_dies)
+  if (cu->load_all_dies)
     load_all = 1;
 
   cu->partial_dies
@@ -19385,9 +19385,9 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
   /* If we didn't find it, and not all dies have been loaded,
      load them all and try again.  */
 
-  if (pd == NULL && cu->per_cu->load_all_dies == 0)
+  if (pd == NULL && cu->load_all_dies == 0)
     {
-      cu->per_cu->load_all_dies = 1;
+      cu->load_all_dies = 1;
 
       /* This is nasty.  When we reread the DIEs, somewhere up the call chain
 	 THIS_CU->cu may already be in use.  So we can't just free it and

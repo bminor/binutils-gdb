@@ -1,3 +1,13 @@
+2021-05-27  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/27898
+	* dwarf2/cu.c (dwarf2_cu::dwarf2_cu): Add load_all_dies init.
+	* dwarf2/cu.h (dwarf2_cu): Add load_all_dies field.
+	* dwarf2/read.c (load_partial_dies, find_partial_die): Update.
+	* dwarf2/read.h (dwarf2_per_cu_data::dwarf2_per_cu_data): Remove
+	load_all_dies init.
+	(dwarf2_per_cu_data): Remove load_all_dies field.
+
 2021-05-26  Simon Marchi  <simon.marchi@efficios.com>
 
 	* regcache.c (reg_buffer::reg_buffer): Default-initialize
