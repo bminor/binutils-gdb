@@ -1,3 +1,7 @@
+2021-05-27  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <xxmr, xxlnot>: New extended mnemonics.
+
 2021-05-25  Alan Modra  <amodra@gmail.com>
 
 	* cris-desc.c: Regenerate.
