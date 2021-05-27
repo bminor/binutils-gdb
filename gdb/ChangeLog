@@ -1,5 +1,11 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.c (ALL_BP_LOCATIONS): Remove, update users to use
+	all_bp_locations.
+	(all_bp_locations): New.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.c (bp_locations): Change to std::vector, update all
 	users.
 	(bp_locations_count): Remove.

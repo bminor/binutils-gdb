@@ -491,15 +491,6 @@ bool target_exact_watchpoints = false;
 	     B ? (TMP=B->next, 1): 0;	\
 	     B = TMP)
 
-/* Similar iterator for the low-level breakpoints.  SAFE variant is
-   not provided so update_global_location_list must not be called
-   while executing the block of ALL_BP_LOCATIONS.  */
-
-#define ALL_BP_LOCATIONS(B,BP_TMP)					\
-	for (BP_TMP = bp_locations.data ();				\
-	     BP_TMP < bp_locations.data () + bp_locations.size () && (B = *BP_TMP);\
-	     BP_TMP++)
-
 /* Iterates through locations with address ADDRESS for the currently selected
    program space.  BP_LOCP_TMP points to each object.  BP_LOCP_START points
    to where the loop should start from.
@@ -555,6 +546,12 @@ all_tracepoints ()
 /* Array is sorted by bp_location_is_less_than - primarily by the ADDRESS.  */
 
 static std::vector<bp_location *> bp_locations;
+
+static const std::vector<bp_location *> &
+all_bp_locations ()
+{
+  return bp_locations;
+}
 
 /* Maximum alignment offset between bp_target_info.PLACED_ADDRESS and
    ADDRESS for the current elements of BP_LOCATIONS which get a valid
@@ -740,7 +737,6 @@ set_condition_evaluation_mode (const char *args, int from_tty,
   /* Only update the mode if the user picked a different one.  */
   if (new_mode != old_mode)
     {
-      struct bp_location *loc, **loc_tmp;
       /* If the user switched to a different evaluation mode, we
 	 need to synch the changes with the target as follows:
 
@@ -752,7 +748,7 @@ set_condition_evaluation_mode (const char *args, int from_tty,
 	{
 	  /* Mark everything modified and synch conditions with the
 	     target.  */
-	  ALL_BP_LOCATIONS (loc, loc_tmp)
+	  for (bp_location *loc : all_bp_locations ())
 	    mark_breakpoint_location_modified (loc);
   	}
       else
@@ -760,7 +756,7 @@ set_condition_evaluation_mode (const char *args, int from_tty,
 	  /* Manually mark non-duplicate locations to synch conditions
 	     with the target.  We do this to remove all the conditions the
 	     target knows about.  */
-	  ALL_BP_LOCATIONS (loc, loc_tmp)
+	  for (bp_location *loc : all_bp_locations ())
 	    if (is_breakpoint (loc->owner) && loc->inserted)
 	      loc->needs_update = 1;
 	}
@@ -2825,12 +2821,10 @@ insert_bp_location (struct bp_location *bl,
 	 supported, try emulating one with an access watchpoint.  */
       if (val == 1 && bl->watchpoint_type == hw_read)
 	{
-	  struct bp_location *loc, **loc_temp;
-
 	  /* But don't try to insert it, if there's already another
 	     hw_access location that would be considered a duplicate
 	     of this one.  */
-	  ALL_BP_LOCATIONS (loc, loc_temp)
+	  for (bp_location *loc : all_bp_locations ())
 	    if (loc != bl
 		&& loc->watchpoint_type == hw_access
 		&& watchpoint_locations_match (bl, loc))
@@ -2895,8 +2889,6 @@ of catchpoint."), bl->owner->number);
 void
 breakpoint_program_space_exit (struct program_space *pspace)
 {
-  struct bp_location *loc, **loc_temp;
-
   /* Remove any breakpoint that was set through this program space.  */
   for (breakpoint *b : all_breakpoints_safe ())
     if (b->pspace == pspace)
@@ -2904,7 +2896,7 @@ breakpoint_program_space_exit (struct program_space *pspace)
 
   /* Breakpoints set through other program spaces could have locations
      bound to PSPACE as well.  Remove those.  */
-  ALL_BP_LOCATIONS (loc, loc_temp)
+  for (bp_location *loc : all_bp_locations ())
     {
       struct bp_location *tmp;
 
@@ -2958,12 +2950,8 @@ insert_breakpoints (void)
 void
 iterate_over_bp_locations (gdb::function_view<void (bp_location *)> callback)
 {
-  struct bp_location *loc, **loc_tmp;
-
-  ALL_BP_LOCATIONS (loc, loc_tmp)
-    {
-      callback (loc);
-    }
+  for (bp_location *loc : all_bp_locations ())
+    callback (loc);
 }
 
 /* This is used when we need to synch breakpoint conditions between GDB and the
@@ -2973,7 +2961,6 @@ iterate_over_bp_locations (gdb::function_view<void (bp_location *)> callback)
 static void
 update_inserted_breakpoint_locations (void)
 {
-  struct bp_location *bl, **blp_tmp;
   int error_flag = 0;
   int val = 0;
   int disabled_breaks = 0;
@@ -2988,7 +2975,7 @@ update_inserted_breakpoint_locations (void)
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  for (bp_location *bl : all_bp_locations ())
     {
       /* We only want to update software breakpoints and hardware
 	 breakpoints.  */
@@ -3029,7 +3016,6 @@ update_inserted_breakpoint_locations (void)
 static void
 insert_breakpoint_locations (void)
 {
-  struct bp_location *bl, **blp_tmp;
   int error_flag = 0;
   int val = 0;
   int disabled_breaks = 0;
@@ -3044,7 +3030,7 @@ insert_breakpoint_locations (void)
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  for (bp_location *bl : all_bp_locations ())
     {
       if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
 	continue;
@@ -3129,10 +3115,9 @@ You may have requested too many hardware breakpoints/watchpoints.\n");
 int
 remove_breakpoints (void)
 {
-  struct bp_location *bl, **blp_tmp;
   int val = 0;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  for (bp_location *bl : all_bp_locations ())
   {
     if (bl->inserted && !is_tracepoint (bl->owner))
       val |= remove_breakpoint (bl);
@@ -3167,10 +3152,9 @@ Thread-specific breakpoint %d deleted - thread %s no longer in the thread list.\
 void
 remove_breakpoints_inf (inferior *inf)
 {
-  struct bp_location *bl, **blp_tmp;
   int val;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  for (bp_location *bl : all_bp_locations ())
   {
     if (bl->pspace != inf->pspace)
       continue;
@@ -3654,8 +3638,6 @@ breakpoint_event_location_empty_p (const struct breakpoint *b)
 void
 update_breakpoints_after_exec (void)
 {
-  struct bp_location *bploc, **bplocp_tmp;
-
   /* We're about to delete breakpoints from GDB's lists.  If the
      INSERTED flag is true, GDB will try to lift the breakpoints by
      writing the breakpoints' "shadow contents" back into memory.  The
@@ -3664,7 +3646,7 @@ update_breakpoints_after_exec (void)
      breakpoints out as soon as it detects an exec.  We don't do that
      here instead, because there may be other attempts to delete
      breakpoints after detecting an exec and before reaching here.  */
-  ALL_BP_LOCATIONS (bploc, bplocp_tmp)
+  for (bp_location *bploc : all_bp_locations ())
     if (bploc->pspace == current_program_space)
       gdb_assert (!bploc->inserted);
 
@@ -3775,7 +3757,6 @@ update_breakpoints_after_exec (void)
 int
 detach_breakpoints (ptid_t ptid)
 {
-  struct bp_location *bl, **blp_tmp;
   int val = 0;
   scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
   struct inferior *inf = current_inferior ();
@@ -3785,7 +3766,7 @@ detach_breakpoints (ptid_t ptid)
 
   /* Set inferior_ptid; remove_breakpoint_1 uses this global.  */
   inferior_ptid = ptid;
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  for (bp_location *bl : all_bp_locations ())
   {
     if (bl->pspace != inf->pspace)
       continue;
@@ -3980,9 +3961,7 @@ remove_breakpoint (struct bp_location *bl)
 void
 mark_breakpoints_out (void)
 {
-  struct bp_location *bl, **blp_tmp;
-
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  for (bp_location *bl : all_bp_locations ())
     if (bl->pspace == current_program_space)
       bl->inserted = 0;
 }
@@ -4114,10 +4093,9 @@ breakpoint_init_inferior (enum inf_context context)
 enum breakpoint_here
 breakpoint_here_p (const address_space *aspace, CORE_ADDR pc)
 {
-  struct bp_location *bl, **blp_tmp;
   int any_breakpoint_here = 0;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  for (bp_location *bl : all_bp_locations ())
     {
       if (bl->loc_type != bp_loc_software_breakpoint
 	  && bl->loc_type != bp_loc_hardware_breakpoint)
@@ -4148,9 +4126,7 @@ int
 breakpoint_in_range_p (const address_space *aspace,
 		       CORE_ADDR addr, ULONGEST len)
 {
-  struct bp_location *bl, **blp_tmp;
-
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  for (bp_location *bl : all_bp_locations ())
     {
       if (bl->loc_type != bp_loc_software_breakpoint
 	  && bl->loc_type != bp_loc_hardware_breakpoint)
@@ -7620,9 +7596,7 @@ create_and_insert_solib_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR add
 void
 disable_breakpoints_in_shlibs (void)
 {
-  struct bp_location *loc, **locp_tmp;
-
-  ALL_BP_LOCATIONS (loc, locp_tmp)
+  for (bp_location *loc : all_bp_locations ())
   {
     /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
     struct breakpoint *b = loc->owner;
@@ -7653,10 +7627,9 @@ disable_breakpoints_in_shlibs (void)
 static void
 disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 {
-  struct bp_location *loc, **locp_tmp;
   int disabled_shlib_breaks = 0;
 
-  ALL_BP_LOCATIONS (loc, locp_tmp)
+  for (bp_location *loc : all_bp_locations ())
   {
     /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
     struct breakpoint *b = loc->owner;
@@ -11660,12 +11633,10 @@ bp_location_is_less_than (const bp_location *a, const bp_location *b)
 static void
 bp_locations_target_extensions_update (void)
 {
-  struct bp_location *bl, **blp_tmp;
-
   bp_locations_placed_address_before_address_max = 0;
   bp_locations_shadow_len_after_address_max = 0;
 
-  ALL_BP_LOCATIONS (bl, blp_tmp)
+  for (bp_location *bl : all_bp_locations ())
     {
       CORE_ADDR start, end, addr;
 
@@ -12095,8 +12066,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
   awp_loc_first = NULL;
   rwp_loc_first = NULL;
 
-  bp_location *loc, **locp;
-  ALL_BP_LOCATIONS (loc, locp)
+  for (bp_location *loc : all_bp_locations ())
     {
       /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always
 	 non-NULL.  */
@@ -15311,9 +15281,7 @@ pc_at_non_inline_function (const address_space *aspace, CORE_ADDR pc,
 void
 breakpoint_free_objfile (struct objfile *objfile)
 {
-  struct bp_location **locp, *loc;
-
-  ALL_BP_LOCATIONS (loc, locp)
+  for (bp_location *loc : all_bp_locations ())
     if (loc->symtab != NULL && SYMTAB_OBJFILE (loc->symtab) == objfile)
       loc->symtab = NULL;
 }
