@@ -898,25 +898,24 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   return 0;
 }
 
-
+/* Append to LIST the breakpoint Python object associated to B.
+
+   Return true on success.  Return false on failure, with the Python error
+   indicator set.  */
 
 static bool
 build_bp_list (struct breakpoint *b, PyObject *list)
 {
   PyObject *bp = (PyObject *) b->py_bp_object;
-  int iserr = 0;
 
   /* Not all breakpoints will have a companion Python object.
      Only breakpoints that were created via bppy_new, or
      breakpoints that were created externally and are tracked by
      the Python Scripting API.  */
-  if (bp)
-    iserr = PyList_Append (list, bp);
-
-  if (iserr == -1)
+  if (bp == nullptr)
     return true;
 
-  return false;
+  return PyList_Append (list, bp) == 0;
 }
 
 /* Static function to return a tuple holding all breakpoints.  */
@@ -931,15 +930,11 @@ gdbpy_breakpoints (PyObject *self, PyObject *args)
   if (list == NULL)
     return NULL;
 
-  /* If iterate_over_breakpoints returns non NULL it signals an error
-     condition.  In that case abandon building the list and return
-     NULL.  */
-  auto callback = [&] (breakpoint *bp)
-    {
-      return build_bp_list(bp, list.get ());
-    };
-  if (iterate_over_breakpoints (callback) != NULL)
-    return NULL;
+  /* If build_bp_list returns false, it signals an error condition.  In that
+     case abandon building the list and return nullptr.  */
+  for (breakpoint *bp : all_breakpoints ())
+    if (!build_bp_list (bp, list.get ()))
+      return nullptr;
 
   return PyList_AsTuple (list.get ());
 }

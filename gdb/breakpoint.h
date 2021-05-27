@@ -31,6 +31,7 @@
 #include "gdbsupport/filtered-iterator.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/refcounted-object.h"
+#include "gdbsupport/safe-iterator.h"
 #include "cli/cli-script.h"
 
 struct block;
@@ -1711,20 +1712,27 @@ public:
   DISABLE_COPY_AND_ASSIGN (scoped_rbreak_breakpoints);
 };
 
-/* Breakpoint iterator function.
-
-   Calls a callback function once for each breakpoint, so long as the
-   callback function returns false.  If the callback function returns
-   true, the iteration will end and the current breakpoint will be
-   returned.  This can be useful for implementing a search for a
-   breakpoint with arbitrary attributes, or for applying an operation
-   to every breakpoint.  */
-extern struct breakpoint *iterate_over_breakpoints
-  (gdb::function_view<bool (breakpoint *)>);
-
 /* Breakpoint linked list iterator.  */
 
 using breakpoint_iterator = next_iterator<breakpoint>;
+
+/* Breakpoint linked list range.  */
+
+using breakpoint_range = next_adapter<breakpoint, breakpoint_iterator>;
+
+/* Return a range to iterate over all breakpoints.  */
+
+breakpoint_range all_breakpoints ();
+
+/* Breakpoint linked list range, safe against deletion of the current
+   breakpoint while iterating.  */
+
+using breakpoint_safe_range = basic_safe_range<breakpoint_range>;
+
+/* Return a range to iterate over all breakpoints.  This range is safe against
+   deletion of the current breakpoint while iterating.  */
+
+breakpoint_safe_range all_breakpoints_safe ();
 
 /* Breakpoint filter to only keep tracepoints.  */
 

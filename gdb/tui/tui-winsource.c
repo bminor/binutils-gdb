@@ -457,7 +457,7 @@ tui_source_window_base::update_breakpoint_info
 	 do with it.  Identify enable/disabled breakpoints as well as
 	 those that we already hit.  */
       tui_bp_flags mode = 0;
-      iterate_over_breakpoints ([&] (breakpoint *bp) -> bool
+      for (breakpoint *bp : all_breakpoints ())
 	{
 	  if (bp == being_deleted)
 	    return false;
@@ -479,7 +479,8 @@ tui_source_window_base::update_breakpoint_info
 		}
 	    }
 	  return false;
-	});
+	}
+
       if (line->break_mode != mode)
 	{
 	  line->break_mode = mode;

@@ -508,7 +508,7 @@ gdbscm_delete_breakpoint_x (SCM self)
 
 /* iterate_over_breakpoints function for gdbscm_breakpoints.  */
 
-static bool
+static void
 bpscm_build_bp_list (struct breakpoint *bp, SCM *list)
 {
   breakpoint_smob *bp_smob = bp->scm_bp_object;
@@ -535,8 +535,6 @@ bpscm_build_bp_list (struct breakpoint *bp, SCM *list)
 
   if (bp_smob != NULL)
     *list = scm_cons (bp_smob->containing_scm, *list);
-
-  return false;
 }
 
 /* (breakpoints) -> list
@@ -547,10 +545,8 @@ gdbscm_breakpoints (void)
 {
   SCM list = SCM_EOL;
 
-  iterate_over_breakpoints ([&] (breakpoint *bp)
-    {
-      return bpscm_build_bp_list(bp, &list);
-    });
+  for (breakpoint *bp : all_breakpoints ())
+    bpscm_build_bp_list (bp, &list);
 
   return scm_reverse_x (list, SCM_EOL);
 }

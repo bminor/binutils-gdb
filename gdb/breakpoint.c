@@ -493,27 +493,17 @@ bool target_exact_watchpoints = false;
 
 static struct breakpoint *breakpoint_chain;
 
-/* Breakpoint linked list range.  */
+/* See breakpoint.h.  */
 
-using breakpoint_range = next_adapter<breakpoint, breakpoint_iterator>;
-
-/* Return a range to iterate over all breakpoints.  */
-
-static breakpoint_range
+breakpoint_range
 all_breakpoints ()
 {
   return breakpoint_range (breakpoint_chain);
 }
 
-/* Breakpoint linked list range, safe against deletion of the current
-   breakpoint while iterating.  */
+/* See breakpoint.h.  */
 
-using breakpoint_safe_range = basic_safe_range<breakpoint_range>;
-
-/* Return a range to iterate over all breakpoints.  This range is safe against
-   deletion of the current breakpoint while iterating.  */
-
-static breakpoint_safe_range
+breakpoint_safe_range
 all_breakpoints_safe ()
 {
   return breakpoint_safe_range (all_breakpoints ());
@@ -15189,16 +15179,6 @@ add_catch_command (const char *name, const char *docstring,
   set_cmd_sfunc (command, sfunc);
   set_cmd_context (command, user_data_tcatch);
   set_cmd_completer (command, completer);
-}
-
-struct breakpoint *
-iterate_over_breakpoints (gdb::function_view<bool (breakpoint *)> callback)
-{
-  for (breakpoint *b : all_breakpoints_safe ())
-    if (callback (b))
-      return b;
-
-  return NULL;
 }
 
 /* Zero if any of the breakpoint's locations could be a location where

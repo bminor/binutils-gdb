@@ -1,5 +1,20 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.h (iterate_over_breakpoints): Remove.  Update
+	callers to use all_breakpoints or all_breakpoints_safe.
+	(breakpoint_range, all_breakpoints, breakpoint_safe_range,
+	all_breakpoints_safe): Move here.
+	* breakpoint.c (all_breakpoints, all_breakpoints_safe): Make
+	non-static.
+	(iterate_over_breakpoints): Remove.
+	* python/py-finishbreakpoint.c (bpfinishpy_detect_out_scope_cb):
+	Return void.
+	* python/py-breakpoint.c (build_bp_list): Add comment, reverse
+	return value logic.
+	* guile/scm-breakpoint.c (bpscm_build_bp_list): Return void.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.c (get_first_locp_gte_addr): Remove.
 	(ALL_BP_LOCATIONS_AT_ADDR): Remove.  Replace all uses with
 	all_bp_locations_at_addr.

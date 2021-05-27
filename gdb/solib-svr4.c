@@ -2059,7 +2059,8 @@ svr4_update_solib_event_breakpoint (struct breakpoint *b)
 static void
 svr4_update_solib_event_breakpoints (void)
 {
-  iterate_over_breakpoints (svr4_update_solib_event_breakpoint);
+  for (breakpoint *bp : all_breakpoints_safe ())
+    svr4_update_solib_event_breakpoint (bp);
 }
 
 /* Create and register solib event breakpoints.  PROBES is an array
