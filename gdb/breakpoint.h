@@ -703,6 +703,10 @@ enum watchpoint_triggered
 
 extern bool target_exact_watchpoints;
 
+/* bp_location linked list range.  */
+
+using bp_locations_range = next_adapter<bp_location>;
+
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint
    does set it to 0).  I implemented it because I thought it would be
@@ -714,6 +718,9 @@ extern bool target_exact_watchpoints;
 struct breakpoint
 {
   virtual ~breakpoint ();
+
+  /* Return a range of this breakpoint's locations.  */
+  bp_locations_range locations ();
 
   /* Methods associated with this breakpoint.  */
   const breakpoint_ops *ops = NULL;

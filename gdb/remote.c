@@ -13521,7 +13521,6 @@ remote_target::get_tracepoint_status (struct breakpoint *bp,
 {
   struct remote_state *rs = get_remote_state ();
   char *reply;
-  struct bp_location *loc;
   struct tracepoint *tp = (struct tracepoint *) bp;
   size_t size = get_remote_packet_size ();
 
@@ -13529,7 +13528,7 @@ remote_target::get_tracepoint_status (struct breakpoint *bp,
     {
       tp->hit_count = 0;
       tp->traceframe_usage = 0;
-      for (loc = tp->loc; loc; loc = loc->next)
+      for (bp_location *loc : tp->locations ())
 	{
 	  /* If the tracepoint was never downloaded, don't go asking for
 	     any status.  */

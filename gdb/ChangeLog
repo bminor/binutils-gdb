@@ -1,5 +1,10 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.h (bp_locations_range): New.
+	(struct breakpoint) <locations>: New.  Use where possible.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.h (all_tracepoints): Remove.
 	(breakpoint_iterator): Move here.
 	(struct tracepoint_filter): New.

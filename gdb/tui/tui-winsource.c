@@ -459,12 +459,10 @@ tui_source_window_base::update_breakpoint_info
       tui_bp_flags mode = 0;
       iterate_over_breakpoints ([&] (breakpoint *bp) -> bool
 	{
-	  struct bp_location *loc;
-
 	  if (bp == being_deleted)
 	    return false;
 
-	  for (loc = bp->loc; loc != NULL; loc = loc->next)
+	  for (bp_location *loc : bp->locations ())
 	    {
 	      if (location_matches_p (loc, i))
 		{

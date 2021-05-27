@@ -636,7 +636,6 @@ validate_actionline (const char *line, struct breakpoint *b)
   struct cmd_list_element *c;
   const char *tmp_p;
   const char *p;
-  struct bp_location *loc;
   struct tracepoint *t = (struct tracepoint *) b;
 
   /* If EOF is typed, *line is NULL.  */
@@ -682,7 +681,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 	      /* else fall thru, treat p as an expression and parse it!  */
 	    }
 	  tmp_p = p;
-	  for (loc = t->loc; loc; loc = loc->next)
+	  for (bp_location *loc : t->locations ())
 	    {
 	      p = tmp_p;
 	      expression_up exp = parse_exp_1 (&p, loc->address,
@@ -732,7 +731,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 	  p = skip_spaces (p);
 
 	  tmp_p = p;
-	  for (loc = t->loc; loc; loc = loc->next)
+	  for (bp_location *loc : t->locations ())
 	    {
 	      p = tmp_p;
 
@@ -1565,9 +1564,7 @@ process_tracepoint_on_disconnect (void)
 	}
       else
 	{
-	  struct bp_location *loc1;
-
-	  for (loc1 = b->loc; loc1; loc1 = loc1->next)
+	  for (bp_location *loc1 : b->locations ())
 	    {
 	      if (loc1->shlib_disabled)
 		{
@@ -1643,11 +1640,10 @@ start_tracing (const char *notes)
   for (breakpoint *b : tracepoint_range)
     {
       struct tracepoint *t = (struct tracepoint *) b;
-      struct bp_location *loc;
       int bp_location_downloaded = 0;
 
       /* Clear `inserted' flag.  */
-      for (loc = b->loc; loc; loc = loc->next)
+      for (bp_location *loc : b->locations ())
 	loc->inserted = 0;
 
       if ((b->type == bp_fast_tracepoint
@@ -1657,7 +1653,7 @@ start_tracing (const char *notes)
 
       t->number_on_target = 0;
 
-      for (loc = b->loc; loc; loc = loc->next)
+      for (bp_location *loc : b->locations ())
 	{
 	  /* Since tracepoint locations are never duplicated, `inserted'
 	     flag should be zero.  */
@@ -1671,7 +1667,7 @@ start_tracing (const char *notes)
 
       t->number_on_target = b->number;
 
-      for (loc = b->loc; loc; loc = loc->next)
+      for (bp_location *loc : b->locations ())
 	if (loc->probe.prob != NULL)
 	  loc->probe.prob->set_semaphore (loc->probe.objfile,
 					  loc->gdbarch);
@@ -1750,14 +1746,12 @@ stop_tracing (const char *note)
 
   for (breakpoint *t : all_tracepoints ())
     {
-      struct bp_location *loc;
-
       if ((t->type == bp_fast_tracepoint
 	   ? !may_insert_fast_tracepoints
 	   : !may_insert_tracepoints))
 	continue;
 
-      for (loc = t->loc; loc; loc = loc->next)
+      for (bp_location *loc : t->locations ())
 	{
 	  /* GDB can be totally absent in some disconnected trace scenarios,
 	     but we don't really care if this semaphore goes out of sync.
@@ -2763,7 +2757,6 @@ struct bp_location *
 get_traceframe_location (int *stepping_frame_p)
 {
   struct tracepoint *t;
-  struct bp_location *tloc;
   struct regcache *regcache;
 
   if (tracepoint_number == -1)
@@ -2784,7 +2777,7 @@ get_traceframe_location (int *stepping_frame_p)
      locations, assume it is a direct hit rather than a while-stepping
      frame.  (FIXME this is not reliable, should record each frame's
      type.)  */
-  for (tloc = t->loc; tloc; tloc = tloc->next)
+  for (bp_location *tloc : t->locations ())
     if (tloc->address == regcache_read_pc (regcache))
       {
 	*stepping_frame_p = 0;

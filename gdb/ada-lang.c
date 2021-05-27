@@ -11552,8 +11552,6 @@ static void
 create_excep_cond_exprs (struct ada_catchpoint *c,
 			 enum ada_exception_catchpoint_kind ex)
 {
-  struct bp_location *bl;
-
   /* Nothing to do if there's no specific exception to catch.  */
   if (c->excep_string.empty ())
     return;
@@ -11569,7 +11567,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
 
   /* Iterate over all the catchpoint's locations, and parse an
      expression for each.  */
-  for (bl = c->loc; bl != NULL; bl = bl->next)
+  for (bp_location *bl : c->locations ())
     {
       struct ada_catchpoint_location *ada_loc
 	= (struct ada_catchpoint_location *) bl;

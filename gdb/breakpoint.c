@@ -680,8 +680,6 @@ get_breakpoint (int num)
 static void
 mark_breakpoint_modified (struct breakpoint *b)
 {
-  struct bp_location *loc;
-
   /* This is only meaningful if the target is
      evaluating conditions and if the user has
      opted for condition evaluation on the target's
@@ -693,7 +691,7 @@ mark_breakpoint_modified (struct breakpoint *b)
   if (!is_breakpoint (b))
     return;
 
-  for (loc = b->loc; loc; loc = loc->next)
+  for (bp_location *loc : b->locations ())
     loc->condition_changed = condition_modified;
 }
 
@@ -910,7 +908,7 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
       else
 	{
 	  int loc_num = 1;
-	  for (bp_location *loc = b->loc; loc != nullptr; loc = loc->next)
+	  for (bp_location *loc : b->locations ())
 	    {
 	      loc->cond.reset ();
 	      if (loc->disabled_by_cond && loc->enabled)
@@ -952,7 +950,7 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 	     the error and the condition string will be rejected.
 	     This two-pass approach is taken to avoid setting the
 	     state of locations in case of a reject.  */
-	  for (bp_location *loc = b->loc; loc != nullptr; loc = loc->next)
+	  for (bp_location *loc : b->locations ())
 	    {
 	      try
 		{
@@ -975,9 +973,11 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 
 	  /* If we reach here, the condition is valid at some locations.  */
 	  int loc_num = 1;
-	  for (bp_location *loc = b->loc; loc != nullptr;
-	       loc = loc->next, loc_num++)
-	    set_breakpoint_location_condition (exp, loc, b->number, loc_num);
+	  for (bp_location *loc : b->locations ())
+	    {
+	      set_breakpoint_location_condition (exp, loc, b->number, loc_num);
+	      loc_num++;
+	    }
 	}
 
       /* We know that the new condition parsed successfully.  The
@@ -1287,12 +1287,11 @@ std::vector<breakpoint *>
 static_tracepoints_here (CORE_ADDR addr)
 {
   std::vector<breakpoint *> found;
-  struct bp_location *loc;
 
   for (breakpoint *b : all_breakpoints ())
     if (b->type == bp_static_tracepoint)
       {
-	for (loc = b->loc; loc; loc = loc->next)
+	for (bp_location *loc : b->locations ())
 	  if (loc->address == addr)
 	    found.push_back (b);
       }
@@ -2032,7 +2031,6 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	{
 	  int reg_cnt;
 	  enum bp_loc_type loc_type;
-	  struct bp_location *bl;
 
 	  reg_cnt = can_use_hardware_watchpoint (val_chain);
 
@@ -2108,7 +2106,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 
 	  loc_type = (b->type == bp_watchpoint? bp_loc_other
 		      : bp_loc_hardware_watchpoint);
-	  for (bl = b->loc; bl; bl = bl->next)
+	  for (bp_location *bl : b->locations ())
 	    bl->loc_type = loc_type;
 	}
 
@@ -3083,7 +3081,6 @@ insert_breakpoint_locations (void)
   for (breakpoint *bpt : all_breakpoints ())
     {
       int some_failed = 0;
-      struct bp_location *loc;
 
       if (!is_hardware_watchpoint (bpt))
 	continue;
@@ -3094,15 +3091,16 @@ insert_breakpoint_locations (void)
       if (bpt->disposition == disp_del_at_next_stop)
 	continue;
       
-      for (loc = bpt->loc; loc; loc = loc->next)
+      for (bp_location *loc : bpt->locations ())
 	if (!loc->inserted && should_be_inserted (loc))
 	  {
 	    some_failed = 1;
 	    break;
 	  }
+
       if (some_failed)
 	{
-	  for (loc = bpt->loc; loc; loc = loc->next)
+	  for (bp_location *loc : bpt->locations ())
 	    if (loc->inserted)
 	      remove_breakpoint (loc);
 
@@ -4287,8 +4285,6 @@ hardware_watchpoint_inserted_in_range (const address_space *aspace,
 {
   for (breakpoint *bpt : all_breakpoints ())
     {
-      struct bp_location *loc;
-
       if (bpt->type != bp_hardware_watchpoint
 	  && bpt->type != bp_access_watchpoint)
 	continue;
@@ -4296,7 +4292,7 @@ hardware_watchpoint_inserted_in_range (const address_space *aspace,
       if (!breakpoint_enabled (bpt))
 	continue;
 
-      for (loc = bpt->loc; loc; loc = loc->next)
+      for (bp_location *loc : bpt->locations ())
 	if (loc->pspace->aspace == aspace && loc->inserted)
 	  {
 	    CORE_ADDR l, h;
@@ -4903,10 +4899,9 @@ watchpoints_triggered (struct target_waitstatus *ws)
     if (is_hardware_watchpoint (b))
       {
 	struct watchpoint *w = (struct watchpoint *) b;
-	struct bp_location *loc;
 
 	w->watchpoint_triggered = watch_triggered_no;
-	for (loc = b->loc; loc; loc = loc->next)
+	for (bp_location *loc : b->locations ())
 	  {
 	    if (is_masked_watchpoint (b))
 	      {
@@ -5448,7 +5443,7 @@ build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
       if (!breakpoint_enabled (b))
 	continue;
 
-      for (bp_location *bl = b->loc; bl != NULL; bl = bl->next)
+      for (bp_location *bl : b->locations ())
 	{
 	  /* For hardware watchpoints, we look only at the first
 	     location.  The watchpoint_check function will work on the
@@ -5918,7 +5913,6 @@ wrap_indent_at_field (struct ui_out *uiout, const char *col_name)
 static const char *
 bp_condition_evaluator (struct breakpoint *b)
 {
-  struct bp_location *bl;
   char host_evals = 0;
   char target_evals = 0;
 
@@ -5932,7 +5926,7 @@ bp_condition_evaluator (struct breakpoint *b)
       || !target_supports_evaluation_of_breakpoint_conditions ())
     return condition_evaluation_host;
 
-  for (bl = b->loc; bl; bl = bl->next)
+  for (bp_location *bl : b->locations ())
     {
       if (bl->cond_bytecode)
 	target_evals++;
@@ -6516,11 +6510,12 @@ print_one_breakpoint (struct breakpoint *b,
 	    locations_list.emplace (uiout, "locations");
 
 	  int n = 1;
-	  for (bp_location *loc = b->loc; loc != NULL; loc = loc->next, ++n)
+	  for (bp_location *loc : b->locations ())
 	    {
 	      ui_out_emit_tuple loc_tuple_emitter (uiout, NULL);
 	      print_one_breakpoint_location (b, loc, n, last_loc,
 					     allflag, allflag);
+	      n++;
 	    }
 	}
     }
@@ -6530,14 +6525,13 @@ static int
 breakpoint_address_bits (struct breakpoint *b)
 {
   int print_address_bits = 0;
-  struct bp_location *loc;
 
   /* Software watchpoints that aren't watching memory don't have an
      address to print.  */
   if (is_no_memory_software_watchpoint (b))
     return 0;
 
-  for (loc = b->loc; loc; loc = loc->next)
+  for (bp_location *loc : b->locations ())
     {
       int addr_bit;
 
@@ -6701,7 +6695,7 @@ breakpoint_1 (const char *bp_num_list, bool show_internal,
 	if (show_internal || user_breakpoint_p (b))
 	  {
 	    print_one_breakpoint (b, &last_loc, show_internal);
-	    for (bp_location *loc = b->loc; loc != NULL; loc = loc->next)
+	    for (bp_location *loc : b->locations ())
 	      if (loc->disabled_by_cond)
 		has_disabled_by_cond_location = true;
 	  }
@@ -6795,9 +6789,7 @@ breakpoint_has_pc (struct breakpoint *b,
 		   struct program_space *pspace,
 		   CORE_ADDR pc, struct obj_section *section)
 {
-  struct bp_location *bl = b->loc;
-
-  for (; bl; bl = bl->next)
+  for (bp_location *bl : b->locations ())
     {
       if (bl->pspace == pspace
 	  && bl->address == pc
@@ -7731,13 +7723,12 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
 
   for (breakpoint *b : all_breakpoints ())
     {
-      struct bp_location *loc;
       int bp_modified = 0;
 
       if (!is_breakpoint (b) && !is_tracepoint (b))
 	continue;
 
-      for (loc = b->loc; loc != NULL; loc = loc->next)
+      for (bp_location *loc : b->locations ())
 	{
 	  CORE_ADDR loc_addr = loc->address;
 
@@ -8067,8 +8058,6 @@ breakpoint_hit_catch_solib (const struct bp_location *bl,
 
   for (breakpoint *other : all_breakpoints ())
   {
-    struct bp_location *other_bl;
-
     if (other == bl->owner)
       continue;
 
@@ -8078,7 +8067,7 @@ breakpoint_hit_catch_solib (const struct bp_location *bl,
     if (self->pspace != NULL && other->pspace != self->pspace)
       continue;
 
-    for (other_bl = other->loc; other_bl != NULL; other_bl = other_bl->next)
+    for (bp_location *other_bl : other->locations ())
       {
 	if (other->ops->breakpoint_hit (other_bl, aspace, bp_addr, ws))
 	  return 1;
@@ -8426,11 +8415,10 @@ static int
 hw_breakpoint_used_count (void)
 {
   int i = 0;
-  struct bp_location *bl;
 
   for (breakpoint *b : all_breakpoints ())
     if (b->type == bp_hardware_breakpoint && breakpoint_enabled (b))
-      for (bl = b->loc; bl; bl = bl->next)
+      for (bp_location *bl : b->locations ())
 	{
 	  /* Special types of hardware breakpoints may use more than
 	     one register.  */
@@ -8447,12 +8435,11 @@ static int
 hw_watchpoint_use_count (struct breakpoint *b)
 {
   int i = 0;
-  struct bp_location *bl;
 
   if (!breakpoint_enabled (b))
     return 0;
 
-  for (bl = b->loc; bl; bl = bl->next)
+  for (bp_location *bl : b->locations ())
     {
       /* Special types of hardware watchpoints may use more than
 	 one register.  */
@@ -8995,7 +8982,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
   /* The order of the locations is now stable.  Set the location
      condition using the location's number.  */
   int loc_num = 1;
-  for (bp_location *loc = b->loc; loc != nullptr; loc = loc->next)
+  for (bp_location *loc : b->locations ())
     {
       if (b->cond_string != nullptr)
 	set_breakpoint_location_condition (b->cond_string, loc, b->number,
@@ -11531,8 +11518,7 @@ clear_command (const char *arg, int from_tty)
 	  /* Are we going to delete b?  */
 	  if (b->type != bp_none && !is_watchpoint (b))
 	    {
-	      struct bp_location *loc = b->loc;
-	      for (; loc; loc = loc->next)
+	      for (bp_location *loc : b->locations ())
 		{
 		  /* If the user specified file:line, don't allow a PC
 		     match.  This matches historical gdb behavior.  */
@@ -11718,7 +11704,6 @@ download_tracepoint_locations (void)
 
   for (breakpoint *b : all_tracepoints ())
     {
-      struct bp_location *bl;
       struct tracepoint *t;
       int bp_location_downloaded = 0;
 
@@ -11738,7 +11723,7 @@ download_tracepoint_locations (void)
       if (can_download_tracepoint == TRIBOOL_FALSE)
 	break;
 
-      for (bl = b->loc; bl; bl = bl->next)
+      for (bp_location *bl : b->locations ())
 	{
 	  /* In tracepoint, locations are _never_ duplicated, so
 	     should_be_inserted is equivalent to
@@ -11846,7 +11831,7 @@ force_breakpoint_reinsertion (struct bp_location *bl)
 static void
 update_global_location_list (enum ugll_insert_mode insert_mode)
 {
-  struct bp_location **locp, *loc;
+  struct bp_location **locp;
   /* Last breakpoint location address that was marked for update.  */
   CORE_ADDR last_addr = 0;
   /* Last breakpoint location program space that was marked for update.  */
@@ -11874,13 +11859,13 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
   bp_locations_count = 0;
 
   for (breakpoint *b : all_breakpoints ())
-    for (loc = b->loc; loc; loc = loc->next)
+    for (bp_location *loc ATTRIBUTE_UNUSED : b->locations ())
       bp_locations_count++;
 
   bp_locations = XNEWVEC (struct bp_location *, bp_locations_count);
   locp = bp_locations;
   for (breakpoint *b : all_breakpoints ())
-    for (loc = b->loc; loc; loc = loc->next)
+    for (bp_location *loc : b->locations ())
       *locp++ = loc;
 
   /* See if we need to "upgrade" a software breakpoint to a hardware
@@ -11891,7 +11876,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
        locp < bp_locations + bp_locations_count;
        locp++)
     {
-      loc = *locp;
+      bp_location *loc = *locp;
       if (!loc->inserted && should_be_inserted (loc))
 	handle_automatic_hardware_breakpoints (loc);
     }
@@ -12135,6 +12120,8 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
   wp_loc_first = NULL;
   awp_loc_first = NULL;
   rwp_loc_first = NULL;
+
+  bp_location *loc;
   ALL_BP_LOCATIONS (loc, locp)
     {
       /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always
@@ -12350,6 +12337,13 @@ breakpoint::~breakpoint ()
 {
   xfree (this->cond_string);
   xfree (this->extra_string);
+}
+
+/* See breakpoint.h.  */
+
+bp_locations_range breakpoint::locations ()
+{
+  return bp_locations_range (this->loc);
 }
 
 static struct bp_location *
@@ -13398,9 +13392,7 @@ delete_command (const char *arg, int from_tty)
 static int
 all_locations_are_pending (struct breakpoint *b, struct program_space *pspace)
 {
-  struct bp_location *loc;
-
-  for (loc = b->loc; loc != NULL; loc = loc->next)
+  for (bp_location *loc : b->locations ())
     if ((pspace == NULL
 	 || loc->pspace == pspace)
 	&& !loc->shlib_disabled
@@ -13719,10 +13711,9 @@ update_breakpoint_locations (struct breakpoint *b,
       {
 	if ((!e->enabled || e->disabled_by_cond) && e->function_name)
 	  {
-	    struct bp_location *l = b->loc;
 	    if (have_ambiguous_names)
 	      {
-		for (; l; l = l->next)
+		for (bp_location *l : b->locations ())
 		  {
 		    /* Ignore software vs hardware location type at
 		       this point, because with "set breakpoint
@@ -13741,7 +13732,7 @@ update_breakpoint_locations (struct breakpoint *b,
 	      }
 	    else
 	      {
-		for (; l; l = l->next)
+		for (bp_location *l : b->locations ())
 		  if (l->function_name
 		      && strcmp (e->function_name, l->function_name) == 0)
 		    {
@@ -14154,7 +14145,7 @@ find_location_by_number (int bp_num, int loc_num)
     error (_("Bad breakpoint location number '%d'"), loc_num);
 
   int n = 0;
-  for (bp_location *loc = b->loc; loc != NULL; loc = loc->next)
+  for (bp_location *loc : b->locations ())
     if (++n == loc_num)
       return loc;
 
@@ -14350,9 +14341,7 @@ disable_breakpoint (struct breakpoint *bpt)
   if (target_supports_enable_disable_tracepoint ()
       && current_trace_status ()->running && is_tracepoint (bpt))
     {
-      struct bp_location *location;
-     
-      for (location = bpt->loc; location; location = location->next)
+      for (bp_location *location : bpt->locations ())
 	target_disable_tracepoint (location);
     }
 
@@ -14471,9 +14460,7 @@ enable_breakpoint_disp (struct breakpoint *bpt, enum bpdisp disposition,
   if (target_supports_enable_disable_tracepoint ()
       && current_trace_status ()->running && is_tracepoint (bpt))
     {
-      struct bp_location *location;
-
-      for (location = bpt->loc; location; location = location->next)
+      for (bp_location *location : bpt->locations ())
 	target_enable_tracepoint (location);
     }
 
@@ -14568,9 +14555,7 @@ invalidate_bp_value_on_memory_change (struct inferior *inferior,
 
 	if (wp->val_valid && wp->val != nullptr)
 	  {
-	    struct bp_location *loc;
-
-	    for (loc = bp->loc; loc != NULL; loc = loc->next)
+	    for (bp_location *loc : bp->locations ())
 	      if (loc->loc_type == bp_loc_hardware_watchpoint
 		  && loc->address + loc->length > addr
 		  && addr + len > loc->address)
@@ -14639,9 +14624,7 @@ breakpoint_has_location_inserted_here (struct breakpoint *bp,
 				       const address_space *aspace,
 				       CORE_ADDR pc)
 {
-  struct bp_location *loc;
-
-  for (loc = bp->loc; loc != NULL; loc = loc->next)
+  for (bp_location *loc : bp->locations ())
     if (loc->inserted
 	&& breakpoint_location_address_match (loc, aspace, pc))
       return 1;
@@ -15182,12 +15165,15 @@ save_breakpoints (const char *filename, int from_tty,
        special, and not user visible.  */
     if (!is_watchpoint (tp) && tp->loc && tp->loc->next)
       {
-	struct bp_location *loc;
 	int n = 1;
 
-	for (loc = tp->loc; loc != NULL; loc = loc->next, n++)
-	  if (!loc->enabled)
-	    fp.printf ("disable $bpnum.%d\n", n);
+	for (bp_location *loc : tp->locations ())
+	  {
+	    if (!loc->enabled)
+	      fp.printf ("disable $bpnum.%d\n", n);
+
+	    n++;
+	  }
       }
   }
 
@@ -15330,14 +15316,12 @@ int
 pc_at_non_inline_function (const address_space *aspace, CORE_ADDR pc,
 			   const struct target_waitstatus *ws)
 {
-  struct bp_location *bl;
-
   for (breakpoint *b : all_breakpoints ())
     {
       if (!is_non_inline_function (b))
 	continue;
 
-      for (bl = b->loc; bl != NULL; bl = bl->next)
+      for (bp_location *bl : b->locations ())
 	{
 	  if (!bl->shlib_disabled
 	      && bpstat_check_location (bl, aspace, pc, ws))

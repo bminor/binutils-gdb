@@ -2019,15 +2019,13 @@ svr4_handle_solib_event (void)
 static bool
 svr4_update_solib_event_breakpoint (struct breakpoint *b)
 {
-  struct bp_location *loc;
-
   if (b->type != bp_shlib_event)
     {
       /* Continue iterating.  */
       return false;
     }
 
-  for (loc = b->loc; loc != NULL; loc = loc->next)
+  for (bp_location *loc : b->locations ())
     {
       struct svr4_info *info;
       struct probe_and_action *pa;

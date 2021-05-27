@@ -783,7 +783,7 @@ jit_breakpoint_deleted (struct breakpoint *b)
   if (b->type != bp_jit_event)
     return;
 
-  for (bp_location *iter = b->loc; iter != nullptr; iter = iter->next)
+  for (bp_location *iter : b->locations ())
     {
       for (objfile *objf : iter->pspace->objfiles ())
 	{
