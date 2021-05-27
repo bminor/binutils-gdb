@@ -1,3 +1,11 @@
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* breakpoint.c (ALL_BREAKPOINTS): Remove, replace all uses with
+	all_breakpoints.
+	(breakpoint_iterator): New.
+	(breakpoint_range): New.
+	(all_breakpoints): New.
+
 2021-05-27  Hannes Domani  <ssbssa@yahoo.de>
 
 	* python/py-tui.c (tui_py_window::output): Add full_window
