@@ -107,8 +107,8 @@ static unsigned int dwarf_read_debug = 0;
   debug_prefixed_printf_cond (dwarf_read_debug >= 2, "dwarf-read", fmt, \
 			      ##__VA_ARGS__)
 
-/* When non-zero, dump DIEs after they are read in.  */
-static unsigned int dwarf_die_debug = 0;
+/* When true, dump DIEs after they are read in.  */
+static bool dwarf_die_debug = false;
 
 /* When non-zero, dump line number entries as they are read in.  */
 unsigned int dwarf_line_debug = 0;
@@ -24735,14 +24735,14 @@ information.  A value greater than 1 provides more verbose information."),
 			    NULL,
 			    &setdebuglist, &showdebuglist);
 
-  add_setshow_zuinteger_cmd ("dwarf-die", no_class, &dwarf_die_debug, _("\
+  add_setshow_boolean_cmd ("dwarf-die", no_class, &dwarf_die_debug, _("\
 Set debugging of the DWARF DIE reader."), _("\
 Show debugging of the DWARF DIE reader."), _("\
-When enabled (non-zero), DIEs are dumped after they are read in.\n\
+When enabled, DIEs are dumped after they are read in.\n\
 The value is the maximum depth to print."),
-			     NULL,
-			     NULL,
-			     &setdebuglist, &showdebuglist);
+			   NULL,
+			   NULL,
+			   &setdebuglist, &showdebuglist);
 
   add_setshow_zuinteger_cmd ("dwarf-line", no_class, &dwarf_line_debug, _("\
 Set debugging of the dwarf line reader."), _("\
