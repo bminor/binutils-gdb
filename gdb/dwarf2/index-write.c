@@ -473,13 +473,12 @@ addrmap_index_data::operator() (CORE_ADDR start_addr, void *obj)
    in the index file.  */
 
 static void
-write_address_map (dwarf2_per_bfd *per_bfd, data_buf &addr_vec,
+write_address_map (struct addrmap *addrmap, data_buf &addr_vec,
 		   cu_index_map &cu_index_htab)
 {
   struct addrmap_index_data addrmap_index_data (addr_vec, cu_index_htab);
 
-  addrmap_foreach (per_bfd->partial_symtabs->psymtabs_addrmap,
-		   addrmap_index_data);
+  addrmap_foreach (addrmap, addrmap_index_data);
 
   /* It's highly unlikely the last entry (end address = 0xff...ff)
      is valid, but we should still handle it.
@@ -1378,7 +1377,8 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
 
   /* Dump the address map.  */
   data_buf addr_vec;
-  write_address_map (per_objfile->per_bfd, addr_vec, cu_index_htab);
+  write_address_map (per_objfile->per_bfd->partial_symtabs->psymtabs_addrmap,
+		     addr_vec, cu_index_htab);
 
   /* Now that we've processed all symbols we can shrink their cu_indices
      lists.  */
