@@ -465,113 +465,112 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
 		     struct cmd_list_element **set_list,
 		     struct cmd_list_element **show_list)
 {
-  struct cmd_list_element *param = NULL;
-  const char *tmp_name = NULL;
+  set_show_commands commands;
 
   switch (parmclass)
     {
     case var_boolean:
-
-      add_setshow_boolean_cmd (cmd_name.get (), cmdclass,
-			       &self->value.boolval, set_doc, show_doc,
-			       help_doc, get_set_value, get_show_value,
-			       set_list, show_list);
+      commands = add_setshow_boolean_cmd (cmd_name.get (), cmdclass,
+					  &self->value.boolval, set_doc,
+					  show_doc, help_doc, get_set_value,
+					  get_show_value, set_list, show_list);
 
       break;
 
     case var_auto_boolean:
-      add_setshow_auto_boolean_cmd (cmd_name.get (), cmdclass,
-				    &self->value.autoboolval,
-				    set_doc, show_doc, help_doc,
-				    get_set_value, get_show_value,
-				    set_list, show_list);
+      commands = add_setshow_auto_boolean_cmd (cmd_name.get (), cmdclass,
+					       &self->value.autoboolval,
+					       set_doc, show_doc, help_doc,
+					       get_set_value, get_show_value,
+					       set_list, show_list);
       break;
 
     case var_uinteger:
-      add_setshow_uinteger_cmd (cmd_name.get (), cmdclass,
-				&self->value.uintval, set_doc, show_doc,
-				help_doc, get_set_value, get_show_value,
-				set_list, show_list);
+      commands = add_setshow_uinteger_cmd (cmd_name.get (), cmdclass,
+					   &self->value.uintval, set_doc,
+					   show_doc, help_doc, get_set_value,
+					   get_show_value, set_list, show_list);
       break;
 
     case var_integer:
-      add_setshow_integer_cmd (cmd_name.get (), cmdclass,
-			       &self->value.intval, set_doc, show_doc,
-			       help_doc, get_set_value, get_show_value,
-			       set_list, show_list); break;
+      commands = add_setshow_integer_cmd (cmd_name.get (), cmdclass,
+					  &self->value.intval, set_doc,
+					  show_doc, help_doc, get_set_value,
+					  get_show_value, set_list, show_list);
+      break;
 
     case var_string:
-      add_setshow_string_cmd (cmd_name.get (), cmdclass,
-			      &self->value.stringval, set_doc, show_doc,
-			      help_doc, get_set_value, get_show_value,
-			      set_list, show_list); break;
+      commands = add_setshow_string_cmd (cmd_name.get (), cmdclass,
+					 &self->value.stringval, set_doc,
+					 show_doc, help_doc, get_set_value,
+					 get_show_value, set_list, show_list);
+      break;
 
     case var_string_noescape:
-      add_setshow_string_noescape_cmd (cmd_name.get (), cmdclass,
-				       &self->value.stringval,
-				       set_doc, show_doc, help_doc,
-				       get_set_value, get_show_value,
-				       set_list, show_list);
-
+      commands = add_setshow_string_noescape_cmd (cmd_name.get (), cmdclass,
+						  &self->value.stringval,
+						  set_doc, show_doc, help_doc,
+						  get_set_value, get_show_value,
+						  set_list, show_list);
       break;
 
     case var_optional_filename:
-      add_setshow_optional_filename_cmd (cmd_name.get (), cmdclass,
-					 &self->value.stringval, set_doc,
-					 show_doc, help_doc, get_set_value,
-					 get_show_value, set_list,
-					 show_list);
+      commands = add_setshow_optional_filename_cmd (cmd_name.get (), cmdclass,
+						    &self->value.stringval,
+						    set_doc, show_doc, help_doc,
+						    get_set_value,
+						    get_show_value, set_list,
+						    show_list);
       break;
 
     case var_filename:
-      add_setshow_filename_cmd (cmd_name.get (), cmdclass,
-				&self->value.stringval, set_doc, show_doc,
-				help_doc, get_set_value, get_show_value,
-				set_list, show_list); break;
+      commands = add_setshow_filename_cmd (cmd_name.get (), cmdclass,
+					   &self->value.stringval, set_doc,
+					   show_doc, help_doc, get_set_value,
+					   get_show_value, set_list, show_list);
+      break;
 
     case var_zinteger:
-      add_setshow_zinteger_cmd (cmd_name.get (), cmdclass,
-				&self->value.intval, set_doc, show_doc,
-				help_doc, get_set_value, get_show_value,
-				set_list, show_list);
+      commands = add_setshow_zinteger_cmd (cmd_name.get (), cmdclass,
+					   &self->value.intval, set_doc,
+					   show_doc, help_doc, get_set_value,
+					   get_show_value, set_list, show_list);
       break;
 
     case var_zuinteger:
-      add_setshow_zuinteger_cmd (cmd_name.get (), cmdclass,
-				&self->value.uintval, set_doc, show_doc,
-				help_doc, get_set_value, get_show_value,
-				set_list, show_list);
+      commands = add_setshow_zuinteger_cmd (cmd_name.get (), cmdclass,
+					    &self->value.uintval, set_doc,
+					    show_doc, help_doc, get_set_value,
+					    get_show_value, set_list,
+					    show_list);
       break;
 
     case var_zuinteger_unlimited:
-      add_setshow_zuinteger_unlimited_cmd (cmd_name.get (), cmdclass,
-					   &self->value.intval, set_doc,
-					   show_doc, help_doc, get_set_value,
-					   get_show_value,
-					   set_list, show_list);
+      commands = add_setshow_zuinteger_unlimited_cmd (cmd_name.get (), cmdclass,
+						      &self->value.intval,
+						      set_doc, show_doc,
+						      help_doc, get_set_value,
+						      get_show_value, set_list,
+						      show_list);
       break;
 
     case var_enum:
-      add_setshow_enum_cmd (cmd_name.get (), cmdclass, self->enumeration,
-			    &self->value.cstringval, set_doc, show_doc,
-			    help_doc, get_set_value, get_show_value,
-			    set_list, show_list);
+      commands = add_setshow_enum_cmd (cmd_name.get (), cmdclass,
+				       self->enumeration,
+				       &self->value.cstringval, set_doc,
+				       show_doc, help_doc, get_set_value,
+				       get_show_value, set_list, show_list);
       /* Initialize the value, just in case.  */
       self->value.cstringval = self->enumeration[0];
       break;
+
+    default:
+      gdb_assert_not_reached ("Unhandled parameter class.");
     }
 
-  /* Lookup created parameter, and register Python object against the
-     parameter context.  Perform this task against both lists.  */
-  tmp_name = cmd_name.get ();
-  param = lookup_cmd (&tmp_name, *show_list, "", NULL, 0, 1);
-  if (param)
-    set_cmd_context (param, self);
-
-  tmp_name = cmd_name.get ();
-  param = lookup_cmd (&tmp_name, *set_list, "", NULL, 0, 1);
-  if (param)
-    set_cmd_context (param, self);
+  /* Register Python objects in both commands' context.  */
+  set_cmd_context (commands.set, self);
+  set_cmd_context (commands.show, self);
 
   /* We (unfortunately) currently leak the command name.  */
   cmd_name.release ();

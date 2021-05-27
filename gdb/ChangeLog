@@ -1,5 +1,10 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* python/py-param.c (add_setshow_generic): Use return values of
+	add_setshow functions.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* mi/mi-main.c (_initialize_mi_main):
 	* python/py-auto-load.c (gdbpy_initialize_auto_load):
 	* remote.c (_initialize_remote):
