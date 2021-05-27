@@ -437,10 +437,10 @@ print_children (PyObject *printer, const char *hint,
 	 2. Arrays.  Always print a ",".
 	 3. Other.  Always print a ",".  */
       if (i == 0)
-      {
-	if (!is_py_none)
-	  fputs_filtered (" = ", stream);
-      }
+	{
+	  if (!is_py_none)
+	    fputs_filtered (" = ", stream);
+	}
       else if (! is_map || i % 2 == 0)
 	fputs_filtered (pretty ? "," : ", ", stream);
 

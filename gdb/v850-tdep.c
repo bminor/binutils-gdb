@@ -1025,12 +1025,14 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
   if (gdbarch_tdep (gdbarch)->abi == V850_ABI_RH850)
     stack_offset = 0;
   else
-  /* The offset onto the stack at which we will start copying parameters
-     (after the registers are used up) begins at 16 rather than at zero.
-     That's how the ABI is defined, though there's no indication that these
-     16 bytes are used for anything, not even for saving incoming
-     argument registers.  */
-  stack_offset = 16;
+    {
+      /* The offset onto the stack at which we will start copying parameters
+	 (after the registers are used up) begins at 16 rather than at zero.
+	 That's how the ABI is defined, though there's no indication that these
+	 16 bytes are used for anything, not even for saving incoming
+	 argument registers.  */
+      stack_offset = 16;
+    }
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)

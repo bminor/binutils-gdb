@@ -1908,15 +1908,13 @@ s390_emit_const (LONGEST num)
     0x98, 0x23, 0x10, 0x00,	/* lm %r2, %r3, 0(%r1) */
   };
   if (num < 0x8000 && num >= 0)
-  {
     add_insns (buf_s, sizeof buf_s);
-  }
   else
-  {
-    s390_emit_litpool (8);
-    add_insns ((unsigned char *) &n, sizeof n);
-    add_insns (buf_l, sizeof buf_l);
-  }
+    {
+      s390_emit_litpool (8);
+      add_insns ((unsigned char *) &n, sizeof n);
+      add_insns (buf_l, sizeof buf_l);
+    }
 }
 
 /* The "emit_call" emit_ops method for s390.  */
@@ -2027,15 +2025,13 @@ s390_emit_set_r2 (int arg1)
     0x58, 0x20, 0x10, 0x00,	/* l %r2, 0(%r1) */
   };
   if (arg1 < 0x8000 && arg1 >= -0x8000)
-  {
     add_insns (buf_s, sizeof buf_s);
-  }
   else
-  {
-    s390_emit_litpool (4);
-    add_insns ((unsigned char *) &arg1, sizeof arg1);
-    add_insns (buf_l, sizeof buf_l);
-  }
+    {
+      s390_emit_litpool (4);
+      add_insns ((unsigned char *) &arg1, sizeof arg1);
+      add_insns (buf_l, sizeof buf_l);
+    }
 }
 
 /* The "emit_int_call_1" emit_ops method for s390.  */
@@ -2553,15 +2549,13 @@ s390x_emit_const (LONGEST num)
     0xe3, 0x20, 0x10, 0x00, 0x00, 0x04,	/* lg %r2, 0(%r1) */
   };
   if (num < 0x8000 && num >= -0x8000)
-  {
     add_insns (buf_s, sizeof buf_s);
-  }
   else
-  {
-    s390_emit_litpool (8);
-    add_insns ((unsigned char *) &n, sizeof n);
-    add_insns (buf_l, sizeof buf_l);
-  }
+    {
+      s390_emit_litpool (8);
+      add_insns ((unsigned char *) &n, sizeof n);
+      add_insns (buf_l, sizeof buf_l);
+    }
 }
 
 /* The "emit_call" emit_ops method for s390x.  */

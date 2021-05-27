@@ -1065,9 +1065,12 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
   else if ((insn & BP_MASK) == BP_INSN)
     regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch), from);
   else
-  /* Handle any other instructions that do not fit in the categories above.  */
-    regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
-				    from + offset);
+    {
+      /* Handle any other instructions that do not fit in the categories
+         above.  */
+      regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
+				      from + offset);
+    }
 }
 
 /* Implementation of gdbarch_displaced_step_prepare.  */

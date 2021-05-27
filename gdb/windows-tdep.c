@@ -761,10 +761,10 @@ create_enum (struct gdbarch *gdbarch, int bit, const char *name,
   type->set_is_unsigned (true);
 
   for (i = 0; i < count; i++)
-  {
-    TYPE_FIELD_NAME (type, i) = values[i].name;
-    SET_FIELD_ENUMVAL (type->field (i), values[i].value);
-  }
+    {
+      TYPE_FIELD_NAME (type, i) = values[i].name;
+      SET_FIELD_ENUMVAL (type->field (i), values[i].value);
+    }
 
   return type;
 }

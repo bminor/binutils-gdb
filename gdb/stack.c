@@ -1005,11 +1005,11 @@ print_pc (struct ui_out *uiout, struct gdbarch *gdbarch, frame_info *frame,
 
   std::string flags = gdbarch_get_pc_address_flags (gdbarch, frame, pc);
   if (!flags.empty ())
-  {
-    uiout->text (" [");
-    uiout->field_string ("addr_flags", flags);
-    uiout->text ("]");
-  }
+    {
+      uiout->text (" [");
+      uiout->field_string ("addr_flags", flags);
+      uiout->text ("]");
+    }
 }
 
 /* See stack.h.  */
@@ -1927,7 +1927,7 @@ public:
     struct frame_info *fid;
 
     if (args == NULL)
-    error (_("Missing address argument to view a frame"));
+      error (_("Missing address argument to view a frame"));
 
     gdb_argv argv (args);
 

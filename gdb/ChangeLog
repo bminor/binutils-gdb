@@ -1,5 +1,9 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Fix some indentation mistakes throughout.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.h (iterate_over_bp_locations): Remove.  Update
 	users to use all_bp_locations.
 	(all_bp_locations): New.

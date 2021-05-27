@@ -707,14 +707,14 @@ get_signaled_thread (void)
   tid_t ktid = 0;
 
   while (1)
-  {
-    if (getthrds (inferior_ptid.pid (), &thrinf, 
-	  	  sizeof (thrinf), &ktid, 1) != 1)
-      break;
+    {
+      if (getthrds (inferior_ptid.pid (), &thrinf,
+		    sizeof (thrinf), &ktid, 1) != 1)
+	break;
 
-    if (thrinf.ti_cursig == SIGTRAP)
-      return thrinf.ti_tid;
-  }
+      if (thrinf.ti_cursig == SIGTRAP)
+	return thrinf.ti_tid;
+    }
 
   /* Didn't find any thread stopped on a SIGTRAP signal.  */
   return 0;

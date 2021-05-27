@@ -2267,7 +2267,7 @@ tfind_command_1 (const char *args, int from_tty)
     { /* TFIND with no args means find NEXT trace frame.  */
       if (traceframe_number == -1)
 	frameno = 0;	/* "next" is first one.  */
-	else
+      else
 	frameno = traceframe_number + 1;
     }
   else if (0 == strcmp (args, "-"))
@@ -2408,11 +2408,13 @@ tfind_line_command (const char *args, int from_tty)
   	}
       }
     else
-    /* Is there any case in which we get here, and have an address
-       which the user would want to see?  If we have debugging
-       symbols and no line numbers?  */
-    error (_("Line number %d is out of range for \"%s\"."),
-	   sal.line, symtab_to_filename_for_display (sal.symtab));
+      {
+	/* Is there any case in which we get here, and have an address
+	   which the user would want to see?  If we have debugging
+	   symbols and no line numbers?  */
+	error (_("Line number %d is out of range for \"%s\"."),
+	       sal.line, symtab_to_filename_for_display (sal.symtab));
+      }
 
   /* Find within range of stated line.  */
   if (args && *args)

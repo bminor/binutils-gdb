@@ -249,15 +249,15 @@ nios2_setup_default (struct nios2_unwind_cache *cache)
   int i;
 
   for (i = 0; i < NIOS2_NUM_REGS; i++)
-  {
-    /* All registers start off holding their previous values.  */
-    cache->reg_value[i].reg    = i;
-    cache->reg_value[i].offset = 0;
+    {
+      /* All registers start off holding their previous values.  */
+      cache->reg_value[i].reg    = i;
+      cache->reg_value[i].offset = 0;
 
-    /* All registers start off not saved.  */
-    cache->reg_saved[i].basereg = -1;
-    cache->reg_saved[i].addr    = 0;
-  }
+      /* All registers start off not saved.  */
+      cache->reg_saved[i].basereg = -1;
+      cache->reg_saved[i].addr    = 0;
+    }
 }
 
 /* Initialize the unwind cache.  */
@@ -1244,16 +1244,16 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
       enum branch_condition cond;
 
       if (pc == current_pc)
-      {
-	/* When we reach the current PC we must save the current
-	   register state (for the backtrace) but keep analysing
-	   because there might be more to find out (eg. is this an
-	   exception handler).  */
-	memcpy (temp_value, value, sizeof (temp_value));
-	value = temp_value;
-	if (nios2_debug)
-	  fprintf_unfiltered (gdb_stdlog, "*");
-      }
+	{
+	  /* When we reach the current PC we must save the current
+	     register state (for the backtrace) but keep analysing
+	     because there might be more to find out (eg. is this an
+	     exception handler).  */
+	  memcpy (temp_value, value, sizeof (temp_value));
+	  value = temp_value;
+	  if (nios2_debug)
+	    fprintf_unfiltered (gdb_stdlog, "*");
+	}
 
       op = nios2_fetch_insn (gdbarch, pc, &insn);
 

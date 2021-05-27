@@ -7143,12 +7143,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      cause GDB to crash with an internal error when the user tries to set
      an unsupported OSABI.  */
   if (!tdesc_has_registers (tdesc))
-  {
-    if (info.bfd_arch_info->mach == bfd_mach_s390_31)
-      tdesc = tdesc_s390_linux32;
-    else
-      tdesc = tdesc_s390x_linux64;
-  }
+    {
+      if (info.bfd_arch_info->mach == bfd_mach_s390_31)
+	tdesc = tdesc_s390_linux32;
+      else
+	tdesc = tdesc_s390x_linux64;
+    }
   tdep->tdesc = tdesc;
 
   /* Check any target description for validity.  */

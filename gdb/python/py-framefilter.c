@@ -780,16 +780,16 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
   get_user_print_options (&opts);
   if (print_frame_info)
-  {
-    gdb::optional<enum print_what> user_frame_info_print_what;
+    {
+      gdb::optional<enum print_what> user_frame_info_print_what;
 
-    get_user_print_what_frame_info (&user_frame_info_print_what);
-    if (!out->is_mi_like_p () && user_frame_info_print_what.has_value ())
-      {
-	/* Use the specific frame information desired by the user.  */
-	print_what = *user_frame_info_print_what;
-      }
-  }
+      get_user_print_what_frame_info (&user_frame_info_print_what);
+      if (!out->is_mi_like_p () && user_frame_info_print_what.has_value ())
+	{
+	  /* Use the specific frame information desired by the user.  */
+	  print_what = *user_frame_info_print_what;
+	}
+    }
 
   /* Get the underlying frame.  This is needed to determine GDB
   architecture, and also, in the cases of frame variables/arguments to

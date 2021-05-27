@@ -9697,11 +9697,11 @@ vfp - VFP co-processor."),
 	  { \
 	    unsigned int mem_len = LENGTH; \
 	    if (mem_len) \
-	    { \
-	      MEMS =  XNEWVEC (struct arm_mem_r, mem_len);  \
-	      memcpy(&MEMS->len, &RECORD_BUF[0], \
-		     sizeof(struct arm_mem_r) * LENGTH); \
-	    } \
+	      { \
+		MEMS =  XNEWVEC (struct arm_mem_r, mem_len);  \
+		memcpy(&MEMS->len, &RECORD_BUF[0], \
+		       sizeof(struct arm_mem_r) * LENGTH); \
+	      } \
 	  } \
 	  while (0)
 
@@ -9997,19 +9997,19 @@ arm_record_extension_space (insn_decode_record *arm_insn_r)
     {
       /* Handle MLA(S) and MUL(S).  */
       if (in_inclusive_range (insn_op1, 0U, 3U))
-      {
-	record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
-	record_buf[1] = ARM_PS_REGNUM;
-	arm_insn_r->reg_rec_count = 2;
-      }
+	{
+	  record_buf[0] = bits (arm_insn_r->arm_insn, 12, 15);
+	  record_buf[1] = ARM_PS_REGNUM;
+	  arm_insn_r->reg_rec_count = 2;
+	}
       else if (in_inclusive_range (insn_op1, 4U, 15U))
-      {
-	/* Handle SMLAL(S), SMULL(S), UMLAL(S), UMULL(S).  */
-	record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
-	record_buf[1] = bits (arm_insn_r->arm_insn, 12, 15);
-	record_buf[2] = ARM_PS_REGNUM;
-	arm_insn_r->reg_rec_count = 3;
-      }
+	{
+	  /* Handle SMLAL(S), SMULL(S), UMLAL(S), UMULL(S).  */
+	  record_buf[0] = bits (arm_insn_r->arm_insn, 16, 19);
+	  record_buf[1] = bits (arm_insn_r->arm_insn, 12, 15);
+	  record_buf[2] = ARM_PS_REGNUM;
+	  arm_insn_r->reg_rec_count = 3;
+	}
     }
 
   opcode1 = bits (arm_insn_r->arm_insn, 26, 27);
@@ -11100,10 +11100,10 @@ arm_record_b_bl (insn_decode_record *arm_insn_r)
   /* Note: BLX(1) doesnt fall here but instead it falls into
      extension space.  */
   if (bit (arm_insn_r->arm_insn, 24))
-  {
-    record_buf[0] = ARM_LR_REGNUM;
-    arm_insn_r->reg_rec_count = 1;
-  }
+    {
+      record_buf[0] = ARM_LR_REGNUM;
+      arm_insn_r->reg_rec_count = 1;
+    }
 
   REG_ALLOC (arm_insn_r->arm_regs, arm_insn_r->reg_rec_count, record_buf);
 

@@ -1605,28 +1605,29 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
   /* Now do full processing of the found relevant range of elements.  */
 
   for (bc = bc_l; bc < bp_locations.size (); bc++)
-  {
-    struct bp_location *bl = bp_locations[bc];
+    {
+      struct bp_location *bl = bp_locations[bc];
 
-    /* bp_location array has BL->OWNER always non-NULL.  */
-    if (bl->owner->type == bp_none)
-      warning (_("reading through apparently deleted breakpoint #%d?"),
-	       bl->owner->number);
+      /* bp_location array has BL->OWNER always non-NULL.  */
+      if (bl->owner->type == bp_none)
+	warning (_("reading through apparently deleted breakpoint #%d?"),
+		 bl->owner->number);
 
-    /* Performance optimization: any further element can no longer affect BUF
-       content.  */
+      /* Performance optimization: any further element can no longer affect BUF
+	 content.  */
 
-    if (bl->address >= bp_locations_placed_address_before_address_max
-	&& memaddr + len <= (bl->address
-			     - bp_locations_placed_address_before_address_max))
-      break;
+      if (bl->address >= bp_locations_placed_address_before_address_max
+	  && (memaddr + len
+	      <= (bl->address
+		  - bp_locations_placed_address_before_address_max)))
+	break;
 
-    if (!bp_location_has_shadow (bl))
-      continue;
+      if (!bp_location_has_shadow (bl))
+	continue;
 
-    one_breakpoint_xfer_memory (readbuf, writebuf, writebuf_org,
-				memaddr, len, &bl->target_info, bl->gdbarch);
-  }
+      one_breakpoint_xfer_memory (readbuf, writebuf, writebuf_org,
+				  memaddr, len, &bl->target_info, bl->gdbarch);
+    }
 }
 
 /* See breakpoint.h.  */
@@ -3079,10 +3080,9 @@ remove_breakpoints (void)
   int val = 0;
 
   for (bp_location *bl : all_bp_locations ())
-  {
     if (bl->inserted && !is_tracepoint (bl->owner))
       val |= remove_breakpoint (bl);
-  }
+
   return val;
 }
 
@@ -3116,17 +3116,17 @@ remove_breakpoints_inf (inferior *inf)
   int val;
 
   for (bp_location *bl : all_bp_locations ())
-  {
-    if (bl->pspace != inf->pspace)
-      continue;
+    {
+      if (bl->pspace != inf->pspace)
+	continue;
 
-    if (bl->inserted && !bl->target_info.persist)
-      {
-	val = remove_breakpoint (bl);
-	if (val != 0)
-	  return;
-      }
-  }
+      if (bl->inserted && !bl->target_info.persist)
+	{
+	  val = remove_breakpoint (bl);
+	  if (val != 0)
+	    return;
+	}
+    }
 }
 
 static int internal_breakpoint_number = -1;
@@ -3612,107 +3612,107 @@ update_breakpoints_after_exec (void)
       gdb_assert (!bploc->inserted);
 
   for (breakpoint *b : all_breakpoints_safe ())
-  {
-    if (b->pspace != current_program_space)
-      continue;
-
-    /* Solib breakpoints must be explicitly reset after an exec().  */
-    if (b->type == bp_shlib_event)
-      {
-	delete_breakpoint (b);
+    {
+      if (b->pspace != current_program_space)
 	continue;
-      }
 
-    /* JIT breakpoints must be explicitly reset after an exec().  */
-    if (b->type == bp_jit_event)
-      {
-	delete_breakpoint (b);
-	continue;
-      }
+      /* Solib breakpoints must be explicitly reset after an exec().  */
+      if (b->type == bp_shlib_event)
+	{
+	  delete_breakpoint (b);
+	  continue;
+	}
 
-    /* Thread event breakpoints must be set anew after an exec(),
-       as must overlay event and longjmp master breakpoints.  */
-    if (b->type == bp_thread_event || b->type == bp_overlay_event
-	|| b->type == bp_longjmp_master || b->type == bp_std_terminate_master
-	|| b->type == bp_exception_master)
-      {
-	delete_breakpoint (b);
-	continue;
-      }
+      /* JIT breakpoints must be explicitly reset after an exec().  */
+      if (b->type == bp_jit_event)
+	{
+	  delete_breakpoint (b);
+	  continue;
+	}
 
-    /* Step-resume breakpoints are meaningless after an exec().  */
-    if (b->type == bp_step_resume || b->type == bp_hp_step_resume)
-      {
-	delete_breakpoint (b);
-	continue;
-      }
+      /* Thread event breakpoints must be set anew after an exec(),
+	 as must overlay event and longjmp master breakpoints.  */
+      if (b->type == bp_thread_event || b->type == bp_overlay_event
+	  || b->type == bp_longjmp_master || b->type == bp_std_terminate_master
+	  || b->type == bp_exception_master)
+	{
+	  delete_breakpoint (b);
+	  continue;
+	}
 
-    /* Just like single-step breakpoints.  */
-    if (b->type == bp_single_step)
-      {
-	delete_breakpoint (b);
-	continue;
-      }
+      /* Step-resume breakpoints are meaningless after an exec().  */
+      if (b->type == bp_step_resume || b->type == bp_hp_step_resume)
+	{
+	  delete_breakpoint (b);
+	  continue;
+	}
 
-    /* Longjmp and longjmp-resume breakpoints are also meaningless
-       after an exec.  */
-    if (b->type == bp_longjmp || b->type == bp_longjmp_resume
-	|| b->type == bp_longjmp_call_dummy
-	|| b->type == bp_exception || b->type == bp_exception_resume)
-      {
-	delete_breakpoint (b);
-	continue;
-      }
+      /* Just like single-step breakpoints.  */
+      if (b->type == bp_single_step)
+	{
+	  delete_breakpoint (b);
+	  continue;
+	}
 
-    if (b->type == bp_catchpoint)
-      {
-	/* For now, none of the bp_catchpoint breakpoints need to
-	   do anything at this point.  In the future, if some of
-	   the catchpoints need to something, we will need to add
-	   a new method, and call this method from here.  */
-	continue;
-      }
+      /* Longjmp and longjmp-resume breakpoints are also meaningless
+	 after an exec.  */
+      if (b->type == bp_longjmp || b->type == bp_longjmp_resume
+	  || b->type == bp_longjmp_call_dummy
+	  || b->type == bp_exception || b->type == bp_exception_resume)
+	{
+	  delete_breakpoint (b);
+	  continue;
+	}
 
-    /* bp_finish is a special case.  The only way we ought to be able
-       to see one of these when an exec() has happened, is if the user
-       caught a vfork, and then said "finish".  Ordinarily a finish just
-       carries them to the call-site of the current callee, by setting
-       a temporary bp there and resuming.  But in this case, the finish
-       will carry them entirely through the vfork & exec.
+      if (b->type == bp_catchpoint)
+	{
+	  /* For now, none of the bp_catchpoint breakpoints need to
+	     do anything at this point.  In the future, if some of
+	     the catchpoints need to something, we will need to add
+	     a new method, and call this method from here.  */
+	  continue;
+	}
 
-       We don't want to allow a bp_finish to remain inserted now.  But
-       we can't safely delete it, 'cause finish_command has a handle to
-       the bp on a bpstat, and will later want to delete it.  There's a
-       chance (and I've seen it happen) that if we delete the bp_finish
-       here, that its storage will get reused by the time finish_command
-       gets 'round to deleting the "use to be a bp_finish" breakpoint.
-       We really must allow finish_command to delete a bp_finish.
+      /* bp_finish is a special case.  The only way we ought to be able
+	 to see one of these when an exec() has happened, is if the user
+	 caught a vfork, and then said "finish".  Ordinarily a finish just
+	 carries them to the call-site of the current callee, by setting
+	 a temporary bp there and resuming.  But in this case, the finish
+	 will carry them entirely through the vfork & exec.
 
-       In the absence of a general solution for the "how do we know
-       it's safe to delete something others may have handles to?"
-       problem, what we'll do here is just uninsert the bp_finish, and
-       let finish_command delete it.
+	 We don't want to allow a bp_finish to remain inserted now.  But
+	 we can't safely delete it, 'cause finish_command has a handle to
+	 the bp on a bpstat, and will later want to delete it.  There's a
+	 chance (and I've seen it happen) that if we delete the bp_finish
+	 here, that its storage will get reused by the time finish_command
+	 gets 'round to deleting the "use to be a bp_finish" breakpoint.
+	 We really must allow finish_command to delete a bp_finish.
 
-       (We know the bp_finish is "doomed" in the sense that it's
-       momentary, and will be deleted as soon as finish_command sees
-       the inferior stopped.  So it doesn't matter that the bp's
-       address is probably bogus in the new a.out, unlike e.g., the
-       solib breakpoints.)  */
+	 In the absence of a general solution for the "how do we know
+	 it's safe to delete something others may have handles to?"
+	 problem, what we'll do here is just uninsert the bp_finish, and
+	 let finish_command delete it.
 
-    if (b->type == bp_finish)
-      {
-	continue;
-      }
+	 (We know the bp_finish is "doomed" in the sense that it's
+	 momentary, and will be deleted as soon as finish_command sees
+	 the inferior stopped.  So it doesn't matter that the bp's
+	 address is probably bogus in the new a.out, unlike e.g., the
+	 solib breakpoints.)  */
 
-    /* Without a symbolic address, we have little hope of the
-       pre-exec() address meaning the same thing in the post-exec()
-       a.out.  */
-    if (breakpoint_event_location_empty_p (b))
-      {
-	delete_breakpoint (b);
-	continue;
-      }
-  }
+      if (b->type == bp_finish)
+	{
+	  continue;
+	}
+
+      /* Without a symbolic address, we have little hope of the
+	 pre-exec() address meaning the same thing in the post-exec()
+	 a.out.  */
+      if (breakpoint_event_location_empty_p (b))
+	{
+	  delete_breakpoint (b);
+	  continue;
+	}
+    }
 }
 
 int
@@ -3728,22 +3728,22 @@ detach_breakpoints (ptid_t ptid)
   /* Set inferior_ptid; remove_breakpoint_1 uses this global.  */
   inferior_ptid = ptid;
   for (bp_location *bl : all_bp_locations ())
-  {
-    if (bl->pspace != inf->pspace)
-      continue;
+    {
+      if (bl->pspace != inf->pspace)
+	continue;
 
-    /* This function must physically remove breakpoints locations
-       from the specified ptid, without modifying the breakpoint
-       package's state.  Locations of type bp_loc_other are only
-       maintained at GDB side.  So, there is no need to remove
-       these bp_loc_other locations.  Moreover, removing these
-       would modify the breakpoint package's state.  */
-    if (bl->loc_type == bp_loc_other)
-      continue;
+      /* This function must physically remove breakpoints locations
+	 from the specified ptid, without modifying the breakpoint
+	 package's state.  Locations of type bp_loc_other are only
+	 maintained at GDB side.  So, there is no need to remove
+	 these bp_loc_other locations.  Moreover, removing these
+	 would modify the breakpoint package's state.  */
+      if (bl->loc_type == bp_loc_other)
+	continue;
 
-    if (bl->inserted)
-      val |= remove_breakpoint_1 (bl, DETACH_BREAKPOINT);
-  }
+      if (bl->inserted)
+	val |= remove_breakpoint_1 (bl, DETACH_BREAKPOINT);
+    }
 
   return val;
 }
@@ -3952,83 +3952,83 @@ breakpoint_init_inferior (enum inf_context context)
   mark_breakpoints_out ();
 
   for (breakpoint *b : all_breakpoints_safe ())
-  {
-    if (b->loc && b->loc->pspace != pspace)
-      continue;
+    {
+      if (b->loc && b->loc->pspace != pspace)
+	continue;
 
-    switch (b->type)
-      {
-      case bp_call_dummy:
-      case bp_longjmp_call_dummy:
-
-	/* If the call dummy breakpoint is at the entry point it will
-	   cause problems when the inferior is rerun, so we better get
-	   rid of it.  */
-
-      case bp_watchpoint_scope:
-
-	/* Also get rid of scope breakpoints.  */
-
-      case bp_shlib_event:
-
-	/* Also remove solib event breakpoints.  Their addresses may
-	   have changed since the last time we ran the program.
-	   Actually we may now be debugging against different target;
-	   and so the solib backend that installed this breakpoint may
-	   not be used in by the target.  E.g.,
-
-	   (gdb) file prog-linux
-	   (gdb) run               # native linux target
-	   ...
-	   (gdb) kill
-	   (gdb) file prog-win.exe
-	   (gdb) tar rem :9999     # remote Windows gdbserver.
-	*/
-
-      case bp_step_resume:
-
-	/* Also remove step-resume breakpoints.  */
-
-      case bp_single_step:
-
-	/* Also remove single-step breakpoints.  */
-
-	delete_breakpoint (b);
-	break;
-
-      case bp_watchpoint:
-      case bp_hardware_watchpoint:
-      case bp_read_watchpoint:
-      case bp_access_watchpoint:
+      switch (b->type)
 	{
-	  struct watchpoint *w = (struct watchpoint *) b;
+	case bp_call_dummy:
+	case bp_longjmp_call_dummy:
 
-	  /* Likewise for watchpoints on local expressions.  */
-	  if (w->exp_valid_block != NULL)
-	    delete_breakpoint (b);
-	  else
-	    {
-	      /* Get rid of existing locations, which are no longer
-		 valid.  New ones will be created in
-		 update_watchpoint, when the inferior is restarted.
-		 The next update_global_location_list call will
-		 garbage collect them.  */
-	      b->loc = NULL;
+	  /* If the call dummy breakpoint is at the entry point it will
+	     cause problems when the inferior is rerun, so we better get
+	     rid of it.  */
 
-	      if (context == inf_starting)
-		{
-		  /* Reset val field to force reread of starting value in
-		     insert_breakpoints.  */
-		  w->val.reset (nullptr);
-		  w->val_valid = false;
-		}
-	    }
+	case bp_watchpoint_scope:
+
+	  /* Also get rid of scope breakpoints.  */
+
+	case bp_shlib_event:
+
+	  /* Also remove solib event breakpoints.  Their addresses may
+	     have changed since the last time we ran the program.
+	     Actually we may now be debugging against different target;
+	     and so the solib backend that installed this breakpoint may
+	     not be used in by the target.  E.g.,
+
+	     (gdb) file prog-linux
+	     (gdb) run               # native linux target
+	     ...
+	     (gdb) kill
+	     (gdb) file prog-win.exe
+	     (gdb) tar rem :9999     # remote Windows gdbserver.
+	  */
+
+	case bp_step_resume:
+
+	  /* Also remove step-resume breakpoints.  */
+
+	case bp_single_step:
+
+	  /* Also remove single-step breakpoints.  */
+
+	  delete_breakpoint (b);
+	  break;
+
+	case bp_watchpoint:
+	case bp_hardware_watchpoint:
+	case bp_read_watchpoint:
+	case bp_access_watchpoint:
+	  {
+	    struct watchpoint *w = (struct watchpoint *) b;
+
+	    /* Likewise for watchpoints on local expressions.  */
+	    if (w->exp_valid_block != NULL)
+	      delete_breakpoint (b);
+	    else
+	      {
+		/* Get rid of existing locations, which are no longer
+		   valid.  New ones will be created in
+		   update_watchpoint, when the inferior is restarted.
+		   The next update_global_location_list call will
+		   garbage collect them.  */
+		b->loc = NULL;
+
+		if (context == inf_starting)
+		  {
+		    /* Reset val field to force reread of starting value in
+		       insert_breakpoints.  */
+		    w->val.reset (nullptr);
+		    w->val_valid = false;
+		  }
+	      }
+	  }
+	  break;
+	default:
+	  break;
 	}
-	break;
-      default:
-	break;
-      }
-  }
+    }
 
   /* Get rid of the moribund locations.  */
   for (bp_location *bl : moribund_locations)
@@ -7394,11 +7394,11 @@ enable_overlay_breakpoints (void)
 {
   for (breakpoint *b : all_breakpoints ())
     if (b->type == bp_overlay_event)
-    {
-      b->enable_state = bp_enabled;
-      update_global_location_list (UGLL_MAY_INSERT);
-      overlay_events_enabled = 1;
-    }
+      {
+	b->enable_state = bp_enabled;
+	update_global_location_list (UGLL_MAY_INSERT);
+	overlay_events_enabled = 1;
+      }
 }
 
 void
@@ -7406,11 +7406,11 @@ disable_overlay_breakpoints (void)
 {
   for (breakpoint *b : all_breakpoints ())
     if (b->type == bp_overlay_event)
-    {
-      b->enable_state = bp_disabled;
-      update_global_location_list (UGLL_DONT_INSERT);
-      overlay_events_enabled = 0;
-    }
+      {
+	b->enable_state = bp_disabled;
+	update_global_location_list (UGLL_DONT_INSERT);
+	overlay_events_enabled = 0;
+      }
 }
 
 /* Set an active std::terminate breakpoint for each std::terminate
@@ -7546,27 +7546,27 @@ void
 disable_breakpoints_in_shlibs (void)
 {
   for (bp_location *loc : all_bp_locations ())
-  {
-    /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
-    struct breakpoint *b = loc->owner;
+    {
+      /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
+      struct breakpoint *b = loc->owner;
 
-    /* We apply the check to all breakpoints, including disabled for
-       those with loc->duplicate set.  This is so that when breakpoint
-       becomes enabled, or the duplicate is removed, gdb will try to
-       insert all breakpoints.  If we don't set shlib_disabled here,
-       we'll try to insert those breakpoints and fail.  */
-    if (((b->type == bp_breakpoint)
-	 || (b->type == bp_jit_event)
-	 || (b->type == bp_hardware_breakpoint)
-	 || (is_tracepoint (b)))
-	&& loc->pspace == current_program_space
-	&& !loc->shlib_disabled
-	&& solib_name_from_address (loc->pspace, loc->address)
-	)
-      {
-	loc->shlib_disabled = 1;
-      }
-  }
+      /* We apply the check to all breakpoints, including disabled for
+	 those with loc->duplicate set.  This is so that when breakpoint
+	 becomes enabled, or the duplicate is removed, gdb will try to
+	 insert all breakpoints.  If we don't set shlib_disabled here,
+	 we'll try to insert those breakpoints and fail.  */
+      if (((b->type == bp_breakpoint)
+	   || (b->type == bp_jit_event)
+	   || (b->type == bp_hardware_breakpoint)
+	   || (is_tracepoint (b)))
+	  && loc->pspace == current_program_space
+	  && !loc->shlib_disabled
+	  && solib_name_from_address (loc->pspace, loc->address)
+	  )
+	{
+	  loc->shlib_disabled = 1;
+	}
+    }
 }
 
 /* Disable any breakpoints and tracepoints that are in SOLIB upon
@@ -7579,39 +7579,39 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
   int disabled_shlib_breaks = 0;
 
   for (bp_location *loc : all_bp_locations ())
-  {
-    /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
-    struct breakpoint *b = loc->owner;
+    {
+      /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always non-NULL.  */
+      struct breakpoint *b = loc->owner;
 
-    if (solib->pspace == loc->pspace
-	&& !loc->shlib_disabled
-	&& (((b->type == bp_breakpoint
-	      || b->type == bp_jit_event
-	      || b->type == bp_hardware_breakpoint)
-	     && (loc->loc_type == bp_loc_hardware_breakpoint
-		 || loc->loc_type == bp_loc_software_breakpoint))
-	    || is_tracepoint (b))
-	&& solib_contains_address_p (solib, loc->address))
-      {
-	loc->shlib_disabled = 1;
-	/* At this point, we cannot rely on remove_breakpoint
-	   succeeding so we must mark the breakpoint as not inserted
-	   to prevent future errors occurring in remove_breakpoints.  */
-	loc->inserted = 0;
+      if (solib->pspace == loc->pspace
+	  && !loc->shlib_disabled
+	  && (((b->type == bp_breakpoint
+		|| b->type == bp_jit_event
+		|| b->type == bp_hardware_breakpoint)
+	       && (loc->loc_type == bp_loc_hardware_breakpoint
+		   || loc->loc_type == bp_loc_software_breakpoint))
+	      || is_tracepoint (b))
+	  && solib_contains_address_p (solib, loc->address))
+	{
+	  loc->shlib_disabled = 1;
+	  /* At this point, we cannot rely on remove_breakpoint
+	     succeeding so we must mark the breakpoint as not inserted
+	     to prevent future errors occurring in remove_breakpoints.  */
+	  loc->inserted = 0;
 
-	/* This may cause duplicate notifications for the same breakpoint.  */
-	gdb::observers::breakpoint_modified.notify (b);
+	  /* This may cause duplicate notifications for the same breakpoint.  */
+	  gdb::observers::breakpoint_modified.notify (b);
 
-	if (!disabled_shlib_breaks)
-	  {
-	    target_terminal::ours_for_output ();
-	    warning (_("Temporarily disabling breakpoints "
-		       "for unloaded shared library \"%s\""),
-		     solib->so_name);
-	  }
-	disabled_shlib_breaks = 1;
-      }
-  }
+	  if (!disabled_shlib_breaks)
+	    {
+	      target_terminal::ours_for_output ();
+	      warning (_("Temporarily disabling breakpoints "
+			 "for unloaded shared library \"%s\""),
+		       solib->so_name);
+	    }
+	  disabled_shlib_breaks = 1;
+	}
+    }
 }
 
 /* Disable any breakpoints and tracepoints in OBJFILE upon
@@ -7975,22 +7975,22 @@ breakpoint_hit_catch_solib (const struct bp_location *bl,
     return 1;
 
   for (breakpoint *other : all_breakpoints ())
-  {
-    if (other == bl->owner)
-      continue;
+    {
+      if (other == bl->owner)
+	continue;
 
-    if (other->type != bp_shlib_event)
-      continue;
+      if (other->type != bp_shlib_event)
+	continue;
 
-    if (self->pspace != NULL && other->pspace != self->pspace)
-      continue;
+      if (self->pspace != NULL && other->pspace != self->pspace)
+	continue;
 
-    for (bp_location *other_bl : other->locations ())
-      {
-	if (other->ops->breakpoint_hit (other_bl, aspace, bp_addr, ws))
-	  return 1;
-      }
-  }
+      for (bp_location *other_bl : other->locations ())
+	{
+	  if (other->ops->breakpoint_hit (other_bl, aspace, bp_addr, ws))
+	    return 1;
+	}
+    }
 
   return 0;
 }
@@ -13174,10 +13174,10 @@ delete_breakpoint (struct breakpoint *bpt)
 
   for (breakpoint *b : all_breakpoints ())
     if (b->next == bpt)
-    {
-      b->next = bpt->next;
-      break;
-    }
+      {
+	b->next = bpt->next;
+	break;
+      }
 
   /* Be sure no bpstat's are pointing at the breakpoint after it's
      been freed.  */
@@ -13913,33 +13913,33 @@ set_ignore_count (int bptnum, int count, int from_tty)
 
   for (breakpoint *b : all_breakpoints ())
     if (b->number == bptnum)
-    {
-      if (is_tracepoint (b))
-	{
-	  if (from_tty && count != 0)
-	    printf_filtered (_("Ignore count ignored for tracepoint %d."),
-			     bptnum);
-	  return;
-	}
-      
-      b->ignore_count = count;
-      if (from_tty)
-	{
-	  if (count == 0)
-	    printf_filtered (_("Will stop next time "
-			       "breakpoint %d is reached."),
-			     bptnum);
-	  else if (count == 1)
-	    printf_filtered (_("Will ignore next crossing of breakpoint %d."),
-			     bptnum);
-	  else
-	    printf_filtered (_("Will ignore next %d "
-			       "crossings of breakpoint %d."),
-			     count, bptnum);
-	}
-      gdb::observers::breakpoint_modified.notify (b);
-      return;
-    }
+      {
+	if (is_tracepoint (b))
+	  {
+	    if (from_tty && count != 0)
+	      printf_filtered (_("Ignore count ignored for tracepoint %d."),
+			       bptnum);
+	    return;
+	  }
+
+	b->ignore_count = count;
+	if (from_tty)
+	  {
+	    if (count == 0)
+	      printf_filtered (_("Will stop next time "
+				 "breakpoint %d is reached."),
+			       bptnum);
+	    else if (count == 1)
+	      printf_filtered (_("Will ignore next crossing of breakpoint %d."),
+			       bptnum);
+	    else
+	      printf_filtered (_("Will ignore next %d "
+				 "crossings of breakpoint %d."),
+			       count, bptnum);
+	  }
+	gdb::observers::breakpoint_modified.notify (b);
+	return;
+      }
 
   error (_("No breakpoint number %d."), bptnum);
 }
@@ -14846,10 +14846,10 @@ trace_pass_command (const char *args, int from_tty)
 	error (_("Junk at end of arguments."));
 
       for (breakpoint *b : all_tracepoints ())
-      {
-	t1 = (struct tracepoint *) b;
-	trace_pass_set_count (t1, count, from_tty);
-      }
+	{
+	  t1 = (struct tracepoint *) b;
+	  trace_pass_set_count (t1, count, from_tty);
+	}
     }
   else if (*args == '\0')
     {
@@ -14931,9 +14931,7 @@ get_tracepoint_by_number (const char **arg,
 
   for (breakpoint *t : all_tracepoints ())
     if (t->number == tpnum)
-    {
       return (struct tracepoint *) t;
-    }
 
   printf_unfiltered ("No tracepoint number %d.\n", tpnum);
   return NULL;
@@ -14968,25 +14966,25 @@ save_breakpoints (const char *filename, int from_tty,
 
   /* See if we have anything to save.  */
   for (breakpoint *tp : all_breakpoints ())
-  {
-    /* Skip internal and momentary breakpoints.  */
-    if (!user_breakpoint_p (tp))
-      continue;
+    {
+      /* Skip internal and momentary breakpoints.  */
+      if (!user_breakpoint_p (tp))
+	continue;
 
-    /* If we have a filter, only save the breakpoints it accepts.  */
-    if (filter && !filter (tp))
-      continue;
+      /* If we have a filter, only save the breakpoints it accepts.  */
+      if (filter && !filter (tp))
+	continue;
 
-    any = 1;
+      any = 1;
 
-    if (is_tracepoint (tp))
-      {
-	extra_trace_bits = 1;
+      if (is_tracepoint (tp))
+	{
+	  extra_trace_bits = 1;
 
-	/* We can stop searching.  */
-	break;
-      }
-  }
+	  /* We can stop searching.  */
+	  break;
+	}
+    }
 
   if (!any)
     {
@@ -15006,65 +15004,65 @@ save_breakpoints (const char *filename, int from_tty,
     save_trace_state_variables (&fp);
 
   for (breakpoint *tp : all_breakpoints ())
-  {
-    /* Skip internal and momentary breakpoints.  */
-    if (!user_breakpoint_p (tp))
-      continue;
+    {
+      /* Skip internal and momentary breakpoints.  */
+      if (!user_breakpoint_p (tp))
+	continue;
 
-    /* If we have a filter, only save the breakpoints it accepts.  */
-    if (filter && !filter (tp))
-      continue;
+      /* If we have a filter, only save the breakpoints it accepts.  */
+      if (filter && !filter (tp))
+	continue;
 
-    tp->ops->print_recreate (tp, &fp);
+      tp->ops->print_recreate (tp, &fp);
 
-    /* Note, we can't rely on tp->number for anything, as we can't
-       assume the recreated breakpoint numbers will match.  Use $bpnum
-       instead.  */
+      /* Note, we can't rely on tp->number for anything, as we can't
+	 assume the recreated breakpoint numbers will match.  Use $bpnum
+	 instead.  */
 
-    if (tp->cond_string)
-      fp.printf ("  condition $bpnum %s\n", tp->cond_string);
+      if (tp->cond_string)
+	fp.printf ("  condition $bpnum %s\n", tp->cond_string);
 
-    if (tp->ignore_count)
-      fp.printf ("  ignore $bpnum %d\n", tp->ignore_count);
+      if (tp->ignore_count)
+	fp.printf ("  ignore $bpnum %d\n", tp->ignore_count);
 
-    if (tp->type != bp_dprintf && tp->commands)
-      {
-	fp.puts ("  commands\n");
-	
-	current_uiout->redirect (&fp);
-	try
-	  {
-	    print_command_lines (current_uiout, tp->commands.get (), 2);
-	  }
-	catch (const gdb_exception &ex)
-	  {
+      if (tp->type != bp_dprintf && tp->commands)
+	{
+	  fp.puts ("  commands\n");
+
+	  current_uiout->redirect (&fp);
+	  try
+	    {
+	      print_command_lines (current_uiout, tp->commands.get (), 2);
+	    }
+	  catch (const gdb_exception &ex)
+	    {
+	    current_uiout->redirect (NULL);
+	      throw;
+	    }
+
 	  current_uiout->redirect (NULL);
-	    throw;
-	  }
+	  fp.puts ("  end\n");
+	}
 
-	current_uiout->redirect (NULL);
-	fp.puts ("  end\n");
-      }
+      if (tp->enable_state == bp_disabled)
+	fp.puts ("disable $bpnum\n");
 
-    if (tp->enable_state == bp_disabled)
-      fp.puts ("disable $bpnum\n");
+      /* If this is a multi-location breakpoint, check if the locations
+	 should be individually disabled.  Watchpoint locations are
+	 special, and not user visible.  */
+      if (!is_watchpoint (tp) && tp->loc && tp->loc->next)
+	{
+	  int n = 1;
 
-    /* If this is a multi-location breakpoint, check if the locations
-       should be individually disabled.  Watchpoint locations are
-       special, and not user visible.  */
-    if (!is_watchpoint (tp) && tp->loc && tp->loc->next)
-      {
-	int n = 1;
+	  for (bp_location *loc : tp->locations ())
+	    {
+	      if (!loc->enabled)
+		fp.printf ("disable $bpnum.%d\n", n);
 
-	for (bp_location *loc : tp->locations ())
-	  {
-	    if (!loc->enabled)
-	      fp.printf ("disable $bpnum.%d\n", n);
-
-	    n++;
-	  }
-      }
-  }
+	      n++;
+	    }
+	}
+    }
 
   if (extra_trace_bits && *default_collect)
     fp.printf ("set default-collect %s\n", default_collect);

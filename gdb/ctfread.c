@@ -1150,10 +1150,10 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
       case CTF_K_UNION:
       case CTF_K_ENUM:
 	if (type == nullptr)
-	{
-	  complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
-	  type = objfile_type (ccp->of)->builtin_error;
-	}
+	  {
+	    complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
+	    type = objfile_type (ccp->of)->builtin_error;
+	  }
 	sym = new (&ccp->of->objfile_obstack) symbol;
 	OBJSTAT (ccp->of, n_syms++);
 	SYMBOL_TYPE (sym) = type;

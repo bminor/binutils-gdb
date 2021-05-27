@@ -824,10 +824,10 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	 2. Arrays.  Always print a ",".
 	 3. Other.  Always print a ",".  */
       if (i == 0)
-      {
-	if (!printed_nothing)
-	  fputs_filtered (" = ", stream);
-      }
+	{
+	  if (!printed_nothing)
+	    fputs_filtered (" = ", stream);
+	}
       else if (! is_map || i % 2 == 0)
 	fputs_filtered (pretty ? "," : ", ", stream);
 

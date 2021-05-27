@@ -276,10 +276,10 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      /* 32-bit decimal floats are right aligned in the
 			 doubleword.  */
 		      if (TYPE_LENGTH (type) == 4)
-		      {
-			memcpy (regval + 4, val, 4);
-			p = regval;
-		      }
+			{
+			  memcpy (regval + 4, val, 4);
+			  p = regval;
+			}
 		      else
 			p = val;
 

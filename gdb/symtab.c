@@ -5637,55 +5637,55 @@ default_collect_symbol_completion_matches_break_on
   if (mode == complete_symbol_mode::LINESPEC)
     sym_text = text;
   else
-  {
-    const char *p;
-    char quote_found;
-    const char *quote_pos = NULL;
+    {
+      const char *p;
+      char quote_found;
+      const char *quote_pos = NULL;
 
-    /* First see if this is a quoted string.  */
-    quote_found = '\0';
-    for (p = text; *p != '\0'; ++p)
-      {
-	if (quote_found != '\0')
-	  {
-	    if (*p == quote_found)
-	      /* Found close quote.  */
-	      quote_found = '\0';
-	    else if (*p == '\\' && p[1] == quote_found)
-	      /* A backslash followed by the quote character
-		 doesn't end the string.  */
-	      ++p;
-	  }
-	else if (*p == '\'' || *p == '"')
-	  {
-	    quote_found = *p;
-	    quote_pos = p;
-	  }
-      }
-    if (quote_found == '\'')
-      /* A string within single quotes can be a symbol, so complete on it.  */
-      sym_text = quote_pos + 1;
-    else if (quote_found == '"')
-      /* A double-quoted string is never a symbol, nor does it make sense
-	 to complete it any other way.  */
-      {
-	return;
-      }
-    else
-      {
-	/* It is not a quoted string.  Break it based on the characters
-	   which are in symbols.  */
-	while (p > text)
-	  {
-	    if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0'
-		|| p[-1] == ':' || strchr (break_on, p[-1]) != NULL)
-	      --p;
-	    else
-	      break;
-	  }
-	sym_text = p;
-      }
-  }
+      /* First see if this is a quoted string.  */
+      quote_found = '\0';
+      for (p = text; *p != '\0'; ++p)
+	{
+	  if (quote_found != '\0')
+	    {
+	      if (*p == quote_found)
+		/* Found close quote.  */
+		quote_found = '\0';
+	      else if (*p == '\\' && p[1] == quote_found)
+		/* A backslash followed by the quote character
+		   doesn't end the string.  */
+		++p;
+	    }
+	  else if (*p == '\'' || *p == '"')
+	    {
+	      quote_found = *p;
+	      quote_pos = p;
+	    }
+	}
+      if (quote_found == '\'')
+	/* A string within single quotes can be a symbol, so complete on it.  */
+	sym_text = quote_pos + 1;
+      else if (quote_found == '"')
+	/* A double-quoted string is never a symbol, nor does it make sense
+	   to complete it any other way.  */
+	{
+	  return;
+	}
+      else
+	{
+	  /* It is not a quoted string.  Break it based on the characters
+	     which are in symbols.  */
+	  while (p > text)
+	    {
+	      if (isalnum (p[-1]) || p[-1] == '_' || p[-1] == '\0'
+		  || p[-1] == ':' || strchr (break_on, p[-1]) != NULL)
+		--p;
+	      else
+		break;
+	    }
+	  sym_text = p;
+	}
+    }
 
   lookup_name_info lookup_name (sym_text, name_match_type, true);
 
@@ -5874,46 +5874,46 @@ collect_file_symbol_completion_matches (completion_tracker &tracker,
   if (mode == complete_symbol_mode::LINESPEC)
     sym_text = text;
   else
-  {
-    const char *p;
-    char quote_found;
-    const char *quote_pos = NULL;
+    {
+      const char *p;
+      char quote_found;
+      const char *quote_pos = NULL;
 
-    /* First see if this is a quoted string.  */
-    quote_found = '\0';
-    for (p = text; *p != '\0'; ++p)
-      {
-	if (quote_found != '\0')
-	  {
-	    if (*p == quote_found)
-	      /* Found close quote.  */
-	      quote_found = '\0';
-	    else if (*p == '\\' && p[1] == quote_found)
-	      /* A backslash followed by the quote character
-		 doesn't end the string.  */
-	      ++p;
-	  }
-	else if (*p == '\'' || *p == '"')
-	  {
-	    quote_found = *p;
-	    quote_pos = p;
-	  }
-      }
-    if (quote_found == '\'')
-      /* A string within single quotes can be a symbol, so complete on it.  */
-      sym_text = quote_pos + 1;
-    else if (quote_found == '"')
-      /* A double-quoted string is never a symbol, nor does it make sense
-	 to complete it any other way.  */
-      {
-	return;
-      }
-    else
-      {
-	/* Not a quoted string.  */
-	sym_text = language_search_unquoted_string (text, p);
-      }
-  }
+      /* First see if this is a quoted string.  */
+      quote_found = '\0';
+      for (p = text; *p != '\0'; ++p)
+	{
+	  if (quote_found != '\0')
+	    {
+	      if (*p == quote_found)
+		/* Found close quote.  */
+		quote_found = '\0';
+	      else if (*p == '\\' && p[1] == quote_found)
+		/* A backslash followed by the quote character
+		   doesn't end the string.  */
+		++p;
+	    }
+	  else if (*p == '\'' || *p == '"')
+	    {
+	      quote_found = *p;
+	      quote_pos = p;
+	    }
+	}
+      if (quote_found == '\'')
+	/* A string within single quotes can be a symbol, so complete on it.  */
+	sym_text = quote_pos + 1;
+      else if (quote_found == '"')
+	/* A double-quoted string is never a symbol, nor does it make sense
+	   to complete it any other way.  */
+	{
+	  return;
+	}
+      else
+	{
+	  /* Not a quoted string.  */
+	  sym_text = language_search_unquoted_string (text, p);
+	}
+    }
 
   lookup_name_info lookup_name (sym_text, name_match_type, true);
 

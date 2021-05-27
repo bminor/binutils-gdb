@@ -4967,10 +4967,8 @@ static int i386_record_floats (struct gdbarch *gdbarch,
   else if (I386_SAVE_FPU_ENV_REG_STACK == iregnum)
     {
       for (i = I387_ST0_REGNUM (tdep); i <= I387_FOP_REGNUM (tdep); i++)
-      {
 	if (record_full_arch_list_add_reg (ir->regcache, i))
 	  return -1;
-      }
     }
   else if ((iregnum >= I387_ST0_REGNUM (tdep)) &&
 	   (iregnum <= I387_FOP_REGNUM (tdep)))

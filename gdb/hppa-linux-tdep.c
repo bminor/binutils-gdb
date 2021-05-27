@@ -174,9 +174,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  sp = pc - pcoffs[attempt];
 	}
       else
-      {
 	return 0;
-      }
     }
 
   /* sp + sfoffs[try] points to a struct rt_sigframe, which contains

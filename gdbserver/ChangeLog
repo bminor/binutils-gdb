@@ -1,3 +1,7 @@
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Fix some indentation mistakes throughout.
+
 2021-05-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* .dir-locals.el: Set sentence-end-double-space for all modes, and

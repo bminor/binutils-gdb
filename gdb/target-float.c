@@ -2451,11 +2451,11 @@ target_float_convert (const gdb_byte *from, const struct type *from_type,
 
   /* Convert between two different formats in the same category.  */
   if (!target_float_same_format_p (from_type, to_type))
-  {
-    const target_float_ops *ops = get_target_float_ops (from_type, to_type);
-    ops->convert (from, from_type, to, to_type);
-    return;
-  }
+    {
+      const target_float_ops *ops = get_target_float_ops (from_type, to_type);
+      ops->convert (from, from_type, to, to_type);
+      return;
+    }
 
   /* The floating-point formats match, so we simply copy the data, ensuring
      possible padding bytes in the target buffer are zeroed out.  */
