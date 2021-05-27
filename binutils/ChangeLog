@@ -1,3 +1,12 @@
+2021-05-29  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (parse_args): Call dwarf_select_sections_all on
+	--debug-dump without optarg.
+	(usage): Associate -w and --debug-dump options closely.
+	Split up help message.  Remove extraneous blank lines around
+	ctf help.
+	* objdump.c (usage): Similarly.
+
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
 	* testsuite/binutils-all/mips/mips-xpa-virt-1.d: Correct CFC0

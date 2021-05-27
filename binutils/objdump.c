@@ -213,105 +213,164 @@ usage (FILE *stream, int status)
   fprintf (stream, _(" Display information from object <file(s)>.\n"));
   fprintf (stream, _(" At least one of the following switches must be given:\n"));
   fprintf (stream, _("\
-  -a, --archive-headers    Display archive header information\n\
-  -f, --file-headers       Display the contents of the overall file header\n\
-  -p, --private-headers    Display object format specific file header contents\n\
-  -P, --private=OPT,OPT... Display object format specific contents\n\
-  -h, --[section-]headers  Display the contents of the section headers\n\
-  -x, --all-headers        Display the contents of all headers\n\
-  -d, --disassemble        Display assembler contents of executable sections\n\
-  -D, --disassemble-all    Display assembler contents of all sections\n\
-      --disassemble=<sym>  Display assembler contents from <sym>\n\
-  -S, --source             Intermix source code with disassembly\n\
-      --source-comment[=<txt>] Prefix lines of source code with <txt>\n\
-  -s, --full-contents      Display the full contents of all sections requested\n\
-  -g, --debugging          Display debug information in object file\n\
-  -e, --debugging-tags     Display debug information using ctags style\n\
-  -G, --stabs              Display (in raw form) any STABS info in the file\n\
-  -W[lLiaprmfFsoORtUuTgAck] or\n\
-  --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
-          =frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,\n\
-          =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
-          =addr,=cu_index,=links]\n\
-                           Display DWARF info in the file\n\
-"));
+  -a, --archive-headers    Display archive header information\n"));
+  fprintf (stream, _("\
+  -f, --file-headers       Display the contents of the overall file header\n"));
+  fprintf (stream, _("\
+  -p, --private-headers    Display object format specific file header contents\n"));
+  fprintf (stream, _("\
+  -P, --private=OPT,OPT... Display object format specific contents\n"));
+  fprintf (stream, _("\
+  -h, --[section-]headers  Display the contents of the section headers\n"));
+  fprintf (stream, _("\
+  -x, --all-headers        Display the contents of all headers\n"));
+  fprintf (stream, _("\
+  -d, --disassemble        Display assembler contents of executable sections\n"));
+  fprintf (stream, _("\
+  -D, --disassemble-all    Display assembler contents of all sections\n"));
+  fprintf (stream, _("\
+      --disassemble=<sym>  Display assembler contents from <sym>\n"));
+  fprintf (stream, _("\
+  -S, --source             Intermix source code with disassembly\n"));
+  fprintf (stream, _("\
+      --source-comment[=<txt>] Prefix lines of source code with <txt>\n"));
+  fprintf (stream, _("\
+  -s, --full-contents      Display the full contents of all sections requested\n"));
+  fprintf (stream, _("\
+  -g, --debugging          Display debug information in object file\n"));
+  fprintf (stream, _("\
+  -e, --debugging-tags     Display debug information using ctags style\n"));
+  fprintf (stream, _("\
+  -G, --stabs              Display (in raw form) any STABS info in the file\n"));
+  fprintf (stream, _("\
+  -W, --dwarf[a/=abbrev, A/=addr, r/=aranges, c/=cu_index, L/=decodedline,\n\
+              f/=frames, F/=frames-interp, g/=gdb_index, i/=info, o/=loc,\n\
+              m/=macro, p/=pubnames, t/=pubtypes, R/=Ranges, l/=rawline,\n\
+              s/=str, O/=str-offsets, u/=trace_abbrev, T/=trace_aranges,\n\
+              U/=trace_info]\n\
+                           Display the contents of DWARF debug sections\n"));
+  fprintf (stream, _("\
+  -Wk,--dwarf=links        Display the contents of sections that link to\n\
+                            separate debuginfo files\n"));
 #if DEFAULT_FOR_FOLLOW_LINKS
   fprintf (stream, _("\
-  -WK,--dwarf=follow-links     Follow links to separate debug info files (default)\n\
-  -WN,--dwarf=no-follow-links  Do not follow links to separate debug info files\n\
-"));
+  -WK,--dwarf=follow-links\
+                           Follow links to separate debug info files (default)\n"));
+  fprintf (stream, _("\
+  -WN,--dwarf=no-follow-links\
+                           Do not follow links to separate debug info files\n"));
 #else
   fprintf (stream, _("\
-  -WK,--dwarf=follow-links     Follow links to separate debug info files\n\
-  -WN,--dwarf=no-follow-links  Do not follow links to separate debug info files (default)\n\
-"));
+  -WK,--dwarf=follow-links\
+                           Follow links to separate debug info files\n"));
+  fprintf (stream, _("\
+  -WN,--dwarf=no-follow-links\
+                           Do not follow links to separate debug info files\n\
+                            (default)\n"));
 #endif
   fprintf (stream, _("\
-  -L, --process-links          Display the contents of non-debug sections in separate debuginfo files.\n\
-"));
+  -L, --process-links      Display the contents of non-debug sections in\n\
+                            separate debuginfo files.  (Implies -WK)\n"));
 #ifdef ENABLE_LIBCTF
   fprintf (stream, _("\
-  --ctf=SECTION            Display CTF info from SECTION\n\
-"));
+      --ctf=SECTION        Display CTF info from SECTION\n"));
 #endif
   fprintf (stream, _("\
-  -t, --syms               Display the contents of the symbol table(s)\n\
-  -T, --dynamic-syms       Display the contents of the dynamic symbol table\n\
-  -r, --reloc              Display the relocation entries in the file\n\
-  -R, --dynamic-reloc      Display the dynamic relocation entries in the file\n\
-  @<file>                  Read options from <file>\n\
-  -v, --version            Display this program's version number\n\
-  -i, --info               List object formats and architectures supported\n\
-  -H, --help               Display this information\n\
-"));
+  -t, --syms               Display the contents of the symbol table(s)\n"));
+  fprintf (stream, _("\
+  -T, --dynamic-syms       Display the contents of the dynamic symbol table\n"));
+  fprintf (stream, _("\
+  -r, --reloc              Display the relocation entries in the file\n"));
+  fprintf (stream, _("\
+  -R, --dynamic-reloc      Display the dynamic relocation entries in the file\n"));
+  fprintf (stream, _("\
+  @<file>                  Read options from <file>\n"));
+  fprintf (stream, _("\
+  -v, --version            Display this program's version number\n"));
+  fprintf (stream, _("\
+  -i, --info               List object formats and architectures supported\n"));
+  fprintf (stream, _("\
+  -H, --help               Display this information\n"));
+
   if (status != 2)
     {
       const struct objdump_private_desc * const *desc;
 
       fprintf (stream, _("\n The following switches are optional:\n"));
       fprintf (stream, _("\
-  -b, --target=BFDNAME           Specify the target object format as BFDNAME\n\
-  -m, --architecture=MACHINE     Specify the target architecture as MACHINE\n\
-  -j, --section=NAME             Only display information for section NAME\n\
-  -M, --disassembler-options=OPT Pass text OPT on to the disassembler\n\
-  -EB --endian=big               Assume big endian format when disassembling\n\
-  -EL --endian=little            Assume little endian format when disassembling\n\
-      --file-start-context       Include context from start of file (with -S)\n\
-  -I, --include=DIR              Add DIR to search list for source files\n\
-  -l, --line-numbers             Include line numbers and filenames in output\n\
-  -F, --file-offsets             Include file offsets when displaying information\n\
+  -b, --target=BFDNAME           Specify the target object format as BFDNAME\n"));
+      fprintf (stream, _("\
+  -m, --architecture=MACHINE     Specify the target architecture as MACHINE\n"));
+      fprintf (stream, _("\
+  -j, --section=NAME             Only display information for section NAME\n"));
+      fprintf (stream, _("\
+  -M, --disassembler-options=OPT Pass text OPT on to the disassembler\n"));
+      fprintf (stream, _("\
+  -EB --endian=big               Assume big endian format when disassembling\n"));
+      fprintf (stream, _("\
+  -EL --endian=little            Assume little endian format when disassembling\n"));
+      fprintf (stream, _("\
+      --file-start-context       Include context from start of file (with -S)\n"));
+      fprintf (stream, _("\
+  -I, --include=DIR              Add DIR to search list for source files\n"));
+      fprintf (stream, _("\
+  -l, --line-numbers             Include line numbers and filenames in output\n"));
+      fprintf (stream, _("\
+  -F, --file-offsets             Include file offsets when displaying information\n"));
+      fprintf (stream, _("\
   -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n\
                                   The STYLE, if specified, can be `auto', `gnu',\n\
                                   `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
-                                  or `gnat'\n\
-      --recurse-limit            Enable a limit on recursion whilst demangling.  [Default]\n\
-      --no-recurse-limit         Disable a limit on recursion whilst demangling\n\
-  -w, --wide                     Format output for more than 80 columns\n\
-  -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n\
-      --start-address=ADDR       Only process data whose address is >= ADDR\n\
-      --stop-address=ADDR        Only process data whose address is < ADDR\n\
-      --no-addresses             Do not print address alongside disassembly\n\
-      --prefix-addresses         Print complete address alongside disassembly\n\
-      --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n\
-      --insn-width=WIDTH         Display WIDTH bytes on a single line for -d\n\
-      --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n\
-      --special-syms             Include special symbols in symbol dumps\n\
-      --inlines                  Print all inlines for source line (with -l)\n\
-      --prefix=PREFIX            Add PREFIX to absolute paths for -S\n\
+                                  or `gnat'\n"));
+      fprintf (stream, _("\
+      --recurse-limit            Enable a limit on recursion whilst demangling\n\
+                                  (default)\n"));
+      fprintf (stream, _("\
+      --no-recurse-limit         Disable a limit on recursion whilst demangling\n"));
+      fprintf (stream, _("\
+  -w, --wide                     Format output for more than 80 columns\n"));
+      fprintf (stream, _("\
+  -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n"));
+      fprintf (stream, _("\
+      --start-address=ADDR       Only process data whose address is >= ADDR\n"));
+      fprintf (stream, _("\
+      --stop-address=ADDR        Only process data whose address is < ADDR\n"));
+      fprintf (stream, _("\
+      --no-addresses             Do not print address alongside disassembly\n"));
+      fprintf (stream, _("\
+      --prefix-addresses         Print complete address alongside disassembly\n"));
+      fprintf (stream, _("\
+      --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n"));
+      fprintf (stream, _("\
+      --insn-width=WIDTH         Display WIDTH bytes on a single line for -d\n"));
+      fprintf (stream, _("\
+      --adjust-vma=OFFSET        Add OFFSET to all displayed section addresses\n"));
+      fprintf (stream, _("\
+      --special-syms             Include special symbols in symbol dumps\n"));
+      fprintf (stream, _("\
+      --inlines                  Print all inlines for source line (with -l)\n"));
+      fprintf (stream, _("\
+      --prefix=PREFIX            Add PREFIX to absolute paths for -S\n"));
+      fprintf (stream, _("\
       --prefix-strip=LEVEL       Strip initial directory names for -S\n"));
       fprintf (stream, _("\
-      --dwarf-depth=N        Do not display DIEs at depth N or greater\n\
-      --dwarf-start=N        Display DIEs starting with N, at the same depth\n\
-                             or deeper\n\
-      --dwarf-check          Make additional dwarf internal consistency checks.\n"));
+      --dwarf-depth=N            Do not display DIEs at depth N or greater\n"));
+      fprintf (stream, _("\
+      --dwarf-start=N            Display DIEs starting at offset N\n"));
+      fprintf (stream, _("\
+      --dwarf-check              Make additional dwarf consistency checks.\n"));
 #ifdef ENABLE_LIBCTF
       fprintf (stream, _("\
-      --ctf-parent=SECTION     Use SECTION as the CTF parent\n"));
+      --ctf-parent=SECTION       Use SECTION as the CTF parent\n"));
 #endif
       fprintf (stream, _("\
-      --visualize-jumps          Visualize jumps by drawing ASCII art lines\n\
-      --visualize-jumps=color    Use colors in the ASCII art\n\
-      --visualize-jumps=extended-color   Use extended 8-bit color codes\n\
+      --visualize-jumps          Visualize jumps by drawing ASCII art lines\n"));
+      fprintf (stream, _("\
+      --visualize-jumps=color    Use colors in the ASCII art\n"));
+      fprintf (stream, _("\
+      --visualize-jumps=extended-color\n\
+                                 Use extended 8-bit color codes\n"));
+      fprintf (stream, _("\
       --visualize-jumps=off      Disable jump visualization\n\n"));
 
       list_supported_targets (program_name, stream);

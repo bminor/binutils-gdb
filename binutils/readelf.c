@@ -4613,77 +4613,123 @@ usage (FILE * stream)
 {
   fprintf (stream, _("Usage: readelf <option(s)> elf-file(s)\n"));
   fprintf (stream, _(" Display information about the contents of ELF format files\n"));
-  fprintf (stream, _(" Options are:\n\
-  -a --all               Equivalent to: -h -l -S -s -r -d -V -A -I\n\
-  -h --file-header       Display the ELF file header\n\
-  -l --program-headers   Display the program headers\n\
-     --segments          An alias for --program-headers\n\
-  -S --section-headers   Display the sections' header\n\
-     --sections          An alias for --section-headers\n\
-  -g --section-groups    Display the section groups\n\
-  -t --section-details   Display the section details\n\
-  -e --headers           Equivalent to: -h -l -S\n\
-  -s --syms              Display the symbol table\n\
-     --symbols           An alias for --syms\n\
-     --dyn-syms          Display the dynamic symbol table\n\
-     --lto-syms          Display LTO symbol tables\n\
+  fprintf (stream, _(" Options are:\n"));
+  fprintf (stream, _("\
+  -a --all               Equivalent to: -h -l -S -s -r -d -V -A -I\n"));
+  fprintf (stream, _("\
+  -h --file-header       Display the ELF file header\n"));
+  fprintf (stream, _("\
+  -l --program-headers   Display the program headers\n"));
+  fprintf (stream, _("\
+     --segments          An alias for --program-headers\n"));
+  fprintf (stream, _("\
+  -S --section-headers   Display the sections' header\n"));
+  fprintf (stream, _("\
+     --sections          An alias for --section-headers\n"));
+  fprintf (stream, _("\
+  -g --section-groups    Display the section groups\n"));
+  fprintf (stream, _("\
+  -t --section-details   Display the section details\n"));
+  fprintf (stream, _("\
+  -e --headers           Equivalent to: -h -l -S\n"));
+  fprintf (stream, _("\
+  -s --syms              Display the symbol table\n"));
+  fprintf (stream, _("\
+     --symbols           An alias for --syms\n"));
+  fprintf (stream, _("\
+     --dyn-syms          Display the dynamic symbol table\n"));
+  fprintf (stream, _("\
+     --lto-syms          Display LTO symbol tables\n"));
+  fprintf (stream, _("\
      --sym-base=[0|8|10|16] \n\
                          Force base for symbol sizes.  The options are \n\
-                         mixed (the default), octal, decimal, hexadecimal.\n\
+                         mixed (the default), octal, decimal, hexadecimal.\n"));
+  fprintf (stream, _("\
   -C --demangle[=STYLE]  Decode low-level symbol names into user-level names\n\
                           The STYLE, if specified, can be `auto' (the default),\n\
                           `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
-                          or `gnat'\n\
-     --no-demangle       Do not demangle low-level symbol names.  (This is the default)\n\
-     --recurse-limit     Enable a demangling recursion limit.  (This is the default)\n\
-     --no-recurse-limit  Disable a demangling recursion limit\n\
-  -n --notes             Display the core notes (if present)\n\
-  -r --relocs            Display the relocations (if present)\n\
-  -u --unwind            Display the unwind info (if present)\n\
-  -d --dynamic           Display the dynamic section (if present)\n\
-  -V --version-info      Display the version sections (if present)\n\
-  -A --arch-specific     Display architecture specific information (if any)\n\
-  -c --archive-index     Display the symbol/file index in an archive\n\
-  -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
-  -L --lint|--enable-checks  Display warning messages for possible problems\n\
+                          or `gnat'\n"));
+  fprintf (stream, _("\
+     --no-demangle       Do not demangle low-level symbol names.  (default)\n"));
+  fprintf (stream, _("\
+     --recurse-limit     Enable a demangling recursion limit.  (default)\n"));
+  fprintf (stream, _("\
+     --no-recurse-limit  Disable a demangling recursion limit\n"));
+  fprintf (stream, _("\
+  -n --notes             Display the core notes (if present)\n"));
+  fprintf (stream, _("\
+  -r --relocs            Display the relocations (if present)\n"));
+  fprintf (stream, _("\
+  -u --unwind            Display the unwind info (if present)\n"));
+  fprintf (stream, _("\
+  -d --dynamic           Display the dynamic section (if present)\n"));
+  fprintf (stream, _("\
+  -V --version-info      Display the version sections (if present)\n"));
+  fprintf (stream, _("\
+  -A --arch-specific     Display architecture specific information (if any)\n"));
+  fprintf (stream, _("\
+  -c --archive-index     Display the symbol/file index in an archive\n"));
+  fprintf (stream, _("\
+  -D --use-dynamic       Use the dynamic section info when displaying symbols\n"));
+  fprintf (stream, _("\
+  -L --lint|--enable-checks\n\
+                         Display warning messages for possible problems\n"));
+  fprintf (stream, _("\
   -x --hex-dump=<number|name>\n\
-                         Dump the contents of section <number|name> as bytes\n\
+                         Dump the contents of section <number|name> as bytes\n"));
+  fprintf (stream, _("\
   -p --string-dump=<number|name>\n\
-                         Dump the contents of section <number|name> as strings\n\
+                         Dump the contents of section <number|name> as strings\n"));
+  fprintf (stream, _("\
   -R --relocated-dump=<number|name>\n\
-                         Dump the contents of section <number|name> as relocated bytes\n\
-  -z --decompress        Decompress section before dumping it\n\
-  -w[lLiaprmfFsOoRtgUuTAc] or\n\
-  --debug-dump=[rawline,decodedline,info,abbrev,pubnames,aranges,macro,frames,\n\
-                frames-interp,str,str-offsets,loc,Ranges,pubtypes,gdb_index,\n\
-                trace_info,trace_abbrev,trace_aranges,addr,cu_index]\n\
-                         Display the contents of DWARF debug sections\n\
-  -wk,--debug-dump=links Display the contents of sections that link to separate debuginfo files\n\
-  -P,--process-links     Display the contents of non-debug sections in separate debuginfo files.  (Implies -wK)\n"));
+                         Dump the relocated contents of section <number|name>\n"));
+  fprintf (stream, _("\
+  -z --decompress        Decompress section before dumping it\n"));
+  fprintf (stream, _("\
+  -w --debug-dump[a/=abbrev, A/=addr, r/=aranges, c/=cu_index, L/=decodedline,\n\
+                  f/=frames, F/=frames-interp, g/=gdb_index, i/=info, o/=loc,\n\
+                  m/=macro, p/=pubnames, t/=pubtypes, R/=Ranges, l/=rawline,\n\
+                  s/=str, O/=str-offsets, u/=trace_abbrev, T/=trace_aranges,\n\
+                  U/=trace_info]\n\
+                         Display the contents of DWARF debug sections\n"));
+  fprintf (stream, _("\
+  -wk --debug-dump=links Display the contents of sections that link to separate\n\
+                          debuginfo files\n"));
+  fprintf (stream, _("\
+  -P --process-links     Display the contents of non-debug sections in separate\n\
+                          debuginfo files.  (Implies -wK)\n"));
 #if DEFAULT_FOR_FOLLOW_LINKS
   fprintf (stream, _("\
-  -wK,--debug-dump=follow-links     Follow links to separate debug info files (default)\n\
-  -wN,--debug-dump=no-follow-links  Do not follow links to separate debug info files\n\
-"));
+  -wK --debug-dump=follow-links\n\
+                         Follow links to separate debug info files (default)\n"));
+  fprintf (stream, _("\
+  -wN --debug-dump=no-follow-links\n\
+                         Do not follow links to separate debug info files\n"));
 #else
   fprintf (stream, _("\
-  -wK,--debug-dump=follow-links     Follow links to separate debug info files\n\
-  -wN,--debug-dump=no-follow-links  Do not follow links to separate debug info files (default)\n\
-"));
+  -wK --debug-dump=follow-links\n\
+                         Follow links to separate debug info files\n"));
+  fprintf (stream, _("\
+  -wN --debug-dump=no-follow-links\n\
+                         Do not follow links to separate debug info files\n\
+                          (default)\n"));
 #endif
   fprintf (stream, _("\
-  --dwarf-depth=N        Do not display DIEs at depth N or greater\n\
-  --dwarf-start=N        Display DIEs starting with N, at the same depth\n\
-                         or deeper\n"));
+  --dwarf-depth=N        Do not display DIEs at depth N or greater\n"));
+  fprintf (stream, _("\
+  --dwarf-start=N        Display DIEs starting at offset N\n"));
 #ifdef ENABLE_LIBCTF
   fprintf (stream, _("\
-  --ctf=<number|name>    Display CTF info from section <number|name>\n\
+  --ctf=<number|name>    Display CTF info from section <number|name>\n"));
+  fprintf (stream, _("\
   --ctf-parent=<number|name>\n\
-                         Use section <number|name> as the CTF parent\n\n\
+                         Use section <number|name> as the CTF parent\n"));
+  fprintf (stream, _("\
   --ctf-symbols=<number|name>\n\
-                         Use section <number|name> as the CTF external symtab\n\n\
+                         Use section <number|name> as the CTF external symtab\n"));
+  fprintf (stream, _("\
   --ctf-strings=<number|name>\n\
-                         Use section <number|name> as the CTF external strtab\n\n"));
+                         Use section <number|name> as the CTF external strtab\n"));
 #endif
 
 #ifdef SUPPORT_DISASSEMBLY
@@ -4692,11 +4738,16 @@ usage (FILE * stream)
                          Disassemble the contents of section <number|name>\n"));
 #endif
   fprintf (stream, _("\
-  -I --histogram         Display histogram of bucket list lengths\n\
-  -W --wide              Allow output width to exceed 80 characters\n\
-  -T --silent-truncation If a symbol name is truncated, do not add a suffix [...]\n\
-  @<file>                Read options from <file>\n\
-  -H --help              Display this information\n\
+  -I --histogram         Display histogram of bucket list lengths\n"));
+  fprintf (stream, _("\
+  -W --wide              Allow output width to exceed 80 characters\n"));
+  fprintf (stream, _("\
+  -T --silent-truncation If a symbol name is truncated, do not add [...] suffix\n"));
+  fprintf (stream, _("\
+  @<file>                Read options from <file>\n"));
+  fprintf (stream, _("\
+  -H --help              Display this information\n"));
+  fprintf (stream, _("\
   -v --version           Display the version number of readelf\n"));
 
   if (REPORT_BUGS_TO[0] && stream == stdout)
@@ -4899,7 +4950,10 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	case OPTION_DEBUG_DUMP:
 	  do_dump = true;
 	  if (optarg == NULL)
-	    do_debugging = true;
+	    {
+	      do_debugging = true;
+	      dwarf_select_sections_all ();
+	    }
 	  else
 	    {
 	      do_debugging = false;
