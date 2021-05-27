@@ -1,5 +1,11 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* mi/mi-main.c (_initialize_mi_main):
+	* python/py-auto-load.c (gdbpy_initialize_auto_load):
+	* remote.c (_initialize_remote):
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* command.h (set_show_commands): New.
 	(add_setshow_enum_cmd, add_setshow_auto_boolean_cmd,
 	add_setshow_boolean_cmd, add_setshow_filename_cmd,
