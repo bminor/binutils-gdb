@@ -3174,48 +3174,54 @@ In a multi-threaded program the signal is queued with, or discarded from,\n\
 the current thread only."));
   set_cmd_completer (c, signal_completer);
 
-  add_com ("stepi", class_run, stepi_command, _("\
+  cmd_list_element *stepi_cmd
+    = add_com ("stepi", class_run, stepi_command, _("\
 Step one instruction exactly.\n\
 Usage: stepi [N]\n\
 Argument N means step N times (or till program stops for another \
 reason)."));
-  add_com_alias ("si", "stepi", class_run, 0);
+  add_com_alias ("si", stepi_cmd, class_run, 0);
 
-  add_com ("nexti", class_run, nexti_command, _("\
+  cmd_list_element *nexti_cmd
+   = add_com ("nexti", class_run, nexti_command, _("\
 Step one instruction, but proceed through subroutine calls.\n\
 Usage: nexti [N]\n\
 Argument N means step N times (or till program stops for another \
 reason)."));
-  add_com_alias ("ni", "nexti", class_run, 0);
+  add_com_alias ("ni", nexti_cmd, class_run, 0);
 
-  add_com ("finish", class_run, finish_command, _("\
+  cmd_list_element *finish_cmd
+    = add_com ("finish", class_run, finish_command, _("\
 Execute until selected stack frame returns.\n\
 Usage: finish\n\
 Upon return, the value returned is printed and put in the value history."));
-  add_com_alias ("fin", "finish", class_run, 1);
+  add_com_alias ("fin", finish_cmd, class_run, 1);
 
-  add_com ("next", class_run, next_command, _("\
+  cmd_list_element *next_cmd
+    = add_com ("next", class_run, next_command, _("\
 Step program, proceeding through subroutine calls.\n\
 Usage: next [N]\n\
 Unlike \"step\", if the current source line calls a subroutine,\n\
 this command does not enter the subroutine, but instead steps over\n\
 the call, in effect treating it as a single source line."));
-  add_com_alias ("n", "next", class_run, 1);
+  add_com_alias ("n", next_cmd, class_run, 1);
 
-  add_com ("step", class_run, step_command, _("\
+  cmd_list_element *step_cmd
+    = add_com ("step", class_run, step_command, _("\
 Step program until it reaches a different source line.\n\
 Usage: step [N]\n\
 Argument N means step N times (or till program stops for another \
 reason)."));
-  add_com_alias ("s", "step", class_run, 1);
+  add_com_alias ("s", step_cmd, class_run, 1);
 
-  c = add_com ("until", class_run, until_command, _("\
+  cmd_list_element *until_cmd
+    = add_com ("until", class_run, until_command, _("\
 Execute until past the current line or past a LOCATION.\n\
 Execute until the program reaches a source line greater than the current\n\
 or a specified location (same args as break command) within the current \
 frame."));
-  set_cmd_completer (c, location_completer);
-  add_com_alias ("u", "until", class_run, 1);
+  set_cmd_completer (until_cmd, location_completer);
+  add_com_alias ("u", until_cmd, class_run, 1);
 
   c = add_com ("advance", class_run, advance_command, _("\
 Continue the program up to the given location (same form as args for break \
@@ -3223,15 +3229,17 @@ command).\n\
 Execution will also stop upon exit from the current stack frame."));
   set_cmd_completer (c, location_completer);
 
-  c = add_com ("jump", class_run, jump_command, _("\
+  cmd_list_element *jump_cmd
+    = add_com ("jump", class_run, jump_command, _("\
 Continue program being debugged at specified line or address.\n\
 Usage: jump LOCATION\n\
 Give as argument either LINENUM or *ADDR, where ADDR is an expression\n\
 for an address to start at."));
-  set_cmd_completer (c, location_completer);
-  add_com_alias ("j", "jump", class_run, 1);
+  set_cmd_completer (jump_cmd, location_completer);
+  add_com_alias ("j", jump_cmd, class_run, 1);
 
-  add_com ("continue", class_run, continue_command, _("\
+  cmd_list_element *continue_cmd
+    = add_com ("continue", class_run, continue_command, _("\
 Continue program being debugged, after signal or breakpoint.\n\
 Usage: continue [N]\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
@@ -3242,14 +3250,15 @@ If non-stop mode is enabled, continue only the current thread,\n\
 otherwise all the threads in the program are continued.  To \n\
 continue all stopped threads in non-stop mode, use the -a option.\n\
 Specifying -a and an ignore count simultaneously is an error."));
-  add_com_alias ("c", "cont", class_run, 1);
-  add_com_alias ("fg", "cont", class_run, 1);
+  add_com_alias ("c", continue_cmd, class_run, 1);
+  add_com_alias ("fg", continue_cmd, class_run, 1);
 
-  c = add_com ("run", class_run, run_command, _("\
+  cmd_list_element *run_cmd
+    = add_com ("run", class_run, run_command, _("\
 Start debugged program.\n"
 RUN_ARGS_HELP));
-  set_cmd_completer (c, filename_completer);
-  add_com_alias ("r", "run", class_run, 1);
+  set_cmd_completer (run_cmd, filename_completer);
+  add_com_alias ("r", run_cmd, class_run, 1);
 
   c = add_com ("start", class_run, start_command, _("\
 Start the debugged program stopping at the beginning of the main procedure.\n"

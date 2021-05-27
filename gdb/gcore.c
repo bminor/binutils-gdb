@@ -604,10 +604,11 @@ void _initialize_gcore ();
 void
 _initialize_gcore ()
 {
-  add_com ("generate-core-file", class_files, gcore_command, _("\
+  cmd_list_element *generate_core_file_cmd
+    = add_com ("generate-core-file", class_files, gcore_command, _("\
 Save a core file with the current state of the debugged process.\n\
 Usage: generate-core-file [FILENAME]\n\
 Argument is optional filename.  Default filename is 'core.PROCESS_ID'."));
 
-  add_com_alias ("gcore", "generate-core-file", class_files, 1);
+  add_com_alias ("gcore", generate_core_file_cmd, class_files, 1);
 }

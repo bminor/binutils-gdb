@@ -1904,8 +1904,6 @@ void _initialize_source ();
 void
 _initialize_source ()
 {
-  struct cmd_list_element *c;
-
   init_source_path ();
 
   /* The intention is to use POSIX Basic Regular Expressions.
@@ -1914,7 +1912,8 @@ _initialize_source ()
      just an approximation.  */
   re_set_syntax (RE_SYNTAX_GREP);
 
-  c = add_cmd ("directory", class_files, directory_command, _("\
+  cmd_list_element *directory_cmd
+    = add_cmd ("directory", class_files, directory_command, _("\
 Add directory DIR to beginning of search path for source files.\n\
 Forget cached info on source file locations and line positions.\n\
 DIR can also be $cwd for the current working directory, or $cdir for the\n\
@@ -1923,9 +1922,9 @@ With no argument, reset the search path to $cdir:$cwd, the default."),
 	       &cmdlist);
 
   if (dbx_commands)
-    add_com_alias ("use", "directory", class_files, 0);
+    add_com_alias ("use", directory_cmd, class_files, 0);
 
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (directory_cmd, filename_completer);
 
   add_setshow_optional_filename_cmd ("directories",
 				     class_files,
@@ -1959,16 +1958,18 @@ This sets the default address for \"x\" to the line's first instruction\n\
 so that \"x/i\" suffices to start examining the machine code.\n\
 The address is also stored as the value of \"$_\"."));
 
-  add_com ("forward-search", class_files, forward_search_command, _("\
+  cmd_list_element *forward_search_cmd
+    = add_com ("forward-search", class_files, forward_search_command, _("\
 Search for regular expression (see regex(3)) from last line listed.\n\
 The matching line number is also stored as the value of \"$_\"."));
-  add_com_alias ("search", "forward-search", class_files, 0);
-  add_com_alias ("fo", "forward-search", class_files, 1);
+  add_com_alias ("search", forward_search_cmd, class_files, 0);
+  add_com_alias ("fo", forward_search_cmd, class_files, 1);
 
-  add_com ("reverse-search", class_files, reverse_search_command, _("\
+  cmd_list_element *reverse_search_cmd
+    = add_com ("reverse-search", class_files, reverse_search_command, _("\
 Search backward for regular expression (see regex(3)) from last line listed.\n\
 The matching line number is also stored as the value of \"$_\"."));
-  add_com_alias ("rev", "reverse-search", class_files, 1);
+  add_com_alias ("rev", reverse_search_cmd, class_files, 1);
 
   add_setshow_integer_cmd ("listsize", class_support, &lines_to_list, _("\
 Set number of source lines gdb will list by default."), _("\

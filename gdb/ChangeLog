@@ -1,5 +1,10 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* command.h (add_com_alias): Accept target as
+	cmd_list_element.  Update callers.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* python/py-param.c (add_setshow_generic): Use return values of
 	add_setshow functions.
 

@@ -359,8 +359,10 @@ extern struct cmd_list_element *add_com (const char *, enum command_class,
 					 cmd_const_cfunc_ftype *fun,
 					 const char *);
 
-extern struct cmd_list_element *add_com_alias (const char *, const char *,
-					       enum command_class, int);
+extern cmd_list_element *add_com_alias (const char *name,
+					cmd_list_element *target,
+					command_class theclass,
+					int abbrev_flag);
 
 extern struct cmd_list_element *add_com_suppress_notification
 		       (const char *name, enum command_class theclass,

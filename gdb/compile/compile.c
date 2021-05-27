@@ -931,7 +931,7 @@ _initialize_compile ()
 					compile_command, _("\
 Command to compile source code and inject it into the inferior."),
 		  &compile_command_list, 1, &cmdlist);
-  add_com_alias ("expression", "compile", class_obscure, 0);
+  add_com_alias ("expression", compile_cmd_element, class_obscure, 0);
 
   const auto compile_opts = make_compile_options_def_group (nullptr);
 

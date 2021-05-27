@@ -1750,19 +1750,20 @@ argv_to_string (char **argv, int n)
    and the user would expect bbb to execute 'backtrace -full -past-main'
    while it will execute 'backtrace -past-main'.  */
 
-static void
+static cmd_list_element *
 validate_aliased_command (const char *command)
 {
-  struct cmd_list_element *c;
   std::string default_args;
-
-  c = lookup_cmd_1 (& command, cmdlist, NULL, &default_args, 1);
+  cmd_list_element *c
+    = lookup_cmd_1 (& command, cmdlist, NULL, &default_args, 1);
 
   if (c == NULL || c == (struct cmd_list_element *) -1)
     error (_("Invalid command to alias to: %s"), command);
 
   if (!default_args.empty ())
     error (_("Cannot define an alias of an alias that has default args"));
+
+  return c;
 }
 
 /* Called when "alias" was incorrectly used.  */
@@ -1832,7 +1833,7 @@ alias_command (const char *args, int from_tty)
   std::string command_string (argv_to_string (command_argv.get (),
 					      command_argc));
   command = command_string.c_str ();
-  validate_aliased_command (command);
+  cmd_list_element *target_cmd = validate_aliased_command (command);
 
   /* ALIAS must not exist.  */
   std::string alias_string (argv_to_string (alias_argv, alias_argc));
@@ -1875,8 +1876,8 @@ alias_command (const char *args, int from_tty)
   if (alias_argc == 1)
     {
       /* add_cmd requires *we* allocate space for name, hence the xstrdup.  */
-      alias_cmd = add_com_alias (xstrdup (alias_argv[0]), command, class_alias,
-				 a_opts.abbrev_flag);
+      alias_cmd = add_com_alias (xstrdup (alias_argv[0]), target_cmd,
+				 class_alias, a_opts.abbrev_flag);
     }
   else
     {
@@ -2332,16 +2333,18 @@ strict == evaluate script according to filename extension, error if not supporte
 			show_script_ext_mode,
 			&setlist, &showlist);
 
-  add_com ("quit", class_support, quit_command, _("\
+  cmd_list_element *quit_cmd
+    = add_com ("quit", class_support, quit_command, _("\
 Exit gdb.\n\
 Usage: quit [EXPR]\n\
 The optional expression EXPR, if present, is evaluated and the result\n\
 used as GDB's exit code.  The default is zero."));
-  c = add_com ("help", class_support, help_command,
+  cmd_list_element *help_cmd
+    = add_com ("help", class_support, help_command,
 	       _("Print list of commands."));
-  set_cmd_completer (c, command_completer);
-  add_com_alias ("q", "quit", class_support, 1);
-  add_com_alias ("h", "help", class_support, 1);
+  set_cmd_completer (help_cmd, command_completer);
+  add_com_alias ("q", quit_cmd, class_support, 1);
+  add_com_alias ("h", help_cmd, class_support, 1);
 
   add_setshow_boolean_cmd ("verbose", class_support, &info_verbose, _("\
 Set verbosity."), _("\
@@ -2365,11 +2368,12 @@ Without an argument, history expansion is enabled."),
 			   show_history_expansion_p,
 			   &sethistlist, &showhistlist);
 
-  add_prefix_cmd ("info", class_info, info_command, _("\
+  cmd_list_element *info_cmd
+    = add_prefix_cmd ("info", class_info, info_command, _("\
 Generic command for showing things about the program being debugged."),
-		  &infolist, 0, &cmdlist);
-  add_com_alias ("i", "info", class_info, 1);
-  add_com_alias ("inf", "info", class_info, 1);
+		      &infolist, 0, &cmdlist);
+  add_com_alias ("i", info_cmd, class_info, 1);
+  add_com_alias ("inf", info_cmd, class_info, 1);
 
   add_com ("complete", class_obscure, complete_command,
 	   _("List the completions for the rest of the line as a command."));
@@ -2380,7 +2384,8 @@ Generic command for showing things about the debugger."),
   /* Another way to get at the same thing.  */
   add_alias_cmd ("set", c, class_info, 0, &infolist);
 
-  c = add_com ("with", class_vars, with_command, _("\
+  cmd_list_element *with_cmd
+    = add_com ("with", class_vars, with_command, _("\
 Temporarily set SETTING to VALUE, run COMMAND, and restore SETTING.\n\
 Usage: with SETTING [VALUE] [-- COMMAND]\n\
 Usage: w SETTING [VALUE] [-- COMMAND]\n\
@@ -2394,8 +2399,8 @@ E.g.:\n\
 You can change multiple settings using nested with, and use\n\
 abbreviations for commands and/or values.  E.g.:\n\
   w la p -- w p el u -- p obj"));
-  set_cmd_completer_handle_brkchars (c, with_command_completer);
-  add_com_alias ("w", "with", class_vars, 1);
+  set_cmd_completer_handle_brkchars (with_cmd, with_command_completer);
+  add_com_alias ("w", with_cmd, class_vars, 1);
 
   add_internal_function ("_gdb_setting_str", _("\
 $_gdb_setting_str - returns the value of a GDB setting as a string.\n\
@@ -2455,12 +2460,13 @@ the previous command number shown."),
 		       _("Generic command for showing gdb debugging flags."),
 		       &showdebuglist, 0, &showlist);
 
-  c = add_com ("shell", class_support, shell_command, _("\
+  cmd_list_element *shell_cmd
+    = add_com ("shell", class_support, shell_command, _("\
 Execute the rest of the line as a shell command.\n\
 With no arguments, run an inferior shell."));
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (shell_cmd, filename_completer);
 
-  add_com_alias ("!", "shell", class_support, 0);
+  add_com_alias ("!", shell_cmd, class_support, 0);
 
   c = add_com ("edit", class_files, edit_command, _("\
 Edit specified file or function.\n\
@@ -2474,7 +2480,8 @@ Uses EDITOR environment variable contents as editor (or ex as default)."));
 
   c->completer = location_completer;
 
-  c = add_com ("pipe", class_support, pipe_command, _("\
+  cmd_list_element *pipe_cmd
+    = add_com ("pipe", class_support, pipe_command, _("\
 Send the output of a gdb command to a shell command.\n\
 Usage: | [COMMAND] | SHELL_COMMAND\n\
 Usage: | -d DELIM COMMAND DELIM SHELL_COMMAND\n\
@@ -2489,10 +2496,11 @@ case COMMAND contains a | character.\n\
 \n\
 With no COMMAND, repeat the last executed command\n\
 and send its output to SHELL_COMMAND."));
-  set_cmd_completer_handle_brkchars (c, pipe_command_completer);
-  add_com_alias ("|", "pipe", class_support, 0);
+  set_cmd_completer_handle_brkchars (pipe_cmd, pipe_command_completer);
+  add_com_alias ("|", pipe_cmd, class_support, 0);
 
-  add_com ("list", class_files, list_command, _("\
+  cmd_list_element *list_cmd
+    = add_com ("list", class_files, list_command, _("\
 List specified function or line.\n\
 With no argument, lists ten more lines after or around previous listing.\n\
 \"list -\" lists the ten lines before a previous ten-line listing.\n\
@@ -2511,10 +2519,10 @@ By default, when a single location is given, display ten lines.\n\
 This can be changed using \"set listsize\", and the current value\n\
 can be shown using \"show listsize\"."));
 
-  add_com_alias ("l", "list", class_files, 1);
+  add_com_alias ("l", list_cmd, class_files, 1);
 
   if (dbx_commands)
-    add_com_alias ("file", "list", class_files, 1);
+    add_com_alias ("file", list_cmd, class_files, 1);
 
   c = add_com ("disassemble", class_vars, disassemble_command, _("\
 Disassemble a specified section of memory.\n\

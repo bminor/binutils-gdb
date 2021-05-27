@@ -2092,10 +2092,11 @@ _initialize_regcache ()
   gdb::observers::thread_ptid_changed.attach (regcache_thread_ptid_changed,
 					      "regcache");
 
-  add_cmd ("register-cache", class_maintenance, reg_flush_command,
-	   _("Force gdb to flush its register and frame cache."),
-	   &maintenanceflushlist);
-  c = add_com_alias ("flushregs", "maintenance flush register-cache",
+  cmd_list_element *maintenance_flush_register_cache_cmd
+    = add_cmd ("register-cache", class_maintenance, reg_flush_command,
+	       _("Force gdb to flush its register and frame cache."),
+	       &maintenanceflushlist);
+  c = add_com_alias ("flushregs", maintenance_flush_register_cache_cmd,
 		     class_maintenance, 0);
   deprecate_cmd (c, "maintenance flush register-cache");
 

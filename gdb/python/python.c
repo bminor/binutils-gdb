@@ -1886,8 +1886,9 @@ void _initialize_python ();
 void
 _initialize_python ()
 {
-  add_com ("python-interactive", class_obscure,
-	   python_interactive_command,
+  cmd_list_element *python_interactive_cmd
+    =	add_com ("python-interactive", class_obscure,
+		 python_interactive_command,
 #ifdef HAVE_PYTHON
 	   _("\
 Start an interactive Python prompt.\n\
@@ -1909,7 +1910,7 @@ Python scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_PYTHON */
 	   );
-  add_com_alias ("pi", "python-interactive", class_obscure, 1);
+  add_com_alias ("pi", python_interactive_cmd, class_obscure, 1);
 
   python_cmd_element = add_com ("python", class_obscure, python_command,
 #ifdef HAVE_PYTHON
@@ -1931,7 +1932,7 @@ Python scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_PYTHON */
 	   );
-  add_com_alias ("py", "python", class_obscure, 1);
+  add_com_alias ("py", python_cmd_element, class_obscure, 1);
 
   /* Add set/show python print-stack.  */
   add_basic_prefix_cmd ("python", no_class,

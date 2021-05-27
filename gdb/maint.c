@@ -1133,14 +1133,15 @@ _initialize_maint_cmds ()
 {
   struct cmd_list_element *cmd;
 
-  add_basic_prefix_cmd ("maintenance", class_maintenance, _("\
+  cmd_list_element *maintenance_cmd
+    = add_basic_prefix_cmd ("maintenance", class_maintenance, _("\
 Commands for use by GDB maintainers.\n\
 Includes commands to dump specific internal GDB structures in\n\
 a human readable form, to cause GDB to deliberately dump core, etc."),
-			&maintenancelist, 0,
-			&cmdlist);
+			    &maintenancelist, 0,
+			    &cmdlist);
 
-  add_com_alias ("mt", "maintenance", class_maintenance, 1);
+  add_com_alias ("mt", maintenance_cmd, class_maintenance, 1);
 
   add_basic_prefix_cmd ("info", class_maintenance, _("\
 Commands for showing internal info about the program being debugged."),

@@ -1007,11 +1007,11 @@ add_com (const char *name, enum command_class theclass,
    different of class_alias, as class_alias is used to identify
    user defined aliases.  */
 
-struct cmd_list_element *
-add_com_alias (const char *name, const char *target_name,
+cmd_list_element *
+add_com_alias (const char *name, cmd_list_element *target,
 	       command_class theclass, int abbrev_flag)
 {
-  return add_alias_cmd (name, target_name, theclass, abbrev_flag, &cmdlist);
+  return add_alias_cmd (name, target, theclass, abbrev_flag, &cmdlist);
 }
 
 /* Add an element with a suppress notification to the list of commands.  */

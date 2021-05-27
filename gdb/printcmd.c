@@ -3351,10 +3351,11 @@ EXP may be preceded with /FMT, where FMT is a format letter\n\
 but no count or size letter (see \"x\" command)."),
 					      print_opts);
 
-  c = add_com ("print", class_vars, print_command, print_help.c_str ());
-  set_cmd_completer_handle_brkchars (c, print_command_completer);
-  add_com_alias ("p", "print", class_vars, 1);
-  add_com_alias ("inspect", "print", class_vars, 1);
+  cmd_list_element *print_cmd
+    = add_com ("print", class_vars, print_command, print_help.c_str ());
+  set_cmd_completer_handle_brkchars (print_cmd, print_command_completer);
+  add_com_alias ("p", print_cmd, class_vars, 1);
+  add_com_alias ("inspect", print_cmd, class_vars, 1);
 
   add_setshow_uinteger_cmd ("max-symbolic-offset", no_class,
 			    &max_symbolic_offset, _("\

@@ -4116,8 +4116,8 @@ one or more \"collect\" commands, to specify what to collect\n\
 while single-stepping.\n\n\
 Note: this command can only be used in a tracepoint \"actions\" list."));
 
-  add_com_alias ("ws", "while-stepping", class_trace, 0);
-  add_com_alias ("stepping", "while-stepping", class_trace, 0);
+  add_com_alias ("ws", while_stepping_cmd_element, class_trace, 0);
+  add_com_alias ("stepping", while_stepping_cmd_element, class_trace, 0);
 
   add_com ("collect", class_trace, collect_pseudocommand, _("\
 Specify one or more data items to be collected at a tracepoint.\n\

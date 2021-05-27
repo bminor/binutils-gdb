@@ -3863,12 +3863,13 @@ When OFFSET is provided, FILE must also be provided.  FILE can be provided\n\
 on its own."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  add_basic_prefix_cmd ("overlay", class_support,
-			_("Commands for debugging overlays."), &overlaylist,
-			0, &cmdlist);
+  cmd_list_element *overlay_cmd
+    = add_basic_prefix_cmd ("overlay", class_support,
+			    _("Commands for debugging overlays."), &overlaylist,
+			    0, &cmdlist);
 
-  add_com_alias ("ovly", "overlay", class_support, 1);
-  add_com_alias ("ov", "overlay", class_support, 1);
+  add_com_alias ("ovly", overlay_cmd, class_support, 1);
+  add_com_alias ("ov", overlay_cmd, class_support, 1);
 
   add_cmd ("map-overlay", class_support, map_overlay_command,
 	   _("Assert that an overlay section is mapped."), &overlaylist);

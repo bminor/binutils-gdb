@@ -785,12 +785,13 @@ A size of \"unlimited\" means unlimited lines.  The default is 10."),
 			    set_record_call_history_size, NULL,
 			    &set_record_cmdlist, &show_record_cmdlist);
 
-  c = add_prefix_cmd ("record", class_obscure, cmd_record_start,
+  cmd_list_element *record_cmd
+    = add_prefix_cmd ("record", class_obscure, cmd_record_start,
 		      _("Start recording."),
 		      &record_cmdlist, 0, &cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (record_cmd, filename_completer);
 
-  add_com_alias ("rec", "record", class_obscure, 1);
+  add_com_alias ("rec", record_cmd, class_obscure, 1);
   add_basic_prefix_cmd ("record", class_support,
 			_("Set record options."), &set_record_cmdlist,
 			0, &setlist);

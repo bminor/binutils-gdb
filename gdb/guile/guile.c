@@ -726,8 +726,8 @@ cmd_list_element *guile_cmd_element = nullptr;
 static void
 install_gdb_commands (void)
 {
-  add_com ("guile-repl", class_obscure,
-	   guile_repl_command,
+  cmd_list_element *guile_repl_cmd
+    = add_com ("guile-repl", class_obscure, guile_repl_command,
 #ifdef HAVE_GUILE
 	   _("\
 Start an interactive Guile prompt.\n\
@@ -742,7 +742,7 @@ Guile scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_GUILE */
 	   );
-  add_com_alias ("gr", "guile-repl", class_obscure, 1);
+  add_com_alias ("gr", guile_repl_cmd, class_obscure, 1);
 
   /* Since "help guile" is easy to type, and intuitive, we add general help
      in using GDB+Guile to this command.  */
@@ -778,7 +778,7 @@ Guile scripting is not supported in this copy of GDB.\n\
 This command is only a placeholder.")
 #endif /* HAVE_GUILE */
 	   );
-  add_com_alias ("gu", "guile", class_obscure, 1);
+  add_com_alias ("gu", guile_cmd_element, class_obscure, 1);
 
   add_basic_prefix_cmd ("guile", class_obscure,
 			_("Prefix command for Guile preference settings."),

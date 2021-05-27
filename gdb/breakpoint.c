@@ -15724,16 +15724,17 @@ so it will be deleted when hit.\n\
 BREAK_ARGS_HELP ("thbreak")));
   set_cmd_completer (c, location_completer);
 
-  add_prefix_cmd ("enable", class_breakpoint, enable_command, _("\
+  cmd_list_element *enable_cmd
+    = add_prefix_cmd ("enable", class_breakpoint, enable_command, _("\
 Enable all or some breakpoints.\n\
 Usage: enable [BREAKPOINTNUM]...\n\
 Give breakpoint numbers (separated by spaces) as arguments.\n\
 With no subcommand, breakpoints are enabled until you command otherwise.\n\
 This is used to cancel the effect of the \"disable\" command.\n\
 With a subcommand you can enable temporarily."),
-		  &enablelist, 1, &cmdlist);
+		      &enablelist, 1, &cmdlist);
 
-  add_com_alias ("en", "enable", class_breakpoint, 1);
+  add_com_alias ("en", enable_cmd, class_breakpoint, 1);
 
   add_prefix_cmd ("breakpoints", class_breakpoint, enable_command, _("\
 Enable all or some breakpoints.\n\
@@ -15781,15 +15782,16 @@ If a breakpoint is hit while enabled in this fashion,\n\
 the count is decremented; when it reaches zero, the breakpoint is disabled."),
 	   &enablelist);
 
-  add_prefix_cmd ("disable", class_breakpoint, disable_command, _("\
+  cmd_list_element *disable_cmd
+    = add_prefix_cmd ("disable", class_breakpoint, disable_command, _("\
 Disable all or some breakpoints.\n\
 Usage: disable [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To disable all breakpoints, give no argument.\n\
 A disabled breakpoint is not forgotten, but has no effect until re-enabled."),
-		  &disablelist, 1, &cmdlist);
-  add_com_alias ("dis", "disable", class_breakpoint, 1);
-  add_com_alias ("disa", "disable", class_breakpoint, 1);
+		      &disablelist, 1, &cmdlist);
+  add_com_alias ("dis", disable_cmd, class_breakpoint, 1);
+  add_com_alias ("disa", disable_cmd, class_breakpoint, 1);
 
   add_cmd ("breakpoints", class_breakpoint, disable_command, _("\
 Disable all or some breakpoints.\n\
@@ -15800,16 +15802,17 @@ A disabled breakpoint is not forgotten, but has no effect until re-enabled.\n\
 This command may be abbreviated \"disable\"."),
 	   &disablelist);
 
-  add_prefix_cmd ("delete", class_breakpoint, delete_command, _("\
+  cmd_list_element *delete_cmd
+    = add_prefix_cmd ("delete", class_breakpoint, delete_command, _("\
 Delete all or some breakpoints.\n\
 Usage: delete [BREAKPOINTNUM]...\n\
 Arguments are breakpoint numbers with spaces in between.\n\
 To delete all breakpoints, give no argument.\n\
 \n\
 Also a prefix command for deletion of other GDB objects."),
-		  &deletelist, 1, &cmdlist);
-  add_com_alias ("d", "delete", class_breakpoint, 1);
-  add_com_alias ("del", "delete", class_breakpoint, 1);
+		      &deletelist, 1, &cmdlist);
+  add_com_alias ("d", delete_cmd, class_breakpoint, 1);
+  add_com_alias ("del", delete_cmd, class_breakpoint, 1);
 
   add_cmd ("breakpoints", class_breakpoint, delete_command, _("\
 Delete all or some breakpoints or auto-display expressions.\n\
@@ -15819,7 +15822,8 @@ To delete all breakpoints, give no argument.\n\
 This command may be abbreviated \"delete\"."),
 	   &deletelist);
 
-  add_com ("clear", class_breakpoint, clear_command, _("\
+  cmd_list_element *clear_cmd
+   = add_com ("clear", class_breakpoint, clear_command, _("\
 Clear breakpoint at specified location.\n\
 Argument may be a linespec, explicit, or address location as described below.\n\
 \n\
@@ -15827,17 +15831,18 @@ With no argument, clears all breakpoints in the line that the selected frame\n\
 is executing in.\n"
 "\n" LOCATION_HELP_STRING "\n\n\
 See also the \"delete\" command which clears breakpoints by number."));
-  add_com_alias ("cl", "clear", class_breakpoint, 1);
+  add_com_alias ("cl", clear_cmd, class_breakpoint, 1);
 
-  c = add_com ("break", class_breakpoint, break_command, _("\
+  cmd_list_element *break_cmd
+    = add_com ("break", class_breakpoint, break_command, _("\
 Set breakpoint at specified location.\n"
 BREAK_ARGS_HELP ("break")));
-  set_cmd_completer (c, location_completer);
+  set_cmd_completer (break_cmd, location_completer);
 
-  add_com_alias ("b", "break", class_run, 1);
-  add_com_alias ("br", "break", class_run, 1);
-  add_com_alias ("bre", "break", class_run, 1);
-  add_com_alias ("brea", "break", class_run, 1);
+  add_com_alias ("b", break_cmd, class_run, 1);
+  add_com_alias ("br", break_cmd, class_run, 1);
+  add_com_alias ("bre", break_cmd, class_run, 1);
+  add_com_alias ("brea", break_cmd, class_run, 1);
 
   if (dbx_commands)
     {
@@ -16006,17 +16011,18 @@ hardware.)"),
 
   /* Tracepoint manipulation commands.  */
 
-  c = add_com ("trace", class_breakpoint, trace_command, _("\
+  cmd_list_element *trace_cmd
+    = add_com ("trace", class_breakpoint, trace_command, _("\
 Set a tracepoint at specified location.\n\
 \n"
 BREAK_ARGS_HELP ("trace") "\n\
 Do \"help tracepoints\" for info on other tracepoint commands."));
-  set_cmd_completer (c, location_completer);
+  set_cmd_completer (trace_cmd, location_completer);
 
-  add_com_alias ("tp", "trace", class_breakpoint, 0);
-  add_com_alias ("tr", "trace", class_breakpoint, 1);
-  add_com_alias ("tra", "trace", class_breakpoint, 1);
-  add_com_alias ("trac", "trace", class_breakpoint, 1);
+  add_com_alias ("tp", trace_cmd, class_breakpoint, 0);
+  add_com_alias ("tr", trace_cmd, class_breakpoint, 1);
+  add_com_alias ("tra", trace_cmd, class_breakpoint, 1);
+  add_com_alias ("trac", trace_cmd, class_breakpoint, 1);
 
   c = add_com ("ftrace", class_breakpoint, ftrace_command, _("\
 Set a fast tracepoint at specified location.\n\
@@ -16094,13 +16100,14 @@ session to restore them."),
 	       &save_cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  c = add_cmd ("tracepoints", class_trace, save_tracepoints_command, _("\
+  cmd_list_element *save_tracepoints_cmd
+    = add_cmd ("tracepoints", class_trace, save_tracepoints_command, _("\
 Save current tracepoint definitions as a script.\n\
 Use the 'source' command in another debug session to restore them."),
 	       &save_cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (save_tracepoints_cmd, filename_completer);
 
-  c = add_com_alias ("save-tracepoints", "save tracepoints", class_trace, 0);
+  c = add_com_alias ("save-tracepoints", save_tracepoints_cmd, class_trace, 0);
   deprecate_cmd (c, "save tracepoints");
 
   add_basic_prefix_cmd ("breakpoint", class_maintenance, _("\
