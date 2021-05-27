@@ -223,8 +223,6 @@ static void set_tracepoint_count (int num);
 
 static bool is_masked_watchpoint (const struct breakpoint *b);
 
-static struct bp_location **get_first_locp_gte_addr (CORE_ADDR address);
-
 /* Return 1 if B refers to a static tracepoint set by marker ("-m"), zero
    otherwise.  */
 
@@ -491,20 +489,6 @@ bool target_exact_watchpoints = false;
 	     B ? (TMP=B->next, 1): 0;	\
 	     B = TMP)
 
-/* Iterates through locations with address ADDRESS for the currently selected
-   program space.  BP_LOCP_TMP points to each object.  BP_LOCP_START points
-   to where the loop should start from.
-   If BP_LOCP_START is a NULL pointer, the macro automatically seeks the
-   appropriate location to start with.  */
-
-#define ALL_BP_LOCATIONS_AT_ADDR(BP_LOCP_TMP, BP_LOCP_START, ADDRESS)	\
-	for (BP_LOCP_START = BP_LOCP_START == NULL ? get_first_locp_gte_addr (ADDRESS) : BP_LOCP_START, \
-	     BP_LOCP_TMP = BP_LOCP_START;				\
-	     BP_LOCP_START						\
-	     && (BP_LOCP_TMP < bp_locations.data () + bp_locations.size () \
-	     && (*BP_LOCP_TMP)->address == ADDRESS);			\
-	     BP_LOCP_TMP++)
-
 /* Chains of all breakpoints defined.  */
 
 static struct breakpoint *breakpoint_chain;
@@ -551,6 +535,65 @@ static const std::vector<bp_location *> &
 all_bp_locations ()
 {
   return bp_locations;
+}
+
+/* Range to iterate over breakpoint locations at a given address.  */
+
+struct bp_locations_at_addr_range
+{
+  using iterator = std::vector<bp_location *>::iterator;
+
+  bp_locations_at_addr_range (CORE_ADDR addr)
+  {
+    struct compare
+    {
+      bool operator() (const bp_location *loc, CORE_ADDR addr_) const
+      { return loc->address < addr_; }
+
+      bool operator() (CORE_ADDR addr_, const bp_location *loc) const
+      { return addr_ < loc->address; }
+    };
+
+    auto it_pair = std::equal_range (bp_locations.begin (), bp_locations.end (),
+				     addr, compare ());
+
+    m_begin = it_pair.first;
+    m_end = it_pair.second;
+  }
+
+  iterator begin () const
+  { return m_begin; }
+
+  iterator end () const
+  { return m_end; }
+
+private:
+  iterator m_begin;
+  iterator m_end;
+};
+
+/* Return a range to iterate over all breakpoint locations exactly at address
+   ADDR.
+
+   If it's needed to iterate multiple times on the same range, it's possible
+   to save the range in a local variable and use it multiple times:
+
+     auto range = all_bp_locations_at_addr (addr);
+
+     for (bp_location *loc : range)
+       // use loc
+
+     for (bp_location *loc : range)
+       // use loc
+
+   This saves a bit of time, as it avoids re-doing the binary searches to find
+   the range's boundaries.  Just remember not to change the bp_locations vector
+   in the mean time, as it could make the range's iterators stale.  */
+
+static bp_locations_at_addr_range
+all_bp_locations_at_addr (CORE_ADDR addr)
+{
+  return bp_locations_at_addr_range (addr);
 }
 
 /* Maximum alignment offset between bp_target_info.PLACED_ADDRESS and
@@ -784,56 +827,6 @@ show_condition_evaluation_mode (struct ui_file *file, int from_tty,
   else
     fprintf_filtered (file, _("Breakpoint condition evaluation mode is %s.\n"),
 		      value);
-}
-
-/* A comparison function for bp_location AP and BP that is used by
-   bsearch.  This comparison function only cares about addresses, unlike
-   the more general bp_location_is_less_than function.  */
-
-static int
-bp_locations_compare_addrs (const void *ap, const void *bp)
-{
-  const struct bp_location *a = *(const struct bp_location **) ap;
-  const struct bp_location *b = *(const struct bp_location **) bp;
-
-  if (a->address == b->address)
-    return 0;
-  else
-    return ((a->address > b->address) - (a->address < b->address));
-}
-
-/* Helper function to skip all bp_locations with addresses
-   less than ADDRESS.  It returns the first bp_location that
-   is greater than or equal to ADDRESS.  If none is found, just
-   return NULL.  */
-
-static struct bp_location **
-get_first_locp_gte_addr (CORE_ADDR address)
-{
-  struct bp_location dummy_loc;
-  struct bp_location *dummy_locp = &dummy_loc;
-  struct bp_location **locp_found = NULL;
-
-  /* Initialize the dummy location's address field.  */
-  dummy_loc.address = address;
-
-  /* Find a close match to the first location at ADDRESS.  */
-  locp_found = ((struct bp_location **)
-		bsearch (&dummy_locp, bp_locations.data (), bp_locations.size (),
-			 sizeof (struct bp_location **),
-			 bp_locations_compare_addrs));
-
-  /* Nothing was found, nothing left to do.  */
-  if (locp_found == NULL)
-    return NULL;
-
-  /* We may have found a location that is at ADDRESS but is not the first in the
-     location's list.  Go backwards (if possible) and locate the first one.  */
-  while ((locp_found - 1) >= bp_locations.data ()
-	 && (*(locp_found - 1))->address == address)
-    locp_found--;
-
-  return locp_found;
 }
 
 /* Parse COND_STRING in the context of LOC and set as the condition
@@ -2248,10 +2241,8 @@ parse_cond_to_aexpr (CORE_ADDR scope, struct expression *cond)
 static void
 build_target_condition_list (struct bp_location *bl)
 {
-  struct bp_location **locp = NULL, **loc2p;
   int null_condition_or_parse_error = 0;
   int modified = bl->needs_update;
-  struct bp_location *loc;
 
   /* Release conditions left over from a previous insert.  */
   bl->target_info.conditions.clear ();
@@ -2264,6 +2255,8 @@ build_target_condition_list (struct bp_location *bl)
       || !target_supports_evaluation_of_breakpoint_conditions ())
     return;
 
+  auto loc_range = all_bp_locations_at_addr (bl->address);
+
   /* Do a first pass to check for locations with no assigned
      conditions or conditions that fail to parse to a valid agent
      expression bytecode.  If any of these happen, then it's no use to
@@ -2273,9 +2266,8 @@ build_target_condition_list (struct bp_location *bl)
      even if the locations aren't considered duplicates (e.g.,
      software breakpoint and hardware breakpoint at the same
      address).  */
-  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+  for (bp_location *loc : loc_range)
     {
-      loc = (*loc2p);
       if (is_breakpoint (loc->owner) && loc->pspace->num == bl->pspace->num)
 	{
 	  if (modified)
@@ -2306,9 +2298,8 @@ build_target_condition_list (struct bp_location *bl)
      being evaluated by GDB or the remote stub.  */
   if (null_condition_or_parse_error)
     {
-      ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+      for (bp_location *loc : loc_range)
 	{
-	  loc = (*loc2p);
 	  if (is_breakpoint (loc->owner) && loc->pspace->num == bl->pspace->num)
 	    {
 	      /* Only go as far as the first NULL bytecode is
@@ -2327,21 +2318,18 @@ build_target_condition_list (struct bp_location *bl)
      considered duplicates, but we still marge all the conditions
      anyway, as it's simpler, and doesn't really make a practical
      difference.  */
-  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
-    {
-      loc = (*loc2p);
-      if (loc->cond
-	  && is_breakpoint (loc->owner)
-	  && loc->pspace->num == bl->pspace->num
-	  && loc->owner->enable_state == bp_enabled
-	  && loc->enabled
-	  && !loc->disabled_by_cond)
-	{
-	  /* Add the condition to the vector.  This will be used later
-	     to send the conditions to the target.  */
-	  bl->target_info.conditions.push_back (loc->cond_bytecode.get ());
-	}
-    }
+  for (bp_location *loc : loc_range)
+    if (loc->cond
+	&& is_breakpoint (loc->owner)
+	&& loc->pspace->num == bl->pspace->num
+	&& loc->owner->enable_state == bp_enabled
+	&& loc->enabled
+	&& !loc->disabled_by_cond)
+      {
+	/* Add the condition to the vector.  This will be used later
+	   to send the conditions to the target.  */
+	bl->target_info.conditions.push_back (loc->cond_bytecode.get ());
+      }
 
   return;
 }
@@ -2430,10 +2418,8 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 static void
 build_target_command_list (struct bp_location *bl)
 {
-  struct bp_location **locp = NULL, **loc2p;
   int null_command_or_parse_error = 0;
   int modified = bl->needs_update;
-  struct bp_location *loc;
 
   /* Clear commands left over from a previous insert.  */
   bl->target_info.tcommands.clear ();
@@ -2445,27 +2431,25 @@ build_target_command_list (struct bp_location *bl)
   if (dprintf_style != dprintf_style_agent)
     return;
 
+  auto loc_range = all_bp_locations_at_addr (bl->address);
+
   /* For now, if we have any location at the same address that isn't a
      dprintf, don't install the target-side commands, as that would
      make the breakpoint not be reported to the core, and we'd lose
      control.  */
-  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
-    {
-      loc = (*loc2p);
-      if (is_breakpoint (loc->owner)
-	  && loc->pspace->num == bl->pspace->num
-	  && loc->owner->type != bp_dprintf)
-	return;
-    }
+  for (bp_location *loc : loc_range)
+    if (is_breakpoint (loc->owner)
+	&& loc->pspace->num == bl->pspace->num
+	&& loc->owner->type != bp_dprintf)
+      return;
 
   /* Do a first pass to check for locations with no assigned
      conditions or conditions that fail to parse to a valid agent expression
      bytecode.  If any of these happen, then it's no use to send conditions
      to the target since this location will always trigger and generate a
      response back to GDB.  */
-  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
+  for (bp_location *loc : loc_range)
     {
-      loc = (*loc2p);
       if (is_breakpoint (loc->owner) && loc->pspace->num == bl->pspace->num)
 	{
 	  if (modified)
@@ -2493,20 +2477,17 @@ build_target_command_list (struct bp_location *bl)
      and so clean up.  */
   if (null_command_or_parse_error)
     {
-      ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
-	{
-	  loc = (*loc2p);
-	  if (is_breakpoint (loc->owner)
-	      && loc->pspace->num == bl->pspace->num)
-	    {
-	      /* Only go as far as the first NULL bytecode is
-		 located.  */
-	      if (loc->cmd_bytecode == NULL)
-		return;
+      for (bp_location *loc : loc_range)
+	if (is_breakpoint (loc->owner)
+	    && loc->pspace->num == bl->pspace->num)
+	  {
+	    /* Only go as far as the first NULL bytecode is
+	       located.  */
+	    if (loc->cmd_bytecode == NULL)
+	      return;
 
-	      loc->cmd_bytecode.reset ();
-	    }
-	}
+	    loc->cmd_bytecode.reset ();
+	  }
     }
 
   /* No NULL commands or failed bytecode generation.  Build a command
@@ -2517,22 +2498,19 @@ build_target_command_list (struct bp_location *bl)
      could end up running the commands twice.  For the moment, we only
      support targets-side commands with dprintf, but it doesn't hurt
      to be pedantically correct in case that changes.  */
-  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, bl->address)
-    {
-      loc = (*loc2p);
-      if (breakpoint_locations_match (bl, loc)
-	  && loc->owner->extra_string
-	  && is_breakpoint (loc->owner)
-	  && loc->pspace->num == bl->pspace->num
-	  && loc->owner->enable_state == bp_enabled
-	  && loc->enabled
-	  && !loc->disabled_by_cond)
-	{
-	  /* Add the command to the vector.  This will be used later
-	     to send the commands to the target.  */
-	  bl->target_info.tcommands.push_back (loc->cmd_bytecode.get ());
-	}
-    }
+  for (bp_location *loc : loc_range)
+    if (breakpoint_locations_match (bl, loc)
+	&& loc->owner->extra_string
+	&& is_breakpoint (loc->owner)
+	&& loc->pspace->num == bl->pspace->num
+	&& loc->owner->enable_state == bp_enabled
+	&& loc->enabled
+	&& !loc->disabled_by_cond)
+      {
+	/* Add the command to the vector.  This will be used later
+	   to send the commands to the target.  */
+	bl->target_info.tcommands.push_back (loc->cmd_bytecode.get ());
+      }
 
   bl->target_info.persist = 0;
   /* Maybe flag this location as persistent.  */
@@ -4190,12 +4168,8 @@ bp_location_inserted_here_p (struct bp_location *bl,
 int
 breakpoint_inserted_here_p (const address_space *aspace, CORE_ADDR pc)
 {
-  struct bp_location **blp, **blp_tmp = NULL;
-
-  ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
+  for (bp_location *bl : all_bp_locations_at_addr (pc))
     {
-      struct bp_location *bl = *blp;
-
       if (bl->loc_type != bp_loc_software_breakpoint
 	  && bl->loc_type != bp_loc_hardware_breakpoint)
 	continue;
@@ -4213,12 +4187,8 @@ int
 software_breakpoint_inserted_here_p (const address_space *aspace,
 				     CORE_ADDR pc)
 {
-  struct bp_location **blp, **blp_tmp = NULL;
-
-  ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
+  for (bp_location *bl : all_bp_locations_at_addr (pc))
     {
-      struct bp_location *bl = *blp;
-
       if (bl->loc_type != bp_loc_software_breakpoint)
 	continue;
 
@@ -4235,12 +4205,8 @@ int
 hardware_breakpoint_inserted_here_p (const address_space *aspace,
 				     CORE_ADDR pc)
 {
-  struct bp_location **blp, **blp_tmp = NULL;
-
-  ALL_BP_LOCATIONS_AT_ADDR (blp, blp_tmp, pc)
+  for (bp_location *bl : all_bp_locations_at_addr (pc))
     {
-      struct bp_location *bl = *blp;
-
       if (bl->loc_type != bp_loc_hardware_breakpoint)
 	continue;
 
@@ -11746,8 +11712,6 @@ swap_insertion (struct bp_location *left, struct bp_location *right)
 static void
 force_breakpoint_reinsertion (struct bp_location *bl)
 {
-  struct bp_location **locp = NULL, **loc2p;
-  struct bp_location *loc;
   CORE_ADDR address = 0;
   int pspace_num;
 
@@ -11766,10 +11730,8 @@ force_breakpoint_reinsertion (struct bp_location *bl)
      the same program space as the location
      as "its condition has changed".  We need to
      update the conditions on the target's side.  */
-  ALL_BP_LOCATIONS_AT_ADDR (loc2p, locp, address)
+  for (bp_location *loc : all_bp_locations_at_addr (address))
     {
-      loc = *loc2p;
-
       if (!is_breakpoint (loc->owner)
 	  || pspace_num != loc->pspace->num)
 	continue;

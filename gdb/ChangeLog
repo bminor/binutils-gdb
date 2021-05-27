@@ -1,5 +1,14 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.c (get_first_locp_gte_addr): Remove.
+	(ALL_BP_LOCATIONS_AT_ADDR): Remove.  Replace all uses with
+	all_bp_locations_at_addr.
+	(struct bp_locations_at_addr_range): New.
+	(all_bp_locations_at_addr): New.
+	(bp_locations_compare_addrs): New.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.c (ALL_BP_LOCATIONS): Remove, update users to use
 	all_bp_locations.
 	(all_bp_locations): New.
