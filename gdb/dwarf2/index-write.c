@@ -421,10 +421,10 @@ struct addrmap_index_data
 
   int operator() (CORE_ADDR start_addr, void *obj);
 
-  /* Non-zero if the previous_* fields are valid.
+  /* True if the previous_* fields are valid.
      We can't write an entry until we see the next entry (since it is only then
      that we know the end of the entry).  */
-  int previous_valid = 0;
+  bool previous_valid = false;
   /* Index of the CU in the table of all CUs in the index file.  */
   unsigned int previous_cu_index = 0;
   /* Start address of the CU.  */
@@ -460,10 +460,10 @@ addrmap_index_data::operator() (CORE_ADDR start_addr, void *obj)
       const auto it = cu_index_htab.find (pst);
       gdb_assert (it != cu_index_htab.cend ());
       previous_cu_index = it->second;
-      previous_valid = 1;
+      previous_valid = true;
     }
   else
-    previous_valid = 0;
+    previous_valid = false;
 
   return 0;
 }
