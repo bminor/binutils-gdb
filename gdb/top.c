@@ -2345,7 +2345,7 @@ input settings."),
 			show_interactive_mode,
 			&setlist, &showlist);
 
-  c = add_setshow_boolean_cmd ("startup-quietly", class_support,
+  add_setshow_boolean_cmd ("startup-quietly", class_support,
 			       &startup_quiet, _("\
 Set whether GDB should start up quietly."), _("		\
 Show whether GDB should start up quietly."), _("\

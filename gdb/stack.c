@@ -3572,17 +3572,18 @@ Usage: func NAME"));
 
   /* Install "set print raw frame-arguments", a deprecated spelling of
      "set print raw-frame-arguments".  */
-  cmd = add_setshow_boolean_cmd
-    ("frame-arguments", no_class,
-     &user_frame_print_options.print_raw_frame_arguments,
-     _("\
+  set_show_commands set_show_frame_args
+    = add_setshow_boolean_cmd
+      ("frame-arguments", no_class,
+       &user_frame_print_options.print_raw_frame_arguments,
+       _("\
 Set whether to print frame arguments in raw form."), _("\
 Show whether to print frame arguments in raw form."), _("\
 If set, frame arguments are printed in raw form, bypassing any\n\
 pretty-printers for that value."),
-     NULL, NULL,
-     &setprintrawlist, &showprintrawlist);
-  deprecate_cmd (cmd, "set print raw-frame-arguments");
+       NULL, NULL,
+       &setprintrawlist, &showprintrawlist);
+  deprecate_cmd (set_show_frame_args.set, "set print raw-frame-arguments");
 
   add_setshow_auto_boolean_cmd ("disassemble-next-line", class_stack,
 				&disassemble_next_line, _("\

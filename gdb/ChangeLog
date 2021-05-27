@@ -1,3 +1,16 @@
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* command.h (set_show_commands): New.
+	(add_setshow_enum_cmd, add_setshow_auto_boolean_cmd,
+	add_setshow_boolean_cmd, add_setshow_filename_cmd,
+	add_setshow_string_cmd, add_setshow_string_noescape_cmd,
+	add_setshow_optional_filename_cmd, add_setshow_integer_cmd,
+	add_setshow_uinteger_cmd, add_setshow_zinteger_cmd,
+	add_setshow_zuinteger_cmd, add_setshow_zuinteger_unlimited_cmd):
+	Return set_show_commands.  Adjust callers.
+	* cli/cli-decode.c (add_setshow_cmd_full): Return
+	set_show_commands, remove result parameters, adjust callers.
+
 2021-05-27  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/27919
