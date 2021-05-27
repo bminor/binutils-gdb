@@ -1,5 +1,9 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* make-init-c: Add option to reverse function calls.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (INIT_FILES_FILTER_OUT): New.
 	(INIT_FILES): Use INIT_FILES_FILTER_OUT.
 	(stamp-init): Use make-init-c.
