@@ -3276,13 +3276,14 @@ If non-stop mode is enabled, interrupt only the current thread,\n\
 otherwise all the threads in the program are stopped.  To \n\
 interrupt all running threads in non-stop mode, use the -a option."));
 
-  c = add_info ("registers", info_registers_command, _("\
+  cmd_list_element *info_registers_cmd
+    = add_info ("registers", info_registers_command, _("\
 List of integer registers and their contents, for selected stack frame.\n\
 One or more register names as argument means describe the given registers.\n\
 One or more register group names as argument means describe the registers\n\
 in the named register groups."));
-  add_info_alias ("r", "registers", 1);
-  set_cmd_completer (c, reg_or_group_completer);
+  add_info_alias ("r", info_registers_cmd, 1);
+  set_cmd_completer (info_registers_cmd, reg_or_group_completer);
 
   c = add_info ("all-registers", info_all_registers_command, _("\
 List of all registers and their contents, for selected stack frame.\n\

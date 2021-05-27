@@ -986,10 +986,10 @@ add_info (const char *name, cmd_const_cfunc_ftype *fun, const char *doc)
 
 /* Add an alias to the list of info subcommands.  */
 
-struct cmd_list_element *
-add_info_alias (const char *name, const char *target_name, int abbrev_flag)
+cmd_list_element *
+add_info_alias (const char *name, cmd_list_element *target, int abbrev_flag)
 {
-  return add_alias_cmd (name, target_name, class_run, abbrev_flag, &infolist);
+  return add_alias_cmd (name, target, class_run, abbrev_flag, &infolist);
 }
 
 /* Add an element to the list of commands.  */

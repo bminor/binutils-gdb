@@ -3508,17 +3508,19 @@ With a negative COUNT, print outermost -COUNT frames."),
   add_com_alias ("bt", backtrace_cmd, class_stack, 0);
 
   add_com_alias ("where", backtrace_cmd, class_stack, 0);
-  add_info ("stack", backtrace_command,
-	    _("Backtrace of the stack, or innermost COUNT frames."));
-  add_info_alias ("s", "stack", 1);
+  cmd_list_element *info_stack_cmd
+    = add_info ("stack", backtrace_command,
+		_("Backtrace of the stack, or innermost COUNT frames."));
+  add_info_alias ("s", info_stack_cmd, 1);
 
-  add_prefix_cmd ("frame", class_info, &info_frame_cmd.base_command,
-		  _("All about the selected stack frame.\n\
+  cmd_list_element *info_frame_cmd_el
+    = add_prefix_cmd ("frame", class_info, &info_frame_cmd.base_command,
+		      _("All about the selected stack frame.\n\
 With no arguments, displays information about the currently selected stack\n\
 frame.  Alternatively a frame specification may be provided (See \"frame\")\n\
 the information is then printed about the specified frame."),
-		  &info_frame_cmd_list, 1, &infolist);
-  add_info_alias ("f", "frame", 1);
+		      &info_frame_cmd_list, 1, &infolist);
+  add_info_alias ("f", info_frame_cmd_el, 1);
 
   add_cmd ("address", class_stack, &info_frame_cmd.address,
 	   _("\

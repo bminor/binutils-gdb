@@ -790,10 +790,11 @@ This command is only a placeholder.")
 		       &show_guile_list, 0, &showlist);
   add_alias_cmd ("gu", "guile", class_obscure, 1, &showlist);
 
-  add_basic_prefix_cmd ("guile", class_obscure,
-			_("Prefix command for Guile info displays."),
-			&info_guile_list, 0, &infolist);
-  add_info_alias ("gu", "guile", 1);
+  cmd_list_element *info_guile_cmd
+    = add_basic_prefix_cmd ("guile", class_obscure,
+			    _("Prefix command for Guile info displays."),
+			    &info_guile_list, 0, &infolist);
+  add_info_alias ("gu", info_guile_cmd, 1);
 
   /* The name "print-stack" is carried over from Python.
      A better name is "print-exception".  */

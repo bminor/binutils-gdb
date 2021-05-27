@@ -373,8 +373,9 @@ extern struct cmd_list_element *add_info (const char *,
 					  cmd_const_cfunc_ftype *fun,
 					  const char *);
 
-extern struct cmd_list_element *add_info_alias (const char *, const char *,
-						int);
+extern cmd_list_element *add_info_alias (const char *name,
+					 cmd_list_element *target,
+					 int abbrev_flag);
 
 extern void complete_on_cmdlist (struct cmd_list_element *,
 				 completion_tracker &tracker,

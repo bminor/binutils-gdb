@@ -1565,9 +1565,10 @@ _initialize_solib ()
 
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   _("Load shared object library symbols for files matching REGEXP."));
-  add_info ("sharedlibrary", info_sharedlibrary_command,
-	    _("Status of loaded shared object libraries."));
-  add_info_alias ("dll", "sharedlibrary", 1);
+  cmd_list_element *info_sharedlibrary_cmd
+    = add_info ("sharedlibrary", info_sharedlibrary_command,
+		_("Status of loaded shared object libraries."));
+  add_info_alias ("dll", info_sharedlibrary_cmd, 1);
   add_com ("nosharedlibrary", class_files, no_shared_libraries,
 	   _("Unload all shared object library symbols."));
 

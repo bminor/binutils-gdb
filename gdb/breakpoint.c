@@ -15870,7 +15870,8 @@ Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."));
     }
 
-  add_info ("breakpoints", info_breakpoints_command, _("\
+  cmd_list_element *info_breakpoints_cmd
+    = add_info ("breakpoints", info_breakpoints_command, _("\
 Status of specified breakpoints (all user-settable breakpoints if no argument).\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
@@ -15886,7 +15887,7 @@ is prefixed with \"server \".\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."));
 
-  add_info_alias ("b", "breakpoints", 1);
+  add_info_alias ("b", info_breakpoints_cmd, 1);
 
   add_cmd ("breakpoints", class_maintenance, maintenance_info_breakpoints, _("\
 Status of all breakpoints, or breakpoint number NUMBER.\n\
@@ -16053,12 +16054,13 @@ Do \"help breakpoints\" for info on other commands dealing with breakpoints.\n\
 Do \"help tracepoints\" for info on other tracepoint commands."));
   set_cmd_completer (c, location_completer);
 
-  add_info ("tracepoints", info_tracepoints_command, _("\
+  cmd_list_element *info_tracepoints_cmd
+    = add_info ("tracepoints", info_tracepoints_command, _("\
 Status of specified tracepoints (all tracepoints if no argument).\n\
 Convenience variable \"$tpnum\" contains the number of the\n\
 last tracepoint set."));
 
-  add_info_alias ("tp", "tracepoints", 1);
+  add_info_alias ("tp", info_tracepoints_cmd, 1);
 
   add_cmd ("tracepoints", class_trace, delete_trace_command, _("\
 Delete specified tracepoints.\n\
