@@ -1872,12 +1872,12 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  continue;
 	}
       else if ((op & 0xffff0000) == 0x38210000)
- 	{			/* addi r1,r1,SIMM */
- 	  fdata->frameless = 0;
- 	  fdata->offset += SIGNED_SHORT (op);
- 	  offset = fdata->offset;
- 	  continue;
- 	}
+	{			/* addi r1,r1,SIMM */
+	  fdata->frameless = 0;
+	  fdata->offset += SIGNED_SHORT (op);
+	  offset = fdata->offset;
+	  continue;
+	}
       /* Load up minimal toc pointer.  Do not treat an epilogue restore
 	 of r31 as a minimal TOC load.  */
       else if (((op >> 22) == 0x20f	||	/* l r31,... or l r30,...  */
@@ -1890,7 +1890,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
 	  /* move parameters from argument registers to local variable
 	     registers */
- 	}
+	}
       else if ((op & 0xfc0007fe) == 0x7c000378 &&	/* mr(.)  Rx,Ry */
 	       (((op >> 21) & 31) >= 3) &&              /* R3 >= Ry >= R10 */
 	       (((op >> 21) & 31) <= 10) &&
@@ -2081,7 +2081,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	    }
 
 	  continue;
-      	}
+	}
       /* Store gen register S at (r31+r0).
 	 Store param on stack when offset from SP bigger than 4 bytes.  */
       /* 000100 sssss 11111 00000 01100100000 */

@@ -73,14 +73,14 @@ i386_fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
       ULONGEST eflags;
 
       /* Workaround for a bug in FreeBSD.  Make sure that the trace
- 	 flag is off when doing a continue.  There is a code path
- 	 through the kernel which leaves the flag set when it should
- 	 have been cleared.  If a process has a signal pending (such
- 	 as SIGALRM) and we do a PT_STEP, the process never really has
- 	 a chance to run because the kernel needs to notify the
- 	 debugger that a signal is being sent.  Therefore, the process
- 	 never goes through the kernel's trap() function which would
- 	 normally clear it.  */
+	 flag is off when doing a continue.  There is a code path
+	 through the kernel which leaves the flag set when it should
+	 have been cleared.  If a process has a signal pending (such
+	 as SIGALRM) and we do a PT_STEP, the process never really has
+	 a chance to run because the kernel needs to notify the
+	 debugger that a signal is being sent.  Therefore, the process
+	 never goes through the kernel's trap() function which would
+	 normally clear it.  */
 
       regcache_cooked_read_unsigned (regcache, I386_EFLAGS_REGNUM,
 				     &eflags);

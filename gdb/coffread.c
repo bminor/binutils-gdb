@@ -968,25 +968,25 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		   symbol lookup which returned no match.  */
 		break;
 	      }
- 	    else if (cs->c_secnum == N_ABS)
- 	      {
- 		/* Use the correct minimal symbol type (and don't
- 		   relocate) for absolute values.  */
- 		ms_type = mst_abs;
- 		sec = cs_to_section (cs, objfile);
- 		tmpaddr = cs->c_value;
- 	      }
+	    else if (cs->c_secnum == N_ABS)
+	      {
+		/* Use the correct minimal symbol type (and don't
+		   relocate) for absolute values.  */
+		ms_type = mst_abs;
+		sec = cs_to_section (cs, objfile);
+		tmpaddr = cs->c_value;
+	      }
 	    else
 	      {
 		asection *bfd_section = cs_to_bfd_section (cs, objfile);
 
 		sec = cs_to_section (cs, objfile);
 		tmpaddr = cs->c_value;
- 		/* Statics in a PE file also get relocated.  */
- 		if (cs->c_sclass == C_EXT
- 		    || cs->c_sclass == C_THUMBEXTFUNC
- 		    || cs->c_sclass == C_THUMBEXT
- 		    || (pe_file && (cs->c_sclass == C_STAT)))
+		/* Statics in a PE file also get relocated.  */
+		if (cs->c_sclass == C_EXT
+		    || cs->c_sclass == C_THUMBEXTFUNC
+		    || cs->c_sclass == C_THUMBEXT
+		    || (pe_file && (cs->c_sclass == C_STAT)))
 		  offset = objfile->section_offsets[sec];
 
 		if (bfd_section->flags & SEC_CODE)

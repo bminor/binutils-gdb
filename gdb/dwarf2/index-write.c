@@ -1649,7 +1649,7 @@ struct index_wip_file
 		  const char *suffix)
   {
     filename = (std::string (dir) + SLASH_STRING + basename
-    		+ suffix);
+		+ suffix);
 
     filename_temp = make_temp_filename (filename);
 

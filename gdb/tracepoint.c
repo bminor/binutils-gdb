@@ -2388,7 +2388,7 @@ tfind_line_command (const char *args, int from_tty)
   if (sal.line > 0 && find_line_pc_range (sal, &start_pc, &end_pc))
     {
       if (start_pc == end_pc)
-  	{
+	{
 	  printf_filtered ("Line %d of \"%s\"",
 			   sal.line,
 			   symtab_to_filename_for_display (sal.symtab));
@@ -2403,9 +2403,9 @@ tfind_line_command (const char *args, int from_tty)
 	      && start_pc != end_pc)
 	    printf_filtered ("Attempting to find line %d instead.\n",
 			     sal.line);
-  	  else
+	  else
 	    error (_("Cannot find a good line."));
-  	}
+	}
       }
     else
       {

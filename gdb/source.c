@@ -1322,7 +1322,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	    uiout->field_string ("file", symtab_to_filename_for_display (s),
 				 file_name_style.style ());
 	  if (uiout->is_mi_like_p () || !uiout->test_flags (ui_source_list))
- 	    {
+	    {
 	      const char *s_fullname = symtab_to_fullname (s);
 	      char *local_fullname;
 
@@ -1333,7 +1333,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	      strcpy (local_fullname, s_fullname);
 
 	      uiout->field_string ("fullname", local_fullname);
- 	    }
+	    }
 
 	  uiout->text ("\n");
 	}

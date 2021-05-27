@@ -508,7 +508,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	opts.format = 0;
 	if (type->is_unsigned ())
 	  type = builtin_type (gdbarch)->builtin_true_unsigned_char;
- 	else
+	else
 	  type = builtin_type (gdbarch)->builtin_true_char;
 
 	value_print (value_from_longest (type, *val_long), stream, &opts);

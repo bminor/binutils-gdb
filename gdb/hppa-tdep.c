@@ -2156,9 +2156,9 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
      if (get_frame_pc (this_frame) >= prologue_end
 	 && (u->Save_SP || u->alloca_frame) && fp != 0)
       {
- 	cache->base = fp;
+	cache->base = fp;
  
- 	if (hppa_debug)
+	if (hppa_debug)
 	  fprintf_unfiltered (gdb_stdlog, " (base=%s) [frame pointer]",
 			      paddress (gdbarch, cache->base));
       }
@@ -2976,7 +2976,7 @@ hppa_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
       if (in_plt_section (pc))
 	{
 	  /* Sanity check: are we pointing to the PLT stub?  */
-  	  if (!hppa_match_insns (gdbarch, pc, hppa_plt_stub, insn))
+	  if (!hppa_match_insns (gdbarch, pc, hppa_plt_stub, insn))
 	    {
 	      warning (_("Cannot resolve PLT stub at %s."),
 		       paddress (gdbarch, pc));

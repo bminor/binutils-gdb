@@ -9790,7 +9790,7 @@ remote_target::read_frame (gdb::char_vector *buf_p)
 	  {
 	    int repeat;
 
- 	    csum += c;
+	    csum += c;
 	    c = readchar (remote_timeout);
 	    csum += c;
 	    repeat = c - ' ' + 3;	/* Compute repeat count.  */

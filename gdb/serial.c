@@ -284,7 +284,7 @@ serial_fdopen_ops (const int fd, const struct serial_ops *ops)
     {
       ops = serial_interface_lookup ("terminal");
       if (!ops)
- 	ops = serial_interface_lookup ("hardwire");
+	ops = serial_interface_lookup ("hardwire");
     }
 
   if (!ops)

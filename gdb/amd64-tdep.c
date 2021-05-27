@@ -2018,8 +2018,8 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 
      "andq $-XXX, %rsp" can be either 4 bytes or 7 bytes:
      
-     	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
-     	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
+	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
+	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
    */
 
   gdb_byte buf[18];
@@ -2182,13 +2182,13 @@ amd64_x32_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 
      "andq $-XXX, %rsp" can be either 4 bytes or 7 bytes:
      
-     	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
-     	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
+	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
+	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
 
      "andl $-XXX, %esp" can be either 3 bytes or 6 bytes:
      
-     	0x83 0xe4 0xf0			andl $-16, %esp
-     	0x81 0xe4 0x00 0xff 0xff 0xff	andl $-256, %esp
+	0x83 0xe4 0xf0			andl $-16, %esp
+	0x81 0xe4 0x00 0xff 0xff 0xff	andl $-256, %esp
    */
 
   gdb_byte buf[19];
@@ -3342,9 +3342,9 @@ void
 _initialize_amd64_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_NONE,
- 			  amd64_none_init_abi);
+			  amd64_none_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x64_32, GDB_OSABI_NONE,
- 			  amd64_x32_none_init_abi);
+			  amd64_x32_none_init_abi);
 }
 
 

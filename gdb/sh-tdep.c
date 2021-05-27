@@ -1406,8 +1406,8 @@ sh_return_value_nofpu (struct gdbarch *gdbarch, struct value *function,
 {
   struct type *func_type = function ? value_type (function) : NULL;
 
-  if (sh_use_struct_convention_nofpu (
-  	sh_is_renesas_calling_convention (func_type), type))
+  if (sh_use_struct_convention_nofpu
+	(sh_is_renesas_calling_convention (func_type), type))
     return RETURN_VALUE_STRUCT_CONVENTION;
   if (writebuf)
     sh_store_return_value_nofpu (type, regcache, writebuf);

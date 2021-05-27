@@ -1326,7 +1326,7 @@ ppc64_sysv_abi_push_freg (struct gdbarch *gdbarch,
       && type->code () == TYPE_CODE_FLT)
     {
       /* Floats and doubles go in f1 .. f13.  32-bit floats are converted
- 	 to double first.  */
+	 to double first.  */
       if (argpos->regcache && argpos->freg <= 13)
 	{
 	  int regnum = tdep->ppc_fp0_regnum + argpos->freg;

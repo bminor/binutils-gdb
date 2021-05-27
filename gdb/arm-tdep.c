@@ -4614,15 +4614,15 @@ displaced_write_reg (regcache *regs, arm_displaced_step_copy_insn_closure *dsc,
 
 	case BX_WRITE_PC:
 	  bx_write_pc (regs, val);
-  	  break;
+	  break;
 
 	case LOAD_WRITE_PC:
 	  load_write_pc (regs, dsc, val);
-  	  break;
+	  break;
 
 	case ALU_WRITE_PC:
 	  alu_write_pc (regs, dsc, val);
-  	  break;
+	  break;
 
 	case CANNOT_WRITE_PC:
 	  warning (_("Instruction wrote to PC in an unexpected way when "

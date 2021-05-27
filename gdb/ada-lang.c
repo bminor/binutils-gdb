@@ -2169,9 +2169,9 @@ decode_constrained_packed_array (struct value *arr)
       && ada_is_modular_type (value_type (arr)))
     {
        /* This is a (right-justified) modular type representing a packed
- 	 array with no wrapper.  In order to interpret the value through
- 	 the (left-justified) packed array type we just built, we must
- 	 first left-justify it.  */
+	  array with no wrapper.  In order to interpret the value through
+	  the (left-justified) packed array type we just built, we must
+	  first left-justify it.  */
       int bit_size, bit_pos;
       ULONGEST mod;
 

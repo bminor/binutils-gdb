@@ -701,7 +701,7 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	  break;
 	case VAROBJ_INVALID:
 	  uiout->field_string ("in_scope", "invalid");
- 	  break;
+	  break;
 	}
 
       if (r.status != VAROBJ_INVALID)

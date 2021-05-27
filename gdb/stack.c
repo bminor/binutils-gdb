@@ -2769,7 +2769,7 @@ return_command (const char *retval_exp, int from_tty)
       if (thisfun != NULL)
 	return_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (thisfun));
       if (return_type == NULL)
-      	{
+	{
 	  if (retval_expr->first_opcode () != UNOP_CAST
 	      && retval_expr->first_opcode () != UNOP_CAST_TYPE)
 	    error (_("Return value type not available for selected "

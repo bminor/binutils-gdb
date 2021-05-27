@@ -1609,7 +1609,7 @@ maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
       /* If the cache hasn't been created yet, avoid creating one.  */
       cache = symbol_cache_key.get (pspace);
       if (cache == NULL)
- 	printf_filtered ("  empty, no stats available\n");
+	printf_filtered ("  empty, no stats available\n");
       else
 	symbol_cache_stats (cache);
     }

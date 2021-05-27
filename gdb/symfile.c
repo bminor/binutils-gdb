@@ -415,7 +415,7 @@ relative_addr_info_to_section_offsets (section_offsets &section_offsets,
 
       osp = &addrs[i];
       if (osp->sectindex == -1)
-  	continue;
+	continue;
 
       /* Record all sections in offsets.  */
       /* The section_offsets in the objfile are here filled in using

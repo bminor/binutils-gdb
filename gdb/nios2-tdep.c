@@ -1375,7 +1375,7 @@ nios2_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR start_pc,
 	  /* ORHI  rb, ra, uimm   (also used for MOVHI) */
 	  if (rb != 0)
 	    {
-  	      value[rb].reg    = (value[ra].reg == 0) ? 0 : -1;
+	      value[rb].reg    = (value[ra].reg == 0) ? 0 : -1;
 	      value[rb].offset = value[ra].offset | (uimm << 16);
 	    }
 	}

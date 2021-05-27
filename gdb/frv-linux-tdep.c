@@ -200,19 +200,19 @@ frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
       else if (tramp_type == RT_SIGTRAMP)
 	{
 	  /* For a realtime sigtramp frame, SP + 12 contains a pointer
- 	     to a ucontext struct.  The ucontext struct contains a
- 	     sigcontext struct starting 24 bytes in.  (The offset of
- 	     uc_mcontext within struct ucontext is derived as follows: 
- 	     stack_t is a 12-byte struct and struct sigcontext is
- 	     8-byte aligned.  This gives an offset of 8 + 12 + 4 (for
- 	     padding) = 24.)  */
+	     to a ucontext struct.  The ucontext struct contains a
+	     sigcontext struct starting 24 bytes in.  (The offset of
+	     uc_mcontext within struct ucontext is derived as follows: 
+	     stack_t is a 12-byte struct and struct sigcontext is
+	     8-byte aligned.  This gives an offset of 8 + 12 + 4 (for
+	     padding) = 24.)  */
 	  if (target_read_memory (sp + 12, buf, sizeof buf) != 0)
 	    {
 	      warning (_("Can't read realtime sigtramp frame."));
 	      return 0;
 	    }
 	  sc_addr = extract_unsigned_integer (buf, sizeof buf, byte_order);
- 	  sc_addr += 24;
+	  sc_addr += 24;
 	}
       else
 	internal_error (__FILE__, __LINE__, _("not a signal trampoline"));

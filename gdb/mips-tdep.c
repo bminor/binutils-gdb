@@ -4284,7 +4284,7 @@ heuristic-fence-post' command.\n",
 
 	/* On MIPS16, any one of the following is likely to be the
 	   start of a function:
-  	   extend save
+	   extend save
 	   save
 	   entry
 	   addiu sp,-n

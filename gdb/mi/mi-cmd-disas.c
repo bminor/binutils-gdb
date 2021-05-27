@@ -202,6 +202,6 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
     }
 
   gdb_disassembly (gdbarch, uiout,
-  		   disasm_flags,
+		   disasm_flags,
 		   how_many, low, high);
 }

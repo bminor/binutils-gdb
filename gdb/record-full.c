@@ -1236,11 +1236,11 @@ record_full_wait_1 (struct target_ops *ops,
 
 		      if (!record_full_message_wrapper_safe (regcache,
 							     GDB_SIGNAL_0))
-  			{
+			{
 			   status->kind = TARGET_WAITKIND_STOPPED;
 			   status->value.sig = GDB_SIGNAL_0;
 			   break;
-  			}
+			}
 
 		      process_stratum_target *proc_target
 			= current_inferior ()->process_target ();

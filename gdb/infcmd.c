@@ -1472,7 +1472,7 @@ get_return_value (struct value *function, struct type *value_type)
      calls are made async, this will likely be made the norm.  */
 
   switch (gdbarch_return_value (gdbarch, function, value_type,
-  				NULL, NULL, NULL))
+				NULL, NULL, NULL))
     {
     case RETURN_VALUE_REGISTER_CONVENTION:
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:

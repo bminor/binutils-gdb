@@ -785,7 +785,7 @@ set_condition_evaluation_mode (const char *args, int from_tty,
 	     target.  */
 	  for (bp_location *loc : all_bp_locations ())
 	    mark_breakpoint_location_modified (loc);
-  	}
+	}
       else
 	{
 	  /* Manually mark non-duplicate locations to synch conditions
@@ -10712,7 +10712,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	  gdbarch *caller_arch = frame_unwind_caller_arch (wp_frame);
 	  CORE_ADDR caller_pc = frame_unwind_caller_pc (wp_frame);
 
- 	  scope_breakpoint
+	  scope_breakpoint
 	    = create_internal_breakpoint (caller_arch, caller_pc,
 					  bp_watchpoint_scope,
 					  &momentary_breakpoint_ops);

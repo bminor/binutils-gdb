@@ -1,5 +1,9 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Fix tab after space indentation issues throughout.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Fix some indentation mistakes throughout.
 
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>

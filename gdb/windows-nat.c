@@ -2600,7 +2600,7 @@ windows_nat_target::create_inferior (const char *exec_file,
     {
       sh = get_shell ();
       if (cygwin_conv_path (CCP_POSIX_TO_WIN_W, sh, shell, __PMAX) < 0)
-      	error (_("Error starting executable via shell: %d"), errno);
+	error (_("Error starting executable via shell: %d"), errno);
 #ifdef __USEWIDE
       len = sizeof (L" -c 'exec  '") + mbstowcs (NULL, exec_file, 0)
 	    + mbstowcs (NULL, allargs, 0) + 2;

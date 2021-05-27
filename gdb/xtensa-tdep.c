@@ -768,7 +768,7 @@ xtensa_coprocessor_register_group (struct reggroup *group)
 static int
 xtensa_register_reggroup_p (struct gdbarch *gdbarch,
 			    int regnum,
-    			    struct reggroup *group)
+			    struct reggroup *group)
 {
   xtensa_register_t* reg = &gdbarch_tdep (gdbarch)->regmap[regnum];
   xtensa_register_type_t type = reg->type;
@@ -2852,7 +2852,7 @@ execute_code (struct gdbarch *gdbarch, CORE_ADDR current_pc, CORE_ADDR wb)
 		  xtensa_write_register (arreg, a7_saved);
 		}
 	      return xtWindowUnderflow;
- 	    default: /* Simply skip this insns.  */
+	    default: /* Simply skip this insns.  */
 	      continue;
 	    }
 
@@ -2965,7 +2965,7 @@ Unable to decode Xtensa Window Interrupt Handler's code."));
 
    int main()
    {	int local_var = 1;
-   	....
+	....
    }
 
    because, for this source code, both Xtensa compilers will generate two
