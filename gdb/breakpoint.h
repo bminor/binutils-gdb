@@ -1313,9 +1313,6 @@ extern void breakpoint_init_inferior (enum inf_context);
 
 extern void breakpoint_auto_delete (bpstat);
 
-extern void iterate_over_bp_locations
-  (gdb::function_view<void (bp_location *)> callback);
-
 /* Return the chain of command lines to execute when this breakpoint
    is hit.  */
 extern struct command_line *breakpoint_commands (struct breakpoint *b);
@@ -1754,6 +1751,10 @@ using tracepoint_range = next_adapter<breakpoint, tracepoint_iterator>;
 /* Return a range to iterate over all tracepoints.  */
 
 tracepoint_range all_tracepoints ();
+
+/* Return a range to iterate over all breakpoint locations.  */
+
+const std::vector<bp_location *> &all_bp_locations ();
 
 /* Nonzero if the specified PC cannot be a location where functions
    have been inlined.  */

@@ -1,5 +1,13 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.h (iterate_over_bp_locations): Remove.  Update
+	users to use all_bp_locations.
+	(all_bp_locations): New.
+	* breakpoint.c (all_bp_locations): Make non-static.
+	(iterate_over_bp_locations): Remove.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.h (iterate_over_breakpoints): Remove.  Update
 	callers to use all_breakpoints or all_breakpoints_safe.
 	(breakpoint_range, all_breakpoints, breakpoint_safe_range,

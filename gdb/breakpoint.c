@@ -521,7 +521,9 @@ all_tracepoints ()
 
 static std::vector<bp_location *> bp_locations;
 
-static const std::vector<bp_location *> &
+/* See breakpoint.h.  */
+
+const std::vector<bp_location *> &
 all_bp_locations ()
 {
   return bp_locations;
@@ -2911,15 +2913,6 @@ insert_breakpoints (void)
      auto-hw", so we need to call it even if we don't have new
      locations.  */
   update_global_location_list (UGLL_INSERT);
-}
-
-/* Invoke CALLBACK for each of bp_location.  */
-
-void
-iterate_over_bp_locations (gdb::function_view<void (bp_location *)> callback)
-{
-  for (bp_location *loc : all_bp_locations ())
-    callback (loc);
 }
 
 /* This is used when we need to synch breakpoint conditions between GDB and the

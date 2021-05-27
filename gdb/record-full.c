@@ -1719,21 +1719,6 @@ struct record_full_breakpoint
    active.  */
 static std::vector<record_full_breakpoint> record_full_breakpoints;
 
-static void
-record_full_sync_record_breakpoints (struct bp_location *loc)
-{
-  if (loc->loc_type != bp_loc_software_breakpoint)
-      return;
-
-  if (loc->inserted)
-    {
-      record_full_breakpoints.emplace_back
-	(loc->target_info.placed_address_space,
-	 loc->target_info.placed_address,
-	 1);
-    }
-}
-
 /* Sync existing breakpoints to record_full_breakpoints.  */
 
 static void
@@ -1741,7 +1726,16 @@ record_full_init_record_breakpoints (void)
 {
   record_full_breakpoints.clear ();
 
-  iterate_over_bp_locations (record_full_sync_record_breakpoints);
+  for (bp_location *loc : all_bp_locations ())
+    {
+      if (loc->loc_type != bp_loc_software_breakpoint)
+	continue;
+
+      if (loc->inserted)
+	record_full_breakpoints.emplace_back
+	  (loc->target_info.placed_address_space,
+	   loc->target_info.placed_address, 1);
+    }
 }
 
 /* Behavior is conditional on RECORD_FULL_IS_REPLAY.  We will not actually
