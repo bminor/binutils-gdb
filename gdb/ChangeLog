@@ -1,5 +1,13 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.c (bp_locations): Change to std::vector, update all
+	users.
+	(bp_locations_count): Remove.
+	(update_global_location_list): Change to work with indices
+	rather than bp_location**.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.h (bp_locations_range): New.
 	(struct breakpoint) <locations>: New.  Use where possible.
 

@@ -496,8 +496,8 @@ bool target_exact_watchpoints = false;
    while executing the block of ALL_BP_LOCATIONS.  */
 
 #define ALL_BP_LOCATIONS(B,BP_TMP)					\
-	for (BP_TMP = bp_locations;					\
-	     BP_TMP < bp_locations + bp_locations_count && (B = *BP_TMP);\
+	for (BP_TMP = bp_locations.data ();				\
+	     BP_TMP < bp_locations.data () + bp_locations.size () && (B = *BP_TMP);\
 	     BP_TMP++)
 
 /* Iterates through locations with address ADDRESS for the currently selected
@@ -510,7 +510,7 @@ bool target_exact_watchpoints = false;
 	for (BP_LOCP_START = BP_LOCP_START == NULL ? get_first_locp_gte_addr (ADDRESS) : BP_LOCP_START, \
 	     BP_LOCP_TMP = BP_LOCP_START;				\
 	     BP_LOCP_START						\
-	     && (BP_LOCP_TMP < bp_locations + bp_locations_count	\
+	     && (BP_LOCP_TMP < bp_locations.data () + bp_locations.size () \
 	     && (*BP_LOCP_TMP)->address == ADDRESS);			\
 	     BP_LOCP_TMP++)
 
@@ -554,11 +554,7 @@ all_tracepoints ()
 
 /* Array is sorted by bp_location_is_less_than - primarily by the ADDRESS.  */
 
-static struct bp_location **bp_locations;
-
-/* Number of elements of BP_LOCATIONS.  */
-
-static unsigned bp_locations_count;
+static std::vector<bp_location *> bp_locations;
 
 /* Maximum alignment offset between bp_target_info.PLACED_ADDRESS and
    ADDRESS for the current elements of BP_LOCATIONS which get a valid
@@ -827,7 +823,7 @@ get_first_locp_gte_addr (CORE_ADDR address)
 
   /* Find a close match to the first location at ADDRESS.  */
   locp_found = ((struct bp_location **)
-		bsearch (&dummy_locp, bp_locations, bp_locations_count,
+		bsearch (&dummy_locp, bp_locations.data (), bp_locations.size (),
 			 sizeof (struct bp_location **),
 			 bp_locations_compare_addrs));
 
@@ -837,7 +833,7 @@ get_first_locp_gte_addr (CORE_ADDR address)
 
   /* We may have found a location that is at ADDRESS but is not the first in the
      location's list.  Go backwards (if possible) and locate the first one.  */
-  while ((locp_found - 1) >= bp_locations
+  while ((locp_found - 1) >= bp_locations.data ()
 	 && (*(locp_found - 1))->address == address)
     locp_found--;
 
@@ -1582,7 +1578,7 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
      report higher one.  */
 
   bc_l = 0;
-  bc_r = bp_locations_count;
+  bc_r = bp_locations.size ();
   while (bc_l + 1 < bc_r)
     {
       struct bp_location *bl;
@@ -1627,7 +1623,7 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 
   /* Now do full processing of the found relevant range of elements.  */
 
-  for (bc = bc_l; bc < bp_locations_count; bc++)
+  for (bc = bc_l; bc < bp_locations.size (); bc++)
   {
     struct bp_location *bl = bp_locations[bc];
 
@@ -11831,7 +11827,6 @@ force_breakpoint_reinsertion (struct bp_location *bl)
 static void
 update_global_location_list (enum ugll_insert_mode insert_mode)
 {
-  struct bp_location **locp;
   /* Last breakpoint location address that was marked for update.  */
   CORE_ADDR last_addr = 0;
   /* Last breakpoint location program space that was marked for update.  */
@@ -11850,38 +11845,22 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 
   /* Saved former bp_locations array which we compare against the newly
      built bp_locations from the current state of ALL_BREAKPOINTS.  */
-  struct bp_location **old_locp;
-  unsigned old_locations_count;
-  gdb::unique_xmalloc_ptr<struct bp_location *> old_locations (bp_locations);
+  std::vector<bp_location *> old_locations = std::move (bp_locations);
+  bp_locations.clear ();
 
-  old_locations_count = bp_locations_count;
-  bp_locations = NULL;
-  bp_locations_count = 0;
-
-  for (breakpoint *b : all_breakpoints ())
-    for (bp_location *loc ATTRIBUTE_UNUSED : b->locations ())
-      bp_locations_count++;
-
-  bp_locations = XNEWVEC (struct bp_location *, bp_locations_count);
-  locp = bp_locations;
   for (breakpoint *b : all_breakpoints ())
     for (bp_location *loc : b->locations ())
-      *locp++ = loc;
+      bp_locations.push_back (loc);
 
   /* See if we need to "upgrade" a software breakpoint to a hardware
      breakpoint.  Do this before deciding whether locations are
      duplicates.  Also do this before sorting because sorting order
      depends on location type.  */
-  for (locp = bp_locations;
-       locp < bp_locations + bp_locations_count;
-       locp++)
-    {
-      bp_location *loc = *locp;
-      if (!loc->inserted && should_be_inserted (loc))
+  for (bp_location *loc : bp_locations)
+    if (!loc->inserted && should_be_inserted (loc))
 	handle_automatic_hardware_breakpoints (loc);
-    }
 
-  std::sort (bp_locations, bp_locations + bp_locations_count,
+  std::sort (bp_locations.begin (), bp_locations.end (),
 	     bp_location_is_less_than);
 
   bp_locations_target_extensions_update ();
@@ -11896,14 +11875,9 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
      LOCP is kept in sync with OLD_LOCP, each pointing to the current
      and former bp_location array state respectively.  */
 
-  locp = bp_locations;
-  for (old_locp = old_locations.get ();
-       old_locp < old_locations.get () + old_locations_count;
-       old_locp++)
+  size_t loc_i = 0;
+  for (bp_location *old_loc : old_locations)
     {
-      struct bp_location *old_loc = *old_locp;
-      struct bp_location **loc2p;
-
       /* Tells if 'old_loc' is found among the new locations.  If
 	 not, we have to free it.  */
       int found_object = 0;
@@ -11913,28 +11887,28 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 
       /* Skip LOCP entries which will definitely never be needed.
 	 Stop either at or being the one matching OLD_LOC.  */
-      while (locp < bp_locations + bp_locations_count
-	     && (*locp)->address < old_loc->address)
-	locp++;
+      while (loc_i < bp_locations.size ()
+	     && bp_locations[loc_i]->address < old_loc->address)
+	loc_i++;
 
-      for (loc2p = locp;
-	   (loc2p < bp_locations + bp_locations_count
-	    && (*loc2p)->address == old_loc->address);
-	   loc2p++)
+      for (size_t loc2_i = loc_i;
+	   (loc2_i < bp_locations.size ()
+	    && bp_locations[loc2_i]->address == old_loc->address);
+	   loc2_i++)
 	{
 	  /* Check if this is a new/duplicated location or a duplicated
 	     location that had its condition modified.  If so, we want to send
 	     its condition to the target if evaluation of conditions is taking
 	     place there.  */
-	  if ((*loc2p)->condition_changed == condition_modified
+	  if (bp_locations[loc2_i]->condition_changed == condition_modified
 	      && (last_addr != old_loc->address
 		  || last_pspace_num != old_loc->pspace->num))
 	    {
-	      force_breakpoint_reinsertion (*loc2p);
+	      force_breakpoint_reinsertion (bp_locations[loc2_i]);
 	      last_pspace_num = old_loc->pspace->num;
 	    }
 
-	  if (*loc2p == old_loc)
+	  if (bp_locations[loc2_i] == old_loc)
 	    found_object = 1;
 	}
 
@@ -11977,12 +11951,12 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
 	      /* OLD_LOC comes from existing struct breakpoint.  */
 	      if (bl_address_is_meaningful (old_loc))
 		{
-		  for (loc2p = locp;
-		       (loc2p < bp_locations + bp_locations_count
-			&& (*loc2p)->address == old_loc->address);
-		       loc2p++)
+		  for (size_t loc2_i = loc_i;
+		       (loc2_i < bp_locations.size ()
+			&& bp_locations[loc2_i]->address == old_loc->address);
+		       loc2_i++)
 		    {
-		      struct bp_location *loc2 = *loc2p;
+		      bp_location *loc2 = bp_locations[loc2_i];
 
 		      if (loc2 == old_loc)
 			continue;
@@ -12121,7 +12095,7 @@ update_global_location_list (enum ugll_insert_mode insert_mode)
   awp_loc_first = NULL;
   rwp_loc_first = NULL;
 
-  bp_location *loc;
+  bp_location *loc, **locp;
   ALL_BP_LOCATIONS (loc, locp)
     {
       /* ALL_BP_LOCATIONS bp_location has LOC->OWNER always
