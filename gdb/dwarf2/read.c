@@ -7020,6 +7020,9 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
 
   cutu_reader reader (this_cu, per_objfile, nullptr, nullptr, false);
 
+  if (reader.comp_unit_die == nullptr)
+    return;
+
   switch (reader.comp_unit_die->tag)
     {
     case DW_TAG_compile_unit:
