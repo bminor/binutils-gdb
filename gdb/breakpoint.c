@@ -540,6 +540,20 @@ all_breakpoints ()
   return breakpoint_range (breakpoint_chain);
 }
 
+/* Breakpoint linked list range, safe against deletion of the current
+   breakpoint while iterating.  */
+
+using breakpoint_safe_range = basic_safe_range<breakpoint_range>;
+
+/* Return a range to iterate over all breakpoints.  This range is safe against
+   deletion of the current breakpoint while iterating.  */
+
+static breakpoint_safe_range
+all_breakpoints_safe ()
+{
+  return breakpoint_safe_range (all_breakpoints ());
+}
+
 /* Array is sorted by bp_location_is_less_than - primarily by the ADDRESS.  */
 
 static struct bp_location **bp_locations;
@@ -2889,15 +2903,12 @@ of catchpoint."), bl->owner->number);
 void
 breakpoint_program_space_exit (struct program_space *pspace)
 {
-  struct breakpoint *b, *b_temp;
   struct bp_location *loc, **loc_temp;
 
   /* Remove any breakpoint that was set through this program space.  */
-  ALL_BREAKPOINTS_SAFE (b, b_temp)
-    {
-      if (b->pspace == pspace)
-	delete_breakpoint (b);
-    }
+  for (breakpoint *b : all_breakpoints_safe ())
+    if (b->pspace == pspace)
+      delete_breakpoint (b);
 
   /* Breakpoints set through other program spaces could have locations
      bound to PSPACE as well.  Remove those.  */
@@ -3143,9 +3154,7 @@ remove_breakpoints (void)
 static void
 remove_threaded_breakpoints (struct thread_info *tp, int silent)
 {
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
     {
       if (b->thread == tp->global_num && user_breakpoint_p (b))
 	{
@@ -3653,7 +3662,6 @@ breakpoint_event_location_empty_p (const struct breakpoint *b)
 void
 update_breakpoints_after_exec (void)
 {
-  struct breakpoint *b, *b_tmp;
   struct bp_location *bploc, **bplocp_tmp;
 
   /* We're about to delete breakpoints from GDB's lists.  If the
@@ -3668,7 +3676,7 @@ update_breakpoints_after_exec (void)
     if (bploc->pspace == current_program_space)
       gdb_assert (!bploc->inserted);
 
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
   {
     if (b->pspace != current_program_space)
       continue;
@@ -4002,7 +4010,6 @@ mark_breakpoints_out (void)
 void
 breakpoint_init_inferior (enum inf_context context)
 {
-  struct breakpoint *b, *b_tmp;
   struct program_space *pspace = current_program_space;
 
   /* If breakpoint locations are shared across processes, then there's
@@ -4012,7 +4019,7 @@ breakpoint_init_inferior (enum inf_context context)
 
   mark_breakpoints_out ();
 
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
   {
     if (b->loc && b->loc->pspace != pspace)
       continue;
@@ -7354,14 +7361,13 @@ set_raw_breakpoint (struct gdbarch *gdbarch,
 void
 set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 {
-  struct breakpoint *b, *b_tmp;
   int thread = tp->global_num;
 
   /* To avoid having to rescan all objfile symbols at every step,
      we maintain a list of continually-inserted but always disabled
      longjmp "master" breakpoints.  Here, we simply create momentary
      clones of those and enable them for the requested thread.  */
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
     if (b->pspace == current_program_space
 	&& (b->type == bp_longjmp_master
 	    || b->type == bp_exception_master))
@@ -7383,9 +7389,7 @@ set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 void
 delete_longjmp_breakpoint (int thread)
 {
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
     if (b->type == bp_longjmp || b->type == bp_exception)
       {
 	if (b->thread == thread)
@@ -7396,9 +7400,7 @@ delete_longjmp_breakpoint (int thread)
 void
 delete_longjmp_breakpoint_at_next_stop (int thread)
 {
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
     if (b->type == bp_longjmp || b->type == bp_exception)
       {
 	if (b->thread == thread)
@@ -7505,9 +7507,7 @@ disable_overlay_breakpoints (void)
 void
 set_std_terminate_breakpoint (void)
 {
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
     if (b->pspace == current_program_space
 	&& b->type == bp_std_terminate_master)
       {
@@ -7520,9 +7520,7 @@ set_std_terminate_breakpoint (void)
 void
 delete_std_terminate_breakpoint (void)
 {
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
     if (b->type == bp_std_terminate)
       delete_breakpoint (b);
 }
@@ -7564,9 +7562,7 @@ create_jit_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 void
 remove_jit_event_breakpoints (void)
 {
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
     if (b->type == bp_jit_event
 	&& b->loc->pspace == current_program_space)
       delete_breakpoint (b);
@@ -7575,9 +7571,7 @@ remove_jit_event_breakpoints (void)
 void
 remove_solib_event_breakpoints (void)
 {
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
     if (b->type == bp_shlib_event
 	&& b->loc->pspace == current_program_space)
       delete_breakpoint (b);
@@ -7588,9 +7582,7 @@ remove_solib_event_breakpoints (void)
 void
 remove_solib_event_breakpoints_at_next_stop (void)
 {
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+  for (breakpoint *b : all_breakpoints_safe ())
     if (b->type == bp_shlib_event
 	&& b->loc->pspace == current_program_space)
       b->disposition = disp_del_at_next_stop;
@@ -11625,19 +11617,15 @@ clear_command (const char *arg, int from_tty)
 void
 breakpoint_auto_delete (bpstat bs)
 {
-  struct breakpoint *b, *b_tmp;
-
   for (; bs; bs = bs->next)
     if (bs->breakpoint_at
 	&& bs->breakpoint_at->disposition == disp_del
 	&& bs->stop)
       delete_breakpoint (bs->breakpoint_at);
 
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
-  {
+  for (breakpoint *b : all_breakpoints_safe ())
     if (b->disposition == disp_del_at_next_stop)
       delete_breakpoint (b);
-  }
 }
 
 /* A comparison function for bp_location AP and BP being interfaced to
@@ -13375,8 +13363,6 @@ iterate_over_related_breakpoints (struct breakpoint *b,
 static void
 delete_command (const char *arg, int from_tty)
 {
-  breakpoint *b_tmp;
-
   dont_repeat ();
 
   if (arg == 0)
@@ -13396,13 +13382,9 @@ delete_command (const char *arg, int from_tty)
       /* Ask user only if there are some breakpoints to delete.  */
       if (!from_tty
 	  || (breaks_to_delete && query (_("Delete all breakpoints? "))))
-	{
-	  breakpoint *b;
-
-	  ALL_BREAKPOINTS_SAFE (b, b_tmp)
-	    if (user_breakpoint_p (b))
-	      delete_breakpoint (b);
-	}
+	for (breakpoint *b : all_breakpoints_safe ())
+	  if (user_breakpoint_p (b))
+	    delete_breakpoint (b);
     }
   else
     map_breakpoint_numbers
@@ -13974,8 +13956,6 @@ breakpoint_re_set_one (breakpoint *b)
 void
 breakpoint_re_set (void)
 {
-  struct breakpoint *b, *b_tmp;
-
   {
     scoped_restore_current_language save_language;
     scoped_restore save_input_radix = make_scoped_restore (&input_radix);
@@ -13999,7 +13979,7 @@ breakpoint_re_set (void)
        breakpoint 1, we'd insert the locations of breakpoint 2, which
        hadn't been re-set yet, and thus may have stale locations.  */
 
-    ALL_BREAKPOINTS_SAFE (b, b_tmp)
+    for (breakpoint *b : all_breakpoints_safe ())
       {
 	try
 	  {
@@ -14126,13 +14106,11 @@ map_breakpoint_number_range (std::pair<int, int> bp_num_range,
     }
   else
     {
-      struct breakpoint *b, *tmp;
-
       for (int i = bp_num_range.first; i <= bp_num_range.second; i++)
 	{
 	  bool match = false;
 
-	  ALL_BREAKPOINTS_SAFE (b, tmp)
+	  for (breakpoint *b : all_breakpoints_safe ())
 	    if (b->number == i)
 	      {
 		match = true;
@@ -14927,20 +14905,19 @@ disable_trace_command (const char *args, int from_tty)
 static void
 delete_trace_command (const char *arg, int from_tty)
 {
-  struct breakpoint *b, *b_tmp;
-
   dont_repeat ();
 
   if (arg == 0)
     {
       int breaks_to_delete = 0;
+      breakpoint *tp;
 
       /* Delete all breakpoints if no argument.
 	 Do not delete internal or call-dummy breakpoints, these
 	 have to be deleted with an explicit breakpoint number 
 	 argument.  */
-      ALL_TRACEPOINTS (b)
-	if (is_tracepoint (b) && user_breakpoint_p (b))
+      ALL_TRACEPOINTS (tp)
+	if (is_tracepoint (tp) && user_breakpoint_p (tp))
 	  {
 	    breaks_to_delete = 1;
 	    break;
@@ -14950,7 +14927,7 @@ delete_trace_command (const char *arg, int from_tty)
       if (!from_tty
 	  || (breaks_to_delete && query (_("Delete all tracepoints? "))))
 	{
-	  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+	  for (breakpoint *b : all_breakpoints_safe ())
 	    if (is_tracepoint (b) && user_breakpoint_p (b))
 	      delete_breakpoint (b);
 	}
@@ -15352,13 +15329,9 @@ add_catch_command (const char *name, const char *docstring,
 struct breakpoint *
 iterate_over_breakpoints (gdb::function_view<bool (breakpoint *)> callback)
 {
-  struct breakpoint *b, *b_tmp;
-
-  ALL_BREAKPOINTS_SAFE (b, b_tmp)
-    {
-      if (callback (b))
-	return b;
-    }
+  for (breakpoint *b : all_breakpoints_safe ())
+    if (callback (b))
+      return b;
 
   return NULL;
 }

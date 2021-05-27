@@ -1,5 +1,11 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.c (breakpoint_safe_range): New.
+	(all_breakpoints_safe): New.  Use instead of
+	ALL_BREAKPOINTS_SAFE where possible.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.c (ALL_BREAKPOINTS): Remove, replace all uses with
 	all_breakpoints.
 	(breakpoint_iterator): New.
