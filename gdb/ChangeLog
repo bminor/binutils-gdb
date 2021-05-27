@@ -1,5 +1,10 @@
 2021-05-27  Tom de Vries  <tdevries@suse.de>
 
+	* dwarf2/read.c (find_partial_die): Fix "Cannot not" typo in dwarf
+	error.
+
+2021-05-27  Tom de Vries  <tdevries@suse.de>
+
 	PR symtab/27898
 	* dwarf2/cu.c (dwarf2_cu::dwarf2_cu): Add load_all_dies init.
 	* dwarf2/cu.h (dwarf2_cu): Add load_all_dies field.
