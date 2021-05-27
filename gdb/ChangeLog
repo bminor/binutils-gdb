@@ -1,5 +1,14 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* Makefile.in (INIT_FILES_FILTER_OUT): New.
+	(INIT_FILES): Use INIT_FILES_FILTER_OUT.
+	(stamp-init): Use make-init-c.
+	* bpf-tdep.c (_initialize_bpf_tdep): Remove "void".
+	* silent-rules.mk (ECHO_INIT_C): Change.
+	* make-init-c: New file.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* command.h (add_alias_cmd): Accept target as
 	cmd_list_element.  Update callers.
 

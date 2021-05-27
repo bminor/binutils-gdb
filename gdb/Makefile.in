@@ -1837,42 +1837,31 @@ test-cp-name-parser$(EXEEXT): test-cp-name-parser.o $(LIBIBERTY)
 # maybe we could just require every .o file to have an initialization routine
 # of a given name (top.o -> _initialize_top, etc.).
 #
-# Formatting conventions:  The name of the _initialize_* routines must start
-# in column zero, and must not be inside #if.
-#
 # Note that the set of files with init functions might change, or the names
 # of the functions might change, so this files needs to depend on all the
 # source files that will be linked into gdb.  However, due to the way
 # this Makefile has generally been written, we do this indirectly, by
 # computing the list of source files from the list of object files.
 
+INIT_FILES_FILTER_OUT = \
+	cp-name-parser.o \
+	init.o \
+	version.o \
+	xml-builtin.o \
+	%_S.o \
+	%_U.o
+
 INIT_FILES = \
 	$(patsubst %.o,%.c, \
 	  $(patsubst %-exp.o,%-exp.y, \
-	    $(filter-out init.o version.o %_S.o %_U.o,\
-	      $(COMMON_OBS))))
+	    $(filter-out $(INIT_FILES_FILTER_OUT), $(COMMON_OBS))))
 
 init.c: stamp-init; @true
-stamp-init: $(INIT_FILES) config.status
-	@$(ECHO_INIT_C) echo "Making init.c"
-	@rm -f init.c-tmp init.l-tmp
-	@touch init.c-tmp
-	@-for f in $(INIT_FILES); do \
-	    sed -n -e 's/^_initialize_\([a-z_0-9A-Z]*\).*/\1/p' \
-	        $(srcdir)/$$f 2>/dev/null; \
-	done > init.l-tmp
-	@echo '/* Do not modify this file.  */' >>init.c-tmp
-	@echo '/* It is created automatically by the Makefile.  */'>>init.c-tmp
-	@echo '#include "defs.h"      /* For initialize_file_ftype.  */' >>init.c-tmp
-	@echo 'extern void initialize_all_files(void);' >>init.c-tmp
-	@sed -e 's/\(.*\)/extern initialize_file_ftype _initialize_\1;/' <init.l-tmp >>init.c-tmp
-	@echo 'void' >>init.c-tmp
-	@echo 'initialize_all_files (void)' >>init.c-tmp
-	@echo '{' >>init.c-tmp
-	@sed -e 's/\(.*\)/  _initialize_\1 ();/' <init.l-tmp >>init.c-tmp
-	@echo '}' >>init.c-tmp
-	@$(SHELL) $(srcdir)/../move-if-change init.c-tmp init.c
-	@echo stamp > stamp-init
+stamp-init: $(INIT_FILES) config.status $(srcdir)/make-init-c
+	$(ECHO_INIT_C)
+	$(SILENCE) $(srcdir)/make-init-c $(addprefix $(srcdir)/,$(INIT_FILES)) > init.c-tmp
+	$(SILENCE) $(SHELL) $(srcdir)/../move-if-change init.c-tmp init.c
+	$(SILENCE) echo stamp > stamp-init
 
 .PRECIOUS: init.c
 

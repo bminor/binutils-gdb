@@ -370,7 +370,7 @@ bpf_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 void _initialize_bpf_tdep ();
 void
-_initialize_bpf_tdep (void)
+_initialize_bpf_tdep ()
 {
   register_gdbarch_init (bfd_arch_bpf, bpf_gdbarch_init);
 

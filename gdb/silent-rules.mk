@@ -9,7 +9,7 @@ ECHO_GEN_XML_BUILTIN = \
               @echo "  GEN    xml-builtin.c";
 ECHO_GEN_XML_BUILTIN_GENERATED = \
               @echo "  GEN    xml-builtin-generated.c";
-ECHO_INIT_C =  echo "  GEN    init.c" ||
+ECHO_INIT_C = @echo "  GEN    init.c"
 ECHO_SIGN =   @echo "  SIGN   gdb";
 ECHO_YACC =   @echo "  YACC   $@";
 ECHO_LEX  =   @echo "  LEX    $@";
