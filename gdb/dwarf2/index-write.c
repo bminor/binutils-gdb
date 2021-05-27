@@ -1577,9 +1577,9 @@ struct index_wip_file
 /* See dwarf-index-write.h.  */
 
 void
-write_psymtabs_to_index (dwarf2_per_objfile *per_objfile, const char *dir,
-			 const char *basename, const char *dwz_basename,
-			 dw_index_kind index_kind)
+write_dwarf_index (dwarf2_per_objfile *per_objfile, const char *dir,
+		   const char *basename, const char *dwz_basename,
+		   dw_index_kind index_kind)
 {
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct objfile *objfile = per_objfile->objfile;
@@ -1675,8 +1675,8 @@ save_gdb_index_command (const char *arg, int from_tty)
 	      if (dwz != NULL)
 		dwz_basename = lbasename (dwz->filename ());
 
-	      write_psymtabs_to_index (per_objfile, arg, basename, dwz_basename,
-				       index_kind);
+	      write_dwarf_index (per_objfile, arg, basename, dwz_basename,
+				 index_kind);
 	    }
 	  catch (const gdb_exception_error &except)
 	    {

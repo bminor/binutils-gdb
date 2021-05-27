@@ -148,9 +148,9 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 
       /* Write the index itself to the directory, using the build id as the
 	 filename.  */
-      write_psymtabs_to_index (per_objfile, m_dir.c_str (),
-			       build_id_str.c_str (), dwz_build_id_ptr,
-			       dw_index_kind::GDB_INDEX);
+      write_dwarf_index (per_objfile, m_dir.c_str (),
+			 build_id_str.c_str (), dwz_build_id_ptr,
+			 dw_index_kind::GDB_INDEX);
     }
   catch (const gdb_exception_error &except)
     {
