@@ -28,6 +28,7 @@
 #include "location.h"
 #include <vector>
 #include "gdbsupport/array-view.h"
+#include "gdbsupport/filtered-iterator.h"
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/refcounted-object.h"
 #include "cli/cli-script.h"
@@ -1683,9 +1684,6 @@ extern struct tracepoint *
   get_tracepoint_by_number (const char **arg,
 			    number_or_range_parser *parser);
 
-/* Return a vector of all tracepoints currently defined.  */
-extern std::vector<breakpoint *> all_tracepoints (void);
-
 /* Return true if B is of tracepoint kind.  */
 
 extern bool is_tracepoint (const struct breakpoint *b);
@@ -1716,6 +1714,31 @@ public:
    to every breakpoint.  */
 extern struct breakpoint *iterate_over_breakpoints
   (gdb::function_view<bool (breakpoint *)>);
+
+/* Breakpoint linked list iterator.  */
+
+using breakpoint_iterator = next_iterator<breakpoint>;
+
+/* Breakpoint filter to only keep tracepoints.  */
+
+struct tracepoint_filter
+{
+  bool operator() (breakpoint *b)
+  { return is_tracepoint (b); }
+};
+
+/* Breakpoint linked list iterator, filtering to only keep tracepoints.  */
+
+using tracepoint_iterator
+  = filtered_iterator<breakpoint_iterator, tracepoint_filter>;
+
+/* Breakpoint linked list range, filtering to only keep tracepoints.  */
+
+using tracepoint_range = next_adapter<breakpoint, tracepoint_iterator>;
+
+/* Return a range to iterate over all tracepoints.  */
+
+tracepoint_range all_tracepoints ();
 
 /* Nonzero if the specified PC cannot be a location where functions
    have been inlined.  */

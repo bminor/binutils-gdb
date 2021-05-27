@@ -1603,13 +1603,13 @@ start_tracing (const char *notes)
   int any_enabled = 0, num_to_download = 0;
   int ret;
 
-  std::vector<breakpoint *> tp_vec = all_tracepoints ();
+  auto tracepoint_range = all_tracepoints ();
 
   /* No point in tracing without any tracepoints...  */
-  if (tp_vec.empty ())
+  if (tracepoint_range.begin () == tracepoint_range.end ())
     error (_("No tracepoints defined, not starting trace"));
 
-  for (breakpoint *b : tp_vec)
+  for (breakpoint *b : tracepoint_range)
     {
       if (b->enable_state == bp_enabled)
 	any_enabled = 1;
@@ -1640,7 +1640,7 @@ start_tracing (const char *notes)
 
   target_trace_init ();
 
-  for (breakpoint *b : tp_vec)
+  for (breakpoint *b : tracepoint_range)
     {
       struct tracepoint *t = (struct tracepoint *) b;
       struct bp_location *loc;

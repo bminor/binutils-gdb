@@ -1,5 +1,19 @@
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* breakpoint.h (all_tracepoints): Remove.
+	(breakpoint_iterator): Move here.
+	(struct tracepoint_filter): New.
+	(tracepoint_iterator): New.
+	(tracepoint_range): New.
+	(all_tracepoints): New.
+	* breakpoint.c (ALL_TRACEPOINTS): Remove, replace all users with
+	all_tracepoints.
+	(breakpoint_iterator): Move to header.
+	(all_tracepoints): New.
+	* tracepoint.c (start_tracing): Adjust.
+
+2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* breakpoint.c (breakpoint_safe_range): New.
 	(all_breakpoints_safe): New.  Use instead of
 	ALL_BREAKPOINTS_SAFE where possible.

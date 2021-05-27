@@ -514,19 +514,9 @@ bool target_exact_watchpoints = false;
 	     && (*BP_LOCP_TMP)->address == ADDRESS);			\
 	     BP_LOCP_TMP++)
 
-/* Iterator for tracepoints only.  */
-
-#define ALL_TRACEPOINTS(B)  \
-  for (B = breakpoint_chain; B; B = B->next)  \
-    if (is_tracepoint (B))
-
 /* Chains of all breakpoints defined.  */
 
 static struct breakpoint *breakpoint_chain;
-
-/* Breakpoint linked list iterator.  */
-
-using breakpoint_iterator = next_iterator<breakpoint>;
 
 /* Breakpoint linked list range.  */
 
@@ -552,6 +542,14 @@ static breakpoint_safe_range
 all_breakpoints_safe ()
 {
   return breakpoint_safe_range (all_breakpoints ());
+}
+
+/* See breakpoint.h.  */
+
+tracepoint_range
+all_tracepoints ()
+{
+  return tracepoint_range (breakpoint_chain);
 }
 
 /* Array is sorted by bp_location_is_less_than - primarily by the ADDRESS.  */
@@ -11714,12 +11712,11 @@ bp_locations_target_extensions_update (void)
 static void
 download_tracepoint_locations (void)
 {
-  struct breakpoint *b;
   enum tribool can_download_tracepoint = TRIBOOL_UNKNOWN;
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
-  ALL_TRACEPOINTS (b)
+  for (breakpoint *b : all_tracepoints ())
     {
       struct bp_location *bl;
       struct tracepoint *t;
@@ -14910,13 +14907,12 @@ delete_trace_command (const char *arg, int from_tty)
   if (arg == 0)
     {
       int breaks_to_delete = 0;
-      breakpoint *tp;
 
       /* Delete all breakpoints if no argument.
 	 Do not delete internal or call-dummy breakpoints, these
 	 have to be deleted with an explicit breakpoint number 
 	 argument.  */
-      ALL_TRACEPOINTS (tp)
+      for (breakpoint *tp : all_tracepoints ())
 	if (is_tracepoint (tp) && user_breakpoint_p (tp))
 	  {
 	    breaks_to_delete = 1;
@@ -14973,13 +14969,11 @@ trace_pass_command (const char *args, int from_tty)
   args = skip_spaces (args);
   if (*args && strncasecmp (args, "all", 3) == 0)
     {
-      struct breakpoint *b;
-
       args += 3;			/* Skip special argument "all".  */
       if (*args)
 	error (_("Junk at end of arguments."));
 
-      ALL_TRACEPOINTS (b)
+      for (breakpoint *b : all_tracepoints ())
       {
 	t1 = (struct tracepoint *) b;
 	trace_pass_set_count (t1, count, from_tty);
@@ -15006,9 +15000,7 @@ trace_pass_command (const char *args, int from_tty)
 struct tracepoint *
 get_tracepoint (int num)
 {
-  struct breakpoint *t;
-
-  ALL_TRACEPOINTS (t)
+  for (breakpoint *t : all_tracepoints ())
     if (t->number == num)
       return (struct tracepoint *) t;
 
@@ -15022,9 +15014,7 @@ get_tracepoint (int num)
 struct tracepoint *
 get_tracepoint_by_number_on_target (int num)
 {
-  struct breakpoint *b;
-
-  ALL_TRACEPOINTS (b)
+  for (breakpoint *b : all_tracepoints ())
     {
       struct tracepoint *t = (struct tracepoint *) b;
 
@@ -15044,7 +15034,6 @@ struct tracepoint *
 get_tracepoint_by_number (const char **arg,
 			  number_or_range_parser *parser)
 {
-  struct breakpoint *t;
   int tpnum;
   const char *instring = arg == NULL ? NULL : *arg;
 
@@ -15068,7 +15057,7 @@ get_tracepoint_by_number (const char **arg,
       return NULL;
     }
 
-  ALL_TRACEPOINTS (t)
+  for (breakpoint *t : all_tracepoints ())
     if (t->number == tpnum)
     {
       return (struct tracepoint *) t;
@@ -15223,22 +15212,6 @@ static void
 save_tracepoints_command (const char *args, int from_tty)
 {
   save_breakpoints (args, from_tty, is_tracepoint);
-}
-
-/* Create a vector of all tracepoints.  */
-
-std::vector<breakpoint *>
-all_tracepoints (void)
-{
-  std::vector<breakpoint *> tp_vec;
-  struct breakpoint *tp;
-
-  ALL_TRACEPOINTS (tp)
-  {
-    tp_vec.push_back (tp);
-  }
-
-  return tp_vec;
 }
 
 
