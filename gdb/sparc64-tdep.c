@@ -535,9 +535,10 @@ _initialize_sparc64_adi_tdep ()
   add_basic_prefix_cmd ("adi", class_support,
 			_("ADI version related commands."),
 			&sparc64adilist, 0, &cmdlist);
-  add_cmd ("examine", class_support, adi_examine_command,
-	   _("Examine ADI versions."), &sparc64adilist);
-  add_alias_cmd ("x", "examine", no_class, 1, &sparc64adilist);
+  cmd_list_element *adi_examine_cmd
+    = add_cmd ("examine", class_support, adi_examine_command,
+	       _("Examine ADI versions."), &sparc64adilist);
+  add_alias_cmd ("x", adi_examine_cmd, no_class, 1, &sparc64adilist);
   add_cmd ("assign", class_support, adi_assign_command,
 	   _("Assign ADI versions."), &sparc64adilist);
 

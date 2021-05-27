@@ -3304,7 +3304,8 @@ current working language.  The result is printed and saved in the value\n\
 history, if it is not void."));
   set_cmd_completer_handle_brkchars (c, print_command_completer);
 
-  add_cmd ("variable", class_vars, set_command, _("\
+  cmd_list_element *set_variable_cmd
+    = add_cmd ("variable", class_vars, set_command, _("\
 Evaluate expression EXP and assign result to variable VAR.\n\
 Usage: set variable VAR = EXP\n\
 This uses assignment syntax appropriate for the current language\n\
@@ -3313,8 +3314,8 @@ VAR may be a debugger \"convenience\" variable (names starting\n\
 with $), a register (a few standard names starting with $), or an actual\n\
 variable in the program being debugged.  EXP is any valid expression.\n\
 This may usually be abbreviated to simply \"set\"."),
-	   &setlist);
-  add_alias_cmd ("var", "variable", class_vars, 0, &setlist);
+	       &setlist);
+  add_alias_cmd ("var", set_variable_cmd, class_vars, 0, &setlist);
 
   const auto print_opts = make_value_print_options_def_group (nullptr);
 

@@ -757,13 +757,15 @@ initialize_current_architecture (void)
     arches = XRESIZEVEC (const char *, arches, nr + 2);
     arches[nr + 0] = "auto";
     arches[nr + 1] = NULL;
-    add_setshow_enum_cmd ("architecture", class_support,
-			  arches, &set_architecture_string, 
-			  _("Set architecture of target."),
-			  _("Show architecture of target."), NULL,
-			  set_architecture, show_architecture,
-			  &setlist, &showlist);
-    add_alias_cmd ("processor", "architecture", class_support, 1, &setlist);
+    set_show_commands architecture_cmds
+      = add_setshow_enum_cmd ("architecture", class_support,
+			      arches, &set_architecture_string,
+			      _("Set architecture of target."),
+			      _("Show architecture of target."), NULL,
+			      set_architecture, show_architecture,
+			      &setlist, &showlist);
+    add_alias_cmd ("processor", architecture_cmds.set, class_support, 1,
+		   &setlist);
   }
 }
 

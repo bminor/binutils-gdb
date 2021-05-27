@@ -333,18 +333,6 @@ add_alias_cmd (const char *name, cmd_list_element *target,
   return c;
 }
 
-struct cmd_list_element *
-add_alias_cmd (const char *name, const char *target_name,
-	       enum command_class theclass, int abbrev_flag,
-	       struct cmd_list_element **list)
-{
-  const char *tmp = target_name;
-  cmd_list_element *target = lookup_cmd (&tmp, *list, "", NULL, 1, 1);
-
-  return add_alias_cmd (name, target, theclass, abbrev_flag, list);
-}
-
-
 /* Update the prefix field of all sub-commands of the prefix command C.
    We must do this when a prefix command is defined as the GDB init sequence
    does not guarantee that a prefix command is created before its sub-commands.

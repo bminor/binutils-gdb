@@ -16062,12 +16062,13 @@ last tracepoint set."));
 
   add_info_alias ("tp", info_tracepoints_cmd, 1);
 
-  add_cmd ("tracepoints", class_trace, delete_trace_command, _("\
+  cmd_list_element *delete_tracepoints_cmd
+    = add_cmd ("tracepoints", class_trace, delete_trace_command, _("\
 Delete specified tracepoints.\n\
 Arguments are tracepoint numbers, separated by spaces.\n\
 No argument means delete all tracepoints."),
 	   &deletelist);
-  add_alias_cmd ("tr", "tracepoints", class_trace, 1, &deletelist);
+  add_alias_cmd ("tr", delete_tracepoints_cmd, class_trace, 1, &deletelist);
 
   c = add_cmd ("tracepoints", class_trace, disable_trace_command, _("\
 Disable specified tracepoints.\n\

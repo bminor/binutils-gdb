@@ -1212,10 +1212,11 @@ _initialize_windows_tdep ()
     = gdbarch_data_register_post_init (init_windows_gdbarch_data);
 
   init_w32_command_list ();
-  add_cmd ("thread-information-block", class_info, display_tib,
-	   _("Display thread information block."),
-	   &info_w32_cmdlist);
-  add_alias_cmd ("tib", "thread-information-block", class_info, 1,
+  cmd_list_element *info_w32_thread_information_block_cmd
+    = add_cmd ("thread-information-block", class_info, display_tib,
+	       _("Display thread information block."),
+	       &info_w32_cmdlist);
+  add_alias_cmd ("tib", info_w32_thread_information_block_cmd, class_info, 1,
 		 &info_w32_cmdlist);
 
   add_setshow_boolean_cmd ("show-all-tib", class_maintenance,

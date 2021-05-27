@@ -2796,14 +2796,15 @@ _initialize_record_full ()
 		  _("Start full execution recording."), &record_full_cmdlist,
 		  0, &record_cmdlist);
 
-  c = add_cmd ("restore", class_obscure, cmd_record_full_restore,
+  cmd_list_element *record_full_restore_cmd
+    = add_cmd ("restore", class_obscure, cmd_record_full_restore,
 	       _("Restore the execution log from a file.\n\
 Argument is filename.  File must be created with 'record save'."),
 	       &record_full_cmdlist);
-  set_cmd_completer (c, filename_completer);
+  set_cmd_completer (record_full_restore_cmd, filename_completer);
 
   /* Deprecate the old version without "full" prefix.  */
-  c = add_alias_cmd ("restore", "full restore", class_obscure, 1,
+  c = add_alias_cmd ("restore", record_full_restore_cmd, class_obscure, 1,
 		     &record_cmdlist);
   set_cmd_completer (c, filename_completer);
   deprecate_cmd (c, "record full restore");
@@ -2817,61 +2818,67 @@ Argument is filename.  File must be created with 'record save'."),
 		       0, &show_record_cmdlist);
 
   /* Record instructions number limit command.  */
-  add_setshow_boolean_cmd ("stop-at-limit", no_class,
-			   &record_full_stop_at_limit, _("\
+  set_show_commands set_record_full_stop_at_limit_cmds
+    = add_setshow_boolean_cmd ("stop-at-limit", no_class,
+			       &record_full_stop_at_limit, _("\
 Set whether record/replay stops when record/replay buffer becomes full."), _("\
 Show whether record/replay stops when record/replay buffer becomes full."),
 			   _("Default is ON.\n\
 When ON, if the record/replay buffer becomes full, ask user what to do.\n\
 When OFF, if the record/replay buffer becomes full,\n\
 delete the oldest recorded instruction to make room for each new one."),
-			   NULL, NULL,
-			   &set_record_full_cmdlist, &show_record_full_cmdlist);
+			       NULL, NULL,
+			       &set_record_full_cmdlist,
+			       &show_record_full_cmdlist);
 
-  c = add_alias_cmd ("stop-at-limit", "full stop-at-limit", no_class, 1,
+  c = add_alias_cmd ("stop-at-limit",
+		     set_record_full_stop_at_limit_cmds.set, no_class, 1,
 		     &set_record_cmdlist);
   deprecate_cmd (c, "set record full stop-at-limit");
 
-  c = add_alias_cmd ("stop-at-limit", "full stop-at-limit", no_class, 1,
+  c = add_alias_cmd ("stop-at-limit",
+		     set_record_full_stop_at_limit_cmds.show, no_class, 1,
 		     &show_record_cmdlist);
   deprecate_cmd (c, "show record full stop-at-limit");
 
-  add_setshow_uinteger_cmd ("insn-number-max", no_class,
-			    &record_full_insn_max_num,
-			    _("Set record/replay buffer limit."),
-			    _("Show record/replay buffer limit."), _("\
+  set_show_commands record_full_insn_number_max_cmds
+    = add_setshow_uinteger_cmd ("insn-number-max", no_class,
+				&record_full_insn_max_num,
+				_("Set record/replay buffer limit."),
+				_("Show record/replay buffer limit."), _("\
 Set the maximum number of instructions to be stored in the\n\
 record/replay buffer.  A value of either \"unlimited\" or zero means no\n\
 limit.  Default is 200000."),
-			    set_record_full_insn_max_num,
-			    NULL, &set_record_full_cmdlist,
-			    &show_record_full_cmdlist);
+				set_record_full_insn_max_num,
+				NULL, &set_record_full_cmdlist,
+				&show_record_full_cmdlist);
 
-  c = add_alias_cmd ("insn-number-max", "full insn-number-max", no_class, 1,
-		     &set_record_cmdlist);
+  c = add_alias_cmd ("insn-number-max", record_full_insn_number_max_cmds.set,
+		     no_class, 1, &set_record_cmdlist);
   deprecate_cmd (c, "set record full insn-number-max");
 
-  c = add_alias_cmd ("insn-number-max", "full insn-number-max", no_class, 1,
-		     &show_record_cmdlist);
+  c = add_alias_cmd ("insn-number-max", record_full_insn_number_max_cmds.show,
+		     no_class, 1, &show_record_cmdlist);
   deprecate_cmd (c, "show record full insn-number-max");
 
-  add_setshow_boolean_cmd ("memory-query", no_class,
-			   &record_full_memory_query, _("\
+  set_show_commands record_full_memory_query_cmds
+    = add_setshow_boolean_cmd ("memory-query", no_class,
+			       &record_full_memory_query, _("\
 Set whether query if PREC cannot record memory change of next instruction."),
-			   _("\
+			       _("\
 Show whether query if PREC cannot record memory change of next instruction."),
-			   _("\
+			       _("\
 Default is OFF.\n\
 When ON, query if PREC cannot record memory change of next instruction."),
-			   NULL, NULL,
-			   &set_record_full_cmdlist,
-			   &show_record_full_cmdlist);
+			       NULL, NULL,
+			       &set_record_full_cmdlist,
+			       &show_record_full_cmdlist);
 
-  c = add_alias_cmd ("memory-query", "full memory-query", no_class, 1,
-		     &set_record_cmdlist);
+  c = add_alias_cmd ("memory-query", record_full_memory_query_cmds.set,
+		     no_class, 1, &set_record_cmdlist);
   deprecate_cmd (c, "set record full memory-query");
 
-  c = add_alias_cmd ("memory-query", "full memory-query", no_class, 1,
-		     &show_record_cmdlist);
+  c = add_alias_cmd ("memory-query", record_full_memory_query_cmds.show,
+		     no_class, 1,&show_record_cmdlist);
   deprecate_cmd (c, "show record full memory-query");
 }

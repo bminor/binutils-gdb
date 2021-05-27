@@ -6897,11 +6897,12 @@ If zero then the symbol cache is disabled."),
 	   _("Print symbol cache statistics for each program space."),
 	   &maintenanceprintlist);
 
-  add_cmd ("symbol-cache", class_maintenance,
-	   maintenance_flush_symbol_cache,
-	   _("Flush the symbol cache for each program space."),
-	   &maintenanceflushlist);
-  c = add_alias_cmd ("flush-symbol-cache", "flush symbol-cache",
+  cmd_list_element *maintenance_flush_symbol_cache_cmd
+    = add_cmd ("symbol-cache", class_maintenance,
+	       maintenance_flush_symbol_cache,
+	       _("Flush the symbol cache for each program space."),
+	       &maintenanceflushlist);
+  c = add_alias_cmd ("flush-symbol-cache", maintenance_flush_symbol_cache_cmd,
 		     class_maintenance, 0, &maintenancelist);
   deprecate_cmd (c, "maintenancelist flush symbol-cache");
 

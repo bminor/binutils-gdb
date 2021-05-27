@@ -8994,17 +8994,20 @@ and is updated automatically from ELF file flags if available."),
   add_cmd ("single", class_support, set_mipsfpu_single_command,
 	   _("Select single-precision MIPS floating-point coprocessor."),
 	   &mipsfpulist);
-  add_cmd ("double", class_support, set_mipsfpu_double_command,
-	   _("Select double-precision MIPS floating-point coprocessor."),
-	   &mipsfpulist);
-  add_alias_cmd ("on", "double", class_support, 1, &mipsfpulist);
-  add_alias_cmd ("yes", "double", class_support, 1, &mipsfpulist);
-  add_alias_cmd ("1", "double", class_support, 1, &mipsfpulist);
-  add_cmd ("none", class_support, set_mipsfpu_none_command,
-	   _("Select no MIPS floating-point coprocessor."), &mipsfpulist);
-  add_alias_cmd ("off", "none", class_support, 1, &mipsfpulist);
-  add_alias_cmd ("no", "none", class_support, 1, &mipsfpulist);
-  add_alias_cmd ("0", "none", class_support, 1, &mipsfpulist);
+  cmd_list_element *set_mipsfpu_double_cmd
+    = add_cmd ("double", class_support, set_mipsfpu_double_command,
+	       _("Select double-precision MIPS floating-point coprocessor."),
+	       &mipsfpulist);
+  add_alias_cmd ("on", set_mipsfpu_double_cmd, class_support, 1, &mipsfpulist);
+  add_alias_cmd ("yes", set_mipsfpu_double_cmd, class_support, 1, &mipsfpulist);
+  add_alias_cmd ("1", set_mipsfpu_double_cmd, class_support, 1, &mipsfpulist);
+
+  cmd_list_element *set_mipsfpu_none_cmd
+    = add_cmd ("none", class_support, set_mipsfpu_none_command,
+	       _("Select no MIPS floating-point coprocessor."), &mipsfpulist);
+  add_alias_cmd ("off", set_mipsfpu_none_cmd, class_support, 1, &mipsfpulist);
+  add_alias_cmd ("no", set_mipsfpu_none_cmd, class_support, 1, &mipsfpulist);
+  add_alias_cmd ("0", set_mipsfpu_none_cmd, class_support, 1, &mipsfpulist);
   add_cmd ("auto", class_support, set_mipsfpu_auto_command,
 	   _("Select MIPS floating-point coprocessor automatically."),
 	   &mipsfpulist);

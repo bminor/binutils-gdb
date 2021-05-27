@@ -1585,20 +1585,21 @@ inferior.  Otherwise, symbols must be loaded manually, using \
 			   show_auto_solib_add,
 			   &setlist, &showlist);
 
-  add_setshow_optional_filename_cmd ("sysroot", class_support,
-				     &gdb_sysroot, _("\
+  set_show_commands sysroot_cmds
+    = add_setshow_optional_filename_cmd ("sysroot", class_support,
+					 &gdb_sysroot, _("\
 Set an alternate system root."), _("\
 Show the current system root."), _("\
 The system root is used to load absolute shared library symbol files.\n\
 For other (relative) files, you can add directories using\n\
 `set solib-search-path'."),
-				     gdb_sysroot_changed,
-				     NULL,
-				     &setlist, &showlist);
+					 gdb_sysroot_changed,
+					 NULL,
+					 &setlist, &showlist);
 
-  add_alias_cmd ("solib-absolute-prefix", "sysroot", class_support, 0,
+  add_alias_cmd ("solib-absolute-prefix", sysroot_cmds.set, class_support, 0,
 		 &setlist);
-  add_alias_cmd ("solib-absolute-prefix", "sysroot", class_support, 0,
+  add_alias_cmd ("solib-absolute-prefix", sysroot_cmds.show, class_support, 0,
 		 &showlist);
 
   add_setshow_optional_filename_cmd ("solib-search-path", class_support,

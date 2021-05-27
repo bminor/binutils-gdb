@@ -1908,8 +1908,7 @@ alias_command (const char *args, int from_tty)
 
       /* add_cmd requires *we* allocate space for name, hence the xstrdup.  */
       alias_cmd = add_alias_cmd (xstrdup (alias_argv[alias_argc - 1]),
-				 command_argv[command_argc - 1],
-				 class_alias, a_opts.abbrev_flag,
+				 target_cmd, class_alias, a_opts.abbrev_flag,
 				 c_command->subcommands);
     }
 

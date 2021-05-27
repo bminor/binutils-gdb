@@ -3143,18 +3143,20 @@ _initialize_valprint ()
 {
   cmd_list_element *cmd;
 
-  add_basic_prefix_cmd ("print", no_class,
-			_("Generic command for setting how things print."),
-			&setprintlist, 0, &setlist);
-  add_alias_cmd ("p", "print", no_class, 1, &setlist);
+  cmd_list_element *set_print_cmd
+    = add_basic_prefix_cmd ("print", no_class,
+			    _("Generic command for setting how things print."),
+			    &setprintlist, 0, &setlist);
+  add_alias_cmd ("p", set_print_cmd, no_class, 1, &setlist);
   /* Prefer set print to set prompt.  */
-  add_alias_cmd ("pr", "print", no_class, 1, &setlist);
+  add_alias_cmd ("pr", set_print_cmd, no_class, 1, &setlist);
 
-  add_show_prefix_cmd ("print", no_class,
-		       _("Generic command for showing print settings."),
-		       &showprintlist, 0, &showlist);
-  add_alias_cmd ("p", "print", no_class, 1, &showlist);
-  add_alias_cmd ("pr", "print", no_class, 1, &showlist);
+  cmd_list_element *show_print_cmd
+    = add_show_prefix_cmd ("print", no_class,
+			   _("Generic command for showing print settings."),
+			   &showprintlist, 0, &showlist);
+  add_alias_cmd ("p", show_print_cmd, no_class, 1, &showlist);
+  add_alias_cmd ("pr", show_print_cmd, no_class, 1, &showlist);
 
   cmd = add_basic_prefix_cmd ("raw", no_class,
 			      _("\

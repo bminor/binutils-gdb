@@ -780,15 +780,17 @@ This command is only a placeholder.")
 	   );
   add_com_alias ("gu", guile_cmd_element, class_obscure, 1);
 
-  add_basic_prefix_cmd ("guile", class_obscure,
-			_("Prefix command for Guile preference settings."),
-			&set_guile_list, 0, &setlist);
-  add_alias_cmd ("gu", "guile", class_obscure, 1, &setlist);
+  cmd_list_element *set_guile_cmd
+    = add_basic_prefix_cmd ("guile", class_obscure,
+			    _("Prefix command for Guile preference settings."),
+			    &set_guile_list, 0, &setlist);
+  add_alias_cmd ("gu", set_guile_cmd, class_obscure, 1, &setlist);
 
-  add_show_prefix_cmd ("guile", class_obscure,
-		       _("Prefix command for Guile preference settings."),
-		       &show_guile_list, 0, &showlist);
-  add_alias_cmd ("gu", "guile", class_obscure, 1, &showlist);
+  cmd_list_element *show_guile_cmd
+    = add_show_prefix_cmd ("guile", class_obscure,
+			   _("Prefix command for Guile preference settings."),
+			   &show_guile_list, 0, &showlist);
+  add_alias_cmd ("gu", show_guile_cmd, class_obscure, 1, &showlist);
 
   cmd_list_element *info_guile_cmd
     = add_basic_prefix_cmd ("guile", class_obscure,

@@ -4231,7 +4231,8 @@ void _initialize_values ();
 void
 _initialize_values ()
 {
-  add_cmd ("convenience", no_class, show_convenience, _("\
+  cmd_list_element *show_convenience_cmd
+    = add_cmd ("convenience", no_class, show_convenience, _("\
 Debugger convenience (\"$foo\") variables and functions.\n\
 Convenience variables are created when you assign them values;\n\
 thus, \"set $foo=1\" gives \"$foo\" the value 1.  Values may be any type.\n\
@@ -4244,7 +4245,7 @@ A few convenience variables are given values automatically:\n\
 Convenience functions are defined via the Python API."
 #endif
 	   ), &showlist);
-  add_alias_cmd ("conv", "convenience", no_class, 1, &showlist);
+  add_alias_cmd ("conv", show_convenience_cmd, no_class, 1, &showlist);
 
   add_cmd ("values", no_set_class, show_values, _("\
 Elements of value history around item number IDX (or last ten)."),

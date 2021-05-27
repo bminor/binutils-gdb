@@ -4075,11 +4075,11 @@ Select a trace frame by PC.\n\
 Default is the current PC, or the PC of the current trace frame."),
 	   &tfindlist);
 
-  add_cmd ("end", class_trace, tfind_end_command, _("\
-De-select any trace frame and resume 'live' debugging."),
-	   &tfindlist);
+  cmd_list_element *tfind_end_cmd
+    = add_cmd ("end", class_trace, tfind_end_command, _("\
+De-select any trace frame and resume 'live' debugging."), &tfindlist);
 
-  add_alias_cmd ("none", "end", class_trace, 0, &tfindlist);
+  add_alias_cmd ("none", tfind_end_cmd, class_trace, 0, &tfindlist);
 
   add_cmd ("start", class_trace, tfind_start_command,
 	   _("Select the first trace frame in the trace buffer."),

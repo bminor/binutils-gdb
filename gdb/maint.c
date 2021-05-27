@@ -1143,11 +1143,13 @@ a human readable form, to cause GDB to deliberately dump core, etc."),
 
   add_com_alias ("mt", maintenance_cmd, class_maintenance, 1);
 
-  add_basic_prefix_cmd ("info", class_maintenance, _("\
+  cmd_list_element *maintenance_info_cmd
+    = add_basic_prefix_cmd ("info", class_maintenance, _("\
 Commands for showing internal info about the program being debugged."),
-			&maintenanceinfolist, 0,
-			&maintenancelist);
-  add_alias_cmd ("i", "info", class_maintenance, 1, &maintenancelist);
+			    &maintenanceinfolist, 0,
+			    &maintenancelist);
+  add_alias_cmd ("i", maintenance_info_cmd, class_maintenance, 1,
+		 &maintenancelist);
 
   const auto opts = make_maint_info_sections_options_def_group (nullptr);
   static std::string maint_info_sections_command_help

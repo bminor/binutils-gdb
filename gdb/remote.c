@@ -1928,24 +1928,27 @@ add_packet_config_cmd (struct packet_config *config, const char *name,
 			 name, title);
   /* set/show TITLE-packet {auto,on,off} */
   cmd_name = xstrprintf ("%s-packet", title);
-  add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
-				&config->detect, set_doc,
-				show_doc, NULL, /* help_doc */
-				NULL,
-				show_remote_protocol_packet_cmd,
-				&remote_set_cmdlist, &remote_show_cmdlist);
+  set_show_commands cmds
+    = add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
+				    &config->detect, set_doc,
+				    show_doc, NULL, /* help_doc */
+				    NULL,
+				    show_remote_protocol_packet_cmd,
+				    &remote_set_cmdlist, &remote_show_cmdlist);
+
   /* The command code copies the documentation strings.  */
   xfree (set_doc);
   xfree (show_doc);
+
   /* set/show remote NAME-packet {auto,on,off} -- legacy.  */
   if (legacy)
     {
       char *legacy_name;
 
       legacy_name = xstrprintf ("%s-packet", name);
-      add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
+      add_alias_cmd (legacy_name, cmds.set, class_obscure, 0,
 		     &remote_set_cmdlist);
-      add_alias_cmd (legacy_name, cmd_name, class_obscure, 0,
+      add_alias_cmd (legacy_name, cmds.show, class_obscure, 0,
 		     &remote_show_cmdlist);
     }
 }

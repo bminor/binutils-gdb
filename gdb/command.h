@@ -174,10 +174,6 @@ extern struct cmd_list_element *add_cmd_suppress_notification
 			 struct cmd_list_element **list,
 			 int *suppress_notification);
 
-extern struct cmd_list_element *add_alias_cmd (const char *, const char *,
-					       enum command_class, int,
-					       struct cmd_list_element **);
-
 extern struct cmd_list_element *add_alias_cmd (const char *,
 					       cmd_list_element *,
 					       enum command_class, int,
