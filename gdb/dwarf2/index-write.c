@@ -1441,7 +1441,7 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
 	{
 	  if (psymtab->user == NULL)
 	    recursively_write_psymbols (objfile, psymtab, &symtab,
-					psyms_seen, i);
+					psyms_seen, counter);
 
 	  const auto insertpair = cu_index_htab.emplace (psymtab, counter);
 	  gdb_assert (insertpair.second);
