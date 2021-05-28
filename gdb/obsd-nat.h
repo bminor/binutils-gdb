@@ -29,7 +29,7 @@ class obsd_nat_target : public inf_ptrace_target
   void update_thread_list () override;
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
-  void follow_fork (ptid_t, target_waitkind, bool, bool) override;
+  void follow_fork (inferior *inf, ptid_t, target_waitkind, bool, bool) override;
 
   int insert_fork_catchpoint (int) override;
 

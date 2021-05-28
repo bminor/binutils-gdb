@@ -85,6 +85,8 @@ process_stratum_target::has_execution (inferior *inf)
   return inf->pid != 0;
 }
 
+/* See process-stratum-target.h.  */
+
 void
 process_stratum_target::follow_exec (inferior *follow_inf, ptid_t ptid,
 				     const char *execd_pathname)
@@ -102,6 +104,21 @@ process_stratum_target::follow_exec (inferior *follow_inf, ptid_t ptid,
 
       /* Leave the new inferior / thread as the current inferior / thread.  */
       switch_to_thread (t);
+    }
+}
+
+/* See process-stratum-target.h.  */
+
+void
+process_stratum_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
+				     target_waitkind fork_kind,
+				     bool follow_child,
+				     bool detach_on_fork)
+{
+  if (child_inf != nullptr)
+    {
+      child_inf->push_target (this);
+      add_thread_silent (this, child_ptid);
     }
 }
 

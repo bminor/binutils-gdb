@@ -2701,9 +2701,9 @@ target_program_signals (gdb::array_view<const unsigned char> program_signals)
 }
 
 static void
-default_follow_fork (struct target_ops *self, ptid_t child_ptid,
-		     target_waitkind fork_kind, bool follow_child,
-		     bool detach_fork)
+default_follow_fork (struct target_ops *self, inferior *child_inf,
+		     ptid_t child_ptid, target_waitkind fork_kind,
+		     bool follow_child, bool detach_fork)
 {
   /* Some target returned a fork event, but did not know how to follow it.  */
   internal_error (__FILE__, __LINE__,
@@ -2713,12 +2713,24 @@ default_follow_fork (struct target_ops *self, ptid_t child_ptid,
 /* See target.h.  */
 
 void
-target_follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
-		    bool follow_child, bool detach_fork)
+target_follow_fork (inferior *child_inf, ptid_t child_ptid,
+		    target_waitkind fork_kind, bool follow_child,
+		    bool detach_fork)
 {
   target_ops *target = current_inferior ()->top_target ();
 
-  return target->follow_fork (child_ptid, fork_kind, follow_child, detach_fork);
+  /* Check consistency between CHILD_INF, CHILD_PTID, FOLLOW_CHILD and
+     DETACH_FORK.  */
+  if (child_inf != nullptr)
+    {
+      gdb_assert (follow_child || !detach_fork);
+      gdb_assert (child_inf->pid == child_ptid.pid ());
+    }
+  else
+    gdb_assert (!follow_child && detach_fork);
+
+  return target->follow_fork (child_inf, child_ptid, fork_kind, follow_child,
+			      detach_fork);
 }
 
 /* See target.h.  */

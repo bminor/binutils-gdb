@@ -682,7 +682,7 @@ public:
 
   const struct btrace_config *btrace_conf (const struct btrace_target_info *) override;
   bool augmented_libraries_svr4_read () override;
-  void follow_fork (ptid_t, target_waitkind, bool, bool) override;
+  void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool) override;
   void follow_exec (inferior *, ptid_t, const char *) override;
   int insert_fork_catchpoint (int) override;
   int remove_fork_catchpoint (int) override;
@@ -5920,9 +5920,13 @@ extended_remote_target::detach (inferior *inf, int from_tty)
    remote target as well.  */
 
 void
-remote_target::follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
-			    bool follow_child, bool detach_fork)
+remote_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
+			    target_waitkind fork_kind, bool follow_child,
+			    bool detach_fork)
 {
+  process_stratum_target::follow_fork (child_inf, child_ptid,
+				       fork_kind, follow_child, detach_fork);
+
   struct remote_state *rs = get_remote_state ();
 
   if ((fork_kind == TARGET_WAITKIND_FORKED && remote_fork_event_p (rs))

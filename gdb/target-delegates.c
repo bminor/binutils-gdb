@@ -56,7 +56,7 @@ struct dummy_target : public target_ops
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
   int remove_vfork_catchpoint (int arg0) override;
-  void follow_fork (ptid_t arg0, target_waitkind arg1, bool arg2, bool arg3) override;
+  void follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4) override;
   int insert_exec_catchpoint (int arg0) override;
   int remove_exec_catchpoint (int arg0) override;
   void follow_exec (inferior *arg0, ptid_t arg1, const char *arg2) override;
@@ -231,7 +231,7 @@ struct debug_target : public target_ops
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
   int remove_vfork_catchpoint (int arg0) override;
-  void follow_fork (ptid_t arg0, target_waitkind arg1, bool arg2, bool arg3) override;
+  void follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4) override;
   int insert_exec_catchpoint (int arg0) override;
   int remove_exec_catchpoint (int arg0) override;
   void follow_exec (inferior *arg0, ptid_t arg1, const char *arg2) override;
@@ -1519,30 +1519,32 @@ debug_target::remove_vfork_catchpoint (int arg0)
 }
 
 void
-target_ops::follow_fork (ptid_t arg0, target_waitkind arg1, bool arg2, bool arg3)
+target_ops::follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4)
 {
-  this->beneath ()->follow_fork (arg0, arg1, arg2, arg3);
+  this->beneath ()->follow_fork (arg0, arg1, arg2, arg3, arg4);
 }
 
 void
-dummy_target::follow_fork (ptid_t arg0, target_waitkind arg1, bool arg2, bool arg3)
+dummy_target::follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4)
 {
-  default_follow_fork (this, arg0, arg1, arg2, arg3);
+  default_follow_fork (this, arg0, arg1, arg2, arg3, arg4);
 }
 
 void
-debug_target::follow_fork (ptid_t arg0, target_waitkind arg1, bool arg2, bool arg3)
+debug_target::follow_fork (inferior *arg0, ptid_t arg1, target_waitkind arg2, bool arg3, bool arg4)
 {
   fprintf_unfiltered (gdb_stdlog, "-> %s->follow_fork (...)\n", this->beneath ()->shortname ());
-  this->beneath ()->follow_fork (arg0, arg1, arg2, arg3);
+  this->beneath ()->follow_fork (arg0, arg1, arg2, arg3, arg4);
   fprintf_unfiltered (gdb_stdlog, "<- %s->follow_fork (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  target_debug_print_inferior_p (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_target_waitkind (arg1);
+  target_debug_print_ptid_t (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_bool (arg2);
+  target_debug_print_target_waitkind (arg2);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_bool (arg3);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_bool (arg4);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

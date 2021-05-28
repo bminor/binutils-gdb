@@ -428,7 +428,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       return true;
     }
 
-  thread_info *child_thr = nullptr;
+  inferior *parent_inf = current_inferior ();
+  inferior *child_inf = nullptr;
 
   if (!follow_child)
     {
@@ -462,25 +463,15 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	}
       else
 	{
-	  struct inferior *parent_inf, *child_inf;
-
 	  /* Add process to GDB's tables.  */
 	  child_inf = add_inferior (child_ptid.pid ());
 
-	  parent_inf = current_inferior ();
 	  child_inf->attach_flag = parent_inf->attach_flag;
 	  copy_terminal_info (child_inf, parent_inf);
 	  child_inf->gdbarch = parent_inf->gdbarch;
 	  copy_inferior_target_desc_info (child_inf, parent_inf);
 
-	  scoped_restore_current_pspace_and_thread restore_pspace_thread;
-
-	  set_current_inferior (child_inf);
-	  switch_to_no_thread ();
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
-	  child_inf->push_target (parent_inf->process_target ());
-	  child_thr = add_thread_silent (child_inf->process_target (),
-					 child_ptid);
 
 	  /* If this is a vfork child, then the address-space is
 	     shared with the parent.  */
@@ -489,7 +480,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      child_inf->pspace = parent_inf->pspace;
 	      child_inf->aspace = parent_inf->aspace;
 
-	      exec_on_vfork ();
+	      exec_on_vfork (child_inf);
 
 	      /* The parent will be frozen until the child is done
 		 with the shared region.  Keep track of the
@@ -498,32 +489,18 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      child_inf->pending_detach = 0;
 	      parent_inf->vfork_child = child_inf;
 	      parent_inf->pending_detach = 0;
-
-	      /* Now that the inferiors and program spaces are all
-		 wired up, we can switch to the child thread (which
-		 switches inferior and program space too).  */
-	      switch_to_thread (child_thr);
 	    }
 	  else
 	    {
 	      child_inf->aspace = new_address_space ();
 	      child_inf->pspace = new program_space (child_inf->aspace);
 	      child_inf->removable = 1;
-	      set_current_program_space (child_inf->pspace);
 	      clone_program_space (child_inf->pspace, parent_inf->pspace);
-
-	      /* solib_create_inferior_hook relies on the current
-		 thread.  */
-	      switch_to_thread (child_thr);
 	    }
 	}
 
       if (has_vforked)
 	{
-	  struct inferior *parent_inf;
-
-	  parent_inf = current_inferior ();
-
 	  /* If we detached from the child, then we have to be careful
 	     to not insert breakpoints in the parent until the child
 	     is done with the shared memory region.  However, if we're
@@ -538,8 +515,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
   else
     {
       /* Follow the child.  */
-      struct inferior *parent_inf, *child_inf;
-      struct program_space *parent_pspace;
 
       if (print_inferior_events)
 	{
@@ -559,71 +534,12 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
       child_inf = add_inferior (child_ptid.pid ());
 
-      parent_inf = current_inferior ();
       child_inf->attach_flag = parent_inf->attach_flag;
       copy_terminal_info (child_inf, parent_inf);
       child_inf->gdbarch = parent_inf->gdbarch;
       copy_inferior_target_desc_info (child_inf, parent_inf);
 
-      parent_pspace = parent_inf->pspace;
-
-      process_stratum_target *target = parent_inf->process_target ();
-
-      {
-	/* Hold a strong reference to the target while (maybe)
-	   detaching the parent.  Otherwise detaching could close the
-	   target.  */
-	auto target_ref = target_ops_ref::new_reference (target);
-
-	/* If we're vforking, we want to hold on to the parent until
-	   the child exits or execs.  At child exec or exit time we
-	   can remove the old breakpoints from the parent and detach
-	   or resume debugging it.  Otherwise, detach the parent now;
-	   we'll want to reuse it's program/address spaces, but we
-	   can't set them to the child before removing breakpoints
-	   from the parent, otherwise, the breakpoints module could
-	   decide to remove breakpoints from the wrong process (since
-	   they'd be assigned to the same address space).  */
-
-	if (has_vforked)
-	  {
-	    gdb_assert (child_inf->vfork_parent == NULL);
-	    gdb_assert (parent_inf->vfork_child == NULL);
-	    child_inf->vfork_parent = parent_inf;
-	    child_inf->pending_detach = 0;
-	    parent_inf->vfork_child = child_inf;
-	    parent_inf->pending_detach = detach_fork;
-	    parent_inf->waiting_for_vfork_done = 0;
-	  }
-	else if (detach_fork)
-	  {
-	    if (print_inferior_events)
-	      {
-		/* Ensure that we have a process ptid.  */
-		ptid_t process_ptid = ptid_t (parent_ptid.pid ());
-
-		target_terminal::ours_for_output ();
-		fprintf_filtered (gdb_stdlog,
-				  _("[Detaching after fork from "
-				    "parent %s]\n"),
-				  target_pid_to_str (process_ptid).c_str ());
-	      }
-
-	    target_detach (parent_inf, 0);
-	    parent_inf = NULL;
-	  }
-
-	/* Note that the detach above makes PARENT_INF dangling.  */
-
-	/* Add the child thread to the appropriate lists, and switch
-	   to this new thread, before cloning the program space, and
-	   informing the solib layer about this new process.  */
-
-	set_current_inferior (child_inf);
-	child_inf->push_target (target);
-      }
-
-      child_thr = add_thread_silent (target, child_ptid);
+      program_space *parent_pspace = parent_inf->pspace;
 
       /* If this is a vfork child, then the address-space is shared
 	 with the parent.  If we detached from the parent, then we can
@@ -633,7 +549,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_inf->pspace = parent_pspace;
 	  child_inf->aspace = child_inf->pspace->aspace;
 
-	  exec_on_vfork ();
+	  exec_on_vfork (child_inf);
 	}
       else
 	{
@@ -641,22 +557,84 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_inf->pspace = new program_space (child_inf->aspace);
 	  child_inf->removable = 1;
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
-	  set_current_program_space (child_inf->pspace);
 	  clone_program_space (child_inf->pspace, parent_pspace);
 	}
-
-      switch_to_thread (child_thr);
     }
 
-  target_follow_fork (child_ptid, fork_kind, follow_child, detach_fork);
+  gdb_assert (current_inferior () == parent_inf);
+
+  /* If we are setting up an inferior for the child, target_follow_fork is
+     responsible for pushing the appropriate targets on the new inferior's
+     target stack and adding the initial thread (with ptid CHILD_PTID).
+
+     If we are not setting up an inferior for the child (because following
+     the parent and detach_fork is true), it is responsible for detaching
+     from CHILD_PTID.  */
+  target_follow_fork (child_inf, child_ptid, fork_kind, follow_child,
+		      detach_fork);
+
+  /* target_follow_fork must leave the parent as the current inferior.  If we
+     want to follow the child, we make it the current one below.  */
+  gdb_assert (current_inferior () == parent_inf);
+
+  /* If there is a child inferior, target_follow_fork must have created a thread
+     for it.  */
+  if (child_inf != nullptr)
+    gdb_assert (!child_inf->thread_list.empty ());
+
+  /* Detach the parent if needed.  */
+  if (follow_child)
+    {
+      /* If we're vforking, we want to hold on to the parent until
+	 the child exits or execs.  At child exec or exit time we
+	 can remove the old breakpoints from the parent and detach
+	 or resume debugging it.  Otherwise, detach the parent now;
+	 we'll want to reuse it's program/address spaces, but we
+	 can't set them to the child before removing breakpoints
+	 from the parent, otherwise, the breakpoints module could
+	 decide to remove breakpoints from the wrong process (since
+	 they'd be assigned to the same address space).  */
+
+      if (has_vforked)
+	{
+	  gdb_assert (child_inf->vfork_parent == NULL);
+	  gdb_assert (parent_inf->vfork_child == NULL);
+	  child_inf->vfork_parent = parent_inf;
+	  child_inf->pending_detach = 0;
+	  parent_inf->vfork_child = child_inf;
+	  parent_inf->pending_detach = detach_fork;
+	  parent_inf->waiting_for_vfork_done = 0;
+	}
+      else if (detach_fork)
+	{
+	  if (print_inferior_events)
+	    {
+	      /* Ensure that we have a process ptid.  */
+	      ptid_t process_ptid = ptid_t (parent_ptid.pid ());
+
+	      target_terminal::ours_for_output ();
+	      fprintf_filtered (gdb_stdlog,
+				_("[Detaching after fork from "
+				  "parent %s]\n"),
+				target_pid_to_str (process_ptid).c_str ());
+	    }
+
+	  target_detach (parent_inf, 0);
+	}
+    }
 
   /* If we ended up creating a new inferior, call post_create_inferior to inform
      the various subcomponents.  */
-  if (child_thr != nullptr)
+  if (child_inf != nullptr)
     {
-      scoped_restore_current_thread restore;
-      switch_to_thread (child_thr);
+      /* If FOLLOW_CHILD, we leave CHILD_INF as the current inferior
+         (do not restore the parent as the current inferior).  */
+      gdb::optional<scoped_restore_current_thread> maybe_restore;
 
+      if (!follow_child)
+	maybe_restore.emplace ();
+
+      switch_to_thread (*child_inf->threads ().begin ());
       post_create_inferior (0);
     }
 

@@ -152,13 +152,16 @@ obsd_nat_target::post_startup_inferior (ptid_t pid)
   obsd_enable_proc_events (pid.pid ());
 }
 
-/* Target hook for follow_fork.  On entry and at return inferior_ptid is
-   the ptid of the followed inferior.  */
+/* Target hook for follow_fork.  */
 
 void
-obsd_nat_target::follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
+obsd_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
+			      target_waitkind fork_kind,
 			      bool follow_child, bool detach_fork)
 {
+  inf_ptrace_target::follow_fork (child_inf, child_ptid, fork_kind,
+				  follow_child, detach_fork);
+
   if (!follow_child && detach_fork)
     {
       /* Breakpoints have already been detached from the child by

@@ -636,7 +636,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     virtual int remove_vfork_catchpoint (int)
       TARGET_DEFAULT_RETURN (1);
-    virtual void follow_fork (ptid_t, target_waitkind, bool, bool)
+    virtual void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool)
       TARGET_DEFAULT_FUNC (default_follow_fork);
     virtual int insert_exec_catchpoint (int)
       TARGET_DEFAULT_RETURN (1);
@@ -1719,8 +1719,9 @@ extern int target_remove_vfork_catchpoint (int pid);
    bookkeeping and fiddling necessary to continue debugging either the parent,
    the child or both.  */
 
-void target_follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
-			 bool follow_child, bool detach_fork);
+void target_follow_fork (inferior *inf, ptid_t child_ptid,
+			 target_waitkind fork_kind, bool follow_child,
+			 bool detach_fork);
 
 /* Handle the target-specific bookkeeping required when the inferior makes an
    exec call.

@@ -678,10 +678,10 @@ program_space::remove_target_sections (void *owner)
 /* See exec.h.  */
 
 void
-exec_on_vfork ()
+exec_on_vfork (inferior *vfork_child)
 {
-  if (!current_program_space->target_sections ().empty ())
-    current_inferior ()->push_target (&exec_ops);
+  if (!vfork_child->pspace->target_sections ().empty ())
+    vfork_child->push_target (&exec_ops);
 }
 
 

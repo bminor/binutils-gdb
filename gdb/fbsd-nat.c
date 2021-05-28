@@ -1471,9 +1471,13 @@ fbsd_nat_target::create_inferior (const char *exec_file,
    the ptid of the followed inferior.  */
 
 void
-fbsd_nat_target::follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
-			      bool follow_child, bool detach_fork)
+fbsd_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
+			      target_waitkind fork_kind, bool follow_child,
+			      bool detach_fork)
 {
+  inf_ptrace_target::follow_fork (child_inf, child_ptid, fork_kind,
+				  follow_child, detach_fork);
+
   if (!follow_child && detach_fork)
     {
       pid_t child_pid = child_ptid.pid ();
