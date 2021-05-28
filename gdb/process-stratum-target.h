@@ -88,6 +88,11 @@ public:
      target's "resumed with pending wait status" list.  */
   void maybe_remove_resumed_with_pending_wait_status (thread_info *thread);
 
+  /* Return true if this target has at least one resumed thread with a pending
+     wait status.  */
+  bool has_resumed_with_pending_wait_status () const
+  { return !m_resumed_with_pending_wait_status.empty (); }
+
   /* The connection number.  Visible in "info connections".  */
   int connection_number = 0;
 

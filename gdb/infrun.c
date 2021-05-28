@@ -2800,15 +2800,7 @@ maybe_set_commit_resumed_all_targets ()
 	 status to report, handle it before requiring the target to
 	 commit its resumed threads: handling the status might lead to
 	 resuming more threads.  */
-      bool has_thread_with_pending_status = false;
-      for (thread_info *thread : all_non_exited_threads (proc_target))
-	if (thread->resumed () && thread->has_pending_waitstatus ())
-	  {
-	    has_thread_with_pending_status = true;
-	    break;
-	  }
-
-      if (has_thread_with_pending_status)
+      if (proc_target->has_resumed_with_pending_wait_status ())
 	{
 	  infrun_debug_printf ("not requesting commit-resumed for target %s, a"
 			       " thread has a pending waitstatus",
