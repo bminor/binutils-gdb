@@ -3,3 +3,4 @@
 #ld:
 #error: .*relocation truncated to fit: R_X86_64_PC16 .*t16.*
 #error: .*relocation truncated to fit: R_X86_64_PC16 .*_start.*
+#xfail: *-*-*

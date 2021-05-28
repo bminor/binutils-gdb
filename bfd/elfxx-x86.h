@@ -549,9 +549,6 @@ struct elf_x86_obj_tdata
 
   /* GOTPLT entries for TLS descriptors.  */
   bfd_vma *local_tlsdesc_gotent;
-
-  /* Set if the objec file has 16-bit code.  */
-  unsigned int has_code16 : 1;
 };
 
 enum elf_x86_plt_type
@@ -586,9 +583,6 @@ struct elf_x86_plt
 
 #define elf_x86_local_tlsdesc_gotent(abfd) \
   (elf_x86_tdata (abfd)->local_tlsdesc_gotent)
-
-#define elf_x86_has_code16(abfd) \
-  (elf_x86_tdata (abfd)->has_code16)
 
 #define elf_x86_compute_jump_table_size(htab) \
   ((htab)->elf.srelplt->reloc_count * (htab)->got_entry_size)

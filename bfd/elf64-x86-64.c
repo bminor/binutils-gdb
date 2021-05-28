@@ -82,7 +82,7 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	false),
   HOWTO(R_X86_64_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_16", false, 0, 0xffff, false),
-  HOWTO(R_X86_64_PC16, 0, 1, 16, true, 0, complain_overflow_signed,
+  HOWTO(R_X86_64_PC16, 0, 1, 16, true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_PC16", false, 0, 0xffff, true),
   HOWTO(R_X86_64_8, 0, 0, 8, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_8", false, 0, 0xff, false),
@@ -187,10 +187,6 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	 _bfd_elf_rel_vtable_reloc_fn, "R_X86_64_GNU_VTENTRY", false, 0, 0,
 	 false),
 
-/* Use complain_overflow_bitfield on R_X86_64_PC16 for code16.  */
-  HOWTO(R_X86_64_PC16, 0, 1, 16, true, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_X86_64_PC16", false, 0, 0xffff, true),
-
 /* Use complain_overflow_bitfield on R_X86_64_32 for x32.  */
   HOWTO(R_X86_64_32, 0, 2, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_X86_64_32", false, 0, 0xffffffff,
@@ -273,14 +269,6 @@ elf_x86_64_rtype_to_howto (bfd *abfd, unsigned r_type)
 	i = r_type;
       else
 	i = ARRAY_SIZE (x86_64_elf_howto_table) - 1;
-    }
-  else if (r_type == (unsigned int) R_X86_64_PC16)
-    {
-      /* Use complain_overflow_bitfield on R_X86_64_PC16 for code16.  */
-      if (elf_x86_has_code16 (abfd))
-	i = ARRAY_SIZE (x86_64_elf_howto_table) - 2;
-      else
-	i = r_type;
     }
   else if (r_type < (unsigned int) R_X86_64_GNU_VTINHERIT
 	   || r_type >= (unsigned int) R_X86_64_max)

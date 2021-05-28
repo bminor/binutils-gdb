@@ -2353,7 +2353,6 @@ _bfd_x86_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
       || (type >= GNU_PROPERTY_X86_UINT32_OR_AND_LO
 	  && type <= GNU_PROPERTY_X86_UINT32_OR_AND_HI))
     {
-      unsigned int number;
       if (datasz != 4)
 	{
 	  _bfd_error_handler
@@ -2362,13 +2361,7 @@ _bfd_x86_elf_parse_gnu_properties (bfd *abfd, unsigned int type,
 	  return property_corrupt;
 	}
       prop = _bfd_elf_get_property (abfd, type, datasz);
-      number = bfd_h_get_32 (abfd, ptr);
-      if ((abfd->flags
-	   & (DYNAMIC | BFD_LINKER_CREATED | BFD_PLUGIN)) == 0
-	  && type == GNU_PROPERTY_X86_FEATURE_2_USED
-	  && (number & GNU_PROPERTY_X86_FEATURE_2_CODE16) != 0)
-	elf_x86_has_code16 (abfd) = 1;
-      prop->u.number |= number;
+      prop->u.number |= bfd_h_get_32 (abfd, ptr);
       prop->pr_kind = property_number;
       return property_number;
     }

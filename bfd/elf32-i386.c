@@ -22,7 +22,6 @@
 #include "elf-vxworks.h"
 #include "dwarf2.h"
 #include "opcode/i386.h"
-#include "libiberty.h"
 
 /* 386 uses REL relocations instead of RELA.  */
 #define USE_REL	1
@@ -94,7 +93,7 @@ static reloc_howto_type elf_howto_table[]=
   HOWTO(R_386_16, 0, 1, 16, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_386_16",
 	true, 0xffff, 0xffff, false),
-  HOWTO(R_386_PC16, 0, 1, 16, true, 0, complain_overflow_signed,
+  HOWTO(R_386_PC16, 0, 1, 16, true, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_386_PC16",
 	true, 0xffff, 0xffff, true),
   HOWTO(R_386_8, 0, 0, 8, false, 0, complain_overflow_bitfield,
@@ -176,14 +175,10 @@ static reloc_howto_type elf_howto_table[]=
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 false),		/* pcrel_offset */
+	 false)			/* pcrel_offset */
 
 #define R_386_vt (R_386_GNU_VTENTRY + 1 - R_386_vt_offset)
 
-/* Use complain_overflow_bitfield on R_386_PC16 for code16.  */
-  HOWTO(R_386_PC16, 0, 1, 16, true, 0, complain_overflow_bitfield,
-	bfd_elf_generic_reloc, "R_386_PC16",
-	true, 0xffff, 0xffff, true)
 };
 
 #define X86_PCREL_TYPE_P(TYPE) ((TYPE) == R_386_PC32)
@@ -374,7 +369,7 @@ elf_i386_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static reloc_howto_type *
-elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
+elf_i386_rtype_to_howto (unsigned r_type)
 {
   unsigned int indx;
 
@@ -389,11 +384,6 @@ elf_i386_rtype_to_howto (bfd *abfd, unsigned r_type)
   /* PR 17512: file: 0f67f69d.  */
   if (elf_howto_table [indx].type != r_type)
     return NULL;
-
-  /* Use complain_overflow_bitfield on R_386_PC16 for code16.  */
-  if (r_type == (unsigned int) R_386_PC16 && elf_x86_has_code16 (abfd))
-    indx = ARRAY_SIZE (elf_howto_table) - 1;
-
   return &elf_howto_table[indx];
 }
 
@@ -404,8 +394,7 @@ elf_i386_info_to_howto_rel (bfd *abfd,
 {
   unsigned int r_type = ELF32_R_TYPE (dst->r_info);
 
-  if ((cache_ptr->howto = elf_i386_rtype_to_howto (abfd, r_type))
-      == NULL)
+  if ((cache_ptr->howto = elf_i386_rtype_to_howto (r_type)) == NULL)
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
@@ -1153,8 +1142,8 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
       reloc_howto_type *from, *to;
       const char *name;
 
-      from = elf_i386_rtype_to_howto (abfd, from_type);
-      to = elf_i386_rtype_to_howto (abfd, to_type);
+      from = elf_i386_rtype_to_howto (from_type);
+      to = elf_i386_rtype_to_howto (to_type);
 
       if (h)
 	name = h->root.root.string;
@@ -2085,7 +2074,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	  continue;
 	}
 
-      howto = elf_i386_rtype_to_howto (input_bfd, r_type);
+      howto = elf_i386_rtype_to_howto (r_type);
       if (howto == NULL)
 	return _bfd_unrecognized_reloc (input_bfd, input_section, r_type);
 

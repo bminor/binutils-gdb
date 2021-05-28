@@ -2695,10 +2695,6 @@ static void
 set_code_flag (int value)
 {
   update_code_flag (value, 0);
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (value == CODE_16BIT)
-    x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_CODE16;
-#endif
 }
 
 static void
@@ -2710,10 +2706,6 @@ set_16bit_gcc_code_flag (int new_code_flag)
   cpu_arch_flags.bitfield.cpu64 = 0;
   cpu_arch_flags.bitfield.cpuno64 = 1;
   stackop_size = LONG_MNEM_SUFFIX;
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (new_code_flag == CODE_16BIT)
-    x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_CODE16;
-#endif
 }
 
 static void
@@ -9040,7 +9032,7 @@ x86_cleanup (void)
   unsigned int isa_1_descsz_raw, feature_2_descsz_raw;
   unsigned int padding;
 
-  if (!IS_ELF || (!x86_used_note && !x86_feature_2_used))
+  if (!IS_ELF || !x86_used_note)
     return;
 
   x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X86;
@@ -9080,23 +9072,15 @@ x86_cleanup (void)
   bfd_set_section_alignment (sec, alignment);
   elf_section_type (sec) = SHT_NOTE;
 
-  if (x86_used_note)
-    {
-      /* GNU_PROPERTY_X86_ISA_1_USED: 4-byte type + 4-byte data size
-	 + 4-byte data  */
-      isa_1_descsz_raw = 4 + 4 + 4;
-      /* Align GNU_PROPERTY_X86_ISA_1_USED.  */
-      isa_1_descsz = (isa_1_descsz_raw + align_size_1) & ~align_size_1;
-    }
-  else
-    {
-      isa_1_descsz_raw = 0;
-      isa_1_descsz = 0;
-    }
+  /* GNU_PROPERTY_X86_ISA_1_USED: 4-byte type + 4-byte data size
+				  + 4-byte data  */
+  isa_1_descsz_raw = 4 + 4 + 4;
+  /* Align GNU_PROPERTY_X86_ISA_1_USED.  */
+  isa_1_descsz = (isa_1_descsz_raw + align_size_1) & ~align_size_1;
 
   feature_2_descsz_raw = isa_1_descsz;
   /* GNU_PROPERTY_X86_FEATURE_2_USED: 4-byte type + 4-byte data size
-     + 4-byte data  */
+				      + 4-byte data  */
   feature_2_descsz_raw += 4 + 4 + 4;
   /* Align GNU_PROPERTY_X86_FEATURE_2_USED.  */
   feature_2_descsz = ((feature_2_descsz_raw + align_size_1)
@@ -9118,23 +9102,20 @@ x86_cleanup (void)
   /* Write n_name.  */
   memcpy (p + 4 * 3, "GNU", 4);
 
-  if (isa_1_descsz != 0)
-    {
-      /* Write 4-byte type.  */
-      md_number_to_chars (p + 4 * 4,
-			  (valueT) GNU_PROPERTY_X86_ISA_1_USED, 4);
+  /* Write 4-byte type.  */
+  md_number_to_chars (p + 4 * 4,
+		      (valueT) GNU_PROPERTY_X86_ISA_1_USED, 4);
 
-      /* Write 4-byte data size.  */
-      md_number_to_chars (p + 4 * 5, (valueT) 4, 4);
+  /* Write 4-byte data size.  */
+  md_number_to_chars (p + 4 * 5, (valueT) 4, 4);
 
-      /* Write 4-byte data.  */
-      md_number_to_chars (p + 4 * 6, (valueT) x86_isa_1_used, 4);
+  /* Write 4-byte data.  */
+  md_number_to_chars (p + 4 * 6, (valueT) x86_isa_1_used, 4);
 
-      /* Zero out paddings.  */
-      padding = isa_1_descsz - isa_1_descsz_raw;
-      if (padding)
-	memset (p + 4 * 7, 0, padding);
-    }
+  /* Zero out paddings.  */
+  padding = isa_1_descsz - isa_1_descsz_raw;
+  if (padding)
+    memset (p + 4 * 7, 0, padding);
 
   /* Write 4-byte type.  */
   md_number_to_chars (p + isa_1_descsz + 4 * 4,

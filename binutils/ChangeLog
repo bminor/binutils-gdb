@@ -1,3 +1,8 @@
+2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* readelf.c (decode_x86_feature_2): Revert commit 50c95a739c9.
+
 2021-05-27  Alan Modra  <amodra@gmail.com>
 
 	* readelf (usage): Order -w letters to match --debug-dump= and

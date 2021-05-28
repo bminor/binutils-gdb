@@ -1,3 +1,19 @@
+2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* elf32-i386.c: Don't include "libiberty.h".
+	(elf_howto_table): Revert commits a7664973b24 and 50c95a739c9.
+	(elf_i386_rtype_to_howto): Revert commit 50c95a739c9.
+	(elf_i386_info_to_howto_rel): Likewise.
+	(elf_i386_tls_transition): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	* elf64-x86-64.c (x86_64_elf_howto_table): Revert commits
+	a7664973b24 and 50c95a739c9.
+	(elf_x86_64_rtype_to_howto): Revert commit 50c95a739c9.
+	* elfxx-x86.c (_bfd_x86_elf_parse_gnu_properties): Likewise.
+	* elfxx-x86.h (elf_x86_obj_tdata): Likewise.
+	(elf_x86_has_code16): Likewise.
+
 2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27905

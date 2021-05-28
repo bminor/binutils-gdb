@@ -1,3 +1,8 @@
+2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_2_CODE16): Removed.
+
 2021-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27905

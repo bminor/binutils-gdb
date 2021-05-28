@@ -1,3 +1,12 @@
+2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27905
+	* config/tc-i386.c (set_code_flag): Revert commit 50c95a739c9.
+	(set_16bit_gcc_code_flag): Likewise.
+	(x86_cleanup): Likewise.
+	* testsuite/gas/i386/code16-2.d: Updated.
+	* testsuite/gas/i386/x86-64-code16-2.d: Likewise.
+
 2021-05-27  Peter Bergner  <bergner@linux.ibm.com>
 
 	* testsuite/gas/ppc/vsx.d <xxmr, xxlnot>: Add tests.

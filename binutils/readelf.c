@@ -19139,9 +19139,6 @@ decode_x86_feature_2 (unsigned int bitmask)
 	case GNU_PROPERTY_X86_FEATURE_2_XSAVEC:
 	  printf ("XSAVEC");
 	  break;
-	case GNU_PROPERTY_X86_FEATURE_2_CODE16:
-	  printf ("CODE16");
-	  break;
 	default:
 	  printf (_("<unknown: %x>"), bit);
 	  break;
