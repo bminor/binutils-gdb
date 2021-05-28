@@ -1301,10 +1301,10 @@ get_detach_signal (struct lwp_info *lp)
 
       if (target_is_non_stop_p () && !tp->executing)
 	{
-	  if (tp->suspend.waitstatus_pending_p)
-	    signo = tp->suspend.waitstatus.value.sig;
+	  if (tp->has_pending_waitstatus ())
+	    signo = tp->pending_waitstatus ().value.sig;
 	  else
-	    signo = tp->suspend.stop_signal;
+	    signo = tp->stop_signal ();
 	}
       else if (!target_is_non_stop_p ())
 	{
@@ -1315,7 +1315,7 @@ get_detach_signal (struct lwp_info *lp)
 
 	  if (last_target == linux_target
 	      && lp->ptid.lwp () == last_ptid.lwp ())
-	    signo = tp->suspend.stop_signal;
+	    signo = tp->stop_signal ();
 	}
     }
 
@@ -1631,8 +1631,8 @@ linux_nat_resume_callback (struct lwp_info *lp, struct lwp_info *except)
       thread = find_thread_ptid (linux_target, lp->ptid);
       if (thread != NULL)
 	{
-	  signo = thread->suspend.stop_signal;
-	  thread->suspend.stop_signal = GDB_SIGNAL_0;
+	  signo = thread->stop_signal ();
+	  thread->set_stop_signal (GDB_SIGNAL_0);
 	}
     }
 

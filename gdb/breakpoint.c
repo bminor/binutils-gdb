@@ -407,7 +407,7 @@ breakpoints_should_be_inserted_now (void)
       /* Don't remove breakpoints yet if, even though all threads are
 	 stopped, we still have events to process.  */
       for (thread_info *tp : all_non_exited_threads ())
-	if (tp->resumed () && tp->suspend.waitstatus_pending_p)
+	if (tp->resumed () && tp->has_pending_waitstatus ())
 	  return 1;
     }
   return 0;

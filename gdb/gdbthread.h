@@ -310,9 +310,91 @@ public:
      See `struct thread_control_state'.  */
   thread_control_state control;
 
-  /* State of inferior thread to restore after GDB is done with an inferior
-     call.  See `struct thread_suspend_state'.  */
-  thread_suspend_state suspend;
+  /* Save M_SUSPEND to SUSPEND.  */
+
+  void save_suspend_to (thread_suspend_state &suspend) const
+  {
+    suspend = m_suspend;
+  }
+
+  /* Restore M_SUSPEND from SUSPEND.  */
+
+  void restore_suspend_from (const thread_suspend_state &suspend)
+  {
+    m_suspend = suspend;
+  }
+
+  /* Return this thread's stop PC.  */
+
+  CORE_ADDR stop_pc () const
+  {
+    return m_suspend.stop_pc;
+  }
+
+  /* Set this thread's stop PC.  */
+
+  void set_stop_pc (CORE_ADDR stop_pc)
+  {
+    m_suspend.stop_pc = stop_pc;
+  }
+
+  /* Return true if this thread has a pending wait status.  */
+
+  bool has_pending_waitstatus () const
+  {
+    return m_suspend.waitstatus_pending_p;
+  }
+
+  /* Get this thread's pending wait status.
+
+     May only be called if has_pending_waitstatus returns true.  */
+
+  const target_waitstatus &pending_waitstatus () const
+  {
+    gdb_assert (this->has_pending_waitstatus ());
+
+    return m_suspend.waitstatus;
+  }
+
+  /* Set this thread's pending wait status.
+
+     May only be called if has_pending_waitstatus returns false.  */
+
+  void set_pending_waitstatus (const target_waitstatus &ws);
+
+  /* Clear this thread's pending wait status.
+
+     May only be called if has_pending_waitstatus returns true.  */
+
+  void clear_pending_waitstatus ();
+
+  /* Return this thread's stop signal.  */
+
+  gdb_signal stop_signal () const
+  {
+    return m_suspend.stop_signal;
+  }
+
+  /* Set this thread's stop signal.  */
+
+  void set_stop_signal (gdb_signal sig)
+  {
+    m_suspend.stop_signal = sig;
+  }
+
+  /* Return this thread's stop reason.  */
+
+  target_stop_reason stop_reason () const
+  {
+    return m_suspend.stop_reason;
+  }
+
+  /* Set this thread's stop reason.  */
+
+  void set_stop_reason (target_stop_reason reason)
+  {
+    m_suspend.stop_reason = reason;
+  }
 
   int current_line = 0;
   struct symtab *current_symtab = NULL;
@@ -400,6 +482,10 @@ private:
      we should not process that wait status if we didn't try to let
      the thread run.  */
   bool m_resumed = false;
+
+  /* State of inferior thread to restore after GDB is done with an inferior
+     call.  See `struct thread_suspend_state'.  */
+  thread_suspend_state m_suspend;
 };
 
 /* A gdb::ref_ptr pointer to a thread_info.  */

@@ -766,6 +766,7 @@ public: /* Remote specific methods.  */
 
   void remote_notice_new_inferior (ptid_t currthread, bool executing);
 
+  void print_one_stopped_thread (thread_info *thread);
   void process_initial_stop_replies (int from_tty);
 
   thread_info *remote_add_thread (ptid_t ptid, bool running, bool executing);
@@ -4479,20 +4480,36 @@ remote_target::add_current_inferior_and_thread (const char *wait_status)
 /* Print info about a thread that was found already stopped on
    connection.  */
 
-static void
-print_one_stopped_thread (struct thread_info *thread)
+void
+remote_target::print_one_stopped_thread (thread_info *thread)
 {
-  struct target_waitstatus *ws = &thread->suspend.waitstatus;
+  target_waitstatus ws;
+
+  /* If there is a pending waitstatus, use it.  If there isn't it's because
+     the thread's stop was reported with TARGET_WAITKIND_STOPPED / GDB_SIGNAL_0
+     and process_initial_stop_replies decided it wasn't interesting to save
+     and report to the core.  */
+  if (thread->has_pending_waitstatus ())
+    {
+      ws = thread->pending_waitstatus ();
+      thread->clear_pending_waitstatus ();
+    }
+  else
+    {
+      ws.kind = TARGET_WAITKIND_STOPPED;
+      ws.value.sig = GDB_SIGNAL_0;
+    }
 
   switch_to_thread (thread);
-  thread->suspend.stop_pc = get_frame_pc (get_current_frame ());
+  thread->set_stop_pc (get_frame_pc (get_current_frame ()));
   set_current_sal_from_frame (get_current_frame ());
 
-  thread->suspend.waitstatus_pending_p = 0;
+  /* For "info program".  */
+  set_last_target_status (this, thread->ptid, ws);
 
-  if (ws->kind == TARGET_WAITKIND_STOPPED)
+  if (ws.kind == TARGET_WAITKIND_STOPPED)
     {
-      enum gdb_signal sig = ws->value.sig;
+      enum gdb_signal sig = ws.value.sig;
 
       if (signal_print_state (sig))
 	gdb::observers::signal_received.notify (sig);
@@ -4512,6 +4529,9 @@ remote_target::process_initial_stop_replies (int from_tty)
   struct thread_info *selected = NULL;
   struct thread_info *lowest_stopped = NULL;
   struct thread_info *first = NULL;
+
+  /* This is only used when the target is non-stop.  */
+  gdb_assert (target_is_non_stop_p ());
 
   /* Consume the initial pending events.  */
   while (pending_stop_replies-- > 0)
@@ -4557,15 +4577,13 @@ remote_target::process_initial_stop_replies (int from_tty)
 	     instead of signal 0.  Suppress it.  */
 	  if (sig == GDB_SIGNAL_TRAP)
 	    sig = GDB_SIGNAL_0;
-	  evthread->suspend.stop_signal = sig;
+	  evthread->set_stop_signal (sig);
 	  ws.value.sig = sig;
 	}
 
-      evthread->suspend.waitstatus = ws;
-
       if (ws.kind != TARGET_WAITKIND_STOPPED
 	  || ws.value.sig != GDB_SIGNAL_0)
-	evthread->suspend.waitstatus_pending_p = 1;
+	evthread->set_pending_waitstatus (ws);
 
       set_executing (this, event_ptid, false);
       set_running (this, event_ptid, false);
@@ -4619,8 +4637,7 @@ remote_target::process_initial_stop_replies (int from_tty)
       else if (thread->state != THREAD_STOPPED)
 	continue;
 
-      if (selected == NULL
-	  && thread->suspend.waitstatus_pending_p)
+      if (selected == nullptr && thread->has_pending_waitstatus ())
 	selected = thread;
 
       if (lowest_stopped == NULL
@@ -4644,11 +4661,6 @@ remote_target::process_initial_stop_replies (int from_tty)
 
       print_one_stopped_thread (thread);
     }
-
-  /* For "info program".  */
-  thread_info *thread = inferior_thread ();
-  if (thread->state == THREAD_STOPPED)
-    set_last_target_status (this, inferior_ptid, thread->suspend.waitstatus);
 }
 
 /* Start the remote connection and sync state.  */
@@ -6260,11 +6272,11 @@ remote_target::append_pending_thread_resumptions (char *p, char *endp,
 {
   for (thread_info *thread : all_non_exited_threads (this, ptid))
     if (inferior_ptid != thread->ptid
-	&& thread->suspend.stop_signal != GDB_SIGNAL_0)
+	&& thread->stop_signal () != GDB_SIGNAL_0)
       {
 	p = append_resumption (p, endp, thread->ptid,
-			       0, thread->suspend.stop_signal);
-	thread->suspend.stop_signal = GDB_SIGNAL_0;
+			       0, thread->stop_signal ());
+	thread->set_stop_signal (GDB_SIGNAL_0);
 	resume_clear_thread_private_info (thread);
       }
 
@@ -7202,7 +7214,7 @@ struct notif_client notif_client_stop =
    -1 if we want to check all threads.  */
 
 static int
-is_pending_fork_parent (struct target_waitstatus *ws, int event_pid,
+is_pending_fork_parent (const target_waitstatus *ws, int event_pid,
 			ptid_t thread_ptid)
 {
   if (ws->kind == TARGET_WAITKIND_FORKED
@@ -7218,11 +7230,11 @@ is_pending_fork_parent (struct target_waitstatus *ws, int event_pid,
 /* Return the thread's pending status used to determine whether the
    thread is a fork parent stopped at a fork event.  */
 
-static struct target_waitstatus *
+static const target_waitstatus *
 thread_pending_fork_status (struct thread_info *thread)
 {
-  if (thread->suspend.waitstatus_pending_p)
-    return &thread->suspend.waitstatus;
+  if (thread->has_pending_waitstatus ())
+    return &thread->pending_waitstatus ();
   else
     return &thread->pending_follow;
 }
@@ -7232,7 +7244,7 @@ thread_pending_fork_status (struct thread_info *thread)
 static int
 is_pending_fork_parent_thread (struct thread_info *thread)
 {
-  struct target_waitstatus *ws = thread_pending_fork_status (thread);
+  const target_waitstatus *ws = thread_pending_fork_status (thread);
   int pid = -1;
 
   return is_pending_fork_parent (ws, pid, thread->ptid);
@@ -7254,7 +7266,7 @@ remote_target::remove_new_fork_children (threads_listing_context *context)
      fork child threads from the CONTEXT list.  */
   for (thread_info *thread : all_non_exited_threads (this))
     {
-      struct target_waitstatus *ws = thread_pending_fork_status (thread);
+      const target_waitstatus *ws = thread_pending_fork_status (thread);
 
       if (is_pending_fork_parent (ws, pid, thread->ptid))
 	context->remove_thread (ws->value.related_pid);

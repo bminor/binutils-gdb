@@ -275,7 +275,7 @@ thread_info::thread_info (struct inferior *inf_, ptid_t ptid_)
   /* Nothing to follow yet.  */
   memset (&this->pending_follow, 0, sizeof (this->pending_follow));
   this->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-  this->suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
+  this->m_suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
 }
 
 thread_info::~thread_info ()
@@ -291,6 +291,27 @@ thread_info::deletable () const
   /* If this is the current thread, or there's code out there that
      relies on it existing (refcount > 0) we can't delete yet.  */
   return refcount () == 0 && !is_current_thread (this);
+}
+
+/* See gdbthread.h.  */
+
+void
+thread_info::set_pending_waitstatus (const target_waitstatus &ws)
+{
+  gdb_assert (!this->has_pending_waitstatus ());
+
+  m_suspend.waitstatus = ws;
+  m_suspend.waitstatus_pending_p = 1;
+}
+
+/* See gdbthread.h.  */
+
+void
+thread_info::clear_pending_waitstatus ()
+{
+  gdb_assert (this->has_pending_waitstatus ());
+
+  m_suspend.waitstatus_pending_p = 0;
 }
 
 /* See gdbthread.h.  */
@@ -771,7 +792,7 @@ set_executing_thread (thread_info *thr, bool executing)
 {
   thr->executing = executing;
   if (executing)
-    thr->suspend.stop_pc = ~(CORE_ADDR) 0;
+    thr->set_stop_pc (~(CORE_ADDR) 0);
 }
 
 void

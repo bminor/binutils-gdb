@@ -92,7 +92,7 @@ elf_none_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
      that stopped SIGNALLED_THR.  */
   gdb_signal stop_signal;
   if (signalled_thr != nullptr)
-    stop_signal = signalled_thr->suspend.stop_signal;
+    stop_signal = signalled_thr->stop_signal ();
   else
     stop_signal = GDB_SIGNAL_0;
 

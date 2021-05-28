@@ -2795,8 +2795,7 @@ record_btrace_set_replay (struct thread_info *tp,
   /* Start anew from the new replay position.  */
   record_btrace_clear_histories (btinfo);
 
-  inferior_thread ()->suspend.stop_pc
-    = regcache_read_pc (get_current_regcache ());
+  inferior_thread ()->set_stop_pc (regcache_read_pc (get_current_regcache ()));
   print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 

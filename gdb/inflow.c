@@ -530,7 +530,7 @@ child_interrupt (struct target_ops *self)
 	  resumed = thr;
 	  break;
 	}
-      if (thr->suspend.waitstatus_pending_p)
+      if (thr->has_pending_waitstatus ())
 	resumed = thr;
     }
 

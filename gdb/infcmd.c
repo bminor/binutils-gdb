@@ -298,11 +298,11 @@ post_create_inferior (int from_tty)
      missing registers info), ignore it.  */
   thread_info *thr = inferior_thread ();
 
-  thr->suspend.stop_pc = 0;
+  thr->set_stop_pc (0);
   try
     {
       regcache *rc = get_thread_regcache (thr);
-      thr->suspend.stop_pc = regcache_read_pc (rc);
+      thr->set_stop_pc (regcache_read_pc (rc));
     }
   catch (const gdb_exception_error &ex)
     {
@@ -534,9 +534,10 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   if (run_how == RUN_STOP_AT_FIRST_INSN)
     {
       thread_info *thr = inferior_thread ();
-      thr->suspend.waitstatus_pending_p = 1;
-      thr->suspend.waitstatus.kind = TARGET_WAITKIND_STOPPED;
-      thr->suspend.waitstatus.value.sig = GDB_SIGNAL_0;
+      target_waitstatus ws;
+      ws.kind = TARGET_WAITKIND_STOPPED;
+      ws.value.sig = GDB_SIGNAL_0;
+      thr->set_pending_waitstatus (ws);
     }
 
   /* Start the target running.  Do not use -1 continuation as it would skip
@@ -1223,15 +1224,15 @@ signal_command (const char *signum_exp, int from_tty)
 	  if (tp == current)
 	    continue;
 
-	  if (tp->suspend.stop_signal != GDB_SIGNAL_0
-	      && signal_pass_state (tp->suspend.stop_signal))
+	  if (tp->stop_signal () != GDB_SIGNAL_0
+	      && signal_pass_state (tp->stop_signal ()))
 	    {
 	      if (!must_confirm)
 		printf_unfiltered (_("Note:\n"));
 	      printf_unfiltered (_("  Thread %s previously stopped with signal %s, %s.\n"),
 				 print_thread_id (tp),
-				 gdb_signal_to_name (tp->suspend.stop_signal),
-				 gdb_signal_to_string (tp->suspend.stop_signal));
+				 gdb_signal_to_name (tp->stop_signal ()),
+				 gdb_signal_to_string (tp->stop_signal ()));
 	      must_confirm = 1;
 	    }
 	}
@@ -1294,7 +1295,7 @@ queue_signal_command (const char *signum_exp, int from_tty)
     error (_("Signal handling set to not pass this signal to the program."));
 
   tp = inferior_thread ();
-  tp->suspend.stop_signal = oursig;
+  tp->set_stop_signal (oursig);
 }
 
 /* Data for the FSM that manages the until (with no argument)
@@ -1914,7 +1915,7 @@ info_program_command (const char *args, int from_tty)
 
   target_files_info ();
   printf_filtered (_("Program stopped at %s.\n"),
-		   paddress (target_gdbarch (), tp->suspend.stop_pc));
+		   paddress (target_gdbarch (), tp->stop_pc ()));
   if (tp->control.stop_step)
     printf_filtered (_("It stopped after being stepped.\n"));
   else if (stat != 0)
@@ -1933,11 +1934,11 @@ info_program_command (const char *args, int from_tty)
 	  stat = bpstat_num (&bs, &num);
 	}
     }
-  else if (tp->suspend.stop_signal != GDB_SIGNAL_0)
+  else if (tp->stop_signal () != GDB_SIGNAL_0)
     {
       printf_filtered (_("It stopped with signal %s, %s.\n"),
-		       gdb_signal_to_name (tp->suspend.stop_signal),
-		       gdb_signal_to_string (tp->suspend.stop_signal));
+		       gdb_signal_to_name (tp->stop_signal ()),
+		       gdb_signal_to_string (tp->stop_signal ()));
     }
 
   if (from_tty)
@@ -2425,7 +2426,7 @@ proceed_after_attach (inferior *inf)
   for (thread_info *thread : inf->non_exited_threads ())
     if (!thread->executing
 	&& !thread->stop_requested
-	&& thread->suspend.stop_signal == GDB_SIGNAL_0)
+	&& thread->stop_signal () == GDB_SIGNAL_0)
       {
 	switch_to_thread (thread);
 	clear_proceed_status (0);
@@ -2500,7 +2501,7 @@ attach_post_wait (int from_tty, enum attach_post_wait_mode mode)
 	proceed_after_attach (inferior);
       else
 	{
-	  if (inferior_thread ()->suspend.stop_signal == GDB_SIGNAL_0)
+	  if (inferior_thread ()->stop_signal () == GDB_SIGNAL_0)
 	    {
 	      clear_proceed_status (0);
 	      proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
