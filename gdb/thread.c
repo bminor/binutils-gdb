@@ -708,7 +708,7 @@ void
 set_resumed (process_stratum_target *targ, ptid_t ptid, bool resumed)
 {
   for (thread_info *tp : all_non_exited_threads (targ, ptid))
-    tp->resumed = resumed;
+    tp->set_resumed (resumed);
 }
 
 /* Helper for set_running, that marks one thread either running or

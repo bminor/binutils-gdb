@@ -293,14 +293,11 @@ public:
      thread is off and running.  */
   bool executing = false;
 
-  /* True if this thread is resumed from infrun's perspective.
-     Note that a thread can be marked both as not-executing and
-     resumed at the same time.  This happens if we try to resume a
-     thread that has a wait status pending.  We shouldn't let the
-     thread really run until that wait status has been processed, but
-     we should not process that wait status if we didn't try to let
-     the thread run.  */
-  bool resumed = false;
+  bool resumed () const
+  { return m_resumed; }
+
+  void set_resumed (bool resumed)
+  { m_resumed = resumed; }
 
   /* Frontend view of the thread state.  Note that the THREAD_RUNNING/
      THREAD_STOPPED states are different from EXECUTING.  When the
@@ -393,6 +390,16 @@ public:
 
   /* Displaced-step state for this thread.  */
   displaced_step_thread_state displaced_step_state;
+
+private:
+  /* True if this thread is resumed from infrun's perspective.
+     Note that a thread can be marked both as not-executing and
+     resumed at the same time.  This happens if we try to resume a
+     thread that has a wait status pending.  We shouldn't let the
+     thread really run until that wait status has been processed, but
+     we should not process that wait status if we didn't try to let
+     the thread run.  */
+  bool m_resumed = false;
 };
 
 /* A gdb::ref_ptr pointer to a thread_info.  */

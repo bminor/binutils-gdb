@@ -8132,7 +8132,7 @@ static ptid_t
 first_remote_resumed_thread (remote_target *target)
 {
   for (thread_info *tp : all_non_exited_threads (target, minus_one_ptid))
-    if (tp->resumed)
+    if (tp->resumed ())
       return tp->ptid;
   return null_ptid;
 }

@@ -1920,7 +1920,7 @@ start_step_over (void)
 	}
 
       if (tp->control.trap_expected
-	  || tp->resumed
+	  || tp->resumed ()
 	  || tp->executing)
 	{
 	  internal_error (__FILE__, __LINE__,
@@ -1928,7 +1928,7 @@ start_step_over (void)
 			  "trap_expected=%d, resumed=%d, executing=%d\n",
 			  target_pid_to_str (tp->ptid).c_str (),
 			  tp->control.trap_expected,
-			  tp->resumed,
+			  tp->resumed (),
 			  tp->executing);
 	}
 
@@ -1953,7 +1953,7 @@ start_step_over (void)
 
       /* If the thread's step over could not be initiated because no buffers
 	 were available, it was re-added to the global step over chain.  */
-      if (tp->resumed)
+      if (tp->resumed  ())
 	{
 	  infrun_debug_printf ("[%s] was resumed.",
 			       target_pid_to_str (tp->ptid).c_str ());
@@ -2219,7 +2219,7 @@ resume_1 (enum gdb_signal sig)
 	 currently_stepping (tp));
 
       tp->inf->process_target ()->threads_executing = true;
-      tp->resumed = true;
+      tp->set_resumed (true);
 
       /* FIXME: What should we do if we are supposed to resume this
 	 thread with a signal?  Maybe we should maintain a queue of
@@ -2341,7 +2341,7 @@ resume_1 (enum gdb_signal sig)
 
 	      resume_ptid = internal_resume_ptid (user_step);
 	      do_target_resume (resume_ptid, false, GDB_SIGNAL_0);
-	      tp->resumed = true;
+	      tp->set_resumed (true);
 	      return;
 	    }
 	}
@@ -2550,7 +2550,7 @@ resume_1 (enum gdb_signal sig)
     }
 
   do_target_resume (resume_ptid, step, sig);
-  tp->resumed = true;
+  tp->set_resumed (true);
 }
 
 /* Resume the inferior.  SIG is the signal to give the inferior
@@ -2802,7 +2802,7 @@ maybe_set_commit_resumed_all_targets ()
 	 resuming more threads.  */
       bool has_thread_with_pending_status = false;
       for (thread_info *thread : all_non_exited_threads (proc_target))
-	if (thread->resumed && thread->suspend.waitstatus_pending_p)
+	if (thread->resumed () && thread->suspend.waitstatus_pending_p)
 	  {
 	    has_thread_with_pending_status = true;
 	    break;
@@ -3237,7 +3237,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 		continue;
 	      }
 
-	    if (tp->resumed)
+	    if (tp->resumed ())
 	      {
 		infrun_debug_printf ("[%s] resumed",
 				     target_pid_to_str (tp->ptid).c_str ());
@@ -3262,7 +3262,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	      error (_("Command aborted."));
 	  }
       }
-    else if (!cur_thr->resumed && !thread_is_in_step_over_chain (cur_thr))
+    else if (!cur_thr->resumed () && !thread_is_in_step_over_chain (cur_thr))
       {
 	/* The thread wasn't started, and isn't queued, run it now.  */
 	reset_ecs (ecs, cur_thr);
@@ -3407,7 +3407,7 @@ infrun_thread_stop_requested (ptid_t ptid)
       /* Otherwise we can process the (new) pending event now.  Set
 	 it so this pending event is considered by
 	 do_target_wait.  */
-      tp->resumed = true;
+      tp->set_resumed (true);
     }
 }
 
@@ -3504,7 +3504,7 @@ random_pending_event_thread (inferior *inf, ptid_t waiton_ptid)
   auto has_event = [&] (thread_info *tp)
     {
       return (tp->ptid.matches (waiton_ptid)
-	      && tp->resumed
+	      && tp->resumed ()
 	      && tp->suspend.waitstatus_pending_p);
     };
 
@@ -3849,7 +3849,7 @@ prepare_for_detach (void)
 		    }
 		}
 	      else
-		thr->resumed = false;
+		thr->set_resumed (false);
 	    }
 	}
 
@@ -4890,7 +4890,7 @@ handle_one (const wait_one_event &event)
 
       t->stop_requested = 0;
       t->executing = 0;
-      t->resumed = false;
+      t->set_resumed (false);
       t->control.may_range_step = 0;
 
       /* This may be the first time we see the inferior report
@@ -5060,7 +5060,7 @@ stop_all_threads (void)
 
 		  /* The thread may be not executing, but still be
 		     resumed with a pending status to process.  */
-		  t->resumed = false;
+		  t->set_resumed (false);
 		}
 	    }
 
@@ -5805,7 +5805,7 @@ restart_threads (struct thread_info *event_thread)
 	  continue;
 	}
 
-      if (tp->resumed)
+      if (tp->resumed ())
 	{
 	  infrun_debug_printf ("restart threads: [%s] resumed",
 			      target_pid_to_str (tp->ptid).c_str ());
@@ -5817,7 +5817,7 @@ restart_threads (struct thread_info *event_thread)
 	{
 	  infrun_debug_printf ("restart threads: [%s] needs step-over",
 			       target_pid_to_str (tp->ptid).c_str ());
-	  gdb_assert (!tp->resumed);
+	  gdb_assert (!tp->resumed ());
 	  continue;
 	}
 
@@ -5826,7 +5826,7 @@ restart_threads (struct thread_info *event_thread)
 	{
 	  infrun_debug_printf ("restart threads: [%s] has pending status",
 			       target_pid_to_str (tp->ptid).c_str ());
-	  tp->resumed = true;
+	  tp->set_resumed (true);
 	  continue;
 	}
 
@@ -5870,7 +5870,7 @@ static int
 resumed_thread_with_pending_status (struct thread_info *tp,
 				    void *arg)
 {
-  return (tp->resumed
+  return (tp->resumed ()
 	  && tp->suspend.waitstatus_pending_p);
 }
 
@@ -5956,7 +5956,7 @@ finish_step_over (struct execution_control_state *ecs)
 	  /* This was cleared early, by handle_inferior_event.  Set it
 	     so this pending event is considered by
 	     do_target_wait.  */
-	  tp->resumed = true;
+	  tp->set_resumed (true);
 
 	  gdb_assert (!tp->executing);
 
@@ -7516,7 +7516,7 @@ restart_after_all_stop_detach (process_stratum_target *proc_target)
 
       /* If we have a pending event to process, skip resuming the
 	 target and go straight to processing it.  */
-      if (thr->resumed && thr->suspend.waitstatus_pending_p)
+      if (thr->resumed () && thr->suspend.waitstatus_pending_p)
 	return;
     }
 
@@ -7621,7 +7621,7 @@ keep_going_stepped_thread (struct thread_info *tp)
 				     get_frame_address_space (frame),
 				     tp->suspend.stop_pc);
 
-      tp->resumed = true;
+      tp->set_resumed (true);
       resume_ptid = internal_resume_ptid (tp->control.stepping_command);
       do_target_resume (resume_ptid, false, GDB_SIGNAL_0);
     }
@@ -8036,7 +8036,7 @@ static void
 keep_going_pass_signal (struct execution_control_state *ecs)
 {
   gdb_assert (ecs->event_thread->ptid == inferior_ptid);
-  gdb_assert (!ecs->event_thread->resumed);
+  gdb_assert (!ecs->event_thread->resumed ());
 
   /* Save the pc before execution, to compare with pc after stop.  */
   ecs->event_thread->prev_pc
