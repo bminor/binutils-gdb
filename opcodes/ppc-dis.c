@@ -580,7 +580,7 @@ skip_optional_operands (const unsigned char *opindex,
 static const struct powerpc_opcode *
 lookup_powerpc (uint64_t insn, ppc_cpu_t dialect)
 {
-  const struct powerpc_opcode *opcode, *opcode_end, *last;
+  const struct powerpc_opcode *opcode, *opcode_end;
   unsigned long op;
 
   /* Get the major opcode of the instruction.  */
@@ -588,7 +588,6 @@ lookup_powerpc (uint64_t insn, ppc_cpu_t dialect)
 
   /* Find the first match in the opcode table for this major opcode.  */
   opcode_end = powerpc_opcodes + powerpc_opcd_indices[op + 1];
-  last = NULL;
   for (opcode = powerpc_opcodes + powerpc_opcd_indices[op];
        opcode < opcode_end;
        ++opcode)
@@ -599,8 +598,8 @@ lookup_powerpc (uint64_t insn, ppc_cpu_t dialect)
 
       if ((insn & opcode->mask) != opcode->opcode
 	  || ((dialect & PPC_OPCODE_ANY) == 0
-	      && ((opcode->flags & dialect) == 0
-		  || (opcode->deprecated & dialect) != 0)))
+	      && (opcode->flags & dialect) == 0)
+	  || (opcode->deprecated & dialect) != 0)
 	continue;
 
       /* Check validity of operands.  */
@@ -614,16 +613,10 @@ lookup_powerpc (uint64_t insn, ppc_cpu_t dialect)
       if (invalid)
 	continue;
 
-      if ((dialect & PPC_OPCODE_RAW) == 0)
-	return opcode;
-
-      /* The raw machine insn is one that is not a specialization.  */
-      if (last == NULL
-	  || (last->mask & ~opcode->mask) != 0)
-	last = opcode;
+      return opcode;
     }
 
-  return last;
+  return NULL;
 }
 
 /* Find a match for INSN in the PREFIX opcode table.  */
@@ -631,7 +624,7 @@ lookup_powerpc (uint64_t insn, ppc_cpu_t dialect)
 static const struct powerpc_opcode *
 lookup_prefix (uint64_t insn, ppc_cpu_t dialect)
 {
-  const struct powerpc_opcode *opcode, *opcode_end, *last;
+  const struct powerpc_opcode *opcode, *opcode_end;
   unsigned long seg;
 
   /* Get the opcode segment of the instruction.  */
@@ -639,7 +632,6 @@ lookup_prefix (uint64_t insn, ppc_cpu_t dialect)
 
   /* Find the first match in the opcode table for this major opcode.  */
   opcode_end = prefix_opcodes + prefix_opcd_indices[seg + 1];
-  last = NULL;
   for (opcode = prefix_opcodes + prefix_opcd_indices[seg];
        opcode < opcode_end;
        ++opcode)
@@ -650,8 +642,8 @@ lookup_prefix (uint64_t insn, ppc_cpu_t dialect)
 
       if ((insn & opcode->mask) != opcode->opcode
 	  || ((dialect & PPC_OPCODE_ANY) == 0
-	      && ((opcode->flags & dialect) == 0
-		  || (opcode->deprecated & dialect) != 0)))
+	      && (opcode->flags & dialect) == 0)
+	  || (opcode->deprecated & dialect) != 0)
 	continue;
 
       /* Check validity of operands.  */
@@ -665,22 +657,16 @@ lookup_prefix (uint64_t insn, ppc_cpu_t dialect)
       if (invalid)
 	continue;
 
-      if ((dialect & PPC_OPCODE_RAW) == 0)
-	return opcode;
-
-      /* The raw machine insn is one that is not a specialization.  */
-      if (last == NULL
-	  || (last->mask & ~opcode->mask) != 0)
-	last = opcode;
+      return opcode;
     }
 
-  return last;
+  return NULL;
 }
 
 /* Find a match for INSN in the VLE opcode table.  */
 
 static const struct powerpc_opcode *
-lookup_vle (uint64_t insn)
+lookup_vle (uint64_t insn, ppc_cpu_t dialect)
 {
   const struct powerpc_opcode *opcode;
   const struct powerpc_opcode *opcode_end;
@@ -711,7 +697,8 @@ lookup_vle (uint64_t insn)
       insn2 = insn;
       if (table_op_is_short)
 	insn2 >>= 16;
-      if ((insn2 & table_mask) != table_opcd)
+      if ((insn2 & table_mask) != table_opcd
+	  || (opcode->deprecated & dialect) != 0)
 	continue;
 
       /* Check validity of operands.  */
@@ -734,7 +721,7 @@ lookup_vle (uint64_t insn)
 /* Find a match for INSN in the SPE2 opcode table.  */
 
 static const struct powerpc_opcode *
-lookup_spe2 (uint64_t insn)
+lookup_spe2 (uint64_t insn, ppc_cpu_t dialect)
 {
   const struct powerpc_opcode *opcode, *opcode_end;
   unsigned op, xop, seg;
@@ -763,7 +750,8 @@ lookup_spe2 (uint64_t insn)
       int invalid;
 
       insn2 = insn;
-      if ((insn2 & table_mask) != table_opcd)
+      if ((insn2 & table_mask) != table_opcd
+	  || (opcode->deprecated & dialect) != 0)
 	continue;
 
       /* Check validity of operands.  */
@@ -916,7 +904,7 @@ print_insn_powerpc (bfd_vma memaddr,
     }
   if (opcode == NULL && (dialect & PPC_OPCODE_VLE) != 0)
     {
-      opcode = lookup_vle (insn);
+      opcode = lookup_vle (insn, dialect);
       if (opcode != NULL && PPC_OP_SE_VLE (opcode->mask))
 	{
 	  /* The operands will be fetched out of the 16-bit instruction.  */
@@ -927,7 +915,7 @@ print_insn_powerpc (bfd_vma memaddr,
   if (opcode == NULL && insn_length == 4)
     {
       if ((dialect & PPC_OPCODE_SPE2) != 0)
-	opcode = lookup_spe2 (insn);
+	opcode = lookup_spe2 (insn, dialect);
       if (opcode == NULL)
 	opcode = lookup_powerpc (insn, dialect & ~PPC_OPCODE_ANY);
       if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)

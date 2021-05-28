@@ -1,3 +1,18 @@
+2021-05-29  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (lookup_powerpc): Test deprecated field when -Many.
+	Don't special case PPC_OPCODE_RAW.
+	(lookup_prefix): Likewise.
+	(lookup_vle, lookup_spe2): Similarly.  Add dialect parameter and..
+	(print_insn_powerpc): ..update caller.
+	* ppc-opc.c (EXT): Define.
+	(powerpc_opcodes): Mark extended mnemonics with EXT.
+	(prefix_opcodes, vle_opcodes): Likewise.
+	(XISEL, XISEL_MASK): Add cr field and simplify.
+	(powerpc_opcodes): Use XISEL with extended isel mnemonics and sort
+	all isel variants to where the base mnemonic belongs.  Sort dstt,
+	dststt and dssall.
+
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
 	* mips-opc.c (mips_builtin_opcodes): Reorder legacy COP0, COP2,
