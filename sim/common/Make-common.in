@@ -117,7 +117,8 @@ POSTCOMPILE = @true
 
 # igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
 # leak detection while running it.
-IGEN = ASAN_OPTIONS=detect_leaks=0 ../igen/igen
+IGEN = ../igen/igen$(EXEEXT)
+IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN)
 
 # Each simulator's Makefile.in defines one or more of these variables
 # to override our settings as necessary.  There is no need to define these

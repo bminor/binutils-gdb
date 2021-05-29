@@ -137,8 +137,8 @@ BUILT_SRC_FROM_IGEN = \
 
 $(BUILT_SRC_FROM_IGEN): tmp-igen
 
-tmp-igen: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
-	$(IGEN) \
+tmp-igen: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -208,8 +208,8 @@ BUILT_SRC_FROM_M16 = \
 
 $(BUILT_SRC_FROM_M16): tmp-m16
 
-tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
-	$(IGEN) \
+tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -244,7 +244,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	$(SHELL) $(srcdir)/../../move-if-change tmp-model.c m16_model.c
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.h m16_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c m16_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -281,7 +281,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	$(SHELL) $(srcdir)/../../move-if-change tmp-model.c m32_model.c
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.h m32_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c m32_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -334,8 +334,8 @@ BUILT_SRC_FROM_MICROMIPS = \
 
 $(BUILT_SRC_FROM_MICROMIPS): tmp-micromips
 
-tmp-micromips: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
-	$(IGEN) \
+tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -380,7 +380,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 						micromips16_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c \
 						micromips16_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -425,7 +425,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 						micromips32_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c \
 						micromips32_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -470,7 +470,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 						micromips_m32_support.h
 	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c \
 						micromips_m32_support.c
-	$(IGEN) \
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
@@ -492,7 +492,7 @@ SIM_MULTI_IGEN_CONFIGS = @sim_multi_igen_configs@
 
 $(BUILT_SRC_FROM_MULTI): tmp-multi
 tmp-multi: tmp-mach-multi tmp-itable-multi tmp-run-multi targ-vals.h
-tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
+tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 	for t in $(SIM_MULTI_IGEN_CONFIGS); do \
 	  p=`echo $${t} | sed -e 's/:.*//'` ; \
 	  m=`echo $${t} | sed -e 's/.*:\(.*\):.*/\1/'` ; \
@@ -510,7 +510,7 @@ tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 	    m16*) e="-B 16 -H 15 -o $(M16_DC) -F 16" ;; \
 	    *) e="-B 32 -H 31 -o $(IGEN_DC) -F $${f}" ;; \
 	  esac; \
-	  $(IGEN) \
+	  $(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		$${e} \
 		-I $(srcdir) \
@@ -562,8 +562,8 @@ tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
 						  $${p}_engine.c ; \
 	done
 	touch tmp-mach-multi
-tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) ../igen/igen $(IGEN_INCLUDE)
-	$(IGEN) \
+tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
+	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-I $(srcdir) \
 		-Werror \
