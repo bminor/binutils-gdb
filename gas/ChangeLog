@@ -1,3 +1,8 @@
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* config/tc-mips.c (FCSR): New macro.
+	(macro) <M_TRUNCWS, M_TRUNCWD>: Use it in place of RA.
+
 2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27905
