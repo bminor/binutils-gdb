@@ -1,3 +1,7 @@
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* simops.c (OP_10007E0): Add (void*) casts to argv & envp.
+
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.

@@ -1640,7 +1640,7 @@ OP_10007E0 (void)
 	    char *path = fetch_str (simulator, PARM1);
 	    char **argv = fetch_argv (simulator, PARM2);
 	    char **envp = fetch_argv (simulator, PARM3);
-	    RETVAL = execve (path, argv, envp);
+	    RETVAL = execve (path, (void *)argv, (void *)envp);
 	    free (path);
 	    freeargv (argv);
 	    freeargv (envp);
@@ -1656,7 +1656,7 @@ OP_10007E0 (void)
 	  {
 	    char *path = fetch_str (simulator, PARM1);
 	    char **argv = fetch_argv (simulator, PARM2);
-	    RETVAL = execv (path, argv);
+	    RETVAL = execv (path, (void *)argv);
 	    free (path);
 	    freeargv (argv);
 	    RETERR = errno;
