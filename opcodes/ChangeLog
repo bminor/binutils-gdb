@@ -1,5 +1,15 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* mips-dis.c (mips_cp1_names_mips): New variable.
+	(mips_arch_choices): Use it rather than `mips_cp1_names_numeric'
+	for "r3000", "r4000", "r4010", "vr4100", "vr4111", "vr4120",
+	"r4300", "r4400", "r4600", "r4650", "r5000", "vr5400", "vr5500",
+	"r5900", "r6000", "rm7000", "rm9000", "r8000", "r10000",
+	"r12000", "r14000", "r16000", "mips5", "loongson2e", and
+	"loongson2f".
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* mips-dis.c (print_reg) <OP_REG_COPRO>: Move control register
 	handling code over to...
 	<OP_REG_CONTROL>: ... this new case.

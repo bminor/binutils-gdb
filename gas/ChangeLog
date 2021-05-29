@@ -1,5 +1,17 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/cp1-names-r3900.d: New test.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+	* testsuite/gas/mips/branch-misc-3.d: Update disassembly
+	according to changes to opcodes.
+	* testsuite/gas/mips/cp1-names-r3000.d: Likewise.
+	* testsuite/gas/mips/cp1-names-r4000.d: Likewise.
+	* testsuite/gas/mips/relax-swap1-mips1.d: Likewise.
+	* testsuite/gas/mips/relax-swap1-mips2.d: Likewise.
+	* testsuite/gas/mips/trunc.d: Likewise.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* testsuite/gas/mips/cp0c.d: New test.
 	* testsuite/gas/mips/cp0m.d: New test.
 	* testsuite/gas/mips/r3900@cp0m.d: New test.
