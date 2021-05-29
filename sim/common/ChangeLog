@@ -1,5 +1,9 @@
 2021-05-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (EXTRA_LIBS): Add $(LIBGNU_EXTRA_LIBS).
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (GNULIB_BUILDDIR): Define.
 	Include $(GNULIB_BUILDDIR)/Makefile.gnulib.inc.
 	(CSEARCH): Add -I../...
