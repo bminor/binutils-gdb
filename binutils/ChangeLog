@@ -1,3 +1,11 @@
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/binutils-all/mips/mips-xpa-virt-1.d: Use `mips:3000'
+	machine for disassembly.
+	* testsuite/binutils-all/mips/mips-xpa-virt-2.d: Likewise.
+	* testsuite/binutils-all/mips/mips-xpa-virt-3.d: Likewise.
+	* testsuite/binutils-all/mips/mips-xpa-virt-4.d: Likewise.
+
 2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27905

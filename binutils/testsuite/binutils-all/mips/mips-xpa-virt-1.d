@@ -1,5 +1,5 @@
 #PROG: objcopy
-#objdump: -d --prefix-addresses --show-raw-insn -M cp0-names=mips32
+#objdump: -d --prefix-addresses --show-raw-insn -m mips:3000 -M cp0-names=mips32
 #name: MIPS XPA and Virtualization ASE instruction disassembly 1
 #source: mips-xpa-virt.s
 
