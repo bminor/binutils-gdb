@@ -1,5 +1,23 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/cp0b.d: New test.
+	* testsuite/gas/mips/cp0bl.d: New test.
+	* testsuite/gas/mips/cp2b.d: New test.
+	* testsuite/gas/mips/micromips@cp2b.d: New test.
+	* testsuite/gas/mips/cp2bl.d: New test.
+	* testsuite/gas/mips/micromips@cp2bl.d: New test.
+	* testsuite/gas/mips/cp3b.d: New test.
+	* testsuite/gas/mips/cp3bl.d: New test.
+	* testsuite/gas/mips/cp0b.s: New test source.
+	* testsuite/gas/mips/cp0bl.s: New test source.
+	* testsuite/gas/mips/cp2b.s: New test source.
+	* testsuite/gas/mips/cp2bl.s: New test source.
+	* testsuite/gas/mips/cp3b.s: New test source.
+	* testsuite/gas/mips/cp3bl.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* testsuite/gas/mips/rfe.d: New test.
 	* testsuite/gas/mips/rfe.s: New test source.
 	* testsuite/gas/mips/mips.exp: Run the new test.
