@@ -126,12 +126,14 @@ set_use_not_cc_complex (SIM_CPU *cpu, INT cc)
   d->cur_cc_complex &= ~(((DI)1) << (cc));
 }
 
+#if 0
 static int
 use_is_cc_complex (SIM_CPU *cpu, INT cc)
 {
   MODEL_FR500_DATA *d = CPU_MODEL_DATA (cpu);
   return d->prev_cc_complex &   (((DI)1) << (cc));
 }
+#endif
 
 void
 fr500_reset_fr_flags (SIM_CPU *cpu, INT fr)

@@ -1,5 +1,21 @@
 2021-05-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* cache.h (frv_cache_unlock): New prototype.
+	* frv-sim.h (frvbf_media_average): Likewise.
+	(frv_queue_data_access_exception_interrupt): Likewise.
+	(frv_queue_division_exception_interrupt): Likewise.
+	(frvbf_check_acc_range): Likewise.
+	(frvbf_check_swap_address): Likewise.
+	(frvbf_*_multiple_*): Rename prototypes to ...
+	(frvbf_*_quad_*): ... these.
+	* profile-fr500.c (use_is_cc_complex): Put #if 0 around.
+	* profile-fr550.c (use_is_ccr_complex): Likewise.
+	* profile.h (frv_ref_SI): New prototype.
+	* registers.h (frv_check_spr_read_access): Likewise.
+	(frv_check_spr_write_access): Likewise.
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* cache.c (non_cache_access): Add parentheses.
 	* memory.c (fr500_check_data_read_address): Likewise.
 	(fr550_check_data_read_address): Likewise.

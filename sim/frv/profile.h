@@ -225,4 +225,6 @@ frv_model_trace_wait_cycles (SIM_CPU *, int, const char *);
 #define REGTYPE_FR   1
 #define REGTYPE_ACC  2
 
+SI frv_ref_SI (SI);
+
 #endif /* PROFILE_H */

@@ -152,12 +152,14 @@ set_use_not_ccr_complex (SIM_CPU *cpu, INT ccr)
   d->cur_ccr_complex &= ~(((SI)1) << (ccr));
 }
 
+#if 0
 static int
 use_is_ccr_complex (SIM_CPU *cpu, INT ccr)
 {
   MODEL_FR550_DATA *d = CPU_MODEL_DATA (cpu);
   return d->prev_ccr_complex & (((SI)1) << (ccr));
 }
+#endif
 
 static void
 set_use_is_acc_mmac (SIM_CPU *cpu, INT acc)
