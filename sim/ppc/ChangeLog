@@ -1,5 +1,10 @@
 2021-05-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac (WERROR_CFLAGS): Add -Wno-format for mingw32 hosts.
+	* configure: Regenerate.
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* emul_generic.c (emul_write_status): Rename errno to err.
 	(emul_write2_status): Likewise.
 	* emul_generic.h (emul_write_status, emul_write2_status): Likewise.

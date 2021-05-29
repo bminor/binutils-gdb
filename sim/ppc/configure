@@ -4778,6 +4778,9 @@ WERROR_CFLAGS=""
 if test "${ERROR_ON_WARNING}" = yes ; then
   WERROR_CFLAGS="-Werror"
 fi
+case "${host}" in
+  *-*-mingw32*) WERROR_CFLAGS="$WERROR_CFLAGS -Wno-format" ;;
+esac
 
 
 # Check whether --enable-sim-warnings was given.
