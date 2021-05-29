@@ -1,5 +1,15 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/micromips.d: Update disassembly according
+	to "dmtc1" entry fix with opcodes.
+	* testsuite/gas/mips/micromips-compact.d: Likewise.
+	* testsuite/gas/mips/micromips-insn32.d: Likewise.
+	* testsuite/gas/mips/micromips-noinsn32.d: Likewise.
+	* testsuite/gas/mips/micromips-trap.d: Likewise.
+	* testsuite/gas/mips/micromips@isa-override-1.d: Likewise.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* config/tc-mips.c (FCSR): New macro.
 	(macro) <M_TRUNCWS, M_TRUNCWD>: Use it in place of RA.
 

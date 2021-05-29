@@ -28,7 +28,7 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 5821 8000 	dsll	at,at,0x10
 [0-9a-f]+ <[^>]*> 5021 89ab 	ori	at,at,0x89ab
 [0-9a-f]+ <[^>]*> 5821 8000 	dsll	at,at,0x10
-[0-9a-f]+ <[^>]*> 5422 2c3b 	dmtc1	at,\$2
+[0-9a-f]+ <[^>]*> 5422 2c3b 	dmtc1	at,\$f2
 [0-9a-f]+ <[^>]*> fc44 0000 	lw	v0,0\(a0\)
 [0-9a-f]+ <[^>]*> fc64 0004 	lw	v1,4\(a0\)
 [0-9a-f]+ <[^>]*> 41a1 89ab 	lui	at,0x89ab
