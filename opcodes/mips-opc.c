@@ -1112,8 +1112,6 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"dmtc1",		"t,G",		0x44a00000, 0xffe007ff, RD_1|WR_2|CM|FP_D,     0,		I3,		0,	SF },
 /* dmfc2 is at the bottom of the table.  */
 /* dmtc2 is at the bottom of the table.  */
-/* dmfc3 is at the bottom of the table.  */
-/* dmtc3 is at the bottom of the table.  */
 {"dmuh",		"d,s,t",	0x000000dc, 0xfc0007ff, WR_1|RD_2|RD_3,		0,		I69,		0,	0 },
 {"dmul",		"d,s,t",	0x0000009c, 0xfc0007ff, WR_1|RD_2|RD_3,		0,		I69,		0,	0 },
 {"dmul",		"d,v,t",	0x70000003, 0xfc0007ff, WR_1|RD_2|RD_3|WR_HILO,	0,		IOCT,		0,	0 },
@@ -2161,8 +2159,6 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"bc3tl",		"p",		0x4d030000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"cfc3",		"t,g",		0x4c400000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"ctc3",		"t,g",		0x4cc00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
-{"dmfc3",		"t,G",		0x4c200000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I3,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
-{"dmtc3",		"t,G",		0x4ca00000, 0xffe007ff,	RD_1|WR_C3|WR_CC|CM,	0,		I3,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"mfc3",		"t,G",		0x4c000000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"mfc3",		"t,G,H",	0x4c000000, 0xffe007f8,	WR_1|RD_C3|LC,		0,		I32,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"mtc3",		"t,G",		0x4c800000, 0xffe007ff,	RD_1|WR_C3|WR_CC|CM,	0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },

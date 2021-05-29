@@ -1,5 +1,10 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* mips-opc.c (mips_builtin_opcodes): Remove "dmfc3" and "dmtc3"
+	entries and associated comments.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* mips-opc.c (mips_builtin_opcodes): Move the "rfe" entry ahead
 	of "c0".
 
