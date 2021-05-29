@@ -211,12 +211,12 @@ non_cache_access (FRV_CACHE *cache, USI address)
     case bfd_mach_fr400:
     case bfd_mach_fr450:
       if (address >= 0xff000000
-	  || address >= 0xfe000000 && address <= 0xfeffffff)
+	  || (address >= 0xfe000000 && address <= 0xfeffffff))
 	return 1; /* non-cache access */
       break;
     case bfd_mach_fr550:
       if (address >= 0xff000000
-	  || address >= 0xfeff0000 && address <= 0xfeffffff)
+	  || (address >= 0xfeff0000 && address <= 0xfeffffff))
 	return 1; /* non-cache access */
       if (cache == CPU_INSN_CACHE (current_cpu))
 	{
@@ -228,7 +228,7 @@ non_cache_access (FRV_CACHE *cache, USI address)
       break;
     default:
       if (address >= 0xff000000
-	  || address >= 0xfeff0000 && address <= 0xfeffffff)
+	  || (address >= 0xfeff0000 && address <= 0xfeffffff))
 	return 1; /* non-cache access */
       if (cache == CPU_INSN_CACHE (current_cpu))
 	{

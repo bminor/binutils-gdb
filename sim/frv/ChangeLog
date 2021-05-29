@@ -1,3 +1,16 @@
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* cache.c (non_cache_access): Add parentheses.
+	* memory.c (fr500_check_data_read_address): Likewise.
+	(fr550_check_data_read_address): Likewise.
+	(fr500_check_readwrite_address): Likewise.
+	(fr550_check_readwrite_address): Likewise.
+	(fr500_check_insn_read_address): Likewise.
+	(fr500_check_write_address): Likewise.
+	(fr550_check_write_address): Likewise.
+	* traps.c (frv_mtrap): Likewise.
+	(frvbf_commit): Likewise.
+
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (struct sim_state): Delete.

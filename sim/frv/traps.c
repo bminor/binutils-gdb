@@ -275,7 +275,8 @@ frv_mtrap (SIM_CPU *current_cpu)
 
   /* Check the status of media exceptions in MSR0.  */
   SI msr = GET_MSR (0);
-  if (GET_MSR_AOVF (msr) || GET_MSR_MTT (msr) && STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550)
+  if (GET_MSR_AOVF (msr)
+      || (GET_MSR_MTT (msr) && STATE_ARCHITECTURE (sd)->mach != bfd_mach_fr550))
     frv_queue_program_interrupt (current_cpu, FRV_MP_EXCEPTION);
 }
 
@@ -922,8 +923,8 @@ frvbf_commit (SIM_CPU *current_cpu, SI target_index, BI is_float)
     NE_flag = GET_NE_FLAG (NE_flags, target_index);
   else
     {
-      NE_flag =
-	hi_available && NE_flags[0] != 0 || lo_available && NE_flags[1] != 0;
+      NE_flag = (hi_available && NE_flags[0] != 0)
+		|| (lo_available && NE_flags[1] != 0);
     }
 
   /* Always clear the appropriate NE flags.  */

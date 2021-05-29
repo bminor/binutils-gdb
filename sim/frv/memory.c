@@ -51,8 +51,8 @@ fr500_check_data_read_address (SIM_CPU *current_cpu, SI address, int align_mask)
       address &= ~align_mask;
     }
 
-  if ((USI)address >= 0xfeff0600 && (USI)address <= 0xfeff7fff
-      || (USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff)
+  if (((USI)address >= 0xfeff0600 && (USI)address <= 0xfeff7fff)
+      || ((USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff))
     frv_queue_data_access_error_interrupt (current_cpu, address);
 
   return address;
@@ -61,7 +61,7 @@ fr500_check_data_read_address (SIM_CPU *current_cpu, SI address, int align_mask)
 static SI
 fr550_check_data_read_address (SIM_CPU *current_cpu, SI address, int align_mask)
 {
-  if ((USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff
+  if (((USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff)
       || (align_mask > 0x3
 	  && ((USI)address >= 0xfeff0000 && (USI)address <= 0xfeffffff)))
     frv_queue_data_access_error_interrupt (current_cpu, address);
@@ -118,10 +118,10 @@ fr400_check_readwrite_address (SIM_CPU *current_cpu, SI address, int align_mask)
 static SI
 fr500_check_readwrite_address (SIM_CPU *current_cpu, SI address, int align_mask)
 {
-  if ((USI)address >= 0xfe000000 && (USI)address <= 0xfe003fff
-      || (USI)address >= 0xfe004000 && (USI)address <= 0xfe3fffff
-      || (USI)address >= 0xfe400000 && (USI)address <= 0xfe403fff
-      || (USI)address >= 0xfe404000 && (USI)address <= 0xfe7fffff)
+  if (((USI)address >= 0xfe000000 && (USI)address <= 0xfe003fff)
+      || ((USI)address >= 0xfe004000 && (USI)address <= 0xfe3fffff)
+      || ((USI)address >= 0xfe400000 && (USI)address <= 0xfe403fff)
+      || ((USI)address >= 0xfe404000 && (USI)address <= 0xfe7fffff))
     frv_queue_data_access_exception_interrupt (current_cpu);
 
   return address;
@@ -132,14 +132,14 @@ fr550_check_readwrite_address (SIM_CPU *current_cpu, SI address, int align_mask)
 {
   /* No alignment restrictions on fr550 */
 
-  if ((USI)address >= 0xfe000000 && (USI)address <= 0xfe3fffff
-      || (USI)address >= 0xfe408000 && (USI)address <= 0xfe7fffff)
+  if (((USI)address >= 0xfe000000 && (USI)address <= 0xfe3fffff)
+      || ((USI)address >= 0xfe408000 && (USI)address <= 0xfe7fffff))
     frv_queue_data_access_exception_interrupt (current_cpu);
   else
     {
       USI hsr0 = GET_HSR0 ();
       if (! GET_HSR0_RME (hsr0)
-	  && (USI)address >= 0xfe400000 && (USI)address <= 0xfe407fff)
+	  && ((USI)address >= 0xfe400000 && (USI)address <= 0xfe407fff))
 	frv_queue_data_access_exception_interrupt (current_cpu);
     }
 
@@ -199,18 +199,18 @@ fr500_check_insn_read_address (SIM_CPU *current_cpu, PCADDR address,
       address &= ~align_mask;
     }
 
-  if ((USI)address >= 0xfeff0600 && (USI)address <= 0xfeff7fff
-      || (USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff)
+  if (((USI)address >= 0xfeff0600 && (USI)address <= 0xfeff7fff)
+      || ((USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff))
     frv_queue_instruction_access_error_interrupt (current_cpu);
-  else if ((USI)address >= 0xfe004000 && (USI)address <= 0xfe3fffff
-	   || (USI)address >= 0xfe400000 && (USI)address <= 0xfe403fff
-	   || (USI)address >= 0xfe404000 && (USI)address <= 0xfe7fffff)
+  else if (((USI)address >= 0xfe004000 && (USI)address <= 0xfe3fffff)
+	   || ((USI)address >= 0xfe400000 && (USI)address <= 0xfe403fff)
+	   || ((USI)address >= 0xfe404000 && (USI)address <= 0xfe7fffff))
     frv_queue_instruction_access_exception_interrupt (current_cpu);
   else
     {
       USI hsr0 = GET_HSR0 ();
       if (! GET_HSR0_RME (hsr0)
-	  && (USI)address >= 0xfe000000 && (USI)address <= 0xfe003fff)
+	  && ((USI)address >= 0xfe000000 && (USI)address <= 0xfe003fff))
 	frv_queue_instruction_access_exception_interrupt (current_cpu);
     }
 
@@ -704,8 +704,8 @@ fr500_check_write_address (SIM_CPU *current_cpu, SI address, int align_mask)
 	item->slot = frv_interrupt_state.slot;
       address &= ~align_mask;
     }
-  if (address >= 0xfeff0600 && address <= 0xfeff7fff
-      || address >= 0xfe800000 && address <= 0xfefeffff)
+  if ((address >= 0xfeff0600 && address <= 0xfeff7fff)
+      || (address >= 0xfe800000 && address <= 0xfefeffff))
     frv_queue_program_interrupt (current_cpu, FRV_DATA_STORE_ERROR);
 
   return address;
@@ -714,7 +714,7 @@ fr500_check_write_address (SIM_CPU *current_cpu, SI address, int align_mask)
 static SI
 fr550_check_write_address (SIM_CPU *current_cpu, SI address, int align_mask)
 {
-  if ((USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff
+  if (((USI)address >= 0xfe800000 && (USI)address <= 0xfefeffff)
       || (align_mask > 0x3
 	  && ((USI)address >= 0xfeff0000 && (USI)address <= 0xfeffffff)))
     frv_queue_program_interrupt (current_cpu, FRV_DATA_STORE_ERROR);
