@@ -90,11 +90,14 @@ gdb_test_multiple "mt print objfiles ${testfile}" $test {
     -re "debug_names.*${gdb_prompt} $" {
 	set binfile_with_index $binfile
     }
-    -re "Psymtabs.*${gdb_prompt} $" {
+    -re "(Psymtabs|Cooked).*${gdb_prompt} $" {
 	set binfile_with_index [local_add_gdb_index $binfile]
 	if { ${binfile_with_index} == "" } {
 	    return -1
 	}
+    }
+    -re ".*${gdb_prompt} $" {
+	fail "unrecognized symbol reader"
     }
 }
 
