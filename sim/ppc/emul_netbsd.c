@@ -98,10 +98,6 @@ extern int getdirentries(int fd, char *buf, int nbytes, long *basep);
 #undef HAVE_GETDIRENTRIES
 #endif
 
-#if (BSD < 199306) /* here BSD as just a bug */
-extern int errno;
-#endif
-
 #ifndef STATIC_INLINE_EMUL_NETBSD
 #define STATIC_INLINE_EMUL_NETBSD STATIC_INLINE
 #endif

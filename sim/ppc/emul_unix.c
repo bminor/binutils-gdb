@@ -124,10 +124,6 @@ int getrusage();
 #include <stdlib.h>
 #include <time.h>
 
-#if defined(BSD) && !defined(errno) && (BSD < 199306)	/* here BSD as just a bug */
-extern int errno;
-#endif
-
 #ifndef STATIC_INLINE_EMUL_UNIX
 #define STATIC_INLINE_EMUL_UNIX STATIC_INLINE
 #endif

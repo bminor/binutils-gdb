@@ -120,10 +120,10 @@ emul_read_string(char *dest,
 INLINE_EMUL_GENERIC void
 emul_write_status(cpu *processor,
 		  int status,
-		  int errno)
+		  int err)
 {
-  if (status == -1 && errno != 0) {
-    cpu_registers(processor)->gpr[3] = errno;
+  if (status == -1 && err != 0) {
+    cpu_registers(processor)->gpr[3] = err;
     CR_SET(0, cr_i_summary_overflow);
   }
   else {
@@ -137,10 +137,10 @@ INLINE_EMUL_GENERIC void
 emul_write2_status(cpu *processor,
 		   int status1,
 		   int status2,
-		   int errno)
+		   int err)
 {
-  if (status1 == -1 && errno != 0) {
-    cpu_registers(processor)->gpr[3] = errno;
+  if (status1 == -1 && err != 0) {
+    cpu_registers(processor)->gpr[3] = err;
     CR_SET(0, cr_i_summary_overflow);
   }
   else {

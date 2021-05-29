@@ -1,5 +1,13 @@
 2021-05-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* emul_generic.c (emul_write_status): Rename errno to err.
+	(emul_write2_status): Likewise.
+	* emul_generic.h (emul_write_status, emul_write2_status): Likewise.
+	* emul_netbsd.c (errno): Delete.
+	* emul_unix.c (errno): Delete.
+
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (INCLUDES): Add -I../..
 
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
