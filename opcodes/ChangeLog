@@ -1,5 +1,15 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* mips-opc.c (mips_builtin_opcodes): Update exclusion list for
+	"ldc2", "ldc3", "lwc0", "lwc2", "lwc3", "sdc2", "sdc3", "swc0",
+	"swc2", "swc3", "cfc0", "ctc0", "bc2f", "bc2fl", "bc2t",
+	"bc2tl", "cfc2", "ctc2", "dmfc2", "dmtc2", "mfc2", "mtc2",
+	"bc3f", "bc3fl", "bc3t", "bc3tl", "cfc3", "ctc3", "mfc3",
+	"mtc3", "bc0f", "bc0fl", "bc0t", "bc0tl", "rfe", "c2", "c3",
+	"cop2", and "cop3" entries.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* mips-opc.c (mips_builtin_opcodes): Remove "dmfc3" and "dmtc3"
 	entries and associated comments.
 

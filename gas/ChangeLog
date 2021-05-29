@@ -1,5 +1,11 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/mips32@isa-override-1.d: Update for LDC3
+	instruction removal.
+	* testsuite/gas/mips/mips32r2@isa-override-1.d: Likewise.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* testsuite/gas/mips/cp0b.d: New test.
 	* testsuite/gas/mips/cp0bl.d: New test.
 	* testsuite/gas/mips/cp2b.d: New test.
