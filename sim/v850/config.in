@@ -13,9 +13,6 @@
 /* Define to 1 if you have the `chmod' function. */
 #undef HAVE_CHMOD
 
-/* Define to 1 if you have the `chown' function. */
-#undef HAVE_CHOWN
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 

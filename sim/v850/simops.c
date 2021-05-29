@@ -1859,7 +1859,6 @@ OP_10007E0 (void)
 	  break;
 #endif
 
-#ifdef HAVE_CHOWN
 #ifdef TARGET_SYS_chown
 	case TARGET_SYS_chown:
 	  {
@@ -1869,7 +1868,6 @@ OP_10007E0 (void)
 	    RETERR = errno;
 	  }
 	  break;
-#endif
 #endif
 
 #if HAVE_CHMOD

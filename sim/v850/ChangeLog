@@ -1,3 +1,9 @@
+2021-06-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CHECK_FUNCS_ONCE): Remove chown.
+	* simops.c (OP_10007E0): Remove HAVE_CHOWN check.
+	* config.in, configure: Regenerate.
+
 2021-05-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* simops.c (OP_10007E0): Add (void*) casts to argv & envp.
