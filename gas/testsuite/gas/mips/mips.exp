@@ -1334,13 +1334,13 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "cp0sel-names-sb1"
 
     run_dump_test_arches "cp0c"		[mips_arch_list_matching mips1 \
-					    !mips32 !micromips]
+					    !micromips]
     run_dump_test_arches "cp0b"		[mips_arch_list_matching mips1 \
-					    !mips4 !mips32 !micromips]
-    run_dump_test_arches "cp0bl"	[mips_arch_list_matching mips2 \
-					    !mips4 !mips32 !micromips]
+					    !micromips]
+    run_dump_test_arches "cp0bl"	[mips_arch_list_matching mips1 \
+					    !micromips]
     run_dump_test_arches "cp0m"		[mips_arch_list_matching mips1 \
-					    !mips2 !micromips]
+					    !micromips]
 
     run_dump_test_arches "rfe"		[mips_arch_list_matching mips1 \
 					    !mips3 !mips32 !micromips]
@@ -1358,29 +1358,27 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "cp1-names-mips64r2"
     run_dump_test "cp1-names-sb1"
 
+    # The VR5400 and R5900 have their own sets of COP2 instructions, so
+    # exclude them from generic testing.  Likewise the Octeon and DMFC2/DMTC2.
     run_dump_test_arches "cp2"		[mips_arch_list_matching mips1 \
+					    !vr5400 !r5900]
+    run_dump_test_arches "cp2-64"	[mips_arch_list_matching mips1 \
 					    !vr5400 !r5900 !octeon]
-    run_dump_test_arches "cp2-64"	[mips_arch_list_matching mips3 \
-					    !vr5400 !r5900 !octeon]
-    run_dump_test_arches "cp2b"		[mips_arch_list_matching mips1 \
-					    !mips32r6 !vr5400 !r5900 !octeon]
-    run_dump_test_arches "cp2bl"	[mips_arch_list_matching mips2 \
-					    !mips32r6 !vr5400 !r5900 !octeon]
-    run_dump_test_arches "cp2m"		[mips_arch_list_matching mips1 \
-					    !vr5400 !r5900 !octeon]
-    run_dump_test_arches "cp2d"		[mips_arch_list_matching mips2 \
-					    !vr5400 !r5900 !octeon]
+    run_dump_test_arches "cp2b"		[mips_arch_list_matching mips1]
+    run_dump_test_arches "cp2bl"	[mips_arch_list_matching mips1]
+    run_dump_test_arches "cp2m"		[mips_arch_list_matching mips1]
+    run_dump_test_arches "cp2d"		[mips_arch_list_matching mips1]
 
     run_dump_test_arches "cp3"		[mips_arch_list_matching mips1 \
-					    !mips3 !mips32r2 !micromips]
+					    !micromips]
     run_dump_test_arches "cp3b"		[mips_arch_list_matching mips1 \
-					    !mips3 !mips32r2 !micromips]
-    run_dump_test_arches "cp3bl"	[mips_arch_list_matching mips2 \
-					    !mips3 !mips32r2 !micromips]
+					    !micromips]
+    run_dump_test_arches "cp3bl"	[mips_arch_list_matching mips1 \
+					    !micromips]
     run_dump_test_arches "cp3m"		[mips_arch_list_matching mips1 \
-					    !mips3 !mips32 !micromips]
-    run_dump_test_arches "cp3d"		[mips_arch_list_matching mips2 \
-					    !mips3 !mips32 !micromips]
+					    !micromips]
+    run_dump_test_arches "cp3d"		[mips_arch_list_matching mips1 \
+					    !micromips]
 
     run_dump_test "hwr-names-numeric"
     run_dump_test "hwr-names-mips32r2"

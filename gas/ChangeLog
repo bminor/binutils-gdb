@@ -1,5 +1,104 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/mips.exp: Run coprocessor tests across all
+	ISAs.
+	* testsuite/gas/mips/cp0b.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp0bl.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp0c.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp0m.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3b.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3bl.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3m.d: Update for ISA exclusions.
+	* testsuite/gas/mips/cp3d.d: Update for ISA exclusions.
+	* testsuite/gas/mips/mips1@cp0b.d: New test.
+	* testsuite/gas/mips/mips2@cp0b.d: New test.
+	* testsuite/gas/mips/mips3@cp0b.d: New test.
+	* testsuite/gas/mips/r3000@cp0b.d: New test.
+	* testsuite/gas/mips/r3900@cp0b.d: New test.
+	* testsuite/gas/mips/r4000@cp0b.d: New test.
+	* testsuite/gas/mips/r5900@cp0b.d: New test.
+	* testsuite/gas/mips/mips2@cp0bl.d: New test.
+	* testsuite/gas/mips/mips3@cp0bl.d: New test.
+	* testsuite/gas/mips/r3900@cp0bl.d: New test.
+	* testsuite/gas/mips/r4000@cp0bl.d: New test.
+	* testsuite/gas/mips/r5900@cp0bl.d: New test.
+	* testsuite/gas/mips/mips1@cp0c.d: New test.
+	* testsuite/gas/mips/mips2@cp0c.d: New test.
+	* testsuite/gas/mips/mips3@cp0c.d: New test.
+	* testsuite/gas/mips/mips4@cp0c.d: New test.
+	* testsuite/gas/mips/mips5@cp0c.d: New test.
+	* testsuite/gas/mips/r3000@cp0c.d: New test.
+	* testsuite/gas/mips/r3900@cp0c.d: New test.
+	* testsuite/gas/mips/r4000@cp0c.d: New test.
+	* testsuite/gas/mips/vr5400@cp0c.d: New test.
+	* testsuite/gas/mips/r5900@cp0c.d: New test.
+	* testsuite/gas/mips/mips1@cp0m.d: New test.
+	* testsuite/gas/mips/r3000@cp0m.d: New test.
+	* testsuite/gas/mips/octeon@cp2.d: New test.
+	* testsuite/gas/mips/mipsr6@cp2b.d: New test.
+	* testsuite/gas/mips/vr5400@cp2b.d: New test.
+	* testsuite/gas/mips/octeon@cp2b.d: New test.
+	* testsuite/gas/mips/mips1@cp2bl.d: New test.
+	* testsuite/gas/mips/mipsr6@cp2bl.d: New test.
+	* testsuite/gas/mips/r3000@cp2bl.d: New test.
+	* testsuite/gas/mips/vr5400@cp2bl.d: New test.
+	* testsuite/gas/mips/octeon@cp2bl.d: New test.
+	* testsuite/gas/mips/vr5400@cp2m.d: New test.
+	* testsuite/gas/mips/r5900@cp2m.d: New test.
+	* testsuite/gas/mips/octeon@cp2m.d: New test.
+	* testsuite/gas/mips/mips1@cp2d.d: New test.
+	* testsuite/gas/mips/r3000@cp2d.d: New test.
+	* testsuite/gas/mips/r3900@cp2d.d: New test.
+	* testsuite/gas/mips/vr5400@cp2d.d: New test.
+	* testsuite/gas/mips/r5900@cp2d.d: New test.
+	* testsuite/gas/mips/octeon@cp2d.d: New test.
+	* testsuite/gas/mips/mips1@cp2-64.d: New test.
+	* testsuite/gas/mips/mips2@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32r2@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32r3@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32r5@cp2-64.d: New test.
+	* testsuite/gas/mips/mips32r6@cp2-64.d: New test.
+	* testsuite/gas/mips/r3000@cp2-64.d: New test.
+	* testsuite/gas/mips/r3900@cp2-64.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@cp2-64.d: New test.
+	* testsuite/gas/mips/mips1@cp3.d: New test.
+	* testsuite/gas/mips/mips2@cp3.d: New test.
+	* testsuite/gas/mips/mips32@cp3.d: New test.
+	* testsuite/gas/mips/r3000@cp3.d: New test.
+	* testsuite/gas/mips/r3900@cp3.d: New test.
+	* testsuite/gas/mips/mips1@cp3b.d: New test.
+	* testsuite/gas/mips/mips2@cp3b.d: New test.
+	* testsuite/gas/mips/mips32@cp3b.d: New test.
+	* testsuite/gas/mips/r3000@cp3b.d: New test.
+	* testsuite/gas/mips/r3900@cp3b.d: New test.
+	* testsuite/gas/mips/mips2@cp3bl.d: New test.
+	* testsuite/gas/mips/mips32@cp3bl.d: New test.
+	* testsuite/gas/mips/r3900@cp3bl.d: New test.
+	* testsuite/gas/mips/mips1@cp3m.d: New test.
+	* testsuite/gas/mips/mips2@cp3m.d: New test.
+	* testsuite/gas/mips/r3000@cp3m.d: New test.
+	* testsuite/gas/mips/r3900@cp3m.d: New test.
+ 	* testsuite/gas/mips/mips2@cp3d.d: New test.
+	* testsuite/gas/mips/cp0b.l: New test stderr output.
+	* testsuite/gas/mips/cp0bl.l: New test stderr output.
+	* testsuite/gas/mips/cp0c.l: New test stderr output.
+	* testsuite/gas/mips/cp0m.l: New test stderr output.
+	* testsuite/gas/mips/cp2.l: New test stderr output.
+	* testsuite/gas/mips/cp2-64.l: New test stderr output.
+	* testsuite/gas/mips/cp2b.l: New test stderr output.
+	* testsuite/gas/mips/cp2bl.l: New test stderr output.
+	* testsuite/gas/mips/cp2m.l: New test stderr output.
+	* testsuite/gas/mips/cp2d.l: New test stderr output.
+	* testsuite/gas/mips/cp3.l: New test stderr output.
+	* testsuite/gas/mips/cp3b.l: New test stderr output.
+	* testsuite/gas/mips/cp3bl.l: New test stderr output.
+	* testsuite/gas/mips/cp3m.l: New test stderr output.
+	* testsuite/gas/mips/cp3d.l: New test stderr output.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* testsuite/gas/mips/mips32@isa-override-1.d: Update for LDC3
 	instruction removal.
 	* testsuite/gas/mips/mips32r2@isa-override-1.d: Likewise.
