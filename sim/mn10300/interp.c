@@ -464,6 +464,9 @@ mn10300_cpu_exception_resume(SIM_DESC sd, sim_cpu* cpu, int exception)
 
   if(exception == 0 && State.exc_suspended > 0)
     {
+#ifndef SIGTRAP
+# define SIGTRAP 5
+#endif
       if(State.exc_suspended != SIGTRAP) /* warn not for breakpoints */
          sim_io_eprintf(sd, "Warning, resuming but ignoring pending exception signal (%d)\n",
   		       State.exc_suspended); 

@@ -1,3 +1,7 @@
+2021-05-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c [!SIGTRAP] (SIGTRAP): Define to 5.
+
 2021-05-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-main.h (SIM_HAVE_COMMON_SIM_STATE): Delete.
