@@ -1,5 +1,11 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/rfe.d: New test.
+	* testsuite/gas/mips/rfe.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new test.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* testsuite/gas/mips/cp1-names-r3900.d: New test.
 	* testsuite/gas/mips/mips.exp: Run the new test.
 	* testsuite/gas/mips/branch-misc-3.d: Update disassembly

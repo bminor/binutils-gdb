@@ -3399,6 +3399,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ginvi",		"s",		0x7c00003d, 0xfc1fffff, RD_1,			0,		0,		GINV,	0 },
 {"ginvt",		"s,+\\",	0x7c0000bd, 0xfc1ffcff, RD_1,			0,		0,		GINV,	0 },
 
+/* RFE conflicts with the new Virt spec instruction tlbgp. */
+{"rfe",			"",		0x42000010, 0xffffffff,	0,			0,		I1|T3,		0,	0 },
+
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the
    user to put in nops as necessary.  These are at the end so that the
@@ -3411,8 +3414,6 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"cop1",		"C",		0,    (int) M_COP1,	INSN_MACRO,		INSN2_M_FP_S,	I1,		0,	0 },
 {"cop2",		"C",		0,    (int) M_COP2,	INSN_MACRO,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
 {"cop3",		"C",		0,    (int) M_COP3,	INSN_MACRO,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
-/* RFE conflicts with the new Virt spec instruction tlbgp. */
-{"rfe",			"",		0x42000010, 0xffffffff,	0,			0,		I1|T3,		0,	0 },
 };
 
 #define MIPS_NUM_OPCODES \

@@ -1,5 +1,10 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* mips-opc.c (mips_builtin_opcodes): Move the "rfe" entry ahead
+	of "c0".
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* mips-dis.c (mips_cp1_names_mips): New variable.
 	(mips_arch_choices): Use it rather than `mips_cp1_names_numeric'
 	for "r3000", "r4000", "r4010", "vr4100", "vr4111", "vr4120",
