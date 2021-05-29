@@ -214,7 +214,7 @@ do { \
 
 #define SET_RC(x) \
   (saved_state.asregs.cregs.named.sr \
-   = saved_state.asregs.cregs.named.sr & 0xf000ffff | ((x) & 0xfff) << 16)
+   = (saved_state.asregs.cregs.named.sr & 0xf000ffff) | ((x) & 0xfff) << 16)
 
 /* Manipulate FPSCR */
 
@@ -2345,7 +2345,7 @@ SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	  struct bfd *abfd, char * const *argv)
 {
-  char **p;
+  char * const *p;
   int i;
   union
     {
