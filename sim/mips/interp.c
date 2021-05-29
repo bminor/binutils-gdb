@@ -543,8 +543,12 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       {
 	/* FIXME: poking at dv-sockser internals, use tcp backend if
 	 --sockser_addr option was given.*/
+#ifdef HAVE_DV_SOCKSER
 	extern char* sockser_addr;
-	if(sockser_addr == NULL)
+#else
+# define sockser_addr NULL
+#endif
+	if (sockser_addr == NULL)
 	  sim_hw_parse (sd, "/tx3904sio@0xfffff300/backend stdio");
 	else
 	  sim_hw_parse (sd, "/tx3904sio@0xfffff300/backend tcp");
