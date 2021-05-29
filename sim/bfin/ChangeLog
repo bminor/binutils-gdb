@@ -1,3 +1,7 @@
+2021-05-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_otp.c (bfin_otp_write_page): Shift data1 & data3 by 32-bits.
+
 2021-05-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* dv-bfin_otp.c (bfin_otp_write_page): Fix args to
