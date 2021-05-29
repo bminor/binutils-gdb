@@ -1,3 +1,11 @@
+2021-06-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add chown.
+	* aclocal.m4, config.in, configure, Makefile.in, import/Makefile.am,
+	import/Makefile.in, import/m4/gnulib-cache.m4,
+	import/m4/gnulib-comp.m4: Regenerate.
+	* import/chown.c, import/fchown-stub.c, import/m4/chown.m4: New files.
+
 2021-05-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add ffs.

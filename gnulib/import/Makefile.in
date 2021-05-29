@@ -49,6 +49,7 @@
 #  --no-vc-files \
 #  alloca \
 #  canonicalize-lgpl \
+#  chown \
 #  count-one-bits \
 #  dirent \
 #  dirfd \
@@ -182,6 +183,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/builtin-expect.m4 \
 	$(top_srcdir)/import/m4/canonicalize.m4 \
 	$(top_srcdir)/import/m4/chdir-long.m4 \
+	$(top_srcdir)/import/m4/chown.m4 \
 	$(top_srcdir)/import/m4/clock_time.m4 \
 	$(top_srcdir)/import/m4/close.m4 \
 	$(top_srcdir)/import/m4/closedir.m4 \
@@ -1787,12 +1789,12 @@ noinst_LTLIBRARIES =
 # No GNU Make output.
 EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	assure.h attribute.h basename-lgpl.h btowc.c \
-	canonicalize-lgpl.c chdir-long.c chdir-long.h cloexec.h \
-	close.c closedir.c dirent-private.h count-one-bits.h \
-	ctype.in.h dirent.in.h dirfd.c dirname.h dup.c dup2.c \
-	eloop-threshold.h errno.in.h error.c error.h exitfail.h \
-	fchdir.c fcntl.c fcntl.in.h fd-hook.h fdopendir.c ffs.c \
-	filename.h filenamecat.h flexmember.h float.c float.in.h \
+	canonicalize-lgpl.c chdir-long.c chdir-long.h chown.c \
+	fchown-stub.c cloexec.h close.c closedir.c dirent-private.h \
+	count-one-bits.h ctype.in.h dirent.in.h dirfd.c dirname.h \
+	dup.c dup2.c eloop-threshold.h errno.in.h error.c error.h \
+	exitfail.h fchdir.c fcntl.c fcntl.in.h fd-hook.h fdopendir.c \
+	ffs.c filename.h filenamecat.h flexmember.h float.c float.in.h \
 	itold.c fnmatch.c fnmatch_loop.c fnmatch.c fnmatch.in.h \
 	fpucw.h free.c frexp.c frexp.c frexpl.c fstat.c stat-w32.c \
 	stat-w32.h at-func.c fstatat.c \
@@ -1876,13 +1878,14 @@ libgnu_a_SOURCES = openat-priv.h openat-proc.c basename-lgpl.c \
 libgnu_a_LIBADD = $(gl_LIBOBJS) @ALLOCA@
 libgnu_a_DEPENDENCIES = $(gl_LIBOBJS) @ALLOCA@
 EXTRA_libgnu_a_SOURCES = alloca.c btowc.c canonicalize-lgpl.c \
-	chdir-long.c close.c closedir.c dirfd.c dup.c dup2.c error.c \
-	fchdir.c fcntl.c fdopendir.c ffs.c float.c itold.c fnmatch.c \
-	fnmatch_loop.c fnmatch.c free.c frexp.c frexp.c frexpl.c \
-	fstat.c stat-w32.c at-func.c fstatat.c getcwd.c getcwd-lgpl.c \
-	getdelim.c getdtablesize.c getline.c getlogin_r.c getrandom.c \
-	gettimeofday.c glob.c glob_pattern_p.c globfree.c inet_ntop.c \
-	isblank.c isnan.c isnand.c isnan.c isnanl.c lstat.c malloc.c \
+	chdir-long.c chown.c fchown-stub.c close.c closedir.c dirfd.c \
+	dup.c dup2.c error.c fchdir.c fcntl.c fdopendir.c ffs.c \
+	float.c itold.c fnmatch.c fnmatch_loop.c fnmatch.c free.c \
+	frexp.c frexp.c frexpl.c fstat.c stat-w32.c at-func.c \
+	fstatat.c getcwd.c getcwd-lgpl.c getdelim.c getdtablesize.c \
+	getline.c getlogin_r.c getrandom.c gettimeofday.c glob.c \
+	glob_pattern_p.c globfree.c inet_ntop.c isblank.c isnan.c \
+	isnand.c isnan.c isnanl.c lstat.c malloc.c \
 	lc-charset-dispatch.c mbrtowc.c mbtowc-lock.c mbsinit.c \
 	mbsrtowcs-state.c mbsrtowcs.c mbtowc.c memchr.c memmem.c \
 	memmem.c mempcpy.c memrchr.c mkdir.c mkdtemp.c mkostemp.c \
@@ -2010,6 +2013,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/btowc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/canonicalize-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chdir-long.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chown.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloexec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/close.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/closedir.Po@am__quote@
@@ -2023,6 +2027,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exitfail.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fchdir.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fchown-stub.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fcntl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fd-hook.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fd-safer-flag.Po@am__quote@

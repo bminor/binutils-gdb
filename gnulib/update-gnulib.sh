@@ -32,6 +32,7 @@
 IMPORTED_GNULIB_MODULES="\
     alloca \
     canonicalize-lgpl \
+    chown \
     count-one-bits \
     dirent \
     dirfd \

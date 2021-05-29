@@ -18,6 +18,19 @@
 /* Define to the number of bits in type 'wint_t'. */
 #undef BITSIZEOF_WINT_T
 
+/* Define to 1 if chown fails to change ctime when at least one argument was
+   not -1. */
+#undef CHOWN_CHANGE_TIME_BUG
+
+/* Define if chown is not POSIX compliant regarding IDs of -1. */
+#undef CHOWN_FAILS_TO_HONOR_ID_OF_NEGATIVE_ONE
+
+/* Define if chown modifies symlinks. */
+#undef CHOWN_MODIFIES_SYMLINK
+
+/* Define to 1 if chown mishandles trailing slash. */
+#undef CHOWN_TRAILING_SLASH_BUG
+
 /* Define to 1 if using 'alloca.c'. */
 #undef C_ALLOCA
 
@@ -139,6 +152,9 @@
 
 /* Define to 1 when the gnulib module chdir should be tested. */
 #undef GNULIB_TEST_CHDIR
+
+/* Define to 1 when the gnulib module chown should be tested. */
+#undef GNULIB_TEST_CHOWN
 
 /* Define to 1 when the gnulib module cloexec should be tested. */
 #undef GNULIB_TEST_CLOEXEC
@@ -355,6 +371,9 @@
 /* Define to 1 if you have the `catgets' function. */
 #undef HAVE_CATGETS
 
+/* Define to 1 if you have the `chown' function. */
+#undef HAVE_CHOWN
+
 /* Define to 1 if you have the `clock_gettime' function. */
 #undef HAVE_CLOCK_GETTIME
 
@@ -520,6 +539,9 @@
 
 /* Define to 1 if you have the `fchdir' function. */
 #undef HAVE_FCHDIR
+
+/* Define to 1 if you have the `fchown' function. */
+#undef HAVE_FCHOWN
 
 /* Define to 1 if you have the `fcntl' function. */
 #undef HAVE_FCNTL

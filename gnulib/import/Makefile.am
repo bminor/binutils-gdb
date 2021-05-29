@@ -35,6 +35,7 @@
 #  --no-vc-files \
 #  alloca \
 #  canonicalize-lgpl \
+#  chown \
 #  count-one-bits \
 #  dirent \
 #  dirfd \
@@ -236,6 +237,15 @@ EXTRA_DIST += chdir-long.c chdir-long.h
 EXTRA_libgnu_a_SOURCES += chdir-long.c
 
 ## end   gnulib module chdir-long
+
+## begin gnulib module chown
+
+
+EXTRA_DIST += chown.c fchown-stub.c
+
+EXTRA_libgnu_a_SOURCES += chown.c fchown-stub.c
+
+## end   gnulib module chown
 
 ## begin gnulib module cloexec
 

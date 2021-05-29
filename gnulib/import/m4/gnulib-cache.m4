@@ -40,6 +40,7 @@
 #  --no-vc-files \
 #  alloca \
 #  canonicalize-lgpl \
+#  chown \
 #  count-one-bits \
 #  dirent \
 #  dirfd \
@@ -85,6 +86,7 @@ gl_LOCAL_DIR([])
 gl_MODULES([
   alloca
   canonicalize-lgpl
+  chown
   count-one-bits
   dirent
   dirfd

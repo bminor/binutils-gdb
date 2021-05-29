@@ -57,6 +57,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module canonicalize-lgpl:
   # Code from module chdir:
   # Code from module chdir-long:
+  # Code from module chown:
   # Code from module clock-time:
   # Code from module cloexec:
   # Code from module close:
@@ -268,6 +269,14 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([chdir-long])
     gl_PREREQ_CHDIR_LONG
   fi
+  gl_FUNC_CHOWN
+  if test $HAVE_CHOWN = 0 || test $REPLACE_CHOWN = 1; then
+    AC_LIBOBJ([chown])
+  fi
+  if test $REPLACE_CHOWN = 1 && test $ac_cv_func_fchown = no; then
+    AC_LIBOBJ([fchown-stub])
+  fi
+  gl_UNISTD_MODULE_INDICATOR([chown])
   gl_CLOCK_TIME
   gl_MODULE_INDICATOR_FOR_TESTS([cloexec])
   gl_FUNC_CLOSE
@@ -968,6 +977,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/cdefs.h
   lib/chdir-long.c
   lib/chdir-long.h
+  lib/chown.c
   lib/cloexec.c
   lib/cloexec.h
   lib/close.c
@@ -991,6 +1001,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/exitfail.c
   lib/exitfail.h
   lib/fchdir.c
+  lib/fchown-stub.c
   lib/fcntl.c
   lib/fcntl.in.h
   lib/fd-hook.c
@@ -1189,6 +1200,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/builtin-expect.m4
   m4/canonicalize.m4
   m4/chdir-long.m4
+  m4/chown.m4
   m4/clock_time.m4
   m4/close.m4
   m4/closedir.m4
