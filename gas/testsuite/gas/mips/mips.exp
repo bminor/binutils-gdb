@@ -1380,6 +1380,15 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "cp3d"		[mips_arch_list_matching mips1 \
 					    !micromips]
 
+    run_dump_test_arches "c0"		[mips_arch_list_matching mips1 \
+					    !micromips]
+    run_dump_test_arches "c1"		[mips_arch_list_matching mips1 \
+					    !micromips]
+    run_dump_test_arches "c2"		[mips_arch_list_matching mips1 \
+					    !micromips]
+    run_dump_test_arches "c3"		[mips_arch_list_matching mips1 \
+					    !micromips]
+
     run_dump_test "hwr-names-numeric"
     run_dump_test "hwr-names-mips32r2"
     run_dump_test "hwr-names-mips64r2"

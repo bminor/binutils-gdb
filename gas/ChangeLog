@@ -1,5 +1,61 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/c0.d: New test.
+	* testsuite/gas/mips/mips1@c0.d: New test.
+	* testsuite/gas/mips/mips2@c0.d: New test.
+	* testsuite/gas/mips/mips3@c0.d: New test.
+	* testsuite/gas/mips/mips4@c0.d: New test.
+	* testsuite/gas/mips/mips5@c0.d: New test.
+	* testsuite/gas/mips/mips32@c0.d: New test.
+	* testsuite/gas/mips/mips64@c0.d: New test.
+	* testsuite/gas/mips/r3000@c0.d: New test.
+	* testsuite/gas/mips/r3900@c0.d: New test.
+	* testsuite/gas/mips/r4000@c0.d: New test.
+	* testsuite/gas/mips/vr5400@c0.d: New test.
+	* testsuite/gas/mips/r5900@c0.d: New test.
+	* testsuite/gas/mips/sb1@c0.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@c0.d: New test.
+	* testsuite/gas/mips/octeon@c0.d: New test.
+	* testsuite/gas/mips/xlr@c0.d: New test.
+	* testsuite/gas/mips/c1.d: New test.
+	* testsuite/gas/mips/mips1@c1.d: New test.
+	* testsuite/gas/mips/mips2@c1.d: New test.
+	* testsuite/gas/mips/mips3@c1.d: New test.
+	* testsuite/gas/mips/mips4@c1.d: New test.
+	* testsuite/gas/mips/mips5@c1.d: New test.
+	* testsuite/gas/mips/mips32@c1.d: New test.
+	* testsuite/gas/mips/mips64@c1.d: New test.
+	* testsuite/gas/mips/mipsr6@c1.d: New test.
+	* testsuite/gas/mips/r3000@c1.d: New test.
+	* testsuite/gas/mips/r3900@c1.d: New test.
+	* testsuite/gas/mips/r4000@c1.d: New test.
+	* testsuite/gas/mips/vr5400@c1.d: New test.
+	* testsuite/gas/mips/r5900@c1.d: New test.
+	* testsuite/gas/mips/sb1@c1.d: New test.
+	* testsuite/gas/mips/interaptiv-mr2@c1.d: New test.
+	* testsuite/gas/mips/octeon@c1.d: New test.
+	* testsuite/gas/mips/xlr@c1.d: New test.
+	* testsuite/gas/mips/c2.d: New test.
+	* testsuite/gas/mips/vr5400@c2.d: New test.
+	* testsuite/gas/mips/r5900@c2.d: New test.
+	* testsuite/gas/mips/octeon@c2.d: New test.
+	* testsuite/gas/mips/c3.d: New test.
+	* testsuite/gas/mips/mips1@c3.d: New test.
+	* testsuite/gas/mips/mips2@c3.d: New test.
+	* testsuite/gas/mips/mips32@c3.d: New test.
+	* testsuite/gas/mips/r3000@c3.d: New test.
+	* testsuite/gas/mips/r3900@c3.d: New test.
+	* testsuite/gas/mips/c0.l: New test stderr output.
+	* testsuite/gas/mips/c2.l: New test stderr output.
+	* testsuite/gas/mips/c3.l: New test stderr output.
+	* testsuite/gas/mips/c0.s: New test source.
+	* testsuite/gas/mips/c1.s: New test source.
+	* testsuite/gas/mips/c2.s: New test source.
+	* testsuite/gas/mips/c3.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* testsuite/gas/mips/mips.exp: Run RFE test across all ISAs.
 	* testsuite/gas/mips/rfe.d: Update for ISA exclusions.
 	* testsuite/gas/mips/mips1@rfe.d: New test.
