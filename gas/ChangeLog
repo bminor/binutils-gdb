@@ -1,5 +1,15 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/mips.exp: Run RFE test across all ISAs.
+	* testsuite/gas/mips/rfe.d: Update for ISA exclusions.
+	* testsuite/gas/mips/mips1@rfe.d: New test.
+	* testsuite/gas/mips/mips2@rfe.d: New test.
+	* testsuite/gas/mips/r3000@rfe.d: New test.
+	* testsuite/gas/mips/r3900@rfe.d: New test.
+	* testsuite/gas/mips/rfe.l: New test stderr output.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* testsuite/gas/mips/mips.exp: Run coprocessor tests across all
 	ISAs.
 	* testsuite/gas/mips/cp0b.d: Update for ISA exclusions.

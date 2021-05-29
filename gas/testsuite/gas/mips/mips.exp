@@ -1343,7 +1343,7 @@ if { [istarget mips*-*-vxworks*] } {
 					    !micromips]
 
     run_dump_test_arches "rfe"		[mips_arch_list_matching mips1 \
-					    !mips3 !mips32 !micromips]
+					    !micromips]
 
     run_dump_test "cp1-names-numeric"
     run_dump_test "cp1-names-r3000"
