@@ -58,7 +58,7 @@ static struct sim_state the_minisim = {
   "This is the sole m32c minisim instance.  See libsim.a's global variables."
 };
 
-static int open;
+static int is_open;
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind,
@@ -66,7 +66,7 @@ sim_open (SIM_OPEN_KIND kind,
 	  struct bfd *abfd, char * const *argv)
 {
   setbuf (stdout, 0);
-  if (open)
+  if (is_open)
     fprintf (stderr, "m32c minisim: re-opened sim\n");
 
   /* The 'run' interface doesn't use this function, so we don't care
@@ -88,7 +88,7 @@ sim_open (SIM_OPEN_KIND kind,
   init_mem ();
   init_regs ();
 
-  open = 1;
+  is_open = 1;
   return &the_minisim;
 }
 
@@ -107,7 +107,7 @@ sim_close (SIM_DESC sd, int quitting)
   /* Not much to do.  At least free up our memory.  */
   init_mem ();
 
-  open = 0;
+  is_open = 0;
 }
 
 static bfd *

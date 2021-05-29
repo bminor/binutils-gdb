@@ -1,3 +1,9 @@
+2021-05-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb-if.c (open): Rename to ...
+	(is_open): ... this.
+	(sim_open, sim_close): Rename open to is_open.
+
 2021-05-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* int.c, misc.c, opc2c.c, reg.c, srcdest.c: Include defs.h.
