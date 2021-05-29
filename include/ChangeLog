@@ -1,5 +1,11 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* opcode/mips.h (isa_is_member): New inline function, factored
+	out from...
+	(opcode_is_member): ... here.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* opcode/mips.h: Document `g' and `y' operand codes.
 	(mips_reg_operand_type): Add OP_REG_CONTROL enumeration
 	constant.

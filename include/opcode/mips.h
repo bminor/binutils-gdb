@@ -1471,6 +1471,26 @@ cpu_is_member (int cpu, unsigned int mask)
     }
 }
 
+/* Return true if the given ISA is included in INSN_* mask MASK.  */
+
+static inline bool
+isa_is_member (int isa, unsigned int mask)
+{
+  isa &= INSN_ISA_MASK;
+  mask &= INSN_ISA_MASK;
+
+  if (isa == 0)
+    return false;
+
+  if (mask == 0)
+    return false;
+
+  if (((mips_isa_table[isa - 1] >> (mask - 1)) & 1) == 0)
+    return false;
+
+  return true;
+}
+
 /* Test for membership in an ISA including chip specific ISAs.  INSN
    is pointer to an element of the opcode table; ISA is the specified
    ISA/ASE bitmask to test against; and CPU is the CPU specific ISA to
@@ -1483,10 +1503,7 @@ opcode_is_member (const struct mips_opcode *insn, int isa, int ase, int cpu)
   if (!cpu_is_member (cpu, insn->exclusions))
     {
       /* Test for ISA level compatibility.  */
-      if ((isa & INSN_ISA_MASK) != 0
-	  && (insn->membership & INSN_ISA_MASK) != 0
-	  && ((mips_isa_table[(isa & INSN_ISA_MASK) - 1]
-	       >> ((insn->membership & INSN_ISA_MASK) - 1)) & 1) != 0)
+      if (isa_is_member (isa, insn->membership))
 	return true;
 
       /* Test for ASE compatibility.  */
