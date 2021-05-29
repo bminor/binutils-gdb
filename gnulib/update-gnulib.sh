@@ -68,6 +68,7 @@ IMPORTED_GNULIB_MODULES="\
     strstr \
     strtok_r \
     sys_stat \
+    sys_wait \
     time_r \
     unistd \
     unsetenv \

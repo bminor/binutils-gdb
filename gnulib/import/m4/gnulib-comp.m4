@@ -213,6 +213,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module sys_time:
   # Code from module sys_types:
   # Code from module sys_uio:
+  # Code from module sys_wait:
   # Code from module tempname:
   # Code from module threadlib:
   gl_THREADLIB_EARLY
@@ -777,6 +778,8 @@ AC_DEFUN([gl_INIT],
   AC_PROG_MKDIR_P
   gl_HEADER_SYS_UIO
   AC_PROG_MKDIR_P
+  gl_SYS_WAIT_H
+  AC_PROG_MKDIR_P
   gl_FUNC_GEN_TEMPNAME
   gl_MODULE_INDICATOR([tempname])
   AC_REQUIRE([gl_THREADLIB])
@@ -1184,6 +1187,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/sys_time.in.h
   lib/sys_types.in.h
   lib/sys_uio.in.h
+  lib/sys_wait.in.h
   lib/tempname.c
   lib/tempname.h
   lib/time.in.h
@@ -1365,6 +1369,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/sys_time_h.m4
   m4/sys_types_h.m4
   m4/sys_uio_h.m4
+  m4/sys_wait_h.m4
   m4/tempname.m4
   m4/threadlib.m4
   m4/time_h.m4

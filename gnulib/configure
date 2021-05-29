@@ -732,6 +732,9 @@ GNULIB_NANOSLEEP
 GNULIB_LOCALTIME
 GNULIB_MKTIME
 GNULIB_CTIME
+NEXT_AS_FIRST_DIRECTIVE_SYS_WAIT_H
+NEXT_SYS_WAIT_H
+GNULIB_WAITPID
 HAVE_SYS_UIO_H
 NEXT_AS_FIRST_DIRECTIVE_SYS_UIO_H
 NEXT_SYS_UIO_H
@@ -3802,6 +3805,7 @@ as_fn_append ac_func_list " snprintf"
 as_fn_append ac_header_list " strings.h"
 as_fn_append ac_header_list " sys/random.h"
 as_fn_append ac_header_list " sys/uio.h"
+as_fn_append ac_header_list " sys/wait.h"
 as_fn_append ac_func_list " localtime_r"
 as_fn_append ac_header_list " crtdefs.h"
 as_fn_append ac_func_list " iswcntrl"
@@ -6865,6 +6869,7 @@ fi
   # Code from module sys_time:
   # Code from module sys_types:
   # Code from module sys_uio:
+  # Code from module sys_wait:
   # Code from module tempname:
   # Code from module threadlib:
 
@@ -17763,6 +17768,11 @@ $as_echo "$gl_cv_next_sys_types_h" >&6; }
 
 
 
+
+
+
+
+  GNULIB_WAITPID=0;
 
 
 
@@ -30717,6 +30727,95 @@ $as_echo "$gl_cv_next_sys_uio_h" >&6; }
   else
     HAVE_SYS_UIO_H=0
   fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_sys_wait_h='<'sys/wait.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <sys/wait.h>" >&5
+$as_echo_n "checking absolute name of <sys/wait.h>... " >&6; }
+if ${gl_cv_next_sys_wait_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_sys_wait_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/wait.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'sys/wait.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_sys_wait_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_sys_wait_h
+           gl_cv_next_sys_wait_h='"'$gl_header'"'
+          else
+               gl_cv_next_sys_wait_h='<'sys/wait.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_sys_wait_h" >&5
+$as_echo "$gl_cv_next_sys_wait_h" >&6; }
+     fi
+     NEXT_SYS_WAIT_H=$gl_cv_next_sys_wait_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'sys/wait.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_sys_wait_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_SYS_WAIT_H=$gl_next_as_first_directive
+
+
+
+
+
+
+
+
+
 
 
 

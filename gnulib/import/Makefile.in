@@ -85,6 +85,7 @@
 #  strstr \
 #  strtok_r \
 #  sys_stat \
+#  sys_wait \
 #  time_r \
 #  unistd \
 #  unsetenv \
@@ -329,6 +330,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/sys_time_h.m4 \
 	$(top_srcdir)/import/m4/sys_types_h.m4 \
 	$(top_srcdir)/import/m4/sys_uio_h.m4 \
+	$(top_srcdir)/import/m4/sys_wait_h.m4 \
 	$(top_srcdir)/import/m4/tempname.m4 \
 	$(top_srcdir)/import/m4/threadlib.m4 \
 	$(top_srcdir)/import/m4/time_h.m4 \
@@ -915,6 +917,7 @@ GNULIB_VPRINTF_POSIX = @GNULIB_VPRINTF_POSIX@
 GNULIB_VSCANF = @GNULIB_VSCANF@
 GNULIB_VSNPRINTF = @GNULIB_VSNPRINTF@
 GNULIB_VSPRINTF_POSIX = @GNULIB_VSPRINTF_POSIX@
+GNULIB_WAITPID = @GNULIB_WAITPID@
 GNULIB_WCPCPY = @GNULIB_WCPCPY@
 GNULIB_WCPNCPY = @GNULIB_WCPNCPY@
 GNULIB_WCRTOMB = @GNULIB_WCRTOMB@
@@ -1409,6 +1412,7 @@ NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_TYPES_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_TYPES_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_UIO_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_UIO_H@
+NEXT_AS_FIRST_DIRECTIVE_SYS_WAIT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_WAIT_H@
 NEXT_AS_FIRST_DIRECTIVE_TIME_H = @NEXT_AS_FIRST_DIRECTIVE_TIME_H@
 NEXT_AS_FIRST_DIRECTIVE_UNISTD_H = @NEXT_AS_FIRST_DIRECTIVE_UNISTD_H@
 NEXT_AS_FIRST_DIRECTIVE_WCHAR_H = @NEXT_AS_FIRST_DIRECTIVE_WCHAR_H@
@@ -1440,6 +1444,7 @@ NEXT_SYS_STAT_H = @NEXT_SYS_STAT_H@
 NEXT_SYS_TIME_H = @NEXT_SYS_TIME_H@
 NEXT_SYS_TYPES_H = @NEXT_SYS_TYPES_H@
 NEXT_SYS_UIO_H = @NEXT_SYS_UIO_H@
+NEXT_SYS_WAIT_H = @NEXT_SYS_WAIT_H@
 NEXT_TIME_H = @NEXT_TIME_H@
 NEXT_UNISTD_H = @NEXT_UNISTD_H@
 NEXT_WCHAR_H = @NEXT_WCHAR_H@
@@ -1856,8 +1861,8 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	string.in.h strings.in.h strnlen.c strstr.c str-two-way.h \
 	strstr.c strtok_r.c sys_random.in.h sys_select.in.h \
 	sys_socket.in.h sys_stat.in.h sys_time.in.h sys_types.in.h \
-	sys_uio.in.h tempname.h time.in.h time_r.c unistd.in.h \
-	unistd--.h unistd-safer.h unsetenv.c \
+	sys_uio.in.h sys_wait.in.h tempname.h time.in.h time_r.c \
+	unistd.in.h unistd--.h unistd-safer.h unsetenv.c \
 	$(top_srcdir)/import/extra/update-copyright verify.h \
 	wchar.in.h wctype.in.h windows-initguard.h windows-mutex.c \
 	windows-mutex.h windows-once.c windows-once.h \
@@ -1870,7 +1875,7 @@ BUILT_SOURCES = $(ALLOCA_H) arpa/inet.h ctype.h dirent.h $(ERRNO_H) \
 	$(STDALIGN_H) $(STDBOOL_H) $(STDDEF_H) $(STDINT_H) stdio.h \
 	stdlib.h string.h strings.h sys/random.h sys/select.h \
 	sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h \
-	time.h unistd.h wchar.h wctype.h
+	sys/wait.h time.h unistd.h wchar.h wctype.h
 SUFFIXES = 
 MOSTLYCLEANFILES = core *.stackdump alloca.h alloca.h-t arpa/inet.h \
 	arpa/inet.h-t ctype.h ctype.h-t dirent.h dirent.h-t errno.h \
@@ -1884,9 +1889,9 @@ MOSTLYCLEANFILES = core *.stackdump alloca.h alloca.h-t arpa/inet.h \
 	sys/random.h sys/random.h-t sys/select.h sys/select.h-t \
 	sys/socket.h sys/socket.h-t sys/stat.h sys/stat.h-t sys/time.h \
 	sys/time.h-t sys/types.h sys/types.h-t sys/uio.h sys/uio.h-t \
-	time.h time.h-t unistd.h unistd.h-t wchar.h wchar.h-t wctype.h \
-	wctype.h-t
-MOSTLYCLEANDIRS = arpa netinet sys sys sys sys sys
+	sys/wait.h sys/wait.h-t time.h time.h-t unistd.h unistd.h-t \
+	wchar.h wchar.h-t wctype.h wctype.h-t
+MOSTLYCLEANDIRS = arpa netinet sys sys sys sys sys sys
 CLEANFILES = 
 DISTCLEANFILES = 
 MAINTAINERCLEANFILES = 
@@ -3743,6 +3748,24 @@ sys/uio.h: sys_uio.in.h $(top_builddir)/config.status
 	      < $(srcdir)/sys_uio.in.h; \
 	} > $@-t && \
 	mv -f $@-t $@
+
+# We need the following in order to create <sys/wait.h> when the system
+# has one that is incomplete.
+sys/wait.h: sys_wait.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H)
+	$(AM_V_at)$(MKDIR_P) sys
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
+	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_SYS_WAIT_H''@|$(NEXT_SYS_WAIT_H)|g' \
+	      -e 's/@''GNULIB_WAITPID''@/$(GNULIB_WAITPID)/g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      < $(srcdir)/sys_wait.in.h; \
+	} > $@-t && \
+	mv $@-t $@
 
 # We need the following in order to create <time.h> when the system
 # doesn't have one that works with the given compiler.
