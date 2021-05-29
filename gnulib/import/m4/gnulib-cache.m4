@@ -63,6 +63,7 @@
 #  mkdir \
 #  mkdtemp \
 #  mkostemp \
+#  netdb \
 #  pathmax \
 #  rawmemchr \
 #  readlink \
@@ -109,6 +110,7 @@ gl_MODULES([
   mkdir
   mkdtemp
   mkostemp
+  netdb
   pathmax
   rawmemchr
   readlink

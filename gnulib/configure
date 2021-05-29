@@ -782,6 +782,17 @@ NETINET_IN_H
 HAVE_NETINET_IN_H
 NEXT_AS_FIRST_DIRECTIVE_NETINET_IN_H
 NEXT_NETINET_IN_H
+HAVE_NETDB_H
+NEXT_AS_FIRST_DIRECTIVE_NETDB_H
+NEXT_NETDB_H
+REPLACE_GETADDRINFO
+REPLACE_GAI_STRERROR
+HAVE_DECL_GETNAMEINFO
+HAVE_DECL_GETADDRINFO
+HAVE_DECL_GAI_STRERROR
+HAVE_DECL_FREEADDRINFO
+HAVE_STRUCT_ADDRINFO
+GNULIB_GETADDRINFO
 UNDEFINE_STRTOK_R
 REPLACE_STRSIGNAL
 REPLACE_STRERRORNAME_NP
@@ -6782,6 +6793,7 @@ fi
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
   # Code from module multiarch:
+  # Code from module netdb:
   # Code from module netinet_in:
   # Code from module nocrash:
   # Code from module open:
@@ -16378,6 +16390,16 @@ $as_echo "#define HAVE_MINMAX_IN_SYS_PARAM_H 1" >>confdefs.h
 
 
 
+
+
+  GNULIB_GETADDRINFO=0;
+    HAVE_STRUCT_ADDRINFO=1;
+  HAVE_DECL_FREEADDRINFO=1;
+  HAVE_DECL_GAI_STRERROR=1;
+  HAVE_DECL_GETADDRINFO=1;
+  HAVE_DECL_GETNAMEINFO=1;
+  REPLACE_GAI_STRERROR=0;
+  REPLACE_GETADDRINFO=0;
 
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for O_CLOEXEC" >&5
@@ -26248,6 +26270,97 @@ $as_echo "#define GNULIB_TEST_MKOSTEMP 1" >>confdefs.h
 cat >>confdefs.h <<_ACEOF
 #define GNULIB_MSVC_NOTHROW 1
 _ACEOF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_netdb_h='<'netdb.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <netdb.h>" >&5
+$as_echo_n "checking absolute name of <netdb.h>... " >&6; }
+if ${gl_cv_next_netdb_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_netdb_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <netdb.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'netdb.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_netdb_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_netdb_h
+           gl_cv_next_netdb_h='"'$gl_header'"'
+          else
+               gl_cv_next_netdb_h='<'netdb.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_netdb_h" >&5
+$as_echo "$gl_cv_next_netdb_h" >&6; }
+     fi
+     NEXT_NETDB_H=$gl_cv_next_netdb_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'netdb.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_netdb_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_NETDB_H=$gl_next_as_first_directive
+
+
+
+
+  if test $ac_cv_header_netdb_h = yes; then
+    HAVE_NETDB_H=1
+  else
+    HAVE_NETDB_H=0
+  fi
+
+
+
 
 
 

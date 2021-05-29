@@ -152,6 +152,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module msvc-inval:
   # Code from module msvc-nothrow:
   # Code from module multiarch:
+  # Code from module netdb:
   # Code from module netinet_in:
   # Code from module nocrash:
   # Code from module open:
@@ -598,6 +599,7 @@ AC_DEFUN([gl_INIT],
   fi
   gl_MODULE_INDICATOR([msvc-nothrow])
   gl_MULTIARCH
+  gl_HEADER_NETDB
   gl_HEADER_NETINET_IN
   AC_PROG_MKDIR_P
   gl_FUNC_OPEN
@@ -1101,6 +1103,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/msvc-inval.h
   lib/msvc-nothrow.c
   lib/msvc-nothrow.h
+  lib/netdb.in.h
   lib/netinet_in.in.h
   lib/open.c
   lib/openat-die.c
@@ -1289,6 +1292,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/msvc-inval.m4
   m4/msvc-nothrow.m4
   m4/multiarch.m4
+  m4/netdb_h.m4
   m4/netinet_in_h.m4
   m4/nocrash.m4
   m4/off_t.m4

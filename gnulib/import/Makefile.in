@@ -72,6 +72,7 @@
 #  mkdir \
 #  mkdtemp \
 #  mkostemp \
+#  netdb \
 #  pathmax \
 #  rawmemchr \
 #  readlink \
@@ -272,6 +273,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/msvc-inval.m4 \
 	$(top_srcdir)/import/m4/msvc-nothrow.m4 \
 	$(top_srcdir)/import/m4/multiarch.m4 \
+	$(top_srcdir)/import/m4/netdb_h.m4 \
 	$(top_srcdir)/import/m4/netinet_in_h.m4 \
 	$(top_srcdir)/import/m4/nocrash.m4 \
 	$(top_srcdir)/import/m4/off_t.m4 \
@@ -595,6 +597,7 @@ GNULIB_FTELLO = @GNULIB_FTELLO@
 GNULIB_FTRUNCATE = @GNULIB_FTRUNCATE@
 GNULIB_FUTIMENS = @GNULIB_FUTIMENS@
 GNULIB_FWRITE = @GNULIB_FWRITE@
+GNULIB_GETADDRINFO = @GNULIB_GETADDRINFO@
 GNULIB_GETC = @GNULIB_GETC@
 GNULIB_GETCHAR = @GNULIB_GETCHAR@
 GNULIB_GETCWD = @GNULIB_GETCWD@
@@ -1000,16 +1003,20 @@ HAVE_DECL_FDOPENDIR = @HAVE_DECL_FDOPENDIR@
 HAVE_DECL_FLOORF = @HAVE_DECL_FLOORF@
 HAVE_DECL_FLOORL = @HAVE_DECL_FLOORL@
 HAVE_DECL_FPURGE = @HAVE_DECL_FPURGE@
+HAVE_DECL_FREEADDRINFO = @HAVE_DECL_FREEADDRINFO@
 HAVE_DECL_FREXPL = @HAVE_DECL_FREXPL@
 HAVE_DECL_FSEEKO = @HAVE_DECL_FSEEKO@
 HAVE_DECL_FTELLO = @HAVE_DECL_FTELLO@
+HAVE_DECL_GAI_STRERROR = @HAVE_DECL_GAI_STRERROR@
 HAVE_DECL_GCVT = @HAVE_DECL_GCVT@
+HAVE_DECL_GETADDRINFO = @HAVE_DECL_GETADDRINFO@
 HAVE_DECL_GETDELIM = @HAVE_DECL_GETDELIM@
 HAVE_DECL_GETDOMAINNAME = @HAVE_DECL_GETDOMAINNAME@
 HAVE_DECL_GETLINE = @HAVE_DECL_GETLINE@
 HAVE_DECL_GETLOADAVG = @HAVE_DECL_GETLOADAVG@
 HAVE_DECL_GETLOGIN = @HAVE_DECL_GETLOGIN@
 HAVE_DECL_GETLOGIN_R = @HAVE_DECL_GETLOGIN_R@
+HAVE_DECL_GETNAMEINFO = @HAVE_DECL_GETNAMEINFO@
 HAVE_DECL_GETPAGESIZE = @HAVE_DECL_GETPAGESIZE@
 HAVE_DECL_GETUSERSHELL = @HAVE_DECL_GETUSERSHELL@
 HAVE_DECL_IMAXABS = @HAVE_DECL_IMAXABS@
@@ -1167,6 +1174,7 @@ HAVE_MODFF = @HAVE_MODFF@
 HAVE_MODFL = @HAVE_MODFL@
 HAVE_MSVC_INVALID_PARAMETER_HANDLER = @HAVE_MSVC_INVALID_PARAMETER_HANDLER@
 HAVE_NANOSLEEP = @HAVE_NANOSLEEP@
+HAVE_NETDB_H = @HAVE_NETDB_H@
 HAVE_NETINET_IN_H = @HAVE_NETINET_IN_H@
 HAVE_NEWLOCALE = @HAVE_NEWLOCALE@
 HAVE_OPENAT = @HAVE_OPENAT@
@@ -1240,6 +1248,7 @@ HAVE_STRTOD = @HAVE_STRTOD@
 HAVE_STRTOLD = @HAVE_STRTOLD@
 HAVE_STRTOLL = @HAVE_STRTOLL@
 HAVE_STRTOULL = @HAVE_STRTOULL@
+HAVE_STRUCT_ADDRINFO = @HAVE_STRUCT_ADDRINFO@
 HAVE_STRUCT_RANDOM_DATA = @HAVE_STRUCT_RANDOM_DATA@
 HAVE_STRUCT_SIGACTION_SA_SIGACTION = @HAVE_STRUCT_SIGACTION_SA_SIGACTION@
 HAVE_STRUCT_SOCKADDR_STORAGE = @HAVE_STRUCT_SOCKADDR_STORAGE@
@@ -1373,6 +1382,7 @@ NEXT_AS_FIRST_DIRECTIVE_INTTYPES_H = @NEXT_AS_FIRST_DIRECTIVE_INTTYPES_H@
 NEXT_AS_FIRST_DIRECTIVE_LIMITS_H = @NEXT_AS_FIRST_DIRECTIVE_LIMITS_H@
 NEXT_AS_FIRST_DIRECTIVE_LOCALE_H = @NEXT_AS_FIRST_DIRECTIVE_LOCALE_H@
 NEXT_AS_FIRST_DIRECTIVE_MATH_H = @NEXT_AS_FIRST_DIRECTIVE_MATH_H@
+NEXT_AS_FIRST_DIRECTIVE_NETDB_H = @NEXT_AS_FIRST_DIRECTIVE_NETDB_H@
 NEXT_AS_FIRST_DIRECTIVE_NETINET_IN_H = @NEXT_AS_FIRST_DIRECTIVE_NETINET_IN_H@
 NEXT_AS_FIRST_DIRECTIVE_SIGNAL_H = @NEXT_AS_FIRST_DIRECTIVE_SIGNAL_H@
 NEXT_AS_FIRST_DIRECTIVE_STDDEF_H = @NEXT_AS_FIRST_DIRECTIVE_STDDEF_H@
@@ -1402,6 +1412,7 @@ NEXT_INTTYPES_H = @NEXT_INTTYPES_H@
 NEXT_LIMITS_H = @NEXT_LIMITS_H@
 NEXT_LOCALE_H = @NEXT_LOCALE_H@
 NEXT_MATH_H = @NEXT_MATH_H@
+NEXT_NETDB_H = @NEXT_NETDB_H@
 NEXT_NETINET_IN_H = @NEXT_NETINET_IN_H@
 NEXT_SIGNAL_H = @NEXT_SIGNAL_H@
 NEXT_STDDEF_H = @NEXT_STDDEF_H@
@@ -1512,6 +1523,8 @@ REPLACE_FTELL = @REPLACE_FTELL@
 REPLACE_FTELLO = @REPLACE_FTELLO@
 REPLACE_FTRUNCATE = @REPLACE_FTRUNCATE@
 REPLACE_FUTIMENS = @REPLACE_FUTIMENS@
+REPLACE_GAI_STRERROR = @REPLACE_GAI_STRERROR@
+REPLACE_GETADDRINFO = @REPLACE_GETADDRINFO@
 REPLACE_GETCWD = @REPLACE_GETCWD@
 REPLACE_GETDELIM = @REPLACE_GETDELIM@
 REPLACE_GETDOMAINNAME = @REPLACE_GETDOMAINNAME@
@@ -1813,11 +1826,11 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	mbtowc-impl.h mbtowc.c memchr.c memchr.valgrind memmem.c \
 	memmem.c str-two-way.h mempcpy.c memrchr.c mkdir.c mkdtemp.c \
 	mkostemp.c msvc-inval.c msvc-inval.h msvc-nothrow.c \
-	msvc-nothrow.h netinet_in.in.h open.c openat.c openat.h \
-	dirent-private.h opendir.c pathmax.h pipe.c rawmemchr.c \
-	rawmemchr.valgrind dirent-private.h readdir.c readlink.c \
-	realloc.c rename.c dirent-private.h rewinddir.c rmdir.c \
-	same-inode.h save-cwd.h malloc/scratch_buffer.h \
+	msvc-nothrow.h netdb.in.h netinet_in.in.h open.c openat.c \
+	openat.h dirent-private.h opendir.c pathmax.h pipe.c \
+	rawmemchr.c rawmemchr.valgrind dirent-private.h readdir.c \
+	readlink.c realloc.c rename.c dirent-private.h rewinddir.c \
+	rmdir.c same-inode.h save-cwd.h malloc/scratch_buffer.h \
 	scratch_buffer.h setenv.c setlocale-lock.c setlocale_null.h \
 	windows-initguard.h signal.in.h _Noreturn.h arg-nonnull.h \
 	c++defs.h warn-on-use.h stat-w32.c stat-w32.h stat.c \
@@ -1837,7 +1850,7 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	wmemchr-impl.h wmemchr.c wmempcpy.c xalloc-oversized.h
 BUILT_SOURCES = $(ALLOCA_H) arpa/inet.h ctype.h dirent.h $(ERRNO_H) \
 	fcntl.h $(FLOAT_H) $(FNMATCH_H) $(GLOB_H) inttypes.h \
-	$(LIMITS_H) locale.h math.h $(NETINET_IN_H) signal.h \
+	$(LIMITS_H) locale.h math.h netdb.h $(NETINET_IN_H) signal.h \
 	$(STDALIGN_H) $(STDBOOL_H) $(STDDEF_H) $(STDINT_H) stdio.h \
 	stdlib.h string.h strings.h sys/random.h sys/socket.h \
 	sys/stat.h sys/time.h sys/types.h sys/uio.h time.h unistd.h \
@@ -1847,15 +1860,15 @@ MOSTLYCLEANFILES = core *.stackdump alloca.h alloca.h-t arpa/inet.h \
 	arpa/inet.h-t ctype.h ctype.h-t dirent.h dirent.h-t errno.h \
 	errno.h-t fcntl.h fcntl.h-t float.h float.h-t fnmatch.h \
 	fnmatch.h-t glob.h glob.h-t inttypes.h inttypes.h-t limits.h \
-	limits.h-t locale.h locale.h-t math.h math.h-t netinet/in.h \
-	netinet/in.h-t signal.h signal.h-t stdalign.h stdalign.h-t \
-	stdbool.h stdbool.h-t stddef.h stddef.h-t stdint.h stdint.h-t \
-	stdio.h stdio.h-t stdlib.h stdlib.h-t string.h string.h-t \
-	strings.h strings.h-t sys/random.h sys/random.h-t sys/socket.h \
-	sys/socket.h-t sys/stat.h sys/stat.h-t sys/time.h sys/time.h-t \
-	sys/types.h sys/types.h-t sys/uio.h sys/uio.h-t time.h \
-	time.h-t unistd.h unistd.h-t wchar.h wchar.h-t wctype.h \
-	wctype.h-t
+	limits.h-t locale.h locale.h-t math.h math.h-t netdb.h \
+	netdb.h-t netinet/in.h netinet/in.h-t signal.h signal.h-t \
+	stdalign.h stdalign.h-t stdbool.h stdbool.h-t stddef.h \
+	stddef.h-t stdint.h stdint.h-t stdio.h stdio.h-t stdlib.h \
+	stdlib.h-t string.h string.h-t strings.h strings.h-t \
+	sys/random.h sys/random.h-t sys/socket.h sys/socket.h-t \
+	sys/stat.h sys/stat.h-t sys/time.h sys/time.h-t sys/types.h \
+	sys/types.h-t sys/uio.h sys/uio.h-t time.h time.h-t unistd.h \
+	unistd.h-t wchar.h wchar.h-t wctype.h wctype.h-t
 MOSTLYCLEANDIRS = arpa netinet sys sys sys sys
 CLEANFILES = 
 DISTCLEANFILES = 
@@ -2969,6 +2982,32 @@ math.h: math.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(
 	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
 	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
 	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)'; \
+	} > $@-t && \
+	mv $@-t $@
+
+# We need the following in order to create <netdb.h> when the system
+# doesn't have one that works with the given compiler.
+netdb.h: netdb.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
+	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_NETDB_H''@|$(NEXT_NETDB_H)|g' \
+	      -e 's|@''HAVE_NETDB_H''@|$(HAVE_NETDB_H)|g' \
+	      -e 's/@''GNULIB_GETADDRINFO''@/$(GNULIB_GETADDRINFO)/g' \
+	      -e 's|@''HAVE_STRUCT_ADDRINFO''@|$(HAVE_STRUCT_ADDRINFO)|g' \
+	      -e 's|@''HAVE_DECL_FREEADDRINFO''@|$(HAVE_DECL_FREEADDRINFO)|g' \
+	      -e 's|@''HAVE_DECL_GAI_STRERROR''@|$(HAVE_DECL_GAI_STRERROR)|g' \
+	      -e 's|@''HAVE_DECL_GETADDRINFO''@|$(HAVE_DECL_GETADDRINFO)|g' \
+	      -e 's|@''HAVE_DECL_GETNAMEINFO''@|$(HAVE_DECL_GETNAMEINFO)|g' \
+	      -e 's|@''REPLACE_GAI_STRERROR''@|$(REPLACE_GAI_STRERROR)|g' \
+	      -e 's|@''REPLACE_GETADDRINFO''@|$(REPLACE_GETADDRINFO)|g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      < $(srcdir)/netdb.in.h; \
 	} > $@-t && \
 	mv $@-t $@
 
