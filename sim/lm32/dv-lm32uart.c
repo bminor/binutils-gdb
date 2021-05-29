@@ -26,6 +26,7 @@
 #include "sim-assert.h"
 
 #include <stdio.h>
+#include <sys/select.h>
 #include <sys/time.h>
 
 struct lm32uart

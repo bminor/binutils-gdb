@@ -39,9 +39,7 @@
 
 #include <sys/time.h>
 
-#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif
 
 /* Not guarded in dv-sockser.c, so why here.  */
 #include <netinet/in.h>

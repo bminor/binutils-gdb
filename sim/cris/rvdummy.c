@@ -48,16 +48,13 @@ main (int argc, char *argv[])
 
 #include <sys/time.h>
 
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-
 #include <errno.h>
 
 /* Not guarded in dv-sockser.c, so why here.  */
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 
 enum rv_command {

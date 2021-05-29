@@ -2355,7 +2355,6 @@ as_fn_append ac_header_list " sys/mman.h"
 as_fn_append ac_header_list " sys/mount.h"
 as_fn_append ac_header_list " sys/param.h"
 as_fn_append ac_header_list " sys/resource.h"
-as_fn_append ac_header_list " sys/select.h"
 as_fn_append ac_header_list " sys/socket.h"
 as_fn_append ac_header_list " sys/stat.h"
 as_fn_append ac_header_list " sys/statfs.h"
@@ -4608,8 +4607,6 @@ _ACEOF
 fi
 
 done
-
-
 
 
 

@@ -36,7 +36,6 @@ AC_CHECK_HEADERS_ONCE(m4_flatten([
   sys/mount.h
   sys/param.h
   sys/resource.h
-  sys/select.h
   sys/socket.h
   sys/stat.h
   sys/statfs.h

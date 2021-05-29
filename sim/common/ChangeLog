@@ -1,5 +1,9 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-sockser.c: Include sys/select.h.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in: Delete SIM_ALIGNMENT.
 	* sim-config.c (sim_config): Change WITH_DEFAULT_ALIGNMENT to
 	NONSTRICT_ALIGNMENT.

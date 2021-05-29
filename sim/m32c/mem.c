@@ -29,9 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif
 #ifdef HAVE_TERMIOS_H
 #include <termios.h>
 #endif

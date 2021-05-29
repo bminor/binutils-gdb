@@ -1,5 +1,9 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-lm32uart.c: Include sys/select.h.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Delete call to SIM_AC_OPTION_ALIGNMENT.
 	* sim-if.c (sim_open): Set current_alignment.
 
