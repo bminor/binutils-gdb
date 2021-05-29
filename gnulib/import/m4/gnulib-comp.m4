@@ -172,6 +172,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module same-inode:
   # Code from module save-cwd:
   # Code from module scratch_buffer:
+  # Code from module select:
   # Code from module setenv:
   # Code from module setlocale-null:
   # Code from module signal-h:
@@ -179,6 +180,8 @@ AC_DEFUN([gl_EARLY],
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
+  # Code from module socketlib:
+  # Code from module sockets:
   # Code from module socklen:
   # Code from module ssize_t:
   # Code from module stat:
@@ -204,6 +207,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module strstr-simple:
   # Code from module strtok_r:
   # Code from module sys_random:
+  # Code from module sys_select:
   # Code from module sys_socket:
   # Code from module sys_stat:
   # Code from module sys_time:
@@ -664,6 +668,11 @@ AC_DEFUN([gl_INIT],
   fi
   gl_UNISTD_MODULE_INDICATOR([rmdir])
   gl_SAVE_CWD
+  gl_FUNC_SELECT
+  if test $REPLACE_SELECT = 1; then
+    AC_LIBOBJ([select])
+  fi
+  gl_SYS_SELECT_MODULE_INDICATOR([select])
   gl_FUNC_SETENV
   if test $HAVE_SETENV = 0 || test $REPLACE_SETENV = 1; then
     AC_LIBOBJ([setenv])
@@ -676,6 +685,8 @@ AC_DEFUN([gl_INIT],
   fi
   gl_LOCALE_MODULE_INDICATOR([setlocale_null])
   gl_SIGNAL_H
+  AC_REQUIRE([gl_SOCKETLIB])
+  AC_REQUIRE([gl_SOCKETS])
   gl_TYPE_SOCKLEN_T
   gt_TYPE_SSIZE_T
   gl_FUNC_STAT
@@ -753,6 +764,8 @@ AC_DEFUN([gl_INIT],
   fi
   gl_STRING_MODULE_INDICATOR([strtok_r])
   gl_HEADER_SYS_RANDOM
+  AC_PROG_MKDIR_P
+  AC_REQUIRE([gl_HEADER_SYS_SELECT])
   AC_PROG_MKDIR_P
   AC_REQUIRE([gl_HEADER_SYS_SOCKET])
   AC_PROG_MKDIR_P
@@ -1127,11 +1140,14 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/save-cwd.c
   lib/save-cwd.h
   lib/scratch_buffer.h
+  lib/select.c
   lib/setenv.c
   lib/setlocale-lock.c
   lib/setlocale_null.c
   lib/setlocale_null.h
   lib/signal.in.h
+  lib/sockets.c
+  lib/sockets.h
   lib/stat-time.c
   lib/stat-time.h
   lib/stat-w32.c
@@ -1161,6 +1177,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strstr.c
   lib/strtok_r.c
   lib/sys_random.in.h
+  lib/sys_select.in.h
   lib/sys_socket.c
   lib/sys_socket.in.h
   lib/sys_stat.in.h
@@ -1177,6 +1194,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/unistd.in.h
   lib/unsetenv.c
   lib/verify.h
+  lib/w32sock.h
   lib/warn-on-use.h
   lib/wchar.in.h
   lib/wctype-h.c
@@ -1313,9 +1331,12 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/rewinddir.m4
   m4/rmdir.m4
   m4/save-cwd.m4
+  m4/select.m4
   m4/setenv.m4
   m4/setlocale_null.m4
   m4/signal_h.m4
+  m4/socketlib.m4
+  m4/sockets.m4
   m4/socklen.m4
   m4/sockpfaf.m4
   m4/ssize_t.m4
@@ -1338,6 +1359,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/strstr.m4
   m4/strtok_r.m4
   m4/sys_random_h.m4
+  m4/sys_select_h.m4
   m4/sys_socket_h.m4
   m4/sys_stat_h.m4
   m4/sys_time_h.m4

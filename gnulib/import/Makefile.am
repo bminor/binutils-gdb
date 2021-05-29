@@ -63,6 +63,7 @@
 #  rawmemchr \
 #  readlink \
 #  rename \
+#  select \
 #  setenv \
 #  signal-h \
 #  strchrnul \
@@ -1701,6 +1702,15 @@ EXTRA_DIST += malloc/scratch_buffer.h scratch_buffer.h
 
 ## end   gnulib module scratch_buffer
 
+## begin gnulib module select
+
+
+EXTRA_DIST += select.c
+
+EXTRA_libgnu_a_SOURCES += select.c
+
+## end   gnulib module select
+
 ## begin gnulib module setenv
 
 
@@ -1809,6 +1819,14 @@ WARN_ON_USE_H=$(srcdir)/warn-on-use.h
 EXTRA_DIST += warn-on-use.h
 
 ## end   gnulib module snippet/warn-on-use
+
+## begin gnulib module sockets
+
+libgnu_a_SOURCES += sockets.h sockets.c
+
+EXTRA_DIST += w32sock.h
+
+## end   gnulib module sockets
 
 ## begin gnulib module stat
 
@@ -2491,6 +2509,40 @@ MOSTLYCLEANDIRS += sys
 EXTRA_DIST += sys_random.in.h
 
 ## end   gnulib module sys_random
+
+## begin gnulib module sys_select
+
+BUILT_SOURCES += sys/select.h
+
+# We need the following in order to create <sys/select.h> when the system
+# doesn't have one that works with the given compiler.
+sys/select.h: sys_select.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H)
+	$(AM_V_at)$(MKDIR_P) sys
+	$(AM_V_GEN)rm -f $@-t $@ && \
+	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
+	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_SYS_SELECT_H''@|$(NEXT_SYS_SELECT_H)|g' \
+	      -e 's|@''HAVE_SYS_SELECT_H''@|$(HAVE_SYS_SELECT_H)|g' \
+	      -e 's/@''GNULIB_PSELECT''@/$(GNULIB_PSELECT)/g' \
+	      -e 's/@''GNULIB_SELECT''@/$(GNULIB_SELECT)/g' \
+	      -e 's|@''HAVE_WINSOCK2_H''@|$(HAVE_WINSOCK2_H)|g' \
+	      -e 's|@''HAVE_PSELECT''@|$(HAVE_PSELECT)|g' \
+	      -e 's|@''REPLACE_PSELECT''@|$(REPLACE_PSELECT)|g' \
+	      -e 's|@''REPLACE_SELECT''@|$(REPLACE_SELECT)|g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      < $(srcdir)/sys_select.in.h; \
+	} > $@-t && \
+	mv $@-t $@
+MOSTLYCLEANFILES += sys/select.h sys/select.h-t
+MOSTLYCLEANDIRS += sys
+
+EXTRA_DIST += sys_select.in.h
+
+## end   gnulib module sys_select
 
 ## begin gnulib module sys_socket
 

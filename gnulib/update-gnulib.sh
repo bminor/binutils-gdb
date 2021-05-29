@@ -60,6 +60,7 @@ IMPORTED_GNULIB_MODULES="\
     rawmemchr \
     readlink \
     rename \
+    select \
     setenv \
     signal-h \
     strchrnul \

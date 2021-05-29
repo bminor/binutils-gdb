@@ -40,5 +40,5 @@ LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
 LIBGNU_EXTRA_LIBS = @FREXPL_LIBM@ @FREXP_LIBM@ @INET_NTOP_LIB@ \
                     @LIBTHREAD@ @LIB_GETLOGIN@ @LIB_GETRANDOM@ \
                     @LIB_HARD_LOCALE@ @LIB_MBRTOWC@ \
-                    @LIB_SETLOCALE_NULL@ @LIBINTL@
+                    @LIB_SETLOCALE_NULL@ @LIBINTL@ @LIB_SELECT@ @LIBSOCKET@
 INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import

@@ -1,6 +1,16 @@
 2021-06-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add netdb.
+	* aclocal.m4, config.in, configure, Makefile.gnulib.inc.in,
+	Makefile.in, import/Makefile.am, import/Makefile.in,
+	import/m4/gnulib-cache.m4, import/m4/gnulib-comp.m4: Regenerate.
+	* import/m4/select.m4, import/m4/socketlib.m4, import/m4/sockets.m4,
+	import/m4/sys_select_h.m4, import/select.c, import/sockets.c,
+	import/sockets.h, import/sys_select.in.h, import/w32sock.h: New files.
+
+2021-06-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add netdb.
 	* aclocal.m4, configure, Makefile.in, import/Makefile.am,
 	import/Makefile.in, import/m4/gnulib-cache.m4,
 	import/m4/gnulib-comp.m4: Regenerate.

@@ -68,6 +68,7 @@
 #  rawmemchr \
 #  readlink \
 #  rename \
+#  select \
 #  setenv \
 #  signal-h \
 #  strchrnul \
@@ -115,6 +116,7 @@ gl_MODULES([
   rawmemchr
   readlink
   rename
+  select
   setenv
   signal-h
   strchrnul
