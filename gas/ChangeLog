@@ -1,5 +1,11 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* tc-mips.c (convert_reg_type) <OP_REG_CONTROL>: New case.
+	(macro) <M_TRUNCWS, M_TRUNCWD>: Use the `g' rather than `G'
+	operand code.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* testsuite/gas/mips/cp0-names-r3900.d: New test.
 	* testsuite/gas/mips/mips.exp: Run it.
 

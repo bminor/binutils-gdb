@@ -1,5 +1,19 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* mips-dis.c (print_reg) <OP_REG_COPRO>: Move control register
+	handling code over to...
+	<OP_REG_CONTROL>: ... this new case.
+	* mips-opc.c (decode_mips_operand) <'g', 'y'>: New cases.
+	(mips_builtin_opcodes): Update "cfc1", "ctc1", "cttc1", "cttc2",
+	"cfc0", "ctc0", "cfc2", "ctc2", "cfc3", and "ctc3" entries
+	replacing the `G' operand code with `g'.  Update "cftc1" and
+	"cftc2" entries replacing the `E' operand code with `y'.
+	* micromips-opc.c (decode_micromips_operand) <'g'>: New case.
+	(micromips_opcodes): Update "cfc1", "cfc2", "ctc1", and "ctc2"
+	entries replacing the `G' operand code with `g'.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* mips-dis.c (mips_cp0_names_r3900): New variable.
 	(mips_arch_choices): Use it rather than `mips_cp0_names_numeric'
 	for "r3900".

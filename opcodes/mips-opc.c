@@ -195,6 +195,7 @@ decode_mips_operand (const char *p)
     case 'c': HINT (10, 16);
     case 'd': REG (5, 11, GP);
     case 'e': UINT (3, 22)
+    case 'g': REG (5, 11, CONTROL);
     case 'h': HINT (5, 11);
     case 'i': HINT (16, 0);
     case 'j': SINT (16, 0);
@@ -209,6 +210,7 @@ decode_mips_operand (const char *p)
     case 'v': OPTIONAL_REG (5, 21, GP);
     case 'w': OPTIONAL_REG (5, 16, GP);
     case 'x': REG (0, 0, GP);
+    case 'y': REG (5, 16, CONTROL);
     case 'z': MAPPED_REG (0, 0, GP, reg_0_map);
     }
   return 0;
@@ -975,13 +977,13 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ceil.w.d",		"D,S",		0x4620000e, 0xffff003f, WR_1|RD_2|FP_S|FP_D,	0,		I2,		0,	SF },
 {"ceil.w.s",		"D,S",		0x4600000e, 0xffff003f, WR_1|RD_2|FP_S,		0,		I2,		0,	EE },
 /* cfc0 is at the bottom of the table.  */
-{"cfc1",		"t,G",		0x44400000, 0xffe007ff,	WR_1|RD_C1|LC,		0,		I1,		0,	0 },
+{"cfc1",		"t,g",		0x44400000, 0xffe007ff,	WR_1|RD_C1|LC,		0,		I1,		0,	0 },
 {"cfc1",		"t,S",		0x44400000, 0xffe007ff,	WR_1|RD_C1|LC,		0,		I1,		0,	0 },
 /* cfc2 is at the bottom of the table.  */
 /* cfc3 is at the bottom of the table.  */
-{"cftc1",		"d,E",		0x41000023, 0xffe007ff, WR_1|RD_C1|TRAP|LC,	0,		0,		MT32,	0 },
+{"cftc1",		"d,y",		0x41000023, 0xffe007ff, WR_1|RD_C1|TRAP|LC,	0,		0,		MT32,	0 },
 {"cftc1",		"d,T",		0x41000023, 0xffe007ff, WR_1|RD_C1|TRAP|LC,	0,		0,		MT32,	0 },
-{"cftc2",		"d,E",		0x41000025, 0xffe007ff,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"cftc2",		"d,y",		0x41000025, 0xffe007ff,	WR_1|RD_C2|TRAP|LC,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
 {"cins32",		"t,r,+p,+s",	0x70000033, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 },
 {"cins",		"t,r,+P,+S",	0x70000033, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 }, /* cins32 */
 {"cins",		"t,r,+p,+S",	0x70000032, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 },
@@ -990,13 +992,13 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"clz",			"d,s",		0x00000050, 0xfc1f07ff, WR_1|RD_2,		0,		I37,		0,	0 },
 {"clz",			"U,s",		0x70000020, 0xfc0007ff, WR_1|RD_2,		0,		I32|N55,	0,	I37 },
 /* ctc0 is at the bottom of the table.  */
-{"ctc1",		"t,G",		0x44c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	0 },
+{"ctc1",		"t,g",		0x44c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	0 },
 {"ctc1",		"t,S",		0x44c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	0 },
 /* ctc2 is at the bottom of the table.  */
 /* ctc3 is at the bottom of the table.  */
-{"cttc1",		"t,G",		0x41800023, 0xffe007ff, RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	0 },
+{"cttc1",		"t,g",		0x41800023, 0xffe007ff, RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	0 },
 {"cttc1",		"t,S",		0x41800023, 0xffe007ff, RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	0 },
-{"cttc2",		"t,G",		0x41800025, 0xffe007ff,	RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"cttc2",		"t,g",		0x41800025, 0xffe007ff,	RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
 {"cvt.d.l",		"D,S",		0x46a00021, 0xffff003f,	WR_1|RD_2|FP_D,		0,		I3_33,		0,	0 },
 {"cvt.d.s",		"D,S",		0x46000021, 0xffff003f,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	SF },
 {"cvt.d.w",		"D,S",		0x46800021, 0xffff003f,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	SF },
@@ -2106,8 +2108,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 /* Coprocessor 0 move instructions cfc0 and ctc0 conflict with the
    mfhc0 and mthc0 XPA instructions, so they have been placed here
    to allow the XPA instructions to take precedence.  */
-{"ctc0",		"t,G",		0x40c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
-{"cfc0",		"t,G",		0x40400000, 0xffe007ff,	WR_1|RD_C0|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
+{"cfc0",		"t,g",		0x40400000, 0xffe007ff,	WR_1|RD_C0|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
+{"ctc0",		"t,g",		0x40c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
 
 /* Coprocessor 2 move/branch operations overlap with VR5400 .ob format
    instructions so they are here for the latters to take precedence.  */
@@ -2121,11 +2123,11 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"bc2t",		"N,p",		0x49010000, 0xffe30000,	RD_CC|CBD,		0,		I32,		0,	IOCT|IOCTP|IOCT2|I37 },
 {"bc2tl",		"p",		0x49030000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	IOCT|IOCTP|IOCT2|I37 },
 {"bc2tl",		"N,p",		0x49030000, 0xffe30000,	RD_CC|CBL,		0,		I32,		0,	IOCT|IOCTP|IOCT2|I37 },
-{"cfc2",		"t,G",		0x48400000, 0xffe007ff,	WR_1|RD_C2|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE },
+{"cfc2",		"t,g",		0x48400000, 0xffe007ff,	WR_1|RD_C2|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE },
 {"cfc2",		"t,+9",		0x48400000, 0xffe007ff,	WR_1|RD_C2|LC,		0,		EE,		0,	0 },
 {"cfc2.i",		"t,+9",		0x48400001, 0xffe007ff, WR_1|RD_C2|LC,		0,		EE,		0,	0 },
 {"cfc2.ni",		"t,+9",		0x48400000, 0xffe007ff, WR_1|RD_C2|LC,		0,		EE,		0,	0 },
-{"ctc2",		"t,G",		0x48c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE },
+{"ctc2",		"t,g",		0x48c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE },
 {"ctc2",		"t,+9",		0x48c00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		EE,		0,	0 },
 {"ctc2.i",		"t,+9",		0x48c00001, 0xffe007ff, RD_1|WR_CC|CM,		0,		EE,		0,	0 },
 {"ctc2.ni",		"t,+9",		0x48c00000, 0xffe007ff, RD_1|WR_CC|CM,		0,		EE,		0,	0 },
@@ -2157,8 +2159,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"bc3fl",		"p",		0x4d020000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"bc3t",		"p",		0x4d010000, 0xffff0000,	RD_CC|CBD,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"bc3tl",		"p",		0x4d030000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
-{"cfc3",		"t,G",		0x4c400000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
-{"ctc3",		"t,G",		0x4cc00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
+{"cfc3",		"t,g",		0x4c400000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
+{"ctc3",		"t,g",		0x4cc00000, 0xffe007ff,	RD_1|WR_CC|CM,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"dmfc3",		"t,G",		0x4c200000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I3,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"dmtc3",		"t,G",		0x4ca00000, 0xffe007ff,	RD_1|WR_C3|WR_CC|CM,	0,		I3,		0,	IOCT|IOCTP|IOCT2|EE|I37 },
 {"mfc3",		"t,G",		0x4c000000, 0xffe007ff,	WR_1|RD_C3|LC,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE|I37 },

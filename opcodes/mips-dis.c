@@ -1192,7 +1192,12 @@ print_reg (struct disassemble_info *info, const struct mips_opcode *opcode,
     case OP_REG_COPRO:
       if (opcode->name[strlen (opcode->name) - 1] == '0')
 	info->fprintf_func (info->stream, "%s", mips_cp0_names[regno]);
-      else if (opcode->name[strlen (opcode->name) - 1] == '1')
+      else
+	info->fprintf_func (info->stream, "$%d", regno);
+      break;
+
+    case OP_REG_CONTROL:
+      if (opcode->name[strlen (opcode->name) - 1] == '1')
 	info->fprintf_func (info->stream, "%s", mips_cp1_names[regno]);
       else
 	info->fprintf_func (info->stream, "$%d", regno);

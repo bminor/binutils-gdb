@@ -1,5 +1,11 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* opcode/mips.h: Document `g' and `y' operand codes.
+	(mips_reg_operand_type): Add OP_REG_CONTROL enumeration
+	constant.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* opcode/mips.h: Complement change made to opcodes and remove
 	references to the `g' regular MIPS ISA operand code.
 
