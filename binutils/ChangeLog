@@ -1,5 +1,9 @@
 2021-05-29  Alan Modra  <amodra@gmail.com>
 
+	* objdump (usage): Add missing \n.
+
+2021-05-29  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (parse_args): Call dwarf_select_sections_all on
 	--debug-dump without optarg.
 	(usage): Associate -w and --debug-dump options closely.

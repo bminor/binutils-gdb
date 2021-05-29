@@ -254,17 +254,17 @@ usage (FILE *stream, int status)
                             separate debuginfo files\n"));
 #if DEFAULT_FOR_FOLLOW_LINKS
   fprintf (stream, _("\
-  -WK,--dwarf=follow-links\
+  -WK,--dwarf=follow-links\n\
                            Follow links to separate debug info files (default)\n"));
   fprintf (stream, _("\
-  -WN,--dwarf=no-follow-links\
+  -WN,--dwarf=no-follow-links\n\
                            Do not follow links to separate debug info files\n"));
 #else
   fprintf (stream, _("\
-  -WK,--dwarf=follow-links\
+  -WK,--dwarf=follow-links\n\
                            Follow links to separate debug info files\n"));
   fprintf (stream, _("\
-  -WN,--dwarf=no-follow-links\
+  -WN,--dwarf=no-follow-links\n\
                            Do not follow links to separate debug info files\n\
                             (default)\n"));
 #endif
