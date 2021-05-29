@@ -40,10 +40,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <sys/select.h>
 #include <sys/socket.h>
 
-#ifndef __CYGWIN32__
-#include <netinet/tcp.h>
-#endif
-
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-options.h"
@@ -198,6 +194,7 @@ dv_sockser_init (SIM_DESC sd)
 
   /* Handle writes to missing client -> SIGPIPE.
      ??? Need a central signal management module.  */
+#ifdef SIGPIPE
   {
     RETSIGTYPE (*orig) ();
     orig = signal (SIGPIPE, SIG_IGN);
@@ -205,6 +202,7 @@ dv_sockser_init (SIM_DESC sd)
     if (orig != SIG_DFL && orig != SIG_IGN)
       signal (SIGPIPE, orig);
   }
+#endif
 
   return SIM_RC_OK;
 }
@@ -276,6 +274,7 @@ connected_p (SIM_DESC sd)
     return 0;
 
   /* Set non-blocking i/o.  */
+#ifdef F_GETFL
   flags = fcntl (sockser_fd, F_GETFL);
   flags |= O_NONBLOCK | O_NDELAY;
   if (fcntl (sockser_fd, F_SETFL, flags) == -1)
@@ -285,6 +284,7 @@ connected_p (SIM_DESC sd)
       sockser_fd = -1;
       return 0;
     }
+#endif
   return 1;
 }
 
