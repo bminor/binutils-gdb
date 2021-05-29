@@ -195,7 +195,6 @@ decode_mips_operand (const char *p)
     case 'c': HINT (10, 16);
     case 'd': REG (5, 11, GP);
     case 'e': UINT (3, 22)
-    case 'g': REG (5, 11, COPRO);
     case 'h': HINT (5, 11);
     case 'i': HINT (16, 0);
     case 'j': SINT (16, 0);
@@ -997,7 +996,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 /* ctc3 is at the bottom of the table.  */
 {"cttc1",		"t,G",		0x41800023, 0xffe007ff, RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	0 },
 {"cttc1",		"t,S",		0x41800023, 0xffe007ff, RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	0 },
-{"cttc2",		"t,g",		0x41800025, 0xffe007ff,	RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"cttc2",		"t,G",		0x41800025, 0xffe007ff,	RD_1|WR_CC|TRAP|CM,	0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
 {"cvt.d.l",		"D,S",		0x46a00021, 0xffff003f,	WR_1|RD_2|FP_D,		0,		I3_33,		0,	0 },
 {"cvt.d.s",		"D,S",		0x46000021, 0xffff003f,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	SF },
 {"cvt.d.w",		"D,S",		0x46800021, 0xffff003f,	WR_1|RD_2|FP_S|FP_D,	0,		I1,		0,	SF },
@@ -1556,14 +1555,14 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mttc0",		"t,G,H",	0x41800000, 0xffe007f8, RD_1|WR_C0|WR_CC|TRAP|CM, 0,		0,		MT32,	0 },
 {"mttc1",		"t,S",		0x41800022, 0xffe007ff, RD_1|WR_2|TRAP|CM|FP_S, 0,		0,		MT32,	0 },
 {"mttc1",		"t,G",		0x41800022, 0xffe007ff, RD_1|WR_2|TRAP|CM|FP_S, 0,		0,		MT32,	0 },
-{"mttc2",		"t,g",		0x41800024, 0xffe007ff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"mttc2",		"t,G",		0x41800024, 0xffe007ff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
 {"mttacx",		"t",		0x41801021, 0xffe0ffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
 {"mttacx",		"t,&",		0x41801021, 0xffe09fff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
 {"mttdsp",		"t",		0x41808021, 0xffe0ffff, RD_1|TRAP,		0,		0,		MT32,	0 },
 {"mttgpr",		"t,d",		0x41800020, 0xffe007ff, RD_1|WR_2|TRAP,		0,		0,		MT32,	0 },
 {"mtthc1",		"t,S",		0x41800032, 0xffe007ff, RD_1|WR_2|TRAP|CM|FP_D, 0,		0,		MT32,	0 },
 {"mtthc1",		"t,G",		0x41800032, 0xffe007ff, RD_1|WR_2|TRAP|CM|FP_D, 0,		0,		MT32,	0 },
-{"mtthc2",		"t,g",		0x41800034, 0xffe007ff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
+{"mtthc2",		"t,G",		0x41800034, 0xffe007ff,	RD_1|WR_C2|WR_CC|TRAP|CM, 0,		0,		MT32,	IOCT|IOCTP|IOCT2 },
 {"mtthi",		"t",		0x41800821, 0xffe0ffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
 {"mtthi",		"t,&",		0x41800821, 0xffe09fff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },
 {"mttlo",		"t",		0x41800021, 0xffe0ffff, RD_1|WR_a|TRAP,		0,		0,		MT32,	0 },

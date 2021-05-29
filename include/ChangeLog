@@ -1,3 +1,8 @@
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* opcode/mips.h: Complement change made to opcodes and remove
+	references to the `g' regular MIPS ISA operand code.
+
 2021-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27905

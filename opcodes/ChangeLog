@@ -1,5 +1,11 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* mips-opc.c (mips_builtin_opcodes): Switch "cttc2", "mttc2",
+	and "mtthc2" to using the `G' rather than `g' operand code for
+	the coprocessor control register referred.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* micromips-opc.c (micromips_opcodes): Swap the two "dmtc1"
 	entries with each other.
 
