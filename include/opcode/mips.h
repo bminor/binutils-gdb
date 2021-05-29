@@ -1459,13 +1459,6 @@ cpu_is_member (int cpu, unsigned int mask)
     case CPU_INTERAPTIV_MR2:
       return (mask & INSN_INTERAPTIV_MR2) != 0;
 
-    case CPU_MIPS32R6:
-      return (mask & INSN_ISA_MASK) == INSN_ISA32R6;
-
-    case CPU_MIPS64R6:
-      return ((mask & INSN_ISA_MASK) == INSN_ISA32R6)
-	     || ((mask & INSN_ISA_MASK) == INSN_ISA64R6);
-
     default:
       return false;
     }
@@ -1500,20 +1493,26 @@ isa_is_member (int isa, unsigned int mask)
 static inline bool
 opcode_is_member (const struct mips_opcode *insn, int isa, int ase, int cpu)
 {
-  if (!cpu_is_member (cpu, insn->exclusions))
-    {
-      /* Test for ISA level compatibility.  */
-      if (isa_is_member (isa, insn->membership))
-	return true;
+  /* Test for ISA level exclusion.  */
+  if (isa_is_member (isa, insn->exclusions))
+    return false;
 
-      /* Test for ASE compatibility.  */
-      if ((ase & insn->ase) != 0)
-	return true;
+  /* Test for processor-specific exclusion.  */
+  if (cpu_is_member (cpu, insn->exclusions))
+    return false;
 
-      /* Test for processor-specific extensions.  */
-      if (cpu_is_member (cpu, insn->membership))
-	return true;
-    }
+  /* Test for ISA level compatibility.  */
+  if (isa_is_member (isa, insn->membership))
+    return true;
+
+  /* Test for ASE compatibility.  */
+  if ((ase & insn->ase) != 0)
+    return true;
+
+  /* Test for processor-specific extensions.  */
+  if (cpu_is_member (cpu, insn->membership))
+    return true;
+
   return false;
 }
 

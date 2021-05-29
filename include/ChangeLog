@@ -1,5 +1,11 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* opcode/mips.h (cpu_is_member): Remove code for MIPSr6 ISA
+	exclusion.
+	(opcode_is_member): Handle ISA level exclusion.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* opcode/mips.h (isa_is_member): New inline function, factored
 	out from...
 	(opcode_is_member): ... here.
