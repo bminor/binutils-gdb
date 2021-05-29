@@ -1,5 +1,10 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* mips-opc.c (mips_builtin_opcodes): Reorder legacy COP0, COP2,
+	COP3 opcode instructions.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* mips-opc.c (mips_builtin_opcodes): Update exclusion list for
 	"ldc2", "ldc3", "lwc0", "lwc2", "lwc3", "sdc2", "sdc3", "swc0",
 	"swc2", "swc3", "cfc0", "ctc0", "bc2f", "bc2fl", "bc2t",
