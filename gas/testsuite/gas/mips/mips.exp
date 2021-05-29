@@ -1315,6 +1315,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "cp0-names-numeric"
     run_dump_test "cp0-names-r3000"
+    run_dump_test "cp0-names-r3900"
     run_dump_test "cp0-names-r4000" \
 		  { { {name} {(r4000)} } { {objdump} {-M cp0-names=r4000} } }
     run_dump_test "cp0-names-r4000" \

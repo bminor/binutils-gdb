@@ -1,5 +1,11 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* mips-dis.c (mips_cp0_names_r3900): New variable.
+	(mips_arch_choices): Use it rather than `mips_cp0_names_numeric'
+	for "r3900".
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* mips-opc.c (mips_builtin_opcodes): Switch "cttc2", "mttc2",
 	and "mtthc2" to using the `G' rather than `g' operand code for
 	the coprocessor control register referred.

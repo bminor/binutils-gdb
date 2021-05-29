@@ -1,5 +1,10 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/cp0-names-r3900.d: New test.
+	* testsuite/gas/mips/mips.exp: Run it.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* testsuite/gas/mips/micromips.d: Update disassembly according
 	to "dmtc1" entry fix with opcodes.
 	* testsuite/gas/mips/micromips-compact.d: Likewise.
