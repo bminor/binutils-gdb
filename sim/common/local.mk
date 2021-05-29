@@ -34,6 +34,7 @@ noinst_LIBRARIES += %D%/libcommon.a
 	-I../bfd \
 	-I..
 %C%_libcommon_a_SOURCES = \
+	%D%/portability.c \
 	%D%/sim-load.c \
 	%D%/version.c
 

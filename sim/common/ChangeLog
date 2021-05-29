@@ -1,5 +1,11 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (COMMON_OBJS_NAMES): Add portability.o.
+	* local.mk (%C%_libcommon_a_SOURCES): Add %D%/portability.c.
+	* portability.c, portability.h: New files.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (SIM_NEW_COMMON_OBJS): Move sim-load.o to ...
 	(COMMON_OBJS_NAMES): ... here.  Rename var from COMMON_OBJS.
 	(COMMON_OBJS): Redefine.

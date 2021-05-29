@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include "portability.h"
 #include "sim/callback.h"
 #include "gdb/signals.h"
 #include "sim-main.h"
@@ -73,25 +74,6 @@
 
 #include "dv-bfin_cec.h"
 #include "dv-bfin_mmu.h"
-
-#ifndef HAVE_GETUID
-# define getuid() 0
-#endif
-#ifndef HAVE_GETGID
-# define getgid() 0
-#endif
-#ifndef HAVE_GETEUID
-# define geteuid() 0
-#endif
-#ifndef HAVE_GETEGID
-# define getegid() 0
-#endif
-#ifndef HAVE_SETUID
-# define setuid(uid) -1
-#endif
-#ifndef HAVE_SETGID
-# define setgid(gid) -1
-#endif
 
 static const char cb_linux_stat_map_32[] =
 /* Linux kernel 32bit layout:  */

@@ -20,6 +20,7 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include "portability.h"
 #include "sim-main.h"
 #include "sim-syscall.h"
 #include "syscall.h"
