@@ -1,3 +1,11 @@
+2021-05-30  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_bfd) <num_psymtabs,
+	m_num_psymtabs>: Remove.
+	(resize_symtabs): Update.
+	* dwarf2/read.c (dwarf2_per_bfd::allocate_per_cu)
+	(dwarf2_per_bfd::allocate_signatured_type): Update.
+
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Fix tab after space indentation issues throughout.

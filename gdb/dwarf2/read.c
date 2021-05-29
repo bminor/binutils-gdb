@@ -2288,7 +2288,7 @@ dwarf2_per_bfd::allocate_per_cu ()
 {
   dwarf2_per_cu_data_up result (new dwarf2_per_cu_data);
   result->per_bfd = this;
-  result->index = m_num_psymtabs++;
+  result->index = all_comp_units.size ();
   return result;
 }
 
@@ -2299,7 +2299,7 @@ dwarf2_per_bfd::allocate_signatured_type ()
 {
   std::unique_ptr<signatured_type> result (new signatured_type);
   result->per_bfd = this;
-  result->index = m_num_psymtabs++;
+  result->index = all_comp_units.size ();
   tu_stats.nr_tus++;
   return result;
 }

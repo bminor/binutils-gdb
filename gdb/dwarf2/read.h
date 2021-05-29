@@ -124,11 +124,6 @@ struct dwarf2_per_bfd
      is allocated on the dwarf2_per_bfd obstack.  */
   std::unique_ptr<signatured_type> allocate_signatured_type ();
 
-  /* Return the number of partial symtabs allocated with allocate_per_cu
-     and allocate_signatured_type so far.  */
-  int num_psymtabs () const
-  { return m_num_psymtabs; }
-
 private:
   /* This function is mapped across the sections and remembers the
      offset and size of each of the debugging sections we are
@@ -249,12 +244,6 @@ public:
 
   /* The address map that is used by the DWARF index code.  */
   struct addrmap *index_addrmap = nullptr;
-
-private:
-
-  /* The total number of per_cu and signatured_type objects that have
-     been created so far for this reader.  */
-  size_t m_num_psymtabs = 0;
 };
 
 /* This is the per-objfile data associated with a type_unit_group.  */
@@ -307,9 +296,9 @@ struct dwarf2_per_objfile
   void resize_symtabs ()
   {
     /* The symtabs vector should only grow, not shrink.  */
-    gdb_assert (per_bfd->num_psymtabs () >= m_symtabs.size ());
+    gdb_assert (per_bfd->all_comp_units.size () >= m_symtabs.size ());
 
-    m_symtabs.resize (per_bfd->num_psymtabs ());
+    m_symtabs.resize (per_bfd->all_comp_units.size ());
   }
 
   /* Return true if the symtab corresponding to PER_CU has been set,
