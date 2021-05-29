@@ -1333,6 +1333,11 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "cp0sel-names-mips64r2"
     run_dump_test "cp0sel-names-sb1"
 
+    run_dump_test_arches "cp0c"		[mips_arch_list_matching mips1 \
+					    !mips32 !micromips]
+    run_dump_test_arches "cp0m"		[mips_arch_list_matching mips1 \
+					    !mips2 !micromips]
+
     run_dump_test "cp1-names-numeric"
     run_dump_test "cp1-names-r3000"
     run_dump_test "cp1-names-r4000" \
@@ -1344,6 +1349,22 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "cp1-names-mips64"
     run_dump_test "cp1-names-mips64r2"
     run_dump_test "cp1-names-sb1"
+
+    run_dump_test_arches "cp2"		[mips_arch_list_matching mips1 \
+					    !vr5400 !r5900 !octeon]
+    run_dump_test_arches "cp2-64"	[mips_arch_list_matching mips3 \
+					    !vr5400 !r5900 !octeon]
+    run_dump_test_arches "cp2m"		[mips_arch_list_matching mips1 \
+					    !vr5400 !r5900 !octeon]
+    run_dump_test_arches "cp2d"		[mips_arch_list_matching mips2 \
+					    !vr5400 !r5900 !octeon]
+
+    run_dump_test_arches "cp3"		[mips_arch_list_matching mips1 \
+					    !mips3 !mips32r2 !micromips]
+    run_dump_test_arches "cp3m"		[mips_arch_list_matching mips1 \
+					    !mips3 !mips32 !micromips]
+    run_dump_test_arches "cp3d"		[mips_arch_list_matching mips2 \
+					    !mips3 !mips32 !micromips]
 
     run_dump_test "hwr-names-numeric"
     run_dump_test "hwr-names-mips32r2"

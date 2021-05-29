@@ -1,5 +1,34 @@
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
+	* testsuite/gas/mips/cp0c.d: New test.
+	* testsuite/gas/mips/cp0m.d: New test.
+	* testsuite/gas/mips/r3900@cp0m.d: New test.
+	* testsuite/gas/mips/cp2.d: New test.
+	* testsuite/gas/mips/micromips@cp2.d: New test.
+	* testsuite/gas/mips/cp2m.d: New test.
+	* testsuite/gas/mips/mipsr6@cp2m.d: New test.
+	* testsuite/gas/mips/micromips@cp2m.d: New test.
+	* testsuite/gas/mips/cp2d.d: New test.
+	* testsuite/gas/mips/mipsr6@cp2d.d: New test.
+	* testsuite/gas/mips/micromips@cp2d.d: New test.
+	* testsuite/gas/mips/cp2-64.d: New test.
+	* testsuite/gas/mips/micromips@cp2-64.d: New test.
+	* testsuite/gas/mips/cp3.d: New test.
+	* testsuite/gas/mips/cp3m.d: New test.
+	* testsuite/gas/mips/cp3d.d: New test.
+	* testsuite/gas/mips/cp0c.s: New test source.
+	* testsuite/gas/mips/cp0m.s: New test source.
+	* testsuite/gas/mips/cp2.s: New test source.
+	* testsuite/gas/mips/cp2m.s: New test source.
+	* testsuite/gas/mips/cp2d.s: New test source.
+	* testsuite/gas/mips/cp2-64.s: New test source.
+	* testsuite/gas/mips/cp3.s: New test source.
+	* testsuite/gas/mips/cp3m.s: New test source.
+	* testsuite/gas/mips/cp3d.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
+2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
+
 	* tc-mips.c (convert_reg_type) <OP_REG_CONTROL>: New case.
 	(macro) <M_TRUNCWS, M_TRUNCWD>: Use the `g' rather than `G'
 	operand code.
