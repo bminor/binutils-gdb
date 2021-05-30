@@ -36,7 +36,6 @@
 #include "gdb/gdb-index.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
-#include "psympriv.h"
 #include "ada-lang.h"
 
 #include <algorithm>
@@ -412,11 +411,9 @@ typedef std::unordered_map<dwarf2_per_cu_data *, unsigned int> cu_index_map;
 /* Helper struct for building the address table.  */
 struct addrmap_index_data
 {
-  addrmap_index_data (data_buf &addr_vec_, cu_index_map &cu_index_htab_,
-		      bool using_index_)
+  addrmap_index_data (data_buf &addr_vec_, cu_index_map &cu_index_htab_)
     : addr_vec (addr_vec_),
-      cu_index_htab (cu_index_htab_),
-      using_index (using_index_)
+      cu_index_htab (cu_index_htab_)
   {}
 
   data_buf &addr_vec;
@@ -424,8 +421,6 @@ struct addrmap_index_data
 
   int operator() (CORE_ADDR start_addr, void *obj);
 
-  /* True if the DWARF reader uses the new DWARF indexer.  */
-  bool using_index;
   /* True if the previous_* fields are valid.
      We can't write an entry until we see the next entry (since it is only then
      that we know the end of the entry).  */
@@ -452,11 +447,7 @@ add_address_entry (data_buf &addr_vec,
 int
 addrmap_index_data::operator() (CORE_ADDR start_addr, void *obj)
 {
-  dwarf2_per_cu_data *per_cu;
-  if (using_index)
-    per_cu = (dwarf2_per_cu_data *) obj;
-  else
-    per_cu = obj == nullptr ? nullptr : ((dwarf2_psymtab *) obj)->per_cu_data;
+  dwarf2_per_cu_data *per_cu = (dwarf2_per_cu_data *) obj;
 
   if (previous_valid)
     add_address_entry (addr_vec,
@@ -483,10 +474,9 @@ addrmap_index_data::operator() (CORE_ADDR start_addr, void *obj)
 
 static void
 write_address_map (struct addrmap *addrmap, data_buf &addr_vec,
-		   cu_index_map &cu_index_htab, bool using_index)
+		   cu_index_map &cu_index_htab)
 {
-  struct addrmap_index_data addrmap_index_data (addr_vec, cu_index_htab,
-						using_index);
+  struct addrmap_index_data addrmap_index_data (addr_vec, cu_index_htab);
 
   addrmap_foreach (addrmap, addrmap_index_data);
 
@@ -499,142 +489,6 @@ write_address_map (struct addrmap *addrmap, data_buf &addr_vec,
     add_address_entry (addr_vec,
 		       addrmap_index_data.previous_cu_start, (CORE_ADDR) -1,
 		       addrmap_index_data.previous_cu_index);
-}
-
-/* Return the symbol kind of PSYM.  */
-
-static gdb_index_symbol_kind
-symbol_kind (struct partial_symbol *psym)
-{
-  domain_enum domain = psym->domain;
-  enum address_class aclass = psym->aclass;
-
-  switch (domain)
-    {
-    case VAR_DOMAIN:
-      switch (aclass)
-	{
-	case LOC_BLOCK:
-	  return GDB_INDEX_SYMBOL_KIND_FUNCTION;
-	case LOC_TYPEDEF:
-	  return GDB_INDEX_SYMBOL_KIND_TYPE;
-	case LOC_COMPUTED:
-	case LOC_CONST_BYTES:
-	case LOC_OPTIMIZED_OUT:
-	case LOC_STATIC:
-	  return GDB_INDEX_SYMBOL_KIND_VARIABLE;
-	case LOC_CONST:
-	  /* Note: It's currently impossible to recognize psyms as enum values
-	     short of reading the type info.  For now punt.  */
-	  return GDB_INDEX_SYMBOL_KIND_VARIABLE;
-	default:
-	  /* There are other LOC_FOO values that one might want to classify
-	     as variables, but dwarf2read.c doesn't currently use them.  */
-	  return GDB_INDEX_SYMBOL_KIND_OTHER;
-	}
-    case STRUCT_DOMAIN:
-      return GDB_INDEX_SYMBOL_KIND_TYPE;
-    default:
-      return GDB_INDEX_SYMBOL_KIND_OTHER;
-    }
-}
-
-/* Add a list of partial symbols to SYMTAB.  */
-
-static void
-write_psymbols (struct mapped_symtab *symtab,
-		std::unordered_set<partial_symbol *> &psyms_seen,
-		const std::vector<partial_symbol *> &symbols,
-		offset_type cu_index,
-		int is_static)
-{
-  for (partial_symbol *psym : symbols)
-    {
-      const char *name = psym->ginfo.search_name ();
-
-      if (psym->ginfo.language () == language_ada)
-	{
-	  /* We want to ensure that the Ada main function's name appears
-	     verbatim in the index.  However, this name will be of the
-	     form "_ada_mumble", and will be rewritten by ada_decode.
-	     So, recognize it specially here and add it to the index by
-	     hand.  */
-	  if (strcmp (main_name (), name) == 0)
-	    {
-	      gdb_index_symbol_kind kind = symbol_kind (psym);
-
-	      add_index_entry (symtab, name, is_static, kind, cu_index);
-	    }
-
-	  /* In order for the index to work when read back into gdb, it
-	     has to supply a funny form of the name: it should be the
-	     encoded name, with any suffixes stripped.  Using the
-	     ordinary encoded name will not work properly with the
-	     searching logic in find_name_components_bounds; nor will
-	     using the decoded name.  Furthermore, an Ada "verbatim"
-	     name (of the form "<MumBle>") must be entered without the
-	     angle brackets.  Note that the current index is unusual,
-	     see PR symtab/24820 for details.  */
-	  std::string decoded = ada_decode (name);
-	  if (decoded[0] == '<')
-	    name = (char *) obstack_copy0 (&symtab->m_string_obstack,
-					   decoded.c_str () + 1,
-					   decoded.length () - 2);
-	  else
-	    name = obstack_strdup (&symtab->m_string_obstack,
-				   ada_encode (decoded.c_str ()));
-	}
-
-      /* Only add a given psymbol once.  */
-      if (psyms_seen.insert (psym).second)
-	{
-	  gdb_index_symbol_kind kind = symbol_kind (psym);
-
-	  add_index_entry (symtab, name, is_static, kind, cu_index);
-	}
-    }
-}
-
-/* Recurse into all "included" dependencies and count their symbols as
-   if they appeared in this psymtab.  */
-
-static void
-recursively_count_psymbols (partial_symtab *psymtab,
-			    size_t &psyms_seen)
-{
-  for (int i = 0; i < psymtab->number_of_dependencies; ++i)
-    if (psymtab->dependencies[i]->user != NULL)
-      recursively_count_psymbols (psymtab->dependencies[i],
-				  psyms_seen);
-
-  psyms_seen += psymtab->global_psymbols.size ();
-  psyms_seen += psymtab->static_psymbols.size ();
-}
-
-/* Recurse into all "included" dependencies and write their symbols as
-   if they appeared in this psymtab.  */
-
-static void
-recursively_write_psymbols (struct objfile *objfile,
-			    partial_symtab *psymtab,
-			    struct mapped_symtab *symtab,
-			    std::unordered_set<partial_symbol *> &psyms_seen,
-			    offset_type cu_index)
-{
-  int i;
-
-  for (i = 0; i < psymtab->number_of_dependencies; ++i)
-    if (psymtab->dependencies[i]->user != NULL)
-      recursively_write_psymbols (objfile,
-				  psymtab->dependencies[i],
-				  symtab, psyms_seen, cu_index);
-
-  write_psymbols (symtab, psyms_seen,
-		  psymtab->global_psymbols, cu_index,
-		  0);
-  write_psymbols (symtab, psyms_seen,
-		  psymtab->static_psymbols, cu_index,
-		  1);
 }
 
 /* DWARF-5 .debug_names builder.  */
@@ -708,18 +562,6 @@ public:
 				     std::set<symbol_value> ());
     std::set<symbol_value> &value_set = insertpair.first->second;
     value_set.emplace (symbol_value (dwarf_tag, cu_index, is_static, kind));
-  }
-
-  void insert (const partial_symbol *psym, int cu_index, bool is_static,
-	       unit_kind kind)
-  {
-    const int dwarf_tag = psymbol_tag (psym);
-    if (dwarf_tag == 0)
-      return;
-    const char *name = psym->ginfo.search_name ();
-
-    insert (dwarf_tag, name, cu_index, is_static, kind,
-	    psym->ginfo.language ());
   }
 
   void insert (const cooked_index_entry *entry)
@@ -861,25 +703,6 @@ public:
   {
     gdb_assert (!m_abbrev_table.empty ());
     return m_abbrev_table.size ();
-  }
-
-  /* Recurse into all "included" dependencies and store their symbols
-     as if they appeared in this psymtab.  */
-  void recursively_write_psymbols
-    (struct objfile *objfile,
-     partial_symtab *psymtab,
-     std::unordered_set<partial_symbol *> &psyms_seen,
-     int cu_index)
-  {
-    for (int i = 0; i < psymtab->number_of_dependencies; ++i)
-      if (psymtab->dependencies[i]->user != NULL)
-	recursively_write_psymbols
-	  (objfile, psymtab->dependencies[i], psyms_seen, cu_index);
-
-    write_psymbols (psyms_seen, psymtab->global_psymbols,
-		    cu_index, false, unit_kind::cu);
-    write_psymbols (psyms_seen, psymtab->static_psymbols,
-		    cu_index, true, unit_kind::cu);
   }
 
   /* Return number of bytes the .debug_names section will have.  This
@@ -1148,59 +971,6 @@ private:
     offset_vec_tmpl<OffsetSize> m_name_table_entry_offs;
   };
 
-  /* Try to reconstruct original DWARF tag for given partial_symbol.
-     This function is not DWARF-5 compliant but it is sufficient for
-     GDB as a DWARF-5 index consumer.  */
-  static int psymbol_tag (const struct partial_symbol *psym)
-  {
-    domain_enum domain = psym->domain;
-    enum address_class aclass = psym->aclass;
-
-    switch (domain)
-      {
-      case VAR_DOMAIN:
-	switch (aclass)
-	  {
-	  case LOC_BLOCK:
-	    return DW_TAG_subprogram;
-	  case LOC_TYPEDEF:
-	    return DW_TAG_typedef;
-	  case LOC_COMPUTED:
-	  case LOC_CONST_BYTES:
-	  case LOC_OPTIMIZED_OUT:
-	  case LOC_STATIC:
-	    return DW_TAG_variable;
-	  case LOC_CONST:
-	    /* Note: It's currently impossible to recognize psyms as enum values
-	       short of reading the type info.  For now punt.  */
-	    return DW_TAG_variable;
-	  default:
-	    /* There are other LOC_FOO values that one might want to classify
-	       as variables, but dwarf2read.c doesn't currently use them.  */
-	    return DW_TAG_variable;
-	  }
-      case STRUCT_DOMAIN:
-	return DW_TAG_structure_type;
-      case MODULE_DOMAIN:
-	return DW_TAG_module;
-      default:
-	return 0;
-      }
-  }
-
-  /* Call insert for all partial symbols and mark them in PSYMS_SEEN.  */
-  void write_psymbols (std::unordered_set<partial_symbol *> &psyms_seen,
-		       const std::vector<partial_symbol *> &symbols,
-		       int cu_index, bool is_static, unit_kind kind)
-  {
-    for (partial_symbol *psym : symbols)
-      {
-	/* Only add a given psymbol once.  */
-	if (psyms_seen.insert (psym).second)
-	  insert (psym, cu_index, is_static, kind);
-      }
-  }
-
   /* Store value of each symbol.  */
   std::unordered_map<c_str_view, std::set<symbol_value>, c_str_view_hasher>
     m_name_to_value_set;
@@ -1250,31 +1020,6 @@ check_dwarf64_offsets (dwarf2_per_objfile *per_objfile)
 	return true;
     }
   return false;
-}
-
-/* The psyms_seen set is potentially going to be largish (~40k
-   elements when indexing a -g3 build of GDB itself).  Estimate the
-   number of elements in order to avoid too many rehashes, which
-   require rebuilding buckets and thus many trips to
-   malloc/free.  */
-
-static size_t
-psyms_seen_size (dwarf2_per_objfile *per_objfile)
-{
-  if (per_objfile->per_bfd->using_index)
-    return 0;
-
-  size_t psyms_count = 0;
-  for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
-    {
-      partial_symtab *psymtab = per_cu->v.psymtab;
-
-      if (psymtab != NULL && psymtab->user == NULL)
-	recursively_count_psymbols (psymtab, psyms_count);
-    }
-  /* Generating an index for gdb itself shows a ratio of
-     TOTAL_SEEN_SYMS/UNIQUE_SYMS or ~5.  4 seems like a good bet.  */
-  return psyms_count / 4;
 }
 
 /* Assert that FILE's size is EXPECTED_SIZE.  Assumes file's seek
@@ -1346,8 +1091,6 @@ write_cooked_index (dwarf2_per_objfile *per_objfile,
 		    const cu_index_map &cu_index_htab,
 		    struct mapped_symtab *symtab)
 {
-  gdb_assert (per_objfile->per_bfd->using_index);
-
   for (const cooked_index_entry *entry
 	 : per_objfile->per_bfd->cooked_index_table->all_entries ())
     {
@@ -1383,7 +1126,6 @@ static void
 write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
 		FILE *dwz_out_file)
 {
-  struct objfile *objfile = per_objfile->objfile;
   mapped_symtab symtab;
   data_buf objfile_cu_list;
   data_buf dwz_cu_list;
@@ -1402,33 +1144,17 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
      work here.  Also, the debug_types entries do not appear in
      all_comp_units, but only in their own hash table.  */
 
-  std::unordered_set<partial_symbol *> psyms_seen
-    (psyms_seen_size (per_objfile));
   int counter = 0;
   int types_counter = 0;
   for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
     {
       dwarf2_per_cu_data *per_cu
 	= per_objfile->per_bfd->all_comp_units[i].get ();
-      partial_symtab *psymtab = (per_objfile->per_bfd->using_index
-				 ? nullptr
-				 : per_cu->v.psymtab);
 
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
 
-      if (psymtab != NULL)
-	{
-	  if (psymtab->user == NULL)
-	    recursively_write_psymbols (objfile, psymtab, &symtab,
-					psyms_seen, this_counter);
-	}
-
-      if (psymtab != NULL || per_objfile->per_bfd->using_index)
-	{
-	  const auto insertpair = cu_index_htab.emplace (per_cu,
-							 this_counter);
-	  gdb_assert (insertpair.second);
-	}
+      const auto insertpair = cu_index_htab.emplace (per_cu, this_counter);
+      gdb_assert (insertpair.second);
 
       /* The all_comp_units list contains CUs read from the objfile as well as
 	 from the eventual dwz file.  We need to place the entry in the
@@ -1452,21 +1178,14 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
       ++this_counter;
     }
 
-  if (per_objfile->per_bfd->using_index)
-    write_cooked_index (per_objfile, cu_index_htab, &symtab);
+  write_cooked_index (per_objfile, cu_index_htab, &symtab);
 
   /* Dump the address map.  */
   data_buf addr_vec;
-  if (per_objfile->per_bfd->using_index)
-    {
-      std::vector<addrmap *> addrmaps
-	= per_objfile->per_bfd->cooked_index_table->get_addrmaps ();
-      for (auto map : addrmaps)
-	write_address_map (map, addr_vec, cu_index_htab, true);
-    }
-  else
-    write_address_map (per_objfile->per_bfd->partial_symtabs->psymtabs_addrmap,
-		       addr_vec, cu_index_htab, false);
+  std::vector<addrmap *> addrmaps
+    = per_objfile->per_bfd->cooked_index_table->get_addrmaps ();
+  for (auto map : addrmaps)
+    write_address_map (map, addr_vec, cu_index_htab);
 
   /* Now that we've processed all symbols we can shrink their cu_indices
      lists.  */
@@ -1509,8 +1228,6 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
   data_buf cu_list;
   data_buf types_cu_list;
   debug_names nametable (per_objfile, dwarf5_is_dwarf64, dwarf5_byte_order);
-  std::unordered_set<partial_symbol *>
-    psyms_seen (psyms_seen_size (per_objfile));
   int counter = 0;
   int types_counter = 0;
   for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
@@ -1520,13 +1237,6 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
 
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
       data_buf &this_list = per_cu->is_debug_types ? types_cu_list : cu_list;
-      partial_symtab *psymtab = (per_objfile->per_bfd->using_index
-				 ? nullptr
-				 : per_cu->v.psymtab);
-
-      if (psymtab != nullptr && psymtab->user == nullptr)
-	nametable.recursively_write_psymbols (objfile, psymtab, psyms_seen,
-					      this_counter);
 
       nametable.add_cu (per_cu, this_counter);
       this_list.append_uint (nametable.dwarf5_offset_size (),
@@ -1540,10 +1250,9 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
 			  - per_objfile->per_bfd->tu_stats.nr_tus));
   gdb_assert (types_counter == per_objfile->per_bfd->tu_stats.nr_tus);
 
-  if (per_objfile->per_bfd->using_index)
-    for (const cooked_index_entry *entry
-	   : per_objfile->per_bfd->cooked_index_table->all_entries ())
-      nametable.insert (entry);
+  for (const cooked_index_entry *entry
+	 : per_objfile->per_bfd->cooked_index_table->all_entries ())
+    nametable.insert (entry);
 
   nametable.build ();
 
@@ -1677,21 +1386,18 @@ write_dwarf_index (dwarf2_per_objfile *per_objfile, const char *dir,
 		   const char *basename, const char *dwz_basename,
 		   dw_index_kind index_kind)
 {
-  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct objfile *objfile = per_objfile->objfile;
 
-  if (per_objfile->per_bfd->using_index
-      && per_objfile->per_bfd->cooked_index_table == nullptr)
-    error (_("Cannot use an index to create the index"));
+  if (per_objfile->per_bfd->cooked_index_table == nullptr)
+    {
+      if (per_objfile->per_bfd->index_table != nullptr
+	  || per_objfile->per_bfd->debug_names_table != nullptr)
+	error (_("Cannot use an index to create the index"));
+      error (_("No debugging symbols"));
+    }
 
   if (per_objfile->per_bfd->types.size () > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));
-
-  if ((per_bfd->partial_symtabs == nullptr
-       || !per_bfd->partial_symtabs->psymtabs
-       || !per_bfd->partial_symtabs->psymtabs_addrmap)
-      && per_bfd->cooked_index_table == nullptr)
-    return;
 
   struct stat st;
   if (stat (objfile_name (objfile), &st) < 0)

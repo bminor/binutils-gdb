@@ -59,9 +59,6 @@ struct file_entry
 
   unsigned int length {};
 
-  /* True if referenced by the Line Number Program.  */
-  bool included_p {};
-
   /* The associated symbol table, if any.  */
   struct symtab *symtab {};
 };

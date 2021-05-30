@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "dwarf2/cu.h"
 #include "dwarf2/read.h"
+#include "objfiles.h"
 
 /* Initialize dwarf2_cu to read PER_CU, in the context of PER_OBJFILE.  */
 

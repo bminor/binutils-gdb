@@ -40,7 +40,7 @@ extern void dwarf2_initialize_objfile (struct objfile *objfile);
 
 struct psymbol_functions;
 extern void dwarf2_build_psymtabs (struct objfile *,
-				   psymbol_functions *psf = nullptr);
+				   bool already_attached = false);
 extern void dwarf2_build_frame_info (struct objfile *);
 
 #endif /* DWARF2_PUBLIC_H */
