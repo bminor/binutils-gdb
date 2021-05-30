@@ -2300,6 +2300,7 @@ dwarf2_per_bfd::allocate_signatured_type ()
   std::unique_ptr<signatured_type> result (new signatured_type);
   result->per_bfd = this;
   result->index = all_comp_units.size ();
+  result->is_debug_types = true;
   tu_stats.nr_tus++;
   return result;
 }
@@ -2398,7 +2399,6 @@ create_signatured_type_table_from_index
       sig_type = per_bfd->allocate_signatured_type ();
       sig_type->signature = signature;
       sig_type->type_offset_in_tu = type_offset_in_tu;
-      sig_type->is_debug_types = 1;
       sig_type->section = section;
       sig_type->sect_off = sect_off;
       sig_type->v.quick
@@ -2450,7 +2450,6 @@ create_signatured_type_table_from_debug_names
       sig_type = per_objfile->per_bfd->allocate_signatured_type ();
       sig_type->signature = cu_header.signature;
       sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
-      sig_type->is_debug_types = 1;
       sig_type->section = section;
       sig_type->sect_off = sect_off;
       sig_type->v.quick
@@ -5896,7 +5895,6 @@ add_type_unit (dwarf2_per_objfile *per_objfile, ULONGEST sig, void **slot)
   per_objfile->per_bfd->all_comp_units.emplace_back
     (sig_type_holder.release ());
   sig_type->signature = sig;
-  sig_type->is_debug_types = 1;
   if (per_objfile->per_bfd->using_index)
     {
       sig_type->v.quick =
@@ -7500,7 +7498,6 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 		       hex_string (sig_ptr->signature));
 	  *slot = sig_ptr;
 	}
-      this_cu->is_debug_types = (cu_header.unit_type == DW_UT_type);
       this_cu->sect_off = sect_off;
       this_cu->length = cu_header.length + cu_header.initial_length_size;
       this_cu->is_dwz = is_dwz;
