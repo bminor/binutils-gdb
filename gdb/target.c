@@ -2701,7 +2701,8 @@ target_program_signals (gdb::array_view<const unsigned char> program_signals)
 }
 
 static void
-default_follow_fork (struct target_ops *self, bool follow_child,
+default_follow_fork (struct target_ops *self, ptid_t child_ptid,
+		     target_waitkind fork_kind, bool follow_child,
 		     bool detach_fork)
 {
   /* Some target returned a fork event, but did not know how to follow it.  */
@@ -2712,11 +2713,12 @@ default_follow_fork (struct target_ops *self, bool follow_child,
 /* See target.h.  */
 
 void
-target_follow_fork (bool follow_child, bool detach_fork)
+target_follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
+		    bool follow_child, bool detach_fork)
 {
   target_ops *target = current_inferior ()->top_target ();
 
-  return target->follow_fork (follow_child, detach_fork);
+  return target->follow_fork (child_ptid, fork_kind, follow_child, detach_fork);
 }
 
 /* See target.h.  */

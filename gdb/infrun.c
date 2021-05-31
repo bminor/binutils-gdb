@@ -404,13 +404,12 @@ show_follow_fork_mode_string (struct ui_file *file, int from_tty,
 static bool
 follow_fork_inferior (bool follow_child, bool detach_fork)
 {
-  int has_vforked;
-  ptid_t parent_ptid, child_ptid;
-
-  has_vforked = (inferior_thread ()->pending_follow.kind
-		 == TARGET_WAITKIND_VFORKED);
-  parent_ptid = inferior_ptid;
-  child_ptid = inferior_thread ()->pending_follow.value.related_pid;
+  target_waitkind fork_kind = inferior_thread ()->pending_follow.kind;
+  gdb_assert (fork_kind == TARGET_WAITKIND_FORKED
+	      || fork_kind == TARGET_WAITKIND_VFORKED);
+  bool has_vforked = fork_kind == TARGET_WAITKIND_VFORKED;
+  ptid_t parent_ptid = inferior_ptid;
+  ptid_t child_ptid = inferior_thread ()->pending_follow.value.related_pid;
 
   if (has_vforked
       && !non_stop /* Non-stop always resumes both branches.  */
@@ -649,7 +648,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       switch_to_thread (child_thr);
     }
 
-  target_follow_fork (follow_child, detach_fork);
+  target_follow_fork (child_ptid, fork_kind, follow_child, detach_fork);
 
   /* If we ended up creating a new inferior, call post_create_inferior to inform
      the various subcomponents.  */

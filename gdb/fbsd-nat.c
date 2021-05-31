@@ -1471,12 +1471,12 @@ fbsd_nat_target::create_inferior (const char *exec_file,
    the ptid of the followed inferior.  */
 
 void
-fbsd_nat_target::follow_fork (bool follow_child, bool detach_fork)
+fbsd_nat_target::follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
+			      bool follow_child, bool detach_fork)
 {
   if (!follow_child && detach_fork)
     {
-      struct thread_info *tp = inferior_thread ();
-      pid_t child_pid = tp->pending_follow.value.related_pid.pid ();
+      pid_t child_pid = child_ptid.pid ();
 
       /* Breakpoints have already been detached from the child by
 	 infrun.c.  */
@@ -1485,7 +1485,7 @@ fbsd_nat_target::follow_fork (bool follow_child, bool detach_fork)
 	perror_with_name (("ptrace"));
 
 #ifndef PTRACE_VFORK
-      if (tp->pending_follow.kind == TARGET_WAITKIND_VFORKED)
+      if (fork_kind == TARGET_WAITKIND_VFORKED)
 	{
 	  /* We can't insert breakpoints until the child process has
 	     finished with the shared memory region.  The parent

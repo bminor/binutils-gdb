@@ -194,17 +194,15 @@ obsd_nat_target::post_startup_inferior (ptid_t pid)
    the ptid of the followed inferior.  */
 
 void
-obsd_nat_target::follow_fork (bool follow_child, bool detach_fork)
+obsd_nat_target::follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
+			      bool follow_child, bool detach_fork)
 {
   if (!follow_child)
     {
-      struct thread_info *tp = inferior_thread ();
-      pid_t child_pid = tp->pending_follow.value.related_pid.pid ();
-
       /* Breakpoints have already been detached from the child by
 	 infrun.c.  */
 
-      if (ptrace (PT_DETACH, child_pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
+      if (ptrace (PT_DETACH, child_ptid.pid (), (PTRACE_TYPE_ARG3)1, 0) == -1)
 	perror_with_name (("ptrace"));
     }
 }

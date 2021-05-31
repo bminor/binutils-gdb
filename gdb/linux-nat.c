@@ -449,24 +449,19 @@ typedef std::unique_ptr<struct lwp_info, lwp_deleter> lwp_info_up;
    unchanged.  */
 
 void
-linux_nat_target::follow_fork (bool follow_child, bool detach_fork)
+linux_nat_target::follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
+			       bool follow_child, bool detach_fork)
 {
   if (!follow_child)
     {
-      struct lwp_info *child_lp = NULL;
-      int has_vforked;
-      ptid_t parent_ptid, child_ptid;
-      int parent_pid, child_pid;
-
-      has_vforked = (inferior_thread ()->pending_follow.kind
-		     == TARGET_WAITKIND_VFORKED);
-      parent_ptid = inferior_ptid;
+      bool has_vforked = fork_kind == TARGET_WAITKIND_VFORKED;
+      ptid_t parent_ptid = inferior_ptid;
       child_ptid = inferior_thread ()->pending_follow.value.related_pid;
-      parent_pid = parent_ptid.lwp ();
-      child_pid = child_ptid.lwp ();
+      int parent_pid = parent_ptid.lwp ();
+      int child_pid = child_ptid.lwp ();
 
       /* We're already attached to the parent, by default.  */
-      child_lp = add_lwp (child_ptid);
+      lwp_info *child_lp = add_lwp (child_ptid);
       child_lp->stopped = 1;
       child_lp->last_resume_kind = resume_stop;
 

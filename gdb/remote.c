@@ -682,7 +682,7 @@ public:
 
   const struct btrace_config *btrace_conf (const struct btrace_target_info *) override;
   bool augmented_libraries_svr4_read () override;
-  void follow_fork (bool, bool) override;
+  void follow_fork (ptid_t, target_waitkind, bool, bool) override;
   void follow_exec (inferior *, ptid_t, const char *) override;
   int insert_fork_catchpoint (int) override;
   int remove_fork_catchpoint (int) override;
@@ -5920,13 +5920,13 @@ extended_remote_target::detach (inferior *inf, int from_tty)
    remote target as well.  */
 
 void
-remote_target::follow_fork (bool follow_child, bool detach_fork)
+remote_target::follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
+			    bool follow_child, bool detach_fork)
 {
   struct remote_state *rs = get_remote_state ();
-  enum target_waitkind kind = inferior_thread ()->pending_follow.kind;
 
-  if ((kind == TARGET_WAITKIND_FORKED && remote_fork_event_p (rs))
-      || (kind == TARGET_WAITKIND_VFORKED && remote_vfork_event_p (rs)))
+  if ((fork_kind == TARGET_WAITKIND_FORKED && remote_fork_event_p (rs))
+      || (fork_kind == TARGET_WAITKIND_VFORKED && remote_vfork_event_p (rs)))
     {
       /* When following the parent and detaching the child, we detach
 	 the child here.  For the case of following the child and
@@ -5937,13 +5937,7 @@ remote_target::follow_fork (bool follow_child, bool detach_fork)
       if (detach_fork && !follow_child)
 	{
 	  /* Detach the fork child.  */
-	  ptid_t child_ptid;
-	  pid_t child_pid;
-
-	  child_ptid = inferior_thread ()->pending_follow.value.related_pid;
-	  child_pid = child_ptid.pid ();
-
-	  remote_detach_pid (child_pid);
+	  remote_detach_pid (child_ptid.pid ());
 	}
     }
 }
