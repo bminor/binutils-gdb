@@ -305,6 +305,8 @@ struct signatured_type : public dwarf2_per_cu_data
   struct dwo_unit *dwo_unit = nullptr;
 };
 
+using signatured_type_up = std::unique_ptr<signatured_type>;
+
 /* Some DWARF data can be shared across objfiles who share the same BFD,
    this data is stored in this object.
 
@@ -339,7 +341,7 @@ struct dwarf2_per_bfd
   /* A convenience function to allocate a signatured_type.  The
      returned object has its "index" field set properly.  The object
      is allocated on the dwarf2_per_bfd obstack.  */
-  std::unique_ptr<signatured_type> allocate_signatured_type ();
+  signatured_type_up allocate_signatured_type ();
 
 private:
   /* This function is mapped across the sections and remembers the

@@ -1,5 +1,9 @@
 2021-05-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2/read.h (signatured_type_up): New, use where possible.
+
+2021-05-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.h (signatured_type, dwarf2_per_cu_data): Move up.
 
 2021-05-30  Tom Tromey  <tom@tromey.com>

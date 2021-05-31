@@ -2294,10 +2294,10 @@ dwarf2_per_bfd::allocate_per_cu ()
 
 /* See read.h.  */
 
-std::unique_ptr<signatured_type>
+signatured_type_up
 dwarf2_per_bfd::allocate_signatured_type ()
 {
-  std::unique_ptr<signatured_type> result (new signatured_type);
+  signatured_type_up result (new signatured_type);
   result->per_bfd = this;
   result->index = all_comp_units.size ();
   result->is_debug_types = true;
@@ -2382,7 +2382,7 @@ create_signatured_type_table_from_index
 
   for (offset_type i = 0; i < elements; i += 3)
     {
-      std::unique_ptr<signatured_type> sig_type;
+      signatured_type_up sig_type;
       ULONGEST signature;
       void **slot;
       cu_offset type_offset_in_tu;
@@ -2432,7 +2432,7 @@ create_signatured_type_table_from_debug_names
 
   for (uint32_t i = 0; i < map.tu_count; ++i)
     {
-      std::unique_ptr<signatured_type> sig_type;
+      signatured_type_up sig_type;
       void **slot;
 
       sect_offset sect_off
@@ -5796,7 +5796,7 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
   end_ptr = info_ptr + section->size;
   while (info_ptr < end_ptr)
     {
-      std::unique_ptr<signatured_type> sig_type;
+      signatured_type_up sig_type;
       struct dwo_unit *dwo_tu;
       void **slot;
       const gdb_byte *ptr = info_ptr;
@@ -5886,7 +5886,7 @@ add_type_unit (dwarf2_per_objfile *per_objfile, ULONGEST sig, void **slot)
       == per_objfile->per_bfd->all_comp_units.capacity ())
     ++per_objfile->per_bfd->tu_stats.nr_all_type_units_reallocs;
 
-  std::unique_ptr<signatured_type> sig_type_holder
+  signatured_type_up sig_type_holder
     = per_objfile->per_bfd->allocate_signatured_type ();
   signatured_type *sig_type = sig_type_holder.get ();
 
