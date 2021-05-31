@@ -1,5 +1,14 @@
 2021-05-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2/read.h (struct structured_type) <signatured_type>: New.
+	Update all callers.
+	(struct dwarf2_per_bfd) <allocate_signatured_type>: Add
+	signature parameter, update all callers.
+	* dwar2/read.c (dwarf2_per_bfd::allocate_signatured_type): Add
+	signature parameter.
+
+2021-05-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.h (signatured_type_up): New, use where possible.
 
 2021-05-31  Simon Marchi  <simon.marchi@polymtl.ca>

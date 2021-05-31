@@ -2295,9 +2295,9 @@ dwarf2_per_bfd::allocate_per_cu ()
 /* See read.h.  */
 
 signatured_type_up
-dwarf2_per_bfd::allocate_signatured_type ()
+dwarf2_per_bfd::allocate_signatured_type (ULONGEST signature)
 {
-  signatured_type_up result (new signatured_type);
+  signatured_type_up result (new signatured_type (signature));
   result->per_bfd = this;
   result->index = all_comp_units.size ();
   result->is_debug_types = true;
@@ -2396,8 +2396,7 @@ create_signatured_type_table_from_index
       signature = extract_unsigned_integer (bytes + 16, 8, BFD_ENDIAN_LITTLE);
       bytes += 3 * 8;
 
-      sig_type = per_bfd->allocate_signatured_type ();
-      sig_type->signature = signature;
+      sig_type = per_bfd->allocate_signatured_type (signature);
       sig_type->type_offset_in_tu = type_offset_in_tu;
       sig_type->section = section;
       sig_type->sect_off = sect_off;
@@ -2447,8 +2446,8 @@ create_signatured_type_table_from_debug_names
 				     section->buffer + to_underlying (sect_off),
 				     rcuh_kind::TYPE);
 
-      sig_type = per_objfile->per_bfd->allocate_signatured_type ();
-      sig_type->signature = cu_header.signature;
+      sig_type = per_objfile->per_bfd->allocate_signatured_type
+	(cu_header.signature);
       sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
       sig_type->section = section;
       sig_type->sect_off = sect_off;
@@ -5887,14 +5886,13 @@ add_type_unit (dwarf2_per_objfile *per_objfile, ULONGEST sig, void **slot)
     ++per_objfile->per_bfd->tu_stats.nr_all_type_units_reallocs;
 
   signatured_type_up sig_type_holder
-    = per_objfile->per_bfd->allocate_signatured_type ();
+    = per_objfile->per_bfd->allocate_signatured_type (sig);
   signatured_type *sig_type = sig_type_holder.get ();
 
   per_objfile->resize_symtabs ();
 
   per_objfile->per_bfd->all_comp_units.emplace_back
     (sig_type_holder.release ());
-  sig_type->signature = sig;
   if (per_objfile->per_bfd->using_index)
     {
       sig_type->v.quick =
@@ -5965,7 +5963,6 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct dwo_file *dwo_file;
   struct dwo_unit find_dwo_entry, *dwo_entry;
-  struct signatured_type find_sig_entry, *sig_entry;
   void **slot;
 
   gdb_assert (cu->dwo_unit && per_objfile->per_bfd->using_index);
@@ -5981,10 +5978,10 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
      the TU has an entry in .gdb_index, replace the recorded data from
      .gdb_index with this TU.  */
 
-  find_sig_entry.signature = sig;
+  signatured_type find_sig_entry (sig);
   slot = htab_find_slot (per_objfile->per_bfd->signatured_types.get (),
 			 &find_sig_entry, INSERT);
-  sig_entry = (struct signatured_type *) *slot;
+  signatured_type *sig_entry = (struct signatured_type *) *slot;
 
   /* We can get here with the TU already read, *or* in the process of being
      read.  Don't reassign the global entry to point to this DWO if that's
@@ -6031,7 +6028,6 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct dwp_file *dwp_file = get_dwp_file (per_objfile);
   struct dwo_unit *dwo_entry;
-  struct signatured_type find_sig_entry, *sig_entry;
   void **slot;
 
   gdb_assert (cu->dwo_unit && per_objfile->per_bfd->using_index);
@@ -6042,10 +6038,10 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (per_objfile->per_bfd->signatured_types == NULL)
     per_objfile->per_bfd->signatured_types = allocate_signatured_type_table ();
 
-  find_sig_entry.signature = sig;
+  signatured_type find_sig_entry (sig);
   slot = htab_find_slot (per_objfile->per_bfd->signatured_types.get (),
 			 &find_sig_entry, INSERT);
-  sig_entry = (struct signatured_type *) *slot;
+  signatured_type *sig_entry = (struct signatured_type *) *slot;
 
   /* Have we already tried to read this TU?
      Note: sig_entry can be NULL if the skeleton TU was removed (thus it
@@ -6086,15 +6082,12 @@ lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
     }
   else
     {
-      struct signatured_type find_entry, *entry;
-
       if (per_objfile->per_bfd->signatured_types == NULL)
 	return NULL;
-      find_entry.signature = sig;
-      entry = ((struct signatured_type *)
-	       htab_find (per_objfile->per_bfd->signatured_types.get (),
-			  &find_entry));
-      return entry;
+      signatured_type find_entry (sig);
+      return ((struct signatured_type *)
+	      htab_find (per_objfile->per_bfd->signatured_types.get (),
+			 &find_entry));
     }
 }
 
@@ -7271,14 +7264,13 @@ process_skeletonless_type_unit (void **slot, void *info)
 {
   struct dwo_unit *dwo_unit = (struct dwo_unit *) *slot;
   dwarf2_per_objfile *per_objfile = (dwarf2_per_objfile *) info;
-  struct signatured_type find_entry, *entry;
 
   /* If this TU doesn't exist in the global table, add it and read it in.  */
 
   if (per_objfile->per_bfd->signatured_types == NULL)
     per_objfile->per_bfd->signatured_types = allocate_signatured_type_table ();
 
-  find_entry.signature = dwo_unit->signature;
+  signatured_type find_entry (dwo_unit->signature);
   slot = htab_find_slot (per_objfile->per_bfd->signatured_types.get (),
 			 &find_entry, INSERT);
   /* If we've already seen this type there's nothing to do.  What's happening
@@ -7288,7 +7280,8 @@ process_skeletonless_type_unit (void **slot, void *info)
 
   /* This does the job that create_all_comp_units would have done for
      this TU.  */
-  entry = add_type_unit (per_objfile, dwo_unit->signature, slot);
+  signatured_type *entry
+    = add_type_unit (per_objfile, dwo_unit->signature, slot);
   fill_in_sig_entry_from_dwo_entry (per_objfile, entry, dwo_unit);
   *slot = entry;
 
@@ -7482,9 +7475,9 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 	  if (types_htab == nullptr)
 	    types_htab = allocate_signatured_type_table ();
 
-	  auto sig_type = per_objfile->per_bfd->allocate_signatured_type ();
+	  auto sig_type = per_objfile->per_bfd->allocate_signatured_type
+	    (cu_header.signature);
 	  signatured_type *sig_ptr = sig_type.get ();
-	  sig_type->signature = cu_header.signature;
 	  sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
 	  this_cu.reset (sig_type.release ());
 

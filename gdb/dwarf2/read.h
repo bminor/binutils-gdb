@@ -281,8 +281,12 @@ struct dwarf2_per_cu_data
 
 struct signatured_type : public dwarf2_per_cu_data
 {
+  signatured_type (ULONGEST signature)
+    : signature (signature)
+  {}
+
   /* The type's signature.  */
-  ULONGEST signature = 0;
+  ULONGEST signature;
 
   /* Offset in the TU of the type's DIE, as read from the TU header.
      If this TU is a DWO stub and the definition lives in a DWO file
@@ -341,7 +345,7 @@ struct dwarf2_per_bfd
   /* A convenience function to allocate a signatured_type.  The
      returned object has its "index" field set properly.  The object
      is allocated on the dwarf2_per_bfd obstack.  */
-  signatured_type_up allocate_signatured_type ();
+  signatured_type_up allocate_signatured_type (ULONGEST signature);
 
 private:
   /* This function is mapped across the sections and remembers the
