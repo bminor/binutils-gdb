@@ -5493,10 +5493,18 @@ handle_inferior_event (struct execution_control_state *ecs)
 	struct gdbarch *gdbarch = regcache->arch ();
 	inferior *parent_inf = find_inferior_ptid (ecs->target, ecs->ptid);
 
-	/* If this is a fork (child gets its own address space copy) and some
-	   displaced step buffers were in use at the time of the fork, restore
-	   the displaced step buffer bytes in the child process.  */
-	if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
+	/* If this is a fork (child gets its own address space copy)
+	   and some displaced step buffers were in use at the time of
+	   the fork, restore the displaced step buffer bytes in the
+	   child process.
+
+	   Architectures which support displaced stepping and fork
+	   events must supply an implementation of
+	   gdbarch_displaced_step_restore_all_in_ptid.  This is not
+	   enforced during gdbarch validation to support architectures
+	   which support displaced stepping but not forks.  */
+	if (ecs->ws.kind == TARGET_WAITKIND_FORKED
+	    && gdbarch_supports_displaced_stepping (gdbarch))
 	  gdbarch_displaced_step_restore_all_in_ptid
 	    (gdbarch, parent_inf, ecs->ws.value.related_pid);
 
