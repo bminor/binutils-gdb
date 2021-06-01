@@ -1,5 +1,13 @@
 2021-06-01  Tom Tromey  <tromey@adacore.com>
 
+	* Makefile.in (all): Don't print anything.
+	($(abs_builddir)/site.exp site.exp): Use $(ECHO_GEN).
+	(expect-read1): Likewise.
+	(read1.so): Use $(ECHO_CC).
+	Include silent-rules.mk.
+
+2021-06-01  Tom Tromey  <tromey@adacore.com>
+
 	* aclocal.m4, configure.ac, configure: Remove.
 	* Makefile.in (EXTRA_RULES): Remove.
 	($(abs_builddir)/site.exp site.exp): Don't depend on

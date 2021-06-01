@@ -1,5 +1,9 @@
 2021-06-01  Tom Tromey  <tromey@adacore.com>
 
+	* silent-rules.mk (ECHO_CC): New variable.
+
+2021-06-01  Tom Tromey  <tromey@adacore.com>
+
 	* Makefile.in (SUBDIRS): Add testsuite.
 	(all): Don't exclude testsuite.
 

@@ -2,6 +2,7 @@
 V ?= 0
 ifeq ($(V),0)
 ECHO_CXX =    @echo "  CXX    $@";
+ECHO_CC  =    @echo "  CC     $@";
 ECHO_CXXLD =  @echo "  CXXLD  $@";
 ECHO_REGDAT = @echo "  REGDAT $@";
 ECHO_GEN =    @echo "  GEN    $@";
