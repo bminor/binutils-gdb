@@ -1,3 +1,9 @@
+2021-06-01  Tom Tromey  <tromey@adacore.com>
+
+	* configure.ac: Copy some code from testsuite/configure.ac.
+	(enable_libctf): Subst this, not ENABLE_LIBCTF.
+	* configure: Rebuild.
+
 2021-06-01  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/26096

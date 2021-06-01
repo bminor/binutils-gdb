@@ -1,3 +1,15 @@
+2021-06-01  Tom Tromey  <tromey@adacore.com>
+
+	* aclocal.m4, configure.ac, configure: Remove.
+	* Makefile.in (EXTRA_RULES): Remove.
+	($(abs_builddir)/site.exp site.exp): Don't depend on
+	config.status.
+	(distclean maintainer-clean realclean, Makefile): Update.
+	(config.status): Remove target.
+	(lib/pdtrace): New target.
+	(all): Don't depend on EXTRA_RULES.
+	(check-read1): Depend on read1.so, expect-read1.
+
 2021-06-01  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/26096
