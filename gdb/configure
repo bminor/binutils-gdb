@@ -1588,7 +1588,7 @@ Optional Features:
                           sometimes confusing) to the casual installer
   --enable-plugins        Enable support for plugins
   --disable-largefile     omit support for large files
-  --enable-shared         build shared libraries deault=yes
+  --enable-shared         build shared libraries [default=yes]
   --enable-targets=TARGETS
                           alternative target configurations
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)

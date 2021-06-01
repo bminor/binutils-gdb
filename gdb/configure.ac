@@ -154,7 +154,7 @@ AC_MSG_RESULT([$with_auto_load_safe_path])
 
 # Enable shared libraries.
 AC_ARG_ENABLE(shared,
-[  --enable-shared         build shared libraries [deault=yes]],,
+AS_HELP_STRING([--enable-shared], [build shared libraries [default=yes]]),,
   enable_shared=yes)
 
 # If we have shared libraries, try to set RPATH_ENVVAR reasonably,
