@@ -1,5 +1,10 @@
 2021-06-01  Tom Tromey  <tromey@adacore.com>
 
+	* Makefile.in (all-data-directory): Remove.
+	(data-directory/Makefile): Remove.
+
+2021-06-01  Tom Tromey  <tromey@adacore.com>
+
 	* configure: Rebuild.
 	* configure.ac: Use AS_HELP_STRING for enable-shared.  Fix typo.
 
