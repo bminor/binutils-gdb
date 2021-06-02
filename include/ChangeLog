@@ -1,3 +1,7 @@
+2021-06-02  Shahab Vahedi  <shahab@synopsys.com>
+
+	* dis-asm.h (disassembler_options_arc): New prototype.
+
 2021-05-29  Maciej W. Rozycki  <macro@orcam.me.uk>
 
 	* opcode/mips.h (cpu_is_member): Remove code for MIPSr6 ISA

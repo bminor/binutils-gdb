@@ -1,3 +1,11 @@
+2021-06-02  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arc-dis.c (arc_option_arg_t): New enumeration.
+	(arc_options): New variable.
+	(disassembler_options_arc): New function.
+	(print_arc_disassembler_options): Reimplement in terms of
+	"disassembler_options_arc".
+
 2021-05-29  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (lookup_powerpc): Test deprecated field when -Many.

@@ -1412,41 +1412,167 @@ arc_get_disassembler (bfd *abfd)
   return print_insn_arc;
 }
 
+/* Indices into option argument vector for options that do require
+   an argument.  Use ARC_OPTION_ARG_NONE for options that don't
+   expect an argument.  */
+typedef enum
+{
+  ARC_OPTION_ARG_NONE = -1,
+  ARC_OPTION_ARG_ARCH,
+  ARC_OPTION_ARG_SIZE
+} arc_option_arg_t;
+
+/* Valid ARC disassembler options.  */
+static struct
+{
+  const char *name;
+  const char *description;
+  arc_option_arg_t arg;
+} arc_options[] =
+{
+  { "cpu=",       N_("Enforce the designated architecture while decoding."),
+		  ARC_OPTION_ARG_ARCH },
+  { "dsp",	  N_("Recognize DSP instructions."),
+		  ARC_OPTION_ARG_NONE },
+  { "spfp",	  N_("Recognize FPX SP instructions."),
+		  ARC_OPTION_ARG_NONE },
+  { "dpfp",	  N_("Recognize FPX DP instructions."),
+		  ARC_OPTION_ARG_NONE },
+  { "quarkse_em", N_("Recognize FPU QuarkSE-EM instructions."),
+		  ARC_OPTION_ARG_NONE },
+  { "fpuda",	  N_("Recognize double assist FPU instructions."),
+		  ARC_OPTION_ARG_NONE },
+  { "fpus",	  N_("Recognize single precision FPU instructions."),
+		  ARC_OPTION_ARG_NONE },
+  { "fpud",	  N_("Recognize double precision FPU instructions."),
+		  ARC_OPTION_ARG_NONE },
+  { "nps400",	  N_("Recognize NPS400 instructions."),
+		  ARC_OPTION_ARG_NONE },
+  { "hex",	  N_("Use only hexadecimal number to print immediates."),
+		  ARC_OPTION_ARG_NONE }
+};
+
+/* Populate the structure for representing ARC's disassembly options.
+   Such a dynamic initialization is desired, because it makes the maintenance
+   easier and also gdb uses this to enable the "disassembler-option".  */
+
+const disasm_options_and_args_t *
+disassembler_options_arc (void)
+{
+  static disasm_options_and_args_t *opts_and_args;
+
+  if (opts_and_args == NULL)
+    {
+      disasm_option_arg_t *args;
+      disasm_options_t *opts;
+      size_t i;
+      const size_t nr_of_options = ARRAY_SIZE (arc_options);
+      /* There is a null element at the end of CPU_TYPES, therefore
+	 NR_OF_CPUS is actually 1 more and that is desired here too.  */
+      const size_t nr_of_cpus = ARRAY_SIZE (cpu_types);
+
+      opts_and_args = XNEW (disasm_options_and_args_t);
+      opts_and_args->args
+	= XNEWVEC (disasm_option_arg_t, ARC_OPTION_ARG_SIZE + 1);
+      opts_and_args->options.name
+	= XNEWVEC (const char *, nr_of_options + 1);
+      opts_and_args->options.description
+	= XNEWVEC (const char *, nr_of_options + 1);
+      opts_and_args->options.arg
+	= XNEWVEC (const disasm_option_arg_t *, nr_of_options + 1);
+
+      /* Populate the arguments for "cpu=" option.  */
+      args = opts_and_args->args;
+      args[ARC_OPTION_ARG_ARCH].name = "ARCH";
+      args[ARC_OPTION_ARG_ARCH].values = XNEWVEC (const char *, nr_of_cpus);
+      for (i = 0; i < nr_of_cpus; ++i)
+	args[ARC_OPTION_ARG_ARCH].values[i] = cpu_types[i].name;
+      args[ARC_OPTION_ARG_SIZE].name = NULL;
+      args[ARC_OPTION_ARG_SIZE].values = NULL;
+
+      /* Populate the options.  */
+      opts = &opts_and_args->options;
+      for (i = 0; i < nr_of_options; ++i)
+	{
+	  opts->name[i] = arc_options[i].name;
+	  opts->description[i] = arc_options[i].description;
+	  if (arc_options[i].arg != ARC_OPTION_ARG_NONE)
+	    opts->arg[i] = &args[arc_options[i].arg];
+	  else
+	    opts->arg[i] = NULL;
+	}
+      opts->name[nr_of_options] = NULL;
+      opts->description[nr_of_options] = NULL;
+      opts->arg[nr_of_options] = NULL;
+    }
+
+  return opts_and_args;
+}
+
+
 void
 print_arc_disassembler_options (FILE *stream)
 {
-  int i;
+  const disasm_options_and_args_t *opts_and_args;
+  const disasm_option_arg_t *args;
+  const disasm_options_t *opts;
+  size_t i, j;
+  size_t max_len = 0;
 
-  fprintf (stream, _("\n\
-The following ARC specific disassembler options are supported for use \n\
-with -M switch (multiple options should be separated by commas):\n"));
+  opts_and_args = disassembler_options_arc ();
+  opts = &opts_and_args->options;
+  args = opts_and_args->args;
 
-  /* cpu=... options.  */
-  for (i = 0; cpu_types[i].name; ++i)
+  fprintf (stream, _("\nThe following ARC specific disassembler options are"
+		     " supported for use \nwith the -M switch (multiple"
+		     " options should be separated by commas):\n"));
+
+  /* Find the maximum length for printing options (and their arg name).  */
+  for (i = 0; opts->name[i] != NULL; ++i)
     {
-      /* As of now all value CPU values are less than 16 characters.  */
-      fprintf (stream, "  cpu=%-16s\tEnforce %s ISA.\n",
-	       cpu_types[i].name, cpu_types[i].isa);
+      size_t len = strlen (opts->name[i]);
+      len += (opts->arg[i]) ? strlen (opts->arg[i]->name) : 0;
+      max_len = (len > max_len) ? len : max_len;
     }
 
-  fprintf (stream, _("\
-  dsp             Recognize DSP instructions.\n"));
-  fprintf (stream, _("\
-  spfp            Recognize FPX SP instructions.\n"));
-  fprintf (stream, _("\
-  dpfp            Recognize FPX DP instructions.\n"));
-  fprintf (stream, _("\
-  quarkse_em      Recognize FPU QuarkSE-EM instructions.\n"));
-  fprintf (stream, _("\
-  fpuda           Recognize double assist FPU instructions.\n"));
-  fprintf (stream, _("\
-  fpus            Recognize single precision FPU instructions.\n"));
-  fprintf (stream, _("\
-  fpud            Recognize double precision FPU instructions.\n"));
-  fprintf (stream, _("\
-  nps400          Recognize NPS400 instructions.\n"));
-  fprintf (stream, _("\
-  hex             Use only hexadecimal number to print immediates.\n"));
+  /* Print the options, their arg and description, if any.  */
+  for (i = 0, ++max_len; opts->name[i] != NULL; ++i)
+    {
+      fprintf (stream, "  %s", opts->name[i]);
+      if (opts->arg[i] != NULL)
+	fprintf (stream, "%s", opts->arg[i]->name);
+      if (opts->description[i] != NULL)
+	{
+	  size_t len = strlen (opts->name[i]);
+	  len += (opts->arg[i]) ? strlen (opts->arg[i]->name) : 0;
+	  fprintf (stream,
+		   "%*c %s", (int) (max_len - len), ' ', opts->description[i]);
+	}
+      fprintf (stream, _("\n"));
+    }
+
+  /* Print the possible values of an argument.  */
+  for (i = 0; args[i].name != NULL; ++i)
+    {
+      size_t len = 3;
+      fprintf (stream, _("\n\
+  For the options above, the following values are supported for \"%s\":\n   "),
+	       args[i].name);
+      for (j = 0; args[i].values[j] != NULL; ++j)
+	{
+	  fprintf (stream, " %s", args[i].values[j]);
+	  len += strlen (args[i].values[j]) + 1;
+	  /* reset line if printed too long.  */
+	  if (len >= 78)
+	    {
+	      fprintf (stream, _("\n   "));
+	      len = 3;
+	    }
+	}
+      fprintf (stream, _("\n"));
+    }
+
+  fprintf (stream, _("\n"));
 }
 
 void arc_insn_decode (bfd_vma addr,
