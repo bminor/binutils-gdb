@@ -1,3 +1,7 @@
+2021-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/fortran.exp (fortran_int8): Escape '*' in pattern.
+
 2021-06-01  Tom Tromey  <tromey@adacore.com>
 
 	* Makefile.in (all): Don't print anything.
