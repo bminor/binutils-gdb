@@ -548,15 +548,15 @@ _bfd_elf_parse_attributes (bfd *abfd, Elf_Internal_Shdr * hdr)
 		}
 	      else
 		{
-		  subsection_len = 0;
 		  p = p_end;
+		  break;
 		}
-	      if (subsection_len == 0)
-		break;
 	      if (subsection_len > section_len)
 		subsection_len = section_len;
 	      section_len -= subsection_len;
 	      end = orig_p + subsection_len;
+	      if (end < p)
+		break;
 	      switch (tag)
 		{
 		case Tag_File:
