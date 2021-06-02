@@ -4098,7 +4098,9 @@ proc gdb_compile {source dest type options} {
 	    || [lsearch -exact $options f90] != -1 } {
 	# Fortran compile.
 	set mod_path [standard_output_file ""]
-	lappend new_options "additional_flags=-J${mod_path}"
+	if [test_compiler_info "gcc-*"] {
+	    lappend new_options "additional_flags=-J${mod_path}"
+	}
     }
 
     set shlib_found 0

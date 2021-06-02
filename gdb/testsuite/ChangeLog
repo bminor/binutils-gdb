@@ -1,5 +1,11 @@
 2021-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* lib/gdb.exp (gdb_compile): Only add the -J option when using a
+	gcc based Fortran compiler, for example, flang does not support
+	this option.
+
+2021-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/fortran.exp (fortran_int8): Escape '*' in pattern.
 
 2021-06-01  Tom Tromey  <tromey@adacore.com>
