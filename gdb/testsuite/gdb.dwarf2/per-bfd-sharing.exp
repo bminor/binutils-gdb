@@ -18,6 +18,11 @@
 
 standard_testfile
 
+if { [build_executable "failed to prepare" $testfile $srcfile \
+	  {debug additional_flags=-Wl,--build-id}] == -1 } {
+    return
+}
+
 lassign [remote_exec host mktemp -d] ret cache_dir
 
 # The output of mktemp contains an end of line, remove it.
@@ -29,11 +34,6 @@ if { $ret != 0 } {
 }
 
 verbose -log "Index cache dir: $cache_dir"
-
-if { [build_executable "failed to prepare" $testfile $srcfile \
-	  {debug additional_flags=-Wl,--build-id}] == -1 } {
-    return
-}
 
 # Populate the index-cache.
 with_test_prefix "populate index cache" {

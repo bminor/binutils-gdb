@@ -1,3 +1,7 @@
+2021-06-02  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* gdb.dwarf2/per-bfd-sharing.exp: Fix temp-dir leakage.
+
 2021-06-02  Carl Love  <cel@us.ibm.com>
 
 	* gdb.threads/threadapply.c: Add global mybarrier.
