@@ -633,6 +633,33 @@ print_callback (void *ignore, const char *message)
   fputs_filtered (message, gdb_stderr);
 }
 
+/* RAII class used to ignore SIGPIPE in a scope.  */
+
+class scoped_ignore_sigpipe
+{
+public:
+  scoped_ignore_sigpipe ()
+  {
+#ifdef SIGPIPE
+    m_osigpipe = signal (SIGPIPE, SIG_IGN);
+#endif
+  }
+
+  ~scoped_ignore_sigpipe ()
+  {
+#ifdef SIGPIPE
+    signal (SIGPIPE, m_osigpipe);
+#endif
+  }
+
+  DISABLE_COPY_AND_ASSIGN (scoped_ignore_sigpipe);
+
+private:
+#ifdef SIGPIPE
+  sighandler_t m_osigpipe = NULL;
+#endif
+};
+
 /* Process the compilation request.  On success it returns the object
    and source file names.  On an error condition, error () is
    called.  */
@@ -754,6 +781,10 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   if (compile_debug)
     fprintf_unfiltered (gdb_stdlog, "source file produced: %s\n\n",
 			fnames.source_file ());
+
+  /* If we don't do this, then GDB simply exits
+     when the compiler dies.  */
+  scoped_ignore_sigpipe ignore_sigpipe;
 
   /* Call the compiler and start the compilation process.  */
   compiler->set_source_file (fnames.source_file ());
