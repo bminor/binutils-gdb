@@ -1,3 +1,8 @@
+2021-06-03   Ben Asselstine  <benasselstine@gmail.com>
+
+	PR 4283
+	* gprof.texi (Executing): Note GMON_OUT_PREFIX environment variable.
+
 2021-05-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.am (html-local, doc/gprof/index.html): New targets.
