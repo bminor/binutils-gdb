@@ -222,6 +222,11 @@ is_gdb_terminal (const char *tty)
   struct stat other_tty;
   int res;
 
+  /* Users can explicitly set the inferior tty to "/dev/tty" to mean
+     "the GDB terminal".  */
+  if (strcmp (tty, "/dev/tty") == 0)
+    return TRIBOOL_TRUE;
+
   res = stat (tty, &other_tty);
   if (res == -1)
     return TRIBOOL_UNKNOWN;
@@ -796,9 +801,10 @@ check_syscall (const char *msg, int result)
 #endif
 
 void
-new_tty (void)
+new_tty ()
 {
-  if (inferior_thisrun_terminal == 0)
+  if (inferior_thisrun_terminal == nullptr
+      || is_gdb_terminal (inferior_thisrun_terminal))
     return;
 #if !defined(__GO32__) && !defined(_WIN32)
   int tty;
@@ -862,13 +868,13 @@ new_tty_postfork (void)
   /* Save the name for later, for determining whether we and the child
      are sharing a tty.  */
 
-  if (inferior_thisrun_terminal)
-    {
-      struct inferior *inf = current_inferior ();
-      struct terminal_info *tinfo = get_inflow_inferior_data (inf);
+  struct inferior *inf = current_inferior ();
+  struct terminal_info *tinfo = get_inflow_inferior_data (inf);
 
-      tinfo->run_terminal = xstrdup (inferior_thisrun_terminal);
-    }
+  if (inferior_thisrun_terminal != nullptr)
+    tinfo->run_terminal = xstrdup (inferior_thisrun_terminal);
+  else
+    tinfo->run_terminal = xstrdup ("/dev/tty");
 
   inferior_thisrun_terminal = NULL;
 }
@@ -927,7 +933,9 @@ create_tty_session (void)
 #ifdef HAVE_SETSID
   pid_t ret;
 
-  if (!job_control || inferior_thisrun_terminal == 0)
+  if (!job_control
+      || inferior_thisrun_terminal == nullptr
+      || is_gdb_terminal (inferior_thisrun_terminal))
     return 0;
 
   ret = setsid ();
