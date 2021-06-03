@@ -30,9 +30,13 @@ if {[mi_runto_main] < 0} {
     return -1
 }
 
-set milogfile [standard_output_file "milog.txt"]
+set milogfile1 [standard_output_file "milog1.txt"]
+set milogfile2 [standard_output_file "milog2.txt"]
 
-mi_gdb_test "-gdb-set logging file $milogfile" ".*"
+remote_file host delete $milogfile1
+remote_file host delete $milogfile2
+
+mi_gdb_test "-gdb-set logging file $milogfile1" ".*"
 
 mi_gdb_test "-gdb-set logging overwrite on" ".*"
 
@@ -44,7 +48,7 @@ mi_next "logged next"
 
 mi_gdb_test "-gdb-set logging off" ".*" "logging off"
 
-set chan [open $milogfile]
+set chan [open $milogfile1]
 set logcontent [read $chan]
 close $chan
 
@@ -58,26 +62,84 @@ if [regexp "\\^done\[\r\n\]+$mi_log_prompt\\^running\[\r\n\]+\\*running,thread-i
 
 # Now try the redirect, which writes into the file only.
 
-mi_gdb_test "-gdb-set logging redirect on" ".*" "redirect logging on"
+mi_gdb_test "-gdb-set logging file $milogfile2" ".*"
 
-# Since all output will be going into the file, just keep sending commands
-# and don't expect anything to appear until logging is turned off.
+mi_gdb_test "999-gdb-set logging redirect on" ".*" "redirect logging on"
 
 send_gdb "1001-gdb-set logging on\n"
+
+# We can't open the file right away, because we're not waiting for
+# GDB's "^done" -- we could end up opening the file before GDB creates
+# it.  So spin waiting until the file exists.
+
+proc wait_open {filename} {
+    set ticks [expr 10 * $::timeout]
+    set t 0
+
+    while {![file exists $filename]} {
+	after 100
+
+	incr t
+	if {$t == $ticks} {
+	    return ""
+	}
+    }
+    return [open $filename]
+}
+
+set chan [wait_open $milogfile2]
+
+# Read GDB output in channel/file CHAN, expect the result.  PATTERN is
+# the pattern to match for a PASS.
+
+proc gdb_test_file {chan pattern test} {
+    global timeout
+
+    verbose -log "gdb_test_file: begin"
+
+    set ticks [expr 10 * $timeout]
+    set t 0
+    set logcontent ""
+
+    while {1} {
+	set r [read $chan]
+	append logcontent $r
+
+	send_log -- "$r"
+
+	if [regexp "$pattern" $logcontent] {
+	    pass "$test"
+	    break
+	} else {
+	    incr t
+	    if {$t == $ticks} {
+		fail "$test (timeout)"
+		break
+	    }
+	    after 100
+	}
+    }
+
+    verbose -log "gdb_test_file: end"
+}
+
+gdb_test_file $chan \
+    "1001\\^done\[\r\n\]+$mi_log_prompt" \
+    "redirect log file contents, set logging on"
+
 send_gdb "1002-exec-step\n"
+gdb_test_file $chan \
+    "1002\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt" \
+    "redirect log file contents, exec-step"
+
 send_gdb "1003-exec-next\n"
+gdb_test_file $chan \
+    "1003\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt" \
+    "redirect log file contents, exec-next"
 
-mi_gdb_test "1004-gdb-set logging off" ".*" "redirect logging off"
-
-set chan [open $milogfile]
-set logcontent [read $chan]
 close $chan
 
-if [regexp "1001\\^done\[\r\n\]+$mi_log_prompt.*1002\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt.*1003\\^running\[\r\n\]+\\*running,thread-id=\"all\"\[\r\n\]+$mi_log_prompt\\*stopped,reason=\"end-stepping-range\",.*\[\r\n\]+$mi_log_prompt" $logcontent] {
-    pass "redirect log file contents"
-} else {
-    fail "redirect log file contents"
-}
+mi_gdb_test "1004-gdb-set logging off" ".*" "redirect logging off"
 
 # Now try enabling a redirect while GDB is already logging.  This used
 # to crash GDB.
@@ -94,5 +156,3 @@ with_test_prefix "redirect while already logging" {
 }
 
 mi_gdb_exit
-
-remote_file host delete $milogfile
