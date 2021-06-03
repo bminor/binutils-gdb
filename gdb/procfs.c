@@ -40,7 +40,6 @@
 #include <signal.h>
 #include <ctype.h>
 #include "gdb_bfd.h"
-#include "inflow.h"
 #include "auxv.h"
 #include "procfs.h"
 #include "observable.h"
