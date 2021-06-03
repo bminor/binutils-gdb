@@ -8537,7 +8537,10 @@ normal_stop (void)
   update_thread_list ();
 
   if (last.kind == TARGET_WAITKIND_STOPPED && stopped_by_random_signal)
-    gdb::observers::signal_received.notify (inferior_thread ()->suspend.stop_signal);
+    {
+      target_terminal::ours_for_output ();
+      gdb::observers::signal_received.notify (inferior_thread ()->suspend.stop_signal);
+    }
 
   /* As with the notification of thread events, we want to delay
      notifying the user that we've switched thread context until
