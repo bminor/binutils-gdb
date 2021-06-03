@@ -16,6 +16,13 @@
 import time
 import os
 import gc
+import sys
+
+# time.perf_counter() and time.process_time() were added in Python
+# 3.3, time.clock() was removed in Python 3.8.
+if sys.version_info < (3, 3, 0):
+    time.perf_counter = time.clock
+    time.process_time = time.clock
 
 
 class Measure(object):
@@ -85,28 +92,43 @@ class Measurement(object):
         self.result.report(reporter, name + " " + self.name)
 
 
-class MeasurementCpuTime(Measurement):
-    """Measurement on CPU time."""
+class MeasurementPerfCounter(Measurement):
+    """Measurement on performance counter."""
 
-    # On UNIX, time.clock() measures the amount of CPU time that has
-    # been used by the current process.  On Windows it will measure
-    # wall-clock seconds elapsed since the first call to the function.
-    # Something other than time.clock() should be used to measure CPU
-    # time on Windows.
+    # Measures time in fractional seconds, using a performance
+    # counter, i.e. a clock with the highest available resolution to
+    # measure a short duration.  It includes time elapsed during sleep
+    # and is system-wide.
 
     def __init__(self, result):
-        super(MeasurementCpuTime, self).__init__("cpu_time", result)
+        super(MeasurementPerfCounter, self).__init__("perf_counter", result)
         self.start_time = 0
 
     def start(self, id):
-        self.start_time = time.clock()
+        self.start_time = time.perf_counter()
 
     def stop(self, id):
-        if os.name == "nt":
-            cpu_time = 0
-        else:
-            cpu_time = time.clock() - self.start_time
-        self.result.record(id, cpu_time)
+        perf_counter = time.perf_counter() - self.start_time
+        self.result.record(id, perf_counter)
+
+
+class MeasurementProcessTime(Measurement):
+    """Measurement on process time."""
+
+    # Measures the sum of the system and user CPU time of the current
+    # process.  Does not include time elapsed during sleep.  It is
+    # process-wide by definition.
+
+    def __init__(self, result):
+        super(MeasurementProcessTime, self).__init__("process_time", result)
+        self.start_time = 0
+
+    def start(self, id):
+        self.start_time = time.process_time()
+
+    def stop(self, id):
+        process_time = time.process_time() - self.start_time
+        self.result.record(id, process_time)
 
 
 class MeasurementWallTime(Measurement):
