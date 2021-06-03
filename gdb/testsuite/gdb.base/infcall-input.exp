@@ -23,8 +23,18 @@ if [target_info exists gdb,cannot_call_functions] {
     continue
 }
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
+if {[build_executable "failed to compile" $testfile $srcfile debug]} {
     return -1
+}
+
+save_vars { GDBFLAGS } {
+    # This test only makes sense when GDB and the inferior are reading
+    # from the same input file / sharing the terminal.  If we instead
+    # let GDB put the inferior in its own session, then while the
+    # inferior is running in the foreground, input would be redirected
+    # to the inferior, and GDB would never see that input.
+    append GDBFLAGS " -ex \"tty /dev/tty\""
+    clean_restart $binfile
 }
 
 if ![runto_main] then {

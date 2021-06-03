@@ -20,6 +20,9 @@ standard_testfile
 
 save_vars { GDBFLAGS } {
     set GDBFLAGS "$GDBFLAGS -ex \"set non-stop on\""
+    # This test only makes sense when GDB and the inferior are reading
+    # from the same input file / sharing the terminal.
+    append GDBFLAGS " -ex \"tty /dev/tty\""
     if { [prepare_for_testing "failed to prepare" ${testfile} $srcfile] } {
 	return -1
     }

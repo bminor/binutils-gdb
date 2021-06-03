@@ -22,6 +22,10 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug] == -1} {
     return -1
 }
 
+# This testcase only makes sense when GDB and the inferior are reading
+# from the same input file (aka sharing the terminal's input buffer).
+gdb_test_no_output "tty /dev/tty"
+
 # Because runto_main doesn't know how to handle the prompt with annotations,
 # run to main before we set the annotation level.
 if ![runto_main] then {
