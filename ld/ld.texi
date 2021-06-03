@@ -2317,8 +2317,6 @@ For a native ELF linker, the directories in @code{DT_RUNPATH} or
 libraries needed by it. The @code{DT_RPATH} entries are ignored if
 @code{DT_RUNPATH} entries exist.
 @item
-The default directories, normally @file{/lib} and @file{/usr/lib}.
-@item
 For a linker for a Linux system, if the file @file{/etc/ld.so.conf}
 exists, the list of directories found in that file.  Note: the path
 to this file is prefixed with the @code{sysroot} value, if that is
@@ -2329,8 +2327,16 @@ For a native linker on a FreeBSD system, any directories specified by
 the @code{_PATH_ELF_HINTS} macro defined in the @file{elf-hints.h}
 header file.
 @item
-Any directories specifed by a @code{SEARCH_DIR} command in the
-linker script being used.
+Any directories specified by a @code{SEARCH_DIR} command in a
+linker script given on the command line, including scripts specified
+by @option{-T} (but not @option{-dT}).
+@item
+The default directories, normally @file{/lib} and @file{/usr/lib}.
+@item
+Any directories specified by a plugin LDPT_SET_EXTRA_LIBRARY_PATH.
+@item
+Any directories specified by a @code{SEARCH_DIR} command in a default
+linker script.
 @end enumerate
 
 Note however on Linux based systems there is an additional caveat:  If

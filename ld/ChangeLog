@@ -1,3 +1,9 @@
+2021-06-03  Alan Modra  <amodra@gmail.com>
+
+	PR 2589
+	* ld.texi (link-time runtime library search path): Mention
+	plugin library path.  Correct order of search.
+
 2021-05-31  Nelson Chu  <nelson.chu@sifive.com>
 	    Lifang Xia  <lifang_xia@c-sky.com>
 
