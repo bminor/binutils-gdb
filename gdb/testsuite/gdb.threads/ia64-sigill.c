@@ -292,11 +292,6 @@ main (int argc, char **argv)
 	  fprintf (stderr, "The testcase must be run by GDB!\n");
 	  exit (EXIT_FAILURE);
 	}
-      if (tracer != getppid ())
-	{
-	  fprintf (stderr, "The testcase parent must be our GDB tracer!\n");
-	  exit (EXIT_FAILURE);
-	}
     }
 
   /* SIGCONT our debugger in the case of our crash as we would deadlock
