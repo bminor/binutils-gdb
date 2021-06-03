@@ -1,3 +1,10 @@
+2021-06-03  Pedro Alves  <pedro@palves.net>
+
+	* MAINTAINERS (The Official FSF-appointed GDB Maintainers): Remove
+	affiliation.
+	(Global Maintainers): Update my address.
+	(Write After Approval): Remove stale entry.
+
 2021-06-03  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-tdep.c (FBSD_SI_USER, FBSD_SI_QUEUE, FBSD_SI_TIMER)

@@ -112,7 +112,7 @@ in alphabetical order.  Their affiliations are provided for reference
 only - their maintainership status is individual and not through their
 affiliation, and they act on behalf of the GNU project.
 
-       Pedro Alves (Red Hat)
+       Pedro Alves
        Joel Brobecker (AdaCore)
        Doug Evans (Google)
        Eli Zaretskii
@@ -148,7 +148,7 @@ future, if there are, a reference to the list will be included here.
 
 The current global maintainers are (in alphabetical order):
 
-Pedro Alves                     palves@redhat.com
+Pedro Alves                     pedro@palves.net
 Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
 Andrew Burgess			andrew.burgess@embecosm.com
@@ -448,7 +448,6 @@ FSF assignment and have submitted one good patch.
 
 Tankut Baris Aktemur				tankut.baris.aktemur@intel.com
 Mihails Strasuns				mihails.strasuns@intel.com
-Pedro Alves					pedro_alves@portugalmail.pt
 David Anderson					davea@sgi.com
 John David Anglin				dave.anglin@nrc-cnrc.gc.ca
 Andreas Arnez					arnez@linux.ibm.com
