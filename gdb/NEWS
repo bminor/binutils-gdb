@@ -6,6 +6,25 @@
 * The 'set disassembler-options' command now supports specifying options
   for the ARC target.
 
+* On GNU/Linux, by default GDB now starts programs associated with a
+  pseudo-terminal slave device created and managed by GDB, instead of
+  having the inferior use the same terminal as GDB directly.  GDB
+  takes care of forwarding input and output to and from GDB's terminal
+  at appropriate times, so this is largely transparent.
+
+  In addition, by default, Ctrl-C no longer stops the program with
+  SIGINT.  Instead you'll see for example:
+
+     Thread 1 "main" stopped.
+
+  With these changes it is now possible to interrupt programs that
+  block or ignore the SIGINT signal (with e.g., the sigprocmask
+  function), or use the sigwait function to wait for SIGINT signal.
+
+  You can use the "tty /dev/tty" command to restore the previous
+  behavior of spawning programs associated with the same terminal as
+  GDB.
+
 * GDB now supports general memory tagging functionality if the underlying
   architecture supports the proper primitives and hooks.  Currently this is
   enabled only for AArch64 MTE.
@@ -83,6 +102,10 @@
 set debug event-loop
 show debug event-loop
   Control the display of debug output about GDB's event loop.
+
+set debug managed-tty
+show debug managed-tty
+  Control the display of debug output about GDB-managed terminals.
 
 set print memory-tag-violations
 show print memory-tag-violations

@@ -2983,11 +2983,27 @@ current working directory of the debuggee.
 @cindex redirection
 @cindex i/o
 @cindex terminal
-By default, the program you run under @value{GDBN} does input and output to
-the same terminal that @value{GDBN} uses.  @value{GDBN} switches the terminal
-to its own terminal modes to interact with you, but it records the terminal
-modes your program was using and switches back to them when you continue
-running your program.
+By default, the program you run under @value{GDBN} does (or
+@value{GDBN} provides the illusion that it does) input and output to
+the same terminal that @value{GDBN} uses.
+
+Depending on the operating system and configuration, either:
+
+@itemize
+
+@item
+@value{GDBN} switches the terminal to its own terminal modes to
+interact with you, but it records the terminal modes your program was
+using and switches back to them when you continue running your
+program.  This is the default on most systems.
+
+@item
+@value{GDBN} creates a pseudo-terminal, sets your program to use it
+for standard input and standard output, and forwards input and output
+to and from @value{GDBN}'s terminal at appropriate times.  This is the
+default on GNU/Linux.
+
+@end itemize
 
 @table @code
 @kindex info terminal
@@ -3023,6 +3039,30 @@ directs that processes started with subsequent @code{run} commands
 default to do input and output on the terminal @file{/dev/ttyb} and have
 that as their controlling terminal.
 
+On some operating systems, by default, @value{GDBN} creates a
+pseudo-terminal, and sets your program to use it for standard input
+and standard output.  @value{GDBN} takes care of forwarding input and
+output to and from @value{GDBN}'s terminal at appropriate times, so
+this is largely transparent.
+
+On such systems, in some cases, like for example if you need to run
+your program and then detach it, and you want the program to remain
+associated with a terminal, you may prefer that @value{GDBN} starts
+your program using the same device for standard input and output as
+@value{GDBN} is using.
+
+Specifying the special @file{/dev/tty} file as input and output device
+is interpreted as a request for doing I/O to the same terminal that
+@value{GDBN} uses directly, skipping creation of an intermediary
+pseudo-terminal on systems where @value{GDBN} creates one by default.
+
+Note that on GNU/Linux at least, a consequence of using the same
+terminal as @value{GDBN} directly is that programs that block or
+ignore the @code{SIGINT} signal (with e.g., the @code{sigprocmask}
+function), or use the @code{sigwait} function to wait for
+@code{SIGINT} signals can not be interrupted by typing the interrupt
+character (often @kbd{Ctrl-c}).
+
 An explicit redirection in @code{run} overrides the @code{tty} command's
 effect on the input/output device, but not its effect on the controlling
 terminal.
@@ -3048,6 +3088,21 @@ restores the default behavior, which is to use the same terminal as
 @item show inferior-tty
 @kindex show inferior-tty
 Show the current tty for the program being debugged.
+@end table
+
+The management of @value{GDBN}-created terminals can be inspected
+using:
+
+@table @code
+@kindex set debug managed-tty
+@item set debug managed-tty @r{[}on|off@r{]}
+Set whether to print debug output about @value{GDBN}-managed
+terminals.
+
+@kindex show debug managed-tty
+@item show debug managed-tty
+Show whether the debug output about @value{GDBN}-managed terminals is
+printed.
 @end table
 
 @node Attach
@@ -3131,6 +3186,16 @@ By default, @value{GDBN} asks for confirmation if you try to do either of these
 things; you can control whether or not you need to confirm by using the
 @code{set confirm} command (@pxref{Messages/Warnings, ,Optional Warnings and
 Messages}).
+
+On systems where @value{GDBN} creates a pseudo-terminal for spawned
+inferiors, detaching from a process that was started by @value{GDBN}
+(for example with the @code{run} command) results in the process
+losing its terminal right after detaching, because @value{GDBN}
+destroys the pseudo-terminal device pair.  If you prefer, you can use
+the @code{tty} command command to instruct @value{GDBN} to start your
+program doing I/O to the same terminal that @value{GDBN} uses or to
+some other terminal.  @xref{Input/Output, ,Your Program's Input and
+Output}.
 
 @node Kill Process
 @section Killing the Child Process
@@ -4224,6 +4289,7 @@ running or not, what process it is, and why it stopped.
 @menu
 * Breakpoints::                 Breakpoints, watchpoints, and catchpoints
 * Continuing and Stepping::     Resuming execution
+* Interrupting::                Interrupting execution
 * Skipping Over Functions and Files::
                                 Skipping over functions and files
 * Signals::                     Signals
@@ -6376,6 +6442,45 @@ default is @code{on}.
 
 @end table
 
+@node Interrupting
+@section Interrupting
+
+You can stop the program while it is running in the foreground by
+pressing the interrupt character (often @kbd{Ctrl-c}).  If the program
+is executing in the background (@pxref{Background Execution}), you can
+use the @code{interrupt} command (@pxref{interrupt}).
+
+Depending on operating system and configuration, this results in
+interrupting the program with either a @code{SIGINT} signal:
+
+@smallexample
+Program received signal SIGINT, Interrupt.
+@end smallexample
+
+@noindent
+or plainly suspending the program:
+
+@smallexample
+Program stopped.
+@end smallexample
+
+The terminal the program was started with affects whether you get the
+former or the latter.  @xref{Input/Output, ,Your Program's Input and
+Output}.
+
+On systems where interrupting the program results in a plain
+suspension instead of the program receiving a @code{SIGINT} signal,
+you can still pass a @code{SIGINT} signal to the program after it
+stops, using either the @code{signal SIGINT} or @code{queue-signal
+SIGINT} commands.  @xref{Signaling,,Giving your Program a Signal}.
+
+The remote target supports a number of options to configure how the
+remote program is interrupted.  @xref{Remote Configuration}.
+
+@value{GDBN} on MS-Windows supports @kbd{C-@key{BREAK}} as an
+alternative interrupt key sequence.  @xref{interrupt debuggee on
+MS-Windows}.
+
 @node Skipping Over Functions and Files
 @section Skipping Over Functions and Files
 @cindex skipping over functions and files
@@ -7090,6 +7195,7 @@ using the @code{interrupt} command.
 
 @table @code
 @kindex interrupt
+@anchor{interrupt}
 @item interrupt
 @itemx interrupt -a
 
@@ -24219,6 +24325,7 @@ DLLs with and without symbolic debugging information.
 
 @cindex Ctrl-BREAK, MS-Windows
 @cindex interrupt debuggee on MS-Windows
+@anchor{interrupt debuggee on MS-Windows}
 MS-Windows programs that call @code{SetConsoleMode} to switch off the
 special meaning of the @samp{Ctrl-C} keystroke cannot be interrupted
 by typing @kbd{C-c}.  For this reason, @value{GDBN} on MS-Windows
