@@ -42,14 +42,9 @@ restore_old_foreground_pgrp (void)
 /* See nat/fork-inferior.h.  */
 
 void
-prefork_hook (const char *args)
+prefork_hook ()
 {
   client_state &cs = get_client_state ();
-  if (debug_threads)
-    {
-      debug_printf ("args: %s\n", args);
-      debug_flush ();
-    }
 
 #ifdef SIGTTOU
   signal (SIGTTOU, SIG_DFL);

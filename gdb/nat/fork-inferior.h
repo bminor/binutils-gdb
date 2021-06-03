@@ -58,10 +58,9 @@ extern ptid_t startup_inferior (process_stratum_target *proc_target,
 				struct target_waitstatus *mystatus,
 				ptid_t *myptid);
 
-/* Perform any necessary tasks before a fork/vfork takes place.  ARGS
-   is a string containing all the arguments received by the inferior.
-   This function is mainly used by fork_inferior.  */
-extern void prefork_hook (const char *args);
+/* Perform any necessary tasks before a fork/vfork takes place.  This
+   function is mainly used by fork_inferior.  */
+extern void prefork_hook ();
 
 /* Perform any necessary tasks after a fork/vfork takes place.  This
    function is mainly used by fork_inferior.  */

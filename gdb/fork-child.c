@@ -59,7 +59,7 @@ static struct ui *saved_ui = NULL;
 /* See nat/fork-inferior.h.  */
 
 void
-prefork_hook (const char *args)
+prefork_hook ()
 {
   gdb_assert (saved_ui == NULL);
   /* Retain a copy of our UI, since the child will replace this value

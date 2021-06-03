@@ -317,7 +317,7 @@ fork_inferior (const char *exec_file_arg, const std::string &allargs,
 
   /* Perform any necessary actions regarding to TTY before the
      fork/vfork call.  */
-  prefork_hook (allargs.c_str ());
+  prefork_hook ();
 
   /* It is generally good practice to flush any possible pending stdio
      output prior to doing a fork, to avoid the possibility of both
