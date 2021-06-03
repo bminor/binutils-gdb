@@ -47,20 +47,45 @@ if { ![runto_main] } then {
 set printing_done_line [gdb_get_line_number "printing done"]
 gdb_test "break $printing_done_line" ".*" "set breakpoint after printing"
 
-send_gdb "continue\n"
+gdb_test_multiple "continue" "" {
+    -re "Continuing\.\r\n" {
+	pass $gdb_test_name
+    }
+}
 
 set expected_lines 3000
 set more 1
 set i 0
 while {$more} {
     set more 0
+
+    # Make sure that we don't get spurious/repeated/bogus output
+    # between each "this is line number ..."  line, with an anchor.
+    # But consume any output that precedes the first line, because
+    # when testing against GDBserver, we'll get:
+    #
+    #   continue
+    #   Continuing.
+    #   PASS: gdb.base/long-inferior-output.exp: continue
+    #   Remote debugging from host ::1, port 40044
+    #   this is line number 0
+    #   ...
+    if {$i != 0} {
+	set anchor "^"
+    } else {
+	set anchor ""
+    }
+
     gdb_expect {
 	-i $inferior_spawn_id
-	-ex "this is line number $i" {
+	-re "${anchor}this is line number $i\r\n" {
 	    incr i
-           if {$i != $expected_lines} {
+	    if {$i != $expected_lines} {
 		set more 1
 	    }
+	}
+	-re "this is line number \[^\r\n\]*\r\n" {
+	    # If we see this, we've lost output.
 	}
     }
 }
