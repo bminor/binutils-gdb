@@ -2401,6 +2401,8 @@ kill_command (const char *arg, int from_tty)
 
   target_kill ();
 
+  update_previous_thread ();
+
   if (print_inferior_events)
     printf_unfiltered (_("[Inferior %d (%s) killed]\n"),
 		       infnum, pid_str.c_str ());
@@ -2756,6 +2758,8 @@ detach_command (const char *args, int from_tty)
 
   target_detach (current_inferior (), from_tty);
 
+  update_previous_thread ();
+
   /* The current inferior process was just detached successfully.  Get
      rid of breakpoints that no longer make sense.  Note we don't do
      this within target_detach because that is also used when
@@ -2794,6 +2798,7 @@ disconnect_command (const char *args, int from_tty)
   target_disconnect (args, from_tty);
   no_shared_libraries (NULL, from_tty);
   init_thread_list ();
+  update_previous_thread ();
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
 }
