@@ -47,6 +47,7 @@ def exit_handler(event):
     print("event type: exit")
     print("exit code: %d" % (event.exit_code))
     print("exit inf: %d" % (event.inferior.num))
+    print("exit pid: %d" % (event.inferior.pid))
     print("dir ok: %s" % str("exit_code" in dir(event)))
 
 

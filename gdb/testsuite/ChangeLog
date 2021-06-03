@@ -1,3 +1,9 @@
+2021-06-03  Magne Hov  <mhov@undo.io>
+
+	PR python/27841
+	* gdb.python/py-events.exp: Extend inferior exit tests.
+	* gdb.python/py-events.py: Print inferior exit PID.
+
 2021-06-03  Hannes Domani  <ssbssa@yahoo.de>
 
 	* gdb.python/py-symbol.exp: Test symbol constants.
