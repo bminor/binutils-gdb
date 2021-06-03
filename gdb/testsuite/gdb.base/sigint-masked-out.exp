@@ -1,0 +1,101 @@
+# Copyright 2021 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Make sure that we can interrupt an inferior that has all signals
+# masked out, including SIGINT, with both Ctrl-C and the "interrupt"
+# command.
+
+standard_testfile
+
+if {[build_executable "failed to build" $testfile $srcfile {debug}]} {
+    return -1
+}
+
+# Test interrupting with Ctrl-C.
+
+proc_with_prefix test_ctrl_c {} {
+    global binfile
+    global gdb_prompt
+
+    clean_restart $binfile
+
+    if ![runto "done"] {
+	fail "can't run to done function"
+	return
+    }
+
+    gdb_test_multiple "continue" "" {
+	-re "Continuing" {
+	    pass $gdb_test_name
+	}
+    }
+
+    after 200
+
+    send_gdb "\003"
+
+    gdb_test_multiple "" "ctrl-c stops process" {
+	-timeout 5
+	-re -wrap "(received signal SIGINT|stopped).*" {
+	    pass $gdb_test_name
+	}
+	timeout {
+	    setup_kfail "gdb/9425" *-*-*
+	    fail "$gdb_test_name (timeout)"
+	}
+    }
+}
+
+# Test interrupting with the "interrupt" command.
+
+proc_with_prefix test_interrupt_cmd {} {
+    global binfile
+    global gdb_prompt
+
+    clean_restart $binfile
+
+    if ![runto "done"] {
+	fail "can't run to done function"
+	return
+    }
+
+    gdb_test_multiple "continue&" "" {
+	-re "Continuing\\.\r\n$gdb_prompt " {
+	    pass $gdb_test_name
+	}
+    }
+
+    after 200
+
+    gdb_test_multiple "interrupt" "" {
+	-re "$gdb_prompt " {
+	    pass $gdb_test_name
+	}
+    }
+
+    gdb_test_multiple "" "interrupt cmd stops process" {
+	-timeout 5
+	-re "(received signal SIGINT|stopped)" {
+	    pass $gdb_test_name
+	}
+	timeout {
+	    setup_kfail "gdb/14559" *-*-*
+	    fail "$gdb_test_name (timeout)"
+	}
+    }
+}
+
+test_ctrl_c
+test_interrupt_cmd
