@@ -1336,7 +1336,6 @@ HFILES_NO_SRCDIR = \
 	inf-ptrace.h \
 	infcall.h \
 	inferior.h \
-	inflow.h \
 	inline-frame.h \
 	interps.h \
 	jit.h \

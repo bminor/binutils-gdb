@@ -32,7 +32,7 @@
 #include "gdbcmd.h"
 #include "gdbsupport/filestuff.h"
 #include <termios.h>
-#include "inflow.h"
+#include "gdbsupport/scoped_ignore_sigttou.h"
 
 struct hardwire_ttystate
   {

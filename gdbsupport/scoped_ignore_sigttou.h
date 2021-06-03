@@ -1,4 +1,4 @@
-/* Low level interface to ptrace, for GDB when running under Unix.
+/* Support for signoring SIGTTOU.
 
    Copyright (C) 2003-2021 Free Software Foundation, Inc.
 
@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef INFLOW_H
-#define INFLOW_H
+#ifndef SCOPED_IGNORE_SIGTTOU_H
+#define SCOPED_IGNORE_SIGTTOU_H
 
 #include <unistd.h>
 #include <signal.h>
@@ -53,4 +53,4 @@ private:
 #endif
 };
 
-#endif /* inflow.h */
+#endif /* SCOPED_IGNORE_SIGTTOU_H */

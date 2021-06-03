@@ -29,12 +29,12 @@
 #include <fcntl.h>
 #include "gdbsupport/gdb_select.h"
 
-#include "inflow.h"
 #include "gdbcmd.h"
 #ifdef HAVE_TERMIOS_H
 #include <termios.h>
 #endif
 #include "gdbsupport/job-control.h"
+#include "gdbsupport/scoped_ignore_sigttou.h"
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
