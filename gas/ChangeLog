@@ -1,3 +1,8 @@
+2021-06-03  Alan Modra  <amodra@gmail.com>
+
+	PR 1202
+	* testsuite/gas/mcore/allinsn.d: Correct loopt expected output.
+
 2021-05-29  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/ppc/raw.s,
