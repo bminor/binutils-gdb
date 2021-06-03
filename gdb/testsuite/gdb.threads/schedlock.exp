@@ -68,14 +68,9 @@ proc stop_process { description } {
   # For this to work we must be sure to consume the "Continuing."
   # message first, or GDB's signal handler may not be in place.
   after 1000 {send_gdb "\003"}
-  gdb_expect {
-    -re "Thread .* received signal SIGINT.*$gdb_prompt $"
-      {
-	pass $description
-      }
-    timeout
-      {
-	fail "$description (timeout)"
+  gdb_test_multiple "" $description {
+      -re "Thread .* (received signal SIGINT|stopped).*$gdb_prompt $" {
+	  pass $description
       }
   }
 }

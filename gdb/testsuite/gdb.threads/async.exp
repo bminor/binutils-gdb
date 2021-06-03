@@ -80,7 +80,7 @@ proc test_current_thread {expected_thr} {
     gdb_test_multiple $test $test {
 	-re "^interrupt\r\n$gdb_prompt " {
 	    gdb_test_multiple "" $test {
-		-re "Thread .* received signal SIGINT, Interrupt\\." {
+		-re "Thread .* (received signal SIGINT, Interrupt|stopped)\\." {
 		    pass $test
 		}
 	    }

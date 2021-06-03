@@ -2846,7 +2846,39 @@ interrupt_target_1 (bool all_threads)
 	stop_current_target_threads_ns (inferior_ptid);
     }
   else
-    target_interrupt ();
+    {
+      if (exists_non_stop_target ())
+	{
+	  /* Ignore the interrupt request if everything is already
+	     stopped.  */
+	  auto any_resumed = [] ()
+	    {
+	      for (thread_info *thr : all_non_exited_threads ())
+		{
+		  if (thr->executing)
+		    return true;
+		  if (thr->suspend.waitstatus_pending_p)
+		    return true;
+		}
+	      return false;
+	    };
+
+	  if (any_resumed ())
+	    {
+	      /* Stop all threads, and report one single stop for all
+		 threads.  Since the "interrupt" command works
+		 asynchronously on all other modes (non-stop or true
+		 all-stop + stopping with SIGINT), i.e., the command
+		 finishes and GDB prints the prompt before the target
+		 actually stops, make this mode work the same, by
+		 deferring the actual synchronous stopping work to the
+		 event loop.  */
+	      mark_infrun_async_event_handler_interrupt_all ();
+	    }
+	}
+      else
+	target_interrupt ();
+    }
 
   disable_commit_resumed.reset_and_commit ();
 }

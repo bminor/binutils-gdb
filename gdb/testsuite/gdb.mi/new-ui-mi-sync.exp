@@ -92,7 +92,7 @@ proc do_test {sync_command} {
 	gdb_test_multiple "interrupt" "$message" {
 	    -re "$gdb_prompt " {
 		gdb_test_multiple "" "$message" {
-		    -re "received signal SIGINT" {
+		    -re "(received signal SIGINT|stopped)" {
 			pass $message
 		    }
 		}

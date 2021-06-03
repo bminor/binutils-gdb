@@ -927,6 +927,21 @@ target_terminal::init (void)
   m_terminal_state = target_terminal_state::is_ours;
 }
 
+/* Called after switching the terminal to the inferior.  If the user
+   hit C-c before, pretend that it was hit right here.  Non-stop
+   targets however are more complicated though, as interruption with
+   "set non-stop off" + "maint set target-non-stop on" wants to stop
+   all threads individually with target_stop (and synchronously wait
+   for the stops), so we let the event loop handle it, when it's
+   recursion-safe to do so.  */
+
+static void
+maybe_pass_ctrlc ()
+{
+  if (!exists_non_stop_target () && check_quit_flag ())
+    target_pass_ctrlc ();
+}
+
 /* See target/target.h.  */
 
 void
@@ -961,8 +976,7 @@ target_terminal::inferior (void)
 
   /* If the user hit C-c before, pretend that it was hit right
      here.  */
-  if (check_quit_flag ())
-    target_pass_ctrlc ();
+  maybe_pass_ctrlc ();
 }
 
 /* See target/target.h.  */
@@ -998,8 +1012,7 @@ target_terminal::restore_inferior (void)
 
   /* If the user hit C-c before, pretend that it was hit right
      here.  */
-  if (check_quit_flag ())
-    target_pass_ctrlc ();
+  maybe_pass_ctrlc ();
 }
 
 /* Switch terminal state to DESIRED_STATE, either is_ours, or
@@ -3797,6 +3810,9 @@ target_interrupt ()
 void
 target_pass_ctrlc (void)
 {
+  /* Non-stop targets interrupt programs with target_stop instead.  */
+  gdb_assert (!exists_non_stop_target ());
+
   /* Pass the Ctrl-C to the first target that has a thread
      running.  */
   for (inferior *inf : all_inferiors ())

@@ -81,7 +81,7 @@ proc do_test {} {
 	}
 
 	after 500 {send_gdb "\003"}
-	gdb_test "" "(Program|Thread .*) received signal SIGINT.*" \
+	gdb_test "" "(Program|Thread .*) (received signal SIGINT|stopped).*" \
 	    "stop with control-c"
 
 	remote_exec host "kill -9 $child_pid"

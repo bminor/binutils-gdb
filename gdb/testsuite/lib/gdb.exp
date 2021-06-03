@@ -2870,6 +2870,25 @@ gdb_caching_proc supports_memtag {
     return 0
 }
 
+# Return true if the target is able to interrupt a program that blocks
+# SIGINT.
+proc can_interrupt_blocked_sigint {} {
+    if {[istarget *-*-linux*]} {
+	gdb_test_multiple "maint show target-non-stop" "" {
+	    -re "(is|currently) on.*$::gdb_prompt $" {
+	    }
+	    -re "(is|currently) off.*$::gdb_prompt $" {
+		# GDBserver still tries to interrupt programs with
+		# SIGINT.
+		return 0
+	    }
+	}
+    }
+
+    # Assume possible.
+    return 1
+}
+
 # Return 1 if the target supports hardware single stepping.
 
 proc can_hardware_single_step {} {

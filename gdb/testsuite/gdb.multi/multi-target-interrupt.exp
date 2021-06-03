@@ -46,7 +46,7 @@ proc test_ctrlc {} {
 
 	set msg "send_gdb control C"
 	gdb_test_multiple "" $msg {
-	    -re "received signal SIGINT.*$gdb_prompt $" {
+	    -re "(received signal SIGINT|stopped).*$gdb_prompt $" {
 		pass $msg
 	    }
 	}

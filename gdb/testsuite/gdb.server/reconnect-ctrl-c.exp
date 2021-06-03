@@ -49,7 +49,7 @@ with_test_prefix "preparation" {
   gdb_test "disconnect" ".*"
 }
 
-# Connect, continue, send Ctrl-C and expect a SIGINT stop.
+# Connect, continue, send Ctrl-C and expect a stop.
 
 proc connect_continue_ctrl_c {} {
     global gdbserver_protocol gdbserver_gdbport
@@ -67,7 +67,7 @@ proc connect_continue_ctrl_c {} {
     }
 
     after 1000 {send_gdb "\003"}
-    gdb_test "" "Program received signal SIGINT.*" "stop with control-c"
+    gdb_test "" "Program (received signal SIGINT|stopped).*" "stop with control-c"
 }
 
 with_test_prefix "first" {

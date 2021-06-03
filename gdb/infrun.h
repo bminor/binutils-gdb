@@ -255,6 +255,18 @@ extern void infrun_async (int enable);
    loop.  */
 extern void mark_infrun_async_event_handler (void);
 
+/* Like mark_infrun_async_event_handler, and ask the event loop to
+   stop all threads, in response to an "interrupt" command.  */
+extern void mark_infrun_async_event_handler_interrupt_all ();
+
+/* Like mark_infrun_async_event_handler, and ask the event loop to
+   handle a "Ctrl-C" interruption request.  In some modes (e.g., "set
+   non-stop off" + "maint set target-non-stop on"), we interrupt the
+   target with target_stop, and it's not safe to use that right away,
+   as we may be in the middle of handling some other event, and
+   target_stop changes infrun state.  */
+extern void mark_infrun_async_event_handler_ctrl_c ();
+
 /* The global chain of threads that need to do a step-over operation
    to get past e.g., a breakpoint.  */
 extern struct thread_info *global_thread_step_over_chain_head;

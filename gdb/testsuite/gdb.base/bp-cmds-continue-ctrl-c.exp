@@ -87,6 +87,9 @@ proc do_test {} {
 	    -re "Program received signal SIGINT.*\r\n$gdb_prompt $" {
 		send_log "$internal_pass (SIGINT)\n"
 	    }
+	    -re "Program stopped.*\r\n$gdb_prompt $" {
+		send_log "$internal_pass (stopped)\n"
+	    }
 	    -re "Quit\r\n$gdb_prompt $" {
 		send_log "$internal_pass (Quit)\n"
 

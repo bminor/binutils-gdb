@@ -47,7 +47,8 @@ proc do_test {} {
     # For this to work we must be sure to consume the "Continuing."
     # message first, or GDB's signal handler may not be in place.
     after 500 {send_gdb "\003"}
-    gdb_test "" "Program received signal SIGINT.*" "stop with control-c"
+    gdb_test "" "Program (received signal SIGINT|stopped).*" \
+	"stop with control-c"
 }
 
 # With native debugging and "run" (with job control), the ctrl-c

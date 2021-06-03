@@ -37,6 +37,8 @@ proc_with_prefix test_ctrl_c {} {
 	return
     }
 
+    set can_interrupt [can_interrupt_blocked_sigint]
+
     gdb_test_multiple "continue" "" {
 	-re "Continuing" {
 	    pass $gdb_test_name
@@ -54,7 +56,9 @@ proc_with_prefix test_ctrl_c {} {
 	    pass $gdb_test_name
 	}
 	-re -wrap "Inferior.*exited normally.*" {
-	    setup_kfail "gdb/9425" *-*-*
+	    if {!$can_interrupt} {
+		setup_kfail "gdb/9425" *-*-*
+	    }
 	    fail "$gdb_test_name (the program exited)"
 	}
     }
@@ -72,6 +76,8 @@ proc_with_prefix test_interrupt_cmd {} {
 	fail "can't run to done function"
 	return
     }
+
+    set can_interrupt [can_interrupt_blocked_sigint]
 
     gdb_test_multiple "continue&" "" {
 	-re "Continuing\\.\r\n$gdb_prompt " {
@@ -95,7 +101,9 @@ proc_with_prefix test_interrupt_cmd {} {
 	    pass $gdb_test_name
 	}
 	-re "Inferior.*exited normally" {
-	    setup_kfail "gdb/14559" *-*-*
+	    if {!$can_interrupt} {
+		setup_kfail "gdb/14559" *-*-*
+	    }
 	    fail "$gdb_test_name (the program exited)"
 	}
     }

@@ -9440,13 +9440,158 @@ static const struct internalvar_funcs siginfo_funcs =
   NULL
 };
 
-/* Callback for infrun's target events source.  This is marked when a
-   thread has a pending status to process.  */
+/* True if the user used the "interrupt" command and we want to handle
+   the interruption via the event loop instead of immediately.  This
+   is so that "interrupt" always stops the program asynchronously in
+   all the different execution modes.  In particular, in "set non-stop
+   off" + "maint set target-non-stop on" mode, we want to
+   synchronously stop all threads with stop_all_threads, so we delay
+   doing that to the event loop, so that "interrupt" presents a prompt
+   immediately, and then presents the stop afterwards, just like what
+   happens in non-stop mode, or if the target is in true all-stop mode
+   and the interrupting is done by sending a SIGINT to the inferior
+   process.  */
+static bool interrupt_all_requested = false;
+
+/* Pick the thread to report the stop on and to switch to it.  */
+
+static void
+switch_to_stop_thread ()
+{
+  thread_info *stop_thr = nullptr;
+
+  if (previous_thread != nullptr && previous_thread->state == THREAD_RUNNING)
+    stop_thr = previous_thread.get ();
+  else
+    {
+      for (thread_info *thr : all_non_exited_threads ())
+	if (thr->state == THREAD_RUNNING)
+	  {
+	    stop_thr = thr;
+	    break;
+	  }
+    }
+
+  gdb_assert (stop_thr != nullptr);
+
+  switch_to_thread (stop_thr);
+}
+
+/* Synchronously stop all threads, saving interesting events as
+   pending events, and present a normal stop on one of the threads.
+   Preference is given to the "previous thread", which was the thread
+   that the user last resumed.  This is used in "set non-stop off" +
+   "maint set target-non-stop on" mode to stop the target in response
+   to Ctrl-C or the "interrupt" command.  */
+
+static void
+sync_interrupt_all ()
+{
+  /* Events are always processed with the main UI as current UI.  This
+     way, warnings, debug output, etc. are always consistently sent to
+     the main console.  */
+  scoped_restore save_ui = make_scoped_restore (&current_ui, main_ui);
+
+  /* Exposed by gdb.base/paginate-after-ctrl-c-running.exp.  */
+
+  /* Temporarily disable pagination.  Otherwise, the user would be
+     given an option to press 'q' to quit, which would cause an early
+     exit and could leave GDB in a half-baked state.  */
+  scoped_restore save_pagination
+    = make_scoped_restore (&pagination_enabled, false);
+
+  scoped_disable_commit_resumed disable_commit_resumed ("stopping for ctrl-c");
+
+  gdb_assert (!non_stop);
+
+  /* Stop all threads before picking which one to present the stop on
+     -- this is safer than the other way around because otherwise the
+     thread we pick could exit just while we try to stop it.  */
+  stop_all_threads ();
+
+  switch_to_stop_thread ();
+
+  target_waitstatus ws;
+  ws.kind = TARGET_WAITKIND_STOPPED;
+  ws.value.sig = GDB_SIGNAL_0;
+  set_last_target_status (current_inferior ()->process_target (),
+			  inferior_ptid, ws);
+  stopped_by_random_signal = true;
+  stop_print_frame = true;
+  normal_stop ();
+
+  inferior_event_handler (INF_EXEC_COMPLETE);
+
+  /* If a UI was in sync execution mode, and now isn't, restore its
+     prompt (a synchronous execution command has finished, and we're
+     ready for input).  */
+  all_uis_check_sync_execution_done ();
+}
+
+/* See infrun.h.  */
+
+void
+mark_infrun_async_event_handler_interrupt_all ()
+{
+  mark_infrun_async_event_handler ();
+  interrupt_all_requested = true;
+}
+
+/* See infrun.h.  */
+
+void
+mark_infrun_async_event_handler_ctrl_c ()
+{
+  mark_infrun_async_event_handler ();
+  set_quit_flag ();
+}
+
+/* Callback for infrun's target events source.  This is marked either
+   when a thread has a pending status to process, or a target
+   interrupt was requested, either with Ctrl-C or the "interrupt"
+   command and target is in non-stop mode.  */
 
 static void
 infrun_async_inferior_event_handler (gdb_client_data data)
 {
+  /* Handle a Ctrl-C while the inferior has the terminal, or an
+     "interrupt" cmd request.  */
+  if ((!target_terminal::is_ours () && check_quit_flag ())
+      || interrupt_all_requested)
+    {
+      interrupt_all_requested = false;
+
+      if (exists_non_stop_target ())
+	{
+	  if (non_stop)
+	    {
+	      /* Stop one thread, like it would happen if we were
+		 stopping with SIGINT sent to the foreground
+		 process.  */
+	      switch_to_stop_thread ();
+	      interrupt_target_1 (false);
+	    }
+	  else
+	    {
+	      /* Stop all threads, and report one single stop for all
+		 threads.  */
+	      sync_interrupt_all ();
+	    }
+	}
+      else
+	{
+	  /* Pass a Ctrl-C request to the target.  Usually this means
+	     sending a SIGINT to the inferior process.  */
+	  target_pass_ctrlc ();
+	}
+
+      /* Don't clear the event handler yet -- there may be pending
+	 events to process.  */
+      return;
+    }
+
   clear_async_event_handler (infrun_async_inferior_event_token);
+
   inferior_event_handler (INF_REG_EVENT);
 }
 

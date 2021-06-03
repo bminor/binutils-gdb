@@ -59,7 +59,7 @@ proc test_no_resumed_infs {inf_A inf_B} {
     # Now stop the program (all targets).
     send_gdb "\003"
     gdb_test_multiple "" "send_gdb control C" {
-	-re "received signal SIGINT.*$gdb_prompt $" {
+	-re "(received signal SIGINT|stopped).*$gdb_prompt $" {
 	    pass $gdb_test_name
 	}
     }

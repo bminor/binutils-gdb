@@ -278,7 +278,7 @@ proc coretest {inf1_how inf2_how} {
     if {$expect_ttou} {
 	gdb_test "" "Quit" "stop with control-c (Quit)"
     } else {
-	gdb_test "" "received signal SIGINT.*" "stop with control-c (SIGINT)"
+	gdb_test "" "(received signal SIGINT|stopped).*" "stop with control-c (SIGINT)"
     }
 
     # Useful for debugging in case the Ctrl-C above fails.

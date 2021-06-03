@@ -1002,7 +1002,15 @@ default_quit_handler (void)
       if (target_terminal::is_ours ())
 	quit ();
       else
-	target_pass_ctrlc ();
+	{
+	  /* Let the even loop handle the quit/interrupt.  In some
+	     modes (e.g., "set non-stop off" + "maint set
+	     target-non-stop on"), it's not safe to request an
+	     interrupt right now, as we may be in the middle of
+	     handling some other event, and target_stop changes infrun
+	     state.  */
+	  mark_infrun_async_event_handler_ctrl_c ();
+	}
     }
 }
 

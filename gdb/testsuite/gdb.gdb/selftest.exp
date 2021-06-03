@@ -97,7 +97,7 @@ proc test_with_self { } {
 	send_gdb "\003"
 	# "Thread 1" is displayed iff Guile support is linked in.
 	gdb_expect {
-	    -re "(Thread .*|Program) received signal SIGINT.*$gdb_prompt $" {
+	    -re "(Thread .*|Program) (received signal SIGINT|stopped).*$gdb_prompt $" {
 		pass "$description"
 	    }
 	    -re ".*$gdb_prompt $" {
@@ -119,7 +119,7 @@ proc test_with_self { } {
     set description "send ^C to child process again"
     send_gdb "\003"
     gdb_expect {
-	-re "(Thread .*|Program) received signal SIGINT.*$gdb_prompt $" {
+	-re "(Thread .*|Program) (received signal SIGINT|stopped).*$gdb_prompt $" {
 	    pass "$description"
 	}
 	-re ".*$gdb_prompt $" {

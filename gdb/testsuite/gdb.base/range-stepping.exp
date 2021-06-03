@@ -193,7 +193,7 @@ if ![target_info exists gdb,nointerrupts] {
 		incr vcont_r_counter
 		exp_continue
 	    }
-	    -re "Program received signal SIGINT.*$gdb_prompt $" {
+	    -re "Program (received signal SIGINT|stopped).*$gdb_prompt $" {
 		pass $test
 	    }
 	}

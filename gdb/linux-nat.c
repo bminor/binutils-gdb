@@ -2142,19 +2142,6 @@ wait_for_signal ()
 {
   linux_nat_debug_printf ("about to sigsuspend");
   sigsuspend (&suspend_mask);
-
-  /* If the quit flag is set, it means that the user pressed Ctrl-C
-     and we're debugging a process that is running on a separate
-     terminal, so we must forward the Ctrl-C to the inferior.  (If the
-     inferior is sharing GDB's terminal, then the Ctrl-C reaches the
-     inferior directly.)  We must do this here because functions that
-     need to block waiting for a signal loop forever until there's an
-     event to report before returning back to the event loop.  */
-  if (!target_terminal::is_ours ())
-    {
-      if (check_quit_flag ())
-	target_pass_ctrlc ();
-    }
 }
 
 /* Wait for LP to stop.  Returns the wait status, or 0 if the LWP has
@@ -3317,8 +3304,32 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
       /* We shouldn't end up here unless we want to try again.  */
       gdb_assert (lp == NULL);
 
-      /* Block until we get an event reported with SIGCHLD.  */
+      /* Block until we get an event reported with SIGCHLD or a SIGINT
+	 interrupt.  */
       wait_for_signal ();
+
+      /* If the quit flag is set, it means that the user pressed
+	 Ctrl-C and we're debugging a process that is running on a
+	 separate terminal, so we must forward the Ctrl-C to the
+	 inferior.  (If the inferior is sharing GDB's terminal, then
+	 the Ctrl-C reaches the inferior directly.)  If we were
+	 interrupted by Ctrl-C, return back to the event loop and let
+	 it handle interrupting the target (or targets).  */
+
+      if (!target_terminal::is_ours () && check_quit_flag ())
+	{
+	  mark_infrun_async_event_handler_ctrl_c ();
+
+	  linux_nat_debug_printf ("exit (quit flag)");
+
+	  /* If we got a SIGCHLD, need to end up here again. */
+	  async_file_mark ();
+
+	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+
+	  restore_child_signals_mask (&prev_mask);
+	  return minus_one_ptid;
+	}
     }
 
   gdb_assert (lp);
