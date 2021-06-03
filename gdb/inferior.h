@@ -182,6 +182,10 @@ extern void child_pass_ctrlc (struct target_ops *self);
 
 extern void child_interrupt (struct target_ops *self);
 
+/* Called when we get a SIGWINCH, to manage the sizes of inferior
+   terminals created by GDB.  */
+extern void child_terminal_on_sigwinch ();
+
 /* From fork-child.c */
 
 /* Helper function to call STARTUP_INFERIOR with PID and NUM_TRAPS.

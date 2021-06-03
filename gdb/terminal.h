@@ -27,6 +27,9 @@ extern void new_tty (void);
 
 extern void new_tty_postfork (void);
 
+/* Returns true if new_tty_prefork created a GDB-managed terminal.  */
+extern bool created_managed_tty ();
+
 extern void copy_terminal_info (struct inferior *to, struct inferior *from);
 
 /* Exchange the terminal info and state between inferiors A and B.  */

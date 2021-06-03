@@ -73,6 +73,14 @@ prefork_hook ()
 
 /* See nat/fork-inferior.h.  */
 
+bool
+child_has_managed_tty_hook ()
+{
+  return created_managed_tty ();
+}
+
+/* See nat/fork-inferior.h.  */
+
 void
 postfork_hook (pid_t pid)
 {

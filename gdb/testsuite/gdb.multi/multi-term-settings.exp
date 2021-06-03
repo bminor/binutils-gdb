@@ -48,9 +48,18 @@ set attach_pid2 [spawn_id_get_pid $attach_spawn_id2]
 # Create inferior WHICH_INF.  INF_HOW is how to create it.  This can
 # be one of:
 #
-#  - "run" - for "run" command.
-#  - "tty" - for "run" + "tty TTY".
-#  - "attach" - for attaching to an existing process.
+#  - "run-session" - for "run" command, GDB puts inferior in its own
+#                    session and gives its own controlling terminal,
+#                    on systems that support it (e.g., GNU/Linux) (the
+#                    default).
+#
+#  - "run-share"   - for "run" command, GDB and inferior share terminal
+#                    ("set inferior-tty /dev/tty").
+#
+#  - "run-tty"     - for "run" + "tty TTY".
+#
+#  - "attach"      - for attaching to an existing process.
+
 proc create_inferior {which_inf inf_how} {
     global binfile
 
@@ -69,12 +78,22 @@ proc create_inferior {which_inf inf_how} {
 	}
     }
 
-    if {$inf_how == "run"} {
+    if {$inf_how == "run-session"} {
+	# Clear inferior-tty back to the default, in case we're
+	# running the testsuite with "set inferior-tty /dev/tty"
+	# forced.
+	gdb_test_no_output "set inferior-tty"
 	if [my_runto_main] {
 	    global inferior_spawn_id
 	    return $inferior_spawn_id
 	}
-    } elseif {$inf_how == "tty"} {
+    } elseif {$inf_how == "run-share"} {
+	gdb_test_no_output "set inferior-tty /dev/tty"
+	if [my_runto_main] {
+	    global inferior_spawn_id
+	    return $inferior_spawn_id
+	}
+    } elseif {$inf_how == "run-tty"} {
 	# Create the new PTY for the inferior.
 	spawn -pty
 	set inf_spawn_id $spawn_id
@@ -161,8 +180,21 @@ proc coretest {inf1_how inf2_how} {
     # "run" makes each inferior be a process group leader.  When we
     # run both inferiors in GDB's terminal/session, only one can end
     # up as the terminal's foreground process group, so it's expected
-    # that the other receives a SIGTTOU.
-    set expect_ttou [expr {$inf1_how == "run" && $inf2_how == "run"}]
+    # that the other receives a SIGTTOU.  Similarly, if we run one
+    # inferior in GDB's terminal, and another in its own GDB-created
+    # terminal/session, then if we resume the latter first, GDB won't
+    # put the former in the foreground either (since GDB must stay in
+    # the foreground to forward input and catch Ctrl-C).
+
+    # Only the native target knows how to put the inferior in its own
+    # terminal/session.
+    set can_per_inf_session [gdb_is_target_native]
+
+    set expect_ttou [expr {(($inf1_how == "run-share"
+			     || (!$can_per_inf_session
+				 && $inf1_how == "run-session"))
+			    && ($inf2_how == "run-share"
+				|| $inf2_how == "run-session"))}]
 
     global gdb_prompt
 
@@ -256,11 +288,11 @@ proc coretest {inf1_how inf2_how} {
     }
 }
 
-set how_modes {"run" "attach" "tty"}
+set how_modes {"run-session" "run-share" "run-tty" "attach"}
 
 foreach_with_prefix inf1_how $how_modes {
     foreach_with_prefix inf2_how $how_modes {
-	if {($inf1_how == "tty" || $inf2_how == "tty")
+	if {($inf1_how == "run-tty" || $inf2_how == "run-tty")
 	    && [target_info gdb_protocol] == "extended-remote"} {
 	    # No way to specify the inferior's tty in the remote
 	    # protocol.

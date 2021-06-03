@@ -40,6 +40,8 @@ public:
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
 
+  pid_t handle_session_leader_fork (pid_t sl_pid) override;
+
   void attach (const char *, int) override;
 
   void detach (inferior *, int) override;

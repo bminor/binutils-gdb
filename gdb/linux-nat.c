@@ -1075,6 +1075,82 @@ linux_nat_post_attach_wait (ptid_t ptid, int *signalled)
   return status;
 }
 
+/* Wait for a SIGSTOP out of PID.  */
+
+static void
+waitpid_sigstop (pid_t pid)
+{
+  int status;
+  int res = waitpid (pid, &status, 0);
+  if (res == -1)
+    perror_with_name (_("waiting for child"));
+  else if (res != pid)
+    error (_("wait returned unexpected PID %d"), res);
+  else if (!WIFSTOPPED (status) || WSTOPSIG (status) != SIGSTOP)
+    error (_("wait returned unexpected status 0x%x"), status);
+}
+
+/* Wait for a fork event out of PID.  */
+
+static void
+waitpid_fork (pid_t pid)
+{
+  int status;
+  int res = waitpid (pid, &status, 0);
+  if (res == -1)
+    perror_with_name (_("waiting for child"));
+  else if (res != pid)
+    error (_("wait returned unexpected PID %d"), res);
+  else if (!WIFSTOPPED (status))
+    error (_("wait returned unexpected status 0x%x"), status);
+  else
+    {
+      int event = linux_ptrace_get_extended_event (status);
+      if (event != PTRACE_EVENT_FORK)
+	error (_("wait returned unexpected status 0x%x"), status);
+    }
+}
+
+pid_t
+linux_nat_target::handle_session_leader_fork (pid_t sl_pid)
+{
+  /* The first fork child is the session leader.  In turn its fork
+     child (i.e., GDB's granchild) is the inferior we want to debug.
+     Enable tracefork in order to trace the grandchild, and get its
+     pid.  */
+
+  waitpid_sigstop (sl_pid);
+
+  linux_enable_event_reporting (sl_pid, PTRACE_O_TRACEFORK);
+  ptrace (PTRACE_CONT, sl_pid, (PTRACE_TYPE_ARG3) 1, 0);
+
+  /* We should see a fork event now, for the second fork.  */
+  waitpid_fork (sl_pid);
+
+  /* Extract the grandchild's pid.  This is the final inferior
+     process.  */
+  unsigned long inf_pid;
+
+  if (ptrace (PTRACE_GETEVENTMSG, sl_pid, 0, &inf_pid) == -1)
+    perror_with_name (_("getting event message"));
+
+  /* The new child has a pending SIGSTOP.  We can't affect it until it
+     hits the SIGSTOP, but we're already attached.  */
+  waitpid_sigstop (inf_pid);
+
+  /* We don't need to continue debugging the session leader.  It's
+     simpler to just detach from it.  */
+  ptrace (PTRACE_DETACH, sl_pid, (PTRACE_TYPE_ARG3) 1, 0);
+
+  /* Resume the grandchild / inferior.  Disable event reporting to
+     avoid confusing startup_inferior with extra events as the
+     inferior goes through the shell.  */
+  linux_disable_event_reporting (inf_pid);
+  ptrace (PTRACE_CONT, inf_pid, (PTRACE_TYPE_ARG3) 1, 0);
+
+  return inf_pid;
+}
+
 void
 linux_nat_target::create_inferior (const char *exec_file,
 				   const std::string &allargs,

@@ -31,12 +31,15 @@ struct process_stratum_target;
    implementations.  */
 #define START_INFERIOR_TRAPS_EXPECTED 1
 
-/* Start an inferior Unix child process and sets inferior_ptid to its
-   pid.  EXEC_FILE is the file to run.  ALLARGS is a string containing
-   the arguments to the program.  ENV is the environment vector to
-   pass.  SHELL_FILE is the shell file, or NULL if we should pick
-   one.  EXEC_FUN is the exec(2) function to use, or NULL for the default
-   one.  */
+/* Start an inferior Unix child process and return its pid.  EXEC_FILE_ARG
+   is the file to run.  ALLARGS is a string containing the arguments
+   to the program.  ENV is the environment vector to pass.
+   SHELL_FILE_ARG is the shell file, or NULL if we should pick one.
+   EXEC_FUN is the exec(2) function to use, or NULL for the default
+   one.  HANDLE_SESSION_LEADER_FORK is the function to use to debug
+   the session leader process across the double-fork and extract the final
+   inferior PID if the inferior is using a gdb-managed terminal, or
+   NULL otherwise.  */
 
 /* This function is NOT reentrant.  Some of the variables have been
    made static to ensure that they survive the vfork call.  */
@@ -48,7 +51,9 @@ extern pid_t fork_inferior (const char *exec_file_arg,
 			    const char *shell_file_arg,
 			    void (*exec_fun) (const char *file,
 					      char * const *argv,
-					      char * const *env));
+					      char * const *env),
+			    pid_t (*handle_session_leader_fork) (pid_t sl_pid)
+			      = nullptr);
 
 /* Accept NTRAPS traps from the inferior.
 
@@ -69,6 +74,10 @@ extern void postfork_hook (pid_t pid);
 /* Perform any necessary tasks *on the child* after a fork/vfork takes
    place.  This function is mainly used by fork_inferior.  */
 extern void postfork_child_hook ();
+
+/* True if the inferior child has a terminal created and managed by
+   GDB or GDBserver.  */
+extern bool child_has_managed_tty_hook ();
 
 /* Flush both stdout and stderr.  This function needs to be
    implemented differently on GDB and GDBserver.  */

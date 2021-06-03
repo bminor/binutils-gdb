@@ -61,6 +61,26 @@ inf_ptrace_me (void)
   /* "Trace me, Dr. Memory!"  */
   if (ptrace (PT_TRACE_ME, 0, (PTRACE_TYPE_ARG3) 0, 0) < 0)
     trace_start_error_with_name ("ptrace");
+  if (created_managed_tty ())
+    {
+      /* We're about to fork again, so that this child remains as
+	 session leader, and the grandchild becomes the real inferior.
+	 Let GDB grab control of this child, and enable tracing the
+	 grandchild fork.  */
+      raise (SIGSTOP);
+    }
+}
+
+/* fork_inferior handle_session_leader_fork hook.  Dispatches to
+   inf_ptrace_target.  */
+
+static pid_t
+inf_ptrace_handle_session_leader_fork (pid_t sl_pid)
+{
+  auto *proc_target = current_inferior ()->process_target ();
+  auto *ptrace_targ = static_cast<inf_ptrace_target *> (proc_target);
+
+  return ptrace_targ->handle_session_leader_fork (sl_pid);
 }
 
 /* Start a new inferior Unix child process.  EXEC_FILE is the file to
@@ -88,7 +108,8 @@ inf_ptrace_target::create_inferior (const char *exec_file,
     }
 
   pid_t pid = fork_inferior (exec_file, allargs, env, inf_ptrace_me, NULL,
-			     NULL, NULL, NULL);
+			     NULL, NULL, NULL,
+			     inf_ptrace_handle_session_leader_fork);
 
   ptid_t ptid (pid);
   /* We have something that executes now.  We'll be running through

@@ -44,6 +44,14 @@ struct inf_ptrace_target : public inf_child_target
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
 
+  /* Targets that support putting the inferior in its own gdb-managed
+     terminal must override this method.  */
+  virtual pid_t handle_session_leader_fork (pid_t sl_pid)
+  {
+    gdb_assert_not_reached ("handle_session_leader_fork called");
+    return -1;
+  }
+
   void mourn_inferior () override;
 
   bool thread_alive (ptid_t ptid) override;
