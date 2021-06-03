@@ -4390,11 +4390,18 @@ exists_non_stop_target ()
   if (target_is_non_stop_p ())
     return true;
 
-  scoped_restore_current_thread restore_thread;
+  /* We can get here quite deep in core code, e.g., from
+     target_terminal::inferior().  Avoid switching thread context or
+     anything that would communicate with the target (e.g., to fetch
+     registers), or flushing e.g., the frame cache, as we may end up
+     called from within the frame building code.  We just switch
+     inferior in order to be able to call through the
+     target_stack.  */
+  scoped_restore_current_inferior restore_inferior;
 
   for (inferior *inf : all_inferiors ())
     {
-      switch_to_inferior_no_thread (inf);
+      set_current_inferior (inf);
       if (target_is_non_stop_p ())
 	return true;
     }
