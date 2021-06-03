@@ -427,7 +427,7 @@
    and use macro ARM_FEATURE to initialize the feature set variable.  */
 typedef struct
 {
-  unsigned long core[2];
+  unsigned long core[3];
   unsigned long coproc;
 } arm_feature_set;
 
@@ -435,23 +435,27 @@ typedef struct
 #define ARM_CPU_HAS_FEATURE(CPU,FEAT) \
   (((CPU).core[0] & (FEAT).core[0]) != 0 \
    || ((CPU).core[1] & (FEAT).core[1]) != 0 \
+   || ((CPU).core[2] & (FEAT).core[2]) != 0 \
    || ((CPU).coproc & (FEAT).coproc) != 0)
 
 /* Tests whether the features of A are a subset of B.  */
 #define ARM_FSET_CPU_SUBSET(A,B) \
   (((A).core[0] & (B).core[0]) == (A).core[0] \
    && ((A).core[1] & (B).core[1]) == (A).core[1] \
+   && ((A).core[2] & (B).core[2]) == (A).core[2] \
    && ((A).coproc & (B).coproc) == (A).coproc)
 
 #define ARM_CPU_IS_ANY(CPU) \
   ((CPU).core[0] == ((arm_feature_set)ARM_ANY).core[0] \
-   && (CPU).core[1] == ((arm_feature_set)ARM_ANY).core[1])
+   && (CPU).core[1] == ((arm_feature_set)ARM_ANY).core[1] \
+   && (CPU).core[2] == ((arm_feature_set)ARM_ANY).core[2])
 
 #define ARM_MERGE_FEATURE_SETS(TARG,F1,F2)		\
   do							\
     {							\
       (TARG).core[0] = (F1).core[0] | (F2).core[0];	\
       (TARG).core[1] = (F1).core[1] | (F2).core[1];	\
+      (TARG).core[2] = (F1).core[2] | (F2).core[2];	\
       (TARG).coproc = (F1).coproc | (F2).coproc;	\
     }							\
   while (0)
@@ -461,6 +465,7 @@ typedef struct
     {							\
       (TARG).core[0] = (F1).core[0] &~ (F2).core[0];	\
       (TARG).core[1] = (F1).core[1] &~ (F2).core[1];	\
+      (TARG).core[2] = (F1).core[2] &~ (F2).core[2];	\
       (TARG).coproc = (F1).coproc &~ (F2).coproc;	\
     }							\
   while (0)
@@ -468,17 +473,24 @@ typedef struct
 #define ARM_FEATURE_EQUAL(T1,T2)		\
   (   (T1).core[0] == (T2).core[0]		\
    && (T1).core[1] == (T2).core[1]		\
+   && (T1).core[2] == (T2).core[2]		\
    && (T1).coproc  == (T2).coproc)
 
 #define ARM_FEATURE_ZERO(T)			\
-  ((T).core[0] == 0 && (T).core[1] == 0 && (T).coproc == 0)
+  ((T).core[0] == 0				\
+   && (T).core[1] == 0				\
+   && (T).core[2] == 0				\
+   && (T).coproc == 0)
 
 #define ARM_FEATURE_CORE_EQUAL(T1, T2)		\
-  ((T1).core[0] == (T2).core[0] && (T1).core[1] == (T2).core[1])
+  ((T1).core[0] == (T2).core[0]			\
+   && (T1).core[1] == (T2).core[1]		\
+   && (T1).core[2] == (T2).core[2])
 
 #define ARM_FEATURE_LOW(core, coproc) {{(core), 0}, (coproc)}
 #define ARM_FEATURE_CORE(core1, core2) {{(core1), (core2)}, 0}
 #define ARM_FEATURE_CORE_LOW(core) {{(core), 0}, 0}
 #define ARM_FEATURE_CORE_HIGH(core) {{0, (core)}, 0}
+#define ARM_FEATURE_CORE_HIGH_HIGH(core) {{0, 0, (core)}, 0}
 #define ARM_FEATURE_COPROC(coproc) {{0, 0}, (coproc)}
 #define ARM_FEATURE(core1, core2, coproc) {{(core1), (core2)}, (coproc)}
