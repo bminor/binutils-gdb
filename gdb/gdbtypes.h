@@ -388,6 +388,7 @@ enum dynamic_prop_kind
   PROP_LOCLIST,    /* Location list.  */
   PROP_VARIANT_PARTS, /* Variant parts.  */
   PROP_TYPE,	   /* Type.  */
+  PROP_VARIABLE_NAME, /* Variable name.  */
 };
 
 union dynamic_prop_data
@@ -414,6 +415,11 @@ union dynamic_prop_data
      rewrite the property's kind and set this field.  */
 
   struct type *original_type;
+
+  /* Name of a variable to look up; the variable holds the value of
+     this property.  */
+
+  const char *variable_name;
 };
 
 /* * Used to store a dynamic property.  */
@@ -494,6 +500,22 @@ struct dynamic_prop
   {
     m_kind = PROP_TYPE;
     m_data.original_type = original_type;
+  }
+
+  /* Return the name of the variable that holds this property's value.
+     Only valid for PROP_VARIABLE_NAME.  */
+  const char *variable_name () const
+  {
+    gdb_assert (m_kind == PROP_VARIABLE_NAME);
+    return m_data.variable_name;
+  }
+
+  /* Set the name of the variable that holds this property's value,
+     and set this property to be of kind PROP_VARIABLE_NAME.  */
+  void set_variable_name (const char *name)
+  {
+    m_kind = PROP_VARIABLE_NAME;
+    m_data.variable_name = name;
   }
 
   /* Determine which field of the union dynamic_prop.data is used.  */

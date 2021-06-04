@@ -1,3 +1,20 @@
+2021-06-04  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.h (dwarf2_fetch_die_type_sect_off): Add 'var_name'
+	parameter.
+	* dwarf2/loc.c (dwarf2_evaluate_property) <case
+	PROP_VARIABLE_NAME>: New case.
+	(compute_var_value): New function.
+	(sect_variable_value): Use compute_var_value.
+	* dwarf2/read.c (attr_to_dynamic_prop): Handle DW_TAG_variable.
+	(var_decl_name): New function.
+	(dwarf2_fetch_die_type_sect_off): Add 'var_name' parameter.
+	* gdbtypes.h (enum dynamic_prop_kind) <PROP_VARIABLE_NAME>: New
+	constant.
+	(union dynamic_prop_data) <variable_name>: New member.
+	(struct dynamic_prop) <variable_name, set_variable_name>: New
+	methods.
+
 2021-06-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* remote.c (remote_target)

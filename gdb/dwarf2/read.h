@@ -671,11 +671,14 @@ extern const gdb_byte *dwarf2_fetch_constant_bytes
    LONGEST *len);
 
 /* Return the type of the die at SECT_OFF in PER_CU.  Return NULL if no
-   valid type for this die is found.  */
+   valid type for this die is found.  If VAR_NAME is non-null, and if
+   the DIE in question is a variable declaration (definitions are
+   excluded), then *VAR_NAME is set to the variable's name.  */
 
 struct type *dwarf2_fetch_die_type_sect_off
   (sect_offset sect_off, dwarf2_per_cu_data *per_cu,
-   dwarf2_per_objfile *per_objfile);
+   dwarf2_per_objfile *per_objfile,
+   const char **var_name = nullptr);
 
 /* When non-zero, dump line number entries as they are read in.  */
 extern unsigned int dwarf_line_debug;
