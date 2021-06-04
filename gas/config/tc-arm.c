@@ -365,6 +365,8 @@ static const arm_feature_set fpu_neon_ext_v8_1 =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_RDMA);
 static const arm_feature_set fpu_neon_ext_dotprod =
   ARM_FEATURE_COPROC (FPU_NEON_EXT_DOTPROD);
+static const arm_feature_set pacbti_ext =
+  ARM_FEATURE_CORE_HIGH_HIGH (ARM_EXT3_PACBTI);
 
 static int mfloat_abi_opt = -1;
 /* Architecture feature bits selected by the last -mcpu/-march or .cpu/.arch
@@ -945,6 +947,7 @@ struct asm_opcode
 			  "and source operands makes instruction UNPREDICTABLE")
 #define BAD_EL_TYPE	_("bad element type for instruction")
 #define MVE_BAD_QREG	_("MVE vector register Q[0..7] expected")
+#define BAD_PACBTI	_("selected processor does not support PACBTI extention")
 
 static htab_t  arm_ops_hsh;
 static htab_t  arm_cond_hsh;
@@ -31934,6 +31937,7 @@ static const struct arm_ext_table armv8_1m_main_ext_table[] =
 			ARM_EXT2_FP16_INST | ARM_EXT2_MVE | ARM_EXT2_MVE_FP,
 			FPU_VFP_V5_SP_D16 | FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA)),
   CDE_EXTENSIONS,
+  ARM_ADD ("pacbti", ARM_FEATURE_CORE_HIGH_HIGH (ARM_AEXT3_V8_1M_MAIN_PACBTI)),
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 

@@ -90,6 +90,11 @@
 #define ARM_EXT2_CDE7	     0x40000000 /* Using CDE coproc 7.	   */
 #define ARM_EXT2_V8R	     0x80000000	/* Arm V8R.	               */
 
+#define ARM_EXT3_PACBTI	     0x00000001 /* Arm v8-M Mainline Pointer
+					   Authentication and Branch
+					   Target Identification
+					   Extension.  */
+
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */
 #define ARM_CEXT_MAVERICK    0x00000002	/* Use Cirrus/DSP coprocessor.	   */
@@ -196,6 +201,8 @@
 #define ARM_AEXT_V8_1M_MAIN	 ARM_AEXT_V8M_MAIN
 #define ARM_AEXT2_V8_1M_MAIN	(ARM_AEXT2_V8M_MAIN | ARM_EXT2_V8_1M_MAIN     \
 						    | ARM_EXT2_FP16_INST)
+
+#define ARM_AEXT3_V8_1M_MAIN_PACBTI	(ARM_AEXT2_V8M_MAIN | ARM_EXT3_PACBTI)
 
 /* Processors with specific extensions in the co-processor space.  */
 #define ARM_ARCH_XSCALE	ARM_FEATURE_LOW (ARM_AEXT_V5TE, ARM_CEXT_XSCALE)
