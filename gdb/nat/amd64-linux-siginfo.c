@@ -206,7 +206,7 @@ typedef struct compat_siginfo
 /* For x32, clock_t in _sigchld is 64bit aligned at 4 bytes.  */
 typedef long __attribute__ ((__aligned__ (4))) compat_x32_clock_t;
 
-typedef struct compat_x32_siginfo
+typedef struct __attribute__ ((__aligned__ (8))) compat_x32_siginfo
 {
   int si_signo;
   int si_errno;
@@ -263,7 +263,7 @@ typedef struct compat_x32_siginfo
       int _fd;
     } _sigpoll;
   } _sifields;
-} compat_x32_siginfo_t __attribute__ ((__aligned__ (8)));
+} compat_x32_siginfo_t;
 
 /* To simplify usage of siginfo fields.  */
 

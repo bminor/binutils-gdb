@@ -1,3 +1,8 @@
+2021-06-07  Pedro Alves  <pedro@palves.net>
+
+	* nat/amd64-linux-siginfo.c (compat_x32_siginfo_t): Move
+	__attribute__ __aligned__ from the typedef to the struct.
+
 2021-06-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/27847
