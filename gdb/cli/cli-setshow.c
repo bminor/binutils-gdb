@@ -375,14 +375,13 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	  {
 	    /* Clear trailing whitespace of filename.  */
 	    const char *ptr = arg + strlen (arg) - 1;
-	    char *copy;
 
 	    while (ptr >= arg && (*ptr == ' ' || *ptr == '\t'))
 	      ptr--;
-	    copy = xstrndup (arg, ptr + 1 - arg);
+	    gdb::unique_xmalloc_ptr<char> copy
+	      = make_unique_xstrndup (arg, ptr + 1 - arg);
 
-	    val = tilde_expand (copy);
-	    xfree (copy);
+	    val = tilde_expand (copy.get ());
 	  }
 	else
 	  val = xstrdup ("");

@@ -199,7 +199,8 @@ parser_state::mark_completion_tag (enum type_code tag, const char *ptr,
 	      || tag == TYPE_CODE_STRUCT
 	      || tag == TYPE_CODE_ENUM);
   m_completion_state.expout_tag_completion_type = tag;
-  m_completion_state.expout_completion_name.reset (xstrndup (ptr, length));
+  m_completion_state.expout_completion_name
+    = make_unique_xstrndup (ptr, length);
 }
 
 /* See parser-defs.h.  */
