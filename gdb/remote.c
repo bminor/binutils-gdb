@@ -7934,11 +7934,15 @@ ptid_t
 remote_target::select_thread_for_ambiguous_stop_reply
   (const struct target_waitstatus *status)
 {
+  REMOTE_SCOPED_DEBUG_ENTER_EXIT;
+
   /* Some stop events apply to all threads in an inferior, while others
      only apply to a single thread.  */
   bool process_wide_stop
     = (status->kind == TARGET_WAITKIND_EXITED
        || status->kind == TARGET_WAITKIND_SIGNALLED);
+
+  remote_debug_printf ("process_wide_stop = %d", process_wide_stop);
 
   thread_info *first_resumed_thread = nullptr;
   bool ambiguous = false;
@@ -7958,6 +7962,10 @@ remote_target::select_thread_for_ambiguous_stop_reply
 	       || first_resumed_thread->ptid.pid () != thr->ptid.pid ())
 	ambiguous = true;
     }
+
+  remote_debug_printf ("first resumed thread is %s",
+		       pid_to_str (first_resumed_thread->ptid).c_str ());
+  remote_debug_printf ("is this guess ambiguous? = %d", ambiguous);
 
   gdb_assert (first_resumed_thread != nullptr);
 

@@ -1,3 +1,9 @@
+2021-06-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* remote.c (remote_target)
+	<select_thread_for_ambiguous_stop_reply>: Add additional debug
+	output.
+
 2021-06-04  Hannes Domani  <ssbssa@yahoo.de>
 
 	* python/py-tui.c (class tui_py_window): Add click function.
