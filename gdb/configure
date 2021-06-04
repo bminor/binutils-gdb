@@ -800,6 +800,7 @@ DEPDIR
 am__leading_dot
 CXX_DIALECT
 HAVE_CXX11
+target_noncanonical
 INSTALL_STRIP_PROGRAM
 STRIP
 install_sh
@@ -5184,6 +5185,24 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 # Set target, target_cpu, target_vendor, and target_os.
+
+
+ case ${build_alias} in
+  "") build_noncanonical=${build} ;;
+  *) build_noncanonical=${build_alias} ;;
+esac
+
+ case ${host_alias} in
+  "") host_noncanonical=${build_noncanonical} ;;
+  *) host_noncanonical=${host_alias} ;;
+esac
+
+ case ${target_alias} in
+  "") target_noncanonical=${host_noncanonical} ;;
+  *) target_noncanonical=${target_alias} ;;
+esac
+
+
 
 
 test "$program_prefix" != NONE &&

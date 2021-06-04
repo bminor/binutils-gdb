@@ -43,6 +43,8 @@ AC_CANONICAL_HOST
 # Set target, target_cpu, target_vendor, and target_os.
 AC_CANONICAL_TARGET
 
+ACX_NONCANONICAL_TARGET
+
 AC_ARG_PROGRAM
 
 # We require a C++11 compiler.  Check if one is available, and if
