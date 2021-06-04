@@ -108,6 +108,18 @@
   registers of a target.  The precise requirements of this register
   feature are documented in the GDB manual.
 
+* TUI improvements
+
+  ** TUI windows now support mouse actions.  The mouse wheel scrolls
+     the appropriate window.
+
+  ** Key combinations that do not have a specific action on the
+     focused window are passed to GDB.  For example, you now can use
+     Ctrl-Left/Ctrl-Right to move between words in the command window
+     regardless of which window is in focus.  Previously you would
+     need to focus on the command window for such key combinations to
+     work.
+
 * New commands
 
 set debug event-loop
@@ -265,6 +277,10 @@ QMemTags
   ** When hitting a catchpoint, the Python API will now emit a
      gdb.BreakpointEvent rather than a gdb.StopEvent.  The
      gdb.Breakpoint attached to the event will have type BP_CATCHPOINT.
+
+  ** Python TUI windows can now receive mouse click events.  If the
+     Window object implements the click method, it is called for each
+     mouse click event in this window.
 
 *** Changes in GDB 10
 

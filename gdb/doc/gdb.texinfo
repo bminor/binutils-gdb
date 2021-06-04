@@ -28387,6 +28387,7 @@ enable} or @kbd{C-x C-a}.  @xref{TUI Commands, ,TUI Commands}, and
 * TUI Overview::                TUI overview
 * TUI Keys::                    TUI key bindings
 * TUI Single Key Mode::         TUI single key mode
+* TUI Mouse Support::           TUI mouse support
 * TUI Commands::                TUI-specific commands
 * TUI Configuration::           TUI configuration variables
 @end menu
@@ -28675,6 +28676,23 @@ this mode is by typing @kbd{q} or @kbd{C-x s}.
 If @value{GDBN} was built with Readline 8.0 or later, the TUI
 SingleKey keymap will be named @samp{SingleKey}.  This can be used in
 @file{.inputrc} to add additional bindings to this keymap.
+
+@node TUI Mouse Support
+@section TUI Mouse Support
+@cindex TUI mouse support
+
+If the curses library supports the mouse, the TUI supports mouse
+actions.
+
+The mouse wheel scrolls the appropriate window under the mouse cursor.
+
+The TUI itself does not directly support copying/pasting with the
+mouse.  However, on Unix terminals, you can typically press and hold
+the @key{SHIFT} key on your keyboard to temporarily bypass
+@value{GDBN}'s TUI and access the terminal's native mouse copy/paste
+functionality (commonly, click-drag-release or double-click to select
+text, middle-click to paste).  This copy/paste works with the
+terminal's selection buffer, as opposed to the TUI's buffer.
 
 @node TUI Commands
 @section TUI-specific Commands

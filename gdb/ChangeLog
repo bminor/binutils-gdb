@@ -1,3 +1,11 @@
+2021-07-02  Pedro Alves  <pedro@palves.net>
+	    Hannes Domani  <ssbssa@yahoo.de>
+
+	* NEWS: Add new "TUI Improvements" section and mention mouse
+	support and that unrecognized special keys are now passed to
+	GDB.  Mention Python Window.click in the Python improvements
+	section.
+
 2021-07-01  Pedro Alves  <pedro@palves.net>
 
 	PR mi/15729
