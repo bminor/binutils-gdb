@@ -1,3 +1,7 @@
+2021-06-05  Tom Tromey  <tom@tromey.com>
+
+	* data-directory/Makefile.in (Makefile): Rewrite.
+
 2021-06-05  Tom Tromey  <tromey@adacore.com>
 
 	* configure: Rebuild.
