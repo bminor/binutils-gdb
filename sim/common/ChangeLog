@@ -1,3 +1,12 @@
+2021-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-defs.h (STATE_RUN_FAST_P, CGEN_STATE, cgen_init): Delete.
+	* cgen-run.c (cgen_get_fast_p): New function.
+	(sim_resume): Move fast_p up and call cgen_get_fast_p.
+	* cgen-utils.c (cgen_init): Delete.
+	* sim-base.h: Delete cgen-sim.h include.
+	(struct sim_state): Delete cgen_state and STATE_CGEN_STATE.
+
 2021-06-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (IGEN_RUN): New variable.

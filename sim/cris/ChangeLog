@@ -1,3 +1,7 @@
+2021-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-if.c (sim_open): Delete cgen_init call.
+
 2021-05-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* cris-desc.c, cris-desc.h, cris-opc.h: Moved to opcodes/.

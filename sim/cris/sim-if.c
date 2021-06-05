@@ -940,10 +940,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 #endif
   }
 
-  /* Initialize various cgen things not done by common framework.
-     Must be done after cris_cgen_cpu_open.  */
-  cgen_init (sd);
-
   cris_set_callbacks (callback);
 
   return sd;

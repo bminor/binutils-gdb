@@ -89,41 +89,6 @@ const CGEN_INSN cgen_virtual_insn_table[] =
   { & virtual_insn_entries[5] }
 };
 
-/* Initialize cgen things.
-   This is called after sim_post_argv_init.  */
-
-void
-cgen_init (SIM_DESC sd)
-{
-  int i, c;
-
-  /* If no profiling or tracing has been enabled, run in fast mode.  */
-  {
-    int run_fast_p = 1;
-
-    for (c = 0; c < MAX_NR_PROCESSORS; ++c)
-      {
-	SIM_CPU *cpu = STATE_CPU (sd, c);
-
-	for (i = 0; i < MAX_PROFILE_VALUES; ++i)
-	  if (CPU_PROFILE_FLAGS (cpu) [i])
-	    {
-	      run_fast_p = 0;
-	      break;
-	    }
-	for (i = 0; i < MAX_TRACE_VALUES; ++i)
-	  if (CPU_TRACE_FLAGS (cpu) [i])
-	    {
-	      run_fast_p = 0;
-	      break;
-	    }
-	if (! run_fast_p)
-	  break;
-      }
-    STATE_RUN_FAST_P (sd) = run_fast_p;
-  }
-}
-
 /* Return the name of insn number I.  */
 
 const char *

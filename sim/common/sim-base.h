@@ -88,10 +88,6 @@ typedef struct _sim_cpu sim_cpu;
 #include "sim-cpu.h"
 #include "sim-assert.h"
 
-#ifdef CGEN_ARCH
-# include "cgen-sim.h"
-#endif
-
 struct sim_state {
   /* All the cpus for this instance.  */
   sim_cpu *cpu[MAX_NR_PROCESSORS];
@@ -216,12 +212,6 @@ struct sim_state {
      target should define a struct and use it here.  */
   void *arch_data;
 #define STATE_ARCH_DATA(sd) ((sd)->arch_data)
-
-#ifdef CGEN_ARCH
-  /* Various cgen runtime state.  */
-  CGEN_STATE cgen_state;
-#endif
-#define STATE_CGEN_STATE(sd) ((sd)->cgen_state)
 
   /* Marker for those wanting to do sanity checks.
      This should remain the last member of this struct to help catch

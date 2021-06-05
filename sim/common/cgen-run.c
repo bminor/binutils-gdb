@@ -51,6 +51,24 @@ static void prime_cpu (SIM_CPU *, int);
 static void engine_run_1 (SIM_DESC, int, int);
 static void engine_run_n (SIM_DESC, int, int, int, int);
 
+/* If no profiling or tracing has been enabled, run in fast mode.  */
+static int
+cgen_get_fast_p (SIM_DESC sd)
+{
+  int i, c;
+  int run_fast_p = 1;
+
+  for (c = 0; c < MAX_NR_PROCESSORS; ++c)
+    {
+      SIM_CPU *cpu = STATE_CPU (sd, c);
+
+      if (PROFILE_ANY_P (cpu) || TRACE_ANY_P (cpu))
+	return 0;
+    }
+
+  return 1;
+}
+
 /* sim_resume for cgen */
 
 void
@@ -59,8 +77,12 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   sim_engine *engine = STATE_ENGINE (sd);
   jmp_buf buf;
   int jmpval;
+  static int fast_p = -1;
 
   ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  if (fast_p == -1)
+    fast_p = cgen_get_fast_p (sd);
 
   /* we only want to be single stepping the simulator once */
   if (engine->stepper != NULL)
@@ -102,7 +124,6 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 			  && STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
 		       ? 0
 		       : 8); /*FIXME: magic number*/
-      int fast_p = STATE_RUN_FAST_P (sd);
 
       sim_events_preprocess (sd, last_cpu_nr >= nr_cpus, next_cpu_nr >= nr_cpus);
       if (next_cpu_nr >= nr_cpus)

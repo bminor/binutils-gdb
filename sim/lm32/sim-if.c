@@ -182,10 +182,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     lm32_cgen_init_dis (cd);
   }
 
-  /* Initialize various cgen things not done by common framework.
-     Must be done after lm32_cgen_cpu_open.  */
-  cgen_init (sd);
-
   return sd;
 }
 

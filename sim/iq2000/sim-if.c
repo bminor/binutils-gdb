@@ -122,10 +122,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     iq2000_cgen_init_dis (cd);
   }
 
-  /* Initialize various cgen things not done by common framework.
-     Must be done after iq2000_cgen_cpu_open.  */
-  cgen_init (sd);
-
   return sd;
 }
 

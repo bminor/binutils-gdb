@@ -104,7 +104,7 @@ or1k32bf_fpu_error (CGEN_FPU* fpu, int status)
 	     per-instruction callbacks are not triggered which would allow
 	     us to track the PC.  This means we cannot track which
 	     instruction caused the FPU error.  */
-	  if (STATE_RUN_FAST_P (sd) == 1)
+	  if (!PROFILE_ANY_P (current_cpu) && !TRACE_ANY_P (current_cpu))
 	    sim_io_eprintf
 	      (sd, "WARNING: ignoring fpu error caught in fast mode.\n");
 	  else

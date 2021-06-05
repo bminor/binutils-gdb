@@ -175,10 +175,6 @@ sim_open (SIM_OPEN_KIND kind,
     bpf_cgen_init_dis (cd);
   }
 
-  /* Initialize various cgen things not done by common framework.
-     Must be done after bpf_cgen_cpu_open.  */
-  cgen_init (sd);
-
   /* XXX do eBPF sim specific initializations.  */
 
   return sd;

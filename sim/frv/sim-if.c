@@ -147,10 +147,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, bfd *abfd,
     frv_cgen_init_dis (cd);
   }
 
-  /* Initialize various cgen things not done by common framework.
-     Must be done after frv_cgen_cpu_open.  */
-  cgen_init (sd);
-
   /* CPU specific initialization.  */
   for (i = 0; i < MAX_NR_PROCESSORS; ++i)
     {

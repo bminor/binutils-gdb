@@ -138,21 +138,7 @@ typedef enum {
 #define ENDSWITCH(N)
 #endif
 
-/* Simulator state.  */
-
-/* CGEN_STATE contains additional state information not present in
-   sim_state_base.  */
-
-typedef struct cgen_state {
-  /* Non-zero if no tracing or profiling is selected.  */
-  int run_fast_p;
-#define STATE_RUN_FAST_P(sd) (STATE_CGEN_STATE (sd).run_fast_p)
-} CGEN_STATE;
-
 /* Various utilities.  */
-
-/* Called after sim_post_argv_init to do any cgen initialization.  */
-extern void cgen_init (SIM_DESC);
 
 /* Return the name of an insn.  */
 extern CPU_INSN_NAME_FN cgen_insn_name;

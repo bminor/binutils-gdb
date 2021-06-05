@@ -238,10 +238,6 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     or1k_cgen_init_dis (cd);
   }
 
-  /* Initialize various cgen things not done by common framework.
-     Must be done after or1k_cgen_cpu_open.  */
-  cgen_init (sd);
-
   /* Do some final OpenRISC sim specific initializations.  */
   for (c = 0; c < MAX_NR_PROCESSORS; ++c)
     {
