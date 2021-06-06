@@ -96,7 +96,8 @@ gdbscm_is_gsmob (SCM scm)
   return slot != NULL;
 }
 
-/* Call this to register a smob, instead of scm_make_smob_type.  */
+/* Call this to register a smob, instead of scm_make_smob_type.
+   Exports the created smob type from the current module.  */
 
 scm_t_bits
 gdbscm_make_smob_type (const char *name, size_t size)
@@ -104,6 +105,32 @@ gdbscm_make_smob_type (const char *name, size_t size)
   scm_t_bits result = scm_make_smob_type (name, size);
 
   register_gsmob (result);
+
+#if SCM_MAJOR_VERSION == 2 && SCM_MINOR_VERSION == 0
+  /* Prior to Guile 2.1.0, smob classes were only exposed via exports
+     from the (oop goops) module.  */
+  SCM bound_name = scm_string_append (scm_list_3 (scm_from_latin1_string ("<"),
+						  scm_from_latin1_string (name),
+						  scm_from_latin1_string (">")));
+  bound_name = scm_string_to_symbol (bound_name);
+  SCM smob_type = scm_public_ref (scm_list_2 (scm_from_latin1_symbol ("oop"),
+					      scm_from_latin1_symbol ("goops")),
+				  bound_name);
+#elif SCM_MAJOR_VERSION == 2 && SCM_MINOR_VERSION == 1 && SCM_MICRO_VERSION == 0
+  /* Guile 2.1.0 doesn't provide any API for looking up smob classes.
+     We could try allocating a fake instance and using scm_class_of,
+     but it's probably not worth the trouble for the sake of a single
+     development release.  */
+#  error "Unsupported Guile version"
+#else
+  /* Guile 2.1.1 and above provides scm_smob_type_class.  */
+  SCM smob_type = scm_smob_type_class (result);
+#endif
+
+  SCM smob_type_name = scm_class_name (smob_type);
+  scm_define (smob_type_name, smob_type);
+  scm_module_export (scm_current_module (), scm_list_1 (smob_type_name));
+
   return result;
 }
 
