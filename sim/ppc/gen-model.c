@@ -30,10 +30,6 @@
 
 #include "gen-model.h"
 
-#ifndef NULL
-#define NULL 0
-#endif
-
 
 static void
 model_c_or_h_data(insn_table *table,

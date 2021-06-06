@@ -31,10 +31,6 @@
 
 #include "ld-decode.h"
 
-#ifndef NULL
-#define NULL 0
-#endif
-
 
 static const name_map decode_type_map[] = {
   {"normal", normal_decode_rule},

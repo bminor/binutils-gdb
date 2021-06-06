@@ -1,3 +1,11 @@
+2021-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* basics.h (NULL): Delete.
+	* gen-itable.c (NULL): Likewise.
+	* gen-model.c (NULL): Likewise.
+	* ld-cache.c (NULL): Likewise.
+	* ld-decode.c (NULL): Likewise.
+
 2021-05-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (WERROR_CFLAGS): Add -Wno-format for mingw32 hosts.

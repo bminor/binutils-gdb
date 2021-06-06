@@ -36,11 +36,6 @@
 #include <setjmp.h>
 
 
-#ifndef NULL
-#define NULL 0
-#endif
-
-
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif

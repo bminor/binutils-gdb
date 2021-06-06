@@ -24,9 +24,6 @@
 #include "table.h"
 #include "ld-decode.h"
 
-#ifndef NULL
-#define NULL 0
-#endif
 
 enum {
   op_options,
