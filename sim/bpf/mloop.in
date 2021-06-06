@@ -121,7 +121,7 @@ cat <<EOF
 
   UDI insn = GETIMEMUDI (current_cpu, vpc);
 
-  if (current_target_byte_order == BFD_ENDIAN_BIG)
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
     {
       /* eBPF instructions are little-endian, but GETIMEMUDI reads according
          to target byte order. Swap to little-endian. */

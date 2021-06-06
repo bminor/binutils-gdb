@@ -222,7 +222,7 @@ bpfbf_prepare_run (SIM_CPU *cpu)
 void
 bpf_engine_run_full (SIM_CPU *cpu)
 {
-  if (current_target_byte_order == BFD_ENDIAN_LITTLE)
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     {
       if (!bpf_idesc_le)
         {
@@ -253,7 +253,7 @@ bpf_engine_run_full (SIM_CPU *cpu)
 void
 bpf_engine_run_fast (SIM_CPU *cpu)
 {
-  if (current_target_byte_order == BFD_ENDIAN_LITTLE)
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
     {
       if (!bpf_idesc_le)
         {
