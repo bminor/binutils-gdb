@@ -780,7 +780,6 @@ enable_sim_debug
 enable_sim_stdio
 enable_sim_trace
 enable_sim_profile
-enable_sim_assert
 enable_sim_environment
 enable_sim_inline
 with_pkgversion
@@ -1437,7 +1436,6 @@ Optional Features:
   --enable-sim-trace=opts Enable tracing of simulated programs
   --enable-sim-profile=opts
                           Enable profiling flags
-  --enable-sim-assert     Specify whether to perform random assertions
   --enable-sim-environment=environment
                           Specify mixed, user, virtual or operating
                           environment
@@ -10797,7 +10795,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10800 "configure"
+#line 10798 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10903,7 +10901,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10906 "configure"
+#line 10904 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11284,26 +11282,6 @@ _ACEOF
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_profile" >&5
 $as_echo "$sim_profile" >&6; }
 
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable sim asserts" >&5
-$as_echo_n "checking whether to enable sim asserts... " >&6; }
-sim_assert="1"
-# Check whether --enable-sim-assert was given.
-if test "${enable_sim_assert+set}" = set; then :
-  enableval=$enable_sim_assert; case "${enableval}" in
-  yes)	sim_assert="1";;
-  no)	sim_assert="0";;
-  *)	as_fn_error $? "--enable-sim-assert does not take a value" "$LINENO" 5;;
-esac
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define WITH_ASSERT $sim_assert
-_ACEOF
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_assert" >&5
-$as_echo "$sim_assert" >&6; }
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking default sim environment setting" >&5

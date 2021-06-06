@@ -99,5 +99,7 @@ if test "${enable_sim}" != no; then
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
 
+SIM_AC_OPTION_ASSERT
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

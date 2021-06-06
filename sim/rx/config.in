@@ -120,9 +120,6 @@
 #endif
 
 
-/* Sim assert settings */
-#undef WITH_ASSERT
-
 /* Sim debug setting */
 #undef WITH_DEBUG
 

@@ -259,6 +259,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* Sim assert settings */
+#undef WITH_ASSERT
+
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
 #if defined AC_APPLE_UNIVERSAL_BUILD

@@ -750,6 +750,7 @@ enable_silent_rules
 enable_sim
 enable_example_sims
 enable_targets
+enable_sim_assert
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1422,6 +1423,7 @@ Optional Features:
   --enable-sim            Enable the GNU simulator
   --enable-example-sims   enable example GNU simulators
   --enable-targets        alternative target configurations
+  --enable-sim-assert     Specify whether to perform random assertions
 
 Some influential environment variables:
   CC          C compiler command
@@ -5915,6 +5917,27 @@ else
   SIM_ENABLE_IGEN_TRUE='#'
   SIM_ENABLE_IGEN_FALSE=
 fi
+
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable sim asserts" >&5
+$as_echo_n "checking whether to enable sim asserts... " >&6; }
+sim_assert="1"
+# Check whether --enable-sim-assert was given.
+if test "${enable_sim_assert+set}" = set; then :
+  enableval=$enable_sim_assert; case "${enableval}" in
+  yes)	sim_assert="1";;
+  no)	sim_assert="0";;
+  *)	as_fn_error $? "--enable-sim-assert does not take a value" "$LINENO" 5;;
+esac
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_ASSERT $sim_assert
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_assert" >&5
+$as_echo "$sim_assert" >&6; }
 
 
 ac_config_files="$ac_config_files Makefile"
