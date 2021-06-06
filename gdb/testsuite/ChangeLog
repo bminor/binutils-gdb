@@ -1,3 +1,8 @@
+2021-06-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.server/stop-reply-no-thread-multi.exp: Clear sysroot when
+	host and target are local.
+
 2021-06-05  Hannes Domani  <ssbssa@yahoo.de>
 
 	* gdb.python/py-symbol.exp: Fix tests for Python 3.

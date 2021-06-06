@@ -48,6 +48,13 @@ proc run_test { target_non_stop disable_feature } {
 
     save_vars { GDBFLAGS } {
 	append GDBFLAGS " -ex \"maint set target-non-stop $target_non_stop\""
+
+	# If GDB and GDBserver are both running locally, set the sysroot to avoid
+	# reading files via the remote protocol.
+	if { ![is_remote host] && ![is_remote target] } {
+	    set GDBFLAGS "$GDBFLAGS -ex \"set sysroot\""
+	}
+
 	clean_restart ${binfile}
     }
 
