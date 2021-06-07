@@ -2467,6 +2467,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 		     "for section %pA found - ignoring"),
 		   abfd, name, target_sect);
 	      }
+	    else
+	      esdt->has_secondary_relocs = true;
 	    goto success;
 	  }
 
@@ -12739,6 +12741,9 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *       abfd,
 #endif
     r_sym = elf32_r_sym;
   
+  if (!elf_section_data (sec)->has_secondary_relocs)
+    return true;
+
   /* Discover if there are any secondary reloc sections
      associated with SEC.  */
   for (relsec = abfd->sections; relsec != NULL; relsec = relsec->next)
