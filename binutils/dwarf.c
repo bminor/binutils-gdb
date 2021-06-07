@@ -7284,7 +7284,7 @@ display_debug_aranges (struct dwarf_section *section,
 
       start = end_ranges;
 
-      while (2 * address_size <= (size_t) (start - addr_ranges))
+      while (2u * address_size <= (size_t) (start - addr_ranges))
 	{
 	  SAFE_BYTE_GET_AND_INC (address, addr_ranges, address_size, start);
 	  SAFE_BYTE_GET_AND_INC (length, addr_ranges, address_size, start);

@@ -3104,7 +3104,7 @@ read_ranges (struct comp_unit *unit, struct arange *arange,
       bfd_vma high_pc;
 
       /* PR 17512: file: 62cada7d.  */
-      if (2 * unit->addr_size > (size_t) (ranges_end - ranges_ptr))
+      if (2u * unit->addr_size > (size_t) (ranges_end - ranges_ptr))
 	return false;
 
       low_pc = read_address (unit, &ranges_ptr, ranges_end);
@@ -3186,7 +3186,7 @@ read_rnglists (struct comp_unit *unit, struct arange *arange,
 	  break;
 
 	case DW_RLE_start_end:
-	  if (2 * unit->addr_size > (size_t) (rngs_end - rngs_ptr))
+	  if (2u * unit->addr_size > (size_t) (rngs_end - rngs_ptr))
 	    return false;
 	  low_pc = read_address (unit, &rngs_ptr, rngs_end);
 	  high_pc = read_address (unit, &rngs_ptr, rngs_end);

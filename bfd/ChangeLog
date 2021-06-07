@@ -1,3 +1,7 @@
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
+	* dwarf2.c (read_ranges, read_rnglists): Add u suffix to constant.
+
 2021-06-02  Alan Modra  <amodra@gmail.com>
 
 	* elf-attrs.c (_bfd_elf_parse_attributes): Break out of loop if
