@@ -4609,7 +4609,15 @@ remote_target::process_initial_stop_replies (int from_tty)
      the inferiors.  */
   if (!non_stop)
     {
-      stop_all_threads ();
+      {
+	/* At this point, the remote target is not async.  It needs to be for
+	   the poll in stop_all_threads to consider events from it, so enable
+	   it temporarily.  */
+	gdb_assert (!this->is_async_p ());
+	SCOPE_EXIT { target_async (0); };
+	target_async (1);
+	stop_all_threads ();
+      }
 
       /* If all threads of an inferior were already stopped, we
 	 haven't setup the inferior yet.  */
