@@ -96,6 +96,7 @@ if [gas_32_check] then {
     run_dump_test "equ"
     run_list_test "equ-bad"
     run_dump_test "divide"
+    run_dump_test "quoted"
     run_dump_test "padlock"
     run_dump_test "crx"
     run_list_test "cr-err" ""

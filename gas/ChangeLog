@@ -1,5 +1,12 @@
 2021-06-07  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (starts_memory_operand): New.
+	(i386_att_operand): Use it.
+	* testsuite/gas/i386/quoted.s, testsuite/gas/i386/quoted.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (i386_att_operand): Flip checking for '*' and
 	start-of-expression. Don't permit '*' when one was already seen.
 

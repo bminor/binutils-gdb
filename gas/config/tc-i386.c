@@ -11368,6 +11368,14 @@ maybe_adjust_templates (void)
   return 1;
 }
 
+static INLINE bool starts_memory_operand (char c)
+{
+  return is_digit_char (c)
+	 || is_identifier_char (c)
+	 || c == '"'
+	 || c == '(';
+}
+
 /* Parse OPERAND_STRING into the i386_insn structure I.  Returns zero
    on error.  */
 
@@ -11422,9 +11430,7 @@ i386_att_operand (char *operand_string)
 	      i.jumpabsolute = true;
 	    }
 
-	  if (!is_digit_char (*op_string)
-	      && !is_identifier_char (*op_string)
-	      && *op_string != '(')
+	  if (!starts_memory_operand (*op_string))
 	    {
 	      as_bad (_("bad memory operand `%s'"), op_string);
 	      return 0;
@@ -11474,10 +11480,7 @@ i386_att_operand (char *operand_string)
       /* If it is a RC or SAE immediate, do nothing.  */
       ;
     }
-  else if (is_digit_char (*op_string)
-	   || is_identifier_char (*op_string)
-	   || *op_string == '"'
-	   || *op_string == '(')
+  else if (starts_memory_operand (*op_string))
     {
       /* This is a memory reference of some sort.  */
       char *base_string;
