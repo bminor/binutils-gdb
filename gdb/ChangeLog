@@ -1,3 +1,10 @@
+2021-06-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27899
+	* sparc-nat.c (sparc_fetch_inferior_registers): Set
+	inferior_ptid instead of using switch_to_thread.
+	(sparc_store_inferior_registers): Likewise.
+
 2021-06-05  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* compile/compile.c (scoped_ignore_sigpipe): New helper class.

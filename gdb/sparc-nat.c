@@ -170,9 +170,8 @@ sparc_fetch_inferior_registers (process_stratum_target *proc_target,
 
       /* Deep down, sparc_supply_rwindow reads memory, so needs the global
 	 thread context to be set.  */
-      thread_info *thread = find_thread_ptid (proc_target, ptid);
-      scoped_restore_current_thread restore_thread;
-      switch_to_thread (thread);
+      scoped_restore restore_inferior_ptid
+	= make_scoped_restore (&inferior_ptid, ptid);
 
       sparc_supply_gregset (sparc_gregmap, regcache, -1, &regs);
       if (regnum != -1)
@@ -219,9 +218,8 @@ sparc_store_inferior_registers (process_stratum_target *proc_target,
 
 	  /* Deep down, sparc_collect_rwindow writes memory, so needs the global
 	     thread context to be set.  */
-	  thread_info *thread = find_thread_ptid (proc_target, ptid);
-	  scoped_restore_current_thread restore_thread;
-	  switch_to_thread (thread);
+	  scoped_restore restore_inferior_ptid
+	    = make_scoped_restore (&inferior_ptid, ptid);
 
 	  sparc_collect_rwindow (regcache, sp, regnum);
 	}
