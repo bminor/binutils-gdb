@@ -1,3 +1,8 @@
+2021-06-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/attach.exp (test_command_line_attach_run): Use
+	proc_with_prefix.
+
 2021-06-07  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/27908
