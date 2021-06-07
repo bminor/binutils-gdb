@@ -1,5 +1,16 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* m4/sim_ac_common.m4: Replace --enable-sim-debug, --enable-sim-stdio,
+	--enable-sim-trace, and --enable-sim-profile with calls to
+	SIM_AC_OPTION_DEBUG, SIM_AC_OPTION_STDIO, SIM_AC_OPTION_TRACE, and
+	SIM_AC_OPTION_PROFILE.
+	* m4/sim_ac_option_debug.m4: New file.
+	* m4/sim_ac_option_profile.m4: New file.
+	* m4/sim_ac_option_stdio.m4: New file.
+	* m4/sim_ac_option_trace.m4: New file.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* m4/sim_ac_platform.m4: Check more headers, funcs, structs, and
 	types.
 	* config.h.in, configure: Regenerate.
