@@ -19,19 +19,6 @@ ALL_LINGUAS=
 ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
 
 
-AC_ARG_ENABLE(sim-alignment,
-[  --enable-sim-alignment=align		Specify strict or nonstrict alignment.],
-[case "${enableval}" in
-  yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
-  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
-  0 | default | DEFAULT)	sim_alignment="-DWITH_ALIGNMENT=0";;
-  *)				AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-alignment"); sim_alignment="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_alignment" != x""; then
-  echo "Setting alignment flags = $sim_alignment" 6>&1
-fi],[sim_alignment=""])dnl
-
-
 AC_MSG_CHECKING([whether to enable sim asserts])
 sim_assert="1"
 AC_ARG_ENABLE(sim-assert,
@@ -818,7 +805,6 @@ AC_SUBST(sim_igen_smp)
 AC_SUBST(sim_bitsize)
 AC_SUBST(sim_hostbitsize)
 AC_SUBST(sim_timebase)
-AC_SUBST(sim_alignment)
 AC_SUBST(sim_float)
 AC_SUBST(sim_reserved)
 AC_SUBST(sim_monitor)

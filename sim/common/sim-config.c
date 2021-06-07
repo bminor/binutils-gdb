@@ -253,8 +253,9 @@ sim_config (SIM_DESC sd)
 #endif
   if (current_alignment == 0)
     current_alignment = WITH_ALIGNMENT;
+  /* If the port hasn't specified an alignment, default to not enforcing.  */
   if (current_alignment == 0)
-    current_alignment = WITH_DEFAULT_ALIGNMENT;
+    current_alignment = NONSTRICT_ALIGNMENT;
 
   /* verify the alignment */
   if (CURRENT_ALIGNMENT == 0)
@@ -330,11 +331,6 @@ sim_config_print (SIM_DESC sd)
 
   sim_io_printf (sd, "WITH_ALIGNMENT = %s\n",
 		 config_alignment_to_a (WITH_ALIGNMENT));
-
-#if defined (WITH_DEFAULT_ALIGNMENT)
-  sim_io_printf (sd, "WITH_DEFAULT_ALIGNMENT = %s\n",
-		 config_alignment_to_a (WITH_DEFAULT_ALIGNMENT));
-#endif
 
 #if defined (WITH_XOR_ENDIAN)
   sim_io_printf (sd, "WITH_XOR_ENDIAN = %d\n", WITH_XOR_ENDIAN);

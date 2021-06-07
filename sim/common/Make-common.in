@@ -82,7 +82,6 @@ CPPFLAGS = @CPPFLAGS@
 CXXFLAGS = @CXXFLAGS@
 LDFLAGS = @LDFLAGS@
 
-SIM_ALIGNMENT = @sim_alignment@
 SIM_BITSIZE = @sim_bitsize@
 SIM_DEFAULT_MODEL = @sim_default_model@
 SIM_ENDIAN = @sim_endian@
@@ -222,7 +221,6 @@ CGEN_INCLUDE_DEPS = \
 CONFIG_CFLAGS = \
 	@DEFS@ \
 	$(SIM_DEFAULT_MODEL) \
-	$(SIM_ALIGNMENT) \
 	$(SIM_BITSIZE) \
 	$(SIM_ENDIAN) \
 	$(SIM_FLOAT) \

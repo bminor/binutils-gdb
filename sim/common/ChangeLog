@@ -1,5 +1,13 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in: Delete SIM_ALIGNMENT.
+	* sim-config.c (sim_config): Change WITH_DEFAULT_ALIGNMENT to
+	NONSTRICT_ALIGNMENT.
+	(sim_config_print): Delete WITH_DEFAULT_ALIGNMENT logic.
+	* sim-config.h (WITH_DEFAULT_ALIGNMENT): Delete.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* defs.h: Include ../config.h.  Undefine PACKAGE* defines.
 
 2021-06-09  Mike Frysinger  <vapier@gentoo.org>

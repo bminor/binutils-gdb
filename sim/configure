@@ -755,6 +755,7 @@ enable_silent_rules
 enable_sim
 enable_example_sims
 enable_targets
+enable_sim_alignment
 enable_sim_assert
 enable_sim_debug
 enable_sim_environment
@@ -1433,6 +1434,9 @@ Optional Features:
   --enable-sim            Enable the GNU simulator
   --enable-example-sims   enable example GNU simulators
   --enable-targets        alternative target configurations
+  --enable-sim-alignment=align
+                          Specify strict, nonstrict or forced alignment of
+                          memory accesses
   --enable-sim-assert     Specify whether to perform random assertions
   --enable-sim-debug=opts Enable debugging flags (for developers of the sim
                           itself)
@@ -6644,6 +6648,26 @@ else
   SIM_ENABLE_IGEN_FALSE=
 fi
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to force sim alignment" >&5
+$as_echo_n "checking whether to force sim alignment... " >&6; }
+sim_alignment=
+# Check whether --enable-sim-alignment was given.
+if test "${enable_sim_alignment+set}" = set; then :
+  enableval=$enable_sim_alignment; case "${enableval}" in
+  yes | strict | STRICT)      sim_alignment="STRICT_ALIGNMENT";;
+  no | nonstrict | NONSTRICT) sim_alignment="NONSTRICT_ALIGNMENT";;
+  forced | FORCED)            sim_alignment="FORCED_ALIGNMENT";;
+  *) as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-alignment\"" "$LINENO" 5;;
+esac
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_ALIGNMENT ${sim_alignment:-0}
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${sim_alignment:-no}" >&5
+$as_echo "${sim_alignment:-no}" >&6; }
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable sim asserts" >&5

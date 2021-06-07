@@ -633,7 +633,6 @@ sim_model
 sim_monitor
 sim_reserved
 sim_float
-sim_alignment
 sim_timebase
 sim_hostbitsize
 sim_bitsize
@@ -742,7 +741,6 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_sim_alignment
 enable_sim_assert
 enable_sim_bitsize
 enable_sim_config
@@ -1400,7 +1398,6 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-sim-alignment=align		Specify strict or nonstrict alignment.
   --enable-sim-assert			Specify whether to perform random assertions.
   --enable-sim-bitsize=n		Specify target bitsize (32 or 64).
   --enable-sim-config=file		Override default config file
@@ -3117,22 +3114,6 @@ $as_echo "$LINGUAS" >&6; }
 
   CATOBJEXT=.gmo
 
-fi
-
-
-# Check whether --enable-sim-alignment was given.
-if test "${enable_sim_alignment+set}" = set; then :
-  enableval=$enable_sim_alignment; case "${enableval}" in
-  yes | strict | STRICT)	sim_alignment="-DWITH_ALIGNMENT=STRICT_ALIGNMENT";;
-  no | nonstrict | NONSTRICT)	sim_alignment="-DWITH_ALIGNMENT=NONSTRICT_ALIGNMENT";;
-  0 | default | DEFAULT)	sim_alignment="-DWITH_ALIGNMENT=0";;
-  *)				as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-alignment\"" "$LINENO" 5; sim_alignment="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_alignment" != x""; then
-  echo "Setting alignment flags = $sim_alignment" 6>&1
-fi
-else
-  sim_alignment=""
 fi
 
 
@@ -5142,7 +5123,6 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
-
 
 
 

@@ -1684,6 +1684,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   SIM_DESC sd = sim_state_alloc_extra (kind, cb, sizeof (struct avr_sim_state));
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
+  /* Set default options before parsing user options.  */
+  current_alignment = STRICT_ALIGNMENT;
+
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {

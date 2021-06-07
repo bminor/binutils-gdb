@@ -330,6 +330,11 @@ sim_open (SIM_OPEN_KIND                  kind,
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
+  /* We use NONSTRICT_ALIGNMENT as the default because AArch64 only enforces
+     4-byte alignment, even for 8-byte reads/writes.  The common core does not
+     support this, so we opt for non-strict alignment instead.  */
+  current_alignment = NONSTRICT_ALIGNMENT;
+
   /* Perform the initialization steps one by one.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK
       || sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK

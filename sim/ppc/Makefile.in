@@ -79,7 +79,6 @@ XOR_ENDIAN_CFLAGS = @sim_xor_endian@
 BITSIZE_CFLAGS = @sim_bitsize@
 HOSTBITSIZE_CFLAGS = @sim_hostbitsize@
 TIMEBASE_CFLAGS = @sim_timebase@
-ALIGNMENT_CFLAGS = @sim_alignment@
 FLOAT_CFLAGS = @sim_float@
 RESERVED_CFLAGS = @sim_reserved@
 MONITOR_CFLAGS = @sim_monitor@
@@ -95,7 +94,6 @@ CONFIG_CFLAGS = \
   $(BITSIZE_CFLAGS) \
   $(HOSTBITSIZE_CFLAGS) \
   $(TIMEBASE_CFLAGS) \
-  $(ALIGNMENT_CFLAGS) \
   $(FLOAT_CFLAGS) \
   $(RESERVED_CFLAGS) \
   $(MONITOR_CFLAGS) \

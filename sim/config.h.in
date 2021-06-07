@@ -437,6 +437,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* Sim alignment settings */
+#undef WITH_ALIGNMENT
+
 /* Sim assert settings */
 #undef WITH_ASSERT
 

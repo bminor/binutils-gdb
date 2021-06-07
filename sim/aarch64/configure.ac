@@ -25,11 +25,6 @@ AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 SIM_AC_COMMON
 
 SIM_AC_OPTION_ENDIAN
-## We use NONSTRICT_ALIGNMENT as the default because AArch64 only
-## enforces 4-byte alignment, even for 8-byte reads/writes.  The
-## common core does not support this, so we opt for non-strict
-## alignment instead.
-SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT,NONSTRICT_ALIGNMENT)
 SIM_AC_OPTION_WARNINGS
 
 SIM_AC_OUTPUT

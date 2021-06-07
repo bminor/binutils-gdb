@@ -195,11 +195,11 @@ extern char *simulator_sysroot;
 
 /* Alignment:
 
-   A processor architecture may or may not handle miss aligned
+   A processor architecture may or may not handle misaligned
    transfers.
 
    As alternatives: both little and big endian modes take an exception
-   (STRICT_ALIGNMENT); big and little endian models handle mis aligned
+   (STRICT_ALIGNMENT); big and little endian models handle misaligned
    transfers (NONSTRICT_ALIGNMENT); or the address is forced into
    alignment using a mask (FORCED_ALIGNMENT).
 
@@ -219,13 +219,6 @@ extern enum sim_alignments current_alignment;
 #if !defined (WITH_ALIGNMENT)
 #define WITH_ALIGNMENT 0
 #endif
-
-#if !defined (WITH_DEFAULT_ALIGNMENT)
-#define WITH_DEFAULT_ALIGNMENT 0 /* fatal */
-#endif
-
-
-
 
 #define CURRENT_ALIGNMENT (WITH_ALIGNMENT \
 			   ? WITH_ALIGNMENT \
