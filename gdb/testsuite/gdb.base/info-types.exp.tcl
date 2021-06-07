@@ -89,9 +89,12 @@ proc run_test { lang } {
 	return 0
     }
 
+    set file_re "File .*[string_to_regexp $srcfile]:"
+
     if { $lang == "c++" } {
 	set output_lines \
 	    [list \
+		 $file_re \
 		 "98:\[\t \]+CL;" \
 		 "42:\[\t \]+anon_struct_t;" \
 		 "65:\[\t \]+anon_union_t;" \
@@ -126,6 +129,7 @@ proc run_test { lang } {
     } else {
 	set output_lines \
 	    [list \
+		 $file_re \
 		 "52:\[\t \]+typedef enum {\\.\\.\\.} anon_enum_t;" \
 		 "45:\[\t \]+typedef struct {\\.\\.\\.} anon_struct_t;" \
 		 "68:\[\t \]+typedef union {\\.\\.\\.} anon_union_t;" \
@@ -160,28 +164,20 @@ proc run_test { lang } {
 	    if { $state == 0 } { set state 1 } else { set state -1 }
 	    exp_continue
 	}
-	-re "^\r\nFile .*[string_to_regexp $srcfile]:" {
-	    if { $state == 1 } { set state 2 } else { set state -2 }
-	    exp_continue
-	}
-	-re "^\r\nFile \[^\r\n\]*:" {
-	    if { $state == 2 } { set state -4 }
-	    exp_continue
-	}
 	-re "^\r\n(\[^\r\n\]*)(?=\r\n)" {
-	    if { $state == 2 } {
+	    if { $state == 1 } {
 		set line $expect_out(1,string)
 		set res [match_line $line $output_lines idx]
 		if { $res == 1 } {
-		    set state 3
+		    set state 2
 		} elseif { $res == -1 } {
-		    set state -3
+		    set state -2
 		}
 	    }
 	    exp_continue
 	}
 	-re -wrap "" {
-	    if { $state == 3} {
+	    if { $state == 2} {
 		pass $gdb_test_name
 	    } else {
 		fail "$gdb_test_name (state == $state)"

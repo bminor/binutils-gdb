@@ -1,5 +1,10 @@
 2021-06-07  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/info-types.exp.tcl: Remove "File .*" matching from regexp
+	matching state machine.
+
+2021-06-07  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/new-ui-pending-input.exp
 	(test_command_line_new_ui_pending_input): Fix regexp for "initial
 	prompt on extra console".
