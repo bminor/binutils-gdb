@@ -54,25 +54,9 @@ AM_CONDITIONAL(PLUGINS, test "$plugins" = yes)
 LT_INIT([dlopen])
 AC_SUBST(lt_cv_dlopen_libs)
 
-dnl Standard (and optional) simulator options.
-dnl Eventually all simulators will support these.
-dnl Do not add any here that cannot be supported by all simulators.
-dnl Do not add similar but different options to a particular simulator,
-dnl all shall eventually behave the same way.
-
-
 dnl We don't use automake, but we still want to support
 dnl --enable-maintainer-mode.
 AM_MAINTAINER_MODE
-
-
-SIM_AC_OPTION_DEBUG
-
-SIM_AC_OPTION_STDIO
-
-SIM_AC_OPTION_TRACE
-
-SIM_AC_OPTION_PROFILE
 
 SIM_AC_OPTION_INLINE
 

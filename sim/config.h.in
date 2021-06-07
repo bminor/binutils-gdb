@@ -3,6 +3,9 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* Sim debug setting */
+#undef DEBUG
+
 /* Define to the type of elements in the array set by `getgroups'. Usually
    this is either `int' or `gid_t'. */
 #undef GETGROUPS_T
@@ -391,6 +394,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Sim profile settings */
+#undef PROFILE
+
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 
@@ -428,8 +434,20 @@
 /* Sim assert settings */
 #undef WITH_ASSERT
 
+/* Sim debug setting */
+#undef WITH_DEBUG
+
 /* Sim default environment */
 #undef WITH_ENVIRONMENT
+
+/* Sim profile settings */
+#undef WITH_PROFILE
+
+/* How to route I/O */
+#undef WITH_STDIO
+
+/* Sim trace settings */
+#undef WITH_TRACE
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

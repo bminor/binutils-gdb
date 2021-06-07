@@ -769,10 +769,8 @@ enable_sim_opcode
 enable_sim_packages
 enable_sim_reserved_bits
 enable_sim_smp
-enable_sim_stdio
 enable_sim_switch
 enable_sim_timebase
-enable_sim_trace
 enable_werror
 enable_sim_warnings
 enable_sim_xor_endian
@@ -1431,10 +1429,8 @@ Optional Features:
   --enable-sim-packages=list		Specify the packages to be included in the build.
   --enable-sim-reserved-bits		Specify whether to check reserved bits in instruction.
   --enable-sim-smp=n			Specify number of processors to configure for.
-  --enable-sim-stdio			Specify whether to use stdio for console input/output.
   --enable-sim-switch			Use a switch instead of a table for instruction call.
   --enable-sim-timebase			Specify whether the PPC timebase is supported.
-  --enable-sim-trace			Specify whether tracing is supported.
   --enable-werror         treat compile warnings as errors
   --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o
   --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).
@@ -4407,26 +4403,6 @@ fi
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim stdio debug behavior" >&5
-$as_echo_n "checking for sim stdio debug behavior... " >&6; }
-sim_stdio=0
-# Check whether --enable-sim-stdio was given.
-if test "${enable_sim_stdio+set}" = set; then :
-  enableval=$enable_sim_stdio; case "${enableval}" in
-  yes)	sim_stdio="DO_USE_STDIO";;
-  no)	sim_stdio="DONT_USE_STDIO";;
-  *)	as_fn_error $? "Unknown value $enableval passed to --enable-sim-stdio" "$LINENO" 5;;
-esac
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define WITH_STDIO $sim_stdio
-_ACEOF
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_stdio" >&5
-$as_echo "$sim_stdio" >&6; }
-
-
 # Check whether --enable-sim-switch was given.
 if test "${enable_sim_switch+set}" = set; then :
   enableval=$enable_sim_switch; case "${enableval}" in
@@ -4458,26 +4434,6 @@ fi
 else
   sim_timebase=""
 fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim trace settings" >&5
-$as_echo_n "checking for sim trace settings... " >&6; }
-sim_trace="1"
-# Check whether --enable-sim-trace was given.
-if test "${enable_sim_trace+set}" = set; then :
-  enableval=$enable_sim_trace; case "${enableval}" in
-  yes)	sim_trace="1";;
-  no)	sim_trace="0";;
-  *)	as_fn_error $? "--enable-sim-trace does not take a value" "$LINENO" 5;;
-esac
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define WITH_TRACE $sim_trace
-_ACEOF
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_trace" >&5
-$as_echo "$sim_trace" >&6; }
 
 
 # Check whether --enable-werror was given.

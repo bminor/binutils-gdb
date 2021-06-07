@@ -751,7 +751,11 @@ enable_sim
 enable_example_sims
 enable_targets
 enable_sim_assert
+enable_sim_debug
 enable_sim_environment
+enable_sim_profile
+enable_sim_stdio
+enable_sim_trace
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1425,9 +1429,16 @@ Optional Features:
   --enable-example-sims   enable example GNU simulators
   --enable-targets        alternative target configurations
   --enable-sim-assert     Specify whether to perform random assertions
+  --enable-sim-debug=opts Enable debugging flags (for developers of the sim
+                          itself)
   --enable-sim-environment=environment
                           Specify mixed, user, virtual or operating
                           environment
+  --enable-sim-profile=opts
+                          Enable profiling flags
+  --enable-sim-stdio      Specify whether to use stdio for console
+                          input/output
+  --enable-sim-trace=opts Enable tracing of simulated programs
 
 Some influential environment variables:
   CC          C compiler command
@@ -6587,6 +6598,32 @@ _ACEOF
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_assert" >&5
 $as_echo "$sim_assert" >&6; }
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim debug setting" >&5
+$as_echo_n "checking for sim debug setting... " >&6; }
+sim_debug="0"
+# Check whether --enable-sim-debug was given.
+if test "${enable_sim_debug+set}" = set; then :
+  enableval=$enable_sim_debug; case "${enableval}" in
+  yes) sim_debug="7";;
+  no)  sim_debug="0";;
+  *)   sim_debug="($enableval)";;
+esac
+fi
+if test "$sim_debug" != "0"; then
+
+cat >>confdefs.h <<_ACEOF
+#define DEBUG $sim_debug
+_ACEOF
+
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_DEBUG $sim_debug
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_debug" >&5
+$as_echo "$sim_debug" >&6; }
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking default sim environment setting" >&5
 $as_echo_n "checking default sim environment setting... " >&6; }
@@ -6608,6 +6645,92 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_environment" >&5
 $as_echo "$sim_environment" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim profile settings" >&5
+$as_echo_n "checking for sim profile settings... " >&6; }
+profile="1"
+sim_profile="-1"
+# Check whether --enable-sim-profile was given.
+if test "${enable_sim_profile+set}" = set; then :
+  enableval=$enable_sim_profile; case "${enableval}" in
+  yes)	profile="1" sim_profile="-1";;
+  no)	profile="0" sim_profile="0";;
+  [-0-9]*)
+	profile="(${enableval})" sim_profile="(${enableval})";;
+  [a-z]*)
+    profile="1"
+	sim_profile=""
+	for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+	  if test x"$sim_profile" = x; then
+	    sim_profile="(PROFILE_$x"
+	  else
+	    sim_profile="${sim_profile}|PROFILE_$x"
+	  fi
+	done
+	sim_profile="$sim_profile)" ;;
+esac
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define PROFILE $profile
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_PROFILE $sim_profile
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_profile" >&5
+$as_echo "$sim_profile" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim stdio debug behavior" >&5
+$as_echo_n "checking for sim stdio debug behavior... " >&6; }
+sim_stdio="0"
+# Check whether --enable-sim-stdio was given.
+if test "${enable_sim_stdio+set}" = set; then :
+  enableval=$enable_sim_stdio; case "${enableval}" in
+  yes)	sim_stdio="DO_USE_STDIO";;
+  no)	sim_stdio="DONT_USE_STDIO";;
+  *)	as_fn_error $? "Unknown value $enableval passed to --enable-sim-stdio" "$LINENO" 5;;
+esac
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_STDIO $sim_stdio
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_stdio" >&5
+$as_echo "$sim_stdio" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim trace settings" >&5
+$as_echo_n "checking for sim trace settings... " >&6; }
+sim_trace="~TRACE_debug"
+# Check whether --enable-sim-trace was given.
+if test "${enable_sim_trace+set}" = set; then :
+  enableval=$enable_sim_trace; case "${enableval}" in
+  yes)	sim_trace="-1";;
+  no)	sim_trace="0";;
+  [-0-9]*)
+	sim_trace="'(${enableval})'";;
+  [[:lower:]]*)
+	sim_trace=""
+	for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+	  if test x"$sim_trace" = x; then
+	    sim_trace="(TRACE_$x"
+	  else
+	    sim_trace="${sim_trace}|TRACE_$x"
+	  fi
+	done
+	sim_trace="$sim_trace)" ;;
+esac
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_TRACE $sim_trace
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_trace" >&5
+$as_echo "$sim_trace" >&6; }
 
 
 ac_config_files="$ac_config_files Makefile"

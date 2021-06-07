@@ -1,5 +1,13 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Call SIM_AC_OPTION_DEBUG, SIM_AC_OPTION_STDIO,
+	SIM_AC_OPTION_TRACE, and SIM_AC_OPTION_PROFILE.
+	* m4/sim_ac_common.m4: Delete calls to SIM_AC_OPTION_DEBUG,
+	SIM_AC_OPTION_STDIO, SIM_AC_OPTION_TRACE, and SIM_AC_OPTION_PROFILE.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* m4/sim_ac_common.m4: Replace --enable-sim-debug, --enable-sim-stdio,
 	--enable-sim-trace, and --enable-sim-profile with calls to
 	SIM_AC_OPTION_DEBUG, SIM_AC_OPTION_STDIO, SIM_AC_OPTION_TRACE, and

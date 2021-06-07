@@ -9,9 +9,6 @@
 /* --enable-cycle-stats */
 #undef CYCLE_STATS
 
-/* Sim debug setting */
-#undef DEBUG
-
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS
@@ -89,9 +86,6 @@
 /* Additional package description */
 #undef PKGVERSION
 
-/* Sim profile settings */
-#undef PROFILE
-
 /* Bug reporting address */
 #undef REPORT_BUGS_TO
 
@@ -119,18 +113,6 @@
 # undef __EXTENSIONS__
 #endif
 
-
-/* Sim debug setting */
-#undef WITH_DEBUG
-
-/* Sim profile settings */
-#undef WITH_PROFILE
-
-/* How to route I/O */
-#undef WITH_STDIO
-
-/* Sim trace settings */
-#undef WITH_TRACE
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */

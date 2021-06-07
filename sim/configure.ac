@@ -99,8 +99,14 @@ if test "${enable_sim}" != no; then
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
 
+dnl Standard (and optional) simulator options.
+dnl Eventually all simulators will support these.
 SIM_AC_OPTION_ASSERT
+SIM_AC_OPTION_DEBUG
 SIM_AC_OPTION_ENVIRONMENT
+SIM_AC_OPTION_PROFILE
+SIM_AC_OPTION_STDIO
+SIM_AC_OPTION_TRACE
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

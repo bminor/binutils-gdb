@@ -519,19 +519,6 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 
 
-AC_MSG_CHECKING([for sim stdio debug behavior])
-sim_stdio=0
-AC_ARG_ENABLE(sim-stdio,
-[  --enable-sim-stdio			Specify whether to use stdio for console input/output.],
-[case "${enableval}" in
-  yes)	sim_stdio="DO_USE_STDIO";;
-  no)	sim_stdio="DONT_USE_STDIO";;
-  *)	AC_MSG_ERROR([Unknown value $enableval passed to --enable-sim-stdio]);;
-esac])dnl
-AC_DEFINE_UNQUOTED([WITH_STDIO], [$sim_stdio], [How to route I/O])
-AC_MSG_RESULT($sim_stdio)
-
-
 AC_ARG_ENABLE(sim-switch,
 [  --enable-sim-switch			Use a switch instead of a table for instruction call.],
 [case "${enableval}" in
@@ -557,19 +544,6 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_timebase" != x""; then
   echo "Setting timebase flags = $sim_timebase" 6>&1
 fi],[sim_timebase=""])dnl
-
-
-AC_MSG_CHECKING([for sim trace settings])
-sim_trace="1"
-AC_ARG_ENABLE(sim-trace,
-[  --enable-sim-trace			Specify whether tracing is supported.],
-[case "${enableval}" in
-  yes)	sim_trace="1";;
-  no)	sim_trace="0";;
-  *)	AC_MSG_ERROR([--enable-sim-trace does not take a value]);;
-esac])dnl
-AC_DEFINE_UNQUOTED([WITH_TRACE], [$sim_trace], [Sim trace settings])
-AC_MSG_RESULT($sim_trace)
 
 
 AC_ARG_ENABLE(werror,
