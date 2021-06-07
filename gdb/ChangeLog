@@ -1,5 +1,12 @@
 2021-06-07  Pedro Alves  <pedro@palves.net>
 
+	* completer.c (RL_QF_SINGLE_QUOTE, RL_QF_DOUBLE_QUOTE)
+	(RL_QF_BACKSLASH, RL_QF_OTHER_QUOTE): Delete.
+	(gdb_rl_find_completion_word): Remove write-only 'found_quote'
+	local.
+
+2021-06-07  Pedro Alves  <pedro@palves.net>
+
 	* nat/amd64-linux-siginfo.c (union nat_sigval): Rename to ...
 	(nat_sigval_t): ... this and remove typedef of same name.
 	(struct nat_siginfo): Rename to ...
