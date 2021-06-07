@@ -148,6 +148,8 @@ if [gas_32_check] then {
     run_dump_test "addr32"
     run_dump_test "code16"
     run_list_test "oversized16" "-al"
+    run_dump_test "wrap32-text"
+    run_dump_test "wrap32-data"
     run_dump_test "sse4_1"
     run_dump_test "sse4_1-intel"
     run_dump_test "sse4_2"

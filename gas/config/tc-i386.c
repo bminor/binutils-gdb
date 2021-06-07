@@ -2457,6 +2457,19 @@ fits_in_unsigned_long (addressT num ATTRIBUTE_UNUSED)
 #endif
 }				/* fits_in_unsigned_long() */
 
+static INLINE valueT extend_to_32bit_address (addressT num)
+{
+#ifdef BFD64
+  if (fits_in_unsigned_long(num))
+    return (num ^ ((addressT) 1 << 31)) - ((addressT) 1 << 31);
+
+  if (!fits_in_signed_long (num))
+    return num & 0xffffffff;
+#endif
+
+  return num;
+}
+
 static INLINE int
 fits_in_disp8 (offsetT num)
 {
@@ -10457,13 +10470,17 @@ x86_cons (expressionS *exp, int size)
   if (intel_syntax)
     i386_intel_simplify (exp);
 
+  /* If not 64bit, massage value, to account for wraparound when !BFD64.  */
+  if (size == 4 && exp->X_op == O_constant && !object_64bit)
+    exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
+
   return got_reloc;
 }
 
 static void
 signed_cons (int size)
 {
-  if (flag_code == CODE_64BIT)
+  if (object_64bit)
     cons_sign = 1;
   cons (size);
   cons_sign = -1;
@@ -10718,11 +10735,11 @@ i386_finalize_immediate (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
     {
       /* Size it properly later.  */
       i.types[this_operand].bitfield.imm64 = 1;
-      /* If not 64bit, sign extend val.  */
-      if (flag_code != CODE_64BIT
-	  && (exp->X_add_number & ~(((addressT) 2 << 31) - 1)) == 0)
-	exp->X_add_number
-	  = (exp->X_add_number ^ ((addressT) 1 << 31)) - ((addressT) 1 << 31);
+
+      /* If not 64bit, sign/zero extend val, to account for wraparound
+	 when !BFD64.  */
+      if (flag_code != CODE_64BIT)
+	exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
     }
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
   else if (OUTPUT_FLAVOR == bfd_target_aout_flavour
@@ -12640,6 +12657,11 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	break;
       }
 #endif /* defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)  */
+
+  /* If not 64bit, massage value, to account for wraparound when !BFD64.  */
+  if (!object_64bit)
+    value = extend_to_32bit_address (value);
+
   *valP = value;
 #endif /* !defined (TE_Mach)  */
 
