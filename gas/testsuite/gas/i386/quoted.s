@@ -5,6 +5,10 @@ quoted:
 	mov	%es:"x(y)", %eax
 	mov	%es:"x(y)"(%eax), %eax
 
+	mov	"x(y", %eax
+	mov	"x)y", %eax
+	mov	"x?y", %eax
+
 	call	*"x(y)"
 	call	*%es:"x(y)"
 	call	%es:*"x(y)"

@@ -5523,11 +5523,13 @@ parse_operands (char *l, const char *mnemonic)
   /* 1 if operand is pending after ','.  */
   unsigned int expecting_operand = 0;
 
-  /* Non-zero if operand parens not balanced.  */
-  unsigned int paren_not_balanced;
-
   while (*l != END_OF_INSN)
     {
+      /* Non-zero if operand parens not balanced.  */
+      unsigned int paren_not_balanced = 0;
+      /* True if inside double quotes.  */
+      bool in_quotes = false;
+
       /* Skip optional white space before operand.  */
       if (is_space_char (*l))
 	++l;
@@ -5539,11 +5541,16 @@ parse_operands (char *l, const char *mnemonic)
 	  return NULL;
 	}
       token_start = l;	/* After white space.  */
-      paren_not_balanced = 0;
-      while (paren_not_balanced || *l != ',')
+      while (in_quotes || paren_not_balanced || *l != ',')
 	{
 	  if (*l == END_OF_INSN)
 	    {
+	      if (in_quotes)
+		{
+		  as_bad (_("unbalanced double quotes in operand %d."),
+			  i.operands + 1);
+		  return NULL;
+		}
 	      if (paren_not_balanced)
 		{
 		  know (!intel_syntax);
@@ -5554,14 +5561,18 @@ parse_operands (char *l, const char *mnemonic)
 	      else
 		break;	/* we are done */
 	    }
-	  else if (!is_operand_char (*l) && !is_space_char (*l) && *l != '"')
+	  else if (*l == '\\' && l[1] == '"')
+	    ++l;
+	  else if (*l == '"')
+	    in_quotes = !in_quotes;
+	  else if (!in_quotes && !is_operand_char (*l) && !is_space_char (*l))
 	    {
 	      as_bad (_("invalid character %s in operand %d"),
 		      output_invalid (*l),
 		      i.operands + 1);
 	      return NULL;
 	    }
-	  if (!intel_syntax)
+	  if (!intel_syntax && !in_quotes)
 	    {
 	      if (*l == '(')
 		++paren_not_balanced;
@@ -11517,23 +11528,21 @@ i386_att_operand (char *operand_string)
       if (*base_string == ')')
 	{
 	  char *temp_string;
-	  unsigned int parens_balanced = 1;
+
 	  /* We've already checked that the number of left & right ()'s are
 	     equal, so this loop will not be infinite.  */
 	  do
 	    {
 	      base_string--;
-	      if (*base_string == ')')
-		parens_balanced++;
-	      if (*base_string == '(')
-		parens_balanced--;
 	    }
-	  while (parens_balanced);
+	  while (*base_string != '(' && *base_string != ')'
+		 && *base_string != '"');
 
 	  temp_string = base_string;
 
 	  /* Skip past '(' and whitespace.  */
-	  ++base_string;
+	  if (*base_string == '(')
+	    ++base_string;
 	  if (is_space_char (*base_string))
 	    ++base_string;
 
