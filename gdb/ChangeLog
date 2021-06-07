@@ -1,3 +1,8 @@
+2021-06-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* remote.c (remote_target::start_remote): Set 'starting_up' using
+	boolean values instead of integers.
+
 2021-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* guile/scm-param.c (struct param_smob) <set_command,
