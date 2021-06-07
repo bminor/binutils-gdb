@@ -168,13 +168,6 @@ proc run_test { lang } {
 	    if { $state == 2 } { set state -4 }
 	    exp_continue
 	}
-	-re -wrap "" {
-	    if { $state == 3} {
-		pass $gdb_test_name
-	    } else {
-		fail "$gdb_test_name (state == $state)"
-	    }
-	}
 	-re "^\r\n(\[^\r\n\]*)(?=\r\n)" {
 	    if { $state == 2 } {
 		set line $expect_out(1,string)
@@ -186,6 +179,13 @@ proc run_test { lang } {
 		}
 	    }
 	    exp_continue
+	}
+	-re -wrap "" {
+	    if { $state == 3} {
+		pass $gdb_test_name
+	    } else {
+		fail "$gdb_test_name (state == $state)"
+	    }
 	}
     }
 }
