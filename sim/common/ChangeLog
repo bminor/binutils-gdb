@@ -1,5 +1,14 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (SIM_NEW_COMMON_OBJS): Move sim-load.o to ...
+	(COMMON_OBJS_NAMES): ... here.  Rename var from COMMON_OBJS.
+	(COMMON_OBJS): Redefine.
+	* defs.h [SIM_COMMON_BUILD]: Do not include ../config.h.
+	* local.mk (%C%_libcommon_a_CPPFLAGS): New variable.
+	(%C%_libcommon_a_SOURCES): Add %D%/sim-load.c.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-sockser.c: Include sys/select.h.
 
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>

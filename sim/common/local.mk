@@ -28,7 +28,13 @@ SIM_ALL_RECURSIVE_DEPS += \
 # NB: libcommon.a isn't used directly by ports.  We need a target for common
 # objects to be a part of, and ports use the individual objects directly.
 noinst_LIBRARIES += %D%/libcommon.a
+%C%_libcommon_a_CPPFLAGS = \
+	$(AM_CPPFLAGS) \
+	-DSIM_COMMON_BUILD \
+	-I../bfd \
+	-I..
 %C%_libcommon_a_SOURCES = \
+	%D%/sim-load.c \
 	%D%/version.c
 
 %D%/version.c: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(srcdir)/%D%/create-version.sh

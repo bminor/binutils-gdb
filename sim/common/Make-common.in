@@ -179,7 +179,6 @@ SIM_NEW_COMMON_OBJS = \
 	sim-hrw.o \
 	sim-io.o \
 	sim-info.o \
-	sim-load.o \
 	sim-memopt.o \
 	sim-model.o \
 	sim-module.o \
@@ -254,7 +253,10 @@ LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB)
 EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
 	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
-COMMON_OBJS = ../common/version.o
+COMMON_OBJS_NAMES = \
+	sim-load.o \
+	version.o
+COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
 
 LIB_OBJS = callback.o modules.o syscall.o targ-map.o $(COMMON_OBJS) $(SIM_OBJS)
 
