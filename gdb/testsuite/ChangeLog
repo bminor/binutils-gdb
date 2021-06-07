@@ -1,5 +1,11 @@
 2021-06-07  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/27908
+	* gdb.base/run-attach-while-running.exp (test): Don't match prompt
+	after attach using '$gdb_prompt $'.
+
+2021-06-07  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/info-types.exp.tcl: Remove "File .*" matching from regexp
 	matching state machine.
 
