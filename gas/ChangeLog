@@ -1,5 +1,10 @@
 2021-06-07  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (parse_operands): Don't check for matched
+	square brackets.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (check_VecOperations): Remove 2nd parameter.
 	(i386_att_operand): Adjust calls to check_VecOperations.
 	* config/tc-i386-intel.c (i386_intel_operand): Likewise.

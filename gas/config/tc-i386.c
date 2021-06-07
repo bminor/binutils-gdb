@@ -5556,12 +5556,9 @@ parse_operands (char *l, const char *mnemonic)
 	    {
 	      if (paren_not_balanced)
 		{
-		  if (!intel_syntax)
-		    as_bad (_("unbalanced parenthesis in operand %d."),
-			    i.operands + 1);
-		  else
-		    as_bad (_("unbalanced brackets in operand %d."),
-			    i.operands + 1);
+		  know (!intel_syntax);
+		  as_bad (_("unbalanced parenthesis in operand %d."),
+			  i.operands + 1);
 		  return NULL;
 		}
 	      else
@@ -5579,13 +5576,6 @@ parse_operands (char *l, const char *mnemonic)
 	      if (*l == '(')
 		++paren_not_balanced;
 	      if (*l == ')')
-		--paren_not_balanced;
-	    }
-	  else
-	    {
-	      if (*l == '[')
-		++paren_not_balanced;
-	      if (*l == ']')
 		--paren_not_balanced;
 	    }
 	  l++;
