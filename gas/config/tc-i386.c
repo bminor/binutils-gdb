@@ -11413,21 +11413,21 @@ i386_att_operand (char *operand_string)
 	  if (is_space_char (*op_string))
 	    ++op_string;
 
-	  if (!is_digit_char (*op_string)
-	      && !is_identifier_char (*op_string)
-	      && *op_string != '('
-	      && *op_string != ABSOLUTE_PREFIX)
-	    {
-	      as_bad (_("bad memory operand `%s'"), op_string);
-	      return 0;
-	    }
 	  /* Handle case of %es:*foo.  */
-	  if (*op_string == ABSOLUTE_PREFIX)
+	  if (!i.jumpabsolute && *op_string == ABSOLUTE_PREFIX)
 	    {
 	      ++op_string;
 	      if (is_space_char (*op_string))
 		++op_string;
 	      i.jumpabsolute = true;
+	    }
+
+	  if (!is_digit_char (*op_string)
+	      && !is_identifier_char (*op_string)
+	      && *op_string != '(')
+	    {
+	      as_bad (_("bad memory operand `%s'"), op_string);
+	      return 0;
 	    }
 	  goto do_memory_reference;
 	}
