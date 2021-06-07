@@ -10689,16 +10689,6 @@ i386_immediate (char *imm_start)
   exp_seg = expression (exp);
 
   SKIP_WHITESPACE ();
-
-  /* Handle vector operations.  */
-  if (*input_line_pointer == '{')
-    {
-      input_line_pointer = check_VecOperations (input_line_pointer,
-						NULL);
-      if (input_line_pointer == NULL)
-	return 0;
-    }
-
   if (*input_line_pointer)
     as_bad (_("junk `%s' after expression"), input_line_pointer);
 
