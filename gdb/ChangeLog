@@ -1,5 +1,12 @@
 2021-06-07  Pedro Alves  <pedro@palves.net>
 
+	* dwarf2/read.c (struct partial_die_info): Add defaulted copy
+	ctor.
+	* symtab.h (struct symbol): Add defaulted copy assignment
+	operator.
+
+2021-06-07  Pedro Alves  <pedro@palves.net>
+
 	* completer.c (RL_QF_SINGLE_QUOTE, RL_QF_DOUBLE_QUOTE)
 	(RL_QF_BACKSLASH, RL_QF_OTHER_QUOTE): Delete.
 	(gdb_rl_find_completion_word): Remove write-only 'found_quote'

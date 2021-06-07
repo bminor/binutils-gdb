@@ -1137,6 +1137,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     }
 
   symbol (const symbol &) = default;
+  symbol &operator= (const symbol &) = default;
 
   /* Data type of value */
 

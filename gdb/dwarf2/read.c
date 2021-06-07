@@ -832,6 +832,7 @@ struct partial_die_info : public allocate_on_obstack
     /* Disable assign but still keep copy ctor, which is needed
        load_partial_dies.   */
     partial_die_info& operator=(const partial_die_info& rhs) = delete;
+    partial_die_info (const partial_die_info &) = default;
 
     /* Adjust the partial die before generating a symbol for it.  This
        function may set the is_external flag or change the DIE's
