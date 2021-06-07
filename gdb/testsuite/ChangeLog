@@ -1,3 +1,19 @@
+2021-06-08  Lancelot Six  <lsix@lancelotsix.com>
+
+	* gdb.base/premature-dummy-frame-removal.py (TestUnwinder): Use
+	'is None' instead of '== None' and 'is not None' instead of
+	'!= None'.
+	* gdb.python/py-frame-args.py (lookup_function): Same.
+	* gdb.python/py-framefilter-invalidarg.py (Reverse_Function): Same.
+	* gdb.python/py-framefilter.py (Reverse_Function): Same.
+	* gdb.python/py-nested-maps.py (lookup_function): Same.
+	* gdb.python/py-objfile-script-gdb.py (lookup_function): Same.
+	* gdb.python/py-prettyprint.py (lookup_function): Same.
+	* gdb.python/py-section-script.py (lookup_function): Same.
+	* gdb.python/py-unwind-inline.py (dummy_unwinder): Same.
+	* gdb.python/python.exp: Same.
+	* gdb.rust/pp.py (lookup_function): Same.
+
 2021-06-08  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (multi_line): Require more than one argument.

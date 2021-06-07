@@ -372,7 +372,7 @@ class SetFrameFilterPriority(gdb.Command):
 
     def invoke(self, arg, from_tty):
         command_tuple = self._parse_pri_arg(arg)
-        if command_tuple != None:
+        if command_tuple is not None:
             self._set_filter_priority(command_tuple)
 
 
@@ -453,7 +453,7 @@ class ShowFrameFilterPriority(gdb.Command):
 
     def invoke(self, arg, from_tty):
         command_tuple = self._parse_pri_arg(arg)
-        if command_tuple == None:
+        if command_tuple is None:
             return
         filter_name = command_tuple[1]
         list_name = command_tuple[0]

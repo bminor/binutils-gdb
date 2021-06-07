@@ -117,7 +117,7 @@ class FrameDecorator(object):
         # address.  If GDB detects an integer value from this function
         # it will attempt to find the function name from minimal
         # symbols via its own internal functions.
-        if func == None:
+        if func is None:
             pc = frame.pc()
             return pc
 
@@ -270,7 +270,7 @@ class FrameVars(object):
         except RuntimeError:
             block = None
 
-        while block != None:
+        while block is not None:
             if block.is_global or block.is_static:
                 break
             for sym in block:
@@ -295,12 +295,12 @@ class FrameVars(object):
         except RuntimeError:
             block = None
 
-        while block != None:
-            if block.function != None:
+        while block is not None:
+            if block.function is not None:
                 break
             block = block.superblock
 
-        if block != None:
+        if block is not None:
             for sym in block:
                 if not sym.is_argument:
                     continue

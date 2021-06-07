@@ -1661,7 +1661,7 @@ example above might be written.
 @smallexample
 def str_lookup_function(val):
     lookup_tag = val.type.tag
-    if lookup_tag == None:
+    if lookup_tag is None:
         return None
     regex = re.compile("^std::basic_string<char,.*>$")
     if regex.match(lookup_tag):

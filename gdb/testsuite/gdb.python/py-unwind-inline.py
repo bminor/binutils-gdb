@@ -45,7 +45,7 @@ class dummy_unwinder(Unwinder):
     def get_regs(self, pending_frame):
         """Return a list of register names that should be read.  Only
         gathers the list once, then caches the result."""
-        if self.regs != None:
+        if self.regs is not None:
             return self.regs
 
         # Collect the names of all registers to read.

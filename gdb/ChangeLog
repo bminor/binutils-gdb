@@ -1,3 +1,12 @@
+2021-06-08  Lancelot Six  <lsix@lancelotsix.com>
+
+	* python/lib/gdb/FrameDecorator.py (FrameDecorator): Use 'is None'
+	instead of '== None'.
+	(FrameVars): Use 'is not None' instead of '!= None'.
+	* python/lib/gdb/command/frame_filters.py (SetFrameFilterPriority):
+	Use 'is None' instead of '== None' and 'is not None' instead of '!=
+	None'.
+
 2021-06-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* inferior.h (class inferior) <in_initial_library_scan>: New.

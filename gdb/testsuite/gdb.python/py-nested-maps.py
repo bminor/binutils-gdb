@@ -88,7 +88,7 @@ def lookup_function(val):
     # Get the type name.
     typename = type.tag
 
-    if typename == None:
+    if typename is None:
         return None
 
     # Iterate over local dictionary of types to determine
@@ -109,7 +109,7 @@ def lookup_typedefs_function(val):
     # Get the type.
     type = val.type
 
-    if type == None or type.name == None or type.code != gdb.TYPE_CODE_TYPEDEF:
+    if type is None or type.name is None or type.code != gdb.TYPE_CODE_TYPEDEF:
         return None
 
     # Iterate over local dictionary of typedef types to determine if a

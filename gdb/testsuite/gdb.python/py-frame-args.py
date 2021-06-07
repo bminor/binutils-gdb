@@ -53,7 +53,7 @@ def lookup_function(val):
 
     # Get the type name.
     typename = type.tag
-    if typename == None:
+    if typename is None:
         return None
 
     # Iterate over local dictionary of types to determine

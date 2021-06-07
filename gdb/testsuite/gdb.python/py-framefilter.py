@@ -28,7 +28,7 @@ class Reverse_Function(FrameDecorator):
 
     def function(self):
         fname = str(self.fobj.function())
-        if fname == None or fname == "":
+        if not fname:
             return None
         if fname == "end_func":
             extra = self.fobj.inferior_frame().read_var("str").string()

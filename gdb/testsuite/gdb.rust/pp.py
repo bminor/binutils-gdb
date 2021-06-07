@@ -38,7 +38,7 @@ def lookup_function(val):
     # Get the type name.
     typename = type.tag
 
-    if typename == None:
+    if typename is None:
         return None
 
     if typename == "pp::Inner":
