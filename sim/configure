@@ -751,6 +751,7 @@ enable_sim
 enable_example_sims
 enable_targets
 enable_sim_assert
+enable_sim_environment
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1424,6 +1425,9 @@ Optional Features:
   --enable-example-sims   enable example GNU simulators
   --enable-targets        alternative target configurations
   --enable-sim-assert     Specify whether to perform random assertions
+  --enable-sim-environment=environment
+                          Specify mixed, user, virtual or operating
+                          environment
 
 Some influential environment variables:
   CC          C compiler command
@@ -5938,6 +5942,28 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_assert" >&5
 $as_echo "$sim_assert" >&6; }
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking default sim environment setting" >&5
+$as_echo_n "checking default sim environment setting... " >&6; }
+sim_environment="ALL_ENVIRONMENT"
+# Check whether --enable-sim-environment was given.
+if test "${enable_sim_environment+set}" = set; then :
+  enableval=$enable_sim_environment; case "${enableval}" in
+  all | ALL)             sim_environment="ALL_ENVIRONMENT";;
+  user | USER)           sim_environment="USER_ENVIRONMENT";;
+  virtual | VIRTUAL)     sim_environment="VIRTUAL_ENVIRONMENT";;
+  operating | OPERATING) sim_environment="OPERATING_ENVIRONMENT";;
+  *)   as_fn_error $? "Unknown value $enableval passed to --enable-sim-environment" "$LINENO" 5;;
+esac
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_ENVIRONMENT $sim_environment
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_environment" >&5
+$as_echo "$sim_environment" >&6; }
 
 
 ac_config_files="$ac_config_files Makefile"

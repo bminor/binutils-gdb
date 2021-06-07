@@ -780,7 +780,6 @@ enable_sim_debug
 enable_sim_stdio
 enable_sim_trace
 enable_sim_profile
-enable_sim_environment
 enable_sim_inline
 with_pkgversion
 with_bugurl
@@ -1436,9 +1435,6 @@ Optional Features:
   --enable-sim-trace=opts Enable tracing of simulated programs
   --enable-sim-profile=opts
                           Enable profiling flags
-  --enable-sim-environment=environment
-                          Specify mixed, user, virtual or operating
-                          environment
   --enable-sim-inline=inlines
                           Specify which functions should be inlined
   --enable-sim-endian=endian
@@ -10795,7 +10791,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10798 "configure"
+#line 10794 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10901,7 +10897,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10904 "configure"
+#line 10900 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11282,28 +11278,6 @@ _ACEOF
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_profile" >&5
 $as_echo "$sim_profile" >&6; }
 
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking default sim environment setting" >&5
-$as_echo_n "checking default sim environment setting... " >&6; }
-sim_environment="ALL_ENVIRONMENT"
-# Check whether --enable-sim-environment was given.
-if test "${enable_sim_environment+set}" = set; then :
-  enableval=$enable_sim_environment; case "${enableval}" in
-  all | ALL)             sim_environment="ALL_ENVIRONMENT";;
-  user | USER)           sim_environment="USER_ENVIRONMENT";;
-  virtual | VIRTUAL)     sim_environment="VIRTUAL_ENVIRONMENT";;
-  operating | OPERATING) sim_environment="OPERATING_ENVIRONMENT";;
-  *)   as_fn_error $? "Unknown value $enableval passed to --enable-sim-environment" "$LINENO" 5;;
-esac
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define WITH_ENVIRONMENT $sim_environment
-_ACEOF
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_environment" >&5
-$as_echo "$sim_environment" >&6; }
 
 
 sim_inline="-DDEFAULT_INLINE=0"

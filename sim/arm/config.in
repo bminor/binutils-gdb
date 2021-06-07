@@ -117,9 +117,6 @@
 /* Sim debug setting */
 #undef WITH_DEBUG
 
-/* Sim default environment */
-#undef WITH_ENVIRONMENT
-
 /* Sim profile settings */
 #undef WITH_PROFILE
 

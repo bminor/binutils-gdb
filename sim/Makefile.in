@@ -198,6 +198,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
 	$(top_srcdir)/../config/override.m4 \
 	$(top_srcdir)/m4/sim_ac_option_assert.m4 \
+	$(top_srcdir)/m4/sim_ac_option_environment.m4 \
 	$(top_srcdir)/m4/sim_ac_platform.m4 \
 	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
 	$(top_srcdir)/configure.ac
