@@ -10510,14 +10510,13 @@ pe_directive_secrel (int dummy ATTRIBUTE_UNUSED)
 /* Handle Vector operations.  */
 
 static char *
-check_VecOperations (char *op_string, char *op_end)
+check_VecOperations (char *op_string)
 {
   const reg_entry *mask;
   const char *saved;
   char *end_op;
 
-  while (*op_string
-	 && (op_end == NULL || op_string < op_end))
+  while (*op_string)
     {
       saved = op_string;
       if (*op_string == '{')
@@ -11446,7 +11445,7 @@ i386_att_operand (char *operand_string)
       /* Handle vector operations.  */
       if (*op_string == '{')
 	{
-	  op_string = check_VecOperations (op_string, NULL);
+	  op_string = check_VecOperations (op_string);
 	  if (op_string == NULL)
 	    return 0;
 	}
@@ -11520,7 +11519,7 @@ i386_att_operand (char *operand_string)
       vop_start = strchr (op_string, '{');
       if (vop_start && vop_start < base_string)
 	{
-	  if (check_VecOperations (vop_start, base_string) == NULL)
+	  if (check_VecOperations (vop_start) == NULL)
 	    return 0;
 	  base_string = vop_start;
 	}

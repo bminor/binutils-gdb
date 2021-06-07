@@ -1,5 +1,11 @@
 2021-06-07  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (check_VecOperations): Remove 2nd parameter.
+	(i386_att_operand): Adjust calls to check_VecOperations.
+	* config/tc-i386-intel.c (i386_intel_operand): Likewise.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (i386_immediate): Don't call check_VecOperations.
 
 2021-06-07  Jan Beulich  <jbeulich@suse.com>
