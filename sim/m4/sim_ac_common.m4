@@ -24,13 +24,6 @@ AC_DEFUN([SIM_AC_COMMON],
 SIM_AC_TOOLCHAIN
 AC_CONFIG_HEADERS([config.h:config.in])
 
-# Some of the common include files depend on bfd.h, and bfd.h checks
-# that config.h is included first by testing that the PACKAGE macro
-# is defined.
-PACKAGE=sim
-AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE", [Name of this package. ])
-AC_SUBST(PACKAGE)
-
 # Dependency checking.
 ZW_CREATE_DEPDIR
 ZW_PROG_COMPILER_DEPENDENCIES([CC])
@@ -59,11 +52,6 @@ dnl --enable-maintainer-mode.
 AM_MAINTAINER_MODE
 
 SIM_AC_OPTION_INLINE
-
-ACX_PKGVERSION([SIM])
-ACX_BUGURL([https://www.gnu.org/software/gdb/bugs/])
-AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
-AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
 
 dnl Detect exe extension
 AC_EXEEXT

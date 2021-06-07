@@ -5,6 +5,13 @@ AC_INIT([sim], [0],
   [https://sourceware.org/bugzilla/enter_bug.cgi?product=gdb&component=sim],
   [], [https://sourceware.org/gdb/wiki/Sim/])
 
+dnl Probably should unify PKGVERSION with PACKAGE_* settings from AC_INIT.
+ACX_PKGVERSION([SIM])
+AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
+dnl PACKAGE_BUGREPORT is provided by AC_INIT.
+ACX_BUGURL([$PACKAGE_BUGREPORT])
+AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
+
 AC_CONFIG_HEADERS([config.h])
 
 SIM_AC_TOOLCHAIN

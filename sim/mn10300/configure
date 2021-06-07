@@ -635,9 +635,6 @@ sim_default_model
 sim_scache
 sim_float
 cgen_breaks
-REPORT_BUGS_TEXI
-REPORT_BUGS_TO
-PKGVERSION
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
@@ -677,7 +674,6 @@ USE_NLS
 CCDEPMODE
 DEPDIR
 am__leading_dot
-PACKAGE
 C_DIALECT
 RANLIB
 AR
@@ -772,8 +768,6 @@ with_gnu_ld
 enable_libtool_lock
 enable_maintainer_mode
 enable_sim_inline
-with_pkgversion
-with_bugurl
 enable_sim_endian
 enable_sim_alignment
 enable_werror
@@ -1444,8 +1438,6 @@ Optional Packages:
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
-  --with-pkgversion=PKG   Use PKG in the version string in place of "SIM"
-  --with-bugurl=URL       Direct users to URL to report a bug
 
 Some influential environment variables:
   CC          C compiler command
@@ -6899,17 +6891,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 ac_config_headers="$ac_config_headers config.h:config.in"
 
 
-# Some of the common include files depend on bfd.h, and bfd.h checks
-# that config.h is included first by testing that the PACKAGE macro
-# is defined.
-PACKAGE=sim
-
-cat >>confdefs.h <<_ACEOF
-#define PACKAGE "$PACKAGE"
-_ACEOF
-
-
-
 # Dependency checking.
 ac_config_commands="$ac_config_commands depdir"
 
@@ -10773,7 +10754,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10776 "configure"
+#line 10757 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10879,7 +10860,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10882 "configure"
+#line 10863 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11171,62 +11152,6 @@ if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
   echo "Setting inline flags = $sim_inline" 6>&1
 fi
 fi
-
-
-
-
-# Check whether --with-pkgversion was given.
-if test "${with_pkgversion+set}" = set; then :
-  withval=$with_pkgversion; case "$withval" in
-      yes) as_fn_error $? "package version not specified" "$LINENO" 5 ;;
-      no)  PKGVERSION= ;;
-      *)   PKGVERSION="($withval) " ;;
-     esac
-else
-  PKGVERSION="(SIM) "
-
-fi
-
-
-
-
-
-# Check whether --with-bugurl was given.
-if test "${with_bugurl+set}" = set; then :
-  withval=$with_bugurl; case "$withval" in
-      yes) as_fn_error $? "bug URL not specified" "$LINENO" 5 ;;
-      no)  BUGURL=
-	   ;;
-      *)   BUGURL="$withval"
-	   ;;
-     esac
-else
-  BUGURL="https://www.gnu.org/software/gdb/bugs/"
-
-fi
-
-  case ${BUGURL} in
-  "")
-    REPORT_BUGS_TO=
-    REPORT_BUGS_TEXI=
-    ;;
-  *)
-    REPORT_BUGS_TO="<$BUGURL>"
-    REPORT_BUGS_TEXI=@uref{`echo "$BUGURL" | sed 's/@/@@/g'`}
-    ;;
-  esac;
-
-
-
-
-cat >>confdefs.h <<_ACEOF
-#define PKGVERSION "$PKGVERSION"
-_ACEOF
-
-
-cat >>confdefs.h <<_ACEOF
-#define REPORT_BUGS_TO "$REPORT_BUGS_TO"
-_ACEOF
 
 
 

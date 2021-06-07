@@ -592,11 +592,6 @@ if test x"$silent" != x"yes" && test x"$sim_xor_endian" != x""; then
 fi],[sim_xor_endian=""])dnl
 
 
-ACX_PKGVERSION([GDB])
-ACX_BUGURL([https://www.gnu.org/software/gdb/bugs/])
-AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
-AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
-
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 

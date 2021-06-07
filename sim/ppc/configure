@@ -675,9 +675,6 @@ build_os
 build_vendor
 build_cpu
 build
-REPORT_BUGS_TEXI
-REPORT_BUGS_TO
-PKGVERSION
 WERROR_CFLAGS
 EGREP
 GREP
@@ -774,8 +771,6 @@ enable_sim_timebase
 enable_werror
 enable_sim_warnings
 enable_sim_xor_endian
-with_pkgversion
-with_bugurl
 with_system_zlib
 enable_plugins
 '
@@ -1439,8 +1434,6 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
-  --with-bugurl=URL       Direct users to URL to report a bug
   --with-system-zlib      use installed libz
 
 Some influential environment variables:
@@ -4486,62 +4479,6 @@ fi
 else
   sim_xor_endian=""
 fi
-
-
-
-
-# Check whether --with-pkgversion was given.
-if test "${with_pkgversion+set}" = set; then :
-  withval=$with_pkgversion; case "$withval" in
-      yes) as_fn_error $? "package version not specified" "$LINENO" 5 ;;
-      no)  PKGVERSION= ;;
-      *)   PKGVERSION="($withval) " ;;
-     esac
-else
-  PKGVERSION="(GDB) "
-
-fi
-
-
-
-
-
-# Check whether --with-bugurl was given.
-if test "${with_bugurl+set}" = set; then :
-  withval=$with_bugurl; case "$withval" in
-      yes) as_fn_error $? "bug URL not specified" "$LINENO" 5 ;;
-      no)  BUGURL=
-	   ;;
-      *)   BUGURL="$withval"
-	   ;;
-     esac
-else
-  BUGURL="https://www.gnu.org/software/gdb/bugs/"
-
-fi
-
-  case ${BUGURL} in
-  "")
-    REPORT_BUGS_TO=
-    REPORT_BUGS_TEXI=
-    ;;
-  *)
-    REPORT_BUGS_TO="<$BUGURL>"
-    REPORT_BUGS_TEXI=@uref{`echo "$BUGURL" | sed 's/@/@@/g'`}
-    ;;
-  esac;
-
-
-
-
-cat >>confdefs.h <<_ACEOF
-#define PKGVERSION "$PKGVERSION"
-_ACEOF
-
-
-cat >>confdefs.h <<_ACEOF
-#define REPORT_BUGS_TO "$REPORT_BUGS_TO"
-_ACEOF
 
 
 # Make sure we can run config.sub.

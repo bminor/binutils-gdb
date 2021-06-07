@@ -703,6 +703,9 @@ build_os
 build_vendor
 build_cpu
 build
+REPORT_BUGS_TEXI
+REPORT_BUGS_TO
+PKGVERSION
 target_alias
 host_alias
 build_alias
@@ -744,6 +747,8 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+with_pkgversion
+with_bugurl
 enable_maintainer_mode
 enable_dependency_tracking
 enable_silent_rules
@@ -1439,6 +1444,12 @@ Optional Features:
   --enable-sim-stdio      Specify whether to use stdio for console
                           input/output
   --enable-sim-trace=opts Enable tracing of simulated programs
+
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-pkgversion=PKG   Use PKG in the version string in place of "SIM"
+  --with-bugurl=URL       Direct users to URL to report a bug
 
 Some influential environment variables:
   CC          C compiler command
@@ -2479,6 +2490,62 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
+
+
+
+# Check whether --with-pkgversion was given.
+if test "${with_pkgversion+set}" = set; then :
+  withval=$with_pkgversion; case "$withval" in
+      yes) as_fn_error $? "package version not specified" "$LINENO" 5 ;;
+      no)  PKGVERSION= ;;
+      *)   PKGVERSION="($withval) " ;;
+     esac
+else
+  PKGVERSION="(SIM) "
+
+fi
+
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define PKGVERSION "$PKGVERSION"
+_ACEOF
+
+
+
+# Check whether --with-bugurl was given.
+if test "${with_bugurl+set}" = set; then :
+  withval=$with_bugurl; case "$withval" in
+      yes) as_fn_error $? "bug URL not specified" "$LINENO" 5 ;;
+      no)  BUGURL=
+	   ;;
+      *)   BUGURL="$withval"
+	   ;;
+     esac
+else
+  BUGURL="$PACKAGE_BUGREPORT"
+
+fi
+
+  case ${BUGURL} in
+  "")
+    REPORT_BUGS_TO=
+    REPORT_BUGS_TEXI=
+    ;;
+  *)
+    REPORT_BUGS_TO="<$BUGURL>"
+    REPORT_BUGS_TEXI=@uref{`echo "$BUGURL" | sed 's/@/@@/g'`}
+    ;;
+  esac;
+
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define REPORT_BUGS_TO "$REPORT_BUGS_TO"
+_ACEOF
 
 
 ac_config_headers="$ac_config_headers config.h"

@@ -194,7 +194,8 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 	testsuite/common/alu-tst$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
+	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
 	$(top_srcdir)/../config/override.m4 \
 	$(top_srcdir)/m4/sim_ac_option_assert.m4 \
@@ -647,8 +648,11 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKGVERSION = @PKGVERSION@
 RANLIB = @RANLIB@
 RANLIB_FOR_BUILD = @RANLIB_FOR_BUILD@
+REPORT_BUGS_TEXI = @REPORT_BUGS_TEXI@
+REPORT_BUGS_TO = @REPORT_BUGS_TO@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@

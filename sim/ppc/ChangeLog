@@ -1,5 +1,16 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Delete calls to ACX_PKGVERSION & ACX_BUGURL.
+	* aclocal.m4, config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete sim-stdio & sim-trace.
+	* debug.h: Define TRACE_* defines.
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Delete AC_STRUCT_*, AC_TYPE_*, AC_CHECK_FUNCS,
 	AC_CHECK_HEADERS, and AC_HEADER_DIRENT calls.
 	* config.in, configure: Regenerate.

@@ -394,8 +394,14 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Additional package description */
+#undef PKGVERSION
+
 /* Sim profile settings */
 #undef PROFILE
+
+/* Bug reporting address */
+#undef REPORT_BUGS_TO
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE

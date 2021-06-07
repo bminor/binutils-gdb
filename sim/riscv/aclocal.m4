@@ -98,7 +98,6 @@ AC_DEFUN([_AM_SUBST_NOTMAKE])
 # Public sister of _AM_SUBST_NOTMAKE.
 AC_DEFUN([AM_SUBST_NOTMAKE], [_AM_SUBST_NOTMAKE($@)])
 
-m4_include([../../config/acx.m4])
 m4_include([../../config/depstand.m4])
 m4_include([../../config/gettext-sister.m4])
 m4_include([../../config/lead-dot.m4])
