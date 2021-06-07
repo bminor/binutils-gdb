@@ -1,5 +1,13 @@
 2021-06-07  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (digit_chars, is_digit_char): Delete.
+	(md_begin): Fold digit and lower-case letter handling.
+	(starts_memory_operand): Permit more characters.
+	* testsuite/gas/i386/unary.s, testsuite/gas/i386/unary.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (starts_memory_operand): New.
 	(i386_att_operand): Use it.
 	* testsuite/gas/i386/quoted.s, testsuite/gas/i386/quoted.d: New.

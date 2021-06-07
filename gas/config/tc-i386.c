@@ -518,7 +518,6 @@ static char mnemonic_chars[256];
 static char register_chars[256];
 static char operand_chars[256];
 static char identifier_chars[256];
-static char digit_chars[256];
 
 /* Lexical macros.  */
 #define is_mnemonic_char(x) (mnemonic_chars[(unsigned char) x])
@@ -526,7 +525,6 @@ static char digit_chars[256];
 #define is_register_char(x) (register_chars[(unsigned char) x])
 #define is_space_char(x) ((x) == ' ')
 #define is_identifier_char(x) (identifier_chars[(unsigned char) x])
-#define is_digit_char(x) (digit_chars[(unsigned char) x])
 
 /* All non-digit non-letter characters that may occur in an operand.  */
 static char operand_special_chars[] = "%$-+(,)*._~/<>|&^!:[@]";
@@ -3140,14 +3138,7 @@ md_begin (void)
 
     for (c = 0; c < 256; c++)
       {
-	if (ISDIGIT (c))
-	  {
-	    digit_chars[c] = c;
-	    mnemonic_chars[c] = c;
-	    register_chars[c] = c;
-	    operand_chars[c] = c;
-	  }
-	else if (ISLOWER (c))
+	if (ISDIGIT (c) || ISLOWER (c))
 	  {
 	    mnemonic_chars[c] = c;
 	    register_chars[c] = c;
@@ -3185,7 +3176,6 @@ md_begin (void)
     identifier_chars['?'] = '?';
     operand_chars['?'] = '?';
 #endif
-    digit_chars['-'] = '-';
     mnemonic_chars['_'] = '_';
     mnemonic_chars['-'] = '-';
     mnemonic_chars['.'] = '.';
@@ -11370,10 +11360,9 @@ maybe_adjust_templates (void)
 
 static INLINE bool starts_memory_operand (char c)
 {
-  return is_digit_char (c)
+  return ISDIGIT (c)
 	 || is_identifier_char (c)
-	 || c == '"'
-	 || c == '(';
+	 || strchr ("([\"+-!~", c);
 }
 
 /* Parse OPERAND_STRING into the i386_insn structure I.  Returns zero
