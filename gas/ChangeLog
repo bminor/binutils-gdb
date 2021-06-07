@@ -1,5 +1,12 @@
 2021-06-07  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (i386_att_operand): Re-write handling of
+	vector operations operand suffix.
+	* testsuite/gas/i386/unary.s: Add more cases.
+	* testsuite/gas/i386/unary.d: Adjust expectations.
+
+2021-06-07  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (parse_operands): Reduce scope of
 	paren_not_balanced, to match the new in_quotes. Skip over quoted
 	regions of operands.

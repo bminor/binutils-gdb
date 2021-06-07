@@ -11488,7 +11488,6 @@ i386_att_operand (char *operand_string)
       /* Start and end of displacement string expression (if found).  */
       char *displacement_string_start;
       char *displacement_string_end;
-      char *vop_start;
 
     do_memory_reference:
       if (i.mem_operands == 1 && !maybe_adjust_templates ())
@@ -11509,17 +11508,42 @@ i386_att_operand (char *operand_string)
       base_string = op_string + strlen (op_string);
 
       /* Handle vector operations.  */
-      vop_start = strchr (op_string, '{');
-      if (vop_start && vop_start < base_string)
-	{
-	  if (check_VecOperations (vop_start) == NULL)
-	    return 0;
-	  base_string = vop_start;
-	}
-
       --base_string;
       if (is_space_char (*base_string))
 	--base_string;
+
+      if (*base_string == '}')
+	{
+	  char *vop_start = NULL;
+
+	  while (base_string-- > op_string)
+	    {
+	      if (*base_string == '"')
+		break;
+	      if (*base_string != '{')
+		continue;
+
+	      vop_start = base_string;
+
+	      --base_string;
+	      if (is_space_char (*base_string))
+		--base_string;
+
+	      if (*base_string != '}')
+		break;
+
+	      vop_start = NULL;
+	    }
+
+	  if (!vop_start)
+	    {
+	      as_bad (_("unbalanced figure braces"));
+	      return 0;
+	    }
+
+	  if (check_VecOperations (vop_start) == NULL)
+	    return 0;
+	}
 
       /* If we only have a displacement, set-up for it to be parsed later.  */
       displacement_string_start = op_string;

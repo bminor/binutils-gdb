@@ -8,6 +8,8 @@ quoted:
 	mov	"x(y", %eax
 	mov	"x)y", %eax
 	mov	"x?y", %eax
+	mov	"x{y", %eax
+	mov	"x{z}", %eax
 
 	call	*"x(y)"
 	call	*%es:"x(y)"
