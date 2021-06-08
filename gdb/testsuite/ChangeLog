@@ -1,5 +1,10 @@
 2021-06-08  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/sect-cmd.exp: Use gdb_test.  Use -wrap "".  Fix
+	test name.
+
+2021-06-08  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/sect-cmd.exp: Fix saw_section_address_line regexp.
 
 2021-06-07  Simon Marchi  <simon.marchi@polymtl.ca>
