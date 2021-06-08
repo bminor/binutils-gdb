@@ -44,10 +44,20 @@ proc spawn_shell {} {
 
     send_gdb "PS1=\"$shell_prompt_ps1\"\n"
 
+    # Try to match:
+    #   PS1="gdb-subshell$ "^M
+    #   $ gdb-subshell$ 
+    # or:
+    #   PS1="gdb-subshell$ "^M
+    #   sh-4.4$ PS1="gdb-subshell$ "^M
+    #   gdb-subshell$ 
     set gotit 0
     set test "spawn shell"
     gdb_expect {
-	-re "PS1=\[^\r\n\]*\r\n.*$shell_prompt_re$" {
+	-re "PS1=\"$shell_prompt_re" {
+	    exp_continue
+	}
+	-re "$shell_prompt_re$" {
 	    pass $test
 	    set gotit 1
 	}
