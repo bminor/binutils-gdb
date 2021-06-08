@@ -11454,6 +11454,7 @@ encode_thumb32_addr_mode (int i, bool is_t, bool is_d)
   X(_asr,   1000, fa40f000),			\
   X(_asrs,  1000, fa50f000),			\
   X(_aut,   0000, f3af802d),			\
+  X(_autg,   0000, fb500f00),			\
   X(_b,     e000, f000b000),			\
   X(_bcond, d000, f0008000),			\
   X(_bf,    0000, f040e001),			\
@@ -26345,6 +26346,7 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & arm_ext_v8_1m_main
  toU("aut",   _aut, 3, (R12, LR, SP), t_pacbti),
+ toU("autg",  _autg, 3, (RR, RR, RR), t_pacbti_nonop),
  ToU("bti",   f3af800f, 0, (), noargs),
  toU("bxaut", _bxaut, 3, (RR, RR, RR), t_pacbti_nonop),
  toU("pac",   _pac,   3, (R12, LR, SP), t_pacbti),

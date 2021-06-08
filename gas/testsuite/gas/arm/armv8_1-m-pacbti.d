@@ -11,4 +11,5 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> f3af 802d 	aut	r12, lr, sp
 0[0-9a-f]+ <[^>]+> f3af 801d 	pac	r12, lr, sp
 0[0-9a-f]+ <[^>]+> fb54 3f15 	bxaut	r3, r4, r5
+0[0-9a-f]+ <[^>]+> fb54 3f05 	autg	r3, r4, r5
 #...
