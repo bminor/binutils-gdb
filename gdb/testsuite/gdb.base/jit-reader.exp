@@ -240,9 +240,7 @@ proc jit_reader_test {} {
 	# the built-in unwinder cannot backtrace through the mangled
 	# stack pointer.
 	gdb_test "bt" \
-	    [multi_line \
-		 "Backtrace stopped: Cannot access memory at address $sp_after_mangling" \
-		] \
+	    "Backtrace stopped: Cannot access memory at address $sp_after_mangling" \
 	    "bt shows error"
 
 	gdb_test "info frame" "Cannot access memory at address.*" \

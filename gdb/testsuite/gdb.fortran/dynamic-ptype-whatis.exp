@@ -73,7 +73,7 @@ gdb_test "whatis var4%t2_array" "type = Type type1, allocatable \\(3\\)"
 gdb_test "whatis var5%t3_array" "type = Type type1 \\(3\\)"
 gdb_test "whatis var6%t4_array" "type = Type type2, allocatable \\(3\\)"
 gdb_test "whatis var7%t5_array" "type = Type type2 \\(4\\)"
-gdb_test "ptype var3%t1_i" [ multi_line "type = integer\\(kind=4\\)" ]
+gdb_test "ptype var3%t1_i" "type = integer\\(kind=4\\)"
 gdb_test "ptype var4%t2_array" [ multi_line "type = Type type1" \
 				     "    integer\\(kind=4\\) :: spacer" \
 				     "    integer\\(kind=4\\) :: t1_i" \

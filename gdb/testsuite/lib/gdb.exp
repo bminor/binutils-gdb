@@ -7294,6 +7294,10 @@ proc capture_command_output { command prefix } {
 # being.
 
 proc multi_line { args } {
+    if { [llength $args] == 1 } {
+	set hint "forgot {*} before list argument?"
+	error "multi_line called with one argument ($hint)"
+    }
     return [join $args "\r\n"]
 }
 

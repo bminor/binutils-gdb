@@ -1,5 +1,12 @@
 2021-06-08  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (multi_line): Require more than one argument.
+	* gdb.base/gdbinit-history.exp: Update multi_line call.
+	* gdb.base/jit-reader.exp: Remove multi_line call.
+	* gdb.fortran/dynamic-ptype-whatis.exp: Same.
+
+2021-06-08  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/info-types.exp.tcl (match_line, gdb_test_lines): Move ...
 	* lib/gdb.exp: ... here.
 	* gdb.base/info-macros.exp: Use gdb_test_lines.
