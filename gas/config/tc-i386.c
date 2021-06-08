@@ -5793,7 +5793,7 @@ optimize_imm (void)
 	       This allows a 16-bit operand such as $0xffe0 to
 	       be recognised as within Imm8S range.  */
 	    if ((i.types[op].bitfield.imm16)
-		&& (i.op[op].imms->X_add_number & ~(offsetT) 0xffff) == 0)
+		&& fits_in_unsigned_word (i.op[op].imms->X_add_number))
 	      {
 		i.op[op].imms->X_add_number = ((i.op[op].imms->X_add_number
 						^ 0x8000) - 0x8000);
@@ -5801,8 +5801,7 @@ optimize_imm (void)
 #ifdef BFD64
 	    /* Store 32-bit immediate in 64-bit for 64-bit BFD.  */
 	    if ((i.types[op].bitfield.imm32)
-		&& ((i.op[op].imms->X_add_number & ~(((offsetT) 2 << 31) - 1))
-		    == 0))
+		&& fits_in_unsigned_long (i.op[op].imms->X_add_number))
 	      {
 		i.op[op].imms->X_add_number = ((i.op[op].imms->X_add_number
 						^ ((offsetT) 1 << 31))

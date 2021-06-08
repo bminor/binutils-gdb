@@ -1,5 +1,10 @@
 2021-06-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (optimize_imm): Use fits_in_unsigned_word
+	and fits_in_unsigned_long.
+
+2021-06-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_disp): Use fits_in_unsigned_word
 	and fits_in_unsigned_long. Combine if()s.
 
