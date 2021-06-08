@@ -1,5 +1,11 @@
 2021-06-08  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/quoted.d, testsuite/gas/i386/wrap32-text.d:
+	Adjust expectations.
+	* testsuite/gas/i386/wrap32-data.d: Likewise. Correct name.
+
+2021-06-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_imm): Use fits_in_unsigned_word
 	and fits_in_unsigned_long.
 
