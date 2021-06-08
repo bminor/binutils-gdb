@@ -41,8 +41,8 @@ srcroot = $(srcdir)/../..
 srcsim = $(srcdir)/..
 
 # Helper code from gnulib.
-GNULIB_BUILDDIR = ../../gnulib
-include $(GNULIB_BUILDDIR)/Makefile.gnulib.inc
+GNULIB_PARENT_DIR = ../..
+include $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@

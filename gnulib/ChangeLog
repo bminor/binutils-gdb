@@ -1,3 +1,10 @@
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.gnulib.inc.in (GNULIB_BUILDDIR): Rename to ...
+	(GNULIB_PARENT_DIR): ... this.
+	(LIBGNU): Add "/gnulib" after $(GNULIB_PARENT_DIR).
+	(INCGNU): Likewise.  Replace .. with $(GNULIB_PARENT_DIR).
+
 2021-06-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add netdb.

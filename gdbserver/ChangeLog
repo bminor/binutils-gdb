@@ -1,3 +1,8 @@
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (GNULIB_BUILDDIR): Rename to ...
+	(GNULIB_PARENT_DIR): ... this.  Remove "gnulib" from value.
+
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Fix some indentation mistakes throughout.
@@ -5712,8 +5717,7 @@
 	* gdbreplay.c: Fix common/ includes.
 	* fork-child.c: Fix common/ includes.
 	* event-loop.c: Fix common/ includes.
-	* ax.c: 
-	(enum gdb_agent_op): Fix common/ includes.
+	* ax.c (enum gdb_agent_op): Fix common/ includes.
 
 2019-01-21  Tom Tromey  <tom@tromey.com>
 
