@@ -1,5 +1,10 @@
 2021-06-08  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.threads/multi-create-ns-info-thr.exp: Limit breakpoint regexp to
+	one line.
+
+2021-06-08  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/sect-cmd.exp: Use gdb_test.  Use -wrap "".  Fix
 	test name.
 
