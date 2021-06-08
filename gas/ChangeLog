@@ -1,3 +1,8 @@
+2021-06-08  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_disp): Drop redundant masking.
+	Re-order.
+
 2021-06-07  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (i386_att_operand): Re-write handling of

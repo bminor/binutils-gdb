@@ -5880,15 +5880,6 @@ optimize_disp (void)
 	  {
 	    offsetT op_disp = i.op[op].disps->X_add_number;
 
-	    if (i.types[op].bitfield.disp16
-		&& (op_disp & ~(offsetT) 0xffff) == 0)
-	      {
-		/* If this operand is at most 16 bits, convert
-		   to a signed 16 bit number and don't use 64bit
-		   displacement.  */
-		op_disp = (((op_disp & 0xffff) ^ 0x8000) - 0x8000);
-		i.types[op].bitfield.disp64 = 0;
-	      }
 	    if (!op_disp && i.types[op].bitfield.baseindex)
 	      {
 		i.types[op].bitfield.disp8 = 0;
@@ -5898,9 +5889,21 @@ optimize_disp (void)
 		i.types[op].bitfield.disp64 = 0;
 		i.op[op].disps = 0;
 		i.disp_operands--;
+		continue;
 	      }
+
+	    if (i.types[op].bitfield.disp16
+		&& (op_disp & ~(offsetT) 0xffff) == 0)
+	      {
+		/* If this operand is at most 16 bits, convert
+		   to a signed 16 bit number and don't use 64bit
+		   displacement.  */
+		op_disp = ((op_disp ^ 0x8000) - 0x8000);
+		i.types[op].bitfield.disp64 = 0;
+	      }
+
 #ifdef BFD64
-	    else if (flag_code == CODE_64BIT)
+	    if (flag_code == CODE_64BIT)
 	      {
 		if (want_disp32 (current_templates->start)
 		    && fits_in_unsigned_long (op_disp))
@@ -5913,7 +5916,6 @@ optimize_disp (void)
 		    /* If this operand is at most 32 bits, convert
 		       to a signed 32 bit number and don't use 64bit
 		       displacement.  */
-		    op_disp &= (((offsetT) 2 << 31) - 1);
 		    op_disp = (op_disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
 		    i.types[op].bitfield.disp64 = 0;
 		  }
