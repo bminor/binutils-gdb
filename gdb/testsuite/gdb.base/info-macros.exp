@@ -273,6 +273,6 @@ gdb_test_multiple_with_read1_timeout_factor 10 "$test" $testname {
 
 set test "info macros info-macros.c:42"
 
-set r1 ".*define DEF_MACROS"
-set r2 ".*define ONE"
-gdb_test "$test" "$r1$r2.*"
+set r1 "#define DEF_MACROS"
+set r2 "#define ONE"
+gdb_test_lines "$test" "" [list $r1 "--any" $r2]

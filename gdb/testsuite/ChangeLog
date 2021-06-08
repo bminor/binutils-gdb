@@ -1,5 +1,11 @@
 2021-06-08  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/info-types.exp.tcl (match_line, gdb_test_lines): Move ...
+	* lib/gdb.exp: ... here.
+	* gdb.base/info-macros.exp: Use gdb_test_lines.
+
+2021-06-08  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/info-types.exp.tcl (match_line): Handle --any.
 	(gdb_test_lines): Factor out of ...
 	(run_test): ... here.
