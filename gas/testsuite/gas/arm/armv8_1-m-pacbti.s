@@ -8,3 +8,4 @@
 	pac	r12, lr, sp
 	bxaut	r3, r4, r5
 	autg	r3, r4, r5
+	pacg	r3, r4, r5
