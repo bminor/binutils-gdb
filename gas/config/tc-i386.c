@@ -5893,7 +5893,7 @@ optimize_disp (void)
 	      }
 
 	    if (i.types[op].bitfield.disp16
-		&& (op_disp & ~(offsetT) 0xffff) == 0)
+		&& fits_in_unsigned_word (op_disp))
 	      {
 		/* If this operand is at most 16 bits, convert
 		   to a signed 16 bit number and don't use 64bit
@@ -5905,19 +5905,17 @@ optimize_disp (void)
 #ifdef BFD64
 	    if (flag_code == CODE_64BIT)
 	      {
-		if (want_disp32 (current_templates->start)
-		    && fits_in_unsigned_long (op_disp))
-		  i.types[op].bitfield.disp32 = 1;
-
 		/* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
-		if (i.types[op].bitfield.disp32
-		    && (op_disp & ~(((offsetT) 2 << 31) - 1)) == 0)
+		if ((i.types[op].bitfield.disp32
+		     || want_disp32 (current_templates->start))
+		    && fits_in_unsigned_long (op_disp))
 		  {
 		    /* If this operand is at most 32 bits, convert
 		       to a signed 32 bit number and don't use 64bit
 		       displacement.  */
 		    op_disp = (op_disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
 		    i.types[op].bitfield.disp64 = 0;
+		    i.types[op].bitfield.disp32 = 1;
 		  }
 
 		if (fits_in_signed_long (op_disp))
