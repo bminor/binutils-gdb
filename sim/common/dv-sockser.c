@@ -37,6 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <sys/time.h>
 #include <sys/types.h>
 
+#include "nonblocking.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-options.h"
@@ -253,17 +255,13 @@ connected_p (SIM_DESC sd)
     return 0;
 
   /* Set non-blocking i/o.  */
-#if defined(F_GETFL) && defined(O_NONBLOCK)
-  flags = fcntl (sockser_fd, F_GETFL);
-  flags |= O_NONBLOCK;
-  if (fcntl (sockser_fd, F_SETFL, flags) == -1)
+  if (set_nonblocking_flag (sockser_fd, true))
     {
       sim_io_eprintf (sd, "unable to set nonblocking i/o");
       close (sockser_fd);
       sockser_fd = -1;
       return 0;
     }
-#endif
   return 1;
 }
 

@@ -35,6 +35,8 @@
 #include <linux/if_tun.h>
 #endif
 
+#include "nonblocking.h"
+
 #ifdef HAVE_LINUX_IF_TUN_H
 # define WITH_TUN 1
 #else
@@ -567,8 +569,7 @@ bfin_emac_tap_init (struct hw *me)
       return;
     }
 
-  flags = fcntl (emac->tap, F_GETFL);
-  fcntl (emac->tap, F_SETFL, flags | O_NONBLOCK);
+  set_nonblocking_flag (emac->tap, true);
 #endif
 }
 

@@ -26,6 +26,8 @@
 
 #include <signal.h>
 
+#include "nonblocking.h"
+
 #include "psim.h"
 #include "options.h"
 #include "device.h" /* FIXME: psim should provide the interface */
@@ -41,11 +43,6 @@
 #include <errno.h>
 
 #include "environ.h"
-
-#if !defined(O_NONBLOCK) || !defined(F_GETFL) || !defined(F_SETFL)
-#undef WITH_STDIO
-#define WITH_STDIO DO_USE_STDIO
-#endif
 
 
 static psim *simulation = NULL;
@@ -150,22 +147,19 @@ sim_io_read_stdin(char *buf,
     return sim_io_eof;
     break;
   case DONT_USE_STDIO:
-#if defined(O_NONBLOCK) && defined(F_GETFL) && defined(F_SETFL)
     {
       /* check for input */
-      int flags;
       int status;
       int nr_read;
       int result;
       /* get the old status */
-      flags = fcntl(0, F_GETFL, 0);
-      if (flags == -1) {
+      status = get_nonblocking_flag (0);
+      if (status == -1) {
 	perror("sim_io_read_stdin");
 	return sim_io_eof;
       }
       /* temp, disable blocking IO */
-      status = fcntl(0, F_SETFL, flags | O_NONBLOCK);
-      if (status == -1) {
+      if (status == 0 && set_nonblocking_flag (0, true) == -1) {
 	perror("sim_io_read_stdin");
 	return sim_io_eof;
       }
@@ -183,15 +177,13 @@ sim_io_read_stdin(char *buf,
 	  result = sim_io_eof;
       }
       /* return to regular vewing */
-      status = fcntl(0, F_SETFL, flags);
-      if (status == -1) {
+      if (status == 0 && set_nonblocking_flag (0, false) == -1) {
 	perror("sim_io_read_stdin");
 	return sim_io_eof;
       }
       return result;
     }
     break;
-#endif
   default:
     error("sim_io_read_stdin: invalid switch\n");
     break;

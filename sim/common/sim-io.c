@@ -33,6 +33,8 @@
 
 #undef open
 
+#include "nonblocking.h"
+
 #include "sim-main.h"
 #include "sim-io.h"
 #include "sim/callback.h"
@@ -347,23 +349,20 @@ sim_io_poll_read (SIM_DESC sd,
 		  char *buf,
 		  int sizeof_buf)
 {
-#if defined(O_NONBLOCK) && defined(F_GETFL) && defined(F_SETFL)
   int fd = STATE_CALLBACK (sd)->fdmap[sim_io_fd];
-  int flags;
   int status;
   int nr_read;
   int result;
   STATE_CALLBACK (sd)->last_errno = 0;
   /* get the old status */
-  flags = fcntl (fd, F_GETFL, 0);
-  if (flags == -1)
+  status = get_nonblocking_flag (fd);
+  if (status == -1)
     {
-      perror ("sim_io_poll_read");
+      perror ("sim_io_read_stdin");
       return 0;
     }
   /* temp, disable blocking IO */
-  status = fcntl (fd, F_SETFL, flags | O_NONBLOCK);
-  if (status == -1)
+  if (status == 0 && set_nonblocking_flag (fd, true) == -1)
     {
       perror ("sim_io_read_stdin");
       return 0;
@@ -381,16 +380,12 @@ sim_io_poll_read (SIM_DESC sd,
       STATE_CALLBACK (sd)->last_errno = errno;
     }
   /* return to regular vewing */
-  status = fcntl (fd, F_SETFL, flags);
-  if (status == -1)
+  if (status == 0 && set_nonblocking_flag (fd, false) == -1)
     {
       perror ("sim_io_read_stdin");
       /* return 0; */
     }
   return result;
-#else
-  return sim_io_read (sd, sim_io_fd, buf, sizeof_buf);
-#endif
 }
 
 int
