@@ -522,6 +522,10 @@ public:
      architecture/description.  */
   bool needs_setup = false;
 
+  /* True when we are reading the library list of the inferior during an
+     attach or handling a fork child.  */
+  bool in_initial_library_scan = false;
+
   /* Private data used by the target vector implementation.  */
   std::unique_ptr<private_inferior> priv;
 

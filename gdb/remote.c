@@ -14522,8 +14522,26 @@ remote_new_objfile (struct objfile *objfile)
 {
   remote_target *remote = get_current_remote_target ();
 
-  if (remote != NULL)			/* Have a remote connection.  */
-    remote->remote_check_symbols ();
+  /* First, check whether the current inferior's process target is a remote
+     target.  */
+  if (remote == nullptr)
+    return;
+
+  /* When we are attaching or handling a fork child and the shared library
+     subsystem reads the list of loaded libraries, we receive new objfile
+     events in between each found library.  The libraries are read in an
+     undefined order, so if we gave the remote side a chance to look up
+     symbols between each objfile, we might give it an inconsistent picture
+     of the inferior.  It could appear that a library A appears loaded but
+     a library B does not, even though library A requires library B.  That
+     would present a state that couldn't normally exist in the inferior.
+
+     So, skip these events, we'll give the remote a chance to look up symbols
+     once all the loaded libraries and their symbols are known to GDB.  */
+    if (current_inferior ()->in_initial_library_scan)
+      return;
+
+  remote->remote_check_symbols ();
 }
 
 /* Pull all the tracepoints defined on the target and create local

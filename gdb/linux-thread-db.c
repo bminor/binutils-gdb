@@ -1012,8 +1012,17 @@ try_thread_db_load (const char *library, bool check_auto_load_safe)
   if (strchr (library, '/') != NULL)
     info->filename = gdb_realpath (library).release ();
 
-  if (try_thread_db_load_1 (info))
-    return true;
+  try
+    {
+      if (try_thread_db_load_1 (info))
+	return true;
+    }
+  catch (const gdb_exception_error &except)
+    {
+      if (libthread_db_debug)
+	exception_fprintf (gdb_stdlog, except,
+			   "Warning: While trying to load libthread_db: ");
+    }
 
   /* This library "refused" to work on current inferior.  */
   delete_thread_db_info (current_inferior ()->process_target (),
@@ -1184,10 +1193,15 @@ has_libpthread (void)
 static bool
 thread_db_load (void)
 {
-  struct thread_db_info *info;
+  inferior *inf = current_inferior ();
 
-  info = get_thread_db_info (current_inferior ()->process_target (),
-			     inferior_ptid.pid ());
+  /* When attaching / handling fork child, don't try loading libthread_db
+     until we know about all shared libraries.  */
+  if (inf->in_initial_library_scan)
+    return false;
+
+  thread_db_info *info = get_thread_db_info (inf->process_target (),
+					     inferior_ptid.pid ());
 
   if (info != NULL)
     return true;

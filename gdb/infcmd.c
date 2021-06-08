@@ -315,6 +315,10 @@ post_create_inferior (int from_tty)
       const unsigned solib_add_generation
 	= current_program_space->solib_add_generation;
 
+      scoped_restore restore_in_initial_library_scan
+	= make_scoped_restore (&current_inferior ()->in_initial_library_scan,
+			       true);
+
       /* Create the hooks to handle shared library load and unload
 	 events.  */
       solib_create_inferior_hook (from_tty);

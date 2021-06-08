@@ -1,3 +1,15 @@
+2021-06-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inferior.h (class inferior) <in_initial_library_scan>: New.
+	* infcmd.c (post_create_inferior): Set in_initial_library_scan.
+	* infrun.c (follow_fork_inferior): Likewise.
+	* linux-thread-db.c (try_thread_db_load): Catch exception thrown
+	by try_thread_db_load_1
+	(thread_db_load): Return early if in_initial_library_scan is
+	set.
+	* remote.c (remote_new_objfile): Return early if
+	in_initial_library_scan is set.
+
 2021-06-07  Pedro Alves  <pedro@palves.net>
 
 	* dwarf2/read.c (struct partial_die_info): Add defaulted copy

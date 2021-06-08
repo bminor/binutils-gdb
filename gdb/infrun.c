@@ -521,6 +521,9 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 		 breakpoint.  If a "cloned-VM" event was propagated
 		 better throughout the core, this wouldn't be
 		 required.  */
+	      scoped_restore restore_in_initial_library_scan
+		= make_scoped_restore (&child_inf->in_initial_library_scan,
+				       true);
 	      solib_create_inferior_hook (0);
 	    }
 	}
@@ -656,6 +659,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	     shared libraries, and install the solib event breakpoint.
 	     If a "cloned-VM" event was propagated better throughout
 	     the core, this wouldn't be required.  */
+	  scoped_restore restore_in_initial_library_scan
+	    = make_scoped_restore (&child_inf->in_initial_library_scan, true);
 	  solib_create_inferior_hook (0);
 	}
 
