@@ -82,3 +82,11 @@ start:
 	lea	(,1), %rax
 	lea	(,1), %eax
 	lea	(,1), %ax
+
+	lea	0xffffffff(%ecx), %eax
+	lea	0xffffffff(%ecx), %rax
+	lea	0xffffffff(%rcx), %eax
+
+	lea	-0xffffffff(%ecx), %eax
+	lea	-0xffffffff(%ecx), %rax
+	lea	-0xffffffff(%rcx), %eax

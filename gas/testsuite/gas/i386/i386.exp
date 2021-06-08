@@ -69,6 +69,7 @@ if [gas_32_check] then {
     run_dump_test "prefix"
     run_list_test "prefix32" "-al"
     run_dump_test "lea"
+    run_dump_test "lea16"
     run_dump_test "amd"
     run_dump_test "katmai"
     run_dump_test "jump"
