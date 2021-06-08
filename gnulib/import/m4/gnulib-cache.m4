@@ -68,6 +68,7 @@
 #  mkdtemp \
 #  mkostemp \
 #  netdb \
+#  nonblocking \
 #  pathmax \
 #  rawmemchr \
 #  readlink \
@@ -123,6 +124,7 @@ gl_MODULES([
   mkdtemp
   mkostemp
   netdb
+  nonblocking
   pathmax
   rawmemchr
   readlink

@@ -125,6 +125,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module intprops:
   # Code from module inttypes:
   # Code from module inttypes-incomplete:
+  # Code from module ioctl:
   # Code from module isblank:
   # Code from module isnand-nolibm:
   # Code from module isnanl-nolibm:
@@ -160,6 +161,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module netdb:
   # Code from module netinet_in:
   # Code from module nocrash:
+  # Code from module nonblocking:
   # Code from module open:
   # Code from module openat:
   # Code from module openat-die:
@@ -213,6 +215,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module strstr:
   # Code from module strstr-simple:
   # Code from module strtok_r:
+  # Code from module sys_ioctl:
   # Code from module sys_random:
   # Code from module sys_select:
   # Code from module sys_socket:
@@ -517,6 +520,10 @@ AC_DEFUN([gl_INIT],
   gl_INTTYPES_INCOMPLETE
   gl_INTTYPES_H_REQUIRE_DEFAULTS
   AC_PROG_MKDIR_P
+  gl_FUNC_IOCTL
+  gl_CONDITIONAL([GL_COND_OBJ_IOCTL],
+                 [test $HAVE_IOCTL = 0 || test $REPLACE_IOCTL = 1])
+  gl_SYS_IOCTL_MODULE_INDICATOR([ioctl])
   gl_FUNC_ISBLANK
   gl_CONDITIONAL([GL_COND_OBJ_ISBLANK], [test $HAVE_ISBLANK = 0])
   gl_MODULE_INDICATOR([isblank])
@@ -655,6 +662,17 @@ AC_DEFUN([gl_INIT],
   gl_HEADER_NETINET_IN
   gl_CONDITIONAL_HEADER([netinet/in.h])
   AC_PROG_MKDIR_P
+  gl_NONBLOCKING_IO
+  gl_FCNTL_MODULE_INDICATOR([nonblocking])
+  dnl Define the C macro GNULIB_NONBLOCKING to 1.
+  gl_MODULE_INDICATOR([nonblocking])
+  dnl Define the substituted variable GNULIB_STDIO_H_NONBLOCKING to 1.
+  gl_STDIO_H_REQUIRE_DEFAULTS
+  AC_REQUIRE([gl_ASM_SYMBOL_PREFIX])
+  gl_MODULE_INDICATOR_INIT_VARIABLE([GNULIB_STDIO_H_NONBLOCKING], [1])
+  dnl Define the substituted variable GNULIB_UNISTD_H_NONBLOCKING to 1.
+  gl_UNISTD_H_REQUIRE_DEFAULTS
+  gl_MODULE_INDICATOR_INIT_VARIABLE([GNULIB_UNISTD_H_NONBLOCKING], [1])
   gl_FUNC_OPEN
   gl_CONDITIONAL([GL_COND_OBJ_OPEN], [test $REPLACE_OPEN = 1])
   AM_COND_IF([GL_COND_OBJ_OPEN], [
@@ -866,6 +884,9 @@ AC_DEFUN([gl_INIT],
     gl_PREREQ_STRTOK_R
   ])
   gl_STRING_MODULE_INDICATOR([strtok_r])
+  gl_SYS_IOCTL_H
+  gl_SYS_IOCTL_H_REQUIRE_DEFAULTS
+  AC_PROG_MKDIR_P
   gl_SYS_RANDOM_H
   gl_SYS_RANDOM_H_REQUIRE_DEFAULTS
   AC_PROG_MKDIR_P
@@ -1210,6 +1231,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/inet_ntop.c
   lib/intprops.h
   lib/inttypes.in.h
+  lib/ioctl.c
   lib/isblank.c
   lib/isnan.c
   lib/isnand-nolibm.h
@@ -1262,6 +1284,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/msvc-nothrow.h
   lib/netdb.in.h
   lib/netinet_in.in.h
+  lib/nonblocking.c
+  lib/nonblocking.h
   lib/open.c
   lib/openat-die.c
   lib/openat-priv.h
@@ -1324,6 +1348,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strnlen1.h
   lib/strstr.c
   lib/strtok_r.c
+  lib/sys_ioctl.in.h
   lib/sys_random.in.h
   lib/sys_select.in.h
   lib/sys_socket.c
@@ -1366,6 +1391,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/absolute-header.m4
   m4/alloca.m4
   m4/arpa_inet_h.m4
+  m4/asm-underscore.m4
   m4/btowc.m4
   m4/builtin-expect.m4
   m4/canonicalize.m4
@@ -1426,6 +1452,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/include_next.m4
   m4/inet_ntop.m4
   m4/inttypes.m4
+  m4/ioctl.m4
   m4/isblank.m4
   m4/isnand.m4
   m4/isnanl.m4
@@ -1462,6 +1489,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/netdb_h.m4
   m4/netinet_in_h.m4
   m4/nocrash.m4
+  m4/nonblocking.m4
   m4/off_t.m4
   m4/open-cloexec.m4
   m4/open-slash.m4
@@ -1507,6 +1535,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/strnlen.m4
   m4/strstr.m4
   m4/strtok_r.m4
+  m4/sys_ioctl_h.m4
   m4/sys_random_h.m4
   m4/sys_select_h.m4
   m4/sys_socket_h.m4

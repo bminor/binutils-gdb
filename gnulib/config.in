@@ -124,6 +124,10 @@
 #undef GNULIB_MSVC_NOTHROW
 
 /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+   whether the gnulib module nonblocking shall be considered present. */
+#undef GNULIB_NONBLOCKING
+
+/* Define to a C preprocessor expression that evaluates to 1 or 0, depending
    whether the gnulib module openat shall be considered present. */
 #undef GNULIB_OPENAT
 
@@ -271,6 +275,9 @@
 /* Define to 1 when the gnulib module glob should be tested. */
 #undef GNULIB_TEST_GLOB
 
+/* Define to 1 when the gnulib module ioctl should be tested. */
+#undef GNULIB_TEST_IOCTL
+
 /* Define to 1 when the gnulib module listen should be tested. */
 #undef GNULIB_TEST_LISTEN
 
@@ -312,6 +319,9 @@
 
 /* Define to 1 when the gnulib module mkostemp should be tested. */
 #undef GNULIB_TEST_MKOSTEMP
+
+/* Define to 1 when the gnulib module nonblocking should be tested. */
+#undef GNULIB_TEST_NONBLOCKING
 
 /* Define to 1 when the gnulib module open should be tested. */
 #undef GNULIB_TEST_OPEN
@@ -707,6 +717,9 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `ioctl' function. */
+#undef HAVE_IOCTL
+
 /* Define to 1 if <sys/socket.h> defines AF_INET. */
 #undef HAVE_IPV4
 
@@ -952,6 +965,9 @@
 
 /* Define to 1 if you have the <sys/inttypes.h> header file. */
 #undef HAVE_SYS_INTTYPES_H
+
+/* Define to 1 if you have the <sys/ioctl.h> header file. */
+#undef HAVE_SYS_IOCTL_H
 
 /* Define to 1 if you have the <sys/mman.h> header file. */
 #undef HAVE_SYS_MMAN_H
@@ -1335,6 +1351,10 @@
 /* Define to 1 if the type of the st_atim member of a struct stat is struct
    timespec. */
 #undef TYPEOF_STRUCT_STAT_ST_ATIM_IS_STRUCT_TIMESPEC
+
+/* Define to the prefix of C symbols at the assembler and linker level, either
+   an underscore or empty. */
+#undef USER_LABEL_PREFIX
 
 /* Define if the combination of the ISO C and POSIX multithreading APIs can be
    used. */

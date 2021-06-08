@@ -112,6 +112,7 @@ am__aclocal_m4_deps = $(top_srcdir)/import/m4/00gnulib.m4 \
 	$(top_srcdir)/import/m4/absolute-header.m4 \
 	$(top_srcdir)/import/m4/alloca.m4 \
 	$(top_srcdir)/import/m4/arpa_inet_h.m4 \
+	$(top_srcdir)/import/m4/asm-underscore.m4 \
 	$(top_srcdir)/import/m4/btowc.m4 \
 	$(top_srcdir)/import/m4/builtin-expect.m4 \
 	$(top_srcdir)/import/m4/canonicalize.m4 \
@@ -171,6 +172,7 @@ am__aclocal_m4_deps = $(top_srcdir)/import/m4/00gnulib.m4 \
 	$(top_srcdir)/import/m4/include_next.m4 \
 	$(top_srcdir)/import/m4/inet_ntop.m4 \
 	$(top_srcdir)/import/m4/inttypes.m4 \
+	$(top_srcdir)/import/m4/ioctl.m4 \
 	$(top_srcdir)/import/m4/isblank.m4 \
 	$(top_srcdir)/import/m4/isnand.m4 \
 	$(top_srcdir)/import/m4/isnanl.m4 \
@@ -207,6 +209,7 @@ am__aclocal_m4_deps = $(top_srcdir)/import/m4/00gnulib.m4 \
 	$(top_srcdir)/import/m4/netdb_h.m4 \
 	$(top_srcdir)/import/m4/netinet_in_h.m4 \
 	$(top_srcdir)/import/m4/nocrash.m4 \
+	$(top_srcdir)/import/m4/nonblocking.m4 \
 	$(top_srcdir)/import/m4/off_t.m4 \
 	$(top_srcdir)/import/m4/open-cloexec.m4 \
 	$(top_srcdir)/import/m4/open-slash.m4 \
@@ -252,6 +255,7 @@ am__aclocal_m4_deps = $(top_srcdir)/import/m4/00gnulib.m4 \
 	$(top_srcdir)/import/m4/strnlen.m4 \
 	$(top_srcdir)/import/m4/strstr.m4 \
 	$(top_srcdir)/import/m4/strtok_r.m4 \
+	$(top_srcdir)/import/m4/sys_ioctl_h.m4 \
 	$(top_srcdir)/import/m4/sys_random_h.m4 \
 	$(top_srcdir)/import/m4/sys_select_h.m4 \
 	$(top_srcdir)/import/m4/sys_socket_h.m4 \
@@ -357,6 +361,7 @@ AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 APPLE_UNIVERSAL_BUILD = @APPLE_UNIVERSAL_BUILD@
 AR = @AR@
 ARFLAGS = @ARFLAGS@
+ASM_SYMBOL_PREFIX = @ASM_SYMBOL_PREFIX@
 AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
@@ -546,6 +551,7 @@ GL_GNULIB_IMAXABS = @GL_GNULIB_IMAXABS@
 GL_GNULIB_IMAXDIV = @GL_GNULIB_IMAXDIV@
 GL_GNULIB_INET_NTOP = @GL_GNULIB_INET_NTOP@
 GL_GNULIB_INET_PTON = @GL_GNULIB_INET_PTON@
+GL_GNULIB_IOCTL = @GL_GNULIB_IOCTL@
 GL_GNULIB_ISATTY = @GL_GNULIB_ISATTY@
 GL_GNULIB_ISBLANK = @GL_GNULIB_ISBLANK@
 GL_GNULIB_ISFINITE = @GL_GNULIB_ISFINITE@
@@ -1183,6 +1189,7 @@ HAVE_SYMLINK = @HAVE_SYMLINK@
 HAVE_SYMLINKAT = @HAVE_SYMLINKAT@
 HAVE_SYS_BITYPES_H = @HAVE_SYS_BITYPES_H@
 HAVE_SYS_INTTYPES_H = @HAVE_SYS_INTTYPES_H@
+HAVE_SYS_IOCTL_H = @HAVE_SYS_IOCTL_H@
 HAVE_SYS_LOADAVG_H = @HAVE_SYS_LOADAVG_H@
 HAVE_SYS_PARAM_H = @HAVE_SYS_PARAM_H@
 HAVE_SYS_RANDOM_H = @HAVE_SYS_RANDOM_H@
@@ -1320,6 +1327,7 @@ NEXT_AS_FIRST_DIRECTIVE_STDIO_H = @NEXT_AS_FIRST_DIRECTIVE_STDIO_H@
 NEXT_AS_FIRST_DIRECTIVE_STDLIB_H = @NEXT_AS_FIRST_DIRECTIVE_STDLIB_H@
 NEXT_AS_FIRST_DIRECTIVE_STRINGS_H = @NEXT_AS_FIRST_DIRECTIVE_STRINGS_H@
 NEXT_AS_FIRST_DIRECTIVE_STRING_H = @NEXT_AS_FIRST_DIRECTIVE_STRING_H@
+NEXT_AS_FIRST_DIRECTIVE_SYS_IOCTL_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_IOCTL_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_RANDOM_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_RANDOM_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_SELECT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_SELECT_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_SOCKET_H@
@@ -1352,6 +1360,7 @@ NEXT_STDIO_H = @NEXT_STDIO_H@
 NEXT_STDLIB_H = @NEXT_STDLIB_H@
 NEXT_STRINGS_H = @NEXT_STRINGS_H@
 NEXT_STRING_H = @NEXT_STRING_H@
+NEXT_SYS_IOCTL_H = @NEXT_SYS_IOCTL_H@
 NEXT_SYS_RANDOM_H = @NEXT_SYS_RANDOM_H@
 NEXT_SYS_SELECT_H = @NEXT_SYS_SELECT_H@
 NEXT_SYS_SOCKET_H = @NEXT_SYS_SOCKET_H@
@@ -1486,6 +1495,7 @@ REPLACE_ILOGBL = @REPLACE_ILOGBL@
 REPLACE_INET_NTOP = @REPLACE_INET_NTOP@
 REPLACE_INET_PTON = @REPLACE_INET_PTON@
 REPLACE_INITSTATE = @REPLACE_INITSTATE@
+REPLACE_IOCTL = @REPLACE_IOCTL@
 REPLACE_ISATTY = @REPLACE_ISATTY@
 REPLACE_ISFINITE = @REPLACE_ISFINITE@
 REPLACE_ISINF = @REPLACE_ISINF@
@@ -1664,6 +1674,8 @@ STDBOOL_H = @STDBOOL_H@
 STDDEF_H = @STDDEF_H@
 STDINT_H = @STDINT_H@
 STRIP = @STRIP@
+SYS_IOCTL_H_HAVE_WINSOCK2_H = @SYS_IOCTL_H_HAVE_WINSOCK2_H@
+SYS_IOCTL_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS = @SYS_IOCTL_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS@
 SYS_TIME_H_DEFINES_STRUCT_TIMESPEC = @SYS_TIME_H_DEFINES_STRUCT_TIMESPEC@
 TIME_H_DEFINES_STRUCT_TIMESPEC = @TIME_H_DEFINES_STRUCT_TIMESPEC@
 TIME_H_DEFINES_TIME_UTC = @TIME_H_DEFINES_TIME_UTC@

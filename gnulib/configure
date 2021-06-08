@@ -769,6 +769,9 @@ NEXT_SYS_TYPES_H
 HAVE_SYS_RANDOM_H
 NEXT_AS_FIRST_DIRECTIVE_SYS_RANDOM_H
 NEXT_SYS_RANDOM_H
+NEXT_AS_FIRST_DIRECTIVE_SYS_IOCTL_H
+NEXT_SYS_IOCTL_H
+HAVE_SYS_IOCTL_H
 GL_COND_OBJ_STRTOK_R_FALSE
 GL_COND_OBJ_STRTOK_R_TRUE
 GL_COND_OBJ_STRNLEN_FALSE
@@ -867,6 +870,7 @@ GL_COND_OBJ_OPENAT_FALSE
 GL_COND_OBJ_OPENAT_TRUE
 GL_COND_OBJ_OPEN_FALSE
 GL_COND_OBJ_OPEN_TRUE
+ASM_SYMBOL_PREFIX
 GL_GENERATE_NETINET_IN_H_FALSE
 GL_GENERATE_NETINET_IN_H_TRUE
 NETINET_IN_H
@@ -1038,6 +1042,9 @@ GL_GENERATE_LIMITS_H_TRUE
 LIMITS_H
 GL_COND_OBJ_ISBLANK_FALSE
 GL_COND_OBJ_ISBLANK_TRUE
+GL_GNULIB_IOCTL
+GL_COND_OBJ_IOCTL_FALSE
+GL_COND_OBJ_IOCTL_TRUE
 GL_GNULIB_STRTOUMAX
 GL_GNULIB_STRTOIMAX
 GL_GNULIB_IMAXDIV
@@ -2032,6 +2039,9 @@ GL_GNULIB_SOCKET
 GL_COND_OBJ_ACCEPT_FALSE
 GL_COND_OBJ_ACCEPT_TRUE
 HAVE_WINSOCK2_H
+REPLACE_IOCTL
+SYS_IOCTL_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS
+SYS_IOCTL_H_HAVE_WINSOCK2_H
 UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS
 UNISTD_H_HAVE_WINSOCK2_H
 UNISTD_H_HAVE_SYS_RANDOM_H
@@ -3997,6 +4007,7 @@ as_fn_append ac_func_list " __xpg_strerror_r"
 as_fn_append ac_func_list " catgets"
 as_fn_append ac_func_list " snprintf"
 as_fn_append ac_header_list " strings.h"
+as_fn_append ac_header_list " sys/ioctl.h"
 as_fn_append ac_header_list " sys/random.h"
 as_fn_append ac_header_list " sys/uio.h"
 as_fn_append ac_header_list " sys/wait.h"
@@ -7103,6 +7114,7 @@ fi
   # Code from module intprops:
   # Code from module inttypes:
   # Code from module inttypes-incomplete:
+  # Code from module ioctl:
   # Code from module isblank:
   # Code from module isnand-nolibm:
   # Code from module isnanl-nolibm:
@@ -7138,6 +7150,7 @@ fi
   # Code from module netdb:
   # Code from module netinet_in:
   # Code from module nocrash:
+  # Code from module nonblocking:
   # Code from module open:
   # Code from module openat:
   # Code from module openat-die:
@@ -7191,6 +7204,7 @@ fi
   # Code from module strstr:
   # Code from module strstr-simple:
   # Code from module strtok_r:
+  # Code from module sys_ioctl:
   # Code from module sys_random:
   # Code from module sys_select:
   # Code from module sys_socket:
@@ -7526,6 +7540,12 @@ $as_echo "$gl_cv_source_line_length_unlimited" >&6; }
   UNISTD_H_HAVE_WINSOCK2_H=0;
   UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS=0;
 
+
+
+    SYS_IOCTL_H_HAVE_WINSOCK2_H=0;
+  SYS_IOCTL_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS=0;
+
+  REPLACE_IOCTL=0;
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for C/C++ restrict keyword" >&5
 $as_echo_n "checking for C/C++ restrict keyword... " >&6; }
@@ -13813,8 +13833,8 @@ rm -f core conftest.err conftest.$ac_objext \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:13816: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:13817: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:13836: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:13837: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -13839,7 +13859,7 @@ rm -f conftest*
 
           ;;
       esac
-      echo "$as_me:13842: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:13862: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -13993,7 +14013,7 @@ fi
 
         fi
       fi
-      echo "$as_me:13996: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:14016: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 $as_echo_n "checking whether POSIX threads API is available... " >&6; }
@@ -15854,6 +15874,12 @@ $as_echo "$gl_cv_test_UINT64_MAX_EQ_ULONG_MAX" >&6; }
 
 
 
+  GL_GNULIB_IOCTL=0
+
+
+
+
+
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find the exponent in a 'double'" >&5
 $as_echo_n "checking where to find the exponent in a 'double'... " >&6; }
@@ -17070,8 +17096,8 @@ rm -f core conftest.err conftest.$ac_objext \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:17073: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:17074: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:17099: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:17100: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -17096,7 +17122,7 @@ rm -f conftest*
 
           ;;
       esac
-      echo "$as_me:17099: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:17125: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -17250,7 +17276,7 @@ fi
 
         fi
       fi
-      echo "$as_me:17253: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:17279: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 $as_echo_n "checking whether POSIX threads API is available... " >&6; }
@@ -17476,8 +17502,8 @@ rm -f core conftest.err conftest.$ac_objext \
         LIBS=$save_LIBS
         test $gl_pthread_api = yes && break
       done
-      echo "$as_me:17479: gl_pthread_api=$gl_pthread_api" >&5
-      echo "$as_me:17480: LIBPTHREAD=$LIBPTHREAD" >&5
+      echo "$as_me:17505: gl_pthread_api=$gl_pthread_api" >&5
+      echo "$as_me:17506: LIBPTHREAD=$LIBPTHREAD" >&5
 
       gl_pthread_in_glibc=no
       # On Linux with glibc >= 2.34, libc contains the fully functional
@@ -17502,7 +17528,7 @@ rm -f conftest*
 
           ;;
       esac
-      echo "$as_me:17505: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
+      echo "$as_me:17531: gl_pthread_in_glibc=$gl_pthread_in_glibc" >&5
 
       # Test for libpthread by looking for pthread_kill. (Not pthread_self,
       # since it is defined as a macro on OSF/1.)
@@ -17656,7 +17682,7 @@ fi
 
         fi
       fi
-      echo "$as_me:17659: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
+      echo "$as_me:17685: LIBPMULTITHREAD=$LIBPMULTITHREAD" >&5
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether POSIX threads API is available" >&5
 $as_echo_n "checking whether POSIX threads API is available... " >&6; }
@@ -19377,6 +19403,97 @@ $as_echo "$gl_cv_next_netdb_h" >&6; }
 
 
 
+
+  case "$host_os" in
+    mingw*) gl_cv_have_nonblocking=no ;;
+    *)      gl_cv_have_nonblocking=yes ;;
+  esac
+  case "$host_os" in
+    mingw*) gl_cv_have_open_O_NONBLOCK=no ;;
+    *)      gl_cv_have_open_O_NONBLOCK=yes ;;
+  esac
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#ifdef _MSC_VER
+MicrosoftCompiler
+#endif
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  $EGREP "MicrosoftCompiler" >/dev/null 2>&1; then :
+            rm -f conftest*
+     echo 'int dummy;' > conftest.c
+     { ac_try='${CC-cc} $CFLAGS $CPPFLAGS -c conftest.c'
+  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; } >/dev/null 2>&1
+     if test -f conftest.o; then
+       gl_asmext='s'
+       gl_c_asm_opt='-S'
+     else
+       gl_asmext='asm'
+       gl_c_asm_opt='-c -Fa'
+     fi
+     rm -f conftest*
+
+else
+  gl_asmext='s'
+     gl_c_asm_opt='-S'
+
+fi
+rm -f conftest*
+
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C symbols are prefixed with underscore at the linker level" >&5
+$as_echo_n "checking whether C symbols are prefixed with underscore at the linker level... " >&6; }
+if ${gl_cv_prog_as_underscore+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat > conftest.c <<EOF
+#ifdef __cplusplus
+extern "C" int foo (void);
+#endif
+int foo(void) { return 0; }
+EOF
+     # Look for the assembly language name in the .s file.
+     { ac_try='${CC-cc} $CFLAGS $CPPFLAGS $gl_c_asm_opt conftest.c'
+  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; } >/dev/null 2>&1
+     if LC_ALL=C $EGREP '(^|[^a-zA-Z0-9_])_foo([^a-zA-Z0-9_]|$)' conftest.$gl_asmext >/dev/null; then
+       gl_cv_prog_as_underscore=yes
+     else
+       gl_cv_prog_as_underscore=no
+     fi
+     rm -f conftest*
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_prog_as_underscore" >&5
+$as_echo "$gl_cv_prog_as_underscore" >&6; }
+  if test $gl_cv_prog_as_underscore = yes; then
+    USER_LABEL_PREFIX=_
+  else
+    USER_LABEL_PREFIX=
+  fi
+
+cat >>confdefs.h <<_ACEOF
+#define USER_LABEL_PREFIX $USER_LABEL_PREFIX
+_ACEOF
+
+  ASM_SYMBOL_PREFIX='"'${USER_LABEL_PREFIX}'"'
+
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for O_CLOEXEC" >&5
 $as_echo_n "checking for O_CLOEXEC... " >&6; }
 if ${gl_cv_macro_O_CLOEXEC+:} false; then :
@@ -20310,6 +20427,20 @@ $as_echo "#define GNULIB_PRINTF_ATTRIBUTE_FLAVOR_GNU 1" >>confdefs.h
 
 
 
+    if test $gl_cv_have_nonblocking != yes; then
+      REPLACE_STDIO_READ_FUNCS=1
+    fi
+
+
+
+
+
+
+
+    if test $gl_cv_have_nonblocking != yes; then
+      REPLACE_STDIO_WRITE_FUNCS=1
+    fi
+
 
 
 
@@ -20991,6 +21122,127 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_STRTOK_R $ac_have_decl
 _ACEOF
+
+
+
+
+
+
+
+  if test $ac_cv_header_sys_ioctl_h = yes; then
+    HAVE_SYS_IOCTL_H=1
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <sys/ioctl.h> declares ioctl" >&5
+$as_echo_n "checking whether <sys/ioctl.h> declares ioctl... " >&6; }
+if ${gl_cv_decl_ioctl_in_sys_ioctl_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/ioctl.h>
+int
+main ()
+{
+(void) ioctl;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_decl_ioctl_in_sys_ioctl_h=yes
+else
+  gl_cv_decl_ioctl_in_sys_ioctl_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_decl_ioctl_in_sys_ioctl_h" >&5
+$as_echo "$gl_cv_decl_ioctl_in_sys_ioctl_h" >&6; }
+  else
+    HAVE_SYS_IOCTL_H=0
+  fi
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_sys_ioctl_h='<'sys/ioctl.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <sys/ioctl.h>" >&5
+$as_echo_n "checking absolute name of <sys/ioctl.h>... " >&6; }
+if ${gl_cv_next_sys_ioctl_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_sys_ioctl_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/ioctl.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'sys/ioctl.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_sys_ioctl_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+          gl_header=$gl_cv_absolute_sys_ioctl_h
+          gl_cv_next_sys_ioctl_h='"'$gl_header'"'
+          else
+               gl_cv_next_sys_ioctl_h='<'sys/ioctl.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_sys_ioctl_h" >&5
+$as_echo "$gl_cv_next_sys_ioctl_h" >&6; }
+     fi
+     NEXT_SYS_IOCTL_H=$gl_cv_next_sys_ioctl_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'sys/ioctl.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_sys_ioctl_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_SYS_IOCTL_H=$gl_next_as_first_directive
+
+
+
+
+
+
+
+
 
 
 
@@ -27471,6 +27723,97 @@ fi
 
 
 
+  HAVE_IOCTL=1
+  if test "$ac_cv_header_winsock2_h" = yes; then
+                HAVE_IOCTL=0
+  else
+    for ac_func in ioctl
+do :
+  ac_fn_c_check_func "$LINENO" "ioctl" "ac_cv_func_ioctl"
+if test "x$ac_cv_func_ioctl" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_IOCTL 1
+_ACEOF
+
+fi
+done
+
+                { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ioctl with POSIX signature" >&5
+$as_echo_n "checking for ioctl with POSIX signature... " >&6; }
+if ${gl_cv_func_ioctl_posix_signature+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/ioctl.h>
+              /* On some platforms, ioctl() is declared in <unistd.h>.  */
+              #include <unistd.h>
+
+int
+main ()
+{
+extern
+              #ifdef __cplusplus
+              "C"
+              #endif
+              int ioctl (int, int, ...);
+
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_func_ioctl_posix_signature=yes
+else
+  gl_cv_func_ioctl_posix_signature=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_ioctl_posix_signature" >&5
+$as_echo "$gl_cv_func_ioctl_posix_signature" >&6; }
+    if test $gl_cv_func_ioctl_posix_signature != yes; then
+      REPLACE_IOCTL=1
+    fi
+  fi
+
+
+     if test $HAVE_IOCTL = 0 || test $REPLACE_IOCTL = 1; then
+  GL_COND_OBJ_IOCTL_TRUE=
+  GL_COND_OBJ_IOCTL_FALSE='#'
+else
+  GL_COND_OBJ_IOCTL_TRUE='#'
+  GL_COND_OBJ_IOCTL_FALSE=
+fi
+:
+    if test -z "${GL_COND_OBJ_IOCTL_TRUE}" && test -z "${GL_COND_OBJ_IOCTL_FALSE}"; then
+    GL_COND_OBJ_IOCTL_TRUE='#'
+    GL_COND_OBJ_IOCTL_FALSE='#'
+  fi
+
+
+
+
+
+
+
+
+
+
+          GL_GNULIB_IOCTL=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_IOCTL 1" >>confdefs.h
+
+
+
+
+
+
 
 
   if test $ac_cv_func_isblank = no; then
@@ -31104,6 +31447,54 @@ fi
 
 
 
+
+
+
+
+
+
+
+
+
+          GL_GNULIB_NONBLOCKING=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_NONBLOCKING 1" >>confdefs.h
+
+
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define GNULIB_NONBLOCKING 1
+_ACEOF
+
+
+
+
+
+
+
+
+
+  GL_GNULIB_STDIO_H_NONBLOCKING=1
+
+
+
+
+
+
+
+
+  GL_GNULIB_UNISTD_H_NONBLOCKING=1
+
+
+
+
+
   case "$host_os" in
     mingw* | pw*)
       REPLACE_OPEN=1
@@ -31201,6 +31592,15 @@ $as_echo "#define OPEN_TRAILING_SLASH_BUG 1" >>confdefs.h
       fi
     fi
 
+
+    if test $REPLACE_OPEN = 0; then
+
+
+
+      if test $gl_cv_have_open_O_NONBLOCK != yes; then
+        REPLACE_OPEN=1
+      fi
+    fi
 
 
 
@@ -32956,6 +33356,10 @@ fi
 
   # When this module is used, sockets may actually occur as file descriptors,
   # hence it is worth warning if the modules 'close' and 'ioctl' are not used.
+
+
+
+
 
 
 
@@ -34901,6 +35305,13 @@ fi
 
 
 $as_echo "#define GNULIB_TEST_STRTOK_R 1" >>confdefs.h
+
+
+
+
+
+
+
 
 
 

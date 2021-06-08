@@ -63,6 +63,7 @@
 #  mkdtemp \
 #  mkostemp \
 #  netdb \
+#  nonblocking \
 #  pathmax \
 #  rawmemchr \
 #  readlink \
@@ -968,6 +969,16 @@ EXTRA_DIST += inttypes.in.h
 
 ## end   gnulib module inttypes-incomplete
 
+## begin gnulib module ioctl
+
+if GL_COND_OBJ_IOCTL
+libgnu_a_SOURCES += ioctl.c
+endif
+
+EXTRA_DIST += w32sock.h
+
+## end   gnulib module ioctl
+
 ## begin gnulib module isblank
 
 if GL_COND_OBJ_ISBLANK
@@ -1618,6 +1629,16 @@ MOSTLYCLEANDIRS += netinet
 EXTRA_DIST += netinet_in.in.h
 
 ## end   gnulib module netinet_in
+
+## begin gnulib module nonblocking
+
+libgnu_a_SOURCES += nonblocking.c
+
+EXTRA_DIST += nonblocking.h stdio-read.c stdio-write.c
+
+EXTRA_libgnu_a_SOURCES += stdio-read.c stdio-write.c
+
+## end   gnulib module nonblocking
 
 ## begin gnulib module open
 
@@ -2577,6 +2598,36 @@ libgnu_a_SOURCES += strtok_r.c
 endif
 
 ## end   gnulib module strtok_r
+
+## begin gnulib module sys_ioctl
+
+BUILT_SOURCES += sys/ioctl.h
+
+# We need the following in order to create <sys/ioctl.h> when the system
+# does not have a complete one.
+sys/ioctl.h: sys_ioctl.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H)
+	$(AM_V_GEN)$(MKDIR_P) '%reldir%/sys'
+	$(AM_V_at)$(SED_HEADER_STDOUT) \
+	      -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''HAVE_SYS_IOCTL_H''@|$(HAVE_SYS_IOCTL_H)|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_SYS_IOCTL_H''@|$(NEXT_SYS_IOCTL_H)|g' \
+	      -e 's/@''GNULIB_IOCTL''@/$(GL_GNULIB_IOCTL)/g' \
+	      -e 's|@''SYS_IOCTL_H_HAVE_WINSOCK2_H''@|$(SYS_IOCTL_H_HAVE_WINSOCK2_H)|g' \
+	      -e 's|@''SYS_IOCTL_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS''@|$(SYS_IOCTL_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS)|g' \
+	      -e 's|@''REPLACE_IOCTL''@|$(REPLACE_IOCTL)|g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      $(srcdir)/sys_ioctl.in.h > $@-t
+	$(AM_V_at)mv $@-t $@
+MOSTLYCLEANFILES += sys/ioctl.h sys/ioctl.h-t
+MOSTLYCLEANDIRS += sys
+
+EXTRA_DIST += sys_ioctl.in.h
+
+## end   gnulib module sys_ioctl
 
 ## begin gnulib module sys_random
 

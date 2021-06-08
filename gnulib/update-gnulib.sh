@@ -60,6 +60,7 @@ IMPORTED_GNULIB_MODULES="\
     mkdtemp \
     mkostemp \
     netdb \
+    nonblocking \
     pathmax \
     rawmemchr \
     readlink \
