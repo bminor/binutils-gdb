@@ -58,7 +58,7 @@ if { $address1 == "" || $address2 == "" || $section_name == "" } {
 set saw_section_address_line false
 gdb_test_multiple "section $section_name $address1" \
     "set section $section_name to original address" {
-	-re ".*$address1 \- $address2 is $section_name.*" {
+	-re ".*$address1 \- $address2 is $section_name in \[^\r\n\]*" {
 	    set saw_section_address_line true
 	    exp_continue
 	}

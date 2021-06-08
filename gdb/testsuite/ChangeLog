@@ -1,3 +1,7 @@
+2021-06-08  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/sect-cmd.exp: Fix saw_section_address_line regexp.
+
 2021-06-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/continue-all-already-running.exp: Call fail if can't
