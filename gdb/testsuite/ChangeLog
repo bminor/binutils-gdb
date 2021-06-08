@@ -1,5 +1,11 @@
 2021-06-08  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/info-types.exp.tcl (match_line): Handle --any.
+	(gdb_test_lines): Factor out of ...
+	(run_test): ... here.
+
+2021-06-08  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/batch-preserve-term-settings.exp (spawn_shell): Fix
 	matching of initial prompt.
 

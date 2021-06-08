@@ -16,7 +16,8 @@
 # Check that 'info types' produces the expected output for an inferior
 # containing a number of different types.
 
-# Match LINE against regexp OUTPUT_LINES[IDX].
+# Match LINE against regexp OUTPUT_LINES[IDX].  Helper function for
+# gdb_test_lines.
 proc match_line { line output_lines idx_name } {
     upvar $idx_name idx
 
@@ -27,14 +28,17 @@ proc match_line { line output_lines idx_name } {
 	}
 
 	set re [lindex $output_lines $idx]
+	set opt 0
+	set any 0
 	if { $re == "--optional" } {
 	    # Optional, get actual regexp.
 	    set opt 1
 	    incr idx
 	    set re [lindex $output_lines $idx]
-	} else {
-	    # Not optional.
-	    set opt 0
+	} elseif { $re == "--any" } {
+	    set any 1
+	    incr idx
+	    set re [lindex $output_lines $idx]
 	}
 
 	if { [regexp $re $line] } {
@@ -55,6 +59,10 @@ proc match_line { line output_lines idx_name } {
 		# Try next regexp on same line.
 		incr idx
 		continue
+	    } elseif { $any } {
+		# Try again with next line.
+		incr idx -1
+		return 0
 	    } else {
 		# Mismatch, bail out.
 		return -1
@@ -65,6 +73,29 @@ proc match_line { line output_lines idx_name } {
 
     # Keep going.
     return 0
+}
+
+# Match output of COMMAND line-by-line, using PATTERNS.
+# Report pass/fail with MESSAGE.
+
+proc gdb_test_lines { command message patterns } {
+    set found 0
+    set idx 0
+    if { $message == ""} {
+	set message $command
+    }
+    gdb_test_multiple $command $message {
+	-re "\r\n(\[^\r\n\]*)(?=\r\n)" {
+	    if { $found == 0 } {
+		set line $expect_out(1,string)
+		set found [match_line $line $patterns idx]
+	    }
+	    exp_continue
+	}
+	-re -wrap "" {
+	    gdb_assert { $found == 1 } $gdb_test_name
+	}
+    }
 }
 
 # Run 'info types' test, compiling the test file for language LANG,
@@ -94,6 +125,8 @@ proc run_test { lang } {
     if { $lang == "c++" } {
 	set output_lines \
 	    [list \
+		 "All defined types:" \
+		 "--any" \
 		 $file_re \
 		 "98:\[\t \]+CL;" \
 		 "42:\[\t \]+anon_struct_t;" \
@@ -129,6 +162,8 @@ proc run_test { lang } {
     } else {
 	set output_lines \
 	    [list \
+		 "All defined types:" \
+		 "--any" \
 		 $file_re \
 		 "52:\[\t \]+typedef enum {\\.\\.\\.} anon_enum_t;" \
 		 "45:\[\t \]+typedef struct {\\.\\.\\.} anon_struct_t;" \
@@ -157,33 +192,7 @@ proc run_test { lang } {
 		 ""]
     }
 
-    set state 0
-    set idx 0
-    gdb_test_multiple "info types" "" {
-	-re "\r\nAll defined types:" {
-	    if { $state == 0 } { set state 1 } else { set state -1 }
-	    exp_continue
-	}
-	-re "^\r\n(\[^\r\n\]*)(?=\r\n)" {
-	    if { $state == 1 } {
-		set line $expect_out(1,string)
-		set res [match_line $line $output_lines idx]
-		if { $res == 1 } {
-		    set state 2
-		} elseif { $res == -1 } {
-		    set state -2
-		}
-	    }
-	    exp_continue
-	}
-	-re -wrap "" {
-	    if { $state == 2} {
-		pass $gdb_test_name
-	    } else {
-		fail "$gdb_test_name (state == $state)"
-	    }
-	}
-    }
+    gdb_test_lines "info types" "" $output_lines
 }
 
 run_test $lang
