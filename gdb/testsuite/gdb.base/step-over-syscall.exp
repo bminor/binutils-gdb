@@ -41,11 +41,50 @@ if { [istarget "i\[34567\]86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
     return -1
 }
 
-proc_with_prefix check_pc_after_cross_syscall { syscall syscall_insn_next_addr } {
+proc_with_prefix check_pc_after_cross_syscall { displaced syscall syscall_insn_next_addr } {
+    global gdb_prompt
+
     set syscall_insn_next_addr_found [get_hexadecimal_valueof "\$pc" "0"]
 
+    # After the 'stepi' we expect thread 1 to still be selected.
+    # However, when displaced stepping over a clone bug gdb/19675
+    # means this might not be the case.
+    #
+    # Which thread we end up in depends on a race between the original
+    # thread-1, and the new thread (created by the clone), so we can't
+    # guarantee which thread we will be in at this point.
+    #
+    # For the fork/vfork syscalls, which are correctly handled by
+    # displaced stepping we will always be in thread-1 or the original
+    # process at this point.
+    set curr_thread "unknown"
+    gdb_test_multiple "info threads" "" {
+	-re "Id\\s+Target Id\\s+Frame\\s*\r\n" {
+	    exp_continue
+	}
+	-re "^\\* (\\d+)\\s+\[^\r\n\]+\r\n" {
+	    set curr_thread $expect_out(1,string)
+	    exp_continue
+	}
+	-re "^\\s+\\d+\\s+\[^\r\n\]+\r\n" {
+	    exp_continue
+	}
+	-re "$gdb_prompt " {
+	}
+    }
+
+    # If we are displaced stepping over a clone, and we ended up in
+    # the wrong thread then the following check of the $pc value will
+    # fail.
+    if { $displaced == "on" && $syscall == "clone" && $curr_thread != 1 } {
+	# GDB doesn't support stepping over clone syscall with
+	# displaced stepping.
+	setup_kfail "*-*-*" "gdb/19675"
+    }
+
     gdb_assert {$syscall_insn_next_addr != 0 \
-      && $syscall_insn_next_addr == $syscall_insn_next_addr_found} \
+      && $syscall_insn_next_addr == $syscall_insn_next_addr_found \
+      && $curr_thread == 1} \
 	"single step over $syscall final pc"
 }
 
@@ -203,20 +242,18 @@ proc step_over_syscall { syscall } {
 
 	set testfile "step-over-$syscall"
 
-	if [build_executable ${testfile}.exp ${testfile} ${testfile}.c {debug}] {
+	set options [list debug]
+	if { $syscall == "clone" } {
+	    lappend options "pthreads"
+	}
+
+	if [build_executable ${testfile}.exp ${testfile} ${testfile}.c $options] {
 	    untested "failed to compile"
 	    return -1
 	}
 
 	foreach_with_prefix displaced {"off" "on"} {
 	    if {$displaced == "on" && ![support_displaced_stepping]} {
-		continue
-	    }
-
-	    if { $displaced == "on" && $syscall == "clone" } {
-		# GDB doesn't support stepping over clone syscall with
-		# displaced stepping.
-		kfail "gdb/19675" "single step over clone"
 		continue
 	    }
 
@@ -256,12 +293,22 @@ proc step_over_syscall { syscall } {
 	    if {[gdb_test "stepi" "x/i .*=>.*" "single step over $syscall"] != 0} {
 		return -1
 	    }
-	    check_pc_after_cross_syscall $syscall $syscall_insn_next_addr
+	    check_pc_after_cross_syscall $displaced $syscall $syscall_insn_next_addr
 
 	    # Delete breakpoint syscall insns to avoid interference to other syscalls.
 	    delete_breakpoints
 
 	    gdb_test "break marker" "Breakpoint.*at.* file .*${testfile}.c, line.*"
+
+	    # If we are displaced stepping over a clone syscall then
+	    # we expect the following check to fail.  See also the
+	    # code in check_pc_after_cross_syscall.
+	    if { $displaced == "on" && $syscall == "clone" } {
+		# GDB doesn't support stepping over clone syscall with
+		# displaced stepping.
+		setup_kfail "*-*-*" "gdb/19675"
+	    }
+
 	    gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, marker \\(\\) at.*" \
 		"continue to marker ($syscall)"
 	}
