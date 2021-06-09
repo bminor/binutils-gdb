@@ -1,3 +1,9 @@
+2021-06-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 27666
+	* config.bfd: Do not add the sparc_elf32_vec or sparc_elf64_vec
+	vectors to Sparc Solaris2 targets.
+
 2021-06-08  Michael Matz  <matz@suse.de>
 
 	* elf.c (bfd_section_from_shdr): Set has_secondary_relocs flag.

@@ -1279,13 +1279,14 @@ case "${targ}" in
     ;;
 
   sparc-*-solaris2.[0-6] | sparc-*-solaris2.[0-6].*)
+    # PR 27666: Do not include sparc_elf32_vec here.
     targ_defvec=sparc_elf32_sol2_vec
-    targ_selvecs=sparc_elf32_vec
     ;;
 #ifdef BFD64
   sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
+    # PR 27666: Do not include sparc_elf32_vec or sparc_elf64_vec here.
     targ_defvec=sparc_elf32_sol2_vec
-    targ_selvecs="sparc_elf64_sol2_vec sparc_elf32_vec sparc_elf64_vec"
+    targ_selvecs="sparc_elf64_sol2_vec"
     want64=true
     ;;
   sparc64-*-freebsd* | sparc64-*-kfreebsd*-gnu)
