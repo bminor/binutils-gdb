@@ -42,7 +42,6 @@ repository without obtaining approval first:
   DJ Delorie <dj@redhat.com>
   Alan Modra <amodra@gmail.com>
   Michael Meissner <gnu@the-meissners.org>
-  Daniel Jacobowitz <drow@false.org>
   Richard Sandiford <rdsandiford@googlemail.com>
 
       --------- Maintainers ---------
@@ -69,7 +68,6 @@ responsibility among the other maintainers.
   BFIN		   Jie Zhang <jzhang918@gmail.com>
   BFIN		   Mike Frysinger <vapier@gentoo.org>
   BPF		   Jose E. Marchesi <jose.marchesi@oracle.com>
-  BUILD SYSTEM	   Daniel Jacobowitz <drow@false.org>
   CR16		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
   CRIS		   Hans-Peter Nilsson <hp@axis.com>
   CRX		   M R Swami Reddy <MR.Swami.Reddy@nsc.com>
