@@ -158,7 +158,7 @@ INTL_CFLAGS = @INCINTL@
 
 TARGETLIB	= libsim.a
 
-all:	run $(TARGETLIB) $(GDB_OBJ)
+all:	run$(EXEEXT) $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
 	$(CC) -c $(STD_CFLAGS) $<
@@ -542,10 +542,10 @@ PACKAGE_SRC = @sim_pk_src@
 PACKAGE_OBJ = @sim_pk_obj@
 
 
-psim: $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
+psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
 
-run: psim
+run$(EXEEXT): psim$(EXEEXT)
 	rm -f run$(EXEEXT)
 	ln psim$(EXEEXT) run$(EXEEXT)
 

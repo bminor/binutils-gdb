@@ -41,9 +41,9 @@ SIM_EXTRA_CFLAGS += -DFAST_UART -I$(srcroot)
 # `sis' doesn't need interf.o.
 SIS_OFILES = exec.o erc32.o func.o help.o float.o
 
-all: sis
-sis: sis.o $(SIS_OFILES) $(COMMON_OBJS) $(LIBDEPS)
-	$(CC) $(ALL_CFLAGS) -o sis \
+all: sis$(EXEEXT)
+sis$(EXEEXT): sis.o $(SIS_OFILES) $(COMMON_OBJS) $(LIBDEPS)
+	$(CC) $(ALL_CFLAGS) -o sis$(EXEEXT) \
 	  sis.o $(SIS_OFILES) $(COMMON_OBJS) $(EXTRA_LIBS)
 
 # Copy the files into directories where they will be run.
