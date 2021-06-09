@@ -1,3 +1,7 @@
+2021-06-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lib/tuiterm.exp (Term) <_check_box>: Improve logging.
+
 2021-06-08  Lancelot Six  <lsix@lancelotsix.com>
 
 	* gdb.base/premature-dummy-frame-removal.py (TestUnwinder): Use

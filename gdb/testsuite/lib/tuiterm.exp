@@ -729,17 +729,26 @@ namespace eval Term {
 	set x2 [expr {$x + $width - 1}]
 	set y2 [expr {$y + $height - 1}]
 
-	if {[get_char $x $y] != "+"} {
-	    return "ul corner"
+	verbose -log "_check_box x=$x, y=$y, x2=$x2, y2=$y2, width=$width, height=$height"
+
+	set c [get_char $x $y]
+	if {$c != "+"} {
+	    return "ul corner is $c, not +"
 	}
-	if {[get_char $x $y2] != "+"} {
-	    return "ll corner"
+
+	set c [get_char $x $y2]
+	if {$c != "+"} {
+	    return "ll corner is $c, not +"
 	}
-	if {[get_char $x2 $y] != "+"} {
-	    return "ur corner"
+
+	set c [get_char $x2 $y]
+	if {$c != "+"} {
+	    return "ur corner is $c, not +"
 	}
-	if {[get_char $x2 $y2] != "+"} {
-	    return "lr corner"
+
+	set c [get_char $x2 $y2]
+	if {$c != "+"} {
+	    return "lr corner is $c, not +"
 	}
 
 	# Note we do not check the full horizonal borders of the box.
@@ -747,21 +756,26 @@ namespace eval Term {
 	# it is overlapped by some other border.  However, at most a
 	# title should appear as '+-VERY LONG TITLE-+', so we can
 	# check for the '+-' on the left, and '-+' on the right.
-	if {[get_char [expr {$x + 1}] $y] != "-"} {
-	    return "ul title padding"
+	set c [get_char [expr {$x + 1}] $y]
+	if {$c != "-"} {
+	    return "ul title padding is $c, not -"
 	}
 
-	if {[get_char [expr {$x2 - 1}] $y] != "-"} {
-	    return "ul title padding"
+	set c [get_char [expr {$x2 - 1}] $y]
+	if {$c != "-"} {
+	    return "ul title padding is $c, not -"
 	}
 
 	# Now check the vertical borders.
 	for {set i [expr {$y + 1}]} {$i < $y2 - 1} {incr i} {
-	    if {[get_char $x $i] != "|"} {
-		return "left side $i"
+	    set c [get_char $x $i]
+	    if {$c != "|"} {
+		return "left side $i is $c, not |"
 	    }
-	    if {[get_char $x2 $i] != "|"} {
-		return "right side $i"
+
+	    set c [get_char $x2 $i]
+	    if {$c != "|"} {
+		return "right side $i is $c, not |"
 	    }
 	}
 
