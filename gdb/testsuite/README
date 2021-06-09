@@ -347,9 +347,13 @@ return at most 1 byte.
 To enable this, either pass a non-empty value in the READ1 make
 variable, or use the check-read1 make target instead of check.
 
-Examples:
+Example:
 
 	make -j10 check-read1 TESTS="*/paginate-*.exp"
+
+If you've already built the read1 support code, either via a previous
+'check-read1' run, or by using "make read1", you can use:
+
 	make -j10 check READ1="1"
 
 Note: While the intention is to detect races and make otherwise passing tests
