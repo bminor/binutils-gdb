@@ -485,6 +485,38 @@ proc_with_prefix test_bkpt_registration {} {
 	"= #t" "breakpoint valid after re-registration"
 }
 
+proc_with_prefix test_bkpt_temporary { } {
+    global srcfile testfile hex decimal
+
+    # Start with a fresh gdb.
+    clean_restart ${testfile}
+
+    if ![gdb_guile_runto_main] {
+	fail "cannot run to main."
+	return 0
+    }
+    delete_breakpoints
+
+    set ibp_location [gdb_get_line_number "Break at multiply."]
+    gdb_scm_test_silent_cmd "guile (define ibp (make-breakpoint \"$ibp_location\" #:temporary #t))" \
+	"create temporary breakpoint"
+    gdb_scm_test_silent_cmd "guile (register-breakpoint! ibp)" \
+	"register ibp"
+    gdb_test "info breakpoints" \
+	"2.*breakpoint.*del.*scm-breakpoint\.c:$ibp_location.*" \
+	"check info breakpoints shows breakpoint with temporary status"
+    gdb_test "guile (print (breakpoint-location ibp))" "scm-breakpoint\.c:$ibp_location*" \
+	"check temporary breakpoint location"
+    gdb_test "guile (print (breakpoint-temporary? ibp))" "#t" \
+	"check breakpoint temporary status"
+    gdb_continue_to_breakpoint "Break at multiply." \
+	".*$srcfile:$ibp_location.*"
+    gdb_test "guile (print (breakpoint-temporary? ibp))" "Invalid object: <gdb:breakpoint>.*" \
+	"check temporary breakpoint is deleted after being hit"
+    gdb_test "info breakpoints" "No breakpoints or watchpoints.*" \
+	"check info breakpoints shows temporary breakpoint is deleted"
+}
+
 proc_with_prefix test_bkpt_address {} {
     global decimal srcfile
 
@@ -564,5 +596,6 @@ test_watchpoints
 test_bkpt_internal
 test_bkpt_eval_funcs
 test_bkpt_registration
+test_bkpt_temporary
 test_bkpt_address
 test_bkpt_probe

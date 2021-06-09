@@ -2965,7 +2965,7 @@ The following breakpoint-related procedures are provided by the
 @code{(gdb)} module:
 
 @c TODO: line length
-@deffn {Scheme Procedure} make-breakpoint location @r{[}#:type type@r{]} @r{[}#:wp-class wp-class@r{]} @r{[}#:internal internal@r{]}
+@deffn {Scheme Procedure} make-breakpoint location @r{[}#:type type@r{]} @r{[}#:wp-class wp-class@r{]} @r{[}#:internal internal@r{]} @r{[}#:temporary temporary@r{]}
 Create a new breakpoint at @var{location}, a string naming the
 location of the breakpoint, or an expression that defines a watchpoint.
 The contents can be any location recognized by the @code{break} command,
@@ -2990,6 +2990,11 @@ registered, nor will it be listed in the output from @code{info breakpoints}
 (but will be listed with the @code{maint info breakpoints} command).
 If an internal flag is not provided, the breakpoint is visible
 (non-internal).
+
+The optional @var{temporary} argument makes the breakpoint a temporary
+breakpoint.  Temporary breakpoints are deleted after they have been hit,
+after which the Guile breakpoint is no longer usable (although it may be
+re-registered with @code{register-breakpoint!}).
 
 When a watchpoint is created, @value{GDBN} will try to create a
 hardware assisted watchpoint.  If successful, the type of the watchpoint
@@ -3085,6 +3090,15 @@ inferior leaves the scope of that watchpoint.
 @deffn {Scheme Procedure} breakpoint-number breakpoint
 Return the breakpoint's number --- the identifier used by
 the user to manipulate the breakpoint.
+@end deffn
+
+@deffn {Scheme Procedure} breakpoint-temporary? breakpoint
+Return @code{#t} if the breakpoint was created as a temporary
+breakpoint.  Temporary breakpoints are automatically deleted after
+they've been hit.  Calling this procedure, and all other procedures
+other than @code{breakpoint-valid?} and @code{register-breakpoint!},
+will result in an error after the breakpoint has been hit (since it has
+been automatically deleted).
 @end deffn
 
 @deffn {Scheme Procedure} breakpoint-type breakpoint

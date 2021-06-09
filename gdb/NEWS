@@ -267,6 +267,9 @@ QMemTags
      value-reference-value, value-rvalue-reference-value and
      value-const-value.
 
+  ** Temporary breakpoints can now be created with make-breakpoint and
+     tested for using breakpoint-temporary?.
+
 * Python API
 
   ** Inferior objects now contain a read-only 'connection_num' attribute that
