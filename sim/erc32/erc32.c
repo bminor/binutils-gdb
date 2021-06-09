@@ -272,17 +272,17 @@ static void	write_uart (uint32 addr, uint32 data);
 static void	flush_uart (void);
 static void	uarta_tx (void);
 static void	uartb_tx (void);
-static void	uart_rx (caddr_t arg);
-static void	uart_intr (caddr_t arg);
+static void	uart_rx (void *arg);
+static void	uart_intr (void *arg);
 static void	uart_irq_start (void);
-static void	wdog_intr (caddr_t arg);
+static void	wdog_intr (void *arg);
 static void	wdog_start (void);
-static void	rtc_intr (caddr_t arg);
+static void	rtc_intr (void *arg);
 static void	rtc_start (void);
 static uint32	rtc_counter_read (void);
 static void	rtc_scaler_set (uint32 val);
 static void	rtc_reload_set (uint32 val);
-static void	gpt_intr (caddr_t arg);
+static void	gpt_intr (void *arg);
 static void	gpt_start (void);
 static uint32	gpt_counter_read (void);
 static void	gpt_scaler_set (uint32 val);
@@ -1262,7 +1262,7 @@ uartb_tx(void)
 }
 
 static void
-uart_rx(caddr_t arg)
+uart_rx(void *arg)
 {
     int32           rsize;
     char            rxd;
@@ -1304,7 +1304,7 @@ uart_rx(caddr_t arg)
 }
 
 static void
-uart_intr(caddr_t arg)
+uart_intr(void *arg)
 {
     read_uart(0xE8);		/* Check for UART interrupts every 1000 clk */
     flush_uart();		/* Flush UART ports      */
@@ -1327,7 +1327,7 @@ uart_irq_start(void)
 /* Watch-dog */
 
 static void
-wdog_intr(caddr_t arg)
+wdog_intr(void *arg)
 {
     if (wdog_status == disabled) {
 	wdog_status = stopped;
@@ -1365,7 +1365,7 @@ wdog_start(void)
 
 
 static void
-rtc_intr(caddr_t arg)
+rtc_intr(void *arg)
 {
     if (rtc_counter == 0) {
 
@@ -1416,7 +1416,7 @@ rtc_reload_set(uint32 val)
 }
 
 static void
-gpt_intr(caddr_t arg)
+gpt_intr(void *arg)
 {
     if (gpt_counter == 0) {
 	mec_irq(12);
