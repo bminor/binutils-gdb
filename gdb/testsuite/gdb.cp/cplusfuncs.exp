@@ -287,13 +287,16 @@ proc probe_demangler { } {
 #
 
 proc info_func_regexp { name demangled } {
-    global gdb_prompt
+    global srcfile decimal
 
     regsub {\\\(void\\\)} $demangled {\(\)} demangled
 
-    gdb_test "info function $name" \
-	"File .*:\t(class|)${demangled}.*" \
-	"info function for \"$name\""
+    set file_re "File .*[string_to_regexp $srcfile]:"
+
+    gdb_test_lines "info function $name" "info function for \"$name\"" \
+	[list \
+	     "$file_re" \
+	     "$decimal:\t(class|)${demangled}.*"]
 }
 
 #
