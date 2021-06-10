@@ -17937,14 +17937,14 @@ do_bfloat_vfma (void)
       neon_check_type (3, rs, N_EQK, N_EQK, N_BF16 | N_KEY);
 
       inst.instruction |= (1 << 25);
-      int index = inst.operands[2].reg & 0xf;
-      constraint (!(index < 4), _("index must be in the range 0 to 3"));
+      int idx = inst.operands[2].reg & 0xf;
+      constraint (!(idx < 4), _("index must be in the range 0 to 3"));
       inst.operands[2].reg >>= 4;
       constraint (!(inst.operands[2].reg < 8),
 		  _("indexed register must be less than 8"));
       neon_three_args (t_bit);
-      inst.instruction |= ((index & 1) << 3);
-      inst.instruction |= ((index & 2) << 4);
+      inst.instruction |= ((idx & 1) << 3);
+      inst.instruction |= ((idx & 2) << 4);
     }
   else
     {
@@ -21579,13 +21579,13 @@ do_vusdot (void)
       neon_check_type (3, rs, N_EQK, N_EQK, N_S8 | N_KEY);
 
       inst.instruction |= (1 << 25);
-      int index = inst.operands[2].reg & 0xf;
-      constraint ((index != 1 && index != 0), _("index must be 0 or 1"));
+      int idx = inst.operands[2].reg & 0xf;
+      constraint ((idx != 1 && idx != 0), _("index must be 0 or 1"));
       inst.operands[2].reg >>= 4;
       constraint (!(inst.operands[2].reg < 16),
 		  _("indexed register must be less than 16"));
       neon_three_args (rs == NS_QQS);
-      inst.instruction |= (index << 5);
+      inst.instruction |= (idx << 5);
     }
   else
     {
@@ -21607,13 +21607,13 @@ do_vsudot (void)
       neon_check_type (3, rs, N_EQK, N_EQK, N_U8 | N_KEY);
 
       inst.instruction |= (1 << 25);
-      int index = inst.operands[2].reg & 0xf;
-      constraint ((index != 1 && index != 0), _("index must be 0 or 1"));
+      int idx = inst.operands[2].reg & 0xf;
+      constraint ((idx != 1 && idx != 0), _("index must be 0 or 1"));
       inst.operands[2].reg >>= 4;
       constraint (!(inst.operands[2].reg < 16),
 		  _("indexed register must be less than 16"));
       neon_three_args (rs == NS_QQS);
-      inst.instruction |= (index << 5);
+      inst.instruction |= (idx << 5);
     }
 }
 
@@ -21642,10 +21642,10 @@ do_vummla (void)
 }
 
 static void
-check_cde_operand (size_t index, int is_dual)
+check_cde_operand (size_t idx, int is_dual)
 {
-  unsigned Rx = inst.operands[index].reg;
-  bool isvec = inst.operands[index].isvec;
+  unsigned Rx = inst.operands[idx].reg;
+  bool isvec = inst.operands[idx].isvec;
   if (is_dual == 0 && thumb_mode)
     constraint (
 		!((Rx <= 14 && Rx != 13) || (Rx == REG_PC && isvec)),
@@ -22289,13 +22289,13 @@ do_vdot (void)
       neon_check_type (3, rs, N_EQK, N_EQK, N_BF16 | N_KEY);
 
       inst.instruction |= (1 << 25);
-      int index = inst.operands[2].reg & 0xf;
-      constraint ((index != 1 && index != 0), _("index must be 0 or 1"));
+      int idx = inst.operands[2].reg & 0xf;
+      constraint ((idx != 1 && idx != 0), _("index must be 0 or 1"));
       inst.operands[2].reg >>= 4;
       constraint (!(inst.operands[2].reg < 16),
 		  _("indexed register must be less than 16"));
       neon_three_args (rs == NS_QQS);
-      inst.instruction |= (index << 5);
+      inst.instruction |= (idx << 5);
     }
   else
     {

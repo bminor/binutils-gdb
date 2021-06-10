@@ -1,5 +1,13 @@
 2021-06-10  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-arm.c (do_bfloat_vfma): Rename index to idx.
+	(do_vusdot): Likewise.
+	(do_vsudot): Likewise.
+	(check_cde_operand): Likewise.
+	(do_vdot): Likewise.
+
+2021-06-10  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-arm.c (reg_expected_msgs): Add REG_TYPE_ZR entry.
 
 2021-06-10  Jan Beulich  <jbeulich@suse.com>
