@@ -544,6 +544,7 @@ if [gas_32_check] then {
     run_list_test "optimize-7" "-I${srcdir}/$subdir -march=+noavx2 -al"
     run_dump_test "lea-optimize"
     run_dump_test "lea16-optimize"
+    run_dump_test "lea16-optimize2"
     run_dump_test "align-branch-1a"
     run_dump_test "align-branch-1b"
     run_dump_test "align-branch-1c"

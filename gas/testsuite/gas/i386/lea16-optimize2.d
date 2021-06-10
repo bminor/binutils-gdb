@@ -1,6 +1,6 @@
-#as: -O -q -I${srcdir}/$subdir
+#as: -O2 -q -I${srcdir}/$subdir
 #objdump: -dw -Mi8086
-#name: i386 16-bit LEA optimizations
+#name: i386 16-bit LEA optimizations at -O2
 #source: lea16.s
 
 .*: +file format .*
@@ -31,9 +31,9 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:[ 	]+8b f6[ 	]+mov[ 	]+%si,%si
 [ 	]*[0-9a-f]+:[ 	]+66 8b c9[ 	]+mov[ 	]+%ecx,%ecx
 [ 	]*[0-9a-f]+:[ 	]+66 8b c1[ 	]+mov[ 	]+%ecx,%eax
-[ 	]*[0-9a-f]+:[ 	]+66 8d 06 01 00[ 	]+lea[ 	]+0x1,%eax
+[ 	]*[0-9a-f]+:[ 	]+66 b8 01 00 00 00[ 	]+mov[ 	]+\$0x1,%eax
 [ 	]*[0-9a-f]+:[ 	]+b8 02 00[ 	]+mov[ 	]+\$0x2,%ax
-[ 	]*[0-9a-f]+:[ 	]+66 8d 06 ff ff[ 	]+lea[ 	]+-0x1,%eax
+[ 	]*[0-9a-f]+:[ 	]+66 b8 ff ff 00 00[ 	]+mov[ 	]+\$0xffff,%eax
 [ 	]*[0-9a-f]+:[ 	]+b8 fe ff[ 	]+mov[ 	]+\$0xfffe,%ax
 [ 	]*[0-9a-f]+:[ 	]+66 b8 01 00 00 00[ 	]+mov[ 	]+\$0x1,%eax
 [ 	]*[0-9a-f]+:[ 	]+b8 02 00[ 	]+mov[ 	]+\$0x2,%ax
@@ -43,7 +43,7 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:[ 	]+b8 00 00[ 	]+mov[ 	]+\$0x0,%ax
 [ 	]*[0-9a-f]+:[ 	]+66 b8 00 00 00 00[ 	]+mov[ 	]+\$0x0,%eax
 [ 	]*[0-9a-f]+:[ 	]+67 8d 05 00 00 00 00[ 	]+addr32 lea[ 	]+0x0,%ax
-[ 	]*[0-9a-f]+:[ 	]+66 8d 06 00 00[ 	]+lea[ 	]+0x0,%eax
+[ 	]*[0-9a-f]+:[ 	]+66 b8 00 00 00 00[ 	]+mov[ 	]+\$0x0,%eax
 [ 	]*[0-9a-f]+:[ 	]+b8 00 00[ 	]+mov[ 	]+\$0x0,%ax
 [ 	]*[0-9a-f]+:[ 	]+8d 47 ff[ 	]+lea[ 	]+-0x1\(%bx\),%ax
 [ 	]*[0-9a-f]+:[ 	]+8d 87 01 00[ 	]+lea[ 	]+0x1\(%bx\),%ax

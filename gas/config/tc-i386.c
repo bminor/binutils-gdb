@@ -4140,6 +4140,13 @@ optimize_encoding (void)
 			   ? i.op[1].regs->reg_type.bitfield.dword
 			   : i.op[1].regs->reg_type.bitfield.word)))
 	    return;
+	  /* In 16-bit mode converting LEA with 16-bit addressing and a 32-bit
+	     destination is going to grow encoding size.  */
+	  else if (flag_code == CODE_16BIT
+		   && (optimize <= 1 || optimize_for_space)
+		   && !i.prefix[ADDR_PREFIX]
+		   && i.op[1].regs->reg_type.bitfield.dword)
+	    return;
 	  else
 	    {
 	      i.tm.base_opcode = 0xb8;
