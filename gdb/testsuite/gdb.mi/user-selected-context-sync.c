@@ -27,10 +27,10 @@ static pthread_barrier_t barrier;
 static void
 child_sub_function (void)
 {
-  /* Deliberately spin on a variable instead of plain 'while (1)' to
-     avoid the Clang bug https://bugs.llvm.org/show_bug.cgi?id=49614.  */
-  int spin = 1;
-  while (spin); /* thread loop line */
+  volatile int dummy = 0;
+  while (1)
+    /* Dummy loop body to allow setting breakpoint.  */
+    dummy = !dummy; /* thread loop line */
 }
 
 static void *
@@ -60,10 +60,10 @@ main (void)
 
   pthread_barrier_wait (&barrier);
 
-  /* Deliberately spin on a variable instead of plain 'while (1)' to
-     avoid the Clang bug https://bugs.llvm.org/show_bug.cgi?id=49614.  */
-  int spin = 1;
-  while (spin); /* main break line */
+  volatile int dummy = 0;
+  while (1)
+    /* Dummy loop body to allow setting breakpoint.  */
+    dummy = !dummy; /* main break line */
 
   return 0;
 }

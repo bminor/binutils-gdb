@@ -1,3 +1,8 @@
+2021-06-10  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.mi/user-selected-context-sync.c (child_sub_function, main):
+	Rewrite while (1) using dummy loop body.
+
 2021-06-10  Bhuvanendra Kumar N  <Bhuvanendra.KumarN@amd.com>
 
 	* gdb.base/foll-exec.c: convert the multi-line function call into
