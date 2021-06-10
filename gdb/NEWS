@@ -3,6 +3,13 @@
 
 *** Changes since GDB 11
 
+maint set backtrace-on-fatal-signal on|off
+maint show backtrace-on-fatal-signal
+  This setting is 'on' by default.  When 'on' GDB will print a limited
+  backtrace to stderr in the situation where GDB terminates with a
+  fatal signal.  This only supported on some platforms where the
+  backtrace and backtrace_symbols_fd functions are available.
+
 *** Changes in GDB 11
 
 * The 'set disassembler-options' command now supports specifying options

@@ -12315,6 +12315,18 @@ fi
 
 done
 
+for ac_header in execinfo.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "execinfo.h" "ac_cv_header_execinfo_h" "$ac_includes_default"
+if test "x$ac_cv_header_execinfo_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_EXECINFO_H 1
+_ACEOF
+
+fi
+
+done
+
 
 # ------------------------- #
 # Checks for declarations.  #
@@ -16483,6 +16495,45 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $found" >&5
 $as_echo "$found" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether execinfo.h backtrace is available" >&5
+$as_echo_n "checking whether execinfo.h backtrace is available... " >&6; }
+if ${gdb_cv_execinfo_backtrace+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+         #include <execinfo.h>
+
+int
+main ()
+{
+
+         int f;
+         void *b[2];
+         f = backtrace (b, 2);
+         backtrace_symbols_fd (b, f, 2);
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  gdb_cv_execinfo_backtrace=yes
+else
+  gdb_cv_execinfo_backtrace=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_execinfo_backtrace" >&5
+$as_echo "$gdb_cv_execinfo_backtrace" >&6; }
+if test "$gdb_cv_execinfo_backtrace" = yes; then
+
+$as_echo "#define HAVE_EXECINFO_BACKTRACE 1" >>confdefs.h
+
+fi
 
 
 if test "${build}" = "${host}" -a "${host}" = "${target}" ; then

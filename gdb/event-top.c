@@ -46,6 +46,10 @@
 #include "readline/readline.h"
 #include "readline/history.h"
 
+#ifdef HAVE_EXECINFO_H
+# include <execinfo.h>
+#endif /* HAVE_EXECINFO_H */
+
 /* readline defines this.  */
 #undef savestring
 
@@ -95,6 +99,38 @@ bool exec_done_display_p = false;
    Setting this to a non-zero value inside an stdin callback makes the callback
    run again.  */
 int call_stdin_event_handler_again_p;
+
+/* When true GDB will produce a minimal backtrace when a fatal signal is
+   reached (within GDB code).  */
+static bool bt_on_fatal_signal
+#ifdef HAVE_EXECINFO_BACKTRACE
+  = true;
+#else
+  = false;
+#endif /* HAVE_EXECINFO_BACKTRACE */
+
+/* Implement 'maintenance show backtrace-on-fatal-signal'.  */
+
+static void
+show_bt_on_fatal_signal (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *cmd, const char *value)
+{
+  fprintf_filtered (file, _("Backtrace on a fatal signal is %s.\n"), value);
+}
+
+/* Implement 'maintenance set backtrace-on-fatal-signal'.  */
+
+static void
+set_bt_on_fatal_signal (const char *args, int from_tty, cmd_list_element *c)
+{
+#ifndef HAVE_EXECINFO_BACKTRACE
+  if (bt_on_fatal_signal)
+    {
+      bt_on_fatal_signal = false;
+      error (_("support for this feature is not compiled into GDB"));
+    }
+#endif
+}
 
 /* Signal handling variables.  */
 /* Each of these is a pointer to a function that the event loop will
@@ -846,6 +882,84 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
 }
 
 
+/* Attempt to unblock signal SIG, return true if the signal was unblocked,
+   otherwise, return false.  */
+
+static bool
+unblock_signal (int sig)
+{
+#if HAVE_SIGPROCMASK
+  sigset_t sigset;
+  sigemptyset (&sigset);
+  sigaddset (&sigset, sig);
+  gdb_sigmask (SIG_UNBLOCK, &sigset, 0);
+  return true;
+#endif
+
+  return false;
+}
+
+/* Called to handle fatal signals.  SIG is the signal number.  */
+
+static void ATTRIBUTE_NORETURN
+handle_fatal_signal (int sig)
+{
+#ifdef HAVE_EXECINFO_BACKTRACE
+  const auto sig_write = [] (const char *msg) -> void
+  {
+    gdb_stderr->write_async_safe (msg, strlen (msg));
+  };
+
+  if (bt_on_fatal_signal)
+    {
+      sig_write ("\n\n");
+      sig_write (_("Fatal signal: "));
+      sig_write (strsignal (sig));
+      sig_write ("\n");
+
+      /* Allow up to 25 frames of backtrace.  */
+      void *buffer[25];
+      int frames = backtrace (buffer, ARRAY_SIZE (buffer));
+      sig_write (_("----- Backtrace -----\n"));
+      if (gdb_stderr->fd () > -1)
+	{
+	  backtrace_symbols_fd (buffer, frames, gdb_stderr->fd ());
+	  if (frames == ARRAY_SIZE (buffer))
+	    sig_write (_("Backtrace might be incomplete.\n"));
+	}
+      else
+	sig_write (_("Backtrace unavailable\n"));
+      sig_write ("---------------------\n");
+      sig_write (_("A fatal error internal to GDB has been detected, "
+		   "further\ndebugging is not possible.  GDB will now "
+		   "terminate.\n\n"));
+      sig_write (_("This is a bug, please report it."));
+      if (REPORT_BUGS_TO[0] != '\0')
+	{
+	  sig_write (_("  For instructions, see:\n"));
+	  sig_write (REPORT_BUGS_TO);
+	  sig_write (".");
+	}
+      sig_write ("\n\n");
+
+      gdb_stderr->flush ();
+    }
+#endif /* HAVE_EXECINF_BACKTRACE */
+
+  /* If possible arrange for SIG to have its default behaviour (which
+     should be to terminate the current process), unblock SIG, and reraise
+     the signal.  This ensures GDB terminates with the expected signal.  */
+  if (signal (sig, SIG_DFL) != SIG_ERR
+      && unblock_signal (sig))
+    raise (sig);
+
+  /* The above failed, so try to use SIGABRT to terminate GDB.  */
+#ifdef SIGABRT
+  signal (SIGABRT, SIG_DFL);
+#endif
+  abort ();		/* ARI: abort */
+}
+
 /* The SIGSEGV handler for this thread, or NULL if there is none.  GDB
    always installs a global SIGSEGV handler, and then lets threads
    indicate their interest in handling the signal by setting this
@@ -887,7 +1001,7 @@ handle_sigsegv (int sig)
   install_handle_sigsegv ();
 
   if (thread_local_segv_handler == nullptr)
-    abort ();			/* ARI: abort */
+    handle_fatal_signal (sig);
   thread_local_segv_handler (sig);
 }
 
@@ -1160,16 +1274,7 @@ async_sigtstp_handler (gdb_client_data arg)
   char *prompt = get_prompt ();
 
   signal (SIGTSTP, SIG_DFL);
-#if HAVE_SIGPROCMASK
-  {
-    sigset_t zero;
-
-    sigemptyset (&zero);
-    gdb_sigmask (SIG_SETMASK, &zero, 0);
-  }
-#elif HAVE_SIGSETMASK
-  sigsetmask (0);
-#endif
+  unblock_signal (SIGTSTP);
   raise (SIGTSTP);
   signal (SIGTSTP, handle_sigtstp);
   printf_unfiltered ("%s", prompt);
@@ -1320,4 +1425,17 @@ Control whether to show event loop-related debug messages."),
 			set_debug_event_loop_command,
 			show_debug_event_loop_command,
 			&setdebuglist, &showdebuglist);
+
+  add_setshow_boolean_cmd ("backtrace-on-fatal-signal", class_maintenance,
+			   &bt_on_fatal_signal, _("\
+Set whether to produce a backtrace if GDB receives a fatal signal."), _("\
+Show whether GDB will produce a backtrace if it receives a fatal signal."), _("\
+Use \"on\" to enable, \"off\" to disable.\n\
+If enabled, GDB will produce a minimal backtrace if it encounters a fatal\n\
+signal from within GDB itself.  This is a mechanism to help diagnose\n\
+crashes within GDB, not a mechanism for debugging inferiors."),
+			   set_bt_on_fatal_signal,
+			   show_bt_on_fatal_signal,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
 }

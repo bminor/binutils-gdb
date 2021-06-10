@@ -83,6 +83,11 @@ public:
 
   virtual void flush ()
   {}
+
+  /* If this object has an underlying file descriptor, then return it.
+     Otherwise, return -1.  */
+  virtual int fd () const
+  { return -1; }
 };
 
 typedef std::unique_ptr<ui_file> ui_file_up;
@@ -194,6 +199,10 @@ public:
   bool isatty () override;
 
   bool can_emit_style_escape () override;
+
+  /* Return the underlying file descriptor.  */
+  int fd () const override
+  { return m_fd; }
 
 private:
   /* Sets the internal stream to FILE, and saves the FILE's file

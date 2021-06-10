@@ -1291,6 +1291,7 @@ AC_CHECK_HEADERS(term.h, [], [],
 
 AC_CHECK_HEADERS([sys/socket.h])
 AC_CHECK_HEADERS([ws2tcpip.h])
+AC_CHECK_HEADERS([execinfo.h])
 
 # ------------------------- #
 # Checks for declarations.  #
@@ -1681,6 +1682,27 @@ else
 fi
 AC_SUBST(RDYNAMIC)
 AC_MSG_RESULT($found)
+
+AC_CACHE_CHECK(
+  [whether execinfo.h backtrace is available],
+  gdb_cv_execinfo_backtrace,
+  [AC_LINK_IFELSE(
+     [AC_LANG_PROGRAM(
+        [
+         #include <execinfo.h>
+        ],
+        [
+         int f;
+         void *b[[2]];
+         f = backtrace (b, 2);
+         backtrace_symbols_fd (b, f, 2);
+        ])],
+   [gdb_cv_execinfo_backtrace=yes],
+   [gdb_cv_execinfo_backtrace=no])])
+if test "$gdb_cv_execinfo_backtrace" = yes; then
+  AC_DEFINE(HAVE_EXECINFO_BACKTRACE, 1,
+            [Define to 1 if execinfo.h backtrace functions are available.])
+fi
 
 dnl For certain native configurations, we need to check whether thread
 dnl support can be built in or not.
