@@ -58,7 +58,6 @@ static void handle_sigquit (int sig);
 #ifdef SIGHUP
 static void handle_sighup (int sig);
 #endif
-static void handle_sigfpe (int sig);
 
 /* Functions to be invoked by the event loop in response to
    signals.  */
@@ -68,7 +67,6 @@ static void async_do_nothing (gdb_client_data);
 #ifdef SIGHUP
 static void async_disconnect (gdb_client_data);
 #endif
-static void async_float_handler (gdb_client_data);
 #ifdef SIGTSTP
 static void async_sigtstp_handler (gdb_client_data);
 #endif
@@ -111,7 +109,6 @@ static struct async_signal_handler *sighup_token;
 #ifdef SIGQUIT
 static struct async_signal_handler *sigquit_token;
 #endif
-static struct async_signal_handler *sigfpe_token;
 #ifdef SIGTSTP
 static struct async_signal_handler *sigtstp_token;
 #endif
@@ -904,7 +901,7 @@ static struct serial_event *quit_serial_event;
 
 /* Initialization of signal handlers and tokens.  There is a function
    handle_sig* for each of the signals GDB cares about.  Specifically:
-   SIGINT, SIGFPE, SIGQUIT, SIGTSTP, SIGHUP, SIGWINCH.  These
+   SIGINT, SIGQUIT, SIGTSTP, SIGHUP, SIGWINCH.  These
    functions are the actual signal handlers associated to the signals
    via calls to signal().  The only job for these functions is to
    enqueue the appropriate event/procedure with the event loop.  Such
@@ -955,9 +952,6 @@ async_init_signals (void)
     sighup_token =
       create_async_signal_handler (async_do_nothing, NULL, "sighup");
 #endif
-  signal (SIGFPE, handle_sigfpe);
-  sigfpe_token =
-    create_async_signal_handler (async_float_handler, NULL, "sigfpe");
 
 #ifdef SIGTSTP
   sigtstp_token =
@@ -1198,23 +1192,6 @@ async_sigtstp_handler (gdb_client_data arg)
 }
 #endif /* SIGTSTP */
 
-/* Tell the event loop what to do if SIGFPE is received.
-   See event-signal.c.  */
-static void
-handle_sigfpe (int sig)
-{
-  mark_async_signal_handler (sigfpe_token);
-  signal (sig, handle_sigfpe);
-}
-
-/* Event loop will call this function to process a SIGFPE.  */
-static void
-async_float_handler (gdb_client_data arg)
-{
-  /* This message is based on ANSI C, section 4.7.  Note that integer
-     divide by zero causes this, so "float" is a misnomer.  */
-  error (_("Erroneous arithmetic operation."));
-}
 
 
 /* Set things up for readline to be invoked via the alternate
