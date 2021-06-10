@@ -729,7 +729,8 @@ const char * const reg_expected_msgs[] =
   [REG_TYPE_MMXWCG] = N_("iWMMXt scalar register expected"),
   [REG_TYPE_XSCALE] = N_("XScale accumulator register expected"),
   [REG_TYPE_MQ]	    = N_("MVE vector register expected"),
-  [REG_TYPE_RNB]    = ""
+  [REG_TYPE_RNB]    = "",
+  [REG_TYPE_ZR]     = N_("ZR register expected"),
 };
 
 /* Some well known registers that we refer to directly elsewhere.  */

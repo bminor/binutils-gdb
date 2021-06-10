@@ -1,5 +1,9 @@
 2021-06-10  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-arm.c (reg_expected_msgs): Add REG_TYPE_ZR entry.
+
+2021-06-10  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_encoding): Suppress LEA conversion
 	when it would grow code size in 16-bit mode.
 	* testsuite/gas/i386/lea16-optimize.d: Adjust expectations.
