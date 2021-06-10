@@ -1,5 +1,10 @@
 2021-06-10  Tom de Vries  <tdevries@suse.de>
 
+	* lib/cp-support.exp (cp_test_ptype_class): Break up regexp.
+	* gdb.cp/nested-types.exp: Remove usage of read1 timeout factor.
+
+2021-06-10  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.cp/cplusfuncs.exp (info_func_regexp): Use gdb_test_lines.
 
 2021-06-09  Tom Tromey  <tromey@adacore.com>
