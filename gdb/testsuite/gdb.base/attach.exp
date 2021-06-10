@@ -179,6 +179,10 @@ proc_with_prefix do_attach_failure_tests {} {
     gdb_test "add-inferior" "Added inferior 2.*" "add empty inferior 2"
     gdb_test "inferior 2" "Switching to inferior 2.*" "switch to inferior 2"
 
+    # Probe this before the failing attach: the failed attach against GDBserver
+    # currently leaves the extended-remote target in a bad state.
+    set do_kfail [target_is_gdbserver]
+
     set test "fail to attach again"
     gdb_test_multiple "attach $testpid" "$test" {
 	-re "Attaching to process $testpid.*warning: process .* is already traced by process .*$gdb_prompt $" {
@@ -190,13 +194,24 @@ proc_with_prefix do_attach_failure_tests {} {
 	}
     }
 
+    # To ensure the target is still alive and working after this, try to run
+    # inferior 1.
+    gdb_test_no_output "set confirm off"
     gdb_test "inferior 1" "Switching to inferior 1.*" "switch to inferior 1"
-    set test "exit after attach failures"
-    gdb_test "kill" \
-	"" \
-	"$test" \
-	"Kill the program being debugged.*y or n. $" \
-	"y"
+
+    if { $do_kfail } { setup_kfail "gdb/19558" "*-*-*" }
+    gdb_test "kill" "killed.*" "exit after attach failures"
+
+    # This can probably be replaced with a call to runto or runto_main once
+    # the kfail is removed.
+    gdb_breakpoint "main"
+    gdb_run_cmd
+    if { $do_kfail } { setup_kfail "gdb/19558" "*-*-*" }
+    gdb_test_multiple "" "stop at main" {
+	-wrap -re "Breakpoint $::decimal, main .*" {
+	    pass $gdb_test_name
+	}
+    }
 
     # Another "don't leave a process around"
     kill_wait_spawned_process $test_spawn_id
