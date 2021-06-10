@@ -1,3 +1,17 @@
+2021-06-10  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lib/gdb.exp (default_gdb_exit): Unset gdb_tty_name.
+	(spawn_capture_tty_name): New, override builtin spawn.
+	(default_gdb_spawn): Capture GDB's TTY name.
+	* lib/tuiterm.exp (tuiterm_spawn): Remove.
+	(tuiterm_env_init, tuiterm_env_finish): Remove spawn override.
+	(Term) <resize>: Use new variable name.
+	(tuiterm_env_init, tuiterm_env_finish): Remove.
+	(tuiterm_env): Don't call tuiterm_env_init and register
+	tuiterm_env_finish in gdb_finish_hooks.
+	(gdb_finish_hooks): Remove.
+	(gdb_finish): Don't call finish hooks.
+
 2021-06-08  Lancelot Six  <lsix@lancelotsix.com>
 
 	* python/lib/gdb/FrameDecorator.py (FrameDecorator): Use 'is None'

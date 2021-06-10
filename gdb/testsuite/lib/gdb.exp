@@ -1909,6 +1909,7 @@ proc default_gdb_exit {} {
 	remote_close host
     }
     unset gdb_spawn_id
+    unset ::gdb_tty_name
     unset inferior_spawn_id
 }
 
@@ -2037,6 +2038,28 @@ proc gdb_file_cmd { arg } {
     }
 }
 
+# The expect "spawn" function puts the tty name into the spawn_out
+# array; but dejagnu doesn't export this globally.  So, we have to
+# wrap spawn with our own function and poke in the built-in spawn
+# so that we can capture this value.
+#
+# If available, the TTY name is saved to the LAST_SPAWN_TTY_NAME global.
+# Otherwise, LAST_SPAWN_TTY_NAME is unset.
+
+proc spawn_capture_tty_name { args } {
+    set result [uplevel builtin_spawn $args]
+    upvar spawn_out spawn_out
+    if { [info exists spawn_out] } {
+	set ::last_spawn_tty_name $spawn_out(slave,name)
+    } else {
+	unset ::last_spawn_tty_name
+    }
+    return $result
+}
+
+rename spawn builtin_spawn
+rename spawn_capture_tty_name spawn
+
 # Default gdb_spawn procedure.
 
 proc default_gdb_spawn { } {
@@ -2074,6 +2097,7 @@ proc default_gdb_spawn { } {
     }
 
     set gdb_spawn_id $res
+    set ::gdb_tty_name $::last_spawn_tty_name
     return 0
 }
 
@@ -7800,13 +7824,6 @@ proc with_override { name override body } {
 # finalization function.
 proc tuiterm_env { } {
     load_lib tuiterm.exp
-
-    # Do initialization.
-    tuiterm_env_init
-
-    # Schedule finalization.
-    global gdb_finish_hooks
-    lappend gdb_finish_hooks tuiterm_env_finish
 }
 
 # Dejagnu has a version of note, but usage is not allowed outside of dejagnu.

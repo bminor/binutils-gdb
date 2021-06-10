@@ -15,36 +15,6 @@
 
 # An ANSI terminal emulator for expect.
 
-# The expect "spawn" function puts the tty name into the spawn_out
-# array; but dejagnu doesn't export this globally.  So, we have to
-# wrap spawn with our own function, so that we can capture this value.
-# The value is later used in calls to stty.
-proc tuiterm_spawn { args } {
-    set result [uplevel builtin_spawn $args]
-    global gdb_spawn_name
-    upvar spawn_out spawn_out
-    if { [info exists spawn_out] } {
-	set gdb_spawn_name $spawn_out(slave,name)
-    } else {
-	unset gdb_spawn_name
-    }
-    return $result
-}
-
-# Initialize tuiterm.exp environment.
-proc tuiterm_env_init { } {
-    # Override spawn with tui_spawn.
-    rename spawn builtin_spawn
-    rename tuiterm_spawn spawn
-}
-
-# Finalize tuiterm.exp environment.
-proc tuiterm_env_finish { } {
-    # Restore spawn.
-    rename spawn tuiterm_spawn
-    rename builtin_spawn spawn
-}
-
 namespace eval Term {
     # Size of the terminal.
     variable _rows
@@ -890,13 +860,12 @@ namespace eval Term {
 	variable _cols
 	variable _resize_count
 
-	global gdb_spawn_name
 	# expect handles each argument to stty separately.  This means
 	# that gdb will see SIGWINCH twice.  Rather than rely on this
 	# behavior (which, after all, could be changed), we make it
 	# explicit here.  This also simplifies waiting for the redraw.
 	_do_resize $rows $_cols
-	stty rows $_rows < $gdb_spawn_name
+	stty rows $_rows < $::gdb_tty_name
 	# Due to the strange column resizing behavior, and because we
 	# don't care about this intermediate resize, we don't check
 	# the size here.
@@ -906,7 +875,7 @@ namespace eval Term {
 	# than what we request from expect.  We hide this weird
 	# details from the caller.
 	_do_resize $_rows $cols
-	stty columns [expr {$_cols + 1}] < $gdb_spawn_name
+	stty columns [expr {$_cols + 1}] < $::gdb_tty_name
 	wait_for "@@ resize done $_resize_count, size = ${_cols}x${rows}"
 	incr _resize_count
     }
