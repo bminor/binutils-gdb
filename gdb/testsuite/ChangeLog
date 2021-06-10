@@ -1,3 +1,8 @@
+2021-06-10  Bhuvanendra Kumar N  <Bhuvanendra.KumarN@amd.com>
+
+	* gdb.base/foll-exec.c: convert the multi-line function call into
+	single line.
+
 2021-06-10  Tom de Vries  <tdevries@suse.de>
 
 	* lib/cp-support.exp (cp_test_ptype_class): Break up regexp.

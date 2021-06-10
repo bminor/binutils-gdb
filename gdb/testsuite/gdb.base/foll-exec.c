@@ -39,18 +39,19 @@ int main (int argc, char ** argv)
   memcpy (prog + len - 9, "execd-prog", 10);
   prog[len + 1] = 0;
 
-  execlp (prog, /* tbreak-execlp */
-	  prog,
-	  "execlp arg1 from foll-exec",
-	  (char *) 0);
+  /* In the following function call, maximum line length exceed the limit 80.
+     This is intentional and required for clang compiler such that complete
+     function call should be in a single line, please do not make it
+     multi-line.  */
+  execlp (prog, /* tbreak-execlp */ prog, "execlp arg1 from foll-exec", (char *) 0);
 
   printf ("foll-exec is about to execl(execd-prog)...\n");
 
-  execl (prog,	/* tbreak-execl */
-	 prog,
-	 "execl arg1 from foll-exec",
-	 "execl arg2 from foll-exec",
-	 (char *) 0);
+  /* In the following function call, maximum line length exceed the limit 80.
+     This is intentional and required for clang compiler such that complete
+     function call should be in a single line, please do not make it
+     multi-line.  */
+  execl (prog, /* tbreak-execl */ prog, "execl arg1 from foll-exec", "execl arg2 from foll-exec", (char *) 0);
 
   {
     static char * argv[] = {
