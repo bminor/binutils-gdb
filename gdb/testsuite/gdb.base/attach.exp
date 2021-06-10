@@ -472,14 +472,19 @@ proc_with_prefix test_command_line_attach_run {} {
     global gdb_prompt
     global binfile
 
-    # Skip test if we cannot attach on the command line and use the run command.
-    # ??? Unclear what condition to use to return here when using gdbserver.
-    # ??? None of the below works.
-    #    ![isnative] || [target_is_gdbserver]
-    #    ![isnative] || [use_gdb_stub]
-    if { ![isnative] || [is_remote target] } then {
+    # The --pid option is used to attach to a process using the native target.
+    # Start GDB and run to main just to see what the execution target is, skip
+    # if it's not the native target.
+    clean_restart $binfile
+
+    if { ![runto_main] } {
+	fail "could not run to main"
+	return
+    }
+
+    if { ![gdb_is_target_native] } {
 	unsupported "commandline attach run test"
-	return 0
+	return
     }
 
     set test_spawn_id [spawn_wait_for_attach $binfile]
