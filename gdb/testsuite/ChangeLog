@@ -1,5 +1,10 @@
 2021-06-11  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.mi/mi-sym-info.exp (114-symbol-info-function test): Increase
+	timeout.
+
+2021-06-11  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdb.base/print-symbol-loading.exp (proc test_load_shlib):
 	Allow "Symbols already loaded for..." messages.
 
