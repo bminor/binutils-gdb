@@ -900,12 +900,17 @@ Do you need \"set solib-search-path\" or \"set sysroot\"?"),
 
    Uses a fairly simplistic heuristic approach where we check
    the file name against "/libpthread".  This can lead to false
-   positives, but this should be good enough in practice.  */
+   positives, but this should be good enough in practice.
+
+   As of glibc-2.34, functions formerly residing in libpthread have
+   been moved to libc, so "/libc." needs to be checked too.  (Matching
+   the "." will avoid matching libraries such as libcrypt.) */
 
 bool
 libpthread_name_p (const char *name)
 {
-  return (strstr (name, "/libpthread") != NULL);
+  return (strstr (name, "/libpthread") != NULL
+          || strstr (name, "/libc.") != NULL );
 }
 
 /* Return non-zero if SO is the libpthread shared library.  */

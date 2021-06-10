@@ -799,6 +799,24 @@ check_thread_db (struct thread_db_info *info, bool log_progress)
   return test_passed;
 }
 
+/* Predicate which tests whether objfile OBJ refers to the library
+   containing pthread related symbols.  Historically, this library has
+   been named in such a way that looking for "libpthread" in the name
+   was sufficient to identify it.  As of glibc-2.34, the C library
+   (libc) contains the thread library symbols.  Therefore we check
+   that the name matches a possible thread library, but we also check
+   that it contains at least one of the symbols (pthread_create) that
+   we'd expect to find in the thread library.  */
+
+static bool
+libpthread_objfile_p (objfile *obj)
+{
+  return (libpthread_name_p (objfile_name (obj))
+          && lookup_minimal_symbol ("pthread_create",
+	                            NULL,
+				    obj).minsym != NULL);
+}
+
 /* Attempt to initialize dlopen()ed libthread_db, described by INFO.
    Return true on success.
    Failure could happen if libthread_db does not have symbols we expect,
@@ -1072,7 +1090,7 @@ try_thread_db_load_from_pdir (const char *subdir)
     return false;
 
   for (objfile *obj : current_program_space->objfiles ())
-    if (libpthread_name_p (objfile_name (obj)))
+    if (libpthread_objfile_p (obj))
       {
 	if (try_thread_db_load_from_pdir_1 (obj, subdir))
 	  return true;
@@ -1181,7 +1199,7 @@ static bool
 has_libpthread (void)
 {
   for (objfile *obj : current_program_space->objfiles ())
-    if (libpthread_name_p (objfile_name (obj)))
+    if (libpthread_objfile_p (obj))
       return true;
 
   return false;
@@ -1286,7 +1304,7 @@ thread_db_new_objfile (struct objfile *objfile)
 	 of the list of shared libraries to load, and in an app of several
 	 thousand shared libraries, this can otherwise be painful.  */
       && ((objfile->flags & OBJF_MAINLINE) != 0
-	  || libpthread_name_p (objfile_name (objfile))))
+	  || libpthread_objfile_p (objfile)))
     check_for_thread_db ();
 }
 

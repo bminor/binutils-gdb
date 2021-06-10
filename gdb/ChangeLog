@@ -1,3 +1,11 @@
+2021-06-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* solib.c (libpthread_name_p): Match "libc" in addition
+	to "libpthread".
+	* linux-thread-db.c (libpthread_objfile_p): New function.
+	(libpthread_name_p): Adjust preexisting callers to use
+	libpthread_objfile_p().
+
 2021-06-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/loc.h (struct call_site_stuff): Remove.
