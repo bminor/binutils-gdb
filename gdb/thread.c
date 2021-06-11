@@ -206,6 +206,14 @@ set_thread_exited (thread_info *tp, bool silent)
 
       /* Clear breakpoints, etc. associated with this thread.  */
       clear_thread_inferior_resources (tp);
+
+      /* Remove from the ptid_t map.  We don't want for
+	 find_thread_ptid to find exited threads.  Also, the target
+	 may reuse the ptid for a new thread, and there can only be
+	 one value per key; adding a new thread with the same ptid_t
+	 would overwrite the exited thread's ptid entry.  */
+      size_t nr_deleted = tp->inf->ptid_thread_map.erase (tp->ptid);
+      gdb_assert (nr_deleted == 1);
     }
 }
 
@@ -227,6 +235,11 @@ new_thread (struct inferior *inf, ptid_t ptid)
   thread_info *tp = new thread_info (inf, ptid);
 
   inf->thread_list.push_back (*tp);
+
+  /* A thread with this ptid should not exist in the map yet.  */
+  gdb_assert (inf->ptid_thread_map.find (ptid) == inf->ptid_thread_map.end ());
+
+  inf->ptid_thread_map[ptid] = tp;
 
   return tp;
 }
@@ -484,11 +497,11 @@ find_thread_ptid (inferior *inf, ptid_t ptid)
 {
   gdb_assert (inf != nullptr);
 
-  for (thread_info *tp : inf->non_exited_threads ())
-    if (tp->ptid == ptid)
-      return tp;
-
-  return NULL;
+  auto it = inf->ptid_thread_map.find (ptid);
+  if (it != inf->ptid_thread_map.end ())
+    return it->second;
+  else
+    return nullptr;
 }
 
 /* See gdbthread.h.  */
@@ -758,7 +771,13 @@ thread_change_ptid (process_stratum_target *targ,
   inf->pid = new_ptid.pid ();
 
   tp = find_thread_ptid (inf, old_ptid);
+  gdb_assert (tp != nullptr);
+
+  int num_erased = inf->ptid_thread_map.erase (old_ptid);
+  gdb_assert (num_erased == 1);
+
   tp->ptid = new_ptid;
+  inf->ptid_thread_map[new_ptid] = tp;
 
   gdb::observers::thread_ptid_changed.notify (targ, old_ptid, new_ptid);
 }

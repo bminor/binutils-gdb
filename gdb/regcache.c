@@ -2044,8 +2044,13 @@ regcache_thread_ptid_changed ()
 
   target1.mock_inferior.pid = old_ptid.pid ();
   target1.mock_thread.ptid = old_ptid;
+  target1.mock_inferior.ptid_thread_map.clear ();
+  target1.mock_inferior.ptid_thread_map[old_ptid] = &target1.mock_thread;
+
   target2.mock_inferior.pid = old_ptid.pid ();
   target2.mock_thread.ptid = old_ptid;
+  target2.mock_inferior.ptid_thread_map.clear ();
+  target2.mock_inferior.ptid_thread_map[old_ptid] = &target2.mock_thread;
 
   gdb_assert (regcaches.empty ());
 

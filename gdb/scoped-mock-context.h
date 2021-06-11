@@ -51,6 +51,7 @@ struct scoped_mock_context
     inferior_list.push_back (mock_inferior);
 
     mock_inferior.thread_list.push_back (mock_thread);
+    mock_inferior.ptid_thread_map[mock_ptid] = &mock_thread;
     mock_inferior.gdbarch = gdbarch;
     mock_inferior.aspace = mock_pspace.aspace;
     mock_inferior.pspace = &mock_pspace;
