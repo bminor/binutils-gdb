@@ -1,3 +1,17 @@
+2021-06-11  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (GET_ELF_SYMBOLS): Delete.  Replace with..
+	(get_elf_symbols): ..this new function throughout.
+	(get_32bit_section_headers): Don't free section_headers.
+	(get_64bit_section_headers): Likewise.
+	(get_section_headers): New function, use throughout in place of
+	32bit and 64bit variants.
+	(get_dynamic_section): Similarly.
+	(process_section_headers): Don't free filedata memory here.
+	(get_file_header): Don't get section headers here..
+	(process_object): ..Read them here instead.  Don't exit without
+	freeing filedata memory.
+
 2021-06-09  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Remove Daniel Jacobwitz from the maintainers list.
