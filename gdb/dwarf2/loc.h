@@ -243,7 +243,6 @@ struct call_site_chain
     struct call_site *call_site[1];
   };
 
-struct call_site_stuff;
 extern gdb::unique_xmalloc_ptr<call_site_chain> call_site_find_chain
   (struct gdbarch *gdbarch, CORE_ADDR caller_pc, CORE_ADDR callee_pc);
 
