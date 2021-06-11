@@ -4349,6 +4349,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  unsigned int tagv = dyn.d_un.d_val;
 		  audit = bfd_elf_string_from_elf_section (abfd, shlink, tagv);
 		}
+	      if (dyn.d_tag == DT_FLAGS_1)
+		elf_tdata (abfd)->is_pie = (dyn.d_un.d_val & DF_1_PIE) != 0;
 	    }
 
 	  free (dynbuf);

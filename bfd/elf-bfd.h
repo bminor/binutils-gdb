@@ -2080,6 +2080,9 @@ struct elf_obj_tdata
      symbols.  */
   unsigned int bad_symtab : 1;
 
+  /* Set if DT_FLAGS_1 has DF_1_PIE set.  */
+  unsigned int is_pie : 1;
+
   /* Information grabbed from an elf core file.  */
   struct core_elf_obj_tdata *core;
 

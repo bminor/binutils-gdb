@@ -1048,7 +1048,9 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	  && elf_tdata (abfd) != NULL
 	  && elf_tdata (abfd)->elf_header != NULL
 	  /* FIXME: Maybe check for other non-supportable types as well ?  */
-	  && elf_tdata (abfd)->elf_header->e_type == ET_EXEC)
+	  && (elf_tdata (abfd)->elf_header->e_type == ET_EXEC
+	      || (elf_tdata (abfd)->elf_header->e_type == ET_DYN
+		  && elf_tdata (abfd)->is_pie)))
 	einfo (_("%F%P: cannot use executable file '%pB' as input to a link\n"),
 	       abfd);
     }
