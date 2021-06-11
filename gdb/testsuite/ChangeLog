@@ -1,3 +1,12 @@
+2021-07-01  Pedro Alves  <pedro@palves.net>
+
+	PR mi/15729
+	PR gdb/13463
+	* gdb.base/access-mem-running.c: New.
+	* gdb.base/access-mem-running.exp: New.
+	* gdb.threads/access-mem-running-thread-exit.c: New.
+	* gdb.threads/access-mem-running-thread-exit.exp: New.
+
 2021-06-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.dwarf2/dw2-reg-undefined.exp: Update regexp.

@@ -1,3 +1,22 @@
+2021-07-01  Pedro Alves  <pedro@palves.net>
+
+	PR mi/15729
+	PR gdb/13463
+	* linux-nat.c (linux_nat_target::detach): Close the
+	/proc/<pid>/mem file if it was open for this process.
+	(linux_handle_extended_wait) <PTRACE_EVENT_EXEC>: Close the
+	/proc/<pid>/mem file if it was open for this process.
+	(linux_nat_target::mourn_inferior): Close the /proc/<pid>/mem file
+	if it was open for this process.
+	(linux_nat_target::xfer_partial): Adjust.  Do not fall back to
+	inf_ptrace_target::xfer_partial for memory accesses.
+	(last_proc_mem_file): New.
+	(maybe_close_proc_mem_file): New.
+	(linux_proc_xfer_memory_partial_pid): New, with bits factored out
+	from linux_proc_xfer_partial.
+	(linux_proc_xfer_partial): Delete.
+	(linux_proc_xfer_memory_partial): New.
+
 2021-06-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* frame.h (FRAME_SCOPED_DEBUG_ENTER_EXIT): New.
