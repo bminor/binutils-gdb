@@ -1,3 +1,10 @@
+2021-06-11  Tom Tromey  <tom@tromey.com>
+
+	PR rust/23427
+	* lib/rust-support.exp (rust_compiler_version): New caching proc.
+	* gdb.rust/rawids.exp: New file.
+	* gdb.rust/rawids.rs: New file.
+
 2021-06-10  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.mi/user-selected-context-sync.c (child_sub_function, main):

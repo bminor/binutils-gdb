@@ -747,12 +747,21 @@ rust_identifier_start_p (char c)
 int
 rust_parser::lex_identifier ()
 {
-  const char *start = pstate->lexptr;
   unsigned int length;
   const struct token_info *token;
   int i;
   int is_gdb_var = pstate->lexptr[0] == '$';
 
+  bool is_raw = false;
+  if (pstate->lexptr[0] == 'r'
+      && pstate->lexptr[1] == '#'
+      && rust_identifier_start_p (pstate->lexptr[2]))
+    {
+      is_raw = true;
+      pstate->lexptr += 2;
+    }
+
+  const char *start = pstate->lexptr;
   gdb_assert (rust_identifier_start_p (pstate->lexptr[0]));
 
   ++pstate->lexptr;
@@ -769,13 +778,16 @@ rust_parser::lex_identifier ()
 
   length = pstate->lexptr - start;
   token = NULL;
-  for (i = 0; i < ARRAY_SIZE (identifier_tokens); ++i)
+  if (!is_raw)
     {
-      if (length == strlen (identifier_tokens[i].name)
-	  && strncmp (identifier_tokens[i].name, start, length) == 0)
+      for (i = 0; i < ARRAY_SIZE (identifier_tokens); ++i)
 	{
-	  token = &identifier_tokens[i];
-	  break;
+	  if (length == strlen (identifier_tokens[i].name)
+	      && strncmp (identifier_tokens[i].name, start, length) == 0)
+	    {
+	      token = &identifier_tokens[i];
+	      break;
+	    }
 	}
     }
 
@@ -789,6 +801,7 @@ rust_parser::lex_identifier ()
 	}
     }
   else if (token == NULL
+	   && !is_raw
 	   && (strncmp (start, "thread", length) == 0
 	       || strncmp (start, "task", length) == 0)
 	   && space_then_number (pstate->lexptr))
@@ -2300,6 +2313,13 @@ rust_lex_tests (void)
   rust_lex_stringish_test (&parser, "hibob", "hibob", IDENT);
   rust_lex_stringish_test (&parser, "hibob__93", "hibob__93", IDENT);
   rust_lex_stringish_test (&parser, "thread", "thread", IDENT);
+  rust_lex_stringish_test (&parser, "r#true", "true", IDENT);
+
+  const int expected1[] = { IDENT, DECIMAL_INTEGER, 0 };
+  rust_lex_test_sequence (&parser, "r#thread 23", ARRAY_SIZE (expected1),
+			  expected1);
+  const int expected2[] = { IDENT, '#', 0 };
+  rust_lex_test_sequence (&parser, "r#", ARRAY_SIZE (expected2), expected2);
 
   rust_lex_stringish_test (&parser, "\"string\"", "string", STRING);
   rust_lex_stringish_test (&parser, "\"str\\ting\"", "str\ting", STRING);
