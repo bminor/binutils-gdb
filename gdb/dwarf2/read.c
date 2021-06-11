@@ -2579,21 +2579,20 @@ create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
 						 &per_bfd->obstack);
 }
 
-/* Read the address map data from DWARF-5 .debug_aranges, and use it to
-   populate the psymtabs_addrmap.  */
+/* Read the address map data from DWARF-5 .debug_aranges, and use it
+   to populate given addrmap.  Returns true on success, false on
+   failure.  */
 
-static void
-create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
-			     struct dwarf2_section_info *section)
+static bool
+read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
+			   struct dwarf2_section_info *section,
+			   addrmap *mutable_map)
 {
   struct objfile *objfile = per_objfile->objfile;
   bfd *abfd = objfile->obfd;
   struct gdbarch *gdbarch = objfile->arch ();
   const CORE_ADDR baseaddr = objfile->text_section_offset ();
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
-
-  auto_obstack temp_obstack;
-  addrmap *mutable_map = addrmap_create_mutable (&temp_obstack);
 
   std::unordered_map<sect_offset,
 		     dwarf2_per_cu_data *,
@@ -2615,7 +2614,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 	  warning (_("Section .debug_aranges in %s has duplicate "
 		     "debug_info_offset %s, ignoring .debug_aranges."),
 		   objfile_name (objfile), sect_offset_str (per_cu->sect_off));
-	  return;
+	  return false;
 	}
     }
 
@@ -2646,7 +2645,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		   plongest (entry_addr - section->buffer),
 		   plongest (bytes_read + entry_length),
 		   pulongest (section->size));
-	  return;
+	  return false;
 	}
 
       /* The version number.  */
@@ -2658,7 +2657,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		     "has unsupported version %d, ignoring .debug_aranges."),
 		   objfile_name (objfile),
 		   plongest (entry_addr - section->buffer), version);
-	  return;
+	  return false;
 	}
 
       const uint64_t debug_info_offset
@@ -2674,7 +2673,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		   objfile_name (objfile),
 		   plongest (entry_addr - section->buffer),
 		   pulongest (debug_info_offset));
-	  return;
+	  return false;
 	}
       dwarf2_per_cu_data *const per_cu = per_cu_it->second;
 
@@ -2685,7 +2684,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		     "address_size %u is invalid, ignoring .debug_aranges."),
 		   objfile_name (objfile),
 		   plongest (entry_addr - section->buffer), address_size);
-	  return;
+	  return false;
 	}
 
       const uint8_t segment_selector_size = *addr++;
@@ -2697,7 +2696,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		   objfile_name (objfile),
 		   plongest (entry_addr - section->buffer),
 		   segment_selector_size);
-	  return;
+	  return false;
 	}
 
       /* Must pad to an alignment boundary that is twice the address
@@ -2718,7 +2717,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 			 "ignoring .debug_aranges."),
 		       objfile_name (objfile),
 		       plongest (entry_addr - section->buffer));
-	      return;
+	      return false;
 	    }
 	  ULONGEST start = extract_unsigned_integer (addr, address_size,
 						     dwarf5_byte_order);
@@ -2742,8 +2741,24 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 	}
     }
 
-  per_bfd->index_addrmap = addrmap_create_fixed (mutable_map,
-						 &per_bfd->obstack);
+  return true;
+}
+
+/* Read the address map data from DWARF-5 .debug_aranges, and use it to
+   populate the psymtabs_addrmap.  */
+
+static void
+create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
+			     struct dwarf2_section_info *section)
+{
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
+
+  auto_obstack temp_obstack;
+  addrmap *mutable_map = addrmap_create_mutable (&temp_obstack);
+
+  if (read_addrmap_from_aranges (per_objfile, section, mutable_map))
+    per_bfd->index_addrmap = addrmap_create_fixed (mutable_map,
+						   &per_bfd->obstack);
 }
 
 /* A helper function that reads the .gdb_index from BUFFER and fills
