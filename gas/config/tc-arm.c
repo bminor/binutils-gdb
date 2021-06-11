@@ -23957,6 +23957,9 @@ static const struct reg_entry reg_names[] =
 
   /* XScale accumulator registers.  */
   REGNUM(acc,0,XSCALE), REGNUM(ACC,0,XSCALE),
+
+  /* Alias 'ra_auth_code' to r12 for pacbti.  */
+  REGDEF(ra_auth_code,12,RN),
 };
 #undef REGDEF
 #undef REGNUM
