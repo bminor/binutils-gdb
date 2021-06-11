@@ -163,6 +163,19 @@ add_inferior (int pid)
   return inf;
 }
 
+/* See inferior.h.  */
+
+void
+inferior::clear_thread_list (bool silent)
+{
+  thread_list.clear_and_dispose ([=] (thread_info *thr)
+    {
+      set_thread_exited (thr, silent);
+      if (thr->deletable ())
+	delete thr;
+    });
+}
+
 void
 delete_inferior (struct inferior *todel)
 {
@@ -177,8 +190,7 @@ delete_inferior (struct inferior *todel)
   if (!inf)
     return;
 
-  for (thread_info *tp : inf->threads_safe ())
-    delete_thread_silent (tp);
+  inf->clear_thread_list (true);
 
   if (infprev)
     infprev->next = inf->next;
@@ -209,13 +221,7 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
   if (!inf)
     return;
 
-  for (thread_info *tp : inf->threads_safe ())
-    {
-      if (silent)
-	delete_thread_silent (tp);
-      else
-	delete_thread (tp);
-    }
+  inf->clear_thread_list (silent);
 
   gdb::observers::inferior_exit.notify (inf);
 

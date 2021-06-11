@@ -20,13 +20,16 @@
 #define THREAD_ITER_H
 
 #include "gdbsupport/filtered-iterator.h"
+#include "gdbsupport/iterator-range.h"
 #include "gdbsupport/next-iterator.h"
+#include "gdbsupport/reference-to-pointer-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 
 /* A forward iterator that iterates over a given inferior's
    threads.  */
 
-using inf_threads_iterator = next_iterator<thread_info>;
+using inf_threads_iterator
+  = reference_to_pointer_iterator<intrusive_list<thread_info>::iterator>;
 
 /* A forward iterator that iterates over all threads of all
    inferiors.  */

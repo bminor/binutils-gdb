@@ -449,6 +449,7 @@ SELFTESTS_SRCS = \
 	unittests/function-view-selftests.c \
 	unittests/gdb_tilde_expand-selftests.c \
 	unittests/gmp-utils-selftests.c \
+	unittests/intrusive_list-selftests.c \
 	unittests/lookup_name_info-selftests.c \
 	unittests/memory-map-selftests.c \
 	unittests/memrange-selftests.c \

@@ -33,6 +33,7 @@ struct symtab;
 #include "gdbsupport/common-gdbthread.h"
 #include "gdbsupport/forward-scope-exit.h"
 #include "displaced-stepping.h"
+#include "gdbsupport/intrusive_list.h"
 
 struct inferior;
 struct process_stratum_target;
@@ -222,9 +223,12 @@ struct private_thread_info
    delete_thread).  All other thread references are considered weak
    references.  Placing a thread in the thread list is an implicit
    strong reference, and is thus not accounted for in the thread's
-   refcount.  */
+   refcount.
 
-class thread_info : public refcounted_object
+   The intrusive_list_node base links threads in a per-inferior list.  */
+
+class thread_info : public refcounted_object,
+		    public intrusive_list_node<thread_info>
 {
 public:
   explicit thread_info (inferior *inf, ptid_t ptid);
@@ -235,7 +239,6 @@ public:
   /* Mark this thread as running and notify observers.  */
   void set_running (bool running);
 
-  struct thread_info *next = NULL;
   ptid_t ptid;			/* "Actual process id";
 				    In fact, this may be overloaded with 
 				    kernel thread id, etc.  */
@@ -434,6 +437,10 @@ extern void delete_thread (struct thread_info *thread);
 /* Like delete_thread, but be quiet about it.  Used when the process
    this thread belonged to has already exited, for example.  */
 extern void delete_thread_silent (struct thread_info *thread);
+
+/* Mark the thread exited, but don't delete it or remove it from the
+   inferior thread list.  */
+extern void set_thread_exited (thread_info *tp, bool silent);
 
 /* Delete a step_resume_breakpoint from the thread database.  */
 extern void delete_step_resume_breakpoint (struct thread_info *);

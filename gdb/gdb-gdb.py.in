@@ -276,16 +276,108 @@ class CoreAddrPrettyPrinter:
         return hex(int(self._val))
 
 
+class IntrusiveListPrinter:
+    """Print a struct intrusive_list."""
+
+    def __init__(self, val):
+        self._val = val
+
+        # Type of linked items.
+        self._item_type = self._val.type.template_argument(0)
+        self._node_ptr_type = gdb.lookup_type(
+            "intrusive_list_node<{}>".format(self._item_type.tag)
+        ).pointer()
+
+        # Type of value -> node converter.
+        self._conv_type = self._val.type.template_argument(1)
+
+        if self._uses_member_node():
+            # The second template argument of intrusive_member_node is a member
+            # pointer value.  Its value is the offset of the node member in the
+            # enclosing type.
+            member_node_ptr = self._conv_type.template_argument(1)
+            member_node_ptr = member_node_ptr.cast(gdb.lookup_type("int"))
+            self._member_node_offset = int(member_node_ptr)
+
+            # This is only needed in _as_node_ptr if using a member node.  Look it
+            # up here so we only do it once.
+            self._char_ptr_type = gdb.lookup_type("char").pointer()
+
+    def display_hint(self):
+        return "array"
+
+    def _uses_member_node(self):
+        """Return True if the list items use a node as a member, False if
+        they use a node as a base class.
+        """
+
+        if self._conv_type.name.startswith("intrusive_member_node<"):
+            return True
+        elif self._conv_type.name.startswith("intrusive_base_node<"):
+            return False
+        else:
+            raise RuntimeError(
+                "Unexpected intrusive_list value -> node converter type: {}".format(
+                    self._conv_type.name
+                )
+            )
+
+    def to_string(self):
+        s = "intrusive list of {}".format(self._item_type)
+
+        if self._uses_member_node():
+            node_member = self._conv_type.template_argument(1)
+            s += ", linked through {}".format(node_member)
+
+        return s
+
+    def _as_node_ptr(self, elem_ptr):
+        """Given ELEM_PTR, a pointer to a list element, return a pointer to the
+        corresponding intrusive_list_node.
+        """
+
+        assert elem_ptr.type.code == gdb.TYPE_CODE_PTR
+
+        if self._uses_member_node():
+            # Node as a member: add the member node offset from to the element's
+            # address to get the member node's address.
+            elem_char_ptr = elem_ptr.cast(self._char_ptr_type)
+            node_char_ptr = elem_char_ptr + self._member_node_offset
+            return node_char_ptr.cast(self._node_ptr_type)
+        else:
+            # Node as a base: just casting from node pointer to item pointer
+            # will adjust the pointer value.
+            return elem_ptr.cast(self._node_ptr_type)
+
+    def _children_generator(self):
+        """Generator that yields one tuple per list item."""
+
+        elem_ptr = self._val["m_front"]
+        idx = 0
+        while elem_ptr != 0:
+            yield (str(idx), elem_ptr.dereference())
+            node_ptr = self._as_node_ptr(elem_ptr)
+            elem_ptr = node_ptr["next"]
+            idx += 1
+
+    def children(self):
+        return self._children_generator()
+
+
 def type_lookup_function(val):
     """A routine that returns the correct pretty printer for VAL
     if appropriate.  Returns None otherwise.
     """
-    if val.type.tag == "type":
+    tag = val.type.tag
+    name = val.type.name
+    if tag == "type":
         return StructTypePrettyPrinter(val)
-    elif val.type.tag == "main_type":
+    elif tag == "main_type":
         return StructMainTypePrettyPrinter(val)
-    elif val.type.name == "CORE_ADDR":
+    elif name == "CORE_ADDR":
         return CoreAddrPrettyPrinter(val)
+    elif tag is not None and tag.startswith("intrusive_list<"):
+        return IntrusiveListPrinter(val)
     return None
 
 

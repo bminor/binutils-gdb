@@ -27,8 +27,15 @@ all_threads_iterator::all_threads_iterator (begin_t)
 {
   /* Advance M_INF/M_THR to the first thread's position.  */
   for (m_inf = inferior_list; m_inf != NULL; m_inf = m_inf->next)
-    if ((m_thr = m_inf->thread_list) != NULL)
-      return;
+    {
+      auto thr_iter = m_inf->thread_list.begin ();
+      if (thr_iter != m_inf->thread_list.end ())
+	{
+	  m_thr = &*thr_iter;
+	  return;
+	}
+    }
+  m_thr = nullptr;
 }
 
 /* See thread-iter.h.  */
@@ -36,6 +43,8 @@ all_threads_iterator::all_threads_iterator (begin_t)
 void
 all_threads_iterator::advance ()
 {
+  intrusive_list<thread_info>::iterator thr_iter (m_thr);
+
   /* The loop below is written in the natural way as-if we'd always
      start at the beginning of the inferior list.  This fast forwards
      the algorithm to the actual current position.  */
@@ -43,14 +52,17 @@ all_threads_iterator::advance ()
 
   for (; m_inf != NULL; m_inf = m_inf->next)
     {
-      m_thr = m_inf->thread_list;
-      while (m_thr != NULL)
+      thr_iter = m_inf->thread_list.begin ();
+      while (thr_iter != m_inf->thread_list.end ())
 	{
+	  m_thr = &*thr_iter;
 	  return;
 	start:
-	  m_thr = m_thr->next;
+	  ++thr_iter;
 	}
     }
+
+  m_thr = nullptr;
 }
 
 /* See thread-iter.h.  */
@@ -74,12 +86,18 @@ all_matching_threads_iterator::all_matching_threads_iterator
   gdb_assert ((filter_target == nullptr && filter_ptid == minus_one_ptid)
 	      || filter_target->stratum () == process_stratum);
 
-  m_thr = nullptr;
   for (m_inf = inferior_list; m_inf != NULL; m_inf = m_inf->next)
     if (m_inf_matches ())
-      for (m_thr = m_inf->thread_list; m_thr != NULL; m_thr = m_thr->next)
-	if (m_thr->ptid.matches (m_filter_ptid))
-	  return;
+      for (auto thr_iter = m_inf->thread_list.begin ();
+	   thr_iter != m_inf->thread_list.end ();
+	   ++thr_iter)
+	if (thr_iter->ptid.matches (m_filter_ptid))
+	  {
+	    m_thr = &*thr_iter;
+	    return;
+	  }
+
+  m_thr = nullptr;
 }
 
 /* See thread-iter.h.  */
@@ -87,6 +105,8 @@ all_matching_threads_iterator::all_matching_threads_iterator
 void
 all_matching_threads_iterator::advance ()
 {
+  intrusive_list<thread_info>::iterator thr_iter (m_thr);
+
   /* The loop below is written in the natural way as-if we'd always
      start at the beginning of the inferior list.  This fast forwards
      the algorithm to the actual current position.  */
@@ -95,13 +115,18 @@ all_matching_threads_iterator::advance ()
   for (; m_inf != NULL; m_inf = m_inf->next)
     if (m_inf_matches ())
       {
-	m_thr = m_inf->thread_list;
-	while (m_thr != NULL)
+	thr_iter = m_inf->thread_list.begin ();
+	while (thr_iter != m_inf->thread_list.end ())
 	  {
-	    if (m_thr->ptid.matches (m_filter_ptid))
-	      return;
+	    if (thr_iter->ptid.matches (m_filter_ptid))
+	      {
+		m_thr = &*thr_iter;
+		return;
+	      }
 	  start:
-	    m_thr = m_thr->next;
+	    ++thr_iter;
 	  }
       }
+
+  m_thr = nullptr;
 }

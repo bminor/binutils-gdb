@@ -390,8 +390,8 @@ public:
   /* Pointer to next inferior in singly-linked list of inferiors.  */
   struct inferior *next = NULL;
 
-  /* This inferior's thread list.  */
-  thread_info *thread_list = nullptr;
+  /* This inferior's thread list, sorted by creation order.  */
+  intrusive_list<thread_info> thread_list;
 
   /* Returns a range adapter covering the inferior's threads,
      including exited threads.  Used like this:
@@ -400,7 +400,7 @@ public:
 	 { .... }
   */
   inf_threads_range threads ()
-  { return inf_threads_range (this->thread_list); }
+  { return inf_threads_range (this->thread_list.begin ()); }
 
   /* Returns a range adapter covering the inferior's non-exited
      threads.  Used like this:
@@ -409,7 +409,7 @@ public:
 	 { .... }
   */
   inf_non_exited_threads_range non_exited_threads ()
-  { return inf_non_exited_threads_range (this->thread_list); }
+  { return inf_non_exited_threads_range (this->thread_list.begin ()); }
 
   /* Like inferior::threads(), but returns a range adapter that can be
      used with range-for, safely.  I.e., it is safe to delete the
@@ -420,7 +420,11 @@ public:
 	 delete f;
   */
   inline safe_inf_threads_range threads_safe ()
-  { return safe_inf_threads_range (this->thread_list); }
+  { return safe_inf_threads_range (this->thread_list.begin ()); }
+
+  /* Delete all threads in the thread list.  If SILENT, exit threads
+     silently.  */
+  void clear_thread_list (bool silent);
 
   /* Continuations-related methods.  A continuation is an std::function
      to be called to finish the execution of a command when running
