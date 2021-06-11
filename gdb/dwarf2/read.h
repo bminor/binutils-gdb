@@ -104,6 +104,7 @@ struct dwarf2_per_cu_data
       reading_dwo_directly (false),
       tu_read (false),
       m_header_read_in (false),
+      addresses_seen (false),
       unit_type {},
       lang (language_unknown)
   {
@@ -153,6 +154,10 @@ struct dwarf2_per_cu_data
      Don't access this field directly.  It should be private, but we can't make
      it private at the moment.  */
   mutable bool m_header_read_in : 1;
+
+  /* If addresses have been read for this CU (usually from
+     .debug_aranges), then this flag is set.  */
+  bool addresses_seen : 1;
 
   /* The unit type of this CU.  */
   ENUM_BITFIELD (dwarf_unit_type) unit_type : 8;

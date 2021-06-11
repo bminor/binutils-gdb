@@ -2740,6 +2740,8 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		 - baseaddr);
 	  addrmap_set_empty (mutable_map, start, end - 1, per_cu);
 	}
+
+      per_cu->addresses_seen = true;
     }
 
   return true;
