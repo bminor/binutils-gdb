@@ -1,3 +1,11 @@
+2021-06-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.server/server-kill.exp: Introduce global kill_pid_of, and
+	make use of this in prepare to select which pid we should kill.
+	Run all the tests twice with a different kill_pid_of value.
+	(prepare): Make use of kill_pid_of.
+	(test_stepi): New proc.
+
 2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-frame.exp: Add Frame.level tests.

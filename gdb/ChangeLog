@@ -1,3 +1,9 @@
+2021-06-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* breakpoint.c (insert_bp_location): If we catch a
+	TARGET_CLOSE_ERROR just rethrow it, the breakpoints might have
+	been deleted.
+
 2021-06-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention new target feature name.

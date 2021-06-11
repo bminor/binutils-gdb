@@ -2698,6 +2698,14 @@ insert_bp_location (struct bp_location *bl,
 	{
 	  /* Can't set the breakpoint.  */
 
+	  /* If the target has closed then it will have deleted any
+	     breakpoints inserted within the target inferior, as a result
+	     any further attempts to interact with the breakpoint objects
+	     is not possible.  Just rethrow the error.  */
+	  if (bp_excpt.error == TARGET_CLOSE_ERROR)
+	    throw bp_excpt;
+	  gdb_assert (bl->owner != nullptr);
+
 	  /* In some cases, we might not be able to insert a
 	     breakpoint in a shared library that has already been
 	     removed, but we have not yet processed the shlib unload
