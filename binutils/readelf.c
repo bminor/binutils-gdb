@@ -263,12 +263,13 @@ typedef struct filedata
   FILE *               handle;
   bfd_size_type        file_size;
   Elf_Internal_Ehdr    file_header;
+  unsigned long        archive_file_offset;
+  unsigned long        archive_file_size;
+  /* Everything below this point is cleared out by free_filedata.  */
   Elf_Internal_Shdr *  section_headers;
   Elf_Internal_Phdr *  program_headers;
   char *               string_table;
   unsigned long        string_table_length;
-  unsigned long        archive_file_offset;
-  unsigned long        archive_file_size;
   unsigned long        dynamic_addr;
   bfd_size_type        dynamic_size;
   size_t               dynamic_nent;
@@ -21191,35 +21192,14 @@ static void
 free_filedata (Filedata *filedata)
 {
   free (filedata->program_interpreter);
-  filedata->program_interpreter = NULL;
-
   free (filedata->program_headers);
-  filedata->program_headers = NULL;
-
   free (filedata->section_headers);
-  filedata->section_headers = NULL;
-
   free (filedata->string_table);
-  filedata->string_table = NULL;
-  filedata->string_table_length = 0;
-
   free (filedata->dump.dump_sects);
-  filedata->dump.dump_sects = NULL;
-  filedata->dump.num_dump_sects = 0;
-
   free (filedata->dynamic_strings);
-  filedata->dynamic_strings = NULL;
-  filedata->dynamic_strings_length = 0;
-
   free (filedata->dynamic_symbols);
-  filedata->dynamic_symbols = NULL;
-  filedata->num_dynamic_syms = 0;
-
   free (filedata->dynamic_syminfo);
-  filedata->dynamic_syminfo = NULL;
-
   free (filedata->dynamic_section);
-  filedata->dynamic_section = NULL;
 
   while (filedata->symtab_shndx_list != NULL)
     {
@@ -21229,7 +21209,6 @@ free_filedata (Filedata *filedata)
     }
 
   free (filedata->section_headers_groups);
-  filedata->section_headers_groups = NULL;
 
   if (filedata->section_groups)
     {
@@ -21247,8 +21226,9 @@ free_filedata (Filedata *filedata)
 	}
 
       free (filedata->section_groups);
-      filedata->section_groups = NULL;
     }
+  memset (&filedata->section_headers, 0,
+	  sizeof (Filedata) - offsetof (Filedata, section_headers));
 }
 
 static void

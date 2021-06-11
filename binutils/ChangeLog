@@ -1,5 +1,11 @@
 2021-06-11  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (struct filedata): Move archive_file_offset and
+	archive_file_size earlier.
+	(free_filedata): Clear using memset.
+
+2021-06-11  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (GET_ELF_SYMBOLS): Delete.  Replace with..
 	(get_elf_symbols): ..this new function throughout.
 	(get_32bit_section_headers): Don't free section_headers.
