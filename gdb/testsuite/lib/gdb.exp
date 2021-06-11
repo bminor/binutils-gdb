@@ -6078,7 +6078,7 @@ proc exec_is_pie { executable } {
     if { $res != 0 } {
 	return -1
     }
-    set res [regexp -line {^[ \t]*Type:[ \t]*DYN \(Shared object file\)$} \
+    set res [regexp -line {^[ \t]*Type:[ \t]*DYN \((Position-Independent Executable|Shared object) file\)$} \
 		 $output]
     if { $res == 1 } {
 	return 1

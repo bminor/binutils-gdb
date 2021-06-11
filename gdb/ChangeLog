@@ -1,3 +1,7 @@
+2021-06-15  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/gdb.exp (exec_is_pie): Match new PIE readelf output.
+
 2021-06-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (GNULIB_BUILDDIR): Rename to ...

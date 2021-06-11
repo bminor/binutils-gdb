@@ -1,3 +1,14 @@
+2021-06-15  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (locate_dynamic_section, is_pie): New functions.
+	(get_file_type): Replace e_type parameter with filedata.  Call
+	is_pie for ET_DYN.  Update all callers.
+	(process_program_headers): Use local variables dynamic_addr and
+	dynamic_size, updating filedata on exit from function.  Set
+	dynamic_size of 1 to indicate no dynamic section or segment.
+	Update tests of dynamic_size throughout.
+	* testsuite/binutils-all/x86-64/pr27708.dump: Update expected output.
+
 2021-06-14  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* dwarf.c (struct abbrev_attr): Change type of implicit_const.

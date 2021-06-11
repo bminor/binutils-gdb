@@ -2339,9 +2339,96 @@ get_dynamic_type (Filedata * filedata, unsigned long type)
     }
 }
 
-static char *
-get_file_type (unsigned e_type)
+static bool get_program_headers (Filedata *);
+static bool get_dynamic_section (Filedata *);
+
+static void
+locate_dynamic_section (Filedata *filedata)
 {
+  unsigned long dynamic_addr = 0;
+  bfd_size_type dynamic_size = 0;
+
+  if (filedata->file_header.e_phnum != 0
+      && get_program_headers (filedata))
+    {
+      Elf_Internal_Phdr *segment;
+      unsigned int i;
+
+      for (i = 0, segment = filedata->program_headers;
+	   i < filedata->file_header.e_phnum;
+	   i++, segment++)
+	{
+	  if (segment->p_type == PT_DYNAMIC)
+	    {
+	      dynamic_addr = segment->p_offset;
+	      dynamic_size = segment->p_filesz;
+
+	      if (filedata->section_headers != NULL)
+		{
+		  Elf_Internal_Shdr *sec;
+
+		  sec = find_section (filedata, ".dynamic");
+		  if (sec != NULL)
+		    {
+		      if (sec->sh_size == 0
+			  || sec->sh_type == SHT_NOBITS)
+			{
+			  dynamic_addr = 0;
+			  dynamic_size = 0;
+			}
+		      else
+			{
+			  dynamic_addr = sec->sh_offset;
+			  dynamic_size = sec->sh_size;
+			}
+		    }
+		}
+
+	      if (dynamic_addr > filedata->file_size
+		  || (dynamic_size > filedata->file_size - dynamic_addr))
+		{
+		  dynamic_addr = 0;
+		  dynamic_size = 0;
+		}
+	      break;
+	    }
+	}
+    }
+  filedata->dynamic_addr = dynamic_addr;
+  filedata->dynamic_size = dynamic_size ? dynamic_size : 1;
+}
+
+static bool
+is_pie (Filedata *filedata)
+{
+  Elf_Internal_Dyn *entry;
+
+  if (filedata->dynamic_size == 0)
+    locate_dynamic_section (filedata);
+  if (filedata->dynamic_size <= 1)
+    return false;
+
+  if (!get_dynamic_section (filedata))
+    return false;
+
+  for (entry = filedata->dynamic_section;
+       entry < filedata->dynamic_section + filedata->dynamic_nent;
+       entry++)
+    {
+      if (entry->d_tag == DT_FLAGS_1)
+	{
+	  if ((entry->d_un.d_val & DF_1_PIE) != 0)
+	    return true;
+	  break;
+	}
+    }
+  return false;
+}
+
+static char *
+get_file_type (Filedata *filedata)
+{
+  unsigned e_type = filedata->file_header.e_type;
   static char buff[64];
 
   switch (e_type)
@@ -2349,7 +2436,11 @@ get_file_type (unsigned e_type)
     case ET_NONE: return _("NONE (None)");
     case ET_REL:  return _("REL (Relocatable file)");
     case ET_EXEC: return _("EXEC (Executable file)");
-    case ET_DYN:  return _("DYN (Shared object file)");
+    case ET_DYN:
+      if (is_pie (filedata))
+	return _("DYN (Position-Independent Executable file)");
+      else
+	return _("DYN (Shared object file)");
     case ET_CORE: return _("CORE (Core file)");
 
     default:
@@ -5168,7 +5259,7 @@ process_file_header (Filedata * filedata)
       printf (_("  ABI Version:                       %d\n"),
 	      header->e_ident[EI_ABIVERSION]);
       printf (_("  Type:                              %s\n"),
-	      get_file_type (header->e_type));
+	      get_file_type (filedata));
       printf (_("  Machine:                           %s\n"),
 	      get_machine_name (header->e_machine));
       printf (_("  Version:                           0x%lx\n"),
@@ -5379,27 +5470,21 @@ get_program_headers (Filedata * filedata)
   return false;
 }
 
-/* Returns TRUE if the program headers were loaded.  */
+/* Print program header info and locate dynamic section.  */
 
-static bool
+static void
 process_program_headers (Filedata * filedata)
 {
   Elf_Internal_Phdr * segment;
   unsigned int i;
   Elf_Internal_Phdr * previous_load = NULL;
 
-  filedata->dynamic_addr = 0;
-  filedata->dynamic_size = 0;
-
   if (filedata->file_header.e_phnum == 0)
     {
       /* PR binutils/12467.  */
       if (filedata->file_header.e_phoff != 0)
-	{
-	  warn (_("possibly corrupt ELF header - it has a non-zero program"
-		  " header offset, but no program headers\n"));
-	  return false;
-	}
+	warn (_("possibly corrupt ELF header - it has a non-zero program"
+		" header offset, but no program headers\n"));
       else if (do_segments)
 	{
 	  if (filedata->is_separate)
@@ -5408,17 +5493,16 @@ process_program_headers (Filedata * filedata)
 	  else
 	    printf (_("\nThere are no program headers in this file.\n"));
 	}
-      return true;
+      goto no_headers;
     }
 
   if (do_segments && !do_header)
     {
       if (filedata->is_separate)
 	printf ("\nIn linked file '%s' the ELF file type is %s\n",
-		filedata->file_name,
-		get_file_type (filedata->file_header.e_type));
+		filedata->file_name, get_file_type (filedata));
       else
-	printf (_("\nElf file type is %s\n"), get_file_type (filedata->file_header.e_type));
+	printf (_("\nElf file type is %s\n"), get_file_type (filedata));
       printf (_("Entry point 0x%s\n"), bfd_vmatoa ("x", filedata->file_header.e_entry));
       printf (ngettext ("There is %d program header, starting at offset %s\n",
 			"There are %d program headers, starting at offset %s\n",
@@ -5428,7 +5512,7 @@ process_program_headers (Filedata * filedata)
     }
 
   if (! get_program_headers (filedata))
-    return true;
+    goto no_headers;
 
   if (do_segments)
     {
@@ -5452,6 +5536,8 @@ process_program_headers (Filedata * filedata)
 	}
     }
 
+  unsigned long dynamic_addr = 0;
+  bfd_size_type dynamic_size = 0;
   for (i = 0, segment = filedata->program_headers;
        i < filedata->file_header.e_phnum;
        i++, segment++)
@@ -5577,13 +5663,13 @@ process_program_headers (Filedata * filedata)
 	  break;
 
 	case PT_DYNAMIC:
-	  if (filedata->dynamic_addr)
+	  if (dynamic_addr)
 	    error (_("more than one dynamic segment\n"));
 
 	  /* By default, assume that the .dynamic section is the first
 	     section in the DYNAMIC segment.  */
-	  filedata->dynamic_addr = segment->p_offset;
-	  filedata->dynamic_size = segment->p_filesz;
+	  dynamic_addr = segment->p_offset;
+	  dynamic_size = segment->p_filesz;
 
 	  /* Try to locate the .dynamic section. If there is
 	     a section header table, we can easily locate it.  */
@@ -5594,27 +5680,28 @@ process_program_headers (Filedata * filedata)
 	      sec = find_section (filedata, ".dynamic");
 	      if (sec == NULL || sec->sh_size == 0)
 		{
-                  /* A corresponding .dynamic section is expected, but on
-                     IA-64/OpenVMS it is OK for it to be missing.  */
-                  if (!is_ia64_vms (filedata))
-                    error (_("no .dynamic section in the dynamic segment\n"));
+		  /* A corresponding .dynamic section is expected, but on
+		     IA-64/OpenVMS it is OK for it to be missing.  */
+		  if (!is_ia64_vms (filedata))
+		    error (_("no .dynamic section in the dynamic segment\n"));
 		  break;
 		}
 
 	      if (sec->sh_type == SHT_NOBITS)
 		{
-		  filedata->dynamic_size = 0;
+		  dynamic_addr = 0;
+		  dynamic_size = 0;
 		  break;
 		}
 
-	      filedata->dynamic_addr = sec->sh_offset;
-	      filedata->dynamic_size = sec->sh_size;
+	      dynamic_addr = sec->sh_offset;
+	      dynamic_size = sec->sh_size;
 
 	      /* The PT_DYNAMIC segment, which is used by the run-time
 		 loader,  should exactly match the .dynamic section.  */
 	      if (do_checks
-		  && (filedata->dynamic_addr != segment->p_offset
-		      || filedata->dynamic_size != segment->p_filesz))
+		  && (dynamic_addr != segment->p_offset
+		      || dynamic_size != segment->p_filesz))
 		warn (_("\
 the .dynamic section is not the same as the dynamic segment\n"));
 	    }
@@ -5623,12 +5710,12 @@ the .dynamic section is not the same as the dynamic segment\n"));
 	     segment.  Check this after matching against the section headers
 	     so we don't warn on debuginfo file (which have NOBITS .dynamic
 	     sections).  */
-	  if (filedata->dynamic_addr > filedata->file_size
-	      || (filedata->dynamic_size
-		  > filedata->file_size - filedata->dynamic_addr))
+	  if (dynamic_addr > filedata->file_size
+	      || (dynamic_size > filedata->file_size - dynamic_addr))
 	    {
 	      error (_("the dynamic segment offset + size exceeds the size of the file\n"));
-	      filedata->dynamic_addr = filedata->dynamic_size = 0;
+	      dynamic_addr = 0;
+	      dynamic_size = 0;
 	    }
 	  break;
 
@@ -5685,7 +5772,13 @@ the .dynamic section is not the same as the dynamic segment\n"));
 	}
     }
 
-  return true;
+  filedata->dynamic_addr = dynamic_addr;
+  filedata->dynamic_size = dynamic_size ? dynamic_size : 1;
+  return;
+
+ no_headers:
+  filedata->dynamic_addr = 0;
+  filedata->dynamic_size = 1;
 }
 
 
@@ -10610,7 +10703,7 @@ process_dynamic_section (Filedata * filedata)
 {
   Elf_Internal_Dyn * entry;
 
-  if (filedata->dynamic_size == 0)
+  if (filedata->dynamic_size <= 1)
     {
       if (do_dynamic)
 	{
@@ -21374,9 +21467,9 @@ process_object (Filedata * filedata)
     /* Without loaded section groups we cannot process unwind.  */
     do_unwind = false;
 
-  res = process_program_headers (filedata);
-  if (res)
-    res = process_dynamic_section (filedata);
+  process_program_headers (filedata);
+
+  res = process_dynamic_section (filedata);
 
   if (! process_relocs (filedata))
     res = false;
@@ -21422,8 +21515,7 @@ process_object (Filedata * filedata)
 	    {
 	      if (! process_section_groups (d->handle))
 		res = false;
-	      if (! process_program_headers (d->handle))
-		res = false;
+	      process_program_headers (d->handle);
 	      if (! process_dynamic_section (d->handle))
 		res = false;
 	      if (! process_relocs (d->handle))
