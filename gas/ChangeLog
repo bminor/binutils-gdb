@@ -1,3 +1,9 @@
+2021-06-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (x86_cons): Handle GOT/PLT relocations only
+	if needed.
+	* config/tc-i386.h (TC_PARSE_CONS_EXPRESSION): Always define.
+
 2021-06-11  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (riscv_set_arch): Call riscv_set_rvc
