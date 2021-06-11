@@ -128,11 +128,13 @@ enum dwarf_section_display_enum
 struct dwarf_section
 {
   /* A debug section has a different name when it's stored compressed
-     or not.  COMPRESSED_NAME and UNCOMPRESSED_NAME are the two
+     or not.  XCOFF DWARF section also have a special name.
+     COMPRESSED_NAME, UNCOMPRESSED_NAME and XCOFF_NAME are the three
      possibilities.  NAME is set to whichever one is used for this
      input file, as determined by load_debug_section().  */
   const char *                     uncompressed_name;
   const char *                     compressed_name;
+  const char *                     xcoff_name;
   const char *                     name;
   /* If non-NULL then FILENAME is the name of the separate debug info
      file containing the section.  */

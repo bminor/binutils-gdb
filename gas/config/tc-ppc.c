@@ -4628,7 +4628,7 @@ ppc_change_debug_section (unsigned int idx, subsegT subseg)
   flagword oldflags;
   const struct xcoff_dwsect_name *dw = &xcoff_dwsect_names[idx];
 
-  sec = subseg_new (dw->name, subseg);
+  sec = subseg_new (dw->xcoff_name, subseg);
   oldflags = bfd_section_flags (sec);
   if (oldflags == SEC_NO_FLAGS)
     {

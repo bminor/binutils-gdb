@@ -4265,20 +4265,22 @@ static const unsigned long xcoff_glink_code[9] =
     0x00000000,	/* traceback table */
   };
 
-/* Table to convert DWARF flags to section names.  */
+/* Table to convert DWARF flags to section names.
+   Remember to update binutils/dwarf.c:debug_displays
+   if new DWARF sections are supported by XCOFF.  */
 
 const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
-  { SSUBTYP_DWINFO,  ".dwinfo",   true },
-  { SSUBTYP_DWLINE,  ".dwline",   true },
-  { SSUBTYP_DWPBNMS, ".dwpbnms",  true },
-  { SSUBTYP_DWPBTYP, ".dwpbtyp",  true },
-  { SSUBTYP_DWARNGE, ".dwarnge",  true },
-  { SSUBTYP_DWABREV, ".dwabrev",  false },
-  { SSUBTYP_DWSTR,   ".dwstr",    true },
-  { SSUBTYP_DWRNGES, ".dwrnges",  true },
-  { SSUBTYP_DWLOC,   ".dwloc",    true },
-  { SSUBTYP_DWFRAME, ".dwframe",  true },
-  { SSUBTYP_DWMAC,   ".dwmac",    true }
+  { SSUBTYP_DWINFO,  ".dwinfo",  ".debug_info",     true },
+  { SSUBTYP_DWLINE,  ".dwline",  ".debug_line",     true },
+  { SSUBTYP_DWPBNMS, ".dwpbnms", ".debug_pubnames", true },
+  { SSUBTYP_DWPBTYP, ".dwpbtyp", ".debug_pubtypes", true },
+  { SSUBTYP_DWARNGE, ".dwarnge", ".debug_aranges",  true },
+  { SSUBTYP_DWABREV, ".dwabrev", ".debug_abbrev",   false },
+  { SSUBTYP_DWSTR,   ".dwstr",   ".debug_str",      true },
+  { SSUBTYP_DWRNGES, ".dwrnges", ".debug_ranges",   true },
+  { SSUBTYP_DWLOC,   ".dwloc",   ".debug_loc",      true },
+  { SSUBTYP_DWFRAME, ".dwframe", ".debug_frame",    true },
+  { SSUBTYP_DWMAC,   ".dwmac",   ".debug_macro",    true }
 };
 
 /* For generic entry points.  */

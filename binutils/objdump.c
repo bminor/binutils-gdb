@@ -3718,7 +3718,6 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
       if (streq (section->filename, bfd_get_filename (abfd)))
 	return true;
     }
-
   /* Locate the debug section.  */
   sec = bfd_get_section_by_name (abfd, section->uncompressed_name);
   if (sec != NULL)
@@ -3728,6 +3727,12 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
       sec = bfd_get_section_by_name (abfd, section->compressed_name);
       if (sec != NULL)
         section->name = section->compressed_name;
+      else
+	{
+	  sec = bfd_get_section_by_name (abfd, section->xcoff_name);
+	  if (sec != NULL)
+	    section->name = section->xcoff_name;
+	}
     }
   if (sec == NULL)
     return false;
@@ -3811,7 +3816,8 @@ dump_dwarf_section (bfd *abfd, asection *section,
 
   for (i = 0; i < max; i++)
     if ((strcmp (debug_displays [i].section.uncompressed_name, match) == 0
-	 || strcmp (debug_displays [i].section.compressed_name, match) == 0)
+	 || strcmp (debug_displays [i].section.compressed_name, match) == 0
+	 || strcmp (debug_displays [i].section.xcoff_name, match) == 0)
 	&& debug_displays [i].enabled != NULL
 	&& *debug_displays [i].enabled)
       {
@@ -3819,8 +3825,10 @@ dump_dwarf_section (bfd *abfd, asection *section,
 
 	if (strcmp (sec->uncompressed_name, match) == 0)
 	  sec->name = sec->uncompressed_name;
-	else
+	else if (strcmp (sec->compressed_name, match) == 0)
 	  sec->name = sec->compressed_name;
+	else
+	  sec->name = sec->xcoff_name;
 	if (load_specific_debug_section ((enum dwarf_section_display_enum) i,
                                          section, abfd))
 	  {

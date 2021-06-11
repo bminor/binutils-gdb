@@ -1,3 +1,8 @@
+2021-07-14  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/tc-ppc.c (ppc_change_debug_section): Update to
+	match new name's field.
+
 2021-07-12  Tucker  <tuckkern@sourceware@gmail.com>
 
 	PR 28054
