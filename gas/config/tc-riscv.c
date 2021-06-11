@@ -417,6 +417,14 @@ riscv_set_arch (const char *s)
 
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&rps, s);
+
+  /* To support .option rvc and rve.  */
+  riscv_set_rvc (false);
+  if (riscv_subset_supports ("c"))
+    riscv_set_rvc (true);
+  riscv_set_rve (false);
+  if (riscv_subset_supports ("e"))
+    riscv_set_rve (true);
 }
 
 /* Indicate -mabi option is explictly set.  */
@@ -2944,16 +2952,6 @@ riscv_after_parse_args (void)
     riscv_set_default_priv_spec (DEFAULT_RISCV_PRIV_SPEC);
 
   riscv_set_arch (default_arch_with_ext);
-
-  /* Add the RVC extension, regardless of -march, to support .option rvc.  */
-  riscv_set_rvc (false);
-  if (riscv_subset_supports ("c"))
-    riscv_set_rvc (true);
-
-  /* Enable RVE if specified by the -march option.  */
-  riscv_set_rve (false);
-  if (riscv_subset_supports ("e"))
-    riscv_set_rve (true);
 
   /* If the CIE to be produced has not been overridden on the command line,
      then produce version 3 by default.  This allows us to use the full

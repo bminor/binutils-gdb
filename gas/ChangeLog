@@ -1,3 +1,9 @@
+2021-06-11  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (riscv_set_arch): Call riscv_set_rvc
+	and riscv_set_rve both for -march and elf attributes.
+	(riscv_after_parse_args): Likewise.
+
 2021-06-10  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-arm.c (do_bfloat_vfma): Rename index to idx.
