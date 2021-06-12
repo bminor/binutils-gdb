@@ -317,7 +317,7 @@ mem_put_byte (unsigned int address, unsigned char value)
       }
       break;
 
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
     case 0x0008c02b: /* PB.DR */
       {
 	if (value == 0)

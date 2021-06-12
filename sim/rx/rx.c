@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "err.h"
 #include "misc.h"
 
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
 static const char * id_names[] = {
   "RXO_unknown",
   "RXO_mov",	/* d = s (signed) */
@@ -213,7 +213,7 @@ static int po0;
 
 #else
 #define STATS(x)
-#endif /* CYCLE_STATS */
+#endif /* WITH_PROFILE */
 
 
 #ifdef CYCLE_ACCURATE
@@ -424,7 +424,7 @@ get_op (const RX_Opcode_Decoded *rd, int i)
       if (regs.m2m == M2M_BOTH)
 	{
 	  tprintf("src memory stall\n");
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
 	  memory_stalls ++;
 #endif
 	  regs.cycle_count ++;
@@ -594,7 +594,7 @@ put_op (const RX_Opcode_Decoded *rd, int i, int v)
 	{
 	  tprintf("dst memory stall\n");
 	  regs.cycle_count ++;
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
 	  memory_stalls ++;
 #endif
 	  regs.m2m = 0;
@@ -943,14 +943,14 @@ decode_opcode (void)
   unsigned long opcode_pc;
   RX_Data rx_data;
   const RX_Opcode_Decoded *opcode;
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
   unsigned long long prev_cycle_count;
 #endif
 #ifdef CYCLE_ACCURATE
   unsigned int tx;
 #endif
 
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
   prev_cycle_count = regs.cycle_count;
 #endif
 
@@ -988,7 +988,7 @@ decode_opcode (void)
 	{
 	  tprintf("1 cycle branch alignment penalty\n");
 	  cycles (branch_alignment_penalty);
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
 	  branch_alignment_stalls ++;
 #endif
 	}
@@ -1087,7 +1087,7 @@ decode_opcode (void)
 	      cycles (3);
 	      branch_alignment_penalty = 1;
 	    }
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
 	  branch_stalls ++;
 #endif
 #endif
@@ -1116,7 +1116,7 @@ decode_opcode (void)
 	      cycles (3);
 	      branch_alignment_penalty = 1;
 	    }
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
 	  branch_stalls ++;
 #endif
 #endif
@@ -1754,7 +1754,7 @@ decode_opcode (void)
 	/* Note: specs say 5, chip says 3.  */
 	if (regs.fast_return && regs.link_register == regs.r_pc)
 	  {
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
 	    fast_returns ++;
 #endif
 	    tprintf("fast return bonus\n");
@@ -1796,7 +1796,7 @@ decode_opcode (void)
       if (regs.fast_return && regs.link_register == regs.r_pc)
 	{
 	  tprintf("fast return bonus\n");
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
 	  fast_returns ++;
 #endif
 	  cycles (tx < 3 ? 3 : tx + 1);
@@ -2172,7 +2172,7 @@ decode_opcode (void)
   new_rt = -1;
 #endif
 
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
   if (prev_cycle_count == regs.cycle_count)
     {
       printf("Cycle count not updated! id %s\n", id_names[opcode->id]);
@@ -2180,7 +2180,7 @@ decode_opcode (void)
     }
 #endif
 
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
   if (running_benchmark)
     {
       int omap = op_lookup (opcode->op[0].type, opcode->op[1].type, opcode->op[2].type);
@@ -2199,7 +2199,7 @@ decode_opcode (void)
   return RX_MAKE_STEPPED ();
 }
 
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
 void
 reset_pipeline_stats (void)
 {
@@ -2227,7 +2227,7 @@ halt_pipeline_stats (void)
 void
 pipeline_stats (void)
 {
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
   int i, o1;
   int p, p1;
 #endif
@@ -2242,7 +2242,7 @@ pipeline_stats (void)
   printf ("cycles: %13s\n", comma (regs.cycle_count));
 #endif
 
-#ifdef CYCLE_STATS
+#ifdef WITH_PROFILE
   if (benchmark_start_cycle)
     printf ("bmark:  %13s\n", comma (benchmark_end_cycle - benchmark_start_cycle));
 

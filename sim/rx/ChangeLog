@@ -1,5 +1,13 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* README.txt: Change cycle-stats to sim-profile.
+	* configure.ac: Delete cycle-stats.
+	* mem.c: Change CYCLE_STATS to WITH_PROFILE
+	* rx.c: Likewise.
+	* config.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* aclocal.m4, config.in, configure: Regenerate.
 
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
