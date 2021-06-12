@@ -37,7 +37,7 @@
 #include <algorithm>
 #include <set>
 
-bool lazy_expand_symtab_p = false;
+bool lazy_expand_symtab_p = true;
 
 static struct partial_symbol *lookup_partial_symbol (struct objfile *,
 						     struct partial_symtab *,
