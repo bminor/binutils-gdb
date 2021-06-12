@@ -1729,7 +1729,8 @@ dwarf2_per_objfile::set_symtab (const dwarf2_per_cu_data *per_cu,
 				compunit_symtab *symtab)
 {
   gdb_assert (per_cu->index < this->m_symtabs.size ());
-  gdb_assert (this->m_symtabs[per_cu->index] == nullptr);
+  gdb_assert (this->m_symtabs[per_cu->index] == nullptr
+	      || symtab == nullptr);
 
   this->m_symtabs[per_cu->index] = symtab;
 }
@@ -5674,6 +5675,10 @@ struct dwarf2_include_psymtab : public partial_symtab
     return nullptr;
   }
 
+  void reset_compunit_symtab (struct objfile *objfile) override
+  {
+  }
+
 private:
   partial_symtab *includer () const
   {
@@ -8585,6 +8590,13 @@ dwarf2_psymtab::get_compunit_symtab (struct objfile *objfile) const
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   return per_objfile->get_symtab (per_cu_data);
+}
+
+void
+dwarf2_psymtab::reset_compunit_symtab (struct objfile *objfile)
+{
+  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  per_objfile->set_symtab (per_cu_data, nullptr);
 }
 
 /* Trivial hash function for die_info: the hash value of a DIE

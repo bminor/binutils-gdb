@@ -173,6 +173,9 @@ struct partial_symtab
   virtual struct compunit_symtab *get_compunit_symtab
     (struct objfile *) const = 0;
 
+  virtual void reset_compunit_symtab
+    (struct objfile *) = 0;
+
   /* Return the raw low text address of this partial_symtab.  */
   CORE_ADDR raw_text_low () const
   {
@@ -426,6 +429,11 @@ struct standard_psymtab : public partial_symtab
   struct compunit_symtab *get_compunit_symtab (struct objfile *) const override
   {
     return compunit_symtab;
+  }
+
+  void reset_compunit_symtab (struct objfile *) override
+  {
+    compunit_symtab = nullptr;
   }
 
   /* True if the symtab corresponding to this psymtab has been

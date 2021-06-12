@@ -626,6 +626,7 @@ struct dwarf2_psymtab : public partial_symtab
   void expand_psymtab (struct objfile *) override;
   bool readin_p (struct objfile *) const override;
   compunit_symtab *get_compunit_symtab (struct objfile *) const override;
+  void reset_compunit_symtab (struct objfile *) override;
 
   struct dwarf2_per_cu_data *per_cu_data;
 };
