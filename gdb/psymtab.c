@@ -37,6 +37,8 @@
 #include <algorithm>
 #include <set>
 
+bool lazy_expand_symtab_p = false;
+
 static struct partial_symbol *lookup_partial_symbol (struct objfile *,
 						     struct partial_symtab *,
 						     const lookup_name_info &,
@@ -1952,4 +1954,12 @@ just the symbol table structures themselves."),
 	   _("\
 Check consistency of currently expanded psymtabs versus symtabs."),
 	   &maintenancelist);
+
+  add_setshow_boolean_cmd ("lazy-expand-symtab", class_maintenance,
+			   &lazy_expand_symtab_p,
+			   _("Set whether symtabs are expanded lazily."),
+			   _("Show whether symtabs are expanded lazily."),
+			   _("Control whether symtabs are expanded lazily."),
+			   NULL, NULL,
+			   &maintenance_set_cmdlist, &maintenance_show_cmdlist);
 }
