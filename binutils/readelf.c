@@ -5237,8 +5237,6 @@ process_file_header (Filedata * filedata)
 	header->e_shstrndx = filedata->section_headers[0].sh_link;
       if (header->e_shstrndx >= header->e_shnum)
 	header->e_shstrndx = SHN_UNDEF;
-      free (filedata->section_headers);
-      filedata->section_headers = NULL;
     }
 
   return true;

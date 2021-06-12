@@ -1,5 +1,9 @@
 2021-06-12  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (process_file_header): Don't clear section_headers.
+
+2021-06-12  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (get_section_headers): Don't test e_shoff here, leave
 	that to get_32bit_section_headers or get_64bit_section_headers.
 	(process_object): Throw away section header read to print file
