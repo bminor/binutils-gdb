@@ -33,42 +33,88 @@ AC_CHECK_HEADERS_ONCE(m4_flatten([
   netinet/tcp.h
   sys/ioctl.h
   sys/mman.h
+  sys/mount.h
   sys/param.h
   sys/resource.h
   sys/select.h
   sys/socket.h
   sys/stat.h
+  sys/statfs.h
+  sys/termio.h
+  sys/termios.h
+  sys/types.h
+  sys/vfs.h
 ]))
+AC_HEADER_DIRENT
 
 AC_CHECK_FUNCS_ONCE(m4_flatten([
   __setfpucw
+  access
   aint
   anint
+  cfgetispeed
+  cfgetospeed
+  cfsetispeed
+  cfsetospeed
+  chdir
   chmod
+  dup
+  dup2
   execv
   execve
+  fcntl
   fork
+  fstat
+  fstatfs
   ftruncate
-  geteuid
+  getdirentries
   getegid
+  geteuid
   getgid
+  getpid
+  getppid
   getrusage
+  gettimeofday
   getuid
+  ioctl
   kill
-  lstat
+  link
+  lseek
   mmap
   munmap
+  pipe
   posix_fallocate
   pread
-  setuid
+  rmdir
+  setregid
+  setreuid
   setgid
+  setuid
   sigaction
+  sigprocmask
   sqrt
+  stat
   strsignal
+  symlink
+  tcdrain
+  tcflow
+  tcflush
+  tcgetattr
+  tcgetpgrp
+  tcsendbreak
+  tcsetattr
+  tcsetpgrp
   time
   truncate
+  umask
+  unlink
   utime
 ]))
+
+AC_STRUCT_ST_BLKSIZE
+AC_STRUCT_ST_BLOCKS
+AC_STRUCT_ST_RDEV
+AC_STRUCT_TIMEZONE
 
 AC_CHECK_MEMBERS([[struct stat.st_dev], [struct stat.st_ino],
 [struct stat.st_mode], [struct stat.st_nlink], [struct stat.st_uid],
@@ -89,5 +135,11 @@ AC_CHECK_TYPES(socklen_t, [], [],
 ])
 
 dnl Types used by common code
+AC_TYPE_GETGROUPS
+AC_TYPE_MODE_T
+AC_TYPE_OFF_T
+AC_TYPE_PID_T
 AC_TYPE_SIGNAL
+AC_TYPE_SIZE_T
+AC_TYPE_UID_T
 ])

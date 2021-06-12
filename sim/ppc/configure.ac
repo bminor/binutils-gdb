@@ -645,23 +645,6 @@ esac
 
 AC_CONFIG_HEADER(config.h:config.in)
 
-AC_STRUCT_ST_BLKSIZE
-AC_STRUCT_ST_BLOCKS
-AC_STRUCT_ST_RDEV
-AC_STRUCT_TIMEZONE
-
-AC_TYPE_GETGROUPS
-AC_TYPE_MODE_T
-AC_TYPE_OFF_T
-AC_TYPE_PID_T
-AC_TYPE_SIGNAL
-AC_TYPE_SIZE_T
-AC_TYPE_UID_T
-
-AC_CHECK_FUNCS(access cfgetispeed cfgetospeed cfsetispeed cfsetospeed chdir chmod chown dup dup2 fchmod fchown fcntl fstat fstatfs getdirentries getegid geteuid getgid getpid getppid getrusage gettimeofday getuid ioctl kill link lseek lstat mkdir pipe readlink rmdir setreuid setregid stat sigprocmask stat symlink tcgetattr tcsetattr tcsendbreak tcdrain tcflush tcflow tcgetpgrp tcsetpgrp time umask unlink)
-
-AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/mount.h sys/param.h sys/resource.h sys/stat.h sys/termio.h sys/termios.h sys/time.h sys/times.h sys/types.h unistd.h sys/vfs.h sys/statfs.h)
-AC_HEADER_DIRENT
 
 dnl Figure out what type of termio/termios support there is
 sim_termio=""

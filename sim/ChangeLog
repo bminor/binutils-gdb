@@ -1,5 +1,11 @@
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* m4/sim_ac_platform.m4: Check more headers, funcs, structs, and
+	types.
+	* config.h.in, configure: Regenerate.
+
+2021-06-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Call SIM_AC_OPTION_ENVIRONMENT.
 	* m4/sim_ac_common.m4: Delete call to SIM_AC_OPTION_ENVIRONMENT.
 	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
