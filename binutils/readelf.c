@@ -5859,9 +5859,6 @@ get_section_headers (Filedata *filedata, bool probe)
   if (filedata->section_headers != NULL)
     return true;
 
-  if (filedata->file_header.e_shoff == 0)
-    return true;
-
   if (is_32bit_elf)
     return get_32bit_section_headers (filedata, probe);
   else
@@ -21360,6 +21357,11 @@ process_object (Filedata * filedata)
       res = false;
       goto out;
     }
+
+  /* Throw away the single section header read above, so that we
+     re-read the entire set.  */
+  free (filedata->section_headers);
+  filedata->section_headers = NULL;
 
   if (! process_section_headers (filedata))
     {
