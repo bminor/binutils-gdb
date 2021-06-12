@@ -217,6 +217,8 @@ struct dwarf2_per_cu_data
      functions above.  */
   std::vector <dwarf2_per_cu_data *> *imported_symtabs = nullptr;
 
+  std::set <sect_offset> *interesting_symbols = nullptr;
+
   /* Return true of IMPORTED_SYMTABS is empty or not yet allocated.  */
   bool imported_symtabs_empty () const
   {

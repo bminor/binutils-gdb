@@ -8366,7 +8366,13 @@ dwarf2_psymtab::read_symtab (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  gdb_assert (!per_objfile->symtab_set_p (per_cu_data));
+  if (lazy_expand_symtab_p)
+    per_cu_data->interesting_symbols = &interesting_symbols;
+  else
+    {
+      gdb_assert (!per_objfile->symtab_set_p (per_cu_data));
+      per_cu_data->interesting_symbols = nullptr;
+    }
 
   /* If this psymtab is constructed from a debug-only objfile, the
      has_section_at_zero flag will not necessarily be correct.  We
