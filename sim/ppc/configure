@@ -753,7 +753,6 @@ enable_sim_decode_mechanism
 enable_sim_default_model
 enable_sim_duplicate
 enable_sim_endian
-enable_sim_env
 enable_sim_filter
 enable_sim_float
 enable_sim_hardware
@@ -1416,7 +1415,6 @@ Optional Features:
   --enable-sim-default-model=which	Specify default PowerPC to model.
   --enable-sim-duplicate		Expand (duplicate) semantic functions.
   --enable-sim-endian=endian		Specify target byte endian orientation.
-  --enable-sim-env=env			Specify target environment (operating, virtual, user).
   --enable-sim-filter=rule		Specify filter rules.
   --enable-sim-float			Specify whether the target has hard, soft, altivec or e500 floating point.
   --enable-sim-hardware=list		Specify the hardware to be included in the build.
@@ -3536,28 +3534,6 @@ else
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking default sim environment setting" >&5
-$as_echo_n "checking default sim environment setting... " >&6; }
-sim_env="0"
-# Check whether --enable-sim-env was given.
-if test "${enable_sim_env+set}" = set; then :
-  enableval=$enable_sim_env; case "${enableval}" in
-  operating | os | oea)	sim_env="OPERATING_ENVIRONMENT";;
-  virtual | vea)	sim_env="VIRTUAL_ENVIRONMENT";;
-  user | uea)		sim_env="USER_ENVIRONMENT";;
-  no)			sim_env="0";;
-  *)			as_fn_error $? "Unknown value $enableval passed to --enable-sim-env" "$LINENO" 5;;
-esac
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define WITH_ENVIRONMENT $sim_env
-_ACEOF
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_env" >&5
-$as_echo "$sim_env" >&6; }
-
-
 # Check whether --enable-sim-filter was given.
 if test "${enable_sim_filter+set}" = set; then :
   enableval=$enable_sim_filter; case "${enableval}" in
@@ -4596,7 +4572,7 @@ if test "${enable_sim_monitor+set}" = set; then :
   no)		sim_monitor="-DWITH_MON=0";;
   instruction)	sim_monitor="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
   memory)	sim_monitor="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
-  *)		as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-mon\"" "$LINENO" 5; sim_env="";;
+  *)		as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-mon\"" "$LINENO" 5;;
 esac
 if test x"$silent" != x"yes" && test x"$sim_monitor" != x""; then
   echo "Setting monitor flags = $sim_monitor" 6>&1

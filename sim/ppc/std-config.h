@@ -107,6 +107,7 @@ extern int current_target_byte_order;
    CURRENT_ENVIRONMENT specifies which of vea or oea is required for
    the current runtime. */
 
+#define ALL_ENVIRONMENT			0
 #define USER_ENVIRONMENT		1
 #define VIRTUAL_ENVIRONMENT		2
 #define OPERATING_ENVIRONMENT		3

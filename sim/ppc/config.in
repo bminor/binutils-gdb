@@ -325,9 +325,6 @@
 /* Sim assert settings */
 #undef WITH_ASSERT
 
-/* Sim default environment */
-#undef WITH_ENVIRONMENT
-
 /* How to route I/O */
 #undef WITH_STDIO
 

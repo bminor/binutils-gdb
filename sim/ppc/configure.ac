@@ -137,21 +137,6 @@ if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
 fi],[sim_endian=""])dnl
 
 
-AC_MSG_CHECKING([default sim environment setting])
-sim_env="0"
-AC_ARG_ENABLE(sim-env,
-[  --enable-sim-env=env			Specify target environment (operating, virtual, user).],
-[case "${enableval}" in
-  operating | os | oea)	sim_env="OPERATING_ENVIRONMENT";;
-  virtual | vea)	sim_env="VIRTUAL_ENVIRONMENT";;
-  user | uea)		sim_env="USER_ENVIRONMENT";;
-  no)			sim_env="0";;
-  *)			AC_MSG_ERROR([Unknown value $enableval passed to --enable-sim-env]);;
-esac])dnl
-AC_DEFINE_UNQUOTED([WITH_ENVIRONMENT], [$sim_env], [Sim default environment])
-AC_MSG_RESULT($sim_env)
-
-
 AC_ARG_ENABLE(sim-filter,
 [  --enable-sim-filter=rule		Specify filter rules.],
 [case "${enableval}" in
@@ -457,7 +442,7 @@ AC_ARG_ENABLE(sim-monitor,
   no)		sim_monitor="-DWITH_MON=0";;
   instruction)	sim_monitor="-DWITH_MON=MONITOR_INSTRUCTION_ISSUE";;
   memory)	sim_monitor="-DWITH_MON=MONITOR_LOAD_STORE_UNIT";;
-  *)		AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-mon"); sim_env="";;
+  *)		AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-mon");;
 esac
 if test x"$silent" != x"yes" && test x"$sim_monitor" != x""; then
   echo "Setting monitor flags = $sim_monitor" 6>&1
