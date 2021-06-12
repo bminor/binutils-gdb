@@ -1,3 +1,7 @@
+2021-06-12  John Baldwin  <jhb@FreeBSD.org>
+
+	* remote.c (remote_new_objfile): Fix indentation.
+
 2021-06-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* solib.c (libpthread_name_p): Match "libc" in addition

@@ -14538,8 +14538,8 @@ remote_new_objfile (struct objfile *objfile)
 
      So, skip these events, we'll give the remote a chance to look up symbols
      once all the loaded libraries and their symbols are known to GDB.  */
-    if (current_inferior ()->in_initial_library_scan)
-      return;
+  if (current_inferior ()->in_initial_library_scan)
+    return;
 
   remote->remote_check_symbols ();
 }
