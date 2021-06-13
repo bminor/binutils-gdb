@@ -218,7 +218,7 @@ CGEN_INCLUDE_DEPS = \
 ## COMMON_POST_CONFIG_FRAG
 
 CONFIG_CFLAGS = \
-	@DEFS@ \
+	-DHAVE_CONFIG_H \
 	$(SIM_DEFAULT_MODEL) \
 	$(SIM_BITSIZE) \
 	$(SIM_ENDIAN) \
@@ -423,7 +423,6 @@ endif
 all_object_files = $(LIB_OBJS) $(SIM_RUN_OBJS)
 generated_files = \
 	$(SIM_EXTRA_DEPS) \
-	config.h \
 	hw-config.h \
 	modules.c \
 	targ-map.c \
@@ -554,7 +553,6 @@ mostlyclean clean: $(SIM_EXTRA_CLEAN)
 distclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
 	rm -f TAGS
 	rm -f Makefile config.cache config.log config.status .gdbinit
-	rm -f config.h stamp-h
 
 .c.o:
 	$(COMPILE) $<
@@ -568,10 +566,6 @@ Makefile: Makefile.in $(srccom)/Make-common.in config.status
 
 config.status: configure
 	$(SHELL) ./config.status --recheck
-
-config.h: stamp-h ; @true
-stamp-h: config.in config.status
-	CONFIG_FILES= CONFIG_HEADERS=config.h:config.in $(SHELL) ./config.status
 
 .gdbinit: # config.status $(srccom)/gdbinit.in
 	CONFIG_FILES=$@:../common/gdbinit.in CONFIG_HEADERS= $(SHELL) ./config.status

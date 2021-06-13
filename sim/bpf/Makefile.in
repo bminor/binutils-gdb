@@ -56,8 +56,7 @@ BPF_INCLUDE_DEPS = \
 	cpu.h cpuall.h \
         decode-le.h decode-be.h \
         defs-le.h defs-be.h \
-        eng-le.h eng-be.h \
-        config.h
+        eng-le.h eng-be.h
 
 # Dependencies for binaries from CGEN generated source
 

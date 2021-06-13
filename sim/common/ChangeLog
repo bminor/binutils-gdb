@@ -1,3 +1,12 @@
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (CONFIG_CFLAGS): Change @DEFS@ to -DHAVE_CONFIG_H.
+	(generated_files): Delete config.h.
+	(distclean): Likewise.
+	(config.h, stamp-h): Delete rules.
+	* defs.h [SIM_COMMON_BUILD]: Delete config.h include and PACKAGE*
+	defines.
+
 2021-06-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in: Add stamp-modules rule to avoid rebuilds.

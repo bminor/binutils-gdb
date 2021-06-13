@@ -53,7 +53,7 @@ check: rvdummy$(EXEEXT)
 rvdummy$(EXEEXT): rvdummy.o $(EXTRA_LIBDEPS)
 	$(CC) $(ALL_CFLAGS) -o rvdummy$(EXEEXT) rvdummy.o $(EXTRA_LIBS)
 
-rvdummy.o: rvdummy.c config.h $(remote_sim_h) $(callback_h)
+rvdummy.o: rvdummy.c $(remote_sim_h) $(callback_h)
 
 # CRISV10 objs
 

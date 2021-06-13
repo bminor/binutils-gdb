@@ -22,7 +22,6 @@ dnl See README-HACKING for more details.
 AC_DEFUN([SIM_AC_COMMON],
 [dnl
 SIM_AC_TOOLCHAIN
-AC_CONFIG_HEADERS([config.h:config.in])
 
 # Dependency checking.
 ZW_CREATE_DEPDIR
