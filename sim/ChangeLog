@@ -1,5 +1,10 @@
 2021-06-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* m4/sim_ac_option_hardware.m4: Delete AC_DEFINE_UNQUOTED call.
+	Add -DHAVE_DV_SOCKSER to sim_hw_cflags.
+
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in: Regenerate.
 
 2021-06-14  Mike Frysinger  <vapier@gentoo.org>

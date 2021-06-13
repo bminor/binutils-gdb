@@ -55,8 +55,7 @@ else
        # that you instatiate.  Instead, other code will call into it directly.
        # At some point, we should convert it over.
        sim_hw_objs="$sim_hw_objs dv-sockser.o"
-       AC_DEFINE_UNQUOTED(
-         [HAVE_DV_SOCKSER], 1, [Define if dv-sockser is usable.])
+       sim_hw_cflags="$sim_hw_cflags -DHAVE_DV_SOCKSER"
        ;;
   esac
   if test x"$silent" != x"yes"; then
