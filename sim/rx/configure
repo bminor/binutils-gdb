@@ -639,6 +639,7 @@ sim_endian
 sim_bitsize
 sim_alignment
 cgen_breaks
+sim_cycle_accurate_flags
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
@@ -10744,7 +10745,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10747 "configure"
+#line 10748 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10850,7 +10851,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10853 "configure"
+#line 10854 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11159,10 +11160,9 @@ fi
 echo enable_cycle_accurate is $enable_cycle_accurate
 
 if test "x${enable_cycle_accurate}" != xno; then
-
-$as_echo "#define CYCLE_ACCURATE 1" >>confdefs.h
-
+  sim_cycle_accurate_flags="-DCYCLE_ACCURATE"
 fi
+
 
 
 # Check whether --enable-werror was given.

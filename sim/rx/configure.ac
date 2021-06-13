@@ -34,7 +34,8 @@ esac])
 echo enable_cycle_accurate is $enable_cycle_accurate
 
 if test "x${enable_cycle_accurate}" != xno; then
-  AC_DEFINE([CYCLE_ACCURATE], 1, [--enable-cycle-accurate])
+  sim_cycle_accurate_flags="-DCYCLE_ACCURATE"
 fi
+AC_SUBST(sim_cycle_accurate_flags)
 
 SIM_AC_OUTPUT

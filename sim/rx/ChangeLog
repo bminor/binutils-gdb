@@ -1,3 +1,10 @@
+2021-06-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Set to @sim_cycle_accurate_flags@.
+	* configure.ac: Move CYCLE_ACCURATE define from AC_DEFINE to
+	AC_SUBST.
+	* config.in, configure: Regenerate.
+
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* README.txt: Change cycle-stats to sim-profile.
