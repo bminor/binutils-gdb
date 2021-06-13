@@ -64,7 +64,24 @@ public:
 
   /* Post a task to the thread pool.  A future is returned, which can
      be used to wait for the result.  */
-  std::future<void> post_task (std::function<void ()> &&func);
+  std::future<void> post_task (std::function<void ()> &&func)
+  {
+    std::packaged_task<void ()> task (std::move (func));
+    std::future<void> result = task.get_future ();
+    do_post_task (std::packaged_task<void ()> (std::move (task)));
+    return result;
+  }
+
+  /* Post a task to the thread pool.  A future is returned, which can
+     be used to wait for the result.  */
+  template<typename T>
+  std::future<T> post_task (std::function<T ()> &&func)
+  {
+    std::packaged_task<T ()> task (std::move (func));
+    std::future<T> result = task.get_future ();
+    do_post_task (std::packaged_task<void ()> (std::move (task)));
+    return result;
+  }
 
 private:
 
@@ -73,6 +90,10 @@ private:
 #if CXX_STD_THREAD
   /* The callback for each worker thread.  */
   void thread_function ();
+
+  /* Post a task to the thread pool.  A future is returned, which can
+     be used to wait for the result.  */
+  void do_post_task (std::packaged_task<void ()> &&func);
 
   /* The current thread count.  */
   size_t m_thread_count = 0;

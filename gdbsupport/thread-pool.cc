@@ -134,11 +134,10 @@ thread_pool::set_thread_count (size_t num_threads)
 #endif /* CXX_STD_THREAD */
 }
 
-std::future<void>
-thread_pool::post_task (std::function<void ()> &&func)
+void
+thread_pool::do_post_task (std::packaged_task<void ()> &&func)
 {
   std::packaged_task<void ()> t (std::move (func));
-  std::future<void> f = t.get_future ();
 
 #if CXX_STD_THREAD
   if (m_thread_count != 0)
@@ -153,7 +152,6 @@ thread_pool::post_task (std::function<void ()> &&func)
       /* Just execute it now.  */
       t ();
     }
-  return f;
 }
 
 #if CXX_STD_THREAD
