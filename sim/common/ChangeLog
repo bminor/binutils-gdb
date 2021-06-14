@@ -1,3 +1,7 @@
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-basics.h: Delete libiberty.h include.
+
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (SIM_ENDIAN): Delete.
