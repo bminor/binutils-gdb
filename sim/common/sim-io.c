@@ -24,6 +24,7 @@
 
 #include "sim-main.h"
 #include "sim-io.h"
+#include "sim/callback.h"
 #include "targ-vals.h"
 
 #include <errno.h>

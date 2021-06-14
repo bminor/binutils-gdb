@@ -23,6 +23,7 @@
 #ifndef SIM_ENDIAN_H
 #define SIM_ENDIAN_H
 
+#include "bfd.h"
 
 /* C byte conversion functions */
 

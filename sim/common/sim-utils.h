@@ -60,6 +60,7 @@ SIM_RC sim_analyze_program (SIM_DESC sd, const char *prog_name,
    write the program sections at LMA interpreted as a virtual address.
    This is still accommodated for backward compatibility reasons. */
 
+typedef struct host_callback_struct host_callback;
 typedef int sim_write_fn (SIM_DESC sd, SIM_ADDR mem,
 			  const unsigned char *buf, int length);
 struct bfd *sim_load_file (SIM_DESC sd, const char *myname,

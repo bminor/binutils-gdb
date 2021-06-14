@@ -24,6 +24,7 @@
 
 #include "sim-main.h"
 #include "sim-syscall.h"
+#include "sim/callback.h"
 #include "targ-vals.h"
 
 /* Read/write functions for system call interface.  */

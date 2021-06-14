@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "bfd.h"
 #include "sim-main.h"
 #include "sim-fpu.h"
+#include "sim/callback.h"
 
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 16

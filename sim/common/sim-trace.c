@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-io.h"
 #include "sim-options.h"
 #include "sim-fpu.h"
+#include "sim/callback.h"
 
 #include "bfd.h"
 #include "libiberty.h"

@@ -1,3 +1,12 @@
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-trace.c: Include sim/callback.h.
+	* nrun.c, sim-hw.c, sim-io.c, sim-syscall.c, sim-trace.c: Likewise.
+	* sim-basics.h: Delete sim/callback.h include.
+	* sim-endian.h: Include bfd.h.
+	* sim-syscall.h (struct cb_syscall): New forward decl.
+	* sim-utils.h (sim_analyze_program): Likewise.
+
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (CONFIG_CFLAGS): Change @DEFS@ to -DHAVE_CONFIG_H.

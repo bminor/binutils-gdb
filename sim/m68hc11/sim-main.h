@@ -28,7 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "opcode/m68hc11.h"
 
-#include "sim/callback.h"
 #include "sim/sim.h"
 #include "opcode/m68hc11.h"
 #include "sim-types.h"
