@@ -436,10 +436,12 @@ trace_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
   return SIM_RC_OK;
 }
 
-/* Install tracing support.  */
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+SIM_RC sim_install_trace (SIM_DESC sd);
 
+/* Install tracing support.  */
 SIM_RC
-trace_install (SIM_DESC sd)
+sim_install_trace (SIM_DESC sd)
 {
   int i;
 

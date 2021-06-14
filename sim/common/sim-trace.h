@@ -142,9 +142,6 @@ enum {
 #define WITH_TRACE_SYSCALL_P	WITH_TRACE_P (TRACE_SYSCALL_IDX)
 #define WITH_TRACE_REGISTER_P	WITH_TRACE_P (TRACE_REGISTER_IDX)
 #define WITH_TRACE_DEBUG_P	WITH_TRACE_P (TRACE_DEBUG_IDX)
-
-/* Tracing install handler.  */
-MODULE_INSTALL_FN trace_install;
 
 /* Struct containing all system and cpu trace data.
 

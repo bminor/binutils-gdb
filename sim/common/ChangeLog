@@ -1,5 +1,12 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-module.c (early_modules): Delete trace_install.
+	* sim-trace.c (trace_install): Rename to ...
+	(sim_install_trace): ... this.  New prototype.
+	* sim-trace.h (trace_install): Delete.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-engine.c (sim_engine_install): Rename to ...
 	(sim_install_engine): ... this.  New prototype.
 	* sim-engine.h (sim_engine_install): Delete.
