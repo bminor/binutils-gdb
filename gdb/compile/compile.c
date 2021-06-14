@@ -43,7 +43,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/pathstuff.h"
-#include <signal.h>
+#include "gdbsupport/scoped_ignore_signal.h"
 
 
 
@@ -633,33 +633,6 @@ print_callback (void *ignore, const char *message)
 {
   fputs_filtered (message, gdb_stderr);
 }
-
-/* RAII class used to ignore SIGPIPE in a scope.  */
-
-class scoped_ignore_sigpipe
-{
-public:
-  scoped_ignore_sigpipe ()
-  {
-#ifdef SIGPIPE
-    m_osigpipe = signal (SIGPIPE, SIG_IGN);
-#endif
-  }
-
-  ~scoped_ignore_sigpipe ()
-  {
-#ifdef SIGPIPE
-    signal (SIGPIPE, m_osigpipe);
-#endif
-  }
-
-  DISABLE_COPY_AND_ASSIGN (scoped_ignore_sigpipe);
-
-private:
-#ifdef SIGPIPE
-  sighandler_t m_osigpipe = NULL;
-#endif
-};
 
 /* Process the compilation request.  On success it returns the object
    and source file names.  On an error condition, error () is

@@ -20,37 +20,61 @@
 #ifndef SCOPED_IGNORE_SIGTTOU_H
 #define SCOPED_IGNORE_SIGTTOU_H
 
-#include <unistd.h>
-#include <signal.h>
+#include "gdbsupport/scoped_ignore_signal.h"
 #include "gdbsupport/job-control.h"
 
-/* RAII class used to ignore SIGTTOU in a scope.  */
+#ifdef SIGTTOU
+
+/* Simple wrapper that allows lazy initialization / destruction of T.
+   Slightly more efficient than gdb::optional, because it doesn't
+   carry storage to track whether the object has been initialized.  */
+template<typename T>
+class lazy_init
+{
+public:
+  void emplace ()
+  {
+    new (m_buf) T ();
+  }
+
+  void reset ()
+  {
+    reinterpret_cast <T *> (m_buf)->~T ();
+  }
+
+private:
+  alignas (T) gdb_byte m_buf[sizeof (T)];
+};
+
+/* RAII class used to ignore SIGTTOU in a scope.  This isn't simply
+   scoped_ignore_signal<SIGTTOU> because we want to check the
+   `job_control' global.  */
 
 class scoped_ignore_sigttou
 {
 public:
   scoped_ignore_sigttou ()
   {
-#ifdef SIGTTOU
     if (job_control)
-      m_osigttou = signal (SIGTTOU, SIG_IGN);
-#endif
+      m_ignore_signal.emplace ();
   }
 
   ~scoped_ignore_sigttou ()
   {
-#ifdef SIGTTOU
     if (job_control)
-      signal (SIGTTOU, m_osigttou);
-#endif
+      m_ignore_signal.reset ();
   }
 
   DISABLE_COPY_AND_ASSIGN (scoped_ignore_sigttou);
 
 private:
-#ifdef SIGTTOU
-  sighandler_t m_osigttou = NULL;
-#endif
+  lazy_init<scoped_ignore_signal<SIGTTOU>> m_ignore_signal;
 };
+
+#else
+
+using scoped_ignore_sigttou = scoped_ignore_signal_nop;
+
+#endif
 
 #endif /* SCOPED_IGNORE_SIGTTOU_H */
