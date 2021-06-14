@@ -1,3 +1,9 @@
+2021-06-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (COMMON_OBJS_NAMES, +COMMON_OBJS): New variables.
+	(LIB_OBJ): Replace version.o with $(COMMON_OBJS).
+	(version.c, version.o): Delete rules.
+
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in: Add $(EXEEXT) to run and psim.
