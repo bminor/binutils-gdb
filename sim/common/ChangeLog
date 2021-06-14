@@ -1,5 +1,9 @@
 2021-06-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* local.mk (%D%/version.c): Use AM_V_GEN & AM_V_at wrappers.
+
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (GNULIB_BUILDDIR): Rename to ...
 	(GNULIB_PARENT_DIR): ... this.  Remove "gnulib" from value.
 

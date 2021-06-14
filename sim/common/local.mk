@@ -39,6 +39,6 @@ noinst_LIBRARIES += %D%/libcommon.a
 	%D%/version.c
 
 %D%/version.c: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(srcdir)/%D%/create-version.sh
-	$(SHELL) $(srcdir)/%D%/create-version.sh $(srcroot)/gdb $@.tmp
-	$(SHELL) $(srcroot)/move-if-change $@.tmp $@
-	touch $@
+	$(AM_V_GEN)$(SHELL) $(srcdir)/%D%/create-version.sh $(srcroot)/gdb $@.tmp
+	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $@
+	$(AM_V_at)touch $@

@@ -19,6 +19,7 @@ SIM_AC_PLATFORM
 
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
+AM_SILENT_RULES([yes])
 
 # If a cpu ever has more than one simulator to choose from, use
 # --enable-sim=... to choose.

@@ -49,33 +49,33 @@ check_PROGRAMS += $(TESTS)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_bits32m0_OBJECTS) $(%C%_bits32m0_LDADD)
 
 %D%/bits32m0.c: %D%/bits-gen %D%/bits-tst.c
-	$< 32 0 big > $@.tmp
-	cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
-	mv $@.tmp $@
+	$(AM_V_GEN)$< 32 0 big > $@.tmp
+	$(AM_V_at)cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
+	$(AM_V_at)mv $@.tmp $@
 
 %D%/bits32m31$(EXEEXT): $(%C%_bits32m31_OBJECTS) $(%C%_bits32m31_DEPENDENCIES) %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_bits32m31_OBJECTS) $(%C%_bits32m31_LDADD)
 
 %D%/bits32m31.c: %D%/bits-gen %D%/bits-tst.c
-	$< 32 31 little > $@.tmp
-	cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
-	mv $@.tmp $@
+	$(AM_V_GEN)$< 32 31 little > $@.tmp
+	$(AM_V_at)cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
+	$(AM_V_at)mv $@.tmp $@
 
 %D%/bits64m0$(EXEEXT): $(%C%_bits64m0_OBJECTS) $(%C%_bits64m0_DEPENDENCIES) %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_bits64m0_OBJECTS) $(%C%_bits64m0_LDADD)
 
 %D%/bits64m0.c: %D%/bits-gen %D%/bits-tst.c
-	$< 64 0 big > $@.tmp
-	cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
-	mv $@.tmp $@
+	$(AM_V_GEN)$< 64 0 big > $@.tmp
+	$(AM_V_at)cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
+	$(AM_V_at)mv $@.tmp $@
 
 %D%/bits64m63$(EXEEXT): $(%C%_bits64m63_OBJECTS) $(%C%_bits64m63_DEPENDENCIES) %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(%C%_bits64m63_OBJECTS) $(%C%_bits64m63_LDADD)
 
 %D%/bits64m63.c: %D%/bits-gen %D%/bits-tst.c
-	$< 64 63 little > $@.tmp
-	cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
-	mv $@.tmp $@
+	$(AM_V_GEN)$< 64 63 little > $@.tmp
+	$(AM_V_at)cat $(srcdir)/%D%/bits-tst.c >> $@.tmp
+	$(AM_V_at)mv $@.tmp $@
 
 CLEANFILES += \
 	%D%/bits-gen \
