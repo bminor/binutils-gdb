@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-main.h"
 #include "sim-syscall.h"
 #include "sim-options.h"
+#include "sim-signal.h"
 #include "sim/callback.h"
 #include "bfd.h"
 /* FIXME: get rid of targ-vals.h usage everywhere else.  */

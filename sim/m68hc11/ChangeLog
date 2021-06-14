@@ -1,3 +1,9 @@
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-m68hc11eepr.c: Include sim-signal.h.
+	* interrupts.c, m68hc11_sim.c: Likewise.
+	* sim-main.h: Delete sim-signal.h include.
+
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.

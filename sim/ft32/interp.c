@@ -33,6 +33,7 @@
 
 #include "sim-main.h"
 #include "sim-options.h"
+#include "sim-signal.h"
 
 #include "opcode/ft32.h"
 

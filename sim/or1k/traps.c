@@ -23,6 +23,7 @@
 #define WANT_CPU
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "cgen-ops.h"
 
 /* Implement the sim invalid instruction function.  This will set the error

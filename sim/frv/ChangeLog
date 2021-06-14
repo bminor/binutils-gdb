@@ -1,3 +1,8 @@
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* interrupts.c: Include sim-signal.h.
+	* traps.c: Likewise.
+
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.

@@ -28,6 +28,7 @@
 #include <time.h>
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 
 #include "opcode/riscv.h"

@@ -21,6 +21,7 @@
 #include "defs.h"
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 #include "targ-vals.h"
 #include <stdlib.h>

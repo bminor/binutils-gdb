@@ -30,6 +30,7 @@
 #include <assert.h>
 #include "opcode/msp430-decode.h"
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 #include "targ-vals.h"
 

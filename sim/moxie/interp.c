@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-base.h"
 #include "sim-options.h"
 #include "sim-io.h"
+#include "sim-signal.h"
 #include "targ-vals.h"
 
 typedef int word;

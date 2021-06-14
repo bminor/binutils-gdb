@@ -22,6 +22,7 @@
 
 #include "portability.h"
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 #include "syscall.h"
 #include "targ-vals.h"

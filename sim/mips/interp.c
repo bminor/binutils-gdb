@@ -31,6 +31,7 @@ code on the hardware.
 #include "sim-options.h"
 #include "sim-assert.h"
 #include "sim-hw.h"
+#include "sim-signal.h"
 
 #include "itable.h"
 

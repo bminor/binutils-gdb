@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cgen-engine.h"
 #include "cgen-par.h"
 #include "sim-fpu.h"
+#include "sim-signal.h"
 #include "sim/callback.h"
 
 #include "bfd.h"

@@ -7,6 +7,7 @@
 #include "sim/sim.h"
 #include "bfd.h"
 #include "sim-fpu.h"
+#include "sim-signal.h"
 
 extern SIM_DESC simulator;
 

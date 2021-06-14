@@ -24,6 +24,7 @@
 
 #include "sim-main.h"
 #include "sim-fpu.h"
+#include "sim-signal.h"
 #include "cgen-mem.h"
 #include "cgen-ops.h"
 #include "cpuall.h"

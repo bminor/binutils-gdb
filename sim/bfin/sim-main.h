@@ -22,7 +22,6 @@
 #define _BFIN_MAIN_SIM_H_
 
 #include "sim-basics.h"
-#include "sim-signal.h"
 #include "arch.h"
 #include "sim-base.h"
 

@@ -2,6 +2,7 @@
 #include "defs.h"
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "v850_sim.h"
 #include "simops.h"
 

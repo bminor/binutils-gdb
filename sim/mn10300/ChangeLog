@@ -1,3 +1,9 @@
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* interp.c: Include sim-signal.h.
+	* op_utils.c, sim-main.h: Likewise.
+	* mn10300_sim.h: Delete sim-signal.h include.
+
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.

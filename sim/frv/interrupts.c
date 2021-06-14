@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define WANT_CPU_FRVBF
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "bfd.h"
 #include <stdlib.h>
 

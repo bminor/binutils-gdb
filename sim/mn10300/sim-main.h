@@ -25,7 +25,6 @@
 #define SIM_ENGINE_HALT_HOOK(SD,LAST_CPU,CIA) /* disable this hook */
 
 #include "sim-basics.h"
-#include "sim-signal.h"
 
 #include <signal.h> /* For kill() in insns:do_trap */
 

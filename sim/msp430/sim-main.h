@@ -22,7 +22,6 @@
 #define _MSP430_MAIN_SIM_H_
 
 #include "sim-basics.h"
-#include "sim-signal.h"
 #include "msp430-sim.h"
 #include "sim-base.h"
 

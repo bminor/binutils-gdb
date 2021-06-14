@@ -24,6 +24,7 @@
 #define WANT_CPU_IQ2000BF
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "cgen-mem.h"
 #include "cgen-ops.h"
 #include "targ-vals.h"

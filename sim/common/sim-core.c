@@ -28,6 +28,7 @@
 
 #include "sim-main.h"
 #include "sim-assert.h"
+#include "sim-signal.h"
 #include "libiberty.h"
 
 #if (WITH_HW)

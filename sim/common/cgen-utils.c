@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "bfd.h"
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "dis-asm.h"
 
 #define MEMOPS_DEFINE_INLINE

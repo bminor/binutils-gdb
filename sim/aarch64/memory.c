@@ -33,6 +33,7 @@
 #include "simulator.h"
 
 #include "sim-core.h"
+#include "sim-signal.h"
 
 static inline void
 mem_error (sim_cpu *cpu, const char *message, uint64_t addr)

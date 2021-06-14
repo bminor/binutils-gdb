@@ -30,6 +30,7 @@
 
 #include "sim-main.h"
 #include "sim-options.h"
+#include "sim-signal.h"
 
 #include "gdb/sim-cr16.h"
 #include "gdb/signals.h"

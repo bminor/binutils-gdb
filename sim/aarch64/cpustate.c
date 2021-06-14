@@ -26,6 +26,7 @@
 #include <math.h>
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "cpustate.h"
 #include "simulator.h"
 #include "libiberty.h"

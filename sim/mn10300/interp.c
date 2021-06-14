@@ -9,6 +9,7 @@
 
 #include "bfd.h"
 #include "sim-assert.h"
+#include "sim-signal.h"
 
 #include <stdlib.h>
 #include <string.h>

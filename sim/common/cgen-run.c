@@ -38,6 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
 #include "sim-assert.h"
+#include "sim-signal.h"
 
 #ifndef SIM_ENGINE_PREFIX_HOOK
 #define SIM_ENGINE_PREFIX_HOOK(sd)

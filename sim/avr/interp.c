@@ -29,6 +29,7 @@
 #include "sim-main.h"
 #include "sim-base.h"
 #include "sim-options.h"
+#include "sim-signal.h"
 
 /* As AVR is a 8/16 bits processor, define handy types.  */
 typedef unsigned short int word;

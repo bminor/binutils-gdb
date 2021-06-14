@@ -121,7 +121,6 @@ typedef enum {
 #include "sim-types.h"
 #include "sim-bits.h"
 #include "sim-endian.h"
-#include "sim-signal.h"
 
 #include "sim-utils.h"
 

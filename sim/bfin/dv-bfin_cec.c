@@ -24,6 +24,7 @@
 #include <strings.h>
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "devices.h"
 #include "dv-bfin_cec.h"
 #include "dv-bfin_evt.h"

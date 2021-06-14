@@ -25,6 +25,7 @@
 #define WANT_CPU_LM32BF
 
 #include "sim-main.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 #include "lm32-sim.h"
 #include "targ-vals.h"

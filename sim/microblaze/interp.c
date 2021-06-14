@@ -30,6 +30,7 @@
 
 #include "sim-main.h"
 #include "sim-options.h"
+#include "sim-signal.h"
 #include "sim-syscall.h"
 
 #include "microblaze-dis.h"

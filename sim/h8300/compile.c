@@ -33,6 +33,7 @@
 #include "sys/stat.h"
 #include "sys/types.h"
 #include "sim-options.h"
+#include "sim-signal.h"
 #include "sim/callback.h"
 
 #ifndef SIGTRAP
