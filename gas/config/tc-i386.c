@@ -246,6 +246,7 @@ enum i386_error
     invalid_vsib_address,
     invalid_vector_register_set,
     invalid_tmm_register_set,
+    invalid_dest_and_src_register_set,
     unsupported_vector_index_register,
     unsupported_broadcast,
     broadcast_needed,
@@ -380,7 +381,7 @@ struct _i386_insn
        expresses the broadcast factor.  */
     struct Broadcast_Operation
     {
-      /* Type of broadcast: {1to2}, {1to4}, {1to8}, or {1to16}.  */
+      /* Type of broadcast: {1to2}, {1to4}, {1to8}, {1to16} or {1to32}.  */
       unsigned int type;
 
       /* Index of broadcasted operand.  */
@@ -1237,6 +1238,8 @@ static const arch_entry cpu_arch[] =
     CPU_UINTR_FLAGS, 0 },
   { STRING_COMMA_LEN (".hreset"), PROCESSOR_UNKNOWN,
     CPU_HRESET_FLAGS, 0 },
+  { STRING_COMMA_LEN (".avx512_fp16"), PROCESSOR_UNKNOWN,
+    CPU_AVX512_FP16_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
@@ -1292,6 +1295,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("nowidekl"), CPU_ANY_WIDEKL_FLAGS },
   { STRING_COMMA_LEN ("nouintr"), CPU_ANY_UINTR_FLAGS },
   { STRING_COMMA_LEN ("nohreset"), CPU_ANY_HRESET_FLAGS },
+  { STRING_COMMA_LEN ("noavx512_fp16"), CPU_ANY_AVX512_FP16_FLAGS },
 };
 
 #ifdef I386COFF
@@ -3270,7 +3274,7 @@ pte (insn_template *t)
 {
   static const unsigned char opc_pfx[] = { 0, 0x66, 0xf3, 0xf2 };
   static const char *const opc_spc[] = {
-    NULL, "0f", "0f38", "0f3a", NULL, NULL, NULL, NULL,
+    NULL, "0f", "0f38", "0f3a", NULL, "evexmap5", "evexmap6", NULL,
     "XOP08", "XOP09", "XOP0A",
   };
   unsigned int j;
@@ -3865,7 +3869,7 @@ build_evex_prefix (void)
   /* The high 3 bits of the second EVEX byte are 1's compliment of RXB
      bits from REX.  */
   gas_assert (i.tm.opcode_modifier.opcodespace >= SPACE_0F);
-  gas_assert (i.tm.opcode_modifier.opcodespace <= SPACE_0F3A);
+  gas_assert (i.tm.opcode_modifier.opcodespace <= SPACE_EVEXMAP6);
   i.vex.bytes[1] = (~i.rex & 0x7) << 5 | i.tm.opcode_modifier.opcodespace;
 
   /* The fifth bit of the second EVEX byte is 1's compliment of the
@@ -6088,6 +6092,24 @@ check_VecOperands (const insn_template *t)
       return 1;
     }
 
+  /* For some special instructions require that destination must be distinct
+     from source registers.  */
+  if (t->opcode_modifier.distinctdest)
+    {
+      unsigned int dest_reg = i.operands - 1;
+
+      know (i.operands >= 3);
+
+      /* #UD if dest_reg == src1_reg or dest_reg == src2_reg.  */
+      if (i.op[dest_reg - 1].regs == i.op[dest_reg].regs
+	  || (i.reg_operands > 2
+	      && i.op[dest_reg - 2].regs == i.op[dest_reg].regs))
+	{
+	  i.error = invalid_dest_and_src_register_set;
+	  return 1;
+	}
+    }
+
   /* Check if broadcast is supported by the instruction and is applied
      to the memory operand.  */
   if (i.broadcast.type)
@@ -6847,6 +6869,9 @@ match_template (char mnem_suffix)
 	  break;
 	case invalid_tmm_register_set:
 	  err_msg = _("all tmm registers must be distinct");
+	  break;
+	case invalid_dest_and_src_register_set:
+	  err_msg = _("destination and source registers must be distinct");
 	  break;
 	case unsupported_vector_index_register:
 	  err_msg = _("unsupported vector index register");
@@ -7627,6 +7652,14 @@ check_word_reg (void)
 		register_prefix, i.op[op].regs->reg_name,
 		i.suffix);
 	return 0;
+      }
+    /* For some instructions need encode as EVEX.W=1 without explicit VexW1. */
+    else if (i.types[op].bitfield.qword
+	     && intel_syntax
+	     && i.tm.opcode_modifier.toqword)
+      {
+	  /* Convert to QWORD.  We want EVEX.W byte. */
+	  i.suffix = QWORD_MNEM_SUFFIX;
       }
   return 1;
 }
@@ -10518,6 +10551,12 @@ check_VecOperations (char *op_string)
 		       && *(op_string+1) == '6')
 		{
 		  bcst_type = 16;
+		  op_string++;
+		}
+	      else if (*op_string == '3'
+		       && *(op_string+1) == '2')
+		{
+		  bcst_type = 32;
 		  op_string++;
 		}
 	      else

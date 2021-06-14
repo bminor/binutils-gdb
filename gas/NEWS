@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel AVX512_FP16 instructions.
+
 Changes in 2.37:
 
 * arm-symbianelf support removed.

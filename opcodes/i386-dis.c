@@ -114,6 +114,7 @@ static void XMM_Fixup (int, int);
 static void FXSAVE_Fixup (int, int);
 
 static void MOVSXD_Fixup (int, int);
+static void DistinctDest_Fixup (int, int);
 
 struct dis_private {
   /* Points to first byte not fetched.  */
@@ -358,18 +359,22 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXw { OP_EX, w_mode }
 #define EXd { OP_EX, d_mode }
 #define EXdS { OP_EX, d_swap_mode }
+#define EXwS { OP_EX, w_swap_mode }
 #define EXq { OP_EX, q_mode }
 #define EXqS { OP_EX, q_swap_mode }
 #define EXdq { OP_EX, dq_mode }
 #define EXx { OP_EX, x_mode }
+#define EXxh { OP_EX, xh_mode }
 #define EXxS { OP_EX, x_swap_mode }
 #define EXxmm { OP_EX, xmm_mode }
 #define EXymm { OP_EX, ymm_mode }
 #define EXtmm { OP_EX, tmm_mode }
 #define EXxmmq { OP_EX, xmmq_mode }
+#define EXxmmqh { OP_EX, evex_half_bcst_xmmqh_mode }
 #define EXEvexHalfBcstXmmq { OP_EX, evex_half_bcst_xmmq_mode }
 #define EXxmmdw { OP_EX, xmmdw_mode }
 #define EXxmmqd { OP_EX, xmmqd_mode }
+#define EXxmmqdh { OP_EX, evex_half_bcst_xmmqdh_mode }
 #define EXymmq { OP_EX, ymmq_mode }
 #define EXEvexXGscat { OP_EX, evex_x_gscat_mode }
 #define EXEvexXNoBcst { OP_EX, evex_x_nobcst_mode }
@@ -459,6 +464,8 @@ enum
   w_mode,
   /* double word operand  */
   d_mode,
+  /* word operand with operand swapped  */
+  w_swap_mode,
   /* double word operand with operand swapped */
   d_swap_mode,
   /* quad word operand */
@@ -479,6 +486,9 @@ enum
   /* Similar to x_mode, but with operands swapped and disabled broadcast
      in EVEX.  */
   x_swap_mode,
+  /* 16-byte XMM, 32-byte YMM or 64-byte ZMM operand.  In EVEX with
+     broadcast of 16bit enabled.  */
+  xh_mode,
   /* 16-byte XMM operand */
   xmm_mode,
   /* XMM, XMM or YMM register operand, or quad word, xmmword or ymmword
@@ -487,10 +497,16 @@ enum
   xmmq_mode,
   /* Same as xmmq_mode, but broadcast is allowed.  */
   evex_half_bcst_xmmq_mode,
+  /* XMM, XMM or YMM register operand, or quad word, xmmword or ymmword
+     memory operand (depending on vector length).  16bit broadcast.  */
+  evex_half_bcst_xmmqh_mode,
   /* 16-byte XMM, word, double word or quad word operand.  */
   xmmdw_mode,
   /* 16-byte XMM, double word, quad word operand or xmm word operand.  */
   xmmqd_mode,
+  /* 16-byte XMM, double word, quad word operand or xmm word operand.
+     16bit broadcast.  */
+  evex_half_bcst_xmmqdh_mode,
   /* 32-byte YMM operand */
   ymm_mode,
   /* quad word, ymmword or zmmword memory operand.  */
@@ -841,7 +857,7 @@ enum
   MOD_EVEX_0F387B_W_0,
   MOD_EVEX_0F387C,
   MOD_EVEX_0F38C6,
-  MOD_EVEX_0F38C7
+  MOD_EVEX_0F38C7,
 };
 
 enum
@@ -1078,6 +1094,48 @@ enum
   PREFIX_EVEX_0F389B,
   PREFIX_EVEX_0F38AA,
   PREFIX_EVEX_0F38AB,
+
+  PREFIX_EVEX_0F3A08_W_0,
+  PREFIX_EVEX_0F3A0A_W_0,
+  PREFIX_EVEX_0F3A26,
+  PREFIX_EVEX_0F3A27,
+  PREFIX_EVEX_0F3A56,
+  PREFIX_EVEX_0F3A57,
+  PREFIX_EVEX_0F3A66,
+  PREFIX_EVEX_0F3A67,
+  PREFIX_EVEX_0F3AC2,
+
+  PREFIX_EVEX_MAP5_10,
+  PREFIX_EVEX_MAP5_11,
+  PREFIX_EVEX_MAP5_1D,
+  PREFIX_EVEX_MAP5_2A,
+  PREFIX_EVEX_MAP5_2C,
+  PREFIX_EVEX_MAP5_2D,
+  PREFIX_EVEX_MAP5_2E,
+  PREFIX_EVEX_MAP5_2F,
+  PREFIX_EVEX_MAP5_51,
+  PREFIX_EVEX_MAP5_58,
+  PREFIX_EVEX_MAP5_59,
+  PREFIX_EVEX_MAP5_5A_W_0,
+  PREFIX_EVEX_MAP5_5A_W_1,
+  PREFIX_EVEX_MAP5_5B_W_0,
+  PREFIX_EVEX_MAP5_5B_W_1,
+  PREFIX_EVEX_MAP5_5C,
+  PREFIX_EVEX_MAP5_5D,
+  PREFIX_EVEX_MAP5_5E,
+  PREFIX_EVEX_MAP5_5F,
+  PREFIX_EVEX_MAP5_78,
+  PREFIX_EVEX_MAP5_79,
+  PREFIX_EVEX_MAP5_7A,
+  PREFIX_EVEX_MAP5_7B,
+  PREFIX_EVEX_MAP5_7C,
+  PREFIX_EVEX_MAP5_7D_W_0,
+
+  PREFIX_EVEX_MAP6_13,
+  PREFIX_EVEX_MAP6_56,
+  PREFIX_EVEX_MAP6_57,
+  PREFIX_EVEX_MAP6_D6,
+  PREFIX_EVEX_MAP6_D7,
 };
 
 enum
@@ -1159,7 +1217,9 @@ enum
 {
   EVEX_0F = 0,
   EVEX_0F38,
-  EVEX_0F3A
+  EVEX_0F3A,
+  EVEX_MAP5,
+  EVEX_MAP6,
 };
 
 enum
@@ -1587,6 +1647,22 @@ enum
   EVEX_W_0F3A43_L_n,
   EVEX_W_0F3A70,
   EVEX_W_0F3A72,
+
+  EVEX_W_MAP5_5A,
+  EVEX_W_MAP5_5B,
+  EVEX_W_MAP5_78_P_0,
+  EVEX_W_MAP5_78_P_2,
+  EVEX_W_MAP5_79_P_0,
+  EVEX_W_MAP5_79_P_2,
+  EVEX_W_MAP5_7A_P_2,
+  EVEX_W_MAP5_7A_P_3,
+  EVEX_W_MAP5_7B_P_2,
+  EVEX_W_MAP5_7C_P_0,
+  EVEX_W_MAP5_7C_P_2,
+  EVEX_W_MAP5_7D,
+
+  EVEX_W_MAP6_13_P_0,
+  EVEX_W_MAP6_13_P_2,
 };
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
@@ -1647,6 +1723,7 @@ struct dis386 {
    "XZ" => print 'x', 'y', or 'z' if suffix_always is true or no
 	   register operands and no broadcast.
    "XW" => print 's', 'd' depending on the VEX.W bit (for FMA)
+   "XH" => print 'h' if EVEX.W=0, EVEX.W=1 is not a valid encoding (for FP16)
    "XV" => print "{vex3}" pseudo prefix
    "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand, cond
 	   being false, or no operand at all in 64bit mode, or if suffix_always
@@ -9252,6 +9329,12 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	case 0x3:
 	  vex_table_index = EVEX_0F3A;
 	  break;
+	case 0x5:
+	  vex_table_index = EVEX_MAP5;
+	  break;
+	case 0x6:
+	  vex_table_index = EVEX_MAP6;
+	  break;
 	}
 
       /* The second byte after 0x62.  */
@@ -10451,28 +10534,46 @@ putop (const char *in_template, int sizeflag)
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'H':
-	  if (intel_syntax)
-	    break;
-	  if ((prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_CS
-	      || (prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_DS)
+	  if (l == 0)
 	    {
-	      used_prefixes |= prefixes & (PREFIX_CS | PREFIX_DS);
-	      *obufp++ = ',';
-	      *obufp++ = 'p';
+	      if (intel_syntax)
+	        break;
+	      if ((prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_CS
+	          || (prefixes & (PREFIX_CS | PREFIX_DS)) == PREFIX_DS)
+		{
+	          used_prefixes |= prefixes & (PREFIX_CS | PREFIX_DS);
+	          *obufp++ = ',';
+	          *obufp++ = 'p';
 
-	      /* Set active_seg_prefix even if not set in 64-bit mode
-		 because here it is a valid branch hint. */
-	      if (prefixes & PREFIX_DS)
-		{
-		  active_seg_prefix = PREFIX_DS;
-		  *obufp++ = 't';
-		}
-	      else
-		{
-		  active_seg_prefix = PREFIX_CS;
-		  *obufp++ = 'n';
+		  /* Set active_seg_prefix even if not set in 64-bit mode
+		     because here it is a valid branch hint. */
+		  if (prefixes & PREFIX_DS)
+		    {
+		      active_seg_prefix = PREFIX_DS;
+		      *obufp++ = 't';
+		    }
+		  else
+		    {
+		      active_seg_prefix = PREFIX_CS;
+		      *obufp++ = 'n';
+		    }
 		}
 	    }
+	  else if (l == 1 && last[0] == 'X')
+	    {
+	      if (vex.w == 0)
+		*obufp++ = 'h';
+	      else
+		{
+		  *obufp++ = '{';
+		  *obufp++ = 'b';
+		  *obufp++ = 'a';
+		  *obufp++ = 'd';
+		  *obufp++ = '}';
+		}
+	    }
+	  else
+	    abort ();
 	  break;
 	case 'K':
 	  USED_REX (REX_W);
@@ -10956,14 +11057,25 @@ print_displacement (char *buf, bfd_vma disp)
 static void
 intel_operand_size (int bytemode, int sizeflag)
 {
-  if (vex.b
-      && (bytemode == x_mode
-	  || bytemode == evex_half_bcst_xmmq_mode))
+  if (vex.b)
     {
-      if (vex.w)
-	oappend ("QWORD PTR ");
-      else
-	oappend ("DWORD PTR ");
+      switch (bytemode)
+	{
+	case x_mode:
+	case evex_half_bcst_xmmq_mode:
+	  if (vex.w)
+	    oappend ("QWORD PTR ");
+	  else
+	    oappend ("DWORD PTR ");
+	  break;
+	case xh_mode:
+	case evex_half_bcst_xmmqh_mode:
+	case evex_half_bcst_xmmqdh_mode:
+	  oappend ("WORD PTR ");
+	  break;
+	default:
+	  abort ();
+	}
       return;
     }
   switch (bytemode)
@@ -10974,6 +11086,7 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("BYTE PTR ");
       break;
     case w_mode:
+    case w_swap_mode:
     case dw_mode:
       oappend ("WORD PTR ");
       break;
@@ -11054,6 +11167,7 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("TBYTE PTR ");
       break;
     case x_mode:
+    case xh_mode:
     case x_swap_mode:
     case evex_x_gscat_mode:
     case evex_x_nobcst_mode:
@@ -11085,6 +11199,7 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("YMMWORD PTR ");
       break;
     case xmmq_mode:
+    case evex_half_bcst_xmmqh_mode:
     case evex_half_bcst_xmmq_mode:
       if (!need_vex)
 	abort ();
@@ -11124,6 +11239,7 @@ intel_operand_size (int bytemode, int sizeflag)
 	}
       break;
     case xmmqd_mode:
+    case evex_half_bcst_xmmqdh_mode:
       if (!need_vex)
 	abort ();
 
@@ -11341,6 +11457,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	{
 	case dw_mode:
 	case w_mode:
+	case w_swap_mode:
 	  shift = 1;
 	  break;
 	case db_mode:
@@ -11361,6 +11478,15 @@ OP_E_memory (int bytemode, int sizeflag)
 	case evex_x_gscat_mode:
 	  shift = vex.w ? 3 : 2;
 	  break;
+	case xh_mode:
+	case evex_half_bcst_xmmqh_mode:
+	case evex_half_bcst_xmmqdh_mode:
+	  if (vex.b)
+	    {
+	      shift = vex.w ? 2 : 1;
+	      break;
+	    }
+	  /* Fall through.  */
 	case x_mode:
 	case evex_half_bcst_xmmq_mode:
 	  if (vex.b)
@@ -11391,10 +11517,12 @@ OP_E_memory (int bytemode, int sizeflag)
 	    }
 	  /* Make necessary corrections to shift for modes that need it.  */
 	  if (bytemode == xmmq_mode
+	      || bytemode == evex_half_bcst_xmmqh_mode
 	      || bytemode == evex_half_bcst_xmmq_mode
 	      || (bytemode == ymmq_mode && vex.length == 128))
 	    shift -= 1;
-	  else if (bytemode == xmmqd_mode)
+	  else if (bytemode == xmmqd_mode
+	           || bytemode == evex_half_bcst_xmmqdh_mode)
 	    shift -= 2;
 	  else if (bytemode == xmmdw_mode)
 	    shift -= 3;
@@ -11780,7 +11908,32 @@ OP_E_memory (int bytemode, int sizeflag)
   if (vex.b)
     {
       evex_used |= EVEX_b_used;
-      if (vex.w
+      if (bytemode == xh_mode)
+        {
+          if (vex.w)
+            {
+              abort ();
+            }
+          else
+            {
+              switch (vex.length)
+                {
+                case 128:
+                  oappend ("{1to8}");
+                  break;
+                case 256:
+                  oappend ("{1to16}");
+                  break;
+                case 512:
+                  oappend ("{1to32}");
+                  break;
+                default:
+                  abort ();
+                }
+            }
+        }
+      else if (vex.w
+	  || bytemode == evex_half_bcst_xmmqdh_mode
 	  || bytemode == evex_half_bcst_xmmq_mode)
 	{
 	  switch (vex.length)
@@ -11798,7 +11951,8 @@ OP_E_memory (int bytemode, int sizeflag)
 	      abort ();
 	    }
 	}
-      else if (bytemode == x_mode)
+      else if (bytemode == x_mode
+	  || bytemode == evex_half_bcst_xmmqh_mode)
 	{
 	  switch (vex.length)
 	    {
@@ -12448,6 +12602,7 @@ print_vector_reg (unsigned int reg, int bytemode)
   const char **names;
 
   if (bytemode == xmmq_mode
+      || bytemode == evex_half_bcst_xmmqh_mode
       || bytemode == evex_half_bcst_xmmq_mode)
     {
       switch (vex.length)
@@ -12479,6 +12634,8 @@ print_vector_reg (unsigned int reg, int bytemode)
 	   && bytemode != scalar_mode
 	   && bytemode != xmmdw_mode
 	   && bytemode != xmmqd_mode
+	   && bytemode != evex_half_bcst_xmmqdh_mode
+	   && bytemode != w_swap_mode
 	   && bytemode != b_mode
 	   && bytemode != w_mode
 	   && bytemode != d_mode
@@ -12634,6 +12791,7 @@ OP_EX (int bytemode, int sizeflag)
 
   if ((sizeflag & SUFFIX_ALWAYS)
       && (bytemode == x_swap_mode
+	  || bytemode == w_swap_mode
 	  || bytemode == d_swap_mode
 	  || bytemode == q_swap_mode))
     swap_operand ();
@@ -13505,6 +13663,46 @@ MOVSXD_Fixup (int bytemode, int sizeflag)
   mnemonicendp = p;
   *p = '\0';
   OP_E (bytemode, sizeflag);
+}
+
+static void
+DistinctDest_Fixup (int bytemode, int sizeflag)
+{
+  unsigned int reg = vex.register_specifier;
+  unsigned int modrm_reg = modrm.reg;
+  unsigned int modrm_rm = modrm.rm;
+
+  /* Calc destination register number.  */
+  if (rex & REX_R)
+    modrm_reg += 8;
+  if (!vex.r)
+    modrm_reg += 16;
+
+  /* Calc src1 register number.  */
+  if (address_mode != mode_64bit)
+    reg &= 7;
+  else if (vex.evex && !vex.v)
+    reg += 16;
+
+  /* Calc src2 register number.  */
+  if (modrm.mod == 3)
+    {
+      if (rex & REX_B)
+        modrm_rm += 8;
+      if (rex & REX_X)
+        modrm_rm += 16;
+    }
+
+  /* Destination and source registers must be distinct, output bad if
+     dest == src1 or dest == src2.  */
+  if (modrm_reg == reg
+      || (modrm.mod == 3
+	  && modrm_reg == modrm_rm))
+    {
+      oappend ("(bad)");
+    }
+  else
+    OP_XMM (bytemode, sizeflag);
 }
 
 static void
