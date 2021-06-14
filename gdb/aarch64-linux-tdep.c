@@ -20,6 +20,7 @@
 
 #include "defs.h"
 
+#include "gdbcmd.h"
 #include "gdbarch.h"
 #include "glibc-tdep.h"
 #include "linux-tdep.h"
@@ -1765,6 +1766,57 @@ aarch64_linux_decode_memtag_note (struct gdbarch *gdbarch,
   return tag;
 }
 
+/* Implement the maintenance print capability tag command.  */
+
+static void
+maint_print_cap_from_addr_cmd (const char *args, int from_tty)
+{
+  gdb::byte_vector cap;
+  CORE_ADDR addr = parse_and_eval_address (args);
+  cap = target_read_capability (addr);
+
+  for (auto it : cap)
+    fprintf_unfiltered (gdb_stdlog, "%02x ", it);
+
+  fputs_unfiltered ("\n", gdb_stdlog);
+}
+
+/* Implement the maintenance set capability in memory command.  */
+
+static void
+maint_set_capability_in_memory_cmd (const char *args, int from_tty)
+{
+  std::string addr_str, tag_str, upper_str, lower_str;
+  const char *args_ptr = args;
+
+  addr_str = extract_string_maybe_quoted (&args_ptr);
+  tag_str = extract_string_maybe_quoted (&args_ptr);
+  upper_str = extract_string_maybe_quoted (&args_ptr);
+  lower_str = extract_string_maybe_quoted (&args_ptr);
+
+  CORE_ADDR addr = parse_and_eval_address (addr_str.c_str ());
+  CORE_ADDR tag_part = parse_and_eval_address (tag_str.c_str ());
+  CORE_ADDR half_a = parse_and_eval_address (upper_str.c_str ());
+  CORE_ADDR half_b = parse_and_eval_address (lower_str.c_str ());
+
+  unsigned __int128 a, b;
+
+  a = half_a;
+  b = half_b;
+
+  a = (a << 64) | b;
+  bool tag = (tag_part != 0)? true : false;
+
+  gdb::byte_vector cap;
+
+  cap.resize (17);
+  memcpy (cap.data (), &tag, 1);
+  memcpy (cap.data () + 1, &a, 16);
+
+  if (!target_write_capability (addr, {cap.data (), cap.size ()}))
+    perror_with_name (_("Failed to set capability in memory."));
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -2024,6 +2076,13 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       /* Core file helper to decode a memory tag note.  */
       set_gdbarch_decode_memtag_note (gdbarch,
 				      aarch64_linux_decode_memtag_note);
+
+      add_cmd ("cap_from_addr", class_maintenance, maint_print_cap_from_addr_cmd,
+	       _("Print the capability from addr."), &maintenanceprintlist);
+
+      add_cmd ("cap_in_memory", class_maintenance,
+	       maint_set_capability_in_memory_cmd,
+	       _("Print the capability from addr."), &maintenancelist);
     }
   else
     {
