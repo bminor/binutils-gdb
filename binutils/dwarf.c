@@ -823,7 +823,7 @@ typedef struct abbrev_attr
 {
   unsigned long          attribute;
   unsigned long          form;
-  bfd_signed_vma         implicit_const;
+  dwarf_signed_vma       implicit_const;
   struct abbrev_attr *   next;
 }
 abbrev_attr;
@@ -998,19 +998,19 @@ add_abbrev (unsigned long  number,
 }
 
 static void
-add_abbrev_attr (unsigned long   attribute,
-		 unsigned long   form,
-		 bfd_signed_vma  implicit_const,
-		 abbrev_list *   list)
+add_abbrev_attr (unsigned long    attribute,
+		 unsigned long    form,
+		 dwarf_signed_vma implicit_const,
+		 abbrev_list *    list)
 {
   abbrev_attr *attr;
 
   attr = (abbrev_attr *) xmalloc (sizeof (*attr));
 
-  attr->attribute = attribute;
-  attr->form      = form;
+  attr->attribute      = attribute;
+  attr->form           = form;
   attr->implicit_const = implicit_const;
-  attr->next      = NULL;
+  attr->next           = NULL;
 
   assert (list != NULL && list->last_abbrev != NULL);
 
@@ -1085,7 +1085,7 @@ process_abbrev_set (struct dwarf_section *section,
 	{
 	  unsigned long form;
 	  /* Initialize it due to a false compiler warning.  */
-	  bfd_signed_vma implicit_const = -1;
+	  dwarf_signed_vma implicit_const = -1;
 
 	  READ_ULEB (attribute, start, end);
 	  if (start == end)
@@ -6255,7 +6255,7 @@ display_debug_abbrev (struct dwarf_section *section,
 		      get_AT_name (attr->attribute),
 		      get_FORM_name (attr->form));
 	      if (attr->form == DW_FORM_implicit_const)
-		printf (": %" BFD_VMA_FMT "d", attr->implicit_const);
+		printf (": %s", dwarf_vmatoa ("d", attr->implicit_const));
 	      putchar ('\n');
 	    }
 	}

@@ -1,3 +1,10 @@
+2021-06-14  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* dwarf.c (struct abbrev_attr): Change type of implicit_const.
+	(add_abbrev_attr): Likewise.
+	(process_abbrev_set): Likewise.
+	(display_debug_abbrev): Adjust to above change.
+
 2021-06-12  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_file_header): Don't clear section_headers.
