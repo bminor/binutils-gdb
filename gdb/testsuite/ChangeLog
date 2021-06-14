@@ -1,3 +1,9 @@
+2021-06-14  Pedro Alves  <pedro@palves.net>
+
+	* gdb.base/annota1.exp: Build list using [list] instead of {}.
+	Tell [join] to join with no character.  Build expected pattern in
+	separate variable instead of in the -re expression directly.
+
 2021-06-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.mi/mi-sym-info.exp (114-symbol-info-function test): Increase
