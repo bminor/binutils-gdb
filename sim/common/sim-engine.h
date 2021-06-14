@@ -153,8 +153,4 @@ extern int sim_engine_last_cpu_nr (SIM_DESC sd);
 extern int sim_engine_nr_cpus (SIM_DESC sd);
 
 
-/* Establish the simulator engine */
-MODULE_INSTALL_FN sim_engine_install;
-
-
 #endif

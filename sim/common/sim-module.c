@@ -37,7 +37,6 @@ static MODULE_INSTALL_FN * const early_modules[] = {
   standard_install,
   sim_events_install,
   sim_model_install,
-  sim_engine_install,
 #if WITH_TRACE_ANY_P
   trace_install,
 #endif
