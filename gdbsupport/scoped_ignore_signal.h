@@ -22,7 +22,10 @@
 
 #include <signal.h>
 
-/* RAII class used to ignore a signal in a scope.  */
+/* RAII class used to ignore a signal in a scope.  If sigprocmask is
+   supported, then the signal is only ignored by the calling thread.
+   Otherwise, the signal disposition is set to SIG_IGN, which affects
+   the whole process.  */
 
 template <int Sig>
 class scoped_ignore_signal
@@ -30,18 +33,48 @@ class scoped_ignore_signal
 public:
   scoped_ignore_signal ()
   {
+#ifdef HAVE_SIGPROCMASK
+    sigset_t set, old_state;
+
+    sigemptyset (&set);
+    sigaddset (&set, Sig);
+    sigprocmask (SIG_BLOCK, &set, &old_state);
+    m_was_blocked = sigismember (&old_state, Sig);
+#else
     m_osig = signal (Sig, SIG_IGN);
+#endif
   }
 
   ~scoped_ignore_signal ()
   {
+#ifdef HAVE_SIGPROCMASK
+    if (!m_was_blocked)
+      {
+	sigset_t set;
+	const timespec zero_timeout = {};
+
+	sigemptyset (&set);
+	sigaddset (&set, Sig);
+
+	/* If we got a pending Sig signal, consume it before
+	   unblocking.  */
+	sigtimedwait (&set, nullptr, &zero_timeout);
+
+	sigprocmask (SIG_UNBLOCK, &set, nullptr);
+      }
+#else
     signal (Sig, m_osig);
+#endif
   }
 
   DISABLE_COPY_AND_ASSIGN (scoped_ignore_signal);
 
 private:
-  sighandler_t m_osig = nullptr;
+#ifdef HAVE_SIGPROCMASK
+  bool m_was_blocked;
+#else
+  sighandler_t m_osig;
+#endif
 };
 
 struct scoped_ignore_signal_nop
