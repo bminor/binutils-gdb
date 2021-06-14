@@ -1,5 +1,12 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-module.c (early_modules): Delete profile_install.
+	* sim-profile.c (profile_install): Rename to ...
+	(sim_install_profile): ... this.  New prototype.
+	* sim-profile.h (profile_install): Delete.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-module.c (early_modules): Delete trace_install.
 	* sim-trace.c (trace_install): Rename to ...
 	(sim_install_trace): ... this.  New prototype.

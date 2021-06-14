@@ -37,9 +37,6 @@ static MODULE_INSTALL_FN * const early_modules[] = {
   standard_install,
   sim_events_install,
   sim_model_install,
-#if WITH_PROFILE
-  profile_install,
-#endif
   sim_core_install,
   sim_memopt_install,
   sim_watchpoint_install,

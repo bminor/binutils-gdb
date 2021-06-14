@@ -1216,10 +1216,12 @@ profile_info (SIM_DESC sd, int verbose)
 
 }
 
-/* Install profiling support in the simulator.  */
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+SIM_RC sim_install_profile (SIM_DESC sd);
 
+/* Install profiling support in the simulator.  */
 SIM_RC
-profile_install (SIM_DESC sd)
+sim_install_profile (SIM_DESC sd)
 {
   int i;
 
