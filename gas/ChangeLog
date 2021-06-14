@@ -1,5 +1,9 @@
 2021-06-14  Jan Beulich  <jbeulich@suse.com>
 
+	* read.c (emit_expr_with_reloc): Fold three as_warn().
+
+2021-06-14  Jan Beulich  <jbeulich@suse.com>
+
 	* doc/internals.texi (TC_ADDRESS_BYTES): Mention generic default.
 	* read.c (potable, cons_worker): Drop TC_ADDRESS_BYTES
 	conditional.
