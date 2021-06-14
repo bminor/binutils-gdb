@@ -1,3 +1,9 @@
+2021-06-14  Jan Beulich  <jbeulich@suse.com>
+
+	* doc/internals.texi (TC_ADDRESS_BYTES): Mention generic default.
+	* read.c (potable, cons_worker): Drop TC_ADDRESS_BYTES
+	conditional.
+
 2021-06-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (x86_cons): Handle GOT/PLT relocations only

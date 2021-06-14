@@ -364,9 +364,7 @@ static const pseudo_typeS potable[] = {
   {"common.s", s_mri_common, 1},
   {"data", s_data, 0},
   {"dc", cons, 2},
-#ifdef TC_ADDRESS_BYTES
   {"dc.a", cons, 0},
-#endif
   {"dc.b", cons, 1},
   {"dc.d", float_cons, 'd'},
   {"dc.l", cons, 4},
@@ -4095,10 +4093,8 @@ cons_worker (int nbytes,	/* 1=.byte, 2=.word, 4=.long.  */
       return;
     }
 
-#ifdef TC_ADDRESS_BYTES
   if (nbytes == 0)
     nbytes = TC_ADDRESS_BYTES ();
-#endif
 
 #ifdef md_cons_align
   md_cons_align (nbytes);
