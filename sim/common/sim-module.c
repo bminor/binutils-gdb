@@ -40,9 +40,6 @@ static MODULE_INSTALL_FN * const early_modules[] = {
   sim_core_install,
   sim_memopt_install,
   sim_watchpoint_install,
-#if WITH_SCACHE
-  scache_install,
-#endif
 };
 static int early_modules_len = ARRAY_SIZE (early_modules);
 

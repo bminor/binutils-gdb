@@ -109,9 +109,6 @@ typedef struct cpu_scache {
 /* Non-zero if cache is in use.  */
 #define USING_SCACHE_P(sd) (STATE_SCACHE_SIZE (sd) > 0)
 
-/* Install the simulator cache into the simulator.  */
-MODULE_INSTALL_FN scache_install;
-
 /* Lookup a PC value in the scache [compilation only].  */
 extern SCACHE * scache_lookup (SIM_CPU *, IADDR);
 /* Return a pointer to at least N buffers.  */

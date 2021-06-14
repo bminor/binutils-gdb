@@ -1,5 +1,12 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-scache.c (scache_install): Rename to ...
+	(sim_install_scache): ... this.  New prototype.
+	* cgen-scache.h (scache_install): Delete.
+	* sim-module.c (early_modules): Delete scache_install.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-module.c (early_modules): Delete profile_install.
 	* sim-profile.c (profile_install): Rename to ...
 	(sim_install_profile): ... this.  New prototype.
