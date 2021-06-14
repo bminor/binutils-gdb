@@ -29,6 +29,9 @@
 #include "gdbsupport/gdb_wait.h"
 #include "inf-ptrace.h"
 #include <sys/types.h>
+#ifdef HAVE_SYS_PROCCTL_H
+#include <sys/procctl.h>
+#endif
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
 #include <sys/signal.h>
@@ -1401,6 +1404,68 @@ fbsd_nat_target::supports_stopped_by_sw_breakpoint ()
 }
 #endif
 
+#ifdef PROC_ASLR_CTL
+class maybe_disable_address_space_randomization
+{
+public:
+  explicit maybe_disable_address_space_randomization (bool disable_randomization)
+  {
+    if (disable_randomization)
+      {
+	if (procctl (P_PID, getpid (), PROC_ASLR_STATUS, &m_aslr_ctl) == -1)
+	  {
+	    warning (_("Failed to fetch current address space randomization "
+		       "status: %s"), safe_strerror (errno));
+	    return;
+	  }
+
+	m_aslr_ctl &= ~PROC_ASLR_ACTIVE;
+	if (m_aslr_ctl == PROC_ASLR_FORCE_DISABLE)
+	  return;
+
+	int ctl = PROC_ASLR_FORCE_DISABLE;
+	if (procctl (P_PID, getpid (), PROC_ASLR_CTL, &ctl) == -1)
+	  {
+	    warning (_("Error disabling address space randomization: %s"),
+		     safe_strerror (errno));
+	    return;
+	  }
+
+	m_aslr_ctl_set = true;
+      }
+  }
+
+  ~maybe_disable_address_space_randomization ()
+  {
+    if (m_aslr_ctl_set)
+      {
+	if (procctl (P_PID, getpid (), PROC_ASLR_CTL, &m_aslr_ctl) == -1)
+	  warning (_("Error restoring address space randomization: %s"),
+		   safe_strerror (errno));
+      }
+  }
+
+  DISABLE_COPY_AND_ASSIGN (maybe_disable_address_space_randomization);
+
+private:
+  bool m_aslr_ctl_set = false;
+  int m_aslr_ctl = 0;
+};
+#endif
+
+void
+fbsd_nat_target::create_inferior (const char *exec_file,
+				  const std::string &allargs,
+				  char **env, int from_tty)
+{
+#ifdef PROC_ASLR_CTL
+  maybe_disable_address_space_randomization restore_aslr_ctl
+    (disable_randomization);
+#endif
+
+  inf_ptrace_target::create_inferior (exec_file, allargs, env, from_tty);
+}
+
 #ifdef TDP_RFPPWAIT
 /* Target hook for follow_fork.  On entry and at return inferior_ptid is
    the ptid of the followed inferior.  */
@@ -1524,6 +1589,16 @@ bool
 fbsd_nat_target::supports_multi_process ()
 {
   return true;
+}
+
+bool
+fbsd_nat_target::supports_disable_randomization ()
+{
+#ifdef PROC_ASLR_CTL
+  return true;
+#else
+  return false;
+#endif
 }
 
 void _initialize_fbsd_nat ();
