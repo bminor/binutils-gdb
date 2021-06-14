@@ -7411,11 +7411,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	symbol_get_bfdsym (fixP->fx_addsy)->flags |= BSF_KEEP;
     }
 #else
-  if (fixP->fx_r_type != BFD_RELOC_PPC_TOC16
-      && fixP->fx_r_type != BFD_RELOC_PPC_TOC16_HI
-      && fixP->fx_r_type != BFD_RELOC_PPC_TOC16_LO)
-    fixP->fx_addnumber = 0;
-  else
+  if (fixP->fx_r_type == BFD_RELOC_PPC_TOC16
+      || fixP->fx_r_type == BFD_RELOC_PPC_TOC16_HI
+      || fixP->fx_r_type == BFD_RELOC_PPC_TOC16_LO)
     {
       /* We want to use the offset within the toc, not the actual VMA
 	 of the symbol.  */
@@ -7430,6 +7428,15 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       /* Set *valP to avoid errors.  */
       *valP = value;
     }
+  else if (fixP->fx_r_type == BFD_RELOC_PPC_TLSM
+	   || fixP->fx_r_type == BFD_RELOC_PPC64_TLSM)
+    /* AIX ld expects the section contents for these relocations
+       to be zero.  Arrange for that to occur when
+       bfd_install_relocation is called.  */
+    fixP->fx_addnumber = (- bfd_section_vma (S_GET_SEGMENT (fixP->fx_addsy))
+			  - S_GET_VALUE (fixP->fx_addsy));
+  else
+    fixP->fx_addnumber = 0;
 #endif
 }
 

@@ -1,3 +1,13 @@
+2021-06-17  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/tc-ppc.c (md_apply_fix): Adjust addend to nullify
+	section contents for BFD_RELOC_PPC_TLSM or
+	BFD_RELOC_PPC64_TLSM.
+	* testsuite/gas/ppc/xcoff-tlsm-32.d: New test.
+	* testsuite/gas/ppc/xcoff-tlsm-64.d: New test.
+	* testsuite/gas/ppc/xcoff-tlsm.s: New test.
+	* testsuite/gas/ppc/aix.exp: Run new tests.
+
 2021-06-16  Jan Beulich  <jbeulich@suse.com>
 
 	* read.c (parse_one_float): New.
