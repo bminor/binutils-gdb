@@ -1,3 +1,8 @@
+2021-06-24  Luis Machado  <luis.machado@arm.com>
+
+	* aarch64-linux-nat.c (store_cregs_to_thread)
+	(aarch64_linux_nat_target::write_capability): Update error message.
+
 2021-05-24  Luis Machado  <luis.machado@arm.com>
 
 	* aarch64-linux-tdep.c (aarch64_linux_cregmap): Update to match

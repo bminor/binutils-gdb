@@ -546,7 +546,8 @@ store_cregs_to_thread (const struct regcache *regcache)
   regcache->raw_collect (regno++, &cregset.cctlr);
 
   if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_MORELLO, &iovec) < 0)
-    perror_with_name (_("Unable to store capability registers."));
+    perror_with_name (_("Unable to store capability registers.\n"
+			"Please run \"sysctl cheri.ptrace_forge_cap=1\"."));
 }
 
 /* Implement the "fetch_registers" target_ops method.  */
@@ -1123,7 +1124,8 @@ aarch64_linux_nat_target::write_capability (CORE_ADDR addr,
   memcpy (&cap.val, buffer.data () + 1, 16);
 
   if (!aarch64_linux_write_capability (tid, addr, cap))
-    perror_with_name (_("Unable to write capability from address."));
+    perror_with_name (_("Unable to write capability to address.\n"
+			"Please run \"sysctl cheri.ptrace_forge_cap=1\"."));
 
   return true;
 }

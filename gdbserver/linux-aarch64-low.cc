@@ -3289,7 +3289,8 @@ aarch64_target::qxfer_capability (const CORE_ADDR address,
 
       if (!aarch64_linux_write_capability (tid, address, cap))
 	{
-	  warning (_("Unable to write capability to address."));
+	  warning (_("Unable to write capability to address.\n"
+		     "Please run \"sysctl cheri.ptrace_forge_cap=1\"."));
 	  return 0;
 	}
     }
