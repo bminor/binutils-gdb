@@ -918,12 +918,13 @@ async_init_signals (void)
 
   quit_serial_event = make_serial_event ();
 
-  signal (SIGINT, handle_sigint);
   sigint_token =
     create_async_signal_handler (async_request_quit, NULL, "sigint");
-  signal (SIGTERM, handle_sigterm);
+  signal (SIGINT, handle_sigint);
+
   async_sigterm_token
     = create_async_signal_handler (async_sigterm_handler, NULL, "sigterm");
+  signal (SIGTERM, handle_sigterm);
 
   /* If SIGTRAP was set to SIG_IGN, then the SIG_IGN will get passed
      to the inferior and breakpoints will be ignored.  */
@@ -940,10 +941,11 @@ async_init_signals (void)
      might be in memory, shared between the two).  Since we establish
      a handler for SIGQUIT, when we call exec it will set the signal
      to SIG_DFL for us.  */
-  signal (SIGQUIT, handle_sigquit);
   sigquit_token =
     create_async_signal_handler (async_do_nothing, NULL, "sigquit");
+  signal (SIGQUIT, handle_sigquit);
 #endif
+
 #ifdef SIGHUP
   if (signal (SIGHUP, handle_sighup) != SIG_IGN)
     sighup_token =
