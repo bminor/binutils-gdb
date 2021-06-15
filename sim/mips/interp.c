@@ -1722,7 +1722,7 @@ dotrace (SIM_DESC sd,
 	 int type,
 	 SIM_ADDR address,
 	 int width,
-	 char *comment,...)
+	 const char *comment, ...)
 {
   if (STATE & simTRACE) {
     va_list ap;

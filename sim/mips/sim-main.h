@@ -965,7 +965,7 @@ address_word micromips_instruction_decode (SIM_DESC sd, sim_cpu * cpu,
 					   int instruction_size);
 
 #if WITH_TRACE_ANY_P
-void dotrace (SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, char *comment, ...);
+void dotrace (SIM_DESC sd, sim_cpu *cpu, FILE *tracefh, int type, SIM_ADDR address, int width, const char *comment, ...) ATTRIBUTE_PRINTF (7, 8);
 extern FILE *tracefh;
 #else
 #define dotrace(sd, cpu, tracefh, type, address, width, comment, ...)
