@@ -769,11 +769,11 @@ enable_libtool_lock
 enable_maintainer_mode
 enable_sim_inline
 enable_sim_endian
+enable_sim_default_model
+enable_sim_bitsize
 enable_werror
 enable_build_warnings
 enable_sim_build_warnings
-enable_sim_default_model
-enable_sim_bitsize
 enable_sim_hardware
 '
       ac_precious_vars='build_alias
@@ -1415,14 +1415,14 @@ Optional Features:
                           Specify which functions should be inlined
   --enable-sim-endian=endian
                           Specify target byte endian orientation
+  --enable-sim-default-model=model
+                          Specify default model to simulate
+  --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-sim-build-warnings
                           enable SIM specific build-time compiler warnings if
                           gcc is used
-  --enable-sim-default-model=model
-                          Specify default model to simulate
-  --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
   --enable-sim-hardware=LIST
                           Specify the hardware to be included in the build.
 
@@ -11198,6 +11198,96 @@ fi
 fi
 
 
+# Select the default model for the target.
+riscv_model=
+case "${target}" in
+riscv32*) riscv_model="RV32G" ;;
+riscv*) riscv_model="RV64G" ;;
+esac
+
+default_sim_default_model="${riscv_model}"
+# Check whether --enable-sim-default-model was given.
+if test "${enable_sim_default_model+set}" = set; then :
+  enableval=$enable_sim_default_model; case "${enableval}" in
+  yes|no) as_fn_error $? "\"Missing argument to --enable-sim-default-model\"" "$LINENO" 5;;
+  *)	sim_default_model="-DWITH_DEFAULT_MODEL='\"${enableval}\"'";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_default_model" != x""; then
+  echo "Setting default model = $sim_default_model" 6>&1
+fi
+else
+  sim_default_model="-DWITH_DEFAULT_MODEL='\"${default_sim_default_model}\"'"
+fi
+
+
+
+# Select the bitsize of the target.
+riscv_addr_bitsize=
+case "${target}" in
+riscv32*) riscv_addr_bitsize=32 ;;
+riscv*) riscv_addr_bitsize=64 ;;
+esac
+wire_word_bitsize="$riscv_addr_bitsize"
+wire_word_msb=""
+wire_address_bitsize=""
+wire_cell_bitsize=""
+# Check whether --enable-sim-bitsize was given.
+if test "${enable_sim_bitsize+set}" = set; then :
+  enableval=$enable_sim_bitsize; sim_bitsize=
+case "${enableval}" in
+  64,63 | 64,63,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63";;
+  32,31 | 32,31,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31";;
+  64,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
+  32,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
+  32) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31"
+      else
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0"
+      fi ;;
+  64) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63"
+      else
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=0"
+      fi ;;
+  *)  as_fn_error $? "\"--enable-sim-bitsize was given $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
+esac
+# address bitsize
+tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9]*,*//"`
+case x"${tmp}" in
+  x ) ;;
+  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=32" ;;
+  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=64" ;;
+  * ) as_fn_error $? "\"--enable-sim-bitsize was given address size $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
+esac
+# cell bitsize
+tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9*]*,*[0-9]*,*//"`
+case x"${tmp}" in
+  x ) ;;
+  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=32" ;;
+  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=64" ;;
+  * ) as_fn_error $? "\"--enable-sim-bitsize was given cell size $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
+esac
+if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
+  echo "Setting bitsize flags = $sim_bitsize" 6>&1
+fi
+else
+  sim_bitsize=""
+if test x"$wire_word_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_BITSIZE=$wire_word_bitsize"
+fi
+if test x"$wire_word_msb" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_MSB=$wire_word_msb"
+fi
+if test x"$wire_address_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_ADDRESS_BITSIZE=$wire_address_bitsize"
+fi
+if test x"$wire_cell_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_CELL_BITSIZE=$wire_cell_bitsize"
+fi
+fi
+
+
+
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror; case "${enableval}" in
@@ -11296,96 +11386,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
-
-
-# Select the default model for the target.
-riscv_model=
-case "${target}" in
-riscv32*) riscv_model="RV32G" ;;
-riscv*) riscv_model="RV64G" ;;
-esac
-
-default_sim_default_model="${riscv_model}"
-# Check whether --enable-sim-default-model was given.
-if test "${enable_sim_default_model+set}" = set; then :
-  enableval=$enable_sim_default_model; case "${enableval}" in
-  yes|no) as_fn_error $? "\"Missing argument to --enable-sim-default-model\"" "$LINENO" 5;;
-  *)	sim_default_model="-DWITH_DEFAULT_MODEL='\"${enableval}\"'";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_default_model" != x""; then
-  echo "Setting default model = $sim_default_model" 6>&1
-fi
-else
-  sim_default_model="-DWITH_DEFAULT_MODEL='\"${default_sim_default_model}\"'"
-fi
-
-
-
-# Select the bitsize of the target.
-riscv_addr_bitsize=
-case "${target}" in
-riscv32*) riscv_addr_bitsize=32 ;;
-riscv*) riscv_addr_bitsize=64 ;;
-esac
-wire_word_bitsize="$riscv_addr_bitsize"
-wire_word_msb=""
-wire_address_bitsize=""
-wire_cell_bitsize=""
-# Check whether --enable-sim-bitsize was given.
-if test "${enable_sim_bitsize+set}" = set; then :
-  enableval=$enable_sim_bitsize; sim_bitsize=
-case "${enableval}" in
-  64,63 | 64,63,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63";;
-  32,31 | 32,31,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31";;
-  64,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
-  32,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
-  32) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
-        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31"
-      else
-        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0"
-      fi ;;
-  64) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
-        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63"
-      else
-        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=0"
-      fi ;;
-  *)  as_fn_error $? "\"--enable-sim-bitsize was given $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
-esac
-# address bitsize
-tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9]*,*//"`
-case x"${tmp}" in
-  x ) ;;
-  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=32" ;;
-  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=64" ;;
-  * ) as_fn_error $? "\"--enable-sim-bitsize was given address size $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
-esac
-# cell bitsize
-tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9*]*,*[0-9]*,*//"`
-case x"${tmp}" in
-  x ) ;;
-  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=32" ;;
-  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=64" ;;
-  * ) as_fn_error $? "\"--enable-sim-bitsize was given cell size $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
-  echo "Setting bitsize flags = $sim_bitsize" 6>&1
-fi
-else
-  sim_bitsize=""
-if test x"$wire_word_bitsize" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_BITSIZE=$wire_word_bitsize"
-fi
-if test x"$wire_word_msb" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_MSB=$wire_word_msb"
-fi
-if test x"$wire_address_bitsize" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_ADDRESS_BITSIZE=$wire_address_bitsize"
-fi
-if test x"$wire_cell_bitsize" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_CELL_BITSIZE=$wire_cell_bitsize"
-fi
-fi
-
 
 
 hardware="cfi core pal glue "

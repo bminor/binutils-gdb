@@ -11193,6 +11193,7 @@ fi
 fi
 
 
+
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror; case "${enableval}" in
@@ -11291,7 +11292,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
-
 
 
 hardware="cfi core pal glue "
