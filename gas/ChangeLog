@@ -1,5 +1,10 @@
 2021-06-15  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (offset_in_range): Replace uses of
+	bfd_sprintf_vma.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (offset_in_range): Adjust conditional.
 	* testsuite/gas/i386/disp-imm-16.s,
 	testsuite/gas/i386/disp-imm-16.l,

@@ -2564,13 +2564,9 @@ offset_in_range (offsetT val, int size)
     }
 
   if ((val & ~mask) != 0 && (-val & ~mask) != 0)
-    {
-      char buf1[40], buf2[40];
+    as_warn (_("%"BFD_VMA_FMT"x shortened to %"BFD_VMA_FMT"x"),
+             val, val & mask);
 
-      bfd_sprintf_vma (stdoutput, buf1, val);
-      bfd_sprintf_vma (stdoutput, buf2, val & mask);
-      as_warn (_("%s shortened to %s"), buf1, buf2);
-    }
   return val & mask;
 }
 
