@@ -241,7 +241,9 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback,
     }
 
     sregs.freq = freq ? freq : 15;
+#ifdef F_GETFL
     termsave = fcntl(0, F_GETFL, 0);
+#endif
     INIT_DISASSEMBLE_INFO(dinfo, stdout,(fprintf_ftype)fprintf);
 #ifdef HOST_LITTLE_ENDIAN
     dinfo.endian = BFD_ENDIAN_LITTLE;
@@ -263,9 +265,10 @@ sim_close(SIM_DESC sd, int quitting)
 {
 
     exit_sim();
+#ifdef F_SETFL
     fcntl(0, F_SETFL, termsave);
-
-};
+#endif
+}
 
 SIM_RC
 sim_load(SIM_DESC sd, const char *prog, bfd *abfd, int from_tty)
