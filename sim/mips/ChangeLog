@@ -1,5 +1,10 @@
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* interp.c (sim_monitor): Change ap type to address_word*.
+	(_P, P): New macros.  Rewrite dynamic printf logic to use these.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-tx3904sio.c (tx3904sio_fifo_push): Change next_buf to
 	unsigned_1.
 

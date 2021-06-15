@@ -1388,7 +1388,7 @@ sim_monitor (SIM_DESC sd,
       {
 	address_word s = A0;
 	unsigned char c;
-	signed_word *ap = &A1; /* 1st argument */
+	address_word *ap = &A1; /* 1st argument */
         /* This isn't the quickest way, since we call the host print
            routine for every character almost. But it does avoid
            having to allocate and manage a temporary string buffer. */
@@ -1471,18 +1471,43 @@ sim_monitor (SIM_DESC sd,
 			  sim_io_printf(sd,"<binary not supported>");
 			else
 			  {
-			    sprintf (tmp, "%%%s%c", longlong ? "ll" : "", c);
-			    if (longlong)
-			      sim_io_printf(sd, tmp, lv);
-			    else
-			      sim_io_printf(sd, tmp, (int)lv);
+#define _P(c, fmt64, fmt32) \
+  case c: \
+    if (longlong) \
+      sim_io_printf (sd, "%" fmt64, lv); \
+    else \
+      sim_io_printf (sd, "%" fmt32, (int)lv); \
+    break;
+#define P(c, fmtc) _P(c, PRI##fmtc##64, PRI##fmtc##32)
+			    switch (c)
+			      {
+			      P('d', d)
+			      P('o', o)
+			      P('x', x)
+			      P('X', X)
+			      P('u', u)
+			      }
 			  }
+#undef P
+#undef _P
 		      }
 		    else if (strchr ("eEfgG", c))
 		      {
 			double dbl = *(double*)(ap++);
-			sprintf (tmp, "%%%d.%d%c", width, trunc, c);
-			sim_io_printf (sd, tmp, dbl);
+
+#define P(c, fmtc) \
+  case c: \
+    sim_io_printf (sd, "%*.*" #fmtc, width, trunc, dbl); \
+    break;
+			switch (c)
+			  {
+			  P('e', e)
+			  P('E', E)
+			  P('f', f)
+			  P('g', g)
+			  P('G', G)
+			  }
+#undef P
 			trunc = 0;
 		      }
 		  }
