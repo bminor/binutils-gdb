@@ -381,7 +381,7 @@ tx3904irc_io_write_buffer (struct hw *me,
       int reg_number = (address - controller->base_address) / 4;
       int reg_offset = (address - controller->base_address) % 4;
       unsigned_4* register_ptr;
-      unsigned_4 register_value;
+      unsigned_4 register_value = 0;
 
       /* fill in entire register_value word */
       switch (reg_number)
