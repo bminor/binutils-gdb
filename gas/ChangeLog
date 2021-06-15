@@ -1,5 +1,14 @@
 2021-06-15  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (offset_in_range): Adjust conditional.
+	* testsuite/gas/i386/disp-imm-16.s,
+	testsuite/gas/i386/disp-imm-16.l,
+	testsuite/gas/i386/disp-imm-64.s,
+	testsuite/gas/i386/disp-imm-64.l: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (i386_att_operand): Re-introduce (now
 	properly named) parens_not_balanced.
 	* testsuite/gas/i386/sib.s: Add more cases.

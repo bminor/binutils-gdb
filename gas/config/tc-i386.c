@@ -2563,7 +2563,7 @@ offset_in_range (offsetT val, int size)
     default: abort ();
     }
 
-  if ((val & ~mask) != 0 && (val & ~mask) != ~mask)
+  if ((val & ~mask) != 0 && (-val & ~mask) != 0)
     {
       char buf1[40], buf2[40];
 
