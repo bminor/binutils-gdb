@@ -427,7 +427,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	      mem_size = (match->modulo != 0
 			  ? match->modulo : match->nr_bytes);
 	      /* Delete old region. */
-	      sim_do_commandf (sd, "memory delete %d:0x%lx@%d",
+	      sim_do_commandf (sd, "memory delete %d:0x%" PRIxTW "@%d",
 			       match->space, match->addr, match->level);
 	    }	      
 	  else if (mem_size == 0)
@@ -436,7 +436,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	  if (mem_size > K1SIZE)
 	    mem_size = K1SIZE;
 	  /* memory alias K1BASE@1,K1SIZE%MEMSIZE,K0BASE */
-	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx%%0x%lx,0x%0x",
+	  sim_do_commandf (sd, "memory alias 0x%x@1,0x%x%%0x%lx,0x%0x",
 			   K1BASE, K1SIZE, (long)mem_size, K0BASE);
 	  if (WITH_TARGET_WORD_BITSIZE == 64)
 	    sim_do_commandf (sd, "memory alias 0x%x,0x%" PRIxTW ",0x%" PRIxTA,
@@ -453,13 +453,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       STATE_ENVIRONMENT (sd) = OPERATING_ENVIRONMENT;
 
       /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 		       0x9FC00000, 
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xBFC00000);
 
       /* SRAM: 0x8000_0000 - 0x803F_FFFF and 0xA000_0000 - 0xA03F_FFFF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 		       0x80000000, 
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xA0000000);
@@ -468,7 +468,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       for (i=0; i<8; i++) /* 32 MB total */
 	{
 	  unsigned size = 4 * 1024 * 1024;  /* 4 MB */
-	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+	  sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 			   0x88000000 + (i * size), 
 			   size, 
 			   0xA8000000 + (i * size));
@@ -499,13 +499,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       /* --- memory --- */
 
       /* ROM: 0x9FC0_0000 - 0x9FFF_FFFF and 0xBFC0_0000 - 0xBFFF_FFFF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 		       0x9FC00000, 
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xBFC00000);
 
       /* SRAM: 0x8000_0000 - 0x803F_FFFF and 0xA000_0000 - 0xA03F_FFFF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 		       0x80000000, 
 		       4 * 1024 * 1024, /* 4 MB */
 		       0xA0000000);
@@ -514,7 +514,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       for (i=0; i<8; i++) /* 32 MB total */
 	{
 	  unsigned size = 4 * 1024 * 1024;  /* 4 MB */
-	  sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx,0x%0x",
+	  sim_do_commandf (sd, "memory alias 0x%x@1,0x%x,0x%0x",
 			   0x88000000 + (i * size), 
 			   size, 
 			   0xA8000000 + (i * size));
@@ -522,15 +522,15 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 
       /* Dummy memory regions for unsimulated devices - sorted by address */
 
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB1000000, 0x400); /* ISA I/O */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2100000, 0x004); /* ISA ctl */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2500000, 0x004); /* LED/switch */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB2700000, 0x004); /* RTC */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xB3C00000, 0x004); /* RTC */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF8000, 0x900); /* DRAMC */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFF9000, 0x200); /* EBIF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFE000, 0x01c); /* EBIF */
-      sim_do_commandf (sd, "memory alias 0x%lx@1,0x%lx", 0xFFFFF500, 0x300); /* PIO */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB1000000, 0x400); /* ISA I/O */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB2100000, 0x004); /* ISA ctl */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB2500000, 0x004); /* LED/switch */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB2700000, 0x004); /* RTC */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xB3C00000, 0x004); /* RTC */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xFFFF8000, 0x900); /* DRAMC */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xFFFF9000, 0x200); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xFFFFE000, 0x01c); /* EBIF */
+      sim_do_commandf (sd, "memory alias 0x%x@1,0x%x", 0xFFFFF500, 0x300); /* PIO */
 
 
       /* --- simulated devices --- */
@@ -711,7 +711,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 			 idt_monitor_base, idt_monitor_size,
 			 EXTENDED (idt_monitor_base));
       else
-	sim_do_commandf (sd, "memory region 0x%x,0x%x",
+	sim_do_commandf (sd, "memory region 0x%x,0x%" PRIxTA,
 			 idt_monitor_base, idt_monitor_size);
 
       /* Entry into the IDT monitor is via fixed address vectors, and
