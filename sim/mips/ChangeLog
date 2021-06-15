@@ -1,5 +1,10 @@
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-tx3904sio.c (tx3904sio_fifo_push): Change next_buf to
+	unsigned_1.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* dv-tx3904irc.c (tx3904irc_io_write_buffer): Initialize
 	register_value to 0.
 

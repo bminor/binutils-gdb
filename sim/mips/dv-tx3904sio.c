@@ -582,7 +582,7 @@ tx3904sio_fifo_push(struct hw* me, struct tx3904sio_fifo* fifo, char it)
   if(fifo->size == fifo->used) /* full */
     {
       int next_size = fifo->size * 2 + 16;
-      char* next_buf = zalloc(next_size);
+      unsigned_1* next_buf = zalloc(next_size);
       memcpy(next_buf, fifo->buffer, fifo->used);
 
       if(fifo->buffer != NULL) free(fifo->buffer);
