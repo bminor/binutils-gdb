@@ -277,13 +277,8 @@ riscv_extended_subset_supports (int insn_class)
     case INSN_CLASS_V: return riscv_subset_supports ("v");
     case INSN_CLASS_V_AND_F:
       return riscv_subset_supports ("v") && riscv_subset_supports ("f");
-    case INSN_CLASS_V_OR_ZVAMO:
-      return (riscv_subset_supports ("a")
-	      && (riscv_subset_supports ("v")
-		  || riscv_subset_supports ("zvamo")));
-    case INSN_CLASS_V_OR_ZVLSSEG:
-      return (riscv_subset_supports ("v")
-	      || riscv_subset_supports ("zvlsseg"));
+    case INSN_CLASS_ZVAMO:
+      return riscv_subset_supports ("a") && riscv_subset_supports ("zvamo");
 
     case INSN_CLASS_ZFH:
       return riscv_subset_supports ("zfh");
@@ -991,8 +986,7 @@ riscv_extended_csr_class_check (int csr_class)
     {
     case CSR_CLASS_V:
       return (riscv_subset_supports ("v")
-	      || riscv_subset_supports ("zvamo")
-	      || riscv_subset_supports ("zvlsseg"));
+	      || riscv_subset_supports ("zvamo"));
     case CSR_CLASS_VENDOR_THEAD:
       return true;
     default:
