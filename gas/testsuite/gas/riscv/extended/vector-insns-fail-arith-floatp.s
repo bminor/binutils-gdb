@@ -120,6 +120,8 @@
 
 	vfneg.v v4, v4			# OK
 	vfneg.v v0, v4, v0.t		# vd overlap vm
+	vfabs.v v4, v4			# OK
+	vfabs.v v0, v4, v0.t		# vd overlap vm
 
 	vfsgnj.vv v4, v4, v8		# OK
 	vfsgnj.vv v8, v4, v8		# OK

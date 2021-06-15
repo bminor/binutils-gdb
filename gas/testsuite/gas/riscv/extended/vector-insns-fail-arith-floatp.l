@@ -34,6 +34,7 @@
 .*Error: illegal operands vd cannot overlap vm `vfmax.vv v0,v4,v8,v0.t'
 .*Error: illegal operands vd cannot overlap vm `vfmax.vf v0,v4,fa1,v0.t'
 .*Error: illegal operands vd cannot overlap vm `vfneg.v v0,v4,v0.t'
+.*Error: illegal operands vd cannot overlap vm `vfabs.v v0,v4,v0.t'
 .*Error: illegal operands vd cannot overlap vm `vfsgnj.vv v0,v4,v8,v0.t'
 .*Error: illegal operands vd cannot overlap vm `vfsgnj.vf v0,v4,fa1,v0.t'
 .*Error: illegal operands vd cannot overlap vm `vfsgnjn.vv v0,v4,v8,v0.t'

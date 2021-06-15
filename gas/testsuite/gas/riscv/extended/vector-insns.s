@@ -36,9 +36,13 @@
 	vsetivli a0, 0xb, e256, m2, ta, mu
 	vsetivli a0, 0xb, e256, m2, tu, mu
 
-	vle1.v v4, (a0)
+	vlm.v v4, (a0)
+	vlm.v v4, 0(a0)
+	vle1.v v4, (a0)		# Alias of vlm.v
 	vle1.v v4, 0(a0)
-	vse1.v v4, (a0)
+	vsm.v v4, (a0)
+	vsm.v v4, 0(a0)
+	vse1.v v4, (a0)		# Alias of vsm.v
 	vse1.v v4, 0(a0)
 
 	vle8.v v4, (a0)
@@ -1978,6 +1982,8 @@
 
 	vfneg.v v4, v8
 	vfneg.v v4, v8, v0.t
+	vfabs.v v4, v8
+	vfabs.v v4, v8, v0.t
 
 	vfsgnj.vv v4, v8, v12
 	vfsgnj.vf v4, v8, fa2
@@ -2090,18 +2096,22 @@
 	vwredsum.vs v4, v8, v12, v0.t
 
 	vfredosum.vs v4, v8, v12
-	vfredsum.vs v4, v8, v12
+	vfredusum.vs v4, v8, v12
+	vfredsum.vs v4, v8, v12		# Alias of vfredusum.vs.
 	vfredmax.vs v4, v8, v12
 	vfredmin.vs v4, v8, v12
 	vfredosum.vs v4, v8, v12, v0.t
-	vfredsum.vs v4, v8, v12, v0.t
+	vfredusum.vs v4, v8, v12, v0.t
+	vfredsum.vs v4, v8, v12, v0.t	# Alias of vfredusum.vs.
 	vfredmax.vs v4, v8, v12, v0.t
 	vfredmin.vs v4, v8, v12, v0.t
 
 	vfwredosum.vs v4, v8, v12
-	vfwredsum.vs v4, v8, v12
+	vfwredusum.vs v4, v8, v12
+	vfwredsum.vs v4, v8, v12	# Alias of vfwredusum.vs.
 	vfwredosum.vs v4, v8, v12, v0.t
-	vfwredsum.vs v4, v8, v12, v0.t
+	vfwredusum.vs v4, v8, v12, v0.t
+	vfwredsum.vs v4, v8, v12, v0.t	# Alias of vfwredusum.vs.
 
 	# Aliases
 	vmcpy.m v4, v8
@@ -2112,21 +2122,23 @@
 
 	vmand.mm v4, v8, v12
 	vmnand.mm v4, v8, v12
-	vmandnot.mm v4, v8, v12
+	vmandn.mm v4, v8, v12
+	vmandnot.mm v4, v8, v12		# Alias of vmandn.mm.
 	vmxor.mm v4, v8, v12
 	vmor.mm v4, v8, v12
 	vmnor.mm v4, v8, v12
-	vmornot.mm v4, v8, v12
+	vmorn.mm v4, v8, v12
+	vmornot.mm v4, v8, v12		# Alias of vmorn.mm.
 	vmxnor.mm v4, v8, v12
 
-	vpopc.m a0, v12
+	vcpop.m a0, v12
 	vfirst.m a0, v12
 	vmsbf.m v4, v8
 	vmsif.m v4, v8
 	vmsof.m v4, v8
 	viota.m v4, v8
 	vid.v v4
-	vpopc.m a0, v12, v0.t
+	vcpop.m a0, v12, v0.t
 	vfirst.m a0, v12, v0.t
 	vmsbf.m v4, v8, v0.t
 	vmsif.m v4, v8, v0.t

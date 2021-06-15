@@ -1436,8 +1436,10 @@ const struct riscv_opcode riscv_draft_opcodes[] =
 {"vsetvli",    0, INSN_CLASS_V,  "d,s,Vc", MATCH_VSETVLI, MASK_VSETVLI, match_opcode, 0},
 {"vsetivli",   0, INSN_CLASS_V,  "d,Z,Vb", MATCH_VSETIVLI, MASK_VSETIVLI, match_opcode, 0},
 
-{"vle1.v",     0, INSN_CLASS_V,  "Vd,0(s)", MATCH_VLE1V, MASK_VLE1V, match_opcode, INSN_DREF },
-{"vse1.v",     0, INSN_CLASS_V,  "Vd,0(s)", MATCH_VSE1V, MASK_VSE1V, match_opcode, INSN_DREF },
+{"vlm.v",      0, INSN_CLASS_V,  "Vd,0(s)", MATCH_VLMV, MASK_VLMV, match_opcode, INSN_DREF },
+{"vsm.v",      0, INSN_CLASS_V,  "Vd,0(s)", MATCH_VSMV, MASK_VSMV, match_opcode, INSN_DREF },
+{"vle1.v",     0, INSN_CLASS_V,  "Vd,0(s)", MATCH_VLMV, MASK_VLMV, match_opcode, INSN_DREF|INSN_ALIAS },
+{"vse1.v",     0, INSN_CLASS_V,  "Vd,0(s)", MATCH_VSMV, MASK_VSMV, match_opcode, INSN_DREF|INSN_ALIAS },
 
 {"vle8.v",     0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE8V, MASK_VLE8V, match_vd_neq_vm, INSN_DREF },
 {"vle16.v",    0, INSN_CLASS_V,  "Vd,0(s)Vm", MATCH_VLE16V, MASK_VLE16V, match_vd_neq_vm, INSN_DREF },
@@ -2106,6 +2108,7 @@ const struct riscv_opcode riscv_draft_opcodes[] =
 {"vfmax.vf",   0, INSN_CLASS_V_AND_F, "Vd,Vt,SVm", MATCH_VFMAXVF, MASK_VFMAXVF, match_vd_neq_vm, 0},
 
 {"vfneg.v",    0, INSN_CLASS_V_AND_F, "Vd,VuVm", MATCH_VFSGNJNVV, MASK_VFSGNJNVV, match_vs1_eq_vs2_neq_vm, INSN_ALIAS },
+{"vfabs.v",    0, INSN_CLASS_V_AND_F, "Vd,VuVm", MATCH_VFSGNJXVV, MASK_VFSGNJXVV, match_vs1_eq_vs2_neq_vm, INSN_ALIAS },
 
 {"vfsgnj.vv",  0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFSGNJVV, MASK_VFSGNJVV, match_vd_neq_vm, 0},
 {"vfsgnj.vf",  0, INSN_CLASS_V_AND_F, "Vd,Vt,SVm", MATCH_VFSGNJVF, MASK_VFSGNJVF, match_vd_neq_vm, 0},
@@ -2169,12 +2172,14 @@ const struct riscv_opcode riscv_draft_opcodes[] =
 {"vwredsum.vs",0, INSN_CLASS_V, "Vd,Vt,VsVm", MATCH_VWREDSUMVS, MASK_VWREDSUMVS, match_opcode, 0},
 
 {"vfredosum.vs",0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDOSUMVS, MASK_VFREDOSUMVS, match_opcode, 0},
-{"vfredsum.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDSUMVS, MASK_VFREDSUMVS, match_opcode, 0},
+{"vfredusum.vs",0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDUSUMVS, MASK_VFREDUSUMVS, match_opcode, 0},
+{"vfredsum.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDUSUMVS, MASK_VFREDUSUMVS, match_opcode, INSN_ALIAS},
 {"vfredmax.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDMAXVS, MASK_VFREDMAXVS, match_opcode, 0},
 {"vfredmin.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFREDMINVS, MASK_VFREDMINVS, match_opcode, 0},
 
 {"vfwredosum.vs",0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFWREDOSUMVS, MASK_VFWREDOSUMVS, match_opcode, 0},
-{"vfwredsum.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFWREDSUMVS, MASK_VFWREDSUMVS, match_opcode, 0},
+{"vfwredusum.vs",0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFWREDUSUMVS, MASK_VFWREDUSUMVS, match_opcode, 0},
+{"vfwredsum.vs", 0, INSN_CLASS_V_AND_F, "Vd,Vt,VsVm", MATCH_VFWREDUSUMVS, MASK_VFWREDUSUMVS, match_opcode, INSN_ALIAS},
 
 {"vmmv.m",     0, INSN_CLASS_V, "Vd,Vu", MATCH_VMANDMM, MASK_VMANDMM, match_vs1_eq_vs2, INSN_ALIAS},
 {"vmcpy.m",    0, INSN_CLASS_V, "Vd,Vu", MATCH_VMANDMM, MASK_VMANDMM, match_vs1_eq_vs2, INSN_ALIAS},
@@ -2184,14 +2189,18 @@ const struct riscv_opcode riscv_draft_opcodes[] =
 
 {"vmand.mm",   0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMANDMM, MASK_VMANDMM, match_opcode, 0},
 {"vmnand.mm",  0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMNANDMM, MASK_VMNANDMM, match_opcode, 0},
-{"vmandnot.mm",0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMANDNOTMM, MASK_VMANDNOTMM, match_opcode, 0},
+
+{"vmandn.mm",  0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMANDNMM, MASK_VMANDNMM, match_opcode, 0},
+{"vmandnot.mm",0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMANDNMM, MASK_VMANDNMM, match_opcode, INSN_ALIAS},
 {"vmxor.mm",   0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMXORMM, MASK_VMXORMM, match_opcode, 0},
 {"vmor.mm",    0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMORMM, MASK_VMORMM, match_opcode, 0},
 {"vmnor.mm",   0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMNORMM, MASK_VMNORMM, match_opcode, 0},
-{"vmornot.mm", 0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMORNOTMM, MASK_VMORNOTMM, match_opcode, 0},
+{"vmorn.mm",   0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMORNMM, MASK_VMORNMM, match_opcode, 0},
+{"vmornot.mm", 0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMORNMM, MASK_VMORNMM, match_opcode, INSN_ALIAS},
 {"vmxnor.mm",  0, INSN_CLASS_V, "Vd,Vt,Vs", MATCH_VMXNORMM, MASK_VMXNORMM, match_opcode, 0},
 
-{"vpopc.m",    0, INSN_CLASS_V, "d,VtVm", MATCH_VPOPCM, MASK_VPOPCM, match_opcode, 0},
+{"vcpop.m",    0, INSN_CLASS_V, "d,VtVm", MATCH_VCPOPM, MASK_VCPOPM, match_opcode, 0},
+{"vpopc.m",    0, INSN_CLASS_V, "d,VtVm", MATCH_VCPOPM, MASK_VCPOPM, match_opcode, INSN_ALIAS},
 {"vfirst.m",   0, INSN_CLASS_V, "d,VtVm", MATCH_VFIRSTM, MASK_VFIRSTM, match_opcode, 0},
 {"vmsbf.m",    0, INSN_CLASS_V, "Vd,VtVm", MATCH_VMSBFM, MASK_VMSBFM, match_vd_neq_vs2_neq_vm, 0},
 {"vmsif.m",    0, INSN_CLASS_V, "Vd,VtVm", MATCH_VMSIFM, MASK_VMSIFM, match_vd_neq_vs2_neq_vm, 0},
