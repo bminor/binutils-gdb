@@ -1,5 +1,11 @@
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.
+	* interp.c (sim_open): Set current_target_byte_order.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* mn10300_sim.h (u642dw, dw2u64): Change INLINE to INLINE2.
 
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>

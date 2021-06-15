@@ -169,8 +169,6 @@ sim_config (SIM_DESC sd)
     current_target_byte_order = prefered_target_byte_order;
   if (current_target_byte_order == BFD_ENDIAN_UNKNOWN)
     current_target_byte_order = WITH_TARGET_BYTE_ORDER;
-  if (current_target_byte_order == BFD_ENDIAN_UNKNOWN)
-    current_target_byte_order = WITH_DEFAULT_TARGET_BYTE_ORDER;
 
   /* verify the target byte order */
   if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_UNKNOWN)
@@ -301,9 +299,6 @@ sim_config_print (SIM_DESC sd)
 {
   sim_io_printf (sd, "WITH_TARGET_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (WITH_TARGET_BYTE_ORDER));
-
-  sim_io_printf (sd, "WITH_DEFAULT_TARGET_BYTE_ORDER = %s\n",
-		 config_byte_order_to_a (WITH_DEFAULT_TARGET_BYTE_ORDER));
 
   sim_io_printf (sd, "HOST_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (HOST_BYTE_ORDER));

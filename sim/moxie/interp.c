@@ -1198,6 +1198,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_BIG;
+
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {

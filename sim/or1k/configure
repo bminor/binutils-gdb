@@ -633,7 +633,6 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 sim_reserved_bits
 sim_float
-sim_alignment
 cgen_breaks
 cgen
 cgendir
@@ -755,7 +754,6 @@ sim_inline
 sim_hw
 sim_hw_objs
 sim_hw_cflags
-sim_endian
 sim_default_model
 sim_bitsize'
 ac_subst_files=''
@@ -771,7 +769,6 @@ with_gnu_ld
 enable_libtool_lock
 enable_maintainer_mode
 enable_sim_inline
-enable_sim_endian
 enable_sim_bitsize
 enable_sim_scache
 enable_sim_default_model
@@ -1418,8 +1415,6 @@ Optional Features:
                           sometimes confusing) to the casual installer
   --enable-sim-inline=inlines
                           Specify which functions should be inlined
-  --enable-sim-endian=endian
-                          Specify target byte endian orientation
   --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
   --enable-sim-scache=size
                           Specify simulator execution cache size
@@ -10755,7 +10750,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10758 "configure"
+#line 10753 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10861,7 +10856,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10864 "configure"
+#line 10859 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11155,51 +11150,6 @@ fi
 fi
 
 
-
-
-wire_endian="BIG"
-default_endian=""
-# Check whether --enable-sim-endian was given.
-if test "${enable_sim_endian+set}" = set; then :
-  enableval=$enable_sim_endian; case "${enableval}" in
-  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
-  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
-  yes)	 if test x"$wire_endian" != x; then
-	   sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
-	 else
-	  if test x"$default_endian" != x; then
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
-	   else
-	     echo "No hard-wired endian for target $target" 1>&6
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
-	   fi
-	 fi;;
-  no)	 if test x"$default_endian" != x; then
-	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
-	 else
-	   if test x"$wire_endian" != x; then
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
-	   else
-	     echo "No default endian for target $target" 1>&6
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
-	   fi
-	 fi;;
-  *)	 as_fn_error $? "\"Unknown value $enableval for --enable-sim-endian\"" "$LINENO" 5; sim_endian="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
-  echo "Setting endian flags = $sim_endian" 6>&1
-fi
-else
-  if test x"$default_endian" != x; then
-  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
-else
-  if test x"$wire_endian" != x; then
-    sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
-  else
-    sim_endian=
-  fi
-fi
-fi
 
 wire_word_bitsize="32"
 wire_word_msb="31"
@@ -11538,8 +11488,6 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
-
-
 
 
 

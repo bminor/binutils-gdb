@@ -1,3 +1,10 @@
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_OPTION_ENDIAN.
+	* m4/sim_ac_option_endian.m4: Delete wire & default arguments.
+	* m4/sim_ac_output.m4: Delete sim_alignment & sim_endian.
+	* aclocal.m4, Makefile.in, config.h.in, configure: Regenerate.
+
 2021-06-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common/Make-common.in (COMPILE, libsim.a, run$(EXEEXT),

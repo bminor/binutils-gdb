@@ -112,6 +112,9 @@ sim_open (SIM_OPEN_KIND kind,
 
   /* Initialise the simulator.  */
 
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
+
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
       sim_state_free (sd);

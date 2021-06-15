@@ -639,7 +639,6 @@ sim_bitsize
 sim_igen_smp
 sim_smp
 sim_xor_endian
-sim_endian
 sim_inline
 sim_pk_obj
 sim_pk_src
@@ -745,7 +744,6 @@ enable_sim_config
 enable_sim_decode_mechanism
 enable_sim_default_model
 enable_sim_duplicate
-enable_sim_endian
 enable_sim_filter
 enable_sim_float
 enable_sim_hardware
@@ -1400,7 +1398,6 @@ Optional Features:
   --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.
   --enable-sim-default-model=which	Specify default PowerPC to model.
   --enable-sim-duplicate		Expand (duplicate) semantic functions.
-  --enable-sim-endian=endian		Specify target byte endian orientation.
   --enable-sim-filter=rule		Specify filter rules.
   --enable-sim-float			Specify whether the target has hard, soft, altivec or e500 floating point.
   --enable-sim-hardware=list		Specify the hardware to be included in the build.
@@ -3201,27 +3198,6 @@ fi
 fi
 
 
-# Check whether --enable-sim-endian was given.
-if test "${enable_sim_endian+set}" = set; then :
-  enableval=$enable_sim_endian; case "${enableval}" in
-  yes)	case "$target" in
-	  *powerpc-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
-	  *powerpcle-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
-	  *) echo "Unknown target $target" 1>&6; sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN";;
-	esac;;
-  no)	 sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN";;
-  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
-  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
-  *)	 as_fn_error $? "\"Unknown value $enableval for --enable-sim-endian\"" "$LINENO" 5; sim_endian="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
-  echo "Setting endian flags = $sim_endian" 6>&1
-fi
-else
-  sim_endian=""
-fi
-
-
 # Check whether --enable-sim-filter was given.
 if test "${enable_sim_filter+set}" = set; then :
   enableval=$enable_sim_filter; case "${enableval}" in
@@ -4847,7 +4823,6 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
-
 
 
 

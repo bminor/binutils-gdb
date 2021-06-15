@@ -4716,6 +4716,9 @@ sim_open (SIM_OPEN_KIND kind,
 
   sd = sim_state_alloc_extra (kind, callback, sizeof (struct h8300_sim_state));
 
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_BIG;
+
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {

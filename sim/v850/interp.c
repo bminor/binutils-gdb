@@ -197,6 +197,9 @@ sim_open (SIM_OPEN_KIND    kind,
 
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
 
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
+
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     return 0;

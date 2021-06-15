@@ -28,25 +28,6 @@ AC_SUBST(SIM_SUBTARGET)
 
 
 #
-# Select the byte order of the target
-#
-mips_endian=
-default_endian=
-case "${target}" in
-  mips64el*-*-*)        mips_endian=LITTLE ;;
-  mips64vr*el-*-*)      default_endian=LITTLE ;;
-  mips64*-*-*)          default_endian=BIG ;;
-  mips16*-*-*)          default_endian=BIG ;;
-  mipsisa32*-*-*)       default_endian=BIG ;;
-  mipsisa64*-*-*)       default_endian=BIG ;;
-  mips*-*-*)            default_endian=BIG ;;
-  *)                    default_endian=BIG ;;
-esac
-SIM_AC_OPTION_ENDIAN($mips_endian,$default_endian)
-
-
-
-#
 # Select the bitsize of the target
 #
 mips_addr_bitsize=

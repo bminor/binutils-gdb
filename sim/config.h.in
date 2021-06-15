@@ -452,6 +452,9 @@
 /* How to route I/O */
 #undef WITH_STDIO
 
+/* Sim endian settings */
+#undef WITH_TARGET_BYTE_ORDER
+
 /* Sim trace settings */
 #undef WITH_TRACE
 

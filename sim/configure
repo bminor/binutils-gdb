@@ -758,6 +758,7 @@ enable_targets
 enable_sim_alignment
 enable_sim_assert
 enable_sim_debug
+enable_sim_endian
 enable_sim_environment
 enable_sim_profile
 enable_sim_stdio
@@ -1440,6 +1441,8 @@ Optional Features:
   --enable-sim-assert     Specify whether to perform random assertions
   --enable-sim-debug=opts Enable debugging flags (for developers of the sim
                           itself)
+  --enable-sim-endian=endian
+                          Specify target byte endian orientation
   --enable-sim-environment=environment
                           Specify mixed, user, virtual or operating
                           environment
@@ -6750,6 +6753,26 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_debug" >&5
 $as_echo "$sim_debug" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to force sim endianness" >&5
+$as_echo_n "checking whether to force sim endianness... " >&6; }
+sim_endian=
+# Check whether --enable-sim-endian was given.
+if test "${enable_sim_endian+set}" = set; then :
+  enableval=$enable_sim_endian; case "${enableval}" in
+  b*|B*) sim_endian="BFD_ENDIAN_BIG";;
+  l*|L*) sim_endian="BFD_ENDIAN_LITTLE";;
+  yes | no) ;;
+  *)	 as_fn_error $? "\"Unknown value $enableval for --enable-sim-endian\"" "$LINENO" 5;;
+esac
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_TARGET_BYTE_ORDER ${sim_endian:-BFD_ENDIAN_UNKNOWN}
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${sim_alignment:-no}" >&5
+$as_echo "${sim_alignment:-no}" >&6; }
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking default sim environment setting" >&5

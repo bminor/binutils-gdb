@@ -633,7 +633,6 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 sim_default_model
 sim_scache
-sim_alignment
 cgen_breaks
 XMKMF
 sim_multi_obj
@@ -764,7 +763,6 @@ sim_hw
 sim_hw_objs
 sim_hw_cflags
 sim_float
-sim_endian
 sim_bitsize'
 ac_subst_files=''
 ac_user_opts='
@@ -783,7 +781,6 @@ enable_werror
 enable_build_warnings
 enable_sim_build_warnings
 enable_sim_reserved_bits
-enable_sim_endian
 enable_sim_bitsize
 enable_sim_float
 enable_sim_hardware
@@ -1439,8 +1436,6 @@ Optional Features:
   --enable-sim-reserved-bits
                           Specify whether to check reserved bits in
                           instruction
-  --enable-sim-endian=endian
-                          Specify target byte endian orientation
   --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
   --enable-sim-float      Specify that the target processor has floating point
                           hardware
@@ -10770,7 +10765,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10773 "configure"
+#line 10768 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10876,7 +10871,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10879 "configure"
+#line 10874 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11300,69 +11295,6 @@ case "${target}" in
   mipsisa64*-*-*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
   *)                    SIM_SUBTARGET="";;
 esac
-
-
-
-
-#
-# Select the byte order of the target
-#
-mips_endian=
-default_endian=
-case "${target}" in
-  mips64el*-*-*)        mips_endian=LITTLE ;;
-  mips64vr*el-*-*)      default_endian=LITTLE ;;
-  mips64*-*-*)          default_endian=BIG ;;
-  mips16*-*-*)          default_endian=BIG ;;
-  mipsisa32*-*-*)       default_endian=BIG ;;
-  mipsisa64*-*-*)       default_endian=BIG ;;
-  mips*-*-*)            default_endian=BIG ;;
-  *)                    default_endian=BIG ;;
-esac
-
-wire_endian="$mips_endian"
-default_endian="$default_endian"
-# Check whether --enable-sim-endian was given.
-if test "${enable_sim_endian+set}" = set; then :
-  enableval=$enable_sim_endian; case "${enableval}" in
-  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
-  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
-  yes)	 if test x"$wire_endian" != x; then
-	   sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
-	 else
-	  if test x"$default_endian" != x; then
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
-	   else
-	     echo "No hard-wired endian for target $target" 1>&6
-	     sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
-	   fi
-	 fi;;
-  no)	 if test x"$default_endian" != x; then
-	   sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
-	 else
-	   if test x"$wire_endian" != x; then
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
-	   else
-	     echo "No default endian for target $target" 1>&6
-	     sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN"
-	   fi
-	 fi;;
-  *)	 as_fn_error $? "\"Unknown value $enableval for --enable-sim-endian\"" "$LINENO" 5; sim_endian="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
-  echo "Setting endian flags = $sim_endian" 6>&1
-fi
-else
-  if test x"$default_endian" != x; then
-  sim_endian="-DWITH_DEFAULT_TARGET_BYTE_ORDER=BFD_ENDIAN_${default_endian}"
-else
-  if test x"$wire_endian" != x; then
-    sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_${wire_endian}"
-  else
-    sim_endian=
-  fi
-fi
-fi
 
 
 
@@ -12184,8 +12116,6 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
-
-
 
 
 

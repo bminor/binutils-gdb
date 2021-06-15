@@ -1,5 +1,11 @@
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Delete SIM_AC_OPTION_ENDIAN call.
+	* sim-if.c (sim_open): Set current_target_byte_order.
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* traps.c: Include sim/callback.h.
 
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>

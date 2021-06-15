@@ -86,7 +86,6 @@ LDFLAGS = @LDFLAGS@
 
 SIM_BITSIZE = @sim_bitsize@
 SIM_DEFAULT_MODEL = @sim_default_model@
-SIM_ENDIAN = @sim_endian@
 SIM_FLOAT = @sim_float@
 SIM_HW_CFLAGS = @sim_hw_cflags@
 SIM_HW_OBJS = @sim_hw_objs@
@@ -223,7 +222,6 @@ CONFIG_CFLAGS = \
 	-DHAVE_CONFIG_H \
 	$(SIM_DEFAULT_MODEL) \
 	$(SIM_BITSIZE) \
-	$(SIM_ENDIAN) \
 	$(SIM_FLOAT) \
 	$(SIM_HW_CFLAGS) \
 	$(SIM_INLINE) \

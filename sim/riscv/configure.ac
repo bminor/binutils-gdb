@@ -4,8 +4,6 @@ AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
 SIM_AC_COMMON
 
-SIM_AC_OPTION_ENDIAN(LITTLE)
-
 # Select the default model for the target.
 riscv_model=
 case "${target}" in

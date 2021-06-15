@@ -1,5 +1,13 @@
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (SIM_ENDIAN): Delete.
+	* sim-config.c (sim_config): Delete WITH_DEFAULT_TARGET_BYTE_ORDER.
+	(sim_config_print): Likewise.
+	* sim-config.h (WITH_TARGET_BYTE_ORDER): Delete.
+	(WITH_DEFAULT_TARGET_BYTE_ORDER): Likewise.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-trace.c: Include sim/callback.h.
 	* nrun.c, sim-hw.c, sim-io.c, sim-syscall.c, sim-trace.c: Likewise.
 	* sim-basics.h: Delete sim/callback.h include.

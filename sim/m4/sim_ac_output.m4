@@ -48,9 +48,7 @@ AC_CONFIG_COMMANDS([stamp-h], [echo > stamp-h])
 dnl These are unfortunate.  They are conditionally called by other sim macros
 dnl but always used by common/Make-common.in.  So we have to subst here even
 dnl when the rest of the code is in the respective macros.
-AC_SUBST(sim_alignment)
 AC_SUBST(sim_bitsize)
-AC_SUBST(sim_endian)
 AC_SUBST(sim_float)
 AC_SUBST(sim_scache)
 AC_SUBST(sim_default_model)

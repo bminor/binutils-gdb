@@ -1,5 +1,11 @@
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (ENDIAN_CFLAGS): Delete.
+	* configure.ac: Delete sim-endian.
+	* configure: Regenerate.
+
+2021-06-17  Mike Frysinger  <vapier@gentoo.org>
+
 	* igen.c (gen_semantics_h): Rename PAGE_SIZE to MPC860C0_PAGE_SIZE.
 	* ppc-instructions: Likewise.
 

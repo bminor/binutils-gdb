@@ -93,24 +93,6 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 
 
-AC_ARG_ENABLE(sim-endian,
-[  --enable-sim-endian=endian		Specify target byte endian orientation.],
-[case "${enableval}" in
-  yes)	case "$target" in
-	  *powerpc-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
-	  *powerpcle-*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
-	  *) echo "Unknown target $target" 1>&6; sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN";;
-	esac;;
-  no)	 sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_UNKNOWN";;
-  b*|B*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_BIG";;
-  l*|L*) sim_endian="-DWITH_TARGET_BYTE_ORDER=BFD_ENDIAN_LITTLE";;
-  *)	 AC_MSG_ERROR("Unknown value $enableval for --enable-sim-endian"); sim_endian="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_endian" != x""; then
-  echo "Setting endian flags = $sim_endian" 6>&1
-fi],[sim_endian=""])dnl
-
-
 AC_ARG_ENABLE(sim-filter,
 [  --enable-sim-filter=rule		Specify filter rules.],
 [case "${enableval}" in
@@ -758,7 +740,6 @@ AC_SUBST(sim_hw_obj)
 AC_SUBST(sim_pk_src)
 AC_SUBST(sim_pk_obj)
 AC_SUBST(sim_inline)
-AC_SUBST(sim_endian)
 AC_SUBST(sim_xor_endian)
 AC_SUBST(sim_smp)
 AC_SUBST(sim_igen_smp)

@@ -654,6 +654,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
      standard ;-) that the rest of the elements won't be initialized.  */
   bfd_byte sp_init[4] = {0, 0, 0, 0};
 
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
+
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {

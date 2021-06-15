@@ -62,6 +62,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   SIM_DESC sd = sim_state_alloc_extra (kind, callback,
 				       sizeof (struct riscv_sim_state));
 
+  /* Set default options before parsing user options.  */
+  current_target_byte_order = BFD_ENDIAN_LITTLE;
+
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     {
