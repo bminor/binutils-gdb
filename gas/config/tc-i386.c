@@ -2556,10 +2556,10 @@ offset_in_range (offsetT val, int size)
     {
     case 1: mask = ((addressT) 1 <<  8) - 1; break;
     case 2: mask = ((addressT) 1 << 16) - 1; break;
-    case 4: mask = ((addressT) 2 << 31) - 1; break;
 #ifdef BFD64
-    case 8: mask = ((addressT) 2 << 63) - 1; break;
+    case 4: mask = ((addressT) 1 << 32) - 1; break;
 #endif
+    case sizeof (val): return val;
     default: abort ();
     }
 
