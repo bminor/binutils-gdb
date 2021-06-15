@@ -18,8 +18,10 @@
 #ifndef INFRUN_H
 #define INFRUN_H 1
 
+#include "gdbthread.h"
 #include "symtab.h"
 #include "gdbsupport/byte-vector.h"
+#include "gdbsupport/intrusive_list.h"
 
 struct target_waitstatus;
 struct frame_info;
@@ -253,7 +255,7 @@ extern void mark_infrun_async_event_handler (void);
 
 /* The global chain of threads that need to do a step-over operation
    to get past e.g., a breakpoint.  */
-extern struct thread_info *global_thread_step_over_chain_head;
+extern thread_step_over_list global_thread_step_over_list;
 
 /* Remove breakpoints if possible (usually that means, if everything
    is stopped).  On failure, print a message.  */

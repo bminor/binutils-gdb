@@ -56,6 +56,9 @@ struct reference_to_pointer_iterator
   reference_to_pointer_iterator (const reference_to_pointer_iterator &) = default;
   reference_to_pointer_iterator (reference_to_pointer_iterator &&) = default;
 
+  reference_to_pointer_iterator &operator= (const reference_to_pointer_iterator &) = default;
+  reference_to_pointer_iterator &operator= (reference_to_pointer_iterator &&) = default;
+
   value_type operator* () const
   { return &*m_it; }
 

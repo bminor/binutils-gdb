@@ -504,6 +504,89 @@ struct intrusive_list_test
   }
 
   static void
+  test_splice ()
+  {
+    {
+      /* Two non-empty lists.  */
+      item_type a ("a"), b ("b"), c ("c"), d ("d"), e ("e");
+      ListType list1;
+      ListType list2;
+      std::vector<const item_type *> expected;
+
+      list1.push_back (a);
+      list1.push_back (b);
+      list1.push_back (c);
+
+      list2.push_back (d);
+      list2.push_back (e);
+
+      list1.splice (std::move (list2));
+
+      expected = {&a, &b, &c, &d, &e};
+      verify_items (list1, expected);
+
+      expected = {};
+      verify_items (list2, expected);
+    }
+
+    {
+      /* Receiving list empty.  */
+      item_type a ("a"), b ("b"), c ("c");
+      ListType list1;
+      ListType list2;
+      std::vector<const item_type *> expected;
+
+      list2.push_back (a);
+      list2.push_back (b);
+      list2.push_back (c);
+
+      list1.splice (std::move (list2));
+
+      expected = {&a, &b, &c};
+      verify_items (list1, expected);
+
+      expected = {};
+      verify_items (list2, expected);
+    }
+
+    {
+      /* Giving list empty.  */
+      item_type a ("a"), b ("b"), c ("c");
+      ListType list1;
+      ListType list2;
+      std::vector<const item_type *> expected;
+
+      list1.push_back (a);
+      list1.push_back (b);
+      list1.push_back (c);
+
+      list1.splice (std::move (list2));
+
+      expected = {&a, &b, &c};
+      verify_items (list1, expected);
+
+      expected = {};
+      verify_items (list2, expected);
+    }
+
+    {
+      /* Both lists empty.  */
+      item_type a ("a"), b ("b"), c ("c");
+      ListType list1;
+      ListType list2;
+      std::vector<const item_type *> expected;
+
+      list1.splice (std::move (list2));
+
+      expected = {};
+      verify_items (list1, expected);
+
+      expected = {};
+      verify_items (list2, expected);
+    }
+  }
+
+  static void
   test_pop_front ()
   {
     item_type a ("a"), b ("b"), c ("c");
@@ -682,6 +765,7 @@ test_intrusive_list ()
   tests.test_push_front ();
   tests.test_push_back ();
   tests.test_insert ();
+  tests.test_splice ();
   tests.test_pop_front ();
   tests.test_pop_back ();
   tests.test_erase ();

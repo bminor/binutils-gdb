@@ -1245,7 +1245,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
    to avoid starvation, otherwise, we could e.g., find ourselves
    constantly stepping the same couple threads past their breakpoints
    over and over, if the single-step finish fast enough.  */
-struct thread_info *global_thread_step_over_chain_head;
+thread_step_over_list global_thread_step_over_list;
 
 /* Bit flags indicating what the thread needs to step over.  */
 
@@ -1843,8 +1843,6 @@ start_step_over (void)
 {
   INFRUN_SCOPED_DEBUG_ENTER_EXIT;
 
-  thread_info *next;
-
   /* Don't start a new step-over if we already have an in-line
      step-over operation ongoing.  */
   if (step_over_info_valid_p ())
@@ -1854,8 +1852,8 @@ start_step_over (void)
      steps, threads will be enqueued in the global chain if no buffers are
      available.  If we iterated on the global chain directly, we might iterate
      indefinitely.  */
-  thread_info *threads_to_step = global_thread_step_over_chain_head;
-  global_thread_step_over_chain_head = NULL;
+  thread_step_over_list threads_to_step
+    = std::move (global_thread_step_over_list);
 
   infrun_debug_printf ("stealing global queue of threads to step, length = %d",
 		       thread_step_over_chain_length (threads_to_step));
@@ -1867,18 +1865,22 @@ start_step_over (void)
      global list.  */
   SCOPE_EXIT
     {
-      if (threads_to_step == nullptr)
+      if (threads_to_step.empty ())
 	infrun_debug_printf ("step-over queue now empty");
       else
 	{
 	  infrun_debug_printf ("putting back %d threads to step in global queue",
 			       thread_step_over_chain_length (threads_to_step));
 
-	  global_thread_step_over_chain_enqueue_chain (threads_to_step);
+	  global_thread_step_over_chain_enqueue_chain
+	    (std::move (threads_to_step));
 	}
     };
 
-  for (thread_info *tp = threads_to_step; tp != NULL; tp = next)
+  thread_step_over_list_safe_range range
+    = make_thread_step_over_list_safe_range (threads_to_step);
+
+  for (thread_info *tp : range)
     {
       struct execution_control_state ecss;
       struct execution_control_state *ecs = &ecss;
@@ -1886,8 +1888,6 @@ start_step_over (void)
       int must_be_in_line;
 
       gdb_assert (!tp->stop_requested);
-
-      next = thread_step_over_chain_next (threads_to_step, tp);
 
       if (tp->inf->displaced_step_state.unavailable)
 	{
@@ -1903,7 +1903,7 @@ start_step_over (void)
 	 step over chain indefinitely if something goes wrong when resuming it
 	 If the error is intermittent and it still needs a step over, it will
 	 get enqueued again when we try to resume it normally.  */
-      thread_step_over_chain_remove (&threads_to_step, tp);
+      threads_to_step.erase (threads_to_step.iterator_to (*tp));
 
       step_what = thread_still_needs_step_over (tp);
       must_be_in_line = ((step_what & STEP_OVER_WATCHPOINT)
@@ -3790,15 +3790,16 @@ prepare_for_detach (void)
 
   /* Remove all threads of INF from the global step-over chain.  We
      want to stop any ongoing step-over, not start any new one.  */
-  thread_info *next;
-  for (thread_info *tp = global_thread_step_over_chain_head;
-       tp != nullptr;
-       tp = next)
-    {
-      next = global_thread_step_over_chain_next (tp);
-      if (tp->inf == inf)
+  thread_step_over_list_safe_range range
+    = make_thread_step_over_list_safe_range (global_thread_step_over_list);
+
+  for (thread_info *tp : range)
+    if (tp->inf == inf)
+      {
+	infrun_debug_printf ("removing thread %s from global step over chain",
+			     target_pid_to_str (tp->ptid).c_str ());
 	global_thread_step_over_chain_remove (tp);
-    }
+      }
 
   /* If we were already in the middle of an inline step-over, and the
      thread stepping belongs to the inferior we're detaching, we need

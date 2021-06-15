@@ -387,11 +387,9 @@ public:
      expressions.  */
   std::vector<struct value *> stack_temporaries;
 
-  /* Step-over chain.  A thread is in the step-over queue if these are
-     non-NULL.  If only a single thread is in the chain, then these
-     fields point to self.  */
-  struct thread_info *step_over_prev = NULL;
-  struct thread_info *step_over_next = NULL;
+  /* Step-over chain.  A thread is in the step-over queue if this node is
+     linked.  */
+  intrusive_list_node<thread_info> step_over_list_node;
 
   /* Displaced-step state for this thread.  */
   displaced_step_thread_state displaced_step_state;
@@ -742,35 +740,41 @@ extern value *get_last_thread_stack_temporary (struct thread_info *tp);
 extern bool value_in_thread_stack_temporaries (struct value *,
 					       struct thread_info *thr);
 
+/* Thread step-over list type.  */
+using thread_step_over_list_node
+  = intrusive_member_node<thread_info, &thread_info::step_over_list_node>;
+using thread_step_over_list
+  = intrusive_list<thread_info, thread_step_over_list_node>;
+using thread_step_over_list_iterator
+  = reference_to_pointer_iterator<thread_step_over_list::iterator>;
+using thread_step_over_list_safe_iterator
+  = basic_safe_iterator<thread_step_over_list_iterator>;
+using thread_step_over_list_safe_range
+  = iterator_range<thread_step_over_list_safe_iterator>;
+
+static inline thread_step_over_list_safe_range
+make_thread_step_over_list_safe_range (thread_step_over_list &list)
+{
+  return thread_step_over_list_safe_range
+    (thread_step_over_list_safe_iterator (list.begin (),
+					  list.end ()),
+     thread_step_over_list_safe_iterator (list.end (),
+					  list.end ()));
+}
+
 /* Add TP to the end of the global pending step-over chain.  */
 
 extern void global_thread_step_over_chain_enqueue (thread_info *tp);
 
-/* Append the thread step over chain CHAIN_HEAD to the global thread step over
+/* Append the thread step over list LIST to the global thread step over
    chain. */
 
 extern void global_thread_step_over_chain_enqueue_chain
-  (thread_info *chain_head);
-
-/* Remove TP from step-over chain LIST_P.  */
-
-extern void thread_step_over_chain_remove (thread_info **list_p,
-					   thread_info *tp);
+  (thread_step_over_list &&list);
 
 /* Remove TP from the global pending step-over chain.  */
 
 extern void global_thread_step_over_chain_remove (thread_info *tp);
-
-/* Return the thread following TP in the step-over chain whose head is
-   CHAIN_HEAD.  Return NULL if TP is the last entry in the chain.  */
-
-extern thread_info *thread_step_over_chain_next (thread_info *chain_head,
-						 thread_info *tp);
-
-/* Return the thread following TP in the global step-over chain, or NULL if TP
-   is the last entry in the chain.  */
-
-extern thread_info *global_thread_step_over_chain_next (thread_info *tp);
 
 /* Return true if TP is in any step-over chain.  */
 
@@ -782,7 +786,7 @@ extern int thread_is_in_step_over_chain (struct thread_info *tp);
    TP may be nullptr, in which case it denotes an empty list, so a length of
    0.  */
 
-extern int thread_step_over_chain_length (thread_info *tp);
+extern int thread_step_over_chain_length (const thread_step_over_list &l);
 
 /* Cancel any ongoing execution command.  */
 

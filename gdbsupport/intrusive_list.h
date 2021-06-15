@@ -350,6 +350,33 @@ public:
     pos_node->prev = &elem;
   }
 
+  /* Move elements from LIST at the end of the current list.  */
+  void splice (intrusive_list &&other)
+  {
+    if (other.empty ())
+      return;
+
+    if (this->empty ())
+      {
+	*this = std::move (other);
+	return;
+      }
+
+    /* [A ... B] + [C ... D] */
+    T *b_elem = m_back;
+    node_type *b_node = as_node (b_elem);
+    T *c_elem = other.m_front;
+    node_type *c_node = as_node (c_elem);
+    T *d_elem = other.m_back;
+
+    b_node->next = c_elem;
+    c_node->prev = b_elem;
+    m_back = d_elem;
+
+    other.m_front = nullptr;
+    other.m_back = nullptr;
+  }
+
   void pop_front ()
   {
     gdb_assert (!this->empty ());
