@@ -1,3 +1,7 @@
+2021-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* elf/common.h (NT_GO_BUILDID): Define.
+
 2021-06-02  Shahab Vahedi  <shahab@synopsys.com>
 
 	* dis-asm.h (disassembler_options_arc): New prototype.

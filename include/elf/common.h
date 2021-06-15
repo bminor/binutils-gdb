@@ -748,6 +748,7 @@
 
 #define NT_VERSION	1		/* Contains a version string.  */
 #define NT_ARCH		2		/* Contains an architecture string.  */
+#define NT_GO_BUILDID	4		/* Contains GO buildid data.  */
 
 /* Values for notes in non-core files using name "GNU".  */
 

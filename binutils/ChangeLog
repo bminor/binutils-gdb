@@ -1,3 +1,7 @@
+2021-06-15  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_note_type): Add support for NT_GO_BUILDID.
+
 2021-06-15  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (locate_dynamic_section, is_pie): New functions.

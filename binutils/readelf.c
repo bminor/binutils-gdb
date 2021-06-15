@@ -18859,6 +18859,8 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("OPEN");
       case NT_GNU_BUILD_ATTRIBUTE_FUNC:
 	return _("func");
+      case NT_GO_BUILDID:
+	return _("GO BUILDID");
       default:
 	break;
       }
