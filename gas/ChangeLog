@@ -1,5 +1,12 @@
 2021-06-17  Clément Chigot  <clement.chigot@atos.net>
 
+	* config/tc-ppc.c (md_begin): Create bss section with dummy
+	symbol.
+	(ppc_frob_symbol): Output XTY_CM for bss csects.
+	(ppc_fix_adjustable): Adjust condition to avoid bss csects.
+
+2021-06-17  Clément Chigot  <clement.chigot@atos.net>
+
 	* config/tc-ppc.c (md_apply_fix): Adjust addend to nullify
 	section contents for BFD_RELOC_PPC_TLSM or
 	BFD_RELOC_PPC64_TLSM.
