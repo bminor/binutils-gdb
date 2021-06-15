@@ -1,3 +1,10 @@
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Delete most m4_include's of ../config files.
+	* configure.ac: Delete m4_include call and call AC_CONFIG_MACRO_DIR.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2021-06-17  Pedro Alves  <pedro@palves.net>
 
 	* scoped_ignore_signal.h (scoped_ignore_signal): Add

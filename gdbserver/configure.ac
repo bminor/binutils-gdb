@@ -19,6 +19,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT
+AC_CONFIG_MACRO_DIRS([../config])
 AC_CONFIG_SRCDIR([server.cc])
 AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 
