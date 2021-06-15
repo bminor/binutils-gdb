@@ -5905,26 +5905,24 @@ optimize_disp (void)
 	      }
 
 #ifdef BFD64
-	    if (flag_code == CODE_64BIT)
+	    /* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
+	    if ((i.types[op].bitfield.disp32
+		 || (flag_code == CODE_64BIT
+		     && want_disp32 (current_templates->start)))
+		&& fits_in_unsigned_long (op_disp))
 	      {
-		/* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
-		if ((i.types[op].bitfield.disp32
-		     || want_disp32 (current_templates->start))
-		    && fits_in_unsigned_long (op_disp))
-		  {
-		    /* If this operand is at most 32 bits, convert
-		       to a signed 32 bit number and don't use 64bit
-		       displacement.  */
-		    op_disp = (op_disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
-		    i.types[op].bitfield.disp64 = 0;
-		    i.types[op].bitfield.disp32 = 1;
-		  }
+		/* If this operand is at most 32 bits, convert
+		   to a signed 32 bit number and don't use 64bit
+		   displacement.  */
+		op_disp = (op_disp ^ ((offsetT) 1 << 31)) - ((addressT) 1 << 31);
+		i.types[op].bitfield.disp64 = 0;
+		i.types[op].bitfield.disp32 = 1;
+	      }
 
-		if (fits_in_signed_long (op_disp))
-		  {
-		    i.types[op].bitfield.disp64 = 0;
-		    i.types[op].bitfield.disp32s = 1;
-		  }
+	    if (flag_code == CODE_64BIT && fits_in_signed_long (op_disp))
+	      {
+		i.types[op].bitfield.disp64 = 0;
+		i.types[op].bitfield.disp32s = 1;
 	      }
 #endif
 	    if ((i.types[op].bitfield.disp32
@@ -11019,9 +11017,18 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
       ret = 0;
     }
 
+  else if (exp->X_op == O_constant)
+    {
+      /* Sizing gets taken care of by optimize_disp().
+
+	 If not 64bit, sign/zero extend val, to account for wraparound
+	 when !BFD64.  */
+      if (flag_code != CODE_64BIT)
+	exp->X_add_number = extend_to_32bit_address (exp->X_add_number);
+    }
+
 #if (defined (OBJ_AOUT) || defined (OBJ_MAYBE_AOUT))
-  else if (exp->X_op != O_constant
-	   && OUTPUT_FLAVOR == bfd_target_aout_flavour
+  else if (OUTPUT_FLAVOR == bfd_target_aout_flavour
 	   && exp_seg != absolute_section
 	   && exp_seg != text_section
 	   && exp_seg != data_section
@@ -11034,9 +11041,7 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
     }
 #endif
 
-  if (current_templates->start->opcode_modifier.jump == JUMP_BYTE
-      /* Constants get taken care of by optimize_disp().  */
-      && exp->X_op != O_constant)
+  else if (current_templates->start->opcode_modifier.jump == JUMP_BYTE)
     i.types[this_operand].bitfield.disp8 = 1;
 
   /* Check if this is a displacement only operand.  */

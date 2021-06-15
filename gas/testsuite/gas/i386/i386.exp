@@ -88,6 +88,9 @@ if [gas_32_check] then {
     run_dump_test "disp-intel"
     run_dump_test "disp32"
     run_list_test "disp-imm-16"
+    if { [gas_bfd64_check] } {
+	run_dump_test "disp-imm-32"
+    }
     run_dump_test "vmx"
     run_dump_test "vmfunc"
     run_dump_test "smx"

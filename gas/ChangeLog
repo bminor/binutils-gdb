@@ -1,5 +1,15 @@
 2021-06-15  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (optimize_disp): Generalize disp32 part of
+	the BFD64-only logic to also apply to non-64-bit code.
+	(i386_finalize_displacement): Use extend_to_32bit_address for
+	non-64-bit code. Drop now redundant O_constant checks.
+	* testsuite/gas/i386/disp-imm-32.s,
+	testsuite/gas/i386/disp-imm-32.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (offset_in_range): Replace uses of
 	bfd_sprintf_vma.
 
