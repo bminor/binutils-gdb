@@ -465,7 +465,8 @@ test-hw-events: $(srccom)/hw-events.c libsim.a
 		$(srccom)/hw-events.c libsim.a $(EXTRA_LIBS)
 
 # See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
-modules.c: Makefile $(SIM_OBJS:.o=.c)
+modules.c: stamp-modules ; @true
+stamp-modules: Makefile $(SIM_OBJS:.o=.c)
 	@echo Generating $@
 	@LANG=C ; export LANG ; \
 	LC_ALL=C ; export LC_ALL ; \
@@ -481,7 +482,7 @@ modules.c: Makefile $(SIM_OBJS:.o=.c)
 	echo '};'; \
 	echo 'const int sim_modules_detected_len = ARRAY_SIZE (sim_modules_detected);'; \
 	) >$@.tmp
-	$(SHELL) $(srcroot)/move-if-change $@.tmp $@
+	$(SHELL) $(srcroot)/move-if-change $@.tmp modules.c
 	@rm -f $@.l-tmp $@.tmp
 	touch $@
 
@@ -543,6 +544,7 @@ mostlyclean clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core
 	rm -f run$(EXEEXT) libsim.a
 	rm -f hw-config.h stamp-hw
+	rm -f modules.c stamp-modules
 	rm -f gentmap targ-map.c targ-vals.h stamp-tvals
 	if [ ! -f Make-common.in ] ; then \
 		rm -f $(BUILT_SRC_FROM_COMMON) ; \

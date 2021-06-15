@@ -1,3 +1,10 @@
+2021-06-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in: Add stamp-modules rule to avoid rebuilds.
+	(clean): Delete modules.c files.
+	* local.mk: Add version.c-stamp rule to avoid rebuilds.
+	(CLEANFILES): Add version.c files.
+
 2021-06-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* local.mk (%D%/version.c): Use AM_V_GEN & AM_V_at wrappers.

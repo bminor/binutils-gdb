@@ -730,7 +730,8 @@ AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
 # NB: libcommon.a isn't used directly by ports.  We need a target for common
 # objects to be a part of, and ports use the individual objects directly.
 noinst_LIBRARIES = common/libcommon.a $(am__append_2)
-CLEANFILES = testsuite/common/bits-gen testsuite/common/bits32m0.c \
+CLEANFILES = common/version.c common/version.c-stamp \
+	testsuite/common/bits-gen testsuite/common/bits32m0.c \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
 	testsuite/common/bits64m63.c
 DISTCLEANFILES = 
@@ -1584,9 +1585,10 @@ nltvals:
 	$(abs_srcdir)/common/gennltvals.py --cpp "$(CPP)" --output nltvals.def --srcroot $(srcroot)
 	$(SHELL) $(srcroot)/move-if-change nltvals.def $(abs_srcdir)/common/nltvals.def
 
-common/version.c: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(srcdir)/common/create-version.sh
+common/version.c: common/version.c-stamp ; @true
+common/version.c-stamp: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(srcdir)/common/create-version.sh
 	$(AM_V_GEN)$(SHELL) $(srcdir)/common/create-version.sh $(srcroot)/gdb $@.tmp
-	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $@
+	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(@:-stamp=)
 	$(AM_V_at)touch $@
 
 # Alias for developers.
