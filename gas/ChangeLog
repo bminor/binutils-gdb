@@ -1,5 +1,12 @@
 2021-06-15  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (disp16, disp32, disp32s): Delete.
+	(optimize_disp, i386_finalize_displacement): Use
+	operand_type_and_not.
+	(build_modrm_byte): Likewise. Eliminate local variable newdisp.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (offset_in_range): Bail early when mask would
 	cover all bits anyway.
 
