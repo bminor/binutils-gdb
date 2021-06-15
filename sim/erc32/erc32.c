@@ -24,7 +24,9 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef HAVE_TERMIOS_H
 #include <termios.h>
+#endif
 #include <sys/fcntl.h>
 #include <sys/file.h>
 #include <unistd.h>
@@ -235,7 +237,9 @@ static char     wbufa[UARTBUF], wbufb[UARTBUF];
 static unsigned wnuma;
 static unsigned wnumb;
 static FILE    *f1in, *f1out, *f2in, *f2out;
+#ifdef HAVE_TERMIOS_H
 static struct termios ioc1, ioc2, iocold1, iocold2;
+#endif
 static int      f1open = 0, f2open = 0;
 
 static char     uarta_sreg, uarta_hreg, uartb_sreg, uartb_hreg;
@@ -926,10 +930,12 @@ init_stdio(void)
 {
     if (dumbio)
         return; /* do nothing */
+#ifdef HAVE_TERMIOS_H
     if (!ifd1)
 	tcsetattr(0, TCSANOW, &ioc1);
     if (!ifd2)
 	tcsetattr(0, TCSANOW, &ioc2);
+#endif
 }
 
 void
@@ -937,10 +943,12 @@ restore_stdio(void)
 {
     if (dumbio)
         return; /* do nothing */
+#ifdef HAVE_TERMIOS_H
     if (!ifd1)
 	tcsetattr(0, TCSANOW, &iocold1);
     if (!ifd2)
 	tcsetattr(0, TCSANOW, &iocold2);
+#endif
 }
 
 #define DO_STDIO_READ( _fd_, _buf_, _len_ )          \
@@ -979,11 +987,13 @@ port_init(void)
 	if (sis_verbose)
 	    printf("serial port A on stdin/stdout\n");
         if (!dumbio) {
+#ifdef HAVE_TERMIOS_H
             tcgetattr(ifd1, &ioc1);
             iocold1 = ioc1;
             ioc1.c_lflag &= ~(ICANON | ECHO);
             ioc1.c_cc[VMIN] = 0;
             ioc1.c_cc[VTIME] = 0;
+#endif
         }
 	f1open = 1;
     }
@@ -1008,11 +1018,13 @@ port_init(void)
 	if (sis_verbose)
 	    printf("serial port B on stdin/stdout\n");
         if (!dumbio) {
+#ifdef HAVE_TERMIOS_H
             tcgetattr(ifd2, &ioc2);
             iocold2 = ioc2;
             ioc2.c_lflag &= ~(ICANON | ECHO);
             ioc2.c_cc[VMIN] = 0;
             ioc2.c_cc[VTIME] = 0;
+#endif
         }
 	f2open = 1;
     }

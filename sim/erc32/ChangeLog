@@ -1,3 +1,11 @@
+2021-06-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* erc32.c [HAVE_TERMIOS_H]: Include termios.h and declare ioc1,
+	ioc2, iocold1, & iocold2.
+	(init_stdio) [HAVE_TERMIOS_H]: Only call tcsetattr.
+	(restore_stdio) [HAVE_TERMIOS_H]: Likewise.
+	(port_init) [HAVE_TERMIOS_H]: Only call tcgetattr.
+
 2021-06-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* erc32.c (uart_rx): Change caddr_t to void*.
