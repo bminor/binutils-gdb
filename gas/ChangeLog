@@ -1,5 +1,12 @@
 2021-06-15  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (md_show_usage): Split ELF and PE/COFF parts
+	of object format controlling option. Add Mach-O to the latter.
+	* testsuite/gas/i386/i386.exp (gas_bfd64_check): Adjust
+	accordingly.
+
+2021-06-15  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (disp16, disp32, disp32s): Delete.
 	(optimize_disp, i386_finalize_displacement): Use
 	operand_type_and_not.

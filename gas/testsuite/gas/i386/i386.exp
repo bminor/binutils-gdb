@@ -41,7 +41,7 @@ proc gas_bfd64_check { } {
     global AS
 
     set status [gas_host_run "$AS --help" ""]
-    return [regexp "32bit/64bit/x32" [lindex $status 1]];
+    return [regexp "32bit/64bit" [lindex $status 1]];
 }
 
 if [gas_32_check] then {

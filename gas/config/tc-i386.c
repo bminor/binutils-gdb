@@ -13719,10 +13719,14 @@ md_show_usage (FILE *stream)
   fprintf (stream, _("\
   -s                      ignored\n"));
 #endif
-#if defined BFD64 && (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
-		      || defined (TE_PE) || defined (TE_PEP))
+#ifdef BFD64
+# if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   fprintf (stream, _("\
-  --32/--64/--x32         generate 32bit/64bit/x32 code\n"));
+  --32/--64/--x32         generate 32bit/64bit/x32 object\n"));
+# elif defined (TE_PE) || defined (TE_PEP) || defined (OBJ_MACH_O)
+  fprintf (stream, _("\
+  --32/--64               generate 32bit/64bit object\n"));
+# endif
 #endif
 #ifdef SVR4_COMMENT_CHARS
   fprintf (stream, _("\
