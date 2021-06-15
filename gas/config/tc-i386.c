@@ -11566,15 +11566,19 @@ i386_att_operand (char *operand_string)
       if (*base_string == ')')
 	{
 	  char *temp_string;
+	  unsigned int parens_not_balanced = 1;
 
 	  /* We've already checked that the number of left & right ()'s are
 	     equal, so this loop will not be infinite.  */
 	  do
 	    {
 	      base_string--;
+	      if (*base_string == ')')
+		parens_not_balanced++;
+	      if (*base_string == '(')
+		parens_not_balanced--;
 	    }
-	  while (*base_string != '(' && *base_string != ')'
-		 && *base_string != '"');
+	  while (parens_not_balanced && *base_string != '"');
 
 	  temp_string = base_string;
 
