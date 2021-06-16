@@ -1,3 +1,8 @@
+2021-06-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common/Make-common.in (COMPILE, libsim.a, run$(EXEEXT),
+	gentmap.o, gentmap): Make rules silent.
+
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
 	* m4/sim_ac_common.m4: Delete AC_EXEEXT call.

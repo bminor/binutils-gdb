@@ -1,3 +1,7 @@
+2021-06-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* silent-rules.mk (ECHO_CCLD, ECHO_AR, ECHO_RANLIB): New.
+
 2021-06-16  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/26327

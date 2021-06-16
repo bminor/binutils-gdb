@@ -40,6 +40,8 @@ srccom = $(srcdir)/../common
 srcroot = $(srcdir)/../..
 srcsim = $(srcdir)/..
 
+include $(srcroot)/gdb/silent-rules.mk
+
 # Helper code from gnulib.
 GNULIB_PARENT_DIR = ../..
 include $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
@@ -111,7 +113,7 @@ depcomp = $(SHELL) $(srcroot)/depcomp
 # GNU make is used.  The overrides implement dependency tracking.
 COMPILE.pre = $(CC) $(C_DIALECT)
 COMPILE.post = -c -o $@
-COMPILE = $(COMPILE.pre) $(ALL_CFLAGS) $(COMPILE.post)
+COMPILE = $(ECHO_CC) $(COMPILE.pre) $(ALL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
 
 # igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
@@ -273,11 +275,11 @@ all: libsim.a run$(EXEEXT) .gdbinit
 
 libsim.a: $(LIB_OBJS)
 	rm -f libsim.a
-	$(AR) $(AR_FLAGS) libsim.a $(LIB_OBJS)
-	$(RANLIB) libsim.a
+	$(ECHO_AR) $(AR) $(AR_FLAGS) libsim.a $(LIB_OBJS)
+	$(ECHO_RANLIB) $(RANLIB) libsim.a
 
 run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
-	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o run$(EXEEXT) \
+	$(ECHO_CCLD) $(CC) $(ALL_CFLAGS) $(LDFLAGS) -o run$(EXEEXT) \
 	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
 
 # FIXME: Ideally, callback.o and friends live in a library outside of
@@ -286,10 +288,10 @@ run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
 # a library).
 
 gentmap.o: Makefile $(srccom)/gentmap.c $(srccom)/nltvals.def
-	$(COMPILE_FOR_BUILD) -o $@ -c $(srccom)/gentmap.c $(NL_TARGET)
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -o $@ -c $(srccom)/gentmap.c $(NL_TARGET)
 
 gentmap: gentmap.o
-	$(LINK_FOR_BUILD) $<
+	$(ECHO_CC) $(LINK_FOR_BUILD) $<
 
 targ-vals.h targ-map.c: stamp-tvals
 stamp-tvals: gentmap
