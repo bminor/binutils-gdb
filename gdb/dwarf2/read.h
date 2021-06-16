@@ -579,6 +579,9 @@ struct dwarf2_per_objfile
   /* Table containing line_header indexed by offset and offset_in_dwz.  */
   htab_up line_header_hash;
 
+  /* The CU containing the m_builder in scope.  */
+  dwarf2_cu *sym_cu = nullptr;
+
 private:
   /* Hold the corresponding compunit_symtab for each CU or TU.  This
      is indexed by dwarf2_per_cu_data::index.  A NULL value means

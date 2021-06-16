@@ -138,3 +138,18 @@ dwarf2_cu::add_dependence (struct dwarf2_per_cu_data *ref_per_cu)
   if (*slot == nullptr)
     *slot = ref_per_cu;
 }
+
+/* See dwarf2/cu.h.  */
+
+buildsym_compunit *
+dwarf2_cu::get_builder ()
+{
+  /* If this CU has a builder associated with it, use that.  */
+  if (m_builder != nullptr)
+    return m_builder.get ();
+
+  if (per_objfile->sym_cu != nullptr)
+    return per_objfile->sym_cu->m_builder.get ();
+
+  gdb_assert_not_reached ("");
+}

@@ -1,3 +1,14 @@
+2021-06-16  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/26327
+	* dwarf2/cu.h (dwarf2_cu::ancestor): Remove.
+	(dwarf2_cu::get_builder): Declare and move ...
+	* dwarf2/cu.c (dwarf2_cu::get_builder): ... here.  Use sym_cu instead
+	of ancestor.  Assert return value is non-null.
+	* dwarf2/read.c (read_file_scope): Set per_objfile->sym_cu.
+	(follow_die_offset, follow_die_sig_1): Remove setting of ancestor.
+	(dwarf2_per_objfile): Add sym_cu field.
+
 2021-06-15  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/gdb.exp (exec_is_pie): Match new PIE readelf output.
