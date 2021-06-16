@@ -32,6 +32,7 @@
 #endif
 
 #include "cpu.h"
+#include "symcat.h"
 
 /* OEA vs VEA
 

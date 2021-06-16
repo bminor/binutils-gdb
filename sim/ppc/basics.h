@@ -24,22 +24,6 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
-/* from Michael Meissner, macro's to handle concating symbols better */
-
-#if defined(__STDC__) || defined(ALMOST_STDC)
-#define CONCAT2(a,b)	 a##b
-#define CONCAT3(a,b,c)	 a##b##c
-#define CONCAT4(a,b,c,d) a##b##c##d
-#else
-#define CONCAT2(a,b)	 a/**/b
-#define CONCAT3(a,b,c)	 a/**/b/**/c
-#define CONCAT4(a,b,c,d) a/**/b/**/c/**/d
-#endif
-
-#define XCONCAT2(a,b)     CONCAT2(a,b)
-#define XCONCAT3(a,b,c)   CONCAT3(a,b,c)
-#define XCONCAT4(a,b,c,d) CONCAT4(a,b,c,d)
-
 
 /* many things pass around the cpu and psim object with out knowing
    what it is */

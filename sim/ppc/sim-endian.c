@@ -25,6 +25,7 @@
 #include "defs.h"
 
 #include "basics.h"
+#include "symcat.h"
 
 
 #if !defined(_SWAP_1)
