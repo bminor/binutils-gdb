@@ -22,6 +22,7 @@
 #define _DOUBLE_C_
 
 #include "basics.h"
+#include "ansidecls.h"
 
 #define SFtype unsigned32
 #define DFtype unsigned64

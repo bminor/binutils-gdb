@@ -1,5 +1,10 @@
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* double.c: Include ansidecls.h.
+	* dp-bit.c: Change __attribute__ ((packed)) to ATTRIBUTE_PACKED.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* basics.h (NORETURN): Delete.
 	* sim_callbacks.h: Include ansidecl.h.  Change NORETURN to
 	ATTRIBUTE_NORETURN.
