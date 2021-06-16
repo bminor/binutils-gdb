@@ -1,3 +1,9 @@
+2021-06-16  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* gdb.texinfo (Process Record and Replay): Stop mentioning lines
+	for "record function-call-history" and
+	"set record function-call-history-size".
+
 2021-06-08  Lancelot Six  <lsix@lancelotsix.com>
 
 	* python.texi (Writing a Pretty-Printer): Use 'is None' instead of
