@@ -974,8 +974,8 @@ vm_synchronize_context(vm *virtual,
   if (WITH_XOR_ENDIAN) {
     int i = 1;
     unsigned mask;
-    if ((little_endian && CURRENT_TARGET_BYTE_ORDER == LITTLE_ENDIAN)
-	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN))
+    if ((little_endian && CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
+	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG))
       mask = 0;
     else
       mask = WITH_XOR_ENDIAN - 1;
@@ -988,8 +988,8 @@ vm_synchronize_context(vm *virtual,
   }
   else {
     /* don't allow the processor to change endian modes */
-    if ((little_endian && CURRENT_TARGET_BYTE_ORDER != LITTLE_ENDIAN)
-	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER != BIG_ENDIAN))
+    if ((little_endian && CURRENT_TARGET_BYTE_ORDER != BFD_ENDIAN_LITTLE)
+	|| (!little_endian && CURRENT_TARGET_BYTE_ORDER != BFD_ENDIAN_BIG))
       cpu_error(processor, cia, "attempt to change hardwired byte order");
   }
 }

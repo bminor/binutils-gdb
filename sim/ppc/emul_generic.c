@@ -64,7 +64,7 @@ emul_read_gpr64(cpu *processor,
 {
   unsigned32 hi;
   unsigned32 lo;
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN) {
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) {
     hi = cpu_registers(processor)->gpr[g];
     lo = cpu_registers(processor)->gpr[g+1];
   }
@@ -83,7 +83,7 @@ emul_write_gpr64(cpu *processor,
 {
   unsigned32 hi = EXTRACTED64(val, 0, 31);
   unsigned32 lo = EXTRACTED64(val, 32, 63);
-  if (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN) {
+  if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG) {
     cpu_registers(processor)->gpr[g] = hi;
     cpu_registers(processor)->gpr[g+1] = lo;
   }

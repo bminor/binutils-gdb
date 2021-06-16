@@ -21,6 +21,7 @@
 #ifndef _PSIM_CONFIG_H_
 #define _PSIM_CONFIG_H_
 
+#include "bfd.h"
 
 /* endianness of the host/target:
 
@@ -28,29 +29,23 @@
    of the host/target it is able to eliminate slower generic endian
    handling code.
 
-   Possible values are 0 (unknown), LITTLE_ENDIAN, BIG_ENDIAN */
-
-#ifndef LITTLE_ENDIAN
-#define LITTLE_ENDIAN 1234
-#endif
-#ifndef BIG_ENDIAN
-#define BIG_ENDIAN 4321
-#endif
+   Possible values are BFD_ENDIAN_UNKNOWN, BFD_ENDIAN_LITTLE,
+   BFD_ENDIAN_BIG.  */
 
 #ifdef WORDS_BIGENDIAN
-# define HOST_BYTE_ORDER BIG_ENDIAN
+# define HOST_BYTE_ORDER BFD_ENDIAN_BIG
 #else
-# define HOST_BYTE_ORDER LITTLE_ENDIAN
+# define HOST_BYTE_ORDER BFD_ENDIAN_LITTLE
 #endif
 
 #ifndef WITH_TARGET_BYTE_ORDER
-#define WITH_TARGET_BYTE_ORDER		0 /*unknown*/
+#define WITH_TARGET_BYTE_ORDER		BFD_ENDIAN_UNKNOWN
 #endif
 
-extern int current_target_byte_order;
-#define CURRENT_TARGET_BYTE_ORDER (WITH_TARGET_BYTE_ORDER \
-				   ? WITH_TARGET_BYTE_ORDER \
-				   : current_target_byte_order)
+extern enum bfd_endian current_target_byte_order;
+#define CURRENT_TARGET_BYTE_ORDER \
+  (WITH_TARGET_BYTE_ORDER != BFD_ENDIAN_UNKNOWN \
+   ? WITH_TARGET_BYTE_ORDER : current_target_byte_order)
 
 
 /* PowerPC XOR endian.

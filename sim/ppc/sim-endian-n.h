@@ -73,7 +73,7 @@ INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_h2be_N(unsigned_N raw_in)
 {
-  if (HOST_BYTE_ORDER == BIG_ENDIAN) {
+  if (HOST_BYTE_ORDER == BFD_ENDIAN_BIG) {
     return raw_in;
   }
   else {
@@ -86,7 +86,7 @@ INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_be2h_N(unsigned_N raw_in)
 {
-  if (HOST_BYTE_ORDER == BIG_ENDIAN) {
+  if (HOST_BYTE_ORDER == BFD_ENDIAN_BIG) {
     return raw_in;
   }
   else {
@@ -99,7 +99,7 @@ INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_h2le_N(unsigned_N raw_in)
 {
-  if (HOST_BYTE_ORDER == LITTLE_ENDIAN) {
+  if (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE) {
     return raw_in;
   }
   else {
@@ -112,7 +112,7 @@ INLINE_PSIM_ENDIAN\
 (unsigned_N)
 endian_le2h_N(unsigned_N raw_in)
 {
-  if (HOST_BYTE_ORDER == LITTLE_ENDIAN) {
+  if (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE) {
     return raw_in;
   }
   else {

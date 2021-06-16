@@ -63,7 +63,7 @@ struct _psim {
 };
 
 
-int current_target_byte_order;
+enum bfd_endian current_target_byte_order;
 int current_environment;
 int current_alignment;
 int current_floating_point;
@@ -450,8 +450,8 @@ psim_create(const char *file_name,
   /* fill in the missing TARGET BYTE ORDER information */
   current_target_byte_order
     = (tree_find_boolean_property(root, "/options/little-endian?")
-       ? LITTLE_ENDIAN
-       : BIG_ENDIAN);
+       ? BFD_ENDIAN_LITTLE
+       : BFD_ENDIAN_BIG);
   if (CURRENT_TARGET_BYTE_ORDER != current_target_byte_order)
     error("target and configured byte order conflict\n");
 

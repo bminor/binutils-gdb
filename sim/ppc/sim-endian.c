@@ -32,7 +32,7 @@
 #define _SWAP_1(SET,RAW) SET (RAW)
 #endif
 
-#if !defined(_SWAP_2) && (HOST_BYTE_ORDER == LITTLE_ENDIAN) && defined(htons)
+#if !defined(_SWAP_2) && (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE) && defined(htons)
 #define _SWAP_2(SET,RAW) SET htons (RAW)
 #endif
 
@@ -40,7 +40,7 @@
 #define _SWAP_2(SET,RAW) SET (((RAW) >> 8) | ((RAW) << 8))
 #endif
 
-#if !defined(_SWAP_4) && (HOST_BYTE_ORDER == LITTLE_ENDIAN) && defined(htonl)
+#if !defined(_SWAP_4) && (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE) && defined(htonl)
 #define _SWAP_4(SET,RAW) SET htonl (RAW)
 #endif
 

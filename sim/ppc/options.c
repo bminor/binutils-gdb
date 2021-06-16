@@ -25,12 +25,11 @@
 
 STATIC_INLINE_OPTIONS\
 (const char *)
-options_byte_order (int order)
+options_byte_order (enum bfd_endian order)
 {
   switch (order) {
-  case 0:		return "0";
-  case BIG_ENDIAN:	return "BIG_ENDIAN";
-  case LITTLE_ENDIAN:	return "LITTLE_ENDIAN";
+  case BFD_ENDIAN_BIG:		return "BIG_ENDIAN";
+  case BFD_ENDIAN_LITTLE:	return "LITTLE_ENDIAN";
   }
 
   return "UNKNOWN";

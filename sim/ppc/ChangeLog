@@ -1,5 +1,27 @@
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* altivec.igen: Change BIG_ENDIAN to BFD_ENDIAN_BIG.
+	* configure.ac: Change LITTLE_ENDIAN, BIG_ENDIAN, & 0 to
+	BFD_ENDIAN_LITTLE, BFD_ENDIAN_BIG, & BFD_ENDIAN_UNKNOWN respectively.
+	* emul_generic.c: Likewise.
+	* options.c (options_byte_order): Likewise.  Change int to bfd_endian.
+	* psim.c (current_target_byte_order): Change type to bfd_endian.
+	(psim_create): Change LITTLE_ENDIAN & BIG_ENDIAN to BFD_ENDIAN_LITTLE
+	& BFD_ENDIAN_BIG respectively.
+	* sim-endian-n.h: Likewise.
+	* sim-endian.c: Likewise.
+	* std-config.h: Include bfd.h.
+	(LITTLE_ENDIAN, BIG_ENDIAN): Delete.
+	(HOST_BYTE_ORDER): Change to BFD_ENDIAN_BIG & BFD_ENDIAN_LITTLE.
+	(WITH_TARGET_BYTE_ORDER): Change to BFD_ENDIAN_UNKNOWN.
+	(current_target_byte_order): Change type to bfd_endian.
+	(CURRENT_TARGET_BYTE_ORDER): Compare to BFD_ENDIAN_UNKNOWN.
+	* vm.c (vm_synchronize_context): Change LITTLE_ENDIAN & BIG_ENDIAN to
+	BFD_ENDIAN_LITTLE & BFD_ENDIAN_BIG respectively.
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* basics.h (__attribute__): Delete.
 	* misc.h (__attribute__): Likewise.
 	Include ansidecl.h.
