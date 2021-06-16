@@ -25,6 +25,9 @@ srccom = $(srcdir)/../common
 srcroot = $(srcdir)/../..
 srcsim = $(srcdir)/..
 
+# Settings from top-level configure.
+include ../arch-subdir.mk
+
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 

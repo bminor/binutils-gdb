@@ -1,5 +1,9 @@
 2021-06-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in: Include ../arch-subdir.mk.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-run.c: Include sim-signal.h.
 	* cgen-utils.c, nrun.c, sim-core.c, sim-engine.c, sim-reason.c,
 	sim-resume.c, sim-signal.c, sim-stop.c, sim-watch.c: Likewise.
