@@ -1,5 +1,11 @@
 2021-06-16  Jan Beulich  <jbeulich@suse.com>
 
+	* read.c (parse_one_float): New.
+	(s_float_space, float_cons): Use it.
+	* testsuite/gas/all/float.s: Add .dc.*, .dcb.*, and .ds.* cases.
+
+2021-06-16  Jan Beulich  <jbeulich@suse.com>
+
 	* read.c (emit_expr_with_reloc): Adjust overflow check. Drop
 	hibit local variable.
 	* write.c (fixup_segment): Differentiate signed and non-signed

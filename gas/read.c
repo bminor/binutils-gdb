@@ -3616,6 +3616,51 @@ s_nops (int ignore ATTRIBUTE_UNUSED)
   *p = val.X_add_number;
 }
 
+static int
+parse_one_float (int float_type, char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT])
+{
+  int length;
+
+  SKIP_WHITESPACE ();
+
+  /* Skip any 0{letter} that may be present.  Don't even check if the
+     letter is legal.  Someone may invent a "z" format and this routine
+     has no use for such information. Lusers beware: you get
+     diagnostics if your input is ill-conditioned.  */
+  if (input_line_pointer[0] == '0'
+      && ISALPHA (input_line_pointer[1]))
+    input_line_pointer += 2;
+
+  /* Accept :xxxx, where the x's are hex digits, for a floating point
+     with the exact digits specified.  */
+  if (input_line_pointer[0] == ':')
+    {
+      ++input_line_pointer;
+      length = hex_float (float_type, temp);
+      if (length < 0)
+	{
+	  ignore_rest_of_line ();
+	  return length;
+	}
+    }
+  else
+    {
+      const char *err;
+
+      err = md_atof (float_type, temp, &length);
+      know (length <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
+      know (err != NULL || length > 0);
+      if (err)
+	{
+	  as_bad (_("bad floating literal: %s"), err);
+	  ignore_rest_of_line ();
+	  return -1;
+	}
+    }
+
+  return length;
+}
+
 /* This is like s_space, but the value is a floating point number with
    the given precision.  This is for the MRI dcb.s pseudo-op and
    friends.  */
@@ -3650,42 +3695,12 @@ s_float_space (int float_type)
 
   ++input_line_pointer;
 
-  SKIP_WHITESPACE ();
-
-  /* Skip any 0{letter} that may be present.  Don't even check if the
-   * letter is legal.  */
-  if (input_line_pointer[0] == '0'
-      && ISALPHA (input_line_pointer[1]))
-    input_line_pointer += 2;
-
-  /* Accept :xxxx, where the x's are hex digits, for a floating point
-     with the exact digits specified.  */
-  if (input_line_pointer[0] == ':')
+  flen = parse_one_float (float_type, temp);
+  if (flen < 0)
     {
-      flen = hex_float (float_type, temp);
-      if (flen < 0)
-	{
-	  ignore_rest_of_line ();
-	  if (flag_mri)
-	    mri_comment_end (stop, stopc);
-	  return;
-	}
-    }
-  else
-    {
-      const char *err;
-
-      err = md_atof (float_type, temp, &flen);
-      know (flen <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
-      know (err != NULL || flen > 0);
-      if (err)
-	{
-	  as_bad (_("bad floating literal: %s"), err);
-	  ignore_rest_of_line ();
-	  if (flag_mri)
-	    mri_comment_end (stop, stopc);
-	  return;
-	}
+      if (flag_mri)
+	mri_comment_end (stop, stopc);
+      return;
     }
 
   while (--count >= 0)
@@ -4909,7 +4924,6 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
 {
   char *p;
   int length;			/* Number of chars in an object.  */
-  const char *err;		/* Error from scanning floating literal.  */
   char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT];
 
   if (is_it_end_of_statement ())
@@ -4943,41 +4957,9 @@ float_cons (/* Clobbers input_line-pointer, checks end-of-line.  */
 
   do
     {
-      /* input_line_pointer->1st char of a flonum (we hope!).  */
-      SKIP_WHITESPACE ();
-
-      /* Skip any 0{letter} that may be present. Don't even check if the
-	 letter is legal. Someone may invent a "z" format and this routine
-	 has no use for such information. Lusers beware: you get
-	 diagnostics if your input is ill-conditioned.  */
-      if (input_line_pointer[0] == '0'
-	  && ISALPHA (input_line_pointer[1]))
-	input_line_pointer += 2;
-
-      /* Accept :xxxx, where the x's are hex digits, for a floating
-	 point with the exact digits specified.  */
-      if (input_line_pointer[0] == ':')
-	{
-	  ++input_line_pointer;
-	  length = hex_float (float_type, temp);
-	  if (length < 0)
-	    {
-	      ignore_rest_of_line ();
-	      return;
-	    }
-	}
-      else
-	{
-	  err = md_atof (float_type, temp, &length);
-	  know (length <= MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT);
-	  know (err != NULL || length > 0);
-	  if (err)
-	    {
-	      as_bad (_("bad floating literal: %s"), err);
-	      ignore_rest_of_line ();
-	      return;
-	    }
-	}
+      length = parse_one_float (float_type, temp);
+      if (length < 0)
+	return;
 
       if (!need_pass_2)
 	{
