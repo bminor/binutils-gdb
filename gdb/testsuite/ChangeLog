@@ -1,3 +1,10 @@
+2021-06-17  Carl Love  <cel@us.ibm.com>
+
+	* gdb.arch/powerpc-power8.exp(bctar, bctarl): Update mnemonics
+	to bgetar and bgetarl.
+	* gdb.arch/powerpc-power8.s((bctar, bctarl): Update comments
+	for mnemonics to bgetar and bnstarl.
+
 2021-06-17  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.base/args.exp: Check target, KFAIL if remote.
