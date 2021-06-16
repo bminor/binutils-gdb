@@ -34,6 +34,7 @@
 #include "os_emul.h"
 #include "mon.h"
 #include "model.h"
+#include "ansidecl.h"
 #include "libiberty.h"
 
 #ifndef CONST_ATTRIBUTE
@@ -113,7 +114,7 @@ EXTERN_CPU\
 (cpu *processor,
  unsigned_word cia,
  const char *fmt,
- ...) __attribute__ ((format (printf, 3, 4)));
+ ...) ATTRIBUTE_PRINTF_3;
 
 
 /* The processors local concept of time */

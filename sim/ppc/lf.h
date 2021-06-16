@@ -20,6 +20,8 @@
 
 /* LF: Line Numbered Output Stream */
 
+#include "ansidecl.h"
+
 typedef struct _lf lf;
 
 typedef enum {
@@ -72,7 +74,7 @@ extern int lf_putbin
 extern int lf_printf
 (lf *file,
  const char *fmt,
- ...) __attribute__((format(printf, 2, 3)));
+ ...) ATTRIBUTE_PRINTF_2;
 
 
 /* Indentation control.

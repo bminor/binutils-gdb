@@ -1,5 +1,20 @@
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* cpu.h: Include ansidecl.h.
+	(cpu_error): Change __attribute__ ((format (printf... to
+	ATTRIBUTE_PRINTF_3.
+	* device.h (device_error): Change __attribute__ ((format (printf...
+	to ATTRIBUTE_PRINTF_2.
+	* lf.h: Include ansidecl.h.
+	(lf_printf): Change __attribute__ ((format (printf... to
+	ATTRIBUTE_PRINTF_2.
+	* sim_callbacks.h (sim_io_printf_filtered): Change __attribute__
+	((format (printf... to ATTRIBUTE_PRINTF_1.
+	* tree.h (tree_parse): Change __attribute__ ((format (printf... to
+	ATTRIBUTE_PRINTF_2.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* double.c: Include ansidecls.h.
 	* dp-bit.c: Change __attribute__ ((packed)) to ATTRIBUTE_PACKED.
 
