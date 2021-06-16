@@ -4505,24 +4505,19 @@ emit_expr_with_reloc (expressionS *exp,
       valueT get;
       valueT use;
       valueT mask;
-      valueT hibit;
       valueT unmask;
 
       /* JF << of >= number of bits in the object is undefined.  In
 	 particular SPARC (Sun 4) has problems.  */
       if (nbytes >= sizeof (valueT))
 	{
+	  know (nbytes == sizeof (valueT));
 	  mask = 0;
-	  if (nbytes > sizeof (valueT))
-	    hibit = 0;
-	  else
-	    hibit = (valueT) 1 << (nbytes * BITS_PER_CHAR - 1);
 	}
       else
 	{
 	  /* Don't store these bits.  */
 	  mask = ~(valueT) 0 << (BITS_PER_CHAR * nbytes);
-	  hibit = (valueT) 1 << (nbytes * BITS_PER_CHAR - 1);
 	}
 
       unmask = ~mask;		/* Do store these bits.  */
@@ -4534,9 +4529,7 @@ emit_expr_with_reloc (expressionS *exp,
 
       get = exp->X_add_number;
       use = get & unmask;
-      if ((get & mask) != 0
-	  && ((get & mask) != mask
-	      || (get & hibit) == 0))
+      if ((get & mask) != 0 && (-get & mask) != 0)
 	{
 	  /* Leading bits contain both 0s & 1s.  */
 	  as_warn (_("value 0x%" BFD_VMA_FMT "x truncated to 0x%" BFD_VMA_FMT "x"),

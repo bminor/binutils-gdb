@@ -1,3 +1,13 @@
+2021-06-16  Jan Beulich  <jbeulich@suse.com>
+
+	* read.c (emit_expr_with_reloc): Adjust overflow check. Drop
+	hibit local variable.
+	* write.c (fixup_segment): Differentiate signed and non-signed
+	relocs in overflow check.
+	* testsuite/gas/all/overflow.s,
+	testsuite/gas/all/overflow.l: New.
+	* testsuite/gas/all/gas.exp: Run new test.
+
 2021-06-15  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (md_show_usage): Split ELF and PE/COFF parts

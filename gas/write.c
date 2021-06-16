@@ -1107,7 +1107,10 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      mask = 0;
 	      mask--;		/* Set all bits to one.  */
 	      mask <<= fixP->fx_size * 8 - (fixP->fx_signed ? 1 : 0);
-	      if ((add_number & mask) != 0 && (add_number & mask) != mask)
+	      if ((add_number & mask) != 0
+		  && (fixP->fx_signed
+		      ? (add_number & mask) != mask
+		      : (-add_number & mask) != 0))
 		{
 		  char buf[50], buf2[50];
 		  bfd_sprintf_vma (stdoutput, buf, fragP->fr_address + fixP->fx_where);

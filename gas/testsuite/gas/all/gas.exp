@@ -372,6 +372,27 @@ switch -glob $target_triplet {
     }
 }
 
+# Various targets use too custom handling to be able to sensibly create
+# common expecations for this test.  Also .equ works differently on some
+# targets.
+if {    ![istarget avr-*-*]
+     && ![istarget bfin-*-*]
+     && ![istarget cris*-*-*]
+     && ![istarget dlx-*-*]
+     && ![istarget hppa*-*-*]
+     && ![istarget m68k-*-*]
+     && ![istarget nios2-*-*]
+     && ![istarget pj-*-*]
+     && ![istarget sh*-*-*]
+     && ![istarget *c4x-*-*]
+     && ![istarget *c54x-*-*]
+     && ![istarget *c6x-*-*]
+     && ![istarget z80-*-*] } then {
+    # Some further targets' custom handling fails to recognize the overflows.
+    setup_xfail "crx-*-*" "h8300-*-*" "mcore-*-*" "mn10200-*-*" "mn10300-*-*" "msp430-*-*" "ns32k-*-*"
+    run_list_test "overflow"
+}
+
 if {  ([istarget "i*86-*-*pe*"] && ![istarget "i*86-*-openbsd*"]) \
     || [istarget "i*86-*-cygwin*"] \
     || [istarget "i*86-*-mingw32*"] } {
