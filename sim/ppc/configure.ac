@@ -19,19 +19,6 @@ ALL_LINGUAS=
 ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
 
 
-AC_MSG_CHECKING([whether to enable sim asserts])
-sim_assert="1"
-AC_ARG_ENABLE(sim-assert,
-[  --enable-sim-assert			Specify whether to perform random assertions.],
-[case "${enableval}" in
-  yes)	sim_assert="1";;
-  no)	sim_assert="0";;
-  *)	AC_MSG_ERROR([--enable-sim-assert does not take a value]);;
-esac])dnl
-AC_DEFINE_UNQUOTED([WITH_ASSERT], [$sim_assert], [Sim assert settings])
-AC_MSG_RESULT($sim_assert)
-
-
 AC_ARG_ENABLE(sim-bitsize,
 [  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).],
 [case "${enableval}" in

@@ -740,7 +740,6 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_sim_assert
 enable_sim_bitsize
 enable_sim_config
 enable_sim_decode_mechanism
@@ -1396,7 +1395,6 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-sim-assert			Specify whether to perform random assertions.
   --enable-sim-bitsize=n		Specify target bitsize (32 or 64).
   --enable-sim-config=file		Override default config file
   --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.
@@ -3112,26 +3110,6 @@ $as_echo "$LINGUAS" >&6; }
   CATOBJEXT=.gmo
 
 fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable sim asserts" >&5
-$as_echo_n "checking whether to enable sim asserts... " >&6; }
-sim_assert="1"
-# Check whether --enable-sim-assert was given.
-if test "${enable_sim_assert+set}" = set; then :
-  enableval=$enable_sim_assert; case "${enableval}" in
-  yes)	sim_assert="1";;
-  no)	sim_assert="0";;
-  *)	as_fn_error $? "--enable-sim-assert does not take a value" "$LINENO" 5;;
-esac
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define WITH_ASSERT $sim_assert
-_ACEOF
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_assert" >&5
-$as_echo "$sim_assert" >&6; }
 
 
 # Check whether --enable-sim-bitsize was given.

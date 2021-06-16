@@ -71,6 +71,3 @@
    Windows, we use the Windows API when building for MinGW, but the POSIX API
    when building for Cygwin. */
 #undef USE_WIN32API
-
-/* Sim assert settings */
-#undef WITH_ASSERT
