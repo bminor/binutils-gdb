@@ -638,6 +638,7 @@ enable_option_checking=no
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+SIM_INLINE
 SIM_ENABLE_IGEN_FALSE
 SIM_ENABLE_IGEN_TRUE
 subdirs
@@ -812,6 +813,7 @@ enable_sim_assert
 enable_sim_debug
 enable_sim_endian
 enable_sim_environment
+enable_sim_inline
 enable_sim_profile
 enable_sim_stdio
 enable_sim_trace
@@ -1507,6 +1509,8 @@ Optional Features:
   --enable-sim-environment=environment
                           Specify mixed, user, virtual or operating
                           environment
+  --enable-sim-inline=inlines
+                          Specify which functions should be inlined
   --enable-sim-profile=opts
                           Enable profiling flags
   --enable-sim-stdio      Specify whether to use stdio for console
@@ -12032,7 +12036,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12035 "configure"
+#line 12039 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12138,7 +12142,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12141 "configure"
+#line 12145 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13844,6 +13848,39 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_environment" >&5
 $as_echo "$sim_environment" >&6; }
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking sim inline settings" >&5
+$as_echo_n "checking sim inline settings... " >&6; }
+sim_inline="-DDEFAULT_INLINE=0"
+# Check whether --enable-sim-inline was given.
+if test "${enable_sim_inline+set}" = set; then :
+  enableval=$enable_sim_inline; sim_inline=""
+case "$enableval" in
+  no)		sim_inline="-DDEFAULT_INLINE=0";;
+  0)		sim_inline="-DDEFAULT_INLINE=0";;
+  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_C_INLINE";;
+  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
+  *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
+       new_flag=""
+       case "$x" in
+	 *_INLINE=*)	new_flag="-D$x";;
+	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
+	 *_INLINE)	new_flag="-D$x=ALL_C_INLINE";;
+	 *)		new_flag="-D$x""_INLINE=ALL_C_INLINE";;
+       esac
+       if test x"$sim_inline" = x""; then
+	 sim_inline="$new_flag"
+       else
+	 sim_inline="$sim_inline $new_flag"
+       fi
+     done;;
+esac
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_inline" >&5
+$as_echo "$sim_inline" >&6; }
+SIM_INLINE=$sim_inline
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim profile settings" >&5
 $as_echo_n "checking for sim profile settings... " >&6; }

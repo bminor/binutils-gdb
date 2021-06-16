@@ -75,7 +75,6 @@ SIM_FLOAT = @sim_float@
 SIM_HW_CFLAGS = @sim_hw_cflags@
 SIM_HW_OBJS = @sim_hw_objs@
 SIM_HW = @sim_hw@
-SIM_INLINE = @sim_inline@
 SIM_RESERVED_BITS = @sim_reserved_bits@
 SIM_SCACHE = @sim_scache@
 SIM_WARN_CFLAGS = $(WARN_CFLAGS)

@@ -58,7 +58,7 @@ SHELL = /bin/sh
 BISON = bison
 MAKEINFO = makeinfo
 
-INLINE_CFLAGS = @sim_inline@
+INLINE_CFLAGS = $(SIM_INLINE)
 SMP_CFLAGS = @sim_smp@
 XOR_ENDIAN_CFLAGS = @sim_xor_endian@
 BITSIZE_CFLAGS = @sim_bitsize@

@@ -1,3 +1,7 @@
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_INLINE): Delete.
+
 2021-06-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* sim-inline.h: Move UNUSED before TYPE.

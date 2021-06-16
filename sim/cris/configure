@@ -633,7 +633,6 @@ PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
 sim_scache
-sim_inline
 sim_hw
 sim_hw_objs
 sim_hw_cflags
@@ -642,7 +641,6 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
-enable_sim_inline
 enable_sim_scache
 enable_sim_hardware
 enable_sim_default_model
@@ -1261,8 +1259,6 @@ Optional Features:
   --enable-maintainer-mode
                           enable make rules and dependencies not useful (and
                           sometimes confusing) to the casual installer
-  --enable-sim-inline=inlines
-                          Specify which functions should be inlined
   --enable-sim-scache=size
                           Specify simulator execution cache size
   --enable-sim-hardware=LIST
@@ -1726,37 +1722,6 @@ fi
 
   MAINT=$MAINTAINER_MODE_TRUE
 
-
-
-
-sim_inline="-DDEFAULT_INLINE=0"
-# Check whether --enable-sim-inline was given.
-if test "${enable_sim_inline+set}" = set; then :
-  enableval=$enable_sim_inline; sim_inline=""
-case "$enableval" in
-  no)		sim_inline="-DDEFAULT_INLINE=0";;
-  0)		sim_inline="-DDEFAULT_INLINE=0";;
-  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_C_INLINE";;
-  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
-  *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
-       new_flag=""
-       case "$x" in
-	 *_INLINE=*)	new_flag="-D$x";;
-	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
-	 *_INLINE)	new_flag="-D$x=ALL_C_INLINE";;
-	 *)		new_flag="-D$x""_INLINE=ALL_C_INLINE";;
-       esac
-       if test x"$sim_inline" = x""; then
-	 sim_inline="$new_flag"
-       else
-	 sim_inline="$sim_inline $new_flag"
-       fi
-     done;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
-  echo "Setting inline flags = $sim_inline" 6>&1
-fi
-fi
 
 
 

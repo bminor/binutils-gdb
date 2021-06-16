@@ -24,6 +24,4 @@ AC_DEFUN([SIM_AC_COMMON],
 dnl We don't use automake, but we still want to support
 dnl --enable-maintainer-mode.
 AM_MAINTAINER_MODE
-
-SIM_AC_OPTION_INLINE
 ]) dnl End of SIM_AC_COMMON

@@ -269,41 +269,6 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 
 
-AC_ARG_ENABLE(sim-inline,
-[  --enable-sim-inline=inlines		Specify which functions should be inlined.],
-[sim_inline=""
-case "$enableval" in
-  no)		sim_inline="-DDEFAULT_INLINE=0";;
-  0)		sim_inline="-DDEFAULT_INLINE=0";;
-  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_C_INLINE";;
-  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
-  *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
-       new_flag=""
-       case "$x" in
-	 *_INLINE=*)	new_flag="-D$x";;
-	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
-	 *_INLINE)	new_flag="-D$x=ALL_C_INLINE";;
-	 *)		new_flag="-D$x""_INLINE=ALL_C_INLINE";;
-       esac
-       if test x"$sim_inline" = x""; then
-	 sim_inline="$new_flag"
-       else
-	 sim_inline="$sim_inline $new_flag"
-       fi
-     done;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
-  echo "Setting inline flags = $sim_inline" 6>&1
-fi],[if test x"$GCC" != ""; then
-  sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS"
-  if test x"$silent" != x"yes"; then
-    echo "Setting inline flags = $sim_inline" 6>&1
-  fi
-else
-  sim_inline=""
-fi])dnl
-
-
 AC_ARG_ENABLE(sim-jump,
 [  --enable-sim-jump		Jump between semantic code (instead of call/return).],
 [case "${enableval}" in
@@ -693,7 +658,6 @@ AC_SUBST(sim_hw_src)
 AC_SUBST(sim_hw_obj)
 AC_SUBST(sim_pk_src)
 AC_SUBST(sim_pk_obj)
-AC_SUBST(sim_inline)
 AC_SUBST(sim_xor_endian)
 AC_SUBST(sim_smp)
 AC_SUBST(sim_igen_smp)

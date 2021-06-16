@@ -208,6 +208,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_option_debug.m4 \
 	$(top_srcdir)/m4/sim_ac_option_endian.m4 \
 	$(top_srcdir)/m4/sim_ac_option_environment.m4 \
+	$(top_srcdir)/m4/sim_ac_option_inline.m4 \
 	$(top_srcdir)/m4/sim_ac_option_profile.m4 \
 	$(top_srcdir)/m4/sim_ac_option_stdio.m4 \
 	$(top_srcdir)/m4/sim_ac_option_trace.m4 \
@@ -700,6 +701,7 @@ REPORT_BUGS_TO = @REPORT_BUGS_TO@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SIM_INLINE = @SIM_INLINE@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 STRIP = @STRIP@
 USE_NLS = @USE_NLS@
@@ -783,7 +785,7 @@ DISTCLEANFILES =
 MOSTLYCLEANFILES = core $(am__append_4) site-srcdir.exp testrun.log \
 	testrun.sum
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
-AM_CPPFLAGS = -I$(srcroot)/include -I$(srcdir)/common
+AM_CPPFLAGS = -I$(srcroot)/include $(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 

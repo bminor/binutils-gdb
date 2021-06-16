@@ -639,7 +639,6 @@ sim_bitsize
 sim_igen_smp
 sim_smp
 sim_xor_endian
-sim_inline
 sim_pk_obj
 sim_pk_src
 sim_hw_obj
@@ -718,7 +717,6 @@ enable_sim_float
 enable_sim_hardware
 enable_sim_hostbitsize
 enable_sim_icache
-enable_sim_inline
 enable_sim_jump
 enable_sim_line_nr
 enable_sim_model
@@ -1359,7 +1357,6 @@ Optional Features:
   --enable-sim-hardware=list		Specify the hardware to be included in the build.
   --enable-sim-hostbitsize=32|64	Specify host bitsize (32 or 64).
   --enable-sim-icache=size		Specify instruction-decode cache size and type.
-  --enable-sim-inline=inlines		Specify which functions should be inlined.
   --enable-sim-jump		Jump between semantic code (instead of call/return).
   --enable-sim-line-nr=opts		Generate extra CPP code that references source rather than generated code
   --enable-sim-model=which		Specify PowerPC to model.
@@ -3305,44 +3302,6 @@ fi
 fi
 
 
-# Check whether --enable-sim-inline was given.
-if test "${enable_sim_inline+set}" = set; then :
-  enableval=$enable_sim_inline; sim_inline=""
-case "$enableval" in
-  no)		sim_inline="-DDEFAULT_INLINE=0";;
-  0)		sim_inline="-DDEFAULT_INLINE=0";;
-  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_C_INLINE";;
-  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
-  *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
-       new_flag=""
-       case "$x" in
-	 *_INLINE=*)	new_flag="-D$x";;
-	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
-	 *_INLINE)	new_flag="-D$x=ALL_C_INLINE";;
-	 *)		new_flag="-D$x""_INLINE=ALL_C_INLINE";;
-       esac
-       if test x"$sim_inline" = x""; then
-	 sim_inline="$new_flag"
-       else
-	 sim_inline="$sim_inline $new_flag"
-       fi
-     done;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
-  echo "Setting inline flags = $sim_inline" 6>&1
-fi
-else
-  if test x"$GCC" != ""; then
-  sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS"
-  if test x"$silent" != x"yes"; then
-    echo "Setting inline flags = $sim_inline" 6>&1
-  fi
-else
-  sim_inline=""
-fi
-fi
-
-
 # Check whether --enable-sim-jump was given.
 if test "${enable_sim_jump+set}" = set; then :
   enableval=$enable_sim_jump; case "${enableval}" in
@@ -4286,7 +4245,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
 
 
 
