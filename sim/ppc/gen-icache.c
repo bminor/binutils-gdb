@@ -112,7 +112,7 @@ print_icache_extraction(lf *file,
   else {
     if (file_name != NULL)
       lf_print__external_reference(file, line_nr, file_name);
-    lf_printf(file, "%s const %s UNUSED = ",
+    lf_printf(file, "%s const %s ATTRIBUTE_UNUSED = ",
 	      entry_type == NULL ? "unsigned" : entry_type,
 	      entry_name);
   }

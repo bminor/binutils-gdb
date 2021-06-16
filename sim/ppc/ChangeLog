@@ -1,5 +1,13 @@
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* basics.h (UNUSED): Delete.
+	* gen-icache.c (print_icache_extraction): Change UNUSED to
+	ATTRIBUTE_UNUSED.
+	* idecode_expression.h: Likewise.  Include ansidecl.h.
+	* inline.h: Likewise.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* basics.h: Delete CONCAT* and XCONCAT* macros.
 	* corefile.c: Include symcat.h.
 	* idecode_fields.h: Likewise.
