@@ -7926,15 +7926,14 @@ instruction-history} command.
 @kindex record function-call-history
 @kindex rec function-call-history
 @item record function-call-history
-Prints the execution history at function granularity. It prints one
-line for each sequence of instructions that belong to the same
-function giving the name of that function, the source lines
-for this instruction sequence (if the @code{/l} modifier is
-specified), and the instructions numbers that form the sequence (if
-the @code{/i} modifier is specified).  The function names are indented
-to reflect the call stack depth if the @code{/c} modifier is
-specified.  The @code{/l}, @code{/i}, and @code{/c} modifiers can be
-given together.
+Prints the execution history at function granularity.  For each sequence
+of instructions that belong to the same function, it prints the name of
+that function, the source lines for this instruction sequence (if the
+@code{/l} modifier is specified), and the instructions numbers that form
+the sequence (if the @code{/i} modifier is specified).  The function names
+are indented to reflect the call stack depth if the @code{/c} modifier is
+specified.  The @code{/l}, @code{/i}, and @code{/c} modifiers can be given
+together.
 
 @smallexample
 (@value{GDBP}) @b{list 1, 10}
@@ -7954,7 +7953,7 @@ given together.
 3  bar     inst 11,13   at foo.c:9,10
 @end smallexample
 
-By default, ten lines are printed.  This can be changed using the
+By default, ten functions are printed.  This can be changed using the
 @code{set record function-call-history-size} command.  Functions are
 printed in execution order.  There are several ways to specify what
 to print:
@@ -7970,10 +7969,10 @@ function number @var{func}.  If @var{n} is preceded with @code{-},
 prints @var{n} functions before function number @var{func}.
 
 @item record function-call-history
-Prints ten more functions after the last ten-line print.
+Prints ten more functions after the last ten-function print.
 
 @item record function-call-history -
-Prints ten more functions before the last ten-line print.
+Prints ten more functions before the last ten-function print.
 
 @item record function-call-history @var{begin}, @var{end}
 Prints functions beginning with function number @var{begin} until
@@ -7984,12 +7983,12 @@ This command may not be available for all recording methods.
 
 @item set record function-call-history-size @var{size}
 @itemx set record function-call-history-size unlimited
-Define how many lines to print in the
+Define how many functions to print in the
 @code{record function-call-history} command.  The default value is 10.
-A size of @code{unlimited} means unlimited lines.
+A size of @code{unlimited} means unlimited functions.
 
 @item show record function-call-history-size
-Show how many lines to print in the
+Show how many functions to print in the
 @code{record function-call-history} command.
 @end table
 
