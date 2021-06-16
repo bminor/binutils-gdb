@@ -3129,6 +3129,53 @@ gdb_caching_proc skip_altivec_tests {
     return $skip_vmx_tests
 }
 
+# Run a test on the power target to see if it supports ISA 3.1 instructions
+gdb_caching_proc skip_power_isa_3_1_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_power_isa_3_1_tests"
+
+    # Compile a test program containing ISA 3.1 instructions.
+    set src {
+	int main() {
+	asm volatile ("pnop"); // marker
+		asm volatile ("nop");
+		return 0;
+	    }
+	}
+
+    if {![gdb_simple_compile $me $src executable ]} {
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Illegal instruction.*${gdb_prompt} $" {
+            verbose -log "\n$me Power ISA 3.1 hardware not detected"
+            set skip_power_isa_3_1_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "\n$me: Power ISA 3.1 hardware detected"
+            set skip_power_isa_3_1_tests 0
+        }
+        default {
+          warning "\n$me: default case taken"
+            set skip_power_isa_3_1_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_power_isa_3_1_tests" 2
+    return $skip_power_isa_3_1_tests
+}
+
 # Run a test on the target to see if it supports vmx hardware.  Return 0 if so,
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 

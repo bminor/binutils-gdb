@@ -1,3 +1,9 @@
+gdb/testsuite/ChangeLog
+2021-06-25  Carl Love  <cel@us.ibm.com>
+
+	* gdb.arch/powerpc-plxv-norel.exp: Add call to skip_power_isa_3_1_tests.
+	* lib/gdb.exp(skip_power_isa_3_1_tests): New gdb_caching_proc test.
+
 2021-06-25  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/py_range.exp: Add type name test cases.
