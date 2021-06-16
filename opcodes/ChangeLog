@@ -1,3 +1,8 @@
+2021-06-17  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Move cell db*cyc to proper location
+	in table.
+
 2021-06-03  Alan Modra  <amodra@gmail.com>
 
 	PR 1202

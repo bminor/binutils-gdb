@@ -7254,10 +7254,15 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"yield",	0x7f7bdb78,	0xffffffff,  POWER7,	EXT,		{0}},
 /* or 28,28,28 */
 {"mdors",	0x7f9ce378,	0xffffffff,  E500MC,	EXT,		{0}},
+{"db8cyc",	0x7f9ce378,	0xffffffff,  CELL,	EXT,		{0}},
 /* or 29,29,29 */
 {"mdoio",	0x7fbdeb78,	0xffffffff,  POWER7,	EXT,		{0}},
+{"db10cyc",	0x7fbdeb78,	0xffffffff,  CELL,	EXT,		{0}},
 /* or 30,30,30 */
 {"mdoom",	0x7fdef378,	0xffffffff,  POWER7,	EXT,		{0}},
+{"db12cyc",	0x7fdef378,	0xffffffff,  CELL,	EXT,		{0}},
+/* or 31,31,31 */
+{"db16cyc",	0x7ffffb78,	0xffffffff,  CELL,	EXT,		{0}},
 
 {"mr",		XRC(31,444,0),	X_MASK,	     COM,	EXT,		{RA, RSB}},
 {"or",		XRC(31,444,0),	X_MASK,	     COM,	0,		{RA, RS, RB}},
@@ -8154,11 +8159,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"dcbzl",	XOPL(31,1014,1), XRT_MASK,   POWER4|E500MC, PPC476,	{RA0, RB}},
 
 {"dcbzep",	XRT(31,1023,0),	XRT_MASK,    E500MC|PPCA2, 0,		{RA0, RB}},
-
-{"db8cyc",	0x7f9ce378,	0xffffffff,  CELL,	0,		{0}},
-{"db10cyc",	0x7fbdeb78,	0xffffffff,  CELL,	0,		{0}},
-{"db12cyc",	0x7fdef378,	0xffffffff,  CELL,	0,		{0}},
-{"db16cyc",	0x7ffffb78,	0xffffffff,  CELL,	0,		{0}},
 
 {"lwz",		OP(32),		OP_MASK,     PPCCOM,	PPCVLE,		{RT, D, RA0}},
 {"l",		OP(32),		OP_MASK,     PWRCOM,	PPCVLE,		{RT, D, RA0}},
