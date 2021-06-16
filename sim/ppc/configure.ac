@@ -275,15 +275,15 @@ AC_ARG_ENABLE(sim-inline,
 case "$enableval" in
   no)		sim_inline="-DDEFAULT_INLINE=0";;
   0)		sim_inline="-DDEFAULT_INLINE=0";;
-  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_INLINE";;
-  1)		sim_inline="-DDEFAULT_INLINE=PSIM_INLINE_LOCALS";;
+  yes | 2)	sim_inline="-DDEFAULT_INLINE=ALL_C_INLINE";;
+  1)		sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS";;
   *) for x in `echo "$enableval" | sed -e "s/,/ /g"`; do
        new_flag=""
        case "$x" in
 	 *_INLINE=*)	new_flag="-D$x";;
 	 *=*)		new_flag=`echo "$x" | sed -e "s/=/_INLINE=/" -e "s/^/-D/"`;;
-	 *_INLINE)	new_flag="-D$x=ALL_INLINE";;
-	 *)		new_flag="-D$x""_INLINE=ALL_INLINE";;
+	 *_INLINE)	new_flag="-D$x=ALL_C_INLINE";;
+	 *)		new_flag="-D$x""_INLINE=ALL_C_INLINE";;
        esac
        if test x"$sim_inline" = x""; then
 	 sim_inline="$new_flag"
@@ -295,7 +295,7 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_inline" != x""; then
   echo "Setting inline flags = $sim_inline" 6>&1
 fi],[if test x"$GCC" != ""; then
-  sim_inline="-DDEFAULT_INLINE=PSIM_INLINE_LOCALS"
+  sim_inline="-DDEFAULT_INLINE=INLINE_LOCALS"
   if test x"$silent" != x"yes"; then
     echo "Setting inline flags = $sim_inline" 6>&1
   fi

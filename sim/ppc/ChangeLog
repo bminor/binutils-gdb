@@ -1,5 +1,18 @@
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Replace ALL_INLINE with ALL_C_INLINE and
+	PSIM_INLINE_LOCALS with INLINE_LOCALS.
+	* inline.h: Likewise.
+	* options.c: Likewise.
+	* std-config.h: Likewise.  Include sim-inline.h explicitly.
+	(REVEAL_MODULE): Define to H_REVEALS_MODULE.
+	(INLINE_MODULE): Define to C_REVEALS_MODULE.
+	(PSIM_INLINE_LOCALS): Delete.
+	(ALL_INLINE): Delete.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in: Move intl vars to ../arch-subdir.mk.in.
 	* configure.ac: Delete ZW_GNU_GETTEXT_SISTER_DIR call.
 	* config.in, configure: Regenerate.
