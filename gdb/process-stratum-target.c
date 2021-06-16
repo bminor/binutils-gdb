@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "process-stratum-target.h"
 #include "inferior.h"
+#include <algorithm>
 
 process_stratum_target::~process_stratum_target ()
 {
@@ -136,6 +137,48 @@ process_stratum_target::maybe_remove_resumed_with_pending_wait_status
     }
   else
     gdb_assert (!thread->resumed_with_pending_wait_status_node.is_linked ());
+}
+
+/* See process-stratum-target.h.  */
+
+thread_info *
+process_stratum_target::random_resumed_with_pending_wait_status
+  (inferior *inf, ptid_t filter_ptid)
+{
+  auto matches = [inf, filter_ptid] (const thread_info &thread)
+    {
+      return thread.inf == inf && thread.ptid.matches (filter_ptid);
+    };
+
+  /* First see how many matching events we have.  */
+  const auto &l = m_resumed_with_pending_wait_status;
+  unsigned int count = std::count_if (l.begin (), l.end (), matches);
+
+  if (count == 0)
+    return nullptr;
+
+  /* Now randomly pick a thread out of those that match the criteria.  */
+  int random_selector
+    = (int) ((count * (double) rand ()) / (RAND_MAX + 1.0));
+
+  if (count > 1)
+    infrun_debug_printf ("Found %u events, selecting #%d",
+			 count, random_selector);
+
+  /* Select the Nth thread that matches.  */
+  auto it = std::find_if (l.begin (), l.end (),
+			  [&random_selector, &matches]
+			  (const thread_info &thread)
+    {
+      if (!matches (thread))
+	return false;
+
+      return random_selector-- == 0;
+    });
+
+  gdb_assert (it != l.end ());
+
+  return &*it;
 }
 
 /* See process-stratum-target.h.  */

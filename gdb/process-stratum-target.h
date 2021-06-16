@@ -93,6 +93,11 @@ public:
   bool has_resumed_with_pending_wait_status () const
   { return !m_resumed_with_pending_wait_status.empty (); }
 
+  /* Return a random resumed thread with pending wait status belonging to INF
+     and matching FILTER_PTID.  */
+  thread_info *random_resumed_with_pending_wait_status
+    (inferior *inf, ptid_t filter_ptid);
+
   /* The connection number.  Visible in "info connections".  */
   int connection_number = 0;
 

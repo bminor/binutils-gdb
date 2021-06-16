@@ -3492,39 +3492,21 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 static struct thread_info *
 random_pending_event_thread (inferior *inf, ptid_t waiton_ptid)
 {
-  int num_events = 0;
+  process_stratum_target *proc_target = inf->process_target ();
+  thread_info *thread
+    = proc_target->random_resumed_with_pending_wait_status (inf, waiton_ptid);
 
-  auto has_event = [&] (thread_info *tp)
+  if (thread == nullptr)
     {
-      return (tp->ptid.matches (waiton_ptid)
-	      && tp->resumed ()
-	      && tp->has_pending_waitstatus ());
-    };
+      infrun_debug_printf ("None found.");
+      return nullptr;
+    }
 
-  /* First see how many events we have.  Count only resumed threads
-     that have an event pending.  */
-  for (thread_info *tp : inf->non_exited_threads ())
-    if (has_event (tp))
-      num_events++;
+  infrun_debug_printf ("Found %s.", target_pid_to_str (thread->ptid).c_str ());
+  gdb_assert (thread->resumed ());
+  gdb_assert (thread->has_pending_waitstatus ());
 
-  if (num_events == 0)
-    return NULL;
-
-  /* Now randomly pick a thread out of those that have had events.  */
-  int random_selector = (int) ((num_events * (double) rand ())
-			       / (RAND_MAX + 1.0));
-
-  if (num_events > 1)
-    infrun_debug_printf ("Found %d events, selecting #%d",
-			 num_events, random_selector);
-
-  /* Select the Nth thread that has had an event.  */
-  for (thread_info *tp : inf->non_exited_threads ())
-    if (has_event (tp))
-      if (random_selector-- == 0)
-	return tp;
-
-  gdb_assert_not_reached ("event thread not found");
+  return thread;
 }
 
 /* Wrapper for target_wait that first checks whether threads have
