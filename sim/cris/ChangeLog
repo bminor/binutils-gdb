@@ -1,5 +1,9 @@
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (rvdummy.o): Delete config.h.
 	* configure: Regenerate.
 	* config.in: Removed.

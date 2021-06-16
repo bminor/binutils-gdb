@@ -51,7 +51,4 @@ dnl --enable-maintainer-mode.
 AM_MAINTAINER_MODE
 
 SIM_AC_OPTION_INLINE
-
-dnl Detect exe extension
-AC_EXEEXT
 ]) dnl End of SIM_AC_COMMON

@@ -737,9 +737,6 @@ else
   rm -rf $tempdir
 fi
 
-dnl Check for exe extension
-AC_EXEEXT
-
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
 AC_SUBST(CFLAGS)

@@ -11144,8 +11144,6 @@ fi
 
 
 
-
-
 wire_endian=""
 default_endian=""
 # Check whether --enable-sim-endian was given.
