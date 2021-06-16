@@ -83,15 +83,6 @@ typedef enum {
 #include <stdlib.h>
 
 
-#if !defined (__attribute__)
-#if (!defined(__GNUC__) \
-     || (__GNUC__ < 2) \
-     || (__GNUC__ == 2 && __GNUC_MINOR__ < 6))
-#define __attribute__(arg)
-#endif
-#endif
-
-
 /* Basic definitions - ordered so that nothing calls what comes after
    it */
 
