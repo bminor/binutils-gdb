@@ -1,5 +1,9 @@
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* device.h (device_add_boolean_property): Rename bool arg to boolean.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (HOSTENDIAN_CFLAGS): Delete.
 	* configure.ac: Delete sim-hostendian logic.
 	* altivec_registers.h (WITH_HOST_BYTE_ORDER): Rename to ...

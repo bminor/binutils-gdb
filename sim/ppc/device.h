@@ -280,7 +280,7 @@ INLINE_DEVICE\
 (void) device_add_boolean_property
 (device *me,
  const char *property,
- int bool);
+ int boolean);
 
 INLINE_DEVICE\
 (int) device_find_boolean_property
