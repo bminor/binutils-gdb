@@ -64,7 +64,6 @@ struct _psim {
 
 
 int current_target_byte_order;
-int current_host_byte_order;
 int current_environment;
 int current_alignment;
 int current_floating_point;
@@ -455,14 +454,6 @@ psim_create(const char *file_name,
        : BIG_ENDIAN);
   if (CURRENT_TARGET_BYTE_ORDER != current_target_byte_order)
     error("target and configured byte order conflict\n");
-
-  /* fill in the missing HOST BYTE ORDER information */
-  current_host_byte_order = (current_host_byte_order = 1,
-			     (*(char*)(&current_host_byte_order)
-			      ? LITTLE_ENDIAN
-			      : BIG_ENDIAN));
-  if (CURRENT_HOST_BYTE_ORDER != current_host_byte_order)
-    error("host and configured byte order conflict\n");
 
   /* fill in the missing OEA/VEA information */
   env = tree_find_string_property(root, "/openprom/options/env");
@@ -917,7 +908,7 @@ psim_read_register(psim *system,
       break;
 #ifdef WITH_ALTIVEC
     case 16:
-      if (CURRENT_HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
+      if (HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
         {
 	  union { vreg v; unsigned_8 d[2]; } h, t;
           memcpy(&h.v/*dest*/, cooked_buf/*src*/, description.size);
@@ -996,7 +987,7 @@ psim_write_register(psim *system,
       break;
 #ifdef WITH_ALTIVEC
     case 16:
-      if (CURRENT_HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
+      if (HOST_BYTE_ORDER != CURRENT_TARGET_BYTE_ORDER)
         {
 	  union { vreg v; unsigned_8 d[2]; } h, t;
           memcpy(&t.v/*dest*/, buf/*src*/, description.size);

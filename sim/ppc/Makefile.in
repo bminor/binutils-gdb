@@ -73,7 +73,6 @@ RANLIB = @RANLIB@
 
 INLINE_CFLAGS = @sim_inline@
 ENDIAN_CFLAGS = @sim_endian@
-HOSTENDIAN_CFLAGS = @sim_hostendian@
 SMP_CFLAGS = @sim_smp@
 XOR_ENDIAN_CFLAGS = @sim_xor_endian@
 BITSIZE_CFLAGS = @sim_bitsize@
@@ -88,7 +87,6 @@ WARNING_CFLAGS = @sim_warnings@
 DEVZERO_CFLAGS = @sim_devzero@
 CONFIG_CFLAGS = \
   $(ENDIAN_CFLAGS) \
-  $(HOSTENDIAN_CFLAGS) \
   $(SMP_CFLAGS) \
   $(XOR_ENDIAN_CFLAGS) \
   $(BITSIZE_CFLAGS) \

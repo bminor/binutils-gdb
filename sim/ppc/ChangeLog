@@ -1,3 +1,23 @@
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (HOSTENDIAN_CFLAGS): Delete.
+	* configure.ac: Delete sim-hostendian logic.
+	* altivec_registers.h (WITH_HOST_BYTE_ORDER): Rename to ...
+	(HOST_BYTE_ORDER): ... this.
+	* options.c: Likewise.
+	* sim-endian.c: Likewise.
+	* psim.c (current_host_byte_order): Delete.
+	(CURRENT_HOST_BYTE_ORDER): Rename to ...
+	(HOST_BYTE_ORDER): ... this.
+	* sim-endian-n.h: Likewise.
+	* sim-endian.h: Delete all custom endian include & define logic.
+	* std-config.h (WITH_HOST_BYTE_ORDER): Delete.
+	(LITTLE_ENDIAN): Define fallback.
+	(BIG_ENDIAN): Likewise.
+	(HOST_BYTE_ORDER): Define based on WORDS_BIGENDIAN.
+	(current_host_byte_order, CURRENT_HOST_BYTE_ORDER): Delete.
+	* config.in, configure: Regenerate.
+
 2021-06-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (COMMON_OBJS_NAMES, +COMMON_OBJS): New variables.

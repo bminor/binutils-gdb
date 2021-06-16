@@ -117,7 +117,7 @@ print_options (void)
   printf_filtered ("Compiled on %s %s\n", __DATE__, __TIME__);
 #endif
 
-  printf_filtered ("WITH_HOST_BYTE_ORDER     = %s\n", options_byte_order (WITH_HOST_BYTE_ORDER));
+  printf_filtered ("HOST_BYTE_ORDER          = %s\n", options_byte_order (HOST_BYTE_ORDER));
   printf_filtered ("WITH_TARGET_BYTE_ORDER   = %s\n", options_byte_order (WITH_TARGET_BYTE_ORDER));
   printf_filtered ("WITH_XOR_ENDIAN          = %d\n", WITH_XOR_ENDIAN);
   printf_filtered ("WITH_SMP                 = %d\n", WITH_SMP);

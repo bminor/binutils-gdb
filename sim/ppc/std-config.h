@@ -30,18 +30,23 @@
 
    Possible values are 0 (unknown), LITTLE_ENDIAN, BIG_ENDIAN */
 
-#ifndef WITH_HOST_BYTE_ORDER
-#define WITH_HOST_BYTE_ORDER		0 /*unknown*/
+#ifndef LITTLE_ENDIAN
+#define LITTLE_ENDIAN 1234
+#endif
+#ifndef BIG_ENDIAN
+#define BIG_ENDIAN 4321
+#endif
+
+#ifdef WORDS_BIGENDIAN
+# define HOST_BYTE_ORDER BIG_ENDIAN
+#else
+# define HOST_BYTE_ORDER LITTLE_ENDIAN
 #endif
 
 #ifndef WITH_TARGET_BYTE_ORDER
 #define WITH_TARGET_BYTE_ORDER		0 /*unknown*/
 #endif
 
-extern int current_host_byte_order;
-#define CURRENT_HOST_BYTE_ORDER (WITH_HOST_BYTE_ORDER \
-				 ? WITH_HOST_BYTE_ORDER \
-				 : current_host_byte_order)
 extern int current_target_byte_order;
 #define CURRENT_TARGET_BYTE_ORDER (WITH_TARGET_BYTE_ORDER \
 				   ? WITH_TARGET_BYTE_ORDER \
