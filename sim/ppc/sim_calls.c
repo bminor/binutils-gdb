@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "ansidecl.h"
 #include "libiberty.h"
 #include "bfd.h"
 #include "sim/callback.h"
@@ -383,7 +384,7 @@ sim_io_error (SIM_DESC sd, const char *fmt, ...)
 
 /****/
 
-void NORETURN
+void ATTRIBUTE_NORETURN
 error (const char *msg, ...)
 {
   va_list ap;

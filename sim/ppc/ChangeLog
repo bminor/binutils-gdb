@@ -1,5 +1,12 @@
 2021-06-16  Mike Frysinger  <vapier@gentoo.org>
 
+	* basics.h (NORETURN): Delete.
+	* sim_callbacks.h: Include ansidecl.h.  Change NORETURN to
+	ATTRIBUTE_NORETURN.
+	* sim_calls.c: Likewise.
+
+2021-06-16  Mike Frysinger  <vapier@gentoo.org>
+
 	* basics.h (UNUSED): Delete.
 	* gen-icache.c (print_icache_extraction): Change UNUSED to
 	ATTRIBUTE_UNUSED.

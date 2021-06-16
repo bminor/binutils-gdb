@@ -21,6 +21,8 @@
 #ifndef _SIM_CALLBACKS_H_
 #define _SIM_CALLBACKS_H_
 
+#include "ansidecl.h"
+
 /* Simulator output:
 
    Functions to report diagnostic information to the user. */
@@ -29,7 +31,7 @@
 void sim_io_printf_filtered
 (const char *msg, ...) __attribute__ ((format (printf, 1, 2)));
 
-void NORETURN error
+void ATTRIBUTE_NORETURN error
 (const char *msg, ...);
 
 

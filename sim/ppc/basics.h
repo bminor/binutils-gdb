@@ -83,10 +83,6 @@ typedef enum {
 #include <stdlib.h>
 
 
-#ifndef NORETURN
-#define NORETURN
-#endif
-
 #if !defined (__attribute__)
 #if (!defined(__GNUC__) \
      || (__GNUC__ < 2) \
