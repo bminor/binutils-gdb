@@ -1,5 +1,17 @@
 2021-06-17  Pedro Alves  <pedro@palves.net>
 
+	* gdbsupport/scoped_ignore_signal.h: New.
+	* compile/compile.c: Include gdbsupport/scoped_ignore_signal.h
+	instead of <signal.h>.  Don't include <unistd.h>.
+	(scoped_ignore_sigpipe): Remove.
+	* gdbsupport/scoped_ignore_sigttou.h: Include gdbsupport/scoped_ignore_signal.h
+	instead of <signal.h>.  Don't include <unistd.h>.
+	(lazy_init): New.
+	(scoped_ignore_sigttou): Reimplement using scoped_ignore_signal
+	and lazy_init.
+
+2021-06-17  Pedro Alves  <pedro@palves.net>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Remove inflow.h.
 	* inf-ptrace.c, inflow.c, procfs.c: Don't include "inflow.h".
 	* inflow.h: Delete, moved to gdbsupport/ under a different name.
