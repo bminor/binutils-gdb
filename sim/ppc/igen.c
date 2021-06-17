@@ -182,7 +182,7 @@ gen_semantics_h(insn_table *table,
   lf_printf(file, "\n");
   if ((code & generate_calls)) {
     lf_printf(file, "extern int option_mpc860c0;\n");
-    lf_printf(file, "#define PAGE_SIZE 0x1000\n");
+    lf_printf(file, "#define MPC860C0_PAGE_SIZE 0x1000\n");
     lf_printf(file, "\n");
     lf_printf(file, "PSIM_EXTERN_SEMANTICS(void)\n");
     lf_printf(file, "semantic_init(device* root);\n");

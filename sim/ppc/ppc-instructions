@@ -1537,7 +1537,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	  If this is a forward branch and it is near the end of a page,
 	  we've detected a problematic branch. */
 	  if (succeed && NIA > CIA) {
-	    if (PAGE_SIZE - (CIA & (PAGE_SIZE-1)) <= option_mpc860c0)
+	    if (MPC860C0_PAGE_SIZE - (CIA & (MPC860C0_PAGE_SIZE-1)) <= option_mpc860c0)
 	      program_interrupt(processor, cia, mpc860c0_instruction_program_interrupt);
 	  }
 	}
@@ -1579,7 +1579,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	  If this is a forward branch and it is near the end of a page,
 	  we've detected a problematic branch. */
 	  if (succeed && NIA > CIA) {
-	    if (PAGE_SIZE - (CIA & (PAGE_SIZE-1)) <= option_mpc860c0)
+	    if (MPC860C0_PAGE_SIZE - (CIA & (MPC860C0_PAGE_SIZE-1)) <= option_mpc860c0)
 	      program_interrupt(processor, cia, mpc860c0_instruction_program_interrupt);
 	  }
 	}
@@ -1610,7 +1610,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	  If this is a forward branch and it is near the end of a page,
 	  we've detected a problematic branch. */
 	  if (succeed && NIA > CIA) {
-	    if (PAGE_SIZE - (CIA & (PAGE_SIZE-1)) <= option_mpc860c0)
+	    if (MPC860C0_PAGE_SIZE - (CIA & (MPC860C0_PAGE_SIZE-1)) <= option_mpc860c0)
 	      program_interrupt(processor, cia, mpc860c0_instruction_program_interrupt);
 	  }
 	}
