@@ -1,3 +1,7 @@
+2021-06-17  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/args.exp: Use save_vars.
+
 2021-06-14  Pedro Alves  <pedro@palves.net>
 
 	* gdb.base/annota1.exp: Build list using [list] instead of {}.
