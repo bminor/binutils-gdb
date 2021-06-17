@@ -1,5 +1,14 @@
 2021-06-17  Pedro Alves  <pedro@palves.net>
 
+	* scoped_ignore_signal.h
+	(scoped_ignore_signal::scoped_ignore_signal)
+	[HAVE_SIGPROCMASK]: Use sigprocmask to block the signal instead of
+	changing the signal disposition for the whole process.
+	(scoped_ignore_signal::~scoped_ignore_signal) [HAVE_SIGPROCMASK]:
+	Use sigtimedwait and sigprocmask to flush and unblock the signal.
+
+2021-06-17  Pedro Alves  <pedro@palves.net>
+
 	* scoped_ignore_sigttou.h: New file, moved from gdb/ and renamed.
 
 2021-05-17  Andrew Burgess  <andrew.burgess@embecosm.com>
