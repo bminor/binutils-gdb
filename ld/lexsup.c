@@ -453,6 +453,8 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Create a position independent executable"), ONE_DASH },
   { {"pic-executable", no_argument, NULL, OPTION_PIE},
     '\0', NULL, NULL, TWO_DASHES },
+  { {"no-pie", no_argument, NULL, OPTION_NO_PIE},
+    '\0', NULL, N_("Create a position dependent executable (default)"), ONE_DASH },
   { {"sort-common", optional_argument, NULL, OPTION_SORT_COMMON},
     '\0', N_("[=ascending|descending]"),
     N_("Sort common symbols by alignment [in specified order]"),
@@ -1261,6 +1263,9 @@ parse_args (unsigned argc, char **argv)
 	    }
 	  else
 	    einfo (_("%F%P: -shared not supported\n"));
+	  break;
+	case OPTION_NO_PIE:
+	  link_info.type = type_pde;
 	  break;
 	case OPTION_PIE:
 	  if (config.has_shared)

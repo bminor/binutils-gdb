@@ -2150,6 +2150,11 @@ address the OS chooses for them (which can vary between invocations).  Like
 normal dynamically linked executables they can be executed and symbols
 defined in the executable cannot be overridden by shared libraries.
 
+@kindex -no-pie
+@item -no-pie
+@cindex position dependent executables
+Create a position dependent executable.  This is the default.
+
 @kindex -qmagic
 @item -qmagic
 This option is ignored for Linux compatibility.
