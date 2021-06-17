@@ -1,3 +1,10 @@
+2021-06-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 27904
+	* config/tc-aarch64.c (ldst_lo12_determine_real_reloc_type):
+	Generate a syntax error message if the reloc qualifier does not
+	match the instruction's size.
+
 2021-06-17  Clément Chigot  <clement.chigot@atos.net>
 
 	* config/tc-ppc.c (md_begin): Create bss section with dummy

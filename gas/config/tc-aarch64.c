@@ -5591,7 +5591,7 @@ get_logsz (unsigned int size)
 static inline bfd_reloc_code_real_type
 ldst_lo12_determine_real_reloc_type (void)
 {
-  unsigned logsz;
+  unsigned logsz, max_logsz;
   enum aarch64_opnd_qualifier opd0_qlf = inst.base.operands[0].qualifier;
   enum aarch64_opnd_qualifier opd1_qlf = inst.base.operands[1].qualifier;
 
@@ -5650,13 +5650,22 @@ ldst_lo12_determine_real_reloc_type (void)
   gas_assert (opd1_qlf != AARCH64_OPND_QLF_NIL);
 
   logsz = get_logsz (aarch64_get_qualifier_esize (opd1_qlf));
+
   if (inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12
       || inst.reloc.type == BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC
       || inst.reloc.type == BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12
       || inst.reloc.type == BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12_NC)
-    gas_assert (logsz <= 3);
+    max_logsz = 3;
   else
-    gas_assert (logsz <= 4);
+    max_logsz = 4;
+
+  if (logsz > max_logsz)
+    {
+      /* SEE PR 27904 for an example of this.  */
+      set_fatal_syntax_error
+	(_("relocation qualifier does not match instruction size"));
+      return BFD_RELOC_AARCH64_NONE;
+    }
 
   /* In reloc.c, these pseudo relocation types should be defined in similar
      order as above reloc_ldst_lo12 array. Because the array index calculation
