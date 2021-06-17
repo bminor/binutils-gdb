@@ -92,9 +92,9 @@ save_vars { GDBFLAGS } {
 
     # try with arguments containing literal newlines.
 
-    set GDBFLAGS "-nx --args $binfile 1 {\n} 3"
+    set GDBFLAGS "$old_gdbflags --args $binfile 1 {\n} 3"
     args_test "one newline" {{1} {\\n} {3}}
 
-    set GDBFLAGS "-nx --args $binfile 1 {\n} {\n} 3"
+    set GDBFLAGS "$old_gdbflags --args $binfile 1 {\n} {\n} 3"
     args_test "two newlines" {{1} {\\n} {\\n} {3}}
 }
