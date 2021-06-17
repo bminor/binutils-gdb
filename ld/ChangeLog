@@ -1,6 +1,12 @@
 2021-06-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27973
+	* testsuite/ld-x86-64/x86-64.exp: Pass $NOPIE_LDFLAGS and
+	$NOPIE_CFLAGS to protected-func-1 without PIE.
+
+2021-06-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27973
 	* testsuite/ld-x86-64/x86-64.exp: Run protected function tests.
 	* testsuite/ld-x86-64/protected-func-1.h: New file.
 	* testsuite/ld-x86-64/protected-func-1a.s: Likewise.

@@ -1740,11 +1740,12 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Run protected-func-1 without PIE" \
-	    "-Wl,--no-as-needed tmpdir/libprotected-func-1.so" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-func-1.so" \
 	    "-Wa,-mx86-used-note=yes" \
 	    { protected-func-1b.c } \
 	    "protected-func-1a" \
 	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
 	] \
 	[list \
 	    "Run protected-func-1 with PIE" \
