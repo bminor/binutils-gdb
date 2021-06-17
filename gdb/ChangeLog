@@ -1,5 +1,11 @@
 2021-06-17  Pedro Alves  <pedro@palves.net>
 
+	* Makefile.in (SELFTESTS_SRCS): Add
+	unittests/scoped_ignore_signal-selftests.c.
+	* unittests/scoped_ignore_signal-selftests.c: New.
+
+2021-06-17  Pedro Alves  <pedro@palves.net>
+
 	* gdbsupport/scoped_ignore_signal.h: New.
 	* compile/compile.c: Include gdbsupport/scoped_ignore_signal.h
 	instead of <signal.h>.  Don't include <unistd.h>.

@@ -461,6 +461,7 @@ SELFTESTS_SRCS = \
 	unittests/mkdir-recursive-selftests.c \
 	unittests/rsp-low-selftests.c \
 	unittests/scoped_fd-selftests.c \
+	unittests/scoped_ignore_signal-selftests.c \
 	unittests/scoped_mmap-selftests.c \
 	unittests/scoped_restore-selftests.c \
 	unittests/search-memory-selftests.c \
