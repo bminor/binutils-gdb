@@ -1,3 +1,18 @@
+2021-06-17  Pedro Alves  <pedro@palves.net>
+
+	* tui/tui-io.c (tui_dispatch_mouse_event): New, factored out from
+	...
+	(tui_dispatch_ctrl_char): ... this.  Move CTRL-L handling to
+	tui_getc_1.
+	(cur_seq, start_sequence): New.
+	(tui_getc_1): Pass key escape sequences for curses control keys to
+	readline.  Handle mouse and ctrl-l here.
+	(tui_resize_all): Disable/reenable the keypad if the command
+	window has the focus too.
+	* tui/tui-win.c (tui_set_focus_command): Don't change keypad
+	setting.
+	* tui/tui.c (tui_rl_other_window): Don't change keypad setting.
+
 2021-06-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* silent-rules.mk (ECHO_CCLD, ECHO_AR, ECHO_RANLIB): New.
