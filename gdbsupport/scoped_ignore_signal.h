@@ -25,9 +25,16 @@
 /* RAII class used to ignore a signal in a scope.  If sigprocmask is
    supported, then the signal is only ignored by the calling thread.
    Otherwise, the signal disposition is set to SIG_IGN, which affects
-   the whole process.  */
+   the whole process.  If ConsumePending is true, the destructor
+   consumes a pending Sig.  SIGPIPE for example is queued on the
+   thread even if blocked at the time the pipe is written to.  SIGTTOU
+   OTOH is not raised at all if the thread writing to the terminal has
+   it blocked.  Because SIGTTOU is sent to the whole process instead
+   of to a specific thread, consuming a pending SIGTTOU in the
+   destructor could consume a signal raised due to actions done by
+   some other thread.  */
 
-template <int Sig>
+template <int Sig, bool ConsumePending>
 class scoped_ignore_signal
 {
 public:
@@ -58,7 +65,8 @@ public:
 
 	/* If we got a pending Sig signal, consume it before
 	   unblocking.  */
-	sigtimedwait (&set, nullptr, &zero_timeout);
+	if (ConsumePending)
+	  sigtimedwait (&set, nullptr, &zero_timeout);
 
 	sigprocmask (SIG_UNBLOCK, &set, nullptr);
       }
@@ -89,7 +97,7 @@ struct scoped_ignore_signal_nop
 };
 
 #ifdef SIGPIPE
-using scoped_ignore_sigpipe = scoped_ignore_signal<SIGPIPE>;
+using scoped_ignore_sigpipe = scoped_ignore_signal<SIGPIPE, true>;
 #else
 using scoped_ignore_sigpipe = scoped_ignore_signal_nop;
 #endif

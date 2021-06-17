@@ -75,7 +75,7 @@ public:
   DISABLE_COPY_AND_ASSIGN (scoped_ignore_sigttou);
 
 private:
-  lazy_init<scoped_ignore_signal<SIGTTOU>> m_ignore_signal;
+  lazy_init<scoped_ignore_signal<SIGTTOU, false>> m_ignore_signal;
 };
 
 #else

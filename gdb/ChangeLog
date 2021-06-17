@@ -1,5 +1,15 @@
 2021-06-17  Pedro Alves  <pedro@palves.net>
 
+	* scoped_ignore_signal.h (scoped_ignore_signal): Add
+	ConsumePending template parameter.
+	(scoped_ignore_signal::~scoped_ignore_signal): Skip calling
+	sigtimedwait if ConsumePending is false.
+	(scoped_ignore_sigpipe): Initialize with ConsumePending=true.
+	* scoped_ignore_sigttou.h (scoped_ignore_sigttou)
+	<m_ignore_signal>: Initialize with ConsumePending=false.
+
+2021-06-17  Pedro Alves  <pedro@palves.net>
+
 	* Makefile.in (SELFTESTS_SRCS): Add
 	unittests/scoped_ignore_signal-selftests.c.
 	* unittests/scoped_ignore_signal-selftests.c: New.
