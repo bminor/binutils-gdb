@@ -195,6 +195,18 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 		  prop = _bfd_elf_get_property (abfd, type, datasz);
 		  prop->u.number |= bfd_h_get_32 (abfd, ptr);
 		  prop->pr_kind = property_number;
+		  if ((abfd->flags & DYNAMIC) == 0
+		      && type == GNU_PROPERTY_1_NEEDED
+		      && ((prop->u.number
+			   & GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS)
+			  != 0))
+		    {
+		      /* NB: Skip the shared library since it may not be
+			 the same at run-time.  */
+		      elf_has_indirect_extern_access (abfd) = true;
+		      /* GNU_PROPERTY_NO_COPY_ON_PROTECTED is implied.  */
+		      elf_has_no_copy_on_protected (abfd) = true;
+		    }
 		  goto next;
 		}
 	      break;
@@ -525,7 +537,8 @@ elf_get_gnu_property_section_size (elf_property_list *list,
 /* Write GNU properties.  */
 
 static void
-elf_write_gnu_properties (bfd *abfd, bfd_byte *contents,
+elf_write_gnu_properties (struct bfd_link_info *info,
+			  bfd *abfd, bfd_byte *contents,
 			  elf_property_list *list, unsigned int size,
 			  unsigned int align_size)
 {
@@ -570,6 +583,11 @@ elf_write_gnu_properties (bfd *abfd, bfd_byte *contents,
 	      break;
 
 	    case 4:
+	      /* Save the pointer to GNU_PROPERTY_1_NEEDED so that it
+		 can be updated later if needed.  */
+	      if (info != NULL
+		  && list->property.pr_type == GNU_PROPERTY_1_NEEDED)
+		info->needed_1_p = contents + size;
 	      bfd_h_put_32 (abfd, list->property.u.number,
 			    contents + size);
 	      break;
@@ -598,7 +616,7 @@ elf_write_gnu_properties (bfd *abfd, bfd_byte *contents,
 bfd *
 _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 {
-  bfd *abfd, *first_pbfd = NULL;
+  bfd *abfd, *first_pbfd = NULL, *elf_bfd = NULL;
   elf_property_list *list;
   asection *sec;
   bool has_properties = false;
@@ -606,31 +624,74 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
     = get_elf_backend_data (info->output_bfd);
   unsigned int elfclass = bed->s->elfclass;
   int elf_machine_code = bed->elf_machine_code;
+  elf_property *p;
 
   /* Find the first relocatable ELF input with GNU properties.  */
   for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
     if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
 	&& (abfd->flags & DYNAMIC) == 0
-	&& elf_properties (abfd) != NULL)
+	&& (elf_machine_code
+	    == get_elf_backend_data (abfd)->elf_machine_code)
+	&& (elfclass == get_elf_backend_data (abfd)->s->elfclass))
       {
-	has_properties = true;
-
 	/* Ignore GNU properties from ELF objects with different machine
 	   code or class.  Also skip objects without a GNU_PROPERTY note
 	   section.  */
-	if ((elf_machine_code
-	     == get_elf_backend_data (abfd)->elf_machine_code)
-	    && (elfclass
-		== get_elf_backend_data (abfd)->s->elfclass)
-	    && bfd_get_section_by_name (abfd,
-					NOTE_GNU_PROPERTY_SECTION_NAME) != NULL
-	    )
+	elf_bfd = abfd;
+
+	if (elf_properties (abfd) != NULL)
 	  {
-	    /* Keep .note.gnu.property section in FIRST_PBFD.  */
-	    first_pbfd = abfd;
-	    break;
+	    has_properties = true;
+
+	    if (bfd_get_section_by_name (abfd,
+					 NOTE_GNU_PROPERTY_SECTION_NAME)
+		!= NULL)
+	      {
+		/* Keep .note.gnu.property section in FIRST_PBFD.  */
+		first_pbfd = abfd;
+		break;
+	      }
 	  }
       }
+
+  if (info->indirect_extern_access > 0 && elf_bfd != NULL)
+    {
+      /* Support -z indirect-extern-access.  */
+      if (first_pbfd == NULL)
+	{
+	  sec = bfd_make_section_with_flags (elf_bfd,
+					     NOTE_GNU_PROPERTY_SECTION_NAME,
+					     (SEC_ALLOC
+					      | SEC_LOAD
+					      | SEC_IN_MEMORY
+					      | SEC_READONLY
+					      | SEC_HAS_CONTENTS
+					      | SEC_DATA));
+	  if (sec == NULL)
+	    info->callbacks->einfo (_("%F%P: failed to create GNU property section\n"));
+
+	  if (!bfd_set_section_alignment (sec,
+					  elfclass == ELFCLASS64 ? 3 : 2))
+	    info->callbacks->einfo (_("%F%pA: failed to align section\n"),
+				    sec);
+
+	  elf_section_type (sec) = SHT_NOTE;
+	  first_pbfd = elf_bfd;
+	  has_properties = true;
+	}
+
+      p = _bfd_elf_get_property (first_pbfd, GNU_PROPERTY_1_NEEDED, 4);
+      if (p->pr_kind == property_unknown)
+	{
+	  /* Create GNU_PROPERTY_1_NEEDED.  */
+	  p->u.number
+	    = GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS;
+	  p->pr_kind = property_number;
+	}
+      else
+	p->u.number
+	  |= GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS;
+    }
 
   /* Do nothing if there is no .note.gnu.property section.  */
   if (!has_properties)
@@ -695,7 +756,6 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	 if N > 0.  */
       if (info->stacksize > 0)
 	{
-	  elf_property *p;
 	  bfd_vma stacksize = info->stacksize;
 
 	  p = _bfd_elf_get_property (first_pbfd, GNU_PROPERTY_STACK_SIZE,
@@ -737,7 +797,30 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
       sec->size = size;
       contents = (bfd_byte *) bfd_zalloc (first_pbfd, size);
 
-      elf_write_gnu_properties (first_pbfd, contents, list, size,
+      if (info->indirect_extern_access <= 0)
+	{
+	  /* Get GNU_PROPERTY_1_NEEDED properties.  */
+	  p = elf_find_and_remove_property (&elf_properties (first_pbfd),
+					    GNU_PROPERTY_1_NEEDED, false);
+	  if (p != NULL)
+	    {
+	      if (info->indirect_extern_access < 0)
+		{
+		  /* Set indirect_extern_access to 1 to indicate that
+		     it is turned on by input properties.  */
+		  if ((p->u.number
+		       & GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS)
+		      != 0)
+		    info->indirect_extern_access = 1;
+		}
+	      else
+		/* Turn off indirect external access.  */
+		p->u.number
+		  &= ~GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS;
+	    }
+	}
+
+      elf_write_gnu_properties (info, first_pbfd, contents, list, size,
 				align_size);
 
       /* Cache the section contents for elf_link_input_bfd.  */
@@ -747,6 +830,15 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	 symbol is defined in the shared object.  */
       if (elf_has_no_copy_on_protected (first_pbfd))
 	info->extern_protected_data = false;
+
+      if (info->indirect_extern_access > 0)
+	{
+	  /* For indirect external access, don't generate copy
+	     relocations.  NB: Set to nocopyreloc to 2 to indicate
+	     that it is implied by indirect_extern_access.  */
+	  info->nocopyreloc = 2;
+	  info->extern_protected_data = false;
+	}
     }
 
   return first_pbfd;
@@ -804,7 +896,8 @@ _bfd_elf_convert_gnu_properties (bfd *ibfd, asection *isec,
   *ptr_size = size;
 
   /* Generate the output .note.gnu.property section.  */
-  elf_write_gnu_properties (ibfd, contents, list, size, 1 << align_shift);
+  elf_write_gnu_properties (NULL, ibfd, contents, list, size,
+			    1 << align_shift);
 
   return true;
 }

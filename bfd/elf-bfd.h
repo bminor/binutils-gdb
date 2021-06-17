@@ -2073,6 +2073,10 @@ struct elf_obj_tdata
      property.  */
   unsigned int has_no_copy_on_protected : 1;
 
+  /* Whether if the bfd contains the
+     GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS property.  */
+  unsigned int has_indirect_extern_access : 1;
+
   /* Irix 5 often screws up the symbol table, sorting local symbols
      after global symbols.  This flag is set if the symbol table in
      this BFD appears to be screwed up.  If it is, we ignore the
@@ -2138,6 +2142,8 @@ struct elf_obj_tdata
 #define elf_properties(bfd) (elf_tdata (bfd) -> properties)
 #define elf_has_no_copy_on_protected(bfd) \
   (elf_tdata(bfd) -> has_no_copy_on_protected)
+#define elf_has_indirect_extern_access(bfd) \
+  (elf_tdata(bfd) -> has_indirect_extern_access)
 
 extern void _bfd_elf_swap_verdef_in
   (bfd *, const Elf_External_Verdef *, Elf_Internal_Verdef *);

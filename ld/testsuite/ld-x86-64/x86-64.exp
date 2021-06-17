@@ -1334,6 +1334,63 @@ if { [isnative] && [check_compiler_available] } {
 	    {} \
 	    "libprotected-func-1.so" \
 	] \
+	[list \
+	    "Build libprotected-func-2a.so" \
+	    "-shared" \
+	    "-fPIC -Wa,-mx86-used-note=yes" \
+	    { protected-func-2a.S } \
+	    {{readelf -n indirect-extern-access.rd}}  \
+	    "libprotected-func-2a.so" \
+	] \
+	[list \
+	    "Build libprotected-func-2b.so" \
+	    "-shared -z indirect-extern-access" \
+	    "-fPIC -Wa,-mx86-used-note=yes" \
+	    { protected-func-2c.c } \
+	    {{readelf -n indirect-extern-access.rd}}  \
+	    "libprotected-func-2b.so" \
+	] \
+	[list \
+	    "Build libprotected-data-1a.so" \
+	    "-shared -z noindirect-extern-access" \
+	    "-fPIC -Wa,-mx86-used-note=yes" \
+	    { protected-data-1a.c } \
+	    {} \
+	    "libprotected-data-1a.so" \
+	] \
+	[list \
+	    "Build libprotected-data-1b.so" \
+	    "-shared -z indirect-extern-access" \
+	    "-fPIC -Wa,-mx86-used-note=yes" \
+	    { protected-data-1a.c } \
+	    {} \
+	    "libprotected-data-1b.so" \
+	] \
+	[list \
+	    "Build protected-data-1 without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-data-1b.so" \
+	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
+	    { protected-data-1b.c } \
+	    {} \
+	    "protected-data-1" \
+	] \
+	[list \
+	    "Build libprotected-data-2a.so" \
+	    "-shared" \
+	    "-fPIC -Wa,-mx86-used-note=yes \
+	     -DUSE_GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS" \
+	    { protected-data-2a.S } \
+	    {{readelf -n indirect-extern-access.rd}}  \
+	    "libprotected-data-2a.so" \
+	] \
+	[list \
+	    "Build libprotected-data-2b.so" \
+	    "-shared -z indirect-extern-access" \
+	    "-fPIC -Wa,-mx86-used-note=yes" \
+	    { protected-data-2a.S } \
+	    {{readelf -n indirect-extern-access.rd}}  \
+	    "libprotected-data-2b.so" \
+	] \
     ]
 
     if  {[istarget "x86_64-*-linux*-gnux32"]} {
@@ -1758,6 +1815,96 @@ if { [isnative] && [check_compiler_available] } {
 	    "-Wa,-mx86-used-note=yes" \
 	    { protected-func-1b.c } \
 	    "protected-func-1b" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run protected-func-2a without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-func-2a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-2b.S } \
+	    "protected-func-2a" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run protected-func-2b with PIE" \
+	    "-Wl,--no-as-needed -pie tmpdir/libprotected-func-2a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-2b.S } \
+	    "protected-func-2b" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run protected-func-2c without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-func-2b.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-2b.S } \
+	    "protected-func-2c" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run protected-func-2d with PIE" \
+	    "-Wl,--no-as-needed -pie tmpdir/libprotected-func-2b.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-2b.S } \
+	    "protected-func-2d" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run protected-data-1a without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-data-1a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-data-1b.c } \
+	    "protected-data-1a" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run protected-data-1b with PIE" \
+	    "-Wl,--no-as-needed -pie tmpdir/libprotected-data-1a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-data-1b.c } \
+	    "protected-data-1b" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run protected-data-2a without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-data-2a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-data-2b.S } \
+	    "protected-data-2a" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run protected-data-2b with PIE" \
+	    "-Wl,--no-as-needed -pie tmpdir/libprotected-data-2a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-data-2b.S } \
+	    "protected-data-2b" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run protected-data-2c without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-data-2b.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-data-2b.S } \
+	    "protected-data-2c" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run protected-data-2d with PIE" \
+	    "-Wl,--no-as-needed -pie tmpdir/libprotected-data-2b.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-data-2b.S } \
+	    "protected-data-2d" \
 	    "pass.out" \
 	    "-fPIE" \
 	] \

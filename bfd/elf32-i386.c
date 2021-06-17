@@ -1815,6 +1815,9 @@ elf_i386_check_relocs (bfd *abfd,
 		     adjust_dynamic_symbol.  */
 		  h->non_got_ref = 1;
 
+		  if (!elf_has_indirect_extern_access (sec->owner))
+		    eh->non_got_ref_without_indirect_extern_access = 1;
+
 		  /* We may need a .plt entry if the symbol is a function
 		     defined in a shared lib or is a function referenced
 		     from the code or read-only section.  */

@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add -z indirect-extern-access/-z noindirect-extern-access to control
+  canonical function pointers and copy relocation.
+
 * Add --max-cache-size=SIZE to set the the maximum cache size to SIZE
   bytes.
 

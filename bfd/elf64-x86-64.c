@@ -1972,6 +1972,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    break;
 	  }
 
+      eh = (struct elf_x86_link_hash_entry *) h;
+
       if (h != NULL)
 	{
 	  /* It is referenced by a non-shared object. */
@@ -2008,7 +2010,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (h == htab->elf.hgot)
 	htab->got_referenced = true;
 
-      eh = (struct elf_x86_link_hash_entry *) h;
       switch (r_type)
 	{
 	case R_X86_64_TLSLD:
@@ -2262,6 +2263,9 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		     Tentatively set the flag for now, and correct in
 		     adjust_dynamic_symbol.  */
 		  h->non_got_ref = 1;
+
+		  if (!elf_has_indirect_extern_access (sec->owner))
+		    eh->non_got_ref_without_indirect_extern_access = 1;
 
 		  /* We may need a .plt entry if the symbol is a function
 		     defined in a shared lib or is a function referenced

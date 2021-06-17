@@ -1824,6 +1824,25 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   eh = (struct elf_x86_link_hash_entry *) h;
 
+  /* Clear GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS if it is turned
+     on by an input relocatable file and there is a non-GOT/non-PLT
+     reference from another relocatable file without it.
+     NB: There can be non-GOT reference in data sections in input with
+     GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS.  */
+  if (eh->non_got_ref_without_indirect_extern_access
+      && info->indirect_extern_access == 1
+      && bfd_link_executable (info))
+    {
+      unsigned int needed_1;
+      info->indirect_extern_access = 0;
+      /* Turn off nocopyreloc if implied by indirect_extern_access.  */
+      if (info->nocopyreloc == 2)
+	info->nocopyreloc = 0;
+      needed_1 = bfd_h_get_32 (info->output_bfd, info->needed_1_p);
+      needed_1 &= ~GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS;
+      bfd_h_put_32 (info->output_bfd, needed_1, info->needed_1_p);
+    }
+
   /* STT_GNU_IFUNC symbol must go through PLT. */
   if (h->type == STT_GNU_IFUNC)
     {

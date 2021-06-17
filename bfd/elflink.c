@@ -3353,6 +3353,10 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
   if (!is_elf_hash_table (&hash_table->root))
     return true;
 
+  /* STV_PROTECTED symbols with indirect external access are local. */
+  if (info->indirect_extern_access > 0)
+    return true;
+
   bed = get_elf_backend_data (hash_table->dynobj);
 
   /* If extern_protected_data is false, STV_PROTECTED non-function

@@ -1293,6 +1293,18 @@ Generate GNU_PROPERTY_X86_FEATURE_1_IBT in .note.gnu.property section
 to indicate compatibility with IBT.  This also implies @option{ibtplt}.
 Supported for Linux/i386 and Linux/x86_64.
 
+@item indirect-extern-access
+@itemx noindirect-extern-access
+Generate GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS in
+.note.gnu.property section to indicate that object file requires
+canonical function pointers and cannot be used with copy relocation.
+This option also implies @option{noextern-protected-data} and
+@option{nocopyreloc}.  Supported for i386 and x86-64.
+
+@option{noindirect-extern-access} removes
+GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS from .note.gnu.property
+section.
+
 @item initfirst
 This option is only meaningful when building a shared object.
 It marks the object so that its runtime initialization will occur
