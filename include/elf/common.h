@@ -792,6 +792,13 @@
 #define GNU_PROPERTY_UINT32_OR_LO	0xb0008000
 #define GNU_PROPERTY_UINT32_OR_HI	0xb000ffff
 
+/* The needed properties by the object file.  */
+#define GNU_PROPERTY_1_NEEDED		GNU_PROPERTY_UINT32_OR_LO
+
+/* Set if the object file requires canonical function pointers and
+   cannot be used with copy relocation.  */
+#define GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS	(1U << 0)
+
 /* Processor-specific semantics, lo */
 #define GNU_PROPERTY_LOPROC  0xc0000000
 /* Processor-specific semantics, hi */

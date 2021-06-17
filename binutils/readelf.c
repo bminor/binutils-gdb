@@ -19333,6 +19333,28 @@ decode_aarch64_feature_1_and (unsigned int bitmask)
 }
 
 static void
+decode_1_needed (unsigned int bitmask)
+{
+  while (bitmask)
+    {
+      unsigned int bit = bitmask & (- bitmask);
+
+      bitmask &= ~ bit;
+      switch (bit)
+	{
+	case GNU_PROPERTY_1_NEEDED_INDIRECT_EXTERN_ACCESS:
+	  printf ("indirect external access");
+	  break;
+	default:
+	  printf (_("<unknown: %x>"), bit);
+	  break;
+	}
+      if (bitmask)
+	printf (", ");
+    }
+}
+
+static void
 print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 {
   unsigned char * ptr = (unsigned char *) pnote->descdata;
@@ -19525,6 +19547,23 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 		  || (type >= GNU_PROPERTY_UINT32_OR_LO
 		      && type <= GNU_PROPERTY_UINT32_OR_HI))
 		{
+		  switch (type)
+		    {
+		    case GNU_PROPERTY_1_NEEDED:
+		      if (datasz != 4)
+			printf (_("1_needed: <corrupt length: %#x> "),
+				datasz);
+		      else
+			{
+			  unsigned int bitmask = byte_get (ptr, 4);
+			  printf ("1_needed: ");
+			  decode_1_needed (bitmask);
+			}
+		      goto next;
+
+		    default:
+		      break;
+		    }
 		  if (type <= GNU_PROPERTY_UINT32_AND_HI)
 		    printf (_("UINT32_AND (%#x): "), type);
 		  else
