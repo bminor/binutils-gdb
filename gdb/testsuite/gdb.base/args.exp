@@ -85,10 +85,10 @@ save_vars { GDBFLAGS } {
     # Try with arguments containing literal single quotes.
 
     set GDBFLAGS "$old_gdbflags --args $binfile 1 '' 3"
-    args_test "one empty (with single quotes)" {{1} {''} {3}}
+    args_test "one empty with single quotes" {{1} {''} {3}}
 
     set GDBFLAGS "$old_gdbflags --args $binfile 1 '' '' 3"
-    args_test "two empty (with single quotes)" {{1} {''} {''} {3}}
+    args_test "two empty with single quotes" {{1} {''} {''} {3}}
 
     # try with arguments containing literal newlines.
 

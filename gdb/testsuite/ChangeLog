@@ -1,5 +1,9 @@
 2021-06-17  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdb.base/args.exp: Remove trailing parenthesis in test names.
+
+2021-06-17  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdb.base/args.exp: Use $old_gdbflags in all tests.
 
 2021-06-17  Simon Marchi  <simon.marchi@efficios.com>
