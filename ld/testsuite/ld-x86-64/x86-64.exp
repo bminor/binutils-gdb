@@ -1321,6 +1321,14 @@ if { [isnative] && [check_compiler_available] } {
 	     {readelf -rW pr22842b.rd}} \
 	    "pr22842" \
 	] \
+	[list \
+	    "Build libprotected-func-1.so" \
+	    "-shared" \
+	    "-fPIC -Wa,-mx86-used-note=yes" \
+	    { protected-func-1a.s } \
+	    {} \
+	    "libprotected-func-1.so" \
+	] \
     ]
 
     if  {[istarget "x86_64-*-linux*-gnux32"]} {
@@ -1729,6 +1737,23 @@ if { [isnative] && [check_compiler_available] } {
 	    { pr23997a.s pr23997b.c pr23997c.c } \
 	    "pr23997" \
 	    "pass.out" \
+	] \
+	[list \
+	    "Run protected-func-1 without PIE" \
+	    "-Wl,--no-as-needed tmpdir/libprotected-func-1.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-1b.c } \
+	    "protected-func-1a" \
+	    "pass.out" \
+	] \
+	[list \
+	    "Run protected-func-1 with PIE" \
+	    "-Wl,--no-as-needed -pie tmpdir/libprotected-func-1.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-1b.c } \
+	    "protected-func-1b" \
+	    "pass.out" \
+	    "-fPIE" \
 	] \
     ]
 

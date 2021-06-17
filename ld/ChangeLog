@@ -1,3 +1,11 @@
+2021-06-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27973
+	* testsuite/ld-x86-64/x86-64.exp: Run protected function tests.
+	* testsuite/ld-x86-64/protected-func-1.h: New file.
+	* testsuite/ld-x86-64/protected-func-1a.s: Likewise.
+	* testsuite/ld-x86-64/protected-func-1b.c: Likewise.
+
 2021-06-17  Fangrui Song  <maskray@google.com>
 
 	* ldlex.h (enum option_values): Add OPTION_NO_PIE.
