@@ -1,5 +1,13 @@
 2021-06-17  Pedro Alves  <pedro@palves.net>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Remove inflow.h.
+	* inf-ptrace.c, inflow.c, procfs.c: Don't include "inflow.h".
+	* inflow.h: Delete, moved to gdbsupport/ under a different name.
+	* ser-unix.c: Don't include "inflow.h".  Include
+	"gdbsupport/scoped_ignore_sigttou.h".
+
+2021-06-17  Pedro Alves  <pedro@palves.net>
+
 	* tui/tui-io.c (tui_dispatch_mouse_event): New, factored out from
 	...
 	(tui_dispatch_ctrl_char): ... this.  Move CTRL-L handling to

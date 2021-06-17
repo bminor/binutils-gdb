@@ -1,3 +1,7 @@
+2021-06-17  Pedro Alves  <pedro@palves.net>
+
+	* scoped_ignore_sigttou.h: New file, moved from gdb/ and renamed.
+
 2021-05-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* .dir-locals.el: Set sentence-end-double-space for all modes, and
