@@ -1,3 +1,10 @@
+2021-06-17  Fangrui Song  <maskray@google.com>
+
+	* ldlex.h (enum option_values): Add OPTION_NO_PIE.
+	* lexsup.c (struct ld_options): Add -no-pie.
+	(parse_args): Handle -no-pie.
+	* ld.texi: Document -no-pie.
+
 2021-06-15  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-pie/vaddr-0.d: Update expected output.
