@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 load_lib "ada.exp"
+load_lib "gdb-python.exp"
 
 if { [skip_ada_tests] } { return -1 }
 
@@ -49,4 +50,20 @@ foreach_with_prefix scenario {all minimal} {
     gdb_test "print objects(2 .. 2)" \
 	[string_to_regexp " = (2 => $v2)"] \
 	"print second array slice"
+
+    # This is only supported for the DWARF encoding.
+    if {$scenario == "minimal" && ![skip_python_tests]} {
+	gdb_test_no_output \
+	    "python o = gdb.parse_and_eval('objects')" \
+	    "fetch value for python"
+	gdb_test "python print(o)" \
+	    [string_to_regexp "($v1, $v2)"] \
+	    "python print array"
+	gdb_test "python print(o\[1\])" \
+	    [string_to_regexp "$v1"] \
+	    "python print first array element"
+	gdb_test "python print(o\[2\])" \
+	    [string_to_regexp "$v2"] \
+	    "python print second array element"
+    }
 }

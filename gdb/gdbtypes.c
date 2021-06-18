@@ -1280,13 +1280,7 @@ update_static_array_size (struct type *type)
       int stride;
       struct type *element_type;
 
-      /* If the array itself doesn't provide a stride value then take
-	 whatever stride the range provides.  Don't update BIT_STRIDE as
-	 we don't want to place the stride value from the range into this
-	 arrays bit size field.  */
-      stride = TYPE_FIELD_BITSIZE (type, 0);
-      if (stride == 0)
-	stride = range_type->bit_stride ();
+      stride = type->bit_stride ();
 
       if (!get_discrete_bounds (range_type, &low_bound, &high_bound))
 	low_bound = high_bound = 0;

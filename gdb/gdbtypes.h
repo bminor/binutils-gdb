@@ -1029,6 +1029,8 @@ struct type
 
   ULONGEST bit_stride () const
   {
+    if (this->code () == TYPE_CODE_ARRAY && this->field (0).bitsize != 0)
+      return this->field (0).bitsize;
     return this->bounds ()->bit_stride ();
   }
 
