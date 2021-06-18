@@ -54,7 +54,10 @@ gdb_test_multiple "maint set backtrace-on-fatal-signal on" "" {
 }
 
 # Now the actual test loop.
-foreach test_data {{SEGV "Segmentation fault"}} {
+foreach test_data {{SEGV "Segmentation fault"} \
+		       {FPE "Floating point exception"} \
+		       {BUS "Bus error"} \
+		       {ABRT "Aborted"}} {
     set sig [lindex ${test_data} 0]
     set msg [lindex ${test_data} 1]
     with_test_prefix ${sig} {
