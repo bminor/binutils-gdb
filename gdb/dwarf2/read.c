@@ -10552,23 +10552,31 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (lazy_expand_symtab_p && cu->per_cu->interesting_symbols
       && cu->per_cu->interesting_symbols->size () > 0)
     {
-      auto interesting_symbol_it = cu->per_cu->interesting_symbols->cbegin ();
-
-      for (child_die = die->child; child_die != nullptr && child_die->tag != 0;
-	   child_die = child_die->sibling)
+      std::set<sect_offset> expanded;
+      while (expanded.size () != cu->per_cu->interesting_symbols->size ())
 	{
-	  if (interesting_symbol_it == cu->per_cu->interesting_symbols->cend ())
-	    break;
+	  auto interesting_symbol_it = cu->per_cu->interesting_symbols->cbegin ();
 
-	  sect_offset interesting_symbol = *interesting_symbol_it;
+	  for (child_die = die->child; child_die != nullptr && child_die->tag != 0;
+	       child_die = child_die->sibling)
+	    {
+	      if (interesting_symbol_it == cu->per_cu->interesting_symbols->cend ())
+		break;
 
-	  if (interesting_symbol > child_die->sect_off)
-	    continue;
+	      sect_offset interesting_symbol = *interesting_symbol_it;
 
-	  gdb_assert (interesting_symbol == child_die->sect_off);
-	  std::advance (interesting_symbol_it, 1);
+	      if (interesting_symbol > child_die->sect_off)
+		continue;
 
-	  process_die (child_die, cu);
+	      gdb_assert (interesting_symbol == child_die->sect_off);
+	      std::advance (interesting_symbol_it, 1);
+
+	      if (expanded.count (interesting_symbol) == 1)
+		continue;
+	      expanded.emplace (interesting_symbol);
+
+	      process_die (child_die, cu);
+	    }
 	}
     }
  else
@@ -22302,6 +22310,16 @@ lookup_die_type (struct die_info *die, const struct attribute *attr,
 	 from an inter-CU reference and the type's CU got expanded before
 	 ours.  */
       this_type = read_type_die (type_die, type_cu);
+      if (lazy_expand_symtab_p
+	  && type_cu == cu && type_cu->per_cu->interesting_symbols)
+	{
+	  struct die_info *interesting_die = type_die;
+	  while (interesting_die->parent != nullptr
+		 && interesting_die->parent->parent != nullptr)
+	    interesting_die = interesting_die->parent;
+	  gdb_assert (type_cu->header.sect_off < interesting_die->sect_off);
+	  type_cu->per_cu->interesting_symbols->emplace (interesting_die->sect_off);
+	}
     }
 
   /* If we still don't have a type use an error marker.  */
