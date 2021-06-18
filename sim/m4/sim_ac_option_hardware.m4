@@ -61,10 +61,6 @@ else
   if test x"$silent" != x"yes"; then
     echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
   fi
-  dnl Some devices require extra libraries.
-  case " $hardware " in
-    *" cfi "*) AC_CHECK_LIB(m, log2);;
-  esac
 fi
 ])
 AC_SUBST(sim_hw_cflags)

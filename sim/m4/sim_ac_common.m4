@@ -32,10 +32,6 @@ dnl to see if there are intl libraries we should link against.
 ALL_LINGUAS=
 ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
 
-# Check for socket libraries
-AC_CHECK_LIB(socket, bind)
-AC_CHECK_LIB(nsl, gethostbyname)
-
 # BFD conditionally uses zlib, so we must link it in if libbfd does, by
 # using the same condition.
 AM_ZLIB

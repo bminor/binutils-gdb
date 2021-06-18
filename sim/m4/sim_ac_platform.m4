@@ -141,4 +141,10 @@ AC_TYPE_PID_T
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T
+
+dnl Libraries.
+AC_CHECK_LIB(socket, bind)
+AC_CHECK_LIB(nsl, gethostbyname)
+AC_CHECK_LIB(m, fabs)
+AC_CHECK_LIB(m, log2)
 ])
