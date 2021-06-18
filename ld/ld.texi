@@ -1437,12 +1437,6 @@ specifies a memory segment that should contain only instructions and must
 be in wholly disjoint pages from any other data.  Don't create separate
 code @code{PT_LOAD} segment if @samp{noseparate-code} is used.
 
-@item unique-symbol
-@itemx nounique-symbol
-Avoid duplicated local symbol names in the symbol string table.  Append
-".@code{number}" to duplicated local symbol names if @samp{unique-symbol}
-is used.  @option{nounique-symbol} is the default.
-
 @item shstk
 Generate GNU_PROPERTY_X86_FEATURE_1_SHSTK in .note.gnu.property section
 to indicate compatibility with Intel Shadow Stack.  Supported for
@@ -1494,6 +1488,12 @@ report an error if @samp{notext} or @samp{textoff}.
 Do not report unresolved symbol references from regular object files,
 either when creating an executable, or when creating a shared library.
 This option is the inverse of @samp{-z defs}.
+
+@item unique-symbol
+@itemx nounique-symbol
+Avoid duplicated local symbol names in the symbol string table.  Append
+".@code{number}" to duplicated local symbol names if @samp{unique-symbol}
+is used.  @option{nounique-symbol} is the default.
 
 @item x86-64-baseline
 @item x86-64-v2

@@ -1,5 +1,9 @@
 2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld.texi: Move -z unique-symbol after -z undefs.
+
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/property-and-1.d: New file.
 	* testsuite/ld-elf/property-and-1.s: Likewise.
 	* testsuite/ld-elf/property-and-2.d: Likewise.
