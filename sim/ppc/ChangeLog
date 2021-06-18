@@ -1,5 +1,11 @@
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in: Delete toolchain vars.
+	* configure.ac: Likewise.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (LIBS): Add $(COMMON_LIBS).
 	(ZLIB): Use $(zlibdir).
 	* configure.ac: Delete AM_ZLIB & AC_PLUGINS calls.

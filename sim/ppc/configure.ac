@@ -5,14 +5,6 @@ AC_CONFIG_MACRO_DIRS([../.. ../../config])
 AC_PROG_INSTALL
 AC_PROG_CC
 
-# Put a plausible default for CC_FOR_BUILD in Makefile.
-if test "x$cross_compiling" = "xno"; then
-  CC_FOR_BUILD='$(CC)'
-else
-  CC_FOR_BUILD=gcc
-fi
-CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-${CFLAGS}}
-
 dnl We don't use gettext, but bfd does.  So we do the appropriate checks
 dnl to see if there are intl libraries we should link against.
 ALL_LINGUAS=
@@ -503,9 +495,6 @@ if test x"$silent" != x"yes" && test x"$sim_xor_endian" != x""; then
 fi],[sim_xor_endian=""])dnl
 
 
-AC_CANONICAL_SYSTEM
-AC_ARG_PROGRAM
-
 case ${host} in
   *mingw32*)
     AC_DEFINE(USE_WIN32API, 1,
@@ -679,7 +668,13 @@ else
   *) realsrcdir=../${srcdir};;
   esac
   saved_CFLAGS="${CFLAGS}"
-  CC="${CC_FOR_BUILD}" CFLAGS="${CFLAGS_FOR_BUILD}" \
+  # Put a plausible default for CC_FOR_BUILD in Makefile.
+  if test "x$cross_compiling" = "xno"; then
+    CC_FOR_BUILD='$(CC)'
+  else
+    CC_FOR_BUILD=gcc
+  fi
+  CC="${CC_FOR_BUILD}" CFLAGS="${CFLAGS_FOR_BUILD-${CFLAGS}}" \
   LDFLAGS="${LDFLAGS_FOR_BUILD}" \
   ${realsrcdir}/configure \
     --enable-languages=${enable_languages-all} \
@@ -690,12 +685,6 @@ else
   rm -rf $tempdir
 fi
 
-AC_SUBST(CC_FOR_BUILD)
-AC_SUBST(CFLAGS_FOR_BUILD)
-AC_SUBST(CFLAGS)
-AR=${AR-ar}
-AC_SUBST(AR)
-AC_PROG_RANLIB
 AC_SUBST(sim_warnings)
 AC_SUBST(sim_line_nr)
 AC_SUBST(sim_config)

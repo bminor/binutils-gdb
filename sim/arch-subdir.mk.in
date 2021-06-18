@@ -17,6 +17,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+host_alias = @host_alias@
+target_alias = @target_alias@
+program_transform_name = @program_transform_name@
+
+EXEEXT = @EXEEXT@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+
+CC = @CC@
+C_DIALECT = @C_DIALECT@
+CC_FOR_BUILD = @CC_FOR_BUILD@
+CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
+CFLAGS = @CFLAGS@
+CPPFLAGS = @CPPFLAGS@
+CXXFLAGS = @CXXFLAGS@
+LDFLAGS = @LDFLAGS@
+
+AR = @AR@
+AR_FLAGS = rc
+RANLIB = @RANLIB@
+
 zlibdir = @zlibdir@
 @PLUGINS_TRUE@LIBDL = @lt_cv_dlopen_libs@
 COMMON_LIBS = @LIBS@

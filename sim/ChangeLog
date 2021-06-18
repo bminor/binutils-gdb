@@ -1,5 +1,11 @@
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>
 
+	* arch-subdir.mk.in: Move toolchain vars from common/Make-common.in.
+	* m4/sim_ac_common.m4: Delete SIM_AC_TOOLCHAIN call.  Require
+	AC_PROG_CC and AC_PROG_INSTALL.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
 	* arch-subdir.mk.in (zlibdir): New variable.
 	(@PLUGINS_TRUE@LIBDL): New variable.
 	* m4/sim_ac_common.m4: Move bfd dep calls ...

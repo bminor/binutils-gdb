@@ -52,9 +52,6 @@ include ../arch-subdir.mk
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-host_alias = @host_alias@
-target_alias = @target_alias@
-program_transform_name = @program_transform_name@
 bindir = @bindir@
 
 libdir = @libdir@
@@ -70,21 +67,7 @@ includedir = @includedir@
 # This can be referenced by the gettext configuration code.
 top_builddir = ..
 
-EXEEXT = @EXEEXT@
 SHELL = @SHELL@
-
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-
-CC = @CC@
-C_DIALECT = @C_DIALECT@
-CC_FOR_BUILD = @CC_FOR_BUILD@
-CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
-CFLAGS = @CFLAGS@
-CPPFLAGS = @CPPFLAGS@
-CXXFLAGS = @CXXFLAGS@
-LDFLAGS = @LDFLAGS@
 
 SIM_BITSIZE = @sim_bitsize@
 SIM_DEFAULT_MODEL = @sim_default_model@
@@ -97,11 +80,6 @@ SIM_RESERVED_BITS = @sim_reserved_bits@
 SIM_SCACHE = @sim_scache@
 SIM_WARN_CFLAGS = $(WARN_CFLAGS)
 SIM_WERROR_CFLAGS = $(WERROR_CFLAGS)
-
-AR = @AR@
-AR_FLAGS = rc
-RANLIB = @RANLIB@
-MAKEINFO = makeinfo
 
 # Dependency tracking information.
 DEPMODE = @CCDEPMODE@

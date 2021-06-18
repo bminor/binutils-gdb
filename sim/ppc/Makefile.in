@@ -31,9 +31,6 @@ include ../arch-subdir.mk
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-host_alias = @host_alias@
-target_alias = @target_alias@
-program_transform_name = @program_transform_name@
 bindir = @bindir@
 libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
@@ -56,22 +53,10 @@ includedir = @includedir@
 # This can be referenced by the gettext configuration code.
 top_builddir = ..
 
-EXEEXT = @EXEEXT@
 SHELL = /bin/sh
 
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-
-AR = @AR@
-AR_FLAGS = rc
-CC = @CC@
-CFLAGS = @CFLAGS@
-CC_FOR_BUILD = @CC_FOR_BUILD@
-CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
 BISON = bison
 MAKEINFO = makeinfo
-RANLIB = @RANLIB@
 
 INLINE_CFLAGS = @sim_inline@
 SMP_CFLAGS = @sim_smp@
@@ -104,7 +89,6 @@ STD_CFLAGS	= $(CFLAGS) $(WERROR_CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARN
 NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(INCLUDES) $(SIM_FPU_CFLAGS)
 BUILD_CFLAGS	= $(CFLAGS_FOR_BUILD) $(INCLUDES) $(WARNING_CFLAGS)
 
-LDFLAGS_FOR_BUILD	=
 LIBS = $(COMMON_LIBS) @LIBS@
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
