@@ -1,5 +1,9 @@
 2021-06-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* aclocal.m4, configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>

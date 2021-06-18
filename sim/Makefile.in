@@ -206,6 +206,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_option_profile.m4 \
 	$(top_srcdir)/m4/sim_ac_option_stdio.m4 \
 	$(top_srcdir)/m4/sim_ac_option_trace.m4 \
+	$(top_srcdir)/m4/sim_ac_option_warnings.m4 \
 	$(top_srcdir)/m4/sim_ac_platform.m4 \
 	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
 	$(top_srcdir)/configure.ac
@@ -667,6 +668,8 @@ SHELL = @SHELL@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WARN_CFLAGS = @WARN_CFLAGS@
+WERROR_CFLAGS = @WERROR_CFLAGS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -738,6 +741,7 @@ CLEANFILES = common/version.c common/version.c-stamp \
 DISTCLEANFILES = 
 MOSTLYCLEANFILES = core $(am__append_4) site-srcdir.exp testrun.log \
 	testrun.sum
+AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(srcroot)/include -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@

@@ -479,28 +479,6 @@ if test x"$silent" != x"yes" && test x"$sim_timebase" != x""; then
 fi],[sim_timebase=""])dnl
 
 
-AC_ARG_ENABLE(werror,
-  AS_HELP_STRING([--enable-werror], [treat compile warnings as errors]),
-  [case "${enableval}" in
-     yes | y) ERROR_ON_WARNING="yes" ;;
-     no | n)  ERROR_ON_WARNING="no" ;;
-     *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
-   esac])
-# Enable -Werror by default when using gcc
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
-  ERROR_ON_WARNING=yes
-fi
-WERROR_CFLAGS=""
-if test "${ERROR_ON_WARNING}" = yes ; then
-  WERROR_CFLAGS="-Werror"
-fi
-dnl Enable -Wno-format by default when using gcc on mingw since many
-dnl GCC versions complain about %I64.
-case "${host}" in
-  *-*-mingw32*) WERROR_CFLAGS="$WERROR_CFLAGS -Wno-format" ;;
-esac
-AC_SUBST(WERROR_CFLAGS)
-
 AC_ARG_ENABLE(sim-warnings,
 [  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
 [case "${enableval}" in
