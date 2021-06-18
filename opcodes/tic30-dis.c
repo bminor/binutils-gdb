@@ -201,7 +201,7 @@ get_register_operand (unsigned char fragment, char *buffer)
     {
       if ((fragment & 0x1F) == current_reg->opcode)
 	{
-	  strncpy (buffer, current_reg->name, OPERAND_BUFFER_LEN);
+	  strncpy (buffer, current_reg->name, OPERAND_BUFFER_LEN - 1);
 	  buffer[OPERAND_BUFFER_LEN - 1] = 0;
 	  return 1;
 	}
