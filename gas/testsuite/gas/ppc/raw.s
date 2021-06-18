@@ -49,4 +49,4 @@
  yield
  mdoom
  lwsync
- pli 3,-1<<33
+ pli 3,0

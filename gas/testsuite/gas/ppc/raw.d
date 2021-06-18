@@ -58,5 +58,5 @@ Disassembly of section \.text:
   c0:	(7f 7b db 78|78 db 7b 7f) 	or      r27,r27,r27
   c4:	(7f de f3 78|78 f3 de 7f) 	or      r30,r30,r30
   c8:	(7c 20 04 ac|ac 04 20 7c) 	sync    1,0
-  cc:	(06 02 00 00|00 00 02 06) 	paddi   r3,0,-8589934592,0
+  cc:	(06 00 00 00|00 00 00 06) 	paddi   r3,0,0,0
   d0:	(38 60 00 00|00 00 60 38) 
