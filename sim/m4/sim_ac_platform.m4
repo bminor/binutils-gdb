@@ -142,6 +142,16 @@ AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
+dnl BFD conditionally uses zlib, so we must link it in if libbfd does, by
+dnl using the same condition.
+AM_ZLIB
+
+dnl BFD uses libdl when when plugins enabled.
+AC_PLUGINS
+AM_CONDITIONAL(PLUGINS, test "$plugins" = yes)
+LT_INIT([dlopen])
+AC_SUBST(lt_cv_dlopen_libs)
+
 dnl Libraries.
 AC_CHECK_LIB(socket, bind)
 AC_CHECK_LIB(nsl, gethostbyname)

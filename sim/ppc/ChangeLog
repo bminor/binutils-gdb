@@ -1,3 +1,10 @@
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (LIBS): Add $(COMMON_LIBS).
+	(ZLIB): Use $(zlibdir).
+	* configure.ac: Delete AM_ZLIB & AC_PLUGINS calls.
+	* aclocal.m4, config.in, configure: Regenerate.
+
 2021-06-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (WERROR_CFLAGS): Delete.

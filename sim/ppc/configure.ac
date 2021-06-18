@@ -506,13 +506,6 @@ fi],[sim_xor_endian=""])dnl
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
-# BFD conditionally uses zlib, so we must link it in if libbfd does, by
-# using the same condition.
-AM_ZLIB
-
-# BFD uses libdl when when plugins enabled.
-AC_PLUGINS
-
 case ${host} in
   *mingw32*)
     AC_DEFINE(USE_WIN32API, 1,
