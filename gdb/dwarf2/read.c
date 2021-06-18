@@ -10531,15 +10531,10 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   handle_DW_AT_stmt_list (die, cu, fnd.comp_dir, lowpc);
 
   /* Process all dies in compilation unit.  */
-  if (die->child != NULL)
-    {
-      child_die = die->child;
-      while (child_die && child_die->tag)
-	{
-	  process_die (child_die, cu);
-	  child_die = child_die->sibling;
-	}
-    }
+  for (child_die = die->child; child_die != nullptr && child_die->tag != 0;
+       child_die = child_die->sibling)
+    process_die (child_die, cu);
+
   per_objfile->sym_cu = nullptr;
 
   /* Decode macro information, if present.  Dwarf 2 macro information
