@@ -7813,6 +7813,16 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
   partial_symbol psymbol;
   memset (&psymbol, 0, sizeof (psymbol));
   psymbol.ginfo.set_language (cu->language, &objfile->objfile_obstack);
+  sect_offset sect_off = sect_offset (0);
+  if (lazy_expand_symtab_p)
+    {
+      struct partial_die_info *top_level = pdi;
+      while (top_level->die_parent != nullptr
+	     && top_level->die_parent->tag != DW_TAG_compile_unit
+	     && top_level->die_parent->tag != DW_TAG_partial_unit)
+	top_level = top_level->die_parent;
+      sect_off = top_level->sect_off;
+    }
   psymbol.ginfo.set_section_index (-1);
 
   /* The code below indicates that the psymbol should be installed by
@@ -7980,7 +7990,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	}
       cu->per_cu->v.psymtab->add_psymbol
 	(psymbol, *where, per_objfile->per_bfd->partial_symtabs.get (),
-	 objfile);
+	 objfile, sect_off);
     }
 }
 

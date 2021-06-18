@@ -253,7 +253,7 @@ struct partial_symtab
   void add_psymbol (const partial_symbol &psym,
 		    psymbol_placement where,
 		    psymtab_storage *partial_symtabs,
-		    struct objfile *objfile);
+		    struct objfile *objfile, sect_offset sect_off = sect_offset (0));
 
 
   /* Indicate that this partial symtab is complete.  */

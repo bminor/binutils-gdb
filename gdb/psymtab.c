@@ -1335,7 +1335,7 @@ void
 partial_symtab::add_psymbol (const partial_symbol &psymbol,
 			     psymbol_placement where,
 			     psymtab_storage *partial_symtabs,
-			     struct objfile *objfile)
+			     struct objfile *objfile, sect_offset sect_off)
 {
   bool added;
 
@@ -1355,6 +1355,9 @@ partial_symtab::add_psymbol (const partial_symbol &psymbol,
        ? static_psymbols
        : global_psymbols);
   list.push_back (psym);
+
+  if (to_underlying (sect_off) != 0)
+    this->sect_off.emplace (psym, sect_off);
 }
 
 /* See psympriv.h.  */
