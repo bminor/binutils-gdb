@@ -11149,12 +11149,14 @@ if test "${enable_werror+set}" = set; then :
 fi
 
 
-# Enable -Werror by default when using gcc
 if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
-    ERROR_ON_WARNING=yes
+  ERROR_ON_WARNING=yes
 fi
 
 WERROR_CFLAGS=""
+if test "${ERROR_ON_WARNING}" = yes ; then
+  WERROR_CFLAGS="-Werror"
+fi
 
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
 -Wpointer-sign \
@@ -11234,7 +11236,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
-
 
 
 hardware="cfi core pal glue "

@@ -1,5 +1,9 @@
 2021-06-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* m4/sim_ac_option_warnings.m4: Delete 1st arg to macro.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Output arch-subdir.mk.
 	* Makefile.in, configure: Regenerate.
 	* arch-subdir.mk.in: New file.

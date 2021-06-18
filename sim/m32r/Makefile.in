@@ -44,6 +44,9 @@ SIM_EXTRA_CFLAGS = @sim_extra_cflags@
 
 SIM_EXTRA_CLEAN = m32r-clean
 
+# Code doesn't build cleanly yet.
+SIM_WERROR_CFLAGS =
+
 ## COMMON_POST_CONFIG_FRAG
 
 arch = m32r

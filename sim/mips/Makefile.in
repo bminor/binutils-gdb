@@ -81,6 +81,8 @@ all: $(SIM_@sim_gen@_ALL)
 
 SIM_EXTRA_DEPS = itable.h
 
+# Code doesn't build cleanly yet.
+SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
 

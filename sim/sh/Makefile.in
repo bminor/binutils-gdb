@@ -28,6 +28,9 @@ SIM_EXTRA_LIBS = -lm
 SIM_EXTRA_CLEAN = sh-clean
 SIM_EXTRA_DEPS = table.c code.c ppi.c
 
+# Code doesn't build cleanly yet.
+SIM_WERROR_CFLAGS =
+
 ## COMMON_POST_CONFIG_FRAG
 
 code.c: gencode

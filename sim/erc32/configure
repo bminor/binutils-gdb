@@ -11141,103 +11141,6 @@ fi
 
 
 
-# Check whether --enable-werror was given.
-if test "${enable_werror+set}" = set; then :
-  enableval=$enable_werror; case "${enableval}" in
-     yes | y) ERROR_ON_WARNING="yes" ;;
-     no | n)  ERROR_ON_WARNING="no" ;;
-     *) as_fn_error $? "bad value ${enableval} for --enable-werror" "$LINENO" 5 ;;
-   esac
-fi
-
-
-# Enable -Werror by default when using gcc
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
-    ERROR_ON_WARNING=yes
-fi
-
-WERROR_CFLAGS=""
-
-build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
--Wpointer-sign \
--Wno-unused -Wunused-value -Wunused-function \
--Wno-switch -Wno-char-subscripts -Wmissing-prototypes
--Wdeclaration-after-statement -Wempty-body -Wmissing-parameter-type \
--Wold-style-declaration -Wold-style-definition"
-
-# Enable -Wno-format by default when using gcc on mingw since many
-# GCC versions complain about %I64.
-case "${host}" in
-  *-*-mingw32*) build_warnings="$build_warnings -Wno-format" ;;
-  *) build_warnings="$build_warnings -Wformat-nonliteral" ;;
-esac
-
-# Check whether --enable-build-warnings was given.
-if test "${enable_build_warnings+set}" = set; then :
-  enableval=$enable_build_warnings; case "${enableval}" in
-  yes)	;;
-  no)	build_warnings="-w";;
-  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
-  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
-  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
-  echo "Setting compiler warning flags = $build_warnings" 6>&1
-fi
-fi
-# Check whether --enable-sim-build-warnings was given.
-if test "${enable_sim_build_warnings+set}" = set; then :
-  enableval=$enable_sim_build_warnings; case "${enableval}" in
-  yes)	;;
-  no)	build_warnings="-w";;
-  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${build_warnings} ${t}";;
-  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
-        build_warnings="${t} ${build_warnings}";;
-  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
-  echo "Setting GDB specific compiler warning flags = $build_warnings" 6>&1
-fi
-fi
-WARN_CFLAGS=""
-if test "x${build_warnings}" != x -a "x$GCC" = xyes
-then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler warning flags" >&5
-$as_echo_n "checking compiler warning flags... " >&6; }
-    # Separate out the -Werror flag as some files just cannot be
-    # compiled with it enabled.
-    for w in ${build_warnings}; do
-	case $w in
-	-Werr*) WERROR_CFLAGS=-Werror ;;
-	*) # Check that GCC accepts it
-	    saved_CFLAGS="$CFLAGS"
-	    CFLAGS="$CFLAGS -Werror $w"
-	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  WARN_CFLAGS="${WARN_CFLAGS} $w"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-	    CFLAGS="$saved_CFLAGS"
-	esac
-    done
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
-$as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
-fi
-
-
 # In the Cygwin environment, we need some additional flags.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for cygwin" >&5
 $as_echo_n "checking for cygwin... " >&6; }
@@ -11378,6 +11281,105 @@ fi
   READLINE_CFLAGS=
 fi
 
+
+
+# Check whether --enable-werror was given.
+if test "${enable_werror+set}" = set; then :
+  enableval=$enable_werror; case "${enableval}" in
+     yes | y) ERROR_ON_WARNING="yes" ;;
+     no | n)  ERROR_ON_WARNING="no" ;;
+     *) as_fn_error $? "bad value ${enableval} for --enable-werror" "$LINENO" 5 ;;
+   esac
+fi
+
+
+if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+  ERROR_ON_WARNING=yes
+fi
+
+WERROR_CFLAGS=""
+if test "${ERROR_ON_WARNING}" = yes ; then
+  WERROR_CFLAGS="-Werror"
+fi
+
+build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
+-Wpointer-sign \
+-Wno-unused -Wunused-value -Wunused-function \
+-Wno-switch -Wno-char-subscripts -Wmissing-prototypes
+-Wdeclaration-after-statement -Wempty-body -Wmissing-parameter-type \
+-Wold-style-declaration -Wold-style-definition"
+
+# Enable -Wno-format by default when using gcc on mingw since many
+# GCC versions complain about %I64.
+case "${host}" in
+  *-*-mingw32*) build_warnings="$build_warnings -Wno-format" ;;
+  *) build_warnings="$build_warnings -Wformat-nonliteral" ;;
+esac
+
+# Check whether --enable-build-warnings was given.
+if test "${enable_build_warnings+set}" = set; then :
+  enableval=$enable_build_warnings; case "${enableval}" in
+  yes)	;;
+  no)	build_warnings="-w";;
+  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${build_warnings} ${t}";;
+  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${t} ${build_warnings}";;
+  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+esac
+if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
+  echo "Setting compiler warning flags = $build_warnings" 6>&1
+fi
+fi
+# Check whether --enable-sim-build-warnings was given.
+if test "${enable_sim_build_warnings+set}" = set; then :
+  enableval=$enable_sim_build_warnings; case "${enableval}" in
+  yes)	;;
+  no)	build_warnings="-w";;
+  ,*)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${build_warnings} ${t}";;
+  *,)   t=`echo "${enableval}" | sed -e "s/,/ /g"`
+        build_warnings="${t} ${build_warnings}";;
+  *)    build_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
+esac
+if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
+  echo "Setting GDB specific compiler warning flags = $build_warnings" 6>&1
+fi
+fi
+WARN_CFLAGS=""
+if test "x${build_warnings}" != x -a "x$GCC" = xyes
+then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler warning flags" >&5
+$as_echo_n "checking compiler warning flags... " >&6; }
+    # Separate out the -Werror flag as some files just cannot be
+    # compiled with it enabled.
+    for w in ${build_warnings}; do
+	case $w in
+	-Werr*) WERROR_CFLAGS=-Werror ;;
+	*) # Check that GCC accepts it
+	    saved_CFLAGS="$CFLAGS"
+	    CFLAGS="$CFLAGS -Werror $w"
+	    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  WARN_CFLAGS="${WARN_CFLAGS} $w"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	    CFLAGS="$saved_CFLAGS"
+	esac
+    done
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
+$as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
+fi
 
 
 hardware="cfi core pal glue "

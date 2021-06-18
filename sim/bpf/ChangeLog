@@ -1,5 +1,11 @@
 2021-06-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_WERROR_CFLAGS): New variable.
+	* configure.ac: Delete call to SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-06-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* bpf.c: Include sim-signal.h.
 
 2021-06-17  Mike Frysinger  <vapier@gentoo.org>

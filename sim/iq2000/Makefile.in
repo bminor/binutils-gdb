@@ -37,6 +37,9 @@ ALL_CPU_CFLAGS = -DHAVE_CPU_IQ2000BF -DHAVE_CPU_IQ10BF
 
 SIM_EXTRA_CLEAN = iq2000-clean
 
+# Code doesn't build cleanly yet.
+SIM_WERROR_CFLAGS =
+
 ## COMMON_POST_CONFIG_FRAG
 
 arch = iq2000

@@ -772,11 +772,11 @@ enable_maintainer_mode
 enable_sim_inline
 enable_sim_scache
 enable_sim_default_model
+enable_cgen_maint
+enable_sim_trapdump
 enable_werror
 enable_build_warnings
 enable_sim_build_warnings
-enable_cgen_maint
-enable_sim_trapdump
 enable_sim_hardware
 '
       ac_precious_vars='build_alias
@@ -1420,13 +1420,13 @@ Optional Features:
                           Specify simulator execution cache size
   --enable-sim-default-model=model
                           Specify default model to simulate
+  --enable-cgen-maint=DIR build cgen generated files
+  --enable-sim-trapdump   Make unknown traps dump the registers
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-sim-build-warnings
                           enable SIM specific build-time compiler warnings if
                           gcc is used
-  --enable-cgen-maint=DIR build cgen generated files
-  --enable-sim-trapdump   Make unknown traps dump the registers
   --enable-sim-hardware=LIST
                           Specify the hardware to be included in the build.
 
@@ -11188,6 +11188,58 @@ fi
 
 
 
+cgen_maint=no
+cgen=guile
+cgendir='$(srcdir)/../../cgen'
+# Check whether --enable-cgen-maint was given.
+if test "${enable_cgen_maint+set}" = set; then :
+  enableval=$enable_cgen_maint; case "${enableval}" in
+  yes)	cgen_maint=yes ;;
+  no)	cgen_maint=no ;;
+  *)
+	# Argument is a directory where cgen can be found.  In some
+	# future world cgen could be installable, but right now this
+	# is not the case.  Instead we assume the directory is a path
+	# to the cgen source tree.
+	cgen_maint=yes
+        if test -r ${enableval}/iformat.scm; then
+          # This looks like a cgen source tree.
+	  cgendir=${enableval}
+        else
+	  as_fn_error $? "${enableval} doesn't look like a cgen source tree" "$LINENO" 5
+        fi
+	;;
+esac
+fi
+if test x${cgen_maint} != xno ; then
+  CGEN_MAINT=''
+else
+  CGEN_MAINT='#'
+fi
+
+
+
+
+
+#
+# Enable making unknown traps dump out registers
+#
+# Check whether --enable-sim-trapdump was given.
+if test "${enable_sim_trapdump+set}" = set; then :
+  enableval=$enable_sim_trapdump; case "${enableval}" in
+  yes) sim_trapdump="-DTRAPDUMP=1";;
+  no)  sim_trapdump="-DTRAPDUMP=0";;
+  *)   as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-trapdump\"" "$LINENO" 5; sim_trapdump="";;
+esac
+if test x"$silent" != x"yes" && test x"$sim_trapdump" != x""; then
+  echo "Setting sim_trapdump = $sim_trapdump" 6>&1
+fi
+else
+  sim_trapdump=""
+fi
+
+
+
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror; case "${enableval}" in
@@ -11198,12 +11250,14 @@ if test "${enable_werror+set}" = set; then :
 fi
 
 
-# Enable -Werror by default when using gcc
 if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
-    ERROR_ON_WARNING=yes
+  ERROR_ON_WARNING=yes
 fi
 
 WERROR_CFLAGS=""
+if test "${ERROR_ON_WARNING}" = yes ; then
+  WERROR_CFLAGS="-Werror"
+fi
 
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
 -Wpointer-sign \
@@ -11283,58 +11337,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
-
-
-cgen_maint=no
-cgen=guile
-cgendir='$(srcdir)/../../cgen'
-# Check whether --enable-cgen-maint was given.
-if test "${enable_cgen_maint+set}" = set; then :
-  enableval=$enable_cgen_maint; case "${enableval}" in
-  yes)	cgen_maint=yes ;;
-  no)	cgen_maint=no ;;
-  *)
-	# Argument is a directory where cgen can be found.  In some
-	# future world cgen could be installable, but right now this
-	# is not the case.  Instead we assume the directory is a path
-	# to the cgen source tree.
-	cgen_maint=yes
-        if test -r ${enableval}/iformat.scm; then
-          # This looks like a cgen source tree.
-	  cgendir=${enableval}
-        else
-	  as_fn_error $? "${enableval} doesn't look like a cgen source tree" "$LINENO" 5
-        fi
-	;;
-esac
-fi
-if test x${cgen_maint} != xno ; then
-  CGEN_MAINT=''
-else
-  CGEN_MAINT='#'
-fi
-
-
-
-
-
-#
-# Enable making unknown traps dump out registers
-#
-# Check whether --enable-sim-trapdump was given.
-if test "${enable_sim_trapdump+set}" = set; then :
-  enableval=$enable_sim_trapdump; case "${enableval}" in
-  yes) sim_trapdump="-DTRAPDUMP=1";;
-  no)  sim_trapdump="-DTRAPDUMP=0";;
-  *)   as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-trapdump\"" "$LINENO" 5; sim_trapdump="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_trapdump" != x""; then
-  echo "Setting sim_trapdump = $sim_trapdump" 6>&1
-fi
-else
-  sim_trapdump=""
-fi
-
 
 
 hardware="cfi core pal glue "

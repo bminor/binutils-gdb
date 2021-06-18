@@ -15,7 +15,6 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 dnl --enable-build-warnings is for developers of the simulator.
 dnl it enables extra GCC specific warnings.
-dnl arg[1] Enable -Werror by default? ("yes" or "no")
 AC_DEFUN([SIM_AC_OPTION_WARNINGS],
 [
 AC_ARG_ENABLE(werror,
@@ -26,17 +25,15 @@ AC_ARG_ENABLE(werror,
      *) AC_MSG_ERROR(bad value ${enableval} for --enable-werror) ;;
    esac])
 
-# Enable -Werror by default when using gcc
+dnl Enable -Werror by default when using gcc
 if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
-    ERROR_ON_WARNING=yes
+  ERROR_ON_WARNING=yes
 fi
 
 WERROR_CFLAGS=""
-m4_if(m4_default([$1], [yes]), [yes], [dnl
-  if test "${ERROR_ON_WARNING}" = yes ; then
-    WERROR_CFLAGS="-Werror"
-  fi
-])dnl
+if test "${ERROR_ON_WARNING}" = yes ; then
+  WERROR_CFLAGS="-Werror"
+fi
 
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
 -Wpointer-sign \
