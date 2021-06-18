@@ -309,6 +309,7 @@ if { [is_elf_format] } then {
     run_dump_test "pr27355"
 
     run_dump_test "syms"
+    run_dump_test "startof"
 
     run_dump_test "missing-build-notes"
     

@@ -1,3 +1,10 @@
+2021-06-18  Jan Beulich  <jbeulich@suse.com>
+
+	* expr.c (symbol_lookup_or_make): New.
+	(operand): Use it.
+	* testsuite/gas/elf/startof.s, testsuite/gas/elf/startof.d: New.
+	* testsuite/gas/elf/elf.exp: Run new test.
+
 2021-06-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 27904
