@@ -178,6 +178,25 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 	      goto next;
 
 	    default:
+	      if ((type >= GNU_PROPERTY_UINT32_AND_LO
+		   && type <= GNU_PROPERTY_UINT32_AND_HI)
+		  || (type >= GNU_PROPERTY_UINT32_OR_LO
+		      && type <= GNU_PROPERTY_UINT32_OR_HI))
+		{
+		  if (datasz != 4)
+		    {
+		      _bfd_error_handler
+			(_("error: %pB: <corrupt property (0x%x) size: 0x%x>"),
+			 abfd, type, datasz);
+		      /* Clear all properties.  */
+		      elf_properties (abfd) = NULL;
+		      return false;
+		    }
+		  prop = _bfd_elf_get_property (abfd, type, datasz);
+		  prop->u.number |= bfd_h_get_32 (abfd, ptr);
+		  prop->pr_kind = property_number;
+		  goto next;
+		}
 	      break;
 	    }
 	}
@@ -203,6 +222,8 @@ elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd, bfd *bbfd,
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
+  unsigned int number;
+  bool updated;
 
   if (bed->merge_gnu_properties != NULL
       && pr_type >= GNU_PROPERTY_LOPROC
@@ -229,6 +250,75 @@ elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd, bfd *bbfd,
       return aprop == NULL;
 
     default:
+      updated = false;
+      if (pr_type >= GNU_PROPERTY_UINT32_OR_LO
+	  && pr_type <= GNU_PROPERTY_UINT32_OR_HI)
+	{
+	  if (aprop != NULL && bprop != NULL)
+	    {
+	      number = aprop->u.number;
+	      aprop->u.number = number | bprop->u.number;
+	      /* Remove the property if all bits are empty.  */
+	      if (aprop->u.number == 0)
+		{
+		  aprop->pr_kind = property_remove;
+		  updated = true;
+		}
+	      else
+		updated = number != (unsigned int) aprop->u.number;
+	    }
+	  else
+	    {
+	      /* Only one of APROP and BPROP can be NULL.  */
+	      if (aprop != NULL)
+		{
+		  if (aprop->u.number == 0)
+		    {
+		      /* Remove APROP if all bits are empty.  */
+		      aprop->pr_kind = property_remove;
+		      updated = true;
+		    }
+		}
+	      else
+		{
+		  /* Return TRUE if APROP is NULL and all bits of BPROP
+		     aren't empty to indicate that BPROP should be added
+		     to ABFD.  */
+		  updated = bprop->u.number != 0;
+		}
+	    }
+	  return updated;
+	}
+      else if (pr_type >= GNU_PROPERTY_UINT32_AND_LO
+	       && pr_type <= GNU_PROPERTY_UINT32_AND_HI)
+	{
+	  /* Only one of APROP and BPROP can be NULL:
+	     1. APROP & BPROP when both APROP and BPROP aren't NULL.
+	     2. If APROP is NULL, remove x86 feature.
+	     3. Otherwise, do nothing.
+	     */
+	  if (aprop != NULL && bprop != NULL)
+	    {
+	      number = aprop->u.number;
+	      aprop->u.number = number & bprop->u.number;
+	      updated = number != (unsigned int) aprop->u.number;
+	      /* Remove the property if all feature bits are cleared.  */
+	      if (aprop->u.number == 0)
+		aprop->pr_kind = property_remove;
+	    }
+	  else
+	    {
+	      /* There should be no AND properties since some input
+	         doesn't have them.   */
+	      if (aprop != NULL)
+		{
+		  aprop->pr_kind = property_remove;
+		  updated = true;
+		}
+	    }
+	  return updated;
+	}
+
       /* Never should happen.  */
       abort ();
     }

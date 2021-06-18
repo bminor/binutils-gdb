@@ -1,3 +1,10 @@
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-properties.c (_bfd_elf_parse_gnu_properties): Handle
+	GNU_PROPERTY_UINT32_AND_LO, GNU_PROPERTY_UINT32_AND_HI,
+	GNU_PROPERTY_UINT32_OR_LO and GNU_PROPERTY_UINT32_OR_HI.
+	(elf_merge_gnu_properties): Likewise.
+
 2021-06-11  Alan Modra  <amodra@gmail.com>
 
 	PR 27952

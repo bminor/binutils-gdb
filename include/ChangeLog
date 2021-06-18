@@ -1,3 +1,10 @@
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (GNU_PROPERTY_UINT32_AND_LO): New.
+	(GNU_PROPERTY_UINT32_AND_HI): Likewise.
+	(GNU_PROPERTY_UINT32_OR_LO): Likewise.
+	(GNU_PROPERTY_UINT32_OR_HI): Likewise.
+
 2021-06-15  Nick Clifton  <nickc@redhat.com>
 
 	* elf/common.h (NT_GO_BUILDID): Define.

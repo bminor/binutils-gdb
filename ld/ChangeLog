@@ -1,3 +1,22 @@
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/property-and-1.d: New file.
+	* testsuite/ld-elf/property-and-1.s: Likewise.
+	* testsuite/ld-elf/property-and-2.d: Likewise.
+	* testsuite/ld-elf/property-and-2.s: Likewise.
+	* testsuite/ld-elf/property-and-3.d: Likewise.
+	* testsuite/ld-elf/property-and-3.s: Likewise.
+	* testsuite/ld-elf/property-and-4.d: Likewise.
+	* testsuite/ld-elf/property-and-empty.s: Likewise.
+	* testsuite/ld-elf/property-or-1.d: Likewise.
+	* testsuite/ld-elf/property-or-1.s: Likewise.
+	* testsuite/ld-elf/property-or-2.d: Likewise.
+	* testsuite/ld-elf/property-or-2.s: Likewise.
+	* testsuite/ld-elf/property-or-3.d: Likewise.
+	* testsuite/ld-elf/property-or-3.s: Likewise.
+	* testsuite/ld-elf/property-or-4.d: Likewise.
+	* testsuite/ld-elf/property-or-empty.s: Likewise.
+
 2021-06-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27973

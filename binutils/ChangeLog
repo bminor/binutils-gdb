@@ -1,3 +1,9 @@
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (print_gnu_property_note): Handle
+	GNU_PROPERTY_UINT32_AND_LO, GNU_PROPERTY_UINT32_AND_HI,
+	GNU_PROPERTY_UINT32_OR_LO and GNU_PROPERTY_UINT32_OR_HI.
+
 2021-06-15  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_note_type): Add support for NT_GO_BUILDID.
