@@ -75,39 +75,56 @@ all_threads_iterator::advance ()
 bool
 all_matching_threads_iterator::m_inf_matches ()
 {
-  return ((m_filter_target == nullptr
-	   || m_filter_target == m_inf->process_target ())
-	  && (m_filter_ptid == minus_one_ptid
-	      || m_filter_ptid.pid () == m_inf->pid));
+  return (m_filter_target == nullptr
+	  || m_filter_target == m_inf->process_target ());
 }
 
 /* See thread-iter.h.  */
 
 all_matching_threads_iterator::all_matching_threads_iterator
   (process_stratum_target *filter_target, ptid_t filter_ptid)
-    : m_filter_target (filter_target),
-      m_filter_ptid (filter_ptid)
+  : m_filter_target (filter_target)
 {
-  gdb_assert ((filter_target == nullptr && filter_ptid == minus_one_ptid)
-	      || filter_target->stratum () == process_stratum);
-
-  for (inferior &inf : inferior_list)
+  if (filter_ptid == minus_one_ptid)
     {
-      m_inf = &inf;
-      if (m_inf_matches ())
-	for (auto thr_iter = m_inf->thread_list.begin ();
-	     thr_iter != m_inf->thread_list.end ();
-	     ++thr_iter)
-	  {
-	    if (thr_iter->ptid.matches (m_filter_ptid))
-	      {
-		m_thr = &*thr_iter;
-		return;
-	      }
-	  }
-    }
+      /* Iterate on all threads of all inferiors, possibly filtering on
+         FILTER_TARGET.  */
+      m_mode = mode::ALL_THREADS;
 
-  m_thr = nullptr;
+      /* Seek the first thread of the first matching inferior.  */
+      for (inferior &inf : inferior_list)
+	{
+	  m_inf = &inf;
+
+	  if (!m_inf_matches ()
+	      || inf.thread_list.empty ())
+	    continue;
+
+	  m_thr = &inf.thread_list.front ();
+	  return;
+	}
+    }
+  else
+    {
+      gdb_assert (filter_target != nullptr);
+
+      if (filter_ptid.is_pid ())
+	{
+	  /* Iterate on all threads of the given inferior.  */
+	  m_mode = mode::ALL_THREADS_OF_INFERIOR;
+
+	  m_inf = find_inferior_pid (filter_target, filter_ptid.pid ());
+	  if (m_inf != nullptr)
+	    m_thr = &m_inf->thread_list.front ();
+	}
+      else
+	{
+	  /* Iterate on a single thread.  */
+	  m_mode = mode::SINGLE_THREAD;
+
+	  m_thr = find_thread_ptid (filter_target, filter_ptid);
+	}
+    }
 }
 
 /* See thread-iter.h.  */
@@ -115,32 +132,57 @@ all_matching_threads_iterator::all_matching_threads_iterator
 void
 all_matching_threads_iterator::advance ()
 {
-  intrusive_list<inferior>::iterator inf_iter (m_inf);
-  intrusive_list<thread_info>::iterator thr_iter (m_thr);
-
-  /* The loop below is written in the natural way as-if we'd always
-     start at the beginning of the inferior list.  This fast forwards
-     the algorithm to the actual current position.  */
-  goto start;
-
-  for (; inf_iter != inferior_list.end (); ++inf_iter)
+  switch (m_mode)
     {
-      m_inf = &*inf_iter;
-      if (m_inf_matches ())
-	{
-	  thr_iter = m_inf->thread_list.begin ();
-	  while (thr_iter != m_inf->thread_list.end ())
-	    {
-	      if (thr_iter->ptid.matches (m_filter_ptid))
-		{
-		  m_thr = &*thr_iter;
-		  return;
-		}
-	    start:
-	      ++thr_iter;
-	    }
-	}
-    }
+    case mode::ALL_THREADS:
+      {
+	intrusive_list<inferior>::iterator inf_iter (m_inf);
+	intrusive_list<thread_info>::iterator thr_iter
+	  = m_inf->thread_list.iterator_to (*m_thr);
 
-  m_thr = nullptr;
+	/* The loop below is written in the natural way as-if we'd always
+	   start at the beginning of the inferior list.  This fast forwards
+	   the algorithm to the actual current position.  */
+	goto start;
+
+	for (; inf_iter != inferior_list.end (); ++inf_iter)
+	  {
+	    m_inf = &*inf_iter;
+
+	    if (!m_inf_matches ())
+	      continue;
+
+	    thr_iter = m_inf->thread_list.begin ();
+	    while (thr_iter != m_inf->thread_list.end ())
+	      {
+		m_thr = &*thr_iter;
+		return;
+
+	      start:
+		++thr_iter;
+	      }
+	  }
+      }
+      m_thr = nullptr;
+      break;
+
+    case mode::ALL_THREADS_OF_INFERIOR:
+      {
+	intrusive_list<thread_info>::iterator thr_iter
+	  = m_inf->thread_list.iterator_to (*m_thr);
+	++thr_iter;
+	if (thr_iter != m_inf->thread_list.end ())
+	  m_thr = &*thr_iter;
+	else
+	  m_thr = nullptr;
+	break;
+      }
+
+    case mode::SINGLE_THREAD:
+      m_thr = nullptr;
+      break;
+
+    default:
+      gdb_assert_not_reached ("invalid mode value");
+    }
 }

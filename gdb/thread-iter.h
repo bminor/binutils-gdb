@@ -99,12 +99,7 @@ public:
 				 ptid_t filter_ptid);
 
   /* Create a one-past-end iterator.  */
-  all_matching_threads_iterator ()
-    : m_inf (nullptr),
-      m_thr (nullptr),
-      m_filter_target (nullptr),
-      m_filter_ptid (minus_one_ptid)
-  {}
+  all_matching_threads_iterator () = default;
 
   thread_info *operator* () const { return m_thr; }
 
@@ -124,20 +119,30 @@ private:
   /* Advance to next thread, skipping filtered threads.  */
   void advance ();
 
-  /* True if M_INF matches the process identified by
-     M_FILTER_PTID.  */
+  /* True if M_INF has the process target M_FILTER_TARGET.  */
   bool m_inf_matches ();
 
 private:
+  enum class mode
+  {
+    /* All threads, possibly filtered down to a single target.  */
+    ALL_THREADS,
+
+    /* All threads of the given inferior.  */
+    ALL_THREADS_OF_INFERIOR,
+
+    /* A specific thread.  */
+    SINGLE_THREAD,
+  } m_mode;
+
   /* The current inferior.  */
-  inferior *m_inf;
+  inferior *m_inf = nullptr;
 
   /* The current thread.  */
-  thread_info *m_thr;
+  thread_info *m_thr = nullptr;
 
-  /* The filter.  */
+  /* The target we filter on (may be nullptr).  */
   process_stratum_target *m_filter_target;
-  ptid_t m_filter_ptid;
 };
 
 /* Filter for filtered_iterator.  Filters out exited threads.  */
