@@ -215,14 +215,6 @@ program_space::remove_objfile (struct objfile *objfile)
 
 /* See progspace.h.  */
 
-next_adapter<struct so_list>
-program_space::solibs () const
-{
-  return next_adapter<struct so_list> (this->so_list);
-}
-
-/* See progspace.h.  */
-
 void
 program_space::exec_close ()
 {

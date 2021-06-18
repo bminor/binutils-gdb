@@ -170,43 +170,24 @@ using safe_inf_threads_iterator
 /* A range adapter that makes it possible to iterate over all threads
    of an inferior with range-for.  */
 
-using inf_threads_range
-  = next_adapter<thread_info, inf_threads_iterator>;
+using inf_threads_range = iterator_range<inf_threads_iterator>;
 
 /* A range adapter that makes it possible to iterate over all
    non-exited threads of an inferior with range-for.  */
 
 using inf_non_exited_threads_range
-  = next_adapter<thread_info, inf_non_exited_threads_iterator>;
+  = iterator_range<inf_non_exited_threads_iterator>;
 
 /* A range adapter that makes it possible to iterate over all threads
    of an inferior with range-for, safely.  */
 
-using safe_inf_threads_range
-  = next_adapter<thread_info, safe_inf_threads_iterator>;
-
-/* A range adapter that makes it possible to iterate over all threads
-   of all inferiors with range-for.  */
-
-struct all_threads_range
-{
-  all_threads_iterator begin () const
-  { return all_threads_iterator (all_threads_iterator::begin_t {}); }
-  all_threads_iterator end () const
-  { return all_threads_iterator (); }
-};
+using safe_inf_threads_range = iterator_range<safe_inf_threads_iterator>;
 
 /* A range adapter that makes it possible to iterate over all threads
    with range-for "safely".  I.e., it is safe to delete the
    currently-iterated thread.  */
 
-struct all_threads_safe_range
-{
-  all_threads_safe_iterator begin () const
-  { return all_threads_safe_iterator (all_threads_iterator::begin_t {}); }
-  all_threads_safe_iterator end () const
-  { return all_threads_safe_iterator (); }
-};
+using all_threads_safe_range = iterator_range<all_threads_safe_iterator>;
 
 /* A range adapter that makes it possible to iterate over all threads
    that match a PTID filter with range-for.  */

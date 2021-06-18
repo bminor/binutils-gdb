@@ -33,6 +33,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/gdb_string_view.h"
 #include "gdbsupport/next-iterator.h"
+#include "gdbsupport/iterator-range.h"
 #include "completer.h"
 #include "gdb-demangle.h"
 
@@ -1521,6 +1522,8 @@ struct compunit_symtab
   struct compunit_symtab *user;
 };
 
+using compunit_symtab_range = next_range<compunit_symtab>;
+
 #define COMPUNIT_OBJFILE(cust) ((cust)->objfile)
 #define COMPUNIT_FILETABS(cust) ((cust)->filetabs)
 #define COMPUNIT_DEBUGFORMAT(cust) ((cust)->debugformat)
@@ -1536,13 +1539,13 @@ struct compunit_symtab
 /* A range adapter to allowing iterating over all the file tables
    within a compunit.  */
 
-struct compunit_filetabs : public next_adapter<struct symtab>
+using symtab_range = next_range<symtab>;
+
+static inline symtab_range
+compunit_filetabs (compunit_symtab *cu)
 {
-  compunit_filetabs (struct compunit_symtab *cu)
-    : next_adapter<struct symtab> (cu->filetabs)
-  {
-  }
-};
+  return symtab_range (cu->filetabs);
+}
 
 /* Return the primary symtab of CUST.  */
 

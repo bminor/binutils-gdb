@@ -12283,9 +12283,9 @@ breakpoint::~breakpoint ()
 
 /* See breakpoint.h.  */
 
-bp_locations_range breakpoint::locations ()
+bp_location_range breakpoint::locations ()
 {
-  return bp_locations_range (this->loc);
+  return bp_location_range (this->loc);
 }
 
 static struct bp_location *

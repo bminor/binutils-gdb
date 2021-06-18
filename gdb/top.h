@@ -204,11 +204,13 @@ public:
 #define SWITCH_THRU_ALL_UIS()		\
   for (switch_thru_all_uis stau_state; !stau_state.done (); stau_state.next ())
 
+using ui_range = next_range<ui>;
+
 /* An adapter that can be used to traverse over all UIs.  */
 static inline
-next_adapter<ui> all_uis ()
+ui_range all_uis ()
 {
-  return next_adapter<ui> (ui_list);
+  return ui_range (ui_list);
 }
 
 /* Register the UI's input file descriptor in the event loop.  */

@@ -445,14 +445,12 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (objfile);
 
-  typedef next_adapter<struct compunit_symtab> compunits_range;
-
   /* A range adapter that makes it possible to iterate over all
      compunits in one objfile.  */
 
-  compunits_range compunits ()
+  compunit_symtab_range compunits ()
   {
-    return compunits_range (compunit_symtabs);
+    return compunit_symtab_range (compunit_symtabs);
   }
 
   /* A range adapter that makes it possible to iterate over all
