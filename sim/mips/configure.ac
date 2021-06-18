@@ -407,7 +407,4 @@ AC_SUBST(sim_multi_obj)
 #
 SIM_AC_OPTION_HARDWARE(tx3904cpu tx3904irc tx3904tmr tx3904sio)
 
-
-AC_PATH_X
-
 SIM_AC_OUTPUT
