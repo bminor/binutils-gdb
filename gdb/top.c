@@ -2403,7 +2403,7 @@ gdb_init ()
      to alter it.  */
   set_initial_gdb_ttystate ();
 
-  async_init_signals ();
+  gdb_init_signals ();
 
   /* We need a default language for parsing expressions, so simple
      things like "set width 0" won't fail if no language is explicitly

@@ -32,7 +32,7 @@ struct cmd_list_element;
 extern void display_gdb_prompt (const char *new_prompt);
 extern void gdb_setup_readline (int);
 extern void gdb_disable_readline (void);
-extern void async_init_signals (void);
+extern void gdb_init_signals (void);
 extern void change_line_handler (int);
 
 extern void command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl);

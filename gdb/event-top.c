@@ -899,20 +899,21 @@ handle_sigsegv (int sig)
    handler.  */
 static struct serial_event *quit_serial_event;
 
-/* Initialization of signal handlers and tokens.  There is a function
-   handle_sig* for each of the signals GDB cares about.  Specifically:
-   SIGINT, SIGQUIT, SIGTSTP, SIGHUP, SIGWINCH.  These
-   functions are the actual signal handlers associated to the signals
-   via calls to signal().  The only job for these functions is to
-   enqueue the appropriate event/procedure with the event loop.  Such
-   procedures are the old signal handlers.  The event loop will take
-   care of invoking the queued procedures to perform the usual tasks
-   associated with the reception of the signal.  */
-/* NOTE: 1999-04-30 This is the asynchronous version of init_signals.
-   init_signals will become obsolete as we move to have to event loop
-   as the default for gdb.  */
+/* Initialization of signal handlers and tokens.  There are a number of
+   different strategies for handling different signals here.
+
+   For SIGINT, SIGTERM, SIGQUIT, SIGHUP, SIGTSTP, there is a function
+   handle_sig* for each of these signals.  These functions are the actual
+   signal handlers associated to the signals via calls to signal().  The
+   only job for these functions is to enqueue the appropriate
+   event/procedure with the event loop.  The event loop will take care of
+   invoking the queued procedures to perform the usual tasks associated
+   with the reception of the signal.
+
+   For SIGSEGV the handle_sig* function does all the work for handling this
+   signal.  */
 void
-async_init_signals (void)
+gdb_init_signals (void)
 {
   initialize_async_signal_handlers ();
 
@@ -926,21 +927,7 @@ async_init_signals (void)
     = create_async_signal_handler (async_sigterm_handler, NULL, "sigterm");
   signal (SIGTERM, handle_sigterm);
 
-  /* If SIGTRAP was set to SIG_IGN, then the SIG_IGN will get passed
-     to the inferior and breakpoints will be ignored.  */
-#ifdef SIGTRAP
-  signal (SIGTRAP, SIG_DFL);
-#endif
-
 #ifdef SIGQUIT
-  /* If we initialize SIGQUIT to SIG_IGN, then the SIG_IGN will get
-     passed to the inferior, which we don't want.  It would be
-     possible to do a "signal (SIGQUIT, SIG_DFL)" after we fork, but
-     on BSD4.3 systems using vfork, that can affect the
-     GDB process as well as the inferior (the signal handling tables
-     might be in memory, shared between the two).  Since we establish
-     a handler for SIGQUIT, when we call exec it will set the signal
-     to SIG_DFL for us.  */
   sigquit_token =
     create_async_signal_handler (async_do_nothing, NULL, "sigquit");
   signal (SIGQUIT, handle_sigquit);
