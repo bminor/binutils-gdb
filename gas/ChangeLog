@@ -1,5 +1,9 @@
 2021-06-19  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-z80.c (signed_overflow, unsigned_overflow): Avoid UB.
+
+2021-06-19  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/ppc/raw.s: Use 0 as pli constant.
 	* testsuite/gas/ppc/raw.d: Update to suit.
 
