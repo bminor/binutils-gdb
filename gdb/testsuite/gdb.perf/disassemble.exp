@@ -55,6 +55,6 @@ PerfTest::assemble {
 
     return 0
 } {
-    gdb_test "python Disassemble\(\).run()"
+    gdb_test_python_run "Disassemble\(\)"
     return 0
 }

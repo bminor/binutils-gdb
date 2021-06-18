@@ -63,7 +63,7 @@ PerfTest::assemble {
 } {
     global BACKTRACE_DEPTH
 
-    gdb_test "python BackTrace\($BACKTRACE_DEPTH\).run()"
+    gdb_test_python_run "BackTrace\($BACKTRACE_DEPTH\)"
 
     return 0
 }

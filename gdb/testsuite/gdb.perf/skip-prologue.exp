@@ -63,16 +63,6 @@ PerfTest::assemble {
 } {
     global SKIP_PROLOGUE_COUNT
 
-    set test "run"
-    gdb_test_multiple "python SkipPrologue\($SKIP_PROLOGUE_COUNT\).run()" $test {
-	-re "Breakpoint $decimal at \[^\n\]*\n" {
-	    # GDB prints some messages on breakpoint creation.
-	    # Consume the output to avoid internal buffer full.
-	    exp_continue
-	}
-	-re ".*$gdb_prompt $" {
-	    pass $test
-	}
-    }
+    gdb_test_python_run "SkipPrologue\($SKIP_PROLOGUE_COUNT\)" "run"
     return 0
 }

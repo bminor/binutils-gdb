@@ -59,7 +59,7 @@ PerfTest::assemble {
 	return 0
 } {
 
-	gdb_test "python TemplateBreakpoints().run()"
+	gdb_test_python_run "TemplateBreakpoints()"
 
 	return 0
 }
