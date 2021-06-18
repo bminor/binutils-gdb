@@ -1,3 +1,9 @@
+2021-06-19  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (display_debug_lines_decoded): Use memcpy rather than
+	strncpy when trimming file name length to MAX_FILENAME_LENGTH.
+	Don't make an unnecessary copy when length is good.
+
 2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (print_gnu_property_note): Handle

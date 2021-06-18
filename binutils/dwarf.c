@@ -5426,31 +5426,22 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		fileName = _("<unknown>");
 
 	      fileNameLength = strlen (fileName);
-
-	      if ((fileNameLength > MAX_FILENAME_LENGTH) && (!do_wide))
+	      newFileName = fileName;
+	      if (fileNameLength > MAX_FILENAME_LENGTH && !do_wide)
 		{
 		  newFileName = (char *) xmalloc (MAX_FILENAME_LENGTH + 1);
 		  /* Truncate file name */
-		  strncpy (newFileName,
-			   fileName + fileNameLength - MAX_FILENAME_LENGTH,
-			   MAX_FILENAME_LENGTH + 1);
-		  /* FIXME: This is to pacify gcc-10 which can warn that the
-		     strncpy above might leave a non-NUL terminated string
-		     in newFileName.  It won't, but gcc's analysis doesn't
-		     quite go far enough to discover this.  */
+		  memcpy (newFileName,
+			  fileName + fileNameLength - MAX_FILENAME_LENGTH,
+			  MAX_FILENAME_LENGTH);
 		  newFileName[MAX_FILENAME_LENGTH] = 0;
-		}
-	      else
-		{
-		  newFileName = (char *) xmalloc (fileNameLength + 1);
-		  strncpy (newFileName, fileName, fileNameLength + 1);
 		}
 
 	      /* A row with end_seq set to true has a meaningful address, but
 		 the other information in the same row is not significant.
 		 In such a row, print line as "-", and don't print
 		 view/is_stmt.  */
-	      if (!do_wide || (fileNameLength <= MAX_FILENAME_LENGTH))
+	      if (!do_wide || fileNameLength <= MAX_FILENAME_LENGTH)
 		{
 		  if (linfo.li_max_ops_per_insn == 1)
 		    {
@@ -5525,7 +5516,8 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  putchar ('\n');
 		}
 
-	      free (newFileName);
+	      if (newFileName != fileName)
+		free (newFileName);
 	    }
 	}
 
