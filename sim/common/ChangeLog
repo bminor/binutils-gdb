@@ -1,5 +1,9 @@
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in: Move dependency vars to ../arch-subdir.mk.in.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in: Move toolchain vars to ../arch-subdir.mk.in.
 
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>

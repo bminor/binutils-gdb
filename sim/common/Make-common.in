@@ -82,8 +82,6 @@ SIM_WARN_CFLAGS = $(WARN_CFLAGS)
 SIM_WERROR_CFLAGS = $(WERROR_CFLAGS)
 
 # Dependency tracking information.
-DEPMODE = @CCDEPMODE@
-DEPDIR = @DEPDIR@
 depcomp = $(SHELL) $(srcroot)/depcomp
 
 # Note that these are overridden by GNU make-specific code below if

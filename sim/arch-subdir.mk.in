@@ -40,6 +40,9 @@ AR = @AR@
 AR_FLAGS = rc
 RANLIB = @RANLIB@
 
+DEPMODE = @CCDEPMODE@
+DEPDIR = @DEPDIR@
+
 zlibdir = @zlibdir@
 @PLUGINS_TRUE@LIBDL = @lt_cv_dlopen_libs@
 COMMON_LIBS = @LIBS@

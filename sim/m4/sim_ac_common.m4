@@ -21,12 +21,6 @@ dnl
 dnl See README-HACKING for more details.
 AC_DEFUN([SIM_AC_COMMON],
 [dnl
-# Dependency checking.
-AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([AC_PROG_INSTALL])
-ZW_CREATE_DEPDIR
-ZW_PROG_COMPILER_DEPENDENCIES([CC])
-
 dnl We don't use gettext, but bfd does.  So we do the appropriate checks
 dnl to see if there are intl libraries we should link against.
 ALL_LINGUAS=

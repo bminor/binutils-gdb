@@ -13099,12 +13099,12 @@ SIM_PRIMARY_TARGET=
 
 
 
+
 if test "${enable_sim}" != no; then
   sim_igen=no
   for targ in `echo $target $enable_targets | sed 's/,/ /g'`
   do
-
-  case "${targ}" in
+      case "${targ}" in
     all|aarch64*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=aarch64
@@ -13113,365 +13113,428 @@ if test "${enable_sim}" != no; then
 
 subdirs="$subdirs aarch64"
 
+    ac_config_commands="$ac_config_commands depdir-aarch64"
+
+
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|arm*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=arm
       fi
-      subdirs="$subdirs arm"
+        subdirs="$subdirs arm"
+
+    ac_config_commands="$ac_config_commands depdir-arm"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|avr*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=avr
       fi
-      subdirs="$subdirs avr"
+        subdirs="$subdirs avr"
+
+    ac_config_commands="$ac_config_commands depdir-avr"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|bfin-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bfin
       fi
-      subdirs="$subdirs bfin"
+        subdirs="$subdirs bfin"
+
+    ac_config_commands="$ac_config_commands depdir-bfin"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|bpf-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bpf
       fi
-      subdirs="$subdirs bpf"
+        subdirs="$subdirs bpf"
+
+    ac_config_commands="$ac_config_commands depdir-bpf"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|cr16*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cr16
       fi
-      subdirs="$subdirs cr16"
+        subdirs="$subdirs cr16"
+
+    ac_config_commands="$ac_config_commands depdir-cr16"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|cris-*-* | crisv32-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cris
       fi
-      subdirs="$subdirs cris"
+        subdirs="$subdirs cris"
+
+    ac_config_commands="$ac_config_commands depdir-cris"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|d10v-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=d10v
       fi
-      subdirs="$subdirs d10v"
+        subdirs="$subdirs d10v"
+
+    ac_config_commands="$ac_config_commands depdir-d10v"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|frv-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=frv
       fi
-      subdirs="$subdirs frv"
+        subdirs="$subdirs frv"
+
+    ac_config_commands="$ac_config_commands depdir-frv"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|h8300*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=h8300
       fi
-      subdirs="$subdirs h8300"
+        subdirs="$subdirs h8300"
+
+    ac_config_commands="$ac_config_commands depdir-h8300"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|iq2000-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=iq2000
       fi
-      subdirs="$subdirs iq2000"
+        subdirs="$subdirs iq2000"
+
+    ac_config_commands="$ac_config_commands depdir-iq2000"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|lm32-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=lm32
       fi
-      subdirs="$subdirs lm32"
+        subdirs="$subdirs lm32"
+
+    ac_config_commands="$ac_config_commands depdir-lm32"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|m32c-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32c
       fi
-      subdirs="$subdirs m32c"
+        subdirs="$subdirs m32c"
+
+    ac_config_commands="$ac_config_commands depdir-m32c"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|m32r-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32r
       fi
-      subdirs="$subdirs m32r"
+        subdirs="$subdirs m32r"
+
+    ac_config_commands="$ac_config_commands depdir-m32r"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|m68hc11-*-*|m6811-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m68hc11
       fi
-      subdirs="$subdirs m68hc11"
+        subdirs="$subdirs m68hc11"
+
+    ac_config_commands="$ac_config_commands depdir-m68hc11"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|mcore-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mcore
       fi
-      subdirs="$subdirs mcore"
+        subdirs="$subdirs mcore"
+
+    ac_config_commands="$ac_config_commands depdir-mcore"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|microblaze-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=microblaze
       fi
-      subdirs="$subdirs microblaze"
+        subdirs="$subdirs microblaze"
+
+    ac_config_commands="$ac_config_commands depdir-microblaze"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|mips*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mips
       fi
-      subdirs="$subdirs mips"
+        subdirs="$subdirs mips"
+
+    ac_config_commands="$ac_config_commands depdir-mips"
+
 
       sim_igen=yes
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|mn10300*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mn10300
       fi
-      subdirs="$subdirs mn10300"
+        subdirs="$subdirs mn10300"
+
+    ac_config_commands="$ac_config_commands depdir-mn10300"
+
 
       sim_igen=yes
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|moxie-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=moxie
       fi
-      subdirs="$subdirs moxie"
+        subdirs="$subdirs moxie"
+
+    ac_config_commands="$ac_config_commands depdir-moxie"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|msp430*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=msp430
       fi
-      subdirs="$subdirs msp430"
+        subdirs="$subdirs msp430"
+
+    ac_config_commands="$ac_config_commands depdir-msp430"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|or1k-*-* | or1knd-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=or1k
       fi
-      subdirs="$subdirs or1k"
+        subdirs="$subdirs or1k"
+
+    ac_config_commands="$ac_config_commands depdir-or1k"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|pru*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=pru
       fi
-      subdirs="$subdirs pru"
+        subdirs="$subdirs pru"
+
+    ac_config_commands="$ac_config_commands depdir-pru"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|riscv*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=riscv
       fi
-      subdirs="$subdirs riscv"
+        subdirs="$subdirs riscv"
+
+    ac_config_commands="$ac_config_commands depdir-riscv"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|rl78-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rl78
       fi
-      subdirs="$subdirs rl78"
+        subdirs="$subdirs rl78"
+
+    ac_config_commands="$ac_config_commands depdir-rl78"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|rx-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rx
       fi
-      subdirs="$subdirs rx"
+        subdirs="$subdirs rx"
+
+    ac_config_commands="$ac_config_commands depdir-rx"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|sh*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=sh
       fi
-      subdirs="$subdirs sh"
+        subdirs="$subdirs sh"
+
+    ac_config_commands="$ac_config_commands depdir-sh"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|sparc-*-rtems*|sparc-*-elf*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=erc32
       fi
-      subdirs="$subdirs erc32"
+        subdirs="$subdirs erc32"
+
+    ac_config_commands="$ac_config_commands depdir-erc32"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|powerpc*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ppc
       fi
-      subdirs="$subdirs ppc"
+        subdirs="$subdirs ppc"
+
+    ac_config_commands="$ac_config_commands depdir-ppc"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|ft32-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ft32
       fi
-      subdirs="$subdirs ft32"
+        subdirs="$subdirs ft32"
+
+    ac_config_commands="$ac_config_commands depdir-ft32"
+
 
 
       ;;
   esac
 
-
-  case "${targ}" in
+      case "${targ}" in
     all|v850*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=v850
       fi
-      subdirs="$subdirs v850"
+        subdirs="$subdirs v850"
+
+    ac_config_commands="$ac_config_commands depdir-v850"
+
 
       sim_igen=yes
       ;;
@@ -13480,7 +13543,10 @@ subdirs="$subdirs aarch64"
   done
 
   if test "x${enable_example_sims}" = xyes; then
-    subdirs="$subdirs example-synacor"
+      subdirs="$subdirs example-synacor"
+
+    ac_config_commands="$ac_config_commands depdir-example-synacor"
+
 
   fi
 fi
@@ -14779,6 +14845,38 @@ fi
 
 
 AMDEP_TRUE="$AMDEP_TRUE" ac_aux_dir="$ac_aux_dir"
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
+ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR
 
 _ACEOF
 
@@ -14791,6 +14889,38 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
+    "depdir-aarch64") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-aarch64" ;;
+    "depdir-arm") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-arm" ;;
+    "depdir-avr") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-avr" ;;
+    "depdir-bfin") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bfin" ;;
+    "depdir-bpf") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bpf" ;;
+    "depdir-cr16") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cr16" ;;
+    "depdir-cris") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cris" ;;
+    "depdir-d10v") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-d10v" ;;
+    "depdir-frv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-frv" ;;
+    "depdir-h8300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-h8300" ;;
+    "depdir-iq2000") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-iq2000" ;;
+    "depdir-lm32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-lm32" ;;
+    "depdir-m32c") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32c" ;;
+    "depdir-m32r") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32r" ;;
+    "depdir-m68hc11") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m68hc11" ;;
+    "depdir-mcore") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mcore" ;;
+    "depdir-microblaze") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-microblaze" ;;
+    "depdir-mips") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mips" ;;
+    "depdir-mn10300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mn10300" ;;
+    "depdir-moxie") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-moxie" ;;
+    "depdir-msp430") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-msp430" ;;
+    "depdir-or1k") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-or1k" ;;
+    "depdir-pru") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-pru" ;;
+    "depdir-riscv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-riscv" ;;
+    "depdir-rl78") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rl78" ;;
+    "depdir-rx") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rx" ;;
+    "depdir-sh") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-sh" ;;
+    "depdir-erc32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-erc32" ;;
+    "depdir-ppc") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ppc" ;;
+    "depdir-ft32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ft32" ;;
+    "depdir-v850") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-v850" ;;
+    "depdir-example-synacor") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-example-synacor" ;;
     "arch-subdir.mk") CONFIG_FILES="$CONFIG_FILES arch-subdir.mk" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 
@@ -16120,6 +16250,38 @@ $as_echo X"$file" |
   done
 }
  ;;
+    "depdir-aarch64":C) $SHELL $ac_aux_dir/mkinstalldirs aarch64/$DEPDIR ;;
+    "depdir-arm":C) $SHELL $ac_aux_dir/mkinstalldirs arm/$DEPDIR ;;
+    "depdir-avr":C) $SHELL $ac_aux_dir/mkinstalldirs avr/$DEPDIR ;;
+    "depdir-bfin":C) $SHELL $ac_aux_dir/mkinstalldirs bfin/$DEPDIR ;;
+    "depdir-bpf":C) $SHELL $ac_aux_dir/mkinstalldirs bpf/$DEPDIR ;;
+    "depdir-cr16":C) $SHELL $ac_aux_dir/mkinstalldirs cr16/$DEPDIR ;;
+    "depdir-cris":C) $SHELL $ac_aux_dir/mkinstalldirs cris/$DEPDIR ;;
+    "depdir-d10v":C) $SHELL $ac_aux_dir/mkinstalldirs d10v/$DEPDIR ;;
+    "depdir-frv":C) $SHELL $ac_aux_dir/mkinstalldirs frv/$DEPDIR ;;
+    "depdir-h8300":C) $SHELL $ac_aux_dir/mkinstalldirs h8300/$DEPDIR ;;
+    "depdir-iq2000":C) $SHELL $ac_aux_dir/mkinstalldirs iq2000/$DEPDIR ;;
+    "depdir-lm32":C) $SHELL $ac_aux_dir/mkinstalldirs lm32/$DEPDIR ;;
+    "depdir-m32c":C) $SHELL $ac_aux_dir/mkinstalldirs m32c/$DEPDIR ;;
+    "depdir-m32r":C) $SHELL $ac_aux_dir/mkinstalldirs m32r/$DEPDIR ;;
+    "depdir-m68hc11":C) $SHELL $ac_aux_dir/mkinstalldirs m68hc11/$DEPDIR ;;
+    "depdir-mcore":C) $SHELL $ac_aux_dir/mkinstalldirs mcore/$DEPDIR ;;
+    "depdir-microblaze":C) $SHELL $ac_aux_dir/mkinstalldirs microblaze/$DEPDIR ;;
+    "depdir-mips":C) $SHELL $ac_aux_dir/mkinstalldirs mips/$DEPDIR ;;
+    "depdir-mn10300":C) $SHELL $ac_aux_dir/mkinstalldirs mn10300/$DEPDIR ;;
+    "depdir-moxie":C) $SHELL $ac_aux_dir/mkinstalldirs moxie/$DEPDIR ;;
+    "depdir-msp430":C) $SHELL $ac_aux_dir/mkinstalldirs msp430/$DEPDIR ;;
+    "depdir-or1k":C) $SHELL $ac_aux_dir/mkinstalldirs or1k/$DEPDIR ;;
+    "depdir-pru":C) $SHELL $ac_aux_dir/mkinstalldirs pru/$DEPDIR ;;
+    "depdir-riscv":C) $SHELL $ac_aux_dir/mkinstalldirs riscv/$DEPDIR ;;
+    "depdir-rl78":C) $SHELL $ac_aux_dir/mkinstalldirs rl78/$DEPDIR ;;
+    "depdir-rx":C) $SHELL $ac_aux_dir/mkinstalldirs rx/$DEPDIR ;;
+    "depdir-sh":C) $SHELL $ac_aux_dir/mkinstalldirs sh/$DEPDIR ;;
+    "depdir-erc32":C) $SHELL $ac_aux_dir/mkinstalldirs erc32/$DEPDIR ;;
+    "depdir-ppc":C) $SHELL $ac_aux_dir/mkinstalldirs ppc/$DEPDIR ;;
+    "depdir-ft32":C) $SHELL $ac_aux_dir/mkinstalldirs ft32/$DEPDIR ;;
+    "depdir-v850":C) $SHELL $ac_aux_dir/mkinstalldirs v850/$DEPDIR ;;
+    "depdir-example-synacor":C) $SHELL $ac_aux_dir/mkinstalldirs example-synacor/$DEPDIR ;;
 
   esac
 done # for ac_tag

@@ -1,5 +1,15 @@
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>
 
+	* arch-subdir.mk.in: Move dependency vars from common/Make-common.in.
+	* configure.ac (SIM_BUILD_TARGET): New macro.
+	(SIM_TARGET): Call SIM_BUILD_TARGET.
+	(example): Change AC_CONFIG_SUBDIRS to SIM_BUILD_TARGET.
+	* m4/sim_ac_common.m4: Delete AC_PROG_CC & AC_PROG_INSTALL require,
+	and delete ZW_CREATE_DEPDIR & ZW_PROG_COMPILER_DEPENDENCIES.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
 	* arch-subdir.mk.in: Move toolchain vars from common/Make-common.in.
 	* m4/sim_ac_common.m4: Delete SIM_AC_TOOLCHAIN call.  Require
 	AC_PROG_CC and AC_PROG_INSTALL.

@@ -48,13 +48,20 @@ dnl used when installing files to see if they need to be suffixed.
 SIM_PRIMARY_TARGET=
 AC_SUBST(SIM_PRIMARY_TARGET)
 
-m4_define([SIM_TARGET], [
+m4_define([SIM_BUILD_TARGET], [dnl
+  AC_CONFIG_SUBDIRS($1)
+  dnl Create the depdirs for ports until we can convert them to automake.
+  AC_CONFIG_COMMANDS([depdir-$1],
+		     [$SHELL $ac_aux_dir/mkinstalldirs $1/$DEPDIR],
+		     [ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR])
+])
+m4_define([SIM_TARGET], [dnl
   case "${targ}" in
     all|$1)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=$2
       fi
-      AC_CONFIG_SUBDIRS($2)
+      SIM_BUILD_TARGET($2)
       $3
       ;;
   esac
@@ -102,7 +109,7 @@ if test "${enable_sim}" != no; then
   done
 
   if test "x${enable_example_sims}" = xyes; then
-    AC_CONFIG_SUBDIRS(example-synacor)
+    SIM_BUILD_TARGET([example-synacor])
   fi
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
