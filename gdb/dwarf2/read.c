@@ -90,6 +90,8 @@
 #include "count-one-bits.h"
 #include <unordered_set>
 
+extern bool lazy_expand_symtab_p;
+
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */
