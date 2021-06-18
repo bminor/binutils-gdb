@@ -1104,9 +1104,7 @@ static dwarf2_psymtab *create_partial_symtab
   (dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile,
    const char *name);
 
-static void build_type_psymtabs_reader (const struct die_reader_specs *reader,
-					const gdb_byte *info_ptr,
-					struct die_info *type_unit_die);
+static void build_type_psymtabs_reader (cutu_reader *reader);
 
 static void dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile);
 
@@ -7162,8 +7160,7 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
       /* Nothing.  */
     }
   else if (this_cu->is_debug_types)
-    build_type_psymtabs_reader (&reader, reader.info_ptr,
-				reader.comp_unit_die);
+    build_type_psymtabs_reader (&reader);
   else if (want_partial_unit
 	   || reader.comp_unit_die->tag != DW_TAG_partial_unit)
     process_psymtab_comp_unit_reader (&reader, reader.info_ptr,
@@ -7177,9 +7174,7 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
 /* Reader function for build_type_psymtabs.  */
 
 static void
-build_type_psymtabs_reader (const struct die_reader_specs *reader,
-			    const gdb_byte *info_ptr,
-			    struct die_info *type_unit_die)
+build_type_psymtabs_reader (cutu_reader *reader)
 {
   dwarf2_per_objfile *per_objfile = reader->cu->per_objfile;
   struct dwarf2_cu *cu = reader->cu;
@@ -7190,6 +7185,8 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   struct partial_die_info *first_die;
   CORE_ADDR lowpc, highpc;
   dwarf2_psymtab *pst;
+  const gdb_byte *info_ptr = reader->info_ptr;
+  struct die_info *type_unit_die = reader->comp_unit_die;
 
   gdb_assert (per_cu->is_debug_types);
   sig_type = (struct signatured_type *) per_cu;
@@ -7322,8 +7319,7 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile)
       cutu_reader reader (tu.sig_type, per_objfile,
 			  abbrev_table.get (), nullptr, false);
       if (!reader.dummy_p)
-	build_type_psymtabs_reader (&reader, reader.info_ptr,
-				    reader.comp_unit_die);
+	build_type_psymtabs_reader (&reader);
     }
 }
 
@@ -7411,8 +7407,7 @@ process_skeletonless_type_unit (void **slot, void *info)
   /* This does the job that build_type_psymtabs would have done.  */
   cutu_reader reader (entry, per_objfile, nullptr, nullptr, false);
   if (!reader.dummy_p)
-    build_type_psymtabs_reader (&reader, reader.info_ptr,
-				reader.comp_unit_die);
+    build_type_psymtabs_reader (&reader);
 
   return 1;
 }
