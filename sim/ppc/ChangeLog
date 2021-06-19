@@ -1,5 +1,11 @@
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in: Move intl vars to ../arch-subdir.mk.in.
+	* configure.ac: Delete ZW_GNU_GETTEXT_SISTER_DIR call.
+	* config.in, configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in: Delete toolchain vars.
 	* configure.ac: Likewise.
 	* configure: Regenerate.

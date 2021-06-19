@@ -21,11 +21,6 @@ dnl
 dnl See README-HACKING for more details.
 AC_DEFUN([SIM_AC_COMMON],
 [dnl
-dnl We don't use gettext, but bfd does.  So we do the appropriate checks
-dnl to see if there are intl libraries we should link against.
-ALL_LINGUAS=
-ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
-
 dnl We don't use automake, but we still want to support
 dnl --enable-maintainer-mode.
 AM_MAINTAINER_MODE

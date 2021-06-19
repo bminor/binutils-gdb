@@ -142,6 +142,11 @@ AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
+dnl We don't use gettext, but bfd does.  So we do the appropriate checks
+dnl to see if there are intl libraries we should link against.
+ALL_LINGUAS=
+ZW_GNU_GETTEXT_SISTER_DIR
+
 dnl BFD conditionally uses zlib, so we must link it in if libbfd does, by
 dnl using the same condition.
 AM_ZLIB

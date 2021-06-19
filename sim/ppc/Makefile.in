@@ -133,10 +133,6 @@ LIBIBERTY_LIB	= ../../libiberty/libiberty.a
 BFD_LIB		= ../../bfd/libbfd.a
 ZLIB		= $(zlibdir) -lz
 
-LIBINTL = @LIBINTL@
-LIBINTL_DEP = @LIBINTL_DEP@
-INTL_CFLAGS = @INCINTL@
-
 
 TARGETLIB	= libsim.a
 
