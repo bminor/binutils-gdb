@@ -591,9 +591,6 @@ sim_float
 sim_bitsize
 cgen_breaks
 sim_cycle_accurate_flags
-MAINT
-MAINTAINER_MODE_FALSE
-MAINTAINER_MODE_TRUE
 target_alias
 host_alias
 build_alias
@@ -638,7 +635,6 @@ sim_hw_cflags'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_maintainer_mode
 enable_cycle_accurate
 enable_sim_hardware
 '
@@ -1252,9 +1248,6 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-maintainer-mode
-                          enable make rules and dependencies not useful (and
-                          sometimes confusing) to the casual installer
   --disable-cycle-accurate
                           Disable cycle accurate simulation (faster runtime)
   --enable-sim-hardware=LIST
@@ -1692,32 +1685,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
-$as_echo_n "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
-    # Check whether --enable-maintainer-mode was given.
-if test "${enable_maintainer_mode+set}" = set; then :
-  enableval=$enable_maintainer_mode; USE_MAINTAINER_MODE=$enableval
-else
-  USE_MAINTAINER_MODE=no
-fi
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $USE_MAINTAINER_MODE" >&5
-$as_echo "$USE_MAINTAINER_MODE" >&6; }
-   if test $USE_MAINTAINER_MODE = yes; then
-  MAINTAINER_MODE_TRUE=
-  MAINTAINER_MODE_FALSE='#'
-else
-  MAINTAINER_MODE_TRUE='#'
-  MAINTAINER_MODE_FALSE=
-fi
-
-  MAINT=$MAINTAINER_MODE_TRUE
-
-
-
-
 # Check whether --enable-cycle-accurate was given.
 if test "${enable_cycle_accurate+set}" = set; then :
   enableval=$enable_cycle_accurate; case "${enableval}" in
@@ -1955,10 +1922,6 @@ LIBOBJS=$ac_libobjs
 LTLIBOBJS=$ac_ltlibobjs
 
 
-if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then
-  as_fn_error $? "conditional \"MAINTAINER_MODE\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0

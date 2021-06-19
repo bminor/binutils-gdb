@@ -1,5 +1,10 @@
 2021-06-20  Mike Frysinger  <vapier@gentoo.org>
 
+	* arch-subdir.mk.in (MAINT): Define.
+	* m4/sim_ac_common.m4: Delete AM_MAINTAINER_MODE call.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
 	* arch-subdir.mk.in (CGEN_MAINT, CGENDIR): Define.
 	* configure.ac: Call SIM_AC_OPTION_CGEN_MAINT.
 	* aclocal.m4, configure, Makefile.in: Regenerate.
