@@ -14,55 +14,42 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl
 dnl --enable-sim-hardware is for users of the simulator
-dnl arg[1] is a space separated list of extra target specific devices.
 AC_DEFUN([SIM_AC_OPTION_HARDWARE],
-[
-hardware="cfi core pal glue [$1]"
-sim_hw_cflags="-DWITH_HW=1"
-sim_hw="$hardware"
-sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/dv-\1.o/g'`"
-
+[dnl
+AC_MSG_CHECKING([for sim hardware settings])
 AC_ARG_ENABLE(sim-hardware,
-  [AS_HELP_STRING([--enable-sim-hardware=LIST],
-                  [Specify the hardware to be included in the build.])],
+  [AS_HELP_STRING([--enable-sim-hardware],
+		  [Whether to enable hardware/device simulation])],
   ,[enable_sim_hardware="yes"])
-case ${enable_sim_hardware} in
-  yes|no) ;;
-  ,*) hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
-  *,) hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
-  *)  hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
-esac
-
+sim_hw_sockser=
 if test "$enable_sim_hardware" = no; then
-  sim_hw_objs=
   sim_hw_cflags="-DWITH_HW=0"
-  sim_hw=
-else
+elif test "$enable_sim_hardware" = yes; then
   sim_hw_cflags="-DWITH_HW=1"
-  # remove duplicates
-  sim_hw=""
-  sim_hw_objs="\$(SIM_COMMON_HW_OBJS)"
-  for i in $hardware ; do
-    case " $sim_hw " in
-      *" $i "*) ;;
-      *) sim_hw="$sim_hw $i" ; sim_hw_objs="$sim_hw_objs dv-$i.o";;
-    esac
-  done
   # mingw does not support sockser
   case ${host} in
     *mingw*) ;;
     *) # TODO: We don't add dv-sockser to sim_hw as it is not a "real" device
        # that you instatiate.  Instead, other code will call into it directly.
        # At some point, we should convert it over.
-       sim_hw_objs="$sim_hw_objs dv-sockser.o"
+       sim_hw_sockser="dv-sockser.o"
        sim_hw_cflags="$sim_hw_cflags -DHAVE_DV_SOCKSER"
        ;;
   esac
-  if test x"$silent" != x"yes"; then
-    echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
-  fi
+else
+  AC_MSG_ERROR([unknown argument "$enable_sim_hardware"])
 fi
-])
+dnl AM_CONDITIONAL([SIM_ENABLE_HW], [test "$enable_sim_hardware" = "yes"])
+if test "$enable_sim_hardware" = "yes"; then
+  SIM_ENABLE_HW_TRUE=
+  SIM_ENABLE_HW_FALSE='#'
+else
+  SIM_ENABLE_HW_TRUE='#'
+  SIM_ENABLE_HW_FALSE=
+fi
+AC_SUBST(SIM_ENABLE_HW_TRUE)
+AC_SUBST(SIM_ENABLE_HW_FALSE)
+AC_MSG_RESULT(${enable_sim_hardware})
 AC_SUBST(sim_hw_cflags)
-AC_SUBST(sim_hw_objs)
-AC_SUBST(sim_hw)
+AC_SUBST(sim_hw_sockser)
+])

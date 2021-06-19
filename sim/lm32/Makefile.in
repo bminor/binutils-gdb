@@ -12,6 +12,8 @@ SIM_OBJS = \
         cpu.o decode.o sem.o model.o mloop.o \
         lm32.o traps.o user.o 
 
+SIM_EXTRA_HW_DEVICES = lm32cpu lm32timer lm32uart
+
 # List of extra dependencies.
 # Generally this consists of simulator specific files included by sim-main.h.
 SIM_EXTRA_DEPS = $(CGEN_INCLUDE_DEPS) $(srcdir)/../../opcodes/lm32-desc.h \

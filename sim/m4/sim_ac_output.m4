@@ -51,9 +51,6 @@ AC_SUBST(sim_bitsize)
 AC_SUBST(sim_float)
 AC_SUBST(sim_scache)
 AC_SUBST(sim_default_model)
-AC_SUBST(sim_hw_cflags)
-AC_SUBST(sim_hw_objs)
-AC_SUBST(sim_hw)
 AC_SUBST(sim_reserved_bits)
 
 AC_OUTPUT

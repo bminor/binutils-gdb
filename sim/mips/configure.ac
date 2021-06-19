@@ -400,9 +400,5 @@ AC_SUBST(sim_multi_flags)
 AC_SUBST(sim_multi_igen_configs)
 AC_SUBST(sim_multi_src)
 AC_SUBST(sim_multi_obj)
-#
-# Add simulated hardware devices
-#
-SIM_AC_OPTION_HARDWARE(tx3904cpu tx3904irc tx3904tmr tx3904sio)
 
 SIM_AC_OUTPUT

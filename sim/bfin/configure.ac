@@ -3,39 +3,6 @@ AC_INIT(Makefile.in)
 AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
 SIM_AC_OPTION_DEFAULT_MODEL(bf537)
-SIM_AC_OPTION_HARDWARE(\
-	bfin_cec \
-	bfin_ctimer \
-	bfin_dma \
-	bfin_dmac \
-	bfin_ebiu_amc \
-	bfin_ebiu_ddrc \
-	bfin_ebiu_sdc \
-	bfin_emac \
-	bfin_eppi \
-	bfin_evt \
-	bfin_gpio \
-	bfin_gpio2 \
-	bfin_gptimer \
-	bfin_jtag \
-	bfin_mmu \
-	bfin_nfc \
-	bfin_otp \
-	bfin_pfmon \
-	bfin_pint \
-	bfin_pll \
-	bfin_ppi \
-	bfin_rtc \
-	bfin_sic \
-	bfin_spi \
-	bfin_trace \
-	bfin_twi \
-	bfin_uart \
-	bfin_uart2 \
-	bfin_wdog \
-	bfin_wp \
-	eth_phy \
-)
 
 PKG_PROG_PKG_CONFIG
 PKG_CHECK_MODULES(SDL, sdl, [

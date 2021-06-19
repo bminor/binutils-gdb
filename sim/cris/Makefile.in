@@ -31,6 +31,8 @@ SIM_OBJS = \
 	$(CRISV32F_OBJS) \
 	traps.o
 
+SIM_EXTRA_HW_DEVICES = rv cris cris_900000xx
+
 # Extra headers included by sim-main.h.
 # FIXME: $(srccom)/cgen-ops.h should be in CGEN_INCLUDE_DEPS.
 SIM_EXTRA_DEPS = \

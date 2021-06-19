@@ -18,6 +18,4 @@ SIM_AC_OPTION_DEFAULT_MODEL(m32r/d)
 AC_SUBST(traps_obj)
 AC_SUBST(sim_extra_cflags)
 
-SIM_AC_OPTION_HARDWARE(m32r_cache m32r_uart)
-
 SIM_AC_OUTPUT

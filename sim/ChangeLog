@@ -1,3 +1,11 @@
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Change SIM_AC_OPTION_HARDWARE to
+	SIM_EXTRA_HW_DEVICES.
+	* m4/sim_ac_option_hardware.m4: Remove first argument, and change
+	configure option to a boolean.  Delete device list.
+	* m4/sim_ac_output.m4: Delete sim_hw variables.
+
 2021-06-20  Mike Frysinger  <vapier@gentoo.org>
 
 	* README-HACKING (SIM_AC_COMMON): Delete mention.

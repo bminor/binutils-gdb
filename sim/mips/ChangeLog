@@ -1,3 +1,9 @@
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (SIM_EXTRA_HW_DEVICES): Define.
+	* configure.ac (SIM_AC_OPTION_HARDWARE): Delete call.
+	* configure: Regenerate.
+
 2021-06-20  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (SIM_AC_COMMON): Delete.

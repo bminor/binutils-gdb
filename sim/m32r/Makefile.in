@@ -34,6 +34,8 @@ SIM_OBJS = \
 	$(M32R2_OBJS) \
 	$(TRAPS_OBJ)
 
+SIM_EXTRA_HW_DEVICES = m32r_cache m32r_uart
+
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \
 	$(CGEN_INCLUDE_DEPS) \
