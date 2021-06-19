@@ -1,3 +1,10 @@
+2021-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-x86-64/textrel-1.err: New file.
+	* testsuite/ld-x86-64/textrel-1a.s: Likewise.
+	* testsuite/ld-x86-64/textrel-1b.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run textrel-1 tests.
+
 2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/property-and-1.d: Skip am33_2.0, hppa-hpux

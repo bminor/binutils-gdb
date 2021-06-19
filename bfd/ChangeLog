@@ -1,3 +1,8 @@
+2021-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (bfd_elf_final_link): Correct DT_TEXTREL warning in
+	PDE.
+
 2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-properties.c (_bfd_elf_parse_gnu_properties): Handle

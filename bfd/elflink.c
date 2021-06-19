@@ -13138,6 +13138,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		  else if (bfd_link_dll (info))
 		    info->callbacks->einfo
 		      (_("%P: warning: creating DT_TEXTREL in a shared object\n"));
+		  else if (bfd_link_pde (info))
+		    info->callbacks->einfo
+		      (_("%P: warning: creating DT_TEXTREL in a PDE\n"));
 		  else
 		    info->callbacks->einfo
 		      (_("%P: warning: creating DT_TEXTREL in a PIE\n"));
