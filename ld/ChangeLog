@@ -1,5 +1,19 @@
 2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/property-and-1.d: Skip am33_2.0, hppa-hpux
+	and mn10300.
+	Pass --generate-missing-build-notes=no to assembler.  Allow
+	other note sections for xtensa.
+	* testsuite/ld-elf/property-and-2.d: Likewise.
+	* testsuite/ld-elf/property-and-3.d: Likewise.
+	* testsuite/ld-elf/property-and-4.d: Likewise.
+	* testsuite/ld-elf/property-or-1.d: Likewise.
+	* testsuite/ld-elf/property-or-2.d: Likewise.
+	* testsuite/ld-elf/property-or-3.d: Likewise.
+	* testsuite/ld-elf/property-or-4.d: Likewise.
+
+2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld.texi: Move -z unique-symbol after -z undefs.
 
 2021-06-18  H.J. Lu  <hongjiu.lu@intel.com>
