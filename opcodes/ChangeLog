@@ -1,5 +1,9 @@
 2021-06-19  Alan Modra  <amodra@gmail.com>
 
+	* vax-dis.c (print_insn_vax): Avoid pointer overflow.
+
+2021-06-19  Alan Modra  <amodra@gmail.com>
+
 	* tic30-dis.c (get_register_operand): Don't ask strncpy to fill
 	entire buffer.
 
