@@ -17,8 +17,6 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Makefile.in)
 AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
-SIM_AC_COMMON
-
 # In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], sim_cv_os_cygwin,
 [AC_EGREP_CPP(lose, [

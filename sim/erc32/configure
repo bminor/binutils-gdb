@@ -1833,8 +1833,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
 # In the Cygwin environment, we need some additional flags.
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'

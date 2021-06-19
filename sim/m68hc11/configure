@@ -1680,8 +1680,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
 hardware="cfi core pal glue \
   m68hc11 m68hc11sio m68hc11eepr m68hc11tim m68hc11spi nvram"
 sim_hw_cflags="-DWITH_HW=1"

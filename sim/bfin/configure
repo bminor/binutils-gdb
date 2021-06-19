@@ -1808,8 +1808,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
 default_sim_default_model="bf537"
 # Check whether --enable-sim-default-model was given.
 if test "${enable_sim_default_model+set}" = set; then :

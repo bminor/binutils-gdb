@@ -1699,8 +1699,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
 default_sim_reserved_bits="1"
 # Check whether --enable-sim-reserved-bits was given.
 if test "${enable_sim_reserved_bits+set}" = set; then :

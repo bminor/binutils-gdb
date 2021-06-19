@@ -21,8 +21,6 @@ dnl
 AC_INIT(Makefile.in)
 AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
-SIM_AC_COMMON
-
 AC_ARG_ENABLE(cycle-accurate,
 [AS_HELP_STRING([--disable-cycle-accurate],
 		[Disable cycle accurate simulation (faster runtime)])],

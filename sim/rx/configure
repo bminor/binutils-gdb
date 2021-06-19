@@ -1683,8 +1683,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
 # Check whether --enable-cycle-accurate was given.
 if test "${enable_cycle_accurate+set}" = set; then :
   enableval=$enable_cycle_accurate; case "${enableval}" in

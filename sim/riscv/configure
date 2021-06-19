@@ -1684,8 +1684,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
 # Select the default model for the target.
 riscv_model=
 case "${target}" in

@@ -22,6 +22,4 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 AC_INIT(Makefile.in)
 AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
-SIM_AC_COMMON
-
 SIM_AC_OUTPUT

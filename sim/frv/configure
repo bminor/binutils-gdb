@@ -1689,8 +1689,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
 default_sim_scache="16384"
 # Check whether --enable-sim-scache was given.
 if test "${enable_sim_scache+set}" = set; then :
