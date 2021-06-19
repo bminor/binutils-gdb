@@ -69,11 +69,6 @@ frv-clean:
 	rm -f tmp-*
 	rm -f stamp-arch stamp-cpu
 
-# cgen support, enable with --enable-cgen-maint
-CGEN_MAINT = ; @true
-# The following line is commented in or out depending upon --enable-cgen-maint.
-@CGEN_MAINT@CGEN_MAINT =
-
 stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(srcdir)/../../cpu/frv.cpu
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
 	  archfile=$(srcdir)/../../cpu/frv.cpu \

@@ -54,4 +54,10 @@ COMMON_LIBS = @LIBS@
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
 
+# cgen support, enable with --enable-cgen-maint
+CGEN_MAINT = ; @true
+# The following line is commented in or out depending upon --enable-cgen-maint.
+@CGEN_MAINT@CGEN_MAINT =
+CGENDIR = @cgendir@
+
 SIM_INLINE = @SIM_INLINE@

@@ -93,11 +93,6 @@ traps.o: traps.c $(SIM_MAIN_DEPS) eng.h
 or1k-clean:
 	rm -f mloop.c eng.h stamp-mloop
 
-# cgen support, enable with --enable-cgen-maint
-CGEN_MAINT = ; @true
-# The following line is commented in or out depending upon --enable-cgen-maint.
-@CGEN_MAINT@CGEN_MAINT =
-
 stamps: stamp-arch stamp-cpu stamp-mloop
 
 # NOTE: Generated source files are specified as full paths,

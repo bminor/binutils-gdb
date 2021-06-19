@@ -542,7 +542,6 @@ config.status: configure
 
 # CGEN support
 
-CGENDIR = @cgendir@
 CGEN = "`if [ -f ../../guile/libguile/guile ]; then echo ../../guile/libguile/guile; else echo guile ; fi` -l $(CGENDIR)/guile.scm -s"
 CGENFLAGS = -v
 CGEN_CPU_DIR = $(CGENDIR)/cpu

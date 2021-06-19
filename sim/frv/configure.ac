@@ -6,7 +6,6 @@ SIM_AC_COMMON
 
 SIM_AC_OPTION_SCACHE(16384)
 SIM_AC_OPTION_DEFAULT_MODEL(fr500)
-SIM_AC_OPTION_CGEN_MAINT
 
 #
 # Enable making unknown traps dump out registers

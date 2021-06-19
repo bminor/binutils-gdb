@@ -639,6 +639,9 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 SIM_INLINE
+cgen
+cgendir
+CGEN_MAINT
 SIM_ENABLE_IGEN_FALSE
 SIM_ENABLE_IGEN_TRUE
 subdirs
@@ -810,6 +813,7 @@ enable_example_sims
 enable_targets
 enable_sim_alignment
 enable_sim_assert
+enable_cgen_maint
 enable_sim_debug
 enable_sim_endian
 enable_sim_environment
@@ -1502,6 +1506,7 @@ Optional Features:
                           Specify strict, nonstrict or forced alignment of
                           memory accesses
   --enable-sim-assert     Specify whether to perform random assertions
+  --enable-cgen-maint=DIR build cgen generated files
   --enable-sim-debug=opts Enable debugging flags (for developers of the sim
                           itself)
   --enable-sim-endian=endian
@@ -12036,7 +12041,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12039 "configure"
+#line 12044 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12142,7 +12147,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12145 "configure"
+#line 12150 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13780,6 +13785,39 @@ _ACEOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_assert" >&5
 $as_echo "$sim_assert" >&6; }
+
+
+cgen_maint=no
+cgen=guile
+cgendir='$(srcdir)/../../cgen'
+# Check whether --enable-cgen-maint was given.
+if test "${enable_cgen_maint+set}" = set; then :
+  enableval=$enable_cgen_maint; case "${enableval}" in
+  yes)	cgen_maint=yes ;;
+  no)	cgen_maint=no ;;
+  *)
+	# Argument is a directory where cgen can be found.  In some
+	# future world cgen could be installable, but right now this
+	# is not the case.  Instead we assume the directory is a path
+	# to the cgen source tree.
+	cgen_maint=yes
+        if test -r ${enableval}/iformat.scm; then
+          # This looks like a cgen source tree.
+	  cgendir=${enableval}
+        else
+	  as_fn_error $? "${enableval} doesn't look like a cgen source tree" "$LINENO" 5
+        fi
+	;;
+esac
+fi
+if test x${cgen_maint} != xno ; then
+  CGEN_MAINT=''
+else
+  CGEN_MAINT='#'
+fi
+
+
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim debug setting" >&5
 $as_echo_n "checking for sim debug setting... " >&6; }

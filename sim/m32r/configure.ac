@@ -6,7 +6,6 @@ SIM_AC_COMMON
 
 SIM_AC_OPTION_SCACHE(16384)
 SIM_AC_OPTION_DEFAULT_MODEL(m32r/d)
-SIM_AC_OPTION_CGEN_MAINT
 
   case "${target_alias}" in
   m32r*-linux*)

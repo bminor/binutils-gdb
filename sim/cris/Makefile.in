@@ -102,11 +102,6 @@ cris-clean:
 	-rm -f stamp-arch
 	-rm -f tmp-*
 
-# cgen support, enable with --enable-cgen-maint
-CGEN_MAINT = ; @true
-# The following line is commented in or out depending upon --enable-cgen-maint.
-@CGEN_MAINT@CGEN_MAINT =
-
 # Useful when making CGEN-generated files manually, without --enable-cgen-maint.
 stamps: stamp-v10fmloop stamp-v32fmloop stamp-arch stamp-v10fcpu stamp-v32fcpu
 

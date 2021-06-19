@@ -46,11 +46,6 @@ SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
 
-# cgen support, enable with --enable-cgen-maint
-CGEN_MAINT = ; @true
-# The following line is commented in or out depending upon --enable-cgen-maint.
-@CGEN_MAINT@CGEN_MAINT =
-
 # BPF headers
 
 BPF_INCLUDE_DEPS = \

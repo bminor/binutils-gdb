@@ -108,11 +108,6 @@ m32r-clean:
 	rm -f stamp-arch stamp-cpu stamp-xcpu stamp-2cpu
 	rm -f tmp-*
 
-# cgen support, enable with --enable-cgen-maint
-CGEN_MAINT = ; @true
-# The following line is commented in or out depending upon --enable-cgen-maint.
-@CGEN_MAINT@CGEN_MAINT =
-
 # NOTE: Generated source files are specified as full paths,
 # e.g. $(srcdir)/arch.c, because make may decide the files live
 # in objdir otherwise.

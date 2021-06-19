@@ -100,7 +100,6 @@ AC_DEFUN([AM_SUBST_NOTMAKE], [_AM_SUBST_NOTMAKE($@)])
 
 m4_include([../../config/override.m4])
 m4_include([../m4/sim_ac_common.m4])
-m4_include([../m4/sim_ac_option_cgen_maint.m4])
 m4_include([../m4/sim_ac_option_default_model.m4])
 m4_include([../m4/sim_ac_option_hardware.m4])
 m4_include([../m4/sim_ac_option_scache.m4])
