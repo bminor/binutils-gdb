@@ -1,5 +1,9 @@
 2021-06-22  Mike Frysinger  <vapier@gentoo.org>
 
+	* callback.c (cb_target_to_host_signal): New function.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.c: Include signal.h.
 	(cb_init_signal_map): New prototype.
 	(os_init): Assign signal_map.

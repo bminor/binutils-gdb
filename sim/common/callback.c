@@ -927,6 +927,19 @@ cb_target_to_host_open (host_callback *cb, int target_val)
   return host_val;
 }
 
+/* Translate the target's version of a signal number to the host's.
+   This isn't actually the host's version, rather a canonical form.
+   ??? Perhaps this should be renamed to ..._canon_signal.  */
+
+int
+cb_target_to_host_signal (host_callback *cb, int target_val)
+{
+  const CB_TARGET_DEFS_MAP *m =
+    cb_target_map_entry (cb->signal_map, target_val);
+
+  return m ? m->host_val : -1;
+}
+
 /* Utility for e.g. cb_host_to_target_stat to store values in the target's
    stat struct.
 
