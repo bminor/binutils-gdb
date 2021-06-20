@@ -518,9 +518,6 @@ mostlyclean clean: $(SIM_EXTRA_CLEAN)
 	rm -f hw-config.h stamp-hw
 	rm -f modules.c stamp-modules
 	rm -f gentmap targ-map.c targ-vals.h stamp-tvals
-	if [ ! -f Make-common.in ] ; then \
-		rm -f $(BUILT_SRC_FROM_COMMON) ; \
-	fi
 	rm -f tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
 
 distclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
