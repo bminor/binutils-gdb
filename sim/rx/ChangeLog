@@ -1,5 +1,12 @@
 2021-06-20  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in: Rename sim_cycle_accurate_flags to
+	sim_rx_cycle_accurate_flags.
+	* configure.ac: Likewise.
+	* configure: Regenerate.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_COMMON): Delete.
 	* aclocal.m4, configure: Regenerate.
 

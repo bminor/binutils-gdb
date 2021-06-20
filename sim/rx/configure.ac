@@ -21,19 +21,20 @@ dnl
 AC_INIT(Makefile.in)
 AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
-AC_ARG_ENABLE(cycle-accurate,
-[AS_HELP_STRING([--disable-cycle-accurate],
+AC_MSG_CHECKING([whether sim rx should be cycle accurate])
+AC_ARG_ENABLE(sim-rx-cycle-accurate,
+[AS_HELP_STRING([--disable-sim-rx-cycle-accurate],
 		[Disable cycle accurate simulation (faster runtime)])],
 [case "${enableval}" in
 yes | no) ;;
-*)	AC_MSG_ERROR(bad value ${enableval} given for --enable-cycle-accurate option) ;;
+*)	AC_MSG_ERROR(bad value ${enableval} given for --enable-sim-rx-cycle-accurate option) ;;
 esac])
-
-echo enable_cycle_accurate is $enable_cycle_accurate
-
-if test "x${enable_cycle_accurate}" != xno; then
-  sim_cycle_accurate_flags="-DCYCLE_ACCURATE"
+if test "x${enable_sim_rx_cycle_accurate}" != xno; then
+  sim_rx_cycle_accurate_flags="-DCYCLE_ACCURATE"
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
 fi
-AC_SUBST(sim_cycle_accurate_flags)
+AC_SUBST(sim_rx_cycle_accurate_flags)
 
 SIM_AC_OUTPUT

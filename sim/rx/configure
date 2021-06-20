@@ -590,7 +590,7 @@ sim_scache
 sim_float
 sim_bitsize
 cgen_breaks
-sim_cycle_accurate_flags
+sim_rx_cycle_accurate_flags
 target_alias
 host_alias
 build_alias
@@ -635,7 +635,7 @@ sim_hw_cflags'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_cycle_accurate
+enable_sim_rx_cycle_accurate
 enable_sim_hardware
 '
       ac_precious_vars='build_alias
@@ -1248,7 +1248,7 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --disable-cycle-accurate
+  --disable-sim-rx-cycle-accurate
                           Disable cycle accurate simulation (faster runtime)
   --enable-sim-hardware=LIST
                           Specify the hardware to be included in the build.
@@ -1683,19 +1683,23 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# Check whether --enable-cycle-accurate was given.
-if test "${enable_cycle_accurate+set}" = set; then :
-  enableval=$enable_cycle_accurate; case "${enableval}" in
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sim rx should be cycle accurate" >&5
+$as_echo_n "checking whether sim rx should be cycle accurate... " >&6; }
+# Check whether --enable-sim-rx-cycle-accurate was given.
+if test "${enable_sim_rx_cycle_accurate+set}" = set; then :
+  enableval=$enable_sim_rx_cycle_accurate; case "${enableval}" in
 yes | no) ;;
-*)	as_fn_error $? "bad value ${enableval} given for --enable-cycle-accurate option" "$LINENO" 5 ;;
+*)	as_fn_error $? "bad value ${enableval} given for --enable-sim-rx-cycle-accurate option" "$LINENO" 5 ;;
 esac
 fi
 
-
-echo enable_cycle_accurate is $enable_cycle_accurate
-
-if test "x${enable_cycle_accurate}" != xno; then
-  sim_cycle_accurate_flags="-DCYCLE_ACCURATE"
+if test "x${enable_sim_rx_cycle_accurate}" != xno; then
+  sim_rx_cycle_accurate_flags="-DCYCLE_ACCURATE"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
 
