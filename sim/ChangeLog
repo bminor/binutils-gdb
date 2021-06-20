@@ -1,5 +1,10 @@
 2021-06-22  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Update rx SIM_TARGET call.  Include rx/acinclude.m4.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.am (SUBDIRS): Add $(SIM_SUBDIRS).
 	* configure.ac (SIM_SUBDIRS): Define.
 	(SIM_COMMON_BUILD): New conditional.

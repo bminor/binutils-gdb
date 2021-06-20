@@ -137,7 +137,7 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([pru*-*-*], [pru])
     SIM_TARGET([riscv*-*-*], [riscv], [true])
     SIM_TARGET([rl78-*-*], [rl78])
-    SIM_TARGET([rx-*-*], [rx], [true])
+    SIM_TARGET([rx-*-*], [rx])
     SIM_TARGET([sh*-*-*], [sh])
     SIM_TARGET([sparc-*-rtems*|sparc-*-elf*], [erc32], [true])
     SIM_TARGET([powerpc*-*-*], [ppc], [true])
@@ -174,6 +174,9 @@ AC_SUBST(sim_float)
 AC_SUBST(sim_scache)
 AC_SUBST(sim_default_model)
 AC_SUBST(sim_reserved_bits)
+
+dnl Some arches have unique configure flags.
+m4_include([rx/acinclude.m4])
 
 AC_CONFIG_FILES([arch-subdir.mk Makefile])
 AC_OUTPUT

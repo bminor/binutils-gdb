@@ -217,7 +217,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_option_warnings.m4 \
 	$(top_srcdir)/m4/sim_ac_platform.m4 \
 	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/rx/acinclude.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -231,8 +231,8 @@ CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
 	d10v/Makefile.sim ft32/Makefile.sim h8300/Makefile.sim \
 	m32c/Makefile.sim m68hc11/Makefile.sim mcore/Makefile.sim \
 	microblaze/Makefile.sim moxie/Makefile.sim msp430/Makefile.sim \
-	pru/Makefile.sim rl78/Makefile.sim sh/Makefile.sim \
-	example-synacor/Makefile.sim arch-subdir.mk
+	pru/Makefile.sim rl78/Makefile.sim rx/Makefile.sim \
+	sh/Makefile.sim example-synacor/Makefile.sim arch-subdir.mk
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -714,6 +714,7 @@ SIM_COMMON_BUILD_FALSE = @SIM_COMMON_BUILD_FALSE@
 SIM_COMMON_BUILD_TRUE = @SIM_COMMON_BUILD_TRUE@
 SIM_INLINE = @SIM_INLINE@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
+SIM_RX_CYCLE_ACCURATE_FLAGS = @SIM_RX_CYCLE_ACCURATE_FLAGS@
 SIM_SUBDIRS = @SIM_SUBDIRS@
 STRIP = @STRIP@
 USE_NLS = @USE_NLS@
@@ -965,6 +966,8 @@ msp430/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/msp430/Makefile
 pru/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/pru/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 rl78/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/rl78/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+rx/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/rx/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 sh/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/sh/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
