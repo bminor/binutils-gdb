@@ -590,10 +590,6 @@ sim_scache
 sim_float
 sim_bitsize
 cgen_breaks
-sim_hw_sockser
-sim_hw_cflags
-SIM_ENABLE_HW_FALSE
-SIM_ENABLE_HW_TRUE
 sim_rx_cycle_accurate_flags
 target_alias
 host_alias
@@ -637,7 +633,6 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_sim_rx_cycle_accurate
-enable_sim_hardware
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1251,7 +1246,6 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-sim-rx-cycle-accurate
                           Disable cycle accurate simulation (faster runtime)
-  --enable-sim-hardware   Whether to enable hardware/device simulation
 
 Report bugs to the package provider.
 _ACEOF
@@ -1701,48 +1695,6 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim hardware settings" >&5
-$as_echo_n "checking for sim hardware settings... " >&6; }
-# Check whether --enable-sim-hardware was given.
-if test "${enable_sim_hardware+set}" = set; then :
-  enableval=$enable_sim_hardware;
-else
-  enable_sim_hardware="yes"
-fi
-
-sim_hw_sockser=
-if test "$enable_sim_hardware" = no; then
-  sim_hw_cflags="-DWITH_HW=0"
-elif test "$enable_sim_hardware" = yes; then
-  sim_hw_cflags="-DWITH_HW=1"
-  # mingw does not support sockser
-  case ${host} in
-    *mingw*) ;;
-    *) # TODO: We don't add dv-sockser to sim_hw as it is not a "real" device
-       # that you instatiate.  Instead, other code will call into it directly.
-       # At some point, we should convert it over.
-       sim_hw_sockser="dv-sockser.o"
-       sim_hw_cflags="$sim_hw_cflags -DHAVE_DV_SOCKSER"
-       ;;
-  esac
-else
-  as_fn_error $? "unknown argument \"$enable_sim_hardware\"" "$LINENO" 5
-fi
-if test "$enable_sim_hardware" = "yes"; then
-  SIM_ENABLE_HW_TRUE=
-  SIM_ENABLE_HW_FALSE='#'
-else
-  SIM_ENABLE_HW_TRUE='#'
-  SIM_ENABLE_HW_FALSE=
-fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${enable_sim_hardware}" >&5
-$as_echo "${enable_sim_hardware}" >&6; }
-
-
 
 
 cgen_breaks=""

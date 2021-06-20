@@ -68,3 +68,8 @@ CGEN_MAINT = ; @true
 CGENDIR = @cgendir@
 
 SIM_INLINE = @SIM_INLINE@
+
+SIM_HW_CFLAGS = @sim_hw_cflags@
+SIM_HW_SOCKSER = @sim_hw_sockser@
+SIM_HW_OBJS = $(SIM_COMMON_HW_OBJS) $(SIM_HW_DEVICES:%=dv-%.o) $(SIM_HW_SOCKSER)
+@SIM_ENABLE_HW_FALSE@SIM_HW_OBJS =

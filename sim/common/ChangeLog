@@ -1,5 +1,9 @@
 2021-06-21  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in: Move sim-hw settings to ../arch-subdir.mk.in.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (SIM_HW): Delete.
 	(SIM_HW_OBJS): Redefine.
 	(SIM_HW_SOCKSER, SIM_HW_DEVICES): Define.

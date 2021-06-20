@@ -14,5 +14,4 @@
 m4_ifndef([AC_CONFIG_MACRO_DIRS], [m4_defun([_AM_CONFIG_MACRO_DIRS], [])m4_defun([AC_CONFIG_MACRO_DIRS], [_AM_CONFIG_MACRO_DIRS($@)])])
 m4_include([../m4/sim_ac_option_bitsize.m4])
 m4_include([../m4/sim_ac_option_default_model.m4])
-m4_include([../m4/sim_ac_option_hardware.m4])
 m4_include([../m4/sim_ac_output.m4])

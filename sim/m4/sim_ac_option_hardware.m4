@@ -39,16 +39,7 @@ elif test "$enable_sim_hardware" = yes; then
 else
   AC_MSG_ERROR([unknown argument "$enable_sim_hardware"])
 fi
-dnl AM_CONDITIONAL([SIM_ENABLE_HW], [test "$enable_sim_hardware" = "yes"])
-if test "$enable_sim_hardware" = "yes"; then
-  SIM_ENABLE_HW_TRUE=
-  SIM_ENABLE_HW_FALSE='#'
-else
-  SIM_ENABLE_HW_TRUE='#'
-  SIM_ENABLE_HW_FALSE=
-fi
-AC_SUBST(SIM_ENABLE_HW_TRUE)
-AC_SUBST(SIM_ENABLE_HW_FALSE)
+AM_CONDITIONAL([SIM_ENABLE_HW], [test "$enable_sim_hardware" = "yes"])
 AC_MSG_RESULT(${enable_sim_hardware})
 AC_SUBST(sim_hw_cflags)
 AC_SUBST(sim_hw_sockser)

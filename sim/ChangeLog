@@ -1,5 +1,13 @@
 2021-06-21  Mike Frysinger  <vapier@gentoo.org>
 
+	* arch-subdir.mk.in: Move sim-hw settings from common/Make-common.in.
+	* configure.ac: Call SIM_AC_OPTION_HARDWARE.
+	* m4/sim_ac_option_hardware.m4: Use AM_CONDITIONAL for SIM_ENABLE_HW.
+	* m4/sim_ac_output.m4: Do not require SIM_AC_OPTION_HARDWARE.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
+2021-06-21  Mike Frysinger  <vapier@gentoo.org>
+
 	* README-HACKING: Change SIM_AC_OPTION_HARDWARE to
 	SIM_EXTRA_HW_DEVICES.
 	* m4/sim_ac_option_hardware.m4: Remove first argument, and change

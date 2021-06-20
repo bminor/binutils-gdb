@@ -209,6 +209,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_option_debug.m4 \
 	$(top_srcdir)/m4/sim_ac_option_endian.m4 \
 	$(top_srcdir)/m4/sim_ac_option_environment.m4 \
+	$(top_srcdir)/m4/sim_ac_option_hardware.m4 \
 	$(top_srcdir)/m4/sim_ac_option_inline.m4 \
 	$(top_srcdir)/m4/sim_ac_option_profile.m4 \
 	$(top_srcdir)/m4/sim_ac_option_stdio.m4 \
@@ -759,6 +760,8 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
+sim_hw_cflags = @sim_hw_cflags@
+sim_hw_sockser = @sim_hw_sockser@
 srcdir = @srcdir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@

@@ -72,8 +72,6 @@ SHELL = @SHELL@
 SIM_BITSIZE = @sim_bitsize@
 SIM_DEFAULT_MODEL = @sim_default_model@
 SIM_FLOAT = @sim_float@
-SIM_HW_CFLAGS = @sim_hw_cflags@
-SIM_HW_SOCKSER = @sim_hw_sockser@
 SIM_RESERVED_BITS = @sim_reserved_bits@
 SIM_SCACHE = @sim_scache@
 SIM_WARN_CFLAGS = $(WARN_CFLAGS)
@@ -216,8 +214,6 @@ BUILD_CFLAGS = $(CFLAGS_FOR_BUILD) $(CSEARCH)
 COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(SIM_EXTRA_CFLAGS)
 
 SIM_HW_DEVICES = cfi core pal glue $(SIM_EXTRA_HW_DEVICES)
-SIM_HW_OBJS = $(SIM_COMMON_HW_OBJS) $(SIM_HW_DEVICES:%=dv-%.o) $(SIM_HW_SOCKSER)
-@SIM_ENABLE_HW_FALSE@SIM_HW_OBJS =
 
 ZLIB = $(zlibdir) -lz
 LIBIBERTY_LIB = ../../libiberty/libiberty.a
