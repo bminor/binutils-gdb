@@ -131,6 +131,10 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
     {
+      /* GOTOFF relocation needs PLT.  */
+      if (eh->gotoff_ref)
+	h->plt.refcount = 1;
+
       if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h, &h->dyn_relocs,
 					      plt_entry_size,
 					      (htab->plt.has_plt0
@@ -1818,6 +1822,8 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   const struct elf_backend_data *bed
     = get_elf_backend_data (info->output_bfd);
 
+  eh = (struct elf_x86_link_hash_entry *) h;
+
   /* STT_GNU_IFUNC symbol must go through PLT. */
   if (h->type == STT_GNU_IFUNC)
     {
@@ -1856,6 +1862,10 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 		    h->plt.refcount += 1;
 		}
 	    }
+
+	  /* GOTOFF relocation needs PLT.  */
+	  if (eh->gotoff_ref)
+	    h->plt.refcount = 1;
 	}
 
       if (h->plt.refcount <= 0)
@@ -1895,8 +1905,6 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
        non-function syms in check-relocs;  Objects loaded later in
        the link may change h->type.  So fix it now.  */
     h->plt.offset = (bfd_vma) -1;
-
-  eh = (struct elf_x86_link_hash_entry *) h;
 
   /* If this is a weak symbol, and there is a real definition, the
      processor independent code will have arranged for us to see the

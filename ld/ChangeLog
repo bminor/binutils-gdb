@@ -1,5 +1,14 @@
 2021-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/27998
+	* testsuite/ld-i386/i386.exp: Run PR ld/27998 tests.
+	* testsuite/ld-i386/pr27998a.d: New file.
+	* testsuite/ld-i386/pr27998a.s: Likewise.
+	* testsuite/ld-i386/pr27998b.d: Likewise.
+	* testsuite/ld-i386/pr27998b.s: Likewise.
+
+2021-06-19  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-x86-64/textrel-1.err: New file.
 	* testsuite/ld-x86-64/textrel-1a.s: Likewise.
 	* testsuite/ld-x86-64/textrel-1b.s: Likewise.
