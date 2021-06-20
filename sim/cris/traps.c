@@ -804,7 +804,10 @@ dump_statistics (SIM_CPU *current_cpu)
   CRIS_MISC_PROFILE *profp
     = CPU_CRIS_MISC_PROFILE (current_cpu);
   unsigned64 total = profp->basic_cycle_count;
-  const char *textmsg = "Basic clock cycles, total @: %llu\n";
+
+  /* Historically, these messages have gone to stderr, so we'll keep it
+     that way.  It's also easier to then tell it from normal program
+     output.  FIXME: Add redirect option like "run -e file".  */
 
   /* The --cris-stats={basic|unaligned|schedulable|all} counts affect
      what's included in the "total" count only.  */
@@ -812,16 +815,18 @@ dump_statistics (SIM_CPU *current_cpu)
 	  & FLAG_CRIS_MISC_PROFILE_ALL)
     {
     case FLAG_CRIS_MISC_PROFILE_SIMPLE:
+      sim_io_eprintf (sd, "Basic clock cycles, total @: %" PRIu64 "\n", total);
       break;
 
     case (FLAG_CRIS_MISC_PROFILE_UNALIGNED | FLAG_CRIS_MISC_PROFILE_SIMPLE):
-      textmsg
-	= "Clock cycles including stall cycles for unaligned accesses @: %llu\n";
       total += profp->unaligned_mem_dword_count;
+      sim_io_eprintf (sd,
+		      "Clock cycles including stall cycles for unaligned "
+		      "accesses @: %" PRIu64 "\n",
+		      total);
       break;
 
     case (FLAG_CRIS_MISC_PROFILE_SCHEDULABLE | FLAG_CRIS_MISC_PROFILE_SIMPLE):
-      textmsg = "Schedulable clock cycles, total @: %llu\n";
       total
 	+= (profp->memsrc_stall_count
 	    + profp->memraw_stall_count
@@ -830,10 +835,11 @@ dump_statistics (SIM_CPU *current_cpu)
 	    + profp->mulsrc_stall_count
 	    + profp->jumpsrc_stall_count
 	    + profp->unaligned_mem_dword_count);
+      sim_io_eprintf (sd, "Schedulable clock cycles, total @: %" PRIu64 "\n",
+		      total);
       break;
 
     case FLAG_CRIS_MISC_PROFILE_ALL:
-      textmsg = "All accounted clock cycles, total @: %llu\n";
       total
 	+= (profp->memsrc_stall_count
 	    + profp->memraw_stall_count
@@ -845,44 +851,36 @@ dump_statistics (SIM_CPU *current_cpu)
 	    + profp->branch_stall_count
 	    + profp->jumptarget_stall_count
 	    + profp->unaligned_mem_dword_count);
+      sim_io_eprintf (sd, "All accounted clock cycles, total @: %" PRIu64 "\n",
+		      total);
       break;
 
     default:
-      abort ();
-
-      sim_io_eprintf (sd,
-		      "Internal inconsistency at %s:%d",
-		      __FILE__, __LINE__);
-      sim_engine_halt (sd, current_cpu, NULL, 0,
-		       sim_stopped, SIM_SIGILL);
+      sim_engine_abort (sd, current_cpu, 0,
+			"Internal inconsistency at %s:%d",
+			__FILE__, __LINE__);
     }
-
-  /* Historically, these messages have gone to stderr, so we'll keep it
-     that way.  It's also easier to then tell it from normal program
-     output.  FIXME: Add redirect option like "run -e file".  */
-  sim_io_eprintf (sd, textmsg, total);
 
   /* For v32, unaligned_mem_dword_count should always be 0.  For
      v10, memsrc_stall_count should always be 0.  */
-  sim_io_eprintf (sd, "Memory source stall cycles: %llu\n",
-		  (unsigned long long) (profp->memsrc_stall_count
-					+ profp->unaligned_mem_dword_count));
-  sim_io_eprintf (sd, "Memory read-after-write stall cycles: %llu\n",
-		  (unsigned long long) profp->memraw_stall_count);
-  sim_io_eprintf (sd, "Movem source stall cycles: %llu\n",
-		  (unsigned long long) profp->movemsrc_stall_count);
-  sim_io_eprintf (sd, "Movem destination stall cycles: %llu\n",
-		  (unsigned long long) profp->movemdst_stall_count);
-  sim_io_eprintf (sd, "Movem address stall cycles: %llu\n",
-		  (unsigned long long) profp->movemaddr_stall_count);
-  sim_io_eprintf (sd, "Multiplication source stall cycles: %llu\n",
-		  (unsigned long long) profp->mulsrc_stall_count);
-  sim_io_eprintf (sd, "Jump source stall cycles: %llu\n",
-		  (unsigned long long) profp->jumpsrc_stall_count);
-  sim_io_eprintf (sd, "Branch misprediction stall cycles: %llu\n",
-		  (unsigned long long) profp->branch_stall_count);
-  sim_io_eprintf (sd, "Jump target stall cycles: %llu\n",
-		  (unsigned long long) profp->jumptarget_stall_count);
+  sim_io_eprintf (sd, "Memory source stall cycles: %" PRIu64 "\n",
+		  profp->memsrc_stall_count + profp->unaligned_mem_dword_count);
+  sim_io_eprintf (sd, "Memory read-after-write stall cycles: %" PRIu64 "\n",
+		  profp->memraw_stall_count);
+  sim_io_eprintf (sd, "Movem source stall cycles: %" PRIu64 "\n",
+		  profp->movemsrc_stall_count);
+  sim_io_eprintf (sd, "Movem destination stall cycles: %" PRIu64 "\n",
+		  profp->movemdst_stall_count);
+  sim_io_eprintf (sd, "Movem address stall cycles: %" PRIu64 "\n",
+		  profp->movemaddr_stall_count);
+  sim_io_eprintf (sd, "Multiplication source stall cycles: %" PRIu64 "\n",
+		  profp->mulsrc_stall_count);
+  sim_io_eprintf (sd, "Jump source stall cycles: %" PRIu64 "\n",
+		  profp->jumpsrc_stall_count);
+  sim_io_eprintf (sd, "Branch misprediction stall cycles: %" PRIu64 "\n",
+		  profp->branch_stall_count);
+  sim_io_eprintf (sd, "Jump target stall cycles: %" PRIu64 "\n",
+		  profp->jumptarget_stall_count);
 }
 
 /* Check whether any part of [addr .. addr + len - 1] is already mapped.
@@ -1481,10 +1479,9 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
 
   if (cb_syscall (cb, &s) != CB_RC_OK)
     {
-      abort ();
-      sim_io_eprintf (sd, "Break 13: invalid %d?  Returned %ld\n", callnum,
-		      s.result);
-      sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped, SIM_SIGILL);
+      sim_engine_abort (sd, current_cpu, pc,
+			"Break 13: invalid %d?  Returned %ld\n", callnum,
+			s.result);
     }
 
   retval = s.result == -1 ? -s.errcode : s.result;

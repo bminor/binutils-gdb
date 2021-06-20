@@ -1,5 +1,11 @@
 2021-06-20  Mike Frysinger  <vapier@gentoo.org>
 
+	* traps.c (dump_statistics): Clean up sim_io_eprintf calls, and
+	replace raw abort with sim engine abort.
+	(cris_break_13_handler): Likewise.
+
+2021-06-20  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_COMMON): Delete.
 	* aclocal.m4, configure: Regenerate.
 
