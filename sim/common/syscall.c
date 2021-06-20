@@ -579,7 +579,8 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
       break;
 
     case CB_SYS_getpid:
-      result = getpid ();
+      /* POSIX says getpid always succeeds.  */
+      result = (*cb->getpid) (cb);
       break;
 
     case CB_SYS_time :

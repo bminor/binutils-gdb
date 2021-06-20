@@ -557,6 +557,17 @@ os_truncate (host_callback *p, const char *file, int64_t len)
 }
 
 static int
+os_getpid (host_callback *p)
+{
+  int result;
+
+  result = getpid ();
+  /* POSIX says getpid always succeeds.  */
+  p->last_errno = 0;
+  return result;
+}
+
+static int
 os_pipe (host_callback *p, int *filedes)
 {
   int i;
@@ -736,6 +747,8 @@ host_callback default_callback =
 
   os_ftruncate,
   os_truncate,
+
+  os_getpid,
 
   os_pipe,
   os_pipe_empty,
