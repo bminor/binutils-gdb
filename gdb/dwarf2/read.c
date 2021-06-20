@@ -1442,7 +1442,8 @@ static void dwarf2_symbol_mark_computed (const struct attribute *attr,
 
 static const gdb_byte *skip_one_die (const struct die_reader_specs *reader,
 				     const gdb_byte *info_ptr,
-				     const struct abbrev_info *abbrev);
+				     const struct abbrev_info *abbrev,
+				     bool do_skip_children = true);
 
 static hashval_t partial_die_hash (const void *item);
 
@@ -8337,12 +8338,15 @@ skip_children (const struct die_reader_specs *reader, const gdb_byte *info_ptr)
 /* Scan the debug information for CU starting at INFO_PTR in buffer BUFFER.
    INFO_PTR should point just after the initial uleb128 of a DIE, and the
    abbrev corresponding to that skipped uleb128 should be passed in
-   ABBREV.  Returns a pointer to this DIE's sibling, skipping any
-   children.  */
+   ABBREV.
+   
+   If DO_SKIP_CHILDREN is true, or if the DIE has no children, this
+   returns a pointer to this DIE's sibling, skipping any children.
+   Otherwise, returns a pointer to the DIE's first child.  */
 
 static const gdb_byte *
 skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
-	      const struct abbrev_info *abbrev)
+	      const struct abbrev_info *abbrev, bool do_skip_children)
 {
   unsigned int bytes_read;
   struct attribute attr;
@@ -8355,7 +8359,7 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
   for (i = 0; i < abbrev->num_attrs; i++)
     {
       /* The only abbrev we care about is DW_AT_sibling.  */
-      if (abbrev->attrs[i].name == DW_AT_sibling)
+      if (do_skip_children && abbrev->attrs[i].name == DW_AT_sibling)
 	{
 	  read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr);
 	  if (attr.form == DW_FORM_ref_addr)
@@ -8472,7 +8476,7 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	}
     }
 
-  if (abbrev->has_children)
+  if (do_skip_children && abbrev->has_children)
     return skip_children (reader, info_ptr);
   else
     return info_ptr;
