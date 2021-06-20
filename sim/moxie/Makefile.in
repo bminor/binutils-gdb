@@ -17,8 +17,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-DTC = @DTC@
-
 dtbdir = @datadir@/gdb/dtb
 
 SIM_OBJS = \

@@ -24,6 +24,8 @@ AC_C_BIGENDIAN
 AC_ARG_PROGRAM
 AC_PROG_INSTALL
 
+AC_CHECK_TOOL(DTC, dtc)
+
 dnl Setup toolchain settings for build-time tools..
 if test "x$cross_compiling" = "xno"; then
   : "${AR_FOR_BUILD:=\$(AR)}"

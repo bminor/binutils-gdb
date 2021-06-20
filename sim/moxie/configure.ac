@@ -4,6 +4,4 @@ AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
 SIM_AC_COMMON
 
-AC_CHECK_TOOL(DTC, dtc)
-
 SIM_AC_OUTPUT

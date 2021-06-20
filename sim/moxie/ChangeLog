@@ -1,5 +1,11 @@
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (DTC): Delete.
+	* configure.ac: Delete AC_CHECK_TOOL call.
+	* configure: Regenerate.
+
+2021-06-19  Mike Frysinger  <vapier@gentoo.org>
+
 	* aclocal.m4: Regenerate.
 	* configure: Regenerate.
 
