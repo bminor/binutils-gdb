@@ -226,7 +226,13 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = arch-subdir.mk
+CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
+	arm/Makefile.sim avr/Makefile.sim cr16/Makefile.sim \
+	d10v/Makefile.sim ft32/Makefile.sim h8300/Makefile.sim \
+	m32c/Makefile.sim m68hc11/Makefile.sim mcore/Makefile.sim \
+	microblaze/Makefile.sim moxie/Makefile.sim msp430/Makefile.sim \
+	pru/Makefile.sim rl78/Makefile.sim sh/Makefile.sim \
+	example-synacor/Makefile.sim arch-subdir.mk
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -704,8 +710,11 @@ REPORT_BUGS_TO = @REPORT_BUGS_TO@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SIM_COMMON_BUILD_FALSE = @SIM_COMMON_BUILD_FALSE@
+SIM_COMMON_BUILD_TRUE = @SIM_COMMON_BUILD_TRUE@
 SIM_INLINE = @SIM_INLINE@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
+SIM_SUBDIRS = @SIM_SUBDIRS@
 STRIP = @STRIP@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
@@ -760,8 +769,13 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
+sim_bitsize = @sim_bitsize@
+sim_default_model = @sim_default_model@
+sim_float = @sim_float@
 sim_hw_cflags = @sim_hw_cflags@
 sim_hw_sockser = @sim_hw_sockser@
+sim_reserved_bits = @sim_reserved_bits@
+sim_scache = @sim_scache@
 srcdir = @srcdir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
@@ -778,7 +792,7 @@ zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 srcroot = $(srcdir)/..
-SUBDIRS = @subdirs@
+SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
 AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
 
 # NB: libcommon.a isn't used directly by ports.  We need a target for common
@@ -920,6 +934,42 @@ $(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+Make-common.sim: $(top_builddir)/config.status $(top_srcdir)/common/Make-common.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+aarch64/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/aarch64/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+arm/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/arm/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+avr/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/avr/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+cr16/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/cr16/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+d10v/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/d10v/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+ft32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/ft32/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+h8300/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/h8300/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+m32c/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m32c/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+m68hc11/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m68hc11/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+mcore/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/mcore/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+microblaze/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/microblaze/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+moxie/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/moxie/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+msp430/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/msp430/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+pru/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/pru/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+rl78/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/rl78/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+sh/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/sh/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+example-synacor/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/example-synacor/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 arch-subdir.mk: $(top_builddir)/config.status $(srcdir)/arch-subdir.mk.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 

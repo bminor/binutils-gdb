@@ -584,6 +584,8 @@ PACKAGE_URL=
 ac_unique_file="Makefile.in"
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+SIM_COMMON_BUILD_FALSE
+SIM_COMMON_BUILD_TRUE
 sim_reserved_bits
 sim_default_model
 sim_scache
@@ -1716,6 +1718,11 @@ ac_config_commands="$ac_config_commands stamp-h"
 
 
 
+
+
+
+SIM_COMMON_BUILD_TRUE='#'
+SIM_COMMON_BUILD_FALSE=
 
 
 

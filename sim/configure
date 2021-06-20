@@ -638,6 +638,11 @@ enable_option_checking=no
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
+sim_reserved_bits
+sim_default_model
+sim_scache
+sim_float
+sim_bitsize
 SIM_INLINE
 sim_hw_sockser
 sim_hw_cflags
@@ -649,6 +654,9 @@ CGEN_MAINT
 SIM_ENABLE_IGEN_FALSE
 SIM_ENABLE_IGEN_TRUE
 subdirs
+SIM_COMMON_BUILD_FALSE
+SIM_COMMON_BUILD_TRUE
+SIM_SUBDIRS
 SIM_PRIMARY_TARGET
 AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
@@ -839,38 +847,21 @@ LDFLAGS
 LIBS
 CPPFLAGS
 CPP'
-ac_subdirs_all='aarch64
-arm
-avr
-bfin
+ac_subdirs_all='bfin
 bpf
-cr16
 cris
-d10v
 frv
-h8300
 iq2000
 lm32
-m32c
 m32r
-m68hc11
-mcore
-microblaze
 mips
 mn10300
-moxie
-msp430
 or1k
-pru
 riscv
-rl78
 rx
-sh
 erc32
 ppc
-ft32
-v850
-example-synacor'
+v850'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -12047,7 +12038,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12050 "configure"
+#line 12041 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12153,7 +12144,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12156 "configure"
+#line 12147 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13290,6 +13281,16 @@ fi
 SIM_PRIMARY_TARGET=
 
 
+SIM_SUBDIRS=
+
+
+SIM_COMMON_BUILD_TRUE=
+SIM_COMMON_BUILD_FALSE='#'
+
+
+
+ac_config_files="$ac_config_files Make-common.sim:common/Make-common.in"
+
 
 
 
@@ -13302,9 +13303,11 @@ if test "${enable_sim}" != no; then
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=aarch64
       fi
+            ac_config_files="$ac_config_files aarch64/Makefile.sim:aarch64/Makefile.in"
 
+    ac_config_commands="$ac_config_commands aarch64/Makefile"
 
-subdirs="$subdirs aarch64"
+    as_fn_append SIM_SUBDIRS " aarch64"
 
     ac_config_commands="$ac_config_commands depdir-aarch64"
 
@@ -13318,7 +13321,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=arm
       fi
-        subdirs="$subdirs arm"
+            ac_config_files="$ac_config_files arm/Makefile.sim:arm/Makefile.in"
+
+    ac_config_commands="$ac_config_commands arm/Makefile"
+
+    as_fn_append SIM_SUBDIRS " arm"
 
     ac_config_commands="$ac_config_commands depdir-arm"
 
@@ -13332,7 +13339,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=avr
       fi
-        subdirs="$subdirs avr"
+            ac_config_files="$ac_config_files avr/Makefile.sim:avr/Makefile.in"
+
+    ac_config_commands="$ac_config_commands avr/Makefile"
+
+    as_fn_append SIM_SUBDIRS " avr"
 
     ac_config_commands="$ac_config_commands depdir-avr"
 
@@ -13346,7 +13357,10 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bfin
       fi
-        subdirs="$subdirs bfin"
+
+
+subdirs="$subdirs bfin"
+
 
     ac_config_commands="$ac_config_commands depdir-bfin"
 
@@ -13360,7 +13374,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bpf
       fi
-        subdirs="$subdirs bpf"
+            subdirs="$subdirs bpf"
+
 
     ac_config_commands="$ac_config_commands depdir-bpf"
 
@@ -13374,7 +13389,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cr16
       fi
-        subdirs="$subdirs cr16"
+            ac_config_files="$ac_config_files cr16/Makefile.sim:cr16/Makefile.in"
+
+    ac_config_commands="$ac_config_commands cr16/Makefile"
+
+    as_fn_append SIM_SUBDIRS " cr16"
 
     ac_config_commands="$ac_config_commands depdir-cr16"
 
@@ -13388,7 +13407,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cris
       fi
-        subdirs="$subdirs cris"
+            subdirs="$subdirs cris"
+
 
     ac_config_commands="$ac_config_commands depdir-cris"
 
@@ -13402,7 +13422,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=d10v
       fi
-        subdirs="$subdirs d10v"
+            ac_config_files="$ac_config_files d10v/Makefile.sim:d10v/Makefile.in"
+
+    ac_config_commands="$ac_config_commands d10v/Makefile"
+
+    as_fn_append SIM_SUBDIRS " d10v"
 
     ac_config_commands="$ac_config_commands depdir-d10v"
 
@@ -13416,9 +13440,28 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=frv
       fi
-        subdirs="$subdirs frv"
+            subdirs="$subdirs frv"
+
 
     ac_config_commands="$ac_config_commands depdir-frv"
+
+
+
+      ;;
+  esac
+
+      case "${targ}" in
+    all|ft32-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=ft32
+      fi
+            ac_config_files="$ac_config_files ft32/Makefile.sim:ft32/Makefile.in"
+
+    ac_config_commands="$ac_config_commands ft32/Makefile"
+
+    as_fn_append SIM_SUBDIRS " ft32"
+
+    ac_config_commands="$ac_config_commands depdir-ft32"
 
 
 
@@ -13430,7 +13473,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=h8300
       fi
-        subdirs="$subdirs h8300"
+            ac_config_files="$ac_config_files h8300/Makefile.sim:h8300/Makefile.in"
+
+    ac_config_commands="$ac_config_commands h8300/Makefile"
+
+    as_fn_append SIM_SUBDIRS " h8300"
 
     ac_config_commands="$ac_config_commands depdir-h8300"
 
@@ -13444,7 +13491,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=iq2000
       fi
-        subdirs="$subdirs iq2000"
+            subdirs="$subdirs iq2000"
+
 
     ac_config_commands="$ac_config_commands depdir-iq2000"
 
@@ -13458,7 +13506,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=lm32
       fi
-        subdirs="$subdirs lm32"
+            subdirs="$subdirs lm32"
+
 
     ac_config_commands="$ac_config_commands depdir-lm32"
 
@@ -13472,7 +13521,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32c
       fi
-        subdirs="$subdirs m32c"
+            ac_config_files="$ac_config_files m32c/Makefile.sim:m32c/Makefile.in"
+
+    ac_config_commands="$ac_config_commands m32c/Makefile"
+
+    as_fn_append SIM_SUBDIRS " m32c"
 
     ac_config_commands="$ac_config_commands depdir-m32c"
 
@@ -13486,7 +13539,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32r
       fi
-        subdirs="$subdirs m32r"
+            subdirs="$subdirs m32r"
+
 
     ac_config_commands="$ac_config_commands depdir-m32r"
 
@@ -13500,7 +13554,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m68hc11
       fi
-        subdirs="$subdirs m68hc11"
+            ac_config_files="$ac_config_files m68hc11/Makefile.sim:m68hc11/Makefile.in"
+
+    ac_config_commands="$ac_config_commands m68hc11/Makefile"
+
+    as_fn_append SIM_SUBDIRS " m68hc11"
 
     ac_config_commands="$ac_config_commands depdir-m68hc11"
 
@@ -13514,7 +13572,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mcore
       fi
-        subdirs="$subdirs mcore"
+            ac_config_files="$ac_config_files mcore/Makefile.sim:mcore/Makefile.in"
+
+    ac_config_commands="$ac_config_commands mcore/Makefile"
+
+    as_fn_append SIM_SUBDIRS " mcore"
 
     ac_config_commands="$ac_config_commands depdir-mcore"
 
@@ -13528,7 +13590,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=microblaze
       fi
-        subdirs="$subdirs microblaze"
+            ac_config_files="$ac_config_files microblaze/Makefile.sim:microblaze/Makefile.in"
+
+    ac_config_commands="$ac_config_commands microblaze/Makefile"
+
+    as_fn_append SIM_SUBDIRS " microblaze"
 
     ac_config_commands="$ac_config_commands depdir-microblaze"
 
@@ -13542,7 +13608,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mips
       fi
-        subdirs="$subdirs mips"
+            subdirs="$subdirs mips"
+
 
     ac_config_commands="$ac_config_commands depdir-mips"
 
@@ -13556,7 +13623,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mn10300
       fi
-        subdirs="$subdirs mn10300"
+            subdirs="$subdirs mn10300"
+
 
     ac_config_commands="$ac_config_commands depdir-mn10300"
 
@@ -13570,7 +13638,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=moxie
       fi
-        subdirs="$subdirs moxie"
+            ac_config_files="$ac_config_files moxie/Makefile.sim:moxie/Makefile.in"
+
+    ac_config_commands="$ac_config_commands moxie/Makefile"
+
+    as_fn_append SIM_SUBDIRS " moxie"
 
     ac_config_commands="$ac_config_commands depdir-moxie"
 
@@ -13584,7 +13656,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=msp430
       fi
-        subdirs="$subdirs msp430"
+            ac_config_files="$ac_config_files msp430/Makefile.sim:msp430/Makefile.in"
+
+    ac_config_commands="$ac_config_commands msp430/Makefile"
+
+    as_fn_append SIM_SUBDIRS " msp430"
 
     ac_config_commands="$ac_config_commands depdir-msp430"
 
@@ -13598,7 +13674,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=or1k
       fi
-        subdirs="$subdirs or1k"
+            subdirs="$subdirs or1k"
+
 
     ac_config_commands="$ac_config_commands depdir-or1k"
 
@@ -13612,7 +13689,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=pru
       fi
-        subdirs="$subdirs pru"
+            ac_config_files="$ac_config_files pru/Makefile.sim:pru/Makefile.in"
+
+    ac_config_commands="$ac_config_commands pru/Makefile"
+
+    as_fn_append SIM_SUBDIRS " pru"
 
     ac_config_commands="$ac_config_commands depdir-pru"
 
@@ -13626,7 +13707,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=riscv
       fi
-        subdirs="$subdirs riscv"
+            subdirs="$subdirs riscv"
+
 
     ac_config_commands="$ac_config_commands depdir-riscv"
 
@@ -13640,7 +13722,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rl78
       fi
-        subdirs="$subdirs rl78"
+            ac_config_files="$ac_config_files rl78/Makefile.sim:rl78/Makefile.in"
+
+    ac_config_commands="$ac_config_commands rl78/Makefile"
+
+    as_fn_append SIM_SUBDIRS " rl78"
 
     ac_config_commands="$ac_config_commands depdir-rl78"
 
@@ -13654,7 +13740,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rx
       fi
-        subdirs="$subdirs rx"
+            subdirs="$subdirs rx"
+
 
     ac_config_commands="$ac_config_commands depdir-rx"
 
@@ -13668,7 +13755,11 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=sh
       fi
-        subdirs="$subdirs sh"
+            ac_config_files="$ac_config_files sh/Makefile.sim:sh/Makefile.in"
+
+    ac_config_commands="$ac_config_commands sh/Makefile"
+
+    as_fn_append SIM_SUBDIRS " sh"
 
     ac_config_commands="$ac_config_commands depdir-sh"
 
@@ -13682,7 +13773,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=erc32
       fi
-        subdirs="$subdirs erc32"
+            subdirs="$subdirs erc32"
+
 
     ac_config_commands="$ac_config_commands depdir-erc32"
 
@@ -13696,23 +13788,10 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ppc
       fi
-        subdirs="$subdirs ppc"
+            subdirs="$subdirs ppc"
+
 
     ac_config_commands="$ac_config_commands depdir-ppc"
-
-
-
-      ;;
-  esac
-
-      case "${targ}" in
-    all|ft32-*-*)
-      if test "${targ}" = "${target}"; then
-        SIM_PRIMARY_TARGET=ft32
-      fi
-        subdirs="$subdirs ft32"
-
-    ac_config_commands="$ac_config_commands depdir-ft32"
 
 
 
@@ -13724,7 +13803,8 @@ subdirs="$subdirs aarch64"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=v850
       fi
-        subdirs="$subdirs v850"
+            subdirs="$subdirs v850"
+
 
     ac_config_commands="$ac_config_commands depdir-v850"
 
@@ -13736,7 +13816,11 @@ subdirs="$subdirs aarch64"
   done
 
   if test "x${enable_example_sims}" = xyes; then
-      subdirs="$subdirs example-synacor"
+          ac_config_files="$ac_config_files example-synacor/Makefile.sim:example-synacor/Makefile.in"
+
+    ac_config_commands="$ac_config_commands example-synacor/Makefile"
+
+    as_fn_append SIM_SUBDIRS " example-synacor"
 
     ac_config_commands="$ac_config_commands depdir-example-synacor"
 
@@ -14150,6 +14234,12 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
+
+
+
+
+
+
 
 
 ac_config_files="$ac_config_files arch-subdir.mk Makefile"
@@ -15192,37 +15282,72 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
+    "Make-common.sim") CONFIG_FILES="$CONFIG_FILES Make-common.sim:common/Make-common.in" ;;
+    "aarch64/Makefile.sim") CONFIG_FILES="$CONFIG_FILES aarch64/Makefile.sim:aarch64/Makefile.in" ;;
+    "aarch64/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS aarch64/Makefile" ;;
     "depdir-aarch64") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-aarch64" ;;
+    "arm/Makefile.sim") CONFIG_FILES="$CONFIG_FILES arm/Makefile.sim:arm/Makefile.in" ;;
+    "arm/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS arm/Makefile" ;;
     "depdir-arm") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-arm" ;;
+    "avr/Makefile.sim") CONFIG_FILES="$CONFIG_FILES avr/Makefile.sim:avr/Makefile.in" ;;
+    "avr/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS avr/Makefile" ;;
     "depdir-avr") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-avr" ;;
     "depdir-bfin") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bfin" ;;
     "depdir-bpf") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bpf" ;;
+    "cr16/Makefile.sim") CONFIG_FILES="$CONFIG_FILES cr16/Makefile.sim:cr16/Makefile.in" ;;
+    "cr16/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS cr16/Makefile" ;;
     "depdir-cr16") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cr16" ;;
     "depdir-cris") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cris" ;;
+    "d10v/Makefile.sim") CONFIG_FILES="$CONFIG_FILES d10v/Makefile.sim:d10v/Makefile.in" ;;
+    "d10v/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS d10v/Makefile" ;;
     "depdir-d10v") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-d10v" ;;
     "depdir-frv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-frv" ;;
+    "ft32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES ft32/Makefile.sim:ft32/Makefile.in" ;;
+    "ft32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS ft32/Makefile" ;;
+    "depdir-ft32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ft32" ;;
+    "h8300/Makefile.sim") CONFIG_FILES="$CONFIG_FILES h8300/Makefile.sim:h8300/Makefile.in" ;;
+    "h8300/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS h8300/Makefile" ;;
     "depdir-h8300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-h8300" ;;
     "depdir-iq2000") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-iq2000" ;;
     "depdir-lm32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-lm32" ;;
+    "m32c/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m32c/Makefile.sim:m32c/Makefile.in" ;;
+    "m32c/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m32c/Makefile" ;;
     "depdir-m32c") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32c" ;;
     "depdir-m32r") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32r" ;;
+    "m68hc11/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m68hc11/Makefile.sim:m68hc11/Makefile.in" ;;
+    "m68hc11/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m68hc11/Makefile" ;;
     "depdir-m68hc11") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m68hc11" ;;
+    "mcore/Makefile.sim") CONFIG_FILES="$CONFIG_FILES mcore/Makefile.sim:mcore/Makefile.in" ;;
+    "mcore/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS mcore/Makefile" ;;
     "depdir-mcore") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mcore" ;;
+    "microblaze/Makefile.sim") CONFIG_FILES="$CONFIG_FILES microblaze/Makefile.sim:microblaze/Makefile.in" ;;
+    "microblaze/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS microblaze/Makefile" ;;
     "depdir-microblaze") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-microblaze" ;;
     "depdir-mips") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mips" ;;
     "depdir-mn10300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mn10300" ;;
+    "moxie/Makefile.sim") CONFIG_FILES="$CONFIG_FILES moxie/Makefile.sim:moxie/Makefile.in" ;;
+    "moxie/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS moxie/Makefile" ;;
     "depdir-moxie") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-moxie" ;;
+    "msp430/Makefile.sim") CONFIG_FILES="$CONFIG_FILES msp430/Makefile.sim:msp430/Makefile.in" ;;
+    "msp430/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS msp430/Makefile" ;;
     "depdir-msp430") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-msp430" ;;
     "depdir-or1k") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-or1k" ;;
+    "pru/Makefile.sim") CONFIG_FILES="$CONFIG_FILES pru/Makefile.sim:pru/Makefile.in" ;;
+    "pru/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS pru/Makefile" ;;
     "depdir-pru") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-pru" ;;
     "depdir-riscv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-riscv" ;;
+    "rl78/Makefile.sim") CONFIG_FILES="$CONFIG_FILES rl78/Makefile.sim:rl78/Makefile.in" ;;
+    "rl78/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS rl78/Makefile" ;;
     "depdir-rl78") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rl78" ;;
     "depdir-rx") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rx" ;;
+    "sh/Makefile.sim") CONFIG_FILES="$CONFIG_FILES sh/Makefile.sim:sh/Makefile.in" ;;
+    "sh/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS sh/Makefile" ;;
     "depdir-sh") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-sh" ;;
     "depdir-erc32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-erc32" ;;
     "depdir-ppc") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ppc" ;;
-    "depdir-ft32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ft32" ;;
     "depdir-v850") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-v850" ;;
+    "example-synacor/Makefile.sim") CONFIG_FILES="$CONFIG_FILES example-synacor/Makefile.sim:example-synacor/Makefile.in" ;;
+    "example-synacor/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS example-synacor/Makefile" ;;
     "depdir-example-synacor") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-example-synacor" ;;
     "arch-subdir.mk") CONFIG_FILES="$CONFIG_FILES arch-subdir.mk" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
@@ -16553,37 +16678,241 @@ $as_echo X"$file" |
   done
 }
  ;;
+    "aarch64/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/aarch64:; }
+		p
+	}' \
+	<Make-common.sim >aarch64/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >aarch64/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r aarch64/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r aarch64/Makesim2.tmp' \
+	<aarch64/Makefile.sim >aarch64/Makefile
+ rm -f aarch64/Makesim1.tmp aarch64/Makesim2.tmp
+ ;;
     "depdir-aarch64":C) $SHELL $ac_aux_dir/mkinstalldirs aarch64/$DEPDIR ;;
+    "arm/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/arm:; }
+		p
+	}' \
+	<Make-common.sim >arm/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >arm/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r arm/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r arm/Makesim2.tmp' \
+	<arm/Makefile.sim >arm/Makefile
+ rm -f arm/Makesim1.tmp arm/Makesim2.tmp
+ ;;
     "depdir-arm":C) $SHELL $ac_aux_dir/mkinstalldirs arm/$DEPDIR ;;
+    "avr/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/avr:; }
+		p
+	}' \
+	<Make-common.sim >avr/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >avr/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r avr/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r avr/Makesim2.tmp' \
+	<avr/Makefile.sim >avr/Makefile
+ rm -f avr/Makesim1.tmp avr/Makesim2.tmp
+ ;;
     "depdir-avr":C) $SHELL $ac_aux_dir/mkinstalldirs avr/$DEPDIR ;;
     "depdir-bfin":C) $SHELL $ac_aux_dir/mkinstalldirs bfin/$DEPDIR ;;
     "depdir-bpf":C) $SHELL $ac_aux_dir/mkinstalldirs bpf/$DEPDIR ;;
+    "cr16/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/cr16:; }
+		p
+	}' \
+	<Make-common.sim >cr16/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >cr16/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r cr16/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r cr16/Makesim2.tmp' \
+	<cr16/Makefile.sim >cr16/Makefile
+ rm -f cr16/Makesim1.tmp cr16/Makesim2.tmp
+ ;;
     "depdir-cr16":C) $SHELL $ac_aux_dir/mkinstalldirs cr16/$DEPDIR ;;
     "depdir-cris":C) $SHELL $ac_aux_dir/mkinstalldirs cris/$DEPDIR ;;
+    "d10v/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/d10v:; }
+		p
+	}' \
+	<Make-common.sim >d10v/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >d10v/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r d10v/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r d10v/Makesim2.tmp' \
+	<d10v/Makefile.sim >d10v/Makefile
+ rm -f d10v/Makesim1.tmp d10v/Makesim2.tmp
+ ;;
     "depdir-d10v":C) $SHELL $ac_aux_dir/mkinstalldirs d10v/$DEPDIR ;;
     "depdir-frv":C) $SHELL $ac_aux_dir/mkinstalldirs frv/$DEPDIR ;;
+    "ft32/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/ft32:; }
+		p
+	}' \
+	<Make-common.sim >ft32/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >ft32/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r ft32/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r ft32/Makesim2.tmp' \
+	<ft32/Makefile.sim >ft32/Makefile
+ rm -f ft32/Makesim1.tmp ft32/Makesim2.tmp
+ ;;
+    "depdir-ft32":C) $SHELL $ac_aux_dir/mkinstalldirs ft32/$DEPDIR ;;
+    "h8300/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/h8300:; }
+		p
+	}' \
+	<Make-common.sim >h8300/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >h8300/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r h8300/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r h8300/Makesim2.tmp' \
+	<h8300/Makefile.sim >h8300/Makefile
+ rm -f h8300/Makesim1.tmp h8300/Makesim2.tmp
+ ;;
     "depdir-h8300":C) $SHELL $ac_aux_dir/mkinstalldirs h8300/$DEPDIR ;;
     "depdir-iq2000":C) $SHELL $ac_aux_dir/mkinstalldirs iq2000/$DEPDIR ;;
     "depdir-lm32":C) $SHELL $ac_aux_dir/mkinstalldirs lm32/$DEPDIR ;;
+    "m32c/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/m32c:; }
+		p
+	}' \
+	<Make-common.sim >m32c/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >m32c/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r m32c/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r m32c/Makesim2.tmp' \
+	<m32c/Makefile.sim >m32c/Makefile
+ rm -f m32c/Makesim1.tmp m32c/Makesim2.tmp
+ ;;
     "depdir-m32c":C) $SHELL $ac_aux_dir/mkinstalldirs m32c/$DEPDIR ;;
     "depdir-m32r":C) $SHELL $ac_aux_dir/mkinstalldirs m32r/$DEPDIR ;;
+    "m68hc11/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/m68hc11:; }
+		p
+	}' \
+	<Make-common.sim >m68hc11/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >m68hc11/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r m68hc11/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r m68hc11/Makesim2.tmp' \
+	<m68hc11/Makefile.sim >m68hc11/Makefile
+ rm -f m68hc11/Makesim1.tmp m68hc11/Makesim2.tmp
+ ;;
     "depdir-m68hc11":C) $SHELL $ac_aux_dir/mkinstalldirs m68hc11/$DEPDIR ;;
+    "mcore/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/mcore:; }
+		p
+	}' \
+	<Make-common.sim >mcore/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >mcore/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r mcore/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r mcore/Makesim2.tmp' \
+	<mcore/Makefile.sim >mcore/Makefile
+ rm -f mcore/Makesim1.tmp mcore/Makesim2.tmp
+ ;;
     "depdir-mcore":C) $SHELL $ac_aux_dir/mkinstalldirs mcore/$DEPDIR ;;
+    "microblaze/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/microblaze:; }
+		p
+	}' \
+	<Make-common.sim >microblaze/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >microblaze/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r microblaze/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r microblaze/Makesim2.tmp' \
+	<microblaze/Makefile.sim >microblaze/Makefile
+ rm -f microblaze/Makesim1.tmp microblaze/Makesim2.tmp
+ ;;
     "depdir-microblaze":C) $SHELL $ac_aux_dir/mkinstalldirs microblaze/$DEPDIR ;;
     "depdir-mips":C) $SHELL $ac_aux_dir/mkinstalldirs mips/$DEPDIR ;;
     "depdir-mn10300":C) $SHELL $ac_aux_dir/mkinstalldirs mn10300/$DEPDIR ;;
+    "moxie/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/moxie:; }
+		p
+	}' \
+	<Make-common.sim >moxie/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >moxie/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r moxie/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r moxie/Makesim2.tmp' \
+	<moxie/Makefile.sim >moxie/Makefile
+ rm -f moxie/Makesim1.tmp moxie/Makesim2.tmp
+ ;;
     "depdir-moxie":C) $SHELL $ac_aux_dir/mkinstalldirs moxie/$DEPDIR ;;
+    "msp430/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/msp430:; }
+		p
+	}' \
+	<Make-common.sim >msp430/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >msp430/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r msp430/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r msp430/Makesim2.tmp' \
+	<msp430/Makefile.sim >msp430/Makefile
+ rm -f msp430/Makesim1.tmp msp430/Makesim2.tmp
+ ;;
     "depdir-msp430":C) $SHELL $ac_aux_dir/mkinstalldirs msp430/$DEPDIR ;;
     "depdir-or1k":C) $SHELL $ac_aux_dir/mkinstalldirs or1k/$DEPDIR ;;
+    "pru/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/pru:; }
+		p
+	}' \
+	<Make-common.sim >pru/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >pru/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r pru/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r pru/Makesim2.tmp' \
+	<pru/Makefile.sim >pru/Makefile
+ rm -f pru/Makesim1.tmp pru/Makesim2.tmp
+ ;;
     "depdir-pru":C) $SHELL $ac_aux_dir/mkinstalldirs pru/$DEPDIR ;;
     "depdir-riscv":C) $SHELL $ac_aux_dir/mkinstalldirs riscv/$DEPDIR ;;
+    "rl78/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/rl78:; }
+		p
+	}' \
+	<Make-common.sim >rl78/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >rl78/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r rl78/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r rl78/Makesim2.tmp' \
+	<rl78/Makefile.sim >rl78/Makefile
+ rm -f rl78/Makesim1.tmp rl78/Makesim2.tmp
+ ;;
     "depdir-rl78":C) $SHELL $ac_aux_dir/mkinstalldirs rl78/$DEPDIR ;;
     "depdir-rx":C) $SHELL $ac_aux_dir/mkinstalldirs rx/$DEPDIR ;;
+    "sh/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/sh:; }
+		p
+	}' \
+	<Make-common.sim >sh/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >sh/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r sh/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r sh/Makesim2.tmp' \
+	<sh/Makefile.sim >sh/Makefile
+ rm -f sh/Makesim1.tmp sh/Makesim2.tmp
+ ;;
     "depdir-sh":C) $SHELL $ac_aux_dir/mkinstalldirs sh/$DEPDIR ;;
     "depdir-erc32":C) $SHELL $ac_aux_dir/mkinstalldirs erc32/$DEPDIR ;;
     "depdir-ppc":C) $SHELL $ac_aux_dir/mkinstalldirs ppc/$DEPDIR ;;
-    "depdir-ft32":C) $SHELL $ac_aux_dir/mkinstalldirs ft32/$DEPDIR ;;
     "depdir-v850":C) $SHELL $ac_aux_dir/mkinstalldirs v850/$DEPDIR ;;
+    "example-synacor/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir / { s:= := ../:; s:$:/example-synacor:; }
+		p
+	}' \
+	<Make-common.sim >example-synacor/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >example-synacor/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r example-synacor/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r example-synacor/Makesim2.tmp' \
+	<example-synacor/Makefile.sim >example-synacor/Makefile
+ rm -f example-synacor/Makesim1.tmp example-synacor/Makesim2.tmp
+ ;;
     "depdir-example-synacor":C) $SHELL $ac_aux_dir/mkinstalldirs example-synacor/$DEPDIR ;;
 
   esac

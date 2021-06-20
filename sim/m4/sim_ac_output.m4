@@ -51,5 +51,11 @@ AC_SUBST(sim_scache)
 AC_SUBST(sim_default_model)
 AC_SUBST(sim_reserved_bits)
 
+dnl Used by common/Make-common.in to see which configure script created it.
+SIM_COMMON_BUILD_TRUE='#'
+SIM_COMMON_BUILD_FALSE=
+AC_SUBST(SIM_COMMON_BUILD_TRUE)
+AC_SUBST(SIM_COMMON_BUILD_FALSE)
+
 AC_OUTPUT
 ])

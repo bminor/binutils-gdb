@@ -1,3 +1,15 @@
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (SUBDIRS): Add $(SIM_SUBDIRS).
+	* configure.ac (SIM_SUBDIRS): Define.
+	(SIM_COMMON_BUILD): New conditional.
+	(SIM_BUILD_TARGET): Update to take a 2nd arg.
+	(SIM_TARGET): Update to take a 4th arg.  Update callers.
+	(sim_bitsize, sim_float, sim_scache, sim_default_model,
+	sim_reserved_bits): Define.
+	* m4/sim_ac_output.m4 (SIM_COMMON_BUILD): New conditional.
+	* configure, Makefile.in: Regenerate.
+
 2021-06-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* arch-subdir.mk.in: Move sim-hw settings from common/Make-common.in.
