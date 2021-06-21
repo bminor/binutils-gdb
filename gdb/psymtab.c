@@ -198,12 +198,13 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 			 pc - baseaddr));
       if (pst != NULL)
 	{
+	  struct partial_symbol *p = nullptr;
+
 	  /* FIXME: addrmaps currently do not handle overlayed sections,
 	     so fall back to the non-addrmap case if we're debugging
 	     overlays and the addrmap returned the wrong section.  */
 	  if (overlay_debugging && msymbol.minsym != NULL && section != NULL)
 	    {
-	      struct partial_symbol *p;
 
 	      /* NOTE: This assumes that every psymbol has a
 		 corresponding msymbol, which is not necessarily
@@ -224,6 +225,8 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 	     granularity and FIND_PC_SECT_PSYMTAB_CLOSER may mislead us into
 	     a worse chosen section due to the TEXTLOW/TEXTHIGH ranges
 	     overlap.  */
+	  if (lazy_expand_symtab_p && p == nullptr)
+	    p = find_pc_sect_psymbol (objfile, pst, pc, section);
 
 	  return pst;
 	}
