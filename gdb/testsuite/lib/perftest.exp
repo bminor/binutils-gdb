@@ -25,9 +25,15 @@ namespace eval PerfTest {
 	set remote_python_file [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 
 	# Set sys.path for module perftest.
-	gdb_test_no_output "python import os, sys"
-	gdb_test_no_output "python sys.path.insert\(0, os.path.abspath\(\"${srcdir}/${subdir}/lib\"\)\)"
-	gdb_test_no_output "python exec (open ('${remote_python_file}').read ())"
+	with_test_prefix "setup perftest" {
+	    gdb_test_no_output "python import os, sys"
+	    gdb_test_no_output \
+		"python sys.path.insert\(0, os.path.abspath\(\"${srcdir}/${subdir}/lib\"\)\)" \
+		"python sys.path.insert\(0, os.path.abspath\(\"\${srcdir}/${subdir}/lib\"\)\)"
+	    gdb_test_no_output \
+		"python exec (open ('${remote_python_file}').read ())" \
+		"python exec (open ('\${srcdir}/${subdir}/${testfile}.py').read ())"
+	}
     }
 
     # A private method to do some cleanups when performance test is
