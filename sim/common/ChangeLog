@@ -1,5 +1,9 @@
 2021-06-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-syscall.c (sim_syscall_multi): Handle CB_SYS_kill.
+
+2021-06-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.c (os_kill): New function.
 	(default_callback): Add os_kill.
 	* syscall.c (cb_syscall): Handle CB_SYS_kill.
