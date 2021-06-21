@@ -101,9 +101,12 @@ proc run_skip_bench { kind text } {
     gdb_test_no_output "set variable flag = 1"
 
     for { set i 0 } { $i < 5 } { incr i } {
-	set nr_skips [expr $i * $SKIP_DIRECTIVE_COUNT]
-	install_skips $kind $text $nr_skips
-	gdb_test_python_run "SkipCommand\(\"skip-$kind-$nr_skips\", ${SKIP_STEP_COUNT}\)"
+	with_test_prefix "iter $i" {
+	    set nr_skips [expr $i * $SKIP_DIRECTIVE_COUNT]
+	    install_skips $kind $text $nr_skips
+	    gdb_test_python_run \
+		"SkipCommand\(\"skip-$kind-$nr_skips\", ${SKIP_STEP_COUNT}\)"
+	}
     }
 
     gdb_test "set variable flag = 0"
