@@ -328,6 +328,14 @@ struct partial_symtab
 
   struct partial_symtab **dependencies = nullptr;
 
+  std::set<sect_offset> interesting_symbols;
+
+  void note_interesting_symbol (partial_symbol *psym)
+  {
+    auto it = sect_off.find (psym);
+    interesting_symbols.emplace (it->second);
+  }
+
   int number_of_dependencies = 0;
 
   /* Global symbol list.  This list will be sorted after readin to

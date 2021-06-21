@@ -1100,7 +1100,12 @@ recursively_search_psymtabs
 	    {
 	      /* Found a match, so notify our caller.  */
 	      result = PST_SEARCHED_AND_FOUND;
-	      keep_going = 0;
+	      if (lazy_expand_symtab_p)
+		ps->note_interesting_symbol (*psym);
+	      else
+		{
+		  keep_going = 0;
+		}
 	    }
 	}
       psym++;
