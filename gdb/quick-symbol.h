@@ -167,6 +167,8 @@ struct quick_symbol_functions
      If the symbol name does not match LOOKUP_NAME, the symbol is skipped.
 
      If SYMBOL_MATCHER returns false, then the symbol is skipped.
+     Note that if SYMBOL_MATCHER is non-NULL, then LOOKUP_NAME must
+     also be provided.
 
      Otherwise, the symbol's symbol table is expanded and the
      notification function is called.  If the notification function

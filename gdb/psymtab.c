@@ -1130,6 +1130,9 @@ psymbol_functions::expand_symtabs_matching
   if (lookup_name != nullptr)
     psym_lookup_name = lookup_name->make_ignore_params ();
 
+  /* This invariant is documented in quick-functions.h.  */
+  gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
+
   for (partial_symtab *ps : m_partial_symtabs->range ())
     {
       QUIT;
@@ -1157,7 +1160,7 @@ psymbol_functions::expand_symtabs_matching
 	    continue;
 	}
 
-      if ((symbol_matcher == NULL && lookup_name == NULL)
+      if (lookup_name == nullptr
 	  || recursively_search_psymtabs (ps, objfile, search_flags,
 					  domain, search,
 					  *psym_lookup_name,

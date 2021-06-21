@@ -4319,7 +4319,9 @@ dwarf2_gdb_index::expand_symtabs_matching
 
   dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
 
-  if (symbol_matcher == NULL && lookup_name == NULL)
+  /* This invariant is documented in quick-functions.h.  */
+  gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
+  if (lookup_name == nullptr)
     {
       for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
 	{
@@ -5307,7 +5309,9 @@ dwarf2_debug_names_index::expand_symtabs_matching
 
   dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
 
-  if (symbol_matcher == NULL && lookup_name == NULL)
+  /* This invariant is documented in quick-functions.h.  */
+  gdb_assert (lookup_name != nullptr || symbol_matcher == nullptr);
+  if (lookup_name == nullptr)
     {
       for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
 	{
