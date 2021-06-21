@@ -10549,7 +10549,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   handle_DW_AT_stmt_list (die, cu, fnd.comp_dir, lowpc);
 
   /* Process all dies in compilation unit.  */
-  if (lazy_expand_symtab_p && cu->per_cu->interesting_symbols
+  if (false && lazy_expand_symtab_p && cu->per_cu->interesting_symbols
       && cu->per_cu->interesting_symbols->size () > 0)
     {
       std::set<sect_offset> expanded;
