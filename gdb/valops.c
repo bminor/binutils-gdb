@@ -2181,6 +2181,10 @@ search_struct_field (const char *name, struct value *arg1,
    ARG1 by OFFSET bytes, and search in it assuming it has (class) type
    TYPE.
 
+   The ARGS array is a list of argument values used to help finding NAME,
+   though ARGS can be nullptr.  If ARGS is not nullptr then the list itself
+   must have a NULL at the end.
+
    If found, return value, else if name matched and args not return
    (value) -1, else return NULL.  */
 
@@ -2309,7 +2313,8 @@ search_struct_method (const char *name, struct value **arg1p,
    ERR is used in the error message if *ARGP's type is wrong.
 
    C++: ARGS is a list of argument types to aid in the selection of
-   an appropriate method.  Also, handle derived types.
+   an appropriate method.  Also, handle derived types.  The array ARGS must
+   have a NULL at the end.
 
    STATIC_MEMFUNCP, if non-NULL, points to a caller-supplied location
    where the truthvalue of whether the function that was resolved was

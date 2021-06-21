@@ -1,3 +1,9 @@
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/27994
+	* gdb.cp/method-call-in-c.cc: New file.
+	* gdb.cp/method-call-in-c.exp: New file.
+
 2021-06-25  Tom Tromey  <tom@tromey.com>
 
 	* lib/gdb.exp (add_gdb_index, ensure_gdb_index): Add "style"

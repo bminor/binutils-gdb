@@ -1,3 +1,13 @@
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/27994
+	* eval.c (structop_base_operation::evaluate_funcall): Add a
+	nullptr to the end of the args array, which should not be included
+	in the argument array_view.  Pass all the arguments through to
+	value_struct_elt.
+	* valops.c (search_struct_method): Update header comment.
+	(value_struct_elt): Likewise.
+
 2021-06-25  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (create_addrmap_from_aranges): Change padding
