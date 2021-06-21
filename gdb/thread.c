@@ -188,6 +188,17 @@ set_thread_exited (thread_info *tp, bool silent)
 
   if (tp->state != THREAD_EXITED)
     {
+      process_stratum_target *proc_target = tp->inf->process_target ();
+
+      /* Some targets unpush themselves from the inferior's target stack before
+         clearing the inferior's thread list (which marks all threads as exited,
+         and therefore leads to this function).  In this case, the inferior's
+         process target will be nullptr when we arrive here.
+
+         See also the comment in inferior::unpush_target.  */
+      if (proc_target != nullptr)
+	proc_target->maybe_remove_resumed_with_pending_wait_status (tp);
+
       gdb::observers::thread_exit.notify (tp, silent);
 
       /* Tag it as exited.  */
@@ -296,12 +307,38 @@ thread_info::deletable () const
 /* See gdbthread.h.  */
 
 void
+thread_info::set_resumed (bool resumed)
+{
+  if (resumed == m_resumed)
+    return;
+
+  process_stratum_target *proc_target = this->inf->process_target ();
+
+  /* If we transition from resumed to not resumed, we might need to remove
+     the thread from the resumed threads with pending statuses list.  */
+  if (!resumed)
+    proc_target->maybe_remove_resumed_with_pending_wait_status (this);
+
+  m_resumed = resumed;
+
+  /* If we transition from not resumed to resumed, we might need to add
+     the thread to the resumed threads with pending statuses list.  */
+  if (resumed)
+    proc_target->maybe_add_resumed_with_pending_wait_status (this);
+}
+
+/* See gdbthread.h.  */
+
+void
 thread_info::set_pending_waitstatus (const target_waitstatus &ws)
 {
   gdb_assert (!this->has_pending_waitstatus ());
 
   m_suspend.waitstatus = ws;
   m_suspend.waitstatus_pending_p = 1;
+
+  process_stratum_target *proc_target = this->inf->process_target ();
+  proc_target->maybe_add_resumed_with_pending_wait_status (this);
 }
 
 /* See gdbthread.h.  */
@@ -310,6 +347,9 @@ void
 thread_info::clear_pending_waitstatus ()
 {
   gdb_assert (this->has_pending_waitstatus ());
+
+  process_stratum_target *proc_target = this->inf->process_target ();
+  proc_target->maybe_remove_resumed_with_pending_wait_status (this);
 
   m_suspend.waitstatus_pending_p = 0;
 }

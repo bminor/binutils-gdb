@@ -296,8 +296,7 @@ public:
   bool resumed () const
   { return m_resumed; }
 
-  void set_resumed (bool resumed)
-  { m_resumed = resumed; }
+  void set_resumed (bool resumed);
 
   /* Frontend view of the thread state.  Note that the THREAD_RUNNING/
      THREAD_STOPPED states are different from EXECUTING.  When the
@@ -470,6 +469,12 @@ public:
      linked.  */
   intrusive_list_node<thread_info> step_over_list_node;
 
+  /* Node for list of threads that are resumed and have a pending wait status.
+
+     The list head for this is in process_stratum_target, hence all threads in
+     this list belong to that process target.  */
+  intrusive_list_node<thread_info> resumed_with_pending_wait_status_node;
+
   /* Displaced-step state for this thread.  */
   displaced_step_thread_state displaced_step_state;
 
@@ -487,6 +492,13 @@ private:
      call.  See `struct thread_suspend_state'.  */
   thread_suspend_state m_suspend;
 };
+
+using thread_info_resumed_with_pending_wait_status_node
+  = intrusive_member_node<thread_info,
+			  &thread_info::resumed_with_pending_wait_status_node>;
+using thread_info_resumed_with_pending_wait_status_list
+  = intrusive_list<thread_info,
+		   thread_info_resumed_with_pending_wait_status_node>;
 
 /* A gdb::ref_ptr pointer to a thread_info.  */
 

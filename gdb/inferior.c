@@ -89,6 +89,27 @@ inferior::inferior (int pid_)
   m_target_stack.push (get_dummy_target ());
 }
 
+/* See inferior.h.  */
+
+int
+inferior::unpush_target (struct target_ops *t)
+{
+  /* If unpushing the process stratum target from the inferior while threads
+     exist in the inferior, ensure that we don't leave any threads of the
+     inferior in the target's "resumed with pending wait status" list.
+
+     See also the comment in set_thread_exited.  */
+  if (t->stratum () == process_stratum)
+    {
+      process_stratum_target *proc_target = as_process_stratum_target (t);
+
+      for (thread_info *thread : this->non_exited_threads ())
+	proc_target->maybe_remove_resumed_with_pending_wait_status (thread);
+    }
+
+  return m_target_stack.unpush (t);
+}
+
 void
 inferior::set_tty (const char *terminal_name)
 {

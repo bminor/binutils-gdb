@@ -106,6 +106,40 @@ process_stratum_target::follow_exec (inferior *follow_inf, ptid_t ptid,
 
 /* See process-stratum-target.h.  */
 
+void
+process_stratum_target::maybe_add_resumed_with_pending_wait_status
+  (thread_info *thread)
+{
+  gdb_assert (!thread->resumed_with_pending_wait_status_node.is_linked ());
+
+  if (thread->resumed () && thread->has_pending_waitstatus ())
+    {
+      infrun_debug_printf ("adding to resumed threads with event list: %s",
+			   thread->ptid.to_string ().c_str ());
+      m_resumed_with_pending_wait_status.push_back (*thread);
+    }
+}
+
+/* See process-stratum-target.h.  */
+
+void
+process_stratum_target::maybe_remove_resumed_with_pending_wait_status
+  (thread_info *thread)
+{
+  if (thread->resumed () && thread->has_pending_waitstatus ())
+    {
+      infrun_debug_printf ("removing from resumed threads with event list: %s",
+			   thread->ptid.to_string ().c_str ());
+      gdb_assert (thread->resumed_with_pending_wait_status_node.is_linked ());
+      auto it = m_resumed_with_pending_wait_status.iterator_to (*thread);
+      m_resumed_with_pending_wait_status.erase (it);
+    }
+  else
+    gdb_assert (!thread->resumed_with_pending_wait_status_node.is_linked ());
+}
+
+/* See process-stratum-target.h.  */
+
 std::set<process_stratum_target *>
 all_non_exited_process_targets ()
 {

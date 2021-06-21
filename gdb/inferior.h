@@ -362,8 +362,7 @@ public:
   }
 
   /* Unpush T from this inferior's target stack.  */
-  int unpush_target (struct target_ops *t)
-  { return m_target_stack.unpush (t); }
+  int unpush_target (struct target_ops *t);
 
   /* Returns true if T is pushed in this inferior's target stack.  */
   bool target_is_pushed (target_ops *t)

@@ -24,3 +24,11 @@
 
 ptid_t const null_ptid = ptid_t::make_null ();
 ptid_t const minus_one_ptid = ptid_t::make_minus_one ();
+
+/* See ptid.h.  */
+
+std::string
+ptid_t::to_string () const
+{
+  return string_printf ("%d.%ld.%ld", m_pid, m_lwp, m_tid);
+}
