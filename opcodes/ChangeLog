@@ -1,3 +1,8 @@
+2021-06-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cgen-dis.c (count_decodable_bits): Use __builtin_popcount when
+	available.
+
 2021-06-22  Alan Modra  <amodra@gmail.com>
 
 	* pj-dis.c (print_insn_pj): Don't print trailing tab.  Do
