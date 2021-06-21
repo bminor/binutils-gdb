@@ -1,3 +1,8 @@
+2021-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* traps.c (cris_getpid): New function.
+	(cris_set_callbacks): Assign cris_getpid.
+
 2021-06-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-if.c: Include sim-hw.h.

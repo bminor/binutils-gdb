@@ -3336,6 +3336,12 @@ cris_time (host_callback *cb ATTRIBUTE_UNUSED)
   return TARGET_TIME (current_cpu_for_cb_callback);
 }
 
+static int
+cris_getpid (host_callback *cb ATTRIBUTE_UNUSED)
+{
+  return TARGET_PID;
+}
+
 /* Set target-specific callback data. */
 
 void
@@ -3344,6 +3350,8 @@ cris_set_callbacks (host_callback *cb)
   /* Yeargh, have to cast away constness to avoid warnings.  */
   cb->syscall_map = (CB_TARGET_DEFS_MAP *) syscall_map;
   cb->errno_map = (CB_TARGET_DEFS_MAP *) errno_map;
+
+  cb->getpid = cris_getpid;
 
   /* The kernel stat64 layout.  If we see a file > 2G, the "long"
      parameter to cb_store_target_endian will make st_size negative.
