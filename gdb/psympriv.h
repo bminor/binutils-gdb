@@ -332,9 +332,16 @@ struct partial_symtab
 
   void note_interesting_symbol (partial_symbol *psym)
   {
+    if (expansion_state == partial_symtab::full)
+      return;
+    expansion_state = partial_symtab::lazy;
     auto it = sect_off.find (psym);
     interesting_symbols.emplace (it->second);
   }
+
+  enum expansion_state { unexpanded, lazy, full };
+  enum expansion_state expansion_state = unexpanded;
+  size_t expanded_interesting_symbols = 0;
 
   int number_of_dependencies = 0;
 
