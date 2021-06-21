@@ -19022,7 +19022,11 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  if (pdi.raw_name == NULL)
 	    complaint (_("malformed enumerator DIE ignored"));
 	  else if (building_psymtab)
-	    add_partial_symbol (&pdi, cu);
+	    {
+	      if (lazy_expand_symtab_p)
+		pdi.die_parent = parent_die;
+	      add_partial_symbol (&pdi, cu);
+	    }
 
 	  info_ptr = locate_pdi_sibling (reader, &pdi, info_ptr);
 	  continue;
