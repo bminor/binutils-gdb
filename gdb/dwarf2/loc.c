@@ -255,9 +255,27 @@ decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
       *new_ptr = loc_ptr;
       return DEBUG_LOC_OFFSET_PAIR;
 
+    case DW_LLE_start_end:
+      if (loc_ptr + 2 * addr_size > buf_end)
+	return DEBUG_LOC_BUFFER_OVERFLOW;
+
+      if (signed_addr_p)
+	*low = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      else
+	*low = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+
+      loc_ptr += addr_size;
+      if (signed_addr_p)
+	*high = extract_signed_integer (loc_ptr, addr_size, byte_order);
+      else
+	*high = extract_unsigned_integer (loc_ptr, addr_size, byte_order);
+
+      loc_ptr += addr_size;
+      *new_ptr = loc_ptr;
+      return DEBUG_LOC_START_END;
+
     /* Following cases are not supported yet.  */
     case DW_LLE_startx_endx:
-    case DW_LLE_start_end:
     case DW_LLE_default_location:
     default:
       return DEBUG_LOC_INVALID_ENTRY;

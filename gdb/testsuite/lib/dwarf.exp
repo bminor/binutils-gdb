@@ -1849,6 +1849,35 @@ namespace eval Dwarf {
 		    incr _debug_loclists_locdesc_count
 		}
 
+		# Emit a DW_LLE_start_end entry.
+
+		proc start_end { start end locdesc } {
+		    variable _debug_loclists_is_64_dwarf
+		    variable _debug_loclists_addr_size
+		    variable _debug_loclists_offset_size
+		    variable _debug_loclists_table_count
+		    variable _debug_loclists_list_count
+		    variable _debug_loclists_locdesc_count
+
+		    _op .byte 0x07 "DW_LLE_start_end"
+
+		    # Start and end of the address range.
+		    _op .${_debug_loclists_addr_size}byte $start "start"
+		    _op .${_debug_loclists_addr_size}byte $end "end"
+
+		    # Length of location description.
+		    set locdesc_start_label ".Lloclists_table_${_debug_loclists_table_count}_list_${_debug_loclists_list_count}_locdesc_${_debug_loclists_locdesc_count}_start"
+		    set locdesc_end_label ".Lloclists_table_${_debug_loclists_table_count}_list_${_debug_loclists_list_count}_locdesc_${_debug_loclists_locdesc_count}_end"
+		    _op .uleb128 "$locdesc_end_label - $locdesc_start_label" "locdesc length"
+
+		    define_label $locdesc_start_label
+		    set dwarf_version 5
+		    _location $locdesc $dwarf_version $_debug_loclists_addr_size $_debug_loclists_offset_size
+		    define_label $locdesc_end_label
+
+		    incr _debug_loclists_locdesc_count
+		}
+
 		uplevel $body
 
 		# Emit end of list.

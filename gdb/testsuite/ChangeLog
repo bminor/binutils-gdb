@@ -1,3 +1,10 @@
+2021-06-22  Andreas Schwab  <schwab@suse.de>
+
+	PR symtab/27999
+	* lib/dwarf.exp (start_end): New proc inside loclists.
+	* gdb.dwarf2/loclists-start-end.exp: New file.
+	* gdb.dwarf2/loclists-start-end.c: New file.
+
 2021-06-22  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/imported-unit-c.exp: New file.
