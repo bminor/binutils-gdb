@@ -10549,9 +10549,32 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   handle_DW_AT_stmt_list (die, cu, fnd.comp_dir, lowpc);
 
   /* Process all dies in compilation unit.  */
-  for (child_die = die->child; child_die != nullptr && child_die->tag != 0;
-       child_die = child_die->sibling)
-    process_die (child_die, cu);
+  if (lazy_expand_symtab_p && cu->per_cu->interesting_symbols
+      && cu->per_cu->interesting_symbols->size () > 0)
+    {
+      auto interesting_symbol_it = cu->per_cu->interesting_symbols->cbegin ();
+
+      for (child_die = die->child; child_die != nullptr && child_die->tag != 0;
+	   child_die = child_die->sibling)
+	{
+	  if (interesting_symbol_it == cu->per_cu->interesting_symbols->cend ())
+	    break;
+
+	  sect_offset interesting_symbol = *interesting_symbol_it;
+
+	  if (interesting_symbol > child_die->sect_off)
+	    continue;
+
+	  gdb_assert (interesting_symbol == child_die->sect_off);
+	  std::advance (interesting_symbol_it, 1);
+
+	  process_die (child_die, cu);
+	}
+    }
+ else
+   for (child_die = die->child; child_die != nullptr && child_die->tag != 0;
+	child_die = child_die->sibling)
+     process_die (child_die, cu);
 
   per_objfile->sym_cu = nullptr;
 
