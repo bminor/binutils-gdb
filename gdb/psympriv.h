@@ -24,6 +24,8 @@
 #include "objfiles.h"
 #include "gdbsupport/gdb_string_view.h"
 
+#include <unordered_map>
+
 /* A partial_symbol records the name, domain, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
    contains their memory address, so we can find them from a PC value.
@@ -342,6 +344,10 @@ struct partial_symtab
      how long errors take).  */
 
   std::vector<partial_symbol *> static_psymbols;
+
+  /* The sect_offset corresponding to the partial symbols in this partial
+     symbol table. */
+  std::unordered_map<partial_symbol *, sect_offset> sect_off;
 
   /* True iff objfile->psymtabs_addrmap is properly populated for this
      partial_symtab.  For discontiguous overlapping psymtabs is the only usable
