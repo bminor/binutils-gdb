@@ -570,6 +570,16 @@ os_getpid (host_callback *p)
 }
 
 static int
+os_kill (host_callback *p, int pid, int signum)
+{
+  int result;
+
+  result = kill (pid, signum);
+  p->last_errno = errno;
+  return result;
+}
+
+static int
 os_pipe (host_callback *p, int *filedes)
 {
   int i;
@@ -752,6 +762,7 @@ host_callback default_callback =
   os_truncate,
 
   os_getpid,
+  os_kill,
 
   os_pipe,
   os_pipe_empty,

@@ -92,6 +92,7 @@ struct host_callback_struct
   int (*ftruncate) (host_callback *, int, int64_t);
   int (*truncate) (host_callback *, const char *, int64_t);
   int (*getpid) (host_callback *);
+  int (*kill) (host_callback *, int, int);
   int (*pipe) (host_callback *, int *);
 
   /* Called by the framework when a read call has emptied a pipe buffer.  */

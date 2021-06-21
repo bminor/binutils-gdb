@@ -583,6 +583,24 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
       result = (*cb->getpid) (cb);
       break;
 
+    case CB_SYS_kill:
+      /* If killing self, leave it to the caller to process so it can send the
+	 signal to the engine.  */
+      if (sc->arg1 == (*cb->getpid) (cb))
+	{
+	  result = -1;
+	  errcode = ENOSYS;
+	}
+      else
+	{
+	  int signum = cb_target_to_host_signal (cb, sc->arg2);
+
+	  result = (*cb->kill) (cb, sc->arg1, signum);
+	  cb->last_errno = errno;
+	  goto ErrorFinish;
+	}
+      break;
+
     case CB_SYS_time :
       {
 	/* FIXME: May wish to change CB_SYS_time to something else.
