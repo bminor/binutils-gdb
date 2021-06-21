@@ -21,14 +21,15 @@ class Disassemble(perftest.TestCaseWithBasicMeasurements):
         super(Disassemble, self).__init__("disassemble")
 
     def warm_up(self):
-        do_test_command = "disassemble ada_evaluate_subexp"
+        do_test_command = "disassemble evaluate_subexp_do_call"
         gdb.execute(do_test_command, False, True)
 
     def _do_test(self, c):
         for func in [
-            "evaluate_subexp_standard",
+            "captured_main",
             "handle_inferior_event",
-            "c_parse_internal",
+            "run_inferior_call",
+            "update_global_location_list",
         ]:
             do_test_command = "disassemble %s" % func
             for _ in range(c + 1):
