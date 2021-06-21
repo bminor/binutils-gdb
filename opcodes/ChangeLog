@@ -1,3 +1,8 @@
+2021-06-22  Alan Modra  <amodra@gmail.com>
+
+	* pj-dis.c (print_insn_pj): Don't print trailing tab.  Do
+	print separator for pcrel insns.
+
 2021-06-19  Alan Modra  <amodra@gmail.com>
 
 	* vax-dis.c (print_insn_vax): Avoid pointer overflow.

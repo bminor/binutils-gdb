@@ -57,7 +57,7 @@ print_insn_pj (bfd_vma addr, struct disassemble_info *info)
 
       if ((status = info->read_memory_func (addr + 1, &byte_2, 1, info)))
 	goto fail;
-      fprintf_fn (stream, "%s\t", pj_opc_info[opcode + byte_2].u.name);
+      fprintf_fn (stream, "%s", pj_opc_info[opcode + byte_2].u.name);
       return 2;
     }
   else
@@ -160,10 +160,11 @@ print_insn_pj (bfd_vma addr, struct disassemble_info *info)
 	  for (i = 0; i < size; i++)
 	    val = (val << 8) | (data[i] & 0xff);
 
+	  fprintf_fn (stream, "%s", sep);
 	  if (PCREL (op->arg[a]))
 	    (*info->print_address_func) (val + insn_start, info);
 	  else
-	    fprintf_fn (stream, "%s%d", sep, val);
+	    fprintf_fn (stream, "%d", val);
 
 	  sep = ",";
 	  addr += size;

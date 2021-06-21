@@ -1,3 +1,12 @@
+2021-06-22  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-pj.c (md_apply_fix): Apply PJ_CODE_REL32 relocs.
+	* testsuite/gas/pj/ops.s: Update jsr, ret, getstatic,
+	putstatic, getfield, putfield, invokevirtual, invokespecial,
+	invokestatic, invokeinterface, goto_w, jsr_w assembly.  Delete
+	version 1 picojava opcodes.
+	* testsuite/gas/pj/ops.d: Match expected output.
+
 2021-06-19  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-z80.c (signed_overflow, unsigned_overflow): Avoid UB.
