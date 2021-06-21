@@ -32,6 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <errno.h>
 #include <unistd.h>
 #include "sim-options.h"
+#include "sim-hw.h"
 #include "dis-asm.h"
 #include "environ.h"
 
@@ -478,7 +479,7 @@ aux_ent_entry (struct bfd *ebfd)
    interp_load_addr offset.  */
 
 static int
-cris_write_interp (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
+cris_write_interp (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
 {
   return sim_write (sd, mem + interp_load_addr, buf, length);
 }
@@ -917,7 +918,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 	CPU_CRIS_MISC_PROFILE (cpu)->flags = STATE_TRACE_FLAGS (sd)[0];
 
 	/* Set SP to the stack we allocated above.  */
-	(* CPU_REG_STORE (cpu)) (cpu, H_GR_SP, (char *) sp_init, 4);
+	(* CPU_REG_STORE (cpu)) (cpu, H_GR_SP, (unsigned char *) sp_init, 4);
 
 	/* Set the simulator environment data.  */
 	cpu->highest_mmapped_page = NULL;

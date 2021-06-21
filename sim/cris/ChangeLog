@@ -1,5 +1,11 @@
 2021-06-22  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-if.c: Include sim-hw.h.
+	(cris_write_interp): Change buf to const.
+	(sim_open): Cast sp_init to unsigned char *.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2021-06-21  Mike Frysinger  <vapier@gentoo.org>
