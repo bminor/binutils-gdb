@@ -214,6 +214,9 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 		  || (p->address (objfile)
 		      != BMSYMBOL_VALUE_ADDRESS (msymbol)))
 		goto next;
+
+	      if (lazy_expand_symtab_p)
+		pst->note_interesting_symbol (p);
 	    }
 
 	  /* We do not try to call FIND_PC_SECT_PSYMTAB_CLOSER as
@@ -340,6 +343,10 @@ find_pc_sect_psymbol (struct objfile *objfile,
 	  best = p;
 	}
     }
+
+  if (lazy_expand_symtab_p
+      && best != nullptr)
+    psymtab->note_interesting_symbol (best);
 
   return best;
 }
