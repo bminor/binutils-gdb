@@ -1,5 +1,14 @@
 2021-06-22  Mike Frysinger  <vapier@gentoo.org>
 
+	* callback.c: Include signal.h.
+	(cb_init_signal_map): New prototype.
+	(os_init): Assign signal_map.
+	* gentmap.c (signal_tdefs): New array.
+	(gen_targ_vals_h): Output signal_tdefs.
+	(gen_targ_map_c): Likewise.
+
+2021-06-22  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.c (os_getpid): New function.
 	(default_callback): Add os_getpid.
 	* syscall.c (cb_syscall): Change getpid to cb->getpid.
