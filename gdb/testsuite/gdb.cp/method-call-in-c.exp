@@ -39,5 +39,9 @@ foreach_with_prefix lang { c++ c } {
 
 	gdb_test "print foo.func (b, f)" " = ${result}"
 	incr result
+
+	set result [expr $result + 3]
+	gdb_test "print foo += b" \
+	    " = \\((?:struct )?foo_type &\\) @${hex}: \\\{var = ${result}\\\}"
     }
 }

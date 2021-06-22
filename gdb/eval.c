@@ -872,9 +872,9 @@ structop_base_operation::evaluate_funcall
      (struct type *expect_type, struct expression *exp, enum noside noside,
       const std::vector<operation_up> &args)
 {
-  /* Allocate space for the function call arguments.  Include space for a
-     `this' pointer at the start, and a trailing nullptr.  */
-  std::vector<value *> vals (args.size () + 2);
+  /* Allocate space for the function call arguments, Including space for a
+     `this' pointer at the start.  */
+  std::vector<value *> vals (args.size () + 1);
   /* First, evaluate the structure into vals[0].  */
   enum exp_opcode op = opcode ();
   if (op == STRUCTOP_STRUCT)
@@ -920,16 +920,13 @@ structop_base_operation::evaluate_funcall
 	}
     }
 
-  /* Evaluate the arguments, and add the trailing nullptr.  The '+ 1' here
-     is to allow for the `this' pointer we placed into vals[0].  */
+  /* Evaluate the arguments.  The '+ 1' here is to allow for the `this'
+     pointer we placed into vals[0].  */
   for (int i = 0; i < args.size (); ++i)
     vals[i + 1] = args[i]->evaluate_with_coercion (exp, noside);
-  vals[args.size () + 1] = nullptr;
 
-  /* The array view includes the `this' pointer, but not the trailing
-     nullptr.  */
-  gdb::array_view<value *> arg_view
-    = gdb::make_array_view (&vals[0], args.size () + 1);
+  /* The array view includes the `this' pointer.  */
+  gdb::array_view<value *> arg_view (vals);
 
   int static_memfuncp;
   value *callee;
@@ -950,7 +947,7 @@ structop_base_operation::evaluate_funcall
     {
       struct value *temp = vals[0];
 
-      callee = value_struct_elt (&temp, &vals[0], tstr,
+      callee = value_struct_elt (&temp, &arg_view, tstr,
 				 &static_memfuncp,
 				 op == STRUCTOP_STRUCT
 				 ? "structure" : "structure pointer");

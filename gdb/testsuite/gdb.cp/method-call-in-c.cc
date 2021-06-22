@@ -29,7 +29,13 @@ struct foo_type
     return var++;
   }
 
-  int var = 123;
+  foo_type &operator+= (const baz_type &rhs)
+  {
+    var += (rhs.a + rhs.b + rhs.c);
+    return *this;
+  }
+
+  int var = 120;
 };
 
 int
@@ -39,6 +45,8 @@ main (void)
   float f = 1.0;
 
   foo_type foo;
+
+  foo += b;
 
   return foo.func (b, f);	/* Break here.  */
 }
