@@ -1,5 +1,34 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (desc_bounds): Use '{}' instead of NULL to indicate
+	an empty gdb::optional when calling value_struct_elt.
+	(desc_data): Likewise.
+	(desc_one_bound): Likewise.
+	* eval.c (structop_base_operation::evaluate_funcall): Pass
+	gdb::array_view, not a gdb::array_view* to value_struct_elt.
+	(eval_op_structop_struct): Use '{}' instead of NULL to indicate
+	an empty gdb::optional when calling value_struct_elt.
+	(eval_op_structop_ptr): Likewise.
+	* f-lang.c (fortran_structop_operation::evaluate): Likewise.
+	* guile/scm-value.c (gdbscm_value_field): Likewise.
+	* m2-lang.c (eval_op_m2_high): Likewise.
+	(eval_op_m2_subscript): Likewise.
+	* opencl-lang.c (opencl_structop_operation::evaluate): Likewise.
+	* python/py-value.c (valpy_getitem): Likewise.
+	* rust-lang.c (rust_val_print_str): Likewise.
+	(rust_range): Likewise.
+	(rust_subscript): Likewise.
+	(eval_op_rust_structop): Likewise.
+	(rust_aggregate_operation::evaluate): Likewise.
+	* valarith.c (value_user_defined_op): Likewise.
+	* valops.c (search_struct_method): Change parameter type, update
+	function body accordingly, and update header comment.
+	(value_struct_elt): Change parameter type, update function body
+	accordingly.
+	* value.h (value_struct_elt): Update declaration.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	PR gdb/27994
 	* eval.c (structop_base_operation::evaluate_funcall): Pass
 	array_view instead of array to value_struct_elt.

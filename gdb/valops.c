@@ -51,7 +51,7 @@ static struct value *search_struct_field (const char *, struct value *,
 					  struct type *, int);
 
 static struct value *search_struct_method (const char *, struct value **,
-					   gdb::array_view<value *> *,
+					   gdb::optional<gdb::array_view<value *>>,
 					   LONGEST, int *, struct type *);
 
 static int find_oload_champ_namespace (gdb::array_view<value *> args,
@@ -2177,17 +2177,18 @@ search_struct_field (const char *name, struct value *arg1,
    ARG1 by OFFSET bytes, and search in it assuming it has (class) type
    TYPE.
 
-   The ARGS array pointer is to a list of argument values used to help
-   finding NAME, though ARGS can be nullptr.  The contents of ARGS can be
-   adjusted if type coercion is required in order to find a matching NAME.
+   ARGS is an optional array of argument values used to help finding NAME.
+   The contents of ARGS can be adjusted if type coercion is required in
+   order to find a matching NAME.
 
    If found, return value, else if name matched and args not return
    (value) -1, else return NULL.  */
 
 static struct value *
 search_struct_method (const char *name, struct value **arg1p,
-		      gdb::array_view<value *> *args, LONGEST offset,
-		      int *static_memfuncp, struct type *type)
+		      gdb::optional<gdb::array_view<value *>> args,
+		      LONGEST offset, int *static_memfuncp,
+		      struct type *type)
 {
   int i;
   struct value *v;
@@ -2205,10 +2206,10 @@ search_struct_method (const char *name, struct value **arg1p,
 
 	  name_matched = 1;
 	  check_stub_method_group (type, i);
-	  if (j > 0 && args == nullptr)
+	  if (j > 0 && !args.has_value ())
 	    error (_("cannot resolve overloaded method "
 		     "`%s': no arguments supplied"), name);
-	  else if (j == 0 && args == nullptr)
+	  else if (j == 0 && !args.has_value ())
 	    {
 	      v = value_fn_field (arg1p, f, j, type, offset);
 	      if (v != NULL)
@@ -2217,7 +2218,7 @@ search_struct_method (const char *name, struct value **arg1p,
 	  else
 	    while (j >= 0)
 	      {
-		gdb_assert (args != nullptr);
+		gdb_assert (args.has_value ());
 		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
 			      TYPE_FN_FIELD_TYPE (f, j)->has_varargs (),
 			      TYPE_FN_FIELD_TYPE (f, j)->num_fields (),
@@ -2320,7 +2321,8 @@ search_struct_method (const char *name, struct value **arg1p,
    found.  */
 
 struct value *
-value_struct_elt (struct value **argp, gdb::array_view<value *> *args,
+value_struct_elt (struct value **argp,
+		  gdb::optional<gdb::array_view<value *>> args,
 		  const char *name, int *static_memfuncp, const char *err)
 {
   struct type *t;
@@ -2350,7 +2352,7 @@ value_struct_elt (struct value **argp, gdb::array_view<value *> *args,
   if (static_memfuncp)
     *static_memfuncp = 0;
 
-  if (args == nullptr)
+  if (!args.has_value ())
     {
       /* if there are no arguments ...do this...  */
 

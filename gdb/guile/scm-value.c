@@ -694,7 +694,7 @@ gdbscm_value_field (SCM self, SCM field_scm)
 
       struct value *tmp = v_smob->value;
 
-      struct value *res_val = value_struct_elt (&tmp, NULL, field.get (), NULL,
+      struct value *res_val = value_struct_elt (&tmp, {}, field.get (), NULL,
 						"struct/class/union");
 
       return vlscm_scm_from_value (res_val);

@@ -344,7 +344,7 @@ value_user_defined_op (struct value **argp, gdb::array_view<value *> args,
 					  noside);
     }
   else
-    result = value_struct_elt (argp, &args, name, static_memfuncp,
+    result = value_struct_elt (argp, args, name, static_memfuncp,
 			       "structure");
 
   return result;

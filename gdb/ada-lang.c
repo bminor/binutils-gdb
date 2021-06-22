@@ -1484,7 +1484,7 @@ desc_bounds (struct value *arr)
 
   else if (is_thick_pntr (type))
     {
-      struct value *p_bounds = value_struct_elt (&arr, NULL, "P_BOUNDS", NULL,
+      struct value *p_bounds = value_struct_elt (&arr, {}, "P_BOUNDS", NULL,
 					       _("Bad GNAT array descriptor"));
       struct type *p_bounds_type = value_type (p_bounds);
 
@@ -1566,7 +1566,7 @@ desc_data (struct value *arr)
   if (is_thin_pntr (type))
     return thin_data_pntr (arr);
   else if (is_thick_pntr (type))
-    return value_struct_elt (&arr, NULL, "P_ARRAY", NULL,
+    return value_struct_elt (&arr, {}, "P_ARRAY", NULL,
 			     _("Bad GNAT array descriptor"));
   else
     return NULL;
@@ -1606,7 +1606,7 @@ desc_one_bound (struct value *bounds, int i, int which)
   char bound_name[20];
   xsnprintf (bound_name, sizeof (bound_name), "%cB%d",
 	     which ? 'U' : 'L', i - 1);
-  return value_struct_elt (&bounds, NULL, bound_name, NULL,
+  return value_struct_elt (&bounds, {}, bound_name, NULL,
 			   _("Bad GNAT array descriptor bounds"));
 }
 

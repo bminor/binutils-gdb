@@ -1511,7 +1511,7 @@ fortran_structop_operation::evaluate (struct type *expect_type,
 	arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, EVAL_NORMAL);
     }
 
-  value *elt = value_struct_elt (&arg1, NULL, str, NULL, "structure");
+  value *elt = value_struct_elt (&arg1, {}, str, NULL, "structure");
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {

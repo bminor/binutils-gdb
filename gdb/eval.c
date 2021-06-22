@@ -947,7 +947,7 @@ structop_base_operation::evaluate_funcall
     {
       struct value *temp = vals[0];
 
-      callee = value_struct_elt (&temp, &arg_view, tstr,
+      callee = value_struct_elt (&temp, arg_view, tstr,
 				 &static_memfuncp,
 				 op == STRUCTOP_STRUCT
 				 ? "structure" : "structure pointer");
@@ -1132,7 +1132,7 @@ eval_op_structop_struct (struct type *expect_type, struct expression *exp,
 			 enum noside noside,
 			 struct value *arg1, const char *string)
 {
-  struct value *arg3 = value_struct_elt (&arg1, NULL, string,
+  struct value *arg3 = value_struct_elt (&arg1, {}, string,
 					 NULL, "structure");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     arg3 = value_zero (value_type (arg3), VALUE_LVAL (arg3));
@@ -1188,7 +1188,7 @@ eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
       }
   }
 
-  struct value *arg3 = value_struct_elt (&arg1, NULL, string,
+  struct value *arg3 = value_struct_elt (&arg1, {}, string,
 					 NULL, "structure pointer");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     arg3 = value_zero (value_type (arg3), VALUE_LVAL (arg3));
