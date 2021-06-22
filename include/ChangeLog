@@ -1,3 +1,7 @@
+2021-06-24  Luis Machado  <luis.machado@arm.com>
+
+	* elf/aarch64.h (EF_AARCH64_CHERI_PURECAP): New constant.
+
 2021-05-24  Luis Machado  <luis.machado@linaro.org>
 
 	* elf/common.h (NT_MEMTAG): New constant.

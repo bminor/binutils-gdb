@@ -59,6 +59,7 @@
 #include "inferior.h"
 
 #include "elf-bfd.h"
+#include "elf/aarch64.h" /* for ELF flags.  */
 
 #define submask(x) ((1L << ((x) + 1)) - 1)
 #define bit(obj,st) (((obj) >> (st)) & 1)
@@ -4990,16 +4991,28 @@ aarch64_bfd_has_capabilities (bfd *abfd)
 
   gdb_assert (abfd != nullptr);
 
-  asection *cap_relocs = bfd_get_section_by_name (abfd, "__cap_relocs");
+  int e_flags = elf_elfheader (abfd)->e_flags;
 
   if (aarch64_debug)
-    debug_printf ("%s: cap_relocs = %s\n", __func__,
-		  cap_relocs == nullptr? "not found" : "found");
+    debug_printf ("%s: e_flags = %x\n", __func__, e_flags);
 
-  if (cap_relocs != nullptr)
+  if (e_flags & EF_AARCH64_CHERI_PURECAP)
     return true;
 
-  /* Assume regular non-capability symbol file.  */
+  if (aarch64_debug)
+    debug_printf ("%s: e_flags doesn't contain EF_AARCH64_CHERI_PURECAP.\n",
+		  __func__);
+
+  /* Use the LSB of e_entry for now.  If the LSB is set, this means we have a
+     Morello pure capability binary.  */
+  if (elf_elfheader (abfd)->e_entry & 1)
+    return true;
+
+  if (aarch64_debug)
+    debug_printf ("%s: e_entry's LSB is not set.  Assuming AAPCS64 ABI.\n",
+		  __func__);
+
+  /* Assume this is a Hybrid ABI ELF.  */
   return false;
 }
 
@@ -5195,6 +5208,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  have_capability = true;
 	}
     }
+  else if (aarch64_current_abi_global == AARCH64_ABI_AAPCS64_CAP)
+    have_capability = true;
 
   /* If there is already a candidate, use it.  */
   for (gdbarch_list *best_arch = gdbarch_list_lookup_by_info (arches, &info);

@@ -40,6 +40,9 @@
 #define DT_AARCH64_PAC_PLT	(DT_LOPROC + 3)
 #define DT_AARCH64_VARIANT_PCS	(DT_LOPROC + 5)
 
+/* AArch64-specific e_flags entries.  */
+#define EF_AARCH64_CHERI_PURECAP 0x00010000
+
 /* AArch64-specific values for st_other.  */
 #define STO_AARCH64_VARIANT_PCS	0x80  /* Symbol may follow different call
 					 convention from the base PCS.  */
