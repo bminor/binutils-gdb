@@ -1,3 +1,17 @@
+2021-06-22  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Updated.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3a.d: New testcase.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3a.s: Likewise.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3b.d: New testcase.
+	Should report error since the %pcrel_lo with addend refers to
+	%got_pcrel_hi.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3b.s: Likewise.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3c.d: New testcase.
+	Should report error since the %got_pcrel_hi with addend.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3c.s: Likewise.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-3.ld: Likewise.
+
 2021-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27998

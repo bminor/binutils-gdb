@@ -1,3 +1,20 @@
+2021-06-22  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_pcrel_hi_reloc): Added field to store
+	the original relocation type, in case the type is converted to
+	R_RISCV_HI20.
+	(riscv_pcrel_lo_reloc): Removed unused name field.
+	(riscv_pcrel_relocs): Added comments.
+	(riscv_zero_pcrel_hi_reloc): Removed unused input_bfd.
+	(riscv_record_pcrel_hi_reloc): Updated.
+	(riscv_record_pcrel_lo_reloc): Likewise.
+	(riscv_resolve_pcrel_lo_relocs): Likewise.  Check the original
+	type of auipc, to make sure the %pcrel_lo without any addends.
+	Otherwise, report dangerous relocation error.
+	(riscv_elf_relocate_section): Updated above functions are changed.
+	For R_RISCV_GOT_HI20, report dangerous relocation error when addend
+	isn't zero.
+
 2021-06-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27998
