@@ -226,7 +226,12 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 	     a worse chosen section due to the TEXTLOW/TEXTHIGH ranges
 	     overlap.  */
 	  if (lazy_expand_symtab_p && p == nullptr)
-	    p = find_pc_sect_psymbol (objfile, pst, pc, section);
+	    {
+	      struct partial_symbol *p2;
+	      p2 = find_pc_sect_psymbol (objfile, pst, pc, section);
+	      if (p2 == nullptr)
+		pst->note_no_interesting_symbol ();
+	    }
 
 	  return pst;
 	}
@@ -252,7 +257,14 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 	best_pst = find_pc_sect_psymtab_closer (objfile, pc, section, pst,
 						msymbol);
 	if (best_pst != NULL)
-	  return best_pst;
+	  {
+	    struct partial_symbol *p2;
+	    p2 = find_pc_sect_psymbol (objfile, best_pst, pc, section);
+	    if (p2 == nullptr)
+	      best_pst->note_no_interesting_symbol ();
+
+	    return best_pst;
+	  }
       }
 
   return NULL;
@@ -1005,10 +1017,16 @@ psymbol_functions::expand_matching_symbols
   for (partial_symtab *ps : require_partial_symbols (objfile))
     {
       QUIT;
-      if (!ps->readin_p (objfile)
-	  && match_partial_symbol (objfile, ps, global, name, domain,
-				   ordered_compare))
-	psymtab_to_symtab (objfile, ps);
+      if (ps->readin_p (objfile))
+	continue;
+
+      partial_symbol *psym
+	= match_partial_symbol (objfile, ps, global, name, domain,
+				ordered_compare);
+      if (psym == nullptr)
+	continue;
+      ps->note_interesting_symbol (psym);
+      psymtab_to_symtab (objfile, ps);
     }
 }
 
@@ -1182,6 +1200,9 @@ psymbol_functions::expand_symtabs_matching
 					  *psym_lookup_name,
 					  symbol_matcher))
 	{
+	  if (symbol_matcher == NULL && lookup_name == NULL)
+	    ps->note_no_interesting_symbol ();
+
 	  struct compunit_symtab *symtab =
 	    psymtab_to_symtab (objfile, ps);
 

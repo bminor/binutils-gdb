@@ -336,7 +336,21 @@ struct partial_symtab
       return;
     expansion_state = partial_symtab::lazy;
     auto it = sect_off.find (psym);
+    if (it == sect_off.end ())
+      {
+	expansion_state = partial_symtab::full;
+	return;
+      }
     interesting_symbols.emplace (it->second);
+  }
+
+  void note_no_interesting_symbol ()
+  {
+    if (expansion_state == partial_symtab::full)
+      return;
+    expansion_state = partial_symtab::full;
+    interesting_symbols.clear ();
+    expanded_interesting_symbols = 0;
   }
 
   enum expansion_state { unexpanded, lazy, full };
