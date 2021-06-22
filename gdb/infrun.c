@@ -3670,8 +3670,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
    more events.  Polls for events from all inferiors/targets.  */
 
 static bool
-do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
-		target_wait_flags options)
+do_target_wait (execution_control_state *ecs, target_wait_flags options)
 {
   int num_inferiors = 0;
   int random_selector;
@@ -3681,10 +3680,9 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
      polling the rest of the inferior list starting from that one in a
      circular fashion until the whole list is polled once.  */
 
-  auto inferior_matches = [&wait_ptid] (inferior *inf)
+  auto inferior_matches = [] (inferior *inf)
     {
-      return (inf->process_target () != NULL
-	      && ptid_t (inf->pid).matches (wait_ptid));
+      return inf->process_target () != nullptr;
     };
 
   /* First see how many matching inferiors we have.  */
@@ -3723,7 +3721,7 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
 
   auto do_wait = [&] (inferior *inf)
   {
-    ecs->ptid = do_target_wait_1 (inf, wait_ptid, &ecs->ws, options);
+    ecs->ptid = do_target_wait_1 (inf, minus_one_ptid, &ecs->ws, options);
     ecs->target = inf->process_target ();
     return (ecs->ws.kind != TARGET_WAITKIND_IGNORE);
   };
@@ -4080,7 +4078,7 @@ fetch_inferior_event ()
        the event.  */
     scoped_disable_commit_resumed disable_commit_resumed ("handling event");
 
-    if (!do_target_wait (minus_one_ptid, ecs, TARGET_WNOHANG))
+    if (!do_target_wait (ecs, TARGET_WNOHANG))
       {
 	infrun_debug_printf ("do_target_wait returned no event");
 	disable_commit_resumed.reset_and_commit ();
