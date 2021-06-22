@@ -4039,6 +4039,11 @@ md_assemble (char *str)
 	 boundaries.  */
       frag_align_code (6, 4);
       record_alignment (now_seg, 6);
+#ifdef OBJ_XCOFF
+      /* Update alignment of the containing csect.  */
+      if (symbol_get_tc (ppc_current_csect)->align < 6)
+	symbol_get_tc (ppc_current_csect)->align = 6;
+#endif
 
       /* Update "dot" in any expressions used by this instruction, and
 	 a label attached to the instruction.  By "attached" we mean

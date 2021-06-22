@@ -1,3 +1,8 @@
+2021-06-24  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/tc-ppc.c (md_assemble): Update ppc_current_csect
+	alignment when finding prefixed instructions.
+
 2021-06-22  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-pj.c (md_apply_fix): Apply PJ_CODE_REL32 relocs.
