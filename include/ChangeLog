@@ -1,3 +1,7 @@
+2021-06-24  Luis Machado  <luis.machado@arm.com>
+
+	* elf/aarch64.h (EF_AARCH64_CHERI_PURECAP): New constant.
+
 2021-03-17  Luis Machado  <luis.machado@arm.com>
 
 	* opcode/aarch64.h (enum map_type): Moved from opcodes/aarch64-dis.c.
