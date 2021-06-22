@@ -94,10 +94,10 @@ def _execute_unwinders(pending_frame):
     Returns:
         Tuple with:
 
-	  [0] gdb.UnwindInfo instance
-	  [1] Name of unwinder that claimed the frame (type `str`)
+          [0] gdb.UnwindInfo instance
+          [1] Name of unwinder that claimed the frame (type `str`)
 
-	or None, if no unwinder has claimed the frame.
+        or None, if no unwinder has claimed the frame.
     """
     for objfile in objfiles():
         for unwinder in objfile.frame_unwinders:

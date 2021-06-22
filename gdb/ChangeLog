@@ -1,5 +1,9 @@
 2021-06-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* python/lib/gdb/__init__.py: Format.
+
+2021-06-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* infrun.c (do_target_wait): Remove wait_ptid parameter.
 	(fetch_inferior_event): Adjust.
 
