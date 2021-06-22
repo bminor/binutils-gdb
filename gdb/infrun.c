@@ -1895,7 +1895,8 @@ displaced_step_prepare (thread_info *thread)
    DISPLACED_STEP_FINISH_STATUS_OK as well.  */
 
 static displaced_step_finish_status
-displaced_step_finish (thread_info *event_thread, enum gdb_signal signal)
+displaced_step_finish (thread_info *event_thread,
+		       const target_waitstatus &event_status)
 {
   displaced_step_thread_state *displaced = &event_thread->displaced_step_state;
 
@@ -1917,7 +1918,7 @@ displaced_step_finish (thread_info *event_thread, enum gdb_signal signal)
   /* Do the fixup, and release the resources acquired to do the displaced
      step. */
   return gdbarch_displaced_step_finish (displaced->get_original_gdbarch (),
-					event_thread, signal);
+					event_thread, event_status);
 }
 
 /* Data to be passed around while handling an event.  This data is
@@ -5128,7 +5129,7 @@ handle_one (const wait_one_event &event)
 	  /* We caught the event that we intended to catch, so
 	     there's no event to save as pending.  */
 
-	  if (displaced_step_finish (t, GDB_SIGNAL_0)
+	  if (displaced_step_finish (t, event.ws)
 	      == DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED)
 	    {
 	      /* Add it back to the step-over queue.  */
@@ -5143,7 +5144,6 @@ handle_one (const wait_one_event &event)
 	}
       else
 	{
-	  enum gdb_signal sig;
 	  struct regcache *regcache;
 
 	  infrun_debug_printf
@@ -5154,10 +5154,7 @@ handle_one (const wait_one_event &event)
 	  /* Record for later.  */
 	  save_waitstatus (t, event.ws);
 
-	  sig = (event.ws.kind () == TARGET_WAITKIND_STOPPED
-		 ? event.ws.sig () : GDB_SIGNAL_0);
-
-	  if (displaced_step_finish (t, sig)
+	  if (displaced_step_finish (t, event.ws)
 	      == DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED)
 	    {
 	      /* Add it back to the step-over queue.  */
@@ -5759,7 +5756,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	       has been done.  Perform cleanup for parent process here.  Note
 	       that this operation also cleans up the child process for vfork,
 	       because their pages are shared.  */
-	    displaced_step_finish (ecs->event_thread, GDB_SIGNAL_TRAP);
+	    displaced_step_finish (ecs->event_thread, ecs->ws);
 	    /* Start a new step-over in another thread if there's one
 	       that needs it.  */
 	    start_step_over ();
@@ -6124,7 +6121,7 @@ resumed_thread_with_pending_status (struct thread_info *tp,
 static int
 finish_step_over (struct execution_control_state *ecs)
 {
-  displaced_step_finish (ecs->event_thread, ecs->event_thread->stop_signal ());
+  displaced_step_finish (ecs->event_thread, ecs->ws);
 
   bool had_step_over_info = step_over_info_valid_p ();
 

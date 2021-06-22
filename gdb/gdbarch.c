@@ -4098,13 +4098,13 @@ set_gdbarch_displaced_step_prepare (struct gdbarch *gdbarch,
 }
 
 displaced_step_finish_status
-gdbarch_displaced_step_finish (struct gdbarch *gdbarch, thread_info *thread, gdb_signal sig)
+gdbarch_displaced_step_finish (struct gdbarch *gdbarch, thread_info *thread, const target_waitstatus &ws)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->displaced_step_finish != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_displaced_step_finish called\n");
-  return gdbarch->displaced_step_finish (gdbarch, thread, sig);
+  return gdbarch->displaced_step_finish (gdbarch, thread, ws);
 }
 
 void

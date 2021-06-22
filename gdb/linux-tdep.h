@@ -72,7 +72,7 @@ extern displaced_step_prepare_status linux_displaced_step_prepare
 /* Implementation of gdbarch_displaced_step_finish.  */
 
 extern displaced_step_finish_status linux_displaced_step_finish
-  (gdbarch *arch, thread_info *thread, gdb_signal sig);
+  (gdbarch *arch, thread_info *thread, const target_waitstatus &status);
 
 /* Implementation of gdbarch_displaced_step_copy_insn_closure_by_addr.  */
 

@@ -2626,13 +2626,14 @@ linux_displaced_step_prepare (gdbarch *arch, thread_info *thread,
 /* See linux-tdep.h.  */
 
 displaced_step_finish_status
-linux_displaced_step_finish (gdbarch *arch, thread_info *thread, gdb_signal sig)
+linux_displaced_step_finish (gdbarch *arch, thread_info *thread,
+			     const target_waitstatus &status)
 {
   linux_info *per_inferior = get_linux_inferior_data (thread->inf);
 
   gdb_assert (per_inferior->disp_step_bufs.has_value ());
 
-  return per_inferior->disp_step_bufs->finish (arch, thread, sig);
+  return per_inferior->disp_step_bufs->finish (arch, thread, status);
 }
 
 /* See linux-tdep.h.  */

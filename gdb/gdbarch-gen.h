@@ -1101,8 +1101,8 @@ extern void set_gdbarch_displaced_step_prepare (struct gdbarch *gdbarch, gdbarch
 
 /* Clean up after a displaced step of THREAD. */
 
-typedef displaced_step_finish_status (gdbarch_displaced_step_finish_ftype) (struct gdbarch *gdbarch, thread_info *thread, gdb_signal sig);
-extern displaced_step_finish_status gdbarch_displaced_step_finish (struct gdbarch *gdbarch, thread_info *thread, gdb_signal sig);
+typedef displaced_step_finish_status (gdbarch_displaced_step_finish_ftype) (struct gdbarch *gdbarch, thread_info *thread, const target_waitstatus &ws);
+extern displaced_step_finish_status gdbarch_displaced_step_finish (struct gdbarch *gdbarch, thread_info *thread, const target_waitstatus &ws);
 extern void set_gdbarch_displaced_step_finish (struct gdbarch *gdbarch, gdbarch_displaced_step_finish_ftype *displaced_step_finish);
 
 /* Return the closure associated to the displaced step buffer that is at ADDR. */

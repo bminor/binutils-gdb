@@ -1089,13 +1089,13 @@ ppc_displaced_step_prepare  (gdbarch *arch, thread_info *thread,
 
 static displaced_step_finish_status
 ppc_displaced_step_finish (gdbarch *arch, thread_info *thread,
-			   gdb_signal sig)
+			   const target_waitstatus &status)
 {
   ppc_inferior_data *per_inferior = get_ppc_per_inferior (thread->inf);
 
   gdb_assert (per_inferior->disp_step_buf.has_value ());
 
-  return per_inferior->disp_step_buf->finish (arch, thread, sig);
+  return per_inferior->disp_step_buf->finish (arch, thread, status);
 }
 
 /* Implementation of gdbarch_displaced_step_restore_all_in_ptid.  */

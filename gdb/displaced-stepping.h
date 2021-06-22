@@ -168,7 +168,7 @@ struct displaced_step_buffers
 					 CORE_ADDR &displaced_pc);
 
   displaced_step_finish_status finish (gdbarch *arch, thread_info *thread,
-				       gdb_signal sig);
+				       const target_waitstatus &status);
 
   const displaced_step_copy_insn_closure *
     copy_insn_closure_by_addr (CORE_ADDR addr);

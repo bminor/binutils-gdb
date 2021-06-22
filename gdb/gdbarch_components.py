@@ -1819,7 +1819,7 @@ Clean up after a displaced step of THREAD.
 """,
     type="displaced_step_finish_status",
     name="displaced_step_finish",
-    params=[("thread_info *", "thread"), ("gdb_signal", "sig")],
+    params=[("thread_info *", "thread"), ("const target_waitstatus &", "ws")],
     predefault="NULL",
     invalid="(! gdbarch->displaced_step_finish) != (! gdbarch->displaced_step_prepare)",
 )
