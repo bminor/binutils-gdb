@@ -1,5 +1,10 @@
 2021-06-24  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-linux-tdep.c: Include gdbsupport/capability.h.
+	(maint_print_cap_from_addr_cmd): Print more information.
+
+2021-06-24  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c: Include elf/aarch64.h.
 	(aarch64_bfd_has_capabilities): Make more robust.
 	(aarch64_gdbarch_init): Set have_capability if we have a pure-cap
