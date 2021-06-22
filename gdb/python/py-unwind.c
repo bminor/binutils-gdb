@@ -556,33 +556,56 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
     }
   gdbpy_ref<> pyo_execute (PyObject_GetAttrString (gdb_python_module,
 						   "_execute_unwinders"));
-  if (pyo_execute == NULL)
+  if (pyo_execute == nullptr)
     {
       gdbpy_print_stack ();
       return 0;
     }
 
-  gdbpy_ref<> pyo_unwind_info
+  /* A (gdb.UnwindInfo, str) tuple, or None.  */
+  gdbpy_ref<> pyo_execute_ret
     (PyObject_CallFunctionObjArgs (pyo_execute.get (),
 				   pyo_pending_frame.get (), NULL));
-  if (pyo_unwind_info == NULL)
+  if (pyo_execute_ret == nullptr)
     {
       /* If the unwinder is cancelled due to a Ctrl-C, then propagate
 	 the Ctrl-C as a GDB exception instead of swallowing it.  */
       gdbpy_print_stack_or_quit ();
       return 0;
     }
-  if (pyo_unwind_info == Py_None)
+  if (pyo_execute_ret == Py_None)
     return 0;
 
+  /* Verify the return value of _execute_unwinders is a tuple of size 2.  */
+  gdb_assert (PyTuple_Check (pyo_execute_ret.get ()));
+  gdb_assert (PyTuple_GET_SIZE (pyo_execute_ret.get ()) == 2);
+
+  if (pyuw_debug)
+    {
+      PyObject *pyo_unwinder_name = PyTuple_GET_ITEM (pyo_execute_ret.get (), 1);
+      gdb::unique_xmalloc_ptr<char> name
+	= python_string_to_host_string (pyo_unwinder_name);
+
+      /* This could happen if the user passed something else than a string
+	 as the unwinder's name.  */
+      if (name == nullptr)
+	{
+	  gdbpy_print_stack ();
+	  name = make_unique_xstrdup ("<failed to get unwinder name>");
+	}
+
+      pyuw_debug_printf ("frame claimed by unwinder %s", name.get ());
+    }
+
   /* Received UnwindInfo, cache data.  */
-  if (PyObject_IsInstance (pyo_unwind_info.get (),
+  PyObject *pyo_unwind_info = PyTuple_GET_ITEM (pyo_execute_ret.get (), 0);
+  if (PyObject_IsInstance (pyo_unwind_info,
 			   (PyObject *) &unwind_info_object_type) <= 0)
     error (_("A Unwinder should return gdb.UnwindInfo instance."));
 
   {
     unwind_info_object *unwind_info =
-      (unwind_info_object *) pyo_unwind_info.get ();
+      (unwind_info_object *) pyo_unwind_info;
     int reg_count = unwind_info->saved_regs->size ();
 
     cached_frame
@@ -613,7 +636,6 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
   }
 
   *cache_ptr = cached_frame;
-  pyuw_debug_printf ("frame claimed");
   return 1;
 }
 

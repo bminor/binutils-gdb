@@ -1,3 +1,10 @@
+2021-06-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* python/lib/gdb/__init__.py (_execute_unwinders): Return tuple
+	with name of chosen unwinder.
+	* python/py-unwind.c (pyuw_sniffer): Print name of chosen
+	unwinder in debug message.
+
 2021-06-22  Andreas Schwab  <schwab@suse.de>
 
 	PR symtab/27999
