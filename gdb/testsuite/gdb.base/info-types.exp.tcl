@@ -43,8 +43,8 @@ proc run_test { lang } {
     if { $lang == "c++" } {
 	set output_lines \
 	    [list \
-		 "All defined types:" \
-		 "--any" \
+		 "^All defined types:" \
+		 ".*" \
 		 $file_re \
 		 "98:\[\t \]+CL;" \
 		 "42:\[\t \]+anon_struct_t;" \
@@ -74,14 +74,14 @@ proc run_test { lang } {
 		 "39:\[\t \]+typedef enum_t nested_enum_t;" \
 		 "19:\[\t \]+typedef float nested_float_t;" \
 		 "18:\[\t \]+typedef int nested_int_t;" \
-		 "62:\[\t \]+typedef union_t nested_union_t;" \
-		 "--optional" "\[\t \]+unsigned int" \
-		 ""]
+		 "62:\[\t \]+typedef union_t nested_union_t;(" \
+		 "\[\t \]+unsigned int)?" \
+		 "($|\r\n.*)"]
     } else {
 	set output_lines \
 	    [list \
-		 "All defined types:" \
-		 "--any" \
+		 "^All defined types:" \
+		 ".*" \
 		 $file_re \
 		 "52:\[\t \]+typedef enum {\\.\\.\\.} anon_enum_t;" \
 		 "45:\[\t \]+typedef struct {\\.\\.\\.} anon_struct_t;" \
@@ -105,12 +105,12 @@ proc run_test { lang } {
 		 "19:\[\t \]+typedef float nested_float_t;" \
 		 "18:\[\t \]+typedef int nested_int_t;" \
 		 "62:\[\t \]+typedef union union_t nested_union_t;" \
-		 "56:\[\t \]+union union_t;" \
-		 "--optional" "\[\t \]+unsigned int" \
-		 ""]
+		 "56:\[\t \]+union union_t;(" \
+		 "\[\t \]+unsigned int)?" \
+		 "($|\r\n.*)"]
     }
 
-    gdb_test_lines "info types" "" $output_lines
+    gdb_test_lines "info types" "" [multi_line {*}$output_lines]
 }
 
 run_test $lang

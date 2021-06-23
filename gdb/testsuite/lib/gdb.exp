@@ -1432,86 +1432,41 @@ proc gdb_test_sequence { args } {
 }
 
 
-# Match LINE against regexp OUTPUT_LINES[IDX].  Helper function for
-# gdb_test_lines.
-proc match_line { line output_lines idx_name } {
-    upvar $idx_name idx
-
-    while { 1 } {
-	if { $idx == [llength $output_lines] } {
-	    # Ran out of regexps, bail out.
-	    return -1
-	}
-
-	set re [lindex $output_lines $idx]
-	set opt 0
-	set any 0
-	if { $re == "--optional" } {
-	    # Optional, get actual regexp.
-	    set opt 1
-	    incr idx
-	    set re [lindex $output_lines $idx]
-	} elseif { $re == "--any" } {
-	    set any 1
-	    incr idx
-	    set re [lindex $output_lines $idx]
-	}
-
-	if { [regexp $re $line] } {
-	    # Match.
-	    incr idx
-	    if { $idx == [llength $output_lines] } {
-		# Last match, we're done.
-		return 1
-	    }
-	    # Match found, keep looking for next match.
-	    return 0
-	} else {
-	    # No match.
-	    if { $idx == 0 } {
-		# First match not found, just keep looking for first match.
-		return 0
-	    } elseif { $opt } {
-		# Try next regexp on same line.
-		incr idx
-		continue
-	    } elseif { $any } {
-		# Try again with next line.
-		incr idx -1
-		return 0
-	    } else {
-		# Mismatch, bail out.
-		return -1
-	    }
-	}
-	break
-    }
-
-    # Keep going.
-    return 0
-}
-
-# Match output of COMMAND line-by-line, using PATTERNS.
+# Match output of COMMAND using RE.  Read output line-by-line.
 # Report pass/fail with MESSAGE.
+# For a command foo with output:
+#   (gdb) foo^M
+#   <line1>^M
+#   <line2>^M
+#   (gdb)
+# the portion matched using RE is:
+#  '<line1>^M
+#   <line2>^M
+#  '
 
-proc gdb_test_lines { command message patterns } {
+proc gdb_test_lines { command message re } {
     set found 0
     set idx 0
     if { $message == ""} {
 	set message $command
     }
+    set lines ""
     gdb_test_multiple $command $message {
 	-re "\r\n(\[^\r\n\]*)(?=\r\n)" {
-	    if { $found == 0 } {
-		set line $expect_out(1,string)
-		set found [match_line $line $patterns idx]
+	    set line $expect_out(1,string)
+	    if { $lines eq "" } {
+		append lines "$line"
+	    } else {
+		append lines "\r\n$line"
 	    }
 	    exp_continue
 	}
 	-re -wrap "" {
-	    gdb_assert { $found == 1 } $gdb_test_name
+	    append lines "\r\n"
 	}
     }
+
+    gdb_assert { [regexp $re $lines] } $message
 }
 
 # Test that a command gives an error.  For pass or fail, return

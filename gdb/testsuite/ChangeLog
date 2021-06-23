@@ -1,3 +1,12 @@
+2021-06-23  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (gdb_test_lines): Rewrite to accept single
+	multiline tcl regexp.
+	* gdb.base/info-types.exp.tcl: Update.  Make empty line at end of
+	regexp optional.
+	* gdb.base/info-macros.exp: Update.
+	* gdb.cp/cplusfuncs.exp: Update.
+
 2021-06-22  Andreas Schwab  <schwab@suse.de>
 
 	PR symtab/27999

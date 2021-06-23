@@ -294,7 +294,7 @@ proc info_func_regexp { name demangled } {
     set file_re "File .*[string_to_regexp $srcfile]:"
 
     gdb_test_lines "info function $name" "info function for \"$name\"" \
-	[list \
+	[multi_line \
 	     "$file_re" \
 	     "$decimal:\t(class|)${demangled}.*"]
 }
