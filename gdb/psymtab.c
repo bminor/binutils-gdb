@@ -595,10 +595,16 @@ lookup_partial_symbol (struct objfile *objfile,
 static struct compunit_symtab *
 psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 {
+  gdb_assert (pst->expansion_state != partial_symtab::unexpanded);
+
   /* If it is a shared psymtab, find an unshared psymtab that includes
      it.  Any such psymtab will do.  */
   while (pst->user != NULL)
-    pst = pst->user;
+    {
+      pst = pst->user;
+      if (pst->expansion_state == partial_symtab::unexpanded)
+	pst->expansion_state = partial_symtab::lazy;
+    }
 
   gdb_assert (pst->expansion_state != partial_symtab::unexpanded);
 
@@ -652,6 +658,7 @@ psymbol_functions::find_last_source_symtab (struct objfile *ofp)
 	}
       else
 	{
+	  cs_pst->note_no_interesting_symbol ();
 	  struct compunit_symtab *cust = psymtab_to_symtab (ofp, cs_pst);
 
 	  if (cust == NULL)
@@ -1202,6 +1209,8 @@ psymbol_functions::expand_symtabs_matching
 	{
 	  if (symbol_matcher == NULL && lookup_name == NULL)
 	    ps->note_no_interesting_symbol ();
+	  else if (ps->expansion_state == partial_symtab::unexpanded)
+	    ps->expansion_state = partial_symtab::lazy;
 
 	  struct compunit_symtab *symtab =
 	    psymtab_to_symtab (objfile, ps);
