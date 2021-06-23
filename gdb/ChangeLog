@@ -1,3 +1,11 @@
+2021-06-28  Luis Machado  <luis.machado@linaro.org>
+
+	* aarch64-linux-tdep.c
+	(aarch64_linux_iterate_over_regset_sections): Update tag_ctl register
+	size.
+	* aarch64-linux-tdep.h (AARCH64_LINUX_SIZEOF_MTE_REGSET): Set to
+	8 and update comments.
+
 2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbarch.sh (struct gdbarch_info): Initialize fields, add

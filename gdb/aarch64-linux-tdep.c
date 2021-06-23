@@ -735,7 +735,7 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
       /* Create this on the fly in order to handle the variable location.  */
       const struct regcache_map_entry mte_regmap[] =
 	{
-	  { 1, tdep->mte_reg_base, 4},
+	  { 1, tdep->mte_reg_base, 8},
 	  { 0 }
 	};
 
