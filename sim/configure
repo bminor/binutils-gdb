@@ -16709,7 +16709,7 @@ $as_echo X"$file" |
  ;;
     "aarch64/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/aarch64:; }
+		/^srcdir = / s:$:/aarch64:
 		p
 	}' \
 	<Make-common.sim >aarch64/Makesim1.tmp
@@ -16722,7 +16722,7 @@ $as_echo X"$file" |
     "depdir-aarch64":C) $SHELL $ac_aux_dir/mkinstalldirs aarch64/$DEPDIR ;;
     "arm/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/arm:; }
+		/^srcdir = / s:$:/arm:
 		p
 	}' \
 	<Make-common.sim >arm/Makesim1.tmp
@@ -16735,7 +16735,7 @@ $as_echo X"$file" |
     "depdir-arm":C) $SHELL $ac_aux_dir/mkinstalldirs arm/$DEPDIR ;;
     "avr/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/avr:; }
+		/^srcdir = / s:$:/avr:
 		p
 	}' \
 	<Make-common.sim >avr/Makesim1.tmp
@@ -16750,7 +16750,7 @@ $as_echo X"$file" |
     "depdir-bpf":C) $SHELL $ac_aux_dir/mkinstalldirs bpf/$DEPDIR ;;
     "cr16/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/cr16:; }
+		/^srcdir = / s:$:/cr16:
 		p
 	}' \
 	<Make-common.sim >cr16/Makesim1.tmp
@@ -16764,7 +16764,7 @@ $as_echo X"$file" |
     "depdir-cris":C) $SHELL $ac_aux_dir/mkinstalldirs cris/$DEPDIR ;;
     "d10v/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/d10v:; }
+		/^srcdir = / s:$:/d10v:
 		p
 	}' \
 	<Make-common.sim >d10v/Makesim1.tmp
@@ -16778,7 +16778,7 @@ $as_echo X"$file" |
     "depdir-frv":C) $SHELL $ac_aux_dir/mkinstalldirs frv/$DEPDIR ;;
     "ft32/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/ft32:; }
+		/^srcdir = / s:$:/ft32:
 		p
 	}' \
 	<Make-common.sim >ft32/Makesim1.tmp
@@ -16791,7 +16791,7 @@ $as_echo X"$file" |
     "depdir-ft32":C) $SHELL $ac_aux_dir/mkinstalldirs ft32/$DEPDIR ;;
     "h8300/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/h8300:; }
+		/^srcdir = / s:$:/h8300:
 		p
 	}' \
 	<Make-common.sim >h8300/Makesim1.tmp
@@ -16806,7 +16806,7 @@ $as_echo X"$file" |
     "depdir-lm32":C) $SHELL $ac_aux_dir/mkinstalldirs lm32/$DEPDIR ;;
     "m32c/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/m32c:; }
+		/^srcdir = / s:$:/m32c:
 		p
 	}' \
 	<Make-common.sim >m32c/Makesim1.tmp
@@ -16820,7 +16820,7 @@ $as_echo X"$file" |
     "depdir-m32r":C) $SHELL $ac_aux_dir/mkinstalldirs m32r/$DEPDIR ;;
     "m68hc11/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/m68hc11:; }
+		/^srcdir = / s:$:/m68hc11:
 		p
 	}' \
 	<Make-common.sim >m68hc11/Makesim1.tmp
@@ -16833,7 +16833,7 @@ $as_echo X"$file" |
     "depdir-m68hc11":C) $SHELL $ac_aux_dir/mkinstalldirs m68hc11/$DEPDIR ;;
     "mcore/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/mcore:; }
+		/^srcdir = / s:$:/mcore:
 		p
 	}' \
 	<Make-common.sim >mcore/Makesim1.tmp
@@ -16846,7 +16846,7 @@ $as_echo X"$file" |
     "depdir-mcore":C) $SHELL $ac_aux_dir/mkinstalldirs mcore/$DEPDIR ;;
     "microblaze/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/microblaze:; }
+		/^srcdir = / s:$:/microblaze:
 		p
 	}' \
 	<Make-common.sim >microblaze/Makesim1.tmp
@@ -16861,7 +16861,7 @@ $as_echo X"$file" |
     "depdir-mn10300":C) $SHELL $ac_aux_dir/mkinstalldirs mn10300/$DEPDIR ;;
     "moxie/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/moxie:; }
+		/^srcdir = / s:$:/moxie:
 		p
 	}' \
 	<Make-common.sim >moxie/Makesim1.tmp
@@ -16874,7 +16874,7 @@ $as_echo X"$file" |
     "depdir-moxie":C) $SHELL $ac_aux_dir/mkinstalldirs moxie/$DEPDIR ;;
     "msp430/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/msp430:; }
+		/^srcdir = / s:$:/msp430:
 		p
 	}' \
 	<Make-common.sim >msp430/Makesim1.tmp
@@ -16888,7 +16888,7 @@ $as_echo X"$file" |
     "depdir-or1k":C) $SHELL $ac_aux_dir/mkinstalldirs or1k/$DEPDIR ;;
     "pru/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/pru:; }
+		/^srcdir = / s:$:/pru:
 		p
 	}' \
 	<Make-common.sim >pru/Makesim1.tmp
@@ -16902,7 +16902,7 @@ $as_echo X"$file" |
     "depdir-riscv":C) $SHELL $ac_aux_dir/mkinstalldirs riscv/$DEPDIR ;;
     "rl78/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/rl78:; }
+		/^srcdir = / s:$:/rl78:
 		p
 	}' \
 	<Make-common.sim >rl78/Makesim1.tmp
@@ -16915,7 +16915,7 @@ $as_echo X"$file" |
     "depdir-rl78":C) $SHELL $ac_aux_dir/mkinstalldirs rl78/$DEPDIR ;;
     "rx/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/rx:; }
+		/^srcdir = / s:$:/rx:
 		p
 	}' \
 	<Make-common.sim >rx/Makesim1.tmp
@@ -16928,7 +16928,7 @@ $as_echo X"$file" |
     "depdir-rx":C) $SHELL $ac_aux_dir/mkinstalldirs rx/$DEPDIR ;;
     "sh/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/sh:; }
+		/^srcdir = / s:$:/sh:
 		p
 	}' \
 	<Make-common.sim >sh/Makesim1.tmp
@@ -16944,7 +16944,7 @@ $as_echo X"$file" |
     "depdir-v850":C) $SHELL $ac_aux_dir/mkinstalldirs v850/$DEPDIR ;;
     "example-synacor/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/example-synacor:; }
+		/^srcdir = / s:$:/example-synacor:
 		p
 	}' \
 	<Make-common.sim >example-synacor/Makesim1.tmp

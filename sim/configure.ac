@@ -69,7 +69,7 @@ m4_define([SIM_BUILD_TARGET], [dnl
     AC_CONFIG_COMMANDS([$1/Makefile],
 [sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
-		/^srcdir / { s:= := ../:; s:$:/$1:; }
+		/^srcdir = / s:$:/$1:
 		p
 	}' \
 	<Make-common.sim >$1/Makesim1.tmp

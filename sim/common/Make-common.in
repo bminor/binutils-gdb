@@ -34,7 +34,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-srcdir = @srcdir@
+srcdir = @abs_srcdir@
 VPATH = $(srcdir):$(srccom)
 srccom = $(srcdir)/../common
 srcroot = $(srcdir)/../..

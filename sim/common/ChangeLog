@@ -1,3 +1,7 @@
+2021-06-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (srcdir): Change to abs_srcdir.
+
 2021-06-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* callback.c (cb_target_to_host_signal): New function.
