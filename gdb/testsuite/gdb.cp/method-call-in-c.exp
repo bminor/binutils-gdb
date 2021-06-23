@@ -43,5 +43,8 @@ foreach_with_prefix lang { c++ c } {
 	set result [expr $result + 3]
 	gdb_test "print foo += b" \
 	    " = \\((?:struct )?foo_type &\\) @${hex}: \\\{var = ${result}\\\}"
+
+	gdb_test "print foo.static_method (f, b)" " = 4"
+	gdb_test "print foo_type::static_method (f, b)" " = 4"
     }
 }

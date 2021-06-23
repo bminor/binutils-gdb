@@ -1,5 +1,10 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* infcall.c (call_function_by_hand_dummy): Add missing 'else' when
+	setting prototyped flag.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (desc_bounds): Use '{}' instead of NULL to indicate
 	an empty gdb::optional when calling value_struct_elt.
 	(desc_data): Likewise.

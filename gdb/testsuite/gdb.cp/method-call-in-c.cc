@@ -35,8 +35,15 @@ struct foo_type
     return *this;
   }
 
+  static int static_method (float f, baz_type b)
+  {
+    return b.a + b.b + b.c + (int) f;
+  }
+
   int var = 120;
 };
+
+volatile int global_var;
 
 int
 main (void)
@@ -47,6 +54,8 @@ main (void)
   foo_type foo;
 
   foo += b;
+
+  global_var = foo.static_method (f, b);
 
   return foo.func (b, f);	/* Break here.  */
 }

@@ -1,5 +1,14 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.cp/method-call-in-c.cc (struct foo_type): Add static member
+	function static_method.
+	(global_var): New global.
+	(main): Use new static_method to ensure it is compiled in.
+	* gdb.cp/method-call-in-c.exp: Test calls to static member
+	function.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	PR gdb/27994
 	* gdb.cp/method-call-in-c.cc (struct foo_type): Add operator+=,
 	change initial value of var member variable.
