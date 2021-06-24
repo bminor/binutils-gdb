@@ -687,7 +687,7 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	{
 	  { 32, AARCH64_SVE_Z0_REGNUM, (int) (tdep->vq * 16) },
 	  { 16, AARCH64_SVE_P0_REGNUM, (int) (tdep->vq * 16 / 8) },
-	  { 1, AARCH64_SVE_FFR_REGNUM, 4 },
+	  { 1, AARCH64_SVE_FFR_REGNUM, (int) (tdep->vq * 16 / 8) },
 	  { 1, AARCH64_FPSR_REGNUM, 4 },
 	  { 1, AARCH64_FPCR_REGNUM, 4 },
 	  { 0 }
