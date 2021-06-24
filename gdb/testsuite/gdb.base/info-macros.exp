@@ -61,9 +61,11 @@ gdb_test "info macro --" \
 	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
 
 gdb_test "info macro -- " \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
+	 "info macro -- <EOL>"
 gdb_test "info macro  -- " \
-	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]"
+	 "You must follow.*with the name.*you want to see.*\[^\r\n\]*\[\r\n\]" \
+	 "info macro  -- <EOL>"
 
 gdb_test "info macro -invalid-option" \
 	 "Unrecognized option.*Try \"help info macro\"\."
