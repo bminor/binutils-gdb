@@ -588,6 +588,8 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
   while (pst->user != NULL)
     pst = pst->user;
 
+  gdb_assert (pst->expansion_state != partial_symtab::unexpanded);
+
   /* If it's been looked up before, return it.  */
   if (pst->get_compunit_symtab (objfile))
     return pst->get_compunit_symtab (objfile);
