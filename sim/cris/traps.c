@@ -929,8 +929,10 @@ is_mapped_only (SIM_DESC sd ATTRIBUTE_UNUSED,
   return 0;
 }
 
-/* Debug helper; to be run from gdb.  */
+/* Provide a prototype to silence -Wmissing-prototypes.  */
+void cris_dump_map (SIM_CPU *current_cpu);
 
+/* Debug helper; to be run from gdb.  */
 void
 cris_dump_map (SIM_CPU *current_cpu)
 {
@@ -1068,36 +1070,6 @@ sim_engine_invalid_insn (SIM_CPU *current_cpu, IADDR cia, SEM_PC vpc)
 
   sim_engine_halt (sd, current_cpu, NULL, cia, sim_stopped, SIM_SIGILL);
   return vpc;
-}
-
-/* Handlers from the CGEN description that should not be called.  */
-
-USI
-cris_bmod_handler (SIM_CPU *current_cpu ATTRIBUTE_UNUSED,
-		   UINT srcreg ATTRIBUTE_UNUSED,
-		   USI dstreg ATTRIBUTE_UNUSED)
-{
-  SIM_DESC sd = CPU_STATE (current_cpu);
-  abort ();
-}
-
-void
-h_supr_set_handler (SIM_CPU *current_cpu ATTRIBUTE_UNUSED,
-		    UINT index ATTRIBUTE_UNUSED,
-		    USI page ATTRIBUTE_UNUSED,
-		    USI newval ATTRIBUTE_UNUSED)
-{
-  SIM_DESC sd = CPU_STATE (current_cpu);
-  abort ();
-}
-
-USI
-h_supr_get_handler (SIM_CPU *current_cpu ATTRIBUTE_UNUSED,
-		    UINT index ATTRIBUTE_UNUSED,
-		    USI page ATTRIBUTE_UNUSED)
-{
-  SIM_DESC sd = CPU_STATE (current_cpu);
-  abort ();
 }
 
 /* Swap one context for another.  */

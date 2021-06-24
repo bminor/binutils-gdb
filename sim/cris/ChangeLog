@@ -1,3 +1,11 @@
+2021-06-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* cris-sim.h (cris_bmod_handler): Delete.
+	* traps.c (cris_dump_map): New prototype.
+	(cris_bmod_handler): Delete.
+	(h_supr_set_handler): Likewise.
+	(h_supr_get_handler): Likewise.
+
 2021-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* traps.c (cris_getpid): New function.
