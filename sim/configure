@@ -654,69 +654,165 @@ ENABLE_SIM_FALSE
 ENABLE_SIM_TRUE
 SIM_ENABLE_IGEN_FALSE
 SIM_ENABLE_IGEN_TRUE
+CC_FOR_TARGET_EXAMPLE_SYNACOR
+LD_FOR_TARGET_EXAMPLE_SYNACOR
+AS_FOR_TARGET_EXAMPLE_SYNACOR
 SIM_ENABLE_ARCH_v850_FALSE
 SIM_ENABLE_ARCH_v850_TRUE
+CC_FOR_TARGET_V850
+LD_FOR_TARGET_V850
+AS_FOR_TARGET_V850
 SIM_ENABLE_ARCH_erc32_FALSE
 SIM_ENABLE_ARCH_erc32_TRUE
+CC_FOR_TARGET_ERC32
+LD_FOR_TARGET_ERC32
+AS_FOR_TARGET_ERC32
 SIM_ENABLE_ARCH_sh_FALSE
 SIM_ENABLE_ARCH_sh_TRUE
+CC_FOR_TARGET_SH
+LD_FOR_TARGET_SH
+AS_FOR_TARGET_SH
 SIM_ENABLE_ARCH_rx_FALSE
 SIM_ENABLE_ARCH_rx_TRUE
+CC_FOR_TARGET_RX
+LD_FOR_TARGET_RX
+AS_FOR_TARGET_RX
 SIM_ENABLE_ARCH_rl78_FALSE
 SIM_ENABLE_ARCH_rl78_TRUE
+CC_FOR_TARGET_RL78
+LD_FOR_TARGET_RL78
+AS_FOR_TARGET_RL78
 SIM_ENABLE_ARCH_riscv_FALSE
 SIM_ENABLE_ARCH_riscv_TRUE
+CC_FOR_TARGET_RISCV
+LD_FOR_TARGET_RISCV
+AS_FOR_TARGET_RISCV
 SIM_ENABLE_ARCH_pru_FALSE
 SIM_ENABLE_ARCH_pru_TRUE
+CC_FOR_TARGET_PRU
+LD_FOR_TARGET_PRU
+AS_FOR_TARGET_PRU
 SIM_ENABLE_ARCH_ppc_FALSE
 SIM_ENABLE_ARCH_ppc_TRUE
+CC_FOR_TARGET_PPC
+LD_FOR_TARGET_PPC
+AS_FOR_TARGET_PPC
 SIM_ENABLE_ARCH_or1k_FALSE
 SIM_ENABLE_ARCH_or1k_TRUE
+CC_FOR_TARGET_OR1K
+LD_FOR_TARGET_OR1K
+AS_FOR_TARGET_OR1K
 SIM_ENABLE_ARCH_msp430_FALSE
 SIM_ENABLE_ARCH_msp430_TRUE
+CC_FOR_TARGET_MSP430
+LD_FOR_TARGET_MSP430
+AS_FOR_TARGET_MSP430
 SIM_ENABLE_ARCH_moxie_FALSE
 SIM_ENABLE_ARCH_moxie_TRUE
+CC_FOR_TARGET_MOXIE
+LD_FOR_TARGET_MOXIE
+AS_FOR_TARGET_MOXIE
 SIM_ENABLE_ARCH_mn10300_FALSE
 SIM_ENABLE_ARCH_mn10300_TRUE
+CC_FOR_TARGET_MN10300
+LD_FOR_TARGET_MN10300
+AS_FOR_TARGET_MN10300
 SIM_ENABLE_ARCH_mips_FALSE
 SIM_ENABLE_ARCH_mips_TRUE
+CC_FOR_TARGET_MIPS
+LD_FOR_TARGET_MIPS
+AS_FOR_TARGET_MIPS
 SIM_ENABLE_ARCH_microblaze_FALSE
 SIM_ENABLE_ARCH_microblaze_TRUE
+CC_FOR_TARGET_MICROBLAZE
+LD_FOR_TARGET_MICROBLAZE
+AS_FOR_TARGET_MICROBLAZE
 SIM_ENABLE_ARCH_mcore_FALSE
 SIM_ENABLE_ARCH_mcore_TRUE
+CC_FOR_TARGET_MCORE
+LD_FOR_TARGET_MCORE
+AS_FOR_TARGET_MCORE
 SIM_ENABLE_ARCH_m68hc11_FALSE
 SIM_ENABLE_ARCH_m68hc11_TRUE
+CC_FOR_TARGET_M68HC11
+LD_FOR_TARGET_M68HC11
+AS_FOR_TARGET_M68HC11
 SIM_ENABLE_ARCH_m32r_FALSE
 SIM_ENABLE_ARCH_m32r_TRUE
+CC_FOR_TARGET_M32R
+LD_FOR_TARGET_M32R
+AS_FOR_TARGET_M32R
 SIM_ENABLE_ARCH_m32c_FALSE
 SIM_ENABLE_ARCH_m32c_TRUE
+CC_FOR_TARGET_M32C
+LD_FOR_TARGET_M32C
+AS_FOR_TARGET_M32C
 SIM_ENABLE_ARCH_lm32_FALSE
 SIM_ENABLE_ARCH_lm32_TRUE
+CC_FOR_TARGET_LM32
+LD_FOR_TARGET_LM32
+AS_FOR_TARGET_LM32
 SIM_ENABLE_ARCH_iq2000_FALSE
 SIM_ENABLE_ARCH_iq2000_TRUE
+CC_FOR_TARGET_IQ2000
+LD_FOR_TARGET_IQ2000
+AS_FOR_TARGET_IQ2000
 SIM_ENABLE_ARCH_h8300_FALSE
 SIM_ENABLE_ARCH_h8300_TRUE
+CC_FOR_TARGET_H8300
+LD_FOR_TARGET_H8300
+AS_FOR_TARGET_H8300
 SIM_ENABLE_ARCH_ft32_FALSE
 SIM_ENABLE_ARCH_ft32_TRUE
+CC_FOR_TARGET_FT32
+LD_FOR_TARGET_FT32
+AS_FOR_TARGET_FT32
 SIM_ENABLE_ARCH_frv_FALSE
 SIM_ENABLE_ARCH_frv_TRUE
+CC_FOR_TARGET_FRV
+LD_FOR_TARGET_FRV
+AS_FOR_TARGET_FRV
 SIM_ENABLE_ARCH_d10v_FALSE
 SIM_ENABLE_ARCH_d10v_TRUE
+CC_FOR_TARGET_D10V
+LD_FOR_TARGET_D10V
+AS_FOR_TARGET_D10V
 SIM_ENABLE_ARCH_cris_FALSE
 SIM_ENABLE_ARCH_cris_TRUE
+CC_FOR_TARGET_CRIS
+LD_FOR_TARGET_CRIS
+AS_FOR_TARGET_CRIS
 SIM_ENABLE_ARCH_cr16_FALSE
 SIM_ENABLE_ARCH_cr16_TRUE
+CC_FOR_TARGET_CR16
+LD_FOR_TARGET_CR16
+AS_FOR_TARGET_CR16
 SIM_ENABLE_ARCH_bpf_FALSE
 SIM_ENABLE_ARCH_bpf_TRUE
+CC_FOR_TARGET_BPF
+LD_FOR_TARGET_BPF
+AS_FOR_TARGET_BPF
 subdirs
 SIM_ENABLE_ARCH_bfin_FALSE
 SIM_ENABLE_ARCH_bfin_TRUE
+CC_FOR_TARGET_BFIN
+LD_FOR_TARGET_BFIN
+AS_FOR_TARGET_BFIN
 SIM_ENABLE_ARCH_avr_FALSE
 SIM_ENABLE_ARCH_avr_TRUE
+CC_FOR_TARGET_AVR
+LD_FOR_TARGET_AVR
+AS_FOR_TARGET_AVR
 SIM_ENABLE_ARCH_arm_FALSE
 SIM_ENABLE_ARCH_arm_TRUE
+CC_FOR_TARGET_ARM
+LD_FOR_TARGET_ARM
+AS_FOR_TARGET_ARM
 SIM_ENABLE_ARCH_aarch64_FALSE
 SIM_ENABLE_ARCH_aarch64_TRUE
+CC_FOR_TARGET_AARCH64
+LD_FOR_TARGET_AARCH64
+AS_FOR_TARGET_AARCH64
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
 SIM_SUBDIRS
@@ -873,6 +969,7 @@ PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
+SIM_TOOLCHAIN_VARS
 WERROR_CFLAGS
 WARN_CFLAGS'
 ac_subst_files=''
@@ -926,7 +1023,103 @@ PKG_CONFIG
 PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
 SDL_CFLAGS
-SDL_LIBS'
+SDL_LIBS
+AS_FOR_TARGET_AARCH64
+LD_FOR_TARGET_AARCH64
+CC_FOR_TARGET_AARCH64
+AS_FOR_TARGET_ARM
+LD_FOR_TARGET_ARM
+CC_FOR_TARGET_ARM
+AS_FOR_TARGET_AVR
+LD_FOR_TARGET_AVR
+CC_FOR_TARGET_AVR
+AS_FOR_TARGET_BFIN
+LD_FOR_TARGET_BFIN
+CC_FOR_TARGET_BFIN
+AS_FOR_TARGET_BPF
+LD_FOR_TARGET_BPF
+CC_FOR_TARGET_BPF
+AS_FOR_TARGET_CR16
+LD_FOR_TARGET_CR16
+CC_FOR_TARGET_CR16
+AS_FOR_TARGET_CRIS
+LD_FOR_TARGET_CRIS
+CC_FOR_TARGET_CRIS
+AS_FOR_TARGET_D10V
+LD_FOR_TARGET_D10V
+CC_FOR_TARGET_D10V
+AS_FOR_TARGET_FRV
+LD_FOR_TARGET_FRV
+CC_FOR_TARGET_FRV
+AS_FOR_TARGET_FT32
+LD_FOR_TARGET_FT32
+CC_FOR_TARGET_FT32
+AS_FOR_TARGET_H8300
+LD_FOR_TARGET_H8300
+CC_FOR_TARGET_H8300
+AS_FOR_TARGET_IQ2000
+LD_FOR_TARGET_IQ2000
+CC_FOR_TARGET_IQ2000
+AS_FOR_TARGET_LM32
+LD_FOR_TARGET_LM32
+CC_FOR_TARGET_LM32
+AS_FOR_TARGET_M32C
+LD_FOR_TARGET_M32C
+CC_FOR_TARGET_M32C
+AS_FOR_TARGET_M32R
+LD_FOR_TARGET_M32R
+CC_FOR_TARGET_M32R
+AS_FOR_TARGET_M68HC11
+LD_FOR_TARGET_M68HC11
+CC_FOR_TARGET_M68HC11
+AS_FOR_TARGET_MCORE
+LD_FOR_TARGET_MCORE
+CC_FOR_TARGET_MCORE
+AS_FOR_TARGET_MICROBLAZE
+LD_FOR_TARGET_MICROBLAZE
+CC_FOR_TARGET_MICROBLAZE
+AS_FOR_TARGET_MIPS
+LD_FOR_TARGET_MIPS
+CC_FOR_TARGET_MIPS
+AS_FOR_TARGET_MN10300
+LD_FOR_TARGET_MN10300
+CC_FOR_TARGET_MN10300
+AS_FOR_TARGET_MOXIE
+LD_FOR_TARGET_MOXIE
+CC_FOR_TARGET_MOXIE
+AS_FOR_TARGET_MSP430
+LD_FOR_TARGET_MSP430
+CC_FOR_TARGET_MSP430
+AS_FOR_TARGET_OR1K
+LD_FOR_TARGET_OR1K
+CC_FOR_TARGET_OR1K
+AS_FOR_TARGET_PPC
+LD_FOR_TARGET_PPC
+CC_FOR_TARGET_PPC
+AS_FOR_TARGET_PRU
+LD_FOR_TARGET_PRU
+CC_FOR_TARGET_PRU
+AS_FOR_TARGET_RISCV
+LD_FOR_TARGET_RISCV
+CC_FOR_TARGET_RISCV
+AS_FOR_TARGET_RL78
+LD_FOR_TARGET_RL78
+CC_FOR_TARGET_RL78
+AS_FOR_TARGET_RX
+LD_FOR_TARGET_RX
+CC_FOR_TARGET_RX
+AS_FOR_TARGET_SH
+LD_FOR_TARGET_SH
+CC_FOR_TARGET_SH
+AS_FOR_TARGET_ERC32
+LD_FOR_TARGET_ERC32
+CC_FOR_TARGET_ERC32
+AS_FOR_TARGET_V850
+LD_FOR_TARGET_V850
+CC_FOR_TARGET_V850
+AS_FOR_TARGET_EXAMPLE_SYNACOR
+LD_FOR_TARGET_EXAMPLE_SYNACOR
+CC_FOR_TARGET_EXAMPLE_SYNACOR'
 ac_subdirs_all='bpf
 mips
 mn10300
@@ -1631,6 +1824,198 @@ Some influential environment variables:
               path overriding pkg-config's built-in search path
   SDL_CFLAGS  C compiler flags for SDL, overriding pkg-config
   SDL_LIBS    linker flags for SDL, overriding pkg-config
+  AS_FOR_TARGET_AARCH64
+              Assembler for aarch64 tests
+  LD_FOR_TARGET_AARCH64
+              Linker for aarch64 tests
+  CC_FOR_TARGET_AARCH64
+              C compiler for aarch64 tests
+  AS_FOR_TARGET_ARM
+              Assembler for arm tests
+  LD_FOR_TARGET_ARM
+              Linker for arm tests
+  CC_FOR_TARGET_ARM
+              C compiler for arm tests
+  AS_FOR_TARGET_AVR
+              Assembler for avr tests
+  LD_FOR_TARGET_AVR
+              Linker for avr tests
+  CC_FOR_TARGET_AVR
+              C compiler for avr tests
+  AS_FOR_TARGET_BFIN
+              Assembler for bfin tests
+  LD_FOR_TARGET_BFIN
+              Linker for bfin tests
+  CC_FOR_TARGET_BFIN
+              C compiler for bfin tests
+  AS_FOR_TARGET_BPF
+              Assembler for bpf tests
+  LD_FOR_TARGET_BPF
+              Linker for bpf tests
+  CC_FOR_TARGET_BPF
+              C compiler for bpf tests
+  AS_FOR_TARGET_CR16
+              Assembler for cr16 tests
+  LD_FOR_TARGET_CR16
+              Linker for cr16 tests
+  CC_FOR_TARGET_CR16
+              C compiler for cr16 tests
+  AS_FOR_TARGET_CRIS
+              Assembler for cris tests
+  LD_FOR_TARGET_CRIS
+              Linker for cris tests
+  CC_FOR_TARGET_CRIS
+              C compiler for cris tests
+  AS_FOR_TARGET_D10V
+              Assembler for d10v tests
+  LD_FOR_TARGET_D10V
+              Linker for d10v tests
+  CC_FOR_TARGET_D10V
+              C compiler for d10v tests
+  AS_FOR_TARGET_FRV
+              Assembler for frv tests
+  LD_FOR_TARGET_FRV
+              Linker for frv tests
+  CC_FOR_TARGET_FRV
+              C compiler for frv tests
+  AS_FOR_TARGET_FT32
+              Assembler for ft32 tests
+  LD_FOR_TARGET_FT32
+              Linker for ft32 tests
+  CC_FOR_TARGET_FT32
+              C compiler for ft32 tests
+  AS_FOR_TARGET_H8300
+              Assembler for h8300 tests
+  LD_FOR_TARGET_H8300
+              Linker for h8300 tests
+  CC_FOR_TARGET_H8300
+              C compiler for h8300 tests
+  AS_FOR_TARGET_IQ2000
+              Assembler for iq2000 tests
+  LD_FOR_TARGET_IQ2000
+              Linker for iq2000 tests
+  CC_FOR_TARGET_IQ2000
+              C compiler for iq2000 tests
+  AS_FOR_TARGET_LM32
+              Assembler for lm32 tests
+  LD_FOR_TARGET_LM32
+              Linker for lm32 tests
+  CC_FOR_TARGET_LM32
+              C compiler for lm32 tests
+  AS_FOR_TARGET_M32C
+              Assembler for m32c tests
+  LD_FOR_TARGET_M32C
+              Linker for m32c tests
+  CC_FOR_TARGET_M32C
+              C compiler for m32c tests
+  AS_FOR_TARGET_M32R
+              Assembler for m32r tests
+  LD_FOR_TARGET_M32R
+              Linker for m32r tests
+  CC_FOR_TARGET_M32R
+              C compiler for m32r tests
+  AS_FOR_TARGET_M68HC11
+              Assembler for m68hc11 tests
+  LD_FOR_TARGET_M68HC11
+              Linker for m68hc11 tests
+  CC_FOR_TARGET_M68HC11
+              C compiler for m68hc11 tests
+  AS_FOR_TARGET_MCORE
+              Assembler for mcore tests
+  LD_FOR_TARGET_MCORE
+              Linker for mcore tests
+  CC_FOR_TARGET_MCORE
+              C compiler for mcore tests
+  AS_FOR_TARGET_MICROBLAZE
+              Assembler for microblaze tests
+  LD_FOR_TARGET_MICROBLAZE
+              Linker for microblaze tests
+  CC_FOR_TARGET_MICROBLAZE
+              C compiler for microblaze tests
+  AS_FOR_TARGET_MIPS
+              Assembler for mips tests
+  LD_FOR_TARGET_MIPS
+              Linker for mips tests
+  CC_FOR_TARGET_MIPS
+              C compiler for mips tests
+  AS_FOR_TARGET_MN10300
+              Assembler for mn10300 tests
+  LD_FOR_TARGET_MN10300
+              Linker for mn10300 tests
+  CC_FOR_TARGET_MN10300
+              C compiler for mn10300 tests
+  AS_FOR_TARGET_MOXIE
+              Assembler for moxie tests
+  LD_FOR_TARGET_MOXIE
+              Linker for moxie tests
+  CC_FOR_TARGET_MOXIE
+              C compiler for moxie tests
+  AS_FOR_TARGET_MSP430
+              Assembler for msp430 tests
+  LD_FOR_TARGET_MSP430
+              Linker for msp430 tests
+  CC_FOR_TARGET_MSP430
+              C compiler for msp430 tests
+  AS_FOR_TARGET_OR1K
+              Assembler for or1k tests
+  LD_FOR_TARGET_OR1K
+              Linker for or1k tests
+  CC_FOR_TARGET_OR1K
+              C compiler for or1k tests
+  AS_FOR_TARGET_PPC
+              Assembler for ppc tests
+  LD_FOR_TARGET_PPC
+              Linker for ppc tests
+  CC_FOR_TARGET_PPC
+              C compiler for ppc tests
+  AS_FOR_TARGET_PRU
+              Assembler for pru tests
+  LD_FOR_TARGET_PRU
+              Linker for pru tests
+  CC_FOR_TARGET_PRU
+              C compiler for pru tests
+  AS_FOR_TARGET_RISCV
+              Assembler for riscv tests
+  LD_FOR_TARGET_RISCV
+              Linker for riscv tests
+  CC_FOR_TARGET_RISCV
+              C compiler for riscv tests
+  AS_FOR_TARGET_RL78
+              Assembler for rl78 tests
+  LD_FOR_TARGET_RL78
+              Linker for rl78 tests
+  CC_FOR_TARGET_RL78
+              C compiler for rl78 tests
+  AS_FOR_TARGET_RX
+              Assembler for rx tests
+  LD_FOR_TARGET_RX
+              Linker for rx tests
+  CC_FOR_TARGET_RX
+              C compiler for rx tests
+  AS_FOR_TARGET_SH
+              Assembler for sh tests
+  LD_FOR_TARGET_SH
+              Linker for sh tests
+  CC_FOR_TARGET_SH
+              C compiler for sh tests
+  AS_FOR_TARGET_ERC32
+              Assembler for erc32 tests
+  LD_FOR_TARGET_ERC32
+              Linker for erc32 tests
+  CC_FOR_TARGET_ERC32
+              C compiler for erc32 tests
+  AS_FOR_TARGET_V850
+              Assembler for v850 tests
+  LD_FOR_TARGET_V850
+              Linker for v850 tests
+  CC_FOR_TARGET_V850
+              C compiler for v850 tests
+  AS_FOR_TARGET_EXAMPLE_SYNACOR
+              Assembler for example-synacor tests
+  LD_FOR_TARGET_EXAMPLE_SYNACOR
+              Linker for example-synacor tests
+  CC_FOR_TARGET_EXAMPLE_SYNACOR
+              C compiler for example-synacor tests
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -12247,7 +12632,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12250 "configure"
+#line 12635 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12353,7 +12738,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12356 "configure"
+#line 12741 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14010,6 +14395,18 @@ if test "${enable_sim}" != no; then
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "aarch64"; then :
+      : "${AS_FOR_TARGET_AARCH64:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_AARCH64:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_AARCH64:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_AARCH64 LD_FOR_TARGET_AARCH64 CC_FOR_TARGET_AARCH64"
+
    if ${sim_enable_arch_aarch64}; then
   SIM_ENABLE_ARCH_aarch64_TRUE=
   SIM_ENABLE_ARCH_aarch64_FALSE='#'
@@ -14038,6 +14435,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "arm"; then :
+      : "${AS_FOR_TARGET_ARM:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_ARM:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_ARM:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_ARM LD_FOR_TARGET_ARM CC_FOR_TARGET_ARM"
+
    if ${sim_enable_arch_arm}; then
   SIM_ENABLE_ARCH_arm_TRUE=
   SIM_ENABLE_ARCH_arm_FALSE='#'
@@ -14066,6 +14475,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "avr"; then :
+      : "${AS_FOR_TARGET_AVR:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_AVR:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_AVR:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_AVR LD_FOR_TARGET_AVR CC_FOR_TARGET_AVR"
+
    if ${sim_enable_arch_avr}; then
   SIM_ENABLE_ARCH_avr_TRUE=
   SIM_ENABLE_ARCH_avr_FALSE='#'
@@ -14094,6 +14515,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "bfin"; then :
+      : "${AS_FOR_TARGET_BFIN:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_BFIN:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_BFIN:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_BFIN LD_FOR_TARGET_BFIN CC_FOR_TARGET_BFIN"
+
    if ${sim_enable_arch_bfin}; then
   SIM_ENABLE_ARCH_bfin_TRUE=
   SIM_ENABLE_ARCH_bfin_FALSE='#'
@@ -14121,6 +14554,18 @@ subdirs="$subdirs bpf"
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "bpf"; then :
+      : "${AS_FOR_TARGET_BPF:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_BPF:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_BPF:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_BPF LD_FOR_TARGET_BPF CC_FOR_TARGET_BPF"
+
    if ${sim_enable_arch_bpf}; then
   SIM_ENABLE_ARCH_bpf_TRUE=
   SIM_ENABLE_ARCH_bpf_FALSE='#'
@@ -14149,6 +14594,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "cr16"; then :
+      : "${AS_FOR_TARGET_CR16:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_CR16:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_CR16:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_CR16 LD_FOR_TARGET_CR16 CC_FOR_TARGET_CR16"
+
    if ${sim_enable_arch_cr16}; then
   SIM_ENABLE_ARCH_cr16_TRUE=
   SIM_ENABLE_ARCH_cr16_FALSE='#'
@@ -14177,6 +14634,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "cris"; then :
+      : "${AS_FOR_TARGET_CRIS:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_CRIS:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_CRIS:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_CRIS LD_FOR_TARGET_CRIS CC_FOR_TARGET_CRIS"
+
    if ${sim_enable_arch_cris}; then
   SIM_ENABLE_ARCH_cris_TRUE=
   SIM_ENABLE_ARCH_cris_FALSE='#'
@@ -14205,6 +14674,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "d10v"; then :
+      : "${AS_FOR_TARGET_D10V:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_D10V:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_D10V:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_D10V LD_FOR_TARGET_D10V CC_FOR_TARGET_D10V"
+
    if ${sim_enable_arch_d10v}; then
   SIM_ENABLE_ARCH_d10v_TRUE=
   SIM_ENABLE_ARCH_d10v_FALSE='#'
@@ -14233,6 +14714,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "frv"; then :
+      : "${AS_FOR_TARGET_FRV:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_FRV:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_FRV:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_FRV LD_FOR_TARGET_FRV CC_FOR_TARGET_FRV"
+
    if ${sim_enable_arch_frv}; then
   SIM_ENABLE_ARCH_frv_TRUE=
   SIM_ENABLE_ARCH_frv_FALSE='#'
@@ -14261,6 +14754,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "ft32"; then :
+      : "${AS_FOR_TARGET_FT32:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_FT32:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_FT32:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_FT32 LD_FOR_TARGET_FT32 CC_FOR_TARGET_FT32"
+
    if ${sim_enable_arch_ft32}; then
   SIM_ENABLE_ARCH_ft32_TRUE=
   SIM_ENABLE_ARCH_ft32_FALSE='#'
@@ -14289,6 +14794,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "h8300"; then :
+      : "${AS_FOR_TARGET_H8300:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_H8300:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_H8300:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_H8300 LD_FOR_TARGET_H8300 CC_FOR_TARGET_H8300"
+
    if ${sim_enable_arch_h8300}; then
   SIM_ENABLE_ARCH_h8300_TRUE=
   SIM_ENABLE_ARCH_h8300_FALSE='#'
@@ -14317,6 +14834,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "iq2000"; then :
+      : "${AS_FOR_TARGET_IQ2000:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_IQ2000:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_IQ2000:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_IQ2000 LD_FOR_TARGET_IQ2000 CC_FOR_TARGET_IQ2000"
+
    if ${sim_enable_arch_iq2000}; then
   SIM_ENABLE_ARCH_iq2000_TRUE=
   SIM_ENABLE_ARCH_iq2000_FALSE='#'
@@ -14345,6 +14874,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "lm32"; then :
+      : "${AS_FOR_TARGET_LM32:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_LM32:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_LM32:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_LM32 LD_FOR_TARGET_LM32 CC_FOR_TARGET_LM32"
+
    if ${sim_enable_arch_lm32}; then
   SIM_ENABLE_ARCH_lm32_TRUE=
   SIM_ENABLE_ARCH_lm32_FALSE='#'
@@ -14373,6 +14914,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "m32c"; then :
+      : "${AS_FOR_TARGET_M32C:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_M32C:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_M32C:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_M32C LD_FOR_TARGET_M32C CC_FOR_TARGET_M32C"
+
    if ${sim_enable_arch_m32c}; then
   SIM_ENABLE_ARCH_m32c_TRUE=
   SIM_ENABLE_ARCH_m32c_FALSE='#'
@@ -14401,6 +14954,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "m32r"; then :
+      : "${AS_FOR_TARGET_M32R:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_M32R:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_M32R:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_M32R LD_FOR_TARGET_M32R CC_FOR_TARGET_M32R"
+
    if ${sim_enable_arch_m32r}; then
   SIM_ENABLE_ARCH_m32r_TRUE=
   SIM_ENABLE_ARCH_m32r_FALSE='#'
@@ -14429,6 +14994,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "m68hc11"; then :
+      : "${AS_FOR_TARGET_M68HC11:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_M68HC11:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_M68HC11:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_M68HC11 LD_FOR_TARGET_M68HC11 CC_FOR_TARGET_M68HC11"
+
    if ${sim_enable_arch_m68hc11}; then
   SIM_ENABLE_ARCH_m68hc11_TRUE=
   SIM_ENABLE_ARCH_m68hc11_FALSE='#'
@@ -14457,6 +15034,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "mcore"; then :
+      : "${AS_FOR_TARGET_MCORE:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MCORE:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MCORE:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MCORE LD_FOR_TARGET_MCORE CC_FOR_TARGET_MCORE"
+
    if ${sim_enable_arch_mcore}; then
   SIM_ENABLE_ARCH_mcore_TRUE=
   SIM_ENABLE_ARCH_mcore_FALSE='#'
@@ -14485,6 +15074,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "microblaze"; then :
+      : "${AS_FOR_TARGET_MICROBLAZE:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MICROBLAZE:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MICROBLAZE:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MICROBLAZE LD_FOR_TARGET_MICROBLAZE CC_FOR_TARGET_MICROBLAZE"
+
    if ${sim_enable_arch_microblaze}; then
   SIM_ENABLE_ARCH_microblaze_TRUE=
   SIM_ENABLE_ARCH_microblaze_FALSE='#'
@@ -14510,6 +15111,18 @@ fi
       sim_igen=yes
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "mips"; then :
+      : "${AS_FOR_TARGET_MIPS:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MIPS:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MIPS:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MIPS LD_FOR_TARGET_MIPS CC_FOR_TARGET_MIPS"
+
    if ${sim_enable_arch_mips}; then
   SIM_ENABLE_ARCH_mips_TRUE=
   SIM_ENABLE_ARCH_mips_FALSE='#'
@@ -14535,6 +15148,18 @@ fi
       sim_igen=yes
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "mn10300"; then :
+      : "${AS_FOR_TARGET_MN10300:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MN10300:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MN10300:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MN10300 LD_FOR_TARGET_MN10300 CC_FOR_TARGET_MN10300"
+
    if ${sim_enable_arch_mn10300}; then
   SIM_ENABLE_ARCH_mn10300_TRUE=
   SIM_ENABLE_ARCH_mn10300_FALSE='#'
@@ -14563,6 +15188,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "moxie"; then :
+      : "${AS_FOR_TARGET_MOXIE:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MOXIE:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MOXIE:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MOXIE LD_FOR_TARGET_MOXIE CC_FOR_TARGET_MOXIE"
+
    if ${sim_enable_arch_moxie}; then
   SIM_ENABLE_ARCH_moxie_TRUE=
   SIM_ENABLE_ARCH_moxie_FALSE='#'
@@ -14591,6 +15228,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "msp430"; then :
+      : "${AS_FOR_TARGET_MSP430:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_MSP430:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_MSP430:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_MSP430 LD_FOR_TARGET_MSP430 CC_FOR_TARGET_MSP430"
+
    if ${sim_enable_arch_msp430}; then
   SIM_ENABLE_ARCH_msp430_TRUE=
   SIM_ENABLE_ARCH_msp430_FALSE='#'
@@ -14616,6 +15265,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "or1k"; then :
+      : "${AS_FOR_TARGET_OR1K:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_OR1K:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_OR1K:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_OR1K LD_FOR_TARGET_OR1K CC_FOR_TARGET_OR1K"
+
    if ${sim_enable_arch_or1k}; then
   SIM_ENABLE_ARCH_or1k_TRUE=
   SIM_ENABLE_ARCH_or1k_FALSE='#'
@@ -14641,6 +15302,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "ppc"; then :
+      : "${AS_FOR_TARGET_PPC:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_PPC:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_PPC:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_PPC LD_FOR_TARGET_PPC CC_FOR_TARGET_PPC"
+
    if ${sim_enable_arch_ppc}; then
   SIM_ENABLE_ARCH_ppc_TRUE=
   SIM_ENABLE_ARCH_ppc_FALSE='#'
@@ -14669,6 +15342,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "pru"; then :
+      : "${AS_FOR_TARGET_PRU:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_PRU:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_PRU:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_PRU LD_FOR_TARGET_PRU CC_FOR_TARGET_PRU"
+
    if ${sim_enable_arch_pru}; then
   SIM_ENABLE_ARCH_pru_TRUE=
   SIM_ENABLE_ARCH_pru_FALSE='#'
@@ -14694,6 +15379,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "riscv"; then :
+      : "${AS_FOR_TARGET_RISCV:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_RISCV:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_RISCV:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_RISCV LD_FOR_TARGET_RISCV CC_FOR_TARGET_RISCV"
+
    if ${sim_enable_arch_riscv}; then
   SIM_ENABLE_ARCH_riscv_TRUE=
   SIM_ENABLE_ARCH_riscv_FALSE='#'
@@ -14722,6 +15419,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "rl78"; then :
+      : "${AS_FOR_TARGET_RL78:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_RL78:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_RL78:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_RL78 LD_FOR_TARGET_RL78 CC_FOR_TARGET_RL78"
+
    if ${sim_enable_arch_rl78}; then
   SIM_ENABLE_ARCH_rl78_TRUE=
   SIM_ENABLE_ARCH_rl78_FALSE='#'
@@ -14750,6 +15459,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "rx"; then :
+      : "${AS_FOR_TARGET_RX:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_RX:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_RX:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_RX LD_FOR_TARGET_RX CC_FOR_TARGET_RX"
+
    if ${sim_enable_arch_rx}; then
   SIM_ENABLE_ARCH_rx_TRUE=
   SIM_ENABLE_ARCH_rx_FALSE='#'
@@ -14778,6 +15499,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "sh"; then :
+      : "${AS_FOR_TARGET_SH:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_SH:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_SH:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_SH LD_FOR_TARGET_SH CC_FOR_TARGET_SH"
+
    if ${sim_enable_arch_sh}; then
   SIM_ENABLE_ARCH_sh_TRUE=
   SIM_ENABLE_ARCH_sh_FALSE='#'
@@ -14806,6 +15539,18 @@ fi
 
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "erc32"; then :
+      : "${AS_FOR_TARGET_ERC32:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_ERC32:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_ERC32:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_ERC32 LD_FOR_TARGET_ERC32 CC_FOR_TARGET_ERC32"
+
    if ${sim_enable_arch_erc32}; then
   SIM_ENABLE_ARCH_erc32_TRUE=
   SIM_ENABLE_ARCH_erc32_FALSE='#'
@@ -14831,6 +15576,18 @@ fi
       sim_igen=yes
       ;;
   esac
+
+
+
+  if test "$SIM_PRIMARY_TARGET" = "v850"; then :
+      : "${AS_FOR_TARGET_V850:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_V850:=\$(abs_builddir)/../ld/ld-new}"
+            : "${CC_FOR_TARGET_V850:=${target_alias}-gcc}"
+
+fi
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_V850 LD_FOR_TARGET_V850 CC_FOR_TARGET_V850"
+
    if ${sim_enable_arch_v850}; then
   SIM_ENABLE_ARCH_v850_TRUE=
   SIM_ENABLE_ARCH_v850_FALSE='#'
@@ -14843,6 +15600,15 @@ fi
   done
 
   if test "x${enable_example_sims}" = xyes; then
+
+
+
+  : "${AS_FOR_TARGET_EXAMPLE_SYNACOR:=\$(abs_builddir)/../gas/as-new}"
+  : "${LD_FOR_TARGET_EXAMPLE_SYNACOR:=\$(abs_builddir)/../ld/ld-new}"
+  : "${CC_FOR_TARGET_EXAMPLE_SYNACOR:=\$(CC)}"
+
+as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EXAMPLE_SYNACOR CC_FOR_TARGET_EXAMPLE_SYNACOR"
+
           ac_config_files="$ac_config_files example-synacor/Makefile.sim:example-synacor/Makefile.in"
 
     ac_config_commands="$ac_config_commands example-synacor/Makefile"

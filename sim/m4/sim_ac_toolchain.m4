@@ -77,3 +77,28 @@ AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 ], [AC_MSG_ERROR([C11 is required])])])
 AC_SUBST(C_DIALECT)
 ])
+dnl
+SIM_TOOLCHAIN_VARS=
+AC_SUBST(SIM_TOOLCHAIN_VARS)
+AC_DEFUN([_SIM_AC_TOOLCHAIN_FOR_TARGET],
+[dnl
+AC_ARG_VAR(AS_FOR_TARGET_$2, [Assembler for $1 tests])
+AC_ARG_VAR(LD_FOR_TARGET_$2, [Linker for $1 tests])
+AC_ARG_VAR(CC_FOR_TARGET_$2, [C compiler for $1 tests])
+m4_bmatch($1, [example-], [dnl
+  : "${AS_FOR_TARGET_$2:=\$(abs_builddir)/../gas/as-new}"
+  : "${LD_FOR_TARGET_$2:=\$(abs_builddir)/../ld/ld-new}"
+  : "${CC_FOR_TARGET_$2:=\$(CC)}"
+], [dnl
+  AS_IF([test "$SIM_PRIMARY_TARGET" = "$1"], [dnl
+    : "${AS_FOR_TARGET_$2:=\$(abs_builddir)/../gas/as-new}"
+    : "${LD_FOR_TARGET_$2:=\$(abs_builddir)/../ld/ld-new}"
+    dnl The default will be checked at test time.  If it's not available, then
+    dnl it is automatically skipped.  So hardcoding this is safe.
+    : "${CC_FOR_TARGET_$2:=${target_alias}-gcc}"
+  ])
+])
+AS_VAR_APPEND([SIM_TOOLCHAIN_VARS], [" AS_FOR_TARGET_$2 LD_FOR_TARGET_$2 CC_FOR_TARGET_$2"])
+])
+AC_DEFUN([SIM_AC_TOOLCHAIN_FOR_TARGET],
+[_SIM_AC_TOOLCHAIN_FOR_TARGET($1, m4_toupper(m4_translit($1, [-], [_])))])

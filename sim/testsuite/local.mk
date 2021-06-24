@@ -28,6 +28,7 @@ site-sim-config.exp: Makefile
 	$(AM_V_GEN)( \
 	echo "set builddir \"$(builddir)\""; \
 	echo "set srcdir \"$(srcdir)/testsuite\""; \
+	$(foreach V,$(SIM_TOOLCHAIN_VARS),echo "set $(V) \"$($(V))\"";) \
 	) > $@
 
 check-DEJAGNU: site.exp

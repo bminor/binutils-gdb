@@ -103,6 +103,7 @@ m4_define([SIM_TARGET], [dnl
       $4
       ;;
   esac
+  SIM_AC_TOOLCHAIN_FOR_TARGET($2)
   AM_CONDITIONAL([SIM_ENABLE_ARCH_$2], [${sim_enable_arch_$2}])
 ])
 
@@ -151,6 +152,7 @@ if test "${enable_sim}" != no; then
   done
 
   if test "x${enable_example_sims}" = xyes; then
+    SIM_AC_TOOLCHAIN_FOR_TARGET(example-synacor)
     SIM_BUILD_TARGET([example-synacor])
   fi
 fi
