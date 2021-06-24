@@ -1,3 +1,7 @@
+2021-06-24  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/argv0-symlink.exp: Use with_test_prefix.
+
 2021-06-23  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gdb_test_lines): Rewrite to accept single
