@@ -6,16 +6,13 @@ global CFLAGS_FOR_TARGET_init
 set CFLAGS_FOR_TARGET_init "-mcpu=bf537"
 sim_init
 
-if [istarget *] {
-    # all machines
-    set all_machs "bfin"
+# all machines
+set all_machs "bfin"
 
-    foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.\[csS\]]] {
-	# If we're only testing specific files and this isn't one of them,
-	# skip it.
-	if ![runtest_file_p $runtests $src] {
-	    continue
-	}
-	run_sim_test $src $all_machs
+foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.\[csS\]]] {
+    # If we're only testing specific files and this isn't one of them, skip it.
+    if ![runtest_file_p $runtests $src] {
+	continue
     }
+    run_sim_test $src $all_machs
 }

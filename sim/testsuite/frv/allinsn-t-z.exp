@@ -8,8 +8,7 @@ set cpu_option -mcpu
 
 # The .cgs suffix is for "cgen .s".
 foreach src [lsort [glob -nocomplain $srcdir/$subdir/\[t-z\]*.cgs]] {
-    # If we're only testing specific files and this isn't one of them,
-    # skip it.
+    # If we're only testing specific files and this isn't one of them, skip it.
     if ![runtest_file_p $runtests $src] {
 	continue
     }
