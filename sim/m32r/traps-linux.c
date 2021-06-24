@@ -252,6 +252,10 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
         s.arg1 = arg1;
         s.arg2 = arg2;
         s.arg3 = arg3;
+        s.arg4 = arg4;
+        s.arg5 = arg5;
+        s.arg6 = arg6;
+        s.arg7 = arg7;
 
         s.p1 = (PTR) sd;
         s.p2 = (PTR) current_cpu;

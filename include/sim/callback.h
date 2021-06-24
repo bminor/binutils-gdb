@@ -241,7 +241,7 @@ typedef struct cb_syscall {
   /* The target's value of what system call to perform.  */
   int func;
   /* The arguments to the syscall.  */
-  long arg1, arg2, arg3, arg4;
+  long arg1, arg2, arg3, arg4, arg5, arg6, arg7;
 
   /* The result.  */
   long result;

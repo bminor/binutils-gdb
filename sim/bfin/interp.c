@@ -120,8 +120,8 @@ bfin_syscall (SIM_CPU *cpu)
       sc.arg2 = args[1] = DREG (1);
       sc.arg3 = args[2] = DREG (2);
       sc.arg4 = args[3] = DREG (3);
-      /*sc.arg5 =*/ args[4] = DREG (4);
-      /*sc.arg6 =*/ args[5] = DREG (5);
+      sc.arg5 = args[4] = DREG (4);
+      sc.arg6 = args[5] = DREG (5);
     }
   else
     {
@@ -131,8 +131,8 @@ bfin_syscall (SIM_CPU *cpu)
       sc.arg2 = args[1] = GET_LONG (DREG (0) + 4);
       sc.arg3 = args[2] = GET_LONG (DREG (0) + 8);
       sc.arg4 = args[3] = GET_LONG (DREG (0) + 12);
-      /*sc.arg5 =*/ args[4] = GET_LONG (DREG (0) + 16);
-      /*sc.arg6 =*/ args[5] = GET_LONG (DREG (0) + 20);
+      sc.arg5 = args[4] = GET_LONG (DREG (0) + 16);
+      sc.arg6 = args[5] = GET_LONG (DREG (0) + 20);
     }
   sc.p1 = (PTR) sd;
   sc.p2 = (PTR) cpu;
