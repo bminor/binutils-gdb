@@ -129,7 +129,7 @@ set_inferior_args_vector (int argc, char **argv)
 {
   gdb::array_view<char * const> args (argv, argc);
   std::string n = construct_inferior_arguments (args);
-  current_inferior ()->set_args (n.c_str ());
+  current_inferior ()->set_args (std::move (n));
 }
 
 /* Notice when `set args' is run.  */
@@ -151,7 +151,7 @@ show_args_command (struct ui_file *file, int from_tty,
   /* Note that we ignore the passed-in value in favor of computing it
      directly.  */
   deprecated_show_value_hack (file, from_tty, c,
-			      current_inferior ()->args ());
+			      current_inferior ()->args ().c_str ());
 }
 
 /* See gdbsupport/common-inferior.h.  */

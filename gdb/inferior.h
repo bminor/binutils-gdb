@@ -444,26 +444,18 @@ public:
 
   /* Set the argument string to use when running this inferior.
 
-     Either nullptr or an empty string can be used to represent "no
-     arguments".  */
-  void set_args (const char *args)
+     An empty string can be used to represent "no arguments".  */
+  void set_args (std::string args)
   {
-    if (args != nullptr && args[0] != '\0')
-      m_args = make_unique_xstrdup (args);
-    else
-      m_args.reset ();
+    m_args = std::move (args);
   };
 
   /* Get the argument string to use when running this inferior.
 
-     The return value is always non-nullptr.  No arguments is represented by
-     an empty string.  */
-  const char *args () const
+     No arguments is represented by an empty string.  */
+  const std::string &args () const
   {
-    if (m_args == nullptr)
-      return "";
-
-    return m_args.get ();
+    return m_args;
   }
 
   /* Set the inferior current working directory.
@@ -602,10 +594,8 @@ private:
   /* The list of continuations.  */
   std::list<std::function<void ()>> m_continuations;
 
-  /* The arguments string to use when running.
-
-     This is nullptr when there are not args.  */
-  gdb::unique_xmalloc_ptr<char> m_args;
+  /* The arguments string to use when running.  */
+  std::string m_args;
 
   /* The current working directory that will be used when starting
      this inferior.  */

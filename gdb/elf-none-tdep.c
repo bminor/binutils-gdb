@@ -49,9 +49,9 @@ elf_none_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
       fname = lbasename (exe);
       psargs = std::string (exe);
 
-      const char *infargs = current_inferior ()->args ();
-      if (infargs != nullptr)
-	psargs += " " + std::string (infargs);
+      const std::string &infargs = current_inferior ()->args ();
+      if (!infargs.empty ())
+	psargs += ' ' + infargs;
 
       /* All existing targets that handle writing out prpsinfo expect the
 	 fname and psargs strings to be at least 16 and 80 characters long

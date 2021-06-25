@@ -684,9 +684,9 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
       const char *fname = lbasename (get_exec_file (0));
       std::string psargs = fname;
 
-      const char *infargs = current_inferior ()->args ();
-      if (infargs != NULL)
-	psargs = psargs + " " + infargs;
+      const std::string &infargs = current_inferior ()->args ();
+      if (!infargs.empty ())
+	psargs += ' ' + infargs;
 
       note_data.reset (elfcore_write_prpsinfo (obfd, note_data.release (),
 					       note_size, fname,

@@ -1847,12 +1847,12 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   strncpy (p->pr_fname, basename, sizeof (p->pr_fname) - 1);
   p->pr_fname[sizeof (p->pr_fname) - 1] = '\0';
 
-  const char *infargs = current_inferior ()->args ();
+  const std::string &infargs = current_inferior ()->args ();
 
   /* The arguments of the program.  */
   std::string psargs = fname.get ();
-  if (infargs != NULL)
-    psargs = psargs + " " + infargs;
+  if (!infargs.empty ())
+    psargs += ' ' + infargs;
 
   strncpy (p->pr_psargs, psargs.c_str (), sizeof (p->pr_psargs) - 1);
   p->pr_psargs[sizeof (p->pr_psargs) - 1] = '\0';
