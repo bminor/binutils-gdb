@@ -1,3 +1,8 @@
+2021-06-25  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_decode): Add wrap parameter.
+	* ada-lang.h (ada_decode): Add wrap parameter.
+
 2021-06-25  Luis Machado  <luis.machado@linaro.org>
 
 	* corelow.c (core_target::core_target) Update to read target

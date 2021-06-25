@@ -216,7 +216,12 @@ extern struct type *ada_get_decoded_type (struct type *type);
 
 extern const char *ada_decode_symbol (const struct general_symbol_info *);
 
-extern std::string ada_decode (const char*);
+/* Decode the GNAT-encoded name NAME, returning the decoded name.  If
+   the name does not appear to be GNAT-encoded, then the result
+   depends on WRAP.  If WRAP is true (the default), then the result is
+   simply wrapped in <...>.  If WRAP is false, then the empty string
+   will be returned.  */
+extern std::string ada_decode (const char *name, bool wrap = true);
 
 extern std::vector<struct block_symbol> ada_lookup_symbol_list
      (const char *, const struct block *, domain_enum);

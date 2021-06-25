@@ -976,12 +976,10 @@ ada_remove_po_subprogram_suffix (const char *encoded, int *len)
     *len = *len - 1;
 }
 
-/* If ENCODED follows the GNAT entity encoding conventions, then return
-   the decoded form of ENCODED.  Otherwise, return "<%s>" where "%s" is
-   replaced by ENCODED.  */
+/* See ada-lang.h.  */
 
 std::string
-ada_decode (const char *encoded)
+ada_decode (const char *encoded, bool wrap)
 {
   int i, j;
   int len0;
@@ -1216,12 +1214,14 @@ ada_decode (const char *encoded)
   return decoded;
 
 Suppress:
+  if (!wrap)
+    return {};
+
   if (encoded[0] == '<')
     decoded = encoded;
   else
     decoded = '<' + std::string(encoded) + '>';
   return decoded;
-
 }
 
 /* Table for keeping permanent unique copies of decoded names.  Once
