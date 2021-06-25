@@ -1465,52 +1465,39 @@ psymtab_storage::discard_psymtab (struct partial_symtab *pst)
 
 
 
-/* We need to pass a couple of items to the addrmap_foreach function,
-   so use a struct.  */
-
-struct dump_psymtab_addrmap_data
-{
-  struct objfile *objfile;
-  struct partial_symtab *psymtab;
-  struct ui_file *outfile;
-
-  /* Non-zero if the previously printed addrmap entry was for PSYMTAB.
-     If so, we want to print the next one as well (since the next addrmap
-     entry defines the end of the range).  */
-  int previous_matched;
-};
-
 /* Helper function for dump_psymtab_addrmap to print an addrmap entry.  */
 
 static int
-dump_psymtab_addrmap_1 (void *datap, CORE_ADDR start_addr, void *obj)
+dump_psymtab_addrmap_1 (struct objfile *objfile,
+			struct partial_symtab *psymtab,
+			struct ui_file *outfile,
+			int *previous_matched,
+			CORE_ADDR start_addr,
+			void *obj)
 {
-  struct dump_psymtab_addrmap_data *data
-    = (struct dump_psymtab_addrmap_data *) datap;
-  struct gdbarch *gdbarch = data->objfile->arch ();
+  struct gdbarch *gdbarch = objfile->arch ();
   struct partial_symtab *addrmap_psymtab = (struct partial_symtab *) obj;
   const char *psymtab_address_or_end = NULL;
 
   QUIT;
 
-  if (data->psymtab == NULL
-      || data->psymtab == addrmap_psymtab)
+  if (psymtab == NULL
+      || psymtab == addrmap_psymtab)
     psymtab_address_or_end = host_address_to_string (addrmap_psymtab);
-  else if (data->previous_matched)
+  else if (*previous_matched)
     psymtab_address_or_end = "<ends here>";
 
-  if (data->psymtab == NULL
-      || data->psymtab == addrmap_psymtab
-      || data->previous_matched)
+  if (psymtab == NULL
+      || psymtab == addrmap_psymtab
+      || *previous_matched)
     {
-      fprintf_filtered (data->outfile, "  %s%s %s\n",
-			data->psymtab != NULL ? "  " : "",
+      fprintf_filtered (outfile, "  %s%s %s\n",
+			psymtab != NULL ? "  " : "",
 			paddress (gdbarch, start_addr),
 			psymtab_address_or_end);
     }
 
-  data->previous_matched = (data->psymtab == NULL
-			    || data->psymtab == addrmap_psymtab);
+  *previous_matched = psymtab == NULL || psymtab == addrmap_psymtab;
 
   return 0;
 }
@@ -1524,20 +1511,24 @@ dump_psymtab_addrmap (struct objfile *objfile,
 		      struct partial_symtab *psymtab,
 		      struct ui_file *outfile)
 {
-  struct dump_psymtab_addrmap_data addrmap_dump_data;
-
   if ((psymtab == NULL
        || psymtab->psymtabs_addrmap_supported)
       && partial_symtabs->psymtabs_addrmap != NULL)
     {
-      addrmap_dump_data.objfile = objfile;
-      addrmap_dump_data.psymtab = psymtab;
-      addrmap_dump_data.outfile = outfile;
-      addrmap_dump_data.previous_matched = 0;
+      /* Non-zero if the previously printed addrmap entry was for
+	 PSYMTAB.  If so, we want to print the next one as well (since
+	 the next addrmap entry defines the end of the range).  */
+      int previous_matched = 0;
+
+      auto callback = [&] (CORE_ADDR start_addr, void *obj)
+      {
+	return dump_psymtab_addrmap_1 (objfile, psymtab, outfile,
+				       &previous_matched, start_addr, obj);
+      };
+
       fprintf_filtered (outfile, "%sddress map:\n",
 			psymtab == NULL ? "Entire a" : "  A");
-      addrmap_foreach (partial_symtabs->psymtabs_addrmap,
-		       dump_psymtab_addrmap_1, &addrmap_dump_data);
+      addrmap_foreach (partial_symtabs->psymtabs_addrmap, callback);
     }
 }
 

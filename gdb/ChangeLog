@@ -1,3 +1,24 @@
+2021-06-25  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/index-write.c (struct addrmap_index_data): Add
+	initializers.
+	<operator()>: Declare.
+	(addrmap_index_data::operator()): Rename from
+	add_address_entry_worker.  Remove 'datap' parameter.
+	(write_address_map): Update.
+	* psymtab.c (struct dump_psymtab_addrmap_data): Remove
+	(dump_psymtab_addrmap_1): Remove 'data' parameter, add other
+	parameters.
+	(dump_psymtab_addrmap): Update.
+	* addrmap.c (struct addrmap_funcs) <foreach>: Remove 'data'
+	parameter.
+	(addrmap_foreach, addrmap_fixed_foreach): Likewise.
+	(struct mutable_foreach_data): Remove.
+	(addrmap_mutable_foreach_worker): Update.
+	(addrmap_mutable_foreach): Remove 'data' parameter.
+	* addrmap.h (addrmap_foreach_fn): Use gdb::function_view.
+	(addrmap_foreach): Remove 'data' parameter.
+
 2021-06-25  Tom Tromey  <tromey@adacore.com>
 
 	* python/py-type.c (typy_get_name): Decode an Ada type name.

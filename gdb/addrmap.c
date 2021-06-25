@@ -41,7 +41,7 @@ struct addrmap_funcs
   struct addrmap *(*create_fixed) (struct addrmap *self,
 				   struct obstack *obstack);
   void (*relocate) (struct addrmap *self, CORE_ADDR offset);
-  int (*foreach) (struct addrmap *self, addrmap_foreach_fn fn, void *data);
+  int (*foreach) (struct addrmap *self, addrmap_foreach_fn fn);
 };
 
 
@@ -84,9 +84,9 @@ addrmap_relocate (struct addrmap *map, CORE_ADDR offset)
 
 
 int
-addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn, void *data)
+addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn)
 {
-  return map->funcs->foreach (map, fn, data);
+  return map->funcs->foreach (map, fn);
 }
 
 /* Fixed address maps.  */
@@ -182,15 +182,14 @@ addrmap_fixed_relocate (struct addrmap *self, CORE_ADDR offset)
 
 
 static int
-addrmap_fixed_foreach (struct addrmap *self, addrmap_foreach_fn fn,
-		       void *data)
+addrmap_fixed_foreach (struct addrmap *self, addrmap_foreach_fn fn)
 {
   struct addrmap_fixed *map = (struct addrmap_fixed *) self;
   size_t i;
 
   for (i = 0; i < map->num_transitions; i++)
     {
-      int res = fn (data, map->transitions[i].addr, map->transitions[i].value);
+      int res = fn (map->transitions[i].addr, map->transitions[i].value);
 
       if (res != 0)
 	return res;
@@ -471,39 +470,24 @@ addrmap_mutable_relocate (struct addrmap *self, CORE_ADDR offset)
 }
 
 
-/* Struct to map addrmap's foreach function to splay_tree's version.  */
-struct mutable_foreach_data
-{
-  addrmap_foreach_fn fn;
-  void *data;
-};
-
-
 /* This is a splay_tree_foreach_fn.  */
 
 static int
 addrmap_mutable_foreach_worker (splay_tree_node node, void *data)
 {
-  struct mutable_foreach_data *foreach_data
-    = (struct mutable_foreach_data *) data;
+  addrmap_foreach_fn *fn = (addrmap_foreach_fn *) data;
 
-  return foreach_data->fn (foreach_data->data,
-			   addrmap_node_key (node),
-			   addrmap_node_value (node));
+  return (*fn) (addrmap_node_key (node), addrmap_node_value (node));
 }
 
 
 static int
-addrmap_mutable_foreach (struct addrmap *self, addrmap_foreach_fn fn,
-			 void *data)
+addrmap_mutable_foreach (struct addrmap *self, addrmap_foreach_fn fn)
 {
   struct addrmap_mutable *mutable_obj = (struct addrmap_mutable *) self;
-  struct mutable_foreach_data foreach_data;
 
-  foreach_data.fn = fn;
-  foreach_data.data = data;
   return splay_tree_foreach (mutable_obj->tree, addrmap_mutable_foreach_worker,
-			     &foreach_data);
+			     &fn);
 }
 
 

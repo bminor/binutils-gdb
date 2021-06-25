@@ -419,14 +419,16 @@ struct addrmap_index_data
   data_buf &addr_vec;
   psym_index_map &cu_index_htab;
 
+  int operator() (CORE_ADDR start_addr, void *obj);
+
   /* Non-zero if the previous_* fields are valid.
      We can't write an entry until we see the next entry (since it is only then
      that we know the end of the entry).  */
-  int previous_valid;
+  int previous_valid = 0;
   /* Index of the CU in the table of all CUs in the index file.  */
-  unsigned int previous_cu_index;
+  unsigned int previous_cu_index = 0;
   /* Start address of the CU.  */
-  CORE_ADDR previous_cu_start;
+  CORE_ADDR previous_cu_start = 0;
 };
 
 /* Write an address entry to ADDR_VEC.  */
@@ -442,27 +444,26 @@ add_address_entry (data_buf &addr_vec,
 
 /* Worker function for traversing an addrmap to build the address table.  */
 
-static int
-add_address_entry_worker (void *datap, CORE_ADDR start_addr, void *obj)
+int
+addrmap_index_data::operator() (CORE_ADDR start_addr, void *obj)
 {
-  struct addrmap_index_data *data = (struct addrmap_index_data *) datap;
   partial_symtab *pst = (partial_symtab *) obj;
 
-  if (data->previous_valid)
-    add_address_entry (data->addr_vec,
-		       data->previous_cu_start, start_addr,
-		       data->previous_cu_index);
+  if (previous_valid)
+    add_address_entry (addr_vec,
+		       previous_cu_start, start_addr,
+		       previous_cu_index);
 
-  data->previous_cu_start = start_addr;
+  previous_cu_start = start_addr;
   if (pst != NULL)
     {
-      const auto it = data->cu_index_htab.find (pst);
-      gdb_assert (it != data->cu_index_htab.cend ());
-      data->previous_cu_index = it->second;
-      data->previous_valid = 1;
+      const auto it = cu_index_htab.find (pst);
+      gdb_assert (it != cu_index_htab.cend ());
+      previous_cu_index = it->second;
+      previous_valid = 1;
     }
   else
-    data->previous_valid = 0;
+    previous_valid = 0;
 
   return 0;
 }
@@ -477,14 +478,8 @@ write_address_map (dwarf2_per_bfd *per_bfd, data_buf &addr_vec,
 {
   struct addrmap_index_data addrmap_index_data (addr_vec, cu_index_htab);
 
-  /* When writing the address table, we have to cope with the fact that
-     the addrmap iterator only provides the start of a region; we have to
-     wait until the next invocation to get the start of the next region.  */
-
-  addrmap_index_data.previous_valid = 0;
-
   addrmap_foreach (per_bfd->partial_symtabs->psymtabs_addrmap,
-		   add_address_entry_worker, &addrmap_index_data);
+		   addrmap_index_data);
 
   /* It's highly unlikely the last entry (end address = 0xff...ff)
      is valid, but we should still handle it.
