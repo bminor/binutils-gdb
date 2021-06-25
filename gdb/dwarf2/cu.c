@@ -60,7 +60,7 @@ dwarf2_cu::start_symtab (const char *name, const char *comp_dir,
 
   m_builder.reset (new struct buildsym_compunit
 		   (this->per_objfile->objfile,
-		    name, comp_dir, language, low_pc));
+		    name, comp_dir, per_cu->lang, low_pc));
 
   list_in_scope = get_builder ()->get_file_symbols ();
 

@@ -1,5 +1,29 @@
 2021-06-25  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (process_psymtab_comp_unit): Don't set 'lang'.
+	(scan_partial_symbols, partial_die_parent_scope)
+	(add_partial_symbol, add_partial_subprogram)
+	(compute_delayed_physnames, rust_union_quirks)
+	(process_full_comp_unit, process_full_type_unit)
+	(process_imported_unit_die, process_die, dw2_linkage_name)
+	(dwarf2_compute_name, dwarf2_physname, read_import_statement)
+	(read_file_scope, queue_and_load_dwo_tu, read_func_scope)
+	(read_variable, dwarf2_get_subprogram_pc_bounds)
+	(dwarf2_attach_fields_to_type, dwarf2_add_member_fn)
+	(dwarf2_attach_fn_fields_to_type)
+	(quirk_ada_thick_pointer_struct, read_structure_type)
+	(handle_struct_member_die, process_structure_scope)
+	(read_array_type, read_array_order, prototyped_function_p)
+	(read_subroutine_type, dwarf2_init_complex_target_type)
+	(read_base_type, read_subrange_type, read_unspecified_type)
+	(load_partial_dies, partial_die_info::fixup, set_cu_language)
+	(new_symbol, need_gnat_info, determine_prefix, typename_concat)
+	(dwarf2_canonicalize_name, follow_die_offset)
+	(prepare_one_comp_unit): Update.
+	* dwarf2/cu.c (dwarf2_cu::start_symtab): Update.
+
+2021-06-25  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_file_scope): Don't call set_cu_language.
 	(dwarf_lang_to_enum_language): Rename from set_cu_language.  Don't
 	set language_defn.  Handle DW_LANG_OpenCL.

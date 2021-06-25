@@ -103,7 +103,6 @@ struct dwarf2_cu
   gdb::optional<CORE_ADDR> base_address;
 
   /* The language we are debugging.  */
-  enum language language = language_unknown;
   const struct language_defn *language_defn = nullptr;
 
   const char *producer = nullptr;
