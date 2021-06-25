@@ -949,17 +949,17 @@ handle_general_set (char *own_buf)
 	{
 	  std::string path = hex2str (p);
 
-	  set_inferior_cwd (path.c_str ());
-
 	  if (remote_debug)
 	    debug_printf (_("[Set the inferior's current directory to %s]\n"),
 			  path.c_str ());
+
+	  set_inferior_cwd (std::move (path));
 	}
       else
 	{
 	  /* An empty argument means that we should clear out any
 	     previously set cwd for the inferior.  */
-	  set_inferior_cwd (NULL);
+	  set_inferior_cwd ("");
 
 	  if (remote_debug)
 	    debug_printf (_("\

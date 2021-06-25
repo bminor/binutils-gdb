@@ -10391,13 +10391,14 @@ remote_target::extended_remote_set_inferior_cwd ()
 {
   if (packet_support (PACKET_QSetWorkingDir) != PACKET_DISABLE)
     {
-      const char *inferior_cwd = current_inferior ()->cwd ();
+      const std::string &inferior_cwd = current_inferior ()->cwd ();
       remote_state *rs = get_remote_state ();
 
-      if (inferior_cwd != NULL)
+      if (!inferior_cwd.empty ())
 	{
-	  std::string hexpath = bin2hex ((const gdb_byte *) inferior_cwd,
-					 strlen (inferior_cwd));
+	  std::string hexpath
+	    = bin2hex ((const gdb_byte *) inferior_cwd.data (),
+		       inferior_cwd.size ());
 
 	  xsnprintf (rs->buf.data (), get_remote_packet_size (),
 		     "QSetWorkingDir:%s", hexpath.c_str ());

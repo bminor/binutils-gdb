@@ -156,7 +156,7 @@ show_args_command (struct ui_file *file, int from_tty,
 
 /* See gdbsupport/common-inferior.h.  */
 
-const char *
+const std::string &
 get_inferior_cwd ()
 {
   return current_inferior ()->cwd ();
@@ -167,10 +167,7 @@ get_inferior_cwd ()
 static void
 set_cwd_command (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  if (*inferior_cwd_scratch == '\0')
-    current_inferior ()->set_cwd (nullptr);
-  else
-    current_inferior ()->set_cwd (inferior_cwd_scratch);
+  current_inferior ()->set_cwd (inferior_cwd_scratch);
 }
 
 /* Handle the 'show cwd' command.  */
@@ -179,9 +176,9 @@ static void
 show_cwd_command (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  const char *cwd = current_inferior ()->cwd ();
+  const std::string &cwd = current_inferior ()->cwd ();
 
-  if (cwd == NULL)
+  if (cwd.empty ())
     fprintf_filtered (gdb_stdout,
 		      _("\
 You have not set the inferior's current working directory.\n\
@@ -190,7 +187,8 @@ server's cwd if remote debugging.\n"));
   else
     fprintf_filtered (gdb_stdout,
 		      _("Current working directory that will be used "
-			"when starting the inferior is \"%s\".\n"), cwd);
+			"when starting the inferior is \"%s\".\n"),
+		      cwd.c_str ());
 }
 
 

@@ -460,21 +460,19 @@ public:
 
   /* Set the inferior current working directory.
 
-     If CWD is NULL, unset the directory.  */
-  void set_cwd (const char *cwd)
+     If CWD is empty, unset the directory.  */
+  void set_cwd (std::string cwd)
   {
-    if (cwd == NULL)
-      m_cwd.reset ();
-    else
-      m_cwd.reset (xstrdup (cwd));
+    m_cwd = std::move (cwd);
   }
 
   /* Get the inferior current working directory.
 
-     Return nullptr if the current working directory is not specified.  */
-  const char *cwd () const
+     Return an empty string if the current working directory is not
+     specified.  */
+  const std::string &cwd () const
   {
-    return m_cwd.get ();
+    return m_cwd;
   }
 
   /* Convenient handle (GDB inferior id).  Unique across all
@@ -599,7 +597,7 @@ private:
 
   /* The current working directory that will be used when starting
      this inferior.  */
-  gdb::unique_xmalloc_ptr<char> m_cwd;
+  std::string m_cwd;
 };
 
 /* Keep a registry of per-inferior data-pointers required by other GDB
