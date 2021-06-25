@@ -7688,12 +7688,15 @@ proc verify_psymtab_expanded { filename readin } {
 # Add a .gdb_index section to PROGRAM.
 # PROGRAM is assumed to be the output of standard_output_file.
 # Returns the 0 if there is a failure, otherwise 1.
+#
+# STYLE controls which style of index to add, if needed.  The empty
+# string (the default) means .gdb_index; "-dwarf-5" means .debug_names.
 
-proc add_gdb_index { program } {
+proc add_gdb_index { program {style ""} } {
     global srcdir GDB env BUILD_DATA_DIRECTORY
     set contrib_dir "$srcdir/../contrib"
     set env(GDB) "$GDB --data-directory=$BUILD_DATA_DIRECTORY"
-    set result [catch "exec $contrib_dir/gdb-add-index.sh $program" output]
+    set result [catch "exec $contrib_dir/gdb-add-index.sh $style $program" output]
     if { $result != 0 } {
 	verbose -log "result is $result"
 	verbose -log "output is $output"
@@ -7707,8 +7710,11 @@ proc add_gdb_index { program } {
 # (.gdb_index/.debug_names).  Gdb doesn't support building an index from a
 # program already using one.  Return 1 if a .gdb_index was added, return 0
 # if it already contained an index, and -1 if an error occurred.
+#
+# STYLE controls which style of index to add, if needed.  The empty
+# string (the default) means .gdb_index; "-dwarf-5" means .debug_names.
 
-proc ensure_gdb_index { binfile } {
+proc ensure_gdb_index { binfile {style ""} } {
     set testfile [file tail $binfile]
     set test "check if index present"
     gdb_test_multiple "mt print objfiles ${testfile}" $test {
@@ -7719,7 +7725,7 @@ proc ensure_gdb_index { binfile } {
 	    return 0
 	}
 	-re -wrap "Psymtabs.*" {
-	    if { [add_gdb_index $binfile] != "1" } {
+	    if { [add_gdb_index $binfile $style] != "1" } {
 		return -1
 	    }
 	    return 1

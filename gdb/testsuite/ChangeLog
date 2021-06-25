@@ -1,3 +1,10 @@
+2021-06-25  Tom Tromey  <tom@tromey.com>
+
+	* lib/gdb.exp (add_gdb_index, ensure_gdb_index): Add "style"
+	parameter.
+	* gdb.rust/dwindex.exp: New file.
+	* gdb.rust/dwindex.rs: New file.
+
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-breakpoint.c (do_throw): New function.

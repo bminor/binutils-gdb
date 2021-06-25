@@ -2637,18 +2637,12 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 
       /* Must pad to an alignment boundary that is twice the address
 	 size.  It is undocumented by the DWARF standard but GCC does
-	 use it.  */
-      for (size_t padding = ((-(addr - section->buffer))
-			     & (2 * address_size - 1));
-	   padding > 0; padding--)
-	if (*addr++ != 0)
-	  {
-	    warning (_("Section .debug_aranges in %s entry at offset %s "
-		       "padding is not zero, ignoring .debug_aranges."),
-		     objfile_name (objfile),
-		     plongest (entry_addr - section->buffer));
-	    return;
-	  }
+	 use it.  However, not every compiler does this.  We can see
+	 whether it has happened by looking at the total length of the
+	 contents of the aranges for this CU -- it if isn't a multiple
+	 of twice the address size, then we skip any leftover
+	 bytes.  */
+      addr += (entry_end - addr) % (2 * address_size);
 
       for (;;)
 	{
