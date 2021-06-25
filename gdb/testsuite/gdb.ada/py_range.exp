@@ -40,3 +40,8 @@ gdb_test "python print(int(gdb.parse_and_eval('si')))" \
 
 gdb_test "python print(int(gdb.parse_and_eval('ir')))" \
          "974"
+
+gdb_test "python print(gdb.parse_and_eval('si').type)" \
+    "foo\\.small_integer" "print type"
+gdb_test "python print(gdb.parse_and_eval('si').type.name)" \
+    "foo\\.small_integer" "print type name"

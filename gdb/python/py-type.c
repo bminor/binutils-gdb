@@ -27,6 +27,7 @@
 #include "objfiles.h"
 #include "language.h"
 #include "typeprint.h"
+#include "ada-lang.h"
 
 struct type_object
 {
@@ -393,6 +394,14 @@ typy_get_name (PyObject *self, void *closure)
 
   if (type->name () == NULL)
     Py_RETURN_NONE;
+  /* Ada type names are encoded, but it is better for users to see the
+     decoded form.  */
+  if (ADA_TYPE_P (type))
+    {
+      std::string name = ada_decode (type->name (), false);
+      if (!name.empty ())
+	return PyString_FromString (name.c_str ());
+    }
   return PyString_FromString (type->name ());
 }
 

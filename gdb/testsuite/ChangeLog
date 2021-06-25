@@ -1,3 +1,7 @@
+2021-06-25  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/py_range.exp: Add type name test cases.
+
 2021-06-24  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/info-macros.exp: Add <EOL> after trailing whitespace in

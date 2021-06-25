@@ -1,5 +1,9 @@
 2021-06-25  Tom Tromey  <tromey@adacore.com>
 
+	* python/py-type.c (typy_get_name): Decode an Ada type name.
+
+2021-06-25  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_decode): Add wrap parameter.
 	* ada-lang.h (ada_decode): Add wrap parameter.
 
