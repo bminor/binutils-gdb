@@ -1,3 +1,10 @@
+2021-06-25  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_file_scope): Don't call set_cu_language.
+	(dwarf_lang_to_enum_language): Rename from set_cu_language.  Don't
+	set language_defn.  Handle DW_LANG_OpenCL.
+	(prepare_one_comp_unit): Check producer and set language_defn.
+
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention Python BP_CATCHPOINT feature.

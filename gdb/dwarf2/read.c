@@ -1173,8 +1173,6 @@ static const char *read_dwo_str_index (const struct die_reader_specs *reader,
 static const char *read_stub_str_index (struct dwarf2_cu *cu,
 					ULONGEST str_index);
 
-static void set_cu_language (unsigned int, struct dwarf2_cu *);
-
 static struct attribute *dwarf2_attr (struct die_info *, unsigned int,
 				      struct dwarf2_cu *);
 
@@ -10508,16 +10506,6 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
 
   file_and_directory fnd = find_file_and_directory (die, cu);
-
-  /* The XLCL doesn't generate DW_LANG_OpenCL because this attribute is not
-     standardised yet.  As a workaround for the language detection we fall
-     back to the DW_AT_producer string.  */
-  if (cu->producer && strstr (cu->producer, "IBM XL C for OpenCL") != NULL)
-    cu->language = language_opencl;
-
-  /* Similar hack for Go.  */
-  if (cu->producer && strstr (cu->producer, "GNU Go ") != NULL)
-    set_cu_language (DW_LANG_Go, cu);
 
   cu->start_symtab (fnd.name, fnd.comp_dir, lowpc);
 
@@ -20355,9 +20343,11 @@ leb128_size (const gdb_byte *buf)
     }
 }
 
-static void
-set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
+static enum language
+dwarf_lang_to_enum_language (unsigned int lang)
 {
+  enum language language;
+
   switch (lang)
     {
     case DW_LANG_C89:
@@ -20365,54 +20355,58 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
     case DW_LANG_C11:
     case DW_LANG_C:
     case DW_LANG_UPC:
-      cu->language = language_c;
+      language = language_c;
       break;
     case DW_LANG_Java:
     case DW_LANG_C_plus_plus:
     case DW_LANG_C_plus_plus_11:
     case DW_LANG_C_plus_plus_14:
-      cu->language = language_cplus;
+      language = language_cplus;
       break;
     case DW_LANG_D:
-      cu->language = language_d;
+      language = language_d;
       break;
     case DW_LANG_Fortran77:
     case DW_LANG_Fortran90:
     case DW_LANG_Fortran95:
     case DW_LANG_Fortran03:
     case DW_LANG_Fortran08:
-      cu->language = language_fortran;
+      language = language_fortran;
       break;
     case DW_LANG_Go:
-      cu->language = language_go;
+      language = language_go;
       break;
     case DW_LANG_Mips_Assembler:
-      cu->language = language_asm;
+      language = language_asm;
       break;
     case DW_LANG_Ada83:
     case DW_LANG_Ada95:
-      cu->language = language_ada;
+      language = language_ada;
       break;
     case DW_LANG_Modula2:
-      cu->language = language_m2;
+      language = language_m2;
       break;
     case DW_LANG_Pascal83:
-      cu->language = language_pascal;
+      language = language_pascal;
       break;
     case DW_LANG_ObjC:
-      cu->language = language_objc;
+      language = language_objc;
       break;
     case DW_LANG_Rust:
     case DW_LANG_Rust_old:
-      cu->language = language_rust;
+      language = language_rust;
+      break;
+    case DW_LANG_OpenCL:
+      language = language_opencl;
       break;
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
     default:
-      cu->language = language_minimal;
+      language = language_minimal;
       break;
     }
-  cu->language_defn = language_def (cu->language);
+
+  return language;
 }
 
 /* Return the named attribute or NULL if not there.  */
@@ -24412,17 +24406,30 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
 {
   struct attribute *attr;
 
+  cu->producer = dwarf2_string_attr (comp_unit_die, DW_AT_producer, cu);
+
   /* Set the language we're debugging.  */
   attr = dwarf2_attr (comp_unit_die, DW_AT_language, cu);
-  if (attr != nullptr)
-    set_cu_language (attr->constant_value (0), cu);
-  else
+  if (cu->producer != nullptr
+      && strstr (cu->producer, "IBM XL C for OpenCL") != NULL)
     {
-      cu->language = pretend_language;
-      cu->language_defn = language_def (cu->language);
+      /* The XLCL doesn't generate DW_LANG_OpenCL because this
+	 attribute is not standardised yet.  As a workaround for the
+	 language detection we fall back to the DW_AT_producer
+	 string.  */
+      cu->language = language_opencl;
     }
-
-  cu->producer = dwarf2_string_attr (comp_unit_die, DW_AT_producer, cu);
+  else if (cu->producer != nullptr
+	   && strstr (cu->producer, "GNU Go ") != NULL)
+    {
+      /* Similar hack for Go.  */
+      cu->language = language_go;
+    }
+  else if (attr != nullptr)
+    cu->language = dwarf_lang_to_enum_language (attr->constant_value (0));
+  else
+    cu->language = pretend_language;
+  cu->language_defn = language_def (cu->language);
 }
 
 /* See read.h.  */
