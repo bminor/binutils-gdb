@@ -274,7 +274,7 @@ pascm_signal_setshow_error (SCM exception, const char *msg)
 static void
 pascm_set_func (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  param_smob *p_smob = (param_smob *) get_cmd_context (c);
+  param_smob *p_smob = (param_smob *) c->context ();
   SCM self, result, exception;
 
   gdb_assert (gdbscm_is_procedure (p_smob->set_func));
@@ -314,7 +314,7 @@ static void
 pascm_show_func (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  param_smob *p_smob = (param_smob *) get_cmd_context (c);
+  param_smob *p_smob = (param_smob *) c->context ();
   SCM value_scm, self, result, exception;
 
   gdb_assert (gdbscm_is_procedure (p_smob->show_func));
@@ -468,13 +468,13 @@ add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
   tmp_name = cmd_name;
   param = lookup_cmd (&tmp_name, *show_list, "", NULL, 0, 1);
   gdb_assert (param != NULL);
-  set_cmd_context (param, self);
+  param->set_context (self);
   *set_cmd = param;
 
   tmp_name = cmd_name;
   param = lookup_cmd (&tmp_name, *set_list, "", NULL, 0, 1);
   gdb_assert (param != NULL);
-  set_cmd_context (param, self);
+  param->set_context (self);
   *show_cmd = param;
 }
 

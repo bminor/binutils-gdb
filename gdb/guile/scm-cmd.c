@@ -294,7 +294,7 @@ static void
 cmdscm_function (struct cmd_list_element *command,
 		 const char *args, int from_tty)
 {
-  command_smob *c_smob/*obj*/ = (command_smob *) get_cmd_context (command);
+  command_smob *c_smob/*obj*/ = (command_smob *) command->context ();
   SCM arg_scm, tty_scm, result;
 
   gdb_assert (c_smob != NULL);
@@ -383,7 +383,7 @@ cmdscm_completer (struct cmd_list_element *command,
 		  completion_tracker &tracker,
 		  const char *text, const char *word)
 {
-  command_smob *c_smob/*obj*/ = (command_smob *) get_cmd_context (command);
+  command_smob *c_smob/*obj*/ = (command_smob *) command->context ();
   SCM completer_result_scm;
   SCM text_scm, word_scm;
 
@@ -788,7 +788,7 @@ gdbscm_register_command_x (SCM self)
   cmd->destroyer = cmdscm_destroyer;
 
   c_smob->command = cmd;
-  set_cmd_context (cmd, c_smob);
+  cmd->set_context (c_smob);
 
   if (gdbscm_is_true (c_smob->complete))
     {

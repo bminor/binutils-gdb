@@ -376,7 +376,7 @@ static void
 get_set_value (const char *args, int from_tty,
 	       struct cmd_list_element *c)
 {
-  PyObject *obj = (PyObject *) get_cmd_context (c);
+  PyObject *obj = (PyObject *) c->context ();
   gdb::unique_xmalloc_ptr<char> set_doc_string;
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
@@ -411,7 +411,7 @@ get_show_value (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c,
 		const char *value)
 {
-  PyObject *obj = (PyObject *) get_cmd_context (c);
+  PyObject *obj = (PyObject *) c->context ();
   gdb::unique_xmalloc_ptr<char> show_doc_string;
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
@@ -569,8 +569,8 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
     }
 
   /* Register Python objects in both commands' context.  */
-  set_cmd_context (commands.set, self);
-  set_cmd_context (commands.show, self);
+  commands.set->set_context (self);
+  commands.show->set_context (self);
 
   /* We (unfortunately) currently leak the command name.  */
   cmd_name.release ();

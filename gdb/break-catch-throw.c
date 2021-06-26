@@ -36,6 +36,7 @@
 #include "gdb_regex.h"
 #include "cp-support.h"
 #include "location.h"
+#include "cli/cli-decode.h"
 
 /* Each spot where we may place an exception-related catchpoint has
    two names: the SDT probe point and the function name.  This
@@ -456,7 +457,7 @@ static void
 catch_catch_command (const char *arg, int from_tty,
 		     struct cmd_list_element *command)
 {
-  bool tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  bool tempflag = command->context () == CATCH_TEMPORARY;
 
   catch_exception_event (EX_EVENT_CATCH, arg, tempflag, from_tty);
 }
@@ -467,7 +468,7 @@ static void
 catch_throw_command (const char *arg, int from_tty,
 		     struct cmd_list_element *command)
 {
-  bool tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  bool tempflag = command->context () == CATCH_TEMPORARY;
 
   catch_exception_event (EX_EVENT_THROW, arg, tempflag, from_tty);
 }
@@ -478,7 +479,7 @@ static void
 catch_rethrow_command (const char *arg, int from_tty,
 		       struct cmd_list_element *command)
 {
-  bool tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  bool tempflag = command->context () == CATCH_TEMPORARY;
 
   catch_exception_event (EX_EVENT_RETHROW, arg, tempflag, from_tty);
 }

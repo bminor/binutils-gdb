@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-decode.h"
 #include "cli/cli-setshow.h"
 #include "cli/cli-style.h"
 #include "source-cache.h"
@@ -167,7 +168,7 @@ void
 cli_style_option::do_set_value (const char *ignore, int from_tty,
 				struct cmd_list_element *cmd)
 {
-  cli_style_option *cso = (cli_style_option *) get_cmd_context (cmd);
+  cli_style_option *cso = (cli_style_option *) cmd->context ();
   cso->changed.notify ();
 }
 
@@ -180,7 +181,7 @@ do_show (const char *what, struct ui_file *file,
 	 struct cmd_list_element *cmd,
 	 const char *value)
 {
-  cli_style_option *cso = (cli_style_option *) get_cmd_context (cmd);
+  cli_style_option *cso = (cli_style_option *) cmd->context ();
   fputs_filtered (_("The "), file);
   fprintf_styled (file, cso->style (), _("\"%s\" style"), cso->name ());
   fprintf_filtered (file, _(" %s is: %s\n"), what, value);

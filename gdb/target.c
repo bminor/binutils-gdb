@@ -52,6 +52,7 @@
 #include <unordered_map>
 #include "target-connection.h"
 #include "valprint.h"
+#include "cli/cli-decode.h"
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
@@ -837,7 +838,7 @@ target_log_command (const char *p)
 static void
 open_target (const char *args, int from_tty, struct cmd_list_element *command)
 {
-  auto *ti = static_cast<target_info *> (get_cmd_context (command));
+  auto *ti = static_cast<target_info *> (command->context ());
   target_open_ftype *func = target_factories[ti];
 
   if (targetdebug)
@@ -874,7 +875,7 @@ information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
 			  &targetlist, 0, &cmdlist);
   c = add_cmd (t.shortname, no_class, t.doc, &targetlist);
-  set_cmd_context (c, (void *) &t);
+  c->set_context ((void *) &t);
   set_cmd_sfunc (c, open_target);
   if (completer != NULL)
     set_cmd_completer (c, completer);
@@ -892,7 +893,7 @@ add_deprecated_target_alias (const target_info &tinfo, const char *alias)
      see PR cli/15104.  */
   c = add_cmd (alias, no_class, tinfo.doc, &targetlist);
   set_cmd_sfunc (c, open_target);
-  set_cmd_context (c, (void *) &tinfo);
+  c->set_context ((void *) &tinfo);
   alt = xstrprintf ("target %s", tinfo.shortname);
   deprecate_cmd (c, alt);
 }

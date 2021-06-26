@@ -1,3 +1,14 @@
+2021-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* cli/cli-decode.h (struct cmd_list_element) <set_context,
+	context>: New.
+	<context>: Rename to...
+	<m_context>: ... this.
+	* cli/cli-decode.c (set_cmd_context, get_cmd_context): Remove.
+	* command.h (set_cmd_context, get_cmd_context): Remove, use
+	cmd_list_element::set_context and cmd_list_element::context
+	everywhere instead.
+
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention changes to 'info sources'.

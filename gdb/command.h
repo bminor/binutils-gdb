@@ -253,12 +253,6 @@ extern void set_cmd_completer_handle_brkchars (struct cmd_list_element *,
 extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
 			 cmd_const_cfunc_ftype *cfun);
 
-/* Each command object has a local context attached to it.  */
-extern void set_cmd_context (struct cmd_list_element *cmd,
-			     void *context);
-extern void *get_cmd_context (struct cmd_list_element *cmd);
-
-
 /* Execute CMD's pre/post hook.  Throw an error if the command fails.
    If already executing this pre/post hook, or there is no pre/post
    hook, the call is silently ignored.  */

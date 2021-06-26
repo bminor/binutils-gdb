@@ -333,7 +333,7 @@ struct dump_context
 static void
 call_dump_func (struct cmd_list_element *c, const char *args, int from_tty)
 {
-  struct dump_context *d = (struct dump_context *) get_cmd_context (c);
+  struct dump_context *d = (struct dump_context *) c->context ();
 
   d->func (args, d->mode);
 }
@@ -352,7 +352,7 @@ add_dump_command (const char *name,
   d = XNEW (struct dump_context);
   d->func = func;
   d->mode = FOPEN_WB;
-  set_cmd_context (c, d);
+  c->set_context (d);
   c->func = call_dump_func;
 
   c = add_cmd (name, all_commands, descr, &append_cmdlist);
@@ -360,7 +360,7 @@ add_dump_command (const char *name,
   d = XNEW (struct dump_context);
   d->func = func;
   d->mode = FOPEN_AB;
-  set_cmd_context (c, d);
+  c->set_context (d);
   c->func = call_dump_func;
 
   /* Replace "Dump " at start of docstring with "Append " (borrowed

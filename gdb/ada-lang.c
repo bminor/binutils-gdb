@@ -49,6 +49,7 @@
 #include "typeprint.h"
 #include "namespace.h"
 #include "cli/cli-style.h"
+#include "cli/cli-decode.h"
 
 #include "value.h"
 #include "mi/mi-common.h"
@@ -12229,7 +12230,7 @@ catch_ada_exception_command (const char *arg_entry, int from_tty,
   std::string excep_string;
   std::string cond_string;
 
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  tempflag = command->context () == CATCH_TEMPORARY;
 
   if (!arg)
     arg = "";
@@ -12254,7 +12255,7 @@ catch_ada_handlers_command (const char *arg_entry, int from_tty,
   std::string excep_string;
   std::string cond_string;
 
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  tempflag = command->context () == CATCH_TEMPORARY;
 
   if (!arg)
     arg = "";
@@ -12322,7 +12323,7 @@ catch_assert_command (const char *arg_entry, int from_tty,
   int tempflag;
   std::string cond_string;
 
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  tempflag = command->context () == CATCH_TEMPORARY;
 
   if (!arg)
     arg = "";

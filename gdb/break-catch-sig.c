@@ -29,6 +29,7 @@
 #include "cli/cli-utils.h"
 #include "completer.h"
 #include "cli/cli-style.h"
+#include "cli/cli-decode.h"
 
 #include <string>
 
@@ -389,7 +390,7 @@ catch_signal_command (const char *arg, int from_tty,
   bool catch_all = false;
   std::vector<gdb_signal> filter;
 
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  tempflag = command->context () == CATCH_TEMPORARY;
 
   arg = skip_spaces (arg);
 

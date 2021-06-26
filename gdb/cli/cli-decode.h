@@ -93,6 +93,12 @@ struct cmd_list_element
   bool is_command_class_help () const
   { return this->func == nullptr; }
 
+  void set_context (void *context)
+  { m_context = context; }
+
+  void *context () const
+  { return m_context; }
+
   /* Points to next command in this list.  */
   struct cmd_list_element *next = nullptr;
 
@@ -172,9 +178,6 @@ struct cmd_list_element
       cmd_const_sfunc_ftype *sfunc;
     }
   function;
-
-  /* Local state (context) for this command.  This can be anything.  */
-  void *context = nullptr;
 
   /* Documentation of this command (or help topic).
      First line is brief documentation; remaining lines form, with it,
@@ -256,6 +259,10 @@ struct cmd_list_element
      when this command is being executed.  It will be set back to false
      when the command has been executed.  */
   int *suppress_notification = nullptr;
+
+private:
+  /* Local state (context) for this command.  This can be anything.  */
+  void *m_context = nullptr;
 };
 
 /* Functions that implement commands about CLI commands.  */

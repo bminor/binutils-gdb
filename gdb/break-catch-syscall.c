@@ -30,6 +30,7 @@
 #include "observable.h"
 #include "xml-syscall.h"
 #include "cli/cli-style.h"
+#include "cli/cli-decode.h"
 
 /* An instance of this type is used to represent a syscall catchpoint.
    A breakpoint is really of this type iff its ops pointer points to
@@ -439,7 +440,7 @@ catch_syscall_command_1 (const char *arg, int from_tty,
     error (_("The feature 'catch syscall' is not supported on \
 this architecture yet."));
 
-  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  tempflag = command->context () == CATCH_TEMPORARY;
 
   arg = skip_spaces (arg);
 

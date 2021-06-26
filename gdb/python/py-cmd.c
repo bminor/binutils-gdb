@@ -103,7 +103,7 @@ static void
 cmdpy_function (struct cmd_list_element *command,
 		const char *args, int from_tty)
 {
-  cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
+  cmdpy_object *obj = (cmdpy_object *) command->context ();
 
   gdbpy_enter enter_py (get_current_arch (), current_language);
 
@@ -172,7 +172,7 @@ static gdbpy_ref<>
 cmdpy_completer_helper (struct cmd_list_element *command,
 			const char *text, const char *word)
 {
-  cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
+  cmdpy_object *obj = (cmdpy_object *) command->context ();
 
   if (obj == NULL)
     error (_("Invalid invocation of Python command object."));
@@ -532,7 +532,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       cmd->name_allocated = 1;
 
       obj->command = cmd;
-      set_cmd_context (cmd, self_ref.release ());
+      cmd->set_context (self_ref.release ());
       set_cmd_completer (cmd, ((completetype == -1) ? cmdpy_completer
 			       : completers[completetype].completer));
       if (completetype == -1)
