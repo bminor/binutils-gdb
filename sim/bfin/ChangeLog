@@ -1,3 +1,10 @@
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Change to $(SDL_CFLAGS) & $(SDL_LIBS).
+	* configure.ac: Delete PKG_PROG_PKG_CONFIG &
+	PKG_CHECK_MODULES calls.
+	* aclocal.m4, configure: Regenerate.
+
 2021-06-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (bfin_syscall): Set sc.arg5 & sc.arg6.

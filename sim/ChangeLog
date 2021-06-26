@@ -1,3 +1,11 @@
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch-subdir.mk.in: Move SDL_CFLAGS & SDL_LIBS from bfin/Makefile.in.
+	* m4/sim_ac_platform.m4: Call PKG_CHECK_MODULES and export SDL_CFLAGS
+	and SDL_LIBS.
+	* m4/sim_ac_toolchain.m4: Call PKG_PROG_PKG_CONFIG.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
 2021-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (SIM_BUILD_TARGET): Simplify sed script.

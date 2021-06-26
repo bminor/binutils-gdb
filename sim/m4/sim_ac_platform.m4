@@ -162,4 +162,13 @@ AC_CHECK_LIB(socket, bind)
 AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(m, fabs)
 AC_CHECK_LIB(m, log2)
+
+PKG_CHECK_MODULES(SDL, sdl, [dnl
+  AC_CHECK_LIB(dl, dlopen, [dnl
+    SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL"
+    SDL_LIBS="-ldl"
+    ], [SDL_CFLAGS= SDL_LIBS=])
+  ], [:])
+AC_SUBST(SDL_CFLAGS)
+AC_SUBST(SDL_LIBS)
 ])
