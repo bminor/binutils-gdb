@@ -403,7 +403,7 @@ extern set_show_commands add_setshow_enum_cmd
    const char **var, const char *set_doc, const char *show_doc,
    const char *help_doc, cmd_const_sfunc_ftype *set_func,
    show_value_ftype *show_func, cmd_list_element **set_list,
-   cmd_list_element **show_list, void *context = nullptr);
+   cmd_list_element **show_list);
 
 extern set_show_commands add_setshow_auto_boolean_cmd
   (const char *name, command_class theclass, auto_boolean *var,

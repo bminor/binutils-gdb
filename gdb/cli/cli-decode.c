@@ -571,8 +571,7 @@ add_setshow_enum_cmd (const char *name,
 		      cmd_const_sfunc_ftype *set_func,
 		      show_value_ftype *show_func,
 		      struct cmd_list_element **set_list,
-		      struct cmd_list_element **show_list,
-		      void *context)
+		      struct cmd_list_element **show_list)
 {
   set_show_commands commands
     =  add_setshow_cmd_full (name, theclass, var_enum, var,
@@ -580,10 +579,6 @@ add_setshow_enum_cmd (const char *name,
 			     set_func, show_func,
 			     set_list, show_list);
   commands.set->enums = enumlist;
-
-  commands.set->set_context (context);
-  commands.show->set_context (context);
-
   return commands;
 }
 

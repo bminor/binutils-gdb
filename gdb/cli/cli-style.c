@@ -230,32 +230,46 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
 			0, set_list);
   add_show_prefix_cmd (m_name, no_class, prefix_doc, &m_show_list,
 		       0, show_list);
+  set_show_commands commands;
 
-  add_setshow_enum_cmd ("foreground", theclass, cli_colors,
-			&m_foreground,
-			_("Set the foreground color for this property."),
-			_("Show the foreground color for this property."),
-			nullptr,
-			do_set_value,
-			do_show_foreground,
-			&m_set_list, &m_show_list, (void *) this);
-  add_setshow_enum_cmd ("background", theclass, cli_colors,
-			&m_background,
-			_("Set the background color for this property."),
-			_("Show the background color for this property."),
-			nullptr,
-			do_set_value,
-			do_show_background,
-			&m_set_list, &m_show_list, (void *) this);
+  commands = add_setshow_enum_cmd
+    ("foreground", theclass, cli_colors,
+     &m_foreground,
+     _("Set the foreground color for this property."),
+     _("Show the foreground color for this property."),
+     nullptr,
+     do_set_value,
+     do_show_foreground,
+     &m_set_list, &m_show_list);
+  commands.set->set_context (this);
+  commands.show->set_context (this);
+
+  commands = add_setshow_enum_cmd
+    ("background", theclass, cli_colors,
+     &m_background,
+     _("Set the background color for this property."),
+     _("Show the background color for this property."),
+     nullptr,
+     do_set_value,
+     do_show_background,
+     &m_set_list, &m_show_list);
+  commands.set->set_context (this);
+  commands.show->set_context (this);
+
   if (!skip_intensity)
-    add_setshow_enum_cmd ("intensity", theclass, cli_intensities,
-			  &m_intensity,
-			  _("Set the display intensity for this property."),
-			  _("Show the display intensity for this property."),
-			  nullptr,
-			  do_set_value,
-			  do_show_intensity,
-			  &m_set_list, &m_show_list, (void *) this);
+    {
+      commands = add_setshow_enum_cmd
+	("intensity", theclass, cli_intensities,
+	 &m_intensity,
+	 _("Set the display intensity for this property."),
+	 _("Show the display intensity for this property."),
+	 nullptr,
+	 do_set_value,
+	 do_show_intensity,
+	 &m_set_list, &m_show_list);
+      commands.set->set_context (this);
+      commands.show->set_context (this);
+    }
 }
 
 static cmd_list_element *style_set_list;

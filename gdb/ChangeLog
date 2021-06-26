@@ -1,5 +1,13 @@
 2021-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* command.h (add_setshow_enum_cmd): Remove context parameter.
+	* cli/cli-decode.c (add_setshow_enum_cmd): Likewise, and don't
+	set context.
+	* cli/cli-style.c (cli_style_option::add_setshow_commands): Set
+	context here.
+
+2021-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli/cli-decode.h (struct cmd_list_element) <set_context>: Add
 	assert.
 
