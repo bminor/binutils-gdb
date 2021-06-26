@@ -171,4 +171,32 @@ PKG_CHECK_MODULES(SDL, sdl, [dnl
   ], [:])
 AC_SUBST(SDL_CFLAGS)
 AC_SUBST(SDL_LIBS)
+
+dnl In the Cygwin environment, we need some additional flags.
+AC_CACHE_CHECK([for cygwin], sim_cv_os_cygwin,
+[AC_EGREP_CPP(lose, [
+#ifdef __CYGWIN__
+lose
+#endif],[sim_cv_os_cygwin=yes],[sim_cv_os_cygwin=no])])
+
+dnl Keep in sync with gdb's configure.ac list.
+AC_SEARCH_LIBS(tgetent, [termcap tinfo curses ncurses],
+  [TERMCAP_LIB=$ac_cv_search_tgetent], [TERMCAP_LIB=""])
+if test x$sim_cv_os_cygwin = xyes; then
+  TERMCAP_LIB="${TERMCAP_LIB} -luser32"
+fi
+AC_SUBST(TERMCAP_LIB)
+
+dnl We prefer the in-tree readline.  Top-level dependencies make sure
+dnl src/readline (if it's there) is configured before src/sim.
+if test -r ../readline/Makefile; then
+  READLINE_LIB=../../readline/readline/libreadline.a
+  READLINE_CFLAGS='-I$(READLINE_SRC)/..'
+else
+  AC_CHECK_LIB(readline, readline, READLINE_LIB=-lreadline,
+	       AC_ERROR([the required "readline" library is missing]), $TERMCAP_LIB)
+  READLINE_CFLAGS=
+fi
+AC_SUBST(READLINE_LIB)
+AC_SUBST(READLINE_CFLAGS)
 ])

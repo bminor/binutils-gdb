@@ -18,11 +18,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-TERMCAP_LIB = @TERMCAP@
-
 READLINE_SRC = $(srcroot)/readline/readline
-READLINE_LIB = @READLINE@
-READLINE_CFLAGS = @READLINE_CFLAGS@
 
 SIM_OBJS = exec.o erc32.o func.o help.o float.o interf.o
 SIM_RUN_OBJS = sis.o

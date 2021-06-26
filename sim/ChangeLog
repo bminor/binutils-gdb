@@ -1,5 +1,13 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* arch-subdir.mk.in: Move TERMCAP and READLINE variables from
+	erc32/Makefile.in.
+	* configure.ac: Remove [true] from erc32 SIM_TARGET call.
+	* m4/sim_ac_platform.m4: Check for cygwin, termcap, and readline.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* arch-subdir.mk.in: Move SDL_CFLAGS & SDL_LIBS from bfin/Makefile.in.
 	* m4/sim_ac_platform.m4: Call PKG_CHECK_MODULES and export SDL_CFLAGS
 	and SDL_LIBS.

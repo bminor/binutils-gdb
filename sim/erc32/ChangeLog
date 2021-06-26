@@ -1,3 +1,8 @@
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Delete TERMCAP_LIB, READLINE_LIB, and READLINE_CFLAGS.
+	* aclocal.m4, configure, configure.ac: Removed.
+
 2021-06-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

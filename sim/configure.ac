@@ -139,7 +139,7 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([rl78-*-*], [rl78])
     SIM_TARGET([rx-*-*], [rx])
     SIM_TARGET([sh*-*-*], [sh])
-    SIM_TARGET([sparc-*-rtems*|sparc-*-elf*], [erc32], [true])
+    SIM_TARGET([sparc-*-rtems*|sparc-*-elf*], [erc32])
     SIM_TARGET([powerpc*-*-*], [ppc], [true])
     SIM_TARGET([v850*-*-*], [v850], [true], [sim_igen=yes])
   done

@@ -233,7 +233,8 @@ CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
 	m32c/Makefile.sim m68hc11/Makefile.sim mcore/Makefile.sim \
 	microblaze/Makefile.sim moxie/Makefile.sim msp430/Makefile.sim \
 	pru/Makefile.sim rl78/Makefile.sim rx/Makefile.sim \
-	sh/Makefile.sim example-synacor/Makefile.sim arch-subdir.mk
+	sh/Makefile.sim erc32/Makefile.sim \
+	example-synacor/Makefile.sim arch-subdir.mk
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -709,6 +710,8 @@ PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 RANLIB_FOR_BUILD = @RANLIB_FOR_BUILD@
+READLINE_CFLAGS = @READLINE_CFLAGS@
+READLINE_LIB = @READLINE_LIB@
 REPORT_BUGS_TEXI = @REPORT_BUGS_TEXI@
 REPORT_BUGS_TO = @REPORT_BUGS_TO@
 SDL_CFLAGS = @SDL_CFLAGS@
@@ -723,6 +726,7 @@ SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 SIM_RX_CYCLE_ACCURATE_FLAGS = @SIM_RX_CYCLE_ACCURATE_FLAGS@
 SIM_SUBDIRS = @SIM_SUBDIRS@
 STRIP = @STRIP@
+TERMCAP_LIB = @TERMCAP_LIB@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
@@ -976,6 +980,8 @@ rl78/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/rl78/Makefile.in
 rx/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/rx/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 sh/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/sh/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+erc32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/erc32/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 example-synacor/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/example-synacor/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
