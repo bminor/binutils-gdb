@@ -1,5 +1,15 @@
 2021-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* guile/scm-param.c (struct param_smob) <set_command,
+	show_command>: Remove.
+	<commands>: New.
+	(pascm_is_valid): Adjust.
+	(add_setshow_generic): Use return values of add_setshow
+	functions, return a set_show_commands.
+	(gdbscm_register_parameter_x): Adjust.
+
+2021-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* command.h (add_setshow_enum_cmd): Remove context parameter.
 	* cli/cli-decode.c (add_setshow_enum_cmd): Likewise, and don't
 	set context.
