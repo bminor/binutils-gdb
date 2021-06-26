@@ -94,7 +94,10 @@ struct cmd_list_element
   { return this->func == nullptr; }
 
   void set_context (void *context)
-  { m_context = context; }
+  {
+    gdb_assert (m_context == nullptr);
+    m_context = context;
+  }
 
   void *context () const
   { return m_context; }

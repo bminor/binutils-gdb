@@ -1,5 +1,10 @@
 2021-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* cli/cli-decode.h (struct cmd_list_element) <set_context>: Add
+	assert.
+
+2021-06-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli/cli-decode.h (struct cmd_list_element) <set_context,
 	context>: New.
 	<context>: Rename to...
