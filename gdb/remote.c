@@ -10391,7 +10391,7 @@ remote_target::extended_remote_set_inferior_cwd ()
 {
   if (packet_support (PACKET_QSetWorkingDir) != PACKET_DISABLE)
     {
-      const char *inferior_cwd = get_inferior_cwd ();
+      const char *inferior_cwd = current_inferior ()->cwd ();
       remote_state *rs = get_remote_state ();
 
       if (inferior_cwd != NULL)

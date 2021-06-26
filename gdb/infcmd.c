@@ -154,28 +154,12 @@ show_args_command (struct ui_file *file, int from_tty,
 			      current_inferior ()->args ());
 }
 
-/* Set the inferior current working directory.  If CWD is NULL, unset
-   the directory.  */
-
-static void
-set_inferior_cwd (const char *cwd)
-{
-  struct inferior *inf = current_inferior ();
-
-  gdb_assert (inf != NULL);
-
-  if (cwd == NULL)
-    inf->cwd.reset ();
-  else
-    inf->cwd.reset (xstrdup (cwd));
-}
-
 /* See gdbsupport/common-inferior.h.  */
 
 const char *
 get_inferior_cwd ()
 {
-  return current_inferior ()->cwd.get ();
+  return current_inferior ()->cwd ();
 }
 
 /* Handle the 'set cwd' command.  */
@@ -184,9 +168,9 @@ static void
 set_cwd_command (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (*inferior_cwd_scratch == '\0')
-    set_inferior_cwd (NULL);
+    current_inferior ()->set_cwd (nullptr);
   else
-    set_inferior_cwd (inferior_cwd_scratch);
+    current_inferior ()->set_cwd (inferior_cwd_scratch);
 }
 
 /* Handle the 'show cwd' command.  */
@@ -195,7 +179,7 @@ static void
 show_cwd_command (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  const char *cwd = get_inferior_cwd ();
+  const char *cwd = current_inferior ()->cwd ();
 
   if (cwd == NULL)
     fprintf_filtered (gdb_stdout,

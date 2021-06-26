@@ -2558,7 +2558,7 @@ windows_nat_target::create_inferior (const char *exec_file,
   if (!exec_file)
     error (_("No executable specified, use `target exec'."));
 
-  const char *inferior_cwd = get_inferior_cwd ();
+  const char *inferior_cwd = current_inferior ()->cwd ();
   std::string expanded_infcwd;
   if (inferior_cwd != NULL)
     {

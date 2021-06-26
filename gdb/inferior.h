@@ -466,6 +466,25 @@ public:
     return m_args.get ();
   }
 
+  /* Set the inferior current working directory.
+
+     If CWD is NULL, unset the directory.  */
+  void set_cwd (const char *cwd)
+  {
+    if (cwd == NULL)
+      m_cwd.reset ();
+    else
+      m_cwd.reset (xstrdup (cwd));
+  }
+
+  /* Get the inferior current working directory.
+
+     Return nullptr if the current working directory is not specified.  */
+  const char *cwd () const
+  {
+    return m_cwd.get ();
+  }
+
   /* Convenient handle (GDB inferior id).  Unique across all
      inferiors.  */
   int num = 0;
@@ -494,10 +513,6 @@ public:
 
   /* The program space bound to this inferior.  */
   struct program_space *pspace = NULL;
-
-  /* The current working directory that will be used when starting
-     this inferior.  */
-  gdb::unique_xmalloc_ptr<char> cwd;
 
   /* The terminal state as set by the last target_terminal::terminal_*
      call.  */
@@ -591,6 +606,10 @@ private:
 
      This is nullptr when there are not args.  */
   gdb::unique_xmalloc_ptr<char> m_args;
+
+  /* The current working directory that will be used when starting
+     this inferior.  */
+  gdb::unique_xmalloc_ptr<char> m_cwd;
 };
 
 /* Keep a registry of per-inferior data-pointers required by other GDB
