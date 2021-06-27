@@ -17,6 +17,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifndef FRV_SIM_MAIN_H
+#define FRV_SIM_MAIN_H
+
 /* Main header for the frv.  */
 
 /* This is a global setting.  Different cpu families can't mix-n-match -scache
@@ -114,3 +117,8 @@ frv_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), \
 
 /* Default memory size.  */
 #define FRV_DEFAULT_MEM_SIZE 0x800000 /* 8M */
+
+void frvbf_model_branch (SIM_CPU *, PCADDR, int hint);
+void frvbf_perform_writeback (SIM_CPU *);
+
+#endif

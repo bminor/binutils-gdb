@@ -1,5 +1,15 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* interrupts.c: Include cgen-mem.h.
+	* profile-fr400.c (acc_use_is_media_p4): Disable function.
+	* reset.c: Include cgen-mem.h.
+	* sim-if.c (print_frv_misc_cpu): Delete.
+	* sim-main.h (FRV_SIM_MAIN_H): Add ifdef guard.
+	(frvbf_model_branch): New prototype.
+	(frvbf_perform_writeback): Likewise.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* profile.c (wait_for_flush): Change %p to %x.
 	* sim-if.c (sim_open): Change %lx to %x.
 

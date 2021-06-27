@@ -30,7 +30,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "elf-bfd.h"
 
 static void free_state (SIM_DESC);
-static void print_frv_misc_cpu (SIM_CPU *cpu, int verbose);
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 

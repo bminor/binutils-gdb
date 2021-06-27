@@ -176,6 +176,7 @@ set_acc_use_not_media_p4 (SIM_CPU *cpu, INT acc)
     d->cur_acc_p4 &= ~(((DI)1) << acc);
 }
 
+#if 0
 static int
 acc_use_is_media_p4 (SIM_CPU *cpu, INT acc)
 {
@@ -184,6 +185,7 @@ acc_use_is_media_p4 (SIM_CPU *cpu, INT acc)
     return d->cur_acc_p4 & (((DI)1) << acc);
   return 0;
 }
+#endif
 
 static void
 set_use_is_media_p6 (SIM_CPU *cpu, INT fr)
