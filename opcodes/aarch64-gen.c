@@ -84,7 +84,7 @@ new_opcode_node (void)
    'aarch64_opcode_table' hard-coded in, e.g. print_find_next_opcode;
    therefore some amount of work needs to be done if the full support
    for multiple tables needs to be enabled.  */
-static const struct aarch64_opcode *aarch64_opcode_tables[] =
+static const struct aarch64_opcode * const aarch64_opcode_tables[] =
 {aarch64_opcode_table};
 
 /* Use top 2 bits to indiate which table.  */

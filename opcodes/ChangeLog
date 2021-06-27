@@ -1,3 +1,8 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* aarch64-gen.c (aarch64_opcode_table): Add const.
+	* aarch64-tbl.h (aarch64_opcode_table): Likewise.
+
 2021-06-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cgen-dis.c (count_decodable_bits): Use __builtin_popcount when
@@ -367,7 +372,7 @@
 2021-03-29  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (process_i386_opcode_modifier): New parameter
-	"space". 
+	"space".
 	(output_i386_opcode): New local variable "space". Adjust
 	process_i386_opcode_modifier() invocation.
 	(process_i386_opcodes): Adjust process_i386_opcode_modifier()

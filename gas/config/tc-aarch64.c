@@ -5214,7 +5214,7 @@ output_inst (struct aarch64_inst *new_inst)
 
 struct templates
 {
-  aarch64_opcode *opcode;
+  const aarch64_opcode *opcode;
   struct templates *next;
 };
 
@@ -7272,7 +7272,7 @@ md_assemble (char *str)
 {
   char *p = str;
   templates *template;
-  aarch64_opcode *opcode;
+  const aarch64_opcode *opcode;
   aarch64_inst *inst_base;
   unsigned saved_cond;
 
@@ -8768,7 +8768,7 @@ sysreg_hash_insert (htab_t table, const char *key, void *value)
 static void
 fill_instruction_hash_table (void)
 {
-  aarch64_opcode *opcode = aarch64_opcode_table;
+  const aarch64_opcode *opcode = aarch64_opcode_table;
 
   while (opcode->name != NULL)
     {

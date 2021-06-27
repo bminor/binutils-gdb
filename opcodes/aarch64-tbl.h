@@ -2584,7 +2584,7 @@ static const aarch64_feature_set aarch64_feature_flagm =
 #define FLAGM_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, FLAGM, OPS, QUALS, FLAGS, 0, 0, NULL }
 
-struct aarch64_opcode aarch64_opcode_table[] =
+const struct aarch64_opcode aarch64_opcode_table[] =
 {
   /* Add/subtract (with carry).  */
   CORE_INSN ("adc",  0x1a000000, 0x7fe0fc00, addsub_carry, 0, OP3 (Rd, Rn, Rm), QL_I3SAMER, F_SF),

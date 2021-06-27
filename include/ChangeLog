@@ -1,3 +1,7 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* opcode/aarch64.h (aarch64_opcode_table): Mark const.
+
 2021-07-01  Richard Earnshaw  <rearnsha@arm.com>
 
 	PR gas/28031
