@@ -1,3 +1,8 @@
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* bpf-helpers.c (bpf_trace_printk): Move value decl to top of scope.
+	* mloop.in: Move off16 & imm32 decls to top of scope.
+
 2021-06-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

@@ -72,6 +72,7 @@ bpf_trace_printk (SIM_CPU *current_cpu)
      supported, which are read from %r3, %r4 and %r5 respectively.  */
   for (i = 0, tags_processed = 0; i < size;)
     {
+      UDI value;
       QI c = GETMEMUQI (current_cpu, CPU_PC_GET (current_cpu),
                         fmt_address + i);
 
@@ -88,7 +89,7 @@ bpf_trace_printk (SIM_CPU *current_cpu)
           if (i++ >= size)
             return -1; /* XXX look for kernel error code.  */
 
-          UDI value = GET_H_GPR (3 + tags_processed);
+          value = GET_H_GPR (3 + tags_processed);
 
           switch ((GETMEMUQI (current_cpu, CPU_PC_GET (current_cpu),
                              fmt_address + i)))
