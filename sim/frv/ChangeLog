@@ -1,5 +1,17 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* profile.c (frvbf_model_insn_after): Change return to void.
+	(enforce_full_fr_latency, post_wait_for_FR, post_wait_for_FRdouble,
+	post_wait_for_ACC, post_wait_for_CCR, post_wait_for_SPR,
+	post_wait_for_fdiv, post_wait_for_fsqrt,
+	post_wait_for_float): Likewise.
+	* profile.h (post_wait_for_FR, post_wait_for_FRdouble,
+	post_wait_for_ACC, post_wait_for_CCR, post_wait_for_SPR,
+	post_wait_for_fdiv, post_wait_for_fsqrt, post_wait_for_float,
+	post_wait_for_media): Likewise.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* frv.c (frvbf_shift_left_arith_saturate): Add braces to if statement.
 	* profile-fr500.c (adjust_float_register_busy): Likewise.
 	* profile-fr550.c (adjust_float_register_busy): Likewise.

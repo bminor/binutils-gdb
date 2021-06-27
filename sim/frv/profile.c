@@ -1012,7 +1012,7 @@ frvbf_model_insn_after (SIM_CPU *cpu, int last_p, int cycles)
     }
 }
 
-USI
+void
 frvbf_model_branch (SIM_CPU *current_cpu, PCADDR target, int hint)
 {
   /* Record the hint and branch address for use in profiling.  */
@@ -1787,7 +1787,7 @@ enforce_full_fr_latency (SIM_CPU *cpu, INT in_FR)
 
 /* Calculate how long the post processing for a floating point insn must
    wait for resources to become available.  */
-int
+void
 post_wait_for_FR (SIM_CPU *cpu, INT in_FR)
 {
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
@@ -1803,7 +1803,7 @@ post_wait_for_FR (SIM_CPU *cpu, INT in_FR)
 
 /* Calculate how long the post processing for a floating point insn must
    wait for resources to become available.  */
-int
+void
 post_wait_for_FRdouble (SIM_CPU *cpu, INT in_FR)
 {
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
@@ -1826,7 +1826,7 @@ post_wait_for_FRdouble (SIM_CPU *cpu, INT in_FR)
     }
 }
 
-int
+void
 post_wait_for_ACC (SIM_CPU *cpu, INT in_ACC)
 {
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
@@ -1840,7 +1840,7 @@ post_wait_for_ACC (SIM_CPU *cpu, INT in_ACC)
     }
 }
 
-int
+void
 post_wait_for_CCR (SIM_CPU *cpu, INT in_CCR)
 {
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
@@ -1859,7 +1859,7 @@ post_wait_for_CCR (SIM_CPU *cpu, INT in_CCR)
     }
 }
 
-int
+void
 post_wait_for_SPR (SIM_CPU *cpu, INT in_SPR)
 {
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
@@ -1873,7 +1873,7 @@ post_wait_for_SPR (SIM_CPU *cpu, INT in_SPR)
     }
 }
 
-int
+void
 post_wait_for_fdiv (SIM_CPU *cpu, INT slot)
 {
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
@@ -1891,7 +1891,7 @@ post_wait_for_fdiv (SIM_CPU *cpu, INT slot)
     }
 }
 
-int
+void
 post_wait_for_fsqrt (SIM_CPU *cpu, INT slot)
 {
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
@@ -1909,7 +1909,7 @@ post_wait_for_fsqrt (SIM_CPU *cpu, INT slot)
     }
 }
 
-int
+void
 post_wait_for_float (SIM_CPU *cpu, INT slot)
 {
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
@@ -1927,7 +1927,7 @@ post_wait_for_float (SIM_CPU *cpu, INT slot)
     }
 }
 
-int
+void
 post_wait_for_media (SIM_CPU *cpu, INT slot)
 {
   FRV_PROFILE_STATE *ps = CPU_PROFILE_STATE (cpu);
