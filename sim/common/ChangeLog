@@ -1,5 +1,10 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-trace.h (cgen_trace_printf): Add ATTRIBUTE_PRINTF_2.
+	(sim_disasm_sprintf): Likewise.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-trace.c (cgen_trace_extract): Make name & fmt const.
 	(cgen_trace_result): Make name const.
 	(cgen_trace_printf): Make fmt const.
