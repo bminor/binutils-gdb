@@ -231,6 +231,9 @@ engine_run_n (SIM_DESC sd, int next_cpu_nr, int nr_cpus, int max_insns, int fast
   int i;
   ENGINE_FN *engine_fns[MAX_NR_PROCESSORS];
 
+  SIM_ASSERT (nr_cpus <= MAX_NR_PROCESSORS);
+  SIM_ASSERT (next_cpu_nr >= 0 && next_cpu_nr < nr_cpus);
+
   for (i = 0; i < nr_cpus; ++i)
     {
       SIM_CPU *cpu = STATE_CPU (sd, i);
@@ -244,7 +247,7 @@ engine_run_n (SIM_DESC sd, int next_cpu_nr, int nr_cpus, int max_insns, int fast
       SIM_ENGINE_PREFIX_HOOK (sd);
 
       /* FIXME: proper cycling of all of them, blah blah blah.  */
-      while (next_cpu_nr != nr_cpus)
+      while (next_cpu_nr < nr_cpus)
 	{
 	  SIM_CPU *cpu = STATE_CPU (sd, next_cpu_nr);
 

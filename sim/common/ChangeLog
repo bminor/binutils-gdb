@@ -1,5 +1,9 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-run.c (engine_run_n): Assert cpu arguments are valid.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-trace.h (cgen_trace_printf): Add ATTRIBUTE_PRINTF_2.
 	(sim_disasm_sprintf): Likewise.
 
