@@ -1,3 +1,7 @@
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch.c (sim_machs): Mark const.
+
 2021-06-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* cpuv10.c (crisv10f_record_trace_results): Delete function.

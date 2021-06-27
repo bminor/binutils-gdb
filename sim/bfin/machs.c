@@ -1962,7 +1962,7 @@ static const SIM_MACH bfin_mach =
   bfin_prepare_run
 };
 
-const SIM_MACH *sim_machs[] =
+const SIM_MACH * const sim_machs[] =
 {
   & bfin_mach,
   NULL

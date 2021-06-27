@@ -1,5 +1,14 @@
 2021-06-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-model.c (model_option_handler): Make machp const.
+	(sim_model_lookup): Likewise.
+	(sim_mach_lookup): Likewise.
+	(sim_mach_lookup_bfd_name): Likewise.
+	(sim_machs): Add const.
+	* sim-model.h (sim_machs): Likewise.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-io.h (sim_io_vprintf): Add ATTRIBUTE_PRINTF.
 	(sim_io_evprintf): Likewise.
 

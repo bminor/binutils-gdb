@@ -140,7 +140,7 @@ typedef struct model {
 /* ??? In a simulator of multiple architectures, will need multiple copies of
    this.  Have an `archs' array that contains a pointer to the machs array
    for each (which in turn has a pointer to the models array for each).  */
-extern const SIM_MACH *sim_machs[];
+extern const SIM_MACH * const sim_machs[];
 
 /* Model module handlers.  */
 extern MODULE_INSTALL_FN sim_model_install;

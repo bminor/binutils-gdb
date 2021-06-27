@@ -111,7 +111,7 @@ static const SIM_MACH rv128i_mach =
 #endif
 
 /* Order matters here.  */
-const SIM_MACH *sim_machs[] =
+const SIM_MACH * const sim_machs[] =
 {
 #if WITH_TARGET_WORD_BITSIZE >= 128
   &rv128i_mach,

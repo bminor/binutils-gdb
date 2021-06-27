@@ -74,7 +74,7 @@ model_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 
     case OPTION_MODEL_INFO :
       {
-	const SIM_MACH **machp;
+	const SIM_MACH * const *machp;
 	const SIM_MODEL *model;
 	for (machp = & sim_machs[0]; *machp != NULL; ++machp)
 	  {
@@ -140,7 +140,7 @@ sim_model_set (SIM_DESC sd, sim_cpu *cpu, const SIM_MODEL *model)
 const SIM_MODEL *
 sim_model_lookup (const char *name)
 {
-  const SIM_MACH **machp;
+  const SIM_MACH * const *machp;
   const SIM_MODEL *model;
 
   for (machp = & sim_machs[0]; *machp != NULL; ++machp)
@@ -160,7 +160,7 @@ sim_model_lookup (const char *name)
 const SIM_MACH *
 sim_mach_lookup (const char *name)
 {
-  const SIM_MACH **machp;
+  const SIM_MACH * const *machp;
 
   for (machp = & sim_machs[0]; *machp != NULL; ++machp)
     {
@@ -176,7 +176,7 @@ sim_mach_lookup (const char *name)
 const SIM_MACH *
 sim_mach_lookup_bfd_name (const char *name)
 {
-  const SIM_MACH **machp;
+  const SIM_MACH * const *machp;
 
   for (machp = & sim_machs[0]; *machp != NULL; ++machp)
     {
@@ -251,7 +251,7 @@ sim_model_init (SIM_DESC sd)
 #if !WITH_MODEL_P
 /* Set up basic model support.  This is a stub for ports that do not define
    models.  See sim-model.h for more details.  */
-const SIM_MACH *sim_machs[] =
+const SIM_MACH * const sim_machs[] =
 {
   NULL
 };
