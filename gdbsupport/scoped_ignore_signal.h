@@ -58,7 +58,6 @@ public:
     if (!m_was_blocked)
       {
 	sigset_t set;
-	const timespec zero_timeout = {};
 
 	sigemptyset (&set);
 	sigaddset (&set, Sig);
@@ -66,7 +65,19 @@ public:
 	/* If we got a pending Sig signal, consume it before
 	   unblocking.  */
 	if (ConsumePending)
-	  sigtimedwait (&set, nullptr, &zero_timeout);
+	  {
+#ifdef HAVE_SIGTIMEDWAIT
+	    const timespec zero_timeout = {};
+
+	    sigtimedwait (&set, nullptr, &zero_timeout);
+#else
+	    sigset_t pending;
+
+	    sigpending (&pending);
+	    if (sigismember (&pending, Sig))
+	      sigwait (&set, nullptr);
+#endif
+	  }
 
 	sigprocmask (SIG_UNBLOCK, &set, nullptr);
       }
