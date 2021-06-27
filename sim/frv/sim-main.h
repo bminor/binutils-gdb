@@ -37,7 +37,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_ENGINE_HALT_HOOK(SD, LAST_CPU, CIA) \
   frv_sim_engine_halt_hook ((SD), (LAST_CPU), (CIA))
 
-#define SIM_ENGINE_RESTART_HOOK(SD, LAST_CPU, CIA) 0
+#define SIM_ENGINE_RESTART_HOOK(SD, LAST_CPU, CIA)
 
 #include "sim-base.h"
 #include "cgen-sim.h"

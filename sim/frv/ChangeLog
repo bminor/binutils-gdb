@@ -1,5 +1,9 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-main.h (SIM_ENGINE_RESTART_HOOK): Delete 0.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* interrupts.c: Include cgen-mem.h.
 	* profile-fr400.c (acc_use_is_media_p4): Disable function.
 	* reset.c: Include cgen-mem.h.
