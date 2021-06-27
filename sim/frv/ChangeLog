@@ -1,5 +1,9 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* traps.c (frv_break): Delete pc and pass down NULL_CIA.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* profile.c (frvbf_model_insn_after): Change return to void.
 	(enforce_full_fr_latency, post_wait_for_FR, post_wait_for_FRdouble,
 	post_wait_for_ACC, post_wait_for_CCR, post_wait_for_SPR,

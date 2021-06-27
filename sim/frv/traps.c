@@ -286,14 +286,14 @@ frv_mtrap (SIM_CPU *current_cpu)
 void
 frv_break (SIM_CPU *current_cpu)
 {
-  IADDR pc;
   SIM_DESC sd = CPU_STATE (current_cpu);
 
   if (STATE_ENVIRONMENT (sd) != OPERATING_ENVIRONMENT)
     {
       /* Invalidate the insn cache because the debugger will presumably
 	 replace the breakpoint insn with the real one.  */
-      sim_engine_halt (sd, current_cpu, NULL, pc, sim_stopped, SIM_SIGTRAP);
+      sim_engine_halt (sd, current_cpu, NULL, NULL_CIA, sim_stopped,
+		       SIM_SIGTRAP);
     }
 
   frv_queue_break_interrupt (current_cpu);
