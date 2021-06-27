@@ -1,5 +1,17 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* microblaze-dis.c (get_field_special): Make op const.
+	(read_insn_microblaze): Make opr & op const.  Rename opcodes to
+	microblaze_opcodes.
+	(print_insn_microblaze): Make op & pop const.
+	(get_insn_microblaze): Make op const.  Rename opcodes to
+	microblaze_opcodes.
+	(microblaze_get_target_address): Likewise.
+	* microblaze-opc.h (struct op_code_struct): Make const.
+	Rename opcodes to microblaze_opcodes.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* aarch64-gen.c (aarch64_opcode_table): Add const.
 	* aarch64-tbl.h (aarch64_opcode_table): Likewise.
 

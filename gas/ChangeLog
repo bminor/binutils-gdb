@@ -1,5 +1,10 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* config/tc-microblaze.c (md_begin): Make opcode const.  Rename
+	opcodes to microblaze_opcodes.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* config/tc-aarch64.c (struct templates): Make opcode const.
 	(md_assemble): Likewise.
 	(fill_instruction_hash_table): Likewise.
