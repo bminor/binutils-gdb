@@ -1,5 +1,12 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* mep-asm.c (macros): Mark static & const.
+	(lookup_macro): Change return & m to const.
+	(expand_macro): Change mac to const.
+	(expand_string): Change pmacro to const.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* nds32-asm.c (operand_fields): Rename to ...
 	(nds32_operand_fields): ... this.
 	(keyword_gpr): Rename to ...
