@@ -185,11 +185,11 @@ cgen_trace_insn (SIM_CPU *cpu, const struct cgen_insn *opcode,
 }
 
 void
-cgen_trace_extract (SIM_CPU *cpu, IADDR pc, char *name, ...)
+cgen_trace_extract (SIM_CPU *cpu, IADDR pc, const char *name, ...)
 {
   va_list args;
   int printed_one_p = 0;
-  char *fmt;
+  const char *fmt;
 
   va_start (args, name);
 
@@ -199,7 +199,7 @@ cgen_trace_extract (SIM_CPU *cpu, IADDR pc, char *name, ...)
   do {
     int type,ival;
 
-    fmt = va_arg (args, char *);
+    fmt = va_arg (args, const char *);
 
     if (fmt)
       {
@@ -224,7 +224,7 @@ cgen_trace_extract (SIM_CPU *cpu, IADDR pc, char *name, ...)
 }
 
 void
-cgen_trace_result (SIM_CPU *cpu, char *name, int type, ...)
+cgen_trace_result (SIM_CPU *cpu, const char *name, int type, ...)
 {
   va_list args;
 
@@ -270,7 +270,7 @@ cgen_trace_result (SIM_CPU *cpu, char *name, int type, ...)
    This is only for tracing semantic code.  */
 
 void
-cgen_trace_printf (SIM_CPU *cpu, char *fmt, ...)
+cgen_trace_printf (SIM_CPU *cpu, const char *fmt, ...)
 {
   va_list args;
 

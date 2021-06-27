@@ -24,9 +24,9 @@ void cgen_trace_insn_init (SIM_CPU *, int);
 void cgen_trace_insn_fini (SIM_CPU *, const struct argbuf *, int);
 void cgen_trace_insn (SIM_CPU *, const struct cgen_insn *,
 		      const struct argbuf *, IADDR);
-void cgen_trace_extract (SIM_CPU *, IADDR, char *, ...);
-void cgen_trace_result (SIM_CPU *, char *, int, ...);
-void cgen_trace_printf (SIM_CPU *, char *fmt, ...);
+void cgen_trace_extract (SIM_CPU *, IADDR, const char *, ...);
+void cgen_trace_result (SIM_CPU *, const char *, int, ...);
+void cgen_trace_printf (SIM_CPU *, const char *fmt, ...);
 
 /* Trace instruction results.  */
 #define CGEN_TRACE_RESULT_P(cpu, abuf) \

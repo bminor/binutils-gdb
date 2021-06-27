@@ -1,5 +1,14 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-trace.c (cgen_trace_extract): Make name & fmt const.
+	(cgen_trace_result): Make name const.
+	(cgen_trace_printf): Make fmt const.
+	* cgen-trace.h (cgen_trace_extract): Make 3rd arg const.
+	(cgen_trace_result): Make 2nd arg const.
+	(cgen_trace_printf): Likewise.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-mem.h (DECLARE_GETMEM_EXTERN): New macro.
 	(DECLARE_GETMEM): Use DECLARE_GETMEM_EXTERN.
 	(DECLARE_SETMEM_EXTERN): New macro.
