@@ -170,11 +170,3 @@ m32rbf_h_lock_set (SIM_CPU *current_cpu, BI newval)
 {
   CPU (h_lock) = newval;
 }
-
-/* Record trace results for INSN.  */
-
-void
-m32rbf_record_trace_results (SIM_CPU *current_cpu, CGEN_INSN *insn,
-			    int *indices, TRACE_RECORD *tr)
-{
-}

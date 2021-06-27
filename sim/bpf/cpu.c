@@ -59,11 +59,3 @@ bpfbf_h_pc_set (SIM_CPU *current_cpu, UDI newval)
 {
   SET_H_PC (newval);
 }
-
-/* Record trace results for INSN.  */
-
-void
-bpfbf_record_trace_results (SIM_CPU *current_cpu, CGEN_INSN *insn,
-			    int *indices, TRACE_RECORD *tr)
-{
-}

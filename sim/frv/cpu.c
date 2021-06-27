@@ -698,11 +698,3 @@ frvbf_h_cccr_set (SIM_CPU *current_cpu, UINT regno, UQI newval)
 {
   CPU (h_cccr[regno]) = newval;
 }
-
-/* Record trace results for INSN.  */
-
-void
-frvbf_record_trace_results (SIM_CPU *current_cpu, CGEN_INSN *insn,
-			    int *indices, TRACE_RECORD *tr)
-{
-}

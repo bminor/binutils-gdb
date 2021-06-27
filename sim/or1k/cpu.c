@@ -10219,11 +10219,3 @@ or1k32bf_h_roff1_set (SIM_CPU *current_cpu, BI newval)
 {
   CPU (h_roff1) = newval;
 }
-
-/* Record trace results for INSN.  */
-
-void
-or1k32bf_record_trace_results (SIM_CPU *current_cpu, CGEN_INSN *insn,
-			    int *indices, TRACE_RECORD *tr)
-{
-}
