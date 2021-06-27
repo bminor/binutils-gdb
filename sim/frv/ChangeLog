@@ -1,5 +1,10 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* profile.c (wait_for_flush): Change %p to %x.
+	* sim-if.c (sim_open): Change %lx to %x.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* traps.c (frv_break): Delete pc and pass down NULL_CIA.
 
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>

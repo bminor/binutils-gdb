@@ -901,7 +901,7 @@ wait_for_flush (SIM_CPU *cpu)
     }
   if (TRACE_INSN_P (cpu) && wait)
     {
-      sprintf (hazard_name, "Data cache flush address %p:", address);
+      sprintf (hazard_name, "Data cache flush address %x:", address);
       frv_model_trace_wait_cycles (cpu, wait, hazard_name);
     }
 }

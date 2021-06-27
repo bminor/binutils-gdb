@@ -86,7 +86,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, bfd *abfd,
   /* Allocate core managed memory if none specified by user.
      Use address 4 here in case the user wanted address 0 unmapped.  */
   if (sim_core_read_buffer (sd, NULL, read_map, &c, 4, 1) == 0)
-    sim_do_commandf (sd, "memory region 0,0x%lx", FRV_DEFAULT_MEM_SIZE);
+    sim_do_commandf (sd, "memory region 0,0x%x", FRV_DEFAULT_MEM_SIZE);
 
   /* check for/establish the reference program image */
   if (sim_analyze_program (sd,
