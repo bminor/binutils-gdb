@@ -69,9 +69,9 @@ extern const field_t *nds32_field_table[NDS32_CORE_COUNT];
 extern opcode_t *nds32_opcode_table[NDS32_CORE_COUNT];
 extern keyword_t **nds32_keyword_table[NDS32_CORE_COUNT];
 extern struct nds32_opcode nds32_opcodes[];
-extern const field_t operand_fields[];
-extern keyword_t *keywords[];
-extern const keyword_t keyword_gpr[];
+extern const field_t nds32_operand_fields[];
+extern keyword_t *nds32_keywords[];
+extern const keyword_t nds32_keyword_gpr[];
 
 static uint32_t nds32_mask_opcode (uint32_t);
 static void nds32_special_opcode (uint32_t, struct nds32_opcode **);
@@ -127,7 +127,7 @@ nds32_parse_audio_ext (const field_t *pfd,
   int_value =
     __GF (insn, pfd->bitpos, pfd->bitsize) << pfd->shift;
   new_value = int_value;
-  psys_reg = (keyword_t*) keywords[pfd->hw_res];
+  psys_reg = (keyword_t*) nds32_keywords[pfd->hw_res];
 
   /* p = bit[4].bit[1:0], r = bit[4].bit[3:2].  */
   if (strcmp (pfd->name, "im5_i") == 0)
@@ -264,7 +264,7 @@ nds32_parse_opcode (struct nds32_opcode *opc, bfd_vma pc ATTRIBUTE_UNUSED,
 	case '=':
 	case '&':
 	  pstr_src++;
-	  /* Compare with operand_fields[].name.  */
+	  /* Compare with nds32_operand_fields[].name.  */
 	  pstr_tmp = &tmp_string[0];
 	  while (*pstr_src)
 	    {
@@ -301,7 +301,7 @@ nds32_parse_opcode (struct nds32_opcode *opc, bfd_vma pc ATTRIBUTE_UNUSED,
 		    {
 		      int_value = nds32_r45map[int_value];
 		    }
-		  func (stream, "$%s", keyword_gpr[int_value].name);
+		  func (stream, "$%s", nds32_keyword_gpr[int_value].name);
 		}
 	      else if ((pfd->hw_res == HW_INT) || (pfd->hw_res == HW_UINT))
 		{
@@ -338,7 +338,7 @@ nds32_parse_opcode (struct nds32_opcode *opc, bfd_vma pc ATTRIBUTE_UNUSED,
 		    {
 		      func (stream, "#%d    ! {$r6", int_value);
 		      if (push25gpr != 6)
-			func (stream, "~$%s", keyword_gpr[push25gpr].name);
+			func (stream, "~$%s", nds32_keyword_gpr[push25gpr].name);
 		      func (stream, ", $fp, $gp, $lp}");
 		    }
 		  else if (pfd->hw_res == HW_INT)
@@ -431,9 +431,9 @@ nds32_parse_opcode (struct nds32_opcode *opc, bfd_vma pc ATTRIBUTE_UNUSED,
 		     the convience comparing with bsp320.  */
 		  if (lsmwRb != 31 || lsmwRe != 31)
 		    {
-		      func (stream, "$%s", keyword_gpr[lsmwRb].name);
+		      func (stream, "$%s", nds32_keyword_gpr[lsmwRb].name);
 		      if (lsmwRb != lsmwRe)
-			func (stream, "~$%s", keyword_gpr[lsmwRe].name);
+			func (stream, "~$%s", nds32_keyword_gpr[lsmwRe].name);
 		      ifthe1st = 0;
 		    }
 		  if (lsmwEnb4 != 0)
@@ -447,10 +447,10 @@ nds32_parse_opcode (struct nds32_opcode *opc, bfd_vma pc ATTRIBUTE_UNUSED,
 			      if (ifthe1st == 1)
 				{
 				  ifthe1st = 0;
-				  func (stream, "$%s", keyword_gpr[28 + i].name);
+				  func (stream, "$%s", nds32_keyword_gpr[28 + i].name);
 				}
 			      else
-				func (stream, ", $%s", keyword_gpr[28 + i].name);
+				func (stream, ", $%s", nds32_keyword_gpr[28 + i].name);
 			    }
 			  checkbit >>= 1;
 			}
@@ -1257,9 +1257,9 @@ disassemble_init_nds32 (struct disassemble_info *info)
     return;
 
   /* Setup main core.  */
-  nds32_keyword_table[NDS32_MAIN_CORE] = &keywords[0];
+  nds32_keyword_table[NDS32_MAIN_CORE] = &nds32_keywords[0];
   nds32_opcode_table[NDS32_MAIN_CORE] = &nds32_opcodes[0];
-  nds32_field_table[NDS32_MAIN_CORE] = &operand_fields[0];
+  nds32_field_table[NDS32_MAIN_CORE] = &nds32_operand_fields[0];
 
   /* Build opcode table.  */
   opcode_htab = htab_create_alloc (1024, htab_hash_hash, htab_hash_eq,

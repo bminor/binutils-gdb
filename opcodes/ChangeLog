@@ -1,5 +1,22 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* nds32-asm.c (operand_fields): Rename to ...
+	(nds32_operand_fields): ... this.
+	(keyword_gpr): Rename to ...
+	(nds32_keyword_gpr): ... this.
+	(keyword_usr, keyword_dxr, keyword_sr, keyword_cp, keyword_cpr,
+	keyword_fsr, keyword_fdr, keyword_abdim, keyword_abm,
+	keyword_dpref_st, keyword_cctl_lv, keyword_standby_st,
+	keyword_msync_st, keyword_im5_i, keyword_im5_m, keyword_accumulator,
+	keyword_aridx, keyword_aridx2, keyword_aridxi, keyword_aridxi_mx):
+	Mark static.
+	(keywords): Rename to ...
+	(nds32_keywords): ... this.
+	* nds32-dis.c: Rename operand_fields to nds32_operand_fields,
+	keywords to nds32_keywords, and keyword_gpr to nds32_keyword_gpr.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* z80-dis.c (opc_ed): Make const.
 	(pref_ed): Make p const.
 
