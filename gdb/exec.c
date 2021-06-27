@@ -201,7 +201,7 @@ try_open_exec_file (const char *exec_file_host, struct inferior *inf,
 	}
       catch (const gdb_exception_error &err)
 	{
-	  if (!exception_print_same (prev_err, err))
+	  if (prev_err != err)
 	    warning ("%s", err.what ());
 	}
     }
