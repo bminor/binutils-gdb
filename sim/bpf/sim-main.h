@@ -27,6 +27,7 @@
 #include "sim-base.h"
 #include "cgen-sim.h"
 #include "bpf-sim.h"
+#include "bpf-helpers.h"
 
 
 struct _sim_cpu

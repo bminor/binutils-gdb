@@ -32,6 +32,8 @@
 #include "cgen-ops.h"
 #include "cpu.h"
 
+#include "bpf-helpers.h"
+
 /* bpf_trace_printk is a printk-like facility for debugging.
 
    In the kernel, it appends a line to the Linux's tracing debugging

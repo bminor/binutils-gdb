@@ -30,14 +30,11 @@
 #include "cpuall.h"
 #include "decode.h"
 
+#include "decode-be.h"
+#include "decode-le.h"
+
 #include "defs-le.h"  /* For SCACHE */
 #include "bpf-helpers.h"
-
-/* It is not possible to include both defs-le.h and defs-be.h due to
-   duplicated definitions, so we need a bunch of forward declarations
-   here.  */
-extern void bpfbf_ebpfle_init_idesc_table (SIM_CPU *);
-extern void bpfbf_ebpfbe_init_idesc_table (SIM_CPU *);
 
 uint64_t skb_data_offset;
 
@@ -84,7 +81,7 @@ bpfbf_model_insn_before (SIM_CPU *current_cpu, int first_p)
 }
 
 void
-bpfbf_model_insn_after (SIM_CPU *current_cpu, int first_p)
+bpfbf_model_insn_after (SIM_CPU *current_cpu, int first_p, int cycles)
 {
   /* XXX */
 }
@@ -209,7 +206,7 @@ bpfbf_breakpoint (SIM_CPU *current_cpu)
    several ISAs.  This should be fixed in CGEN.  */
 
 static void
-bpf_def_model_init (void)
+bpf_def_model_init (SIM_CPU *cpu)
 {
   /* Do nothing.  */
 }
@@ -220,7 +217,7 @@ bpfbf_prepare_run (SIM_CPU *cpu)
   /* Nothing.  */
 }
 
-void
+static void
 bpf_engine_run_full (SIM_CPU *cpu)
 {
   if (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
