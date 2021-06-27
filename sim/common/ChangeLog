@@ -1,5 +1,9 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-ops.h: Move prototype blocks before function definitions.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-ops.h (SUBWORDSIQI): Add int 2nd argument.
 	(SUBWORDSIHI, SUBWORDSIUQI, SUBWORDDIUQI): Likewise.
 	(ADDCFSI): Change return type to BI.
