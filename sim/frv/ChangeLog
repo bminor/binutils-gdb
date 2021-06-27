@@ -1,3 +1,9 @@
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* frv.c (frvbf_shift_left_arith_saturate): Add braces to if statement.
+	* profile-fr500.c (adjust_float_register_busy): Likewise.
+	* profile-fr550.c (adjust_float_register_busy): Likewise.
+
 2021-06-22  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

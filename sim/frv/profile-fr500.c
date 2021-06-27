@@ -158,22 +158,28 @@ adjust_float_register_busy (SIM_CPU *cpu, INT in_FRi, INT in_FRj, INT out_FRk,
      then their latency will be less than previously recorded.
      See Table 13-13 in the LSI.  */
   if (in_FRi >= 0)
-    if (use_is_fpop (cpu, in_FRi))
-      decrease_FR_busy (cpu, in_FRi, cycles);
-    else
-      enforce_full_fr_latency (cpu, in_FRi);
-  
+    {
+      if (use_is_fpop (cpu, in_FRi))
+	decrease_FR_busy (cpu, in_FRi, cycles);
+      else
+	enforce_full_fr_latency (cpu, in_FRi);
+    }
+
   if (in_FRj >= 0 && in_FRj != in_FRi)
-    if (use_is_fpop (cpu, in_FRj))
-      decrease_FR_busy (cpu, in_FRj, cycles);
-    else
-      enforce_full_fr_latency (cpu, in_FRj);
+    {
+      if (use_is_fpop (cpu, in_FRj))
+	decrease_FR_busy (cpu, in_FRj, cycles);
+      else
+	enforce_full_fr_latency (cpu, in_FRj);
+    }
 
   if (out_FRk >= 0 && out_FRk != in_FRi && out_FRk != in_FRj)
-    if (use_is_fpop (cpu, out_FRk))
-      decrease_FR_busy (cpu, out_FRk, cycles);
-    else
-      enforce_full_fr_latency (cpu, out_FRk);
+    {
+      if (use_is_fpop (cpu, out_FRk))
+	decrease_FR_busy (cpu, out_FRk, cycles);
+      else
+	enforce_full_fr_latency (cpu, out_FRk);
+    }
 }
 
 /* Latency of floating point registers may be less than recorded when followed
