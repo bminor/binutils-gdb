@@ -1,5 +1,9 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-if.c (sim_open): Mark backend_data const.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-main.h (SIM_ENGINE_RESTART_HOOK): Delete 0.
 
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>

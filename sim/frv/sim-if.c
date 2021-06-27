@@ -103,7 +103,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, bfd *abfd,
     bfd *prog_bfd = STATE_PROG_BFD (sd);
     if (prog_bfd != NULL)
       {
-	struct elf_backend_data *backend_data;
+	const struct elf_backend_data *backend_data;
 
 	if (bfd_get_arch (prog_bfd) != bfd_arch_frv)
 	  {
