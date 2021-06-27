@@ -414,7 +414,7 @@ dump (struct buffer *buf, disassemble_info * info, const char *txt)
 }
 
 /* Table to disassemble machine codes with prefix 0xED.  */
-struct tab_elt opc_ed[] =
+static const struct tab_elt opc_ed[] =
 {
   { 0x30, 0xFF, prt, "mul d,e", INSS_Z80N },
   { 0x31, 0xFF, prt, "add hl,a", INSS_Z80N },
@@ -525,7 +525,7 @@ static int
 pref_ed (struct buffer *buf, disassemble_info *info,
          const char *txt ATTRIBUTE_UNUSED)
 {
-  struct tab_elt *p;
+  const struct tab_elt *p;
 
   if (fetch_data (buf, info, 1))
     {

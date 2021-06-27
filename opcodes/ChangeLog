@@ -1,5 +1,10 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* z80-dis.c (opc_ed): Make const.
+	(pref_ed): Make p const.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* microblaze-dis.c (get_field_special): Make op const.
 	(read_insn_microblaze): Make opr & op const.  Rename opcodes to
 	microblaze_opcodes.
