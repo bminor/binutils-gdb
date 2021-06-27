@@ -1,3 +1,8 @@
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
+	* decodev10.c: Include cgen-mem.h.
+	* decodev32.c: Likewise.
+
 2021-06-24  Mike Frysinger  <vapier@gentoo.org>
 
 	* cris-sim.h (cris_bmod_handler): Delete.
