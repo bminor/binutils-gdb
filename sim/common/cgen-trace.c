@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
 #include <stdlib.h>
+#include "diagnostics.h"
 #include "dis-asm.h"
 #include "bfd.h"
 #include "sim-main.h"
@@ -211,7 +212,10 @@ cgen_trace_extract (SIM_CPU *cpu, IADDR pc, const char *name, ...)
 	  {
 	  case 'x' :
 	    ival = va_arg (args, int);
+	    DIAGNOSTIC_PUSH
+	    DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
 	    trace_printf (CPU_STATE (cpu), cpu, fmt, ival);
+	    DIAGNOSTIC_POP
 	    break;
 	  default :
 	    abort ();

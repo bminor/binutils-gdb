@@ -1,5 +1,11 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-trace.c: Include diagnostics.h.
+	(cgen_trace_extract): Call DIAGNOSTIC_PUSH,
+	DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL, and DIAGNOSTIC_POP.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-run.c (engine_run_n): Assert cpu arguments are valid.
 
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
