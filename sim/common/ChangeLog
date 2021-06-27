@@ -1,5 +1,18 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* cgen-mem.h (DECLARE_GETMEM_EXTERN): New macro.
+	(DECLARE_GETMEM): Use DECLARE_GETMEM_EXTERN.
+	(DECLARE_SETMEM_EXTERN): New macro.
+	(DECLARE_SETMEM): Use DECLARE_SETMEM_EXTERN.
+	(DECLARE_GETIMEM_EXTERN): New macro.
+	(DECLARE_GETIMEM): Use DECLARE_GETIMEM_EXTERN.
+	(DECLARE_GETT_EXTERN): New macro.
+	(DECLARE_GETT): Use DECLARE_GETT_EXTERN.
+	(DECLARE_SETT_EXTERN): New macro.
+	(DECLARE_SETT): Use DECLARE_SETT_EXTERN.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-ops.h: Move prototype blocks before function definitions.
 
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
