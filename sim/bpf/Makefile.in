@@ -41,9 +41,6 @@ SIM_EXTRA_DEPS = \
 
 SIM_EXTRA_CLEAN = bpf-clean
 
-# Code doesn't build cleanly yet.
-SIM_WERROR_CFLAGS =
-
 ## COMMON_POST_CONFIG_FRAG
 
 # BPF headers
