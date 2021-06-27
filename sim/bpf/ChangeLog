@@ -1,5 +1,9 @@
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
+	* bpf-helpers.c (bpf_trace_printk): Add casts to every value printf.
+
+2021-06-27  Mike Frysinger  <vapier@gentoo.org>
+
 	* bpf-helpers.c (bpf_trace_printk): Move value decl to top of scope.
 	* mloop.in: Move off16 & imm32 decls to top of scope.
 
