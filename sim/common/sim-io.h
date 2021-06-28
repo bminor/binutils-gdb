@@ -65,13 +65,15 @@ void sim_io_printf (SIM_DESC sd,
 		    const char *fmt,
 		    ...) ATTRIBUTE_PRINTF (2, 3);
 
-void sim_io_vprintf (SIM_DESC sd, const char *fmt, va_list ap);
+void sim_io_vprintf (SIM_DESC sd, const char *fmt, va_list ap)
+  ATTRIBUTE_PRINTF (2, 0);
 
 void sim_io_eprintf (SIM_DESC sd,
 		     const char *fmt,
 		     ...) ATTRIBUTE_PRINTF (2, 3);
 
-void sim_io_evprintf (SIM_DESC sd, const char *fmt, va_list ap);
+void sim_io_evprintf (SIM_DESC sd, const char *fmt, va_list ap)
+  ATTRIBUTE_PRINTF (2, 0);
 
 void sim_io_error (SIM_DESC sd,
 		   const char *fmt,

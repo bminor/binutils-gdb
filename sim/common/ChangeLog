@@ -1,5 +1,10 @@
 2021-06-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-io.h (sim_io_vprintf): Add ATTRIBUTE_PRINTF.
+	(sim_io_evprintf): Likewise.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-io.c (sim_io_error): Change "" to " ".
 
 2021-06-29  Mike Frysinger  <vapier@gentoo.org>
