@@ -113,18 +113,22 @@ struct host_callback_struct
   int (*init)     (host_callback *);
 
   /* depreciated, use vprintf_filtered - Talk to the user on a console.  */
-  void (*printf_filtered) (host_callback *, const char *, ...);
+  void (*printf_filtered) (host_callback *, const char *, ...)
+    ATTRIBUTE_PRINTF_2;
 
   /* Talk to the user on a console.  */
-  void (*vprintf_filtered) (host_callback *, const char *, va_list);
+  void (*vprintf_filtered) (host_callback *, const char *, va_list)
+    ATTRIBUTE_PRINTF (2, 0);
 
   /* Same as vprintf_filtered but to stderr.  */
-  void (*evprintf_filtered) (host_callback *, const char *, va_list);
+  void (*evprintf_filtered) (host_callback *, const char *, va_list)
+    ATTRIBUTE_PRINTF (2, 0);
 
   /* Print an error message and "exit".
      In the case of gdb "exiting" means doing a longjmp back to the main
      command loop.  */
-  void (*error) (host_callback *, const char *, ...) ATTRIBUTE_NORETURN;
+  void (*error) (host_callback *, const char *, ...)
+    ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF_2;
 
   int last_errno;		/* host format */
 

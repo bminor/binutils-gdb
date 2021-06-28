@@ -309,7 +309,9 @@ sim_io_error (SIM_DESC sd,
     va_start (ap, fmt);
     STATE_CALLBACK (sd)->evprintf_filtered (STATE_CALLBACK (sd), fmt, ap);
     va_end (ap);
-    STATE_CALLBACK (sd)->error (STATE_CALLBACK (sd), "");
+    /* Printing a space here avoids empty printf compiler warnings.  Not ideal,
+       but we want error's side-effect where it halts processing.  */
+    STATE_CALLBACK (sd)->error (STATE_CALLBACK (sd), " ");
   }
 }
 
