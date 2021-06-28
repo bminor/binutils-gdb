@@ -1,5 +1,11 @@
 2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	PR gdb/28017
+	* machoread.c (macho_symfile_offsets): Use
+	gdb_bfd_count_sections to allocate objfile::section_offsets.
+
+2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* objfiles.h (struct obj_section): Move down.
 	<offset, set_offset, addr, endaddr>: New.
 	(obj_section_offset, obj_section_addr, obj_section_endaddr),
