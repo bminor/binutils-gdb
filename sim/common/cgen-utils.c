@@ -118,17 +118,6 @@ cgen_cpu_max_extra_bytes (void)
 #ifdef DI_FN_SUPPORT
 
 DI
-make_struct_di (hi, lo)
-     SI hi, lo;
-{
-  DI result;
-
-  result.hi = hi;
-  result.lo = lo;
-  return result;
-}
-
-DI
 ANDDI (a, b)
      DI a, b;
 {

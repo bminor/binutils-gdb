@@ -1,3 +1,9 @@
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-types.h (HAVE_LONGLONG): Delete define.
+	[!HAVE_LONGLONG]: Delete all protected code.
+	* cgen-utils.c (make_struct_di): Delete.
+
 2021-06-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* cgen-trace.c: Include diagnostics.h.
