@@ -926,7 +926,7 @@ macho_symfile_offsets (struct objfile *objfile,
 
 	  if (bfd_sect_name == addrs[i].name)
 	    {
-	      obj_section_offset (osect) = addrs[i].addr;
+	      osect->set_offset (addrs[i].addr);
 	      break;
 	    }
 	}

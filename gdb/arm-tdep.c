@@ -395,8 +395,7 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
 	      data->section_maps_sorted[section_idx] = true;
 	    }
 
-	  struct arm_mapping_symbol map_key
-	    = { memaddr - obj_section_addr (sec), 0 };
+	  arm_mapping_symbol map_key = { memaddr - sec->addr (), 0 };
 	  arm_mapping_symbol_vec::const_iterator it
 	    = std::lower_bound (map.begin (), map.end (), map_key);
 
@@ -409,7 +408,7 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
 	      if (it->value == map_key.value)
 		{
 		  if (start)
-		    *start = it->value + obj_section_addr (sec);
+		    *start = it->value + sec->addr ();
 		  return it->type;
 		}
 	    }
@@ -420,7 +419,7 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
 		= it - 1;
 
 	      if (start)
-		*start = prev_it->value + obj_section_addr (sec);
+		*start = prev_it->value + sec->addr ();
 	      return prev_it->type;
 	    }
 	}
@@ -2218,7 +2217,7 @@ arm_exidx_new_objfile (struct objfile *objfile)
 			  NULL
 			};
 
-		      CORE_ADDR pc = pers + obj_section_offset (pers_sec);
+		      CORE_ADDR pc = pers + pers_sec->offset ();
 		      int k;
 
 		      for (k = 0; personality[k]; k++)
@@ -2303,7 +2302,7 @@ arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
   if (sec != NULL)
     {
       struct arm_exidx_data *data;
-      struct arm_exidx_entry map_key = { memaddr - obj_section_addr (sec), 0 };
+      struct arm_exidx_entry map_key = { memaddr - sec->addr (), 0 };
 
       data = arm_exidx_data_key.get (sec->objfile->obfd);
       if (data != NULL)
@@ -2323,7 +2322,7 @@ arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
 		  if (idx->addr == map_key.addr)
 		    {
 		      if (start)
-			*start = idx->addr + obj_section_addr (sec);
+			*start = idx->addr + sec->addr ();
 		      return idx->entry;
 		    }
 		}
@@ -2332,7 +2331,7 @@ arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
 		{
 		  idx = idx - 1;
 		  if (start)
-		    *start = idx->addr + obj_section_addr (sec);
+		    *start = idx->addr + sec->addr ();
 		  return idx->entry;
 		}
 	    }

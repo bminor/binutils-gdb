@@ -1,5 +1,21 @@
 2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* objfiles.h (struct obj_section): Move down.
+	<offset, set_offset, addr, endaddr>: New.
+	(obj_section_offset, obj_section_addr, obj_section_endaddr),
+	replace all users to use obj_section methods.
+	(struct objfile) <section_offset, set_section_offset>: New.
+
+2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* objfiles.h (struct obj_section): Move down.
+	<offset, set_offset, addr, endaddr>: New.
+	(obj_section_offset, obj_section_addr, obj_section_endaddr),
+	replace all users to use obj_section methods.
+	(struct objfile) <section_offset, set_section_offset>: New.
+
+2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* .flake8: New.
 
 2021-06-28  Luis Machado  <luis.machado@linaro.org>

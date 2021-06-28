@@ -636,8 +636,7 @@ program_space::add_target_sections (struct objfile *objfile)
       if (bfd_section_size (osect->the_bfd_section) == 0)
 	continue;
 
-      m_target_sections.emplace_back (obj_section_addr (osect),
-				      obj_section_endaddr (osect),
+      m_target_sections.emplace_back (osect->addr (), osect->endaddr (),
 				      osect->the_bfd_section, (void *) objfile);
     }
 }

@@ -729,7 +729,7 @@ objfile_relocate1 (struct objfile *objfile,
       int idx = s - objfile->sections;
 
       exec_set_section_address (bfd_get_filename (objfile->obfd), idx,
-				obj_section_addr (s));
+				s->addr ());
     }
 
   /* Data changed.  */
@@ -899,8 +899,8 @@ have_minimal_symbols (void)
 static bool
 sort_cmp (const struct obj_section *sect1, const obj_section *sect2)
 {
-  const CORE_ADDR sect1_addr = obj_section_addr (sect1);
-  const CORE_ADDR sect2_addr = obj_section_addr (sect2);
+  const CORE_ADDR sect1_addr = sect1->addr ();
+  const CORE_ADDR sect2_addr = sect2->addr ();
 
   if (sect1_addr < sect2_addr)
     return true;
@@ -982,7 +982,7 @@ sort_cmp (const struct obj_section *sect1, const obj_section *sect2)
 static struct obj_section *
 preferred_obj_section (struct obj_section *a, struct obj_section *b)
 {
-  gdb_assert (obj_section_addr (a) == obj_section_addr (b));
+  gdb_assert (a->addr () == b->addr ());
   gdb_assert ((a->objfile->separate_debug_objfile == b->objfile)
 	      || (b->objfile->separate_debug_objfile == a->objfile));
   gdb_assert ((a->objfile->separate_debug_objfile_backlink == b->objfile)
@@ -1030,8 +1030,8 @@ filter_debuginfo_sections (struct obj_section **map, int map_size)
       struct obj_section *const sect2 = map[i + 1];
       const struct objfile *const objfile1 = sect1->objfile;
       const struct objfile *const objfile2 = sect2->objfile;
-      const CORE_ADDR sect1_addr = obj_section_addr (sect1);
-      const CORE_ADDR sect2_addr = obj_section_addr (sect2);
+      const CORE_ADDR sect1_addr = sect1->addr ();
+      const CORE_ADDR sect2_addr = sect2->addr ();
 
       if (sect1_addr == sect2_addr
 	  && (objfile1->separate_debug_objfile == objfile2
@@ -1075,9 +1075,9 @@ filter_overlapping_sections (struct obj_section **map, int map_size)
 	{
 	  struct obj_section *const sect1 = map[i];
 	  struct obj_section *const sect2 = map[k];
-	  const CORE_ADDR sect1_addr = obj_section_addr (sect1);
-	  const CORE_ADDR sect2_addr = obj_section_addr (sect2);
-	  const CORE_ADDR sect1_endaddr = obj_section_endaddr (sect1);
+	  const CORE_ADDR sect1_addr = sect1->addr ();
+	  const CORE_ADDR sect2_addr = sect2->addr ();
+	  const CORE_ADDR sect1_endaddr = sect1->endaddr ();
 
 	  gdb_assert (sect1_addr <= sect2_addr);
 
@@ -1093,7 +1093,7 @@ filter_overlapping_sections (struct obj_section **map, int map_size)
 	      const struct bfd_section *const bfds1 = sect1->the_bfd_section;
 	      const struct bfd_section *const bfds2 = sect2->the_bfd_section;
 
-	      const CORE_ADDR sect2_endaddr = obj_section_endaddr (sect2);
+	      const CORE_ADDR sect2_endaddr = sect2->endaddr ();
 
 	      struct gdbarch *const gdbarch = objf1->arch ();
 
@@ -1184,9 +1184,9 @@ bsearch_cmp (const void *key, const void *elt)
   const CORE_ADDR pc = *(CORE_ADDR *) key;
   const struct obj_section *section = *(const struct obj_section **) elt;
 
-  if (pc < obj_section_addr (section))
+  if (pc < section->addr ())
     return -1;
-  if (pc < obj_section_endaddr (section))
+  if (pc < section->endaddr ())
     return 0;
   return 1;
 }
@@ -1289,8 +1289,7 @@ is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile)
       if (section_is_overlay (osect) && !section_is_mapped (osect))
 	continue;
 
-      if (obj_section_addr (osect) <= addr
-	  && addr < obj_section_endaddr (osect))
+      if (osect->addr () <= addr && addr < osect->endaddr ())
 	return true;
     }
   return false;

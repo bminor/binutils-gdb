@@ -127,37 +127,6 @@ struct entry_info
   unsigned initialized : 1;
 };
 
-/* Sections in an objfile.  The section offsets are stored in the
-   OBJFILE.  */
-
-struct obj_section
-{
-  /* BFD section pointer */
-  struct bfd_section *the_bfd_section;
-
-  /* Objfile this section is part of.  */
-  struct objfile *objfile;
-
-  /* True if this "overlay section" is mapped into an "overlay region".  */
-  int ovly_mapped;
-};
-
-/* Relocation offset applied to S.  */
-#define obj_section_offset(s)						\
-  (((s)->objfile->section_offsets)[gdb_bfd_section_index ((s)->objfile->obfd, (s)->the_bfd_section)])
-
-/* The memory address of section S (vma + offset).  */
-#define obj_section_addr(s)				      		\
-  (bfd_section_vma (s->the_bfd_section)					\
-   + obj_section_offset (s))
-
-/* The one-passed-the-end memory address of section S
-   (vma + size + offset).  */
-#define obj_section_endaddr(s)						\
-  (bfd_section_vma (s->the_bfd_section)					\
-   + bfd_section_size ((s)->the_bfd_section)				\
-   + obj_section_offset (s))
-
 #define ALL_OBJFILE_OSECTIONS(objfile, osect)	\
   for (osect = objfile->sections; osect < objfile->sections_end; osect++) \
     if (osect->the_bfd_section == NULL)					\
@@ -664,6 +633,27 @@ public:
   /* See quick_symbol_functions.  */
   void require_partial_symbols (bool verbose);
 
+  /* Return the relocation offset applied to SECTION.  */
+  CORE_ADDR section_offset (bfd_section *section) const
+  {
+    /* The section's owner can be nullptr if it is one of the _bfd_std_section
+       section.  */
+    gdb_assert (section->owner == nullptr || section->owner == this->obfd);
+
+    int idx = gdb_bfd_section_index (this->obfd, section);
+    return this->section_offsets[idx];
+  }
+
+  /* Set the relocation offset applied to SECTION.  */
+  void set_section_offset (bfd_section *section, CORE_ADDR offset)
+  {
+    /* The section's owner can be nullptr if it is one of the _bfd_std_section
+       section.  */
+    gdb_assert (section->owner == nullptr || section->owner == this->obfd);
+
+    int idx = gdb_bfd_section_index (this->obfd, section);
+    this->section_offsets[idx] = offset;
+  }
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
@@ -835,6 +825,47 @@ struct objfile_deleter
 /* A unique pointer that holds an objfile.  */
 
 typedef std::unique_ptr<objfile, objfile_deleter> objfile_up;
+
+
+/* Sections in an objfile.  The section offsets are stored in the
+   OBJFILE.  */
+
+struct obj_section
+{
+  /* Relocation offset applied to the section.  */
+  CORE_ADDR offset () const
+  {
+    return this->objfile->section_offset (this->the_bfd_section);
+  }
+
+  /* Set the relocation offset applied to the section.  */
+  void set_offset (CORE_ADDR offset)
+  {
+    this->objfile->set_section_offset (this->the_bfd_section, offset);
+  }
+
+  /* The memory address of the section (vma + offset).  */
+  CORE_ADDR addr () const
+  {
+    return bfd_section_vma (this->the_bfd_section) + this->offset ();
+  }
+
+  /* The one-passed-the-end memory address of the section
+     (vma + size + offset).  */
+  CORE_ADDR endaddr () const
+  {
+    return this->addr () + bfd_section_size (this->the_bfd_section);
+  }
+
+  /* BFD section pointer */
+  struct bfd_section *the_bfd_section;
+
+  /* Objfile this section is part of.  */
+  struct objfile *objfile;
+
+  /* True if this "overlay section" is mapped into an "overlay region".  */
+  int ovly_mapped;
+};
 
 /* Declarations for functions defined in objfiles.c */
 

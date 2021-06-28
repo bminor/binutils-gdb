@@ -687,9 +687,9 @@ frob_address (struct objfile *objfile, CORE_ADDR *pc)
 
   ALL_OBJFILE_OSECTIONS (objfile, iter)
     {
-      if (*pc >= obj_section_addr (iter) && *pc < obj_section_endaddr (iter))
+      if (*pc >= iter->addr () && *pc < iter->endaddr ())
 	{
-	  *pc -= obj_section_offset (iter);
+	  *pc -= iter->offset ();
 	  return 1;
 	}
     }
@@ -1616,12 +1616,12 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
   obj_section = minsym.obj_section ();
   if (iter != past_the_end
       && (MSYMBOL_VALUE_ADDRESS (minsym.objfile, iter)
-	  < obj_section_endaddr (obj_section)))
+	  < obj_section->endaddr ()))
     result = MSYMBOL_VALUE_ADDRESS (minsym.objfile, iter);
   else
     /* We got the start address from the last msymbol in the objfile.
        So the end address is the end of the section.  */
-    result = obj_section_endaddr (obj_section);
+    result = obj_section->endaddr ();
 
   return result;
 }

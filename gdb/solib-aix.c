@@ -685,8 +685,7 @@ solib_aix_get_toc_value (CORE_ADDR pc)
 	     "(%s has no data section)"),
 	   core_addr_to_string (pc), objfile_name (pc_osect->objfile));
 
-  result = (obj_section_addr (data_osect)
-	    + xcoff_get_toc_offset (pc_osect->objfile));
+  result = data_osect->addr () + xcoff_get_toc_offset (pc_osect->objfile);
 
   solib_aix_debug_printf ("pc=%s -> %s", core_addr_to_string (pc),
 			  core_addr_to_string (result));

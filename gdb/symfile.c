@@ -3012,7 +3012,7 @@ pc_in_unmapped_range (CORE_ADDR pc, struct obj_section *section)
 
       /* We assume the LMA is relocated by the same offset as the VMA.  */
       bfd_vma size = bfd_section_size (bfd_section);
-      CORE_ADDR offset = obj_section_offset (section);
+      CORE_ADDR offset = section->offset ();
 
       if (bfd_section_lma (bfd_section) + offset <= pc
 	  && pc < bfd_section_lma (bfd_section) + offset + size)
@@ -3030,8 +3030,8 @@ pc_in_mapped_range (CORE_ADDR pc, struct obj_section *section)
 {
   if (section_is_overlay (section))
     {
-      if (obj_section_addr (section) <= pc
-	  && pc < obj_section_endaddr (section))
+      if (section->addr () <= pc
+	  && pc < section->endaddr ())
 	return 1;
     }
 
@@ -3044,10 +3044,10 @@ pc_in_mapped_range (CORE_ADDR pc, struct obj_section *section)
 static int
 sections_overlap (struct obj_section *a, struct obj_section *b)
 {
-  CORE_ADDR a_start = obj_section_addr (a);
-  CORE_ADDR a_end = obj_section_endaddr (a);
-  CORE_ADDR b_start = obj_section_addr (b);
-  CORE_ADDR b_end = obj_section_endaddr (b);
+  CORE_ADDR a_start = a->addr ();
+  CORE_ADDR a_end = a->endaddr ();
+  CORE_ADDR b_start = b->addr ();
+  CORE_ADDR b_end = b->endaddr ();
 
   return (a_start < b_end && b_start < a_end);
 }

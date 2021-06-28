@@ -797,7 +797,7 @@ frv_relocate_main_executable (void)
       osect_idx = osect - objf->sections;
 
       /* Current address of section.  */
-      addr = obj_section_addr (osect);
+      addr = osect->addr ();
       /* Offset from where this section started.  */
       offset = objf->section_offsets[osect_idx];
       /* Original address prior to any past relocations.  */
