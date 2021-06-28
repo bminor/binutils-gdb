@@ -21,7 +21,7 @@
 
 struct inferior;
 
-extern void new_tty_prefork (const char *);
+extern void new_tty_prefork (std::string ttyname);
 
 extern void new_tty (void);
 

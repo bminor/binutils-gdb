@@ -244,7 +244,10 @@ mi_cmd_env_dir (const char *command, char **argv, int argc)
 void
 mi_cmd_inferior_tty_set (const char *command, char **argv, int argc)
 {
-  current_inferior ()->set_tty (argv[0]);
+  if (argc > 0)
+    current_inferior ()->set_tty (argv[0]);
+  else
+    current_inferior ()->set_tty ("");
 }
 
 /* Print the inferior terminal device name.  */
@@ -255,8 +258,8 @@ mi_cmd_inferior_tty_show (const char *command, char **argv, int argc)
   if ( !mi_valid_noargs ("-inferior-tty-show", argc, argv))
     error (_("-inferior-tty-show: Usage: No args"));
 
-  const char *inferior_tty = current_inferior ()->tty ();
-  if (inferior_tty != NULL)
+  const std::string &inferior_tty = current_inferior ()->tty ();
+  if (!inferior_tty.empty ())
     current_uiout->field_string ("inferior_tty_terminal", inferior_tty);
 }
 

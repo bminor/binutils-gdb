@@ -434,13 +434,15 @@ public:
   void add_continuation (std::function<void ()> &&cont);
   void do_all_continuations ();
 
-  /* Set/get file name for default use for standard in/out in the
-     inferior.  On Unix systems, we try to make TERMINAL_NAME the
-     inferior's controlling terminal.  If TERMINAL_NAME is nullptr or
-     the empty string, then the inferior inherits GDB's terminal (or
-     GDBserver's if spawning a remote process).  */
-  void set_tty (const char *terminal_name);
-  const char *tty ();
+  /* Set/get file name for default use for standard in/out in the inferior.
+
+     On Unix systems, we try to make TERMINAL_NAME the inferior's controlling
+     terminal.
+
+     If TERMINAL_NAME is the empty string, then the inferior inherits GDB's
+     terminal (or GDBserver's if spawning a remote process).  */
+  void set_tty (std::string terminal_name);
+  const std::string &tty ();
 
   /* Set the argument string to use when running this inferior.
 
@@ -587,7 +589,7 @@ private:
   target_stack m_target_stack;
 
   /* The name of terminal device to use for I/O.  */
-  gdb::unique_xmalloc_ptr<char> m_terminal;
+  std::string m_terminal;
 
   /* The list of continuations.  */
   std::list<std::function<void ()>> m_continuations;

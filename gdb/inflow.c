@@ -65,7 +65,7 @@ struct terminal_info
 
   /* The name of the tty (from the `tty' command) that we gave to the
      inferior when it was started.  */
-  char *run_terminal = nullptr;
+  std::string run_terminal;
 
   /* TTY state.  We save it whenever the inferior stops, and restore
      it when it resumes in the foreground.  */
@@ -123,7 +123,7 @@ static sighandler_t sigquit_ours;
    be) used as a transient global by new_tty_prefork,
    create_tty_session, new_tty and new_tty_postfork, all called from
    fork_inferior, while forking a new child.  */
-static const char *inferior_thisrun_terminal;
+static std::string inferior_thisrun_terminal;
 
 /* Track who owns GDB's terminal (is it GDB or some inferior?).  While
    target_terminal::is_ours() etc. tracks the core's intention and is
@@ -303,8 +303,8 @@ sharing_input_terminal (inferior *inf)
 	 output was redirected to our terminal), and with a false
 	 positive we just end up trying to save/restore terminal
 	 settings when we didn't need to or we actually can't.  */
-      if (tinfo->run_terminal != NULL)
-	res = is_gdb_terminal (tinfo->run_terminal);
+      if (!tinfo->run_terminal.empty ())
+	res = is_gdb_terminal (tinfo->run_terminal.c_str ());
 
       /* If we still can't determine, assume yes.  */
       if (res == TRIBOOL_UNKNOWN)
@@ -603,7 +603,6 @@ static const struct inferior_key<terminal_info> inflow_inferior_data;
 
 terminal_info::~terminal_info ()
 {
-  xfree (run_terminal);
   xfree (ttystate);
 }
 
@@ -643,14 +642,9 @@ copy_terminal_info (struct inferior *to, struct inferior *from)
   tinfo_to = get_inflow_inferior_data (to);
   tinfo_from = get_inflow_inferior_data (from);
 
-  xfree (tinfo_to->run_terminal);
   xfree (tinfo_to->ttystate);
 
   *tinfo_to = *tinfo_from;
-
-  if (tinfo_from->run_terminal)
-    tinfo_to->run_terminal
-      = xstrdup (tinfo_from->run_terminal);
 
   if (tinfo_from->ttystate)
     tinfo_to->ttystate
@@ -765,19 +759,19 @@ child_terminal_info (struct target_ops *self, const char *args, int from_tty)
 
 /* NEW_TTY_PREFORK is called before forking a new child process,
    so we can record the state of ttys in the child to be formed.
-   TTYNAME is null if we are to share the terminal with gdb;
-   or points to a string containing the name of the desired tty.
+   TTYNAME is empty if we are to share the terminal with gdb;
+   otherwise it contains the name of the desired tty.
 
    NEW_TTY is called in new child processes under Unix, which will
    become debugger target processes.  This actually switches to
    the terminal specified in the NEW_TTY_PREFORK call.  */
 
 void
-new_tty_prefork (const char *ttyname)
+new_tty_prefork (std::string ttyname)
 {
   /* Save the name for later, for determining whether we and the child
      are sharing a tty.  */
-  inferior_thisrun_terminal = ttyname;
+  inferior_thisrun_terminal = std::move (ttyname);
 }
 
 #if !defined(__GO32__) && !defined(_WIN32)
@@ -798,7 +792,7 @@ check_syscall (const char *msg, int result)
 void
 new_tty (void)
 {
-  if (inferior_thisrun_terminal == 0)
+  if (inferior_thisrun_terminal.empty ())
     return;
 #if !defined(__GO32__) && !defined(_WIN32)
   int tty;
@@ -818,8 +812,8 @@ new_tty (void)
 #endif
 
   /* Now open the specified new terminal.  */
-  tty = open (inferior_thisrun_terminal, O_RDWR | O_NOCTTY);
-  check_syscall (inferior_thisrun_terminal, tty);
+  tty = open (inferior_thisrun_terminal.c_str (), O_RDWR | O_NOCTTY);
+  check_syscall (inferior_thisrun_terminal.c_str (), tty);
 
   /* Avoid use of dup2; doesn't exist on all systems.  */
   if (tty != 0)
@@ -854,7 +848,7 @@ new_tty (void)
 
 /* NEW_TTY_POSTFORK is called after forking a new child process, and
    adding it to the inferior table, to store the TTYNAME being used by
-   the child, or null if it sharing the terminal with gdb.  */
+   the child, or empty if it sharing the terminal with gdb.  */
 
 void
 new_tty_postfork (void)
@@ -862,15 +856,11 @@ new_tty_postfork (void)
   /* Save the name for later, for determining whether we and the child
      are sharing a tty.  */
 
-  if (inferior_thisrun_terminal)
-    {
-      struct inferior *inf = current_inferior ();
-      struct terminal_info *tinfo = get_inflow_inferior_data (inf);
+  struct inferior *inf = current_inferior ();
+  struct terminal_info *tinfo = get_inflow_inferior_data (inf);
 
-      tinfo->run_terminal = xstrdup (inferior_thisrun_terminal);
-    }
-
-  inferior_thisrun_terminal = NULL;
+  tinfo->run_terminal = std::move (inferior_thisrun_terminal);
+  inferior_thisrun_terminal.clear ();
 }
 
 
@@ -894,7 +884,7 @@ set_sigint_trap (void)
   struct inferior *inf = current_inferior ();
   struct terminal_info *tinfo = get_inflow_inferior_data (inf);
 
-  if (inf->attach_flag || tinfo->run_terminal)
+  if (inf->attach_flag || !tinfo->run_terminal.empty ())
     {
       osig = signal (SIGINT, pass_signal);
       osig_set = 1;
@@ -927,7 +917,7 @@ create_tty_session (void)
 #ifdef HAVE_SETSID
   pid_t ret;
 
-  if (!job_control || inferior_thisrun_terminal == 0)
+  if (!job_control || inferior_thisrun_terminal.empty ())
     return 0;
 
   ret = setsid ();

@@ -115,13 +115,11 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
 {
   /* Note that we ignore the passed-in value in favor of computing it
      directly.  */
-  const char *inferior_tty = current_inferior ()->tty ();
+  const std::string &inferior_tty = current_inferior ()->tty ();
 
-  if (inferior_tty == nullptr)
-    inferior_tty = "";
   fprintf_filtered (gdb_stdout,
 		    _("Terminal for future runs of program being debugged "
-		      "is \"%s\".\n"), inferior_tty);
+		      "is \"%s\".\n"), inferior_tty.c_str ());
 }
 
 void

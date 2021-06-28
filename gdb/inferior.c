@@ -111,18 +111,15 @@ inferior::unpush_target (struct target_ops *t)
 }
 
 void
-inferior::set_tty (const char *terminal_name)
+inferior::set_tty (std::string terminal_name)
 {
-  if (terminal_name != nullptr && *terminal_name != '\0')
-    m_terminal = make_unique_xstrdup (terminal_name);
-  else
-    m_terminal = NULL;
+  m_terminal = std::move (terminal_name);
 }
 
-const char *
+const std::string &
 inferior::tty ()
 {
-  return m_terminal.get ();
+  return m_terminal;
 }
 
 void
