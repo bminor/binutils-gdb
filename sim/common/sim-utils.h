@@ -73,13 +73,6 @@ void sim_do_commandf (SIM_DESC sd, const char *fmt, ...)
     ATTRIBUTE_PRINTF (2, 3);
 
 
-/* These are defined in callback.c as cover functions to the vprintf
-   callbacks.  */
-
-void sim_cb_printf (host_callback *, const char *, ...);
-void sim_cb_eprintf (host_callback *, const char *, ...);
-
-
 /* sim-basics.h defines a number of enumerations, convert each of them
    to a string representation */
 const char *map_to_str (unsigned map);

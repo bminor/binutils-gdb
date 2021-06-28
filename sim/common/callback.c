@@ -49,12 +49,6 @@
 #define PIPE_BUF 512
 #endif
 
-/* ??? sim_cb_printf should be cb_printf, but until the callback support is
-   broken out of the simulator directory, these are here to not require
-   sim-utils.h.  */
-void sim_cb_printf (host_callback *, const char *, ...);
-void sim_cb_eprintf (host_callback *, const char *, ...);
-
 extern CB_TARGET_DEFS_MAP cb_init_syscall_map[];
 extern CB_TARGET_DEFS_MAP cb_init_errno_map[];
 extern CB_TARGET_DEFS_MAP cb_init_signal_map[];
@@ -148,43 +142,21 @@ os_close (host_callback *p, int fd)
 /* taken from gdb/util.c:notice_quit() - should be in a library */
 
 
-#if defined(__GO32__) || defined (_MSC_VER)
+#if defined(_MSC_VER)
 static int
 os_poll_quit (host_callback *p)
 {
-#if defined(__GO32__)
-  int kbhit ();
-  int getkey ();
-  if (kbhit ())
-    {
-      int k = getkey ();
-      if (k == 1)
-	{
-	  return 1;
-	}
-      else if (k == 2)
-	{
-	  return 1;
-	}
-      else
-	{
-	  sim_cb_eprintf (p, "CTRL-A to quit, CTRL-B to quit harder\n");
-	}
-    }
-#endif
-#if defined (_MSC_VER)
   /* NB - this will not compile! */
   int k = win32pollquit ();
   if (k == 1)
     return 1;
   else if (k == 2)
     return 1;
-#endif
   return 0;
 }
 #else
 #define os_poll_quit 0
-#endif /* defined(__GO32__) || defined(_MSC_VER) */
+#endif /* defined(_MSC_VER) */
 
 static int
 os_get_errno (host_callback *p)
@@ -1078,35 +1050,6 @@ cb_host_to_target_stat (host_callback *cb, const struct stat *hs, void *ts)
   return p - (char *) ts;
 }
 
-/* Cover functions to the vfprintf callbacks.
-
-   ??? If one thinks of the callbacks as a subsystem onto itself [or part of
-   a larger "remote target subsystem"] with a well defined interface, then
-   one would think that the subsystem would provide these.  However, until
-   one is allowed to create such a subsystem (with its own source tree
-   independent of any particular user), such a critter can't exist.  Thus
-   these functions are here for the time being.  */
-
-void
-sim_cb_printf (host_callback *p, const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-  p->vprintf_filtered (p, fmt, ap);
-  va_end (ap);
-}
-
-void
-sim_cb_eprintf (host_callback *p, const char *fmt, ...)
-{
-  va_list ap;
-
-  va_start (ap, fmt);
-  p->evprintf_filtered (p, fmt, ap);
-  va_end (ap);
-}
-
 int
 cb_is_stdin (host_callback *cb, int fd)
 {
