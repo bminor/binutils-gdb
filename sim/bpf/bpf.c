@@ -186,7 +186,7 @@ bpfbf_exit (SIM_CPU *current_cpu)
   /*  r0 holds "return code" */
   DI r0 = GET_H_GPR (0);
 
-  printf ("exit %ld (0x%lx)\n", r0, r0);
+  printf ("exit %" PRId64 " (0x%" PRIx64 ")\n", r0, r0);
 
   sim_engine_halt (sd, current_cpu, NULL, CPU_PC_GET (current_cpu),
                    sim_exited, 0 /* sigrc */);
