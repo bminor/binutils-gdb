@@ -627,7 +627,6 @@ aarch64_analyze_prologue_test (void)
 {
   struct gdbarch_info info;
 
-  gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_scan_arch ("aarch64");
 
   struct gdbarch *gdbarch = gdbarch_find_by_info (info);
@@ -4559,7 +4558,6 @@ aarch64_process_record_test (void)
   struct gdbarch_info info;
   uint32_t ret;
 
-  gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_scan_arch ("aarch64");
 
   struct gdbarch *gdbarch = gdbarch_find_by_info (info);

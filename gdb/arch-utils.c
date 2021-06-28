@@ -389,8 +389,6 @@ set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
 {
   struct gdbarch_info info;
 
-  gdbarch_info_init (&info);
-
   if (set_endian_string == endian_auto)
     {
       target_byte_order_user = BFD_ENDIAN_UNKNOWN;
@@ -548,8 +546,6 @@ set_architecture (const char *ignore_args,
 {
   struct gdbarch_info info;
 
-  gdbarch_info_init (&info);
-
   if (strcmp (set_architecture_string, "auto") == 0)
     {
       target_architecture_user = NULL;
@@ -630,7 +626,6 @@ struct gdbarch *
 gdbarch_from_bfd (bfd *abfd)
 {
   struct gdbarch_info info;
-  gdbarch_info_init (&info);
 
   info.abfd = abfd;
   return gdbarch_find_by_info (info);
@@ -645,7 +640,6 @@ set_gdbarch_from_file (bfd *abfd)
   struct gdbarch_info info;
   struct gdbarch *gdbarch;
 
-  gdbarch_info_init (&info);
   info.abfd = abfd;
   info.target_desc = target_current_description ();
   gdbarch = gdbarch_find_by_info (info);
@@ -679,10 +673,6 @@ void
 initialize_current_architecture (void)
 {
   const char **arches = gdbarch_printable_names ();
-  struct gdbarch_info info;
-
-  /* determine a default architecture and byte order.  */
-  gdbarch_info_init (&info);
   
   /* Find a default architecture.  */
   if (default_bfd_arch == NULL)
@@ -705,6 +695,7 @@ initialize_current_architecture (void)
 			_("initialize_current_architecture: Arch not found"));
     }
 
+  gdbarch_info info;
   info.bfd_arch_info = default_bfd_arch;
 
   /* Take several guesses at a byte order.  */
@@ -767,21 +758,6 @@ initialize_current_architecture (void)
     add_alias_cmd ("processor", architecture_cmds.set, class_support, 1,
 		   &setlist);
   }
-}
-
-
-/* Initialize a gdbarch info to values that will be automatically
-   overridden.  Note: Originally, this ``struct info'' was initialized
-   using memset(0).  Unfortunately, that ran into problems, namely
-   BFD_ENDIAN_BIG is zero.  An explicit initialization function that
-   can explicitly set each field to a well defined value is used.  */
-
-void
-gdbarch_info_init (struct gdbarch_info *info)
-{
-  memset (info, 0, sizeof (struct gdbarch_info));
-  info->byte_order = BFD_ENDIAN_UNKNOWN;
-  info->byte_order_for_code = info->byte_order;
 }
 
 /* Similar to init, but this time fill in the blanks.  Information is

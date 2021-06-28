@@ -865,7 +865,6 @@ set_mips64_transfers_32bit_regs (const char *args, int from_tty,
 				 struct cmd_list_element *c)
 {
   struct gdbarch_info info;
-  gdbarch_info_init (&info);
   /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
      instead of relying on globals.  Doing that would let generic code
      handle the search for this specific architecture.  */
@@ -6918,7 +6917,6 @@ static void
 set_mipsfpu_single_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
-  gdbarch_info_init (&info);
   mips_fpu_type = MIPS_FPU_SINGLE;
   mips_fpu_type_auto = 0;
   /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
@@ -6932,7 +6930,6 @@ static void
 set_mipsfpu_double_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
-  gdbarch_info_init (&info);
   mips_fpu_type = MIPS_FPU_DOUBLE;
   mips_fpu_type_auto = 0;
   /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
@@ -6946,7 +6943,6 @@ static void
 set_mipsfpu_none_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
-  gdbarch_info_init (&info);
   mips_fpu_type = MIPS_FPU_NONE;
   mips_fpu_type_auto = 0;
   /* FIXME: cagney/2003-11-15: Should be setting a field in "info"
@@ -8790,7 +8786,6 @@ mips_abi_update (const char *ignore_args,
 
   /* Force the architecture to update, and (if it's a MIPS architecture)
      mips_gdbarch_init will take care of the rest.  */
-  gdbarch_info_init (&info);
   gdbarch_update_p (info);
 }
 

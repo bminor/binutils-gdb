@@ -1,5 +1,13 @@
 2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdbarch.sh (struct gdbarch_info): Initialize fields, add
+	constructor.
+	* gdbarch.h: Re-generate.
+	* arch-utils.h (gdbarch_info_init): Remove, delete all usages.
+	* arch-utils.c (gdbarch_info_init): Remove.
+
+2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbarch.sh (struct gdbarch_info) <tdep_info>: Remove.
 	(gdbarch_find_by_info): Remove print.
 	* gdbarch.c, gdbarch.h: Re-generate.

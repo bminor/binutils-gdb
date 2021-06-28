@@ -747,7 +747,6 @@ add_inferior_with_spaces (void)
   struct address_space *aspace;
   struct program_space *pspace;
   struct inferior *inf;
-  struct gdbarch_info info;
 
   /* If all inferiors share an address space on this system, this
      doesn't really return a new address space; otherwise, it
@@ -760,7 +759,7 @@ add_inferior_with_spaces (void)
 
   /* Setup the inferior's initial arch, based on information obtained
      from the global "set ..." options.  */
-  gdbarch_info_init (&info);
+  gdbarch_info info;
   inf->gdbarch = gdbarch_find_by_info (info);
   /* The "set ..." options reject invalid settings, so we should
      always have a valid arch by now.  */

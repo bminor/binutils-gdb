@@ -7260,7 +7260,6 @@ powerpc_set_soft_float (const char *args, int from_tty,
   struct gdbarch_info info;
 
   /* Update the architecture.  */
-  gdbarch_info_init (&info);
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__, _("could not update architecture"));
 }
@@ -7269,7 +7268,6 @@ static void
 powerpc_set_vector_abi (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
-  struct gdbarch_info info;
   int vector_abi;
 
   for (vector_abi = POWERPC_VEC_AUTO;
@@ -7287,7 +7285,7 @@ powerpc_set_vector_abi (const char *args, int from_tty,
 		    powerpc_vector_abi_string);
 
   /* Update the architecture.  */
-  gdbarch_info_init (&info);
+  gdbarch_info info;
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__, _("could not update architecture"));
 }

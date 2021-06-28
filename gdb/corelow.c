@@ -165,7 +165,6 @@ core_target::core_target ()
   if (tdesc != nullptr)
     {
       struct gdbarch_info info;
-      gdbarch_info_init (&info);
       info.abfd = core_bfd;
       info.target_desc = tdesc;
       m_core_gdbarch = gdbarch_find_by_info (info);

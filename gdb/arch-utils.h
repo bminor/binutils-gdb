@@ -196,12 +196,6 @@ extern enum bfd_endian selected_byte_order (void);
    was explicitly selected.  */
 extern const char *selected_architecture_name (void);
 
-/* Initialize a ``struct info''.  Can't use memset(0) since some
-   default values are not zero.  "fill" takes all available
-   information and fills in any unspecified fields.  */
-
-extern void gdbarch_info_init (struct gdbarch_info *info);
-
 /* Similar to init, but this time fill in the blanks.  Information is
    obtained from the global "set ..." options and explicitly
    initialized INFO fields.  */

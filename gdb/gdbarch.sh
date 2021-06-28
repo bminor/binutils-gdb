@@ -1533,18 +1533,20 @@ struct gdbarch_list
 
 struct gdbarch_info
 {
-  /* Use default: NULL (ZERO).  */
-  const struct bfd_arch_info *bfd_arch_info;
+  gdbarch_info ()
+    /* Ensure the union is zero-initialized.  Relies on the fact that there's
+       no member larger than TDESC_DATA.  */
+    : tdesc_data ()
+  {}
 
-  /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
-  enum bfd_endian byte_order;
+  const struct bfd_arch_info *bfd_arch_info = nullptr;
 
-  enum bfd_endian byte_order_for_code;
+  enum bfd_endian byte_order = BFD_ENDIAN_UNKNOWN;
 
-  /* Use default: NULL (ZERO).  */
-  bfd *abfd;
+  enum bfd_endian byte_order_for_code = BFD_ENDIAN_UNKNOWN;
 
-  /* Use default: NULL (ZERO).  */
+  bfd *abfd = nullptr;
+
   union
     {
       /* Architecture-specific target description data.  Numerous targets
@@ -1557,11 +1559,9 @@ struct gdbarch_info
       int *id;
     };
 
-  /* Use default: GDB_OSABI_UNINITIALIZED (-1).  */
-  enum gdb_osabi osabi;
+  enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
-  /* Use default: NULL (ZERO).  */
-  const struct target_desc *target_desc;
+  const struct target_desc *target_desc = nullptr;
 };
 
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
@@ -1637,8 +1637,8 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 
 /* Helper function.  Find an architecture matching info.
 
-   INFO should be initialized using gdbarch_info_init, relevant fields
-   set, and then finished using gdbarch_info_fill.
+   INFO should have relevant fields set, and then finished using
+   gdbarch_info_fill.
 
    Returns the corresponding architecture, or NULL if no matching
    architecture was found.  */

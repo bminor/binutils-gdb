@@ -64,7 +64,6 @@ struct gdbarch_selftest : public selftest
 	  {
 	    struct gdbarch_info info;
 
-	    gdbarch_info_init (&info);
 	    info.bfd_arch_info = bfd_scan_arch (arches[i]);
 
 	    struct gdbarch *gdbarch = gdbarch_find_by_info (info);

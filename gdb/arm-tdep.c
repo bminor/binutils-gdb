@@ -8403,15 +8403,12 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
 static void
 arm_update_current_architecture (void)
 {
-  struct gdbarch_info info;
-
   /* If the current architecture is not ARM, we have nothing to do.  */
   if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_arm)
     return;
 
   /* Update the architecture.  */
-  gdbarch_info_init (&info);
-
+  gdbarch_info info;
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__, _("could not update architecture"));
 }
@@ -13237,7 +13234,6 @@ static void
 arm_record_test (void)
 {
   struct gdbarch_info info;
-  gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_scan_arch ("arm");
 
   struct gdbarch *gdbarch = gdbarch_find_by_info (info);
@@ -13329,7 +13325,6 @@ arm_analyze_prologue_test ()
   for (bfd_endian endianness : {BFD_ENDIAN_LITTLE, BFD_ENDIAN_BIG})
     {
       struct gdbarch_info info;
-      gdbarch_info_init (&info);
       info.byte_order = endianness;
       info.byte_order_for_code = endianness;
       info.bfd_arch_info = bfd_scan_arch ("arm");
