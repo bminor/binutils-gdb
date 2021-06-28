@@ -3993,7 +3993,7 @@ riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count,
 	 foo becomes an alias for foo@BAR, and hence they need the same
 	 treatment.  */
       if (link_info->wrap_hash != NULL
-	  || sym_hash->versioned == versioned_hidden)
+	  || sym_hash->versioned != unversioned)
 	{
 	  struct elf_link_hash_entry **cur_sym_hashes;
 

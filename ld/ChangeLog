@@ -1,3 +1,12 @@
+2021-07-07  Michael Matz  <matz@suse.de>
+
+	PR ld/28021
+	* testsuite/ld-riscv-elf/relax-twice.ver: New.
+	* testsuite/ld-riscv-elf/relax-twice-1.s: New.
+	* testsuite/ld-riscv-elf/relax-twice-2.s: New.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp
+	(run_relax_twice_test): New, and call it.
+
 2021-07-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18028
