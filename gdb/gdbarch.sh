@@ -1547,10 +1547,6 @@ struct gdbarch_info
   /* Use default: NULL (ZERO).  */
   union
     {
-      /* Architecture-specific information.  The generic form for targets
-	 that have extra requirements.  */
-      struct gdbarch_tdep_info *tdep_info;
-
       /* Architecture-specific target description data.  Numerous targets
 	 need only this, so give them an easy way to hold it.  */
       struct tdesc_arch_data *tdesc_data;
@@ -2479,9 +2475,6 @@ gdbarch_find_by_info (struct gdbarch_info info)
       fprintf_unfiltered (gdb_stdlog,
 			  "gdbarch_find_by_info: info.abfd %s\n",
 			  host_address_to_string (info.abfd));
-      fprintf_unfiltered (gdb_stdlog,
-			  "gdbarch_find_by_info: info.tdep_info %s\n",
-			  host_address_to_string (info.tdep_info));
     }
 
   /* Find the tdep code that knows about this architecture.  */

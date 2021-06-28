@@ -1,3 +1,9 @@
+2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (struct gdbarch_info) <tdep_info>: Remove.
+	(gdbarch_find_by_info): Remove print.
+	* gdbarch.c, gdbarch.h: Re-generate.
+
 2021-06-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* remote.c (remote_target::start_remote): Set 'starting_up' using
