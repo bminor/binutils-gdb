@@ -78,6 +78,46 @@ proc run_dump_test_ifunc { name target output} {
 	      "$name-$target.$ext"]]
 }
 
+proc run_relax_twice_test {} {
+    global as
+    global ld
+    global nm
+    global nm_output
+    global srcdir
+    global subdir
+    global runtests
+
+    set testname "relax-twice"
+    if ![runtest_file_p $runtests $testname] then {
+	return
+    }
+
+    # assemble and link the two input files with a version script, then
+    # capture output of nm and compare addresses of the two symbols
+    # 'foobar_new' and 'foobar@@New'.  They must be equal.
+    # Bitness doesn't matter so we simply force 64bit.
+    if { ![ld_assemble_flags $as "-march=rv64i" $srcdir/$subdir/relax-twice-1.s tmpdir/relax-twice-1.o ]
+	|| ![ld_assemble_flags $as "-march=rv64i" $srcdir/$subdir/relax-twice-2.s tmpdir/relax-twice-2.o]
+	|| ![ld_link $ld tmpdir/relax-twice.so "-m[riscv_choose_lp64_emul] -shared --relax --version-script $srcdir/$subdir/relax-twice.ver tmpdir/relax-twice-1.o tmpdir/relax-twice-2.o"] } {
+	fail $testname
+    } elseif { ![ld_nm $nm "" tmpdir/relax-twice.so] } {
+	fail $testname
+    } elseif { ![info exists nm_output(foobar_new)]
+	       || ![info exists nm_output(foobar@@New)]} {
+	send_log "bad output from nm\n"
+	verbose "bad output from nm"
+	fail $testname
+    } elseif {$nm_output(foobar_new) != $nm_output(foobar@@New)} {
+	send_log "foobar_new == $nm_output(foobar_new)\n"
+	verbose "foobar_new == $nm_output(foobar_new)"
+	send_log "foobar@@New == $nm_output(foobar@@New)\n"
+	verbose "foobar@@New == $nm_output(foobar@@New)"
+	fail $testname
+    } else {
+	pass $testname
+    }
+}
+
 if [istarget "riscv*-*-*"] {
     run_dump_test "call-relax"
     run_dump_test "pcgp-relax"
@@ -128,6 +168,7 @@ if [istarget "riscv*-*-*"] {
 
     run_dump_test "relro-relax-lui"
     run_dump_test "relro-relax-pcrel"
+    run_relax_twice_test
 
     set abis [list rv32gc ilp32 [riscv_choose_ilp32_emul] rv64gc lp64 [riscv_choose_lp64_emul]]
     foreach { arch abi emul } $abis {

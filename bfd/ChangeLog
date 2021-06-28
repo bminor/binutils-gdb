@@ -1,3 +1,9 @@
+2021-07-06  Michael Matz  <matz@suse.de>
+
+	PR ld/28021
+	* elfnn-riscv.c (riscv_relax_delete_bytes): Check for any
+	versioning.
+
 2021-07-06  Alan Modra  <amodra@gmail.com>
 
 	PR 28055
