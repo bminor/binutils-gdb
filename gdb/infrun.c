@@ -5065,6 +5065,8 @@ wait_one ()
       if (nfds == 0)
 	{
 	  /* No waitable targets left.  All must be stopped.  */
+	  infrun_debug_printf ("no waitable targets left");
+
 	  target_waitstatus ws;
 	  ws.set_no_resumed ();
 	  return {nullptr, minus_one_ptid, std::move (ws)};
@@ -5323,6 +5325,83 @@ handle_one (const wait_one_event &event)
   return false;
 }
 
+/* Helper for stop_all_threads.  wait_one waits for events until it
+   sees a TARGET_WAITKIND_NO_RESUMED event.  When it sees one, it
+   disables target_async for the target to stop waiting for events
+   from it.  TARGET_WAITKIND_NO_RESUMED can be delayed though,
+   consider, debugging against gdbserver:
+
+    #1 - Threads 1-5 are running, and thread 1 hits a breakpoint.
+
+    #2 - gdb processes the breakpoint hit for thread 1, stops all
+	 threads, and steps thread 1 over the breakpoint.  while
+	 stopping threads, some other threads reported interesting
+	 events, which were left pending in the thread's objects
+	 (infrun's queue).
+
+    #2 - Thread 1 exits (it stepped an exit syscall), and gdbserver
+	 reports the thread exit for thread 1.	The event ends up in
+	 remote's stop reply queue.
+
+    #3 - That was the last resumed thread, so gdbserver reports
+	 no-resumed, and that event also ends up in remote's stop
+	 reply queue, queued after the thread exit from #2.
+
+    #4 - gdb processes the thread exit event, which finishes the
+	 step-over, and so gdb restarts all threads (threads with
+	 pending events are left marked resumed, but aren't set
+	 executing).  The no-resumed event is still left pending in
+	 the remote stop reply queue.
+
+    #5 - Since there are now resumed threads with pending breakpoint
+	 hits, gdb picks one at random to process next.
+
+    #5 - gdb picks the breakpoint hit for thread 2 this time, and that
+	 breakpoint also needs to be stepped over, so gdb stops all
+	 threads again.
+
+    #6 - stop_all_threads counts number of expected stops and calls
+	 wait_one once for each.
+
+    #7 - The first wait_one call collects the no-resumed event from #3
+	 above.
+
+    #9 - Seeing the no-resumed event, wait_one disables target async
+	 for the remote target, to stop waiting for events from it.
+	 wait_one from here on always return no-resumed directly
+	 without reaching the target.
+
+    #10 - stop_all_threads still hasn't seen all the stops it expects,
+	  so it does another pass.
+
+    #11 - Since the remote target is not async (disabled in #9),
+	  wait_one doesn't wait on it, so it won't see the expected
+	  stops, and instead returns no-resumed directly.
+
+    #12 - stop_all_threads still haven't seen all the stops, so it
+	  does another pass.  goto #b, looping forever.
+
+   To handle this, we explicitly (re-)enable target async on all
+   targets that can async every time stop_all_threads goes wait for
+   the expected stops.  */
+
+static void
+reenable_target_async ()
+{
+  for (inferior *inf : all_inferiors ())
+    {
+      process_stratum_target *target = inf->process_target ();
+      if (target != nullptr
+	  && target->threads_executing
+	  && target->can_async_p ()
+	  && !target->is_async_p ())
+	{
+	  switch_to_inferior_no_thread (inf);
+	  target_async (1);
+	}
+    }
+}
+
 /* See infrun.h.  */
 
 void
@@ -5448,6 +5527,8 @@ stop_all_threads (const char *reason, inferior *inf)
 	     threads stopped.  */
 	  if (pass > 0)
 	    pass = -1;
+
+	  reenable_target_async ();
 
 	  for (int i = 0; i < waits_needed; i++)
 	    {
