@@ -3956,17 +3956,17 @@ value_fetch_lazy_register (struct value *val)
       regnum = VALUE_REGNUM (val);
       gdbarch = get_frame_arch (frame);
 
-      fprintf_unfiltered (gdb_stdlog,
-			  "{ value_fetch_lazy "
-			  "(frame=%d,regnum=%d(%s),...) ",
+      string_file debug_file;
+      fprintf_unfiltered (&debug_file,
+			  "(frame=%d, regnum=%d(%s), ...) ",
 			  frame_relative_level (frame), regnum,
 			  user_reg_map_regnum_to_name (gdbarch, regnum));
 
-      fprintf_unfiltered (gdb_stdlog, "->");
+      fprintf_unfiltered (&debug_file, "->");
       if (value_optimized_out (new_val))
 	{
-	  fprintf_unfiltered (gdb_stdlog, " ");
-	  val_print_optimized_out (new_val, gdb_stdlog);
+	  fprintf_unfiltered (&debug_file, " ");
+	  val_print_optimized_out (new_val, &debug_file);
 	}
       else
 	{
@@ -3974,23 +3974,23 @@ value_fetch_lazy_register (struct value *val)
 	  const gdb_byte *buf = value_contents (new_val);
 
 	  if (VALUE_LVAL (new_val) == lval_register)
-	    fprintf_unfiltered (gdb_stdlog, " register=%d",
+	    fprintf_unfiltered (&debug_file, " register=%d",
 				VALUE_REGNUM (new_val));
 	  else if (VALUE_LVAL (new_val) == lval_memory)
-	    fprintf_unfiltered (gdb_stdlog, " address=%s",
+	    fprintf_unfiltered (&debug_file, " address=%s",
 				paddress (gdbarch,
 					  value_address (new_val)));
 	  else
-	    fprintf_unfiltered (gdb_stdlog, " computed");
+	    fprintf_unfiltered (&debug_file, " computed");
 
-	  fprintf_unfiltered (gdb_stdlog, " bytes=");
-	  fprintf_unfiltered (gdb_stdlog, "[");
+	  fprintf_unfiltered (&debug_file, " bytes=");
+	  fprintf_unfiltered (&debug_file, "[");
 	  for (i = 0; i < register_size (gdbarch, regnum); i++)
-	    fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
-	  fprintf_unfiltered (gdb_stdlog, "]");
+	    fprintf_unfiltered (&debug_file, "%02x", buf[i]);
+	  fprintf_unfiltered (&debug_file, "]");
 	}
 
-      fprintf_unfiltered (gdb_stdlog, " }\n");
+      frame_debug_printf ("%s", debug_file.c_str ());
     }
 
   /* Dispose of the intermediate values.  This prevents

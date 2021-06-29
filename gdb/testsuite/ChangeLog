@@ -1,3 +1,7 @@
+2021-06-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.dwarf2/dw2-reg-undefined.exp: Update regexp.
+
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/info_sources_2-header.h: New file.

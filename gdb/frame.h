@@ -216,6 +216,11 @@ extern const struct frame_id outer_frame_id;
 
 extern bool frame_debug;
 
+/* Print a "frame" debug statement.  */
+
+#define frame_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (frame_debug, "frame", fmt, ##__VA_ARGS__)
+
 /* Construct a frame ID.  The first parameter is the frame's constant
    stack address (typically the outer-bound), and the second the
    frame's constant code address (typically the entry point).

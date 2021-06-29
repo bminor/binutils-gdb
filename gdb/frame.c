@@ -111,6 +111,9 @@ enum class frame_id_status
 
 struct frame_info
 {
+  /* Return a string representation of this frame.  */
+  std::string to_string () const;
+
   /* Level of this frame.  The inner-most (youngest) frame is at level
      0.  As you move towards the outer-most (oldest) frame, the level
      increases.  This is a cached value.  It could just as easily be
@@ -414,95 +417,85 @@ frame_id::to_string () const
   return res;
 }
 
-static void
-fprint_frame_type (struct ui_file *file, enum frame_type type)
+/* Return a string representation of TYPE.  */
+
+static const char *
+frame_type_str (frame_type type)
 {
   switch (type)
     {
     case NORMAL_FRAME:
-      fprintf_unfiltered (file, "NORMAL_FRAME");
-      return;
+      return "NORMAL_FRAME";
+
     case DUMMY_FRAME:
-      fprintf_unfiltered (file, "DUMMY_FRAME");
-      return;
+      return "DUMMY_FRAME";
+
     case INLINE_FRAME:
-      fprintf_unfiltered (file, "INLINE_FRAME");
-      return;
+      return "INLINE_FRAME";
+
     case TAILCALL_FRAME:
-      fprintf_unfiltered (file, "TAILCALL_FRAME");
-      return;
+      return "TAILCALL_FRAME";
+
     case SIGTRAMP_FRAME:
-      fprintf_unfiltered (file, "SIGTRAMP_FRAME");
-      return;
+      return "SIGTRAMP_FRAME";
+
     case ARCH_FRAME:
-      fprintf_unfiltered (file, "ARCH_FRAME");
-      return;
+      return "ARCH_FRAME";
+
     case SENTINEL_FRAME:
-      fprintf_unfiltered (file, "SENTINEL_FRAME");
-      return;
+      return "SENTINEL_FRAME";
+
     default:
-      fprintf_unfiltered (file, "<unknown type>");
-      return;
+      return "<unknown type>";
     };
 }
 
-static void
-fprint_frame (struct ui_file *file, struct frame_info *fi)
+ /* See struct frame_info.  */
+
+std::string
+frame_info::to_string () const
 {
-  if (fi == NULL)
-    {
-      fprintf_unfiltered (file, "<NULL frame>");
-      return;
-    }
+  const frame_info *fi = this;
 
-  fprintf_unfiltered (file, "{");
-  fprintf_unfiltered (file, "level=%d", fi->level);
-  fprintf_unfiltered (file, ",");
+  std::string res;
 
-  fprintf_unfiltered (file, "type=");
+  res += string_printf ("{level=%d,", fi->level);
+
   if (fi->unwind != NULL)
-    fprint_frame_type (file, fi->unwind->type);
+    res += string_printf ("type=%s,", frame_type_str (fi->unwind->type));
   else
-    fprintf_unfiltered (file, "<unknown>");
-  fprintf_unfiltered (file, ",");
+    res += "type=<unknown>,";
 
-  fprintf_unfiltered (file, "unwind=");
   if (fi->unwind != NULL)
-    gdb_print_host_address (fi->unwind, file);
+    res += string_printf ("unwind=%p,", host_address_to_string (fi->unwind));
   else
-    fprintf_unfiltered (file, "<unknown>");
-  fprintf_unfiltered (file, ",");
+    res += "unwind=<unknown>,";
 
-  fprintf_unfiltered (file, "pc=");
   if (fi->next == NULL || fi->next->prev_pc.status == CC_UNKNOWN)
-    fprintf_unfiltered (file, "<unknown>");
+    res += "pc=<unknown>,";
   else if (fi->next->prev_pc.status == CC_VALUE)
-    {
-      fprintf_unfiltered (file, "%s", hex_string (fi->next->prev_pc.value));
-      if (fi->next->prev_pc.masked)
-	fprintf_unfiltered (file, "[PAC]");
-    }
+    res += string_printf ("pc=%s%s,", hex_string (fi->next->prev_pc.value),
+			  fi->next->prev_pc.masked ? "[PAC]" : "");
   else if (fi->next->prev_pc.status == CC_NOT_SAVED)
-    val_print_not_saved (file);
+    res += "pc=<not saved>,";
   else if (fi->next->prev_pc.status == CC_UNAVAILABLE)
-    val_print_unavailable (file);
-  fprintf_unfiltered (file, ",");
+    res += "pc=<unavailable>,";
 
-  fprintf_unfiltered (file, "id=");
   if (fi->this_id.p == frame_id_status::NOT_COMPUTED)
-    fprintf_unfiltered (file, "<not computed>");
+    res += "id=<not computed>,";
   else if (fi->this_id.p == frame_id_status::COMPUTING)
-    fprintf_unfiltered (file, "<computing>");
+    res += "id=<computing>,";
   else
-    fprintf_unfiltered (file, "%s", fi->this_id.value.to_string ().c_str ());
-  fprintf_unfiltered (file, ",");
+    res += string_printf ("id=%s,", fi->this_id.value.to_string ().c_str ());
 
-  fprintf_unfiltered (file, "func=");
   if (fi->next != NULL && fi->next->prev_func.status == CC_VALUE)
-    fprintf_unfiltered (file, "%s", hex_string (fi->next->prev_func.addr));
+    res += string_printf ("func=%s", hex_string (fi->next->prev_func.addr));
   else
-    fprintf_unfiltered (file, "<unknown>");
-  fprintf_unfiltered (file, "}");
+    res += "func=<unknown>";
+
+  res += "}";
+
+  return res;
 }
 
 /* Given FRAME, return the enclosing frame as found in real frames read-in from
@@ -576,9 +569,7 @@ compute_frame_id (struct frame_info *fi)
       /* Mark this frame's id as "being computed.  */
       fi->this_id.p = frame_id_status::COMPUTING;
 
-      if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog, "{ compute_frame_id (fi=%d) ",
-			    fi->level);
+      frame_debug_printf ("fi=%d", fi->level);
 
       /* Find the unwinder.  */
       if (fi->unwind == NULL)
@@ -593,9 +584,7 @@ compute_frame_id (struct frame_info *fi)
       /* Mark this frame's id as "computed".  */
       fi->this_id.p = frame_id_status::COMPUTED;
 
-      if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog, "-> %s }\n",
-			    fi->this_id.value.to_string ().c_str ());
+      frame_debug_printf ("  -> %s", fi->this_id.value.to_string ().c_str ());
     }
   catch (const gdb_exception &ex)
     {
@@ -746,9 +735,7 @@ frame_id_p (frame_id l)
   /* The frame is valid iff it has a valid stack address.  */
   bool p = l.stack_status != FID_STACK_INVALID;
 
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ frame_id_p (l=%s) -> %d }\n",
-			l.to_string ().c_str (), p);
+  frame_debug_printf ("l=%s -> %d", l.to_string ().c_str (), p);
 
   return p;
 }
@@ -791,9 +778,8 @@ frame_id_eq (frame_id l, frame_id r)
     /* Frames are equal.  */
     eq = true;
 
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ frame_id_eq (l=%s,r=%s) -> %d }\n",
-			l.to_string ().c_str (), r.to_string ().c_str (), eq);
+  frame_debug_printf ("l=%s, r=%s -> %d",
+		      l.to_string ().c_str (), r.to_string ().c_str (), eq);
 
   return eq;
 }
@@ -869,10 +855,9 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
        different .code and/or .special address).  */
     inner = gdbarch_inner_than (gdbarch, l.stack_addr, r.stack_addr);
 
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ frame_id_inner (l=%s,r=%s) -> %d }\n",
-			l.to_string ().c_str (), r.to_string ().c_str (),
-			inner);
+  frame_debug_printf ("is l=%s inner than r=%s? %d",
+		      l.to_string ().c_str (), r.to_string ().c_str (),
+		      inner);
 
   return inner;
 }
@@ -967,21 +952,15 @@ frame_unwind_pc (struct frame_info *this_frame)
 	    {
 	      this_frame->prev_pc.status = CC_UNAVAILABLE;
 
-	      if (frame_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "{ frame_unwind_pc (this_frame=%d)"
-				    " -> <unavailable> }\n",
-				    this_frame->level);
+	      frame_debug_printf ("this_frame=%d -> <unavailable>",
+				  this_frame->level);
 	    }
 	  else if (ex.error == OPTIMIZED_OUT_ERROR)
 	    {
 	      this_frame->prev_pc.status = CC_NOT_SAVED;
 
-	      if (frame_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "{ frame_unwind_pc (this_frame=%d)"
-				    " -> <not saved> }\n",
-				    this_frame->level);
+	      frame_debug_printf ("this_frame=%d -> <not saved>",
+				  this_frame->level);
 	    }
 	  else
 	    throw;
@@ -991,12 +970,10 @@ frame_unwind_pc (struct frame_info *this_frame)
 	{
 	  this_frame->prev_pc.value = pc;
 	  this_frame->prev_pc.status = CC_VALUE;
-	  if (frame_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"{ frame_unwind_pc (this_frame=%d) "
-				"-> %s }\n",
-				this_frame->level,
-				hex_string (this_frame->prev_pc.value));
+
+	  frame_debug_printf ("this_frame=%d -> %s",
+			      this_frame->level,
+			      hex_string (this_frame->prev_pc.value));
 	}
     }
 
@@ -1039,21 +1016,18 @@ get_frame_func_if_available (frame_info *this_frame, CORE_ADDR *pc)
       if (!get_frame_address_in_block_if_available (this_frame, &addr_in_block))
 	{
 	  next_frame->prev_func.status = CC_UNAVAILABLE;
-	  if (frame_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"{ get_frame_func (this_frame=%d)"
-				" -> unavailable }\n",
-				this_frame->level);
+
+	  frame_debug_printf ("this_frame=%d -> unavailable",
+			      this_frame->level);
 	}
       else
 	{
 	  next_frame->prev_func.status = CC_VALUE;
 	  next_frame->prev_func.addr = get_pc_function_start (addr_in_block);
-	  if (frame_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"{ get_frame_func (this_frame=%d) -> %s }\n",
-				this_frame->level,
-				hex_string (next_frame->prev_func.addr));
+
+	  frame_debug_printf ("this_frame=%d -> %s",
+			      this_frame->level,
+			      hex_string (next_frame->prev_func.addr));
 	}
     }
 
@@ -1247,14 +1221,9 @@ frame_unwind_register_value (frame_info *next_frame, int regnum)
   gdb_assert (next_frame != NULL);
   gdbarch = frame_unwind_arch (next_frame);
 
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "{ frame_unwind_register_value "
-			  "(frame=%d,regnum=%d(%s),...) ",
-			  next_frame->level, regnum,
-			  user_reg_map_regnum_to_name (gdbarch, regnum));
-    }
+  frame_debug_printf ("frame=%d, regnum=%d(%s)",
+		      next_frame->level, regnum,
+		      user_reg_map_regnum_to_name (gdbarch, regnum));
 
   /* Find the unwinder.  */
   if (next_frame->unwind == NULL)
@@ -1267,40 +1236,42 @@ frame_unwind_register_value (frame_info *next_frame, int regnum)
 
   if (frame_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "->");
+      string_file debug_file;
+
+      fprintf_unfiltered (&debug_file, "  ->");
       if (value_optimized_out (value))
 	{
-	  fprintf_unfiltered (gdb_stdlog, " ");
-	  val_print_not_saved (gdb_stdlog);
+	  fprintf_unfiltered (&debug_file, " ");
+	  val_print_not_saved (&debug_file);
 	}
       else
 	{
 	  if (VALUE_LVAL (value) == lval_register)
-	    fprintf_unfiltered (gdb_stdlog, " register=%d",
+	    fprintf_unfiltered (&debug_file, " register=%d",
 				VALUE_REGNUM (value));
 	  else if (VALUE_LVAL (value) == lval_memory)
-	    fprintf_unfiltered (gdb_stdlog, " address=%s",
+	    fprintf_unfiltered (&debug_file, " address=%s",
 				paddress (gdbarch,
 					  value_address (value)));
 	  else
-	    fprintf_unfiltered (gdb_stdlog, " computed");
+	    fprintf_unfiltered (&debug_file, " computed");
 
 	  if (value_lazy (value))
-	    fprintf_unfiltered (gdb_stdlog, " lazy");
+	    fprintf_unfiltered (&debug_file, " lazy");
 	  else
 	    {
 	      int i;
 	      const gdb_byte *buf = value_contents (value);
 
-	      fprintf_unfiltered (gdb_stdlog, " bytes=");
-	      fprintf_unfiltered (gdb_stdlog, "[");
+	      fprintf_unfiltered (&debug_file, " bytes=");
+	      fprintf_unfiltered (&debug_file, "[");
 	      for (i = 0; i < register_size (gdbarch, regnum); i++)
-		fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
-	      fprintf_unfiltered (gdb_stdlog, "]");
+		fprintf_unfiltered (&debug_file, "%02x", buf[i]);
+	      fprintf_unfiltered (&debug_file, "]");
 	    }
 	}
 
-      fprintf_unfiltered (gdb_stdlog, " }\n");
+      frame_debug_printf ("%s", debug_file.c_str ());
     }
 
   return value;
@@ -1610,12 +1581,9 @@ create_sentinel_frame (struct program_space *pspace, struct regcache *regcache)
   /* The sentinel frame has a special ID.  */
   frame->this_id.p = frame_id_status::COMPUTED;
   frame->this_id.value = sentinel_frame_id;
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "{ create_sentinel_frame (...) -> ");
-      fprint_frame (gdb_stdlog, frame);
-      fprintf_unfiltered (gdb_stdlog, " }\n");
-    }
+
+  frame_debug_printf ("  -> %s", frame->to_string ().c_str ());
+
   return frame;
 }
 
@@ -1939,12 +1907,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 {
   struct frame_info *fi;
 
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "{ create_new_frame (addr=%s, pc=%s) ",
-			  hex_string (addr), hex_string (pc));
-    }
+  frame_debug_printf ("addr=%s, pc=%s", hex_string (addr), hex_string (pc));
 
   fi = FRAME_OBSTACK_ZALLOC (struct frame_info);
 
@@ -1969,12 +1932,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
   fi->this_id.p = frame_id_status::COMPUTED;
   fi->this_id.value = frame_id_build (addr, pc);
 
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "-> ");
-      fprint_frame (gdb_stdlog, fi);
-      fprintf_unfiltered (gdb_stdlog, " }\n");
-    }
+  frame_debug_printf ("  -> %s", fi->to_string ().c_str ());
 
   return fi;
 }
@@ -2047,8 +2005,8 @@ reinit_frame_cache (void)
   sentinel_frame = NULL;		/* Invalidate cache */
   select_frame (NULL);
   frame_stash_invalidate ();
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ reinit_frame_cache () }\n");
+
+  frame_debug_printf ("generation=%d", frame_cache_generation);
 }
 
 /* Find where a register is saved (in memory or another register).
@@ -2116,12 +2074,8 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
 	{
 	  /* Another frame with the same id was already in the stash.  We just
 	     detected a cycle.  */
-	  if (frame_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, "-> ");
-	      fprint_frame (gdb_stdlog, NULL);
-	      fprintf_unfiltered (gdb_stdlog, " // this frame has same ID }\n");
-	    }
+	  frame_debug_printf ("  -> nullptr // this frame has same ID");
+
 	  this_frame->stop_reason = UNWIND_SAME_ID;
 	  /* Unlink.  */
 	  prev_frame->next = NULL;
@@ -2157,23 +2111,17 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
 
   if (frame_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "{ get_prev_frame_always (this_frame=");
       if (this_frame != NULL)
-	fprintf_unfiltered (gdb_stdlog, "%d", this_frame->level);
+	frame_debug_printf ("this_frame=%d", this_frame->level);
       else
-	fprintf_unfiltered (gdb_stdlog, "<NULL>");
-      fprintf_unfiltered (gdb_stdlog, ") ");
+	frame_debug_printf ("this_frame=nullptr");
     }
 
   /* Only try to do the unwind once.  */
   if (this_frame->prev_p)
     {
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, this_frame->prev);
-	  fprintf_unfiltered (gdb_stdlog, " // cached \n");
-	}
+      frame_debug_printf ("  -> %s // cached",
+			  this_frame->prev->to_string ().c_str ());
       return this_frame->prev;
     }
 
@@ -2220,15 +2168,9 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
 
   if (this_frame->stop_reason != UNWIND_NO_REASON)
     {
-      if (frame_debug)
-	{
-	  enum unwind_stop_reason reason = this_frame->stop_reason;
-
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, " // %s }\n",
-			      frame_stop_reason_symbol_string (reason));
-	}
+      frame_debug_printf
+	("  -> nullptr // %s",
+	 frame_stop_reason_symbol_string (this_frame->stop_reason));
       return NULL;
     }
 
@@ -2253,13 +2195,7 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
 	morestack_name = morestack_msym->linkage_name ();
       if (!morestack_name || strcmp (morestack_name, "__morestack") != 0)
 	{
-	  if (frame_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, "-> ");
-	      fprint_frame (gdb_stdlog, NULL);
-	      fprintf_unfiltered (gdb_stdlog,
-				  " // this frame ID is inner }\n");
-	    }
+	  frame_debug_printf ("  -> nullptr // this frame ID is inner");
 	  this_frame->stop_reason = UNWIND_INNER_ID;
 	  return NULL;
 	}
@@ -2299,13 +2235,7 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
       if ((lval == lval_memory && lval == nlval && addr == naddr)
 	  || (lval == lval_register && lval == nlval && realnum == nrealnum))
 	{
-	  if (frame_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, "-> ");
-	      fprint_frame (gdb_stdlog, NULL);
-	      fprintf_unfiltered (gdb_stdlog, " // no saved PC }\n");
-	    }
-
+	  frame_debug_printf ("  -> nullptr // no saved PC");
 	  this_frame->stop_reason = UNWIND_NO_SAVED_PC;
 	  this_frame->prev = NULL;
 	  return NULL;
@@ -2407,12 +2337,7 @@ get_prev_frame_raw (struct frame_info *this_frame)
   this_frame->prev = prev_frame;
   prev_frame->next = this_frame;
 
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "-> ");
-      fprint_frame (gdb_stdlog, prev_frame);
-      fprintf_unfiltered (gdb_stdlog, " }\n");
-    }
+  frame_debug_printf ("  -> %s", prev_frame->to_string ().c_str ());
 
   return prev_frame;
 }
@@ -2425,12 +2350,10 @@ frame_debug_got_null_frame (struct frame_info *this_frame,
 {
   if (frame_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "{ get_prev_frame (this_frame=");
       if (this_frame != NULL)
-	fprintf_unfiltered (gdb_stdlog, "%d", this_frame->level);
+	frame_debug_printf ("this_frame=%d -> %s", this_frame->level, reason);
       else
-	fprintf_unfiltered (gdb_stdlog, "<NULL>");
-      fprintf_unfiltered (gdb_stdlog, ") -> // %s}\n", reason);
+	frame_debug_printf ("this_frame=nullptr -> %s", reason);
     }
 }
 
@@ -2944,11 +2867,9 @@ frame_unwind_arch (struct frame_info *next_frame)
 
       next_frame->prev_arch.arch = arch;
       next_frame->prev_arch.p = true;
-      if (frame_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "{ frame_unwind_arch (next_frame=%d) -> %s }\n",
-			    next_frame->level,
-			    gdbarch_bfd_arch_info (arch)->printable_name);
+      frame_debug_printf ("next_frame=%d -> %s",
+			  next_frame->level,
+			  gdbarch_bfd_arch_info (arch)->printable_name);
     }
 
   return next_frame->prev_arch.arch;
