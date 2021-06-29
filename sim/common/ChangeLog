@@ -1,3 +1,8 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (GUILE): New variable.
+	(CGEN): Use $(GUILE).
+
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (SIM_SCACHE): Delete.

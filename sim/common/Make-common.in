@@ -542,7 +542,8 @@ Makefile: Makefile.in $(srccom)/Make-common.in $(config.status)
 
 # CGEN support
 
-CGEN = "`if [ -f ../../guile/libguile/guile ]; then echo ../../guile/libguile/guile; else echo guile ; fi` -l $(CGENDIR)/guile.scm -s"
+GUILE = `if [ -f ../../guile/libguile/guile ]; then echo ../../guile/libguile/guile; else echo guile ; fi`
+CGEN = "$(GUILE) -l $(CGENDIR)/guile.scm -s"
 CGENFLAGS = -v
 CGEN_CPU_DIR = $(CGENDIR)/cpu
 
