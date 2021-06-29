@@ -120,6 +120,11 @@ END_RELOC_NUMBERS (R_RISCV_max)
 /* Additional section types.  */
 #define SHT_RISCV_ATTRIBUTES 0x70000003 /* Section holds attributes.  */
 
+/* Processor specific program header types.  */
+
+/* Location of RISC-V ELF attribute section. */
+#define PT_RISCV_ATTRIBUTES 0x70000003
+
 /* Object attributes.  */
 enum
 {

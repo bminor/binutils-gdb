@@ -62,6 +62,8 @@
 #define ELF_MAXPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 
+#define RISCV_ATTRIBUTES_SECTION_NAME ".riscv.attributes"
+
 /* RISC-V ELF linker hash entry.  */
 
 struct riscv_elf_link_hash_entry
@@ -5158,6 +5160,64 @@ riscv_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 	  || _bfd_elf_is_local_label_name (abfd, sym->name));
 }
 
+static int
+riscv_elf_additional_program_headers (bfd *abfd,
+				      struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  asection *s;
+  int ret = 0;
+
+  /* See if we need a PT_RISCV_ATTRIBUTES segment.  */
+  if (bfd_get_section_by_name (abfd, RISCV_ATTRIBUTES_SECTION_NAME))
+    ++ret;
+
+  return ret;
+}
+
+static bool
+riscv_elf_modify_segment_map (bfd *abfd,
+			      struct bfd_link_info *info)
+{
+  asection *s;
+  struct elf_segment_map *m, **pm;
+  size_t amt;
+
+  /* If there is a .riscv.attributes section, we need a PT_RISCV_ATTRIBUTES
+     segment.  */
+  s = bfd_get_section_by_name (abfd, RISCV_ATTRIBUTES_SECTION_NAME);
+  if (s != NULL)
+    {
+      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
+	if (m->p_type == PT_RISCV_ATTRIBUTES)
+	  break;
+      /* If there is already a PT_RISCV_ATTRIBUTES header, avoid adding
+	 another.  */
+      if (m == NULL)
+	{
+	  amt = sizeof (*m);
+	  m = bfd_zalloc (abfd, amt);
+	  if (m == NULL)
+	    return false;
+
+	  m->p_type = PT_RISCV_ATTRIBUTES;
+	  m->count = 1;
+	  m->sections[0] = s;
+
+	  /* We want to put it after the PHDR and INTERP segments.  */
+	  pm = &elf_seg_map (abfd);
+	  while (*pm != NULL
+		 && ((*pm)->p_type == PT_PHDR
+		     || (*pm)->p_type == PT_INTERP))
+	    pm = &(*pm)->next;
+
+	  m->next = *pm;
+	  *pm = m;
+	}
+    }
+
+  return true;
+}
+
 #define TARGET_LITTLE_SYM			riscv_elfNN_vec
 #define TARGET_LITTLE_NAME			"elfNN-littleriscv"
 #define TARGET_BIG_SYM				riscv_elfNN_be_vec
@@ -5190,6 +5250,9 @@ riscv_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 #define elf_info_to_howto			riscv_info_to_howto_rela
 #define bfd_elfNN_bfd_relax_section		_bfd_riscv_relax_section
 #define bfd_elfNN_mkobject			elfNN_riscv_mkobject
+#define elf_backend_additional_program_headers \
+  riscv_elf_additional_program_headers
+#define elf_backend_modify_segment_map		riscv_elf_modify_segment_map
 
 #define elf_backend_init_index_section		_bfd_elf_init_1_index_section
 
@@ -5211,6 +5274,6 @@ riscv_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 #undef  elf_backend_obj_attrs_section_type
 #define elf_backend_obj_attrs_section_type	SHT_RISCV_ATTRIBUTES
 #undef  elf_backend_obj_attrs_section
-#define elf_backend_obj_attrs_section		".riscv.attributes"
+#define elf_backend_obj_attrs_section		RISCV_ATTRIBUTES_SECTION_NAME
 
 #include "elfNN-target.h"

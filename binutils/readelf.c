@@ -4095,6 +4095,16 @@ get_tic6x_segment_type (unsigned long type)
 }
 
 static const char *
+get_riscv_segment_type (unsigned long type)
+{
+  switch (type)
+    {
+    case PT_RISCV_ATTRIBUTES: return "RISCV_ATTRIBUTES";
+    default:                  return NULL;
+    }
+}
+
+static const char *
 get_hpux_segment_type (unsigned long type, unsigned e_machine)
 {
   if (e_machine == EM_PARISC)
@@ -4202,6 +4212,9 @@ get_segment_type (Filedata * filedata, unsigned long p_type)
 	    case EM_S390:
 	    case EM_S390_OLD:
 	      result = get_s390_segment_type (p_type);
+	      break;
+	    case EM_RISCV:
+	      result = get_riscv_segment_type (p_type);
 	      break;
 	    default:
 	      result = NULL;

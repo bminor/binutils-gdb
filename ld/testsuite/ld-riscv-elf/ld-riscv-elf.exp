@@ -112,6 +112,7 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "attr-merge-priv-spec-failed-04"
     run_dump_test "attr-merge-priv-spec-failed-05"
     run_dump_test "attr-merge-priv-spec-failed-06"
+    run_dump_test "attr-phdr"
     run_ld_link_tests [list \
 	[list "Weak reference 32" "-T weakref.ld -m[riscv_choose_ilp32_emul]" "" \
 	    "-march=rv32i -mabi=ilp32" {weakref32.s} \
