@@ -1,3 +1,27 @@
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-defs.h (cgen_cpu_max_extra_bytes): Add SIM_DESC arg.
+	* cgen-utils.c (cgen_cpu_max_extra_bytes): Likewise.  Change sim_machs
+	to STATE_MACHS.
+	* sim-base.h (struct sim_state): Add machs.
+	(STATE_MACHS): New define.
+	* sim-cpu.c (sim_cpu_alloc): Pass sd to cgen_cpu_max_extra_bytes.
+	* sim-model.c (model_option_handler): Pass sd to sim_model_lookup.
+	Change sim_machs to STATE_MACHS.
+	(sim_model_lookup): Add SIM_DESC arg.  Change sim_machs to
+	STATE_MACHS.
+	(sim_mach_lookup): Likewiwse.
+	(sim_mach_lookup_bfd_name): Likewise.
+	(sim_model_init): Pass sd to sim_model_lookup and
+	sim_mach_lookup_bfd_name.
+	(sim_machs): Delete.
+	* sim-model.h (enum mach_attr): Delete.
+	(SIM_MODEL): Change num to int.
+	(sim_machs): Delete.
+	(sim_model_lookup): Add SIM_DESC arg.
+	(sim_mach_lookup): Likewise.
+	(sim_mach_lookup_bfd_name): Likewise.
+
 2021-06-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (Makefile): Replace $(arch) and pass more files to

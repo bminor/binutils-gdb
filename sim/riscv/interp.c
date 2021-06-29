@@ -53,6 +53,8 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
+extern const SIM_MACH * const riscv_sim_machs[];
+
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 	  struct bfd *abfd, char * const *argv)
@@ -63,6 +65,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 				       sizeof (struct riscv_sim_state));
 
   /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = riscv_sim_machs;
   current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */

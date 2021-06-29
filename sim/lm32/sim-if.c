@@ -80,6 +80,8 @@ find_limit (SIM_DESC sd)
   return (addr + 65536) & ~(0xffffUL);
 }
 
+extern const SIM_MACH * const lm32_sim_machs[];
+
 /* Create an instance of the simulator.  */
 
 SIM_DESC
@@ -92,6 +94,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   unsigned long base, limit;
 
   /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = lm32_sim_machs;
   current_alignment = STRICT_ALIGNMENT;
   current_target_byte_order = BFD_ENDIAN_BIG;
 

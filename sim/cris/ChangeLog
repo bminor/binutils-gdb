@@ -1,3 +1,10 @@
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* arch.c (sim_machs): Rename to ...
+	(cris_sim_machs): ... this.
+	* sim-if.c (cris_sim_machs): New decl.
+	(sim_open): Set STATE_MACH.
+
 2021-06-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (stamp-v10fcpu): Do not insert cgen-ops.h include.

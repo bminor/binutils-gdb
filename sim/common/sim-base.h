@@ -143,6 +143,10 @@ struct sim_state {
   const char *target;
 #define STATE_TARGET(sd) ((sd)->target)
 
+  /* List of machs available.  */
+  const SIM_MACH * const *machs;
+#define STATE_MACHS(sd) ((sd)->machs)
+
   /* In standalone simulator, this is the program's arguments passed
      on the command line.  */
   char **prog_argv;

@@ -608,6 +608,8 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
   return ok;
 }
 
+extern const SIM_MACH * const cris_sim_machs[];
+
 /* Create an instance of the simulator.  */
 
 SIM_DESC
@@ -656,6 +658,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   bfd_byte sp_init[4] = {0, 0, 0, 0};
 
   /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = cris_sim_machs;
   current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */

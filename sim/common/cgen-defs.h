@@ -146,7 +146,7 @@ extern CPU_INSN_NAME_FN cgen_insn_name;
 /* Return the maximum number of extra bytes required for a sim_cpu struct.  */
 /* ??? Ok, yes, this is less pretty than it should be.  Give me a better
    language [or suggest a better way].  */
-extern int cgen_cpu_max_extra_bytes (void);
+extern int cgen_cpu_max_extra_bytes (SIM_DESC);
 
 /* Target supplied routine to process an invalid instruction.  */
 extern SEM_PC sim_engine_invalid_insn (SIM_CPU *, IADDR, SEM_PC);

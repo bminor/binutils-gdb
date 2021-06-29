@@ -48,7 +48,7 @@ sim_cpu_alloc (SIM_DESC sd)
   int extra_bytes = 0;
 
 #ifdef CGEN_ARCH
-  extra_bytes += cgen_cpu_max_extra_bytes ();
+  extra_bytes += cgen_cpu_max_extra_bytes (sd);
 #endif
 
   return zalloc (sizeof (sim_cpu) + extra_bytes);

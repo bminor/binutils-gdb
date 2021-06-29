@@ -101,14 +101,16 @@ cgen_insn_name (SIM_CPU *cpu, int i)
 /* Return the maximum number of extra bytes required for a SIM_CPU struct.  */
 
 int
-cgen_cpu_max_extra_bytes (void)
+cgen_cpu_max_extra_bytes (SIM_DESC sd)
 {
-  int i;
+  const SIM_MACH * const *machp;
   int extra = 0;
 
-  for (i = 0; sim_machs[i] != 0; ++i)
+  SIM_ASSERT (STATE_MACHS (sd) != NULL);
+
+  for (machp = STATE_MACHS (sd); *machp != NULL; ++machp)
     {
-      int size = IMP_PROPS_SIM_CPU_SIZE (MACH_IMP_PROPS (sim_machs[i]));
+      int size = IMP_PROPS_SIM_CPU_SIZE (MACH_IMP_PROPS (*machp));
       if (size > extra)
 	extra = size;
     }

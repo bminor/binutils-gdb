@@ -703,6 +703,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
 				       sizeof (struct bfin_board_data));
 
   /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = bfin_sim_machs;
   current_alignment = STRICT_ALIGNMENT;
   current_target_byte_order = BFD_ENDIAN_LITTLE;
 

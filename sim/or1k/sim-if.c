@@ -150,6 +150,8 @@ or1k_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt, char *arg,
   return SIM_RC_FAIL;
 }
 
+extern const SIM_MACH * const or1k_sim_machs[];
+
 /* Create an instance of the simulator.  */
 
 SIM_DESC
@@ -161,6 +163,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   int i;
 
   /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = or1k_sim_machs;
   current_target_byte_order = BFD_ENDIAN_BIG;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */

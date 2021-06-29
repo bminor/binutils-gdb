@@ -50,6 +50,8 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
+extern const SIM_MACH * const iq2000_sim_machs[];
+
 /* Create an instance of the simulator.  */
 
 SIM_DESC
@@ -61,6 +63,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   SIM_DESC sd = sim_state_alloc (kind, callback);
 
   /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = iq2000_sim_machs;
   current_alignment = STRICT_ALIGNMENT;
   current_target_byte_order = BFD_ENDIAN_BIG;
 

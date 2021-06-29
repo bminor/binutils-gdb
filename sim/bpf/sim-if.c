@@ -111,6 +111,8 @@ bpf_free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
+extern const SIM_MACH * const bpf_sim_machs[];
+
 /* Create an instance of the simulator.  */
 
 SIM_DESC
@@ -124,6 +126,9 @@ sim_open (SIM_OPEN_KIND kind,
      instruction will need that information, to update %fp.  */
 
   SIM_DESC sd = sim_state_alloc (kind, callback);
+
+  /* Set default options before parsing user options.  */
+  STATE_MACHS (sd) = bpf_sim_machs;
 
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     goto error;
