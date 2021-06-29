@@ -628,12 +628,10 @@ PACKAGE_VERSION
 PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
-SHELL
-sim_default_model'
+SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_sim_default_model
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1241,13 +1239,6 @@ if test -n "$ac_init_help"; then
 
   cat <<\_ACEOF
 
-Optional Features:
-  --disable-option-checking  ignore unrecognized --enable/--with options
-  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
-  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-sim-default-model=model
-                          Specify default model to simulate
-
 Report bugs to the package provider.
 _ACEOF
 ac_status=$?
@@ -1678,23 +1669,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-default_sim_default_model="bf537"
-# Check whether --enable-sim-default-model was given.
-if test "${enable_sim_default_model+set}" = set; then :
-  enableval=$enable_sim_default_model; case "${enableval}" in
-  yes|no) as_fn_error $? "\"Missing argument to --enable-sim-default-model\"" "$LINENO" 5;;
-  *)	sim_default_model="-DWITH_DEFAULT_MODEL='\"${enableval}\"'";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_default_model" != x""; then
-  echo "Setting default model = $sim_default_model" 6>&1
-fi
-else
-  sim_default_model="-DWITH_DEFAULT_MODEL='\"${default_sim_default_model}\"'"
-fi
-
-
-
 cgen_breaks=""
 if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
 cgen_breaks="break cgen_rtx_error";
@@ -1709,7 +1683,6 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
-
 
 
 

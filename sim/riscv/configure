@@ -628,12 +628,10 @@ PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
-sim_default_model
 sim_bitsize'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_sim_default_model
 enable_sim_bitsize
 '
       ac_precious_vars='build_alias
@@ -1246,8 +1244,6 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-sim-default-model=model
-                          Specify default model to simulate
   --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
 
 Report bugs to the package provider.
@@ -1680,29 +1676,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-# Select the default model for the target.
-riscv_model=
-case "${target}" in
-riscv32*) riscv_model="RV32G" ;;
-riscv*) riscv_model="RV64G" ;;
-esac
-
-default_sim_default_model="${riscv_model}"
-# Check whether --enable-sim-default-model was given.
-if test "${enable_sim_default_model+set}" = set; then :
-  enableval=$enable_sim_default_model; case "${enableval}" in
-  yes|no) as_fn_error $? "\"Missing argument to --enable-sim-default-model\"" "$LINENO" 5;;
-  *)	sim_default_model="-DWITH_DEFAULT_MODEL='\"${enableval}\"'";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_default_model" != x""; then
-  echo "Setting default model = $sim_default_model" 6>&1
-fi
-else
-  sim_default_model="-DWITH_DEFAULT_MODEL='\"${default_sim_default_model}\"'"
-fi
-
-
-
 # Select the bitsize of the target.
 riscv_addr_bitsize=
 case "${target}" in
@@ -1783,7 +1756,6 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
-
 
 
 

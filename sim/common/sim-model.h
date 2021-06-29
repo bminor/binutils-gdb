@@ -47,13 +47,6 @@ typedef struct {
 #define MAX_UNITS 1
 #endif
 
-#ifndef WITH_DEFAULT_MODEL
-# define WITH_DEFAULT_MODEL NULL
-# define WITH_MODEL_P 0
-#else
-# define WITH_MODEL_P 1
-#endif
-
 typedef int (MODEL_FN) (sim_cpu *, void *);
 
 typedef struct {

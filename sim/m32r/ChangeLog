@@ -1,5 +1,12 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Delete SIM_AC_OPTION_DEFAULT_MODEL call.
+	* sim-if.c (sim_open): Set STATE_MODEL_NAME.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* arch.c (sim_machs): Rename to ...
 	(m32r_sim_machs): ... this.
 	* sim-if.c (m32r_sim_machs): New decl.

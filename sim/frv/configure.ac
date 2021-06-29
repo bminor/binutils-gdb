@@ -3,7 +3,6 @@ AC_INIT(Makefile.in)
 AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
 SIM_AC_OPTION_SCACHE(16384)
-SIM_AC_OPTION_DEFAULT_MODEL(fr500)
 
 #
 # Enable making unknown traps dump out registers

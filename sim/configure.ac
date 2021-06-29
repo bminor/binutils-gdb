@@ -172,7 +172,6 @@ dnl respective SIM_AC_OPTION_xxx call above, we can drop these.
 AC_SUBST(sim_bitsize)
 AC_SUBST(sim_float)
 AC_SUBST(sim_scache)
-AC_SUBST(sim_default_model)
 AC_SUBST(sim_reserved_bits)
 
 dnl Some arches have unique configure flags.

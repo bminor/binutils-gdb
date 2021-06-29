@@ -95,6 +95,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   /* Set default options before parsing user options.  */
   STATE_MACHS (sd) = lm32_sim_machs;
+  STATE_MODEL_NAME (sd) = "lm32";
   current_alignment = STRICT_ALIGNMENT;
   current_target_byte_order = BFD_ENDIAN_BIG;
 

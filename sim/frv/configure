@@ -629,13 +629,11 @@ PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
-sim_scache
-sim_default_model'
+sim_scache'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_sim_scache
-enable_sim_default_model
 enable_sim_trapdump
 '
       ac_precious_vars='build_alias
@@ -1250,8 +1248,6 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-sim-scache=size
                           Specify simulator execution cache size
-  --enable-sim-default-model=model
-                          Specify default model to simulate
   --enable-sim-trapdump   Make unknown traps dump the registers
 
 Report bugs to the package provider.
@@ -1704,22 +1700,6 @@ fi
 
 
 
-default_sim_default_model="fr500"
-# Check whether --enable-sim-default-model was given.
-if test "${enable_sim_default_model+set}" = set; then :
-  enableval=$enable_sim_default_model; case "${enableval}" in
-  yes|no) as_fn_error $? "\"Missing argument to --enable-sim-default-model\"" "$LINENO" 5;;
-  *)	sim_default_model="-DWITH_DEFAULT_MODEL='\"${enableval}\"'";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_default_model" != x""; then
-  echo "Setting default model = $sim_default_model" 6>&1
-fi
-else
-  sim_default_model="-DWITH_DEFAULT_MODEL='\"${default_sim_default_model}\"'"
-fi
-
-
-
 #
 # Enable making unknown traps dump out registers
 #
@@ -1752,7 +1732,6 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
-
 
 
 

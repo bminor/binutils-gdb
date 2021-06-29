@@ -129,6 +129,7 @@ sim_open (SIM_OPEN_KIND kind,
 
   /* Set default options before parsing user options.  */
   STATE_MACHS (sd) = bpf_sim_machs;
+  STATE_MODEL_NAME (sd) = "bpf-def";
 
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
     goto error;

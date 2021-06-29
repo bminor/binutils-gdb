@@ -1,5 +1,16 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (SIM_DEFAULT_MODEL): Delete.
+	* sim-base.h (struct sim_state): Add model_name.
+	(STATE_MODEL_NAME): Define.
+	* sim-model.c (model_option_handler): Set STATE_MODEL_NAME.
+	(sim_model_init): Delete WITH_MODEL_P check.  Change
+	WITH_DEFAULT_MODEL to STATE_MODEL_NAME.
+	* sim-model.h (WITH_DEFAULT_MODEL): Delete.
+	(WITH_MODEL_P): Delete.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-defs.h (cgen_cpu_max_extra_bytes): Add SIM_DESC arg.
 	* cgen-utils.c (cgen_cpu_max_extra_bytes): Likewise.  Change sim_machs
 	to STATE_MACHS.

@@ -68,6 +68,7 @@ model_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	    sim_io_eprintf (sd, "unknown model `%s'\n", arg);
 	    return SIM_RC_FAIL;
 	  }
+	STATE_MODEL_NAME (sd) = arg;
 	sim_model_set (sd, cpu, model);
 	break;
       }
@@ -209,9 +210,6 @@ sim_model_init (SIM_DESC sd)
 {
   SIM_CPU *cpu;
 
-  if (!WITH_MODEL_P)
-    return SIM_RC_OK;
-
   /* If both cpu model and state architecture are set, ensure they're
      compatible.  If only one is set, set the other.  If neither are set,
      use the default model.  STATE_ARCHITECTURE is the bfd_arch_info data
@@ -222,10 +220,11 @@ sim_model_init (SIM_DESC sd)
   cpu = STATE_CPU (sd, 0);
 
   if (! STATE_ARCHITECTURE (sd)
-      && ! CPU_MACH (cpu))
+      && ! CPU_MACH (cpu)
+      && STATE_MODEL_NAME (sd))
     {
       /* Set the default model.  */
-      const SIM_MODEL *model = sim_model_lookup (sd, WITH_DEFAULT_MODEL);
+      const SIM_MODEL *model = sim_model_lookup (sd, STATE_MODEL_NAME (sd));
       SIM_ASSERT (model != NULL);
       sim_model_set (sd, NULL, model);
     }
@@ -242,7 +241,7 @@ sim_model_init (SIM_DESC sd)
 	  return SIM_RC_FAIL;
 	}
     }
-  else if (STATE_ARCHITECTURE (sd))
+  else if (STATE_ARCHITECTURE (sd) && STATE_MACHS (sd))
     {
       /* Use the default model for the selected machine.
 	 The default model is the first one in the list.  */
@@ -257,7 +256,7 @@ sim_model_init (SIM_DESC sd)
 	}
       sim_model_set (sd, NULL, MACH_MODELS (mach));
     }
-  else
+  else if (CPU_MACH (cpu))
     {
       STATE_ARCHITECTURE (sd) = bfd_scan_arch (MACH_BFD_NAME (CPU_MACH (cpu)));
     }

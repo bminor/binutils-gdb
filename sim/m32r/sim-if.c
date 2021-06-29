@@ -58,6 +58,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   /* Set default options before parsing user options.  */
   STATE_MACHS (sd) = m32r_sim_machs;
+  STATE_MODEL_NAME (sd) = "m32r/d";
   current_alignment = STRICT_ALIGNMENT;
   current_target_byte_order = BFD_ENDIAN_BIG;
 

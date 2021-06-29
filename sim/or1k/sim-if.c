@@ -164,6 +164,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   /* Set default options before parsing user options.  */
   STATE_MACHS (sd) = or1k_sim_machs;
+  STATE_MODEL_NAME (sd) = "or1200";
   current_target_byte_order = BFD_ENDIAN_BIG;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */

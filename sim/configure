@@ -640,7 +640,6 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 SIM_RX_CYCLE_ACCURATE_FLAGS
 sim_reserved_bits
-sim_default_model
 sim_scache
 sim_float
 sim_bitsize
@@ -12180,7 +12179,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12183 "configure"
+#line 12182 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12286,7 +12285,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12289 "configure"
+#line 12288 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14667,7 +14666,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
-
 
 
 

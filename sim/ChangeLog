@@ -1,3 +1,10 @@
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (sim_default_model): Delete.
+	* m4/sim_ac_output.m4 (sim_default_model): Likewise.
+	* configure, Makefile.in: Regenerate.
+	* m4/sim_ac_option_default_model.m4: Removed.
+
 2021-06-29  Mike Frysinger  <vapier@gentoo.org>
 
 	* m4/sim_ac_option_warnings.m4: Add -Wunused-but-set-parameter.
