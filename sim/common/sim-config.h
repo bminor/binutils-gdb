@@ -252,29 +252,6 @@ extern int current_floating_point;
 					 | MONITOR_INSTRUCTION_ISSUE)
 
 
-/* Current CPU model (models are in the generated models.h include file)  */
-#ifndef WITH_MODEL
-#define WITH_MODEL			0
-#endif
-
-#define CURRENT_MODEL (WITH_MODEL	\
-		       ? WITH_MODEL	\
-		       : current_model)
-
-#define MODEL_ISSUE_IGNORE		(-1)
-#define MODEL_ISSUE_PROCESS		1
-
-#ifndef WITH_MODEL_ISSUE
-#define WITH_MODEL_ISSUE		0
-#endif
-
-extern int current_model_issue;
-#define CURRENT_MODEL_ISSUE (WITH_MODEL_ISSUE	\
-			     ? WITH_MODEL_ISSUE	\
-			     : current_model_issue)
-
-
-
 /* Whether or not input/output just uses stdio, or uses printf_filtered for
    output, and polling input for input.  */
 

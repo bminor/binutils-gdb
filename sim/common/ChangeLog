@@ -1,5 +1,11 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-config.h (WITH_MODEL): Delete.
+	(CURRENT_MODEL, MODEL_ISSUE_IGNORE, MODEL_ISSUE_PROCESS,
+	WITH_MODEL_ISSUE, CURRENT_MODEL_ISSUE): Likewise.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (SIM_DEFAULT_MODEL): Delete.
 	* sim-base.h (struct sim_state): Add model_name.
 	(STATE_MODEL_NAME): Define.
