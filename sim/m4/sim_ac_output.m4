@@ -47,7 +47,6 @@ dnl but always used by common/Make-common.in.  So we have to subst here even
 dnl when the rest of the code is in the respective macros.
 AC_SUBST(sim_bitsize)
 AC_SUBST(sim_float)
-AC_SUBST(sim_scache)
 AC_SUBST(sim_reserved_bits)
 
 dnl Used by common/Make-common.in to see which configure script created it.

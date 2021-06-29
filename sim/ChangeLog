@@ -1,5 +1,13 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Call SIM_AC_OPTION_SCACHE.
+	(sim_scache): Delete.
+	* m4/sim_ac_option_scache.m4: Delete first arg.  Define WITH_SCACHE.
+	* m4/sim_ac_output.m4 (sim_scache): Delete.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Remove [true] from bfin SIM_TARGET call.
 	* configure, Makefile.in: Regenerate.
 

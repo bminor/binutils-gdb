@@ -2,8 +2,6 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Makefile.in)
 AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
-SIM_AC_OPTION_SCACHE(16384)
-
 dnl Enable making unknown traps dump out registers
 AC_MSG_CHECKING([whether sim frv should dump cpu state on unknown traps])
 AC_ARG_ENABLE(sim-frv-trapdump,

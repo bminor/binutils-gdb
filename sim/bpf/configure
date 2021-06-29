@@ -627,13 +627,11 @@ PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
-sim_scache
 sim_bitsize'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_sim_bitsize
-enable_sim_scache
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1246,8 +1244,6 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
-  --enable-sim-scache=size
-                          Specify simulator execution cache size
 
 Report bugs to the package provider.
 _ACEOF
@@ -1739,25 +1735,6 @@ fi
 fi
 
 
-default_sim_scache="16384"
-# Check whether --enable-sim-scache was given.
-if test "${enable_sim_scache+set}" = set; then :
-  enableval=$enable_sim_scache; case "${enableval}" in
-  yes)	sim_scache="-DWITH_SCACHE=${default_sim_scache}";;
-  no)	sim_scache="-DWITH_SCACHE=0" ;;
-  [0-9]*) sim_scache="-DWITH_SCACHE=${enableval}";;
-  *)	as_fn_error $? "\"Bad value $enableval passed to --enable-sim-scache\"" "$LINENO" 5;
-	sim_scache="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_scache" != x""; then
-  echo "Setting scache size = $sim_scache" 6>&1
-fi
-else
-  sim_scache="-DWITH_SCACHE=${default_sim_scache}"
-fi
-
-
-
 cgen_breaks=""
 if grep CGEN_MAINT $srcdir/Makefile.in >/dev/null; then
 cgen_breaks="break cgen_rtx_error";
@@ -1772,7 +1749,6 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
-
 
 
 

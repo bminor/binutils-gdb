@@ -586,7 +586,6 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
-sim_scache
 cgen_breaks
 sim_multi_obj
 sim_multi_src
@@ -2204,7 +2203,6 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
-
 
 
 

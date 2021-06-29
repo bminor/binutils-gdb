@@ -469,6 +469,9 @@
 /* Sim profile settings */
 #undef WITH_PROFILE
 
+/* Sim cache szie */
+#undef WITH_SCACHE
+
 /* How to route I/O */
 #undef WITH_STDIO
 

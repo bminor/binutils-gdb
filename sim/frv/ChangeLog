@@ -1,5 +1,11 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Delete SIM_AC_OPTION_SCACHE call.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_EXTRA_CFLAGS): Change to SIM_FRV_TRAPDUMP_FLAGS.
 	* configure.ac: Change sim-trapdump to sim-frv-trapdump.
 	* configure: Regenerate.

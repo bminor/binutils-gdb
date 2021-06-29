@@ -640,7 +640,6 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 SIM_RX_CYCLE_ACCURATE_FLAGS
 sim_reserved_bits
-sim_scache
 sim_float
 sim_bitsize
 SIM_INLINE
@@ -840,6 +839,7 @@ enable_sim_environment
 enable_sim_hardware
 enable_sim_inline
 enable_sim_profile
+enable_sim_scache
 enable_sim_stdio
 enable_sim_trace
 enable_werror
@@ -1526,6 +1526,8 @@ Optional Features:
                           Specify which functions should be inlined
   --enable-sim-profile=opts
                           Enable profiling flags
+  --enable-sim-scache=size
+                          Specify simulator execution cache size
   --enable-sim-stdio      Specify whether to use stdio for console
                           input/output
   --enable-sim-trace=opts Enable tracing of simulated programs
@@ -12178,7 +12180,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12181 "configure"
+#line 12183 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12284,7 +12286,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12287 "configure"
+#line 12289 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14516,6 +14518,27 @@ _ACEOF
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_profile" >&5
 $as_echo "$sim_profile" >&6; }
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim cache size" >&5
+$as_echo_n "checking for sim cache size... " >&6; }
+sim_scache="16384"
+# Check whether --enable-sim-scache was given.
+if test "${enable_sim_scache+set}" = set; then :
+  enableval=$enable_sim_scache; case "${enableval}" in
+  yes)	;;
+  no)	sim_scache="0";;
+  [0-9]*) sim_scache="${enableval}";;
+  *)	as_fn_error $? "\"Bad value $enableval passed to --enable-sim-scache\"" "$LINENO" 5;;
+esac
+fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_SCACHE $sim_scache
+_ACEOF
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_scache" >&5
+$as_echo "$sim_scache" >&6; }
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim stdio debug behavior" >&5
 $as_echo_n "checking for sim stdio debug behavior... " >&6; }
 sim_stdio="0"
@@ -14668,7 +14691,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
-
 
 
 

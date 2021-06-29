@@ -1,5 +1,11 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (SIM_SCACHE): Delete.
+	* cgen-scache.h (WITH_SCACHE): Delete.
+	* sim-profile.c (profile_info): Check CGEN_ARCH.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-scache.c (scache_install): Rename to ...
 	(sim_install_scache): ... this.  New prototype.
 	* cgen-scache.h (scache_install): Delete.
