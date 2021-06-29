@@ -1320,6 +1320,7 @@ v850_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static const struct frame_unwind v850_frame_unwind = {
+  "v850 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   v850_frame_this_id,

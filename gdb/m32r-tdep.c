@@ -835,6 +835,7 @@ m32r_frame_prev_register (struct frame_info *this_frame,
 }
 
 static const struct frame_unwind m32r_frame_unwind = {
+  "m32r prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   m32r_frame_this_id,

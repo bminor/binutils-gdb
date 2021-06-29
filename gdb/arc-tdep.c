@@ -1922,6 +1922,7 @@ arc_sigtramp_frame_sniffer (const struct frame_unwind *self,
    accepts the frame.  */
 
 static const struct frame_unwind arc_frame_unwind = {
+  "arc prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   arc_frame_this_id,
@@ -1937,6 +1938,7 @@ static const struct frame_unwind arc_frame_unwind = {
    context.  */
 
 static const struct frame_unwind arc_sigtramp_frame_unwind = {
+  "arc sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   arc_sigtramp_frame_this_id,

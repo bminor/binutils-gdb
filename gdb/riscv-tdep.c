@@ -3320,6 +3320,7 @@ riscv_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind riscv_frame_unwind =
 {
+  /*.name          =*/ "riscv prologue",
   /*.type          =*/ NORMAL_FRAME,
   /*.stop_reason   =*/ default_frame_unwind_stop_reason,
   /*.this_id       =*/ riscv_frame_this_id,

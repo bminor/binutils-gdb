@@ -222,6 +222,7 @@ sparc64obsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind sparc64obsd_frame_unwind =
 {
+  "sparc64 openbsd sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   sparc64obsd_frame_this_id,
@@ -305,6 +306,7 @@ sparc64obsd_trapframe_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind sparc64obsd_trapframe_unwind =
 {
+  "sparc64 openbsd trap",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   sparc64obsd_trapframe_this_id,

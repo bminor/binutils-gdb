@@ -2196,6 +2196,7 @@ i386_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 
 static const struct frame_unwind i386_frame_unwind =
 {
+  "i386 prologue",
   NORMAL_FRAME,
   i386_frame_unwind_stop_reason,
   i386_frame_this_id,
@@ -2317,6 +2318,7 @@ i386_epilogue_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind i386_epilogue_frame_unwind =
 {
+  "i386 epilogue",
   NORMAL_FRAME,
   i386_epilogue_frame_unwind_stop_reason,
   i386_epilogue_frame_this_id,
@@ -2398,6 +2400,7 @@ i386_stack_tramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind i386_stack_tramp_frame_unwind =
 {
+  "i386 stack tramp",
   NORMAL_FRAME,
   i386_epilogue_frame_unwind_stop_reason,
   i386_epilogue_frame_this_id,
@@ -2545,6 +2548,7 @@ i386_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind i386_sigtramp_frame_unwind =
 {
+  "i386 sigtramp",
   SIGTRAMP_FRAME,
   i386_sigtramp_frame_unwind_stop_reason,
   i386_sigtramp_frame_this_id,

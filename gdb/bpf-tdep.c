@@ -184,6 +184,7 @@ bpf_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind bpf_frame_unwind =
 {
+  "bpf prologue",
   NORMAL_FRAME,
   bpf_frame_unwind_stop_reason,
   bpf_frame_this_id,

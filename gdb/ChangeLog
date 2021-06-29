@@ -1,5 +1,12 @@
 2021-06-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* frame-unwind.h (struct frame_unwind) <name>: New.  Update
+	instances everywhere to include this field.
+	* frame-unwind.c (frame_unwind_try_unwinder,
+	frame_unwind_find_by_frame): Add debug messages.
+
+2021-06-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* frame.h (frame_debug_printf): New.
 	* frame.c: Use frame_debug_printf throughout when printing frame
 	debug messages.

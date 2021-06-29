@@ -680,6 +680,7 @@ pyuw_on_new_gdbarch (struct gdbarch *newarch)
       struct frame_unwind *unwinder
 	  = GDBARCH_OBSTACK_ZALLOC (newarch, struct frame_unwind);
 
+      unwinder->name = "python";
       unwinder->type = NORMAL_FRAME;
       unwinder->stop_reason = default_frame_unwind_stop_reason;
       unwinder->this_id = pyuw_this_id;

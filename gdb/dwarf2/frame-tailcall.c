@@ -468,6 +468,7 @@ tailcall_frame_prev_arch (struct frame_info *this_frame,
 
 const struct frame_unwind dwarf2_tailcall_frame_unwind =
 {
+  "dwarf2 tailcall",
   TAILCALL_FRAME,
   default_frame_unwind_stop_reason,
   tailcall_frame_this_id,

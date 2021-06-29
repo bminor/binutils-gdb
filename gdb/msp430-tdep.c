@@ -538,6 +538,7 @@ msp430_prev_register (struct frame_info *this_frame,
 }
 
 static const struct frame_unwind msp430_unwind = {
+  "msp430 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   msp430_this_id,

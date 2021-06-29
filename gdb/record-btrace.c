@@ -1889,6 +1889,7 @@ record_btrace_frame_dealloc_cache (struct frame_info *self, void *this_cache)
 
 const struct frame_unwind record_btrace_frame_unwind =
 {
+  "record-btrace",
   NORMAL_FRAME,
   record_btrace_frame_unwind_stop_reason,
   record_btrace_frame_this_id,
@@ -1900,6 +1901,7 @@ const struct frame_unwind record_btrace_frame_unwind =
 
 const struct frame_unwind record_btrace_tailcall_frame_unwind =
 {
+  "record-btrace tailcall",
   TAILCALL_FRAME,
   record_btrace_frame_unwind_stop_reason,
   record_btrace_frame_this_id,

@@ -1048,6 +1048,7 @@ jit_frame_prev_register (struct frame_info *this_frame, void **cache, int reg)
 
 static const struct frame_unwind jit_frame_unwind =
 {
+  "jit",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   jit_frame_this_id,

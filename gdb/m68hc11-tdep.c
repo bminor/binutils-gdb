@@ -924,6 +924,7 @@ m68hc11_frame_prev_register (struct frame_info *this_frame,
 }
 
 static const struct frame_unwind m68hc11_frame_unwind = {
+  "m68hc11 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   m68hc11_frame_this_id,

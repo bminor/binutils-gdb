@@ -390,6 +390,7 @@ vax_frame_prev_register (struct frame_info *this_frame,
 
 static const struct frame_unwind vax_frame_unwind =
 {
+  "vax prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   vax_frame_this_id,

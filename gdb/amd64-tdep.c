@@ -2702,6 +2702,7 @@ amd64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 
 static const struct frame_unwind amd64_frame_unwind =
 {
+  "amd64 prologue",
   NORMAL_FRAME,
   amd64_frame_unwind_stop_reason,
   amd64_frame_this_id,
@@ -2846,6 +2847,7 @@ amd64_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind amd64_sigtramp_frame_unwind =
 {
+  "amd64 sigtramp",
   SIGTRAMP_FRAME,
   amd64_sigtramp_frame_unwind_stop_reason,
   amd64_sigtramp_frame_this_id,
@@ -2981,6 +2983,7 @@ amd64_epilogue_frame_this_id (struct frame_info *this_frame,
 
 static const struct frame_unwind amd64_epilogue_frame_unwind =
 {
+  "amd64 epilogue",
   NORMAL_FRAME,
   amd64_epilogue_frame_unwind_stop_reason,
   amd64_epilogue_frame_this_id,

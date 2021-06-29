@@ -437,6 +437,7 @@ cris_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind cris_sigtramp_frame_unwind =
 {
+  "cris sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   cris_sigtramp_frame_this_id,
@@ -900,6 +901,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 static const struct frame_unwind cris_frame_unwind = 
 {
+  "cris prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   cris_frame_this_id,

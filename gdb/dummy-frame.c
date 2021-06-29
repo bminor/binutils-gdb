@@ -378,6 +378,7 @@ dummy_frame_this_id (struct frame_info *this_frame,
 
 const struct frame_unwind dummy_frame_unwind =
 {
+  "dummy",
   DUMMY_FRAME,
   default_frame_unwind_stop_reason,
   dummy_frame_this_id,

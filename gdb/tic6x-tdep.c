@@ -457,6 +457,7 @@ tic6x_frame_base_address (struct frame_info *this_frame, void **this_cache)
 
 static const struct frame_unwind tic6x_frame_unwind =
 {
+  "tic6x prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   tic6x_frame_this_id,
@@ -519,6 +520,7 @@ tic6x_stub_unwind_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind tic6x_stub_unwind =
 {
+  "tic6x stub",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   tic6x_stub_this_id,
