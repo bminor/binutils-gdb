@@ -590,7 +590,7 @@ sim_reserved_bits
 sim_float
 sim_bitsize
 cgen_breaks
-sim_trapdump
+SIM_FRV_TRAPDUMP_FLAGS
 target_alias
 host_alias
 build_alias
@@ -634,7 +634,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_sim_scache
-enable_sim_trapdump
+enable_sim_frv_trapdump
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1248,7 +1248,8 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-sim-scache=size
                           Specify simulator execution cache size
-  --enable-sim-trapdump   Make unknown traps dump the registers
+  --enable-sim-frv-trapdump
+                          Make unknown traps dump the registers
 
 Report bugs to the package provider.
 _ACEOF
@@ -1700,21 +1701,24 @@ fi
 
 
 
-#
-# Enable making unknown traps dump out registers
-#
-# Check whether --enable-sim-trapdump was given.
-if test "${enable_sim_trapdump+set}" = set; then :
-  enableval=$enable_sim_trapdump; case "${enableval}" in
-  yes) sim_trapdump="-DTRAPDUMP=1";;
-  no)  sim_trapdump="-DTRAPDUMP=0";;
-  *)   as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-trapdump\"" "$LINENO" 5; sim_trapdump="";;
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sim frv should dump cpu state on unknown traps" >&5
+$as_echo_n "checking whether sim frv should dump cpu state on unknown traps... " >&6; }
+# Check whether --enable-sim-frv-trapdump was given.
+if test "${enable_sim_frv_trapdump+set}" = set; then :
+  enableval=$enable_sim_frv_trapdump; case "${enableval}" in
+yes|no) ;;
+*) as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-trapdump\"" "$LINENO" 5;;
 esac
-if test x"$silent" != x"yes" && test x"$sim_trapdump" != x""; then
-  echo "Setting sim_trapdump = $sim_trapdump" 6>&1
 fi
+
+if test "x${enable_sim_frv_trapdump}" != xno; then
+  SIM_FRV_TRAPDUMP_FLAGS="-DTRAPDUMP=1"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 else
-  sim_trapdump=""
+  SIM_FRV_TRAPDUMP_FLAGS="-DTRAPDUMP=0"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
 

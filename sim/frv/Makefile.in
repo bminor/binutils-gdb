@@ -36,7 +36,7 @@ SIM_EXTRA_DEPS = \
 	registers.h profile.h eng.h \
 	$(sim-options_h)
 
-SIM_EXTRA_CFLAGS = @sim_trapdump@
+SIM_EXTRA_CFLAGS = @SIM_FRV_TRAPDUMP_FLAGS@
 
 SIM_EXTRA_CLEAN = frv-clean
 
