@@ -479,10 +479,6 @@ extern thread_info *find_thread_ptid (inferior *inf, ptid_t ptid);
 extern struct thread_info *find_thread_ptid (process_stratum_target *targ,
 					     ptid_t ptid);
 
-/* Search function to lookup a (non-exited) thread by 'ptid'.  Only
-   searches in threads of INF.  */
-extern struct thread_info *find_thread_ptid (inferior *inf, ptid_t ptid);
-
 /* Find thread by GDB global thread ID.  */
 struct thread_info *find_thread_global_id (int global_id);
 

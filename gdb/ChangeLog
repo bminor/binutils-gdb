@@ -1,3 +1,7 @@
+2021-06-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdbthread.h (find_thread_ptid): Remove the duplicate declaration.
+
 2021-06-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/28017
