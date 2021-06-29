@@ -1,5 +1,10 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Remove [true] from bfin SIM_TARGET call.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (sim_default_model): Delete.
 	* m4/sim_ac_output.m4 (sim_default_model): Likewise.
 	* configure, Makefile.in: Regenerate.

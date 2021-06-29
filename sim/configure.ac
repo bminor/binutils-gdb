@@ -114,7 +114,7 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([aarch64*-*-*], [aarch64])
     SIM_TARGET([arm*-*-*], [arm])
     SIM_TARGET([avr*-*-*], [avr])
-    SIM_TARGET([bfin-*-*], [bfin], [true])
+    SIM_TARGET([bfin-*-*], [bfin])
     SIM_TARGET([bpf-*-*], [bpf], [true])
     SIM_TARGET([cr16*-*-*], [cr16])
     SIM_TARGET([cris-*-* | crisv32-*-*], [cris], [true])

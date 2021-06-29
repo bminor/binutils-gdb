@@ -228,12 +228,12 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
-	arm/Makefile.sim avr/Makefile.sim cr16/Makefile.sim \
-	d10v/Makefile.sim ft32/Makefile.sim h8300/Makefile.sim \
-	m32c/Makefile.sim m68hc11/Makefile.sim mcore/Makefile.sim \
-	microblaze/Makefile.sim moxie/Makefile.sim msp430/Makefile.sim \
-	pru/Makefile.sim rl78/Makefile.sim rx/Makefile.sim \
-	sh/Makefile.sim erc32/Makefile.sim \
+	arm/Makefile.sim avr/Makefile.sim bfin/Makefile.sim \
+	cr16/Makefile.sim d10v/Makefile.sim ft32/Makefile.sim \
+	h8300/Makefile.sim m32c/Makefile.sim m68hc11/Makefile.sim \
+	mcore/Makefile.sim microblaze/Makefile.sim moxie/Makefile.sim \
+	msp430/Makefile.sim pru/Makefile.sim rl78/Makefile.sim \
+	rx/Makefile.sim sh/Makefile.sim erc32/Makefile.sim \
 	example-synacor/Makefile.sim arch-subdir.mk
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
@@ -951,6 +951,8 @@ aarch64/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/aarch64/Makefi
 arm/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/arm/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 avr/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/avr/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+bfin/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/bfin/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 cr16/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/cr16/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

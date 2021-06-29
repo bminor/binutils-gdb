@@ -861,8 +861,7 @@ PKG_CONFIG_PATH
 PKG_CONFIG_LIBDIR
 SDL_CFLAGS
 SDL_LIBS'
-ac_subdirs_all='bfin
-bpf
+ac_subdirs_all='bpf
 cris
 frv
 iq2000
@@ -12179,7 +12178,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12182 "configure"
+#line 12181 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12285,7 +12284,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12288 "configure"
+#line 12287 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13778,10 +13777,11 @@ if test "${enable_sim}" != no; then
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bfin
       fi
+            ac_config_files="$ac_config_files bfin/Makefile.sim:bfin/Makefile.in"
 
+    ac_config_commands="$ac_config_commands bfin/Makefile"
 
-subdirs="$subdirs bfin"
-
+    as_fn_append SIM_SUBDIRS " bfin"
 
     ac_config_commands="$ac_config_commands depdir-bfin"
 
@@ -13795,7 +13795,9 @@ subdirs="$subdirs bfin"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bpf
       fi
-            subdirs="$subdirs bpf"
+
+
+subdirs="$subdirs bpf"
 
 
     ac_config_commands="$ac_config_commands depdir-bpf"
@@ -15744,6 +15746,8 @@ do
     "avr/Makefile.sim") CONFIG_FILES="$CONFIG_FILES avr/Makefile.sim:avr/Makefile.in" ;;
     "avr/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS avr/Makefile" ;;
     "depdir-avr") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-avr" ;;
+    "bfin/Makefile.sim") CONFIG_FILES="$CONFIG_FILES bfin/Makefile.sim:bfin/Makefile.in" ;;
+    "bfin/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS bfin/Makefile" ;;
     "depdir-bfin") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bfin" ;;
     "depdir-bpf") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bpf" ;;
     "cr16/Makefile.sim") CONFIG_FILES="$CONFIG_FILES cr16/Makefile.sim:cr16/Makefile.in" ;;
@@ -17173,6 +17177,18 @@ $as_echo X"$file" |
  rm -f avr/Makesim1.tmp avr/Makesim2.tmp
  ;;
     "depdir-avr":C) $SHELL $ac_aux_dir/mkinstalldirs avr/$DEPDIR ;;
+    "bfin/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/bfin:
+		p
+	}' \
+	<Make-common.sim >bfin/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >bfin/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r bfin/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r bfin/Makesim2.tmp' \
+	<bfin/Makefile.sim >bfin/Makefile
+ rm -f bfin/Makesim1.tmp bfin/Makesim2.tmp
+ ;;
     "depdir-bfin":C) $SHELL $ac_aux_dir/mkinstalldirs bfin/$DEPDIR ;;
     "depdir-bpf":C) $SHELL $ac_aux_dir/mkinstalldirs bpf/$DEPDIR ;;
     "cr16/Makefile":C) sed -n \
