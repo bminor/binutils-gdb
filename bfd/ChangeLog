@@ -1,3 +1,7 @@
+2021-06-29  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd (obsolete configurations): Add netbsdpe.
+
 2021-06-22  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_pcrel_hi_reloc): Added field to store

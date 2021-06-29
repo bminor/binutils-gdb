@@ -53,7 +53,7 @@ case $targ in
     echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
     exit 1
     ;;
- null)
+ *-*-netbsdpe* | null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
       echo "*** Specify --enable-obsolete to build it anyway." >&2
