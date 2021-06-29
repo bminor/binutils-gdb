@@ -1,5 +1,10 @@
 2021-06-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (stamp-v10fcpu): Do not insert cgen-ops.h include.
+	(stamp-v32fcpu): Likewise.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* arch.c (sim_machs): Mark const.
 
 2021-06-28  Mike Frysinger  <vapier@gentoo.org>
