@@ -178,6 +178,7 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
 void
 frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
 {
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
   frame_debug_printf ("this_frame=%d", frame_relative_level (this_frame));
 
   struct gdbarch *gdbarch = get_frame_arch (this_frame);

@@ -560,6 +560,8 @@ skip_tailcall_frames (struct frame_info *frame)
 static void
 compute_frame_id (struct frame_info *fi)
 {
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
+
   gdb_assert (fi->this_id.p == frame_id_status::NOT_COMPUTED);
 
   unsigned int entry_generation = get_frame_cache_generation ();
@@ -1215,12 +1217,10 @@ get_frame_register (struct frame_info *frame,
 struct value *
 frame_unwind_register_value (frame_info *next_frame, int regnum)
 {
-  struct gdbarch *gdbarch;
-  struct value *value;
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
 
   gdb_assert (next_frame != NULL);
-  gdbarch = frame_unwind_arch (next_frame);
-
+  gdbarch *gdbarch = frame_unwind_arch (next_frame);
   frame_debug_printf ("frame=%d, regnum=%d(%s)",
 		      next_frame->level, regnum,
 		      user_reg_map_regnum_to_name (gdbarch, regnum));
@@ -1230,9 +1230,9 @@ frame_unwind_register_value (frame_info *next_frame, int regnum)
     frame_unwind_find_by_frame (next_frame, &next_frame->prologue_cache);
 
   /* Ask this frame to unwind its register.  */
-  value = next_frame->unwind->prev_register (next_frame,
-					     &next_frame->prologue_cache,
-					     regnum);
+  value *value = next_frame->unwind->prev_register (next_frame,
+						    &next_frame->prologue_cache,
+						    regnum);
 
   if (frame_debug)
     {
@@ -2104,10 +2104,9 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
 static struct frame_info *
 get_prev_frame_always_1 (struct frame_info *this_frame)
 {
-  struct gdbarch *gdbarch;
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
 
   gdb_assert (this_frame != NULL);
-  gdbarch = get_frame_arch (this_frame);
 
   if (frame_debug)
     {
@@ -2116,6 +2115,8 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
       else
 	frame_debug_printf ("this_frame=nullptr");
     }
+
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
 
   /* Only try to do the unwind once.  */
   if (this_frame->prev_p)
@@ -2419,6 +2420,8 @@ inside_entry_func (frame_info *this_frame)
 struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
 {
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
+
   CORE_ADDR frame_pc;
   int frame_pc_p;
 

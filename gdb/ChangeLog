@@ -1,5 +1,13 @@
 2021-06-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* frame.h (FRAME_SCOPED_DEBUG_ENTER_EXIT): New.
+	* frame.c (compute_frame_id, get_prev_frame_always_1,
+	get_prev_frame): Use FRAME_SCOPED_DEBUG_ENTER_EXIT.
+	* frame-unwind.c (frame_unwind_find_by_frame): Likewise.
+	(frame_unwind_register_value): Likewise.
+
+2021-06-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* frame-unwind.h (struct frame_unwind) <name>: New.  Update
 	instances everywhere to include this field.
 	* frame-unwind.c (frame_unwind_try_unwinder,

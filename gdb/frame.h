@@ -71,6 +71,7 @@
 
 #include "language.h"
 #include "cli/cli-option.h"
+#include "gdbsupport/common-debug.h"
 
 struct symtab_and_line;
 struct frame_unwind;
@@ -220,6 +221,11 @@ extern bool frame_debug;
 
 #define frame_debug_printf(fmt, ...) \
   debug_prefixed_printf_cond (frame_debug, "frame", fmt, ##__VA_ARGS__)
+
+/* Print "frame" enter/exit debug statements.  */
+
+#define FRAME_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (frame_debug, "frame")
 
 /* Construct a frame ID.  The first parameter is the frame's constant
    stack address (typically the outer-bound), and the second the
