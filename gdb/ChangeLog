@@ -1,3 +1,9 @@
+2021-06-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* frame.h (frame_debug): Change type to bool.
+	* frame.c (frame_debug): Change type to bool.
+	(_initialize_frame): Adjust.
+
 2021-06-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdbthread.h (find_thread_ptid): Remove the duplicate declaration.

@@ -330,7 +330,8 @@ scoped_restore_selected_frame::~scoped_restore_selected_frame ()
 
 /* Flag to control debugging.  */
 
-unsigned int frame_debug;
+bool frame_debug;
+
 static void
 show_frame_debug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
@@ -3195,11 +3196,11 @@ Literal \"unlimited\" or zero means no limit."),
      set_backtrace_option_defs, &set_backtrace_cmdlist, &show_backtrace_cmdlist);
 
   /* Debug this files internals.  */
-  add_setshow_zuinteger_cmd ("frame", class_maintenance, &frame_debug,  _("\
+  add_setshow_boolean_cmd ("frame", class_maintenance, &frame_debug,  _("\
 Set frame debugging."), _("\
 Show frame debugging."), _("\
 When non-zero, frame specific internal debugging is enabled."),
-			     NULL,
-			     show_frame_debug,
-			     &setdebuglist, &showdebuglist);
+			   NULL,
+			   show_frame_debug,
+			   &setdebuglist, &showdebuglist);
 }

@@ -214,7 +214,7 @@ extern const struct frame_id outer_frame_id;
 
 /* Flag to control debugging.  */
 
-extern unsigned int frame_debug;
+extern bool frame_debug;
 
 /* Construct a frame ID.  The first parameter is the frame's constant
    stack address (typically the outer-bound), and the second the
