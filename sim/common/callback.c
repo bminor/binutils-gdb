@@ -544,11 +544,16 @@ os_getpid (host_callback *p)
 static int
 os_kill (host_callback *p, int pid, int signum)
 {
+#ifdef HAVE_KILL
   int result;
 
   result = kill (pid, signum);
   p->last_errno = errno;
   return result;
+#else
+  p->last_errno = ENOSYS;
+  return -1;
+#endif
 }
 
 static int
