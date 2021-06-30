@@ -76,6 +76,17 @@ dnl The cgen virtual insn logic involves enum conversions.
 dnl Disable until we can figure out how to make this work.
 -Wno-enum-conversion
 "
+build_build_warnings="
+dnl TODO Fix the sh/gencode.c which triggers a ton of these warnings.
+-Wno-missing-braces
+dnl TODO Figure out the igen code that triggers warnings w/FORTIFY_SOURCE.
+-Wno-stringop-truncation
+dnl Fixing this requires ATTRIBUTE_FALLTHROUGH support at build time, but we
+dnl don't have gnulib there (yet).
+-Wno-implicit-fallthrough
+dnl TODO Enable this after cleaning up code.
+-Wno-shadow=local
+"
 
 case "${host}" in
   *-*-mingw32*)
@@ -123,8 +134,10 @@ if test x"$silent" != x"yes" && test x"$build_warnings" != x""; then
   echo "Setting GDB specific compiler warning flags = $build_warnings" 6>&1
 fi])dnl
 WARN_CFLAGS=""
+BUILD_WARN_CFLAGS=""
 if test "x${build_warnings}" != x -a "x$GCC" = xyes
 then
+AC_DEFUN([_SIM_TEST_ALL_WARNING_FLAGS], [dnl
     AC_MSG_CHECKING(compiler warning flags)
     # Separate out the -Werror flag as some files just cannot be
     # compiled with it enabled.
@@ -135,6 +148,20 @@ then
 	esac
     done
     AC_MSG_RESULT(${WARN_CFLAGS} ${WERROR_CFLAGS})
+])
+
+    dnl Test the host flags.
+    _SIM_TEST_ALL_WARNING_FLAGS
+
+    dnl Test the build flags.
+    AS_IF([test "x$cross_compiling" = "xno"], [dnl
+	SAVE_WARN_CFLAGS=$WARN_CFLAGS
+	build_warnings=$build_build_warnings
+	_SIM_TEST_ALL_WARNING_FLAGS
+	BUILD_WARN_CFLAGS=$WARN_CFLAGS
+	WARN_CFLAGS=$SAVE_WARN_CFLAGS
+	BUILD_WERROR_CFLAGS=$WERROR_CFLAGS
+    ])
 
     dnl Test individual flags to export to dedicated variables.
     m4_map([_SIM_EXPORT_WARNING_FLAG], m4_split(m4_normalize([
@@ -183,3 +210,5 @@ AC_DEFUN([_SIM_EXPORT_WARNING_FLAG], [dnl
 ])
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WERROR_CFLAGS)
+AC_SUBST(BUILD_WARN_CFLAGS)
+AC_SUBST(BUILD_WERROR_CFLAGS)
