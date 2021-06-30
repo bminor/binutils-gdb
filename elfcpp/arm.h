@@ -306,6 +306,7 @@ enum
   Tag_undefined43 = 43,
   Tag_DIV_use = 44,
   Tag_MVE_arch = 48,
+  Tag_PAC_extension = 50,
   Tag_nodefaults = 64,
   Tag_also_compatible_with = 65,
   Tag_T2EE_use = 66,

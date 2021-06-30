@@ -327,6 +327,7 @@ enum
   Tag_DIV_use,
   Tag_DSP_extension = 46,
   Tag_MVE_arch = 48,
+  Tag_PAC_extension = 50,
   Tag_nodefaults = 64,
   Tag_also_compatible_with,
   Tag_T2EE_use,

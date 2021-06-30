@@ -16139,6 +16139,11 @@ static const char *const arm_attr_tag_MPextension_use_legacy[] =
 static const char *const arm_attr_tag_MVE_arch[] =
   {"No MVE", "MVE Integer only", "MVE Integer and FP"};
 
+static const char * arm_attr_tag_PAC_extension[] =
+  {"No PAC/AUT instructions",
+   "PAC/AUT instructions permitted in the NOP space",
+   "PAC/AUT instructions permitted in the NOP and in the non-NOP space"};
+
 #define LOOKUP(id, name) \
   {id, #name, 0x80 | ARRAY_SIZE(arm_attr_tag_##name), arm_attr_tag_##name}
 static arm_attr_public_tag arm_attr_public_tags[] =
@@ -16179,6 +16184,7 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(44, DIV_use),
   LOOKUP(46, DSP_extension),
   LOOKUP(48, MVE_arch),
+  LOOKUP(50, PAC_extension),
   {64, "nodefaults", 0, NULL},
   {65, "also_compatible_with", 0, NULL},
   LOOKUP(66, T2EE_use),
