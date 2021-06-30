@@ -94,22 +94,23 @@ print_help_for_command (struct cmd_list_element *c,
 
 /* Set the callback function for the specified command.  For each both
    the commands callback and func() are set.  The latter set to a
-   bounce function (unless cfunc / sfunc is NULL that is).  */
+   bounce function (unless simple_func / sfunc is NULL that is).  */
 
 static void
-do_const_cfunc (struct cmd_list_element *c, const char *args, int from_tty)
+do_simple_func (struct cmd_list_element *c, const char *args, int from_tty)
 {
-  c->function.const_cfunc (args, from_tty);
+  c->function.simple_func (args, from_tty);
 }
 
 static void
-set_cmd_cfunc (struct cmd_list_element *cmd, cmd_const_cfunc_ftype *cfunc)
+set_cmd_simple_func (struct cmd_list_element *cmd, cmd_simple_func_ftype *simple_func)
 {
-  if (cfunc == NULL)
+  if (simple_func == NULL)
     cmd->func = NULL;
   else
-    cmd->func = do_const_cfunc;
-  cmd->function.const_cfunc = cfunc;
+    cmd->func = do_simple_func;
+
+  cmd->function.simple_func = simple_func;
 }
 
 static void
@@ -129,9 +130,10 @@ set_cmd_sfunc (struct cmd_list_element *cmd, cmd_const_sfunc_ftype *sfunc)
 }
 
 int
-cmd_cfunc_eq (struct cmd_list_element *cmd, cmd_const_cfunc_ftype *cfunc)
+cmd_simple_func_eq (struct cmd_list_element *cmd, cmd_simple_func_ftype *simple_func)
 {
-  return cmd->func == do_const_cfunc && cmd->function.const_cfunc == cfunc;
+  return (cmd->func == do_simple_func
+	  && cmd->function.simple_func == simple_func);
 }
 
 void
@@ -238,17 +240,17 @@ add_cmd (const char *name, enum command_class theclass,
 {
   cmd_list_element *result = do_add_cmd (name, theclass, doc, list);
   result->func = NULL;
-  result->function.const_cfunc = NULL;
+  result->function.simple_func = NULL;
   return result;
 }
 
 struct cmd_list_element *
 add_cmd (const char *name, enum command_class theclass,
-	 cmd_const_cfunc_ftype *fun,
+	 cmd_simple_func_ftype *fun,
 	 const char *doc, struct cmd_list_element **list)
 {
   cmd_list_element *result = do_add_cmd (name, theclass, doc, list);
-  set_cmd_cfunc (result, fun);
+  set_cmd_simple_func (result, fun);
   return result;
 }
 
@@ -256,7 +258,7 @@ add_cmd (const char *name, enum command_class theclass,
 
 struct cmd_list_element *
 add_cmd_suppress_notification (const char *name, enum command_class theclass,
-			       cmd_const_cfunc_ftype *fun, const char *doc,
+			       cmd_simple_func_ftype *fun, const char *doc,
 			       struct cmd_list_element **list,
 			       int *suppress_notification)
 {
@@ -359,7 +361,7 @@ update_prefix_field_of_prefixed_commands (struct cmd_list_element *c)
 
 struct cmd_list_element *
 add_prefix_cmd (const char *name, enum command_class theclass,
-		cmd_const_cfunc_ftype *fun,
+		cmd_simple_func_ftype *fun,
 		const char *doc, struct cmd_list_element **subcommands,
 		int allow_unknown, struct cmd_list_element **list)
 {
@@ -432,7 +434,7 @@ add_show_prefix_cmd (const char *name, enum command_class theclass,
 struct cmd_list_element *
 add_prefix_cmd_suppress_notification
 	       (const char *name, enum command_class theclass,
-		cmd_const_cfunc_ftype *fun,
+		cmd_simple_func_ftype *fun,
 		const char *doc, struct cmd_list_element **subcommands,
 		int allow_unknown, struct cmd_list_element **list,
 		int *suppress_notification)
@@ -448,7 +450,7 @@ add_prefix_cmd_suppress_notification
 
 struct cmd_list_element *
 add_abbrev_prefix_cmd (const char *name, enum command_class theclass,
-		       cmd_const_cfunc_ftype *fun, const char *doc,
+		       cmd_simple_func_ftype *fun, const char *doc,
 		       struct cmd_list_element **subcommands,
 		       int allow_unknown, struct cmd_list_element **list)
 {
@@ -460,7 +462,7 @@ add_abbrev_prefix_cmd (const char *name, enum command_class theclass,
   return c;
 }
 
-/* This is an empty "cfunc".  */
+/* This is an empty "simple func".  */
 void
 not_just_help_class_command (const char *args, int from_tty)
 {
@@ -951,7 +953,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 /* Add an element to the list of info subcommands.  */
 
 struct cmd_list_element *
-add_info (const char *name, cmd_const_cfunc_ftype *fun, const char *doc)
+add_info (const char *name, cmd_simple_func_ftype *fun, const char *doc)
 {
   return add_cmd (name, class_info, fun, doc, &infolist);
 }
@@ -968,7 +970,7 @@ add_info_alias (const char *name, cmd_list_element *target, int abbrev_flag)
 
 struct cmd_list_element *
 add_com (const char *name, enum command_class theclass,
-	 cmd_const_cfunc_ftype *fun,
+	 cmd_simple_func_ftype *fun,
 	 const char *doc)
 {
   return add_cmd (name, theclass, fun, doc, &cmdlist);
@@ -990,7 +992,7 @@ add_com_alias (const char *name, cmd_list_element *target,
 
 struct cmd_list_element *
 add_com_suppress_notification (const char *name, enum command_class theclass,
-			       cmd_const_cfunc_ftype *fun, const char *doc,
+			       cmd_simple_func_ftype *fun, const char *doc,
 			       int *suppress_notification)
 {
   return add_cmd_suppress_notification (name, theclass, fun, doc,
@@ -2167,5 +2169,5 @@ int
 cli_user_command_p (struct cmd_list_element *cmd)
 {
   return (cmd->theclass == class_user
-	  && (cmd->func == do_const_cfunc || cmd->func == do_sfunc));
+	  && (cmd->func == do_simple_func || cmd->func == do_sfunc));
 }

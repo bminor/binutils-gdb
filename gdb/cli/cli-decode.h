@@ -174,8 +174,12 @@ struct cmd_list_element
      to one of the below.  */
   union
     {
-      /* If type is not_set_cmd, call it like this: */
-      cmd_const_cfunc_ftype *const_cfunc;
+      /* Most commands don't need the cmd_list_element parameter passed to FUNC.
+	 They therefore register a command of this type, which doesn't have the
+	 cmd_list_element parameter.  do_simple_func is installed as FUNC, and
+	 acts as a shim between the two.  */
+      cmd_simple_func_ftype *simple_func;
+
       /* If type is set_cmd or show_cmd, first set the variables,
 	 and then call this: */
       cmd_const_sfunc_ftype *sfunc;

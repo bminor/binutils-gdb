@@ -443,7 +443,7 @@ complete_command (const char *arg, int from_tty)
 int
 is_complete_command (struct cmd_list_element *c)
 {
-  return cmd_cfunc_eq (c, complete_command);
+  return cmd_simple_func_eq (c, complete_command);
 }
 
 static void

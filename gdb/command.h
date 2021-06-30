@@ -128,7 +128,10 @@ var_types;
 /* This structure records one command'd definition.  */
 struct cmd_list_element;
 
-typedef void cmd_const_cfunc_ftype (const char *args, int from_tty);
+/* The "simple" signature of command callbacks, which doesn't include a
+   cmd_list_element parameter.  */
+
+typedef void cmd_simple_func_ftype (const char *args, int from_tty);
 
 /* This structure specifies notifications to be suppressed by a cli
    command interpreter.  */
@@ -158,7 +161,7 @@ extern bool valid_cmd_char_p (int c);
 /* Const-correct variant of the above.  */
 
 extern struct cmd_list_element *add_cmd (const char *, enum command_class,
-					 cmd_const_cfunc_ftype *fun,
+					 cmd_simple_func_ftype *fun,
 					 const char *,
 					 struct cmd_list_element **);
 
@@ -170,7 +173,7 @@ extern struct cmd_list_element *add_cmd (const char *, enum command_class,
 
 extern struct cmd_list_element *add_cmd_suppress_notification
 			(const char *name, enum command_class theclass,
-			 cmd_const_cfunc_ftype *fun, const char *doc,
+			 cmd_simple_func_ftype *fun, const char *doc,
 			 struct cmd_list_element **list,
 			 int *suppress_notification);
 
@@ -181,7 +184,7 @@ extern struct cmd_list_element *add_alias_cmd (const char *,
 
 
 extern struct cmd_list_element *add_prefix_cmd (const char *, enum command_class,
-						cmd_const_cfunc_ftype *fun,
+						cmd_simple_func_ftype *fun,
 						const char *,
 						struct cmd_list_element **,
 						int,
@@ -203,7 +206,7 @@ extern struct cmd_list_element *add_show_prefix_cmd
 
 extern struct cmd_list_element *add_prefix_cmd_suppress_notification
 			(const char *name, enum command_class theclass,
-			 cmd_const_cfunc_ftype *fun,
+			 cmd_simple_func_ftype *fun,
 			 const char *doc, struct cmd_list_element **subcommands,
 			 int allow_unknown,
 			 struct cmd_list_element **list,
@@ -211,7 +214,7 @@ extern struct cmd_list_element *add_prefix_cmd_suppress_notification
 
 extern struct cmd_list_element *add_abbrev_prefix_cmd (const char *,
 						       enum command_class,
-						       cmd_const_cfunc_ftype *fun,
+						       cmd_simple_func_ftype *fun,
 						       const char *,
 						       struct cmd_list_element
 						       **, int,
@@ -250,8 +253,8 @@ extern void set_cmd_completer_handle_brkchars (struct cmd_list_element *,
 
 /* HACK: cagney/2002-02-23: Code, mostly in tracepoints.c, grubs
    around in cmd objects to test the value of the commands sfunc().  */
-extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
-			 cmd_const_cfunc_ftype *cfun);
+extern int cmd_simple_func_eq (struct cmd_list_element *cmd,
+			 cmd_simple_func_ftype *cfun);
 
 /* Execute CMD's pre/post hook.  Throw an error if the command fails.
    If already executing this pre/post hook, or there is no pre/post
@@ -346,7 +349,7 @@ extern int lookup_cmd_composition (const char *text,
 				   struct cmd_list_element **cmd);
 
 extern struct cmd_list_element *add_com (const char *, enum command_class,
-					 cmd_const_cfunc_ftype *fun,
+					 cmd_simple_func_ftype *fun,
 					 const char *);
 
 extern cmd_list_element *add_com_alias (const char *name,
@@ -356,11 +359,11 @@ extern cmd_list_element *add_com_alias (const char *name,
 
 extern struct cmd_list_element *add_com_suppress_notification
 		       (const char *name, enum command_class theclass,
-			cmd_const_cfunc_ftype *fun, const char *doc,
+			cmd_simple_func_ftype *fun, const char *doc,
 			int *supress_notification);
 
 extern struct cmd_list_element *add_info (const char *,
-					  cmd_const_cfunc_ftype *fun,
+					  cmd_simple_func_ftype *fun,
 					  const char *);
 
 extern cmd_list_element *add_info_alias (const char *name,

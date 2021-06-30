@@ -655,7 +655,7 @@ validate_actionline (const char *line, struct breakpoint *b)
   if (c == 0)
     error (_("`%s' is not a tracepoint action, or is ambiguous."), p);
 
-  if (cmd_cfunc_eq (c, collect_pseudocommand))
+  if (cmd_simple_func_eq (c, collect_pseudocommand))
     {
       int trace_string = 0;
 
@@ -723,7 +723,7 @@ validate_actionline (const char *line, struct breakpoint *b)
       while (p && *p++ == ',');
     }
 
-  else if (cmd_cfunc_eq (c, teval_pseudocommand))
+  else if (cmd_simple_func_eq (c, teval_pseudocommand))
     {
       do
 	{			/* Repeat over a comma-separated list.  */
@@ -750,7 +750,7 @@ validate_actionline (const char *line, struct breakpoint *b)
       while (p && *p++ == ',');
     }
 
-  else if (cmd_cfunc_eq (c, while_stepping_pseudocommand))
+  else if (cmd_simple_func_eq (c, while_stepping_pseudocommand))
     {
       char *endp;
 
@@ -761,7 +761,7 @@ validate_actionline (const char *line, struct breakpoint *b)
       p = endp;
     }
 
-  else if (cmd_cfunc_eq (c, end_actions_pseudocommand))
+  else if (cmd_simple_func_eq (c, end_actions_pseudocommand))
     ;
 
   else
@@ -1308,7 +1308,7 @@ encode_actions_1 (struct command_line *action,
       if (cmd == 0)
 	error (_("Bad action list item: %s"), action_exp);
 
-      if (cmd_cfunc_eq (cmd, collect_pseudocommand))
+      if (cmd_simple_func_eq (cmd, collect_pseudocommand))
 	{
 	  int trace_string = 0;
 
@@ -1464,7 +1464,7 @@ encode_actions_1 (struct command_line *action,
 	    }
 	  while (action_exp && *action_exp++ == ',');
 	}			/* if */
-      else if (cmd_cfunc_eq (cmd, teval_pseudocommand))
+      else if (cmd_simple_func_eq (cmd, teval_pseudocommand))
 	{
 	  do
 	    {			/* Repeat over a comma-separated list.  */
@@ -1488,7 +1488,7 @@ encode_actions_1 (struct command_line *action,
 	    }
 	  while (action_exp && *action_exp++ == ',');
 	}			/* if */
-      else if (cmd_cfunc_eq (cmd, while_stepping_pseudocommand))
+      else if (cmd_simple_func_eq (cmd, while_stepping_pseudocommand))
 	{
 	  /* We check against nested while-stepping when setting
 	     breakpoint action, so no way to run into nested
@@ -2690,13 +2690,13 @@ trace_dump_actions (struct command_line *action,
       if (cmd == 0)
 	error (_("Bad action list item: %s"), action_exp);
 
-      if (cmd_cfunc_eq (cmd, while_stepping_pseudocommand))
+      if (cmd_simple_func_eq (cmd, while_stepping_pseudocommand))
 	{
 	  gdb_assert (action->body_list_1 == nullptr);
 	  trace_dump_actions (action->body_list_0.get (),
 			      1, stepping_frame, from_tty);
 	}
-      else if (cmd_cfunc_eq (cmd, collect_pseudocommand))
+      else if (cmd_simple_func_eq (cmd, collect_pseudocommand))
 	{
 	  /* Display the collected data.
 	     For the trap frame, display only what was collected at
