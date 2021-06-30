@@ -35,10 +35,13 @@ if test "${ERROR_ON_WARNING}" = yes ; then
   WERROR_CFLAGS="-Werror"
 fi
 
+dnl The options we'll try to enable.
+dnl NB: Kept somewhat in sync with gdbsupport/warnings.m4.
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
 -Wpointer-sign \
 -Wno-unused -Wunused-value -Wunused-function \
 -Wno-switch -Wno-char-subscripts -Wmissing-prototypes
+-Wno-error=maybe-uninitialized
 -Wdeclaration-after-statement -Wempty-body -Wmissing-parameter-type \
 -Wold-style-declaration -Wold-style-definition"
 
