@@ -214,6 +214,8 @@ sim_io_flush_stdoutput(void)
   }
 }
 
+/* Glue to use sim-fpu module.  */
+
 void
 sim_io_error (SIM_DESC sd, const char *msg, ...)
 {

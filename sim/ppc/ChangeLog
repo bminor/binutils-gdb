@@ -1,3 +1,9 @@
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
+	* main.c (sim_io_error): Add comment
+	* sim_calls.c (sim_io_error): Likewise.  Change "" to " ".
+	(error): Likewise.
+
 2021-06-20  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (INLINE_CFLAGS): Change to $(SIM_INLINE).
