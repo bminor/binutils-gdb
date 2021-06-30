@@ -639,6 +639,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 SIM_RX_CYCLE_ACCURATE_FLAGS
+SIM_FRV_TRAPDUMP_FLAGS
 sim_reserved_bits
 sim_float
 sim_bitsize
@@ -845,6 +846,7 @@ enable_sim_trace
 enable_werror
 enable_build_warnings
 enable_sim_build_warnings
+enable_sim_frv_trapdump
 enable_sim_rx_cycle_accurate
 '
       ac_precious_vars='build_alias
@@ -862,10 +864,6 @@ PKG_CONFIG_LIBDIR
 SDL_CFLAGS
 SDL_LIBS'
 ac_subdirs_all='bpf
-cris
-frv
-iq2000
-lm32
 m32r
 mips
 mn10300
@@ -1536,6 +1534,8 @@ Optional Features:
   --enable-sim-build-warnings
                           enable SIM specific build-time compiler warnings if
                           gcc is used
+  --enable-sim-frv-trapdump
+                          Make unknown traps dump the registers
   --disable-sim-rx-cycle-accurate
                           Disable cycle accurate simulation (faster runtime)
 
@@ -13832,8 +13832,11 @@ subdirs="$subdirs bpf"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cris
       fi
-            subdirs="$subdirs cris"
+            ac_config_files="$ac_config_files cris/Makefile.sim:cris/Makefile.in"
 
+    ac_config_commands="$ac_config_commands cris/Makefile"
+
+    as_fn_append SIM_SUBDIRS " cris"
 
     ac_config_commands="$ac_config_commands depdir-cris"
 
@@ -13865,8 +13868,11 @@ subdirs="$subdirs bpf"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=frv
       fi
-            subdirs="$subdirs frv"
+            ac_config_files="$ac_config_files frv/Makefile.sim:frv/Makefile.in"
 
+    ac_config_commands="$ac_config_commands frv/Makefile"
+
+    as_fn_append SIM_SUBDIRS " frv"
 
     ac_config_commands="$ac_config_commands depdir-frv"
 
@@ -13916,8 +13922,11 @@ subdirs="$subdirs bpf"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=iq2000
       fi
-            subdirs="$subdirs iq2000"
+            ac_config_files="$ac_config_files iq2000/Makefile.sim:iq2000/Makefile.in"
 
+    ac_config_commands="$ac_config_commands iq2000/Makefile"
+
+    as_fn_append SIM_SUBDIRS " iq2000"
 
     ac_config_commands="$ac_config_commands depdir-iq2000"
 
@@ -13931,8 +13940,11 @@ subdirs="$subdirs bpf"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=lm32
       fi
-            subdirs="$subdirs lm32"
+            ac_config_files="$ac_config_files lm32/Makefile.sim:lm32/Makefile.in"
 
+    ac_config_commands="$ac_config_commands lm32/Makefile"
+
+    as_fn_append SIM_SUBDIRS " lm32"
 
     ac_config_commands="$ac_config_commands depdir-lm32"
 
@@ -14695,6 +14707,27 @@ fi
 
 
 
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sim frv should dump cpu state on unknown traps" >&5
+$as_echo_n "checking whether sim frv should dump cpu state on unknown traps... " >&6; }
+# Check whether --enable-sim-frv-trapdump was given.
+if test "${enable_sim_frv_trapdump+set}" = set; then :
+  enableval=$enable_sim_frv_trapdump; case "${enableval}" in
+yes|no) ;;
+*) as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-trapdump\"" "$LINENO" 5;;
+esac
+fi
+
+if test "x${enable_sim_frv_trapdump}" != xno; then
+  SIM_FRV_TRAPDUMP_FLAGS="-DTRAPDUMP=1"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  SIM_FRV_TRAPDUMP_FLAGS="-DTRAPDUMP=0"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sim rx should be cycle accurate" >&5
@@ -15775,10 +15808,14 @@ do
     "cr16/Makefile.sim") CONFIG_FILES="$CONFIG_FILES cr16/Makefile.sim:cr16/Makefile.in" ;;
     "cr16/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS cr16/Makefile" ;;
     "depdir-cr16") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cr16" ;;
+    "cris/Makefile.sim") CONFIG_FILES="$CONFIG_FILES cris/Makefile.sim:cris/Makefile.in" ;;
+    "cris/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS cris/Makefile" ;;
     "depdir-cris") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cris" ;;
     "d10v/Makefile.sim") CONFIG_FILES="$CONFIG_FILES d10v/Makefile.sim:d10v/Makefile.in" ;;
     "d10v/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS d10v/Makefile" ;;
     "depdir-d10v") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-d10v" ;;
+    "frv/Makefile.sim") CONFIG_FILES="$CONFIG_FILES frv/Makefile.sim:frv/Makefile.in" ;;
+    "frv/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS frv/Makefile" ;;
     "depdir-frv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-frv" ;;
     "ft32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES ft32/Makefile.sim:ft32/Makefile.in" ;;
     "ft32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS ft32/Makefile" ;;
@@ -15786,7 +15823,11 @@ do
     "h8300/Makefile.sim") CONFIG_FILES="$CONFIG_FILES h8300/Makefile.sim:h8300/Makefile.in" ;;
     "h8300/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS h8300/Makefile" ;;
     "depdir-h8300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-h8300" ;;
+    "iq2000/Makefile.sim") CONFIG_FILES="$CONFIG_FILES iq2000/Makefile.sim:iq2000/Makefile.in" ;;
+    "iq2000/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS iq2000/Makefile" ;;
     "depdir-iq2000") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-iq2000" ;;
+    "lm32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES lm32/Makefile.sim:lm32/Makefile.in" ;;
+    "lm32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS lm32/Makefile" ;;
     "depdir-lm32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-lm32" ;;
     "m32c/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m32c/Makefile.sim:m32c/Makefile.in" ;;
     "m32c/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m32c/Makefile" ;;
@@ -17226,6 +17267,18 @@ $as_echo X"$file" |
  rm -f cr16/Makesim1.tmp cr16/Makesim2.tmp
  ;;
     "depdir-cr16":C) $SHELL $ac_aux_dir/mkinstalldirs cr16/$DEPDIR ;;
+    "cris/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/cris:
+		p
+	}' \
+	<Make-common.sim >cris/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >cris/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r cris/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r cris/Makesim2.tmp' \
+	<cris/Makefile.sim >cris/Makefile
+ rm -f cris/Makesim1.tmp cris/Makesim2.tmp
+ ;;
     "depdir-cris":C) $SHELL $ac_aux_dir/mkinstalldirs cris/$DEPDIR ;;
     "d10v/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
@@ -17240,6 +17293,18 @@ $as_echo X"$file" |
  rm -f d10v/Makesim1.tmp d10v/Makesim2.tmp
  ;;
     "depdir-d10v":C) $SHELL $ac_aux_dir/mkinstalldirs d10v/$DEPDIR ;;
+    "frv/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/frv:
+		p
+	}' \
+	<Make-common.sim >frv/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >frv/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r frv/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r frv/Makesim2.tmp' \
+	<frv/Makefile.sim >frv/Makefile
+ rm -f frv/Makesim1.tmp frv/Makesim2.tmp
+ ;;
     "depdir-frv":C) $SHELL $ac_aux_dir/mkinstalldirs frv/$DEPDIR ;;
     "ft32/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
@@ -17267,7 +17332,31 @@ $as_echo X"$file" |
  rm -f h8300/Makesim1.tmp h8300/Makesim2.tmp
  ;;
     "depdir-h8300":C) $SHELL $ac_aux_dir/mkinstalldirs h8300/$DEPDIR ;;
+    "iq2000/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/iq2000:
+		p
+	}' \
+	<Make-common.sim >iq2000/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >iq2000/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r iq2000/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r iq2000/Makesim2.tmp' \
+	<iq2000/Makefile.sim >iq2000/Makefile
+ rm -f iq2000/Makesim1.tmp iq2000/Makesim2.tmp
+ ;;
     "depdir-iq2000":C) $SHELL $ac_aux_dir/mkinstalldirs iq2000/$DEPDIR ;;
+    "lm32/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/lm32:
+		p
+	}' \
+	<Make-common.sim >lm32/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >lm32/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r lm32/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r lm32/Makesim2.tmp' \
+	<lm32/Makefile.sim >lm32/Makefile
+ rm -f lm32/Makesim1.tmp lm32/Makesim2.tmp
+ ;;
     "depdir-lm32":C) $SHELL $ac_aux_dir/mkinstalldirs lm32/$DEPDIR ;;
     "m32c/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {

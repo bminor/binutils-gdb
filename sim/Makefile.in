@@ -219,7 +219,8 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_option_warnings.m4 \
 	$(top_srcdir)/m4/sim_ac_platform.m4 \
 	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
-	$(top_srcdir)/rx/acinclude.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/frv/acinclude.m4 $(top_srcdir)/rx/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -230,11 +231,13 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
 	arm/Makefile.sim avr/Makefile.sim bfin/Makefile.sim \
-	cr16/Makefile.sim d10v/Makefile.sim ft32/Makefile.sim \
-	h8300/Makefile.sim m32c/Makefile.sim m68hc11/Makefile.sim \
-	mcore/Makefile.sim microblaze/Makefile.sim moxie/Makefile.sim \
-	msp430/Makefile.sim pru/Makefile.sim rl78/Makefile.sim \
-	rx/Makefile.sim sh/Makefile.sim erc32/Makefile.sim \
+	cr16/Makefile.sim cris/Makefile.sim d10v/Makefile.sim \
+	frv/Makefile.sim ft32/Makefile.sim h8300/Makefile.sim \
+	iq2000/Makefile.sim lm32/Makefile.sim m32c/Makefile.sim \
+	m68hc11/Makefile.sim mcore/Makefile.sim \
+	microblaze/Makefile.sim moxie/Makefile.sim msp430/Makefile.sim \
+	pru/Makefile.sim rl78/Makefile.sim rx/Makefile.sim \
+	sh/Makefile.sim erc32/Makefile.sim \
 	example-synacor/Makefile.sim arch-subdir.mk
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
@@ -722,6 +725,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SIM_COMMON_BUILD_FALSE = @SIM_COMMON_BUILD_FALSE@
 SIM_COMMON_BUILD_TRUE = @SIM_COMMON_BUILD_TRUE@
+SIM_FRV_TRAPDUMP_FLAGS = @SIM_FRV_TRAPDUMP_FLAGS@
 SIM_INLINE = @SIM_INLINE@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 SIM_RX_CYCLE_ACCURATE_FLAGS = @SIM_RX_CYCLE_ACCURATE_FLAGS@
@@ -956,11 +960,19 @@ bfin/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/bfin/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 cr16/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/cr16/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
+cris/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/cris/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 d10v/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/d10v/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+frv/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/frv/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 ft32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/ft32/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 h8300/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/h8300/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+iq2000/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/iq2000/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+lm32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/lm32/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 m32c/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m32c/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

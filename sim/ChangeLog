@@ -1,5 +1,11 @@
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Remove [true] from cris, frv, iq2000, and lm32
+	SIM_TARGET calls.  Include frv/acinclude.m4.
+	* configure, Makefile.in: Regenerate.
+
+2021-06-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Call SIM_AC_OPTION_SCACHE.
 	(sim_scache): Delete.
 	* m4/sim_ac_option_scache.m4: Delete first arg.  Define WITH_SCACHE.
