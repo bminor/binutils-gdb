@@ -1,3 +1,10 @@
+2021-06-30  YunQiang Su  <yunqiang.su@cipunited.com>
+
+	PR mips/28009
+	* bfd/elfxx-mips.c (_bfd_mips_elf_section_from_shdr,
+	_bfd_mips_elf_fake_sections): Mark LTO debug info as
+	SHT_MIPS_DWARF.
+
 2021-06-29  Nick Clifton  <nickc@redhat.com>
 
 	* config.bfd (obsolete configurations): Add netbsdpe.
