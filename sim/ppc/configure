@@ -3496,18 +3496,55 @@ else
 fi
 
 
+sim_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
+-Wno-unused -Wunused-value -Wunused-function
+-Wno-switch -Wno-char-subscripts
+-Wempty-body -Wunused-but-set-parameter
+-Wno-error=maybe-uninitialized
+-Wno-missing-declarations
+-Wno-missing-prototypes
+-Wdeclaration-after-statement -Wmissing-parameter-type
+-Wno-pointer-sign
+-Wold-style-declaration -Wold-style-definition
+"
 # Check whether --enable-sim-warnings was given.
 if test "${enable_sim_warnings+set}" = set; then :
   enableval=$enable_sim_warnings; case "${enableval}" in
-  yes)	sim_warnings="-Werror -Wall -Wpointer-arith -Wmissing-prototypes -Wmissing-declarations ";;
+  yes)	;;
   no)	sim_warnings="-w";;
   *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
   echo "Setting warning flags = $sim_warnings" 6>&1
 fi
-else
-  sim_warnings=""
+fi
+if test "x${sim_warnings}" != x -a "x$GCC" = xyes; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler warning flags" >&5
+$as_echo_n "checking compiler warning flags... " >&6; }
+  build_warnings="${sim_warnings}"
+  sim_warnings=
+  for w in ${build_warnings}; do
+        saved_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -Werror $w"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sim_warnings="${sim_warnings} $w"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CFLAGS="$saved_CFLAGS"
+  done
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${sim_warnings}" >&5
+$as_echo "${sim_warnings}" >&6; }
 fi
 
 

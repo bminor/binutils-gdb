@@ -430,16 +430,41 @@ if test x"$silent" != x"yes" && test x"$sim_timebase" != x""; then
 fi],[sim_timebase=""])dnl
 
 
+dnl TODO: Switch to common $(WARN_CFLAGS).
+sim_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
+-Wno-unused -Wunused-value -Wunused-function
+-Wno-switch -Wno-char-subscripts
+-Wempty-body -Wunused-but-set-parameter
+-Wno-error=maybe-uninitialized
+-Wno-missing-declarations
+-Wno-missing-prototypes
+-Wdeclaration-after-statement -Wmissing-parameter-type
+-Wno-pointer-sign
+-Wold-style-declaration -Wold-style-definition
+"
 AC_ARG_ENABLE(sim-warnings,
 [  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
 [case "${enableval}" in
-  yes)	sim_warnings="-Werror -Wall -Wpointer-arith -Wmissing-prototypes -Wmissing-declarations ";;
+  yes)	;;
   no)	sim_warnings="-w";;
   *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
 esac
 if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
   echo "Setting warning flags = $sim_warnings" 6>&1
-fi],[sim_warnings=""])dnl
+fi])dnl
+if test "x${sim_warnings}" != x -a "x$GCC" = xyes; then
+  AC_MSG_CHECKING(compiler warning flags)
+  build_warnings="${sim_warnings}"
+  sim_warnings=
+  for w in ${build_warnings}; do
+    dnl Check that GCC accepts it
+    saved_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -Werror $w"
+    AC_TRY_COMPILE([],[],sim_warnings="${sim_warnings} $w",)
+    CFLAGS="$saved_CFLAGS"
+  done
+  AC_MSG_RESULT(${sim_warnings})
+fi
 
 
 AC_ARG_ENABLE(sim-xor-endian,
