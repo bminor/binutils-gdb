@@ -2517,6 +2517,10 @@ read_and_display_attr_value (unsigned long           attribute,
 					  offset_size, dwarf_version,
 					  debug_info_p, do_loc,
 					  section, this_set, delimiter, level);
+
+    case DW_FORM_implicit_const:
+      uvalue = implicit_const;
+      break;
     }
 
   switch (form)
