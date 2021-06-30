@@ -1,3 +1,8 @@
+2021-06-30  Richard Henderson  <richard.henderson@linaro.org>
+
+	* dwarf.c (display_debug_frames): Both DW_CFA_def_cfa_sf
+	and DW_CFA_def_cfa_offset_sf have a signed offset.
+
 2021-06-19  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c (display_debug_lines_decoded): Use memcpy rather than
