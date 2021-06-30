@@ -331,7 +331,7 @@ struct dump_context
 };
 
 static void
-call_dump_func (struct cmd_list_element *c, const char *args, int from_tty)
+call_dump_func (const char *args, int from_tty, cmd_list_element *c)
 {
   struct dump_context *d = (struct dump_context *) c->context ();
 

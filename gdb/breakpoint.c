@@ -15204,7 +15204,7 @@ static struct cmd_list_element *tcatch_cmdlist;
 
 void
 add_catch_command (const char *name, const char *docstring,
-		   cmd_const_sfunc_ftype *sfunc,
+		   cmd_func_ftype *func,
 		   completer_ftype *completer,
 		   void *user_data_catch,
 		   void *user_data_tcatch)
@@ -15213,13 +15213,13 @@ add_catch_command (const char *name, const char *docstring,
 
   command = add_cmd (name, class_breakpoint, docstring,
 		     &catch_cmdlist);
-  set_cmd_sfunc (command, sfunc);
+  command->func = func;
   command->set_context (user_data_catch);
   set_cmd_completer (command, completer);
 
   command = add_cmd (name, class_breakpoint, docstring,
 		     &tcatch_cmdlist);
-  set_cmd_sfunc (command, sfunc);
+  command->func = func;
   command->set_context (user_data_tcatch);
   set_cmd_completer (command, completer);
 }

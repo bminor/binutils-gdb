@@ -353,7 +353,7 @@ static set_show_commands
 add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
 		     char *cmd_name, param_smob *self,
 		     char *set_doc, char *show_doc, char *help_doc,
-		     cmd_const_sfunc_ftype *set_func,
+		     cmd_func_ftype *set_func,
 		     show_value_ftype *show_func,
 		     struct cmd_list_element **set_list,
 		     struct cmd_list_element **show_list)

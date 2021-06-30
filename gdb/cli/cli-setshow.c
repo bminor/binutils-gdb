@@ -517,7 +517,8 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
     default:
       error (_("gdb internal error: bad var_type in do_setshow_command"));
     }
-  c->func (c, NULL, from_tty);
+
+  c->func (NULL, from_tty, c);
 
   if (notify_command_param_changed_p (option_changed, c))
     {
@@ -723,7 +724,7 @@ do_show_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	deprecated_show_value_hack (gdb_stdout, from_tty, c, val.c_str ());
     }
 
-  c->func (c, NULL, from_tty);
+  c->func (NULL, from_tty, c);
 }
 
 /* Show all the settings in a list of show commands.  */

@@ -876,7 +876,7 @@ information on the arguments for a particular protocol, type\n\
 			  &targetlist, 0, &cmdlist);
   c = add_cmd (t.shortname, no_class, t.doc, &targetlist);
   c->set_context ((void *) &t);
-  set_cmd_sfunc (c, open_target);
+  c->func = open_target;
   if (completer != NULL)
     set_cmd_completer (c, completer);
 }
@@ -892,7 +892,7 @@ add_deprecated_target_alias (const target_info &tinfo, const char *alias)
   /* If we use add_alias_cmd, here, we do not get the deprecated warning,
      see PR cli/15104.  */
   c = add_cmd (alias, no_class, tinfo.doc, &targetlist);
-  set_cmd_sfunc (c, open_target);
+  c->func = open_target;
   c->set_context ((void *) &tinfo);
   alt = xstrprintf ("target %s", tinfo.shortname);
   deprecate_cmd (c, alt);

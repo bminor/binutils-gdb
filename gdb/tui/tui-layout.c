@@ -169,8 +169,7 @@ find_layout (tui_layout_split *layout)
 /* Function to set the layout. */
 
 static void
-tui_apply_layout (struct cmd_list_element *command,
-		  const char *args, int from_tty)
+tui_apply_layout (const char *args, int from_tty, cmd_list_element *command)
 {
   tui_layout_split *layout = (tui_layout_split *) command->context ();
 
