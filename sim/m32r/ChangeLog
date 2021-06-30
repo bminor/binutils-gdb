@@ -1,3 +1,8 @@
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
+	* syscall.h: Change __NR_ prefix on all symbols to TARGET_LINUX_SYS_.
+	* traps-linux.c: Likewise.  Include sim/callback.h & stdlib.h.
+
 2021-06-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Delete SIM_AC_OPTION_SCACHE call.

@@ -24,11 +24,13 @@
 #include "sim-main.h"
 #include "sim-signal.h"
 #include "sim-syscall.h"
+#include "sim/callback.h"
 #include "syscall.h"
 #include "targ-vals.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 #include <utime.h>
@@ -268,52 +270,52 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 
         switch (func)
           {
-          case __NR_exit:
+          case TARGET_LINUX_SYS_exit:
 	    sim_engine_halt (sd, current_cpu, NULL, pc, sim_exited, arg1);
             break;
 
-          case __NR_read:
+          case TARGET_LINUX_SYS_read:
             result = read(arg1, t2h_addr(cb, &s, arg2), arg3);
             errcode = errno;
             break;
 
-          case __NR_write:
+          case TARGET_LINUX_SYS_write:
             result = write(arg1, t2h_addr(cb, &s, arg2), arg3);
             errcode = errno;
             break;
 
-          case __NR_open:
+          case TARGET_LINUX_SYS_open:
             result = open((char *) t2h_addr(cb, &s, arg1), arg2, arg3);
             errcode = errno;
             break;
 
-          case __NR_close:
+          case TARGET_LINUX_SYS_close:
             result = close(arg1);
             errcode = errno;
             break;
 
-          case __NR_creat:
+          case TARGET_LINUX_SYS_creat:
             result = creat((char *) t2h_addr(cb, &s, arg1), arg2);
             errcode = errno;
             break;
 
-          case __NR_link:
+          case TARGET_LINUX_SYS_link:
             result = link((char *) t2h_addr(cb, &s, arg1),
                           (char *) t2h_addr(cb, &s, arg2));
             errcode = errno;
             break;
 
-          case __NR_unlink:
+          case TARGET_LINUX_SYS_unlink:
             result = unlink((char *) t2h_addr(cb, &s, arg1));
             errcode = errno;
             break;
 
-          case __NR_chdir:
+          case TARGET_LINUX_SYS_chdir:
             result = chdir((char *) t2h_addr(cb, &s, arg1));
             errcode = errno;
             break;
 
-          case __NR_time:
+          case TARGET_LINUX_SYS_time:
             {
               time_t t;
 
@@ -340,41 +342,41 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_mknod:
+          case TARGET_LINUX_SYS_mknod:
             result = mknod((char *) t2h_addr(cb, &s, arg1),
                            (mode_t) arg2, (dev_t) arg3);
             errcode = errno;
             break;
 
-          case __NR_chmod:
+          case TARGET_LINUX_SYS_chmod:
             result = chmod((char *) t2h_addr(cb, &s, arg1), (mode_t) arg2);
             errcode = errno;
             break;
 
-          case __NR_lchown32:
-          case __NR_lchown:
+          case TARGET_LINUX_SYS_lchown32:
+          case TARGET_LINUX_SYS_lchown:
             result = lchown((char *) t2h_addr(cb, &s, arg1),
                             (uid_t) arg2, (gid_t) arg3);
             errcode = errno;
             break;
 
-          case __NR_lseek:
+          case TARGET_LINUX_SYS_lseek:
             result = (int) lseek(arg1, (off_t) arg2, arg3);
             errcode = errno;
             break;
 
-          case __NR_getpid:
+          case TARGET_LINUX_SYS_getpid:
             result = getpid();
             errcode = errno;
             break;
 
-          case __NR_getuid32:
-          case __NR_getuid:
+          case TARGET_LINUX_SYS_getuid32:
+          case TARGET_LINUX_SYS_getuid:
             result = getuid();
             errcode = errno;
             break;
 
-          case __NR_utime:
+          case TARGET_LINUX_SYS_utime:
             {
               struct utimbuf buf;
 
@@ -393,12 +395,12 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_access:
+          case TARGET_LINUX_SYS_access:
             result = access((char *) t2h_addr(cb, &s, arg1), arg2);
             errcode = errno;
             break;
 
-          case __NR_ftime:
+          case TARGET_LINUX_SYS_ftime:
             {
               struct timeb t;
 
@@ -420,82 +422,82 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
                 }
             }
 
-          case __NR_sync:
+          case TARGET_LINUX_SYS_sync:
             sync();
             result = 0;
             break;
 
-          case __NR_rename:
+          case TARGET_LINUX_SYS_rename:
             result = rename((char *) t2h_addr(cb, &s, arg1),
                             (char *) t2h_addr(cb, &s, arg2));
             errcode = errno;
             break;
 
-          case __NR_mkdir:
+          case TARGET_LINUX_SYS_mkdir:
             result = mkdir((char *) t2h_addr(cb, &s, arg1), arg2);
             errcode = errno;
             break;
 
-          case __NR_rmdir:
+          case TARGET_LINUX_SYS_rmdir:
             result = rmdir((char *) t2h_addr(cb, &s, arg1));
             errcode = errno;
             break;
 
-          case __NR_dup:
+          case TARGET_LINUX_SYS_dup:
             result = dup(arg1);
             errcode = errno;
             break;
 
-          case __NR_brk:
+          case TARGET_LINUX_SYS_brk:
             result = brk((void *) arg1);
             errcode = errno;
             //result = arg1;
             break;
 
-          case __NR_getgid32:
-          case __NR_getgid:
+          case TARGET_LINUX_SYS_getgid32:
+          case TARGET_LINUX_SYS_getgid:
             result = getgid();
             errcode = errno;
             break;
 
-          case __NR_geteuid32:
-          case __NR_geteuid:
+          case TARGET_LINUX_SYS_geteuid32:
+          case TARGET_LINUX_SYS_geteuid:
             result = geteuid();
             errcode = errno;
             break;
 
-          case __NR_getegid32:
-          case __NR_getegid:
+          case TARGET_LINUX_SYS_getegid32:
+          case TARGET_LINUX_SYS_getegid:
             result = getegid();
             errcode = errno;
             break;
 
-          case __NR_ioctl:
+          case TARGET_LINUX_SYS_ioctl:
             result = ioctl(arg1, arg2, arg3);
             errcode = errno;
             break;
 
-          case __NR_fcntl:
+          case TARGET_LINUX_SYS_fcntl:
             result = fcntl(arg1, arg2, arg3);
             errcode = errno;
             break;
 
-          case __NR_dup2:
+          case TARGET_LINUX_SYS_dup2:
             result = dup2(arg1, arg2);
             errcode = errno;
             break;
 
-          case __NR_getppid:
+          case TARGET_LINUX_SYS_getppid:
             result = getppid();
             errcode = errno;
             break;
 
-          case __NR_getpgrp:
+          case TARGET_LINUX_SYS_getpgrp:
             result = getpgrp();
             errcode = errno;
             break;
 
-          case __NR_getrlimit:
+          case TARGET_LINUX_SYS_getrlimit:
             {
               struct rlimit rlim;
 
@@ -515,7 +517,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_getrusage:
+          case TARGET_LINUX_SYS_getrusage:
             {
               struct rusage usage;
 
@@ -535,7 +537,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_gettimeofday:
+          case TARGET_LINUX_SYS_gettimeofday:
             {
               struct timeval tv;
               struct timezone tz;
@@ -564,8 +566,8 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_getgroups32:
-          case __NR_getgroups:
+          case TARGET_LINUX_SYS_getgroups32:
+          case TARGET_LINUX_SYS_getgroups:
             {
               gid_t *list;
 
@@ -589,7 +591,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_select:
+          case TARGET_LINUX_SYS_select:
             {
               int n;
               fd_set readfds;
@@ -689,26 +691,26 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_symlink:
+          case TARGET_LINUX_SYS_symlink:
             result = symlink((char *) t2h_addr(cb, &s, arg1),
                              (char *) t2h_addr(cb, &s, arg2));
             errcode = errno;
             break;
 
-          case __NR_readlink:
+          case TARGET_LINUX_SYS_readlink:
             result = readlink((char *) t2h_addr(cb, &s, arg1),
                               (char *) t2h_addr(cb, &s, arg2),
                               arg3);
             errcode = errno;
             break;
 
-          case __NR_readdir:
+          case TARGET_LINUX_SYS_readdir:
             result = (int) readdir((DIR *) t2h_addr(cb, &s, arg1));
             errcode = errno;
             break;
 
 #if 0
-          case __NR_mmap:
+          case TARGET_LINUX_SYS_mmap:
             {
               result = (int) mmap((void *) t2h_addr(cb, &s, arg1),
                                   arg2, arg3, arg4, arg5, arg6);
@@ -723,7 +725,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 #endif
-          case __NR_mmap2:
+          case TARGET_LINUX_SYS_mmap2:
             {
               void *addr;
               size_t len;
@@ -750,7 +752,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_mmap:
+          case TARGET_LINUX_SYS_mmap:
             {
               void *addr;
               size_t len;
@@ -787,7 +789,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_munmap:
+          case TARGET_LINUX_SYS_munmap:
             {
             result = munmap((void *)arg1, arg2);
             errcode = errno;
@@ -798,28 +800,28 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_truncate:
+          case TARGET_LINUX_SYS_truncate:
             result = truncate((char *) t2h_addr(cb, &s, arg1), arg2);
             errcode = errno;
             break;
 
-          case __NR_ftruncate:
+          case TARGET_LINUX_SYS_ftruncate:
             result = ftruncate(arg1, arg2);
             errcode = errno;
             break;
 
-          case __NR_fchmod:
+          case TARGET_LINUX_SYS_fchmod:
             result = fchmod(arg1, arg2);
             errcode = errno;
             break;
 
-          case __NR_fchown32:
-          case __NR_fchown:
+          case TARGET_LINUX_SYS_fchown32:
+          case TARGET_LINUX_SYS_fchown:
             result = fchown(arg1, arg2, arg3);
             errcode = errno;
             break;
 
-          case __NR_statfs:
+          case TARGET_LINUX_SYS_statfs:
             {
               struct statfs statbuf;
 
@@ -839,7 +841,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_fstatfs:
+          case TARGET_LINUX_SYS_fstatfs:
             {
               struct statfs statbuf;
 
@@ -859,12 +861,12 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_syslog:
+          case TARGET_LINUX_SYS_syslog:
             result = syslog(arg1, (char *) t2h_addr(cb, &s, arg2));
             errcode = errno;
             break;
 
-          case __NR_setitimer:
+          case TARGET_LINUX_SYS_setitimer:
             {
               struct itimerval value, ovalue;
 
@@ -895,7 +897,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_getitimer:
+          case TARGET_LINUX_SYS_getitimer:
             {
               struct itimerval value;
 
@@ -915,7 +917,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_stat:
+          case TARGET_LINUX_SYS_stat:
             {
               char *buf;
               int buflen;
@@ -948,7 +950,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_lstat:
+          case TARGET_LINUX_SYS_lstat:
             {
               char *buf;
               int buflen;
@@ -981,7 +983,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_fstat:
+          case TARGET_LINUX_SYS_fstat:
             {
               char *buf;
               int buflen;
@@ -1014,7 +1016,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_sysinfo:
+          case TARGET_LINUX_SYS_sysinfo:
             {
               struct sysinfo info;
 
@@ -1050,7 +1052,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             break;
 
 #if 0
-          case __NR_ipc:
+          case TARGET_LINUX_SYS_ipc:
             {
               result = ipc(arg1, arg2, arg3, arg4,
                            (void *) t2h_addr(cb, &s, arg5), arg6);
@@ -1059,19 +1061,19 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             break;
 #endif
 
-          case __NR_fsync:
+          case TARGET_LINUX_SYS_fsync:
             result = fsync(arg1);
             errcode = errno;
             break;
 
-          case __NR_uname:
+          case TARGET_LINUX_SYS_uname:
             /* utsname contains only arrays of char, so it is not necessary
                to translate endian. */
             result = uname((struct utsname *) t2h_addr(cb, &s, arg1));
             errcode = errno;
             break;
 
-          case __NR_adjtimex:
+          case TARGET_LINUX_SYS_adjtimex:
             {
               struct timex buf;
 
@@ -1091,30 +1093,30 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_mprotect:
+          case TARGET_LINUX_SYS_mprotect:
             result = mprotect((void *) arg1, arg2, arg3);
             errcode = errno;
             break;
 
-          case __NR_fchdir:
+          case TARGET_LINUX_SYS_fchdir:
             result = fchdir(arg1);
             errcode = errno;
             break;
 
-          case __NR_setfsuid32:
-          case __NR_setfsuid:
+          case TARGET_LINUX_SYS_setfsuid32:
+          case TARGET_LINUX_SYS_setfsuid:
             result = setfsuid(arg1);
             errcode = errno;
             break;
 
-          case __NR_setfsgid32:
-          case __NR_setfsgid:
+          case TARGET_LINUX_SYS_setfsgid32:
+          case TARGET_LINUX_SYS_setfsgid:
             result = setfsgid(arg1);
             errcode = errno;
             break;
 
 #if 0
-          case __NR__llseek:
+          case TARGET_LINUX_SYS__llseek:
             {
               loff_t buf;
 
@@ -1134,7 +1136,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_getdents:
+          case TARGET_LINUX_SYS_getdents:
             {
               struct dirent dir;
 
@@ -1157,17 +1159,17 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             break;
 #endif
 
-          case __NR_flock:
+          case TARGET_LINUX_SYS_flock:
             result = flock(arg1, arg2);
             errcode = errno;
             break;
 
-          case __NR_msync:
+          case TARGET_LINUX_SYS_msync:
             result = msync((void *) arg1, arg2, arg3);
             errcode = errno;
             break;
 
-          case __NR_readv:
+          case TARGET_LINUX_SYS_readv:
             {
               struct iovec vector;
 
@@ -1179,7 +1181,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_writev:
+          case TARGET_LINUX_SYS_writev:
             {
               struct iovec vector;
 
@@ -1191,22 +1193,22 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_fdatasync:
+          case TARGET_LINUX_SYS_fdatasync:
             result = fdatasync(arg1);
             errcode = errno;
             break;
 
-          case __NR_mlock:
+          case TARGET_LINUX_SYS_mlock:
             result = mlock((void *) t2h_addr(cb, &s, arg1), arg2);
             errcode = errno;
             break;
 
-          case __NR_munlock:
+          case TARGET_LINUX_SYS_munlock:
             result = munlock((void *) t2h_addr(cb, &s, arg1), arg2);
             errcode = errno;
             break;
 
-          case __NR_nanosleep:
+          case TARGET_LINUX_SYS_nanosleep:
             {
               struct timespec req, rem;
 
@@ -1229,13 +1231,13 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_mremap: /* FIXME */
+          case TARGET_LINUX_SYS_mremap: /* FIXME */
             result = (int) mremap((void *) t2h_addr(cb, &s, arg1), arg2, arg3, arg4); 
             errcode = errno;
             break;
 
-          case __NR_getresuid32:
-          case __NR_getresuid:
+          case TARGET_LINUX_SYS_getresuid32:
+          case TARGET_LINUX_SYS_getresuid:
             {
               uid_t ruid, euid, suid;
 
@@ -1251,7 +1253,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_poll:
+          case TARGET_LINUX_SYS_poll:
             {
               struct pollfd ufds;
 
@@ -1265,8 +1267,8 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_getresgid32:
-          case __NR_getresgid:
+          case TARGET_LINUX_SYS_getresgid32:
+          case TARGET_LINUX_SYS_getresgid:
             {
               uid_t rgid, egid, sgid;
 
@@ -1282,28 +1284,28 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
             }
             break;
 
-          case __NR_pread:
+          case TARGET_LINUX_SYS_pread:
             result =  pread(arg1, (void *) t2h_addr(cb, &s, arg2), arg3, arg4); 
             errcode = errno;
             break;
 
-          case __NR_pwrite:
+          case TARGET_LINUX_SYS_pwrite:
             result =  pwrite(arg1, (void *) t2h_addr(cb, &s, arg2), arg3, arg4); 
             errcode = errno;
             break;
 
-          case __NR_chown32:
-          case __NR_chown:
+          case TARGET_LINUX_SYS_chown32:
+          case TARGET_LINUX_SYS_chown:
             result = chown((char *) t2h_addr(cb, &s, arg1), arg2, arg3);
             errcode = errno;
             break;
 
-          case __NR_getcwd:
+          case TARGET_LINUX_SYS_getcwd:
             result = (int) getcwd((char *) t2h_addr(cb, &s, arg1), arg2);
             errcode = errno;
             break;
 
-          case __NR_sendfile:
+          case TARGET_LINUX_SYS_sendfile:
             {
               off_t offset;
 
