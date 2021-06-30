@@ -1,5 +1,10 @@
 2021-06-29  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (Makefile): Replace $(arch) and pass more files to
+	config.status.
+
+2021-06-29  Mike Frysinger  <vapier@gentoo.org>
+
 	* callback.c [!HAVE_KILL] (os_kill): Return ENOSYS.
 
 2021-06-29  Mike Frysinger  <vapier@gentoo.org>
