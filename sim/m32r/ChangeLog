@@ -1,5 +1,15 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* traps-linux.c (conv_endian, conv_endian16,
+	translate_endian): Delete.
+	(translate_endian_h2t): New host-to-target function.
+	(translate_endian_t2h): New target-to-host function.
+	(m32r_trap): Replace conv_endian with H2T_4 & T2H_4, conv_endian16
+	with H2T_2 & T2H_2, and translate_endian with translate_endian_h2t
+	& translate_endian_t2h.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* traps-linux.c (m32r_trap): Change OPERATING_ENVIRONMENT check to
 	!USER_ENVIRONMENT.  Jump to default switch case.
 

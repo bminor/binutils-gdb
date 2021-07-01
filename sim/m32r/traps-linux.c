@@ -137,61 +137,34 @@ t2h_addr (host_callback *cb, struct cb_syscall *sc,
   return sim_core_trans_addr (sd, cpu, read_map, taddr);
 }
 
-static unsigned int
-conv_endian (unsigned int tvalue)
-{
-  unsigned int hvalue;
-  unsigned int t1, t2, t3, t4;
-
-  if (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-    {
-      t1 = tvalue & 0xff000000;
-      t2 = tvalue & 0x00ff0000;
-      t3 = tvalue & 0x0000ff00;
-      t4 = tvalue & 0x000000ff;
-
-      hvalue =  t1 >> 24;
-      hvalue += t2 >> 8;
-      hvalue += t3 << 8;
-      hvalue += t4 << 24;
-    }
-  else
-    hvalue = tvalue;
-
-  return hvalue;
-}
-
-static unsigned short
-conv_endian16 (unsigned short tvalue)
-{
-  unsigned short hvalue;
-  unsigned short t1, t2;
-
-  if (HOST_BYTE_ORDER == BFD_ENDIAN_LITTLE)
-    {
-      t1 = tvalue & 0xff00;
-      t2 = tvalue & 0x00ff;
-
-      hvalue =  t1 >> 8;
-      hvalue += t2 << 8;
-    }
-  else
-    hvalue = tvalue;
-
-  return hvalue;
-}
+/* TODO: These functions are a big hack and assume that the host runtime has
+   type sizes and struct layouts that match the target.  So the Linux emulation
+   probaly only really works in 32-bit runtimes.  */
 
 static void
-translate_endian(void *addr, size_t size)
+translate_endian_h2t (void *addr, size_t size)
 {
   unsigned int *p = (unsigned int *) addr;
   int i;
-  
+
   for (i = 0; i <= size - 4; i += 4,p++)
-    *p = conv_endian(*p);
-  
+    *p = H2T_4 (*p);
+
   if (i <= size - 2)
-    *((unsigned short *) p) = conv_endian16(*((unsigned short *) p));
+    *((unsigned short *) p) = H2T_2 (*((unsigned short *) p));
+}
+
+static void
+translate_endian_t2h (void *addr, size_t size)
+{
+  unsigned int *p = (unsigned int *) addr;
+  int i;
+
+  for (i = 0; i <= size - 4; i += 4,p++)
+    *p = T2H_4 (*p);
+
+  if (i <= size - 2)
+    *((unsigned short *) p) = T2H_2 (*((unsigned short *) p));
 }
 
 /* Trap support.
@@ -326,7 +299,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
                   if (result != 0)
                     break;
 
-                  translate_endian((void *) &t, sizeof(t));
+                  t = H2T_4 (t);
                   if ((s.write_mem) (cb, &s, arg1, (char *) &t, sizeof(t)) != sizeof(t))
                     {
                       result = -1;
@@ -382,7 +355,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               else
                 {
                   buf = *((struct utimbuf *) t2h_addr(cb, &s, arg2));
-                  translate_endian((void *) &buf, sizeof(buf));
+                  translate_endian_t2h (&buf, sizeof(buf));
                   result = utime((char *) t2h_addr(cb, &s, arg1), &buf);
                   errcode = errno;
                 }
@@ -404,10 +377,10 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              t.time = conv_endian(t.time);
-              t.millitm = conv_endian16(t.millitm);
-              t.timezone = conv_endian16(t.timezone);
-              t.dstflag = conv_endian16(t.dstflag);
+              t.time = H2T_4 (t.time);
+              t.millitm = H2T_2 (t.millitm);
+              t.timezone = H2T_2 (t.timezone);
+              t.dstflag = H2T_2 (t.dstflag);
               if ((s.write_mem) (cb, &s, arg1, (char *) &t, sizeof(t))
                   != sizeof(t))
                 {
@@ -501,7 +474,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) &rlim, sizeof(rlim));
+              translate_endian_h2t (&rlim, sizeof(rlim));
               if ((s.write_mem) (cb, &s, arg2, (char *) &rlim, sizeof(rlim))
                   != sizeof(rlim))
                 {
@@ -521,7 +494,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) &usage, sizeof(usage));
+              translate_endian_h2t (&usage, sizeof(usage));
               if ((s.write_mem) (cb, &s, arg2, (char *) &usage, sizeof(usage))
                   != sizeof(usage))
                 {
@@ -542,7 +515,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) &tv, sizeof(tv));
+              translate_endian_h2t (&tv, sizeof(tv));
               if ((s.write_mem) (cb, &s, arg1, (char *) &tv, sizeof(tv))
                   != sizeof(tv))
                 {
@@ -550,7 +523,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
                   errcode = EINVAL;
                 }
 
-              translate_endian((void *) &tz, sizeof(tz));
+              translate_endian_h2t (&tz, sizeof(tz));
               if ((s.write_mem) (cb, &s, arg2, (char *) &tz, sizeof(tz))
                   != sizeof(tz))
                 {
@@ -574,7 +547,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) list, arg1 * sizeof(gid_t));
+              translate_endian_h2t (list, arg1 * sizeof(gid_t));
               if (arg1 > 0)
                 if ((s.write_mem) (cb, &s, arg2, (char *) list, arg1 * sizeof(gid_t))
                     != arg1 * sizeof(gid_t))
@@ -606,7 +579,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (treadfdsp != NULL)
                 {
                   readfds = *((fd_set *) t2h_addr(cb, &s, (unsigned int) treadfdsp));
-                  translate_endian((void *) &readfds, sizeof(readfds));
+                  translate_endian_t2h (&readfds, sizeof(readfds));
                   hreadfdsp = &readfds;
                 }
               else
@@ -616,7 +589,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (twritefdsp != NULL)
                 {
                   writefds = *((fd_set *) t2h_addr(cb, &s, (unsigned int) twritefdsp));
-                  translate_endian((void *) &writefds, sizeof(writefds));
+                  translate_endian_t2h (&writefds, sizeof(writefds));
                   hwritefdsp = &writefds;
                 }
               else
@@ -626,7 +599,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (texceptfdsp != NULL)
                 {
                   exceptfds = *((fd_set *) t2h_addr(cb, &s, (unsigned int) texceptfdsp));
-                  translate_endian((void *) &exceptfds, sizeof(exceptfds));
+                  translate_endian_t2h (&exceptfds, sizeof(exceptfds));
                   hexceptfdsp = &exceptfds;
                 }
               else
@@ -634,7 +607,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               
               ttimeoutp = (struct timeval *) arg5;
               timeout = *((struct timeval *) t2h_addr(cb, &s, (unsigned int) ttimeoutp));
-              translate_endian((void *) &timeout, sizeof(timeout));
+              translate_endian_t2h (&timeout, sizeof(timeout));
 
               result = select(n, hreadfdsp, hwritefdsp, hexceptfdsp, &timeout);
               errcode = errno;
@@ -644,7 +617,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 
               if (treadfdsp != NULL)
                 {
-                  translate_endian((void *) &readfds, sizeof(readfds));
+                  translate_endian_h2t (&readfds, sizeof(readfds));
                   if ((s.write_mem) (cb, &s, (unsigned long) treadfdsp,
                        (char *) &readfds, sizeof(readfds)) != sizeof(readfds))
                     {
@@ -655,7 +628,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 
               if (twritefdsp != NULL)
                 {
-                  translate_endian((void *) &writefds, sizeof(writefds));
+                  translate_endian_h2t (&writefds, sizeof(writefds));
                   if ((s.write_mem) (cb, &s, (unsigned long) twritefdsp,
                        (char *) &writefds, sizeof(writefds)) != sizeof(writefds))
                     {
@@ -666,7 +639,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 
               if (texceptfdsp != NULL)
                 {
-                  translate_endian((void *) &exceptfds, sizeof(exceptfds));
+                  translate_endian_h2t (&exceptfds, sizeof(exceptfds));
                   if ((s.write_mem) (cb, &s, (unsigned long) texceptfdsp,
                        (char *) &exceptfds, sizeof(exceptfds)) != sizeof(exceptfds))
                     {
@@ -675,7 +648,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
                     }
                 }
 
-              translate_endian((void *) &timeout, sizeof(timeout));
+              translate_endian_h2t (&timeout, sizeof(timeout));
               if ((s.write_mem) (cb, &s, (unsigned long) ttimeoutp,
                    (char *) &timeout, sizeof(timeout)) != sizeof(timeout))
                 {
@@ -760,12 +733,12 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               fildes = *((int *)    t2h_addr(cb, &s, arg1 + 16));
               off    = *((off_t *)  t2h_addr(cb, &s, arg1 + 20));
 
-              addr   = (void *) conv_endian((unsigned int) addr);
-              len    = conv_endian(len);
-              prot   = conv_endian(prot);
-              flags  = conv_endian(flags);
-              fildes = conv_endian(fildes);
-              off    = conv_endian(off);
+              addr   = (void *) T2H_4 ((unsigned int) addr);
+              len    = T2H_4 (len);
+              prot   = T2H_4 (prot);
+              flags  = T2H_4 (flags);
+              fildes = T2H_4 (fildes);
+              off    = T2H_4 (off);
 
               //addr   = (void *) t2h_addr(cb, &s, (unsigned int) addr);
               result = (int) mmap(addr, len, prot, flags, fildes, off);
@@ -825,7 +798,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) &statbuf, sizeof(statbuf));
+              translate_endian_h2t (&statbuf, sizeof(statbuf));
               if ((s.write_mem) (cb, &s, arg2, (char *) &statbuf, sizeof(statbuf))
                   != sizeof(statbuf))
                 {
@@ -845,7 +818,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) &statbuf, sizeof(statbuf));
+              translate_endian_h2t (&statbuf, sizeof(statbuf));
               if ((s.write_mem) (cb, &s, arg2, (char *) &statbuf, sizeof(statbuf))
                   != sizeof(statbuf))
                 {
@@ -865,7 +838,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               struct itimerval value, ovalue;
 
               value = *((struct itimerval *) t2h_addr(cb, &s, arg2));
-              translate_endian((void *) &value, sizeof(value));
+              translate_endian_t2h (&value, sizeof(value));
 
               if (arg2 == 0)
                 {
@@ -880,7 +853,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
                   if (result != 0)
                     break;
 
-                  translate_endian((void *) &ovalue, sizeof(ovalue));
+                  translate_endian_h2t (&ovalue, sizeof(ovalue));
                   if ((s.write_mem) (cb, &s, arg3, (char *) &ovalue, sizeof(ovalue))
                       != sizeof(ovalue))
                     {
@@ -901,7 +874,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) &value, sizeof(value));
+              translate_endian_h2t (&value, sizeof(value));
               if ((s.write_mem) (cb, &s, arg2, (char *) &value, sizeof(value))
                   != sizeof(value))
                 {
@@ -1020,21 +993,21 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              info.uptime    = conv_endian(info.uptime);
-              info.loads[0]  = conv_endian(info.loads[0]);
-              info.loads[1]  = conv_endian(info.loads[1]);
-              info.loads[2]  = conv_endian(info.loads[2]);
-              info.totalram  = conv_endian(info.totalram);
-              info.freeram   = conv_endian(info.freeram);
-              info.sharedram = conv_endian(info.sharedram);
-              info.bufferram = conv_endian(info.bufferram);
-              info.totalswap = conv_endian(info.totalswap);
-              info.freeswap  = conv_endian(info.freeswap);
-              info.procs     = conv_endian16(info.procs);
+              info.uptime    = H2T_4 (info.uptime);
+              info.loads[0]  = H2T_4 (info.loads[0]);
+              info.loads[1]  = H2T_4 (info.loads[1]);
+              info.loads[2]  = H2T_4 (info.loads[2]);
+              info.totalram  = H2T_4 (info.totalram);
+              info.freeram   = H2T_4 (info.freeram);
+              info.sharedram = H2T_4 (info.sharedram);
+              info.bufferram = H2T_4 (info.bufferram);
+              info.totalswap = H2T_4 (info.totalswap);
+              info.freeswap  = H2T_4 (info.freeswap);
+              info.procs     = H2T_2 (info.procs);
 #if LINUX_VERSION_CODE >= 0x20400
-              info.totalhigh = conv_endian(info.totalhigh);
-              info.freehigh  = conv_endian(info.freehigh);
-              info.mem_unit  = conv_endian(info.mem_unit);
+              info.totalhigh = H2T_4 (info.totalhigh);
+              info.freehigh  = H2T_4 (info.freehigh);
+              info.mem_unit  = H2T_4 (info.mem_unit);
 #endif
               if ((s.write_mem) (cb, &s, arg1, (char *) &info, sizeof(info))
                   != sizeof(info))
@@ -1077,7 +1050,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) &buf, sizeof(buf));
+              translate_endian_h2t (&buf, sizeof(buf));
               if ((s.write_mem) (cb, &s, arg1, (char *) &buf, sizeof(buf))
                   != sizeof(buf))
                 {
@@ -1120,7 +1093,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) &buf, sizeof(buf));
+              translate_endian_h2t (&buf, sizeof(buf));
               if ((s.write_mem) (cb, &s, t2h_addr(cb, &s, arg4),
                                  (char *) &buf, sizeof(buf)) != sizeof(buf))
                 {
@@ -1140,9 +1113,9 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              dir.d_ino = conv_endian(dir.d_ino);
-              dir.d_off = conv_endian(dir.d_off);
-              dir.d_reclen = conv_endian16(dir.d_reclen);
+              dir.d_ino = H2T_4 (dir.d_ino);
+              dir.d_off = H2T_4 (dir.d_off);
+              dir.d_reclen = H2T_2 (dir.d_reclen);
               if ((s.write_mem) (cb, &s, arg2, (char *) &dir, sizeof(dir))
                   != sizeof(dir))
                 {
@@ -1168,7 +1141,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               struct iovec vector;
 
               vector = *((struct iovec *) t2h_addr(cb, &s, arg2));
-              translate_endian((void *) &vector, sizeof(vector));
+              translate_endian_t2h (&vector, sizeof(vector));
 
               result = readv(arg1, &vector, arg3);
               errcode = errno;
@@ -1180,7 +1153,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               struct iovec vector;
 
               vector = *((struct iovec *) t2h_addr(cb, &s, arg2));
-              translate_endian((void *) &vector, sizeof(vector));
+              translate_endian_t2h (&vector, sizeof(vector));
 
               result = writev(arg1, &vector, arg3);
               errcode = errno;
@@ -1207,7 +1180,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               struct timespec req, rem;
 
               req = *((struct timespec *) t2h_addr(cb, &s, arg2));
-              translate_endian((void *) &req, sizeof(req));
+              translate_endian_t2h (&req, sizeof(req));
 
               result = nanosleep(&req, &rem);
               errcode = errno;
@@ -1215,7 +1188,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              translate_endian((void *) &rem, sizeof(rem));
+              translate_endian_h2t (&rem, sizeof(rem));
               if ((s.write_mem) (cb, &s, arg2, (char *) &rem, sizeof(rem))
                   != sizeof(rem))
                 {
@@ -1241,9 +1214,9 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              *((uid_t *) t2h_addr(cb, &s, arg1)) = conv_endian(ruid);
-              *((uid_t *) t2h_addr(cb, &s, arg2)) = conv_endian(euid);
-              *((uid_t *) t2h_addr(cb, &s, arg3)) = conv_endian(suid);
+              *((uid_t *) t2h_addr(cb, &s, arg1)) = H2T_4 (ruid);
+              *((uid_t *) t2h_addr(cb, &s, arg2)) = H2T_4 (euid);
+              *((uid_t *) t2h_addr(cb, &s, arg3)) = H2T_4 (suid);
             }
             break;
 
@@ -1252,9 +1225,9 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               struct pollfd ufds;
 
               ufds = *((struct pollfd *) t2h_addr(cb, &s, arg1));
-              ufds.fd = conv_endian(ufds.fd);
-              ufds.events = conv_endian16(ufds.events);
-              ufds.revents = conv_endian16(ufds.revents);
+              ufds.fd = T2H_4 (ufds.fd);
+              ufds.events = T2H_2 (ufds.events);
+              ufds.revents = T2H_2 (ufds.revents);
 
               result = poll(&ufds, arg2, arg3);
               errcode = errno;
@@ -1272,9 +1245,9 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              *((uid_t *) t2h_addr(cb, &s, arg1)) = conv_endian(rgid);
-              *((uid_t *) t2h_addr(cb, &s, arg2)) = conv_endian(egid);
-              *((uid_t *) t2h_addr(cb, &s, arg3)) = conv_endian(sgid);
+              *((uid_t *) t2h_addr(cb, &s, arg1)) = H2T_4 (rgid);
+              *((uid_t *) t2h_addr(cb, &s, arg2)) = H2T_4 (egid);
+              *((uid_t *) t2h_addr(cb, &s, arg3)) = H2T_4 (sgid);
             }
             break;
 
@@ -1304,7 +1277,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               off_t offset;
 
               offset = *((off_t *) t2h_addr(cb, &s, arg3));
-              offset = conv_endian(offset);
+              offset = T2H_4 (offset);
 
               result = sendfile(arg1, arg2, &offset, arg3);
               errcode = errno;
@@ -1312,7 +1285,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
               if (result != 0)
                 break;
 
-              *((off_t *) t2h_addr(cb, &s, arg3)) = conv_endian(offset);
+              *((off_t *) t2h_addr(cb, &s, arg3)) = H2T_4 (offset);
             }
             break;
 
