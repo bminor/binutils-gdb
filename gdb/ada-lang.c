@@ -10097,6 +10097,23 @@ ada_binop_exp (struct type *expect_type,
 namespace expr
 {
 
+/* See ada-exp.h.  */
+
+operation_up
+ada_resolvable::replace (operation_up &&owner,
+			 struct expression *exp,
+			 bool deprocedure_p,
+			 bool parse_completion,
+			 innermost_block_tracker *tracker,
+			 struct type *context_type)
+{
+  if (resolve (exp, deprocedure_p, parse_completion, tracker, context_type))
+    return (make_operation<ada_funcall_operation>
+	    (std::move (owner),
+	     std::vector<operation_up> ()));
+  return std::move (owner);
+}
+
 value *
 ada_wrapped_operation::evaluate (struct type *expect_type,
 				 struct expression *exp,

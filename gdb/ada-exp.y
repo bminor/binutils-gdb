@@ -119,16 +119,13 @@ resolve (operation_up &&op, bool deprocedure_p, struct type *context_type)
 {
   operation_up result = std::move (op);
   ada_resolvable *res = dynamic_cast<ada_resolvable *> (result.get ());
-  if (res != nullptr
-      && res->resolve (pstate->expout.get (),
-		       deprocedure_p,
-		       pstate->parse_completion,
-		       pstate->block_tracker,
-		       context_type))
-    result
-      = make_operation<ada_funcall_operation> (std::move (result),
-					       std::vector<operation_up> ());
-
+  if (res != nullptr)
+    return res->replace (std::move (result),
+			 pstate->expout.get (),
+			 deprocedure_p,
+			 pstate->parse_completion,
+			 pstate->block_tracker,
+			 context_type);
   return result;
 }
 
