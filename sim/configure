@@ -640,7 +640,6 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 SIM_RX_CYCLE_ACCURATE_FLAGS
 SIM_FRV_TRAPDUMP_FLAGS
-sim_reserved_bits
 sim_float
 sim_bitsize
 SIM_INLINE
@@ -840,6 +839,7 @@ enable_sim_environment
 enable_sim_hardware
 enable_sim_inline
 enable_sim_profile
+enable_sim_reserved_bits
 enable_sim_scache
 enable_sim_stdio
 enable_sim_trace
@@ -1523,6 +1523,9 @@ Optional Features:
                           Specify which functions should be inlined
   --enable-sim-profile=opts
                           Enable profiling flags
+  --enable-sim-reserved-bits
+                          Specify whether to check reserved bits in
+                          instruction
   --enable-sim-scache=size
                           Specify simulator execution cache size
   --enable-sim-stdio      Specify whether to use stdio for console
@@ -12179,7 +12182,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12182 "configure"
+#line 12185 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12285,7 +12288,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12288 "configure"
+#line 12291 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14532,6 +14535,31 @@ _ACEOF
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sim_profile" >&5
 $as_echo "$sim_profile" >&6; }
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to check reserved bits in instruction" >&5
+$as_echo_n "checking whether to check reserved bits in instruction... " >&6; }
+# Check whether --enable-sim-reserved-bits was given.
+if test "${enable_sim_reserved_bits+set}" = set; then :
+  enableval=$enable_sim_reserved_bits; case "${enableval}" in
+yes|no) ;;
+*) as_fn_error $? "\"--enable-sim-reserved-bits does not take a value\"" "$LINENO" 5;;
+esac
+fi
+
+if test "x${enable_sim_reserved_bits}" != xno; then
+  sim_reserved_bits=1
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  sim_reserved_bits=0
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define WITH_RESERVED_BITS $sim_reserved_bits
+_ACEOF
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sim cache size" >&5
 $as_echo_n "checking for sim cache size... " >&6; }
 sim_scache="16384"
@@ -14705,7 +14733,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WARN_CFLAGS} ${WERROR_CFLAGS}" >&5
 $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
-
 
 
 

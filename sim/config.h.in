@@ -469,6 +469,9 @@
 /* Sim profile settings */
 #undef WITH_PROFILE
 
+/* Sim reserved bits setting */
+#undef WITH_RESERVED_BITS
+
 /* Sim cache szie */
 #undef WITH_SCACHE
 

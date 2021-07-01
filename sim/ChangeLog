@@ -1,5 +1,14 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Call SIM_AC_OPTION_RESERVED_BITS.
+	(sim_reserved_bits): Delete.
+	* m4/sim_ac_option_reserved_bits.m4: Delete first arg.  Define
+	WITH_RESERVED_BITS.
+	* m4/sim_ac_output.m4 (sim_reserved_bits): Delete.
+	* aclocal.m4, config.h.in, configure, Makefile.in: Regenerate.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Remove [true] from m32r SIM_TARGET call.
 	* configure, Makefile.in: Regenerate.
 

@@ -161,6 +161,7 @@ SIM_AC_OPTION_ENVIRONMENT
 SIM_AC_OPTION_HARDWARE
 SIM_AC_OPTION_INLINE
 SIM_AC_OPTION_PROFILE
+SIM_AC_OPTION_RESERVED_BITS
 SIM_AC_OPTION_SCACHE
 SIM_AC_OPTION_STDIO
 SIM_AC_OPTION_TRACE
@@ -172,7 +173,6 @@ dnl when the rest of the code is in the respective macros.  Once we merge the
 dnl respective SIM_AC_OPTION_xxx call above, we can drop these.
 AC_SUBST(sim_bitsize)
 AC_SUBST(sim_float)
-AC_SUBST(sim_reserved_bits)
 
 dnl Some arches have unique configure flags.
 m4_include([frv/acinclude.m4])

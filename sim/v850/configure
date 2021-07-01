@@ -626,12 +626,10 @@ PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
-sim_reserved_bits
 sim_bitsize'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_sim_reserved_bits
 enable_sim_bitsize
 '
       ac_precious_vars='build_alias
@@ -1244,9 +1242,6 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-sim-reserved-bits
-                          Specify whether to check reserved bits in
-                          instruction
   --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
 
 Report bugs to the package provider.
@@ -1679,22 +1674,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-default_sim_reserved_bits="1"
-# Check whether --enable-sim-reserved-bits was given.
-if test "${enable_sim_reserved_bits+set}" = set; then :
-  enableval=$enable_sim_reserved_bits; case "${enableval}" in
-  yes)	sim_reserved_bits="-DWITH_RESERVED_BITS=1";;
-  no)	sim_reserved_bits="-DWITH_RESERVED_BITS=0";;
-  *)	as_fn_error $? "\"--enable-sim-reserved-bits does not take a value\"" "$LINENO" 5; sim_reserved_bits="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_reserved_bits" != x""; then
-  echo "Setting reserved flags = $sim_reserved_bits" 6>&1
-fi
-else
-  sim_reserved_bits="-DWITH_RESERVED_BITS=${default_sim_reserved_bits}"
-fi
-
 wire_word_bitsize="32"
 wire_word_msb="31"
 wire_address_bitsize=""
@@ -1769,7 +1748,6 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
-
 
 
 

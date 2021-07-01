@@ -1,5 +1,9 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (SIM_RESERVED_BITS): Delete.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (GUILE): New variable.
 	(CGEN): Use $(GUILE).
 

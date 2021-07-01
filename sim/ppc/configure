@@ -631,7 +631,6 @@ sim_model_issue
 sim_default_model
 sim_model
 sim_monitor
-sim_reserved
 sim_float
 sim_timebase
 sim_hostbitsize
@@ -724,7 +723,6 @@ enable_sim_model_issue
 enable_sim_monitor
 enable_sim_opcode
 enable_sim_packages
-enable_sim_reserved_bits
 enable_sim_smp
 enable_sim_switch
 enable_sim_timebase
@@ -1364,7 +1362,6 @@ Optional Features:
   --enable-sim-monitor=mon		Specify whether to enable monitoring events.
   --enable-sim-opcode=which		Override default opcode lookup.
   --enable-sim-packages=list		Specify the packages to be included in the build.
-  --enable-sim-reserved-bits		Specify whether to check reserved bits in instruction.
   --enable-sim-smp=n			Specify number of processors to configure for.
   --enable-sim-switch			Use a switch instead of a table for instruction call.
   --enable-sim-timebase			Specify whether the PPC timebase is supported.
@@ -3430,21 +3427,6 @@ fi
 fi
 
 
-# Check whether --enable-sim-reserved-bits was given.
-if test "${enable_sim_reserved_bits+set}" = set; then :
-  enableval=$enable_sim_reserved_bits; case "${enableval}" in
-  yes)	sim_reserved="-DWITH_RESERVED_BITS=1";;
-  no)	sim_reserved="-DWITH_RESERVED_BITS=0";;
-  *)	as_fn_error $? "\"--enable-sim-reserved-bits does not take a value\"" "$LINENO" 5; sim_reserved="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_reserved" != x""; then
-  echo "Setting reserved flags = $sim_reserved" 6>&1
-fi
-else
-  sim_reserved=""
-fi
-
-
 # Check whether --enable-sim-smp was given.
 if test "${enable_sim_smp+set}" = set; then :
   enableval=$enable_sim_smp; case "${enableval}" in
@@ -4282,7 +4264,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
 
 
 

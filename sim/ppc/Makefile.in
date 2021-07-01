@@ -65,7 +65,6 @@ BITSIZE_CFLAGS = @sim_bitsize@
 HOSTBITSIZE_CFLAGS = @sim_hostbitsize@
 TIMEBASE_CFLAGS = @sim_timebase@
 FLOAT_CFLAGS = @sim_float@
-RESERVED_CFLAGS = @sim_reserved@
 MONITOR_CFLAGS = @sim_monitor@
 MODEL_CFLAGS = @sim_model@ @sim_default_model@ @sim_model_issue@
 TERMIO_CFLAGS = @sim_termio@
@@ -78,7 +77,6 @@ CONFIG_CFLAGS = \
   $(HOSTBITSIZE_CFLAGS) \
   $(TIMEBASE_CFLAGS) \
   $(FLOAT_CFLAGS) \
-  $(RESERVED_CFLAGS) \
   $(MONITOR_CFLAGS) \
   $(MODEL_CFLAGS) \
   $(TERMIO_CFLAGS) \

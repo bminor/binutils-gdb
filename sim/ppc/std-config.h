@@ -220,12 +220,6 @@ extern int current_floating_point;
 
    Control the inclusion of debugging code. */
 
-/* Whether to check instructions for reserved bits being set */
-
-#ifndef WITH_RESERVED_BITS
-#define WITH_RESERVED_BITS		1
-#endif
-
 /* include monitoring code */
 
 #define MONITOR_INSTRUCTION_ISSUE	1

@@ -376,18 +376,6 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 
 
-AC_ARG_ENABLE(sim-reserved-bits,
-[  --enable-sim-reserved-bits		Specify whether to check reserved bits in instruction.],
-[case "${enableval}" in
-  yes)	sim_reserved="-DWITH_RESERVED_BITS=1";;
-  no)	sim_reserved="-DWITH_RESERVED_BITS=0";;
-  *)	AC_MSG_ERROR("--enable-sim-reserved-bits does not take a value"); sim_reserved="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_reserved" != x""; then
-  echo "Setting reserved flags = $sim_reserved" 6>&1
-fi],[sim_reserved=""])dnl
-
-
 AC_ARG_ENABLE(sim-smp,
 [  --enable-sim-smp=n			Specify number of processors to configure for.],
 [case "${enableval}" in
@@ -690,7 +678,6 @@ AC_SUBST(sim_bitsize)
 AC_SUBST(sim_hostbitsize)
 AC_SUBST(sim_timebase)
 AC_SUBST(sim_float)
-AC_SUBST(sim_reserved)
 AC_SUBST(sim_monitor)
 AC_SUBST(sim_model)
 AC_SUBST(sim_default_model)

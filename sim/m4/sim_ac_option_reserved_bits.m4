@@ -13,18 +13,21 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 AC_DEFUN([SIM_AC_OPTION_RESERVED_BITS],
-[
-default_sim_reserved_bits="ifelse([$1],,1,[$1])"
+[dnl
+AC_MSG_CHECKING([whether to check reserved bits in instruction])
 AC_ARG_ENABLE(sim-reserved-bits,
 [AS_HELP_STRING([--enable-sim-reserved-bits],
 		[Specify whether to check reserved bits in instruction])],
 [case "${enableval}" in
-  yes)	sim_reserved_bits="-DWITH_RESERVED_BITS=1";;
-  no)	sim_reserved_bits="-DWITH_RESERVED_BITS=0";;
-  *)	AC_MSG_ERROR("--enable-sim-reserved-bits does not take a value"); sim_reserved_bits="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_reserved_bits" != x""; then
-  echo "Setting reserved flags = $sim_reserved_bits" 6>&1
-fi],[sim_reserved_bits="-DWITH_RESERVED_BITS=${default_sim_reserved_bits}"])dnl
+yes|no) ;;
+*) AC_MSG_ERROR("--enable-sim-reserved-bits does not take a value");;
+esac])
+if test "x${enable_sim_reserved_bits}" != xno; then
+  sim_reserved_bits=1
+  AC_MSG_RESULT([yes])
+else
+  sim_reserved_bits=0
+  AC_MSG_RESULT([no])
+fi
+AC_DEFINE_UNQUOTED([WITH_RESERVED_BITS], [$sim_reserved_bits], [Sim reserved bits setting])
 ])
-AC_SUBST(sim_reserved_bits)

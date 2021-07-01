@@ -213,6 +213,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_option_hardware.m4 \
 	$(top_srcdir)/m4/sim_ac_option_inline.m4 \
 	$(top_srcdir)/m4/sim_ac_option_profile.m4 \
+	$(top_srcdir)/m4/sim_ac_option_reserved_bits.m4 \
 	$(top_srcdir)/m4/sim_ac_option_scache.m4 \
 	$(top_srcdir)/m4/sim_ac_option_stdio.m4 \
 	$(top_srcdir)/m4/sim_ac_option_trace.m4 \
@@ -789,7 +790,6 @@ sim_bitsize = @sim_bitsize@
 sim_float = @sim_float@
 sim_hw_cflags = @sim_hw_cflags@
 sim_hw_sockser = @sim_hw_sockser@
-sim_reserved_bits = @sim_reserved_bits@
 srcdir = @srcdir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
