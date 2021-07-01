@@ -10114,6 +10114,66 @@ ada_resolvable::replace (operation_up &&owner,
   return std::move (owner);
 }
 
+/* Convert the character literal whose ASCII value would be VAL to the
+   appropriate value of type TYPE, if there is a translation.
+   Otherwise return VAL.  Hence, in an enumeration type ('A', 'B'),
+   the literal 'A' (VAL == 65), returns 0.  */
+
+static LONGEST
+convert_char_literal (struct type *type, LONGEST val)
+{
+  char name[7];
+  int f;
+
+  if (type == NULL)
+    return val;
+  type = check_typedef (type);
+  if (type->code () != TYPE_CODE_ENUM)
+    return val;
+
+  if ((val >= 'a' && val <= 'z') || (val >= '0' && val <= '9'))
+    xsnprintf (name, sizeof (name), "Q%c", (int) val);
+  else
+    xsnprintf (name, sizeof (name), "QU%02x", (int) val);
+  size_t len = strlen (name);
+  for (f = 0; f < type->num_fields (); f += 1)
+    {
+      /* Check the suffix because an enum constant in a package will
+	 have a name like "pkg__QUxx".  This is safe enough because we
+	 already have the correct type, and because mangling means
+	 there can't be clashes.  */
+      const char *ename = TYPE_FIELD_NAME (type, f);
+      size_t elen = strlen (ename);
+
+      if (elen >= len && strcmp (name, ename + elen - len) == 0)
+	return TYPE_FIELD_ENUMVAL (type, f);
+    }
+  return val;
+}
+
+/* See ada-exp.h.  */
+
+operation_up
+ada_char_operation::replace (operation_up &&owner,
+			     struct expression *exp,
+			     bool deprocedure_p,
+			     bool parse_completion,
+			     innermost_block_tracker *tracker,
+			     struct type *context_type)
+{
+  operation_up result = std::move (owner);
+
+  if (context_type != nullptr && context_type->code () == TYPE_CODE_ENUM)
+    {
+      gdb_assert (result.get () == this);
+      std::get<0> (m_storage) = context_type;
+      std::get<1> (m_storage)
+	= convert_char_literal (context_type, std::get<1> (m_storage));
+    }
+
+  return make_operation<ada_wrapped_operation> (std::move (result));
+}
+
 value *
 ada_wrapped_operation::evaluate (struct type *expect_type,
 				 struct expression *exp,

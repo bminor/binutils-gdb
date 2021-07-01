@@ -742,6 +742,35 @@ private:
   operation_up m_val;
 };
 
+/* A character constant expression.  This is a separate operation so
+   that it can participate in resolution, so that TYPE'(CST) can
+   work correctly for enums with character enumerators.  */
+class ada_char_operation : public long_const_operation,
+			   public ada_resolvable
+{
+public:
+
+  using long_const_operation::long_const_operation;
+
+  bool resolve (struct expression *exp,
+		bool deprocedure_p,
+		bool parse_completion,
+		innermost_block_tracker *tracker,
+		struct type *context_type) override
+  {
+    /* This should never be called, because this class also implements
+       'replace'.  */
+    gdb_assert_not_reached ("unexpected call");
+  }
+
+  operation_up replace (operation_up &&owner,
+			struct expression *exp,
+			bool deprocedure_p,
+			bool parse_completion,
+			innermost_block_tracker *tracker,
+			struct type *context_type) override;
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */

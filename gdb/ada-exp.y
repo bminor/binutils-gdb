@@ -91,8 +91,6 @@ static void write_name_assoc (struct parser_state *, struct stoken);
 
 static const struct block *block_lookup (const struct block *, const char *);
 
-static LONGEST convert_char_literal (struct type *, LONGEST);
-
 static void write_ambiguous_var (struct parser_state *,
 				 const struct block *, const char *, int);
 
@@ -869,11 +867,9 @@ primary	:	INT
 	;
 
 primary	:	CHARLIT
-		  { write_int (pstate,
-			       convert_char_literal (type_qualifier, $1.val),
-			       (type_qualifier == NULL) 
-			       ? $1.type : type_qualifier);
-		  }
+			{
+			  pstate->push_new<ada_char_operation> ($1.type, $1.val);
+			}
 	;
 
 primary	:	FLOAT
@@ -1716,43 +1712,6 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
       error (_("Invalid use of type."));
 
   push_association<ada_name_association> (ada_pop ());
-}
-
-/* Convert the character literal whose ASCII value would be VAL to the
-   appropriate value of type TYPE, if there is a translation.
-   Otherwise return VAL.  Hence, in an enumeration type ('A', 'B'),
-   the literal 'A' (VAL == 65), returns 0.  */
-
-static LONGEST
-convert_char_literal (struct type *type, LONGEST val)
-{
-  char name[7];
-  int f;
-
-  if (type == NULL)
-    return val;
-  type = check_typedef (type);
-  if (type->code () != TYPE_CODE_ENUM)
-    return val;
-
-  if ((val >= 'a' && val <= 'z') || (val >= '0' && val <= '9'))
-    xsnprintf (name, sizeof (name), "Q%c", (int) val);
-  else
-    xsnprintf (name, sizeof (name), "QU%02x", (int) val);
-  size_t len = strlen (name);
-  for (f = 0; f < type->num_fields (); f += 1)
-    {
-      /* Check the suffix because an enum constant in a package will
-	 have a name like "pkg__QUxx".  This is safe enough because we
-	 already have the correct type, and because mangling means
-	 there can't be clashes.  */
-      const char *ename = TYPE_FIELD_NAME (type, f);
-      size_t elen = strlen (ename);
-
-      if (elen >= len && strcmp (name, ename + elen - len) == 0)
-	return TYPE_FIELD_ENUMVAL (type, f);
-    }
-  return val;
 }
 
 static struct type *
