@@ -310,6 +310,32 @@ proc readelf_dump_test {} {
     # XXX FIXME: Add test of readelf -x here
 }
 
+# Tests whether readelf can read thin archives
+proc readelf_thin_archive_test {} {
+    global AR
+
+    if ![is_remote host] {
+	set tempfile tmpdir/bintest.o
+        set templib  tmpdir/bintest.thin.a
+        set libname  tmpdir/bintest.thin.a
+    } else {
+	set tempfile [remote_download host tmpdir/bintest.o]
+        set templib  [remote_download host tmpdir/bintest.thin.a]
+        set libname  bintest.thin.a
+    }
+
+    set testname "readelf -h bintest.thin"
+    set got [binutils_run $AR "rcT $libname ${tempfile}"]
+    if ![string match "" $got] {
+        fail $testname
+        return
+    }
+
+    readelf_test -h $templib readelf.h.thin
+
+    pass $testname
+}
+
 if ![is_remote host] {
     if {[which $READELF] == 0} then {
         perror "$READELF does not exist"
@@ -344,6 +370,8 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
     setup_xfail "mips-*-*irix*"
     readelf_test -s $tempfile readelf.ss
     readelf_test -r $tempfile readelf.r
+
+    readelf_thin_archive_test
 }
 
 # Test demangling symbol names.

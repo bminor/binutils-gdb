@@ -1,3 +1,10 @@
+2021-07-01  Andrei Homescu  <ah@immunant.com>
+
+	* readelf.c (process_archive): Reset file position to the
+	beginning when calling process_object for thin archive members.
+	* testsuite/binutils-all/readelf.exp: Add test.
+	* testsuite/binutils-all/readelf.h.thin: New file.
+
 2021-06-30  Tom Tromey  <tom@tromey.com>
 
 	* dwarf.c (read_and_display_attr_value): Handle

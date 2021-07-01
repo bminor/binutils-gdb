@@ -21792,6 +21792,9 @@ process_archive (Filedata * filedata, bool is_thin_archive)
 	  filedata->archive_file_offset = arch.nested_member_origin;
 	  member_filedata->file_name = qualified_name;
 
+	  /* The call to process_object() expects the file to be at the beginning.  */
+	  rewind (member_filedata->handle);
+
 	  if (! process_object (member_filedata))
 	    ret = false;
 
