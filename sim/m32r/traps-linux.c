@@ -231,14 +231,8 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
         unsigned int func, arg1, arg2, arg3, arg4, arg5, arg6, arg7;
         int result, result2, errcode;
 
-        if (STATE_ENVIRONMENT (sd) == OPERATING_ENVIRONMENT)
-          {
-            /* The new pc is the trap vector entry.
-               We assume there's a branch there to some handler.
-	       Use cr5 as EVB (EIT Vector Base) register.  */
-            USI new_pc = m32rbf_h_cr_get (current_cpu, 5) + 0x40 + num * 4;
-            return new_pc;
-          }
+	if (STATE_ENVIRONMENT (sd) != USER_ENVIRONMENT)
+	  goto case_default;
 
 	func = m32rbf_h_gr_get (current_cpu, 7);
 	arg1 = m32rbf_h_gr_get (current_cpu, 0);
@@ -1344,6 +1338,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
       /* Do nothing.  */
       break;
 
+    case_default:
     default :
       {
 	/* Use cr5 as EVB (EIT Vector Base) register.  */

@@ -1,5 +1,6 @@
 # m32r testcase for trap #$uimm4
 # mach(): m32r m32rx
+# sim: --environment virtual
 
 	.include "testutils.inc"
 
