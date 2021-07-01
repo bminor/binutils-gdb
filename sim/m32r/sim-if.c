@@ -30,6 +30,8 @@
 
 #include "dv-m32r_uart.h"
 
+#define M32R_DEFAULT_MEM_SIZE 0x2000000 /* 32M */
+
 static void free_state (SIM_DESC);
 static void print_m32r_misc_cpu (SIM_CPU *cpu, int verbose);
 
@@ -158,12 +160,13 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char * const *argv,
     addr = 0;
   sim_pc_set (current_cpu, addr);
 
-#ifdef M32R_LINUX
-  m32rbf_h_cr_set (current_cpu,
-                    m32r_decode_gdb_ctrl_regnum(SPI_REGNUM), 0x1f00000);
-  m32rbf_h_cr_set (current_cpu,
-                    m32r_decode_gdb_ctrl_regnum(SPU_REGNUM), 0x1f00000);
-#endif
+  if (STATE_ENVIRONMENT (sd) == USER_ENVIRONMENT)
+    {
+      m32rbf_h_cr_set (current_cpu,
+		       m32r_decode_gdb_ctrl_regnum(SPI_REGNUM), 0x1f00000);
+      m32rbf_h_cr_set (current_cpu,
+		       m32r_decode_gdb_ctrl_regnum(SPU_REGNUM), 0x1f00000);
+    }
 
   /* Standalone mode (i.e. `run`) will take care of the argv for us in
      sim_open() -> sim_parse_args().  But in debug mode (i.e. 'target sim'

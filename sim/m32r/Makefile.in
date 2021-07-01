@@ -22,7 +22,6 @@
 M32R_OBJS = m32r.o cpu.o decode.o sem.o model.o mloop.o
 M32RX_OBJS = m32rx.o cpux.o decodex.o modelx.o mloopx.o
 M32R2_OBJS = m32r2.o cpu2.o decode2.o model2.o mloop2.o
-TRAPS_OBJ = @traps_obj@
 
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
@@ -32,7 +31,7 @@ SIM_OBJS = \
 	$(M32R_OBJS) \
 	$(M32RX_OBJS) \
 	$(M32R2_OBJS) \
-	$(TRAPS_OBJ)
+	traps.o
 
 SIM_EXTRA_HW_DEVICES = m32r_cache m32r_uart
 
@@ -41,8 +40,6 @@ SIM_EXTRA_DEPS = \
 	$(CGEN_INCLUDE_DEPS) \
 	arch.h cpuall.h m32r-sim.h $(srcdir)/../../opcodes/m32r-desc.h \
 	eng.h engx.h eng2.h
-
-SIM_EXTRA_CFLAGS = @sim_extra_cflags@
 
 SIM_EXTRA_CLEAN = m32r-clean
 

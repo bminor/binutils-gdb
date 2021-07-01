@@ -590,8 +590,6 @@ sim_reserved_bits
 sim_float
 sim_bitsize
 cgen_breaks
-sim_extra_cflags
-traps_obj
 target_alias
 host_alias
 build_alias
@@ -1667,19 +1665,6 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-
-
-
-  case "${target_alias}" in
-  m32r*-linux*)
-    traps_obj=traps-linux.o
-    sim_extra_cflags="-DM32R_LINUX"
-    ;;
-  *)
-    traps_obj=traps.o
-    sim_extra_cflags="-DM32R_ELF"
-    ;;
-  esac
 
 
 

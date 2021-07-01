@@ -1,5 +1,17 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (TRAPS_OBJ, SIM_EXTRA_CFLAGS): Delete.
+	* configure.ac (traps_obj, sim_extra_cflags): Delete.
+	* sim-if.c (M32R_DEFAULT_MEM_SIZE): New define.
+	(sim_create_inferior): Replace M32R_LINUX with STATE_ENVIRONMENT
+	check.
+	* sim-main.h (M32R_DEFAULT_MEM_SIZE): Delete.
+	* traps-linux.c: Merge with ...
+	* traps.c: ... this file.
+	* configure: Regenerate.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* traps-linux.c (conv_endian, conv_endian16,
 	translate_endian): Delete.
 	(translate_endian_h2t): New host-to-target function.
