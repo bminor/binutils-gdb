@@ -4522,19 +4522,6 @@ ada_lookup_simple_minsym (const char *name)
   return result;
 }
 
-/* For all subprograms that statically enclose the subprogram of the
-   selected frame, add symbols matching identifier NAME in DOMAIN
-   and their blocks to the list of data in RESULT, as for
-   ada_add_block_symbols (q.v.).   If WILD_MATCH_P, treat as NAME
-   with a wildcard prefix.  */
-
-static void
-add_symbols_from_enclosing_procs (std::vector<struct block_symbol> &result,
-				  const lookup_name_info &lookup_name,
-				  domain_enum domain)
-{
-}
-
 /* True if TYPE is definitely an artificial type supplied to a symbol
    for which no debugging information was given in the symbol file.  */
 
@@ -4937,25 +4924,17 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
 }
 
 /* Add to RESULT all symbols from BLOCK (and its super-blocks)
-   whose name and domain match NAME and DOMAIN respectively.
-   If no match was found, then extend the search to "enclosing"
-   routines (in other words, if we're inside a nested function,
-   search the symbols defined inside the enclosing functions).
-   If WILD_MATCH_P is nonzero, perform the naming matching in
-   "wild" mode (see function "wild_match" for more info).
+   whose name and domain match LOOKUP_NAME and DOMAIN respectively.
 
-   Note: This function assumes that RESULT has 0 (zero) element in it.  */
+   Note: This function assumes that RESULT is empty.  */
 
 static void
 ada_add_local_symbols (std::vector<struct block_symbol> &result,
 		       const lookup_name_info &lookup_name,
 		       const struct block *block, domain_enum domain)
 {
-  int block_depth = 0;
-
   while (block != NULL)
     {
-      block_depth += 1;
       ada_add_block_symbols (result, block, lookup_name, domain, NULL);
 
       /* If we found a non-function match, assume that's the one.  */
@@ -4964,11 +4943,6 @@ ada_add_local_symbols (std::vector<struct block_symbol> &result,
 
       block = BLOCK_SUPERBLOCK (block);
     }
-
-  /* If no luck so far, try to find NAME as a local symbol in some lexically
-     enclosing subprogram.  */
-  if (result.empty () && block_depth > 2)
-    add_symbols_from_enclosing_procs (result, lookup_name, domain);
 }
 
 /* An object of this type is used as the callback argument when
