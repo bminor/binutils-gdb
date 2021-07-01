@@ -1,3 +1,8 @@
+2021-07-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 28029
+	* testsuite/binutils-all/debuginfod.exp: Replace -wK with -wk.
+
 2021-07-01  Andrei Homescu  <ah@immunant.com>
 
 	* readelf.c (process_archive): Reset file position to the

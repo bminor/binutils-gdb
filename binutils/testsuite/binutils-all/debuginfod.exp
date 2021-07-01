@@ -44,7 +44,7 @@ if { [which $OBJDUMP] == 0} {
 
 # Compile testprog.c, move the debuginfo to a separate file and add .gnu_debuglink.
 if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != ""} {
-    fail "$test (compilation failed)"
+    unsupported "$test (compilation failed)"
     return
 }
 
@@ -93,8 +93,8 @@ file delete -force $db
 # To check this we attempt to follow a broken debuglink. If configured
 # with debuginfod the output will contain the debuginfod URLs that were
 # queried (these queries fail since the server is not yet running).
-set conf_objdump [binutils_run $OBJDUMP "-WK tmpdir/testprog"]
-set conf_readelf [binutils_run $READELF "-wK tmpdir/testprog"]
+set conf_objdump [binutils_run $OBJDUMP "-Wk tmpdir/testprog"]
+set conf_readelf [binutils_run $READELF "-wk tmpdir/testprog"]
 
 # Find an unused port
 set port 7999
@@ -185,14 +185,14 @@ proc test_fetch_debugaltlink { prog progargs } {
 
 if { [regexp ".*DEBUGINFOD.*" $conf_objdump] } {
     test_fetch_debuglink $OBJDUMP "-W"
-    test_fetch_debugaltlink $OBJDUMP "-WK"
+    test_fetch_debugaltlink $OBJDUMP "-Wk"
 } else {
     untested "$test (objdump not configured with debuginfod)"
 }
 
 if { [regexp ".*DEBUGINFOD.*" $conf_readelf] } {
     test_fetch_debuglink $READELF "-w"
-    test_fetch_debugaltlink $READELF "-wK"
+    test_fetch_debugaltlink $READELF "-wk"
 } else {
     untested "$test (readelf not configured with debuginfod)"
 }
