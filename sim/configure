@@ -864,7 +864,6 @@ PKG_CONFIG_LIBDIR
 SDL_CFLAGS
 SDL_LIBS'
 ac_subdirs_all='bpf
-m32r
 mips
 mn10300
 or1k
@@ -12180,7 +12179,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12183 "configure"
+#line 12182 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12286,7 +12285,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12289 "configure"
+#line 12288 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13976,8 +13975,11 @@ subdirs="$subdirs bpf"
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32r
       fi
-            subdirs="$subdirs m32r"
+            ac_config_files="$ac_config_files m32r/Makefile.sim:m32r/Makefile.in"
 
+    ac_config_commands="$ac_config_commands m32r/Makefile"
+
+    as_fn_append SIM_SUBDIRS " m32r"
 
     ac_config_commands="$ac_config_commands depdir-m32r"
 
@@ -15832,6 +15834,8 @@ do
     "m32c/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m32c/Makefile.sim:m32c/Makefile.in" ;;
     "m32c/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m32c/Makefile" ;;
     "depdir-m32c") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32c" ;;
+    "m32r/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m32r/Makefile.sim:m32r/Makefile.in" ;;
+    "m32r/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m32r/Makefile" ;;
     "depdir-m32r") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32r" ;;
     "m68hc11/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m68hc11/Makefile.sim:m68hc11/Makefile.in" ;;
     "m68hc11/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m68hc11/Makefile" ;;
@@ -17371,6 +17375,18 @@ $as_echo X"$file" |
  rm -f m32c/Makesim1.tmp m32c/Makesim2.tmp
  ;;
     "depdir-m32c":C) $SHELL $ac_aux_dir/mkinstalldirs m32c/$DEPDIR ;;
+    "m32r/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/m32r:
+		p
+	}' \
+	<Make-common.sim >m32r/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >m32r/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r m32r/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r m32r/Makesim2.tmp' \
+	<m32r/Makefile.sim >m32r/Makefile
+ rm -f m32r/Makesim1.tmp m32r/Makesim2.tmp
+ ;;
     "depdir-m32r":C) $SHELL $ac_aux_dir/mkinstalldirs m32r/$DEPDIR ;;
     "m68hc11/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {

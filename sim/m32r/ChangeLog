@@ -1,5 +1,11 @@
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Removed.
+	* aclocal.m4: Removed.
+	* configure: Removed.
+
+2021-07-01  Mike Frysinger  <vapier@gentoo.org>
+
 	* traps.c (m32r_trap): Reformat indentation to GNU style.
 
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>

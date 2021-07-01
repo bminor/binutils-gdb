@@ -125,7 +125,7 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([iq2000-*-*], [iq2000])
     SIM_TARGET([lm32-*-*], [lm32])
     SIM_TARGET([m32c-*-*], [m32c])
-    SIM_TARGET([m32r-*-*], [m32r], [true])
+    SIM_TARGET([m32r-*-*], [m32r])
     SIM_TARGET([m68hc11-*-*|m6811-*-*], [m68hc11])
     SIM_TARGET([mcore-*-*], [mcore])
     SIM_TARGET([microblaze-*-*], [microblaze])

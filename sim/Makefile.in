@@ -234,7 +234,7 @@ CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
 	cr16/Makefile.sim cris/Makefile.sim d10v/Makefile.sim \
 	frv/Makefile.sim ft32/Makefile.sim h8300/Makefile.sim \
 	iq2000/Makefile.sim lm32/Makefile.sim m32c/Makefile.sim \
-	m68hc11/Makefile.sim mcore/Makefile.sim \
+	m32r/Makefile.sim m68hc11/Makefile.sim mcore/Makefile.sim \
 	microblaze/Makefile.sim moxie/Makefile.sim msp430/Makefile.sim \
 	pru/Makefile.sim rl78/Makefile.sim rx/Makefile.sim \
 	sh/Makefile.sim erc32/Makefile.sim \
@@ -975,6 +975,8 @@ iq2000/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/iq2000/Makefile
 lm32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/lm32/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 m32c/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m32c/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+m32r/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m32r/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 m68hc11/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m68hc11/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
