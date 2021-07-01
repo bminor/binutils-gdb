@@ -1,3 +1,8 @@
+2021-07-01  Richard Earnshaw  <rearnsha@arm.com>
+
+	PR gas/28031
+	* opcode/arm.h (FPU_ANY): Exclude XScale-related features.
+
 2021-02-19  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* opcode/s390.h (enum s390_opcode_cpu_val): Add
