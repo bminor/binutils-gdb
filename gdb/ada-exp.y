@@ -68,10 +68,6 @@ struct name_info {
 
 static struct parser_state *pstate = NULL;
 
-/* If expression is in the context of TYPE'(...), then TYPE, else
- * NULL.  */
-static struct type *type_qualifier;
-
 int yyparse (void);
 
 static int yylex (void);
@@ -428,8 +424,6 @@ pop_associations (int n)
 %type <bval> block
 %type <lval> arglist tick_arglist
 
-%type <tval> save_qualifier
-
 %token DOT_ALL
 
 /* Special type cases, put in to allow the parser to distinguish different
@@ -516,8 +510,7 @@ primary :	primary '(' arglist ')'
 			}
 	;
 
-primary :	var_or_type '\'' save_qualifier { type_qualifier = $1; } 
-		   '(' exp ')'
+primary :	var_or_type '\'' '(' exp ')'
 			{
 			  if ($1 == NULL)
 			    error (_("Type required for qualification"));
@@ -525,11 +518,7 @@ primary :	var_or_type '\'' save_qualifier { type_qualifier = $1; }
 						      check_typedef ($1));
 			  pstate->push_new<ada_qual_operation>
 			    (std::move (arg), $1);
-			  type_qualifier = $3;
 			}
-	;
-
-save_qualifier : 	{ $$ = type_qualifier; }
 	;
 
 primary :
@@ -1093,7 +1082,6 @@ ada_parse (struct parser_state *par_state)
   pstate = par_state;
 
   lexer_init (yyin);		/* (Re-)initialize lexer.  */
-  type_qualifier = NULL;
   obstack_free (&temp_parse_space, NULL);
   obstack_init (&temp_parse_space);
   components.clear ();
