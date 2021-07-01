@@ -3425,6 +3425,29 @@ ada_resolve_funcall (struct symbol *sym, const struct block *block,
   return candidates[i];
 }
 
+/* Resolve a mention of a name where the context type is an
+   enumeration type.  */
+
+static int
+ada_resolve_enum (std::vector<struct block_symbol> &syms,
+		  const char *name, struct type *context_type,
+		  bool parse_completion)
+{
+  gdb_assert (context_type->code () == TYPE_CODE_ENUM);
+  context_type = ada_check_typedef (context_type);
+
+  for (int i = 0; i < syms.size (); ++i)
+    {
+      /* We already know the name matches, so we're just looking for
+	 an element of the correct enum type.  */
+      if (ada_check_typedef (SYMBOL_TYPE (syms[i].symbol)) == context_type)
+	return i;
+    }
+
+  error (_("No name '%s' in enumeration type '%s'"), name,
+	 ada_type_name (context_type));
+}
+
 /* See ada-lang.h.  */
 
 block_symbol
@@ -3474,6 +3497,10 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
     error (_("No definition found for %s"), sym->print_name ());
   else if (candidates.size () == 1)
     i = 0;
+  else if (context_type != nullptr
+	   && context_type->code () == TYPE_CODE_ENUM)
+    i = ada_resolve_enum (candidates, sym->linkage_name (), context_type,
+			  parse_completion);
   else if (deprocedure_p && !is_nonfunction (candidates))
     {
       i = ada_resolve_function
@@ -4937,8 +4964,10 @@ ada_add_local_symbols (std::vector<struct block_symbol> &result,
     {
       ada_add_block_symbols (result, block, lookup_name, domain, NULL);
 
-      /* If we found a non-function match, assume that's the one.  */
-      if (is_nonfunction (result))
+      /* If we found a non-function match, assume that's the one.  We
+	 only check this when finding a function boundary, so that we
+	 can accumulate all results from intervening blocks first.  */
+      if (BLOCK_FUNCTION (block) != nullptr && is_nonfunction (result))
 	return;
 
       block = BLOCK_SUPERBLOCK (block);
