@@ -94,7 +94,7 @@ static const struct block *block_lookup (const struct block *, const char *);
 static LONGEST convert_char_literal (struct type *, LONGEST);
 
 static void write_ambiguous_var (struct parser_state *,
-				 const struct block *, char *, int);
+				 const struct block *, const char *, int);
 
 static struct type *type_int (struct parser_state *);
 
@@ -1400,7 +1400,7 @@ find_primitive_type (struct parser_state *par_state, const char *name)
 }
 
 static int
-chop_selector (char *name, int end)
+chop_selector (const char *name, int end)
 {
   int i;
   for (i = end - 1; i > 0; i -= 1)
@@ -1413,8 +1413,8 @@ chop_selector (char *name, int end)
    '.'), chop this separator and return the result; else, return
    NAME.  */
 
-static char *
-chop_separator (char *name)
+static const char *
+chop_separator (const char *name)
 {
   if (*name == '.')
    return name + 1;
@@ -1429,11 +1429,11 @@ chop_separator (char *name)
    <sep> is '__' or '.', write the indicated sequence of
    STRUCTOP_STRUCT expression operators. */
 static void
-write_selectors (struct parser_state *par_state, char *sels)
+write_selectors (struct parser_state *par_state, const char *sels)
 {
   while (*sels != '\0')
     {
-      char *p = chop_separator (sels);
+      const char *p = chop_separator (sels);
       sels = p;
       while (*sels != '\0' && *sels != '.' 
 	     && (sels[0] != '_' || sels[1] != '_'))
@@ -1450,7 +1450,7 @@ write_selectors (struct parser_state *par_state, char *sels)
    */
 static void
 write_ambiguous_var (struct parser_state *par_state,
-		     const struct block *block, char *name, int len)
+		     const struct block *block, const char *name, int len)
 {
   struct symbol *sym = new (&temp_parse_space) symbol ();
 
@@ -1489,10 +1489,10 @@ ada_nget_field_index (const struct type *type, const char *field_name0,
    In case of failure, we return NULL.  */
 
 static struct type *
-get_symbol_field_type (struct symbol *sym, char *encoded_field_name)
+get_symbol_field_type (struct symbol *sym, const char *encoded_field_name)
 {
-  char *field_name = encoded_field_name;
-  char *subfield_name;
+  const char *field_name = encoded_field_name;
+  const char *subfield_name;
   struct type *type = SYMBOL_TYPE (sym);
   int fieldno;
 
