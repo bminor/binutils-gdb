@@ -1,3 +1,8 @@
+2021-07-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-nds32.c: Change all references of keyword_gpr to
+	nds32_keyword_gpr.
+
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/tc-microblaze.c (md_begin): Make opcode const.  Rename

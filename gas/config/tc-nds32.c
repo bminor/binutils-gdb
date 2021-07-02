@@ -97,7 +97,7 @@ static int optimize_for_space = 0;
 static int label_exist = 0;
 /* Flag to save state in omit_fp region.  */
 static int in_omit_fp = 0;
-extern struct nds32_keyword keyword_gpr[];
+extern struct nds32_keyword nds32_keyword_gpr[];
 /* Tag there is relax relocation having to link.  */
 static bool relaxing = false;
 /* ICT model.  */
@@ -4615,7 +4615,7 @@ md_begin (void)
 
   /* Initial general purpose registers hash table.  */
   nds32_gprs_hash = str_htab_create ();
-  for (k = keyword_gpr; k->name; k++)
+  for (k = nds32_keyword_gpr; k->name; k++)
     str_hash_insert (nds32_gprs_hash, k->name, k, 0);
 
   /* Initial branch hash table.  */
