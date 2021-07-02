@@ -65,14 +65,6 @@ struct nds32_private_data
 #define NDS32_PARSE_INSN16      0x01
 #define NDS32_PARSE_INSN32      0x02
 
-extern const field_t *nds32_field_table[NDS32_CORE_COUNT];
-extern opcode_t *nds32_opcode_table[NDS32_CORE_COUNT];
-extern keyword_t **nds32_keyword_table[NDS32_CORE_COUNT];
-extern struct nds32_opcode nds32_opcodes[];
-extern const field_t nds32_operand_fields[];
-extern keyword_t *nds32_keywords[];
-extern const keyword_t nds32_keyword_gpr[];
-
 static uint32_t nds32_mask_opcode (uint32_t);
 static void nds32_special_opcode (uint32_t, struct nds32_opcode **);
 static int get_mapping_symbol_type (struct disassemble_info *, int,
@@ -86,8 +78,8 @@ static htab_t opcode_htab;
 
 /* Find the value map register name.  */
 
-static keyword_t *
-nds32_find_reg_keyword (keyword_t *reg, int value)
+static const keyword_t *
+nds32_find_reg_keyword (const keyword_t *reg, int value)
 {
   if (!reg)
     return NULL;
@@ -107,7 +99,7 @@ nds32_parse_audio_ext (const field_t *pfd,
 {
   fprintf_ftype func = info->fprintf_func;
   void *stream = info->stream;
-  keyword_t *psys_reg;
+  const keyword_t *psys_reg;
   int int_value, new_value;
 
   if (pfd->hw_res == HW_INT || pfd->hw_res == HW_UINT)
@@ -224,7 +216,7 @@ nds32_parse_opcode (struct nds32_opcode *opc, bfd_vma pc ATTRIBUTE_UNUSED,
   unsigned int push25gpr = 0, lsmwRb, lsmwRe, lsmwEnb4, checkbit, i;
   int int_value, ifthe1st = 1;
   const field_t *pfd;
-  keyword_t *psys_reg;
+  const keyword_t *psys_reg;
 
   if (opc == NULL)
     {

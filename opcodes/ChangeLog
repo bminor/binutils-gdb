@@ -1,3 +1,12 @@
+2021-07-02  Alan Modra  <amodra@gmail.com>
+
+	* nds32-dis.c (nds32_find_reg_keyword): Constify arg and return.
+	(nds32_parse_audio_ext, nds32_parse_opcode): Constify psys_reg.
+	(nds32_field_table, nds32_opcode_table, nds32_keyword_table),
+	(nds32_opcodes, nds32_operand_fields, nds32_keywords),
+	(nds32_keyword_gpr): Move declarations to..
+	* nds32-asm.h: ..here, constifying to match definitions.
+
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.am (GUILE): New variable.
