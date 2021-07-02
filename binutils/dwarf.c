@@ -2211,7 +2211,7 @@ get_type_signedness (abbrev_entry *entry,
 	      if (attr->form == DW_FORM_strp)
 		printf (", %s", fetch_indirect_string (uvalue));
 	      else if (attr->form == DW_FORM_string)
-		printf (", %s", orig_data);
+		printf (", %.*s", (int) (end - orig_data), orig_data);
 	    }
 	  break;
 

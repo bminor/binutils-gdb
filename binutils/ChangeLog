@@ -1,3 +1,9 @@
+2021-07-02  Alan Modra  <amodra@gmail.com>
+
+	PR 28048
+	* dwarf.c (get_type_signedness): Don't run off end of buffer
+	printing DW_FORM_string attribute.
+
 2021-07-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 28029
