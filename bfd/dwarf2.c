@@ -909,7 +909,8 @@ read_address (struct comp_unit *unit, bfd_byte **ptr, bfd_byte *buf_end)
   if (bfd_get_flavour (unit->abfd) == bfd_target_elf_flavour)
     signed_vma = get_elf_backend_data (unit->abfd)->sign_extend_vma;
 
-  if (unit->addr_size > (size_t) (buf_end - buf))
+  if (unit->addr_size > (size_t) (buf_end - buf)
+      || (buf > buf_end))
     {
       *ptr = buf_end;
       return 0;
@@ -3097,6 +3098,8 @@ read_ranges (struct comp_unit *unit, struct arange *arange,
   if (ranges_ptr < unit->file->dwarf_ranges_buffer)
     return false;
   ranges_end = unit->file->dwarf_ranges_buffer + unit->file->dwarf_ranges_size;
+  if (ranges_ptr >= ranges_end)
+    return false;
 
   for (;;)
     {
