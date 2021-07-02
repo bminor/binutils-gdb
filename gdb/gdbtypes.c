@@ -5579,6 +5579,10 @@ copy_type_recursive (struct objfile *objfile,
 				  xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type,
 								       i)));
 	      break;
+            case FIELD_LOC_KIND_DWARF_BLOCK:
+              SET_FIELD_DWARF_BLOCK (new_type->field (i),
+                                     TYPE_FIELD_DWARF_BLOCK (type, i));
+              break;
 	    default:
 	      internal_error (__FILE__, __LINE__,
 			      _("Unexpected type field location kind: %d"),
