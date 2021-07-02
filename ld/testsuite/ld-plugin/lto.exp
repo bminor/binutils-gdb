@@ -786,6 +786,13 @@ if { [at_least_gcc_version 4 7] } {
     } else {
 	fail "PR binutils/23460"
     }
+    set exec_output [run_host_cmd "$RANLIB" "$plug_opt tmpdir/libpr23460.a"]
+    set exec_output [prune_warnings $exec_output]
+    if [string match "" $exec_output] then {
+	pass "PR binutils/23460"
+    } else {
+	fail "PR binutils/23460"
+    }
 }
 
 # Run "ld -r" to generate inputs for complex LTO tests.
