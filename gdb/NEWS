@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 10
+*** Changes since GDB 11
+
+*** Changes in GDB 11
 
 * The 'set disassembler-options' command now supports specifying options
   for the ARC target.
