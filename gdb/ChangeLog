@@ -1,5 +1,9 @@
 2021-07-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 11.0.90.
+
+2021-07-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Replace "Changes since GDB 10" by "Changes in GDB 11".
 
 2021-07-03  Joel Brobecker  <brobecker@adacore.com>
