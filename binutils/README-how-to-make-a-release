@@ -85,13 +85,13 @@ Approx time to complete from here: 2 hours ....
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
      of the next release:
      
-       m4_define([BFD_VERSION], [2.37.50])
+       m4_define([BFD_VERSION], [2.38.50])
        
      Update the release number in bfd/version.m4 for the BRANCH.
      The branch only needs the point value set to 90 as the release
      has not actually happened yet.
 
-       m4_define([BFD_VERSION], [2.36.90])
+       m4_define([BFD_VERSION], [2.37.90])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold" and then building
@@ -115,12 +115,12 @@ Approx time to complete from here: 2 hours ....
 
      c. Build a test target using this tarball.
 
-           cp binutils-2.36.90.tar.xz /dev/shm
+           cp binutils-2.37.90.tar.xz /dev/shm
 	   pushd /dev/shm
 	   tar xvf binutils-2.36.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-2.36.90/configure --quiet --enable-gold
+	   ../binutils-2.37.90/configure --quiet --enable-gold
 	   make
 	   popd
 
@@ -128,8 +128,8 @@ Approx time to complete from here: 2 hours ....
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          scp binutils-2.36.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.36.90.tar.xz
+          scp binutils-2.37.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.37.90.tar.xz
 
      e. Clean up the source directory again.
 
@@ -142,11 +142,11 @@ Approx time to complete from here: 2 hours ....
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The <NEW_VERSION> release branch has been created for the GNU binutils.
+  The 2.38 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-<OLD_VERSION>.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.37.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
@@ -162,7 +162,7 @@ Hi Everyone,
 
   The <NEW_VERSION> branch has now been created:
 
-     git clone git://sourceware.org/git/binutils-gdb.git -b binutils-<NEW_VERSION>-branch <NEW_VERSION>
+     git clone git://sourceware.org/git/binutils-gdb.git -b binutils-<NEW_VERSION>-branch
 
   A snapshot of the sources is also available here:
 
