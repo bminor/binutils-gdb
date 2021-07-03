@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.37:
+
 * arm-symbianelf support removed.
 
 * Add -z report-relative-reloc to x86 ELF linker to report dynamic

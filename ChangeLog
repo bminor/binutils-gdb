@@ -1,5 +1,9 @@
 2021-07-03  Nick Clifton  <nickc@redhat.com>
 
+	* 2.37 release branch created.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
 	* libiberty: Sync with gcc.  Bring in:
 	2021-06-30  Gerald Pfeifer  <gerald@pfeifer.com>
 

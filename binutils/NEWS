@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.37:
+
 * The readelf tool has a new command line option which can be used to specify
   how the numeric values of symbols are reported.  --sym-base=0|8|10|16 tells
   readelf to display the values in base 8, base 10 or base 16.  A sym base of 0

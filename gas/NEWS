@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.37:
+
 * arm-symbianelf support removed.
 
 * Add support for Realm Management Extension (RME) for AArch64.
