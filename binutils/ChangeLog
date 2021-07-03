@@ -1,5 +1,10 @@
 2021-07-03  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
 	* 2.37 release branch created.
 
 2021-07-02  Alan Modra  <amodra@gmail.com>
