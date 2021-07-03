@@ -20997,7 +20997,7 @@ lnp_state_machine::record_line (bool end_sequence)
      previous version of the code.  */
   else if (m_op_index == 0 || end_sequence)
     {
-      fe->included_p = 1;
+      fe->included_p = true;
       if (m_record_lines_p)
 	{
 	  /* When we switch files we insert an end maker in the first file,
@@ -21368,7 +21368,7 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
       /* Now that we're done scanning the Line Header Program, we can
 	 create the psymtab of each included file.  */
       for (auto &file_entry : lh->file_names ())
-	if (file_entry.included_p == 1)
+	if (file_entry.included_p)
 	  {
 	    gdb::unique_xmalloc_ptr<char> name_holder;
 	    const char *include_name =

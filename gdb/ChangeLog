@@ -1,3 +1,8 @@
+2021-07-03  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (lnp_state_machine::record_line): Use 'true'.
+	(dwarf_decode_lines): Remove '=='.
+
 2021-07-02  Tom Tromey  <tromey@adacore.com>
 
 	* ada-exp.y (chop_selector, chop_separator, write_selectors)
