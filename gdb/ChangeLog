@@ -1,3 +1,8 @@
+2021-07-03  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 11 branch created (4b51505e33441c6165e7789fa2b6d21930242927):
+	* version.in: Bump version to 12.0.50.DATE-git.
+
 2021-07-03  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (lnp_state_machine::record_line): Use 'true'.

@@ -1,3 +1,7 @@
+2021-07-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/default.exp: Change $_gdb_major to 12.
+
 2021-07-01  Pedro Alves  <pedro@palves.net>
 
 	PR mi/15729
