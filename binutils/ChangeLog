@@ -1,5 +1,11 @@
 2021-07-03  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+	* README-how-to-make-a-release: Update.
+
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
 	* 2.37 release branch created.
 
 2021-07-02  Alan Modra  <amodra@gmail.com>

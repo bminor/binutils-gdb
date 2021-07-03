@@ -35,7 +35,8 @@ Approx time to complete from here: 2 hours ....
      in the gold directory - it has its own release numbering.
 
      Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
-     elfcpp, gas, gold, gprof, include, ld, libctf, opcodes and toplevel.
+     elfcpp, gas, gold, gprof, include, ld, libctf, libiberty, opcodes
+     and toplevel.
 
      Add a note of the name of the new branch to binutils/BRANCHES.
 
@@ -43,8 +44,8 @@ Approx time to complete from here: 2 hours ....
 
   4. Create the release branch using:
 
-	git branch binutils-2_37-branch
-        git push origin binutils-2_37-branch
+	git branch binutils-2_38-branch
+        git push origin binutils-2_38-branch
 
      If you get a message like:
      
@@ -54,7 +55,7 @@ Approx time to complete from here: 2 hours ....
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_37-branch 2.37
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_38-branch 2.38
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -76,8 +77,8 @@ Approx time to complete from here: 2 hours ....
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.37 (HEAD)" to 2.37, and create
-     "2.38 (HEAD)":
+     new one.  E.g. rename "2.38 (HEAD)" to 2.38, and create
+     "2.39 (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
