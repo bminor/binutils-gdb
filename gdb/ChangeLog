@@ -1,5 +1,9 @@
 2021-07-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 11.0.90.DATE-git.
+
+2021-07-03  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 11.0.90 released.
 
 2021-07-03  Joel Brobecker  <brobecker@adacore.com>
