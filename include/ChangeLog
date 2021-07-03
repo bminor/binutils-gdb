@@ -1,3 +1,12 @@
+2021-07-03  Nick Clifton  <nickc@redhat.com>
+
+	Import from gcc mainline:
+	2021-03-31  Patrick Palka  <ppalka@redhat.com>
+
+	PR c++/88115
+	* demangle.h (enum demangle_component_type): Add
+	DEMANGLE_COMPONENT_VENDOR_EXPR.
+
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* opcode/aarch64.h (aarch64_opcode_table): Mark const.

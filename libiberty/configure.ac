@@ -108,18 +108,6 @@ dnl to call AC_CHECK_PROG.
 AC_CHECK_TOOL(AR, ar)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
 
-GCC_PLUGIN_OPTION(PLUGIN_OPTION)
-if test -n "$PLUGIN_OPTION"; then
-  if $AR --help 2>&1 | grep -q "\--plugin"; then
-    AR_PLUGIN_OPTION="$PLUGIN_OPTION"
-    AC_SUBST(AR_PLUGIN_OPTION)
-  fi
-  if $RANLIB --help 2>&1 | grep -q "\--plugin"; then
-    RANLIB_PLUGIN_OPTION="$PLUGIN_OPTION"
-    AC_SUBST(RANLIB_PLUGIN_OPTION)
-  fi
-fi
-
 dnl When switching to automake, replace the following with AM_ENABLE_MULTILIB.
 # Add --enable-multilib to configure.
 # Default to --enable-multilib
@@ -623,6 +611,12 @@ if test -z "${setobjs}"; then
     ac_cv_func_getpagesize=yes
     ;;
 
+  hppa*-*-hpux*)
+    # Replace system snprintf and vsnprintf with libiberty implementations.
+    AC_LIBOBJ([snprintf])
+    AC_LIBOBJ([vsnprintf])
+    ;;
+
   *-*-mingw32*)
     # Under mingw32, sys_nerr and sys_errlist exist, but they are
     # macros, so the test below won't find them.
@@ -677,7 +671,7 @@ if test -z "${setobjs}"; then
   for v in $vars; do
     AC_MSG_CHECKING([for $v])
     AC_CACHE_VAL(libiberty_cv_var_$v,
-      [AC_LINK_IFELSE([AC_LANG_PROGRAM([[int *p;]],[[extern int $v []; p = $v;]])],
+      [AC_LINK_IFELSE([AC_LANG_PROGRAM([[extern int $v [];]],[[if ($v [0]) return 1;]])],
 		      [eval "libiberty_cv_var_$v=yes"],
 		      [eval "libiberty_cv_var_$v=no"])])
     if eval "test \"`echo '$libiberty_cv_var_'$v`\" = yes"; then
