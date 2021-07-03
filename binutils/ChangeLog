@@ -1,3 +1,10 @@
+2021-07-05  Alan Modra  <amodra@gmail.com>
+
+	PR 28047
+	* dwarf.c (get_type_abbrev_from_form): Add cu_end parameter.
+	Check DW_FORM_ref1 etc. arg against cu_end rather than end of
+	section.  Adjust all callers.
+
 2021-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
