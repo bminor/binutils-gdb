@@ -1,3 +1,8 @@
+2021-07-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* solib-darwin.c (darwin_solib_create_inferior_hook): Return
+	early if no execution.
+
 2021-07-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 11.0.90.DATE-git.
