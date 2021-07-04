@@ -1989,9 +1989,9 @@ struct dwarf2_per_cu_quick_data
      expand_symtabs_matching.  */
   unsigned int mark : 1;
 
-  /* True if we've tried to read the file table and found there isn't one.
-     There will be no point in trying to read it again next time.  */
-  unsigned int no_file_data : 1;
+  /* True if we've tried to read the file table.  There will be no
+     point in trying to read it again next time.  */
+  bool files_read : 1;
 };
 
 /* A subclass of psymbol_functions that arranges to read the DWARF
@@ -2897,13 +2897,11 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 
   gdb_assert (! this_cu->is_debug_types);
 
+  this_cu->v.quick->files_read = true;
   /* Our callers never want to match partial units -- instead they
      will match the enclosing full CU.  */
   if (comp_unit_die->tag == DW_TAG_partial_unit)
-    {
-      this_cu->v.quick->no_file_data = 1;
-      return;
-    }
+    return;
 
   lh_cu = this_cu;
   slot = NULL;
@@ -2933,10 +2931,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
       lh = dwarf_decode_line_header (line_offset, cu);
     }
   if (lh == NULL)
-    {
-      lh_cu->v.quick->no_file_data = 1;
-      return;
-    }
+    return;
 
   qfn = XOBNEW (&per_objfile->per_bfd->obstack, struct quick_file_names);
   qfn->hash.dwo_unit = cu->dwo_unit;
@@ -2976,18 +2971,13 @@ dw2_get_file_names (dwarf2_per_cu_data *this_cu,
   /* Nor type unit groups.  */
   gdb_assert (! this_cu->type_unit_group_p ());
 
-  if (this_cu->v.quick->file_names != NULL)
+  if (this_cu->v.quick->files_read)
     return this_cu->v.quick->file_names;
-  /* If we know there is no line data, no point in looking again.  */
-  if (this_cu->v.quick->no_file_data)
-    return NULL;
 
   cutu_reader reader (this_cu, per_objfile);
   if (!reader.dummy_p)
     dw2_get_file_names_reader (&reader, reader.comp_unit_die);
 
-  if (this_cu->v.quick->no_file_data)
-    return NULL;
   return this_cu->v.quick->file_names;
 }
 
