@@ -4420,7 +4420,8 @@ dwarf2_base_index_functions::map_symbol_filenames
 
   for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
     {
-      if (per_objfile->symtab_set_p (per_cu.get ()))
+      if (!per_cu->is_debug_types
+	  && per_objfile->symtab_set_p (per_cu.get ()))
 	{
 	  if (per_cu->v.quick->file_names != nullptr)
 	    qfn_cache.insert (per_cu->v.quick->file_names);
@@ -4430,7 +4431,8 @@ dwarf2_base_index_functions::map_symbol_filenames
   for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
     {
       /* We only need to look at symtabs not already expanded.  */
-      if (per_objfile->symtab_set_p (per_cu.get ()))
+      if (per_cu->is_debug_types
+	  || per_objfile->symtab_set_p (per_cu.get ()))
 	continue;
 
       quick_file_names *file_data = dw2_get_file_names (per_cu.get (),
