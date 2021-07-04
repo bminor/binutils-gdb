@@ -1533,14 +1533,10 @@ struct file_and_directory
   const char *name;
 
   /* The compilation directory.  NULL if not known.  If we needed to
-     compute a new string, this points to COMP_DIR_STORAGE, otherwise,
-     points directly to the DW_AT_comp_dir string attribute owned by
-     the obstack that owns the DIE.  */
+     compute a new string, it will be stored in the per-BFD string
+     bcache; otherwise, points directly to the DW_AT_comp_dir string
+     attribute owned by the obstack that owns the DIE.  */
   const char *comp_dir;
-
-  /* If we needed to build a new string for comp_dir, this is what
-     owns the storage.  */
-  std::string comp_dir_storage;
 };
 
 static file_and_directory find_file_and_directory (struct die_info *die,
@@ -10387,9 +10383,10 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
       && producer_is_gcc_lt_4_3 (cu) && res.name != NULL
       && IS_ABSOLUTE_PATH (res.name))
     {
-      res.comp_dir_storage = ldirname (res.name);
-      if (!res.comp_dir_storage.empty ())
-	res.comp_dir = res.comp_dir_storage.c_str ();
+      std::string comp_dir_storage = ldirname (res.name);
+      if (!comp_dir_storage.empty ())
+	res.comp_dir
+	  = cu->per_objfile->objfile->intern (comp_dir_storage.c_str ());
     }
   if (res.comp_dir != NULL)
     {
