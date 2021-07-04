@@ -1193,6 +1193,34 @@ open_source_file (struct symtab *s)
   return fd;
 }
 
+/* See source.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+find_source_or_rewrite (const char *filename, const char *dirname)
+{
+  gdb::unique_xmalloc_ptr<char> fullname;
+
+  scoped_fd fd = find_and_open_source (filename, dirname, &fullname);
+  if (fd.get () < 0)
+    {
+      /* rewrite_source_path would be applied by find_and_open_source, we
+	 should report the pathname where GDB tried to find the file.  */
+
+      if (dirname == nullptr || IS_ABSOLUTE_PATH (filename))
+	fullname.reset (xstrdup (filename));
+      else
+	fullname.reset (concat (dirname, SLASH_STRING,
+				filename, (char *) nullptr));
+
+      gdb::unique_xmalloc_ptr<char> rewritten
+	= rewrite_source_path (fullname.get ());
+      if (rewritten != nullptr)
+	fullname = std::move (rewritten);
+    }
+
+  return fullname;
+}
+
 /* Finds the fullname that a symtab represents.
 
    This functions finds the fullname and saves it in s->fullname.

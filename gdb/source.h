@@ -72,6 +72,13 @@ extern scoped_fd find_and_open_source (const char *filename,
 				       const char *dirname,
 				       gdb::unique_xmalloc_ptr<char> *fullname);
 
+/* A wrapper for find_and_open_source that returns the full name.  If
+   the full name cannot be found, a full name is constructed based on
+   the parameters, passing them through rewrite_source_path.  */
+
+extern gdb::unique_xmalloc_ptr<char> find_source_or_rewrite
+     (const char *filename, const char *dirname);
+
 /* Open a source file given a symtab S.  Returns a file descriptor or
    negative number for error.  */
 extern scoped_fd open_source_file (struct symtab *s);
