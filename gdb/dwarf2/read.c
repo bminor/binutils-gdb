@@ -20606,21 +20606,21 @@ dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu)
 }
 
 /* Subroutine of dwarf_decode_lines to simplify it.
-   Return the file name of the psymtab for the given file_entry.
+   Return the file name for the given file_entry.
    COMP_DIR is the compilation directory (DW_AT_comp_dir) or NULL if unknown.
+   CU_INFO describes the CU's DW_AT_name and DW_AT_comp_dir.
    If space for the result is malloc'd, *NAME_HOLDER will be set.
-   Returns NULL if FILE_INDEX should be ignored, i.e., it is pst->filename.  */
+   Returns NULL if FILE_INDEX should be ignored, i.e., it is
+   equivalent to CU_INFO.  */
 
 static const char *
-psymtab_include_file_name (const struct line_header *lh, const file_entry &fe,
-			   const dwarf2_psymtab *pst,
+compute_include_file_name (const struct line_header *lh, const file_entry &fe,
+			   const file_and_directory &cu_info,
 			   const char *comp_dir,
 			   gdb::unique_xmalloc_ptr<char> *name_holder)
 {
   const char *include_name = fe.name;
   const char *include_name_to_compare = include_name;
-  const char *pst_filename;
-  int file_is_pst;
 
   const char *dir_name = fe.include_dir (lh);
 
@@ -20628,8 +20628,8 @@ psymtab_include_file_name (const struct line_header *lh, const file_entry &fe,
   if (!IS_ABSOLUTE_PATH (include_name)
       && (dir_name != NULL || comp_dir != NULL))
     {
-      /* Avoid creating a duplicate psymtab for PST.
-	 We do this by comparing INCLUDE_NAME and PST_FILENAME.
+      /* Avoid creating a duplicate name for CU_INFO.
+	 We do this by comparing INCLUDE_NAME and CU_INFO.
 	 Before we do the comparison, however, we need to account
 	 for DIR_NAME and COMP_DIR.
 	 First prepend dir_name (if non-NULL).  If we still don't
@@ -20664,19 +20664,17 @@ psymtab_include_file_name (const struct line_header *lh, const file_entry &fe,
 	}
     }
 
-  pst_filename = pst->filename;
   gdb::unique_xmalloc_ptr<char> copied_name;
-  if (!IS_ABSOLUTE_PATH (pst_filename) && pst->dirname != NULL)
+  const char *cu_filename = cu_info.name;
+  if (!IS_ABSOLUTE_PATH (cu_filename) && cu_info.comp_dir != nullptr)
     {
-      copied_name.reset (concat (pst->dirname, SLASH_STRING,
-				 pst_filename, (char *) NULL));
-      pst_filename = copied_name.get ();
+      copied_name.reset (concat (cu_info.comp_dir, SLASH_STRING,
+				 cu_filename, (char *) NULL));
+      cu_filename = copied_name.get ();
     }
 
-  file_is_pst = FILENAME_CMP (include_name_to_compare, pst_filename) == 0;
-
-  if (file_is_pst)
-    return NULL;
+  if (FILENAME_CMP (include_name_to_compare, cu_filename) == 0)
+    return nullptr;
   return include_name;
 }
 
@@ -21378,12 +21376,15 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
     {
       /* Now that we're done scanning the Line Header Program, we can
 	 create the psymtab of each included file.  */
+      file_and_directory fnd;
+      fnd.name = pst->filename;
+      fnd.comp_dir = pst->dirname;
       for (auto &file_entry : lh->file_names ())
 	if (file_entry.included_p)
 	  {
 	    gdb::unique_xmalloc_ptr<char> name_holder;
 	    const char *include_name =
-	      psymtab_include_file_name (lh, file_entry, pst,
+	      compute_include_file_name (lh, file_entry, fnd,
 					 comp_dir, &name_holder);
 	    if (include_name != NULL)
 	      dwarf2_create_include_psymtab
