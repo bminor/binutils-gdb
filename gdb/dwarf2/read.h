@@ -275,6 +275,9 @@ struct dwarf2_per_cu_data
   {
     return section == nullptr;
   }
+
+  /* Free any cached file names.  */
+  void free_cached_file_names ();
 };
 
 /* Entry in the signatured_types hash table.  */

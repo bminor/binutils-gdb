@@ -96,25 +96,6 @@ line_header::file_file_name (int file) const
     }
 }
 
-gdb::unique_xmalloc_ptr<char>
-line_header::file_full_name (int file, const char *comp_dir) const
-{
-  /* Is the file number a valid index into the line header's file name
-     table?  Remember that file numbers start with one, not zero.  */
-  if (is_valid_file_index (file))
-    {
-      gdb::unique_xmalloc_ptr<char> relative = file_file_name (file);
-
-      if (IS_ABSOLUTE_PATH (relative.get ()) || comp_dir == NULL)
-	return relative;
-      return gdb::unique_xmalloc_ptr<char> (concat (comp_dir, SLASH_STRING,
-						    relative.get (),
-						    (char *) NULL));
-    }
-  else
-    return file_file_name (file);
-}
-
 static void
 dwarf2_statement_list_fits_in_line_number_section_complaint (void)
 {

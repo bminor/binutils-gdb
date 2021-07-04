@@ -1542,6 +1542,12 @@ struct file_and_directory
 static file_and_directory find_file_and_directory (struct die_info *die,
 						   struct dwarf2_cu *cu);
 
+static const char *compute_include_file_name
+     (const struct line_header *lh,
+      const file_entry &fe,
+      const file_and_directory &cu_info,
+      gdb::unique_xmalloc_ptr<char> *name_holder);
+
 static htab_up allocate_signatured_type_table ();
 
 static htab_up allocate_dwo_unit_table ();
@@ -1654,7 +1660,10 @@ dwarf2_per_bfd::dwarf2_per_bfd (bfd *obfd, const dwarf2_debug_sections *names,
 dwarf2_per_bfd::~dwarf2_per_bfd ()
 {
   for (auto &per_cu : all_comp_units)
-    per_cu->imported_symtabs_free ();
+    {
+      per_cu->imported_symtabs_free ();
+      per_cu->free_cached_file_names ();
+    }
 
   /* Everything else should be on this->obstack.  */
 }
@@ -1966,6 +1975,10 @@ struct quick_file_names
   /* The number of entries in file_names, real_names.  */
   unsigned int num_file_names;
 
+  /* The CU directory, as given by DW_AT_comp_dir.  May be
+     nullptr.  */
+  const char *comp_dir;
+
   /* The file names from the line table, after being run through
      file_full_name.  */
   const char **file_names;
@@ -2162,25 +2175,6 @@ eq_file_name_entry (const void *a, const void *b)
   return eq_stmt_list_entry (&ea->hash, &eb->hash);
 }
 
-/* Delete function for a quick_file_names.  */
-
-static void
-delete_file_name_entry (void *e)
-{
-  struct quick_file_names *file_data = (struct quick_file_names *) e;
-  int i;
-
-  for (i = 0; i < file_data->num_file_names; ++i)
-    {
-      xfree ((void*) file_data->file_names[i]);
-      if (file_data->real_names)
-	xfree ((void*) file_data->real_names[i]);
-    }
-
-  /* The space for the struct itself lives on the obstack, so we don't
-     free it here.  */
-}
-
 /* Create a quick_file_names hash table.  */
 
 static htab_up
@@ -2188,7 +2182,7 @@ create_quick_file_names_table (unsigned int nr_initial_entries)
 {
   return htab_up (htab_create_alloc (nr_initial_entries,
 				     hash_file_name_entry, eq_file_name_entry,
-				     delete_file_name_entry, xcalloc, xfree));
+				     nullptr, xcalloc, xfree));
 }
 
 /* Read in CU (dwarf2_cu object) for PER_CU in the context of PER_OBJFILE.  This
@@ -2930,30 +2924,50 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 
       lh = dwarf_decode_line_header (line_offset, cu);
     }
-  if (lh == NULL)
-    return;
-
-  qfn = XOBNEW (&per_objfile->per_bfd->obstack, struct quick_file_names);
-  qfn->hash.dwo_unit = cu->dwo_unit;
-  qfn->hash.line_sect_off = line_offset;
-  gdb_assert (slot != NULL);
-  *slot = qfn;
 
   file_and_directory fnd = find_file_and_directory (comp_unit_die, cu);
 
   int offset = 0;
   if (strcmp (fnd.name, "<unknown>") != 0)
     ++offset;
+  else if (lh == nullptr)
+    return;
 
-  qfn->num_file_names = offset + lh->file_names_size ();
+  qfn = XOBNEW (&per_objfile->per_bfd->obstack, struct quick_file_names);
+  qfn->hash.dwo_unit = cu->dwo_unit;
+  qfn->hash.line_sect_off = line_offset;
+  /* There may not be a DW_AT_stmt_list.  */
+  if (slot != nullptr)
+    *slot = qfn;
+
+  std::vector<const char *> include_names;
+  if (lh != nullptr)
+    {
+      for (const auto &entry : lh->file_names ())
+	{
+	  gdb::unique_xmalloc_ptr<char> name_holder;
+	  const char *include_name =
+	    compute_include_file_name (lh.get (), entry, fnd, &name_holder);
+	  if (include_name != nullptr)
+	    {
+	      include_name = per_objfile->objfile->intern (include_name);
+	      include_names.push_back (include_name);
+	    }
+	}
+    }
+
+  qfn->num_file_names = offset + include_names.size ();
+  qfn->comp_dir = fnd.comp_dir;
   qfn->file_names =
     XOBNEWVEC (&per_objfile->per_bfd->obstack, const char *,
 	       qfn->num_file_names);
   if (offset != 0)
     qfn->file_names[0] = xstrdup (fnd.name);
-  for (int i = 0; i < lh->file_names_size (); ++i)
-    qfn->file_names[i + offset] = lh->file_full_name (i + 1,
-						      fnd.comp_dir).release ();
+
+  if (!include_names.empty ())
+    memcpy (&qfn->file_names[offset], include_names.data (),
+	    include_names.size () * sizeof (const char *));
+
   qfn->real_names = NULL;
 
   lh_cu->v.quick->file_names = qfn;
@@ -2993,7 +3007,17 @@ dw2_get_real_path (dwarf2_per_objfile *per_objfile,
 				      qfn->num_file_names, const char *);
 
   if (qfn->real_names[index] == NULL)
-    qfn->real_names[index] = gdb_realpath (qfn->file_names[index]).release ();
+    {
+      const char *dirname = nullptr;
+
+      if (!IS_ABSOLUTE_PATH (qfn->file_names[index]))
+	dirname = qfn->comp_dir;
+
+      gdb::unique_xmalloc_ptr<char> fullname;
+      fullname = find_source_or_rewrite (qfn->file_names[index], dirname);
+
+      qfn->real_names[index] = fullname.release ();
+    }
 
   return qfn->real_names[index];
 }
@@ -3012,25 +3036,23 @@ dwarf2_base_index_functions::find_last_source_symtab (struct objfile *objfile)
   return compunit_primary_filetab (cust);
 }
 
-/* Traversal function for dw2_forget_cached_source_info.  */
+/* See read.h.  */
 
-static int
-dw2_free_cached_file_names (void **slot, void *info)
+void
+dwarf2_per_cu_data::free_cached_file_names ()
 {
-  struct quick_file_names *file_data = (struct quick_file_names *) *slot;
+  if (per_bfd == nullptr || !per_bfd->using_index || v.quick == nullptr)
+    return;
 
-  if (file_data->real_names)
+  struct quick_file_names *file_data = v.quick->file_names;
+  if (file_data != nullptr && file_data->real_names != nullptr)
     {
-      int i;
-
-      for (i = 0; i < file_data->num_file_names; ++i)
+      for (int i = 0; i < file_data->num_file_names; ++i)
 	{
-	  xfree ((void*) file_data->real_names[i]);
-	  file_data->real_names[i] = NULL;
+	  xfree ((void *) file_data->real_names[i]);
+	  file_data->real_names[i] = nullptr;
 	}
     }
-
-  return 1;
 }
 
 void
@@ -3039,8 +3061,8 @@ dwarf2_base_index_functions::forget_cached_source_info
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  htab_traverse_noresize (per_objfile->per_bfd->quick_file_names_table.get (),
-			  dw2_free_cached_file_names, NULL);
+  for (auto &per_cu : per_objfile->per_bfd->all_comp_units)
+    per_cu->free_cached_file_names ();
 }
 
 /* Struct used to manage iterating over all CUs looking for a symbol.  */
@@ -4444,18 +4466,19 @@ dwarf2_base_index_functions::map_symbol_filenames
       for (int j = 0; j < file_data->num_file_names; ++j)
 	{
 	  const char *filename = file_data->file_names[j];
-	  filenames_cache.seen (filename);
+	  const char *key = filename;
+	  const char *fullname = nullptr;
+
+	  if (need_fullname)
+	    {
+	      fullname = dw2_get_real_path (per_objfile, file_data, j);
+	      key = fullname;
+	    }
+
+	  if (!filenames_cache.seen (key))
+	    fun (filename, fullname);
 	}
     }
-
-  filenames_cache.traverse ([&] (const char *filename)
-    {
-      gdb::unique_xmalloc_ptr<char> this_real_name;
-
-      if (need_fullname)
-	this_real_name = gdb_realpath (filename);
-      fun (filename, this_real_name.get ());
-    });
 }
 
 bool
