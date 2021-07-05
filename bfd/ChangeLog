@@ -1,3 +1,9 @@
+2021-07-05  Alan Modra  <amodra@gmail.com>
+
+	PR 28055
+	* elf64-bpf.c (bpf_elf_generic_reloc): Use correct bfd for bfd_put
+	and bfd_put_32 calls.  Correct section limit checks.
+
 2021-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* version.m4: Update version number.
