@@ -14615,6 +14615,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	case Tag_PAC_extension:
 	case Tag_BTI_extension:
 	case Tag_BTI_use:
+	case Tag_PACRET_use:
 	  /* Use the largest value specified.  */
 	  if (in_attr[i].i > out_attr[i].i)
 	    out_attr[i].i = in_attr[i].i;

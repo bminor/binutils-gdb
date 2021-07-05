@@ -16153,6 +16153,10 @@ static const char * arm_attr_tag_BTI_use[] =
   {"Compiled without branch target enforcement",
    "Compiled with branch target enforcement"};
 
+static const char * arm_attr_tag_PACRET_use[] =
+  {"Compiled without return address signing and authentication",
+   "Compiled with return address signing and authentication"};
+
 #define LOOKUP(id, name) \
   {id, #name, 0x80 | ARRAY_SIZE(arm_attr_tag_##name), arm_attr_tag_##name}
 static arm_attr_public_tag arm_attr_public_tags[] =
@@ -16196,6 +16200,7 @@ static arm_attr_public_tag arm_attr_public_tags[] =
   LOOKUP(50, PAC_extension),
   LOOKUP(52, BTI_extension),
   LOOKUP(74, BTI_use),
+  LOOKUP(76, PACRET_use),
   {64, "nodefaults", 0, NULL},
   {65, "also_compatible_with", 0, NULL},
   LOOKUP(66, T2EE_use),

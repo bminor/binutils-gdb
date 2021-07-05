@@ -309,6 +309,7 @@ enum
   Tag_PAC_extension = 50,
   Tag_BTI_extension = 52,
   Tag_BTI_use = 74,
+  Tag_PACRET_use = 76,
   Tag_nodefaults = 64,
   Tag_also_compatible_with = 65,
   Tag_T2EE_use = 66,
