@@ -266,6 +266,9 @@
 /* Define if sigsetjmp is available. */
 #undef HAVE_SIGSETJMP
 
+/* Define to 1 if you have the `sigtimedwait' function. */
+#undef HAVE_SIGTIMEDWAIT
+
 /* Define to 1 if you have the `socketpair' function. */
 #undef HAVE_SOCKETPAIR
 
