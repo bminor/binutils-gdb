@@ -1,5 +1,11 @@
 2021-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* scoped_ignore_signal.h (struct scoped_ignore_signal)
+	<~scoped_ignore_signal>: Use sigtimedwait if HAVE_SIGTIMEDWAIT
+	is defined, else use sigpending + sigwait.
+
+2021-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* common.m4 (GDB_AC_COMMON): Check for sigtimedwait.
 	* config.in, configure: Re-generate.
 
