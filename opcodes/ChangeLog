@@ -1,3 +1,9 @@
+2021-07-05  Nick Clifton  <nickc@redhat.com>
+
+	* po/de.po: Updated German translation.
+	* po/pt_BR.po: Updated Brazilian Portuguese translation.
+	* po/uk.po: Updated Ukranian translation.
+
 2021-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
