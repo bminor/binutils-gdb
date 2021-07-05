@@ -1,3 +1,7 @@
+2021-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* config.in, configure: Re-generate.
+
 2021-06-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4: Delete most m4_include's of ../config files.

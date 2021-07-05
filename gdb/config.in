@@ -414,6 +414,9 @@
 /* Define to 1 if you have the `sigsetmask' function. */
 #undef HAVE_SIGSETMASK
 
+/* Define to 1 if you have the `sigtimedwait' function. */
+#undef HAVE_SIGTIMEDWAIT
+
 /* Define to 1 if you have the `socketpair' function. */
 #undef HAVE_SOCKETPAIR
 

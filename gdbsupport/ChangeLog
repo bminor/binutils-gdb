@@ -1,3 +1,8 @@
+2021-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common.m4 (GDB_AC_COMMON): Check for sigtimedwait.
+	* config.in, configure: Re-generate.
+
 2021-06-17  Pedro Alves  <pedro@palves.net>
 
 	* scoped_ignore_signal.h

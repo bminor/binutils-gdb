@@ -1,3 +1,7 @@
+2021-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* config.in, configure: Re-generate.
+
 2021-07-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* solib-darwin.c (darwin_solib_create_inferior_hook): Return
