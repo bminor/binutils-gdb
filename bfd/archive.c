@@ -2845,6 +2845,10 @@ _bfd_archive_close_and_cleanup (bfd *abfd)
 	  htab_delete (htab);
 	  bfd_ardata (abfd)->cache = NULL;
 	}
+
+      /* Close the archive plugin file descriptor if needed.  */
+      if (abfd->archive_plugin_fd > 0)
+	close (abfd->archive_plugin_fd);
     }
 
   _bfd_unlink_from_archive_parent (abfd);

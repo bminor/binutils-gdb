@@ -1,3 +1,16 @@
+2021-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/28040
+	* plugin.c (plugin_input_file): Add ibfd.
+	(release_plugin_file_descriptor): New function.
+	(release_input_file): Call release_plugin_file_descriptor to
+	close input->fd.
+	(plugin_object_p): Call release_plugin_file_descriptor to close
+	input->fd.  Also call release_plugin_file_descriptor if not
+	claimed.
+	* testsuite/config/default.exp (RANLIB): New.
+	* testsuite/ld-plugin/lto.exp: Run ranlib test.
+
 2021-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

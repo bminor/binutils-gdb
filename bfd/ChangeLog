@@ -1,3 +1,18 @@
+2021-07-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/28040
+	* archive.c (_bfd_archive_close_and_cleanup): Close the archive
+	plugin file descriptor if needed.
+	* bfd.c (bfd): Add archive_plugin_fd and
+	archive_plugin_fd_open_count.
+	* opncls.c (_bfd_new_bfd): Initialize to -1.
+	* plugin.c (bfd_plugin_open_input): Cache and reuse the archive
+	plugin file descriptor.
+	(bfd_plugin_close_file_descriptor): New function.
+	(try_claim): Call bfd_plugin_close_file_descriptor.
+	* plugin.h (bfd_plugin_close_file_descriptor): New.
+	* bfd-in2.h: Regenerated.
+
 2021-07-05  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

@@ -89,6 +89,8 @@ _bfd_new_bfd (void)
       return NULL;
     }
 
+  nbfd->archive_plugin_fd = -1;
+
   return nbfd;
 }
 

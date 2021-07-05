@@ -192,6 +192,7 @@ int
 bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
 {
   bfd *iobfd;
+  int fd;
 
   iobfd = ibfd;
   while (iobfd->my_archive
@@ -202,50 +203,60 @@ bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
   if (!iobfd->iostream && !bfd_open_file (iobfd))
     return 0;
 
-  /* The plugin API expects that the file descriptor won't be closed
-     and reused as done by the bfd file cache.  So open it again.
-     dup isn't good enough.  plugin IO uses lseek/read while BFD uses
-     fseek/fread.  It isn't wise to mix the unistd and stdio calls on
-     the same underlying file descriptor.  */
-  file->fd = open (file->name, O_RDONLY | O_BINARY);
-  if (file->fd < 0)
+  /* Reuse the archive plugin file descriptor.  */
+  if (iobfd != ibfd)
+    fd = iobfd->archive_plugin_fd;
+  else
+    fd = -1;
+
+  if (fd < 0)
     {
+      /* The plugin API expects that the file descriptor won't be closed
+	 and reused as done by the bfd file cache.  So open it again.
+	 dup isn't good enough.  plugin IO uses lseek/read while BFD uses
+	 fseek/fread.  It isn't wise to mix the unistd and stdio calls on
+	 the same underlying file descriptor.  */
+      fd = open (file->name, O_RDONLY | O_BINARY);
+      if (fd < 0)
+	{
 #ifndef EMFILE
-      return 0;
+	  return 0;
 #else
-      if (errno != EMFILE)
-	return 0;
+	  if (errno != EMFILE)
+	    return 0;
 
 #ifdef HAVE_GETRLIMIT
-      struct rlimit lim;
+	  struct rlimit lim;
 
-      /* Complicated links involving lots of files and/or large archives
-	 can exhaust the number of file descriptors available to us.
-	 If possible, try to allocate more descriptors.  */
-      if (getrlimit (RLIMIT_NOFILE, & lim) == 0
-	  && lim.rlim_cur < lim.rlim_max)
-	{
-	  lim.rlim_cur = lim.rlim_max;
-	  if (setrlimit (RLIMIT_NOFILE, &lim) == 0)
-	    file->fd = open (file->name, O_RDONLY | O_BINARY);
+	  /* Complicated links involving lots of files and/or large
+	     archives can exhaust the number of file descriptors
+	     available to us.  If possible, try to allocate more
+	     descriptors.  */
+	  if (getrlimit (RLIMIT_NOFILE, & lim) == 0
+	      && lim.rlim_cur < lim.rlim_max)
+	    {
+	      lim.rlim_cur = lim.rlim_max;
+	      if (setrlimit (RLIMIT_NOFILE, &lim) == 0)
+		fd = open (file->name, O_RDONLY | O_BINARY);
+	    }
+
+	  if (fd < 0)
+#endif
+	    {
+	      _bfd_error_handler (_("plugin framework: out of file descriptors. Try using fewer objects/archives\n"));
+	      return 0;
+	    }
+#endif
 	}
-
-      if (file->fd < 0)
-#endif
-	{
-	  _bfd_error_handler (_("plugin framework: out of file descriptors. Try using fewer objects/archives\n"));
-	  return 0;
-	} 
-#endif
-   }
+    }
 
   if (iobfd == ibfd)
     {
       struct stat stat_buf;
 
-      if (fstat (file->fd, &stat_buf))
+      if (fstat (fd, &stat_buf))
 	{
-	  close(file->fd);
+	  close (fd);
 	  return 0;
 	}
 
@@ -254,10 +265,42 @@ bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
     }
   else
     {
+      /* Cache the archive plugin file descriptor.  */
+      iobfd->archive_plugin_fd = fd;
+      iobfd->archive_plugin_fd_open_count++;
+
       file->offset = ibfd->origin;
       file->filesize = arelt_size (ibfd);
     }
+
+  file->fd = fd;
   return 1;
+}
+
+/* Close the plugin file descriptor.  */
+
+void
+bfd_plugin_close_file_descriptor (bfd *abfd, int fd)
+{
+  bfd *iobfd;
+
+  iobfd = abfd;
+  while (iobfd->my_archive
+	 && !bfd_is_thin_archive (iobfd->my_archive))
+    iobfd = iobfd->my_archive;
+  if (iobfd == abfd)
+    close (fd);
+  else
+    {
+      iobfd->archive_plugin_fd_open_count--;
+      /* Dup the archive plugin file descriptor for later use, which
+	 will be closed by _bfd_archive_close_and_cleanup.  */
+      if (iobfd->archive_plugin_fd_open_count == 0)
+	{
+	  iobfd->archive_plugin_fd = dup (fd);
+	  close (fd);
+	}
+    }
 }
 
 static int
@@ -271,7 +314,7 @@ try_claim (bfd *abfd)
       && current_plugin->claim_file)
     {
       current_plugin->claim_file (&file, &claimed);
-      close (file.fd);
+      bfd_plugin_close_file_descriptor (abfd, file.fd);
     }
 
   return claimed;
