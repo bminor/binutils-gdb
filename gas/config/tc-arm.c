@@ -33518,6 +33518,7 @@ arm_convert_symbolic_attribute (const char *name)
       T (Tag_MVE_arch),
       T (Tag_PAC_extension),
       T (Tag_BTI_extension),
+      T (Tag_BTI_use),
       /* We deliberately do not include Tag_MPextension_use_legacy.  */
 #undef T
     };
