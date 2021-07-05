@@ -1,3 +1,8 @@
+2021-07-05  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.fortran/ptype-on-functions.exp: Allow both $integer8 and
+	$integer4 for size of string length.
+
 2021-07-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/default.exp: Change $_gdb_major to 12.
