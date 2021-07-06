@@ -1443,13 +1443,34 @@ proc gdb_test_sequence { args } {
 #  '<line1>^M
 #   <line2>^M
 #  '
+#
+# Optionally, additional -re-not <regexp> arguments can be specified, to
+# ensure that a regexp is not match by the COMMAND output.
+# Such an additional argument generates an additional PASS/FAIL of the form:
+#   PASS: test-case.exp: $message: pattern not matched: <regexp>
 
-proc gdb_test_lines { command message re } {
-    set found 0
-    set idx 0
+proc gdb_test_lines { command message re args } {
+    set re_not [list]
+
+    for {set i 0} {$i < [llength $args]} {incr i} {
+	set arg [lindex $args $i]
+	if { $arg == "-re-not" } {
+	    incr i
+	    if { [llength $args] == $i } {
+		error "Missing argument for -re-not"
+		break
+	    }
+	    set arg [lindex $args $i]
+	    lappend re_not $arg
+	} else {
+	    error "Unhandled argument: $arg"
+	}
+    }
+
     if { $message == ""} {
 	set message $command
     }
+
     set lines ""
     gdb_test_multiple $command $message {
 	-re "\r\n(\[^\r\n\]*)(?=\r\n)" {
@@ -1467,6 +1488,10 @@ proc gdb_test_lines { command message re } {
     }
 
     gdb_assert { [regexp $re $lines] } $message
+
+    foreach re $re_not {
+	gdb_assert { ![regexp $re $lines] } "$message: pattern not matched: $re"
+    }
 }
 
 # Test that a command gives an error.  For pass or fail, return
