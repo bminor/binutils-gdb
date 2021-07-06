@@ -153,31 +153,7 @@ AC_DEFINE_DIR(AUTO_LOAD_SAFE_PATH, escape_dir,
 	      [Directories safe to hold auto-loaded files.])
 AC_MSG_RESULT([$with_auto_load_safe_path])
 
-# Enable shared libraries.
-AC_ARG_ENABLE(shared,
-AS_HELP_STRING([--enable-shared], [build shared libraries [default=yes]]),,
-  enable_shared=yes)
-
-# If we have shared libraries, try to set RPATH_ENVVAR reasonably,
-# such that we can find the shared libraries in the build tree.
-if test $enable_shared = no; then
-  # The variable `RPATH_ENVVAR' itself is not likely to be used on any
-  # platform.
-  RPATH_ENVVAR=RPATH_ENVVAR
-else
-  # The variable `LD_LIBRARY_PATH' is used on most platforms.
-  RPATH_ENVVAR=LD_LIBRARY_PATH
-  # The following exceptions are taken from Libtool 1.4.3.
-  case $host_os in
-    aix*)
-      if test $host_cpu != ia64; then
-        RPATH_ENVVAR=LIBPATH
-      fi ;;
-    darwin* | rhapsody*)
-      RPATH_ENVVAR=DYLD_LIBRARY_PATH ;;
-  esac
-fi
-AC_SUBST(RPATH_ENVVAR)
+AC_CONFIG_SUBDIRS(testsuite)
 
 # Check whether to support alternative target configurations
 AC_ARG_ENABLE(targets,
@@ -2195,7 +2171,6 @@ else
   LIBCTF=
   CTF_DEPS=
 fi
-AC_SUBST(enable_libctf)
 AC_SUBST(LIBCTF)
 AC_SUBST(CTF_DEPS)
 
@@ -2261,13 +2236,5 @@ GDB_AC_TRANSFORM([gdb], [GDB_TRANSFORM_NAME])
 GDB_AC_TRANSFORM([gcore], [GCORE_TRANSFORM_NAME])
 AC_CONFIG_FILES([gcore], [chmod +x gcore])
 AC_CONFIG_FILES([Makefile gdb-gdb.gdb gdb-gdb.py doc/Makefile data-directory/Makefile])
-# Transform the name of some programs for the testsuite/lib/pdtrace
-# test tool.
-GDB_AC_TRANSFORM(strip, STRIP_TRANSFORM_NAME)
-GDB_AC_TRANSFORM(readelf, READELF_TRANSFORM_NAME)
-GDB_AC_TRANSFORM(as, GAS_TRANSFORM_NAME)
-GDB_AC_TRANSFORM(nm, NM_TRANSFORM_NAME)
-AC_CONFIG_FILES([testsuite/lib/pdtrace], [chmod +x testsuite/lib/pdtrace])
-AC_CONFIG_FILES([testsuite/Makefile])
 
 AC_OUTPUT

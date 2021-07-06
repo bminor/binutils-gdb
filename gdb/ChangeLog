@@ -1,3 +1,9 @@
+2021-07-06  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac: Remove things that were moved from
+	testsuite/configure.ac.
+	* configure: Re-generate.
+
 2021-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* config.in, configure: Re-generate.

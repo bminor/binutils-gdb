@@ -1,3 +1,13 @@
+2021-07-06  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac: Restore.
+	* configure: Re-generate.
+	* aclocal.m4: Re-generate.
+	* Makefile.in (distclean): Add config.status.
+	(Makefile): Adjust paths.
+	(lib/pdtrace): Adjust paths.
+	(config.status): Add.
+
 2021-07-06  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.fortran/ptype-on-functions.exp: Allow both $integer8 and

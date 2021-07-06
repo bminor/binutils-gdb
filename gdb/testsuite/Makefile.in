@@ -348,14 +348,17 @@ clean mostlyclean:
 
 distclean maintainer-clean realclean: clean
 	-rm -f *~ core
-	-rm -f Makefile *-init.exp
+	-rm -f Makefile config.status *-init.exp
 	-rm -fr *.log summary detail *.plog *.sum *.psum site.*
 
-Makefile : Makefile.in ../config.status $(host_makefile_frag)
-	cd .. && $(SHELL) ./config.status testsuite/Makefile
+Makefile : Makefile.in config.status $(host_makefile_frag)
+	$(SHELL) config.status Makefile
 
-lib/pdtrace: pdtrace.in ../config.status
-	cd .. && $(SHELL) ./config.status testsuite/lib/pdtrace
+lib/pdtrace: pdtrace.in config.status
+	$(SHELL) config.status lib/pdtrace
+
+config.status: configure
+	$(SHELL) config.status --recheck
 
 TAGS: force
 	find $(srcdir) -name '*.exp' -print | \
