@@ -33,6 +33,13 @@ set integer4 [fortran_int4]
 set logical4 [fortran_logical4]
 set integer8 [fortran_int8]
 
+# A fortran string parameter is passed as a char *, and an additional
+# argument str_ for the string length.  The type used for the string length
+# argument is size_t, but for gcc 7 and earlier, the actual type is int
+# instead ( see
+# https://gcc.gnu.org/onlinedocs/gfortran/Argument-passing-conventions.html ).
+set stringlen ($integer8|$integer4)
+
 if {[test_compiler_info {clang-*}]} {
     set some_module_class_type "Type number"
     set some_module_aux_info ", $integer8 \\(10\\)"
@@ -62,7 +69,7 @@ gdb_test "ptype fun_ptr" \
     "type = PTR TO -> \\( $integer4 \\(\\) \\(${fun_ptr_arg}\\) \\)"
 
 gdb_test "ptype say_string" \
-    "type = void \\(character\[^,\]+, $integer8\\)"
+    "type = void \\(character\[^,\]+, $stringlen\\)"
 
 set say_array_artificial_first_arg ""
 if {[test_compiler_info {clang-*}]} {
