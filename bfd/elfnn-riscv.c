@@ -5164,7 +5164,6 @@ static int
 riscv_elf_additional_program_headers (bfd *abfd,
 				      struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
-  asection *s;
   int ret = 0;
 
   /* See if we need a PT_RISCV_ATTRIBUTES segment.  */
@@ -5176,7 +5175,7 @@ riscv_elf_additional_program_headers (bfd *abfd,
 
 static bool
 riscv_elf_modify_segment_map (bfd *abfd,
-			      struct bfd_link_info *info)
+			      struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
   asection *s;
   struct elf_segment_map *m, **pm;
