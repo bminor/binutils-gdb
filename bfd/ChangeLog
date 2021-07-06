@@ -1,3 +1,8 @@
+2021-07-06  Alan Modra  <amodra@gmail.com>
+
+	PR 28055
+	* elf64-bpf.c (bpf_elf_generic_reloc): Add missing ATTRIBUTE_UNUSED.
+
 2021-07-05  Alan Modra  <amodra@gmail.com>
 
 	PR 28055

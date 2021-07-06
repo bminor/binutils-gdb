@@ -599,7 +599,7 @@ elf64_bpf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 static bfd_reloc_status_type
 bpf_elf_generic_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 		       void *data, asection *input_section,
-		       bfd *output_bfd,
+		       bfd *output_bfd ATTRIBUTE_UNUSED,
 		       char **error_message ATTRIBUTE_UNUSED)
 {
 
