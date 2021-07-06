@@ -48,30 +48,29 @@ gdb_test "show annotate" "Annotation_level is 0..*"  "default annotation_level i
 #test set annotate 2
 
 # Here we need to fiddle with prompts.
-set old_gdb_prompt $gdb_prompt
-set gdb_prompt "\r\n\032\032pre-prompt\r\n$gdb_prompt \r\n\032\032prompt\r\n"
+save_vars { gdb_prompt } {
+    set old_gdb_prompt $gdb_prompt
+    set gdb_prompt "\r\n\032\032pre-prompt\r\n$gdb_prompt \r\n\032\032prompt\r\n"
 
-gdb_test_multiple "set annotate 2" "set annotate 2" {
-    -re "\r\n$gdb_prompt$" {
-	pass "set annotate 2"
+    gdb_test_multiple "set annotate 2" "set annotate 2" {
+	-re "\r\n$gdb_prompt$" {
+	    pass "set annotate 2"
+	}
+    }
+
+    gdb_test_multiple "show annotate" "show annotate 2" {
+	-re ".*\032\032post-prompt.*Annotation_level is 2..*\032\032pre-prompt.*$old_gdb_prompt .*\032\032prompt.*$" {
+	    pass "show annotate 2"
+	}
+    }
+
+    #test annotation_level 2
+    gdb_test_multiple "info line 1" "annotation_level 2" {
+	-re ".*\032\032post-prompt.*Line 1 of .* is at address .* but contains no code.*:1:0:beg:0x.*\032\032pre-prompt.*$old_gdb_prompt .*\032\032prompt.*$" {
+	    pass "annotation_level 2"
+	}
     }
 }
-
-gdb_test_multiple "show annotate" "show annotate 2" {
-    -re ".*\032\032post-prompt.*Annotation_level is 2..*\032\032pre-prompt.*$old_gdb_prompt .*\032\032prompt.*$" {
-	pass "show annotate 2"
-    }
-}
-
-#test annotation_level 2
-gdb_test_multiple "info line 1" "annotation_level 2" {
-    -re ".*\032\032post-prompt.*Line 1 of .* is at address .* but contains no code.*:1:0:beg:0x.*\032\032pre-prompt.*$old_gdb_prompt .*\032\032prompt.*$" {
-	pass "annotation_level 2" 
-    }
-}
-
-# Restore the original prompt for the rest of the testsuite.
-set gdb_prompt $old_gdb_prompt
 
 #test set annotate 1
 gdb_test "set annotate 1" ".*post-prompt.*"
