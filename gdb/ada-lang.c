@@ -846,6 +846,21 @@ const struct ada_opname_map ada_opname_table[] = {
   {NULL, NULL}
 };
 
+/* If STR is a decoded version of a compiler-provided suffix (like the
+   "[cold]" in "symbol[cold]"), return true.  Otherwise, return
+   false.  */
+
+static bool
+is_compiler_suffix (const char *str)
+{
+  gdb_assert (*str == '[');
+  ++str;
+  while (*str != '\0' && isalpha (*str))
+    ++str;
+  /* We accept a missing "]" in order to support completion.  */
+  return *str == '\0' || (str[0] == ']' && str[1] == '\0');
+}
+
 /* The "encoded" form of DECODED, according to GNAT conventions.  If
    THROW_ERRORS, throw an error if invalid operator name is found.
    Otherwise, return the empty string in that case.  */
@@ -861,6 +876,13 @@ ada_encode_1 (const char *decoded, bool throw_errors)
     {
       if (*p == '.')
 	encoding_buffer.append ("__");
+      else if (*p == '[' && is_compiler_suffix (p))
+	{
+	  encoding_buffer = encoding_buffer + "." + (p + 1);
+	  if (encoding_buffer.back () == ']')
+	    encoding_buffer.pop_back ();
+	  break;
+	}
       else if (*p == '"')
 	{
 	  const struct ada_opname_map *mapping;
@@ -977,6 +999,24 @@ ada_remove_po_subprogram_suffix (const char *encoded, int *len)
     *len = *len - 1;
 }
 
+/* If ENCODED ends with a compiler-provided suffix (like ".cold"),
+   then update *LEN to remove the suffix and return the offset of the
+   character just past the ".".  Otherwise, return -1.  */
+
+static int
+remove_compiler_suffix (const char *encoded, int *len)
+{
+  int offset = *len - 1;
+  while (offset > 0 && isalpha (encoded[offset]))
+    --offset;
+  if (offset > 0 && encoded[offset] == '.')
+    {
+      *len = offset;
+      return offset + 1;
+    }
+  return -1;
+}
+
 /* See ada-lang.h.  */
 
 std::string
@@ -987,6 +1027,7 @@ ada_decode (const char *encoded, bool wrap)
   const char *p;
   int at_start_name;
   std::string decoded;
+  int suffix = -1;
 
   /* With function descriptors on PPC64, the value of a symbol named
      ".FN", if it exists, is the entry point of the function "FN".  */
@@ -1006,6 +1047,8 @@ ada_decode (const char *encoded, bool wrap)
     goto Suppress;
 
   len0 = strlen (encoded);
+
+  suffix = remove_compiler_suffix (encoded, &len0);
 
   ada_remove_trailing_digits (encoded, &len0);
   ada_remove_po_subprogram_suffix (encoded, &len0);
@@ -1211,6 +1254,10 @@ ada_decode (const char *encoded, bool wrap)
   for (i = 0; i < decoded.length(); ++i)
     if (isupper (decoded[i]) || decoded[i] == ' ')
       goto Suppress;
+
+  /* If the compiler added a suffix, append it now.  */
+  if (suffix >= 0)
+    decoded = decoded + "[" + &encoded[suffix] + "]";
 
   return decoded;
 
