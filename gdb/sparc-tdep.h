@@ -245,7 +245,7 @@ extern int sparc_is_annulled_branch_insn (CORE_ADDR pc);
 extern const struct sparc_gregmap sparc32_sol2_gregmap;
 extern const struct sparc_fpregmap sparc32_sol2_fpregmap;
 
-/* Functions and variables exported from sparcnbsd-tdep.c.  */
+/* Functions and variables exported from sparc-netbsd-tdep.c.  */
 
 /* Register offsets for NetBSD.  */
 extern const struct sparc_gregmap sparc32nbsd_gregmap;

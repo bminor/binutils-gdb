@@ -105,7 +105,7 @@ case "${targ}" in
 *-*-freebsd* | *-*-kfreebsd*-gnu)
 	os_obs="fbsd-tdep.o solib-svr4.o";;
 *-*-netbsd* | *-*-knetbsd*-gnu)
-	os_obs="nbsd-tdep.o solib-svr4.o";;
+	os_obs="netbsd-tdep.o solib-svr4.o";;
 *-*-openbsd*)
 	os_obs="obsd-tdep.o solib-svr4.o";;
 esac
@@ -146,7 +146,7 @@ alpha*-*-netbsd* | alpha*-*-knetbsd*-gnu)
 alpha*-*-openbsd*)
 	# Target: OpenBSD/alpha
 	gdb_target_obs="alpha-mdebug-tdep.o alpha-bsd-tdep.o \
-			alpha-netbsd-tdep.o alpha-obsd-tdep.o nbsd-tdep.o"
+			alpha-netbsd-tdep.o alpha-obsd-tdep.o netbsd-tdep.o"
 	;;
 
 am33_2.0*-*-linux*)
@@ -632,14 +632,14 @@ sparc64-*-netbsd* | sparc64-*-knetbsd*-gnu)
 sparc-*-openbsd*)
 	# Target: OpenBSD/sparc
 	gdb_target_obs="sparc-tdep.o sparc-netbsd-tdep.o sparc-obsd-tdep.o \
-			nbsd-tdep.o bsd-uthread.o \
+			netbsd-tdep.o bsd-uthread.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc64-*-openbsd*)
 	# Target: OpenBSD/sparc64
 	gdb_target_obs="sparc64-tdep.o sparc64-netbsd-tdep.o sparc64-obsd-tdep.o \
 			sparc-tdep.o sparc-netbsd-tdep.o sparc-obsd-tdep.o \
-			nbsd-tdep.o bsd-uthread.o \
+			netbsd-tdep.o bsd-uthread.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc-*-solaris2* | sparcv9-*-solaris2* | sparc64-*-solaris2*)
