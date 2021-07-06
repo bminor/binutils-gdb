@@ -102,7 +102,9 @@ typedef struct view_buffer
    pointer.  */
 typedef struct plugin_input_file
 {
+  /* The dummy BFD.  */
   bfd *abfd;
+  /* The original input BFD.  Non-NULL if it is an archive member.  */
   bfd *ibfd;
   view_buffer_t view_buffer;
   char *name;
@@ -1220,7 +1222,7 @@ plugin_object_p (bfd *ibfd)
 
   file.handle = input;
   input->abfd = abfd;
-  input->ibfd = ibfd;
+  input->ibfd = ibfd->my_archive != NULL ? ibfd : NULL;
   input->view_buffer.addr = NULL;
   input->view_buffer.filesize = 0;
   input->view_buffer.offset = 0;
