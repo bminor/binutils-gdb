@@ -1307,7 +1307,7 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 	{
 	  howto = bfd_reloc_type_lookup (stdoutput, reloc_type);
 	  if (howto == NULL)
-	    as_bad (_("internal: usupported RISC-V relocation number %d"),
+	    as_bad (_("internal: unsupported RISC-V relocation number %d"),
 		    reloc_type);
 
 	  ip->fixp = fix_new_exp (ip->frag, ip->where,
