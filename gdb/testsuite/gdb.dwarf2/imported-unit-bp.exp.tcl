@@ -38,13 +38,14 @@ set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     global srcdir subdir srcfile srcfile
     global build_options
+    global lang
     declare_labels lines_label callee_subprog_label cu_label
 
     get_func_info func "$build_options additional_flags=-DWITHMAIN"
 
     cu {} {
 	compile_unit {
-	    {language @DW_LANG_C}
+	    {language @$lang}
 	    {name "<artificial>"}
 	} {
 	    imported_unit {
@@ -56,7 +57,7 @@ Dwarf::assemble $asm_file {
     cu {} {
 	cu_label: compile_unit {
 	    {producer "gcc"}
-	    {language @DW_LANG_C}
+	    {language @$lang}
 	    {name ${srcfile}}
 	    {comp_dir "/tmp"}
 	    {low_pc 0 addr}

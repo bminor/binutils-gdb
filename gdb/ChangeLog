@@ -1,3 +1,13 @@
+2021-07-06  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (scan_partial_symbols): Skip top-level imports of
+	c++ CU.
+	* testsuite/gdb.dwarf2/imported-unit-bp.exp: Moved to ...
+	* testsuite/gdb.dwarf2/imported-unit-bp.exp.tcl: ... here.
+	* testsuite/gdb.dwarf2/imported-unit-bp-c++.exp: New test.
+	* testsuite/gdb.dwarf2/imported-unit-bp-c.exp: New test.
+	* testsuite/gdb.dwarf2/imported-unit.exp: Update.
+
 2021-07-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

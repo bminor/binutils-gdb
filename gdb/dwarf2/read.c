@@ -7639,6 +7639,13 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		  process_psymtab_comp_unit (per_cu, cu->per_objfile, true,
 					     cu->per_cu->lang);
 
+		if (pdi->die_parent == nullptr
+		    && per_cu->unit_type == DW_UT_compile
+		    && per_cu->lang == language_cplus)
+		  /* Regard import as hint.  See corresponding code in
+		     process_imported_unit_die.  */
+		  break;
+
 		cu->per_cu->imported_symtabs_push (per_cu);
 	      }
 	      break;
