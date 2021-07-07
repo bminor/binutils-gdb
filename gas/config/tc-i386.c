@@ -2561,8 +2561,15 @@ offset_in_range (offsetT val, int size)
     }
 
   if ((val & ~mask) != 0 && (-val & ~mask) != 0)
-    as_warn (_("%"BFD_VMA_FMT"x shortened to %"BFD_VMA_FMT"x"),
-             val, val & mask);
+    {
+      char val_buf[128];
+      char masked_buf[128];
+
+      /* Coded this way in order to ease translation.  */
+      sprintf_vma (val_buf, val);
+      sprintf_vma (masked_buf, val & mask);
+      as_warn (_("0x%s shortened to 0x%s"), val_buf, masked_buf);
+    }
 
   return val & mask;
 }
@@ -4916,8 +4923,12 @@ md_assemble (char *line)
 	  i.types[j].bitfield.disp32s = 0;
 	  if (i.types[j].bitfield.baseindex)
 	    {
-	      as_bad (_("0x%" BFD_VMA_FMT "x out of range of signed 32bit displacement"),
-		      exp->X_add_number);
+	      char number_buf[128];
+
+	      /* Coded this way in order to allow for ease of translation.  */
+	      sprintf_vma (number_buf, exp->X_add_number);
+	      as_bad (_("0x%s out of range of signed 32bit displacement"),
+		      number_buf);
 	      return;
 	    }
 	}

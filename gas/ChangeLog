@@ -1,3 +1,14 @@
+2021-07-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 28051
+	* config/tc-i386.c (offset_in_range): Reformat error messages in
+	order to fix problems when translating.
+	(md_assemble): Likewise.
+	* messages.c (as_internal_value_out_of_range): Likewise.
+	* read.c (emit_expr_with_reloc): Likewise.
+	* testsuite/gas/all/overflow.l Change expected output format.
+	* po/gas.pot: Regenerate.
+
 2021-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

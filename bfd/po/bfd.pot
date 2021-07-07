@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-07-03 15:01+0100\n"
+"POT-Creation-Date: 2021-07-07 09:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -130,115 +130,115 @@ msgstr ""
 msgid "Writing updated armap timestamp"
 msgstr ""
 
-#: bfd.c:681
+#: bfd.c:687
 msgid "no error"
 msgstr ""
 
-#: bfd.c:682
+#: bfd.c:688
 msgid "system call error"
 msgstr ""
 
-#: bfd.c:683
+#: bfd.c:689
 msgid "invalid bfd target"
 msgstr ""
 
-#: bfd.c:684
+#: bfd.c:690
 msgid "file in wrong format"
 msgstr ""
 
-#: bfd.c:685
+#: bfd.c:691
 msgid "archive object file in wrong format"
 msgstr ""
 
-#: bfd.c:686
+#: bfd.c:692
 msgid "invalid operation"
 msgstr ""
 
-#: bfd.c:687
+#: bfd.c:693
 msgid "memory exhausted"
 msgstr ""
 
-#: bfd.c:688
+#: bfd.c:694
 msgid "no symbols"
 msgstr ""
 
-#: bfd.c:689
+#: bfd.c:695
 msgid "archive has no index; run ranlib to add one"
 msgstr ""
 
-#: bfd.c:690
+#: bfd.c:696
 msgid "no more archived files"
 msgstr ""
 
-#: bfd.c:691
+#: bfd.c:697
 msgid "malformed archive"
 msgstr ""
 
-#: bfd.c:692
+#: bfd.c:698
 msgid "DSO missing from command line"
 msgstr ""
 
-#: bfd.c:693
+#: bfd.c:699
 msgid "file format not recognized"
 msgstr ""
 
-#: bfd.c:694
+#: bfd.c:700
 msgid "file format is ambiguous"
 msgstr ""
 
-#: bfd.c:695
+#: bfd.c:701
 msgid "section has no contents"
 msgstr ""
 
-#: bfd.c:696
+#: bfd.c:702
 msgid "nonrepresentable section on output"
 msgstr ""
 
-#: bfd.c:697
+#: bfd.c:703
 msgid "symbol needs debug section which does not exist"
 msgstr ""
 
-#: bfd.c:698
+#: bfd.c:704
 msgid "bad value"
 msgstr ""
 
-#: bfd.c:699
+#: bfd.c:705
 msgid "file truncated"
 msgstr ""
 
-#: bfd.c:700
+#: bfd.c:706
 msgid "file too big"
 msgstr ""
 
-#: bfd.c:701
+#: bfd.c:707
 msgid "sorry, cannot handle this file"
 msgstr ""
 
-#: bfd.c:702
+#: bfd.c:708
 #, c-format
 msgid "error reading %s: %s"
 msgstr ""
 
-#: bfd.c:703
+#: bfd.c:709
 msgid "#<invalid error code>"
 msgstr ""
 
-#: bfd.c:1640
+#: bfd.c:1646
 #, c-format
 msgid "BFD %s assertion fail %s:%d"
 msgstr ""
 
-#: bfd.c:1653
+#: bfd.c:1659
 #, c-format
 msgid "BFD %s internal error, aborting at %s:%d in %s\n"
 msgstr ""
 
-#: bfd.c:1658
+#: bfd.c:1664
 #, c-format
 msgid "BFD %s internal error, aborting at %s:%d\n"
 msgstr ""
 
-#: bfd.c:1660
+#: bfd.c:1666
 msgid "Please report this bug.\n"
 msgstr ""
 
@@ -308,19 +308,29 @@ msgstr ""
 msgid "%pB: TOC reloc at %#<PRIx64> to symbol `%s' with no TOC entry"
 msgstr ""
 
-#: coff-rs6000.c:3209 coff-rs6000.c:3220
-msgid "%pB: TLS relocation at (0x%"
+#: coff-rs6000.c:3212
+#, c-format
+msgid ""
+"%pB: TLS relocation at 0x%s over internal symbols (C_HIDEXT) not yet "
+"possible\n"
 msgstr ""
 
-#: coff-rs6000.c:3234
-msgid "%pB: TLS local relocation at (0x%"
+#: coff-rs6000.c:3225
+#, c-format
+msgid "%pB: TLS relocation at 0x%s over non-TLS symbol %s (0x%x)\n"
 msgstr ""
 
-#: coff-rs6000.c:3642 coff64-rs6000.c:1573
-msgid "%pB: relocatation (%d) at (0x%"
+#: coff-rs6000.c:3241
+#, c-format
+msgid "%pB: TLS local relocation at 0x%s over imported symbol %s\n"
 msgstr ""
 
-#: coff-rs6000.c:3905 coff64-rs6000.c:2023
+#: coff-rs6000.c:3652
+#, c-format
+msgid "%pB: relocation (%d) at 0x%s has wrong r_rsize (0x%x)\n"
+msgstr ""
+
+#: coff-rs6000.c:3915 coff64-rs6000.c:2023
 #, c-format
 msgid "%pB: symbol `%s' has unrecognized smclas %d"
 msgstr ""
@@ -370,7 +380,7 @@ msgstr ""
 msgid "%pB: fatal: generic symbols retrieved before relaxing"
 msgstr ""
 
-#: coff-sh.c:2781 cofflink.c:2959
+#: coff-sh.c:2781 cofflink.c:2963
 #, c-format
 msgid "%pB: illegal symbol index %ld in relocs"
 msgstr ""
@@ -388,6 +398,10 @@ msgstr ""
 #: coff64-rs6000.c:479
 #, c-format
 msgid "%pB: wrong auxtype %#x for storage class %#x"
+msgstr ""
+
+#: coff64-rs6000.c:1573
+msgid "%pB: relocation (%d) at (0x%"
 msgstr ""
 
 #: coffcode.h:986
@@ -560,21 +574,22 @@ msgid ""
 "%pA' of %pB\n"
 msgstr ""
 
-#: cofflink.c:2610
-msgid "%pB: stripping non-representable symbol '%s' (value %"
+#: cofflink.c:2614
+#, c-format
+msgid "%pB: stripping non-representable symbol '%s' (value 0x%s)"
 msgstr ""
 
-#: cofflink.c:2728
+#: cofflink.c:2732
 #, c-format
 msgid "%pB: %pA: reloc overflow: %#x > 0xffff"
 msgstr ""
 
-#: cofflink.c:2736
+#: cofflink.c:2740
 #, c-format
 msgid "%pB: warning: %pA: line number overflow: %#x > 0xffff"
 msgstr ""
 
-#: cofflink.c:3127
+#: cofflink.c:3131
 #, c-format
 msgid "%pB: bad reloc address %#<PRIx64> in section `%pA'"
 msgstr ""
@@ -1364,7 +1379,7 @@ msgstr ""
 msgid "GNU_RETAIN section is supported only by GNU and FreeBSD targets"
 msgstr ""
 
-#: elf.c:12850 elf64-sparc.c:123 elfcode.h:1504
+#: elf.c:12850 elf64-sparc.c:123 elfcode.h:1505
 #, c-format
 msgid "%pB(%pA): relocation %d has invalid symbol index %ld"
 msgstr ""
@@ -4911,22 +4926,22 @@ msgstr ""
 msgid "%F%pB: PC-relative offset overflow in GOT PLT entry for `%s'\n"
 msgstr ""
 
-#: elfcode.h:329
+#: elfcode.h:330
 #, c-format
 msgid "warning: %pB has a section extending past end of file"
 msgstr ""
 
-#: elfcode.h:775
+#: elfcode.h:776
 #, c-format
 msgid "warning: %pB has a corrupt string table index - ignoring"
 msgstr ""
 
-#: elfcode.h:819
+#: elfcode.h:820
 #, c-format
 msgid "warning: %pB has a program header with invalid alignment"
 msgstr ""
 
-#: elfcode.h:1244
+#: elfcode.h:1245
 #, c-format
 msgid "%pB: version count (%<PRId64>) does not match symbol count (%ld)"
 msgstr ""
@@ -6384,7 +6399,7 @@ msgstr ""
 msgid "%pB: error: debug data ends beyond end of debug directory"
 msgstr ""
 
-#: plugin.c:236
+#: plugin.c:246
 msgid ""
 "plugin framework: out of file descriptors. Try using fewer objects/archives\n"
 msgstr ""

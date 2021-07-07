@@ -1,3 +1,13 @@
+2021-07-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 28051
+	* coff-rs6000.c (xcoff_reloc_type_tls): Reformat error messages in
+	order to fix problems when translating.
+	* cofflink.c (_bfd_coff_write_global_sym): Likewise.
+	* elfnn-aarch64.c (_bfd_aarch64_erratum_843419_branch_to_stub):
+	Likewise.
+	* po/bfd.pot: Regenerate.
+
 2021-07-06  Michael Matz  <matz@suse.de>
 
 	PR ld/28021
