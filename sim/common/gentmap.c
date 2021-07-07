@@ -53,11 +53,6 @@ gen_targ_vals_h (void)
     printf ("#define TARGET_%s %d\n", t->symbol, t->value);
   printf ("\n");
 
-  printf ("/* errno values */\n");
-  for (t = &errno_tdefs[0]; t->symbol; ++t)
-    printf ("#define TARGET_%s %d\n", t->symbol, t->value);
-  printf ("\n");
-
   printf ("/* signal values */\n");
   for (t = &signal_tdefs[0]; t->symbol; ++t)
     printf ("#define TARGET_%s %d\n", t->symbol, t->value);
@@ -104,6 +99,7 @@ gen_targ_map_c (void)
   printf ("CB_TARGET_DEFS_MAP cb_init_errno_map[] = {\n");
   for (t = &errno_tdefs[0]; t->symbol; ++t)
     {
+      printf ("#define TARGET_%s %d\n", t->symbol, t->value);
       printf ("#ifdef %s\n", t->symbol);
       printf ("  { \"%s\", %s, TARGET_%s },\n", t->symbol, t->symbol, t->symbol);
       printf ("#endif\n");

@@ -37,8 +37,6 @@
 #include "sim-syscall.h"
 #include "sim-hw.h"
 
-#include "targ-vals.h"
-
 /* The numbers here do not matter.  They just need to be unique.  They also
    need not be static across releases -- they're used internally only.  The
    mapping from the Linux ABI to the CB values is in linux-targ-map.h.  */
@@ -228,7 +226,7 @@ bfin_syscall (SIM_CPU *cpu)
       else
 	{
 	  sc.result = -1;
-	  sc.errcode = TARGET_EINVAL;
+	  sc.errcode = cb_host_to_target_errno (cb, EINVAL);
 	}
       break;
 
@@ -245,7 +243,7 @@ bfin_syscall (SIM_CPU *cpu)
 	if (sc.arg4 & 0x20 /*MAP_ANONYMOUS*/)
 	  /* XXX: We don't handle zeroing, but default is all zeros.  */;
 	else if (args[4] >= MAX_CALLBACK_FDS)
-	  sc.errcode = TARGET_ENOSYS;
+	  sc.errcode = cb_host_to_target_errno (cb, ENOSYS);
 	else
 	  {
 #ifdef HAVE_PREAD
@@ -255,11 +253,11 @@ bfin_syscall (SIM_CPU *cpu)
 	    if (pread (cb->fdmap[args[4]], data, sc.arg2, args[5] << 12) == sc.arg2)
 	      sc.write_mem (cb, &sc, heap, data, sc.arg2);
 	    else
-	      sc.errcode = TARGET_EINVAL;
+	      sc.errcode = cb_host_to_target_errno (cb, EINVAL);
 
 	    free (data);
 #else
-	    sc.errcode = TARGET_ENOSYS;
+	    sc.errcode = cb_host_to_target_errno (cb, ENOSYS);
 #endif
 	  }
 
@@ -288,7 +286,7 @@ bfin_syscall (SIM_CPU *cpu)
       if (sc.arg1 >= MAX_CALLBACK_FDS || sc.arg2 >= MAX_CALLBACK_FDS)
 	{
 	  sc.result = -1;
-	  sc.errcode = TARGET_EINVAL;
+	  sc.errcode = cb_host_to_target_errno (cb, EINVAL);
 	}
       else
 	{
@@ -304,7 +302,7 @@ bfin_syscall (SIM_CPU *cpu)
       if (sc.arg2)
 	{
 	  sc.result = -1;
-	  sc.errcode = TARGET_EINVAL;
+	  sc.errcode = cb_host_to_target_errno (cb, EINVAL);
 	}
       else
 	{
@@ -327,7 +325,7 @@ bfin_syscall (SIM_CPU *cpu)
       if (sc.arg1 >= MAX_CALLBACK_FDS)
 	{
 	  sc.result = -1;
-	  sc.errcode = TARGET_EINVAL;
+	  sc.errcode = cb_host_to_target_errno (cb, EINVAL);
 	}
       else
 	{
@@ -376,7 +374,7 @@ bfin_syscall (SIM_CPU *cpu)
       if (getcwd (p, sc.arg2) == NULL)
 	{
 	  sc.result = -1;
-	  sc.errcode = TARGET_EINVAL;
+	  sc.errcode = cb_host_to_target_errno (cb, EINVAL);
 	}
       else
 	{
@@ -446,7 +444,7 @@ bfin_syscall (SIM_CPU *cpu)
       if (sc.arg1 != getpid ())
 	{
 	  sc.result = -1;
-	  sc.errcode = TARGET_EPERM;
+	  sc.errcode = cb_host_to_target_errno (cb, EPERM);
 	}
       else
 	{
@@ -455,7 +453,7 @@ bfin_syscall (SIM_CPU *cpu)
 	  goto sys_finish;
 #else
 	  sc.result = -1;
-	  sc.errcode = TARGET_ENOSYS;
+	  sc.errcode = cb_host_to_target_errno (cb, ENOSYS);
 #endif
 	}
       break;
