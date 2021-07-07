@@ -3947,7 +3947,7 @@
 {
   /* OP_F0C0 (); */
   PC = cia;
-  do_syscall ();
+  do_syscall (SD);
 }
 
 

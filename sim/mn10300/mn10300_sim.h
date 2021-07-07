@@ -200,7 +200,7 @@ INLINE_SIM_MAIN (void) genericCmp (unsigned32 leftOpnd, unsigned32 rightOpnd);
 INLINE_SIM_MAIN (void) genericOr (unsigned32 source, unsigned32 destReg);
 INLINE_SIM_MAIN (void) genericXor (unsigned32 source, unsigned32 destReg);
 INLINE_SIM_MAIN (void) genericBtst (unsigned32 leftOpnd, unsigned32 rightOpnd);
-INLINE_SIM_MAIN (void) do_syscall (void);
+INLINE_SIM_MAIN (void) do_syscall (SIM_DESC sd);
 void program_interrupt (SIM_DESC sd, sim_cpu *cpu, sim_cia cia, SIM_SIGNAL sig);
 
 void mn10300_cpu_exception_trigger(SIM_DESC sd, sim_cpu* cpu, address_word pc);

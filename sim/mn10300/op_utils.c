@@ -4,7 +4,6 @@
 #include "sim-main.h"
 #include "sim-signal.h"
 #include "sim-syscall.h"
-#include "targ-vals.h"
 
 #include <time.h>
 #ifdef HAVE_UNISTD_H
@@ -132,7 +131,7 @@ genericBtst(unsigned32 leftOpnd, unsigned32 rightOpnd)
 
 /* syscall */
 INLINE_SIM_MAIN (void)
-do_syscall (void)
+do_syscall (SIM_DESC sd)
 {
   /* Registers passed to trap 0.  */
 
@@ -150,7 +149,7 @@ do_syscall (void)
   int save_errno = errno;	
   errno = 0;
 
-  if (func == TARGET_SYS_exit)
+  if (cb_target_to_host_syscall (STATE_CALLBACK (sd), func) == CB_SYS_exit)
     {
       /* EXIT - caller can look in parm1 to work out the reason */
       sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
