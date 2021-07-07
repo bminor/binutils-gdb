@@ -1,5 +1,10 @@
 2021-07-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* sysdep.h [!ENABLE_NLS]: Prevent inclusion of <libintl.h> on
+	Solaris.
+
+2021-07-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	* configure.ac: Check for strnlen declaration.
 	* configure, config.in: Regenerate.
 
