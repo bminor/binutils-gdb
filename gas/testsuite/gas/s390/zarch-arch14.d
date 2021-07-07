@@ -28,4 +28,5 @@ Disassembly of section .text:
 .*:	eb fd 68 f0 fd 71 [	 ]*lpswey	-10000\(%r6\),253
 .*:	b2 00 6f a0 [	 ]*lbear	4000\(%r6\)
 .*:	b2 01 6f a0 [	 ]*stbear	4000\(%r6\)
+.*:	b2 8f 5f ff [	 ]*qpaci	4095\(%r5\)
 .*:	07 07 [	 ]*nopr	%r7

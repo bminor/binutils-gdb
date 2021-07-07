@@ -22,3 +22,4 @@ foo:
 	lpswey	-10000(%r6),253
 	lbear	4000(%r6)
 	stbear	4000(%r6)
+	qpaci	4095(%r5)
