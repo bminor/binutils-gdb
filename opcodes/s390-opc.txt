@@ -2044,3 +2044,5 @@ b98B rdp RRF_RURR2 " " arch14 zarch optparm
 eb0000000071 lpswey SIY_RD " " arch14 zarch
 b200 lbear S_RD " " arch14 zarch
 b201 stbear S_RD " " arch14 zarch
+
+b28f qpaci S_RD " " arch14 zarch
