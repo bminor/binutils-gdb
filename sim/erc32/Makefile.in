@@ -41,9 +41,9 @@ SIM_WERROR_CFLAGS =
 SIS_OFILES = exec.o erc32.o func.o help.o float.o
 
 all: sis$(EXEEXT)
-sis$(EXEEXT): sis.o $(SIS_OFILES) $(COMMON_OBJS) $(LIBDEPS)
+sis$(EXEEXT): sis.o $(SIS_OFILES) libsim.a $(LIBDEPS)
 	$(CC) $(ALL_CFLAGS) -o sis$(EXEEXT) \
-	  sis.o $(SIS_OFILES) $(COMMON_OBJS) $(EXTRA_LIBS)
+	  sis.o $(SIS_OFILES) libsim.a $(EXTRA_LIBS)
 
 # Copy the files into directories where they will be run.
 install-sis: installdirs
