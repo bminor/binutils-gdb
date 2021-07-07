@@ -1,3 +1,8 @@
+2021-06-07  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* testsuite/gas/s390/zarch-arch14.d: Add qpaci.
+	* testsuite/gas/s390/zarch-arch14.s: Add qpaci.
+
 2021-07-07  Nick Clifton  <nickc@redhat.com>
 
 	PR 28051
