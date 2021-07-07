@@ -160,7 +160,7 @@ def get_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument(
         '-o', '--output', type=Path,
-        help='write to the specified file instead of stdout')
+        help='write to the specified directory')
     parser.add_argument(
         '--cpp', type=str, default='cpp',
         help='the preprocessor to use')
@@ -178,8 +178,14 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser = get_parser()
     opts = parser.parse_args(argv)
 
+    if opts.output is None:
+        # Default to where the script lives.
+        opts.output = Path(__file__).resolve().parent
+
     if opts.srcroot is None:
         opts.srcroot = Path(__file__).resolve().parent.parent.parent
+    else:
+        opts.srcroot = opts.srcroot.resolve()
 
     if opts.newlib is None:
         # Try to find newlib relative to our source tree.
@@ -202,10 +208,7 @@ def main(argv: List[str]) -> int:
     """The main entry point for scripts."""
     opts = parse_args(argv)
 
-    if opts.output is not None:
-        output = open(opts.output, 'w', encoding='utf-8')
-    else:
-        output = sys.stdout
+    output = (opts.output / 'nltvals.def').open('w', encoding='utf-8')
 
     gen(output, opts.newlib, opts.cpp)
     return 0

@@ -55,8 +55,7 @@ SIM_ALL_RECURSIVE_DEPS =
 # An alternative is to slurp in the tables at runtime.
 .PHONY: nltvals
 nltvals:
-	$(abs_srcdir)/common/gennltvals.py --cpp "$(CPP)" --output nltvals.def --srcroot $(srcroot)
-	$(SHELL) $(srcroot)/move-if-change nltvals.def $(abs_srcdir)/common/nltvals.def
+	$(srcdir)/common/gennltvals.py --cpp "$(CPP)"
 
 pkginclude_HEADERS = \
 	$(srcroot)/include/sim/callback.h \
