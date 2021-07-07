@@ -1,3 +1,8 @@
+2021-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* elfcode.h (elf_swap_symbol_out): Revert accidental change that
+	removed an abort if the shndx pointer is NULL.
+
 2021-07-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* sysdep.h [!ENABLE_NLS]: Prevent inclusion of <libintl.h> on

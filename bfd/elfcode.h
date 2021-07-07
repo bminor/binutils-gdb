@@ -221,9 +221,8 @@ elf_swap_symbol_out (bfd *abfd,
   if (tmp >= (SHN_LORESERVE & 0xffff) && tmp < SHN_LORESERVE)
     {
       if (shndx == NULL)
-	H_PUT_32 (abfd, tmp, 0);
-      else
-	H_PUT_32 (abfd, tmp, shndx);
+	abort ();
+      H_PUT_32 (abfd, tmp, shndx);
       tmp = SHN_XINDEX & 0xffff;
     }
   H_PUT_16 (abfd, tmp, dst->st_shndx);
