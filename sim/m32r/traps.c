@@ -26,7 +26,6 @@
 #include "sim-syscall.h"
 #include "sim/callback.h"
 #include "syscall.h"
-#include "targ-vals.h"
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>

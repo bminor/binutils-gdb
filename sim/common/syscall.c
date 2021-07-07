@@ -41,7 +41,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "sim/callback.h"
-#include "targ-vals.h"
 
 #ifndef ENOSYS
 #define ENOSYS EINVAL

@@ -32,7 +32,6 @@
 #include "sim-main.h"
 #include "sim-signal.h"
 #include "sim-syscall.h"
-#include "targ-vals.h"
 
 static sim_cia
 msp430_pc_fetch (SIM_CPU *cpu)
