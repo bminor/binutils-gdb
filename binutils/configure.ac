@@ -265,7 +265,7 @@ if test $bu_cv_header_utime_h = yes; then
   AC_DEFINE(HAVE_GOOD_UTIME_H, 1, [Does <utime.h> define struct utimbuf?])
 fi
 
-AC_CHECK_DECLS([asprintf, environ, getc_unlocked, sbrk, stpcpy])
+AC_CHECK_DECLS([asprintf, environ, getc_unlocked, sbrk, stpcpy, strnlen])
 
 # Link in zlib if we can.  This allows us to read compressed debug
 # sections.  This is used only by readelf.c (objdump uses bfd for
