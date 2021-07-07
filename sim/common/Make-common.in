@@ -229,6 +229,7 @@ EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
 	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
 COMMON_OBJS_NAMES = \
+	callback.o \
 	portability.o \
 	sim-load.o \
 	target-newlib-errno.o \
@@ -237,7 +238,7 @@ COMMON_OBJS_NAMES = \
 	version.o
 COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
 
-LIB_OBJS = callback.o modules.o syscall.o targ-map.o $(COMMON_OBJS) $(SIM_OBJS)
+LIB_OBJS = modules.o syscall.o targ-map.o $(COMMON_OBJS) $(SIM_OBJS)
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@

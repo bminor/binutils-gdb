@@ -251,6 +251,7 @@ common_libcommon_a_AR = $(AR) $(ARFLAGS)
 common_libcommon_a_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
 am_common_libcommon_a_OBJECTS =  \
+	common/common_libcommon_a-callback.$(OBJEXT) \
 	common/common_libcommon_a-portability.$(OBJEXT) \
 	common/common_libcommon_a-sim-load.$(OBJEXT) \
 	common/common_libcommon_a-target-newlib-errno.$(OBJEXT) \
@@ -844,6 +845,7 @@ common_libcommon_a_CPPFLAGS = \
 	-I..
 
 common_libcommon_a_SOURCES = \
+	common/callback.c \
 	common/portability.c \
 	common/sim-load.c \
 	common/target-newlib-errno.c \
@@ -1017,6 +1019,8 @@ common/$(am__dirstamp):
 common/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) common/$(DEPDIR)
 	@: > common/$(DEPDIR)/$(am__dirstamp)
+common/common_libcommon_a-callback.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
 common/common_libcommon_a-portability.$(OBJEXT):  \
 	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
 common/common_libcommon_a-sim-load.$(OBJEXT): common/$(am__dirstamp) \
@@ -1147,6 +1151,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-callback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-portability.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-sim-load.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-target-newlib-errno.Po@am__quote@
@@ -1201,6 +1206,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
+
+common/common_libcommon_a-callback.o: common/callback.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-callback.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-callback.Tpo -c -o common/common_libcommon_a-callback.o `test -f 'common/callback.c' || echo '$(srcdir)/'`common/callback.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-callback.Tpo common/$(DEPDIR)/common_libcommon_a-callback.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/callback.c' object='common/common_libcommon_a-callback.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-callback.o `test -f 'common/callback.c' || echo '$(srcdir)/'`common/callback.c
+
+common/common_libcommon_a-callback.obj: common/callback.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-callback.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-callback.Tpo -c -o common/common_libcommon_a-callback.obj `if test -f 'common/callback.c'; then $(CYGPATH_W) 'common/callback.c'; else $(CYGPATH_W) '$(srcdir)/common/callback.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-callback.Tpo common/$(DEPDIR)/common_libcommon_a-callback.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/callback.c' object='common/common_libcommon_a-callback.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-callback.obj `if test -f 'common/callback.c'; then $(CYGPATH_W) 'common/callback.c'; else $(CYGPATH_W) '$(srcdir)/common/callback.c'; fi`
 
 common/common_libcommon_a-portability.o: common/portability.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-portability.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-portability.Tpo -c -o common/common_libcommon_a-portability.o `test -f 'common/portability.c' || echo '$(srcdir)/'`common/portability.c

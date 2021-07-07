@@ -34,6 +34,7 @@ noinst_LIBRARIES += %D%/libcommon.a
 	-I../bfd \
 	-I..
 %C%_libcommon_a_SOURCES = \
+	%D%/callback.c \
 	%D%/portability.c \
 	%D%/sim-load.c \
 	%D%/target-newlib-errno.c \
