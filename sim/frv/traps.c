@@ -24,7 +24,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define WANT_CPU_FRVBF
 
 #include "sim-main.h"
-#include "targ-vals.h"
 #include "cgen-engine.h"
 #include "cgen-par.h"
 #include "sim-fpu.h"
@@ -134,7 +133,7 @@ frv_itrap (SIM_CPU *current_cpu, PCADDR pc, USI base, SI offset)
 	s.arg2 = GET_H_GR (9);
 	s.arg3 = GET_H_GR (10);
 
-	if (s.func == TARGET_SYS_exit)
+	if (cb_target_to_host_syscall (cb, s.func) == CB_SYS_exit)
 	  {
 	    sim_engine_halt (sd, current_cpu, NULL, pc, sim_exited, s.arg1);
 	  }
