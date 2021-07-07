@@ -1,3 +1,11 @@
+2021-07-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18028
+	* plugin.c (bfd_plugin_close_file_descriptor): Check archive
+	only of abfd != NULL.
+	(try_claim): Pass NULL to bfd_plugin_close_file_descriptor if
+	it isn't an archive member.
+
 2021-07-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* sysdep.h [!ENABLE_NLS]: Prevent inclusion of <libintl.h> on

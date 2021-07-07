@@ -277,27 +277,26 @@ bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
   return 1;
 }
 
-/* Close the plugin file descriptor.  */
+/* Close the plugin file descriptor FD.  If ABFD isn't NULL, it is an
+   archive member.   */
 
 void
 bfd_plugin_close_file_descriptor (bfd *abfd, int fd)
 {
-  bfd *iobfd;
-
-  iobfd = abfd;
-  while (iobfd->my_archive
-	 && !bfd_is_thin_archive (iobfd->my_archive))
-    iobfd = iobfd->my_archive;
-  if (iobfd == abfd)
+  if (abfd == NULL)
     close (fd);
   else
     {
-      iobfd->archive_plugin_fd_open_count--;
+      while (abfd->my_archive
+	     && !bfd_is_thin_archive (abfd->my_archive))
+	abfd = abfd->my_archive;
+
+      abfd->archive_plugin_fd_open_count--;
       /* Dup the archive plugin file descriptor for later use, which
 	 will be closed by _bfd_archive_close_and_cleanup.  */
-      if (iobfd->archive_plugin_fd_open_count == 0)
+      if (abfd->archive_plugin_fd_open_count == 0)
 	{
-	  iobfd->archive_plugin_fd = dup (fd);
+	  abfd->archive_plugin_fd = dup (fd);
 	  close (fd);
 	}
     }
@@ -314,7 +313,9 @@ try_claim (bfd *abfd)
       && current_plugin->claim_file)
     {
       current_plugin->claim_file (&file, &claimed);
-      bfd_plugin_close_file_descriptor (abfd, file.fd);
+      bfd_plugin_close_file_descriptor ((abfd->my_archive != NULL
+					 ? abfd : NULL),
+					file.fd);
     }
 
   return claimed;

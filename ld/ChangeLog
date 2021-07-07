@@ -1,3 +1,10 @@
+2021-07-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18028
+	* plugin.c (plugin_input_file): Add comments for abfd and ibfd.
+	(plugin_object_p): Set input->ibfd to NULL if it isn't an
+	archive member.
+
 2021-07-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/28040
