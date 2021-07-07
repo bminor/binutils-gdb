@@ -231,6 +231,7 @@ EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
 COMMON_OBJS_NAMES = \
 	portability.o \
 	sim-load.o \
+	target-newlib-errno.o \
 	version.o
 COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
 

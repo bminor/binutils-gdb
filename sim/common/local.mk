@@ -36,6 +36,7 @@ noinst_LIBRARIES += %D%/libcommon.a
 %C%_libcommon_a_SOURCES = \
 	%D%/portability.c \
 	%D%/sim-load.c \
+	%D%/target-newlib-errno.c \
 	%D%/version.c
 
 %D%/version.c: %D%/version.c-stamp ; @true
