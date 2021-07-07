@@ -1591,7 +1591,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	$(SUBDIR_TARGET_OBS) \
 	$(SUBDIR_GCC_COMPILE_OBS)
 
-SUBDIRS = doc @subdirs@ data-directory testsuite
+SUBDIRS = doc @subdirs@ data-directory
 CLEANDIRS = $(SUBDIRS)
 
 # List of subdirectories in the build tree that must exist.
