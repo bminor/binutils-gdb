@@ -1120,7 +1120,7 @@ s390_linux_init_abi_any (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->s390_syscall_record = s390_linux_syscall_record;
 
-  linux_init_abi (info, gdbarch, 0);
+  linux_init_abi (info, gdbarch, 1);
 
   /* Register handling.  */
   set_gdbarch_core_read_description (gdbarch, s390_core_read_description);

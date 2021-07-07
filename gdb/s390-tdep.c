@@ -7050,10 +7050,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					s390_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, s390_displaced_step_fixup);
-  set_gdbarch_displaced_step_prepare (gdbarch, linux_displaced_step_prepare);
-  set_gdbarch_displaced_step_finish (gdbarch, linux_displaced_step_finish);
-  set_gdbarch_displaced_step_restore_all_in_ptid
-    (gdbarch, linux_displaced_step_restore_all_in_ptid);
   set_gdbarch_displaced_step_hw_singlestep (gdbarch, s390_displaced_step_hw_singlestep);
   set_gdbarch_software_single_step (gdbarch, s390_software_single_step);
   set_gdbarch_max_insn_length (gdbarch, S390_MAX_INSTR_SIZE);
