@@ -37,7 +37,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "sim/callback.h"
-#include "targ-vals.h"
 /* For xmalloc.  */
 #include "libiberty.h"
 
@@ -886,29 +885,44 @@ cb_target_to_host_open (host_callback *cb, int target_val)
 {
   int host_val = 0;
   CB_TARGET_DEFS_MAP *m;
+  int o_rdonly = 0;
+  int o_wronly = 0;
+  int o_rdwr = 0;
+  int o_binary = 0;
+  int o_rdwrmask;
+
+  /* O_RDONLY can be (and usually is) 0 which needs to be treated specially.  */
+  for (m = &cb->open_map[0]; m->host_val != -1; ++m)
+    {
+      if (!strcmp (m->name, "O_RDONLY"))
+	o_rdonly = m->target_val;
+      else if (!strcmp (m->name, "O_WRONLY"))
+	o_wronly = m->target_val;
+      else if (!strcmp (m->name, "O_RDWR"))
+	o_rdwr = m->target_val;
+      else if (!strcmp (m->name, "O_BINARY"))
+	o_binary = m->target_val;
+    }
+  o_rdwrmask = o_rdonly | o_wronly | o_rdwr;
 
   for (m = &cb->open_map[0]; m->host_val != -1; ++m)
     {
-      switch (m->target_val)
+      if (m->target_val == o_rdonly || m->target_val == o_wronly
+	  || m->target_val == o_rdwr)
 	{
-	  /* O_RDONLY can be (and usually is) 0 which needs to be treated
-	     specially.  */
-	case TARGET_O_RDONLY :
-	case TARGET_O_WRONLY :
-	case TARGET_O_RDWR :
-	  if ((target_val & (TARGET_O_RDONLY | TARGET_O_WRONLY | TARGET_O_RDWR))
-	      == m->target_val)
+	  if ((target_val & o_rdwrmask) == m->target_val)
 	    host_val |= m->host_val;
 	  /* Handle the host/target differentiating between binary and
              text mode.  Only one case is of importance */
-#if ! defined (TARGET_O_BINARY) && defined (O_BINARY)
-	  host_val |= O_BINARY;
+#ifdef O_BINARY
+	  if (o_binary == 0)
+	    host_val |= O_BINARY;
 #endif
-	  break;
-	default :
+	}
+      else
+	{
 	  if ((m->target_val & target_val) == m->target_val)
 	    host_val |= m->host_val;
-	  break;
 	}
     }
 
