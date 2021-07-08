@@ -1,3 +1,7 @@
+2021-07-08  Nick Clifton  <nickc@redhat.com>
+
+	* po/pt.po: Updated Portuguese translation.
+
 2021-07-07  Nick Clifton  <nickc@redhat.com>
 
 	* elfcode.h (elf_swap_symbol_out): Revert accidental change that
