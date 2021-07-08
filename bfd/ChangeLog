@@ -1,3 +1,9 @@
+2021-07-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/21782
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Disallow PC
+	relocations against weak undefined symbols in PIE.
+
 2021-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt.po: Updated Portuguese translation.
