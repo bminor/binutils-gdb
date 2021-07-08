@@ -1,5 +1,12 @@
 2021-07-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* s390-linux-tdep.c (s390_linux_init_abi_any): Pass 1 (number
+	of displaced stepping buffers to linux_init_abi.
+	* s390-tdep.c (s390_gdbarch_init): Don't set the Linux-specific
+	displaced-stepping gdbarch callbacks.
+
+2021-07-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* Makefile.in (SUBDIRS): Remove testsuite.
 
 2021-07-06  Simon Marchi  <simon.marchi@polymtl.ca>
