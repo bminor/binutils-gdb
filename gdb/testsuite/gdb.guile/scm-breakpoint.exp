@@ -260,10 +260,10 @@ proc_with_prefix test_watchpoints { } {
 	"test watchpoint write"
 
     gdb_test "guile (define wp2 (make-breakpoint \"result\" #:wp-class WP_WRITE #:type 999))" \
-	"ERROR: In procedure gdbscm_make_breakpoint: Out of range: invalid breakpoint type in position 5: 999\r\n.*" \
+	"(ERROR: )?In procedure gdbscm_make_breakpoint: Out of range: invalid breakpoint type in position 5: 999\r\n.*" \
 	"create a breakpoint with an invalid type number"
     gdb_test "guile (define wp2 (make-breakpoint \"result\" #:wp-class WP_WRITE #:type BP_NONE))" \
-	"ERROR: In procedure gdbscm_make_breakpoint: unsupported breakpoint type in position 5: \"BP_NONE\"\r\n.*" \
+	"(ERROR: )?In procedure gdbscm_make_breakpoint: unsupported breakpoint type in position 5: \"BP_NONE\"\r\n.*" \
 	"create a breakpoint with an unsupported type"
 }
 
@@ -533,7 +533,7 @@ proc_with_prefix test_catchpoints {} {
     # Try to create a catchpoint, currently this isn't supported via
     # the guile api.
     gdb_test "guile (define cp (make-breakpoint \"syscall\" #:type BP_CATCHPOINT))" \
-	"ERROR: In procedure gdbscm_make_breakpoint: unsupported breakpoint type in position 3: \"BP_CATCHPOINT\"\r\n.*" \
+	"(ERROR: )?In procedure gdbscm_make_breakpoint: unsupported breakpoint type in position 3: \"BP_CATCHPOINT\"\r\n.*" \
 	"create a catchpoint via the api"
 
     # Setup a catchpoint.
