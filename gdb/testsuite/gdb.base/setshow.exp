@@ -86,7 +86,8 @@ proc_with_prefix test_setshow_args {} {
 	return
     }
 
-    gdb_test "show args" "Argument list to give program being debugged when it is started is \"\"\."
+    gdb_test "show args" "Argument list to give program being debugged when it is started is \"\"\." \
+	"show args empty"
     gdb_test "p \$_gdb_setting_str(\"args\")" " = \"\""
 
     gdb_test_no_output "set args ~"
@@ -97,7 +98,8 @@ proc_with_prefix test_setshow_args {} {
     gdb_test_no_output "set args foo bar blup baz bubble" "set args"
 
     #test show args
-    gdb_test "show args" "Argument list to give program being debugged when it is started is \"foo bar blup baz bubble\"..*"
+    gdb_test "show args" "Argument list to give program being debugged when it is started is \"foo bar blup baz bubble\"..*" \
+	"show args multiple words"
     gdb_test "p \$_gdb_setting(\"args\")" " = \"foo bar blup baz bubble\"" \
 	"_gdb_setting args"
 
