@@ -89,7 +89,7 @@ static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
 
 static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 
-static bool maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc);
+static bool maybe_software_singlestep (struct gdbarch *gdbarch);
 
 static void resume (gdb_signal sig);
 
@@ -2048,14 +2048,13 @@ set_schedlock_func (const char *args, int from_tty, struct cmd_list_element *c)
    process.  */
 bool sched_multi = false;
 
-/* Try to setup for software single stepping over the specified location.
-   Return true if target_resume() should use hardware single step.
+/* Try to setup for software single stepping.  Return true if target_resume()
+   should use hardware single step.
 
-   GDBARCH the current gdbarch.
-   PC the location to step over.  */
+   GDBARCH the current gdbarch.  */
 
 static bool
-maybe_software_singlestep (struct gdbarch *gdbarch, CORE_ADDR pc)
+maybe_software_singlestep (struct gdbarch *gdbarch)
 {
   bool hw_step = true;
 
@@ -2390,7 +2389,7 @@ resume_1 (enum gdb_signal sig)
 	  set_step_over_info (regcache->aspace (),
 			      regcache_read_pc (regcache), 0, tp->global_num);
 
-	  step = maybe_software_singlestep (gdbarch, pc);
+	  step = maybe_software_singlestep (gdbarch);
 
 	  insert_breakpoints ();
 	}
@@ -2409,7 +2408,7 @@ resume_1 (enum gdb_signal sig)
 
   /* Do we need to do it the hard way, w/temp breakpoints?  */
   else if (step)
-    step = maybe_software_singlestep (gdbarch, pc);
+    step = maybe_software_singlestep (gdbarch);
 
   /* Currently, our software single-step implementation leads to different
      results than hardware single-stepping in one situation: when stepping
