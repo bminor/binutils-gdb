@@ -3161,6 +3161,8 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		       || (no_copyreloc_p
 			   && h->def_dynamic
 			   && !(h->root.u.def.section->flags & SEC_CODE))))
+		  || (bfd_link_pie (info)
+		      && h->root.type == bfd_link_hash_undefweak)
 		  || bfd_link_dll (info)))
 	    {
 	      bool fail = false;
@@ -3174,8 +3176,9 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		{
 		  /* We can only use PC-relative relocations in PIE
 		     from non-code sections.  */
-		  if (h->type == STT_FUNC
-		      && (sec->flags & SEC_CODE) != 0)
+		  if (h->root.type == bfd_link_hash_undefweak
+		      || (h->type == STT_FUNC
+			  && (sec->flags & SEC_CODE) != 0))
 		    fail = true;
 		}
 	      else if (no_copyreloc_p || bfd_link_dll (info))
