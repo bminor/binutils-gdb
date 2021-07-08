@@ -1683,8 +1683,7 @@ info_address_command (const char *exp, int from_tty)
     }
 
   printf_filtered ("Symbol \"");
-  fprintf_symbol_filtered (gdb_stdout, sym->print_name (),
-			   current_language->la_language, DMGL_ANSI);
+  fputs_filtered (sym->print_name (), gdb_stdout);
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
   if (SYMBOL_OBJFILE_OWNED (sym))

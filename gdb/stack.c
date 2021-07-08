@@ -427,17 +427,14 @@ print_frame_arg (const frame_print_options &fp_opts,
 
   annotate_arg_emitter arg_emitter;
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
-  fprintf_symbol_filtered (&stb, arg->sym->print_name (),
-			   arg->sym->language (), DMGL_PARAMS | DMGL_ANSI);
+  fputs_filtered (arg->sym->print_name (), &stb);
   if (arg->entry_kind == print_entry_values_compact)
     {
       /* It is OK to provide invalid MI-like stream as with
 	 PRINT_ENTRY_VALUE_COMPACT we never use MI.  */
       stb.puts ("=");
 
-      fprintf_symbol_filtered (&stb, arg->sym->print_name (),
-			       arg->sym->language (),
-			       DMGL_PARAMS | DMGL_ANSI);
+      fputs_filtered (arg->sym->print_name (), &stb);
     }
   if (arg->entry_kind == print_entry_values_only
       || arg->entry_kind == print_entry_values_compact)
@@ -1368,8 +1365,7 @@ print_frame (const frame_print_options &fp_opts,
     annotate_frame_function_name ();
 
     string_file stb;
-    fprintf_symbol_filtered (&stb, funname ? funname.get () : "??",
-			     funlang, DMGL_ANSI);
+    fputs_filtered (funname ? funname.get () : "??", &stb);
     uiout->field_stream ("func", stb, function_name_style.style ());
     uiout->wrap_hint ("   ");
     annotate_frame_args ();
@@ -1564,8 +1560,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   if (funname)
     {
       printf_filtered (" in ");
-      fprintf_symbol_filtered (gdb_stdout, funname, funlang,
-			       DMGL_ANSI | DMGL_PARAMS);
+      fputs_filtered (funname, gdb_stdout);
     }
   wrap_here ("   ");
   if (sal.symtab)
