@@ -1,3 +1,7 @@
+2021-07-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in (SUBDIRS): Remove testsuite.
+
 2021-07-06  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* configure.ac: Remove things that were moved from
