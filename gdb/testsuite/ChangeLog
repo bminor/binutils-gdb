@@ -1,3 +1,8 @@
+2021-07-08  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.guile/scm-breakpoint.exp: Make additional "ERROR: " prefix in
+	exception printing optional.
+
 2021-07-06  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* configure.ac: Restore.
