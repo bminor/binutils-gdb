@@ -2818,7 +2818,14 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
   int len = TYPE_LENGTH (type);
   gdb_byte buf[I386_MAX_REGISTER_SIZE];
 
-  if (type->code () == TYPE_CODE_FLT)
+  /* _Float16 and _Float16 _Complex values are returned via xmm0.  */
+  if (((type->code () == TYPE_CODE_FLT) && len == 2)
+      || ((type->code () == TYPE_CODE_COMPLEX) && len == 4))
+    {
+	regcache->raw_read (I387_XMM0_REGNUM (tdep), valbuf);
+	return;
+    }
+  else if (type->code () == TYPE_CODE_FLT)
     {
       if (tdep->st0_regnum < 0)
 	{

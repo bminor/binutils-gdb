@@ -728,10 +728,10 @@ amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
       && (len == 1 || len == 2 || len == 4 || len == 8))
     theclass[0] = AMD64_INTEGER;
 
-  /* Arguments of types float, double, _Decimal32, _Decimal64 and __m64
-     are in class SSE.  */
+  /* Arguments of types _Float16, float, double, _Decimal32, _Decimal64 and
+     __m64 are in class SSE.  */
   else if ((code == TYPE_CODE_FLT || code == TYPE_CODE_DECFLOAT)
-	   && (len == 4 || len == 8))
+	   && (len == 2 || len == 4 || len == 8))
     /* FIXME: __m64 .  */
     theclass[0] = AMD64_SSE;
 
@@ -749,8 +749,8 @@ amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
     /* Class X87 and X87UP.  */
     theclass[0] = AMD64_X87, theclass[1] = AMD64_X87UP;
 
-  /* Arguments of complex T where T is one of the types float or
-     double get treated as if they are implemented as:
+  /* Arguments of complex T - where T is one of the types _Float16, float or
+     double - get treated as if they are implemented as:
 
      struct complexT {
        T real;
@@ -758,7 +758,7 @@ amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
      };
 
   */
-  else if (code == TYPE_CODE_COMPLEX && len == 8)
+  else if (code == TYPE_CODE_COMPLEX && (len == 8 || len == 4))
     theclass[0] = AMD64_SSE;
   else if (code == TYPE_CODE_COMPLEX && len == 16)
     theclass[0] = theclass[1] = AMD64_SSE;
