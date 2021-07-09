@@ -3,11 +3,7 @@
 #as:
 #ld: -shared -z noindirect-extern-access
 #readelf: -n
-#xfail: ![check_shared_lib_support]
-#notarget: am33_2.0-*-* hppa*-*-hpux* mn10300-*-*
-# Assembly source file for the HPPA assembler is renamed and modifed by
-# sed.  mn10300 has relocations in .note.gnu.property section which
-# elf_parse_notes doesn't support.
+#target: x86_64-*-linux* i?86-*-linux-gnu i?86-*-gnu*
 
 #...
 Displaying notes found in: .note.gnu.property
