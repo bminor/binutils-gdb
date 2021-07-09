@@ -1,5 +1,15 @@
 2021-07-09  Nick Clifton  <nickc@redhat.com>
 
+	Backport from mainline:
+
+	2021-06-08  Michael Matz  <matz@suse.de>
+
+	PR 28058
+	* elf.c (bfd_section_from_shdr): Set has_secondary_relocs flag.
+	(_bfd_elf_slurp_secondary_reloc_section): Use it for early-out.
+
+2021-07-09  Nick Clifton  <nickc@redhat.com>
+
 	Backport this patch from the mainline:
 	2021-03-02  Nick Clifton  <nickc@redhat.com>
 
