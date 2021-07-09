@@ -1484,6 +1484,8 @@ struct funcinfo
   struct arange		arange;
   /* Where the symbol is defined.  */
   asection *		sec;
+  /* The offset of the funcinfo from the start of the unit.  */
+  bfd_uint64_t          unit_offset;
 };
 
 struct lookup_funcinfo
@@ -3304,6 +3306,15 @@ read_rangelist (struct comp_unit *unit, struct arange *arange,
     return read_rnglists (unit, arange, offset);
 }
 
+static struct funcinfo *
+lookup_func_by_offset (bfd_uint64_t offset, struct funcinfo * table)
+{
+  for (; table != NULL; table = table->prev_func)
+    if (table->unit_offset == offset)
+      return table;
+  return NULL;
+}
+
 static struct varinfo *
 lookup_var_by_offset (bfd_uint64_t offset, struct varinfo * table)
 {
@@ -3317,7 +3328,6 @@ lookup_var_by_offset (bfd_uint64_t offset, struct varinfo * table)
   return NULL;
 }
 
-
 /* DWARF2 Compilation unit functions.  */
 
 /* Scan over each die in a comp. unit looking for functions to add
@@ -3330,7 +3340,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
   bfd_byte *info_ptr = unit->first_child_die_ptr;
   bfd_byte *info_ptr_end = unit->end_ptr;
   int nesting_level = 0;
-  struct nest_funcinfo {
+  struct nest_funcinfo
+  {
     struct funcinfo *func;
   } *nested_funcs;
   int nested_funcs_size;
@@ -3344,16 +3355,16 @@ scan_unit_for_symbols (struct comp_unit *unit)
     return FALSE;
   nested_funcs[nesting_level].func = 0;
 
+  /* PR 27484: We must scan the DIEs twice.  The first time we look for
+     function and variable tags and accumulate them into their respective
+     tables.  The second time through we process the attributes of the
+     functions/variables and augment the table entries.  */
   while (nesting_level >= 0)
     {
       unsigned int abbrev_number, bytes_read, i;
       struct abbrev_info *abbrev;
-      struct attribute attr;
       struct funcinfo *func;
       struct varinfo *var;
-      bfd_vma low_pc = 0;
-      bfd_vma high_pc = 0;
-      bfd_boolean high_pc_relative = FALSE;
       bfd_uint64_t current_offset;
 
       /* PR 17512: file: 9f405d9d.  */
@@ -3365,7 +3376,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 					     FALSE, info_ptr_end);
       info_ptr += bytes_read;
 
-      if (! abbrev_number)
+      if (abbrev_number == 0)
 	{
 	  nesting_level--;
 	  continue;
@@ -3400,6 +3411,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	    goto fail;
 	  func->tag = abbrev->tag;
 	  func->prev_func = unit->function_table;
+	  func->unit_offset = current_offset;
 	  unit->function_table = func;
 	  unit->number_of_functions++;
 	  BFD_ASSERT (!unit->cached);
@@ -3420,6 +3432,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	      || abbrev->tag == DW_TAG_member)
 	    {
 	      size_t amt = sizeof (struct varinfo);
+
 	      var = (struct varinfo *) bfd_zalloc (abfd, amt);
 	      if (var == NULL)
 		goto fail;
@@ -3437,6 +3450,89 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  /* No inline function in scope at this nesting level.  */
 	  nested_funcs[nesting_level].func = 0;
 	}
+
+      for (i = 0; i < abbrev->num_attrs; ++i)
+	{
+	  struct attribute attr;
+
+	  info_ptr = read_attribute (&attr, &abbrev->attrs[i],
+				     unit, info_ptr, info_ptr_end);
+	  if (info_ptr == NULL)
+	    goto fail;
+	}
+
+      if (abbrev->has_children)
+	{
+	  nesting_level++;
+
+	  if (nesting_level >= nested_funcs_size)
+	    {
+	      struct nest_funcinfo *tmp;
+
+	      nested_funcs_size *= 2;
+	      tmp = (struct nest_funcinfo *)
+		bfd_realloc (nested_funcs,
+			     nested_funcs_size * sizeof (*nested_funcs));
+	      if (tmp == NULL)
+		goto fail;
+	      nested_funcs = tmp;
+	    }
+	  nested_funcs[nesting_level].func = 0;
+	}
+    }
+
+  /* This is the second pass over the abbrevs.  */      
+  info_ptr = unit->first_child_die_ptr;
+  nesting_level = 0;
+  
+  while (nesting_level >= 0)
+    {
+      unsigned int abbrev_number, bytes_read, i;
+      struct abbrev_info *abbrev;
+      struct attribute attr;
+      struct funcinfo *func;
+      struct varinfo *var;
+      bfd_vma low_pc = 0;
+      bfd_vma high_pc = 0;
+      bfd_boolean high_pc_relative = FALSE;
+      bfd_uint64_t current_offset;
+
+      /* PR 17512: file: 9f405d9d.  */
+      if (info_ptr >= info_ptr_end)
+	goto fail;
+
+      current_offset = info_ptr - unit->info_ptr_unit;
+      abbrev_number = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
+                                            FALSE, info_ptr_end);
+      info_ptr += bytes_read;
+
+      if (! abbrev_number)
+	{
+	  nesting_level--;
+	  continue;
+	}
+
+      abbrev = lookup_abbrev (abbrev_number, unit->abbrevs);
+      /* This should have been handled above.  */
+      BFD_ASSERT (abbrev != NULL);
+
+      func = NULL;
+      var = NULL;
+      if (abbrev->tag == DW_TAG_subprogram
+         || abbrev->tag == DW_TAG_entry_point
+         || abbrev->tag == DW_TAG_inlined_subroutine)
+       {
+         func = lookup_func_by_offset (current_offset, unit->function_table);
+         if (func == NULL)
+           goto fail;
+       }
+      else if (abbrev->tag == DW_TAG_variable
+              || abbrev->tag == DW_TAG_member)
+       {
+         var = lookup_var_by_offset (current_offset, unit->variable_table);
+         if (var == NULL)
+           goto fail;
+       }
 
       for (i = 0; i < abbrev->num_attrs; ++i)
 	{
@@ -3532,7 +3628,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 			{
 			  _bfd_error_handler (_("DWARF error: could not find "
 						"variable specification "
-						"at offset %lx"),
+						"at offset 0x%lx"),
 					      (unsigned long) attr.u.val);
 			  break;
 			}
@@ -3604,6 +3700,9 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	    }
 	}
 
+      if (abbrev->has_children)
+	nesting_level++;
+
       if (high_pc_relative)
 	high_pc += low_pc;
 
@@ -3611,25 +3710,6 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	{
 	  if (!arange_add (unit, &func->arange, low_pc, high_pc))
 	    goto fail;
-	}
-
-      if (abbrev->has_children)
-	{
-	  nesting_level++;
-
-	  if (nesting_level >= nested_funcs_size)
-	    {
-	      struct nest_funcinfo *tmp;
-
-	      nested_funcs_size *= 2;
-	      tmp = (struct nest_funcinfo *)
-		bfd_realloc (nested_funcs,
-			     nested_funcs_size * sizeof (*nested_funcs));
-	      if (tmp == NULL)
-		goto fail;
-	      nested_funcs = tmp;
-	    }
-	  nested_funcs[nesting_level].func = 0;
 	}
     }
 

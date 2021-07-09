@@ -1,3 +1,13 @@
+2021-07-09  Nick Clifton  <nickc@redhat.com>
+
+	Backport this patch from the mainline:
+	2021-03-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 27484
+	* dwarf2.c (scan_unit_for_symbols): Scan twice, once to accumulate
+	function and variable tags and a second time to resolve their
+	attributes.
+
 2021-05-03  Alan Modra  <amodra@gmail.com>
 
 	PR 27755
