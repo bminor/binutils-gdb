@@ -1,3 +1,8 @@
+2021-07-10  Alan Modra  <amodra@gmail.com>
+
+	* dwarf2.c (read_address): Remove accidental commit.
+	(read_ranges): Compare offset rather than pointers.
+
 2021-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt.po: Updated Portuguese translation.
