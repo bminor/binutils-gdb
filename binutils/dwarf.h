@@ -264,12 +264,12 @@ extern unsigned char * get_build_id (void *);
 #endif
 
 static inline void
-report_leb_status (int status, const char *file, unsigned long lnum)
+report_leb_status (int status)
 {
   if ((status & 1) != 0)
-    error (_("%s:%lu: end of data encountered whilst reading LEB\n"), file, lnum);
+    error (_("end of data encountered whilst reading LEB\n"));
   else if ((status & 2) != 0)
-    error (_("%s:%lu: read LEB value is too large to store in destination variable\n"), file, lnum);
+    error (_("read LEB value is too large to store in destination variable\n"));
 }
 
 #define SKIP_ULEB(start, end)					\
@@ -302,7 +302,7 @@ report_leb_status (int status, const char *file, unsigned long lnum)
       (var) = _val;						\
       if ((var) != _val)					\
 	_status |= 2;						\
-      report_leb_status (_status, __FILE__, __LINE__);		\
+      report_leb_status (_status);				\
     }								\
   while (0)
 
@@ -318,6 +318,6 @@ report_leb_status (int status, const char *file, unsigned long lnum)
       (var) = _val;						\
       if ((var) != _val)					\
 	_status |= 2;						\
-      report_leb_status (_status, __FILE__, __LINE__);		\
+      report_leb_status (_status);				\
     }								\
   while (0)

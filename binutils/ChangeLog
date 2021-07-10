@@ -1,3 +1,16 @@
+2021-07-10  Alan Modra  <amodra@gmail.com>
+
+	PR 28069
+	* dwarf.c (display_discr_list): Remove assertions.  Delete "end"
+	parameter, use initial "data" pointer as the end.  Formatting.
+	Don't count down bytes as they are read.
+	(read_and_display_attr_value): Adjust display_discr_list call.
+	(read_and_print_leb128): Don't pass __FILE__ and __LINE__ to
+	report_leb_status.
+	* dwarf.h (report_leb_status): Don't report file and line
+	numbers.  Delete file and lnum parameters,
+	(READ_ULEB, READ_SLEB): Adjust.
+
 2021-07-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* configure.ac: Check for strnlen declaration.

@@ -2280,7 +2280,7 @@ read_and_print_leb128 (unsigned char *data,
   int status;
   dwarf_vma val = read_leb128 (data, end, is_signed, bytes_read, &status);
   if (status != 0)
-    report_leb_status (status, __FILE__, __LINE__);
+    report_leb_status (status);
   else
     printf ("%s", dwarf_vmatoa (is_signed ? "d" : "u", val));
 }
@@ -2289,9 +2289,10 @@ static void
 display_discr_list (unsigned long          form,
 		    dwarf_vma              uvalue,
 		    unsigned char *        data,
-		    unsigned const char *  end,
 		    int                    level)
 {
+  unsigned char *end = data;
+
   if (uvalue == 0)
     {
       printf ("[default]");
@@ -2320,41 +2321,32 @@ display_discr_list (unsigned long          form,
       return;
     }
 
-  bool is_signed =
-    (level > 0 && level <= MAX_CU_NESTING)
-    ? level_type_signed [level - 1] : false;
+  bool is_signed = (level > 0 && level <= MAX_CU_NESTING
+		    ? level_type_signed [level - 1] : false);
 
   printf ("(");
-  while (uvalue)
+  while (data < end)
     {
       unsigned char     discriminant;
       unsigned int      bytes_read;
 
       SAFE_BYTE_GET_AND_INC (discriminant, data, 1, end);
-      -- uvalue;
 
-      assert (uvalue > 0);
       switch (discriminant)
 	{
 	case DW_DSC_label:
 	  printf ("label ");
 	  read_and_print_leb128 (data, & bytes_read, end, is_signed);
-	  assert (bytes_read <= uvalue && bytes_read > 0);
-	  uvalue -= bytes_read;
 	  data += bytes_read;
 	  break;
 
 	case DW_DSC_range:
 	  printf ("range ");
 	  read_and_print_leb128 (data, & bytes_read, end, is_signed);
-	  assert (bytes_read <= uvalue && bytes_read > 0);
-	  uvalue -= bytes_read;
 	  data += bytes_read;
 
 	  printf ("..");
 	  read_and_print_leb128 (data, & bytes_read, end, is_signed);
-	  assert (bytes_read <= uvalue && bytes_read > 0);
-	  uvalue -= bytes_read;
 	  data += bytes_read;
 	  break;
 
@@ -2365,7 +2357,7 @@ display_discr_list (unsigned long          form,
 	  return;
 	}
 
-      if (uvalue)
+      if (data < end)
 	printf (", ");
     }
 
@@ -3230,7 +3222,7 @@ read_and_display_attr_value (unsigned long           attribute,
 
     case DW_AT_discr_list:
       printf ("\t");
-      display_discr_list (form, uvalue, data, end, level);
+      display_discr_list (form, uvalue, data, level);
       break;
 
     case DW_AT_frame_base:
