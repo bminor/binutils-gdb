@@ -69,16 +69,7 @@
 #endif
 
 #ifndef TC_VALIDATE_FIX_SUB
-#ifdef UNDEFINED_DIFFERENCE_OK
-/* The PA needs this for PIC code generation.  */
-#define TC_VALIDATE_FIX_SUB(FIX, SEG)			\
-  (md_register_arithmetic || (SEG) != reg_section)
-#else
-#define TC_VALIDATE_FIX_SUB(FIX, SEG)			\
-  ((md_register_arithmetic || (SEG) != reg_section)	\
-   && ((FIX)->fx_r_type == BFD_RELOC_GPREL32		\
-       || (FIX)->fx_r_type == BFD_RELOC_GPREL16))
-#endif
+#define TC_VALIDATE_FIX_SUB(FIX, SEG) 0
 #endif
 
 #ifndef TC_LINKRELAX_FIXUP

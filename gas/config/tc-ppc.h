@@ -285,8 +285,6 @@ extern int ppc_force_relocation (struct fix *);
      || (FIX)->fx_r_type == BFD_RELOC_PPC64_D34			\
      || (FIX)->fx_r_type == BFD_RELOC_PPC64_D28))
 
-#define TC_VALIDATE_FIX_SUB(FIX, SEG) 0
-
 #endif /* OBJ_ELF */
 
 #define RELOC_EXPANSION_POSSIBLE
@@ -303,6 +301,10 @@ extern int ppc_force_relocation (struct fix *);
 /* XCOFF allows undefined differences which will be encoded with
    R_NEG relocations.  */
 #define UNDEFINED_DIFFERENCE_OK
+
+#define TC_VALIDATE_FIX_SUB(FIX, SEG) \
+  (md_register_arithmetic || (SEG) != reg_section)
+
 #endif /* OBJ_XCOFF */
 
 /* Various frobbings of labels and their addresses.  */

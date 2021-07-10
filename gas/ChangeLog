@@ -1,3 +1,12 @@
+2021-07-14  Alan Modra  <amodra@gmail.com>
+
+	* write.c (TC_VALIDATE_FIX_SUB): Default to 0.
+	* config/tc-hppa.h (TC_VALIDATE_FIX_SUB): Define.
+	* config/tc-microblaze.h (TC_VALIDATE_FIX_SUB): Define.
+	* config/tc-alpha.h (TC_VALIDATE_FIX_SUB): Define for ECOFF.
+	* config/tc-ppc.h (TC_VALIDATE_FIX_SUB): Don't define for ELF.
+	Do define for XCOFF.
+
 2021-07-14  Clément Chigot  <clement.chigot@atos.net>
 
 	* config/tc-ppc.c (ppc_change_debug_section): Update to
@@ -470,7 +479,7 @@
 	* testsuite/gas/mips/mips2@cp3m.d: New test.
 	* testsuite/gas/mips/r3000@cp3m.d: New test.
 	* testsuite/gas/mips/r3900@cp3m.d: New test.
- 	* testsuite/gas/mips/mips2@cp3d.d: New test.
+	* testsuite/gas/mips/mips2@cp3d.d: New test.
 	* testsuite/gas/mips/cp0b.l: New test stderr output.
 	* testsuite/gas/mips/cp0bl.l: New test stderr output.
 	* testsuite/gas/mips/cp0c.l: New test stderr output.
