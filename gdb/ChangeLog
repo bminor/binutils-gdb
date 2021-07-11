@@ -1,3 +1,9 @@
+2021-07-11  Tom Tromey  <tom@tromey.com>
+
+	Committed by Joel Brobecker  <brobecker@adacore.com>:
+	* gdb/symtab.c (info_sources_filter::matches): Add default
+	case hander in switch statement.
+
 2021-07-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* s390-linux-tdep.c (s390_linux_init_abi_any): Pass 1 (number

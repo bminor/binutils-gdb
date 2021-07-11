@@ -4242,6 +4242,8 @@ info_sources_filter::matches (const char *fullname) const
         case match_on::FULLNAME:
           to_match = fullname;
           break;
+	default:
+	  gdb_assert_not_reached ("bad m_match_type");
         }
 
       if (m_c_regexp->exec (to_match, 0, NULL, 0) != 0)
