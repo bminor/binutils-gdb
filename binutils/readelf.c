@@ -10943,28 +10943,19 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 
   if (do_dynamic && filedata->dynamic_addr)
     {
-      if (filedata->dynamic_nent == 1)
-	{
-	  if (filedata->is_separate)
-	    printf (_("\nIn linked file '%s' the dynamic section at offset 0x%lx contains 1 entry:\n"),
-		    filedata->file_name,
-		    filedata->dynamic_addr);
+      if (filedata->is_separate)
+	printf (ngettext ("\nIn linked file '%s' the dynamic section at offset 0x%lx contains %lu entry:\n",
+			  "\nIn linked file '%s' the dynamic section at offset 0x%lx contains %lu entries:\n",
+			  (unsigned long) filedata->dynamic_nent),
+		filedata->file_name,
+		filedata->dynamic_addr,
+		(unsigned long) filedata->dynamic_nent);
 	  else
-	    printf (_("\nDynamic section at offset 0x%lx contains 1 entry:\n"),
-		    filedata->dynamic_addr);
-	}
-      else
-	{
-	  if (filedata->is_separate)
-	    printf (_("\nIn linked file '%s' the dynamic section at offset 0x%lx contains %lu entries:\n"),
-		    filedata->file_name,
+	    printf (ngettext ("\nDynamic section at offset 0x%lx contains %lu entry:\n",
+			      "\nDynamic section at offset 0x%lx contains %lu entries:\n",
+			      (unsigned long) filedata->dynamic_nent),
 		    filedata->dynamic_addr,
 		    (unsigned long) filedata->dynamic_nent);
-	  else
-	    printf (_("\nDynamic section at offset 0x%lx contains %lu entries:\n"),
-		    filedata->dynamic_addr,
-		    (unsigned long) filedata->dynamic_nent);
-	}
     }
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
@@ -17295,24 +17286,27 @@ display_csky_attribute (unsigned char * p,
       break;
     case Tag_CSKY_FPU_ROUNDING:
       READ_ULEB (val, p, end);
-      if (val == 1) {
-	printf ("  Tag_CSKY_FPU_ROUNDING:\t");
-	printf ("Needed\n");
-      }
+      if (val == 1)
+	{
+	  printf ("  Tag_CSKY_FPU_ROUNDING:\t");
+	  printf ("Needed\n");
+	}
       break;
     case Tag_CSKY_FPU_DENORMAL:
       READ_ULEB (val, p, end);
-      if (val == 1) {
-	printf ("  Tag_CSKY_FPU_DENORMAL:\t");
-	printf ("Needed\n");
-      }
+      if (val == 1)
+	{
+	  printf ("  Tag_CSKY_FPU_DENORMAL:\t");
+	  printf ("Needed\n");
+	}
       break;
     case Tag_CSKY_FPU_Exception:
       READ_ULEB (val, p, end);
-      if (val == 1) {
-	printf ("  Tag_CSKY_FPU_Exception:\t");
-	printf ("Needed\n");
-      }
+      if (val == 1)
+	{
+	  printf ("  Tag_CSKY_FPU_Exception:\t");
+	  printf ("Needed\n");
+	}
       break;
     case Tag_CSKY_FPU_NUMBER_MODULE:
       printf ("  Tag_CSKY_FPU_NUMBER_MODULE:\t");
