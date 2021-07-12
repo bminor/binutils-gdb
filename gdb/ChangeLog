@@ -1,6 +1,14 @@
 2021-07-13  Pedro Alves  <pedro@palves.net>
 
 	PR gdb/28080
+	* gdb_bfd.c (gdb_bfd_close_warning): New.
+	(gdb_bfd_iovec_fileio_close): Wrap target_fileio_close in
+	try/catch and print warning on exception.
+	(gdb_bfd_close_or_warn): Use gdb_bfd_close_warning.
+
+2021-07-13  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/28080
 	* remote.c (remote_unpush_target): Invalidate file I/O target
 	handles.
 	* target.c (fileio_handles_invalidate_target): Make extern.
