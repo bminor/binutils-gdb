@@ -743,6 +743,22 @@ obj_elf_change_section (const char *name,
   if (linkonce)
     flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
+  /* PR 28054: Set the SEC_ELF_OCTETS flag for debugging sections.
+     Based on the code in bfd/elf.c:_bfd_elf_make_section_from_shdr().
+
+     FIXME: We do not set the SEC_DEBUGGING flag because that causes
+     problems for the FT32 and MSP430 targets.  Investigate and fix.  */
+  if ((flags & SEC_ALLOC) == 0 && name [0] == '.')
+    {
+      if (   startswith (name, ".debug")
+	  || startswith (name, ".zdebug")
+	  || startswith (name, ".gnu.debuglto_.debug_")
+	  || startswith (name, ".gnu.linkonce.wi.")
+	  || startswith (name, GNU_BUILD_ATTRS_SECTION_NAME)
+	  || startswith (name, ".note.gnu"))
+	flags |= SEC_ELF_OCTETS;
+    }
+  
   if (old_sec == NULL)
     {
       symbolS *secsym;

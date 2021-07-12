@@ -1,3 +1,9 @@
+2021-07-12  Tucker  <tuckkern@sourceware@gmail.com>
+
+	PR 28054
+	* config/obj-elf.c (obj_elf_change_section): Set the
+	SEF_ELF_OCTETS flag on debug sections.
+
 2021-06-07  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* testsuite/gas/s390/zarch-arch14.d: Add qpaci.
