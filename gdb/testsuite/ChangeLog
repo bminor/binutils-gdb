@@ -1,3 +1,9 @@
+2021-07-13  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/28080
+	* gdb.base/detach-sysroot-target.exp: New.
+	* gdb.base/detach-sysroot-target.c: New.
+
 2021-07-13  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/27690

@@ -1,3 +1,11 @@
+2021-07-13  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/28080
+	* remote.c (remote_unpush_target): Invalidate file I/O target
+	handles.
+	* target.c (fileio_handles_invalidate_target): Make extern.
+	* target.h (fileio_handles_invalidate_target): Declare.
+
 2021-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* mi/mi-main.c (mi_cmd_exec_interrupt): Use
