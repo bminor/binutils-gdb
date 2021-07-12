@@ -59,6 +59,11 @@ set abort_2 [multi_line \
     "\[0-9\]*\t   0x\[0-9a-f\]+ <test\\+\[0-9\]+>:\tmov\[^\\\r\\\n\]*" \
     "\[0-9\]*\t   0x\[0-9a-f\]+ <test\\+\[0-9\]+>:\tret\[^\\\r\\\n\]*" \
     ]
+set abort_3 \
+    [multi_line \
+	 "$decimal\t   $hex <main\\+$decimal>:\t\[^\\\r\\\n\]*" \
+	 "$decimal\t   $hex <test\\+$decimal>:\tmov\[^\\\r\\\n\]*" \
+	 "$decimal\t   $hex <test\\+$decimal>:\tret\[^\\\r\\\n\]*"]
 
 set test "speculation indication"
 gdb_test_multiple "record instruction-history" $test {
@@ -67,6 +72,9 @@ gdb_test_multiple "record instruction-history" $test {
     }
     -re "$abort_2.*$gdb_prompt $" {
         pass $test
+    }
+    -re -wrap "$abort_3.*" {
+        pass $gdb_test_name
     }
     -re  "$begin_to_end.*$gdb_prompt $" {
         pass $test

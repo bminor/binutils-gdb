@@ -1,5 +1,11 @@
 2021-07-12  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/28057
+	* gdb.btrace/tsx.exp: Add pattern for system with tsx disabled in
+	microcode.
+
+2021-07-12  Tom de Vries  <tdevries@suse.de>
+
 	* lib/mi-support.exp (mi_readnow): New proc.
 	* gdb.mi/mi-info-sources.exp: Use nosharedlibrary.  Update patterns.
 	Skip tests for readnow.  Use "maint expand-symtabs".
