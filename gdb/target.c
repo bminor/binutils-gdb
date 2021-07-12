@@ -3121,13 +3121,9 @@ static std::vector<fileio_fh_t> fileio_fhandles;
    list each time a new file is opened.  */
 static int lowest_closed_fd;
 
-/* Invalidate the target associated with open handles that were open
-   on target TARG, since we're about to close (and maybe destroy) the
-   target.  The handles remain open from the client's perspective, but
-   trying to do anything with them other than closing them will fail
-   with EIO.  */
+/* See target.h.  */
 
-static void
+void
 fileio_handles_invalidate_target (target_ops *targ)
 {
   for (fileio_fh_t &fh : fileio_fhandles)

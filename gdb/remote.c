@@ -5636,6 +5636,15 @@ remote_unpush_target (remote_target *target)
       pop_all_targets_at_and_above (process_stratum);
       generic_mourn_inferior ();
     }
+
+  /* Don't rely on target_close doing this when the target is popped
+     from the last remote inferior above, because something may be
+     holding a reference to the target higher up on the stack, meaning
+     target_close won't be called yet.  We lost the connection to the
+     target, so clear these now, otherwise we may later throw
+     TARGET_CLOSE_ERROR while trying to tell the remote target to
+     close the file.  */
+  fileio_handles_invalidate_target (target);
 }
 
 static void

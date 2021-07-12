@@ -2230,6 +2230,12 @@ extern LONGEST target_fileio_read_alloc (struct inferior *inf,
 extern gdb::unique_xmalloc_ptr<char> target_fileio_read_stralloc
     (struct inferior *inf, const char *filename);
 
+/* Invalidate the target associated with open handles that were open
+   on target TARG, since we're about to close (and maybe destroy) the
+   target.  The handles remain open from the client's perspective, but
+   trying to do anything with them other than closing them will fail
+   with EIO.  */
+extern void fileio_handles_invalidate_target (target_ops *targ);
 
 /* Tracepoint-related operations.  */
 
