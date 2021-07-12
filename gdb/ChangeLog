@@ -1,3 +1,7 @@
+2021-07-13  Lancelot Six  <lsix@lancelotsix.com>
+
+	* make-init-c: Use /bin/sh as shebang.
+
 2021-07-13  Pedro Alves  <pedro@palves.net>
 
 	PR gdb/28080
