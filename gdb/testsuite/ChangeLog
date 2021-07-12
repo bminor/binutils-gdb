@@ -1,3 +1,9 @@
+2021-07-12  Tom de Vries  <tdevries@suse.de>
+
+	* lib/mi-support.exp (mi_readnow): New proc.
+	* gdb.mi/mi-info-sources.exp: Use nosharedlibrary.  Update patterns.
+	Skip tests for readnow.  Use "maint expand-symtabs".
+
 2021-07-08  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.guile/scm-breakpoint.exp: Make additional "ERROR: " prefix in

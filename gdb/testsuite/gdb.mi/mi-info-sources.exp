@@ -28,7 +28,13 @@ if {[prepare_for_testing $testfile.exp $testfile \
 
 mi_clean_restart $binfile
 
+set readnow_p [mi_readnow]
+
 mi_runto_main
+
+# Unload symbols for shared libraries to prevent
+# 'ERROR: internal buffer is full'.
+mi_gdb_test "nosharedlibrary" ".*\\^done" "nosharedlibrary"
 
 # Helper to build expected MI output pattern for a list.  NAME is the
 # name of the list (which can be the empty string) and args is one
@@ -108,27 +114,45 @@ proc check_info_sources { debug_fully_read } {
     with_test_prefix "debug_read=${debug_fully_read}" {
 
 	if { $debug_fully_read } {
-	    set p [mi_list "files" \
-		       [mi_tuple "" \
-			    [mi_field "file" "\[^\"\]+/mi-info-sources-base\\.c"] \
-			    [mi_field "fullname" "\[^\"\]+/mi-info-sources-base\\.c"] \
-			    [mi_field "debug-fully-read" "${debug_fully_read}"]] \
-		       [mi_tuple "" \
-			    [mi_field "file" "\[^\"\]+/mi-info-sources\\.c"] \
-			    [mi_field "fullname" "\[^\"\]+/mi-info-sources\\.c"] \
-			    [mi_field "debug-fully-read" "true"]]]
+	    set p1 \
+		[mi_list "files" \
+		     ".*" \
+		     [mi_tuple "" \
+			  [mi_field "file" "\[^\"\]+/mi-info-sources-base\\.c"] \
+			  [mi_field "fullname" "\[^\"\]+/mi-info-sources-base\\.c"] \
+			  [mi_field "debug-fully-read" "${debug_fully_read}"]] \
+		     ".*"]
+	    set p2 \
+		[mi_list "files" \
+		     ".*" \
+		     [mi_tuple "" \
+			  [mi_field "file" "\[^\"\]+/mi-info-sources\\.c"] \
+			  [mi_field "fullname" "\[^\"\]+/mi-info-sources\\.c"] \
+			  [mi_field "debug-fully-read" "true"]] \
+		     ".*"]
 	} else {
-	    set p [mi_list "files" \
-		       [mi_tuple "" \
-			    [mi_field "file" "\[^\"\]+/mi-info-sources\\.c"] \
-			    [mi_field "fullname" "\[^\"\]+/mi-info-sources\\.c"] \
-			    [mi_field "debug-fully-read" "true"]] \
-		       [mi_tuple "" \
-			    [mi_field "file" "\[^\"\]+/mi-info-sources-base\\.c"] \
-			    [mi_field "fullname" "\[^\"\]+/mi-info-sources-base\\.c"] \
-			    [mi_field "debug-fully-read" "${debug_fully_read}"]]]
+	    set p1 \
+		[mi_list "files" \
+		     ".*" \
+		     [mi_tuple "" \
+			  [mi_field "file" "\[^\"\]+/mi-info-sources\\.c"] \
+			  [mi_field "fullname" "\[^\"\]+/mi-info-sources\\.c"] \
+			  [mi_field "debug-fully-read" "true"]] \
+		     ".*"]
+	    set p2 \
+		[mi_list "files" \
+		     ".*" \
+		     [mi_tuple "" \
+			  [mi_field "file" "\[^\"\]+/mi-info-sources-base\\.c"] \
+			  [mi_field "fullname" "\[^\"\]+/mi-info-sources-base\\.c"] \
+			  [mi_field "debug-fully-read" "${debug_fully_read}"]] \
+		     ".*"]
 	}
-	mi_gdb_test "-file-list-exec-source-files" ".*\\^done,${p}" "-file-list-exec-source-files"
+
+	mi_gdb_test "-file-list-exec-source-files" ".*\\^done,${p1}" \
+	    "-file-list-exec-source-files, src1"
+	mi_gdb_test "-file-list-exec-source-files" ".*\\^done,${p2}" \
+	    "-file-list-exec-source-files, src2"
 
 	set p [mi_list "files" \
 		   [mi_tuple "" \
@@ -147,7 +171,7 @@ proc check_info_sources { debug_fully_read } {
 
 	set p [mi_list "files" \
 		   [mi_tuple "" \
-			[mi_field "filename" "\[^\"\]+/mi-info-sources"] \
+			[mi_field "filename" "\[^\"\]+/mi-info-sources(\.debug)?"] \
 			[mi_field "debug-info" "${debug_info}"] \
 			[mi_list "sources" \
 			     ".*" \
@@ -162,7 +186,7 @@ proc check_info_sources { debug_fully_read } {
 
 	set p [mi_list "files" \
 		   [mi_tuple "" \
-			[mi_field "filename" "\[^\"\]+/mi-info-sources"] \
+			[mi_field "filename" "\[^\"\]+/mi-info-sources(\.debug)?"] \
 			[mi_field "debug-info" "${debug_info}"] \
 			[mi_list "sources" \
 			     ".*" \
@@ -177,8 +201,13 @@ proc check_info_sources { debug_fully_read } {
     }
 }
 
-check_info_sources "false"
+if { ! $readnow_p } {
+    check_info_sources "false"
+}
 
 mi_continue_to "some_other_func"
+
+# Force "fully-read".
+mi_gdb_test "maint expand-symtabs"
 
 check_info_sources "true"
