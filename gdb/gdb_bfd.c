@@ -423,6 +423,15 @@ gdb_bfd_iovec_fileio_pread (struct bfd *abfd, void *stream, void *buf,
   return pos;
 }
 
+/* Warn that it wasn't possible to close a bfd for file NAME, because
+   of REASON.  */
+
+static void
+gdb_bfd_close_warning (const char *name, const char *reason)
+{
+  warning (_("cannot close \"%s\": %s"), name, reason);
+}
+
 /* Wrapper for target_fileio_close suitable for passing as the
    CLOSE_FUNC argument to gdb_bfd_openr_iovec.  */
 
@@ -436,7 +445,16 @@ gdb_bfd_iovec_fileio_close (struct bfd *abfd, void *stream)
 
   /* Ignore errors on close.  These may happen with remote
      targets if the connection has already been torn down.  */
-  target_fileio_close (fd, &target_errno);
+  try
+    {
+      target_fileio_close (fd, &target_errno);
+    }
+  catch (const gdb_exception &ex)
+    {
+      /* Also avoid crossing exceptions over bfd.  */
+      gdb_bfd_close_warning (bfd_get_filename (abfd),
+			     ex.message->c_str ());
+    }
 
   /* Zero means success.  */
   return 0;
@@ -626,8 +644,8 @@ gdb_bfd_close_or_warn (struct bfd *abfd)
   ret = bfd_close (abfd);
 
   if (!ret)
-    warning (_("cannot close \"%s\": %s"),
-	     name, bfd_errmsg (bfd_get_error ()));
+    gdb_bfd_close_warning (name,
+			   bfd_errmsg (bfd_get_error ()));
 
   return ret;
 }
