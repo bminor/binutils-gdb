@@ -803,9 +803,7 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 					0 /*non-strict*/,
 					&except_scm);
 	      if (s != NULL)
-		value = value_cstring (s.get (), len,
-				       language_string_char_type (language,
-								  gdbarch));
+		value = language->value_string (gdbarch, s.get (), len);
 	      else
 		value = NULL;
 	    }

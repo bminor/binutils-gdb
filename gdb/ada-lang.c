@@ -13525,6 +13525,19 @@ public:
   }
 
   /* See language.h.  */
+  struct value *value_string (struct gdbarch *gdbarch,
+			      const char *ptr, ssize_t len) const override
+  {
+    struct type *type = language_string_char_type (this, gdbarch);
+    value *val = ::value_string (ptr, len, type);
+    /* VAL will be a TYPE_CODE_STRING, but Ada only knows how to print
+       strings that are arrays of characters, so fix the type now.  */
+    gdb_assert (val->type ()->code () == TYPE_CODE_STRING);
+    val->type ()->set_code (TYPE_CODE_ARRAY);
+    return val;
+  }
+
+  /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
 			   struct language_arch_info *lai) const override
   {

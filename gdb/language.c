@@ -874,6 +874,16 @@ language_string_char_type (const struct language_defn *la,
 
 /* See language.h.  */
 
+struct value *
+language_defn::value_string (struct gdbarch *gdbarch,
+			     const char *ptr, ssize_t len) const
+{
+  struct type *type = language_string_char_type (this, gdbarch);
+  return value_cstring (ptr, len, type);
+}
+
+/* See language.h.  */
+
 struct type *
 language_bool_type (const struct language_defn *la,
 		    struct gdbarch *gdbarch)

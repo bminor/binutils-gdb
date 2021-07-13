@@ -203,6 +203,11 @@ public:
 
   /* See language.h.  */
 
+  struct value *value_string (struct gdbarch *gdbarch,
+			      const char *ptr, ssize_t len) const override;
+
+  /* See language.h.  */
+
   const char *struct_too_deep_ellipsis () const override
   { return "(...)"; }
 

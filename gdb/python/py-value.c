@@ -54,9 +54,6 @@
 #define builtin_type_pybool \
   language_bool_type (current_language, gdbpy_enter::get_gdbarch ())
 
-#define builtin_type_pychar \
-  language_string_char_type (current_language, gdbpy_enter::get_gdbarch ())
-
 struct value_object {
   PyObject_HEAD
   struct value_object *next;
@@ -1881,8 +1878,9 @@ convert_value_from_python (PyObject *obj)
 	  gdb::unique_xmalloc_ptr<char> s
 	    = python_string_to_target_string (obj);
 	  if (s != NULL)
-	    value = value_cstring (s.get (), strlen (s.get ()),
-				   builtin_type_pychar);
+	    value
+	      = current_language->value_string (gdbpy_enter::get_gdbarch (),
+						s.get (), strlen (s.get ()));
 	}
       else if (PyObject_TypeCheck (obj, &value_object_type))
 	value = ((value_object *) obj)->value->copy ();

@@ -1738,39 +1738,38 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   return val;
 }
 
+/* See value.h.  */
+
 struct value *
-value_cstring (const char *ptr, ssize_t len, struct type *char_type)
+value_cstring (const gdb_byte *ptr, ssize_t count, struct type *char_type)
 {
   struct value *val;
   int lowbound = current_language->string_lower_bound ();
-  ssize_t highbound = len / char_type->length ();
+  ssize_t highbound = count + 1;
   struct type *stringtype
     = lookup_array_range_type (char_type, lowbound, highbound + lowbound - 1);
 
   val = value::allocate (stringtype);
+  ssize_t len = count * char_type->length ();
   memcpy (val->contents_raw ().data (), ptr, len);
+  /* Write the terminating null-character.  */
+  memset (val->contents_raw ().data () + len, 0, char_type->length ());
   return val;
 }
 
-/* Create a value for a string constant by allocating space in the
-   inferior, copying the data into that space, and returning the
-   address with type TYPE_CODE_STRING.  PTR points to the string
-   constant data; LEN is number of characters.
-
-   Note that string types are like array of char types with a lower
-   bound of zero and an upper bound of LEN - 1.  Also note that the
-   string may contain embedded null bytes.  */
+/* See value.h.  */
 
 struct value *
-value_string (const char *ptr, ssize_t len, struct type *char_type)
+value_string (const gdb_byte *ptr, ssize_t count, struct type *char_type)
 {
   struct value *val;
   int lowbound = current_language->string_lower_bound ();
-  ssize_t highbound = len / char_type->length ();
+  ssize_t highbound = count;
   struct type *stringtype
     = lookup_string_range_type (char_type, lowbound, highbound + lowbound - 1);
 
   val = value::allocate (stringtype);
+  ssize_t len = count * char_type->length ();
   memcpy (val->contents_raw ().data (), ptr, len);
   return val;
 }

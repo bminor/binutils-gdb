@@ -288,7 +288,7 @@ mi_create_dynamic_varobj nstype2 nstype2 ".*" 1 \
   "create nstype2 varobj"
 
 mi_list_varobj_children nstype2 {
-    { {nstype2.<error at 0>} {<error at 0>} 6 {char \[6\]} }
+    { {nstype2.<error at 0>} {<error at 0>} 7 {char \[7\]} }
 } "list children after setting exception flag"
 
 mi_create_varobj me me \

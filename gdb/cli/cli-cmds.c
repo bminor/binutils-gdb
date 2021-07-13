@@ -2315,12 +2315,7 @@ value_from_setting (const setting &var, struct gdbarch *gdbarch)
 	    len = st.length ();
 	  }
 
-	if (len > 0)
-	  return value_cstring (value, len,
-				builtin_type (gdbarch)->builtin_char);
-	else
-	  return value_cstring ("", 1,
-				builtin_type (gdbarch)->builtin_char);
+	return current_language->value_string (gdbarch, value, len);
       }
     default:
       gdb_assert_not_reached ("bad var_type");
@@ -2372,8 +2367,8 @@ str_value_from_setting (const setting &var, struct gdbarch *gdbarch)
       {
 	std::string cmd_val = get_setshow_command_value_string (var);
 
-	return value_cstring (cmd_val.c_str (), cmd_val.size (),
-			      builtin_type (gdbarch)->builtin_char);
+	return current_language->value_string (gdbarch, cmd_val.c_str (),
+					       cmd_val.size ());
       }
 
     case var_string:
@@ -2400,12 +2395,7 @@ str_value_from_setting (const setting &var, struct gdbarch *gdbarch)
 	    len = st.length ();
 	  }
 
-	if (len > 0)
-	  return value_cstring (value, len,
-				builtin_type (gdbarch)->builtin_char);
-	else
-	  return value_cstring ("", 1,
-				builtin_type (gdbarch)->builtin_char);
+	return current_language->value_string (gdbarch, value, len);
       }
     default:
       gdb_assert_not_reached ("bad var_type");

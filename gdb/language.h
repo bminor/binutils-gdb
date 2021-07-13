@@ -602,6 +602,12 @@ struct language_defn
   virtual char string_lower_bound () const
   { return c_style_arrays_p () ? 0 : 1; }
 
+  /* Return the LEN characters long string at PTR as a value suitable for
+     this language.  GDBARCH is used to infer the character type.  The
+     default implementation returns a null-terminated C string.  */
+  virtual struct value *value_string (struct gdbarch *gdbarch,
+				      const char *ptr, ssize_t len) const;
+
   /* Returns true if the symbols names should be stored in GDB's data
      structures for minimal/partial/full symbols using their linkage (aka
      mangled) form; false if the symbol names should be demangled first.

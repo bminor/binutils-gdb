@@ -1183,10 +1183,47 @@ class scoped_value_mark
   bool m_freed = false;
 };
 
-extern struct value *value_cstring (const char *ptr, ssize_t len,
+/* Create not_lval value representing a NULL-terminated C string.  The
+   resulting value has type TYPE_CODE_ARRAY.  The string passed in should
+   not include embedded null characters.
+
+   PTR points to the string data; COUNT is number of characters (does
+   not include the NULL terminator) pointed to by PTR, each character is of
+   type (and size of) CHAR_TYPE.  */
+
+extern struct value *value_cstring (const gdb_byte *ptr, ssize_t count,
 				    struct type *char_type);
-extern struct value *value_string (const char *ptr, ssize_t len,
+
+/* Specialisation of value_cstring above.  In this case PTR points to
+   single byte characters.  CHAR_TYPE must have a length of 1.  */
+inline struct value *value_cstring (const char *ptr, ssize_t count,
+				    struct type *char_type)
+{
+  gdb_assert (char_type->length () == 1);
+  return value_cstring ((const gdb_byte *) ptr, count, char_type);
+}
+
+/* Create a not_lval value with type TYPE_CODE_STRING, the resulting value
+   has type TYPE_CODE_STRING.
+
+   PTR points to the string data; COUNT is number of characters pointed to
+   by PTR, each character has the type (and size of) CHAR_TYPE.
+
+   Note that string types are like array of char types with a lower bound
+   defined by the language (usually zero or one).  Also the string may
+   contain embedded null characters.  */
+
+extern struct value *value_string (const gdb_byte *ptr, ssize_t count,
 				   struct type *char_type);
+
+/* Specialisation of value_string above.  In this case PTR points to
+   single byte characters.  CHAR_TYPE must have a length of 1.  */
+inline struct value *value_string (const char *ptr, ssize_t count,
+				   struct type *char_type)
+{
+  gdb_assert (char_type->length () == 1);
+  return value_string ((const gdb_byte *) ptr, count, char_type);
+}
 
 extern struct value *value_array (int lowbound, int highbound,
 				  struct value **elemvec);
