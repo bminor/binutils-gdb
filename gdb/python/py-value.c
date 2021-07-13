@@ -1907,7 +1907,7 @@ convert_value_from_python (PyObject *obj)
 	  gdb::unique_xmalloc_ptr<char> s
 	    = python_string_to_target_string (obj);
 	  if (s != NULL)
-	    value = value_cstring (s.get (), strlen (s.get ()),
+	    value = value_cstring (s.get (), strlen (s.get ()) + 1,
 				   builtin_type_pychar);
 	}
       else if (PyObject_TypeCheck (obj, &value_object_type))

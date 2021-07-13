@@ -2146,7 +2146,8 @@ value_from_setting (const cmd_list_element *cmd, struct gdbarch *gdbarch)
     case var_filename:
     case var_enum:
       if (*(char **) cmd->var)
-	return value_cstring (*(char **) cmd->var, strlen (*(char **) cmd->var),
+	return value_cstring (*(char **) cmd->var,
+			      strlen (*(char **) cmd->var) + 1,
 			      builtin_type (gdbarch)->builtin_char);
       else
 	return value_cstring ("", 1,
@@ -2198,7 +2199,7 @@ str_value_from_setting (const cmd_list_element *cmd, struct gdbarch *gdbarch)
       {
 	std::string cmd_val = get_setshow_command_value_string (cmd);
 
-	return value_cstring (cmd_val.c_str (), cmd_val.size (),
+	return value_cstring (cmd_val.c_str (), cmd_val.size () + 1,
 			      builtin_type (gdbarch)->builtin_char);
       }
 
@@ -2212,7 +2213,8 @@ str_value_from_setting (const cmd_list_element *cmd, struct gdbarch *gdbarch)
 	 escaping quotes.  So, we directly use the cmd->var string value,
 	 similarly to the value_from_setting code for these cases.  */
       if (*(char **) cmd->var)
-	return value_cstring (*(char **) cmd->var, strlen (*(char **) cmd->var),
+	return value_cstring (*(char **) cmd->var,
+			      strlen (*(char **) cmd->var) + 1,
 			      builtin_type (gdbarch)->builtin_char);
       else
 	return value_cstring ("", 1,

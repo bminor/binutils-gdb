@@ -498,7 +498,7 @@ proc_with_prefix test-enum {} {
     gdb_test_no_output "$set_cmd zzz"
     show_setting "$show_cmd" "zzz" 0 "yyy"
 
-    check_type "test-settings enum" "type = char \\\[3\\\]"
+    check_type "test-settings enum" "type = char \\\[4\\\]"
 
     test_gdb_complete_multiple "$set_cmd " "" "" {
 	"xxx"

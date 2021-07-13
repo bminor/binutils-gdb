@@ -782,8 +782,22 @@ class scoped_value_mark
   const struct value *m_value;
 };
 
+/* Create a not_lval value with type TYPE_CODE_ARRAY.
+
+   PTR points to the string data; LEN is the length of the string including the
+   NULL terminator.  */
+
 extern struct value *value_cstring (const char *ptr, ssize_t len,
 				    struct type *char_type);
+
+/* Create a not_lval value with type TYPE_CODE_STRING.
+
+   PTR points to the string data; LEN is number of characters.
+
+   Note that string types are like array of char types with a lower
+   bound of zero and an upper bound of LEN - 1.  Also note that the
+   string may contain embedded null bytes.  */
+
 extern struct value *value_string (const char *ptr, ssize_t len,
 				   struct type *char_type);
 

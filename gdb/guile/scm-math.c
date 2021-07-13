@@ -776,8 +776,6 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	}
       else if (scm_is_string (obj))
 	{
-	  size_t len;
-
 	  if (type != NULL)
 	    {
 	      except_scm = gdbscm_make_misc_error (func_name, type_arg_pos,
@@ -789,12 +787,12 @@ vlscm_convert_typed_value_from_scheme (const char *func_name,
 	    {
 	      /* TODO: Provide option to specify conversion strategy.  */
 	      gdb::unique_xmalloc_ptr<char> s
-		= gdbscm_scm_to_string (obj, &len,
+		= gdbscm_scm_to_string (obj, nullptr,
 					target_charset (gdbarch),
 					0 /*non-strict*/,
 					&except_scm);
 	      if (s != NULL)
-		value = value_cstring (s.get (), len,
+		value = value_cstring (s.get (), strlen (s.get ()) + 1,
 				       language_string_char_type (language,
 								  gdbarch));
 	      else

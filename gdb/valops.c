@@ -1747,6 +1747,8 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   return val;
 }
 
+/* See value.h.  */
+
 struct value *
 value_cstring (const char *ptr, ssize_t len, struct type *char_type)
 {
@@ -1761,14 +1763,7 @@ value_cstring (const char *ptr, ssize_t len, struct type *char_type)
   return val;
 }
 
-/* Create a value for a string constant by allocating space in the
-   inferior, copying the data into that space, and returning the
-   address with type TYPE_CODE_STRING.  PTR points to the string
-   constant data; LEN is number of characters.
-
-   Note that string types are like array of char types with a lower
-   bound of zero and an upper bound of LEN - 1.  Also note that the
-   string may contain embedded null bytes.  */
+/* See value.h.  */
 
 struct value *
 value_string (const char *ptr, ssize_t len, struct type *char_type)
