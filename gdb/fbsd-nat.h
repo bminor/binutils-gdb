@@ -21,6 +21,8 @@
 #define FBSD_NAT_H
 
 #include "inf-ptrace.h"
+#include "regcache.h"
+#include "regset.h"
 #include <osreldate.h>
 #include <sys/proc.h>
 
@@ -103,6 +105,47 @@ public:
   bool supports_multi_process () override;
 
   bool supports_disable_randomization () override;
+
+private:
+  /* Helper routines for use in fetch_registers and store_registers in
+     subclasses.  These routines fetch and store a single set of
+     registers described by REGSET.  The REGSET's 'regmap' field must
+     point to an array of 'struct regcache_map_entry'.
+
+     FETCH_OP is a ptrace operation to fetch the set of registers from
+     a native thread.  STORE_OP is a ptrace operation to store the set
+     of registers to a native thread.
+
+     The caller must provide storage for the set of registers in REGS,
+     and SIZE is the size of the storage.  */
+
+  void fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
+			   const struct regset *regset, void *regs, size_t size);
+
+  void store_register_set (struct regcache *regcache, int regnum, int fetch_op,
+			   int store_op, const struct regset *regset,
+			   void *regs, size_t size);
+protected:
+  /* Wrapper versions of the above helpers which accept a register set
+     type such as 'struct reg' or 'struct fpreg'.  */
+
+  template <class Regset>
+  void fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
+			   const struct regset *regset)
+  {
+    Regset regs;
+    fetch_register_set (regcache, regnum, fetch_op, regset, &regs,
+			sizeof (regs));
+  }
+
+  template <class Regset>
+  void store_register_set (struct regcache *regcache, int regnum, int fetch_op,
+			   int store_op, const struct regset *regset)
+  {
+    Regset regs;
+    store_register_set (regcache, regnum, fetch_op, store_op, regset, &regs,
+			sizeof (regs));
+  }
 };
 
 #endif /* fbsd-nat.h */

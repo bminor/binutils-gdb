@@ -1601,6 +1601,52 @@ fbsd_nat_target::supports_disable_randomization ()
 #endif
 }
 
+/* See fbsd-nat.h.  */
+
+void
+fbsd_nat_target::fetch_register_set (struct regcache *regcache, int regnum,
+				     int fetch_op, const struct regset *regset,
+				     void *regs, size_t size)
+{
+  const struct regcache_map_entry *map
+    = (const struct regcache_map_entry *) regset->regmap;
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
+
+  if (regnum == -1 || regcache_map_supplies (map, regnum, regcache->arch(),
+					     size))
+    {
+      if (ptrace (fetch_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
+	perror_with_name (_("Couldn't get registers"));
+
+      regcache->supply_regset (regset, regnum, regs, size);
+    }
+}
+
+/* See fbsd-nat.h.  */
+
+void
+fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
+				     int fetch_op, int store_op,
+				     const struct regset *regset, void *regs,
+				     size_t size)
+{
+  const struct regcache_map_entry *map
+    = (const struct regcache_map_entry *) regset->regmap;
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
+
+  if (regnum == -1 || regcache_map_supplies (map, regnum, regcache->arch(),
+					     size))
+    {
+      if (ptrace (fetch_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
+	perror_with_name (_("Couldn't get registers"));
+
+      regcache->collect_regset (regset, regnum, regs, size);
+
+      if (ptrace (store_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
+	perror_with_name (_("Couldn't write registers"));
+    }
+}
+
 void _initialize_fbsd_nat ();
 void
 _initialize_fbsd_nat ()
