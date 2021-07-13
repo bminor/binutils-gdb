@@ -1,3 +1,14 @@
+2021-07-13  John Ericson  <git@JohnEricson.me>
+
+	* sparc-tdep.h: Fix comment.
+	* netbsd-tdep.c (nbsd_info_proc_mappings_header): Fix comment.
+	(nbsd_init_abi): Fix comment.
+	* configure.tgt (*-*-netbsd* | *-*-knetbsd*-gnu): Fix netbsd
+	file name.
+	(alpha*-*-openbsd*): Likewise.
+	(sparc-*-openbsd*): Likewise.
+	(sparc64-*-openbsd*): Likewise.
+
 2021-07-11  Tom Tromey  <tom@tromey.com>
 
 	Committed by Joel Brobecker  <brobecker@adacore.com>:
