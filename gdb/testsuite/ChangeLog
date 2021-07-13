@@ -1,3 +1,8 @@
+2021-07-13  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/27690
+	* gdb.threads/check-libthread-db.exp: Update patterns for glibc 2.33.
+
 2021-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.mi/interrupt-thread-group.c: New.
