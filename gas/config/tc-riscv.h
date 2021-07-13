@@ -128,4 +128,28 @@ extern void riscv_elf_final_processing (void);
 extern void riscv_md_end (void);
 extern int riscv_convert_symbolic_attribute (const char *);
 
+/* Set mapping symbol states.  */
+#define md_cons_align(nbytes) riscv_mapping_state (MAP_DATA, 0)
+void riscv_mapping_state (enum riscv_seg_mstate, int);
+
+/* Define target segment type.  */
+#define TC_SEGMENT_INFO_TYPE struct riscv_segment_info_type
+struct riscv_segment_info_type
+{
+  enum riscv_seg_mstate map_state;
+};
+
+/* Define target fragment type.  */
+#define TC_FRAG_TYPE struct riscv_frag_type
+struct riscv_frag_type
+{
+  symbolS *first_map_symbol, *last_map_symbol;
+};
+
+#define TC_FRAG_INIT(fragp, max_bytes) riscv_init_frag (fragp, max_bytes)
+extern void riscv_init_frag (struct frag *, int);
+
+#define obj_adjust_symtab() riscv_adjust_symtab ()
+extern void riscv_adjust_symtab (void);
+
 #endif /* TC_RISCV */

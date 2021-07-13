@@ -140,3 +140,12 @@ riscv_get_priv_spec_class_from_numbers (unsigned int major,
   RISCV_GET_PRIV_SPEC_CLASS (buf, class_t);
   *class = class_t;
 }
+
+/* Define mapping symbols for riscv.  */
+
+bool
+riscv_elf_is_mapping_symbols (const char *name)
+{
+  return (!strncmp (name, "$d", 2)
+	  || !strncmp (name, "$x", 2));
+}

@@ -20304,7 +20304,7 @@ get_symbol_for_build_attribute (Filedata *filedata,
 	if (ba_cache.strtab[sym->st_name] == 0)
 	  continue;
 
-	/* The AArch64 and ARM architectures define mapping symbols
+	/* The AArch64, ARM and RISC-V architectures define mapping symbols
 	   (eg $d, $x, $t) which we want to ignore.  */
 	if (ba_cache.strtab[sym->st_name] == '$'
 	    && ba_cache.strtab[sym->st_name + 1] != 0

@@ -425,6 +425,13 @@ enum
   M_NUM_MACROS
 };
 
+/* The mapping symbol states.  */
+enum riscv_seg_mstate
+{
+  MAP_NONE = 0,		/* Must be zero, for seginfo in new sections.  */
+  MAP_DATA,		/* Data.  */
+  MAP_INSN,		/* Instructions.  */
+};
 
 extern const char * const riscv_gpr_names_numeric[NGPR];
 extern const char * const riscv_gpr_names_abi[NGPR];

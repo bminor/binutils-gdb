@@ -5150,14 +5150,32 @@ riscv_elf_obj_attrs_arg_type (int tag)
   return (tag & 1) != 0 ? ATTR_TYPE_FLAG_STR_VAL : ATTR_TYPE_FLAG_INT_VAL;
 }
 
-/* PR27584, Omit local and empty symbols since they usually generated
-   for pcrel relocations.  */
+/* Do not choose mapping symbols as a function name.  */
+
+static bfd_size_type
+riscv_maybe_function_sym (const asymbol *sym,
+			  asection *sec,
+			  bfd_vma *code_off)
+{
+  if (sym->flags & BSF_LOCAL
+      && riscv_elf_is_mapping_symbols (sym->name))
+    return 0;
+
+  return _bfd_elf_maybe_function_sym (sym, sec, code_off);
+}
+
+/* Treat the following cases as target special symbols, they are
+   usually omitted.  */
 
 static bool
 riscv_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 {
+  /* PR27584, local and empty symbols.  Since they are usually
+     generated for pcrel relocations.  */
   return (!strcmp (sym->name, "")
-	  || _bfd_elf_is_local_label_name (abfd, sym->name));
+	  || _bfd_elf_is_local_label_name (abfd, sym->name)
+	  /* PR27916, mapping symbols.  */
+	  || riscv_elf_is_mapping_symbols (sym->name));
 }
 
 static int
@@ -5245,6 +5263,7 @@ riscv_elf_modify_segment_map (bfd *abfd,
 #define elf_backend_grok_psinfo			riscv_elf_grok_psinfo
 #define elf_backend_object_p			riscv_elf_object_p
 #define elf_backend_write_core_note		riscv_write_core_note
+#define elf_backend_maybe_function_sym		riscv_maybe_function_sym
 #define elf_info_to_howto_rel			NULL
 #define elf_info_to_howto			riscv_info_to_howto_rela
 #define bfd_elfNN_bfd_relax_section		_bfd_riscv_relax_section

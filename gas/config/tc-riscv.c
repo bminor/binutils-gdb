@@ -561,6 +561,157 @@ static bool explicit_priv_attr = false;
 
 static char *expr_end;
 
+/* Create a new mapping symbol for the transition to STATE.  */
+
+static void
+make_mapping_symbol (enum riscv_seg_mstate state,
+		     valueT value,
+		     fragS *frag)
+{
+  const char *name;
+  switch (state)
+    {
+    case MAP_DATA:
+      name = "$d";
+      break;
+    case MAP_INSN:
+      name = "$x";
+      break;
+    default:
+      abort ();
+    }
+
+  symbolS *symbol = symbol_new (name, now_seg, frag, value);
+  symbol_get_bfdsym (symbol)->flags |= (BSF_NO_FLAGS | BSF_LOCAL);
+
+  /* If .fill or other data filling directive generates zero sized data,
+     or we are adding odd alignemnts, then the mapping symbol for the
+     following code will have the same value.  */
+  if (value == 0)
+    {
+       if (frag->tc_frag_data.first_map_symbol != NULL)
+	{
+	  know (S_GET_VALUE (frag->tc_frag_data.first_map_symbol)
+		== S_GET_VALUE (symbol));
+	  /* Remove the old one.  */
+	  symbol_remove (frag->tc_frag_data.first_map_symbol,
+			 &symbol_rootP, &symbol_lastP);
+	}
+      frag->tc_frag_data.first_map_symbol = symbol;
+    }
+  if (frag->tc_frag_data.last_map_symbol != NULL)
+    {
+      /* The mapping symbols should be added in offset order.  */
+      know (S_GET_VALUE (frag->tc_frag_data.last_map_symbol)
+			 <= S_GET_VALUE (symbol));
+      /* Remove the old one.  */
+      if (S_GET_VALUE (frag->tc_frag_data.last_map_symbol)
+	  == S_GET_VALUE (symbol))
+	symbol_remove (frag->tc_frag_data.last_map_symbol,
+		       &symbol_rootP, &symbol_lastP);
+    }
+  frag->tc_frag_data.last_map_symbol = symbol;
+}
+
+/* Set the mapping state for frag_now.  */
+
+void
+riscv_mapping_state (enum riscv_seg_mstate to_state,
+		     int max_chars)
+{
+  enum riscv_seg_mstate from_state =
+	seg_info (now_seg)->tc_segment_info_data.map_state;
+
+  if (!SEG_NORMAL (now_seg)
+      /* For now I only add the mapping symbols to text sections.
+	 Therefore, the dis-assembler only show the actual contents
+	 distribution for text.  Other sections will be shown as
+	 data without the details.  */
+      || !subseg_text_p (now_seg))
+    return;
+
+  /* The mapping symbol should be emitted if not in the right
+     mapping state  */
+  if (from_state == to_state)
+    return;
+
+  valueT value = (valueT) (frag_now_fix () - max_chars);
+  seg_info (now_seg)->tc_segment_info_data.map_state = to_state;
+  make_mapping_symbol (to_state, value, frag_now);
+}
+
+/* Add the odd bytes of paddings for riscv_handle_align.  */
+
+static void
+riscv_add_odd_padding_symbol (fragS *frag)
+{
+  /* If there was already a mapping symbol, it should be
+     removed in the make_mapping_symbol.  */
+  make_mapping_symbol (MAP_DATA, frag->fr_fix, frag);
+  make_mapping_symbol (MAP_INSN, frag->fr_fix + 1, frag);
+}
+
+/* Remove any excess mapping symbols generated for alignment frags in
+   SEC.  We may have created a mapping symbol before a zero byte
+   alignment; remove it if there's a mapping symbol after the
+   alignment.  */
+
+static void
+riscv_check_mapping_symbols (bfd *abfd ATTRIBUTE_UNUSED,
+			     asection *sec,
+			     void *dummy ATTRIBUTE_UNUSED)
+{
+  segment_info_type *seginfo = seg_info (sec);
+  fragS *fragp;
+
+  if (seginfo == NULL || seginfo->frchainP == NULL)
+    return;
+
+  for (fragp = seginfo->frchainP->frch_root;
+       fragp != NULL;
+       fragp = fragp->fr_next)
+    {
+      symbolS *last = fragp->tc_frag_data.last_map_symbol;
+      fragS *next = fragp->fr_next;
+
+      if (last == NULL || next == NULL)
+	continue;
+
+      /* Check the last mapping symbol if it is at the boundary of
+	 fragment.  */
+      if (S_GET_VALUE (last) < next->fr_address)
+	continue;
+      know (S_GET_VALUE (last) == next->fr_address);
+
+      do
+	{
+	  if (next->tc_frag_data.first_map_symbol != NULL)
+	    {
+	      /* The last mapping symbol overlaps with another one
+		 which at the start of the next frag.  */
+	      symbol_remove (last, &symbol_rootP, &symbol_lastP);
+	      break;
+	    }
+
+	  if (next->fr_next == NULL)
+	    {
+	      /* The last mapping symbol is at the end of the section.  */
+	      know (next->fr_fix == 0 && next->fr_var == 0);
+	      symbol_remove (last, &symbol_rootP, &symbol_lastP);
+	      break;
+	    }
+
+	  /* Since we may have empty frags without any mapping symbols,
+	     keep looking until the non-empty frag.  */
+	  if (next->fr_address != next->fr_next->fr_address)
+	    break;
+
+	  next = next->fr_next;
+	}
+      while (next != NULL);
+    }
+}
+
 /* The default target format to use.  */
 
 const char *
@@ -2767,6 +2918,8 @@ md_assemble (char *str)
        return;
     }
 
+  riscv_mapping_state (MAP_INSN, 0);
+
   const char *error = riscv_ip (str, &insn, &imm_expr, &imm_reloc, op_hash);
 
   if (error)
@@ -3421,6 +3574,8 @@ riscv_frag_align_code (int n)
   fix_new_exp (frag_now, nops - frag_now->fr_literal, 0,
 	       &ex, false, BFD_RELOC_RISCV_ALIGN);
 
+  riscv_mapping_state (MAP_INSN, worst_case_bytes);
+
   return true;
 }
 
@@ -3440,6 +3595,7 @@ riscv_handle_align (fragS *fragP)
 	  /* We have 4 byte uncompressed nops.  */
 	  bfd_signed_vma size = 4;
 	  bfd_signed_vma excess = bytes % size;
+	  bfd_boolean odd_padding = (excess % 2 == 1);
 	  char *p = fragP->fr_literal + fragP->fr_fix;
 
 	  if (bytes <= 0)
@@ -3448,17 +3604,49 @@ riscv_handle_align (fragS *fragP)
 	  /* Insert zeros or compressed nops to get 4 byte alignment.  */
 	  if (excess)
 	    {
+	      if (odd_padding)
+		riscv_add_odd_padding_symbol (fragP);
 	      riscv_make_nops (p, excess);
 	      fragP->fr_fix += excess;
 	      p += excess;
 	    }
 
-	  /* Insert variable number of 4 byte uncompressed nops.  */
+	  /* The frag will be changed to `rs_fill` later.  The function
+	     `write_contents` will try to fill the remaining spaces
+	     according to the patterns we give.  In this case, we give
+	     a 4 byte uncompressed nop as the pattern, and set the size
+	     of the pattern into `fr_var`.  The nop will be output to the
+	     file `fr_offset` times.  However, `fr_offset` could be zero
+	     if we don't need to pad the boundary finally.  */
 	  riscv_make_nops (p, size);
 	  fragP->fr_var = size;
 	}
       break;
 
+    default:
+      break;
+    }
+}
+
+/* This usually called from frag_var.  */
+
+void
+riscv_init_frag (fragS * fragP, int max_chars)
+{
+  /* Do not add mapping symbol to debug sections.  */
+  if (bfd_section_flags (now_seg) & SEC_DEBUGGING)
+    return;
+
+  switch (fragP->fr_type)
+    {
+    case rs_fill:
+    case rs_align:
+    case rs_align_test:
+      riscv_mapping_state (MAP_DATA, max_chars);
+      break;
+    case rs_align_code:
+      riscv_mapping_state (MAP_INSN, max_chars);
+      break;
     default:
       break;
     }
@@ -3720,6 +3908,8 @@ s_riscv_insn (int x ATTRIBUTE_UNUSED)
   save_c = *input_line_pointer;
   *input_line_pointer = '\0';
 
+  riscv_mapping_state (MAP_INSN, 0);
+
   const char *error = riscv_ip (str, &insn, &imm_expr,
 				&imm_reloc, insn_type_hash);
 
@@ -3808,6 +3998,15 @@ void
 riscv_md_end (void)
 {
   riscv_set_public_attributes ();
+}
+
+/* Adjust the symbol table.  */
+
+void
+riscv_adjust_symtab (void)
+{
+  bfd_map_over_sections (stdoutput, riscv_check_mapping_symbols, (char *) 0);
+  elf_adjust_symtab ();
 }
 
 /* Given a symbolic attribute NAME, return the proper integer value.
