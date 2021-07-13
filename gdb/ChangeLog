@@ -1,3 +1,8 @@
+2021-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* mi/mi-main.c (mi_cmd_exec_interrupt): Use
+	scoped_disable_commit_resumed in the --thread-group case.
+
 2021-07-13  John Ericson  <git@JohnEricson.me>
 
 	* sparc-tdep.h: Fix comment.

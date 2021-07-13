@@ -1,3 +1,8 @@
+2021-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.mi/interrupt-thread-group.c: New.
+	* gdb.mi/interrupt-thread-group.exp: New.
+
 2021-07-12  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/28057

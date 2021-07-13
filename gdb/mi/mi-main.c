@@ -383,6 +383,9 @@ mi_cmd_exec_interrupt (const char *command, char **argv, int argc)
     {
       struct inferior *inf = find_inferior_id (current_context->thread_group);
 
+      scoped_disable_commit_resumed disable_commit_resumed
+	("interrupting all threads of thread group");
+
       iterate_over_threads (interrupt_thread_callback, &inf->pid);
     }
   else
