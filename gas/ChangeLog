@@ -1,3 +1,8 @@
+2021-07-13  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-aarch64.h (TC_INIT_FIX_DATA): Initialize c64
+	member.
+
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
 	* config/tc-aarch64.c (s_tlsdesccall): Emit Morello

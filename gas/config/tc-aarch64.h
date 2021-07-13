@@ -133,8 +133,11 @@ struct eh_entry_extras
     while (0);
 
 #define TC_FIX_TYPE struct aarch64_fix
-#define TC_INIT_FIX_DATA(FIX) { (FIX)->tc_fix_data.inst = NULL;	\
-    (FIX)->tc_fix_data.opnd = AARCH64_OPND_NIL; }
+#define TC_INIT_FIX_DATA(FIX) { \
+    (FIX)->tc_fix_data.inst = NULL;	\
+    (FIX)->tc_fix_data.opnd = AARCH64_OPND_NIL; \
+    (FIX)->tc_fix_data.c64 = FALSE; \
+}
 
 #define TC_SYMFIELD_TYPE 	unsigned int
 #define AARCH64_GET_FLAG(s)	(*symbol_get_tc (s))
