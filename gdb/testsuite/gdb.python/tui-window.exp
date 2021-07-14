@@ -25,6 +25,11 @@ if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
     return -1
 }
 
+clean_restart
+if {[skip_tui_tests]} {
+    return
+}
+
 Term::clean_restart 24 80 $testfile
 
 # Skip all tests if Python scripting is not enabled.
