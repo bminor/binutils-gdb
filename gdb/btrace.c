@@ -1052,6 +1052,12 @@ btrace_compute_ftrace_bts (struct thread_info *tp,
 			   const struct btrace_data_bts *btrace,
 			   std::vector<unsigned int> &gaps)
 {
+ /* We may end up doing target calls that require the current thread to be TP,
+    for example reading memory through gdb_insn_length.  Make sure TP is the
+    current thread.  */
+  scoped_restore_current_thread restore_thread;
+  switch_to_thread (tp);
+
   struct btrace_thread_info *btinfo;
   struct gdbarch *gdbarch;
   unsigned int blk;
@@ -1427,6 +1433,12 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 			  const struct btrace_data_pt *btrace,
 			  std::vector<unsigned int> &gaps)
 {
+ /* We may end up doing target calls that require the current thread to be TP,
+    for example reading memory through btrace_pt_readmem_callback.  Make sure
+    TP is the current thread.  */
+  scoped_restore_current_thread restore_thread;
+  switch_to_thread (tp);
+
   struct btrace_thread_info *btinfo;
   struct pt_insn_decoder *decoder;
   struct pt_config config;
