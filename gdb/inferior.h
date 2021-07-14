@@ -676,7 +676,7 @@ extern intrusive_list<inferior> inferior_list;
 inline all_inferiors_safe_range
 all_inferiors_safe ()
 {
-  return {};
+  return all_inferiors_safe_range (nullptr, inferior_list);
 }
 
 /* Returns a range representing all inferiors, suitable to use with
