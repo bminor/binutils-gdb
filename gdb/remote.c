@@ -2244,7 +2244,7 @@ show_remote_protocol_packet_cmd (struct ui_file *file, int from_tty,
        packet < &remote_protocol_packets[PACKET_MAX];
        packet++)
     {
-      if (&packet->detect == c->var)
+      if (&packet->detect == c->var->get_p<enum auto_boolean> ())
 	{
 	  show_packet_config_cmd (packet);
 	  return;

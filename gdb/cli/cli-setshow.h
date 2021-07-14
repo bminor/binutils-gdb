@@ -57,8 +57,8 @@ extern void do_set_command (const char *arg, int from_tty,
 extern void do_show_command (const char *arg, int from_tty,
 			     struct cmd_list_element *c);
 
-/* Get a string version of C's current value.  */
-extern std::string get_setshow_command_value_string (const cmd_list_element *c);
+/* Get a string version of VAR's value.  */
+extern std::string get_setshow_command_value_string (const setting &var);
 
 extern void cmd_show_list (struct cmd_list_element *list, int from_tty);
 
