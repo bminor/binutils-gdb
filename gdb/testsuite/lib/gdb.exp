@@ -7645,6 +7645,34 @@ proc readnow { args } {
     return $readnow_p
 }
 
+# Return index name if symbols were read in using an index.
+# Otherwise, return "".
+
+proc have_index { objfile } {
+
+    set res ""
+    set cmd "maint print objfiles $objfile"
+    gdb_test_multiple $cmd "" -lbl {
+	-re "\r\n.gdb_index: faked for \"readnow\"" {
+	    set res ""
+	    exp_continue
+	}
+	-re "\r\n.gdb_index:" {
+	    set res "gdb_index"
+	    exp_continue
+	}
+	-re "\r\n.debug_names:" {
+	    set res "debug_names"
+	    exp_continue
+	}
+	-re -wrap "" {
+	    # We don't care about any other input.
+	}
+    }
+
+    return $res
+}
+
 # Return 1 if partial symbols are available.  Otherwise, return 0.
 
 proc psymtabs_p {  } {

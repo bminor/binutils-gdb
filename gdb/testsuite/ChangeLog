@@ -1,3 +1,8 @@
+2021-07-14  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (have_index): New proc.
+	* gdb.base/gold-gdb-index.exp: Use have_index.
+
 2021-07-13  Pedro Alves  <pedro@palves.net>
 
 	PR gdb/28080

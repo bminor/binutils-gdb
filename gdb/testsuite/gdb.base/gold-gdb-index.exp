@@ -28,7 +28,7 @@ if {[prepare_for_testing "failed to prepare" $testfile "$srcfile $srcfile2" \
     return -1
 }
 
-if { [readnow] } {
+if { [have_index $binfile] != "gdb_index" } {
     return -1
 }
 
