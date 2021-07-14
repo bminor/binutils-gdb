@@ -742,6 +742,29 @@
 #define NT_OPENBSD_WCOOKIE	23
 
 
+/* Note segments for core files on Solaris systems.  Note name
+   must start with "CORE".  */
+#define SOLARIS_NT_PRSTATUS    1
+#define SOLARIS_NT_PRFPREG     2
+#define SOLARIS_NT_PRPSINFO    3
+#define SOLARIS_NT_PRXREG      4
+#define SOLARIS_NT_PLATFORM    5
+#define SOLARIS_NT_AUXV        6
+#define SOLARIS_NT_GWINDOWS    7
+#define SOLARIS_NT_ASRS        8
+#define SOLARIS_NT_LDT         9
+#define SOLARIS_NT_PSTATUS    10
+#define SOLARIS_NT_PSINFO     13
+#define SOLARIS_NT_PRCRED     14
+#define SOLARIS_NT_UTSNAME    15
+#define SOLARIS_NT_LWPSTATUS  16
+#define SOLARIS_NT_LWPSINFO   17
+#define SOLARIS_NT_PRPRIV     18
+#define SOLARIS_NT_PRPRIVINFO 19
+#define SOLARIS_NT_CONTENT    20
+#define SOLARIS_NT_ZONENAME   21
+#define SOLARIS_NT_PRCPUXREG  22
+
 /* Note segments for core files on SPU systems.  Note name
    must start with "SPU/".  */
 
