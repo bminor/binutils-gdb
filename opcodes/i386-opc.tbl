@@ -537,6 +537,7 @@ bts, 0xfba, 5, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf|HLEPrefixLock, { Imm8, Reg
 // See gas/config/tc-i386.c for conversion of 'int $3' into the special
 // int 3 insn.
 int, 0xcd, None, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8 }
+int1, 0xf1, None, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 int3, 0xcc, None, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 into, 0xce, None, CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 iret, 0xcf, None, 0, DefaultSize|No_bSuf|No_sSuf|No_ldSuf, {}

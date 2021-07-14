@@ -1965,7 +1965,7 @@ static const struct dis386 dis386[] = {
   { "outG",		{ indirDX, zAX }, 0 },
   /* f0 */
   { Bad_Opcode },	/* lock prefix */
-  { "icebp",		{ XX }, 0 },
+  { "int1",		{ XX }, 0 },
   { Bad_Opcode },	/* repne */
   { Bad_Opcode },	/* repz */
   { "hlt",		{ XX }, 0 },
