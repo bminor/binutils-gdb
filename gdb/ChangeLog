@@ -1,3 +1,7 @@
+2021-07-26  Frederic Cambus  <fred@statdns.com>
+
+	* syscalls/netbsd.xml: Regenerate.
+
 2021-07-26  Shahab Vahedi  <shahab@synopsys.com>
 	    Simon Marchi  <simon.marchi@efficios.com>
 
