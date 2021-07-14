@@ -176,6 +176,14 @@ with_test_prefix "test-restricted-param" {
 gdb_test "guile (register-parameter! (make-parameter \"height\"))" \
     "ERROR.*is already defined.*" "error registering existing parameter"
 
+# Test printing and setting the value of an unregistered parameter.
+gdb_test "guile (print (parameter-value (make-parameter \"foo\")))" \
+    "= #f"
+gdb_test "guile (define myparam (make-parameter \"foo\"))"
+gdb_test_no_output "guile (set-parameter-value! myparam #t)"
+gdb_test "guile (print (parameter-value myparam))" \
+    "= #t"
+
 # Test registering a parameter named with what was an ambiguous spelling
 # of existing parameters.
 
