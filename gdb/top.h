@@ -261,7 +261,7 @@ extern scoped_value_mark prepare_execute_command (void);
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt.  */
-extern char *get_prompt (void);
+extern const std::string &get_prompt ();
 
 /* This function returns a pointer to the string that is used
    by gdb for its command prompt.  */

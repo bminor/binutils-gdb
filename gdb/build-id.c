@@ -130,7 +130,7 @@ build_id_to_bfd_suffix (size_t build_id_len, const bfd_byte *build_id,
      cause "/.build-id/..." lookups.  */
 
   std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
-    = dirnames_to_char_ptr_vec (debug_file_directory);
+    = dirnames_to_char_ptr_vec (debug_file_directory.c_str ());
 
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
@@ -167,7 +167,7 @@ build_id_to_bfd_suffix (size_t build_id_len, const bfd_byte *build_id,
 	 Don't do it if the sysroot is the target system ("target:").  It
 	 could work in theory, but the lrealpath in build_id_to_debug_bfd_1
 	 only works with local paths.  */
-      if (strcmp (gdb_sysroot, TARGET_SYSROOT_PREFIX) != 0)
+      if (gdb_sysroot != TARGET_SYSROOT_PREFIX)
 	{
 	  link = gdb_sysroot + link;
 	  debug_bfd = build_id_to_debug_bfd_1 (link, build_id_len, build_id);

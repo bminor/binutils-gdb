@@ -276,7 +276,7 @@ static const char *dprintf_style = dprintf_style_gdb;
    copied into the command, so it can be anything that GDB can
    evaluate to a callable address, not necessarily a function name.  */
 
-static char *dprintf_function;
+static std::string dprintf_function = "printf";
 
 /* The channel to use for dynamic printf if the preferred style is to
    call into the inferior; if a nonempty string, it will be passed to
@@ -286,7 +286,7 @@ static char *dprintf_function;
    "stderr", this could be an app-specific expression like
    "mystreams[curlogger]".  */
 
-static char *dprintf_channel;
+static std::string dprintf_channel;
 
 /* True if dprintf commands should continue to operate even if GDB
    has disconnected.  */
@@ -6672,7 +6672,7 @@ default_collect_info (void)
   /* If it has no value (which is frequently the case), say nothing; a
      message like "No default-collect." gets in user's face when it's
      not wanted.  */
-  if (!*default_collect)
+  if (default_collect.empty ())
     return;
 
   /* The following phrase lines up nicely with per-tracepoint collect
@@ -8773,17 +8773,17 @@ update_dprintf_command_list (struct breakpoint *b)
     printf_line = xstrprintf ("printf %s", dprintf_args);
   else if (strcmp (dprintf_style, dprintf_style_call) == 0)
     {
-      if (!dprintf_function)
+      if (dprintf_function.empty ())
 	error (_("No function supplied for dprintf call"));
 
-      if (dprintf_channel && strlen (dprintf_channel) > 0)
+      if (!dprintf_channel.empty ())
 	printf_line = xstrprintf ("call (void) %s (%s,%s)",
-				  dprintf_function,
-				  dprintf_channel,
+				  dprintf_function.c_str (),
+				  dprintf_channel.c_str (),
 				  dprintf_args);
       else
 	printf_line = xstrprintf ("call (void) %s (%s)",
-				  dprintf_function,
+				  dprintf_function.c_str (),
 				  dprintf_args);
     }
   else if (strcmp (dprintf_style, dprintf_style_agent) == 0)
@@ -15116,8 +15116,8 @@ save_breakpoints (const char *filename, int from_tty,
 	}
     }
 
-  if (extra_trace_bits && *default_collect)
-    fp.printf ("set default-collect %s\n", default_collect);
+  if (extra_trace_bits && !default_collect.empty ())
+    fp.printf ("set default-collect %s\n", default_collect.c_str ());
 
   if (from_tty)
     printf_filtered (_("Saved to file '%s'.\n"), expanded_filename.get ());
@@ -16028,7 +16028,6 @@ output stream by setting dprintf-function and dprintf-channel."),
 			update_dprintf_commands, NULL,
 			&setlist, &showlist);
 
-  dprintf_function = xstrdup ("printf");
   add_setshow_string_cmd ("dprintf-function", class_support,
 			  &dprintf_function, _("\
 Set the function to use for dynamic printf."), _("\
@@ -16036,7 +16035,6 @@ Show the function to use for dynamic printf."), NULL,
 			  update_dprintf_commands, NULL,
 			  &setlist, &showlist);
 
-  dprintf_channel = xstrdup ("");
   add_setshow_string_cmd ("dprintf-channel", class_support,
 			  &dprintf_channel, _("\
 Set the channel to use for dynamic printf."), _("\

@@ -44,7 +44,7 @@ union pascm_variable
   unsigned int uintval;
 
   /* Hold a string, for the various string types.  */
-  char *stringval;
+  std::string *stringval;
 
   /* Hold a string, for enums.  */
   const char *cstringval;
@@ -57,10 +57,7 @@ union pascm_variable
    2) Call register-parameter! to add the parameter to gdb.
    It is done this way so that the constructor, make-parameter, doesn't have
    any side-effects.  This means that the smob needs to store everything
-   that was passed to make-parameter.
-
-   N.B. There is no free function for this smob.
-   All objects pointed to by this smob must live in GC space.  */
+   that was passed to make-parameter.  */
 
 struct param_smob
 {
@@ -122,8 +119,18 @@ struct param_smob
 struct setting_wrapper final : public setting
 {
   explicit setting_wrapper (param_smob *s)
-    : setting (s->type, (void *) &s->value)
+    : setting (s->type, this->get_var_ptr (s))
   {}
+
+private:
+  /* Get pointer to the setting's storage.  */
+  void *get_var_ptr (param_smob *s)
+  {
+    if (var_type_uses<std::string> (s->type))
+      return s->value.stringval;
+    else
+      return &s->value;
+  }
 };
 
 static const char param_smob_name[] = "gdb:parameter";
@@ -421,14 +428,14 @@ add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
 
     case var_string:
       commands = add_setshow_string_cmd (cmd_name, cmd_class,
-					 &self->value.stringval, set_doc,
+					 self->value.stringval, set_doc,
 					 show_doc, help_doc, set_func,
 					 show_func, set_list, show_list);
       break;
 
     case var_string_noescape:
       commands = add_setshow_string_noescape_cmd (cmd_name, cmd_class,
-						  &self->value.stringval,
+						  self->value.stringval,
 						  set_doc, show_doc, help_doc,
 						  set_func, show_func, set_list,
 						  show_list);
@@ -437,7 +444,7 @@ add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
 
     case var_optional_filename:
       commands = add_setshow_optional_filename_cmd (cmd_name, cmd_class,
-						    &self->value.stringval,
+						    self->value.stringval,
 						    set_doc, show_doc, help_doc,
 						    set_func, show_func,
 						    set_list, show_list);
@@ -445,7 +452,7 @@ add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
 
     case var_filename:
       commands = add_setshow_filename_cmd (cmd_name, cmd_class,
-					   &self->value.stringval, set_doc,
+					   self->value.stringval, set_doc,
 					   show_doc, help_doc, set_func,
 					   show_func, set_list, show_list);
       break;
@@ -591,14 +598,14 @@ pascm_param_value (const setting &var, int arg_pos, const char *func_name)
     case var_string_noescape:
     case var_optional_filename:
     case var_filename:
+      {
+	const std::string str = var.get<std::string> ();
+	return gdbscm_scm_from_host_string (str.c_str (), str.length ());
+      }
+
     case var_enum:
       {
-	const char *str;
-	if (var.type () == var_enum)
-	  str = var.get<const char *> ();
-	else
-	  str = var.get<char *> ();
-
+	const char *str = var.get<const char *> ();
 	if (str == nullptr)
 	  str = "";
 	return gdbscm_scm_from_host_string (str, strlen (str));
@@ -671,13 +678,7 @@ pascm_set_param_value_x (param_smob *p_smob,
 		       value, arg_pos, func_name,
 		       _("string or #f for non-PARAM_FILENAME parameters"));
       if (gdbscm_is_false (value))
-	{
-	  xfree (var.get<char *> ());
-	  if (var.type () == var_optional_filename)
-	    var.set<char *> (xstrdup (""));
-	  else
-	    var.set<char *> (nullptr);
-	}
+	var.set<std::string> ("");
       else
 	{
 	  SCM exception;
@@ -686,8 +687,7 @@ pascm_set_param_value_x (param_smob *p_smob,
 	    = gdbscm_scm_to_host_string (value, nullptr, &exception);
 	  if (string == nullptr)
 	    gdbscm_throw (exception);
-	  xfree (var.get<char *> ());
-	  var.set<char *> (string.release ());
+	  var.set<std::string> (string.release ());
 	}
       break;
 
@@ -786,6 +786,21 @@ pascm_set_param_value_x (param_smob *p_smob,
     default:
       gdb_assert_not_reached ("bad parameter type");
     }
+}
+
+/* Free function for a param_smob.  */
+static size_t
+pascm_free_parameter_smob (SCM self)
+{
+  param_smob *p_smob = (param_smob *) SCM_SMOB_DATA (self);
+
+  if (var_type_uses<std::string> (p_smob->type))
+    {
+      delete p_smob->value.stringval;
+      p_smob->value.stringval = nullptr;
+    }
+
+  return 0;
 }
 
 /* Parameter Scheme functions.  */
@@ -942,6 +957,10 @@ gdbscm_make_parameter (SCM name_scm, SCM rest)
   p_smob->enumeration = enum_list;
   p_smob->set_func = set_func;
   p_smob->show_func = show_func;
+
+  scm_set_smob_free (parameter_smob_tag, pascm_free_parameter_smob);
+  if (var_type_uses<std::string> (p_smob->type))
+    p_smob->value.stringval = new std::string;
 
   if (initial_value_arg_pos > 0)
     {

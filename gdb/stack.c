@@ -2424,12 +2424,7 @@ print_frame_local_vars (struct frame_info *frame,
 struct info_print_options
 {
   bool quiet = false;
-  char *type_regexp = nullptr;
-
-  ~info_print_options ()
-  {
-    xfree (type_regexp);
-  }
+  std::string type_regexp;
 };
 
 /* The options used by the 'info locals' and 'info args' commands.  */
@@ -2488,9 +2483,11 @@ info_locals_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  print_frame_local_vars (get_selected_frame (_("No frame selected.")),
-			  opts.quiet, args, opts.type_regexp,
-			  0, gdb_stdout);
+  print_frame_local_vars
+    (get_selected_frame (_("No frame selected.")),
+     opts.quiet, args,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     0, gdb_stdout);
 }
 
 /* Iterate over all the argument variables in block B.  */
@@ -2599,8 +2596,11 @@ info_args_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  print_frame_arg_vars (get_selected_frame (_("No frame selected.")),
-			opts.quiet, args, opts.type_regexp, gdb_stdout);
+  print_frame_arg_vars
+    (get_selected_frame (_("No frame selected.")),
+     opts.quiet, args,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     gdb_stdout);
 }
 
 /* Return the symbol-block in which the selected frame is executing.

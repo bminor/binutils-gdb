@@ -97,16 +97,15 @@ typedef enum var_types
 
     /* String which the user enters with escapes (e.g. the user types
        \n and it is a real newline in the stored string).
-       *VAR is a malloc'd string, or NULL if the string is empty.  */
+       *VAR is a std::string, "" if the string is empty.  */
     var_string,
     /* String which stores what the user types verbatim.
-       *VAR is a malloc'd string, or NULL if the string is empty.  */
+       *VAR is std::string, "" if the string is empty.  */
     var_string_noescape,
-    /* String which stores a filename.  (*VAR) is a malloc'd string,
-       or "" if the string was empty.  */
+    /* String which stores a filename.  (*VAR) is a std::string,
+       "" if the string was empty.  */
     var_optional_filename,
-    /* String which stores a filename.  (*VAR) is a malloc'd
-       string.  */
+    /* String which stores a filename.  (*VAR) is a std::string.  */
     var_filename,
     /* ZeroableInteger.  *VAR is an int.  Like var_integer except
        that zero really means zero.  */
@@ -166,9 +165,9 @@ inline bool var_type_uses<int> (var_types t)
 	  || t == var_zuinteger_unlimited);
 }
 
-/* Return true if a setting of type T is backed by a char * variable.  */
+/* Return true if a setting of type T is backed by a std::string variable.  */
 template<>
-inline bool var_type_uses<char *> (var_types t)
+inline bool var_type_uses<std::string> (var_types t)
 {
   return (t == var_string || t == var_string_noescape
 	  || t == var_optional_filename || t == var_filename);
@@ -559,25 +558,25 @@ extern set_show_commands add_setshow_boolean_cmd
    cmd_list_element **show_list);
 
 extern set_show_commands add_setshow_filename_cmd
-  (const char *name, command_class theclass, char **var, const char *set_doc,
+  (const char *name, command_class theclass, std::string *var, const char *set_doc,
    const char *show_doc, const char *help_doc, cmd_func_ftype *set_func,
    show_value_ftype *show_func, cmd_list_element **set_list,
    cmd_list_element **show_list);
 
 extern set_show_commands add_setshow_string_cmd
-  (const char *name, command_class theclass, char **var, const char *set_doc,
+  (const char *name, command_class theclass, std::string *var, const char *set_doc,
    const char *show_doc, const char *help_doc, cmd_func_ftype *set_func,
    show_value_ftype *show_func, cmd_list_element **set_list,
    cmd_list_element **show_list);
 
 extern set_show_commands add_setshow_string_noescape_cmd
-  (const char *name, command_class theclass, char **var, const char *set_doc,
+  (const char *name, command_class theclass, std::string *var, const char *set_doc,
    const char *show_doc, const char *help_doc, cmd_func_ftype *set_func,
    show_value_ftype *show_func, cmd_list_element **set_list,
    cmd_list_element **show_list);
 
 extern set_show_commands add_setshow_optional_filename_cmd
-  (const char *name, command_class theclass, char **var, const char *set_doc,
+  (const char *name, command_class theclass, std::string *var, const char *set_doc,
    const char *show_doc, const char *help_doc, cmd_func_ftype *set_func,
    show_value_ftype *show_func, cmd_list_element **set_list,
    cmd_list_element **show_list);

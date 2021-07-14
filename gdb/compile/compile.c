@@ -495,7 +495,22 @@ get_expr_block_and_pc (CORE_ADDR *pc)
 }
 
 /* String for 'set compile-args' and 'show compile-args'.  */
-static char *compile_args;
+static std::string compile_args =
+  /* Override flags possibly coming from DW_AT_producer.  */
+  "-O0 -gdwarf-4"
+  /* We use -fPIE Otherwise GDB would need to reserve space large enough for
+     any object file in the inferior in advance to get the final address when
+     to link the object file to and additionally the default system linker
+     script would need to be modified so that one can specify there the
+     absolute target address.
+     -fPIC is not used at is would require from GDB to generate .got.  */
+  " -fPIE"
+  /* We want warnings, except for some commonly happening for GDB commands.  */
+  " -Wall "
+  " -Wno-unused-but-set-variable"
+  " -Wno-unused-variable"
+  /* Override CU's possible -fstack-protector-strong.  */
+  " -fno-stack-protector";
 
 /* Parsed form of COMPILE_ARGS.  */
 static gdb_argv compile_args_argv;
@@ -505,7 +520,7 @@ static gdb_argv compile_args_argv;
 static void
 set_compile_args (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  compile_args_argv = gdb_argv (compile_args);
+  compile_args_argv = gdb_argv (compile_args.c_str ());
 }
 
 /* Implement 'show compile-args'.  */
@@ -520,7 +535,7 @@ show_compile_args (struct ui_file *file, int from_tty,
 }
 
 /* String for 'set compile-gcc' and 'show compile-gcc'.  */
-static char *compile_gcc;
+static std::string compile_gcc;
 
 /* Implement 'show compile-gcc'.  */
 
@@ -696,13 +711,13 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 
   compiler->set_verbose (compile_debug);
 
-  if (compile_gcc[0] != 0)
+  if (!compile_gcc.empty ())
     {
       if (compiler->version () < GCC_FE_VERSION_1)
 	error (_("Command 'set compile-gcc' requires GCC version 6 or higher "
 		 "(libcc1 interface version 1 or higher)"));
 
-      compiler->set_driver_filename (compile_gcc);
+      compiler->set_driver_filename (compile_gcc.c_str ());
     }
   else
     {
@@ -1029,23 +1044,9 @@ String quoting is parsed like in shell, for example:\n\
   -mno-align-double \"-I/dir with a space/include\""),
 			  set_compile_args, show_compile_args, &setlist, &showlist);
 
-  /* Override flags possibly coming from DW_AT_producer.  */
-  compile_args = xstrdup ("-O0 -gdwarf-4"
-  /* We use -fPIE Otherwise GDB would need to reserve space large enough for
-     any object file in the inferior in advance to get the final address when
-     to link the object file to and additionally the default system linker
-     script would need to be modified so that one can specify there the
-     absolute target address.
-     -fPIC is not used at is would require from GDB to generate .got.  */
-			 " -fPIE"
-  /* We want warnings, except for some commonly happening for GDB commands.  */
-			 " -Wall "
-			 " -Wno-unused-but-set-variable"
-			 " -Wno-unused-variable"
-  /* Override CU's possible -fstack-protector-strong.  */
-			 " -fno-stack-protector"
-  );
-  set_compile_args (compile_args, 0, NULL);
+
+  /* Initialize compile_args_argv.  */
+  set_compile_args (compile_args.c_str (), 0, NULL);
 
   add_setshow_optional_filename_cmd ("compile-gcc", class_support,
 				     &compile_gcc,
@@ -1058,5 +1059,4 @@ It should be absolute filename of the gcc executable.\n\
 If empty the default target triplet will be searched in $PATH."),
 				     NULL, show_compile_gcc, &setlist,
 				     &showlist);
-  compile_gcc = xstrdup ("");
 }

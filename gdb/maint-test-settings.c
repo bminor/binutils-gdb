@@ -44,13 +44,13 @@ static unsigned int maintenance_test_settings_zuinteger;
 
 static int maintenance_test_settings_zuinteger_unlimited;
 
-static char *maintenance_test_settings_string;
+static std::string maintenance_test_settings_string;
 
-static char *maintenance_test_settings_string_noescape;
+static std::string maintenance_test_settings_string_noescape;
 
-static char *maintenance_test_settings_optional_filename;
+static std::string maintenance_test_settings_optional_filename;
 
-static char *maintenance_test_settings_filename;
+static std::string maintenance_test_settings_filename;
 
 /* Enum values for the "maintenance set/show test-settings boolean"
    commands.  */

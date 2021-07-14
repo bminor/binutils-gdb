@@ -33,14 +33,14 @@
 /* The exec-wrapper, if any, that will be used when starting the
    inferior.  */
 
-static char *exec_wrapper = NULL;
+static std::string exec_wrapper;
 
 /* See gdbsupport/common-inferior.h.  */
 
 const char *
 get_exec_wrapper ()
 {
-  return exec_wrapper;
+  return !exec_wrapper.empty () ? exec_wrapper.c_str () : nullptr;
 }
 
 /* See nat/fork-inferior.h.  */
@@ -139,8 +139,7 @@ gdb_startup_inferior (pid_t pid, int num_traps)
 static void
 unset_exec_wrapper_command (const char *args, int from_tty)
 {
-  xfree (exec_wrapper);
-  exec_wrapper = NULL;
+  exec_wrapper.clear ();
 }
 
 static void

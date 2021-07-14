@@ -395,7 +395,7 @@ write_memory_signed_integer (CORE_ADDR addr, int len,
 const char *gnutarget;
 
 /* Same thing, except it is "auto" not NULL for the default case.  */
-static char *gnutarget_string;
+static std::string gnutarget_string;
 static void
 show_gnutarget_string (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c,
@@ -409,15 +409,15 @@ static void
 set_gnutarget_command (const char *ignore, int from_tty,
 		       struct cmd_list_element *c)
 {
-  char *gend = gnutarget_string + strlen (gnutarget_string);
+  const char *gend = gnutarget_string.c_str () + gnutarget_string.size ();
+  gend = remove_trailing_whitespace (gnutarget_string.c_str (), gend);
+  gnutarget_string
+    = gnutarget_string.substr (0, gend - gnutarget_string.data ());
 
-  gend = remove_trailing_whitespace (gnutarget_string, gend);
-  *gend = '\0';
-
-  if (strcmp (gnutarget_string, "auto") == 0)
+  if (gnutarget_string == "auto")
     gnutarget = NULL;
   else
-    gnutarget = gnutarget_string;
+    gnutarget = gnutarget_string.c_str ();
 }
 
 /* A completion function for "set gnutarget".  */
@@ -449,8 +449,7 @@ complete_set_gnutarget (struct cmd_list_element *cmd,
 void
 set_gnutarget (const char *newtarget)
 {
-  xfree (gnutarget_string);
-  gnutarget_string = xstrdup (newtarget);
+  gnutarget_string = newtarget;
   set_gnutarget_command (NULL, 0, NULL);
 }
 

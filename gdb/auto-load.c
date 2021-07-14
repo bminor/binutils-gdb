@@ -137,7 +137,7 @@ show_auto_load_local_gdbinit (struct ui_file *file, int from_tty,
 /* Directory list from which to load auto-loaded scripts.  It is not checked
    for absolute paths but they are strongly recommended.  It is initialized by
    _initialize_auto_load.  */
-static char *auto_load_dir;
+static std::string auto_load_dir = AUTO_LOAD_DIR;
 
 /* "set" command for the auto_load_dir configuration variable.  */
 
@@ -145,11 +145,8 @@ static void
 set_auto_load_dir (const char *args, int from_tty, struct cmd_list_element *c)
 {
   /* Setting the variable to "" resets it to the compile time defaults.  */
-  if (auto_load_dir[0] == '\0')
-    {
-      xfree (auto_load_dir);
-      auto_load_dir = xstrdup (AUTO_LOAD_DIR);
-    }
+  if (auto_load_dir.empty ())
+    auto_load_dir = AUTO_LOAD_DIR;
 }
 
 /* "show" command for the auto_load_dir configuration variable.  */
@@ -166,7 +163,7 @@ show_auto_load_dir (struct ui_file *file, int from_tty,
 /* Directory list safe to hold auto-loaded files.  It is not checked for
    absolute paths but they are strongly recommended.  It is initialized by
    _initialize_auto_load.  */
-static char *auto_load_safe_path;
+static std::string auto_load_safe_path = AUTO_LOAD_SAFE_PATH;
 
 /* Vector of directory elements of AUTO_LOAD_SAFE_PATH with each one normalized
    by tilde_expand and possibly each entries has added its gdb_realpath
@@ -181,7 +178,7 @@ auto_load_expand_dir_vars (const char *string)
 {
   char *s = xstrdup (string);
   substitute_path_component (&s, "$datadir", gdb_datadir.c_str ());
-  substitute_path_component (&s, "$debugdir", debug_file_directory);
+  substitute_path_component (&s, "$debugdir", debug_file_directory.c_str ());
 
   if (debug_auto_load && strcmp (s, string) != 0)
     auto_load_debug_printf ("Expanded $-variables to \"%s\".", s);
@@ -199,9 +196,10 @@ static void
 auto_load_safe_path_vec_update (void)
 {
   auto_load_debug_printf ("Updating directories of \"%s\".",
-			  auto_load_safe_path);
+			  auto_load_safe_path.c_str ());
 
-  auto_load_safe_path_vec = auto_load_expand_dir_vars (auto_load_safe_path);
+  auto_load_safe_path_vec
+    = auto_load_expand_dir_vars (auto_load_safe_path.c_str ());
   size_t len = auto_load_safe_path_vec.size ();
 
   /* Apply tilde_expand and gdb_realpath to each AUTO_LOAD_SAFE_PATH_VEC
@@ -253,11 +251,8 @@ set_auto_load_safe_path (const char *args,
 			 int from_tty, struct cmd_list_element *c)
 {
   /* Setting the variable to "" resets it to the compile time defaults.  */
-  if (auto_load_safe_path[0] == '\0')
-    {
-      xfree (auto_load_safe_path);
-      auto_load_safe_path = xstrdup (AUTO_LOAD_SAFE_PATH);
-    }
+  if (auto_load_safe_path.empty ())
+    auto_load_safe_path = AUTO_LOAD_SAFE_PATH;
 
   auto_load_safe_path_vec_update ();
 }
@@ -291,17 +286,14 @@ show_auto_load_safe_path (struct ui_file *file, int from_tty,
 static void
 add_auto_load_safe_path (const char *args, int from_tty)
 {
-  char *s;
-
   if (args == NULL || *args == 0)
     error (_("\
 Directory argument required.\n\
 Use 'set auto-load safe-path /' for disabling the auto-load safe-path security.\
 "));
 
-  s = xstrprintf ("%s%c%s", auto_load_safe_path, DIRNAME_SEPARATOR, args);
-  xfree (auto_load_safe_path);
-  auto_load_safe_path = s;
+  auto_load_safe_path = string_printf ("%s%c%s", auto_load_safe_path.c_str (),
+				       DIRNAME_SEPARATOR, args);
 
   auto_load_safe_path_vec_update ();
 }
@@ -312,14 +304,11 @@ Use 'set auto-load safe-path /' for disabling the auto-load safe-path security.\
 static void
 add_auto_load_dir (const char *args, int from_tty)
 {
-  char *s;
-
   if (args == NULL || *args == 0)
     error (_("Directory argument required."));
 
-  s = xstrprintf ("%s%c%s", auto_load_dir, DIRNAME_SEPARATOR, args);
-  xfree (auto_load_dir);
-  auto_load_dir = s;
+  auto_load_dir = string_printf ("%s%c%s", auto_load_dir.c_str (),
+				 DIRNAME_SEPARATOR, args);
 }
 
 /* Implementation for filename_is_in_pattern overwriting the caller's FILENAME
@@ -459,7 +448,7 @@ file_is_auto_load_safe (const char *filename)
   warning (_("File \"%ps\" auto-loading has been declined by your "
 	     "`auto-load safe-path' set to \"%s\"."),
 	   styled_string (file_name_style.style (), filename_real.get ()),
-	   auto_load_safe_path);
+	   auto_load_safe_path.c_str ());
 
   if (!advice_printed)
     {
@@ -749,11 +738,11 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 	 directory.  */
 
       std::vector<gdb::unique_xmalloc_ptr<char>> vec
-	= auto_load_expand_dir_vars (auto_load_dir);
+	= auto_load_expand_dir_vars (auto_load_dir.c_str ());
 
       auto_load_debug_printf
 	("Searching 'set auto-load scripts-directory' path \"%s\".",
-	 auto_load_dir);
+	 auto_load_dir.c_str ());
 
       /* Convert Windows file name from c:/dir/file to /c/dir/file.  */
       if (HAS_DRIVE_SPEC (debugfile))
@@ -1542,8 +1531,6 @@ This option has security implications for untrusted inferiors."),
 Usage: info auto-load local-gdbinit"),
 	   auto_load_info_cmdlist_get ());
 
-  auto_load_dir = xstrdup (AUTO_LOAD_DIR);
-
   suffix = ext_lang_auto_load_suffix (get_ext_lang_defn (EXT_LANG_GDB));
   gdb_name_help
     = xstrprintf (_("\
@@ -1595,7 +1582,6 @@ Show the list of directories from which to load auto-loaded scripts."),
   xfree (gdb_name_help);
   xfree (guile_name_help);
 
-  auto_load_safe_path = xstrdup (AUTO_LOAD_SAFE_PATH);
   auto_load_safe_path_vec_update ();
   add_setshow_optional_filename_cmd ("safe-path", class_support,
 				     &auto_load_safe_path, _("\

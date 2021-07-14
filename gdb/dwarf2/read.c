@@ -12047,10 +12047,10 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
   gdb::unique_xmalloc_ptr<char> search_path_holder;
   if (search_cwd)
     {
-      if (*debug_file_directory != '\0')
+      if (!debug_file_directory.empty ())
 	{
 	  search_path_holder.reset (concat (".", dirname_separator_string,
-					    debug_file_directory,
+					    debug_file_directory.c_str (),
 					    (char *) NULL));
 	  search_path = search_path_holder.get ();
 	}
@@ -12058,7 +12058,7 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
 	search_path = ".";
     }
   else
-    search_path = debug_file_directory;
+    search_path = debug_file_directory.c_str ();
 
   /* Add the path for the executable binary to the list of search paths.  */
   std::string objfile_dir = ldirname (objfile_name (per_objfile->objfile));
@@ -12129,7 +12129,7 @@ open_dwo_file (dwarf2_per_objfile *per_objfile,
   /* That didn't work, try debug-file-directory, which, despite its name,
      is a list of paths.  */
 
-  if (*debug_file_directory == '\0')
+  if (debug_file_directory.empty ())
     return NULL;
 
   return try_open_dwop_file (per_objfile, file_name,
@@ -12458,7 +12458,7 @@ open_dwp_file (dwarf2_per_objfile *per_objfile, const char *file_name)
      [IWBN if the dwp file name was recorded in the executable, akin to
      .gnu_debuglink, but that doesn't exist yet.]
      Strip the directory from FILE_NAME and search again.  */
-  if (*debug_file_directory != '\0')
+  if (!debug_file_directory.empty ())
     {
       /* Don't implicitly search the current directory here.
 	 If the user wants to search "." to handle this case,

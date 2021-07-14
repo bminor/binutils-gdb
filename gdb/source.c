@@ -57,7 +57,7 @@
 /* Path of directories to search for source files.
    Same format as the PATH environment variable's value.  */
 
-char *source_path;
+std::string source_path;
 
 /* Support for source path substitution commands.  */
 
@@ -365,17 +365,15 @@ set_directories_command (const char *args,
 {
   /* This is the value that was set.
      It needs to be processed to maintain $cdir:$cwd and remove dups.  */
-  char *set_path = source_path;
+  std::string set_path = source_path;
 
   /* We preserve the invariant that $cdir:$cwd begins life at the end of
      the list by calling init_source_path.  If they appear earlier in
      SET_PATH then mod_path will move them appropriately.
      mod_path will also remove duplicates.  */
   init_source_path ();
-  if (*set_path != '\0')
-    mod_path (set_path, &source_path);
-
-  xfree (set_path);
+  if (!set_path.empty ())
+    mod_path (set_path.c_str (), source_path);
 }
 
 /* Print the list of source directories.
@@ -386,7 +384,7 @@ static void
 show_directories_1 (char *ignore, int from_tty)
 {
   puts_filtered ("Source directories searched: ");
-  puts_filtered (source_path);
+  puts_filtered (source_path.c_str ());
   puts_filtered ("\n");
 }
 
@@ -437,10 +435,7 @@ forget_cached_source_info (void)
 void
 init_source_path (void)
 {
-  char buf[20];
-
-  xsnprintf (buf, sizeof (buf), "$cdir%c$cwd", DIRNAME_SEPARATOR);
-  source_path = xstrdup (buf);
+  source_path = string_printf ("$cdir%c$cwd", DIRNAME_SEPARATOR);
   forget_cached_source_info ();
 }
 
@@ -456,20 +451,20 @@ directory_command (const char *dirname, int from_tty)
     {
       if (!from_tty || query (_("Reinitialize source path to empty? ")))
 	{
-	  xfree (source_path);
 	  init_source_path ();
 	  value_changed = true;
 	}
     }
   else
     {
-      mod_path (dirname, &source_path);
+      mod_path (dirname, source_path);
       forget_cached_source_info ();
       value_changed = true;
     }
   if (value_changed)
     {
-      gdb::observers::command_param_changed.notify ("directories", source_path);
+      gdb::observers::command_param_changed.notify ("directories",
+						    source_path.c_str ());
       if (from_tty)
 	show_directories_1 ((char *) 0, from_tty);
     }
@@ -481,13 +476,13 @@ directory_command (const char *dirname, int from_tty)
 void
 directory_switch (const char *dirname, int from_tty)
 {
-  add_path (dirname, &source_path, 0);
+  add_path (dirname, source_path, 0);
 }
 
 /* Add zero or more directories to the front of an arbitrary path.  */
 
 void
-mod_path (const char *dirname, char **which_path)
+mod_path (const char *dirname, std::string &which_path)
 {
   add_path (dirname, which_path, 1);
 }
@@ -675,6 +670,17 @@ add_path (const char *dirname, char **which_path, int parse_separators)
     }
 }
 
+/* add_path would need to be re-written to work on an std::string, but this is
+   not trivial.  Hence this overload which copies to a `char *` and back.  */
+
+void
+add_path (const char *dirname, std::string &which_path, int parse_separators)
+{
+  char *which_path_copy = xstrdup (which_path.data ());
+  add_path (dirname, &which_path_copy, parse_separators);
+  which_path = which_path_copy;
+  xfree (which_path_copy);
+}
 
 static void
 info_source_command (const char *ignore, int from_tty)
@@ -953,7 +959,7 @@ source_full_path_of (const char *filename,
 {
   int fd;
 
-  fd = openp (source_path,
+  fd = openp (source_path.c_str (),
 	      OPF_TRY_CWD_FIRST | OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH,
 	      filename, O_RDONLY, full_pathname);
   if (fd < 0)
@@ -1044,7 +1050,8 @@ find_and_open_source (const char *filename,
 		      const char *dirname,
 		      gdb::unique_xmalloc_ptr<char> *fullname)
 {
-  char *path = source_path;
+  const char *path = source_path.c_str ();
+  std::string expanded_path_holder;
   const char *p;
   int result;
 
@@ -1086,19 +1093,22 @@ find_and_open_source (const char *filename,
       /* Replace a path entry of $cdir with the compilation directory
 	 name.  */
 #define	cdir_len	5
-      p = strstr (source_path, "$cdir");
+      p = strstr (source_path.c_str (), "$cdir");
       if (p && (p == path || p[-1] == DIRNAME_SEPARATOR)
 	  && (p[cdir_len] == DIRNAME_SEPARATOR || p[cdir_len] == '\0'))
 	{
-	  int len;
+	  int len = p - source_path.c_str ();
 
-	  path = (char *)
-	    alloca (strlen (source_path) + 1 + strlen (dirname) + 1);
-	  len = p - source_path;
-	  strncpy (path, source_path, len);	/* Before $cdir */
-	  strcpy (path + len, dirname);		/* new stuff */
-	  strcat (path + len, source_path + len + cdir_len);	/* After
-								   $cdir */
+	  /* Before $cdir */
+	  expanded_path_holder = source_path.substr (0, len);
+
+	  /* new stuff */
+	  expanded_path_holder += dirname;
+
+	  /* After $cdir */
+	  expanded_path_holder += source_path.c_str () + len + cdir_len;
+
+	  path = expanded_path_holder.c_str ();
 	}
     }
 

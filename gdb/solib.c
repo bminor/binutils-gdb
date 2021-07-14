@@ -98,7 +98,7 @@ struct target_so_ops *current_target_so_ops;
 /* If non-empty, this is a search path for loading non-absolute shared library
    symbol files.  This takes precedence over the environment variables PATH
    and LD_LIBRARY_PATH.  */
-static char *solib_search_path = NULL;
+static std::string solib_search_path;
 static void
 show_solib_search_path (struct ui_file *file, int from_tty,
 			struct cmd_list_element *c, const char *value)
@@ -157,7 +157,7 @@ solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
   int found_file = -1;
   gdb::unique_xmalloc_ptr<char> temp_pathname;
   const char *fskind = effective_target_file_system_kind ();
-  const char *sysroot = gdb_sysroot;
+  const char *sysroot = gdb_sysroot.c_str ();
   int prefix_len, orig_prefix_len;
 
   /* If the absolute prefix starts with "target:" but the filesystem
@@ -321,8 +321,8 @@ solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
 
   /* If not found, and we're looking for a solib, search the
      solib_search_path (if any).  */
-  if (is_solib && found_file < 0 && solib_search_path != NULL)
-    found_file = openp (solib_search_path,
+  if (is_solib && found_file < 0 && !solib_search_path.empty ())
+    found_file = openp (solib_search_path.c_str (),
 			OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH,
 			in_pathname, O_RDONLY | O_BINARY, &temp_pathname);
 
@@ -330,8 +330,8 @@ solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
      solib_search_path (if any) for the basename only (ignoring the
      path).  This is to allow reading solibs from a path that differs
      from the opened path.  */
-  if (is_solib && found_file < 0 && solib_search_path != NULL)
-    found_file = openp (solib_search_path,
+  if (is_solib && found_file < 0 && !solib_search_path.empty ())
+    found_file = openp (solib_search_path.c_str (),
 			OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH,
 			target_lbasename (fskind, in_pathname),
 			O_RDONLY | O_BINARY, &temp_pathname);
@@ -380,7 +380,7 @@ exec_file_find (const char *in_pathname, int *fd)
   if (in_pathname == NULL)
     return NULL;
 
-  if (*gdb_sysroot != '\0' && IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname))
+  if (!gdb_sysroot.empty () && IS_TARGET_ABSOLUTE_PATH (fskind, in_pathname))
     {
       result = solib_find_1 (in_pathname, fd, false);
 
@@ -1396,18 +1396,18 @@ gdb_sysroot_changed (const char *ignored, int from_tty,
   const char *old_prefix = "remote:";
   const char *new_prefix = TARGET_SYSROOT_PREFIX;
 
-  if (startswith (gdb_sysroot, old_prefix))
+  if (startswith (gdb_sysroot.c_str (), old_prefix))
     {
       static bool warning_issued = false;
 
       gdb_assert (strlen (old_prefix) == strlen (new_prefix));
-      memcpy (gdb_sysroot, new_prefix, strlen (new_prefix));
+      gdb_sysroot = new_prefix + gdb_sysroot.substr (strlen (old_prefix));
 
       if (!warning_issued)
 	{
 	  warning (_("\"%s\" is deprecated, use \"%s\" instead."),
 		   old_prefix, new_prefix);
-	  warning (_("sysroot set to \"%s\"."), gdb_sysroot);
+	  warning (_("sysroot set to \"%s\"."), gdb_sysroot.c_str ());
 
 	  warning_issued = true;
 	}

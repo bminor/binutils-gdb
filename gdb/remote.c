@@ -1004,7 +1004,7 @@ static const struct program_space_key<char, gdb::xfree_deleter<char>>
    remote exec-file commands.  While the remote exec-file setting is
    per-program-space, the set/show machinery uses this as the 
    location of the remote exec-file value.  */
-static char *remote_exec_file_var;
+static std::string remote_exec_file_var;
 
 /* The size to align memory write packets, when practical.  The protocol
    does not guarantee any alignment, and gdb will generate short
@@ -1355,8 +1355,8 @@ static void
 set_remote_exec_file (const char *ignored, int from_tty,
 		      struct cmd_list_element *c)
 {
-  gdb_assert (remote_exec_file_var != NULL);
-  set_pspace_remote_exec_file (current_program_space, remote_exec_file_var);
+  set_pspace_remote_exec_file (current_program_space,
+			       remote_exec_file_var.c_str ());
 }
 
 /* The "set/show remote exec-file" show command hook.  */
@@ -12618,7 +12618,7 @@ remote_target::filesystem_is_local ()
      this case we treat the remote filesystem as local if the
      sysroot is exactly TARGET_SYSROOT_PREFIX and if the stub
      does not support vFile:open.  */
-  if (strcmp (gdb_sysroot, TARGET_SYSROOT_PREFIX) == 0)
+  if (gdb_sysroot == TARGET_SYSROOT_PREFIX)
     {
       enum packet_support ps = packet_support (PACKET_vFile_open);
 
@@ -13246,7 +13246,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
 		   "ignoring tp %d cond"), b->number);
     }
 
-  if (b->commands || *default_collect)
+  if (b->commands || !default_collect.empty ())
     {
       size_left = buf.size () - strlen (buf.data ());
 

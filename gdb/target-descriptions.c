@@ -510,7 +510,7 @@ target_desc_info_free (struct target_desc_info *tdesc_info)
 
 /* The string manipulated by the "set tdesc filename ..." command.  */
 
-static char *tdesc_filename_cmd_string;
+static std::string tdesc_filename_cmd_string;
 
 /* Fetch the current target's description, and switch the current
    architecture to one which incorporates that description.  */
