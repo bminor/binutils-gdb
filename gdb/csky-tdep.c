@@ -235,9 +235,6 @@ static const char * const csky_register_names[] =
 static const char *
 csky_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
-    return tdesc_register_name (gdbarch, reg_nr);
-
   if (reg_nr < 0)
     return NULL;
 
