@@ -1,3 +1,8 @@
+2021-07-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 99935
+	* rust-demangle.c: Add recursion limit.
+
 2021-07-05  Nick Clifton  <nickc@redhat.com>
 
 	Reapply this change from commit:
