@@ -193,6 +193,9 @@ public:
 		&& TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR));
   }
 
+  struct value *value_string (struct gdbarch *gdbarch,
+			      const char *ptr, ssize_t len) const override;
+
   /* See language.h.  */
 
   const char *struct_too_deep_ellipsis () const override

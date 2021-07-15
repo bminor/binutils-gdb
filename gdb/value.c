@@ -2188,8 +2188,9 @@ value_of_internalvar (struct gdbarch *gdbarch, struct internalvar *var)
       break;
 
     case INTERNALVAR_STRING:
-      val = value_cstring (var->u.string, strlen (var->u.string) + 1,
-			   builtin_type (gdbarch)->builtin_char);
+      val = current_language->value_string (gdbarch,
+					    var->u.string,
+					    strlen (var->u.string));
       break;
 
     case INTERNALVAR_VALUE:

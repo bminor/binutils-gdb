@@ -653,16 +653,11 @@ c_string_operation::evaluate (struct type *expect_type,
     }
   else
     {
-      int i;
-
-      /* Write the terminating character.  */
-      for (i = 0; i < TYPE_LENGTH (type); ++i)
-	obstack_1grow (&output, 0);
+      int element_size = TYPE_LENGTH (type);
 
       if (satisfy_expected)
 	{
 	  LONGEST low_bound, high_bound;
-	  int element_size = TYPE_LENGTH (type);
 
 	  if (!get_discrete_bounds (expect_type->index_type (),
 				    &low_bound, &high_bound))
@@ -677,10 +672,13 @@ c_string_operation::evaluate (struct type *expect_type,
 	  result = allocate_value (expect_type);
 	  memcpy (value_contents_raw (result), obstack_base (&output),
 		  obstack_object_size (&output));
+	  /* Write the terminating character.  */
+	  memset (value_contents_raw (result) + obstack_object_size (&output),
+		  0, element_size);
 	}
       else
 	result = value_cstring ((const char *) obstack_base (&output),
-				obstack_object_size (&output),
+				obstack_object_size (&output) / element_size,
 				type);
     }
   return result;

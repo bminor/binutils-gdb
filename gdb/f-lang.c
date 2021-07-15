@@ -103,6 +103,14 @@ f_language::get_encoding (struct type *type)
 
 
 
+struct value *
+f_language::value_string (struct gdbarch *gdbarch,
+			  const char *ptr, ssize_t len) const
+{
+  struct type *type = language_string_char_type (this, gdbarch);
+  return ::value_string (ptr, len, type);
+}
+
 /* A helper function for the "bound" intrinsics that checks that TYPE
    is an array.  LBOUND_P is true for lower bound; this is used for
    the error message, if any.  */

@@ -12900,6 +12900,16 @@ public:
     return language_defn::read_var_value (var, var_block, frame);
   }
 
+  struct value *value_string (struct gdbarch *gdbarch,
+			      const char *ptr, ssize_t len) const override
+  {
+    struct type *type = language_string_char_type (this, gdbarch);
+    value *val = ::value_string (ptr, len, type);
+    /* See ada_string_operation::evaluate.  */
+    value_type (val)->set_code (TYPE_CODE_ARRAY);
+    return val;
+  }
+
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
 			   struct language_arch_info *lai) const override

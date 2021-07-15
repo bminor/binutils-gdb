@@ -47,6 +47,7 @@
 #include <algorithm>
 #include "gdbarch.h"
 #include "compile/compile-internal.h"
+#include "arch-utils.h"
 
 static void set_range_case (void);
 
@@ -974,6 +975,14 @@ language_string_char_type (const struct language_defn *la,
   struct language_gdbarch *ld
     = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
   return ld->arch_info[la->la_language].string_char_type ();
+}
+
+struct value *
+language_defn::value_string (struct gdbarch *gdbarch,
+			     const char *ptr, ssize_t len) const
+{
+  struct type *type = language_string_char_type (this, gdbarch);
+  return value_cstring (ptr, len, type);
 }
 
 /* See language.h.  */

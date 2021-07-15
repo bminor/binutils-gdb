@@ -1754,12 +1754,15 @@ value_cstring (const char *ptr, ssize_t len, struct type *char_type)
 {
   struct value *val;
   int lowbound = current_language->string_lower_bound ();
-  ssize_t highbound = len / TYPE_LENGTH (char_type);
+  ssize_t highbound = len + 1;
   struct type *stringtype
     = lookup_array_range_type (char_type, lowbound, highbound + lowbound - 1);
 
   val = allocate_value (stringtype);
-  memcpy (value_contents_raw (val), ptr, len);
+  memcpy (value_contents_raw (val), ptr, len * TYPE_LENGTH (char_type));
+  /* Write the terminating character.  */
+  memset (value_contents_raw (val) + len * TYPE_LENGTH (char_type),
+	  0, TYPE_LENGTH (char_type));
   return val;
 }
 

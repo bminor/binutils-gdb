@@ -782,10 +782,12 @@ class scoped_value_mark
   const struct value *m_value;
 };
 
-/* Create a not_lval value with type TYPE_CODE_ARRAY.
+/* Create not_lval value representing a NULL-terminated C string.  The
+   resulting value has type TYPE_CODE_ARRAY.
 
-   PTR points to the string data; LEN is the length of the string including the
-   NULL terminator.  */
+   PTR points to the string data; LEN is number of characters (does
+   not include the NULL terminator).  CHAR_TYPE is the character
+   type.  */
 
 extern struct value *value_cstring (const char *ptr, ssize_t len,
 				    struct type *char_type);
