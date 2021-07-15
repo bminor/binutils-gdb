@@ -323,6 +323,12 @@ operation; new members are always placed at the end of the archive.
 
 The modifier @samp{v} makes @command{ar} list each file as it is appended.
 
+The modifier @samp{L} makes @command{ar} check whether each file being
+added is itself an archive file.  If it's an archive file, then each
+of the archive's members is added as a separate member with its own
+name rather than the archive file itself being added as a single
+member with the name of the archive file.
+
 Since the point of this operation is speed, implementations of
 @command{ar} have the option of not updating the archive's symbol
 table if one exists.  Too many different systems however assume that
@@ -595,7 +601,7 @@ The @option{--output} option can be used to specify a path to a
 directory into which archive members should be extracted.  If this
 option is not specified then the current directory will be used.
 
-Note - although the presence of this option does imply a @option{x} 
+Note - although the presence of this option does imply a @option{x}
 extraction operation that option must still be included on the command
 line.
 
@@ -1078,7 +1084,7 @@ information can be found, print it after the other symbol information.
 @item --inlines
 @cindex objdump inlines
 When option @option{-l} is active, if the address belongs to a
-function that was inlined, then this option causes the source 
+function that was inlined, then this option causes the source
 information for all enclosing scopes back to the first non-inlined
 function to be printed as well.  For example, if @code{main} inlines
 @code{callee1} which inlines @code{callee2}, and address is from
@@ -1720,7 +1726,7 @@ ELF format files.
 @item --set-section-alignment @var{sectionpattern}=@var{align}
 Set the alignment for any sections matching @var{sectionpattern}.
 @var{align} specifies the alignment in bytes and must be a power of
-two, i.e. 1, 2, 4, 8@dots{}. 
+two, i.e. 1, 2, 4, 8@dots{}.
 
 @item --add-section @var{sectionname}=@var{filename}
 Add a new section named @var{sectionname} while copying the file.  The
@@ -2354,7 +2360,7 @@ with ctags tool.
 @cindex disassembling object code
 @cindex machine instructions
 Display the assembler mnemonics for the machine instructions from the
-input file.  This option only disassembles those sections which are 
+input file.  This option only disassembles those sections which are
 expected to contain instructions.  If the optional @var{symbol}
 argument is given, then display the assembler mnemonics starting at
 @var{symbol}.  If @var{symbol} is a function name then disassembly

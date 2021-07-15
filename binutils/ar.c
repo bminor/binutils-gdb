@@ -138,6 +138,9 @@ static bool full_pathname = false;
 /* Whether to create a "thin" archive (symbol index only -- no files).  */
 static bool make_thin_archive = false;
 
+/* Whether to flatten other archives as inputs so their members are added.  */
+static bool flatten_archives = false;
+
 #define LIBDEPS	"__.LIBDEP"
 /* Text to store in the __.LIBDEP archive element for the linker to use.  */
 static char * libdeps = NULL;
@@ -285,13 +288,13 @@ usage (int help)
 #if BFD_SUPPORTS_PLUGINS
   /* xgettext:c-format */
   const char *command_line
-    = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoOPsSTuvV]"
+    = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilLMNoOPsSTuvV]"
 	" [--plugin <name>] [member-name] [count] archive-file file...\n");
 
 #else
   /* xgettext:c-format */
   const char *command_line
-    = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoOPsSTuvV]"
+    = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilLMNoOPsSTuvV]"
 	" [member-name] [count] archive-file file...\n");
 #endif
   s = help ? stdout : stderr;
@@ -304,7 +307,7 @@ usage (int help)
   fprintf (s, _("  d            - delete file(s) from the archive\n"));
   fprintf (s, _("  m[ab]        - move file(s) in the archive\n"));
   fprintf (s, _("  p            - print file(s) found in the archive\n"));
-  fprintf (s, _("  q[f]         - quick append file(s) to the archive\n"));
+  fprintf (s, _("  q[f][L]      - quick append file(s) to the archive\n"));
   fprintf (s, _("  r[ab][f][u]  - replace existing or insert new file(s) into the archive\n"));
   fprintf (s, _("  s            - act as ranlib\n"));
   fprintf (s, _("  t[O][v]      - display contents of the archive\n"));
@@ -332,6 +335,7 @@ usage (int help)
   fprintf (s, _("  [o]          - preserve original dates\n"));
   fprintf (s, _("  [O]          - display offsets of files in the archive\n"));
   fprintf (s, _("  [u]          - only replace files that are newer than current archive contents\n"));
+  fprintf (s, _("  [L]          - flatten archive files: add their members\n"));
   fprintf (s, _(" generic modifiers:\n"));
   fprintf (s, _("  [c]          - do not warn if the library had to be created\n"));
   fprintf (s, _("  [s]          - create an archive index (cf. ranlib)\n"));
@@ -495,7 +499,7 @@ decode_options (int argc, char **argv)
       argv = new_argv;
     }
 
-  while ((c = getopt_long (argc, argv, "hdmpqrtxl:coOVsSuvabiMNfPTDU",
+  while ((c = getopt_long (argc, argv, "hdmpqrtxl:coOVsSuvabiMNfPTDUL",
 			   long_options, NULL)) != EOF)
     {
       switch (c)
@@ -601,6 +605,9 @@ decode_options (int argc, char **argv)
         case 'U':
           deterministic = false;
           break;
+        case 'L':
+          flatten_archives = true;
+          break;
 	case OPTION_PLUGIN:
 #if BFD_SUPPORTS_PLUGINS
 	  bfd_plugin_set_plugin (optarg);
@@ -621,6 +628,12 @@ decode_options (int argc, char **argv)
           usage (0);
         }
     }
+
+  if (flatten_archives && operation != quick_append) {
+    fprintf(stderr, _("%s: L modifier is only valid with q operation\n"),
+            program_name);
+    usage (1);
+  }
 
   /* PR 13256: Allow for the possibility that the first command line option
      started with a dash (eg --plugin) but then the following option(s) are
@@ -1476,6 +1489,8 @@ replace_members (bfd *arch, char **files_to_move, bool quick)
   bfd *current;
   bfd **current_ptr;
 
+  const bool flatten = make_thin_archive || flatten_archives;
+
   while (files_to_move && *files_to_move)
     {
       if (! quick)
@@ -1545,12 +1560,12 @@ replace_members (bfd *arch, char **files_to_move, bool quick)
 	  && FILENAME_CMP (normalize (*files_to_move, arch), LIBDEPS) == 0)
         {
 	  changed |= ar_emul_append_bfd (after_bfd, libdeps_bfd,
-					 verbose, make_thin_archive);
+					 verbose, flatten);
 	}
       else
         {
 	  changed |= ar_emul_append (after_bfd, *files_to_move, target,
-				     verbose, make_thin_archive);
+				     verbose, flatten);
 	}
 
     next_file:;

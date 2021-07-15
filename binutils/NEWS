@@ -54,6 +54,9 @@ Changes in 2.37:
 * Nm has a new command line option: --quiet.  This suppresses "no symbols"
   diagnostic.
 
+* The ar tool has a new L modifier for the q operation.  This says to flatten
+  archive files added on the command line by adding their individual members.
+
 Changes in 2.36:
 
 * Update elfedit and readelf with LAM_U48 and LAM_U57 support.

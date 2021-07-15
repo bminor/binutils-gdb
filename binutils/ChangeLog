@@ -1,3 +1,12 @@
+2021-07-14  Roland McGrath  <mcgrathr@google.com>
+
+	* doc/binutils.texi (ar cmdline): Document L modifier for q operation.
+	* NEWS: Mention that.
+	* ar.c (flatten_archives): New variable.
+	(usage): Describe L.
+	(decode_options): Parse L.
+	(replace_members): Use L.
+
 2021-07-14  Clément Chigot  <clement.chigot@atos.net>
 
 	* dwarf.h (struct dwarf_section): Add XCOFF name.
