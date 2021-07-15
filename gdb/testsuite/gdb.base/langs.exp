@@ -111,6 +111,12 @@ if [runto csub] then {
              "set lang to minimal"
     
     gdb_test "print x" " = 5000" "print parameter value"
+
+    # Ensure this at least does not crash.
+    gdb_test_no_output "set language unknown"
+    gdb_test "print x" \
+	"expression parsing not implemented for language .Unknown." \
+	"expression parsing does not crash for unknown"
 }
 
 set timeout $oldtimeout

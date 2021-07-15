@@ -1,3 +1,8 @@
+2021-07-19  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/28093
+	* gdb.base/langs.exp: Add tests.
+
 2021-07-14  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (have_index): New proc.

@@ -825,8 +825,8 @@ public:
 
   int parser (struct parser_state *ps) const override
   {
-    /* No parsing is done, just claim success.  */
-    return 1;
+    error (_("expression parsing not implemented for language \"%s\""),
+	   natural_name ());
   }
 
   /* See language.h.  */

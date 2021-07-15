@@ -1,3 +1,8 @@
+2021-07-19  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/28093
+	* language.c (auto_or_unknown_language::parser): Call error.
+
 2021-07-17  Sergey Belyashov  <Sergey.Belyashov@gmail.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add z80-tdep.c.
