@@ -43,6 +43,8 @@
 #include "c-lang.h"
 #include "cp-abi.h"
 #include "inferior.h"
+#include "gdbsupport/selftest.h"
+#include "selftest-arch.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -1221,8 +1223,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 	  else
 	    {
 	      unsigned field_len = TYPE_FIELD_BITSIZE (type, field);
-	      ULONGEST field_val
-		= val >> (TYPE_FIELD_BITPOS (type, field) - field_len + 1);
+	      ULONGEST field_val = val >> TYPE_FIELD_BITPOS (type, field);
 
 	      if (field_len < sizeof (ULONGEST) * TARGET_CHAR_BIT)
 		field_val &= ((ULONGEST) 1 << field_len) - 1;
@@ -3137,10 +3138,41 @@ make_value_print_options_def_group (value_print_options *opts)
   return {{value_print_option_defs}, opts};
 }
 
+#if GDB_SELF_TEST
+
+/* Test printing of TYPE_CODE_FLAGS values.  */
+
+static void
+test_print_flags (gdbarch *arch)
+{
+  type *flags_type = arch_flags_type (arch, "test_type", 32);
+  type *field_type = builtin_type (arch)->builtin_uint32;
+
+  /* Value:  1010 1010
+     Fields: CCCB BAAA */
+  append_flags_type_field (flags_type, 0, 3, field_type, "A");
+  append_flags_type_field (flags_type, 3, 2, field_type, "B");
+  append_flags_type_field (flags_type, 5, 3, field_type, "C");
+
+  value *val = allocate_value (flags_type);
+  gdb_byte *contents = value_contents_writeable (val);
+  store_unsigned_integer (contents, 4, gdbarch_byte_order (arch), 0xaa);
+
+  string_file out;
+  val_print_type_code_flags (flags_type, val, 0, &out);
+  SELF_CHECK (out.string () == "[ A=2 B=1 C=5 ]");
+}
+
+#endif
+
 void _initialize_valprint ();
 void
 _initialize_valprint ()
 {
+#if GDB_SELF_TEST
+  selftests::register_test_foreach_arch ("print-flags", test_print_flags);
+#endif
+
   cmd_list_element *cmd;
 
   cmd_list_element *set_print_cmd
