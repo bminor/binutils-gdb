@@ -27,6 +27,11 @@
 #include "trad-frame.h"
 #include "gdbarch.h"
 
+/* The following value is derived from __NR_rt_sigreturn in
+   <include/uapi/asm-generic/unistd.h> from the Linux source tree.  */
+
+#define RISCV_NR_rt_sigreturn 139
+
 /* Define the general register mapping.  The kernel puts the PC at offset 0,
    gdb puts it at offset 32.  Register x0 is always 0 and can be ignored.
    Registers x1 to x31 are in the same place.  */
@@ -154,11 +159,28 @@ riscv_linux_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
 }
 
+/* When FRAME is at a syscall instruction (ECALL), return the PC of the next
+   instruction to be executed.  */
+
+static CORE_ADDR
+riscv_linux_syscall_next_pc (struct frame_info *frame)
+{
+  const CORE_ADDR pc = get_frame_pc (frame);
+  const ULONGEST a7 = get_frame_register_unsigned (frame, RISCV_A7_REGNUM);
+
+  if (a7 == RISCV_NR_rt_sigreturn)
+    return frame_unwind_caller_pc (frame);
+
+  return pc + 4 /* Length of the ECALL insn.  */;
+}
+
 /* Initialize RISC-V Linux ABI info.  */
 
 static void
 riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   linux_init_abi (info, gdbarch, 0);
 
   set_gdbarch_software_single_step (gdbarch, riscv_software_single_step);
@@ -182,6 +204,8 @@ riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, riscv_linux_iterate_over_regset_sections);
 
   tramp_frame_prepend_unwinder (gdbarch, &riscv_linux_sigframe);
+
+  tdep->syscall_next_pc = riscv_linux_syscall_next_pc;
 }
 
 /* Initialize RISC-V Linux target support.  */

@@ -1421,6 +1421,8 @@ public:
       /* These are needed for stepping over atomic sequences.  */
       LR,
       SC,
+      /* This instruction is used to do a syscall.  */
+      ECALL,
 
       /* Other instructions are not interesting during the prologue scan, and
 	 are ignored.  */
@@ -1711,6 +1713,8 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 	decode_r_type_insn (SC, ival);
       else if (is_sc_d_insn (ival))
 	decode_r_type_insn (SC, ival);
+      else if (is_ecall_insn (ival))
+	decode_i_type_insn (ECALL, ival);
       else
 	/* None of the other fields are valid in this case.  */
 	m_opcode = OTHER;
@@ -3764,6 +3768,7 @@ static CORE_ADDR
 riscv_next_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = regcache->arch ();
+  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct riscv_insn insn;
   CORE_ADDR next_pc;
 
@@ -3825,6 +3830,11 @@ riscv_next_pc (struct regcache *regcache, CORE_ADDR pc)
       regcache->cooked_read (insn.rs2 (), &src2);
       if (src1 >= src2)
 	next_pc = pc + insn.imm_signed ();
+    }
+  else if (insn.opcode () == riscv_insn::ECALL)
+    {
+      if (tdep->syscall_next_pc != nullptr)
+	next_pc = tdep->syscall_next_pc (get_current_frame ());
     }
 
   return next_pc;

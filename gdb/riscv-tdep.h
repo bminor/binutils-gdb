@@ -34,6 +34,7 @@ enum
   RISCV_FP_REGNUM = 8,		/* Frame Pointer.  */
   RISCV_A0_REGNUM = 10,		/* First argument.  */
   RISCV_A1_REGNUM = 11,		/* Second argument.  */
+  RISCV_A7_REGNUM = 17,		/* Seventh argument.  */
   RISCV_PC_REGNUM = 32,		/* Program Counter.  */
 
   RISCV_NUM_INTEGER_REGS = 32,
@@ -102,6 +103,9 @@ struct gdbarch_tdep
   int duplicate_frm_regnum = -1;
   int duplicate_fcsr_regnum = -1;
 
+  /* Return the expected next PC assuming FRAME is stopped at a syscall
+     instruction.  */
+  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
 };
 
 
