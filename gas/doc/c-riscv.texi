@@ -213,13 +213,23 @@ desirable.
 Enables or disables the CSR checking.
 
 @cindex INSN directives
-@item .insn @var{value}
+@item .insn @var{type}, @var{operand} [,...,@var{operand_n}]
+@itemx .insn @var{insn_length}, @var{value}
 @itemx .insn @var{value}
 This directive permits the numeric representation of an instructions
 and makes the assembler insert the operands according to one of the
 instruction formats for @samp{.insn} (@ref{RISC-V-Formats}).
 For example, the instruction @samp{add a0, a1, a2} could be written as
-@samp{.insn r 0x33, 0, 0, a0, a1, a2}.
+@samp{.insn r 0x33, 0, 0, a0, a1, a2}.  But in fact, the instruction
+formats are difficult to use for some users, so most of them are using
+@samp{.word} to encode the instruction directly, rather than using
+@samp{.insn}.  It is fine for now, but will be wrong when the mapping
+symbols are supported, since @samp{.word} will not be shown as an
+instruction, it should be shown as data.  Therefore, we also support
+two more formats of the @samp{.insn}, the instruction @samp{add a0, a1, a2}
+could also be written as @samp{.insn 0x4, 0xc58533} or @samp{.insn 0xc58533}.
+When the @var{insn_length} is set, then assembler will check if the
+@var{value} is a valid @var{insn_length} bytes instruction.
 
 @cindex @code{.attribute} directive, RISC-V
 @item .attribute @var{tag}, @var{value}

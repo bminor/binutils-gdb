@@ -2900,6 +2900,51 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   return error;
 }
 
+/* Similar to riscv_ip, but assembles an instruction according to the
+   hardcode values of .insn directive.  */
+
+static const char *
+riscv_ip_hardcode (char *str,
+		   struct riscv_cl_insn *ip,
+		   expressionS *imm_expr,
+		   const char *error)
+{
+  struct riscv_opcode *insn;
+  insn_t values[2] = {0, 0};
+  unsigned int num = 0;
+
+  input_line_pointer = str;
+  do
+    {
+      expression (imm_expr);
+      if (imm_expr->X_op != O_constant)
+	{
+	  /* The first value isn't constant, so it should be
+	     .insn <type> <operands>.  We have been parsed it
+	     in the riscv_ip.  */
+	  if (num == 0)
+	    return error;
+	  return _("values must be constant");
+	}
+      values[num++] = (insn_t) imm_expr->X_add_number;
+    }
+  while (*input_line_pointer++ == ',' && num < 2);
+
+  input_line_pointer--;
+  if (*input_line_pointer != '\0')
+    return _("unrecognized values");
+
+  insn = XNEW (struct riscv_opcode);
+  insn->match = values[num - 1];
+  create_insn (ip, insn);
+  unsigned int bytes = riscv_insn_length (insn->match);
+  if (values[num - 1] >> (8 * bytes) != 0
+      || (num == 2 && values[0] != bytes))
+    return _("value conflicts with instruction length");
+
+  return NULL;
+}
+
 void
 md_assemble (char *str)
 {
@@ -3891,7 +3936,10 @@ s_riscv_leb128 (int sign)
   return s_leb128 (sign);
 }
 
-/* Parse the .insn directive.  */
+/* Parse the .insn directive.  There are three formats,
+   Format 1: .insn <type> <operand1>, <operand2>, ...
+   Format 2: .insn <length>, <value>
+   Format 3: .insn <value>.  */
 
 static void
 s_riscv_insn (int x ATTRIBUTE_UNUSED)
@@ -3912,11 +3960,15 @@ s_riscv_insn (int x ATTRIBUTE_UNUSED)
 
   const char *error = riscv_ip (str, &insn, &imm_expr,
 				&imm_reloc, insn_type_hash);
-
   if (error)
     {
-      as_bad ("%s `%s'", error, str);
+      char *save_in = input_line_pointer;
+      error = riscv_ip_hardcode (str, &insn, &imm_expr, error);
+      input_line_pointer = save_in;
     }
+
+  if (error)
+    as_bad ("%s `%s'", error, str);
   else
     {
       gas_assert (insn.insn_mo->pinfo != INSN_MACRO);
