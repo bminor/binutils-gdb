@@ -1543,6 +1543,18 @@ or1k_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_OR1K_INSN_REL_26:
+	  /* For a non-shared link, these will reference plt or call the
+	     version of actual object.  */
+	  if (bfd_link_pic (info) && !SYMBOL_CALLS_LOCAL (info, h))
+	    {
+	      _bfd_error_handler
+		(_("%pB: pc-relative relocation against dynamic symbol %s"),
+		 input_bfd, name);
+	      ret_val = false;
+	      bfd_set_error (bfd_error_bad_value);
+	    }
+	  break;
+
 	case R_OR1K_PCREL_PG21:
 	case R_OR1K_LO13:
 	case R_OR1K_SLO13:

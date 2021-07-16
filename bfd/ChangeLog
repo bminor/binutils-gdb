@@ -1,3 +1,9 @@
+2021-07-16  Giulio Benetti  <giulio.benetti@benettiengineering.com>
+
+	* elf32-or1k.c (or1k_elf_relocate_section): Use a separate entry
+	in switch case R_OR1K_INSN_REL_26 where we need to check for
+	!SYMBOL_CALLS_LOCAL() instead of !SYMBOL_REFERENCES_LOCAL().
+
 2021-07-14  Clément Chigot  <clement.chigot@atos.net>
 
 	* libxcoff.h (struct xcoff_dwsect_name): Add DWARF name.
