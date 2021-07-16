@@ -2856,7 +2856,7 @@ proc can_hardware_single_step {} {
 
     if { [istarget "arm*-*-*"] || [istarget "mips*-*-*"]
 	 || [istarget "tic6x-*-*"] || [istarget "sparc*-*-linux*"]
-	 || [istarget "nios2-*-*"] } {
+	 || [istarget "nios2-*-*"] || [istarget "riscv*-*-linux*"] } {
 	return 0
     }
 
