@@ -3463,8 +3463,10 @@ process_debug_info (struct dwarf_section * section,
 	 relocations to an object file, or if the file is corrupt.  */
       if (length > (size_t) (end - section_begin))
 	{
-	  warn (_("Corrupt unit length (0x%s) found in section %s\n"),
-		dwarf_vmatoa ("x", length), section->name);
+	  warn (_("Corrupt unit length (got 0x%s expected at most 0x%s) in section %s\n"),
+		dwarf_vmatoa ("x", length),
+		dwarf_vmatoa ("x", end - section_begin),
+		section->name);
 	  return false;
 	}
       section_begin += length;
