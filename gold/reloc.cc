@@ -1602,7 +1602,10 @@ Track_relocs<size, big_endian>::advance(off_t offset)
       elfcpp::Rel<size, big_endian> rel(this->prelocs_ + this->pos_);
       if (static_cast<off_t>(rel.get_r_offset()) >= offset)
 	break;
-      ++ret;
+      // Skip R_*_NONE relocation entries with r_sym of zero
+      // without counting.
+      if (rel.get_r_info() != 0)
+	++ret;
       this->pos_ += this->reloc_size_;
     }
   return ret;

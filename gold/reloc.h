@@ -1171,7 +1171,7 @@ class Track_relocs
   next_addend() const;
 
   // Advance to OFFSET within the data section, and return the number
-  // of relocs which would be skipped.
+  // of relocs which would be skipped, excluding r_info==0 relocs.
   int
   advance(off_t offset);
 
