@@ -1,3 +1,15 @@
+2021-07-17  Sergey Belyashov  <Sergey.Belyashov@gmail.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add z80-tdep.c.
+	* NEWS: Mention z80 support.
+	* configure.tgt: Handle z80*.
+	* features/Makefile (XMLTOC): Add z80.xml.
+	* features/z80-cpu.xml: New.
+	* features/z80.c: Generate.
+	* features/z80.xml: New.
+	* z80-tdep.c: New file.
+	* z80-tdep.h: New file.
+
 2021-07-13  Lancelot Six  <lsix@lancelotsix.com>
 
 	* make-init-c: Use /bin/sh as shebang.

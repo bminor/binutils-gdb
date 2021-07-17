@@ -424,6 +424,7 @@ alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]
 
 GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
 BPF				bpf-unknown-none
+Z80				z80-unknown-*
 
 * Python API
 
