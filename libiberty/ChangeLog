@@ -1,3 +1,9 @@
+2021-07-19  Christopher Wellons  <wellons@nullprogram.com>
+
+	* rust-demangle.c (struct rust_demangler): Change type of
+	"recursion" to unsigned.
+	(RUST_NO_RECURSION_LIMIT): Similarly in cast.
+
 2021-07-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 99935
