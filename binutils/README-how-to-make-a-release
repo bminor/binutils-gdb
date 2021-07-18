@@ -201,10 +201,10 @@ When the time comes to actually make the release....
 
   21. Update the release number in bfd/version.m4 on the release
       branch to a whole new minor version number, without a point
-      value.  Eg "2.36.90" becomes "2.37".  Change bfd/development.sh
+      value.  Eg "2.37.90" becomes "2.38".  Change bfd/development.sh
       to set all values to "false".  Regenerate the configure and
       makefiles.  And *info* files.  Add ChangeLog entries for the
-      updates and add a  "this-is-the-2.3x-release" comment and
+      updates and add a  "this-is-the-2.38-release" comment and
       commit.
 
   22. Check that your file creation mask will create the
@@ -228,7 +228,9 @@ When the time comes to actually make the release....
             ./src-release.sh -b -g -l -x binutils
 
   24. Check that the files in the tarballs have the correct
-      permissions.  (FIXME: How to do this ?)
+      permissions.
+
+           tar tvf binutils-2.37.tar.bz2 | grep -e "---"
 
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
       running the testsuites (gas, gold, binutils and ld).  Make the
@@ -238,7 +240,7 @@ When the time comes to actually make the release....
         cd /dev/shm
 	mkdir delme
 	cd delme
-	tar xvf <path-to-sources>/binutils-2.*.tar.xz
+	tar xvf <path-to-sources>/binutils-2.*.tar.lz
 	chmod -R -w binutils-2.*
 	mkdir build
 	cd build
@@ -253,9 +255,12 @@ When the time comes to actually make the release....
   26. Tag the branch with the new release number:
 
             git tag -a binutils-2_3x     <=== Be careful to get the tag right
+	    
 	      [optional: add "-u XXXXX" to sign with a gpg key]
 	      enter a tag message such as: "Official Binutils 2.3x release"
-	      
+
+            eg: git tag -a binutils-2_37 -u DD9E3C4F
+
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
 
@@ -297,7 +302,11 @@ When the time comes to actually make the release....
          cd /sourceware/www/sourceware/htdocs/binutils
 	 mkdir docs-2.3x
 	 cd docs-2.3x
-	 mkdir as bfd binutils gprof ld
+	 mkdir as
+	 mkdir bfd
+	 mkdir binutils
+	 mkdir gprof
+	 mkdir ld
 	 cd ../docs-2.3(x-1)
 	 get index.html
 
@@ -313,28 +322,38 @@ When the time comes to actually make the release....
       however, so the directories had to be made by hand, as shown above).
 
          cd as
-	 lcd <build-dir>/gas/doc/
-	 put -R as                {be patient - this takes a long time...}
+	 lcd <build-dir>/gas/doc/as
+	 put *                {be patient - this takes a long time...}
+	 lcd ..
+	 cd ..
 	 put as.html
 	 put as.pdf
 	 cd ../bfd
-	 lcd ../../../bfd/doc/
-	 put -R bfd
+	 lcd ../../bfd/doc/bfd
+	 put *
+	 cd ..
+	 lcd ..
 	 put bfd.html
 	 put bfd.pdf
 	 cd ../binutils
-	 lcd ../../../binutils/doc/
-	 put -R binutils
+	 lcd ../../binutils/doc/binutils
+	 put *
+	 cd ..
+	 lcd ..
 	 put binutils.html
 	 put binutils.pdf
 	 cd ../gprof
-	 lcd ../../../gprof/
-	 put -R doc/gprof
+	 lcd ../../gprof/doc/gprof
+	 put *
+	 cd ..
+	 lcd ../..
 	 put gprof.html
 	 put gprof.pdf
 	 cd ../ld
-	 lcd ../../ld/
-	 put -R doc/ld
+	 lcd ../ld/doc/ld
+	 put *
+	 cd ..
+	 lcd ../..
 	 put ld.html
 	 put ld.pdf
 	 
