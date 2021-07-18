@@ -1,3 +1,7 @@
+2021-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Move pending obsoletion targets to obsolete list.
+
 2021-07-16  Giulio Benetti  <giulio.benetti@benettiengineering.com>
 
 	* elf32-or1k.c (or1k_elf_relocate_section): Use a separate entry

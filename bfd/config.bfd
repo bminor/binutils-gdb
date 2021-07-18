@@ -48,12 +48,7 @@ targ_underscore=no
 
 # Catch obsolete configurations.
 case $targ in
- openrisc-*-* | or32-*-*)
-    echo "*** Configuration $targ is obsolete." >&2
-    echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
-    exit 1
-    ;;
- *-*-netbsdpe* | null)
+ null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
       echo "*** Specify --enable-obsolete to build it anyway." >&2
@@ -73,6 +68,7 @@ case $targ in
  *-sony-* | \
  *-tandem-* | \
  *-*-ieee* | \
+ *-*-netbsdpe* | \
  *-*-netware* | \
  *-*-rtemsaout* | \
  *-*-rtemscoff* | \
@@ -141,6 +137,8 @@ case $targ in
  mips*-dec-* | \
  mips*-sgi-* | \
  mips*el-*-rtems* | \
+ openrisc-*-* | \
+ or32-*-* | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
  powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin* | \
  sh*-*-symbianelf* | sh5*-*-* | sh64*-*-* | \
