@@ -216,8 +216,7 @@ foreach flags $test_flags {
 	|| [istarget "*-*-winnt*"]
 	|| [istarget "*-*-mingw*"]
 	|| [istarget "*-*-interix*"]
-	|| [istarget "*-*-beospe*"]
-	|| [istarget "*-*-netbsdpe*"]} {
+	|| [istarget "*-*-beospe*"]} {
 	# Trim off the date present in PE binaries by only looking
 	#   at the ends of the files
 	# Although this works, a way to set the date would be better.

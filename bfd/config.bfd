@@ -614,10 +614,6 @@ case "${targ}" in
     targ_selvecs="iamcu_elf32_vec"
     targ64_selvecs="x86_64_elf64_vec l1om_elf64_vec k1om_elf64_vec"
     ;;
-  i[3-7]86-*-netbsdpe*)
-    targ_defvec=i386_pe_vec
-    targ_selvecs="i386_pe_vec i386_pei_vec i386_elf32_vec iamcu_elf32_vec"
-    ;;
   i[3-7]86-*-openbsd*)
     targ_defvec=i386_elf32_vec
     targ_selvecs="iamcu_elf32_vec"

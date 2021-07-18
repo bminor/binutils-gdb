@@ -14,6 +14,7 @@
 case $targ in
  *-*-irix* | \
  *-*-solaris2.[01] | *-*-solaris2.[2-9]* | *-*-solaris2.10* | \
+ *-*-netbsdpe* | \
  alpha*-*-osf* | \
  alpha*-*-freebsd* | \
  alpha*-*-kfreebsd*-gnu | \

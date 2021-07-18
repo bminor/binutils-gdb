@@ -105,7 +105,6 @@ proc is_pecoff_format args {
 	 || [istarget $m_os-cygwin*]
 	 || [istarget $m_os-interix*]
 	 || [istarget $m_os-mingw*]
-	 || [istarget $m_os-netbsdpe*]
 	 || [istarget $m_os-pe*]
 	 || [istarget $m_os-winnt*] } {
 	return 1

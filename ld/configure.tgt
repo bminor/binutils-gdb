@@ -347,9 +347,6 @@ i[3-7]86-*-openbsd*)
 			targ_emul=elf_i386
 			targ_extra_emuls="elf_iamcu"
 			;;
-i[3-7]86-*-netbsdpe*)	targ_emul=i386pe
-			targ_extra_ofiles="deffilep.o pe-dll.o"
-			;;
 i[3-7]86-*-elfiamcu)	targ_emul=elf_iamcu
 			targ_extra_emuls=elf_i386
 			;;
