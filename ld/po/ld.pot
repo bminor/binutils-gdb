@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-07-03 15:08+0100\n"
+"POT-Creation-Date: 2021-07-18 17:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2717,83 +2717,83 @@ msgstr ""
 msgid "%X%P: error: can't use long section names on this arch\n"
 msgstr ""
 
-#: plugin.c:233 plugin.c:279
+#: plugin.c:236 plugin.c:282
 msgid "<no plugin>"
 msgstr ""
 
-#: plugin.c:248 plugin.c:1100
+#: plugin.c:251 plugin.c:1111
 msgid "%F%P: %s: error loading plugin: %s\n"
 msgstr ""
 
-#: plugin.c:255
+#: plugin.c:258
 msgid "%P: %s: duplicated plugin\n"
 msgstr ""
 
-#: plugin.c:341
+#: plugin.c:344
 msgid "%F%P: could not create dummy IR bfd: %E\n"
 msgstr ""
 
-#: plugin.c:422
+#: plugin.c:425
 msgid "%F%P: %s: non-ELF symbol in ELF BFD!\n"
 msgstr ""
 
-#: plugin.c:433
+#: plugin.c:436
 msgid "%F%P: unknown ELF symbol visibility: %d!\n"
 msgstr ""
 
-#: plugin.c:542
+#: plugin.c:545
 msgid "%F%P: unsupported input file size: %s (%ld bytes)\n"
 msgstr ""
 
-#: plugin.c:679
+#: plugin.c:690
 #, c-format
 msgid "unknown LTO kind value %x"
 msgstr ""
 
-#: plugin.c:705
+#: plugin.c:716
 #, c-format
 msgid "unknown LTO resolution value %x"
 msgstr ""
 
-#: plugin.c:725
+#: plugin.c:736
 #, c-format
 msgid "unknown LTO visibility value %x"
 msgstr ""
 
 #. We should not have a new, indirect or warning symbol here.
-#: plugin.c:805
+#: plugin.c:816
 msgid "%F%P: %s: plugin symbol table corrupt (sym type %d)\n"
 msgstr ""
 
-#: plugin.c:867
+#: plugin.c:878
 msgid "%P: %pB: symbol `%s' definition: %s, visibility: %s, resolution: %s\n"
 msgstr ""
 
-#: plugin.c:944
+#: plugin.c:955
 msgid "%P: warning: "
 msgstr ""
 
-#: plugin.c:955
+#: plugin.c:966
 msgid "%P: error: "
 msgstr ""
 
-#: plugin.c:1107
+#: plugin.c:1118
 msgid "%F%P: %s: plugin error: %d\n"
 msgstr ""
 
-#: plugin.c:1162
+#: plugin.c:1173
 msgid "%F%P: plugin_strdup failed to allocate memory: %s\n"
 msgstr ""
 
-#: plugin.c:1199
+#: plugin.c:1210
 msgid "%F%P: plugin failed to allocate memory for input: %s\n"
 msgstr ""
 
-#: plugin.c:1226
+#: plugin.c:1238
 msgid "%F%P: %s: plugin reported error claiming file\n"
 msgstr ""
 
-#: plugin.c:1337
+#: plugin.c:1349
 msgid "%P: %s: error in plugin cleanup: %d (ignored)\n"
 msgstr ""
 

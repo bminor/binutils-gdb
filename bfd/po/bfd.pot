@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-07-03 15:02+0100\n"
+"POT-Creation-Date: 2021-07-18 17:37+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -130,115 +130,115 @@ msgstr ""
 msgid "Writing updated armap timestamp"
 msgstr ""
 
-#: bfd.c:681
+#: bfd.c:687
 msgid "no error"
 msgstr ""
 
-#: bfd.c:682
+#: bfd.c:688
 msgid "system call error"
 msgstr ""
 
-#: bfd.c:683
+#: bfd.c:689
 msgid "invalid bfd target"
 msgstr ""
 
-#: bfd.c:684
+#: bfd.c:690
 msgid "file in wrong format"
 msgstr ""
 
-#: bfd.c:685
+#: bfd.c:691
 msgid "archive object file in wrong format"
 msgstr ""
 
-#: bfd.c:686
+#: bfd.c:692
 msgid "invalid operation"
 msgstr ""
 
-#: bfd.c:687
+#: bfd.c:693
 msgid "memory exhausted"
 msgstr ""
 
-#: bfd.c:688
+#: bfd.c:694
 msgid "no symbols"
 msgstr ""
 
-#: bfd.c:689
+#: bfd.c:695
 msgid "archive has no index; run ranlib to add one"
 msgstr ""
 
-#: bfd.c:690
+#: bfd.c:696
 msgid "no more archived files"
 msgstr ""
 
-#: bfd.c:691
+#: bfd.c:697
 msgid "malformed archive"
 msgstr ""
 
-#: bfd.c:692
+#: bfd.c:698
 msgid "DSO missing from command line"
 msgstr ""
 
-#: bfd.c:693
+#: bfd.c:699
 msgid "file format not recognized"
 msgstr ""
 
-#: bfd.c:694
+#: bfd.c:700
 msgid "file format is ambiguous"
 msgstr ""
 
-#: bfd.c:695
+#: bfd.c:701
 msgid "section has no contents"
 msgstr ""
 
-#: bfd.c:696
+#: bfd.c:702
 msgid "nonrepresentable section on output"
 msgstr ""
 
-#: bfd.c:697
+#: bfd.c:703
 msgid "symbol needs debug section which does not exist"
 msgstr ""
 
-#: bfd.c:698
+#: bfd.c:704
 msgid "bad value"
 msgstr ""
 
-#: bfd.c:699
+#: bfd.c:705
 msgid "file truncated"
 msgstr ""
 
-#: bfd.c:700
+#: bfd.c:706
 msgid "file too big"
 msgstr ""
 
-#: bfd.c:701
+#: bfd.c:707
 msgid "sorry, cannot handle this file"
 msgstr ""
 
-#: bfd.c:702
+#: bfd.c:708
 #, c-format
 msgid "error reading %s: %s"
 msgstr ""
 
-#: bfd.c:703
+#: bfd.c:709
 msgid "#<invalid error code>"
 msgstr ""
 
-#: bfd.c:1640
+#: bfd.c:1646
 #, c-format
 msgid "BFD %s assertion fail %s:%d"
 msgstr ""
 
-#: bfd.c:1653
+#: bfd.c:1659
 #, c-format
 msgid "BFD %s internal error, aborting at %s:%d in %s\n"
 msgstr ""
 
-#: bfd.c:1658
+#: bfd.c:1664
 #, c-format
 msgid "BFD %s internal error, aborting at %s:%d\n"
 msgstr ""
 
-#: bfd.c:1660
+#: bfd.c:1666
 msgid "Please report this bug.\n"
 msgstr ""
 
@@ -947,7 +947,7 @@ msgstr ""
 
 #: elf-m10300.c:2093 elf32-arm.c:13376 elf32-i386.c:3426 elf32-m32r.c:2331
 #: elf32-m68k.c:3929 elf32-s390.c:3080 elf32-sh.c:3671 elf32-tilepro.c:3275
-#: elf32-xtensa.c:3024 elf64-s390.c:3029 elf64-x86-64.c:4082 elfxx-sparc.c:2917
+#: elf32-xtensa.c:3024 elf64-s390.c:3029 elf64-x86-64.c:4085 elfxx-sparc.c:2917
 #: elfxx-sparc.c:3814 elfxx-tilegx.c:3665 elfnn-aarch64.c:5501
 #: elfnn-aarch64.c:7104
 #, c-format
@@ -2217,7 +2217,7 @@ msgid "%pB(%pA+%#<PRIx64>): unresolvable relocation against symbol `%s'"
 msgstr ""
 
 #: elf32-bfin.c:1619 elf32-i386.c:3466 elf32-m68k.c:4006 elf32-s390.c:3138
-#: elf64-s390.c:3087 elf64-x86-64.c:4137
+#: elf64-s390.c:3087 elf64-x86-64.c:4140
 #, c-format
 msgid "%pB(%pA+%#<PRIx64>): reloc against `%s': error %d"
 msgstr ""
@@ -2688,7 +2688,7 @@ msgid "%pB: relocation %s against STT_GNU_IFUNC symbol `%s' isn't supported"
 msgstr ""
 
 #: elf32-i386.c:2406 elf32-i386.c:3677 elf32-i386.c:3824 elf64-x86-64.c:2778
-#: elf64-x86-64.c:4310 elf64-x86-64.c:4472 elfnn-riscv.c:2157
+#: elf64-x86-64.c:4313 elf64-x86-64.c:4475 elfnn-riscv.c:2157
 #: elfnn-riscv.c:2956 elfnn-riscv.c:3030
 #, c-format
 msgid "Local IFUNC function `%s' in %pB\n"
@@ -4879,34 +4879,34 @@ msgid ""
 "when making a shared object"
 msgstr ""
 
-#: elf64-x86-64.c:3297
+#: elf64-x86-64.c:3300
 #, c-format
 msgid ""
 "%pB: addend %s%#x in relocation %s against symbol `%s' at %#<PRIx64> in "
 "section `%pA' is out of range"
 msgstr ""
 
-#: elf64-x86-64.c:3437 elflink.c:13453
+#: elf64-x86-64.c:3440 elflink.c:13453
 msgid "%F%P: corrupt input: %pB\n"
 msgstr ""
 
-#: elf64-x86-64.c:4123
+#: elf64-x86-64.c:4126
 #, c-format
 msgid ""
 " failed to convert GOTPCREL relocation against '%s'; relink with --no-relax\n"
 msgstr ""
 
-#: elf64-x86-64.c:4284
+#: elf64-x86-64.c:4287
 #, c-format
 msgid "%F%pB: PC-relative offset overflow in PLT entry for `%s'\n"
 msgstr ""
 
-#: elf64-x86-64.c:4352
+#: elf64-x86-64.c:4355
 #, c-format
 msgid "%F%pB: branch displacement overflow in PLT entry for `%s'\n"
 msgstr ""
 
-#: elf64-x86-64.c:4405
+#: elf64-x86-64.c:4408
 #, c-format
 msgid "%F%pB: PC-relative offset overflow in GOT PLT entry for `%s'\n"
 msgstr ""
@@ -6384,7 +6384,7 @@ msgstr ""
 msgid "%pB: error: debug data ends beyond end of debug directory"
 msgstr ""
 
-#: plugin.c:236
+#: plugin.c:246
 msgid ""
 "plugin framework: out of file descriptors. Try using fewer objects/archives\n"
 msgstr ""

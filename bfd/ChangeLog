@@ -1,3 +1,7 @@
+2021-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* 2.37 release.
+
 2021-07-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/21782
