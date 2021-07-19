@@ -1,3 +1,8 @@
+2021-07-20  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Use correct enum type for
+	temporaries.
+
 2021-07-13  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-aarch64.h (TC_INIT_FIX_DATA): Initialize c64

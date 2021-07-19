@@ -6638,7 +6638,7 @@ bad_adrdp:
 		  case branch_imm:
 		    /* e.g. B or BL  */
 		      {
-			enum aarch64_opnd jump, call;
+			bfd_reloc_code_real_type jump, call;
 
 			gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL26);
 
