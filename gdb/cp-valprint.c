@@ -38,6 +38,8 @@
 #include "gdbsupport/byte-vector.h"
 #include "gdbarch.h"
 #include "cli/cli-style.h"
+#include "gdbsupport/selftest.h"
+#include "selftest-arch.h"
 
 static struct obstack dont_print_vb_obstack;
 static struct obstack dont_print_statmem_obstack;
@@ -715,11 +717,77 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
     fprintf_filtered (stream, "%ld", (long) val);
 }
 
+#if GDB_SELF_TEST
+
+/* Test printing of TYPE_CODE_STRUCT values.  */
+
+static void
+test_print_fields (gdbarch *arch)
+{
+  struct field *f;
+  type *uint8_type = builtin_type (arch)->builtin_uint8;
+  type *bool_type = builtin_type (arch)->builtin_bool;
+  type *the_struct = arch_composite_type (arch, NULL, TYPE_CODE_STRUCT);
+  TYPE_LENGTH (the_struct) = 4;
+
+  /* Value:  1110 1001
+     Fields: C-BB B-A- */
+  if (gdbarch_byte_order (arch) == BFD_ENDIAN_LITTLE)
+    {
+      f = append_composite_type_field_raw (the_struct, "A", bool_type);
+      SET_FIELD_BITPOS (*f, 1);
+      FIELD_BITSIZE (*f) = 1;
+      f = append_composite_type_field_raw (the_struct, "B", uint8_type);
+      SET_FIELD_BITPOS (*f, 3);
+      FIELD_BITSIZE (*f) = 3;
+      f = append_composite_type_field_raw (the_struct, "C", bool_type);
+      SET_FIELD_BITPOS (*f, 7);
+      FIELD_BITSIZE (*f) = 1;
+    }
+  /* According to the logic commented in "make_gdb_type_struct ()" of
+   * target-descriptions.c, bit positions are numbered differently for
+   * little and big endians.  */
+  else
+    {
+      f = append_composite_type_field_raw (the_struct, "A", bool_type);
+      SET_FIELD_BITPOS (*f, 30);
+      FIELD_BITSIZE (*f) = 1;
+      f = append_composite_type_field_raw (the_struct, "B", uint8_type);
+      SET_FIELD_BITPOS (*f, 26);
+      FIELD_BITSIZE (*f) = 3;
+      f = append_composite_type_field_raw (the_struct, "C", bool_type);
+      SET_FIELD_BITPOS (*f, 24);
+      FIELD_BITSIZE (*f) = 1;
+    }
+
+  value *val = allocate_value (the_struct);
+  gdb_byte *contents = value_contents_writeable (val);
+  store_unsigned_integer (contents, TYPE_LENGTH (value_enclosing_type (val)),
+			  gdbarch_byte_order (arch), 0xe9);
+
+  string_file out;
+  struct value_print_options opts;
+  get_no_prettyformat_print_options (&opts);
+  cp_print_value_fields(val, &out, 0, &opts, NULL, 0);
+  SELF_CHECK (out.string () == "{A = false, B = 5, C = true}");
+
+  out.clear();
+  opts.format = 'x';
+  cp_print_value_fields(val, &out, 0, &opts, NULL, 0);
+  SELF_CHECK (out.string () == "{A = 0x0, B = 0x5, C = 0x1}");
+}
+
+#endif
+
 
 void _initialize_cp_valprint ();
 void
 _initialize_cp_valprint ()
 {
+#if GDB_SELF_TEST
+  selftests::register_test_foreach_arch ("print-fields", test_print_fields);
+#endif
+
   obstack_begin (&dont_print_stat_array_obstack,
 		 32 * sizeof (struct type *));
   obstack_begin (&dont_print_statmem_obstack,

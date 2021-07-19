@@ -6093,7 +6093,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_string
     = arch_type (gdbarch, TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
   builtin_type->builtin_bool
-    = arch_type (gdbarch, TYPE_CODE_BOOL, TARGET_CHAR_BIT, "bool");
+    = arch_boolean_type (gdbarch, TARGET_CHAR_BIT, 1, "bool");
 
   /* The following three are about decimal floating point types, which
      are 32-bits, 64-bits and 128-bits respectively.  */

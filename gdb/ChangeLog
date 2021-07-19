@@ -1,3 +1,12 @@
+2021-08-02  Shahab Vahedi  <shahab@synopsys.com>
+
+	PR gdb/28104
+	* gdbtypes.c (gdbtypes_post_init): Use
+	"arch_boolean_type (..., unsigned=1, ...) to construct
+	"boolean".
+	cp-valprint.c (test_print_flags): New.
+	(_initialize_cp_valprint): Run the "test_print_flags" unit-test.
+
 2021-07-28  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/read.c (attr_to_dynamic_prop): Handle DW_FORM_data16.
