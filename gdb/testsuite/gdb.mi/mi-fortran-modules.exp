@@ -35,9 +35,9 @@ mi_runto_main
 
 # Patterns to skip optional system modules that appear with later versions of GFortran.
 set system_modules_pattern \
-    "\{filename=\"\[^\"\]+/ieee/\[^/\]+\.F90\",fullname=\"\[^\"\]+\",symbols=\\\[(\[^\]\]+)\\\]\},"
+    "\{filename=\"\[^\"\]+/ieee/\[^/\]+\.F90\",fullname=\"\[^\"\]+\",symbols=\\\[(\[^\]\]+)\\\]\},.*"
 set system_module_symbols_pattern \
-    "\{module=\"\[^\"\]*ieee\[^\"\]*\",files=\\\[\{filename=\"\[^\"\]+\",fullname=\"\[^\"\]+\",symbols=\\\[\[^\]\]+\\\]\}\\\]\},"
+    "\{module=\"\[^\"\]*ieee\[^\"\]*\",files=\\\[\{filename=\"\[^\"\]+\",fullname=\"\[^\"\]+\",symbols=\\\[\[^\]\]+\\\]\}\\\]\},.*"
 
 mi_gdb_test "101-symbol-info-modules" \
     "101\\^done,symbols=\{debug=\\\[($system_modules_pattern)*\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"16\",name=\"mod1\"\},\{line=\"27\",name=\"mod2\"\}\\\]\},\{filename=\"\[^\"\]+$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"16\",name=\"mod3\"\},\{line=\"32\",name=\"modmany\"\},\{line=\"41\",name=\"moduse\"\}\\\]\}\\\]\}" \
