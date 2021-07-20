@@ -111,7 +111,7 @@ proc test_controlled_execution_reverse {} {
 
     mi_execute_to "exec-step --reverse" \
  	"end-stepping-range" "callee1" \
-	"\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}" \
+	"\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\[0-9\]*\"\}" \
  	"basics.c" $line_callee1_close "" \
  	"reverse step to callee1"
 
