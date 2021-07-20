@@ -255,6 +255,9 @@ proc_with_prefix test_bkpt_invisible { } {
 proc_with_prefix test_hardware_breakpoints { } {
     global srcfile testfile hex decimal
 
+    # Skip these tests if the HW does not support hardware breakpoints.
+    if { [skip_hw_breakpoint_tests] } { return 0 }
+
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
