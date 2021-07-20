@@ -1,3 +1,9 @@
+2021-07-20  Alan Modra  <amodra@gmail.com>
+
+	PR gold/28106
+	PR gold/27815
+	* gc.h (gc_process_relocs): Use static_cast in Section_id constructor.
+
 2021-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* 2.37 release.

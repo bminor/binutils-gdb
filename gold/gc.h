@@ -247,7 +247,7 @@ gc_process_relocs(
 	      if (is_ordinary) 
 		(*secvec).push_back(Section_id(src_obj, dst_indx));
 	      else
-		(*secvec).push_back(Section_id(reinterpret_cast<Relobj*>(NULL), 0));
+		(*secvec).push_back(Section_id(static_cast<Relobj*>(NULL), 0));
               // If the target of the relocation is an STT_SECTION symbol,
               // make a note of that by storing -1 in the symbol vector.
               if (lsym.get_st_type() == elfcpp::STT_SECTION)
@@ -329,7 +329,7 @@ gc_process_relocs(
               if (is_ordinary && dst_obj != NULL)
 		(*secvec).push_back(Section_id(dst_obj, dst_indx));
 	      else
-		(*secvec).push_back(Section_id(reinterpret_cast<Relobj*>(NULL), 0));
+		(*secvec).push_back(Section_id(static_cast<Relobj*>(NULL), 0));
               (*symvec).push_back(gsym);
 	      (*addendvec).push_back(std::make_pair(
 					static_cast<long long>(symvalue),
