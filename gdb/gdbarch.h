@@ -730,7 +730,8 @@ typedef std::string (gdbarch_memtag_to_string_ftype) (struct gdbarch *gdbarch, s
 extern std::string gdbarch_memtag_to_string (struct gdbarch *gdbarch, struct value *tag);
 extern void set_gdbarch_memtag_to_string (struct gdbarch *gdbarch, gdbarch_memtag_to_string_ftype *memtag_to_string);
 
-/* Return true if ADDRESS contains a tag and false otherwise. */
+/* Return true if ADDRESS contains a tag and false otherwise.  ADDRESS
+   must be either a pointer or a reference type. */
 
 typedef bool (gdbarch_tagged_address_p_ftype) (struct gdbarch *gdbarch, struct value *address);
 extern bool gdbarch_tagged_address_p (struct gdbarch *gdbarch, struct value *address);

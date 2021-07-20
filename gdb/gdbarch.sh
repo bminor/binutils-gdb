@@ -608,7 +608,8 @@ v;int;significant_addr_bit;;;;;;0
 # Return a string representation of the memory tag TAG.
 m;std::string;memtag_to_string;struct value *tag;tag;;default_memtag_to_string;;0
 
-# Return true if ADDRESS contains a tag and false otherwise.
+# Return true if ADDRESS contains a tag and false otherwise.  ADDRESS
+# must be either a pointer or a reference type.
 m;bool;tagged_address_p;struct value *address;address;;default_tagged_address_p;;0
 
 # Return true if the tag from ADDRESS matches the memory tag for that

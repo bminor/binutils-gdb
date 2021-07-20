@@ -1,3 +1,15 @@
+2021-07-20  Luis Machado  <luis.machado@linaro.org>
+	    Pedro Alves  <pedro@palves.net>
+
+	PR gdb/28110
+	* gdbarch.sh: Updated documentation for gdbarch_tagged_address_p.
+	* gdbarch.h: Regenerate.
+	* printcmd.c (should_validate_memtags): Reorder comparisons and only
+	validate tags for pointer and reference types.  Skip validation of
+	optimized out or unavailable values.
+	(print_command_1): Guard call memory tagging validation code with
+	a try/catch block.
+
 2021-07-19  Tom Tromey  <tromey@adacore.com>
 
 	PR gdb/28093
