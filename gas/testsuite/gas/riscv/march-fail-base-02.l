@@ -1,2 +1,2 @@
 .*Assembler messages:
-.*Error: .*rv64e is not a valid base ISA
+.*Error: rv64 does not support the `e' extension
