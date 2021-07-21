@@ -1,3 +1,7 @@
+2021-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
 2021-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* version.m4 (BFD_VERSION): Set to 2.37/0
