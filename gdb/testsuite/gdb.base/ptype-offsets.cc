@@ -185,6 +185,9 @@ struct static_member
   int abc;
 };
 
+/* Work around PR gcc/101452.  */
+static_member static_member::Empty;
+
 struct empty_member
 {
   struct { } empty;

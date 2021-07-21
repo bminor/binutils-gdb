@@ -1,5 +1,15 @@
 2021-07-21  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (gcc_major_version): New proc.
+	* gdb.base/ptype-offsets.cc: Define static member static_member::Empty.
+	* gdb.cp/templates.exp: Define static member using -DGCC_BUG.
+	* gdb.cp/m-static.exp: Add
+	additional_flags=-fno-eliminate-unused-debug-types.
+	* gdb.cp/pr-574.exp: Same.
+	* gdb.cp/pr9167.exp: Same.
+
+2021-07-21  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.ada/arrayptr.exp: Add KFAILs for PR20991 and PR28115.
 	* gdb.ada/exprs.exp: Add KFAILs for PR20991.
 	* gdb.ada/packed_array_assign.exp: Same.
