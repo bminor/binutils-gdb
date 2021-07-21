@@ -3998,6 +3998,27 @@ proc test_compiler_info { {compiler ""} } {
     return [string match $compiler $compiler_info]
 }
 
+# Return the gcc major version, or -1.
+# For gcc 4.8.5, the major version is 4.8.
+# For gcc 7.5.0, the major version 7.
+
+proc gcc_major_version { } {
+    global compiler_info
+    global decimal
+    if { ![test_compiler_info "gcc-*"] } {
+	return -1
+    }
+    set res [regexp gcc-($decimal)-($decimal)- $compiler_info \
+		 dummy_var major minor]
+    if { $res != 1 } {
+	return -1
+    }
+    if { $major >= 5} {
+	return $major
+    }
+    return $major.$minor
+}
+
 proc current_target_name { } {
     global target_info
     if [info exists target_info(target,name)] {

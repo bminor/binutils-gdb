@@ -32,7 +32,13 @@ if [get_compiler_info "c++"] {
     return -1
 }
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
+set flags [list debug c++]
+if { [test_compiler_info gcc-*] && [gcc_major_version] >= 10 } {
+    # Work around PR gcc/101452.
+    lappend flags additional_flags=-fno-eliminate-unused-debug-types
+}
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile $flags]} {
     return -1
 }
 
