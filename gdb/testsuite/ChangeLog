@@ -1,3 +1,9 @@
+2021-07-21  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/arrayptr.exp: Add KFAILs for PR20991 and PR28115.
+	* gdb.ada/exprs.exp: Add KFAILs for PR20991.
+	* gdb.ada/packed_array_assign.exp: Same.
+
 2021-07-19  Tom Tromey  <tromey@adacore.com>
 
 	PR gdb/28093
