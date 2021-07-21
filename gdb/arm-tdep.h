@@ -114,6 +114,11 @@ struct gdbarch_tdep
 				   registers.  */
   bool have_neon;		/* Do we have a NEON unit?  */
 
+  bool have_mve;		/* Do we have a MVE extension?  */
+  int mve_vpr_regnum;		/* MVE VPR register number.  */
+  int mve_pseudo_base;		/* Number of the first MVE pseudo register.  */
+  int mve_pseudo_count;		/* Total number of MVE pseudo registers.  */
+
   bool is_m;			/* Does the target follow the "M" profile.  */
   CORE_ADDR lowest_pc;		/* Lowest address at which instructions 
 				   will appear.  */

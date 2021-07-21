@@ -152,6 +152,10 @@ maint show internal-warning backtrace
   registers of a target.  The precise requirements of this register
   feature are documented in the GDB manual.
 
+* For ARM targets, the "org.gnu.gdb.arm.m-profile-mve" feature is now
+  supported by GDB and describes a new VPR register from the ARM MVE
+  (Helium) extension. See the GDB manual for more information.
+
 * TUI improvements
 
   ** TUI windows now support mouse actions.  The mouse wheel scrolls

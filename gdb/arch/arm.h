@@ -59,6 +59,8 @@ enum gdb_regnum {
 
 /* Register count constants.  */
 enum arm_register_counts {
+  /* Number of Q registers for MVE.  */
+  ARM_MVE_NUM_Q_REGS = 8,
   /* Number of argument registers.  */
   ARM_NUM_ARG_REGS = 4,
   /* Number of floating point argument registers.  */
@@ -89,6 +91,7 @@ enum arm_m_profile_type {
    ARM_M_TYPE_M_PROFILE,
    ARM_M_TYPE_VFP_D16,
    ARM_M_TYPE_WITH_FPA,
+   ARM_M_TYPE_MVE,
    ARM_M_TYPE_INVALID
 };
 

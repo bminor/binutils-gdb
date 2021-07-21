@@ -46212,6 +46212,17 @@ and @samp{xpsr}.
 The @samp{org.gnu.gdb.arm.fpa} feature is optional.  If present, it
 should contain registers @samp{f0} through @samp{f7} and @samp{fps}.
 
+The @samp{org.gnu.gdb.arm.m-profile-mve} feature is optional.  If present, it
+must contain register @samp{vpr}.
+
+If the @samp{org.gnu.gdb.arm.m-profile-mve} feature is available, @value{GDBN}
+will synthesize the @samp{p0} pseudo register from @samp{vpr} contents.
+
+If the @samp{org.gnu.gdb.arm.vfp} feature is available alongside the
+@samp{org.gnu.gdb.arm.m-profile-mve} feature, @value{GDBN} will
+synthesize the @samp{q} pseudo registers from @samp{d} register
+contents.
+
 The @samp{org.gnu.gdb.xscale.iwmmxt} feature is optional.  If present,
 it should contain at least registers @samp{wR0} through @samp{wR15} and
 @samp{wCGR0} through @samp{wCGR3}.  The @samp{wCID}, @samp{wCon},
