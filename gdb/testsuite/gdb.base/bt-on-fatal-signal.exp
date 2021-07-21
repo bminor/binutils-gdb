@@ -135,3 +135,39 @@ foreach test_data {{SEGV "Segmentation fault"} \
 	gdb_exit
     }
 }
+
+# Check that when we get an internal error and choose to dump core, we
+# don't print a backtrace to the console.
+with_test_prefix "internal-error" {
+    # Restart GDB.
+    clean_restart $binfile
+
+    set saw_bt_start false
+
+    gdb_test_multiple "maint internal-error foo" "" {
+	-early -re "internal-error: foo\r\n" {
+	    exp_continue
+	}
+	-early -re "^A problem internal to GDB has been detected,\r\n" {
+	    exp_continue
+	}
+	-early -re "^further debugging may prove unreliable\\.\r\n" {
+	    exp_continue
+	}
+	-early -re "^Quit this debugging session\\? \\(y or n\\)" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+	-early -re "^Create a core file of GDB\\? \\(y or n\\)" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+	-early -re "----- Backtrace -----\r\n" {
+	    set saw_bt_start true
+	    exp_continue
+	}
+	eof {
+	    gdb_assert { [expr ! $saw_bt_start] }
+	}
+    }
+}

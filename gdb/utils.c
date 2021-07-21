@@ -201,6 +201,11 @@ dump_core (void)
   setrlimit (RLIMIT_CORE, &rlim);
 #endif /* HAVE_SETRLIMIT */
 
+  /* Ensure that the SIGABRT we're about to raise will immediately cause
+     GDB to exit and dump core, we don't want to trigger GDB's printing of
+     a backtrace to the console here.  */
+  signal (SIGABRT, SIG_DFL);
+
   abort ();		/* ARI: abort */
 }
 
