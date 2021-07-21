@@ -5474,6 +5474,8 @@ parentheses.  The following types are defined:
 @item NOLOAD
 The section should be marked as not loadable, so that it will not be
 loaded into memory when the program is run.
+@item READONLY
+The section should be marked as read-only.
 @item DSECT
 @itemx COPY
 @itemx INFO

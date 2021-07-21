@@ -139,6 +139,7 @@ static int error_index;
 %token REGION_ALIAS
 %token LD_FEATURE
 %token NOLOAD DSECT COPY INFO OVERLAY
+%token READONLY
 %token DEFINED TARGET_K SEARCH_DIR MAP ENTRY
 %token <integer> NEXT
 %token SIZEOF ALIGNOF ADDR LOADADDR MAX_K MIN_K
@@ -1123,6 +1124,7 @@ type:
 	|  COPY    { sectype = noalloc_section; }
 	|  INFO    { sectype = noalloc_section; }
 	|  OVERLAY { sectype = noalloc_section; }
+	|  READONLY { sectype = readonly_section; }
 	;
 
 atype:
