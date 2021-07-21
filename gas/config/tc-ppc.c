@@ -7476,7 +7476,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
     }
   reloc->addend = fixp->fx_addnumber;
 
-  if (fixp->fx_subsy && fixp->fx_addsy)
+  if (fixp->fx_subsy != NULL)
     {
       relocs[1] = reloc = XNEW (arelent);
       relocs[2] = NULL;
@@ -7490,9 +7490,11 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 
       if (reloc->howto == (reloc_howto_type *) NULL)
         {
-          as_bad_where (fixp->fx_file, fixp->fx_line,
-            _("reloc %d not supported by object file format"),
-            BFD_RELOC_PPC_NEG);
+	  as_bad_subtract (fixp);
+	  free (relocs[1]->sym_ptr_ptr);
+	  free (relocs[1]);
+	  free (relocs[0]->sym_ptr_ptr);
+	  free (relocs[0]);
 	  relocs[0] = NULL;
         }
     }

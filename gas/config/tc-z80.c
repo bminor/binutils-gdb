@@ -3853,7 +3853,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED , fixS *fixp)
 
   if (fixp->fx_subsy != NULL)
     {
-      as_bad_where (fixp->fx_file, fixp->fx_line, _("expression too complex"));
+      as_bad_subtract (fixp);
       return NULL;
     }
 

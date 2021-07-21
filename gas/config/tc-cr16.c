@@ -573,14 +573,10 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS * fixP)
       else
 	{
 	  /* We only resolve difference expressions in the same section.  */
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("can't resolve `%s' {%s section} - `%s' {%s section}"),
-			fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
-			segment_name (fixP->fx_addsy
-				      ? S_GET_SEGMENT (fixP->fx_addsy)
-				      : absolute_section),
-			S_GET_NAME (fixP->fx_subsy),
-			segment_name (S_GET_SEGMENT (fixP->fx_addsy)));
+	  as_bad_subtract (fixP);
+	  free (reloc->sym_ptr_ptr);
+	  free (reloc);
+	  return NULL;
 	}
     }
 #ifdef OBJ_ELF

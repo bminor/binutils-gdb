@@ -899,6 +899,15 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
   dump_section_relocs (abfd, sec, stderr);
 }
 
+void
+as_bad_subtract (fixS *fixp)
+{
+  as_bad_where (fixp->fx_file, fixp->fx_line,
+		_("can't resolve %s - %s"),
+		fixp->fx_addsy ? S_GET_NAME (fixp->fx_addsy) : "0",
+		S_GET_NAME (fixp->fx_subsy));
+}
+
 /* fixup_segment()
 
    Go through all the fixS's in a segment and see which ones can be
@@ -1021,12 +1030,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 		as_bad_where (fixP->fx_file, fixP->fx_line,
 			      _("register value used as expression"));
 	      else
-		as_bad_where (fixP->fx_file, fixP->fx_line,
-			      _("can't resolve `%s' {%s section} - `%s' {%s section}"),
-			      fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
-			      segment_name (add_symbol_segment),
-			      S_GET_NAME (fixP->fx_subsy),
-			      segment_name (sub_symbol_segment));
+		as_bad_subtract (fixP);
 	    }
 	  else if (sub_symbol_segment != undefined_section
 		   && ! bfd_is_com_section (sub_symbol_segment)

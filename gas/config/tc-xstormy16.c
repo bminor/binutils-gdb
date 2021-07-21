@@ -479,7 +479,7 @@ xstormy16_md_apply_fix (fixS *   fixP,
 
   /* We don't actually support subtracting a symbol.  */
   if (fixP->fx_subsy != (symbolS *) NULL)
-    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+    as_bad_subtract (fixP);
 
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
     {

@@ -1548,7 +1548,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
              fixP->fx_r_type = BFD_RELOC_AVR_DIFF32;
              break;
            default:
-             as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+             as_bad_subtract (fixP);
              break;
          }
 
@@ -1560,7 +1560,7 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
   }
   /* We don't actually support subtracting a symbol.  */
   if (fixP->fx_subsy != (symbolS *) NULL)
-    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+    as_bad_subtract (fixP);
 
   /* For the DIFF relocs, write the value into the object file while still
      keeping fx_done FALSE, as both the difference (recorded in the object file)
@@ -1824,7 +1824,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED,
 
   if (fixp->fx_subsy != NULL)
     {
-      as_bad_where (fixp->fx_file, fixp->fx_line, _("expression too complex"));
+      as_bad_subtract (fixp);
       return NULL;
     }
 

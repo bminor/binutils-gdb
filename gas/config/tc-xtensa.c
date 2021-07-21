@@ -6006,7 +6006,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
   if (fixP->fx_subsy && !(linkrelax && (fixP->fx_r_type == BFD_RELOC_32
 					|| fixP->fx_r_type == BFD_RELOC_16
 					|| fixP->fx_r_type == BFD_RELOC_8)))
-    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+    as_bad_subtract (fixP);
 
   switch (fixP->fx_r_type)
     {

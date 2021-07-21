@@ -742,8 +742,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  diffval /= 4;
 	  break;
 	default:
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("expression too complex"));
+	  as_bad_subtract (fixP);
 	  break;
 	}
 
@@ -753,7 +752,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   }
   /* We don't actually support subtracting a symbol.  */
   if (fixP->fx_subsy != (symbolS *) NULL)
-    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+    as_bad_subtract (fixP);
 
   /* For the DIFF relocs, write the value into the object file while still
      keeping fx_done FALSE, as both the difference (recorded in the object file)

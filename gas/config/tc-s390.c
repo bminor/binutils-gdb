@@ -2254,10 +2254,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   where = fixP->fx_frag->fr_literal + fixP->fx_where;
 
   if (fixP->fx_subsy != NULL)
-    as_bad_where (fixP->fx_file, fixP->fx_line,
-		  _("cannot emit relocation %s against subsy symbol %s"),
-		  bfd_get_reloc_code_name (fixP->fx_r_type),
-		  S_GET_NAME (fixP->fx_subsy));
+    as_bad_subtract (fixP);
 
   if (fixP->fx_addsy != NULL)
     {

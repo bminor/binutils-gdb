@@ -3201,8 +3201,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     }
 
   if (fixP->fx_subsy != NULL)
-    as_bad_where (fixP->fx_file, fixP->fx_line,
-		  _("unsupported symbol subtraction"));
+    as_bad_subtract (fixP);
 
   /* Add an R_RISCV_RELAX reloc if the reloc is relaxable.  */
   if (relaxable && fixP->fx_tcbit && fixP->fx_addsy != NULL)

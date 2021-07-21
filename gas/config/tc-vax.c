@@ -279,7 +279,7 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
   valueT value = * valueP;
 
   if (fixP->fx_subsy != (symbolS *) NULL)
-    as_bad_where (fixP->fx_file, fixP->fx_line, _("expression too complex"));
+    as_bad_subtract (fixP);
 
   if (fixP->fx_addsy == NULL)
     fixP->fx_done = 1;

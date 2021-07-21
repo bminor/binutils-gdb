@@ -7825,8 +7825,7 @@ nds32_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  /* cvt_frag_to_fill () has called output_leb128 () for us.  */
 	  break;
 	default:
-	  as_bad_where (fixP->fx_file, fixP->fx_line,
-			_("expression too complex"));
+	  as_bad_subtract (fixP);
 	  return;
 	}
     }
