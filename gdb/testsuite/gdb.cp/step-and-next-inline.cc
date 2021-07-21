@@ -41,7 +41,7 @@ tree_check (tree *t, int i)
     abort();
   tree *x = t;
   return x;
-}
+} // tree-check
 
 #endif	/* USE_NEXT_INLINE_H */
 
@@ -54,7 +54,7 @@ get_alias_set (tree *t)
       && TREE_TYPE (t).z != 3)
     return 0;
   return 1;
-}
+} // get_alias_set
 
 tree xx;
 
@@ -63,4 +63,4 @@ main()
 {
   get_alias_set (&xx);
   return 0;
-}
+} // main
