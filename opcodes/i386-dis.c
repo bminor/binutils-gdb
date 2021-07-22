@@ -9316,7 +9316,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	  /* In 16/32-bit mode silently ignore following bits.  */
 	  rex &= ~REX_B;
 	  vex.r = 1;
-	  vex.v = 1;
 	}
 
       need_vex = 1;
@@ -11718,8 +11717,13 @@ OP_E_memory (int bytemode, int sizeflag)
 		      *obufp = '\0';
 		    }
 		  if (haveindex)
-		    oappend (address_mode == mode_64bit && !addr32flag
-			     ? indexes64[vindex] : indexes32[vindex]);
+		    {
+		      if (address_mode == mode_64bit || vindex < 16)
+			oappend (address_mode == mode_64bit && !addr32flag
+				 ? indexes64[vindex] : indexes32[vindex]);
+		      else
+			oappend ("(bad)");
+		    }
 		  else
 		    oappend (address_mode == mode_64bit && !addr32flag
 			     ? index64 : index32);
@@ -13256,7 +13260,15 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   reg = vex.register_specifier;
   vex.register_specifier = 0;
   if (address_mode != mode_64bit)
-    reg &= 7;
+    {
+      if (vex.evex && !vex.v)
+	{
+	  oappend ("(bad)");
+	  return;
+	}
+
+      reg &= 7;
+    }
   else if (vex.evex && !vex.v)
     reg += 16;
 
