@@ -1538,8 +1538,8 @@ struct index_wip_file
 
     filename_temp = make_temp_filename (filename);
 
-    scoped_fd out_file_fd (gdb_mkostemp_cloexec (filename_temp.data (),
-						 O_BINARY));
+    scoped_fd out_file_fd = gdb_mkostemp_cloexec (filename_temp.data (),
+						  O_BINARY);
     if (out_file_fd.get () == -1)
       perror_with_name (("mkstemp"));
 

@@ -1833,7 +1833,7 @@ copy_shell_to_cache (const char *shell, const std::string &new_name)
 	   new_dir.c_str (), safe_strerror (errno));
 
   gdb::char_vector temp_name = make_temp_filename (new_name);
-  scoped_fd to_fd (gdb_mkostemp_cloexec (&temp_name[0]));
+  scoped_fd to_fd = gdb_mkostemp_cloexec (&temp_name[0]);
   gdb::unlinker unlink_file_on_error (temp_name.data ());
 
   if (to_fd.get () < 0)

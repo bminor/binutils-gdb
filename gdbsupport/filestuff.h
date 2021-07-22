@@ -54,11 +54,11 @@ extern scoped_fd gdb_open_cloexec (const char *filename, int flags,
 /* Like mkstemp, but ensures that the file descriptor is
    close-on-exec.  */
 
-static inline int
+static inline scoped_fd
 gdb_mkostemp_cloexec (char *name_template, int flags = 0)
 {
   /* gnulib provides a mkostemp replacement if needed.  */
-  return mkostemp (name_template, flags | O_CLOEXEC);
+  return scoped_fd (mkostemp (name_template, flags | O_CLOEXEC));
 }
 
 /* Convenience wrapper for the above, which takes the filename as an
