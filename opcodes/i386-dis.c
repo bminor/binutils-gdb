@@ -11934,6 +11934,13 @@ OP_G (int bytemode, int sizeflag)
 {
   int add = 0;
   const char **names;
+
+  if (vex.evex && !vex.r && address_mode == mode_64bit)
+    {
+      oappend ("(bad)");
+      return;
+    }
+
   USED_REX (REX_R);
   if (rex & REX_R)
     add += 8;
@@ -12012,7 +12019,7 @@ OP_G (int bytemode, int sizeflag)
       break;
     case mask_bd_mode:
     case mask_mode:
-      if (add || (vex.evex && !vex.r))
+      if (add)
 	{
 	  oappend ("(bad)");
 	  return;
