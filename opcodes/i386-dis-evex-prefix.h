@@ -30,7 +30,7 @@
     { Bad_Opcode },
     { "vcvtsi2ss{%LQ|}",	{ XMScalar, VexScalar, EXxEVexR, Edq }, 0 },
     { Bad_Opcode },
-    { VEX_W_TABLE (EVEX_W_0F2A_P_3) },
+    { "vcvtsi2sd{%LQ|}",	{ XMScalar, VexScalar, EXxEVexR64, Edq }, 0 },
   },
   /* PREFIX_EVEX_0F51 */
   {
@@ -134,7 +134,7 @@
     { Bad_Opcode },
     { "vcvtusi2ss{%LQ|}",	{ XMScalar, VexScalar, EXxEVexR, Edq }, 0 },
     { VEX_W_TABLE (EVEX_W_0F7B_P_2) },
-    { VEX_W_TABLE (EVEX_W_0F7B_P_3) },
+    { "vcvtusi2sd{%LQ|}",	{ XMScalar, VexScalar, EXxEVexR64, Edq }, 0 },
   },
   /* PREFIX_EVEX_0F7E */
   {

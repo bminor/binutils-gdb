@@ -1476,7 +1476,6 @@ enum
   EVEX_W_0F12_P_3,
   EVEX_W_0F16_P_0_M_1,
   EVEX_W_0F16_P_1,
-  EVEX_W_0F2A_P_3,
   EVEX_W_0F51_P_1,
   EVEX_W_0F51_P_3,
   EVEX_W_0F58_P_1,
@@ -1521,7 +1520,6 @@ enum
   EVEX_W_0F7A_P_2,
   EVEX_W_0F7A_P_3,
   EVEX_W_0F7B_P_2,
-  EVEX_W_0F7B_P_3,
   EVEX_W_0F7E_P_1,
   EVEX_W_0F7F_P_1,
   EVEX_W_0F7F_P_2,
@@ -13724,7 +13722,7 @@ OP_Rounding (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     switch (bytemode)
       {
       case evex_rounding_64_mode:
-	if (address_mode != mode_64bit)
+	if (address_mode != mode_64bit || !vex.w)
 	  {
 	    oappend ("(bad)");
 	    break;

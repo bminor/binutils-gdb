@@ -929,6 +929,7 @@ if [gas_64_check] then {
     run_dump_test "x86-64-avx512er-intel"
     run_dump_test "x86-64-avx512pf"
     run_dump_test "x86-64-avx512pf-intel"
+    run_dump_test "x86-64-evex"
     run_dump_test "x86-64-evex-lig256"
     run_dump_test "x86-64-evex-lig512"
     run_dump_test "x86-64-evex-lig256-intel"

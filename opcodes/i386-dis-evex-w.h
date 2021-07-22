@@ -37,11 +37,6 @@
   {
     { "vmovshdup",	{ XM, EXx }, 0 },
   },
-  /* EVEX_W_0F2A_P_3 */
-  {
-    { "vcvtsi2sd{%LQ|}",	{ XMScalar, VexScalar, Ed }, 0 },
-    { "vcvtsi2sd{%LQ|}",	{ XMScalar, VexScalar, EXxEVexR64, Edq }, 0 },
-  },
   /* EVEX_W_0F51_P_1 */
   {
     { "vsqrtss",	{ XMScalar, VexScalar, EXxmm_md, EXxEVexR }, 0 },
@@ -242,11 +237,6 @@
   {
     { "vcvtps2qq",	{ XM, EXEvexHalfBcstXmmq, EXxEVexR }, 0 },
     { "vcvtpd2qq",	{ XM, EXx, EXxEVexR }, 0 },
-  },
-  /* EVEX_W_0F7B_P_3 */
-  {
-    { "vcvtusi2sd{%LQ|}",	{ XMScalar, VexScalar, Ed }, 0 },
-    { "vcvtusi2sd{%LQ|}",	{ XMScalar, VexScalar, EXxEVexR64, Edq }, 0 },
   },
   /* EVEX_W_0F7E_P_1 */
   {
