@@ -1156,6 +1156,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
 
 static struct riscv_supported_ext riscv_supported_std_s_ext[] =
 {
+  {"svinval",		ISA_SPEC_CLASS_DRAFT,	0, 1, 0 },		/* draft.  */
   {NULL, 0, 0, 0, 0}
 };
 

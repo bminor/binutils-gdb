@@ -288,6 +288,10 @@ riscv_extended_subset_supports (int insn_class)
       return riscv_subset_supports ("d") && riscv_subset_supports ("zfh");
     case INSN_CLASS_Q_AND_ZFH:
       return riscv_subset_supports ("q") && riscv_subset_supports ("zfh");
+
+    case INSN_CLASS_SVINVAL:
+      return riscv_subset_supports ("svinval");
+
     default:
       as_fatal ("internal: unknown INSN_CLASS (0x%x)", insn_class);
       return false;

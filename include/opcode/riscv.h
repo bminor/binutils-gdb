@@ -504,6 +504,7 @@ enum riscv_extended_insn_class
   INSN_CLASS_ZFH,
   INSN_CLASS_D_AND_ZFH,
   INSN_CLASS_Q_AND_ZFH,
+  INSN_CLASS_SVINVAL,
 };
 
 /* This is a list of macro expanded instructions for extended
