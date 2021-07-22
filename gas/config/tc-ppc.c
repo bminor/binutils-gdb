@@ -5680,7 +5680,6 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
   if (cpu_string != NULL)
     {
       ppc_cpu_t old_cpu = ppc_cpu;
-      ppc_cpu_t new_cpu;
       char *p;
 
       for (p = cpu_string; *p != 0; p++)
@@ -5703,10 +5702,23 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
 	  else
 	    ppc_cpu = cpu_history[--curr_hist];
 	}
-      else if ((new_cpu = ppc_parse_cpu (ppc_cpu, &sticky, cpu_string)) != 0)
-	ppc_cpu = new_cpu;
       else
-	as_bad (_("invalid machine `%s'"), cpu_string);
+	{
+	  ppc_cpu_t new_cpu;
+	  /* Not using the global "sticky" variable here results in
+	     none of the extra functional unit command line options,
+	     -many, -maltivec, -mspe, -mspe2, -mvle, -mvsx, being in
+	     force after selecting a new cpu with .machine.
+	     ".machine altivec" and other extra functional unit
+	     options do not count as a new machine, instead they add
+	     to currently selected opcodes.  */
+	  ppc_cpu_t machine_sticky = 0;
+	  new_cpu = ppc_parse_cpu (ppc_cpu, &machine_sticky, cpu_string);
+	  if (new_cpu != 0)
+	    ppc_cpu = new_cpu;
+	  else
+	    as_bad (_("invalid machine `%s'"), cpu_string);
+	}
 
       if (ppc_cpu != old_cpu)
 	ppc_setup_opcodes ();
