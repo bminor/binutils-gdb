@@ -1725,6 +1725,13 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vmv4r.v",    0, INSN_CLASS_V, "Vd,Vt", MATCH_VMV4RV, MASK_VMV4RV, match_opcode, 0},
 {"vmv8r.v",    0, INSN_CLASS_V, "Vd,Vt", MATCH_VMV8RV, MASK_VMV8RV, match_opcode, 0},
 
+/* Svinval instructions.  */
+{"sinval.vma",      0, INSN_CLASS_SVINVAL, "s,t", MATCH_SINVAL_VMA, MASK_SINVAL_VMA, match_opcode, 0 },
+{"sfence.w.inval",  0, INSN_CLASS_SVINVAL, "",    MATCH_SFENCE_W_INVAL, MASK_SFENCE_W_INVAL, match_opcode, 0 },
+{"sfence.inval.ir", 0, INSN_CLASS_SVINVAL, "",    MATCH_SFENCE_INVAL_IR, MASK_SFENCE_INVAL_IR, match_opcode, 0 },
+{"hinval.vvma",     0, INSN_CLASS_SVINVAL, "s,t", MATCH_HINVAL_VVMA, MASK_HINVAL_VVMA, match_opcode, 0 },
+{"hinval.gvma",     0, INSN_CLASS_SVINVAL, "s,t", MATCH_HINVAL_GVMA, MASK_HINVAL_GVMA, match_opcode, 0 },
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };
