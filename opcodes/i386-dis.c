@@ -116,8 +116,6 @@ static void FXSAVE_Fixup (int, int);
 
 static void MOVSXD_Fixup (int, int);
 
-static void OP_Mask (int, int);
-
 struct dis_private {
   /* Points to first byte not fetched.  */
   bfd_byte *max_fetched;
@@ -406,7 +404,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXxEVexR64 { OP_Rounding, evex_rounding_64_mode }
 #define EXxEVexS { OP_Rounding, evex_sae_mode }
 
-#define XMask { OP_Mask, mask_mode }
 #define MaskG { OP_G, mask_mode }
 #define MaskE { OP_E, mask_mode }
 #define MaskBDE { OP_E, mask_bd_mode }
@@ -12017,12 +12014,12 @@ OP_G (int bytemode, int sizeflag)
       break;
     case mask_bd_mode:
     case mask_mode:
-      if ((modrm.reg + add) > 0x7)
+      if (add || (vex.evex && !vex.r))
 	{
 	  oappend ("(bad)");
 	  return;
 	}
-      oappend (names_mask[modrm.reg + add]);
+      oappend (names_mask[modrm.reg]);
       break;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);
@@ -13718,23 +13715,6 @@ MOVSXD_Fixup (int bytemode, int sizeflag)
   mnemonicendp = p;
   *p = '\0';
   OP_E (bytemode, sizeflag);
-}
-
-static void
-OP_Mask (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
-{
-  if (!vex.evex
-      || (bytemode != mask_mode && bytemode != mask_bd_mode))
-    abort ();
-
-  USED_REX (REX_R);
-  if ((rex & REX_R) != 0 || !vex.r)
-    {
-      BadOp ();
-      return;
-    }
-
-  oappend (names_mask [modrm.reg]);
 }
 
 static void

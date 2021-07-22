@@ -142,7 +142,7 @@
   },
   /* EVEX_W_0F66 */
   {
-    { "vpcmpgtd",	{ XMask, Vex, EXx }, PREFIX_DATA },
+    { "vpcmpgtd",	{ MaskG, Vex, EXx }, PREFIX_DATA },
   },
   /* EVEX_W_0F6A */
   {
@@ -201,7 +201,7 @@
   },
   /* EVEX_W_0F76 */
   {
-    { "vpcmpeqd",	{ XMask, Vex, EXx }, PREFIX_DATA },
+    { "vpcmpeqd",	{ MaskG, Vex, EXx }, PREFIX_DATA },
   },
   /* EVEX_W_0F78_P_0 */
   {
@@ -270,12 +270,12 @@
   },
   /* EVEX_W_0FC2_P_1 */
   {
-    { "vcmpss",	{ XMask, VexScalar, EXxmm_md, EXxEVexS, CMP }, 0 },
+    { "vcmpss",	{ MaskG, VexScalar, EXxmm_md, EXxEVexS, CMP }, 0 },
   },
   /* EVEX_W_0FC2_P_3 */
   {
     { Bad_Opcode },
-    { "vcmpsd",	{ XMask, VexScalar, EXxmm_mq, EXxEVexS, CMP }, 0 },
+    { "vcmpsd",	{ MaskG, VexScalar, EXxmm_mq, EXxEVexS, CMP }, 0 },
   },
   /* EVEX_W_0FD2 */
   {
@@ -450,7 +450,7 @@
   /* EVEX_W_0F3829_P_2 */
   {
     { Bad_Opcode },
-    { "vpcmpeqq",	{ XMask, Vex, EXx }, 0 },
+    { "vpcmpeqq",	{ MaskG, Vex, EXx }, 0 },
   },
   /* EVEX_W_0F382A_P_1 */
   {
@@ -496,7 +496,7 @@
   /* EVEX_W_0F3837 */
   {
     { Bad_Opcode },
-    { "vpcmpgtq",	{ XMask, Vex, EXx }, PREFIX_DATA },
+    { "vpcmpgtq",	{ MaskG, Vex, EXx }, PREFIX_DATA },
   },
   /* EVEX_W_0F383A_P_1 */
   {

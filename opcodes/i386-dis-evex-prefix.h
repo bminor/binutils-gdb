@@ -151,9 +151,9 @@
   },
   /* PREFIX_EVEX_0FC2 */
   {
-    { "vcmppX",	{ XMask, Vex, EXx, EXxEVexS, CMP }, PREFIX_OPCODE },
+    { "vcmppX",	{ MaskG, Vex, EXx, EXxEVexS, CMP }, PREFIX_OPCODE },
     { VEX_W_TABLE (EVEX_W_0FC2_P_1) },
-    { "vcmppX",	{ XMask, Vex, EXx, EXxEVexS, CMP }, PREFIX_OPCODE },
+    { "vcmppX",	{ MaskG, Vex, EXx, EXxEVexS, CMP }, PREFIX_OPCODE },
     { VEX_W_TABLE (EVEX_W_0FC2_P_3) },
   },
   /* PREFIX_EVEX_0FE6 */
@@ -238,14 +238,14 @@
   /* PREFIX_EVEX_0F3826 */
   {
     { Bad_Opcode },
-    { "vptestnm%BW",	{ XMask, Vex, EXx }, 0 },
-    { "vptestm%BW",	{ XMask, Vex, EXx }, 0 },
+    { "vptestnm%BW",	{ MaskG, Vex, EXx }, 0 },
+    { "vptestm%BW",	{ MaskG, Vex, EXx }, 0 },
   },
   /* PREFIX_EVEX_0F3827 */
   {
     { Bad_Opcode },
-    { "vptestnm%DQ",	{ XMask, Vex, EXx }, 0 },
-    { "vptestm%DQ",	{ XMask, Vex, EXx }, 0 },
+    { "vptestnm%DQ",	{ MaskG, Vex, EXx }, 0 },
+    { "vptestm%DQ",	{ MaskG, Vex, EXx }, 0 },
   },
   /* PREFIX_EVEX_0F3828 */
   {
@@ -256,7 +256,7 @@
   /* PREFIX_EVEX_0F3829 */
   {
     { Bad_Opcode },
-    { "vpmov%BW2m",	{ XMask, EXx }, 0 },
+    { "vpmov%BW2m",	{ MaskG, EXx }, 0 },
     { VEX_W_TABLE (EVEX_W_0F3829_P_2) },
   },
   /* PREFIX_EVEX_0F382A */
@@ -310,7 +310,7 @@
   /* PREFIX_EVEX_0F3839 */
   {
     { Bad_Opcode },
-    { "vpmov%DQ2m",	{ XMask, EXx }, 0 },
+    { "vpmov%DQ2m",	{ MaskG, EXx }, 0 },
     { "vpmins%DQ",	{ XM, Vex, EXx }, 0 },
   },
   /* PREFIX_EVEX_0F383A */
@@ -338,7 +338,7 @@
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vp2intersect%DQ", { XMask, Vex, EXx, EXxEVexS }, 0 },
+    { "vp2intersect%DQ", { MaskG, Vex, EXx, EXxEVexS }, 0 },
   },
   /* PREFIX_EVEX_0F3872 */
   {
