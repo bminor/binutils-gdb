@@ -384,10 +384,10 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define XMM0 { XMM_Fixup, 0 }
 #define FXSAVE { FXSAVE_Fixup, 0 }
 
-#define Vex { OP_VEX, vex_mode }
-#define VexW { OP_VexW, vex_mode }
-#define VexScalar { OP_VEX, vex_scalar_mode }
-#define VexScalarR { OP_VexR, vex_scalar_mode }
+#define Vex { OP_VEX, x_mode }
+#define VexW { OP_VexW, x_mode }
+#define VexScalar { OP_VEX, scalar_mode }
+#define VexScalarR { OP_VexR, scalar_mode }
 #define VexGatherD { OP_VEX, vex_vsib_d_w_dq_mode }
 #define VexGatherQ { OP_VEX, vex_vsib_q_w_dq_mode }
 #define VexGdq { OP_VEX, dq_mode }
@@ -546,8 +546,6 @@ enum
   dw_mode,
   /* registers like dq_mode, memory like d_mode.  */
   dqd_mode,
-  /* normal vex mode */
-  vex_mode,
 
   /* Operand size depends on the VEX.W bit, with VSIB dword indices.  */
   vex_vsib_d_w_dq_mode,
@@ -558,8 +556,6 @@ enum
 
   /* scalar, ignore vector length.  */
   scalar_mode,
-  /* like vex_mode, ignore vector length.  */
-  vex_scalar_mode,
   /* Operand size depends on the VEX.W bit, ignore vector length.  */
   vex_scalar_w_dq_mode,
 
@@ -13274,7 +13270,7 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 
   switch (bytemode)
     {
-    case vex_scalar_mode:
+    case scalar_mode:
       oappend (names_xmm[reg]);
       return;
 
@@ -13343,7 +13339,7 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     case 128:
       switch (bytemode)
 	{
-	case vex_mode:
+	case x_mode:
 	  names = names_xmm;
 	  break;
 	case dq_mode:
@@ -13369,7 +13365,7 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     case 256:
       switch (bytemode)
 	{
-	case vex_mode:
+	case x_mode:
 	  names = names_ymm;
 	  break;
 	case mask_bd_mode:
