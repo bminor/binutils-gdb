@@ -13601,31 +13601,25 @@ MOVSXD_Fixup (int bytemode, int sizeflag)
   switch (bytemode)
     {
     case movsxd_mode:
-      if (intel_syntax)
+      if (!intel_syntax)
 	{
-	  *p++ = 'x';
-	  *p++ = 'd';
-	  goto skip;
+	  USED_REX (REX_W);
+	  if (rex & REX_W)
+	    {
+	      *p++ = 'l';
+	      *p++ = 'q';
+	      break;
+	    }
 	}
 
-      USED_REX (REX_W);
-      if (rex & REX_W)
-	{
-	  *p++ = 'l';
-	  *p++ = 'q';
-	}
-      else
-	{
-	  *p++ = 'x';
-	  *p++ = 'd';
-	}
+      *p++ = 'x';
+      *p++ = 'd';
       break;
     default:
       oappend (INTERNAL_DISASSEMBLER_ERROR);
       break;
     }
 
- skip:
   mnemonicendp = p;
   *p = '\0';
   OP_E (bytemode, sizeflag);
