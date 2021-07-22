@@ -496,12 +496,27 @@ if ![runto_main] then {
 runto [gdb_get_line_number "Break at func2 call site."]
 
 gdb_py_test_silent_cmd "python line = gdb.selected_frame().find_sal().line" "Get line number of func2 call site" 1
+
+gdb_py_test_silent_cmd "python pc_call = gdb.selected_frame().pc()" \
+    "Get pc of func2 call site" 1
+
 gdb_test "python print (gdb.find_pc_line(gdb.selected_frame().pc()).line == line)" "True" "test find_pc_line at func2 call site"
 
 gdb_py_test_silent_cmd "step" "Step into func2" 1
 gdb_py_test_silent_cmd "up" "Step out of func2" 1
 
-gdb_test "python print (gdb.find_pc_line(gdb.selected_frame().pc()).line > line)" "True" "test find_pc_line with resume address"
+# The point of the following test is to see if gdb has advanced past the
+# location where the branch to a function was made.
+set test_name "test find_pc_line with resume address"
+
+gdb_py_test_silent_cmd "python pc_rtn = gdb.selected_frame().pc()" \
+    "Get pc at func2 return site" 1
+
+gdb_test "python print (pc_rtn > pc_call)" "True" \
+    "test resume address greater then call address"
+
+gdb_test "python print (gdb.find_pc_line(pc_rtn).line >= line)" "True" \
+    "test find_pc_line with resume address"
 
 gdb_test_no_output "set variable \$cvar1 = 23" "set convenience variable"
 gdb_test "python print(gdb.convenience_variable('cvar1'))" "23"
