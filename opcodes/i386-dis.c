@@ -240,11 +240,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EvS { OP_E, v_swap_mode }
 #define Ed { OP_E, d_mode }
 #define Edq { OP_E, dq_mode }
-#define Edqw { OP_E, dqw_mode }
-#define Edqb { OP_E, dqb_mode }
 #define Edb { OP_E, db_mode }
 #define Edw { OP_E, dw_mode }
-#define Edqd { OP_E, dqd_mode }
 #define Eq { OP_E, q_mode }
 #define indirEv { OP_indirE, indir_v_mode }
 #define indirEp { OP_indirE, f_mode }
@@ -509,8 +506,7 @@ enum
   v_bndmk_mode,
   /* operand size depends on REX.W / VEX.W.  */
   dq_mode,
-  /* registers like dq_mode, memory like w_mode, displacements like
-     v_mode without considering Intel64 ISA.  */
+  /* Displacements like v_mode without considering Intel64 ISA.  */
   dqw_mode,
   /* bounds operand */
   bnd_mode,
@@ -527,14 +523,10 @@ enum
   z_mode,
   /* 16-byte operand */
   o_mode,
-  /* registers like dq_mode, memory like b_mode.  */
-  dqb_mode,
   /* registers like d_mode, memory like b_mode.  */
   db_mode,
   /* registers like d_mode, memory like w_mode.  */
   dw_mode,
-  /* registers like dq_mode, memory like d_mode.  */
-  dqd_mode,
 
   /* Operand size depends on the VEX.W bit, with VSIB dword indices.  */
   vex_vsib_d_w_dq_mode,
@@ -2182,8 +2174,8 @@ static const struct dis386 dis386_twobyte[] = {
   { "xaddS",		{ Evh1, Gv }, 0 },
   { PREFIX_TABLE (PREFIX_0FC2) },
   { MOD_TABLE (MOD_0FC3) },
-  { "pinsrw",		{ MX, Edqw, Ib }, PREFIX_OPCODE },
-  { "pextrw",		{ Gdq, MS, Ib }, PREFIX_OPCODE },
+  { "pinsrw",		{ MX, Edw, Ib }, PREFIX_OPCODE },
+  { "pextrw",		{ Gd, MS, Ib }, PREFIX_OPCODE },
   { "shufpX",		{ XM, EXx, Ib }, PREFIX_OPCODE },
   { REG_TABLE (REG_0FC7) },
   /* c8 */
@@ -4687,10 +4679,10 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "pextrb",	{ Edqb, XM, Ib }, PREFIX_DATA },
-    { "pextrw",	{ Edqw, XM, Ib }, PREFIX_DATA },
+    { "pextrb",	{ Edb, XM, Ib }, PREFIX_DATA },
+    { "pextrw",	{ Edw, XM, Ib }, PREFIX_DATA },
     { "pextrK",	{ Edq, XM, Ib }, PREFIX_DATA },
-    { "extractps", { Edqd, XM, Ib }, PREFIX_DATA },
+    { "extractps", { Ed, XM, Ib }, PREFIX_DATA },
     /* 18 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -4701,7 +4693,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 20 */
-    { "pinsrb",	{ XM, Edqb, Ib }, PREFIX_DATA },
+    { "pinsrb",	{ XM, Edb, Ib }, PREFIX_DATA },
     { "insertps", { XM, EXd, Ib }, PREFIX_DATA },
     { "pinsrK",	{ XM, Edq, Ib }, PREFIX_DATA },
     { Bad_Opcode },
@@ -6850,12 +6842,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0FC4 */
   {
-    { "vpinsrw",	{ XM, Vex, Edqw, Ib }, PREFIX_DATA },
+    { "vpinsrw",	{ XM, Vex, Edw, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0FC5 */
   {
-    { "vpextrw",	{ Gdq, XS, Ib }, PREFIX_DATA },
+    { "vpextrw",	{ Gd, XS, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0FD6 */
@@ -7012,12 +7004,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A14 */
   {
-    { "vpextrb",	{ Edqb, XM, Ib }, PREFIX_DATA },
+    { "vpextrb",	{ Edb, XM, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A15 */
   {
-    { "vpextrw",	{ Edqw, XM, Ib }, PREFIX_DATA },
+    { "vpextrw",	{ Edw, XM, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A16  */
@@ -7027,7 +7019,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A17 */
   {
-    { "vextractps",	{ Edqd, XM, Ib }, PREFIX_DATA },
+    { "vextractps",	{ Ed, XM, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A18 */
@@ -7044,7 +7036,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A20 */
   {
-    { "vpinsrb",	{ XM, Vex, Edqb, Ib }, PREFIX_DATA },
+    { "vpinsrb",	{ XM, Vex, Edb, Ib }, PREFIX_DATA },
   },
 
   /* VEX_LEN_0F3A21 */
@@ -10957,13 +10949,11 @@ intel_operand_size (int bytemode, int sizeflag)
     {
     case b_mode:
     case b_swap_mode:
-    case dqb_mode:
     case db_mode:
       oappend ("BYTE PTR ");
       break;
     case w_mode:
     case dw_mode:
-    case dqw_mode:
       oappend ("WORD PTR ");
       break;
     case indir_v_mode:
@@ -11020,7 +11010,6 @@ intel_operand_size (int bytemode, int sizeflag)
       break;
     case d_mode:
     case d_swap_mode:
-    case dqd_mode:
       oappend ("DWORD PTR ");
       break;
     case q_mode:
@@ -11263,9 +11252,6 @@ print_register (unsigned int reg, unsigned int rexmask, int bytemode, int sizefl
     case v_mode:
     case v_swap_mode:
     case dq_mode:
-    case dqb_mode:
-    case dqd_mode:
-    case dqw_mode:
       USED_REX (REX_W);
       if (rex & REX_W)
 	names = names64;
@@ -11340,12 +11326,10 @@ OP_E_memory (int bytemode, int sizeflag)
 	}
       switch (bytemode)
 	{
-	case dqw_mode:
 	case dw_mode:
 	case w_mode:
 	  shift = 1;
 	  break;
-	case dqb_mode:
 	case db_mode:
 	case b_mode:
 	  shift = 0;
@@ -11353,7 +11337,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	case dq_mode:
 	  if (address_mode != mode_64bit)
 	    {
-	case dqd_mode:
 	case d_mode:
 	case d_swap_mode:
 	      shift = 2;
