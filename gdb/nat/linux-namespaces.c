@@ -520,13 +520,8 @@ static ssize_t
 mnsh_handle_open (int sock, const char *filename,
 		  int flags, mode_t mode)
 {
-  int fd = gdb_open_cloexec (filename, flags, mode);
-  ssize_t result = mnsh_return_fd (sock, fd, errno);
-
-  if (fd >= 0)
-    close (fd);
-
-  return result;
+  scoped_fd fd = gdb_open_cloexec (filename, flags, mode);
+  return mnsh_return_fd (sock, fd.get (), errno);
 }
 
 /* Handle a MNSH_REQ_UNLINK message.  Must be async-signal-safe.  */
@@ -901,7 +896,7 @@ linux_mntns_access_fs (pid_t pid)
   if (ns == NULL)
     return MNSH_FS_DIRECT;
 
-  fd = gdb_open_cloexec (linux_ns_filename (ns, pid), O_RDONLY, 0);
+  fd = gdb_open_cloexec (linux_ns_filename (ns, pid), O_RDONLY, 0).release ();
   if (fd < 0)
     return MNSH_FS_ERROR;
 
@@ -968,7 +963,7 @@ linux_mntns_open_cloexec (pid_t pid, const char *filename,
     return -1;
 
   if (access == MNSH_FS_DIRECT)
-    return gdb_open_cloexec (filename, flags, mode);
+    return gdb_open_cloexec (filename, flags, mode).release ();
 
   gdb_assert (access == MNSH_FS_HELPER);
 

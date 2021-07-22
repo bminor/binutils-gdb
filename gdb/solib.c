@@ -257,7 +257,8 @@ solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
     }
 
   /* Now see if we can open it.  */
-  found_file = gdb_open_cloexec (temp_pathname.get (), O_RDONLY | O_BINARY, 0);
+  found_file = gdb_open_cloexec (temp_pathname.get (),
+				 O_RDONLY | O_BINARY, 0).release ();
 
   /* If the search in gdb_sysroot failed, and the path name has a
      drive spec (e.g, c:/foo), try stripping ':' from the drive spec,
@@ -278,7 +279,7 @@ solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
 				   in_pathname + 2, (char *) NULL));
 
       found_file = gdb_open_cloexec (temp_pathname.get (),
-				     O_RDONLY | O_BINARY, 0);
+				     O_RDONLY | O_BINARY, 0).release ();
       if (found_file < 0)
 	{
 	  /* If the search in gdb_sysroot still failed, try fully
@@ -292,7 +293,7 @@ solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
 				       in_pathname + 2, (char *) NULL));
 
 	  found_file = gdb_open_cloexec (temp_pathname.get (),
-					 O_RDONLY | O_BINARY, 0);
+					 O_RDONLY | O_BINARY, 0).release ();
 	}
     }
 

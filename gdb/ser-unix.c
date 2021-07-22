@@ -75,7 +75,7 @@ static int hardwire_setstopbits (struct serial *, int);
 static int
 hardwire_open (struct serial *scb, const char *name)
 {
-  scb->fd = gdb_open_cloexec (name, O_RDWR, 0);
+  scb->fd = gdb_open_cloexec (name, O_RDWR, 0).release ();
   if (scb->fd < 0)
     return -1;
 

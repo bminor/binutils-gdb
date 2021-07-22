@@ -3832,7 +3832,7 @@ linux_proc_xfer_memory_partial_pid (ptid_t ptid,
 		 "/proc/%d/task/%ld/mem", ptid.pid (), ptid.lwp ());
 
       last_proc_mem_file.fd
-	= gdb_open_cloexec (filename, O_RDWR | O_LARGEFILE, 0);
+	= gdb_open_cloexec (filename, O_RDWR | O_LARGEFILE, 0).release ();
 
       if (last_proc_mem_file.fd == -1)
 	{

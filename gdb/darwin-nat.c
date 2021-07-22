@@ -1822,7 +1822,7 @@ may_have_sip ()
 static void
 copy_shell_to_cache (const char *shell, const std::string &new_name)
 {
-  scoped_fd from_fd (gdb_open_cloexec (shell, O_RDONLY, 0));
+  scoped_fd from_fd = gdb_open_cloexec (shell, O_RDONLY, 0);
   if (from_fd.get () < 0)
     error (_("Could not open shell (%s) for reading: %s"),
 	   shell, safe_strerror (errno));

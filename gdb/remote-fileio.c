@@ -425,7 +425,7 @@ remote_fileio_func_open (remote_target *remote, char *buf)
 	}
     }
 
-  fd = gdb_open_cloexec (pathname, flags, mode);
+  fd = gdb_open_cloexec (pathname, flags, mode).release ();
   if (fd < 0)
     {
       remote_fileio_return_errno (remote, -1);

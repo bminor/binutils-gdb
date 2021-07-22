@@ -22,6 +22,7 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include "gdb_file.h"
+#include "scoped_fd.h"
 
 /* Note all the file descriptors which are open when this is called.
    These file descriptors will not be closed by close_most_fds.  */
@@ -47,8 +48,8 @@ extern void close_most_fds (void);
 /* Like 'open', but ensures that the returned file descriptor has the
    close-on-exec flag set.  */
 
-extern int gdb_open_cloexec (const char *filename, int flags,
-			     /* mode_t */ unsigned long mode);
+extern scoped_fd gdb_open_cloexec (const char *filename, int flags,
+				   /* mode_t */ unsigned long mode);
 
 /* Like mkstemp, but ensures that the file descriptor is
    close-on-exec.  */
@@ -63,7 +64,7 @@ gdb_mkostemp_cloexec (char *name_template, int flags = 0)
 /* Convenience wrapper for the above, which takes the filename as an
    std::string.  */
 
-static inline int
+static inline scoped_fd
 gdb_open_cloexec (const std::string &filename, int flags,
 		  /* mode_t */ unsigned long mode)
 {

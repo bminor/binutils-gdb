@@ -261,7 +261,7 @@ inf_child_target::fileio_open (struct inferior *inf, const char *filename,
       return -1;
     }
 
-  fd = gdb_open_cloexec (filename, nat_flags, nat_mode);
+  fd = gdb_open_cloexec (filename, nat_flags, nat_mode).release ();
   if (fd == -1)
     *target_errno = host_to_fileio_error (errno);
 

@@ -335,13 +335,11 @@ ui::~ui ()
 static gdb_file_up
 open_terminal_stream (const char *name)
 {
-  int fd;
-
-  fd = gdb_open_cloexec (name, O_RDWR | O_NOCTTY, 0);
-  if (fd < 0)
+  scoped_fd fd = gdb_open_cloexec (name, O_RDWR | O_NOCTTY, 0);
+  if (fd.get () < 0)
     perror_with_name  (_("opening terminal failed"));
 
-  return gdb_file_up (fdopen (fd, "w+"));
+  return fd.to_file ("w+");
 }
 
 /* Implementation of the "new-ui" command.  */

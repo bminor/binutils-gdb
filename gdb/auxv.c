@@ -46,23 +46,21 @@ procfs_xfer_auxv (gdb_byte *readbuf,
 		  ULONGEST len,
 		  ULONGEST *xfered_len)
 {
-  int fd;
   ssize_t l;
 
   std::string pathname = string_printf ("/proc/%d/auxv", inferior_ptid.pid ());
-  fd = gdb_open_cloexec (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY, 0);
-  if (fd < 0)
+  scoped_fd fd
+    = gdb_open_cloexec (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY, 0);
+  if (fd.get () < 0)
     return TARGET_XFER_E_IO;
 
   if (offset != (ULONGEST) 0
-      && lseek (fd, (off_t) offset, SEEK_SET) != (off_t) offset)
+      && lseek (fd.get (), (off_t) offset, SEEK_SET) != (off_t) offset)
     l = -1;
   else if (readbuf != NULL)
-    l = read (fd, readbuf, (size_t) len);
+    l = read (fd.get (), readbuf, (size_t) len);
   else
-    l = write (fd, writebuf, (size_t) len);
-
-  (void) close (fd);
+    l = write (fd.get (), writebuf, (size_t) len);
 
   if (l < 0)
     return TARGET_XFER_E_IO;

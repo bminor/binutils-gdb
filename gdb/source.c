@@ -832,7 +832,7 @@ openp (const char *path, openp_flags opts, const char *string,
 	{
 	  filename = (char *) alloca (strlen (string) + 1);
 	  strcpy (filename, string);
-	  fd = gdb_open_cloexec (filename, mode, 0);
+	  fd = gdb_open_cloexec (filename, mode, 0).release ();
 	  if (fd >= 0)
 	    goto done;
 	  last_errno = errno;
@@ -924,7 +924,7 @@ openp (const char *path, openp_flags opts, const char *string,
 
       if (is_regular_file (filename, &reg_file_errno))
 	{
-	  fd = gdb_open_cloexec (filename, mode, 0);
+	  fd = gdb_open_cloexec (filename, mode, 0).release ();
 	  if (fd >= 0)
 	    break;
 	  last_errno = errno;
@@ -1060,7 +1060,6 @@ find_and_open_source (const char *filename,
 {
   char *path = source_path;
   const char *p;
-  int result;
 
   /* If reading of source files is disabled then return a result indicating
      the attempt to read this source file failed.  GDB will then display
@@ -1080,12 +1079,11 @@ find_and_open_source (const char *filename,
       if (rewritten_fullname != NULL)
 	*fullname = std::move (rewritten_fullname);
 
-      result = gdb_open_cloexec (fullname->get (), OPEN_MODE, 0);
-
-      if (result >= 0)
+      scoped_fd result = gdb_open_cloexec (fullname->get (), OPEN_MODE, 0);
+      if (result.get () >= 0)
 	{
 	  *fullname = gdb_realpath (fullname->get ());
-	  return scoped_fd (result);
+	  return result;
 	}
 
       /* Didn't work -- free old one, try again.  */
@@ -1129,8 +1127,8 @@ find_and_open_source (const char *filename,
     filename = rewritten_filename.get ();
 
   /* Try to locate file using filename.  */
-  result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH, filename,
-		  OPEN_MODE, fullname);
+  int result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH, filename,
+		      OPEN_MODE, fullname);
   if (result < 0 && dirname != NULL)
     {
       /* Remove characters from the start of PATH that we don't need when

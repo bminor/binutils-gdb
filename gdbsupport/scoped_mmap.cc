@@ -27,7 +27,7 @@
 scoped_mmap
 mmap_file (const char *filename)
 {
-  scoped_fd fd (gdb_open_cloexec (filename, O_RDONLY, 0));
+  scoped_fd fd = gdb_open_cloexec (filename, O_RDONLY, 0);
   if (fd.get () < 0)
     perror_with_name (("open"));
 

@@ -541,7 +541,7 @@ gdb_bfd_open (const char *name, const char *target, int fd,
 
   if (fd == -1)
     {
-      fd = gdb_open_cloexec (name, O_RDONLY | O_BINARY, 0);
+      fd = gdb_open_cloexec (name, O_RDONLY | O_BINARY, 0).release ();
       if (fd == -1)
 	{
 	  bfd_set_error (bfd_error_system_call);
