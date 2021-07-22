@@ -11966,7 +11966,7 @@ OP_G (int bytemode, int sizeflag)
       oappend (names64[modrm.reg + add]);
       break;
     case bnd_mode:
-      if (modrm.reg > 0x3)
+      if (modrm.reg + add > 0x3)
 	{
 	  oappend ("(bad)");
 	  return;

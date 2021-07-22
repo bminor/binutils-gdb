@@ -227,6 +227,20 @@ bad:
 	.byte 0x1a
 	.byte 0xc4
 
+	# bndmov with REX.B set
+	.byte 0x66
+	.byte 0x41
+	.byte 0x0f
+	.byte 0x1a
+	.byte 0xc0
+
+	# bndmov with REX.R set
+	.byte 0x66
+	.byte 0x44
+	.byte 0x0f
+	.byte 0x1a
+	.byte 0xc0
+
 	# bndmk (bad),%bnd0
 	.byte 0xf3
 	.byte 0x0f
