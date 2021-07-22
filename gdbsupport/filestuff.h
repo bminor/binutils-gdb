@@ -21,6 +21,7 @@
 
 #include <dirent.h>
 #include <fcntl.h>
+#include "gdb_file.h"
 
 /* Note all the file descriptors which are open when this is called.
    These file descriptors will not be closed by close_most_fds.  */
@@ -68,18 +69,6 @@ gdb_open_cloexec (const std::string &filename, int flags,
 {
   return gdb_open_cloexec (filename.c_str (), flags, mode);
 }
-
-struct gdb_file_deleter
-{
-  void operator() (FILE *file) const
-  {
-    fclose (file);
-  }
-};
-
-/* A unique pointer to a FILE.  */
-
-typedef std::unique_ptr<FILE, gdb_file_deleter> gdb_file_up;
 
 /* Like 'fopen', but ensures that the returned file descriptor has the
    close-on-exec flag set.  */
