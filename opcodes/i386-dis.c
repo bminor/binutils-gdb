@@ -50,7 +50,6 @@ static void oappend (const char *);
 static void append_seg (void);
 static void OP_indirE (int, int);
 static void print_operand_value (char *, int, bfd_vma);
-static void OP_E_register (int, int);
 static void OP_E_memory (int, int);
 static void print_displacement (char *, bfd_vma);
 static void OP_E (int, int);
@@ -4180,7 +4179,7 @@ static const struct dis386 x86_64_table[][2] = {
   /* X86_64_63 */
   {
     { "arpl", { Ew, Gw }, 0 },
-    { "movs", { { OP_G, movsxd_mode }, { MOVSXD_Fixup, movsxd_mode } }, 0 },
+    { "movs", { Gv, { MOVSXD_Fixup, movsxd_mode } }, 0 },
   },
 
   /* X86_64_6D */
@@ -11290,20 +11289,13 @@ intel_operand_size (int bytemode, int sizeflag)
 }
 
 static void
-OP_E_register (int bytemode, int sizeflag)
+print_register (unsigned int reg, unsigned int rexmask, int bytemode, int sizeflag)
 {
-  int reg = modrm.rm;
   const char **names;
 
-  USED_REX (REX_B);
-  if ((rex & REX_B))
+  USED_REX (rexmask);
+  if (rex & rexmask)
     reg += 8;
-
-  if ((sizeflag & SUFFIX_ALWAYS)
-      && (bytemode == b_swap_mode
-	  || bytemode == bnd_swap_mode
-	  || bytemode == v_swap_mode))
-    swap_operand ();
 
   switch (bytemode)
     {
@@ -11924,7 +11916,15 @@ OP_E (int bytemode, int sizeflag)
   codep++;
 
   if (modrm.mod == 3)
-    OP_E_register (bytemode, sizeflag);
+    {
+      if ((sizeflag & SUFFIX_ALWAYS)
+	  && (bytemode == b_swap_mode
+	      || bytemode == bnd_swap_mode
+	      || bytemode == v_swap_mode))
+	swap_operand ();
+
+      print_register (modrm.rm, REX_B, bytemode, sizeflag);
+    }
   else
     OP_E_memory (bytemode, sizeflag);
 }
@@ -11932,104 +11932,13 @@ OP_E (int bytemode, int sizeflag)
 static void
 OP_G (int bytemode, int sizeflag)
 {
-  int add = 0;
-  const char **names;
-
   if (vex.evex && !vex.r && address_mode == mode_64bit)
     {
       oappend ("(bad)");
       return;
     }
 
-  USED_REX (REX_R);
-  if (rex & REX_R)
-    add += 8;
-  switch (bytemode)
-    {
-    case b_mode:
-      if (modrm.reg & 4)
-	USED_REX (0);
-      if (rex)
-	oappend (names8rex[modrm.reg + add]);
-      else
-	oappend (names8[modrm.reg + add]);
-      break;
-    case w_mode:
-      oappend (names16[modrm.reg + add]);
-      break;
-    case d_mode:
-    case db_mode:
-    case dw_mode:
-      oappend (names32[modrm.reg + add]);
-      break;
-    case q_mode:
-      oappend (names64[modrm.reg + add]);
-      break;
-    case bnd_mode:
-      if (modrm.reg + add > 0x3)
-	{
-	  oappend ("(bad)");
-	  return;
-	}
-      oappend (names_bnd[modrm.reg]);
-      break;
-    case v_mode:
-    case dq_mode:
-    case dqb_mode:
-    case dqd_mode:
-    case dqw_mode:
-    case movsxd_mode:
-      USED_REX (REX_W);
-      if (rex & REX_W)
-	oappend (names64[modrm.reg + add]);
-      else if (bytemode != v_mode && bytemode != movsxd_mode)
-	oappend (names32[modrm.reg + add]);
-      else
-	{
-	  if (sizeflag & DFLAG)
-	    oappend (names32[modrm.reg + add]);
-	  else
-	    oappend (names16[modrm.reg + add]);
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	}
-      break;
-    case va_mode:
-      names = (address_mode == mode_64bit
-	       ? names64 : names32);
-      if (!(prefixes & PREFIX_ADDR))
-	{
-	  if (address_mode == mode_16bit)
-	    names = names16;
-	}
-      else
-	{
-	  /* Remove "addr16/addr32".  */
-	  all_prefixes[last_addr_prefix] = 0;
-	  names = (address_mode != mode_32bit
-		       ? names32 : names16);
-	  used_prefixes |= PREFIX_ADDR;
-	}
-      oappend (names[modrm.reg + add]);
-      break;
-    case m_mode:
-      if (address_mode == mode_64bit)
-	oappend (names64[modrm.reg + add]);
-      else
-	oappend (names32[modrm.reg + add]);
-      break;
-    case mask_bd_mode:
-    case mask_mode:
-      if (add)
-	{
-	  oappend ("(bad)");
-	  return;
-	}
-      oappend (names_mask[modrm.reg]);
-      break;
-    default:
-      oappend (INTERNAL_DISASSEMBLER_ERROR);
-      break;
-    }
+  print_register (modrm.reg, REX_R, bytemode, sizeflag);
 }
 
 static bfd_vma
