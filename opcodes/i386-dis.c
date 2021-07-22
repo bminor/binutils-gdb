@@ -12530,19 +12530,9 @@ OP_MMX (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 }
 
 static void
-OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
+print_vector_reg (unsigned int reg, int bytemode)
 {
-  int reg = modrm.reg;
   const char **names;
-
-  USED_REX (REX_R);
-  if (rex & REX_R)
-    reg += 8;
-  if (vex.evex)
-    {
-      if (!vex.r)
-	reg += 16;
-    }
 
   if (bytemode == xmmq_mode
       || bytemode == evex_half_bcst_xmmq_mode)
@@ -12564,7 +12554,6 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     names = names_ymm;
   else if (bytemode == tmm_mode)
     {
-      modrm.reg = reg;
       if (reg >= 8)
 	{
 	  oappend ("(bad)");
@@ -12574,7 +12563,14 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     }
   else if (need_vex
 	   && bytemode != xmm_mode
-	   && bytemode != scalar_mode)
+	   && bytemode != scalar_mode
+	   && bytemode != xmmdw_mode
+	   && bytemode != xmmqd_mode
+	   && bytemode != xmm_mb_mode
+	   && bytemode != xmm_mw_mode
+	   && bytemode != xmm_md_mode
+	   && bytemode != xmm_mq_mode
+	   && bytemode != vex_scalar_w_dq_mode)
     {
       switch (vex.length)
 	{
@@ -12602,6 +12598,26 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   else
     names = names_xmm;
   oappend (names[reg]);
+}
+
+static void
+OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
+{
+  unsigned int reg = modrm.reg;
+
+  USED_REX (REX_R);
+  if (rex & REX_R)
+    reg += 8;
+  if (vex.evex)
+    {
+      if (!vex.r)
+	reg += 16;
+    }
+
+  if (bytemode == tmm_mode)
+    modrm.reg = reg;
+
+  print_vector_reg (reg, bytemode);
 }
 
 static void
@@ -12679,7 +12695,6 @@ static void
 OP_EX (int bytemode, int sizeflag)
 {
   int reg;
-  const char **names;
 
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
@@ -12708,66 +12723,10 @@ OP_EX (int bytemode, int sizeflag)
 	  || bytemode == q_swap_mode))
     swap_operand ();
 
-  if (need_vex
-      && bytemode != xmm_mode
-      && bytemode != xmmdw_mode
-      && bytemode != xmmqd_mode
-      && bytemode != xmm_mb_mode
-      && bytemode != xmm_mw_mode
-      && bytemode != xmm_md_mode
-      && bytemode != xmm_mq_mode
-      && bytemode != xmmq_mode
-      && bytemode != evex_half_bcst_xmmq_mode
-      && bytemode != ymm_mode
-      && bytemode != tmm_mode
-      && bytemode != vex_scalar_w_dq_mode)
-    {
-      switch (vex.length)
-	{
-	case 128:
-	  names = names_xmm;
-	  break;
-	case 256:
-	  names = names_ymm;
-	  break;
-	case 512:
-	  names = names_zmm;
-	  break;
-	default:
-	  abort ();
-	}
-    }
-  else if (bytemode == xmmq_mode
-	   || bytemode == evex_half_bcst_xmmq_mode)
-    {
-      switch (vex.length)
-	{
-	case 128:
-	case 256:
-	  names = names_xmm;
-	  break;
-	case 512:
-	  names = names_ymm;
-	  break;
-	default:
-	  abort ();
-	}
-    }
-  else if (bytemode == tmm_mode)
-    {
-      modrm.rm = reg;
-      if (reg >= 8)
-	{
-	  oappend ("(bad)");
-	  return;
-	}
-      names = names_tmm;
-    }
-  else if (bytemode == ymm_mode)
-    names = names_ymm;
-  else
-    names = names_xmm;
-  oappend (names[reg]);
+  if (bytemode == tmm_mode)
+    modrm.rm = reg;
+
+  print_vector_reg (reg, bytemode);
 }
 
 static void
