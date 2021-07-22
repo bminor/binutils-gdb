@@ -1,5 +1,11 @@
 2021-07-22  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.ada/formatted_ref.exp: Add xfail for PR gcc/101575.
+	* gdb.ada/iwide.exp: Same.
+	* gdb.ada/pkd_arr_elem.exp: Same.
+
+2021-07-22  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.cp/step-and-next-inline.cc (tree_check, get_alias_set, main):
 	Tag closing brace with comment.
 	* gdb.cp/step-and-next-inline.h: Update to keep identical with
