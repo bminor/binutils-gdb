@@ -1,3 +1,11 @@
+2021-07-22  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.cp/step-and-next-inline.cc (tree_check, get_alias_set, main):
+	Tag closing brace with comment.
+	* gdb.cp/step-and-next-inline.h: Update to keep identical with
+	step-and-next-inline.cc.
+	* gdb.cp/step-and-next-inline.exp: Issue extra next when required.
+
 2021-07-21  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gcc_major_version): New proc.
