@@ -111,16 +111,16 @@
   /* PREFIX_EVEX_0F78 */
   {
     { VEX_W_TABLE (EVEX_W_0F78_P_0) },
-    { "vcvttss2usi",	{ Gdq, EXxmm_md, EXxEVexS }, 0 },
+    { "vcvttss2usi",	{ Gdq, EXd, EXxEVexS }, 0 },
     { VEX_W_TABLE (EVEX_W_0F78_P_2) },
-    { "vcvttsd2usi",	{ Gdq, EXxmm_mq, EXxEVexS }, 0 },
+    { "vcvttsd2usi",	{ Gdq, EXq, EXxEVexS }, 0 },
   },
   /* PREFIX_EVEX_0F79 */
   {
     { VEX_W_TABLE (EVEX_W_0F79_P_0) },
-    { "vcvtss2usi",	{ Gdq, EXxmm_md, EXxEVexR }, 0 },
+    { "vcvtss2usi",	{ Gdq, EXd, EXxEVexR }, 0 },
     { VEX_W_TABLE (EVEX_W_0F79_P_2) },
-    { "vcvtsd2usi",	{ Gdq, EXxmm_mq, EXxEVexR }, 0 },
+    { "vcvtsd2usi",	{ Gdq, EXq, EXxEVexR }, 0 },
   },
   /* PREFIX_EVEX_0F7A */
   {
