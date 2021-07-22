@@ -2029,10 +2029,20 @@ proc gdb_file_cmd { arg } {
 proc spawn_capture_tty_name { args } {
     set result [uplevel builtin_spawn $args]
     upvar spawn_out spawn_out
-    if { [info exists spawn_out] } {
+    if { [info exists spawn_out(slave,name)] } {
 	set ::last_spawn_tty_name $spawn_out(slave,name)
     } else {
-	unset ::last_spawn_tty_name
+	# If a process is spawned as part of a pipe line (e.g. passing
+	# -leaveopen to the spawn proc) then the spawned process is no
+	# assigned a tty and spawn_out(slave,name) will not be set.
+	# In that case we want to ensure that last_spawn_tty_name is
+	# not set.
+	#
+	# If the previous process spawned was also not assigned a tty
+	# (e.g. multiple processed chained in a pipeline) then
+	# last_spawn_tty_name will already be unset, so, if we don't
+	# use -nocomplain here we would otherwise get an error.
+	unset -nocomplain ::last_spawn_tty_name
     }
     return $result
 }
