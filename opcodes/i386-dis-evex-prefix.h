@@ -358,7 +358,7 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsub132s%XW",	{ XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
+    { "vfmsub132s%XW",	{ XMScalar, VexScalar, EXdq, EXxEVexR }, 0 },
     { "v4fmaddss",	{ XMScalar, VexScalar, Mxmm }, 0 },
   },
   /* PREFIX_EVEX_0F38AA */
@@ -372,6 +372,6 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsub213s%XW",	{ XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
+    { "vfmsub213s%XW",	{ XMScalar, VexScalar, EXdq, EXxEVexR }, 0 },
     { "v4fnmaddss",	{ XMScalar, VexScalar, Mxmm }, 0 },
   },

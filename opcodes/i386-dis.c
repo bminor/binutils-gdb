@@ -358,6 +358,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXdS { OP_EX, d_swap_mode }
 #define EXq { OP_EX, q_mode }
 #define EXqS { OP_EX, q_swap_mode }
+#define EXdq { OP_EX, dq_mode }
 #define EXx { OP_EX, x_mode }
 #define EXxS { OP_EX, x_swap_mode }
 #define EXxmm { OP_EX, xmm_mode }
@@ -368,7 +369,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXxmmdw { OP_EX, xmmdw_mode }
 #define EXxmmqd { OP_EX, xmmqd_mode }
 #define EXymmq { OP_EX, ymmq_mode }
-#define EXVexWdqScalar { OP_EX, vex_scalar_w_dq_mode }
 #define EXEvexXGscat { OP_EX, evex_x_gscat_mode }
 #define EXEvexXNoBcst { OP_EX, evex_x_nobcst_mode }
 #define MS { OP_MS, v_mode }
@@ -507,7 +507,7 @@ enum
   v_bnd_mode,
   /* like v_bnd_mode in 32bit, no RIP-rel in 64bit mode.  */
   v_bndmk_mode,
-  /* operand size depends on REX prefixes.  */
+  /* operand size depends on REX.W / VEX.W.  */
   dq_mode,
   /* registers like dq_mode, memory like w_mode, displacements like
      v_mode without considering Intel64 ISA.  */
@@ -545,8 +545,6 @@ enum
 
   /* scalar, ignore vector length.  */
   scalar_mode,
-  /* Operand size depends on the VEX.W bit, ignore vector length.  */
-  vex_scalar_w_dq_mode,
 
   /* Static rounding.  */
   evex_rounding_mode,
@@ -6300,13 +6298,13 @@ static const struct dis386 vex_table[][256] = {
     { "vfmsubadd132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
     /* 98 */
     { "vfmadd132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmadd132s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfmsub132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmsub132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmsub132s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmadd132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmadd132s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmsub132p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmsub132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmsub132s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     /* a0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6318,13 +6316,13 @@ static const struct dis386 vex_table[][256] = {
     { "vfmsubadd213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
     /* a8 */
     { "vfmadd213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmadd213s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfmsub213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmsub213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmsub213s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmadd213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmadd213s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmsub213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmsub213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmsub213s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     /* b0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6336,13 +6334,13 @@ static const struct dis386 vex_table[][256] = {
     { "vfmsubadd231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
     /* b8 */
     { "vfmadd231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmadd231s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfmsub231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfmsub231s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmadd231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmadd231s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     { "vfnmsub231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
-    { "vfnmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, PREFIX_DATA },
+    { "vfnmsub231s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     /* c0 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -11170,15 +11168,6 @@ intel_operand_size (int bytemode, int sizeflag)
     case o_mode:
       oappend ("OWORD PTR ");
       break;
-    case vex_scalar_w_dq_mode:
-      if (!need_vex)
-	abort ();
-
-      if (vex.w)
-	oappend ("QWORD PTR ");
-      else
-	oappend ("DWORD PTR ");
-      break;
     case vex_vsib_d_w_dq_mode:
     case vex_vsib_q_w_dq_mode:
       if (!need_vex)
@@ -11371,7 +11360,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	      break;
 	    }
 	    /* fall through */
-	case vex_scalar_w_dq_mode:
 	case vex_vsib_d_w_dq_mode:
 	case vex_vsib_q_w_dq_mode:
 	case evex_x_gscat_mode:
@@ -12496,8 +12484,7 @@ print_vector_reg (unsigned int reg, int bytemode)
 	   && bytemode != b_mode
 	   && bytemode != w_mode
 	   && bytemode != d_mode
-	   && bytemode != q_mode
-	   && bytemode != vex_scalar_w_dq_mode)
+	   && bytemode != q_mode)
     {
       switch (vex.length)
 	{
@@ -12626,6 +12613,9 @@ OP_EX (int bytemode, int sizeflag)
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
   codep++;
+
+  if (bytemode == dq_mode)
+    bytemode = vex.w ? q_mode : d_mode;
 
   if (modrm.mod != 3)
     {
