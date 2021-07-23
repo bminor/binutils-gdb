@@ -159,6 +159,11 @@ static int rex_used;
    current instruction.  */
 static int used_prefixes;
 
+/* Flags for EVEX bits which we somehow handled when printing the
+   current instruction.  */
+#define EVEX_b_used 1
+static int evex_used;
+
 /* Flags stored in PREFIXES.  */
 #define PREFIX_REPZ 1
 #define PREFIX_REPNZ 2
@@ -2524,12 +2529,12 @@ static const char *att_names_mask[] = {
   "%k0", "%k1", "%k2", "%k3", "%k4", "%k5", "%k6", "%k7"
 };
 
-static const char *names_rounding[] =
+static const char *const names_rounding[] =
 {
-  "{rn-sae}",
-  "{rd-sae}",
-  "{ru-sae}",
-  "{rz-sae}"
+  "{rn-",
+  "{rd-",
+  "{ru-",
+  "{rz-"
 };
 
 static const struct dis386 reg_table[][8] = {
@@ -8578,6 +8583,7 @@ ckprefix (void)
   prefixes = 0;
   used_prefixes = 0;
   rex_used = 0;
+  evex_used = 0;
   last_lock_prefix = -1;
   last_repz_prefix = -1;
   last_repnz_prefix = -1;
@@ -9659,6 +9665,21 @@ print_insn (bfd_vma pc, disassemble_info *info)
 		       || dp->op[0].bytemode == vex_vsib_q_w_dq_mode)
 		      && (vex.mask_register_specifier == 0 || vex.zeroing))
 		    oappend ("/(bad)");
+		}
+	    }
+
+	  /* Check whether rounding control was enabled for an insn not
+	     supporting it.  */
+	  if (modrm.mod == 3 && vex.b && !(evex_used & EVEX_b_used))
+	    {
+	      for (i = 0; i < MAX_OPERANDS; ++i)
+		{
+		  obufp = op_out[i];
+		  if (*obufp)
+		    continue;
+		  oappend (names_rounding[vex.ll]);
+		  oappend ("bad}");
+		  break;
 		}
 	    }
 	}
@@ -11316,14 +11337,6 @@ OP_E_memory (int bytemode, int sizeflag)
 
   if (vex.evex)
     {
-      /* In EVEX, if operand doesn't allow broadcast, vex.b should be 0.  */
-      if (vex.b
-	  && bytemode != x_mode
-	  && bytemode != evex_half_bcst_xmmq_mode)
-	{
-	  BadOp ();
-	  return;
-	}
       switch (bytemode)
 	{
 	case dw_mode:
@@ -11764,10 +11777,9 @@ OP_E_memory (int bytemode, int sizeflag)
 	  oappend (scratchbuf);
 	}
     }
-  if (vex.b
-      && (bytemode == x_mode
-	  || bytemode == evex_half_bcst_xmmq_mode))
+  if (vex.b)
     {
+      evex_used |= EVEX_b_used;
       if (vex.w
 	  || bytemode == evex_half_bcst_xmmq_mode)
 	{
@@ -11786,7 +11798,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	      abort ();
 	    }
 	}
-      else
+      else if (bytemode == x_mode)
 	{
 	  switch (vex.length)
 	    {
@@ -11803,6 +11815,9 @@ OP_E_memory (int bytemode, int sizeflag)
 	      abort ();
 	    }
 	}
+      else
+	/* If operand doesn't allow broadcast, vex.b should be 0.  */
+	oappend ("{bad}");
     }
 }
 
@@ -13495,24 +13510,25 @@ MOVSXD_Fixup (int bytemode, int sizeflag)
 static void
 OP_Rounding (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
-  if (modrm.mod == 3 && vex.b)
-    switch (bytemode)
-      {
-      case evex_rounding_64_mode:
-	if (address_mode != mode_64bit || !vex.w)
-	  {
-	    oappend ("(bad)");
-	    break;
-	  }
-	/* Fall through.  */
-      case evex_rounding_mode:
-	oappend (names_rounding[vex.ll]);
-	break;
-      case evex_sae_mode:
-	oappend ("{sae}");
-	break;
-      default:
-	abort ();
-	break;
-      }
+  if (modrm.mod != 3 || !vex.b)
+    return;
+
+  switch (bytemode)
+    {
+    case evex_rounding_64_mode:
+      if (address_mode != mode_64bit || !vex.w)
+        return;
+      /* Fall through.  */
+    case evex_rounding_mode:
+      evex_used |= EVEX_b_used;
+      oappend (names_rounding[vex.ll]);
+      break;
+    case evex_sae_mode:
+      evex_used |= EVEX_b_used;
+      oappend ("{");
+      break;
+    default:
+      abort ();
+    }
+  oappend ("sae}");
 }
