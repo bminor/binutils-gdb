@@ -5839,7 +5839,7 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
   gdb_assert (type->code () == TYPE_CODE_FLAGS);
   gdb_assert (type->num_fields () + 1 <= type_bitsize);
   gdb_assert (start_bitpos >= 0 && start_bitpos < type_bitsize);
-  gdb_assert (nr_bits >= 1 && nr_bits <= type_bitsize);
+  gdb_assert (nr_bits >= 1 && (start_bitpos + nr_bits) <= type_bitsize);
   gdb_assert (name != NULL);
 
   TYPE_FIELD_NAME (type, field_nr) = xstrdup (name);
