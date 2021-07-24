@@ -21,6 +21,7 @@ Idx Name +Size +VMA +LMA +File off +Algn
 SYMBOL TABLE:
 0+ l +d +\.text	0+ (|\.text)
 0+ l +d +\.data	0+ (|\.data)
+0+ l +d +\.bss	0+ (|\.bss)
 0+ l +\.data	0+ dsym0
 0+10 l +\.data	0+ dsym1
 0+ l +d +\.toc	0+ (|\.toc)

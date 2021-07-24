@@ -25,8 +25,10 @@
    http://www.linuxbase.org/spec/ELF/ppc64/PPC-elf64abi.txt, and
    http://www.linuxbase.org/spec/ELF/ppc64/spec/book1.html  */
 
-/* Don't generate unused section symbols.  */
-#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS false
+/* The assembler should generate a full set of section symbols even
+   when they appear unused.  The linux kernel build tool recordmcount
+   needs them.  */
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS true
 
 #include "sysdep.h"
 #include <stdarg.h>

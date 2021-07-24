@@ -19,8 +19,10 @@
    Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
-/* Don't generate unused section symbols.  */
-#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS false
+/* The assembler should generate a full set of section symbols even
+   when they appear unused.  The linux kernel build tool recordmcount
+   needs them.  */
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS true
 
 #include "sysdep.h"
 #include <stdarg.h>
