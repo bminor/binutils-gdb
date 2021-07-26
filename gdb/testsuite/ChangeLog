@@ -1,3 +1,9 @@
+2021-07-26  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	PR gdb/28076
+	* gdb.mi/mi-break.exp: Add more tests to check clearing the
+	breakpoint condition.
+
 2021-07-22  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.ada/formatted_ref.exp: Add xfail for PR gcc/101575.

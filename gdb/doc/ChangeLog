@@ -1,3 +1,9 @@
+2021-07-26  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	PR gdb/28076
+	* gdb.texinfo (GDB/MI Breakpoint Commands): Mention clearing
+	the condition in the -break-condition command.
+
 2021-07-02  Pedro Alves  <pedro@palves.net>
 
 	* gdb.texinfo (TUI): <TUI Mouse Support>: New node/section.

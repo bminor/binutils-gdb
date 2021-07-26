@@ -30565,7 +30565,7 @@ times="0"@}
 @subsubheading Synopsis
 
 @smallexample
- -break-condition [ --force ] @var{number} @var{expr}
+ -break-condition [ --force ] @var{number} [ @var{expr} ]
 @end smallexample
 
 Breakpoint @var{number} will stop the program only if the condition in
@@ -30573,7 +30573,8 @@ Breakpoint @var{number} will stop the program only if the condition in
 @samp{-break-list} output (see the description of the @samp{-break-list}
 command below).  If the @samp{--force} flag is passed, the condition
 is forcibly defined even when it is invalid for all locations of
-breakpoint @var{number}.
+breakpoint @var{number}.  If the @var{expr} argument is omitted,
+breakpoint @var{number} becomes unconditional.
 
 @subsubheading @value{GDBN} Command
 

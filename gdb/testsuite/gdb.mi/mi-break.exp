@@ -435,6 +435,28 @@ proc_with_prefix test_forced_conditions {} {
     mi_gdb_test "-break-info 16" \
 	"\\^done,[mi_make_breakpoint_table [list $bp]]" \
         "invalid condition is defined"
+
+    # No cond argument should clear the condition.
+    mi_gdb_test "-break-condition 16" \
+	"~\"Breakpoint 16's condition is now valid at location 1, enabling.*\\^done" \
+	"clear the condition"
+    set bp [mi_make_breakpoint -number 16]
+    mi_gdb_test "-break-info 16" \
+	"\\^done,[mi_make_breakpoint_table [list $bp]]" \
+	"condition is cleared"
+
+    # Zero-argument is an error.
+    mi_gdb_test "-break-condition" \
+	"\\^error,msg=\"-break-condition: Missing the <number> argument\"" \
+	"no arguments to -break-condition"
+
+    # Passing --force with no condition should not crash or raise an error.
+    mi_gdb_test "-break-condition --force 16" \
+	"\\^done" \
+	"clear the condition with --force"
+    mi_gdb_test "-break-condition --force" \
+	"\\^error,msg=\"-break-condition: Missing the <number> argument\"" \
+	"no arguments with --force"
 }
 
 proc test_break {mi_mode} {
