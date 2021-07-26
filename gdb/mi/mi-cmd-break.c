@@ -423,20 +423,19 @@ mi_cmd_break_condition (const char *command, char **argv, int argc)
 	}
     }
 
-  /* There must be at least two more args: a bpnum and a condition
-     expression.  */
-  if (oind + 1 >= argc)
-    error (_("-break-condition: Missing the <number> and/or <expr> "
-	     "argument"));
+  /* There must be at least one more arg: a bpnum.  */
+  if (oind >= argc)
+    error (_("-break-condition: Missing the <number> argument"));
 
   int bpnum = atoi (argv[oind]);
 
   /* The rest form the condition expr.  */
-  std::string expr (argv[oind + 1]);
-  for (int i = oind + 2; i < argc; ++i)
+  std::string expr = "";
+  for (int i = oind + 1; i < argc; ++i)
     {
-      expr += " ";
       expr += argv[i];
+      if (i + 1 < argc)
+	expr += " ";
     }
 
   set_breakpoint_condition (bpnum, expr.c_str (), 0 /* from_tty */,
