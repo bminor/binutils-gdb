@@ -713,8 +713,9 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 
       /* It's not an element of a nested archive;
 	 open the external file as a bfd.  */
+      bfd_set_error (bfd_error_no_error);
       n_bfd = open_nested_file (filename, archive);
-      if (n_bfd == NULL)
+      if (n_bfd == NULL && bfd_get_error () == bfd_error_no_error)
 	bfd_set_error (bfd_error_malformed_archive);
     }
   else
