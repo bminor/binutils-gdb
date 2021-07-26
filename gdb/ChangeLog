@@ -1,3 +1,12 @@
+2021-07-26  Shahab Vahedi  <shahab@synopsys.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/28103
+	* valprint.c (val_print_type_code_flags): Merely shift the VAL
+	to the right to get rid of the lower bits.
+	(test_print_flags): New.
+	(_initialize_valprint): Invoke the "test_print_flags" as a unit-test.
+
 2021-07-26  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	PR gdb/28076
