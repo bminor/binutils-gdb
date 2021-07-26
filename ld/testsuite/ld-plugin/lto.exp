@@ -930,4 +930,34 @@ if { [check_lto_fat_available] } {
     }
 }
 
+run_cc_link_tests [list \
+    [list \
+	"Build pr28138.a" \
+	"-T" "" \
+	{pr28138-1.c pr28138-2.c pr28138-3.c pr28138-4.c pr28138-5.c \
+	 pr28138-6.c pr28138-7.c} {} "pr28138.a" \
+    ] \
+    [list \
+	"Build pr28138.o" \
+	"" "" \
+	{pr28138.c} {} \
+    ] \
+]
+
+set exec_output [run_host_cmd "sh" \
+			      "-c \"ulimit -n 20; \
+			      $CC -Btmpdir/ld -o tmpdir/pr28138 \
+			      tmpdir/pr28138.o tmpdir/pr28138.a\""]
+set exec_output [prune_warnings $exec_output]
+if [string match "" $exec_output] then {
+    set exec_output [run_host_cmd "tmpdir/pr28138" ""]
+    if [string match "PASS" $exec_output] then {
+	pass "PR ld/28138"
+    } else {
+	fail "PR ld/28138"
+    }
+} else {
+    fail "PR ld/28138"
+}
+
 restore_notify
