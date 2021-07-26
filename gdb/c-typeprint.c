@@ -436,8 +436,8 @@ c_type_print_varspec_prefix (struct type *type,
 
     case TYPE_CODE_ARRAY:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-				   stream, show, 0, 0, language, flags,
-				   podata);
+				   stream, show, 0, need_post_space,
+				   language, flags, podata);
       if (passed_a_ptr)
 	fprintf_filtered (stream, "(");
       break;
