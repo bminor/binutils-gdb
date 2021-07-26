@@ -2553,14 +2553,16 @@ windows_nat_target::create_inferior (const char *exec_file,
   PROCESS_INFORMATION pi;
   BOOL ret;
   DWORD flags = 0;
-  const char *inferior_tty = current_inferior ()->tty ();
+  const std::string &inferior_tty = current_inferior ()->tty ();
 
   if (!exec_file)
     error (_("No executable specified, use `target exec'."));
 
-  const char *inferior_cwd = current_inferior ()->cwd ();
+  const char *inferior_cwd = current_inferior ()->cwd ().c_str ();
   std::string expanded_infcwd;
-  if (inferior_cwd != NULL)
+  if (*inferior_cwd == '\0')
+    inferior_cwd = nullptr;
+  else
     {
       expanded_infcwd = gdb_tilde_expand (inferior_cwd);
       /* Mirror slashes on inferior's cwd.  */
@@ -2652,14 +2654,14 @@ windows_nat_target::create_inferior (const char *exec_file,
       w32_env = NULL;
     }
 
-  if (inferior_tty == nullptr)
+  if (inferior_tty.empty ())
     tty = ostdin = ostdout = ostderr = -1;
   else
     {
-      tty = open (inferior_tty, O_RDWR | O_NOCTTY);
+      tty = open (inferior_tty.c_str (), O_RDWR | O_NOCTTY);
       if (tty < 0)
 	{
-	  print_sys_errmsg (inferior_tty, errno);
+	  print_sys_errmsg (inferior_tty.c_str (), errno);
 	  ostdin = ostdout = ostderr = -1;
 	}
       else
@@ -2725,18 +2727,18 @@ windows_nat_target::create_inferior (const char *exec_file,
     }
   /* If not all the standard streams are redirected by the command
      line, use INFERIOR_TTY for those which aren't.  */
-  if (inferior_tty != nullptr
+  if (!inferior_tty.empty ()
       && !(fd_inp >= 0 && fd_out >= 0 && fd_err >= 0))
     {
       SECURITY_ATTRIBUTES sa;
       sa.nLength = sizeof(sa);
       sa.lpSecurityDescriptor = 0;
       sa.bInheritHandle = TRUE;
-      tty = CreateFileA (inferior_tty, GENERIC_READ | GENERIC_WRITE,
+      tty = CreateFileA (inferior_tty.c_str (), GENERIC_READ | GENERIC_WRITE,
 			 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
       if (tty == INVALID_HANDLE_VALUE)
 	warning (_("Warning: Failed to open TTY %s, error %#x."),
-		 inferior_tty, (unsigned) GetLastError ());
+		 inferior_tty.c_str (), (unsigned) GetLastError ());
     }
   if (redirected || tty != INVALID_HANDLE_VALUE)
     {

@@ -559,7 +559,7 @@ static BOOL
 create_process (const char *program, char *args,
 		DWORD flags, PROCESS_INFORMATION *pi)
 {
-  const char *inferior_cwd = get_inferior_cwd ();
+  const std::string &inferior_cwd = get_inferior_cwd ();
   BOOL ret;
   size_t argslen, proglen;
 
@@ -580,9 +580,9 @@ create_process (const char *program, char *args,
 			flags,             /* start flags */
 			NULL,              /* environment */
 			/* current directory */
-			(inferior_cwd == NULL
+			(inferior_cwd.empty ()
 			 ? NULL
-			 : gdb_tilde_expand (inferior_cwd).c_str()),
+			 : gdb_tilde_expand (inferior_cwd.c_str ()).c_str()),
 			&si,               /* start info */
 			pi);               /* proc info */
 
