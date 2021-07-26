@@ -1,3 +1,7 @@
+2021-07-26  Chenghua Xu  <xuchenghua@loongson.cn>
+
+	* mips-dis.c (mips_arch_choices): Correct gs264e bfd_mach.
+
 2021-06-07  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* s390-opc.txt: Add qpaci.
