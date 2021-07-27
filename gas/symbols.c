@@ -1380,7 +1380,17 @@ resolve_symbol_value (symbolS *symp)
 	      && add_symbol->flags.resolving)
 	    break;
 
-	  if (finalize_syms && final_val == 0)
+	  if (finalize_syms && final_val == 0
+#ifdef OBJ_XCOFF
+	      /* Avoid changing symp's "within" when dealing with
+		 AIX debug symbols. For some storage classes, "within"
+	         have a special meaning.
+		 C_DWARF should behave like on Linux, thus this check
+		 isn't done to be closer.  */
+	      && ((symbol_get_bfdsym (symp)->flags & BSF_DEBUGGING) == 0
+		  || (S_GET_STORAGE_CLASS (symp) == C_DWARF))
+#endif
+	      )
 	    {
 	      if (add_symbol->flags.local_symbol)
 		add_symbol = local_symbol_convert (add_symbol);

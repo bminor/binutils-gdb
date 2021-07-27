@@ -130,6 +130,7 @@ struct ppc_tc_sy
   /* For a csect symbol, the last symbol which has been defined in
      this csect, or NULL if none have been defined so far.
      For a .bs symbol, the referenced csect symbol.
+     For a C_STSYM symbol, the containing block (.bs symbol).
      For a label, the enclosing csect.  */
   symbolS *within;
   union

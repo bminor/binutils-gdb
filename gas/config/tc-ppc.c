@@ -2901,8 +2901,13 @@ ppc_frob_label (symbolS *sym)
       symbol_remove (sym, &symbol_rootP, &symbol_lastP);
       symbol_append (sym, symbol_get_tc (ppc_current_csect)->within,
 		     &symbol_rootP, &symbol_lastP);
+      /* Update last csect symbol.  */
       symbol_get_tc (ppc_current_csect)->within = sym;
-      symbol_get_tc (sym)->within = ppc_current_csect;
+
+      /* Some labels like .bs are using within differently.
+         So avoid changing it, if it's already set.  */
+      if (symbol_get_tc (sym)->within == NULL)
+	symbol_get_tc (sym)->within = ppc_current_csect;
     }
 #endif
 
@@ -5056,7 +5061,6 @@ ppc_stabx (int ignore ATTRIBUTE_UNUSED)
             as_bad (_(".stabx of storage class stsym must be within .bs/.es"));
 
           symbol_get_tc (sym)->within = ppc_current_block;
-          symbol_get_tc (exp.X_add_symbol)->within = ppc_current_block;
         }
     }
 

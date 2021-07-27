@@ -2043,8 +2043,10 @@ coff_get_symbol_info (bfd *abfd, asymbol *symbol, symbol_info *ret)
   if (coffsymbol (symbol)->native != NULL
       && coffsymbol (symbol)->native->fix_value
       && coffsymbol (symbol)->native->is_sym)
-    ret->value = coffsymbol (symbol)->native->u.syment.n_value -
-      (bfd_hostptr_t) obj_raw_syments (abfd);
+    ret->value =
+      ((coffsymbol (symbol)->native->u.syment.n_value -
+	(bfd_hostptr_t) obj_raw_syments (abfd))
+       / sizeof (combined_entry_type));
 }
 
 /* Print out information about COFF symbol.  */
@@ -2092,7 +2094,8 @@ coff_print_symbol (bfd *abfd,
 	  if (! combined->fix_value)
 	    val = (bfd_vma) combined->u.syment.n_value;
 	  else
-	    val = combined->u.syment.n_value - (bfd_hostptr_t) root;
+	    val = ((combined->u.syment.n_value - (bfd_hostptr_t) root)
+		   / sizeof (combined_entry_type));
 
 	  fprintf (file, "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d) 0x",
 		   combined->u.syment.n_scnum,
