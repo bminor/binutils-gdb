@@ -1,5 +1,10 @@
 2021-07-27  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/26904
+	* gdb/testsuite/gdb.ada/big_packed_array.exp: Add xfail.
+
+2021-07-27  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/26903
 	* gdb/testsuite/gdb.ada/array_of_variant.exp: Add xfails.
 

@@ -19,6 +19,11 @@ if { [skip_ada_tests] } { return -1 }
 
 standard_ada_testfile foo_ra24_010
 
+if [get_compiler_info] {
+    return -1
+}
+set old_gcc [expr [test_compiler_info {gcc-[0-8]-*}]]
+
 foreach_with_prefix scenario {all minimal} {
     set flags [list debug additional_flags=-fgnat-encodings=$scenario]
 
@@ -34,6 +39,20 @@ foreach_with_prefix scenario {all minimal} {
     gdb_test "print good" \
 	"= \\(false <repeats 196 times>\\)" \
 
-    gdb_test "print bad" \
-	"= \\(false <repeats 196 times>\\)"
+    set have_xfail [expr $old_gcc && [string equal "$scenario" "minimal"]]
+
+    set re "= \\(false <repeats 196 times>\\)"
+    set re_xfail "= \\(0 => 0 <repeats 25 times>\\)"
+    gdb_test_multiple "print bad" "" {
+       -re -wrap $re  {
+           pass $gdb_test_name
+       }
+       -re -wrap $re_xfail {
+           if { $have_xfail } {
+               # gcc/101643
+               setup_xfail *-*-*
+           }
+           fail $gdb_test_name
+       }
+    }
 }
