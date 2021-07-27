@@ -360,26 +360,12 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	*q++ = '\0';
 	newobj = (char *) xrealloc (newobj, q - newobj);
 
-	const std::string cur_val = c->var->get<std::string> ();
-	if (cur_val != std::string (newobj))
-	  {
-	    c->var->set<std::string> (std::string (newobj));
-
-	    option_changed = true;
-	  }
+	option_changed = c->var->set<std::string> (std::string (newobj));
 	xfree (newobj);
       }
       break;
     case var_string_noescape:
-      {
-	const std::string cur_val = c->var->get<std::string> ();
-	if (cur_val != arg)
-	  {
-	    c->var->set<std::string> (std::string (arg));
-
-	    option_changed = true;
-	  }
-      }
+      option_changed = c->var->set<std::string> (std::string (arg));
       break;
     case var_filename:
       if (*arg == '\0')
@@ -405,13 +391,8 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	else
 	  val = xstrdup ("");
 
-	const std::string cur_val = c->var->get<std::string> ();
-	if (cur_val != std::string (val))
-	  {
-	    c->var->set<std::string> (std::string (val));
-
-	    option_changed = true;
-	  }
+	option_changed
+	  = c->var->set<std::string> (std::string (val));
 	xfree (val);
       }
       break;
@@ -421,39 +402,18 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 
 	if (val < 0)
 	  error (_("\"on\" or \"off\" expected."));
-	if (val != c->var->get<bool> ())
-	  {
-	    c->var->set<bool> (val);
 
-	    option_changed = true;
-	  }
+	option_changed = c->var->set<bool> (val);
       }
       break;
     case var_auto_boolean:
-      {
-	enum auto_boolean val = parse_auto_binary_operation (arg);
-
-	if (c->var->get<enum auto_boolean> () != val)
-	  {
-	    c->var->set<enum auto_boolean> (val);
-
-	    option_changed = true;
-	  }
-      }
+      option_changed = c->var->set<enum auto_boolean> (parse_auto_binary_operation (arg));
       break;
     case var_uinteger:
     case var_zuinteger:
-      {
-	unsigned int val
-	  = parse_cli_var_uinteger (c->var->type (), &arg, true);
-
-	if (c->var->get<unsigned int> () != val)
-	  {
-	    c->var->set<unsigned int> (val);
-
-	    option_changed = true;
-	  }
-      }
+      option_changed
+	= c->var->set<unsigned int> (parse_cli_var_uinteger (c->var->type (),
+							     &arg, true));
       break;
     case var_integer:
     case var_zinteger:
@@ -483,12 +443,7 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 		 || (c->var->type () == var_zinteger && val > INT_MAX))
 	  error (_("integer %s out of range"), plongest (val));
 
-	if (c->var->get<int> () != val)
-	  {
-	    c->var->set<int> (val);
-
-	    option_changed = true;
-	  }
+	option_changed = c->var->set<int> (val);
       }
       break;
     case var_enum:
@@ -501,24 +456,12 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	if (*after != '\0')
 	  error (_("Junk after item \"%.*s\": %s"), len, arg, after);
 
-	if (c->var->get<const char *> () != match)
-	  {
-	    c->var->set<const char *> (match);
-
-	    option_changed = true;
-	  }
+	option_changed = c->var->set<const char *> (match);
       }
       break;
     case var_zuinteger_unlimited:
-      {
-	int val = parse_cli_var_zuinteger_unlimited (&arg, true);
-
-	if (c->var->get<int> () != val)
-	  {
-	    c->var->set<int> (val);
-	    option_changed = true;
-	  }
-      }
+      option_changed = c->var->set<int>
+	(parse_cli_var_zuinteger_unlimited (&arg, true));
       break;
     default:
       error (_("gdb internal error: bad var_type in do_setshow_command"));
