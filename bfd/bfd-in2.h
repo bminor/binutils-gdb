@@ -7106,6 +7106,8 @@ unsigned int bfd_get_gp_size (bfd *abfd);
 
 void bfd_set_gp_size (bfd *abfd, unsigned int i);
 
+void bfd_set_gp_value (bfd *abfd, bfd_vma v);
+
 bfd_vma bfd_scan_vma (const char *string, const char **end, int base);
 
 bool bfd_copy_private_header_data (bfd *ibfd, bfd *obfd);

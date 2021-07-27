@@ -1862,6 +1862,24 @@ _bfd_set_gp_value (bfd *abfd, bfd_vma v)
 
 /*
 FUNCTION
+	bfd_set_gp_value
+
+SYNOPSIS
+	void bfd_set_gp_value (bfd *abfd, bfd_vma v);
+
+DESCRIPTION
+	Allow external access to the fucntion to set the GP value.
+	This is specifically added for gdb-compile support.
+*/
+
+void
+bfd_set_gp_value (bfd *abfd, bfd_vma v)
+{
+  return _bfd_set_gp_value (abfd, v);
+}
+
+/*
+FUNCTION
 	bfd_scan_vma
 
 SYNOPSIS
