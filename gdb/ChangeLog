@@ -1,3 +1,8 @@
+2021-07-27  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26903
+	* gdb/testsuite/gdb.ada/array_of_variant.exp: Add xfails.
+
 2021-07-26  Frederic Cambus  <fred@statdns.com>
 
 	* syscalls/netbsd.xml: Regenerate.
