@@ -491,11 +491,11 @@ ldfile_open_file (lang_input_statement_type *entry)
 		}
 	      else /* We ignore the return status of the script
 		      and always print the error message.  */
-		einfo (_("%P: cannot find %s\n"), entry->local_sym_name);
+		einfo (_("%P: cannot find %s: %E\n"), entry->local_sym_name);
 	    }
 #endif
 	  else
-	    einfo (_("%P: cannot find %s\n"), entry->local_sym_name);
+	    einfo (_("%P: cannot find %s: %E\n"), entry->local_sym_name);
 
 	  /* PR 25747: Be kind to users who forgot to add the
 	     "lib" prefix to their library when it was created.  */
