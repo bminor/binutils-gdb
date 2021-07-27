@@ -1,3 +1,7 @@
+2021-07-26  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/ld-x86-64/x86-64.exp (Build textrel-1): Use --warn-textrel.
+
 2021-07-06  Michael Matz  <matz@suse.de>
 
 	PR ld/28021

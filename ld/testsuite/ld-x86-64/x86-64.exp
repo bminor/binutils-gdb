@@ -233,7 +233,7 @@ set x86_64tests {
      {{readelf -SW pr27590.rd}} "pr27590.o"}
     {"Build textrel-1.so" "-melf_x86_64 -shared" ""
      "--64" { textrel-1a.s } {} "textrel-1.so"}
-    {"Build textrel-1" "-no-pie -melf_x86_64 -z nocopyreloc"
+    {"Build textrel-1" "-no-pie -melf_x86_64 -z nocopyreloc --warn-textrel"
      "tmpdir/textrel-1.so"
      "--64" { textrel-1b.s } {{ld "textrel-1.err"}} "textrel-1"}
 }
