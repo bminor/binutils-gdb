@@ -6076,21 +6076,16 @@ check_VecOperands (const insn_template *t)
 	}
     }
 
-  /* For AMX instructions with three tmmword operands, all tmmword operand must be
-     distinct */
-  if (t->operand_types[0].bitfield.tmmword
-      && i.reg_operands == 3)
+  /* For AMX instructions with 3 TMM register operands, all operands
+      must be distinct.  */
+  if (i.reg_operands == 3
+      && t->operand_types[0].bitfield.tmmword
+      && (i.op[0].regs == i.op[1].regs
+          || i.op[0].regs == i.op[2].regs
+          || i.op[1].regs == i.op[2].regs))
     {
-      if (register_number (i.op[0].regs)
-          == register_number (i.op[1].regs)
-          || register_number (i.op[0].regs)
-             == register_number (i.op[2].regs)
-          || register_number (i.op[1].regs)
-             == register_number (i.op[2].regs))
-	{
-	  i.error = invalid_tmm_register_set;
-	  return 1;
-	}
+      i.error = invalid_tmm_register_set;
+      return 1;
     }
 
   /* Check if broadcast is supported by the instruction and is applied
