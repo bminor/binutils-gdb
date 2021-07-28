@@ -18231,7 +18231,22 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
       baton->locexpr.per_cu = cu->per_cu;
       baton->locexpr.per_objfile = per_objfile;
 
-      struct dwarf_block *block = attr->as_block ();
+      struct dwarf_block *block;
+      if (attr->form == DW_FORM_data16)
+	{
+	  size_t data_size = 16;
+	  block = XOBNEW (obstack, struct dwarf_block);
+	  block->size = (data_size
+			 + 2 /* Extra bytes for DW_OP and arg.  */);
+	  gdb_byte *data = XOBNEWVEC (obstack, gdb_byte, block->size);
+	  data[0] = DW_OP_implicit_value;
+	  data[1] = data_size;
+	  memcpy (&data[2], attr->as_block ()->data, data_size);
+	  block->data = data;
+	}
+      else
+	block = attr->as_block ();
+
       baton->locexpr.size = block->size;
       baton->locexpr.data = block->data;
       switch (attr->name)
