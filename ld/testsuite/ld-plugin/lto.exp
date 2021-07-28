@@ -687,6 +687,40 @@ if { [is_elf_format] && [check_lto_shared_available] } {
     }
 }
 
+run_cc_link_tests [list \
+    [list \
+	"Build pr28138.a" \
+	"-T" "" \
+	{pr28138-1.c pr28138-2.c pr28138-3.c pr28138-4.c pr28138-5.c \
+	 pr28138-6.c pr28138-7.c} {} "pr28138.a" \
+    ] \
+    [list \
+	"Build pr28138.o" \
+	"" "" \
+	{pr28138.c} {} \
+    ] \
+]
+
+set exec_output [run_host_cmd "sh" \
+			      "-c \"ulimit -n 20; \
+			      $CC -Btmpdir/ld -o tmpdir/pr28138 \
+			      tmpdir/pr28138.o tmpdir/pr28138.a\""]
+set exec_output [prune_warnings $exec_output]
+if [string match "" $exec_output] then {
+    if { [isnative] } {
+	set exec_output [run_host_cmd "tmpdir/pr28138" ""]
+	if [string match "PASS" $exec_output] then {
+	    pass "PR ld/28138"
+	} else {
+	    fail "PR ld/28138"
+	}
+    } else {
+	pass "PR ld/28138"
+    }
+} else {
+    fail "PR ld/28138"
+}
+
 set testname "Build liblto-11.a"
 remote_file host delete "tmpdir/liblto-11.a"
 set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
@@ -928,36 +962,6 @@ if { [check_lto_fat_available] } {
 	]
 	pr20103 "-O2" "tmpdir/thinpr20103a.a tmpdir/thinpr20103b.a tmpdir/thinpr20103c.a"
     }
-}
-
-run_cc_link_tests [list \
-    [list \
-	"Build pr28138.a" \
-	"-T" "" \
-	{pr28138-1.c pr28138-2.c pr28138-3.c pr28138-4.c pr28138-5.c \
-	 pr28138-6.c pr28138-7.c} {} "pr28138.a" \
-    ] \
-    [list \
-	"Build pr28138.o" \
-	"" "" \
-	{pr28138.c} {} \
-    ] \
-]
-
-set exec_output [run_host_cmd "sh" \
-			      "-c \"ulimit -n 20; \
-			      $CC -Btmpdir/ld -o tmpdir/pr28138 \
-			      tmpdir/pr28138.o tmpdir/pr28138.a\""]
-set exec_output [prune_warnings $exec_output]
-if [string match "" $exec_output] then {
-    set exec_output [run_host_cmd "tmpdir/pr28138" ""]
-    if [string match "PASS" $exec_output] then {
-	pass "PR ld/28138"
-    } else {
-	fail "PR ld/28138"
-    }
-} else {
-    fail "PR ld/28138"
 }
 
 restore_notify
