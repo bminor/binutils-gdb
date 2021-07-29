@@ -37,7 +37,7 @@ std::string
 obsd_nat_target::pid_to_str (ptid_t ptid)
 {
   if (ptid.lwp () != 0)
-    return string_printf ("thread %ld", ptid.lwp ());
+    return string_printf ("thread %ld of process %d", ptid.lwp (), ptid.pid ());
 
   return normal_pid_to_str (ptid);
 }
