@@ -2176,6 +2176,37 @@ s_aarch64_capinit (int ignored ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 }
+
+static void
+s_aarch64_chericap (int ignored ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+
+  expression (&exp);
+  if (exp.X_op != O_symbol)
+    {
+      as_bad (_(".chericap expects a target symbol as an argument"));
+      return;
+    }
+
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+  frag_grow (16);
+  fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 16, &exp, 0,
+		   BFD_RELOC_MORELLO_CAPINIT);
+
+  mapping_state (MAP_DATA);
+  for (int i = 0; i < 4; i++)
+    {
+      /* The documentation of our md_number_to_chars says the greatest value
+	 size it can handle is 4 bytes.  */
+      char *p = frag_more (4);
+      md_number_to_chars (p, 0, 4);
+    }
+  demand_empty_rest_of_line ();
+}
 #endif	/* OBJ_ELF */
 
 static void s_aarch64_arch (int);
@@ -2211,6 +2242,7 @@ const pseudo_typeS md_pseudo_table[] = {
   {"dword", s_aarch64_elf_cons, 8},
   {"variant_pcs", s_variant_pcs, 0},
   {"capinit", s_aarch64_capinit, 0},
+  {"chericap", s_aarch64_chericap, 0},
 #endif
   {"float16", float_cons, 'h'},
   {"bfloat16", float_cons, 'b'},
