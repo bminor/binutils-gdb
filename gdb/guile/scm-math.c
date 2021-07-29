@@ -529,9 +529,7 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
     {
       if (type->is_unsigned ())
 	{
-	  ULONGEST max;
-
-	  get_unsigned_type_max (type, &max);
+	  ULONGEST max = get_unsigned_type_max (type);
 	  if (!scm_is_unsigned_integer (obj, 0, max))
 	    {
 	      *except_scmp
@@ -575,12 +573,11 @@ vlscm_integer_fits_p (SCM obj, struct type *type)
 {
   if (type->is_unsigned ())
     {
-      ULONGEST max;
-
       /* If scm_is_unsigned_integer can't work with this type, just punt.  */
       if (TYPE_LENGTH (type) > sizeof (uintmax_t))
 	return 0;
-      get_unsigned_type_max (type, &max);
+
+      ULONGEST max = get_unsigned_type_max (type);
       return scm_is_unsigned_integer (obj, 0, max);
     }
   else

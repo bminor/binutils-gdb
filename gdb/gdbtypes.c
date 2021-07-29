@@ -1891,11 +1891,10 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
     return NULL;
 }
 
-/* Store in *MAX the largest number representable by unsigned integer type
-   TYPE.  */
+/* Return the largest number representable by unsigned integer type TYPE.  */
 
-void
-get_unsigned_type_max (struct type *type, ULONGEST *max)
+ULONGEST
+get_unsigned_type_max (struct type *type)
 {
   unsigned int n;
 
@@ -1905,7 +1904,7 @@ get_unsigned_type_max (struct type *type, ULONGEST *max)
 
   /* Written this way to avoid overflow.  */
   n = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
-  *max = ((((ULONGEST) 1 << (n - 1)) - 1) << 1) | 1;
+  return ((((ULONGEST) 1 << (n - 1)) - 1) << 1) | 1;
 }
 
 /* Store in *MIN, *MAX the smallest and largest numbers representable by
