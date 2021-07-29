@@ -75,7 +75,9 @@ enum aarch64_abi_type
 {
   AARCH64_ABI_NONE = 0,
   AARCH64_ABI_LP64 = 1,
-  AARCH64_ABI_ILP32 = 2
+  AARCH64_ABI_ILP32 = 2,
+  AARCH64_ABI_PURECAP = 3,
+  AARCH64_ABI_HYBRID = 4,
 };
 
 #ifndef DEFAULT_ARCH
@@ -10048,6 +10050,10 @@ struct aarch64_option_abi_value_table
 static const struct aarch64_option_abi_value_table aarch64_abis[] = {
   {"ilp32",		AARCH64_ABI_ILP32},
   {"lp64",		AARCH64_ABI_LP64},
+  /* Note that these values are accepted since they are valid parameters to
+     the -mabi argument for GCC.  However we base no decision on them.  */
+  {"purecap",		AARCH64_ABI_PURECAP},
+  {"hybrid",		AARCH64_ABI_HYBRID},
 };
 
 static int
