@@ -33,6 +33,14 @@
 #include "inf-ptrace.h"
 
 
+#ifdef PT_GETXSTATE_INFO
+size_t x86bsd_xsave_len;
+#endif
+
+/* Support for debug registers.  */
+
+#ifdef HAVE_PT_GETDBREGS
+
 static PTRACE_TYPE_RET
 gdb_ptrace (PTRACE_TYPE_ARG1 request, ptid_t ptid, PTRACE_TYPE_ARG3 addr)
 {
@@ -45,14 +53,6 @@ gdb_ptrace (PTRACE_TYPE_ARG1 request, ptid_t ptid, PTRACE_TYPE_ARG3 addr)
   return ptrace (request, pid, addr, 0);
 #endif
 }
-
-#ifdef PT_GETXSTATE_INFO
-size_t x86bsd_xsave_len;
-#endif
-
-/* Support for debug registers.  */
-
-#ifdef HAVE_PT_GETDBREGS
 
 /* Helper macro to access debug register X.  FreeBSD/amd64 and modern
    versions of FreeBSD/i386 provide this macro in system headers.  Define
