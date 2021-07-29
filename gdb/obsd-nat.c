@@ -33,8 +33,6 @@
    that maps userland threads directly onto kernel threads in a 1:1
    fashion.  */
 
-#ifdef PT_GET_THREAD_FIRST
-
 std::string
 obsd_nat_target::pid_to_str (ptid_t ptid)
 {
@@ -72,6 +70,21 @@ obsd_nat_target::update_thread_list ()
     }
 }
 
+/* Enable additional event reporting on a new or existing process.  */
+
+static void
+obsd_enable_proc_events (pid_t pid)
+{
+  ptrace_event_t pe;
+
+  /* Set the initial event mask.  */
+  memset (&pe, 0, sizeof pe);
+  pe.pe_set_event |= PTRACE_FORK;
+  if (ptrace (PT_SET_EVENT_MASK, pid,
+	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+    perror_with_name (("ptrace"));
+}
+
 ptid_t
 obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		       target_wait_flags options)
@@ -84,6 +97,8 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       pid_t pid = wptid.pid ();
       if (ptrace (PT_GET_PROCESS_STATE, pid, (caddr_t)&pe, sizeof pe) == -1)
 	perror_with_name (("ptrace"));
+
+      wptid = ptid_t (pid, pe.pe_tid, 0);
 
       switch (pe.pe_report_event)
 	{
@@ -105,13 +120,15 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  if (find_inferior_pid (this, fpid) != nullptr)
 	    {
 	      ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
-	      return ptid_t (fpid);
+	      wptid = ptid_t (fpid, pe.pe_tid, 0);
 	    }
 
-	  return ptid_t (pid);
+	  obsd_enable_proc_events (ourstatus->value.related_pid.pid ());
+	  break;
 	}
 
-      wptid = ptid_t (pid, pe.pe_tid, 0);
+      /* Ensure the ptid is updated with an LWP id on the first stop
+         of a process.  */
       if (!in_thread_list (this, wptid))
 	{
 	  if (in_thread_list (this, ptid_t (pid)))
@@ -123,34 +140,16 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   return wptid;
 }
 
-#endif /* PT_GET_THREAD_FIRST */
-
-#ifdef PT_GET_PROCESS_STATE
-
 void
 obsd_nat_target::post_attach (int pid)
 {
-  ptrace_event_t pe;
-
-  /* Set the initial event mask.  */
-  memset (&pe, 0, sizeof pe);
-  pe.pe_set_event |= PTRACE_FORK;
-  if (ptrace (PT_SET_EVENT_MASK, pid,
-	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
-    perror_with_name (("ptrace"));
+  obsd_enable_proc_events (pid);
 }
 
 void
 obsd_nat_target::post_startup_inferior (ptid_t pid)
 {
-  ptrace_event_t pe;
-
-  /* Set the initial event mask.  */
-  memset (&pe, 0, sizeof pe);
-  pe.pe_set_event |= PTRACE_FORK;
-  if (ptrace (PT_SET_EVENT_MASK, pid.pid (),
-	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
-    perror_with_name (("ptrace"));
+  obsd_enable_proc_events (pid.pid ());
 }
 
 /* Target hook for follow_fork.  On entry and at return inferior_ptid is
@@ -160,7 +159,7 @@ void
 obsd_nat_target::follow_fork (ptid_t child_ptid, target_waitkind fork_kind,
 			      bool follow_child, bool detach_fork)
 {
-  if (!follow_child)
+  if (!follow_child && detach_fork)
     {
       /* Breakpoints have already been detached from the child by
 	 infrun.c.  */
@@ -181,5 +180,3 @@ obsd_nat_target::remove_fork_catchpoint (int pid)
 {
   return 0;
 }
-
-#endif /* PT_GET_PROCESS_STATE */
