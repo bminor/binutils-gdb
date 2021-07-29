@@ -2170,8 +2170,8 @@ s_aarch64_capinit (int ignored ATTRIBUTE_UNUSED)
       return;
     }
 
-  frag_grow (8);
-  fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 8, &exp, 0,
+  frag_grow (16);
+  fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 16, &exp, 0,
 		   BFD_RELOC_MORELLO_CAPINIT);
 
   demand_empty_rest_of_line ();
