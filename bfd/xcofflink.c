@@ -3992,7 +3992,8 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  if (info->strip != strip_all)
+  if (info->strip != strip_all
+      && xcoff_hash_table (info)->debug_section != NULL)
     xcoff_hash_table (info)->debug_section->size =
       _bfd_stringtab_size (debug_strtab);
 
