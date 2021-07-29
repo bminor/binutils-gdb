@@ -532,9 +532,9 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 	  if (!scm_is_unsigned_integer (obj, 0, max))
 	    {
 	      *except_scmp
-		= gdbscm_make_out_of_range_error (func_name,
-						  obj_arg_pos, obj,
-					_("value out of range for type"));
+		= gdbscm_make_out_of_range_error
+		    (func_name, obj_arg_pos, obj,
+		     _("value out of range for type"));
 	      return NULL;
 	    }
 	  return value_from_longest (type, gdbscm_scm_to_ulongest (obj));
@@ -547,9 +547,9 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 	  if (!scm_is_signed_integer (obj, min, max))
 	    {
 	      *except_scmp
-		= gdbscm_make_out_of_range_error (func_name,
-						  obj_arg_pos, obj,
-					_("value out of range for type"));
+		= gdbscm_make_out_of_range_error
+		    (func_name, obj_arg_pos, obj,
+		     _("value out of range for type"));
 	      return NULL;
 	    }
 	  return value_from_longest (type, gdbscm_scm_to_longest (obj));
@@ -561,9 +561,9 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
       if (!scm_is_unsigned_integer (obj, 0, max))
 	{
 	  *except_scmp
-	    = gdbscm_make_out_of_range_error (func_name,
-					      obj_arg_pos, obj,
-					_("value out of range for type"));
+	    = gdbscm_make_out_of_range_error
+	        (func_name, obj_arg_pos, obj,
+		 _("value out of range for type"));
 	  return NULL;
 	}
       return value_from_pointer (type, gdbscm_scm_to_ulongest (obj));
