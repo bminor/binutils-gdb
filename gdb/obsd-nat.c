@@ -26,7 +26,7 @@
 #include <sys/ptrace.h>
 #include "gdbsupport/gdb_wait.h"
 
-#include "inf-child.h"
+#include "inf-ptrace.h"
 #include "obsd-nat.h"
 
 /* OpenBSD 5.2 and later include rthreads which uses a thread model
@@ -76,47 +76,12 @@ ptid_t
 obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		       target_wait_flags options)
 {
-  pid_t pid;
-  int status, save_errno;
-
-  do
-    {
-      set_sigint_trap ();
-
-      do
-	{
-	  pid = waitpid (ptid.pid (), &status, 0);
-	  save_errno = errno;
-	}
-      while (pid == -1 && errno == EINTR);
-
-      clear_sigint_trap ();
-
-      if (pid == -1)
-	{
-	  fprintf_unfiltered (gdb_stderr,
-			      _("Child process unexpectedly missing: %s.\n"),
-			      safe_strerror (save_errno));
-
-	  /* Claim it exited with unknown signal.  */
-	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-	  ourstatus->value.sig = GDB_SIGNAL_UNKNOWN;
-	  return inferior_ptid;
-	}
-
-      /* Ignore terminated detached child processes.  */
-      if (!WIFSTOPPED (status) && pid != inferior_ptid.pid ())
-	pid = -1;
-    }
-  while (pid == -1);
-
-  ptid = ptid_t (pid);
-
-  if (WIFSTOPPED (status))
+  ptid_t wptid = inf_ptrace_target::wait (ptid, ourstatus, options);
+  if (ourstatus->kind == TARGET_WAITKIND_STOPPED)
     {
       ptrace_state_t pe;
-      pid_t fpid;
 
+      pid_t pid = wptid.pid ();
       if (ptrace (PT_GET_PROCESS_STATE, pid, (caddr_t)&pe, sizeof pe) == -1)
 	perror_with_name (("ptrace"));
 
@@ -127,7 +92,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
 
 	  /* Make sure the other end of the fork is stopped too.  */
-	  fpid = waitpid (pe.pe_other_pid, &status, 0);
+	  pid_t fpid = waitpid (pe.pe_other_pid, nullptr, 0);
 	  if (fpid == -1)
 	    perror_with_name (("waitpid"));
 
@@ -137,7 +102,7 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 	  gdb_assert (pe.pe_report_event == PTRACE_FORK);
 	  gdb_assert (pe.pe_other_pid == pid);
-	  if (fpid == inferior_ptid.pid ())
+	  if (find_inferior_pid (this, fpid) != nullptr)
 	    {
 	      ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
 	      return ptid_t (fpid);
@@ -146,18 +111,16 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  return ptid_t (pid);
 	}
 
-      ptid = ptid_t (pid, pe.pe_tid, 0);
-      if (!in_thread_list (this, ptid))
+      wptid = ptid_t (pid, pe.pe_tid, 0);
+      if (!in_thread_list (this, wptid))
 	{
-	  if (inferior_ptid.lwp () == 0)
-	    thread_change_ptid (this, inferior_ptid, ptid);
+	  if (in_thread_list (this, ptid_t (pid)))
+	    thread_change_ptid (this, ptid_t (pid), wptid);
 	  else
-	    add_thread (this, ptid);
+	    add_thread (this, wptid);
 	}
     }
-
-  store_waitstatus (ourstatus, status);
-  return ptid;
+  return wptid;
 }
 
 #endif /* PT_GET_THREAD_FIRST */
