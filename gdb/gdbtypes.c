@@ -1924,6 +1924,21 @@ get_signed_type_minmax (struct type *type, LONGEST *min, LONGEST *max)
   *max = ((ULONGEST) 1 << (n - 1)) - 1;
 }
 
+/* Return the largest value representable by pointer type TYPE. */
+
+CORE_ADDR
+get_pointer_type_max (struct type *type)
+{
+  unsigned int n;
+
+  type = check_typedef (type);
+  gdb_assert (type->code () == TYPE_CODE_PTR);
+  gdb_assert (TYPE_LENGTH (type) <= sizeof (CORE_ADDR));
+
+  n = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
+  return ((((CORE_ADDR) 1 << (n - 1)) - 1) << 1) | 1;
+}
+
 /* Internal routine called by TYPE_VPTR_FIELDNO to return the value of
    cplus_stuff.vptr_fieldno.
 

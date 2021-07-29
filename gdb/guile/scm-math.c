@@ -524,8 +524,7 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 			    int type_arg_pos, SCM type_scm, struct type *type,
 			    struct gdbarch *gdbarch, SCM *except_scmp)
 {
-  if (is_integral_type (type)
-      || type->code () == TYPE_CODE_PTR)
+  if (is_integral_type (type))
     {
       if (type->is_unsigned ())
 	{
@@ -555,6 +554,19 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 	    }
 	  return value_from_longest (type, gdbscm_scm_to_longest (obj));
 	}
+    }
+  else if (type->code () == TYPE_CODE_PTR)
+    {
+      CORE_ADDR max = get_pointer_type_max (type);
+      if (!scm_is_unsigned_integer (obj, 0, max))
+	{
+	  *except_scmp
+	    = gdbscm_make_out_of_range_error (func_name,
+					      obj_arg_pos, obj,
+					_("value out of range for type"));
+	  return NULL;
+	}
+      return value_from_pointer (type, gdbscm_scm_to_ulongest (obj));
     }
   else if (type->code () == TYPE_CODE_FLT)
     return value_from_host_double (type, scm_to_double (obj));
