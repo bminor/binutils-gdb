@@ -1,5 +1,12 @@
 2021-07-29  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* config/tc-aarch64.c (s_aarch64_capinit, s_aarch64_chericap):
+	Automatically align to 16 bytes.
+	* testsuite/gas/aarch64/morello-capinit-align.s: New.
+	* testsuite/gas/aarch64/morello-capinit-align.d: New.
+
+2021-07-29  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* config/tc-aarch64.c (s_aarch64_capinit): Use 16 as size required.
 	* testsuite/gas/aarch64/morello-capinit-require-size.s: New.
 	* testsuite/gas/aarch64/morello-capinit-require-size.d: New.
