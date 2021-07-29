@@ -1,3 +1,24 @@
+2021-07-29  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-aarch64.c (s_aarch64_capinit): Use 16 as size required.
+	* testsuite/gas/aarch64/morello-capinit-require-size.s: New.
+	* testsuite/gas/aarch64/morello-capinit-require-size.d: New.
+	* testsuite/gas/aarch64/morello-capinit-require-size.l: New.
+
+2021-07-29  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-aarch64.c (s_aarch64_chericap): New function.
+	(md_pseudo_table): Add chericap directive.
+	* testsuite/gas/aarch64/morello-chericap.s: New.
+	* testsuite/gas/aarch64/morello-chericap.d: New.
+
+2021-07-29  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-aarch64.c (aarch64_frob_label): Include LSB on C64 function
+	symbols.
+	* testsuite/gas/aarch64/morello-function-lsb.s: New.
+	* testsuite/gas/aarch64/morello-function-lsb.d: New.
+
 2021-07-20  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* config/tc-aarch64.c (parse_operands): Use correct enum type for
