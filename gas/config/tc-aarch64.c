@@ -7668,6 +7668,8 @@ aarch64_frob_label (symbolS * sym)
   last_label_seen = sym;
 
   AARCH64_SET_C64 (sym, IS_C64);
+  if (AARCH64_IS_C64 (sym) && S_IS_FUNCTION (sym))
+    *symbol_X_add_number (sym) += 1;
 
   dwarf2_emit_label (sym);
 }
