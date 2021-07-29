@@ -1,5 +1,13 @@
 2021-07-29  Matthew Malcomson  <matthew.malcomson@arm.com>
 
+	* config/tc-aarch64.c (aarch64_abi_type): Introduce PURECAP and HYBRID
+	enum entries.
+	(aarch64_abis): Add "purecap" and "hybrid" parameters.
+	* testsuite/gas/aarch64/morello-abis-ignored.s: New.
+	* testsuite/gas/aarch64/morello-abis-ignored.d: New.
+
+2021-07-29  Matthew Malcomson  <matthew.malcomson@arm.com>
+
 	* config/tc-aarch64.c (s_aarch64_capinit, s_aarch64_chericap):
 	Automatically align to 16 bytes.
 	* testsuite/gas/aarch64/morello-capinit-align.s: New.
