@@ -4723,7 +4723,7 @@ ppc_dwsect (int ignore ATTRIBUTE_UNUSED)
   else
     {
       /* Create a new dw subsection.  */
-      subseg = XNEW (struct dw_subsection);
+      subseg = XCNEW (struct dw_subsection);
 
       if (opt_label == NULL)
         {
