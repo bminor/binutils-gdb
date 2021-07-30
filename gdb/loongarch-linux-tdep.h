@@ -22,7 +22,9 @@
 #define LOONGARCH_LINUX_TDEP_H
 
 #include <regset.h>
-#include <sys/procfs.h>
+
+#define ELF_NGREG   45
+#define ELF_NFPREG  34
 
 typedef uint64_t loongarch_elf_gregset_t[ELF_NGREG];
 extern const struct regset loongarch_elf_gregset;
