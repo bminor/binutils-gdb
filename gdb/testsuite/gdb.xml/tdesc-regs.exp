@@ -83,6 +83,11 @@ switch -glob -- [istarget] {
 	set regdir "i386/"
         set core-regs {64bit-core.xml 64bit-sse.xml}
     }
+    "loongarch64-*-*" {
+	set architecture "loongarch64"
+	set regdir "loongarch/"
+        set core-regs {base64.xml fpu64.xml lbt64.xml lsx.xml lasx.xml}
+    }
 }
 
 # If no core registers were specified, assume this target does not

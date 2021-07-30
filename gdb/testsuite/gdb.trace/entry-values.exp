@@ -62,6 +62,8 @@ if { [istarget "arm*-*-*"] || [istarget "aarch64*-*-*"] } {
     # returns.  The only exception is JALRC, in which case execution
     # resumes from `insn1' instead.
     set call_insn {jalrc|[jb]al[sxr]*[ \t][^\r\n]+\r\n}
+} elseif { [istarget "loongarch*-*-*"] } {
+    set call_insn "bl"
 } else {
     set call_insn "call"
 }

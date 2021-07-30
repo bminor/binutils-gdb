@@ -965,6 +965,45 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	}
       /* FALL THROUGH */
 
+    case TARGET_OBJECT_LARCH:
+      if (strcmp (annex, "cpucfg") == 0)
+	{
+	  struct bfd_section *section;
+	  bfd_size_type size;
+
+	  if (writebuf)
+	    return TARGET_XFER_E_IO;
+	  section = bfd_get_section_by_name (core_bfd, ".reg-loongarch-cpucfg");
+	  if (section == NULL)
+	    return TARGET_XFER_E_IO;
+
+	  size = bfd_section_size (section);
+	  if (offset >= size)
+	    return TARGET_XFER_EOF;
+	  size -= offset;
+	  if (size > len)
+	    size = len;
+
+	  if (size == 0)
+	    return TARGET_XFER_EOF;
+	  if (!bfd_get_section_contents (core_bfd, section, readbuf,
+					 (file_ptr) offset, size))
+	    {
+	      warning (_("Couldn't read .reg-cpucfg section in core file."));
+	      return TARGET_XFER_E_IO;
+	    }
+
+	  *xfered_len = (ULONGEST) size;
+	  return TARGET_XFER_OK;
+	}
+
+      if (strcmp (annex, "csr") == 0)
+	{
+	  return TARGET_XFER_UNAVAILABLE;
+	}
+
+      return TARGET_XFER_E_IO;
+
     case TARGET_OBJECT_SIGNAL_INFO:
       if (readbuf)
 	{

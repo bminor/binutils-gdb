@@ -135,6 +135,9 @@ enum inferior_event_type
 
 enum target_object
 {
+  /* LARCH target specific transfer. See "loongarch-nat.c" "corelow.c"
+     and "remote.c".  */
+  TARGET_OBJECT_LARCH,
   /* AVR target specific transfer.  See "avr-tdep.c" and "remote.c".  */
   TARGET_OBJECT_AVR,
   /* Transfer up-to LEN bytes of memory starting at OFFSET.  */

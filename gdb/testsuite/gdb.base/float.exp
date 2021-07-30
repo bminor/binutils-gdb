@@ -120,6 +120,8 @@ if { [is_aarch64_target] } then {
 	      pass "info float (without FPU)"
 	}
     }
+} elseif [istarget "loongarch*-*-*"] then {
+    gdb_test "info float" "f.*fcc0.*fcsr.*" "info float"
 } else {
     gdb_test "info float" "No floating.point info available for this processor." "info float (unknown target)"
 }

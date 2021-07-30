@@ -145,11 +145,13 @@ make_dump_file "dump srec val [set intarr1.srec] intarray" \
 make_dump_file "dump srec val [set intstr1.srec] intstruct" \
 	"dump struct as value, srec"
 
+if { ![istarget loongarch*-*-*] } {
 make_dump_file "dump ihex val [set intarr1.ihex] intarray" \
 	"dump array as value, intel hex"
 
 make_dump_file "dump ihex val [set intstr1.ihex] intstruct" \
 	"dump struct as value, intel hex"
+}
 
 make_dump_file "dump tekhex val [set intarr1.tekhex] intarray" \
 	"dump array as value, tekhex"
@@ -246,11 +248,13 @@ make_dump_file "dump srec mem [set intarr2.srec] $array_start $array_end" \
 make_dump_file "dump srec mem [set intstr2.srec] $struct_start $struct_end" \
 	"dump struct as memory, srec"
 
+if { ![istarget loongarch*-*-*] } {
 make_dump_file "dump ihex mem [set intarr2.ihex] $array_start $array_end" \
 	"dump array as memory, ihex"
 
 make_dump_file "dump ihex mem [set intstr2.ihex] $struct_start $struct_end" \
 	"dump struct as memory, ihex"
+}
 
 make_dump_file "dump tekhex mem [set intarr2.tekhex] $array_start $array_end" \
 	"dump array as memory, tekhex"

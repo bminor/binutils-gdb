@@ -97,6 +97,9 @@ xtensa*)
 	cpu_obs="xtensa-tdep.o xtensa-config.o solib-svr4.o"
 	;;
 
+loongarch*)
+	cpu_obs="arch/loongarch.o";;
+
 esac
 
 # 2. Get the objects per os in $TARG.
@@ -343,6 +346,11 @@ iq2000-*-*)
 lm32-*-*)		
 	gdb_target_obs="lm32-tdep.o" 
 	gdb_sim=../sim/lm32/libsim.a
+	;;
+
+loongarch*-linux*)
+	gdb_target_obs="loongarch-tdep.o loongarch-linux-tdep.o glibc-tdep.o linux-tdep.o solib-svr4.o symfile-mem.o"
+	build_gdbserver=yes
 	;;
 
 m32c-*-*)

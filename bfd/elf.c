@@ -9975,6 +9975,30 @@ elfcore_grok_gdb_tdesc (bfd *abfd, Elf_Internal_Note *note)
   return elfcore_make_note_pseudosection (abfd, ".gdb-tdesc", note);
 }
 
+static bool
+elfcore_grok_loongarch_cpucfg (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-loongarch-cpucfg", note);
+}
+
+static bool
+elfcore_grok_loongarch_lbt (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-loongarch-lbt", note);
+}
+
+static bool
+elfcore_grok_loongarch_lsx (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-loongarch-lsx", note);
+}
+
+static bool
+elfcore_grok_loongarch_lasx (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-loongarch-lasx", note);
+}
+
 #if defined (HAVE_PRPSINFO_T)
 typedef prpsinfo_t   elfcore_psinfo_t;
 #if defined (HAVE_PRPSINFO32_T)		/* Sparc64 cross Sparc32 */
@@ -10651,6 +10675,34 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       if (note->namesz == 4
           && strcmp (note->namedata, "GDB") == 0)
         return elfcore_grok_riscv_csr (abfd, note);
+      else
+	return true;
+
+    case NT_LARCH_CPUCFG:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_loongarch_cpucfg (abfd, note);
+      else
+	return true;
+
+    case NT_LARCH_LBT:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_loongarch_lbt (abfd, note);
+      else
+	return true;
+
+    case NT_LARCH_LSX:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_loongarch_lsx (abfd, note);
+      else
+	return true;
+
+    case NT_LARCH_LASX:
+      if (note->namesz == 6
+	  && strcmp (note->namedata, "LINUX") == 0)
+	return elfcore_grok_loongarch_lasx (abfd, note);
       else
 	return true;
 
@@ -12047,6 +12099,55 @@ elfcore_write_arc_v2 (bfd *abfd,
 			     note_name, NT_ARC_V2, arc_v2, size);
 }
 
+char *
+elfcore_write_loongarch_cpucfg (bfd *abfd,
+				char *buf,
+				int *bufsiz,
+				const void *loongarch_cpucfg,
+				int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_LARCH_CPUCFG,
+			     loongarch_cpucfg, size);
+}
+
+char *
+elfcore_write_loongarch_lbt (bfd *abfd,
+			     char *buf,
+			     int *bufsiz,
+			     const void *loongarch_lbt,
+			     int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_LARCH_LBT, loongarch_lbt, size);
+}
+
+char *
+elfcore_write_loongarch_lsx (bfd *abfd,
+			     char *buf,
+			     int *bufsiz,
+			     const void *loongarch_lsx,
+			     int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_LARCH_LSX, loongarch_lsx, size);
+}
+
+char *
+elfcore_write_loongarch_lasx (bfd *abfd,
+			      char *buf,
+			      int *bufsiz,
+			      const void *loongarch_lasx,
+			      int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_LARCH_LASX, loongarch_lasx, size);
+}
+
 /* Write the buffer of csr values in CSRS (length SIZE) into the note
    buffer BUF and update *BUFSIZ.  ABFD is the bfd the note is being
    written into.  Return a pointer to the new start of the note buffer, to
@@ -12171,6 +12272,14 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_gdb_tdesc (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-riscv-csr") == 0)
     return elfcore_write_riscv_csr (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-loongarch-cpucfg") == 0)
+    return elfcore_write_loongarch_cpucfg (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-loongarch-lbt") == 0)
+    return elfcore_write_loongarch_lbt (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-loongarch-lsx") == 0)
+    return elfcore_write_loongarch_lsx (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-loongarch-lasx") == 0)
+    return elfcore_write_loongarch_lasx (abfd, buf, bufsiz, data, size);
   return NULL;
 }
 

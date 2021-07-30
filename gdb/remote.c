@@ -2071,6 +2071,8 @@ enum {
   PACKET_qXfer_statictrace_read,
   PACKET_qXfer_traceframe_info,
   PACKET_qXfer_uib,
+  PACKET_qXfer_loongarch_read,
+  PACKET_qXfer_loongarch_write,
   PACKET_qGetTIBAddr,
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
@@ -5262,6 +5264,10 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_threads },
   { "qXfer:traceframe-info:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_traceframe_info },
+  { "qXfer:loongarch:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_loongarch_read },
+  { "qXfer:loongarch:write", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_loongarch_write },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QPassSignals },
   { "QCatchSyscalls", PACKET_DISABLE, remote_supported_packet,
@@ -11267,6 +11273,18 @@ remote_target::xfer_partial (enum target_object object,
 	return TARGET_XFER_E_IO;
     }
 
+  if (object == TARGET_OBJECT_LARCH)
+    {
+      if (readbuf)
+	return remote_read_qxfer ("loongarch", annex, readbuf, offset, len,
+				  xfered_len, &remote_protocol_packets
+				  [PACKET_qXfer_loongarch_read]);
+      else
+	return remote_write_qxfer ("loongarch", annex, writebuf, offset, len,
+				   xfered_len, &remote_protocol_packets
+				   [PACKET_qXfer_loongarch_write]);
+    }
+
   /* Only handle flash writes.  */
   if (writebuf != NULL)
     {
@@ -15101,6 +15119,13 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_uib],
 			 "qXfer:uib:read", "unwind-info-block", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_loongarch_read],
+                         "qXfer:loongarch:read", "read-loongarch-object", 0);
+
+  add_packet_config_cmd
+    (&remote_protocol_packets[PACKET_qXfer_loongarch_write],
+     "qXfer:loongarch:write", "write-loongarch-object", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qGetTLSAddr],
 			 "qGetTLSAddr", "get-thread-local-storage-address",
