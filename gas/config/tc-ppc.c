@@ -1014,18 +1014,15 @@ ppc_xcoff_section_is_initialized (struct ppc_xcoff_section *section)
 
 /* Initialize a ppc_xcoff_section.
    Dummy symbols are used to ensure the position of .text over .data
-   and .tdata.  These symbols won't be output.  */
+   and .tdata.  Moreover, they allow all algorithms here to be sure that
+   csects isn't NULL.  These symbols won't be output.  */
 static void
-ppc_init_xcoff_section (struct ppc_xcoff_section *s, segT seg,
-			bool need_dummy)
+ppc_init_xcoff_section (struct ppc_xcoff_section *s, segT seg)
 {
   s->segment = seg;
   s->next_subsegment = 2;
-  if (need_dummy)
-    {
-      s->csects = symbol_make ("dummy\001");
-      symbol_get_tc (s->csects)->within = s->csects;
-    }
+  s->csects = symbol_make ("dummy\001");
+  symbol_get_tc (s->csects)->within = s->csects;
 }
 
 /* The current csect.  */
@@ -1881,9 +1878,9 @@ md_begin (void)
   /* Create XCOFF sections with .text in first, as it's creating dummy symbols
      to serve as initial csects.  This forces the text csects to precede the
      data csects.  These symbols will not be output.  */
-  ppc_init_xcoff_section (&ppc_xcoff_text_section, text_section, true);
-  ppc_init_xcoff_section (&ppc_xcoff_data_section, data_section, true);
-  ppc_init_xcoff_section (&ppc_xcoff_bss_section, bss_section, true);
+  ppc_init_xcoff_section (&ppc_xcoff_text_section, text_section);
+  ppc_init_xcoff_section (&ppc_xcoff_data_section, data_section);
+  ppc_init_xcoff_section (&ppc_xcoff_bss_section, bss_section);
 #endif
 }
 
@@ -4400,8 +4397,7 @@ ppc_comm (int lcomm)
       section = &ppc_xcoff_tbss_section;
       if (!ppc_xcoff_section_is_initialized (section))
 	{
-	  ppc_init_xcoff_section (section,
-				  subseg_new (".tbss", 0), false);
+	  ppc_init_xcoff_section (section, subseg_new (".tbss", 0));
 	  bfd_set_section_flags (section->segment,
 				 SEC_ALLOC | SEC_THREAD_LOCAL);
 	  seg_info (section->segment)->bss = 1;
@@ -4558,8 +4554,7 @@ ppc_change_csect (symbolS *sym, offsetT align)
 	  /* Create .tdata section if not yet done.  */
 	  if (!ppc_xcoff_section_is_initialized (section))
 	    {
-	      ppc_init_xcoff_section (section, subseg_new (".tdata", 0),
-				      true);
+	      ppc_init_xcoff_section (section, subseg_new (".tdata", 0));
 	      bfd_set_section_flags (section->segment, SEC_ALLOC
 				     | SEC_LOAD | SEC_RELOC | SEC_DATA
 				     | SEC_THREAD_LOCAL);
@@ -4570,8 +4565,7 @@ ppc_change_csect (symbolS *sym, offsetT align)
 	  /* Create .tbss section if not yet done.  */
 	  if (!ppc_xcoff_section_is_initialized (section))
 	    {
-	      ppc_init_xcoff_section (section, subseg_new (".tbss", 0),
-				      false);
+	      ppc_init_xcoff_section (section, subseg_new (".tbss", 0));
 	      bfd_set_section_flags (section->segment, SEC_ALLOC |
 				     SEC_THREAD_LOCAL);
 	      seg_info (section->segment)->bss = 1;
