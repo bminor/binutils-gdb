@@ -8559,7 +8559,7 @@ _bfd_elf_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
       return -1;
     }
 #endif
-  return (asect->reloc_count + 1) * sizeof (arelent *);
+  return (asect->reloc_count + 1L) * sizeof (arelent *);
 }
 
 /* Canonicalize the relocs.  */

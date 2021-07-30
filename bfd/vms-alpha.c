@@ -5443,7 +5443,7 @@ alpha_vms_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED, asection *section)
 {
   alpha_vms_slurp_relocs (abfd);
 
-  return (section->reloc_count + 1) * sizeof (arelent *);
+  return (section->reloc_count + 1L) * sizeof (arelent *);
 }
 
 /* Convert relocations from VMS (external) form into BFD internal

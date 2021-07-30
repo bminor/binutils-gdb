@@ -1427,7 +1427,7 @@ bfd_mach_o_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
       return -1;
     }
 #endif
- return (asect->reloc_count + 1) * sizeof (arelent *);
+ return (asect->reloc_count + 1L) * sizeof (arelent *);
 }
 
 /* In addition to the need to byte-swap the symbol number, the bit positions

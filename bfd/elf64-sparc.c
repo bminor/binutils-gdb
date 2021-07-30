@@ -44,7 +44,7 @@ elf64_sparc_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       return -1;
     }
 #endif
-  return (sec->reloc_count * 2 + 1) * sizeof (arelent *);
+  return (sec->reloc_count * 2L + 1) * sizeof (arelent *);
 }
 
 static long
