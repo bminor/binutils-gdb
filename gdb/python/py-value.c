@@ -1960,6 +1960,33 @@ gdbpy_history (PyObject *self, PyObject *args)
   return value_to_value_object (res_val);
 }
 
+/* Add a gdb.Value into GDB's history, and return (as an integer) the
+   position of the newly added value.  */
+PyObject *
+gdbpy_add_history (PyObject *self, PyObject *args)
+{
+  PyObject *value_obj;
+
+  if (!PyArg_ParseTuple (args, "O", &value_obj))
+    return nullptr;
+
+  struct value *value = convert_value_from_python (value_obj);
+  if (value == nullptr)
+    return nullptr;
+
+  try
+    {
+      int idx = record_latest_value (value);
+      return gdb_py_object_from_longest (idx).release ();
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  return nullptr;
+}
+
 /* Return the value of a convenience variable.  */
 PyObject *
 gdbpy_convenience_variable (PyObject *self, PyObject *args)

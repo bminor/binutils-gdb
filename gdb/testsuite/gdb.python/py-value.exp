@@ -575,6 +575,31 @@ proc test_value_from_buffer {} {
 	   "attempt to construct value with string as type"
 }
 
+# Test the gdb.add_history API.
+proc test_add_to_history {} {
+    # Add a gdb.Value to the value history list.
+    gdb_test_no_output "python idx = gdb.add_history(gdb.Value(42))" \
+	"add value 42 to the history list"
+    gdb_test "python print (\"$%d = %s\" % (idx, gdb.history (idx)))" \
+	" = 42" "print value 42 from the history list"
+    set idx [get_python_valueof "idx" "**DEFAULT**" "get idx for value 42"]
+    gdb_test "print \$${idx}" " = 42"
+
+    # Add something to the history list that can be converted into a
+    # gdb.Value.
+    gdb_test_no_output "python idx = gdb.add_history(84)" \
+	"add value to 84 to the history list"
+    gdb_test "python print (\"$%d = %s\" % (idx, gdb.history (idx)))" \
+	" = 84" "print value 84 from the history list"
+    set idx [get_python_valueof "idx" "**DEFAULT**" "get idx for value 84"]
+    gdb_test "print \$${idx}" " = 84"
+
+    # Try adding something that can't be converted to a gdb.Value,
+    # this should give an error.
+    gdb_test "python idx = gdb.add_history(gdb.GdbError(\"an error\"))" \
+	"TypeError: Could not convert Python object: .*"
+}
+
 # Build C version of executable.  C++ is built later.
 if { [build_inferior "${binfile}" "c"] < 0 } {
     return -1
@@ -594,6 +619,7 @@ test_objfiles
 test_parse_and_eval
 test_value_hash
 test_float_conversion
+test_add_to_history
 
 # The following tests require execution.
 

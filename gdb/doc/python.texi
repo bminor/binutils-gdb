@@ -346,6 +346,20 @@ If no exception is raised, the return value is always an instance of
 @code{gdb.Value} (@pxref{Values From Inferior}).
 @end defun
 
+@defun gdb.add_history (value)
+Takes @var{value}, an instance of @code{gdb.Value} (@pxref{Values From
+Inferior}), and appends the value this object represents to
+@value{GDBN}'s value history (@pxref{Value History}), and return an
+integer, its history number.  If @var{value} is not a
+@code{gdb.Value}, it is is converted using the @code{gdb.Value}
+constructor.  If @var{value} can't be converted to a @code{gdb.Value}
+then a @code{TypeError} is raised.
+
+When a command implemented in Python prints a single @code{gdb.Value}
+as its result, then placing the value into the history will allow the
+user convenient access to those values via CLI history facilities.
+@end defun
+
 @findex gdb.convenience_variable
 @defun gdb.convenience_variable (name)
 Return the value of the convenience variable (@pxref{Convenience

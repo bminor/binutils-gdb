@@ -10,6 +10,13 @@ maint show backtrace-on-fatal-signal
   fatal signal.  This only supported on some platforms where the
   backtrace and backtrace_symbols_fd functions are available.
 
+* Python API
+
+  ** New function gdb.add_history(), which takes a gdb.Value object
+     and adds the value it represents to GDB's history list.  An
+     integer, the index of the new item in the history list, is
+     returned.
+
 *** Changes in GDB 11
 
 * The 'set disassembler-options' command now supports specifying options
