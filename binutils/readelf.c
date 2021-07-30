@@ -21789,8 +21789,6 @@ process_archive (Filedata * filedata, bool is_thin_archive)
       arch.next_arhdr_offset += sizeof arch.arhdr;
 
       filedata->archive_file_size = strtoul (arch.arhdr.ar_size, NULL, 10);
-      if (filedata->archive_file_size & 01)
-	++filedata->archive_file_size;
 
       name = get_archive_member_name (&arch, &nested_arch);
       if (name == NULL)
@@ -21894,7 +21892,7 @@ process_archive (Filedata * filedata, bool is_thin_archive)
 	  filedata->file_name = qualified_name;
 	  if (! process_object (filedata))
 	    ret = false;
-	  arch.next_arhdr_offset += filedata->archive_file_size;
+	  arch.next_arhdr_offset += (filedata->archive_file_size + 1) & -2;
 	  /* Stop looping with "negative" archive_file_size.  */
 	  if (arch.next_arhdr_offset < filedata->archive_file_size)
 	    arch.next_arhdr_offset = -1ul;
