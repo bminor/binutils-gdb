@@ -1,3 +1,8 @@
+2021-08-02  Tom Tromey  <tromey@adacore.com>
+
+	PR varobj/28131
+	* varobj.c (~varobj): Delete 'dynamic' before 'root'.
+
 2021-08-02  Shahab Vahedi  <shahab@synopsys.com>
 
 	PR gdb/28104

@@ -1,3 +1,9 @@
+2021-08-02  Tom Tromey  <tromey@adacore.com>
+
+	PR varobj/28131
+	* gdb.python/py-mi-var-info-path-expression.exp: Add regression
+	test.
+
 2021-07-26  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	PR gdb/28076
