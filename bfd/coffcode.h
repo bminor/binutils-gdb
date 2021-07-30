@@ -1951,6 +1951,12 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
       coff_swap_reloc_in (abfd, &dst, &n);
       if (bfd_seek (abfd, oldpos, 0) != 0)
 	return;
+      if (n.r_vaddr < 0xffff)
+	{
+	  _bfd_error_handler (_("%pB: overflow reloc count too small"), abfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return;
+	}
       section->reloc_count = hdr->s_nreloc = n.r_vaddr - 1;
       section->rel_filepos += relsz;
     }
