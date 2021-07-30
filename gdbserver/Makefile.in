@@ -193,6 +193,7 @@ SFILES = \
 	$(srcdir)/linux-arm-low.cc \
 	$(srcdir)/linux-ia64-low.cc \
 	$(srcdir)/linux-low.cc \
+	$(srcdir)/linux-loongarch-low.cc \
 	$(srcdir)/linux-m68k-low.cc \
 	$(srcdir)/linux-mips-low.cc \
 	$(srcdir)/linux-nios2-low.cc \
@@ -226,6 +227,7 @@ SFILES = \
 	$(srcdir)/../gdb/arch/arm.c \
 	$(srcdir)/../gdb/arch/arm-get-next-pcs.c \
 	$(srcdir)/../gdb/arch/arm-linux.c \
+	$(srcdir)/../gdb/arch/loongarch.c \
 	$(srcdir)/../gdb/arch/ppc-linux-common.c \
 	$(srcdir)/../gdb/arch/riscv.c \
 	$(srcdir)/../gdb/nat/aarch64-mte-linux-ptrace.c \

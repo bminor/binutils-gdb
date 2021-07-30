@@ -381,6 +381,21 @@ case "${gdbserver_host}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
+  loongarch*-linux*)	srv_tgtobj="$srv_linux_obj linux-loongarch-low.o"
+			srv_tgtobj="${srv_tgtobj} arch/loongarch.o"
+			srv_tgtobj="${srv_tgtobj} arch/loongarch-linux-nat.o"
+			srv_xmlfiles="loongarch/base32.xml"
+			srv_xmlfiles="${srv_xmlfiles} loongarch/base64.xml"
+			srv_xmlfiles="${srv_xmlfiles} loongarch/fpu32.xml"
+			srv_xmlfiles="${srv_xmlfiles} loongarch/fpu64.xml"
+			srv_xmlfiles="${srv_xmlfiles} loongarch/lbt32.xml"
+			srv_xmlfiles="${srv_xmlfiles} loongarch/lbt64.xml"
+			srv_xmlfiles="${srv_xmlfiles} loongarch/lsx.xml"
+			srv_xmlfiles="${srv_xmlfiles} loongarch/lasx.xml"
+			srv_linux_regsets=yes
+			srv_linux_usrregs=yes
+			srv_linux_thread_db=yes
+			;;
   *)
 			# Who are you?
 			UNSUPPORTED=1
