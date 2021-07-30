@@ -6001,7 +6001,8 @@ ppc_frob_symbol (symbolS *sym)
 	      a->x_csect.x_scnlen.l = (S_GET_VALUE (symbol_get_tc (sym)->next)
 				       - S_GET_VALUE (sym));
 	    }
-	  if (symbol_get_tc (sym)->symbol_class == XMC_BS)
+	  if (symbol_get_tc (sym)->symbol_class == XMC_BS
+	      || symbol_get_tc (sym)->symbol_class == XMC_UL)
 	    a->x_csect.x_smtyp = (symbol_get_tc (sym)->align << 3) | XTY_CM;
 	  else
 	    a->x_csect.x_smtyp = (symbol_get_tc (sym)->align << 3) | XTY_SD;
