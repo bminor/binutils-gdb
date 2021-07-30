@@ -446,6 +446,15 @@ changequote([,])dnl
 	using_cgen=yes
 	;;
 
+      loongarch)
+	for f in loongarch-parse.o loongarch-lex-wrapper.o; do
+	  case " $extra_objects " in
+	    *" $f "*) ;;
+	    *) extra_objects="$extra_objects $f" ;;
+	  esac
+	done
+	;;
+
       m32c)
 	using_cgen=yes
 	;;

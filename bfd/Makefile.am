@@ -118,6 +118,7 @@ ALL_MACHINES = \
 	cpu-ip2k.lo \
 	cpu-iq2000.lo \
 	cpu-lm32.lo \
+	cpu-loongarch.lo \
 	cpu-m10200.lo \
 	cpu-m10300.lo \
 	cpu-m32c.lo \
@@ -202,6 +203,7 @@ ALL_MACHINES_CFILES = \
 	cpu-ip2k.c \
 	cpu-iq2000.c \
 	cpu-lm32.c \
+	cpu-loongarch.c \
 	cpu-m10200.c \
 	cpu-m10300.c \
 	cpu-m32c.c \
@@ -548,6 +550,9 @@ BFD64_BACKENDS = \
 	elf64-ia64.lo \
 	elf64-ia64-vms.lo \
 	elfxx-ia64.lo \
+	elf32-loongarch.lo \
+	elf64-loongarch.lo \
+	elfxx-loongarch.lo \
 	elfn32-mips.lo \
 	elf64-mips.lo \
 	elfxx-mips.lo \
@@ -601,6 +606,7 @@ BFD64_BACKENDS_CFILES = \
 	elfn32-mips.c \
 	elfxx-aarch64.c \
 	elfxx-ia64.c \
+	elfxx-loongarch.c \
 	elfxx-mips.c \
 	elfxx-riscv.c \
 	mach-o-aarch64.c \
@@ -665,6 +671,7 @@ SOURCE_CFILES = \
 BUILD_CFILES = \
 	elf32-aarch64.c elf64-aarch64.c \
 	elf32-ia64.c elf64-ia64.c \
+	elf32-loongarch.c elf64-loongarch.c \
 	elf32-riscv.c elf64-riscv.c \
 	peigen.c pepigen.c pex64igen.c
 
@@ -686,7 +693,7 @@ SOURCE_HFILES = \
 	elf-bfd.h elfcode.h elfcore.h elf-hppa.h elf-linker-x86.h \
 	elf-linux-core.h elf-nacl.h elf-s390.h elf-vxworks.h \
 	elfxx-aarch64.h elfxx-ia64.h elfxx-mips.h elfxx-riscv.h \
-	elfxx-sparc.h elfxx-tilegx.h elfxx-x86.h \
+	elfxx-sparc.h elfxx-tilegx.h elfxx-x86.h elfxx-loongarch.h \
 	genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libpei.h libxcoff.h \
@@ -840,6 +847,14 @@ elf32-ia64.c : elfnn-ia64.c
 
 elf64-ia64.c : elfnn-ia64.c
 	echo "#line 1 \"elfnn-ia64.c\"" > $@
+	$(SED) -e s/NN/64/g < $< >> $@
+
+elf32-loongarch.c : elfnn-loongarch.c
+	echo "#line 1 \"elfnn-loongarch.c\"" > $@
+	$(SED) -e s/NN/32/g < $< >> $@
+
+elf64-loongarch.c : elfnn-loongarch.c
+	echo "#line 1 \"elfnn-loongarch.c\"" > $@
 	$(SED) -e s/NN/64/g < $< >> $@
 
 elf32-riscv.c : elfnn-riscv.c

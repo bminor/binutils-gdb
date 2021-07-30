@@ -182,6 +182,7 @@ hppa*)		 targ_archs=bfd_hppa_arch ;;
 i[3-7]86)	 targ_archs=bfd_i386_arch ;;
 ia16)		 targ_archs=bfd_i386_arch ;;
 lm32)	         targ_archs=bfd_lm32_arch ;;
+loongarch*)		 targ_archs=bfd_loongarch_arch ;;
 m6811*|m68hc11*) targ_archs="bfd_m68hc11_arch bfd_m68hc12_arch bfd_m9s12x_arch bfd_m9s12xg_arch" ;;
 m6812*|m68hc12*) targ_archs="bfd_m68hc12_arch bfd_m68hc11_arch bfd_m9s12x_arch bfd_m9s12xg_arch" ;;
 m68*)		 targ_archs=bfd_m68k_arch ;;
@@ -1412,6 +1413,20 @@ case "${targ}" in
     targ_defvec=z8k_coff_vec
     targ_underscore=yes
     ;;
+
+#ifdef BFD64
+  loongarch32-*)
+    targ_defvec=loongarch_elf32_vec
+    targ_selvecs="loongarch_elf32_vec"
+    want64=false
+    ;;
+
+  loongarch64-*)
+    targ_defvec=loongarch_elf64_vec
+    targ_selvecs="loongarch_elf32_vec loongarch_elf64_vec"
+    want64=true
+    ;;
+#endif
 
 # END OF targmatch.h
   bpf-*-*)

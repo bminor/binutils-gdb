@@ -508,6 +508,7 @@ enum elf_target_id
   I386_ELF_DATA,
   IA64_ELF_DATA,
   LM32_ELF_DATA,
+  LARCH_ELF_DATA,
   M32R_ELF_DATA,
   M68HC11_ELF_DATA,
   M68K_ELF_DATA,
@@ -2853,6 +2854,14 @@ extern char *elfcore_write_lwpstatus
 extern char *elfcore_write_register_note
   (bfd *, char *, int *, const char *, const void *, int);
 extern char *elfcore_write_file_note
+  (bfd *, char *, int *, const void*, int);
+extern char *elfcore_write_loongarch_cpucfg
+  (bfd *, char *, int *, const void*, int);
+extern char *elfcore_write_loongarch_lbt
+  (bfd *, char *, int *, const void*, int);
+extern char *elfcore_write_loongarch_lsx
+  (bfd *, char *, int *, const void*, int);
+extern char *elfcore_write_loongarch_lasx
   (bfd *, char *, int *, const void*, int);
 
 /* Internal structure which holds information to be included in the

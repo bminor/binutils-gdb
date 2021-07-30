@@ -162,6 +162,7 @@
 #include "elf/xstormy16.h"
 #include "elf/xtensa.h"
 #include "elf/z80.h"
+#include "elf/loongarch.h"
 
 #include "getopt.h"
 #include "libiberty.h"
@@ -1653,6 +1654,9 @@ dump_relocations (Filedata *          filedata,
 	case EM_Z80:
 	  rtype = elf_z80_reloc_type (type);
 	  break;
+    case EM_LOONGARCH:
+      rtype = elf_loongarch_reloc_type (type);
+      break;
 	}
 
       if (rtype == NULL)
@@ -13673,6 +13677,8 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 2; /* R_IQ2000_32.  */
     case EM_LATTICEMICO32:
       return reloc_type == 3; /* R_LM32_32.  */
+    case EM_LOONGARCH:
+      return reloc_type == 1; /* R_LARCH_32. */
     case EM_M32C_OLD:
     case EM_M32C:
       return reloc_type == 3; /* R_M32C_32.  */
@@ -13890,6 +13896,8 @@ is_64bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_IA_64:
       return (reloc_type == 0x26    /* R_IA64_DIR64MSB.  */
 	      || reloc_type == 0x27 /* R_IA64_DIR64LSB.  */);
+    case EM_LOONGARCH:
+      return reloc_type == 2;      /* R_LARCH_64 */
     case EM_PARISC:
       return reloc_type == 80; /* R_PARISC_DIR64.  */
     case EM_PPC64:

@@ -768,6 +768,8 @@ extern const bfd_target l1om_elf64_vec;
 extern const bfd_target l1om_elf64_fbsd_vec;
 extern const bfd_target lm32_elf32_vec;
 extern const bfd_target lm32_elf32_fdpic_vec;
+extern const bfd_target loongarch_elf64_vec;
+extern const bfd_target loongarch_elf32_vec;
 extern const bfd_target m32c_elf32_vec;
 extern const bfd_target m32r_elf32_vec;
 extern const bfd_target m32r_elf32_le_vec;
@@ -1359,6 +1361,12 @@ static const bfd_target * const _bfd_target_vector[] =
 	&z80_elf32_vec,
 
 	&z8k_coff_vec,
+
+#ifdef BFD64
+	&loongarch_elf32_vec,
+	&loongarch_elf64_vec,
+#endif
+
 #endif /* not SELECT_VECS */
 
 /* Always support S-records, for convenience.  */

@@ -154,6 +154,7 @@ TARGET_CPU_CFILES = \
 	config/tc-ip2k.c \
 	config/tc-iq2000.c \
 	config/tc-lm32.c \
+	config/tc-loongarch.c \
 	config/tc-m32c.c \
 	config/tc-m32r.c \
 	config/tc-m68hc11.c \
@@ -374,7 +375,8 @@ EXTRA_SCRIPTS = .gdbinit
 EXTRA_DIST = config/m68k-parse.c itbl-parse.c itbl-parse.h itbl-lex.c \
 	config/bfin-parse.c config/bfin-parse.h config/bfin-lex.c \
 	config/rl78-parse.c config/rl78-parse.h \
-	config/rx-parse.c config/rx-parse.h
+	config/rx-parse.c config/rx-parse.h \
+	config/loongarch-parse.c config/loongarch-parse.h config/loongarch-lex.c
 
 diststuff: $(EXTRA_DIST) info
 
@@ -470,6 +472,28 @@ config/rx-parse.c: $(srcdir)/config/rx-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/rx-parse.y y.tab.c $@ y.tab.h config/rx-parse.h -- $(YACCCOMPILE) -d ;
 config/rx-parse.h: config/rx-parse.c
 	@true
+
+# The loongarch lexical analyzer and parser.
+EXTRA_as_new_SOURCES += config/loongarch-parse.y
+loongarch-parse.c: $(srcdir)/config/loongarch-parse.y
+	$(SHELL) $(YLWRAP) $(srcdir)/config/loongarch-parse.y y.tab.c loongarch-parse.c y.tab.h loongarch-parse.h -- $(YACCCOMPILE) -d ;
+loongarch-parse.h: loongarch-parse.c
+loongarch-parse.h: ; @true
+$(srcdir)/config/loongarch-parse.h: ; @true
+
+loongarch-lex.c: $(srcdir)/config/loongarch-lex.l
+	$(SHELL) $(YLWRAP) $(srcdir)/config/loongarch-lex.l lex.yy.c loongarch-lex.c -- $(LEXCOMPILE)
+loongarch-lex-wrapper.@OBJEXT@: $(srcdir)/config/loongarch-lex-wrapper.c loongarch-lex.c loongarch-parse.h
+if am__fastdepCC
+	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(srcdir)/config/loongarch-lex-wrapper.c $(NO_WERROR)
+	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+else
+if AMDEP
+	source='loongarch-lex-wrapper.c' object='$@' libtool=no @AMDEPBACKSLASH@
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+endif
+	$(COMPILE) -c $(srcdir)/config/loongarch-lex-wrapper.c $(NO_WERROR)
+endif
 
 # The mips instruction table specification lexical analyzer and parser.
 

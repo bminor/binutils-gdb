@@ -360,6 +360,10 @@ proc verbose_eval { expr { level 1 } } {
 # This definition is taken from an unreleased version of DejaGnu.  Once
 # that version gets released, and has been out in the world for a few
 # months at least, it may be safe to delete this copy.
+
+if { [istarget loongarch*-*-*] } {
+    rename prune_warnings prune_warnings_other
+}
 if ![string length [info proc prune_warnings]] {
     #
     # prune_warnings -- delete various system verbosities from TEXT.
