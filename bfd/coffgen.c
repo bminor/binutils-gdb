@@ -1662,8 +1662,10 @@ _bfd_coff_read_string_table (bfd *abfd)
   char extstrsize[STRING_SIZE_SIZE];
   bfd_size_type strsize;
   char *strings;
-  file_ptr pos;
+  ufile_ptr pos;
   ufile_ptr filesize;
+  size_t symesz;
+  size_t size;
 
   if (obj_coff_strings (abfd) != NULL)
     return obj_coff_strings (abfd);
@@ -1674,9 +1676,16 @@ _bfd_coff_read_string_table (bfd *abfd)
       return NULL;
     }
 
+  symesz = bfd_coff_symesz (abfd);
   pos = obj_sym_filepos (abfd);
-  pos += obj_raw_syment_count (abfd) * bfd_coff_symesz (abfd);
-  if (bfd_seek (abfd, pos, SEEK_SET) != 0)
+  if (_bfd_mul_overflow (obj_raw_syment_count (abfd), symesz, &size)
+      || pos + size < pos)
+    {
+      bfd_set_error (bfd_error_file_truncated);
+      return NULL;
+    }
+
+  if (bfd_seek (abfd, pos + size, SEEK_SET) != 0)
     return NULL;
 
   if (bfd_bread (extstrsize, (bfd_size_type) sizeof extstrsize, abfd)
