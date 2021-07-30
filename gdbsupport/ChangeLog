@@ -1,3 +1,7 @@
+2021-07-30  Tom de Vries  <tdevries@suse.de>
+
+	* common-defs.h (ATTRIBUTE_NONNULL): Disable.
+
 2021-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* scoped_ignore_signal.h (struct scoped_ignore_signal)
