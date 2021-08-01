@@ -1944,6 +1944,7 @@ _bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
 		{
 		  if (a->vna_other == vernum)
 		    {
+		      *hidden = true;
 		      version_string = a->vna_nodename;
 		      break;
 		    }

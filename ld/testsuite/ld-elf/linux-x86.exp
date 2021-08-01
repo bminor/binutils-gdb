@@ -117,6 +117,23 @@ run_cc_link_tests [list \
 	{{readelf -rn indirect-extern-access-3.rd}} \
 	"indirect-extern-access-2b" \
     ] \
+    [list \
+	"Build pr28158.so" \
+	"-shared -Wl,-version-script,pr27128.t" \
+	"-fPIC" \
+	{ pr28158-1.c } \
+	{} \
+	"pr28158.so" \
+    ] \
+    [list \
+	"Build pr28158" \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed  \
+	 tmpdir/pr28158.so" \
+	"" \
+	{ pr28158-2.S } \
+	{{readelf {--dyn-syms -W} pr28158.rd} {nm -D pr28158.nd}} \
+	"pr28158" \
+    ] \
 ]
 
 run_ld_link_exec_tests [list \
