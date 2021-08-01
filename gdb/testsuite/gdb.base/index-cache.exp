@@ -227,7 +227,7 @@ test_cache_enabled_hit $cache_dir
 test_cache_disabled $cache_dir "after populate"
 
 lassign [remote_exec host sh "-c \"rm $cache_dir/*.gdb-index\""] ret
-if { $ret != 0 } {
+if { $ret != 0 && $expecting_index_cache_use } {
     fail "couldn't remove files in temporary cache dir"
     return
 }
