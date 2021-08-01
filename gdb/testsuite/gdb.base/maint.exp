@@ -191,19 +191,27 @@ if [istarget "*-*-cygwin*"] {
 	set timeout [expr $timeout + 500]
 }
 
-send_gdb "maint print statistics\n"
-gdb_expect  {
-    -re "Statistics for\[^\n\r\]*maint\[^\n\r\]*:\r\n  Number of \"minimal\" symbols read: $decimal\r\n  Number of \"full\" symbols read: $decimal\r\n  Number of \"types\" defined: $decimal\r\n(  Number of read CUs: $decimal\r\n  Number of unread CUs: $decimal\r\n)?  Number of symbol tables: $decimal\r\n  Number of symbol tables with line tables: $decimal\r\n  Number of symbol tables with blockvectors: $decimal\r\n(  Number of \"partial\" symbols read: $decimal\r\n)?(  Number of psym tables \\(not yet expanded\\): $decimal\r\n)?  Total memory used for psymbol cache: $decimal\r\n  Total memory used for objfile obstack: $decimal\r\n  Total memory used for BFD obstack: $decimal\r\n  Total memory used for string cache: $decimal\r\n" {
-	gdb_expect {
-	    -re "$gdb_prompt $" {
-		pass "maint print statistics"
-	    }
-	    timeout { fail "(timeout) maint print statistics" }
-	}
-    }
-    -re ".*$gdb_prompt $"     { fail "maint print statistics" }
-    timeout         { fail "(timeout) maint print statistics" }
-}
+set re \
+    [list \
+	 "Statistics for\[^\n\r\]*maint\[^\n\r\]*:" \
+	 "  Number of \"minimal\" symbols read: $decimal" \
+	 "  Number of \"full\" symbols read: $decimal" \
+	 "  Number of \"types\" defined: $decimal" \
+	 "  Number of symbol tables: $decimal" \
+	 "  Number of symbol tables with line tables: $decimal" \
+	 "  Number of symbol tables with blockvectors: $decimal" \
+	 "(  Number of read CUs: $decimal" \
+	 "  Number of unread CUs: $decimal" \
+	 ")?(  Number of \"partial\" symbols read: $decimal" \
+	 ")?(  Number of psym tables \\(not yet expanded\\): $decimal" \
+	 ")?(  Total memory used for psymbol cache: $decimal" \
+	 ")?  Total memory used for objfile obstack: $decimal" \
+	 "  Total memory used for BFD obstack: $decimal" \
+	 "  Total memory used for string cache: $decimal" \
+	 ""]
+
+set re [multi_line {*}$re]
+gdb_test_lines "maint print statistics" "" $re
 
 # There aren't any ...
 gdb_test_no_output "maint print dummy-frames"
