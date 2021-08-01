@@ -467,9 +467,9 @@ frame_info::to_string () const
     res += "type=<unknown>,";
 
   if (fi->unwind != NULL)
-    res += string_printf ("unwind=%p,", host_address_to_string (fi->unwind));
+    res += string_printf ("unwinder=\"%s\",", fi->unwind->name);
   else
-    res += "unwind=<unknown>,";
+    res += "unwinder=<unknown>,";
 
   if (fi->next == NULL || fi->next->prev_pc.status == CC_UNKNOWN)
     res += "pc=<unknown>,";
