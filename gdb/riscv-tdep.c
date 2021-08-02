@@ -1409,6 +1409,8 @@ public:
       LUI,
       SD,
       SW,
+      LD,
+      LW,
       /* These are needed for software breakpoint support.  */
       JAL,
       JALR,
@@ -1517,6 +1519,15 @@ private:
     m_opcode = opcode;
     m_rd = m_rs1 = decode_register_index (ival, OP_SH_CRS1S);
     m_imm.s = EXTRACT_CITYPE_IMM (ival);
+  }
+
+  /* Helper for DECODE, decode 16-bit compressed CL-type instruction.  */
+  void decode_cl_type_insn (enum opcode opcode, ULONGEST ival)
+  {
+    m_opcode = opcode;
+    m_rd = decode_register_index_short (ival, OP_SH_CRS2S);
+    m_rs1 = decode_register_index_short (ival, OP_SH_CRS1S);
+    m_imm.s = EXTRACT_CLTYPE_IMM (ival);
   }
 
   /* Helper for DECODE, decode 32-bit S-type instruction.  */
@@ -1715,6 +1726,10 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 	decode_r_type_insn (SC, ival);
       else if (is_ecall_insn (ival))
 	decode_i_type_insn (ECALL, ival);
+      else if (is_ld_insn (ival))
+	decode_i_type_insn (LD, ival);
+      else if (is_lw_insn (ival))
+	decode_i_type_insn (LW, ival);
       else
 	/* None of the other fields are valid in this case.  */
 	m_opcode = OTHER;
@@ -1783,6 +1798,10 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 	decode_cb_type_insn (BEQ, ival);
       else if (is_c_bnez_insn (ival))
 	decode_cb_type_insn (BNE, ival);
+      else if (is_c_ld_insn (ival))
+	decode_cl_type_insn (LD, ival);
+      else if (is_c_lw_insn (ival))
+	decode_cl_type_insn (LW, ival);
       else
 	/* None of the other fields of INSN are valid in this case.  */
 	m_opcode = OTHER;
@@ -1930,6 +1949,20 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	  gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
 	  gdb_assert (insn.rs2 () < RISCV_NUM_INTEGER_REGS);
 	  regs[insn.rd ()] = pv_add (regs[insn.rs1 ()], regs[insn.rs2 ()]);
+	}
+      else if (insn.opcode () == riscv_insn::LD
+	       || insn.opcode () == riscv_insn::LW)
+	{
+	  /* Handle: ld reg, offset(rs1)
+	     or:     c.ld reg, offset(rs1)
+	     or:     lw reg, offset(rs1)
+	     or:     c.lw reg, offset(rs1)  */
+	  gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
+	  gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
+	  regs[insn.rd ()]
+	    = stack.fetch (pv_add_constant (regs[insn.rs1 ()],
+					    insn.imm_signed ()),
+			   (insn.opcode () == riscv_insn::LW ? 4 : 8));
 	}
       else
 	{
