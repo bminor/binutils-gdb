@@ -100,6 +100,19 @@ if ![runto_main] {
 # field names, all of which are stored in the .debug_str section.
 gdb_test "p global_var" " = \\{aa = 0, bb = 0, cc = 0\\}"
 
+# Verify that the executable actually contains a .debug_str section, before
+# trying to remove it.  This can be missing with target boards
+# cc-with-dwz-m.exp and cc-with-gnu-debuglink.exp.  Handle this by
+# skipping the remainder of the test-case.
+set debug_str_section "${binfile}-debug-str"
+set args "--dump-section .debug_str=debug_str_section $binfile"
+set result [remote_exec host "[gdb_find_objcopy] $args"]
+set status [lindex $result 0]
+set output [lindex $result 1]
+if { $status == 0 && ![string equal $output ""] } {
+    return -1
+}
+
 # Now copy the executable, and remove the .debug_str section.  This
 # creates an executable with an invalid DWARF configuration.  GDB
 # should give an error when trying to read the debug information from
