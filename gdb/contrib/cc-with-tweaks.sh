@@ -179,6 +179,19 @@ fi
 if [ "$want_index" = true ]; then
     get_tmpdir
     mv "$output_file" "$tmpdir"
+    output_dir=$(dirname "$output_file")
+
+    # Copy .dwo file alongside, to fix gdb.dwarf2/fission-relative-dwo.exp.
+    # Use copy instead of move to not break
+    # rtf=gdb.dwarf2/fission-absolute-dwo.exp.
+    dwo_pattern="$output_dir/*.dwo"
+    for f in $dwo_pattern; do
+	if [ "$f" = "$dwo_pattern" ]; then
+	    break
+	fi
+	cp "$f" "$tmpdir"
+    done
+
     tmpfile="$tmpdir/$(basename $output_file)"
     # Filter out these messages which would stop dejagnu testcase run:
     # echo "$myname: No index was created for $file" 1>&2
@@ -187,6 +200,7 @@ if [ "$want_index" = true ]; then
 	| grep -v "^${GDB_ADD_INDEX##*/}: " >&2
     rc=${PIPESTATUS[0]}
     mv "$tmpfile" "$output_file"
+    rm -f "$tmpdir"/*.dwo
     [ $rc != 0 ] && exit $rc
 fi
 
