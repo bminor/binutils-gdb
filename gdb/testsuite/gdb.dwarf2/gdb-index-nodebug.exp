@@ -22,7 +22,26 @@ if {[prepare_for_testing "failed to prepare" "${testfile}" \
     return -1
 }
 
+set have_index [have_index $binfile]
+set have_index_re \
+    [list \
+	 "Error while writing index for \[^\r\n\]*:" \
+	 "Cannot use an index to create the index"]
+set have_index_re [join $have_index_re]
+set readnow_p [readnow]
+
 set index_file ${testfile}.gdb-index
 # The bug was that gdb would crash here.
-gdb_test_no_output "save gdb-index [file dirname ${index_file}]" \
-    "try to save gdb index"
+set cmd "save gdb-index [file dirname ${index_file}]"
+gdb_test_multiple $cmd "try to save gdb index" {
+    -re -wrap $have_index_re {
+	if { $have_index != "" || $readnow_p } {
+	    unsupported $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+    -re -wrap "^$cmd" {
+	pass $gdb_test_name
+    }
+}
