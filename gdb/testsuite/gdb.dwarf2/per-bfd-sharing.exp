@@ -23,6 +23,10 @@ if { [build_executable "failed to prepare" $testfile $srcfile \
     return
 }
 
+set has_index_section [exec_has_index_section $binfile]
+set uses_readnow [expr [string first "-readnow" $GDBFLAGS] != -1]
+set expecting_index_cache_use [expr !$has_index_section && !$uses_readnow]
+
 lassign [remote_exec host mktemp -d] ret cache_dir
 
 # The output of mktemp contains an end of line, remove it.
@@ -93,7 +97,7 @@ foreach_with_prefix first $methods {
 }
 
 lassign [remote_exec host sh "-c \"rm $cache_dir/*.gdb-index\""] ret
-if { $ret != 0 } {
+if { $ret != 0 && $expecting_index_cache_use } {
     fail "couldn't remove files in temporary cache dir"
     return
 }
