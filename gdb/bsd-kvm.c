@@ -238,7 +238,7 @@ bsd_kvm_target::fetch_registers (struct regcache *regcache, int regnum)
   /* On dumping core, BSD kernels store the faulting context (PCB)
      in the variable "dumppcb".  */
   memset (nl, 0, sizeof nl);
-  nl[0].n_name = "_dumppcb";
+  nl[0].n_name = (char *) "_dumppcb";
 
   if (kvm_nlist (core_kd, nl) == -1)
     error (("%s"), kvm_geterr (core_kd));
@@ -256,7 +256,7 @@ bsd_kvm_target::fetch_registers (struct regcache *regcache, int regnum)
      "proc0paddr".  */
 
   memset (nl, 0, sizeof nl);
-  nl[0].n_name = "_proc0paddr";
+  nl[0].n_name = (char *) "_proc0paddr";
 
   if (kvm_nlist (core_kd, nl) == -1)
     error (("%s"), kvm_geterr (core_kd));
@@ -280,7 +280,7 @@ bsd_kvm_target::fetch_registers (struct regcache *regcache, int regnum)
      variable "thread0".  */
 
   memset (nl, 0, sizeof nl);
-  nl[0].n_name = "_thread0";
+  nl[0].n_name = (char *) "_thread0";
 
   if (kvm_nlist (core_kd, nl) == -1)
     error (("%s"), kvm_geterr (core_kd));
