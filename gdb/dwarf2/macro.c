@@ -330,7 +330,7 @@ skip_unknown_opcode (unsigned int opcode,
 
   if (opcode_definitions[opcode] == NULL)
     {
-      complaint (_("unrecognized DW_MACFINO opcode 0x%x"),
+      complaint (_("unrecognized DW_MACINFO or DW_MACRO opcode 0x%x"),
 		 opcode);
       return NULL;
     }
