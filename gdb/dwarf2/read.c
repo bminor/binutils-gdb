@@ -24122,7 +24122,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 
   struct dwarf2_section_info *str_offsets_section;
   struct dwarf2_section_info *str_section;
-  ULONGEST str_offsets_base;
+  gdb::optional<ULONGEST> str_offsets_base;
 
   if (cu->dwo_unit != nullptr)
     {
@@ -24135,7 +24135,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
     {
       str_offsets_section = &per_objfile->per_bfd->str_offsets;
       str_section = &per_objfile->per_bfd->str;
-      str_offsets_base = *cu->str_offsets_base;
+      str_offsets_base = cu->str_offsets_base;
     }
 
   dwarf_decode_macros (per_objfile, builder, section, lh,

@@ -429,7 +429,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 			  unsigned int offset_size,
 			  struct dwarf2_section_info *str_section,
 			  struct dwarf2_section_info *str_offsets_section,
-			  ULONGEST str_offsets_base,
+			  gdb::optional<ULONGEST> str_offsets_base,
 			  htab_t include_hash)
 {
   struct objfile *objfile = per_objfile->objfile;
@@ -575,15 +575,27 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	    int offset_index = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
 	    mac_ptr += bytes_read;
 
+	    /* Use of the strx operators requires a DW_AT_str_offsets_base.  */
+	    if (!str_offsets_base.has_value ())
+	      {
+		complaint (_("use of %s with unknown string offsets base "
+			     "[in module %s]"),
+			   (macinfo_type == DW_MACRO_define_strx
+			    ? "DW_MACRO_define_strx"
+			    : "DW_MACRO_undef_strx"),
+			   objfile_name (objfile));
+		break;
+	      }
+
 	    str_offsets_section->read (objfile);
 	    const gdb_byte *info_ptr = (str_offsets_section->buffer
-					+ str_offsets_base
+					+ *str_offsets_base
 					+ offset_index * offset_size);
 
 	    const char *macinfo_str = (macinfo_type == DW_MACRO_define_strx ?
 				       "DW_MACRO_define_strx" : "DW_MACRO_undef_strx");
 
-	    if (str_offsets_base + offset_index * offset_size
+	    if (*str_offsets_base + offset_index * offset_size
 		>= str_offsets_section->size)
 	      {
 		complaint (_("%s pointing outside of .debug_str_offsets section "
@@ -767,7 +779,8 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
 		     const struct line_header *lh, unsigned int offset_size,
 		     unsigned int offset, struct dwarf2_section_info *str_section,
 		     struct dwarf2_section_info *str_offsets_section,
-		     ULONGEST str_offsets_base, int section_is_gnu)
+		     gdb::optional<ULONGEST> str_offsets_base,
+		     int section_is_gnu)
 {
   bfd *abfd;
   const gdb_byte *mac_ptr, *mac_end;
