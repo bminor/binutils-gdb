@@ -266,6 +266,8 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	  continue;
 	}
 
+      elf_symbol_type *elf_sym = (elf_symbol_type *) sym;
+
       /* Skip "special" symbols, e.g. ARM mapping symbols.  These are
 	 symbols which do not correspond to objects in the symbol table,
 	 but have some other target-specific meaning.  */
@@ -373,7 +375,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 		 NOTE: uweigand-20071112: Synthetic symbols do not
 		 have an ELF-private part, so do not touch those.  */
 	      unsigned int shndx = type == ST_SYNTHETIC ? 0 :
-		((elf_symbol_type *) sym)->internal_elf_sym.st_shndx;
+		elf_sym->internal_elf_sym.st_shndx;
 
 	      switch (shndx)
 		{
@@ -481,7 +483,6 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	      if (type != ST_SYNTHETIC)
 		{
 		  /* Pass symbol size field in via BFD.  FIXME!!!  */
-		  elf_symbol_type *elf_sym = (elf_symbol_type *) sym;
 		  SET_MSYMBOL_SIZE (msym, elf_sym->internal_elf_sym.st_size);
 		}
 
@@ -495,41 +496,39 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	  if (msym != NULL)
 	    {
 	      const char *atsign = strchr (sym->name, '@');
+	      bool is_at_symbol = atsign != nullptr && atsign > sym->name;
+	      bool is_plt = is_at_symbol && strcmp (atsign, "@plt") == 0;
+	      int len = is_at_symbol ? atsign - sym->name : 0;
 
-	      if (atsign != NULL && atsign[1] == '@' && atsign > sym->name)
+	      if (is_at_symbol
+		  && !is_plt
+		  && (elf_sym->version & VERSYM_HIDDEN) == 0)
+		record_minimal_symbol (reader,
+				       gdb::string_view (sym->name, len),
+				       true, symaddr, ms_type, sym->section,
+				       objfile);
+	      else if (is_plt)
 		{
-		  int len = atsign - sym->name;
-
-		  record_minimal_symbol (reader,
-					 gdb::string_view (sym->name, len),
-					 true, symaddr, ms_type, sym->section,
-					 objfile);
-		}
-	    }
-
-	  /* For @plt symbols, also record a trampoline to the
-	     destination symbol.  The @plt symbol will be used in
-	     disassembly, and the trampoline will be used when we are
-	     trying to find the target.  */
-	  if (msym && ms_type == mst_text && type == ST_SYNTHETIC)
-	    {
-	      int len = strlen (sym->name);
-
-	      if (len > 4 && strcmp (sym->name + len - 4, "@plt") == 0)
-		{
-		  struct minimal_symbol *mtramp;
-
-		  mtramp = record_minimal_symbol
-		    (reader, gdb::string_view (sym->name, len - 4), true,
-		     symaddr, mst_solib_trampoline, sym->section, objfile);
-		  if (mtramp)
+		  /* For @plt symbols, also record a trampoline to the
+		     destination symbol.  The @plt symbol will be used
+		     in disassembly, and the trampoline will be used
+		     when we are trying to find the target.  */
+		  if (ms_type == mst_text && type == ST_SYNTHETIC)
 		    {
-		      SET_MSYMBOL_SIZE (mtramp, MSYMBOL_SIZE (msym));
-		      mtramp->created_by_gdb = 1;
-		      mtramp->filename = filesymname;
-		      if (elf_make_msymbol_special_p)
-			gdbarch_elf_make_msymbol_special (gdbarch,
-							  sym, mtramp);
+		      struct minimal_symbol *mtramp;
+
+		      mtramp = record_minimal_symbol
+			(reader, gdb::string_view (sym->name, len), true,
+			 symaddr, mst_solib_trampoline, sym->section, objfile);
+		      if (mtramp)
+			{
+			  SET_MSYMBOL_SIZE (mtramp, MSYMBOL_SIZE (msym));
+			  mtramp->created_by_gdb = 1;
+			  mtramp->filename = filesymname;
+			  if (elf_make_msymbol_special_p)
+			    gdbarch_elf_make_msymbol_special (gdbarch,
+							      sym, mtramp);
+			}
 		    }
 		}
 	    }
