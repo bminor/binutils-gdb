@@ -611,41 +611,20 @@ core_addr (void *p)
     }									\
   while (0)
 
-/* We'll verify using the addresses of the elements of this array.  */
-static char *array;
-/* We'll verify using these values stored into the map.  */
-static void *val1;
-static void *val2;
-
-/* Callback for addrmap_foreach to check transitions.  */
-
-static int
-addrmap_foreach_check (CORE_ADDR start_addr, void *obj)
-{
-  if (start_addr == core_addr (nullptr))
-    SELF_CHECK (obj == nullptr);
-  else if (start_addr == core_addr (&array[10]))
-    SELF_CHECK (obj == val1);
-  else if (start_addr == core_addr (&array[13]))
-    SELF_CHECK (obj == nullptr);
-  else
-    SELF_CHECK (false);
-  return 0;
-}
-
 /* Entry point for addrmap unit tests.  */
 
 static void
 test_addrmap ()
 {
-  /* Initialize static variables.  */
-  char local_array[20];
-  array = local_array;
-  val1 = &array[1];
-  val2 = &array[2];
+  /* We'll verify using the addresses of the elements of this array.  */
+  char array[20];
+
+  /* We'll verify using these values stored into the map.  */
+  void *val1 = &array[1];
+  void *val2 = &array[2];
 
   /* Create mutable addrmap.  */
-  static struct obstack temp_obstack;
+  struct obstack temp_obstack;
   obstack_init (&temp_obstack);
   struct addrmap *map = addrmap_create_mutable (&temp_obstack);
   SELF_CHECK (map != nullptr);
@@ -668,8 +647,20 @@ test_addrmap ()
   CHECK_ADDRMAP_FIND (map2, array, 13, 19, nullptr);
 
   /* Iterate over both addrmaps.  */
-  SELF_CHECK (addrmap_foreach (map, addrmap_foreach_check) == 0);
-  SELF_CHECK (addrmap_foreach (map2, addrmap_foreach_check) == 0);
+  auto callback = [&] (CORE_ADDR start_addr, void *obj)
+    {
+      if (start_addr == core_addr (nullptr))
+	SELF_CHECK (obj == nullptr);
+      else if (start_addr == core_addr (&array[10]))
+	SELF_CHECK (obj == val1);
+      else if (start_addr == core_addr (&array[13]))
+	SELF_CHECK (obj == nullptr);
+      else
+	SELF_CHECK (false);
+      return 0;
+    };
+  SELF_CHECK (addrmap_foreach (map, callback) == 0);
+  SELF_CHECK (addrmap_foreach (map2, callback) == 0);
 
   /* Relocate fixed addrmap.  */
   addrmap_relocate (map2, 1);
