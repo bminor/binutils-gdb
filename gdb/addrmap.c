@@ -21,6 +21,7 @@
 #include "splay-tree.h"
 #include "gdb_obstack.h"
 #include "addrmap.h"
+#include "gdbsupport/selftest.h"
 
 /* Make sure splay trees can actually hold the values we want to
    store in them.  */
@@ -390,10 +391,22 @@ addrmap_mutable_set_empty (struct addrmap *self,
 static void *
 addrmap_mutable_find (struct addrmap *self, CORE_ADDR addr)
 {
-  /* Not needed yet.  */
-  internal_error (__FILE__, __LINE__,
-		  _("addrmap_find is not implemented yet "
-		    "for mutable addrmaps"));
+  struct addrmap_mutable *map = (struct addrmap_mutable *) self;
+  splay_tree_node n = addrmap_splay_tree_lookup (map, addr);
+  if (n != nullptr)
+    {
+      gdb_assert (addrmap_node_key (n) == addr);
+      return addrmap_node_value (n);
+    }
+
+  n = addrmap_splay_tree_predecessor (map, addr);
+  if (n != nullptr)
+    {
+      gdb_assert (addrmap_node_key (n) < addr);
+      return addrmap_node_value (n);
+    }
+
+  return nullptr;
 }
 
 
@@ -576,3 +589,112 @@ addrmap_create_mutable (struct obstack *obstack)
 
   return (struct addrmap *) map;
 }
+
+#if GDB_SELF_TEST
+namespace selftests {
+
+/* Convert P to CORE_ADDR.  */
+
+static CORE_ADDR
+core_addr (void *p)
+{
+  return (CORE_ADDR)(uintptr_t)p;
+}
+
+/* Check that &ARRAY[LOW]..&ARRAY[HIGH] has VAL in MAP.  */
+
+#define CHECK_ADDRMAP_FIND(MAP, ARRAY, LOW, HIGH, VAL)			\
+  do									\
+    {									\
+      for (unsigned i = LOW; i <= HIGH; ++i)				\
+	SELF_CHECK (addrmap_find (MAP, core_addr (&ARRAY[i])) == VAL);	\
+    }									\
+  while (0)
+
+/* We'll verify using the addresses of the elements of this array.  */
+static char *array;
+/* We'll verify using these values stored into the map.  */
+static void *val1;
+static void *val2;
+
+/* Callback for addrmap_foreach to check transitions.  */
+
+static int
+addrmap_foreach_check (CORE_ADDR start_addr, void *obj)
+{
+  if (start_addr == core_addr (nullptr))
+    SELF_CHECK (obj == nullptr);
+  else if (start_addr == core_addr (&array[10]))
+    SELF_CHECK (obj == val1);
+  else if (start_addr == core_addr (&array[13]))
+    SELF_CHECK (obj == nullptr);
+  else
+    SELF_CHECK (false);
+  return 0;
+}
+
+/* Entry point for addrmap unit tests.  */
+
+static void
+test_addrmap ()
+{
+  /* Initialize static variables.  */
+  char local_array[20];
+  array = local_array;
+  val1 = &array[1];
+  val2 = &array[2];
+
+  /* Create mutable addrmap.  */
+  static struct obstack temp_obstack;
+  obstack_init (&temp_obstack);
+  struct addrmap *map = addrmap_create_mutable (&temp_obstack);
+  SELF_CHECK (map != nullptr);
+
+  /* Check initial state.  */
+  CHECK_ADDRMAP_FIND (map, array, 0, 19, nullptr);
+
+  /* Insert address range into mutable addrmap.  */
+  addrmap_set_empty (map, core_addr (&array[10]), core_addr (&array[12]),
+		     val1);
+  CHECK_ADDRMAP_FIND (map, array, 0, 9, nullptr);
+  CHECK_ADDRMAP_FIND (map, array, 10, 12, val1);
+  CHECK_ADDRMAP_FIND (map, array, 13, 19, nullptr);
+
+  /* Create corresponding fixed addrmap.  */
+  struct addrmap *map2 = addrmap_create_fixed (map, &temp_obstack);
+  SELF_CHECK (map2 != nullptr);
+  CHECK_ADDRMAP_FIND (map2, array, 0, 9, nullptr);
+  CHECK_ADDRMAP_FIND (map2, array, 10, 12, val1);
+  CHECK_ADDRMAP_FIND (map2, array, 13, 19, nullptr);
+
+  /* Iterate over both addrmaps.  */
+  SELF_CHECK (addrmap_foreach (map, addrmap_foreach_check) == 0);
+  SELF_CHECK (addrmap_foreach (map2, addrmap_foreach_check) == 0);
+
+  /* Relocate fixed addrmap.  */
+  addrmap_relocate (map2, 1);
+  CHECK_ADDRMAP_FIND (map2, array, 0, 10, nullptr);
+  CHECK_ADDRMAP_FIND (map2, array, 11, 13, val1);
+  CHECK_ADDRMAP_FIND (map2, array, 14, 19, nullptr);
+
+  /* Insert partially overlapping address range into mutable addrmap.  */
+  addrmap_set_empty (map, core_addr (&array[11]), core_addr (&array[13]),
+		     val2);
+  CHECK_ADDRMAP_FIND (map, array, 0, 9, nullptr);
+  CHECK_ADDRMAP_FIND (map, array, 10, 12, val1);
+  CHECK_ADDRMAP_FIND (map, array, 13, 13, val2);
+  CHECK_ADDRMAP_FIND (map, array, 14, 19, nullptr);
+
+  /* Cleanup.  */
+  obstack_free (&temp_obstack, NULL);
+}
+
+} // namespace selftests
+
+void _initialize_addrmap ();
+void
+_initialize_addrmap ()
+{
+  selftests::register_test ("addrmap", selftests::test_addrmap);
+}
+#endif /* GDB_SELF_TEST */
