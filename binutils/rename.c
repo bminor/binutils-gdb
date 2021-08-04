@@ -131,6 +131,7 @@ get_stat_mtime_ns (struct stat const *st ATTRIBUTE_UNUSED)
 # endif
 }
 
+#if defined HAVE_UTIMENSAT
 /* Return *ST's access time.  */
 static inline struct timespec
 get_stat_atime (struct stat const *st)
@@ -158,6 +159,7 @@ get_stat_mtime (struct stat const *st)
   return t;
 #endif
 }
+#endif
 /* End FIXME.  */
 
 /* Set the times of the file DESTINATION to be the same as those in
