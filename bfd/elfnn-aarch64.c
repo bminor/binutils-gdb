@@ -4892,6 +4892,7 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
   asection *sec, *pcc_low_sec = NULL, *pcc_high_sec = NULL;
   struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
   bfd_vma low = (bfd_vma) -1, high = 0;
+  bfd *input_bfd;
 
   htab->layout_sections_again = layout_sections_again;
 
@@ -4903,7 +4904,7 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
   /* First, walk through all the relocations to find those referring to linker
      defined and ldscript defined symbols since we set their range to their
      output sections.  */
-  for (bfd *input_bfd = info->input_bfds;
+  for (input_bfd = info->input_bfds;
        htab->c64_rel && input_bfd != NULL; input_bfd = input_bfd->link.next)
     {
       Elf_Internal_Shdr *symtab_hdr;
