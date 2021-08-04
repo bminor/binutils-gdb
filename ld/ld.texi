@@ -683,7 +683,7 @@ When creating an ELF shared object, set the internal DT_SONAME field to
 the specified name.  When an executable is linked with a shared object
 which has a DT_SONAME field, then when the executable is run the dynamic
 linker will attempt to load the shared object specified by the DT_SONAME
-field rather than the using the file name given to the linker.
+field rather than using the file name given to the linker.
 
 @kindex -i
 @cindex incremental link
