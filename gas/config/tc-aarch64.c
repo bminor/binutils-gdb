@@ -2206,7 +2206,8 @@ s_aarch64_chericap (int ignored ATTRIBUTE_UNUSED)
 		   BFD_RELOC_MORELLO_CAPINIT);
 
   mapping_state (MAP_DATA);
-  for (int i = 0; i < 4; i++)
+  int i;
+  for (i = 0; i < 4; i++)
     {
       /* The documentation of our md_number_to_chars says the greatest value
 	 size it can handle is 4 bytes.  */
@@ -8031,7 +8032,7 @@ tc_aarch64_fde_entry_init_extra(struct fde_entry *fde)
 bfd_boolean
 tc_aarch64_cfi_startproc_exp (const char *arg)
 {
-  // Allow purecap only for C64 functions.
+  /* Allow purecap only for C64 functions.  */
   if (!strcmp ("purecap", arg) && IS_C64)
     return TRUE;
 

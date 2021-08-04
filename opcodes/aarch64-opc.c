@@ -470,7 +470,8 @@ get_form_from_value (aarch64_insn value)
 const aarch64_form *
 get_form_from_str (const char *form, size_t len)
 {
-  for (unsigned i = 1; i < sizeof (aarch64_forms) / sizeof (aarch64_form); i++)
+  unsigned i;
+  for (i = 1; i < sizeof (aarch64_forms) / sizeof (aarch64_form); i++)
     if (!strncmp (form, aarch64_forms[i].name, len))
       return &aarch64_forms[i];
 
@@ -2799,11 +2800,12 @@ operand_general_constraint_met_p (aarch64_feature_set features,
 	      unsigned flags = 0;
 	      int regno_idx = idx == 0 ? 1 : 0;
 	      enum aarch64_opnd reg_type = opcode->operands[regno_idx];
+	      size_t i;
 
 	      if (reg_type == AARCH64_OPND_Cat)
 		flags = F_CAPREG;
 
-	      for (size_t i = 0; aarch64_sys_regs[i].name; ++i)
+	      for (i = 0; aarch64_sys_regs[i].name; ++i)
 		if (aarch64_sys_regs[i].value == opnd->sysreg.value)
 		    {
 		      part_match = TRUE;
