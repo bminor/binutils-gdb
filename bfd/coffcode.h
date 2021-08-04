@@ -1951,7 +1951,7 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
       coff_swap_reloc_in (abfd, &dst, &n);
       if (bfd_seek (abfd, oldpos, 0) != 0)
 	return;
-      if (n.r_vaddr < 0xffff)
+      if (n.r_vaddr < 0x10000)
 	{
 	  _bfd_error_handler (_("%pB: overflow reloc count too small"), abfd);
 	  bfd_set_error (bfd_error_bad_value);
