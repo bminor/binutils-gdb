@@ -517,16 +517,6 @@ struct dwarf2_per_objfile
 				const struct comp_unit_head *cu_header,
 				unsigned int *bytes_read_ptr);
 
-  /* Resize the M_SYMTABS vector to the needed size (the number of partial
-     symtabs allocated by the per-bfd).  */
-  void resize_symtabs ()
-  {
-    /* The symtabs vector should only grow, not shrink.  */
-    gdb_assert (per_bfd->all_comp_units.size () >= m_symtabs.size ());
-
-    m_symtabs.resize (per_bfd->all_comp_units.size ());
-  }
-
   /* Return true if the symtab corresponding to PER_CU has been set,
      false otherwise.  */
   bool symtab_set_p (const dwarf2_per_cu_data *per_cu) const;
