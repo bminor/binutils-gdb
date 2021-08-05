@@ -211,7 +211,17 @@ static reloc_howto_type rx_elf_howto_table [] =
   RXREL (OPshla,    2, 32, 0, dont, false),
   RXREL (OPshra,    2, 32, 0, dont, false),
   RXREL (OPsctsize, 2, 32, 0, dont, false),
+
+  EMPTY_HOWTO (0x89),
+  EMPTY_HOWTO (0x8a),
+  EMPTY_HOWTO (0x8b),
+  EMPTY_HOWTO (0x8c),
+
   RXREL (OPscttop,  2, 32, 0, dont, false),
+
+  EMPTY_HOWTO (0x8e),
+  EMPTY_HOWTO (0x8f),
+
   RXREL (OPand,	    2, 32, 0, dont, false),
   RXREL (OPor,	    2, 32, 0, dont, false),
   RXREL (OPxor,	    2, 32, 0, dont, false),
@@ -307,7 +317,8 @@ rx_info_to_howto_rela (bfd *		   abfd,
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  if (r_type >= (unsigned int) R_RX_max)
+  BFD_ASSERT (R_RX_max == ARRAY_SIZE (rx_elf_howto_table));
+  if (r_type >= ARRAY_SIZE (rx_elf_howto_table))
     {
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
