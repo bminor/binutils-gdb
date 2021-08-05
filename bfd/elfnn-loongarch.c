@@ -1467,7 +1467,7 @@ perform_relocation (const Elf_Internal_Rela *rel, bfd_vma value,
 
     case R_LARCH_SOP_ASSERT:
       r = loongarch_pop (&opr1);
-      if (r != bfd_reloc_ok && opr1 == false)
+      if (r != bfd_reloc_ok || opr1 == false)
         r = bfd_reloc_notsupported;
       break;
 
