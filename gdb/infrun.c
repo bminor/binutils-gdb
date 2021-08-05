@@ -855,17 +855,13 @@ follow_inferior_reset_breakpoints (void)
   insert_breakpoints ();
 }
 
-/* The child has exited or execed: resume threads of the parent the
-   user wanted to be executing.  */
+/* The child has exited or execed: resume THREAD, a thread of the parent,
+   if it was meant to be executing.  */
 
-static int
-proceed_after_vfork_done (struct thread_info *thread,
-			  void *arg)
+static void
+proceed_after_vfork_done (thread_info *thread)
 {
-  int pid = * (int *) arg;
-
-  if (thread->ptid.pid () == pid
-      && thread->state == THREAD_RUNNING
+  if (thread->state == THREAD_RUNNING
       && !thread->executing
       && !thread->stop_requested
       && thread->stop_signal () == GDB_SIGNAL_0)
@@ -877,8 +873,6 @@ proceed_after_vfork_done (struct thread_info *thread,
       clear_proceed_status (0);
       proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
     }
-
-  return 0;
 }
 
 /* Called whenever we notice an exec or exit event, to handle
@@ -891,7 +885,7 @@ handle_vfork_child_exec_or_exit (int exec)
 
   if (inf->vfork_parent)
     {
-      int resume_parent = -1;
+      inferior *resume_parent = nullptr;
 
       /* This exec or exit marks the end of the shared memory region
 	 between the parent and the child.  Break the bonds.  */
@@ -969,7 +963,7 @@ handle_vfork_child_exec_or_exit (int exec)
 	  inf->removable = 1;
 	  set_current_program_space (inf->pspace);
 
-	  resume_parent = vfork_parent->pid;
+	  resume_parent = vfork_parent;
 	}
       else
 	{
@@ -995,21 +989,22 @@ handle_vfork_child_exec_or_exit (int exec)
 	  inf->symfile_flags = SYMFILE_NO_READ;
 	  clone_program_space (inf->pspace, vfork_parent->pspace);
 
-	  resume_parent = vfork_parent->pid;
+	  resume_parent = vfork_parent;
 	}
 
       gdb_assert (current_program_space == inf->pspace);
 
-      if (non_stop && resume_parent != -1)
+      if (non_stop && resume_parent != nullptr)
 	{
 	  /* If the user wanted the parent to be running, let it go
 	     free now.  */
 	  scoped_restore_current_thread restore_thread;
 
 	  infrun_debug_printf ("resuming vfork parent process %d",
-			       resume_parent);
+			       resume_parent->pid);
 
-	  iterate_over_threads (proceed_after_vfork_done, &resume_parent);
+	  for (thread_info *thread : resume_parent->threads ())
+	    proceed_after_vfork_done (thread);
 	}
     }
 }
