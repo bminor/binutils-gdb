@@ -54,6 +54,8 @@
 #include "loongarch-tdep.h"
 #include "arch/loongarch.h"
 
+#include <algorithm>
+
 static int
 loongarch_rlen (struct gdbarch *gdbarch)
 {
@@ -88,6 +90,20 @@ loongarch_fetch_instruction (CORE_ADDR addr, int *errp)
     }
   ret = extract_unsigned_integer (buf, insnlen, BFD_ENDIAN_LITTLE);
   return ret;
+}
+
+static int
+loongarch_insn_is_lsx (const insn_t insn)
+{
+  return ((insn & 0xf0000000) == 0x70000000) &&
+         ((insn & 0x0f000000) == (insn & 0x03000000));
+}
+
+static int
+loongarch_insn_is_lasx (const insn_t insn)
+{
+  return ((insn & 0xf0000000) == 0x70000000) && (insn & 0x04000000) &&
+         ((insn & 0x0f000000) == (insn & 0x07000000));
 }
 
 static int
@@ -760,124 +776,312 @@ static const struct frame_unwind loongarch_frame_unwind =
   /*.prev_arch     =*/NULL,
 };
 
+typedef struct stack_data_t
+{
+  const gdb_byte *addr;
+  int len;
+} stack_data_t;
+
+static int
+loongarch_find_vector_insn_bit (struct gdbarch *gdbarch,
+                                struct value *function)
+{
+  const int size_insn = loongarch_insn_length (0);
+  CORE_ADDR start_pc = value_raw_address (function);
+  /* search create stack insn in start 16 insn */
+  CORE_ADDR stack_max_pc = start_pc + 16 * size_insn;
+  CORE_ADDR max_pc = start_pc + 200 * size_insn;
+  insn_t end_insn = *(insn_t *) max_pc;
+  int addi_spsp;
+
+  /* addi.wd $sp, $sp, stack_size */
+  if (loongarch_rlen (gdbarch) == 64)
+    addi_spsp = 0x2C00063;
+  else
+    addi_spsp = 0x2800063;
+
+  for (CORE_ADDR pc = start_pc; pc < stack_max_pc; pc = pc + size_insn)
+    {
+      insn_t insn = *(insn_t *) pc;
+      if ((addi_spsp & insn) == addi_spsp)
+        {
+          const int stack_mask = 0xFFC003FF;
+          /* stacksize in addi_spsp insn */
+          int s12 = ((insn & stack_mask) >> 10);
+          /* signed stacksize */
+          if ((s12 & (0x1 << 12)) != 0)
+            {
+              end_insn = addi_spsp | ((s12 & 0x7ff) << 10);
+              max_pc = max_pc + 200 * size_insn;
+              break;
+            }
+        }
+    }
+
+  for (CORE_ADDR pc = start_pc; pc < max_pc; pc = pc + size_insn)
+    {
+      insn_t insn = *(insn_t *) pc;
+      if (insn == end_insn)
+        break;
+      if (loongarch_insn_is_lsx (insn))
+        return 128;
+      else if (loongarch_insn_is_lasx (insn))
+        return 256;
+    }
+
+  return 0;
+}
+
+static void
+pass_on_stack (std::vector<stack_data_t> &stack, const gdb_byte *val, int len,
+               int align)
+{
+  stack_data_t buf;
+  buf.addr = val;
+  buf.len = align_up (len, align);
+
+  stack.push_back (buf);
+}
+
+static void
+pass_on_reg (struct regcache *regcache, int regno, const gdb_byte *val,
+             int len)
+{
+  gdb_byte reg[32];
+  memset (reg, 0, sizeof (reg));
+  memcpy (reg, val, len);
+  regcache->cooked_write (regno, reg);
+}
+
+static void
+pass_small_struct_on_reg (struct gdbarch *gdbarch, struct type *tp,
+                          const gdb_byte *data, std::vector<stack_data_t> &gp,
+                          std::vector<stack_data_t> &fp, int &bitpos)
+{
+  const int rlen = loongarch_rlen (gdbarch) / 8;
+  int len = TYPE_LENGTH (tp);
+
+  gdb_assert (len <= 2 * rlen);
+  gdb_assert (tp->code () == TYPE_CODE_STRUCT);
+
+  for (int i = 0; i < tp->num_fields (); i++)
+    {
+      stack_data_t elm;
+      field fd = tp->field (i);
+      struct type *t = fd.type ();
+
+      if (t->code () == TYPE_CODE_STRUCT)
+        pass_small_struct_on_reg (gdbarch, t, data, gp, fp, bitpos);
+      else if (t->code () == TYPE_CODE_FLT)
+        {
+          elm.addr = data;
+          elm.len = TYPE_LENGTH (t);
+          data = data + elm.len;
+          fp.push_back (elm);
+          bitpos = 0;
+        }
+      else
+        {
+          len = TYPE_LENGTH (t);
+
+          if (fd.bitsize != 0)
+            {
+              if (bitpos == 0 ||
+                  fd.bitsize > align_up (fd.loc.bitpos - bitpos, 8))
+                {
+                  len = fd.bitsize / TARGET_CHAR_BIT + 1;
+                  bitpos = fd.loc.bitpos;
+                }
+              else
+                continue;
+            }
+          else
+            {
+              bitpos = fd.loc.bitpos + len * TARGET_CHAR_BIT;
+            }
+          /* merge size < rlen */
+
+          if (!gp.empty () && (gp.back ().addr + gp.back ().len == data) &&
+              (gp.back ().len + len <= rlen))
+            {
+              gp.back ().len += len;
+              data = data + len;
+            }
+          else
+            {
+              elm.addr = data;
+              elm.len = len;
+              data = data + elm.len;
+              gp.push_back (elm);
+            }
+        }
+    }
+}
+
+static bool
+try_pass_small_struct_on_reg (struct gdbarch *gdbarch,
+                              struct regcache *regcache, struct value *arg,
+                              int &gp, int &fp, int gp_max, int fp_max)
+{
+  const int rlen = loongarch_rlen (gdbarch) / 8;
+  struct type *a_type = check_typedef (value_type (arg));
+  int len = TYPE_LENGTH (a_type);
+  const gdb_byte *val = value_contents (arg);
+  int bitpos = 0;
+
+  std::vector<stack_data_t> gpreg;
+  std::vector<stack_data_t> fpreg;
+
+  gdb_assert (len <= 2 * rlen);
+  gdb_assert (a_type->code () == TYPE_CODE_STRUCT);
+
+  pass_small_struct_on_reg (gdbarch, a_type, val, gpreg, fpreg, bitpos);
+
+  if (gp + gpreg.size () - 1 < gp_max && fp + fpreg.size () - 1 < fp_max)
+    {
+      for (auto it : gpreg)
+        {
+          pass_on_reg (regcache, gp, it.addr, it.len);
+          gp++;
+        }
+      for (auto it : fpreg)
+        {
+          pass_on_reg (regcache, fp, it.addr, it.len);
+          fp++;
+        }
+      return true;
+    }
+  return false;
+}
+
 /* Implement the push dummy call gdbarch callback.  */
-/* FIXME la old abi! */
+
 static CORE_ADDR
-loongarch_lp64_push_dummy_call (
+loongarch_lp32lp64_push_dummy_call (
   struct gdbarch *gdbarch, struct value *function, struct regcache *regcache,
   CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp,
   function_call_return_method return_method, CORE_ADDR struct_addr)
 {
-  const size_t rlen = loongarch_rlen (gdbarch) / 8;
-  size_t i;
-
-  /* 1. We find out the size of space to settle actual args */
-  size_t Narg_slots = 0;
-  if (return_method == return_method_hidden_param)
-    Narg_slots++;
-  for (i = 0; i < nargs; i++)
-    {
-      struct value *arg = args[i];
-      struct type *arg_type = check_typedef (value_type (arg));
-      size_t len = TYPE_LENGTH (arg_type);
-      size_t align = type_align (arg_type);
-      enum type_code typecode = arg_type->code ();
-
-      gdb_assert (0 < align);
-      if (typecode == TYPE_CODE_COMPLEX && len == 8 &&
-          (check_typedef (TYPE_TARGET_TYPE (arg_type)))->code () ==
-            TYPE_CODE_FLT)
-        /* For _Complex float, sometimes we need two float argument registers
-	   to fit its real and img. */
-        Narg_slots += 2;
-      else
-        {
-          Narg_slots = align_up (Narg_slots, (align + rlen - 1) / rlen);
-          Narg_slots += (len + rlen - 1) / rlen;
-        }
-    }
-
-  /* 2. Set all actual arguments here */
-  struct type *func_type = check_typedef (value_type (function));
-  gdb_byte raw_args[Narg_slots * rlen];
-  Narg_slots = 0;
-  if (return_method != return_method_normal)
-    store_signed_integer (raw_args + Narg_slots * rlen, rlen,
-                          BFD_ENDIAN_LITTLE, struct_addr),
-      Narg_slots++;
-
-  for (i = 0; i < nargs; i++)
-    {
-      struct value *arg = args[i];
-      struct type *arg_type = check_typedef (value_type (arg));
-      size_t len = TYPE_LENGTH (arg_type);
-      size_t align = type_align (arg_type);
-      enum type_code typecode = arg_type->code ();
-      const gdb_byte *val = value_contents (arg);
-      Narg_slots = align_up (Narg_slots, (align + rlen - 1) / rlen);
-      int is_var = func_type->has_varargs () && func_type->num_fields () <= i;
-
-      if (((typecode == TYPE_CODE_INT && arg_type->is_unsigned ()) ||
-           typecode == TYPE_CODE_ENUM) &&
-          len <= rlen)
-        {
-          /* For unsigned scalar type in a register */
-          ULONGEST uireg =
-            extract_unsigned_integer (val, len, BFD_ENDIAN_LITTLE);
-          store_unsigned_integer (raw_args + Narg_slots * rlen, rlen,
-                                  BFD_ENDIAN_LITTLE, uireg);
-          Narg_slots++;
-        }
-      else if ((typecode == TYPE_CODE_INT || typecode == TYPE_CODE_PTR) &&
-               len <= rlen)
-        {
-          /* For signed scalar type in a register */
-          LONGEST ireg = extract_signed_integer (val, len, BFD_ENDIAN_LITTLE);
-          store_signed_integer (raw_args + Narg_slots * rlen, rlen,
-                                BFD_ENDIAN_LITTLE, ireg);
-          Narg_slots++;
-        }
-      else if (!is_var && typecode == TYPE_CODE_COMPLEX && len == 8 &&
-               (check_typedef (TYPE_TARGET_TYPE (arg_type)))->code () ==
-                 TYPE_CODE_FLT &&
-               Narg_slots < 7)
-        {
-          /* For '_Complex float', sometimes we need two float registers */
-          memcpy (raw_args + Narg_slots * rlen, val, 4);
-          memcpy (raw_args + (Narg_slots + 1) * rlen, val + 4, 4);
-          Narg_slots += 2;
-        }
-      else
-        {
-          /* Otherwise for bigger actual args, such as structure
-	     or '_Complex double long' etc, we memcpy. */
-          memcpy (raw_args + Narg_slots * rlen, val, len);
-          Narg_slots += (len + rlen - 1) / rlen;
-        }
-    }
-
-  /* 3. Write in stack and argument registers */
-  if (8 < Narg_slots)
-    sp -= (Narg_slots - 8) * rlen;
-  sp = align_down (sp, 16);
-
-  if (8 < Narg_slots)
-    write_memory (sp, raw_args + 8 * rlen, (Narg_slots - 8) * rlen);
-
+  const int rlen = loongarch_rlen (gdbarch) / 8;
   auto regs = &gdbarch_tdep (gdbarch)->regs;
+  int gp = regs->r + 4;      /* $a0 = $r4 = regs->r + 4 */
+  int fp = regs->f;          /* $fa0 */
+  const int gp_max = gp + 8; /* gpr $a0 ~ $a7 ($r4 ~ $r11) */
+  const int fp_max = fp + 8; /* fpr $fa0 ~ $fa7 */
+  std::vector<stack_data_t> stack;
+
+  {
+    if (return_method != return_method_normal)
+      {
+        regcache_cooked_write_unsigned (regcache, gp, struct_addr);
+      }
+
+    if (return_method == return_method_hidden_param)
+      {
+        gp++;
+        nargs--;
+      }
+    /* search vector instruction from function code */
+    loongarch_find_vector_insn_bit (gdbarch, function);
+  }
   regcache_cooked_write_signed (regcache, regs->ra, bp_addr);
-  regcache_cooked_write_signed (regcache, regs->sp, sp);
-  for (i = 0; i < (8 < Narg_slots ? 8 : Narg_slots); i++)
+
+  for (int i = 0; i < nargs; i++)
     {
-      ULONGEST data = extract_unsigned_integer (raw_args + i * rlen, rlen,
-                                                BFD_ENDIAN_LITTLE);
-      regcache_cooked_write_unsigned (regcache, regs->r + 4 /* $a0 */ + i,
-                                      data);
-      if (0 <= regs->f)
-        regcache_cooked_write_unsigned (regcache, regs->f /* $fa0 */ + i,
-                                        data);
+      struct value *arg = args[i];
+      struct type *a_type = check_typedef (value_type (arg));
+      int len = TYPE_LENGTH (a_type);
+      const gdb_byte *val = value_contents (arg);
+
+      switch (a_type->code ())
+        {
+        case TYPE_CODE_INT:
+        case TYPE_CODE_BOOL:
+        case TYPE_CODE_CHAR:
+        case TYPE_CODE_RANGE:
+        case TYPE_CODE_ENUM:
+        case TYPE_CODE_PTR:
+          if (gp < gp_max)
+            {
+              if (a_type->is_unsigned ())
+                {
+                  ULONGEST data =
+                    extract_unsigned_integer (val, len, BFD_ENDIAN_LITTLE);
+                  regcache_cooked_write_unsigned (regcache, gp++, data);
+                }
+              else
+                {
+                  LONGEST data =
+                    extract_signed_integer (val, len, BFD_ENDIAN_LITTLE);
+                  regcache_cooked_write_signed (regcache, gp++, data);
+                }
+            }
+          else
+            {
+              pass_on_stack (stack, val, len, rlen);
+            }
+          break;
+        case TYPE_CODE_FLT:
+          if (len <= rlen)
+            {
+              if (fp < fp_max)
+                pass_on_reg (regcache, fp++, val, len);
+              else if (gp < gp_max)
+                pass_on_reg (regcache, gp++, val, len);
+              else
+                pass_on_stack (stack, val, len, rlen);
+            }
+          /* long double like struct */
+          else
+            {
+              if (gp < gp_max - 1)
+                {
+                  pass_on_reg (regcache, gp++, val, rlen);
+                  pass_on_reg (regcache, gp++, val + rlen, len - rlen);
+                }
+              else
+                pass_on_stack (stack, val, len, rlen);
+            }
+          break;
+        case TYPE_CODE_STRUCT:
+        case TYPE_CODE_ARRAY:
+        case TYPE_CODE_UNION:
+          if (len > rlen * 2)
+            {
+              /* address on register, data on stack */
+              sp = align_down (sp - len, rlen);
+              write_memory (sp, val, len);
+              if (gp < gp_max)
+                pass_on_reg (regcache, gp++, (const gdb_byte *) &sp, rlen);
+              else
+                pass_on_stack (stack, (const gdb_byte *) &sp, rlen, rlen);
+            }
+          else
+            {
+              if (!try_pass_small_struct_on_reg (gdbarch, regcache, arg, gp,
+                                                 fp, gp_max, fp_max))
+                {
+                  pass_on_stack (stack, val, len, rlen);
+                }
+            }
+          break;
+        default:
+          break;
+        }
     }
 
+  int sp_off = 0;
+  if (!stack.empty ())
+    sp_off = (stack.size () - 1) * rlen;
+  sp = align_down (sp - sp_off, 16);
+  while (!stack.empty ())
+    {
+      auto val = stack.back ();
+      write_memory (sp + sp_off, val.addr, val.len);
+      sp_off -= rlen;
+      stack.pop_back ();
+    }
+  regcache_cooked_write_unsigned (regcache, regs->sp, sp);
   return sp;
 }
 
@@ -893,10 +1097,9 @@ loongarch_xfer_reg_part (struct regcache *regcache, int reg_num, int len,
 }
 
 static enum return_value_convention
-loongarch_lp64_return_value (struct gdbarch *gdbarch,
-                                  struct value *function, struct type *type,
-                                  struct regcache *regcache, gdb_byte *readbuf,
-                                  const gdb_byte *writebuf)
+loongarch_lp64_return_value (struct gdbarch *gdbarch, struct value *function,
+                             struct type *type, struct regcache *regcache,
+                             gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   const size_t rlen = loongarch_rlen (gdbarch) / 8;
   auto regs = &gdbarch_tdep (gdbarch)->regs;
@@ -1436,7 +1639,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       /* Functions handling dummy frames.  */
       set_gdbarch_push_dummy_call (gdbarch,
-                                   loongarch_lp64_push_dummy_call);
+                                   loongarch_lp32lp64_push_dummy_call);
       set_gdbarch_return_value (gdbarch, loongarch_lp64_return_value);
 
       break;
