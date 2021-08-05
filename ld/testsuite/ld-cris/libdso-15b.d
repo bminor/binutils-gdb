@@ -16,10 +16,10 @@
 
 DYNAMIC SYMBOL TABLE:
 #...
-0+[	 ]+DO \*UND\*[	 ]+0+  TST3[	 ]+__expobj2
+0+[	 ]+DO \*UND\*[	 ]+0+[	 ]+\(TST3\)[	 ]+__expobj2
 #...
-0+[	 ]+DO \*UND\*[	 ]+0+  TST3[	 ]+expobj2
-0+[	 ]+DF \*UND\*[	 ]+0+  TST3[	 ]+expfn2
+0+[	 ]+DO \*UND\*[	 ]+0+[	 ]+\(TST3\)[	 ]+expobj2
+0+[	 ]+DF \*UND\*[	 ]+0+[	 ]+\(TST3\)[	 ]+expfn2
 #...
 Contents of section .rela.dyn:
  017c 8c220000 0a040000 00000000 90220000  .*

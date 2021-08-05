@@ -15,8 +15,8 @@
 
 DYNAMIC SYMBOL TABLE:
 #...
-0+[ 	]+DF \*UND\*	0+[ 	]+TST2[	 ]+expobj
-0+[ 	]+DF \*UND\*	0+[ 	]+TST2[	 ]+expfn
+0+[ 	]+DF \*UND\*	0+[ 	]+\(TST2\)[	 ]+expobj
+0+[ 	]+DF \*UND\*	0+[ 	]+\(TST2\)[	 ]+expfn
 #...
 Contents of section .rela.dyn:
  0140 50220000 0a020000 00000000 54220000  .*
