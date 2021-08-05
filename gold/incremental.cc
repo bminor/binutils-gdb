@@ -1848,7 +1848,7 @@ class Local_got_offset_visitor : public Got_offset_list::Visitor
   { }
 
   void
-  visit(unsigned int got_type, unsigned int got_offset)
+  visit(unsigned int got_type, unsigned int got_offset, uint64_t)
   {
     unsigned int got_index = got_offset / this->info_.got_entry_size;
     gold_assert(got_index < this->info_.got_count);
@@ -1860,6 +1860,12 @@ class Local_got_offset_visitor : public Got_offset_list::Visitor
     unsigned char* pov = this->info_.got_desc_p + got_index * 8;
     elfcpp::Swap<32, big_endian>::writeval(pov, this->info_.sym_index);
     elfcpp::Swap<32, big_endian>::writeval(pov + 4, this->info_.input_index);
+    // FIXME: the uint64_t addend should be written here if powerpc64
+    // sym+addend got entries are to be supported, with similar changes
+    // to Global_got_offset_visitor and support to read them back in
+    // do_process_got_plt.
+    // FIXME: don't we need this for section symbol plus addend anyway?
+    // (See 2015-12-03 commit 7ef8ae7c5f35)
   }
 
  private:
@@ -1879,7 +1885,7 @@ class Global_got_offset_visitor : public Got_offset_list::Visitor
   { }
 
   void
-  visit(unsigned int got_type, unsigned int got_offset)
+  visit(unsigned int got_type, unsigned int got_offset, uint64_t)
   {
     unsigned int got_index = got_offset / this->info_.got_entry_size;
     gold_assert(got_index < this->info_.got_count);

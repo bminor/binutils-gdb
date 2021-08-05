@@ -214,11 +214,13 @@ class Got_offset_list
 {
  public:
   Got_offset_list()
-    : got_type_(-1U), got_offset_(0), got_next_(NULL)
+    : got_type_(-1U), got_offset_(0), addend_(0), got_next_(NULL)
   { }
 
-  Got_offset_list(unsigned int got_type, unsigned int got_offset)
-    : got_type_(got_type), got_offset_(got_offset), got_next_(NULL)
+  Got_offset_list(unsigned int got_type, unsigned int got_offset,
+		  uint64_t addend)
+    : got_type_(got_type), got_offset_(got_offset), addend_(addend),
+      got_next_(NULL)
   { }
 
   ~Got_offset_list()
@@ -236,29 +238,31 @@ class Got_offset_list
   {
     this->got_type_ = -1U;
     this->got_offset_ = 0;
+    this->addend_ = 0;
     this->got_next_ = NULL;
   }
 
   // Set the offset for the GOT entry of type GOT_TYPE.
   void
-  set_offset(unsigned int got_type, unsigned int got_offset)
+  set_offset(unsigned int got_type, unsigned int got_offset, uint64_t addend)
   {
     if (this->got_type_ == -1U)
       {
         this->got_type_ = got_type;
         this->got_offset_ = got_offset;
+        this->addend_ = addend;
       }
     else
       {
         for (Got_offset_list* g = this; g != NULL; g = g->got_next_)
           {
-            if (g->got_type_ == got_type)
+            if (g->got_type_ == got_type && g->addend_ == addend)
               {
                 g->got_offset_ = got_offset;
                 return;
               }
           }
-        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
+        Got_offset_list* g = new Got_offset_list(got_type, got_offset, addend);
         g->got_next_ = this->got_next_;
         this->got_next_ = g;
       }
@@ -266,11 +270,11 @@ class Got_offset_list
 
   // Return the offset for a GOT entry of type GOT_TYPE.
   unsigned int
-  get_offset(unsigned int got_type) const
+  get_offset(unsigned int got_type, uint64_t addend) const
   {
     for (const Got_offset_list* g = this; g != NULL; g = g->got_next_)
       {
-        if (g->got_type_ == got_type)
+        if (g->got_type_ == got_type && g->addend_ == addend)
           return g->got_offset_;
       }
     return -1U;
@@ -297,7 +301,7 @@ class Got_offset_list
     { }
 
     virtual void
-    visit(unsigned int, unsigned int) = 0;
+    visit(unsigned int, unsigned int, uint64_t) = 0;
   };
 
   // Loop over all GOT offset entries, calling a visitor class V for each.
@@ -307,12 +311,13 @@ class Got_offset_list
     if (this->got_type_ == -1U)
       return;
     for (const Got_offset_list* g = this; g != NULL; g = g->got_next_)
-      v->visit(g->got_type_, g->got_offset_);
+      v->visit(g->got_type_, g->got_offset_, g->addend_);
   }
 
  private:
   unsigned int got_type_;
   unsigned int got_offset_;
+  uint64_t addend_;
   Got_offset_list* got_next_;
 };
 
@@ -2134,7 +2139,7 @@ class Sized_relobj : public Relobj
     Local_got_offsets::const_iterator p =
         this->local_got_offsets_.find(key);
     return (p != this->local_got_offsets_.end()
-            && p->second->get_offset(got_type) != -1U);
+            && p->second->get_offset(got_type, addend) != -1U);
   }
 
   // Return the GOT offset of type GOT_TYPE of the local symbol
@@ -2147,7 +2152,7 @@ class Sized_relobj : public Relobj
     Local_got_offsets::const_iterator p =
         this->local_got_offsets_.find(key);
     gold_assert(p != this->local_got_offsets_.end());
-    unsigned int off = p->second->get_offset(got_type);
+    unsigned int off = p->second->get_offset(got_type, addend);
     gold_assert(off != -1U);
     return off;
   }
@@ -2162,10 +2167,10 @@ class Sized_relobj : public Relobj
     Local_got_offsets::const_iterator p =
         this->local_got_offsets_.find(key);
     if (p != this->local_got_offsets_.end())
-      p->second->set_offset(got_type, got_offset);
+      p->second->set_offset(got_type, got_offset, addend);
     else
       {
-        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
+	Got_offset_list* g = new Got_offset_list(got_type, got_offset, addend);
         std::pair<Local_got_offsets::iterator, bool> ins =
             this->local_got_offsets_.insert(std::make_pair(key, g));
         gold_assert(ins.second);
