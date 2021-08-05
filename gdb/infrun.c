@@ -3442,15 +3442,11 @@ void
 print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 			   const struct target_waitstatus *ws)
 {
-  infrun_debug_printf ("target_wait (%d.%ld.%ld [%s], status) =",
-		       waiton_ptid.pid (),
-		       waiton_ptid.lwp (),
-		       waiton_ptid.tid (),
+  infrun_debug_printf ("target_wait (%s [%s], status) =",
+		       waiton_ptid.to_string ().c_str (),
 		       target_pid_to_str (waiton_ptid).c_str ());
-  infrun_debug_printf ("  %d.%ld.%ld [%s],",
-		       result_ptid.pid (),
-		       result_ptid.lwp (),
-		       result_ptid.tid (),
+  infrun_debug_printf ("  %s [%s],",
+		       result_ptid.to_string ().c_str (),
 		       target_pid_to_str (result_ptid).c_str ());
   infrun_debug_printf ("  %s", target_waitstatus_to_string (ws).c_str ());
 }
