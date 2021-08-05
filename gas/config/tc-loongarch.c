@@ -906,8 +906,6 @@ md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
   return 0;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
@@ -925,6 +923,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_LARCH_SOP_PUSH_TLS_GOT:
       if (fixP->fx_addsy)
         S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      else
+        as_bad_where (fixP->fx_file, fixP->fx_line,
+                      _ ("Relocation against a constant"));
+      break;
     case BFD_RELOC_LARCH_SOP_PUSH_PCREL:
     case BFD_RELOC_LARCH_SOP_PUSH_PLT_PCREL:
       if (fixP->fx_addsy == NULL)
@@ -1100,7 +1102,6 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
     }
 }
-#pragma GCC diagnostic pop
 
 int
 loongarch_relax_frag (asection *sec ATTRIBUTE_UNUSED,
@@ -1177,8 +1178,6 @@ md_show_usage (FILE *stream)
 }
 
 /* Fill in an rs_align_code fragment.  We want to fill 'andi $r0,$r0,0'.  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
 void
 loongarch_handle_align (fragS *fragp)
 {
@@ -1205,22 +1204,13 @@ loongarch_handle_align (fragS *fragp)
 
   gas_assert (excess < 4);
   fragp->fr_fix += excess;
-  switch (excess)
-    {
-    case 3:
-      *p++ = '\0';
-    case 2:
-      *p++ = '\0';
-    case 1:
-      *p++ = '\0';
-    case 0:
-      break;
-    }
+
+  while(excess-- != 0)
+    *p++ = 0;
 
   md_number_to_chars (p, opcode, size);
   fragp->fr_var = size;
 }
-#pragma GCC diagnostic pop
 
 void
 loongarch_elf_final_processing (void)

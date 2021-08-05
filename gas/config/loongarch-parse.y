@@ -170,8 +170,6 @@ reloc (const char *op_c_str, const char *id_c_str, offsetT addend)
     as_fatal (_("unknown reloc hint: %s"), op_c_str);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
 static void
 emit_unary (char op)
 {
@@ -205,6 +203,7 @@ emit_unary (char op)
 	{
 	case '!':
 	  top->type = BFD_RELOC_LARCH_SOP_NOT;
+	  break;
 	default:
 	  abort ();
 	}
@@ -212,7 +211,6 @@ emit_unary (char op)
       top++;
     }
 }
-#pragma GCC diagnostic pop
 
 static void
 emit_bin (int op)
