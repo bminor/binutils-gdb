@@ -672,8 +672,17 @@
 					/*   note name must be "LINUX".  */
 #define NT_ARM_PAC_MASK	0x406		/* AArch pointer authentication code masks */
 					/*   note name must be "LINUX".  */
+#define NT_ARM_PACA_KEYS  0x407		/* ARM pointer authentication address
+					   keys */
+					/*   note name must be "LINUX".  */
+#define NT_ARM_PACG_KEYS  0x408		/* ARM pointer authentication generic
+					   keys */
+					/*  note name must be "LINUX".  */
 #define NT_ARM_TAGGED_ADDR_CTRL	0x409	/* AArch64 tagged address control
 					   (prctl()) */
+					/*   note name must be "LINUX".  */
+#define NT_ARM_PAC_ENABLED_KEYS	0x40a	/* AArch64 pointer authentication
+					   enabled keys (prctl()) */
 					/*   note name must be "LINUX".  */
 #define NT_ARC_V2	0x600		/* ARC HS accumulator/extra registers.  */
 					/*   note name must be "LINUX".  */
