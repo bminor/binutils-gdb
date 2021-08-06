@@ -2777,6 +2777,15 @@ to use the section anyway."),
   ++i;
   map->constant_pool = buffer.slice (metadata[i]);
 
+  if (map->constant_pool.empty () && !map->symbol_table.empty ())
+    {
+      /* An empty constant pool implies that all symbol table entries are
+	 empty.  Make map->symbol_table.empty () == true.  */
+      map->symbol_table
+	= offset_view (gdb::array_view<const gdb_byte> (symbol_table,
+							symbol_table));
+    }
+
   return 1;
 }
 

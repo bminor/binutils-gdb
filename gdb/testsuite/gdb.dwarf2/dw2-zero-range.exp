@@ -139,16 +139,7 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
 	    }
 	}
 
-	if { $have_complaint } {
-	    pass $test
-	} else {
-	    set index [have_index $lib1]
-	    if { $index == "gdb_index" } {
-		kfail symtab/28159 $test
-	    } else {
-		fail $test
-	    }
-	}
+	gdb_assert { $have_complaint } $test
     }
 
     if { ! $readnow_p } {
@@ -164,16 +155,7 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
 	gdb_load $lib1
 	set test "Zero address complaint - unrelocated - psymtab"
 	set have_complaint [regexp $re.* $gdb_file_cmd_msg]
-	if { $have_complaint } {
-	    pass $test
-	} else {
-	    set index [have_index $lib1]
-	    if { $index == "gdb_index" } {
-		kfail symtab/28159 $test
-	    } else {
-		fail $test
-	    }
-	}
+	gdb_assert { $have_complaint } $test
     }
 
     if { ! $readnow_p } {
