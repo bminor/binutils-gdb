@@ -2032,3 +2032,4 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*62 f3 16 07 c2 aa 00 04 00 00 1f[ 	]*vcmptrue_ussh 0x400\(%rdx\),%xmm29,%k5\{%k7\}
 [ 	]*[a-f0-9]+:[ 	]*62 f3 16 07 c2 aa 00 fc ff ff 1f[ 	]*vcmptrue_ussh -0x400\(%rdx\),%xmm29,%k5\{%k7\}
 [ 	]*[a-f0-9]+:[ 	]*62 f3 16 07 c2 aa f8 fb ff ff 1f[ 	]*vcmptrue_ussh -0x408\(%rdx\),%xmm29,%k5\{%k7\}
+#pass
