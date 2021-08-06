@@ -59,8 +59,9 @@ bfin_pcrel24_reloc (bfd *abfd,
   reloc_howto_type *howto = reloc_entry->howto;
   asection *output_section;
   bool relocatable = (output_bfd != NULL);
+  bfd_size_type limit = bfd_get_section_limit_octets (abfd, input_section);
 
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
+  if (addr - 2 > limit || limit - (addr - 2) < 2)
     return bfd_reloc_outofrange;
 
   if (bfd_is_und_section (symbol->section)
@@ -156,9 +157,10 @@ bfin_imm16_reloc (bfd *abfd,
   reloc_howto_type *howto = reloc_entry->howto;
   asection *output_section;
   bool relocatable = (output_bfd != NULL);
+  bfd_size_type limit = bfd_get_section_limit_octets (abfd, input_section);
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
+  if (reloc_addr > limit || limit - reloc_addr < 2)
     return bfd_reloc_outofrange;
 
   if (bfd_is_und_section (symbol->section)
@@ -227,9 +229,10 @@ bfin_byte4_reloc (bfd *abfd,
   bfd_vma output_base = 0;
   asection *output_section;
   bool relocatable = (output_bfd != NULL);
+  bfd_size_type limit = bfd_get_section_limit_octets (abfd, input_section);
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
+  if (addr > limit || limit - addr < 4)
     return bfd_reloc_outofrange;
 
   if (bfd_is_und_section (symbol->section)
@@ -294,9 +297,10 @@ bfin_bfd_reloc (bfd *abfd,
   reloc_howto_type *howto = reloc_entry->howto;
   asection *output_section;
   bool relocatable = (output_bfd != NULL);
+  bfd_size_type limit = bfd_get_section_limit_octets (abfd, input_section);
 
   /* Is the address of the relocation really within the section?  */
-  if (reloc_entry->address > bfd_get_section_limit (abfd, input_section))
+  if (addr > limit || limit - addr < howto->size + 1u)
     return bfd_reloc_outofrange;
 
   if (bfd_is_und_section (symbol->section)
@@ -1316,8 +1320,10 @@ bfin_final_link_relocate (Elf_Internal_Rela *rel, reloc_howto_type *howto,
     {
       bfd_reloc_status_type r = bfd_reloc_ok;
       bfd_vma x;
+      bfd_size_type limit = bfd_get_section_limit_octets (input_bfd,
+							  input_section);
 
-      if (address > bfd_get_section_limit (input_bfd, input_section))
+      if (address - 2 > limit || limit - (address - 2) < 4)
 	return bfd_reloc_outofrange;
 
       value += addend;
