@@ -13631,7 +13631,6 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
   /* Base address selection entry.  */
   gdb::optional<CORE_ADDR> base;
   const gdb_byte *buffer;
-  CORE_ADDR baseaddr;
   bool overflow = false;
   ULONGEST addr_index;
   struct dwarf2_section_info *rnglists_section;
@@ -13647,8 +13646,6 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
       return false;
     }
   buffer = rnglists_section->buffer + offset;
-
-  baseaddr = objfile->text_section_offset ();
 
   while (1)
     {
@@ -13791,7 +13788,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 
       /* A not-uncommon case of bad debug info.
 	 Don't pollute the addrmap with bad data.  */
-      if (range_beginning + baseaddr == 0
+      if (range_beginning == 0
 	  && !per_objfile->per_bfd->has_section_at_zero)
 	{
 	  complaint (_(".debug_rnglists entry has start address of zero"
@@ -13833,7 +13830,6 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
   gdb::optional<CORE_ADDR> base;
   unsigned int dummy;
   const gdb_byte *buffer;
-  CORE_ADDR baseaddr;
 
   if (cu_header->version >= 5)
     return dwarf2_rnglists_process (offset, cu, tag, callback);
@@ -13848,8 +13844,6 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
       return 0;
     }
   buffer = per_objfile->per_bfd->ranges.buffer + offset;
-
-  baseaddr = objfile->text_section_offset ();
 
   while (1)
     {
@@ -13901,7 +13895,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
 
       /* A not-uncommon case of bad debug info.
 	 Don't pollute the addrmap with bad data.  */
-      if (range_beginning + baseaddr == 0
+      if (range_beginning == 0
 	  && !per_objfile->per_bfd->has_section_at_zero)
 	{
 	  complaint (_(".debug_ranges entry has start address of zero"
