@@ -1469,43 +1469,6 @@ psymtab_storage::discard_psymtab (struct partial_symtab *pst)
 
 
 
-/* Helper function for dump_psymtab_addrmap to print an addrmap entry.  */
-
-static int
-dump_psymtab_addrmap_1 (struct objfile *objfile,
-			struct partial_symtab *psymtab,
-			struct ui_file *outfile,
-			int *previous_matched,
-			CORE_ADDR start_addr,
-			void *obj)
-{
-  struct gdbarch *gdbarch = objfile->arch ();
-  struct partial_symtab *addrmap_psymtab = (struct partial_symtab *) obj;
-  const char *psymtab_address_or_end = NULL;
-
-  QUIT;
-
-  if (psymtab == NULL
-      || psymtab == addrmap_psymtab)
-    psymtab_address_or_end = host_address_to_string (addrmap_psymtab);
-  else if (*previous_matched)
-    psymtab_address_or_end = "<ends here>";
-
-  if (psymtab == NULL
-      || psymtab == addrmap_psymtab
-      || *previous_matched)
-    {
-      fprintf_filtered (outfile, "  %s%s %s\n",
-			psymtab != NULL ? "  " : "",
-			paddress (gdbarch, start_addr),
-			psymtab_address_or_end);
-    }
-
-  *previous_matched = psymtab == NULL || psymtab == addrmap_psymtab;
-
-  return 0;
-}
-
 /* Helper function for maintenance_print_psymbols to print the addrmap
    of PSYMTAB.  If PSYMTAB is NULL print the entire addrmap.  */
 
@@ -1519,20 +1482,11 @@ dump_psymtab_addrmap (struct objfile *objfile,
        || psymtab->psymtabs_addrmap_supported)
       && partial_symtabs->psymtabs_addrmap != NULL)
     {
-      /* Non-zero if the previously printed addrmap entry was for
-	 PSYMTAB.  If so, we want to print the next one as well (since
-	 the next addrmap entry defines the end of the range).  */
-      int previous_matched = 0;
-
-      auto callback = [&] (CORE_ADDR start_addr, void *obj)
-      {
-	return dump_psymtab_addrmap_1 (objfile, psymtab, outfile,
-				       &previous_matched, start_addr, obj);
-      };
-
-      fprintf_filtered (outfile, "%sddress map:\n",
-			psymtab == NULL ? "Entire a" : "  A");
-      addrmap_foreach (partial_symtabs->psymtabs_addrmap, callback);
+      if (psymtab == nullptr)
+	fprintf_filtered (outfile, _("Entire address map:\n"));
+      else
+	fprintf_filtered (outfile, _("Address map:\n"));
+      addrmap_dump (partial_symtabs->psymtabs_addrmap, outfile, psymtab);
     }
 }
 

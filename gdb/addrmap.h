@@ -104,4 +104,10 @@ typedef gdb::function_view<int (CORE_ADDR start_addr, void *obj)>
    returns 0.  */
 int addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn);
 
+/* Dump the addrmap to OUTFILE.  If PAYLOAD is non-NULL, only dump any
+   components that map to PAYLOAD.  (If PAYLOAD is NULL, the entire
+   map is dumped.)  */
+void addrmap_dump (struct addrmap *map, struct ui_file *outfile,
+		   void *payload);
+
 #endif /* ADDRMAP_H */
