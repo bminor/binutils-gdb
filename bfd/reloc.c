@@ -547,7 +547,7 @@ bfd_reloc_offset_in_range (reloc_howto_type *howto,
   /* The reloc field must be contained entirely within the section.
      Allow zero length fields (marker relocs or NONE relocs where no
      relocation will be performed) at the end of the section.  */
-  return octet <= octet_end && octet + reloc_size <= octet_end;
+  return octet <= octet_end && reloc_size <= octet_end - octet;
 }
 
 /* Read and return the section contents at DATA converted to a host
