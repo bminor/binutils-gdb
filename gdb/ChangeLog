@@ -1,3 +1,10 @@
+2021-08-06  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/28004
+	* dwarf2/read.c (dwarf2_rnglists_process, dwarf2_ranges_process):
+	Fix zero address complaint.
+
 2021-08-02  Tom Tromey  <tromey@adacore.com>
 
 	PR varobj/28131
