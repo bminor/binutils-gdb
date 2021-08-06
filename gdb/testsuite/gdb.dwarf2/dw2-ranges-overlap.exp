@@ -44,10 +44,10 @@ Dwarf::assemble $asm_file {
     declare_labels ranges_label
 
     # Find start address and length for our functions.
-    set main_func \
-	[function_range main [list ${srcdir}/${subdir}/$srcfile]]
     set foo_func \
 	[function_range foo [list ${srcdir}/${subdir}/$srcfile]]
+    set quux_func \
+	[function_range quux [list ${srcdir}/${subdir}/$srcfile]]
     set bar_func \
 	[function_range bar [list ${srcdir}/${subdir}/$srcfile]]
 
@@ -59,15 +59,15 @@ Dwarf::assemble $asm_file {
 	} {
 	    subprogram {
 		{external 1 flag}
-		{name main}
+		{name quux}
 	    }
 	}
     }
 
     ranges {is_64 [is_64_target]} {
 	ranges_label: sequence {
-	    base [lindex $main_func 0]
-	    range 0 [lindex $main_func 1]
+	    base [lindex $quux_func 0]
+	    range 0 [lindex $quux_func 1]
 	    base [lindex $bar_func 0]
 	    range 0 [lindex $bar_func 1]
 	}

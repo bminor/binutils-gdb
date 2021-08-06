@@ -29,8 +29,15 @@ foo (int a)
 }
 
 int
+quux (int a)
+{
+  asm ("quux_label: .globl quux_label");
+  return foo (a);
+}
+
+int
 main (void)
 {
   asm ("main_label: .globl main_label");
-  return foo (5) + 1;
+  return quux (5) + 1;
 }
