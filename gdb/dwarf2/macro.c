@@ -35,6 +35,7 @@
 #include "buildsym.h"
 #include "macrotab.h"
 #include "complaints.h"
+#include "objfiles.h"
 
 static void
 dwarf2_macro_malformed_definition_complaint (const char *arg1)
