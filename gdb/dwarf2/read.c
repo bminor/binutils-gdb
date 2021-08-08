@@ -2536,6 +2536,12 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
     debug_info_offset_to_per_cu;
   for (const auto &per_cu : per_bfd->all_comp_units)
     {
+      /* A TU will not need aranges, and skipping them here is an easy
+	 way of ignoring .debug_types -- and possibly seeing a
+	 duplicate section offset -- entirely.  */
+      if (per_cu->is_debug_types)
+	continue;
+
       const auto insertpair
 	= debug_info_offset_to_per_cu.emplace (per_cu->sect_off,
 					       per_cu.get ());

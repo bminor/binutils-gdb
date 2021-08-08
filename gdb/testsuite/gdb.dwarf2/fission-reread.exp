@@ -47,7 +47,8 @@ if [build_executable_and_dwo_files "$testfile.exp" "${binfile}" $options \
     return -1
 }
 
-clean_restart $binfile
+clean_restart
+gdb_load_no_complaints $binfile
 
 gdb_test "break -q main" "Breakpoint.*at.*"
 
