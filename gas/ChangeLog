@@ -1,3 +1,15 @@
+2021-08-09  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2dbg.c (get_directory_table_entry): Ensure that dir[0]
+	contains current working directory.
+	(out_dir_and_file_list): Likewise.
+	* testsuite/gas/elf/dwarf-5-dir0.s: New test source file.
+	* testsuite/gas/elf/dwarf-5-dir0.d: New test driver.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+	* testsuite/gas/elf/dwarf-5-file0.d: Adjust expected output.
+	* testsuite/gas/i386/dwarf5-line-1.d: Likewise.
+	* testsuite/gas/i386/dwarf5-line-2.d: Likewise.
+
 2021-07-14  Alan Modra  <amodra@gmail.com>
 
 	* write.c (TC_VALIDATE_FIX_SUB): Default to 0.

@@ -620,7 +620,22 @@ get_directory_table_entry (const char *dirname,
   if (can_use_zero)
     {
       if (dirs == NULL || dirs[0] == NULL)
-	d = 0;
+	{
+	  const char * pwd = getpwd ();
+
+	  if (dwarf_level >= 5 && strcmp (dirname, pwd) != 0)
+	    {
+	      /* In DWARF-5 the 0 entry in the directory table is expected to be
+		 the same as the DW_AT_comp_dir (which is set to the current build
+		 directory).  Since we are about to create a directory entry that
+		 is not the same, allocate the current directory first.
+		 FIXME: Alternatively we could generate an error message here.  */
+	      (void) get_directory_table_entry (pwd, strlen (pwd), true);
+	      d = 1;
+	    }
+	  else
+	    d = 0;
+	}
     }
   else if (d == 0)
     d = 1;
@@ -628,8 +643,8 @@ get_directory_table_entry (const char *dirname,
   if (d >= dirs_allocated)
     {
       unsigned int old = dirs_allocated;
-
-      dirs_allocated = d + 32;
+#define DIR_TABLE_INCREMENT 32
+      dirs_allocated = d + DIR_TABLE_INCREMENT;
       dirs = XRESIZEVEC (char *, dirs, dirs_allocated);
       memset (dirs + old, 0, (dirs_allocated - old) * sizeof (char *));
     }
@@ -779,7 +794,7 @@ allocate_filename_to_slot (const char *dirname,
 	    {
 	      if (dirs == NULL)
 		{
-		  dirs_allocated = files[num].dir + 32;
+		  dirs_allocated = files[num].dir + DIR_TABLE_INCREMENT;
 		  dirs = XCNEWVEC (char *, dirs_allocated);
 		}
 	      
@@ -807,7 +822,7 @@ allocate_filename_to_slot (const char *dirname,
 		{
 		  if (dirs == NULL)
 		    {
-		      dirs_allocated = files[num].dir + 32;
+		      dirs_allocated = files[num].dir + DIR_TABLE_INCREMENT;
 		      dirs = XCNEWVEC (char *, dirs_allocated);
 		    }
 
@@ -840,7 +855,7 @@ allocate_filename_to_slot (const char *dirname,
       dirlen = strlen (dirname);
       file = filename;
     }
-  
+
   d = get_directory_table_entry (dirname, dirlen, num == 0);
   i = num;
 
@@ -2082,7 +2097,12 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 	 Otherwise use pwd as main file directory.  */
       if (dirs_in_use > 0 && dirs != NULL && dirs[0] != NULL)
 	dir = remap_debug_filename (dirs[0]);
-      else if (dirs_in_use > 1 && dirs != NULL && dirs[1] != NULL)
+      else if (dirs_in_use > 1
+	       && dirs != NULL
+	       && dirs[1] != NULL
+	       /* DWARF-5 directory tables expect dir[0] to be the same as
+		  DW_AT_comp_dir, which is the same as pwd.  */
+	       && dwarf_level < 5)
 	dir = remap_debug_filename (dirs[1]);
       else
 	dir = remap_debug_filename (getpwd ());
@@ -2185,8 +2205,8 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 	     uses slot zero, but that is only set explicitly using a
 	     .file 0 directive.  If that isn't used, but file 1 is,
 	     then use that as main file name.  */
-	  if (DWARF2_LINE_VERSION >= 5 && i == 0 && files_in_use >= 1)
-	      files[0].filename = files[1].filename;
+	  if (DWARF2_LINE_VERSION >= 5 && i == 0 && files_in_use >= 1 && files[0].filename == NULL)
+	    files[0].filename = files[1].filename;
 	  else
 	    files[i].filename = "";
 	  if (DWARF2_LINE_VERSION < 5 || i != 0)

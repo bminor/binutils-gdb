@@ -33,7 +33,7 @@ Raw dump of debug contents of section \.z?debug_line:
 
  The Directory Table \(offset 0x.*, lines 2, columns 1\):
   Entry	Name
-  0	\(indirect line string, offset: 0x.*\): .*/gas/testsuite/gas/i386
+  0	\(indirect line string, offset: 0x.*\): .*/gas/testsuite
   1	\(indirect line string, offset: 0x.*\): .*/gas/testsuite/gas/i386
 
  The File Name Table \(offset 0x.*, lines 2, columns 3\):
