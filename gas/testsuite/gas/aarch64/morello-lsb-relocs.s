@@ -14,6 +14,11 @@ a:		// This function is local, so the relocation on the ADR
 		// instruction will be relaxed to a value.
 altlabel:	// This label does not have function type, so will not have the
 		// LSB set.
+	adr	c0, x
+	adr	c0, f
+	adr	c0, a	// Local C64 function on instruction that does not
+			// ignore LSB so we the LSB included in the output.
+	adr	c0, altlabel
 	b	x
 	b	f
 	b	a
