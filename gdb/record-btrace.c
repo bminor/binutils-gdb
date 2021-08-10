@@ -1998,7 +1998,7 @@ get_thread_current_frame_id (struct thread_info *tp)
      For the former, EXECUTING is true and we're in wait, about to
      move the thread.  Since we need to recompute the stack, we temporarily
      set EXECUTING to false.  */
-  executing = tp->executing;
+  executing = tp->executing ();
   set_executing (proc_target, inferior_ptid, false);
 
   id = null_frame_id;

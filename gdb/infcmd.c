@@ -2371,7 +2371,7 @@ proceed_after_attach (inferior *inf)
   scoped_restore_current_thread restore_thread;
 
   for (thread_info *thread : inf->non_exited_threads ())
-    if (!thread->executing
+    if (!thread->executing ()
 	&& !thread->stop_requested
 	&& thread->stop_signal () == GDB_SIGNAL_0)
       {
@@ -2644,7 +2644,7 @@ notice_new_inferior (thread_info *thr, bool leave_running, int from_tty)
   /* When we "notice" a new inferior we need to do all the things we
      would normally do if we had just attached to it.  */
 
-  if (thr->executing)
+  if (thr->executing ())
     {
       struct inferior *inferior = current_inferior ();
 

@@ -1641,7 +1641,7 @@ thread_db_target::update_thread_list ()
 	continue;
 
       thread_info *thread = any_live_thread_of_inferior (inf);
-      if (thread == NULL || thread->executing)
+      if (thread == NULL || thread->executing ())
 	continue;
 
       /* It's best to avoid td_ta_thr_iter if possible.  That walks

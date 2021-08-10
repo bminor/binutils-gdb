@@ -862,7 +862,7 @@ static void
 proceed_after_vfork_done (thread_info *thread)
 {
   if (thread->state == THREAD_RUNNING
-      && !thread->executing
+      && !thread->executing ()
       && !thread->stop_requested
       && thread->stop_signal () == GDB_SIGNAL_0)
     {
@@ -1885,7 +1885,7 @@ start_step_over (void)
 
       if (tp->control.trap_expected
 	  || tp->resumed ()
-	  || tp->executing)
+	  || tp->executing ())
 	{
 	  internal_error (__FILE__, __LINE__,
 			  "[%s] has inconsistent state: "
@@ -1893,7 +1893,7 @@ start_step_over (void)
 			  target_pid_to_str (tp->ptid).c_str (),
 			  tp->control.trap_expected,
 			  tp->resumed (),
-			  tp->executing);
+			  tp->executing ());
 	}
 
       infrun_debug_printf ("resuming [%s] for step-over",
@@ -3197,7 +3197,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	      {
 		infrun_debug_printf ("[%s] resumed",
 				     target_pid_to_str (tp->ptid).c_str ());
-		gdb_assert (tp->executing || tp->has_pending_waitstatus ());
+		gdb_assert (tp->executing () || tp->has_pending_waitstatus ());
 		continue;
 	      }
 
@@ -3329,7 +3329,7 @@ infrun_thread_stop_requested (ptid_t ptid)
     {
       if (tp->state != THREAD_RUNNING)
 	continue;
-      if (tp->executing)
+      if (tp->executing ())
 	continue;
 
       /* Remove matching threads from the step-over queue, so
@@ -3778,7 +3778,7 @@ prepare_for_detach (void)
 	{
 	  if (thr->displaced_step_state.in_progress ())
 	    {
-	      if (thr->executing)
+	      if (thr->executing ())
 		{
 		  if (!thr->stop_requested)
 		    {
@@ -4806,7 +4806,7 @@ handle_one (const wait_one_event &event)
 	t = add_thread (event.target, event.ptid);
 
       t->stop_requested = 0;
-      t->executing = 0;
+      t->set_executing (false);
       t->set_resumed (false);
       t->control.may_range_step = 0;
 
@@ -4947,7 +4947,7 @@ stop_all_threads (void)
 	      if (!target_is_non_stop_p ())
 		continue;
 
-	      if (t->executing)
+	      if (t->executing ())
 		{
 		  /* If already stopping, don't request a stop again.
 		     We just haven't seen the notification yet.  */
@@ -5091,7 +5091,7 @@ handle_no_resumed (struct execution_control_state *ecs)
 
   for (thread_info *thread : all_non_exited_threads ())
     {
-      if (swap_terminal && thread->executing)
+      if (swap_terminal && thread->executing ())
 	{
 	  if (thread->inf != curr_inf)
 	    {
@@ -5104,7 +5104,7 @@ handle_no_resumed (struct execution_control_state *ecs)
 	}
 
       if (!ignore_event
-	  && (thread->executing || thread->has_pending_waitstatus ()))
+	  && (thread->executing () || thread->has_pending_waitstatus ()))
 	{
 	  /* Either there were no unwaited-for children left in the
 	     target at some point, but there are now, or some target
@@ -5722,7 +5722,7 @@ restart_threads (struct thread_info *event_thread)
 	{
 	  infrun_debug_printf ("restart threads: [%s] resumed",
 			      target_pid_to_str (tp->ptid).c_str ());
-	  gdb_assert (tp->executing || tp->has_pending_waitstatus ());
+	  gdb_assert (tp->executing () || tp->has_pending_waitstatus ());
 	  continue;
 	}
 
@@ -5869,7 +5869,7 @@ finish_step_over (struct execution_control_state *ecs)
 	     do_target_wait.  */
 	  tp->set_resumed (true);
 
-	  gdb_assert (!tp->executing);
+	  gdb_assert (!tp->executing ());
 
 	  regcache = get_thread_regcache (tp);
 	  tp->set_stop_pc (regcache_read_pc (regcache));
@@ -7419,7 +7419,7 @@ restart_after_all_stop_detach (process_stratum_target *proc_target)
       /* If we have any thread that is already executing, then we
 	 don't need to resume the target -- it is already been
 	 resumed.  */
-      if (thr->executing)
+      if (thr->executing ())
 	return;
 
       /* If we have a pending event to process, skip resuming the

@@ -320,6 +320,16 @@ thread_info::deletable () const
 /* See gdbthread.h.  */
 
 void
+thread_info::set_executing (bool executing)
+{
+  m_executing = executing;
+  if (executing)
+    this->set_stop_pc (~(CORE_ADDR) 0);
+}
+
+/* See gdbthread.h.  */
+
+void
 thread_info::set_resumed (bool resumed)
 {
   if (resumed == m_resumed)
@@ -625,13 +635,13 @@ any_live_thread_of_inferior (inferior *inf)
       curr_tp = inferior_thread ();
       if (curr_tp->state == THREAD_EXITED)
 	curr_tp = NULL;
-      else if (!curr_tp->executing)
+      else if (!curr_tp->executing ())
 	return curr_tp;
     }
 
   for (thread_info *tp : inf->non_exited_threads ())
     {
-      if (!tp->executing)
+      if (!tp->executing ())
 	return tp;
 
       tp_executing = tp;
@@ -841,24 +851,11 @@ set_running (process_stratum_target *targ, ptid_t ptid, bool running)
     gdb::observers::target_resumed.notify (ptid);
 }
 
-
-/* Helper for set_executing.  Set's the thread's 'executing' field
-   from EXECUTING, and if EXECUTING is true also clears the thread's
-   stop_pc.  */
-
-static void
-set_executing_thread (thread_info *thr, bool executing)
-{
-  thr->executing = executing;
-  if (executing)
-    thr->set_stop_pc (~(CORE_ADDR) 0);
-}
-
 void
 set_executing (process_stratum_target *targ, ptid_t ptid, bool executing)
 {
   for (thread_info *tp : all_non_exited_threads (targ, ptid))
-    set_executing_thread (tp, executing);
+    tp->set_executing (executing);
 
   /* It only takes one running thread to spawn more threads.  */
   if (executing)
@@ -895,7 +892,7 @@ finish_thread_state (process_stratum_target *targ, ptid_t ptid)
   bool any_started = false;
 
   for (thread_info *tp : all_non_exited_threads (targ, ptid))
-    if (set_running_thread (tp, tp->executing))
+    if (set_running_thread (tp, tp->executing ()))
       any_started = true;
 
   if (any_started)
@@ -922,7 +919,7 @@ validate_registers_access (void)
      at the prompt) when a thread is not executing for some internal
      reason, but is marked running from the user's perspective.  E.g.,
      the thread is waiting for its turn in the step-over queue.  */
-  if (tp->executing)
+  if (tp->executing ())
     error (_("Selected thread is running."));
 }
 
@@ -940,7 +937,7 @@ can_access_registers_thread (thread_info *thread)
     return false;
 
   /* ... or from a spinning thread.  FIXME: see validate_registers_access.  */
-  if (thread->executing)
+  if (thread->executing ())
     return false;
 
   return true;
@@ -1997,7 +1994,7 @@ update_threads_executing (void)
 
       for (thread_info *tp : inf->non_exited_threads ())
 	{
-	  if (tp->executing)
+	  if (tp->executing ())
 	    {
 	      targ->threads_executing = true;
 	      return;

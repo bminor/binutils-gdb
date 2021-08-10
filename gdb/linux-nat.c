@@ -1280,7 +1280,7 @@ get_detach_signal (struct lwp_info *lp)
     {
       struct thread_info *tp = find_thread_ptid (linux_target, lp->ptid);
 
-      if (target_is_non_stop_p () && !tp->executing)
+      if (target_is_non_stop_p () && !tp->executing ())
 	{
 	  if (tp->has_pending_waitstatus ())
 	    signo = tp->pending_waitstatus ().value.sig;

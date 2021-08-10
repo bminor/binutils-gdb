@@ -287,15 +287,19 @@ public:
      if the thread does not have a user-given name.  */
   char *name = NULL;
 
-  /* True means the thread is executing.  Note: this is different
-     from saying that there is an active target and we are stopped at
-     a breakpoint, for instance.  This is a real indicator whether the
-     thread is off and running.  */
-  bool executing = false;
+  bool executing () const
+  { return m_executing; }
+
+  /* Set the thread's 'm_executing' field from EXECUTING, and if EXECUTING
+     is true also clears the thread's stop_pc.  */
+  void set_executing (bool executing);
 
   bool resumed () const
   { return m_resumed; }
 
+  /* Set the thread's 'm_resumed' field from RESUMED.  The thread may also
+     be added to (when RESUMED is true), or removed from (when RESUMED is
+     false), the list of threads with a pending wait status.  */
   void set_resumed (bool resumed);
 
   /* Frontend view of the thread state.  Note that the THREAD_RUNNING/
@@ -487,6 +491,12 @@ private:
      we should not process that wait status if we didn't try to let
      the thread run.  */
   bool m_resumed = false;
+
+  /* True means the thread is executing.  Note: this is different
+     from saying that there is an active target and we are stopped at
+     a breakpoint, for instance.  This is a real indicator whether the
+     thread is off and running.  */
+  bool m_executing = false;
 
   /* State of inferior thread to restore after GDB is done with an inferior
      call.  See `struct thread_suspend_state'.  */
