@@ -1,3 +1,7 @@
+2021-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
 2021-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2dbg.c (get_directory_table_entry): Ensure that dir[0]
