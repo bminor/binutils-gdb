@@ -22,7 +22,7 @@
 #include "bfd.h"
 #include "libbfd.h"
 
-static const bfd_arch_info_type bfd_loongarch32_arch = 
+static const bfd_arch_info_type bfd_loongarch32_arch =
 {
   32,                     /* 32 bits in a word.  */
   32,                     /* 64 bits in an address.  */
@@ -40,7 +40,7 @@ static const bfd_arch_info_type bfd_loongarch32_arch =
   0,
 };
 
-const bfd_arch_info_type bfd_loongarch_arch = 
+const bfd_arch_info_type bfd_loongarch_arch =
 {
   32,                   /* 32 bits in a word.  */
   64,                   /* 64 bits in an address.  */

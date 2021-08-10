@@ -241,7 +241,7 @@ emit_bin (int op)
 	  opr1 = opr1 << opr2;
 	  break;
 	case RIGHT_OP:
-	  /* Algorithm right shift  */
+	  /* Algorithm right shift.  */
 	  opr1 = (offsetT)opr1 >> (offsetT)opr2;
 	  break;
 	case '<':

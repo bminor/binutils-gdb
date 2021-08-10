@@ -60,7 +60,7 @@ struct _bfd_loongarch_elf_obj_tdata
 {
   struct elf_obj_tdata root;
 
-  /* tls_type for each local got entry.  */
+  /* The tls_type for each local got entry.  */
   char *local_got_tls_type;
 };
 
@@ -295,7 +295,7 @@ elfNN_loongarch_get_local_sym_hash (struct loongarch_elf_link_hash_table *htab,
       ret->elf.got.refcount = -1;
       ret->elf.def_dynamic = 0;
       ret->elf.def_regular = 1;
-      ret->elf.ref_dynamic = 0; /* this should be always 0 for local  */
+      ret->elf.ref_dynamic = 0; /* This should be always 0 for local.  */
       ret->elf.ref_regular = 0;
       ret->elf.forced_local = 1;
       ret->elf.root.type = bfd_link_hash_defined;
@@ -531,7 +531,7 @@ loongarch_elf_record_tls_and_got_reference (bfd *abfd,
     case GOT_NORMAL:
     case GOT_TLS_GD:
     case GOT_TLS_IE:
-      /* need GOT */
+      /* Need GOT. */
       if (htab->elf.sgot == NULL &&
           !loongarch_elf_create_got_section (htab->elf.dynobj, info))
         return false;
@@ -545,7 +545,7 @@ loongarch_elf_record_tls_and_got_reference (bfd *abfd,
         elf_local_got_refcounts (abfd)[symndx]++;
       break;
     case GOT_TLS_LE:
-      /* no need for GOT */
+      /* No need for GOT. */
       break;
     default:
       _bfd_error_handler (_ ("Interl error: unreachable."));
@@ -671,7 +671,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
         case R_LARCH_SOP_PUSH_TLS_GOT:
           if (bfd_link_pic (info))
-            /* may fail for lazy-bind */
+            /* May fail for lazy-bind. */
             info->flags |= DF_STATIC_TLS;
 
           if (!loongarch_elf_record_tls_and_got_reference (
@@ -1904,9 +1904,9 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
           RELOC_FOR_GLOBAL_SYMBOL (
             info, input_bfd, input_section, rel, r_symndx, symtab_hdr,
             sym_hashes, h, sec, relocation, unresolved_reloc, warned, ignored);
-          /* here means symbol isn't local symbol only and 'h != NULL' */
+          /* Here means symbol isn't local symbol only and 'h != NULL'. */
 
-          /* 'unresolved_syms_in_objects' specify how to deal with undefined
+          /* The 'unresolved_syms_in_objects' specify how to deal with undefined
 	     symbol. And 'dynamic_undefined_weak' specify what to do when
 	     meeting undefweak.  */
 
@@ -1955,7 +1955,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       if (bfd_link_relocatable (info))
         continue;
 
-      /* r_symndx will be STN_UNDEF (zero) only for relocs against symbols
+      /* The r_symndx will be STN_UNDEF (zero) only for relocs against symbols
 	 from removed linkonce sections, or sections discarded by a linker
 	 script. Also for R_*_SOP_PUSH_ABSOLUTE and PCREL to specify const.  */
       if (r_symndx == STN_UNDEF || bfd_is_abs_section (sec))
@@ -2309,7 +2309,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
                       outrel.r_offset = sec_addr (got) + off;
                       outrel.r_info = ELFNN_R_INFO (0, R_LARCH_RELATIVE);
-                      outrel.r_addend = relocation; /* link-time addr */
+                      outrel.r_addend = relocation; /* Link-time addr. */
                       loongarch_elf_append_rela (output_bfd, s, &outrel);
                     }
 
@@ -2552,7 +2552,7 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       plt_idx = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
 
-      /* one of '.plt' and '.iplt' represents */
+      /* One of '.plt' and '.iplt' represents. */
       BFD_ASSERT (!!htab->elf.splt ^ !!htab->elf.iplt);
 
       if (htab->elf.splt)
@@ -2666,7 +2666,7 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
         }
       else if (bfd_link_pic (info) && SYMBOL_REFERENCES_LOCAL (info, h))
         {
-          BFD_ASSERT (h->got.offset & 1 /* has been filled in addr */);
+          BFD_ASSERT (h->got.offset & 1 /* Has been filled in addr. */);
           asection *sec = h->root.u.def.section;
           rela.r_info = ELFNN_R_INFO (0, R_LARCH_RELATIVE);
           rela.r_addend = h->root.u.def.value + sec->output_section->vma +
@@ -2979,7 +2979,7 @@ loongarch_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
       return false;
 
     case sizeof (
-      prstatus_t): /* sizeof(struct elf_prstatus) on Linux/Loongarch.  */
+      prstatus_t): /* The sizeof(struct elf_prstatus) on Linux/Loongarch.  */
       /* pr_cursig */
       elf_tdata (abfd)->core->signal =
         bfd_get_16 (abfd, note->descdata + offsetof (prstatus_t, pr_cursig));
@@ -3098,7 +3098,7 @@ _loongarch_bfd_set_section_contents (bfd *abfd, sec_ptr section,
 #define bfd_elfNN_bfd_link_hash_table_create                                  \
   loongarch_elf_link_hash_table_create
 #define bfd_elfNN_bfd_reloc_name_lookup loongarch_reloc_name_lookup
-#define elf_info_to_howto_rel NULL /* fall through to elf_info_to_howto */
+#define elf_info_to_howto_rel NULL /* Fall through to elf_info_to_howto. */
 #define elf_info_to_howto loongarch_info_to_howto_rela
 #define bfd_elfNN_bfd_merge_private_bfd_data                                  \
   elfNN_loongarch_merge_private_bfd_data

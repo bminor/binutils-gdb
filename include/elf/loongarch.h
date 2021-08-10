@@ -24,7 +24,7 @@
 #include "libiberty.h"
 
 START_RELOC_NUMBERS (elf_loongarch_reloc_type)
-/* used by the dynamic linker */
+/* Used by the dynamic linker. */
 RELOC_NUMBER (R_LARCH_NONE, 0)
 RELOC_NUMBER (R_LARCH_32, 1)
 RELOC_NUMBER (R_LARCH_64, 2)
@@ -41,7 +41,7 @@ RELOC_NUMBER (R_LARCH_IRELATIVE, 12)
 
 /* Reserved for future relocs that the dynamic linker must understand.  */
 
-/* used by the static linker for relocating .text */
+/* Used by the static linker for relocating .text. */
 RELOC_NUMBER (R_LARCH_MARK_LA, 20)
 RELOC_NUMBER (R_LARCH_MARK_PCREL, 21)
 
@@ -74,7 +74,7 @@ RELOC_NUMBER (R_LARCH_SOP_POP_32_S_0_5_10_16_S2, 44)
 RELOC_NUMBER (R_LARCH_SOP_POP_32_S_0_10_10_16_S2, 45)
 RELOC_NUMBER (R_LARCH_SOP_POP_32_U, 46)
 
-/* used by the static linker for relocating non .text */
+/* Used by the static linker for relocating non .text. */
 RELOC_NUMBER (R_LARCH_ADD8, 47)
 RELOC_NUMBER (R_LARCH_ADD16, 48)
 RELOC_NUMBER (R_LARCH_ADD24, 49)

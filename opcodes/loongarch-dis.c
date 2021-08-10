@@ -321,7 +321,8 @@ loongarch_disassemble_one (int64_t pc, insn_t insn,
                                                 const char *format, ...),
                            void *stream)
 {
-  static struct disassemble_info my_disinfo = {
+  static struct disassemble_info my_disinfo =
+  {
     .print_address_func = my_print_address_func,
   };
   static int not_init_yet = 1;

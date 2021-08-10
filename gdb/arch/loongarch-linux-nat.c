@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* for external ptrace */
+/* For external ptrace. */
 #ifdef GDBSERVER
 #include "server.h"
 #include "nat/gdb_ptrace.h"

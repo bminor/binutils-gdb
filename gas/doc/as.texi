@@ -538,6 +538,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mabi}=@var{ABI}]
    [@b{-mlittle-endian}|@b{-mbig-endian}]
 @end ifset
+@ifset LOONGARCH
+
+@emph{Target LOONGARCH options:}
+   [@b{-fpic}|@b{-fPIC}|@b{-fno-pic}]
+@end ifset
 @ifset RL78
 
 @emph{Target RL78 options:}
@@ -1833,6 +1838,25 @@ RISC-V processor.
 @c man end
 @c man begin INCLUDE
 @include c-riscv.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
+@ifset LOONGARCH
+
+@ifclear man
+@xref{LoongArch-Options}, for the options available when @value{AS} is configured
+for a LoongArch processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for a
+LoongArch processor.
+@c man end
+@c man begin INCLUDE
+@include c-loongarch.texi
 @c ended inside the included file
 @end ifset
 
@@ -7897,6 +7921,9 @@ subject, see the hardware manufacturer's manual.
 @ifset RISCV
 * RISC-V-Dependent::            RISC-V Dependent Features
 @end ifset
+@ifset LOONGARCH
+* LoongArch-Dependent::         LoongArch Dependent Features
+@end ifset
 @ifset RL78
 * RL78-Dependent::              RL78 Dependent Features
 @end ifset
@@ -8135,6 +8162,10 @@ family.
 
 @ifset RISCV
 @include c-riscv.texi
+@end ifset
+
+@ifset LOONGARCH
+@include c-loongarch.texi
 @end ifset
 
 @ifset RL78

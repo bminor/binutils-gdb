@@ -249,7 +249,8 @@ loongarch_store_lasxregset (struct regcache *regcache, const void *buf)
     supply_register (regcache, xr + i, (const uint64_t *) buf + 4 * i);
 }
 
-static struct regset_info loongarch_regsets[] = {
+static struct regset_info loongarch_regsets[] =
+{
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS, 33 * 8, GENERAL_REGS,
     loongarch_fill_gregset, loongarch_store_gregset },
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET, 34 * 8, FP_REGS,
@@ -263,7 +264,7 @@ static struct regset_info loongarch_regsets[] = {
   NULL_REGSET
 };
 
-static struct regsets_info loongarch_regsets_info = 
+static struct regsets_info loongarch_regsets_info =
 {
   loongarch_regsets, /* regsets */
   0,                 /* num_regsets */

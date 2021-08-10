@@ -27,7 +27,7 @@
 #define WORKING_DOT_WORD 1
 #define REPEAT_CONS_EXPRESSIONS
 
-/* early than md_begin */
+/* Early than md_begin. */
 #define md_after_parse_args loongarch_after_parse_args
 extern void loongarch_after_parse_args (void);
 
@@ -68,8 +68,8 @@ extern void loongarch_cfi_frame_initial_instructions (void);
 #define tc_parse_to_dw2regnum tc_loongarch_parse_to_dw2regnum
 extern void tc_loongarch_parse_to_dw2regnum (expressionS *);
 
-/* a enumerated values to specific how to deal with align in '.text' */
-/* now we want to fill 'andi $r0,$r0,0x0' */
+/* A enumerated values to specific how to deal with align in '.text'. */
+/* Now we want to fill 'andi $r0,$r0,0x0'. */
 #define loongarch_nop_opcode() 0
 #define NOP_OPCODE (loongarch_nop_opcode ())
 

@@ -54,7 +54,7 @@ loongarch_supply_elf_gregset (const struct regset *r,
 
   if (regno == -1)
     {
-      /* $r0 = zero */
+      /* Set $r0 = 0. */
       regcache->raw_supply_zeroed (regs->r);
 
       for (int i = 1; i < 32; i++)
@@ -63,11 +63,11 @@ loongarch_supply_elf_gregset (const struct regset *r,
         regcache->raw_supply (regs->r + i, (const void *)buf);
         }
 
-      /* base(pc) = regsize * regs->pc */
+      /* Size base(pc) = regsize * regs->pc. */
       buf = (const gdb_byte*)gprs + regsize * regs->pc;
       regcache->raw_supply (regs->pc, (const void *)buf);
 
-      /* base(badvaddr) = regsize * regs->badvaddr */
+      /* Size base(badvaddr) = regsize * regs->badvaddr. */
       buf = (const gdb_byte*)gprs + regsize * regs->badvaddr;
       regcache->raw_supply (regs->badvaddr, (const void *)buf);
     }
@@ -77,7 +77,7 @@ loongarch_supply_elf_gregset (const struct regset *r,
           || (regs->pc == regno)
           || (regs->badvaddr == regno))
     {
-    /* offset(regno) = regsize * (regno - regs->r) */
+    /* Offset offset(regno) = regsize * (regno - regs->r). */
     buf = (const gdb_byte*)gprs + regsize * (regno - regs->r);
     regcache->raw_supply (regno, (const void *)buf);
     }
@@ -101,11 +101,11 @@ loongarch_fill_elf_gregset (const struct regset *r,
         regcache->raw_collect (regs->r + i, (void *)buf);
         }
 
-      /* base(pc) = regsize * regs->pc */
+      /* Size base(pc) = regsize * regs->pc. */
       buf = (gdb_byte *)gprs + regsize * regs->pc;
       regcache->raw_collect (regs->pc, (void *)buf);
 
-      /* base(badvaddr) = regsize * regs->badvaddr */
+      /* Size base(badvaddr) = regsize * regs->badvaddr. */
       buf = (gdb_byte *)gprs + regsize * regs->badvaddr;
       regcache->raw_collect (regs->badvaddr, (void *)buf);
     }
@@ -113,13 +113,14 @@ loongarch_fill_elf_gregset (const struct regset *r,
           ||(regs->pc == regno)
           ||(regs->badvaddr == regno))
     {
-    /* offset(regno) = regsize * (regno - regs->r) */
+    /* Offset offset(regno) = regsize * (regno - regs->r). */
     buf = (gdb_byte *)gprs + regsize * (regno - regs->r);
     regcache->raw_collect (regno, (void *)buf);
     }
 }
 
-const struct regset loongarch_elf_gregset = {
+const struct regset loongarch_elf_gregset =
+{
   NULL,
   loongarch_supply_elf_gregset,
   loongarch_fill_elf_gregset,
@@ -146,7 +147,7 @@ loongarch_supply_elf_fpregset (const struct regset *r,
       regcache->raw_supply (regs->f + i, (const void *)buf);
       }
 
-    /* 8 fccs , base(fcc) = 32 * sizeof(fpr) */
+    /* 8 fccs , base(fcc) = 32 * sizeof(fpr). */
     buf = (const gdb_byte *)fprs + fprsize * 32;
     for (int i = 0; i < 8; i++)
       {
@@ -154,25 +155,25 @@ loongarch_supply_elf_fpregset (const struct regset *r,
       buf += fccsize;
       }
 
-    /* base(fcsr) = 32 * sizeof(fpr) + 8 * sizeof(fcc) */
+    /* Size base(fcsr) = 32 * sizeof(fpr) + 8 * sizeof(fcc). */
     buf = (const gdb_byte *)fprs + 32 * fprsize + 8 * fccsize;
     regno = regs->fcsr;
     }
   else if (regs->f <= regno && regno < regs->f + 32)
     {
-    /* offset(regno - f) = (regno - regs->f) * sizeof(fpr) */
+    /* Offset offset(regno - f) = (regno - regs->f) * sizeof(fpr). */
     buf = (const gdb_byte *)fprs + fprsize * (regno - regs->f);
     }
   else if (regs->fcc <= regno && regno < regs->fcc + 8)
     {
-    /* base(fcc) + offset(regno - fcc) =
-       32 * sizeof(fpr) + (regno - regs->fcc) * sizeof(fcc) */
+    /* Size base(fcc) + offset(regno - fcc) =
+       32 * sizeof(fpr) + (regno - regs->fcc) * sizeof(fcc). */
     buf = (const gdb_byte *)fprs + 32 * fprsize +
           (regno - regs->fcc) * fccsize;
     }
   else if (regs->fcsr == regno)
     {
-    /* base(fcsr) = 32 * sizeof(fpr) + 8 * sizeof(fcc) */
+    /* Size base(fcsr) = 32 * sizeof(fpr) + 8 * sizeof(fcc). */
     buf = (const gdb_byte *)fprs + 32 * fprsize + 8 * fccsize;
     }
   else
@@ -180,7 +181,7 @@ loongarch_supply_elf_fpregset (const struct regset *r,
     return;
     }
 
-    /* supply register */
+    /* Supply register. */
     regcache->raw_supply (regno, (const void *)buf);
 }
 
@@ -197,14 +198,14 @@ loongarch_fill_elf_fpregset (const struct regset *r,
 
   if (regno == -1)
     {
-    /* 32 fprs */
+    /* 32 fprs. */
     for (int i = 0; i < 32; i++)
       {
       buf = (gdb_byte *)fprs + fprsize * i;
       regcache->raw_collect (regs->f + i, (void *)buf);
       }
 
-      /* 8 fccs , base(fcc) = 32 * sizeof(fpr) */
+      /* 8 fccs , base(fcc) = 32 * sizeof(fpr). */
       buf = (gdb_byte *)fprs + fprsize * 32;
       for (int i = 0; i < 8; i++)
         {
@@ -212,24 +213,24 @@ loongarch_fill_elf_fpregset (const struct regset *r,
         buf += fccsize;
         }
 
-      /* base(fcsr) = 32 * sizeof(fpr) + 8 * sizeof(fcc) */
+      /* Size base(fcsr) = 32 * sizeof(fpr) + 8 * sizeof(fcc). */
       buf = (gdb_byte *)fprs + fprsize * 32 + fccsize * 8;
       regno = regs->fcsr;
     }
   else if (regs->f <= regno && regno < regs->f + 32)
     {
-    /* offset(regno - f) = (regno - regs->f) * sizeof(fpr) */
+    /* Offset offset(regno - f) = (regno - regs->f) * sizeof(fpr). */
     buf = (gdb_byte *)fprs + fprsize * (regno - regs->f);
     }
   else if (regs->fcc <= regno && regno < regs->fcc + 8)
     {
-    /* base(fcc) + offset(regno - fcc) =
-       32 * sizeof(fpr) + (regno - regs->fcc) * sizeof(fcc) */
+    /* Size base(fcc) + offset(regno - fcc) =
+       32 * sizeof(fpr) + (regno - regs->fcc) * sizeof(fcc). */
     buf = (gdb_byte *)fprs + 32 * fprsize + (regno - regs->fcc) * fccsize;
     }
   else if (regs->fcsr == regno)
     {
-    /* base(fcsr) = 32 * sizeof(fpr) + 8 * sizeof(fcc) */
+    /* Size base(fcsr) = 32 * sizeof(fpr) + 8 * sizeof(fcc). */
     buf = (gdb_byte *)fprs + 32 * fprsize + 8 * fccsize;
     }
   else
@@ -237,11 +238,12 @@ loongarch_fill_elf_fpregset (const struct regset *r,
     return;
     }
 
-    /* supply register */
+    /* Supply register. */
     regcache->raw_collect (regno, (void *)buf);
 }
 
-const struct regset loongarch_elf_fpregset = {
+const struct regset loongarch_elf_fpregset =
+{
   NULL,
   loongarch_supply_elf_fpregset,
   loongarch_fill_elf_fpregset,
@@ -267,7 +269,8 @@ loongarch_fill_elf_cpucfgregset (const struct regset *r,
   memset ((gdb_byte *) cpucfgs + xfered_len, 0, len - xfered_len);
 }
 
-const struct regset loongarch_elf_cpucfgregset = {
+const struct regset loongarch_elf_cpucfgregset =
+{
   NULL,
   loongarch_supply_elf_cpucfgregset,
   loongarch_fill_elf_cpucfgregset,
@@ -287,30 +290,30 @@ loongarch_supply_elf_lbtregset (const struct regset *r,
 
   if (regno == -1)
     {
-    /* 4 scrs */
+    /* 4 scrs. */
     for (int i = 0; i < 4; i++)
       {
       buf = (const gdb_byte *)lbtrs + scrsize * i;
       regcache->raw_supply (regs->scr + i, (const void *)buf);
       }
 
-      /* base(EFLAG) = 4 * sizeof(scr) */
+      /* Size base(EFLAG) = 4 * sizeof(scr). */
       buf = (const gdb_byte *)lbtrs + scrsize * 4;
       regcache->raw_supply (regs->EFLAG, (const void *)buf);
 
-      /* base(x86_top) = 4 * sizeof(scr) + sizeof(EFLAG) */
+      /* Size base(x86_top) = 4 * sizeof(scr) + sizeof(EFLAG). */
       buf = (const gdb_byte *)lbtrs + scrsize * 4 + efsize;
       regno = regs->x86_top;
     }
   else if (regs->scr <= regno && regno < regs->scr + 4)
-    /* offset(EFLAG) = sizeof(scr) * (regno - regs->scr) */
+    /* Offset offset(EFLAG) = sizeof(scr) * (regno - regs->scr). */
     buf = (const gdb_byte *)lbtrs + scrsize * (regno - regs->scr);
   else if (regs->EFLAG == regno)
-    /* base(EFLAG) = 4 * sizeof(scr) */
+    /* Size base(EFLAG) = 4 * sizeof(scr). */
     buf = (const gdb_byte *)lbtrs + scrsize * 4;
   else if (regs->x86_top == regno)
     {
-    /* base(x86_top) = 4 * sizeof(scr) + sizeof(EFLAG) */
+    /* Size base(x86_top) = 4 * sizeof(scr) + sizeof(EFLAG). */
     buf = (const gdb_byte *)lbtrs + scrsize * 4 + efsize;
     }
   else
@@ -336,29 +339,29 @@ loongarch_fill_elf_lbtregset (const struct regset *r,
   if (regno == -1)
     {
 
-    /* 4 scrs */
+    /* 4 scrs. */
     for (int i = 0; i < 4; i++)
       {
       buf = (gdb_byte *)lbtrs + scrsize * i;
       regcache->raw_collect (regs->scr + i, (void *)buf);
       }
 
-      /* base(EFLAG) = 4 * sizeof(scr) */
+      /* Size base(EFLAG) = 4 * sizeof(scr). */
       buf = (gdb_byte *)lbtrs + scrsize * 4;
       regcache->raw_collect (regs->EFLAG, (void *)buf);
 
-      /* base(x86_top) = 4 * sizeof(scr) + sizeof(EFLAG) */
+      /* Size base(x86_top) = 4 * sizeof(scr) + sizeof(EFLAG). */
       buf = (gdb_byte *)lbtrs + scrsize * 4 + efsize;
       regno = regs->x86_top;
     }
   else if (regs->scr <= regno && regno < regs->scr + 4)
-    /* offset(EFLAG) = sizeof(scr) * (regno - regs->scr) */
+    /* Offset offset(EFLAG) = sizeof(scr) * (regno - regs->scr). */
     buf = (gdb_byte *)lbtrs + scrsize * (regno - regs->scr);
   else if (regs->EFLAG == regno)
-    /* base(EFLAG) = 4 * sizeof(scr) */
+    /* Size base(EFLAG) = 4 * sizeof(scr). */
     buf = (gdb_byte *)lbtrs + scrsize * 4;
   else if (regs->x86_top == regno)
-    /* base(x86_top) = 4 * sizeof(scr) + sizeof(EFLAG) */
+    /* Size base(x86_top) = 4 * sizeof(scr) + sizeof(EFLAG). */
     buf = (gdb_byte *)lbtrs + scrsize * 4 + efsize;
   else
     {
@@ -368,7 +371,8 @@ loongarch_fill_elf_lbtregset (const struct regset *r,
   regcache->raw_collect (regno, (void *)buf);
 }
 
-const struct regset loongarch_elf_lbtregset = {
+const struct regset loongarch_elf_lbtregset =
+{
   NULL,
   loongarch_supply_elf_lbtregset,
   loongarch_fill_elf_lbtregset,
@@ -426,7 +430,8 @@ loongarch_fill_elf_lsxregset (const struct regset *r,
     }
 }
 
-const struct regset loongarch_elf_lsxregset = {
+const struct regset loongarch_elf_lsxregset =
+{
   NULL,
   loongarch_supply_elf_lsxregset,
   loongarch_fill_elf_lsxregset,
@@ -484,7 +489,8 @@ loongarch_fill_elf_lasxregset (const struct regset *r,
     }
 }
 
-const struct regset loongarch_elf_lasxregset = {
+const struct regset loongarch_elf_lasxregset =
+{
   NULL,
   loongarch_supply_elf_lasxregset,
   loongarch_fill_elf_lasxregset,
@@ -570,10 +576,11 @@ loongarch_linux_lp64_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
 }
 
-static const struct tramp_frame loongarch_linux_lp64_rt_sigframe = {
+static const struct tramp_frame loongarch_linux_lp64_rt_sigframe =
+{
   SIGTRAMP_FRAME,
   4,
-  { /* from $kernel/arch/loongarch/vdso/sigreturn.S */
+  { /* From $kernel/arch/loongarch/vdso/sigreturn.S. */
     { 0x03822c0b, ULONGEST_MAX }, /* ori	$r11, $r0, 0x8b(__NR_rt_sigreturn) */
     { 0x002b0000, ULONGEST_MAX }, /* syscall	0 */
     { TRAMP_SENTINEL_INSN, ULONGEST_MAX } },

@@ -1,5 +1,9 @@
 -*- text -*-
 
+Changes in 2.37:
+
+* Add support for the LoongArch instruction set.
+
 * Add -z indirect-extern-access/-z noindirect-extern-access to x86 ELF
   linker to control canonical function pointers and copy relocation.
 

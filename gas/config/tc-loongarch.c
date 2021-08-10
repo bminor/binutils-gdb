@@ -338,7 +338,7 @@ s_dtprel (int bytes)
   demand_empty_rest_of_line ();
 }
 
-static const pseudo_typeS loongarch_pseudo_table[] = 
+static const pseudo_typeS loongarch_pseudo_table[] =
 {
   { "align", s_loongarch_align, -4 },
   { "dword", cons, 8 },
@@ -390,13 +390,13 @@ setup_internal_label_here (unsigned long label)
   colon (loongarch_internal_label_name (label, 0));
 }
 
-extern void /* no static. used by 'loongarch-parse.y' */
+extern void /* No static. used by 'loongarch-parse.y'. */
 get_internal_label (expressionS *label_expr, unsigned long label,
-                    int augend /* 0 for previous, 1 for next */);
+                    int augend /* 0 for previous, 1 for next. */);
 
 void
 get_internal_label (expressionS *label_expr, unsigned long label,
-                    int augend /* 0 for previous, 1 for next */)
+                    int augend /* 0 for previous, 1 for next. */)
 {
   assert (label < INTERNAL_LABEL_SPECIAL);
   if (augend == 0 && internal_label_count[label] == 0)
@@ -473,7 +473,7 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
           bfd_reloc_code_real_type reloc_type = BFD_RELOC_NONE;
           reloc_num_we_have -= reloc_num;
           if (reloc_num_we_have == 0)
-            as_fatal (_ ("expr too huge") /* want one more reloc */);
+            as_fatal (_ ("expr too huge") /* Want one more reloc. */);
           if (esc_ch1 == 'u')
             {
               if (strncmp (bit_field, "10:12", strlen ("10:12")) == 0)
@@ -553,7 +553,7 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 
   do
     {
-      /* check imm overflow */
+      /* Check imm overflow. */
       int bit_width, bits_needed_s, bits_needed_u;
       char *t;
 
@@ -566,7 +566,7 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
       bit_width = loongarch_get_bit_field_width (bit_field, &t);
 
       if (bit_width == -1)
-        /* no specify bit width */
+        /* No specify bit width. */
         break;
 
       imm = ret;
@@ -586,7 +586,7 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 
       if ((esc_ch1 == 's' && bit_width < bits_needed_s) ||
           (esc_ch1 != 's' && bit_width < bits_needed_u))
-        /* how to do after we detect overflow */
+        /* How to do after we detect overflow. */
         as_fatal (_ ("Immediate overflow.\n"
                      "format: %c%c%s\n"
                      "arg: %s"),
@@ -660,7 +660,7 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
             (ip->insn_bin & 0xffff0000) == 0x38700000 ||
             (ip->insn_bin & 0xffff0000) == 0x38710000))
     {
-      /* for AMO insn amswap.[wd], amadd.[wd], etc. */
+      /* For AMO insn amswap.[wd], amadd.[wd], etc. */
       if (ip->args[0] != 0 &&
           (ip->args[0] == ip->args[1] || ip->args[0] == ip->args[2]))
         as_fatal (
@@ -671,7 +671,7 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
            (ip->insn->mask == 0xffc00000 &&
             (ip->insn_bin & 0xff800000) == 0x00800000))
     {
-      /* for bstr(ins|pick).[wd] */
+      /* For bstr(ins|pick).[wd] */
       if (ip->args[2] < ip->args[3])
         as_fatal (_ ("bstr(ins|pick).[wd] require msbd >= lsbd"));
     }
@@ -739,7 +739,7 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
   dwarf2_emit_insn (0);
 }
 
-/* ask helper for returning a malloced c_str or NULL */
+/* Ask helper for returning a malloced c_str or NULL. */
 static char *
 assember_macro_helper (const char *const args[], void *context_ptr)
 {
@@ -823,8 +823,8 @@ assember_macro_helper (const char *const args[], void *context_ptr)
   return ret;
 }
 
-/* accept instructions separated by ';'
-* assuming 'not starting with space and not ending with space' or pass in empty c_str */
+/* Accept instructions separated by ';'
+* assuming 'not starting with space and not ending with space' or pass in empty c_str. */
 static void
 loongarch_assemble_INSNs (char *str)
 {

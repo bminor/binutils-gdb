@@ -1352,8 +1352,8 @@ typedef BP_MANIPULATION (loongarch_default_breakpoint) loongarch_breakpoint;
    Called e.g. at program startup, when reading a core file, and when
    reading a binary file.  */
 
-/* This predicate tests whether we need to read lsx/lasx registers 
-   (instead of fp registers with the same DWARF2 code 
+/* This predicate tests whether we need to read lsx/lasx registers
+   (instead of fp registers with the same DWARF2 code
    (thus the same internal code, though lasx/lsx/fp reg internal codes are different))
    according to the byte-size of requested type. */
 
@@ -1363,10 +1363,10 @@ loongarch_fp_regnum_refers_to_lsx_lasx_p (struct gdbarch *gdbarch, int regnum,
 {
   /* Conditions:
        1) regnum is in "disputed" zone (fp/lsx/lasx, translated from dwarf regnum)
-       2) type is larger than 8 bytes 
+       2) type is larger than 8 bytes
 
-      (if specified type is larger than 8 bytes, 
-       then regnum refers to lsx / lasx register instead of fp register) 
+      (if specified type is larger than 8 bytes,
+       then regnum refers to lsx / lasx register instead of fp register)
     */
   return regnum >= gdbarch_tdep (gdbarch)->regs.f &&
          regnum < gdbarch_tdep (gdbarch)->regs.f + 32 &&

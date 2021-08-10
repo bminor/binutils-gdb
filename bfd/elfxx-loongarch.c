@@ -28,7 +28,7 @@
 /* This does not include any relocation information, but should be
    good enough for GDB or objdump to read the file.  */
 
-static reloc_howto_type howto_table[] = 
+static reloc_howto_type howto_table[] =
 {
 #define LOONGARCH_HOWTO(r_name)                                               \
   HOWTO (R_LARCH_##r_name, 0, 3, 32, false, 0, complain_overflow_signed,      \
@@ -104,7 +104,7 @@ struct elf_reloc_map
   enum elf_loongarch_reloc_type elf_val;
 };
 
-static const struct elf_reloc_map loong_reloc_map[] = 
+static const struct elf_reloc_map loong_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_LARCH_NONE },
   { BFD_RELOC_32, R_LARCH_32 },

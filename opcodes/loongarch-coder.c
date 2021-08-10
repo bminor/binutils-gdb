@@ -234,7 +234,7 @@ loongarch_encode_imm (const char *bit_field, int32_t imm)
   return ret;
 }
 
-/* parse such FORMAT
+/* Parse such FORMAT
      ""
      "u"
      "v0:5,r5:5,s10:10<<2"
@@ -269,14 +269,14 @@ loongarch_parse_format (const char *format, char *esc1s, char *esc2s,
 
       arg_num++;
       if (MAX_ARG_NUM_PLUS_2 - 2 < arg_num)
-        /* need larger MAX_ARG_NUM_PLUS_2 */
+        /* Need larger MAX_ARG_NUM_PLUS_2. */
         return -1;
 
       *bit_fields++ = format;
 
       if ('0' <= *format && *format <= '9')
         {
-          /* for "[0-9]+:[0-9]+(\|[0-9]+:[0-9]+)*" */
+          /* For "[0-9]+:[0-9]+(\|[0-9]+:[0-9]+)*". */
           while (1)
             {
               while ('0' <= *format && *format <= '9')
@@ -296,7 +296,7 @@ loongarch_parse_format (const char *format, char *esc1s, char *esc2s,
               format++;
             }
 
-          /* for "((\+|<<)[1-9][0-9]*)?" */
+          /* For "((\+|<<)[1-9][0-9]*)?". */
           do
             {
               if (*format == '+')
@@ -378,7 +378,7 @@ loongarch_foreach_args (const char *format, const char *arg_strs[],
 
   ok = loongarch_parse_format (format, esc1s, esc2s, bit_fields) == 0;
 
-  /* make sure the num of actual args is equal to the num of escape */
+  /* Make sure the num of actual args is equal to the num of escape. */
   for (i = 0; esc1s[i] && arg_strs[i]; i++)
     ;
   ok = ok && !esc1s[i] && !arg_strs[i];
@@ -428,7 +428,7 @@ loongarch_check_macro (const char *format, const char *macro)
         if ('1' <= macro[0] && macro[0] <= '9')
           {
             if (num_of_args < macro[0] - '0')
-              /* out of args num */
+              /* Out of args num. */
               return -1;
           }
         else if (macro[0] == 'f')

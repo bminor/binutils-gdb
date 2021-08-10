@@ -478,7 +478,8 @@ static int watch_readback_valid;
 
 /* Cached watch register read values.  */
 
-static struct pt_watch_regs watch_readback = {
+static struct pt_watch_regs watch_readback =
+{
   .max_valid = MAX_DEBUG_REGISTER,
 };
 
@@ -487,7 +488,8 @@ static struct loongarch_watchpoint *current_watches;
 /*  The current set of watch register values for writing the
     registers.  */
 
-static struct pt_watch_regs watch_mirror = {
+static struct pt_watch_regs watch_mirror =
+{
   .max_valid = MAX_DEBUG_REGISTER,
 };
 
@@ -698,7 +700,8 @@ loongarch_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
                                                enum target_hw_bp_type type,
                                                struct expression *cond)
 {
-  struct pt_watch_regs regs = {
+  struct pt_watch_regs regs =
+  {
     .max_valid = MAX_DEBUG_REGISTER,
   };
   struct loongarch_watchpoint *new_watch;

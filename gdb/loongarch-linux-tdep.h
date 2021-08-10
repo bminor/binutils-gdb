@@ -32,10 +32,10 @@ extern const struct regset loongarch_elf_gregset;
 typedef uint64_t loongarch_elf_fpregset_t[ELF_NFPREG];
 extern const struct regset loongarch_elf_fpregset;
 
-/* regset variable size */
+/* Regset variable size. */
 extern const struct regset loongarch_elf_cpucfg;
 
-/* 4 SCRs + 4-byte EFLAG + 1-byte x86_top */
+/* 4 SCRs + 4-byte EFLAG + 1-byte x86_top. */
 typedef uint64_t loongarch_elf_lbtregset_t[5];
 extern const struct regset loongarch_elf_lbtregset;
 
