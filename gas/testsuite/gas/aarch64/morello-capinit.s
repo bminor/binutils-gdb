@@ -49,3 +49,20 @@ e:
 _start:
 	ldr	c2, [c2, :lo12:a]
 	ret
+
+	.type f, %function
+f:
+	ldr	c2, [c2, :lo12:a]
+        .p2align 4
+.Llab:
+	.capinit f+((.Llab+1)-f)
+	.xword	0
+	.xword	0
+	.type f2, %function
+f2:
+	ldr	c2, [c2, :lo12:a]
+        .8byte	0
+.Llab2:
+	.capinit f2+((.Llab2+1)-f2)
+	.xword	0
+	.xword	0

@@ -2164,13 +2164,7 @@ static void
 s_aarch64_capinit (int ignored ATTRIBUTE_UNUSED)
 {
   expressionS exp;
-
   expression (&exp);
-  if (exp.X_op != O_symbol)
-    {
-      as_bad (_(".capinit expects a target symbol as an argument"));
-      return;
-    }
 
   /* align to 16 bytes. */
   do_align (4, (char *) NULL, 0, 0);
@@ -2186,13 +2180,7 @@ static void
 s_aarch64_chericap (int ignored ATTRIBUTE_UNUSED)
 {
   expressionS exp;
-
   expression (&exp);
-  if (exp.X_op != O_symbol)
-    {
-      as_bad (_(".chericap expects a target symbol as an argument"));
-      return;
-    }
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
