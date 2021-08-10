@@ -77,3 +77,16 @@ e:
 _start:
 	ldr	c2, [c2, :lo12:a]
 	ret
+
+	.type g, %function
+g:
+	ldr	c2, [c2, :lo12:a]
+        .p2align 4
+.Llab:
+	.chericap g+((.Llab+1)-g)
+	.type g2, %function
+g2:
+	ldr	c2, [c2, :lo12:a]
+        .8byte	0
+.Llab2:
+	.chericap g2+((.Llab2+1)-g2)
