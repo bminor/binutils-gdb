@@ -6689,21 +6689,6 @@ bad_adrdp:
 		  case pcreladdr:
 		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL21);
 		    inst.reloc.type = BFD_RELOC_AARCH64_ADR_LO21_PCREL;
-		    if (inst.reloc.exp.X_op == O_symbol
-			&& inst.reloc.exp.X_add_symbol != NULL)
-		      {
-			symbolS *sym = inst.reloc.exp.X_add_symbol;
-
-			/* We set LSB for C64 local functions.  We do not do
-			   this for local labels even in code section because
-			   it could be embedded data.  */
-			if (S_IS_DEFINED (sym) && AARCH64_IS_C64 (sym)
-			    && (symbol_get_bfdsym (sym)->flags & BSF_FUNCTION))
-			  {
-			      inst.reloc.exp.X_add_number += 1;
-			  }
-		      }
-
 		    break;
 		  default:
 		    gas_assert (0);
