@@ -7710,7 +7710,10 @@ aarch64_frob_label (symbolS * sym)
 
   AARCH64_SET_C64 (sym, IS_C64);
   if (AARCH64_IS_C64 (sym) && S_IS_FUNCTION (sym))
-    *symbol_X_add_number (sym) += 1;
+    {
+      gas_assert ((*symbol_X_add_number (sym) & 1) == 0);
+      *symbol_X_add_number (sym) += 1;
+    }
 
   dwarf2_emit_label (sym);
 }
@@ -8500,6 +8503,15 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   int scale;
   unsigned flags = fixP->fx_addnumber;
+  /* We check alignment for relocations of this kind.  These relocations could
+     be applied on a C64 STT_FUNC symbol and hence may have the LSB set on
+     `*valP`, their AARCH64 counterparts can not be applied on such symbols and
+     hence should never have the LSB set on their value.  */
+  valueT alignment_mask = (fixP->fx_r_type == BFD_RELOC_MORELLO_BRANCH19
+			   || fixP->fx_r_type == BFD_RELOC_MORELLO_TSTBR14
+			   || fixP->fx_r_type == BFD_RELOC_MORELLO_CALL26
+			   || fixP->fx_r_type == BFD_RELOC_MORELLO_JUMP26)
+    ? 2 : 3;
 
   DEBUG_TRACE ("\n\n");
   DEBUG_TRACE ("~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -8609,7 +8621,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_MORELLO_BRANCH19:
       if (fixP->fx_done || !seg->use_rela_p)
 	{
-	  if (value & 3)
+	  if (value & alignment_mask)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("conditional branch target not word aligned"));
 	  if (signed_overflow (value, 21))
@@ -8625,7 +8637,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TSTBR14:
       if (fixP->fx_done || !seg->use_rela_p)
 	{
-	  if (value & 3)
+	  if (value & alignment_mask)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("conditional branch target not word aligned"));
 	  if (signed_overflow (value, 16))
@@ -8643,7 +8655,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_JUMP26:
       if (fixP->fx_done || !seg->use_rela_p)
 	{
-	  if (value & 3)
+	  if (value & alignment_mask)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("branch target not word aligned"));
 	  if (signed_overflow (value, 28))
