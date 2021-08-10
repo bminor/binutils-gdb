@@ -197,9 +197,12 @@ struct thread_suspend_state
        stop_reason: if the thread's PC has changed since the thread
        last stopped, a pending breakpoint waitstatus is discarded.
 
-     - If the thread is running, this is set to -1, to avoid leaving
-       it with a stale value, to make it easier to catch bugs.  */
-  CORE_ADDR stop_pc = 0;
+     - If the thread is running, then this field has its value removed by
+       calling stop_pc.reset() (see thread_info::set_executing()).
+       Attempting to read a gdb::optional with no value is undefined
+       behaviour and will trigger an assertion error when _GLIBCXX_DEBUG is
+       defined, which should make error easier to track down.  */
+  gdb::optional<CORE_ADDR> stop_pc;
 };
 
 /* Base class for target-specific thread data.  */
@@ -327,11 +330,15 @@ public:
     m_suspend = suspend;
   }
 
-  /* Return this thread's stop PC.  */
+  /* Return this thread's stop PC.  This should only be called when it is
+     known that stop_pc has a value.  If this function is being used in a
+     situation where a thread may not have had a stop_pc assigned, then
+     stop_pc_p() can be used to check if the stop_pc is defined.  */
 
   CORE_ADDR stop_pc () const
   {
-    return m_suspend.stop_pc;
+    gdb_assert (m_suspend.stop_pc.has_value ());
+    return *m_suspend.stop_pc;
   }
 
   /* Set this thread's stop PC.  */
@@ -339,6 +346,21 @@ public:
   void set_stop_pc (CORE_ADDR stop_pc)
   {
     m_suspend.stop_pc = stop_pc;
+  }
+
+  /* Remove the stop_pc stored on this thread.  */
+
+  void clear_stop_pc ()
+  {
+    m_suspend.stop_pc.reset ();
+  }
+
+  /* Return true if this thread has a cached stop pc value, otherwise
+     return false.  */
+
+  bool stop_pc_p () const
+  {
+    return m_suspend.stop_pc.has_value ();
   }
 
   /* Return true if this thread has a pending wait status.  */

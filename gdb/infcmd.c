@@ -249,7 +249,7 @@ post_create_inferior (int from_tty)
      missing registers info), ignore it.  */
   thread_info *thr = inferior_thread ();
 
-  thr->set_stop_pc (0);
+  thr->clear_stop_pc ();
   try
     {
       regcache *rc = get_thread_regcache (thr);
