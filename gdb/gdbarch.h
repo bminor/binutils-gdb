@@ -1824,12 +1824,11 @@ extern void gdbarch_register (enum bfd_architecture architecture,
 			      gdbarch_dump_tdep_ftype *);
 
 
-/* Return a freshly allocated, NULL terminated, array of the valid
-   architecture names.  Since architectures are registered during the
-   _initialize phase this function only returns useful information
-   once initialization has been completed.  */
+/* Return a vector of the valid architecture names.  Since architectures are
+   registered during the _initialize phase this function only returns useful
+   information once initialization has been completed.  */
 
-extern const char **gdbarch_printable_names (void);
+extern std::vector<const char *> gdbarch_printable_names ();
 
 
 /* Helper function.  Search the list of ARCHES for a GDBARCH that

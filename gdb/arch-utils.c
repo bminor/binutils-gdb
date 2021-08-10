@@ -669,10 +669,14 @@ static const bfd_target *default_bfd_vec;
 
 static enum bfd_endian default_byte_order = BFD_ENDIAN_UNKNOWN;
 
+/* Printable names of architectures.  Used as the enum list of the
+   "set arch" command.  */
+static std::vector<const char *> arches;
+
 void
 initialize_current_architecture (void)
 {
-  const char **arches = gdbarch_printable_names ();
+  arches = gdbarch_printable_names ();
   
   /* Find a default architecture.  */
   if (default_bfd_arch == NULL)
@@ -680,15 +684,17 @@ initialize_current_architecture (void)
       /* Choose the architecture by taking the first one
 	 alphabetically.  */
       const char *chosen = arches[0];
-      const char **arch;
-      for (arch = arches; *arch != NULL; arch++)
+
+      for (const char *arch : arches)
 	{
-	  if (strcmp (*arch, chosen) < 0)
-	    chosen = *arch;
+	  if (strcmp (arch, chosen) < 0)
+	    chosen = arch;
 	}
+
       if (chosen == NULL)
 	internal_error (__FILE__, __LINE__,
 			_("initialize_current_architecture: No arch"));
+
       default_bfd_arch = bfd_scan_arch (chosen);
       if (default_bfd_arch == NULL)
 	internal_error (__FILE__, __LINE__,
@@ -743,14 +749,11 @@ initialize_current_architecture (void)
      list of architectures.  */
   {
     /* Append ``auto''.  */
-    int nr;
-    for (nr = 0; arches[nr] != NULL; nr++);
-    arches = XRESIZEVEC (const char *, arches, nr + 2);
-    arches[nr + 0] = "auto";
-    arches[nr + 1] = NULL;
+    arches.push_back ("auto");
+    arches.push_back (nullptr);
     set_show_commands architecture_cmds
       = add_setshow_enum_cmd ("architecture", class_support,
-			      arches, &set_architecture_string,
+			      arches.data (), &set_architecture_string,
 			      _("Set architecture of target."),
 			      _("Show architecture of target."), NULL,
 			      set_architecture, show_architecture,

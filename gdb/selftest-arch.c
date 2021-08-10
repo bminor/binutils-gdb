@@ -36,23 +36,23 @@ struct gdbarch_selftest : public selftest
 
   void operator() () const override
   {
-    const char **arches = gdbarch_printable_names ();
+    std::vector<const char *> arches = gdbarch_printable_names ();
     bool pass = true;
 
-    for (int i = 0; arches[i] != NULL; i++)
+    for (const char *arch : arches)
       {
-	if (strcmp ("fr300", arches[i]) == 0)
+	if (strcmp ("fr300", arch) == 0)
 	  {
 	    /* PR 20946 */
 	    continue;
 	  }
-	else if (strcmp ("powerpc:EC603e", arches[i]) == 0
-		 || strcmp ("powerpc:e500mc", arches[i]) == 0
-		 || strcmp ("powerpc:e500mc64", arches[i]) == 0
-		 || strcmp ("powerpc:titan", arches[i]) == 0
-		 || strcmp ("powerpc:vle", arches[i]) == 0
-		 || strcmp ("powerpc:e5500", arches[i]) == 0
-		 || strcmp ("powerpc:e6500", arches[i]) == 0)
+	else if (strcmp ("powerpc:EC603e", arch) == 0
+		 || strcmp ("powerpc:e500mc", arch) == 0
+		 || strcmp ("powerpc:e500mc64", arch) == 0
+		 || strcmp ("powerpc:titan", arch) == 0
+		 || strcmp ("powerpc:vle", arch) == 0
+		 || strcmp ("powerpc:e5500", arch) == 0
+		 || strcmp ("powerpc:e6500", arch) == 0)
 	  {
 	    /* PR 19797 */
 	    continue;
@@ -64,7 +64,7 @@ struct gdbarch_selftest : public selftest
 	  {
 	    struct gdbarch_info info;
 
-	    info.bfd_arch_info = bfd_scan_arch (arches[i]);
+	    info.bfd_arch_info = bfd_scan_arch (arch);
 
 	    struct gdbarch *gdbarch = gdbarch_find_by_info (info);
 	    SELF_CHECK (gdbarch != NULL);
@@ -75,7 +75,7 @@ struct gdbarch_selftest : public selftest
 	  {
 	    pass = false;
 	    exception_fprintf (gdb_stderr, ex,
-			       _("Self test failed: arch %s: "), arches[i]);
+			       _("Self test failed: arch %s: "), arch);
 	  }
 
 	reset ();
