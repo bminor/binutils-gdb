@@ -27,6 +27,7 @@ extern FLONUM_TYPE generic_floating_point_number;
 /* Don't count the gap in the m68k extended precision format.  */
 #define MAX_PRECISION  5
 #define H_PRECISION    1
+#define B_PRECISION    1 /* Not strictly IEEE, but handled here anyway.  */
 #define F_PRECISION    2
 #define D_PRECISION    4
 #define X_PRECISION    5
@@ -243,6 +244,12 @@ atof_ieee (char *str,			/* Text to convert to binary.  */
       exponent_bits = 5;
       break;
 
+    case 'b':
+    case 'B':
+      precision = B_PRECISION;
+      exponent_bits = 8;
+      break;
+
     case 'f':
     case 'F':
     case 's':
@@ -368,9 +375,9 @@ gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
 	as_warn (_("Infinities are not supported by this target"));
 
       /* +INF:  Do the right thing.  */
-      if (precision == H_PRECISION)
+      if (precision == H_PRECISION /* also B_PRECISION */)
 	{
-	  words[0] = 0x7c00;
+	  words[0] = exponent_bits == 5 ? 0x7c00 : 0x7f80;
 	}
       else if (precision == F_PRECISION)
 	{
@@ -413,9 +420,9 @@ gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
 	as_warn (_("Infinities are not supported by this target"));
 
       /* Negative INF.  */
-      if (precision == H_PRECISION)
+      if (precision == H_PRECISION /* also B_PRECISION */)
 	{
-	  words[0] = 0xfc00;
+	  words[0] = exponent_bits == 5 ? 0xfc00 : 0xff80;
 	}
       else if (precision == F_PRECISION)
 	{
@@ -775,6 +782,11 @@ ieee_md_atof (int type,
 	case 'H':
 	case 'h':
 	  prec = H_PRECISION;
+	  break;
+
+	case 'B':
+	case 'b':
+	  prec = B_PRECISION;
 	  break;
 
 	case 'f':

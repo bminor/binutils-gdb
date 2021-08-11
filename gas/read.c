@@ -4852,6 +4852,8 @@ hex_float (int float_type, char *bytes)
 
   switch (float_type)
     {
+    case 'b':
+    case 'B':
     case 'h':
     case 'H':
       length = 2;

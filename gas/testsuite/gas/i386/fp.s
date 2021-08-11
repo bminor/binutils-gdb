@@ -31,4 +31,5 @@
 	.p2align 4,0xaa
 
 	.hfloat 1, -2, 0x:3c00
+	.bfloat16 1, -2, 0x:3f80
 	.p2align 4,0x55
