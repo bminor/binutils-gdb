@@ -387,6 +387,7 @@ gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
       return return_value;
 
     case 'P':
+    case 'N':
       if (TC_LARGEST_EXPONENT_IS_NORMAL (precision))
 	as_warn (_("Infinities are not supported by this target"));
 
@@ -428,50 +429,10 @@ gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
 	  words[2] = 0;
 	  words[3] = 0;
 	}
-      return return_value;
 
-    case 'N':
-      if (TC_LARGEST_EXPONENT_IS_NORMAL (precision))
-	as_warn (_("Infinities are not supported by this target"));
+      if (generic_floating_point_number.sign == 'N')
+	words[0] |= 0x8000;
 
-      /* Negative INF.  */
-      if (precision == H_PRECISION /* also B_PRECISION */)
-	{
-	  words[0] = exponent_bits == 5 ? 0xfc00 : 0xff80;
-	}
-      else if (precision == F_PRECISION)
-	{
-	  words[0] = 0xff80;
-	  words[1] = 0x0;
-	}
-      else if (precision == X_PRECISION)
-	{
-#ifdef TC_M68K
-	  words[0] = 0xffff;
-	  words[1] = 0;
-	  words[2] = 0;
-	  words[3] = 0;
-	  words[4] = 0;
-	  words[5] = 0;
-#else /* ! TC_M68K  */
-#ifdef TC_I386
-	  words[0] = 0xffff;
-	  words[1] = 0x8000;
-	  words[2] = 0;
-	  words[3] = 0;
-	  words[4] = 0;
-#else /* ! TC_I386  */
-	  abort ();
-#endif /* ! TC_I386  */
-#endif /* ! TC_M68K  */
-	}
-      else
-	{
-	  words[0] = 0xfff0;
-	  words[1] = 0x0;
-	  words[2] = 0x0;
-	  words[3] = 0x0;
-	}
       return return_value;
     }
 
