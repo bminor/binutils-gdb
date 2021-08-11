@@ -1,3 +1,12 @@
+2021-08-11  Matt Jacobson  <mhjacobson@me.com>
+
+	* config/tc-avr.c (enum options): Add option flag.
+	(struct option): Add option -mno-dollar-line-separator.
+	(md_parse_option): Adjust treatment of $ when option is present.
+	(usage): Mention the new option.
+	* config/tc-avr.h: Use avr_line_separator_chars.
+	* doc/c-avr.texi: Document the new option.
+
 2021-08-11  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-tic4x.c (tic4x_gen_to_words): Fix typo.

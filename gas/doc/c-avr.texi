@@ -159,6 +159,12 @@ information.
 @item -mgcc-isr
 Enable the @code{__gcc_isr} pseudo instruction.
 
+@cindex @code{-mno-dollar-line-separator} command line option, AVR
+@item -mno-dollar-line-separator
+Do not treat the @code{$} character as a line separator character.
+This is for languages where @code{$} is valid character inside symbol
+names.
+
 @end table
 
 
@@ -189,7 +195,8 @@ control command (@pxref{Preprocessing}).
 @cindex AVR line separator
 
 The @samp{$} character can be used instead of a newline to separate
-statements.
+statements.  Note: the @option{-mno-dollar-line-separator} option
+disables this behaviour.
 
 @node AVR-Regs
 @subsection Register Names

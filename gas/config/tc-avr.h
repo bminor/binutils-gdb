@@ -143,7 +143,7 @@ extern int avr_force_relocation (struct fix *);
    would print `12 34 56 78'.  The default value is 4.  */
 #define LISTING_WORD_SIZE 2
 
-/* AVR port uses `$' as a logical line separator.  */
+/* AVR port uses `$' as a logical line separator by default. */
 #define LEX_DOLLAR 0
 
 /* An `.lcomm' directive with no explicit alignment parameter will
@@ -244,3 +244,6 @@ struct avr_frag_data
 #define TC_FRAG_TYPE			struct avr_frag_data
 #define TC_FRAG_INIT(frag, max_bytes)	avr_frag_init (frag)
 extern void avr_frag_init (fragS *);
+
+#define tc_line_separator_chars avr_line_separator_chars
+extern const char *avr_line_separator_chars;
