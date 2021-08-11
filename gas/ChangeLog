@@ -1,3 +1,9 @@
+2021-08-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 28215
+	* config/tc-csky.c (md_apply_fix): Correctly handle a fixup that
+	involves an overlarge constant.
+
 2021-08-11  Matt Jacobson  <mhjacobson@me.com>
 
 	* config/tc-avr.c (enum options): Add option flag.
