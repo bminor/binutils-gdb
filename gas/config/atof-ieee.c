@@ -19,6 +19,7 @@
    02110-1301, USA.  */
 
 #include "as.h"
+#include "safe-ctype.h"
 
 /* Flonums returned here.  */
 extern FLONUM_TYPE generic_floating_point_number;
@@ -324,24 +325,34 @@ gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
       return return_value;
     }
 
-  /* NaN:  Do the right thing.  */
-  if (generic_floating_point_number.sign == 0)
+  switch (generic_floating_point_number.sign)
     {
+    /* NaN:  Do the right thing.  */
+    case 0:
+    case 'Q': case 'q':
+    case 'S': case 's':
       if (TC_LARGEST_EXPONENT_IS_NORMAL (precision))
 	as_warn (_("NaNs are not supported by this target"));
 
       if (precision == H_PRECISION)
 	{
-	  words[0] = 0x7fff;
+	  if (TOUPPER (generic_floating_point_number.sign) != 'S')
+	    words[0] = 0x7fff;
+	  else
+	    words[0] = exponent_bits == 5 ? 0x7dff : 0x7fbf;
 	}
       else if (precision == F_PRECISION)
 	{
-	  words[0] = 0x7fff;
+	  words[0] = TOUPPER (generic_floating_point_number.sign) == 'S'
+	             ? 0x7fbf : 0x7fff;
 	  words[1] = 0xffff;
 	}
       else if (precision == X_PRECISION)
 	{
 #ifdef TC_M68K
+	  if (generic_floating_point_number.sign)
+	    as_warn (_("NaN flavors are not supported by this target"));
+
 	  words[0] = 0x7fff;
 	  words[1] = 0;
 	  words[2] = 0xffff;
@@ -350,11 +361,12 @@ gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
 	  words[5] = 0xffff;
 #else /* ! TC_M68K  */
 #ifdef TC_I386
-	  words[0] = 0xffff;
-	  words[1] = 0xc000;
-	  words[2] = 0;
-	  words[3] = 0;
-	  words[4] = 0;
+	  words[0] = 0x7fff;
+	  words[1] = TOUPPER (generic_floating_point_number.sign) == 'S'
+		     ? 0xbfff : 0xffff;
+	  words[2] = 0xffff;
+	  words[3] = 0xffff;
+	  words[4] = 0xffff;
 #else /* ! TC_I386  */
 	  abort ();
 #endif /* ! TC_I386  */
@@ -362,15 +374,19 @@ gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
 	}
       else
 	{
-	  words[0] = 0x7fff;
+	  words[0] = TOUPPER (generic_floating_point_number.sign) == 'S'
+	             ? 0x7ff7 : 0x7fff;
 	  words[1] = 0xffff;
 	  words[2] = 0xffff;
 	  words[3] = 0xffff;
 	}
+
+      if (ISLOWER (generic_floating_point_number.sign))
+	words[0] |= 0x8000;
+
       return return_value;
-    }
-  else if (generic_floating_point_number.sign == 'P')
-    {
+
+    case 'P':
       if (TC_LARGEST_EXPONENT_IS_NORMAL (precision))
 	as_warn (_("Infinities are not supported by this target"));
 
@@ -413,9 +429,8 @@ gen_to_words (LITTLENUM_TYPE *words, int precision, long exponent_bits)
 	  words[3] = 0;
 	}
       return return_value;
-    }
-  else if (generic_floating_point_number.sign == 'N')
-    {
+
+    case 'N':
       if (TC_LARGEST_EXPONENT_IS_NORMAL (precision))
 	as_warn (_("Infinities are not supported by this target"));
 

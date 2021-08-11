@@ -13,3 +13,27 @@ Contents of section .data:
  0060 00000000 00000080 fe3f0000 00000000  .*
  0070 0080fdbf 00000000 00000080 ff03aaaa  .*
  0080 003c00c0 003c803f 00c0803f 55555555  .*
+ 0090 007c807f 0000807f 00000000 0000f07f  .*
+ 00a0 00000000 00000080 ff7f4444 44444444  .*
+ 00b0 007c807f 0000807f 00000000 0000f07f  .*
+ 00c0 00000000 00000080 ff7f3333 33333333  .*
+ 00d0 00fc80ff 000080ff 00000000 0000f0ff  .*
+ 00e0 00000000 00000080 ffff2222 22222222  .*
+ 00f0 ff7fff7f ffffff7f ffffffff ffffff7f  .*
+ 0100 ffffffff ffffffff ff7f4444 44444444  .*
+ 0110 ff7fff7f ffffff7f ffffffff ffffff7f  .*
+ 0120 ffffffff ffffffff ff7f3333 33333333  .*
+ 0130 ffffffff ffffffff ffffffff ffffffff  .*
+ 0140 ffffffff ffffffff ffff2222 22222222  .*
+ 0150 ff7fff7f ffffff7f ffffffff ffffff7f  .*
+ 0160 ffffffff ffffffff ff7f4444 44444444  .*
+ 0170 ff7fff7f ffffff7f ffffffff ffffff7f  .*
+ 0180 ffffffff ffffffff ff7f3333 33333333  .*
+ 0190 ffffffff ffffffff ffffffff ffffffff  .*
+ 01a0 ffffffff ffffffff ffff2222 22222222  .*
+ 01b0 ff7dbf7f ffffbf7f ffffffff fffff77f  .*
+ 01c0 ffffffff ffffffbf ff7f4444 44444444  .*
+ 01d0 ff7dbf7f ffffbf7f ffffffff fffff77f  .*
+ 01e0 ffffffff ffffffbf ff7f3333 33333333  .*
+ 01f0 fffdbfff ffffbfff ffffffff fffff7ff  .*
+ 0200 ffffffff ffffffbf ffff2222 22222222  .*

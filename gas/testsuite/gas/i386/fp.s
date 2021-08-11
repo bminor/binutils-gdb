@@ -33,3 +33,87 @@
 	.hfloat 1, -2, 0x:3c00
 	.bfloat16 1, -2, 0x:3f80
 	.p2align 4,0x55
+
+	.hfloat Inf
+	.bfloat16 Inf
+	.single Inf
+	.double Inf
+	.tfloat Inf
+	.p2align 4,0x44
+
+	.hfloat +Inf
+	.bfloat16 +Inf
+	.single +Inf
+	.double +Inf
+	.tfloat +Inf
+	.p2align 4,0x33
+
+	.hfloat -Inf
+	.bfloat16 -Inf
+	.single -Inf
+	.double -Inf
+	.tfloat -Inf
+	.p2align 4,0x22
+
+	.hfloat NaN
+	.bfloat16 NaN
+	.single NaN
+	.double NaN
+	.tfloat NaN
+	.p2align 4,0x44
+
+	.hfloat +NaN
+	.bfloat16 +NaN
+	.single +NaN
+	.double +NaN
+	.tfloat +NaN
+	.p2align 4,0x33
+
+	.hfloat -NaN
+	.bfloat16 -NaN
+	.single -NaN
+	.double -NaN
+	.tfloat -NaN
+	.p2align 4,0x22
+
+	.hfloat QNaN
+	.bfloat16 QNaN
+	.single QNaN
+	.double QNaN
+	.tfloat QNaN
+	.p2align 4,0x44
+
+	.hfloat +QNaN
+	.bfloat16 +QNaN
+	.single +QNaN
+	.double +QNaN
+	.tfloat +QNaN
+	.p2align 4,0x33
+
+	.hfloat -QNaN
+	.bfloat16 -QNaN
+	.single -QNaN
+	.double -QNaN
+	.tfloat -QNaN
+	.p2align 4,0x22
+
+	.hfloat SNaN
+	.bfloat16 SNaN
+	.single SNaN
+	.double SNaN
+	.tfloat SNaN
+	.p2align 4,0x44
+
+	.hfloat +SNaN
+	.bfloat16 +SNaN
+	.single +SNaN
+	.double +SNaN
+	.tfloat +SNaN
+	.p2align 4,0x33
+
+	.hfloat -SNaN
+	.bfloat16 -SNaN
+	.single -SNaN
+	.double -SNaN
+	.tfloat -SNaN
+	.p2align 4,0x22

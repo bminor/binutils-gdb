@@ -7,6 +7,10 @@ foo:	.single	0r1.2345e+06
 
 	.dc.s 1
 	.dc.s 0f:1234
+	.dc.s Inf
+	.dc.s NaN
+	.dc.s QNaN
+	.dc.s SNaN
 	.dcb.s 1
 	.dcb.s 1, 1
 	.dcb.s 1, 0s:4321
@@ -14,6 +18,10 @@ foo:	.single	0r1.2345e+06
 
 	.dc.d 1
 	.dc.d 0d:1234
+	.dc.d +Inf
+	.dc.d -NaN
+	.dc.d +QNaN
+	.dc.d -SNaN
 	.dcb.d 1
 	.dcb.d 1, 1
 	.dcb.d 1, 0r:4321
