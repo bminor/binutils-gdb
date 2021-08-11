@@ -54,7 +54,12 @@ proc is_elf_format {} {
 	 && ![istarget *-*-wasm32*]
 	 && ![istarget avr-*-*]
 	 && ![istarget hppa*64*-*-hpux*]
+	 && ![istarget i?86-*-beos*]
 	 && ![istarget ia64-*-hpux*] } {
+	return 0
+    }
+
+    if { [istarget i?86-*-beospe*] } {
 	return 0
     }
 
