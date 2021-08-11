@@ -4847,7 +4847,7 @@ parse_repeat_cons (expressionS *exp, unsigned int nbytes)
 static int
 hex_float (int float_type, char *bytes)
 {
-  int length;
+  int length, pad = 0;
   int i;
 
   switch (float_type)
@@ -4868,12 +4868,22 @@ hex_float (int float_type, char *bytes)
 
     case 'x':
     case 'X':
-      length = 12;
+#ifdef X_PRECISION
+      length = X_PRECISION * sizeof (LITTLENUM_TYPE);
+      pad = X_PRECISION_PAD * sizeof (LITTLENUM_TYPE);
+      if (!length)
+#endif
+	length = 12;
       break;
 
     case 'p':
     case 'P':
-      length = 12;
+#ifdef P_PRECISION
+      length = P_PRECISION * sizeof (LITTLENUM_TYPE);
+      pad = P_PRECISION_PAD * sizeof (LITTLENUM_TYPE);
+      if (!length)
+#endif
+	length = 12;
       break;
 
     default:
@@ -4926,7 +4936,9 @@ hex_float (int float_type, char *bytes)
 	memset (bytes, 0, length - i);
     }
 
-  return length;
+  memset (bytes + length, 0, pad);
+
+  return length + pad;
 }
 
 /*			float_cons()

@@ -24,3 +24,8 @@
 
 	.ds.x 1, -1
 	.p2align 4,0xcc
+
+	.tfloat 0x:3ffe80
+	.dc.x 0x:bffd80
+	.dcb.x 1, 0x:03ff80
+	.p2align 4,0xaa
