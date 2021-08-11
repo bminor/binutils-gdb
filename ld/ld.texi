@@ -6286,9 +6286,11 @@ expect when you upgrade.
 @cindex expressions
 @cindex arithmetic
 The syntax for expressions in the linker script language is identical to
-that of C expressions.  All expressions are evaluated as integers.  All
-expressions are evaluated in the same size, which is 32 bits if both the
-host and target are 32 bits, and is otherwise 64 bits.
+that of C expressions, except that whitespace is required in some
+places to resolve syntactic ambiguities.  All expressions are
+evaluated as integers.  All expressions are evaluated in the same
+size, which is 32 bits if both the host and target are 32 bits, and is
+otherwise 64 bits.
 
 You can use and set symbol values in expressions.
 
