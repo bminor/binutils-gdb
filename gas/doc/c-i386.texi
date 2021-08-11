@@ -1313,18 +1313,21 @@ data type.  Constructors build these data types into memory.
 @cindex @code{single} directive, i386
 @cindex @code{double} directive, i386
 @cindex @code{tfloat} directive, i386
+@cindex @code{hfloat} directive, i386
 @cindex @code{float} directive, x86-64
 @cindex @code{single} directive, x86-64
 @cindex @code{double} directive, x86-64
 @cindex @code{tfloat} directive, x86-64
+@cindex @code{hfloat} directive, x86-64
 @itemize @bullet
 @item
 Floating point constructors are @samp{.float} or @samp{.single},
-@samp{.double}, and @samp{.tfloat} for 32-, 64-, and 80-bit formats.
-These correspond to instruction mnemonic suffixes @samp{s}, @samp{l},
-and @samp{t}. @samp{t} stands for 80-bit (ten byte) real.  The 80387
-only supports this format via the @samp{fldt} (load 80-bit real to stack
-top) and @samp{fstpt} (store 80-bit real and pop stack) instructions.
+@samp{.double}, @samp{.tfloat}, and @samp{.hfloat} for 32-, 64-, 80-, and
+16-bit formats respectively. The former three correspond to instruction
+mnemonic suffixes @samp{s}, @samp{l}, and @samp{t}. @samp{t} stands for
+80-bit (ten byte) real.  The 80387 only supports this format via the
+@samp{fldt} (load 80-bit real to stack top) and @samp{fstpt} (store 80-bit
+real and pop stack) instructions.
 
 @cindex @code{word} directive, i386
 @cindex @code{long} directive, i386

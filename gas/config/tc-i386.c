@@ -512,7 +512,7 @@ const char EXP_CHARS[] = "eE";
 /* Chars that mean this number is a floating point constant
    As in 0f12.456
    or    0d1.2345e12.  */
-const char FLT_CHARS[] = "fFdDxX";
+const char FLT_CHARS[] = "fFdDxXhH";
 
 /* Tables for lexical analysis.  */
 static char mnemonic_chars[256];
@@ -1356,6 +1356,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"ffloat", float_cons, 'f'},
   {"dfloat", float_cons, 'd'},
   {"tfloat", float_cons, 'x'},
+  {"hfloat", float_cons, 'h'},
   {"value", cons, 2},
   {"slong", signed_cons, 4},
   {"noopt", s_ignore, 0},

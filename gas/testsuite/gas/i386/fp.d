@@ -12,3 +12,4 @@ Contents of section .data:
  0050 ffffffff ffffffff ffffcccc cccccccc  .*
  0060 00000000 00000080 fe3f0000 00000000  .*
  0070 0080fdbf 00000000 00000080 ff03aaaa  .*
+ 0080 003c00c0 003c5555 55555555 55555555  .*

@@ -29,3 +29,6 @@
 	.dc.x 0x:bffd80
 	.dcb.x 1, 0x:03ff80
 	.p2align 4,0xaa
+
+	.hfloat 1, -2, 0x:3c00
+	.p2align 4,0x55
