@@ -523,7 +523,7 @@ const char EXP_CHARS[] = "eE";
 /* As in 0f12.456  */
 /* or	 0d1.2345e12  */
 
-const char FLT_CHARS[] = "rRsSfFdDxXeEpPhH";
+const char FLT_CHARS[] = "rRsSfFdDxXeEpPhHb";
 
 /* Prefix character that indicates the start of an immediate value.  */
 #define is_immediate_prefix(C) ((C) == '#')
@@ -643,54 +643,6 @@ aarch64_get_expression (expressionS *  ep,
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  /* If this is a bfloat16 type, then parse it slightly differently -
-     as it does not follow the IEEE standard exactly.  */
-  if (type == 'b')
-    {
-      char * t;
-      LITTLENUM_TYPE words[MAX_LITTLENUMS];
-      FLONUM_TYPE generic_float;
-
-      t = atof_ieee_detail (input_line_pointer, 1, 8, words, &generic_float);
-
-      if (t)
-	input_line_pointer = t;
-      else
-	return _("invalid floating point number");
-
-      switch (generic_float.sign)
-	{
-	/* Is +Inf.  */
-	case 'P':
-	  words[0] = 0x7f80;
-	  break;
-
-	/* Is -Inf.  */
-	case 'N':
-	  words[0] = 0xff80;
-	  break;
-
-	/* Is NaN.  */
-	/* bfloat16 has two types of NaN - quiet and signalling.
-	   Quiet NaN has bit[6] == 1 && faction != 0, whereas
-	   signalling Nan's have bit[0] == 0 && fraction != 0.
-	   Chose this specific encoding as it is the same form
-	   as used by other IEEE 754 encodings in GAS.  */
-	case 0:
-	  words[0] = 0x7fff;
-	  break;
-
-	default:
-	  break;
-	}
-
-      *sizeP = 2;
-
-      md_number_to_chars (litP, (valueT) words[0], sizeof (LITTLENUM_TYPE));
-
-      return NULL;
-    }
-
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
 }
 
