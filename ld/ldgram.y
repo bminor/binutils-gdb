@@ -422,7 +422,7 @@ sec_or_group_p1:
 statement_anywhere:
 		ENTRY '(' NAME ')'
 		{ lang_add_entry ($3, false); }
-	|	assignment end
+	|	assignment separator
 	|	ASSERT_K  {ldlex_expression ();} '(' exp ',' NAME ')'
 		{ ldlex_popstate ();
 		  lang_add_assignment (exp_assert ($4, $6)); }
@@ -663,16 +663,15 @@ input_section_spec:
 	;
 
 statement:
-		assignment end
-	|	CREATE_OBJECT_SYMBOLS
+	';'
+	| assignment separator
+	| CREATE_OBJECT_SYMBOLS
 		{
-		lang_add_attribute(lang_object_symbols_statement_enum);
+		  lang_add_attribute (lang_object_symbols_statement_enum);
 		}
-	|	';'
-	|	CONSTRUCTORS
+	| CONSTRUCTORS
 		{
-
-		  lang_add_attribute(lang_constructors_statement_enum);
+		  lang_add_attribute (lang_constructors_statement_enum);
 		}
 	| SORT_BY_NAME '(' CONSTRUCTORS ')'
 		{
@@ -689,12 +688,19 @@ statement:
 		{
 		  lang_add_fill ($3);
 		}
-	| ASSERT_K  {ldlex_expression ();} '(' exp ',' NAME ')' end
-			{ ldlex_popstate ();
-			  lang_add_assignment (exp_assert ($4, $6)); }
+	| ASSERT_K
+		{ ldlex_expression (); }
+	  '(' exp ',' NAME ')' separator
+		{
+		  ldlex_popstate ();
+		  lang_add_assignment (exp_assert ($4, $6));
+		}
 	| INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
-		statement_list_opt END
+		{
+		  ldlex_script ();
+		  ldfile_open_command_file ($2);
+		}
+	  statement_list_opt END
 		{ ldlex_popstate (); }
 	;
 
@@ -754,7 +760,7 @@ assign_op:
 
 	;
 
-end:	';' | ','
+separator:	';' | ','
 	;
 
 
@@ -905,13 +911,13 @@ nocrossref_list:
 		}
 	;
 
-paren_script_name:
-		{ ldlex_script (); } '(' NAME  { ldlex_popstate (); } ')'
-			{ $$ = $3; }
+paren_script_name:	{ ldlex_script (); }
+		'(' NAME ')'
+			{ ldlex_popstate (); $$ = $3; }
 
-mustbe_exp:		 { ldlex_expression (); }
+mustbe_exp:		{ ldlex_expression (); }
 		exp
-			 { ldlex_popstate (); $$=$2;}
+			{ ldlex_popstate (); $$ = $2; }
 	;
 
 exp	:
@@ -1056,31 +1062,35 @@ sect_constraint:
 	|	{ $$ = 0; }
 	;
 
-section:	NAME		{ ldlex_expression(); }
+section:	NAME
+			{ ldlex_expression(); }
 		opt_exp_with_type
 		opt_at
 		opt_align
 		opt_align_with_input
-		opt_subalign	{ ldlex_popstate (); ldlex_script (); }
+		opt_subalign
+			{ ldlex_popstate (); ldlex_script (); }
 		sect_constraint
 		'{'
 			{
-			  lang_enter_output_section_statement($1, $3,
-							      sectype,
-							      $5, $7, $4, $9, $6);
+			  lang_enter_output_section_statement($1, $3, sectype,
+							      $5, $7, $4,
+							      $9, $6);
 			}
 		statement_list_opt
-		'}' { ldlex_popstate (); ldlex_expression (); }
+		'}'
+			{ ldlex_popstate (); ldlex_expression (); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
-		{
-		  if (yychar == NAME)
-		    {
-		      yyclearin;
-		      ldlex_backup ();
-		    }
-		  ldlex_popstate ();
-		  lang_leave_output_section_statement ($18, $15, $17, $16);
-		}
+			{
+			  if (yychar == NAME)
+			    {
+			      yyclearin;
+			      ldlex_backup ();
+			    }
+			  ldlex_popstate ();
+			  lang_leave_output_section_statement ($18, $15,
+							       $17, $16);
+			}
 		opt_comma
 	|	OVERLAY
 			{ ldlex_expression (); }
@@ -1109,17 +1119,21 @@ section:	NAME		{ ldlex_expression(); }
 		   svr3.ifile script.  It is not intended to be full
 		   support.  I'm not even sure what GROUP is supposed
 		   to mean.  */
-		GROUP { ldlex_expression (); }
+		GROUP
+			{ ldlex_expression (); }
 		opt_exp_with_type
-		{
-		  ldlex_popstate ();
-		  lang_add_assignment (exp_assign (".", $3, false));
-		}
+			{
+			  ldlex_popstate ();
+			  lang_add_assignment (exp_assign (".", $3, false));
+			}
 		'{' sec_or_group_p1 '}'
 	|	INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
+			{
+			  ldlex_script ();
+			  ldfile_open_command_file ($2);
+			}
 		sec_or_group_p1 END
-		{ ldlex_popstate (); }
+			{ ldlex_popstate (); }
 	;
 
 type:
