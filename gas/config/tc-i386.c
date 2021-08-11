@@ -10229,6 +10229,19 @@ x86_cons_fix_new (fragS *frag, unsigned int off, unsigned int len,
   fix_new_exp (frag, off, len, exp, 0, r);
 }
 
+/* Return the number of padding LITTLENUMs following a tbyte floating
+   point value.  */
+
+int
+x86_tfloat_pad (void)
+{
+#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
+   if (IS_ELF)
+     return object_64bit ? 3 : 1;
+#endif
+   return 0;
+}
+
 /* Export the ABI address size for use by TC_ADDRESS_BYTES for the
    purpose of the `.dc.a' internal pseudo-op.  */
 

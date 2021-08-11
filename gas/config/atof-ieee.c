@@ -30,7 +30,13 @@ extern FLONUM_TYPE generic_floating_point_number;
 #define F_PRECISION    2
 #define D_PRECISION    4
 #define X_PRECISION    5
+#ifndef X_PRECISION_PAD
+#define X_PRECISION_PAD 0
+#endif
 #define P_PRECISION    5
+#ifndef P_PRECISION_PAD
+#define P_PRECISION_PAD X_PRECISION_PAD
+#endif
 
 /* Length in LittleNums of guard bits.  */
 #define GUARD          2
@@ -760,7 +766,7 @@ ieee_md_atof (int type,
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   LITTLENUM_TYPE *wordP;
   char *t;
-  int prec = 0;
+  int prec = 0, pad = 0;
 
   if (strchr (FLT_CHARS, type) != NULL)
     {
@@ -788,6 +794,7 @@ ieee_md_atof (int type,
 	case 't':
 	case 'T':
 	  prec = X_PRECISION;
+	  pad = X_PRECISION_PAD;
 	  type = 'x';		/* This is what atof_ieee() understands.  */
 	  break;
 
@@ -803,6 +810,7 @@ ieee_md_atof (int type,
 #else
 	  prec = P_PRECISION;
 #endif
+	  pad = P_PRECISION_PAD;
 	  break;
 
 	default:
@@ -835,7 +843,7 @@ ieee_md_atof (int type,
   if (t)
     input_line_pointer = t;
 
-  *sizeP = prec * sizeof (LITTLENUM_TYPE);
+  *sizeP = (prec + pad) * sizeof (LITTLENUM_TYPE);
 
   if (big_wordian)
     {
@@ -853,6 +861,9 @@ ieee_md_atof (int type,
 	  litP += sizeof (LITTLENUM_TYPE);
 	}
     }
+
+  memset (litP, 0, pad * sizeof (LITTLENUM_TYPE));
+  litP += pad * sizeof (LITTLENUM_TYPE);
 
   return NULL;
 }
