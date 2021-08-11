@@ -1316,7 +1316,7 @@ token_table[] =
 
   { "DPSW", DCREG, 0 },
   { "DCMR", DCREG, 1 },
-  { "DCENT", DCREG, 2 },
+  { "DECNT", DCREG, 2 },
   { "DEPC", DCREG, 3 },
   { "DCR0", DCREG, 0 },
   { "DCR1", DCREG, 1 },

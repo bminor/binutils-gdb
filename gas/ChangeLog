@@ -1,3 +1,10 @@
+2021-08-11  Darius Galis  <darius.galis@cyberthorstudios.com>
+
+	* config/rx-parse.y (DECNT): Fixed typo.
+	* testsuite/gas/rx/dpopm.sm (DECNT): Fixed typo.
+	* testsuite/gas/rx/dpushm.sm (DECNT): Fixed typo.
+	* testsuite/gas/rx/macros.inc (DECNT): Fixed typo.
+
 2021-08-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 28215

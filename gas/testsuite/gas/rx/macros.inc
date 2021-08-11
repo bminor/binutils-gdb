@@ -9,7 +9,7 @@ macro	pswf	{U;I;O;S;Z;C}
 macro	dreg	{dr0;dr15}
 macro	dregh	{drh0;drh15}
 macro	dregl	{drl0;drl15}
-macro	dcreg	{dpsw;dcmr;dcent;depc}
+macro	dcreg	{dpsw;dcmr;decnt;depc}
 macro	dregPlo	{dr1;dr7}
 macro	dregPhi	{dr8;dr14}
 
