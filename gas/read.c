@@ -3639,6 +3639,68 @@ s_nops (int ignore ATTRIBUTE_UNUSED)
   *p = val.X_add_number;
 }
 
+/* Obtain the size of a floating point number, given a type.  */
+
+static int
+float_length (int float_type, int *pad_p)
+{
+  int length, pad = 0;
+
+  switch (float_type)
+    {
+    case 'b':
+    case 'B':
+    case 'h':
+    case 'H':
+      length = 2;
+      break;
+
+    case 'f':
+    case 'F':
+    case 's':
+    case 'S':
+      length = 4;
+      break;
+
+    case 'd':
+    case 'D':
+    case 'r':
+    case 'R':
+      length = 8;
+      break;
+
+    case 'x':
+    case 'X':
+#ifdef X_PRECISION
+      length = X_PRECISION * sizeof (LITTLENUM_TYPE);
+      pad = X_PRECISION_PAD * sizeof (LITTLENUM_TYPE);
+      if (!length)
+#endif
+	length = 12;
+      break;
+
+    case 'p':
+    case 'P':
+#ifdef P_PRECISION
+      length = P_PRECISION * sizeof (LITTLENUM_TYPE);
+      pad = P_PRECISION_PAD * sizeof (LITTLENUM_TYPE);
+      if (!length)
+#endif
+	length = 12;
+      break;
+
+    default:
+      as_bad (_("unknown floating type '%c'"), float_type);
+      length = -1;
+      break;
+    }
+
+  if (pad_p)
+    *pad_p = pad;
+
+  return length;
+}
+
 static int
 parse_one_float (int float_type, char temp[MAXIMUM_NUMBER_OF_CHARS_FOR_FLOAT])
 {
@@ -3709,16 +3771,19 @@ s_float_space (int float_type)
   SKIP_WHITESPACE ();
   if (*input_line_pointer != ',')
     {
-      as_bad (_("missing value"));
-      ignore_rest_of_line ();
-      if (flag_mri)
-	mri_comment_end (stop, stopc);
-      return;
+      int pad;
+
+      flen = float_length (float_type, &pad);
+      if (flen >= 0)
+	memset (temp, 0, flen += pad);
+    }
+  else
+    {
+      ++input_line_pointer;
+
+      flen = parse_one_float (float_type, temp);
     }
 
-  ++input_line_pointer;
-
-  flen = parse_one_float (float_type, temp);
   if (flen < 0)
     {
       if (flag_mri)
@@ -4847,56 +4912,11 @@ parse_repeat_cons (expressionS *exp, unsigned int nbytes)
 static int
 hex_float (int float_type, char *bytes)
 {
-  int length, pad = 0;
+  int pad, length = float_length (float_type, &pad);
   int i;
 
-  switch (float_type)
-    {
-    case 'b':
-    case 'B':
-    case 'h':
-    case 'H':
-      length = 2;
-      break;
-
-    case 'f':
-    case 'F':
-    case 's':
-    case 'S':
-      length = 4;
-      break;
-
-    case 'd':
-    case 'D':
-    case 'r':
-    case 'R':
-      length = 8;
-      break;
-
-    case 'x':
-    case 'X':
-#ifdef X_PRECISION
-      length = X_PRECISION * sizeof (LITTLENUM_TYPE);
-      pad = X_PRECISION_PAD * sizeof (LITTLENUM_TYPE);
-      if (!length)
-#endif
-	length = 12;
-      break;
-
-    case 'p':
-    case 'P':
-#ifdef P_PRECISION
-      length = P_PRECISION * sizeof (LITTLENUM_TYPE);
-      pad = P_PRECISION_PAD * sizeof (LITTLENUM_TYPE);
-      if (!length)
-#endif
-	length = 12;
-      break;
-
-    default:
-      as_bad (_("unknown floating type type '%c'"), float_type);
-      return -1;
-    }
+  if (length < 0)
+    return length;
 
   /* It would be nice if we could go through expression to parse the
      hex constant, but if we get a bignum it's a pain to sort it into
