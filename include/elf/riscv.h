@@ -117,6 +117,12 @@ END_RELOC_NUMBERS (R_RISCV_max)
 /* The name of the global pointer symbol.  */
 #define RISCV_GP_SYMBOL "__global_pointer$"
 
+/* Processor specific dynamic array tags.  */
+#define DT_RISCV_VARIANT_CC (DT_LOPROC + 1)
+
+/* RISC-V specific values for st_other.  */
+#define STO_RISCV_VARIANT_CC 0x80
+
 /* Additional section types.  */
 #define SHT_RISCV_ATTRIBUTES 0x70000003 /* Section holds attributes.  */
 

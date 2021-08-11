@@ -2443,6 +2443,17 @@ get_solaris_dynamic_type (unsigned long type)
 }
 
 static const char *
+get_riscv_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case DT_RISCV_VARIANT_CC:	return "RISCV_VARIANT_CC";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_dynamic_type (Filedata * filedata, unsigned long type)
 {
   static char buff[64];
@@ -2566,6 +2577,9 @@ get_dynamic_type (Filedata * filedata, unsigned long type)
 	      break;
 	    case EM_ALTERA_NIOS2:
 	      result = get_nios2_dynamic_type (type);
+	      break;
+	    case EM_RISCV:
+	      result = get_riscv_dynamic_type (type);
 	      break;
 	    default:
 	      if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
@@ -12644,6 +12658,28 @@ get_ppc64_symbol_other (unsigned int other)
 }
 
 static const char *
+get_riscv_symbol_other (unsigned int other)
+{
+  static char buf[32];
+  buf[0] = 0;
+
+  if (other & STO_RISCV_VARIANT_CC)
+    {
+      strcat (buf, _(" VARIANT_CC"));
+      other &= ~STO_RISCV_VARIANT_CC;
+    }
+
+  if (other != 0)
+    snprintf (buf, sizeof buf, " %x", other);
+
+
+  if (buf[0] != 0)
+    return buf + 1;
+  else
+    return buf;
+}
+
+static const char *
 get_symbol_other (Filedata * filedata, unsigned int other)
 {
   const char * result = NULL;
@@ -12668,6 +12704,9 @@ get_symbol_other (Filedata * filedata, unsigned int other)
       break;
     case EM_PPC64:
       result = get_ppc64_symbol_other (other);
+      break;
+    case EM_RISCV:
+      result = get_riscv_symbol_other (other);
       break;
     default:
       result = NULL;

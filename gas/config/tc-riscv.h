@@ -152,4 +152,8 @@ extern void riscv_init_frag (struct frag *, int);
 #define obj_adjust_symtab() riscv_adjust_symtab ()
 extern void riscv_adjust_symtab (void);
 
+void riscv_elf_copy_symbol_attributes (symbolS *, symbolS *);
+#define OBJ_COPY_SYMBOL_ATTRIBUTES(DEST, SRC)  \
+  riscv_elf_copy_symbol_attributes (DEST, SRC)
+
 #endif /* TC_RISCV */

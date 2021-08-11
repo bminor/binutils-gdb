@@ -169,6 +169,9 @@ if [istarget "riscv*-*-*"] {
 
     run_dump_test "relro-relax-lui"
     run_dump_test "relro-relax-pcrel"
+    run_dump_test "variant_cc-now"
+    run_dump_test "variant_cc-shared"
+    run_dump_test "variant_cc-r"
     run_relax_twice_test
 
     set abis [list rv32gc ilp32 [riscv_choose_ilp32_emul] rv64gc lp64 [riscv_choose_lp64_emul]]
