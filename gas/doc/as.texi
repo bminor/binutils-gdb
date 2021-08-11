@@ -5125,13 +5125,13 @@ Emits 8-byte values.
 @item @samp{.l}
 Emits 4-byte values.
 @item @samp{.p}
-Emits 12-byte values.
+Emits values with size matching packed-decimal floating-point ones.
 @item @samp{.s}
 Emits 4-byte values.
 @item @samp{.w}
 Emits 2-byte values.
 @item @samp{.x}
-Emits 12-byte values.
+Emits values with size matching long double precision floating-point ones.
 @end table
 
 Note - unlike the @code{.dcb} directive the @samp{.d}, @samp{.s} and @samp{.x}

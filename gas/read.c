@@ -382,10 +382,10 @@ static const pseudo_typeS potable[] = {
   {"ds.b", s_space, 1},
   {"ds.d", s_space, 8},
   {"ds.l", s_space, 4},
-  {"ds.p", s_space, 12},
+  {"ds.p", s_space, 'p'},
   {"ds.s", s_space, 4},
   {"ds.w", s_space, 2},
-  {"ds.x", s_space, 12},
+  {"ds.x", s_space, 'x'},
   {"debug", s_ignore, 0},
 #ifdef S_SET_DESC
   {"desc", s_desc, 0},
@@ -3326,6 +3326,29 @@ s_space (int mult)
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
 #endif
+
+  switch (mult)
+    {
+    case 'x':
+#ifdef X_PRECISION
+# ifndef P_PRECISION
+#  define P_PRECISION     X_PRECISION
+#  define P_PRECISION_PAD X_PRECISION_PAD
+# endif
+      mult = (X_PRECISION + X_PRECISION_PAD) * sizeof (LITTLENUM_TYPE);
+      if (!mult)
+#endif
+	mult = 12;
+      break;
+
+    case 'p':
+#ifdef P_PRECISION
+      mult = (P_PRECISION + P_PRECISION_PAD) * sizeof (LITTLENUM_TYPE);
+      if (!mult)
+#endif
+	mult = 12;
+      break;
+    }
 
 #ifdef md_cons_align
   md_cons_align (1);
