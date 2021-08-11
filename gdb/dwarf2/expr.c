@@ -2338,7 +2338,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_push_object_address:
 	  /* Return the address of the object we are currently observing.  */
-	  if (this->m_addr_info == nullptr)
+	  if (this->m_addr_info == nullptr
+	      || (this->m_addr_info->valaddr.data () == nullptr
+		  && this->m_addr_info->addr == 0))
 	    error (_("Location address is not set."));
 
 	  result_val
