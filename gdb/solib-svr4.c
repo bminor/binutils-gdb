@@ -582,109 +582,6 @@ find_program_interpreter (void)
 }
 
 
-/* Scan for DESIRED_DYNTAG in .dynamic section of ABFD.  If DESIRED_DYNTAG is
-   found, 1 is returned and the corresponding PTR is set.  */
-
-static int
-scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
-	     CORE_ADDR *ptr_addr)
-{
-  int arch_size, step, sect_size;
-  long current_dyntag;
-  CORE_ADDR dyn_ptr, dyn_addr;
-  gdb_byte *bufend, *bufstart, *buf;
-  Elf32_External_Dyn *x_dynp_32;
-  Elf64_External_Dyn *x_dynp_64;
-  struct bfd_section *sect;
-
-  if (abfd == NULL)
-    return 0;
-
-  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
-    return 0;
-
-  arch_size = bfd_get_arch_size (abfd);
-  if (arch_size == -1)
-    return 0;
-
-  /* Find the start address of the .dynamic section.  */
-  sect = bfd_get_section_by_name (abfd, ".dynamic");
-  if (sect == NULL)
-    return 0;
-
-  bool found = false;
-  for (const target_section &target_section
-	 : current_program_space->target_sections ())
-    if (sect == target_section.the_bfd_section)
-      {
-	dyn_addr = target_section.addr;
-	found = true;
-	break;
-      }
-  if (!found)
-    {
-      /* ABFD may come from OBJFILE acting only as a symbol file without being
-	 loaded into the target (see add_symbol_file_command).  This case is
-	 such fallback to the file VMA address without the possibility of
-	 having the section relocated to its actual in-memory address.  */
-
-      dyn_addr = bfd_section_vma (sect);
-    }
-
-  /* Read in .dynamic from the BFD.  We will get the actual value
-     from memory later.  */
-  sect_size = bfd_section_size (sect);
-  buf = bufstart = (gdb_byte *) alloca (sect_size);
-  if (!bfd_get_section_contents (abfd, sect,
-				 buf, 0, sect_size))
-    return 0;
-
-  /* Iterate over BUF and scan for DYNTAG.  If found, set PTR and return.  */
-  step = (arch_size == 32) ? sizeof (Elf32_External_Dyn)
-			   : sizeof (Elf64_External_Dyn);
-  for (bufend = buf + sect_size;
-       buf < bufend;
-       buf += step)
-  {
-    if (arch_size == 32)
-      {
-	x_dynp_32 = (Elf32_External_Dyn *) buf;
-	current_dyntag = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp_32->d_tag);
-	dyn_ptr = bfd_h_get_32 (abfd, (bfd_byte *) x_dynp_32->d_un.d_ptr);
-      }
-    else
-      {
-	x_dynp_64 = (Elf64_External_Dyn *) buf;
-	current_dyntag = bfd_h_get_64 (abfd, (bfd_byte *) x_dynp_64->d_tag);
-	dyn_ptr = bfd_h_get_64 (abfd, (bfd_byte *) x_dynp_64->d_un.d_ptr);
-      }
-     if (current_dyntag == DT_NULL)
-       return 0;
-     if (current_dyntag == desired_dyntag)
-       {
-	 /* If requested, try to read the runtime value of this .dynamic
-	    entry.  */
-	 if (ptr)
-	   {
-	     struct type *ptr_type;
-	     gdb_byte ptr_buf[8];
-	     CORE_ADDR ptr_addr_1;
-
-	     ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-	     ptr_addr_1 = dyn_addr + (buf - bufstart) + arch_size / 8;
-	     if (target_read_memory (ptr_addr_1, ptr_buf, arch_size / 8) == 0)
-	       dyn_ptr = extract_typed_address (ptr_buf, ptr_type);
-	     *ptr = dyn_ptr;
-	     if (ptr_addr)
-	       *ptr_addr = dyn_addr + (buf - bufstart);
-	   }
-	 return 1;
-       }
-  }
-
-  return 0;
-}
-
 /* Scan for DESIRED_DYNTAG in .dynamic section of the target's main executable,
    found by consulting the OS auxillary vector.  If DESIRED_DYNTAG is found, 1
    is returned and the corresponding PTR is set.  */
@@ -768,8 +665,9 @@ elf_locate_base (void)
   /* Look for DT_MIPS_RLD_MAP first.  MIPS executables use this
      instead of DT_DEBUG, although they sometimes contain an unused
      DT_DEBUG.  */
-  if (scan_dyntag (DT_MIPS_RLD_MAP, current_program_space->exec_bfd (),
-		   &dyn_ptr, NULL)
+  if (gdb_bfd_scan_elf_dyntag (DT_MIPS_RLD_MAP,
+			       current_program_space->exec_bfd (),
+			       &dyn_ptr, NULL)
       || scan_dyntag_auxv (DT_MIPS_RLD_MAP, &dyn_ptr, NULL))
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
@@ -787,8 +685,9 @@ elf_locate_base (void)
   /* Then check DT_MIPS_RLD_MAP_REL.  MIPS executables now use this form
      because of needing to support PIE.  DT_MIPS_RLD_MAP will also exist
      in non-PIE.  */
-  if (scan_dyntag (DT_MIPS_RLD_MAP_REL, current_program_space->exec_bfd (),
-		   &dyn_ptr, &dyn_ptr_addr)
+  if (gdb_bfd_scan_elf_dyntag (DT_MIPS_RLD_MAP_REL,
+			       current_program_space->exec_bfd (),
+			       &dyn_ptr, &dyn_ptr_addr)
       || scan_dyntag_auxv (DT_MIPS_RLD_MAP_REL, &dyn_ptr, &dyn_ptr_addr))
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
@@ -804,7 +703,8 @@ elf_locate_base (void)
     }
 
   /* Find DT_DEBUG.  */
-  if (scan_dyntag (DT_DEBUG, current_program_space->exec_bfd (), &dyn_ptr, NULL)
+  if (gdb_bfd_scan_elf_dyntag (DT_DEBUG, current_program_space->exec_bfd (),
+			       &dyn_ptr, NULL)
       || scan_dyntag_auxv (DT_DEBUG, &dyn_ptr, NULL))
     return dyn_ptr;
 
@@ -3258,7 +3158,7 @@ svr4_iterate_over_objfiles_in_search_order
 	abfd = current_objfile->obfd;
 
       if (abfd != nullptr
-	  && scan_dyntag (DT_SYMBOLIC, abfd, nullptr, nullptr) == 1)
+	  && gdb_bfd_scan_elf_dyntag (DT_SYMBOLIC, abfd, nullptr, nullptr) == 1)
 	{
 	  checked_current_objfile = true;
 	  if (cb (current_objfile, cb_data) != 0)
