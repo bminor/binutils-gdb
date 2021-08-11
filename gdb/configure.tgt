@@ -580,7 +580,7 @@ sh*-*-linux*)
 			glibc-tdep.o linux-tdep.o"
 	gdb_sim=../sim/sh/libsim.a
 	;;
-sh*-*-netbsdelf* | sh*-*-knetbsd*-gnu)
+sh*-*-netbsd* | sh*-*-knetbsd*-gnu)
 	# Target: NetBSD/sh
 	gdb_target_obs="sh-tdep.o sh-netbsd-tdep.o"
 	gdb_sim=../sim/sh/libsim.a

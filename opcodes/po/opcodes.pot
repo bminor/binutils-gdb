@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-07-03 15:03+0100\n"
+"POT-Creation-Date: 2021-08-11 10:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgid "specified register cannot be written to"
 msgstr ""
 
 #. Invalid option.
-#: aarch64-dis.c:94 arc-dis.c:802 arm-dis.c:11652
+#: aarch64-dis.c:94 arc-dis.c:802 arm-dis.c:11669
 #, c-format
 msgid "unrecognised disassembler option: %s"
 msgstr ""
@@ -591,67 +591,67 @@ msgstr ""
 msgid "invalid position, should be one of: 0,4,8,...124."
 msgstr ""
 
-#: arm-dis.c:5187
+#: arm-dis.c:5204
 msgid "Select raw register names"
 msgstr ""
 
-#: arm-dis.c:5189
+#: arm-dis.c:5206
 msgid "Select register names used by GCC"
 msgstr ""
 
-#: arm-dis.c:5191
+#: arm-dis.c:5208
 msgid "Select register names used in ARM's ISA documentation"
 msgstr ""
 
-#: arm-dis.c:5193
+#: arm-dis.c:5210
 msgid "Assume all insns are Thumb insns"
 msgstr ""
 
-#: arm-dis.c:5194
+#: arm-dis.c:5211
 msgid "Examine preceding label to determine an insn's type"
 msgstr ""
 
-#: arm-dis.c:5195
+#: arm-dis.c:5212
 msgid "Select register names used in the APCS"
 msgstr ""
 
-#: arm-dis.c:5197
+#: arm-dis.c:5214
 msgid "Select register names used in the ATPCS"
 msgstr ""
 
-#: arm-dis.c:5199
+#: arm-dis.c:5216
 msgid "Select special register names used in the ATPCS"
 msgstr ""
 
-#: arm-dis.c:5201
+#: arm-dis.c:5218
 msgid "Enable CDE extensions for coprocessor N space"
 msgstr ""
 
-#: arm-dis.c:8373
+#: arm-dis.c:8390
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:11613
+#: arm-dis.c:11630
 #, c-format
 msgid "unrecognised register name set: %s"
 msgstr ""
 
-#: arm-dis.c:11627
+#: arm-dis.c:11644
 #, c-format
 msgid "cde coprocessor not between 0-7: %s"
 msgstr ""
 
-#: arm-dis.c:11633
+#: arm-dis.c:11650
 #, c-format
 msgid "coproc must have an argument: %s"
 msgstr ""
 
-#: arm-dis.c:11646
+#: arm-dis.c:11663
 #, c-format
 msgid "coprocN argument takes options \"generic\", \"cde\", or \"CDE\": %s"
 msgstr ""
 
-#: arm-dis.c:12357
+#: arm-dis.c:12374
 #, c-format
 msgid ""
 "\n"
@@ -1055,11 +1055,11 @@ msgstr ""
 msgid "Don't understand 0x%x \n"
 msgstr ""
 
-#: i386-dis.c:8591
+#: i386-dis.c:8642
 msgid "<internal disassembler error>"
 msgstr ""
 
-#: i386-dis.c:8900
+#: i386-dis.c:8952
 #, c-format
 msgid ""
 "\n"
@@ -1068,175 +1068,175 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: i386-dis.c:8904
+#: i386-dis.c:8956
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr ""
 
-#: i386-dis.c:8905
+#: i386-dis.c:8957
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr ""
 
-#: i386-dis.c:8906
+#: i386-dis.c:8958
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr ""
 
-#: i386-dis.c:8907
+#: i386-dis.c:8959
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:8908
+#: i386-dis.c:8960
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr ""
 
-#: i386-dis.c:8909
+#: i386-dis.c:8961
 #, c-format
 msgid ""
 "  att-mnemonic\n"
 "              Display instruction in AT&T mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:8911
+#: i386-dis.c:8963
 #, c-format
 msgid ""
 "  intel-mnemonic\n"
 "              Display instruction in Intel mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:8913
+#: i386-dis.c:8965
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr ""
 
-#: i386-dis.c:8914
+#: i386-dis.c:8966
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr ""
 
-#: i386-dis.c:8915
+#: i386-dis.c:8967
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr ""
 
-#: i386-dis.c:8916
+#: i386-dis.c:8968
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr ""
 
-#: i386-dis.c:8917
+#: i386-dis.c:8969
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr ""
 
-#: i386-dis.c:8918
+#: i386-dis.c:8970
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:8919
+#: i386-dis.c:8971
 #, c-format
 msgid "  amd64       Display instruction in AMD64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:8920
+#: i386-dis.c:8972
 #, c-format
 msgid "  intel64     Display instruction in Intel64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:9484
+#: i386-dis.c:9541
 msgid "64-bit address is disabled"
 msgstr ""
 
-#: i386-gen.c:851
+#: i386-gen.c:857
 #, c-format
 msgid "%s: error: "
 msgstr ""
 
-#: i386-gen.c:1007
+#: i386-gen.c:1013
 #, c-format
 msgid "%s: %d: unknown bitfield: %s\n"
 msgstr ""
 
-#: i386-gen.c:1009
+#: i386-gen.c:1015
 #, c-format
 msgid "unknown bitfield: %s\n"
 msgstr ""
 
-#: i386-gen.c:1072
+#: i386-gen.c:1078
 #, c-format
 msgid "%s: %d: missing `)' in bitfield: %s\n"
 msgstr ""
 
-#: i386-gen.c:1173
+#: i386-gen.c:1179
 #, c-format
 msgid "unknown broadcast operand: %s\n"
 msgstr ""
 
-#: i386-gen.c:1228
+#: i386-gen.c:1234
 #, c-format
 msgid "%s:%d: Conflicting opcode space specifications\n"
 msgstr ""
 
-#: i386-gen.c:1232
+#: i386-gen.c:1238
 #, c-format
 msgid "%s:%d: Warning: redundant opcode space specification\n"
 msgstr ""
 
-#: i386-gen.c:1241
+#: i386-gen.c:1247
 #, c-format
 msgid "%s:%d: Conflicting prefix specifications\n"
 msgstr ""
 
-#: i386-gen.c:1245
+#: i386-gen.c:1251
 #, c-format
 msgid "%s:%d: Warning: redundant prefix specification\n"
 msgstr ""
 
-#: i386-gen.c:1455
+#: i386-gen.c:1461
 #, c-format
 msgid "%s:%d: %s: unrecognized opcode encoding space\n"
 msgstr ""
 
-#: i386-gen.c:1461
+#: i386-gen.c:1467
 #, c-format
 msgid "%s:%d: %s: residual opcode (0x%0*llx) too large\n"
 msgstr ""
 
-#: i386-gen.c:1883
+#: i386-gen.c:1889
 #, c-format
 msgid "can't find i386-reg.tbl for reading, errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:1961
+#: i386-gen.c:1967
 #, c-format
 msgid "can't create i386-init.h, errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:2051 ia64-gen.c:2829
+#: i386-gen.c:2057 ia64-gen.c:2829
 #, c-format
 msgid "unable to change directory to \"%s\", errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:2065 i386-gen.c:2070
+#: i386-gen.c:2071 i386-gen.c:2076
 #, c-format
 msgid "CpuMax != %d!\n"
 msgstr ""
 
-#: i386-gen.c:2074
+#: i386-gen.c:2080
 #, c-format
 msgid "%d unused bits in i386_cpu_flags.\n"
 msgstr ""
 
-#: i386-gen.c:2089
+#: i386-gen.c:2095
 #, c-format
 msgid "%d unused bits in i386_operand_type.\n"
 msgstr ""
 
-#: i386-gen.c:2103
+#: i386-gen.c:2109
 #, c-format
 msgid "can't create i386-tbl.h, errno = %s\n"
 msgstr ""

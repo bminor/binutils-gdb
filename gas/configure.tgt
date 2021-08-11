@@ -155,7 +155,7 @@ case ${generic_target} in
   arm-*-uclinux*eabi*)			fmt=elf  em=armlinuxeabi ;;
   arm-*-uclinux*)			fmt=elf  em=linux ;;
   arm-*-nacl*)				fmt=elf  em=nacl ;;
-  arm-*-netbsdelf*)			fmt=elf  em=nbsd ;;
+  arm-*-netbsd*)			fmt=elf  em=nbsd ;;
   arm-*-nto*)				fmt=elf ;;
   arm-wince-pe | arm-*-wince | arm*-*-mingw32ce* | arm*-*-cegcc*)
 					fmt=coff em=wince-pe ;;
@@ -287,7 +287,7 @@ case ${generic_target} in
   m68k-*-linux-*)			fmt=elf em=linux ;;
   m68k-*-uclinux*)			fmt=elf em=uclinux ;;
   m68k-*-gnu*)				fmt=elf ;;
-  m68k-*-netbsdelf*)			fmt=elf em=nbsd ;;
+  m68k-*-netbsd*)			fmt=elf em=nbsd ;;
 
   s12z-*-*)				fmt=elf ;;
 
@@ -373,7 +373,7 @@ case ${generic_target} in
       sh*eb)	endian=big ;;
       *)	endian=little ;;
     esac ;;
-  sh*-*-netbsdelf*)			fmt=elf em=nbsd
+  sh*-*-netbsd*)			fmt=elf em=nbsd
     case ${cpu} in
       sh*l*)	endian=little ;;
       *)	endian=big ;;
@@ -402,7 +402,8 @@ case ${generic_target} in
 
   v850*-*-*)				fmt=elf ;;
 
-  vax-*-netbsdelf*)			fmt=elf em=nbsd ;;
+  vax-*-netbsdaout)			fmt=aout em=nbsd ;;
+  vax-*-netbsd*)			fmt=elf em=nbsd ;;
   vax-*-linux-*)			fmt=elf em=linux ;;
 
   visium-*-elf)				fmt=elf ;;

@@ -304,7 +304,7 @@ set array_tests_static {
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
-set xfails "*-*-netbsdelf*"
+set xfails "*-*-netbsd*"
 run_ld_link_exec_tests $array_tests $xfails
 
 if { [istarget *-*-linux*]

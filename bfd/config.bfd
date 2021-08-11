@@ -48,6 +48,7 @@ targ_underscore=no
 
 # Catch obsolete configurations.
 case $targ in
+ ns32k-*-netbsd* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -58,8 +59,19 @@ case $targ in
     fi;;
 esac
 
+# Warn on changed defaulting
 case $targ in
- *-*-netbsdelf* | i[3-7]86-*-netbsd*-gnu* | i[3-7]86-*-knetbsd*-gnu | \
+ *-*-netbsdelf* | *-*-netbsdaout* | *-*-netbsdpe*)
+    # Explicit, no defaulting
+    ;;
+ *-*-netbsd* )
+    targ_migrated=`echo "$targ" | sed 's/netbsd/netbsdaout/'`
+    echo "*** WARNING: $targ is now defaults to meaning ELF not a.out." >&2
+    echo "*** Use $targ_migrated instead to explicitly specify a.out." >&2
+    ;;
+esac
+
+case $targ in
  mips*-*-irix5* | mips*-*-irix6*)
     # Not obsolete
     ;;
@@ -75,7 +87,7 @@ case $targ in
  a29k-* | \
  arm*-*-aout | \
  arm-*-coff | \
- arm-*-netbsd* | \
+ arm*-*-netbsdaout* | \
  arm-*-openbsd* | \
  arm-*-oabi | \
  arm-*-riscix* | \
@@ -96,7 +108,7 @@ case $targ in
  i[3-7]86-*-aix* | \
  i[3-7]86-sequent-bsd* | \
  i[3-7]86-*-freebsdaout* | i[3-7]86-*-freebsd[12].* | i[3-7]86-*-freebsd[12] | \
- i[3-7]86-*-netbsdaout* | i[3-7]86-*-netbsd* | \
+ i[3-7]86-*-netbsdaout* | \
  i[3-7]86-*-openbsd[0-2].* | i[3-7]86-*-openbsd3.[0-3] | \
  i[3-7]86-*-linux*aout* | \
  i[3-7]86-*-mach* | i[3-7]86-*-osf1mk* | \
@@ -141,6 +153,7 @@ case $targ in
  or32-*-* | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
  powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin* | \
+ sh*-*-netbsdaout* | \
  sh*-*-symbianelf* | sh5*-*-* | sh64*-*-* | \
  sparc*-*-*aout* | \
  sparc*-*-chorus* | \
@@ -345,11 +358,11 @@ case "${targ}" in
     targ_defvec=arm_elf32_nacl_be_vec
     targ_selvecs="arm_elf32_nacl_le_vec"
     ;;
-  armeb-*-netbsdelf*)
+  armeb-*-netbsd*)
     targ_defvec=arm_elf32_be_vec
     targ_selvecs="arm_elf32_le_vec"
     ;;
-  arm-*-netbsdelf*)
+  arm-*-netbsd*)
     targ_defvec=arm_elf32_le_vec
     targ_selvecs="arm_elf32_be_vec"
     ;;
@@ -609,7 +622,7 @@ case "${targ}" in
 	targ_cflags=-DOLD_FREEBSD_ABI_LABEL ;;
     esac
     ;;
-  i[3-7]86-*-netbsdelf* | i[3-7]86-*-netbsd*-gnu* | i[3-7]86-*-knetbsd*-gnu)
+  i[3-7]86-*-netbsd* | i[3-7]86-*-knetbsd*-gnu)
     targ_defvec=i386_elf32_vec
     targ_selvecs="iamcu_elf32_vec"
     targ64_selvecs="x86_64_elf64_vec l1om_elf64_vec k1om_elf64_vec"
@@ -983,7 +996,7 @@ case "${targ}" in
     targ_defvec=ns32k_aout_pc532mach_vec
     targ_underscore=yes
     ;;
-  ns32k-*-netbsd* | ns32k-*-lites* | ns32k-*-openbsd*)
+  ns32k-*-lites* | ns32k-*-openbsd*)
     targ_defvec=ns32k_aout_pc532nbsd_vec
     targ_underscore=yes
     ;;
@@ -1222,11 +1235,11 @@ case "${targ}" in
     targ_selvecs="sh_elf32_le_vec sh_elf32_linux_be_vec sh_elf32_linux_vec sh_elf32_fdpic_le_vec sh_elf32_fdpic_be_vec"
     ;;
 
-  sh*l*-*-netbsdelf*)
+  sh*l*-*-netbsd*)
     targ_defvec=sh_elf32_nbsd_le_vec
     targ_selvecs="sh_elf32_nbsd_vec sh_coff_vec sh_coff_le_vec"
     ;;
-  sh*-*-netbsdelf*)
+  sh*-*-netbsd*)
     targ_defvec=sh_elf32_nbsd_vec
     targ_selvecs="sh_elf32_nbsd_le_vec sh_coff_vec sh_coff_le_vec"
     ;;
@@ -1345,15 +1358,15 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  vax-*-netbsdelf*)
-    targ_defvec=vax_elf32_vec
-    targ_selvecs="vax_aout_nbsd_vec vax_aout_1knbsd_vec"
-    ;;
-
-  vax-*-netbsdaout* | vax-*-netbsd*)
+  vax-*-netbsdaout*)
     targ_defvec=vax_aout_nbsd_vec
     targ_selvecs="vax_elf32_vec vax_aout_1knbsd_vec"
     targ_underscore=yes
+    ;;
+
+  vax-*-netbsd*)
+    targ_defvec=vax_elf32_vec
+    targ_selvecs="vax_aout_nbsd_vec vax_aout_1knbsd_vec"
     ;;
 
   vax-*-openbsd*)

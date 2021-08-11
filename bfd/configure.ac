@@ -45,9 +45,8 @@ ACX_LARGEFILE
 
 changequote(,)dnl
 case "${target}" in
-    hppa*64*-*-* | vax-*-netbsdelf*) ;;
-    *-*-*aout* | i[3-7]86-*-bsd* | i[3-7]86-*-msdos* | ns32k-*-* | \
-    pdp11-*-* | vax-*-*bsd*)
+    hppa*64*-*-*) ;;
+    *-*-*aout*| i[3-7]86-*-msdos* | ns32k-*-* | pdp11-*-*)
 changequote([,])dnl
 	if test "$plugins" = "yes"; then
 	    if test "${enable_plugins+set}" = set; then

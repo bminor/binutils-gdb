@@ -1124,7 +1124,7 @@ set run_tests [list \
 ]
 
 # NetBSD ELF systems do not currently support the .*_array sections.
-run_ld_link_exec_tests $run_tests "*-*-netbsdelf*"
+run_ld_link_exec_tests $run_tests "*-*-netbsd*"
 
 # These tests require dlopen support.
 set dlopen_run_tests [list \
@@ -1182,7 +1182,7 @@ if [check_libdl_available] {
   # Disable all sanitizers.
   set old_CFLAGS "$CFLAGS"
   append CFLAGS " $NOSANITIZE_CFLAGS"
-  run_ld_link_exec_tests $dlopen_run_tests "*-*-netbsdelf*"
+  run_ld_link_exec_tests $dlopen_run_tests "*-*-netbsd*"
   set CFLAGS "$old_CFLAGS"
 }
 

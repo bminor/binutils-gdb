@@ -19,7 +19,7 @@
 
 # Written by Cygnus Support.
 
-if {[istarget "sh*-*-linux-*"] || [istarget "sh*l*-*-netbsdelf*"]} then {
+if {[istarget "sh*-*-linux-*"] || [istarget "sh*l*-*-netbsd*"]} then {
     global ASFLAGS
     set ASFLAGS "$ASFLAGS -big"
 }

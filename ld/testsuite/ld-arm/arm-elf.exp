@@ -235,7 +235,7 @@ set tmp {
 	{{readelf -s script-type.sym}}
 	"script-type"}
 }
-if ![istarget "arm*-*-netbsdelf"] { append armelftests_common $tmp }
+if ![istarget "arm*-*-netbsd*"] { append armelftests_common $tmp }
 
 set tmp {
     {"callweak" "-static -T arm.ld" "" "" {callweak.s}
@@ -433,7 +433,7 @@ run_dump_test "pie-bind-locally"
 
 # Exclude non-ARM-EABI targets.
 
-if { [istarget "arm*-*-netbsdelf"] } {
+if { [istarget "arm*-*-netbsd*"] } {
     return
 }
 

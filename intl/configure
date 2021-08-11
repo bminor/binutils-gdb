@@ -6874,7 +6874,7 @@ case "${host}" in
 	PICFLAG=-fpic
 	;;
     # FIXME: Simplify to sh*-*-netbsd*?
-    sh-*-netbsdelf* | shl*-*-netbsdelf* | sh5-*-netbsd* | sh5l*-*-netbsd* | \
+    sh-*-netbsd* | shl*-*-netbsd* | sh5-*-netbsd* | sh5l*-*-netbsd* | \
       sh64-*-netbsd* | sh64l*-*-netbsd*)
 	PICFLAG=-fpic
 	;;
