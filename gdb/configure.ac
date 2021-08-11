@@ -2131,6 +2131,29 @@ if test x"${gdb_osabi}" != x ; then
 		       [Define to the default OS ABI for this configuration.])
 fi
 
+# Setup possible use of libbacktrace.
+AC_ARG_ENABLE([libbacktrace],
+[AS_HELP_STRING([--enable-libbacktrace],
+                [use libbacktrace to write a backtrace after a fatal signal.])],
+[case "${enableval}" in
+  yes)  enable_libbacktrace=yes ;;
+  no)   enable_libbacktrace=no  ;;
+  *)    AC_MSG_ERROR(bad value ${enableval} for --enable-libbacktrace option) ;;
+esac],
+enable_libbacktrace=yes)
+
+if test "${enable_libbacktrace}" == "yes"; then
+  LIBBACKTRACE_INC="-I$srcdir/../libbacktrace/ -I../libbacktrace/"
+  LIBBACKTRACE_LIB=../libbacktrace/.libs/libbacktrace.a
+  AC_DEFINE(HAVE_LIBBACKTRACE, 1, [Define if libbacktrace is being used.])
+else
+  LIBBACKTRACE_INC=
+  LIBBACKTRACE_LIB=
+fi
+
+AC_SUBST(LIBBACKTRACE_INC)
+AC_SUBST(LIBBACKTRACE_LIB)
+
 # Check for babeltrace and babeltrace-ctf
 AC_ARG_WITH(babeltrace,
   AS_HELP_STRING([--with-babeltrace], [include babeltrace support (auto/yes/no)]),

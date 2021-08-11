@@ -228,6 +228,9 @@
 /* Define if you have the babeltrace library. */
 #undef HAVE_LIBBABELTRACE
 
+/* Define if libbacktrace is being used. */
+#undef HAVE_LIBBACKTRACE
+
 /* Define to 1 if debuginfod is enabled. */
 #undef HAVE_LIBDEBUGINFOD
 

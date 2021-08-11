@@ -636,6 +636,8 @@ LIBCTF
 LTLIBBABELTRACE
 LIBBABELTRACE
 HAVE_LIBBABELTRACE
+LIBBACKTRACE_LIB
+LIBBACKTRACE_INC
 HAVE_NATIVE_GCORE_HOST
 NAT_GENERATED_FILES
 XM_CLIBS
@@ -925,6 +927,7 @@ with_tcl
 with_tk
 with_x
 enable_sim
+enable_libbacktrace
 with_babeltrace
 with_libbabeltrace_prefix
 with_libbabeltrace_type
@@ -1601,6 +1604,8 @@ Optional Features:
                           gcc is used
   --enable-ubsan          enable undefined behavior sanitizer (auto/yes/no)
   --enable-sim            link gdb with simulator
+  --enable-libbacktrace   use libbacktrace to write a backtrace after a fatal
+                          signal.
   --enable-libctf         Handle .ctf type-info sections [default=yes]
   --enable-unit-tests     Enable the inclusion of unit tests when compiling
                           GDB
@@ -18658,6 +18663,33 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 fi
+
+# Setup possible use of libbacktrace.
+# Check whether --enable-libbacktrace was given.
+if test "${enable_libbacktrace+set}" = set; then :
+  enableval=$enable_libbacktrace; case "${enableval}" in
+  yes)  enable_libbacktrace=yes ;;
+  no)   enable_libbacktrace=no  ;;
+  *)    as_fn_error $? "bad value ${enableval} for --enable-libbacktrace option" "$LINENO" 5 ;;
+esac
+else
+  enable_libbacktrace=yes
+fi
+
+
+if test "${enable_libbacktrace}" == "yes"; then
+  LIBBACKTRACE_INC="-I$srcdir/../libbacktrace/ -I../libbacktrace/"
+  LIBBACKTRACE_LIB=../libbacktrace/.libs/libbacktrace.a
+
+$as_echo "#define HAVE_LIBBACKTRACE 1" >>confdefs.h
+
+else
+  LIBBACKTRACE_INC=
+  LIBBACKTRACE_LIB=
+fi
+
+
+
 
 # Check for babeltrace and babeltrace-ctf
 

@@ -41,14 +41,11 @@
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/gdb-sigmask.h"
 #include "async-event.h"
+#include "bt-utils.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
 #include "readline/history.h"
-
-#ifdef HAVE_EXECINFO_H
-# include <execinfo.h>
-#endif /* HAVE_EXECINFO_H */
 
 /* readline defines this.  */
 #undef savestring
@@ -102,12 +99,7 @@ int call_stdin_event_handler_again_p;
 
 /* When true GDB will produce a minimal backtrace when a fatal signal is
    reached (within GDB code).  */
-static bool bt_on_fatal_signal
-#ifdef HAVE_EXECINFO_BACKTRACE
-  = true;
-#else
-  = false;
-#endif /* HAVE_EXECINFO_BACKTRACE */
+static bool bt_on_fatal_signal = GDB_PRINT_INTERNAL_BACKTRACE_INIT_ON;
 
 /* Implement 'maintenance show backtrace-on-fatal-signal'.  */
 
@@ -116,20 +108,6 @@ show_bt_on_fatal_signal (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *cmd, const char *value)
 {
   fprintf_filtered (file, _("Backtrace on a fatal signal is %s.\n"), value);
-}
-
-/* Implement 'maintenance set backtrace-on-fatal-signal'.  */
-
-static void
-set_bt_on_fatal_signal (const char *args, int from_tty, cmd_list_element *c)
-{
-#ifndef HAVE_EXECINFO_BACKTRACE
-  if (bt_on_fatal_signal)
-    {
-      bt_on_fatal_signal = false;
-      error (_("support for this feature is not compiled into GDB"));
-    }
-#endif
 }
 
 /* Signal handling variables.  */
@@ -904,7 +882,7 @@ unblock_signal (int sig)
 static void ATTRIBUTE_NORETURN
 handle_fatal_signal (int sig)
 {
-#ifdef HAVE_EXECINFO_BACKTRACE
+#ifdef GDB_PRINT_INTERNAL_BACKTRACE
   const auto sig_write = [] (const char *msg) -> void
   {
     gdb_stderr->write_async_safe (msg, strlen (msg));
@@ -917,19 +895,8 @@ handle_fatal_signal (int sig)
       sig_write (strsignal (sig));
       sig_write ("\n");
 
-      /* Allow up to 25 frames of backtrace.  */
-      void *buffer[25];
-      int frames = backtrace (buffer, ARRAY_SIZE (buffer));
-      sig_write (_("----- Backtrace -----\n"));
-      if (gdb_stderr->fd () > -1)
-	{
-	  backtrace_symbols_fd (buffer, frames, gdb_stderr->fd ());
-	  if (frames == ARRAY_SIZE (buffer))
-	    sig_write (_("Backtrace might be incomplete.\n"));
-	}
-      else
-	sig_write (_("Backtrace unavailable\n"));
-      sig_write ("---------------------\n");
+      gdb_internal_backtrace ();
+
       sig_write (_("A fatal error internal to GDB has been detected, "
 		   "further\ndebugging is not possible.  GDB will now "
 		   "terminate.\n\n"));
@@ -944,7 +911,7 @@ handle_fatal_signal (int sig)
 
       gdb_stderr->flush ();
     }
-#endif /* HAVE_EXECINF_BACKTRACE */
+#endif
 
   /* If possible arrange for SIG to have its default behaviour (which
      should be to terminate the current process), unblock SIG, and reraise
@@ -1449,7 +1416,7 @@ Use \"on\" to enable, \"off\" to disable.\n\
 If enabled, GDB will produce a minimal backtrace if it encounters a fatal\n\
 signal from within GDB itself.  This is a mechanism to help diagnose\n\
 crashes within GDB, not a mechanism for debugging inferiors."),
-			   set_bt_on_fatal_signal,
+			   gdb_internal_backtrace_set_cmd,
 			   show_bt_on_fatal_signal,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
