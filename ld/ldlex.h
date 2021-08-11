@@ -193,7 +193,6 @@ extern void ldlex_defsym (void);
 extern void ldlex_expression (void);
 extern void ldlex_both (void);
 extern void ldlex_popstate (void);
-extern void ldlex_backup (void);
 extern const char* ldlex_filename (void);
 
 /* In lexsup.c.  */

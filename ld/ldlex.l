@@ -385,7 +385,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				  yylval.name = xstrdup (yytext + 2);
 				  return LNAME;
 				}
-<EXPRESSION>{SYMBOLNAMECHAR1}{SYMBOLNAMECHAR}* {
+<EXPRESSION>{SYMBOLNAMECHAR1}{NOCFILENAMECHAR}* {
 				  yylval.name = xstrdup (yytext);
 				  return NAME;
 				}
@@ -634,16 +634,6 @@ void
 ldlex_popstate (void)
 {
   yy_start = *(--state_stack_p);
-}
-
-/* In cases where the parser needs to look ahead and the context
-   changes from expression to script or vice-versa, throw away a
-   NAME.  What constitutes a NAME depends on context.  */
-
-void
-ldlex_backup (void)
-{
-  yyless (0);
 }
 
 /* Return the current file name, or the previous file if no file is
