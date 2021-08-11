@@ -420,8 +420,13 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 					yylval.name[len] = 0;
 					return NAME;
 				}
-<BOTH,SCRIPT,EXPRESSION>"\n"		{ lineno++;}
-<MRI,BOTH,SCRIPT,EXPRESSION>[ \t\r]+	{ }
+
+<BOTH,SCRIPT,EXPRESSION,VERS_START,VERS_NODE,VERS_SCRIPT,INPUTLIST>"\n" {
+				lineno++; }
+<MRI,BOTH,SCRIPT,EXPRESSION,VERS_START,VERS_NODE,VERS_SCRIPT,INPUTLIST>[ \t\r]+ {
+				/* Eat up whitespace */ }
+<BOTH,SCRIPT,EXPRESSION,VERS_START,VERS_NODE,VERS_SCRIPT>#.* {
+				/* Eat up comments */ }
 
 <VERS_NODE,VERS_SCRIPT>[:,;]	{ return *yytext; }
 
@@ -449,12 +454,6 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				    BEGIN(VERS_SCRIPT);
 				  return *yytext;
 				}
-
-<VERS_START,VERS_NODE,VERS_SCRIPT,INPUTLIST>[\n]	{ lineno++; }
-
-<VERS_START,VERS_NODE,VERS_SCRIPT>#.*		{ /* Eat up comments */ }
-
-<VERS_START,VERS_NODE,VERS_SCRIPT,INPUTLIST>[ \t\r]+	{ /* Eat up whitespace */ }
 
 <<EOF>> {
   include_stack_ptr--;
