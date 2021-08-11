@@ -1,3 +1,7 @@
+2021-08-11  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-tic4x.c (tic4x_gen_to_words): Fix typo.
+
 2021-08-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.
