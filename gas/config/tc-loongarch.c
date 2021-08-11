@@ -657,11 +657,11 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
     }
   else if (ip->insn->mask == 0xffff8000 &&
            ((ip->insn_bin & 0xfff00000) == 0x38600000 ||  /* amswap.w  rd, rk,
-                                                             rj */
+                                                             rj  */
             (ip->insn_bin & 0xffff0000) == 0x38700000 ||  /* ammax_db.wu  rd, 
-                                                             rk, rj */
+                                                             rk, rj  */
             (ip->insn_bin & 0xffff0000) == 0x38710000))  /* ammin_db.wu  rd, 
-                                                            rk, rj */
+                                                            rk, rj  */
     {
       /* For AMO insn amswap.[wd], amadd.[wd], etc. */
       if (ip->args[0] != 0 &&
@@ -671,17 +671,17 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
     }
   else if ((ip->insn->mask == 0xffe08000 &&
             (ip->insn_bin & 0xffe00000) == 0x00600000) ||  /* bstrins.w  rd, 
-                                                              rj, msbw, lsbw */
+                                                              rj, msbw, lsbw  */
            (ip->insn->mask == 0xffc00000 &&
             (ip->insn_bin & 0xff800000) == 0x00800000))  /* bstrins.d  rd, rj, 
-                                                            msbd, lsbd */
+                                                            msbd, lsbd  */
     {
       /* For bstr(ins|pick).[wd] */
       if (ip->args[2] < ip->args[3])
         as_fatal (_ ("bstr(ins|pick).[wd] require msbd >= lsbd"));
     }
   else if (ip->insn->mask != 0 && (ip->insn_bin & 0xfe0003c0) == 0x04000000 && 
-        /*  csrxchg  rd, rj, csr_num */
+        /* csrxchg  rd, rj, csr_num  */
            (strcmp ("csrxchg", ip->name) == 0))
     as_fatal (_ ("csrxchg require rj != $r0 && rj != $r1"));
 
