@@ -25,7 +25,7 @@ fragment <<EOF
 #include "elf/loongarch.h"
 
 static void
-loong_elf_before_allocation (void)
+larch_elf_before_allocation (void)
 {
   gld${EMULATION_NAME}_before_allocation ();
 
@@ -69,7 +69,7 @@ gld${EMULATION_NAME}_after_allocation (void)
    After the output has been created, but before inputs are read.  */
 
 static void
-loong_create_output_section_statements (void)
+larch_create_output_section_statements (void)
 {
   /* See PR 22920 for an example of why this is necessary.  */
   if (strstr (bfd_get_target (link_info.output_bfd), "loong") == NULL)
@@ -86,6 +86,6 @@ loong_create_output_section_statements (void)
 
 EOF
 
-LDEMUL_BEFORE_ALLOCATION=loong_elf_before_allocation
+LDEMUL_BEFORE_ALLOCATION=larch_elf_before_allocation
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
-LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=loong_create_output_section_statements
+LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=larch_create_output_section_statements

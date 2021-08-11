@@ -104,7 +104,7 @@ struct elf_reloc_map
   enum elf_loongarch_reloc_type elf_val;
 };
 
-static const struct elf_reloc_map loong_reloc_map[] =
+static const struct elf_reloc_map larch_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_LARCH_NONE },
   { BFD_RELOC_32, R_LARCH_32 },
@@ -175,9 +175,9 @@ loongarch_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
                              bfd_reloc_code_real_type code)
 {
   unsigned int i;
-  for (i = 0; i < ARRAY_SIZE (loong_reloc_map); i++)
-    if (loong_reloc_map[i].bfd_val == code)
-      return loongarch_elf_rtype_to_howto ((int) loong_reloc_map[i].elf_val);
+  for (i = 0; i < ARRAY_SIZE (larch_reloc_map); i++)
+    if (larch_reloc_map[i].bfd_val == code)
+      return loongarch_elf_rtype_to_howto ((int) larch_reloc_map[i].elf_val);
 
   return NULL;
 }

@@ -17,8 +17,8 @@
    along with this program; see the file COPYING3. If not,
    see <http://www.gnu.org/licenses/>.  */
 
-#ifndef _ELF_LOONG_H
-#define _ELF_LOONG_H
+#ifndef _ELF_LOONGARCH_H
+#define _ELF_LOONGARCH_H
 
 #include "elf/reloc-macros.h"
 #include "libiberty.h"
@@ -98,4 +98,4 @@ END_RELOC_NUMBERS (R_LARCH_count)
 #define EF_LARCH_ABI_LP64 0x0003
 #define EF_LARCH_ABI_LP32 0x0001
 
-#endif /* _ELF_LOONG_H */
+#endif /* _ELF_LOONGARCH_H */
