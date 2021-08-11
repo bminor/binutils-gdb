@@ -1001,12 +1001,6 @@
 
 2021-02-01  Alan Modra  <amodra@gmail.com>
 
-	* ldgram.y (defsym_expr): Use assignment rule.
-	* ldlex.h (ldlex_defsym): Delete.
-	* ldlex.l (DEFSYMEXP, ldlex_defsym): Delete.
-
-2021-02-01  Alan Modra  <amodra@gmail.com>
-
 	* ldgram.y (section): Call ldlex_backup.  Remove empty action.
 	* ldlex.h (ldlex_backup): Declare.
 	* ldlex.l (<EXPRESSION>NAME): Don't use NOCFILENAMECHAR set of

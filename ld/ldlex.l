@@ -79,6 +79,7 @@ static void lex_warn_invalid (char *where, char *what);
 	SCRIPT		definitely in a script
 	INPUTLIST	definitely in a script, a filename-list
 	BOTH		either EXPRESSION or SCRIPT
+	DEFSYMEXP	in an argument to -defsym
 	MRI		in an MRI script
 	VERS_START	starting a Sun style mapfile
 	VERS_SCRIPT	a Sun style mapfile
@@ -106,6 +107,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 %s INPUTLIST
 %s EXPRESSION
 %s BOTH
+%s DEFSYMEXP
 %s MRI
 %s VERS_START
 %s VERS_SCRIPT
@@ -130,6 +132,12 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 
 <BOTH,SCRIPT,EXPRESSION,VERS_START,VERS_NODE,VERS_SCRIPT,INPUTLIST>"/*"	{ comment (); }
 
+
+<DEFSYMEXP>"-"			{ RTOKEN('-');}
+<DEFSYMEXP>"+"			{ RTOKEN('+');}
+<DEFSYMEXP>{SYMBOLNAMECHAR1}{SYMBOLNAMECHAR}* { yylval.name = xstrdup (yytext);
+						return NAME; }
+<DEFSYMEXP>"="			{ RTOKEN('='); }
 
 <MRI,EXPRESSION>"$"([0-9A-Fa-f])+ {
 				yylval.integer = bfd_scan_vma (yytext + 1, 0, 16);
@@ -162,7 +170,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 				   yylval.bigint.str = NULL;
 				   return INT;
 				 }
-<SCRIPT,MRI,BOTH,EXPRESSION>((("$"|0[xX])([0-9A-Fa-f])+)|(([0-9])+))(M|K|m|k)? {
+<SCRIPT,DEFSYMEXP,MRI,BOTH,EXPRESSION>((("$"|0[xX])([0-9A-Fa-f])+)|(([0-9])+))(M|K|m|k)? {
 				  char *s = yytext;
 				  int ibase = 0;
 
@@ -472,7 +480,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 }
 
 <SCRIPT,MRI,VERS_START,VERS_SCRIPT,VERS_NODE>.	lex_warn_invalid (" in script", yytext);
-<EXPRESSION,BOTH>.	lex_warn_invalid (" in expression", yytext);
+<EXPRESSION,DEFSYMEXP,BOTH>.	lex_warn_invalid (" in expression", yytext);
 
 %%
 
@@ -599,6 +607,13 @@ ldlex_version_file (void)
 {
   *(state_stack_p)++ = yy_start;
   BEGIN (VERS_SCRIPT);
+}
+
+void
+ldlex_defsym (void)
+{
+  *(state_stack_p)++ = yy_start;
+  BEGIN (DEFSYMEXP);
 }
 
 void

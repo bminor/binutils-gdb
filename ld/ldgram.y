@@ -176,9 +176,12 @@ filename:  NAME;
 
 
 defsym_expr:
-		{ ldlex_expression(); }
-		assignment
-		{ ldlex_popstate(); }
+		{ ldlex_defsym(); }
+		NAME '=' exp
+		{
+		  ldlex_popstate();
+		  lang_add_assignment (exp_defsym ($2, $4));
+		}
 	;
 
 /* SYNTAX WITHIN AN MRI SCRIPT FILE */
