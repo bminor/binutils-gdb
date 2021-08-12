@@ -1,3 +1,7 @@
+2021-08-12  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Output Styling): Mention Pygments.
+
 2021-07-26  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	PR gdb/28076
