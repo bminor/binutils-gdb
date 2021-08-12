@@ -74,12 +74,8 @@ larch_create_output_section_statements (void)
   /* See PR 22920 for an example of why this is necessary.  */
   if (strstr (bfd_get_target (link_info.output_bfd), "loong") == NULL)
     {
-      /* The RISC-V backend needs special fields in the output hash structure.
-	 These will only be created if the output format is a RISC-V format,
-	 hence we do not support linking and changing output formats at the
-	 same time.  Use a link followed by objcopy to change output formats.  */
       einfo (_("%F%P: error: cannot change output format"
-	       " whilst linking %s binaries\n"), "RISC-V");
+	       " whilst linking %s binaries\n"), "LoongArch");
       return;
     }
 }

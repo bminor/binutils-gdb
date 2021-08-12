@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; see the file COPYING3. If not,
+   along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 
 #include "sysdep.h"
@@ -30,9 +30,9 @@
 
 static reloc_howto_type howto_table[] =
 {
-#define LOONGARCH_HOWTO(r_name)                                               \
-  HOWTO (R_LARCH_##r_name, 0, 3, 32, false, 0, complain_overflow_signed,      \
-         bfd_elf_generic_reloc, "R_LARCH_" #r_name, false, 0, 0, false)
+#define LOONGARCH_HOWTO(r_name)						 \
+  HOWTO (R_LARCH_##r_name, 0, 3, 32, false, 0, complain_overflow_signed, \
+	 bfd_elf_generic_reloc, "R_LARCH_" #r_name, false, 0, 0, false)
   LOONGARCH_HOWTO (NONE),
   LOONGARCH_HOWTO (32),
   LOONGARCH_HOWTO (64),
@@ -49,19 +49,19 @@ static reloc_howto_type howto_table[] =
 
   LOONGARCH_HOWTO (MARK_LA),
   LOONGARCH_HOWTO (MARK_PCREL),
-  HOWTO (R_LARCH_SOP_PUSH_PCREL,              /* type */
-         2,                                   /* rightshift */
-         3,                                   /* size */
-         32,                                  /* bitsize */
-         true /* FIXME: somewhat use this */, /* pc_relative */
-         0,                                   /* bitpos */
-         complain_overflow_signed,            /* complain_on_overflow */
-         bfd_elf_generic_reloc,               /* special_function */
-         "R_LARCH_SOP_PUSH_PCREL",            /* name */
-         false,                               /* partial_inplace */
-         0x03ffffff,                          /* src_mask */
-         0x03ffffff,                          /* dst_mask */
-         false),                              /* pcrel_offset */
+  HOWTO (R_LARCH_SOP_PUSH_PCREL,	      	/* type.  */
+	 2,				   	/* rightshift.  */
+	 3,				   	/* size.  */
+	 32,				  	/* bitsize.  */
+	 true /* FIXME: somewhat use this.  */,	/* pc_relative.  */
+	 0,				   	/* bitpos.  */
+	 complain_overflow_signed,	    	/* complain_on_overflow.  */
+	 bfd_elf_generic_reloc,	       		/* special_function.  */
+	 "R_LARCH_SOP_PUSH_PCREL",	    	/* name.  */
+	 false,			       		/* partial_inplace.  */
+	 0x03ffffff,			  	/* src_mask.  */
+	 0x03ffffff,			  	/* dst_mask.  */
+	 false),			      	/* pcrel_offset.  */
   LOONGARCH_HOWTO (SOP_PUSH_ABSOLUTE),
   LOONGARCH_HOWTO (SOP_PUSH_DUP),
   LOONGARCH_HOWTO (SOP_PUSH_GPREL),
@@ -110,9 +110,9 @@ static const struct elf_reloc_map larch_reloc_map[] =
   { BFD_RELOC_32, R_LARCH_32 },
   { BFD_RELOC_64, R_LARCH_64 },
 
-#define LOONGARCH_reloc_map(r_name)                                           \
-  {                                                                           \
-    BFD_RELOC_LARCH_##r_name, R_LARCH_##r_name                                \
+#define LOONGARCH_reloc_map(r_name)		   	\
+  {						  	\
+    BFD_RELOC_LARCH_##r_name, R_LARCH_##r_name		\
   }
   LOONGARCH_reloc_map (TLS_DTPMOD32),
   LOONGARCH_reloc_map (TLS_DTPMOD64),
@@ -172,7 +172,7 @@ loongarch_elf_rtype_to_howto (unsigned int r_type)
 
 reloc_howto_type *
 loongarch_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
-                             bfd_reloc_code_real_type code)
+			     bfd_reloc_code_real_type code)
 {
   unsigned int i;
   for (i = 0; i < ARRAY_SIZE (larch_reloc_map); i++)

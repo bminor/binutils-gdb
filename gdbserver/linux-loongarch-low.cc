@@ -266,13 +266,13 @@ static struct regset_info loongarch_regsets[] =
 
 static struct regsets_info loongarch_regsets_info =
 {
-  loongarch_regsets, /* regsets */
-  0,                 /* num_regsets */
-  NULL,              /* disabled_regsets */
+  loongarch_regsets, 	/* regsets.  */
+  0,		 	/* num_regsets.  */
+  NULL,	      		/* disabled_regsets.  */
 };
 
-static regs_info loongarch_regs_info = { NULL, /* regset_bitmap */
-                                         NULL, &loongarch_regsets_info };
+static regs_info loongarch_regs_info = { NULL, /* regset_bitmap.  */
+					 NULL, &loongarch_regsets_info };
 
 const regs_info *
 loongarch_target::get_regs_info ()

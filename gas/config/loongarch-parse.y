@@ -14,12 +14,14 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; see the file COPYING3. If not,
+   along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 %{
 #include "as.h"
 #include "loongarch-parse.h"
-static void yyerror (const char *s ATTRIBUTE_UNUSED){};
+static void yyerror (const char *s ATTRIBUTE_UNUSED)
+{
+};
 extern int yylex (void);
 extern void yy_scan_string (const char *);
 extern void
@@ -45,10 +47,10 @@ is_const (struct reloc_info *info)
 
 int
 loongarch_parse_expr (const char *expr,
-                      struct reloc_info *reloc_stack_top,
-                      size_t max_reloc_num,
-                      size_t *reloc_num,
-                      offsetT *imm);
+		      struct reloc_info *reloc_stack_top,
+		      size_t max_reloc_num,
+		      size_t *reloc_num,
+		      offsetT *imm);
 
 int
 loongarch_parse_expr (const char *expr,

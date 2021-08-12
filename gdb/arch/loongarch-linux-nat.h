@@ -24,7 +24,7 @@ static inline uint32_t
 loongarch_cpucfg (uint64_t rj)
 {
   uint32_t ret;
-  asm("cpucfg %0,%1" : "=r"(ret) : "r"(rj));
+  asm ("cpucfg %0,%1" : "=r"(ret) : "r"(rj));
   return ret;
 }
 

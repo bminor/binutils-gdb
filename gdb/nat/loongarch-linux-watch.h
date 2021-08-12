@@ -54,7 +54,6 @@ struct la32_watch_regs
   uint8_t irwstat;
   uint8_t irwmask;
   /* There is confusion across gcc versions about structure alignment,
- *
      so we force 8 byte alignment for these structures so they match
      the kernel even if it was build with a different gcc version.  */
 } __attribute__ ((aligned (8)));
@@ -80,7 +79,7 @@ struct pt_watch_regs
   };
 };
 
-#endif /* !PTRACE_GET_WATCH_REGS */
+#endif /* !PTRACE_GET_WATCH_REGS  */
 
 #define W_BIT 0
 #define R_BIT 1
@@ -109,23 +108,23 @@ uint8_t loongarch_linux_watch_get_irwmask (struct pt_watch_regs *regs, int n);
 uint8_t loongarch_linux_watch_get_irwstat (struct pt_watch_regs *regs, int n);
 CORE_ADDR loongarch_linux_watch_get_addr (struct pt_watch_regs *regs, int n);
 void loongarch_linux_watch_set_addr (struct pt_watch_regs *regs, int n,
-                                     CORE_ADDR value);
+				     CORE_ADDR value);
 CORE_ADDR loongarch_linux_watch_get_mask (struct pt_watch_regs *regs, int n);
 void loongarch_linux_watch_set_mask (struct pt_watch_regs *regs, int n,
-                                     CORE_ADDR value);
+				     CORE_ADDR value);
 uint8_t loongarch_linux_watch_get_irw (struct pt_watch_regs *regs, int n);
 void loongarch_linux_watch_set_irw (struct pt_watch_regs *regs, int n,
-                                    uint8_t value);
+				    uint8_t value);
 int loongarch_linux_watch_try_one_watch (struct pt_watch_regs *regs,
-                                         CORE_ADDR addr, int len,
-                                         uint32_t irw);
+					 CORE_ADDR addr, int len,
+					 uint32_t irw);
 void loongarch_linux_watch_populate_regs (
   struct loongarch_watchpoint *current_watches, struct pt_watch_regs *regs);
 uint32_t loongarch_linux_watch_type_to_irw (enum target_hw_bp_type type);
 
 int loongarch_linux_read_watch_registers (long lwpid,
-                                          struct pt_watch_regs *watch_readback,
-                                          int *watch_readback_valid,
-                                          int force);
+					  struct pt_watch_regs *watch_readback,
+					  int *watch_readback_valid,
+					  int force);
 
-#endif /* #define LOONGARCH_LINUX_WATCH_H */
+#endif /* #define LOONGARCH_LINUX_WATCH_H  */

@@ -51,16 +51,16 @@ public:
   int can_use_hw_breakpoint (enum bptype, int, int) override;
 
   int insert_hw_breakpoint (struct gdbarch *,
-                            struct bp_target_info *) override;
+			    struct bp_target_info *) override;
 
   int remove_hw_breakpoint (struct gdbarch *,
-                            struct bp_target_info *) override;
+			    struct bp_target_info *) override;
 
   int remove_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
-                         struct expression *) override;
+			 struct expression *) override;
 
   int insert_watchpoint (CORE_ADDR, int, enum target_hw_bp_type,
-                         struct expression *) override;
+			 struct expression *) override;
 
   bool stopped_by_watchpoint () override;
 
@@ -71,14 +71,14 @@ public:
   const struct target_desc *read_description () override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
-                                        const char *annex, gdb_byte *readbuf,
-                                        const gdb_byte *writebuf,
-                                        ULONGEST offset, ULONGEST len,
-                                        ULONGEST *xfered_len) override;
+					const char *annex, gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
 
 protected:
   CORE_ADDR register_u_offset (struct gdbarch *gdbarch, int regno,
-                               int store_p) override;
+			       int store_p) override;
 
   void low_new_thread (struct lwp_info *lp) override;
 
@@ -88,7 +88,7 @@ private:
 };
 
 /* Assume that we have PTRACE_{GET,SET}REGSET et al. support.  If we do not,
-   we'll clear this and use PTRACE_PEEKUSR instead.*/
+   we'll clear this and use PTRACE_PEEKUSR instead.  */
 extern enum tribool have_ptrace_getregset;
 
 static void
@@ -102,16 +102,15 @@ ensure_ptrace_getregset ()
 
 void
 loongarch_linux_nat_target::fetch_registers (struct regcache *regcache,
-                                             int regnum)
+					     int regnum)
 {
   if (have_ptrace_getregset == TRIBOOL_UNKNOWN)
     ensure_ptrace_getregset ();
 
   if (sizeof (void *) == 4)
-    gdb_assert (have_ptrace_getregset == TRIBOOL_TRUE ||
-                register_size (regcache->arch (),
-                               gdbarch_tdep (regcache->arch ())->regs.r) !=
-                  32);
+    gdb_assert (have_ptrace_getregset == TRIBOOL_TRUE
+		||register_size (regcache->arch (),
+		  gdbarch_tdep (regcache->arch ())->regs.r) != 32);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     loongarch_fetch_regs (regcache, regnum);
@@ -124,16 +123,15 @@ loongarch_linux_nat_target::fetch_registers (struct regcache *regcache,
 
 void
 loongarch_linux_nat_target::store_registers (struct regcache *regcache,
-                                             int regnum)
+					     int regnum)
 {
   if (have_ptrace_getregset == TRIBOOL_UNKNOWN)
     ensure_ptrace_getregset ();
 
   if (sizeof (void *) == 4)
-    gdb_assert (have_ptrace_getregset == TRIBOOL_TRUE ||
-                register_size (regcache->arch (),
-                               gdbarch_tdep (regcache->arch ())->regs.r) !=
-                  32);
+    gdb_assert (have_ptrace_getregset == TRIBOOL_TRUE
+		|| register_size (regcache->arch (),
+		   gdbarch_tdep (regcache->arch ())->regs.r) != 32);
 
   if (have_ptrace_getregset == TRIBOOL_TRUE)
     loongarch_store_regs (regcache, regnum);
@@ -150,7 +148,7 @@ loongarch_linux_nat_target::read_description ()
 
 void
 loongarch_linux_nat_target::loongarch_fetch_regs (struct regcache *regcache,
-                                                  int regno)
+						  int regno)
 {
   auto regs = &gdbarch_tdep (regcache->arch ())->regs;
   pid_t tid = get_ptrace_pid (regcache->ptid ());
@@ -158,114 +156,114 @@ loongarch_linux_nat_target::loongarch_fetch_regs (struct regcache *regcache,
   do
     {
       if (regs->r < 0)
-        break;
+	break;
       if (regno == -1)
-        ;
+	;
       else if (regs->r <= regno && regno < regs->r + 32)
-        ;
+	;
       else if (regs->pc == regno)
-        ;
+	;
       else if (regs->badvaddr == regno)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_gregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iovec));
       loongarch_elf_gregset.supply_regset (NULL, regcache, regno, &regset,
-                                           sizeof (regset));
+					   sizeof (regset));
     }
   while (0);
 
   do
     {
       if (regs->f < 0)
-        break;
+	break;
       if (regno == -1)
-        ;
+	;
       else if (regs->f <= regno && regno < regs->f + 32)
-        ;
+	;
       else if (regs->fcc <= regno && regno < regs->fcc + 8)
-        ;
+	;
       else if (regs->fcsr == regno)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_fpregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iovec));
       loongarch_elf_fpregset.supply_regset (NULL, regcache, regno, &regset,
-                                            sizeof (regset));
+					    sizeof (regset));
     }
   while (0);
 
   do
     {
       if (regs->scr < 0)
-        break;
+	break;
       else if (regno == -1)
-        ;
+	;
       else if (regs->scr <= regno && regno < regs->scr + 4)
-        ;
+	;
       else if (regs->EFLAG == regno)
-        ;
+	;
       else if (regs->x86_top == regno)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_lbtregset_t regset = { 0 };
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LBT, &iovec));
       loongarch_elf_lbtregset.supply_regset (NULL, regcache, regno, &regset,
-                                             sizeof (regset));
+					     sizeof (regset));
     }
   while (0);
 
   do
     {
       if (regs->vr < 0)
-        break;
+	break;
       if (regno == -1)
-        ;
+	;
       else if (regs->vr <= regno && regno < regs->vr + 32)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_lsxregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LSX, &iovec));
       loongarch_elf_lsxregset.supply_regset (NULL, regcache, regno, &regset,
-                                             sizeof (regset));
+					     sizeof (regset));
     }
   while (0);
 
   do
     {
       if (regs->xr < 0)
-        break;
+	break;
       else if (regno == -1)
-        ;
+	;
       else if (regs->xr <= regno && regno < regs->xr + 32)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_lasxregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LASX, &iovec));
       loongarch_elf_lasxregset.supply_regset (NULL, regcache, regno, &regset,
-                                              sizeof (regset));
+					      sizeof (regset));
     }
   while (0);
 }
 
 void
 loongarch_linux_nat_target::loongarch_store_regs (struct regcache *regcache,
-                                                  int regno)
+						  int regno)
 {
   auto regs = &gdbarch_tdep (regcache->arch ())->regs;
   pid_t tid = get_ptrace_pid (regcache->ptid ());
@@ -273,21 +271,21 @@ loongarch_linux_nat_target::loongarch_store_regs (struct regcache *regcache,
   do
     {
       if (regs->r < 0)
-        break;
+	break;
       if (regno == -1)
-        ;
+	;
       else if (regs->r <= regno && regno < regs->r + 32)
-        ;
+	;
       else if (regs->pc == regno || regs->badvaddr == regno)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_gregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iovec));
       loongarch_elf_gregset.collect_regset (NULL, regcache, regno, &regset,
-                                            sizeof (regset));
+					    sizeof (regset));
       gdb_assert (0 == ptrace (PTRACE_SETREGSET, tid, NT_PRSTATUS, &iovec));
     }
   while (0);
@@ -295,23 +293,23 @@ loongarch_linux_nat_target::loongarch_store_regs (struct regcache *regcache,
   do
     {
       if (regs->f < 0)
-        break;
+	break;
       if (regno == -1)
-        ;
+	;
       else if (regs->f <= regno && regno < regs->f + 32)
-        ;
+	;
       else if (regs->fcc <= regno && regno < regs->fcc + 8)
-        ;
+	;
       else if (regs->fcsr == regno)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_fpregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iovec));
       loongarch_elf_fpregset.collect_regset (NULL, regcache, regno, &regset,
-                                             sizeof (regset));
+					     sizeof (regset));
       gdb_assert (0 == ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET, &iovec));
     }
   while (0);
@@ -319,23 +317,23 @@ loongarch_linux_nat_target::loongarch_store_regs (struct regcache *regcache,
   do
     {
       if (regs->scr < 0)
-        break;
+	break;
       else if (regno == -1)
-        ;
+	;
       else if (regs->scr <= regno && regno < regs->scr + 4)
-        ;
+	;
       else if (regs->EFLAG == regno)
-        ;
+	;
       else if (regs->x86_top == regno)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_lbtregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LBT, &iovec));
       loongarch_elf_lbtregset.collect_regset (NULL, regcache, regno, &regset,
-                                              sizeof (regset));
+					      sizeof (regset));
       gdb_assert (0 == ptrace (PTRACE_SETREGSET, tid, NT_LARCH_LBT, &iovec));
     }
   while (0);
@@ -343,19 +341,19 @@ loongarch_linux_nat_target::loongarch_store_regs (struct regcache *regcache,
   do
     {
       if (regs->vr < 0)
-        break;
+	break;
       if (regno == -1)
-        ;
+	;
       else if (regs->vr <= regno && regno < regs->vr + 32)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_lsxregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LSX, &iovec));
       loongarch_elf_lsxregset.collect_regset (NULL, regcache, regno, &regset,
-                                              sizeof (regset));
+					      sizeof (regset));
       gdb_assert (0 == ptrace (PTRACE_SETREGSET, tid, NT_LARCH_LSX, &iovec));
     }
   while (0);
@@ -363,19 +361,19 @@ loongarch_linux_nat_target::loongarch_store_regs (struct regcache *regcache,
   do
     {
       if (regs->xr < 0)
-        break;
+	break;
       else if (regno == -1)
-        ;
+	;
       else if (regs->xr <= regno && regno < regs->xr + 32)
-        ;
+	;
       else
-        break;
+	break;
 
       loongarch_elf_lasxregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       gdb_assert (0 == ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LASX, &iovec));
       loongarch_elf_lasxregset.collect_regset (NULL, regcache, regno, &regset,
-                                               sizeof (regset));
+					       sizeof (regset));
       gdb_assert (0 == ptrace (PTRACE_SETREGSET, tid, NT_LARCH_LASX, &iovec));
     }
   while (0);
@@ -385,7 +383,7 @@ loongarch_linux_nat_target::loongarch_store_regs (struct regcache *regcache,
 
 CORE_ADDR
 loongarch_linux_nat_target::register_u_offset (struct gdbarch *gdbarch,
-                                               int regno, int store_p)
+					       int regno, int store_p)
 {
   auto regs = &gdbarch_tdep (gdbarch)->regs;
   /* according to <asm/ptrace.h> */
@@ -400,10 +398,10 @@ loongarch_linux_nat_target::register_u_offset (struct gdbarch *gdbarch,
 
 enum target_xfer_status
 loongarch_linux_nat_target::xfer_partial (enum target_object object,
-                                          const char *annex, gdb_byte *readbuf,
-                                          const gdb_byte *writebuf,
-                                          ULONGEST offset, ULONGEST len,
-                                          ULONGEST *xfered_len)
+					  const char *annex, gdb_byte *readbuf,
+					  const gdb_byte *writebuf,
+					  ULONGEST offset, ULONGEST len,
+					  ULONGEST *xfered_len)
 {
   pid_t pid = inferior_ptid.pid ();
 
@@ -414,17 +412,17 @@ loongarch_linux_nat_target::xfer_partial (enum target_object object,
   if (strcmp (annex, "cpucfg") == 0)
     {
       if (writebuf)
-        return TARGET_XFER_E_IO;
+	return TARGET_XFER_E_IO;
       if (offset % 4 != 0 || offset % 4 != 0)
-        return TARGET_XFER_E_IO;
+	return TARGET_XFER_E_IO;
       char t_buf[offset + len];
       struct iovec iovec = { .iov_base = &t_buf, .iov_len = sizeof (t_buf) };
       if (ptrace (PTRACE_GETREGSET, pid, NT_LARCH_CPUCFG, &iovec) < 0)
-        {
-          size_t i;
-          for (i = offset / 4; i < (offset + len) / 4 + 1; i++)
-            ((uint32_t *) t_buf)[i] = loongarch_cpucfg (i);
-        }
+	{
+	  size_t i;
+	  for (i = offset / 4; i < (offset + len) / 4 + 1; i++)
+	    ((uint32_t *) t_buf)[i] = loongarch_cpucfg (i);
+	}
       memcpy (readbuf, t_buf + offset, len);
       *xfered_len = len;
       return TARGET_XFER_OK;
@@ -439,34 +437,34 @@ static loongarch_linux_nat_target the_loongarch_linux_nat_target;
 
 void
 supply_gregset (struct regcache *regcache,
-                const gdb_gregset_t /* elf_gregset_t */ *gregset)
+		const gdb_gregset_t /* elf_gregset_t  */ *gregset)
 {
   loongarch_elf_gregset.supply_regset (NULL, regcache, -1, gregset,
-                                       sizeof (gdb_gregset_t));
+				       sizeof (gdb_gregset_t));
 }
 
 void
 fill_gregset (const struct regcache *regcache,
-              gdb_gregset_t /* elf_gregset_t */ *gregset, int regno)
+	      gdb_gregset_t /* elf_gregset_t  */ *gregset, int regno)
 {
   loongarch_elf_gregset.collect_regset (NULL, regcache, regno, gregset,
-                                        sizeof (gdb_gregset_t));
+					sizeof (gdb_gregset_t));
 }
 
 void
 supply_fpregset (struct regcache *regcache,
-                 const gdb_fpregset_t /* elf_fpregset_t */ *fpregset)
+		 const gdb_fpregset_t /* elf_fpregset_t  */ *fpregset)
 {
   loongarch_elf_fpregset.supply_regset (NULL, regcache, -1, fpregset,
-                                        sizeof (gdb_fpregset_t));
+					sizeof (gdb_fpregset_t));
 }
 
 void
 fill_fpregset (const struct regcache *regcache,
-               gdb_fpregset_t /* elf_fpregset_t */ *fpregset, int regno)
+	       gdb_fpregset_t /* elf_fpregset_t  */ *fpregset, int regno)
 {
   loongarch_elf_fpregset.collect_regset (NULL, regcache, regno, fpregset,
-                                         sizeof (gdb_fpregset_t));
+					 sizeof (gdb_fpregset_t));
 }
 
 /* -1 if the kernel and/or CPU do not support watch registers.
@@ -495,7 +493,7 @@ static struct pt_watch_regs watch_mirror =
 
 static void
 loongarch_show_dr (const char *func, CORE_ADDR addr, int len,
-                   enum target_hw_bp_type type)
+		   enum target_hw_bp_type type)
 {
   int i;
 
@@ -504,21 +502,21 @@ loongarch_show_dr (const char *func, CORE_ADDR addr, int len,
     printf_unfiltered (
       " (addr=%s, len=%d, type=%s)", paddress (target_gdbarch (), addr), len,
       type == hw_write
-        ? "data-write"
-        : (type == hw_read
-             ? "data-read"
-             : (type == hw_access ? "data-read/write"
-                                  : (type == hw_execute ? "instruction-execute"
-                                                        : "??unknown??"))));
+	? "data-write"
+	: (type == hw_read
+	     ? "data-read"
+	     : (type == hw_access ? "data-read/write"
+				  : (type == hw_execute ? "instruction-execute"
+							: "??unknown??"))));
   puts_unfiltered (":\n");
 
   for (i = 0; i < MAX_DEBUG_REGISTER; i++)
     printf_unfiltered (
       "\tDR%d: addr=%s, mask=%s\n", i,
       paddress (target_gdbarch (),
-                loongarch_linux_watch_get_addr (&watch_mirror, i)),
+		loongarch_linux_watch_get_addr (&watch_mirror, i)),
       paddress (target_gdbarch (),
-                loongarch_linux_watch_get_mask (&watch_mirror, i)));
+		loongarch_linux_watch_get_mask (&watch_mirror, i)));
 }
 
 /* Target to_can_use_hw_breakpoint implementation.  Return 1 if we can
@@ -526,14 +524,14 @@ loongarch_show_dr (const char *func, CORE_ADDR addr, int len,
 
 int
 loongarch_linux_nat_target::can_use_hw_breakpoint (enum bptype type, int cnt,
-                                                   int ot)
+						   int ot)
 {
   int i;
   uint32_t wanted_mask, irw_mask;
   long lwp = inferior_ptid.lwp ();
 
   if (!loongarch_linux_read_watch_registers (lwp, &watch_readback,
-                                             &watch_readback_valid, 0))
+					     &watch_readback_valid, 0))
     return 0;
 
   switch (type)
@@ -559,7 +557,7 @@ loongarch_linux_nat_target::can_use_hw_breakpoint (enum bptype type, int cnt,
     {
       irw_mask = loongarch_linux_watch_get_irwmask (&watch_readback, i);
       if ((irw_mask & wanted_mask) == wanted_mask)
-        cnt--;
+	cnt--;
     }
   return (cnt == 0) ? 1 : 0;
 }
@@ -575,14 +573,14 @@ loongarch_linux_nat_target::stopped_by_watchpoint ()
   int num_valid;
 
   if (!loongarch_linux_read_watch_registers (
-        inferior_ptid.lwp (), &watch_readback, &watch_readback_valid, 1))
+	inferior_ptid.lwp (), &watch_readback, &watch_readback_valid, 1))
     return false;
 
   num_valid = loongarch_linux_watch_get_num_valid (&watch_readback);
 
   for (n = 0; n < MAX_DEBUG_REGISTER && n < num_valid; n++)
-    if (loongarch_linux_watch_get_irwstat (&watch_readback, n) &
-        (R_MASK | W_MASK))
+    if (loongarch_linux_watch_get_irwstat (&watch_readback, n)
+	& (R_MASK | W_MASK))
       return true;
 
   return false;
@@ -597,40 +595,40 @@ loongarch_linux_nat_target::stopped_data_address (CORE_ADDR *paddr)
 {
   int num_valid, n;
   if (!loongarch_linux_read_watch_registers (
-        inferior_ptid.lwp (), &watch_readback, &watch_readback_valid, 1))
+	inferior_ptid.lwp (), &watch_readback, &watch_readback_valid, 1))
     return false;
 
   num_valid = loongarch_linux_watch_get_num_valid (&watch_readback);
 
   for (n = 0; n < MAX_DEBUG_REGISTER && n < num_valid; n++)
-    if (loongarch_linux_watch_get_irwstat (&watch_readback, n) &
-        (R_MASK | W_MASK))
+    if (loongarch_linux_watch_get_irwstat (&watch_readback, n)
+	& (R_MASK | W_MASK))
       {
-        CORE_ADDR t_addr, t_mask;
-        int t_irw;
-        struct loongarch_watchpoint *watch;
+	CORE_ADDR t_addr, t_mask;
+	int t_irw;
+	struct loongarch_watchpoint *watch;
 
-        t_addr = loongarch_linux_watch_get_addr (&watch_readback, n);
-        t_irw = loongarch_linux_watch_get_irw (&watch_readback, n) & IRW_MASK;
-        t_mask = loongarch_linux_watch_get_mask (&watch_readback, n);
+	t_addr = loongarch_linux_watch_get_addr (&watch_readback, n);
+	t_irw = loongarch_linux_watch_get_irw (&watch_readback, n) & IRW_MASK;
+	t_mask = loongarch_linux_watch_get_mask (&watch_readback, n);
 
-        for (watch = current_watches; watch != NULL; watch = watch->next)
-          {
-            CORE_ADDR addr = watch->addr;
-            CORE_ADDR last_byte = addr + watch->len - 1;
+	for (watch = current_watches; watch != NULL; watch = watch->next)
+	  {
+	    CORE_ADDR addr = watch->addr;
+	    CORE_ADDR last_byte = addr + watch->len - 1;
 
-            if ((t_irw & loongarch_linux_watch_type_to_irw (watch->type)) == 0)
-              {
-                /* Different type.  */
-                continue;
-              }
-            /* Check for overlap of even a single byte.  */
-            if (last_byte >= t_addr && addr <= t_addr + t_mask)
-              {
-                *paddr = addr;
-                return true;
-              }
-          }
+	    if ((t_irw & loongarch_linux_watch_type_to_irw (watch->type)) == 0)
+	      {
+		/* Different type.  */
+		continue;
+	      }
+	    /* Check for overlap of even a single byte.  */
+	    if (last_byte >= t_addr && addr <= t_addr + t_mask)
+	      {
+		*paddr = addr;
+		return true;
+	      }
+	  }
       }
   return false;
 }
@@ -640,13 +638,13 @@ loongarch_linux_nat_target::stopped_data_address (CORE_ADDR *paddr)
 
 int
 loongarch_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr,
-                                                         int len)
+							 int len)
 {
   struct pt_watch_regs dummy_regs;
   int i;
 
   if (!loongarch_linux_read_watch_registers (
-        inferior_ptid.lwp (), &watch_readback, &watch_readback_valid, 0))
+	inferior_ptid.lwp (), &watch_readback, &watch_readback_valid, 0))
     return 0;
 
   dummy_regs = watch_readback;
@@ -685,7 +683,7 @@ loongarch_linux_nat_target::low_new_thread (struct lwp_info *lp)
   long tid = lp->ptid.lwp ();
 
   if (!loongarch_linux_read_watch_registers (tid, &watch_readback,
-                                             &watch_readback_valid, 0))
+					     &watch_readback_valid, 0))
     return;
 
   if (ptrace (PTRACE_SET_WATCH_REGS, tid, &watch_mirror, NULL) == -1)
@@ -697,8 +695,8 @@ loongarch_linux_nat_target::low_new_thread (struct lwp_info *lp)
 
 int
 loongarch_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
-                                               enum target_hw_bp_type type,
-                                               struct expression *cond)
+					       enum target_hw_bp_type type,
+					       struct expression *cond)
 {
   struct pt_watch_regs regs =
   {
@@ -710,7 +708,7 @@ loongarch_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
   int retval;
 
   if (!loongarch_linux_read_watch_registers (
-        inferior_ptid.lwp (), &watch_readback, &watch_readback_valid, 0))
+	inferior_ptid.lwp (), &watch_readback, &watch_readback_valid, 0))
     return -1;
 
   if (len <= 0)
@@ -722,7 +720,7 @@ loongarch_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
 
   /* Now try to add the new watch.  */
   if (!loongarch_linux_watch_try_one_watch (
-        &regs, addr, len, loongarch_linux_watch_type_to_irw (type)))
+	&regs, addr, len, loongarch_linux_watch_type_to_irw (type)))
     return -1;
 
   /* It fit.  Stick it on the end of the list.  */
@@ -751,8 +749,8 @@ loongarch_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
 
 int
 loongarch_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
-                                               enum target_hw_bp_type type,
-                                               struct expression *cond)
+					       enum target_hw_bp_type type,
+					       struct expression *cond)
 {
   int retval;
   int deleted_one;
@@ -767,12 +765,12 @@ loongarch_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
   while ((w = *pw))
     {
       if (w->addr == addr && w->len == len && w->type == type)
-        {
-          *pw = w->next;
-          xfree (w);
-          deleted_one = 1;
-          break;
-        }
+	{
+	  *pw = w->next;
+	  xfree (w);
+	  deleted_one = 1;
+	  break;
+	}
       pw = &(w->next);
     }
 

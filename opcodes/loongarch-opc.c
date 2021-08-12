@@ -15,7 +15,7 @@
    License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; see the file COPYING3. If not,
+   along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 
 #include <stddef.h>
@@ -44,7 +44,7 @@ struct loongarch_ASEs_option LARCH_opts =
 size_t
 loongarch_insn_length (insn_t insn)
 {
-  return insn ? 4 : 4; /* eliminate warning */
+  return insn ? 4 : 4; /* Eliminate warning.  */
 }
 
 const char *const loongarch_r_normal_name[32] =
@@ -122,7 +122,7 @@ const char *const loongarch_x_normal_name[32] =
 
 static struct loongarch_opcode loongarch_macro_opcodes[] =
 {
-  /* match,    mask,       name, format, macro, include, exclude, pinfo */
+  /* match,    mask,       name, format, macro, include, exclude, pinfo.  */
   { 0, 0, "li.w", "r,sc", "%f", 0, 0, 0},
   { 0, 0, "li.d", "r,sc", "%f", 0, 0, 0},
   { 0, 0, "la", "r,la", "la.global %1,%2", 0, 0, 0 },
@@ -204,7 +204,7 @@ static struct loongarch_opcode loongarch_macro_opcodes[] =
     "lu12i.w %1,%%tprel(%2)>>12;"
     "ori %1,%1,%%tprel(%2)&0xfff",
     &LARCH_opts.addrwidth_is_32, 0, 0 },
-  /* {0, 0, "la.tls.le", "r,la",
+  /* { 0, 0, "la.tls.le", "r,la",
   * "lu12i.w %1,%%tprel(%2)>>12;"
   * "ori %1,%1,%%tprel(%2)&0xfff"
   * , &LARCH_opts.addrwidth_is_64, 0, 0}, */
@@ -278,7 +278,7 @@ static struct loongarch_opcode loongarch_macro_opcodes[] =
 
 static struct loongarch_opcode loongarch_fix_opcodes[] =
 {
-  /* match,    mask,       name, format, macro, include, exclude, pinfo */
+  /* match,    mask,       name, format, macro, include, exclude, pinfo.  */
   { 0x00001000, 0xfffffc00, "clo.w", "r0:5,r5:5", 0, 0, 0, 0 },
   { 0x00001400, 0xfffffc00, "clz.w", "r0:5,r5:5", 0, 0, 0, 0 },
   { 0x00001800, 0xfffffc00, "cto.w", "r0:5,r5:5", 0, 0, 0, 0 },
@@ -299,7 +299,8 @@ static struct loongarch_opcode loongarch_fix_opcodes[] =
   { 0x00005400, 0xfffffc00, "bitrev.d", "r0:5,r5:5", 0, 0, 0, 0 },
   { 0x00005800, 0xfffffc00, "ext.w.h", "r0:5,r5:5", 0, 0, 0, 0 },
   { 0x00005c00, 0xfffffc00, "ext.w.b", "r0:5,r5:5", 0, 0, 0, 0 },
-  { 0x00150000, 0xfffffc00, "move", "r0:5,r5:5", 0 /* or %1,%2,$r0 */, 0, 0, 0 },
+  /* or %1,%2,$r0  */
+  { 0x00150000, 0xfffffc00, "move", "r0:5,r5:5", 0, 0, 0, 0 },
   { 0x00006000, 0xfffffc00, "rdtimel.w", "r0:5,r5:5", 0, 0, 0, 0 },
   { 0x00006400, 0xfffffc00, "rdtimeh.w", "r0:5,r5:5", 0, 0, 0, 0 },
   { 0x00006800, 0xfffffc00, "rdtime.d", "r0:5,r5:5", 0, 0, 0, 0 },
@@ -377,7 +378,7 @@ static struct loongarch_opcode loongarch_fix_opcodes[] =
 
 static struct loongarch_opcode loongarch_float_opcodes[] =
 {
-  /* match,    mask,       name, format, macro, include, exclude, pinfo */
+  /* match,    mask,       name, format, macro, include, exclude, pinfo.  */
   { 0x01008000, 0xffff8000, "fadd.s", "f0:5,f5:5,f10:5", 0, 0, 0, 0 },
   { 0x01010000, 0xffff8000, "fadd.d", "f0:5,f5:5,f10:5", 0, 0, 0, 0 },
   { 0x01028000, 0xffff8000, "fsub.s", "f0:5,f5:5,f10:5", 0, 0, 0, 0 },
@@ -459,7 +460,7 @@ static struct loongarch_opcode loongarch_float_opcodes[] =
 
 static struct loongarch_opcode loongarch_lmm_opcodes[] =
 {
-  /* match,    mask,       name, format, macro, include, exclude, pinfo */
+  /* match,    mask,       name, format, macro, include, exclude, pinfo.  */
   { 0x02000000, 0xffc00000, "slti", "r0:5,r5:5,s10:12", 0, 0, 0, 0 },
   { 0x02400000, 0xffc00000, "sltui", "r0:5,r5:5,s10:12", 0, 0, 0, 0 },
   { 0x02800000, 0xffc00000, "addi.w", "r0:5,r5:5,s10:12", 0, 0, 0, 0 },
@@ -481,7 +482,7 @@ static struct loongarch_opcode loongarch_lmm_opcodes[] =
 
 static struct loongarch_opcode loongarch_privilege_opcodes[] =
 {
-  /* match,    mask,       name, format, macro, include, exclude, pinfo */
+  /* match,    mask,       name, format, macro, include, exclude, pinfo.  */
   { 0x04000000, 0xff0003e0, "csrrd", "r0:5,u10:14", 0, 0, 0, 0 },
   { 0x04000020, 0xff0003e0, "csrwr", "r0:5,u10:14", 0, 0, 0, 0 },
   { 0x04000000, 0xff000000, "csrxchg", "r0:5,r5:5,u10:14", 0, 0, 0, 0 },
@@ -510,7 +511,7 @@ static struct loongarch_opcode loongarch_privilege_opcodes[] =
 
 static struct loongarch_opcode loongarch_4opt_opcodes[] =
 {
-  /* match,    mask,       name, format, macro, include, exclude, pinfo */
+  /* match,    mask,       name, format, macro, include, exclude, pinfo.  */
   { 0x08100000, 0xfff00000, "fmadd.s", "f0:5,f5:5,f10:5,f15:5", 0, 0, 0, 0 },
   { 0x08200000, 0xfff00000, "fmadd.d", "f0:5,f5:5,f10:5,f15:5", 0, 0, 0, 0 },
   { 0x08500000, 0xfff00000, "fmsub.s", "f0:5,f5:5,f10:5,f15:5", 0, 0, 0, 0 },
@@ -577,7 +578,7 @@ static struct loongarch_opcode loongarch_4opt_opcodes[] =
 
 static struct loongarch_opcode loongarch_load_store_opcodes[] =
 {
-  /* match,    mask,       name, format, macro, include, exclude, pinfo */
+  /* match,    mask,       name, format, macro, include, exclude, pinfo.  */
   { 0x20000000, 0xff000000, "ll.w", "r0:5,r5:5,s10:14<<2", 0, 0, 0, 0 },
   { 0x21000000, 0xff000000, "sc.w", "r0:5,r5:5,s10:14<<2", 0, 0, 0, 0 },
   { 0x22000000, 0xff000000, "ll.d", "r0:5,r5:5,s10:14<<2", 0, 0, 0, 0 },
@@ -721,7 +722,7 @@ static struct loongarch_opcode loongarch_load_store_opcodes[] =
 
 static struct loongarch_opcode loongarch_jmp_opcodes[] =
 {
-  /* match,    mask,       name, format, macro, include, exclude, pinfo */
+  /* match,    mask,       name, format, macro, include, exclude, pinfo.  */
   { 0, 0, "bltz", "r,la", "bltz %1,%%pcrel(%2)", 0, 0, 0 },
   { 0x60000000, 0xfc00001f, "bltz", "r5:5,sb10:16<<2", 0, 0, 0, 0 },
   { 0, 0, "bgtz", "r,la", "bgtz %1,%%pcrel(%2)", 0, 0, 0 },

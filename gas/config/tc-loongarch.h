@@ -15,7 +15,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; see the file COPYING3. If not,
+   along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 
 #ifndef TC_LOONGARCH
@@ -27,7 +27,7 @@
 #define WORKING_DOT_WORD 1
 #define REPEAT_CONS_EXPRESSIONS
 
-/* Early than md_begin. */
+/* Early than md_begin.  */
 #define md_after_parse_args loongarch_after_parse_args
 extern void loongarch_after_parse_args (void);
 
@@ -37,7 +37,7 @@ extern void loongarch_pop_insert (void);
 #define TARGET_FORMAT loongarch_target_format ()
 extern const char *loongarch_target_format (void);
 
-#define md_relax_frag(segment, fragp, stretch)                                \
+#define md_relax_frag(segment, fragp, stretch)	\
   loongarch_relax_frag (segment, fragp, stretch)
 extern int loongarch_relax_frag (asection *, struct frag *, long);
 #define md_section_align(seg, size) (size)
@@ -53,23 +53,23 @@ extern int loongarch_relax_frag (asection *, struct frag *, long);
 #define DIFF_EXPR_OK 1
 
 #define TARGET_USE_CFIPOP 1
-#define DWARF2_DEFAULT_RETURN_COLUMN 1 /* $ra */
+#define DWARF2_DEFAULT_RETURN_COLUMN 1 /* $ra.  */
 #define DWARF2_CIE_DATA_ALIGNMENT -4
 extern int loongarch_dwarf2_addr_size (void);
 #define DWARF2_FDE_RELOC_SIZE loongarch_dwarf2_addr_size ()
 #define DWARF2_ADDR_SIZE(bfd) loongarch_dwarf2_addr_size ()
 #define CFI_DIFF_EXPR_OK 0
 
-#define tc_cfi_frame_initial_instructions                                     \
+#define tc_cfi_frame_initial_instructions	\
   loongarch_cfi_frame_initial_instructions
 extern void loongarch_cfi_frame_initial_instructions (void);
 
-/* #define tc_regname_to_dw2regnum tc_loongarch_regname_to_dw2regnum */
+/* #define tc_regname_to_dw2regnum tc_loongarch_regname_to_dw2regnum  */
 #define tc_parse_to_dw2regnum tc_loongarch_parse_to_dw2regnum
 extern void tc_loongarch_parse_to_dw2regnum (expressionS *);
 
-/* A enumerated values to specific how to deal with align in '.text'. */
-/* Now we want to fill 'andi $r0,$r0,0x0'. */
+/* A enumerated values to specific how to deal with align in '.text'.  */
+/* Now we want to fill 'andi $r0,$r0,0x0'.  */
 #define loongarch_nop_opcode() 0
 #define NOP_OPCODE (loongarch_nop_opcode ())
 

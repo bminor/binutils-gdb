@@ -15,7 +15,7 @@
    License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; see the file COPYING3. If not,
+   along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 
 #include "sysdep.h"
@@ -33,27 +33,28 @@ get_loongarch_opcode_by_binfmt (insn_t insn)
   size_t i;
   for (ase = loongarch_ASEs; ase->enabled; ase++)
     {
-      if (!*ase->enabled || (ase->include && !*ase->include) ||
-          (ase->exclude && *ase->exclude))
-        continue;
+      if (!*ase->enabled || (ase->include && !*ase->include)
+	  || (ase->exclude && *ase->exclude))
+	continue;
 
       if (!ase->opc_htab_inited)
-        {
-          for (it = ase->opcodes; it->mask; it++)
-            if (!ase->opc_htab[LARCH_INSN_OPC (it->match)] &&
-                it->macro == NULL)
-              ase->opc_htab[LARCH_INSN_OPC (it->match)] = it;
-          for (i = 0; i < 16; i++)
-            if (!ase->opc_htab[i])
-              ase->opc_htab[i] = it;
-          ase->opc_htab_inited = 1;
-        }
+	{
+	  for (it = ase->opcodes; it->mask; it++)
+	    if (!ase->opc_htab[LARCH_INSN_OPC (it->match)]
+		&& it->macro == NULL)
+	      ase->opc_htab[LARCH_INSN_OPC (it->match)] = it;
+	  for (i = 0; i < 16; i++)
+	    if (!ase->opc_htab[i])
+	      ase->opc_htab[i] = it;
+	  ase->opc_htab_inited = 1;
+	}
 
       it = ase->opc_htab[LARCH_INSN_OPC (insn)];
       for (; it->name; it++)
-        if ((insn & it->mask) == it->match && it->mask &&
-            !(it->include && !*it->include) && !(it->exclude && *it->exclude))
-          return it;
+	if ((insn & it->mask) == it->match && it->mask
+	    && !(it->include && !*it->include)
+	    && !(it->exclude && *it->exclude))
+	  return it;
     }
   return NULL;
 }
@@ -102,23 +103,23 @@ parse_loongarch_dis_options (const char *opts_in)
     return 0;
 
   char *opts, *opt, *opt_end;
-  opts = xmalloc(strlen(opts_in) + 1);
+  opts = xmalloc (strlen (opts_in) + 1);
   strcpy (opts, opts_in);
 
   for (opt = opt_end = opts; opt_end != NULL; opt = opt_end + 1)
     {
       if ((opt_end = strchr (opt, ',')) != NULL)
-        *opt_end = 0;
+	*opt_end = 0;
       if (parse_loongarch_dis_option (opt) != 0)
-        return -1;
+	return -1;
     }
-  free(opts);
+  free (opts);
   return 0;
 }
 
 static int32_t
 dis_one_arg (char esc1, char esc2, const char *bit_field,
-             const char *arg ATTRIBUTE_UNUSED, void *context)
+	     const char *arg ATTRIBUTE_UNUSED, void *context)
 {
   static int need_comma = 0;
   struct disassemble_info *info = context;
@@ -128,7 +129,7 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
   if (esc1)
     {
       if (need_comma)
-        info->fprintf_func (info->stream, ", ");
+	info->fprintf_func (info->stream, ", ");
       need_comma = 1;
       imm = loongarch_decode_imm (bit_field, insn, 1);
       u_imm = loongarch_decode_imm (bit_field, insn, 0);
@@ -144,13 +145,13 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
       break;
     case 'c':
       switch (esc2)
-        {
-        case 'r':
-          info->fprintf_func (info->stream, "%s", loongarch_cr_disname[u_imm]);
-          break;
-        default:
-          info->fprintf_func (info->stream, "%s", loongarch_c_disname[u_imm]);
-        }
+	{
+	case 'r':
+	  info->fprintf_func (info->stream, "%s", loongarch_cr_disname[u_imm]);
+	  break;
+	default:
+	  info->fprintf_func (info->stream, "%s", loongarch_c_disname[u_imm]);
+	}
       break;
     case 'v':
       info->fprintf_func (info->stream, "%s", loongarch_v_disname[u_imm]);
@@ -163,15 +164,15 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
       break;
     case 's':
       if (imm == 0)
-        info->fprintf_func (info->stream, "%d", imm);
+	info->fprintf_func (info->stream, "%d", imm);
       else
-        info->fprintf_func (info->stream, "%d(0x%x)", imm, u_imm);
+	info->fprintf_func (info->stream, "%d(0x%x)", imm, u_imm);
       switch (esc2)
-        {
-        case 'b':
-          info->insn_type = dis_branch;
-          info->target += imm;
-        }
+	{
+	case 'b':
+	  info->insn_type = dis_branch;
+	  info->target += imm;
+	}
       break;
     case '\0':
       need_comma = 0;
@@ -192,24 +193,25 @@ disassemble_one (insn_t insn, struct disassemble_info *info)
   if (t_f)
     while (*t_f)
       {
-        while (('a' <= t_f[0] && t_f[0] <= 'z') ||
-               ('A' <= t_f[0] && t_f[0] <= 'Z') t_f[0] == ',')
-          t_f++;
-        while (1)
-          {
-            i = strtol (t_f, &t_f, 10);
-            have_space[i] = 1;
-            t_f++; /* ':' */
-            i += strtol (t_f, &t_f, 10);
-            have_space[i] = 1;
-            if (t_f[0] == '|')
-              t_f++;
-            else
-              break;
-          }
-        if (t_f[0] == '<')
-          t_f += 2; /* '<' '<' */
-        strtol (t_f, &t_f, 10);
+	while (('a' <= t_f[0] && t_f[0] <= 'z')
+	       || ('A' <= t_f[0] && t_f[0] <= 'Z')
+	       || t_f[0] == ',')
+	  t_f++;
+	while (1)
+	  {
+	    i = strtol (t_f, &t_f, 10);
+	    have_space[i] = 1;
+	    t_f++; /* ':' */
+	    i += strtol (t_f, &t_f, 10);
+	    have_space[i] = 1;
+	    if (t_f[0] == '|')
+	      t_f++;
+	    else
+	      break;
+	  }
+	if (t_f[0] == '<')
+	  t_f += 2; /* '<' '<' */
+	strtol (t_f, &t_f, 10);
       }
 
   have_space[28] = 1;
@@ -218,11 +220,11 @@ disassemble_one (insn_t insn, struct disassemble_info *info)
   for (i = 31; 0 <= i; i--)
     {
       if (t & insn)
-        info->fprintf_func (info->stream, "1");
+	info->fprintf_func (info->stream, "1");
       else
-        info->fprintf_func (info->stream, "0");
+	info->fprintf_func (info->stream, "0");
       if (have_space[i])
-        info->fprintf_func (info->stream, " ");
+	info->fprintf_func (info->stream, " ");
       t = t >> 1;
     }
   info->fprintf_func (info->stream, "\t");
@@ -239,18 +241,18 @@ disassemble_one (insn_t insn, struct disassemble_info *info)
   info->fprintf_func (info->stream, "%-12s", opc->name);
 
   {
-    char *fake_args = xmalloc(strlen(opc->format) + 1);
+    char *fake_args = xmalloc (strlen (opc->format) + 1);
     const char *fake_arg_strs[MAX_ARG_NUM_PLUS_2];
     strcpy (fake_args, opc->format);
     if (0 < loongarch_split_args_by_comma (fake_args, fake_arg_strs))
       info->fprintf_func (info->stream, "\t");
     info->private_data = &insn;
     loongarch_foreach_args (opc->format, fake_arg_strs, dis_one_arg, info);
-    free(fake_args);
+    free (fake_args);
   }
 
   if (info->insn_type == dis_branch || info->insn_type == dis_condbranch
-      /* || someother if we have extra info to print */)
+      /* Someother if we have extra info to print.  */)
     info->fprintf_func (info->stream, "\t#");
 
   if (info->insn_type == dis_branch || info->insn_type == dis_condbranch)
@@ -280,7 +282,7 @@ print_insn_loongarch (bfd_vma memaddr, struct disassemble_info *info)
   info->target = memaddr;
 
   if ((status = info->read_memory_func (memaddr, (bfd_byte *) &insn,
-                                        sizeof (insn), info)) != 0)
+					sizeof (insn), info)) != 0)
     {
       info->memory_error_func (status, memaddr, info);
       return -1; /* loongarch_insn_length (0); */
@@ -299,7 +301,7 @@ The following LoongArch disassembler options are supported for use\n\
 with the -M switch (multiple options should be separated by commas):\n"));
 
   fprintf (stream, _ ("\n\
-           numeric       Print numeric register names, rather than ABI names.\n"));
+    numeric       Print numeric register names, rather than ABI names.\n"));
   fprintf (stream, _ ("\n"));
 }
 
@@ -317,9 +319,9 @@ my_print_address_func (bfd_vma addr, struct disassemble_info *dinfo)
 
 void
 loongarch_disassemble_one (int64_t pc, insn_t insn,
-                           int (*fprintf_func) (void *stream,
-                                                const char *format, ...),
-                           void *stream)
+			   int (*fprintf_func) (void *stream,
+						const char *format, ...),
+			   void *stream)
 {
   static struct disassemble_info my_disinfo =
   {

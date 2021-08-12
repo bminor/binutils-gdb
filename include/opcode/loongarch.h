@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; see the file COPYING3. If not,
+   along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 
 #ifndef _LOONGARCH_H_
@@ -33,12 +33,11 @@ extern "C"
   struct loongarch_opcode
   {
     const insn_t match;
-    const insn_t mask; /* High 1 byte is main opcode and it must be 0xf. */
+    const insn_t mask; /* High 1 byte is main opcode and it must be 0xf.  */
 #define LARCH_INSN_OPC(insn) ((insn & 0xf0000000) >> 28)
     const char *const name;
 
-    /*
-     ACTUAL PARAMETER:
+    /* ACTUAL PARAMETER:
 
   // BNF with regular expression.
 args : token* end
@@ -47,7 +46,8 @@ args : token* end
 token : ','
 | '('
 | ')'
-| iden             // maybe a label (include at least one alphabet), maybe a number, maybe a expr
+| iden	     // maybe a label (include at least one alphabet),
+		      maybe a number, maybe a expr
 | regname
 
 regname : '$' iden
@@ -57,11 +57,13 @@ iden : [a-zA-Z0-9\.\+\-]+
 end : '\0'
 
 
-FORMAT: A string to describe the format of actual parameter including bit field infomation.
-For example, "r5:5,r0:5,sr10:16<<2" matches "$12,$13,12345" and "$4,$7,a_label".
-That 'sr' means the instruction may need relocate. '10:16' means bit field of instruction.
-In a 'format', every 'escape's can be replaced to 'iden' or 'regname' acrroding to its meaning.
-We fill all information needed by disassembing and assembing to 'format'.
+FORMAT: A string to describe the format of actual parameter including
+bit field infomation.  For example, "r5:5,r0:5,sr10:16<<2" matches
+"$12,$13,12345" and "$4,$7,a_label".  That 'sr' means the instruction
+may need relocate. '10:16' means bit field of instruction.
+In a 'format', every 'escape's can be replaced to 'iden' or 'regname'
+acrroding to its meaning.  We fill all information needed by
+disassembing and assembing to 'format'.
 
   // BNF with regular expression.
 format : escape (literal+ escape)* literal* end
@@ -69,7 +71,8 @@ format : escape (literal+ escape)* literal* end
 
 end : '\0'       // Get here means parse end.
 
-  // The intersection between any two among FIRST (end), FIRST (literal) and FIRST (escape) must be empty.
+  // The intersection between any two among FIRST (end), FIRST
+     (literal) and FIRST (escape) must be empty.
   // So we can build a simple parser.
 literal : ','
 | '('
@@ -82,7 +85,8 @@ escape : esc_ch bit_field '<' '<' dec2
 
   // '|' means to concatenate nonadjacent bit fields
   // For example, "10:16|0:4" means
-  // "16 bits starting from the 10th bit concatenating with 4 bits starting from the 0th bit".
+  // "16 bits starting from the 10th bit concatenating with 4 bits
+     starting from the 0th bit".
   // This is to say "[25..10]||[3..0]" (little endian).
 b_field : dec2 ':' dec2
 | dec2 ':' dec2 '|' bit_field
@@ -102,9 +106,9 @@ dec2 : [1-9][0-9]?
 */
     const char *const format;
 
-    /*
-MACRO: Indicate how a macro instruction expand for assembling.
-The main is to replace the '%num'(means the 'num'th 'escape' in 'format') in 'macro' string to get the real instruction.
+    /* MACRO: Indicate how a macro instruction expand for assembling.
+The main is to replace the '%num'(means the 'num'th 'escape' in 'format')
+in 'macro' string to get the real instruction.
 
 Maybe need
 */
@@ -125,11 +129,11 @@ Maybe need
     const int *include;
     const int *exclude;
 
-    /* For disassemble to create main opcode hash table. */
+    /* For disassemble to create main opcode hash table.  */
     const struct loongarch_opcode *opc_htab[16];
     unsigned char opc_htab_inited;
 
-    /* For GAS to create hash table. */
+    /* For GAS to create hash table.  */
     struct htab *name_hash_entry;
   };
 
@@ -141,17 +145,17 @@ Maybe need
 
   extern int loongarch_get_bit_field_width (const char *bit_field, char **end);
   extern int32_t loongarch_decode_imm (const char *bit_field, insn_t insn,
-                                       int si);
+				       int si);
 
 #define MAX_ARG_NUM_PLUS_2 9
 
   extern size_t loongarch_split_args_by_comma (char *args,
-                                               const char *arg_strs[]);
+					       const char *arg_strs[]);
   extern char *loongarch_cat_splited_strs (const char *arg_strs[]);
   extern insn_t loongarch_foreach_args (
     const char *format, const char *arg_strs[],
     int32_t (*helper) (char esc1, char esc2, const char *bit_field,
-                       const char *arg, void *context),
+		       const char *arg, void *context),
     void *context);
 
   extern int loongarch_check_format (const char *format);

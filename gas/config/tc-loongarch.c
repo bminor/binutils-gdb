@@ -16,7 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; see the file COPYING3. If not,
+   along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 
 #include "as.h"
@@ -29,17 +29,17 @@
 #include <stdio.h>
 #include <assert.h>
 
-/* All information about an instruction during assemble */
+/* All information about an instruction during assemble.  */
 struct loongarch_cl_insn
 {
-  /* First split string */
+  /* First split string.  */
   const char *name;
   const char *arg_strs[MAX_ARG_NUM_PLUS_2];
   size_t arg_num;
 
   /* Second analyze name_str and each actual args string to match the insn
      in 'loongarch-opc.c'. And actual args may need be relocated.
-     We get length of insn. If 'insn_length == 0 && insn_mo->macro != NULL',
+     We get length of insn.  If 'insn_length == 0 && insn_mo->macro != NULL',
      it's a macro insntruction and we call 'md_assemble' recursively
      after expanding it.  */
   int match_now;
@@ -52,14 +52,14 @@ struct loongarch_cl_insn
   struct reloc_info reloc_info[MAX_RELOC_NUMBER_A_INSN];
   size_t reloc_num;
 
-  /* For relax reserved. We not support relax now.
+  /* For relax reserved.  We not support relax now.
      'insn_length < relax_max_length' means need to relax.
-     And 'insn_length == relax_max_length' means no need to relax. */
+     And 'insn_length == relax_max_length' means no need to relax.  */
   size_t relax_max_length;
   relax_substateT subtype;
 
   /* Then we get the binary representation of insn
-     and write it in to section. */
+     and write it in to section.  */
   insn_t insn_bin;
 
   /* The frag that contains the instruction.  */
@@ -71,12 +71,12 @@ struct loongarch_cl_insn
 };
 
 /* This array holds the chars that always start a comment.  If the
-   pre-processor is disabled, these aren't very useful */
+   pre-processor is disabled, these aren't very useful.  */
 const char comment_chars[] = "#";
 
 /* This array holds the chars that only start a comment at the beginning of
    a line.  If the line seems to have the form '# 123 filename'
-   .line and .file directives will appear in the pre-processed output */
+   .line and .file directives will appear in the pre-processed output.  */
 /* Note that input_file.c hand checks for '#' at the beginning of the
    first line of the input file.  This is because the compiler outputs
 #NO_APP at the beginning of its output.  */
@@ -86,12 +86,12 @@ const char line_comment_chars[] = "#";
 /* This array holds machine specific line separator characters.  */
 const char line_separator_chars[] = ";";
 
-/* Chars that can be used to separate mant from exp in floating point nums */
+/* Chars that can be used to separate mant from exp in floating point nums.  */
 const char EXP_CHARS[] = "eE";
 
-/* Chars that mean this number is a floating point constant */
-/* As in 0f12.456 */
-/* or    0d1.2345e12 */
+/* Chars that mean this number is a floating point constant.  */
+/* As in 0f12.456.  */
+/* or    0d1.2345e12.  */
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 const char *md_shortopts = "O::g::G:";
@@ -271,7 +271,8 @@ md_begin ()
 	  }
     }
 
-  /* FIXME: expressionS use 'offsetT' as constant, we want this is 64-bit type */
+  /* FIXME: expressionS use 'offsetT' as constant,
+   * we want this is 64-bit type */
   assert (8 <= sizeof (offsetT));
 }
 
@@ -584,8 +585,8 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
       bits_needed_s = loongarch_bits_imm_needed (imm, 1);
       bits_needed_u = loongarch_bits_imm_needed (imm, 0);
 
-      if ((esc_ch1 == 's' && bit_width < bits_needed_s) ||
-	  (esc_ch1 != 's' && bit_width < bits_needed_u))
+      if ((esc_ch1 == 's' && bit_width < bits_needed_s)
+	  || (esc_ch1 != 's' && bit_width < bits_needed_u))
 	/* How to do after we detect overflow.  */
 	as_fatal (_ ("Immediate overflow.\n"
 		     "format: %c%c%s\n"
@@ -609,8 +610,8 @@ get_loongarch_opcode (struct loongarch_cl_insn *insn)
   struct loongarch_ase *ase;
   for (ase = loongarch_ASEs; ase->enabled; ase++)
     {
-      if (!*ase->enabled || (ase->include && !*ase->include) ||
-	  (ase->exclude && *ase->exclude))
+      if (!*ase->enabled || (ase->include && !*ase->include)
+	  || (ase->exclude && *ase->exclude))
 	continue;
 
       if (!ase->name_hash_entry)
@@ -663,7 +664,7 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
 	   /* ammin_db.wu  rd, rk, rj  */
 	       || (ip->insn_bin & 0xffff0000) == 0x38710000))
     {
-      /* For AMO insn amswap.[wd], amadd.[wd], etc. */
+      /* For AMO insn amswap.[wd], amadd.[wd], etc.  */
       if (ip->args[0] != 0
 	  && (ip->args[0] == ip->args[1] || ip->args[0] == ip->args[2]))
 	as_fatal (
@@ -744,7 +745,7 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
   dwarf2_emit_insn (0);
 }
 
-/* Ask helper for returning a malloced c_str or NULL. */
+/* Ask helper for returning a malloced c_str or NULL.  */
 static char *
 assember_macro_helper (const char *const args[], void *context_ptr)
 {
@@ -1015,8 +1016,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  && (stack_top & ~(uint64_t) 0xfffff) != ~(uint64_t) 0xfffff)
 	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
       insn = bfd_getl32 (buf);
-      insn = (insn & 0xfc0003e0) | ((stack_top & 0xffff) << 10) |
-	     ((stack_top & 0x1f0000) >> 16);
+      insn = (insn & 0xfc0003e0)
+	     | ((stack_top & 0xffff) << 10)
+	     | ((stack_top & 0x1f0000) >> 16);
       bfd_putl32 (insn, buf);
       break;
 
@@ -1041,8 +1043,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  && (stack_top & ~(uint64_t) 0x1ffffff) != ~(uint64_t) 0x1ffffff)
 	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
       insn = bfd_getl32 (buf);
-      insn = (insn & 0xfc000000) | ((stack_top & 0xffff) << 10) |
-	     ((stack_top & 0x3ff0000) >> 16);
+      insn = (insn & 0xfc000000)
+	     | ((stack_top & 0xffff) << 10)
+	     | ((stack_top & 0x3ff0000) >> 16);
       bfd_putl32 (insn, buf);
       break;
 
@@ -1210,7 +1213,7 @@ loongarch_handle_align (fragS *fragp)
   gas_assert (excess < 4);
   fragp->fr_fix += excess;
 
-  while(excess-- != 0)
+  while (excess-- != 0)
     *p++ = 0;
 
   md_number_to_chars (p, opcode, size);

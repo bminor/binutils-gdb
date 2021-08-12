@@ -15,7 +15,7 @@
    License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; see the file COPYING3. If not,
+   along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 #include "sysdep.h"
 #include "opcode/loongarch.h"
@@ -26,10 +26,10 @@ is_unsigned (const char *c_str)
   if (c_str[0] == '0' && (c_str[1] == 'x' || c_str[1] == 'X'))
     {
       c_str += 2;
-      while (('a' <= *c_str && *c_str <= 'f') ||
-             ('A' <= *c_str && *c_str <= 'F') ||
-             ('0' <= *c_str && *c_str <= '9'))
-        c_str++;
+      while (('a' <= *c_str && *c_str <= 'f')
+	     || ('A' <= *c_str && *c_str <= 'F')
+	     || ('0' <= *c_str && *c_str <= '9'))
+	c_str++;
     }
   else if (*c_str == '\0')
     return 0;
@@ -51,14 +51,14 @@ is_internal_label (const char *c_str)
   do
     {
       if (*c_str != ':')
-        break;
+	break;
       c_str++;
       if (!('0' <= *c_str && *c_str <= '9'))
-        break;
+	break;
       while ('0' <= *c_str && *c_str <= '9')
-        c_str++;
+	c_str++;
       if (*c_str != 'b' && *c_str != 'f')
-        break;
+	break;
       c_str++;
       return *c_str == '\0';
     }
@@ -73,21 +73,25 @@ is_label (const char *c_str)
     return 1;
   else if ('0' <= *c_str && *c_str <= '9')
     {
-      /* [0-9]+[bf] */
+      /* [0-9]+[bf]  */
       while ('0' <= *c_str && *c_str <= '9')
-        c_str++;
+	c_str++;
       return *c_str == 'b' || *c_str == 'f';
     }
-  else if (('a' <= *c_str && *c_str <= 'z') ||
-           ('A' <= *c_str && *c_str <= 'Z') || *c_str == '.' ||
-           *c_str == '_' || *c_str == '$')
+  else if (('a' <= *c_str && *c_str <= 'z')
+	   || ('A' <= *c_str && *c_str <= 'Z')
+	   || *c_str == '.'
+	   || *c_str == '_'
+	   || *c_str == '$')
     {
-      /* [a-zA-Z\._\$][0-9a-zA-Z\._\$]* */
-      while (('a' <= *c_str && *c_str <= 'z') ||
-             ('A' <= *c_str && *c_str <= 'Z') ||
-             ('0' <= *c_str && *c_str <= '9') || *c_str == '.' ||
-             *c_str == '_' || *c_str == '$')
-        c_str++;
+      /* [a-zA-Z\._\$][0-9a-zA-Z\._\$]*  */
+      while (('a' <= *c_str && *c_str <= 'z')
+	     || ('A' <= *c_str && *c_str <= 'Z')
+	     || ('0' <= *c_str && *c_str <= '9')
+	     || *c_str == '.'
+	     || *c_str == '_'
+	     || *c_str == '$')
+	c_str++;
       return *c_str == '\0';
     }
   else
@@ -101,28 +105,34 @@ is_label_with_addend (const char *c_str)
     return 1;
   else if ('0' <= *c_str && *c_str <= '9')
     {
-      /* [0-9]+[bf] */
+      /* [0-9]+[bf]  */
       while ('0' <= *c_str && *c_str <= '9')
-        c_str++;
+	c_str++;
       if (*c_str == 'b' || *c_str == 'f')
-        c_str++;
+	c_str++;
       else
-        return 0;
-      return *c_str == '\0' ||
-             ((*c_str == '-' || *c_str == '+') && is_unsigned (c_str + 1));
+	return 0;
+      return *c_str == '\0'
+		       || ((*c_str == '-' || *c_str == '+')
+			   && is_unsigned (c_str + 1));
     }
-  else if (('a' <= *c_str && *c_str <= 'z') ||
-           ('A' <= *c_str && *c_str <= 'Z') || *c_str == '.' ||
-           *c_str == '_' || *c_str == '$')
+  else if (('a' <= *c_str && *c_str <= 'z')
+	   || ('A' <= *c_str && *c_str <= 'Z')
+	   || *c_str == '.'
+	   || *c_str == '_'
+	   || *c_str == '$')
     {
-      /* [a-zA-Z\._\$][0-9a-zA-Z\._\$]* */
-      while (('a' <= *c_str && *c_str <= 'z') ||
-             ('A' <= *c_str && *c_str <= 'Z') ||
-             ('0' <= *c_str && *c_str <= '9') || *c_str == '.' ||
-             *c_str == '_' || *c_str == '$')
-        c_str++;
-      return *c_str == '\0' ||
-             ((*c_str == '-' || *c_str == '+') && is_unsigned (c_str + 1));
+      /* [a-zA-Z\._\$][0-9a-zA-Z\._\$]*  */
+      while (('a' <= *c_str && *c_str <= 'z')
+	     || ('A' <= *c_str && *c_str <= 'Z')
+	     || ('0' <= *c_str && *c_str <= '9')
+	     || *c_str == '.'
+	     || *c_str == '_'
+	     || *c_str == '$')
+	c_str++;
+      return *c_str == '\0'
+		       || ((*c_str == '-' || *c_str == '+')
+			   && is_unsigned (c_str + 1));
     }
   else
     return 0;
@@ -136,18 +146,18 @@ loongarch_get_bit_field_width (const char *bit_field, char **end)
   if (bit_field_1 && *bit_field_1 != '\0')
     while (1)
       {
-        strtol (bit_field_1, &bit_field_1, 10);
+	strtol (bit_field_1, &bit_field_1, 10);
 
-        if (*bit_field_1 != ':')
-          break;
-        bit_field_1++;
+	if (*bit_field_1 != ':')
+	  break;
+	bit_field_1++;
 
-        width += strtol (bit_field_1, &bit_field_1, 10);
-        has_specify = 1;
+	width += strtol (bit_field_1, &bit_field_1, 10);
+	has_specify = 1;
 
-        if (*bit_field_1 != '|')
-          break;
-        bit_field_1++;
+	if (*bit_field_1 != '|')
+	  break;
+	bit_field_1++;
       }
   if (end)
     *end = bit_field_1;
@@ -165,7 +175,7 @@ loongarch_decode_imm (const char *bit_field, insn_t insn, int si)
     {
       b_start = strtol (bit_field_1, &bit_field_1, 10);
       if (*bit_field_1 != ':')
-        break;
+	break;
       width = strtol (bit_field_1 + 1, &bit_field_1, 10);
       len += width;
 
@@ -176,7 +186,7 @@ loongarch_decode_imm (const char *bit_field, insn_t insn, int si)
       ret |= t;
 
       if (*bit_field_1 != '|')
-        break;
+	break;
       bit_field_1++;
     }
 
@@ -219,7 +229,7 @@ loongarch_encode_imm (const char *bit_field, int32_t imm)
     {
       b_start = strtol (bit_field_1, &bit_field_1, 10);
       if (*bit_field_1 != ':')
-        break;
+	break;
       width = strtol (bit_field_1 + 1, &bit_field_1, 10);
       i = imm;
       i >>= sizeof (i) * 8 - width;
@@ -228,7 +238,7 @@ loongarch_encode_imm (const char *bit_field, int32_t imm)
       imm <<= width;
 
       if (*bit_field_1 != '|')
-        break;
+	break;
       bit_field_1++;
     }
   return ret;
@@ -243,7 +253,7 @@ loongarch_encode_imm (const char *bit_field, int32_t imm)
 */
 static int
 loongarch_parse_format (const char *format, char *esc1s, char *esc2s,
-                        const char **bit_fields)
+			const char **bit_fields)
 {
   size_t arg_num = 0;
 
@@ -252,74 +262,74 @@ loongarch_parse_format (const char *format, char *esc1s, char *esc2s,
 
   while (1)
     {
-      /*        esc1    esc2
-                for "[a-zA-Z][a-zA-Z]?" */
-      if (('a' <= *format && *format <= 'z') ||
-          ('A' <= *format && *format <= 'Z'))
-        {
-          *esc1s++ = *format++;
-          if (('a' <= *format && *format <= 'z') ||
-              ('A' <= *format && *format <= 'Z'))
-            *esc2s++ = *format++;
-          else
-            *esc2s++ = '\0';
-        }
+      /* esc1    esc2
+	 for "[a-zA-Z][a-zA-Z]?"  */
+      if (('a' <= *format && *format <= 'z')
+	  || ('A' <= *format && *format <= 'Z'))
+	{
+	  *esc1s++ = *format++;
+	  if (('a' <= *format && *format <= 'z')
+	      || ('A' <= *format && *format <= 'Z'))
+	    *esc2s++ = *format++;
+	  else
+	    *esc2s++ = '\0';
+	}
       else
-        return -1;
+	return -1;
 
       arg_num++;
       if (MAX_ARG_NUM_PLUS_2 - 2 < arg_num)
-        /* Need larger MAX_ARG_NUM_PLUS_2. */
-        return -1;
+	/* Need larger MAX_ARG_NUM_PLUS_2.  */
+	return -1;
 
       *bit_fields++ = format;
 
       if ('0' <= *format && *format <= '9')
-        {
-          /* For "[0-9]+:[0-9]+(\|[0-9]+:[0-9]+)*". */
-          while (1)
-            {
-              while ('0' <= *format && *format <= '9')
-                format++;
+	{
+	  /* For "[0-9]+:[0-9]+(\|[0-9]+:[0-9]+)*".  */
+	  while (1)
+	    {
+	      while ('0' <= *format && *format <= '9')
+		format++;
 
-              if (*format != ':')
-                return -1;
-              format++;
+	      if (*format != ':')
+		return -1;
+	      format++;
 
-              if (!('0' <= *format && *format <= '9'))
-                return -1;
-              while ('0' <= *format && *format <= '9')
-                format++;
+	      if (!('0' <= *format && *format <= '9'))
+		return -1;
+	      while ('0' <= *format && *format <= '9')
+		format++;
 
-              if (*format != '|')
-                break;
-              format++;
-            }
+	      if (*format != '|')
+		break;
+	      format++;
+	    }
 
-          /* For "((\+|<<)[1-9][0-9]*)?". */
-          do
-            {
-              if (*format == '+')
-                format++;
-              else if (format[0] == '<' && format[1] == '<')
-                format += 2;
-              else
-                break;
+	  /* For "((\+|<<)[1-9][0-9]*)?".  */
+	  do
+	    {
+	      if (*format == '+')
+		format++;
+	      else if (format[0] == '<' && format[1] == '<')
+		format += 2;
+	      else
+		break;
 
-              if (!('1' <= *format && *format <= '9'))
-                return -1;
-              while ('0' <= *format && *format <= '9')
-                format++;
-            }
-          while (0);
-        }
+	      if (!('1' <= *format && *format <= '9'))
+		return -1;
+	      while ('0' <= *format && *format <= '9')
+		format++;
+	    }
+	  while (0);
+	}
 
       if (*format == ',')
-        format++;
+	format++;
       else if (*format == '\0')
-        break;
+	break;
       else
-        return -1;
+	return -1;
     }
 
 end:
@@ -337,10 +347,10 @@ loongarch_split_args_by_comma (char *args, const char *arg_strs[])
   for (; *args; args++)
     if (*args == ',')
       {
-        if (MAX_ARG_NUM_PLUS_2 - 1 == num)
-          break;
-        else
-          *args = '\0', arg_strs[num++] = args + 1;
+	if (MAX_ARG_NUM_PLUS_2 - 1 == num)
+	  break;
+	else
+	  *args = '\0', arg_strs[num++] = args + 1;
       }
   arg_strs[num] = NULL;
   return num;
@@ -365,10 +375,10 @@ loongarch_cat_splited_strs (const char *arg_strs[])
 
 insn_t
 loongarch_foreach_args (const char *format, const char *arg_strs[],
-                        int32_t (*helper) (char esc1, char esc2,
-                                           const char *bit_field,
-                                           const char *arg, void *context),
-                        void *context)
+			int32_t (*helper) (char esc1, char esc2,
+					   const char *bit_field,
+					   const char *arg, void *context),
+			void *context)
 {
   char esc1s[MAX_ARG_NUM_PLUS_2 - 1], esc2s[MAX_ARG_NUM_PLUS_2 - 1];
   const char *bit_fields[MAX_ARG_NUM_PLUS_2 - 1];
@@ -378,7 +388,7 @@ loongarch_foreach_args (const char *format, const char *arg_strs[],
 
   ok = loongarch_parse_format (format, esc1s, esc2s, bit_fields) == 0;
 
-  /* Make sure the num of actual args is equal to the num of escape. */
+  /* Make sure the num of actual args is equal to the num of escape.  */
   for (i = 0; esc1s[i] && arg_strs[i]; i++)
     ;
   ok = ok && !esc1s[i] && !arg_strs[i];
@@ -386,9 +396,9 @@ loongarch_foreach_args (const char *format, const char *arg_strs[],
   if (ok && helper)
     {
       for (i = 0; arg_strs[i]; i++)
-        ret |= loongarch_encode_imm (
-          bit_fields[i],
-          helper (esc1s[i], esc2s[i], bit_fields[i], arg_strs[i], context));
+	ret |= loongarch_encode_imm (
+	  bit_fields[i],
+	  helper (esc1s[i], esc2s[i], bit_fields[i], arg_strs[i], context));
       ret |= helper ('\0', '\0', NULL, NULL, context);
     }
 
@@ -414,8 +424,8 @@ loongarch_check_macro (const char *format, const char *macro)
   char esc1s[MAX_ARG_NUM_PLUS_2 - 1], esc2s[MAX_ARG_NUM_PLUS_2 - 1];
   const char *bit_fields[MAX_ARG_NUM_PLUS_2 - 1];
 
-  if (!format || !macro ||
-      loongarch_parse_format (format, esc1s, esc2s, bit_fields) != 0)
+  if (!format || !macro
+      || loongarch_parse_format (format, esc1s, esc2s, bit_fields) != 0)
     return -1;
 
   for (num_of_args = 0; esc1s[num_of_args]; num_of_args++)
@@ -424,19 +434,19 @@ loongarch_check_macro (const char *format, const char *macro)
   for (; macro[0]; macro++)
     if (macro[0] == '%')
       {
-        macro++;
-        if ('1' <= macro[0] && macro[0] <= '9')
-          {
-            if (num_of_args < macro[0] - '0')
-              /* Out of args num. */
-              return -1;
-          }
-        else if (macro[0] == 'f')
-          ;
-        else if (macro[0] == '%')
-          ;
-        else
-          return -1;
+	macro++;
+	if ('1' <= macro[0] && macro[0] <= '9')
+	  {
+	    if (num_of_args < macro[0] - '0')
+	      /* Out of args num.  */
+	      return -1;
+	  }
+	else if (macro[0] == 'f')
+	  ;
+	else if (macro[0] == '%')
+	  ;
+	else
+	  return -1;
       }
   return 0;
 }
@@ -469,28 +479,28 @@ loongarch_expand_macro_with_format_map (
   while (*src)
     if (*src == '%')
       {
-        src++;
-        if ('1' <= *src && *src <= '9')
-          {
-            size_t i = *src - '1';
-            const char *t = map (esc1s[i], esc2s[i], arg_strs[i]);
-            while (*t)
-              *dest++ = *t++;
-          }
-        else if (*src == '%')
-          *dest++ = '%';
-        else if (*src == 'f' && helper)
-          {
-            char *b, *t;
-            t = b = (*helper) (arg_strs, context);
-            if (b)
-              {
-                while (*t)
-                  *dest++ = *t++;
-                free (b);
-              }
-          }
-        src++;
+	src++;
+	if ('1' <= *src && *src <= '9')
+	  {
+	    size_t i = *src - '1';
+	    const char *t = map (esc1s[i], esc2s[i], arg_strs[i]);
+	    while (*t)
+	      *dest++ = *t++;
+	  }
+	else if (*src == '%')
+	  *dest++ = '%';
+	else if (*src == 'f' && helper)
+	  {
+	    char *b, *t;
+	    t = b = (*helper) (arg_strs, context);
+	    if (b)
+	      {
+		while (*t)
+		  *dest++ = *t++;
+		free (b);
+	      }
+	  }
+	src++;
       }
     else
       *dest++ = *src++;
@@ -501,12 +511,12 @@ loongarch_expand_macro_with_format_map (
 
 char *
 loongarch_expand_macro (const char *macro, const char *const arg_strs[],
-                        char *(*helper) (const char *const arg_strs[],
-                                         void *context),
-                        void *context)
+			char *(*helper) (const char *const arg_strs[],
+					 void *context),
+			void *context)
 {
   return loongarch_expand_macro_with_format_map (NULL, macro, arg_strs, I,
-                                                 helper, context);
+						 helper, context);
 }
 
 size_t
@@ -516,19 +526,19 @@ loongarch_bits_imm_needed (int64_t imm, int si)
   if (si)
     {
       if (imm < 0)
-        {
-          for (ret = 0; imm < 0; imm <<= 1, ret++)
-            ;
-          ret = 64 - ret + 1;
-        }
+	{
+	  for (ret = 0; imm < 0; imm <<= 1, ret++)
+	    ;
+	  ret = 64 - ret + 1;
+	}
       else
-        ret = loongarch_bits_imm_needed (imm, 0) + 1;
+	ret = loongarch_bits_imm_needed (imm, 0) + 1;
     }
   else
     {
       uint64_t t = imm;
       for (ret = 0; t; t >>= 1, ret++)
-        ;
+	;
     }
   return ret;
 }
@@ -542,7 +552,7 @@ loongarch_eliminate_adjacent_repeat_char (char *dest, char c)
   while (*dest)
     {
       while (src[0] == c && src[0] == src[1])
-        src++;
+	src++;
       *dest++ = *src++;
     }
 }

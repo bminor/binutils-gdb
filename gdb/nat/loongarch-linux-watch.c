@@ -34,7 +34,7 @@ loongarch_linux_watch_get_irwmask (struct pt_watch_regs *regs, int n)
       return regs->la64[n].irwmask & IRW_MASK;
     default:
       internal_error (__FILE__, __LINE__,
-                      _ ("Unrecognized watch register style"));
+		      _ ("Unrecognized watch register style"));
     }
 }
 
@@ -52,7 +52,7 @@ loongarch_linux_watch_get_irwstat (struct pt_watch_regs *regs, int n)
       return regs->la64[n].irwstat & IRW_MASK;
     default:
       internal_error (__FILE__, __LINE__,
-                      _ ("Unrecognized watch register style"));
+		      _ ("Unrecognized watch register style"));
     }
 }
 
@@ -78,7 +78,7 @@ loongarch_linux_watch_get_addr (struct pt_watch_regs *regs, int n)
       return regs->la64[n].addr;
     default:
       internal_error (__FILE__, __LINE__,
-                      _ ("Unrecognized watch register style"));
+		      _ ("Unrecognized watch register style"));
     }
 }
 
@@ -87,7 +87,7 @@ loongarch_linux_watch_get_addr (struct pt_watch_regs *regs, int n)
 
 void
 loongarch_linux_watch_set_addr (struct pt_watch_regs *regs, int n,
-                                CORE_ADDR value)
+				CORE_ADDR value)
 {
   switch (regs->style)
     {
@@ -101,7 +101,7 @@ loongarch_linux_watch_set_addr (struct pt_watch_regs *regs, int n,
       break;
     default:
       internal_error (__FILE__, __LINE__,
-                      _ ("Unrecognized watch register style"));
+		      _ ("Unrecognized watch register style"));
     }
 }
 
@@ -119,7 +119,7 @@ loongarch_linux_watch_get_mask (struct pt_watch_regs *regs, int n)
       return regs->la64[n].mask;
     default:
       internal_error (__FILE__, __LINE__,
-                      _ ("Unrecognized watch register style"));
+		      _ ("Unrecognized watch register style"));
     }
 }
 
@@ -128,7 +128,7 @@ loongarch_linux_watch_get_mask (struct pt_watch_regs *regs, int n)
 
 void
 loongarch_linux_watch_set_mask (struct pt_watch_regs *regs, int n,
-                                CORE_ADDR value)
+				CORE_ADDR value)
 {
   switch (regs->style)
     {
@@ -140,7 +140,7 @@ loongarch_linux_watch_set_mask (struct pt_watch_regs *regs, int n,
       break;
     default:
       internal_error (__FILE__, __LINE__,
-                      _ ("Unrecognized watch register style"));
+		      _ ("Unrecognized watch register style"));
     }
 }
 
@@ -158,7 +158,7 @@ loongarch_linux_watch_get_irw (struct pt_watch_regs *regs, int n)
       return regs->la64[n].irw;
     default:
       internal_error (__FILE__, __LINE__,
-                      _ ("Unrecognized watch register style"));
+		      _ ("Unrecognized watch register style"));
     }
 }
 
@@ -167,7 +167,7 @@ loongarch_linux_watch_get_irw (struct pt_watch_regs *regs, int n)
 
 void
 loongarch_linux_watch_set_irw (struct pt_watch_regs *regs, int n,
-                               uint8_t value)
+			       uint8_t value)
 {
   switch (regs->style)
     {
@@ -179,7 +179,7 @@ loongarch_linux_watch_set_irw (struct pt_watch_regs *regs, int n,
       break;
     default:
       internal_error (__FILE__, __LINE__,
-                      _ ("Unrecognized watch register style"));
+		      _ ("Unrecognized watch register style"));
     }
 }
 
@@ -190,21 +190,21 @@ loongarch_linux_watch_set_irw (struct pt_watch_regs *regs, int n,
 
 int
 loongarch_linux_read_watch_registers (long lwpid,
-                                      struct pt_watch_regs *watch_readback,
-                                      int *watch_readback_valid, int force)
+				      struct pt_watch_regs *watch_readback,
+				      int *watch_readback_valid, int force)
 {
   if (force || *watch_readback_valid == 0)
     {
       if (ptrace (PTRACE_GET_WATCH_REGS, lwpid, watch_readback, NULL) == -1)
-        {
-          *watch_readback_valid = -1;
-          return 0;
-        }
+	{
+	  *watch_readback_valid = -1;
+	  return 0;
+	}
       if (watch_readback->num_valid == 0)
-        {
-          *watch_readback_valid = -1;
-          return 0;
-        }
+	{
+	  *watch_readback_valid = -1;
+	  return 0;
+	}
       /* Watch registers appear to be usable.  */
       *watch_readback_valid = 1;
     }
@@ -252,7 +252,7 @@ fill_mask (CORE_ADDR mask)
 
 int
 loongarch_linux_watch_try_one_watch (struct pt_watch_regs *regs,
-                                     CORE_ADDR addr, int len, uint32_t irw)
+				     CORE_ADDR addr, int len, uint32_t irw)
 {
   CORE_ADDR base_addr, last_byte;
   CORE_ADDR mask_bits, t_addr, t_mask;
@@ -272,25 +272,25 @@ loongarch_linux_watch_try_one_watch (struct pt_watch_regs *regs,
       t_addr = loongarch_linux_watch_get_addr (regs, i);
       t_irw = loongarch_linux_watch_get_irw (regs, i);
       if (t_addr != 0 && irw == ((uint32_t) t_irw & irw))
-        {
-          t_mask = loongarch_linux_watch_get_mask (regs, i);
-          if (addr >= t_addr && last_byte <= (t_addr + t_mask))
-            return 1;
-        }
+	{
+	  t_mask = loongarch_linux_watch_get_mask (regs, i);
+	  if (addr >= t_addr && last_byte <= (t_addr + t_mask))
+	    return 1;
+	}
     }
   /* Try to find an empty register.  */
   for (i = 0; i < loongarch_linux_watch_get_num_valid (regs); i++)
     {
       t_addr = loongarch_linux_watch_get_addr (regs, i);
-      if (t_addr == 0 &&
-          irw == (loongarch_linux_watch_get_irwmask (regs, i) & irw))
-        {
-          /* It fits, we'll take it.  */
-          loongarch_linux_watch_set_addr (regs, i, base_addr);
-          loongarch_linux_watch_set_mask (regs, i, mask_bits);
-          loongarch_linux_watch_set_irw (regs, i, irw);
-          return 1;
-        }
+      if (t_addr == 0
+	  && irw == (loongarch_linux_watch_get_irwmask (regs, i) & irw))
+	{
+	  /* It fits, we'll take it.  */
+	  loongarch_linux_watch_set_addr (regs, i, base_addr);
+	  loongarch_linux_watch_set_mask (regs, i, mask_bits);
+	  loongarch_linux_watch_set_irw (regs, i, irw);
+	  return 1;
+	}
     }
   /* It didn't fit anywhere, we failed.  */
   return 0;

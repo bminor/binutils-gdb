@@ -25,7 +25,7 @@
 
 struct gdbarch_tdep
 {
-  int ef_abi; /* EF_LARCH_ABI */
+  int ef_abi; /* EF_LARCH_ABI  */
 
   struct
   {
@@ -52,4 +52,4 @@ struct gdbarch_tdep
   CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
 };
 
-#endif /* LOONGARCH_TDEP_H */
+#endif /* LOONGARCH_TDEP_H  */

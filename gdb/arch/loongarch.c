@@ -34,14 +34,14 @@ unsigned int loongarch_debug = 0;
 
 target_desc *
 loongarch_create_target_description (int rlen, int fpu32, int fpu64, int lbt,
-                                     int lsx, int lasx)
+				     int lsx, int lasx)
 {
   gdb_assert (rlen == 32 || rlen == 64);
 
   target_desc_up tdesc = allocate_target_description ();
 
   set_tdesc_architecture (tdesc.get (),
-                          rlen == 64 ? "loongarch64" : "loongarch32");
+			  rlen == 64 ? "loongarch64" : "loongarch32");
 
   int regnum = 0;
 
