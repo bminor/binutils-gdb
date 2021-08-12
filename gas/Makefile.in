@@ -792,7 +792,7 @@ as_new_DEPENDENCIES = $(TARG_CPU_O) $(OBJ_FORMAT_O) $(ATOF_TARG_O) \
 	$(extra_objects) $(GASLIBS) $(LIBINTL_DEP)
 
 
-# The loongarch lexical analyzer and parser.
+# The LoongArch lexical analyzer and parser.
 EXTRA_as_new_SOURCES = $(CFILES) $(HFILES) $(TARGET_CPU_CFILES) \
 	$(TARGET_CPU_HFILES) $(TARGET_EXTRA_FILES) $(TARG_ENV_CFILES) \
 	$(OBJ_FORMAT_CFILES) $(OBJ_FORMAT_HFILES) \

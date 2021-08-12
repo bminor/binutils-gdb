@@ -1,4 +1,4 @@
-/* Loongarch-specific support for NN-bit ELF.
+/* LoongArch-specific support for NN-bit ELF.
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
 
@@ -37,7 +37,7 @@ loongarch_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED, arelent *cache_ptr,
   return cache_ptr->howto != NULL;
 }
 
-/* Loongarch ELF linker hash entry.  */
+/* LoongArch ELF linker hash entry.  */
 struct loongarch_elf_link_hash_entry
 {
   struct elf_link_hash_entry elf;
@@ -96,7 +96,7 @@ struct loongarch_elf_link_hash_table
   bfd_vma max_alignment;
 };
 
-/* Get the Loongarch ELF linker hash table from a link_info structure.  */
+/* Get the LoongArch ELF linker hash table from a link_info structure.  */
 #define loongarch_elf_hash_table(p)					\
   (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash))	\
     == LARCH_ELF_DATA							\
@@ -202,7 +202,7 @@ loongarch_make_plt_entry (bfd_vma got_plt_entry_addr, bfd_vma plt_entry_addr,
   /* entry[3] = 0x4c0001e0; */ /* jirl $r0, $15, 0 */
 }
 
-/* Create an entry in an Loongarch ELF linker hash table.  */
+/* Create an entry in an LoongArch ELF linker hash table.  */
 
 static struct bfd_hash_entry *
 link_hash_newfunc (struct bfd_hash_entry *entry, struct bfd_hash_table *table,
@@ -304,7 +304,7 @@ elfNN_loongarch_get_local_sym_hash (struct loongarch_elf_link_hash_table *htab,
   return &ret->elf;
 }
 
-/* Destroy an Loongarch elf linker hash table.  */
+/* Destroy an LoongArch elf linker hash table.  */
 
 static void
 elfNN_loongarch_link_hash_table_free (bfd *obfd)
@@ -320,7 +320,7 @@ elfNN_loongarch_link_hash_table_free (bfd *obfd)
   _bfd_elf_link_hash_table_free (obfd);
 }
 
-/* Create a Loongarch ELF linker hash table.  */
+/* Create a LoongArch ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
 loongarch_elf_link_hash_table_create (bfd *abfd)
@@ -2980,7 +2980,7 @@ loongarch_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
       return false;
 
     case sizeof (
-      prstatus_t): /* The sizeof(struct elf_prstatus) on Linux/Loongarch.  */
+      prstatus_t): /* The sizeof(struct elf_prstatus) on Linux/LoongArch.  */
       /* pr_cursig  */
       elf_tdata (abfd)->core->signal =
 	bfd_get_16 (abfd, note->descdata + offsetof (prstatus_t, pr_cursig));
@@ -3006,7 +3006,7 @@ loongarch_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
       return false;
 
     case sizeof (
-      prpsinfo_t): /* sizeof(struct elf_prpsinfo) on Linux/Loongarch.  */
+      prpsinfo_t): /* sizeof(struct elf_prpsinfo) on Linux/LoongArch.  */
       /* pr_pid  */
       elf_tdata (abfd)->core->pid =
 	bfd_get_32 (abfd, note->descdata + offsetof (prpsinfo_t, pr_pid));
@@ -3042,7 +3042,7 @@ loongarch_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 static bool
 loongarch_elf_object_p (bfd *abfd)
 {
-  /* There are only two mach types in Loongarch currently.  */
+  /* There are only two mach types in LoongArch currently.  */
   if (strcmp (abfd->xvec->name, "elf64-loongarch") == 0)
     bfd_default_set_arch_mach (abfd, bfd_arch_loongarch, bfd_mach_loongarch64);
   else

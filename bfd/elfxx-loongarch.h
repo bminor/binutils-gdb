@@ -1,4 +1,4 @@
-/* Loonarch-specific backend routines.
+/* LoongArch-specific backend routines.
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
 

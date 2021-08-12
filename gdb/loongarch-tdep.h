@@ -1,4 +1,4 @@
-/* Target-dependent code for GNU/Linux Loongarch.
+/* Target-dependent code for GNU/Linux LoongArch.
 
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.

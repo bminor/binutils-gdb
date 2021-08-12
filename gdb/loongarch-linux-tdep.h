@@ -1,4 +1,4 @@
-/* GNU/Linux on Loongarch target support, prototypes.
+/* GNU/Linux on LoongArch target support, prototypes.
 
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.

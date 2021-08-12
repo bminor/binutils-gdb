@@ -1,4 +1,4 @@
-/* Target-dependent code for GNU/Linux Loongarch.
+/* Target-dependent code for GNU/Linux LoongArch.
 
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
@@ -520,21 +520,21 @@ loongarch_linux_iterate_over_regset_sections (
 			       &xfered_len) != TARGET_XFER_OK)
 	break;
       cb (".reg-loongarch-cpucfg", 64 * 4, 64 * 4, &loongarch_elf_cpucfgregset,
-	  "Loongarch CPU config", cb_data);
+	  "LoongArch CPU config", cb_data);
     }
   while (0);
   if (0 <= regs->scr)
     cb (".reg-loongarch-lbt", sizeof (loongarch_elf_lbtregset_t),
 	sizeof (loongarch_elf_lbtregset_t), &loongarch_elf_lbtregset,
-	"Loongson Binary Translation", cb_data);
+	"LoongArch Binary Translation", cb_data);
   if (0 <= regs->vr)
     cb (".reg-loongarch-lsx", sizeof (loongarch_elf_lsxregset_t),
 	sizeof (loongarch_elf_lsxregset_t), &loongarch_elf_lsxregset,
-	"Loongson SIMD Extension", cb_data);
+	"LoongArch SIMD Extension", cb_data);
   if (0 <= regs->xr)
     cb (".reg-loongarch-lasx", sizeof (loongarch_elf_lasxregset_t),
 	sizeof (loongarch_elf_lasxregset_t), &loongarch_elf_lasxregset,
-	"Loongson Advanced SIMD Extension", cb_data);
+	"LoongArch Advanced SIMD Extension", cb_data);
 }
 
 static const struct target_desc *

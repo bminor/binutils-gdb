@@ -1,4 +1,4 @@
-/* Target-dependent code for GNU/Linux Loongarch.
+/* Target-dependent code for GNU/Linux LoongArch.
 
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
@@ -270,7 +270,7 @@ loongarch_deal_with_atomic_sequence (struct regcache *regcache, CORE_ADDR pc)
   return next_pcs;
 }
 
-/* Implement loongarch software single step.  */
+/* Implement LoongArch software single step.  */
 
 std::vector<CORE_ADDR>
 loongarch_software_single_step (struct regcache *regcache);
@@ -1240,7 +1240,7 @@ loongarch_lp64_return_value (struct gdbarch *gdbarch, struct value *function,
        || (typecode == TYPE_CODE_STRUCT && type->num_fields () == 1
 	   && check_typedef (type->field (0).type ())->code ()
 		== TYPE_CODE_FLT))
-      && len <= rlen /* FIXME: May fpu32 on loongarch32.  */)
+      && len <= rlen /* FIXME: May fpu32 on LoongArch32.  */)
     /* If $fv0 could fit in.  */
     loongarch_xfer_reg_part (regcache, fv, len, readbuf, 0, writebuf, 0);
   else if ((typecode == TYPE_CODE_FLT
@@ -1319,7 +1319,7 @@ loongarch_lp64_return_value (struct gdbarch *gdbarch, struct value *function,
 			       0);
   else
     {
-      /* For small structure or int64_t on loongarch32.  */
+      /* For small structure or int64_t on LoongArch32.  */
       if (len <= rlen)
 	loongarch_xfer_reg_part (regcache, regs->r + 4, len, readbuf, 0,
 				 writebuf, 0);

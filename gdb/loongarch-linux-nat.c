@@ -1,4 +1,4 @@
-/* Target-dependent code for GNU/Linux Loongarch.
+/* Target-dependent code for GNU/Linux LoongArch.
 
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
@@ -867,9 +867,9 @@ _initialize_loongarch_linux_nat ()
 {
   add_setshow_boolean_cmd (
     "show-debug-regs", class_maintenance, &show_debug_regs, _ ("\
-Set whether to show variables that mirror the loongarch debug registers."),
+Set whether to show variables that mirror the LoongArch debug registers."),
     _ ("\
-Show whether to show variables that mirror the loongarch debug registers."),
+Show whether to show variables that mirror the LoongArch debug registers."),
     _ ("\
 Use \"on\" to enable, \"off\" to disable.\n\
 If enabled, the debug registers values are shown when GDB inserts\n\

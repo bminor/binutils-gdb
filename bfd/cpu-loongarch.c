@@ -1,4 +1,4 @@
-/* BFD support for Loongarch.
+/* BFD support for LoongArch.
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
 
@@ -46,8 +46,8 @@ const bfd_arch_info_type bfd_loongarch_arch =
   64,				/* 64 bits in an address.  */
   8,				/* 8 bits in a byte.  */
   bfd_arch_loongarch,		/* Architecture.  */
-  /* Machine number of loongarch64 is larger
-   * so that loongarch64 is compatible to loongarch32.  */
+  /* Machine number of LoongArch64 is larger
+   * so that LoongArch64 is compatible to LoongArch32.  */
   bfd_mach_loongarch64,
   "loongarch64",		/* Architecture name.  */
   "Loongarch64",		/* Printable name.  */

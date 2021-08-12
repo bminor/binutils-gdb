@@ -679,15 +679,15 @@
 					/*   note name must be "LINUX".  */
 #define NT_RISCV_CSR    0x900		/* RISC-V Control and Status Registers */
 					/*   note name must be "LINUX".  */
-#define NT_LARCH_CPUCFG 0xa00		/* Loongarch CPU config registers */
+#define NT_LARCH_CPUCFG 0xa00		/* LoongArch CPU config registers */
 					/*   note name must be "LINUX".  */
-#define NT_LARCH_CSR    0xa01		/* Loongarch control state registers */
+#define NT_LARCH_CSR    0xa01		/* LoongArch control state registers */
 					/*   note name must be "LINUX".  */
-#define NT_LARCH_LSX    0xa02		/* Loongarch Loongson SIMD Extension registers */
+#define NT_LARCH_LSX    0xa02		/* LoongArch Loongson SIMD Extension registers */
 					/*   note name must be "LINUX".  */
-#define NT_LARCH_LASX   0xa03		/* Loongarch Loongson Advanced SIMD Extension registers */
+#define NT_LARCH_LASX   0xa03		/* LoongArch Loongson Advanced SIMD Extension registers */
 					/*   note name must be "LINUX".  */
-#define NT_LARCH_LBT    0xa04		/* Loongarch Loongson Binary Translation registers */
+#define NT_LARCH_LBT    0xa04		/* LoongArch Loongson Binary Translation registers */
 					/*   note name must be "CORE".  */
 #define NT_SIGINFO	0x53494749	/* Fields of siginfo_t.  */
 #define NT_FILE		0x46494c45	/* Description of mapped files.  */

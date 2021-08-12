@@ -473,7 +473,7 @@ config/rx-parse.c: $(srcdir)/config/rx-parse.y
 config/rx-parse.h: config/rx-parse.c
 	@true
 
-# The loongarch lexical analyzer and parser.
+# The LoongArch lexical analyzer and parser.
 EXTRA_as_new_SOURCES += config/loongarch-parse.y
 loongarch-parse.c: $(srcdir)/config/loongarch-parse.y
 	$(SHELL) $(YLWRAP) $(srcdir)/config/loongarch-parse.y y.tab.c loongarch-parse.c y.tab.h loongarch-parse.h -- $(YACCCOMPILE) -d ;

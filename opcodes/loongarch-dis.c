@@ -1,4 +1,4 @@
-/* loongarch opcode support.
+/* LoongArch opcode support.
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
 

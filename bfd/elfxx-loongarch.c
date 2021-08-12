@@ -1,4 +1,4 @@
-/* Loongarch-specific support for ELF.
+/* LoongArch-specific support for ELF.
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
 

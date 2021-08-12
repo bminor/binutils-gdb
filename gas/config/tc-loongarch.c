@@ -1,4 +1,4 @@
-/* tc-loongarch.c -- Assemble for the Loongarch ISA
+/* tc-loongarch.c -- Assemble for the LoongArch ISA
 
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.

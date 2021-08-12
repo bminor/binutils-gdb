@@ -555,7 +555,7 @@ DESCRIPTION
 .#define bfd_mach_ck807		6
 .#define bfd_mach_ck810		7
 .#define bfd_mach_ck860		8
-.  bfd_arch_loongarch,       {* Loongarch *}
+.  bfd_arch_loongarch,       {* LoongArch *}
 .#define bfd_mach_loongarch32	1
 .#define bfd_mach_loongarch64	2
 .  bfd_arch_last

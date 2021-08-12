@@ -1,4 +1,4 @@
-/* Loongarch assembler/disassembler support.
+/* LoongArch assembler/disassembler support.
 
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
