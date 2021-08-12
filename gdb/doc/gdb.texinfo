@@ -26033,10 +26033,16 @@ Show the current state of styling.
 
 @item set style sources @samp{on|off}
 Enable or disable source code styling.  This affects whether source
-code, such as the output of the @code{list} command, is styled.  Note
-that source styling only works if styling in general is enabled, and
-if @value{GDBN} was linked with the GNU Source Highlight library.  The
-default is @samp{on}.
+code, such as the output of the @code{list} command, is styled.  The
+default is @samp{on}.  Note that source styling only works if styling
+in general is enabled, and if a source highlighting library is
+available to @value{GDBN}.
+
+There are two ways that highlighting can be done.  First, if
+@value{GDBN} was linked with the GNU Source Highlight library, then it
+is used.  Otherwise, if @value{GDBN} was configured with Python
+scripting support, and if the Python Pygments package is available,
+then it will be used.
 
 @item show style sources
 Show the current state of source code styling.
