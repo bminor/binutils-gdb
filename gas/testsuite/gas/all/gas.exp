@@ -45,7 +45,12 @@ if { [istarget hppa*-*-*] || [istarget *c54x*-*-*] || [istarget mep*-*-*]} then 
 # No floating point support in assembly code for CRIS and Z80.
 if { ![istarget cris-*-*] && ![istarget crisv32-*-*] 
      && ![istarget z80-*-*] } then {
-    gas_test "float.s" ""   "" "simple FP constants"
+    if { [istarget tic4x-*-*] } then {
+	set as_opt ""
+    } else {
+	set as_opt "--defsym hasnan=1"
+    }
+    gas_test "float.s" $as_opt "" "simple FP constants"
 }
 
 # This test is meaningless for the PA; the difference of two undefined
