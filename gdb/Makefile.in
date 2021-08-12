@@ -1353,8 +1353,8 @@ HFILES_NO_SRCDIR = \
 	linux-record.h \
 	linux-tdep.h \
 	location.h \
-	loonarch-tdep.h \
-	loonarch-linux-tdep.h \
+	loongarch-tdep.h \
+	loongarch-linux-tdep.h \
 	m2-lang.h \
 	m32r-tdep.h \
 	m68k-tdep.h \
