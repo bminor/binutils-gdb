@@ -59,7 +59,7 @@ loongarch_linux_read_description_runtime (int tid)
       loongarch_elf_fpregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iovec) < 0)
-        fpu32 = 0, fpu64 = 0;
+	fpu32 = 0, fpu64 = 0;
     }
 
   lbt = 0;
@@ -68,7 +68,7 @@ loongarch_linux_read_description_runtime (int tid)
       loongarch_elf_lbtregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       if (ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LBT, &iovec) == 0)
-        lbt = 1;
+	lbt = 1;
     }
 
   lsx = 0;
@@ -77,7 +77,7 @@ loongarch_linux_read_description_runtime (int tid)
       loongarch_elf_lsxregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       if (ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LSX, &iovec) == 0)
-        lsx = 1;
+	lsx = 1;
     }
 
   lasx = 0;
@@ -86,9 +86,9 @@ loongarch_linux_read_description_runtime (int tid)
       loongarch_elf_lasxregset_t regset;
       struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
       if (ptrace (PTRACE_GETREGSET, tid, NT_LARCH_LASX, &iovec) == 0)
-        lasx = 1;
+	lasx = 1;
     }
 
   return loongarch_create_target_description (rlen, fpu32, fpu64, lbt, lsx,
-                                              lasx);
+					      lasx);
 }

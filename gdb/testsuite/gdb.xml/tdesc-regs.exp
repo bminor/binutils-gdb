@@ -86,7 +86,7 @@ switch -glob -- [istarget] {
     "loongarch64-*-*" {
 	set architecture "loongarch64"
 	set regdir "loongarch/"
-        set core-regs {base64.xml fpu64.xml lbt64.xml lsx.xml lasx.xml}
+	set core-regs {base64.xml fpu64.xml lbt64.xml lsx.xml lasx.xml}
     }
 }
 

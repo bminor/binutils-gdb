@@ -15121,7 +15121,7 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			 "qXfer:uib:read", "unwind-info-block", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_loongarch_read],
-                         "qXfer:loongarch:read", "read-loongarch-object", 0);
+			 "qXfer:loongarch:read", "read-loongarch-object", 0);
 
   add_packet_config_cmd
     (&remote_protocol_packets[PACKET_qXfer_loongarch_write],

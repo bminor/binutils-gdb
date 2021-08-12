@@ -32,6 +32,6 @@ extern struct target_desc *loongarch_get_base_target_description (int rlen);
 
 extern struct target_desc *
 loongarch_create_target_description (int rlen, int fpu32, int fpu64, int lbt,
-                                     int lsx, int lasx);
+				     int lsx, int lasx);
 
 #endif

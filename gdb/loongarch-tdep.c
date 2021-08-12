@@ -109,7 +109,7 @@ loongarch_insn_is_lasx (const insn_t insn)
 static int
 loongarch_insn_is_branch_and_must_branch (insn_t insn)
 {
-  if ((insn & 0xfc000000) == 0x4c000000     /* jirl r0:5,r5:5,s10:16<<2 */
+  if ((insn & 0xfc000000) == 0x4c000000	    /* jirl r0:5,r5:5,s10:16<<2 */
       || (insn & 0xfc000000) == 0x50000000  /* b sb0:10|10:16<<2 */
       || (insn & 0xfc000000) == 0x54000000  /* bl sb0:10|10:16<<2 */
       || (insn & 0xfc0003e0) == 0x48000200  /* jiscr0 s0:5|10:16<<2 */
@@ -122,7 +122,7 @@ static int
 loongarch_insn_is_branch (insn_t insn)
 {
   if (loongarch_insn_is_branch_and_must_branch (insn)
-      || (insn & 0xfc000000) == 0x40000000     /* beqz r5:5,sb0:5|10:16<<2 */
+      || (insn & 0xfc000000) == 0x40000000  /* beqz r5:5,sb0:5|10:16<<2 */
       || (insn & 0xfc000000) == 0x44000000  /* bnez r5:5,sb0:5|10:16<<2 */
       || (insn & 0xfc000300) == 0x48000000  /* bceqz c5:3,sb0:5|10:16<<2 */
       || (insn & 0xfc000300) == 0x48000100  /* bcnez c5:3,sb0:5|10:16<<2 */
@@ -144,7 +144,7 @@ loongarch_next_pc_if_branch (struct regcache *regcache, CORE_ADDR cur_pc,
   auto regs = &gdbarch_tdep (gdbarch)->regs;
   CORE_ADDR next_pc;
 
-  if ((insn & 0xfc000000) == 0x40000000     /* beqz r5:5,sb0:5|10:16<<2 */
+  if ((insn & 0xfc000000) == 0x40000000	    /* beqz r5:5,sb0:5|10:16<<2 */
       || (insn & 0xfc000000) == 0x44000000  /* bnez r5:5,sb0:5|10:16<<2 */
       || (insn & 0xfc000300) == 0x48000000  /* bceqz c5:3,sb0:5|10:16<<2 */
       || (insn & 0xfc000300) == 0x48000100) /* bcnez c5:3,sb0:5|10:16<<2 */
@@ -164,16 +164,17 @@ loongarch_next_pc_if_branch (struct regcache *regcache, CORE_ADDR cur_pc,
   else if ((insn & 0xfc000000) == 0x4c000000) /* jirl r0:5,r5:5,s10:16<<2 */
     next_pc = regcache_raw_get_signed (
 		regcache, regs->r + loongarch_decode_imm ("5:5", insn, 0))
-		+ loongarch_decode_imm ("10:16<<2", insn, 1);
-  else if ((insn & 0xfc000000) == 0x50000000     /* b sb0:10|10:16<<2 */
+	      + loongarch_decode_imm ("10:16<<2", insn, 1);
+  else if ((insn & 0xfc000000) == 0x50000000	 /* b sb0:10|10:16<<2 */
 	   || (insn & 0xfc000000) == 0x54000000) /* bl sb0:10|10:16<<2 */
     next_pc = cur_pc + loongarch_decode_imm ("0:10|10:16<<2", insn, 1);
-  else if ((insn & 0xfc000000) == 0x58000000    /* beq r5:5,r0:5,sb10:16<<2 */
+  else if ((insn & 0xfc000000) == 0x58000000	/* beq r5:5,r0:5,sb10:16<<2 */
 	   || (insn & 0xfc000000) == 0x5c000000 /* bne r5:5,r0:5,sb10:16<<2 */
 	   || (insn & 0xfc000000) == 0x60000000 /* blt r5:5,r0:5,sb10:16<<2 */
 	   || (insn & 0xfc000000) == 0x64000000 /* bge r5:5,r0:5,sb10:16<<2 */
 	   || (insn & 0xfc000000) == 0x68000000 /* bltu r5:5,r0:5,sb10:16<<2 */
-	   || (insn & 0xfc000000) == 0x6c000000) /* bgeu r5:5,r0:5,sb10:16<<2 */
+	   || (insn & 0xfc000000)
+		== 0x6c000000) /* bgeu r5:5,r0:5,sb10:16<<2 */
     next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
   else
     gdb_assert_not_reached ("I don't know what branch is this");
@@ -196,7 +197,7 @@ loongarch_deal_with_atomic_sequence (struct regcache *regcache, CORE_ADDR pc)
   size_t insnlen = loongarch_insn_length (insn);
   int i, atomic_sequence_length, found_atomic_sequence_endpoint;
 
-  if ((insn & 0xff000000) != 0x20000000     /* ll.w */
+  if ((insn & 0xff000000) != 0x20000000	    /* ll.w */
       && (insn & 0xff000000) != 0x22000000) /* ll.d */
     return {};
 
@@ -279,8 +280,8 @@ loongarch_software_single_step (struct regcache *regcache)
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   CORE_ADDR pc = regcache_read_pc (regcache);
-  std::vector<CORE_ADDR> next_pcs =
-    loongarch_deal_with_atomic_sequence (regcache, pc);
+  std::vector<CORE_ADDR> next_pcs
+    = loongarch_deal_with_atomic_sequence (regcache, pc);
 
   if (!next_pcs.empty ())
     return next_pcs;
@@ -295,10 +296,11 @@ loongarch_software_single_step (struct regcache *regcache)
       if (syscall_next != -1)
 	{
 	  if (loongarch_debug)
-	    fprintf_unfiltered (
-	      gdb_stdlog, "PC: %s Syscall found. Next pc is %s.\n",
-	      paddress (gdbarch, pc), paddress (gdbarch, syscall_next));
-	  return { syscall_next };
+	    fprintf_unfiltered (gdb_stdlog,
+				"PC: %s Syscall found. Next pc is %s.\n",
+				paddress (gdbarch, pc),
+				paddress (gdbarch, syscall_next));
+	  return {syscall_next};
 	}
     }
 
@@ -310,14 +312,14 @@ loongarch_software_single_step (struct regcache *regcache)
 	  gdb_stdlog, "PC: %s Next pc is %s if branch, %s for non-branch.\n",
 	  paddress (gdbarch, pc), paddress (gdbarch, branch_tgt),
 	  paddress (gdbarch, next));
-      return { next, branch_tgt };
+      return {next, branch_tgt};
     }
   else
     {
       if (loongarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "PC: %s Next pc is %s.\n",
 			    paddress (gdbarch, pc), paddress (gdbarch, next));
-      return { next };
+      return {next};
     }
 }
 
@@ -375,14 +377,14 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
   int cfa_unknown = 0;
 
   /* Try to trace li.  */
-  int64_t r_value[32] = { 0 };
-  int r_value_known[32] = { 1, 0 };
+  int64_t r_value[32] = {0};
+  int r_value_known[32] = {1, 0};
 
-  long r_cfa_offset[32] = { 0 };
-  int r_cfa_offset_p[32] = { 0 };
+  long r_cfa_offset[32] = {0};
+  int r_cfa_offset_p[32] = {0};
 
-  long f_cfa_offset[32] = { 0 };
-  int f_cfa_offset_p[32] = { 0 };
+  long f_cfa_offset[32] = {0};
+  int f_cfa_offset_p[32] = {0};
 
   if (start_pc + 80 < limit_pc)
     limit_pc = start_pc + 80;
@@ -405,9 +407,8 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
       if ((((insn & 0xffc00000) == 0x02800000 /* addi.w fp,fp,si12 */
 	    && !rlen_is_64b)
 	   || ((insn & 0xffc00000) == 0x02c00000 /* addi.d fp,fp,si12 */
-	  && rlen_is_64b))
-	  && rd == fp
-	  && rj == fp)
+	       && rlen_is_64b))
+	  && rd == fp && rj == fp)
 	{
 	  if (si12 < 0)
 	    frame_offset -= si12;
@@ -421,7 +422,7 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
       else if ((((insn & 0xffc00000) == 0x29800000 /* st.w rd,fp,si12 */
 		 && !rlen_is_64b)
 		|| ((insn & 0xffc00000) == 0x29c00000 /* st.d rd,fp,si12 */
-	       && rlen_is_64b))
+		    && rlen_is_64b))
 	       && rj == fp)
 	{
 	  if (!r_cfa_offset_p[rd] && !r_value_known[rd])
@@ -431,7 +432,7 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
       else if ((((insn & 0xff000000) == 0x25000000 /* stptr.w rd,fp,si14 */
 		 && !rlen_is_64b)
 		|| ((insn & 0xff000000) == 0x27000000 /* stptr.d rd,fp,si14 */
-	       && rlen_is_64b))
+		    && rlen_is_64b))
 	       && rj == fp)
 	{
 	  if (!r_cfa_offset_p[rd] && !r_value_known[rd])
@@ -448,9 +449,8 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
       else if ((((insn & 0xffff8000) == 0x00110000 /* sub.w fp,fp,rk */
 		 && !rlen_is_64b)
 		|| ((insn & 0xffff8000) == 0x00118000 /* sub.d fp,fp,rk */
-	       && rlen_is_64b))
-	       && rd == fp
-	       && rj == fp)
+		    && rlen_is_64b))
+	       && rd == fp && rj == fp)
 	{
 	  if (r_value_known[rk])
 	    {
@@ -508,9 +508,10 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
     {
       const char *fun_name;
       find_pc_partial_function (start_pc, &fun_name, NULL, NULL);
-      fprintf_unfiltered (
-	gdb_stdlog, "Prologue Analyze: -- Start -- Callee [%s] %s\n",
-	fun_name ? fun_name : "<unknown>", paddress (gdbarch, start_pc));
+      fprintf_unfiltered (gdb_stdlog,
+			  "Prologue Analyze: -- Start -- Callee [%s] %s\n",
+			  fun_name ? fun_name : "<unknown>",
+			  paddress (gdbarch, start_pc));
     }
 
   do
@@ -650,8 +651,8 @@ loongarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
      is greater.  */
   if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
     {
-      CORE_ADDR post_prologue_pc =
-	skip_prologue_using_sal (gdbarch, func_addr);
+      CORE_ADDR post_prologue_pc
+	= skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
 	return std::max (pc, post_prologue_pc);
     }
@@ -725,9 +726,10 @@ loongarch_frame_cache (struct frame_info *this_frame, void **this_cache)
     {
       loongarch_scan_prologue (gdbarch, start_addr, pc, this_frame, cache);
       stack_addr = trad_frame_get_this_base (cache);
-      trad_frame_set_id (
-	cache, stack_addr == -1 ? frame_id_build_unavailable_stack (start_addr)
-				: frame_id_build (stack_addr, start_addr));
+      trad_frame_set_id (cache,
+			 stack_addr == -1
+			   ? frame_id_build_unavailable_stack (start_addr)
+			   : frame_id_build (stack_addr, start_addr));
     }
   else
     {
@@ -765,8 +767,7 @@ loongarch_frame_prev_register (struct frame_info *this_frame,
   return trad_frame_get_register (info, this_frame, regnum);
 }
 
-static const struct frame_unwind loongarch_frame_unwind =
-{
+static const struct frame_unwind loongarch_frame_unwind = {
   "loongarch prologue",
   /*.type	  =*/NORMAL_FRAME,
   /*.stop_reason   =*/default_frame_unwind_stop_reason,
@@ -787,7 +788,7 @@ typedef struct stack_data_t
 
 static int
 loongarch_find_vector_insn_size (struct gdbarch *gdbarch,
-				struct value *function)
+				 struct value *function)
 {
   const int size_insn = loongarch_insn_length (0);
   CORE_ADDR start_pc = value_raw_address (function);
@@ -870,7 +871,7 @@ pass_small_struct_on_reg (struct gdbarch *gdbarch, struct type *tp,
   int len = TYPE_LENGTH (tp);
 
   gdb_assert (len <= 2 * rlen);
-  //gdb_assert (tp->code () == TYPE_CODE_STRUCT);
+  // gdb_assert (tp->code () == TYPE_CODE_STRUCT);
 
   for (int i = 0; i < tp->num_fields (); i++)
     {
@@ -941,7 +942,7 @@ try_pass_small_struct_on_reg (struct gdbarch *gdbarch,
   std::vector<stack_data_t> fpreg;
 
   gdb_assert (len <= 2 * rlen);
-  //gdb_assert (a_type->code () == TYPE_CODE_STRUCT);
+  // gdb_assert (a_type->code () == TYPE_CODE_STRUCT);
 
   pass_small_struct_on_reg (gdbarch, a_type, val, gpreg, fpreg, bitpos);
 
@@ -972,8 +973,8 @@ loongarch_lp32lp64_push_dummy_call (
 {
   const int rlen = loongarch_rlen (gdbarch) / 8;
   auto regs = &gdbarch_tdep (gdbarch)->regs;
-  int gp = regs->r + 4;      /* $a0 = $r4 = regs->r + 4 */
-  int fp = regs->f;	  /* $fa0 */
+  int gp = regs->r + 4;	     /* $a0 = $r4 = regs->r + 4 */
+  int fp = regs->f;	     /* $fa0 */
   const int gp_max = gp + 8; /* gpr $a0 ~ $a7 ($r4 ~ $r11) */
   const int fp_max = fp + 8; /* fpr $fa0 ~ $fa7 */
   std::vector<stack_data_t> stack;
@@ -1005,10 +1006,10 @@ loongarch_lp32lp64_push_dummy_call (
       const gdb_byte *val = value_contents (arg);
 
       if (f_type->has_varargs () && i >= f_type->num_fields ())
-      {
-	if (len == 2 * rlen && (gp&1))
+	{
+	  if (len == 2 * rlen && (gp & 1))
 	    gp++;
-      }
+	}
 
       switch (a_type->code ())
 	{
@@ -1022,14 +1023,14 @@ loongarch_lp32lp64_push_dummy_call (
 	    {
 	      if (a_type->is_unsigned ())
 		{
-		  ULONGEST data =
-		    extract_unsigned_integer (val, len, BFD_ENDIAN_LITTLE);
+		  ULONGEST data
+		    = extract_unsigned_integer (val, len, BFD_ENDIAN_LITTLE);
 		  regcache_cooked_write_unsigned (regcache, gp++, data);
 		}
 	      else
 		{
-		  LONGEST data =
-		    extract_signed_integer (val, len, BFD_ENDIAN_LITTLE);
+		  LONGEST data
+		    = extract_signed_integer (val, len, BFD_ENDIAN_LITTLE);
 		  regcache_cooked_write_signed (regcache, gp++, data);
 		}
 	    }
@@ -1062,51 +1063,48 @@ loongarch_lp32lp64_push_dummy_call (
 	  break;
 	case TYPE_CODE_ARRAY:
 	  /* lsx */
-	  if (a_type->is_vector ()
-	      && len == vec_insn
-	      && vec_insn == 16
+	  if (a_type->is_vector () && len == vec_insn && vec_insn == 16
 	      && fp < fp_max)
-	  {
-	    pass_on_reg (regcache, regs->vr + (fp++ - regs->f), val, len);
-	  }
+	    {
+	      pass_on_reg (regcache, regs->vr + (fp++ - regs->f), val, len);
+	    }
 	  /* lasx */
-	  else if (a_type->is_vector ()
-		   && len == vec_insn
-		   && vec_insn == 32
+	  else if (a_type->is_vector () && len == vec_insn && vec_insn == 32
 		   && fp < fp_max)
-	  {
-	    pass_on_reg (regcache, regs->xr + (fp++ - regs->f), val, len);
-	  }
+	    {
+	      pass_on_reg (regcache, regs->xr + (fp++ - regs->f), val, len);
+	    }
 	  /* scalar */
 	  else
-	  {
-	  if (len > rlen * 2)
 	    {
-	      /* Address on register, data on stack.  */
-	      sp = align_down (sp - len, rlen);
-	      write_memory (sp, val, len);
-	      if (gp < gp_max)
-		pass_on_reg (regcache, gp++, (const gdb_byte *) &sp, rlen);
-	      else
-		pass_on_stack (stack, (const gdb_byte *)sp, rlen, rlen, true);
-	    }
-	  else
-	    {
-	      if (len <= rlen && gp < gp_max)
+	      if (len > rlen * 2)
 		{
-		pass_on_reg (regcache, gp++, val, len);
-		}
-	      else if (gp + 1 < gp_max)
-		{
-		pass_on_reg (regcache, gp++, val, rlen);
-		pass_on_reg (regcache, gp++, val + rlen, rlen);
+		  /* Address on register, data on stack.  */
+		  sp = align_down (sp - len, rlen);
+		  write_memory (sp, val, len);
+		  if (gp < gp_max)
+		    pass_on_reg (regcache, gp++, (const gdb_byte *) &sp, rlen);
+		  else
+		    pass_on_stack (stack, (const gdb_byte *) sp, rlen, rlen,
+				   true);
 		}
 	      else
 		{
-		pass_on_stack (stack, val, len, rlen);
+		  if (len <= rlen && gp < gp_max)
+		    {
+		      pass_on_reg (regcache, gp++, val, len);
+		    }
+		  else if (gp + 1 < gp_max)
+		    {
+		      pass_on_reg (regcache, gp++, val, rlen);
+		      pass_on_reg (regcache, gp++, val + rlen, rlen);
+		    }
+		  else
+		    {
+		      pass_on_stack (stack, val, len, rlen);
+		    }
 		}
 	    }
-	  }
 	  break;
 	case TYPE_CODE_STRUCT:
 	case TYPE_CODE_UNION:
@@ -1118,7 +1116,7 @@ loongarch_lp32lp64_push_dummy_call (
 	      if (gp < gp_max)
 		pass_on_reg (regcache, gp++, (const gdb_byte *) &sp, rlen);
 	      else
-		pass_on_stack (stack, (const gdb_byte *)sp, rlen, rlen, true);
+		pass_on_stack (stack, (const gdb_byte *) sp, rlen, rlen, true);
 	    }
 	  else
 	    {
@@ -1131,54 +1129,58 @@ loongarch_lp32lp64_push_dummy_call (
 	  break;
 	case TYPE_CODE_COMPLEX:
 	  {
-	  /* Two fpr or  mem.  */
-	  struct type *t_type = check_typedef (TYPE_TARGET_TYPE (a_type));
-	  int tlen = TYPE_LENGTH (t_type);
+	    /* Two fpr or  mem.  */
+	    struct type *t_type = check_typedef (TYPE_TARGET_TYPE (a_type));
+	    int tlen = TYPE_LENGTH (t_type);
 
-	  if (tlen < rlen)
-	    {
-	    if (fp + 1 < fp_max)
+	    if (tlen < rlen)
 	      {
-	      pass_on_reg (regcache, fp++, (const gdb_byte *) val, tlen);
-	      pass_on_reg (regcache, fp++, (const gdb_byte *) val + tlen, tlen);
+		if (fp + 1 < fp_max)
+		  {
+		    pass_on_reg (regcache, fp++, (const gdb_byte *) val, tlen);
+		    pass_on_reg (regcache, fp++, (const gdb_byte *) val + tlen,
+				 tlen);
+		  }
+		else if (gp < gp_max)
+		  {
+		    pass_on_reg (regcache, gp++, (const gdb_byte *) val, rlen);
+		  }
+		else
+		  {
+		    pass_on_stack (stack, val, len, rlen);
+		  }
 	      }
-	    else if (gp < gp_max)
+	    else if (tlen == rlen)
 	      {
-	      pass_on_reg (regcache, gp++, (const gdb_byte *) val, rlen);
+		if (fp + 1 < fp_max)
+		  {
+		    pass_on_reg (regcache, fp++, (const gdb_byte *) val, tlen);
+		    pass_on_reg (regcache, fp++, (const gdb_byte *) val + tlen,
+				 tlen);
+		  }
+		else if (gp < gp_max)
+		  {
+		    pass_on_reg (regcache, gp++, (const gdb_byte *) val, rlen);
+		    pass_on_reg (regcache, gp++, (const gdb_byte *) val + rlen,
+				 rlen);
+		  }
+		else
+		  {
+		    pass_on_stack (stack, val, len, rlen);
+		  }
 	      }
 	    else
 	      {
-	      pass_on_stack (stack, val, len, rlen);
+		sp = align_down (sp - len, rlen);
+		write_memory (sp, val, len);
+		if (gp < gp_max)
+		  pass_on_reg (regcache, gp++, (const gdb_byte *) &sp, rlen);
+		else
+		  {
+		    pass_on_stack (stack, (const gdb_byte *) sp, rlen, rlen,
+				   true);
+		  }
 	      }
-	    }
-	  else if (tlen == rlen)
-	    {
-	    if (fp + 1 < fp_max)
-	      {
-	      pass_on_reg (regcache, fp++, (const gdb_byte *) val, tlen);
-	      pass_on_reg (regcache, fp++, (const gdb_byte *) val + tlen, tlen);
-	      }
-	    else if (gp < gp_max)
-	      {
-	      pass_on_reg (regcache, gp++, (const gdb_byte *) val, rlen);
-	      pass_on_reg (regcache, gp++, (const gdb_byte *) val + rlen, rlen);
-	      }
-	    else
-	      {
-	      pass_on_stack (stack, val, len, rlen);
-	      }
-	    }
-	  else
-	    {
-	      sp = align_down (sp - len, rlen);
-	      write_memory (sp, val, len);
-	      if (gp < gp_max)
-		pass_on_reg (regcache, gp++, (const gdb_byte *) &sp, rlen);
-	      else
-		{
-		pass_on_stack (stack, (const gdb_byte *)sp, rlen, rlen, true);
-		}
-	    }
 	  }
 	  break;
 	default:
@@ -1194,9 +1196,9 @@ loongarch_lp32lp64_push_dummy_call (
   for (auto it : stack)
     {
       if (it.ref)
-      write_memory (tsp, (const gdb_byte*)&it.addr, it.len);
+	write_memory (tsp, (const gdb_byte *) &it.addr, it.len);
       else
-      write_memory (tsp, it.addr, it.len);
+	write_memory (tsp, it.addr, it.len);
       tsp += it.len;
       stack.pop_back ();
     }
@@ -1235,39 +1237,37 @@ loongarch_lp64_return_value (struct gdbarch *gdbarch, struct value *function,
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if ((typecode == TYPE_CODE_FLT
-       || (typecode == TYPE_CODE_STRUCT
-	&& type->num_fields () == 1
-	&& check_typedef (type->field (0).type ())->code () == TYPE_CODE_FLT))
+       || (typecode == TYPE_CODE_STRUCT && type->num_fields () == 1
+	   && check_typedef (type->field (0).type ())->code ()
+		== TYPE_CODE_FLT))
       && len <= rlen /* FIXME: May fpu32 on loongarch32.  */)
     /* If $fv0 could fit in.  */
     loongarch_xfer_reg_part (regcache, fv, len, readbuf, 0, writebuf, 0);
   else if ((typecode == TYPE_CODE_FLT
-	    || (typecode == TYPE_CODE_STRUCT
-		&& type->num_fields () == 1
+	    || (typecode == TYPE_CODE_STRUCT && type->num_fields () == 1
 		&& check_typedef (type->field (0).type ())->code ()
-		   == TYPE_CODE_FLT))
-	   && rlen < len
-	   && len <= 2 * rlen)
+		     == TYPE_CODE_FLT))
+	   && rlen < len && len <= 2 * rlen)
     /* For 'long double' on fpu64 or 'double' on fpu32,
        '$fv0 | $fv1' is that.  */
     /* Long double pass on $a0 and $a1.  */
     if (typecode == TYPE_CODE_FLT && len == 2 * rlen)
-    {
-    loongarch_xfer_reg_part (regcache, regs->r + 4, rlen,
-			     readbuf, 0, writebuf, 0),
-      loongarch_xfer_reg_part (regcache, regs->r + 4 + 1, len - rlen,
-			       readbuf, rlen, writebuf, rlen);
-    }
+      {
+	loongarch_xfer_reg_part (regcache, regs->r + 4, rlen, readbuf, 0,
+				 writebuf, 0),
+	  loongarch_xfer_reg_part (regcache, regs->r + 4 + 1, len - rlen,
+				   readbuf, rlen, writebuf, rlen);
+      }
     else
-    {
-    loongarch_xfer_reg_part (regcache, fv, rlen, readbuf, 0, writebuf, 0),
-      loongarch_xfer_reg_part (regcache, fv + 1, len - rlen, readbuf, rlen,
-			       writebuf, rlen);
-    }
-  else if (typecode == TYPE_CODE_STRUCT
-	   && type->num_fields () == 2
+      {
+	loongarch_xfer_reg_part (regcache, fv, rlen, readbuf, 0, writebuf, 0),
+	  loongarch_xfer_reg_part (regcache, fv + 1, len - rlen, readbuf, rlen,
+				   writebuf, rlen);
+      }
+  else if (typecode == TYPE_CODE_STRUCT && type->num_fields () == 2
 	   && check_typedef (type->field (0).type ())->code () == TYPE_CODE_FLT
-	   && check_typedef (type->field (1).type ())->code () == TYPE_CODE_FLT)
+	   && check_typedef (type->field (1).type ())->code ()
+		== TYPE_CODE_FLT)
     {
       /* For structure with two float member,
 	 $fv0 is the 1st member and $fv1 is the 2nd member.  */
@@ -1280,22 +1280,21 @@ loongarch_lp64_return_value (struct gdbarch *gdbarch, struct value *function,
     }
   else if (typecode == TYPE_CODE_COMPLEX
 	   && (check_typedef (TYPE_TARGET_TYPE (type)))->code ()
-	       == TYPE_CODE_FLT)
+		== TYPE_CODE_FLT)
     /* For '_Complex', $fv0 is real and $fv1 is img.  */
     loongarch_xfer_reg_part (regcache, fv, len / 2, readbuf, 0, writebuf, 0),
       loongarch_xfer_reg_part (regcache, fv + 1, len / 2, readbuf, len / 2,
 			       writebuf, len / 2);
-  else if (((typecode == TYPE_CODE_INT
-	     && type->is_unsigned ())
+  else if (((typecode == TYPE_CODE_INT && type->is_unsigned ())
 	    || typecode == TYPE_CODE_ENUM)
 	   && len <= rlen)
     /* For unsigned scalar type, we have zero-extended one in $v0.  */
     if (writebuf)
       {
 	gdb_byte buf[rlen];
-	store_signed_integer (
-	  buf, rlen, BFD_ENDIAN_LITTLE,
-	  extract_unsigned_integer (writebuf, len, BFD_ENDIAN_LITTLE));
+	store_signed_integer (buf, rlen, BFD_ENDIAN_LITTLE,
+			      extract_unsigned_integer (writebuf, len,
+							BFD_ENDIAN_LITTLE));
 	loongarch_xfer_reg_part (regcache, regs->r + 4, rlen, NULL, 0,
 				 writebuf, 0);
       }
@@ -1309,9 +1308,9 @@ loongarch_lp64_return_value (struct gdbarch *gdbarch, struct value *function,
     if (writebuf)
       {
 	gdb_byte buf[rlen];
-	store_signed_integer (
-	  buf, rlen, BFD_ENDIAN_LITTLE,
-	  extract_signed_integer (writebuf, len, BFD_ENDIAN_LITTLE));
+	store_signed_integer (buf, rlen, BFD_ENDIAN_LITTLE,
+			      extract_signed_integer (writebuf, len,
+						      BFD_ENDIAN_LITTLE));
 	loongarch_xfer_reg_part (regcache, regs->r + 4, rlen, NULL, 0,
 				 writebuf, 0);
       }
@@ -1372,8 +1371,7 @@ loongarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return 1;
 
   if (group == general_reggroup
-      && (regs->pc == regnum
-	  || regs->badvaddr == regnum
+      && (regs->pc == regnum || regs->badvaddr == regnum
 	  || (regs->r <= regnum && regnum < regs->r + 32)))
     return 1;
 
@@ -1382,8 +1380,7 @@ loongarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return 0;
 
   if (0 <= regs->f
-      && (regs->fcsr == regnum
-	  || (regs->f <= regnum && regnum < regs->f + 32)
+      && (regs->fcsr == regnum || (regs->f <= regnum && regnum < regs->f + 32)
 	  || (regs->fcc <= regnum && regnum < regs->fcc + 8)))
     return group == float_reggroup;
 
@@ -1448,8 +1445,8 @@ loongarch_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 {
   int i;
   auto regs = &gdbarch_tdep (gdbarch)->regs;
-  const int numregs =
-    gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+  const int numregs
+    = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 
   for (i = 0; i < numregs; i++)
     {
@@ -1480,7 +1477,7 @@ loongarch_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     }
 }
 
-constexpr gdb_byte loongarch_default_breakpoint[] = { 0x05, 0x00, 0x2a, 0x00 };
+constexpr gdb_byte loongarch_default_breakpoint[] = {0x05, 0x00, 0x2a, 0x00};
 typedef BP_MANIPULATION (loongarch_default_breakpoint) loongarch_breakpoint;
 
 /* Initialize the current architecture based on INFO.  If possible,
@@ -1508,8 +1505,8 @@ loongarch_fp_regnum_refers_to_lsx_lasx_p (struct gdbarch *gdbarch, int regnum,
        then regnum refers to lsx / lasx register instead of fp register).
     */
   return regnum >= gdbarch_tdep (gdbarch)->regs.f
-		   && regnum < gdbarch_tdep (gdbarch)->regs.f + 32
-		   && TYPE_LENGTH (type) > 8;
+	 && regnum < gdbarch_tdep (gdbarch)->regs.f + 32
+	 && TYPE_LENGTH (type) > 8;
 }
 
 static int
@@ -1532,19 +1529,22 @@ loongarch_register_to_value (struct frame_info *frame, int regnum,
       switch (TYPE_LENGTH (type))
 	{
 	case 16: /* 16-byte types, access vr.  */
-	  if (!get_frame_register_bytes (
-		frame, regnum + gdbarch_tdep (gdbarch)->regs.vr
-		- gdbarch_tdep (gdbarch)->regs.f,
-		0, { to + 0, 16 }, optimizedp, unavailablep))
+	  if (!get_frame_register_bytes (frame,
+					 regnum
+					   + gdbarch_tdep (gdbarch)->regs.vr
+					   - gdbarch_tdep (gdbarch)->regs.f,
+					 0, {to + 0, 16}, optimizedp,
+					 unavailablep))
 	    return 0;
 	  break;
 
 	case 32: /* 32-byte types, access xr.  */
-	  if (!get_frame_register_bytes (
-		frame,
-		regnum + gdbarch_tdep (gdbarch)->regs.xr
-		- gdbarch_tdep (gdbarch)->regs.f,
-		0, { to + 0, 32 }, optimizedp, unavailablep))
+	  if (!get_frame_register_bytes (frame,
+					 regnum
+					   + gdbarch_tdep (gdbarch)->regs.xr
+					   - gdbarch_tdep (gdbarch)->regs.f,
+					 0, {to + 0, 32}, optimizedp,
+					 unavailablep))
 	    return 0;
 	  break;
 
@@ -1643,32 +1643,34 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					loongarch_r_normal_name[i] + 1);
   valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 				      tdep->regs.pc = regnum++, "pc");
-  valid_p &= tdesc_numbered_register (
-    feature, tdesc_data.get (), tdep->regs.badvaddr = regnum++, "badvaddr");
+  valid_p
+    &= tdesc_numbered_register (feature, tdesc_data.get (),
+				tdep->regs.badvaddr = regnum++, "badvaddr");
 
   if ((feature = tdesc_find_feature (tdesc, "org.gnu.gdb.loongarch.fpu")))
     {
       tdep->regs.f = regnum;
       for (i = 0; i < 32; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, loongarch_f_normal_name[i] + 1);
+	valid_p
+	  &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+				      loongarch_f_normal_name[i] + 1);
       tdep->regs.fcc = regnum;
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, "fcc0");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, "fcc1");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, "fcc2");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, "fcc3");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, "fcc4");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, "fcc5");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, "fcc6");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, "fcc7");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+					  "fcc0");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+					  "fcc1");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+					  "fcc2");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+					  "fcc3");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+					  "fcc4");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+					  "fcc5");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+					  "fcc6");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+					  "fcc7");
       valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  tdep->regs.fcsr = regnum++, "fcsr");
     }
@@ -1677,28 +1679,33 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       tdep->regs.scr = regnum;
       for (i = 0; i < 4; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, loongarch_cr_normal_name[i] + 1);
-      valid_p &= tdesc_numbered_register (
-	feature, tdesc_data.get (), tdep->regs.EFLAG = regnum++, "EFLAG");
-      valid_p &= tdesc_numbered_register (
-	feature, tdesc_data.get (), tdep->regs.x86_top = regnum++, "x86_top");
+	valid_p
+	  &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+				      loongarch_cr_normal_name[i] + 1);
+      valid_p
+	&= tdesc_numbered_register (feature, tdesc_data.get (),
+				    tdep->regs.EFLAG = regnum++, "EFLAG");
+      valid_p
+	&= tdesc_numbered_register (feature, tdesc_data.get (),
+				    tdep->regs.x86_top = regnum++, "x86_top");
     }
 
   if ((feature = tdesc_find_feature (tdesc, "org.gnu.gdb.loongarch.lsx")))
     {
       tdep->regs.vr = regnum;
       for (i = 0; i < 32; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, loongarch_v_normal_name[i] + 1);
+	valid_p
+	  &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+				      loongarch_v_normal_name[i] + 1);
     }
 
   if ((feature = tdesc_find_feature (tdesc, "org.gnu.gdb.loongarch.lasx")))
     {
       tdep->regs.xr = regnum;
       for (i = 0; i < 32; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
-				regnum++, loongarch_x_normal_name[i] + 1);
+	valid_p
+	  &= tdesc_numbered_register (feature, tdesc_data.get (), regnum++,
+				      loongarch_x_normal_name[i] + 1);
     }
 
   if (!valid_p)
@@ -1718,7 +1725,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return arches->gdbarch;
     }
 
-  /* None found, so create a new architecture from the information provided.  */
+  /* None found, so create a new architecture from the information provided. */
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (tdep_instant));
   memcpy (tdep, &tdep_instant, sizeof (tdep_instant));
   gdbarch = gdbarch_alloc (&info, tdep);
@@ -1898,9 +1905,10 @@ info_loongarch (const char *addr_exp, int from_tty)
       {
 	uint64_t val64 = value;
 	ULONGEST xfered_len;
-	target_xfer_partial (
-	  current_inferior ()->top_target (), TARGET_OBJECT_LARCH, item, NULL,
-	  (const gdb_byte *) &val64, addr * 8, sizeof (val64), &xfered_len);
+	target_xfer_partial (current_inferior ()->top_target (),
+			     TARGET_OBJECT_LARCH, item, NULL,
+			     (const gdb_byte *) &val64, addr * 8,
+			     sizeof (val64), &xfered_len);
 	if (0 < xfered_len)
 	  fprintf_unfiltered (gdb_stdout, "ok\n");
 	else

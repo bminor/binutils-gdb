@@ -272,7 +272,7 @@ md_begin ()
     }
 
   /* FIXME: expressionS use 'offsetT' as constant,
-   * we want this is 64-bit type */
+   * we want this is 64-bit type.  */
   assert (8 <= sizeof (offsetT));
 }
 
@@ -545,7 +545,7 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
       ip->all_match = ip->match_now;
       ip->insn_length =
 	ip->insn->mask ? loongarch_insn_length (ip->insn->match) : 0;
-      /* FIXME: now we have no relax insn */
+      /* FIXME: now we have no relax insn.  */
       ip->relax_max_length = ip->insn_length;
       break;
     default:
@@ -677,7 +677,7 @@ check_this_insn_before_appending (struct loongarch_cl_insn *ip)
 	    /* bstrins.d  rd, rj, msbd, lsbd  */
 	    && (ip->insn_bin & 0xff800000) == 0x00800000))
     {
-      /* For bstr(ins|pick).[wd] */
+      /* For bstr(ins|pick).[wd].  */
       if (ip->args[2] < ip->args[3])
 	as_fatal (_ ("bstr(ins|pick).[wd] require msbd >= lsbd"));
     }

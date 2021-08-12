@@ -740,7 +740,7 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  need_dynreloc = 1;
 
 	  /* If resolved symbol is defined in this object,
-       	     1.  Under pie, the symbol is known.  We convert it
+	     1.  Under pie, the symbol is known.  We convert it
 	     into R_LARCH_RELATIVE and need load-addr still.
 	     2.  Under pde, the symbol is known and we can discard R_LARCH_NN.
 	     3.  Under dll, R_LARCH_NN can't be changed normally, since
@@ -878,7 +878,7 @@ loongarch_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       if (h->plt.refcount < 0
 	  || (h->type != STT_GNU_IFUNC
 	     && (SYMBOL_REFERENCES_LOCAL (info, h)
-	     	|| (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		 || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 		   && h->root.type == bfd_link_hash_undefweak))))
 	{
 	  /* This case can occur if we saw a R_LARCH_SOP_PUSH_PLT_PCREL reloc

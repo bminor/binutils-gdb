@@ -73,7 +73,7 @@ loongarch_supply_elf_gregset (const struct regset *r,
     }
   else if (regs->r == regno)
     regcache->raw_supply_zeroed (regno);
-  else if((regs->r < regno && regno < regs->r + 32)
+  else if ((regs->r < regno && regno < regs->r + 32)
 	  || (regs->pc == regno)
 	  || (regs->badvaddr == regno))
     {
@@ -109,7 +109,7 @@ loongarch_fill_elf_gregset (const struct regset *r,
       buf = (gdb_byte *)gprs + regsize * regs->badvaddr;
       regcache->raw_collect (regs->badvaddr, (void *)buf);
     }
-  else if((regs->r <= regno && regno < regs->r + 32)
+  else if ((regs->r <= regno && regno < regs->r + 32)
 	  ||(regs->pc == regno)
 	  ||(regs->badvaddr == regno))
     {

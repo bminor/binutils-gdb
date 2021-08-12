@@ -258,7 +258,7 @@ case ${gdb_host} in
 		# Host: Intel IA-64 running GNU/Linux
 		NATDEPFILES="${NATDEPFILES} ia64-linux-nat.o"
 		;;
-        loongarch)
+	    loongarch)
 		# Host: Loongarch, running GNU/Linux.
 		NATDEPFILES="${NATDEPFILES} loongarch-linux-nat.o arch/loongarch-linux-nat.o linux-nat-trad.o nat/loongarch-linux-watch.o"
 		;;
