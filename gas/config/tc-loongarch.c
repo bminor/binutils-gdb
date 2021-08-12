@@ -1,6 +1,6 @@
 /* tc-loongarch.c -- Assemble for the Loongarch ISA
 
-   Copyright (C) 2021-2021 Free Software Foundation, Inc.
+   Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
 
    This file is part of GAS.
