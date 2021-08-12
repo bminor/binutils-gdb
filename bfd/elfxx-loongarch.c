@@ -2,6 +2,8 @@
    Copyright (C) 2021 Free Software Foundation, Inc.
    Contributed by Loongson Ltd.
 
+   Based on RISC-V target.
+
    This file is part of BFD, the Binary File Descriptor library.
 
    This program is free software; you can redistribute it and/or modify
