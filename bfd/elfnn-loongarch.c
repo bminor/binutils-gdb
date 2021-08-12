@@ -463,8 +463,8 @@ loongarch_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   if (bed->want_got_sym)
     {
       /* Define the symbol _GLOBAL_OFFSET_TABLE_ at the start of the .got
-	 section.  We don't do this in the linker script because we don't want
-	 to define the symbol if we are not creating a global offset table.  */
+         section.  We don't do this in the linker script because we don't want
+         to define the symbol if we are not creating a global offset table.  */
       h = _bfd_elf_define_linkage_sym (abfd, info, s_got,
                                        "_GLOBAL_OFFSET_TABLE_");
       elf_hash_table (info)->hgot = h;
@@ -693,11 +693,11 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
         case R_LARCH_SOP_PUSH_ABSOLUTE:
           if (h != NULL)
             /* If this reloc is in a read-only section, we might
-	       need a copy reloc.  We can't check reliably at this
-	       stage whether the section is read-only, as input
-	       sections have not yet been mapped to output sections.
-	       Tentatively set the flag for now, and correct in
-	       adjust_dynamic_symbol.  */
+               need a copy reloc.  We can't check reliably at this
+               stage whether the section is read-only, as input
+               sections have not yet been mapped to output sections.
+               Tentatively set the flag for now, and correct in
+               adjust_dynamic_symbol.  */
             h->non_got_ref = 1;
           break;
 
@@ -715,10 +715,10 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
         case R_LARCH_SOP_PUSH_PLT_PCREL:
           /* This symbol requires a procedure linkage table entry.  We
-	     actually build the entry in adjust_dynamic_symbol,
-	     because this might be a case of linking PIC code without
-	     linking in any dynamic objects, in which case we don't
-	     need to generate a procedure linkage table after all.  */
+             actually build the entry in adjust_dynamic_symbol,
+             because this might be a case of linking PIC code without
+             linking in any dynamic objects, in which case we don't
+             need to generate a procedure linkage table after all.  */
           if (h != NULL)
             {
               h->needs_plt = 1;
@@ -740,13 +740,13 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
           need_dynreloc = 1;
 
           /* If resolved symbol is defined in this object,
-	       1. Under pie, the symbol is known. We convert it
-		  into R_LARCH_RELATIVE and need load-addr still.
-	       2. Under pde, the symbol is known and we can discard R_LARCH_NN.
-	       3. Under dll, R_LARCH_NN can't be changed normally, since
-		  its defination could be covered by the one in executable.
-		  For symbolic, we convert it into R_LARCH_RELATIVE.
-	     Thus, only under pde, it needs pcrel only. We discard it. */
+             1. Under pie, the symbol is known. We convert it
+             into R_LARCH_RELATIVE and need load-addr still.
+             2. Under pde, the symbol is known and we can discard R_LARCH_NN.
+             3. Under dll, R_LARCH_NN can't be changed normally, since
+             its defination could be covered by the one in executable.
+             For symbolic, we convert it into R_LARCH_RELATIVE.
+             Thus, only under pde, it needs pcrel only. We discard it. */
           only_need_pcrel = bfd_link_pde (info);
 
           if (h != NULL)
@@ -771,8 +771,8 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (need_dynreloc && (sec->flags & SEC_ALLOC))
         {
           /* When creating a shared object, we must copy these
-	     relocs into the output file.  We create a reloc
-	     section in dynobj and make room for the reloc.  */
+             relocs into the output file.  We create a reloc
+             section in dynobj and make room for the reloc.  */
           struct elf_dyn_relocs *p;
           struct elf_dyn_relocs **head;
 
@@ -787,14 +787,14 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
             }
 
           /* If this is a global symbol, we count the number of
-	     relocations we need for this symbol.  */
+             relocations we need for this symbol.  */
           if (h != NULL)
             head = &((struct loongarch_elf_link_hash_entry *) h)->dyn_relocs;
           else
             {
               /* Track dynamic relocs needed for local syms too.
-		 We really need local syms available to do this
-		 easily.  Oh well.  */
+                 We really need local syms available to do this
+                 easily.  Oh well.  */
 
               asection *s;
               void *vpp;
@@ -882,9 +882,9 @@ loongarch_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
              h->root.type == bfd_link_hash_undefweak))))
         {
           /* This case can occur if we saw a R_LARCH_SOP_PUSH_PLT_PCREL reloc
-	     in an input file, but the symbol was never referred to by a
-	     dynamic object, or if all references were garbage collected.
-	     In such a case, we don't actually need to build a PLT entry.  */
+             in an input file, but the symbol was never referred to by a
+             dynamic object, or if all references were garbage collected.
+             In such a case, we don't actually need to build a PLT entry.  */
           h->plt.offset = MINUS_ONE;
           h->needs_plt = 0;
         }
@@ -1054,7 +1054,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       int tls_type = loongarch_elf_hash_entry (h)->tls_type;
 
       /* Make sure this symbol is output as a dynamic symbol.
-	 Undefined weak syms won't yet be marked as dynamic.  */
+         Undefined weak syms won't yet be marked as dynamic.  */
       if (h->dynindx == -1 && !h->forced_local &&
           !bfd_elf_link_record_dynamic_symbol (info, h))
         return false;
@@ -1115,7 +1115,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       else if (h->dynindx == -1 &&
                !h->forced_local
                /* Make sure this symbol is output as a dynamic symbol.
-		  Undefined weak syms won't yet be marked as dynamic.  */
+                  Undefined weak syms won't yet be marked as dynamic.  */
                && !bfd_elf_link_record_dynamic_symbol (info, h))
         return false;
     }
@@ -1227,9 +1227,9 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
                   bfd_is_abs_section (p->sec->output_section))
                 {
                   /* Input section has been discarded, either because
-		     it is a copy of a linkonce section or due to
-		     linker script /DISCARD/, so we'll be discarding
-		     the relocs too.  */
+                     it is a copy of a linkonce section or due to
+                     linker script /DISCARD/, so we'll be discarding
+                     the relocs too.  */
                 }
               else if (0 < p->count)
                 {
@@ -1297,14 +1297,14 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
           s == htab->elf.sdynbss || s == htab->elf.sdynrelro)
         {
           /* Strip this section if we don't need it; see the
-	     comment below.  */
+             comment below.  */
         }
       else if (strncmp (s->name, ".rela", 5) == 0)
         {
           if (s->size != 0)
             {
               /* We use the reloc_count field as a counter if we need
-		 to copy relocs into the output file.  */
+                 to copy relocs into the output file.  */
               s->reloc_count = 0;
             }
         }
@@ -1317,14 +1317,14 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
       if (s->size == 0)
         {
           /* If we don't need this section, strip it from the
-	     output file.  This is mostly to handle .rela.bss and
-	     .rela.plt.  We must create both sections in
-	     create_dynamic_sections, because they must be created
-	     before the linker maps input sections to output
-	     sections.  The linker does that before
-	     adjust_dynamic_symbol is called, and it is that
-	     function which decides whether anything needs to go
-	     into these sections.  */
+             output file.  This is mostly to handle .rela.bss and
+             .rela.plt.  We must create both sections in
+             create_dynamic_sections, because they must be created
+             before the linker maps input sections to output
+             sections.  The linker does that before
+             adjust_dynamic_symbol is called, and it is that
+             function which decides whether anything needs to go
+             into these sections.  */
           s->flags |= SEC_EXCLUDE;
           continue;
         }
@@ -1333,8 +1333,8 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
         continue;
 
       /* Allocate memory for the section contents.  Zero the memory
-	 for the benefit of .rela.plt, which has 4 unused entries
-	 at the beginning, and we don't want garbage.  */
+         for the benefit of .rela.plt, which has 4 unused entries
+         at the beginning, and we don't want garbage.  */
       s->contents = (bfd_byte *) bfd_zalloc (dynobj, s->size);
       if (s->contents == NULL)
         return false;
@@ -1343,10 +1343,10 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
   if (elf_hash_table (info)->dynamic_sections_created)
     {
       /* Add some entries to the .dynamic section.  We fill in the
-	 values later, in loongarch_elf_finish_dynamic_sections, but we
-	 must add the entries now so that we get the correct size for
-	 the .dynamic section.  The DT_DEBUG entry is filled in by the
-	 dynamic linker and used by the debugger.  */
+         values later, in loongarch_elf_finish_dynamic_sections, but we
+         must add the entries now so that we get the correct size for
+         the .dynamic section.  The DT_DEBUG entry is filled in by the
+         dynamic linker and used by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
       if (bfd_link_executable (info))
@@ -1370,7 +1370,7 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
         return false;
 
       /* If any dynamic relocs apply to a read-only section,
-	 then we need a DT_TEXTREL entry.  */
+         then we need a DT_TEXTREL entry.  */
       if ((info->flags & DF_TEXTREL) == 0)
         elf_link_hash_traverse (&htab->elf, maybe_set_textrel, info);
 
@@ -1907,8 +1907,8 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
           /* Here means symbol isn't local symbol only and 'h != NULL'. */
 
           /* The 'unresolved_syms_in_objects' specify how to deal with undefined
-	     symbol. And 'dynamic_undefined_weak' specify what to do when
-	     meeting undefweak.  */
+             symbol. And 'dynamic_undefined_weak' specify what to do when
+             meeting undefweak.  */
 
           if ((is_undefweak = h->root.type == bfd_link_hash_undefweak))
             {
@@ -1921,12 +1921,12 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
           else if (warned)
             {
               /* Symbol undefined offen means failed already. I don't know why
-		 'warned' here but I guess it want to continue relocating as if
-		 no error occures to find other errors as more as possible. */
+                 'warned' here but I guess it want to continue relocating as if
+                 no error occures to find other errors as more as possible. */
 
               /* To avoid generating warning messages about truncated
-		 relocations, set the relocation's address to be the same as
-		 the start of this section.  */
+                 relocations, set the relocation's address to be the same as
+                 the start of this section.  */
               relocation = input_section->output_section
                              ? input_section->output_section->vma
                              : 0;
@@ -1956,8 +1956,8 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
         continue;
 
       /* The r_symndx will be STN_UNDEF (zero) only for relocs against symbols
-	 from removed linkonce sections, or sections discarded by a linker
-	 script. Also for R_*_SOP_PUSH_ABSOLUTE and PCREL to specify const.  */
+         from removed linkonce sections, or sections discarded by a linker
+         script. Also for R_*_SOP_PUSH_ABSOLUTE and PCREL to specify const.  */
       if (r_symndx == STN_UNDEF || bfd_is_abs_section (sec))
         resolved_dynly = resolved_local = defined_local = false,
         resolved_to_const = true;
@@ -1995,9 +1995,9 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
         r = bfd_fail_state;                                                   \
         switch (r)                                                            \
           {                                                                   \
-          /* 'dangerous' means we do it but can't promise it's ok		\
-       'unsupport' means out of ability of relocation type		\
-       'undefined' means we can't deal with the undefined symbol  */          \
+          /* 'dangerous' means we do it but can't promise it's ok             \
+             'unsupport' means out of ability of relocation type              \
+             'undefined' means we can't deal with the undefined symbol  */    \
           case bfd_reloc_undefined:                                           \
             info->callbacks->undefined_symbol (                               \
               info, name, input_bfd, input_section, rel->r_offset, true);     \
@@ -2046,7 +2046,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
               Elf_Internal_Rela outrel;
 
               /* When generating a shared object, these relocations are copied
-		 into the output file to be resolved at run time.  */
+                 into the output file to be resolved at run time.  */
 
               outrel.r_offset = _bfd_elf_section_offset (
                 output_bfd, info, input_section, rel->r_offset);
@@ -2254,17 +2254,17 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
                   (is_pic && SYMBOL_REFERENCES_LOCAL (info, h)))
                 {
                   /* This is actually a static link, or it is a
-		     -Bsymbolic link and the symbol is defined
-		     locally, or the symbol was forced to be local
-		     because of a version file.  We must initialize
-		     this entry in the global offset table.  Since the
-		     offset must always be a multiple of the word size,
-		     we use the least significant bit to record whether
-		     we have initialized it already.
+                     -Bsymbolic link and the symbol is defined
+                     locally, or the symbol was forced to be local
+                     because of a version file.  We must initialize
+                     this entry in the global offset table.  Since the
+                     offset must always be a multiple of the word size,
+                     we use the least significant bit to record whether
+                     we have initialized it already.
 
-		     When doing a dynamic link, we create a .rela.got
-		     relocation entry to initialize the value.  This
-		     is done in the finish_dynamic_symbol routine.  */
+                     When doing a dynamic link, we create a .rela.got
+                     relocation entry to initialize the value.  This
+                     is done in the finish_dynamic_symbol routine.  */
 
                   LARCH_ASSERT (!resolved_dynly, bfd_reloc_dangerous,
                                 "Internal: here shouldn't dynamic.");
@@ -2291,8 +2291,8 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
                             "Internal: GOT entry doesn't represent.");
 
               /* The offset must always be a multiple of the word size.
-		 So, we can use the least significant bit to record
-		 whether we have already processed this entry.  */
+                 So, we can use the least significant bit to record
+                 whether we have already processed this entry.  */
               if ((off & 1) != 0)
                 off &= ~1;
               else
@@ -2302,7 +2302,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
                       asection *s;
                       Elf_Internal_Rela outrel;
                       /* We need to generate a R_LARCH_RELATIVE reloc
-			 for the dynamic linker.  */
+                         for the dynamic linker.  */
                       s = htab->elf.srelgot;
                       LARCH_ASSERT (s, bfd_reloc_notsupported,
                                     "Internal: '.rel.got' not represent");
@@ -2356,7 +2356,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
           tls_type = _bfd_loongarch_elf_tls_type (input_bfd, h, r_symndx);
 
           /* If this symbol is referenced by both GD and IE TLS, the IE
-	     reference's GOT slot follows the GD reference's slots.  */
+             reference's GOT slot follows the GD reference's slots.  */
           ie_off = 0;
           if ((tls_type & GOT_TLS_GD) && (tls_type & GOT_TLS_IE))
             ie_off = 2 * GOT_ENTRY_SIZE;
@@ -2450,14 +2450,14 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       do
         {
           /* 'unresolved_reloc' means we haven't done it yet.
-	     We need help of dynamic linker to fix this memory location up. */
+             We need help of dynamic linker to fix this memory location up. */
           if (!unresolved_reloc)
             break;
 
           if (_bfd_elf_section_offset (output_bfd, info, input_section,
                                        rel->r_offset) == MINUS_ONE)
             /* WHY? May because it's invalid so skip checking.
-	       But why dynamic reloc a invalid section? */
+               But why dynamic reloc a invalid section? */
             break;
 
           if (input_section->output_section->flags & SEC_DEBUGGING)
@@ -2612,12 +2612,12 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
       if (!h->def_regular)
         {
           /* Mark the symbol as undefined, rather than as defined in
-	     the .plt section.  Leave the value alone.  */
+             the .plt section.  Leave the value alone.  */
           sym->st_shndx = SHN_UNDEF;
           /* If the symbol is weak, we do need to clear the value.
-	     Otherwise, the PLT entry would provide a definition for
-	     the symbol even if the symbol wasn't defined anywhere,
-	     and so the symbol would never be NULL.  */
+             Otherwise, the PLT entry would provide a definition for
+             the symbol even if the symbol wasn't defined anywhere,
+             and so the symbol would never be NULL.  */
           if (!h->ref_regular_nonweak)
             sym->st_value = 0;
         }
@@ -2826,7 +2826,7 @@ loongarch_elf_finish_dynamic_sections (bfd *output_bfd,
       if (0 < htab->elf.sgotplt->size)
         {
           /* Write the first two entries in .got.plt, needed for the dynamic
-	     linker.  */
+             linker.  */
           bfd_put_NN (output_bfd, MINUS_ONE, htab->elf.sgotplt->contents);
 
           bfd_put_NN (output_bfd, (bfd_vma) 0,
@@ -2843,7 +2843,7 @@ loongarch_elf_finish_dynamic_sections (bfd *output_bfd,
       if (0 < htab->elf.sgot->size)
         {
           /* Set the first entry in the global offset table to the address of
-	     the dynamic section.  */
+             the dynamic section.  */
           bfd_vma val = sdyn ? sec_addr (sdyn) : 0;
           bfd_put_NN (output_bfd, val, htab->elf.sgot->contents);
         }
@@ -2879,7 +2879,7 @@ loongarch_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
   if (htab->elf.dynsym != NULL && htab->elf.dynsym->contents != NULL)
     {
       /* Check relocation against STT_GNU_IFUNC symbol if there are
-	 dynamic symbols. */
+         dynamic symbols. */
       bfd *abfd = info->output_bfd;
       const struct elf_backend_data *bed = get_elf_backend_data (abfd);
       unsigned long r_symndx = ELFNN_R_SYM (rela->r_info);
@@ -2937,7 +2937,7 @@ loongarch_elf_copy_indirect_symbol (struct bfd_link_info *info,
           struct elf_dyn_relocs *p;
 
           /* Add reloc counts against the indirect sym to the direct sym
-	     list.  Merge any entries against the same section.  */
+             list.  Merge any entries against the same section.  */
           for (pp = &eind->dyn_relocs; (p = *pp) != NULL;)
             {
               struct elf_dyn_relocs *q;
