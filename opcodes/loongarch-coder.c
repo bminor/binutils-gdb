@@ -253,7 +253,7 @@ loongarch_parse_format (const char *format, char *esc1s, char *esc2s,
   while (1)
     {
       /*        esc1    esc2
-	 for "[a-zA-Z][a-zA-Z]?" */
+                for "[a-zA-Z][a-zA-Z]?" */
       if (('a' <= *format && *format <= 'z') ||
           ('A' <= *format && *format <= 'Z'))
         {

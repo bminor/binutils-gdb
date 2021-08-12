@@ -123,8 +123,8 @@ const char *const loongarch_x_normal_name[32] =
 static struct loongarch_opcode loongarch_macro_opcodes[] =
 {
   /* match,    mask,       name, format, macro, include, exclude, pinfo */
-  {0, 0, "li.w", "r,sc", "%f", 0, 0, 0},
-  {0, 0, "li.d", "r,sc", "%f", 0, 0, 0},
+  { 0, 0, "li.w", "r,sc", "%f", 0, 0, 0},
+  { 0, 0, "li.d", "r,sc", "%f", 0, 0, 0},
   { 0, 0, "la", "r,la", "la.global %1,%2", 0, 0, 0 },
 
   { 0, 0, "la.global", "r,la", "la.pcrel %1,%2",
@@ -308,8 +308,8 @@ static struct loongarch_opcode loongarch_fix_opcodes[] =
   { 0x00018000, 0xffff801f, "asrtgt.d", "r5:5,r10:5", 0, 0, 0, 0 },
   { 0x00040000, 0xfffe0000, "alsl.w", "r0:5,r5:5,r10:5,u15:2+1", 0, 0, 0, 0 },
   { 0x00060000, 0xfffe0000, "alsl.wu", "r0:5,r5:5,r10:5,u15:2+1", 0, 0, 0, 0 },
-  { 0x00080000, 0xfffe0000, "bytepick.w", "r0:5,r5:5,r10:5,u15:2", 0, 0, 0,0 },
-  { 0x000c0000, 0xfffc0000, "bytepick.d", "r0:5,r5:5,r10:5,u15:3", 0, 0, 0,0 },
+  { 0x00080000, 0xfffe0000, "bytepick.w", "r0:5,r5:5,r10:5,u15:2", 0, 0, 0, 0 },
+  { 0x000c0000, 0xfffc0000, "bytepick.d", "r0:5,r5:5,r10:5,u15:3", 0, 0, 0, 0 },
   { 0x00100000, 0xffff8000, "add.w", "r0:5,r5:5,r10:5", 0, 0, 0, 0 },
   { 0x00108000, 0xffff8000, "add.d", "r0:5,r5:5,r10:5", 0, 0, 0, 0 },
   { 0x00110000, 0xffff8000, "sub.w", "r0:5,r5:5,r10:5", 0, 0, 0, 0 },
@@ -369,9 +369,9 @@ static struct loongarch_opcode loongarch_fix_opcodes[] =
   { 0x004c8000, 0xffff8000, "rotri.w", "r0:5,r5:5,u10:5", 0, 0, 0, 0 },
   { 0x004d0000, 0xffff0000, "rotri.d", "r0:5,r5:5,u10:6", 0, 0, 0, 0 },
   { 0x00600000, 0xffe08000, "bstrins.w", "r0:5,r5:5,u16:5,u10:5", 0, 0, 0, 0 },
-  { 0x00608000, 0xffe08000, "bstrpick.w", "r0:5,r5:5,u16:5,u10:5", 0, 0, 0,0 },
+  { 0x00608000, 0xffe08000, "bstrpick.w", "r0:5,r5:5,u16:5,u10:5", 0, 0, 0, 0 },
   { 0x00800000, 0xffc00000, "bstrins.d", "r0:5,r5:5,u16:6,u10:6", 0, 0, 0, 0 },
-  { 0x00c00000, 0xffc00000, "bstrpick.d", "r0:5,r5:5,u16:6,u10:6", 0, 0, 0,0 },
+  { 0x00c00000, 0xffc00000, "bstrpick.d", "r0:5,r5:5,u16:6,u10:6", 0, 0, 0, 0 },
   { 0 } /* Terminate the list.  */
 };
 
@@ -739,8 +739,8 @@ static struct loongarch_opcode loongarch_jmp_opcodes[] =
   { 0, 0, "bcnez", "c,la", "bcnez %1,%%pcrel(%2)", 0, 0, 0 },
   { 0x48000100, 0xfc000300, "bcnez", "c5:3,sb0:5|10:16<<2", 0, 0, 0, 0 },
   { 0, 0, "jr", "r", "jirl $r0,%1,0", 0, 0, 0 },
-  { 0, 0, "b", "la", "b %%pcrel(%1)", 0, 0, 0},
-  { 0x50000000, 0xfc000000, "b", "sb0:10|10:16<<2", 0, 0, 0, 0},
+  { 0, 0, "b", "la", "b %%pcrel(%1)", 0, 0, 0 },
+  { 0x50000000, 0xfc000000, "b", "sb0:10|10:16<<2", 0, 0, 0, 0 },
   { 0x4c000000, 0xfc000000, "jirl", "r0:5,r5:5,s10:16<<2", 0, 0, 0, 0 },
   { 0, 0, "bl", "la", "bl %%pcrel(%1)", 0, 0, 0 },
   { 0x54000000, 0xfc000000, "bl", "sb0:10|10:16<<2", 0, 0, 0, 0 },
