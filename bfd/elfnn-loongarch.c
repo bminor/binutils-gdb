@@ -198,8 +198,6 @@ loongarch_make_plt_entry (bfd_vma got_plt_entry_addr, bfd_vma plt_entry_addr,
 	     | (lo & 0xfff) << 10;
   entry[2] = 0x4c0001ed;	/* jirl $r13, $15, 0 */
   entry[3] = 0x03400000;	/* nop */
-  /* entry[2] = 0x1c00000d; */ /* pcaddu12i $13, 4 */
-  /* entry[3] = 0x4c0001e0; */ /* jirl $r0, $15, 0 */
 }
 
 /* Create an entry in an LoongArch ELF linker hash table.  */
