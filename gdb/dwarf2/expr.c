@@ -927,9 +927,11 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	{
 	case DWARF_VALUE_REGISTER:
 	  {
+	    gdbarch *f_arch = get_frame_arch (this->m_frame);
 	    int dwarf_regnum
 	      = longest_to_int (value_as_long (this->fetch (0)));
-	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, dwarf_regnum);
+	    int gdb_regnum = dwarf_reg_to_regnum_or_error (f_arch,
+							   dwarf_regnum);
 
 	    if (subobj_offset != 0)
 	      error (_("cannot use offset on synthetic pointer to register"));
