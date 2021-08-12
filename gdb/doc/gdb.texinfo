@@ -39257,6 +39257,19 @@ demangler warnings always create a core file and this cannot be
 disabled.
 @end table
 
+@kindex maint set internal-error
+@kindex maint show internal-error
+@kindex maint set internal-warning
+@kindex maint show internal-warning
+@item maint set internal-error backtrace @r{[}on|off@r{]}
+@itemx maint show internal-error backtrace
+@itemx maint set internal-warning backtrace @r{[}on|off@r{]}
+@itemx maint show internal-warning backtrace
+When @value{GDBN} reports an internal problem (error or warning) it is
+possible to have a backtrace of @value{GDBN} printed to stderr.  This
+is @samp{on} by default for @code{internal-error} and @samp{off} by
+default for @code{internal-warning}.
+
 @kindex maint packet
 @item maint packet @var{text}
 If @value{GDBN} is talking to an inferior via the serial protocol,

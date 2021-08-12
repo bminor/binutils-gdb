@@ -19,6 +19,14 @@ show source open
   to open and read source code files, which can be useful if the files
   are located over a slow network connection.
 
+maint set internal-error backtrace on|off
+maint show internal-error backtrace
+maint set internal-warning backtrace on|off
+maint show internal-warning backtrace
+  GDB can now print a backtrace of itself when it encounters either an
+  internal-error, or an internal-warning.  This is on by default for
+  internal-error and off by default for internal-warning.
+
 * Python API
 
   ** New function gdb.add_history(), which takes a gdb.Value object
