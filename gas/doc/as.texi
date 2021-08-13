@@ -379,6 +379,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @emph{Target IP2K options:}
    [@b{-mip2022}|@b{-mip2022ext}]
 @end ifset
+@ifset LOONGARCH
+
+@emph{Target LOONGARCH options:}
+   [@b{-fpic}|@b{-fPIC}|@b{-fno-pic}]
+@end ifset
 @ifset M32C
 
 @emph{Target M32C options:}
@@ -537,11 +542,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-march}=@var{ISA}]
    [@b{-mabi}=@var{ABI}]
    [@b{-mlittle-endian}|@b{-mbig-endian}]
-@end ifset
-@ifset LOONGARCH
-
-@emph{Target LOONGARCH options:}
-   [@b{-fpic}|@b{-fPIC}|@b{-fno-pic}]
 @end ifset
 @ifset RL78
 
@@ -1761,6 +1761,25 @@ Assemble for a little endian target.
 @end ifset
 @c man end
 
+@ifset LOONGARCH
+
+@ifclear man
+@xref{LoongArch-Options}, for the options available when @value{AS} is configured
+for a LoongArch processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for a
+LoongArch processor.
+@c man end
+@c man begin INCLUDE
+@include c-loongarch.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
 @ifset METAG
 
 @ifclear man
@@ -1838,25 +1857,6 @@ RISC-V processor.
 @c man end
 @c man begin INCLUDE
 @include c-riscv.texi
-@c ended inside the included file
-@end ifset
-
-@end ifset
-
-@ifset LOONGARCH
-
-@ifclear man
-@xref{LoongArch-Options}, for the options available when @value{AS} is configured
-for a LoongArch processor.
-@end ifclear
-
-@ifset man
-@c man begin OPTIONS
-The following options are available when @value{AS} is configured for a
-LoongArch processor.
-@c man end
-@c man begin INCLUDE
-@include c-loongarch.texi
 @c ended inside the included file
 @end ifset
 
@@ -7861,6 +7861,9 @@ subject, see the hardware manufacturer's manual.
 @ifset IP2K
 * IP2K-Dependent::              IP2K Dependent Features
 @end ifset
+@ifset LOONGARCH
+* LoongArch-Dependent::         LoongArch Dependent Features
+@end ifset
 @ifset LM32
 * LM32-Dependent::              LM32 Dependent Features
 @end ifset
@@ -7920,9 +7923,6 @@ subject, see the hardware manufacturer's manual.
 @end ifset
 @ifset RISCV
 * RISC-V-Dependent::            RISC-V Dependent Features
-@end ifset
-@ifset LOONGARCH
-* LoongArch-Dependent::         LoongArch Dependent Features
 @end ifset
 @ifset RL78
 * RL78-Dependent::              RL78 Dependent Features
@@ -8088,6 +8088,10 @@ family.
 @include c-lm32.texi
 @end ifset
 
+@ifset LOONGARCH
+@include c-loongarch.texi
+@end ifset
+
 @ifset M32C
 @include c-m32c.texi
 @end ifset
@@ -8162,10 +8166,6 @@ family.
 
 @ifset RISCV
 @include c-riscv.texi
-@end ifset
-
-@ifset LOONGARCH
-@include c-loongarch.texi
 @end ifset
 
 @ifset RL78
