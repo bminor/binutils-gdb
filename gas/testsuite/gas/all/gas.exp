@@ -68,7 +68,8 @@ if {    ![istarget alpha*-*-*vms*]
      && ![istarget riscv*-*-*]
      && ![istarget rl78-*-*]
      && ![istarget rs6000*-*-aix*]
-     && ![istarget rx-*-*] } then {
+     && ![istarget rx-*-*]
+     && ![istarget loongarch*-*-*] } then {
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
 }
 
@@ -160,9 +161,11 @@ switch -glob $target_triplet {
 	# symbols on relocs.
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
 	setup_xfail "riscv*-*-*" "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
+	setup_xfail "loongarch*-*-*"
 	run_dump_test redef2
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
 	setup_xfail "riscv*-*-*" "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
+	setup_xfail "loongarch*-*-*"
 	# rs6000-aix disallows redefinition via .comm.
 	if [is_xcoff_format] {
 	    setup_xfail *-*-*

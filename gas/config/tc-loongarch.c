@@ -157,6 +157,9 @@ md_parse_option (int c, const char *arg)
       break;
     case OPTION_IGNORE:
       break;
+    default:
+      ret = 0;
+      break;
     }
   return ret;
 }
