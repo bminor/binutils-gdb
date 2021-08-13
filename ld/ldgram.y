@@ -248,9 +248,8 @@ mri_script_command:
 	|	CASE casesymlist
 	|	EXTERN extern_name_list
 	|	INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
+		{ ldfile_open_command_file ($2); }
 		mri_script_lines END
-		{ ldlex_popstate (); }
 	|	START NAME
 		{ lang_add_entry ($2, false); }
 	|
@@ -346,9 +345,8 @@ ifile_p1:
 	|	MAP '(' filename ')'
 		{ lang_add_map($3); }
 	|	INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
+		{ ldfile_open_command_file ($2); }
 		ifile_list END
-		{ ldlex_popstate (); }
 	|	NOCROSSREFS '(' nocrossref_list ')'
 		{
 		  lang_add_nocrossref ($3);
@@ -697,11 +695,9 @@ statement:
 		}
 	| INCLUDE filename
 		{
-		  ldlex_script ();
 		  ldfile_open_command_file ($2);
 		}
 	  statement_list_opt END
-		{ ldlex_popstate (); }
 	;
 
 statement_list:
@@ -814,9 +810,8 @@ memory_spec:	NAME
 		origin_spec opt_comma length_spec
 		{}
 	|	INCLUDE filename
-		{ ldlex_script (); ldfile_open_command_file($2); }
+		{ ldfile_open_command_file ($2); }
 		memory_spec_list_opt END
-		{ ldlex_popstate (); }
 	;
 
 origin_spec:
@@ -1117,11 +1112,9 @@ section:	NAME
 		'{' sec_or_group_p1 '}'
 	|	INCLUDE filename
 			{
-			  ldlex_script ();
 			  ldfile_open_command_file ($2);
 			}
 		sec_or_group_p1 END
-			{ ldlex_popstate (); }
 	;
 
 type:
