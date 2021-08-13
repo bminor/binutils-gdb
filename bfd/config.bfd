@@ -64,6 +64,9 @@ case $targ in
  *-*-netbsdelf* | *-*-netbsdaout* | *-*-netbsdpe*)
     # Explicit, no defaulting
     ;;
+ ns32k-*-netbsd*)
+    # The obsolete warning is enough, and ns32k does not have ELF support
+    ;;
  *-*-netbsd* )
     targ_migrated=`echo "$targ" | sed 's/netbsd/netbsdaout/'`
     echo "*** WARNING: $targ is now defaults to meaning ELF not a.out." >&2
@@ -996,7 +999,7 @@ case "${targ}" in
     targ_defvec=ns32k_aout_pc532mach_vec
     targ_underscore=yes
     ;;
-  ns32k-*-lites* | ns32k-*-openbsd*)
+  ns32k-*-lites* | ns32k-*-*bsd*)
     targ_defvec=ns32k_aout_pc532nbsd_vec
     targ_underscore=yes
     ;;

@@ -605,7 +605,7 @@ nios2*-*-*)		targ_emul=nios2elf
 ns32k-pc532-mach* | ns32k-pc532-ux*)  targ_emul=pc532macha
 			targ_extra_ofiles=
 			;;
-ns32k-*-netbsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd
+ns32k-*-*bsd* | ns32k-pc532-lites*) targ_emul=ns32knbsd
 			targ_extra_ofiles=
 			;;
 or1k-*-elf | or1knd-*-elf | or1k-*-rtems* | or1knd-*-rtems*)
