@@ -280,18 +280,12 @@ casesymlist:
 	| casesymlist ',' NAME
 	;
 
-/* Parsed as expressions so that commas separate entries */
 extern_name_list:
-	{ ldlex_expression (); }
-	extern_name_list_body
-	{ ldlex_popstate (); }
-
-extern_name_list_body:
-	  NAME
+	NAME
 			{ ldlang_add_undef ($1, false); }
-	| extern_name_list_body NAME
+	| extern_name_list NAME
 			{ ldlang_add_undef ($2, false); }
-	| extern_name_list_body ',' NAME
+	| extern_name_list ',' NAME
 			{ ldlang_add_undef ($3, false); }
 	;
 
@@ -355,7 +349,8 @@ ifile_p1:
 		{
 		  lang_add_nocrossref_to ($3);
 		}
-	|	EXTERN '(' extern_name_list ')'
+	|	EXTERN '(' { ldlex_expression (); } extern_name_list ')'
+			{ ldlex_popstate (); }
 	|	INSERT_K AFTER NAME
 		{ lang_add_insert ($3, 0); }
 	|	INSERT_K BEFORE NAME
