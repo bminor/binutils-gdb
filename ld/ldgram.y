@@ -421,20 +421,10 @@ statement_anywhere:
 		  lang_add_assignment (exp_assert ($4, $6)); }
 	;
 
-/* The '*' and '?' cases are there because the lexer returns them as
-   separate tokens rather than as NAME.  */
 wildcard_name:
 		NAME
 			{
 			  $$ = $1;
-			}
-	|	'*'
-			{
-			  $$ = "*";
-			}
-	|	'?'
-			{
-			  $$ = "?";
 			}
 	;
 
