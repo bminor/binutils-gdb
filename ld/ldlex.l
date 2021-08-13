@@ -245,6 +245,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <SCRIPT,EXPRESSION>"ADDR"		{ RTOKEN(ADDR);}
 <SCRIPT,EXPRESSION>"LOADADDR"		{ RTOKEN(LOADADDR);}
 <SCRIPT,EXPRESSION>"ALIGNOF"		{ RTOKEN(ALIGNOF); }
+<SCRIPT,EXPRESSION>"ABSOLUTE"		{ RTOKEN(ABSOLUTE); }
 <EXPRESSION>"MAX"			{ RTOKEN(MAX_K); }
 <EXPRESSION>"MIN"			{ RTOKEN(MIN_K); }
 <EXPRESSION>"LOG2CEIL"			{ RTOKEN(LOG2CEIL); }
@@ -252,7 +253,6 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <SCRIPT,WILD>"ENTRY"			{ RTOKEN(ENTRY);}
 <SCRIPT,MRI>"EXTERN"			{ RTOKEN(EXTERN);}
 <SCRIPT,EXPRESSION>"NEXT"		{ RTOKEN(NEXT);}
-<SCRIPT,EXPRESSION>"sizeof_headers"	{ RTOKEN(SIZEOF_HEADERS);}
 <SCRIPT,EXPRESSION>"SIZEOF_HEADERS"	{ RTOKEN(SIZEOF_HEADERS);}
 <SCRIPT,EXPRESSION>"SEGMENT_START"	{ RTOKEN(SEGMENT_START);}
 <SCRIPT>"MAP"				{ RTOKEN(MAP);}
@@ -325,6 +325,7 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <MRI>"*".*			{ /* Mri comment line */ }
 <MRI>";".*			{ /* Mri comment line */ }
 <MRI>"END"			{ RTOKEN(ENDWORD); }
+<MRI>"ABSOLUTE"			{ RTOKEN(ABSOLUTE); }
 <MRI>"ALIGNMOD"			{ RTOKEN(ALIGNMOD);}
 <MRI>"ALIGN"			{ RTOKEN(ALIGN_K);}
 <MRI>"CHIP"			{ RTOKEN(CHIP); }
@@ -340,8 +341,8 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <MRI>"START"			{ RTOKEN(START); }
 <MRI>"LIST".*			{ RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"SECT"			{ RTOKEN(SECT); }
-<SCRIPT,EXPRESSION,MRI>"ABSOLUTE"			{ RTOKEN(ABSOLUTE); }
 <MRI>"end"			{ RTOKEN(ENDWORD); }
+<MRI>"absolute"			{ RTOKEN(ABSOLUTE); }
 <MRI>"alignmod"			{ RTOKEN(ALIGNMOD);}
 <MRI>"align"			{ RTOKEN(ALIGN_K);}
 <MRI>"chip"			{ RTOKEN(CHIP); }
@@ -358,7 +359,6 @@ V_IDENTIFIER [*?.$_a-zA-Z\[\]\-\!\^\\]([*?.$_a-zA-Z0-9\[\]\-\!\^\\]|::)*
 <MRI>"start"			{ RTOKEN(START); }
 <MRI>"list".*			{ RTOKEN(LIST); /* LIST and ignore to end of line */ }
 <MRI>"sect"			{ RTOKEN(SECT); }
-<SCRIPT,EXPRESSION,MRI>"absolute"			{ RTOKEN(ABSOLUTE); }
 
 <MRI>{FILENAMECHAR1}{NOCFILENAMECHAR}*	{
 /* Filename without commas, needed to parse mri stuff */

@@ -7044,7 +7044,6 @@ SECTIONS@{ @dots{}
 @end smallexample
 
 @item SIZEOF_HEADERS
-@itemx sizeof_headers
 @kindex SIZEOF_HEADERS
 @cindex header size
 Return the size in bytes of the output file's headers.  This is
