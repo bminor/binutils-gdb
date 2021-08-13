@@ -93,27 +93,11 @@ loongarch_fetch_instruction (CORE_ADDR addr, int *errp)
 }
 
 static int
-loongarch_insn_is_lsx (const insn_t insn)
-{
-  return ((insn & 0xf0000000) == 0x70000000)
-	 && ((insn & 0x0f000000) == (insn & 0x03000000));
-}
-
-static int
-loongarch_insn_is_lasx (const insn_t insn)
-{
-  return ((insn & 0xf0000000) == 0x70000000) && (insn & 0x04000000)
-	 && ((insn & 0x0f000000) == (insn & 0x07000000));
-}
-
-static int
 loongarch_insn_is_branch_and_must_branch (insn_t insn)
 {
   if ((insn & 0xfc000000) == 0x4c000000	    /* jirl r0:5,r5:5,s10:16<<2 */
       || (insn & 0xfc000000) == 0x50000000  /* b sb0:10|10:16<<2 */
-      || (insn & 0xfc000000) == 0x54000000  /* bl sb0:10|10:16<<2 */
-      || (insn & 0xfc0003e0) == 0x48000200  /* jiscr0 s0:5|10:16<<2 */
-      || (insn & 0xfc0003e0) == 0x48000300) /* jiscr1 s0:5|10:16<<2 */
+      || (insn & 0xfc000000) == 0x54000000) /* bl sb0:10|10:16<<2 */
     return 1;
   return 0;
 }
@@ -149,18 +133,6 @@ loongarch_next_pc_if_branch (struct regcache *regcache, CORE_ADDR cur_pc,
       || (insn & 0xfc000300) == 0x48000000  /* bceqz c5:3,sb0:5|10:16<<2 */
       || (insn & 0xfc000300) == 0x48000100) /* bcnez c5:3,sb0:5|10:16<<2 */
     next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
-  else if ((insn & 0xfc0003e0) == 0x48000200) /* jiscr0 s0:5|10:16<<2 */
-    {
-      gdb_assert (0 <= regs->scr);
-      next_pc = regcache_raw_get_signed (regcache, regs->scr)
-		+ loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
-    }
-  else if ((insn & 0xfc0003e0) == 0x48000300) /* jiscr1 s0:5|10:16<<2 */
-    {
-      gdb_assert (0 <= regs->scr);
-      next_pc = regcache_raw_get_signed (regcache, regs->scr + 1)
-		+ loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
-    }
   else if ((insn & 0xfc000000) == 0x4c000000) /* jirl r0:5,r5:5,s10:16<<2 */
     next_pc = regcache_raw_get_signed (
 		regcache, regs->r + loongarch_decode_imm ("5:5", insn, 0))
@@ -786,60 +758,6 @@ typedef struct stack_data_t
   bool ref = false;
 } stack_data_t;
 
-static int
-loongarch_find_vector_insn_size (struct gdbarch *gdbarch,
-				 struct value *function)
-{
-  const int size_insn = loongarch_insn_length (0);
-  CORE_ADDR start_pc = value_raw_address (function);
-
-  if (!start_pc)
-    return 0;
-
-  /* Search create stack insn in start 16 insn.  */
-  CORE_ADDR stack_max_pc = start_pc + 16 * size_insn;
-  CORE_ADDR max_pc = start_pc + 200 * size_insn;
-  insn_t end_insn = *(insn_t *) max_pc;
-  int addi_spsp;
-
-  /* Set addi.wd $sp, $sp, stack_size.  */
-  if (loongarch_rlen (gdbarch) == 64)
-    addi_spsp = 0x2C00063;
-  else
-    addi_spsp = 0x2800063;
-
-  for (CORE_ADDR pc = start_pc; pc < stack_max_pc; pc = pc + size_insn)
-    {
-      insn_t insn = *(insn_t *) pc;
-      if ((addi_spsp & insn) == addi_spsp)
-	{
-	  const int stack_mask = 0xFFC003FF;
-	  /* Stacksize in addi_spsp insn.  */
-	  int s12 = ((insn & stack_mask) >> 10);
-	  /* Signed stacksize.  */
-	  if ((s12 & (0x1 << 12)) != 0)
-	    {
-	      end_insn = addi_spsp | ((s12 & 0x7ff) << 10);
-	      max_pc = max_pc + 200 * size_insn;
-	      break;
-	    }
-	}
-    }
-
-  for (CORE_ADDR pc = start_pc; pc < max_pc; pc = pc + size_insn)
-    {
-      insn_t insn = *(insn_t *) pc;
-      if (insn == end_insn)
-	break;
-      if (loongarch_insn_is_lsx (insn))
-	return 16;
-      else if (loongarch_insn_is_lasx (insn))
-	return 32;
-    }
-
-  return 0;
-}
-
 static void
 pass_on_stack (std::vector<stack_data_t> &stack, const gdb_byte *val, int len,
 	       int align, bool ref = false)
@@ -991,8 +909,6 @@ loongarch_lp32lp64_push_dummy_call (
 	args++;
 	nargs--;
       }
-    /* Search vector instruction from function code.  */
-    vec_insn = loongarch_find_vector_insn_size (gdbarch, function);
   }
   regcache_cooked_write_signed (regcache, regs->ra, bp_addr);
 
