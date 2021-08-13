@@ -297,9 +297,9 @@ extern_name_list_body:
 	;
 
 script_file:
-	{ ldlex_both(); }
+	{ ldlex_script (); }
 	ifile_list
-	{ ldlex_popstate(); }
+	{ ldlex_popstate (); }
 	;
 
 ifile_list:
@@ -1021,10 +1021,10 @@ exp	:
 			{ $$ = exp_binop (MIN_K, $3, $5 ); }
 	|	ASSERT_K '(' exp ',' NAME ')'
 			{ $$ = exp_assert ($3, $5); }
-	|	ORIGIN '(' NAME ')'
-			{ $$ = exp_nameop (ORIGIN, $3); }
-	|	LENGTH '(' NAME ')'
-			{ $$ = exp_nameop (LENGTH, $3); }
+	|	ORIGIN paren_script_name
+			{ $$ = exp_nameop (ORIGIN, $2); }
+	|	LENGTH paren_script_name
+			{ $$ = exp_nameop (LENGTH, $2); }
 	|	LOG2CEIL '(' exp ')'
 			{ $$ = exp_unop (LOG2CEIL, $3); }
 	;
@@ -1069,50 +1069,38 @@ section:	NAME
 		opt_align
 		opt_align_with_input
 		opt_subalign
-			{ ldlex_popstate (); ldlex_script (); }
 		sect_constraint
-		'{'
 			{
+			  ldlex_popstate ();
+			  ldlex_wild ();
 			  lang_enter_output_section_statement($1, $3, sectype,
 							      $5, $7, $4,
-							      $9, $6);
+							      $8, $6);
 			}
+		'{'
 		statement_list_opt
 		'}'
-			{ ldlex_popstate (); ldlex_expression (); }
+			{ ldlex_popstate (); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
 			{
-			  if (yychar == NAME)
-			    {
-			      yyclearin;
-			      ldlex_backup ();
-			    }
-			  ldlex_popstate ();
-			  lang_leave_output_section_statement ($18, $15,
-							       $17, $16);
+			  lang_leave_output_section_statement ($17, $14,
+							       $16, $15);
 			}
 		opt_comma
 	|	OVERLAY
 			{ ldlex_expression (); }
 		opt_exp_without_type opt_nocrossrefs opt_at opt_subalign
-			{ ldlex_popstate (); ldlex_script (); }
+			{ ldlex_popstate (); }
 		'{'
 			{
 			  lang_enter_overlay ($3, $6);
 			}
 		overlay_section
 		'}'
-			{ ldlex_popstate (); ldlex_expression (); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
 			{
-			  if (yychar == NAME)
-			    {
-			      yyclearin;
-			      ldlex_backup ();
-			    }
-			  ldlex_popstate ();
 			  lang_leave_overlay ($5, (int) $4,
-					      $16, $13, $15, $14);
+					      $15, $12, $14, $13);
 			}
 		opt_comma
 	|	/* The GROUP case is just enough to support the gcc
@@ -1204,18 +1192,15 @@ overlay_section:
 	|	overlay_section
 		NAME
 			{
+			  ldlex_wild ();
 			  lang_enter_overlay_section ($2);
 			}
-		'{' statement_list_opt '}'
-			{ ldlex_expression (); }
+		'{'
+		statement_list_opt
+		'}'
+			{ ldlex_popstate (); }
 		phdr_opt fill_opt
 			{
-			  if (yychar == NAME)
-			    {
-			      yyclearin;
-			      ldlex_backup ();
-			    }
-			  ldlex_popstate ();
 			  lang_leave_overlay_section ($9, $8);
 			}
 		opt_comma

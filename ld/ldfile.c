@@ -193,7 +193,7 @@ ldfile_try_open_bfd (const char *attempt,
 
 		  ldfile_assumed_script = true;
 		  parser_input = input_selected;
-		  ldlex_both ();
+		  ldlex_script ();
 		  token = INPUT_SCRIPT;
 		  while (token != 0)
 		    {
