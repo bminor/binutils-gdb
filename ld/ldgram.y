@@ -1063,6 +1063,18 @@ section:	NAME
 			{ ldlex_popstate (); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
 			{
+			  /* fill_opt may have switched the lexer into
+			     expression state, and back again, but in
+			     order to find the end of the fill
+			     expression the parser must look ahead one
+			     token.  If it is a NAME, throw it away as
+			     it will have been lexed in the wrong
+			     state.  */
+			  if (yychar == NAME)
+			    {
+			      yyclearin;
+			      ldlex_backup ();
+			    }
 			  lang_leave_output_section_statement ($17, $14,
 							       $16, $15);
 			}
@@ -1079,6 +1091,11 @@ section:	NAME
 		'}'
 		memspec_opt memspec_at_opt phdr_opt fill_opt
 			{
+			  if (yychar == NAME)
+			    {
+			      yyclearin;
+			      ldlex_backup ();
+			    }
 			  lang_leave_overlay ($5, (int) $4,
 					      $15, $12, $14, $13);
 			}
@@ -1179,6 +1196,11 @@ overlay_section:
 			{ ldlex_popstate (); }
 		phdr_opt fill_opt
 			{
+			  if (yychar == NAME)
+			    {
+			      yyclearin;
+			      ldlex_backup ();
+			    }
 			  lang_leave_overlay_section ($9, $8);
 			}
 		opt_comma
