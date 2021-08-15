@@ -698,7 +698,10 @@ if [gas_32_check] then {
 	    run_list_test "iamcu-inval-1" "-march=iamcu -al"
 	}
     } else {
+	set saved_ASFLAGS "$ASFLAGS"
+	append ASFLAGS " --defsym NO_TFLOAT_PADDING=1"
 	run_dump_test "fp"
+	set $ASFLAGS "$saved_ASFLAGS"
     }
 
     # This is a PE specific test.

@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Outputs of .ds.x directive and .tfloat directive with hex input from
+  x86 assembler have been reduced from 12 bytes to 10 bytes to match the
+  output of .tfloat directive.
+
 * Add support for Intel AVX512_FP16 instructions.
 
 Changes in 2.37:

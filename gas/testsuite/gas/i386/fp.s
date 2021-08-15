@@ -1,6 +1,13 @@
 	.data
 # .tfloat is 80-bit floating point format.
 	.tfloat 3.32192809488736218171e0
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 #	.byte 0x0, 0x88, 0x1b, 0xcd, 0x4b, 0x78, 0x9a, 0xd4, 0x0, 0x40
 # .double is 64-bit floating point format.
 	.double 3.32192809488736218171e0
@@ -23,11 +30,39 @@
 	.p2align 4,0
 
 	.ds.x 1, -1
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte -1, -1, -1, -1, -1, -1
+  .else
+	.byte -1, -1
+  .endif
+.endif
 	.p2align 4,0xcc
 
 	.tfloat 0x:3ffe80
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.dc.x 0x:bffd80
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.dcb.x 1, 0x:03ff80
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0xaa
 
 	.hfloat 1, -2, 0x:3c00
@@ -39,6 +74,13 @@
 	.single Inf
 	.double Inf
 	.tfloat Inf
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x44
 
 	.hfloat +Inf
@@ -46,6 +88,13 @@
 	.single +Inf
 	.double +Inf
 	.tfloat +Inf
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x33
 
 	.hfloat -Inf
@@ -53,6 +102,13 @@
 	.single -Inf
 	.double -Inf
 	.tfloat -Inf
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x22
 
 	.hfloat NaN
@@ -60,6 +116,13 @@
 	.single NaN
 	.double NaN
 	.tfloat NaN
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x44
 
 	.hfloat +NaN
@@ -67,6 +130,13 @@
 	.single +NaN
 	.double +NaN
 	.tfloat +NaN
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x33
 
 	.hfloat -NaN
@@ -74,6 +144,13 @@
 	.single -NaN
 	.double -NaN
 	.tfloat -NaN
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x22
 
 	.hfloat QNaN
@@ -81,6 +158,13 @@
 	.single QNaN
 	.double QNaN
 	.tfloat QNaN
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x44
 
 	.hfloat +QNaN
@@ -88,6 +172,13 @@
 	.single +QNaN
 	.double +QNaN
 	.tfloat +QNaN
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x33
 
 	.hfloat -QNaN
@@ -95,6 +186,13 @@
 	.single -QNaN
 	.double -QNaN
 	.tfloat -QNaN
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x22
 
 	.hfloat SNaN
@@ -102,6 +200,13 @@
 	.single SNaN
 	.double SNaN
 	.tfloat SNaN
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x44
 
 	.hfloat +SNaN
@@ -109,6 +214,13 @@
 	.single +SNaN
 	.double +SNaN
 	.tfloat +SNaN
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x33
 
 	.hfloat -SNaN
@@ -116,4 +228,11 @@
 	.single -SNaN
 	.double -SNaN
 	.tfloat -SNaN
+.ifndef NO_TFLOAT_PADDING
+  .ifdef x86_64
+	.byte 0, 0, 0, 0, 0, 0
+  .else
+	.byte 0, 0
+  .endif
+.endif
 	.p2align 4,0x22

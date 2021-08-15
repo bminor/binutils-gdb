@@ -135,8 +135,7 @@ extern void x86_cons_fix_new
 (fragS *, unsigned int, unsigned int, expressionS *, bfd_reloc_code_real_type);
 
 #define X_PRECISION     5
-#define X_PRECISION_PAD x86_tfloat_pad ()
-extern int x86_tfloat_pad (void);
+#define X_PRECISION_PAD 0
 
 #define TC_ADDRESS_BYTES x86_address_bytes
 extern int x86_address_bytes (void);
