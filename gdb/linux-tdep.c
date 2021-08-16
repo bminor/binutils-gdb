@@ -41,6 +41,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "gcore.h"
 #include "gcore-elf.h"
+#include "solib-svr4.h"
 
 #include <ctype.h>
 
@@ -2723,4 +2724,63 @@ VM_DONTDUMP flag (\"dd\" in /proc/PID/smaps) when generating the corefile.  For\
 more information about this file, refer to the manpage of proc(5) and core(5)."),
 			   NULL, show_dump_excluded_mappings,
 			   &setlist, &showlist);
+}
+
+/* Fetch (and possibly build) an appropriate `link_map_offsets' for
+   ILP32/LP64 Linux systems which don't have the r_ldsomap field.  */
+
+link_map_offsets *
+linux_ilp32_fetch_link_map_offsets ()
+{
+  static link_map_offsets lmo;
+  static link_map_offsets *lmp = nullptr;
+
+  if (lmp == nullptr)
+    {
+      lmp = &lmo;
+
+      lmo.r_version_offset = 0;
+      lmo.r_version_size = 4;
+      lmo.r_map_offset = 4;
+      lmo.r_brk_offset = 8;
+      lmo.r_ldsomap_offset = -1;
+
+      /* Everything we need is in the first 20 bytes.  */
+      lmo.link_map_size = 20;
+      lmo.l_addr_offset = 0;
+      lmo.l_name_offset = 4;
+      lmo.l_ld_offset = 8;
+      lmo.l_next_offset = 12;
+      lmo.l_prev_offset = 16;
+    }
+
+  return lmp;
+}
+
+link_map_offsets *
+linux_lp64_fetch_link_map_offsets ()
+{
+  static link_map_offsets lmo;
+  static link_map_offsets *lmp = nullptr;
+
+  if (lmp == nullptr)
+    {
+      lmp = &lmo;
+
+      lmo.r_version_offset = 0;
+      lmo.r_version_size = 4;
+      lmo.r_map_offset = 8;
+      lmo.r_brk_offset = 16;
+      lmo.r_ldsomap_offset = -1;
+
+      /* Everything we need is in the first 40 bytes.  */
+      lmo.link_map_size = 40;
+      lmo.l_addr_offset = 0;
+      lmo.l_name_offset = 8;
+      lmo.l_ld_offset = 16;
+      lmo.l_next_offset = 24;
+      lmo.l_prev_offset = 32;
+    }
+
+  return lmp;
 }

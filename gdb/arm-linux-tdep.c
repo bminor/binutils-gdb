@@ -1763,7 +1763,7 @@ arm_linux_init_abi (struct gdbarch_info info,
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
 
   set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+    (gdbarch, linux_ilp32_fetch_link_map_offsets);
 
   /* Single stepping.  */
   set_gdbarch_software_single_step (gdbarch, arm_linux_software_single_step);

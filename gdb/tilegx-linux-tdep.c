@@ -121,10 +121,10 @@ tilegx_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* GNU/Linux uses SVR4-style shared libraries.  */
   if (arch_size == 32)
     set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					   svr4_ilp32_fetch_link_map_offsets);
+					   linux_ilp32_fetch_link_map_offsets);
   else
     set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					   svr4_lp64_fetch_link_map_offsets);
+					   linux_lp64_fetch_link_map_offsets);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

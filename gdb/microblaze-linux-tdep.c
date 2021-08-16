@@ -124,7 +124,7 @@ microblaze_linux_init_abi (struct gdbarch_info info,
 
   /* Shared library handling.  */
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 svr4_ilp32_fetch_link_map_offsets);
+					 linux_ilp32_fetch_link_map_offsets);
 
   /* Trampolines.  */
   tramp_frame_prepend_unwinder (gdbarch,

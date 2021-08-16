@@ -98,4 +98,9 @@ extern CORE_ADDR linux_get_hwcap (struct target_ops *target);
    error, 0 is returned.  */
 extern CORE_ADDR linux_get_hwcap2 (struct target_ops *target);
 
+/* Fetch (and possibly build) an appropriate `struct link_map_offsets'
+   for ILP32 and LP64 Linux systems.  */
+extern struct link_map_offsets *linux_ilp32_fetch_link_map_offsets ();
+extern struct link_map_offsets *linux_lp64_fetch_link_map_offsets ();
+
 #endif /* linux-tdep.h */

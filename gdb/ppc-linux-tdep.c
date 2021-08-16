@@ -2035,7 +2035,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, svr4_ilp32_fetch_link_map_offsets);
+	(gdbarch, linux_ilp32_fetch_link_map_offsets);
 
       /* Setting the correct XML syscall filename.  */
       set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC);
@@ -2087,7 +2087,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets
-	(gdbarch, svr4_lp64_fetch_link_map_offsets);
+	(gdbarch, linux_lp64_fetch_link_map_offsets);
 
       /* Setting the correct XML syscall filename.  */
       set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_PPC64);

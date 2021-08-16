@@ -1158,7 +1158,7 @@ s390_linux_init_abi_31 (struct gdbarch_info info, struct gdbarch *gdbarch)
   s390_linux_init_abi_any (info, gdbarch);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 svr4_ilp32_fetch_link_map_offsets);
+					 linux_ilp32_fetch_link_map_offsets);
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390);
 }
 
@@ -1174,7 +1174,7 @@ s390_linux_init_abi_64 (struct gdbarch_info info, struct gdbarch *gdbarch)
   s390_linux_init_abi_any (info, gdbarch);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
-					 svr4_lp64_fetch_link_map_offsets);
+					 linux_lp64_fetch_link_map_offsets);
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_S390X);
 }
 
