@@ -799,6 +799,28 @@ proc_with_prefix test_catchpoints {} {
     gdb_test "continue" "Stopped at catchpoint event: ${num}"
 }
 
+# Test auto-disable is effective when notifying breakpoint_modified.
+
+proc_with_prefix test_bkpt_auto_disable { } {
+    global srcfile testfile hex decimal
+
+    # Start with a fresh gdb.
+    clean_restart ${testfile}
+
+    if ![runto_main] then {
+	fail "cannot run to main."
+	return 0
+    }
+    delete_breakpoints
+
+    set mult_line [gdb_get_line_number "Break at multiply."]
+    gdb_breakpoint ${mult_line}
+    gdb_test_no_output "enable count 1 2" "one shot enable"
+    gdb_test_no_output "python gdb.events.breakpoint_modified.connect(lambda bp: print(bp.enabled))" \
+	"trap breakpoint_modified event"
+    gdb_test "continue" "False.*" "auto-disabling after enable count reached"
+}
+
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
@@ -815,3 +837,4 @@ test_bkpt_events
 test_bkpt_explicit_loc
 test_bkpt_qualified
 test_bkpt_probe
+test_bkpt_auto_disable

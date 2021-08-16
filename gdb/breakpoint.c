@@ -5491,7 +5491,6 @@ bpstat_stop_status (const address_space *aspace,
 	  if (bs->stop)
 	    {
 	      ++(b->hit_count);
-	      gdb::observers::breakpoint_modified.notify (b);
 
 	      /* We will stop here.  */
 	      if (b->disposition == disp_disable)
@@ -5501,6 +5500,7 @@ bpstat_stop_status (const address_space *aspace,
 		    b->enable_state = bp_disabled;
 		  removed_any = 1;
 		}
+	      gdb::observers::breakpoint_modified.notify (b);
 	      if (b->silent)
 		bs->print = 0;
 	      bs->commands = b->commands;

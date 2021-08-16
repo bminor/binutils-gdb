@@ -257,3 +257,44 @@ proc test_pending_resolved { } {
 with_test_prefix "test_pending_resolved" {
     test_pending_resolved
 }
+
+# Test auto-disable is effective when notifying breakpoint-modified.
+
+proc test_auto_disable { } {
+    global mi_gdb_prompt
+    global lib_sl1 lib_sl2
+    global binfile
+
+    mi_clean_restart $binfile
+
+    mi_load_shlibs $lib_sl1 $lib_sl2
+
+    mi_runto_main
+
+    # Set the breakpoint.
+    mi_gdb_test "-break-insert -f pendfunc1" \
+	{(&.*)*.*~"Breakpoint 2 at.*\\n".*=breakpoint-created,bkpt=\{number="2",type="breakpoint".*\}.*\n\^done}
+
+    # Enable for one shot only.
+    mi_gdb_test "-break-enable count 1 2" \
+	{=breakpoint-modified,bkpt=\{number="2",type="breakpoint",disp="dis",enabled="y".*\}.*\n\^done}
+
+    mi_send_resuming_command "exec-continue" "continuing execution to breakpoint"
+
+    set test "breakpoint auto-disabling after enable count reached"
+    gdb_expect {
+	-re ".*=breakpoint-modified,bkpt=\{number=\"2\".*enabled=\"n\"" {
+	    pass $test
+	}
+	-re ".*${mi_gdb_prompt}$" {
+	    fail $test
+	}
+	timeout {
+	    fail "$test (timeout)"
+	}
+    }
+}
+
+with_test_prefix "test_auto_disable" {
+    test_auto_disable
+}
