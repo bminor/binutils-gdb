@@ -3799,7 +3799,7 @@ static struct
   /* Close FD and clear it to -1.  */
   void close ()
   {
-    linux_nat_debug_printf ("closing fd %d for /proc/%d/task/%ld/mem\n",
+    linux_nat_debug_printf ("closing fd %d for /proc/%d/task/%ld/mem",
 			    fd, ptid.pid (), ptid.lwp ());
     ::close (fd);
     fd = -1;
@@ -3859,7 +3859,7 @@ linux_proc_xfer_memory_partial_pid (ptid_t ptid,
 	}
       last_proc_mem_file.ptid = ptid;
 
-      linux_nat_debug_printf ("opened fd %d for %s\n",
+      linux_nat_debug_printf ("opened fd %d for %s",
 			      last_proc_mem_file.fd, filename);
     }
 
