@@ -273,6 +273,11 @@ extern void elf_frob_symbol (symbolS *, int *);
 #define obj_frob_symbol(symp, punt) elf_frob_symbol (symp, &punt)
 #endif
 
+extern void elf_fixup_removed_symbol (symbolS **);
+#ifndef obj_fixup_removed_symbol
+#define obj_fixup_removed_symbol(sympp) elf_fixup_removed_symbol (sympp)
+#endif
+
 extern void elf_pop_insert (void);
 #ifndef obj_pop_insert
 #define obj_pop_insert()	elf_pop_insert()

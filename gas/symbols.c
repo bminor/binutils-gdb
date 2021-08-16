@@ -78,6 +78,10 @@ struct symbol_flags
      before.  It is cleared as soon as any direct reference to the
      symbol is present.  */
   unsigned int weakrefd : 1;
+
+  /* Whether the symbol has been marked to be removed by a .symver
+     directive.  */
+  unsigned int removed : 1;
 };
 
 /* A pointer in the symbol may point to either a complete symbol
@@ -194,7 +198,7 @@ static void *
 symbol_entry_find (htab_t table, const char *name)
 {
   hashval_t hash = htab_hash_string (name);
-  symbol_entry_t needle = { { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+  symbol_entry_t needle = { { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 			      hash, name, 0, 0, 0 } };
   return htab_find_with_hash (table, &needle, hash);
 }
@@ -2805,6 +2809,26 @@ symbol_written_p (symbolS *s)
   if (s->flags.local_symbol)
     return 0;
   return s->flags.written;
+}
+
+/* Mark a symbol as to be removed.  */
+
+void
+symbol_mark_removed (symbolS *s)
+{
+  if (s->flags.local_symbol)
+    return;
+  s->flags.removed = 1;
+}
+
+/* Return whether a symbol has been marked to be removed.  */
+
+int
+symbol_removed_p (symbolS *s)
+{
+  if (s->flags.local_symbol)
+    return 0;
+  return s->flags.removed;
 }
 
 /* Mark a symbol has having been resolved.  */
