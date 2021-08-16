@@ -6845,7 +6845,7 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
 	  if (linux_read_memory (priv->r_debug + lmo->r_version_offset,
 				 (unsigned char *) &r_version,
 				 sizeof (r_version)) != 0
-	      || r_version != 1)
+	      || r_version < 1)
 	    {
 	      warning ("unexpected r_debug version %d", r_version);
 	    }
