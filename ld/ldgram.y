@@ -809,6 +809,11 @@ origin_spec:
 length_spec:
 	     LENGTH '=' mustbe_exp
 		{
+		  if (yychar == NAME)
+		    {
+		      yyclearin;
+		      ldlex_backup ();
+		    }
 		  region->length_exp = $3;
 		}
 	;
