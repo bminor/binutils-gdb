@@ -380,7 +380,7 @@ thread_is_in_step_over_chain (struct thread_info *tp)
 int
 thread_step_over_chain_length (const thread_step_over_list &l)
 {
-  int num = 1;
+  int num = 0;
 
   for (const thread_info &thread ATTRIBUTE_UNUSED : l)
     ++num;
