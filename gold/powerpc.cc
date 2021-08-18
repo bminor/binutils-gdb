@@ -11086,6 +11086,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		{
 		  if (ent->save_res_)
 		    value = (value - target->savres_section()->address()
+			     + stub_table->stub_address()
+			     + stub_table->plt_size()
 			     + stub_table->branch_size());
 		  else
 		    {
