@@ -107,6 +107,9 @@ dnl WHEN ADDING ENTRIES TO THIS MATRIX:
 dnl Make sure that the left side always has two dashes.  Otherwise you can get
 dnl spurious matches.  Even for unambiguous cases, do this as a convention, else
 dnl the table becomes a real mess to understand and maintain.
+dnl
+dnl NB: Target matching is aligned with gdb/configure.tgt.  Changes must be kept
+dnl in sync with that file.
 if test "${enable_sim}" != no; then
   sim_igen=no
   for targ in `echo $target $enable_targets | sed 's/,/ /g'`
@@ -128,19 +131,19 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([m32r-*-*], [m32r])
     SIM_TARGET([m68hc11-*-*|m6811-*-*], [m68hc11])
     SIM_TARGET([mcore-*-*], [mcore])
-    SIM_TARGET([microblaze-*-*], [microblaze])
+    SIM_TARGET([microblaze*-*-*], [microblaze])
     SIM_TARGET([mips*-*-*], [mips], [true], [sim_igen=yes])
     SIM_TARGET([mn10300*-*-*], [mn10300], [true], [sim_igen=yes])
     SIM_TARGET([moxie-*-*], [moxie])
     SIM_TARGET([msp430*-*-*], [msp430])
-    SIM_TARGET([or1k-*-* | or1knd-*-*], [or1k], [true])
+    SIM_TARGET([or1k*-*-*], [or1k], [true])
+    SIM_TARGET([powerpc*-*-*], [ppc], [true])
     SIM_TARGET([pru*-*-*], [pru])
     SIM_TARGET([riscv*-*-*], [riscv], [true])
     SIM_TARGET([rl78-*-*], [rl78])
     SIM_TARGET([rx-*-*], [rx])
     SIM_TARGET([sh*-*-*], [sh])
-    SIM_TARGET([sparc-*-rtems*|sparc-*-elf*], [erc32])
-    SIM_TARGET([powerpc*-*-*], [ppc], [true])
+    SIM_TARGET([sparc-*-*], [erc32])
     SIM_TARGET([v850*-*-*], [v850], [true], [sim_igen=yes])
   done
 

@@ -867,8 +867,8 @@ ac_subdirs_all='bpf
 mips
 mn10300
 or1k
-riscv
 ppc
+riscv
 v850'
 
 # Initialize some variables set by options.
@@ -11386,7 +11386,7 @@ haiku*)
   soname_spec='${libname}${release}${shared_ext}$major'
   shlibpath_var=LIBRARY_PATH
   shlibpath_overrides_runpath=yes
-  sys_lib_dlsearch_path_spec='/boot/home/config/lib /boot/common/lib /boot/beos/system/lib'
+  sys_lib_dlsearch_path_spec='/boot/home/config/lib /boot/common/lib /boot/system/lib'
   hardcode_into_libs=yes
   ;;
 
@@ -14028,7 +14028,7 @@ subdirs="$subdirs bpf"
   esac
 
       case "${targ}" in
-    all|microblaze-*-*)
+    all|microblaze*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=microblaze
       fi
@@ -14112,7 +14112,7 @@ subdirs="$subdirs bpf"
   esac
 
       case "${targ}" in
-    all|or1k-*-* | or1knd-*-*)
+    all|or1k*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=or1k
       fi
@@ -14120,6 +14120,21 @@ subdirs="$subdirs bpf"
 
 
     ac_config_commands="$ac_config_commands depdir-or1k"
+
+
+
+      ;;
+  esac
+
+      case "${targ}" in
+    all|powerpc*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=ppc
+      fi
+            subdirs="$subdirs ppc"
+
+
+    ac_config_commands="$ac_config_commands depdir-ppc"
 
 
 
@@ -14214,7 +14229,7 @@ subdirs="$subdirs bpf"
   esac
 
       case "${targ}" in
-    all|sparc-*-rtems*|sparc-*-elf*)
+    all|sparc-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=erc32
       fi
@@ -14225,21 +14240,6 @@ subdirs="$subdirs bpf"
     as_fn_append SIM_SUBDIRS " erc32"
 
     ac_config_commands="$ac_config_commands depdir-erc32"
-
-
-
-      ;;
-  esac
-
-      case "${targ}" in
-    all|powerpc*-*-*)
-      if test "${targ}" = "${target}"; then
-        SIM_PRIMARY_TARGET=ppc
-      fi
-            subdirs="$subdirs ppc"
-
-
-    ac_config_commands="$ac_config_commands depdir-ppc"
 
 
 
@@ -15882,6 +15882,7 @@ do
     "msp430/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS msp430/Makefile" ;;
     "depdir-msp430") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-msp430" ;;
     "depdir-or1k") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-or1k" ;;
+    "depdir-ppc") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ppc" ;;
     "pru/Makefile.sim") CONFIG_FILES="$CONFIG_FILES pru/Makefile.sim:pru/Makefile.in" ;;
     "pru/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS pru/Makefile" ;;
     "depdir-pru") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-pru" ;;
@@ -15898,7 +15899,6 @@ do
     "erc32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES erc32/Makefile.sim:erc32/Makefile.in" ;;
     "erc32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS erc32/Makefile" ;;
     "depdir-erc32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-erc32" ;;
-    "depdir-ppc") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ppc" ;;
     "depdir-v850") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-v850" ;;
     "example-synacor/Makefile.sim") CONFIG_FILES="$CONFIG_FILES example-synacor/Makefile.sim:example-synacor/Makefile.in" ;;
     "example-synacor/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS example-synacor/Makefile" ;;
@@ -17483,6 +17483,7 @@ $as_echo X"$file" |
  ;;
     "depdir-msp430":C) $SHELL $ac_aux_dir/mkinstalldirs msp430/$DEPDIR ;;
     "depdir-or1k":C) $SHELL $ac_aux_dir/mkinstalldirs or1k/$DEPDIR ;;
+    "depdir-ppc":C) $SHELL $ac_aux_dir/mkinstalldirs ppc/$DEPDIR ;;
     "pru/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
 		/^srcdir = / s:$:/pru:
@@ -17549,7 +17550,6 @@ $as_echo X"$file" |
  rm -f erc32/Makesim1.tmp erc32/Makesim2.tmp
  ;;
     "depdir-erc32":C) $SHELL $ac_aux_dir/mkinstalldirs erc32/$DEPDIR ;;
-    "depdir-ppc":C) $SHELL $ac_aux_dir/mkinstalldirs ppc/$DEPDIR ;;
     "depdir-v850":C) $SHELL $ac_aux_dir/mkinstalldirs v850/$DEPDIR ;;
     "example-synacor/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
