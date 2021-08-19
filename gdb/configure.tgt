@@ -738,6 +738,7 @@ gdb_target_obs="${cpu_obs} ${os_obs} ${gdb_target_obs}"
 # in sync with that file.
 
 case "${targ}" in
+aarch64*-*-*)		gdb_sim=aarch64 ;;
 arm*-*-*)		gdb_sim=arm ;;
 avr*-*-*)		gdb_sim=avr ;;
 bfin-*-*)		gdb_sim=bfin ;;
