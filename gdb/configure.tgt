@@ -190,30 +190,25 @@ arm*-*-openbsd*)
 arm*-*-*)
 	# Target: ARM embedded system
 	gdb_target_obs="arm-pikeos-tdep.o"
-	gdb_sim=../sim/arm/libsim.a
 	;;
 
 avr-*-*)
 	# Target: AVR
 	gdb_target_obs="avr-tdep.o"
-	gdb_sim=../sim/avr/libsim.a
 	;;
 
 bfin-*-*linux*)
 	# Target: Blackfin Linux
 	gdb_target_obs="bfin-tdep.o bfin-linux-tdep.o linux-tdep.o"
-	gdb_sim=../sim/bfin/libsim.a
 	;;
 bfin-*-*)
 	# Target: Blackfin processor
 	gdb_target_obs="bfin-tdep.o"
-	gdb_sim=../sim/bfin/libsim.a
 	;;
 
 bpf-*-*)
 	# Target: eBPF
 	gdb_target_obs="bpf-tdep.o"
-	gdb_sim=../sim/bpf/libsim.a
 	;;
 
 cris*)
@@ -235,18 +230,15 @@ csky*-*-*)
 frv-*-*)
 	# Target: Fujitsu FRV processor
 	gdb_target_obs="frv-tdep.o frv-linux-tdep.o linux-tdep.o solib-frv.o"
-	gdb_sim=../sim/frv/libsim.a
 	;;
 
 moxie-*-elf | moxie-*-moxiebox | moxie-*-rtems*)
 	gdb_target_obs="moxie-tdep.o"
-	gdb_sim=../sim/moxie/libsim.a
 	;;
 
 h8300-*-*)
 	# Target: H8300 processor
 	gdb_target_obs="h8300-tdep.o"
-	gdb_sim=../sim/h8300/libsim.a
 	;;
 
 hppa*-*-linux*)
@@ -338,20 +330,15 @@ ia64-*-*vms*)
 
 iq2000-*-*)
 	gdb_target_obs="iq2000-tdep.o"
-	gdb_sim=../sim/iq2000/libsim.a
 	;;
 
 lm32-*-*)		
 	gdb_target_obs="lm32-tdep.o" 
-	gdb_sim=../sim/lm32/libsim.a
 	;;
 
 m32c-*-*)
 	# Target: Renesas M32C family
 	gdb_target_obs="m32c-tdep.o"
-	# There may also be a SID / CGEN simulator for this,
-	# but we do have DJ Delorie's mini-sim.
-	gdb_sim=../sim/m32c/libsim.a
 	;;
 
 m32r*-*-linux*)
@@ -359,18 +346,15 @@ m32r*-*-linux*)
 	gdb_target_obs="m32r-tdep.o m32r-linux-tdep.o \
 			glibc-tdep.o solib-svr4.o symfile-mem.o \
 			linux-tdep.o"
-	gdb_sim=../sim/m32r/libsim.a
 	;;
 m32r*-*-*)
 	# Target: Renesas m32r processor
 	gdb_target_obs="m32r-tdep.o"
-	gdb_sim=../sim/m32r/libsim.a
 	;;
 
 m68hc11*-*-*|m6811*-*-*)
 	# Target: Motorola 68HC11 processor
 	gdb_target_obs="m68hc11-tdep.o"
-	gdb_sim=../sim/m68hc11/libsim.a
 	;;
 
 m68*-*-aout* | m68*-*-coff* | m68*-*-elf* | m68*-*-rtems* | m68*-*-uclinux* | \
@@ -402,29 +386,24 @@ microblaze*-linux-*|microblaze*-*-linux*)
 	# Target: Xilinx MicroBlaze running Linux
 	gdb_target_obs="microblaze-tdep.o microblaze-linux-tdep.o solib-svr4.o \
 			symfile-mem.o linux-tdep.o"
-	gdb_sim=../sim/microblaze/libsim.a
 	;;
 microblaze*-*-*)
 	# Target: Xilinx MicroBlaze running standalone
 	gdb_target_obs="microblaze-tdep.o"
-	gdb_sim=../sim/microblaze/libsim.a
 	;;
 
 mips*-*-linux*)
 	# Target: Linux/MIPS
 	gdb_target_obs="mips-tdep.o mips-linux-tdep.o glibc-tdep.o \
 			solib-svr4.o symfile-mem.o linux-tdep.o"
-	gdb_sim=../sim/mips/libsim.a
 	;;
 mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 	# Target: MIPS running NetBSD
 	gdb_target_obs="mips-tdep.o mips-netbsd-tdep.o"
-	gdb_sim=../sim/mips/libsim.a
 	;;
 mips*-*-freebsd*)
 	# Target: MIPS running FreeBSD
 	gdb_target_obs="mips-tdep.o mips-fbsd-tdep.o"
-	gdb_sim=../sim/mips/libsim.a
 	;;
 mips64*-*-openbsd*)
 	# Target: OpenBSD/mips64
@@ -433,28 +412,23 @@ mips64*-*-openbsd*)
 mips*-sde*-elf*)
 	# Target: MIPS SDE
 	gdb_target_obs="mips-tdep.o mips-sde-tdep.o"
-	gdb_sim=../sim/mips/libsim.a
 	;;
 mips*-*-elf)
 	# Target: MIPS ELF
 	gdb_target_obs="mips-tdep.o"
-	gdb_sim=../sim/mips/libsim.a
 	;;
 mips*-*-*)
 	# Target: MIPS
 	gdb_target_obs="mips-tdep.o"
-	gdb_sim=../sim/mips/libsim.a
 	;;
 
 mn10300-*-*)
 	# Target: Matsushita mn10300
 	gdb_target_obs="mn10300-tdep.o"
-	gdb_sim=../sim/mn10300/libsim.a
 	;;
 
 msp430-*-elf*)
 	gdb_target_obs="msp430-tdep.o"
-	gdb_sim=../sim/msp430/libsim.a
 	;;
 
 nds32*-*-elf)
@@ -477,13 +451,11 @@ or1k*-*-linux*)
 	# Target: OpenCores OpenRISC 1000 32-bit running Linux
 	gdb_target_obs="or1k-tdep.o or1k-linux-tdep.o solib-svr4.o \
 			symfile-mem.o glibc-tdep.o linux-tdep.o"
-	gdb_sim=../sim/or1k/libsim.a
 	;;
 
 or1k-*-* | or1knd-*-*)
 	# Target: OpenCores OpenRISC 1000 32-bit implementation bare metal
 	gdb_target_obs="or1k-tdep.o"
-	gdb_sim=../sim/or1k/libsim.a
 	;;
 
 powerpc*-*-freebsd*)
@@ -497,7 +469,6 @@ powerpc-*-netbsd* | powerpc-*-knetbsd*-gnu)
 	# Target: NetBSD/powerpc
 	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o ppc-netbsd-tdep.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
-	gdb_sim=../sim/ppc/libsim.a
 	;;
 powerpc-*-openbsd*)
 	# Target: OpenBSD/powerpc
@@ -518,7 +489,6 @@ powerpc*-*-linux*)
 			ravenscar-thread.o ppc-ravenscar-thread.o \
 			linux-record.o \
 			arch/ppc-linux-common.o"
-	gdb_sim=../sim/ppc/libsim.a
 	;;
 powerpc-*-lynx*178)
 	# Target: PowerPC running Lynx178.
@@ -530,7 +500,6 @@ powerpc*-*-*)
 	# Target: PowerPC running eabi
 	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o solib-svr4.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
-	gdb_sim=../sim/ppc/libsim.a
 	;;
 
 s390*-*-linux*)
@@ -553,19 +522,16 @@ riscv*-*-linux*)
 riscv*-*-*)
 	# Target: RISC-V architecture
 	gdb_target_obs=""
-	gdb_sim=../sim/riscv/libsim.a
 	;;
 
 rl78-*-elf)
 	# Target: Renesas rl78
 	gdb_target_obs="rl78-tdep.o"
-	gdb_sim=../sim/rl78/libsim.a
 	;;
 
 rx-*-elf)
 	# Target: Renesas RX
 	gdb_target_obs="rx-tdep.o"
-	gdb_sim=../sim/rx/libsim.a
 	;;
 
 score-*-*)
@@ -578,12 +544,10 @@ sh*-*-linux*)
 	gdb_target_obs="sh-tdep.o sh-linux-tdep.o \
 			solib-svr4.o symfile-mem.o \
 			glibc-tdep.o linux-tdep.o"
-	gdb_sim=../sim/sh/libsim.a
 	;;
 sh*-*-netbsd* | sh*-*-knetbsd*-gnu)
 	# Target: NetBSD/sh
 	gdb_target_obs="sh-tdep.o sh-netbsd-tdep.o"
-	gdb_sim=../sim/sh/libsim.a
 	;;
 sh*-*-openbsd*)
 	# Target: OpenBSD/sh
@@ -592,7 +556,6 @@ sh*-*-openbsd*)
 sh*)
 	# Target: Embedded Renesas Super-H processor
 	gdb_target_obs="sh-tdep.o"
-	gdb_sim=../sim/sh/libsim.a
 	;;
 
 sparc-*-linux*)
@@ -653,7 +616,6 @@ sparc-*-*)
 	# Target: SPARC
 	gdb_target_obs="sparc-tdep.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
-	gdb_sim=../sim/erc32/libsim.a
 	;;
 sparc64-*-*)
 	# Target: UltraSPARC
@@ -691,13 +653,11 @@ xstormy16-*-*)
 
 ft32-*-elf)
 	gdb_target_obs="ft32-tdep.o"
-	gdb_sim=../sim/ft32/libsim.a
 	;;
 
 v850*-*-elf | v850*-*-rtems*)
 	# Target: NEC V850 processor
 	gdb_target_obs="v850-tdep.o"
-	gdb_sim=../sim/v850/libsim.a
 	;;
 
 vax-*-netbsd* | vax-*-knetbsd*-gnu)
@@ -772,6 +732,41 @@ esac
 # Put them together.
 
 gdb_target_obs="${cpu_obs} ${os_obs} ${gdb_target_obs}"
+
+# Get the sim settings.
+# NB: Target matching is aligned with sim/configure.ac.  Changes must be kept
+# in sync with that file.
+
+case "${targ}" in
+arm*-*-*)		gdb_sim=arm ;;
+avr*-*-*)		gdb_sim=avr ;;
+bfin-*-*)		gdb_sim=bfin ;;
+bpf-*-*)		gdb_sim=bpf ;;
+frv-*-*)		gdb_sim=frv ;;
+ft32-*-*)		gdb_sim=ft32 ;;
+h8300*-*-*)		gdb_sim=h8300 ;;
+iq2000-*-*)		gdb_sim=iq2000 ;;
+lm32-*-*)		gdb_sim=lm32 ;;
+m32c-*-*)		gdb_sim=m32c ;;
+m32r-*-*)		gdb_sim=m32r ;;
+m68hc11-*-*|m6811-*-*)	gdb_sim=m68hc11 ;;
+microblaze*-*-*)	gdb_sim=microblaze ;;
+mips*-*-*)		gdb_sim=mips ;;
+mn10300*-*-*)		gdb_sim=mn10300 ;;
+moxie-*-*)		gdb_sim=moxie ;;
+msp430*-*-*)		gdb_sim=msp430 ;;
+or1k*-*-*)		gdb_sim=or1k ;;
+powerpc*-*-*)		gdb_sim=ppc ;;
+riscv*-*-*)		gdb_sim=riscv ;;
+rl78-*-*)		gdb_sim=rl78 ;;
+rx-*-*)			gdb_sim=rx ;;
+sh*-*-*)		gdb_sim=sh ;;
+sparc-*-*)		gdb_sim=erc32 ;;
+v850*-*-*)		gdb_sim=v850 ;;
+esac
+if test "x$gdb_sim" != "x"; then
+  gdb_sim="../sim/${gdb_sim}/libsim.a"
+fi
 
 # map target onto default OS ABI
 
