@@ -11928,7 +11928,7 @@ OP_E_memory (int bytemode, int sizeflag)
                   oappend ("{1to32}");
                   break;
                 default:
-		  oappend ("{bad}");
+		  abort ();
                 }
             }
         }
@@ -11948,7 +11948,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	      oappend ("{1to8}");
 	      break;
 	    default:
-	      oappend ("{bad}");
+	      abort ();
 	    }
 	}
       else if (bytemode == x_mode
@@ -11966,7 +11966,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	      oappend ("{1to16}");
 	      break;
 	    default:
-	      oappend ("{bad}");
+	      abort ();
 	    }
 	}
       else
