@@ -743,6 +743,7 @@ arm*-*-*)		gdb_sim=arm ;;
 avr*-*-*)		gdb_sim=avr ;;
 bfin-*-*)		gdb_sim=bfin ;;
 bpf-*-*)		gdb_sim=bpf ;;
+cris-*-*|cris32-*-*)	gdb_sim=cris ;;
 frv-*-*)		gdb_sim=frv ;;
 ft32-*-*)		gdb_sim=ft32 ;;
 h8300*-*-*)		gdb_sim=h8300 ;;
