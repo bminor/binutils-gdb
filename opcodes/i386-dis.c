@@ -11912,7 +11912,7 @@ OP_E_memory (int bytemode, int sizeflag)
         {
           if (vex.w)
             {
-              abort ();
+	      oappend ("{bad}");
             }
           else
             {
@@ -11928,7 +11928,7 @@ OP_E_memory (int bytemode, int sizeflag)
                   oappend ("{1to32}");
                   break;
                 default:
-                  abort ();
+		  oappend ("{bad}");
                 }
             }
         }
@@ -11948,7 +11948,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	      oappend ("{1to8}");
 	      break;
 	    default:
-	      abort ();
+	      oappend ("{bad}");
 	    }
 	}
       else if (bytemode == x_mode
@@ -11966,7 +11966,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	      oappend ("{1to16}");
 	      break;
 	    default:
-	      abort ();
+	      oappend ("{bad}");
 	    }
 	}
       else
