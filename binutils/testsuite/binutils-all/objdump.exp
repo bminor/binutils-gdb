@@ -62,6 +62,7 @@ set obj o
 if { [istarget "*-*-vms"] } then {
     set obj obj
 }
+set exe [exeext]
 
 # The remaining tests require a test file.
 
@@ -519,6 +520,7 @@ proc test_build_id_debuglink {} {
     global OBJCOPY
     global OBJDUMP
     global CFLAGS_FOR_TARGET
+    global exe
     
     set test "build-id-debuglink"
 
@@ -528,7 +530,7 @@ proc test_build_id_debuglink {} {
     }
     set CFLAGS_FOR_TARGET "-g -Wl,--build-id=0x12345678abcdef01"
 
-    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog${exe} executable debug] != "" } {
 	unsupported "$test (build)"
 	return
     }
@@ -539,12 +541,12 @@ proc test_build_id_debuglink {} {
 	unset CFLAGS_FOR_TARGET
     }
 
-    if { [binutils_run $STRIP "--strip-debug --remove-section=.comment tmpdir/testprog -o tmpdir/testprog.strip"] != "" } {
+    if { [binutils_run $STRIP "--strip-debug --remove-section=.comment tmpdir/testprog${exe} -o tmpdir/testprog.strip"] != "" } {
 	fail "$test (strip debug info)"
 	return
     }
 
-    if { [binutils_run $OBJCOPY "--only-keep-debug tmpdir/testprog tmpdir/testprog.debug"] != "" } {
+    if { [binutils_run $OBJCOPY "--only-keep-debug tmpdir/testprog${exe} tmpdir/testprog.debug"] != "" } {
 	fail "$test (create separate debug info file)"
 	return
     }
@@ -813,15 +815,16 @@ proc test_objdump_S { } {
     global subdir
     global OBJDUMP
     global OBJDUMPFLAGS
+    global exe
     
     set test "objdump -S"
 
-    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog${exe} executable debug] != "" } {
 	unsupported "$test (build)"
 	return
     }
 
-    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -D -S tmpdir/testprog"]
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS -D -S tmpdir/testprog${exe}"]
 
     set want "static int local = 2"
 
@@ -833,7 +836,7 @@ proc test_objdump_S { } {
 
     set test "objdump --source-comment"
 
-    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble-all --source-comment=// tmpdir/testprog"]
+    set got [binutils_run $OBJDUMP "$OBJDUMPFLAGS --disassemble-all --source-comment=// tmpdir/testprog${exe}"]
 
     set want "//static int local = 2"
 

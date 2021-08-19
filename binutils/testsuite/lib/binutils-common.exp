@@ -183,6 +183,18 @@ proc is_rela { binary_file } {
     return 1
 }
 
+# Return the file name suffix required for executables, if any.
+#
+proc exeext {} {
+    if { [istarget *-*-cygwin*]
+	 || [istarget *-*-mingw*]
+	 || [istarget *-*-msdos*]
+	 || [istarget *-*-*vms*] } {
+	return ".exe"
+    }
+    return ""
+}
+
 # True if the target matches TARGET, specified as a TCL procedure if
 # in square brackets or as machine triplet otherwise.
 #

@@ -631,11 +631,8 @@ strip_test_with_saving_a_symbol
 
 # Build a final executable.
 
-if { [istarget *-*-cygwin] || [istarget *-*-mingw*] } {
-    set test_prog "testprog.exe"
-} else {
-    set test_prog "testprog"
-}
+set exe [exeext]
+set test_prog "testprog${exe}"
 
 proc copy_setup { } {
     global srcdir
@@ -1342,6 +1339,13 @@ proc objcopy_remove_relocations_from_executable { } {
     set out tmpdir/pr23611.out
 
     set exec_output1 [binutils_run $OBJCOPY "-R .rela.plt -R .rela.dyn -R .rel.plt -R .rel.dyn $objfile $out"]
+
+    set exec_output1 [prune_warnings $exec_output1]
+    if ![string equal "" $exec_output1] {
+	fail $test
+	return
+    }
+
     set exec_output2 [binutils_run $READELF "-S $out"]
     if { [string match "*.rel.plt*" $exec_output2] || [string match "*.rela.plt*" $exec_output2] || [string match "*.rel.dyn*" $exec_output2] || [string match "*.rela.dyn*" $exec_output2] } {
 	fail $test
@@ -1350,7 +1354,9 @@ proc objcopy_remove_relocations_from_executable { } {
     pass $test
 }
 
-objcopy_remove_relocations_from_executable
+if [is_elf_format] {
+    objcopy_remove_relocations_from_executable
+}
 
 run_dump_test "pr23633"
 
