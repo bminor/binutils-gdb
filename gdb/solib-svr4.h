@@ -102,6 +102,7 @@ extern CORE_ADDR svr4_fetch_objfile_link_map (struct objfile *objfile);
    for ILP32 and LP64 SVR4 systems.  */
 extern struct link_map_offsets *svr4_ilp32_fetch_link_map_offsets (void);
 extern struct link_map_offsets *svr4_lp64_fetch_link_map_offsets (void);
+extern struct link_map_offsets *svr4_lp64_cheri_fetch_link_map_offsets (void);
 
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
    SVR4 run time loader.  */
