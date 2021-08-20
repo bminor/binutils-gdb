@@ -34,6 +34,11 @@
 #include <time.h>
 #include <unistd.h>
 #include <utime.h>
+/* TODO: The Linux syscall emulation needs work to support non-Linux hosts.
+   Use an OS hack for now so the CPU emulation is available everywhere.
+   NB: The emulation is also missing argument conversion (endian & bitsize)
+   even on Linux hosts.  */
+#ifdef __linux__
 #include <sys/mman.h>
 #include <sys/poll.h>
 #include <sys/resource.h>
@@ -49,6 +54,7 @@
 #include <linux/sysctl.h>
 #include <linux/types.h>
 #include <linux/unistd.h>
+#endif
 
 #define TRAP_LINUX_SYSCALL 2
 #define TRAP_FLUSH_CACHE 12
@@ -203,6 +209,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	break;
       }
 
+#ifdef __linux__
     case TRAP_LINUX_SYSCALL:
       {
 	CB_SYSCALL s;
@@ -1302,6 +1309,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	  m32rbf_h_gr_set (current_cpu, 0, result);
 	break;
       }
+#endif
 
     case TRAP_BREAKPOINT:
       sim_engine_halt (sd, current_cpu, NULL, pc,
