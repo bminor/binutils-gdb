@@ -3205,6 +3205,58 @@ svr4_lp64_fetch_link_map_offsets (void)
 
   return lmp;
 }
+
+/* Build an appropriate `struct link_map_offsets'
+   for a LP64 CHERI SVR4 system.
+
+   The structure, offsets and sizes for CHERI are the following:
+
+   struct link_map {          size 80
+     ElfW(Addr) l_addr;       offset 0 - size 8
+     char* l_name;            offset 16 - size 16
+     ElfW(Dyn)* l_ld;         offset 32 - size 16
+     struct link_map* l_next; offset 48 - size 16
+     struct link_map* l_prev; offset 64 - size 16
+   };
+
+   struct r_debug {          size 64
+     int32_t r_version;      offset 0 - size 4
+     struct link_map* r_map; offset 16 - size 16
+     ElfW(Addr) r_brk;       offset 32 - size 8
+     enum {                  offset 40 - size 4
+       RT_CONSISTENT,
+       RT_ADD,
+       RT_DELETE
+     } r_state;
+     ElfW(Addr) r_ldbase;    offset 48 - size 8
+   };  */
+
+struct link_map_offsets *
+svr4_lp64_cheri_fetch_link_map_offsets (void)
+{
+  static struct link_map_offsets lmo;
+  static struct link_map_offsets *lmp = NULL;
+
+  if (lmp == NULL)
+    {
+      lmp = &lmo;
+
+      lmo.r_version_offset = 0;
+      lmo.r_version_size = 4;
+      lmo.r_map_offset = 16;
+      lmo.r_brk_offset = 32;
+      lmo.r_ldsomap_offset = 48;
+
+      lmo.link_map_size = 80;
+      lmo.l_addr_offset = 0;
+      lmo.l_name_offset = 16;
+      lmo.l_ld_offset = 32;
+      lmo.l_next_offset = 48;
+      lmo.l_prev_offset = 64;
+    }
+
+  return lmp;
+}
 
 
 struct target_so_ops svr4_so_ops;

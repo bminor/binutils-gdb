@@ -131,6 +131,30 @@ struct process_info_private
 
 struct lwp_info;
 
+struct link_map_offsets
+{
+  /* Offset and size of r_debug.r_version.  */
+  int r_version_offset;
+
+  /* Offset and size of r_debug.r_map.  */
+  int r_map_offset;
+
+  /* Offset to l_addr field in struct link_map.  */
+  int l_addr_offset;
+
+  /* Offset to l_name field in struct link_map.  */
+  int l_name_offset;
+
+  /* Offset to l_ld field in struct link_map.  */
+  int l_ld_offset;
+
+  /* Offset to l_next field in struct link_map.  */
+  int l_next_offset;
+
+  /* Offset to l_prev field in struct link_map.  */
+  int l_prev_offset;
+};
+
 /* Target ops definitions for a Linux target.  */
 
 class linux_process_target : public process_stratum_target
@@ -690,6 +714,10 @@ protected:
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();
+
+  /* Return the linkmap offsets based on IS_ELF64.  */
+  virtual const struct link_map_offsets *low_fetch_linkmap_offsets (int is_elf64);
+
 };
 
 extern linux_process_target *the_linux_target;
@@ -883,6 +911,11 @@ extern int have_ptrace_getregset;
 
 int linux_get_auxv (int wordsize, CORE_ADDR match,
 		    CORE_ADDR *valp);
+
+/* Fetch the AT_ENTRY entry from the auxv vector, where entries are length
+   WORDSIZE.  If no entry was found, return zero.  */
+
+CORE_ADDR linux_get_at_entry (int wordsize);
 
 /* Fetch the AT_HWCAP entry from the auxv vector, where entries are length
    WORDSIZE.  If no entry was found, return zero.  */

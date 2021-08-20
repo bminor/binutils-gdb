@@ -6709,29 +6709,35 @@ linux_process_target::supports_qxfer_libraries_svr4 ()
   return true;
 }
 
-struct link_map_offsets
-  {
-    /* Offset and size of r_debug.r_version.  */
-    int r_version_offset;
+/* Generic Linux 32-bit/64-bit linkmap offsets.  */
 
-    /* Offset and size of r_debug.r_map.  */
-    int r_map_offset;
+static const struct link_map_offsets lmo_32bit_offsets =
+{
+  0,     /* r_version offset. */
+  4,     /* r_debug.r_map offset.  */
+  0,     /* l_addr offset in link_map.  */
+  4,     /* l_name offset in link_map.  */
+  8,     /* l_ld offset in link_map.  */
+  12,    /* l_next offset in link_map.  */
+  16     /* l_prev offset in link_map.  */
+};
 
-    /* Offset to l_addr field in struct link_map.  */
-    int l_addr_offset;
+static const struct link_map_offsets lmo_64bit_offsets =
+{
+  0,     /* r_version offset. */
+  8,     /* r_debug.r_map offset.  */
+  0,     /* l_addr offset in link_map.  */
+  8,     /* l_name offset in link_map.  */
+  16,    /* l_ld offset in link_map.  */
+  24,    /* l_next offset in link_map.  */
+  32     /* l_prev offset in link_map.  */
+};
 
-    /* Offset to l_name field in struct link_map.  */
-    int l_name_offset;
-
-    /* Offset to l_ld field in struct link_map.  */
-    int l_ld_offset;
-
-    /* Offset to l_next field in struct link_map.  */
-    int l_next_offset;
-
-    /* Offset to l_prev field in struct link_map.  */
-    int l_prev_offset;
-  };
+const struct link_map_offsets *
+linux_process_target::low_fetch_linkmap_offsets (int is_elf64)
+{
+  return is_elf64 ? &lmo_64bit_offsets : &lmo_32bit_offsets;
+}
 
 /* Construct qXfer:libraries-svr4:read reply.  */
 
@@ -6745,27 +6751,6 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
   char filename[PATH_MAX];
   int pid, is_elf64;
 
-  static const struct link_map_offsets lmo_32bit_offsets =
-    {
-      0,     /* r_version offset. */
-      4,     /* r_debug.r_map offset.  */
-      0,     /* l_addr offset in link_map.  */
-      4,     /* l_name offset in link_map.  */
-      8,     /* l_ld offset in link_map.  */
-      12,    /* l_next offset in link_map.  */
-      16     /* l_prev offset in link_map.  */
-    };
-
-  static const struct link_map_offsets lmo_64bit_offsets =
-    {
-      0,     /* r_version offset. */
-      8,     /* r_debug.r_map offset.  */
-      0,     /* l_addr offset in link_map.  */
-      8,     /* l_name offset in link_map.  */
-      16,    /* l_ld offset in link_map.  */
-      24,    /* l_next offset in link_map.  */
-      32     /* l_prev offset in link_map.  */
-    };
   const struct link_map_offsets *lmo;
   unsigned int machine;
   int ptr_size;
@@ -6781,7 +6766,7 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
   pid = lwpid_of (current_thread);
   xsnprintf (filename, sizeof filename, "/proc/%d/exe", pid);
   is_elf64 = elf_64_file_p (filename, &machine);
-  lmo = is_elf64 ? &lmo_64bit_offsets : &lmo_32bit_offsets;
+  lmo = low_fetch_linkmap_offsets (is_elf64);
   ptr_size = is_elf64 ? 8 : 4;
 
   while (annex[0] != '\0')
@@ -7198,6 +7183,16 @@ linux_get_auxv (int wordsize, CORE_ADDR match, CORE_ADDR *valp)
     }
 
   return 0;
+}
+
+/* See linux-low.h.  */
+
+CORE_ADDR
+linux_get_at_entry (int wordsize)
+{
+  CORE_ADDR entry = 0;
+  linux_get_auxv (wordsize, AT_ENTRY, &entry);
+  return entry;
 }
 
 /* See linux-low.h.  */

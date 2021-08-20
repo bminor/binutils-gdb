@@ -2066,6 +2066,11 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   if (tdep->has_capability ())
     {
+      /* Register CHERI-specific linkmap offsets for the AAPCS64_CAP ABI.  */
+      if (tdep->abi == AARCH64_ABI_AAPCS64_CAP)
+	set_solib_svr4_fetch_link_map_offsets (gdbarch,
+					svr4_lp64_cheri_fetch_link_map_offsets);
+
       /* Initialize the register numbers for the core file register set.
 	 Please note the PCC/CSP position in GDB's target description is
 	 the inverse of the position in the Linux Kernel's user_morello_state

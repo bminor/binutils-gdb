@@ -137,6 +137,8 @@ protected:
   bool low_supports_catch_syscall () override;
 
   void low_get_syscall_trapinfo (regcache *regcache, int *sysno) override;
+
+  const struct link_map_offsets *low_fetch_linkmap_offsets (int is_elf64) override;
 };
 
 /* The singleton target ops object.  */
@@ -873,6 +875,33 @@ aarch64_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
     }
   else
     collect_register_by_name (regcache, "r7", sysno);
+}
+
+static const struct link_map_offsets lmo_64bit_morello_offsets =
+{
+  0,     /* r_version offset. */
+  16,     /* r_debug.r_map offset.  */
+  0,     /* l_addr offset in link_map.  */
+  16,     /* l_name offset in link_map.  */
+  32,    /* l_ld offset in link_map.  */
+  48,    /* l_next offset in link_map.  */
+  64     /* l_prev offset in link_map.  */
+};
+
+const struct link_map_offsets *
+aarch64_target::low_fetch_linkmap_offsets (int is_elf64)
+{
+  if (is_elf64)
+    {
+      CORE_ADDR entry_addr = linux_get_at_entry (8);
+
+      /* If the LSB of AT_ENTRY is 1, then we have a pure capability Morello
+	 ELF.  */
+      if (entry_addr & 1)
+	return &lmo_64bit_morello_offsets;
+    }
+
+  return linux_process_target::low_fetch_linkmap_offsets (is_elf64);
 }
 
 /* List of condition codes that we need.  */
