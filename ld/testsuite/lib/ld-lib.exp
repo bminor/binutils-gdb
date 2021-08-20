@@ -117,7 +117,11 @@ proc run_host_cmd { prog command } {
 	    set gcc_ld_version_message [run_host_cmd "$prog" "$gccflags $ver"]
 	    if {[string first $ld_version_message $gcc_ld_version_message] < 0} {
 		perror "************************************************************************"
-		perror "Your compiler driver ignores -B when choosing ld."
+		perror "Your compiler apparently ignores -B when choosing ld."
+		set gcc_v [run_host_cmd "$prog" "$gccflags -v"]
+		if { [string first "--with-ld=" $gcc_v] >= 0 } {
+		    perror "Hint: don't configure gcc using --with-ld (or --with-as)"
+		}
 		perror "You will not be testing the new ld in many of the following tests."
 		set gcc_ld_version [run_host_cmd "$prog" "$gccflags --print-prog-name=ld"]
 		if {![string match "" $gcc_ld_version] && ![string match "ld" $gcc_ld_version]} {
