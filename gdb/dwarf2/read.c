@@ -14420,14 +14420,14 @@ dwarf2_access_attribute (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Look for DW_AT_data_member_location.  Set *OFFSET to the byte
-   offset.  If the attribute was not found return 0, otherwise return
-   1.  If it was found but could not properly be handled, set *OFFSET
-   to 0.  */
+/* Look for DW_AT_data_member_location or DW_AT_data_bit_offset.  Set
+   *OFFSET to the byte offset.  If the attribute was not found return
+   0, otherwise return 1.  If it was found but could not properly be
+   handled, set *OFFSET to 0.  */
 
 static int
-handle_data_member_location (struct die_info *die, struct dwarf2_cu *cu,
-			     LONGEST *offset)
+handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
+			LONGEST *offset)
 {
   struct attribute *attr;
 
@@ -14451,15 +14451,25 @@ handle_data_member_location (struct die_info *die, struct dwarf2_cu *cu,
 
       return 1;
     }
+  else
+    {
+      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
+      if (attr != nullptr)
+	{
+	  *offset = attr->constant_value (0);
+	  return 1;
+	}
+    }
 
   return 0;
 }
 
-/* Look for DW_AT_data_member_location and store the results in FIELD.  */
+/* Look for DW_AT_data_member_location or DW_AT_data_bit_offset and
+   store the results in FIELD.  */
 
 static void
-handle_data_member_location (struct die_info *die, struct dwarf2_cu *cu,
-			     struct field *field)
+handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
+			struct field *field)
 {
   struct attribute *attr;
 
@@ -14500,6 +14510,12 @@ handle_data_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	}
       else
 	dwarf2_complex_location_expr_complaint ();
+    }
+  else
+    {
+      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
+      if (attr != nullptr)
+	SET_FIELD_BITPOS (*field, attr->constant_value (0));
     }
 }
 
@@ -14562,7 +14578,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	}
 
       /* Get bit offset of field.  */
-      handle_data_member_location (die, cu, fp);
+      handle_member_location (die, cu, fp);
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
       if (attr != nullptr && attr->form_is_constant ())
 	{
@@ -14609,10 +14625,6 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 				 - bit_offset - FIELD_BITSIZE (*fp)));
 	    }
 	}
-      attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
-      if (attr != NULL)
-	SET_FIELD_BITPOS (*fp, (FIELD_BITPOS (*fp)
-				+ attr->constant_value (0)));
 
       /* Get name of field.  */
       fieldname = dwarf2_name (die, cu);
@@ -14673,7 +14685,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
   else if (die->tag == DW_TAG_inheritance)
     {
       /* C++ base class field.  */
-      handle_data_member_location (die, cu, fp);
+      handle_member_location (die, cu, fp);
       FIELD_BITSIZE (*fp) = 0;
       fp->set_type (die_type (die, cu));
       FIELD_NAME (*fp) = fp->type ()->name ();
@@ -18388,6 +18400,9 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
       if (target_attr == NULL)
 	target_attr = dwarf2_attr (target_die, DW_AT_data_member_location,
 				   target_cu);
+      if (target_attr == nullptr)
+	target_attr = dwarf2_attr (target_die, DW_AT_data_bit_offset,
+				   target_cu);
       if (target_attr == NULL)
 	{
 	  const char *name = var_decl_name (target_die, target_cu);
@@ -18431,11 +18446,11 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 	      }
 	    break;
 	  case DW_AT_data_member_location:
+	  case DW_AT_data_bit_offset:
 	    {
 	      LONGEST offset;
 
-	      if (!handle_data_member_location (target_die, target_cu,
-						&offset))
+	      if (!handle_member_location (target_die, target_cu, &offset))
 		return 0;
 
 	      baton = XOBNEW (obstack, struct dwarf2_property_baton);
