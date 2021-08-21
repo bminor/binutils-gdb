@@ -81,6 +81,11 @@ i[34567]86-*-*)
 	fi
 	;;
 
+ia16*-*-*)
+	# Target: Intel IA-16
+	cpu_obs="${i386_tobjs}"
+	;;
+
 ia64*-*-*)
 	# Target: Intel IA-64
 	cpu_obs="ia64-tdep.o"
