@@ -453,9 +453,8 @@ exec_file_attach (const char *filename, int from_tty)
 
       if (!current_program_space->exec_bfd ())
 	{
-	  error (_("\"%ps\": could not open as an executable file: %s."),
-		 styled_string (file_name_style.style (), scratch_pathname),
-		 bfd_errmsg (bfd_get_error ()));
+	  error (_("\"%s\": could not open as an executable file: %s."),
+		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
 
       /* gdb_realpath_keepfile resolves symlinks on the local
@@ -475,8 +474,7 @@ exec_file_attach (const char *filename, int from_tty)
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
 	  current_program_space->exec_close ();
-	  error (_("\"%ps\": not in executable format: %s"),
-		 styled_string (file_name_style.style (), scratch_pathname),
+	  error (_("\"%s\": not in executable format: %s"), scratch_pathname,
 		 gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 	}
 
