@@ -1,9 +1,9 @@
 # Vector Widening Integer Add/Subtract
 
 	# vwcvtu.x.x.v vd,vs,vm = vwaddu.vx vd,vs,x0,vm
-	vwcvtu.x.x.v v1, v2		# vd should be multiple of 2
+	vwcvtu.x.x.v v1, v2		# OK since fractional LMUL.  vd should be multiple of 2
 	vwcvtu.x.x.v v2, v2		# vd overlap vs2
-	vwcvtu.x.x.v v2, v3		# vd overlap vs2
+	vwcvtu.x.x.v v2, v3		# OK since fractional LMUL.  vd overlap vs2
 	vwcvtu.x.x.v v0, v2, v0.t	# vd overlap vm
 
 	# vwcvt.x.x.v vd,vs,vm = vwadd.vx vd,vs,x0,vm
@@ -12,25 +12,25 @@
 	vwcvt.x.x.v v2, v3
 	vwcvt.x.x.v v0, v2, v0.t
 
-	vwaddu.vv v1, v2, v4		# vd should be multiple of 2
+	vwaddu.vv v1, v2, v4		# OK since fractional LMUL.  vd should be multiple of 2
 	vwaddu.vv v2, v2, v4		# vd overlap vs2
-	vwaddu.vv v2, v3, v4		# vd overlap vs2
+	vwaddu.vv v2, v3, v4		# OK since fractional LMUL.  vd overlap vs2
 	vwaddu.vv v4, v2, v4		# vd overlap vs1
-	vwaddu.vv v4, v2, v5		# vd overlap vs1
+	vwaddu.vv v4, v2, v5		# OK since fractional LMUL.  vd overlap vs1
 	vwaddu.vv v0, v2, v4, v0.t	# vd overlap vm
-	vwaddu.vx v1, v2, a1		# vd should be multiple of 2
+	vwaddu.vx v1, v2, a1		# OK since fractional LMUL.  vd should be multiple of 2
 	vwaddu.vx v2, v2, a1		# vd overlap vs2
-	vwaddu.vx v2, v3, a1		# vd overlap vs2
+	vwaddu.vx v2, v3, a1		# OK since fractional LMUL.  vd overlap vs2
 	vwaddu.vx v0, v2, a1, v0.t	# vd overlap vm
-	vwaddu.wv v1, v2, v4		# vd should be multiple of 2
+	vwaddu.wv v1, v2, v4		# OK since fractional LMUL.  vd should be multiple of 2
 	vwaddu.wv v2, v2, v4		# OK
-	vwaddu.wv v2, v3, v4		# vs2 should be multiple of 2
+	vwaddu.wv v2, v3, v4		# OK since fractional LMUL.  vs2 should be multiple of 2
 	vwaddu.wv v4, v2, v4		# vd overlap vs1
-	vwaddu.wv v4, v2, v5		# vd overlap vs1
+	vwaddu.wv v4, v2, v5		# OK since fractional LMUL.  vd overlap vs1
 	vwaddu.wv v0, v2, v4, v0.t	# vd overlap vm
-	vwaddu.wx v1, v2, a1		# vd should be multiple of 2
+	vwaddu.wx v1, v2, a1		# OK since fractional LMUL.  vd should be multiple of 2
 	vwaddu.wx v2, v2, a1		# OK
-	vwaddu.wx v2, v3, a1		# vs2 should be multiple of 2
+	vwaddu.wx v2, v3, a1		# OK since fractional LMUL.  vs2 should be multiple of 2
 	vwaddu.wx v0, v2, a1, v0.t	# vd overlap vm
 
 	vwsubu.vv v1, v2, v4
@@ -98,15 +98,15 @@
 
 # Vector Widening Integer Multiply Instructions
 
-	vwmul.vv v1, v2, v4		# vd should be multiple of 2
+	vwmul.vv v1, v2, v4		# OK since fractional LMUL.  vd should be multiple of 2
 	vwmul.vv v2, v2, v4		# vd overlap vs2
-	vwmul.vv v2, v3, v4		# vd overlap vs2
+	vwmul.vv v2, v3, v4		# OK since fractional LMUL.  vd overlap vs2
 	vwmul.vv v4, v2, v4		# vd overlap vs1
-	vwmul.vv v4, v2, v5		# vd overlap vs1
+	vwmul.vv v4, v2, v5		# OK since fractional LMUL.  vd overlap vs1
 	vwmul.vv v0, v2, v4, v0.t	# vd overlap vm
-	vwmul.vx v1, v2, a1		# vd should be multiple of 2
+	vwmul.vx v1, v2, a1		# OK since fractional LMUL.  vd should be multiple of 2
 	vwmul.vx v2, v2, a1		# vd overlap vs2
-	vwmul.vx v2, v3, a1		# vd overlap vs2
+	vwmul.vx v2, v3, a1		# OK since fractional LMUL.  vd overlap vs2
 	vwmul.vx v0, v2, a1, v0.t	# vd overlap vm
 
 	vwmulu.vv v1, v2, v4
@@ -133,15 +133,15 @@
 
 # Vector Widening Integer Multiply-Add Instructions
 
-	vwmaccu.vv v1, v2, v4		# vd should be multiple of 2
+	vwmaccu.vv v1, v2, v4		# OK since fractional LMUL.  vd should be multiple of 2
 	vwmaccu.vv v2, v2, v4		# vd overlap vs1
-	vwmaccu.vv v2, v3, v4		# vd overlap vs1
+	vwmaccu.vv v2, v3, v4		# OK since fractional LMUL.  vd overlap vs1
 	vwmaccu.vv v4, v2, v4		# vd overlap vs2
-	vwmaccu.vv v4, v2, v5		# vd overlap vs2
+	vwmaccu.vv v4, v2, v5		# OK since fractional LMUL.  vd overlap vs2
 	vwmaccu.vv v0, v2, v4, v0.t	# vd overlap vm
-	vwmaccu.vx v1, a1, v2		# vd should be multiple of 2
+	vwmaccu.vx v1, a1, v2		# OK since fractional LMUL.  vd should be multiple of 2
 	vwmaccu.vx v2, a1, v2		# vd overlap vs2
-	vwmaccu.vx v2, a1, v3		# vd overlap vs2
+	vwmaccu.vx v2, a1, v3		# OK since fractional LMUL.  vd overlap vs2
 	vwmaccu.vx v0, a1, v2, v0.t	# vd overlap vm
 
 	vwmacc.vv v1, v2, v4
@@ -166,28 +166,28 @@
 	vwmaccsu.vx v2, a1, v3
 	vwmaccsu.vx v0, a1, v2, v0.t
 
-	vwmaccus.vx v1, a1, v2		# vd should be multiple of 2
+	vwmaccus.vx v1, a1, v2		# OK since fractional LMUL.  vd should be multiple of 2
 	vwmaccus.vx v2, a1, v2		# vd overlap vs2
-	vwmaccus.vx v2, a1, v3		# vd overlap vs2
+	vwmaccus.vx v2, a1, v3		# OK since fractional LMUL.  vd overlap vs2
 	vwmaccus.vx v0, a1, v2, v0.t	# vd overlap vm
 
 # Vector Widening Floating-Point Add/Subtract Instructions
 
-	vfwadd.vv v1, v2, v4		# vd should be multiple of 2
+	vfwadd.vv v1, v2, v4		# OK since fractional LMUL.  vd should be multiple of 2
 	vfwadd.vv v2, v2, v4		# vd overlap vs2
-	vfwadd.vv v2, v3, v4		# vd overlap vs2
+	vfwadd.vv v2, v3, v4		# OK since fractional LMUL.  vd overlap vs2
 	vfwadd.vv v4, v2, v4		# vd overlap vs1
-	vfwadd.vv v4, v2, v5		# vd overlap vs1
+	vfwadd.vv v4, v2, v5		# OK since fractional LMUL.  vd overlap vs1
 	vfwadd.vv v0, v2, v4, v0.t	# vd overlap vm
-	vfwadd.vf v1, v2, fa1		# vd should be multiple of 2
+	vfwadd.vf v1, v2, fa1		# OK since fractional LMUL.  vd should be multiple of 2
 	vfwadd.vf v2, v2, fa1		# vd overlap vs2
-	vfwadd.vf v2, v3, fa1		# vd overlap vs2
+	vfwadd.vf v2, v3, fa1		# OK since fractional LMUL.  vd overlap vs2
 	vfwadd.vf v0, v2, fa1, v0.t	# vd overlap vm
-	vfwadd.wv v1, v2, v4		# vd should be multiple of 2
+	vfwadd.wv v1, v2, v4		# OK since fractional LMUL.  vd should be multiple of 2
 	vfwadd.wv v2, v2, v4		# OK
-	vfwadd.wv v2, v3, v4		# vs2 should be multiple of 2
+	vfwadd.wv v2, v3, v4		# OK since fractional LMUL.  vs2 should be multiple of 2
 	vfwadd.wv v4, v2, v4		# vd overlap vs1
-	vfwadd.wv v4, v2, v5		# vd overlap vs1
+	vfwadd.wv v4, v2, v5		# OK since fractional LMUL.  vd overlap vs1
 	vfwadd.wv v0, v2, v4, v0.t	# vd overlap vm
 
 	vfwsub.vv v1, v2, v4
@@ -209,27 +209,27 @@
 
 # Vector Widening Floating-Point Multiply
 
-	vfwmul.vv v1, v2, v4		# vd should be multiple of 2
+	vfwmul.vv v1, v2, v4		# OK since fractional LMUL.  vd should be multiple of 2
 	vfwmul.vv v2, v2, v4		# vd overlap vs2
-	vfwmul.vv v2, v3, v4		# vd overlap vs2
+	vfwmul.vv v2, v3, v4		# OK since fractional LMUL.  vd overlap vs2
 	vfwmul.vv v4, v2, v4		# vd overlap vs1
-	vfwmul.vv v4, v2, v5		# vd overlap vs1
+	vfwmul.vv v4, v2, v5		# OK since fractional LMUL.  vd overlap vs1
 	vfwmul.vv v0, v2, v4, v0.t	# vd overlap vm
-	vfwsub.vf v1, v2, fa1		# vd should be multiple of 2
+	vfwsub.vf v1, v2, fa1		# OK since fractional LMUL.  vd should be multiple of 2
 	vfwsub.vf v2, v2, fa1		# vd overlap vs2
-	vfwsub.vf v2, v3, fa1		# vd overlap vs2
+	vfwsub.vf v2, v3, fa1		# OK since fractional LMUL.  vd overlap vs2
 	vfwsub.vf v0, v2, fa1, v0.t	# vd overlap vm
 
 # Vector Widening Floating-Point Fused Multiply-Add Instructions
-	vfwmacc.vv v1, v2, v4		# vd should be multiple of 2
+	vfwmacc.vv v1, v2, v4		# OK since fractional LMUL.  vd should be multiple of 2
 	vfwmacc.vv v2, v2, v4		# vd overlap vs1
-	vfwmacc.vv v2, v3, v4		# vd overlap vs1
+	vfwmacc.vv v2, v3, v4		# OK since fractional LMUL.  vd overlap vs1
 	vfwmacc.vv v4, v2, v4		# vd overlap vs2
-	vfwmacc.vv v4, v2, v5		# vd overlap vs2
+	vfwmacc.vv v4, v2, v5		# OK since fractional LMUL.  vd overlap vs2
 	vfwmacc.vv v0, v2, v4, v0.t	# vd overlap vm
-	vfwmacc.vf v1, fa1, v2		# vd should be multiple of 2
+	vfwmacc.vf v1, fa1, v2		# OK since fractional LMUL.  vd should be multiple of 2
 	vfwmacc.vf v2, fa1, v2		# vd overlap vs2
-	vfwmacc.vf v2, fa1, v3		# vd overlap vs2
+	vfwmacc.vf v2, fa1, v3		# OK since fractional LMUL.  vd overlap vs2
 	vfwmacc.vf v0, fa1, v2, v0.t	# vd overlap vm
 
 	vfwnmacc.vv v1, v2, v4
@@ -267,9 +267,9 @@
 
 # Widening Floating-Point/Integer Type-Convert Instructions
 
-	vfwcvt.xu.f.v v1, v2		# vd should be multiple of 2
+	vfwcvt.xu.f.v v1, v2		# OK since fractional LMUL.  vd should be multiple of 2
 	vfwcvt.xu.f.v v2, v2		# vd overlap vs2
-	vfwcvt.xu.f.v v2, v3		# vd overlap vs2
+	vfwcvt.xu.f.v v2, v3		# OK since fractional LMUL.  vd overlap vs2
 	vfwcvt.xu.f.v v0, v2, v0.t	# vd overlap vm
 	vfwcvt.x.f.v v1, v2
 	vfwcvt.x.f.v v2, v2
