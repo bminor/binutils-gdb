@@ -2252,6 +2252,13 @@ namespace eval Dwarf {
 	}
     }
 
+    # Emit a dummy CU.
+    proc dummy_cu {} {
+	# Generate a CU with default options and empty body.
+	cu {} {
+	}
+    }
+
     # The top-level interface to the DWARF assembler.
     # FILENAME is the name of the file where the generated assembly
     # code is written.
@@ -2291,7 +2298,7 @@ namespace eval Dwarf {
 	}
 
 	set _output_file [open $filename w]
-	set _cu_count 0
+	set _cu_count -1
 	_empty_array _deferred_output
 	set _defer ""
 	set _label_num 0
@@ -2304,10 +2311,18 @@ namespace eval Dwarf {
 
 	set _debug_addr_index 0
 
+	# Dummy CU at the start to ensure that the first CU in $body is not
+	# the first in .debug_info.
+	dummy_cu
+
 	# Not "uplevel" here, because we want to evaluate in this
 	# namespace.  This is somewhat bad because it means we can't
 	# readily refer to outer variables.
 	eval $body
+
+	# Dummy CU at the end to ensure that the last CU in $body is not
+	# the last in .debug_info.
+	dummy_cu
 
 	_write_deferred_output
 
