@@ -1871,25 +1871,6 @@ struct quick_file_names
   const char **real_names;
 };
 
-/* When using the index (and thus not using psymtabs), each CU has an
-   object of this type.  This is used to hold information needed by
-   the various "quick" methods.  */
-struct dwarf2_per_cu_quick_data
-{
-  /* The file table.  This can be NULL if there was no file table
-     or it's currently not read in.
-     NOTE: This points into dwarf2_per_objfile->per_bfd->quick_file_names_table.  */
-  struct quick_file_names *file_names;
-
-  /* A temporary mark bit used when iterating over all CUs in
-     expand_symtabs_matching.  */
-  unsigned int mark : 1;
-
-  /* True if we've tried to read the file table.  There will be no
-     point in trying to read it again next time.  */
-  bool files_read : 1;
-};
-
 struct dwarf2_base_index_functions : public quick_symbol_functions
 {
   bool has_symbols (struct objfile *objfile) override;
@@ -2163,8 +2144,6 @@ create_cu_from_index_list (dwarf2_per_bfd *per_bfd,
   the_cu->sect_off = sect_off;
   the_cu->length = length;
   the_cu->section = section;
-  the_cu->v.quick = OBSTACK_ZALLOC (&per_bfd->obstack,
-				    struct dwarf2_per_cu_quick_data);
   the_cu->is_dwz = is_dwz;
   return the_cu;
 }
@@ -2245,9 +2224,6 @@ create_signatured_type_table_from_index
       sig_type->type_offset_in_tu = type_offset_in_tu;
       sig_type->section = section;
       sig_type->sect_off = sect_off;
-      sig_type->v.quick
-	= OBSTACK_ZALLOC (&per_bfd->obstack,
-			  struct dwarf2_per_cu_quick_data);
 
       slot = htab_find_slot (sig_types_hash.get (), sig_type.get (), INSERT);
       *slot = sig_type.get ();
@@ -2296,9 +2272,6 @@ create_signatured_type_table_from_debug_names
       sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
       sig_type->section = section;
       sig_type->sect_off = sect_off;
-      sig_type->v.quick
-	= OBSTACK_ZALLOC (&per_objfile->per_bfd->obstack,
-			  struct dwarf2_per_cu_quick_data);
 
       slot = htab_find_slot (sig_types_hash.get (), sig_type.get (), INSERT);
       *slot = sig_type.get ();
@@ -2775,7 +2748,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 
   gdb_assert (! this_cu->is_debug_types);
 
-  this_cu->v.quick->files_read = true;
+  this_cu->files_read = true;
   /* Our callers never want to match partial units -- instead they
      will match the enclosing full CU.  */
   if (comp_unit_die->tag == DW_TAG_partial_unit)
@@ -2802,7 +2775,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 			     &find_entry, INSERT);
       if (*slot != NULL)
 	{
-	  lh_cu->v.quick->file_names = (struct quick_file_names *) *slot;
+	  lh_cu->file_names = (struct quick_file_names *) *slot;
 	  return;
 	}
 
@@ -2854,7 +2827,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 
   qfn->real_names = NULL;
 
-  lh_cu->v.quick->file_names = qfn;
+  lh_cu->file_names = qfn;
 }
 
 /* A helper for the "quick" functions which attempts to read the line
@@ -2867,14 +2840,14 @@ dw2_get_file_names (dwarf2_per_cu_data *this_cu,
   /* This should never be called for TUs.  */
   gdb_assert (! this_cu->is_debug_types);
 
-  if (this_cu->v.quick->files_read)
-    return this_cu->v.quick->file_names;
+  if (this_cu->files_read)
+    return this_cu->file_names;
 
   cutu_reader reader (this_cu, per_objfile);
   if (!reader.dummy_p)
     dw2_get_file_names_reader (&reader, reader.comp_unit_die);
 
-  return this_cu->v.quick->file_names;
+  return this_cu->file_names;
 }
 
 /* A helper for the "quick" functions which computes and caches the
@@ -2926,10 +2899,10 @@ dwarf2_per_cu_data::free_cached_file_names ()
   if (fnd != nullptr)
     fnd->forget_fullname ();
 
-  if (per_bfd == nullptr || v.quick == nullptr)
+  if (per_bfd == nullptr)
     return;
 
-  struct quick_file_names *file_data = v.quick->file_names;
+  struct quick_file_names *file_data = file_names;
   if (file_data != nullptr && file_data->real_names != nullptr)
     {
       for (int i = 0; i < file_data->num_file_names; ++i)
@@ -4001,7 +3974,7 @@ dw2_expand_symtabs_matching_one
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify)
 {
-  if (file_matcher == NULL || per_cu->v.quick->mark)
+  if (file_matcher == NULL || per_cu->mark)
     {
       bool symtab_was_null = !per_objfile->symtab_set_p (per_cu);
 
@@ -4142,7 +4115,7 @@ dw_expand_symtabs_matching_file_matcher
 
       if (per_cu->is_debug_types)
 	continue;
-      per_cu->v.quick->mark = 0;
+      per_cu->mark = 0;
 
       /* We only need to look at symtabs not already expanded.  */
       if (per_objfile->symtab_set_p (per_cu.get ()))
@@ -4154,7 +4127,7 @@ dw_expand_symtabs_matching_file_matcher
 
 	  if (file_matcher (fnd->get_name (), false))
 	    {
-	      per_cu->v.quick->mark = 1;
+	      per_cu->mark = 1;
 	      continue;
 	    }
 
@@ -4164,7 +4137,7 @@ dw_expand_symtabs_matching_file_matcher
 	       || file_matcher (lbasename (fnd->get_name ()), true))
 	      && file_matcher (fnd->get_fullname (), false))
 	    {
-	      per_cu->v.quick->mark = 1;
+	      per_cu->mark = 1;
 	      continue;
 	    }
 	}
@@ -4178,7 +4151,7 @@ dw_expand_symtabs_matching_file_matcher
 	continue;
       else if (htab_find (visited_found.get (), file_data) != NULL)
 	{
-	  per_cu->v.quick->mark = 1;
+	  per_cu->mark = 1;
 	  continue;
 	}
 
@@ -4188,7 +4161,7 @@ dw_expand_symtabs_matching_file_matcher
 
 	  if (file_matcher (file_data->file_names[j], false))
 	    {
-	      per_cu->v.quick->mark = 1;
+	      per_cu->mark = 1;
 	      break;
 	    }
 
@@ -4202,12 +4175,12 @@ dw_expand_symtabs_matching_file_matcher
 	  this_real_name = dw2_get_real_path (per_objfile, file_data, j);
 	  if (file_matcher (this_real_name, false))
 	    {
-	      per_cu->v.quick->mark = 1;
+	      per_cu->mark = 1;
 	      break;
 	    }
 	}
 
-      void **slot = htab_find_slot (per_cu->v.quick->mark
+      void **slot = htab_find_slot (per_cu->mark
 				    ? visited_found.get ()
 				    : visited_not_found.get (),
 				    file_data, INSERT);
@@ -4351,8 +4324,8 @@ dwarf2_base_index_functions::map_symbol_filenames
       if (!per_cu->is_debug_types
 	  && per_objfile->symtab_set_p (per_cu.get ()))
 	{
-	  if (per_cu->v.quick->file_names != nullptr)
-	    qfn_cache.insert (per_cu->v.quick->file_names);
+	  if (per_cu->file_names != nullptr)
+	    qfn_cache.insert (per_cu->file_names);
 	}
     }
 
@@ -5361,14 +5334,6 @@ dwarf2_initialize_objfile (struct objfile *objfile)
       per_bfd->quick_file_names_table
 	= create_quick_file_names_table (per_bfd->all_comp_units.size ());
 
-      for (int i = 0; i < per_bfd->all_comp_units.size (); ++i)
-	{
-	  dwarf2_per_cu_data *per_cu = per_bfd->get_cu (i);
-
-	  per_cu->v.quick = OBSTACK_ZALLOC (&per_bfd->obstack,
-					    struct dwarf2_per_cu_quick_data);
-	}
-
       /* Arrange for gdb to see the "quick" functions.  However, these
 	 functions will be no-ops because we will have expanded all
 	 symtabs.  */
@@ -5695,8 +5660,6 @@ add_type_unit (dwarf2_per_objfile *per_objfile, ULONGEST sig, void **slot)
 
   per_objfile->per_bfd->all_comp_units.emplace_back
     (sig_type_holder.release ());
-  sig_type->v.quick = OBSTACK_ZALLOC (&per_objfile->per_bfd->obstack,
-				      struct dwarf2_per_cu_quick_data);
 
   if (slot == NULL)
     {
@@ -5722,7 +5685,6 @@ fill_in_sig_entry_from_dwo_entry (dwarf2_per_objfile *per_objfile,
   /* Make sure we're not clobbering something we don't expect to.  */
   gdb_assert (! sig_entry->queued);
   gdb_assert (per_objfile->get_cu (sig_entry) == NULL);
-  gdb_assert (sig_entry->v.quick != NULL);
   gdb_assert (!per_objfile->symtab_set_p (sig_entry));
   gdb_assert (sig_entry->signature == dwo_entry->signature);
   gdb_assert (to_underlying (sig_entry->type_offset_in_section) == 0
@@ -7297,9 +7259,6 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
       this_cu->length = cu_header.length + cu_header.initial_length_size;
       this_cu->is_dwz = is_dwz;
       this_cu->section = section;
-
-      this_cu->v.quick = OBSTACK_ZALLOC (&per_objfile->per_bfd->obstack,
-					 struct dwarf2_per_cu_quick_data);
 
       info_ptr = info_ptr + this_cu->length;
       per_objfile->per_bfd->all_comp_units.push_back (std::move (this_cu));
@@ -18712,7 +18671,7 @@ cooked_index_functions::expand_symtabs_matching
 
 	  /* If file-matching was done, we don't need to consider
 	     symbols from unmarked CUs.  */
-	  if (file_matcher != nullptr && !entry->per_cu->v.quick->mark)
+	  if (file_matcher != nullptr && !entry->per_cu->mark)
 	    continue;
 
 	  /* See if the symbol matches the type filter.  */

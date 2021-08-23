@@ -104,6 +104,8 @@ struct dwarf2_per_cu_data
       tu_read (false),
       m_header_read_in (false),
       addresses_seen (false),
+      mark (false),
+      files_read (false),
       unit_type {},
       lang (language_unknown),
       scanned (false)
@@ -159,6 +161,14 @@ struct dwarf2_per_cu_data
      .debug_aranges), then this flag is set.  */
   bool addresses_seen : 1;
 
+  /* A temporary mark bit used when iterating over all CUs in
+     expand_symtabs_matching.  */
+  unsigned int mark : 1;
+
+  /* True if we've tried to read the file table.  There will be no
+     point in trying to read it again next time.  */
+  bool files_read : 1;
+
   /* The unit type of this CU.  */
   ENUM_BITFIELD (dwarf_unit_type) unit_type : 8;
 
@@ -195,11 +205,10 @@ struct dwarf2_per_cu_data
      have one.  */
   std::unique_ptr<file_and_directory> fnd;
 
-  union
-  {
-    /* Data needed by the "quick" functions.  */
-    struct dwarf2_per_cu_quick_data *quick;
-  } v {};
+  /* The file table.  This can be NULL if there was no file table
+     or it's currently not read in.
+     NOTE: This points into dwarf2_per_objfile->per_bfd->quick_file_names_table.  */
+  struct quick_file_names *file_names = nullptr;
 
   /* The CUs we import using DW_TAG_imported_unit.  This is filled in
      while reading psymtabs, used to compute the psymtab dependencies,
