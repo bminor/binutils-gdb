@@ -1412,10 +1412,17 @@ Output_data_got<got_size, big_endian>::Got_entry::write(
 	      default:
 		gold_unreachable();
 	      }
+	    // If this is a GOT entry for a known value global symbol,
+	    // then the value should include the addend.  If the value
+	    // is not known leave the value as zero; The GOT entry
+	    // will be set by a dynamic relocation.
+	    if (this->addend_ && gsym->final_value_is_known())
+	      val += this->addend_;
 	    if (this->use_plt_or_tls_offset_
 		&& gsym->type() == elfcpp::STT_TLS)
 	      val += parameters->target().tls_offset_for_global(gsym,
-								got_indx);
+								got_indx,
+								this->addend_);
 	  }
       }
       break;
@@ -1444,7 +1451,8 @@ Output_data_got<got_size, big_endian>::Got_entry::write(
 	    val = convert_types<Valtype, uint64_t>(lval);
 	    if (this->use_plt_or_tls_offset_ && is_tls)
 	      val += parameters->target().tls_offset_for_local(object, lsi,
-							       got_indx);
+							       got_indx,
+							       this->addend_);
 	  }
       }
       break;

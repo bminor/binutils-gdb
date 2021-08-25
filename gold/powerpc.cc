@@ -825,12 +825,14 @@ class Target_powerpc : public Sized_target<size, big_endian>
   int64_t
   do_tls_offset_for_local(const Relobj* object,
 			  unsigned int symndx,
-			  unsigned int got_indx) const;
+			  unsigned int got_indx,
+			  uint64_t addend) const;
 
   // Return the offset to use for the GOT_INDX'th got entry which is
   // for global tls symbol GSYM.
   int64_t
-  do_tls_offset_for_global(Symbol* gsym, unsigned int got_indx) const;
+  do_tls_offset_for_global(Symbol* gsym, unsigned int got_indx,
+			   uint64_t addend) const;
 
   void
   do_function_location(Symbol_location*) const;
@@ -12790,7 +12792,8 @@ int64_t
 Target_powerpc<size, big_endian>::do_tls_offset_for_local(
     const Relobj* object,
     unsigned int symndx,
-    unsigned int got_indx) const
+    unsigned int got_indx,
+    uint64_t addend) const
 {
   const Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<const Powerpc_relobj<size, big_endian>*>(object);
@@ -12799,9 +12802,10 @@ Target_powerpc<size, big_endian>::do_tls_offset_for_local(
       for (Got_type got_type = GOT_TYPE_TLSGD;
 	   got_type <= GOT_TYPE_TPREL;
 	   got_type = Got_type(got_type + 1))
-	if (ppc_object->local_has_got_offset(symndx, got_type))
+	if (ppc_object->local_has_got_offset(symndx, got_type, addend))
 	  {
-	    unsigned int off = ppc_object->local_got_offset(symndx, got_type);
+	    unsigned int off
+	      = ppc_object->local_got_offset(symndx, got_type, addend);
 	    if (got_type == GOT_TYPE_TLSGD)
 	      off += size / 8;
 	    if (off == got_indx * (size / 8))
@@ -12822,16 +12826,17 @@ template<int size, bool big_endian>
 int64_t
 Target_powerpc<size, big_endian>::do_tls_offset_for_global(
     Symbol* gsym,
-    unsigned int got_indx) const
+    unsigned int got_indx,
+    uint64_t addend) const
 {
   if (gsym->type() == elfcpp::STT_TLS)
     {
       for (Got_type got_type = GOT_TYPE_TLSGD;
 	   got_type <= GOT_TYPE_TPREL;
 	   got_type = Got_type(got_type + 1))
-	if (gsym->has_got_offset(got_type))
+	if (gsym->has_got_offset(got_type, addend))
 	  {
-	    unsigned int off = gsym->got_offset(got_type);
+	    unsigned int off = gsym->got_offset(got_type, addend);
 	    if (got_type == GOT_TYPE_TLSGD)
 	      off += size / 8;
 	    if (off == got_indx * (size / 8))
