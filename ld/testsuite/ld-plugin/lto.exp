@@ -238,6 +238,15 @@ if { [at_least_gcc_version 10 0] } {
 	 "-flto -fno-common $lto_no_fat" \
 	 {pr25355.c} \
 	 [list [list "nm" "$plug_opt" "pr25355.d"]]] \
+	[list "pr28264.so" \
+	 "-shared -Wl,--version-script=pr28264.ver" \
+	 "-flto $lto_no_fat -fPIC" \
+	 {pr28264.c} \
+	 {{readelf {--dyn-syms --wide} pr28264-1.d} \
+	  {readelf {--dyn-syms --wide} pr28264-2.d} \
+	  {readelf {--dyn-syms --wide} pr28264-3.d} \
+	  {readelf {--dyn-syms --wide} pr28264-4.d}} \
+	 {pr28264.so}] \
     ]]
 }
 

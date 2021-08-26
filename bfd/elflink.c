@@ -1272,14 +1272,25 @@ _bfd_elf_merge_symbol (bfd *abfd,
       olddyn = (oldsec->symbol->flags & BSF_DYNAMIC) != 0;
     }
 
-  /* Handle a case where plugin_notice won't be called and thus won't
-     set the non_ir_ref flags on the first pass over symbols.  */
   if (oldbfd != NULL
-      && (oldbfd->flags & BFD_PLUGIN) != (abfd->flags & BFD_PLUGIN)
-      && newdyn != olddyn)
+      && (oldbfd->flags & BFD_PLUGIN) != (abfd->flags & BFD_PLUGIN))
     {
-      h->root.non_ir_ref_dynamic = true;
-      hi->root.non_ir_ref_dynamic = true;
+      if (newdyn != olddyn)
+	{
+	  /* Handle a case where plugin_notice won't be called and thus
+	     won't set the non_ir_ref flags on the first pass over
+	     symbols.  */
+	  h->root.non_ir_ref_dynamic = true;
+	  hi->root.non_ir_ref_dynamic = true;
+	}
+
+      if ((oldbfd->flags & BFD_PLUGIN) != 0
+	  && hi->root.type == bfd_link_hash_indirect)
+	{
+	  /* Change indirect symbol from IR to undefined.  */
+	  hi->root.type = bfd_link_hash_undefined;
+	  hi->root.u.undef.abfd = oldbfd;
+	}
     }
 
   /* NEWDEF and OLDDEF indicate whether the new or old symbol,
