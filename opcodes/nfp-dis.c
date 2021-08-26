@@ -46,6 +46,9 @@
 #define _NFP_ME27_28_CSR_CTX_ENABLES     0x18
 #define _NFP_ME27_28_CSR_MISC_CONTROL    0x160
 
+#define _NFP_ISLAND_MAX 64
+#define _NFP_ME_MAX     12
+
 typedef struct
 {
   unsigned char ctx4_mode:1;
@@ -65,7 +68,7 @@ nfp_opts;
 /* mecfgs[island][menum][is-text] */
 typedef struct
 {
-  nfp_priv_mecfg mecfgs[64][12][2];
+  nfp_priv_mecfg mecfgs[_NFP_ISLAND_MAX][_NFP_ME_MAX][2];
 }
 nfp_priv_data;
 
@@ -2835,6 +2838,12 @@ _print_instrs (bfd_vma addr, struct disassemble_info *dinfo, nfp_opts * opts)
 	  island = SHI_NFP_ISLAND (sh_info);
 	  menum = SHI_NFP_MENUM (sh_info);
 	  break;
+	}
+
+      if (island >= _NFP_ISLAND_MAX || menum >= _NFP_ME_MAX)
+	{
+	  dinfo->fprintf_func (dinfo->stream, "Invalid island or me.");
+	  return _NFP_ERR_STOP;
 	}
 
       mecfg = &priv->mecfgs[island][menum][is_text];
