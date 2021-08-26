@@ -1682,7 +1682,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	      cycle = true;
 	      break;
 	    }
-	  if (strcmp (h->u.i.link->root.string, string) == 0)
+	  if (string != NULL && strcmp (h->u.i.link->root.string, string) == 0)
 	    break;
 	  /* Fall through.  */
 	case MDEF:
