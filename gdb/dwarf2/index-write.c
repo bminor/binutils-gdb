@@ -1385,6 +1385,9 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
   uniquify_cu_indices (&symtab);
 
   data_buf symtab_vec, constant_pool;
+  if (symtab.n_elements == 0)
+    symtab.data.resize (0);
+
   write_hash_table (&symtab, symtab_vec, constant_pool);
 
   write_gdbindex_1(out_file, objfile_cu_list, types_cu_list, addr_vec,
