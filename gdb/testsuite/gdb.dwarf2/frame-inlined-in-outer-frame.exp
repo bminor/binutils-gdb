@@ -43,7 +43,7 @@ Dwarf::assemble $dwarf_asm {
     # See the comment in the .S file for the equivalent C program this is meant
     # to represent.
 
-    cu { addr_size 4 } {
+    cu { label cu_label addr_size 4 } {
 	DW_TAG_compile_unit {
 	    {DW_AT_name $srcfile}
 	    {DW_AT_stmt_list $stmt_list DW_FORM_sec_offset}
@@ -92,6 +92,10 @@ Dwarf::assemble $dwarf_asm {
 
 	include_dir "/some/directory"
 	file_name "/some/directory/file.c" 0
+    }
+
+    aranges {} cu_label {
+	arange __cu_low_pc __cu_high_pc
     }
 }
 
