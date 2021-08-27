@@ -2210,6 +2210,159 @@ namespace eval Dwarf {
 	define_label $unit_end_label
     }
 
+    # Emit a DWARF .debug_aranges entry.
+
+    proc arange { arange_start arange_length {comment ""} {seg_sel ""} } {
+	if { $comment != "" } {
+	    # Wrap
+	    set comment " ($comment)"
+	}
+
+	if { $seg_sel != "" } {
+	    variable _seg_size
+	    if { $_seg_size == 8 } {
+		set seg_op .8byte
+	    } elseif { $_seg_size == 4 } {
+		set seg_op .4byte
+	    } else {
+		error \
+		    "Don't know how to handle segment selector size $_seg_size"
+	    }
+	    _op $seg_op $seg_sel "Address range segment selector$comment"
+	}
+
+	variable _addr_size
+	if { $_addr_size == 8 } {
+	    set addr_op .8byte
+	} elseif { $_addr_size == 4 } {
+	    set addr_op .4byte
+	}
+
+	_op $addr_op $arange_start "Address range start$comment"
+	_op $addr_op $arange_length "Address range length$comment"
+    }
+
+    # Emit a DWARF .debug_aranges unit.
+    #
+    # OPTIONS is a list with an even number of elements containing
+    # option-name and option-value pairs.
+    # Current options are:
+    # is_64 0|1    - boolean indicating if you want to emit 64-bit DWARF
+    #                default = 0 (32-bit)
+    # cu_is_64 0|1 - boolean indicating if LABEL refers to a 64-bit DWARF CU
+    #                default = 0 (32-bit)
+    # section_version n
+    #                - section version number to emit
+    #                default = 2
+    # seg_size n   - the size of the adress selector in bytes: 0, 4, or 8
+    #                default = 0
+    #
+    # LABEL is the label of the corresponding CU.
+    #
+    # BODY is Tcl code that emits the parts which make up the body of
+    # the aranges unit.  It is evaluated in the caller's context.  The
+    # following commands are available for the BODY section:
+    #
+    #   arange [-c <comment>] [<segment selector>] <start> <length>
+    #     -- adds an address range.
+
+    proc aranges { options label body } {
+	variable _addr_size
+	variable _seg_size
+
+	# Establish the defaults.
+	set is_64 0
+	set cu_is_64 0
+	set section_version 2
+	set _seg_size 0
+
+	# Handle options.
+	foreach { name value } $options {
+	    switch -exact -- $name {
+		is_64 { set is_64 $value }
+		cu_is_64 { set cu_is_64 $value }
+		section_version {set section_version $value }
+		seg_size { set _seg_size $value }
+		default { error "unknown option $name" }
+	    }
+	}
+
+	if { [is_64_target] } {
+	    set _addr_size 8
+	} else {
+	    set _addr_size 4
+	}
+
+	# Switch to .debug_aranges section.
+	_section .debug_aranges
+
+	# Keep track of offset from start of section entry to determine
+	# padding amount.
+	set offset 0
+
+	# Initial length.
+	declare_labels aranges_start aranges_end
+	set length "$aranges_end - $aranges_start"
+	set comment "Length"
+	if { $is_64 } {
+	    _op .4byte 0xffffffff
+	    _op .8byte $length $comment
+	    incr offset 12
+	} else {
+	    _op .4byte $length $comment
+	    incr offset 4
+	}
+
+	# Start label.
+	aranges_start:
+
+	# Section version.
+	_op .2byte $section_version "Section version"
+	incr offset 2
+
+	# Offset into .debug_info.
+	upvar $label my_label
+	if { $cu_is_64 } {
+	    _op .8byte $my_label "Offset into .debug_info"
+	    incr offset 8
+	} else {
+	    _op .4byte $my_label "Offset into .debug_info"
+	    incr offset 4
+	}
+
+	# Address size.
+	_op .byte $_addr_size "Address size"
+	incr offset
+
+	# Segment selector size.
+	_op .byte $_seg_size "Segment selector size"
+	incr offset
+
+	# Padding.
+	set tuple_size [expr 2 * $_addr_size + $_seg_size]
+	while { 1 } {
+	    if { [expr $offset % $tuple_size] == 0 } {
+		break
+	    }
+	    _op .byte 0 "Pad to $tuple_size byte boundary"
+	    incr offset
+	}
+
+	# Range tuples.
+	uplevel $body
+
+	# Terminator tuple.
+	set comment "Terminator"
+	if { $_seg_size == 0 } {
+	    arange 0 0 $comment
+	} else {
+	    arange 0 0 $comment 0
+	}
+
+	# End label.
+	aranges_end:
+    }
+
     proc _empty_array {name} {
 	upvar $name the_array
 
