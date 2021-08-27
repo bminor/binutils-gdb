@@ -19,7 +19,6 @@
 
 #include "defs.h"
 #include "value.h"
-#include "language.h"		/* For value_true */
 #include <ctype.h>
 
 #include "ui-out.h"
@@ -579,7 +578,7 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
 	/* Keep iterating so long as the expression is true.  */
 	while (loop == 1)
 	  {
-	    int cond_result;
+	    bool cond_result;
 
 	    QUIT;
 

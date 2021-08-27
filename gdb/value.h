@@ -1022,7 +1022,15 @@ extern int value_equal_contents (struct value *arg1, struct value *arg2);
 
 extern int value_less (struct value *arg1, struct value *arg2);
 
-extern int value_logical_not (struct value *arg1);
+/* Simulate the C operator ! -- return true if ARG1 contains zero.  */
+extern bool value_logical_not (struct value *arg1);
+
+/* Returns true if the value VAL represents a true value.  */
+static inline bool
+value_true (struct value *val)
+{
+  return !value_logical_not (val);
+}
 
 /* C++ */
 

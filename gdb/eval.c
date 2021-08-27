@@ -2204,7 +2204,7 @@ logical_and_operation::evaluate (struct type *expect_type,
     }
   else
     {
-      int tem = value_logical_not (arg1);
+      bool tem = value_logical_not (arg1);
       if (!tem)
 	{
 	  arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
@@ -2233,7 +2233,7 @@ logical_or_operation::evaluate (struct type *expect_type,
     }
   else
     {
-      int tem = value_logical_not (arg1);
+      bool tem = value_logical_not (arg1);
       if (tem)
 	{
 	  arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);

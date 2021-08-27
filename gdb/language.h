@@ -778,10 +778,6 @@ extern enum language set_language (enum language);
 
 extern void range_error (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
-/* Data:  Does this value represent "truth" to the current language?  */
-
-extern int value_true (struct value *);
-
 /* Misc:  The string representing a particular enum language.  */
 
 extern enum language language_enum (const char *str);

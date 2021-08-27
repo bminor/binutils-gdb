@@ -748,7 +748,7 @@ opencl_logical_binop_operation::evaluate (struct type *expect_type,
       /* For scalar built-in types, only evaluate the right
 	 hand operand if the left hand operand compares
 	 unequal(&&)/equal(||) to 0.  */
-      int tmp = value_logical_not (arg1);
+      bool tmp = value_logical_not (arg1);
 
       if (op == BINOP_LOGICAL_OR)
 	tmp = !tmp;

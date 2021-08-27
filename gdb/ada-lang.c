@@ -11765,13 +11765,13 @@ re_set_exception (struct breakpoint *b)
    user specified a specific exception, we only want to cause a stop
    if the program thrown that exception.  */
 
-static int
+static bool
 should_stop_exception (const struct bp_location *bl)
 {
   struct ada_catchpoint *c = (struct ada_catchpoint *) bl->owner;
   const struct ada_catchpoint_location *ada_loc
     = (const struct ada_catchpoint_location *) bl;
-  int stop;
+  bool stop;
 
   struct internalvar *var = lookup_internalvar ("_ada_exception");
   if (c->m_kind == ada_catch_assert)
@@ -11799,16 +11799,16 @@ should_stop_exception (const struct bp_location *bl)
 
   /* With no specific exception, should always stop.  */
   if (c->excep_string.empty ())
-    return 1;
+    return true;
 
   if (ada_loc->excep_cond_expr == NULL)
     {
       /* We will have a NULL expression if back when we were creating
 	 the expressions, this location's had failed to parse.  */
-      return 1;
+      return true;
     }
 
-  stop = 1;
+  stop = true;
   try
     {
       struct value *mark;

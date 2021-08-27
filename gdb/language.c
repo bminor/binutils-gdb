@@ -387,23 +387,6 @@ language_info ()
   show_language_command (NULL, 1, NULL, NULL);
 }
 
-
-/* This page contains functions that return info about
-   (struct value) values used in GDB.  */
-
-/* Returns non-zero if the value VAL represents a true value.  */
-int
-value_true (struct value *val)
-{
-  /* It is possible that we should have some sort of error if a non-boolean
-     value is used in this context.  Possibly dependent on some kind of
-     "boolean-checking" option like range checking.  But it should probably
-     not depend on the language except insofar as is necessary to identify
-     a "boolean" value (i.e. in C using a float, pointer, etc., as a boolean
-     should be an error, probably).  */
-  return !value_logical_not (val);
-}
-
 /* This page contains functions for the printing out of
    error messages that occur during type- and range-
    checking.  */
