@@ -2419,7 +2419,11 @@ namespace eval Dwarf {
     # Emit a dummy CU.
     proc dummy_cu {} {
 	# Generate a CU with default options and empty body.
-	cu {} {
+	cu {label dummy_cu} {
+	}
+
+	# Generate an .debug_aranges entry for the dummy CU.
+	aranges {} dummy_cu {
 	}
     }
 
