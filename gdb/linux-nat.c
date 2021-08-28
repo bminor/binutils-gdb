@@ -845,19 +845,10 @@ purge_lwp_list (int pid)
 static struct lwp_info *
 add_initial_lwp (ptid_t ptid)
 {
-  struct lwp_info *lp;
-
   gdb_assert (ptid.lwp_p ());
 
-  lp = XNEW (struct lwp_info);
+  lwp_info *lp = new lwp_info (ptid);
 
-  memset (lp, 0, sizeof (struct lwp_info));
-
-  lp->last_resume_kind = resume_continue;
-  lp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
-
-  lp->ptid = ptid;
-  lp->core = -1;
 
   /* Add to sorted-by-reverse-creation-order list.  */
   lwp_list_add (lp);
@@ -893,16 +884,13 @@ add_lwp (ptid_t ptid)
 static void
 delete_lwp (ptid_t ptid)
 {
-  struct lwp_info *lp;
-  void **slot;
-  struct lwp_info dummy;
+  lwp_info dummy (ptid);
 
-  dummy.ptid = ptid;
-  slot = htab_find_slot (lwp_lwpid_htab, &dummy, NO_INSERT);
+  void **slot = htab_find_slot (lwp_lwpid_htab, &dummy, NO_INSERT);
   if (slot == NULL)
     return;
 
-  lp = *(struct lwp_info **) slot;
+  lwp_info *lp = *(struct lwp_info **) slot;
   gdb_assert (lp != NULL);
 
   htab_clear_slot (lwp_lwpid_htab, slot);
@@ -920,18 +908,15 @@ delete_lwp (ptid_t ptid)
 static struct lwp_info *
 find_lwp_pid (ptid_t ptid)
 {
-  struct lwp_info *lp;
   int lwp;
-  struct lwp_info dummy;
 
   if (ptid.lwp_p ())
     lwp = ptid.lwp ();
   else
     lwp = ptid.pid ();
 
-  dummy.ptid = ptid_t (0, lwp);
-  lp = (struct lwp_info *) htab_find (lwp_lwpid_htab, &dummy);
-  return lp;
+  lwp_info dummy (ptid_t (0, lwp));
+  return (struct lwp_info *) htab_find (lwp_lwpid_htab, &dummy);
 }
 
 /* See nat/linux-nat.h.  */

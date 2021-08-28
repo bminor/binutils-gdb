@@ -202,20 +202,26 @@ struct arch_lwp_info;
 
 struct lwp_info
 {
+  lwp_info (ptid_t ptid)
+    : ptid (ptid)
+  {
+    waitstatus.kind = TARGET_WAITKIND_IGNORE;
+  }
+
   /* The process id of the LWP.  This is a combination of the LWP id
      and overall process id.  */
   ptid_t ptid;
 
   /* If this flag is set, we need to set the event request flags the
      next time we see this LWP stop.  */
-  int must_set_ptrace_flags;
+  int must_set_ptrace_flags = 0;
 
   /* Non-zero if we sent this LWP a SIGSTOP (but the LWP didn't report
      it back yet).  */
-  int signalled;
+  int signalled = 0;
 
   /* Non-zero if this LWP is stopped.  */
-  int stopped;
+  int stopped = 0;
 
   /* Non-zero if this LWP will be/has been resumed.  Note that an LWP
      can be marked both as stopped and resumed at the same time.  This
@@ -223,38 +229,38 @@ struct lwp_info
      pending.  We shouldn't let the LWP run until that wait status has
      been processed, but we should not report that wait status if GDB
      didn't try to let the LWP run.  */
-  int resumed;
+  int resumed = 0;
 
   /* The last resume GDB requested on this thread.  */
-  enum resume_kind last_resume_kind;
+  resume_kind last_resume_kind = resume_continue;
 
   /* If non-zero, a pending wait status.  */
-  int status;
+  int status = 0;
 
   /* When 'stopped' is set, this is where the lwp last stopped, with
      decr_pc_after_break already accounted for.  If the LWP is
      running and stepping, this is the address at which the lwp was
      resumed (that is, it's the previous stop PC).  If the LWP is
      running and not stepping, this is 0.  */
-  CORE_ADDR stop_pc;
+  CORE_ADDR stop_pc = 0;
 
   /* Non-zero if we were stepping this LWP.  */
-  int step;
+  int step = 0;
 
   /* The reason the LWP last stopped, if we need to track it
      (breakpoint, watchpoint, etc.).  */
-  enum target_stop_reason stop_reason;
+  target_stop_reason stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
   /* On architectures where it is possible to know the data address of
      a triggered watchpoint, STOPPED_DATA_ADDRESS_P is non-zero, and
      STOPPED_DATA_ADDRESS contains such data address.  Otherwise,
      STOPPED_DATA_ADDRESS_P is false, and STOPPED_DATA_ADDRESS is
      undefined.  Only valid if STOPPED_BY_WATCHPOINT is true.  */
-  int stopped_data_address_p;
-  CORE_ADDR stopped_data_address;
+  int stopped_data_address_p = 0;
+  CORE_ADDR stopped_data_address = 0;
 
   /* Non-zero if we expect a duplicated SIGINT.  */
-  int ignore_sigint;
+  int ignore_sigint = 0;
 
   /* If WAITSTATUS->KIND != TARGET_WAITKIND_SPURIOUS, the waitstatus
      for this LWP's last event.  This may correspond to STATUS above,
@@ -269,15 +275,15 @@ struct lwp_info
   enum target_waitkind syscall_state;
 
   /* The processor core this LWP was last seen on.  */
-  int core;
+  int core = -1;
 
   /* Arch-specific additions.  */
-  struct arch_lwp_info *arch_private;
+  struct arch_lwp_info *arch_private = nullptr;
 
   /* Previous and next pointers in doubly-linked list of known LWPs,
      sorted by reverse creation order.  */
-  struct lwp_info *prev;
-  struct lwp_info *next;
+  struct lwp_info *prev = nullptr;
+  struct lwp_info *next = nullptr;
 };
 
 /* The global list of LWPs, for ALL_LWPS.  Unlike the threads list,
