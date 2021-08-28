@@ -327,15 +327,15 @@ class Got_offset_list
 class Local_got_entry_key
 {
  public:
-  Local_got_entry_key(unsigned int symndx, uint64_t addend)
-    : symndx_(symndx), addend_(addend)
+  Local_got_entry_key(unsigned int symndx)
+    : symndx_(symndx)
   {}
 
   // Whether this equals to another Local_got_entry_key.
   bool
   eq(const Local_got_entry_key& key) const
   {
-    return (this->symndx_ == key.symndx_ && this->addend_ == key.addend_);
+    return this->symndx_ == key.symndx_;
   }
 
   // Compute a hash value for this using 64-bit FNV-1a hash.
@@ -345,7 +345,6 @@ class Local_got_entry_key
     uint64_t h = 14695981039346656037ULL; // FNV offset basis.
     uint64_t prime = 1099511628211ULL;
     h = (h ^ static_cast<uint64_t>(this->symndx_)) * prime;
-    h = (h ^ static_cast<uint64_t>(this->addend_)) * prime;
     return h;
   }
 
@@ -368,8 +367,6 @@ class Local_got_entry_key
  private:
   // The local symbol index.
   unsigned int symndx_;
-  // The addend.
-  uint64_t addend_;
 };
 
 // Type for mapping section index to uncompressed size and contents.
@@ -2135,7 +2132,7 @@ class Sized_relobj : public Relobj
   do_local_has_got_offset(unsigned int symndx, unsigned int got_type,
 			  uint64_t addend) const
   {
-    Local_got_entry_key key(symndx, addend);
+    Local_got_entry_key key(symndx);
     Local_got_offsets::const_iterator p =
         this->local_got_offsets_.find(key);
     return (p != this->local_got_offsets_.end()
@@ -2148,7 +2145,7 @@ class Sized_relobj : public Relobj
   do_local_got_offset(unsigned int symndx, unsigned int got_type,
 			  uint64_t addend) const
   {
-    Local_got_entry_key key(symndx, addend);
+    Local_got_entry_key key(symndx);
     Local_got_offsets::const_iterator p =
         this->local_got_offsets_.find(key);
     gold_assert(p != this->local_got_offsets_.end());
@@ -2163,7 +2160,7 @@ class Sized_relobj : public Relobj
   do_set_local_got_offset(unsigned int symndx, unsigned int got_type,
 			  unsigned int got_offset, uint64_t addend)
   {
-    Local_got_entry_key key(symndx, addend);
+    Local_got_entry_key key(symndx);
     Local_got_offsets::const_iterator p =
         this->local_got_offsets_.find(key);
     if (p != this->local_got_offsets_.end())
