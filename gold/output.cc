@@ -1531,26 +1531,6 @@ Output_data_got<got_size, big_endian>::add_global_pair_with_rel(
 				got_offset + got_size / 8, 0);
 }
 
-// Add an entry for a local symbol to the GOT.  This returns true if
-// this is a new GOT entry, false if the symbol already has a GOT
-// entry.
-
-template<int got_size, bool big_endian>
-bool
-Output_data_got<got_size, big_endian>::add_local(
-    Relobj* object,
-    unsigned int symndx,
-    unsigned int got_type)
-{
-  if (object->local_has_got_offset(symndx, got_type))
-    return false;
-
-  unsigned int got_offset = this->add_got_entry(Got_entry(object, symndx,
-							  false));
-  object->set_local_got_offset(symndx, got_type, got_offset);
-  return true;
-}
-
 // Add an entry for a local symbol plus ADDEND to the GOT.  This returns
 // true if this is a new GOT entry, false if the symbol already has a GOT
 // entry.
@@ -1590,26 +1570,6 @@ Output_data_got<got_size, big_endian>::add_local_plt(
   return true;
 }
 
-// Add an entry for a local symbol to the GOT, and add a dynamic
-// relocation of type R_TYPE for the GOT entry.
-
-template<int got_size, bool big_endian>
-void
-Output_data_got<got_size, big_endian>::add_local_with_rel(
-    Relobj* object,
-    unsigned int symndx,
-    unsigned int got_type,
-    Output_data_reloc_generic* rel_dyn,
-    unsigned int r_type)
-{
-  if (object->local_has_got_offset(symndx, got_type))
-    return;
-
-  unsigned int got_offset = this->add_got_entry(Got_entry());
-  object->set_local_got_offset(symndx, got_type, got_offset);
-  rel_dyn->add_local_generic(object, symndx, r_type, this, got_offset, 0);
-}
-
 // Add an entry for a local symbol plus ADDEND to the GOT, and add a dynamic
 // relocation of type R_TYPE for the GOT entry.
 
@@ -1629,32 +1589,6 @@ Output_data_got<got_size, big_endian>::add_local_with_rel(
   object->set_local_got_offset(symndx, got_type, got_offset, addend);
   rel_dyn->add_local_generic(object, symndx, r_type, this, got_offset,
                              addend);
-}
-
-// Add a pair of entries for a local symbol to the GOT, and add
-// a dynamic relocation of type R_TYPE using the section symbol of
-// the output section to which input section SHNDX maps, on the first.
-// The first got entry will have a value of zero, the second the
-// value of the local symbol.
-template<int got_size, bool big_endian>
-void
-Output_data_got<got_size, big_endian>::add_local_pair_with_rel(
-    Relobj* object,
-    unsigned int symndx,
-    unsigned int shndx,
-    unsigned int got_type,
-    Output_data_reloc_generic* rel_dyn,
-    unsigned int r_type)
-{
-  if (object->local_has_got_offset(symndx, got_type))
-    return;
-
-  unsigned int got_offset =
-      this->add_got_entry_pair(Got_entry(),
-			       Got_entry(object, symndx, false));
-  object->set_local_got_offset(symndx, got_type, got_offset);
-  Output_section* os = object->output_section(shndx);
-  rel_dyn->add_output_section_generic(os, r_type, this, got_offset, 0);
 }
 
 // Add a pair of entries for a local symbol plus ADDEND to the GOT, and add

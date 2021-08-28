@@ -2488,18 +2488,12 @@ class Output_data_got : public Output_data_got_base
 			   Output_data_reloc_generic* rel_dyn,
 			   unsigned int r_type_1, unsigned int r_type_2);
 
-  // Add an entry for a local symbol to the GOT.  This returns true if
-  // this is a new GOT entry, false if the symbol already has a GOT
-  // entry.
-  bool
-  add_local(Relobj* object, unsigned int sym_index, unsigned int got_type);
-
   // Add an entry for a local symbol plus ADDEND to the GOT.  This returns
   // true if this is a new GOT entry, false if the symbol already has a GOT
   // entry.
   bool
   add_local(Relobj* object, unsigned int sym_index, unsigned int got_type,
-	    uint64_t addend);
+	    uint64_t addend = 0);
 
   // Like add_local, but use the PLT offset of the local symbol if it
   // has one.
@@ -2512,30 +2506,12 @@ class Output_data_got : public Output_data_got_base
   add_local_tls(Relobj* object, unsigned int sym_index, unsigned int got_type)
   { return add_local_plt(object, sym_index, got_type); }
 
-  // Add an entry for a local symbol to the GOT, and add a dynamic
-  // relocation of type R_TYPE for the GOT entry.
-  void
-  add_local_with_rel(Relobj* object, unsigned int sym_index,
-		     unsigned int got_type, Output_data_reloc_generic* rel_dyn,
-		     unsigned int r_type);
-
   // Add an entry for a local symbol plus ADDEND to the GOT, and add a dynamic
   // relocation of type R_TYPE for the GOT entry.
   void
   add_local_with_rel(Relobj* object, unsigned int sym_index,
 		     unsigned int got_type, Output_data_reloc_generic* rel_dyn,
-		     unsigned int r_type, uint64_t addend);
-
-  // Add a pair of entries for a local symbol to the GOT, and add
-  // a dynamic relocation of type R_TYPE using the section symbol of
-  // the output section to which input section SHNDX maps, on the first.
-  // The first got entry will have a value of zero, the second the
-  // value of the local symbol.
-  void
-  add_local_pair_with_rel(Relobj* object, unsigned int sym_index,
-			  unsigned int shndx, unsigned int got_type,
-			  Output_data_reloc_generic* rel_dyn,
-			  unsigned int r_type);
+		     unsigned int r_type, uint64_t addend = 0);
 
   // Add a pair of entries for a local symbol plus ADDEND to the GOT, and add
   // a dynamic relocation of type R_TYPE using the section symbol of
@@ -2546,7 +2522,7 @@ class Output_data_got : public Output_data_got_base
   add_local_pair_with_rel(Relobj* object, unsigned int sym_index,
 			  unsigned int shndx, unsigned int got_type,
 			  Output_data_reloc_generic* rel_dyn,
-			  unsigned int r_type, uint64_t addend);
+			  unsigned int r_type, uint64_t addend = 0);
 
   // Add a pair of entries for a local symbol to the GOT, and add
   // a dynamic relocation of type R_TYPE using STN_UNDEF on the first.
