@@ -1216,46 +1216,27 @@ class Relobj : public Object
   local_plt_offset(unsigned int symndx) const
   { return this->do_local_plt_offset(symndx); }
 
-  // Return whether the local symbol SYMNDX has a GOT offset of type
-  // GOT_TYPE.
-  bool
-  local_has_got_offset(unsigned int symndx, unsigned int got_type) const
-  { return this->do_local_has_got_offset(symndx, got_type, 0); }
-
-  // Return whether the local symbol SYMNDX plus ADDEND has a GOT offset
-  // of type GOT_TYPE.
+  // Return whether there is a GOT entry of type GOT_TYPE for the
+  // local symbol SYMNDX with given ADDEND.
   bool
   local_has_got_offset(unsigned int symndx, unsigned int got_type,
-		       uint64_t addend) const
+		       uint64_t addend = 0) const
   { return this->do_local_has_got_offset(symndx, got_type, addend); }
 
-  // Return the GOT offset of type GOT_TYPE of the local symbol
-  // SYMNDX.  It is an error to call this if the symbol does not have
-  // a GOT offset of the specified type.
-  unsigned int
-  local_got_offset(unsigned int symndx, unsigned int got_type) const
-  { return this->do_local_got_offset(symndx, got_type, 0); }
-
-  // Return the GOT offset of type GOT_TYPE of the local symbol
-  // SYMNDX plus ADDEND.  It is an error to call this if the symbol
-  // does not have a GOT offset of the specified type.
+  // Return the GOT offset of the GOT entry with type GOT_TYPE for the
+  // local symbol SYMNDX with given ADDEND.  It is an error to call
+  // this function if the symbol does not have such a GOT entry.
   unsigned int
   local_got_offset(unsigned int symndx, unsigned int got_type,
-		       uint64_t addend) const
+		   uint64_t addend = 0) const
   { return this->do_local_got_offset(symndx, got_type, addend); }
 
-  // Set the GOT offset with type GOT_TYPE of the local symbol SYMNDX
-  // to GOT_OFFSET.
+  // Set the GOT offset for a GOT entry with type GOT_TYPE for the
+  // local symbol SYMNDX with ADDEND to GOT_OFFSET.  Create such an
+  // entry if none exists.
   void
   set_local_got_offset(unsigned int symndx, unsigned int got_type,
-		       unsigned int got_offset)
-  { this->do_set_local_got_offset(symndx, got_type, got_offset, 0); }
-
-  // Set the GOT offset with type GOT_TYPE of the local symbol SYMNDX
-  // plus ADDEND to GOT_OFFSET.
-  void
-  set_local_got_offset(unsigned int symndx, unsigned int got_type,
-		       unsigned int got_offset, uint64_t addend)
+		       unsigned int got_offset, uint64_t addend = 0)
   { this->do_set_local_got_offset(symndx, got_type, got_offset, addend); }
 
   // Return whether the local symbol SYMNDX is a TLS symbol.
