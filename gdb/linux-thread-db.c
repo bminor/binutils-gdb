@@ -920,13 +920,12 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   if (info->td_ta_thr_iter_p == NULL)
     {
-      struct lwp_info *lp;
       int pid = inferior_ptid.pid ();
       thread_info *curr_thread = inferior_thread ();
 
       linux_stop_and_wait_all_lwps ();
 
-      ALL_LWPS (lp)
+      for (const lwp_info *lp : all_lwps ())
 	if (lp->ptid.pid () == pid)
 	  thread_from_lwp (curr_thread, lp->ptid);
 

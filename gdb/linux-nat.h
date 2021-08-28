@@ -196,11 +196,9 @@ extern linux_nat_target *linux_target;
 
 struct arch_lwp_info;
 
-/* Structure describing an LWP.  This is public only for the purposes
-   of ALL_LWPS; target-specific code should generally not access it
-   directly.  */
+/* Structure describing an LWP.  */
 
-struct lwp_info
+struct lwp_info : intrusive_list_node<lwp_info>
 {
   lwp_info (ptid_t ptid)
     : ptid (ptid)
@@ -283,26 +281,25 @@ struct lwp_info
 
   /* Arch-specific additions.  */
   struct arch_lwp_info *arch_private = nullptr;
-
-  /* Previous and next pointers in doubly-linked list of known LWPs,
-     sorted by reverse creation order.  */
-  struct lwp_info *prev = nullptr;
-  struct lwp_info *next = nullptr;
 };
 
-/* The global list of LWPs, for ALL_LWPS.  Unlike the threads list,
-   there is always at least one LWP on the list while the GNU/Linux
-   native target is active.  */
-extern struct lwp_info *lwp_list;
+/* lwp_info iterator and range types.  */
+
+using lwp_info_iterator
+  = reference_to_pointer_iterator<intrusive_list<lwp_info>::iterator>;
+using lwp_info_range = iterator_range<lwp_info_iterator>;
+using lwp_info_safe_range = basic_safe_range<lwp_info_range>;
+
+/* Get an iterable range over all lwps.  */
+
+lwp_info_range all_lwps ();
+
+/* Same as the above, but safe against deletion while iterating.  */
+
+lwp_info_safe_range all_lwps_safe ();
 
 /* Does the current host support PTRACE_GETREGSET?  */
 extern enum tribool have_ptrace_getregset;
-
-/* Iterate over each active thread (light-weight process).  */
-#define ALL_LWPS(LP)							\
-  for ((LP) = lwp_list;							\
-       (LP) != NULL;							\
-       (LP) = (LP)->next)
 
 /* Called from the LWP layer to inform the thread_db layer that PARENT
    spawned CHILD.  Both LWPs are currently stopped.  This function
