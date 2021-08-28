@@ -208,6 +208,10 @@ struct lwp_info
     waitstatus.kind = TARGET_WAITKIND_IGNORE;
   }
 
+  ~lwp_info ();
+
+  DISABLE_COPY_AND_ASSIGN (lwp_info);
+
   /* The process id of the LWP.  This is a combination of the LWP id
      and overall process id.  */
   ptid_t ptid;

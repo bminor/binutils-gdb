@@ -793,13 +793,10 @@ static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
 
 /* Destroy and free LP.  */
 
-static void
-lwp_free (struct lwp_info *lp)
+lwp_info::~lwp_info ()
 {
   /* Let the arch specific bits release arch_lwp_info.  */
-  linux_target->low_delete_thread (lp->arch_private);
-
-  xfree (lp);
+  linux_target->low_delete_thread (this->arch_private);
 }
 
 /* Traversal function for purge_lwp_list.  */
@@ -814,7 +811,7 @@ lwp_lwpid_htab_remove_pid (void **slot, void *info)
     {
       htab_clear_slot (lwp_lwpid_htab, slot);
       lwp_list_remove (lp);
-      lwp_free (lp);
+      delete lp;
     }
 
   return 1;
@@ -899,7 +896,7 @@ delete_lwp (ptid_t ptid)
   lwp_list_remove (lp);
 
   /* Release.  */
-  lwp_free (lp);
+  delete lp;
 }
 
 /* Return a pointer to the structure describing the LWP corresponding
