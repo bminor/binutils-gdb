@@ -866,6 +866,21 @@ maintenance_set_worker_threads (const char *args, int from_tty,
   update_thread_pool_size ();
 }
 
+static void
+maintenance_show_worker_threads (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c,
+				 const char *value)
+{
+  if (n_worker_threads == -1)
+    fprintf_filtered (file, _("The number of worker threads GDB "
+			      "can use is unlimited (currently %zu).\n"),
+		      gdb::thread_pool::g_thread_pool->thread_count ());
+  else
+    fprintf_filtered (file, _("The number of worker threads GDB "
+			      "can use is %d.\n"),
+		      n_worker_threads);
+}
+
 
 /* If true, display time usage both at startup and for each command.  */
 
@@ -1371,7 +1386,8 @@ Set the number of worker threads GDB can use."), _("\
 Show the number of worker threads GDB can use."), _("\
 GDB may use multiple threads to speed up certain CPU-intensive operations,\n\
 such as demangling symbol names."),
-				       maintenance_set_worker_threads, NULL,
+				       maintenance_set_worker_threads,
+				       maintenance_show_worker_threads,
 				       &maintenance_set_cmdlist,
 				       &maintenance_show_cmdlist);
 
