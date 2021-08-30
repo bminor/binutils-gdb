@@ -523,8 +523,8 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	    {
 	      QUIT;
 	      /* Don't print out virtual function table.  */
-	      if ((startswith (TYPE_FIELD_NAME (type, i), "_vptr"))
-		  && is_cplus_marker ((TYPE_FIELD_NAME (type, i))[5]))
+	      if ((startswith (type->field (i).name (), "_vptr"))
+		  && is_cplus_marker ((type->field (i).name ())[5]))
 		continue;
 
 	      /* If this is a pascal object or class we can print the
@@ -565,7 +565,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	      if (field_is_static (&type->field (i)))
 		fprintf_filtered (stream, "static ");
 	      print_type (type->field (i).type (),
-				 TYPE_FIELD_NAME (type, i),
+				 type->field (i).name (),
 				 stream, show - 1, level + 4, flags);
 	      if (!field_is_static (&type->field (i))
 		  && TYPE_FIELD_PACKED (type, i))
@@ -710,7 +710,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	      if (i)
 		fprintf_filtered (stream, ", ");
 	      wrap_here ("    ");
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	      fputs_filtered (type->field (i).name (), stream);
 	      if (lastval != TYPE_FIELD_ENUMVAL (type, i))
 		{
 		  fprintf_filtered (stream,

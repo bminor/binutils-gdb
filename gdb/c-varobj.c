@@ -165,7 +165,7 @@ c_is_path_expr_parent (const struct varobj *var)
 	      const char *field_name;
 
 	      gdb_assert (var->index < parent_type->num_fields ());
-	      field_name = TYPE_FIELD_NAME (parent_type, var->index);
+	      field_name = parent_type->field (var->index).name ();
 	      return !(field_name == NULL || *field_name == '\0');
 	    }
 	}
@@ -341,7 +341,7 @@ c_describe_child (const struct varobj *parent, int index,
 
 	/* If the type is anonymous and the field has no name,
 	   set an appropriate name.  */
-	field_name = TYPE_FIELD_NAME (type, index);
+	field_name = type->field (index).name ();
 	if (field_name == NULL || *field_name == '\0')
 	  {
 	    if (cname)
@@ -761,7 +761,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 
 	  /* If the type is anonymous and the field has no name,
 	     set an appropriate name.  */
-	  field_name = TYPE_FIELD_NAME (type, type_index);
+	  field_name = type->field (type_index).name ();
 	  if (field_name == NULL || *field_name == '\0')
 	    {
 	      if (cname)
@@ -780,7 +780,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	  else
 	    {
 	      if (cname)
-		*cname = TYPE_FIELD_NAME (type, type_index);
+		*cname = type->field (type_index).name ();
 
 	      if (cfull_expression)
 		*cfull_expression
@@ -798,7 +798,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 	{
 	  /* This is a baseclass.  */
 	  if (cname)
-	    *cname = TYPE_FIELD_NAME (type, index);
+	    *cname = type->field (index).name ();
 
 	  if (cvalue && value)
 	    *cvalue = value_cast (type->field (index).type (), value);
@@ -827,7 +827,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 		 'class' keyword.  See PR mi/11912  */
 	      *cfull_expression = string_printf ("(%s(class %s%s) %s)",
 						 ptr,
-						 TYPE_FIELD_NAME (type, index),
+						 type->field (index).name (),
 						 ptr,
 						 parent_expression);
 	    }

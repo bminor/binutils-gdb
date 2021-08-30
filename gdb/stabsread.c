@@ -3195,7 +3195,7 @@ read_tilde_fields (struct stab_field_info *fip, const char **pp,
 		   i >= TYPE_N_BASECLASSES (t);
 		   --i)
 		{
-		  const char *name = TYPE_FIELD_NAME (t, i);
+		  const char *name = t->field (i).name ();
 
 		  if (!strncmp (name, vptr_name, sizeof (vptr_name) - 2)
 		      && is_cplus_marker (name[sizeof (vptr_name) - 2]))

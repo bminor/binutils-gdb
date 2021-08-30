@@ -1993,7 +1993,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
   if (!m_looking_for_baseclass)
     for (i = type->num_fields () - 1; i >= nbases; i--)
       {
-	const char *t_field_name = TYPE_FIELD_NAME (type, i);
+	const char *t_field_name = type->field (i).name ();
 
 	if (t_field_name && (strcmp_iw (t_field_name, m_name) == 0))
 	  {
@@ -3337,7 +3337,7 @@ enum_constant_from_type (struct type *type, const char *name)
 
   for (i = TYPE_N_BASECLASSES (type); i < type->num_fields (); ++i)
     {
-      const char *fname = TYPE_FIELD_NAME (type, i);
+      const char *fname = type->field (i).name ();
       int len;
 
       if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_ENUMVAL
@@ -3509,7 +3509,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
   for (i = t->num_fields () - 1; i >= TYPE_N_BASECLASSES (t); i--)
     {
-      const char *t_field_name = TYPE_FIELD_NAME (t, i);
+      const char *t_field_name = t->field (i).name ();
 
       if (t_field_name && strcmp (t_field_name, name) == 0)
 	{

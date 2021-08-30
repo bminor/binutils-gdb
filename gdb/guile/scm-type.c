@@ -999,7 +999,7 @@ gdbscm_type_field (SCM self, SCM field_scm)
 
     for (int i = 0; i < type->num_fields (); i++)
       {
-	const char *t_field_name = TYPE_FIELD_NAME (type, i);
+	const char *t_field_name = type->field (i).name ();
 
 	if (t_field_name && (strcmp_iw (t_field_name, field.get ()) == 0))
 	  {
@@ -1041,7 +1041,7 @@ gdbscm_type_has_field_p (SCM self, SCM field_scm)
 
     for (int i = 0; i < type->num_fields (); i++)
       {
-	const char *t_field_name = TYPE_FIELD_NAME (type, i);
+	const char *t_field_name = type->field (i).name ();
 
 	if (t_field_name && (strcmp_iw (t_field_name, field.get ()) == 0))
 	  return SCM_BOOL_T;
@@ -1131,8 +1131,8 @@ gdbscm_field_name (SCM self)
     = tyscm_get_field_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct field *field = tyscm_field_smob_to_field (f_smob);
 
-  if (FIELD_NAME (*field))
-    return gdbscm_scm_from_c_string (FIELD_NAME (*field));
+  if (field->name () != nullptr)
+    return gdbscm_scm_from_c_string (field->name ());
   return SCM_BOOL_F;
 }
 

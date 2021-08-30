@@ -312,7 +312,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 	      if (printed_field > 0)
 		fputs_filtered (", ", stream);
 
-	      field_name = TYPE_FIELD_NAME (type, index);
+	      field_name = type->field (index).name ();
 	      if (field_name != NULL)
 		{
 		  fputs_styled (field_name, variable_name_style.style (),

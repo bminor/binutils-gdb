@@ -96,10 +96,10 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
       /* Old Borland type pascal strings from Free Pascal Compiler.  */
       /* Two fields: length and st.  */
       if (type->num_fields () == 2
-	  && TYPE_FIELD_NAME (type, 0)
-	  && strcmp (TYPE_FIELD_NAME (type, 0), "length") == 0
-	  && TYPE_FIELD_NAME (type, 1)
-	  && strcmp (TYPE_FIELD_NAME (type, 1), "st") == 0)
+	  && type->field (0).name ()
+	  && strcmp (type->field (0).name (), "length") == 0
+	  && type->field (1).name ()
+	  && strcmp (type->field (1).name (), "st") == 0)
 	{
 	  if (length_pos)
 	    *length_pos = TYPE_FIELD_BITPOS (type, 0) / TARGET_CHAR_BIT;
@@ -110,16 +110,16 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
 	  if (char_type)
 	    *char_type = TYPE_TARGET_TYPE (type->field (1).type ());
 	  if (arrayname)
-	    *arrayname = TYPE_FIELD_NAME (type, 1);
+	    *arrayname = type->field (1).name ();
 	 return 2;
 	};
       /* GNU pascal strings.  */
       /* Three fields: Capacity, length and schema$ or _p_schema.  */
       if (type->num_fields () == 3
-	  && TYPE_FIELD_NAME (type, 0)
-	  && strcmp (TYPE_FIELD_NAME (type, 0), "Capacity") == 0
-	  && TYPE_FIELD_NAME (type, 1)
-	  && strcmp (TYPE_FIELD_NAME (type, 1), "length") == 0)
+	  && type->field (0).name ()
+	  && strcmp (type->field (0).name (), "Capacity") == 0
+	  && type->field (1).name ()
+	  && strcmp (type->field (1).name (), "length") == 0)
 	{
 	  if (length_pos)
 	    *length_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
@@ -136,7 +136,7 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
 		*char_type = TYPE_TARGET_TYPE (*char_type);
 	    }
 	  if (arrayname)
-	    *arrayname = TYPE_FIELD_NAME (type, 2);
+	    *arrayname = type->field (2).name ();
 	 return 3;
 	};
     }

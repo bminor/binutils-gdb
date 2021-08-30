@@ -633,7 +633,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 	}
       if (i < len)
 	{
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	  fputs_filtered (type->field (i).name (), stream);
 	}
       else
 	{

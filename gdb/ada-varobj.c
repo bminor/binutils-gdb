@@ -502,7 +502,7 @@ ada_varobj_describe_struct_child (struct value *parent_value,
 		 name, except that we need to strip suffixes from it.
 		 For instance, fields with alignment constraints will
 		 have an __XVA suffix added to them.  */
-	      const char *field_name = TYPE_FIELD_NAME (parent_type, fieldno);
+	      const char *field_name = parent_type->field (fieldno).name ();
 	      int child_name_len = ada_name_prefix_len (field_name);
 
 	      *child_name = string_printf ("%.*s", child_name_len, field_name);
@@ -522,7 +522,7 @@ ada_varobj_describe_struct_child (struct value *parent_value,
 		 name, except that we need to strip suffixes from it.
 		 For instance, fields with alignment constraints will
 		 have an __XVA suffix added to them.  */
-	      const char *field_name = TYPE_FIELD_NAME (parent_type, fieldno);
+	      const char *field_name = parent_type->field (fieldno).name ();
 	      int child_name_len = ada_name_prefix_len (field_name);
 
 	      *child_path_expr =

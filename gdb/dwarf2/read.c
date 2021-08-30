@@ -9050,9 +9050,9 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 
 #define RUST_ENUM_PREFIX "RUST$ENCODED$ENUM$"
   if (type->num_fields () == 1
-      && startswith (TYPE_FIELD_NAME (type, 0), RUST_ENUM_PREFIX))
+      && startswith (type->field (0).name (), RUST_ENUM_PREFIX))
     {
-      const char *name = TYPE_FIELD_NAME (type, 0) + strlen (RUST_ENUM_PREFIX);
+      const char *name = type->field (0).name () + strlen (RUST_ENUM_PREFIX);
 
       /* Decode the field name to find the offset of the
 	 discriminant.  */
@@ -9070,7 +9070,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	    {
 	      complaint (_("Could not parse Rust enum encoding string \"%s\""
 			   "[in module %s]"),
-			 TYPE_FIELD_NAME (type, 0),
+			 type->field (0).name (),
 			 objfile_name (objfile));
 	      return;
 	    }
@@ -9102,7 +9102,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	(rust_last_path_segment (type->field (1).type ()->name ()));
       type->field (1).type ()->set_name
 	(rust_fully_qualify (&objfile->objfile_obstack, type->name (),
-			     TYPE_FIELD_NAME (type, 1)));
+			     type->field (1).name ()));
 
       const char *dataless_name
 	= rust_fully_qualify (&objfile->objfile_obstack, type->name (),
@@ -9121,7 +9121,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
     }
   /* A union with a single anonymous field is probably an old-style
      univariant enum.  */
-  else if (type->num_fields () == 1 && streq (TYPE_FIELD_NAME (type, 0), ""))
+  else if (type->num_fields () == 1 && streq (type->field (0).name (), ""))
     {
       /* Smash this type to be a structure type.  We have to do this
 	 because the type has already been recorded.  */
@@ -9154,7 +9154,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	      /* Could be data-less variant, so keep going.  */
 	      disr_type = nullptr;
 	    }
-	  else if (strcmp (TYPE_FIELD_NAME (disr_type, 0),
+	  else if (strcmp (disr_type->field (0).name (),
 			   "RUST$ENUM$DISR") != 0)
 	    {
 	      /* Not a Rust enum.  */
@@ -9200,7 +9200,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	  if (TYPE_FIELD_LOC_KIND (enum_type, i) == FIELD_LOC_KIND_ENUMVAL)
 	    {
 	      const char *name
-		= rust_last_path_segment (TYPE_FIELD_NAME (enum_type, i));
+		= rust_last_path_segment (enum_type->field (i).name ());
 	      discriminant_map[name] = TYPE_FIELD_ENUMVAL (enum_type, i);
 	    }
 	}
@@ -15327,10 +15327,10 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
     return;
 
   /* Check for __pfn and __delta members.  */
-  if (TYPE_FIELD_NAME (type, 0) == NULL
-      || strcmp (TYPE_FIELD_NAME (type, 0), "__pfn") != 0
-      || TYPE_FIELD_NAME (type, 1) == NULL
-      || strcmp (TYPE_FIELD_NAME (type, 1), "__delta") != 0)
+  if (type->field (0).name () == NULL
+      || strcmp (type->field (0).name (), "__pfn") != 0
+      || type->field (1).name () == NULL
+      || strcmp (type->field (1).name (), "__delta") != 0)
     return;
 
   /* Find the type of the method.  */
@@ -15421,10 +15421,10 @@ quirk_ada_thick_pointer_struct (struct die_info *die, struct dwarf2_cu *cu,
     return;
 
   /* Check for P_ARRAY and P_BOUNDS members.  */
-  if (TYPE_FIELD_NAME (type, 0) == NULL
-      || strcmp (TYPE_FIELD_NAME (type, 0), "P_ARRAY") != 0
-      || TYPE_FIELD_NAME (type, 1) == NULL
-      || strcmp (TYPE_FIELD_NAME (type, 1), "P_BOUNDS") != 0)
+  if (type->field (0).name () == NULL
+      || strcmp (type->field (0).name (), "P_ARRAY") != 0
+      || type->field (1).name () == NULL
+      || strcmp (type->field (1).name (), "P_BOUNDS") != 0)
     return;
 
   /* Make sure we're looking at a pointer to an array.  */
@@ -15937,7 +15937,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		       i >= TYPE_N_BASECLASSES (t);
 		       --i)
 		    {
-		      const char *fieldname = TYPE_FIELD_NAME (t, i);
+		      const char *fieldname = t->field (i).name ();
 
 		      if (is_vtable_name (fieldname, cu))
 			{
@@ -15970,7 +15970,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		   i >= TYPE_N_BASECLASSES (type);
 		   --i)
 		{
-		  if (strcmp (TYPE_FIELD_NAME (type, i), "__vfp") == 0)
+		  if (strcmp (type->field (i).name (), "__vfp") == 0)
 		    {
 		      set_type_vptr_fieldno (type, i);
 		      set_type_vptr_basetype (type, type);

@@ -615,7 +615,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
     }
   if (i < len)
     {
-      fputs_styled (TYPE_FIELD_NAME (type, i), variable_name_style.style (),
+      fputs_styled (type->field (i).name (), variable_name_style.style (),
 		    stream);
     }
   else if (type->is_flag_enum ())
@@ -646,7 +646,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 		fputs_filtered (" | ", stream);
 
 	      val &= ~TYPE_FIELD_ENUMVAL (type, i);
-	      fputs_styled (TYPE_FIELD_NAME (type, i),
+	      fputs_styled (type->field (i).name (),
 			    variable_name_style.style (), stream);
 	    }
 	}
@@ -1203,7 +1203,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
   fputs_filtered ("[", stream);
   for (field = 0; field < nfields; field++)
     {
-      if (TYPE_FIELD_NAME (type, field)[0] != '\0')
+      if (type->field (field).name ()[0] != '\0')
 	{
 	  struct type *field_type = type->field (field).type ();
 
@@ -1218,7 +1218,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 		fprintf_filtered
 		  (stream, " %ps",
 		   styled_string (variable_name_style.style (),
-				  TYPE_FIELD_NAME (type, field)));
+				  type->field (field).name ()));
 	    }
 	  else
 	    {
@@ -1229,7 +1229,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 		field_val &= ((ULONGEST) 1 << field_len) - 1;
 	      fprintf_filtered (stream, " %ps=",
 				styled_string (variable_name_style.style (),
-					       TYPE_FIELD_NAME (type, field)));
+					       type->field (field).name ()));
 	      if (field_type->code () == TYPE_CODE_ENUM)
 		generic_val_print_enum_1 (field_type, field_val, stream);
 	      else

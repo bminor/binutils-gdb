@@ -1974,7 +1974,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_TAIL_CALL_LIST(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->tail_call_list
 #define TYPE_BASECLASS(thistype,index) ((thistype)->field (index).type ())
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
-#define TYPE_BASECLASS_NAME(thistype,index) TYPE_FIELD_NAME(thistype, index)
+#define TYPE_BASECLASS_NAME(thistype,index) (thistype->field (index).name ())
 #define TYPE_BASECLASS_BITPOS(thistype,index) TYPE_FIELD_BITPOS(thistype,index)
 #define BASETYPE_VIA_PUBLIC(thistype, index) \
   ((!TYPE_FIELD_PRIVATE(thistype, index)) && (!TYPE_FIELD_PROTECTED(thistype, index)))
@@ -1984,7 +1984,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define FIELD_NAME(thisfld) ((thisfld).name ())
 #define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind)
 #define FIELD_BITPOS_LVAL(thisfld) ((thisfld).loc.bitpos)
 #define FIELD_BITPOS(thisfld) (FIELD_BITPOS_LVAL (thisfld) + 0)
@@ -2011,7 +2010,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD_NAME(thistype, n) ((thistype)->field (n).name ())
 #define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND ((thistype)->field (n))
 #define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS ((thistype)->field (n))
 #define TYPE_FIELD_ENUMVAL(thistype, n) FIELD_ENUMVAL ((thistype)->field (n))

@@ -2298,7 +2298,7 @@ array_operation::evaluate_struct_tuple (struct value *struct_val,
 	error (_("too many initializers"));
       field_type = struct_type->field (fieldno).type ();
       if (field_type->code () == TYPE_CODE_UNION
-	  && TYPE_FIELD_NAME (struct_type, fieldno)[0] == '0')
+	  && struct_type->field (fieldno).name ()[0] == '0')
 	error (_("don't know which variant you want to set"));
 
       /* Here, struct_type is the type of the inner struct,

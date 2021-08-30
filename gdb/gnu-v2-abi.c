@@ -294,7 +294,7 @@ static int
 vb_match (struct type *type, int index, struct type *basetype)
 {
   struct type *fieldtype;
-  const char *name = TYPE_FIELD_NAME (type, index);
+  const char *name = type->field (index).name ();
   const char *field_class_name = NULL;
 
   if (*name != '_')

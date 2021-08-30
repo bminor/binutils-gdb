@@ -36,8 +36,8 @@ dynamic_array_type (struct type *type,
 {
   if (type->num_fields () == 2
       && type->field (0).type ()->code () == TYPE_CODE_INT
-      && strcmp (TYPE_FIELD_NAME (type, 0), "length") == 0
-      && strcmp (TYPE_FIELD_NAME (type, 1), "ptr") == 0
+      && strcmp (type->field (0).name (), "length") == 0
+      && strcmp (type->field (1).name (), "ptr") == 0
       && !value_bits_any_optimized_out (val,
 					TARGET_CHAR_BIT * embedded_offset,
 					TARGET_CHAR_BIT * TYPE_LENGTH (type)))

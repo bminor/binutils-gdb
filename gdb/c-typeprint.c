@@ -1206,7 +1206,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	    }
 
 	  c_print_type_1 (type->field (i).type (),
-			  TYPE_FIELD_NAME (type, i),
+			  type->field (i).name (),
 			  stream, newshow, level + 4,
 			  language, &local_flags, &local_podata);
 
@@ -1602,7 +1602,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	      if (i)
 		fprintf_filtered (stream, ", ");
 	      wrap_here ("    ");
-	      fputs_styled (TYPE_FIELD_NAME (type, i),
+	      fputs_styled (type->field (i).name (),
 			    variable_name_style.style (), stream);
 	      if (lastval != TYPE_FIELD_ENUMVAL (type, i))
 		{
@@ -1650,7 +1650,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 		/* We pass "show" here and not "show - 1" to get enum types
 		   printed.  There's no other way to see them.  */
 		c_print_type_1 (type->field (i).type (),
-				TYPE_FIELD_NAME (type, i),
+				type->field (i).name (),
 				stream, show, level + 4,
 				language, &local_flags, podata);
 		fprintf_filtered (stream, " @%s",

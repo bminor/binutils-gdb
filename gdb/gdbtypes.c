@@ -1846,7 +1846,7 @@ lookup_struct_elt (struct type *type, const char *name, int noerr)
 
   for (i = type->num_fields () - 1; i >= TYPE_N_BASECLASSES (type); i--)
     {
-      const char *t_field_name = TYPE_FIELD_NAME (type, i);
+      const char *t_field_name = type->field (i).name ();
 
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
@@ -4206,8 +4206,7 @@ check_types_equal (struct type *type1, struct type *type2,
 	      || FIELD_BITSIZE (*field1) != FIELD_BITSIZE (*field2)
 	      || FIELD_LOC_KIND (*field1) != FIELD_LOC_KIND (*field2))
 	    return false;
-	  if (!compare_maybe_null_strings (FIELD_NAME (*field1),
-					   FIELD_NAME (*field2)))
+	  if (!compare_maybe_null_strings (field1->name (), field2->name ()))
 	    return false;
 	  switch (FIELD_LOC_KIND (*field1))
 	    {
@@ -5346,10 +5345,10 @@ recursive_dump_type (struct type *type, int spaces)
 			 TYPE_FIELD_BITSIZE (type, idx));
       gdb_print_host_address (type->field (idx).type (), gdb_stdout);
       printf_filtered (" name '%s' (",
-		       TYPE_FIELD_NAME (type, idx) != NULL
-		       ? TYPE_FIELD_NAME (type, idx)
+		       type->field (idx).name () != NULL
+		       ? type->field (idx).name ()
 		       : "<NULL>");
-      gdb_print_host_address (TYPE_FIELD_NAME (type, idx), gdb_stdout);
+      gdb_print_host_address (type->field (idx).name (), gdb_stdout);
       printf_filtered (")\n");
       if (type->field (idx).type () != NULL)
 	{
@@ -5558,8 +5557,8 @@ copy_type_recursive (struct objfile *objfile,
 	    new_type->field (i).set_type
 	      (copy_type_recursive (objfile, type->field (i).type (),
 				    copied_types));
-	  if (TYPE_FIELD_NAME (type, i))
-	    new_type->field (i).set_name (xstrdup (TYPE_FIELD_NAME (type, i)));
+	  if (type->field (i).name ())
+	    new_type->field (i).set_name (xstrdup (type->field (i).name ()));
 	  switch (TYPE_FIELD_LOC_KIND (type, i))
 	    {
 	    case FIELD_LOC_KIND_BITPOS:

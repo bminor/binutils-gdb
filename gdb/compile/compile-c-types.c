@@ -112,7 +112,7 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
       if (bitsize == 0)
 	bitsize = 8 * TYPE_LENGTH (type->field (i).type ());
       context->plugin ().build_add_field (result,
-					  TYPE_FIELD_NAME (type, i),
+					  type->field (i).name (),
 					  field_type,
 					  bitsize,
 					  TYPE_FIELD_BITPOS (type, i));
@@ -137,7 +137,7 @@ convert_enum (compile_c_instance *context, struct type *type)
   for (i = 0; i < type->num_fields (); ++i)
     {
       context->plugin ().build_add_enum_constant
-	(result, TYPE_FIELD_NAME (type, i), TYPE_FIELD_ENUMVAL (type, i));
+	(result, type->field (i).name (), TYPE_FIELD_ENUMVAL (type, i));
     }
 
   context->plugin ().finish_enum_type (result);

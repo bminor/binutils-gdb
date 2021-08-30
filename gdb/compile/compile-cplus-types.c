@@ -582,7 +582,7 @@ compile_cplus_convert_struct_or_union_members
 {
   for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); ++i)
     {
-      const char *field_name = TYPE_FIELD_NAME (type, i);
+      const char *field_name = type->field (i).name ();
 
       if (TYPE_FIELD_IGNORE (type, i)
 	  || TYPE_FIELD_ARTIFICIAL (type, i))
@@ -937,7 +937,7 @@ compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
   for (int i = 0; i < type->num_fields (); ++i)
     {
       gdb::unique_xmalloc_ptr<char> fname
-	= compile_cplus_instance::decl_name (TYPE_FIELD_NAME (type, i));
+	= compile_cplus_instance::decl_name (type->field (i).name ());
 
       if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_ENUMVAL
 	  || fname == nullptr)

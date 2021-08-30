@@ -353,8 +353,8 @@ m2_is_long_set (struct type *type)
 	    return 0;
 	  if (type->field (i).type ()->code () != TYPE_CODE_SET)
 	    return 0;
-	  if (TYPE_FIELD_NAME (type, i) != NULL
-	      && (strcmp (TYPE_FIELD_NAME (type, i), "") != 0))
+	  if (type->field (i).name () != NULL
+	      && (strcmp (type->field (i).name (), "") != 0))
 	    return 0;
 	  range = type->field (i).type ()->index_type ();
 	  if ((i > TYPE_N_BASECLASSES (type))
@@ -492,9 +492,9 @@ m2_is_unbounded_array (struct type *type)
        */
       if (type->num_fields () != 2)
 	return 0;
-      if (strcmp (TYPE_FIELD_NAME (type, 0), "_m2_contents") != 0)
+      if (strcmp (type->field (0).name (), "_m2_contents") != 0)
 	return 0;
-      if (strcmp (TYPE_FIELD_NAME (type, 1), "_m2_high") != 0)
+      if (strcmp (type->field (1).name (), "_m2_high") != 0)
 	return 0;
       if (type->field (0).type ()->code () != TYPE_CODE_PTR)
 	return 0;
@@ -563,7 +563,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	  QUIT;
 
 	  print_spaces_filtered (level + 4, stream);
-	  fputs_styled (TYPE_FIELD_NAME (type, i),
+	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
 	  fputs_filtered (" : ", stream);
 	  m2_print_type (type->field (i).type (),
@@ -609,7 +609,7 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
 	  if (i > 0)
 	    fprintf_filtered (stream, ", ");
 	  wrap_here ("    ");
-	  fputs_styled (TYPE_FIELD_NAME (type, i),
+	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
 	  if (lastval != TYPE_FIELD_ENUMVAL (type, i))
 	    {

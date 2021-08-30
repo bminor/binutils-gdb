@@ -583,12 +583,12 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	    {
 	      fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream,
-				       TYPE_FIELD_NAME (type, i),
+				       type->field (i).name (),
 				       current_language->la_language,
 				       DMGL_PARAMS | DMGL_ANSI);
 	    }
 	  else
-	    fputs_styled (TYPE_FIELD_NAME (type, i),
+	    fputs_styled (type->field (i).name (),
 			  variable_name_style.style (), stream);
 	  annotate_field_name_end ();
 	  fputs_filtered (" = ", stream);

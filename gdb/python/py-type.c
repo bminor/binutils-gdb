@@ -204,13 +204,13 @@ convert_field (struct type *type, int field)
     }
 
   arg.reset (NULL);
-  if (TYPE_FIELD_NAME (type, field))
+  if (type->field (field).name ())
     {
-      const char *field_name = TYPE_FIELD_NAME (type, field);
+      const char *field_name = type->field (field).name ();
 
       if (field_name[0] != '\0')
 	{
-	  arg.reset (PyString_FromString (TYPE_FIELD_NAME (type, field)));
+	  arg.reset (PyString_FromString (type->field (field).name ()));
 	  if (arg == NULL)
 	    return NULL;
 	}
@@ -261,8 +261,8 @@ field_name (struct type *type, int field)
 {
   gdbpy_ref<> result;
 
-  if (TYPE_FIELD_NAME (type, field))
-    result.reset (PyString_FromString (TYPE_FIELD_NAME (type, field)));
+  if (type->field (field).name ())
+    result.reset (PyString_FromString (type->field (field).name ()));
   else
     result = gdbpy_ref<>::new_reference (Py_None);
 
@@ -1205,7 +1205,7 @@ typy_getitem (PyObject *self, PyObject *key)
 
   for (i = 0; i < type->num_fields (); i++)
     {
-      const char *t_field_name = TYPE_FIELD_NAME (type, i);
+      const char *t_field_name = type->field (i).name ();
 
       if (t_field_name && (strcmp_iw (t_field_name, field.get ()) == 0))
 	return convert_field (type, i).release ();
@@ -1263,7 +1263,7 @@ typy_has_key (PyObject *self, PyObject *args)
 
   for (i = 0; i < type->num_fields (); i++)
     {
-      const char *t_field_name = TYPE_FIELD_NAME (type, i);
+      const char *t_field_name = type->field (i).name ();
 
       if (t_field_name && (strcmp_iw (t_field_name, field) == 0))
 	Py_RETURN_TRUE;

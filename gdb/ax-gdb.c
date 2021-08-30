@@ -1337,7 +1337,7 @@ gen_struct_ref_recursive (struct agent_expr *ax, struct axs_value *value,
 
   for (i = type->num_fields () - 1; i >= nbases; i--)
     {
-      const char *this_name = TYPE_FIELD_NAME (type, i);
+      const char *this_name = type->field (i).name ();
 
       if (this_name)
 	{
@@ -1481,7 +1481,7 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
 
   for (i = t->num_fields () - 1; i >= TYPE_N_BASECLASSES (t); i--)
     {
-      const char *t_field_name = TYPE_FIELD_NAME (t, i);
+      const char *t_field_name = t->field (i).name ();
 
       if (t_field_name && strcmp (t_field_name, fieldname) == 0)
 	{
