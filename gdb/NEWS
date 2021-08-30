@@ -24,6 +24,9 @@ show varsize-limit
   These are now deprecated aliases for "set max-value-size" and
   "show max-value-size".
 
+watch [...] task ID
+  Watchpoints can now be restricted to a specific Ada task.
+
 maint set internal-error backtrace on|off
 maint show internal-error backtrace
 maint set internal-warning backtrace on|off

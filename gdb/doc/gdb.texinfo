@@ -4860,7 +4860,7 @@ slow down the running of your program.
 
 @table @code
 @kindex watch
-@item watch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{thread-id}@r{]} @r{[}mask @var{maskvalue}@r{]}
+@item watch @r{[}-l@r{|}-location@r{]} @var{expr} @r{[}thread @var{thread-id}@r{]} @r{[}mask @var{maskvalue}@r{]} @r{[}task @var{task-id}@r{]}
 Set a watchpoint for an expression.  @value{GDBN} will break when the
 expression @var{expr} is written into by the program and its value
 changes.  The simplest (and the most popular) use of this command is
@@ -4876,6 +4876,9 @@ argument, @value{GDBN} breaks only when the thread identified by
 change the value of @var{expr}, @value{GDBN} will not break.  Note
 that watchpoints restricted to a single thread in this way only work
 with Hardware Watchpoints.
+
+Similarly, if the @code{task} argument is given, then the watchpoint
+will be specific to the indicated Ada task (@pxref{Ada Tasks}).
 
 Ordinarily a watchpoint respects the scope of variables in @var{expr}
 (see below).  The @code{-location} argument tells @value{GDBN} to
