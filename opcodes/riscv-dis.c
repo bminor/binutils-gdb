@@ -793,7 +793,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
       if (status != 0)
 	{
 	  (*info->memory_error_func) (status, memaddr, info);
-	  return 1;
+	  return status;
 	}
       insn = (insn_t) bfd_getl16 (packet);
       dump_size = riscv_insn_length (insn);
@@ -805,7 +805,7 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
   if (status != 0)
     {
       (*info->memory_error_func) (status, memaddr, info);
-      return 1;
+      return status;
     }
   insn = (insn_t) bfd_get_bits (packet, dump_size * 8, false);
 
