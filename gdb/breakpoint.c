@@ -627,19 +627,6 @@ static struct cmd_list_element *breakpoint_set_cmdlist;
 static struct cmd_list_element *breakpoint_show_cmdlist;
 struct cmd_list_element *save_cmdlist;
 
-/* See declaration at breakpoint.h.  */
-
-struct breakpoint *
-breakpoint_find_if (int (*func) (struct breakpoint *b, void *d),
-		    void *user_data)
-{
-  for (breakpoint *b : all_breakpoints ())
-    if (func (b, user_data) != 0)
-      return b;
-
-  return nullptr;
-}
-
 /* Return whether a breakpoint is an active enabled breakpoint.  */
 static int
 breakpoint_enabled (struct breakpoint *b)
