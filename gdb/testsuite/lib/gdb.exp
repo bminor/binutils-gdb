@@ -8017,9 +8017,14 @@ proc with_override { name override body } {
     #   the override
     # So, we use this more elaborate but cleaner mechanism.
 
-    # Save the old proc.
-    set old_args [info args $name]
-    set old_body [info body $name]
+    # Save the old proc, if it exists.
+    if { [info procs $name] != "" } {
+	set old_args [info args $name]
+	set old_body [info body $name]
+	set existed true
+    } else {
+	set existed false
+    }
 
     # Install the override.
     set new_args [info args $override]
@@ -8029,8 +8034,12 @@ proc with_override { name override body } {
     # Execute body.
     set code [catch {uplevel 1 $body} result]
 
-    # Restore old proc.
-    eval proc $name {$old_args} {$old_body}
+    # Restore old proc if it existed on entry, else delete it.
+    if { $existed } {
+	eval proc $name {$old_args} {$old_body}
+    } else {
+	rename $name ""
+    }
 
     # Return as appropriate.
     if { $code == 1 } {
