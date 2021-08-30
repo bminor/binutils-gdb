@@ -69,7 +69,7 @@ Dwarf::assemble $asm_file {
     }
 
     aranges {} cu_start {
-	arange "$main_start" "$main_length"
+	arange {} "$main_start" "$main_length"
     }
 }
 

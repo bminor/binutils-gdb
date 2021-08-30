@@ -95,7 +95,7 @@ Dwarf::assemble $dwarf_asm {
     }
 
     aranges {} cu_label {
-	arange __cu_low_pc __cu_high_pc
+	arange {} __cu_low_pc __cu_high_pc
     }
 }
 

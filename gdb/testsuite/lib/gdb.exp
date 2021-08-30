@@ -7293,8 +7293,8 @@ proc using_fission { } {
     return [regexp -- "-gsplit-dwarf" $debug_flags]
 }
 
-# Search the caller's ARGS list and set variables according to the list of
-# valid options described by ARGSET.
+# Search LISTNAME in uplevel LEVEL caller and set variables according to the
+# list of valid options with prefix PREFIX described by ARGSET.
 #
 # The first member of each one- or two-element list in ARGSET defines the
 # name of a variable that will be added to the caller's scope.
@@ -7305,13 +7305,15 @@ proc using_fission { } {
 #
 # If two elements are given, the second element is the default value of
 # the variable.  This is then overwritten if the option exists in ARGS.
+# If EVAL, then subst is called on the value, which allows variables
+# to be used.
 #
 # Any parse_args elements in (the caller's) ARGS will be removed, leaving
 # any optional components.
-
+#
 # Example:
 # proc myproc {foo args} {
-#  parse_args {{bar} {baz "abc"} {qux}}
+#   parse_list args 1 {{bar} {baz "abc"} {qux}} "-" false
 #    # ...
 # }
 # myproc ABC -bar -baz DEF peanut butter
@@ -7319,41 +7321,77 @@ proc using_fission { } {
 # foo (=ABC), bar (=1), baz (=DEF), and qux (=0)
 # args will be the list {peanut butter}
 
-proc parse_args { argset } {
-    upvar args args
+proc parse_list { level listname argset prefix eval } {
+    upvar $level $listname args
 
     foreach argument $argset {
-        if {[llength $argument] == 1} {
-            # No default specified, so we assume that we should set
-            # the value to 1 if the arg is present and 0 if it's not.
-            # It is assumed that no value is given with the argument.
-            set result [lsearch -exact $args "-$argument"]
-            if {$result != -1} then {
-                uplevel 1 [list set $argument 1]
-                set args [lreplace $args $result $result]
-            } else {
-                uplevel 1 [list set $argument 0]
-            }
-        } elseif {[llength $argument] == 2} {
-            # There are two items in the argument.  The second is a
-            # default value to use if the item is not present.
-            # Otherwise, the variable is set to whatever is provided
-            # after the item in the args.
-            set arg [lindex $argument 0]
-            set result [lsearch -exact $args "-[lindex $arg 0]"]
-            if {$result != -1} then {
-                uplevel 1 [list set $arg [lindex $args [expr $result+1]]]
-                set args [lreplace $args $result [expr $result+1]]
-            } else {
-                uplevel 1 [list set $arg [lindex $argument 1]]
-            }
-        } else {
-            error "Badly formatted argument \"$argument\" in argument set"
-        }
+	if {[llength $argument] == 1} {
+	    # Normalize argument, strip leading/trailing whitespace.
+	    # Allows us to treat {foo} and { foo } the same.
+	    set argument [string trim $argument]
+
+	    # No default specified, so we assume that we should set
+	    # the value to 1 if the arg is present and 0 if it's not.
+	    # It is assumed that no value is given with the argument.
+	    set pattern "$prefix$argument"
+	    set result [lsearch -exact $args $pattern]
+
+	    if {$result != -1} then {
+		set value 1
+		set args [lreplace $args $result $result]
+	    } else {
+		set value 0
+	    }
+	    uplevel $level [list set $argument $value]
+	} elseif {[llength $argument] == 2} {
+	    # There are two items in the argument.  The second is a
+	    # default value to use if the item is not present.
+	    # Otherwise, the variable is set to whatever is provided
+	    # after the item in the args.
+	    set arg [lindex $argument 0]
+	    set pattern "$prefix[lindex $arg 0]"
+	    set result [lsearch -exact $args $pattern]
+
+	    if {$result != -1} then {
+		set value [lindex $args [expr $result+1]]
+		if { $eval } {
+		    set value [uplevel [expr $level + 1] [list subst $value]]
+		}
+		set args [lreplace $args $result [expr $result+1]]
+	    } else {
+		set value [lindex $argument 1]
+		if { $eval } {
+		    set value [uplevel $level [list subst $value]]
+		}
+	    }
+	    uplevel $level [list set $arg $value]
+	} else {
+	    error "Badly formatted argument \"$argument\" in argument set"
+	}
     }
+}
+
+# Search the caller's args variable and set variables according to the list of
+# valid options described by ARGSET.
+
+proc parse_args { argset } {
+    parse_list 2 args $argset "-" false
 
     # The remaining args should be checked to see that they match the
     # number of items expected to be passed into the procedure...
+}
+
+# Process the caller's options variable and set variables according
+# to the list of valid options described by OPTIONSET.
+
+proc parse_options { optionset } {
+    parse_list 2 options $optionset "" true
+
+    # Require no remaining options.
+    upvar 1 options options
+    if { [llength $options] != 0 } {
+	error "Options left unparsed: $options"
+    }
 }
 
 # Capture the output of COMMAND in a string ignoring PREFIX (a regexp);

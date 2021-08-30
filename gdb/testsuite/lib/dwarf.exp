@@ -2212,7 +2212,12 @@ namespace eval Dwarf {
 
     # Emit a DWARF .debug_aranges entry.
 
-    proc arange { arange_start arange_length {comment ""} {seg_sel ""} } {
+    proc arange { options arange_start arange_length } {
+	parse_options {
+	    { comment "" }
+	    { seg_sel "" }
+	}
+
 	if { $comment != "" } {
 	    # Wrap
 	    set comment " ($comment)"
@@ -2270,22 +2275,14 @@ namespace eval Dwarf {
 	variable _addr_size
 	variable _seg_size
 
-	# Establish the defaults.
-	set is_64 0
-	set cu_is_64 0
-	set section_version 2
-	set _seg_size 0
-
 	# Handle options.
-	foreach { name value } $options {
-	    switch -exact -- $name {
-		is_64 { set is_64 $value }
-		cu_is_64 { set cu_is_64 $value }
-		section_version {set section_version $value }
-		seg_size { set _seg_size $value }
-		default { error "unknown option $name" }
-	    }
+	parse_options {
+	    { is_64 0 }
+	    { cu_is_64 0 }
+	    { section_version 2 }
+	    { seg_size 0 }
 	}
+	set _seg_size $seg_size
 
 	if { [is_64_target] } {
 	    set _addr_size 8
@@ -2354,9 +2351,9 @@ namespace eval Dwarf {
 	# Terminator tuple.
 	set comment "Terminator"
 	if { $_seg_size == 0 } {
-	    arange 0 0 $comment
+	    arange {comment $comment} 0 0
 	} else {
-	    arange 0 0 $comment 0
+	    arange {comment $comment seg_sel 0} 0 0
 	}
 
 	# End label.
