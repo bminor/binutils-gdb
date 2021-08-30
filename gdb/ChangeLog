@@ -1,3 +1,9 @@
+2021-08-30  Tom de Vries  <tdevries@suse.de>
+
+	PR cli/28290
+	* gdb/corelow.c (core_target_open): Skip call to gdb_abspath in the
+	empty-string case.
+
 2021-08-23  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/26880
