@@ -365,7 +365,7 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 	  printf_filtered ("Parent process: %d\n", kp.ki_ppid);
 	  printf_filtered ("Process group: %d\n", kp.ki_pgid);
 	  printf_filtered ("Session id: %d\n", kp.ki_sid);
-	  printf_filtered ("TTY: %ju\n", (uintmax_t) kp.ki_tdev);
+	  printf_filtered ("TTY: %s\n", pulongest (kp.ki_tdev));
 	  printf_filtered ("TTY owner process group: %d\n", kp.ki_tpgid);
 	  printf_filtered ("User IDs (real, effective, saved): %d %d %d\n",
 			   kp.ki_ruid, kp.ki_uid, kp.ki_svuid);
@@ -383,34 +383,35 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 			   kp.ki_rusage.ru_majflt);
 	  printf_filtered ("Major faults, children: %ld\n",
 			   kp.ki_rusage_ch.ru_majflt);
-	  printf_filtered ("utime: %jd.%06ld\n",
-			   (intmax_t) kp.ki_rusage.ru_utime.tv_sec,
+	  printf_filtered ("utime: %s.%06ld\n",
+			   plongest (kp.ki_rusage.ru_utime.tv_sec),
 			   kp.ki_rusage.ru_utime.tv_usec);
-	  printf_filtered ("stime: %jd.%06ld\n",
-			   (intmax_t) kp.ki_rusage.ru_stime.tv_sec,
+	  printf_filtered ("stime: %s.%06ld\n",
+			   plongest (kp.ki_rusage.ru_stime.tv_sec),
 			   kp.ki_rusage.ru_stime.tv_usec);
-	  printf_filtered ("utime, children: %jd.%06ld\n",
-			   (intmax_t) kp.ki_rusage_ch.ru_utime.tv_sec,
+	  printf_filtered ("utime, children: %s.%06ld\n",
+			   plongest (kp.ki_rusage_ch.ru_utime.tv_sec),
 			   kp.ki_rusage_ch.ru_utime.tv_usec);
-	  printf_filtered ("stime, children: %jd.%06ld\n",
-			   (intmax_t) kp.ki_rusage_ch.ru_stime.tv_sec,
+	  printf_filtered ("stime, children: %s.%06ld\n",
+			   plongest (kp.ki_rusage_ch.ru_stime.tv_sec),
 			   kp.ki_rusage_ch.ru_stime.tv_usec);
 	  printf_filtered ("'nice' value: %d\n", kp.ki_nice);
-	  printf_filtered ("Start time: %jd.%06ld\n", kp.ki_start.tv_sec,
+	  printf_filtered ("Start time: %s.%06ld\n",
+			   plongest (kp.ki_start.tv_sec),
 			   kp.ki_start.tv_usec);
 	  pgtok = getpagesize () / 1024;
-	  printf_filtered ("Virtual memory size: %ju kB\n",
-			   (uintmax_t) kp.ki_size / 1024);
-	  printf_filtered ("Data size: %ju kB\n",
-			   (uintmax_t) kp.ki_dsize * pgtok);
-	  printf_filtered ("Stack size: %ju kB\n",
-			   (uintmax_t) kp.ki_ssize * pgtok);
-	  printf_filtered ("Text size: %ju kB\n",
-			   (uintmax_t) kp.ki_tsize * pgtok);
-	  printf_filtered ("Resident set size: %ju kB\n",
-			   (uintmax_t) kp.ki_rssize * pgtok);
-	  printf_filtered ("Maximum RSS: %ju kB\n",
-			   (uintmax_t) kp.ki_rusage.ru_maxrss);
+	  printf_filtered ("Virtual memory size: %s kB\n",
+			   pulongest (kp.ki_size / 1024));
+	  printf_filtered ("Data size: %s kB\n",
+			   pulongest (kp.ki_dsize * pgtok));
+	  printf_filtered ("Stack size: %s kB\n",
+			   pulongest (kp.ki_ssize * pgtok));
+	  printf_filtered ("Text size: %s kB\n",
+			   pulongest (kp.ki_tsize * pgtok));
+	  printf_filtered ("Resident set size: %s kB\n",
+			   pulongest (kp.ki_rssize * pgtok));
+	  printf_filtered ("Maximum RSS: %s kB\n",
+			   pulongest (kp.ki_rusage.ru_maxrss));
 	  printf_filtered ("Pending Signals: ");
 	  for (int i = 0; i < _SIG_WORDS; i++)
 	    printf_filtered ("%08x ", kp.ki_siglist.__bits[i]);

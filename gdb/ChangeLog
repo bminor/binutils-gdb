@@ -1,3 +1,8 @@
+2021-09-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_nat_target::info_proc): Use plongest and
+	pulongest instead of %j.
+
 2021-08-30  Tom de Vries  <tdevries@suse.de>
 
 	PR cli/28290
