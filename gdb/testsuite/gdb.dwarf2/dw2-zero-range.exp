@@ -81,8 +81,8 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
 		}
 	    }
 
-	    rnglists {
-		table {
+	    rnglists {} {
+		table {} {
 		    rnglists_label: list_ {
 			start_end 0 1
 		    }

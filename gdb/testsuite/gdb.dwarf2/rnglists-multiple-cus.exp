@@ -63,17 +63,17 @@ foreach_with_prefix is_64 {false true} {
 	    }
 	}
 
-	rnglists -is-64 $is_64 {
+	rnglists {is-64 $is_64} {
 	    # This table is unused, but exists so that the used table is not at
 	    # the beginning of the section.
-	    table {
+	    table {} {
 		list_ {
 		    start_end 0x1000 0x2000
 		}
 	    }
 
 	    # The lists in this table are accessed by index (DW_FORM_rnglistx).
-	    table -post-header-label cu_table {
+	    table {post-header-label cu_table} {
 		# This list is unused, but exists to offset the next ones.
 		list_ {
 		    start_end 0x2000 0x3000

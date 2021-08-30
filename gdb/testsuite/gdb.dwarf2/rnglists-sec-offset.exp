@@ -90,10 +90,10 @@ foreach_with_prefix is_64 {false true} {
 	    }
 	}
 
-	rnglists -is-64 $is_64 {
+	rnglists {is-64 $is_64} {
 	    # The lists in this table are accessed by direct offset
 	    # (DW_FORM_sec_offset).
-	    table {
+	    table {} {
 		# For the first CU.
 		cu1_range_list: list_ {
 		    start_end 0x4000 0x5000
@@ -105,7 +105,7 @@ foreach_with_prefix is_64 {false true} {
 		}
 	    }
 
-	    table -post-header-label cu2_table {
+	    table {post-header-label cu2_table} {
 		# For the second CU.
 		cu2_range_list: list_ {
 		    start_end 0x5000 0x6000
@@ -117,7 +117,7 @@ foreach_with_prefix is_64 {false true} {
 		}
 	    }
 
-	    table -with-offset-array false {
+	    table {with-offset-array false} {
 		# For the third CU.
 		cu3_range_list: list_ {
 		    start_end 0x6000 0x7000

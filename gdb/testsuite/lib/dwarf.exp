@@ -1543,27 +1543,18 @@ namespace eval Dwarf {
     #
     # The target address size is based on the current target's address size.
     #
-    # There is one mandatory positional argument, BODY, which must be Tcl code
-    # that emits the content of the section.  It is evaluated in the caller's
-    # context.
+    # BODY must be Tcl code that emits the content of the section.  It is
+    # evaluated in the caller's context.
     #
-    # The following option can be used:
-    #
-    #  - -is-64 true|false: Whether to use 64-bit DWARF instead of 32-bit DWARF.
-    #                       The default is 32-bit.
+    # The `is-64 true|false` options tells whether to use 64-bit DWARF instead
+    # of 32-bit DWARF.  The default is 32-bit.
 
-    proc rnglists { args } {
+    proc rnglists { options body } {
 	variable _debug_rnglists_addr_size
 	variable _debug_rnglists_offset_size
 	variable _debug_rnglists_is_64_dwarf
 
-	parse_args {{"is-64" "false"}}
-
-	if { [llength $args] != 1 } {
-	    error "rnglists proc expects one positional argument (body)"
-	}
-
-	lassign $args body
+	parse_options {{"is-64" "false"}}
 
 	if [is_64_target] {
 	    set _debug_rnglists_addr_size 8
@@ -1603,33 +1594,28 @@ namespace eval Dwarf {
     # This proc is meant to be used within proc rnglists' body.  It is made
     # available as `table` while inside proc rnglists' body.
     #
-    # Accepts one positional argument, BODY.  BODY may call the LIST_ procedure
-    # to generate rnglists.
+    # BODY must be Tcl code that emits the content of the table.  It may call
+    # the LIST_ procedure to generate rnglists.  It is evaluated in the
+    # caller's context.
     #
-    # The -post-header-label option can be used to define a label just after
+    # The `post-header-label` option can be used to define a label just after
     # the header of the table.  This is the label that a DW_AT_rnglists_base
     # attribute will usually refer to.
     #
-    # The `-with-offset-array true|false` option can be used to control whether
+    # The `with-offset-array true|false` option can be used to control whether
     # the headers of the location list tables have an array of offset.  The
     # default is true.
 
-    proc _rnglists_table { args } {
+    proc _rnglists_table { options body } {
 	variable _debug_rnglists_table_count
 	variable _debug_rnglists_addr_size
 	variable _debug_rnglists_offset_size
 	variable _debug_rnglists_is_64_dwarf
 
-	parse_args {
+	parse_options {
 	    {post-header-label ""}
 	    {with-offset-array true}
 	}
-
-	if { [llength $args] != 1 } {
-	    error "table proc expects one positional argument (body)"
-	}
-
-	lassign $args body
 
 	# Count of lists in the table.
 	variable _debug_rnglists_list_count 0
@@ -1743,27 +1729,18 @@ namespace eval Dwarf {
     #
     # The target address size is based on the current target's address size.
     #
-    # There is one mandatory positional argument, BODY, which must be Tcl code
-    # that emits the content of the section.  It is evaluated in the caller's
-    # context.
+    # BODY must be Tcl code that emits the content of the section.  It is
+    # evaluated in the caller's context.
     #
-    # The following option can be used:
-    #
-    #  - -is-64 true|false: Whether to use 64-bit DWARF instead of 32-bit DWARF.
-    #                       The default is 32-bit.
+    # The `is-64 true|false` options tells whether to use 64-bit DWARF instead
+    # of 32-bit DWARF.  The default is 32-bit.
 
-    proc loclists { args } {
+    proc loclists { options body } {
 	variable _debug_loclists_addr_size
 	variable _debug_loclists_offset_size
 	variable _debug_loclists_is_64_dwarf
 
-	parse_args {{"is-64" "false"}}
-
-	if { [llength $args] != 1 } {
-	    error "loclists proc expects one positional argument (body)"
-	}
-
-	lassign $args body
+	parse_options {{"is-64" "false"}}
 
 	if [is_64_target] {
 	    set _debug_loclists_addr_size 8
@@ -1803,34 +1780,28 @@ namespace eval Dwarf {
     # This proc is meant to be used within proc loclists' body.  It is made
     # available as `table` while inside proc rnglists' body.
     #
-    # Accepts one position argument, BODY.  BODY may call the LIST_
-    # procedure to generate loclists.
+    # BODY must be Tcl code that emits the content of the table.  It may call
+    # the LIST_ procedure to generate rnglists.  It is evaluated in the
+    # caller's context.
     #
-    # The -post-header-label option can be used to define a label just after the
-    # header of the table.  This is the label that a DW_AT_loclists_base
+    # The `post-header-label` option can be used to define a label just after
+    # the header of the table.  This is the label that a DW_AT_loclists_base
     # attribute will usually refer to.
     #
-    # The `-with-offset-array true|false` option can be used to control
+    # The `with-offset-array true|false` option can be used to control
     # whether the headers of the location list tables have an array of
     # offset.  The default is true.
 
-    proc _loclists_table { args } {
+    proc _loclists_table { options body } {
 	variable _debug_loclists_table_count
 	variable _debug_loclists_addr_size
 	variable _debug_loclists_offset_size
 	variable _debug_loclists_is_64_dwarf
 
-	parse_args {
+	parse_options {
 	    {post-header-label ""}
 	    {with-offset-array true}
 	}
-
-	if { [llength $args] != 1 } {
-	    error "table proc expects one positional argument (body)"
-	}
-
-	lassign $args body
-
 
 	# Count of lists in the table.
 	variable _debug_loclists_list_count 0
