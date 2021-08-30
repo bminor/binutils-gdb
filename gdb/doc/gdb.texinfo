@@ -18537,6 +18537,41 @@ from the current task to the given task.
 #4  0x804aacc in un () at un.adb:5
 @end smallexample
 
+@item task apply [@var{task-id-list} | all] [@var{flag}]@dots{} @var{command}
+The @code{task apply} command is the Ada tasking analogue of
+@code{thread apply} (@pxref{Threads}).  It allows you to apply the
+named @var{command} to one or more tasks.  Specify the tasks that you
+want affected using a list of task IDs, or specify @code{all} to apply
+to all tasks.
+
+The @var{flag} arguments control what output to produce and how to
+handle errors raised when applying @var{command} to a task.
+@var{flag} must start with a @code{-} directly followed by one letter
+in @code{qcs}.  If several flags are provided, they must be given
+individually, such as @code{-c -q}.
+
+By default, @value{GDBN} displays some task information before the
+output produced by @var{command}, and an error raised during the
+execution of a @var{command} will abort @code{task apply}.  The
+following flags can be used to fine-tune this behavior:
+
+@table @code
+@item -c
+The flag @code{-c}, which stands for @samp{continue}, causes any
+errors in @var{command} to be displayed, and the execution of
+@code{task apply} then continues.
+@item -s
+The flag @code{-s}, which stands for @samp{silent}, causes any errors
+or empty output produced by a @var{command} to be silently ignored.
+That is, the execution continues, but the task information and errors
+are not printed.
+@item -q
+The flag @code{-q} (@samp{quiet}) disables printing the task
+information.
+@end table
+
+Flags @code{-c} and @code{-s} cannot be used together.
+
 @item break @var{location} task @var{taskno}
 @itemx break @var{location} task @var{taskno} if @dots{}
 @cindex breakpoints and tasks, in Ada

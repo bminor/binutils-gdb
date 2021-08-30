@@ -662,10 +662,9 @@ thread_alive (thread_info *tp)
   return target_thread_alive (tp->ptid);
 }
 
-/* Switch to thread TP if it is alive.  Returns true if successfully
-   switched, false otherwise.  */
+/* See gdbthreads.h.  */
 
-static bool
+bool
 switch_to_thread_if_alive (thread_info *thr)
 {
   scoped_restore_current_thread restore_thread;
@@ -1428,23 +1427,25 @@ tp_array_compar_descending (const thread_info_ref &a, const thread_info_ref &b)
   return (a->per_inf_num > b->per_inf_num);
 }
 
-/* Assuming that THR is the current thread, execute CMD.
-   FLAGS.QUIET controls the printing of the thread information.
-   FLAGS.CONT and FLAGS.SILENT control how to handle errors.  Can throw an
-   exception if !FLAGS.SILENT and !FLAGS.CONT and CMD fails.  */
+/* See gdbthread.h.  */
 
-static void
-thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
-		   const qcs_flags &flags)
+void
+thread_try_catch_cmd (thread_info *thr, gdb::optional<int> ada_task,
+		      const char *cmd, int from_tty,
+		      const qcs_flags &flags)
 {
   gdb_assert (is_current_thread (thr));
 
   /* The thread header is computed before running the command since
      the command can change the inferior, which is not permitted
      by thread_target_id_str.  */
-  std::string thr_header =
-    string_printf (_("\nThread %s (%s):\n"), print_thread_id (thr),
-		   thread_target_id_str (thr).c_str ());
+  std::string thr_header;
+  if (ada_task.has_value ())
+    thr_header = string_printf (_("\nTask ID %d:\n"), *ada_task);
+  else
+    thr_header = string_printf (_("\nThread %s (%s):\n"),
+				print_thread_id (thr),
+				thread_target_id_str (thr).c_str ());
 
   try
     {
@@ -1576,7 +1577,7 @@ thread_apply_all_command (const char *cmd, int from_tty)
 
       for (thread_info_ref &thr : thr_list_cpy)
 	if (switch_to_thread_if_alive (thr.get ()))
-	  thr_try_catch_cmd (thr.get (), cmd, from_tty, flags);
+	  thread_try_catch_cmd (thr.get (), {}, cmd, from_tty, flags);
     }
 }
 
@@ -1738,7 +1739,7 @@ thread_apply_command (const char *tidlist, int from_tty)
 	  continue;
 	}
 
-      thr_try_catch_cmd (tp, cmd, from_tty, flags);
+      thread_try_catch_cmd (tp, {}, cmd, from_tty, flags);
     }
 }
 

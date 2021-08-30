@@ -1472,6 +1472,163 @@ ada_tasks_new_objfile_observer (struct objfile *objfile)
       ada_tasks_invalidate_inferior_data (inf);
 }
 
+/* The qcs command line flags for the "task apply" commands.  Keep
+   this in sync with the "frame apply" commands.  */
+
+using qcs_flag_option_def
+  = gdb::option::flag_option_def<qcs_flags>;
+
+static const gdb::option::option_def task_qcs_flags_option_defs[] = {
+  qcs_flag_option_def {
+    "q", [] (qcs_flags *opt) { return &opt->quiet; },
+    N_("Disables printing the task information."),
+  },
+
+  qcs_flag_option_def {
+    "c", [] (qcs_flags *opt) { return &opt->cont; },
+    N_("Print any error raised by COMMAND and continue."),
+  },
+
+  qcs_flag_option_def {
+    "s", [] (qcs_flags *opt) { return &opt->silent; },
+    N_("Silently ignore any errors or empty output produced by COMMAND."),
+  },
+};
+
+/* Create an option_def_group for the "task apply all" options, with
+   FLAGS as context.  */
+
+static inline std::array<gdb::option::option_def_group, 1>
+make_task_apply_all_options_def_group (qcs_flags *flags)
+{
+  return {{
+    { {task_qcs_flags_option_defs}, flags },
+  }};
+}
+
+/* Create an option_def_group for the "task apply" options, with
+   FLAGS as context.  */
+
+static inline gdb::option::option_def_group
+make_task_apply_options_def_group (qcs_flags *flags)
+{
+  return {{task_qcs_flags_option_defs}, flags};
+}
+
+/* Implementation of 'task apply all'.  */
+
+static void
+task_apply_all_command (const char *cmd, int from_tty)
+{
+  qcs_flags flags;
+
+  auto group = make_task_apply_all_options_def_group (&flags);
+  gdb::option::process_options
+    (&cmd, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group);
+
+  validate_flags_qcs ("task apply all", &flags);
+
+  if (cmd == nullptr || *cmd == '\0')
+    error (_("Please specify a command at the end of 'task apply all'"));
+
+  update_thread_list ();
+  ada_build_task_list ();
+
+  inferior *inf = current_inferior ();
+  struct ada_tasks_inferior_data *data = get_ada_tasks_inferior_data (inf);
+
+  /* Save a copy of the thread list and increment each thread's
+     refcount while executing the command in the context of each
+     thread, in case the command affects this.  */
+  std::vector<std::pair<int, thread_info_ref>> thr_list_cpy;
+
+  for (int i = 1; i <= data->task_list.size (); ++i)
+    {
+      ada_task_info &task = data->task_list[i - 1];
+      if (!ada_task_is_alive (&task))
+	continue;
+
+      thread_info *tp = find_thread_ptid (inf, task.ptid);
+      if (tp == nullptr)
+	warning (_("Unable to compute thread ID for task %s.\n"
+		   "Cannot switch to this task."),
+		 task_to_str (i, &task).c_str ());
+      else
+	thr_list_cpy.emplace_back (i, thread_info_ref::new_reference (tp));
+    }
+
+  scoped_restore_current_thread restore_thread;
+
+  for (const auto &info : thr_list_cpy)
+    if (switch_to_thread_if_alive (info.second.get ()))
+      thread_try_catch_cmd (info.second.get (), info.first, cmd,
+			    from_tty, flags);
+}
+
+/* Implementation of 'task apply'.  */
+
+static void
+task_apply_command (const char *tidlist, int from_tty)
+{
+
+  if (tidlist == nullptr || *tidlist == '\0')
+    error (_("Please specify a task ID list"));
+
+  update_thread_list ();
+  ada_build_task_list ();
+
+  inferior *inf = current_inferior ();
+  struct ada_tasks_inferior_data *data = get_ada_tasks_inferior_data (inf);
+
+  /* Save a copy of the thread list and increment each thread's
+     refcount while executing the command in the context of each
+     thread, in case the command affects this.  */
+  std::vector<std::pair<int, thread_info_ref>> thr_list_cpy;
+
+  number_or_range_parser parser (tidlist);
+  while (!parser.finished ())
+    {
+      int num = parser.get_number ();
+
+      if (num < 1 || num - 1 >= data->task_list.size ())
+	warning (_("no Ada Task with number %d"), num);
+      else
+	{
+	  ada_task_info &task = data->task_list[num - 1];
+	  if (!ada_task_is_alive (&task))
+	    continue;
+
+	  thread_info *tp = find_thread_ptid (inf, task.ptid);
+	  if (tp == nullptr)
+	    warning (_("Unable to compute thread ID for task %s.\n"
+		       "Cannot switch to this task."),
+		     task_to_str (num, &task).c_str ());
+	  else
+	    thr_list_cpy.emplace_back (num,
+				       thread_info_ref::new_reference (tp));
+	}
+    }
+
+  qcs_flags flags;
+  const char *cmd = parser.cur_tok ();
+
+  auto group = make_task_apply_options_def_group (&flags);
+  gdb::option::process_options
+    (&cmd, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, group);
+
+  validate_flags_qcs ("task apply", &flags);
+
+  if (*cmd == '\0')
+    error (_("Please specify a command following the task ID list"));
+
+  scoped_restore_current_thread restore_thread;
+
+  for (const auto &info : thr_list_cpy)
+    if (switch_to_thread_if_alive (info.second.get ()))
+      thread_try_catch_cmd (info.second.get (), info.first, cmd,
+			    from_tty, flags);
+}
+
 void _initialize_tasks ();
 void
 _initialize_tasks ()
@@ -1482,11 +1639,52 @@ _initialize_tasks ()
   gdb::observers::new_objfile.attach (ada_tasks_new_objfile_observer,
 				      "ada-tasks");
 
+  static struct cmd_list_element *task_cmd_list;
+  static struct cmd_list_element *task_apply_list;
+
+
   /* Some new commands provided by this module.  */
   add_info ("tasks", info_tasks_command,
 	    _("Provide information about all known Ada tasks."));
-  add_cmd ("task", class_run, task_command,
-	   _("Use this command to switch between Ada tasks.\n\
+
+  add_prefix_cmd ("task", class_run, task_command,
+		  _("Use this command to switch between Ada tasks.\n\
 Without argument, this command simply prints the current task ID."),
-	   &cmdlist);
+		  &task_cmd_list, 1, &cmdlist);
+
+#define TASK_APPLY_OPTION_HELP "\
+Prints per-inferior task number followed by COMMAND output.\n\
+\n\
+By default, an error raised during the execution of COMMAND\n\
+aborts \"task apply\".\n\
+\n\
+Options:\n\
+%OPTIONS%"
+
+  static const auto task_apply_opts
+    = make_task_apply_options_def_group (nullptr);
+
+  static std::string task_apply_help = gdb::option::build_help (_("\
+Apply a command to a list of tasks.\n\
+Usage: task apply ID... [OPTION]... COMMAND\n\
+ID is a space-separated list of IDs of tasks to apply COMMAND on.\n"
+TASK_APPLY_OPTION_HELP), task_apply_opts);
+
+  add_prefix_cmd ("apply", class_run,
+		  task_apply_command,
+		  task_apply_help.c_str (),
+		  &task_apply_list, 1,
+		  &task_cmd_list);
+
+  static const auto task_apply_all_opts
+    = make_task_apply_all_options_def_group (nullptr);
+
+  static std::string task_apply_all_help = gdb::option::build_help (_("\
+Apply a command to all tasks in the current inferior.\n\
+\n\
+Usage: task apply all [OPTION]... COMMAND\n"
+TASK_APPLY_OPTION_HELP), task_apply_all_opts);
+
+  add_cmd ("all", class_run, task_apply_all_command,
+	   task_apply_all_help.c_str (), &task_apply_list);
 }

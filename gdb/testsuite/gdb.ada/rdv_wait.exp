@@ -35,3 +35,8 @@ runto "break_me"
 gdb_test "task 2" \
          [join {"\\\[Switching to task 2 \"mit\"\\\].*" \
                 ".*foo\\.t \\(.*\\).*foo\\.adb:.*"} ""]
+
+gdb_test "task apply 1 -q frame" ".*pck\\.break_me.*"
+
+gdb_test "task apply all frame" \
+    "Task ID 1:.*pck\\.break_me.*Task ID 2:.*"

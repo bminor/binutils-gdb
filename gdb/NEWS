@@ -24,6 +24,9 @@ show varsize-limit
   These are now deprecated aliases for "set max-value-size" and
   "show max-value-size".
 
+task apply [all | TASK-IDS...] [FLAG]... COMMAND
+  Like "thread apply", but applies COMMAND to Ada tasks.
+
 watch [...] task ID
   Watchpoints can now be restricted to a specific Ada task.
 

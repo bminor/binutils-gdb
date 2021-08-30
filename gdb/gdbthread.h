@@ -975,4 +975,21 @@ extern void thread_select (const char *tidstr, class thread_info *thr);
    target to get the name.  May return nullptr.  */
 extern const char *thread_name (thread_info *thread);
 
+/* Switch to thread TP if it is alive.  Returns true if successfully
+   switched, false otherwise.  */
+
+extern bool switch_to_thread_if_alive (thread_info *thr);
+
+/* Assuming that THR is the current thread, execute CMD.
+   If ADA_TASK is not empty, it is the Ada task ID, and will
+   be printed instead of the thread information.
+   FLAGS.QUIET controls the printing of the thread information.
+   FLAGS.CONT and FLAGS.SILENT control how to handle errors.  Can throw an
+   exception if !FLAGS.SILENT and !FLAGS.CONT and CMD fails.  */
+
+extern void thread_try_catch_cmd (thread_info *thr,
+				  gdb::optional<int> ada_task,
+				  const char *cmd, int from_tty,
+				  const qcs_flags &flags);
+
 #endif /* GDBTHREAD_H */
