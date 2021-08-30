@@ -76,3 +76,7 @@ test_exit_status 1 "-batch -x $good_commands -x $bad_commands" \
     "-batch -x good-commands -x bad-commands"
 test_exit_status 1 "-batch -x $good_commands -ex \"set not-a-thing 4\"" \
     "-batch -x good-commands -ex \"set not-a-thing 4\""
+
+set no_such_re ": No such file or directory\\."
+test_exit_status 1 "-batch \"\"" $no_such_re
+test_exit_status 1 "-batch \"\" \"\"" [multi_line $no_such_re $no_such_re]
