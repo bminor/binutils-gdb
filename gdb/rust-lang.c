@@ -915,7 +915,7 @@ rust_composite_type (struct type *original,
       SET_FIELD_BITPOS (*field, bitpos);
       bitpos += TYPE_LENGTH (type1) * TARGET_CHAR_BIT;
 
-      FIELD_NAME (*field) = field1;
+      field->set_name (field1);
       field->set_type (type1);
       ++i;
     }
@@ -935,7 +935,7 @@ rust_composite_type (struct type *original,
 	}
       SET_FIELD_BITPOS (*field, bitpos);
 
-      FIELD_NAME (*field) = field2;
+      field->set_name (field2);
       field->set_type (type2);
       ++i;
     }

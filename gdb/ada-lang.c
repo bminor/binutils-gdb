@@ -7601,7 +7601,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	  ada_ensure_varsize_limit (field_type);
 
 	  rtype->field (f).set_type (field_type);
-	  TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
+	  rtype->field (f).set_name (TYPE_FIELD_NAME (type, f));
 	  /* The multiplication can potentially overflow.  But because
 	     the field length has been size-checked just above, and
 	     assuming that the maximum size is a reasonable value,
@@ -7624,7 +7624,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     to distinguish between the two options.  Stripping it
 	     would prevent us from printing this field appropriately.  */
 	  rtype->field (f).set_type (type->field (f).type ());
-	  TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
+	  rtype->field (f).set_name (TYPE_FIELD_NAME (type, f));
 	  if (TYPE_FIELD_BITSIZE (type, f) > 0)
 	    fld_bit_len =
 	      TYPE_FIELD_BITSIZE (rtype, f) = TYPE_FIELD_BITSIZE (type, f);
@@ -7686,7 +7686,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
       else
 	{
 	  rtype->field (variant_field).set_type (branch_type);
-	  TYPE_FIELD_NAME (rtype, variant_field) = "S";
+	  rtype->field (variant_field).set_name ("S");
 	  fld_bit_len =
 	    TYPE_LENGTH (rtype->field (variant_field).type ()) *
 	    TARGET_CHAR_BIT;
@@ -7802,7 +7802,7 @@ template_to_static_fixed_type (struct type *type0)
 	      TYPE_LENGTH (type) = 0;
 	    }
 	  type->field (f).set_type (new_type);
-	  TYPE_FIELD_NAME (type, f) = TYPE_FIELD_NAME (type0, f);
+	  type->field (f).set_name (TYPE_FIELD_NAME (type0, f));
 	}
     }
 
@@ -7871,7 +7871,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   else
     {
       rtype->field (variant_field).set_type (branch_type);
-      TYPE_FIELD_NAME (rtype, variant_field) = "S";
+      rtype->field (variant_field).set_name ("S");
       TYPE_FIELD_BITSIZE (rtype, variant_field) = 0;
       TYPE_LENGTH (rtype) += TYPE_LENGTH (branch_type);
     }

@@ -1058,13 +1058,13 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 		SET_FIELD_ENUMVAL (*f, tsym.value);
 		f->set_type (t);
-		FIELD_NAME (*f) = debug_info->ss + cur_fdr->issBase + tsym.iss;
+		f->set_name (debug_info->ss + cur_fdr->issBase + tsym.iss);
 		FIELD_BITSIZE (*f) = 0;
 
 		enum_sym = new (&mdebugread_objfile->objfile_obstack) symbol;
 		enum_sym->set_linkage_name
 		  (obstack_strdup (&mdebugread_objfile->objfile_obstack,
-				   f->name));
+				   f->name ()));
 		SYMBOL_ACLASS_INDEX (enum_sym) = LOC_CONST;
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_DOMAIN (enum_sym) = VAR_DOMAIN;
@@ -1241,7 +1241,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       {
 	struct field *f = &top_stack->cur_type->field (top_stack->cur_field);
 	top_stack->cur_field++;
-	FIELD_NAME (*f) = name;
+	f->set_name (name);
 	SET_FIELD_BITPOS (*f, sh->value);
 	bitsize = 0;
 	f->set_type (parse_type (cur_fd, ax, sh->index, &bitsize, bigend,

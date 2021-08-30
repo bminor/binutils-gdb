@@ -399,7 +399,7 @@ ctf_add_member_cb (const char *name,
   uint32_t kind;
 
   fp = &new_field.field;
-  FIELD_NAME (*fp) = name;
+  fp->set_name (name);
 
   kind = ctf_type_kind (ccp->fp, tid);
   t = fetch_tid_type (ccp, tid);
@@ -438,7 +438,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
   struct ctf_context *ccp = fip->cur_context;
 
   fp = &new_field.field;
-  FIELD_NAME (*fp) = name;
+  fp->set_name (name);
   fp->set_type (nullptr);
   SET_FIELD_ENUMVAL (*fp, enum_value);
   FIELD_BITSIZE (*fp) = 0;

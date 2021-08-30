@@ -1225,8 +1225,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	    for (j = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; j >= 0; j--)
 	      if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) == 0)
-		TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) =
-		  TYPE_BASECLASS (SYMBOL_TYPE (sym), j)->name ();
+		SYMBOL_TYPE (sym)->field (j).set_name
+		  (TYPE_BASECLASS (SYMBOL_TYPE (sym), j)->name ());
 	  }
 
       if (SYMBOL_TYPE (sym)->name () == NULL)
@@ -2712,8 +2712,8 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 	    {
 	      name = "";
 	    }
-	  fip->list->field.name = obconcat (&objfile->objfile_obstack,
-					    vptr_name, name, (char *) NULL);
+	  fip->list->field.set_name (obconcat (&objfile->objfile_obstack,
+					       vptr_name, name, (char *) NULL));
 	  break;
 
 	case 'b':		/* $vb -- a virtual bsomethingorother */
@@ -2725,15 +2725,15 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 			 symnum);
 	      name = "FOO";
 	    }
-	  fip->list->field.name = obconcat (&objfile->objfile_obstack, vb_name,
-					    name, (char *) NULL);
+	  fip->list->field.set_name (obconcat (&objfile->objfile_obstack,
+					       vb_name, name, (char *) NULL));
 	  break;
 
 	default:
 	  invalid_cpp_abbrev_complaint (*pp);
-	  fip->list->field.name = obconcat (&objfile->objfile_obstack,
-					    "INVALID_CPLUSPLUS_ABBREV",
-					    (char *) NULL);
+	  fip->list->field.set_name (obconcat (&objfile->objfile_obstack,
+					       "INVALID_CPLUSPLUS_ABBREV",
+					       (char *) NULL));
 	  break;
 	}
 
@@ -2782,8 +2782,8 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 {
   struct gdbarch *gdbarch = objfile->arch ();
 
-  fip->list->field.name
-    = obstack_strndup (&objfile->objfile_obstack, *pp, p - *pp);
+  fip->list->field.set_name
+    (obstack_strndup (&objfile->objfile_obstack, *pp, p - *pp));
   *pp = p + 1;
 
   /* This means we have a visibility for a field coming.  */
@@ -3120,7 +3120,7 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
 	 field's name.  */
 
       newobj->field.set_type (read_type (pp, objfile));
-      newobj->field.name = newobj->field.type ()->name ();
+      newobj->field.set_name (newobj->field.type ()->name ());
 
       /* Skip trailing ';' and bump count of number of fields seen.  */
       if (**pp == ';')
@@ -3638,7 +3638,7 @@ read_enum_type (const char **pp, struct type *type,
 	  struct symbol *xsym = syms->symbol[j];
 
 	  SYMBOL_TYPE (xsym) = type;
-	  TYPE_FIELD_NAME (type, n) = xsym->linkage_name ();
+	  type->field (n).set_name (xsym->linkage_name ());
 	  SET_FIELD_ENUMVAL (type->field (n), SYMBOL_VALUE (xsym));
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}

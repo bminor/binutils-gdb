@@ -654,6 +654,16 @@ struct field
     this->m_type = type;
   }
 
+  const char *name () const
+  {
+    return m_name;
+  }
+
+  void set_name (const char *name)
+  {
+    m_name = name;
+  }
+
   union field_location loc;
 
   /* * For a function or member type, this is 1 if the argument is
@@ -685,7 +695,7 @@ struct field
      NULL for range bounds, array domains, and member function
      arguments.  */
 
-  const char *name;
+  const char *m_name;
 };
 
 struct range_bounds
@@ -1974,7 +1984,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define FIELD_NAME(thisfld) ((thisfld).name)
+#define FIELD_NAME(thisfld) ((thisfld).name ())
 #define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind)
 #define FIELD_BITPOS_LVAL(thisfld) ((thisfld).loc.bitpos)
 #define FIELD_BITPOS(thisfld) (FIELD_BITPOS_LVAL (thisfld) + 0)
@@ -2001,7 +2011,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD_NAME(thistype, n) FIELD_NAME((thistype)->field (n))
+#define TYPE_FIELD_NAME(thistype, n) ((thistype)->field (n).name ())
 #define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND ((thistype)->field (n))
 #define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS ((thistype)->field (n))
 #define TYPE_FIELD_ENUMVAL(thistype, n) FIELD_ENUMVAL ((thistype)->field (n))
