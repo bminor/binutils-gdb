@@ -81,7 +81,7 @@ void (*deprecated_error_begin_hook) (void);
 /* Prototypes for local functions */
 
 static void vfprintf_maybe_filtered (struct ui_file *, const char *,
-				     va_list, bool, bool)
+				     va_list, bool)
   ATTRIBUTE_PRINTF (2, 0);
 
 static void fputs_maybe_filtered (const char *, struct ui_file *, int);
@@ -2102,27 +2102,19 @@ puts_debug (char *prefix, char *string, char *suffix)
 
 static void
 vfprintf_maybe_filtered (struct ui_file *stream, const char *format,
-			 va_list args, bool filter, bool gdbfmt)
+			 va_list args, bool filter)
 {
-  if (gdbfmt)
-    {
-      ui_out_flags flags = disallow_ui_out_field;
-      if (!filter)
-	flags |= unfiltered_output;
-      cli_ui_out (stream, flags).vmessage (applied_style, format, args);
-    }
-  else
-    {
-      std::string str = string_vprintf (format, args);
-      fputs_maybe_filtered (str.c_str (), stream, filter);
-    }
+  ui_out_flags flags = disallow_ui_out_field;
+  if (!filter)
+    flags |= unfiltered_output;
+  cli_ui_out (stream, flags).vmessage (applied_style, format, args);
 }
 
 
 void
 vfprintf_filtered (struct ui_file *stream, const char *format, va_list args)
 {
-  vfprintf_maybe_filtered (stream, format, args, true, true);
+  vfprintf_maybe_filtered (stream, format, args, true);
 }
 
 void
@@ -2156,13 +2148,13 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
       needs_timestamp = (len > 0 && linebuffer[len - 1] == '\n');
     }
   else
-    vfprintf_maybe_filtered (stream, format, args, false, true);
+    vfprintf_maybe_filtered (stream, format, args, false);
 }
 
 void
 vprintf_filtered (const char *format, va_list args)
 {
-  vfprintf_maybe_filtered (gdb_stdout, format, args, true, false);
+  vfprintf_filtered (gdb_stdout, format, args);
 }
 
 void
