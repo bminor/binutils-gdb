@@ -39286,6 +39286,9 @@ displays the response packet.  @value{GDBN} supplies the initial
 @samp{$} character, the terminating @samp{#} character, and the
 checksum.
 
+Any non-printable characters in the reply are printed as escaped hex,
+e.g. @samp{\x00}, @samp{\x01}, etc.
+
 @kindex maint print architecture
 @item maint print architecture @r{[}@var{file}@r{]}
 Print the entire architecture configuration.  The optional argument

@@ -39,6 +39,14 @@ set logging enabled on|off
 show logging enabled
   These commands set or show whether logging is enabled or disabled.
 
+* Changed commands
+
+maint packet
+  This command can now print a reply, if the reply includes
+  non-printable characters.  Any non-printable characters are printed
+  as escaped hex, e.g. \x?? where '??' is replaces with the value of
+  the non-printable character.
+
 * Python API
 
   ** New function gdb.add_history(), which takes a gdb.Value object
