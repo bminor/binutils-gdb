@@ -6007,14 +6007,35 @@ describes how @value{GDBN} controls the program being debugged.
 Examples of different connection types are @samp{native} and
 @samp{remote}.  @xref{Inferiors Connections and Programs}.
 
-@value{GDBN} uses the @code{gdb.TargetConnection} object type to
-represent a connection in Python code.  To get a list of all
-connections use @code{gdb.connections}
+Connections in @value{GDBN} are represented as instances of
+@code{gdb.TargetConnection}, or as one of its sub-classes.  To get a
+list of all connections use @code{gdb.connections}
 (@pxref{gdbpy_connections,,gdb.connections}).
 
 To get the connection for a single @code{gdb.Inferior} read its
 @code{gdb.Inferior.connection} attribute
 (@pxref{gdbpy_inferior_connection,,gdb.Inferior.connection}).
+
+Currently there is only a single sub-class of
+@code{gdb.TargetConnection}, @code{gdb.RemoteTargetConnection},
+however, additional sub-classes may be added in future releases of
+@value{GDBN}.  As a result you should avoid writing code like:
+
+@smallexample
+conn = gdb.selected_inferior().connection
+if type(conn) is gdb.RemoteTargetConnection:
+  print("This is a remote target connection")
+@end smallexample
+
+@noindent
+as this may fail when more connection types are added.  Instead, you
+should write:
+
+@smallexample
+conn = gdb.selected_inferior().connection
+if isinstance(conn, gdb.RemoteTargetConnection):
+  print("This is a remote target connection")
+@end smallexample
 
 A @code{gdb.TargetConnection} has the following method:
 
@@ -6061,6 +6082,49 @@ the @samp{remote} connection, in this case the details string can
 contain the @samp{@var{hostname}:@var{port}} that was used to connect
 to the remote target.
 @end defvar
+
+The @code{gdb.RemoteTargetConnection} class is a sub-class of
+@code{gdb.TargetConnection}, and is used to represent @samp{remote}
+and @samp{extended-remote} connections.  In addition to the attributes
+and methods available from the @code{gdb.TargetConnection} base class,
+a @code{gdb.RemoteTargetConnection} has the following method:
+
+@kindex maint packet
+@defun RemoteTargetConnection.send_packet (@var{packet})
+This method sends @var{packet} to the remote target and returns the
+response.  The @var{packet} should either be a @code{bytes} object, or
+a @code{Unicode} string.
+
+If @var{packet} is a @code{Unicode} string, then the string is encoded
+to a @code{bytes} object using the @sc{ascii} codec.  If the string
+can't be encoded then an @code{UnicodeError} is raised.
+
+If @var{packet} is not a @code{bytes} object, or a @code{Unicode}
+string, then a @code{TypeError} is raised.  If @var{packet} is empty
+then a @code{ValueError} is raised.
+
+The response is returned as a @code{bytes} object.  For Python 3 if it
+is known that the response can be represented as a string then this
+can be decoded from the buffer.  For example, if it is known that the
+response is an @sc{ascii} string:
+
+@smallexample
+remote_connection.send_packet("some_packet").decode("ascii")
+@end smallexample
+
+In Python 2 @code{bytes} and @code{str} are aliases, so the result is
+already a string, if the response includes non-printable characters,
+or null characters, then these will be present in the result, care
+should be taken when processing the result to handle this case.
+
+The prefix, suffix, and checksum (as required by the remote serial
+protocol) are automatically added to the outgoing packet, and removed
+from the incoming packet before the contents of the reply are
+returned.
+
+This is equivalent to the @code{maintenance packet} command
+(@pxref{maint packet}).
+@end defun
 
 @node TUI Windows In Python
 @subsubsection Implementing new TUI windows

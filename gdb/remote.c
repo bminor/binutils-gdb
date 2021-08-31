@@ -994,6 +994,15 @@ public:
   bool supports_disable_randomization () override;
 };
 
+/* See remote.h.  */
+
+bool
+is_remote_target (process_stratum_target *target)
+{
+  remote_target *rt = dynamic_cast<remote_target *> (target);
+  return rt != nullptr;
+}
+
 /* Per-program-space data key.  */
 static const struct program_space_key<char, gdb::xfree_deleter<char>>
   remote_pspace_data;

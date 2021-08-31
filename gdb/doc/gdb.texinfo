@@ -39278,6 +39278,7 @@ possible to have a backtrace of @value{GDBN} printed to the standard
 error stream.  This is @samp{on} by default for @code{internal-error}
 and @samp{off} by default for @code{internal-warning}.
 
+@anchor{maint packet}
 @kindex maint packet
 @item maint packet @var{text}
 If @value{GDBN} is talking to an inferior via the serial protocol,

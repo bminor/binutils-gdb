@@ -68,7 +68,9 @@ maint packet
      integer type given a size and a signed-ness.
 
   ** New gdb.TargetConnection object type that represents a connection
-     (as displayed by the 'info connections' command).
+     (as displayed by the 'info connections' command).  A sub-class,
+     gdb.RemoteTargetConnection, is used to represent 'remote' and
+     'extended-remote' connections.
 
   ** The gdb.Inferior type now has a 'connection' property which is an
      instance of gdb.TargetConnection, the connection used by this
@@ -81,6 +83,10 @@ maint packet
 
   ** New gdb.connections() function that returns a list of all
      currently active connections.
+
+  ** New gdb.RemoteTargetConnection.send_packet(PACKET) method.  This
+     is equivalent to the existing 'maint packet' CLI command; it
+     allows a user specified packet to be sent to the remote target.
 
 * New features in the GDB remote stub, GDBserver
 

@@ -26,6 +26,8 @@
 #include "py-events.h"
 #include "py-event.h"
 #include "arch-utils.h"
+#include "remote.h"
+#include "charset.h"
 
 #include <map>
 
@@ -46,6 +48,9 @@ struct connection_object
 
 extern PyTypeObject connection_object_type
   CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("connection_object");
+
+extern PyTypeObject remote_connection_object_type
+  CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("remote_connection_object");
 
 /* Require that CONNECTION be valid.  */
 #define CONNPY_REQUIRE_VALID(connection)			\
@@ -81,8 +86,14 @@ target_to_connection_object (process_stratum_target *target)
   auto conn_obj_iter = all_connection_objects.find (target);
   if (conn_obj_iter == all_connection_objects.end ())
     {
-      conn_obj.reset (PyObject_New (connection_object,
-				    &connection_object_type));
+      PyTypeObject *type;
+
+      if (is_remote_target (target))
+	type = &remote_connection_object_type;
+      else
+	type = &connection_object_type;
+
+      conn_obj.reset (PyObject_New (connection_object, type));
       if (conn_obj == nullptr)
 	return nullptr;
       conn_obj->target = target;
@@ -284,7 +295,146 @@ gdbpy_initialize_connection (void)
 			      (PyObject *) &connection_object_type) < 0)
     return -1;
 
+  if (PyType_Ready (&remote_connection_object_type) < 0)
+    return -1;
+
+  if (gdb_pymodule_addobject (gdb_module, "RemoteTargetConnection",
+			      (PyObject *) &remote_connection_object_type) < 0)
+    return -1;
+
   return 0;
+}
+
+/* Set of callbacks used to implement gdb.send_packet.  */
+
+struct py_send_packet_callbacks : public send_remote_packet_callbacks
+{
+  /* Constructor, initialise the result to nullptr.  It is invalid to try
+     and read the result before sending a packet and processing the
+     reply.  */
+
+  py_send_packet_callbacks ()
+    : m_result (nullptr)
+  { /* Nothing.  */ }
+
+  /* There's nothing to do when the packet is sent.  */
+
+  void sending (gdb::array_view<const char> &buf) override
+  { /* Nothing.  */ }
+
+  /* When the result is returned create a Python object and assign this
+     into M_RESULT.  If for any reason we can't create a Python object to
+     represent the result then M_RESULT is set to nullptr, and Python's
+     internal error flags will be set.  If the result we got back from the
+     remote is empty then set the result to None.  */
+
+  void received (gdb::array_view<const char> &buf) override
+  {
+    if (buf.size () > 0 && buf.data ()[0] != '\0')
+      m_result.reset (PyBytes_FromStringAndSize (buf.data (), buf.size ()));
+    else
+      {
+	/* We didn't get back any result data; set the result to None.  */
+	Py_INCREF (Py_None);
+	m_result.reset (Py_None);
+      }
+  }
+
+  /* Get a reference to the result as a Python object.  It is invalid to
+     call this before sending a packet to the remote and processing the
+     reply.
+
+     The result value is setup in the RECEIVED call above.  If the RECEIVED
+     call causes an error then the result value will be set to nullptr,
+     and the error reason is left stored in Python's global error state.
+
+     It is important that the result is inspected immediately after sending
+     a packet to the remote, and any error fetched,  calling any other
+     Python functions that might clear the error state, or rely on an error
+     not being set will cause undefined behaviour.  */
+
+  gdbpy_ref<> result () const
+  {
+    return m_result;
+  }
+
+private:
+
+  /* A reference to the result value.  */
+
+  gdbpy_ref<> m_result;
+};
+
+/* Implement RemoteTargetConnection.send_packet function.  Send a packet to
+   the target identified by SELF.  The connection must still be valid, and
+   the packet to be sent must be non-empty, otherwise an exception will be
+   thrown.  */
+
+static PyObject *
+connpy_send_packet (PyObject *self, PyObject *args, PyObject *kw)
+{
+  connection_object *conn = (connection_object *) self;
+
+  CONNPY_REQUIRE_VALID (conn);
+
+  static const char *keywords[] = {"packet", nullptr};
+  PyObject *packet_obj;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O", keywords,
+					&packet_obj))
+    return nullptr;
+
+  /* If the packet is a unicode string then convert it to a bytes object.  */
+  if (PyUnicode_Check (packet_obj))
+    {
+      /* We encode the string to bytes using the ascii codec, if this fails
+	 then a suitable error will have been set.  */
+      packet_obj = PyUnicode_AsASCIIString (packet_obj);
+      if (packet_obj == nullptr)
+	return nullptr;
+    }
+
+  /* Check the packet is now a bytes object.  */
+  if (!PyBytes_Check (packet_obj))
+    {
+      PyErr_SetString (PyExc_TypeError, _("Packet is not a bytes object"));
+      return nullptr;
+    }
+
+  Py_ssize_t packet_len = 0;
+  char *packet_str_nonconst = nullptr;
+  if (PyBytes_AsStringAndSize (packet_obj, &packet_str_nonconst,
+			       &packet_len) < 0)
+    return nullptr;
+  const char *packet_str = packet_str_nonconst;
+  gdb_assert (packet_str != nullptr);
+
+  if (packet_len == 0)
+    {
+      PyErr_SetString (PyExc_ValueError, _("Packet must not be empty"));
+      return nullptr;
+    }
+
+  try
+    {
+      scoped_restore_current_thread restore_thread;
+      switch_to_target_no_thread (conn->target);
+
+      gdb::array_view<const char> view (packet_str, packet_len);
+      py_send_packet_callbacks callbacks;
+      send_remote_packet (view, &callbacks);
+      PyObject *result = callbacks.result ().release ();
+      /* If we encountered an error converting the reply to a Python
+	 object, then the result here can be nullptr.  In that case, Python
+	 should be aware that an error occurred.  */
+      gdb_assert ((result == nullptr) == (PyErr_Occurred () != nullptr));
+      return result;
+    }
+  catch (const gdb_exception &except)
+    {
+      gdbpy_convert_exception (except);
+      return nullptr;
+    }
 }
 
 /* Global initialization for this file.  */
@@ -304,6 +454,17 @@ static PyMethodDef connection_object_methods[] =
   { "is_valid", connpy_is_valid, METH_NOARGS,
     "is_valid () -> Boolean.\n\
 Return true if this TargetConnection is valid, false if not." },
+  { NULL }
+};
+
+/* Methods for the gdb.RemoteTargetConnection object type.  */
+
+static PyMethodDef remote_connection_object_methods[] =
+{
+  { "send_packet", (PyCFunction) connpy_send_packet,
+    METH_VARARGS | METH_KEYWORDS,
+    "send_packet (PACKET) -> Bytes\n\
+Send PACKET to a remote target, return the reply as a bytes array." },
   { NULL }
 };
 
@@ -345,7 +506,7 @@ PyTypeObject connection_object_type =
   0,				  /* tp_getattro */
   0,				  /* tp_setattro */
   0,				  /* tp_as_buffer */
-  Py_TPFLAGS_DEFAULT,		  /* tp_flags */
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,	/* tp_flags */
   "GDB target connection object", /* tp_doc */
   0,				  /* tp_traverse */
   0,				  /* tp_clear */
@@ -357,6 +518,49 @@ PyTypeObject connection_object_type =
   0,				  /* tp_members */
   connection_object_getset,	  /* tp_getset */
   0,				  /* tp_base */
+  0,				  /* tp_dict */
+  0,				  /* tp_descr_get */
+  0,				  /* tp_descr_set */
+  0,				  /* tp_dictoffset */
+  0,				  /* tp_init */
+  0				  /* tp_alloc */
+};
+
+/* Define the gdb.RemoteTargetConnection object type.  */
+
+PyTypeObject remote_connection_object_type =
+{
+  PyVarObject_HEAD_INIT (NULL, 0)
+  "gdb.RemoteTargetConnection",	  /* tp_name */
+  sizeof (connection_object),	  /* tp_basicsize */
+  0,				  /* tp_itemsize */
+  connpy_connection_dealloc,	  /* tp_dealloc */
+  0,				  /* tp_print */
+  0,				  /* tp_getattr */
+  0,				  /* tp_setattr */
+  0,				  /* tp_compare */
+  connpy_repr,			  /* tp_repr */
+  0,				  /* tp_as_number */
+  0,				  /* tp_as_sequence */
+  0,				  /* tp_as_mapping */
+  0,				  /* tp_hash  */
+  0,				  /* tp_call */
+  0,				  /* tp_str */
+  0,				  /* tp_getattro */
+  0,				  /* tp_setattro */
+  0,				  /* tp_as_buffer */
+  Py_TPFLAGS_DEFAULT,		  /* tp_flags */
+  "GDB remote target connection object",	  /* tp_doc */
+  0,				  /* tp_traverse */
+  0,				  /* tp_clear */
+  0,				  /* tp_richcompare */
+  0,				  /* tp_weaklistoffset */
+  0,				  /* tp_iter */
+  0,				  /* tp_iternext */
+  remote_connection_object_methods,	  /* tp_methods */
+  0,				  /* tp_members */
+  0,				  /* tp_getset */
+  &connection_object_type,	  /* tp_base */
   0,				  /* tp_dict */
   0,				  /* tp_descr_get */
   0,				  /* tp_descr_set */

@@ -24,6 +24,8 @@
 struct target_desc;
 struct remote_target;
 
+class process_stratum_target;
+
 /* True when printing "remote" debug statements is enabled.  */
 
 extern bool remote_debug;
@@ -112,5 +114,11 @@ struct send_remote_packet_callbacks
 
 extern void send_remote_packet (gdb::array_view<const char> &buf,
 				send_remote_packet_callbacks *callbacks);
+
+
+/* Return true if TARGET is a remote, or extended-remote target, otherwise,
+   return false.  */
+
+extern bool is_remote_target (process_stratum_target *target);
 
 #endif

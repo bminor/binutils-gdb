@@ -33,12 +33,18 @@ if ![runto_main] then {
     return 0
 }
 
+if { [target_info exists gdb_protocol] } {
+    set connection_type "RemoteTargetConnection"
+} else {
+    set connection_type "TargetConnection"
+}
+
 # Create a gdb.TargetConnection object and check it is initially
 # valid.
 gdb_test_no_output "python conn = gdb.selected_inferior().connection"
 gdb_test "python print(conn)" \
-    "<gdb.TargetConnection num=1, what=\"\[^\"\]+\">" \
-    "print gdb.TargetConnection while it is still valid"
+    "<gdb.${connection_type} num=1, what=\"\[^\"\]+\">" \
+    "print gdb.${connection_type} while it is still valid"
 gdb_test "python print(conn.is_valid())" "True" "is_valid returns True"
 
 # Get the connection again, and ensure we get the exact same object.
@@ -53,8 +59,8 @@ gdb_test "disconnect" "" "kill the inferior" \
     "A program is being debugged already\\.  Kill it\\? .*y or n. $" "y"
 gdb_test "info connections" "No connections\\." \
     "info connections now all the connections have gone"
-gdb_test "python print(conn)" "<gdb.TargetConnection \\(invalid\\)>" \
-    "print gdb.TargetConnection now its invalid"
+gdb_test "python print(conn)" "<gdb.${connection_type} \\(invalid\\)>" \
+    "print gdb.${connection_type} now its invalid"
 gdb_test "python print(conn.is_valid())" "False" "is_valid returns False"
 
 # Now check that accessing properties of the invalid connection cases
