@@ -232,6 +232,10 @@ When the time comes to actually make the release....
 
            tar tvf binutils-2.37.tar.bz2 | grep -e "---"
 
+      Also check that the man files are not empty.  (cf PR 28144).
+
+           tar tvf binutils-2.37.tar.xz | grep -e "\.1"
+
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
       running the testsuites (gas, gold, binutils and ld).  Make the
       source directory read-only before building.  Also test
