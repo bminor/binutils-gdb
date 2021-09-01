@@ -92,7 +92,6 @@
 #endif
 
 #ifdef IS_PY3K
-#define Py_TPFLAGS_HAVE_ITER 0
 #define Py_TPFLAGS_CHECKTYPES 0
 
 #define PyInt_Check PyLong_Check
