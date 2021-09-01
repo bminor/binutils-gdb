@@ -1,3 +1,8 @@
+2021-09-01  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.fortran/call-no-debug.exp: Avoid shared lib symbols for
+	find_mangled_name calls.
+
 2021-08-30  Tom de Vries  <tdevries@suse.de>
 
 	PR cli/28290
