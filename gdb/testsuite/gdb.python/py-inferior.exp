@@ -51,6 +51,8 @@ gdb_py_test_silent_cmd "python i0 = inferiors\[0\]" "get first inferior" 0
 gdb_test "python print ('result = %s' % (i0 == inferiors\[0\]))" " = True" "test equality comparison (true)"
 gdb_test "python print ('result = %s' % i0.num)" " = \[0-9\]+" "test Inferior.num"
 gdb_test "python print ('result = %s' % i0.connection_num)" " = \[0-9\]+" "test Inferior.connection_num"
+gdb_test "python print ('result = %s' % (i0.connection_num == i0.connection.num))" " = True" \
+    "Inferior.connection_num equals Inferior.connection.num"
 gdb_test "python print ('result = %s' % i0.pid)" " = \[0-9\]+" "test Inferior.pid"
 gdb_test "python print ('result = %s' % i0.was_attached)" " = False" "test Inferior.was_attached"
 gdb_test "python print (i0.threads ())" "\\(<gdb.InferiorThread object at 0x\[\[:xdigit:\]\]+>,\\)" "test Inferior.threads"
@@ -264,6 +266,8 @@ with_test_prefix "is_valid" {
 	"RuntimeError: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].connection_num)" \
 	"RuntimeError: Inferior no longer exists.*"
+    gdb_test "python print (inf_list\[1\].connection)" \
+	"RuntimeError: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].pid)" \
 	"RuntimeError: Inferior no longer exists.*"
     gdb_test "python print (inf_list\[1\].was_attached)" \
@@ -281,7 +285,9 @@ with_test_prefix "selected_inferior" {
     gdb_test "inferior 1" ".*" "switch to first inferior"
     gdb_test "py print (gdb.selected_inferior().num)" "1" "first inferior selected"
     gdb_test "py print (gdb.selected_inferior().connection_num)" "1" \
-	"first inferior's connection"
+	"first inferior's connection number"
+    gdb_test "py print (gdb.selected_inferior().connection.num)" "1" \
+	"first inferior's connection number, though connection object"
     # Figure out if inf 1 has a native target.
     set inf_1_is_native [gdb_is_target_native]
 
@@ -289,6 +295,8 @@ with_test_prefix "selected_inferior" {
     gdb_test "inferior 3" ".*" "switch to third inferior"
     gdb_test "py print (gdb.selected_inferior().num)" "3" "third inferior selected"
     gdb_test "py print (gdb.selected_inferior().connection_num)" "None" \
+	"third inferior's None connection number"
+    gdb_test "py print (gdb.selected_inferior().connection)" "None" \
 	"third inferior's None connection"
     gdb_test "target native" "Done.  Use the \"run\" command to start a process." \
 	"target for the third inferior"
@@ -302,7 +310,15 @@ with_test_prefix "selected_inferior" {
     }
     gdb_test "py print (gdb.selected_inferior().connection_num)" \
 	"$expected_connection_num" \
-	"third inferior's native connection"
+	"third inferior's native connection number"
+    gdb_test "py print (gdb.selected_inferior().connection.num)" \
+	"$expected_connection_num" \
+	"third inferior's native connection number, though connection object"
+
+    # Test printing of gdb.TargetConnection object.
+    gdb_test "py print (gdb.selected_inferior().connection)" \
+	"<gdb.TargetConnection num=${expected_connection_num}, what=\"\[^\"\]+\">" \
+	"print a connection object"
 
     gdb_test "inferior 1" ".*" "switch back to first inferior"
     gdb_test_no_output "remove-inferiors 3" "remove second inferior"

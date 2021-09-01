@@ -253,6 +253,9 @@ extern observable<> current_source_symtab_and_line_changed;
 /* Called when GDB is about to exit.  */
 extern observable<int> gdb_exiting;
 
+/* When a connection is removed.  */
+extern observable<process_stratum_target */* target */> connection_removed;
+
 } /* namespace observers */
 
 } /* namespace gdb */

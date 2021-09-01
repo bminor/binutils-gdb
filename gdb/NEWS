@@ -59,6 +59,21 @@ show logging enabled
   ** New function gdb.Architecture.integer_type(), which returns an
      integer type given a size and a signed-ness.
 
+  ** New gdb.TargetConnection object type that represents a connection
+     (as displayed by the 'info connections' command).
+
+  ** The gdb.Inferior type now has a 'connection' property which is an
+     instance of gdb.TargetConnection, the connection used by this
+     inferior.  This can be None if the inferior has no connection.
+
+  ** New 'gdb.events.connection_removed' event registry, which emits a
+     'gdb.ConnectionEvent' when a connection is removed from GDB.
+     This event has a 'connection' property, a gdb.TargetConnection
+     object for the connection being removed.
+
+  ** New gdb.connections() function that returns a list of all
+     currently active connections.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on OpenRISC GNU/Linux.

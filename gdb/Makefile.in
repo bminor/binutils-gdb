@@ -391,6 +391,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-bpevent.c \
 	python/py-breakpoint.c \
 	python/py-cmd.c \
+	python/py-connection.c \
 	python/py-continueevent.c \
 	python/py-event.c \
 	python/py-evtregistry.c \

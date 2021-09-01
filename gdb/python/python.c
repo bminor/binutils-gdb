@@ -1876,6 +1876,7 @@ do_start_initialization ()
       || gdbpy_initialize_xmethods () < 0
       || gdbpy_initialize_unwind () < 0
       || gdbpy_initialize_membuf () < 0
+      || gdbpy_initialize_connection () < 0
       || gdbpy_initialize_tui () < 0)
     return false;
 
@@ -2325,6 +2326,10 @@ Register a TUI window constructor." },
   { "architecture_names", gdbpy_all_architecture_names, METH_NOARGS,
     "architecture_names () -> List.\n\
 Return a list of all the architecture names GDB understands." },
+
+  { "connections", gdbpy_connections, METH_NOARGS,
+    "connections () -> List.\n\
+Return a list of gdb.TargetConnection objects." },
 
   {NULL, NULL, 0, NULL}
 };

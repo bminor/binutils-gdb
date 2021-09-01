@@ -24,6 +24,7 @@
 
 #include "inferior.h"
 #include "target.h"
+#include "observable.h"
 
 /* A map between connection number and representative process_stratum
    target.  */
@@ -49,6 +50,9 @@ connection_list_add (process_stratum_target *t)
 void
 connection_list_remove (process_stratum_target *t)
 {
+  /* Notify about the connection being removed before we reset the
+     connection number to zero.  */
+  gdb::observers::connection_removed.notify (t);
   process_targets.erase (t->connection_number);
   t->connection_number = 0;
 }

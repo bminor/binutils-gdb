@@ -220,6 +220,7 @@ optional arguments while skipping others.  Example:
 * Lazy Strings In Python::      Python representation of lazy strings.
 * Architectures In Python::     Python representation of architectures.
 * Registers In Python::         Python representation of registers.
+* Connections In Python::	Python representation of connections.
 * TUI Windows In Python::       Implementing new TUI windows.
 @end menu
 
@@ -563,6 +564,13 @@ current build of @value{GDBN} supports.  Each architecture name is a
 string.  The names returned in this list are the same names as are
 returned from @code{gdb.Architecture.name}
 (@pxref{gdbpy_architecture_name,,Architecture.name}).
+@end defun
+
+@anchor{gdbpy_connections}
+@defun gdb.connections
+Return a list of @code{gdb.TargetConnection} objects, one for each
+currently active connection (@pxref{Connections In Python}).  The
+connection objects are in no particular order in the returned list.
 @end defun
 
 @node Exception Handling
@@ -3095,10 +3103,18 @@ A @code{gdb.Inferior} object has the following attributes:
 ID of inferior, as assigned by GDB.
 @end defvar
 
+@anchor{gdbpy_inferior_connection}
+@defvar Inferior.connection
+The @code{gdb.TargetConnection} for this inferior (@pxref{Connections
+In Python}), or @code{None} if this inferior has no connection.
+@end defvar
+
 @defvar Inferior.connection_num
 ID of inferior's connection as assigned by @value{GDBN}, or None if
-the inferior is not connected to a target.
-@xref{Inferiors Connections and Programs}.
+the inferior is not connected to a target.  @xref{Inferiors Connections
+and Programs}.  This is equivalent to
+@code{gdb.Inferior.connection.num} in the case where
+@code{gdb.Inferior.connection} is not @code{None}.
 @end defvar
 
 @defvar Inferior.pid
@@ -3437,6 +3453,15 @@ which has a single attribute:
 
 @defvar GdbExitingEvent.exit_code
 An integer, the value of the exit code @value{GDBN} will return.
+@end defvar
+
+@item events.connection_removed
+This is emitted when @value{GDBN} removes a connection
+(@pxref{Connections In Python}).  The event is of type
+@code{gdb.ConnectionEvent}.  This has a single read-only attribute:
+
+@defvar ConnectionEvent.connection
+The @code{gdb.TargetConnection} that is being removed.
 @end defvar
 
 @end table
@@ -5971,6 +5996,70 @@ properties:
 
 @defvar RegisterGroup.name
 A string that is the name of this register group.
+@end defvar
+
+@node Connections In Python
+@subsubsection Connections In Python
+@cindex connections in python
+@value{GDBN} lets you run and debug multiple programs in a single
+session.  Each program being debugged has a connection, the connection
+describes how @value{GDBN} controls the program being debugged.
+Examples of different connection types are @samp{native} and
+@samp{remote}.  @xref{Inferiors Connections and Programs}.
+
+@value{GDBN} uses the @code{gdb.TargetConnection} object type to
+represent a connection in Python code.  To get a list of all
+connections use @code{gdb.connections}
+(@pxref{gdbpy_connections,,gdb.connections}).
+
+To get the connection for a single @code{gdb.Inferior} read its
+@code{gdb.Inferior.connection} attribute
+(@pxref{gdbpy_inferior_connection,,gdb.Inferior.connection}).
+
+A @code{gdb.TargetConnection} has the following method:
+
+@defun TargetConnection.is_valid ()
+Return @code{True} if the @code{gdb.TargetConnection} object is valid,
+@code{False} if not.  A @code{gdb.TargetConnection} will become
+invalid if the connection no longer exists within @value{GDBN}, this
+might happen when no inferiors are using the connection, but could be
+delayed until the user replaces the current target.
+
+Reading any of the @code{gdb.TargetConnection} properties will throw
+an exception if the connection is invalid.
+@end defun
+
+A @code{gdb.TargetConnection} has the following read-only properties:
+
+@defvar TargetConnection.num
+An integer assigned by @value{GDBN} to uniquely identify this
+connection.  This is the same value as displayed in the @samp{Num}
+column of the @code{info connections} command output (@pxref{Inferiors
+Connections and Programs,,info connections}).
+@end defvar
+
+@defvar TargetConnection.type
+A string that describes what type of connection this is.  This string
+will be one of the valid names that can be passed to the @code{target}
+command (@pxref{Target Commands,,target command}).
+@end defvar
+
+@defvar TargetConnection.description
+A string that gives a short description of this target type.  This is
+the same string that is displayed in the @samp{Description} column of
+the @code{info connection} command output (@pxref{Inferiors
+Connections and Programs,,info connections}).
+@end defvar
+
+@defvar TargetConnection.details
+An optional string that gives additional information about this
+connection.  This attribute can be @code{None} if there are no
+additional details for this connection.
+
+An example of a connection type that might have additional details is
+the @samp{remote} connection, in this case the details string can
+contain the @samp{@var{hostname}:@var{port}} that was used to connect
+to the remote target.
 @end defvar
 
 @node TUI Windows In Python
