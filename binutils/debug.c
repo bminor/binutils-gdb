@@ -3334,7 +3334,7 @@ debug_class_type_samep (struct debug_handle *info, struct debug_type_s *t1,
 	      || strcmp (m1->name, m2->name) != 0
 	      || (m1->variants == NULL) != (m2->variants == NULL))
 	    return false;
-	  if (m1->variants == NULL)
+	  if (m1->variants != NULL)
 	    {
 	      struct debug_method_variant_s **pv1, **pv2;
 
