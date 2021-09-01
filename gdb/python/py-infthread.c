@@ -66,14 +66,10 @@ static PyObject *
 thpy_get_name (PyObject *self, void *ignore)
 {
   thread_object *thread_obj = (thread_object *) self;
-  const char *name;
 
   THPY_REQUIRE_VALID (thread_obj);
 
-  name = thread_obj->thread->name;
-  if (name == NULL)
-    name = target_thread_name (thread_obj->thread);
-
+  const char *name = thread_name (thread_obj->thread);
   if (name == NULL)
     Py_RETURN_NONE;
 
@@ -115,8 +111,7 @@ thpy_set_name (PyObject *self, PyObject *newvalue, void *ignore)
 	return -1;
     }
 
-  xfree (thread_obj->thread->name);
-  thread_obj->thread->name = name.release ();
+  thread_obj->thread->set_name (std::move (name));
 
   return 0;
 }

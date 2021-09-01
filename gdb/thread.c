@@ -302,11 +302,6 @@ thread_info::thread_info (struct inferior *inf_, ptid_t ptid_)
   this->m_suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
 }
 
-thread_info::~thread_info ()
-{
-  xfree (this->name);
-}
-
 /* See gdbthread.h.  */
 
 bool
@@ -998,7 +993,7 @@ thread_target_id_str (thread_info *tp)
 {
   std::string target_id = target_pid_to_str (tp->ptid);
   const char *extra_info = target_extra_thread_info (tp);
-  const char *name = tp->name != nullptr ? tp->name : target_thread_name (tp);
+  const char *name = thread_name (tp);
 
   if (extra_info != nullptr && name != nullptr)
     return string_printf ("%s \"%s\" (%s)", target_id.c_str (), name,
@@ -1140,9 +1135,7 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 	      if (extra_info != nullptr)
 		uiout->field_string ("details", extra_info);
 
-	      const char *name = (tp->name != nullptr
-				  ? tp->name
-				  : target_thread_name (tp));
+	      const char *name = thread_name (tp);
 	      if (name != NULL)
 		uiout->field_string ("name", name);
 	    }
@@ -1835,8 +1828,7 @@ thread_name_command (const char *arg, int from_tty)
   arg = skip_spaces (arg);
 
   info = inferior_thread ();
-  xfree (info->name);
-  info->name = arg ? xstrdup (arg) : NULL;
+  info->set_name (arg != nullptr ? make_unique_xstrdup (arg) : nullptr);
 }
 
 /* Find thread ids with a name, target pid, or extra info matching ARG.  */
@@ -1863,10 +1855,10 @@ thread_find_command (const char *arg, int from_tty)
     {
       switch_to_inferior_no_thread (tp->inf);
 
-      if (tp->name != NULL && re_exec (tp->name))
+      if (tp->name () != nullptr && re_exec (tp->name ()))
 	{
 	  printf_filtered (_("Thread %s has name '%s'\n"),
-			   print_thread_id (tp), tp->name);
+			   print_thread_id (tp), tp->name ());
 	  match++;
 	}
 
@@ -2008,6 +2000,24 @@ update_thread_list (void)
 {
   target_update_thread_list ();
   update_threads_executing ();
+}
+
+/* See gdbthread.h.  */
+
+const char *
+thread_name (thread_info *thread)
+{
+  /* Use the manually set name if there is one.  */
+  const char *name = thread->name ();
+  if (name != nullptr)
+    return name;
+
+  /* Otherwise, ask the target.  Ensure we query the right target stack.  */
+  scoped_restore_current_thread restore_thread;
+  if (thread->inf != current_inferior ())
+    switch_to_inferior_no_thread (thread->inf);
+
+  return target_thread_name (thread);
 }
 
 /* Return a new value for the selected thread's id.  Return a value of

@@ -8185,12 +8185,10 @@ print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
     ;
   else if (show_thread_that_caused_stop ())
     {
-      const char *name;
-
       uiout->text ("\nThread ");
       uiout->field_string ("thread-id", print_thread_id (thr));
 
-      name = thr->name != NULL ? thr->name : target_thread_name (thr);
+      const char *name = thread_name (thr);
       if (name != NULL)
 	{
 	  uiout->text (" \"");

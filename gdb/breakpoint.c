@@ -4565,13 +4565,12 @@ maybe_print_thread_hit_breakpoint (struct ui_out *uiout)
 
   if (show_thread_that_caused_stop ())
     {
-      const char *name;
       struct thread_info *thr = inferior_thread ();
 
       uiout->text ("Thread ");
       uiout->field_string ("thread-id", print_thread_id (thr));
 
-      name = thr->name != NULL ? thr->name : target_thread_name (thr);
+      const char *name = thread_name (thr);
       if (name != NULL)
 	{
 	  uiout->text (" \"");
