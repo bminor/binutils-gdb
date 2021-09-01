@@ -47,9 +47,6 @@
 # define SYMBOL(str)     str
 #endif
 
-#define XSTR(s) STR(s)
-#define STR(s) #s
-
 	.file	"fission-reread.cc"
 
 	.globl	SYMBOL(baz)
@@ -146,7 +143,7 @@ SYMBOL(main):
 	.4byte	0	/* Offset to Type DIE */
 	.uleb128 0x2	/* (DIE (0) DW_TAG_type_unit) */
 	.ascii "/tmp/src/gdb/testsuite\0"	/* DW_AT_comp_dir */
-	.asciz XSTR(DWO) /* DW_AT_GNU_dwo_name */
+	.asciz DWO /* DW_AT_GNU_dwo_name */
 	.4byte	.Ldebug_pubnames0	/* DW_AT_GNU_pubnames */
 	.4byte	.Ldebug_pubtypes0	/* DW_AT_GNU_pubtypes */
 	.4byte	.Ldebug_addr0	/* DW_AT_GNU_addr_base */
@@ -217,7 +214,7 @@ SYMBOL(main):
 	.4byte	.Letext0-.Ltext0	/* DW_AT_high_pc */
 	.4byte	.Ldebug_line0	/* DW_AT_stmt_list */
 	.ascii "/tmp/src/gdb/testsuite\0"	/* DW_AT_comp_dir */
-	.asciz XSTR(DWO) /* DW_AT_GNU_dwo_name */
+	.asciz DWO /* DW_AT_GNU_dwo_name */
 	.4byte	.Ldebug_pubnames0	/* DW_AT_GNU_pubnames */
 	.4byte	.Ldebug_pubtypes0	/* DW_AT_GNU_pubtypes */
 	.4byte	.Ldebug_addr0	/* DW_AT_GNU_addr_base */
