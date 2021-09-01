@@ -3649,7 +3649,7 @@ _bfd_elf_strip_zero_sized_dynamic_sections (struct bfd_link_info *info)
     else
       pp = &s->next;
 
-  if (strip_zero_sized_plt)
+  if (strip_zero_sized_plt && sdynamic->size != 0)
     for (extdyn = sdynamic->contents;
 	 extdyn < sdynamic->contents + sdynamic->size;
 	 extdyn = next)
@@ -3709,7 +3709,7 @@ bfd_elf_add_dt_needed_tag (bfd *abfd, struct bfd_link_info *info)
 
       bed = get_elf_backend_data (hash_table->dynobj);
       sdyn = bfd_get_linker_section (hash_table->dynobj, ".dynamic");
-      if (sdyn != NULL)
+      if (sdyn != NULL && sdyn->size != 0)
 	for (extdyn = sdyn->contents;
 	     extdyn < sdyn->contents + sdyn->size;
 	     extdyn += bed->s->sizeof_dyn)
@@ -3858,7 +3858,7 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 
   /* Update all .dynamic entries referencing .dynstr strings.  */
   for (extdyn = sdyn->contents;
-       extdyn < sdyn->contents + sdyn->size;
+       extdyn < PTR_ADD (sdyn->contents, sdyn->size);
        extdyn += bed->s->sizeof_dyn)
     {
       Elf_Internal_Dyn dyn;
@@ -4276,7 +4276,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		       | DYN_NO_NEEDED)) == 0;
 
       s = bfd_get_section_by_name (abfd, ".dynamic");
-      if (s != NULL)
+      if (s != NULL && s->size != 0)
 	{
 	  bfd_byte *dynbuf;
 	  bfd_byte *extdyn;
@@ -4650,7 +4650,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	(_("%pB: plugin needed to handle lto object"), abfd);
     }
 
-  for (isym = isymbuf, isymend = isymbuf + extsymcount;
+  for (isym = isymbuf, isymend = PTR_ADD (isymbuf, extsymcount);
        isym < isymend;
        isym++, sym_hash++, ever = (ever != NULL ? ever + 1 : NULL))
     {
@@ -10913,7 +10913,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
   /* Find local symbol sections and adjust values of symbols in
      SEC_MERGE sections.  Write out those local symbols we know are
      going into the output file.  */
-  isymend = isymbuf + locsymcount;
+  isymend = PTR_ADD (isymbuf, locsymcount);
   for (isym = isymbuf, pindex = flinfo->indices, ppsection = flinfo->sections;
        isym < isymend;
        isym++, pindex++, ppsection++)
@@ -11457,7 +11457,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 
 	      irela = internal_relocs;
 	      irelaend = irela + o->reloc_count;
-	      rel_hash = esdo->rel.hashes + esdo->rel.count;
+	      rel_hash = PTR_ADD (esdo->rel.hashes, esdo->rel.count);
 	      /* We start processing the REL relocs, if any.  When we reach
 		 IRELAMID in the loop, we switch to the RELA relocs.  */
 	      irelamid = irela;
@@ -11483,7 +11483,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 
 		  if (irela == irelamid)
 		    {
-		      rel_hash = esdo->rela.hashes + esdo->rela.count;
+		      rel_hash = PTR_ADD (esdo->rela.hashes, esdo->rela.count);
 		      rela_hash_list = rel_hash;
 		      rela_normal = bed->rela_normal;
 		    }
@@ -12957,7 +12957,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       BFD_ASSERT (o != NULL);
 
       dyncon = o->contents;
-      dynconend = o->contents + o->size;
+      dynconend = PTR_ADD (o->contents, o->size);
       for (; dyncon < dynconend; dyncon += bed->s->sizeof_dyn)
 	{
 	  Elf_Internal_Dyn dyn;
@@ -13160,7 +13160,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
       /* Check for DT_TEXTREL (late, in case the backend removes it).  */
       if (bfd_link_textrel_check (info)
-	  && (o = bfd_get_linker_section (dynobj, ".dynamic")) != NULL)
+	  && (o = bfd_get_linker_section (dynobj, ".dynamic")) != NULL
+	  && o->size != 0)
 	{
 	  bfd_byte *dyncon, *dynconend;
 
@@ -14206,7 +14207,7 @@ bfd_elf_gc_record_vtinherit (bfd *abfd,
     extsymcount -= elf_tdata (abfd)->symtab_hdr.sh_info;
 
   sym_hashes = elf_sym_hashes (abfd);
-  sym_hashes_end = sym_hashes + extsymcount;
+  sym_hashes_end = PTR_ADD (sym_hashes, extsymcount);
 
   /* Hunt down the child symbol, which is in this section at the same
      offset as the relocation.  */

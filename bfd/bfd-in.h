@@ -113,6 +113,11 @@ typedef struct bfd bfd;
 # define TRUE 1
 #endif
 
+/* Silence "applying zero offset to null pointer" UBSAN warnings.  */
+#define PTR_ADD(P,A) ((A) ? (P) + (A) : (P))
+/* Also prevent non-zero offsets from being applied to a null pointer.  */
+#define NPTR_ADD(P,A) ((P) ? (P) + (A) : (P))
+
 #ifdef BFD64
 
 #ifndef BFD_HOST_64_BIT

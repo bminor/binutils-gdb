@@ -3208,7 +3208,7 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	    }
 	}
     }
-  rel_ppend = rel_pp + rel_count;
+  rel_ppend = PTR_ADD (rel_pp, rel_count);
 
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
