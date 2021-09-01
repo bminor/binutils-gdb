@@ -40,7 +40,7 @@ if { $additional_flags != "" } {
 
 set dwo_options $options
 lappend dwo_options split-dwo
-lappend dwo_options additional_flags=-DDWO=$dwo
+lappend dwo_options additional_flags=-DDWO=\"$dwo\"
 
 if [build_executable_and_dwo_files "$testfile.exp" "${binfile}" $options \
 	[list $srcfile $dwo_options $obj]] {
