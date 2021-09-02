@@ -1713,7 +1713,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
       /* Now create the conditional branch + fixup to the final target.  */
       /* 0x000107ea = bne LBL(disp17).  */
       md_number_to_chars ((char *) buffer + 2, 0x000107ea, 4);
-      fix_new (fragP, fragP->fr_fix+2, 4, fragP->fr_symbol,
+      fix_new (fragP, fragP->fr_fix + 2, 4, fragP->fr_symbol,
 	       fragP->fr_offset, 1,
 	       BFD_RELOC_V850_17_PCREL);
       fragP->fr_fix += 6;
@@ -2020,22 +2020,19 @@ handle_lo16 (const struct v850_operand *operand, const char **errmsg)
 {
   if (operand == NULL)
     return BFD_RELOC_LO16;
-
-  if (operand->default_reloc == BFD_RELOC_LO16)
-    return BFD_RELOC_LO16;
-
-  if (operand->default_reloc == BFD_RELOC_V850_16_SPLIT_OFFSET)
-    return BFD_RELOC_V850_LO16_SPLIT_OFFSET;
-
-  if (operand->default_reloc == BFD_RELOC_V850_16_S1)
-    return BFD_RELOC_V850_LO16_S1;
-
-  if (operand->default_reloc == BFD_RELOC_16)
-    return BFD_RELOC_LO16;
-
-  *errmsg = _("lo() relocation used on an instruction which does "
-	      "not support it");
-  return BFD_RELOC_64;  /* Used to indicate an error condition.  */
+  
+  switch (operand->default_reloc)
+    {
+    case BFD_RELOC_LO16: return BFD_RELOC_LO16;
+    case BFD_RELOC_V850_LO16_SPLIT_OFFSET: return BFD_RELOC_V850_LO16_SPLIT_OFFSET;
+    case BFD_RELOC_V850_16_SPLIT_OFFSET: return BFD_RELOC_V850_LO16_SPLIT_OFFSET;
+    case BFD_RELOC_V850_16_S1: return BFD_RELOC_V850_LO16_S1;
+    case BFD_RELOC_16: return BFD_RELOC_LO16;
+    default:
+      *errmsg = _("lo() relocation used on an instruction which does "
+		  "not support it");
+      return BFD_RELOC_64;  /* Used to indicate an error condition.  */
+    }
 }
 
 static bfd_reloc_code_real_type
@@ -2157,15 +2154,15 @@ v850_reloc_prefix (const struct v850_operand *operand, const char **errmsg)
       return reloc;							\
     }
 
-  CHECK_ ("hi0",    handle_hi016(operand, errmsg)  );
-  CHECK_ ("hi",	    handle_hi16(operand, errmsg)   );
-  CHECK_ ("lo",	    handle_lo16 (operand, errmsg)  );
+  CHECK_ ("hi0",    handle_hi016 (operand, errmsg));
+  CHECK_ ("hi",	    handle_hi16 (operand, errmsg));
+  CHECK_ ("lo",	    handle_lo16 (operand, errmsg));
   CHECK_ ("sdaoff", handle_sdaoff (operand, errmsg));
   CHECK_ ("zdaoff", handle_zdaoff (operand, errmsg));
   CHECK_ ("tdaoff", handle_tdaoff (operand, errmsg));
   CHECK_ ("hilo",   BFD_RELOC_32);
   CHECK_ ("lo23",   BFD_RELOC_V850_23);
-  CHECK_ ("ctoff",  handle_ctoff (operand, errmsg) );
+  CHECK_ ("ctoff",  handle_ctoff (operand, errmsg));
 
   /* Restore skipped parenthesis.  */
   if (paren_skipped)

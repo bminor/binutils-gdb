@@ -1,3 +1,11 @@
+2021-09-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 28292
+	* config/tc-v850.c (handle_lo16): Also accept
+	BFD_RELOC_V850_LO16_SPLIT_OFFSET.
+	* testsuite/gas/v850/split-lo16.s: Add extra line.
+	* testsuite/gas/v850/split-lo16.d: Update expected disassembly.
+
 2021-08-11  Darius Galis  <darius.galis@cyberthorstudios.com>
 
 	* config/rx-parse.y (DECNT): Fixed typo.

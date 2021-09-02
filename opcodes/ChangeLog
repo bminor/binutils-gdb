@@ -1,3 +1,9 @@
+2021-09-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 28292
+	* v850-opc.c (D16): Use BFD_RELOC_V850_LO16_SPLIT_OFFSET in place
+	of BFD_RELOC_16.
+
 2021-08-17  Shahab Vahedi <shahab@synopsys.com>
 
 	* arc-regs.h (DEF): Fix the register numbers.
