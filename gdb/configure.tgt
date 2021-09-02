@@ -529,7 +529,7 @@ rl78-*-elf)
 	gdb_target_obs="rl78-tdep.o"
 	;;
 
-rx-*-elf)
+rx-*-*)
 	# Target: Renesas RX
 	gdb_target_obs="rx-tdep.o"
 	;;
