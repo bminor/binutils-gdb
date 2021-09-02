@@ -8095,7 +8095,6 @@ swap_out_syms (bfd *abfd,
   bfd_byte *outbound_syms;
   bfd_byte *outbound_shndx;
   unsigned long outbound_syms_index;
-  unsigned long outbound_shndx_index;
   unsigned int idx;
   unsigned int num_locals;
   size_t amt;
@@ -8144,7 +8143,6 @@ swap_out_syms (bfd *abfd,
   outbound_syms_index = 0;
 
   outbound_shndx = NULL;
-  outbound_shndx_index = 0;
 
   if (elf_symtab_shndx_list (abfd))
     {
@@ -8180,10 +8178,7 @@ swap_out_syms (bfd *abfd,
     sym.st_target_internal = 0;
     symstrtab[0].sym = sym;
     symstrtab[0].dest_index = outbound_syms_index;
-    symstrtab[0].destshndx_index = outbound_shndx_index;
     outbound_syms_index++;
-    if (outbound_shndx != NULL)
-      outbound_shndx_index++;
   }
 
   name_local_sections
@@ -8415,11 +8410,8 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
       idx++;
       symstrtab[idx].sym = sym;
       symstrtab[idx].dest_index = outbound_syms_index;
-      symstrtab[idx].destshndx_index = outbound_shndx_index;
 
       outbound_syms_index++;
-      if (outbound_shndx != NULL)
-	outbound_shndx_index++;
     }
 
   /* Finalize the .strtab section.  */
@@ -8444,9 +8436,9 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
 			       (outbound_syms
 				+ (elfsym->dest_index
 				   * bed->s->sizeof_sym)),
-			       (outbound_shndx
-				+ (elfsym->destshndx_index
-				   * sizeof (Elf_External_Sym_Shndx))));
+			       NPTR_ADD (outbound_shndx,
+					 (elfsym->dest_index
+					  * sizeof (Elf_External_Sym_Shndx))));
     }
   free (symstrtab);
 

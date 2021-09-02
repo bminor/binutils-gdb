@@ -9916,7 +9916,7 @@ elf_link_output_symstrtab (void *finf,
 
   hash_table = elf_hash_table (flinfo->info);
   strtabsize = hash_table->strtabsize;
-  if (strtabsize <= hash_table->strtabcount)
+  if (strtabsize <= flinfo->output_bfd->symcount)
     {
       strtabsize += strtabsize;
       hash_table->strtabsize = strtabsize;
@@ -9927,14 +9927,10 @@ elf_link_output_symstrtab (void *finf,
       if (hash_table->strtab == NULL)
 	return 0;
     }
-  hash_table->strtab[hash_table->strtabcount].sym = *elfsym;
-  hash_table->strtab[hash_table->strtabcount].dest_index
-    = hash_table->strtabcount;
-  hash_table->strtab[hash_table->strtabcount].destshndx_index
-    = flinfo->symshndxbuf ? bfd_get_symcount (flinfo->output_bfd) : 0;
-
+  hash_table->strtab[flinfo->output_bfd->symcount].sym = *elfsym;
+  hash_table->strtab[flinfo->output_bfd->symcount].dest_index
+    = flinfo->output_bfd->symcount;
   flinfo->output_bfd->symcount += 1;
-  hash_table->strtabcount += 1;
 
   return 1;
 }
@@ -9954,14 +9950,14 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
   file_ptr pos;
   bool ret;
 
-  if (!hash_table->strtabcount)
+  if (flinfo->output_bfd->symcount == 0)
     return true;
 
   BFD_ASSERT (elf_onesymtab (flinfo->output_bfd));
 
   bed = get_elf_backend_data (flinfo->output_bfd);
 
-  amt = bed->s->sizeof_sym * hash_table->strtabcount;
+  amt = bed->s->sizeof_sym * flinfo->output_bfd->symcount;
   symbuf = (bfd_byte *) bfd_malloc (amt);
   if (symbuf == NULL)
     return false;
@@ -9979,7 +9975,7 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
     }
 
   /* Now swap out the symbols.  */
-  for (i = 0; i < hash_table->strtabcount; i++)
+  for (i = 0; i < flinfo->output_bfd->symcount; i++)
     {
       struct elf_sym_strtab *elfsym = &hash_table->strtab[i];
       if (elfsym->sym.st_name == (unsigned long) -1)
@@ -9999,13 +9995,13 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
 			       ((bfd_byte *) symbuf
 				+ (elfsym->dest_index
 				   * bed->s->sizeof_sym)),
-			       (flinfo->symshndxbuf
-				+ elfsym->destshndx_index));
+			       NPTR_ADD (flinfo->symshndxbuf,
+					 elfsym->dest_index));
     }
 
   hdr = &elf_tdata (flinfo->output_bfd)->symtab_hdr;
   pos = hdr->sh_offset + hdr->sh_size;
-  amt = hash_table->strtabcount * bed->s->sizeof_sym;
+  amt = bed->s->sizeof_sym * flinfo->output_bfd->symcount;
   if (bfd_seek (flinfo->output_bfd, pos, SEEK_SET) == 0
       && bfd_bwrite (symbuf, amt, flinfo->output_bfd) == amt)
     {
