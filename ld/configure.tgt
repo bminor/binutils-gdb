@@ -77,6 +77,9 @@ aarch64-*-linux*)	targ_emul=aarch64linux
 			targ_extra_libpath="aarch64linuxb aarch64linux32 aarch64linux32b armelfb_linux_eabi armelf_linux_eabi"
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb $targ_extra_libpath"
 			;;
+aarch64-*-haiku*)	targ_emul=aarch64haiku
+			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb armelf_haiku $targ_extra_libpath"
+			;;
 alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
 			targ_emul=elf64alpha_fbsd
 			targ_extra_emuls="elf64alpha alpha"
@@ -198,6 +201,9 @@ arm*-*-conix*)		targ_emul=armelf
 			;;
 arm*-*-fuchsia*)	targ_emul=armelf_fuchsia
 			targ_extra_emuls="armelfb_fuchsia armelf armelfb"
+			;;
+arm*-*-haiku*)		arg_emul=armelf_haiku
+			targ_extra_emuls=armelf
 			;;
 avr-*-*)		targ_emul=avr2
 			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6 avrxmega1 avrxmega2 avrxmega3 avrxmega4 avrxmega5 avrxmega6 avrxmega7 avrtiny"
@@ -395,6 +401,8 @@ i[3-7]86-*-beospe*)	targ_emul=i386beos
 			;;
 i[3-7]86-*-beos*)	targ_emul=elf_i386_be
 			;;
+i[3-7]86-*-haiku*)	targ_emul=elf_i386_haiku
+			;;
 i[3-7]86-*-vxworks*)	targ_emul=elf_i386_vxworks
 			;;
 i[3-7]86-*-chaos)	targ_emul=elf_i386_chaos
@@ -448,6 +456,8 @@ m68hc12-*-*|m6812-*-*)	targ_emul=m68hc12elf
 			;;
 m68*-*-netbsd*)	targ_emul=m68kelfnbsd
 			;;
+m68*-*-haiku*)		targ_emul=m68kelf
+			;;
 m68*-*-*)		targ_emul=m68kelf
 			;;
 mcore-*-pe)		targ_emul=mcorepe ;
@@ -476,6 +486,9 @@ mips*-sgi-irix5*)	targ_emul=elf32bsmip
 mips*-sgi-irix6*)	targ_emul=elf32bmipn32
 			targ_extra_emuls="elf32bsmip elf64bmip"
 			targ_extra_libpath=$targ_extra_emuls
+			;;
+mips*el-*-haiku*)	targ_emul=elf_mipsel_haiku
+			targ_extra_emuls="elf32ltsmip elf32btsmip elf32ltsmipn32 elf64ltsmip elf32btsmipn32 elf64btsmip"
 			;;
 mips*el-*-netbsd*)	targ_emul=elf32ltsmip
 			targ_extra_emuls="elf32btsmip elf64ltsmip elf64btsmip"
@@ -733,6 +746,8 @@ powerpc-*-aix*)		targ_emul=aixppc
 powerpc-*-beos*)	targ_emul=aixppc
 			targ_extra_ofiles=
 			;;
+powerpc-*-haiku*)	targ_emul=elf32ppchaiku
+			;;
 powerpc-*-windiss*)	targ_emul=elf32ppcwindiss
 			;;
 pru*-*-*)		targ_emul=pruelf
@@ -869,6 +884,8 @@ sparc64-*-solaris2* | sparcv9-*-solaris2*)
 			targ_extra_libpath=$targ_extra_emuls
 			tdir_elf32_sparc=`echo ${targ_alias} | sed -e 's/64//'`
 			;;
+sparc64-*-haiku*)	targ_emul=elf64_sparc
+			;;
 sparc64-*-*)		targ_emul=elf64_sparc
 			;;
 sparc*-*-linux-*)	targ_emul=elf32_sparc
@@ -935,6 +952,9 @@ visium-*-elf)		targ_emul=elf32visium
 x86_64-*-rdos*)		targ_emul=elf64rdos
 			;;
 x86_64-*-cloudabi*)	targ_emul=elf_x86_64_cloudabi
+			;;
+x86_64-*-haiku*)	targ_emul=elf_x86_64_haiku
+			targ_extra_emuls="elf_x86_64 elf_i386_haiku"
 			;;
 x86_64-*-linux-gnux32)	targ_emul=elf32_x86_64
 			targ_extra_emuls="elf_x86_64 elf_i386 elf_iamcu elf_l1om elf_k1om"

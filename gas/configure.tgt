@@ -125,6 +125,7 @@ generic_target=${cpu_type}-$vendor-$os
 case ${generic_target} in
   aarch64*-*-elf*)			fmt=elf;;
   aarch64*-*-fuchsia*)			fmt=elf;;
+  aarch64*-*-haiku*)			fmt=elf em=haiku ;;
   aarch64*-*-genode*)			fmt=elf;;
   aarch64*-*-linux*)			fmt=elf em=linux
     case ${cpu}-${os} in
@@ -161,6 +162,7 @@ case ${generic_target} in
 					fmt=coff em=wince-pe ;;
   arm-*-pe)				fmt=coff em=pe ;;
   arm-*-fuchsia*)			fmt=elf ;;
+  arm-*-haiku*)				fmt=elf em=haiku ;;
 
   avr-*-*)				fmt=elf bfd_gas=yes ;;
 
@@ -222,6 +224,7 @@ case ${generic_target} in
   i386-*-elfiamcu)			fmt=elf arch=iamcu ;;
   i386-*-elf*)				fmt=elf ;;
   i386-*-fuchsia*)			fmt=elf ;;
+  i386-*-haiku*)			fmt=elf em=haiku ;;
   i386-*-genode*)			fmt=elf ;;
   i386-*-bsd*)				fmt=aout em=386bsd ;;
   i386-*-netbsd*-gnu* | \
@@ -288,6 +291,7 @@ case ${generic_target} in
   m68k-*-uclinux*)			fmt=elf em=uclinux ;;
   m68k-*-gnu*)				fmt=elf ;;
   m68k-*-netbsd*)			fmt=elf em=nbsd ;;
+  m68k-*-haiku*)			fmt=elf em=haiku ;;
 
   s12z-*-*)				fmt=elf ;;
 
@@ -309,6 +313,7 @@ case ${generic_target} in
   mips-*-sysv4* | mips-*-gnu*)		fmt=elf em=tmips ;;
   mips*-sde-elf* | mips*-mti-elf* | mips*-img-elf*)
 					fmt=elf em=tmips ;;
+  mips-*-haiku*)			fmt=elf em=haiku ;;
   mips-*-elf*)				fmt=elf ;;
   mips-*-netbsd*)			fmt=elf em=tmips ;;
   mips-*-openbsd*)			fmt=elf em=tmips ;;
@@ -351,6 +356,7 @@ case ${generic_target} in
   ppc-*-beos*)				fmt=coff ;;
   ppc-*-*n*bsd* | ppc-*-elf*)		fmt=elf ;;
   ppc-*-eabi* | ppc-*-sysv4*)		fmt=elf ;;
+  ppc-*-haiku*)				fmt=elf em=haiku ;;
   ppc-*-linux-*)			fmt=elf em=linux ;;
   ppc-*-solaris*)			fmt=elf em=solaris ;;
   ppc-*-macos*)				fmt=coff em=macos ;;
@@ -359,6 +365,7 @@ case ${generic_target} in
 
   pru-*-*)				fmt=elf ;;
 
+  riscv*-*-haiku*)			fmt=elf endian=little em=haiku ;;
   riscv*-*-*)				fmt=elf ;;
 
   rx-*-linux*)				fmt=elf em=linux ;;
@@ -386,6 +393,7 @@ case ${generic_target} in
   sh-*-kaos*)				fmt=elf ;;
   shle*-*-kaos*)			fmt=elf ;;
 
+  sparc-*-haiku*)			fmt=elf em=haiku ;;
   sparc-*-linux-*)			fmt=elf em=linux ;;
   sparc-*-solaris*)			fmt=elf em=solaris ;;
   sparc-*-freebsd*)			fmt=elf em=freebsd ;;
