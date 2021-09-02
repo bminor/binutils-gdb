@@ -238,7 +238,7 @@ init_symtab (ctf_dict_t *fp, const ctf_header_t *hp, const ctf_sect_t *sp)
   int skip_func_info = 0;
   int i;
   uint32_t *xp = fp->ctf_sxlate;
-  uint32_t *xend = xp + fp->ctf_nsyms;
+  uint32_t *xend = PTR_ADD (xp, fp->ctf_nsyms);
 
   uint32_t objtoff = hp->cth_objtoff;
   uint32_t funcoff = hp->cth_funcoff;
