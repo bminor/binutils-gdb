@@ -258,8 +258,8 @@ ALL_EMULATION_SOURCES = \
 	eelf32or1k_linux.c \
 	eelf32ppc.c \
 	eelf32ppc_fbsd.c \
-	eelf32ppclinux.c \
 	eelf32ppchaiku.c \
+	eelf32ppclinux.c \
 	eelf32ppcnto.c \
 	eelf32ppcsim.c \
 	eelf32ppcvxworks.c \
@@ -285,8 +285,8 @@ ALL_EMULATION_SOURCES = \
 	eelf_i386_ldso.c \
 	eelf_i386_sol2.c \
 	eelf_i386_vxworks.c \
-	eelf_mipsel_haiku.c \
 	eelf_iamcu.c \
+	eelf_mipsel_haiku.c \
 	eelf_s390.c \
 	eh8300elf.c \
 	eh8300elf_linux.c \
@@ -459,8 +459,8 @@ ALL_64_EMULATION_SOURCES = \
 	eelf_k1om_fbsd.c \
 	eelf_x86_64.c \
 	eelf_x86_64_cloudabi.c \
-	eelf_x86_64_haiku.c \
 	eelf_x86_64_fbsd.c \
+	eelf_x86_64_haiku.c \
 	eelf_x86_64_sol2.c \
 	ehppa64linux.c \
 	ei386pep.c \
