@@ -864,12 +864,20 @@ static void
 infpy_dealloc (PyObject *obj)
 {
   inferior_object *inf_obj = (inferior_object *) obj;
-  struct inferior *inf = inf_obj->inferior;
 
-  if (! inf)
-    return;
+  /* The inferior itself holds a reference to this Python object, which
+     will keep the reference count of this object above zero until GDB
+     deletes the inferior and py_free_inferior is called.
 
-  set_inferior_data (inf, infpy_inf_data_key, NULL);
+     Once py_free_inferior has been called then the link between this
+     Python object and the inferior is set to nullptr, and then the
+     reference count on this Python object is decremented.
+
+     The result of all this is that the link between this Python object and
+     the inferior should always have been set to nullptr before this
+     function is called.  */
+  gdb_assert (inf_obj->inferior == nullptr);
+
   Py_TYPE (obj)->tp_free (obj);
 }
 
