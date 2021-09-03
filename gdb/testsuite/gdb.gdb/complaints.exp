@@ -104,6 +104,26 @@ proc test_empty_complaint { cmd msg } {
 }
 
 proc test_empty_complaints { } {
+    global decimal
+
+    set re [multi_line \
+		"All functions matching regular expression \[^:\]*:" \
+		"" \
+		"File \[^\r\n\]*/complaints\\.c:" \
+		"$decimal:\tvoid clear_complaints\\(\\);"]
+
+    set found 0
+    gdb_test_multiple "info function ^clear_complaints()$" "" {
+	-re -wrap $re {
+	    set found 1
+	}
+	-re -wrap "" {
+	}
+    }
+    if { ! $found } {
+	untested "Cannot find clear_complaints, skipping test"
+	return 0
+    }
 
     test_empty_complaint "call clear_complaints()" \
 	    "clear complaints"
