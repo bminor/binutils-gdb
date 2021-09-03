@@ -2475,12 +2475,6 @@ Symbol_table::do_add_undefined_symbols_from_command_line(Layout* layout)
        ++p)
     this->add_undefined_symbol_from_command_line<size>(p->c_str());
 
-  for (options::String_set::const_iterator p =
-	 parameters->options().export_dynamic_symbol_begin();
-       p != parameters->options().export_dynamic_symbol_end();
-       ++p)
-    this->add_undefined_symbol_from_command_line<size>(p->c_str());
-
   for (Script_options::referenced_const_iterator p =
 	 layout->script_options()->referenced_begin();
        p != layout->script_options()->referenced_end();

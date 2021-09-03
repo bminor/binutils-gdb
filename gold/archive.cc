@@ -120,13 +120,6 @@ Library_base::should_include_member(Symbol_table* symtab, Layout* layout,
       return Library_base::SHOULD_INCLUDE_YES;
     }
 
-  if (parameters->options().is_export_dynamic_symbol(sym_name))
-    {
-      *why = "--export-dynamic-symbol ";
-      *why += sym_name;
-      return Library_base::SHOULD_INCLUDE_YES;
-    }
-
   if (layout->script_options()->is_referenced(sym_name))
     {
       size_t alc = 100 + strlen(sym_name);
