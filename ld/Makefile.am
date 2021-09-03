@@ -123,8 +123,8 @@ CXX_FOR_TARGET = ` \
   fi`
 
 # Strip out sanitization options as we want to test building binaries without any extra paraphernalia
-CFLAGS_FOR_TARGET = `echo $(CFLAGS) | sed -e 's/-fsanitize=address//g' -e 's/-fsanitize=undefined//g'`
-CXXFLAGS_FOR_TARGET = `echo $(CXXFLAGS) | sed -e 's/-fsanitize=address//g' -e 's/-fsanitize=undefined//g'`
+CFLAGS_FOR_TARGET = `echo $(CFLAGS) | sed -e 's/-fsanitize=[^ ]*//g'`
+CXXFLAGS_FOR_TARGET = `echo $(CXXFLAGS) | sed -e 's/-fsanitize=[^ ]*//g'`
 
 transform = s/^ld-new$$/$(installed_linker)/;@program_transform_name@
 bin_PROGRAMS = ld-new

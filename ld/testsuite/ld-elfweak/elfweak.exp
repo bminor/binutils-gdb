@@ -384,16 +384,16 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
 }
 verbose "Using $picflag to compile PIC code"
 
-if {![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/foo.c $tmpdir/foo.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/bar.c $tmpdir/bar.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/main.c $tmpdir/main.o]
+if {![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/foo.c $tmpdir/foo.o]
+    || ![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/bar.c $tmpdir/bar.o]
+    || ![ld_compile "$cc_cmd" $srcdir/$subdir/main.c $tmpdir/main.o]
     || ![ld_link $cc_cmd $tmpdir/libbar.so "$shared $tmpdir/bar.o"]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/foo1a.c $tmpdir/foo1a.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/foo1b.c $tmpdir/foo1b.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/bar1a.c $tmpdir/bar1a.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/bar1b.c $tmpdir/bar1b.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/bar1c.c $tmpdir/bar1c.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/main1.c $tmpdir/main1.o]} then {
+    || ![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/foo1a.c $tmpdir/foo1a.o]
+    || ![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/foo1b.c $tmpdir/foo1b.o]
+    || ![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/bar1a.c $tmpdir/bar1a.o]
+    || ![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/bar1b.c $tmpdir/bar1b.o]
+    || ![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/bar1c.c $tmpdir/bar1c.o]
+    || ![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/main1.c $tmpdir/main1.o]} then {
     unsupported "ELF weak"
 } elseif {![ld_link $cc_cmd $tmpdir/libfoo1a.so "$shared $tmpdir/foo1a.o"]
 	  || ![ld_link $cc_cmd $tmpdir/libfoo1b.so "$shared $tmpdir/foo1b.o"]
@@ -424,10 +424,10 @@ if {![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/foo.c $tm
     build_exec "ELF weak data last DSO common" foo "libfoo1b.so main1.o libbar1a.so" "-Wl,--no-as-needed,-rpath,.,-rpath-link,." weakdata weakdata.dsym ""
 }
 
-if {![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/size_foo.c $tmpdir/size_foo.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/size_bar.c $tmpdir/size_bar_s.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag -DSIZE_BIG" $srcdir/$subdir/size_bar.c $tmpdir/size_bar.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/size_main.c $tmpdir/size_main.o]} then {
+if {![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/size_foo.c $tmpdir/size_foo.o]
+    || ![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/size_bar.c $tmpdir/size_bar_s.o]
+    || ![ld_compile "$cc_cmd $picflag -DSIZE_BIG" $srcdir/$subdir/size_bar.c $tmpdir/size_bar.o]
+    || ![ld_compile "$cc_cmd" $srcdir/$subdir/size_main.c $tmpdir/size_main.o]} then {
     unsupported "ELF weak (size)"
 } else {
     build_lib "ELF DSO small bar (size)" libsize_bar_s "size_bar_s.o" ""
@@ -439,11 +439,11 @@ if {![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/size_foo.
 verbose "size2"
 run_dump_test $srcdir/$subdir/size2
 
-if {![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/alias.c $tmpdir/alias.o]
+if {![ld_compile "$cc_cmd $picflag" $srcdir/$subdir/alias.c $tmpdir/alias.o]
     || ![ld_link $cc_cmd $tmpdir/alias.so "$shared $tmpdir/alias.o"]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/aliasmain.c $tmpdir/aliasmain.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/weakref1.c $tmpdir/weakref1.o]
-    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/weakref2.c $tmpdir/weakref2.o]} then {
+    || ![ld_compile $cc_cmd $srcdir/$subdir/aliasmain.c $tmpdir/aliasmain.o]
+    || ![ld_compile $cc_cmd $srcdir/$subdir/weakref1.c $tmpdir/weakref1.o]
+    || ![ld_compile $cc_cmd $srcdir/$subdir/weakref2.c $tmpdir/weakref2.o]} then {
     unsupported "ELF weak (alias)"
 } else {
     build_exec "ELF weak (alias)" alias "aliasmain.o weakref1.o weakref2.o alias.so" "-Wl,-rpath=.,--no-as-needed" alias "" ""

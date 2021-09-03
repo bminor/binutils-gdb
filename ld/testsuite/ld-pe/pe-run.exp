@@ -63,13 +63,12 @@ set tmpdir tmpdir
 
 proc test_direct_link_dll {} {
     global CC_FOR_TARGET
-    global CFLAGS_FOR_TARGET
     global srcdir
     global subdir
     global tmpdir
 
     # Compile the dll.
-    if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/direct_dll.c $tmpdir/direct_dll.o ] {
+    if ![ld_compile $CC_FOR_TARGET $srcdir/$subdir/direct_dll.c $tmpdir/direct_dll.o ] {
 	fail "compiling shared lib"
     } elseif ![ld_link "$CC_FOR_TARGET -shared" $tmpdir/direct_dll.dll "$tmpdir/direct_dll.o" ] {
 	fail "linking shared lib (.dll)"
@@ -77,7 +76,7 @@ proc test_direct_link_dll {} {
 	fail "linking shared lib (.sl)"
     } else {
 	# Compile and link the client program.
-	if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/direct_client.c $tmpdir/direct_client.o ] {
+	if ![ld_compile $CC_FOR_TARGET $srcdir/$subdir/direct_client.c $tmpdir/direct_client.o ] {
 	    fail "compiling client"
 	} else {
 	    # Check linking directly to direct_dll.dll.

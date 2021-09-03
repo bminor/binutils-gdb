@@ -212,7 +212,7 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
 verbose "Using $picflag to compile PIC code"
 
 # Compile the main program.
-if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
+if ![ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
     unsupported "shared (non PIC)"
     unsupported "shared"
 } else {
@@ -223,8 +223,8 @@ if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/mai
     # using -fpic will cause some of the tests to return different
     # results.  Make sure that PLT is used since PLT is expected.
     global PLT_CFLAGS NOPIE_CFLAGS
-    if { ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $NOPIE_CFLAGS $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
-	 || ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
+    if { ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $NOPIE_CFLAGS $SHCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
+	 || ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $SHCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	unsupported "shared (non PIC)"
     } else { if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	shared_test shnp "shared (nonPIC)" mainnp.o sh1np.o sh2np.o xcoff
@@ -284,25 +284,25 @@ if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/mai
 
     # Now compile the code using -fpic.
 
-    if { ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o]
-	 || ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
+    if { ![ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o]
+	 || ![ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
 	unsupported "shared"
     } else {
 	if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o xcoff
 	} else {
 	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o shared
-	    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET -DSYMBOLIC_TEST -DXCOFF_TEST $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
-	    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET -DSYMBOLIC_TEST -DXCOFF_TEST $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
+	    ld_compile "$CC_FOR_TARGET -DSYMBOLIC_TEST -DXCOFF_TEST $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
+	    ld_compile "$CC_FOR_TARGET -DSYMBOLIC_TEST -DXCOFF_TEST $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
 	    shared_test shp "shared -Bsymbolic" mainnp.o sh1p.o sh2p.o symbolic "-Bsymbolic"
-	    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
-	    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
+	    ld_compile "$CC_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
+	    ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
 	}
     }
 }
 
 # Now do the same tests again, but this time compile main.c PIC.
-if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
+if ![ld_compile "$CC_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
     unsupported "shared (PIC main, non PIC so)"
     unsupported "shared (PIC main)"
 } else {

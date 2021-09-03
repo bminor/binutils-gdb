@@ -619,8 +619,8 @@ CXX_FOR_TARGET = ` \
 
 
 # Strip out sanitization options as we want to test building binaries without any extra paraphernalia
-CFLAGS_FOR_TARGET = `echo $(CFLAGS) | sed -e 's/-fsanitize=address//g' -e 's/-fsanitize=undefined//g'`
-CXXFLAGS_FOR_TARGET = `echo $(CXXFLAGS) | sed -e 's/-fsanitize=address//g' -e 's/-fsanitize=undefined//g'`
+CFLAGS_FOR_TARGET = `echo $(CFLAGS) | sed -e 's/-fsanitize=[^ ]*//g'`
+CXXFLAGS_FOR_TARGET = `echo $(CXXFLAGS) | sed -e 's/-fsanitize=[^ ]*//g'`
 info_TEXINFOS = ld.texi
 ld_TEXINFOS = configdoc.texi
 noinst_TEXINFOS = ldint.texi

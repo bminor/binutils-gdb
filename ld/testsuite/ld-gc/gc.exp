@@ -37,7 +37,7 @@ if { [istarget m681*-*-*] || [istarget m68hc1*-*-*] } {
 }
 
 if { [check_compiler_available] } {
-    ld_compile "$CC_FOR_TARGET -c $CFLAGS_FOR_TARGET $cflags" $srcdir/$subdir/gc.c $objfile
+    ld_compile "$CC_FOR_TARGET -c $cflags" $srcdir/$subdir/gc.c $objfile
 }
 
 proc test_gc { testname filename linker ldflags} {
@@ -144,9 +144,9 @@ if { [check_compiler_available] } {
     if { [istarget "*-*-linux*"]
 	 || [istarget "*-*-nacl*"]
 	 || [istarget "*-*-gnu*"] } {
-	ld_compile "$CC_FOR_TARGET -fPIC $CFLAGS_FOR_TARGET $cflags" $srcdir/$subdir/pr11218-1.c tmpdir/pr11218-1.o
+	ld_compile "$CC_FOR_TARGET -fPIC $cflags" $srcdir/$subdir/pr11218-1.c tmpdir/pr11218-1.o
 	ld_link $ld tmpdir/pr11218-1.so "-shared tmpdir/pr11218-1.o"
-	ld_compile "$CC_FOR_TARGET -c $CFLAGS_FOR_TARGET $cflags" $srcdir/$subdir/pr11218-2.c tmpdir/pr11218-2.o
+	ld_compile "$CC_FOR_TARGET -c $cflags" $srcdir/$subdir/pr11218-2.c tmpdir/pr11218-2.o
 	run_dump_test "pr11218"
     }
 }
@@ -157,18 +157,18 @@ if [is_pecoff_format] {
 }
 
 if { [check_compiler_available] } {
-    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $cflags" $srcdir/$subdir/pr13683.c tmpdir/pr13683.o
+    ld_compile "$CC_FOR_TARGET $cflags" $srcdir/$subdir/pr13683.c tmpdir/pr13683.o
     run_dump_test "pr13683" $symdefs
 }
 
 if { [check_compiler_available] } {
-    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $cflags $NOPIE_CFLAGS" $srcdir/$subdir/pr14265.c tmpdir/pr14265.o
+    ld_compile "$CC_FOR_TARGET $cflags $NOPIE_CFLAGS" $srcdir/$subdir/pr14265.c tmpdir/pr14265.o
     run_dump_test "pr14265" $symdefs
 }
 
 if { [check_compiler_available] } {
-    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $cflags -O0" $srcdir/$subdir/pr19161-1.c tmpdir/pr19161-1.o
-    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $cflags -O0" $srcdir/$subdir/pr19161-2.c tmpdir/pr19161-2.o
+    ld_compile "$CC_FOR_TARGET $cflags -O0" $srcdir/$subdir/pr19161-1.c tmpdir/pr19161-1.o
+    ld_compile "$CC_FOR_TARGET $cflags -O0" $srcdir/$subdir/pr19161-2.c tmpdir/pr19161-2.o
     if [istarget hppa*-*-linux*] {
 	set symdefs {{ld {--defsym '\$\$dyncall=0'}}}
     }

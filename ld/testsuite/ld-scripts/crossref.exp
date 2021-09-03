@@ -38,12 +38,10 @@ if { ![check_compiler_available] } {
     return
 }
 
-set old_CFLAGS "$CFLAGS_FOR_TARGET"
-
 # Pass -fplt to CC since -fno-plt doesn't work with NOCROSSREFS tests.
 # Also add $NOPIE_CFLAGS since PIE doesn't work NOCROSSREFS tests.
-set old_CC "$CC_FOR_TARGET"
-append CC_FOR_TARGET " $PLT_CFLAGS $NOPIE_CFLAGS"
+set old_CFLAGS "$CFLAGS_FOR_TARGET"
+append CFLAGS_FOR_TARGET " $PLT_CFLAGS $NOPIE_CFLAGS"
 
 # Xtensa targets currently default to putting literal values in a separate
 # section and that requires linker script support, so put literals in text.
@@ -68,7 +66,6 @@ if { ![ld_compile "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$su
     unsupported $test1
     unsupported $test2
     set CFLAGS_FOR_TARGET "$old_CFLAGS"
-    set CC_FOR_TARGET "$old_CC"
     return
 }
 
@@ -105,7 +102,6 @@ if [string match "" $exec_output] then {
 if { ![ld_compile "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross3.c" tmpdir/cross3.o] } {
     unsupported $test2
     set CFLAGS_FOR_TARGET "$old_CFLAGS"
-    set CC_FOR_TARGET "$old_CC"
     return
 }
 
@@ -130,14 +126,12 @@ if [string match "" $exec_output] then {
 if { ![ld_compile "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross4.c" tmpdir/cross4.o] } {
     unsupported $test3
     set CFLAGS_FOR_TARGET "$old_CFLAGS"
-    set CC_FOR_TARGET "$old_CC"
     return
 }
 
 if ![ld_relocate $ld tmpdir/cross3-partial.o "tmpdir/cross1.o tmpdir/cross4.o"] {
     fail $test3
     set CFLAGS_FOR_TARGET "$old_CFLAGS"
-    set CC_FOR_TARGET "$old_CC"
     return
 }
 
@@ -211,4 +205,3 @@ if [string match "" $exec_output] then {
 }
 
 set CFLAGS_FOR_TARGET "$old_CFLAGS"
-set CC_FOR_TARGET "$old_CC"

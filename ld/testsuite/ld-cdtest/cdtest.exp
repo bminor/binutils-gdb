@@ -48,7 +48,7 @@ if {   ![ld_compile "$CXX_FOR_TARGET $CXXFLAGS_FOR_TARGET -fno-exceptions" $srcd
 
 set expected_output "$srcdir/$subdir/cdtest.dat"
 
-if ![ld_link $CC_FOR_TARGET tmpdir/cdtest {tmpdir/cdtest-foo.o tmpdir/cdtest-bar.o tmpdir/cdtest-main.o}] {
+if ![ld_link $CC_FOR_TARGET tmpdir/cdtest "$CFLAGS_FOR_TARGET tmpdir/cdtest-foo.o tmpdir/cdtest-bar.o tmpdir/cdtest-main.o"] {
     fail $test1
 } else {
     send_log   "tmpdir/cdtest >tmpdir/cdtest.out\n"
@@ -100,7 +100,7 @@ if [is_pecoff_format] {
 if ![ld_relocate $ld tmpdir/cdtest.o {-Ur tmpdir/cdtest-foo.o tmpdir/cdtest-bar.o tmpdir/cdtest-main.o}] {
     fail $test2
 } else {
-    if ![ld_link $CC_FOR_TARGET tmpdir/cdtest tmpdir/cdtest.o] {
+    if ![ld_link $CC_FOR_TARGET tmpdir/cdtest "$CFLAGS_FOR_TARGET tmpdir/cdtest.o"] {
 	fail $test2
     } else {
 	send_log   "tmpdir/cdtest >tmpdir/cdtest.out\n"

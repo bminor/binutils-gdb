@@ -87,7 +87,7 @@ set support_protected "no"
 if { [istarget *-*-linux*]
      || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
-    if [ld_compile "$CC_FOR_TARGET -g $CFLAGS_FOR_TARGET -DPROTECTED_CHECK" $srcdir/$subdir/main.c $tmpdir/main.o] {
+    if [ld_compile "$CC_FOR_TARGET -g -DPROTECTED_CHECK" $srcdir/$subdir/main.c $tmpdir/main.o] {
       if [ld_link $CC_FOR_TARGET $tmpdir/main "$tmpdir/main.o"] {
 	catch "exec $tmpdir/main" support_protected
       }
@@ -185,7 +185,6 @@ proc visibility_test { visibility progname testname main sh1 sh2 dat args } {
 
 proc visibility_run {visibility} {
     global CC_FOR_TARGET
-    global CFLAGS_FOR_TARGET
     global SHCFLAG
     global srcdir
     global subdir
@@ -237,7 +236,7 @@ proc visibility_run {visibility} {
     } else {
     # Compile the main program.  Make sure that PLT is used since PLT
     # is expected.
-    if ![ld_compile "$CC_FOR_TARGET -g $PLT_CFLAGS $CFLAGS_FOR_TARGET $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
+    if ![ld_compile "$CC_FOR_TARGET -g $PLT_CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
 	unsupported "visibility ($visibility) (non PIC)"
 	unsupported "visibility ($visibility)"
     } else {
@@ -247,8 +246,8 @@ proc visibility_run {visibility} {
 	# will need to do more relocation work.  However, note that not
 	# using -fpic will cause some of the tests to return different
 	# results.  Make sure that PLT is used since PLT is expected.
-	if { ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $CFLAGS_FOR_TARGET $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
-	     || ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $CFLAGS_FOR_TARGET $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
+	if { ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
+	     || ![ld_compile "$CC_FOR_TARGET -g $NOPIE_CFLAGS $PLT_CFLAGS $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	    unsupported "visibility ($visibility) (non PIC)"
 	} else {
 	    # SunOS non PIC shared libraries don't permit some cases of
@@ -336,8 +335,8 @@ proc visibility_run {visibility} {
 
 	# Now compile the code using -fpic.
 
-	if { ![ld_compile "$CC_FOR_TARGET -g $CFLAGS_FOR_TARGET $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o]
-	    || ![ld_compile "$CC_FOR_TARGET -g $CFLAGS_FOR_TARGET $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
+	if { ![ld_compile "$CC_FOR_TARGET -g $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o]
+	    || ![ld_compile "$CC_FOR_TARGET -g $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
 	    unsupported "visibility ($visibility)"
 	} else {
 	    if { [ string match $visibility "protected" ]
@@ -354,7 +353,7 @@ proc visibility_run {visibility} {
 	# Don't bother.
     } else {
     # Now do the same tests again, but this time compile main.c PIC.
-    if ![ld_compile "$CC_FOR_TARGET -g $CFLAGS_FOR_TARGET $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
+    if ![ld_compile "$CC_FOR_TARGET -g $SHCFLAG $VSBCFLAG $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
 	unsupported "visibility ($visibility) (PIC main, non PIC so)"
 	unsupported "visibility ($visibility) (PIC main)"
     } else {
@@ -446,7 +445,7 @@ visibility_run protected_undef_def
 visibility_run protected_weak
 visibility_run normal
 
-if { ![ld_compile "$CC_FOR_TARGET -g $CFLAGS_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/common.c tmpdir/common.o] } {
+if { ![ld_compile "$CC_FOR_TARGET -g $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/common.c tmpdir/common.o] } {
     unsupported "common hidden symbol"
 } else {
     if ![ld_link $ld tmpdir/common "tmpdir/common.o"] {
@@ -456,10 +455,10 @@ if { ![ld_compile "$CC_FOR_TARGET -g $CFLAGS_FOR_TARGET $NOSANITIZE_CFLAGS $NOLT
     }
 }
 
-if { ![ld_compile "$CC_FOR_TARGET -g $CFLAGS_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/test.c tmpdir/test.o] } {
+if { ![ld_compile "$CC_FOR_TARGET -g $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/test.c tmpdir/test.o] } {
     unsupported "weak hidden symbol"
 } else {
-   if { ![ld_compile "$CC_FOR_TARGET -g $CFLAGS_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/sh3.c tmpdir/sh3.o] } {
+   if { ![ld_compile "$CC_FOR_TARGET -g $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -DSHARED $picflag" $srcdir/$subdir/sh3.c tmpdir/sh3.o] } {
 	unsupported "weak hidden symbol"
     } else {
 	if ![ld_link $ld tmpdir/sh3.so "-shared tmpdir/sh3.o"] {

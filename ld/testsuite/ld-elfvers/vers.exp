@@ -487,12 +487,11 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
     global as_options
     global objdump
     global CC_FOR_TARGET
-    global CFLAGS_FOR_TARGET
     global script
     global NOSANITIZE_CFLAGS
     global NOLTO_CFLAGS
 
-    if ![ld_compile "$CC_FOR_TARGET -S $pic $CFLAGS_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/$source $tmpdir/$libname.s]     {
+    if ![ld_compile "$CC_FOR_TARGET -S $pic $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/$source $tmpdir/$libname.s]     {
 	unsupported "$test"
 	return
     }
@@ -579,7 +578,6 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
     global as_options
     global objdump
     global CC_FOR_TARGET
-    global CFLAGS_FOR_TARGET
     global script
 
     if [string match "" $other] then {
@@ -588,7 +586,7 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
 	set other_lib $tmpdir/$other
     }
 
-    if ![ld_compile "$CC_FOR_TARGET -S $flag $CFLAGS_FOR_TARGET" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
+    if ![ld_compile "$CC_FOR_TARGET -S $flag" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
 	unsupported "$test"
 	return
     }
@@ -619,10 +617,9 @@ proc test_asfail { test flag source execname whyfail } {
     global tmpdir
     global as
     global CC_FOR_TARGET
-    global CFLAGS_FOR_TARGET
     global NOLTO_CFLAGS
 
-    if ![ld_compile "$CC_FOR_TARGET -S $flag $CFLAGS_FOR_TARGET $NOLTO_CFLAGS" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
+    if ![ld_compile "$CC_FOR_TARGET -S $flag $NOLTO_CFLAGS" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
 	unsupported "$test"
 	return
     }
@@ -689,7 +686,6 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     global as_options
     global objdump
     global CC_FOR_TARGET
-    global CFLAGS_FOR_TARGET
     global NOSANITIZE_CFLAGS
     global NOLTO_CFLAGS
 
@@ -697,7 +693,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     set script --version-script
 
     # Disable LTO for these tests.
-    set cc_cmd "$CC_FOR_TARGET -S $CFLAGS_FOR_TARGET"
+    set cc_cmd "$CC_FOR_TARGET -S"
     if {[check_lto_available]} {
 	append cc_cmd " -fno-lto"
     }

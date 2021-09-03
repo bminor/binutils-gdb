@@ -71,7 +71,7 @@ proc test_direct2_link_dll {} {
     global tmpdir
 
     # Compile the dll.
-    if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/direct2_dll.c $tmpdir/direct2_dll.o ] {
+    if ![ld_compile $CC_FOR_TARGET $srcdir/$subdir/direct2_dll.c $tmpdir/direct2_dll.o ] {
 	fail "compiling shared lib fastcall/stdcall"
     } elseif ![ld_link "$CC_FOR_TARGET -shared -Wl,--enable-stdcall-fixup -Wl,--kill-at " $tmpdir/direct2_dll.dll "$tmpdir/direct2_dll.o" ] {
 	fail "linking shared lib (.dll) fastcall/stdcall"
@@ -79,7 +79,7 @@ proc test_direct2_link_dll {} {
 	fail "linking shared lib (.sl) fastcall/stdcall"
     } else {
 	# Compile and link the client program.
-	if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/direct2_client.c $tmpdir/direct2_client.o ] {
+	if ![ld_compile $CC_FOR_TARGET $srcdir/$subdir/direct2_client.c $tmpdir/direct2_client.o ] {
 	    fail "compiling client fastcall/stdcall"
 	} else {
 	    # Check linking directly to direct2_dll.dll.
