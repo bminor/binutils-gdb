@@ -76,20 +76,23 @@ if {[file exists tmpdir/libpath.exp]} {
     }
 }
 
-# The "make check" target in the Makefile passes in
-# "CC=$(CC_FOR_TARGET)".  But, if the user invokes runtest directly
-# (as when testing an installed linker), these flags may not be set.  
 if {![info exists CC]} {
-    set CC [find_gcc]
+    set CC gcc
 }
 if {![info exists CFLAGS]} {
     set CFLAGS "-g -O2"
 }
-if {![info exists CXX]} {
-    set CXX [find_g++]
+if {![info exists CC_FOR_TARGET]} {
+    set CC_FOR_TARGET [find_gcc]
 }
-if {![info exists CXXFLAGS]} {
-    set CXXFLAGS ""
+if {![info exists CFLAGS_FOR_TARGET]} {
+    set CFLAGS_FOR_TARGET "-g -O2"
+}
+if {![info exists CXX_FOR_TARGET]} {
+    set CXX_FOR_TARGET [find_g++]
+}
+if {![info exists CXXFLAGS_FOR_TARGET]} {
+    set CXXFLAGS_FOR_TARGET ""
 }
 
 # This allows us to run the linker testsuite with clang as the compilation
@@ -324,7 +327,7 @@ if { ![info exists LD_CLASS] } then {
 # Compiler tests
 proc compiler_supports { flag args } {
     if { [check_compiler_available] } {
-	global CC
+	global CC_FOR_TARGET
 	set flags ""
 	if [board_info [target_info name] exists cflags] {
 	    append flags " [board_info [target_info name] cflags]"
@@ -341,7 +344,7 @@ proc compiler_supports { flag args } {
 	}
 	close $f
 	set rfn [remote_download host $fn]
-	set avail [run_host_cmd_yesno "$CC" "$flags $flag $rfn -o /dev/null"]
+	set avail [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $flag $rfn -o /dev/null"]
 	remote_file host delete $rfn
 	file delete $fn
 	return $avail
@@ -442,9 +445,9 @@ if { [check_compiler_available] } {
 	cyglto_plugin-0.dll
     }
     foreach plug $plugin_names {
-	set plug_so [run_host_cmd $CC "--print-prog-name $plug"]
+	set plug_so [run_host_cmd $CC_FOR_TARGET "--print-prog-name $plug"]
 	if { $plug_so eq $plug } then {
-	    set plug_so [run_host_cmd $CC "--print-file-name $plug"]
+	    set plug_so [run_host_cmd $CC_FOR_TARGET "--print-file-name $plug"]
 	}
 	if { $plug_so ne $plug } then {
 	    set plug_opt "--plugin $plug_so"

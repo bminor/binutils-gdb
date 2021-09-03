@@ -38,7 +38,7 @@ if { ![check_compiler_available] } {
 }
 
 # Some bare-metal targets don't support shared libs or PIC.
-if { ![run_host_cmd_yesno $CC "-shared -fPIC $srcdir/$subdir/dummy.c -o tmpdir/t.so"] } {
+if { ![run_host_cmd_yesno $CC_FOR_TARGET "-shared -fPIC $srcdir/$subdir/dummy.c -o tmpdir/t.so"] } {
     return
 }
 
@@ -59,7 +59,7 @@ proc check_link_message { cmd string testname } {
 }
 
 # Disable LTO for these tests.
-set cc_cmd "$CC"
+set cc_cmd "$CC_FOR_TARGET"
 if {[check_lto_available]} {
    append cc_cmd " -fno-lto"
 }
@@ -226,8 +226,8 @@ foreach t [list indirect5a indirect5b indirect6a indirect6b] {
     }
 }
 
-send_log "$CC -fPIE -pie $srcdir/$subdir/main.c -o tmpdir/pie"
-catch "exec $CC -fPIE -pie $srcdir/$subdir/main.c -o tmpdir/pie" exec_output
+send_log "$CC_FOR_TARGET -fPIE -pie $srcdir/$subdir/main.c -o tmpdir/pie"
+catch "exec $CC_FOR_TARGET -fPIE -pie $srcdir/$subdir/main.c -o tmpdir/pie" exec_output
 send_log "$exec_output"
 if { ! [string match "" $exec_output] } {
     return

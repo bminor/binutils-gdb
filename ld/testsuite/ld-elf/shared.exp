@@ -1180,36 +1180,36 @@ if [check_libdl_available] {
   # XFAIL on NetBSD ELF systems as they do not currently support the .*_array
   # sections.
   # Disable all sanitizers.
-  set old_CFLAGS "$CFLAGS"
-  append CFLAGS " $NOSANITIZE_CFLAGS"
+  set old_CFLAGS "$CFLAGS_FOR_TARGET"
+  append CFLAGS_FOR_TARGET " $NOSANITIZE_CFLAGS"
   run_ld_link_exec_tests $dlopen_run_tests "*-*-netbsd*"
-  set CFLAGS "$old_CFLAGS"
+  set CFLAGS_FOR_TARGET "$old_CFLAGS"
 }
 
 # Check --no-add-needed and --no-copy-dt-needed-entries
 set testname "--no-add-needed"
-set exec_output [run_host_cmd "$CC" "tmpdir/libneeded1c.o -Wl,--no-add-needed,-rpath-link=tmpdir -Ltmpdir -lneeded1a"]
+set exec_output [run_host_cmd "$CC_FOR_TARGET" "tmpdir/libneeded1c.o -Wl,--no-add-needed,-rpath-link=tmpdir -Ltmpdir -lneeded1a"]
 if { [ regexp "tmpdir/libneeded1b.so: .*: DSO missing" $exec_output ] } {
     pass $testname
 } {
     fail $testname
 }
 set testname "--no-copy-dt-needed-entries"
-set exec_output [run_host_cmd "$CC" "tmpdir/libneeded1c.o -Wl,--no-copy-dt-needed-entries,-rpath-link=tmpdir -Ltmpdir -lneeded1a"]
+set exec_output [run_host_cmd "$CC_FOR_TARGET" "tmpdir/libneeded1c.o -Wl,--no-copy-dt-needed-entries,-rpath-link=tmpdir -Ltmpdir -lneeded1a"]
 if { [ regexp "tmpdir/libneeded1b.so: .*: DSO missing" $exec_output ] } {
     pass $testname
 } {
     fail $testname
 }
 set testname "--no-add-needed -shared"
-set exec_output [run_host_cmd "$CC" "-shared tmpdir/libneeded1pic.o -Wl,--no-add-needed,-z,defs -Ltmpdir -lneeded1a"]
+set exec_output [run_host_cmd "$CC_FOR_TARGET" "-shared tmpdir/libneeded1pic.o -Wl,--no-add-needed,-z,defs -Ltmpdir -lneeded1a"]
 if { [ regexp "undefined reference to `\.?bar'" $exec_output ] } {
     pass $testname
 } {
     fail $testname
 }
 set testname "--no-copy-dt-needed-entries -shared"
-set exec_output [run_host_cmd "$CC" "-shared tmpdir/libneeded1pic.o -Wl,--no-copy-dt-needed-entries,-z,defs -Ltmpdir -lneeded1a"]
+set exec_output [run_host_cmd "$CC_FOR_TARGET" "-shared tmpdir/libneeded1pic.o -Wl,--no-copy-dt-needed-entries,-z,defs -Ltmpdir -lneeded1a"]
 if { [ regexp "undefined reference to `\.?bar'" $exec_output ] } {
     pass $testname
 } {
@@ -1217,7 +1217,7 @@ if { [ regexp "undefined reference to `\.?bar'" $exec_output ] } {
 }
 
 # Check to see if the C++ compiler works
-if { [which $CXX] == 0 } {
+if { [which $CXX_FOR_TARGET] == 0 } {
     return
 }
 

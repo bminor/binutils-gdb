@@ -31,8 +31,8 @@ if { ![check_compiler_available] } {
 }
 
 # Check if -pie is supported or not.
-send_log "$CC -fpie -pie $srcdir/$subdir/pie.c -o tmpdir/pie"
-catch "exec $CC -fpie -pie $srcdir/$subdir/pie.c -o tmpdir/pie" exec_output
+send_log "$CC_FOR_TARGET -fpie -pie $srcdir/$subdir/pie.c -o tmpdir/pie"
+catch "exec $CC_FOR_TARGET -fpie -pie $srcdir/$subdir/pie.c -o tmpdir/pie" exec_output
 send_log "$exec_output\n"
 if { ![string match "" $exec_output] } {
     return

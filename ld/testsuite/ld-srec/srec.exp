@@ -355,26 +355,26 @@ if { ![check_compiler_available] } {
 # tests. Also add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if PIE doesn't work
 # with S-records.  Also add $NOCF_PROTECTION_CFLAGS for S-records.
 # Also add $NOSANITIZE_CFLAGS for S-records.
-set old_CC "$CC"
-set CC "$CC $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS $NOCF_PROTECTION_CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
-set old_CXX "$CXX"
-set old_CXXFLAGS "$CXXFLAGS"
-set CXXFLAGS "$CXXFLAGS $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS $NOCF_PROTECTION_CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
+set old_CC "$CC_FOR_TARGET"
+append CC_FOR_TARGET " $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS $NOCF_PROTECTION_CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
+set old_CXX "$CXX_FOR_TARGET"
+set old_CXXFLAGS "$CXXFLAGS_FOR_TARGET"
+append CXXFLAGS_FOR_TARGET " $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS $NOCF_PROTECTION_CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
 
 # S-records can't handle .note.gnu.property sections.
 if { [is_elf_format] \
      && ([istarget "i?86-*-*"] || [istarget "x86_64-*-*"]) } {
-    set CC "$CC -Wa,-mx86-used-note=no"
-    set CXX "$CXX -Wa,-mx86-used-note=no"
+    append CC_FOR_TARGET " -Wa,-mx86-used-note=no"
+    append CXX_FOR_TARGET " -Wa,-mx86-used-note=no"
 }
 
-if { ![ld_compile $CC $srcdir/$subdir/sr1.c tmpdir/sr1.o] \
-     || ![ld_compile $CC $srcdir/$subdir/sr2.c tmpdir/sr2.o] } {
+if { ![ld_compile $CC_FOR_TARGET $srcdir/$subdir/sr1.c tmpdir/sr1.o] \
+     || ![ld_compile $CC_FOR_TARGET $srcdir/$subdir/sr2.c tmpdir/sr2.o] } {
     unsupported $test1
     unsupported $test2
-    set CC "$old_CC"
-    set CXX "$old_CXX"
-    set CXXFLAGS "$old_CXXFLAGS"
+    set CC_FOR_TARGET "$old_CC"
+    set CXX_FOR_TARGET "$old_CXX"
+    set CXXFLAGS_FOR_TARGET "$old_CXXFLAGS"
     return
 }
 
@@ -444,19 +444,19 @@ run_srec_test $test1 "tmpdir/sr1.o tmpdir/sr2.o"
 # destructors.  Note that since we are not linking against any
 # libraries, this program won't actually work or anything.
 
-if { ![is_remote host] && [which $CXX] == 0 } {
+if { ![is_remote host] && [which $CXX_FOR_TARGET] == 0 } {
     untested $test2
-    set CC "$old_CC"
-    set CXX "$old_CXX"
-    set CXXFLAGS "$old_CXXFLAGS"
+    set CC_FOR_TARGET "$old_CC"
+    set CXX_FOR_TARGET "$old_CXX"
+    set CXXFLAGS_FOR_TARGET "$old_CXXFLAGS"
     return
 }
 
-if ![ld_compile "$CXX $CXXFLAGS -fno-exceptions" $srcdir/$subdir/sr3.cc tmpdir/sr3.o] {
+if ![ld_compile "$CXX_FOR_TARGET $CXXFLAGS_FOR_TARGET -fno-exceptions" $srcdir/$subdir/sr3.cc tmpdir/sr3.o] {
     unsupported $test2
-    set CC "$old_CC"
-    set CXX "$old_CXX"
-    set CXXFLAGS "$old_CXXFLAGS"
+    set CC_FOR_TARGET "$old_CC"
+    set CXX_FOR_TARGET "$old_CXX"
+    set CXXFLAGS_FOR_TARGET "$old_CXXFLAGS"
     return
 }
 
@@ -482,6 +482,6 @@ setup_xfail "bpf-*-*"
 
 run_srec_test $test2 "tmpdir/sr3.o"
 
-set CC "$old_CC"
-set CXX "$old_CXX"
-set CXXFLAGS "$old_CXXFLAGS"
+set CC_FOR_TARGET "$old_CC"
+set CXX_FOR_TARGET "$old_CXX"
+set CXXFLAGS_FOR_TARGET "$old_CXXFLAGS"

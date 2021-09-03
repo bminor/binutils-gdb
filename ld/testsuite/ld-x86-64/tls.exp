@@ -178,7 +178,7 @@ run_ld_link_exec_tests [list \
 ]
 
 # Skip if -mtls-dialect=gnu2 doesn't work.
-if { ![run_host_cmd_yesno $CC "-c -O2 -fPIC $GNU2_CFLAGS $srcdir/$subdir/tlsdesc1b.c -o tmpdir/tlsdesc1b.o"] } {
+if { ![run_host_cmd_yesno $CC_FOR_TARGET "-c -O2 -fPIC $GNU2_CFLAGS $srcdir/$subdir/tlsdesc1b.c -o tmpdir/tlsdesc1b.o"] } {
     return
 }
 

@@ -851,9 +851,9 @@ if ![string length [info proc prune_warnings]] {
 # regexps in FILE.d.
 #
 proc run_dump_test { name {extra_options {}} } {
-    global ADDR2LINE ADDR2LINEFLAGS AS ASFLAGS CC CFLAGS ELFEDIT ELFEDITFLAGS
-    global LD LDFLAGS NM NMFLAGS OBJCOPY OBJCOPYFLAGS OBJDUMP OBJDUMPFLAGS
-    global READELF READELFFLAGS STRIP STRIPFLAGS
+    global ADDR2LINE ADDR2LINEFLAGS AS ASFLAGS CC_FOR_TARGET CFLAGS_FOR_TARGET
+    global ELFEDIT ELFEDITFLAGS LD LDFLAGS NM NMFLAGS OBJCOPY OBJCOPYFLAGS
+    global OBJDUMP OBJDUMPFLAGS READELF READELFFLAGS STRIP STRIPFLAGS
     global copyfile env runtests srcdir subdir verbose
 
     if [string match "*/*" $name] {
@@ -1159,7 +1159,7 @@ proc run_dump_test { name {extra_options {}} } {
 	    # ofile is never absolute, so this always works to protect sfile
 	    # from later absolutization.
 	    set sfile "./[file rootname $ofile].s"
-	    set cmd "$CC $CFLAGS -S $opts(cc) -o $sfile $cfile"
+	    set cmd "$CC_FOR_TARGET $CFLAGS_FOR_TARGET -S $opts(cc) -o $sfile $cfile"
 	    send_log "$cmd\n"
 	    set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "dump.tmp"]
 	    remote_upload host "dump.tmp"

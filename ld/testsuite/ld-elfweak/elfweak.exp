@@ -261,7 +261,7 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 }
 
 proc build_lib {test libname objs dynsymexp} {
-    global CC
+    global CC_FOR_TARGET
     global objdump
     global tmpdir
     global shared
@@ -275,7 +275,7 @@ proc build_lib {test libname objs dynsymexp} {
       set files "$files $tmpdir/$obj"
     }
 
-    if {![ld_link "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $tmpdir/$libname.so "$shared $files"]} {
+    if {![ld_link "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $tmpdir/$libname.so "$shared $files"]} {
 	fail $test
 	return
     }
@@ -289,7 +289,7 @@ proc build_lib {test libname objs dynsymexp} {
 }
 
 proc build_exec { test execname objs flags dat dynsymexp symexp} {
-    global CC
+    global CC_FOR_TARGET
     global objdump
     global tmpdir
     global srcdir
@@ -303,7 +303,7 @@ proc build_exec { test execname objs flags dat dynsymexp symexp} {
       set files "$files $tmpdir/$obj"
     }
 
-    if {![ld_link $CC $tmpdir/$execname "$flags $NOSANITIZE_CFLAGS $NOLTO_CFLAGS $files"]} {
+    if {![ld_link $CC_FOR_TARGET $tmpdir/$execname "$flags $NOSANITIZE_CFLAGS $NOLTO_CFLAGS $files"]} {
 	fail "$test"
 	return
     }
@@ -353,14 +353,14 @@ proc build_exec { test execname objs flags dat dynsymexp symexp} {
 }
 
 # Disable LTO for these tests.
-set cc_cmd "$CC"
+set cc_cmd "$CC_FOR_TARGET"
 if {[check_lto_available]} {
    append cc_cmd " -fno-lto"
 }
 
 # Disable all sanitizers and LTO.
-set saved_CFLAGS "$CFLAGS"
-set CFLAGS "$CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
+set saved_CFLAGS "$CFLAGS_FOR_TARGET"
+append CFLAGS_FOR_TARGET " $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
 
 # Old version of GCC for MIPS default to enabling -fpic
 # and get confused if it is used on the command line.
@@ -370,9 +370,9 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
     # Unfortunately, the gcc argument is -fpic and the cc argument is
     # -KPIC.  We have to try both.
     set picflag "-fpic"
-    send_log "$CC $picflag\n"
-    verbose "$CC $picflag"
-    catch "exec $CC $picflag" exec_output
+    send_log "$CC_FOR_TARGET $picflag\n"
+    verbose "$CC_FOR_TARGET $picflag"
+    catch "exec $CC_FOR_TARGET $picflag" exec_output
     send_log "$exec_output\n"
     verbose "--" "$exec_output"
     if { [string match "*illegal option*" $exec_output]
@@ -384,16 +384,16 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
 }
 verbose "Using $picflag to compile PIC code"
 
-if {![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/foo.c $tmpdir/foo.o]
-    || ![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/bar.c $tmpdir/bar.o]
-    || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/main.c $tmpdir/main.o]
+if {![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/foo.c $tmpdir/foo.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/bar.c $tmpdir/bar.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/main.c $tmpdir/main.o]
     || ![ld_link $cc_cmd $tmpdir/libbar.so "$shared $tmpdir/bar.o"]
-    || ![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/foo1a.c $tmpdir/foo1a.o]
-    || ![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/foo1b.c $tmpdir/foo1b.o]
-    || ![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/bar1a.c $tmpdir/bar1a.o]
-    || ![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/bar1b.c $tmpdir/bar1b.o]
-    || ![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/bar1c.c $tmpdir/bar1c.o]
-    || ![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/main1.c $tmpdir/main1.o]} then {
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/foo1a.c $tmpdir/foo1a.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/foo1b.c $tmpdir/foo1b.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/bar1a.c $tmpdir/bar1a.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/bar1b.c $tmpdir/bar1b.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/bar1c.c $tmpdir/bar1c.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/main1.c $tmpdir/main1.o]} then {
     unsupported "ELF weak"
 } elseif {![ld_link $cc_cmd $tmpdir/libfoo1a.so "$shared $tmpdir/foo1a.o"]
 	  || ![ld_link $cc_cmd $tmpdir/libfoo1b.so "$shared $tmpdir/foo1b.o"]
@@ -424,10 +424,10 @@ if {![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/foo.c $tmpdir/foo.o]
     build_exec "ELF weak data last DSO common" foo "libfoo1b.so main1.o libbar1a.so" "-Wl,--no-as-needed,-rpath,.,-rpath-link,." weakdata weakdata.dsym ""
 }
 
-if {![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/size_foo.c $tmpdir/size_foo.o]
-    || ![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/size_bar.c $tmpdir/size_bar_s.o]
-    || ![ld_compile "$cc_cmd $CFLAGS $picflag -DSIZE_BIG" $srcdir/$subdir/size_bar.c $tmpdir/size_bar.o]
-    || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/size_main.c $tmpdir/size_main.o]} then {
+if {![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/size_foo.c $tmpdir/size_foo.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/size_bar.c $tmpdir/size_bar_s.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag -DSIZE_BIG" $srcdir/$subdir/size_bar.c $tmpdir/size_bar.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/size_main.c $tmpdir/size_main.o]} then {
     unsupported "ELF weak (size)"
 } else {
     build_lib "ELF DSO small bar (size)" libsize_bar_s "size_bar_s.o" ""
@@ -439,14 +439,14 @@ if {![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/size_foo.c $tmpdir/s
 verbose "size2"
 run_dump_test $srcdir/$subdir/size2
 
-if {![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/alias.c $tmpdir/alias.o]
+if {![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET $picflag" $srcdir/$subdir/alias.c $tmpdir/alias.o]
     || ![ld_link $cc_cmd $tmpdir/alias.so "$shared $tmpdir/alias.o"]
-    || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/aliasmain.c $tmpdir/aliasmain.o]
-    || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/weakref1.c $tmpdir/weakref1.o]
-    || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/weakref2.c $tmpdir/weakref2.o]} then {
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/aliasmain.c $tmpdir/aliasmain.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/weakref1.c $tmpdir/weakref1.o]
+    || ![ld_compile "$cc_cmd $CFLAGS_FOR_TARGET" $srcdir/$subdir/weakref2.c $tmpdir/weakref2.o]} then {
     unsupported "ELF weak (alias)"
 } else {
     build_exec "ELF weak (alias)" alias "aliasmain.o weakref1.o weakref2.o alias.so" "-Wl,-rpath=.,--no-as-needed" alias "" ""
 }
 
-set CFLAGS "$saved_CFLAGS"
+set CFLAGS_FOR_TARGET "$saved_CFLAGS"

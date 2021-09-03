@@ -77,10 +77,6 @@ set regas "-plugin-opt registerallsymbolsread"
 set regassilent "-plugin-opt registerallsymbolsreadsilent"
 set regcln "-plugin-opt registercleanup"
 
-if { [istarget m681*-*-*] || [istarget m68hc1*-*-*] || [istarget m9s12x*-*-*] } {
-    # otherwise get FAILS due to _.frame
-    set CFLAGS "$CFLAGS -fomit-frame-pointer"
-}
 # In order to define symbols in plugin options in the list of tests below,
 # we need to know if the platform prepends an underscore to C symbols,
 # which we find out by compiling the test objects now.  If there is any
@@ -91,16 +87,20 @@ if { [istarget m681*-*-*] || [istarget m68hc1*-*-*] || [istarget m9s12x*-*-*] } 
 set failed_compile 0
 set _ ""
 set plugin_nm_output ""
-set old_CFLAGS "$CFLAGS"
-append CFLAGS " $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
+set old_CFLAGS "$CFLAGS_FOR_TARGET"
+append CFLAGS_FOR_TARGET " $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
+if { [istarget m681*-*-*] || [istarget m68hc1*-*-*] || [istarget m9s12x*-*-*] } {
+    # otherwise get FAILS due to _.frame
+    append CFLAGS_FOR_TARGET " -fomit-frame-pointer"
+}
 
 if { $can_compile && \
-	(![ld_compile "$CC $CFLAGS" $srcdir/$subdir/main.c tmpdir/main.o] \
-	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/func.c tmpdir/func.o] \
-	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/text.c tmpdir/text.o] \
-	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/pr20070a.c tmpdir/pr20070a.o] \
-	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/dummy.s tmpdir/dummy.o] \
-	|| ![ld_compile "$CC $CFLAGS" $srcdir/$subdir/pr17973.s tmpdir/pr17973.o]) } {
+	(![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/main.c tmpdir/main.o] \
+	|| ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/func.c tmpdir/func.o] \
+	|| ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/text.c tmpdir/text.o] \
+	|| ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/pr20070a.c tmpdir/pr20070a.o] \
+	|| ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/dummy.s tmpdir/dummy.o] \
+	|| ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/pr17973.s tmpdir/pr17973.o]) } {
     # Defer fail until we have list of tests set.
     set failed_compile 1
 }
@@ -291,16 +291,16 @@ if { !$can_compile || $failed_compile } {
 	    unsupported [lindex $testitem 0]
 	}
     }
-    set CFLAGS "$old_CFLAGS"
+    set CFLAGS_FOR_TARGET "$old_CFLAGS"
     return
 }
 
 run_ld_link_tests $plugin_tests
 
 if { [is_elf_format] \
-     && [ld_compile "$CC $CFLAGS" $srcdir/$subdir/func1p.c tmpdir/func1p.o] \
-     && [ld_compile "$CC $CFLAGS" $srcdir/$subdir/func2i.c tmpdir/func2i.o] \
-     && [ld_compile "$CC $CFLAGS" $srcdir/$subdir/func3h.c tmpdir/func3h.o] } {
+     && [ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/func1p.c tmpdir/func1p.o] \
+     && [ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/func2i.c tmpdir/func2i.o] \
+     && [ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET" $srcdir/$subdir/func3h.c tmpdir/func3h.o] } {
     run_ld_link_tests $plugin_extra_elf_tests
 }
 
@@ -394,4 +394,4 @@ if [ar_simple_create $ar "--plugin $plugin4_path" "tmpdir/libpr20070.a" \
     unsupported "PR ld/20070"
 }
 
-set CFLAGS "$old_CFLAGS"
+set CFLAGS_FOR_TARGET "$old_CFLAGS"

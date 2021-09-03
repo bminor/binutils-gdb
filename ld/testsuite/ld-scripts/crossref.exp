@@ -38,37 +38,37 @@ if { ![check_compiler_available] } {
     return
 }
 
-set old_CFLAGS "$CFLAGS"
+set old_CFLAGS "$CFLAGS_FOR_TARGET"
 
 # Pass -fplt to CC since -fno-plt doesn't work with NOCROSSREFS tests.
 # Also add $NOPIE_CFLAGS since PIE doesn't work NOCROSSREFS tests.
-set old_CC "$CC"
-set CC "$CC $PLT_CFLAGS $NOPIE_CFLAGS"
+set old_CC "$CC_FOR_TARGET"
+append CC_FOR_TARGET " $PLT_CFLAGS $NOPIE_CFLAGS"
 
 # Xtensa targets currently default to putting literal values in a separate
 # section and that requires linker script support, so put literals in text.
 if [istarget xtensa*-*-*] {
-    set CFLAGS "$CFLAGS -mtext-section-literals"
+    append CFLAGS_FOR_TARGET " -mtext-section-literals"
 }
 
 # Prevent the use of the MeP's small data area which references a symbol
 # called __sdabase which will not be defined by our test linker scripts.
 if [istarget mep*-*-elf] {
-    set CFLAGS "-mtiny=0"
+    append CFLAGS_FOR_TARGET " -mtiny=0"
 }
 
 # The .dsbt section and __c6xabi_DSBT_BASE are not defined in our test
 # linker scripts.
 if [istarget tic6x*-*-*] {
-    set CFLAGS "-mno-dsbt -msdata=none"
+    append CFLAGS_FOR_TARGET " -mno-dsbt -msdata=none"
 }
 
-if { ![ld_compile "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
-     || ![ld_compile "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross2.c" tmpdir/cross2.o] } {
+if { ![ld_compile "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
+     || ![ld_compile "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross2.c" tmpdir/cross2.o] } {
     unsupported $test1
     unsupported $test2
-    set CFLAGS "$old_CFLAGS"
-    set CC "$old_CC"
+    set CFLAGS_FOR_TARGET "$old_CFLAGS"
+    set CC_FOR_TARGET "$old_CC"
     return
 }
 
@@ -102,10 +102,10 @@ if [string match "" $exec_output] then {
 
 # Check cross references within a single object.
 
-if { ![ld_compile "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross3.c" tmpdir/cross3.o] } {
+if { ![ld_compile "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross3.c" tmpdir/cross3.o] } {
     unsupported $test2
-    set CFLAGS "$old_CFLAGS"
-    set CC "$old_CC"
+    set CFLAGS_FOR_TARGET "$old_CFLAGS"
+    set CC_FOR_TARGET "$old_CC"
     return
 }
 
@@ -127,17 +127,17 @@ if [string match "" $exec_output] then {
 
 # Check cross references for ld -r
 
-if { ![ld_compile "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross4.c" tmpdir/cross4.o] } {
+if { ![ld_compile "$CC_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" "$srcdir/$subdir/cross4.c" tmpdir/cross4.o] } {
     unsupported $test3
-    set CFLAGS "$old_CFLAGS"
-    set CC "$old_CC"
+    set CFLAGS_FOR_TARGET "$old_CFLAGS"
+    set CC_FOR_TARGET "$old_CC"
     return
 }
 
 if ![ld_relocate $ld tmpdir/cross3-partial.o "tmpdir/cross1.o tmpdir/cross4.o"] {
     fail $test3
-    set CFLAGS "$old_CFLAGS"
-    set CC "$old_CC"
+    set CFLAGS_FOR_TARGET "$old_CFLAGS"
+    set CC_FOR_TARGET "$old_CC"
     return
 }
 
@@ -210,5 +210,5 @@ if [string match "" $exec_output] then {
     }
 }
 
-set CFLAGS "$old_CFLAGS"
-set CC "$old_CC"
+set CFLAGS_FOR_TARGET "$old_CFLAGS"
+set CC_FOR_TARGET "$old_CC"

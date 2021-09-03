@@ -24,16 +24,16 @@ load_file $srcdir/../../binutils/testsuite/lib/binutils-common.exp
 # Returns 0 otherwise.
 #
 proc at_least_gcc_version { major minor } {
-    global CC
+    global CC_FOR_TARGET
 
-    if {![info exists CC]} {
-	set CC [find_gcc]
+    if {![info exists CC_FOR_TARGET]} {
+	set CC_FOR_TARGET [find_gcc]
     }
-    if { $CC == "" } {
+    if { $CC_FOR_TARGET == "" } {
 	return 0
     }
     # Filter out -Wl, options.
-    regsub -all -- "-Wl,\[^ ^\t\]+" $CC "" cc_cmd
+    regsub -all -- "-Wl,\[^ ^\t\]+" $CC_FOR_TARGET "" cc_cmd
     set state [remote_exec host $cc_cmd --version]
     if { [lindex $state 0] != 0 } {
 	return 0;
@@ -216,8 +216,8 @@ proc default_ld_link { ld target objects } {
 # Compile an object using cc.
 #
 proc default_ld_compile { cc source object } {
-    global CFLAGS
-    global CXXFLAGS
+    global CFLAGS_FOR_TARGET
+    global CXXFLAGS_FOR_TARGET
     global srcdir
     global subdir
     global host_triplet
@@ -252,9 +252,9 @@ proc default_ld_compile { cc source object } {
 
     set ccexe [string replace $ccexe 0 [string last "/" $ccexe] ""]
     if {[string match "*++*" $ccexe]} {
-	append flags " $CXXFLAGS"
+	append flags " $CXXFLAGS_FOR_TARGET"
     } else {
-	append flags " $CFLAGS"
+	append flags " $CFLAGS_FOR_TARGET"
     }
 
     if [board_info [target_info name] exists cflags] {
@@ -466,8 +466,8 @@ proc run_ld_link_tests { ldtests args } {
     global srcdir
     global subdir
     global env
-    global CC
-    global CFLAGS
+    global CC_FOR_TARGET
+    global CFLAGS_FOR_TARGET
     global runtests
     global exec_output
 
@@ -534,7 +534,7 @@ proc run_ld_link_tests { ldtests args } {
 		set objfile "tmpdir/$fileroot.o"
 		if { [file extension $src_file] == ".c" } {
 		    set as_file "tmpdir/$fileroot.s"
-		    if ![ld_compile "$CC -S $CFLAGS $cflags" $srcdir/$subdir/$src_file $as_file] {
+		    if ![ld_compile "$CC_FOR_TARGET -S $CFLAGS_FOR_TARGET $cflags" $srcdir/$subdir/$src_file $as_file] {
 			set is_unsupported 1
 			break
 		    }
@@ -683,10 +683,10 @@ proc run_ld_link_exec_tests { ldtests args } {
     global srcdir
     global subdir
     global env
-    global CC
-    global CXX
-    global CFLAGS
-    global CXXFLAGS
+    global CC_FOR_TARGET
+    global CXX_FOR_TARGET
+    global CFLAGS_FOR_TARGET
+    global CXXFLAGS_FOR_TARGET
     global errcnt
     global exec_output
     global board_cflags
@@ -746,9 +746,9 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    lappend objfiles $objfile
 
 	    if { [ string match "c++" $lang ] } {
-		set cmd "$CXX -c $CXXFLAGS $cflags"
+		set cmd "$CXX_FOR_TARGET -c $CXXFLAGS_FOR_TARGET $cflags"
 	    } else {
-		set cmd "$CC -c $CFLAGS $cflags"
+		set cmd "$CC_FOR_TARGET -c $CFLAGS_FOR_TARGET $cflags"
 	    }
 	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
 		set failed 1
@@ -765,10 +765,10 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    set link_cmd $ld
 	} elseif { [ string match "c++" $lang ] } {
 	    set link_proc ld_link
-	    set link_cmd $CXX
+	    set link_cmd $CXX_FOR_TARGET
 	} else {
 	    set link_proc ld_link
-	    set link_cmd $CC
+	    set link_cmd $CC_FOR_TARGET
 	}
 
 	if { $binfile eq "tmpdir/" } {
@@ -851,10 +851,10 @@ proc run_cc_link_tests { ldtests } {
     global srcdir
     global subdir
     global env
-    global CC
-    global CXX
-    global CFLAGS
-    global CXXFLAGS
+    global CC_FOR_TARGET
+    global CXX_FOR_TARGET
+    global CFLAGS_FOR_TARGET
+    global CXXFLAGS_FOR_TARGET
     global ar
     global exec_output
     global board_cflags
@@ -936,9 +936,9 @@ proc run_cc_link_tests { ldtests } {
 	    lappend objfiles $objfile
 
 	    if { [ string match "c++" $lang ] } {
-		set cmd "$CXX -c $CXXFLAGS $cflags"
+		set cmd "$CXX_FOR_TARGET -c $CXXFLAGS_FOR_TARGET $cflags"
 	    } else {
-		set cmd "$CC -c $CFLAGS $cflags"
+		set cmd "$CC_FOR_TARGET -c $CFLAGS_FOR_TARGET $cflags"
 	    }
 	    if ![ld_compile $cmd $srcdir/$subdir/$src_file $objfile] {
 		set failed 1
@@ -954,9 +954,9 @@ proc run_cc_link_tests { ldtests } {
 	reset_vars
 
 	if { [ string match "c++" $lang ] } {
-	    set cc_cmd $CXX
+	    set cc_cmd $CXX_FOR_TARGET
 	} else {
-	    set cc_cmd $CC
+	    set cc_cmd $CC_FOR_TARGET
 	}
 
 	if { $binfile eq "tmpdir/" } {
@@ -1200,10 +1200,10 @@ proc check_sysroot_available { } {
 
 proc check_compiler_available { } {
     global compiler_available_saved
-    global CC
+    global CC_FOR_TARGET
 
     if {![info exists compiler_available_saved]} {
-	if { [which $CC] == 0 } {
+	if { [which $CC_FOR_TARGET] == 0 } {
 	    set compiler_available_saved 0
 	    return 0
 	}
@@ -1228,7 +1228,7 @@ proc check_compiler_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set compiler_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
+	set compiler_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1238,16 +1238,16 @@ proc check_compiler_available { } {
 
 # Returns 1 if plugin is enabled in gcc.  Returns 0 otherwise.
 proc check_gcc_plugin_enabled { } {
-    global CC
+    global CC_FOR_TARGET
 
-    if {![info exists CC]} {
-	set CC [find_gcc]
+    if {![info exists CC_FOR_TARGET]} {
+	set CC_FOR_TARGET [find_gcc]
     }
-    if { $CC == ""} {
+    if { $CC_FOR_TARGET == ""} {
 	return 0
     }
     # Filter out -Wl, options.
-    regsub -all -- "-Wl,\[^ ^\t\]+" $CC "" cc_cmd
+    regsub -all -- "-Wl,\[^ ^\t\]+" $CC_FOR_TARGET "" cc_cmd
     set state [remote_exec host $cc_cmd -v]
     if { [lindex $state 0] != 0 } {
 	return 0;
@@ -1266,7 +1266,7 @@ proc check_gcc_plugin_enabled { } {
 # Returns true if the target compiler supports LTO
 proc check_lto_available { } {
     global lto_available_saved
-    global CC
+    global CC_FOR_TARGET
 
     if {![info exists lto_available_saved]} {
 	if { ![check_gcc_plugin_enabled] } {
@@ -1298,7 +1298,7 @@ proc check_lto_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set lto_available_saved [run_host_cmd_yesno "$CC" "$flags -flto -fuse-linker-plugin $src -o $output"]
+	set lto_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags -flto -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1309,7 +1309,7 @@ proc check_lto_available { } {
 # Returns true if the target compiler supports LTO  -ffat-lto-objects
 proc check_lto_fat_available { } {
     global lto_fat_available_saved
-    global CC
+    global CC_FOR_TARGET
 
     if {![info exists lto_fat_available_saved]} {
 	if { ![check_gcc_plugin_enabled] } {
@@ -1341,7 +1341,7 @@ proc check_lto_fat_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set lto_fat_available_saved [run_host_cmd_yesno "$CC" "$flags -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
+	set lto_fat_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1352,7 +1352,7 @@ proc check_lto_fat_available { } {
 # Returns true if the target compiler supports LTO and -shared
 proc check_lto_shared_available { } {
     global lto_shared_available_saved
-    global CC
+    global CC_FOR_TARGET
 
     if {![info exists lto_shared_available_saved]} {
 	if { ![check_gcc_plugin_enabled] } {
@@ -1384,7 +1384,7 @@ proc check_lto_shared_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set lto_shared_available_saved [run_host_cmd_yesno "$CC" "$flags -shared -fPIC -flto -fuse-linker-plugin $src -o $output"]
+	set lto_shared_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags -shared -fPIC -flto -fuse-linker-plugin $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1418,7 +1418,7 @@ proc check_as_cfi { } {
 
 proc check_ifunc_available { } {
     global ifunc_available_saved
-    global CC
+    global CC_FOR_TARGET
 
     if {![info exists ifunc_available_saved]} {
 	if { ![check_compiler_available] } {
@@ -1452,7 +1452,7 @@ proc check_ifunc_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set ifunc_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
+	set ifunc_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $src -o $output"]
 	if { [isnative] && $ifunc_available_saved == 1 } {
 	  set ifunc_available_saved [run_host_cmd_yesno "$output" ""]
 	}
@@ -1467,7 +1467,7 @@ proc check_ifunc_available { } {
 
 proc check_ifunc_attribute_available { } {
     global ifunc_attribute_available_saved
-    global CC
+    global CC_FOR_TARGET
 
     if {![info exists ifunc_attribute_available_saved]} {
 	if { ![check_compiler_available] } {
@@ -1499,7 +1499,7 @@ proc check_ifunc_attribute_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set ifunc_attribute_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
+	set ifunc_attribute_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $src -o $output"]
 	if { [isnative] && $ifunc_attribute_available_saved == 1 } {
 	  set ifunc_attribute_available_saved [run_host_cmd_yesno "$output" ""]
 	}
@@ -1514,7 +1514,7 @@ proc check_ifunc_attribute_available { } {
 
 proc check_libdl_available { } {
     global libdl_available_saved
-    global CC
+    global CC_FOR_TARGET
 
     if {![info exists libdl_available_saved]} {
 	if { ![check_compiler_available] } {
@@ -1537,7 +1537,7 @@ proc check_libdl_available { } {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set libdl_available_saved [run_host_cmd_yesno "$CC" "$src -o $output -ldl"]
+	set libdl_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$src -o $output -ldl"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
@@ -1549,7 +1549,7 @@ proc check_libdl_available { } {
 
 proc check_gnu2_tls_available { } {
     global gnu2_tls_available_saved
-    global CC
+    global CC_FOR_TARGET
     global GNU2_CFLAGS
 
     if {![info exists gnu2_tls_available_saved]} {
@@ -1593,9 +1593,9 @@ proc check_gnu2_tls_available { } {
 	if [is_remote host] {
 	    set src2 [remote_download host $src2]
 	}
-	set gnu2_tls_available_saved [run_host_cmd_yesno "$CC" "-fPIC -shared $flags $src1 -o $output1"]
+	set gnu2_tls_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "-fPIC -shared $flags $src1 -o $output1"]
 	if { $gnu2_tls_available_saved == 1 } {
-	    set gnu2_tls_available_saved [run_host_cmd_yesno "$CC" "$flags $src2 $output1 -o $output2"]
+	    set gnu2_tls_available_saved [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $src2 $output1 -o $output2"]
 	    if { $gnu2_tls_available_saved == 1 } {
 		set gnu2_tls_available_saved [run_host_cmd_yesno "$output2" ""]
 	    }
@@ -1611,8 +1611,8 @@ proc check_gnu2_tls_available { } {
 
 # Compile a C source file, with the specified additional_flags.
 proc compile_one_cc { src output additional_flags } {
-    global CC
-    global CFLAGS
+    global CC_FOR_TARGET
+    global CFLAGS_FOR_TARGET
 
     set flags ""
     if [board_info [target_info name] exists cflags] {
@@ -1625,7 +1625,7 @@ proc compile_one_cc { src output additional_flags } {
     if [is_remote host] {
 	set src [remote_download host $src]
     }
-    return [run_host_cmd_yesno "$CC" "$flags $CFLAGS $additional_flags $src -o $output"]
+    return [run_host_cmd_yesno "$CC_FOR_TARGET" "$flags $CFLAGS_FOR_TARGET $additional_flags $src -o $output"]
 }
 
 # Returns true if the target compiler supports -gctf

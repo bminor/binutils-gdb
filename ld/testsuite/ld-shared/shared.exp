@@ -66,8 +66,8 @@ set SHCFLAG ""
 set shared_needs_pic "no"
 
 # Disable all sanitizers.
-set old_CFLAGS "$CFLAGS"
-append CFLAGS " $NOSANITIZE_CFLAGS"
+set old_CFLAGS "$CFLAGS_FOR_TARGET"
+append CFLAGS_FOR_TARGET " $NOSANITIZE_CFLAGS"
 
 if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 
@@ -114,7 +114,7 @@ if [istarget arm*-*-linux*] {
 	set file [open $tmpdir/movw-detect.c w]
 	puts $file "void foo(void) { __asm (\"movw r0, #0\"); }"
 	close $file
-	if [run_host_cmd_yesno "$CC" "$CFLAGS -c $tmpdir/movw-detect.c -o $tmpdir/movw-detect.o"] {
+	if [run_host_cmd_yesno "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET -c $tmpdir/movw-detect.c -o $tmpdir/movw-detect.o"] {
 	    set shared_needs_pic "yes"
 	}
     }
@@ -122,7 +122,7 @@ if [istarget arm*-*-linux*] {
 
 # The test procedure.
 proc shared_test { progname testname main sh1 sh2 dat args } {
-    global CC
+    global CC_FOR_TARGET
     global srcdir
     global subdir
     global exec_output
@@ -140,7 +140,7 @@ proc shared_test { progname testname main sh1 sh2 dat args } {
     if { [is_elf_format] && [check_shared_lib_support] } {
 	append shared " -Wl,-z,notext"
     }
-    if {![ld_link $CC $tmpdir/$progname.so "$shared $shldflags $tmpdir/$sh1 $tmpdir/$sh2"]} {
+    if {![ld_link $CC_FOR_TARGET $tmpdir/$progname.so "$shared $shldflags $tmpdir/$sh1 $tmpdir/$sh2"]} {
         fail "$testname"
     	return
     }
@@ -153,7 +153,7 @@ proc shared_test { progname testname main sh1 sh2 dat args } {
     if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	set rpath /lib:$tmpdir
     }
-    if ![ld_link $CC $tmpdir/$progname "-Wl,-rpath,$rpath $tmpdir/$main $tmpdir/$progname.so"] {
+    if ![ld_link $CC_FOR_TARGET $tmpdir/$progname "-Wl,-rpath,$rpath $tmpdir/$main $tmpdir/$progname.so"] {
     	fail "$testname"
     	return
     }
@@ -197,9 +197,9 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
     # Unfortunately, the gcc argument is -fpic and the cc argument is
     # -KPIC.  We have to try both.
     set picflag "-fpic"
-    send_log "$CC $picflag\n"
-    verbose "$CC $picflag"
-    catch "exec $CC $picflag" exec_output
+    send_log "$CC_FOR_TARGET $picflag\n"
+    verbose "$CC_FOR_TARGET $picflag"
+    catch "exec $CC_FOR_TARGET $picflag" exec_output
     send_log "$exec_output\n"
     verbose "--" "$exec_output"
     if { [string match "*illegal option*" $exec_output] \
@@ -212,7 +212,7 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
 verbose "Using $picflag to compile PIC code"
 
 # Compile the main program.
-if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
+if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
     unsupported "shared (non PIC)"
     unsupported "shared"
 } else {
@@ -223,8 +223,8 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
     # using -fpic will cause some of the tests to return different
     # results.  Make sure that PLT is used since PLT is expected.
     global PLT_CFLAGS NOPIE_CFLAGS
-    if { ![ld_compile "$CC $PLT_CFLAGS $NOPIE_CFLAGS $CFLAGS $SHCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
-	 || ![ld_compile "$CC $PLT_CFLAGS $CFLAGS $SHCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
+    if { ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $NOPIE_CFLAGS $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
+	 || ![ld_compile "$CC_FOR_TARGET $PLT_CFLAGS $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
 	unsupported "shared (non PIC)"
     } else { if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	shared_test shnp "shared (nonPIC)" mainnp.o sh1np.o sh2np.o xcoff
@@ -284,25 +284,25 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 
     # Now compile the code using -fpic.
 
-    if { ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o]
-	 || ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
+    if { ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o]
+	 || ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
 	unsupported "shared"
     } else {
 	if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o xcoff
 	} else {
 	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o shared
-	    ld_compile "$CC $CFLAGS -DSYMBOLIC_TEST -DXCOFF_TEST $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
-	    ld_compile "$CC $CFLAGS -DSYMBOLIC_TEST -DXCOFF_TEST $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
+	    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET -DSYMBOLIC_TEST -DXCOFF_TEST $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
+	    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET -DSYMBOLIC_TEST -DXCOFF_TEST $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
 	    shared_test shp "shared -Bsymbolic" mainnp.o sh1p.o sh2p.o symbolic "-Bsymbolic"
-	    ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
-	    ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
+	    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o
+	    ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o
 	}
     }
 }
 
 # Now do the same tests again, but this time compile main.c PIC.
-if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
+if ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
     unsupported "shared (PIC main, non PIC so)"
     unsupported "shared (PIC main)"
 } else {
@@ -347,7 +347,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
     }
 }
 
-set CFLAGS "$old_CFLAGS"
+set CFLAGS_FOR_TARGET "$old_CFLAGS"
 
 if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
     # Remove the temporary directory.

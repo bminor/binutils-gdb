@@ -144,7 +144,7 @@ if [istarget sh*-*linux*] {
 }
 
 if {![ld_assemble $as "-relax tmpdir/start.s" tmpdir/start.o] \
-    || ![ld_compile $CC "-O -mrelax -foptimize-sibling-calls $srcdir/$subdir/sh2.c" tmpdir/sh2.o]} {
+    || ![ld_compile $CC_FOR_TARGET "-O -mrelax -foptimize-sibling-calls $srcdir/$subdir/sh2.c" tmpdir/sh2.o]} {
     unsupported $testlink
     unsupported $testjsr
     unsupported $testrun

@@ -164,14 +164,14 @@ proc stt_common_test { options testname } {
 }
 
 if [istarget nios2*-*-*] {
-    set CFLAGS "$CFLAGS -G0"
+    append CFLAGS_FOR_TARGET " -G0"
 }
 
 # Explicitly use "-fcommon" so that even if $CFLAGS includes
 # "-fno-common", these tests are compiled as expected.
-if {   ![ld_compile "$CC $CFLAGS -fcommon $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/common1a.c tmpdir/common1a.o]
-    || ![ld_compile "$CC $CFLAGS -fcommon $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/common1b.c tmpdir/common1b.o]
-    || ![ld_compile "$CC $CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -Wa,--elf-stt-common=yes -fcommon" $srcdir/$subdir/common1b.c tmpdir/common1c.o] } {
+if {   ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET -fcommon $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/common1a.c tmpdir/common1a.o]
+    || ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET -fcommon $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/common1b.c tmpdir/common1b.o]
+    || ![ld_compile "$CC_FOR_TARGET $CFLAGS_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS -Wa,--elf-stt-common=yes -fcommon" $srcdir/$subdir/common1b.c tmpdir/common1c.o] } {
     unsupported $test1
     return
 }

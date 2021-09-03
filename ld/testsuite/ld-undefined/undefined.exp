@@ -29,7 +29,7 @@ if { ![check_compiler_available] } {
     untested $testund
     untested $testfn
     untested $testline
-} elseif { ![ld_compile "$CC -g $NOLTO_CFLAGS" $srcdir/$subdir/undefined.c tmpdir/undefined.o] } {
+} elseif { ![ld_compile "$CC_FOR_TARGET -g $NOLTO_CFLAGS" $srcdir/$subdir/undefined.c tmpdir/undefined.o] } {
     verbose "Unable to compile test file!" 1
     unsupported $testund
     unsupported $testfn

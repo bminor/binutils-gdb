@@ -73,9 +73,9 @@ if { [istarget mips*-*-*] && ! [at_least_gcc_version 4 3] } then {
     # Unfortunately, the gcc argument is -fpic and the cc argument is
     # -KPIC.  We have to try both.
     set picflag "-fpic"
-    send_log "$CC $picflag\n"
-    verbose "$CC $picflag"
-    catch "exec $CC $picflag" exec_output
+    send_log "$CC_FOR_TARGET $picflag\n"
+    verbose "$CC_FOR_TARGET $picflag"
+    catch "exec $CC_FOR_TARGET $picflag" exec_output
     send_log "$exec_output\n"
     verbose "--" "$exec_output"
     if { [string match "*illegal option*" $exec_output]
@@ -486,13 +486,13 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
     global as
     global as_options
     global objdump
-    global CC
-    global CFLAGS
+    global CC_FOR_TARGET
+    global CFLAGS_FOR_TARGET
     global script
     global NOSANITIZE_CFLAGS
     global NOLTO_CFLAGS
 
-    if ![ld_compile "$CC -S $pic $CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/$source $tmpdir/$libname.s]     {
+    if ![ld_compile "$CC_FOR_TARGET -S $pic $CFLAGS_FOR_TARGET $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/$source $tmpdir/$libname.s]     {
 	unsupported "$test"
 	return
     }
@@ -578,8 +578,8 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
     global as
     global as_options
     global objdump
-    global CC
-    global CFLAGS
+    global CC_FOR_TARGET
+    global CFLAGS_FOR_TARGET
     global script
 
     if [string match "" $other] then {
@@ -588,7 +588,7 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
 	set other_lib $tmpdir/$other
     }
 
-    if ![ld_compile "$CC -S $flag $CFLAGS" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
+    if ![ld_compile "$CC_FOR_TARGET -S $flag $CFLAGS_FOR_TARGET" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
 	unsupported "$test"
 	return
     }
@@ -606,7 +606,7 @@ proc test_ldfail { test flag source execname other mapfile whyfail } {
 	set script_arg "-Wl,$script $srcdir/$subdir/$mapfile"
     }
 
-    if {![ld_link $CC $tmpdir/$execname "$tmpdir/$execname.o $other_lib $script_arg"]}     {
+    if {![ld_link $CC_FOR_TARGET $tmpdir/$execname "$tmpdir/$execname.o $other_lib $script_arg"]}     {
 	pass "$test"
 	return
     }
@@ -618,11 +618,11 @@ proc test_asfail { test flag source execname whyfail } {
     global subdir
     global tmpdir
     global as
-    global CC
-    global CFLAGS
+    global CC_FOR_TARGET
+    global CFLAGS_FOR_TARGET
     global NOLTO_CFLAGS
 
-    if ![ld_compile "$CC -S $flag $CFLAGS $NOLTO_CFLAGS" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
+    if ![ld_compile "$CC_FOR_TARGET -S $flag $CFLAGS_FOR_TARGET $NOLTO_CFLAGS" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
 	unsupported "$test"
 	return
     }
@@ -688,8 +688,8 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     global as
     global as_options
     global objdump
-    global CC
-    global CFLAGS
+    global CC_FOR_TARGET
+    global CFLAGS_FOR_TARGET
     global NOSANITIZE_CFLAGS
     global NOLTO_CFLAGS
 
@@ -697,7 +697,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     set script --version-script
 
     # Disable LTO for these tests.
-    set cc_cmd "$CC -S $CFLAGS"
+    set cc_cmd "$CC_FOR_TARGET -S $CFLAGS_FOR_TARGET"
     if {[check_lto_available]} {
 	append cc_cmd " -fno-lto"
     }
@@ -721,7 +721,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
 	set solibname_lib $tmpdir/$solibname
     }
 
-    if {![ld_link $CC $tmpdir/$execname "$flags $tmpdir/$execname.o $solibname_lib"]}     {
+    if {![ld_link $CC_FOR_TARGET $tmpdir/$execname "$flags $tmpdir/$execname.o $solibname_lib"]}     {
 	fail "$test"
 	return
     }

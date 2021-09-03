@@ -182,7 +182,7 @@ proc contains_ifunc_reloc { binary_file } {
 set fails 0
 
 # Disable LTO for these tests.
-set cc_cmd "$CC"
+set cc_cmd "$CC_FOR_TARGET"
 if {[check_lto_available]} {
    append cc_cmd " -fno-lto"
 }
@@ -238,16 +238,16 @@ if { $fails != 0 } {
     return
 }
 
-if ![ld_link $CC "tmpdir/dynamic_prog" "-Wl,--no-as-needed,-rpath=./tmpdir,-Bdynamic -Ltmpdir tmpdir/shared_prog.o -lshared_ifunc"] {
+if ![ld_link $CC_FOR_TARGET "tmpdir/dynamic_prog" "-Wl,--no-as-needed,-rpath=./tmpdir,-Bdynamic -Ltmpdir tmpdir/shared_prog.o -lshared_ifunc"] {
     fail "Could not link a dynamic executable"
     set fails [expr $fails + 1]
 }
-if ![ld_link $CC "tmpdir/local_prog" "$NOPIE_LDFLAGS -Wl,--no-as-needed,-rpath=./tmpdir -Ltmpdir tmpdir/static_prog.o -lifunc"] {
+if ![ld_link $CC_FOR_TARGET "tmpdir/local_prog" "$NOPIE_LDFLAGS -Wl,--no-as-needed,-rpath=./tmpdir -Ltmpdir tmpdir/static_prog.o -lifunc"] {
     fail "Could not link a dynamic executable using local ifunc"
     set fails [expr $fails + 1]
 }
 if ![string match "" $STATIC_LDFLAGS] {
-    if ![ld_link $CC "tmpdir/static_prog" "-static -Ltmpdir tmpdir/static_prog.o -lifunc"] {
+    if ![ld_link $CC_FOR_TARGET "tmpdir/static_prog" "-static -Ltmpdir tmpdir/static_prog.o -lifunc"] {
 	fail "Could not link a static executable"
 	set fails [expr $fails + 1]
     }
@@ -256,7 +256,7 @@ if ![ld_link $ld "tmpdir/static_nonifunc_prog" "-static tmpdir/empty.o"] {
     fail "Could not link a non-ifunc using static executable"
     set fails [expr $fails + 1]
 }
-if ![ld_link $CC "tmpdir/test-1" "-Wl,--no-as-needed,-rpath=./tmpdir tmpdir/test-1.o tmpdir/libshared_ifunc.so"] {
+if ![ld_link $CC_FOR_TARGET "tmpdir/test-1" "-Wl,--no-as-needed,-rpath=./tmpdir tmpdir/test-1.o tmpdir/libshared_ifunc.so"] {
     fail "Could not link test-1"
     set fails [expr $fails + 1]
 }

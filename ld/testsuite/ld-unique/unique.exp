@@ -102,13 +102,13 @@ proc contains_unique_symbol { binary_file } {
 set fails 0
 
 # Create object file containing unique symbol.
-if ![ld_compile "$CC -c" "$srcdir/$subdir/unique.s" "tmpdir/unique.o"] {
+if ![ld_compile "$CC_FOR_TARGET -c" "$srcdir/$subdir/unique.s" "tmpdir/unique.o"] {
     fail "Could not create a unique object"
     set fails [expr $fails + 1]
 }
 
 # Create object file NOT containing unique symbol.
-if ![ld_compile "$CC -c" "$srcdir/$subdir/unique_empty.s" "tmpdir/unique_empty.o"] {
+if ![ld_compile "$CC_FOR_TARGET -c" "$srcdir/$subdir/unique_empty.s" "tmpdir/unique_empty.o"] {
     fail "Could not create a non-unique object"
     set fails [expr $fails + 1]
 }
@@ -123,7 +123,7 @@ if [board_info [target_info name] exists cflags] {
 }
 
 # Create executable containing unique symbol.
-if ![ld_link "$CC $NOPIE_LDFLAGS $board_cflags" "tmpdir/unique_prog" "tmpdir/unique.o"] {
+if ![ld_link "$CC_FOR_TARGET $NOPIE_LDFLAGS $board_cflags" "tmpdir/unique_prog" "tmpdir/unique.o"] {
     fail "Could not link a unique executable"
     set fails [expr $fails + 1]
 }
@@ -190,7 +190,7 @@ if { ![check_shared_lib_support] } {
 }
 
 # Create pic object file containing unique symbol.
-if {![ld_compile "$CC -c -fPIC" "$srcdir/$subdir/unique_shared.s" "tmpdir/unique_shared.o"] } {
+if {![ld_compile "$CC_FOR_TARGET -c -fPIC" "$srcdir/$subdir/unique_shared.s" "tmpdir/unique_shared.o"] } {
     fail "Could not create a pic unique object"
     set fails [expr $fails + 1]
 }
@@ -202,7 +202,7 @@ if {![ld_link $ld "tmpdir/libunique_shared.so" "-shared tmpdir/unique_shared.o"]
 }
 
 # Create executable NOT containing unique symbol linked against library.
-if {![ld_link "$CC $NOPIE_LDFLAGS $board_cflags" "tmpdir/unique_shared_prog" "-Ltmpdir tmpdir/unique_empty.o -Wl,-Bdynamic,-rpath=./tmpdir -lunique_shared"] } {
+if {![ld_link "$CC_FOR_TARGET $NOPIE_LDFLAGS $board_cflags" "tmpdir/unique_shared_prog" "-Ltmpdir tmpdir/unique_empty.o -Wl,-Bdynamic,-rpath=./tmpdir -lunique_shared"] } {
     fail "Could not link a dynamic executable"
     set fails [expr $fails + 1]
 }

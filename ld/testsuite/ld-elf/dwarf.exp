@@ -41,7 +41,7 @@ if { ![check_compiler_available] } {
 }
 
 # Skip if -feliminate-dwarf2-dups isn't supported.
-if ![ld_compile "$CC -g -feliminate-dwarf2-dups" $srcdir/$subdir/dummy.c tmpdir/dummy.o] {
+if ![ld_compile "$CC_FOR_TARGET -g -feliminate-dwarf2-dups" $srcdir/$subdir/dummy.c tmpdir/dummy.o] {
     return
 }
 
@@ -69,11 +69,11 @@ set run_tests {
 }
 
 # Disable all sanitizers.
-set old_CFLAGS "$CFLAGS"
-append CFLAGS " $NOSANITIZE_CFLAGS"
+set old_CFLAGS "$CFLAGS_FOR_TARGET"
+append CFLAGS_FOR_TARGET " $NOSANITIZE_CFLAGS"
 run_cc_link_tests $build_tests
 run_ld_link_exec_tests $run_tests
-set CFLAGS "$old_CFLAGS"
+set CFLAGS_FOR_TARGET "$old_CFLAGS"
 
 proc strip_test {} {
     global ld

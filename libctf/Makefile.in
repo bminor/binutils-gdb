@@ -1374,8 +1374,9 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 @TCL_TRY_TRUE@	runtest=$(RUNTEST); \
 @TCL_TRY_TRUE@	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 @TCL_TRY_TRUE@	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
-@TCL_TRY_TRUE@		CC="$(CC_FOR_TARGET)" CFLAGS="$(CFLAGS) -I$(INCDIR) -I$(srcdir) -I$(builddir) -I$(builddir)/../bfd $(ZLIBINC)" \
-@TCL_TRY_TRUE@		CC_FOR_HOST="$(CC)" LIBS="$(libctf_nobfd_la_LIBADD) $(LIBS)" $(RUNTESTFLAGS); \
+@TCL_TRY_TRUE@		CC="$(CC)" CC_FOR_TARGET="$(CC_FOR_TARGET)" \
+@TCL_TRY_TRUE@		CFLAGS="$(CFLAGS) -I$(INCDIR) -I$(srcdir) -I$(builddir) -I$(builddir)/../bfd $(ZLIBINC)" \
+@TCL_TRY_TRUE@		LIBS="$(libctf_nobfd_la_LIBADD) $(LIBS)" $(RUNTESTFLAGS); \
 @TCL_TRY_TRUE@	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 @TCL_TRY_TRUE@	fi
 
