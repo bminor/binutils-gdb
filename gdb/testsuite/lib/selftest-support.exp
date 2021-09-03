@@ -40,6 +40,8 @@ proc find_gdb { arg } {
 # EXECUTABLE is the gdb to use.
 # FUNCTION is the function to break in, either captured_main
 # or captured_command_loop.
+# Return 0 in case of success, -1 in case of failure, and -2 in case of
+# skipping the test-case.
 
 proc selftest_setup { executable function } {
     global gdb_prompt
@@ -73,14 +75,14 @@ proc selftest_setup { executable function } {
 
     if { $gdb_file_cmd_debug_info != "debug" } then {
 	untested "no debug information, skipping testcase."
-	return -1
+	return -2
     }
 
-    # Set a breakpoint at main.  Allow more than one location, as
-    # workaround for PR26096 - "gdb sets breakpoint at cold clone".
-    gdb_test "break $function" \
-            "Breakpoint.*at.* (file.*, line|locations).*" \
-            "breakpoint in $function"
+    # Set a breakpoint at $function.
+    if { [gdb_breakpoint $function "no-message"] != 1 } {
+	untested "Cannot set breakpoint at $function, skipping testcase."
+	return -2
+    }
 
     # run yourself
     # It may take a very long time for the inferior gdb to start (lynx),
@@ -165,7 +167,7 @@ proc do_self_tests {function body} {
     gdb_exit
     catch "remote_file host delete $file"
 
-    if {$result < 0} then {
+    if {$result == -1} then {
 	warning "Couldn't test self"
     }
 }
