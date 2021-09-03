@@ -1,5 +1,10 @@
 2021-09-03  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.gdb/complaints.exp: Use untested if clear_complaints cannot
+	be found.
+
+2021-09-03  Tom de Vries  <tdevries@suse.de>
+
 	* lib/selftest-support.exp: Emit untested when not being able to set
 	breakpoint.
 
