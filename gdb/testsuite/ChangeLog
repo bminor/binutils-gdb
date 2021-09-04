@@ -1,3 +1,12 @@
+2021-09-04  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26950
+	* gdb/testsuite/gdb.arch/i386-avx.c (main): Remove call to have_avx.
+	(have_avx): Move ...
+	* gdb/testsuite/lib/gdb.exp (have_avx): ... here.  New proc.
+	* gdb/testsuite/gdb.arch/amd64-disp-step-avx.exp: Use have_avx.
+	* gdb/testsuite/gdb.arch/i386-avx.exp: Same.
+
 2021-09-03  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.gdb/complaints.exp: Use untested if clear_complaints cannot

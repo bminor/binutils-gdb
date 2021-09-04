@@ -24,6 +24,11 @@ if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
     return
 }
 
+if { ![have_avx] } {
+    verbose "Skipping x86 AVX tests."
+    return
+}
+
 standard_testfile .c
 
 if [get_compiler_info] {
@@ -45,23 +50,6 @@ clean_restart ${binfile}
 if ![runto_main] then {
     fail "can't run to main"
     return 0
-}
-
-send_gdb "print have_avx ()\r"
-gdb_expect {
-    -re ".. = 1\r\n$gdb_prompt " {
-        pass "check whether processor supports AVX"
-    }
-    -re ".. = 0\r\n$gdb_prompt " {
-        verbose "processor does not support AVX; skipping AVX tests"
-        return
-    }
-    -re ".*$gdb_prompt $" {
-        fail "check whether processor supports AVX"
-    }
-    timeout {
-        fail "check whether processor supports AVX (timeout)"
-    }
 }
 
 gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
