@@ -8123,5 +8123,49 @@ gdb_caching_proc have_mpx {
     return $status
 }
 
+# Return 1 if target supports avx, otherwise return 0.
+gdb_caching_proc have_avx {
+    global srcdir
+
+    set me "have_avx"
+    if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
+        verbose "$me: target does not support avx, returning 0" 2
+        return 0
+    }
+
+    # Compile a test program.
+    set src {
+       #include "nat/x86-cpuid.h"
+
+	int main() {
+	  unsigned int eax, ebx, ecx, edx;
+
+	if (!x86_cpuid (1, &eax, &ebx, &ecx, &edx))
+	  return 0;
+
+	if ((ecx & (bit_AVX | bit_OSXSAVE)) == (bit_AVX | bit_OSXSAVE))
+	  return 1;
+	else
+	  return 0;
+	}
+    }
+    set compile_flags "incdir=${srcdir}/.."
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+        return 0
+    }
+
+    set result [remote_exec target $obj]
+    set status [lindex $result 0]
+    set output [lindex $result 1]
+    if { $output != "" } {
+	set status 0
+    }
+
+    remote_file build delete $obj
+
+    verbose "$me: returning $status" 2
+    return $status
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

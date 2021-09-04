@@ -23,6 +23,11 @@ if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
     return
 }
 
+if { ![have_avx] } {
+    verbose "Skipping x86_64 displaced stepping tests."
+    return
+}
+
 standard_testfile .S
 
 set options [list debug \

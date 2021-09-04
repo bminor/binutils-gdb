@@ -49,80 +49,63 @@ v8sf_t data[] =
 
 
 int
-have_avx (void)
-{
-  unsigned int eax, ebx, ecx, edx;
-
-  if (!x86_cpuid (1, &eax, &ebx, &ecx, &edx))
-    return 0;
-
-  if ((ecx & (bit_AVX | bit_OSXSAVE)) == (bit_AVX | bit_OSXSAVE))
-    return 1;
-  else
-    return 0;
-}
-
-int
 main (int argc, char **argv)
 {
-  if (have_avx ())
-    {
-      asm ("vmovaps 0(%0), %%ymm0\n\t"
-           "vmovaps 32(%0), %%ymm1\n\t"
-           "vmovaps 64(%0), %%ymm2\n\t"
-           "vmovaps 96(%0), %%ymm3\n\t"
-           "vmovaps 128(%0), %%ymm4\n\t"
-           "vmovaps 160(%0), %%ymm5\n\t"
-           "vmovaps 192(%0), %%ymm6\n\t"
-           "vmovaps 224(%0), %%ymm7\n\t"
-           : /* no output operands */
-           : "r" (data) 
-           : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+  asm ("vmovaps 0(%0), %%ymm0\n\t"
+       "vmovaps 32(%0), %%ymm1\n\t"
+       "vmovaps 64(%0), %%ymm2\n\t"
+       "vmovaps 96(%0), %%ymm3\n\t"
+       "vmovaps 128(%0), %%ymm4\n\t"
+       "vmovaps 160(%0), %%ymm5\n\t"
+       "vmovaps 192(%0), %%ymm6\n\t"
+       "vmovaps 224(%0), %%ymm7\n\t"
+       : /* no output operands */
+       : "r" (data)
+       : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
 #ifdef __x86_64__
-      asm ("vmovaps 256(%0), %%ymm8\n\t"
-           "vmovaps 288(%0), %%ymm9\n\t"
-           "vmovaps 320(%0), %%ymm10\n\t"
-           "vmovaps 352(%0), %%ymm11\n\t"
-           "vmovaps 384(%0), %%ymm12\n\t"
-           "vmovaps 416(%0), %%ymm13\n\t"
-           "vmovaps 448(%0), %%ymm14\n\t"
-           "vmovaps 480(%0), %%ymm15\n\t"
-           : /* no output operands */
-           : "r" (data) 
-           : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
+  asm ("vmovaps 256(%0), %%ymm8\n\t"
+       "vmovaps 288(%0), %%ymm9\n\t"
+       "vmovaps 320(%0), %%ymm10\n\t"
+       "vmovaps 352(%0), %%ymm11\n\t"
+       "vmovaps 384(%0), %%ymm12\n\t"
+       "vmovaps 416(%0), %%ymm13\n\t"
+       "vmovaps 448(%0), %%ymm14\n\t"
+       "vmovaps 480(%0), %%ymm15\n\t"
+       : /* no output operands */
+       : "r" (data)
+       : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
 #endif
 
-      asm ("nop"); /* first breakpoint here */
+  asm ("nop"); /* first breakpoint here */
 
-      asm (
-           "vmovaps %%ymm0, 0(%0)\n\t"
-           "vmovaps %%ymm1, 32(%0)\n\t"
-           "vmovaps %%ymm2, 64(%0)\n\t"
-           "vmovaps %%ymm3, 96(%0)\n\t"
-           "vmovaps %%ymm4, 128(%0)\n\t"
-           "vmovaps %%ymm5, 160(%0)\n\t"
-           "vmovaps %%ymm6, 192(%0)\n\t"
-           "vmovaps %%ymm7, 224(%0)\n\t"
-           : /* no output operands */
-           : "r" (data) 
-           : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
+  asm (
+       "vmovaps %%ymm0, 0(%0)\n\t"
+       "vmovaps %%ymm1, 32(%0)\n\t"
+       "vmovaps %%ymm2, 64(%0)\n\t"
+       "vmovaps %%ymm3, 96(%0)\n\t"
+       "vmovaps %%ymm4, 128(%0)\n\t"
+       "vmovaps %%ymm5, 160(%0)\n\t"
+       "vmovaps %%ymm6, 192(%0)\n\t"
+       "vmovaps %%ymm7, 224(%0)\n\t"
+       : /* no output operands */
+       : "r" (data)
+       : "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7");
 #ifdef __x86_64__
-      asm (
-           "vmovaps %%ymm8, 256(%0)\n\t"
-           "vmovaps %%ymm9, 288(%0)\n\t"
-           "vmovaps %%ymm10, 320(%0)\n\t"
-           "vmovaps %%ymm11, 352(%0)\n\t"
-           "vmovaps %%ymm12, 384(%0)\n\t"
-           "vmovaps %%ymm13, 416(%0)\n\t"
-           "vmovaps %%ymm14, 448(%0)\n\t"
-           "vmovaps %%ymm15, 480(%0)\n\t"
-           : /* no output operands */
-           : "r" (data) 
-           : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
+  asm (
+       "vmovaps %%ymm8, 256(%0)\n\t"
+       "vmovaps %%ymm9, 288(%0)\n\t"
+       "vmovaps %%ymm10, 320(%0)\n\t"
+       "vmovaps %%ymm11, 352(%0)\n\t"
+       "vmovaps %%ymm12, 384(%0)\n\t"
+       "vmovaps %%ymm13, 416(%0)\n\t"
+       "vmovaps %%ymm14, 448(%0)\n\t"
+       "vmovaps %%ymm15, 480(%0)\n\t"
+       : /* no output operands */
+       : "r" (data)
+       : "xmm8", "xmm9", "xmm10", "xmm11", "xmm12", "xmm13", "xmm14", "xmm15");
 #endif
 
-      puts ("Bye!"); /* second breakpoint here */
-    }
+  puts ("Bye!"); /* second breakpoint here */
 
   return 0;
 }
