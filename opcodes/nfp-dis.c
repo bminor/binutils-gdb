@@ -2594,7 +2594,7 @@ init_nfp3200_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
 
 static bool
 init_nfp6000_mecsr_sec (nfp_priv_data * priv, Elf_Internal_Shdr * sec,
-			int is_for_text, struct disassemble_info *dinfo)
+			bool is_for_text, struct disassemble_info *dinfo)
 {
   Elf_Nfp_InitRegEntry ireg;
   unsigned char buffer[sizeof (Elf_Nfp_InitRegEntry)];
@@ -2644,6 +2644,9 @@ init_nfp6000_mecsr_sec (nfp_priv_data * priv, Elf_Internal_Shdr * sec,
       menum = _BF (ireg.cpp_offset_lo, 13, 10) - 4;
       csr_off = _BF (ireg.cpp_offset_lo, 9, 0);
 
+      if (isl >= _NFP_ISLAND_MAX || menum >= _NFP_ME_MAX)
+	return false;
+	
       mecfg = &priv->mecfgs[isl][menum][is_for_text];
       switch (csr_off)
 	{
@@ -2669,7 +2672,7 @@ init_nfp6000_priv (nfp_priv_data * priv, struct disassemble_info *dinfo)
   size_t isl;
   unsigned int sec_cnt = 0;
   unsigned int sec_idx;
-  int is_for_text;
+  bool is_for_text;
 
   memset (mecfg_orders, -1, sizeof (mecfg_orders));
 
