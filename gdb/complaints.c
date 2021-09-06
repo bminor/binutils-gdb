@@ -23,6 +23,7 @@
 #include "gdbcmd.h"
 #include "gdbsupport/selftest.h"
 #include <unordered_map>
+#include <mutex>
 
 /* Map format strings to counters.  */
 
@@ -34,6 +35,10 @@ static std::unordered_map<const char *, int> counters;
 
 int stop_whining = 0;
 
+#if CXX_STD_THREAD
+static std::mutex complaint_mutex;
+#endif /* CXX_STD_THREAD */
+
 /* See complaints.h.  */
 
 void
@@ -41,8 +46,13 @@ complaint_internal (const char *fmt, ...)
 {
   va_list args;
 
-  if (++counters[fmt] > stop_whining)
-    return;
+  {
+#if CXX_STD_THREAD
+    std::lock_guard<std::mutex> guard (complaint_mutex);
+#endif
+    if (++counters[fmt] > stop_whining)
+      return;
+  }
 
   va_start (args, fmt);
 
@@ -64,6 +74,60 @@ void
 clear_complaints ()
 {
   counters.clear ();
+}
+
+/* See complaints.h.  */
+
+complaint_interceptor *complaint_interceptor::g_complaint_interceptor;
+
+/* See complaints.h.  */
+
+complaint_interceptor::complaint_interceptor ()
+  : m_saved_warning_hook (deprecated_warning_hook)
+{
+  /* These cannot be stacked.  */
+  gdb_assert (g_complaint_interceptor == nullptr);
+  g_complaint_interceptor = this;
+  deprecated_warning_hook = issue_complaint;
+}
+
+/* A helper that wraps a warning hook.  */
+
+static void
+wrap_warning_hook (void (*hook) (const char *, va_list), ...)
+{
+  va_list args;
+  va_start (args, hook);
+  hook ("%s", args);
+  va_end (args);
+}
+
+/* See complaints.h.  */
+
+complaint_interceptor::~complaint_interceptor ()
+{
+  for (const std::string &str : m_complaints)
+    {
+      if (m_saved_warning_hook)
+	wrap_warning_hook (m_saved_warning_hook, str.c_str ());
+      else
+	gdb_printf (gdb_stderr, _("During symbol reading: %s\n"),
+		    str.c_str ());
+    }
+
+  g_complaint_interceptor = nullptr;
+  deprecated_warning_hook = m_saved_warning_hook;
+}
+
+/* See complaints.h.  */
+
+void
+complaint_interceptor::issue_complaint (const char *fmt, va_list args)
+{
+#if CXX_STD_THREAD
+  std::lock_guard<std::mutex> guard (complaint_mutex);
+#endif
+  g_complaint_interceptor->m_complaints.insert (string_vprintf (fmt, args));
 }
 
 static void
