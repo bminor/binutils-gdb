@@ -30,7 +30,6 @@
 #include "symfile.h"
 #include "coff-pe-read.h"
 #include "gdb_bfd.h"
-#include "complaints.h"
 #include "solib.h"
 #include "solib-target.h"
 #include "gdbcore.h"
