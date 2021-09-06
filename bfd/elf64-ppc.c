@@ -1435,6 +1435,10 @@ ppc64_elf_ha_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   value = (bfd_signed_vma) value >> 16;
 
   octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, octets))
+    return bfd_reloc_outofrange;
+
   insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
   insn &= ~0x1fffc1;
   insn |= (value & 0xffc1) | ((value & 0x3e) << 15);
@@ -1510,6 +1514,10 @@ ppc64_elf_brtaken_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 				  input_section, output_bfd, error_message);
 
   octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, octets))
+    return bfd_reloc_outofrange;
+
   insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
   insn &= ~(0x01 << 21);
   r_type = reloc_entry->howto->type;
@@ -1655,11 +1663,15 @@ ppc64_elf_toc64_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
     return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
+  octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, octets))
+    return bfd_reloc_outofrange;
+
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
   if (TOCstart == 0)
     TOCstart = ppc64_elf_set_toc (NULL, input_section->output_section->owner);
 
-  octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
   bfd_put_64 (abfd, TOCstart + TOC_BASE_OFF, (bfd_byte *) data + octets);
   return bfd_reloc_ok;
 }
@@ -1671,14 +1683,20 @@ ppc64_elf_prefix_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 {
   uint64_t insn;
   bfd_vma targ;
+  bfd_size_type octets;
 
   if (output_bfd != NULL)
     return bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,
 				  input_section, output_bfd, error_message);
 
-  insn = bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address);
+  octets = reloc_entry->address * OCTETS_PER_BYTE (abfd, input_section);
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, octets))
+    return bfd_reloc_outofrange;
+
+  insn = bfd_get_32 (abfd, (bfd_byte *) data + octets);
   insn <<= 32;
-  insn |= bfd_get_32 (abfd, (bfd_byte *) data + reloc_entry->address + 4);
+  insn |= bfd_get_32 (abfd, (bfd_byte *) data + octets + 4);
 
   targ = (symbol->section->output_section->vma
 	  + symbol->section->output_offset
@@ -1697,8 +1715,8 @@ ppc64_elf_prefix_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
   targ >>= reloc_entry->howto->rightshift;
   insn &= ~reloc_entry->howto->dst_mask;
   insn |= ((targ << 16) | (targ & 0xffff)) & reloc_entry->howto->dst_mask;
-  bfd_put_32 (abfd, insn >> 32, (bfd_byte *) data + reloc_entry->address);
-  bfd_put_32 (abfd, insn, (bfd_byte *) data + reloc_entry->address + 4);
+  bfd_put_32 (abfd, insn >> 32, (bfd_byte *) data + octets);
+  bfd_put_32 (abfd, insn, (bfd_byte *) data + octets + 4);
   if (reloc_entry->howto->complain_on_overflow == complain_overflow_signed
       && (targ + (1ULL << (reloc_entry->howto->bitsize - 1))
 	  >= 1ULL << reloc_entry->howto->bitsize))
