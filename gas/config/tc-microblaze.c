@@ -915,7 +915,7 @@ md_assemble (char * str)
   unsigned reg2;
   unsigned reg3;
   unsigned isize;
-  unsigned int immed, temp;
+  unsigned int immed = 0, temp;
   expressionS exp;
   char name[20];
 
