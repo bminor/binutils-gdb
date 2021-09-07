@@ -741,6 +741,57 @@ wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout)
   return result;
 }
 
+/* Helper template for the CreateProcess wrappers.  */
+template<typename FUNC, typename CHAR, typename INFO>
+BOOL
+create_process_wrapper (FUNC *do_create_process, const CHAR *image,
+			CHAR *command_line, DWORD flags,
+			void *environment, const CHAR *cur_dir,
+			INFO *startup_info,
+			PROCESS_INFORMATION *process_info)
+{
+  return do_create_process (image,
+			    command_line, /* command line */
+			    nullptr,	  /* Security */
+			    nullptr,	  /* thread */
+			    TRUE,	  /* inherit handles */
+			    flags,	  /* start flags */
+			    environment,  /* environment */
+			    cur_dir,	  /* current directory */
+			    startup_info,
+			    process_info);
+}
+
+/* See nat/windows-nat.h.  */
+
+BOOL
+create_process (const char *image, char *command_line, DWORD flags,
+		void *environment, const char *cur_dir,
+		STARTUPINFOA *startup_info,
+		PROCESS_INFORMATION *process_info)
+{
+  return create_process_wrapper (CreateProcessA, image, command_line, flags,
+				 environment, cur_dir,
+				 startup_info, process_info);
+}
+
+#ifdef __CYGWIN__
+
+/* See nat/windows-nat.h.  */
+
+BOOL
+create_process (const wchar_t *image, wchar_t *command_line, DWORD flags,
+		void *environment, const wchar_t *cur_dir,
+		STARTUPINFOW *startup_info,
+		PROCESS_INFORMATION *process_info);
+{
+  return create_process_wrapper (CreateProcessW, image, command_line, flags,
+				 environment, cur_dir,
+				 startup_info, process_info);
+}
+
+#endif /* __CYGWIN__ */
+
 /* Define dummy functions which always return error for the rare cases where
    these functions could not be found.  */
 template<typename... T>

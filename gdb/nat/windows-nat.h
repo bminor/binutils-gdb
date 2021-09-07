@@ -294,6 +294,21 @@ extern BOOL continue_last_debug_event (DWORD continue_status,
 
 extern BOOL wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout);
 
+/* Wrappers for CreateProcess.  */
+
+extern BOOL create_process (const char *image, char *command_line,
+			    DWORD flags, void *environment,
+			    const char *cur_dir,
+			    STARTUPINFOA *startup_info,
+			    PROCESS_INFORMATION *process_info);
+#ifdef __CYGWIN__
+extern BOOL create_process (const wchar_t *image, wchar_t *command_line,
+			    DWORD flags, void *environment,
+			    const wchar_t *cur_dir,
+			    STARTUPINFOW *startup_info,
+			    PROCESS_INFORMATION *process_info);
+#endif /* __CYGWIN__ */
+
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
 #define DebugBreakProcess		dyn_DebugBreakProcess

@@ -578,11 +578,8 @@ create_process (const char *program, char *args,
   strcpy (program_and_args, program);
   strcat (program_and_args, " ");
   strcat (program_and_args, args);
-  ret = CreateProcessA (program,           /* image name */
+  ret = create_process (program,           /* image name */
 			program_and_args,  /* command line */
-			NULL,              /* security */
-			NULL,              /* thread */
-			TRUE,              /* inherit handles */
 			flags,             /* start flags */
 			NULL,              /* environment */
 			/* current directory */

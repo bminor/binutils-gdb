@@ -78,12 +78,10 @@ using namespace windows_nat;
 static windows_process_info windows_process;
 
 #undef STARTUPINFO
-#undef CreateProcess
 
 #ifndef __CYGWIN__
 # define __PMAX	(MAX_PATH + 1)
 # define STARTUPINFO STARTUPINFOA
-# define CreateProcess CreateProcessA
 #else
 # define __PMAX	PATH_MAX
 /* The starting and ending address of the cygwin1.dll text segment.  */
@@ -92,7 +90,6 @@ static windows_process_info windows_process;
 #   define __USEWIDE
     typedef wchar_t cygwin_buf_t;
 #   define STARTUPINFO STARTUPINFOW
-#   define CreateProcess CreateProcessW
 #endif
 
 static int have_saved_context;	/* True if we've saved context from a
@@ -2494,17 +2491,9 @@ windows_nat_target::create_inferior (const char *exec_file,
     }
 
   windows_init_thread_list ();
-  ret = CreateProcess (0,
-		       args,	/* command line */
-		       NULL,	/* Security */
-		       NULL,	/* thread */
-		       TRUE,	/* inherit handles */
-		       flags,	/* start flags */
-		       w32_env,	/* environment */
-		       inferior_cwd != NULL ? infcwd : NULL, /* current
-								directory */
-		       &si,
-		       &pi);
+  ret = create_process (args, flags, w32_env,
+			inferior_cwd != nullptr ? infcwd : nullptr,
+			&si, &pi);
   if (w32_env)
     /* Just free the Win32 environment, if it could be created. */
     free (w32_env);
@@ -2618,11 +2607,8 @@ windows_nat_target::create_inferior (const char *exec_file,
   *temp = 0;
 
   windows_init_thread_list ();
-  ret = CreateProcessA (0,
+  ret = create_process (nullptr, /* image */
 			args,	/* command line */
-			NULL,	/* Security */
-			NULL,	/* thread */
-			TRUE,	/* inherit handles */
 			flags,	/* start flags */
 			w32env,	/* environment */
 			inferior_cwd, /* current directory */
