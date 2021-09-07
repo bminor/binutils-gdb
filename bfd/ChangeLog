@@ -1,3 +1,9 @@
+2021-09-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 28303
+	* elfxx-riscv.c (riscv_elf_add_sub_reloc): Add check for out of
+	range relocs.
+
 2021-08-10  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: Updated Serbian translation.

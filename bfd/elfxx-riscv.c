@@ -1002,6 +1002,13 @@ riscv_elf_add_sub_reloc (bfd *abfd,
 
   relocation = symbol->value + symbol->section->output_section->vma
     + symbol->section->output_offset + reloc_entry->addend;
+
+  bfd_size_type octets = reloc_entry->address
+    * bfd_octets_per_byte (abfd, input_section);
+  if (!bfd_reloc_offset_in_range (reloc_entry->howto, abfd,
+				  input_section, octets))
+    return bfd_reloc_outofrange;
+
   bfd_vma old_value = bfd_get (howto->bitsize, abfd,
 			       data + reloc_entry->address);
 
