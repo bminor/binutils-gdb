@@ -235,6 +235,11 @@ proc gdb_unload {} {
 	    exp_continue
 	}
 	-re "$gdb_prompt $" {}
+	-re "A problem internal to GDB has been detected" {
+	    perror "Couldn't unload file in $GDB (GDB internal error)."
+	    gdb_internal_error_resync
+	    return -1
+	}
 	timeout {
 	    perror "couldn't unload file in $GDB (timeout)."
 	    return -1
