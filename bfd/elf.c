@@ -9599,23 +9599,6 @@ elfcore_make_auxv_note_section (bfd *abfd, Elf_Internal_Note *note,
   return true;
 }
 
-static bool
-elfcore_make_memtag_note_section (bfd *abfd, Elf_Internal_Note *note,
-				  size_t offs)
-{
-  asection *sect = bfd_make_section_anyway_with_flags (abfd, ".memtag",
-						       SEC_HAS_CONTENTS);
-
-  if (sect == NULL)
-    return false;
-
-  sect->size = note->descsz - offs;
-  sect->filepos = note->descpos + offs;
-  sect->alignment_power = 1 + bfd_get_arch_size (abfd) / 32;
-
-  return true;
-}
-
 /* prstatus_t exists on:
      solaris 2.5+
      linux 2.[01] + glibc
@@ -10676,8 +10659,6 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
       return elfcore_make_note_pseudosection (abfd, ".note.linuxcore.siginfo",
 					      note);
 
-    case NT_MEMTAG:
-      return elfcore_make_memtag_note_section (abfd, note, 0);
     }
 }
 
