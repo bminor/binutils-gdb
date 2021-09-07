@@ -1170,6 +1170,16 @@ static struct riscv_supported_ext riscv_supported_std_zxm_ext[] =
   {NULL, 0, 0, 0, 0}
 };
 
+/* T-HEAD extentions for Xuantie C9xx.  The version 2.0 just keeps
+   compatible.  */
+static struct riscv_supported_ext riscv_supported_vendor_thead_ext[] =
+{
+  {"xtheadc",		VENDOR_SPEC_CLASS_THEAD,	2, 0, 0 },
+  {"xtheade",		VENDOR_SPEC_CLASS_THEAD,	2, 0, 0 },
+  {"xtheadse",		VENDOR_SPEC_CLASS_THEAD,	2, 0, 0 },
+  {NULL, 0, 0, 0, 0}
+};
+
 const struct riscv_supported_ext *riscv_all_supported_ext[] =
 {
   riscv_supported_std_ext,
@@ -1177,6 +1187,7 @@ const struct riscv_supported_ext *riscv_all_supported_ext[] =
   riscv_supported_std_s_ext,
   riscv_supported_std_h_ext,
   riscv_supported_std_zxm_ext,
+  riscv_supported_vendor_thead_ext,
   NULL
 };
 
@@ -1441,6 +1452,7 @@ riscv_get_default_ext_version (enum riscv_spec_class default_isa_spec,
     case RV_ISA_CLASS_S: table = riscv_supported_std_s_ext; break;
     case RV_ISA_CLASS_H: table = riscv_supported_std_h_ext; break;
     case RV_ISA_CLASS_X:
+      table = riscv_supported_vendor_thead_ext;
       break;
     default:
       table = riscv_supported_std_ext;
@@ -1451,6 +1463,7 @@ riscv_get_default_ext_version (enum riscv_spec_class default_isa_spec,
     {
       if (strcmp (table[i].name, name) == 0
 	  && (table[i].isa_spec_class == ISA_SPEC_CLASS_DRAFT
+	      || table[i].isa_spec_class == VENDOR_SPEC_CLASS_THEAD
 	      || table[i].isa_spec_class == default_isa_spec))
 	{
 	  *major_version = table[i].major_version;

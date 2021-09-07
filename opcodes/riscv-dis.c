@@ -265,6 +265,59 @@ print_extended_insn_args (const char **opcode_args,
 	}
       break;
 
+    case 'X':
+	{
+	  int nbit = 0;
+	  int at = -1;
+	  char c = 0;
+	  int shift = 0;
+	  oparg++;
+	  c = *oparg++;
+	  switch (c)
+	    {
+	    case 'I':
+	      nbit = strtol (oparg, (char **) &oparg, 10);
+	      if ((*oparg) =='@')
+		at = strtol (++oparg, (char **) &oparg, 10);
+
+	      oparg--;
+
+	      print (info->stream, "%d",
+		     (unsigned int) (EXTRACT_VENDOR_THEAD_IMM (l, nbit, at)
+				     << shift));
+	      break;
+
+	    case 'S':
+	      nbit = strtol (oparg, (char **) &oparg, 10);
+	      if ((*oparg) == '<' && (*(oparg + 1) == '<'))
+		{
+		  oparg += 2;
+		  shift = strtol (oparg, (char **) &oparg, 10);
+		}
+	      if ((*oparg) =='@')
+		at = strtol (++oparg, (char **) &oparg, 10);
+
+	      oparg--;
+
+	      print (info->stream, "%d",
+		     (unsigned) (EXTRACT_VENDOR_THEAD_SIGN_IMM (l, nbit, at)
+				 << shift));
+	      break;
+
+	    case 'g':
+	      nbit = strtol (oparg, (char **) &oparg, 10);
+	      if ((*oparg) =='@')
+		at = strtol (++oparg, (char **) &oparg, 10);
+
+	      oparg--;
+
+	      print (info->stream, "%s",
+		     riscv_gpr_names[EXTRACT_VENDOR_THEAD_IMM (l, nbit, at)]);
+	      break;
+	    }
+	}
+      break;
+
     default:
       return false;
     }

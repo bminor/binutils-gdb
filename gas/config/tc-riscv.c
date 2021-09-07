@@ -39,6 +39,7 @@
 enum
 {
   DRAFT_EXT = 0,
+  VENDOR_THEAD_EXT,
   EXTENDED_EXT_NUM
 };
 
@@ -78,6 +79,7 @@ enum riscv_csr_class
 enum riscv_extended_csr_class
 {
   CSR_CLASS_V = CSR_CLASS_EXTENDED, /* RVV CSR */
+  CSR_CLASS_VENDOR_THEAD, /* vendor CSR for T-HEAD */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -100,6 +102,7 @@ struct riscv_csr_extra
   /* The CSR may have more than one setting.  */
   struct riscv_csr_extra *next;
 };
+
 
 #ifndef DEFAULT_ARCH
 #define DEFAULT_ARCH "riscv64"
@@ -292,6 +295,20 @@ riscv_extended_subset_supports (int insn_class)
     case INSN_CLASS_SVINVAL:
       return riscv_subset_supports ("svinval");
 
+    case INSN_CLASS_THEADC:
+      return riscv_subset_supports ("xtheadc");
+    case INSN_CLASS_THEADC_OR_THEADE:
+      return (riscv_subset_supports ("xtheadc")
+	      || riscv_subset_supports ("xtheade"));
+    case INSN_CLASS_THEADC_OR_THEADE_OR_THEADSE:
+      return (riscv_subset_supports ("xtheadc")
+	      || riscv_subset_supports ("xtheade")
+	      || riscv_subset_supports ("xtheadse"));
+    case INSN_CLASS_THEADE:
+      return riscv_subset_supports ("xtheade");
+    case INSN_CLASS_THEADSE:
+      return riscv_subset_supports ("xtheadse");
+
     default:
       as_fatal ("internal: unknown INSN_CLASS (0x%x)", insn_class);
       return false;
@@ -439,6 +456,9 @@ static htab_t op_hash = NULL;
 
 /* Handle of the draft OPCODE hash table.  */
 static htab_t op_draft_hash = NULL;
+
+/* Handle of the T-HEAD OPCODE hash table.  */
+static htab_t op_vendor_thead_hash = NULL;
 
 /* Handle of the type of .insn hash table.  */
 static htab_t insn_type_hash = NULL;
@@ -973,6 +993,8 @@ riscv_extended_csr_class_check (int csr_class)
       return (riscv_subset_supports ("v")
 	      || riscv_subset_supports ("zvamo")
 	      || riscv_subset_supports ("zvlsseg"));
+    case CSR_CLASS_VENDOR_THEAD:
+      return true;
     default:
       as_bad (_("internal: bad RISC-V CSR class (0x%x)"), csr_class);
     }
@@ -1165,6 +1187,47 @@ validate_riscv_extended_insn (insn_t *bits,
 	  return false;
 	}
       break;
+
+    case 'X':
+      switch (*++oparg)
+	{
+	case 'g':
+	  /* Xgm@n.  */
+	case 'F':
+	  /* XFm@n.  */
+	case 'I':
+	    {
+	      /* XIm@n.  */
+	      int nbit = 0;
+	      int at = -1;
+	      int shift = 0;
+	      nbit = strtol (++oparg, (char **)&oparg, 10);
+	      if (*oparg =='@')
+		at = strtol (++oparg, (char **)&oparg, 10);
+	      oparg--;
+
+	      used_bits |= ENCODE_VENDOR_THEAD_IMM ((-1U>>shift), nbit, at);
+	      break;
+	    }
+	case 'S':
+	  /* XSm@n.  */
+	    {
+	      int nbit = 0;
+	      int at = -1;
+	      int shift = 0;
+	      nbit = strtol (++oparg, (char **) &oparg, 10);
+	      if ((*oparg) =='>' && (*(oparg+1)) == '>')
+		shift = strtol (oparg, (char **) &oparg, 10);
+	      if (*oparg =='@')
+		at = strtol(++oparg, (char **) &oparg, 10);
+	      oparg--;
+
+	      used_bits |= ENCODE_VENDOR_THEAD_IMM ((-1>>shift), nbit, at);
+	      break;
+	    }
+	}
+      break;
+
     default:
       return false;
     }
@@ -1418,6 +1481,7 @@ md_begin (void)
   hash_reg_names (RCLASS_VECR, riscv_vecr_names_numeric, NVECR);
   hash_reg_names (RCLASS_VECM, riscv_vecm_names_numeric, NVECM);
   op_draft_hash = init_opcode_hash (riscv_extended_opcodes[DRAFT_EXT], false);
+  op_vendor_thead_hash = init_opcode_hash (riscv_extended_opcodes[VENDOR_THEAD_EXT], false);
 }
 
 static insn_t
@@ -1525,6 +1589,9 @@ riscv_find_extended_opcode_hash (char *str ATTRIBUTE_UNUSED)
 	{
 	case DRAFT_EXT:
 	  insn = (struct riscv_opcode *) str_hash_find (op_draft_hash, str);
+	  break;
+	case VENDOR_THEAD_EXT:
+	  insn = (struct riscv_opcode *) str_hash_find (op_vendor_thead_hash, str);
 	  break;
 	default:
 	  break;
@@ -2625,6 +2692,81 @@ riscv_parse_extended_operands (struct riscv_cl_insn *ip ATTRIBUTE_UNUSED,
 
 	default:
 	  return false;
+	}
+      break;
+
+    case 'X':
+	{
+	  int nbit = 0;
+	  int at = -1;
+	  int shift = 0;
+	  switch (*++oparg)
+	    {
+	    case 'I':
+	      /* XIm@n.  */
+	      nbit = strtol (++oparg, (char **) &oparg, 10);
+	      if ((*oparg) =='@')
+		at = strtol (++oparg, (char **) &oparg, 10);
+
+	      oparg--;
+
+	      my_getExpression (imm_expr, asarg);
+	      if (imm_expr->X_op != O_constant
+		  || !VALID_VENDOR_THEAD_IMM (imm_expr->X_add_number, nbit, at))
+		return false;
+	      ip->insn_opcode |=
+		ENCODE_VENDOR_THEAD_IMM ((imm_expr->X_add_number >> shift), nbit, at);
+	      asarg = expr_end;
+	      imm_expr->X_op = O_absent;
+	      break;
+
+	    case 'S':
+	      /* XSm@n.  */
+	      nbit = strtol (++oparg, (char **) &oparg, 10);
+	      if ((*oparg) =='<' && (*(oparg+1)) == '<')
+		{
+		  oparg+= 2;
+		  shift = strtol (++oparg, (char **) &oparg, 10);
+		}
+
+	      if ((*oparg) =='@')
+		at = strtol(++oparg, (char **) &oparg, 10);
+
+	      oparg--;
+
+	      my_getExpression (imm_expr, asarg);
+	      if (imm_expr->X_op != O_constant
+		  || !VALID_VENDOR_THEAD_SIGN_IMM ((imm_expr->X_add_number >> shift), nbit, at))
+		return false;
+	      ip->insn_opcode |=
+		ENCODE_VENDOR_THEAD_SIGN_IMM (imm_expr->X_add_number, nbit, at);
+	      asarg = expr_end;
+	      imm_expr->X_op = O_absent;
+	      break;;
+
+	    case 'g':
+	      /* Xgm@n.  */
+	      nbit = strtol (++oparg, (char **) &oparg, 10);
+	      if ((*oparg) == '<' && (*(oparg + 1)) == '<')
+		{
+		  oparg += 2;
+		  shift = strtol (++oparg, (char **) &oparg, 10);
+		}
+
+	      if ((*oparg) == '@')
+		at = strtol (++oparg, (char **) &oparg, 10);
+
+	      oparg--;
+
+	      my_getExpression (imm_expr, asarg);
+	      if (imm_expr->X_op != O_register
+		  || !VALID_VENDOR_THEAD_IMM (imm_expr->X_add_number, nbit, at))
+		return false;
+	      ip->insn_opcode |=
+		ENCODE_VENDOR_THEAD_IMM (imm_expr->X_add_number, nbit, at);
+	      asarg = expr_end;
+	      break;;
+	    }
 	}
       break;
 

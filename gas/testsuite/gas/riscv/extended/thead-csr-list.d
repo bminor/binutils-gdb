@@ -1,0 +1,107 @@
+#as: -march=rv64gcxtheadc
+#objdump: -dr
+
+.*:[ 	]+file format .*
+
+
+Disassembly of section .text:
+
+0000000000000000 <.text>:
+   0:	7c002573          	csrr	a0,mxstatus
+   4:	7c102573          	csrr	a0,mhcr
+   8:	7c202573          	csrr	a0,mcor
+   c:	7c302573          	csrr	a0,mccr2
+  10:	7c402573          	csrr	a0,mcer2
+  14:	7c502573          	csrr	a0,mhint
+  18:	7c602573          	csrr	a0,mrmr
+  1c:	7c702573          	csrr	a0,mrvbr
+  20:	7c802573          	csrr	a0,mcer
+  24:	7c902573          	csrr	a0,mcounterwen
+  28:	7ca02573          	csrr	a0,mcounterinten
+  2c:	7cb02573          	csrr	a0,mcounterof
+  30:	7cc02573          	csrr	a0,mhint2
+  34:	7cd02573          	csrr	a0,mhint3
+  38:	7e002573          	csrr	a0,mraddr
+  3c:	7e102573          	csrr	a0,mexstatus
+  40:	7e202573          	csrr	a0,mnmicause
+  44:	7e302573          	csrr	a0,mnmipc
+  48:	7f002573          	csrr	a0,mhpmcr
+  4c:	7f102573          	csrr	a0,mhpmsr
+  50:	7f202573          	csrr	a0,mhpmer
+  54:	7f302573          	csrr	a0,msmpr
+  58:	7f402573          	csrr	a0,mteecfg
+  5c:	7d102573          	csrr	a0,usp
+  60:	7d202573          	csrr	a0,mcins
+  64:	7d302573          	csrr	a0,mcindex
+  68:	7d402573          	csrr	a0,mcdata0
+  6c:	7d502573          	csrr	a0,mcdata1
+  70:	7d602573          	csrr	a0,meicr
+  74:	7d702573          	csrr	a0,meicr2
+  78:	be002573          	csrr	a0,mebr
+  7c:	be102573          	csrr	a0,nt_mstatus
+  80:	be302573          	csrr	a0,nt_mtvec
+  84:	be202573          	csrr	a0,nt_mie
+  88:	be402573          	csrr	a0,nt_mtvt
+  8c:	be502573          	csrr	a0,nt_mepc
+  90:	be602573          	csrr	a0,nt_mcause
+  94:	be702573          	csrr	a0,nt_mip
+  98:	be802573          	csrr	a0,nt_mintstate
+  9c:	be902573          	csrr	a0,nt_mxstatus
+  a0:	bea02573          	csrr	a0,nt_mebr
+  a4:	beb02573          	csrr	a0,nt_msp
+  a8:	bec02573          	csrr	a0,t_usp
+  ac:	bed02573          	csrr	a0,t_mdcr
+  b0:	bee02573          	csrr	a0,t_mpcr
+  b4:	bef02573          	csrr	a0,pmpteecfg
+  b8:	fc002573          	csrr	a0,mcpuid
+  bc:	fc102573          	csrr	a0,mapbaddr
+  c0:	fc202573          	csrr	a0,mwmsr
+  c4:	80002573          	csrr	a0,fxcr
+  c8:	9c002573          	csrr	a0,smir
+  cc:	9c102573          	csrr	a0,smel
+  d0:	9c202573          	csrr	a0,smeh
+  d4:	9c302573          	csrr	a0,smcir
+  d8:	5c002573          	csrr	a0,sxstatus
+  dc:	5c102573          	csrr	a0,shcr
+  e0:	5c202573          	csrr	a0,scer2
+  e4:	5c302573          	csrr	a0,scer
+  e8:	5c402573          	csrr	a0,scounterinten
+  ec:	5c502573          	csrr	a0,scounterof
+  f0:	5c602573          	csrr	a0,shint
+  f4:	5c702573          	csrr	a0,shint2
+  f8:	5c802573          	csrr	a0,shpminhibit
+  fc:	5c902573          	csrr	a0,shpmcr
+ 100:	5ca02573          	csrr	a0,shpmsr
+ 104:	5cb02573          	csrr	a0,shpmer
+ 108:	5e002573          	csrr	a0,scycle
+ 10c:	5e102573          	csrr	a0,shpmcounter1
+ 110:	5e202573          	csrr	a0,shpmcounter2
+ 114:	5e302573          	csrr	a0,shpmcounter3
+ 118:	5e402573          	csrr	a0,shpmcounter4
+ 11c:	5e502573          	csrr	a0,shpmcounter5
+ 120:	5e602573          	csrr	a0,shpmcounter6
+ 124:	5e702573          	csrr	a0,shpmcounter7
+ 128:	5e802573          	csrr	a0,shpmcounter8
+ 12c:	5e902573          	csrr	a0,shpmcounter9
+ 130:	5ea02573          	csrr	a0,shpmcounter10
+ 134:	5eb02573          	csrr	a0,shpmcounter11
+ 138:	5ec02573          	csrr	a0,shpmcounter12
+ 13c:	5ed02573          	csrr	a0,shpmcounter13
+ 140:	5ee02573          	csrr	a0,shpmcounter14
+ 144:	5ef02573          	csrr	a0,shpmcounter15
+ 148:	5f002573          	csrr	a0,shpmcounter16
+ 14c:	5f102573          	csrr	a0,shpmcounter17
+ 150:	5f202573          	csrr	a0,shpmcounter18
+ 154:	5f302573          	csrr	a0,shpmcounter19
+ 158:	5f402573          	csrr	a0,shpmcounter20
+ 15c:	5f502573          	csrr	a0,shpmcounter21
+ 160:	5f602573          	csrr	a0,shpmcounter22
+ 164:	5f702573          	csrr	a0,shpmcounter23
+ 168:	5f802573          	csrr	a0,shpmcounter24
+ 16c:	5f902573          	csrr	a0,shpmcounter25
+ 170:	5fa02573          	csrr	a0,shpmcounter26
+ 174:	5fb02573          	csrr	a0,shpmcounter27
+ 178:	5fc02573          	csrr	a0,shpmcounter28
+ 17c:	5fd02573          	csrr	a0,shpmcounter29
+ 180:	5fe02573          	csrr	a0,shpmcounter30
+ 184:	5ff02573          	csrr	a0,shpmcounter31

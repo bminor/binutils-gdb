@@ -33,6 +33,9 @@ enum riscv_spec_class
   PRIV_SPEC_CLASS_1P10,
   PRIV_SPEC_CLASS_1P11,
   PRIV_SPEC_CLASS_DRAFT,
+
+  /* Vendor spec for T_HEAD XuanTie.  */
+  VENDOR_SPEC_CLASS_THEAD,
 };
 
 struct riscv_spec

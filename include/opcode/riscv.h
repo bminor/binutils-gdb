@@ -492,6 +492,22 @@ extern const struct riscv_opcode riscv_insn_types[];
 #define NVECR 32
 #define NVECM 1
 
+/* T-HEAD IMM Encoding.  */
+#define EXTRACT_VENDOR_THEAD_IMM(x,nbit,at) \
+  (RV_X(x, at, nbit))
+#define EXTRACT_VENDOR_THEAD_SIGN_IMM(x,nbit,at) \
+  (RV_X(x, at, nbit) | ((-(RV_X(x, (at+nbit-1),1))) << (nbit)))
+
+#define ENCODE_VENDOR_THEAD_IMM(x,nbit,at) \
+  (RV_X(x, 0, nbit) << at)
+#define ENCODE_VENDOR_THEAD_SIGN_IMM(x,nbit,at) \
+  (RV_X(x, 0, nbit) << at)
+
+#define VALID_VENDOR_THEAD_IMM(x,nbit,at) \
+  (EXTRACT_VENDOR_THEAD_IMM(ENCODE_VENDOR_THEAD_IMM(x,nbit,at),nbit,at) == (x))
+#define VALID_VENDOR_THEAD_SIGN_IMM(x,nbit,at) \
+  (EXTRACT_VENDOR_THEAD_SIGN_IMM(ENCODE_VENDOR_THEAD_SIGN_IMM(x,nbit,at),nbit,at) == (x))
+
 /* All RISC-V extended instructions belong to at least one of
    these classes.  */
 enum riscv_extended_insn_class
@@ -505,6 +521,13 @@ enum riscv_extended_insn_class
   INSN_CLASS_D_AND_ZFH,
   INSN_CLASS_Q_AND_ZFH,
   INSN_CLASS_SVINVAL,
+
+  /* INSN class for THEAD.  */
+  INSN_CLASS_THEADC,
+  INSN_CLASS_THEADC_OR_THEADE,
+  INSN_CLASS_THEADC_OR_THEADE_OR_THEADSE,
+  INSN_CLASS_THEADE,
+  INSN_CLASS_THEADSE,
 };
 
 /* This is a list of macro expanded instructions for extended
