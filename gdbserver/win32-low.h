@@ -29,9 +29,6 @@ struct target_desc;
 extern const struct target_desc *win32_tdesc;
 #ifdef __x86_64__
 extern const struct target_desc *wow64_win32_tdesc;
-
-typedef BOOL (WINAPI *winapi_Wow64GetThreadContext) (HANDLE, PWOW64_CONTEXT);
-extern winapi_Wow64GetThreadContext win32_Wow64GetThreadContext;
 #endif
 
 struct win32_target_ops
