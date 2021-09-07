@@ -694,12 +694,6 @@
 /* The range 0xff000000 to 0xffffffff is set aside for notes that don't
    originate from any particular operating system.  */
 #define NT_GDB_TDESC	0xff000000	/* Contains copy of GDB's target description XML.  */
-#define NT_MEMTAG	0xff000001	/* Contains a copy of the memory tags.  */
-
-/* NT_MEMTAG record types.  */
-
-/* ARM-specific NT_MEMTAG types.  */
-#define NT_MEMTAG_TYPE_AARCH_MTE  0x400	/* MTE memory tags for AArch64.  */
 
 /* Note segments for core files on dir-style procfs systems.  */
 

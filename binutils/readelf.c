@@ -18878,8 +18878,6 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("NT_SIGINFO (siginfo_t data)");
       case NT_FILE:
 	return _("NT_FILE (mapped files)");
-      case NT_MEMTAG:
-	return _("NT_MEMTAG (memory tags)");
       default:
 	break;
       }
