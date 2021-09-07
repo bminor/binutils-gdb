@@ -105,3 +105,8 @@ GDB_PY_DEFINE_EVENT_TYPE (thread,
 			  "ThreadEvent",
 			  "GDB thread event object",
 			  event_object_type);
+
+GDB_PY_DEFINE_EVENT_TYPE (gdb_exiting,
+			  "GdbExitingEvent",
+			  "GDB is about to exit",
+			  event_object_type);

@@ -248,8 +248,10 @@ extern observable<> source_styling_changed;
 /* The CLI's notion of the current source has changed.  This differs
    from user_selected_context_changed in that it is also set by the
    "list" command.  */
-
 extern observable<> current_source_symtab_and_line_changed;
+
+/* Called when GDB is about to exit.  */
+extern observable<int> gdb_exiting;
 
 } /* namespace observers */
 

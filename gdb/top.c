@@ -1761,14 +1761,16 @@ quit_force (int *exit_arg, int from_tty)
 {
   int exit_code = 0;
 
-  undo_terminal_modifications_before_exit ();
-
   /* An optional expression may be used to cause gdb to terminate with the
      value of that expression.  */
   if (exit_arg)
     exit_code = *exit_arg;
   else if (return_child_result)
     exit_code = return_child_result_value;
+
+  gdb::observers::gdb_exiting.notify (exit_code);
+
+  undo_terminal_modifications_before_exit ();
 
   /* We want to handle any quit errors and exit regardless.  */
 

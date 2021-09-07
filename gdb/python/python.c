@@ -36,6 +36,7 @@
 #include "location.h"
 #include "run-on-main-thread.h"
 #include "gdbsupport/selftest.h"
+#include "observable.h"
 
 /* Declared constants and enum for python stack printing.  */
 static const char python_excp_none[] = "none";
@@ -1720,6 +1721,38 @@ init__gdb_module (void)
 }
 #endif
 
+/* Emit a gdb.GdbExitingEvent, return a negative value if there are any
+   errors, otherwise, return 0.  */
+
+static int
+emit_exiting_event (int exit_code)
+{
+  gdbpy_ref<> event_obj = create_event_object (&gdb_exiting_event_object_type);
+  if (event_obj == nullptr)
+    return -1;
+
+  gdbpy_ref<> code = gdb_py_object_from_longest (exit_code);
+  if (evpy_add_attribute (event_obj.get (), "exit_code", code.get ()) < 0)
+    return -1;
+
+  return evpy_emit_event (event_obj.get (), gdb_py_events.gdb_exiting);
+}
+
+/* Callback for the gdb_exiting observable.  EXIT_CODE is the value GDB
+   will exit with.  */
+
+static void
+gdbpy_gdb_exiting (int exit_code)
+{
+  if (!gdb_python_initialized)
+    return;
+
+  gdbpy_enter enter_py (python_gdbarch, python_language);
+
+  if (emit_exiting_event (exit_code) < 0)
+    gdbpy_print_stack ();
+}
+
 static bool
 do_start_initialization ()
 {
@@ -1870,6 +1903,8 @@ do_start_initialization ()
   gdbpy_value_cst = PyString_FromString ("value");
   if (gdbpy_value_cst == NULL)
     return false;
+
+  gdb::observers::gdb_exiting.attach (gdbpy_gdb_exiting, "python");
 
   /* Release the GIL while gdb runs.  */
   PyEval_SaveThread ();

@@ -3418,6 +3418,16 @@ This has a single attribute:
 The new thread.
 @end defvar
 
+@item events.gdb_exiting
+This is emitted when @value{GDBN} exits.  This event is not emitted if
+@value{GDBN} exits as a result of an internal error, or after an
+unexpected signal.  The event is of type @code{gdb.GdbExitingEvent},
+which has a single attribute:
+
+@defvar GdbExitingEvent.exit_code
+An integer, the value of the exit code @value{GDBN} will return.
+@end defvar
+
 @end table
 
 @node Threads In Python

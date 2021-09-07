@@ -34,6 +34,12 @@ maint show internal-warning backtrace
      integer, the index of the new item in the history list, is
      returned.
 
+  ** New gdb.events.gdb_exiting event.  This event is called with a
+     gdb.GdbExitingEvent object which has the read-only attribute
+     'exit_code', which contains the value of the GDB exit code.  This
+     event is triggered once GDB decides it is going to exit, but
+     before GDB starts to clean up its internal state.
+
 *** Changes in GDB 11
 
 * The 'set disassembler-options' command now supports specifying options
