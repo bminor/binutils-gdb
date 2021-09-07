@@ -227,7 +227,6 @@ xtensa_insnbuf_from_chars (xtensa_isa isa,
     }
 }
 
-
 
 /* ISA information.  */
 

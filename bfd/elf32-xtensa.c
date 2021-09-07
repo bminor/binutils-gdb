@@ -1968,6 +1968,8 @@ elf_xtensa_do_reloc (reloc_howto_type *howto,
       return bfd_reloc_dangerous;
     }
 
+  if (input_size <= address)
+    return bfd_reloc_outofrange;
   /* Read the instruction into a buffer and decode the opcode.  */
   xtensa_insnbuf_from_chars (isa, ibuff, contents + address,
 			     input_size - address);

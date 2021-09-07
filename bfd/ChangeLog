@@ -1,5 +1,9 @@
 2021-09-07  Nick Clifton  <nickc@redhat.com>
 
+	PR 28305
+	* elf32-xtensa.c (elf_xtensa_do_reloc): Add check for put of range
+	reloc.
+
 	PR 28303
 	* elfxx-riscv.c (riscv_elf_add_sub_reloc): Add check for out of
 	range relocs.
