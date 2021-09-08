@@ -1,3 +1,11 @@
+2021-09-07  Luis Machado  <luis.machado@linaro.org>
+
+	Revert: [AArch64] MTE corefile support
+
+	2021-05-21  Luis Machado  <luis.machado@linaro.org>
+
+	* readelf.c (get_note_type): Handle NT_MEMTAG note types.
+
 2021-07-03  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

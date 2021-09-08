@@ -1,3 +1,12 @@
+2021-09-07  Luis Machado  <luis.machado@linaro.org>
+
+	Revert: [AArch64] MTE corefile support
+
+	2021-05-21  Luis Machado  <luis.machado@linaro.org>
+
+	* elf.c (elfcore_make_memtag_note_section): New function.
+	(elfcore_grok_note): Handle NT_MEMTAG note types.
+
 2021-07-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* development.sh (development): Set to false.
