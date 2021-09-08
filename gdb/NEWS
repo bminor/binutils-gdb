@@ -71,6 +71,8 @@ maintenance info line-table
   Python 2.  From GDB 13, it will only be possible to build GDB itself
   with Python 3 support.
 
+* The disable-randomization setting now works on Windows.
+
 * Improved C++ template support
 
   GDB now treats functions/types involving C++ templates like it does function

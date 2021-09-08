@@ -281,6 +281,11 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
   int get_windows_debug_event (int pid, struct target_waitstatus *ourstatus);
 
   void do_initial_windows_stuff (DWORD pid, bool attaching);
+
+  bool supports_disable_randomization () override
+  {
+    return disable_randomization_available ();
+  }
 };
 
 static windows_nat_target the_windows_nat_target;
@@ -2493,6 +2498,7 @@ windows_nat_target::create_inferior (const char *exec_file,
   windows_init_thread_list ();
   ret = create_process (args, flags, w32_env,
 			inferior_cwd != nullptr ? infcwd : nullptr,
+			disable_randomization,
 			&si, &pi);
   if (w32_env)
     /* Just free the Win32 environment, if it could be created. */
@@ -2612,6 +2618,7 @@ windows_nat_target::create_inferior (const char *exec_file,
 			flags,	/* start flags */
 			w32env,	/* environment */
 			inferior_cwd, /* current directory */
+			disable_randomization,
 			&si,
 			&pi);
   if (tty != INVALID_HANDLE_VALUE)

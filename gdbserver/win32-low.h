@@ -165,6 +165,11 @@ public:
   { return true; }
 
   const char *pid_to_exec_file (int pid) override;
+
+  bool supports_disable_randomization () override
+  {
+    return windows_nat::disable_randomization_available ();
+  }
 };
 
 /* The sole Windows process.  */

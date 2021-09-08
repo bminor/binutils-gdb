@@ -294,17 +294,21 @@ extern BOOL continue_last_debug_event (DWORD continue_status,
 
 extern BOOL wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout);
 
-/* Wrappers for CreateProcess.  */
+/* Wrappers for CreateProcess.  These exist primarily so that the
+   "disable randomization" feature can be implemented in a single
+   place.  */
 
 extern BOOL create_process (const char *image, char *command_line,
 			    DWORD flags, void *environment,
 			    const char *cur_dir,
+			    bool no_randomization,
 			    STARTUPINFOA *startup_info,
 			    PROCESS_INFORMATION *process_info);
 #ifdef __CYGWIN__
 extern BOOL create_process (const wchar_t *image, wchar_t *command_line,
 			    DWORD flags, void *environment,
 			    const wchar_t *cur_dir,
+			    bool no_randomization,
 			    STARTUPINFOW *startup_info,
 			    PROCESS_INFORMATION *process_info);
 #endif /* __CYGWIN__ */
@@ -313,10 +317,15 @@ extern BOOL create_process (const wchar_t *image, wchar_t *command_line,
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
 #define DebugBreakProcess		dyn_DebugBreakProcess
 #define DebugSetProcessKillOnExit	dyn_DebugSetProcessKillOnExit
+#undef EnumProcessModules
 #define EnumProcessModules		dyn_EnumProcessModules
+#undef EnumProcessModulesEx
 #define EnumProcessModulesEx		dyn_EnumProcessModulesEx
+#undef GetModuleInformation
 #define GetModuleInformation		dyn_GetModuleInformation
+#undef GetModuleFileNameExA
 #define GetModuleFileNameExA		dyn_GetModuleFileNameExA
+#undef GetModuleFileNameExW
 #define GetModuleFileNameExW		dyn_GetModuleFileNameExW
 #define LookupPrivilegeValueA		dyn_LookupPrivilegeValueA
 #define OpenProcessToken		dyn_OpenProcessToken
@@ -327,6 +336,9 @@ extern BOOL create_process (const wchar_t *image, wchar_t *command_line,
 #define Wow64SetThreadContext		dyn_Wow64SetThreadContext
 #define Wow64GetThreadSelectorEntry	dyn_Wow64GetThreadSelectorEntry
 #define GenerateConsoleCtrlEvent	dyn_GenerateConsoleCtrlEvent
+#define InitializeProcThreadAttributeList dyn_InitializeProcThreadAttributeList
+#define UpdateProcThreadAttribute dyn_UpdateProcThreadAttribute
+#define DeleteProcThreadAttributeList dyn_DeleteProcThreadAttributeList
 
 typedef BOOL WINAPI (AdjustTokenPrivileges_ftype) (HANDLE, BOOL,
 						   PTOKEN_PRIVILEGES,
@@ -396,6 +408,30 @@ extern Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
 
 typedef BOOL WINAPI (GenerateConsoleCtrlEvent_ftype) (DWORD, DWORD);
 extern GenerateConsoleCtrlEvent_ftype *GenerateConsoleCtrlEvent;
+
+/* We use a local typedef for this type to avoid depending on
+   Windows 8.  */
+typedef void *gdb_lpproc_thread_attribute_list;
+
+typedef BOOL WINAPI (InitializeProcThreadAttributeList_ftype)
+     (gdb_lpproc_thread_attribute_list lpAttributeList,
+      DWORD dwAttributeCount, DWORD dwFlags, PSIZE_T lpSize);
+extern InitializeProcThreadAttributeList_ftype *InitializeProcThreadAttributeList;
+
+typedef BOOL WINAPI (UpdateProcThreadAttribute_ftype)
+     (gdb_lpproc_thread_attribute_list lpAttributeList,
+      DWORD dwFlags, DWORD_PTR Attribute, PVOID lpValue, SIZE_T cbSize,
+      PVOID lpPreviousValue, PSIZE_T lpReturnSize);
+extern UpdateProcThreadAttribute_ftype *UpdateProcThreadAttribute;
+
+typedef void WINAPI (DeleteProcThreadAttributeList_ftype)
+     (gdb_lpproc_thread_attribute_list lpAttributeList);
+extern DeleteProcThreadAttributeList_ftype *DeleteProcThreadAttributeList;
+
+/* Return true if it's possible to disable randomization on this
+   host.  */
+
+extern bool disable_randomization_available ();
 
 /* Load any functions which may not be available in ancient versions
    of Windows.  */
