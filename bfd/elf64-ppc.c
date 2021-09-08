@@ -16657,7 +16657,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TPREL16_HIGHERA:
 	case R_PPC64_TPREL16_HIGHEST:
 	case R_PPC64_TPREL16_HIGHESTA:
-	case R_PPC64_TPREL34:
 	  if (h != NULL
 	      && h->elf.root.type == bfd_link_hash_undefweak
 	      && h->elf.dynindx == -1)
@@ -16674,6 +16673,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		bfd_put_32 (input_bfd, insn, p);
 	      break;
 	    }
+	  /* Fall through.  */
+
+	case R_PPC64_TPREL34:
 	  if (htab->elf.tls_sec != NULL)
 	    addend -= htab->elf.tls_sec->vma + TP_OFFSET;
 	  /* The TPREL16 relocs shouldn't really be used in shared
