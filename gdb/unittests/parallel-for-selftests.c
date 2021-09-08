@@ -20,9 +20,10 @@
 #include "defs.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/parallel-for.h"
-#include "gdbsupport/thread-pool.h"
 
 #if CXX_STD_THREAD
+
+#include "gdbsupport/thread-pool.h"
 
 namespace selftests {
 namespace parallel_for {
