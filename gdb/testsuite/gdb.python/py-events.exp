@@ -280,3 +280,23 @@ with_test_prefix "inferior continue exit" {
     gdb_test "continue" "exited with code.*" "continue to exit"
     gdb_test "print \$_foo" "= 2" "check foo after start continue"
 }
+
+# Check that when GDB exits, we see gdb.ExitedEvent objects with no
+# 'exit_code' attribute.
+with_test_prefix "gdb exiting" {
+    set saw_inferior_exit 0
+    gdb_test_multiple "quit" "" {
+	-re "Quit anyway\\? \\(y or n\\) $" {
+	    send_gdb "y\n"
+	    exp_continue
+	}
+	-re "event type: exit\r\nexit code: not-present\r\nexit inf: $decimal\r\nexit pid: $decimal\r\ndir ok: False\r\n" {
+	    incr saw_inferior_exit
+	    exp_continue
+	}
+	eof {
+	    gdb_assert { $saw_inferior_exit == 2 }
+	    pass $gdb_test_name
+	}
+    }
+}
