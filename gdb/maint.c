@@ -871,14 +871,23 @@ maintenance_show_worker_threads (struct ui_file *file, int from_tty,
 				 struct cmd_list_element *c,
 				 const char *value)
 {
+#if CXX_STD_THREAD
   if (n_worker_threads == -1)
-    fprintf_filtered (file, _("The number of worker threads GDB "
-			      "can use is unlimited (currently %zu).\n"),
-		      gdb::thread_pool::g_thread_pool->thread_count ());
-  else
-    fprintf_filtered (file, _("The number of worker threads GDB "
-			      "can use is %d.\n"),
-		      n_worker_threads);
+    {
+      fprintf_filtered (file, _("The number of worker threads GDB "
+				"can use is unlimited (currently %zu).\n"),
+			gdb::thread_pool::g_thread_pool->thread_count ());
+      return;
+    }
+#endif
+
+  int report_threads = 0;
+#if CXX_STD_THREAD
+  report_threads = n_worker_threads;
+#endif
+  fprintf_filtered (file, _("The number of worker threads GDB "
+			    "can use is %d.\n"),
+		    report_threads);
 }
 
 
