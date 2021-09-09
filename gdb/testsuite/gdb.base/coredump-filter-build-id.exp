@@ -58,7 +58,8 @@ if { [catch "exec [gdb_find_eu-unstrip] -n --core $corefilename" output] == 0 } 
 
     verbose -log "First line of eu-unstrip: $line"
 
-    if { [regexp "^${hex}\\+${hex} \[a-f0-9\]+@${hex}.*[string_to_regexp $binfile]$" $line] } {
+    set binfile_re (?:[string_to_regexp $binfile]|\\\[(?:exe|pie)\\\])
+    if { [regexp "^${hex}\\+${hex} \[a-f0-9\]+@${hex}.*$binfile_re$" $line] } {
 	pass "$test"
     } else {
 	fail "$test"
