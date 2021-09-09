@@ -424,8 +424,8 @@ sim_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
 -Wno-switch -Wno-char-subscripts
 -Wempty-body -Wunused-but-set-parameter
 -Wno-error=maybe-uninitialized
--Wno-missing-declarations
--Wno-missing-prototypes
+-Wmissing-declarations
+-Wmissing-prototypes
 -Wdeclaration-after-statement -Wmissing-parameter-type
 -Wno-pointer-sign
 -Wold-style-declaration -Wold-style-definition
