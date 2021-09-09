@@ -22,7 +22,7 @@ Disassembly of section .text:
 [^:]+:[ 	]+fddff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+: R_RISCV_JAL[	]+target
 [^:]+:[ 	]+852e[ 	]+mv[ 	]+a0,a1
-[^:]+:[ 	]+0511[ 	]+addi[ 	]+a0,a0,4
+[^:]+:[ 	]+0511[ 	]+addi[ 	]+a0,a0,4 # .*
 [^:]+:[ 	]+002c[ 	]+addi[ 	]+a1,sp,8
 [^:]+:[ 	]+c0aa[ 	]+sw[ 	]+a0,64\(sp\)
 [^:]+:[ 	]+41a8[ 	]+lw[ 	]+a0,64\(a1\)
@@ -46,7 +46,7 @@ Disassembly of section .text:
 [^:]+:[ 	]+fa5ff56f[ 	]+jal[ 	]+a0,0 \<target\>
 [^:]+: R_RISCV_JAL[	]+target
 [^:]+:[ 	]+852e[ 	]+mv[ 	]+a0,a1
-[^:]+:[ 	]+0511[ 	]+addi[ 	]+a0,a0,4
+[^:]+:[ 	]+0511[ 	]+addi[ 	]+a0,a0,4 # .*
 [^:]+:[ 	]+002c[ 	]+addi[ 	]+a1,sp,8
 [^:]+:[ 	]+c0aa[ 	]+sw[ 	]+a0,64\(sp\)
 [^:]+:[ 	]+41a8[ 	]+lw[ 	]+a0,64\(a1\)

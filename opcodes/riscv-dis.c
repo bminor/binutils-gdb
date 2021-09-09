@@ -156,7 +156,8 @@ arg_print (struct disassemble_info *info, unsigned long val,
 }
 
 static void
-maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset)
+maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
+		     int wide)
 {
   if (pd->hi_addr[base_reg] != (bfd_vma)-1)
     {
@@ -167,6 +168,10 @@ maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset)
     pd->print_addr = pd->gp + offset;
   else if (base_reg == X_TP || base_reg == 0)
     pd->print_addr = offset;
+
+  /* Sign-extend a 32-bit value to a 64-bit value.  */
+  if (wide)
+    pd->print_addr = (bfd_vma)(int32_t) pd->print_addr;
 }
 
 /* Print insn arguments for 32/64-bit code.  */
@@ -211,6 +216,11 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	      break;
 	    case 'o':
 	    case 'j':
+	      if (((l & MASK_C_ADDI) == MATCH_C_ADDI) && rd != 0)
+		maybe_print_address (pd, rd, EXTRACT_CITYPE_IMM (l), 0);
+	      if (info->mach == bfd_mach_riscv64
+		  && ((l & MASK_C_ADDIW) == MATCH_C_ADDIW) && rd != 0)
+		maybe_print_address (pd, rd, EXTRACT_CITYPE_IMM (l), 1);
 	      print (info->stream, "%d", (int)EXTRACT_CITYPE_IMM (l));
 	      break;
 	    case 'k':
@@ -283,7 +293,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	case 'b':
 	case 's':
 	  if ((l & MASK_JALR) == MATCH_JALR)
-	    maybe_print_address (pd, rs1, 0);
+	    maybe_print_address (pd, rs1, 0, 0);
 	  print (info->stream, "%s", riscv_gpr_names[rs1]);
 	  break;
 
@@ -313,17 +323,20 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	  break;
 
 	case 'o':
-	  maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l));
+	  maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 0);
 	  /* Fall through.  */
 	case 'j':
 	  if (((l & MASK_ADDI) == MATCH_ADDI && rs1 != 0)
 	      || (l & MASK_JALR) == MATCH_JALR)
-	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l));
+	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 0);
+	  if (info->mach == bfd_mach_riscv64
+	      && ((l & MASK_ADDIW) == MATCH_ADDIW) && rs1 != 0)
+	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 1);
 	  print (info->stream, "%d", (int)EXTRACT_ITYPE_IMM (l));
 	  break;
 
 	case 'q':
-	  maybe_print_address (pd, rs1, EXTRACT_STYPE_IMM (l));
+	  maybe_print_address (pd, rs1, EXTRACT_STYPE_IMM (l), 0);
 	  print (info->stream, "%d", (int)EXTRACT_STYPE_IMM (l));
 	  break;
 
