@@ -592,6 +592,7 @@ get_basename (const char * pathname)
 
 static unsigned int
 get_directory_table_entry (const char *dirname,
+			   const char *file0_dirname,
 			   size_t dirlen,
 			   bool can_use_zero)
 {
@@ -621,7 +622,7 @@ get_directory_table_entry (const char *dirname,
     {
       if (dirs == NULL || dirs[0] == NULL)
 	{
-	  const char * pwd = getpwd ();
+	  const char * pwd = file0_dirname ? file0_dirname : getpwd ();
 
 	  if (dwarf_level >= 5 && strcmp (dirname, pwd) != 0)
 	    {
@@ -630,7 +631,8 @@ get_directory_table_entry (const char *dirname,
 		 directory).  Since we are about to create a directory entry that
 		 is not the same, allocate the current directory first.
 		 FIXME: Alternatively we could generate an error message here.  */
-	      (void) get_directory_table_entry (pwd, strlen (pwd), true);
+	      (void) get_directory_table_entry (pwd, NULL, strlen (pwd),
+						true);
 	      d = 1;
 	    }
 	  else
@@ -726,7 +728,7 @@ allocate_filenum (const char * pathname)
   file = get_basename (pathname);
   dir_len = file - pathname;
 
-  dir = get_directory_table_entry (pathname, dir_len, false);
+  dir = get_directory_table_entry (pathname, NULL, dir_len, false);
 
   /* Do not use slot-0.  That is specifically reserved for use by
      the '.file 0 "name"' directive.  */
@@ -766,6 +768,7 @@ allocate_filename_to_slot (const char *dirname,
   const char *file;
   size_t dirlen;
   unsigned int i, d;
+  const char *file0_dirname = dirname;
 
   /* Short circuit the common case of adding the same pathname
      as last time.  */
@@ -856,7 +859,8 @@ allocate_filename_to_slot (const char *dirname,
       file = filename;
     }
 
-  d = get_directory_table_entry (dirname, dirlen, num == 0);
+  d = get_directory_table_entry (dirname, file0_dirname, dirlen,
+				 num == 0);
   i = num;
 
   if (! assign_file_to_slot (i, file, d))
