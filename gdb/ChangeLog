@@ -1,3 +1,18 @@
+2021-09-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (dwarf2_per_objfile::resize_symtabs): Remove.
+	* dwarf2/read.c (all_comp_units_iterator, all_comp_units_range):
+	New classes.
+	(dwarf2_per_objfile::symtab_set_p)
+	(dwarf2_per_objfile::get_symtab, dwarf2_per_objfile::set_symtab):
+	Adjust to resizeable vectors.
+	(dwarf2_gdb_index::expand_symtabs_matching)
+	(dwarf2_base_index_functions::map_symbol_filenames)
+	(dwarf2_debug_names_index::expand_symtabs_matching): Use
+	all_comp_units_range.
+	(dwarf2_initialize_objfile, dwarf2_build_psymtabs)
+	(add_type_unit): Don't call resize_symtabs.
+
 2021-09-07  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_nat_target::info_proc): Use plongest and
