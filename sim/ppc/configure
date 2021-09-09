@@ -651,7 +651,6 @@ sim_switch
 sim_opcode
 sim_config
 sim_line_nr
-sim_warnings
 EGREP
 GREP
 CPP
@@ -726,7 +725,6 @@ enable_sim_packages
 enable_sim_smp
 enable_sim_switch
 enable_sim_timebase
-enable_sim_warnings
 enable_sim_xor_endian
 '
       ac_precious_vars='build_alias
@@ -1365,7 +1363,6 @@ Optional Features:
   --enable-sim-smp=n			Specify number of processors to configure for.
   --enable-sim-switch			Use a switch instead of a table for instruction call.
   --enable-sim-timebase			Specify whether the PPC timebase is supported.
-  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o
   --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).
 
 Some influential environment variables:
@@ -3478,64 +3475,6 @@ else
 fi
 
 
-sim_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
--Wno-unused -Wunused-value -Wunused-function
--Wno-switch -Wno-char-subscripts
--Wempty-body -Wunused-but-set-parameter
--Wno-error=maybe-uninitialized
--Wmissing-declarations
--Wmissing-prototypes
--Wdeclaration-after-statement -Wmissing-parameter-type
--Wpointer-sign
--Wold-style-declaration -Wold-style-definition
-"
-# Enable -Wno-format by default when using gcc on mingw since many
-# GCC versions complain about %I64.
-case "${host}" in
-  *-*-mingw32*) sim_warnings="$sim_warnings -Wno-format" ;;
-  *) sim_warnings="$sim_warnings -Wformat-nonliteral" ;;
-esac
-# Check whether --enable-sim-warnings was given.
-if test "${enable_sim_warnings+set}" = set; then :
-  enableval=$enable_sim_warnings; case "${enableval}" in
-  yes)	;;
-  no)	sim_warnings="-w";;
-  *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
-  echo "Setting warning flags = $sim_warnings" 6>&1
-fi
-fi
-if test "x${sim_warnings}" != x -a "x$GCC" = xyes; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler warning flags" >&5
-$as_echo_n "checking compiler warning flags... " >&6; }
-  build_warnings="${sim_warnings}"
-  sim_warnings=
-  for w in ${build_warnings}; do
-        saved_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -Werror $w"
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  sim_warnings="${sim_warnings} $w"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    CFLAGS="$saved_CFLAGS"
-  done
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${sim_warnings}" >&5
-$as_echo "${sim_warnings}" >&6; }
-fi
-
-
 # Check whether --enable-sim-xor-endian was given.
 if test "${enable_sim_xor_endian+set}" = set; then :
   enableval=$enable_sim_xor_endian; case "${enableval}" in
@@ -4270,7 +4209,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
 
 
 

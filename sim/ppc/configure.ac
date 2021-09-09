@@ -418,49 +418,6 @@ if test x"$silent" != x"yes" && test x"$sim_timebase" != x""; then
 fi],[sim_timebase=""])dnl
 
 
-dnl TODO: Switch to common $(WARN_CFLAGS).
-sim_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
--Wno-unused -Wunused-value -Wunused-function
--Wno-switch -Wno-char-subscripts
--Wempty-body -Wunused-but-set-parameter
--Wno-error=maybe-uninitialized
--Wmissing-declarations
--Wmissing-prototypes
--Wdeclaration-after-statement -Wmissing-parameter-type
--Wpointer-sign
--Wold-style-declaration -Wold-style-definition
-"
-# Enable -Wno-format by default when using gcc on mingw since many
-# GCC versions complain about %I64.
-case "${host}" in
-  *-*-mingw32*) sim_warnings="$sim_warnings -Wno-format" ;;
-  *) sim_warnings="$sim_warnings -Wformat-nonliteral" ;;
-esac
-AC_ARG_ENABLE(sim-warnings,
-[  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
-[case "${enableval}" in
-  yes)	;;
-  no)	sim_warnings="-w";;
-  *)	sim_warnings=`echo "${enableval}" | sed -e "s/,/ /g"`;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_warnings" != x""; then
-  echo "Setting warning flags = $sim_warnings" 6>&1
-fi])dnl
-if test "x${sim_warnings}" != x -a "x$GCC" = xyes; then
-  AC_MSG_CHECKING(compiler warning flags)
-  build_warnings="${sim_warnings}"
-  sim_warnings=
-  for w in ${build_warnings}; do
-    dnl Check that GCC accepts it
-    saved_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -Werror $w"
-    AC_TRY_COMPILE([],[],sim_warnings="${sim_warnings} $w",)
-    CFLAGS="$saved_CFLAGS"
-  done
-  AC_MSG_RESULT(${sim_warnings})
-fi
-
-
 AC_ARG_ENABLE(sim-xor-endian,
 [  --enable-sim-xor-endian=n		Specify number bytes involved in PowerPC XOR bi-endian mode (default 8).],
 [case "${enableval}" in
@@ -663,7 +620,6 @@ else
   rm -rf $tempdir
 fi
 
-AC_SUBST(sim_warnings)
 AC_SUBST(sim_line_nr)
 AC_SUBST(sim_config)
 AC_SUBST(sim_opcode)
