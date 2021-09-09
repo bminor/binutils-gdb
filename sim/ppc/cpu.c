@@ -21,6 +21,9 @@
 #ifndef _CPU_C_
 #define _CPU_C_
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <setjmp.h>
 
 #include "cpu.h"

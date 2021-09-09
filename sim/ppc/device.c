@@ -21,6 +21,9 @@
 #ifndef _DEVICE_C_
 #define _DEVICE_C_
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdio.h>
 
 #include "device_table.h"

@@ -17,6 +17,8 @@
  
     */
 
+/* This must come before any other includes.  */
+#include "defs.h"
 
 #include <stdarg.h>
 #include <stdio.h>
