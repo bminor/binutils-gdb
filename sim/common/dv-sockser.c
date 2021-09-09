@@ -49,24 +49,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef HAVE_SOCKLEN_T
 typedef int socklen_t;
 #endif
-
-/* Get definitions for both O_NONBLOCK and O_NDELAY.  */
-
-#ifndef O_NDELAY
-#ifdef FNDELAY
-#define O_NDELAY FNDELAY
-#else /* ! defined (FNDELAY) */
-#define O_NDELAY 0
-#endif /* ! defined (FNDELAY) */
-#endif /* ! defined (O_NDELAY) */
-
-#ifndef O_NONBLOCK
-#ifdef FNBLOCK
-#define O_NONBLOCK FNBLOCK
-#else /* ! defined (FNBLOCK) */
-#define O_NONBLOCK 0
-#endif /* ! defined (FNBLOCK) */
-#endif /* ! defined (O_NONBLOCK) */
 
 
 /* Compromise between eating cpu and properly busy-waiting.
@@ -274,9 +256,9 @@ connected_p (SIM_DESC sd)
     return 0;
 
   /* Set non-blocking i/o.  */
-#ifdef F_GETFL
+#if defined(F_GETFL) && defined(O_NONBLOCK)
   flags = fcntl (sockser_fd, F_GETFL);
-  flags |= O_NONBLOCK | O_NDELAY;
+  flags |= O_NONBLOCK;
   if (fcntl (sockser_fd, F_SETFL, flags) == -1)
     {
       sim_io_eprintf (sd, "unable to set nonblocking i/o");
