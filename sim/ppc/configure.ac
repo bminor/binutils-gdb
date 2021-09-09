@@ -430,6 +430,12 @@ sim_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith
 -Wno-pointer-sign
 -Wold-style-declaration -Wold-style-definition
 "
+# Enable -Wno-format by default when using gcc on mingw since many
+# GCC versions complain about %I64.
+case "${host}" in
+  *-*-mingw32*) sim_warnings="$sim_warnings -Wno-format" ;;
+  *) sim_warnings="$sim_warnings -Wformat-nonliteral" ;;
+esac
 AC_ARG_ENABLE(sim-warnings,
 [  --enable-sim-warnings=opts		Extra CFLAGS for turning on compiler warnings except for idecode.o, semantics.o and psim.o],
 [case "${enableval}" in
