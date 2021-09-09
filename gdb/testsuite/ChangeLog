@@ -1,5 +1,9 @@
 2021-09-09  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/coredump-filter-build-id.exp: Handle older eu-unstrip.
+
+2021-09-09  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.mi/mi-sym-info.exp: Fix regexps.  Add missing message argument
 	to mi_gdb_test.  Factor out regexps for functions and variables.
 
