@@ -21,8 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "sim-main.h"
-
 #include <string.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -46,6 +44,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <netinet/tcp.h>
 #endif
 
+#include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-options.h"
 
