@@ -121,19 +121,19 @@ sim_engine_run (SIM_DESC sd,
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
   int needfetch;
-  word inst;
+  signed_4 inst;
   enum microblaze_instr op;
   int memops;
   int bonus_cycles;
   int insts;
   int w;
   int cycs;
-  word WLhash;
-  ubyte carry;
+  signed_4 WLhash;
+  unsigned_1 carry;
   bool imm_unsigned;
   short ra, rb, rd;
   long immword;
-  uword oldpc, newpc;
+  unsigned_4 oldpc, newpc;
   short delay_slot_enable;
   short branch_taken;
   short num_delay_slot; /* UNUSED except as reqd parameter */

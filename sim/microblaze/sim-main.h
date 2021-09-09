@@ -35,12 +35,12 @@
    gdb/config/microblaze/tm-microblaze.h file in the REGISTER_NAMES macro.  */
  struct microblaze_regset
 {
-  word	          regs[32];		/* primary registers */
-  word	          spregs[2];		/* pc + msr */
-  int		  cycles;
-  int		  insts;
-  ubyte           imm_enable;
-  half            imm_high;
+  signed_4	regs[32];		/* primary registers */
+  signed_4	spregs[2];		/* pc + msr */
+  int		cycles;
+  int		insts;
+  unsigned_1	imm_enable;
+  signed_2	imm_high;
 };
 
 struct _sim_cpu {
