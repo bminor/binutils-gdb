@@ -113,7 +113,7 @@ static const OPTION standard_options[] =
       standard_option_handler, NULL },
 
   { {"endian", required_argument, NULL, OPTION_ENDIAN},
-      'E', "big|little", "Set endianness",
+      'E', "B|big|L|little", "Set endianness",
       standard_option_handler, NULL },
 
   /* This option isn't supported unless all choices are supported in keeping
@@ -190,7 +190,7 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       break;
 
     case OPTION_ENDIAN:
-      if (strcmp (arg, "big") == 0)
+      if (strcmp (arg, "big") == 0 || strcmp (arg, "B") == 0)
 	{
 	  if (WITH_TARGET_BYTE_ORDER == BFD_ENDIAN_LITTLE)
 	    {
@@ -200,7 +200,7 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
 	  /* FIXME:wip: Need to set something in STATE_CONFIG.  */
 	  current_target_byte_order = BFD_ENDIAN_BIG;
 	}
-      else if (strcmp (arg, "little") == 0)
+      else if (strcmp (arg, "little") == 0 || strcmp (arg, "L") == 0)
 	{
 	  if (WITH_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 	    {
