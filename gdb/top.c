@@ -696,12 +696,10 @@ execute_command (const char *p, int from_tty)
   cleanup_if_error.release ();
 }
 
-/* Run execute_command for P and FROM_TTY.  Sends its output to FILE,
-   do not display it to the screen.  BATCH_FLAG will be
-   temporarily set to true.  */
+/* See gdbcmd.h.  */
 
 void
-execute_command_to_ui_file (struct ui_file *file, const char *p, int from_tty)
+execute_fn_to_ui_file (struct ui_file *file, std::function<void(void)> fn)
 {
   /* GDB_STDOUT should be better already restored during these
      restoration callbacks.  */
@@ -724,8 +722,28 @@ execute_command_to_ui_file (struct ui_file *file, const char *p, int from_tty)
     scoped_restore save_stdtargerr
       = make_scoped_restore (&gdb_stdtargerr, file);
 
-    execute_command (p, from_tty);
+    fn ();
   }
+}
+
+/* See gdbcmd.h.  */
+
+std::string
+execute_fn_to_string (std::function<void(void)> fn, bool term_out)
+{
+  string_file str_file (term_out);
+
+  execute_fn_to_ui_file (&str_file, fn);
+  return std::move (str_file.string ());
+}
+
+/* See gdbcmd.h.  */
+
+void
+execute_command_to_ui_file (struct ui_file *file,
+			    const char *p, int from_tty)
+{
+  execute_fn_to_ui_file (file, [=]() { execute_command (p, from_tty); });
 }
 
 /* See gdbcmd.h.  */
@@ -734,12 +752,9 @@ std::string
 execute_command_to_string (const char *p, int from_tty,
 			   bool term_out)
 {
-  string_file str_file (term_out);
-
-  execute_command_to_ui_file (&str_file, p, from_tty);
-  return std::move (str_file.string ());
+  return
+    execute_fn_to_string ([=]() { execute_command (p, from_tty); }, term_out);
 }
-
 
 /* When nonzero, cause dont_repeat to do nothing.  This should only be
    set via prevent_dont_repeat.  */

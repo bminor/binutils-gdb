@@ -134,16 +134,28 @@ extern struct cmd_list_element *save_cmdlist;
 
 extern void execute_command (const char *, int);
 
-/* Run execute_command for P and FROM_TTY.  Capture its output into the
-   returned string, do not display it to the screen.  The global BATCH_FLAG
-   will temporarily be set to true.  When TERM_OUT is true the output is
-   collected with terminal behaviour (e.g. with styling).  When TERM_OUT is
-   false raw output will be collected (e.g. no styling).  */
+/* Run FN.  Sends its output to FILE, do not display it to the screen.
+   The global BATCH_FLAG will be temporarily set to true.  */
+
+extern void execute_fn_to_ui_file (struct ui_file *file, std::function<void(void)> fn);
+
+/* Run FN.  Capture its output into the returned string, do not display it
+   to the screen.  The global BATCH_FLAG will temporarily be set to true.
+   When TERM_OUT is true the output is collected with terminal behaviour
+   (e.g. with styling).  When TERM_OUT is false raw output will be collected
+   (e.g. no styling).  */
+
+extern std::string execute_fn_to_string (std::function<void(void)> fn, bool term_out);
+
+/* As execute_fn_to_ui_file, but run execute_command for P and FROM_TTY.  */
+
+extern void execute_command_to_ui_file (struct ui_file *file,
+					const char *p, int from_tty);
+
+/* As execute_fn_to_string, but run execute_command for P and FROM_TTY.  */
 
 extern std::string execute_command_to_string (const char *p, int from_tty,
 					      bool term_out);
-extern void execute_command_to_ui_file (struct ui_file *file,
-					const char *p, int from_tty);
 
 extern void print_command_line (struct command_line *, unsigned int,
 				struct ui_file *);
