@@ -16,27 +16,6 @@ if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
 fi],[sim_bitsize=""])dnl
 
 
-AC_ARG_ENABLE(sim-config,
-[  --enable-sim-config=file		Override default config file],
-[case "${enableval}" in
-  yes|no)	AC_MSG_ERROR("No value supplied for --enable-sim-config=file");;
-  *)		if test -f "${srcdir}/${enableval}"; then
-		  sim_config="${enableval}";
-		elif test -f "${srcdir}/${enableval}-config.h"; then
-		  sim_config="${enableval}-config.h"
-		else
-		  AC_MSG_ERROR("Config file $enableval was not found");
-		  sim_config=std-config.h
-		fi;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_config" != x""; then
-  echo "Setting config flags = $sim_config" 6>&1
-fi],[sim_config="std-config.h"
-if test x"$silent" != x"yes"; then
-  echo "Setting config flags = $sim_config" 6>&1
-fi])dnl
-
-
 AC_ARG_ENABLE(sim-decode-mechanism,
 [  --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.],
 [case "${enableval}" in
@@ -621,7 +600,6 @@ else
 fi
 
 AC_SUBST(sim_line_nr)
-AC_SUBST(sim_config)
 AC_SUBST(sim_opcode)
 AC_SUBST(sim_switch)
 AC_SUBST(sim_dup)

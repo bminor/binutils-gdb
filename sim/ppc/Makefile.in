@@ -95,7 +95,6 @@ LIBS = $(COMMON_LIBS) @LIBS@ $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
 
-CONFIG_FILE = @sim_config@
 IGEN_OPCODE_RULES = @sim_opcode@
 IGEN_DECODE_MECHANISM = @sim_decode_mechanism@
 IGEN_DUPLICATE = @sim_dup@
@@ -168,7 +167,6 @@ ALTIVEC_REGISTERS_H = \
 BASICS_H = \
 	basics.h \
 	$(CONFIG_H) \
-	$(PPC_CONFIG_H) \
 	$(INLINE_H) \
 	$(SIM_CALLBACKS_H) \
 	$(DEBUG_H) \
@@ -401,9 +399,6 @@ MODEL_H = \
 PK_H = \
         pk.h
 
-PPC_CONFIG_H = \
-        ppc-config.h
-
 SEMANTICS_H = \
         semantics.h
 
@@ -437,8 +432,7 @@ BUILT_SRC_WO_CONFIG = \
 
 BUILT_SRC = \
 	$(BUILT_SRC_WO_CONFIG) \
-	config.h \
-	ppc-config.h 
+	config.h
 
 LIB_INLINE_SRC = \
 	psim.c \
@@ -541,7 +535,7 @@ psim.o: psim.c $(CPU_H) $(IDECODE_H) $(OPTIONS_H) $(TREE_H) $(BFD_H)
 bits.o: bits.c $(BASICS_H)
 
 debug.o: debug.c $(CONFIG_H) $(BASICS_H)
-filter_filename.o: filter_filename.c $(CONFIG_H) $(PPC_CONFIG_H) $(FILTER_FILENAME_H)
+filter_filename.o: filter_filename.c $(CONFIG_H) $(FILTER_FILENAME_H)
 
 sim-endian.o: sim-endian.c $(CONFIG_H) $(BASICS_H) $(SIM_ENDIAN_N_H)
 
@@ -646,10 +640,6 @@ tmp-defines: config.h Makefile
 # Rules to create the built c source code files
 #
 
-ppc-config.h: $(CONFIG_FILE)
-	cp $(srcdir)/$(CONFIG_FILE) ppc-config.h
-
-
 tmp-dgen: dgen ppc-spr-table $(srcdir)/../../move-if-change
 	$(DGEN) $(DGEN_FLAGS) \
 		-r $(srcdir)/ppc-spr-table \
@@ -705,7 +695,7 @@ igen: igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o l
 filter_host.c: filter_filename.c
 	cat $(srcdir)/filter_filename.c > filter_host.c
 
-filter_host.o: filter_host.c $(CONFIG_H) $(PPC_CONFIG_H) $(FILTER_FILENAME_H)
+filter_host.o: filter_host.c $(CONFIG_H) $(FILTER_FILENAME_H)
 	$(COMPILE_FOR_BUILD) -c filter_host.c
 
 table.o: table.c $(CONFIG_H) $(MISC_H) $(LF_H) $(TABLE_H)
@@ -856,7 +846,7 @@ distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log
 
 maintainer-clean: distclean
-	rm -f *~ *.log ppc-config.h core *.core
+	rm -f *~ *.log core *.core
 
 Makefile: Makefile.in config.status
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status

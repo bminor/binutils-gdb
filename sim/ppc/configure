@@ -649,7 +649,6 @@ sim_decode_mechanism
 sim_dup
 sim_switch
 sim_opcode
-sim_config
 sim_line_nr
 EGREP
 GREP
@@ -706,7 +705,6 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_sim_bitsize
-enable_sim_config
 enable_sim_decode_mechanism
 enable_sim_default_model
 enable_sim_duplicate
@@ -1344,7 +1342,6 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-sim-bitsize=n		Specify target bitsize (32 or 64).
-  --enable-sim-config=file		Override default config file
   --enable-sim-decode-mechanism=which		Specify the instruction decode mechanism.
   --enable-sim-default-model=which	Specify default PowerPC to model.
   --enable-sim-duplicate		Expand (duplicate) semantic functions.
@@ -2936,30 +2933,6 @@ else
 fi
 
 
-# Check whether --enable-sim-config was given.
-if test "${enable_sim_config+set}" = set; then :
-  enableval=$enable_sim_config; case "${enableval}" in
-  yes|no)	as_fn_error $? "\"No value supplied for --enable-sim-config=file\"" "$LINENO" 5;;
-  *)		if test -f "${srcdir}/${enableval}"; then
-		  sim_config="${enableval}";
-		elif test -f "${srcdir}/${enableval}-config.h"; then
-		  sim_config="${enableval}-config.h"
-		else
-		  as_fn_error $? "\"Config file $enableval was not found\"" "$LINENO" 5;
-		  sim_config=std-config.h
-		fi;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_config" != x""; then
-  echo "Setting config flags = $sim_config" 6>&1
-fi
-else
-  sim_config="std-config.h"
-if test x"$silent" != x"yes"; then
-  echo "Setting config flags = $sim_config" 6>&1
-fi
-fi
-
-
 # Check whether --enable-sim-decode-mechanism was given.
 if test "${enable_sim_decode_mechanism+set}" = set; then :
   enableval=$enable_sim_decode_mechanism; case "${enableval}" in
@@ -4209,7 +4182,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
 
 
 
