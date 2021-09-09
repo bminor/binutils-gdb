@@ -915,8 +915,6 @@ unsigned64 mdmx_shuffle (SIM_STATE, int, unsigned64, unsigned64);
 #define LOADDRMASK (WITH_TARGET_WORD_BITSIZE == 64 \
 		    ? AccessLength_DOUBLEWORD /*7*/ \
 		    : AccessLength_WORD /*3*/)
-#define PSIZE (WITH_TARGET_ADDRESS_BITSIZE)
-
 
 INLINE_SIM_MAIN (void) load_memory (SIM_DESC sd, sim_cpu *cpu, address_word cia, uword64* memvalp, uword64* memval1p, int CCA, unsigned int AccessLength, address_word pAddr, address_word vAddr, int IorD);
 #define LoadMemory(memvalp,memval1p,AccessLength,pAddr,vAddr,IorD,raw) \
