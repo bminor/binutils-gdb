@@ -57,6 +57,8 @@ typedef enum mode_type {
 extern const char * const cgen_mode_names[];
 #define MODE_NAME(m) (cgen_mode_names[m])
 
+/* Some system headers define VOID already, so undo it.  */
+#undef VOID
 typedef void VOID;
 typedef unsigned char BI;
 typedef signed8 QI;
