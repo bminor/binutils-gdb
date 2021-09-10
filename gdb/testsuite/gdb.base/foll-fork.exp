@@ -22,12 +22,32 @@ if [gdb_debug_enabled] {
 
 standard_testfile
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
+if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
-proc check_fork_catchpoints {} {
+# Restart GDB and run the inferior to main.  Return 1 on success, 0 on failure.
+
+proc setup {} {
+    clean_restart $::testfile
+
+    if { ![runto_main] } {
+	fail "could not run to main"
+	return 0
+    }
+
+    return 1
+}
+
+# Check that fork catchpoints are supported, as an indicator for whether
+# fork-following is supported.  Return 1 if they are, else 0.
+
+proc_with_prefix check_fork_catchpoints {} {
   global gdb_prompt
+
+  if { ![setup] } {
+      return
+  }
 
   # Verify that the system supports "catch fork".
   gdb_test "catch fork" "Catchpoint \[0-9\]* \\(fork\\)" "insert first fork catchpoint"
@@ -42,10 +62,7 @@ proc check_fork_catchpoints {} {
     }
   }
 
-  if {$has_fork_catchpoints == 0} {
-    unsupported "fork catchpoints"
-    return -code return
-  }
+  return $has_fork_catchpoints
 }
 
 # Test follow-fork to ensure that the correct process is followed, that
@@ -57,7 +74,7 @@ proc check_fork_catchpoints {} {
 # execute the program past the fork.  If the value of WHO or DETACH is
 # 'default', the corresponding GDB command is skipped for that test.
 # The value of CMD must be either 'next 2' or 'continue'.
-proc test_follow_fork { who detach cmd } {
+proc_with_prefix test_follow_fork { who detach cmd } {
     global gdb_prompt
     global srcfile
     global testfile
@@ -65,11 +82,8 @@ proc test_follow_fork { who detach cmd } {
     with_test_prefix "follow $who, detach $detach, command \"$cmd\"" {
 
 	# Start a new debugger session each time so defaults are legitimate.
-	clean_restart $testfile
-
-	if ![runto_main] {
-	    untested "could not run to main"
-	    return -1
+	if { ![setup] } {
+	    return
 	}
 
 	# The "Detaching..." and "Attaching..." messages may be hidden by
@@ -174,10 +188,17 @@ proc test_follow_fork { who detach cmd } {
 
 set reading_in_symbols_re {(?:\r\nReading in symbols for [^\r\n]*)?}
 
-proc catch_fork_child_follow {} {
+# Test the ability to catch a fork, specify that the child be
+# followed, and continue.  Make the catchpoint permanent.
+
+proc_with_prefix catch_fork_child_follow {} {
     global gdb_prompt
     global srcfile
     global reading_in_symbols_re
+
+    if { ![setup] } {
+	return
+    }
 
     set bp_after_fork [gdb_get_line_number "set breakpoint here"]
 
@@ -224,9 +245,17 @@ proc catch_fork_child_follow {} {
 	"y"
 }
 
-proc catch_fork_unpatch_child {} {
+# Test that parent breakpoints are successfully detached from the
+# child at fork time, even if the user removes them from the
+# breakpoints list after stopping at a fork catchpoint.
+
+proc_with_prefix catch_fork_unpatch_child {} {
     global gdb_prompt
     global srcfile
+
+    if { ![setup] } {
+	return
+    }
 
     set bp_exit [gdb_get_line_number "at exit"]
 
@@ -271,10 +300,17 @@ proc catch_fork_unpatch_child {} {
     }
 }
 
-proc tcatch_fork_parent_follow {} {
+# Test the ability to catch a fork, specify via a -do clause that
+# the parent be followed, and continue.  Make the catchpoint temporary.
+
+proc_with_prefix tcatch_fork_parent_follow {} {
     global gdb_prompt
     global srcfile
     global reading_in_symbols_re
+
+    if { ![setup] } {
+	return
+    }
 
     set bp_after_fork [gdb_get_line_number "set breakpoint here"]
 
@@ -313,9 +349,10 @@ proc tcatch_fork_parent_follow {} {
 	"y"
 }
 
-proc do_fork_tests {} {
-    global gdb_prompt
-    global testfile
+# Test simple things about the "set follow-fork-mode" command.
+
+proc_with_prefix test_set_follow_fork_command {} {
+    clean_restart
 
     # Verify that help is available for "set follow-fork-mode".
     #
@@ -342,56 +379,37 @@ By default, the debugger will follow the parent process..*"
 	"set follow-fork to nonsense is prohibited"
 
     gdb_test_no_output "set follow-fork parent" "reset parent"
-
-    # Check that fork catchpoints are supported, as an indicator for whether
-    # fork-following is supported.
-    if [runto_main] then { check_fork_catchpoints }
-
-    # Test the basic follow-fork functionality using all combinations of
-    # values for follow-fork-mode and detach-on-fork, using either a
-    # breakpoint or single-step to execute past the fork.
-    #
-    # The first loop should be sufficient to test the defaults.  There
-    # is no need to test using the defaults in other permutations (e.g.
-    # "default" "on", "parent" "default", etc.).
-    foreach cmd {"next 2" "continue"} {
-        test_follow_fork "default" "default" $cmd
-    }
-
-    # Now test all explicit permutations.
-    foreach who {"parent" "child"} {
-	foreach detach {"on" "off"} {
-	    foreach cmd {"next 2" "continue"} {
-		test_follow_fork $who $detach $cmd
-	    }
-	}
-    }
-
-    # Catchpoint tests.
-
-    # Restart to eliminate any effects of the follow-fork tests.
-    clean_restart $testfile
-    gdb_test_no_output "set verbose"
-
-    # Test the ability to catch a fork, specify that the child be
-    # followed, and continue.  Make the catchpoint permanent.
-    #
-    if [runto_main] then { catch_fork_child_follow }
-
-    # Test that parent breakpoints are successfully detached from the
-    # child at fork time, even if the user removes them from the
-    # breakpoints list after stopping at a fork catchpoint.
-    if [runto_main] then { catch_fork_unpatch_child }
-
-    # Test the ability to catch a fork, specify via a -do clause that
-    # the parent be followed, and continue.  Make the catchpoint temporary.
-    #
-    if [runto_main] then { tcatch_fork_parent_follow }
 }
 
-# This is a test of gdb's ability to follow the parent, child or both
-# parent and child of a Unix fork() system call.
-#
-do_fork_tests
+test_set_follow_fork_command
 
-return 0
+if { ![check_fork_catchpoints] } {
+    untested "follow-fork not supported"
+    return
+}
+
+# Test the basic follow-fork functionality using all combinations of
+# values for follow-fork-mode and detach-on-fork, using either a
+# breakpoint or single-step to execute past the fork.
+#
+# The first loop should be sufficient to test the defaults.  There
+# is no need to test using the defaults in other permutations (e.g.
+# "default" "on", "parent" "default", etc.).
+foreach cmd {"next 2" "continue"} {
+    test_follow_fork "default" "default" $cmd
+}
+
+# Now test all explicit permutations.
+foreach who {"parent" "child"} {
+    foreach detach {"on" "off"} {
+	foreach cmd {"next 2" "continue"} {
+	    test_follow_fork $who $detach $cmd
+	}
+    }
+}
+
+# Catchpoint tests.
+
+catch_fork_child_follow
+catch_fork_unpatch_child
+tcatch_fork_parent_follow
