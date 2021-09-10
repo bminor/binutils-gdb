@@ -2202,21 +2202,34 @@ proc gdb_interact { } {
 # Examine the output of compilation to determine whether compilation
 # failed or not.  If it failed determine whether it is due to missing
 # compiler or due to compiler error.  Report pass, fail or unsupported
-# as appropriate
+# as appropriate.
 
 proc gdb_compile_test {src output} {
+    set msg "compilation [file tail $src]"
+
     if { $output == "" } {
-	pass "compilation [file tail $src]"
-    } elseif { [regexp {^[a-zA-Z_0-9]+: Can't find [^ ]+\.$} $output] } {
-	unsupported "compilation [file tail $src]"
-    } elseif { [regexp {.*: command not found[\r|\n]*$} $output] } {
-	unsupported "compilation [file tail $src]"
-    } elseif { [regexp {.*: [^\r\n]*compiler not installed[^\r\n]*[\r|\n]*$} $output] } {
-	unsupported "compilation [file tail $src]"
-    } else {
-	verbose -log "compilation failed: $output" 2
-	fail "compilation [file tail $src]"
+	pass $msg
+	return
     }
+
+    if { [regexp {^[a-zA-Z_0-9]+: Can't find [^ ]+\.$} $output]
+	 || [regexp {.*: command not found[\r|\n]*$} $output]
+	 || [regexp {.*: [^\r\n]*compiler not installed[^\r\n]*[\r|\n]*$} $output] } {
+	unsupported "$msg (missing compiler)"
+	return
+    }
+
+    set gcc_re ".*: error: unrecognized command line option "
+    set clang_re ".*: error: unsupported option "
+    if { [regexp "(?:$gcc_re|$clang_re)(\[^ \t;\r\n\]*)" $output dummy option]
+	 && $option != "" } {
+	unsupported "$msg (unsupported option $option)"
+	return
+    }
+
+    # Unclassified compilation failure, be more verbose.
+    verbose -log "compilation failed: $output" 2
+    fail "$msg"
 }
 
 # Return a 1 for configurations for which we don't even want to try to
