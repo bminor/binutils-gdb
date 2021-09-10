@@ -13,13 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Until "set follow-fork-mode" and "catch fork" are implemented on
-# other targets...
-#
-if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
-    continue
-}
-
 # Test relies on checking follow-fork output. Do not run if gdb debug is
 # enabled as it will be redirected to the log.
 if [gdb_debug_enabled] {
