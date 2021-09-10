@@ -539,17 +539,38 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       child_inf->gdbarch = parent_inf->gdbarch;
       copy_inferior_target_desc_info (child_inf, parent_inf);
 
-      program_space *parent_pspace = parent_inf->pspace;
-
-      /* If this is a vfork child, then the address-space is shared
-	 with the parent.  If we detached from the parent, then we can
-	 reuse the parent's program/address spaces.  */
-      if (has_vforked || detach_fork)
+      if (has_vforked)
 	{
-	  child_inf->pspace = parent_pspace;
-	  child_inf->aspace = child_inf->pspace->aspace;
+	  /* If this is a vfork child, then the address-space is shared
+	     with the parent.  */
+	  child_inf->aspace = parent_inf->aspace;
+	  child_inf->pspace = parent_inf->pspace;
 
 	  exec_on_vfork (child_inf);
+	}
+      else if (detach_fork)
+	{
+	  /* We follow the child and detach from the parent: move the parent's
+	     program space to the child.  This simplifies some things, like
+	     doing "next" over fork() and landing on the expected line in the
+	     child (note, that is broken with "set detach-on-fork off").
+
+	     Before assigning brand new spaces for the parent, remove
+	     breakpoints from it: because the new pspace won't match
+	     currently inserted locations, the normal detach procedure
+	     wouldn't remove them, and we would leave them inserted when
+	     detaching.  */
+	  remove_breakpoints_inf (parent_inf);
+
+	  child_inf->aspace = parent_inf->aspace;
+	  child_inf->pspace = parent_inf->pspace;
+	  parent_inf->aspace = new_address_space ();
+	  parent_inf->pspace = new program_space (parent_inf->aspace);
+	  clone_program_space (parent_inf->pspace, child_inf->pspace);
+
+	  /* The parent inferior is still the current one, so keep things
+	     in sync.  */
+	  set_current_program_space (parent_inf->pspace);
 	}
       else
 	{
@@ -557,7 +578,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_inf->pspace = new program_space (child_inf->aspace);
 	  child_inf->removable = 1;
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
-	  clone_program_space (child_inf->pspace, parent_pspace);
+	  clone_program_space (child_inf->pspace, parent_inf->pspace);
 	}
     }
 
