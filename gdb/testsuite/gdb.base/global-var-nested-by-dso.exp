@@ -52,6 +52,6 @@ if { ![runto_main] } {
   return -1
 }
 
-gdb_test "next" "$decimal.*b_main \\(\\);"
-gdb_test "next" "$decimal.*return 0;"
+gdb_test "next" "$decimal.*b_main \\(\\);" "step over c_main"
+gdb_test "next" "$decimal.*return 0;" "step over b_main"
 gdb_test "print test" " = 42"
