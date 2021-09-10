@@ -38,6 +38,18 @@ proc string_to_regexp {str} {
     return $result
 }
 
+# Given a list of strings, adds backslashes as needed to each string to
+# create a regexp that will match the string, and join the result.
+
+proc string_list_to_regexp { args } {
+    set result ""
+    foreach arg $args {
+	set arg [string_to_regexp $arg]
+       append result $arg
+    }
+    return $result
+}
+
 # Wrap STR in an ANSI terminal escape sequences -- one to set the
 # style to STYLE, and one to reset the style to the default.  The
 # return value is suitable for use as a regular expression.
