@@ -32,7 +32,8 @@ if {[mi_runto_main] < 0} {
 
 set milogfile [standard_output_file "milog.txt"]
 
-mi_gdb_test "-gdb-set logging file $milogfile" ".*"
+mi_gdb_test "-gdb-set logging file $milogfile" "\\^done" \
+    "-gdb-set logging file"
 
 mi_gdb_test "-gdb-set logging overwrite on" ".*"
 

@@ -115,7 +115,12 @@ mi_check_thread_states \
 # gdb_test_multiple (or an MI equivalent)
 
 mi_gdb_test "102-break-delete" "102\\^done.*"
-mi_gdb_test "print done = 1" { = 1"}
+set re [list \
+	    [string_list_to_regexp ~ {"} $] \
+	    $decimal \
+	    [string_list_to_regexp " = 1" \\ n {"} \r\n ^ done]]
+set re [join $re ""]
+mi_gdb_test "print done = 1" $re
 mi_gdb_test "103-exec-continue --all" "\[^\n\]*\r\n$running_re"
 
 gdb_expect {

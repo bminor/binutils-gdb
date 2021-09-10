@@ -341,7 +341,7 @@ proc_with_prefix test_explicit_breakpoints {} {
 
     # First check mixed explicit/parsed linespecs.
     mi_gdb_test "-break-insert --function main $srcfile:$line_callee3_head" \
-	".*Garbage following explicit linespec"
+	".*Garbage following explicit location.*"
 
     # Insert some breakpoints and list them
     # Also, disable some so they do not interfere with other tests

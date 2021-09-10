@@ -44,7 +44,9 @@ mi_runto_main
 
 set remote_python_file [gdb_remote_download host ${srcdir}/${subdir}/${pyfile}]
 
-mi_gdb_test "source ${remote_python_file}" "load python file"
+set cmd "source ${remote_python_file}"
+set re [string_list_to_regexp & {"} $cmd \\ n {"} \r\n ^ done]
+mi_gdb_test $cmd $re "load python file"
 
 mi_continue_to_line [gdb_get_line_number {MI breakpoint here} ${srcfile}] \
   "step to breakpoint"
@@ -74,7 +76,7 @@ with_test_prefix "varobj nscont" {
     mi_delete_varobj nscont "delete varobj"
 }
 
-mi_gdb_test "-enable-pretty-printing" ""
+mi_gdb_test "-enable-pretty-printing" "\\^done"
 
 mi_create_varobj_checked string string_1 \
     "struct string_repr" \
@@ -283,7 +285,9 @@ with_test_prefix "varobj nscont" {
 	"choose default visualizer"
 }
 
-mi_gdb_test "python exception_flag = True" ""
+set cmd "python exception_flag = True"
+set re [string_list_to_regexp & {"} $cmd \\ n {"} \r\n ^ done]
+mi_gdb_test $cmd $re
 
 mi_create_dynamic_varobj nstype2 nstype2 1 \
   "create nstype2 varobj"
