@@ -142,7 +142,7 @@ static const OPTION standard_options[] =
       standard_option_handler },
 
   { {"help", no_argument, NULL, OPTION_HELP},
-      'H', NULL, "Print help information",
+      'h', NULL, "Print help information",
       standard_option_handler },
   { {"version", no_argument, NULL, OPTION_VERSION},
       '\0', NULL, "Print version information",
