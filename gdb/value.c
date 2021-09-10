@@ -1407,10 +1407,21 @@ value_contents_writeable (struct value *value)
 int
 value_optimized_out (struct value *value)
 {
-  /* We can only know if a value is optimized out once we have tried to
-     fetch it.  */
-  if (value->optimized_out.empty () && value->lazy)
+  if (value->lazy)
     {
+      /* See if we can compute the result without fetching the
+	 value.  */
+      if (VALUE_LVAL (value) == lval_memory)
+	return false;
+      else if (VALUE_LVAL (value) == lval_computed)
+	{
+	  const struct lval_funcs *funcs = value->location.computed.funcs;
+
+	  if (funcs->is_optimized_out != nullptr)
+	    return funcs->is_optimized_out (value);
+	}
+
+      /* Fall back to fetching.  */
       try
 	{
 	  value_fetch_lazy (value);

@@ -254,6 +254,7 @@ static const struct lval_funcs opencl_value_funcs =
   {
     lval_func_read,
     lval_func_write,
+    nullptr,
     NULL,	/* indirect */
     NULL,	/* coerce_ref */
     lval_func_check_synthetic_pointer,

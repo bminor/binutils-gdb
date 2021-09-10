@@ -264,6 +264,12 @@ struct lval_funcs
      TOVAL is not considered as an lvalue.  */
   void (*write) (struct value *toval, struct value *fromval);
 
+  /* Return true if any part of V is optimized out, false otherwise.
+     This will only be called for lazy values -- if the value has been
+     fetched, then the value's optimized-out bits are consulted
+     instead.  */
+  bool (*is_optimized_out) (struct value *v);
+
   /* If non-NULL, this is used to implement pointer indirection for
      this value.  This method may return NULL, in which case value_ind
      will fall back to ordinary indirection.  */

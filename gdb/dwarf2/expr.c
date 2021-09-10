@@ -149,10 +149,13 @@ allocate_piece_closure (dwarf2_per_cu_data *per_cu,
 /* Read or write a pieced value V.  If FROM != NULL, operate in "write
    mode": copy FROM into the pieces comprising V.  If FROM == NULL,
    operate in "read mode": fetch the contents of the (lazy) value V by
-   composing it from its pieces.  */
+   composing it from its pieces.  If CHECK_OPTIMIZED is true, then no
+   reading or writing is done; instead the return value of this
+   function is true if any piece is optimized out.  When
+   CHECK_OPTIMIZED is true, FROM must be nullptr.  */
 
-static void
-rw_pieced_value (value *v, value *from)
+static bool
+rw_pieced_value (value *v, value *from, bool check_optimized)
 {
   int i;
   LONGEST offset = 0, max_offset;
@@ -163,6 +166,7 @@ rw_pieced_value (value *v, value *from)
   gdb::byte_vector buffer;
   bool bits_big_endian = type_byte_order (value_type (v)) == BFD_ENDIAN_BIG;
 
+  gdb_assert (!check_optimized || from == nullptr);
   if (from != nullptr)
     {
       from_contents = value_contents (from);
@@ -174,7 +178,10 @@ rw_pieced_value (value *v, value *from)
 	internal_error (__FILE__, __LINE__,
 			_("Should not be able to create a lazy value with "
 			  "an enclosing type"));
-      v_contents = value_contents_raw (v);
+      if (check_optimized)
+	v_contents = nullptr;
+      else
+	v_contents = value_contents_raw (v);
       from_contents = nullptr;
     }
 
@@ -240,17 +247,22 @@ rw_pieced_value (value *v, value *from)
 					       buffer, &optim, &unavail))
 		  {
 		    if (optim)
-		      mark_value_bits_optimized_out (v, offset,
-						     this_size_bits);
-		    if (unavail)
+		      {
+			if (check_optimized)
+			  return true;
+			mark_value_bits_optimized_out (v, offset,
+						       this_size_bits);
+		      }
+		    if (unavail && !check_optimized)
 		      mark_value_bits_unavailable (v, offset,
 						   this_size_bits);
 		    break;
 		  }
 
-		copy_bitwise (v_contents, offset,
-			      buffer.data (), bits_to_skip % 8,
-			      this_size_bits, bits_big_endian);
+		if (!check_optimized)
+		  copy_bitwise (v_contents, offset,
+				buffer.data (), bits_to_skip % 8,
+				this_size_bits, bits_big_endian);
 	      }
 	    else
 	      {
@@ -286,6 +298,9 @@ rw_pieced_value (value *v, value *from)
 
 	case DWARF_VALUE_MEMORY:
 	  {
+	    if (check_optimized)
+	      break;
+
 	    bits_to_skip += p->offset;
 
 	    CORE_ADDR start_addr = p->v.mem.addr + bits_to_skip / 8;
@@ -355,6 +370,9 @@ rw_pieced_value (value *v, value *from)
 
 	case DWARF_VALUE_STACK:
 	  {
+	    if (check_optimized)
+	      break;
+
 	    if (from != nullptr)
 	      {
 		mark_value_bits_optimized_out (v, offset, this_size_bits);
@@ -384,6 +402,9 @@ rw_pieced_value (value *v, value *from)
 
 	case DWARF_VALUE_LITERAL:
 	  {
+	    if (check_optimized)
+	      break;
+
 	    if (from != nullptr)
 	      {
 		mark_value_bits_optimized_out (v, offset, this_size_bits);
@@ -418,6 +439,8 @@ rw_pieced_value (value *v, value *from)
 	  break;
 
 	case DWARF_VALUE_OPTIMIZED_OUT:
+	  if (check_optimized)
+	    return true;
 	  mark_value_bits_optimized_out (v, offset, this_size_bits);
 	  break;
 
@@ -428,18 +451,26 @@ rw_pieced_value (value *v, value *from)
       offset += this_size_bits;
       bits_to_skip = 0;
     }
+
+  return false;
 }
 
 static void
 read_pieced_value (value *v)
 {
-  rw_pieced_value (v, nullptr);
+  rw_pieced_value (v, nullptr, false);
 }
 
 static void
 write_pieced_value (value *to, value *from)
 {
-  rw_pieced_value (to, from);
+  rw_pieced_value (to, from, false);
+}
+
+static bool
+is_optimized_out_pieced_value (value *v)
+{
+  return rw_pieced_value (v, nullptr, true);
 }
 
 /* An implementation of an lval_funcs method to see whether a value is
@@ -617,6 +648,7 @@ free_pieced_value_closure (value *v)
 static const struct lval_funcs pieced_value_funcs = {
   read_pieced_value,
   write_pieced_value,
+  is_optimized_out_pieced_value,
   indirect_pieced_value,
   coerce_pieced_ref,
   check_pieced_synthetic_pointer,
