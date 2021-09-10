@@ -1,3 +1,8 @@
+2021-09-10  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (gdb_compile_test): Handle unrecognized command line
+	option.
+
 2021-09-09  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/coredump-filter-build-id.exp: Handle older eu-unstrip.
