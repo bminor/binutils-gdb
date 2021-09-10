@@ -1,3 +1,8 @@
+2021-09-10  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (AARCH64_ARCH_MORELLO): Change F16_FML
+	feature bit to F16.
+
 2021-06-24  Luis Machado  <luis.machado@arm.com>
 
 	* elf/aarch64.h (EF_AARCH64_CHERI_PURECAP): New constant.
