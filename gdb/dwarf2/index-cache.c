@@ -37,7 +37,7 @@
 static bool debug_index_cache = false;
 
 /* The index cache directory, used for "set/show index-cache directory".  */
-static char *index_cache_directory = NULL;
+static std::string index_cache_directory;
 
 /* See dwarf-index.cache.h.  */
 index_cache global_index_cache;
@@ -290,9 +290,9 @@ set_index_cache_directory_command (const char *arg, int from_tty,
 				   cmd_list_element *element)
 {
   /* Make sure the index cache directory is absolute and tilde-expanded.  */
-  gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (index_cache_directory));
-  xfree (index_cache_directory);
-  index_cache_directory = abs.release ();
+  gdb::unique_xmalloc_ptr<char> abs
+    = gdb_abspath (index_cache_directory.c_str ());
+  index_cache_directory = abs.get ();
   global_index_cache.set_directory (index_cache_directory);
 }
 
@@ -325,7 +325,7 @@ _initialize_index_cache ()
   std::string cache_dir = get_standard_cache_dir ();
   if (!cache_dir.empty ())
     {
-      index_cache_directory = xstrdup (cache_dir.c_str ());
+      index_cache_directory = cache_dir;
       global_index_cache.set_directory (std::move (cache_dir));
     }
   else

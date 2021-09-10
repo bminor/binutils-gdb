@@ -71,16 +71,16 @@ static void step_1 (int, int, const char *);
    Arguments are separated by spaces.  Empty string (pointer to '\0')
    means no args.  */
 
-static char *inferior_args_scratch;
+static std::string inferior_args_scratch;
 
 /* Scratch area where the new cwd will be stored by 'set cwd'.  */
 
-static char *inferior_cwd_scratch;
+static std::string inferior_cwd_scratch;
 
 /* Scratch area where 'set inferior-tty' will store user-provided value.
    We'll immediate copy it into per-inferior storage.  */
 
-static char *inferior_io_terminal_scratch;
+static std::string inferior_io_terminal_scratch;
 
 /* Pid of our debugged inferior, or 0 if no inferior now.
    Since various parts of infrun.c test this to see whether there is a program
@@ -2021,7 +2021,6 @@ path_info (const char *args, int from_tty)
 static void
 path_command (const char *dirname, int from_tty)
 {
-  char *exec_path;
   const char *env;
 
   dont_repeat ();
@@ -2029,10 +2028,9 @@ path_command (const char *dirname, int from_tty)
   /* Can be null if path is not set.  */
   if (!env)
     env = "";
-  exec_path = xstrdup (env);
-  mod_path (dirname, &exec_path);
-  current_inferior ()->environment.set (path_var_name, exec_path);
-  xfree (exec_path);
+  std::string exec_path = env;
+  mod_path (dirname, exec_path);
+  current_inferior ()->environment.set (path_var_name, exec_path.c_str ());
   if (from_tty)
     path_info (NULL, from_tty);
 }

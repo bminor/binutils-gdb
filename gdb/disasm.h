@@ -164,6 +164,6 @@ extern char *get_disassembler_options (struct gdbarch *gdbarch);
 
 /* Sets the active gdbarch's disassembler options to OPTIONS.  */
 
-extern void set_disassembler_options (char *options);
+extern void set_disassembler_options (const char *options);
 
 #endif

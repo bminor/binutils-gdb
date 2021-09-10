@@ -360,27 +360,22 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	*q++ = '\0';
 	newobj = (char *) xrealloc (newobj, q - newobj);
 
-	char * const var = c->var->get<char *> ();
-	if (var == nullptr
-	    || strcmp (var, newobj) != 0)
+	const std::string &cur_val = c->var->get<std::string> ();
+	if (strcmp (cur_val.c_str(),  newobj) != 0)
 	  {
-	    xfree (var);
-	    c->var->set<char *> (newobj);
+	    c->var->set<std::string> (std::string (newobj));
 
 	    option_changed = true;
 	  }
-	else
-	  xfree (newobj);
+	xfree (newobj);
       }
       break;
     case var_string_noescape:
       {
-	char * const var = c->var->get<char *> ();
-	if (var == nullptr
-	    || strcmp (var, arg) != 0)
+	const std::string &cur_val = c->var->get<std::string> ();
+	if (strcmp (cur_val.c_str (), arg) != 0)
 	  {
-	    xfree (var);
-	    c->var->set<char *> (xstrdup (arg));
+	    c->var->set<std::string> (std::string (arg));
 
 	    option_changed = true;
 	  }
@@ -410,17 +405,14 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	else
 	  val = xstrdup ("");
 
-	char * const var = c->var->get<char *> ();
-	if (var == nullptr
-	    || strcmp (var, val) != 0)
+	const std::string &cur_val = c->var->get<std::string> ();
+	if (strcmp (cur_val.c_str (), val) != 0)
 	  {
-	    xfree (var);
-	    c->var->set<char *> (val);
+	    c->var->set<std::string> (std::string (val));
 
 	    option_changed = true;
 	  }
-	else
-	  xfree (val);
+	xfree (val);
       }
       break;
     case var_boolean:
@@ -598,15 +590,12 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	case var_string_noescape:
 	case var_filename:
 	case var_optional_filename:
+	  gdb::observers::command_param_changed.notify
+	    (name, c->var->get<std::string> ().c_str ());
+	  break;
 	case var_enum:
-	  {
-	    const char *var;
-	    if (c->var->type () == var_enum)
-	      var = c->var->get<const char *> ();
-	    else
-	      var = c->var->get<char *> ();
-	    gdb::observers::command_param_changed.notify (name, var);
-	  }
+	  gdb::observers::command_param_changed.notify
+	    (name, c->var->get<const char *> ());
 	  break;
 	case var_boolean:
 	  {
@@ -658,23 +647,19 @@ get_setshow_command_value_string (const setting &var)
     {
     case var_string:
       {
-	char *value = var.get<char *> ();
-
-	if (value != nullptr)
-	  stb.putstr (value, '"');
+	std::string value = var.get<std::string> ();
+	if (!value.empty ())
+	  stb.putstr (value.c_str (), '"');
       }
       break;
     case var_string_noescape:
     case var_optional_filename:
     case var_filename:
+      stb.puts (var.get<std::string> ().c_str ());
+      break;
     case var_enum:
       {
-	const char *value;
-	if (var.type () == var_enum)
-	  value = var.get<const char *> ();
-	else
-	  value = var.get<char *> ();
-
+	const char *value = var.get<const char *> ();
 	if (value != nullptr)
 	  stb.puts (value);
       }

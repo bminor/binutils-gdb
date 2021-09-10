@@ -118,7 +118,7 @@ dwz_search_other_debugdirs (std::string &filename, bfd_byte *buildid,
 
   gdb_bfd_ref_ptr dwz_bfd;
   std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
-    = dirnames_to_char_ptr_vec (debug_file_directory);
+    = dirnames_to_char_ptr_vec (debug_file_directory.c_str ());
 
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {

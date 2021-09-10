@@ -650,7 +650,7 @@ find_and_open_script (const char *script_file, int search_path)
   /* Search for and open 'file' on the search path used for source
      files.  Put the full location in *FULL_PATHP.  */
   gdb::unique_xmalloc_ptr<char> full_path;
-  fd = openp (source_path, search_flags,
+  fd = openp (source_path.c_str (), search_flags,
 	      file.get (), O_RDONLY, &full_path);
 
   if (fd == -1)
@@ -1042,12 +1042,7 @@ edit_command (const char *arg, int from_tty)
 struct pipe_cmd_opts
 {
   /* For "-d".  */
-  char *delimiter = nullptr;
-
-  ~pipe_cmd_opts ()
-  {
-    xfree (delimiter);
-  }
+  std::string delimiter;
 };
 
 static const gdb::option::option_def pipe_cmd_option_defs[] = {
@@ -1084,8 +1079,8 @@ pipe_command (const char *arg, int from_tty)
     (&arg, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
 
   const char *delim = "|";
-  if (opts.delimiter != nullptr)
-    delim = opts.delimiter;
+  if (!opts.delimiter.empty ())
+    delim = opts.delimiter.c_str ();
 
   const char *command = arg;
   if (command == nullptr)
@@ -1148,8 +1143,8 @@ pipe_command_completer (struct cmd_list_element *ignore,
     return;
 
   const char *delimiter = "|";
-  if (opts.delimiter != nullptr)
-    delimiter = opts.delimiter;
+  if (!opts.delimiter.empty ())
+    delimiter = opts.delimiter.c_str ();
 
   /* Check if we're past option values already.  */
   if (text > org_text && !isspace (text[-1]))
@@ -2152,13 +2147,21 @@ value_from_setting (const setting &var, struct gdbarch *gdbarch)
     case var_enum:
       {
 	const char *value;
+	size_t len;
 	if (var.type () == var_enum)
-	  value = var.get<const char *> ();
+	  {
+	    value = var.get<const char *> ();
+	    len = strlen (value);
+	  }
 	else
-	  value = var.get<char *> ();
+	  {
+	    const std::string &st = var.get<std::string> ();
+	    value = st.c_str ();
+	    len = st.length ();
+	  }
 
-	if (value != nullptr)
-	  return value_cstring (value, strlen (value),
+	if (len > 0)
+	  return value_cstring (value, len,
 				builtin_type (gdbarch)->builtin_char);
 	else
 	  return value_cstring ("", 1,
@@ -2231,13 +2234,21 @@ str_value_from_setting (const setting &var, struct gdbarch *gdbarch)
 	 similarly to the value_from_setting code for these casevar.  */
       {
 	const char *value;
+	size_t len;
 	if (var.type () == var_enum)
-	  value = var.get<const char *> ();
+	  {
+	    value = var.get<const char *> ();
+	    len = strlen (value);
+	  }
 	else
-	  value = var.get<char *> ();
+	  {
+	    const std::string &st = var.get<std::string> ();
+	    value = st.c_str ();
+	    len = st.length ();
+	  }
 
-	if (value != nullptr)
-	  return value_cstring (value, strlen (value),
+	if (len > 0)
+	  return value_cstring (value, len,
 				builtin_type (gdbarch)->builtin_char);
 	else
 	  return value_cstring ("", 1,

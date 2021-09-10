@@ -39,13 +39,14 @@ extern int openp (const char *, openp_flags, const char *, int,
 
 extern int source_full_path_of (const char *, gdb::unique_xmalloc_ptr<char> *);
 
-extern void mod_path (const char *, char **);
+extern void mod_path (const char *, std::string &);
 
 extern void add_path (const char *, char **, int);
+extern void add_path (const char *, std::string &, int);
 
 extern void directory_switch (const char *, int);
 
-extern char *source_path;
+extern std::string source_path;
 
 extern void init_source_path (void);
 

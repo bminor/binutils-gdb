@@ -655,7 +655,7 @@ add_setshow_boolean_cmd (const char *name, enum command_class theclass, bool *va
 
 set_show_commands
 add_setshow_filename_cmd (const char *name, enum command_class theclass,
-			  char **var,
+			  std::string *var,
 			  const char *set_doc, const char *show_doc,
 			  const char *help_doc,
 			  cmd_func_ftype *set_func,
@@ -664,10 +664,10 @@ add_setshow_filename_cmd (const char *name, enum command_class theclass,
 			  struct cmd_list_element **show_list)
 {
   set_show_commands commands
-    = add_setshow_cmd_full<char *> (name, theclass, var_filename, var,
-				    set_doc, show_doc, help_doc,
-				    set_func, show_func,
-				    set_list, show_list);
+    = add_setshow_cmd_full<std::string> (name, theclass, var_filename, var,
+					 set_doc, show_doc, help_doc,
+					 set_func, show_func,
+					 set_list, show_list);
 
   set_cmd_completer (commands.set, filename_completer);
 
@@ -679,7 +679,7 @@ add_setshow_filename_cmd (const char *name, enum command_class theclass,
 
 set_show_commands
 add_setshow_string_cmd (const char *name, enum command_class theclass,
-			char **var,
+			std::string *var,
 			const char *set_doc, const char *show_doc,
 			const char *help_doc,
 			cmd_func_ftype *set_func,
@@ -688,10 +688,10 @@ add_setshow_string_cmd (const char *name, enum command_class theclass,
 			struct cmd_list_element **show_list)
 {
   set_show_commands commands
-    = add_setshow_cmd_full<char *> (name, theclass, var_string, var,
-				    set_doc, show_doc, help_doc,
-				    set_func, show_func,
-				    set_list, show_list);
+    = add_setshow_cmd_full<std::string> (name, theclass, var_string, var,
+					 set_doc, show_doc, help_doc,
+					 set_func, show_func,
+					 set_list, show_list);
 
   /* Disable the default symbol completer.  */
   set_cmd_completer (commands.set, nullptr);
@@ -704,7 +704,7 @@ add_setshow_string_cmd (const char *name, enum command_class theclass,
 
 set_show_commands
 add_setshow_string_noescape_cmd (const char *name, enum command_class theclass,
-				 char **var,
+				 std::string *var,
 				 const char *set_doc, const char *show_doc,
 				 const char *help_doc,
 				 cmd_func_ftype *set_func,
@@ -713,9 +713,10 @@ add_setshow_string_noescape_cmd (const char *name, enum command_class theclass,
 				 struct cmd_list_element **show_list)
 {
   set_show_commands commands
-    = add_setshow_cmd_full<char *> (name, theclass, var_string_noescape, var,
-				    set_doc, show_doc, help_doc, set_func,
-				    show_func, set_list, show_list);
+    = add_setshow_cmd_full<std::string> (name, theclass, var_string_noescape,
+					 var, set_doc, show_doc, help_doc,
+					 set_func, show_func, set_list,
+					 show_list);
 
   /* Disable the default symbol completer.  */
   set_cmd_completer (commands.set, nullptr);
@@ -728,7 +729,7 @@ add_setshow_string_noescape_cmd (const char *name, enum command_class theclass,
 
 set_show_commands
 add_setshow_optional_filename_cmd (const char *name, enum command_class theclass,
-				   char **var,
+				   std::string *var,
 				   const char *set_doc, const char *show_doc,
 				   const char *help_doc,
 				   cmd_func_ftype *set_func,
@@ -737,9 +738,10 @@ add_setshow_optional_filename_cmd (const char *name, enum command_class theclass
 				   struct cmd_list_element **show_list)
 {
   set_show_commands commands
-    = add_setshow_cmd_full<char *> (name, theclass, var_optional_filename,
-				    var, set_doc, show_doc, help_doc,
-				    set_func, show_func, set_list, show_list);
+    = add_setshow_cmd_full<std::string> (name, theclass, var_optional_filename,
+					 var, set_doc, show_doc, help_doc,
+					 set_func, show_func, set_list,
+					 show_list);
 
   set_cmd_completer (commands.set, filename_completer);
 

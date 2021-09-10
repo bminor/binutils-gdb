@@ -460,13 +460,11 @@ gdbpy_parameter_value (const setting &var)
     case var_enum:
       {
 	const char *str;
-        if (var.type () == var_enum)
-          str = var.get<const char *> ();
-        else
-          str = var.get<char *> ();
+	if (var.type () == var_enum)
+	  str = var.get<const char *> ();
+	else
+	  str = var.get<std::string> ().c_str ();
 
-	if (str == nullptr)
-	  str = "";
 	return host_string_to_python_string (str).release ();
       }
 

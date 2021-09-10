@@ -5170,12 +5170,7 @@ struct info_vars_funcs_options
 {
   bool quiet = false;
   bool exclude_minsyms = false;
-  char *type_regexp = nullptr;
-
-  ~info_vars_funcs_options ()
-  {
-    xfree (type_regexp);
-  }
+  std::string type_regexp;
 };
 
 /* The options used by the 'info variables' and 'info functions'
@@ -5198,8 +5193,7 @@ static const gdb::option::option_def info_vars_funcs_options_defs[] = {
 
   gdb::option::string_option_def<info_vars_funcs_options> {
     "t",
-    [] (info_vars_funcs_options *opt) { return &opt->type_regexp;
-  },
+    [] (info_vars_funcs_options *opt) { return &opt->type_regexp; },
     nullptr, /* show_cmd_cb */
     nullptr /* set_doc */
   }
@@ -5243,8 +5237,10 @@ info_variables_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  symtab_symbol_info (opts.quiet, opts.exclude_minsyms, args, VARIABLES_DOMAIN,
-		      opts.type_regexp, from_tty);
+  symtab_symbol_info
+    (opts.quiet, opts.exclude_minsyms, args, VARIABLES_DOMAIN,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     from_tty);
 }
 
 /* Implement the 'info functions' command.  */
@@ -5260,8 +5256,10 @@ info_functions_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  symtab_symbol_info (opts.quiet, opts.exclude_minsyms, args,
-		      FUNCTIONS_DOMAIN, opts.type_regexp, from_tty);
+  symtab_symbol_info
+    (opts.quiet, opts.exclude_minsyms, args, FUNCTIONS_DOMAIN,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     from_tty);
 }
 
 /* Holds the -q option for the 'info types' command.  */
@@ -6773,14 +6771,8 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 struct info_modules_var_func_options
 {
   bool quiet = false;
-  char *type_regexp = nullptr;
-  char *module_regexp = nullptr;
-
-  ~info_modules_var_func_options ()
-  {
-    xfree (type_regexp);
-    xfree (module_regexp);
-  }
+  std::string type_regexp;
+  std::string module_regexp;
 };
 
 /* The options used by 'info module variables' and 'info module functions'
@@ -6830,8 +6822,11 @@ info_module_functions_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  info_module_subcommand (opts.quiet, opts.module_regexp, args,
-			  opts.type_regexp, FUNCTIONS_DOMAIN);
+  info_module_subcommand
+    (opts.quiet,
+     opts.module_regexp.empty () ? nullptr : opts.module_regexp.c_str (), args,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     FUNCTIONS_DOMAIN);
 }
 
 /* Implements the 'info module variables' command.  */
@@ -6846,8 +6841,11 @@ info_module_variables_command (const char *args, int from_tty)
   if (args != nullptr && *args == '\0')
     args = nullptr;
 
-  info_module_subcommand (opts.quiet, opts.module_regexp, args,
-			  opts.type_regexp, VARIABLES_DOMAIN);
+  info_module_subcommand
+    (opts.quiet,
+     opts.module_regexp.empty () ? nullptr : opts.module_regexp.c_str (), args,
+     opts.type_regexp.empty () ? nullptr : opts.type_regexp.c_str (),
+     VARIABLES_DOMAIN);
 }
 
 /* Command completer for 'info module ...' sub-commands.  */
