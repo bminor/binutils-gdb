@@ -5,7 +5,7 @@
 	.globl	x
 	.section	.bss
 	.balign 4
-	.type	x, @object
+	.type	x, %object
 	.size	x, 4
 x:
 	.zero	4
@@ -14,30 +14,30 @@ x:
 	.file 1 "test.c"
 	.section	.debug_info,"",%progbits
 .Ldebug_info0:
-	.long	0x32
+	.4byte	0x32
 	.2byte	0x5
 	.byte	0x1
 	.byte	0x4
-	.long	.Ldebug_abbrev0
+	.4byte	.Ldebug_abbrev0
 	.uleb128 0x1
-	.long	.LASF2
+	.4byte	.LASF2
 	.byte	0x1d
-	.long	.LASF0
-	.long	.LASF1
-	.long	.Ldebug_line0
+	.4byte	.LASF0
+	.4byte	.LASF1
+	.4byte	.Ldebug_line0
 	.uleb128 0x2
-	.string	"x"
+	.asciz	"x"
 	.byte	0x1
 	.byte	0x1
 	.byte	0x5
-	.long	0x2e
+	.4byte	0x2e
 	.uleb128 0x5
 	.byte	0x3
-	.long	x
+	.4byte	x
 	.uleb128 0x3
 	.byte	0x4
 	.byte	0x5
-	.string	"int"
+	.asciz	"int"
 	.byte	0
 	.section	.debug_abbrev,"",%progbits
 .Ldebug_abbrev0:
@@ -88,24 +88,24 @@ x:
 	.byte	0
 	.byte	0
 	.section	.debug_aranges,"",%progbits
-	.long	0x14
+	.4byte	0x14
 	.2byte	0x2
-	.long	.Ldebug_info0
+	.4byte	.Ldebug_info0
 	.byte	0x4
 	.byte	0
 	.2byte	0
 	.2byte	0
-	.long	0
-	.long	0
+	.4byte	0
+	.4byte	0
 	.section	.debug_line,"",%progbits
 .Ldebug_line0:
 	.section	.debug_str,"MS",%progbits,1
 .LASF2:
-	.string	"GNU C17 11.2.1 -g"
+	.asciz	"GNU C17 11.2.1 -g"
 	.section	.debug_line_str,"MS",%progbits,1
 .LASF1:
-	.string	"/example"
+	.asciz	"/example"
 .LASF0:
-	.string	"test.c"
+	.asciz	"test.c"
 	.ident	"GCC: (GNU) 11.2.1"
 	.section	.note.GNU-stack,"",%progbits
