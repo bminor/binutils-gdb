@@ -470,7 +470,7 @@ typy_get_composite (struct type *type)
 	  GDB_PY_HANDLE_EXCEPTION (except);
 	}
 
-      if (type->code () != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
+      if (!type->is_pointer_or_reference ())
 	break;
       type = TYPE_TARGET_TYPE (type);
     }

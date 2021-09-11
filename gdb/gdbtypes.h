@@ -1355,6 +1355,12 @@ struct type
     return main_type->type_specific.int_stuff.bit_offset;
   }
 
+  /* Return true if this is a pointer or reference type.  */
+  bool is_pointer_or_reference () const
+  {
+    return this->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (this);
+  }
+
   /* * Type that is a pointer to this type.
      NULL if no such pointer-to type is known yet.
      The debugger may add the address of such a type

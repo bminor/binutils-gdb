@@ -1182,7 +1182,7 @@ value_actual_type (struct value *value, int resolve_simple_types,
     {
       /* If result's target type is TYPE_CODE_STRUCT, proceed to
 	 fetch its rtti type.  */
-      if ((result->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (result))
+      if (result->is_pointer_or_reference ()
 	  && (check_typedef (TYPE_TARGET_TYPE (result))->code ()
 	      == TYPE_CODE_STRUCT)
 	  && !value_optimized_out (value))
@@ -2778,8 +2778,7 @@ value_as_address (struct value *val)
      converted to pointers; usually, the ABI doesn't either, but
      ABI-specific code is a more reasonable place to handle it.  */
 
-  if (value_type (val)->code () != TYPE_CODE_PTR
-      && !TYPE_IS_REFERENCE (value_type (val))
+  if (!value_type (val)->is_pointer_or_reference ()
       && gdbarch_integer_to_address_p (gdbarch))
     return gdbarch_integer_to_address (gdbarch, value_type (val),
 				       value_contents (val));
@@ -3726,8 +3725,7 @@ readjust_indirect_value_type (struct value *value, struct type *enc_type,
 			      struct value *original_value,
 			      CORE_ADDR original_value_address)
 {
-  gdb_assert (original_type->code () == TYPE_CODE_PTR
-	      || TYPE_IS_REFERENCE (original_type));
+  gdb_assert (original_type->is_pointer_or_reference ());
 
   struct type *original_target_type = TYPE_TARGET_TYPE (original_type);
   gdb::array_view<const gdb_byte> view;

@@ -400,7 +400,7 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
       type = value_type (val);
       type = check_typedef (type);
 
-      if (((type->code () == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
+      if (type->is_pointer_or_reference ()
 	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
 	{
 	  struct value *target;
@@ -851,7 +851,7 @@ value_has_field (struct value *v, PyObject *field)
     {
       val_type = value_type (v);
       val_type = check_typedef (val_type);
-      if (TYPE_IS_REFERENCE (val_type) || val_type->code () == TYPE_CODE_PTR)
+      if (val_type->is_pointer_or_reference ())
 	val_type = check_typedef (TYPE_TARGET_TYPE (val_type));
 
       type_code = val_type->code ();

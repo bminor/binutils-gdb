@@ -574,8 +574,7 @@ cplus_number_of_children (const struct varobj *var)
       if (opts.objectprint)
 	{
 	  value = var->value.get ();
-	  lookup_actual_type = (TYPE_IS_REFERENCE (var->type)
-				|| var->type->code () == TYPE_CODE_PTR);
+	  lookup_actual_type = var->type->is_pointer_or_reference ();
 	}
       adjust_value_for_child_access (&value, &type, NULL, lookup_actual_type);
 
@@ -611,8 +610,7 @@ cplus_number_of_children (const struct varobj *var)
 	  const struct varobj *parent = var->parent;
 
 	  value = parent->value.get ();
-	  lookup_actual_type = (TYPE_IS_REFERENCE (parent->type)
-				|| parent->type->code () == TYPE_CODE_PTR);
+	  lookup_actual_type = parent->type->is_pointer_or_reference ();
 	}
       adjust_value_for_child_access (&value, &type, NULL, lookup_actual_type);
 
@@ -716,8 +714,7 @@ cplus_describe_child (const struct varobj *parent, int index,
 
   var = (CPLUS_FAKE_CHILD (parent)) ? parent->parent : parent;
   if (opts.objectprint)
-    lookup_actual_type = (TYPE_IS_REFERENCE (var->type)
-			  || var->type->code () == TYPE_CODE_PTR);
+    lookup_actual_type = var->type->is_pointer_or_reference ();
   value = var->value.get ();
   type = varobj_get_value_type (var);
   if (cfull_expression)

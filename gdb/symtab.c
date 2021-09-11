@@ -2068,7 +2068,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 	  /* I'm not really sure that type of this can ever
 	     be typedefed; just be safe.  */
 	  t = check_typedef (t);
-	  if (t->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
+	  if (t->is_pointer_or_reference ())
 	    t = TYPE_TARGET_TYPE (t);
 
 	  if (t->code () != TYPE_CODE_STRUCT

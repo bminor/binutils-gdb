@@ -388,14 +388,6 @@ language_info ()
 }
 
 
-/* Returns non-zero if the value is a pointer type.  */
-int
-pointer_type (struct type *type)
-{
-  return type->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type);
-}
-
-
 /* This page contains functions that return info about
    (struct value) values used in GDB.  */
 

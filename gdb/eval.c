@@ -1596,12 +1596,10 @@ eval_op_ind (struct type *expect_type, struct expression *exp,
 	 There is a risk that this dereference will have side-effects
 	 in the inferior, but being able to print accurate type
 	 information seems worth the risk. */
-      if ((type->code () != TYPE_CODE_PTR
-	   && !TYPE_IS_REFERENCE (type))
+      if (!type->is_pointer_or_reference ()
 	  || !is_dynamic_type (TYPE_TARGET_TYPE (type)))
 	{
-	  if (type->code () == TYPE_CODE_PTR
-	      || TYPE_IS_REFERENCE (type)
+	  if (type->is_pointer_or_reference ()
 	      /* In C you can dereference an array to get the 1st elt.  */
 	      || type->code () == TYPE_CODE_ARRAY)
 	    return value_zero (TYPE_TARGET_TYPE (type),
@@ -2706,8 +2704,7 @@ unop_ind_base_operation::evaluate_for_sizeof (struct expression *exp,
   value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
 						  EVAL_AVOID_SIDE_EFFECTS);
   struct type *type = check_typedef (value_type (val));
-  if (type->code () != TYPE_CODE_PTR
-      && !TYPE_IS_REFERENCE (type)
+  if (!type->is_pointer_or_reference ()
       && type->code () != TYPE_CODE_ARRAY)
     error (_("Attempt to take contents of a non-pointer value."));
   type = TYPE_TARGET_TYPE (type);

@@ -544,7 +544,7 @@ whatis_exp (const char *exp, int show)
   get_user_print_options (&opts);
   if (val != NULL && opts.objectprint)
     {
-      if (((type->code () == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
+      if (type->is_pointer_or_reference ()
 	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
 	real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
       else if (type->code () == TYPE_CODE_STRUCT)

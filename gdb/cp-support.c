@@ -1335,8 +1335,7 @@ add_symbol_overload_list_adl_namespace (struct type *type,
   const char *type_name;
   int i, prefix_len;
 
-  while (type->code () == TYPE_CODE_PTR
-	 || TYPE_IS_REFERENCE (type)
+  while (type->is_pointer_or_reference ()
 	 || type->code () == TYPE_CODE_ARRAY
 	 || type->code () == TYPE_CODE_TYPEDEF)
     {

@@ -4774,7 +4774,7 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
       struct type *t2 = arg;
 
       /* For pointers and references, compare target type.  */
-      if (parm->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (parm))
+      if (parm->is_pointer_or_reference ())
 	{
 	  t1 = TYPE_TARGET_TYPE (parm);
 	  t2 = TYPE_TARGET_TYPE (arg);

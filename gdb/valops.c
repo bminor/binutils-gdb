@@ -2335,7 +2335,7 @@ value_struct_elt (struct value **argp,
 
   /* Follow pointers until we get to a non-pointer.  */
 
-  while (t->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
+  while (t->is_pointer_or_reference ())
     {
       *argp = value_ind (*argp);
       /* Don't coerce fn pointer to fn and then back again!  */
@@ -2422,7 +2422,7 @@ value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
 
   t = check_typedef (value_type (*argp));
 
-  while (t->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
+  while (t->is_pointer_or_reference ())
     {
       *argp = value_ind (*argp);
       if (check_typedef (value_type (*argp))->code () != TYPE_CODE_FUNC)
@@ -2575,7 +2575,7 @@ value_find_oload_method_list (struct value **argp, const char *method,
   t = check_typedef (value_type (*argp));
 
   /* Code snarfed from value_struct_elt.  */
-  while (t->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
+  while (t->is_pointer_or_reference ())
     {
       *argp = value_ind (*argp);
       /* Don't coerce fn pointer to fn and then back again!  */
@@ -2969,8 +2969,7 @@ find_overload_match (gdb::array_view<value *> args,
       struct type *objtype = check_typedef (obj_type);
 
       if (temp_type->code () != TYPE_CODE_PTR
-	  && (objtype->code () == TYPE_CODE_PTR
-	      || TYPE_IS_REFERENCE (objtype)))
+	  && objtype->is_pointer_or_reference ())
 	{
 	  temp = value_addr (temp);
 	}
