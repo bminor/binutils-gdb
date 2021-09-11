@@ -19990,6 +19990,26 @@ get_netbsd_elfcore_note_type (Filedata * filedata, unsigned e_type)
 }
 
 static const char *
+get_openbsd_elfcore_note_type (Filedata * filedata, unsigned e_type)
+{
+  switch (e_type)
+    {
+    case NT_OPENBSD_PROCINFO:
+      return _("OpenBSD procinfo structure");
+    case NT_OPENBSD_AUXV:
+      return _("OpenBSD ELF auxiliary vector data");
+    case NT_OPENBSD_REGS:
+      return _("OpenBSD regular registers");
+    case NT_OPENBSD_FPREGS:
+      return _("OpenBSD floating point registers");
+    case NT_OPENBSD_WCOOKIE:
+      return _("OpenBSD window cookie");
+    }
+
+  return get_note_type (filedata, e_type);
+}
+
+static const char *
 get_stapsdt_note_type (unsigned e_type)
 {
   static char buff[64];
@@ -20769,6 +20789,10 @@ process_note (Elf_Internal_Note *  pnote,
   else if (startswith (pnote->namedata, "PaX"))
     /* NetBSD-specific core file notes.  */
     return process_netbsd_elf_note (pnote);
+
+  else if (startswith (pnote->namedata, "OpenBSD"))
+    /* OpenBSD-specific core file notes.  */
+    nt = get_openbsd_elfcore_note_type (filedata, pnote->type);
 
   else if (startswith (pnote->namedata, "SPU/"))
     {
