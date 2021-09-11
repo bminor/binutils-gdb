@@ -1,0 +1,7 @@
+@node MCORE
+@chapter MCORE
+Motorola's microRISC M·CORE architecture.
+
+@node MCORE Environment Support
+@section Environment Support
+Only the virtual environment is supported.

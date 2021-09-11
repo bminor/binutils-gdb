@@ -1,0 +1,1166 @@
+@node Blackfin
+@chapter Blackfin
+Analog Devices Inc's 32-bit Blackfin RISC processor.
+
+@node Blackfin ISA Support
+@section ISA Support
+The BF535 is not supported and never will be.
+
+BF5xx CPUs should be fully supported for all BF5xx CPUs.
+
+BF60x should be OK, but it's in-progress.
+
+BF70x has not been evaluated at all.  It might work, it might not.
+
+@node Blackfin Custom Instructions
+@section Custom Instrutions
+A few debug instructions are provided to assist developers.  These use invalid
+opcode ranges, so if executed on real hardware, they'll trigger undefined
+instruction exceptions.
+
+The GNU assembler supports these and will generate the right opcodes.
+
+@multitable @columnfractions .4 .6
+@headitem Instruction @tab Description
+@item @code{DBG @var{register}}
+@tab Dump the specified register name and value.
+@item @code{ABORT}
+@tab Halt the simulator as if an error occurred.
+@item @code{HLT}
+@tab Halt the simulator normally.
+@item @code{OUTC @var{dreg}}
+@tab Output the register character to stdout.
+@item @code{DBGHALT}
+@tab Unsupported.
+@item @code{DBGCMPLX @var{register}}
+@tab Unsupported.
+@item @code{DBG}
+@tab Unsupported.
+@item @code{PRNT @var{register}}
+@tab Unsupported.
+@end multitable
+
+@node Blackfin Environment Support
+@section Environment Support
+All environments are fully supported: virtual, user, operating.
+
+@node Blackfin Virtual Environment Syscall ABI
+@subsection Virtual Environment Syscall ABI
+The syscall ABI, as used by @value{libgloss} in the virtual environment, uses
+the interface defined in the following table.
+
+@multitable @columnfractions .2 .3 .5
+@headitem Field @tab Code/Register @tab Description
+@item instruction
+@tab @center @code{EXCPT 0;}
+@tab The assembly instruction to invoke the syscall handler.
+@item (in) syscall NR
+@tab @center @code{P0}
+@tab The system call number to select which function to run.
+@item (in) arguments
+@tab @center @code{R0}
+@tab A pointer to an array of 32-bit integers holding the syscall arguments.
+@item (in) arg 1
+@tab @center @code{((long*)R0)[0]}
+@tab The first syscall argument.
+@item (in) arg 2
+@tab @center @code{((long*)R0)[1]}
+@tab The second syscall argument.
+@item (in) arg 3
+@tab @center @code{((long*)R0)[2]}
+@tab The third syscall argument.
+@item (in) arg 4
+@tab @center @code{((long*)R0)[3]}
+@tab The fourth syscall argument.
+@item (in) arg 5
+@tab @center @code{((long*)R0)[4]}
+@tab The fifth syscall argument.
+@item (in) arg 6
+@tab @center @code{((long*)R0)[5]}
+@tab The sixth syscall argument.
+@item (out) return 1
+@tab @center @code{R0}
+@tab The first return value (most commonly used).
+@item (out) return 2
+@tab @center @code{R1}
+@tab The second return value (e.g. for 64-bit values).
+@item (out) error
+@tab @center @code{R2}
+@tab Whether an error occurred.
+@end multitable
+
+@node Blackfin Models
+@section CPU Models
+The Blackfin port includes support for many CPU models that match the stock
+ones commercially available.  Selecting a specific SoC with @option{--model}
+will construct all the corresponding devices models (peripherals) and memory
+layouts (e.g. L1 caches) so you don't have to.
+
+The BF537 is the default SoC as one of the most successful & common models on
+the market (at least at the time of the development of this port).
+
+If you want a bare environment to completely construct your own synthetic CPU
+(e.g. for prototyping a new SoC combination), use the BF500 model.
+
+@multitable @columnfractions .1 .1 .8
+@headitem Model @tab sirevs @tab Description
+@item @center bf000
+@tab 0
+@tab An ISA-only Blackfin cpu with no device models.  This means no Core or
+System MMRs will be mapped, nor any L1/L2 caches (other than the scratchpad
+SRAM).
+@item @center bf504
+@tab 0
+@tab The BF504 from the BF50x family.
+@item @center bf506
+@tab 0
+@tab The BF506 from the BF50x family.
+@item @center bf512
+@tab 0 1 2
+@tab The BF512 from the BF51x family.
+@item @center bf514
+@tab 0 1 2
+@tab The BF514 from the BF51x family.
+@item @center bf516
+@tab 0 1 2
+@tab The BF516 from the BF51x family.
+@item @center bf518
+@tab 0 1 2
+@tab The BF518 from the BF51x family.
+@item @center bf522
+@tab 0 1 2
+@tab The BF522 & BF522C from the BF52x family.
+@item @center bf523
+@tab 0 1 2
+@tab The BF523 & BF523C from the BF52x family.
+@item @center bf524
+@tab 0 1 2
+@tab The BF524 & BF524C from the BF52x family.
+@item @center bf525
+@tab 0 1 2
+@tab The BF525 & BF525C from the BF52x family.
+@item @center bf526
+@tab 0 1 2
+@tab The BF526 & BF526C from the BF52x family.
+@item @center bf527
+@tab 0 1 2
+@tab The BF527 & BF527C from the BF52x family.
+@item @center bf531
+@tab 1 2 3 4 5 6
+@tab The BF531 from the BF533 family.
+@item @center bf532
+@tab 1 2 3 4 5 6
+@tab The BF532 from the BF533 family.
+@item @center bf533
+@tab 1 2 3 4 5 6
+@tab The BF533 from the BF533 family.
+@item @center bf534
+@tab 0 1 2 3
+@tab The BF534 from the BF537 family.
+@item @center bf536
+@tab 0 1 2 3
+@tab The BF536 from the BF537 family.
+@item @center bf537
+@tab 0 1 2 3
+@tab The BF537 from the BF537 family.
+@item @center bf538
+@tab 0 1 2 3 4 5
+@tab The BF538 & BF538F.
+@item @center bf539
+@tab 0 1 2 3 4 5
+@tab The BF539 & BF539F.
+@item @center bf542
+@tab 0 1 2 4
+@tab The BF542 from the BF54x family.
+@item @center bf544
+@tab 0 1 2 4
+@tab The BF544 from the BF54x family.
+@item @center bf547
+@tab 0 1 2 4
+@tab The BF547 from the BF54x family.
+@item @center bf548
+@tab 0 1 2 4
+@tab The BF548 from the BF54x family.
+@item @center bf549
+@tab 0 1 2 4
+@tab The BF549 from the BF54x family.
+@item @center bf561
+@tab 5
+@tab The BF561 (dual-core not supported currently).
+@item @center bf592
+@tab 0 1
+@tab The BF592.
+@end multitable
+
+@node Blackfin Silicon Revisions (sirevs)
+@section Silicon Revisions (sirevs)
+The @option{--sirev} option allows for specifying the silicon revision of the
+core.  The simulator itself does not use this information to change behavior,
+only to expose it to the running software (via the @code{CHIPID} MMR).
+
+More specifically, the simulator does @b{not} implement any hardware anomalies.
+It provides a simulation of the ideal environment---one that is not buggy.
+
+The silicon revision does implicitly select the bfrom that is mapped in.
+@xref{Blackfin ROMs (bfroms)}.
+
+If no @option{--sirev} is specified, then the latest known version for the
+specified @option{--model} (@xref{Blackfin Models}) is used.
+
+@node Blackfin ROMs (bfroms)
+@section Blackfin ROMs (bfroms)
+All Blackfin CPUs come with an on-chip ROM referred to as "the Blackfin ROM"
+or "bfrom" for short.  It is (usually) the first thing executed at power-on
+as a first stage boot loader.
+
+The ROM is drastically different between processor families, and may differ
+even between silicon revisions.
+
+Dumps of many CPU & silicon revisions are available, but not shipped as part
+of the GNU Simulator due to unclear licensing terms.  Instead, a stub (zero
+filled) ROM is mapped into the corresponding memory region.
+
+Here are a list of known issues when using a stub ROM.
+
+@itemize
+@item It is not possible to boot LDR (Blackfin loader) files directly.
+Fortunately, pretty much no one ever wants to do that, and instead will execute
+Blackfin ELFs directly.  The simulator will have no problem loading them.
+
+@item Software reset (via the bfrom's @code{SYSCTRL_SOFTRESET}) for some
+processors will not work.  Attempting to do a software reset will most likely
+result in hardware exceptions & double faults.
+
+@item Accessing OTP (available on some processors) via the bfrom's APIs will
+not work.  Attempting to do so will most likely result in hardware exceptions &
+double faults.  @xref{bfin_otp}.
+
+@end itemize
+
+@node Blackfin Device Models
+@section Device Models
+Many peripherals are available.
+
+Many properties and behaviors are standardized across models:
+@itemize @bullet
+@item @code{type} is used to communicate which variant to use based on family.
+Not all models change behavior across families, so this might not be checked.
+For example, the @ref{bfin_sic} uses this to determine register layout and
+default values.
+@item @code{reg} length should match exactly the expected space that the block
+of registers require.  Short or excess mappings are not supported.
+@item Unaligned MMR access is not allowed and will trigger exceptions or
+hardware error interrupts (to match real hardware).
+@end itemize
+
+@node bfin_cec
+@subsection bfin_cec
+@dvindex bfin_cec
+@dvindex Blackfin CEC
+@dvindex Blackfin Core Event Controller
+The Blackfin Core Event Controller (CEC) model.
+
+Attaching device:
+@example
+/core/bfin_cec
+/core/bfin_cec/reg 0xffe02100 0x14
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{emu} (input): Emulation Interrupt (e.g. JTAG)
+@item @code{rst} (input): Reset Interrupt (hardware pin or watchdog)
+@item @code{nmi} (input): Nonmaskable Interrupt (hardware pin or watchdog)
+@item @code{evx} (input): Hardware Exceptions
+@item @code{ivhw} (input): Hardware Error Interrupt
+@item @code{ivtmr} (input): Core Timer Interrupt
+@item @code{ivg7} (input): General-purpose Core Interrupt
+@item @code{ivg8} (input): General-purpose Core Interrupt
+@item @code{ivg9} (input): General-purpose Core Interrupt
+@item @code{ivg10} (input): General-purpose Core Interrupt
+@item @code{ivg11} (input): General-purpose Core Interrupt
+@item @code{ivg12} (input): General-purpose Core Interrupt
+@item @code{ivg13} (input): General-purpose Core Interrupt
+@item @code{ivg14} (input): General-purpose Core Interrupt
+@item @code{ivg15} (input): General-purpose Core Interrupt
+@end itemize
+
+@node bfin_ctimer
+@subsection bfin_ctimer
+@dvindex bfin_ctimer
+@dvindex Blackfin Timers
+@dvindex Blackfin Core Timer
+The Blackfin Core Timer model.
+
+Attaching device:
+@example
+/core/bfin_ctimer
+/core/bfin_ctimer/reg 0xffe03000 0x10
+# Connect ctimer's ivtmr output port to cec's ivtmr input port.
+/core/bfin_ctimer > ivtmr ivtmr /core/bfin_cec
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{ivtmr} (output): Timer expired
+@end itemize
+
+@node bfin_dma
+@subsection bfin_dma
+@dvindex bfin_dma
+@dvindex Blackfin DMA
+@dvindex Blackfin Direct Memory Access Controller
+The Blackfin Direct Memory Access (DMA) Controller model.
+
+Ports:
+@itemize @bullet
+@item @code{di} (output): DMA finished
+@end itemize
+
+@node bfin_dmac
+@subsection bfin_dmac
+@dvindex bfin_dmac
+@dvindex Blackfin DMA
+@dvindex Blackfin DMAC
+@dvindex Blackfin Direct Memory Access Channel
+The Blackfin Direct Memory Access (DMA) Channel model.
+
+BF50x Ports:
+@itemize @bullet
+@item @code{ppi@@0} (input):
+@item @code{rsi} (input):
+@item @code{sport@@0_rx} (input):
+@item @code{sport@@0_tx} (input):
+@item @code{sport@@1_tx} (input):
+@item @code{sport@@1_rx} (input):
+@item @code{spi@@0} (input):
+@item @code{spi@@1} (input):
+@item @code{uart2@@0_rx} (input):
+@item @code{uart2@@0_tx} (input):
+@item @code{uart2@@1_rx} (input):
+@item @code{uart2@@1_tx} (input):
+@end itemize
+
+BF51x Ports:
+@itemize @bullet
+@item @code{ppi@@0} (input):
+@item @code{emac_rx} (input):
+@item @code{emac_tx} (input):
+@item @code{sport@@0_rx} (input):
+@item @code{sport@@0_tx} (input):
+@c @item @code{rsi} (input):
+@item @code{sport@@1_tx} (input):
+@c @item @code{spi@@1} (input):
+@item @code{sport@@1_rx} (input):
+@item @code{spi@@0} (input):
+@item @code{uart@@0_rx} (input):
+@item @code{uart@@0_tx} (input):
+@item @code{uart@@1_rx} (input):
+@item @code{uart@@1_tx} (input):
+@end itemize
+
+BF51x Ports:
+@itemize @bullet
+@item @code{ppi@@0} (input):
+@c @item @code{nfc} (input):
+@item @code{emac_rx} (input):
+@c @item @code{hostdp} (input):
+@item @code{emac_tx} (input):
+@c @item @code{nfc} (input):
+@item @code{sport@@0_tx} (input):
+@item @code{sport@@0_rx} (input):
+@item @code{sport@@1_tx} (input):
+@item @code{sport@@1_rx} (input):
+@item @code{spi} (input):
+@item @code{uart@@0_tx} (input):
+@item @code{uart@@0_rx} (input):
+@item @code{uart@@1_tx} (input):
+@item @code{uart@@1_rx} (input):
+@end itemize
+
+BF533 Ports:
+@itemize @bullet
+@item @code{ppi@@0} (input):
+@item @code{sport@@0_tx} (input):
+@item @code{sport@@0_rx} (input):
+@item @code{sport@@1_tx} (input):
+@item @code{sport@@1_rx} (input):
+@item @code{spi} (input):
+@item @code{uart@@0_tx} (input):
+@item @code{uart@@0_rx} (input):
+@end itemize
+
+BF537 Ports:
+@itemize @bullet
+@item @code{ppi@@0} (input):
+@item @code{emac_rx} (input):
+@item @code{emac_tx} (input):
+@item @code{sport@@0_tx} (input):
+@item @code{sport@@0_rx} (input):
+@item @code{sport@@1_tx} (input):
+@item @code{sport@@1_rx} (input):
+@item @code{spi} (input):
+@item @code{uart@@0_tx} (input):
+@item @code{uart@@0_rx} (input):
+@item @code{uart@@1_tx} (input):
+@item @code{uart@@1_rx} (input):
+@end itemize
+
+BF538 Ports (DMAC0):
+@itemize @bullet
+@item @code{ppi@@0} (input):
+@item @code{sport@@0_rx} (input):
+@item @code{sport@@0_tx} (input):
+@item @code{sport@@1_rx} (input):
+@item @code{sport@@1_tx} (input):
+@item @code{spi@@0} (input):
+@item @code{uart@@0_rx} (input):
+@item @code{uart@@0_tx} (input):
+@end itemize
+
+BF538 Ports (DMAC1):
+@itemize @bullet
+@item @code{sport@@2_rx} (input):
+@item @code{sport@@2_tx} (input):
+@item @code{sport@@3_rx} (input):
+@item @code{sport@@3_tx} (input):
+@item @code{spi@@1} (input):
+@item @code{spi@@2} (input):
+@item @code{uart@@1_rx} (input):
+@item @code{uart@@1_tx} (input):
+@item @code{uart@@2_rx} (input):
+@item @code{uart@@2_tx} (input):
+@end itemize
+
+BF54x Ports (DMAC0):
+@itemize @bullet
+@item @code{sport@@0_rx} (input):
+@item @code{sport@@0_tx} (input):
+@item @code{sport@@1_rx} (input):
+@item @code{sport@@1_tx} (input):
+@item @code{spi@@0} (input):
+@item @code{spi@@1} (input):
+@item @code{uart2@@0_rx} (input):
+@item @code{uart2@@0_tx} (input):
+@item @code{uart2@@1_rx} (input):
+@item @code{uart2@@1_tx} (input):
+@item @code{atapi} (input):
+@item @code{atapi} (input):
+@end itemize
+
+BF54x Ports (DMAC1):
+@itemize @bullet
+@item @code{eppi@@0} (input):
+@item @code{eppi@@1} (input):
+@item @code{eppi@@2} (input):
+@item @code{pixc} (input):
+@item @code{pixc} (input):
+@item @code{pixc} (input):
+@item @code{sport@@2_rx} (input):
+@item @code{sport@@2_tx} (input):
+@item @code{sport@@3_rx} (input):
+@item @code{sport@@3_tx} (input):
+@item @code{sdh} (input):
+@c @item @code{nfc} (input):
+@item @code{spi@@2} (input):
+@item @code{uart2@@2_rx} (input):
+@item @code{uart2@@2_tx} (input):
+@item @code{uart2@@3_rx} (input):
+@item @code{uart2@@3_tx} (input):
+@end itemize
+
+BF561 Ports (DMAC0):
+@itemize @bullet
+@item @code{sport@@0_rx} (input):
+@item @code{sport@@0_tx} (input):
+@item @code{sport@@1_rx} (input):
+@item @code{sport@@1_tx} (input):
+@item @code{spi@@0} (input):
+@item @code{uart@@0_rx} (input):
+@item @code{uart@@0_tx} (input):
+@end itemize
+
+BF561 Ports (DMAC1):
+@itemize @bullet
+@item @code{ppi@@0} (input):
+@item @code{ppi@@1} (input):
+@end itemize
+
+BF59x Ports:
+@itemize @bullet
+@item @code{ppi@@0} (input):
+@item @code{sport@@0_tx} (input):
+@item @code{sport@@0_rx} (input):
+@item @code{sport@@1_tx} (input):
+@item @code{sport@@1_rx} (input):
+@item @code{spi@@0} (input):
+@item @code{spi@@1} (input):
+@item @code{uart@@0_rx} (input):
+@item @code{uart@@0_tx} (input):
+@end itemize
+
+@node bfin_ebiu_amc
+@subsection bfin_ebiu_amc
+@dvindex bfin_ebiu_amc
+@dvindex Blackfin EBIU
+@dvindex Blackfin External Bus Interface Unit
+@dvindex Blackfin AMC
+@dvindex Blackfin Asynchronous Memory Controller
+The Blackfin External Bus Interface Unit (EBIU) Asynchronous Memory Controller.
+
+Attaching device:
+@example
+/core/bfin_ebiu_amc
+/core/bfin_ebiu_amc/reg 0xffc00a00 0xc
+/core/bfin_ebiu_amc/type 537
+@end example
+
+@node bfin_ebiu_ddrc
+@subsection bfin_ebiu_ddrc
+@dvindex bfin_ebiu_ddrc
+@dvindex Blackfin EBIU
+@dvindex Blackfin External Bus Interface Unit
+@dvindex Blackfin DDR
+@dvindex Blackfin DDRC
+@dvindex Blackfin Double Data Rate Memory
+The Blackfin External Bus Interface Unit (EBIU) DDR Controller (DDRC) model.
+
+Attaching device:
+@example
+/core/bfin_ebiu_ddrc
+/core/bfin_ebiu_ddrc/reg 0xffc00a20 0xb0
+/core/bfin_ebiu_ddrc/type 548
+@end example
+
+@node bfin_ebiu_sdc
+@subsection bfin_ebiu_sdc
+@dvindex bfin_ebiu_sdc
+@dvindex Blackfin EBIU
+@dvindex Blackfin External Bus Interface Unit
+@dvindex Blackfin SDRAM
+@dvindex Blackfin Synchronous Dynamic Random-Access Memory
+The Blackfin External Bus Interface Unit (EBIU) SDRAM Controller (SDC) model.
+
+Attaching device:
+@example
+/core/bfin_ebiu_sdc
+/core/bfin_ebiu_sdc/reg 0xffc00a10 0x10
+/core/bfin_ebiu_sdc/type 537
+@end example
+
+@node bfin_emac
+@subsection bfin_emac
+@dvindex bfin_emac
+@dvindex Blackfin EMAC
+@dvindex Blackfin Ethernet Media Access Controller
+The Blackfin Ethernet Media Access Controller (EMAC) model.
+
+Attaching device:
+@example
+/core/bfin_emac
+/core/bfin_emac/reg 0xffc03000 0x200
+/core/bfin_emac/type 537
+/core/bfin_emac > rx emac_rx /core/bfin_dmac@@0
+/core/bfin_emac > tx emac_tx /core/bfin_dmac@@0
+/core/bfin_emac > stat int0 /core/glue-or@@2
+/core/bfin_emac/eth_phy
+/core/bfin_emac/eth_phy/reg 0 0x20
+/core/bfin_emac/eth_phy/type 537
+/core/glue-or@@2
+/core/glue-or@@2/interrupt-ranges 0x0 0x8
+/core/glue-or@@2 > int0 int2@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{tx} (output): Transmit finished
+@item @code{rx} (output): Receive finished
+@item @code{stat} (output): Status changed
+@end itemize
+
+@node bfin_eppi
+@subsection bfin_eppi
+@dvindex bfin_eppi
+@dvindex Blackfin PPI
+@dvindex Blackfin Parallel Port Interface
+@dvindex Blackfin EPPI
+@dvindex Blackfin Enhanced Parallel Port Interface
+The Blackfin Enhanced Parallel Port Interface (EPPI) model.
+
+Attaching device:
+@example
+/core/bfin_eppi@@0
+/core/bfin_eppi@@0/reg 0xffc01000 0x40
+/core/bfin_eppi@@0/type 548
+/core/bfin_eppi@@0 > stat int2@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{stat} (output): Status changed
+@end itemize
+
+@node bfin_evt
+@subsection bfin_evt
+@dvindex bfin_evt
+@dvindex Blackfin EVT
+@dvindex Blackfin Event Vector Table
+The Blackfin Event Vector Table (EVT) model.
+
+Attaching device:
+@example
+/core/bfin_evt
+/core/bfin_evt/reg 0xffe02000 0x40
+@end example
+
+@node bfin_gpio
+@subsection bfin_gpio
+@dvindex bfin_gpio
+@dvindex Blackfin GPIO
+@dvindex Blackfin General Purpose Ports
+The Blackfin General Purpose Ports (GPIO) model for "older" systems.
+
+Attaching device:
+@example
+/core/bfin_gpio@@5
+/core/bfin_gpio@@5/reg 0xffc00700 0x44
+/core/bfin_gpio@@5/type 537
+/core/bfin_gpio@@5 > mask_b int0 /core/glue-or@@0x1f
+/core/bfin_gpio@@5 > mask_a int0 /core/glue-or@@0x1b
+/core/glue-or@@0x1f
+/core/glue-or@@0x1f/interrupt-ranges 0x0 0x2
+/core/glue-or@@0x1f > int0 int31@@0 /core/bfin_sic
+/core/glue-or@@0x1b
+/core/glue-or@@0x1b/interrupt-ranges 0x0 0x2
+/core/glue-or@@0x1b > int0 int27@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{mask_a} (output):
+@item @code{mask_b} (output):
+@item @code{p0} (bidirectional):
+@item @code{p1} (bidirectional):
+@item @code{p2} (bidirectional):
+@item @code{p3} (bidirectional):
+@item @code{p4} (bidirectional):
+@item @code{p5} (bidirectional):
+@item @code{p6} (bidirectional):
+@item @code{p7} (bidirectional):
+@item @code{p8} (bidirectional):
+@item @code{p9} (bidirectional):
+@item @code{p10} (bidirectional):
+@item @code{p11} (bidirectional):
+@item @code{p12} (bidirectional):
+@item @code{p13} (bidirectional):
+@item @code{p14} (bidirectional):
+@item @code{p15} (bidirectional):
+@end itemize
+
+@node bfin_gpio2
+@subsection bfin_gpio2
+@dvindex bfin_gpio2
+@dvindex Blackfin GPIO
+@dvindex Blackfin General Purpose Ports
+The Blackfin General Purpose Ports (GPIO) model for "new style" BF54x.
+
+Attaching device:
+@example
+/core/bfin_gpio2@@0
+/core/bfin_gpio2@@0/reg 0xffc014c0 0x20
+/core/bfin_gpio2@@0/type 548
+/core/bfin_gpio2@@0 > p15 piq15@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p14 piq14@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p13 piq13@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p12 piq12@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p11 piq11@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p10 piq10@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p9 piq9@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p8 piq8@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p7 piq7@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p6 piq6@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p5 piq5@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p4 piq4@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p3 piq3@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p2 piq2@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p1 piq1@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p0 piq0@@0 /core/bfin_pint@@1
+/core/bfin_gpio2@@0 > p15 piq15@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p14 piq14@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p13 piq13@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p12 piq12@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p11 piq11@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p10 piq10@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p9 piq9@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p8 piq8@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p7 piq7@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p6 piq6@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p5 piq5@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p4 piq4@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p3 piq3@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p2 piq2@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p1 piq1@@0 /core/bfin_pint@@0
+/core/bfin_gpio2@@0 > p0 piq0@@0 /core/bfin_pint@@0
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{p0} (bidirectional):
+@item @code{p1} (bidirectional):
+@item @code{p2} (bidirectional):
+@item @code{p3} (bidirectional):
+@item @code{p4} (bidirectional):
+@item @code{p5} (bidirectional):
+@item @code{p6} (bidirectional):
+@item @code{p7} (bidirectional):
+@item @code{p8} (bidirectional):
+@item @code{p9} (bidirectional):
+@item @code{p10} (bidirectional):
+@item @code{p11} (bidirectional):
+@item @code{p12} (bidirectional):
+@item @code{p13} (bidirectional):
+@item @code{p14} (bidirectional):
+@item @code{p15} (bidirectional):
+@end itemize
+
+@node bfin_gptimer
+@subsection bfin_gptimer
+@dvindex bfin_gptimer
+@dvindex Blackfin Timers
+@dvindex Blackfin General Purpose Timers
+The Blackfin General Purpose Timers (GPtimer) model.
+
+Attaching device:
+@example
+/core/bfin_gptimer@@0
+/core/bfin_gptimer@@0/reg 0xffc00600 0x10
+/core/bfin_gptimer@@0/type 537
+/core/bfin_gptimer@@0 > stat int19@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{stat} (output):
+@end itemize
+
+@node bfin_jtag
+@subsection bfin_jtag
+@dvindex bfin_jtag
+@dvindex Blackfin JTAG
+@dvindex Blackfin ICE
+@dvindex Blackfin Joint Test Action Group
+The Blackfin JTAG model.
+
+Attaching device:
+@example
+/core/bfin_jtag
+/core/bfin_jtag/reg 0xffe05000 0xc
+@end example
+
+@code{DSPID} is initialized from the @option{--model}.
+
+@node bfin_mmu
+@subsection bfin_mmu
+@dvindex bfin_mmu
+@dvindex Blackfin MPU
+@dvindex Blackfin Memory Protection Unit
+@dvindex Blackfin MMU
+@dvindex Blackfin Memory Management Unit
+The Blackfin Memory Management Unit (MMU) model.
+
+Attaching device:
+@example
+/core/bfin_mmu
+/core/bfin_mmu/reg 0xffe00000 0x2000
+@end example
+
+@node bfin_nfc
+@subsection bfin_nfc
+@dvindex bfin_nfc
+@dvindex Blackfin NFC
+@dvindex Blackfin NAND
+@dvindex Blackfin NAND Flash Memory Controller
+The Blackfin NAND Flash Memory Controller (NFC) model.
+
+Attaching device:
+@example
+/core/bfin_nfc
+/core/bfin_nfc/reg 0xffc03b00 0x50
+/core/bfin_nfc/type 548
+/core/bfin_nfc > stat int28@@1 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{stat} (output):
+@end itemize
+
+@node bfin_otp
+@subsection bfin_otp
+@dvindex bfin_otp
+@dvindex Blackfin OTP
+@dvindex Blackfin One-Time Programmable Memory
+The Blackfin One-Time Programmable Memory (OTP) model.
+
+Attaching device:
+@example
+/core/bfin_otp
+/core/bfin_otp/reg 0xffc03600 0xa0
+/core/bfin_otp/type 527
+/core/bfin_otp > stat int26@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{stat} (output):
+@end itemize
+
+@node bfin_pfmon
+@subsection bfin_pfmon
+@dvindex bfin_pfmon
+@dvindex Blackfin Performance Monitor
+The Blackfin Performance Monitor model.
+
+Attaching device:
+@example
+/core/bfin_pfmon
+/core/bfin_pfmon/reg 0xffe08000 0x108
+@end example
+
+@node bfin_pint
+@subsection bfin_pint
+@dvindex bfin_pint
+@dvindex Blackfin Interrupt Controller
+@dvindex Blackfin Pin Interrupt Controller
+The Blackfin Pin Interrupt (PINT) model.
+
+Attaching device:
+@example
+/core/bfin_pint@@0
+/core/bfin_pint@@0/reg 0xffc01400 0x28
+/core/bfin_pint@@0/type 548
+/core/bfin_pint@@0 > stat int19@@0 /core/bfin_sic
+@end example
+
+Ports (replace @code{@@X} with @code{@@0...@@7}):
+@itemize @bullet
+@item @code{stat} (output):
+@item @code{piq0@@X} (input):
+@item @code{piq1@@X} (input):
+@item @code{piq2@@X} (input):
+@item @code{piq3@@X} (input):
+@item @code{piq4@@X} (input):
+@item @code{piq5@@X} (input):
+@item @code{piq6@@X} (input):
+@item @code{piq7@@X} (input):
+@item @code{piq8@@X} (input):
+@item @code{piq9@@X} (input):
+@item @code{piq10@@X} (input):
+@item @code{piq11@@X} (input):
+@item @code{piq12@@X} (input):
+@item @code{piq13@@X} (input):
+@item @code{piq14@@X} (input):
+@item @code{piq15@@X} (input):
+@item @code{piq16@@X} (input):
+@item @code{piq17@@X} (input):
+@item @code{piq18@@X} (input):
+@item @code{piq19@@X} (input):
+@item @code{piq20@@X} (input):
+@item @code{piq21@@X} (input):
+@item @code{piq22@@X} (input):
+@item @code{piq23@@X} (input):
+@item @code{piq24@@X} (input):
+@item @code{piq25@@X} (input):
+@item @code{piq26@@X} (input):
+@item @code{piq27@@X} (input):
+@item @code{piq28@@X} (input):
+@item @code{piq29@@X} (input):
+@item @code{piq30@@X} (input):
+@item @code{piq31@@X} (input):
+@end itemize
+
+@node bfin_pll
+@subsection bfin_pll
+@dvindex bfin_pll
+@dvindex Blackfin PLL
+@dvindex Blackfin Phase Lock Loop
+The Blackfin Phase Lock Loop (PLL) model.
+
+Attaching device:
+@example
+/core/bfin_pll
+/core/bfin_pll/reg 0xffc00000 0x18
+/core/bfin_pll/type 537
+/core/bfin_pll > pll int0@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{pll} (output):
+@end itemize
+
+@node bfin_ppi
+@subsection bfin_ppi
+@dvindex bfin_ppi
+@dvindex Blackfin PPI
+@dvindex Blackfin Parallel Port Interface
+The Blackfin Parallel Port Interface (PPI) model.
+
+Attaching device:
+@example
+/core/bfin_ppi@@0
+/core/bfin_ppi@@0/reg 0xffc01000 0x14
+/core/bfin_ppi@@0/type 537
+/core/bfin_ppi@@0 > stat int0 /core/glue-or@@2
+/core/glue-or@@2
+/core/glue-or@@2/interrupt-ranges 0x0 0x8
+/core/glue-or@@2 > int0 int2@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{stat} (output):
+@end itemize
+
+@node bfin_rtc
+@subsection bfin_rtc
+@dvindex bfin_rtc
+@dvindex Blackfin RTC
+@dvindex Blackfin Real Time Clock
+The Blackfin Real Time Clock (RTC) model.
+
+Attaching device:
+@example
+/core/bfin_rtc
+/core/bfin_rtc/reg 0xffc00300 0x18
+/core/bfin_rtc/type 537
+/core/bfin_rtc > rtc int7@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{rtc} (output):
+@end itemize
+
+@node bfin_sic
+@subsection bfin_sic
+@dvindex bfin_sic
+@dvindex Blackfin Interrupt Controller
+@dvindex Blackfin System Interrupt Controller
+The Blackfin System Interrupt Controller (SIC) model.
+
+Attaching device:
+@example
+/core/bfin_sic
+/core/bfin_sic/reg 0xffc00100 0x100
+/core/bfin_sic/type 537
+/core/bfin_sic > ivg15 ivg15 /core/bfin_cec
+/core/bfin_sic > ivg14 ivg14 /core/bfin_cec
+/core/bfin_sic > ivg13 ivg13 /core/bfin_cec
+/core/bfin_sic > ivg12 ivg12 /core/bfin_cec
+/core/bfin_sic > ivg11 ivg11 /core/bfin_cec
+/core/bfin_sic > ivg10 ivg10 /core/bfin_cec
+/core/bfin_sic > ivg9 ivg9 /core/bfin_cec
+/core/bfin_sic > ivg8 ivg8 /core/bfin_cec
+/core/bfin_sic > ivg7 ivg7 /core/bfin_cec
+@end example
+
+Ports (replace @code{@@X} with @code{@@0...@@2}):
+@itemize @bullet
+@item @code{ivg7} (output):
+@item @code{ivg8} (output):
+@item @code{ivg9} (output):
+@item @code{ivg10} (output):
+@item @code{ivg11} (output):
+@item @code{ivg12} (output):
+@item @code{ivg13} (output):
+@item @code{ivg14} (output):
+@item @code{ivg15} (output):
+@item @code{int0@@X} (input):
+@item @code{int1@@X} (input):
+@item @code{int2@@X} (input):
+@item @code{int3@@X} (input):
+@item @code{int4@@X} (input):
+@item @code{int5@@X} (input):
+@item @code{int6@@X} (input):
+@item @code{int7@@X} (input):
+@item @code{int8@@X} (input):
+@item @code{int9@@X} (input):
+@item @code{int10@@X} (input):
+@item @code{int11@@X} (input):
+@item @code{int12@@X} (input):
+@item @code{int13@@X} (input):
+@item @code{int14@@X} (input):
+@item @code{int15@@X} (input):
+@item @code{int16@@X} (input):
+@item @code{int17@@X} (input):
+@item @code{int18@@X} (input):
+@item @code{int19@@X} (input):
+@item @code{int20@@X} (input):
+@item @code{int21@@X} (input):
+@item @code{int22@@X} (input):
+@item @code{int23@@X} (input):
+@item @code{int24@@X} (input):
+@item @code{int25@@X} (input):
+@item @code{int26@@X} (input):
+@item @code{int27@@X} (input):
+@item @code{int28@@X} (input):
+@item @code{int29@@X} (input):
+@item @code{int30@@X} (input):
+@item @code{int31@@X} (input):
+@item @code{sup_irq@@0} (output): (BF56x only)
+@item @code{sup_irq@@1} (output): (BF56x only)
+@end itemize
+
+@node bfin_spi
+@subsection bfin_spi
+@dvindex bfin_spi
+@dvindex Blackfin SPI
+@dvindex Blackfin Serial Peripheral Interface
+The Blackfin Serial Peripheral Interface (SPI) model.
+
+Attaching device:
+@example
+/core/bfin_spi@@0
+/core/bfin_spi@@0/reg 0xffc00500 0x1c
+/core/bfin_spi@@0/type 537
+/core/bfin_spi@@0 > stat int0 /core/glue-or@@2
+/core/glue-or@@2
+/core/glue-or@@2/interrupt-ranges 0x0 0x8
+/core/glue-or@@2 > int0 int2@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{stat} (output):
+@end itemize
+
+@node bfin_trace
+@subsection bfin_trace
+@dvindex bfin_trace
+@dvindex Blackfin Trace
+@dvindex Blackfin Hardware Trace
+The Blackfin Trace (TBUF) model.
+
+While the buffer depth on real hardware is limited to 16 entries, the simulator
+allows up to 64 entries.  This can be changed at compile time by editing the
+source, but experience suggests that 64 entries is pretty good for most cases.
+
+Attaching device:
+@example
+/core/bfin_trace
+/core/bfin_trace/reg 0xffe06000 0x104
+@end example
+
+@node bfin_twi
+@subsection bfin_twi
+@dvindex bfin_twi
+@dvindex Blackfin I2C
+@dvindex Blackfin I@sup{2}C
+@dvindex Blackfin TWI
+@dvindex Blackfin Two Wire Interface
+The Blackfin Two Wire Interface (TWI) model (i.e. I2C).
+
+Attaching device:
+@example
+/core/bfin_twi@@0
+/core/bfin_twi@@0/reg 0xffc01400 0x90
+/core/bfin_twi@@0/type 537
+/core/bfin_twi@@0 > stat int9@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{stat} (output):
+@end itemize
+
+@node bfin_uart
+@subsection bfin_uart
+@dvindex bfin_uart
+@dvindex Blackfin Serial port
+@dvindex Blackfin UART
+@dvindex Blackfin Universal Asynchronous Receiver/Transmitter
+The Blackfin Universal Asynchronous Receiver/Transmitter (UART) model for
+"older" systems.
+
+Attaching device:
+@example
+/core/bfin_uart@@0
+/core/bfin_uart@@0/reg 0xffc00400 0x30
+/core/bfin_uart@@0/type 537
+/core/bfin_uart@@0 > rx uart@@0_rx /core/bfin_dmac@@0
+/core/bfin_uart@@0 > tx uart@@0_tx /core/bfin_dmac@@0
+/core/bfin_uart@@0 > stat int0 /core/glue-or@@2
+/core/glue-or@@2
+/core/glue-or@@2/interrupt-ranges 0x0 0x8
+/core/glue-or@@2 > int0 int2@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{tx} (output): Trasnmit finished
+@item @code{rx} (output): Receive finished
+@item @code{stat} (output): Status changed
+@end itemize
+
+@node bfin_uart2
+@subsection bfin_uart2
+@dvindex bfin_uart2
+@dvindex Blackfin Serial port
+@dvindex Blackfin UART
+@dvindex Blackfin Universal Asynchronous Receiver/Transmitter
+The Blackfin Universal Asynchronous Receiver/Transmitter (UART) for "new
+style" BF54x.
+
+Attaching device:
+@example
+/core/bfin_uart2@@1
+/core/bfin_uart2@@1/reg 0xffc02000 0x30
+/core/bfin_uart2@@1/type 548
+/core/bfin_uart2@@1 > rx uart2@@1_rx /core/bfin_dmac@@0
+/core/bfin_uart2@@1 > tx uart2@@1_tx /core/bfin_dmac@@0
+/core/bfin_uart2@@1 > stat int30@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{tx} (output): Trasnmit finished
+@item @code{rx} (output): Receive finished
+@item @code{stat} (output): Status changed
+@end itemize
+
+@node bfin_wdog
+@subsection bfin_wdog
+@dvindex bfin_wdog
+@dvindex Blackfin Hardware Watchdog
+@dvindex Blackfin Watchdog
+The Blackfin Watchdog (WDOG) model.
+
+Attaching device:
+@example
+/core/bfin_wdog@@0
+/core/bfin_wdog@@0/reg 0xffc00200 0xc
+/core/bfin_wdog@@0/type 537
+/core/bfin_wdog@@0 > nmi nmi /core/bfin_cec
+/core/bfin_wdog@@0 > reset rst /core/bfin_cec
+/core/bfin_wdog@@0 > gpi int23@@0 /core/bfin_sic
+@end example
+
+Ports:
+@itemize @bullet
+@item @code{reset} (output): Watchdog expiration triggers reset
+@item @code{nmi} (output): Watchdog expiration triggers nonmaskable interrupt
+@item @code{gpi} (output): Watchdog expiration triggers general purpose interrupt
+@end itemize
+
+@node bfin_wp
+@subsection bfin_wp
+@dvindex bfin_wp
+@dvindex Blackfin Watchpoint
+The Blackfin Watchpoint (WP) model.
+
+Attaching device:
+@example
+/core/bfin_wp
+/core/bfin_wp/reg 0xffe07000 0x204
+@end example

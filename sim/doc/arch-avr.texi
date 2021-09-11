@@ -1,0 +1,7 @@
+@node AVR
+@chapter AVR
+Atmel's AVR 8-bit processors.
+
+@node AVR Environment Support
+@section Environment Support
+Only the virtual environment is supported.

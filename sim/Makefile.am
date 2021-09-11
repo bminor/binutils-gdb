@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
+AUTOMAKE_OPTIONS = dejagnu foreign info-in-builddir no-dist subdir-objects
 ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 
 GNULIB_PARENT_DIR = ..
@@ -40,6 +40,7 @@ BUILT_SOURCES =
 
 CLEANFILES =
 DISTCLEANFILES =
+MAINTAINERCLEANFILES =
 MOSTLYCLEANFILES = core
 ## We build some objects ourselves directly that Automake doesn't track, so
 ## make sure all objects in subdirs get cleaned up.
@@ -104,6 +105,7 @@ SIM_COMPILE = \
 	$(am__mv) $(SIM_DEPBASE).Tpo $(SIM_DEPBASE).Po
 
 include common/local.mk
+include doc/local.mk
 include igen/local.mk
 include testsuite/local.mk
 

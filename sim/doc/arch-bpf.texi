@@ -1,0 +1,7 @@
+@node BPF
+@chapter BPF
+The @abbr{eBPF,extended Berkeley Packet Filter} virtual machine.
+
+@node BPF Environment Support
+@section Environment Support
+Only the virtual environment is supported.

@@ -1,0 +1,25 @@
+@node CRIS
+@chapter CRIS
+Axis Communications' CRIS (Code Reduced Instruction Set) processors.
+
+@node CRIS ISA Support
+@section ISA Support
+Currently ETRAX 100 LX (v10) and ETRAX FS (v32) are supported.
+
+@node CRIS Environment Support
+@section Environment Support
+Only the virtual environment is supported.
+
+@c TODO what about linux?
+
+@node CRIS Device Models
+@section Device Models
+
+@node dv-cris_900000xx
+@subsection cris_900000xx
+
+@node dv-cris
+@subsection cris
+
+@node dv-rv
+@subsection rv

@@ -1,0 +1,7 @@
+@node MSP30
+@chapter MSP30
+Texas Instruments' 16-bit mixed-signal microcontrollers.
+
+@node MSP30 Environment Support
+@section Environment Support
+Only the virtual environment is supported.

@@ -1,0 +1,7 @@
+@node PRU
+@chapter PRU
+Texas Instruments' Programmable Real-time Unit processor.
+
+@node PRU Environment Support
+@section Environment Support
+Only the virtual environment is supported.

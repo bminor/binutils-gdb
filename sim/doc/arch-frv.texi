@@ -1,0 +1,7 @@
+@node FRV
+@chapter FRV
+Fujitsu's FR-V VLIW processor.
+
+@node FRV Environment Support
+@section Environment Support
+The virtual & operating environments are supported.

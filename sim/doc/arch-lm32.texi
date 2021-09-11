@@ -1,0 +1,19 @@
+@node LM32
+@chapter LM32
+Lattice Semiconductor's LatticeMico32 soft core for FPGAs.
+
+@node LM32 Environment Support
+@section Environment Support
+The virtual & operating environments are supported.
+
+@node LM32 Device Models
+@section Device Models
+
+@node lm32cpu
+@subsection lm32cpu
+
+@node lm32timer
+@subsection lm32timer
+
+@node lm32uart
+@subsection lm32uart

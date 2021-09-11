@@ -1,0 +1,22 @@
+@node MIPS
+@chapter MIPS
+MIPS Technologies's MIPS architecture.
+
+@node MIPS Environment Support
+@section Environment Support
+The virtual & operating environments are supported.
+
+@node MIPS Device Models
+@section Device Models
+
+@node dv-tx3904cpu
+@subsection tx3904cpu
+
+@node dv-tx3904irc
+@subsection tx3904irc
+
+@node dv-tx3904sio
+@subsection tx3904sio
+
+@node dv-tx3904tmr
+@subsection tx3904tmr

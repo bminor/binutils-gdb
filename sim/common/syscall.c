@@ -134,7 +134,7 @@ get_path (host_callback *cb, CB_SYSCALL *sc, TADDR addr, char **bufp)
 CB_RC
 cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 {
-  TWORD result = 0, errcode = 0;
+  TWORD result = 0, result2 = 0, errcode = 0;
 
   if (sc->magic != CB_SYSCALL_MAGIC)
     abort ();
@@ -266,7 +266,7 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 	  goto einval;
 
 	result = argc;
-	sc->result2 = envc;
+	result2 = envc;
 	break;
 
  efault:
@@ -654,6 +654,8 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 	   here down.  */
 	time_t t = (*cb->time) (cb);
 	result = t;
+	if (cb->target_sizeof_int == 32)
+	  result2 = (uint64_t)t >> 32;
 	/* It is up to target code to process the argument to time().  */
       }
       break;
@@ -671,6 +673,7 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 
  FinishSyscall:
   sc->result = result;
+  sc->result2 = result2;
   if (errcode == 0)
     sc->errcode = 0;
   else
@@ -679,6 +682,7 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 
  ErrorFinish:
   sc->result = result;
+  sc->result2 = result2;
   sc->errcode = (*cb->get_errno) (cb);
   return CB_RC_OK;
 }

@@ -1,0 +1,7 @@
+@node IQ2000
+@chapter IQ2000
+Vitesse's IQ2000 @abbr{NPU,Network Processor Unit}.
+
+@node IQ2000 Environment Support
+@section Environment Support
+Only the virtual environment is supported.

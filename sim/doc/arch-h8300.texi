@@ -1,0 +1,7 @@
+@node H8/300
+@chapter H8/300
+Renesas's (Hitachi's) H8 processors.
+
+@node H8/300 Environment Support
+@section Environment Support
+Only the virtual environment is supported.

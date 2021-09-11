@@ -1,0 +1,2837 @@
+\input texinfo      @c -*-texinfo-*-
+@c Copyright (C) 1997-2023 Free Software Foundation, Inc.
+@c
+@c %**start of header
+@setfilename sim.info
+@settitle GNU simulator
+@documentencoding UTF-8
+@include simver.texi
+@setchapternewpage odd
+@c %**end of header
+
+@c A texinfo hack.  Pay it no mind.
+@finalout
+
+@c Summary of indexes used:
+@c cp Concept index.
+@c fn Public APIs index (functions).
+@c tp Merge public data type index into the function index.
+@syncodeindex tp fn
+@c vr Merge public variable index into the function index.
+@syncodeindex vr fn
+@c sc Syscall index.
+@defindex sc
+@c dv Device models.
+@defindex dv
+
+@c This is a dir.info fragment to support semi-automated addition of
+@c manuals to an info tree.
+@dircategory Software development
+@direntry
+* Sim: (sim).                     The GNU simulator.
+@end direntry
+
+@c Link to online POSIX documentation.
+@macro posix{section, page}
+@url{https://pubs.opengroup.org/onlinepubs/9699919799/\section\/\page\.html, \page\(P)}
+@end macro
+
+@c Link to online Linux man pages.
+@macro man{section, page}
+@url{https://man7.org/linux/man-pages/man\section\/\page\.\section\.html, \page\(\section\)}
+@end macro
+
+@c Projects that we refer to often.
+@set bfd @url{https://www.gnu.org/software/bfd/,BFD}
+@set cgen @url{https://sourceware.org/cgen/,CGEN}
+@set elf @url{https://en.wikipedia.org/wiki/Executable_and_Linkable_Format,ELF}
+@set libgloss @url{https://sourceware.org/newlib/,libgloss}
+@set linux @url{https://www.kernel.org/,Linux}
+@set man7 @url{https://man7.org/linux/man-pages/,Linux man pages}
+@set newlib @url{https://sourceware.org/newlib/,newlib}
+@set rtems @url{https://www.rtems.org/,RTEMS}
+@set uboot @url{https://en.wikipedia.org/wiki/Das_U-Boot,Das U-Boot}
+
+@c Terms that we use frequently.
+@set crt @abbr{CRT,C runtime object}
+@set cwd @abbr{cwd,current working directory}
+@set pid @abbr{PID,Process Identifier}
+
+@copying
+@c man begin COPYRIGHT
+Copyright @copyright{} 1997-2023 Free Software Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, with no Front-Cover Texts, and with no
+Back-Cover Texts.  A copy of the license is included in the
+section entitled ``GNU Free Documentation License''.
+
+@c man end
+@end copying
+
+@ifnottex
+This file documents the @sc{gnu} simulator.
+
+@insertcopying
+@end ifnottex
+
+@titlepage
+@c First the title page.
+@title Simulating Systems
+@subtitle The @sc{gnu} Simulator
+@ifset VERSION_PACKAGE
+@sp 1
+@subtitle @value{VERSION_PACKAGE}
+@end ifset
+@sp 1
+@subtitle Version @value{VERSION}
+@c GNU standards say to list principal human writers of the manual as the
+@c authors, not the maintainers or authors of the Simulator itself.
+@c Everyone will be listed in the Acknowledgements chapter.
+@author Mike Frysinger
+
+@c Then the copyright page.  This must be a page by itself after the titlepage.
+@page
+(Send bugs & comments to@*@value{BUGURL}.)
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@c This is for html & pdf outputs.
+@contents
+
+@c This is for info outputs where @contents is automatically omitted.
+@node Top, Overview
+@top Simulating Systems
+
+This file describes the @sc{gnu} simulator
+@ifset VERSION_PACKAGE
+@value{VERSION_PACKAGE}
+@end ifset
+version @value{VERSION}.
+
+@node Overview
+@chapter Overview
+The GNU Simulator provides a reasonably fast functional simulation environment
+for a variety of Instruction Set Architectures (ISAs) and device models (SoCs,
+peripherals).
+
+It can provide both functional simulation as well as cycle accurate simulation
+(although the accuracy quality varies greatly by port).
+
+Common uses include, but are not limited to, the following.
+@itemize @bullet
+@item Toolchain testing (e.g. @sc{gcc} or @sc{gdb}).
+@item Bare-metal firmware development.
+@item Quick experimentation via debugger integration.
+@end itemize
+
+This manual is useful to multiple audiences: users, integrators, and developers.
+
+@node Simulation or Emulation
+@section Simulation or Emulation?
+Terminology is hard.  Depending on who you talk to and the time of day, the
+terms "simulation" and "emulation" will often be used interchangeably.  Don't
+spend too much time thinking about it.
+
+The GNU Simulator does not utilize virtualization.  It is only a simulator.
+
+@node Why Another Simulator
+@section Why Another Simulator?
+There are many simulators out there, so one might ask why do we need another?
+
+The GNU Simulator, while not well known, has been around in one form or another
+since at least 1992!  It predates many open source projects out there, even if
+it never quite gained the largely community that others enjoy.
+
+Its integration with existing GNU toolchain projects makes it a good choice for
+automated testing and new target bring-ups.
+
+Its simplicity makes it a good target for bringing up a new architecture quickly
+and proving out basic functionality.
+
+All that said, the GNU Simulator does not really aspire to be more popular or
+"better" than other open source tools.  It is maintained under the GNU banner,
+and in the hopes that others will find it useful.
+
+If another FOSS simulator works well for you, then by all means, use it instead!
+
+@node Other Simulators
+@section Other Simulators
+The currently most common open source project is of course
+@url{https://www.qemu.org/, QEMU}.  It has a much larger & active community,
+tends to support more architectures, has more device models, and is
+significantly faster than the GNU Simulator.
+
+The @url{https://sourceware.org/sid/, SID} project seemingly overlaps a lot with
+the GNU Simulator.  It is an independent code base, and was designed more for
+modeling whole systems, and providing a framework for creating new models that
+anyone could integrate.  While it was quite ahead of its time, it hasn't seen
+development in a long time, and is effectively dormant at this point.  It would
+be interesting to see if the GNU Simulator could somehow leverage its existing
+corpus of models.
+
+There are a few simulators out there that are actually forked from old versions
+of the GNU Simulator.
+
+And of course, there are a variety of proprietary (i.e. non-FOSS) simulators,
+but by their very nature, are not interesting :).
+
+Finally, remember that this is only about simulation, not virtualization.
+
+@node Contact and Support
+@section Contact and Support
+There are a number of ways you can get in touch!
+
+@itemize
+@item Homepage @url{@value{HOMEPAGE}}
+@item Wiki @url{https://sourceware.org/gdb/wiki/Sim}
+@item Issue Tracker
+@itemize
+@item New Reports @value{BUGURL}
+@item @url{https://sourceware.org/bugzilla/buglist.cgi?bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=SUSPENDED&bug_status=WAITING&bug_status=REOPENED&component=sim,Existing Reports}
+@end itemize
+@item Mailing Lists @url{https://sourceware.org/gdb/mailing-lists/}
+(we use the same lists as @sc{gdb})
+@end itemize
+
+@node Contributing
+@section Contributing
+Thanks for considering helping out.  There are many ways to contribute, and many
+areas that could use your help.
+
+If you want to report a bug, either a compile failure, or runtime misbehavior,
+check out @ref{Reporting Bugs} section.
+
+If you want to request a feature or new functionality, we also use the bug
+tracker to manage things.  @xref{Contact and Support} has links.
+
+If you're looking for things to help fix, we maintain a rough TODO list in
+@url{https://sourceware.org/gdb/wiki/Sim/TODO,our wiki}.  Feel free to dive in
+to anything listed there.
+
+If you're not comfortable writing code, that's OK---we have documentation too
+(like this manual!) that can always use review and improvement.
+
+@node Free Software
+@unnumberedsec Free Software
+The GNU Simulator is @dfn{free software}, protected by the @sc{gnu} General
+Public License (GPL).  The GPL gives you the freedom to copy or adapt a licensed
+program---but every person getting a copy also gets with it the freedom to
+modify that copy (which means that they must get access to the source code), and
+the freedom to distribute further copies.  Typical software companies use
+copyrights to limit your freedoms; the Free Software Foundation uses the GPL to
+preserve these freedoms.
+
+Fundamentally, the General Public License is a license which says that you have
+these freedoms and that you cannot take these freedoms away from anyone else.
+
+@node Running The Simulator
+@chapter Running The Simulator
+The primary method for running the GNU Simulator is via the @command{run}
+program.  It usually is part of a cross-compiler toolchain which has a tool
+prefix, e.g. @command{arm-none-elf-run}.  @xref{Config Names}.
+
+It is given the program to simulate.  It understands any format that @value{bfd}
+understands---typically, this means @value{elf} programs.  You can control the
+format via the @option{--target} option---@command{binary} is a common one to
+load a blob directly into memory.
+
+The program could be a boot loader (e.g. @value{uboot}), or bare-metal programs
+you wrote (i.e. no OS), or an OS kernel itself (e.g. @value{rtems} or
+@value{linux}), or typical userland programs (e.g. @command{ls}).
+
+Another common usage pattern is via @sc{gdb} itself.  @xref{GDB Integration} for
+more details.
+
+Many simulator subsystems may be disabled at build time, so not all options
+described below may be available in your simulator.  Even if they are available,
+not all architecture backends support every specific feature.
+
+@node CLI Invocation
+@section Invocation
+Running the simulator is fairly straightforward.  It takes the basic form:
+@example
+$ run [simulator options] [VAR=VALUE|--] <program> [program options]
+
+$ run hello.elf
+$ run HOME=/tmp arm.elf
+@end example
+
+Multiple environment variables may be specified before @var{program}.  If
+@option{--} is used, then environment variable processing is halted, and the
+remaining arguments will be treated as the @var{program} and its own options.
+
+@node Common Options
+@section Common Options
+Here's the common, albeit boring, options.
+
+@table @option
+@item --
+Halt all further option processing.  This can be useful in scripts to force a
+break between simulator options and the @var{program} to run.
+
+@item -h
+@itemx --help
+Print help information.  This can show a quick summary of all the options that
+a particular build actually supports.
+
+@item --version
+Print version information.
+
+@item -v
+@itemx --verbose
+Enable more verbose output.
+
+@item --do-command <comman>
+Execute a simulator @var{command}.  These are the same as the command line
+options, but as a string and with leading dashes omitted.  This option is meant
+more as an escape hatch when scripting or integrating into other systems rather
+than used normally.
+
+For example, @samp{--version} and @samp{--do-command version} are equivalent.
+
+@item --environment <user|virtual|operating>
+Set running environment.  @xref{Runtime Environments} for more details.
+
+@item -E <B|big|L|little>
+@itemx --endian <B|big|L|little>
+Set endianness.
+
+Most architectures only support one endianness, so this option isn't that
+useful there.
+
+@item --architecture <MACHINE>
+Specify the architecture to use.  @xref{Architecture Specifics} for possible
+options.  Currently, most builds only include one architecture at a time, and
+it's selected by default, so this setting isn't useful there.
+
+@item --architecture-info
+@itemx --info-architecture
+List supported architectures.
+
+@item --target <bfdname>
+Specify the object-code format for input object files.  This is usually handled
+automatically for you by the @value{bfd} library which autodetects most formats.
+
+Binary files are a common format that is not handled automatically.  You will
+want to use @samp{binary} explicitly in that case.
+
+@item --target-info
+@itemx --info-target
+List supported @value{bfd} targets.
+
+@item --sysroot <sysroot>
+Root for system calls with absolute file-names and the initial @value{cwd}.
+
+@item --argv0 <arg>
+Set argv[0] to the specified string.  This overrides the default program name
+and can be useful when testing programs that rely on argv[0] for changing its
+behavior.
+@end table
+
+@node Environment Variables (environ)
+@section Environment Variables (environ)
+The environment variables exposed to the simulated program is distinct from the
+active environment variables the simulator itself has (which in turn tends to be
+inherited from its parent, e.g. the user's shell where @code{run} is invoked).
+
+That said, by default, the simulated program's environment variables are also
+inherited.  The options below can limit or adjust the set of variables exposed.
+
+How the environment variables are exposed to the simulated program depends
+heavily on the @ref{Runtime Environments} used, so refer to those sections for
+more details.
+
+@table @option
+@item --env-set <variable=value>
+Set the @var{variable} in the program's environment to @var{value}.  Any
+existing @var{variable} will be overridden.
+
+Environment variables may also be specified, sans @option{--env-set}, on the
+command line before the path to the program to run.  This provides a succinct
+method for setting multiple environment variables.
+
+@item --env-unset <variable|variable=value>
+Unset the @var{variable} in the program's environment.
+
+An extended syntax is supported where the value is unset only if the
+@var{value} matches.  For example, if the environment has @samp{FOO=bar}, but
+@samp{--env-unset FOO=boo} was used, @samp{FOO} would not be unset.
+
+@item --env-clear
+Clear the program's environment.
+
+The environment options stack, so this will clear all previously variables, but
+any following @option{--env-set} variables will be retained.
+@end table
+
+@node Memory Options
+@section Memory
+Manage memory settings.
+
+Options are processed in the order specified and operate on the current memory
+state.  This allows for building up the memory layout one mapping at a time.
+
+Some of these options are "stateful".  That is, they set implicit arguments
+for follow up options rather than doing anything by themselves.  For example,
+@samp{--memory-fill 0xff --memory-region 0,0x1000} will set the fill setting
+to @samp{0xff} for the @samp{--memory-region} call.
+
+Addresses are usually specified using the @code{[<space>:]<address>[@@<level>]}
+syntax.
+
+Sizes are usually specified using the @code{<bytes>[BKMG]} syntax.  Suffixes use
+base 2 sizes, not base 10, so @code{K} is a kibibyte (1024), not kilobyte
+(1000).  If no suffix is specified, bytes (@code{b}) are used.
+
+@table @option
+@item --alignment <strict|nonstrict|forced>
+@xref{Memory Alignment} for more details.
+
+@item --load-lma
+@itemx --load-vma
+Use @abbr{VMA, Virtual Memory Address} or @abbr{LMA, Load Memory Address} (the
+default) addresses when loading the inputs.
+
+@item --memory-delete <address|all>
+@itemx --delete-memory <address|all>
+Delete memory at @var{address}, or @var{all} addresses.
+
+@item --memory-region <address,size[,modulo]>
+Add a memory region starting at @var{address} with @var{size} bytes.
+
+A @var{modulo} size specifies that accesses to the region [address ...
+address+size] should be mapped onto the sub region [address ... address+modulo].
+The @var{modulo} value must be a power of two.
+
+@item --memory-alias <address,size@{,address@}>
+Add a memory shadow from one address to another.
+
+@item --memory-size <size>
+Add memory at address zero.  The @var{size} is specified in bytes, kibibytes
+(KiB) with @code{k} suffix, mebibytes (MiB) with @code{m}, or gibibytes (GiB)
+with @code{g} suffix.
+
+@item --memory-fill <value>
+Fill subsequently added memory regions.  @var{value} is a single byte (from
+@code{0-255}), and may be decimal or hexidecimal.
+
+@item --memory-clear
+Clear subsequently added memory regions.  This is equivalent to
+@option{--memory-fill 0}.
+
+@item --memory-mapfile <file>
+Have the next memory region memory-map @var{file}.  The file is opened for
+reading & writing.
+
+If the memory region size is specified, the file must be at least as big as it.
+If the memory region size is not declared explicitly, it will be calculated from
+the file's size.
+
+@item --memory-info
+@itemx --info-memory
+List configurable memory regions.  This only shows the basic memory mappings
+(e.g. RAM regions).
+
+@item --map-info
+List mapped regions.  This displays all types of address mappings and their
+read/write/execute status.  For example, this will include hardware device
+register mappings.
+@end table
+
+@node Memory Alignment
+@subsection Alignment
+Different architectures have, at different points in their evolution, taken
+different approaches to how unaligned memory accesses are handled.  The most
+common patterns are supported.
+
+The default behavior depends on the specific architecture backend (which tends
+to match the respective hardware), and may be overridden by @option{--alignment}
+at runtime.  The @option{--enable-sim-alignment} configure time option will
+override both of these if it were specified.  @xref{Configure Simulator Options}
+for more details.
+
+The alignment setting is global and affects all memory accesses.  It cannot be
+changed on a per-memory region basis.
+
+Possible alignment settings:
+@itemize @bullet
+@item @samp{strict}: Unaligned accesses cause exceptions.@*
+For example, requesting a 32-bit value at address @code{0x2} will fail.
+
+@item @samp{nonstrict}: Unaligned accesses always work.@*
+For example, requesting a 32-bit value at address @code{0x2} will work---the
+bytes from @code{0x2-0x5} will be read.
+
+@item @samp{forced}: Unaligned addresses are masked before access.@*
+For example, requesting a 32-bit value at address @code{0x2} will read the bytes
+from @code{0x0-0x3} (since @code{(0x2 & ~3) = 0x0}).
+@end itemize
+
+@node Tracing Options
+@section Tracing
+Note: Not all architecture backends support all tracing categories.
+
+@xref{Configure Simulator Options} for configure-time control over which
+categories are available.
+
+@table @option
+@item -t[on|off]
+@itemx --trace[=on|off]
+Trace useful things.  This option must be specified in order for other tracing
+options to be useful.
+
+@item --trace-insn[=on|off]
+Perform instruction tracing.  This tends to be high-level instruction family.
+
+@item --trace-disasm[=on|off]
+Disassemble instructions using the @sc{opcodes} library.  This will produce more
+accurate output, but will be slower.  This can be useful when comparing decode
+behavior between the simulator and the disassembler.
+
+@item --trace-decode[=on|off]
+Trace instruction decoding.  This tends to be for breaking down the instruction
+into its component parts.
+
+@item --trace-extract[=on|off]
+Trace instruction extraction.  This tends to be for extracting arguments or bit
+fields from the instruction.
+
+@item --trace-linenum[=on|off]
+Perform line number tracing (implies @option{--trace-insn}).
+
+@item --trace-memory[=on|off]
+Trace memory operations.  This covers loads & stores.
+
+@item --trace-alu[=on|off]
+Trace @abbr{ALU, Arithmetic Logic Unit} operations.  This tends to be basic
+integer math operations.
+
+@item --trace-fpu[=on|off]
+Trace @abbr{FPU, Floating Point Unit} operations.  Not all architectures have
+FPU's, and ones that implement them in software cannot be traced at this level
+(since there are no actual FPU instructions).
+
+@item --trace-vpu[=on|off]
+Trace @abbr{VPU, Vector Processing Unit} operations (also known as @abbr{SIMD,
+Single Instruction, Multiple Data} operations).  Not all architectures have
+VPU's or SIMD instructions, and ones that implement them in software cannot
+be traced at this level since there are no actual machine instructions).
+
+@item --trace-branch[=on|off]
+Trace branching.  These can be conditional or unconditional branches, jumps,
+returns, and exceptions.
+
+@item --trace-semantics[=on|off]
+Perform ALU, FPU, VPU, MEMORY, and BRANCH tracing.  Meant as a shortcut for
+common set of operations that users are interested in.
+
+@item --trace-model[=on|off]
+Include model performance data.
+
+@item --trace-core[=on|off]
+Trace core operations.
+
+@item --trace-events[=on|off]
+Trace simulator events.
+
+@item --trace-syscall[=on|off]
+Trace system calls.
+
+@item --trace-register[=on|off]
+Trace cpu register accesses.
+
+@item --trace-debug[=on|off]
+Add information useful for debugging the simulator to the tracing output.
+
+@item --trace-file <FILENAME>
+Specify tracing output file instead of dumping to stderr.
+@end table
+
+@node Debugging Options
+@section Debugging
+Note: The debugging subsystem is disabled at compile time by default.  You will
+have to pass @option{--enable-sim-trace} and @option{--enable-sim-debug}.
+
+Note: Not all architecture backends support all debugging categories.
+
+@table @option
+@item -D, --debug
+Print debugging messages.  This is required for any of the @option{--debug-*}
+options to have any effect.
+
+@item --debug-insn
+Print instruction debugging messages.
+
+@item --debug-file <FILENAME>
+Specify debugging output file instead of using stderr.
+@end table
+
+@node Profiling Options
+@section Profiling
+Note: Not all architecture backends support all profiling categories.
+
+@table @option
+@item -p[on|off]
+@itemx --profile[=on|off]
+Perform profiling.  This is required for any of the @option{--profile-*}
+options to have any effect.
+
+@item --profile-insn[=on|off]
+Perform instruction profiling.
+
+@item --profile-memory[=on|off]
+Perform memory profiling.
+
+@item --profile-core[=on|off]
+Perform CORE profiling.
+
+@item --profile-model[=on|off]
+Perform model profiling.
+
+@item --profile-cpu-frequency <CPU FREQUENCY>
+Specify the speed of the simulated cpu clock.
+
+@item --profile-file FILENAME
+Specify profile output file instead of using stderr.
+
+@item --profile-pc[=on|off]
+Perform PC profiling.
+
+@item -F PC PROFILE FREQUENCY
+@item --profile-pc-frequency <PC PROFILE FREQUENCY>
+Specified PC profiling frequency.
+
+@item -S <PC PROFILE SIZE>
+@itemx --profile-pc-size <PC PROFILE SIZE>
+Specify PC profiling size.
+
+@item --profile-pc-granularity <PC PROFILE GRANULARITY>
+Specify PC profiling sample coverage.
+
+@item --profile-pc-range BASE,BOUND
+Specify PC profiling address range.
+@end table
+
+@node Watchpoints Options
+@section Watchpoints
+Note: Not all architecture backends support the same set of watchpoint events
+or actions.
+
+A note on terminology: watchpoints and breakpoints tend to be synonymous.  The
+GNU Simulator uses the term "watchpoints".  These are effectively "hardware
+watchpoints" as they do not require changing the instructions executed (how
+"software breakpoints" are implemented).
+
+Watchpoint functionality is mostly meant to be used when integrating with other
+systems (for example, @sc{gdb}).  When running the simulator via @command{run},
+watchpoints will trigger @code{SIGTRAP} signals which halt the simulation and
+cause the program to exit.
+
+@table @option
+@item --watch-cycles-ACTION [+]COUNT
+Watch the simulator, take ACTION in COUNT cycles (`+' for every COUNT cycles),
+ACTION is int breakpoint.
+
+@item --watch-pc-ACTION [!]ADDRESS
+Watch the PC, take ACTION when matches ADDRESS (in range ADDRESS,ADDRESS),
+`!' negates test.
+
+@item --watch-clock-ACTION [+]MILLISECONDS
+Watch the clock, take ACTION after MILLISECONDS (`+' for every MILLISECONDS).
+
+@item --watch-delete IDENT|all|pc|cycles|clock
+Delete a watchpoint.
+
+@item --watch-info
+List scheduled watchpoints.
+@end table
+
+@node Device Models Options
+@section Device Models
+Note: Not all architecture backends support hardware/device simulation.
+
+@xref{Modeling Hardware} for more details.
+
+@table @option
+@item --hw-info
+@itemx --info-hw
+List configurable hardware regions.
+
+@item --hw-trace[=on|off]
+@itemx --trace-hw
+Trace all hardware devices.
+
+@item --hw-device <DEVICE>
+Add the specified device.  This is used to configure a single device or
+component, not an entire system.
+
+@item --hw-list
+List the current active device tree.
+
+@item --hw-file FILE
+Add the devices listed in the file.
+
+@item --model MODEL
+Specify model to simulate.  This is used to select a standard CPU or core
+architecture, and all of its associated pieces.  This is a higher level
+abstraction than the @option{--hw-device} setting.
+
+Think of this as selecting an entire SoC while @option{--hw-device} controls
+individual components or peripherals (for example, a single I2C bus).
+
+@item --model-info
+@itemx --info-model
+List selectable models.
+@end table
+
+@node Serial Socket
+@section Serial Ports Over Network Sockets
+@table @option
+@item --sockser-addr SOCKET ADDRESS
+Set serial emulation socket address.
+@end table
+
+@node GDB Integration
+@section GDB Integration
+If the simulator has been enabled and ported to the target, it should be
+available while running @sc{gdb} automatically.  This makes for quick testing
+and low level debugging starting from the very first instruction.
+
+You can check that the simulator is available by running @code{target sim
+--version} in @sc{gdb}.  If it reports @code{Undefined target command: "sim"},
+verify that @sc{gdb} has been compiled correctly.
+
+Running via @sc{gdb} has a few caveats and error reporting is terse.  Here's a
+quick example.
+
+@smallexample
+# First connect to the simulator.
+(gdb) target sim [simulator options]
+
+# You won't be able to do anything until you load a program (e.g. ELF).
+(gdb) load ./hello.elf
+
+# You then need to actually run the program to get resources (e.g. registers).
+# You might want to set some breakpoints before executing things.
+(gdb) run
+
+# You can change some simulator settings while running.  Note that the options
+# are the same as the command line options, but with no leading dashes.
+(gdb) sim help
+@end smallexample
+
+@node Runtime Environments
+@chapter Runtime Environments
+@cartouche
+Runtime environments have no relation to environment variables (e.g.
+@code{environ}).  They are completely distinct concepts, and anytime those are
+discussed, the full term @samp{environment variables} will be used to maintain
+clarity.
+@end cartouche
+
+The simulator has the concept of environments.  These define how many services
+the simulator itself provides (akin to a hypervisor), and how much the program
+itself will have to handle.
+
+This is similar to QEMU's user & system modes if you're familiar with those.
+
+Let's look at a quick summary to try and clear up confusion.  These names are
+used with the @code{--environment} option.
+
+@table @asis
+@item No environment
+Only CPU registers and memory (RAM) are available.
+@item @code{virtual}
+The simulator acts as a hypervisor by handling exceptions (e.g. syscalls), but
+the program otherwise runs as if it were in the highest CPU privilege level
+available.  This is used to run simple bare-metal programs.
+@item @code{user}
+The simulator acts as an OS kernel by handling exceptions.  The program runs as
+if it were in the lowest CPU privilege level available.  This can be used to run
+user (e.g. @value{linux}) programs.
+@item @code{operating}
+The simulator acts like real hardware.  The program runs as if it were an OS
+kernel itself on hardware, so it must handle interrupts, exceptions, devices,
+etc... all itself.  This can be used to run a Linux kernel which in turn could
+run Linux user programs).
+@end table
+
+While all ports support basic ISA simulation (e.g. registers), not all ports
+support any or all of the environments.  Be sure to consult the port specific
+section of the manual before attempting to use unsupported functionality.
+
+@node Virtual Environment
+@section Virtual Environment
+The virtual environment provides a quick way of executing bare-metal programs.
+The simulator acts as a hypervisor by servicing all exceptions.  Memory is
+available, but no interrupts or device models work.  Privileged instructions
+behavse as if the CPU is always in the highest level.  Code that would switch
+privilege levels is ignored (e.g. nop).
+
+Basic @value{libgloss} system calls will be processed by the simulator.
+
+@node Virtual Environment Variables (environ)
+@subsection Environment Variables (environ)
+Passing environment variables to the simulated program is supported.  These are
+independent of the environment variables that the GNU Simulator itself sees.
+
+The runtime support code (e.g. the @value{crt}, @code{crt0}) is responsible for
+reading the environemt settings from the simulator.  Consult the particular
+runtime's documentation for more details.  @value{libgloss} is known to only
+provide an empty stub.
+
+@node Virtual environ Access
+@subsubsection Syscall Access
+The environment variables are accessible via the @ref{sys_argv} and
+@ref{sys_argvlen} syscalls.  Currently they are not accessible indepenently from
+the @ref{Virtual Command Line Arguments (argv)}.
+
+@node Virtual Command Line Arguments (argv)
+@subsection Command Line Arguments (argv)
+Passing command line options to the simulated program is supported.  These are
+independent of the options that the GNU Simulator itself handles.  All arguments
+specified after the program will be made available.
+
+In this example, the @code{hello.elf} program will be passed three arguments:
+@code{--opt}, @code{abc}, and @code{def}.  The @code{--env virtual} will be
+consumed by the GNU Simulator itself to set the execution environment.
+@example
+$ run --env virtual ./hello.elf --opt abc def
+@end example
+
+@node Virtual argv Access
+@subsubsection Syscall Access
+There are two ways the command line may be accessed.  There's the so-called
+"old" and "new" ways.  Both are supported since they're in use by different
+@value{libgloss} ports, and at this point, trying to deprecate & remove one set
+is not really worth the effort.
+
+Originally, only the "old" set of syscalls existed: @ref{sys_argv} and
+@ref{sys_argvlen}.  The process first calls @ref{sys_argvlen} to see how many
+bytes are required to store all of the command line arguments and environment
+strings, then it allocates that space, then it calls @ref{sys_argv} to copy the
+flattened string data into the specified buffer.  Finally, the process has to
+scan the NUL delimited strings to count the number of arguments (i.e.
+@code{argc}) & build up the array of pointers (i.e. @code{argv} and
+@code{environ}).  If the space required is too large (especially if too many
+arguments or a large environment are specified), then it's impossible to access
+any of the individual elements.  Since this logic typically lives in the early
+startup code of the process, that typically would result in an early crash or
+abort.
+
+To address the memory limitations, a "new" set of syscalls were added:
+@ref{sys_argc}, @ref{sys_argnlen}, and @ref{sys_argn}.  The process calls
+@ref{sys_argc} to see how many command line arguments are available, and then
+calls @ref{sys_argnlen} on a single argument to get its individual length, and
+then calls @ref{sys_argn} to copy the single argument into its buffer.  This
+simplifies common startup code a bit, and provides the flexibility of accessing
+arguments only if and when they're needed.  There is no support for accessing
+environment variables in this scenario though.
+
+All the syscalls may be used in a single execution of course---there is no
+limitation in the simulator itself restricting things to a single set at a
+time.  It just doesn't normally happen since code is written with a certain
+pattern in mind.
+
+The command line arguments and environment variables these syscalls access are
+fixed for the entire run.  The simulated program is free to copy state in and
+then manage things however it wants, but the simulator itself will never change
+the state it makes available via the syscalls.  Consider them the "initial set".
+
+@node Virtual Filesystem
+@subsection Filesystem
+Access to the real file system is allowed when using related system calls.  The
+@option{--sysroot} option allows some control over which parts of the host file
+system is actually visible.  By default, the sysroot is set to @file{/}.
+
+File descriptors are not shared directly.  A mapping table is maintained to
+translate the file descriptors from the real ones to what the simulated
+environment sees.  This avoids leaking file descriptors used by the simulator
+itself into the simulated environment, and for cleanly managing conflicting
+file descriptors like stdio.
+
+Sockets and other services using file descriptors go through the same table.
+
+@node Virtual Processes
+@subsection Processes
+The active process settings are exposed to the simulated environment.  This
+allows the simulator to access its own @value{pid} via @ref{sys_getpid} so that
+it can send itself signals (e.g. via @ref{sys_kill}), as well as send signals to
+other processes in the system.
+
+@node Virtual Runtime ABI
+@subsection Runtime ABI
+When processing system calls, the virtual environment uses the @value{newlib}
+ABI by default (e.g., when using the GNU Simulator directly via @command{run}).
+However, projects that integrate the simulator directly are able to change these
+ABI values to whatever they want.  @xref{Integration} for more details.
+
+This covers a number of items:
+@itemize @bullet
+@item
+Error values (i.e. errno) such as @code{EINVAL}
+@item
+Signal values such as @code{SIGINT}
+@item
+Filesystem stat structures such as @code{struct st}
+@item
+File open constants such as @code{O_RDWR}
+@item
+System call numbers
+@end itemize
+
+The ABI of the simulated program does not need to match the ABI of the host
+runtime environment.  The values, flags, structures, etc... are translated on
+the fly.  This allows for independence between the simulated program (e.g. its
+architecture, bitsize, endianness, etc...) and the host runtime (e.g. its
+architecture, bitsize, endianness, etc...).
+
+@node Virtual System Calls
+@subsection System Calls
+These are the syscalls supported by the virtual environment.  For specific
+architecture syscall ABI information, @pxref{Architecture Specifics}.
+
+When using the GNU Simulator directly via @command{run}, these syscalls will
+behave as you would expect---by interacting with the current filesystem and
+overall OS runtime.  However, projects that integrate the simulator directly
+are able to hook every low-level call and choose to take a different action.
+@xref{Integration} for more details.
+
+The use of @code{long} in the definitions below is to indicate that arguments
+are passed in a single register of native word-size.  So for 32-bit CPUs,
+these are 32-bit integers, and in 64-bit CPUs, these are 64-bit integers.
+
+All syscalls have dedicated error values---one register indicates success,
+while a different pair holds result values.  This avoids the common problem of
+with using a single value to distinguish between success & failure, and the
+type of success or failure.  For example, if failure were defined as "negative
+values", and the @ref{sys_lseek} syscall was used with large files (4 GiB), the
+caller will have difficulty writing checks with 32-bit signed integers.  By
+dedicating a register to error status, there is never ambiguity, at the slight
+(but perhaps immeasurable) cost of more register usage.
+
+As noted, result values (not including the error status) come in pairs.  This
+permits, depending on the syscall, either returning 64-bit values even on a
+32-bit CPU (by splitting the value across two registers), or returning two
+independent values.
+
+No header file is currently provided to make these syscalls.  These are provided
+merely as reference for low-level implementers (e.g. @value{libgloss}
+maintainers).  Those environments might provide a raw @code{syscall()} interface
+but with a different interface more attuned for use in C or C++ languages (where
+returning multiple values can be tricky).
+
+Typographically, the @code{@{...@comma{} ...@}} return value indicates the separate
+error and result values.  The error and results are always initialized so
+callers can always check the error status before using the result.
+
+@macro defsyscall{ret, name, args, desc, returns, errors, example}
+Syscall: @{@i{long error}, @i{\ret\}@} @b{sys_\name\} (@i{\args\})
+
+\desc\
+
+Returns:
+@indentedblock
+\returns\
+@end indentedblock
+
+Errors:
+@indentedblock
+NB: Exact errors may change based on the host environment.
+
+\errors\
+@end indentedblock
+
+Example:
+@example
+\example\
+@end example
+@end macro
+
+@node sys_argc
+@subsubsection argc
+@defsyscall{long, argc, void,
+Calculates the number of command line arguments available.,
+The number of command line arguments available.  @code{0} is a valid result to
+indicate there are no arguments.,
+This call will never fail.,
+// argv = @{"abc"@comma{} "def"@}
+sys_argc()
+    @result{} 2
+
+// argv = @{@}
+sys_argc()
+    @result{} 0
+}
+
+See Also:
+@indentedblock
+Use in conjunction with @ref{sys_argn} & @ref{sys_argnlen}.@*
+@b{Not used} with @ref{sys_argvlen} or @ref{sys_argv}.@*
+@xref{Virtual argv Access} for more information.
+@end indentedblock
+
+@node sys_argnlen
+@subsubsection argnlen
+@defsyscall{long, argnlen, long @var{argn},
+Calculates the length of the command line argument @var{argn}.,
+The number of bytes@comma{} not including the trailing @code{NUL}@comma{} of
+the command line argument @var{argn}.,
+@code{EINVAL}: @var{argn} is less than zero.@*
+@code{EINVAL}: @var{argn} is greater or equal to @ref{sys_argc}.@*
+,
+// argv = @{"blah"@comma{} "abc"@}
+
+sys_argnlen(0)
+    @result{} 4
+
+sys_argnlen(1)
+    @result{} 3
+
+sys_argnlen(-1)
+    @error{} EINVAL
+
+sys_argnlen(100)
+    @error{} EINVAL
+}
+
+See Also:
+@indentedblock
+Use in conjunction with @ref{sys_argc} & @ref{sys_argn}.@*
+@b{Not used} with @ref{sys_argvlen} or @ref{sys_argv}.@*
+@xref{Virtual argv Access} for more information.
+@end indentedblock
+
+@node sys_argn
+@subsubsection argn
+
+@defsyscall{char *, argn, long @var{argn}@comma{} char *@var{arg},
+Copies the command line argument @var{argn} to the @var{arg} buffer.  The caller
+must guarantee that @var{arg} is large enough to hold the string;
+@ref{sys_argnlen} may be used beforehand.,
+The @var{arg} pointer.,
+@code{EINVAL}: @var{argn} is less than zero.@*
+@code{EINVAL}: @var{argn} is greater or equal to @ref{sys_argc}.@*
+@code{EINVAL}: @var{buffer} cannot be written (e.g. address is outside of available address space).@*
+,
+// argv = @{"blah"@comma{} "abc"@}
+// buffer = @{...@}
+
+sys_argn(0@comma{} buffer)
+    @result{} buffer
+    @result{} @point{}buffer = @{
+      // "blah\0"
+      98, 108, 97, 104, 0,
+    @}
+
+sys_argn(1@comma{} buffer)
+    @result{} buffer
+    @result{} @point{}buffer = @{
+      // "abc\0"
+      97, 98, 99, 0,
+    @}
+
+sys_argn(-1@comma{} buffer)
+    @error{} EINVAL
+
+sys_argn(100@comma{} buffer)
+    @error{} EINVAL
+}
+
+See Also:
+@indentedblock
+Use in conjunction with @ref{sys_argc} & @ref{sys_argnlen}.@*
+@b{Not used} with @ref{sys_argvlen} or @ref{sys_argv}.@*
+@xref{Virtual argv Access} for more information.
+@end indentedblock
+
+@node sys_argvlen
+@subsubsection argvlen
+@defsyscall{long, argvlen, void,
+Calculates the byte size of all command line arguments and environment strings.
+This is the sum of the string length (including the NUL byte) of every command
+line argument and environment string@comma{} plus 2 additional @code{NUL} bytes
+to mark the end of each segment (1 per segment).,
+The total byte size for use with @ref{sys_argv}.,
+This call will never fail.,
+// argv = @{@}
+// environ = @{@}
+sys_argvlen()
+    @result{} 0 + 1 + 0 + 1
+    @result{} 2
+
+// argv = @{"abc"@}
+// environ = @{@}
+sys_argc()
+    @result{} 4 + 1 + 0 + 1
+    @result{} 6
+
+// argv = @{"abc"@comma{} "blah"@}
+// environ = @{"var=value"@comma{} "HOME=/"@}
+sys_argc()
+    @result{} (4 + 5) + 1 + (10 + 7) + 1
+    @result{} 28
+}
+
+See Also:
+@indentedblock
+Use in conjunction with @ref{sys_argv}.@*
+@b{Not used} with @ref{sys_argc}, @ref{sys_argnlen}, or @ref{sys_argn}.@*
+@xref{Virtual argv Access} for more information.
+@end indentedblock
+
+@node sys_argv
+@subsubsection argv
+@defsyscall{long @var{argc}@comma{} long @var{envc}, argv, const char *@var{buffer}@comma{} long @var{size},
+Copies the command line arguments and environment strings to the @var{buffer}.,
+The number of command line arguments @var{argc} and the number of environment
+variables @var{envc}.,
+@code{EFAULT}: @var{size} is too small to hold all the data.@*
+@code{EINVAL}: @var{buffer} cannot be written (e.g. address is outside of available address space).@*
+,
+// argv = @{@}
+// environ = @{@}
+// buffer = @{...@}
+sys_argvlen(buffer@comma{} 2)
+    @result{} 0
+    @result{} @point{}buffer = @{
+        // NIL to mark end of argv.
+        0@comma{}
+        // NIL to mark end of environ.
+        0@comma{}
+    @}
+
+// argv = @{"abc"@}
+// environ = @{@}
+// buffer = @{...@}
+sys_argvlen(buffer@comma{} 200)
+    @result{} 0
+    @result{} @point{}buffer = @{
+        // "abc\0"
+        97@comma{} 98@comma{} 99@comma{} 0@comma{}
+        // NIL to mark end of argv.
+        0@comma{}
+        // NIL to mark end of environ.
+        0@comma{}
+    @}
+
+// argv = @{"abc"@comma{} "blah"@}
+// environ = @{"var=value"@comma{} "HOME=/"@}
+// buffer = @{...@}
+sys_argvlen(buffer@comma{} 200)
+    @result{} 0
+    @result{} @point{}buffer = @{
+        // "abc\0"
+        97@comma{} 98@comma{} 99@comma{} 0@comma{}
+        // "blah\0"
+        98@comma{} 108@comma{} 97@comma{} 104@comma{} 0@comma{}
+        // NIL to mark end of argv.
+        0@comma{}
+        // "var=value\0"
+        118@comma{} 97@comma{} 114@comma{} 61@comma{} 118@comma{} 97@comma{} 108@comma{} 117@comma{} 101@comma{} 0@comma{}
+        // "HOME=/\0"
+        72@comma{} 79@comma{} 77@comma{} 69@comma{} 61@comma{} 47@comma{} 0@comma{}
+        // NIL to mark end of environ.
+        0@comma{}
+    @}
+}
+
+See Also:
+@indentedblock
+Use in conjunction with @ref{sys_argv}.@*
+@b{Not used} with @ref{sys_argc}, @ref{sys_argnlen}, or @ref{sys_argn}.@*
+@xref{Virtual argv Access} for more information.
+@end indentedblock
+
+@node sys_chdir
+@subsubsection chdir
+@defsyscall{void, chdir, char *@var{path},
+Change the working directory to @var{path}.,
+@code{0} the @value{cwd} was changed to @var{path}.,
+,
+// cwd = "/"
+sys_chdir("/foo")
+    @result{} 0
+    @result{} cwd = "/foo"
+}
+
+@node sys_chmod
+@subsubsection chmod
+@defsyscall{void, chmod, const char *@var{path}@comma{} long @var{mode},
+Change @var{path}'s permissions to @var{mode}.,
+@code{0} if @var{path} had its permissions changed.,
+,
+// ./foo is 0644 (rw-r--r--)
+sys_chmod("foo"@comma{} 0755)
+    @result{} ./foo is 0755 (rwxr-xr-x)
+}
+
+@node sys_close
+@subsubsection close
+@defsyscall{void, close, long @var{fd},
+Close the open file descriptor @var{fd}.,
+@code{0} if @var{fd} was closed.,
+@code{EBADF}: @var{fd} is not a valid file descriptor.,
+// 3 is an open file descriptor.
+sys_close(3)
+    @result{} 0
+
+// 5 is not a valid file descriptor.
+sys_close(5)
+    @error{} EBADF
+}
+
+@node sys_exit
+@subsubsection exit
+@defsyscall{void, exit, long @var{status},
+Halts execution of the simulation.  Typically @code{0} is used to indicate
+"success" while non-zero values are "failure".
+@*@*
+The full value is passed back and made available to the simulator.
+However@comma{} when using @command{run}@comma{} the value callers typically see
+are still limited by the OS's @posix{functions, exit} call.  Which means the
+value is masked by @code{0xff} to get it into the [0@comma{}255] range.,
+N/A,
+This call will never fail.,
+sys_exit(0)
+    @result{} The simulation exits with status of 0.
+
+sys_exit(1)
+    @result{} The simulation exits with status of 1.
+}
+
+@node sys_fstat
+@subsubsection fstat
+@defsyscall{long, fstat, long @var{fd}@comma{} struct stat *@var{statbuf},
+Get the file status for open @var{fd} and store it in @var{statbuf}.,
+@code{0} if the file status was stored successfully.,
+@code{EBADF}: @var{fd} is not a valid file descriptor.@*
+,
+// 4 is a valid file descriptor.
+// st is a struct stat.
+sys_fstat(4@comma{} &st)
+    @result{} 0
+    @result{} st = @{
+        // The stat structure contains details on the open file.
+    @}
+}
+
+@node sys_ftruncate
+@subsubsection ftruncate
+@defsyscall{long, ftruncate, long @var{fd}@comma{} long @var{length},
+Truncates the open file @var{fd} to the byte size @var{length}.,
+@code{0} if @var{fd} was truncated to @var{length} bytes.,
+@code{EBADF}: @var{fd} is not a valid file descriptor.@*
+,
+// 4 is a valid file descriptor.
+sys_ftruncate(4@comma{} 100)
+    @result{} 0
+    @result{} The open file's size is now 100 bytes.
+}
+
+@node sys_getpid
+@subsubsection getpid
+@defsyscall{long, getpid, void,
+Gets the current process's id (PID).  When using @command{run}@comma{} this is
+the actual simulator's process id.,
+The process id.,
+This call will never fail.,
+sys_getpid()
+    @result{} 10505  // The process id will probably change between every run.
+}
+
+@node sys_kill
+@subsubsection kill
+@defsyscall{long, kill, long @var{pid}@comma{} long @var{signal},
+Send a @var{signal} to the proccess @var{pid}.,
+@code{0} if @var{signal} was sent to @var{pid}.,
+@code{EINVAL}: An invalid @var{signal} was specified.@*
+@code{EPERM}: The process may not send signals to @var{pid}.@*
+@code{ESRCH}: Process @var{pid} does not exist.@*
+,
+// Get the current process's id.
+sys_getpid()
+    @result{} 42
+
+// Send a SIGINT (i.e. @kbd{@key{CTRL}-c}) to self.
+sys_kill(42@comma{} SIGINT)
+    @result{} 0
+    @result{} The simulator will receive a SIGINT for the process.
+}
+
+@node sys_lseek
+@subsubsection lseek
+@defsyscall{int64_t, lseek, long @var{fd}@comma{} long @var{offset}@comma{} long @var{whence},
+Adjust the file offset of the open @var{fd} according to @var{whence}.,
+The new file offset.,
+@code{EBADF}: @var{fd} is not a valid file descriptor.@*
+,
+// 4 is a valid file descriptor.
+// Its current offset is 100 with a length of 300 bytes.
+
+sys_lseek(4@comma{} 20@comma{} SEEK_CUR)
+    @result{} 120
+    @result{} The file offset is now 120.
+
+sys_lseek(4@comma{} -40@comma{} SEEK_CUR)
+    @result{} 80
+    @result{} The file offset is now 80.
+
+sys_lseek(4@comma{} 0@comma{} SEEK_SET)
+    @result{} 0
+    @result{} The file offset is now 0.
+
+sys_lseek(4@comma{} -50@comma{} SEEK_END)
+    @result{} 250
+    @result{} The file offset is now 250.
+}
+
+@node sys_lstat
+@subsubsection lstat
+@defsyscall{long, lstat, const char *@var{path}@comma{} struct stat *@var{statbuf},
+Get the file status for the symlink @var{path} and store it in @var{statbuf}.,
+@code{0} if the file status was stored successfully.,
+@code{ENOENT}: @var{path} does not exist.@*
+,
+// ./foo is a symlink.
+// st is a struct stat.
+sys_lstat("foo"@comma{} &st)
+    @result{} 0
+    @result{} st = @{
+        // The stat structure contains details on the symlink ./foo.
+    @}
+}
+
+@node sys_open
+@subsubsection open
+@defsyscall{long, open, const char *@var{path}@comma{} long @var{flags}@comma{} long @var{mode},
+Open the @var{path} and return the new file descriptor.  The @var{flags} contain
+the access mode@comma{} creation flags@comma{} and other file status related
+flags.,
+The new @var{fd}.,
+,
+// ./foo is a file.
+sys_open("foo"@comma{} O_RDONLY)
+    @result{} 3  // The file descriptor may change between runs.
+
+// ./foo is a file.
+sys_open("foo"@comma{} O_WRONLY)
+    @result{} 3  // The file descriptor may change between runs.
+
+// ./foo does not exist.
+sys_open("foo"@comma{} O_RDWR|O_CREAT@comma{} 0644)
+    @result{} 3  // The file descriptor may change between runs.
+}
+
+@node sys_pipe
+@subsubsection pipe
+@defsyscall{long, pipe, long @var{fds}[2],
+Create a new unidirectional pipe and store the file descriptors in @var{fds}.
+@var{fds[0]} is the read end while @var{fds[1]} is the write end.,
+@code{0} if the pipe was successfully created.,
+,
+// long fds[2]
+sys_pipe(fds)
+    @result{} 0
+    @result{} fds[0] and fds[1] are valid file descriptors.
+}
+
+@node sys_read
+@subsubsection read
+@defsyscall{long, read, long @var{fd}@comma{} char *@var{buffer}@comma{} long @var{count},
+Read up to @var{count} bytes from @var{fd} and store them in @var{buffer}.,
+The number of bytes read.  @code{0} means end of file is reached.,
+@code{EBADF}: @var{fd} is not a valid file descriptor.@*
+,
+// 4 is a valid file descriptor for a file opened for reading.
+// It contains the string "some data".
+
+// buffer = @{...@}
+sys_read(4@comma{} buffer@comma{} 4)
+    @result{} 4
+    @result{} The file offset is now 4.
+    @result{} @point{}buffer = @{
+        // "some"
+        115, 111, 109, 101,
+    @}
+
+sys_read(4@comma{} buffer@comma{} 1000)
+    @result{} 5
+    @result{} The file offset is now 9.
+    @result{} @point{}buffer = @{
+        // " data"
+        32, 100, 97, 116, 97,
+    @}
+
+sys_read(4@comma{} buffer@comma{} 4)
+    @result{} 0
+    @result{} The file offset is still 9.
+}
+
+@node sys_rename
+@subsubsection rename
+@defsyscall{long, rename, const char *@var{old_path}@comma{} const char *@var{new_path},
+Rename the @var{old_path} to @var{new_path}.  @var{new_path} must not exist
+already nor may it be a directory.,
+@code{0} if the files were renamed correctly.,
+@code{EEXIST}: @var{new_path} already exists.@*
+@code{ENOENT}: @var{old_path} does not exist.@*
+,
+// ./foo is a file.  ./bar does not exist.
+sys_rename("foo"@comma{} "bar")
+    @result{} 0
+    @result{} "foo" has been renamed to "bar".
+}
+
+@node sys_sbrk
+@subsubsection sbrk
+@c /*#define sbrk 11 - not currently a system call, but reserved.  */
+
+@node sys_stat
+@subsubsection stat
+@defsyscall{long, stat, const char *@var{path}@comma{} struct stat *@var{statbuf},
+Get the file status for the @var{path} and store it in @var{statbuf}.  If
+@var{path} is a symlink@comma{} it is dereferenced first.,
+@code{0} if the file status was stored successfully.,
+@code{ENOENT}: @var{path} does not exist.@*
+,
+// ./foo is a path (e.g. file@comma{} directory@comma{} etc...) that exists.
+// st is a struct stat.
+sys_stat("foo"@comma{} &st)
+    @result{} 0
+    @result{} st = @{
+        // The stat structure contains details on the path ./foo.
+    @}
+}
+
+@node sys_time
+@subsubsection time
+@c TODO: Actually make time syscall handle 64-bit.
+@defsyscall{int64_t, time, void,
+Get the current UNIX time as the number of seconds since the Epoch
+(1970-01-01 00:00:00 +0000 (UTC)).  Leap seconds are never included.,
+The UNIX timestamp.,
+This call will never fail.,
+sys_time()
+    @result{} 631152000  // 1 Jan 1990
+}
+
+@node sys_truncate
+@subsubsection truncate
+@defsyscall{long, truncate, const char *@var{path}@comma{} long @var{length},
+Truncates @var{path} to the byte size @var{length}.,
+@code{0} if @var{path} was truncated to @var{length} bytes.,
+,
+// ./foo is a file.
+sys_truncate("foo"@comma{} 100)
+    @result{} 0
+    @result{} "foo" is now 100 bytes.
+}
+
+@node sys_utime
+@subsubsection utime
+@defsyscall{long, utime, const char *@var{path}@comma{} const int64_t @var{times}[2],
+Change @var{path}'s access & modify times.  @var{times[0]} is the access time
+while @var{times[1]} is the modify time.  Times are specified as the number of
+seconds since the Epoch (1970-01-01 00:00:00 +0000 (UTC)).  Leap seconds are
+never included.,
+@code{0} if @var{path}'s filesystem times were changed.,
+@code{ENOENT}: @var{path} does not exist.@*
+,
+// ./foo is a file.
+// buffer = @{0@comma{} 100@}
+sys_utime("foo"@comma{} buffer)
+    @result{} 0
+    @result{} "foo"'s access time is now 0.
+    @result{} "foo"'s modify time is now 100.
+}
+
+@node sys_write
+@subsubsection write
+@defsyscall{long, write, long @var{fd}@comma{} char *@var{buffer}@comma{} long @var{count},
+Write @var{count} bytes from @var{buffer} to @var{fd}.,
+The number of bytes written.,
+@code{EBADF}: @var{fd} is not a valid file descriptor.@*
+,
+// 4 is a valid file descriptor for a file opened for writing.
+// It contains the string "nothing".
+
+// buffer = @{115@comma{} 111@comma{} 109@comma{} 101@}  // "some"
+sys_write(4@comma{} buffer@comma{} 4)
+    @result{} 4
+    @result{} The file offset is now 4.
+    @result{} The file contains "someing".
+
+// buffer = @{32@comma{} 100@comma{} 97@comma{} 116@comma{} 97@}  // " data"
+sys_write(4@comma{} buffer@comma{} 5)
+    @result{} 5
+    @result{} The file offset is now 9.
+    @result{} The file contains "some data".
+}
+
+@node sys_unlink
+@subsubsection unlink
+@defsyscall{long, unlink, const char *@var{path},
+Remove @var{path} from the filesystem.,
+@code{0} if @var{path} was successfully removed@comma{} @code{-1} otherwise.,
+@code{ENOENT}: @var{path} does not exist.@*
+,
+// "foo" exists in the current directory.
+sys_unlink("foo")
+    @result{} 0
+    @result{} "foo" no longer exists.
+
+// "foo" no longer exists.
+sys_unlink("foo")
+    @error{} ENOENT
+}
+
+@node User Environment
+@section User Environment
+Similar to the virtual environment, the user environment makes the simulator act
+like an OS kernel by handling exceptions.  Memory is available, but no
+interrupts or device models work.  Privileged instructions behave as if the CPU
+is always in the lowest level.  Code that requires higher priveleged levels
+cause exceptions like real hardware which usually means the program exits.
+
+More featureful system call environments are supported here (e.g.
+@value{linux}).  Refer to the @value{man7} for more details.
+
+@node User Environment Variables (environ)
+@subsection Environment Variables (environ)
+Passing environment variables to the simulated program is supported.  These are
+independent of the environment variables that the GNU Simulator itself sees.
+
+The environment variables are passed via the stack like a typical operating
+system (e.g. @value{linux}) to the @value{crt}.
+
+@node User Command Line Arguments (argv)
+@subsection Command Line Arguments (argv)
+Passing command line options to the simulated program is supported.  These are
+independent of the options that the GNU Simulator itself handles.  All arguments
+specified after the program will be made available.
+
+The arguments are passed via the stack like a typical operating system (e.g.
+@value{linux}) to the @value{crt}.
+
+@node User System Calls
+@subsection System Calls
+Currently, @value{linux} system calls are supported by some architectures.
+@xref{Architecture Specifics} for more details.
+
+@node Operating Environment
+@section Operating Environment
+The operating environment is the most complete for the simulated program and
+requires the most effort for the simulator ports.  This is akin to running on
+an actual CPU with peripherals: the simulated program has to handle all
+exceptions and interrupts and privilege levels itself, and communication with
+the outside world is via device models (e.g. serial ports).
+
+This can be used to run real bootloaders or OS kernels which in turn could run
+user programs.
+
+@node Operating Environment Variables (environ)
+@subsection Environment Variables (environ)
+There is no support for passing environment variables into the operating
+environment since, conceptually, they don't make much sense.  Bare metal
+programs (e.g. bootloaders and kernels) don't usually have a lower level in the
+software stack where environment variables would live.
+
+Some programs, like @value{uboot}, have a way of storing persistent
+configuration data referred to as an environment, but the structure of it tends
+to be highly specific.  In those cases, it's better to instantiate device models
+that take the place of real hardware.  For example, @value{uboot} could be
+configured to store state in CFI flash, and use the @ref{dv-cfi} model.
+
+@node Operating Command Line Arguments (argv)
+@subsection Command Line Arguments (argv)
+There is no support for passing command line arguments into the operating
+environment since, conceptually, they don't make much sense.  Some programs,
+like @value{linux}, have a "command line", but passing that information tends
+to be highly ABI specific.
+
+@node Modeling Hardware
+@chapter Modeling Hardware
+TODO discuss models
+
+@node Common Device Models
+@section Device Models
+Many peripherals are available.
+
+@node dv-cfi
+@subsection cfi
+Common Flash Memory Interface (CFI) model.
+
+The flash memory defaults to being erased (all zeros) on every run.  The
+@code{file} property can be used for persistent storage.
+
+@subsubsection Properties
+@table @code
+@item @b{(required)} reg = <address> <size>
+Specify the @var{address} (within the parent bus) to attach the flash memory.
+The @var{size} controls how much of the flash memory is accessible.
+
+@item @b{(required)} cmdset = <primary; integer> [alt; integer]
+The CFI command set to use.  Only @code{1} (Intel) is supported currently.
+
+@item size = <device size>
+The flash @var{size} (in bytes).  Defaults to the @var{register size}.
+
+The @var{size} must be a power of 2.
+
+@item width = <8|16|32>
+The flash bus @var{width} (in bits).  Defaults to @code{8} bits.
+
+@item write_size = <integer>
+The flash maximum @var{write size} (in bytes).
+
+The @var{write size} must be a power of 2.
+
+The values specified are not interpreted and are passed directly through.  So
+the default is @code{0} which the CFI standard defines as @samp{not supported}.
+
+@item erase_regions = <number blocks> <block size> [<number blocks> <block size> ...]
+Define flash @var{erase regions}.  Defaults to 1 erase region (i.e. can only
+erase whole chip).
+
+@item voltage = <vcc min> <vcc max> <vpp min> <vpp max>
+Define flash voltage settings.  This is not used directly, but is included in
+the CFI query command responses.
+
+The values specified are not interpreted and are passed directly through.  So
+the defaults are @code{0 0 0 0} which the CFI standard defines as @samp{0.0V}.
+
+@item timeouts = <typ unit write> <typ buf write> <typ block erase> <typ chip erase> <max unit write> <max buf write> <max block erase> <max chip erase>
+Define flash timeout settings.  These are not used directly, but are included in
+the CFI query command responses.
+
+The values specified are not interpreted and are passed directly through.  So
+the defaults are @code{0 0 0 0 0 0 0 0 0} which the CFI standard defines as
+@samp{typ: 1µs, not supported, 1ms, not supported} and @samp{max: 1µs, 1ms, 1ms,
+not supported}.
+
+@item file = <file> [ro|rw]
+Use @var{file} as persistent storage of the flash memory data.  It will be
+memory mapped directly.
+
+Access mode defaults to @code{ro} (read-only).
+@end table
+
+@node dv-core
+@subsection core
+The root of the device tree.
+
+The core device, positioned at the root of the device tree appears to its child
+devices as a normal device just like every other device in the tree.
+
+Internally it is implemented using a core object.  Requests to attach (or
+detach) address spaces are passed to that core object.  Requests to transfer
+(DMA) data are reflected back down the device tree using the core_map data
+transfer methods.
+
+@subsubsection Examples
+@example
+# Define the core.
+/core
+# Attach devices below it.
+/core/glue-or@@0x11
+/core/glue-or@@0x11/interrupt-ranges 0 2
+@end example
+
+@node dv-glue
+@subsection glue
+Glue to interconnect and test hardware ports.
+
+The glue device provides two functions.  Firstly, it provides a mechanism for
+inspecting and driving the port network.  Secondly, it provides a set of boolean
+primitives that can be used to apply combinatorial operations to the port
+network.
+
+Glue devices have a variable number of big endian @code{output registers}.  Each
+register is target-word sized.  The registers can be read and written.
+
+Writing to an output register results in an event being driven (level determined
+by the value written) on the devices corresponding output port.
+
+Reading an @code{output register} returns either the last value written or the
+most recently computed value (for that register) as a result of an event ariving
+on that port (which ever was computed last).
+
+@subsubsection Device types
+At present the following device types are available:
+
+@table @code
+@item glue
+In addition to driving its output interrupt port with any value written to an
+interrupt input port is stored in the corresponding @code{output register}.
+Such input interrupts, however, are not propogated to an output interrupt port.
+
+@item glue-and
+The bit-wise AND of the interrupt inputs is computed and then both stored in
+@code{output register} zero and propogated to output interrupt output port zero.
+
+@item glue-or
+The bit-wise OR of the interrupt inputs is computed and then both stored in
+@code{output register} zero and propogated to output interrupt output port zero.
+
+@item glue-xor
+The bit-wise XOR of the interrupt inputs is computed and then both stored in
+@code{output register} zero and propogated to output interrupt output port zero.
+
+@c TODO: These are listed in the source, but not actually implemented yet.
+@c @item glue-nand
+@c @item glue-nor
+@c @item glue-not
+@end table
+
+@subsubsection Properties
+
+@table @code
+@item @b{(required)} reg = <address> <size>
+Specify the @var{address} (within the parent bus) that this device is to live.
+The address must be 2048 * sizeof (word) (8k in a 32-bit simulation) aligned.
+
+@item interrupt-ranges = <int-number> <range>
+If present, this specifies the number of valid interrupt inputs (up to the
+maximum of 2048).  By default, @var{int-number} is zero and @var{range} is
+determined by the @var{reg size}.
+@end table
+
+@subsubsection Ports
+@itemize @bullet
+@item @code{int@var{N}} (bidirectional):
+Both an input and an output port for connecting to ports on other devices.
+@end itemize
+
+@subsubsection Examples
+Create source, bitwize-and, and sink glue devices.  Since the device at address
+@var{0x10000} is of size @var{8} it will have two output interrupt ports.
+@example
+/iobus@@0xf0000000/glue@@0x10000/reg 0x10000 8
+/iobus@@0xf0000000/glue-and@@0x20000/reg 0x20000 4
+/iobus@@0xf0000000/glue-and/interrupt-ranges 0 2
+/iobus@@0xf0000000/glue@@0x30000/reg 0x30000 4
+@end example
+
+Wire the two source interrupts to the AND device:
+@example
+/iobus@@0xf0000000/glue@@0x10000 > 0 0 /iobus/glue-and
+/iobus@@0xf0000000/glue@@0x10000 > 1 1 /iobus/glue-and
+@end example
+
+Wire the AND device up to the sink so that the and's output is not left open.
+@example
+/iobus@@0xf0000000/glue-and > 0 0 /iobus/glue@@0x30000
+@end example
+
+With the above configuration, the client program is able to compute a two bit
+AND.  For instance the @var{C} stub below prints 1 AND 0.
+@example
+unsigned *input = (void*)0xf0010000;
+unsigned *output = (void*)0xf0030000;
+unsigned ans;
+input[0] = htonl(1);
+input[1] = htonl(0);
+ans = ntohl(*output);
+write_string("AND is ");
+write_int(ans);
+write_line();
+@end example
+
+@subsubsection Bugs
+
+A future implementation of this device may support multiple interrupt ranges.
+
+Some of the devices listed may not yet be fully implemented.
+
+Additional devices such as a D flip-flop (DFF), an inverter (INV) or a latch
+(LAT) may prove useful.
+
+@node dv-pal
+@subsection pal
+The @abbr{PAL, Privileged Architecture Library} for assorted device junk.
+
+Typical hardware dependant hack.  This device allows the firmware to gain access
+to all the things the firmware needs (but the OS doesn't).
+
+@subsubsection Registers
+The pal contains the following registers:
+
+@multitable @columnfractions .1 .05 .05 .05 .7
+@headitem Name @tab Address @tab Size @tab R/W @tab Description
+@item @code{RESET}
+@tab @code{0}
+@tab 8-bit
+@tab write
+@tab Halts the simulator.  The value written to the register is used as an
+exit status.
+
+@item @code{PROCESSOR ID}
+@tab @code{4}
+@tab 8-bit
+@tab read
+@tab Returns the processor identifier (0 .. N-1) of the processor performing
+the read.
+
+@item @code{INTERRUPT}
+@tab @code{8}
+@tab 16-bit
+@tab write
+@tab This register must be written using a two byte store.  The low byte
+(address @code{8}) specifies a port and the upper byte (address @code{9})
+specifies the level.  @var{level} is driven on the specified port.  By
+convention, the pal's interrupt ports (int0, int1, ...) are wired up to the
+corresponding processor's level sensative external interrupt pin.
+
+@item @code{PROCESSOR COUNT}
+@tab @code{12}
+@tab 8-bit
+@tab read
+@tab Returns the total number of processors active in the current simulation.
+
+@item @code{TTY INPUT FIFO}
+@tab @code{16}
+@tab 8-bit
+@tab read
+@tab Returns the next available character from the pal's tty input port.
+
+@item @code{TTY INPUT STATUS}
+@tab @code{20}
+@tab 8-bit
+@tab read
+@tab Nonzero if a character is available in @code{TTY INPUT FIFO}, zero
+otherwise.  Reading the register will consume the next character (if
+available).
+
+@item @code{TTY OUTPUT FIFO}
+@tab @code{24}
+@tab 8-bit
+@tab write
+@tab Queue the character to be written to the pal's tty output port.  It will
+be automatically flushed.
+
+@item @code{TTY OUTPUT STATUS}
+@tab @code{28}
+@tab 8-bit
+@tab read
+@tab Zero if the @code{TTY OUTPUT FIFO} is empty, nonzero otherwise.
+
+@item @code{COUNDOWN}
+@tab @code{32}
+@tab 32-bit BE
+@tab read/write
+@tab The countdown registers provide a non-repeating timed interrupt source.
+Writing zero to this register clears the countdown timer.  Writing a non-zero
+32-bit big-endian value to this register sets the countdown timer to expire in
+@var{value} ticks (ticks is target dependant).  Reading the countdown register
+returns the last value written.
+
+@item @code{COUNTDOWN VALUE}
+@tab @code{36}
+@tab 32-bit BE
+@tab read
+@tab Reading this 32-bit big-endian register returns the number of ticks
+remaining until the countdown timer expires.
+
+@item @code{TIMER}
+@tab @code{40}
+@tab 32-bit BE
+@tab read/write
+@tab The timer registers provide a periodic timed interrupt source.  Writing
+zero to this register clears the periodic timer.  Writing a 32-bit non-zero
+value to this register sets the periodic timer to triger every @var{value} ticks
+(ticks is target dependant).  Reading the timer register returns the last value
+written.
+
+@item @code{TIMER VALUE}
+@tab @code{44}
+@tab 32-bit BE
+@tab read
+@tab Reading this 32-bit big-endian register returns the number of ticks until
+the next periodic interrupt.
+@end multitable
+
+@itemize @bullet
+@item @code{0}: reset register (write, 8bit)
+@end itemize
+
+@subsubsection Properties
+
+@table @code
+@item @b{(required)} reg = <address> <size>
+Specify the address (within the parent bus) that this device is to be located.
+
+@item poll? = <boolean>
+If present and true, indicates that the device should poll its input.
+@end table
+
+@subsubsection Ports
+@itemize @bullet
+@item @code{int@var{N}} (output):
+Driven as a result of a write to the interrupt-port / interrupt-level register
+pair.  @var{N} is valid from @code{0} through @var{number of simulated
+processors}.
+
+@item @code{countdown} (output):
+Driven whenever the countdown counter reaches zero.
+
+@item @code{timer} (output):
+Driven whenever the timer counter reaches zero.
+@end itemize
+
+@subsubsection Examples
+@c INTERRUPT register write:
+@c Eg: A two byte write to address 8 of 0x0102
+@c   (big-endian) will result in processor 2's external interrupt pin
+@c   being asserted.
+
+@subsubsection Bugs
+At present the common simulator framework does not support input polling.
+
+@node dv-sockser
+@subsection sockser
+A pseudo device model for connecting data streams to network sockets.
+
+@node Architecture Specifics
+@chapter Architecture Specifics
+The GNU simulator has support for many different ISA's and models.
+
+@lowersections
+@include arch-aarch64.texi
+@raisesections
+@lowersections
+@include arch-arm.texi
+@raisesections
+@lowersections
+@include arch-avr.texi
+@raisesections
+@lowersections
+@include arch-bfin.texi
+@raisesections
+@lowersections
+@include arch-bpf.texi
+@raisesections
+@lowersections
+@include arch-cr16.texi
+@raisesections
+@lowersections
+@include arch-cris.texi
+@raisesections
+@lowersections
+@include arch-d10v.texi
+@raisesections
+@lowersections
+@include arch-frv.texi
+@raisesections
+@lowersections
+@include arch-ft32.texi
+@raisesections
+@lowersections
+@include arch-h8300.texi
+@raisesections
+@lowersections
+@include arch-iq2000.texi
+@raisesections
+@lowersections
+@include arch-lm32.texi
+@raisesections
+@lowersections
+@include arch-m32c.texi
+@raisesections
+@lowersections
+@include arch-m32r.texi
+@raisesections
+@lowersections
+@include arch-m68hc11.texi
+@raisesections
+@lowersections
+@include arch-mcore.texi
+@raisesections
+@lowersections
+@include arch-microblaze.texi
+@raisesections
+@lowersections
+@include arch-mips.texi
+@raisesections
+@lowersections
+@include arch-mn10300.texi
+@raisesections
+@lowersections
+@include arch-moxie.texi
+@raisesections
+@lowersections
+@include arch-msp430.texi
+@raisesections
+@lowersections
+@include arch-or1k.texi
+@raisesections
+@lowersections
+@include arch-ppc.texi
+@raisesections
+@lowersections
+@include arch-pru.texi
+@raisesections
+@lowersections
+@include arch-riscv.texi
+@raisesections
+@lowersections
+@include arch-rl78.texi
+@raisesections
+@lowersections
+@include arch-rx.texi
+@raisesections
+@lowersections
+@include arch-sh.texi
+@raisesections
+@lowersections
+@include arch-erc32.texi
+@raisesections
+@lowersections
+@include arch-v850.texi
+@raisesections
+
+@node Integration
+@chapter Integration
+Projects might want to integrate simulation directly without relying on the
+external @command{run} program.  The GNU simulator provides a libsim.a library
+for precisely this with the API defined in @file{sim/sim.h}.
+
+Multiple simulator instances may be instantiated at a time and operate
+independently.  Although not all backends support this correct and still rely
+on global state.  They are considered buggy and will be fixed one day.
+
+@node Integration API
+@section API
+The @file{sim/sim.h} header defines the entry points to the simulator library.
+
+The overall life cycle of a simulator looks something like:
+[sim_open -> sim_create_inferior -> sim_load] ->
+[sim_resume]
+[sim_close]
+
+@node Integration Core API
+@subsection Core APIs
+
+@node SIM_DESC
+@subsubsection SIM_DESC
+Each simulator instance is represented by a @code{SIM_DESC}, often abbreviated
+@code{sd}, which is the simulator descriptor.  It is an opaque handle to pass
+to the simulator APIs akin to a file descriptor.
+
+@node sim_open
+@subsubsection sim_open
+
+@node sim_create_inferior
+@subsubsection sim_create_inferior
+
+@node sim_load
+@subsubsection sim_load
+
+@node sim_resume
+@subsubsection sim_resume
+
+@node sim_close
+@subsubsection sim_close
+
+@node sim_stop
+@subsubsection sim_stop
+
+@node sim_stop_reason
+@subsubsection sim_stop_reason
+
+
+@node Integration Memory API
+@subsection Memory APIs
+
+@node sim_read
+@subsubsection sim_read
+
+@node sim_write
+@subsubsection sim_write
+
+@node sim_fetch_register
+@subsubsection sim_fetch_register
+
+@node sim_store_register
+@subsubsection sim_store_register
+
+
+@node Integration Supplemental API
+@subsection Supplemental APIs
+These APIs are not needed by most projects.  They provide functionality for
+specific use cases.
+
+@node sim_complete_command
+@subsubsection sim_complete_command
+
+
+@node sim_do_command
+@subsubsection sim_do_command
+
+@node sim_info
+@subsubsection sim_info
+
+@node sim_memory_map
+@subsubsection sim_memory_map
+
+@node Integration Callbacks
+@section Callbacks
+TODO
+- syscalls
+- stat structs
+- errno maps
+- signal maps
+- open maps
+- etc...
+
+@node Reporting Bugs
+@chapter Reporting Bugs
+
+Your bug reports play an essential role in making simulations reliable.
+
+Reporting a bug may help you by bringing a solution to your problem, or it may
+not.  But in any case the principal function of a bug report is to help the
+entire community by making the next version work better.  Bug reports are your
+contribution to the maintenance of the simulator.
+
+@node Bug Criteria
+@section Have You Found a Bug?
+@cindex bug criteria
+
+If you are not sure whether you have found a bug, here are some guidelines:
+
+@itemize @bullet
+@cindex fatal signal
+@cindex simulator crash
+@cindex crash of simulator
+@item
+If the simulator gets a fatal signal, for any input whatever, that is a bug.
+Reliable simulators never crash.
+
+@cindex error on valid input
+@item
+If @command{as} produces an error message for valid input, that is a bug.
+
+@cindex invalid input
+@item
+If @command{as} does not produce an error message for invalid input, that
+is a bug.  However, you should note that your idea of ``invalid input'' might
+be our idea of ``an extension'' or ``support for traditional practice''.
+
+@item
+If you are an experienced user of simulators, your suggestions for improvement
+of @command{as} are welcome in any case.
+@end itemize
+
+@node Bug Reporting
+@section How to Report Bugs
+@cindex bug reports
+@cindex simulator bugs, reporting
+
+A number of companies and individuals offer support for @sc{gnu} products.  If
+you obtained @command{as} from a support organization, we recommend you
+contact that organization first.
+
+You can find contact information for many support companies and
+individuals in the file @file{etc/SERVICE} in the @sc{gnu} Emacs
+distribution.
+
+@ifset BUGURL
+In any event, we also recommend that you send bug reports for @command{as}
+to @value{BUGURL}.
+@end ifset
+
+The fundamental principle of reporting bugs usefully is this:
+@strong{report all the facts}.  If you are not sure whether to state a
+fact or leave it out, state it!
+
+Often people omit facts because they think they know what causes the problem
+and assume that some details do not matter.  Thus, you might assume that the
+name of a symbol you use in an example does not matter.  Well, probably it does
+not, but one cannot be sure.  Perhaps the bug is a stray memory reference which
+happens to fetch from the location where that name is stored in memory;
+perhaps, if the name were different, the contents of that location would fool
+the simulator into doing the right thing despite the bug.  Play it safe and
+give a specific, complete example.  That is the easiest thing for you to do,
+and the most helpful.
+
+Keep in mind that the purpose of a bug report is to enable us to fix the bug if
+it is new to us.  Therefore, always write your bug reports on the assumption
+that the bug has not been reported previously.
+
+Sometimes people give a few sketchy facts and ask, ``Does this ring a
+bell?''  This cannot help us fix a bug, so it is basically useless.  We
+respond by asking for enough details to enable us to investigate.
+You might as well expedite matters by sending them to begin with.
+
+To enable us to fix the bug, you should include all these things:
+
+@itemize @bullet
+@item
+The version of @command{as}.  @command{as} announces it if you start
+it with the @samp{--version} argument.
+
+Without this, we will not know whether there is any point in looking for
+the bug in the current version of @command{as}.
+
+@item
+Any patches you may have applied to the @command{as} source.
+
+@item
+The type of machine you are using, and the operating system name and
+version number.
+
+@item
+What compiler (and its version) was used to compile @command{as}---e.g.
+``@code{gcc-2.7}''.
+
+@item
+The command arguments you gave the simulator to assemble your example and
+observe the bug.  To guarantee you will not omit something important, list them
+all.  A copy of the Makefile (or the output from make) is sufficient.
+
+If we were to try to guess the arguments, we would probably guess wrong
+and then we might not encounter the bug.
+
+@item
+A complete input file that will reproduce the bug.  If the bug is observed when
+the simulator is invoked via a compiler, send the simulator source, not the
+high level language source.  Most compilers will produce the simulator source
+when run with the @samp{-S} option.  If you are using @code{GCC}, use
+the options @samp{-v --save-temps}; this will save the simulator source in a
+file with an extension of @file{.s}, and also show you exactly how
+@command{as} is being run.
+
+@item
+A description of what behavior you observe that you believe is
+incorrect.  For example, ``It gets a fatal signal.''
+
+Of course, if the bug is that @command{as} gets a fatal signal, then we
+will certainly notice it.  But if the bug is incorrect output, we might not
+notice unless it is glaringly wrong.  You might as well not give us a chance to
+make a mistake.
+
+Even if the problem you experience is a fatal signal, you should still say so
+explicitly.  Suppose something strange is going on, such as, your copy of
+@command{as} is out of sync, or you have encountered a bug in the C
+library on your system.  (This has happened!)  Your copy might crash and ours
+would not.  If you told us to expect a crash, then when ours fails to crash, we
+would know that the bug was not happening for us.  If you had not told us to
+expect a crash, then we would not be able to draw any conclusion from our
+observations.
+
+@item
+If you wish to suggest changes to the @command{as} source, send us context
+diffs, as generated by @code{diff} with the @samp{-u}, @samp{-c}, or @samp{-p}
+option.  Always send diffs from the old file to the new file.  If you even
+discuss something in the @command{as} source, refer to it by context, not
+by line number.
+
+The line numbers in our development sources will not match those in your
+sources.  Your line numbers would convey no useful information to us.
+@end itemize
+
+Here are some things that are not necessary:
+
+@itemize @bullet
+@item
+A description of the envelope of the bug.
+
+Often people who encounter a bug spend a lot of time investigating
+which changes to the input file will make the bug go away and which
+changes will not affect it.
+
+This is often time consuming and not very useful, because the way we
+will find the bug is by running a single example under the debugger
+with breakpoints, not by pure deduction from a series of examples.
+We recommend that you save your time for something else.
+
+Of course, if you can find a simpler example to report @emph{instead}
+of the original one, that is a convenience for us.  Errors in the
+output will be easier to spot, running under the debugger will take
+less time, and so on.
+
+However, simplification is not vital; if you do not want to do this,
+report the bug anyway and send us the entire test case you used.
+
+@item
+A patch for the bug.
+
+A patch for the bug does help us if it is a good one.  But do not omit
+the necessary information, such as the test case, on the assumption that
+a patch is all we need.  We might see problems with your patch and decide
+to fix the problem another way, or we might not understand it at all.
+
+Sometimes with a program as complicated as @command{as} it is very hard to
+construct an example that will make the program follow a certain path through
+the code.  If you do not send us the example, we will not be able to construct
+one, so we will not be able to verify that the bug is fixed.
+
+And if we cannot understand what bug you are trying to fix, or why your
+patch should be an improvement, we will not install it.  A test case will
+help us to understand.
+
+@item
+A guess about what the bug is or what it depends on.
+
+Such guesses are usually wrong.  Even we cannot guess right about such
+things without first using the debugger to find the facts.
+@end itemize
+
+@node Acknowledgements
+@unnumbered Acknowledgements
+
+If you have contributed and your name isn't listed here, it is not meant as a
+slight.  We just don't know about it.  File a bug for us, and we'll correct the
+situation.
+
+@c List everyone (sorted).
+@author Ben Elliston
+@author Frank Ch. Eigler
+@author Andrew Burgess
+@author Mike Frysinger
+
+@c TODO: Fill in maintainers & a bit of history.
+
+@node Installing
+@appendix Installing
+@cindex installation
+
+@node Requirements
+@section Requirements for building
+@cindex building, requirements for
+
+Building requires various tools and packages to be available.
+Other packages will be used only if they are found.
+
+@heading Necessary Tools/Packages for Building
+@table @asis
+@item C11 compiler
+The GNU Simulator is written in C11.  It should be buildable with any
+recent C11 compiler, e.g.@: GCC.
+
+@end table
+
+@heading Optional Tools/Packages for Building
+@table @asis
+@item SDL
+@anchor{SDL}
+The Simple DirectMedia Layer (SDL) may be utilized if available.  This library
+may be included with your operating system distribution; if it is not, you can
+get the latest version from @url{https://www.libsdl.org/}.
+The @file{configure} script will search for this library in several standard
+locations; if it is installed in an unusual path, you can use the
+@option{SDL_CFLAGS} and @option{SDL_LIBS} options to specify the compiler &
+linker settings.
+
+The library will not be linked directly.  Instead, it will be loaded dynamically
+(via @code{dlopen}) at runtime.  This allows building with support for SDL, but
+not actually requiring it if the features aren't used.
+
+SDL 1 & SDL 2 are supported, but the version is fixed at build time.
+
+SDL is used for:
+
+@itemize @bullet
+@item
+Emulating framebuffer graphics
+(@pxref{bfin_ppi} & @pxref{bfin_eppi})
+@end itemize
+@end table
+
+@node Running Configure
+@section Invoking the @file{configure} Script
+@cindex configuring
+Releases include a @file{configure} script that automates the process of
+preparing the simulator for installation; you can then use @code{make} to build
+the @code{run} program.
+@iftex
+@c irrelevant in info file; it's as current as the code it lives with.
+@footnote{If you have a more recent simulator version than @value{VERSION},
+look at the @file{README} file in the sources; we may have improved the
+installation procedures since publishing this manual.}
+@end iftex
+
+The distribution includes all the source code you need in a single directory,
+whose name is usually composed by appending the version number to @samp{gdb}.
+That directory contains:
+
+@table @code
+@item gdb-@value{VERSION}/configure @r{(and supporting files)}
+script for configuring everything
+
+@item gdb-@value{VERSION}/sim/
+the source specific to the simulator itself
+
+@item gdb-@value{VERSION}/gdb/
+the source specific to @sc{gdb} itself
+
+@item gdb-@value{VERSION}/bfd/
+source for the Binary File Descriptor library
+
+@item gdb-@value{VERSION}/include/
+@sc{gnu} include files
+
+@item gdb-@value{VERSION}/libiberty/
+source for the @samp{-liberty} free software library
+
+@item gdb-@value{VERSION}/opcodes/
+source for the library of opcode tables and disassemblers
+
+@item gdb-@value{VERSION}/readline/
+source for the @sc{gnu} command-line interface
+@end table
+
+There may be other subdirectories as well.
+
+The simplest way to configure and build is to run @file{configure}
+from the @file{gdb-@var{version-number}} source directory, which in
+this example is the @file{gdb-@value{VERSION}} directory.
+
+First switch to the @file{gdb-@var{version-number}} source directory
+if you are not already in it; then run @file{configure}.  Pass the
+identifier for the platform on which the simulator will run as an
+argument.
+
+For example:
+
+@smallexample
+cd gdb-@value{VERSION}
+./configure
+make
+@end smallexample
+
+Running @samp{configure} and then running @code{make} builds the
+included supporting libraries, then @code{gdb} itself.  The configured
+source files, and the binaries, are left in the corresponding source
+directories.
+
+@need 750
+@file{configure} is a Bourne-shell (@code{/bin/sh}) script; if your
+system does not recognize this automatically when you run a different
+shell, you may need to run @code{sh} on it explicitly:
+
+@smallexample
+sh configure
+@end smallexample
+
+You should run the @file{configure} script from the top directory in the
+source tree, the @file{gdb-@var{version-number}} directory.  If you run
+@file{configure} from one of the subdirectories, you will configure only
+that subdirectory.  That is usually not what you want.  In particular,
+if you run the first @file{configure} from the @file{gdb} subdirectory
+of the @file{gdb-@var{version-number}} directory, you will omit the
+configuration of @file{bfd}, @file{readline}, and other sibling
+directories of the @file{gdb} subdirectory.  This leads to build errors
+about missing include files such as @file{bfd/bfd.h}.
+
+You can install @code{run} anywhere.  The best way to do this
+is to pass the @code{--prefix} option to @code{configure}, and then
+install it with @code{make install}.
+
+@node Separate Objdir
+@section Compiling in Another Directory
+
+If you want to run simulator versions for several host or target machines,
+you need a different @code{run} compiled for each combination of
+host and target.  @file{configure} is designed to make this easy by
+allowing you to generate each configuration in a separate subdirectory,
+rather than in the source directory.  If your @code{make} program
+handles the @samp{VPATH} feature (@sc{gnu} @code{make} does), running
+@code{make} in each of these directories builds the @code{gdb}
+program specified there.
+
+To build @code{gdb} in a separate directory, run @file{configure}
+with the @samp{--srcdir} option to specify where to find the source.
+(You also need to specify a path to find @file{configure}
+itself from your working directory.  If the path to @file{configure}
+would be the same as the argument to @samp{--srcdir}, you can leave out
+the @samp{--srcdir} option; it is assumed.)
+
+For example, with version @value{VERSION}, you can build in a separate directory
+for a Sun 4 like this:
+
+@smallexample
+@group
+cd gdb-@value{VERSION}
+mkdir ../gdb-sun4
+cd ../gdb-sun4
+../gdb-@value{VERSION}/configure
+make
+@end group
+@end smallexample
+
+When @file{configure} builds a configuration using a remote source
+directory, it creates a tree for the binaries with the same structure
+(and using the same names) as the tree under the source directory.  In
+the example, you'd find the Sun 4 library @file{libiberty.a} in the
+directory @file{gdb-sun4/libiberty}, and @code{run} itself in
+@file{gdb-sun4/sim/@var{arch}/g}.
+
+Make sure that your path to the @file{configure} script has just one instance
+of @file{gdb} in it.  If your path to @file{configure} looks like
+@file{../gdb-@value{VERSION}/sim/configure}, you are configuring only one
+subdirectory, not the whole package.  This leads to build errors about missing
+include files such as @file{bfd/bfd.h}.
+
+One popular reason to build several configurations in separate directories is to
+configure for cross-compiling (where the simulator runs on one machine---the
+@dfn{host}---while debugging programs that are compiled for another
+machine---the @dfn{target}).  You specify a cross-debugging target by giving the
+@samp{--target=@var{target}} option to @file{configure}.
+
+When you run @code{make} to build a program or library, you must run it in a
+configured directory---whatever directory you were in when you called
+@file{configure} (or one of its subdirectories).
+
+The @code{Makefile} that @file{configure} generates in each source directory
+also runs recursively.  If you type @code{make} in a source directory such as
+@file{gdb-@value{VERSION}} (or in a separate configured directory configured
+with @samp{--srcdir=@var{dirname}/gdb-@value{VERSION}}), you will build all
+the required libraries, and then build the simulator.
+
+When you have multiple hosts or targets configured in separate directories, you
+can run @code{make} on them in parallel (for example, if they are NFS-mounted on
+each of the hosts); they will not interfere with each other.
+
+@node Config Names
+@section Specifying Names for Hosts and Targets
+
+The specifications used for hosts and targets in the @file{configure} script are
+based on a three-part naming scheme, but some short predefined aliases are also
+supported.  The full naming scheme encodes three pieces of information in the
+following pattern:
+
+@smallexample
+@var{architecture}-@var{vendor}-@var{os}
+@end smallexample
+
+For example, you can use the alias @code{sun4} as a @var{host} argument, or as
+the value for @var{target} in a @code{--target=@var{target}} option.  The
+equivalent full name is @samp{sparc-sun-sunos4}.
+
+The @file{configure} script does not provide any query facility to list all
+supported host and target names or aliases.  @file{configure} calls the Bourne
+shell script @code{config.sub} to map abbreviations to full names; you can read
+the script, if you wish, or you can use it to test your guesses on
+abbreviations---for example:
+
+@smallexample
+% sh config.sub i386-linux
+i386-pc-linux-gnu
+% sh config.sub alpha-linux
+alpha-unknown-linux-gnu
+% sh config.sub hp9k700
+hppa1.1-hp-hpux
+% sh config.sub sun4
+sparc-sun-sunos4.1.1
+% sh config.sub sun3
+m68k-sun-sunos4.1.1
+% sh config.sub i986v
+Invalid configuration `i986v': machine `i986v' not recognized
+@end smallexample
+
+@noindent
+@code{config.sub} is also distributed in the source directory.
+
+@node Configure Options
+@section @file{configure} Options
+
+Here is a summary of the @file{configure} options and arguments that are most
+often useful when building.  @file{configure} also has several other options
+not listed here.  @xref{Running configure Scripts,,,autoconf}, for a full
+explanation of @file{configure}.
+
+@smallexample
+configure @r{[}--help@r{]}
+          @r{[}--prefix=@var{dir}@r{]}
+          @r{[}--exec-prefix=@var{dir}@r{]}
+          @r{[}--srcdir=@var{dirname}@r{]}
+          @r{[}--target=@var{target}@r{]}
+@end smallexample
+
+@noindent
+You may introduce options with a single @samp{-} rather than
+@samp{--} if you prefer; but you may abbreviate option names if you use
+@samp{--}.
+
+@node Configure Common Options
+@subsection Common Options
+These are the generic configure options that apply to all projects and are
+frequently useful to people building from source.
+
+@table @option
+@item --help
+Display a quick summary of how to invoke @file{configure}.
+
+@item --prefix=@var{dir}
+Configure the source to install programs and files under directory
+@file{@var{dir}}.
+
+@item --exec-prefix=@var{dir}
+Configure the source to install programs under directory
+@file{@var{dir}}.
+
+@c avoid splitting the warning from the explanation:
+@need 2000
+@item --srcdir=@var{dirname}
+Use this option to make configurations in directories separate from the source
+directories.  Among other things, you can use this to build (or maintain)
+several configurations simultaneously, in separate directories.
+@file{configure} writes configuration-specific files in the current directory,
+but arranges for them to use the source in the directory @var{dirname}.
+@file{configure} creates directories under the working directory in parallel to
+the source directories below @var{dirname}.
+
+@item --target=@var{target}
+Configure for cross-debugging programs running on the specified @var{target}.
+Without this option, the simulator is configured to debug programs that run on
+the same machine (@var{host}) as the simulator itself.
+
+There is no convenient way to generate a list of all available targets.  Also
+see the @code{--enable-targets} option, below.
+
+@item --enable-targets=@r{[}@var{target}@r{]}@dots{}
+@itemx --enable-targets=all
+Configure for cross-debugging programs running on the specified list of targets.
+The special value @samp{all} configures for debugging programs running on any
+target it supports.
+
+@item --with-relocated-sources=@var{dir}
+Sets up the default source path substitution rule so that directory names
+recorded in debug information will be automatically adjusted for any directory
+under @var{dir}.  @var{dir} should be a subdirectory of the configured prefix,
+the one mentioned in the @code{--prefix} or @code{--exec-prefix} options to
+configure.  This option is useful if installing to a different place after it
+is built.
+
+@item --enable-64-bit-bfd
+Enable 64-bit support in BFD on 32-bit hosts.
+
+@item --with-sysroot=@var{dir}
+Use @var{dir} as the default system root directory for libraries whose file
+names begin with @file{/lib}' or @file{/usr/lib'}.  (The value of @var{dir} can
+be modified at run time by using the @command{--sysroot} option.)  If @var{dir}
+is under the configured prefix (set with @code{--prefix} or @code{--exec-prefix
+options}, the default system root will be automatically adjusted if and when
+everything is moved to a different location.
+
+@end table
+
+@node Configure Simulator Options
+@subsection Simulator Options
+These are the GNU Simulator specific options.  None of them are required to get
+a working build---many options can already be controlled at runtime instead.
+These are provided to help fine tune overall execution in case you need to shave
+off a bit of execution time.
+
+@table @option
+@item --enable-sim
+Enable or disable the GNU Simulator specifically.
+
+@item --enable-sim-alignment=@var{align}
+Force the @ref{Memory Alignment} behavior.  This will always override the
+runtime selections.
+
+@item --enable-sim-assert
+Whether to enable extra internal asserts that keep track of general health of
+simulator runtime and its data structures.  These can be helpful when tracking
+down bugs, but are not required for correct functioning, and can provide a minor
+speed boost when they're disabled.
+
+@item --enable-sim-endian=@var{endian}
+Force the target byte endian orientation.  This will always override the runtime
+selections.
+
+The default depends on the specific architecture backend (which tends to match
+the hardware, and @ref{Config Names}), and may be overridden by
+@option{--endian}.
+
+Possible @var{endian} settings:
+@itemize @bullet
+@item @samp{big}: Big byte endian orientation.
+@item @samp{little}: Little byte endian orientation.
+@end itemize
+
+@item --enable-sim-environment=@var{environment}
+Force one of the @ref{Runtime Environments}.  This will always override the
+runtime selections.
+
+@item --enable-sim-hardware
+Whether to enable hardware/device simulation.  This is normally enabled as it
+doesn't incur runtime overhead unless devices are actually used.
+
+@item --enable-sim-inline=@var{inlines}
+A comma separated list of which sim modules should be inlined.  By default, no
+modules are inlined.
+
+This often will greatly increase the code size of the program, but may increase
+the speed at the same time.
+
+Specifying @samp{yes} will inline all modules.
+
+@item --enable-sim-profile=opts
+A comma separated list of which profile subsystems to support.  By default, all
+subsystems are enabled except for debug.
+
+@xref{Profiling Options} for available subsystem names.
+
+@item --enable-sim-reserved-bits
+Specify whether to check reserved bits in instruction.
+
+This option should not be specified by most users.
+
+@item --enable-sim-scache=@var{size}
+@i{Only for backends using @value{cgen}.}
+
+The size (in bytes) of the semantic cache.  The default is 16384 (16KiB).
+
+@item --enable-sim-stdio
+Whether input/output is routed through callbacks to the C library stdio layers
+(the default), or directly to the underlying file descriptors.  Most people will
+never change this.
+
+@item --enable-sim-trace=@var{opts}
+A comma separated list of which trace subsystems to support.  The default is all
+subsystems except for debug (see @option{--enable-sim-debug} for more info).
+
+@xref{Tracing Options} for available subsystem names.
+
+@item --enable-sim-frv-trapdump
+@i{For the @ref{FRV} architecture only.}
+
+Make unknown traps dump CPU registers for easier debugging.
+
+@item --disable-sim-rx-cycle-accurate
+@i{For the @ref{RX} architecture only.}
+
+Disable cycle accurate simulation which speeds up overall runtime.  If you
+don't need cycle accuracy (e.g. for performance tuning), then you should turn
+this option off.
+
+@end table
+
+@node Configure Developer Options
+@subsection Developer Options
+These are largely meant for developers of the GNU Simulator itself.
+
+@table @option
+@item --enable-build-warnings
+When building the sources, ask the compiler to warn about any code which looks
+even vaguely suspicious.  It passes many different warning flags, depending on
+the exact version of the compiler you are using.
+
+This option applies to all projects in the source tree, not just the simulator.
+
+@item --enable-sim-build-warnings
+When building the simulator sources, ask the compiler to warn about any code
+which looks even vaguely suspicious.  It passes many different warning flags,
+depending on the exact version of the compiler you are using.
+
+This option applies only to the simulator.  It allows building all the other
+projects with one set of warnings, but the simulator with a different set.
+
+@item --enable-werror
+Treat compiler warnings as errors.  It adds the @code{-Werror} flag
+to the compiler, which will fail the compilation if the compiler
+outputs any warning messages.
+
+@item --enable-example-sims
+Enable example simulator backends.  If your target does not have an architecture
+backend, these will provide simple toy CPUs for reference.  Useful when porting
+to a new architecture.
+
+@item --enable-maintainer-mode
+Enable build rules and dependencies only useful to simulator developers.  For
+example, turn on automatic regeneration of build scripts and source files.
+These are often expensive operations and require additional tools.
+
+@item --enable-cgen-maint=@var{dir}
+Enable build rules and dependencies, specific to @value{cgen}, only useful to
+simulator developers.  If you're working on an architecture backend that uses
+@value{cgen}, then this is a necessity.
+
+Normally @value{cgen} will be checked out in the top level of the source tree
+(alongside the @file{sim/} directory).  The optional @var{dir} setting allows
+specifying any path to the @value{cgen} source tree.
+
+@item --enable-sim-debug=opts
+A comma separated list of which debug subsystems to support.  By default, none
+are enabled.  This setting first requires that @code{debug} be enabled with the
+@option{--enable-sim-trace} option.
+
+@xref{Debugging Options} for available subsystem names.
+@end table
+
+@node Newlib ABI
+@appendix Newlib ABI
+These are the ABI constants & structures that @value{newlib} uses.  They are
+autogenerated from the @value{newlib} source tree.
+
+@node Newlib ABI Errno
+@section Errno Values
+@include abi-newlib-errno.texi
+
+@node Newlib ABI Signal Numbers
+@section Signal Numbers
+@include abi-newlib-signal.texi
+
+@node Newlib ABI Open Flags
+@section Open Flags
+@include abi-newlib-open.texi
+
+@node Newlib ABI Syscalls
+@section Syscall Numbers
+@include abi-newlib-sys.texi
+
+@node Porting
+@appendix Porting
+Porting the GNU Simulator to a new architecture can be fun!
+
+This information is maintained in the wiki.@*
+@url{https://sourceware.org/gdb/wiki/Sim/Porting}
+
+Documentation is maintained only for the latest source tree, not for releases.
+If you need to work on an old release, the source is probably your best bet.
+
+@node Internals
+@appendix Internals
+Adding new features to the GNU Simulator can be fun!
+
+This information is maintained in the wiki.@*
+@url{https://sourceware.org/gdb/wiki/Sim/Internals}
+
+Documentation is maintained only for the latest source tree, not for releases.
+If you need to work on an old release, the source is probably your best bet.
+
+@c todo discuss CGEN
+@c todo discuss IGEN
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include fdl.texi
+
+@c To avoid filename clashes between index.html and Index.html on systems with
+@c case-insentivie filesystems, we avoid the chapter name "Index".
+
+@node Concept Index
+@unnumbered Concept Index
+@printindex cp
+
+@node Syscall Index
+@unnumbered Syscall Index
+@printindex sc
+
+@node Device Model Index
+@unnumbered Device Model Index
+@printindex dv
+
+@node Public API Index
+@unnumbered Public API Index
+@printindex fn
+
+@bye

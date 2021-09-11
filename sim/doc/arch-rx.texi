@@ -1,0 +1,7 @@
+@node RX
+@chapter RX
+Renesas' 32-bit microcontrollers.
+
+@node RX Environment Support
+@section Environment Support
+Only the virtual environment is supported.

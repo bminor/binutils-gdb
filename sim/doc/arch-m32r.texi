@@ -1,0 +1,16 @@
+@node M32R
+@chapter M32R
+Mitsubishi Electric's M32R RISC architecture.
+
+@node M32R Environment Support
+@section Environment Support
+All environments are supported: virtual, user, operating.
+
+@node M32R Device Models
+@section Device Models
+
+@node m32r_cache
+@subsection m32r_cache
+
+@node m32r_uart
+@subsection m32r_uart

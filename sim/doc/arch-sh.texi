@@ -1,0 +1,7 @@
+@node SuperH
+@chapter SuperH
+Hitachi's SuperH architecture.
+
+@node SuperH Environment Support
+@section Environment Support
+Only the virtual environment is supported.

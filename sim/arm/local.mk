@@ -47,6 +47,3 @@ noinst_LIBRARIES += %D%/libsim.a
 	$(SIM_COMMON_LIBS)
 
 noinst_PROGRAMS += %D%/run
-
-%C%docdir = $(docdir)/%C%
-%C%doc_DATA = %D%/README

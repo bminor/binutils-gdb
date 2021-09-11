@@ -1,0 +1,7 @@
+@node OpenRISC
+@chapter OpenRISC
+OpenCores' OpenRISC architecture.
+
+@node OpenRISC Environment Support
+@section Environment Support
+Only the virtual environment is supported.

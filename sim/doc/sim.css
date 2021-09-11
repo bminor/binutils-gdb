@@ -1,0 +1,23 @@
+@charset "utf-8";
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #333;
+    color: #FFF;
+  }
+
+  a:link {
+    color: #8CB4FF;
+  }
+
+  a:visited {
+    color: #8CB400;
+  }
+}
+
+/* This is ~480px with 16pt font.  */
+@media only screen and (max-width: 30em) {
+  blockquote, dd, div.display, div.example, ul {
+    margin-left: 1em;
+  }
+}

@@ -1,0 +1,7 @@
+@node PowerPC
+@chapter PowerPC
+IBM's PowerPC architecture.
+
+@node PowerPC Environment Support
+@section Environment Support
+All environments are fully supported: virtual, user, operating.

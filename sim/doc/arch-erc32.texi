@@ -1,0 +1,13 @@
+@node SPARC
+@chapter SPARC
+Sun Microsystems' Scalable Processor Architecture (SPARC) architectures.
+
+@node SPARC ISA Support
+@section ISA Support
+Currently only the ERC32 (SPARC V7) is supported.
+
+@node SPARC Environment Support
+@section Environment Support
+Only the virtual environment is supported.
+
+@c TODO is this true ?

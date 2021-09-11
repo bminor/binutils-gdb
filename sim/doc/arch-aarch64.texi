@@ -1,0 +1,28 @@
+@node AArch64
+@chapter AArch64
+Arm Ltd's 64-bit ARM64 RISC architecture.
+
+@node AArch64 Environment Support
+@section Environment Support
+Only the virtual environment is supported.
+
+@node AArch64 Virtual Environment Syscall ABI
+@subsection Virtual Environment Syscall ABI
+The syscall ABI, as used by the RDI (Angel) monitor and @value{libgloss} in the
+virtual environment, uses the interface defined in the following table.
+
+@multitable @columnfractions .2 .3 .5
+@headitem Field @tab Assembly/Register @tab Description
+@item instruction
+@tab @center @code{hlt #0xf000;}
+@tab The assembly instruction to invoke the syscall handler.
+@item (in) syscall NR
+@tab @center @code{w0}
+@tab The system call number to select which function to run.
+@item (in) parameters
+@tab @center @code{x1}
+@tab Pointer to the syscall argument array (64-bit elements).
+@item (out) return & error
+@tab @center @code{x0}
+@tab The return value (most commonly used).
+@end multitable

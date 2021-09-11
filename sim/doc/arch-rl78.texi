@@ -1,0 +1,7 @@
+@node RL78
+@chapter RL78
+Renesas' 16-bit RL78 MCUs.
+
+@node RL78 Environment Support
+@section Environment Support
+Only the virtual environment is supported.

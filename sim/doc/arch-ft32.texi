@@ -1,0 +1,7 @@
+@node FT32
+@chapter FT32
+Future Technology Devices International (FTDI) Limited's FT32 processor.
+
+@node FT32 Environment Support
+@section Environment Support
+Only the virtual environment is supported.

@@ -1,0 +1,7 @@
+@node M32C
+@chapter M32C
+Renesas's M16C & M32C proessors.
+
+@node M32C Environment Support
+@section Environment Support
+Only the virtual environment is supported.

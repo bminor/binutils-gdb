@@ -25,28 +25,6 @@
 #include "sim-main.h"
 #include "hw-main.h"
 
-/* DEVICE
-
-   core - root of the device tree
-
-   DESCRIPTION
-
-   The core device, positioned at the root of the device tree appears
-   to its child devices as a normal device just like every other
-   device in the tree.
-
-   Internally it is implemented using a core object.  Requests to
-   attach (or detach) address spaces are passed to that core object.
-   Requests to transfer (DMA) data are reflected back down the device
-   tree using the core_map data transfer methods.
-
-   PROPERTIES
-
-   None.
-
-   */
-
-
 static void
 dv_core_attach_address_callback (struct hw *me,
 				 int level,

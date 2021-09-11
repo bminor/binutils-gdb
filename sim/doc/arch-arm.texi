@@ -1,0 +1,53 @@
+@node ARM
+@chapter ARM
+Arm Ltd's 32-bit ARM RISC architecture.
+
+Forked from the venerable ARMulator project.
+
+@node ARM ISA Support
+@section ISA Support
+ARM6, ARM7, ARM32, and Thumb are supported.
+
+@node ARM Environment Support
+@section Environment Support
+Only the virtual environment is supported.
+
+@node ARM Virtual Environment Syscall ABI
+@subsection Virtual Environment Syscall ABI
+The syscall ABI, as used by @url{https://sourceware.org/redboot/,RedBoot} and
+@value{libgloss} in the virtual environment, uses the interface defined in the
+following table.
+
+@c There is also support for syscall NR in the SWI number instead of R0, but
+@c documenting just this one interface seems easiest.
+@c The thumb "swi 0x18" does not appear to be implemented currently.
+@multitable @columnfractions .2 .3 .5
+@headitem Field @tab Assembly/Register @tab Description
+@item instruction
+@tab @center @code{swi 0x180001;}
+@tab The assembly instruction to invoke the syscall handler.
+@item (in) syscall NR
+@tab @center @code{R0}
+@tab The system call number to select which function to run.
+@item (in) arg 1
+@tab @center @code{R1}
+@tab The first syscall argument.
+@item (in) arg 2
+@tab @center @code{R2}
+@tab The second syscall argument.
+@item (in) arg 3
+@tab @center @code{R3}
+@tab The third syscall argument.
+@item (in) arg 4
+@tab @center @code{R4}
+@tab The fourth syscall argument.
+@item (in) arg 5
+@tab @center @code{R5}
+@tab The fifth syscall argument.
+@item (in) arg 6
+@tab @center @code{R6}
+@tab The sixth syscall argument.
+@item (out) return & error
+@tab @center @code{R0}
+@tab The return value (most commonly used).
+@end multitable

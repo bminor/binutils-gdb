@@ -550,30 +550,7 @@ cfi_add_erase_region (struct hw *me, struct cfi *cfi,
   cfi->query.num_erase_regions = num_regions + 1;
 }
 
-/* Device tree options:
-     Required:
-       .../reg <addr> <len>
-       .../cmdset <primary; integer> [alt; integer]
-     Optional:
-       .../size <device size (must be pow of 2)>
-       .../width <8|16|32>
-       .../write_size <integer (must be pow of 2)>
-       .../erase_regions <number blocks> <block size> \
-                         [<number blocks> <block size> ...]
-       .../voltage <vcc min> <vcc max> <vpp min> <vpp max>
-       .../timeouts <typ unit write>  <typ buf write>  \
-                    <typ block erase> <typ chip erase> \
-                    <max unit write>  <max buf write>  \
-                    <max block erase> <max chip erase>
-       .../file <file> [ro|rw]
-     Defaults:
-       size: <len> from "reg"
-       width: 8
-       write_size: 0 (not supported)
-       erase_region: 1 (can only erase whole chip)
-       voltage: 0.0V (for all)
-       timeouts: typ: 1µs, not supported, 1ms, not supported
-                 max: 1µs, 1ms, 1ms, not supported
+/* Process the device tree options.
 
   TODO: Verify user args are valid (e.g. voltage is 8 bits).  */
 static void

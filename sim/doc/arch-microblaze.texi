@@ -1,0 +1,7 @@
+@node MicroBlaze
+@chapter MicroBlaze
+Xilinx's MicroBlaze soft core for FPGAs.
+
+@node MicroBlaze Environment Support
+@section Environment Support
+Only the virtual environment is supported.
