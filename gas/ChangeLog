@@ -1,3 +1,8 @@
+2021-09-13  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-ia64.c (cross_section): Use obj_elf_section_name to
+	parse the section name.
+
 2021-09-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 28292

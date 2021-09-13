@@ -4773,20 +4773,12 @@ cross_section (int ref, void (*builder) (int), int ua)
   char *start, *end;
   int saved_auto_align;
   unsigned int section_count;
-  char *name;
-  char c;
+  const char *name;
 
-  SKIP_WHITESPACE ();
   start = input_line_pointer;
-  c = get_symbol_name (&name);
-  if (input_line_pointer == start)
-    {
-      as_bad (_("Missing section name"));
-      ignore_rest_of_line ();
-      return;
-    }
-  * input_line_pointer = c;
-  SKIP_WHITESPACE_AFTER_NAME ();
+  name = obj_elf_section_name ();
+  if (name == NULL)
+    return;
   end = input_line_pointer;
   if (*input_line_pointer != ',')
     {
