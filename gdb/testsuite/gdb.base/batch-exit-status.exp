@@ -20,7 +20,7 @@ standard_testfile
 set good_commands "$srcdir/$subdir/batch-exit-status.good-commands"
 set bad_commands "$srcdir/$subdir/batch-exit-status.bad-commands"
 
-proc _test_exit_status {expect_status cmdline_opts} {
+proc _test_exit_status {expect_status cmdline_opts {re ""}} {
     global gdb_spawn_id
 
     gdb_exit
@@ -29,7 +29,16 @@ proc _test_exit_status {expect_status cmdline_opts} {
 	return
     }
 
+    set has_re [expr ![string equal $re ""]]
+    if { ! $has_re } {
+	set re "\$FOOBAR^"
+    }
+    set re_matched 0
     gdb_test_multiple "" "run til exit" {
+	-re $re {
+	    set re_matched 1
+	    exp_continue
+	}
 	eof {
 	    set result [wait -i $gdb_spawn_id]
 	    verbose $result
@@ -41,15 +50,18 @@ proc _test_exit_status {expect_status cmdline_opts} {
 	    clear_gdb_spawn_id
 	}
     }
+    if { $has_re } {
+	gdb_assert { $re_matched } "output matched"
+    }
 }
 
-proc test_exit_status {expect_status cmdline_opts prefix} {
+proc test_exit_status {expect_status cmdline_opts prefix args} {
     if { $prefix == "" } {
 	set prefix $cmdline_opts
     }
 
     with_test_prefix $prefix {
-	_test_exit_status $expect_status $cmdline_opts
+	_test_exit_status $expect_status $cmdline_opts {*}$args
     }
 }
 
@@ -77,6 +89,8 @@ test_exit_status 1 "-batch -x $good_commands -x $bad_commands" \
 test_exit_status 1 "-batch -x $good_commands -ex \"set not-a-thing 4\"" \
     "-batch -x good-commands -ex \"set not-a-thing 4\""
 
-set no_such_re ": No such file or directory\\."
-test_exit_status 1 "-batch \"\"" $no_such_re
-test_exit_status 1 "-batch \"\" \"\"" [multi_line $no_such_re $no_such_re]
+set test "No such file or directory"
+set no_such_re ": $test\\."
+test_exit_status 1 "-batch \"\"" "1x: $test" ^[multi_line $no_such_re ""]$
+test_exit_status 1 "-batch \"\" \"\"" "2x: $test" \
+    ^[multi_line $no_such_re $no_such_re ""]$
