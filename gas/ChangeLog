@@ -2,6 +2,7 @@
 
 	* config/tc-ia64.c (cross_section): Use obj_elf_section_name to
 	parse the section name.
+	* config/tc-mips.c (s_change_section): Likewise.
 
 2021-09-02  Nick Clifton  <nickc@redhat.com>
 
