@@ -1,3 +1,7 @@
+2021-09-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Set GDB version number to 11.1.
+
 2021-09-08  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.h (dwarf2_per_objfile::resize_symtabs): Remove.
