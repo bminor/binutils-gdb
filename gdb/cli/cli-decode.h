@@ -55,7 +55,6 @@ struct cmd_list_element
       allow_unknown (0),
       abbrev_flag (0),
       type (not_set_cmd),
-      var_type (var_boolean),
       doc (doc_)
   {
     memset (&function, 0, sizeof (function));
@@ -160,9 +159,6 @@ struct cmd_list_element
      or "show").  */
   ENUM_BITFIELD (cmd_types) type : 2;
 
-  /* What kind of variable is *VAR?  */
-  ENUM_BITFIELD (var_types) var_type : 4;
-
   /* Function definition of this command.  NULL for command class
      names and for help topics that are not really commands.  NOTE:
      cagney/2002-02-02: This function signature is evolving.  For
@@ -228,9 +224,8 @@ struct cmd_list_element
      used to finalize the CONTEXT field, if needed.  */
   void (*destroyer) (struct cmd_list_element *self, void *context) = nullptr;
 
-  /* Pointer to variable affected by "set" and "show".  Doesn't
-     matter if type is not_set.  */
-  void *var = nullptr;
+  /* Setting affected by "set" and "show".  Not used if type is not_set_cmd.  */
+  gdb::optional<setting> var;
 
   /* Pointer to NULL terminated list of enumerated values (like
      argv).  */

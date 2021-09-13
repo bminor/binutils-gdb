@@ -1408,7 +1408,7 @@ set_auto_load_cmd (const char *args, int from_tty)
 	     "otherwise check the auto-load sub-commands."));
 
   for (list = *auto_load_set_cmdlist_get (); list != NULL; list = list->next)
-    if (list->var_type == var_boolean)
+    if (list->var->type () == var_boolean)
       {
 	gdb_assert (list->type == set_cmd);
 	do_set_command (args, from_tty, list);

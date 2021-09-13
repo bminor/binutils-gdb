@@ -88,6 +88,30 @@ struct parmpy_object
   const char **enumeration;
 };
 
+/* Wraps a setting around an existing parmpy_object.  This abstraction
+   is used to manipulate the value in S->VALUE in a type safe manner using
+   the setting interface.  */
+
+static setting
+make_setting (parmpy_object *s)
+{
+
+  if (var_type_uses<bool> (s->type))
+    return setting (s->type, &s->value.boolval);
+  else if (var_type_uses<int> (s->type))
+    return setting (s->type, &s->value.intval);
+  else if (var_type_uses<auto_boolean> (s->type))
+    return setting (s->type, &s->value.autoboolval);
+  else if (var_type_uses<unsigned int> (s->type))
+    return setting (s->type, &s->value.uintval);
+  else if (var_type_uses<char *> (s->type))
+    return setting (s->type, &s->value.stringval);
+  else if (var_type_uses<const char *> (s->type))
+    return setting (s->type, &s->value.cstringval);
+  else
+    gdb_assert_not_reached ("unhandled var type");
+}
+
 extern PyTypeObject parmpy_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("parmpy_object");
 
@@ -110,7 +134,7 @@ get_attr (PyObject *obj, PyObject *attr_name)
     {
       parmpy_object *self = (parmpy_object *) obj;
 
-      return gdbpy_parameter_value (self->type, &self->value);
+      return gdbpy_parameter_value (make_setting (self));
     }
 
   return PyObject_GenericGetAttr (obj, attr_name);

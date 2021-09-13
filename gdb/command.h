@@ -125,6 +125,149 @@ typedef enum var_types
   }
 var_types;
 
+/* Return true if a setting of type VAR_TYPE is backed with type T.
+
+   This function is left without definition intentionally.  This template is
+   specialized for all valid types that are used to back var_types.  Therefore
+   if one tries to instantiate this un-specialized template it means the T
+   parameter is not a type used to back a var_type and it is most likely a
+   programming error.  */
+template<typename T>
+bool var_type_uses (var_types var_type) = delete;
+
+/* Return true if a setting of type T is backed by a bool variable.  */
+template<>
+inline bool var_type_uses<bool> (var_types t)
+{
+  return t == var_boolean;
+};
+
+/* Return true if a setting of type T is backed by a auto_boolean variable.
+*/
+template<>
+inline bool var_type_uses<enum auto_boolean> (var_types t)
+{
+  return t == var_auto_boolean;
+}
+
+/* Return true if a setting of type T is backed by an unsigned int variable.
+*/
+template<>
+inline bool var_type_uses<unsigned int> (var_types t)
+{
+  return (t == var_uinteger || t == var_zinteger || t == var_zuinteger);
+}
+
+/* Return true if a setting of type T is backed by an int variable.  */
+template<>
+inline bool var_type_uses<int> (var_types t)
+{
+  return (t == var_integer || t == var_zinteger
+	  || t == var_zuinteger_unlimited);
+}
+
+/* Return true if a setting of type T is backed by a char * variable.  */
+template<>
+inline bool var_type_uses<char *> (var_types t)
+{
+  return (t == var_string || t == var_string_noescape
+	  || t == var_optional_filename || t == var_filename);
+}
+
+/* Return true if a setting of type T is backed by a const char * variable.
+*/
+template<>
+inline bool var_type_uses<const char *> (var_types t)
+{
+  return t == var_enum;
+}
+
+/* Interface for getting and setting a setting's value.
+
+   The underlying data can be of any VAR_TYPES type.  */
+struct setting
+{
+  /* Create a setting backed by a variable of type T.
+
+     Type T must match the var type VAR_TYPE (see VAR_TYPE_USES).  */
+  template<typename T>
+  setting (var_types var_type, T *var)
+    : m_var_type (var_type), m_var (var)
+  {
+    gdb_assert (var != nullptr);
+    gdb_assert (var_type_uses<T> (var_type));
+  }
+
+  /* A setting can also be constructed with a pre-validated
+     type-erased variable.  Use the following function to
+     validate & type-erase said variable/function pointers.  */
+
+  struct erased_args
+  {
+    void *var;
+  };
+
+  template<typename T>
+  static erased_args erase_args (var_types var_type, T *var)
+  {
+    gdb_assert (var_type_uses<T> (var_type));
+
+    return {var};
+  }
+
+  /* Create a setting backed by pre-validated type-erased args.
+     ERASED_VAR's fields' real types must match the var type VAR_TYPE
+     (see VAR_TYPE_USES).  */
+  setting (var_types var_type, const erased_args &args)
+    : m_var_type (var_type),
+      m_var (args.var)
+  {
+  }
+
+  /* Access the type of the current setting.  */
+  var_types type () const
+  {
+    return m_var_type;
+  }
+
+  /* Return the current value.
+
+     The template parameter T is the type of the variable used to store the
+     setting.  */
+  template<typename T>
+  const T &get () const
+  {
+    gdb_assert (var_type_uses<T> (m_var_type));
+    gdb_assert (m_var != nullptr);
+
+    return *static_cast<const T *> (m_var);
+  }
+
+  /* Sets the value of the setting to V.
+
+     The template parameter T indicates the type of the variable used to
+     store the setting.
+
+     The var_type of the setting must match T.  */
+  template<typename T>
+  void set (const T &v)
+  {
+    /* Check that the current instance is of one of the supported types for
+       this instantiation.  */
+    gdb_assert (var_type_uses<T> (m_var_type));
+
+    *static_cast<T *> (m_var) = v;
+  }
+
+private:
+  /* The type of the variable M_VAR is pointing to.  */
+  var_types m_var_type;
+
+  /* Pointer to the enclosed variable.  The type of the variable is encoded
+     in M_VAR_TYPE.  */
+  void *m_var;
+};
+
 /* This structure records one command'd definition.  */
 struct cmd_list_element;
 

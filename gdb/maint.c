@@ -1112,7 +1112,7 @@ set_per_command_cmd (const char *args, int from_tty)
     error (_("Bad value for 'mt set per-command no'."));
 
   for (list = per_command_setlist; list != NULL; list = list->next)
-    if (list->var_type == var_boolean)
+    if (list->var->type () == var_boolean)
       {
 	gdb_assert (list->type == set_cmd);
 	do_set_command (args, from_tty, list);

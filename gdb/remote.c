@@ -2239,12 +2239,13 @@ show_remote_protocol_packet_cmd (struct ui_file *file, int from_tty,
 				 const char *value)
 {
   struct packet_config *packet;
+  gdb_assert (c->var.has_value ());
 
   for (packet = remote_protocol_packets;
        packet < &remote_protocol_packets[PACKET_MAX];
        packet++)
     {
-      if (&packet->detect == c->var)
+      if (&packet->detect == &c->var->get<enum auto_boolean> ())
 	{
 	  show_packet_config_cmd (packet);
 	  return;
