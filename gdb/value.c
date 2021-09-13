@@ -180,6 +180,7 @@ struct value
       lazy (1),
       initialized (1),
       stack (0),
+      is_zero (false),
       type (type_),
       enclosing_type (type_)
   {
@@ -229,6 +230,10 @@ struct value
   /* If value is from the stack.  If this is set, read_stack will be
      used instead of read_memory to enable extra caching.  */
   unsigned int stack : 1;
+
+  /* True if this is a zero value, created by 'value_zero'; false
+     otherwise.  */
+  bool is_zero : 1;
 
   /* Location of value (if lval).  */
   union
@@ -1704,6 +1709,7 @@ value_copy (struct value *arg)
   val->pointed_to_offset = arg->pointed_to_offset;
   val->modifiable = arg->modifiable;
   val->stack = arg->stack;
+  val->is_zero = arg->is_zero;
   val->initialized = arg->initialized;
   if (!value_lazy (val))
     {
@@ -3507,6 +3513,18 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
 }
 
 
+/* Create a value of type TYPE that is zero, and return it.  */
+
+struct value *
+value_zero (struct type *type, enum lval_type lv)
+{
+  struct value *val = allocate_value_lazy (type);
+
+  VALUE_LVAL (val) = (lv == lval_computed ? not_lval : lv);
+  val->is_zero = true;
+  return val;
+}
+
 /* Convert C numbers into newly allocated values.  */
 
 struct value *
@@ -4026,7 +4044,11 @@ value_fetch_lazy (struct value *val)
      value.  */
   gdb_assert (val->optimized_out.empty ());
   gdb_assert (val->unavailable.empty ());
-  if (value_bitsize (val))
+  if (val->is_zero)
+    {
+      /* Nothing.  */
+    }
+  else if (value_bitsize (val))
     value_fetch_lazy_bitfield (val);
   else if (VALUE_LVAL (val) == lval_memory)
     value_fetch_lazy_memory (val);

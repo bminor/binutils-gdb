@@ -935,17 +935,6 @@ value_dynamic_cast (struct type *type, struct value *arg)
   error (_("dynamic_cast failed"));
 }
 
-/* Create a value of type TYPE that is zero, and return it.  */
-
-struct value *
-value_zero (struct type *type, enum lval_type lv)
-{
-  struct value *val = allocate_value (type);
-
-  VALUE_LVAL (val) = (lv == lval_computed ? not_lval : lv);
-  return val;
-}
-
 /* Create a not_lval value of numeric type TYPE that is one, and return it.  */
 
 struct value *
