@@ -11613,6 +11613,7 @@ parse_arm_disassembler_options (const char *options)
 {
   const char *opt;
 
+  force_thumb = false;
   FOR_EACH_DISASSEMBLER_OPTION (opt, options)
     {
       if (startswith (opt, "reg-names-"))
