@@ -121,12 +121,13 @@ case $targ in
  i370-* | \
  i860-*-* | \
  i960-*-* | \
- m68*-*-*bsd* | \
+ m68*-*-bsd* | \
  m68*-*-aout* | \
  m68*-*-coff* | \
  m68*-*-hpux* | \
  m68*-*-linux*aout* | \
  m68*-*-lynxos* | \
+ m68*-*-openbsd* | \
  m68*-*-os68k* | \
  m68*-*-psos* | \
  m68*-*-sunos* | \
