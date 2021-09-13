@@ -31,10 +31,13 @@ if ![runto "vsizelim.adb:$bp_location" ] then {
   return
 }
 
-gdb_test_no_output "set varsize-limit 16"
+gdb_test "set varsize-limit 16" \
+    "Warning: command 'set varsize-limit' is deprecated.\r\nUse 'set max-value-size'."
 
 gdb_test "print small" " = \"1234567890\""
 
-gdb_test "print larger" "object size is larger than varsize-limit.*"
+gdb_test "print larger" "more than max-value-size.*"
 
-gdb_test "print name.all" "object size is larger than varsize-limit.*"
+gdb_test "print name.all" "more than max-value-size.*"
+
+gdb_test "print ba.data(5)" " = 5" "print array element"

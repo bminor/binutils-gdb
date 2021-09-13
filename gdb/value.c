@@ -4326,6 +4326,16 @@ prevents future values, larger than this size, from being allocated."),
 			    set_max_value_size,
 			    show_max_value_size,
 			    &setlist, &showlist);
+  set_show_commands vsize_limit
+    = add_setshow_zuinteger_unlimited_cmd ("varsize-limit", class_support,
+					   &max_value_size, _("\
+Set the maximum number of bytes allowed in a variable-size object."), _("\
+Show the maximum number of bytes allowed in a variable-size object."), _("\
+Attempts to access an object whose size is not a compile-time constant\n\
+and exceeds this limit will cause an error."),
+					   NULL, NULL, &setlist, &showlist);
+  deprecate_cmd (vsize_limit.set, "set max-value-size");
+
 #if GDB_SELF_TEST
   selftests::register_test ("ranges_contain", selftests::test_ranges_contain);
   selftests::register_test ("insert_into_bit_range_vector",

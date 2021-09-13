@@ -149,8 +149,6 @@ struct ada_task_info
   int base_cpu;
 };
 
-extern void ada_ensure_varsize_limit (const struct type *type);
-
 extern int ada_get_field_index (const struct type *type,
 				const char *field_name,
 				int maybe_missing);

@@ -19,6 +19,11 @@ show source open
   to open and read source code files, which can be useful if the files
   are located over a slow network connection.
 
+set varsize-limit
+show varsize-limit
+  These are now deprecated aliases for "set max-value-size" and
+  "show max-value-size".
+
 maint set internal-error backtrace on|off
 maint show internal-error backtrace
 maint set internal-warning backtrace on|off

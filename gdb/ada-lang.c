@@ -247,9 +247,6 @@ struct ada_symbol_cache
   struct cache_entry *root[HASH_SIZE] {};
 };
 
-/* Maximum-sized dynamic type.  */
-static unsigned int varsize_limit;
-
 static const char ada_completer_word_break_characters[] =
 #ifdef VMS
   " \t\n!@#%^&*()+=|~`}{[]\";:?/,-";
@@ -524,10 +521,6 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
     {
       struct value *result;
 
-      /* Make sure that the object size is not unreasonable before
-	 trying to allocate some memory for it.  */
-      ada_ensure_varsize_limit (type);
-
       if (value_optimized_out (val))
 	result = allocate_optimized_out_value (type);
       else if (value_lazy (val)
@@ -587,17 +580,6 @@ lim_warning (const char *format, ...)
     vwarning (format, args);
 
   va_end (args);
-}
-
-/* Issue an error if the size of an object of type T is unreasonable,
-   i.e. if it would be a bad idea to allocate a value of this type in
-   GDB.  */
-
-void
-ada_ensure_varsize_limit (const struct type *type)
-{
-  if (TYPE_LENGTH (type) > varsize_limit)
-    error (_("object size is larger than varsize-limit"));
 }
 
 /* Maximum value of a SIZE-byte signed integer type.  */
@@ -1898,7 +1880,6 @@ ada_coerce_to_simple_array (struct value *arr)
 
       if (arrVal == NULL)
 	error (_("Bounds unavailable for null array pointer."));
-      ada_ensure_varsize_limit (TYPE_TARGET_TYPE (value_type (arrVal)));
       return value_ind (arrVal);
     }
   else if (ada_is_constrained_packed_array_type (value_type (arr)))
@@ -7539,12 +7520,6 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 
 	  if (dval0 == NULL)
 	    {
-	      /* rtype's length is computed based on the run-time
-		 value of discriminants.  If the discriminants are not
-		 initialized, the type size may be completely bogus and
-		 GDB may fail to allocate a value for it.  So check the
-		 size first before creating the value.  */
-	      ada_ensure_varsize_limit (rtype);
 	      /* Using plain value_from_contents_and_address here
 		 causes problems because we will end up trying to
 		 resolve a type that is currently being
@@ -7585,14 +7560,6 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	  field_type = ada_get_base_type (field_type);
 	  field_type = ada_to_fixed_type (field_type, field_valaddr,
 					  field_address, dval, 0);
-	  /* If the field size is already larger than the maximum
-	     object size, then the record itself will necessarily
-	     be larger than the maximum object size.  We need to make
-	     this check now, because the size might be so ridiculously
-	     large (due to an uninitialized variable in the inferior)
-	     that it would cause an overflow when adding it to the
-	     record size.  */
-	  ada_ensure_varsize_limit (field_type);
 
 	  rtype->field (f).set_type (field_type);
 	  rtype->field (f).set_name (type->field (f).name ());
@@ -7713,8 +7680,6 @@ ada_template_to_fixed_record_type_1 (struct type *type,
     }
 
   value_free_to_mark (mark);
-  if (TYPE_LENGTH (rtype) > varsize_limit)
-    error (_("record type with dynamic size is larger than varsize-limit"));
   return rtype;
 }
 
@@ -8161,8 +8126,6 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 				      result, range_type);
 	  elt_type0 = TYPE_TARGET_TYPE (elt_type0);
 	}
-      if (!ignore_too_big && TYPE_LENGTH (result) > varsize_limit)
-	error (_("array type with dynamic size is larger than varsize-limit"));
     }
 
   /* We want to preserve the type name.  This can be useful when
@@ -10584,7 +10547,6 @@ ada_unop_ind_operation::evaluate (struct type *expect_type,
 		(ada_aligned_type
 		 (ada_check_typedef (TYPE_TARGET_TYPE (type))));
 	    }
-	  ada_ensure_varsize_limit (type);
 	  return value_zero (type, lval_memory);
 	}
       else if (type->code () == TYPE_CODE_INT)
@@ -10618,11 +10580,6 @@ ada_unop_ind_operation::evaluate (struct type *expect_type,
 	return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
 			      (CORE_ADDR) value_as_address (arg1));
     }
-
-  struct type *target_type = (to_static_fixed_type
-			      (ada_aligned_type
-			       (ada_check_typedef (TYPE_TARGET_TYPE (type)))));
-  ada_ensure_varsize_limit (target_type);
 
   if (ada_is_array_descriptor_type (type))
     /* GDB allows dereferencing GNAT array descriptors.  */
@@ -13592,15 +13549,6 @@ exception should cause a stop."),
 		     NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
-
-  varsize_limit = 65536;
-  add_setshow_uinteger_cmd ("varsize-limit", class_support,
-			    &varsize_limit, _("\
-Set the maximum number of bytes allowed in a variable-size object."), _("\
-Show the maximum number of bytes allowed in a variable-size object."), _("\
-Attempts to access an object whose size is not a compile-time constant\n\
-and exceeds this limit will cause an error."),
-			    NULL, NULL, &setlist, &showlist);
 
   add_info ("exceptions", info_exceptions_command,
 	    _("\
