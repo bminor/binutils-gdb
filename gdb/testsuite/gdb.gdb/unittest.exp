@@ -51,13 +51,6 @@ proc run_selftests { binfile } {
 	    set num_ran $expect_out(1,string)
 	    set num_failed $expect_out(2,string)
 	    gdb_assert "$num_ran > 0" "$test, ran some tests"
-
-	    if { $binfile != "" } {
-		# There's a known issue here (see PR gdb/27891),
-		# however, we should not have more than 1 failure.
-		gdb_assert "$num_failed <= 1" "$test, failed no more than 1"
-		setup_kfail "gdb/27891" "*-*-*"
-	    }
 	    gdb_assert "$num_failed == 0" "$test, failed none"
 	}
 	-re "Selftests have been disabled for this build.\r\n$gdb_prompt $" {

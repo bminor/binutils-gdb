@@ -7727,7 +7727,9 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
      the assert on the mismatch of info->mach and
      bfd_get_mach (current_program_space->exec_bfd ()) in
      default_print_insn.  */
-  if (current_program_space->exec_bfd () != NULL)
+  if (current_program_space->exec_bfd () != NULL
+      && (current_program_space->exec_bfd ()->arch_info
+	  == gdbarch_bfd_arch_info (gdbarch)))
     info->flags |= USER_SPECIFIED_MACHINE_TYPE;
 
   return default_print_insn (memaddr, info);
