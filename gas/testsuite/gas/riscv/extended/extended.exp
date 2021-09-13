@@ -19,22 +19,5 @@
 # MA 02110-1301, USA.
 
 if [istarget riscv*-*-*] {
-    run_dump_tests "vector-insns"
-    run_dump_tests "vector-insns-vmsgtvx"
-    run_dump_tests "vector-insns-zero-imm"
-    run_dump_tests "vector-insns-fail-arith-fixp"
-    run_dump_tests "vector-insns-fail-arith-floatp"
-    run_dump_tests "vector-insns-fail-arith-int"
-    run_dump_tests "vector-insns-fail-arith-narrow"
-    run_dump_tests "vector-insns-fail-arith-widen"
-    run_dump_tests "vector-insns-fail-load-store"
-    run_dump_tests "vector-insns-fail-mask"
-    run_dump_tests "vector-insns-fail-permutation"
-    run_dump_tests "vector-insns-fail-zvamo"
-    run_dump_tests "fp-zfh-insns"
-    run_dump_tests "float16-le"
-    run_dump_tests "float16-be"
-    run_dump_tests "svinval"
-
-    run_dump_tests "extended-csr"
+    run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 }
