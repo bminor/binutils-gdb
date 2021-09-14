@@ -300,7 +300,9 @@ struct setting
       return *static_cast<const T *> (m_var);
   }
 
-  /* Sets the value of the setting to V.
+  /* Sets the value of the setting to V.  Returns true if the setting was
+     effectively changed, false if the update failed and the setting is left
+     unchanged.
 
      If we have a user-provided setter, use it to set the setting.  Otherwise
      copy the value V to the internally referenced buffer.
@@ -310,11 +312,13 @@ struct setting
 
      The var_type of the setting must match T.  */
   template<typename T>
-  void set (const T &v)
+  bool set (const T &v)
   {
     /* Check that the current instance is of one of the supported types for
        this instantiation.  */
     gdb_assert (var_type_uses<T> (m_var_type));
+
+    const T old_value = this->get<T> ();
 
     if (m_var == nullptr)
       {
@@ -324,6 +328,8 @@ struct setting
       }
     else
       *static_cast<T *> (m_var) = v;
+
+    return old_value != this->get<T> ();
   }
 
 private:
