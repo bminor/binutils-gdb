@@ -5406,8 +5406,8 @@ proc gdb_load_no_complaints { arg } {
     # Verify that there were no complaints.
     set re \
 	[multi_line \
-	     "^Reading symbols from \[^\r\n\]*" \
-	     "(Expanding full symbols from \[^\r\n\]*" \
+	     "^(Reading symbols from \[^\r\n\]*" \
+	     ")+(Expanding full symbols from \[^\r\n\]*" \
 	     ")?$gdb_prompt $"]
     gdb_assert {[regexp $re $gdb_file_cmd_msg]} "No complaints"
 }
