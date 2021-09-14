@@ -1431,16 +1431,10 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
 	= per_objfile->per_bfd->all_comp_units[i].get ();
       partial_symtab *psymtab = per_cu->v.psymtab;
 
-      /* CU of a shared file from 'dwz -m' may be unused by this main
-	 file.  It may be referenced from a local scope but in such
-	 case it does not need to be present in .debug_names.  */
-      if (psymtab == NULL)
-	continue;
-
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
       data_buf &this_list = per_cu->is_debug_types ? types_cu_list : cu_list;
 
-      if (psymtab->user == NULL)
+      if (psymtab != nullptr && psymtab->user == nullptr)
 	nametable.recursively_write_psymbols (objfile, psymtab, psyms_seen,
 					      this_counter);
 
@@ -1449,6 +1443,11 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
 			     to_underlying (per_cu->sect_off));
       ++this_counter;
     }
+
+   /* Verify that all units are represented.  */
+  gdb_assert (counter == (per_objfile->per_bfd->all_comp_units.size ()
+			  - per_objfile->per_bfd->tu_stats.nr_tus));
+  gdb_assert (types_counter == per_objfile->per_bfd->tu_stats.nr_tus);
 
   nametable.build ();
 
@@ -1484,14 +1483,11 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
   header.append_uint (2, dwarf5_byte_order, 0);
 
   /* comp_unit_count - The number of CUs in the CU list.  */
-  header.append_uint (4, dwarf5_byte_order,
-		      per_objfile->per_bfd->all_comp_units.size ()
-		      - per_objfile->per_bfd->tu_stats.nr_tus);
+  header.append_uint (4, dwarf5_byte_order, counter);
 
   /* local_type_unit_count - The number of TUs in the local TU
      list.  */
-  header.append_uint (4, dwarf5_byte_order,
-		      per_objfile->per_bfd->tu_stats.nr_tus);
+  header.append_uint (4, dwarf5_byte_order, types_counter);
 
   /* foreign_type_unit_count - The number of TUs in the foreign TU
      list.  */
