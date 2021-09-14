@@ -1,3 +1,8 @@
+2021-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* ld-arc/got-weak.d: New file.
+	* ld-arc/got-weak.s: Likewise.
+
 2021-07-26  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/ld-x86-64/x86-64.exp (Build textrel-1): Use --warn-textrel.

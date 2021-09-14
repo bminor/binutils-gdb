@@ -1,3 +1,12 @@
+2021-09-014  Cupertino Miranda  <cmiranda@synopsys.com>
+           Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* arc-got.h (arc_static_sym_data): New structure.
+	(get_static_sym_data): New function.
+	(relocate_fix_got_relocs_for_got_info): Move the computation fo
+	symbol value and section to above introduced function, and use
+	this new function.
+
 2021-09-07  Luis Machado  <luis.machado@linaro.org>
 
 	Revert: [AArch64] MTE corefile support
