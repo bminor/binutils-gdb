@@ -69,6 +69,7 @@
 #include "gdbsupport/scope-exit.h"
 #include "gdbsupport/gdb-sigmask.h"
 #include "gdbsupport/common-debug.h"
+#include <unordered_map>
 
 /* This comment documents high-level logic of this file.
 
@@ -280,7 +281,8 @@ static int lwp_status_pending_p (struct lwp_info *lp);
 
 static void save_stop_reason (struct lwp_info *lp);
 
-static void maybe_close_proc_mem_file (pid_t pid);
+static void close_proc_mem_file (pid_t pid);
+static void open_proc_mem_file (ptid_t ptid);
 
 
 /* LWP accessors.  */
@@ -514,6 +516,8 @@ linux_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 		  && !signal_pass_state (gdb_signal_from_host (signo)))
 		signo = 0;
 	      ptrace (PTRACE_DETACH, child_pid, 0, signo);
+
+	      close_proc_mem_file (child_pid);
 	    }
 	}
 
@@ -1059,6 +1063,8 @@ linux_nat_target::create_inferior (const char *exec_file,
   pass_signals ({});
 
   inf_ptrace_target::create_inferior (exec_file, allargs, env, from_tty);
+
+  open_proc_mem_file (inferior_ptid);
 }
 
 /* Callback for linux_proc_attach_tgid_threads.  Attach to PTID if not
@@ -1203,6 +1209,8 @@ linux_nat_target::attach (const char *args, int from_tty)
     }
 
   lp->stopped = 1;
+
+  open_proc_mem_file (lp->ptid);
 
   /* Save the wait status to report later.  */
   lp->resumed = 1;
@@ -1455,7 +1463,7 @@ linux_nat_target::detach (inferior *inf, int from_tty)
       detach_success (inf);
     }
 
-  maybe_close_proc_mem_file (pid);
+  close_proc_mem_file (pid);
 }
 
 /* Resume execution of the inferior process.  If STEP is nonzero,
@@ -1894,6 +1902,8 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 
       if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK)
 	{
+	  open_proc_mem_file (child_ptid);
+
 	  /* The arch-specific native code may need to know about new
 	     forks even if those end up never mapped to an
 	     inferior.  */
@@ -1999,9 +2009,13 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
     {
       linux_nat_debug_printf ("Got exec event from LWP %ld", lp->ptid.lwp ());
 
-      /* Close the /proc/<pid>/mem file if it was open for this
-	 inferior.  */
-      maybe_close_proc_mem_file (lp->ptid.pid ());
+      /* Close the previous /proc/PID/mem file for this inferior,
+	 which was using the address space which is now gone.
+	 Reading/writing from this file would return 0/EOF.  */
+      close_proc_mem_file (lp->ptid.pid ());
+
+      /* Open a new file for the new address space.  */
+      open_proc_mem_file (lp->ptid);
 
       ourstatus->set_execd
 	(make_unique_xstrdup (linux_proc_pid_to_exec_file (pid)));
@@ -3566,9 +3580,7 @@ linux_nat_target::mourn_inferior ()
 
   purge_lwp_list (pid);
 
-  /* Close the /proc/<pid>/mem file if it was open for this
-     inferior.  */
-  maybe_close_proc_mem_file (pid);
+  close_proc_mem_file (pid);
 
   if (! forks_exist_p ())
     /* Normal case, no other forks available.  */
@@ -3765,91 +3777,134 @@ linux_nat_target::pid_to_exec_file (int pid)
   return linux_proc_pid_to_exec_file (pid);
 }
 
-/* Keep the /proc/<pid>/mem file open between memory accesses, as a
-   cache to avoid constantly closing/opening the file in the common
-   case of multiple memory reads/writes from/to the same inferior.
-   Note we don't keep a file open per inferior to avoid keeping too
-   many file descriptors open, which can run into resource limits.  */
-static struct
+/* Object representing an /proc/PID/mem open file.  We keep one such
+   file open per inferior.
+
+   It might be tempting to think about only ever opening one file at
+   most for all inferiors, closing/reopening the file as we access
+   memory of different inferiors, to minimize number of file
+   descriptors open, which can otherwise run into resource limits.
+   However, that does not work correctly -- if the inferior execs and
+   we haven't processed the exec event yet, and, we opened a
+   /proc/PID/mem file, we will get a mem file accessing the post-exec
+   address space, thinking we're opening it for the pre-exec address
+   space.  That is dangerous as we can poke memory (e.g. clearing
+   breakpoints) in the post-exec memory by mistake, corrupting the
+   inferior.  For that reason, we open the mem file as early as
+   possible, right after spawning, forking or attaching to the
+   inferior, when the inferior is stopped and thus before it has a
+   chance of execing.
+
+   Note that after opening the file, even if the thread we opened it
+   for subsequently exits, the open file is still usable for accessing
+   memory.  It's only when the whole process exits or execs that the
+   file becomes invalid, at which point reads/writes return EOF.  */
+
+class proc_mem_file
 {
-  /* The LWP this open file is for.  Note that after opening the file,
-     even if the thread subsequently exits, the open file is still
-     usable for accessing memory.  It's only when the whole process
-     exits or execs that the file becomes invalid (at which point
-     reads/writes return EOF).  */
-  ptid_t ptid;
+public:
+  proc_mem_file (ptid_t ptid, int fd)
+    : m_ptid (ptid), m_fd (fd)
+  {
+    gdb_assert (m_fd != -1);
+  }
 
-  /* The file descriptor.  -1 if file is not open.  */
-  int fd = -1;
-
-  /* Close FD and clear it to -1.  */
-  void close ()
+  ~proc_mem_file ()
   {
     linux_nat_debug_printf ("closing fd %d for /proc/%d/task/%ld/mem",
-			    fd, ptid.pid (), ptid.lwp ());
-    ::close (fd);
-    fd = -1;
+			    m_fd, m_ptid.pid (), m_ptid.lwp ());
+    close (m_fd);
   }
-} last_proc_mem_file;
 
-/* Close the /proc/<pid>/mem file if its LWP matches PTID.  */
+  DISABLE_COPY_AND_ASSIGN (proc_mem_file);
+
+  int fd ()
+  {
+    return m_fd;
+  }
+
+private:
+  /* The LWP this file was opened for.  Just for debugging
+     purposes.  */
+  ptid_t m_ptid;
+
+  /* The file descriptor.  */
+  int m_fd = -1;
+};
+
+/* The map between an inferior process id, and the open /proc/PID/mem
+   file.  This is stored in a map instead of in a per-inferior
+   structure because we need to be able to access memory of processes
+   which don't have a corresponding struct inferior object.  E.g.,
+   with "detach-on-fork on" (the default), and "follow-fork parent"
+   (also default), we don't create an inferior for the fork child, but
+   we still need to remove breakpoints from the fork child's
+   memory.  */
+static std::unordered_map<int, proc_mem_file> proc_mem_file_map;
+
+/* Close the /proc/PID/mem file for PID.  */
 
 static void
-maybe_close_proc_mem_file (pid_t pid)
+close_proc_mem_file (pid_t pid)
 {
-  if (last_proc_mem_file.ptid.pid () == pid)
-    last_proc_mem_file.close ();
+  proc_mem_file_map.erase (pid);
 }
 
-/* Helper for linux_proc_xfer_memory_partial.  Accesses /proc via
-   PTID.  Returns -1 on error, with errno set.  Returns number of
-   read/written bytes otherwise.  Returns 0 on EOF, which indicates
-   the address space is gone (because the process exited or
-   execed).  */
+/* Open the /proc/PID/mem file for the process (thread group) of PTID.
+   We actually open /proc/PID/task/LWP/mem, as that's the LWP we know
+   exists and is stopped right now.  We prefer the
+   /proc/PID/task/LWP/mem form over /proc/LWP/mem to avoid tid-reuse
+   races, just in case this is ever called on an already-waited
+   LWP.  */
 
-static ssize_t
-linux_proc_xfer_memory_partial_pid (ptid_t ptid,
-				    gdb_byte *readbuf, const gdb_byte *writebuf,
-				    ULONGEST offset, LONGEST len)
+static void
+open_proc_mem_file (ptid_t ptid)
+{
+  auto iter = proc_mem_file_map.find (ptid.pid ());
+  gdb_assert (iter == proc_mem_file_map.end ());
+
+  char filename[64];
+  xsnprintf (filename, sizeof filename,
+	     "/proc/%d/task/%ld/mem", ptid.pid (), ptid.lwp ());
+
+  int fd = gdb_open_cloexec (filename, O_RDWR | O_LARGEFILE, 0).release ();
+
+  if (fd == -1)
+    {
+      warning (_("opening /proc/PID/mem file for lwp %d.%ld failed: %s (%d)"),
+	       ptid.pid (), ptid.lwp (),
+	       safe_strerror (errno), errno);
+      return;
+    }
+
+  proc_mem_file_map.emplace (std::piecewise_construct,
+			     std::forward_as_tuple (ptid.pid ()),
+			     std::forward_as_tuple (ptid, fd));
+
+  linux_nat_debug_printf ("opened fd %d for lwp %d.%ld\n",
+			  fd, ptid.pid (), ptid.lwp ());
+}
+
+/* Implement the to_xfer_partial target method using /proc/PID/mem.
+   Because we can use a single read/write call, this can be much more
+   efficient than banging away at PTRACE_PEEKTEXT.  Also, unlike
+   PTRACE_PEEKTEXT/PTRACE_POKETEXT, this works with running
+   threads.  */
+
+static enum target_xfer_status
+linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
+				ULONGEST offset, LONGEST len,
+				ULONGEST *xfered_len)
 {
   ssize_t ret;
 
-  /* As long as we're hitting the same inferior, the previously open
-     file is good, even if the thread it was open for exits.  */
-  if (last_proc_mem_file.fd != -1
-      && last_proc_mem_file.ptid.pid () != ptid.pid ())
-    last_proc_mem_file.close ();
+  auto iter = proc_mem_file_map.find (inferior_ptid.pid ());
+  if (iter == proc_mem_file_map.end ())
+    return TARGET_XFER_EOF;
 
-  if (last_proc_mem_file.fd == -1)
-    {
-      /* Actually use /proc/<pid>/task/<lwp>/mem instead of
-	 /proc/<lwp>/mem to avoid PID-reuse races, as we may be trying
-	 to read memory via a thread which we've already reaped.
-	 /proc/<lwp>/mem could open a file for the wrong process.  If
-	 the LWPID is reused for the same process it's OK, we can read
-	 memory through it just fine.  If the LWPID is reused for a
-	 different process, then the open will fail because the path
-	 won't exist.  */
-      char filename[64];
-      xsnprintf (filename, sizeof filename,
-		 "/proc/%d/task/%ld/mem", ptid.pid (), ptid.lwp ());
+  int fd = iter->second.fd ();
 
-      last_proc_mem_file.fd
-	= gdb_open_cloexec (filename, O_RDWR | O_LARGEFILE, 0).release ();
-
-      if (last_proc_mem_file.fd == -1)
-	{
-	  linux_nat_debug_printf ("opening %s failed: %s (%d)\n",
-				  filename, safe_strerror (errno), errno);
-	  return -1;
-	}
-      last_proc_mem_file.ptid = ptid;
-
-      linux_nat_debug_printf ("opened fd %d for %s",
-			      last_proc_mem_file.fd, filename);
-    }
-
-  int fd = last_proc_mem_file.fd;
+  gdb_assert (fd != -1);
 
   /* Use pread64/pwrite64 if available, since they save a syscall and can
      handle 64-bit offsets even on 32-bit platforms (for instance, SPARC
@@ -3866,125 +3921,24 @@ linux_proc_xfer_memory_partial_pid (ptid_t ptid,
 
   if (ret == -1)
     {
-      linux_nat_debug_printf ("accessing fd %d for pid %ld failed: %s (%d)\n",
-			      fd, ptid.lwp (),
+      linux_nat_debug_printf ("accessing fd %d for pid %d failed: %s (%d)\n",
+			      fd, inferior_ptid.pid (),
 			      safe_strerror (errno), errno);
+      return TARGET_XFER_EOF;
     }
   else if (ret == 0)
     {
-      linux_nat_debug_printf ("accessing fd %d for pid %ld got EOF\n",
-			      fd, ptid.lwp ());
-    }
-
-  return ret;
-}
-
-/* Implement the to_xfer_partial target method using /proc/<pid>/mem.
-   Because we can use a single read/write call, this can be much more
-   efficient than banging away at PTRACE_PEEKTEXT.  Also, unlike
-   PTRACE_PEEKTEXT/PTRACE_POKETEXT, this works with running
-   threads.  */
-
-static enum target_xfer_status
-linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
-				ULONGEST offset, LONGEST len,
-				ULONGEST *xfered_len)
-{
-  /* Unlike PTRACE_PEEKTEXT/PTRACE_POKETEXT, reading/writing from/to
-     /proc/<pid>/mem works with running threads, and even exited
-     threads if the file was already open.  If we need to open or
-     reopen the /proc file though, we may get an EACCES error
-     ("Permission denied"), meaning the thread is gone but its exit
-     status isn't reaped yet, or ENOENT if the thread is gone and
-     already reaped.  In that case, just try opening the file for
-     another thread in the process.  If all threads fail, then it must
-     mean the whole process exited, in which case there's nothing else
-     to do and we just fail the memory access.
-
-     Note we don't simply always access via the leader thread because
-     the leader may exit without exiting the whole process.  See
-     gdb.threads/leader-exit.exp, for example.  */
-
-  /* It's frequently the case that the selected thread is stopped, and
-     is thus not likely to exit (unless something kills the process
-     outside our control, with e.g., SIGKILL).  Give that one a try
-     first.
-
-     Also, inferior_ptid may actually point at an LWP not in lwp_list.
-     This happens when we're detaching from a fork child that we don't
-     want to debug ("set detach-on-fork on"), and the breakpoints
-     module uninstalls breakpoints from the fork child.  Which process
-     to access is given by inferior_ptid.  */
-  int res = linux_proc_xfer_memory_partial_pid (inferior_ptid,
-						readbuf, writebuf,
-						offset, len);
-  if (res == 0)
-    {
-      /* EOF means the address space is gone, the whole
-	 process exited or execed.  */
+      /* EOF means the address space is gone, the whole process exited
+	 or execed.  */
+      linux_nat_debug_printf ("accessing fd %d for pid %d got EOF\n",
+			      fd, inferior_ptid.pid ());
       return TARGET_XFER_EOF;
-    }
-  else if (res != -1)
-    {
-      *xfered_len = res;
-      return TARGET_XFER_OK;
     }
   else
     {
-      /* If we simply raced with the thread exiting (EACCES), or the
-	 current thread is THREAD_EXITED (ENOENT), try some other
-	 thread.  It's easier to handle an ENOENT failure than check
-	 for THREAD_EXIT upfront because this function is called
-	 before a thread for inferior_ptid is added to the thread
-	 list.  */
-      if (errno != EACCES && errno != ENOENT)
-	return TARGET_XFER_EOF;
-    }
-
-  int cur_pid = current_inferior ()->pid;
-
-  if (inferior_ptid.pid () != cur_pid)
-    {
-      /* We're accessing a fork child, and the access above failed.
-	 Don't bother iterating the LWP list, since there's no other
-	 LWP for this process.  */
-      return TARGET_XFER_EOF;
-    }
-
-  /* Iterate over LWPs of the current inferior, trying to access
-     memory through one of them.  */
-  for (lwp_info *lp : all_lwps ())
-    {
-      if (lp->ptid.pid () != cur_pid)
-	continue;
-
-      res = linux_proc_xfer_memory_partial_pid (lp->ptid,
-						readbuf, writebuf,
-						offset, len);
-
-      if (res == 0)
-	{
-	  /* EOF means the address space is gone, the whole process
-	     exited or execed.  */
-	  return TARGET_XFER_EOF;
-	}
-      else if (res == -1)
-	{
-	  if (errno == EACCES)
-	    {
-	      /* This LWP is gone, try another one.  */
-	      continue;
-	    }
-
-	  return TARGET_XFER_EOF;
-	}
-
-      *xfered_len = res;
+      *xfered_len = ret;
       return TARGET_XFER_OK;
     }
-
-  /* No luck.  */
-  return TARGET_XFER_EOF;
 }
 
 /* Parse LINE as a signal set and add its set bits to SIGS.  */
