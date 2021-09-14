@@ -45972,11 +45972,17 @@ pointers; printing a code pointer converts it into a symbolic
 address.  The stack pointer and any dedicated address registers
 may be marked as data pointers.
 
+@item ieee_half
+Half precision IEEE floating point.
+
 @item ieee_single
 Single precision IEEE floating point.
 
 @item ieee_double
 Double precision IEEE floating point.
+
+@item bfloat16
+The 16-bit @dfn{brain floating point} format used e.g.@: by x86 and ARM.
 
 @item arm_fpa_ext
 The 12-byte extended precision format used by ARM FPA registers.
