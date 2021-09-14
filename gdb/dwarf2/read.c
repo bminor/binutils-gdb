@@ -863,6 +863,7 @@ struct partial_die_info : public allocate_on_obstack
     unsigned int has_type : 1;
     unsigned int has_specification : 1;
     unsigned int has_pc_info : 1;
+    unsigned int has_range_info : 1;
     unsigned int may_be_inlined : 1;
 
     /* This DIE has been marked DW_AT_main_subprogram.  */
@@ -914,9 +915,17 @@ struct partial_die_info : public allocate_on_obstack
       sect_offset sect_off;
     } d {};
 
-    /* If HAS_PC_INFO, the PC range associated with this DIE.  */
-    CORE_ADDR lowpc = 0;
-    CORE_ADDR highpc = 0;
+    union
+    {
+      /* If HAS_PC_INFO, the PC range associated with this DIE.  */
+      struct
+      {
+	CORE_ADDR lowpc = 0;
+	CORE_ADDR highpc = 0;
+      };
+      /* If HAS_RANGE_INFO, the ranges offset associated with this DIE.  */
+      ULONGEST ranges_offset;
+    };
 
     /* Pointer into the info_buffer (or types_buffer) pointing at the target of
        DW_AT_sibling, if any.  */
@@ -954,6 +963,7 @@ struct partial_die_info : public allocate_on_obstack
       has_type = 0;
       has_specification = 0;
       has_pc_info = 0;
+      has_range_info = 0;
       may_be_inlined = 0;
       main_subprogram = 0;
       scope_set = 0;
@@ -8125,6 +8135,10 @@ add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
     scan_partial_symbols (pdi->die_child, lowpc, highpc, set_addrmap, cu);
 }
 
+static int
+dwarf2_ranges_read (unsigned, CORE_ADDR *, CORE_ADDR *, struct dwarf2_cu *,
+		    dwarf2_psymtab *, dwarf_tag);
+
 /* Read a partial die corresponding to a subprogram or an inlined
    subprogram and create a partial symbol for that subprogram.
    When the CU language allows it, this routine also defines a partial
@@ -8174,7 +8188,20 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	    }
 	}
 
-      if (pdi->has_pc_info || (!pdi->is_external && pdi->may_be_inlined))
+      if (pdi->has_range_info
+	  && dwarf2_ranges_read (pdi->ranges_offset, &pdi->lowpc, &pdi->highpc,
+				 cu,
+				 set_addrmap ? cu->per_cu->v.psymtab : nullptr,
+				 pdi->tag))
+	{
+	  if (pdi->lowpc < *lowpc)
+	    *lowpc = pdi->lowpc;
+	  if (pdi->highpc > *highpc)
+	    *highpc = pdi->highpc;
+	}
+
+      if (pdi->has_pc_info || pdi->has_range_info
+	  || (!pdi->is_external && pdi->may_be_inlined))
 	{
 	  if (!pdi->is_declaration)
 	    /* Ignore subprogram DIEs that do not have a name, they are
@@ -19389,16 +19416,14 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  {
 	    /* Offset in the .debug_ranges or .debug_rnglist section (depending
 	       on DWARF version).  */
-	    ULONGEST ranges_offset = attr.as_unsigned ();
+	    ranges_offset = attr.as_unsigned ();
 
 	    /* See dwarf2_cu::gnu_ranges_base's doc for why we might want to add
 	       this value.  */
 	    if (tag != DW_TAG_compile_unit)
 	      ranges_offset += cu->gnu_ranges_base;
 
-	    if (dwarf2_ranges_read (ranges_offset, &lowpc, &highpc, cu,
-				    nullptr, tag))
-	      has_pc_info = 1;
+	    has_range_info = 1;
 	  }
 	  break;
 
