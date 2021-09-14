@@ -144,7 +144,7 @@ Dwarf::assemble ${asm_file} {
     get_func_info foo $flags
     get_func_info bar $flags
 
-    cu {} {
+    cu { label cu_label } {
 	DW_TAG_compile_unit {
 	    {DW_AT_language @DW_LANG_C_plus_plus}
 	    {name ${::srcfile}}
@@ -293,6 +293,11 @@ Dwarf::assemble ${asm_file} {
 	    {DW_LNS_copy}
 	    {DW_LNE_end_sequence}
 	}
+    }
+
+    aranges {} cu_label {
+	arange {} $foo_start $foo_end
+	arange {} $bar_start $bar_end
     }
 }
 
