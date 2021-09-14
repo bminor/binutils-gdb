@@ -163,12 +163,21 @@ AC_CHECK_LIB(nsl, gethostbyname)
 AC_CHECK_LIB(m, fabs)
 AC_CHECK_LIB(m, log2)
 
-PKG_CHECK_MODULES(SDL, sdl, [dnl
-  AC_CHECK_LIB(dl, dlopen, [dnl
-    SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL"
+AC_CHECK_LIB(dl, dlopen)
+if test "${ac_cv_lib_dl_dlopen}" = "yes"; then
+  PKG_CHECK_MODULES(SDL, sdl2, [dnl
+    SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=2"
     SDL_LIBS="-ldl"
-    ], [SDL_CFLAGS= SDL_LIBS=])
-  ], [:])
+  ], [
+    PKG_CHECK_MODULES(SDL, sdl, [dnl
+      SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=1"
+      SDL_LIBS="-ldl"
+    ], [:])
+  ])
+else
+  SDL_CFLAGS=
+  SDL_LIBS=
+fi
 AC_SUBST(SDL_CFLAGS)
 AC_SUBST(SDL_LIBS)
 
