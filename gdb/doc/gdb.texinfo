@@ -39437,7 +39437,7 @@ data structures, including its flags and contained types.
 Run any self tests that were compiled in to @value{GDBN}.  This will
 print a message showing how many tests were run, and how many failed.
 If a @var{filter} is passed, only the tests with @var{filter} in their
-name will by ran.
+name will be ran.
 
 @kindex maint info selftests
 @cindex self tests
