@@ -1,3 +1,7 @@
+2021-09-15  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* testsuite/ld-arc/got-weak.d: Update file.
+
 2021-09-14  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* ld-arc/got-weak.d: New file.
