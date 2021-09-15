@@ -2324,6 +2324,10 @@ Set the value of the convenience variable $NAME." },
 Register a TUI window constructor." },
 #endif	/* TUI */
 
+  { "architecture_names", gdbpy_all_architecture_names, METH_NOARGS,
+    "architecture_names () -> List.\n\
+Return a list of all the architecture names GDB understands." },
+
   {NULL, NULL, 0, NULL}
 };
 

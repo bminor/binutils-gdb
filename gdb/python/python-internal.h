@@ -469,6 +469,7 @@ PyObject *objfpy_get_xmethods (PyObject *, void *);
 PyObject *gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw);
 
 PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
+PyObject *gdbpy_all_architecture_names (PyObject *self, PyObject *args);
 
 PyObject *gdbpy_new_register_descriptor_iterator (struct gdbarch *gdbarch,
 						  const char *group_name);

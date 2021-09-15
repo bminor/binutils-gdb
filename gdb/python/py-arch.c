@@ -271,6 +271,29 @@ archpy_register_groups (PyObject *self, PyObject *args)
   return gdbpy_new_reggroup_iterator (gdbarch);
 }
 
+/* Implementation of gdb.architecture_names().  Return a list of all the
+   BFD architecture names that GDB understands.  */
+
+PyObject *
+gdbpy_all_architecture_names (PyObject *self, PyObject *args)
+{
+  gdbpy_ref<> list (PyList_New (0));
+  if (list == nullptr)
+    return nullptr;
+
+  std::vector<const char *> name_list = gdbarch_printable_names ();
+  for (const char *name : name_list)
+    {
+      gdbpy_ref <> py_name (PyString_FromString (name));
+      if (py_name == nullptr)
+	return nullptr;
+      if (PyList_Append (list.get (), py_name.get ()) < 0)
+	return nullptr;
+    }
+
+ return list.release ();
+}
+
 void _initialize_py_arch ();
 void
 _initialize_py_arch ()

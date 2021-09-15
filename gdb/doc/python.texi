@@ -557,6 +557,14 @@ such as those used by readline for command input, and annotation
 related prompts are prohibited from being changed.
 @end defun
 
+@defun gdb.architecture_names ()
+Return a list containing all of the architecture names that the
+current build of @value{GDBN} supports.  Each architecture name is a
+string.  The names returned in this list are the same names as are
+returned from @code{gdb.Architecture.name}
+(@pxref{gdbpy_architecture_name,,Architecture.name}).
+@end defun
+
 @node Exception Handling
 @subsubsection Exception Handling
 @cindex python exceptions
@@ -5834,6 +5842,7 @@ by an instance of the @code{gdb.Architecture} class.
 
 A @code{gdb.Architecture} class has the following methods:
 
+@anchor{gdbpy_architecture_name}
 @defun Architecture.name ()
 Return the name (string value) of the architecture.
 @end defun
