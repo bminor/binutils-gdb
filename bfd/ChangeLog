@@ -1,3 +1,8 @@
+2021-09-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* archures.c (bfd_arch_list): Use 'char *' instead of 'char **'
+	when calculating space for a string list.
+
 2021-09-014  Cupertino Miranda  <cmiranda@synopsys.com>
            Claudiu Zissulescu  <claziss@synopsys.com>
 
