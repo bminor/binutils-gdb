@@ -27,10 +27,9 @@
     bfd_default_compatible, bfd_default_scan,			\
     bfd_arch_default_fill, next, 0 }
 
-static const bfd_arch_info_type arch_info_struct[3] =
+static const bfd_arch_info_type arch_info_struct[2] =
 {
-  N (bfd_mach_rx,    "rx",    3, false, arch_info_struct + 1),
-  N (bfd_mach_rx_v2, "rx:v2", 3, false, arch_info_struct + 2),
+  N (bfd_mach_rx_v2, "rx:v2", 3, false, arch_info_struct + 1),
   N (bfd_mach_rx_v3, "rx:v3", 3, false, NULL)
 };
 

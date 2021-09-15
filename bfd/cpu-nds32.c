@@ -42,4 +42,4 @@ static const bfd_arch_info_type arch_info_struct[] =
 };
 
 const bfd_arch_info_type bfd_nds32_arch =
-  N (bfd_mach_n1, "n1h", true, NEXT);
+  N (bfd_mach_n1, "n1", true, NEXT);
