@@ -17,12 +17,11 @@
 
 extern int v;
 
-asm (".hello_start: .globl .hello_start\n");
 void
 hello (void)
 {
+asm ("hello_label: .globl hello_label\n");
 asm (".hello0: .globl .hello0\n");
   v++;
 asm (".hello1: .globl .hello1\n");
 }
-asm (".hello_end: .globl .hello_end\n");
