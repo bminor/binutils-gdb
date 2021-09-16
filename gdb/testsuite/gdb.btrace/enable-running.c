@@ -25,7 +25,9 @@ test (void *arg)
 {
   /* Let's hope this is long enough for GDB to enable tracing and check that
      everything is working as expected.  */
-  sleep (10);
+  int unslept = 10;
+  while (unslept > 0)
+    unslept = sleep (unslept);
 
   return arg;
 }
