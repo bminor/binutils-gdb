@@ -38843,7 +38843,7 @@ different warning flags, depending on the exact version of the
 compiler you are using.
 
 @item --enable-werror
-Treat compiler warnings as werrors.  It adds the @code{-Werror} flag
+Treat compiler warnings as errors.  It adds the @code{-Werror} flag
 to the compiler, which will fail the compilation if the compiler
 outputs any warning messages.
 
