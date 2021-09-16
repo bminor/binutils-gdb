@@ -29,7 +29,6 @@
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 
-#include "bfd/cpu-riscv.h"
 #include "bfd/elfxx-riscv.h"
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
@@ -86,65 +85,6 @@ struct riscv_csr_extra
 
   /* The CSR may have more than one setting.  */
   struct riscv_csr_extra *next;
-};
-
-/* All standard/Z* extensions defined in all supported ISA spec.  */
-struct riscv_ext_version
-{
-  const char *name;
-  enum riscv_spec_class isa_spec_class;
-  int major_version;
-  int minor_version;
-};
-
-static const struct riscv_ext_version ext_version_table[] =
-{
-  {"e", ISA_SPEC_CLASS_20191213, 1, 9},
-  {"e", ISA_SPEC_CLASS_20190608, 1, 9},
-  {"e", ISA_SPEC_CLASS_2P2,      1, 9},
-
-  {"i", ISA_SPEC_CLASS_20191213, 2, 1},
-  {"i", ISA_SPEC_CLASS_20190608, 2, 1},
-  {"i", ISA_SPEC_CLASS_2P2,      2, 0},
-
-  {"m", ISA_SPEC_CLASS_20191213, 2, 0},
-  {"m", ISA_SPEC_CLASS_20190608, 2, 0},
-  {"m", ISA_SPEC_CLASS_2P2,      2, 0},
-
-  {"a", ISA_SPEC_CLASS_20191213, 2, 1},
-  {"a", ISA_SPEC_CLASS_20190608, 2, 0},
-  {"a", ISA_SPEC_CLASS_2P2,      2, 0},
-
-  {"f", ISA_SPEC_CLASS_20191213, 2, 2},
-  {"f", ISA_SPEC_CLASS_20190608, 2, 2},
-  {"f", ISA_SPEC_CLASS_2P2,      2, 0},
-
-  {"d", ISA_SPEC_CLASS_20191213, 2, 2},
-  {"d", ISA_SPEC_CLASS_20190608, 2, 2},
-  {"d", ISA_SPEC_CLASS_2P2,      2, 0},
-
-  {"q", ISA_SPEC_CLASS_20191213, 2, 2},
-  {"q", ISA_SPEC_CLASS_20190608, 2, 2},
-  {"q", ISA_SPEC_CLASS_2P2,      2, 0},
-
-  {"c", ISA_SPEC_CLASS_20191213, 2, 0},
-  {"c", ISA_SPEC_CLASS_20190608, 2, 0},
-  {"c", ISA_SPEC_CLASS_2P2,      2, 0},
-
-  {"zicsr", ISA_SPEC_CLASS_20191213, 2, 0},
-  {"zicsr", ISA_SPEC_CLASS_20190608, 2, 0},
-
-  {"zifencei", ISA_SPEC_CLASS_20191213, 2, 0},
-  {"zifencei", ISA_SPEC_CLASS_20190608, 2, 0},
-
-  {"zihintpause", ISA_SPEC_CLASS_DRAFT, 1, 0},
-
-  {"zbb",   ISA_SPEC_CLASS_DRAFT, 0, 93},
-  {"zba",   ISA_SPEC_CLASS_DRAFT, 0, 93},
-  {"zbc",   ISA_SPEC_CLASS_DRAFT, 0, 93},
-
-  /* Terminate the list.  */
-  {NULL, 0, 0, 0}
 };
 
 #ifndef DEFAULT_ARCH
@@ -349,57 +289,6 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
     }
 }
 
-/* Handle of the extension with version hash table.  */
-static htab_t ext_version_hash = NULL;
-
-static htab_t
-init_ext_version_hash (void)
-{
-  const struct riscv_ext_version *table = ext_version_table;
-  htab_t hash = str_htab_create ();
-  int i = 0;
-
-  while (table[i].name)
-    {
-      const char *name = table[i].name;
-      if (str_hash_insert (hash, name, &table[i], 0) != NULL)
-	as_fatal (_("internal: duplicate %s"), name);
-
-      i++;
-      while (table[i].name
-	     && strcmp (table[i].name, name) == 0)
-       i++;
-    }
-
-  return hash;
-}
-
-static void
-riscv_get_default_ext_version (const char *name,
-			       int *major_version,
-			       int *minor_version)
-{
-  struct riscv_ext_version *ext;
-
-  if (name == NULL || default_isa_spec == ISA_SPEC_CLASS_NONE)
-    return;
-
-  ext = (struct riscv_ext_version *) str_hash_find (ext_version_hash, name);
-  while (ext
-	 && ext->name
-	 && strcmp (ext->name, name) == 0)
-    {
-      if (ext->isa_spec_class == ISA_SPEC_CLASS_DRAFT
-	  || ext->isa_spec_class == default_isa_spec)
-	{
-	  *major_version = ext->major_version;
-	  *minor_version = ext->minor_version;
-	  return;
-	}
-      ext++;
-    }
-}
-
 /* Set which ISA and extensions are available.  */
 
 static void
@@ -409,11 +298,15 @@ riscv_set_arch (const char *s)
   rps.subset_list = &riscv_subsets;
   rps.error_handler = as_bad;
   rps.xlen = &xlen;
-  rps.get_default_version = riscv_get_default_ext_version;
+  rps.isa_spec = default_isa_spec;
   rps.check_unknown_prefixed_ext = true;
 
-  if (s == NULL)
-    return;
+  if (s != NULL && strcmp (s, "") == 0)
+    {
+      as_bad (_("the architecture string of -march and elf architecture "
+		"attributes cannot be empty"));
+      return;
+    }
 
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&rps, s);
@@ -3137,11 +3030,6 @@ riscv_after_parse_args (void)
       else
 	as_bad ("unknown default architecture `%s'", default_arch);
     }
-  if (default_arch_with_ext == NULL)
-    default_arch_with_ext = xlen == 64 ? "rv64g" : "rv32g";
-
-  /* Initialize the hash table for extensions with default version.  */
-  ext_version_hash = init_ext_version_hash ();
 
   /* Set default specs.  */
   if (default_isa_spec == ISA_SPEC_CLASS_NONE)

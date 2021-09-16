@@ -32,7 +32,6 @@
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
 #include "objalloc.h"
-#include "cpu-riscv.h"
 
 #include <limits.h>
 #ifndef CHAR_BIT
@@ -3443,7 +3442,7 @@ riscv_merge_std_ext (bfd *ibfd,
 		     struct riscv_subset_t **pin,
 		     struct riscv_subset_t **pout)
 {
-  const char *standard_exts = riscv_supported_std_ext ();
+  const char *standard_exts = "mafdqlcbjtpvn";
   const char *p;
   struct riscv_subset_t *in = *pin;
   struct riscv_subset_t *out = *pout;
@@ -3587,13 +3586,13 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
   rpe_in.subset_list = &in_subsets;
   rpe_in.error_handler = _bfd_error_handler;
   rpe_in.xlen = &xlen_in;
-  rpe_in.get_default_version = NULL;
+  rpe_in.isa_spec = ISA_SPEC_CLASS_NONE;
   rpe_in.check_unknown_prefixed_ext = false;
 
   rpe_out.subset_list = &out_subsets;
   rpe_out.error_handler = _bfd_error_handler;
   rpe_out.xlen = &xlen_out;
-  rpe_out.get_default_version = NULL;
+  rpe_out.isa_spec = ISA_SPEC_CLASS_NONE;
   rpe_out.check_unknown_prefixed_ext = false;
 
   if (in_arch == NULL && out_arch == NULL)
