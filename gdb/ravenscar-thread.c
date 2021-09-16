@@ -164,7 +164,7 @@ private:
      needed because sometimes the runtime will report an active task
      that hasn't yet been put on the list of tasks that is read by
      ada-tasks.c.  */
-  std::unordered_map<long, int> m_cpu_map;
+  std::unordered_map<ULONGEST, int> m_cpu_map;
 };
 
 /* Return true iff PTID corresponds to a ravenscar task.  */
@@ -469,7 +469,8 @@ ravenscar_thread_target::pid_to_str (ptid_t ptid)
   if (!is_ravenscar_task (ptid))
     return beneath ()->pid_to_str (ptid);
 
-  return string_printf ("Ravenscar Thread %#x", (int) ptid.tid ());
+  return string_printf ("Ravenscar Thread 0x%s",
+			phex_nz (ptid.tid (), sizeof (ULONGEST)));
 }
 
 /* Temporarily set the ptid of a regcache to some other value.  When

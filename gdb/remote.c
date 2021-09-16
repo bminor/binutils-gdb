@@ -6907,8 +6907,9 @@ remote_target::remote_stop_ns (ptid_t ptid)
 	    == resume_state::RESUMED_PENDING_VCONT)
 	  {
 	    remote_debug_printf ("Enqueueing phony stop reply for thread pending "
-				 "vCont-resume (%d, %ld, %ld)", tp->ptid.pid(),
-				 tp->ptid.lwp (), tp->ptid.tid ());
+				 "vCont-resume (%d, %ld, %s)", tp->ptid.pid(),
+				 tp->ptid.lwp (),
+				 pulongest (tp->ptid.tid ()));
 
 	    /* Check that the thread wasn't resumed with a signal.
 	       Generating a phony stop would result in losing the

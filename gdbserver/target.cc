@@ -286,8 +286,8 @@ target_pid_to_str (ptid_t ptid)
   else if (ptid == null_ptid)
     xsnprintf (buf, sizeof (buf), "<null thread>");
   else if (ptid.tid () != 0)
-    xsnprintf (buf, sizeof (buf), "Thread %d.0x%lx",
-	       ptid.pid (), ptid.tid ());
+    xsnprintf (buf, sizeof (buf), "Thread %d.0x%s",
+	       ptid.pid (), phex_nz (ptid.tid (), sizeof (ULONGEST)));
   else if (ptid.lwp () != 0)
     xsnprintf (buf, sizeof (buf), "LWP %d.%ld",
 	       ptid.pid (), ptid.lwp ());

@@ -1233,7 +1233,8 @@ info_task (struct ui_out *uiout, const char *taskno_str, struct inferior *inf)
     fprintf_styled (gdb_stdout, metadata_style.style (), _("<no name>\n"));
 
   /* Print the TID and LWP.  */
-  printf_filtered (_("Thread: %#lx\n"), task_info->ptid.tid ());
+  printf_filtered (_("Thread: 0x%s\n"), phex_nz (task_info->ptid.tid (),
+						 sizeof (ULONGEST)));
   printf_filtered (_("LWP: %#lx\n"), task_info->ptid.lwp ());
 
   /* If set, print the base CPU.  */

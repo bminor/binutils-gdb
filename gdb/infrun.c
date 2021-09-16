@@ -4646,11 +4646,9 @@ wait_one ()
 static void
 save_waitstatus (struct thread_info *tp, const target_waitstatus *ws)
 {
-  infrun_debug_printf ("saving status %s for %d.%ld.%ld",
+  infrun_debug_printf ("saving status %s for %s",
 		       target_waitstatus_to_string (ws).c_str (),
-		       tp->ptid.pid (),
-		       tp->ptid.lwp (),
-		       tp->ptid.tid ());
+		       tp->ptid.to_string ().c_str ());
 
   /* Record for later.  */
   tp->set_pending_waitstatus (*ws);
@@ -4845,9 +4843,9 @@ handle_one (const wait_one_event &event)
 	  struct regcache *regcache;
 
 	  infrun_debug_printf
-	    ("target_wait %s, saving status for %d.%ld.%ld",
+	    ("target_wait %s, saving status for %s",
 	     target_waitstatus_to_string (&event.ws).c_str (),
-	     t->ptid.pid (), t->ptid.lwp (), t->ptid.tid ());
+	     t->ptid.to_string ().c_str ());
 
 	  /* Record for later.  */
 	  save_waitstatus (t, &event.ws);

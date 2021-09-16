@@ -296,7 +296,8 @@ PyObject *
 gdbpy_create_ptid_object (ptid_t ptid)
 {
   int pid;
-  long tid, lwp;
+  long lwp;
+  ULONGEST tid;
   PyObject *ret;
 
   ret = PyTuple_New (3);
@@ -313,7 +314,7 @@ gdbpy_create_ptid_object (ptid_t ptid)
   gdbpy_ref<> lwp_obj = gdb_py_object_from_longest (lwp);
   if (lwp_obj == nullptr)
     return nullptr;
-  gdbpy_ref<> tid_obj = gdb_py_object_from_longest (tid);
+  gdbpy_ref<> tid_obj = gdb_py_object_from_ulongest (tid);
   if (tid_obj == nullptr)
     return nullptr;
 
