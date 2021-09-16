@@ -929,7 +929,7 @@ find_lwp_pid (ptid_t ptid)
   else
     lwp = ptid.pid ();
 
-  dummy.ptid = ptid_t (0, lwp, 0);
+  dummy.ptid = ptid_t (0, lwp);
   lp = (struct lwp_info *) htab_find (lwp_lwpid_htab, &dummy);
   return lp;
 }
@@ -1176,8 +1176,7 @@ linux_nat_target::attach (const char *args, int from_tty)
   /* The ptrace base target adds the main thread with (pid,0,0)
      format.  Decorate it with lwp info.  */
   ptid = ptid_t (inferior_ptid.pid (),
-		 inferior_ptid.pid (),
-		 0);
+		 inferior_ptid.pid ());
   thread_change_ptid (linux_target, inferior_ptid, ptid);
 
   /* Add the initial process as the first LWP to the list.  */
@@ -1901,7 +1900,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 			    _("wait returned unexpected status 0x%x"), status);
 	}
 
-      ourstatus->value.related_pid = ptid_t (new_pid, new_pid, 0);
+      ourstatus->value.related_pid = ptid_t (new_pid, new_pid);
 
       if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK)
 	{
@@ -1924,7 +1923,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 
 	  /* This won't actually modify the breakpoint list, but will
 	     physically remove the breakpoints from the child.  */
-	  detach_breakpoints (ptid_t (new_pid, new_pid, 0));
+	  detach_breakpoints (ptid_t (new_pid, new_pid));
 
 	  /* Retain child fork in ptrace (stopped) state.  */
 	  if (!find_fork_pid (new_pid))
@@ -1952,7 +1951,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	  linux_nat_debug_printf
 	    ("Got clone event from LWP %d, new child is LWP %ld", pid, new_pid);
 
-	  new_lp = add_lwp (ptid_t (lp->ptid.pid (), new_pid, 0));
+	  new_lp = add_lwp (ptid_t (lp->ptid.pid (), new_pid));
 	  new_lp->stopped = 1;
 	  new_lp->resumed = 1;
 
@@ -2840,7 +2839,7 @@ linux_nat_filter_event (int lwpid, int status)
       /* A multi-thread exec after we had seen the leader exiting.  */
       linux_nat_debug_printf ("Re-adding thread group leader LWP %d.", lwpid);
 
-      lp = add_lwp (ptid_t (lwpid, lwpid, 0));
+      lp = add_lwp (ptid_t (lwpid, lwpid));
       lp->stopped = 1;
       lp->resumed = 1;
       add_thread (linux_target, lp->ptid);
@@ -4101,7 +4100,7 @@ linux_nat_target::static_tracepoint_markers_by_strid (const char *strid)
   int pid = inferior_ptid.pid ();
   std::vector<static_tracepoint_marker> markers;
   const char *p = s;
-  ptid_t ptid = ptid_t (pid, 0, 0);
+  ptid_t ptid = ptid_t (pid, 0);
   static_tracepoint_marker marker;
 
   /* Pause all */

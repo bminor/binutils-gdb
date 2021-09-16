@@ -581,7 +581,7 @@ read_ptid (const char *buf, const char **obuf)
 
       if (obuf)
 	*obuf = pp;
-      return ptid_t (pid, tid, 0);
+      return ptid_t (pid, tid);
     }
 
   /* No multi-process.  Just a tid.  */
@@ -594,7 +594,7 @@ read_ptid (const char *buf, const char **obuf)
 
   if (obuf)
     *obuf = pp;
-  return ptid_t (pid, tid, 0);
+  return ptid_t (pid, tid);
 }
 
 /* Write COUNT bytes in BUF to the client.

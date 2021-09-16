@@ -890,7 +890,7 @@ fbsd_add_threads (fbsd_nat_target *target, pid_t pid)
 
   for (i = 0; i < nlwps; i++)
     {
-      ptid_t ptid = ptid_t (pid, lwps[i], 0);
+      ptid_t ptid = ptid_t (pid, lwps[i]);
 
       if (!in_thread_list (target, ptid))
 	{
@@ -1191,7 +1191,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  if (ptrace (PT_LWPINFO, pid, (caddr_t) &pl, sizeof pl) == -1)
 	    perror_with_name (("ptrace"));
 
-	  wptid = ptid_t (pid, pl.pl_lwpid, 0);
+	  wptid = ptid_t (pid, pl.pl_lwpid);
 
 	  if (debug_fbsd_nat)
 	    {
@@ -1287,7 +1287,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		    perror_with_name (("ptrace"));
 
 		  gdb_assert (pl.pl_flags & PL_FLAG_CHILD);
-		  child_ptid = ptid_t (child, pl.pl_lwpid, 0);
+		  child_ptid = ptid_t (child, pl.pl_lwpid);
 		}
 
 	      /* Enable additional events on the child process.  */

@@ -3101,7 +3101,7 @@ read_ptid (const char *buf, const char **obuf)
       pp = unpack_varlen_hex (p + 1, &tid);
       if (obuf)
 	*obuf = pp;
-      return ptid_t (pid, tid, 0);
+      return ptid_t (pid, tid);
     }
 
   /* No multi-process.  Just a tid.  */
@@ -3126,7 +3126,7 @@ read_ptid (const char *buf, const char **obuf)
 
   if (obuf)
     *obuf = pp;
-  return ptid_t (pid, tid, 0);
+  return ptid_t (pid, tid);
 }
 
 static int
@@ -4138,7 +4138,7 @@ remote_target::static_tracepoint_markers_by_strid (const char *strid)
 ptid_t
 remote_target::get_ada_task_ptid (long lwp, long thread)
 {
-  return ptid_t (inferior_ptid.pid (), lwp, 0);
+  return ptid_t (inferior_ptid.pid (), lwp);
 }
 
 
@@ -6242,7 +6242,7 @@ remote_target::append_resumption (char *p, char *endp,
       ptid_t nptid;
 
       /* All (-1) threads of process.  */
-      nptid = ptid_t (ptid.pid (), -1, 0);
+      nptid = ptid_t (ptid.pid (), -1);
 
       p += xsnprintf (p, endp - p, ":");
       p = write_ptid (p, endp, nptid);
@@ -6959,7 +6959,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
 
       if (ptid.is_pid ())
 	  /* All (-1) threads of process.  */
-	nptid = ptid_t (ptid.pid (), -1, 0);
+	nptid = ptid_t (ptid.pid (), -1);
       else
 	{
 	  /* Small optimization: if we already have a stop reply for

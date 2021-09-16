@@ -251,7 +251,7 @@ ravenscar_thread_target::get_base_thread_from_ravenscar_task (ptid_t ptid)
     return ptid;
 
   base_cpu = get_thread_base_cpu (ptid);
-  return ptid_t (ptid.pid (), base_cpu, 0);
+  return ptid_t (ptid.pid (), base_cpu);
 }
 
 /* Fetch the ravenscar running thread from target memory, make sure

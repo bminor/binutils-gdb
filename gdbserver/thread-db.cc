@@ -214,7 +214,7 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
 {
   struct process_info *proc = current_process ();
   int pid = pid_of (proc);
-  ptid_t ptid = ptid_t (pid, ti_p->ti_lid, 0);
+  ptid_t ptid = ptid_t (pid, ti_p->ti_lid);
   struct lwp_info *lwp;
   int err;
 
