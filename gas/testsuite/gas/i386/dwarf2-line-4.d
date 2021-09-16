@@ -33,11 +33,14 @@ Raw dump of debug contents of section \.z?debug_line:
 
  The File Name Table \(offset 0x.*\):
   Entry	Dir	Time	Size	Name
-  1	1	0	0	dwarf2-line-4.s
+  1	0	0	0	dwarf2-test.c
+  2	1	0	0	dwarf2-line-4.s
 
  Line Number Statements:
+  \[0x.*\]  Set File Name to entry 2 in the File Name Table
   \[0x.*\]  Extended opcode 2: set Address to 0x0
   \[0x.*\]  Special opcode 13: advance Address by 0 to 0x0 and Line by 8 to 9
+  \[0x.*\]  Set File Name to entry 1 in the File Name Table
   \[0x.*\]  Advance Line by -8 to 1
   \[0x.*\]  Special opcode 19: advance Address by 1 to 0x1 and Line by 0 to 1
   \[0x.*\]  Advance PC by 1 to 0x2

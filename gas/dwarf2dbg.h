@@ -36,7 +36,12 @@ struct dwarf2_line_info
   unsigned int isa;
   unsigned int flags;
   unsigned int discriminator;
-  symbolS *view;
+  /* filenum == -1u chooses filename, otherwise view.  */
+  union
+  {
+    symbolS *view;
+    const char *filename;
+  } u;
 };
 
 /* Implements the .file FILENO "FILENAME" directive.  FILENO can be 0

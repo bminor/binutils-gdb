@@ -36,12 +36,14 @@ Raw dump of debug contents of section \.z?debug_line:
   Entry	Dir	Time	Size	Name
   1	0	0	0	foo.c
   2	0	0	0	foo.h
+  3	1	0	0	dwarf4-line-1.s
 
  Line Number Statements:
+  \[0x.*\]  Set File Name to entry 2 in the File Name Table
   \[0x.*\]  Extended opcode 2: set Address to 0x0
   \[0x.*\]  Advance Line by 81 to 82
   \[0x.*\]  Copy
-  \[0x.*\]  Set File Name to entry 2 in the File Name Table
+  \[0x.*\]  Set File Name to entry 3 in the File Name Table
   \[0x.*\]  Advance Line by -73 to 9
   \[0x.*\]  Special opcode 19: advance Address by 1 to 0x1 and Line by 0 to 9
   \[0x.*\]  Advance PC by 3 to 0x4

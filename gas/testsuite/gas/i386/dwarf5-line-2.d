@@ -36,9 +36,10 @@ Raw dump of debug contents of section \.z?debug_line:
   0	\(indirect line string, offset: 0x.*\): .*/gas/testsuite
   1	\(indirect line string, offset: 0x.*\): .*/gas/testsuite/gas/i386
 
- The File Name Table \(offset 0x.*, lines 1, columns 3\):
+ The File Name Table \(offset 0x.*, lines 2, columns 3\):
   Entry	Dir	MD5				Name
   0	0 0xbbd69fc03ce253b2dbaab2522dd519ae	\(indirect line string, offset: 0x.*\): core.c
+  1	1 0x0	\(indirect line string, offset: .*\): dwarf5-line-2.s
 
  Line Number Statements:
   \[0x.*\]  Extended opcode 2: set Address to 0x0
