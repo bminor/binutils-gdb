@@ -31,22 +31,13 @@ Raw dump of debug contents of section \.z?debug_line:
   Opcode 11 has 0 args
   Opcode 12 has 1 arg
 
- The Directory Table \(offset 0x.*, lines 2, columns 1\):
+ The Directory Table \(offset 0x.*, lines 1, columns 1\):
   Entry	Name
   0	\(indirect line string, offset: 0x.*\): .*/gas/testsuite
-  1	\(indirect line string, offset: 0x.*\): .*/gas/testsuite/gas/i386
 
- The File Name Table \(offset 0x.*, lines 3, columns 3\):
+ The File Name Table \(offset 0x.*, lines 2, columns 3\):
   Entry	Dir	MD5				Name
   0	0 0xbbd69fc03ce253b2dbaab2522dd519ae	\(indirect line string, offset: 0x.*\): core.c
   1	0 0x0	\(indirect line string, offset: 0x.*\): types.h
-  2	1 0x0	\(indirect line string, offset: 0x.*\): dwarf5-line-1.s
 
- Line Number Statements:
-  \[0x.*\]  Set File Name to entry 2 in the File Name Table
-  \[0x.*\]  Extended opcode 2: set Address to 0x0
-  \[0x.*\]  Special opcode 8: advance Address by 0 to 0x0 and Line by 3 to 4
-  \[0x.*\]  Advance PC by 1 to 0x1
-  \[0x.*\]  Extended opcode 1: End of Sequence
-
-
+ No Line Number Statements\.

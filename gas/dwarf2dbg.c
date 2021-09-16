@@ -782,6 +782,32 @@ do_allocate_filenum (struct line_entry *e)
   while (e);
 }
 
+/* Remove any generated line entries.  These don't live comfortably
+   with compiler generated line info.  */
+
+static void
+purge_generated_debug (void)
+{
+  struct line_seg *s;
+
+  for (s = all_segs; s; s = s->next)
+    {
+      struct line_subseg *lss = s->head;
+      struct line_entry *e, *next;
+
+      for (e = lss->head; e; e = next)
+	{
+	  know (e->loc.filenum == -1u);
+	  next = e->next;
+	  free (e);
+	}
+
+      lss->head = NULL;
+      lss->ptail = &lss->head;
+      lss->pmove_tail = &lss->head;
+    }
+}
+
 /* Allocate slot NUM in the .debug_line file table to FILENAME.
    If DIRNAME is not NULL or there is a directory component to FILENAME
    then this will be stored in the directory table, if not already present.
@@ -1146,6 +1172,8 @@ dwarf2_directive_filename (void)
 
   /* A .file directive implies compiler generated debug information is
      being supplied.  Turn off gas generated debug info.  */
+  if (debug_type == DEBUG_DWARF2)
+    purge_generated_debug ();
   debug_type = DEBUG_NONE;
 
   if (num != (unsigned int) num
@@ -2414,7 +2442,7 @@ out_debug_line (segT line_seg)
   for (s = all_segs; s; s = s->next)
     /* Paranoia - this check should have already have
        been handled in dwarf2_gen_line_info_1().  */
-    if (SEG_NORMAL (s->seg))
+    if (s->head->head && SEG_NORMAL (s->seg))
       process_entries (s->seg, s->head->head);
 
   if (flag_dwarf_sections)
