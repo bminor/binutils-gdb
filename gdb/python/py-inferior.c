@@ -62,18 +62,6 @@ extern PyTypeObject inferior_object_type
 
 static const struct inferior_data *infpy_inf_data_key;
 
-struct membuf_object {
-  PyObject_HEAD
-  void *buffer;
-
-  /* These are kept just for mbpy_str.  */
-  CORE_ADDR addr;
-  CORE_ADDR length;
-};
-
-extern PyTypeObject membuf_object_type
-    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("membuf_object");
-
 /* Require that INFERIOR be a valid inferior ID.  */
 #define INFPY_REQUIRE_VALID(Inferior)				\
   do {								\
@@ -514,7 +502,7 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
   CORE_ADDR addr, length;
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;
-  PyObject *addr_obj, *length_obj, *result;
+  PyObject *addr_obj, *length_obj;
   static const char *keywords[] = { "address", "length", NULL };
 
   if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "OO", keywords,
@@ -536,23 +524,8 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  gdbpy_ref<membuf_object> membuf_obj (PyObject_New (membuf_object,
-						     &membuf_object_type));
-  if (membuf_obj == NULL)
-    return NULL;
 
-  membuf_obj->buffer = buffer.release ();
-  membuf_obj->addr = addr;
-  membuf_obj->length = length;
-
-#ifdef IS_PY3K
-  result = PyMemoryView_FromObject ((PyObject *) membuf_obj.get ());
-#else
-  result = PyBuffer_FromReadWriteObject ((PyObject *) membuf_obj.get (), 0,
-					 Py_END_OF_BUFFER);
-#endif
-
-  return result;
+  return gdbpy_buffer_to_membuf (std::move (buffer), addr, length);
 }
 
 /* Implementation of Inferior.write_memory (address, buffer [, length]).
@@ -601,93 +574,6 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 
   Py_RETURN_NONE;
 }
-
-/* Destructor of Membuf objects.  */
-static void
-mbpy_dealloc (PyObject *self)
-{
-  xfree (((membuf_object *) self)->buffer);
-  Py_TYPE (self)->tp_free (self);
-}
-
-/* Return a description of the Membuf object.  */
-static PyObject *
-mbpy_str (PyObject *self)
-{
-  membuf_object *membuf_obj = (membuf_object *) self;
-
-  return PyString_FromFormat (_("Memory buffer for address %s, \
-which is %s bytes long."),
-			      paddress (python_gdbarch, membuf_obj->addr),
-			      pulongest (membuf_obj->length));
-}
-
-#ifdef IS_PY3K
-
-static int
-get_buffer (PyObject *self, Py_buffer *buf, int flags)
-{
-  membuf_object *membuf_obj = (membuf_object *) self;
-  int ret;
-
-  ret = PyBuffer_FillInfo (buf, self, membuf_obj->buffer,
-			   membuf_obj->length, 0,
-			   PyBUF_CONTIG);
-
-  /* Despite the documentation saying this field is a "const char *",
-     in Python 3.4 at least, it's really a "char *".  */
-  buf->format = (char *) "c";
-
-  return ret;
-}
-
-#else
-
-static Py_ssize_t
-get_read_buffer (PyObject *self, Py_ssize_t segment, void **ptrptr)
-{
-  membuf_object *membuf_obj = (membuf_object *) self;
-
-  if (segment)
-    {
-      PyErr_SetString (PyExc_SystemError,
-		       _("The memory buffer supports only one segment."));
-      return -1;
-    }
-
-  *ptrptr = membuf_obj->buffer;
-
-  return membuf_obj->length;
-}
-
-static Py_ssize_t
-get_write_buffer (PyObject *self, Py_ssize_t segment, void **ptrptr)
-{
-  return get_read_buffer (self, segment, ptrptr);
-}
-
-static Py_ssize_t
-get_seg_count (PyObject *self, Py_ssize_t *lenp)
-{
-  if (lenp)
-    *lenp = ((membuf_object *) self)->length;
-
-  return 1;
-}
-
-static Py_ssize_t
-get_char_buffer (PyObject *self, Py_ssize_t segment, char **ptrptr)
-{
-  void *ptr = NULL;
-  Py_ssize_t ret;
-
-  ret = get_read_buffer (self, segment, &ptr);
-  *ptrptr = (char *) ptr;
-
-  return ret;
-}
-
-#endif	/* IS_PY3K */
 
 /* Implementation of
    gdb.search_memory (address, length, pattern).  ADDRESS is the
@@ -957,12 +843,7 @@ gdbpy_initialize_inferior (void)
   gdb::observers::inferior_removed.attach (python_inferior_deleted,
 					   "py-inferior");
 
-  membuf_object_type.tp_new = PyType_GenericNew;
-  if (PyType_Ready (&membuf_object_type) < 0)
-    return -1;
-
-  return gdb_pymodule_addobject (gdb_module, "Membuf",
-				 (PyObject *) &membuf_object_type);
+  return 0;
 }
 
 static gdb_PyGetSetDef inferior_object_getset[] =
@@ -1052,61 +933,4 @@ PyTypeObject inferior_object_type =
   0,				  /* tp_dictoffset */
   0,				  /* tp_init */
   0				  /* tp_alloc */
-};
-
-#ifdef IS_PY3K
-
-static PyBufferProcs buffer_procs =
-{
-  get_buffer
-};
-
-#else
-
-static PyBufferProcs buffer_procs = {
-  get_read_buffer,
-  get_write_buffer,
-  get_seg_count,
-  get_char_buffer
-};
-#endif	/* IS_PY3K */
-
-PyTypeObject membuf_object_type = {
-  PyVarObject_HEAD_INIT (NULL, 0)
-  "gdb.Membuf",			  /*tp_name*/
-  sizeof (membuf_object),	  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  mbpy_dealloc,			  /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  0,				  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  0,				  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  mbpy_str,			  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  &buffer_procs,		  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT,		  /*tp_flags*/
-  "GDB memory buffer object", 	  /*tp_doc*/
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  0,				  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  0,				  /* tp_methods */
-  0,				  /* tp_members */
-  0,				  /* tp_getset */
-  0,				  /* tp_base */
-  0,				  /* tp_dict */
-  0,				  /* tp_descr_get */
-  0,				  /* tp_descr_set */
-  0,				  /* tp_dictoffset */
-  0,				  /* tp_init */
-  0,				  /* tp_alloc */
 };

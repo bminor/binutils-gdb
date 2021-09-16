@@ -407,6 +407,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-instruction.c \
 	python/py-lazy-string.c \
 	python/py-linetable.c \
+	python/py-membuf.c \
 	python/py-newobjfileevent.c \
 	python/py-objfile.c \
 	python/py-param.c \
