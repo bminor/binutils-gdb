@@ -277,7 +277,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   char *pid_to_exec_file (int pid) override;
 
-  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+  ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
   bool get_tib_address (ptid_t ptid, CORE_ADDR *addr) override;
 
@@ -3082,7 +3082,7 @@ windows_nat_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 }
 
 ptid_t
-windows_nat_target::get_ada_task_ptid (long lwp, long thread)
+windows_nat_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 {
   return ptid_t (inferior_ptid.pid (), lwp, 0);
 }

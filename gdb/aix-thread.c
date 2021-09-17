@@ -144,7 +144,7 @@ public:
 
   const char *extra_thread_info (struct thread_info *) override;
 
-  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+  ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 };
 
 static aix_thread_target aix_thread_ops;
@@ -1825,7 +1825,7 @@ aix_thread_target::extra_thread_info (struct thread_info *thread)
 }
 
 ptid_t
-aix_thread_target::get_ada_task_ptid (long lwp, long thread)
+aix_thread_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 {
   return ptid_t (inferior_ptid.pid (), 0, thread);
 }

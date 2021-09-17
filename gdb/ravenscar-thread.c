@@ -118,7 +118,7 @@ struct ravenscar_thread_target final : public target_ops
 
   std::string pid_to_str (ptid_t) override;
 
-  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+  ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
   struct btrace_target_info *enable_btrace (ptid_t ptid,
 					    const struct btrace_config *conf)
@@ -682,7 +682,7 @@ ravenscar_inferior_created (inferior *inf)
 }
 
 ptid_t
-ravenscar_thread_target::get_ada_task_ptid (long lwp, long thread)
+ravenscar_thread_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 {
   return ptid_t (m_base_ptid.pid (), 0, thread);
 }

@@ -99,7 +99,7 @@ struct dummy_target : public target_ops
   void flash_erase (ULONGEST arg0, LONGEST arg1) override;
   void flash_done () override;
   const struct target_desc *read_description () override;
-  ptid_t get_ada_task_ptid (long arg0, long arg1) override;
+  ptid_t get_ada_task_ptid (long arg0, ULONGEST arg1) override;
   int auxv_parse (gdb_byte **arg0, gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3) override;
   int search_memory (CORE_ADDR arg0, ULONGEST arg1, const gdb_byte *arg2, ULONGEST arg3, CORE_ADDR *arg4) override;
   bool can_execute_reverse () override;
@@ -274,7 +274,7 @@ struct debug_target : public target_ops
   void flash_erase (ULONGEST arg0, LONGEST arg1) override;
   void flash_done () override;
   const struct target_desc *read_description () override;
-  ptid_t get_ada_task_ptid (long arg0, long arg1) override;
+  ptid_t get_ada_task_ptid (long arg0, ULONGEST arg1) override;
   int auxv_parse (gdb_byte **arg0, gdb_byte *arg1, CORE_ADDR *arg2, CORE_ADDR *arg3) override;
   int search_memory (CORE_ADDR arg0, ULONGEST arg1, const gdb_byte *arg2, ULONGEST arg3, CORE_ADDR *arg4) override;
   bool can_execute_reverse () override;
@@ -2598,19 +2598,19 @@ debug_target::read_description ()
 }
 
 ptid_t
-target_ops::get_ada_task_ptid (long arg0, long arg1)
+target_ops::get_ada_task_ptid (long arg0, ULONGEST arg1)
 {
   return this->beneath ()->get_ada_task_ptid (arg0, arg1);
 }
 
 ptid_t
-dummy_target::get_ada_task_ptid (long arg0, long arg1)
+dummy_target::get_ada_task_ptid (long arg0, ULONGEST arg1)
 {
   return default_get_ada_task_ptid (this, arg0, arg1);
 }
 
 ptid_t
-debug_target::get_ada_task_ptid (long arg0, long arg1)
+debug_target::get_ada_task_ptid (long arg0, ULONGEST arg1)
 {
   ptid_t result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->get_ada_task_ptid (...)\n", this->beneath ()->shortname ());
@@ -2618,7 +2618,7 @@ debug_target::get_ada_task_ptid (long arg0, long arg1)
   fprintf_unfiltered (gdb_stdlog, "<- %s->get_ada_task_ptid (", this->beneath ()->shortname ());
   target_debug_print_long (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_long (arg1);
+  target_debug_print_ULONGEST (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_ptid_t (result);
   fputs_unfiltered ("\n", gdb_stdlog);

@@ -111,7 +111,7 @@ class darwin_nat_target : public inf_child_target
 
   bool supports_multi_process () override;
 
-  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+  ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
 private:
   ptid_t wait_1 (ptid_t, struct target_waitstatus *);

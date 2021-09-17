@@ -88,7 +88,7 @@ public:
   void resume (ptid_t, int, enum gdb_signal) override;
   void mourn_inferior () override;
   std::string pid_to_str (ptid_t) override;
-  ptid_t get_ada_task_ptid (long lwp, long thread) override;
+  ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -1120,7 +1120,7 @@ info_solthreads (const char *args, int from_tty)
 static int
 thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
 {
-  long *tid = (long *) data;
+  ULONGEST *tid = (ULONGEST *) data;
 
   if (thread->ptid.tid () == *tid)
     return 1;
@@ -1129,7 +1129,7 @@ thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
 }
 
 ptid_t
-sol_thread_target::get_ada_task_ptid (long lwp, long thread)
+sol_thread_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 {
   struct thread_info *thread_info =
     iterate_over_threads (thread_db_find_thread_from_tid, &thread);

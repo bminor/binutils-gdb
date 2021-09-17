@@ -856,7 +856,7 @@ struct target_ops
        based on LWP and THREAD.  These values are extracted from the
        task Private_Data section of the Ada Task Control Block, and
        their interpretation depends on the target.  */
-    virtual ptid_t get_ada_task_ptid (long lwp, long thread)
+    virtual ptid_t get_ada_task_ptid (long lwp, ULONGEST thread)
       TARGET_DEFAULT_FUNC (default_get_ada_task_ptid);
 
     /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
@@ -2141,7 +2141,7 @@ extern bool target_can_execute_reverse ();
 
 extern const struct target_desc *target_read_description (struct target_ops *);
 
-extern ptid_t target_get_ada_task_ptid (long lwp, long tid);
+extern ptid_t target_get_ada_task_ptid (long lwp, ULONGEST tid);
 
 /* Main entry point for searching memory.  */
 extern int target_search_memory (CORE_ADDR start_addr,

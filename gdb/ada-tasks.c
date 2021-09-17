@@ -600,7 +600,7 @@ ada_get_tcb_types_info (void)
 static ptid_t
 ptid_from_atcb_common (struct value *common_value)
 {
-  long thread = 0;
+  ULONGEST thread;
   CORE_ADDR lwp = 0;
   struct value *ll_value;
   ptid_t ptid;

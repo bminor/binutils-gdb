@@ -2376,7 +2376,7 @@ darwin_nat_target::pid_to_exec_file (int pid)
 }
 
 ptid_t
-darwin_nat_target::get_ada_task_ptid (long lwp, long thread)
+darwin_nat_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 {
   struct inferior *inf = current_inferior ();
   darwin_inferior *priv = get_darwin_inferior (inf);

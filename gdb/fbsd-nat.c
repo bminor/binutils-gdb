@@ -1045,8 +1045,8 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
     return;
 #endif
 
-  fbsd_lwp_debug_printf ("ptid (%d, %ld, %ld)", ptid.pid (), ptid.lwp (),
-			 ptid.tid ());
+  fbsd_lwp_debug_printf ("ptid (%d, %ld, %s)", ptid.pid (), ptid.lwp (),
+			 pulongest (ptid.tid ()));
   if (ptid.lwp_p ())
     {
       /* If ptid is a specific LWP, suspend all other LWPs in the process.  */

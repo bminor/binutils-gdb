@@ -67,7 +67,7 @@ static int default_region_ok_for_hw_watchpoint (struct target_ops *,
 static void default_rcmd (struct target_ops *, const char *, struct ui_file *);
 
 static ptid_t default_get_ada_task_ptid (struct target_ops *self,
-					 long lwp, long tid);
+					 long lwp, ULONGEST tid);
 
 static void default_mourn_inferior (struct target_ops *self);
 
@@ -595,7 +595,7 @@ target_can_execute_reverse ()
 }
 
 ptid_t
-target_get_ada_task_ptid (long lwp, long tid)
+target_get_ada_task_ptid (long lwp, ULONGEST tid)
 {
   return current_inferior ()->top_target ()->get_ada_task_ptid (lwp, tid);
 }
@@ -1133,7 +1133,7 @@ default_terminal_info (struct target_ops *self, const char *args, int from_tty)
    inferior_ptid.  */
 
 static ptid_t
-default_get_ada_task_ptid (struct target_ops *self, long lwp, long tid)
+default_get_ada_task_ptid (struct target_ops *self, long lwp, ULONGEST tid)
 {
   return ptid_t (inferior_ptid.pid (), lwp, tid);
 }
