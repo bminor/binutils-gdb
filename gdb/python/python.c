@@ -166,6 +166,8 @@ static const struct extension_language_ops python_extension_ops =
   gdbpy_colorize,
 
   gdbpy_colorize_disasm,
+
+  NULL, /* gdbpy_print_insn, */
 };
 
 #endif /* HAVE_PYTHON */

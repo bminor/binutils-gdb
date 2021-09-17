@@ -327,6 +327,16 @@ extern gdb::optional<std::string> ext_lang_colorize
 extern gdb::optional<std::string> ext_lang_colorize_disasm
   (const std::string &content, gdbarch *gdbarch);
 
+/* Calls extension_language_ops::print_insn for each extension language,
+   returning the result from the first extension language that returns a
+   non-empty result (any further extension languages are not then called).
+
+   All arguments are forwarded to extension_language_ops::print_insn, see
+   that function for a full description.  */
+
+extern gdb::optional<int> ext_lang_print_insn
+  (struct gdbarch *gdbarch, CORE_ADDR address, struct disassemble_info *info);
+
 #if GDB_SELF_TEST
 namespace selftests {
 extern void (*hook_set_active_ext_lang) ();

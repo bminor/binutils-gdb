@@ -851,6 +851,29 @@ gdb_disassemble_info::~gdb_disassemble_info ()
   disassemble_free_target (&m_di);
 }
 
+/* Wrapper around calling gdbarch_print_insn.  This function takes care of
+   first calling the extension language hooks for print_insn, and, if none
+   of the extension languages can print this instruction, calls
+   gdbarch_print_insn to do the work.
+
+   GDBARCH is the architecture to disassemble in, VMA is the address of the
+   instruction being disassembled, and INFO is the libopcodes disassembler
+   related information.  */
+
+static int
+gdb_print_insn_1 (struct gdbarch *gdbarch, CORE_ADDR vma,
+		  struct disassemble_info *info)
+{
+  /* Call into the extension languages to do the disassembly.  */
+  gdb::optional<int> length = ext_lang_print_insn (gdbarch, vma, info);
+  if (length.has_value ())
+    return *length;
+
+  /* No extension language wanted to do the disassembly, so do it
+     manually.  */
+  return gdbarch_print_insn (gdbarch, vma, info);
+}
+
 /* See disasm.h.  */
 
 bool gdb_disassembler::use_ext_lang_colorization_p = true;
@@ -864,7 +887,7 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
   m_err_memaddr.reset ();
   m_buffer.clear ();
 
-  int length = gdbarch_print_insn (arch (), memaddr, &m_di);
+  int length = gdb_print_insn_1 (arch (), memaddr, &m_di);
 
   /* If we have successfully disassembled an instruction, styling is on, we
      think that the extension language might be able to perform styling for
@@ -899,7 +922,7 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
 	  gdb_assert (!m_buffer.term_out ());
 	  m_buffer.~string_file ();
 	  new (&m_buffer) string_file (true);
-	  length = gdbarch_print_insn (arch (), memaddr, &m_di);
+	  length = gdb_print_insn_1 (arch (), memaddr, &m_di);
 	  gdb_assert (length > 0);
 	}
     }
@@ -1054,7 +1077,7 @@ gdb_buffered_insn_length (struct gdbarch *gdbarch,
   gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr,
 				     &disassembler_options_holder);
 
-  int result = gdbarch_print_insn (gdbarch, addr, &di);
+  int result = gdb_print_insn_1 (gdbarch, addr, &di);
   disassemble_free_target (&di);
   return result;
 }

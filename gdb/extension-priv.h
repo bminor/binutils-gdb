@@ -263,6 +263,21 @@ struct extension_language_ops
      contents, or an empty optional.  */
   gdb::optional<std::string> (*colorize_disasm) (const std::string &content,
 						 gdbarch *gdbarch);
+
+  /* Print a single instruction from ADDRESS in architecture GDBARCH.  INFO
+     is the standard libopcodes disassembler_info structure.  Bytes for the
+     instruction being printed should be read using INFO->read_memory_func
+     as the actual instruction bytes might be in a buffer.
+
+     Use INFO->fprintf_func to print the results of the disassembly, and
+     return the length of the instruction.
+
+     If no instruction can be disassembled then return an empty value and
+     other extension languages will get a chance to perform the
+     disassembly.  */
+  gdb::optional<int> (*print_insn) (struct gdbarch *gdbarch,
+				    CORE_ADDR address,
+				    struct disassemble_info *info);
 };
 
 /* State necessary to restore a signal handler to its previous value.  */
