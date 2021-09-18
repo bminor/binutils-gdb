@@ -69,11 +69,13 @@ proc prepare {} {
 
     gdbserver_run ""
 
-    if { $::kill_pid_of == "inferior" } {
-	# Continue past server_pid assignment.
-	gdb_breakpoint ${srcfile}:[gdb_get_line_number "i = 0;"]
-	gdb_continue_to_breakpoint "after server_pid assignment"
+    # Continue past server_pid assignment.  We do this for both scenarios,
+    # to avoid doing a backtrace from _start, which may not trigger remote
+    # communication.
+    gdb_breakpoint ${srcfile}:[gdb_get_line_number "i = 0;"]
+    gdb_continue_to_breakpoint "after server_pid assignment"
 
+    if { $::kill_pid_of == "inferior" } {
 	# Get the pid of GDBServer.
 	set test "p server_pid"
 	set server_pid 0
