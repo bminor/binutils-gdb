@@ -2322,6 +2322,8 @@ do_print_variable_and_value (const char *print_name,
   if (p->treg.has_value ()
       && !treg_matches_sym_type_name (*p->treg, sym))
     return;
+  if (language_def (sym->language ())->symbol_printing_suppressed (sym))
+    return;
 
   frame = frame_find_by_id (p->frame_id);
   if (frame == NULL)

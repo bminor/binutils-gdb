@@ -327,6 +327,14 @@ struct language_defn
     return {};
   }
 
+  /* Return true if SYMBOL represents an entity that is not
+     supposed to be seen by the user.  To be used to filter symbols
+     during printing.  */
+  virtual bool symbol_printing_suppressed (struct symbol *symbol) const
+  {
+    return false;
+  }
+
   /* The per-architecture (OS/ABI) language information.  */
 
   virtual void language_arch_info (struct gdbarch *,

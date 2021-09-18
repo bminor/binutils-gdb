@@ -1122,7 +1122,8 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       is_argument (0),
       is_inlined (0),
       maybe_copied (0),
-      subclass (SYMBOL_NONE)
+      subclass (SYMBOL_NONE),
+      artificial (false)
     {
       /* We can't use an initializer list for members of a base class, and
 	 general_symbol_info needs to stay a POD type.  */
@@ -1191,6 +1192,10 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   /* The concrete type of this symbol.  */
 
   ENUM_BITFIELD (symbol_subclass_kind) subclass : 2;
+
+  /* Whether this symbol is artificial.  */
+
+  bool artificial : 1;
 
   /* Line number of this symbol's definition, except for inlined
      functions.  For an inlined function (class LOC_BLOCK and

@@ -33,3 +33,10 @@ gdb_test "print r" \
 
 gdb_test "print s" \
          "= \\(x => 1, y => 2, w => 3, h => 4\\)"
+
+set cmd "info locals"
+gdb_test $cmd \
+    [multi_line \
+	 $cmd \
+	 "r = \[^\r\n\]*" \
+	 "s = \[^\r\n\]*"]

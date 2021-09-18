@@ -3539,6 +3539,17 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
 	 candidates.end ());
     }
 
+  /* Filter out artificial symbols.  */
+  candidates.erase
+    (std::remove_if
+     (candidates.begin (),
+      candidates.end (),
+      [] (block_symbol &bsym)
+      {
+       return bsym.symbol->artificial;
+      }),
+     candidates.end ());
+
   int i;
   if (candidates.empty ())
     error (_("No definition found for %s"), sym->print_name ());
@@ -13025,6 +13036,12 @@ public:
     /* This is a typical case where we expect the default_read_var_value
        function to work.  */
     return language_defn::read_var_value (var, var_block, frame);
+  }
+
+  /* See language.h.  */
+  virtual bool symbol_printing_suppressed (struct symbol *symbol) const override
+  {
+    return symbol->artificial;
   }
 
   /* See language.h.  */
