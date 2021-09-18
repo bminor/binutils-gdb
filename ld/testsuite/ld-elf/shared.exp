@@ -868,6 +868,45 @@ run_cc_link_tests [list \
 	{} \
 	"pr26590" \
     ] \
+    [list \
+	"Build libpr28348a.so" \
+	"-shared -Wl,--version-script=pr28348.t" \
+	"-fPIC" \
+	{pr28348a.c} \
+	{} \
+	"libpr28348a.so" \
+    ] \
+    [list \
+	"Build pr28348b.o" \
+	"" \
+	"-fPIC" \
+	{pr28348b.c} \
+    ] \
+    [list \
+	"Build pr28348c.o" \
+	"" \
+	"" \
+	{pr28348c.c} \
+    ] \
+    [list \
+	"Build libpr28348b.so" \
+	"-shared -Wl,--version-script=pr28348.t \
+	 -Wl,--no-as-needed tmpdir/pr28348b.o tmpdir/libpr28348a.so" \
+	"-fPIC" \
+	{dummy.c} \
+	{} \
+	"libpr28348b.so" \
+    ] \
+    [list \
+	"Build pr28348" \
+	"-Wl,--no-as-needed tmpdir/pr28348c.o \
+	 tmpdir/pr28348a.o tmpdir/libpr28348a.so tmpdir/libpr28348b.so \
+	 tmpdir/libpr28348a.so" \
+	"" \
+	{dummy.c} \
+	{{readelf {--dyn-syms --wide} pr28348.rd}} \
+	"pr28348" \
+    ] \
 ]
 
 # pr19073.s uses .set, which has a different meaning on alpha.
