@@ -38632,8 +38632,8 @@ directory (@file{gdb-@value{GDBVN}}, for version @value{GDBVN}).
 
 Here is a summary of the @file{configure} options and arguments that
 are most often useful for building @value{GDBN}.  @file{configure}
-also has several other options not listed here.  @inforef{Running
-configure scripts,,autoconf.info}, for a full
+also has several other options not listed here.  @xref{Running
+configure Scripts,,,autoconf}, for a full
 explanation of @file{configure}.
 
 @smallexample
