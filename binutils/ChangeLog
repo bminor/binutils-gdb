@@ -1,3 +1,9 @@
+2021-09-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testsuite/binutils-all/riscv/riscv.exp: New file.
+	* testsuite/binutils-all/riscv/unknown.d: New file.
+	* testsuite/binutils-all/riscv/unknown.s: New file.
+
 2021-09-07  Luis Machado  <luis.machado@linaro.org>
 
 	Revert: [AArch64] MTE corefile support

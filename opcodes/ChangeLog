@@ -1,3 +1,9 @@
+2021-09-20  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-dis.c (riscv_disassemble_insn): Print a .%dbyte opcode
+	before an unknown instruction, '%d' is replaced with the
+	instruction length.
+
 2021-09-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 28292

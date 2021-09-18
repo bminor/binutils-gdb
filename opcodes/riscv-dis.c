@@ -570,7 +570,29 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 
   /* We did not find a match, so just print the instruction bits.  */
   info->insn_type = dis_noninsn;
-  (*info->fprintf_func) (info->stream, "0x%llx", (unsigned long long)word);
+  switch (insnlen)
+    {
+    case 2:
+    case 4:
+    case 8:
+      (*info->fprintf_func) (info->stream, ".%dbyte\t0x%llx",
+                             insnlen, (unsigned long long) word);
+      break;
+    default:
+      {
+        int i;
+        (*info->fprintf_func) (info->stream, ".byte\t");
+        for (i = 0; i < insnlen; ++i)
+          {
+            if (i > 0)
+              (*info->fprintf_func) (info->stream, ", ");
+            (*info->fprintf_func) (info->stream, "0x%02x",
+                                   (unsigned int) (word & 0xff));
+            word >>= 8;
+          }
+      }
+      break;
+    }
   return insnlen;
 }
 
