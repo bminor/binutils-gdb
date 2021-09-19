@@ -26,8 +26,8 @@ if [target_info exists no_long_long] {
 
 standard_testfile whatis.c
 
-# Using `-gt` generates full-fledged CTF debug information.
-set opts "additional_flags=-gt -Wl,--export-dynamic"
+# Using `-gctf` generates full-fledged CTF debug information.
+set opts "additional_flags=-gctf -Wl,--export-dynamic"
 
 if { [prepare_for_testing "failed to prepare" ${testfile} \
 	  [list $srcfile] [list $opts nowarnings]] } {

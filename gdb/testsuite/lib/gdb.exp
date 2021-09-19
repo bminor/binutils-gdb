@@ -7737,7 +7737,7 @@ proc cmp_file_string { file str msg } {
     }
 }
 
-# Does the compiler support CTF debug output using '-gt' compiler
+# Does the compiler support CTF debug output using '-gctf' compiler
 # flag?  If not then we should skip these tests.  We should also
 # skip them if libctf was explicitly disabled.
 
@@ -7752,7 +7752,7 @@ gdb_caching_proc skip_ctf_tests {
 	int main () {
 	    return 0;
 	}
-    } executable "additional_flags=-gt"]
+    } executable "additional_flags=-gctf"]
 
     return [expr {!$can_ctf}]
 }

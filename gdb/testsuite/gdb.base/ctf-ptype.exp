@@ -22,8 +22,8 @@ if [skip_ctf_tests] {
 
 standard_testfile .c
 
-# Using `-gt` generates full-fledged CTF debug information.
-set opts "additional_flags=-gt"
+# Using `-gctf` generates full-fledged CTF debug information.
+set opts "additional_flags=-gctf"
 
 if { [prepare_for_testing "failed to prepare" ${testfile} \
 	  [list $srcfile] [list $opts nowarnings]] } {
