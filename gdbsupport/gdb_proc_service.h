@@ -174,7 +174,7 @@ EXTERN_C_POP
    -fvisibility=hidden.  */
 
 #define PS_EXPORT(SYM)						\
-  __attribute__((visibility ("default"))) typeof (SYM) SYM
+  __attribute__((visibility ("default"))) decltype (SYM) SYM
 
 PS_EXPORT (ps_get_thread_area);
 PS_EXPORT (ps_getpid);
