@@ -43,12 +43,22 @@ foreach_with_prefix scenario {all minimal} {
 
     set re "= \\(false <repeats 196 times>\\)"
     set re_xfail "= \\(0 => 0 <repeats 25 times>\\)"
+    set re_xfail2 "= \\(0 => 0 <repeats 24 times>, ($decimal)\\)"
     gdb_test_multiple "print bad" "" {
        -re -wrap $re  {
            pass $gdb_test_name
        }
        -re -wrap $re_xfail {
            if { $have_xfail } {
+               # gcc/101643
+               setup_xfail *-*-*
+           }
+           fail $gdb_test_name
+       }
+       -re -wrap $re_xfail2 {
+	   set last $expect_out(1,string)
+           if { $have_xfail && [string is integer $last] \
+		    && [expr ($last & 0xf) == 0] } {
                # gcc/101643
                setup_xfail *-*-*
            }
