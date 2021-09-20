@@ -44,7 +44,7 @@ extern void register_test (const std::string &name, selftest *test);
 /* Register a new self-test.  */
 
 extern void register_test (const std::string &name,
-			   self_test_function *function);
+			   std::function<void(void)> function);
 
 /* Run all the self tests.  This print a message describing the number
    of test and the number of failures.

@@ -21,6 +21,7 @@
 #include "common-debug.h"
 #include "selftest.h"
 #include <map>
+#include <functional>
 
 namespace selftests
 {
@@ -29,22 +30,6 @@ namespace selftests
    exists.  */
 
 static std::map<std::string, std::unique_ptr<selftest>> tests;
-
-/* A selftest that calls the test function without arguments.  */
-
-struct simple_selftest : public selftest
-{
-  simple_selftest (self_test_function *function_)
-  : function (function_)
-  {}
-
-  void operator() () const override
-  {
-    function ();
-  }
-
-  self_test_function *function;
-};
 
 /* See selftest.h.  */
 
@@ -57,12 +42,30 @@ register_test (const std::string &name, selftest *test)
   tests[name] = std::unique_ptr<selftest> (test);
 }
 
+/* A selftest that calls the test function without arguments.  */
+
+struct lambda_selftest : public selftest
+{
+  lambda_selftest (std::function<void(void)> function_)
+  {
+    function  = function_;
+  }
+
+  void operator() () const override
+  {
+    function ();
+  }
+
+  std::function<void(void)> function;
+};
+
 /* See selftest.h.  */
 
 void
-register_test (const std::string &name, self_test_function *function)
+register_test (const std::string &name,
+	       std::function<void(void)> function)
 {
-  register_test (name, new simple_selftest (function));
+  register_test (name, new lambda_selftest (function));
 }
 
 /* See selftest.h.  */
