@@ -46,4 +46,4 @@ mi_continue_to_line $line "continue to protected method"
 
 # The bug was that this crashed.
 mi_gdb_test "-stack-list-arguments --no-frame-filters 1" \
-    "\\^done,stack=.*"
+    "\\^done,stack-args=.*"
