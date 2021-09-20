@@ -730,9 +730,9 @@ allocate_filenum (const char * pathname)
 	}
       else
 	{
-	  if (filename_ncmp (pathname, dirname, last_used_dir_len) == 0
-	      && IS_DIR_SEPARATOR (pathname [last_used_dir_len])
-	      && filename_cmp (pathname + last_used_dir_len + 1,
+	  if (filename_ncmp (pathname, dirname, last_used_dir_len - 1) == 0
+	      && IS_DIR_SEPARATOR (pathname [last_used_dir_len - 1])
+	      && filename_cmp (pathname + last_used_dir_len,
 			       files[last_used].filename) == 0)
 	    return last_used;
 	}
