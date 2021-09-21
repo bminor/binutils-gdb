@@ -3910,7 +3910,9 @@ the value of a target-specific symbol, if it is defined;  For many
 targets this is @code{start}, but PE- and BeOS-based systems for example
 check a list of possible entry symbols, matching the first one found.
 @item
-the address of the first byte of the @samp{.text} section, if present;
+the address of the first byte of the code section, if present and an
+executable is being created - the code section is usually
+@samp{.text}, but can be something else; 
 @item
 The address @code{0}.
 @end itemize

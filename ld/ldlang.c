@@ -6984,7 +6984,8 @@ lang_end (void)
 	  if (!bfd_set_start_address (link_info.output_bfd, val))
 	    einfo (_("%F%P: can't set start address\n"));
 	}
-      else
+      /* BZ 2004952: Only use the start of the entry section for executables.  */
+      else if bfd_link_executable (&link_info)
 	{
 	  asection *ts;
 
@@ -7009,6 +7010,13 @@ lang_end (void)
 			 " not setting start address\n"),
 		       entry_symbol.name);
 	    }
+	}
+      else
+	{
+	  if (warn)
+	    einfo (_("%P: warning: cannot find entry symbol %s;"
+		     " not setting start address\n"),
+		   entry_symbol.name);
 	}
     }
 }

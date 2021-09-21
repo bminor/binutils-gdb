@@ -1,3 +1,30 @@
+2021-09-21  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (lang_end): When computing the entry point, only
+	try the start address of the entry section when creating an
+	executable.
+	* ld.texi (Entry point): Update description of heuristic used to
+	choose the entry point.
+	testsuite/ld-alpha/tlspic.rd: Update expected entry point address.
+	testsuite/ld-arm/tls-gdesc-got.d: Likewise.
+	testsuite/ld-i386/tlsnopic.rd: Likewise.
+	testsuite/ld-ia64/tlspic.rd: Likewise.
+	testsuite/ld-sparc/gotop32.rd: Likewise.
+	testsuite/ld-sparc/gotop64.rd: Likewise.
+	testsuite/ld-sparc/tlssunnopic32.rd: Likewise.
+	testsuite/ld-sparc/tlssunnopic64.rd: Likewise.
+	testsuite/ld-sparc/tlssunpic32.rd: Likewise.
+	testsuite/ld-sparc/tlssunpic64.rd: Likewise.
+	testsuite/ld-tic6x/shlib-1.rd: Likewise.
+	testsuite/ld-tic6x/shlib-1b.rd: Likewise.
+	testsuite/ld-tic6x/shlib-1r.rd: Likewise.
+	testsuite/ld-tic6x/shlib-1rb.rd: Likewise.
+	testsuite/ld-tic6x/shlib-noindex.rd: Likewise.
+	testsuite/ld-x86-64/pr14207.d: Likewise.
+	testsuite/ld-x86-64/tlsdesc.rd: Likewise.
+	testsuite/ld-x86-64/tlspic.rd: Likewise.
+	testsuite/ld-x86-64/tlspic2.rd: Likewise.
+
 2021-09-15  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* testsuite/ld-arc/got-weak.d: Update file.
