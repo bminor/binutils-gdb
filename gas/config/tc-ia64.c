@@ -306,6 +306,7 @@ static struct
     slot[NUM_SLOTS];
 
     segT last_text_seg;
+    subsegT last_text_subseg;
 
     struct dynreg
       {
@@ -952,7 +953,7 @@ ia64_flush_insns (void)
   saved_seg = now_seg;
   saved_subseg = now_subseg;
 
-  subseg_set (md.last_text_seg, 0);
+  subseg_set (md.last_text_seg, md.last_text_subseg);
 
   while (md.num_slots_in_use > 0)
     emit_one_bundle ();		/* force out queued instructions */
@@ -4410,7 +4411,7 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
     {
       symbolS *proc_end;
 
-      subseg_set (md.last_text_seg, 0);
+      subseg_set (md.last_text_seg, md.last_text_subseg);
       proc_end = expr_build_dot ();
 
       start_unwind_section (saved_seg, SPECIAL_SECTION_UNWIND);
@@ -7767,6 +7768,7 @@ ia64_frob_label (struct symbol *sym)
   if (bfd_section_flags (now_seg) & SEC_CODE)
     {
       md.last_text_seg = now_seg;
+      md.last_text_subseg = now_subseg;
       fix = XOBNEW (&notes, struct label_fix);
       fix->sym = sym;
       fix->next = CURR_SLOT.label_fixups;
@@ -10854,6 +10856,7 @@ md_assemble (char *str)
     insn_group_break (1, 0, 0);
 
   md.last_text_seg = now_seg;
+  md.last_text_subseg = now_subseg;
 
  done:
   input_line_pointer = saved_input_line_pointer;
