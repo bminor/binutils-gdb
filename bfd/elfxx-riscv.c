@@ -1536,13 +1536,9 @@ riscv_parsing_subset_version (const char *p,
 	{
 	  np = *(p + 1);
 
+	  /* Might be beginning of `p` extension.  */
 	  if (!ISDIGIT (np))
-	    {
-	      /* Might be beginning of `p` extension.  */
-	      *major_version = version;
-	      *minor_version = 0;
-	      return p;
-	    }
+	    break;
 
 	  *major_version = version;
 	  major_p = false;
