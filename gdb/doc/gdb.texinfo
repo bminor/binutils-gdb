@@ -39478,6 +39478,13 @@ If a @var{filter} is passed, only the tests with @var{filter} in their
 name will be ran.  If @code{-verbose} is passed, the self tests can be
 more verbose.
 
+@kindex maint set selftest verbose
+@kindex maint show selftest verbose
+@cindex self tests
+@item maint set selftest verbose
+@item maint show selftest verbose
+Control whether self tests are run verbosely or not.
+
 @kindex maint info selftests
 @cindex self tests
 @item maint info selftests
