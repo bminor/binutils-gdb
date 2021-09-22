@@ -1127,8 +1127,9 @@ static void
 maintenance_selftest (const char *args, int from_tty)
 {
 #if GDB_SELF_TEST
+  bool verbose = args != nullptr && check_for_argument (&args, "-verbose");
   gdb_argv argv (args);
-  selftests::run_tests (argv.as_array_view ());
+  selftests::run_tests (argv.as_array_view (), verbose);
 #else
   printf_filtered (_("\
 Selftests have been disabled for this build.\n"));

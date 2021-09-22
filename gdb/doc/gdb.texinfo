@@ -39433,11 +39433,12 @@ data structures, including its flags and contained types.
 
 @kindex maint selftest
 @cindex self tests
-@item maint selftest @r{[}@var{filter}@r{]}
+@item maint selftest @r{[}-verbose@r{]} @r{[}@var{filter}@r{]}
 Run any self tests that were compiled in to @value{GDBN}.  This will
 print a message showing how many tests were run, and how many failed.
 If a @var{filter} is passed, only the tests with @var{filter} in their
-name will be ran.
+name will be ran.  If @code{-verbose} is passed, the self tests can be
+more verbose.
 
 @kindex maint info selftests
 @cindex self tests

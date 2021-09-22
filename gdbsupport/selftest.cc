@@ -70,10 +70,23 @@ register_test (const std::string &name,
 
 /* See selftest.h.  */
 
+static bool run_verbose_ = false;
+
+/* See selftest.h.  */
+
+bool
+run_verbose ()
+{
+  return run_verbose_;
+}
+
+/* See selftest.h.  */
+
 void
-run_tests (gdb::array_view<const char *const> filters)
+run_tests (gdb::array_view<const char *const> filters, bool verbose)
 {
   int ran = 0, failed = 0;
+  run_verbose_ = verbose;
 
   for (const auto &pair : tests)
     {
