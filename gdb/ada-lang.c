@@ -13508,13 +13508,12 @@ _initialize_ada_language ()
 {
   initialize_ada_catchpoint_ops ();
 
-  add_basic_prefix_cmd ("ada", no_class,
-			_("Prefix command for changing Ada-specific settings."),
-			&set_ada_list, 0, &setlist);
-
-  add_show_prefix_cmd ("ada", no_class,
-		       _("Generic command for showing Ada-specific settings."),
-		       &show_ada_list, 0, &showlist);
+  add_setshow_prefix_cmd
+    ("ada", no_class,
+     _("Prefix command for changing Ada-specific settings."),
+     _("Generic command for showing Ada-specific settings."),
+     &set_ada_list, &show_ada_list,
+     &setlist, &showlist);
 
   add_setshow_boolean_cmd ("trust-PAD-over-XVS", class_obscure,
 			   &trust_pad_over_xvs, _("\
@@ -13582,15 +13581,11 @@ Usage: info exceptions [REGEXP]\n\
 If a regular expression is passed as an argument, only those matching\n\
 the regular expression are listed."));
 
-  add_basic_prefix_cmd ("ada", class_maintenance,
-			_("Set Ada maintenance-related variables."),
-			&maint_set_ada_cmdlist,
-			0/*allow-unknown*/, &maintenance_set_cmdlist);
-
-  add_show_prefix_cmd ("ada", class_maintenance,
-		       _("Show Ada maintenance-related variables."),
-		       &maint_show_ada_cmdlist,
-		       0/*allow-unknown*/, &maintenance_show_cmdlist);
+  add_setshow_prefix_cmd ("ada", class_maintenance,
+			  _("Set Ada maintenance-related variables."),
+			  _("Show Ada maintenance-related variables."),
+			  &maint_set_ada_cmdlist, &maint_show_ada_cmdlist,
+			  &maintenance_set_cmdlist, &maintenance_show_cmdlist);
 
   add_setshow_boolean_cmd
     ("ignore-descriptive-types", class_maintenance,

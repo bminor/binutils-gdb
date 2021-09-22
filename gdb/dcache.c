@@ -702,13 +702,12 @@ With no arguments, this command prints the cache configuration and a\n\
 summary of each line in the cache.  With an argument, dump\"\n\
 the contents of the given line."));
 
-  add_basic_prefix_cmd ("dcache", class_obscure, _("\
+  add_setshow_prefix_cmd ("dcache", class_obscure,
+			  _("\
 Use this command to set number of lines in dcache and line-size."),
-			&dcache_set_list, /*allow_unknown*/0, &setlist);
-  add_show_prefix_cmd ("dcache", class_obscure, _("\
-Show dcachesettings."),
-		       &dcache_show_list, /*allow_unknown*/0,
-		       &showlist);
+			  ("Show dcache settings."),
+			  &dcache_set_list, &dcache_show_list,
+			  &setlist, &showlist);
 
   add_setshow_zuinteger_cmd ("line-size", class_obscure,
 			     &dcache_line_size, _("\

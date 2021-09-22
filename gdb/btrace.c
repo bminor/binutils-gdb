@@ -3455,25 +3455,21 @@ _initialize_btrace ()
 			_("Branch tracing maintenance commands."),
 			&maint_btrace_cmdlist, 0, &maintenancelist);
 
-  add_basic_prefix_cmd ("btrace", class_maintenance, _("\
-Set branch tracing specific variables."),
-			&maint_btrace_set_cmdlist,
-			0, &maintenance_set_cmdlist);
+  add_setshow_prefix_cmd ("btrace", class_maintenance,
+			  _("Set branch tracing specific variables."),
+			  _("Show branch tracing specific variables."),
+			  &maint_btrace_set_cmdlist,
+			  &maint_btrace_show_cmdlist,
+			  &maintenance_set_cmdlist,
+			  &maintenance_show_cmdlist);
 
-  add_basic_prefix_cmd ("pt", class_maintenance, _("\
-Set Intel Processor Trace specific variables."),
-			&maint_btrace_pt_set_cmdlist,
-			0, &maint_btrace_set_cmdlist);
-
-  add_show_prefix_cmd ("btrace", class_maintenance, _("\
-Show branch tracing specific variables."),
-		       &maint_btrace_show_cmdlist,
-		       0, &maintenance_show_cmdlist);
-
-  add_show_prefix_cmd ("pt", class_maintenance, _("\
-Show Intel Processor Trace specific variables."),
-		       &maint_btrace_pt_show_cmdlist,
-		       0, &maint_btrace_show_cmdlist);
+  add_setshow_prefix_cmd ("pt", class_maintenance,
+			  _("Set Intel Processor Trace specific variables."),
+			  _("Show Intel Processor Trace specific variables."),
+			  &maint_btrace_pt_set_cmdlist,
+			  &maint_btrace_pt_show_cmdlist,
+			  &maint_btrace_set_cmdlist,
+			  &maint_btrace_show_cmdlist);
 
   add_setshow_boolean_cmd ("skip-pad", class_maintenance,
 			   &maint_btrace_pt_skip_pad, _("\

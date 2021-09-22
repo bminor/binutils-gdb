@@ -2416,10 +2416,11 @@ _initialize_sh_tdep ()
 {
   gdbarch_register (bfd_arch_sh, sh_gdbarch_init, NULL);
 
-  add_basic_prefix_cmd ("sh", no_class, "SH specific commands.",
-			&setshcmdlist, 0, &setlist);
-  add_show_prefix_cmd ("sh", no_class, "SH specific commands.",
-		       &showshcmdlist, 0, &showlist);
+  add_setshow_prefix_cmd ("sh", no_class,
+			  _("SH specific commands."),
+			  _("SH specific commands."),
+			  &setshcmdlist, &showshcmdlist,
+			  &setlist, &showlist);
   
   add_setshow_enum_cmd ("calling-convention", class_vars, sh_cc_enum,
 			&sh_active_calling_convention,

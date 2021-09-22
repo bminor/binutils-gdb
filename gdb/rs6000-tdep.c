@@ -7411,13 +7411,11 @@ _initialize_rs6000_tdep ()
 
   /* Add root prefix command for all "set powerpc"/"show powerpc"
      commands.  */
-  add_basic_prefix_cmd ("powerpc", no_class,
-			_("Various PowerPC-specific commands."),
-			&setpowerpccmdlist, 0, &setlist);
-
-  add_show_prefix_cmd ("powerpc", no_class,
-		       _("Various PowerPC-specific commands."),
-		       &showpowerpccmdlist, 0, &showlist);
+  add_setshow_prefix_cmd ("powerpc", no_class,
+			  _("Various PowerPC-specific commands."),
+			  _("Various PowerPC-specific commands."),
+			  &setpowerpccmdlist, &showpowerpccmdlist,
+			  &setlist, &showlist);
 
   /* Add a command to allow the user to force the ABI.  */
   add_setshow_auto_boolean_cmd ("soft-float", class_support,

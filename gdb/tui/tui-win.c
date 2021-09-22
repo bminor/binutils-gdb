@@ -987,12 +987,11 @@ _initialize_tui_win ()
 
   /* Define the classes of commands.
      They will appear in the help list in the reverse of this order.  */
-  add_basic_prefix_cmd ("tui", class_tui,
-			_("TUI configuration variables."),
-			&tui_setlist, 0 /* allow-unknown */, &setlist);
-  add_show_prefix_cmd ("tui", class_tui,
-		       _("TUI configuration variables."),
-		       &tui_showlist, 0 /* allow-unknown */, &showlist);
+  add_setshow_prefix_cmd ("tui", class_tui,
+			  _("TUI configuration variables."),
+			  _("TUI configuration variables."),
+			  &tui_setlist, &tui_showlist,
+			  &setlist, &showlist);
 
   add_com ("refresh", class_tui, tui_refresh_all_command,
 	   _("Refresh the terminal display."));

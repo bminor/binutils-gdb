@@ -793,17 +793,16 @@ A size of \"unlimited\" means unlimited lines.  The default is 10."),
 
   add_com_alias ("rec", record_cmd, class_obscure, 1);
 
-  cmd_list_element *set_record_cmd
-    = add_basic_prefix_cmd ("record", class_support,
-			    _("Set record options."), &set_record_cmdlist,
-			    0, &setlist);
-  add_alias_cmd ("rec", set_record_cmd, class_obscure, 1, &setlist);
+  set_show_commands setshow_record_cmds
+    = add_setshow_prefix_cmd ("record", class_support,
+			      _("Set record options."),
+			      _("Show record options."),
+			      &set_record_cmdlist, &show_record_cmdlist,
+			      &setlist, &showlist);
 
-  cmd_list_element *show_record_cmd
-    = add_show_prefix_cmd ("record", class_support,
-			   _("Show record options."), &show_record_cmdlist,
-			   0, &showlist);
-  add_alias_cmd ("rec", show_record_cmd, class_obscure, 1, &showlist);
+
+  add_alias_cmd ("rec", setshow_record_cmds.set, class_obscure, 1, &setlist);
+  add_alias_cmd ("rec", setshow_record_cmds.show, class_obscure, 1, &showlist);
 
   cmd_list_element *info_record_cmd
     = add_prefix_cmd ("record", class_support, info_record_command,

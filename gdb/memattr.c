@@ -623,14 +623,11 @@ Do \"info mem\" to see current list of IDs."), &deletelist);
   add_info ("mem", info_mem_command,
 	    _("Memory region attributes."));
 
-  add_basic_prefix_cmd ("mem", class_vars, _("\
-Memory regions settings."),
-			&mem_set_cmdlist,
-			0/* allow-unknown */, &setlist);
-  add_show_prefix_cmd ("mem", class_vars, _("\
-Memory regions settings."),
-		       &mem_show_cmdlist,
-		       0/* allow-unknown */, &showlist);
+  add_setshow_prefix_cmd ("mem", class_vars,
+			  _("Memory regions settings."),
+			  _("Memory regions settings."),
+			  &mem_set_cmdlist, &mem_show_cmdlist,
+			  &setlist, &showlist);
 
   add_setshow_boolean_cmd ("inaccessible-by-default", no_class,
 				  &inaccessible_by_default, _("\

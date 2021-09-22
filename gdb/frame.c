@@ -3129,16 +3129,15 @@ _initialize_frame ()
   gdb::observers::target_changed.attach (frame_observer_target_changed,
 					 "frame");
 
-  add_basic_prefix_cmd ("backtrace", class_maintenance, _("\
+  add_setshow_prefix_cmd ("backtrace", class_maintenance,
+			  _("\
 Set backtrace specific variables.\n\
 Configure backtrace variables such as the backtrace limit"),
-			&set_backtrace_cmdlist,
-			0/*allow-unknown*/, &setlist);
-  add_show_prefix_cmd ("backtrace", class_maintenance, _("\
+			  _("\
 Show backtrace specific variables.\n\
 Show backtrace variables such as the backtrace limit."),
-		       &show_backtrace_cmdlist,
-		       0/*allow-unknown*/, &showlist);
+			  &set_backtrace_cmdlist, &show_backtrace_cmdlist,
+			  &setlist, &showlist);
 
   add_setshow_uinteger_cmd ("limit", class_obscure,
 			    &user_set_backtrace_options.backtrace_limit, _("\

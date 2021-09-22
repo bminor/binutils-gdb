@@ -9759,14 +9759,11 @@ _initialize_arm_tdep ()
 				  arm_elf_osabi_sniffer);
 
   /* Add root prefix command for all "set arm"/"show arm" commands.  */
-  add_basic_prefix_cmd ("arm", no_class,
-			_("Various ARM-specific commands."),
-			&setarmcmdlist, 0, &setlist);
-
-  add_show_prefix_cmd ("arm", no_class,
-		       _("Various ARM-specific commands."),
-		       &showarmcmdlist, 0, &showlist);
-
+  add_setshow_prefix_cmd ("arm", no_class,
+			  _("Various ARM-specific commands."),
+			  _("Various ARM-specific commands."),
+			  &setarmcmdlist, &showarmcmdlist,
+			  &setlist, &showlist);
 
   arm_disassembler_options = xstrdup ("reg-names-std");
   const disasm_options_t *disasm_options

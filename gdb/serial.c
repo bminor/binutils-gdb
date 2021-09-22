@@ -669,17 +669,11 @@ Connect the terminal directly up to the command monitor.\n\
 Use <CR>~. or <CR>~^D to break out."));
 #endif /* 0 */
 
-  add_basic_prefix_cmd ("serial", class_maintenance, _("\
-Set default serial/parallel port configuration."),
-			&serial_set_cmdlist,
-			0/*allow-unknown*/,
-			&setlist);
-
-  add_show_prefix_cmd ("serial", class_maintenance, _("\
-Show default serial/parallel port configuration."),
-		       &serial_show_cmdlist,
-		       0/*allow-unknown*/,
-		       &showlist);
+  add_setshow_prefix_cmd ("serial", class_maintenance,
+			  _("Set default serial/parallel port configuration."),
+			  _("Show default serial/parallel port configuration."),
+			  &serial_set_cmdlist, &serial_show_cmdlist,
+			  &setlist, &showlist);
 
   /* If target is open when baud changes, it doesn't take effect until
      the next open (I think, not sure).  */

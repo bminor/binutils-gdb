@@ -9043,19 +9043,13 @@ is \"default\"."),
 			NULL, /* FIXME: i18n: */
 			&setlist, &showlist);
 
-  /* Add "mpx" prefix for the set commands.  */
+  /* Add "mpx" prefix for the set and show commands.  */
 
-  add_basic_prefix_cmd ("mpx", class_support, _("\
-Set Intel Memory Protection Extensions specific variables."),
-			&mpx_set_cmdlist,
-			0 /* allow-unknown */, &setlist);
-
-  /* Add "mpx" prefix for the show commands.  */
-
-  add_show_prefix_cmd ("mpx", class_support, _("\
-Show Intel Memory Protection Extensions specific variables."),
-		       &mpx_show_cmdlist,
-		       0 /* allow-unknown */, &showlist);
+  add_setshow_prefix_cmd
+    ("mpx", class_support,
+     _("Set Intel Memory Protection Extensions specific variables."),
+     _("Show Intel Memory Protection Extensions specific variables."),
+     &mpx_set_cmdlist, &mpx_show_cmdlist, &setlist, &showlist);
 
   /* Add "bound" command for the show mpx commands list.  */
 

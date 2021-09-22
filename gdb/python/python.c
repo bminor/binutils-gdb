@@ -2041,13 +2041,11 @@ This command is only a placeholder.")
   add_com_alias ("py", python_cmd_element, class_obscure, 1);
 
   /* Add set/show python print-stack.  */
-  add_basic_prefix_cmd ("python", no_class,
-			_("Prefix command for python preference settings."),
-			&user_show_python_list, 0, &showlist);
-
-  add_show_prefix_cmd ("python", no_class,
-		       _("Prefix command for python preference settings."),
-		       &user_set_python_list, 0, &setlist);
+  add_setshow_prefix_cmd ("python", no_class,
+			  _("Prefix command for python preference settings."),
+			  _("Prefix command for python preference settings."),
+			  &user_set_python_list, &user_show_python_list,
+			  &setlist, &showlist);
 
   add_setshow_enum_cmd ("print-stack", no_class, python_excp_enums,
 			&gdbpy_should_print_stack, _("\

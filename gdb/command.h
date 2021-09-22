@@ -382,6 +382,13 @@ extern bool valid_user_defined_cmd_name_p (const char *name);
 
 extern bool valid_cmd_char_p (int c);
 
+/* Return value type for the add_setshow_* functions.  */
+
+struct set_show_commands
+{
+  cmd_list_element *set, *show;
+};
+
 /* Const-correct variant of the above.  */
 
 extern struct cmd_list_element *add_cmd (const char *, enum command_class,
@@ -427,6 +434,17 @@ extern struct cmd_list_element *add_basic_prefix_cmd
 extern struct cmd_list_element *add_show_prefix_cmd
   (const char *, enum command_class, const char *, struct cmd_list_element **,
    int, struct cmd_list_element **);
+
+/* Add matching set and show commands using add_basic_prefix_cmd and
+   add_show_prefix_cmd.  */
+
+extern set_show_commands add_setshow_prefix_cmd
+  (const char *name, command_class theclass, const char *set_doc,
+   const char *show_doc,
+   cmd_list_element **set_subcommands_list,
+   cmd_list_element **show_subcommands_list,
+   cmd_list_element **set_list,
+   cmd_list_element **show_list);
 
 extern struct cmd_list_element *add_prefix_cmd_suppress_notification
 			(const char *name, enum command_class theclass,
@@ -615,13 +633,6 @@ typedef void (show_value_ftype) (struct ui_file *file,
 /* NOTE: i18n: This function is not i18n friendly.  Callers should
    instead print the value out directly.  */
 extern show_value_ftype deprecated_show_value_hack;
-
-/* Return value type for the add_setshow_* functions.  */
-
-struct set_show_commands
-{
-  cmd_list_element *set, *show;
-};
 
 extern set_show_commands add_setshow_enum_cmd
   (const char *name, command_class theclass, const char *const *enumlist,

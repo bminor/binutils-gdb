@@ -2394,12 +2394,11 @@ Show verbosity."), NULL,
 			   show_info_verbose,
 			   &setlist, &showlist);
 
-  add_basic_prefix_cmd ("history", class_support, _("\
-Generic command for setting command history parameters."),
-			&sethistlist, 0, &setlist);
-  add_show_prefix_cmd ("history", class_support, _("\
-Generic command for showing command history parameters."),
-		       &showhistlist, 0, &showlist);
+  add_setshow_prefix_cmd
+    ("history", class_support,
+     _("Generic command for setting command history parameters."),
+     _("Generic command for showing command history parameters."),
+     &sethistlist, &showhistlist, &setlist, &showlist);
 
   add_setshow_boolean_cmd ("expansion", no_class, &history_expansion_p, _("\
 Set history expansion on command input."), _("\
@@ -2493,13 +2492,11 @@ the previous command number shown."),
   add_cmd ("configuration", no_set_class, show_configuration,
 	   _("Show how GDB was configured at build time."), &showlist);
 
-  add_basic_prefix_cmd ("debug", no_class,
-			_("Generic command for setting gdb debugging flags."),
-			&setdebuglist, 0, &setlist);
-
-  add_show_prefix_cmd ("debug", no_class,
-		       _("Generic command for showing gdb debugging flags."),
-		       &showdebuglist, 0, &showlist);
+  add_setshow_prefix_cmd ("debug", no_class,
+			  _("Generic command for setting gdb debugging flags."),
+			  _("Generic command for showing gdb debugging flags."),
+			  &setdebuglist, &showdebuglist,
+			  &setlist, &showlist);
 
   cmd_list_element *shell_cmd
     = add_com ("shell", class_support, shell_command, _("\

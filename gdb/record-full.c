@@ -2804,13 +2804,13 @@ Argument is filename.  File must be created with 'record save'."),
   set_cmd_completer (c, filename_completer);
   deprecate_cmd (c, "record full restore");
 
-  add_basic_prefix_cmd ("full", class_support,
-			_("Set record options."), &set_record_full_cmdlist,
-			0, &set_record_cmdlist);
-
-  add_show_prefix_cmd ("full", class_support,
-		       _("Show record options."), &show_record_full_cmdlist,
-		       0, &show_record_cmdlist);
+  add_setshow_prefix_cmd ("full", class_support,
+			  _("Set record options."),
+			  _("Show record options."),
+			  &set_record_full_cmdlist,
+			  &show_record_full_cmdlist,
+			  &set_record_cmdlist,
+			  &show_record_cmdlist);
 
   /* Record instructions number limit command.  */
   set_show_commands set_record_full_stop_at_limit_cmds

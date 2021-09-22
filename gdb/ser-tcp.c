@@ -466,16 +466,15 @@ _initialize_ser_tcp ()
   serial_add_interface (&tcp_ops);
 #endif /* USE_WIN32API */
 
-  add_basic_prefix_cmd ("tcp", class_maintenance, _("\
+  add_setshow_prefix_cmd ("tcp", class_maintenance,
+			  _("\
 TCP protocol specific variables.\n\
 Configure variables specific to remote TCP connections."),
-			&tcp_set_cmdlist,
-			0 /* allow-unknown */, &setlist);
-  add_show_prefix_cmd ("tcp", class_maintenance, _("\
+			  _("\
 TCP protocol specific variables.\n\
 Configure variables specific to remote TCP connections."),
-		       &tcp_show_cmdlist,
-		       0 /* allow-unknown */, &showlist);
+			  &tcp_set_cmdlist, &tcp_show_cmdlist,
+			  &setlist, &showlist);
 
   add_setshow_boolean_cmd ("auto-retry", class_obscure,
 			   &tcp_auto_retry, _("\

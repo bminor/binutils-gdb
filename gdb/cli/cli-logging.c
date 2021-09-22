@@ -169,12 +169,12 @@ _initialize_cli_logging ()
 {
   static struct cmd_list_element *set_logging_cmdlist, *show_logging_cmdlist;
 
-  add_basic_prefix_cmd ("logging", class_support,
-			_("Set logging options."), &set_logging_cmdlist,
-			0, &setlist);
-  add_show_prefix_cmd ("logging", class_support,
-		       _("Show logging options."), &show_logging_cmdlist,
-		       0, &showlist);
+  add_setshow_prefix_cmd ("logging", class_support,
+			  _("Set logging options."),
+			  _("Show logging options."),
+			  &set_logging_cmdlist, &show_logging_cmdlist,
+			  &setlist, &showlist);
+
   add_setshow_boolean_cmd ("overwrite", class_support, &logging_overwrite, _("\
 Set whether logging overwrites or appends to the log file."), _("\
 Show whether logging overwrites or appends to the log file."), _("\

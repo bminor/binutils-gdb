@@ -226,10 +226,9 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
 					struct cmd_list_element **show_list,
 					bool skip_intensity)
 {
-  add_basic_prefix_cmd (m_name, no_class, prefix_doc, &m_set_list,
-			0, set_list);
-  add_show_prefix_cmd (m_name, no_class, prefix_doc, &m_show_list,
-		       0, show_list);
+  add_setshow_prefix_cmd (m_name, theclass, prefix_doc, prefix_doc,
+			  &m_set_list, &m_show_list, set_list, show_list);
+
   set_show_commands commands;
 
   commands = add_setshow_enum_cmd
@@ -306,14 +305,15 @@ void _initialize_cli_style ();
 void
 _initialize_cli_style ()
 {
-  add_basic_prefix_cmd ("style", no_class, _("\
+  add_setshow_prefix_cmd ("style", no_class,
+			  _("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
-		  &style_set_list, 0, &setlist);
-  add_show_prefix_cmd ("style", no_class, _("\
+			  _("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
-		  &style_show_list, 0, &showlist);
+			  &style_set_list, &style_show_list,
+			  &setlist, &showlist);
 
   add_setshow_boolean_cmd ("enabled", no_class, &cli_styling, _("\
 Set whether CLI styling is enabled."), _("\

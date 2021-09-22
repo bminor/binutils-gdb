@@ -1962,14 +1962,12 @@ _initialize_target_descriptions ()
 
   tdesc_data = gdbarch_data_register_pre_init (tdesc_data_init);
 
-  add_basic_prefix_cmd ("tdesc", class_maintenance, _("\
-Set target description specific variables."),
-			&tdesc_set_cmdlist,
-			0 /* allow-unknown */, &setlist);
-  add_show_prefix_cmd ("tdesc", class_maintenance, _("\
-Show target description specific variables."),
-		       &tdesc_show_cmdlist,
-		       0 /* allow-unknown */, &showlist);
+  add_setshow_prefix_cmd ("tdesc", class_maintenance,
+			  _("Set target description specific variables."),
+			  _("Show target description specific variables."),
+			  &tdesc_set_cmdlist, &tdesc_show_cmdlist,
+			  &setlist, &showlist);
+
   add_basic_prefix_cmd ("tdesc", class_maintenance, _("\
 Unset target description specific variables."),
 			&tdesc_unset_cmdlist,

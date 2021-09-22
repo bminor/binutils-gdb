@@ -539,13 +539,9 @@ add_internal_problem_command (struct internal_problem *problem)
     = xstrprintf (_("Show what GDB does when %s is detected."),
 		  problem->name);
 
-  add_basic_prefix_cmd (problem->name, class_maintenance, set_doc,
-			set_cmd_list,
-			0/*allow-unknown*/, &maintenance_set_cmdlist);
-
-  add_show_prefix_cmd (problem->name, class_maintenance, show_doc,
-		       show_cmd_list,
-		       0/*allow-unknown*/, &maintenance_show_cmdlist);
+  add_setshow_prefix_cmd (problem->name, class_maintenance,
+			  set_doc, show_doc, set_cmd_list, show_cmd_list,
+			  &maintenance_set_cmdlist, &maintenance_show_cmdlist);
 
   if (problem->user_settable_should_quit)
     {

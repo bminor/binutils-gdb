@@ -8942,13 +8942,11 @@ _initialize_mips_tdep ()
   set_tdesc_property (mips_tdesc_gp64, PROPERTY_GP64, "");
 
   /* Add root prefix command for all "set mips"/"show mips" commands.  */
-  add_basic_prefix_cmd ("mips", no_class,
-			_("Various MIPS specific commands."),
-			&setmipscmdlist, 0, &setlist);
-
-  add_show_prefix_cmd ("mips", no_class,
-		       _("Various MIPS specific commands."),
-		       &showmipscmdlist, 0, &showlist);
+  add_setshow_prefix_cmd ("mips", no_class,
+			  _("Various MIPS specific commands."),
+			  _("Various MIPS specific commands."),
+			  &setmipscmdlist, &showmipscmdlist,
+			  &setlist, &showlist);
 
   /* Allow the user to override the ABI.  */
   add_setshow_enum_cmd ("abi", class_obscure, mips_abi_strings,

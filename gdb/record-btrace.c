@@ -3132,13 +3132,12 @@ This format may not be available on all processors."),
 	     &record_btrace_cmdlist);
   add_alias_cmd ("pt", record_btrace_pt_cmd, class_obscure, 1, &record_cmdlist);
 
-  add_basic_prefix_cmd ("btrace", class_support,
-			_("Set record options."), &set_record_btrace_cmdlist,
-			0, &set_record_cmdlist);
-
-  add_show_prefix_cmd ("btrace", class_support,
-		       _("Show record options."), &show_record_btrace_cmdlist,
-		       0, &show_record_cmdlist);
+  add_setshow_prefix_cmd ("btrace", class_support,
+			  _("Set record options."),
+			  _("Show record options."),
+			  &set_record_btrace_cmdlist,
+			  &show_record_btrace_cmdlist,
+			  &set_record_cmdlist, &show_record_cmdlist);
 
   add_setshow_enum_cmd ("replay-memory-access", no_class,
 			replay_memory_access_types, &replay_memory_access, _("\
@@ -3181,17 +3180,13 @@ Do not enable errata workarounds for trace decode."),
 Show the cpu to be used for trace decode."),
 	   &show_record_btrace_cmdlist);
 
-  add_basic_prefix_cmd ("bts", class_support,
-			_("Set record btrace bts options."),
-			&set_record_btrace_bts_cmdlist,
-			0,
-			&set_record_btrace_cmdlist);
-
-  add_show_prefix_cmd ("bts", class_support,
-		       _("Show record btrace bts options."),
-		       &show_record_btrace_bts_cmdlist,
-		       0,
-		       &show_record_btrace_cmdlist);
+  add_setshow_prefix_cmd ("bts", class_support,
+			  _("Set record btrace bts options."),
+			  _("Show record btrace bts options."),
+			  &set_record_btrace_bts_cmdlist,
+			  &show_record_btrace_bts_cmdlist,
+			  &set_record_btrace_cmdlist,
+			  &show_record_btrace_cmdlist);
 
   add_setshow_uinteger_cmd ("buffer-size", no_class,
 			    &record_btrace_conf.bts.size,
@@ -3207,17 +3202,13 @@ The trace buffer size may not be changed while recording."), NULL,
 			    &set_record_btrace_bts_cmdlist,
 			    &show_record_btrace_bts_cmdlist);
 
-  add_basic_prefix_cmd ("pt", class_support,
-			_("Set record btrace pt options."),
-			&set_record_btrace_pt_cmdlist,
-			0,
-			&set_record_btrace_cmdlist);
-
-  add_show_prefix_cmd ("pt", class_support,
-		       _("Show record btrace pt options."),
-		       &show_record_btrace_pt_cmdlist,
-		       0,
-		       &show_record_btrace_cmdlist);
+  add_setshow_prefix_cmd ("pt", class_support,
+			  _("Set record btrace pt options."),
+			  _("Show record btrace pt options."),
+			  &set_record_btrace_pt_cmdlist,
+			  &show_record_btrace_pt_cmdlist,
+			  &set_record_btrace_cmdlist,
+			  &show_record_btrace_cmdlist);
 
   add_setshow_uinteger_cmd ("buffer-size", no_class,
 			    &record_btrace_conf.pt.size,

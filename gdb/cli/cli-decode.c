@@ -407,6 +407,28 @@ add_show_prefix_cmd (const char *name, enum command_class theclass,
   return cmd;
 }
 
+/* See command.h.  */
+
+set_show_commands
+add_setshow_prefix_cmd (const char *name, command_class theclass,
+			const char *set_doc, const char *show_doc,
+			cmd_list_element **set_subcommands_list,
+			cmd_list_element **show_subcommands_list,
+			cmd_list_element **set_list,
+			cmd_list_element **show_list)
+{
+  set_show_commands cmds;
+
+  cmds.set = add_basic_prefix_cmd (name, theclass, set_doc,
+				   set_subcommands_list, 0,
+				   set_list);
+  cmds.show = add_show_prefix_cmd (name, theclass, show_doc,
+				   show_subcommands_list, 0,
+				   show_list);
+
+  return cmds;
+}
+
 /* Like ADD_PREFIX_CMD but sets the suppress_notification pointer on the
    new command list element.  */
 

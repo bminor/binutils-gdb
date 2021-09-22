@@ -1681,13 +1681,12 @@ _initialize_f_language ()
 {
   f_type_data = gdbarch_data_register_post_init (build_fortran_types);
 
-  add_basic_prefix_cmd ("fortran", no_class,
-			_("Prefix command for changing Fortran-specific settings."),
-			&set_fortran_list, 0, &setlist);
-
-  add_show_prefix_cmd ("fortran", no_class,
-		       _("Generic command for showing Fortran-specific settings."),
-		       &show_fortran_list, 0, &showlist);
+  add_setshow_prefix_cmd
+    ("fortran", no_class,
+     _("Prefix command for changing Fortran-specific settings."),
+     _("Generic command for showing Fortran-specific settings."),
+     &set_fortran_list, &show_fortran_list,
+     &setlist, &showlist);
 
   add_setshow_boolean_cmd ("repack-array-slices", class_vars,
 			   &repack_array_slices, _("\

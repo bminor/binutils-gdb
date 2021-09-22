@@ -1140,19 +1140,16 @@ _initialize_language ()
 
   /* GDB commands for language specific stuff.  */
 
-  cmd_list_element *set_check_cmd
-    = add_basic_prefix_cmd ("check", no_class,
-			    _("Set the status of the type/range checker."),
-			    &setchecklist, 0, &setlist);
-  add_alias_cmd ("c", set_check_cmd, no_class, 1, &setlist);
-  add_alias_cmd ("ch", set_check_cmd, no_class, 1, &setlist);
-
-  cmd_list_element *show_check_cmd
-    = add_show_prefix_cmd ("check", no_class,
-			 _("Show the status of the type/range checker."),
-			 &showchecklist, 0, &showlist);
-  add_alias_cmd ("c", show_check_cmd, no_class, 1, &showlist);
-  add_alias_cmd ("ch", show_check_cmd, no_class, 1, &showlist);
+  set_show_commands setshow_check_cmds
+    = add_setshow_prefix_cmd ("check", no_class,
+			      _("Set the status of the type/range checker."),
+			      _("Show the status of the type/range checker."),
+			      &setchecklist, &showchecklist,
+			      &setlist, &showlist);
+  add_alias_cmd ("c", setshow_check_cmds.set, no_class, 1, &setlist);
+  add_alias_cmd ("ch", setshow_check_cmds.set, no_class, 1, &setlist);
+  add_alias_cmd ("c", setshow_check_cmds.show, no_class, 1, &showlist);
+  add_alias_cmd ("ch", setshow_check_cmds.show, no_class, 1, &showlist);
 
   add_setshow_enum_cmd ("range", class_support, type_or_range_names,
 			&range,

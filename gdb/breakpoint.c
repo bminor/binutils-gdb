@@ -15881,18 +15881,17 @@ Use the 'source' command in another debug session to restore them."),
   c = add_com_alias ("save-tracepoints", save_tracepoints_cmd, class_trace, 0);
   deprecate_cmd (c, "save tracepoints");
 
-  add_basic_prefix_cmd ("breakpoint", class_maintenance, _("\
+  add_setshow_prefix_cmd ("breakpoint", class_maintenance,
+			  _("\
 Breakpoint specific settings.\n\
 Configure various breakpoint-specific variables such as\n\
 pending breakpoint behavior."),
-			&breakpoint_set_cmdlist,
-			0/*allow-unknown*/, &setlist);
-  add_show_prefix_cmd ("breakpoint", class_maintenance, _("\
+			  _("\
 Breakpoint specific settings.\n\
 Configure various breakpoint-specific variables such as\n\
 pending breakpoint behavior."),
-		       &breakpoint_show_cmdlist,
-		       0/*allow-unknown*/, &showlist);
+			  &breakpoint_set_cmdlist, &breakpoint_show_cmdlist,
+			  &setlist, &showlist);
 
   add_setshow_auto_boolean_cmd ("pending", no_class,
 				&pending_break_support, _("\

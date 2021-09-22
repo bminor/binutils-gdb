@@ -85,19 +85,14 @@ _initialize_maint_test_settings ()
 {
   maintenance_test_settings_filename = xstrdup ("/foo/bar");
 
-  add_basic_prefix_cmd ("test-settings", class_maintenance,
-			_("\
+  add_setshow_prefix_cmd ("test-settings", class_maintenance,
+			  _("\
 Set GDB internal variables used for set/show command infrastructure testing."),
-			&maintenance_set_test_settings_list,
-			0/*allow-unknown*/,
-			&maintenance_set_cmdlist);
-
-  add_show_prefix_cmd ("test-settings", class_maintenance,
-		       _("\
+			  _("\
 Show GDB internal variables used for set/show command infrastructure testing."),
-		       &maintenance_show_test_settings_list,
-		       0/*allow-unknown*/,
-		       &maintenance_show_cmdlist);
+			  &maintenance_set_test_settings_list,
+			  &maintenance_show_test_settings_list,
+			  &maintenance_set_cmdlist, &maintenance_show_cmdlist);
 
   add_setshow_boolean_cmd ("boolean", class_maintenance,
 			   &maintenance_test_settings_boolean, _("\

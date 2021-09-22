@@ -3173,33 +3173,26 @@ _initialize_valprint ()
   selftests::register_test_foreach_arch ("print-flags", test_print_flags);
 #endif
 
-  cmd_list_element *cmd;
-
-  cmd_list_element *set_print_cmd
-    = add_basic_prefix_cmd ("print", no_class,
-			    _("Generic command for setting how things print."),
-			    &setprintlist, 0, &setlist);
-  add_alias_cmd ("p", set_print_cmd, no_class, 1, &setlist);
+  set_show_commands setshow_print_cmds
+    = add_setshow_prefix_cmd ("print", no_class,
+			      _("Generic command for setting how things print."),
+			      _("Generic command for showing print settings."),
+			      &setprintlist, &showprintlist,
+			      &setlist, &showlist);
+  add_alias_cmd ("p", setshow_print_cmds.set, no_class, 1, &setlist);
   /* Prefer set print to set prompt.  */
-  add_alias_cmd ("pr", set_print_cmd, no_class, 1, &setlist);
+  add_alias_cmd ("pr", setshow_print_cmds.set, no_class, 1, &setlist);
+  add_alias_cmd ("p", setshow_print_cmds.show, no_class, 1, &showlist);
+  add_alias_cmd ("pr", setshow_print_cmds.show, no_class, 1, &showlist);
 
-  cmd_list_element *show_print_cmd
-    = add_show_prefix_cmd ("print", no_class,
-			   _("Generic command for showing print settings."),
-			   &showprintlist, 0, &showlist);
-  add_alias_cmd ("p", show_print_cmd, no_class, 1, &showlist);
-  add_alias_cmd ("pr", show_print_cmd, no_class, 1, &showlist);
-
-  cmd = add_basic_prefix_cmd ("raw", no_class,
-			      _("\
-Generic command for setting what things to print in \"raw\" mode."),
-			      &setprintrawlist, 0, &setprintlist);
-  deprecate_cmd (cmd, nullptr);
-
-  cmd = add_show_prefix_cmd ("raw", no_class,
-			     _("Generic command for showing \"print raw\" settings."),
-			     &showprintrawlist, 0, &showprintlist);
-  deprecate_cmd (cmd, nullptr);
+  set_show_commands setshow_print_raw_cmds
+    = add_setshow_prefix_cmd
+	("raw", no_class,
+	 _("Generic command for setting what things to print in \"raw\" mode."),
+	 _("Generic command for showing \"print raw\" settings."),
+	 &setprintrawlist, &showprintrawlist, &setprintlist, &showprintlist);
+  deprecate_cmd (setshow_print_raw_cmds.set, nullptr);
+  deprecate_cmd (setshow_print_raw_cmds.show, nullptr);
 
   gdb::option::add_setshow_cmds_for_options
     (class_support, &user_print_options, value_print_option_defs,
