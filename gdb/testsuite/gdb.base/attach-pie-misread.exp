@@ -25,7 +25,8 @@ standard_testfile .c
 set genfile [standard_output_file ${testfile}-gen.h]
 set executable $testfile
 
-if {[build_executable_own_libs ${testfile}.exp $executable $srcfile [list additional_flags=-fPIE ldflags=-pie]] == ""} {
+if {[build_executable_own_libs ${testfile}.exp $executable $srcfile \
+	 {pie}] == ""} {
     return -1
 }
 
@@ -95,7 +96,8 @@ if {$result == 0} {
     fail $test
 }
 
-set prelink_args [build_executable_own_libs ${test}.exp $executable $srcfile [list "additional_flags=-fPIE -DGEN=\"$genfile\"" "ldflags=-pie"]]
+set prelink_args [build_executable_own_libs ${test}.exp $executable $srcfile \
+		      [list pie "additional_flags=-DGEN=\"$genfile\""]]
 if {$prelink_args == ""} {
     return -1
 }
@@ -118,7 +120,7 @@ verbose -log "first_offset is $first_offset"
 
 set test "first offset is non-zero"
 if {$first_offset == 0} {
-    fail "$test (-fPIE -pie in effect?)"
+    fail "$test (failing because PIE is not effect?)"
 } else {
     pass $test
 }

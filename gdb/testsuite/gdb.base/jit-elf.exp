@@ -158,8 +158,7 @@ if {[can_spawn_for_attach]} {
     }
 }
 
-if { [compile_jit_main ${main_srcfile} "${main_binfile}-pie" \
-	  {additional_flags=-fPIE ldflags=-pie}] == 0 } {
+if { [compile_jit_main ${main_srcfile} "${main_binfile}-pie" pie] == 0 } {
     with_test_prefix PIE {
 	one_jit_test [lindex $jit_solibs_target 0] "${hex}  jit_function_0001" 0
     }
