@@ -24,26 +24,12 @@
 /* A test is just a function that does some checks and throws an
    exception if something has gone wrong.  */
 
-typedef void self_test_function (void);
-
 namespace selftests
 {
-
-/* Interface for the various kinds of selftests.  */
-
-struct selftest
-{
-  virtual ~selftest () = default;
-  virtual void operator() () const = 0;
-};
 
 /* True if selftest should run verbosely.  */
 
 extern bool run_verbose ();
-
-/* Register a new self-test.  */
-
-extern void register_test (const std::string &name, selftest *test);
 
 /* Register a new self-test.  */
 

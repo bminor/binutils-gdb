@@ -29,35 +29,7 @@ namespace selftests
    the order of tests stable and easily looking up whether a test name
    exists.  */
 
-static std::map<std::string, std::unique_ptr<selftest>> tests;
-
-/* See selftest.h.  */
-
-void
-register_test (const std::string &name, selftest *test)
-{
-  /* Check that no test with this name already exist.  */
-  gdb_assert (tests.find (name) == tests.end ());
-
-  tests[name] = std::unique_ptr<selftest> (test);
-}
-
-/* A selftest that calls the test function without arguments.  */
-
-struct lambda_selftest : public selftest
-{
-  lambda_selftest (std::function<void(void)> function_)
-  {
-    function  = function_;
-  }
-
-  void operator() () const override
-  {
-    function ();
-  }
-
-  std::function<void(void)> function;
-};
+static std::map<std::string, std::function<void(void)>> tests;
 
 /* See selftest.h.  */
 
@@ -65,7 +37,10 @@ void
 register_test (const std::string &name,
 	       std::function<void(void)> function)
 {
-  register_test (name, new lambda_selftest (function));
+  /* Check that no test with this name already exist.  */
+  gdb_assert (tests.find (name) == tests.end ());
+
+  tests[name] = function;
 }
 
 /* See selftest.h.  */
@@ -91,7 +66,7 @@ run_tests (gdb::array_view<const char *const> filters, bool verbose)
   for (const auto &pair : tests)
     {
       const std::string &name = pair.first;
-      const std::unique_ptr<selftest> &test = pair.second;
+      const auto &test = pair.second;
       bool run = false;
 
       if (filters.empty ())
@@ -112,7 +87,7 @@ run_tests (gdb::array_view<const char *const> filters, bool verbose)
 	{
 	  debug_printf (_("Running selftest %s.\n"), name.c_str ());
 	  ++ran;
-	  (*test) ();
+	  test ();
 	}
       catch (const gdb_exception_error &ex)
 	{
