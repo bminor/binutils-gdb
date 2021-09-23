@@ -59,10 +59,6 @@ GDB_AC_PTRACE
 # Detect support warning flags.
 AM_GDB_WARNINGS
 
-TARGET_WORD_SIZE=`sed -n 's,#define BFD_ARCH_SIZE \(.*\)$,\1,p' ../bfd/bfd-in3.h`
-AC_DEFINE_UNQUOTED(TARGET_WORD_SIZE, $TARGET_WORD_SIZE,
-   [Define to the word size for the target.])
-
 case ${host} in
   *mingw32*)
     AC_DEFINE(USE_WIN32API, 1,
