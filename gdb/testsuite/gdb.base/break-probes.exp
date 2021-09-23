@@ -52,15 +52,17 @@ set test "ensure using probes"
 set using_probes 0
 gdb_test_multiple "bt" $test {
     -re "#0 +\[^\r\n\]*\\m(__GI_)?$normal_bp\\M.*$gdb_prompt $" {
-	untested "probes not present on this system"
     }
     -re "#0 +\[^\r\n\]*\\m(__GI_)?$probes_bp\\M.*$gdb_prompt $" {
 	pass $test
 	set using_probes 1
     }
+    -re -wrap "" {
+    }
 }
 
 if { ! $using_probes } {
+    unsupported "probes not present on this system"
     return -1
 }
 
