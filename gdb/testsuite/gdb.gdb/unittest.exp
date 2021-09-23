@@ -20,6 +20,8 @@ if [gdb_debug_enabled] {
     return 0
 }
 
+load_lib completion-support.exp
+
 set do_xml_test [expr ![gdb_skip_xml_test]]
 
 standard_testfile
@@ -59,6 +61,17 @@ proc run_selftests { binfile } {
     }
 }
 
+# Test completion of command "maintenance selftest".
+
+proc_with_prefix test_completion {} {
+    clean_restart
+    test_gdb_complete_tab_multiple "maintenance selftest string_v" "" \
+	{string_vappendf string_view string_vprintf}
+    test_gdb_complete_tab_unique "maintenance selftest string_vie" "maintenance selftest string_view" " "
+    test_gdb_complete_tab_unique "maintenance selftest -ver" "maintenance selftest -verbose" " "
+    test_gdb_complete_tab_none "maintenance selftest name_that_does_not_exist"
+}
+
 with_test_prefix "no executable loaded" {
     run_selftests ""
 }
@@ -66,6 +79,8 @@ with_test_prefix "no executable loaded" {
 with_test_prefix "executable loaded" {
     run_selftests ${binfile}
 }
+
+test_completion
 
 if { ![is_remote host] && $do_xml_test } {
     gdb_test "maintenance check xml-descriptions ${srcdir}/../features" \

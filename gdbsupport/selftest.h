@@ -20,6 +20,7 @@
 #define COMMON_SELFTEST_H
 
 #include "gdbsupport/array-view.h"
+#include "gdbsupport/function-view.h"
 
 /* A test is just a function that does some checks and throws an
    exception if something has gone wrong.  */
@@ -48,7 +49,8 @@ extern void run_tests (gdb::array_view<const char *const> filters,
 /* Reset GDB or GDBserver's internal state.  */
 extern void reset ();
 
-typedef void for_each_selftest_ftype (const std::string &name);
+using for_each_selftest_ftype
+  = gdb::function_view<void(const std::string &name)>;
 
 /* Call FUNC for each registered selftest.  */
 

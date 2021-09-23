@@ -1176,8 +1176,15 @@ maintenance_selftest_completer (cmd_list_element *cmd,
 {
   auto grp = make_maintenance_selftest_option_group (nullptr);
 
-  gdb::option::complete_options
-    (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp);
+  if (gdb::option::complete_options
+	(tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp))
+    return;
+
+  selftests::for_each_selftest ([&tracker, text] (const std::string &name)
+    {
+      if (startswith (name.c_str (), text))
+	tracker.add_completion (make_unique_xstrdup (name.c_str ()));
+    });
 }
 
 static void
