@@ -27,13 +27,54 @@ proc set_lang_rust {} {
 }
 
 proc gdb_compile_rust {sources dest options} {
+    set res -1
+
     if {[llength $sources] > 1} {
 	error "gdb rust setup can only compile one source file at a time"
     }
-    if {[gdb_compile [lindex $sources 0] $dest executable $options] != ""} {
-	return -1
+
+    global board
+    set board [target_info name]
+    set multilib_flags_orig [board_info $board multilib_flags]
+    set multilib_flags {}
+    foreach op $multilib_flags_orig {
+	# Pretend rustc supports -pie/-no-pie/-fPIE/-fno-PIE.
+	switch $op {
+	    "-pie" - "-no-pie" {
+		# Pass it to linker.
+		lappend multilib_flags -C link-arg=$op
+	    }
+	    "-fno-PIE" {
+		# Translate to rustc codegen equivalent.
+
+		# The rustc documentation insists that we should use static
+		# here, but that causes segfaults leading to:
+		# UNTESTED: gdb.rust/rawids.exp: could not run to breakpoint
+		# UNTESTED: gdb.rust/pp.exp: could not run to breakpoint
+		# Instead, we use dynamic-no-pic which does seem to work.
+		lappend multilib_flags -C relocation-model=dynamic-no-pic
+	    }
+	    "-fPIE" {
+		# Translate to rustc codegen equivalent.
+		lappend multilib_flags -C relocation-model=pic
+	    }
+	    default {
+		# Pass unmodified.
+		lappend multilib_flags $op
+	    }
+	}
     }
-    return ""
+
+    save_target_board_info { multilib_flags } {
+	unset_board_info multilib_flags
+	set_board_info multilib_flags "$multilib_flags"
+	if {[gdb_compile [lindex $sources 0] $dest executable \
+		 $options] == ""} {
+	    set res ""
+	}
+    }
+
+    return $res
 }
 
 # Return the version of LLVM used by the Rust compiler.  Note that
