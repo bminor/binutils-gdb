@@ -33,7 +33,27 @@ procedure P is
 
    Objects : array (1 .. 2) of Payload_T;
 
+   type Another_Type (Tag : Tag_T := Unused) is
+      record
+         case Tag is
+	    when Unused =>
+	       CVal : Character;
+            when Object =>
+	       IVal : Integer;
+	 end case;
+      end record;
+
+   type Enclosing is record
+      Initial : Integer;
+      Rest : Another_Type;
+   end record;
+
+   Another_Array : array (1 .. 2) of Enclosing
+      := ((Initial => 0, Rest => (Tag => Unused, CVal => 'X')),
+          (Initial => 0, Rest => (Tag => Object, IVal => 88)));
+
 begin
    Objects (1) := (Tag => Object, Values => (others => 2));
    Do_Nothing (Objects'Address);  --  START
+   Do_Nothing (Another_Array'Address);
 end P;

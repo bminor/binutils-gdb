@@ -2615,10 +2615,11 @@ resolve_dynamic_struct (struct type *type,
 		 " (invalid location kind)"));
 
       pinfo.type = check_typedef (resolved_type->field (i).type ());
+      size_t offset = TYPE_FIELD_BITPOS (resolved_type, i) / TARGET_CHAR_BIT;
       pinfo.valaddr = addr_stack->valaddr;
-      pinfo.addr
-	= (addr_stack->addr
-	   + (TYPE_FIELD_BITPOS (resolved_type, i) / TARGET_CHAR_BIT));
+      if (!pinfo.valaddr.empty ())
+	pinfo.valaddr = pinfo.valaddr.slice (offset);
+      pinfo.addr = addr_stack->addr + offset;
       pinfo.next = addr_stack;
 
       resolved_type->field (i).set_type
