@@ -2846,7 +2846,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
       }
   }
 
-  if (FIELD_BITPOS (fip->list->field) == 0
+  if (fip->list->field.loc_bitpos () == 0
       && FIELD_BITSIZE (fip->list->field) == 0)
     {
       /* This can happen in two cases: (1) at least for gcc 2.4.5 or so,
@@ -2889,7 +2889,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 		  == gdbarch_int_bit (gdbarch))
 	  )
 	  &&
-	  FIELD_BITPOS (fip->list->field) % 8 == 0)
+	  fip->list->field.loc_bitpos () % 8 == 0)
 	{
 	  FIELD_BITSIZE (fip->list->field) = 0;
 	}

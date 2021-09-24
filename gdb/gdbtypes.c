@@ -4211,7 +4211,7 @@ check_types_equal (struct type *type1, struct type *type2,
 	  switch (field1->loc_kind ())
 	    {
 	    case FIELD_LOC_KIND_BITPOS:
-	      if (FIELD_BITPOS (*field1) != FIELD_BITPOS (*field2))
+	      if (field1->loc_bitpos () != field2->loc_bitpos ())
 		return false;
 	      break;
 	    case FIELD_LOC_KIND_ENUMVAL:
@@ -5917,18 +5917,18 @@ append_composite_type_field_aligned (struct type *t, const char *name,
       if (t->num_fields () > 1)
 	{
 	  f->set_loc_bitpos
-	    ((FIELD_BITPOS (f[-1]) + (TYPE_LENGTH (f[-1].type ()) * TARGET_CHAR_BIT)));
+	    (f[-1].loc_bitpos () + (TYPE_LENGTH (f[-1].type ()) * TARGET_CHAR_BIT));
 
 	  if (alignment)
 	    {
 	      int left;
 
 	      alignment *= TARGET_CHAR_BIT;
-	      left = FIELD_BITPOS (f[0]) % alignment;
+	      left = f[0].loc_bitpos () % alignment;
 
 	      if (left)
 		{
-		  f->set_loc_bitpos (FIELD_BITPOS (f[0]) + (alignment - left));
+		  f->set_loc_bitpos (f[0].loc_bitpos () + (alignment - left));
 		  TYPE_LENGTH (t) += (alignment - left) / TARGET_CHAR_BIT;
 		}
 	    }

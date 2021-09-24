@@ -14594,7 +14594,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		 anonymous object to the MSB of the field.  We don't
 		 have to do anything special since we don't need to
 		 know the size of the anonymous object.  */
-	      fp->set_loc_bitpos ((FIELD_BITPOS (*fp) + attr->constant_value (0)));
+	      fp->set_loc_bitpos (fp->loc_bitpos () + attr->constant_value (0));
 	    }
 	  else
 	    {
@@ -14623,9 +14623,9 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		     bit field.  */
 		  anonymous_size = TYPE_LENGTH (fp->type ());
 		}
-	      fp->set_loc_bitpos (FIELD_BITPOS (*fp)
-			      + anonymous_size * bits_per_byte
-			      - bit_offset - FIELD_BITSIZE (*fp));
+	      fp->set_loc_bitpos (fp->loc_bitpos ()
+				  + anonymous_size * bits_per_byte
+				  - bit_offset - FIELD_BITSIZE (*fp));
 	    }
 	}
 

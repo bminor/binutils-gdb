@@ -5248,8 +5248,7 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
 				: MIPS_V0_REGNUM);
 	   field < type->num_fields (); field++, regnum += 2)
 	{
-	  int offset = (FIELD_BITPOS (type->field (field))
-			/ TARGET_CHAR_BIT);
+	  int offset = type->field (field).loc_bitpos () / TARGET_CHAR_BIT;
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return float struct+%d\n",
 				offset);
@@ -5800,8 +5799,7 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct value *function,
       for (field = 0, regnum = mips_regnum (gdbarch)->fp0;
 	   field < type->num_fields (); field++, regnum += 2)
 	{
-	  int offset = (FIELD_BITPOS (type->fields ()[field])
-			/ TARGET_CHAR_BIT);
+	  int offset = (type->fields ()[field].loc_bitpos () / TARGET_CHAR_BIT);
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return float struct+%d\n",
 				offset);
