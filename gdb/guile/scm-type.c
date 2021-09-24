@@ -1166,7 +1166,7 @@ gdbscm_field_enumval (SCM self)
   SCM_ASSERT_TYPE (type->code () == TYPE_CODE_ENUM,
 		   self, SCM_ARG1, FUNC_NAME, _("enum type"));
 
-  return scm_from_long (FIELD_ENUMVAL (*field));
+  return scm_from_long (field->loc_enumval ());
 }
 
 /* (field-bitpos <gdb:field>) -> integer

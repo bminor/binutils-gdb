@@ -4215,7 +4215,7 @@ check_types_equal (struct type *type1, struct type *type2,
 		return false;
 	      break;
 	    case FIELD_LOC_KIND_ENUMVAL:
-	      if (FIELD_ENUMVAL (*field1) != FIELD_ENUMVAL (*field2))
+	      if (field1->loc_enumval () != field2->loc_enumval ())
 		return false;
 	      /* Don't compare types of enum fields, because they don't
 		 have a type.  */
