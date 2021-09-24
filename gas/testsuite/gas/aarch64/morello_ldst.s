@@ -80,7 +80,7 @@ morello_uimm c4, VAREG
 morello_uimm c4, SP_
 
 	.macro morello_simm ct, xnsp
-	  .irp op, ldur, ldtr, stur, sttr
+	  .irp op, ldur, stur
 	    \op    \ct, [\xnsp, #255]
 	    \op    \ct, [\xnsp, #-255]
 	    \op    \ct, [\xnsp, #0]
@@ -89,6 +89,17 @@ morello_uimm c4, SP_
 	.endm
 morello_simm c4, VAREG
 morello_simm c4, SP_
+
+	.macro morello_simm_scale ct, xnsp
+	  .irp op, ldtr, sttr
+	    \op    \ct, [\xnsp, #4080]
+	    \op    \ct, [\xnsp, #-4096]
+	    \op    \ct, [\xnsp, #0]
+	    \op    \ct, [\xnsp, #16]
+	  .endr
+	.endm
+morello_simm_scale c4, VAREG
+morello_simm_scale c4, SP_
 
 	.macro morello_simm_pair ct, ct2, xnsp
 	  .irp op, ldp, stp, ldnp, stnp

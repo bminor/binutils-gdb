@@ -1,3 +1,15 @@
+2021-09-24  Alex Coplan  <alex.coplan@arm.com>
+
+	* testsuite/gas/aarch64/morello_ldst-c64.d: Update following
+	test + encoding change.
+	* testsuite/gas/aarch64/morello_ldst-invalid.d: New test.
+	* testsuite/gas/aarch64/morello_ldst-invalid.l: New test.
+	* testsuite/gas/aarch64/morello_ldst-invalid.s: New test.
+	* testsuite/gas/aarch64/morello_ldst.d: Update following
+	test + encoding change.
+	* testsuite/gas/aarch64/morello_ldst.s: Update to use valid
+	immediates for ldtr/sttr instructions.
+
 2021-07-29  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* config/tc-aarch64.c (aarch64_abi_type): Introduce PURECAP and HYBRID
