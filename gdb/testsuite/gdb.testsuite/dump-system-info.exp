@@ -15,34 +15,24 @@
 # The purpose of this test-case is to dump /proc/cpuinfo and similar system
 # info into gdb.log.
 
-# Check if /proc/cpuinfo is available.
-set res [remote_exec target "test -r /proc/cpuinfo"]
-set status [lindex $res 0]
-set output [lindex $res 1]
 
-if { $status == 0 && $output == "" } {
-    verbose -log "Cpuinfo available, dumping:"
-    remote_exec target "cat /proc/cpuinfo"
-} else {
-    verbose -log "Cpuinfo not available"
+proc dump_info {cmd {what ""}} {
+
+  if {$what == ""} {
+    set what $cmd
+  }
+
+  set res [remote_exec target $cmd]
+  set status [lindex $res 0]
+  set output [lindex $res 1]
+
+  if { $status == 0 } {
+    verbose -log "$what available, dumping:\n$output"
+  } else {
+    verbose -log "$what not available"
+  }
 }
 
-set res [remote_exec target "lsb_release -a"]
-set status [lindex $res 0]
-set output [lindex $res 1]
-
-if { $status == 0 } {
-    verbose -log "lsb_release -a availabe, dumping:\n$output"
-} else {
-    verbose -log "lsb_release -a not available"
-}
-
-set res [remote_exec target "uname -a"]
-set status [lindex $res 0]
-set output [lindex $res 1]
-
-if { $status == 0 } {
-    verbose -log "uname -a availabe, dumping:\n$output"
-} else {
-    verbose -log "uname -a not available"
-}
+dump_info "cat /proc/cpuinfo" "Cpuinfo"
+dump_info "uname -a"
+dump_info "lsb_release -a"
