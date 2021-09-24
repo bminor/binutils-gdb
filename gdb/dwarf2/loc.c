@@ -640,7 +640,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 			  struct call_site *call_site,
 			  struct frame_info *caller_frame)
 {
-  switch (FIELD_LOC_KIND (call_site->target))
+  switch (call_site->target.loc_kind ())
     {
     case FIELD_LOC_KIND_DWARF_BLOCK:
       {

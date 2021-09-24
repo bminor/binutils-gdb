@@ -2125,7 +2125,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind ())
 #define FIELD_BITPOS(thisfld) ((thisfld).loc_bitpos ())
 #define FIELD_ENUMVAL(thisfld) ((thisfld).loc_enumval ())
 #define FIELD_STATIC_PHYSNAME(thisfld) ((thisfld).loc_physname ())
@@ -2134,7 +2133,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND ((thistype)->field (n))
+#define TYPE_FIELD_LOC_KIND(thistype, n) ((thistype)->field (n).loc_kind ())
 #define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS ((thistype)->field (n))
 #define TYPE_FIELD_ENUMVAL(thistype, n) FIELD_ENUMVAL ((thistype)->field (n))
 #define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_STATIC_PHYSNAME ((thistype)->field (n))

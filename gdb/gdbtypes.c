@@ -4204,11 +4204,11 @@ check_types_equal (struct type *type1, struct type *type2,
 
 	  if (FIELD_ARTIFICIAL (*field1) != FIELD_ARTIFICIAL (*field2)
 	      || FIELD_BITSIZE (*field1) != FIELD_BITSIZE (*field2)
-	      || FIELD_LOC_KIND (*field1) != FIELD_LOC_KIND (*field2))
+	      || field1->loc_kind () != field2->loc_kind ())
 	    return false;
 	  if (!compare_maybe_null_strings (field1->name (), field2->name ()))
 	    return false;
-	  switch (FIELD_LOC_KIND (*field1))
+	  switch (field1->loc_kind ())
 	    {
 	    case FIELD_LOC_KIND_BITPOS:
 	      if (FIELD_BITPOS (*field1) != FIELD_BITPOS (*field2))
@@ -4245,7 +4245,7 @@ check_types_equal (struct type *type1, struct type *type2,
 	    default:
 	      internal_error (__FILE__, __LINE__, _("Unsupported field kind "
 						    "%d by check_types_equal"),
-			      FIELD_LOC_KIND (*field1));
+			      field1->loc_kind ());
 	    }
 
 	  worklist->emplace_back (field1->type (), field2->type ());
@@ -4891,8 +4891,8 @@ field_is_static (struct field *f)
      have a dedicated flag that would be set for static fields when
      the type is being created.  But in practice, checking the field
      loc_kind should give us an accurate answer.  */
-  return (FIELD_LOC_KIND (*f) == FIELD_LOC_KIND_PHYSNAME
-	  || FIELD_LOC_KIND (*f) == FIELD_LOC_KIND_PHYSADDR);
+  return (f->loc_kind () == FIELD_LOC_KIND_PHYSNAME
+	  || f->loc_kind () == FIELD_LOC_KIND_PHYSADDR);
 }
 
 static void
