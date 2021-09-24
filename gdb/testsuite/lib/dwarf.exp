@@ -271,6 +271,7 @@ proc function_range { func src {options {debug}} } {
 	}
     }
 
+    gdb_exit
     return [list "${func}_label - $func_label_offset" $func_length]
 }
 

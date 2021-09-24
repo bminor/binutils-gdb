@@ -36,18 +36,23 @@ if {![dwarf2_support]} {
 
 standard_testfile main.c -other.S -dwarf.S
 
+if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
+    untested "failed to compile"
+    return -1
+}
+
+set int_size [get_sizeof "int" 4]
+
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile3]
 Dwarf::assemble $asm_file {
-    global srcdir subdir srcfile srcfile2
+    global srcdir subdir srcfile srcfile2 int_size
 
     declare_labels ranges_label_1 ranges_label_2 L1 L2
 
     set main_result [function_range main ${srcdir}/${subdir}/${srcfile}]
     set main_start [lindex $main_result 0]
     set main_length [lindex $main_result 1]
-
-    set int_size [get_sizeof "int" 4]
 
     cu {} {
 	DW_TAG_compile_unit {
