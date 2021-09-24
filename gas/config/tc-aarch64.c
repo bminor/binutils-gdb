@@ -9518,6 +9518,11 @@ md_begin (void)
   mach = ilp32_p ? bfd_mach_aarch64_ilp32 : bfd_mach_aarch64;
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
+
+#ifdef OBJ_ELF
+  if (IS_C64)
+    bfd_set_private_flags (stdoutput, EF_AARCH64_CHERI_PURECAP);
+#endif
 }
 
 /* Command line processing.  */
