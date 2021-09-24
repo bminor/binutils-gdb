@@ -694,7 +694,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	const char *physname;
 	struct bound_minimal_symbol msym;
 
-	physname = FIELD_STATIC_PHYSNAME (call_site->target);
+	physname = call_site->target.loc_physname ();
 
 	/* Handle both the mangled and demangled PHYSNAME.  */
 	msym = lookup_minimal_symbol (physname, NULL, NULL);

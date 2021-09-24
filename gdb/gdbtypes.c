@@ -4226,8 +4226,8 @@ check_types_equal (struct type *type1, struct type *type2,
 		return false;
 	      break;
 	    case FIELD_LOC_KIND_PHYSNAME:
-	      if (!compare_maybe_null_strings (FIELD_STATIC_PHYSNAME (*field1),
-					       FIELD_STATIC_PHYSNAME (*field2)))
+	      if (!compare_maybe_null_strings (field1->loc_physname (),
+					       field2->loc_physname ()))
 		return false;
 	      break;
 	    case FIELD_LOC_KIND_DWARF_BLOCK:
