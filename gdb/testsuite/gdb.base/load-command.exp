@@ -42,8 +42,12 @@ gdb_test "print/x the_variable" " = 0x1234" "check initial value of the_variable
 gdb_test_no_output "set the_variable = 0x5555" "manually change the_variable"
 gdb_test "print/x the_variable" " = 0x5555" "check manually changed value of the_variable"
 
-# Re-load the binary using the load command.
-gdb_test "load ${binfile}" ".*Loading section .data.*Transfer rate:.*" "re-load binary"
+with_test_prefix "reload" {
+    # Re-load the binary using the load command.
+    gdb_test "load ${binfile}" ".*Loading section .data.*Transfer rate:.*" \
+	"re-load binary"
 
-# Re-loading the binary should have reset the variable value.
-gdb_test "print/x the_variable" " = 0x1234" "check initial value of the_variable"
+    # Re-loading the binary should have reset the variable value.
+    gdb_test "print/x the_variable" " = 0x1234" \
+	"check initial value of the_variable"
+}
