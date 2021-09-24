@@ -20,7 +20,7 @@ standard_testfile
 # Disable generation of position independent executable (PIE).  Otherwise, we
 # would have to manually specify an offset to load.
 
-set opts {debug ldflags=-no-pie}
+set opts {debug nopie}
 
 if [prepare_for_testing "failed to prepare" $testfile $srcfile $opts] {
     return -1

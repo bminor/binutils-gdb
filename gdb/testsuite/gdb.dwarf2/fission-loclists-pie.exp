@@ -40,7 +40,7 @@ standard_testfile .S
 set obj [standard_output_file "${testfile}.o"]
 set dwo [standard_output_file "${testfile}.dwo"]
 if [build_executable_and_dwo_files "$testfile.exp" "${binfile}" \
-	{nodebug ldflags=-pie} \
+	{nodebug pie} \
 	[list $srcfile [list nodebug split-dwo additional_flags=-DDWO=\"$dwo\"] \
 	     $obj]] {
     return -1
