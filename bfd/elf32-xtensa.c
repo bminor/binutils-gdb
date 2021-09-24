@@ -885,7 +885,8 @@ xtensa_read_table_entries (bfd *abfd,
   flagword predef_flags;
   bfd_size_type table_entry_size, section_limit;
 
-  if (!section
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour
+      || !section
       || !(section->flags & SEC_ALLOC)
       || (section->flags & SEC_DEBUGGING))
     {
