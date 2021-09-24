@@ -1,5 +1,10 @@
 2021-09-24  Alex Coplan  <alex.coplan@arm.com>
 
+	* config/tc-aarch64.c (md_begin): Set the ELF header flag
+	EF_AARCH64_CHERI_PURECAP if we have the C64 extension.
+
+2021-09-24  Alex Coplan  <alex.coplan@arm.com>
+
 	* testsuite/gas/aarch64/morello_ldst-c64.d: Update following
 	test + encoding change.
 	* testsuite/gas/aarch64/morello_ldst-invalid.d: New test.
