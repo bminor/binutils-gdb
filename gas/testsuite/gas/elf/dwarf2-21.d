@@ -1,6 +1,6 @@
 #name: DWARF2 21
 #as: -gdwarf-2
-#readelf: -wL
+#readelf: -wL -W
 # Note that non-zero view numbers are allowed here.  This doesn't really
 # make much sense, but DW_LNS_fixed_advance_pc is defined to not set the
 # view back to zero in contrast with all other changes in PC.  A number
