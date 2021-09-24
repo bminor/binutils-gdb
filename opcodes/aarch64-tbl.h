@@ -4093,8 +4093,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("str", 0xa2000400, 0xffe00400, ldst_imm9, 0, OP2 (Cat, A64C_ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
   A64C_INSN ("ldr", 0xa2600800, 0xffe00c00, ldst_regoff, 0, OP2 (Cat, ADDR_REGOFF), QL2_A64C_CA_ADDR, 0),
   A64C_INSN ("str", 0xa2200800, 0xffe00c00, ldst_regoff, 0, OP2 (Cat, ADDR_REGOFF), QL2_A64C_CA_ADDR, 0),
-  A64C_INSN ("ldtr", 0xa2400800, 0xffe00c00, ldst_unpriv, 0, OP2 (Cat, ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
-  A64C_INSN ("sttr", 0xa2000800, 0xffe00c00, ldst_unpriv, 0, OP2 (Cat, ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("ldtr", 0xa2400800, 0xffe00c00, ldst_unpriv, 0, OP2 (Cat, A64C_ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("sttr", 0xa2000800, 0xffe00c00, ldst_unpriv, 0, OP2 (Cat, A64C_ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
   A64C_INSN ("ldur", 0xa2400000, 0xffe00c00, ldst_unscaled, OP_LDUR_C, OP2 (Cat, ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
   A64C_INSN ("stur", 0xa2000000, 0xffe00c00, ldst_unscaled, OP_STUR_C, OP2 (Cat, ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
 

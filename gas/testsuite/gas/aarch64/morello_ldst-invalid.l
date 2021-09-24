@@ -1,0 +1,13 @@
+[^:]*: Assembler messages:
+.*: Error: immediate value must be a multiple of 16 at operand 2 -- `ldtr c0,\[x1,#1\]'
+.*: Error: immediate value must be a multiple of 16 at operand 2 -- `ldtr c0,\[x1,#2\]'
+.*: Error: immediate value must be a multiple of 16 at operand 2 -- `ldtr c0,\[x1,#7\]'
+.*: Error: immediate value must be a multiple of 16 at operand 2 -- `ldtr c0,\[x1,#4079\]'
+.*: Error: immediate offset out of range -4096 to 4080 at operand 2 -- `ldtr c0,\[x1,#4081\]'
+.*: Error: immediate offset out of range -4096 to 4080 at operand 2 -- `ldtr c0,\[x1,#4096\]'
+.*: Error: immediate value must be a multiple of 16 at operand 2 -- `ldtr c0,\[x1,#-1\]'
+.*: Error: immediate value must be a multiple of 16 at operand 2 -- `ldtr c0,\[x1,#-2\]'
+.*: Error: immediate value must be a multiple of 16 at operand 2 -- `ldtr c0,\[x1,#-7\]'
+.*: Error: immediate value must be a multiple of 16 at operand 2 -- `ldtr c0,\[x1,#-4095\]'
+.*: Error: immediate offset out of range -4096 to 4080 at operand 2 -- `ldtr c0,\[x1,#-4097\]'
+.*: Error: immediate offset out of range -4096 to 4080 at operand 2 -- `ldtr c0,\[x1,#-4112\]'

@@ -1,3 +1,9 @@
+2021-09-24  Alex Coplan  <alex.coplan@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Update A64C_INSNs
+	ldtr/sttr to take A64C_ADDR_SIMM9 instead of ADDR_SIMM9
+	operands.
+
 2021-03-17  Luis Machado  <luis.machado@arm.com>
 
 	* aarch64-dis.c (enum map_type): Moved to include/opcode/aarch64.h.
