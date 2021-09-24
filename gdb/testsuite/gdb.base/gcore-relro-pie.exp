@@ -19,7 +19,8 @@
 
 standard_testfile
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug additional_flags=-fpie "ldflags=-pie -Wl,-z,relro"}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {debug pie "ldflags=-Wl,-z,relro"}]} {
     return -1
 }
 
