@@ -2125,7 +2125,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define FIELD_STATIC_PHYSADDR(thisfld) ((thisfld).loc_physaddr ())
 #define FIELD_DWARF_BLOCK(thisfld) ((thisfld).loc_dwarf_block ())
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
@@ -2134,7 +2133,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FIELD_BITPOS(thistype, n) ((thistype)->field (n).loc_bitpos ())
 #define TYPE_FIELD_ENUMVAL(thistype, n) ((thistype)->field (n).loc_enumval ())
 #define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) ((thistype)->field (n).loc_physname ())
-#define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_STATIC_PHYSADDR ((thistype)->field (n))
+#define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) ((thistype)->field (n).loc_physaddr ())
 #define TYPE_FIELD_DWARF_BLOCK(thistype, n) FIELD_DWARF_BLOCK ((thistype)->field (n))
 #define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL((thistype)->field (n))
 #define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE((thistype)->field (n))

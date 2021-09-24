@@ -4221,8 +4221,7 @@ check_types_equal (struct type *type1, struct type *type2,
 		 have a type.  */
 	      continue;
 	    case FIELD_LOC_KIND_PHYSADDR:
-	      if (FIELD_STATIC_PHYSADDR (*field1)
-		  != FIELD_STATIC_PHYSADDR (*field2))
+	      if (field1->loc_physaddr () != field2->loc_physaddr ())
 		return false;
 	      break;
 	    case FIELD_LOC_KIND_PHYSNAME:

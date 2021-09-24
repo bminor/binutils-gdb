@@ -719,7 +719,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	int sect_idx = COMPUNIT_BLOCK_LINE_SECTION (cust);
 	CORE_ADDR delta = per_objfile->objfile->section_offsets[sect_idx];
 
-	return FIELD_STATIC_PHYSADDR (call_site->target) + delta;
+	return call_site->target.loc_physaddr () + delta;
       }
 
     default:
