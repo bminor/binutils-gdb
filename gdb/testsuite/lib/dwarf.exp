@@ -1845,6 +1845,8 @@ namespace eval Dwarf {
 		    variable _debug_loclists_list_count
 		    variable _debug_loclists_locdesc_count
 
+		    set locdesc [uplevel [list subst $locdesc]]
+
 		    _op .byte 0x08 "DW_LLE_start_length"
 
 		    # Start and end of the address range.
@@ -1873,6 +1875,8 @@ namespace eval Dwarf {
 		    variable _debug_loclists_table_count
 		    variable _debug_loclists_list_count
 		    variable _debug_loclists_locdesc_count
+
+		    set locdesc [uplevel [list subst $locdesc]]
 
 		    _op .byte 0x07 "DW_LLE_start_end"
 
