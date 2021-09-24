@@ -649,7 +649,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	struct type *caller_core_addr_type;
 	struct gdbarch *caller_arch;
 
-	dwarf_block = FIELD_DWARF_BLOCK (call_site->target);
+	dwarf_block = call_site->target.loc_dwarf_block ();
 	if (dwarf_block == NULL)
 	  {
 	    struct bound_minimal_symbol msym;

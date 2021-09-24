@@ -4233,8 +4233,8 @@ check_types_equal (struct type *type1, struct type *type2,
 	      {
 		struct dwarf2_locexpr_baton *block1, *block2;
 
-		block1 = FIELD_DWARF_BLOCK (*field1);
-		block2 = FIELD_DWARF_BLOCK (*field2);
+		block1 = field1->loc_dwarf_block ();
+		block2 = field2->loc_dwarf_block ();
 		if (block1->per_cu != block2->per_cu
 		    || block1->size != block2->size
 		    || memcmp (block1->data, block2->data, block1->size) != 0)
