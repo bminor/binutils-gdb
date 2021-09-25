@@ -5297,15 +5297,17 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		state_machine_regs.file = uladv;
 
 		{
-		  unsigned file = state_machine_regs.file - 1;
+		  unsigned file = state_machine_regs.file;
 		  unsigned dir;
 
+		  if (linfo.li_version < 5)
+		    --file;
 		  if (file_table == NULL || n_files == 0)
 		    printf (_("\n [Use file table entry %d]\n"), file);
 		  /* PR 20439 */
 		  else if (file >= n_files)
 		    {
-		      warn (_("file index %u > number of files %u\n"), file + 1, n_files);
+		      warn (_("file index %u > number of files %u\n"), file, n_files);
 		      printf (_("\n <over large file table index %u>"), file);
 		    }
 		  else if ((dir = file_table[file].directory_index) == 0)
@@ -5414,7 +5416,10 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      if (file_table)
 		{
-		  unsigned indx = state_machine_regs.file - 1;
+		  unsigned indx = state_machine_regs.file;
+
+		  if (linfo.li_version < 5)
+		    --indx;
 		  /* PR 20439  */
 		  if (indx >= n_files)
 		    {
