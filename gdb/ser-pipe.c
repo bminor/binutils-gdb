@@ -30,6 +30,7 @@
 #include "gdbsupport/gdb_sys_time.h"
 #include <fcntl.h>
 #include "gdbsupport/filestuff.h"
+#include "gdbsupport/pathstuff.h"
 
 #include <signal.h>
 
@@ -122,7 +123,9 @@ pipe_open (struct serial *scb, const char *name)
 	}
 
       close_most_fds ();
-      execl ("/bin/sh", "sh", "-c", name, (char *) 0);
+
+      const char *shellfile = get_shell ();
+      execl (shellfile, shellfile, "-c", name, (char *) 0);
       _exit (127);
     }
 
