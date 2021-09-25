@@ -31,8 +31,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {pthreads d
     return -1
 }
 
-clean_restart ${testfile}
-
 if { ![runto_main] } then {
     return -1
 }

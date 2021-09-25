@@ -24,7 +24,6 @@ if { [prepare_for_testing "failed to prepare" $executable "" [list debug pie]] }
     return -1
 }
 
-clean_restart $executable
 set arch ""
 set test "show architecture"
 gdb_test_multiple $test $test {

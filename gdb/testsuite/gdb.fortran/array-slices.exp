@@ -38,7 +38,7 @@ if {[skip_fortran_tests]} { return -1 }
 standard_testfile ".f90"
 load_lib fortran.exp
 
-if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
+if {[build_executable ${testfile}.exp ${testfile} ${srcfile} \
 	 {debug f90}]} {
     return -1
 }

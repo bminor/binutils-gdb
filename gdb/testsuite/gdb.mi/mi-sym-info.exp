@@ -28,7 +28,7 @@ set MIFLAGS "-i=mi"
 
 standard_testfile mi-sym-info-1.c mi-sym-info-2.c
 
-if {[prepare_for_testing "failed to prepare" ${testfile} \
+if {[build_executable "failed to prepare" ${testfile} \
 	 [list $srcfile $srcfile2] {debug}]} {
     return -1
 }

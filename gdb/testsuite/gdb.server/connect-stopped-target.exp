@@ -27,7 +27,7 @@ if {[skip_gdbserver_tests]} {
 standard_testfile
 set executable ${testfile}
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
+if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 

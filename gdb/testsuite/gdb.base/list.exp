@@ -21,7 +21,7 @@ standard_testfile list0.c list1.c
 # Need to download the header to the host.
 gdb_remote_download host ${srcdir}/${subdir}/list0.h
 
-if {[prepare_for_testing "failed to prepare" $testfile [list $srcfile $srcfile2] \
+if {[build_executable "failed to prepare" $testfile [list $srcfile $srcfile2] \
 	 {debug}]} {
     return -1
 }

@@ -34,8 +34,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}
     return -1
 }
 
-clean_restart $binfile
-
 if ![runto_main] {
     continue
 }

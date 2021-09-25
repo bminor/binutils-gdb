@@ -24,9 +24,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }
 
-# Start with a fresh gdb.
-clean_restart ${testfile}
-
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 

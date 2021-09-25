@@ -46,9 +46,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
-# Start with a fresh gdb.
-clean_restart ${testfile}
-
 # Using the source command to read commands from a file is important,
 # otherwise section data is freed and reallocated using the same
 # memory locations and the bug is not exposed.

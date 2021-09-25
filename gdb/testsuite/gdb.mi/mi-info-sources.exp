@@ -20,7 +20,7 @@ set MIFLAGS "-i=mi"
 
 standard_testfile .c -base.c
 
-if {[prepare_for_testing $testfile.exp $testfile \
+if {[build_executable $testfile.exp $testfile \
 	 [list $srcfile $srcfile2] debug]} {
     untested $testfile.exp
     return -1

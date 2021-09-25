@@ -31,8 +31,6 @@ proc do_test {dir options} {
 	return 0
     }
 
-    clean_restart ${binfile}
-
     gdb_test_no_output "set print sevenbit-strings"
     gdb_test_no_output "set print address off"
     gdb_test_no_output "set width 0"

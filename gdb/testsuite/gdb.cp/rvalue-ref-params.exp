@@ -20,7 +20,7 @@ if {[skip_cplus_tests]} { continue }
 
 standard_testfile .cc
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile \
+if {[build_executable $testfile.exp $testfile $srcfile \
     {debug c++ additional_flags="-std=gnu++11"}] == -1} {
     return -1
 }

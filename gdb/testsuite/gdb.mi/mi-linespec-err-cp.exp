@@ -27,7 +27,7 @@ set MIFLAGS "-i=mi"
 standard_testfile .cc
 set exefile $testfile
 
-if {[prepare_for_testing "failed to prepare" $exefile $srcfile {debug c++}]} {
+if {[build_executable "failed to prepare" $exefile $srcfile {debug c++}]} {
     return -1
 }
 

@@ -33,8 +33,6 @@ if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug}] {
     return -1
 }
 
-clean_restart ${binfile}
-
 set test_spawn_id [spawn_wait_for_attach $binfile]
 set testpid [spawn_id_get_pid $test_spawn_id]
 

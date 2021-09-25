@@ -32,9 +32,6 @@ if [get_compiler_info] {
     return -1
 }
 
-clean_restart ${binfile}
-
-
 set bp_location1  [gdb_get_line_number "set breakpoint 1 here"]
 set bp_location6  [gdb_get_line_number "set breakpoint 6 here"]
 set bp_location8  [gdb_get_line_number "set breakpoint 8 here" $srcfile2]

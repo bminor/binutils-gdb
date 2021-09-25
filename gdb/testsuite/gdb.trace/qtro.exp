@@ -25,7 +25,6 @@ standard_testfile
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nopie}]} {
     return -1
 }
-clean_restart $testfile
 
 if ![runto_main] {
     fail "can't run to main to check for trace support"

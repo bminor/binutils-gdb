@@ -26,7 +26,7 @@ if { [target_info gdb_protocol] != "" } {
 
 standard_testfile
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
+if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 

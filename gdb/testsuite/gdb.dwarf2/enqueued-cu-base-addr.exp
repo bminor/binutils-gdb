@@ -27,12 +27,6 @@ standard_testfile main.c .S
 set executable ${testfile}
 set asm_file [standard_output_file ${srcfile2}]
 
-# We need to know the size of integer types in order to write some of the
-# debugging info we'd like to generate.
-if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] {
-    return -1
-}
-
 # Create the DWARF.
 Dwarf::assemble $asm_file {
     global srcdir subdir srcfile
@@ -82,8 +76,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
 	  [list $srcfile $asm_file] {nodebug}] } {
     return -1
 }
-
-clean_restart ${binfile}
 
 # Expand cu1.  This will enqueue cu2.
 gdb_test "ptype foo" "type = int"

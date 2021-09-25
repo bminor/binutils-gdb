@@ -80,7 +80,7 @@ proc test {cmds_after_kill} {
     }
 }
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile] == -1} {
+if {[build_executable "failed to prepare" $testfile $srcfile] == -1} {
     return -1
 }
 

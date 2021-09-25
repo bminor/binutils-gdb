@@ -23,7 +23,8 @@ if [target_info exists gdb,nosignals] {
     return -1
 }
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}]} {
+if {[build_executable "failed to prepare" $testfile $srcfile \
+	 {debug pthreads}]} {
     return -1
 }
 

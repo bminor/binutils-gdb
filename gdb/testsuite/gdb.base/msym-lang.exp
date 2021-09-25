@@ -20,6 +20,4 @@ if {[prepare_for_testing "failed to prepare" $testfile [list $srcfile $srcfile2]
     return -1
 }
 
-clean_restart ${testfile}
-
 gdb_test "info func foo" ".* foo\\(\\).* foo\\(\\).*"

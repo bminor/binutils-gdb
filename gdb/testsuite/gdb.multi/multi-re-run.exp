@@ -31,14 +31,14 @@ set srcfile2 multi-re-run-2.c
 set binfile2 [standard_output_file ${exec2}]
 
 with_test_prefix "exec1" {
-    if { [prepare_for_testing "failed to prepare" ${exec1} "${srcfile1}" \
+    if { [build_executable "failed to prepare" ${exec1} "${srcfile1}" \
 	      [list pthreads debug]] } {
 	return -1
     }
 }
 
 with_test_prefix "exec2" {
-    if { [prepare_for_testing "failed to prepare" ${exec2} "${srcfile2}" \
+    if { [build_executable "failed to prepare" ${exec2} "${srcfile2}" \
 	      [list pthreads debug]] } {
 	return -1
     }

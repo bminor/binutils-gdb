@@ -46,6 +46,4 @@ proc noreturn_finish_test { } {
    }
 }
 
-clean_restart ${binfile}
-
 noreturn_finish_test

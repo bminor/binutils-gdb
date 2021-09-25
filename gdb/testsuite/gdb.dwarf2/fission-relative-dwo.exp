@@ -25,10 +25,6 @@ if {![dwarf2_support]} {
 
 standard_testfile .c -dw.S
 
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
-    return -1
-}
-
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     global srcfile gdb_test_file_name

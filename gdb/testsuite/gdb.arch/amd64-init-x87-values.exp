@@ -27,7 +27,7 @@ standard_testfile .S
 set options [list debug \
 		 additional_flags=-static \
 		 additional_flags=-nostartfiles]
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $options] } {
+if { [build_executable "failed to prepare" ${testfile} ${srcfile} $options] } {
     return -1
 }
 

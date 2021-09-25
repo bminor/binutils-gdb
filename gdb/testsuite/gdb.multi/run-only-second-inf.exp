@@ -24,7 +24,7 @@ if {[use_gdb_stub]} {
     return 0
 }
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
+if {[build_executable "failed to prepare" $testfile $srcfile {debug}]} {
     return -1
 }
 

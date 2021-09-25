@@ -24,9 +24,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile}] } {
     return -1
 }
 
-clean_restart ${binfile}
-
-
 if ![runto setup_done] then {
     fail "can't run to setup_done"
     return 0

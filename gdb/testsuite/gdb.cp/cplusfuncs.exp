@@ -581,8 +581,6 @@ proc do_tests {} {
     global binfile
     global dm_type_int_star
 
-    clean_restart $binfile
-
     gdb_test_no_output "set width 0"
 
     runto_main

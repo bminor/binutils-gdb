@@ -20,7 +20,7 @@ load_lib "fortran.exp"
 
 standard_testfile ".f90"
 
-if {[prepare_for_testing ${testfile}.exp ${testfile} \
+if {[build_executable ${testfile}.exp ${testfile} \
 	 ${srcfile} {debug f90}]} {
     return -1
 }

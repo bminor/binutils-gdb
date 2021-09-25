@@ -28,7 +28,7 @@ if { [use_gdb_stub] } then {
 standard_testfile
 set escapedbinfile [string_to_regexp ${binfile}]
 
-if [prepare_for_testing "failed to prepare for dprintf-detach" \
+if [build_executable "failed to prepare for dprintf-detach" \
     ${testfile} ${srcfile} {debug}] {
     return -1
 }

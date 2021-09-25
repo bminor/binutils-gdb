@@ -30,8 +30,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
-clean_restart $binfile
-
 if ![runto_main] {
     untested "can't run to main"
     return -1

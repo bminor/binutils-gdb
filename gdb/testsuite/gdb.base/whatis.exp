@@ -51,8 +51,6 @@ proc do_test {dir options} {
 	return 0
     }
 
-    clean_restart ${binfile}
-
     #
     # Test whatis command with basic C types
     #
