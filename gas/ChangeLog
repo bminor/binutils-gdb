@@ -1,3 +1,12 @@
+2021-09-25  Peter Bergner  <bergner@linux.ibm.com>
+
+	* testsuite/gas/ppc/power5.s: New test.
+	* testsuite/gas/ppc/power5.d: Likewise.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+	* testsuite/gas/ppc/power7.s: Remove tests for mfppr, mfppr32, mtppr
+	and mtppr32.
+	* testsuite/gas/ppc/power7.d: Likewise.
+
 2021-09-13  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-ia64.c (cross_section): Use obj_elf_section_name to
