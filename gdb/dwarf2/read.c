@@ -9065,7 +9065,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	  name = tail;
 	  if (*name != '$'
 	      || index >= field_type->num_fields ()
-	      || (TYPE_FIELD_LOC_KIND (field_type, index)
+	      || (field_type->field (index).loc_kind ()
 		  != FIELD_LOC_KIND_BITPOS))
 	    {
 	      complaint (_("Could not parse Rust enum encoding string \"%s\""
@@ -9197,7 +9197,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       std::unordered_map<std::string, ULONGEST> discriminant_map;
       for (int i = 0; i < enum_type->num_fields (); ++i)
 	{
-	  if (TYPE_FIELD_LOC_KIND (enum_type, i) == FIELD_LOC_KIND_ENUMVAL)
+	  if (enum_type->field (i).loc_kind () == FIELD_LOC_KIND_ENUMVAL)
 	    {
 	      const char *name
 		= rust_last_path_segment (enum_type->field (i).name ());

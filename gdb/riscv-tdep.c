@@ -2542,7 +2542,7 @@ riscv_struct_info::analyse_inner (struct type *type, int offset)
 
   for (i = 0; i < count; ++i)
     {
-      if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_BITPOS)
+      if (type->field (i).loc_kind () != FIELD_LOC_KIND_BITPOS)
 	continue;
 
       struct type *field_type = type->field (i).type ();

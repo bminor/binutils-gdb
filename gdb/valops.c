@@ -3332,7 +3332,7 @@ enum_constant_from_type (struct type *type, const char *name)
       const char *fname = type->field (i).name ();
       int len;
 
-      if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_ENUMVAL
+      if (type->field (i).loc_kind () != FIELD_LOC_KIND_ENUMVAL
 	  || fname == NULL)
 	continue;
 

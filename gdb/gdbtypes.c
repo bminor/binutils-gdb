@@ -2154,7 +2154,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
 	      return 1;
 	    /* If the field is at a fixed offset, then it is not
 	       dynamic.  */
-	    if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_DWARF_BLOCK)
+	    if (type->field (i).loc_kind () != FIELD_LOC_KIND_DWARF_BLOCK)
 	      continue;
 	    /* Do not consider C++ virtual base types to be dynamic
 	       due to the field's offset being dynamic; these are
@@ -2454,7 +2454,7 @@ compute_variant_fields_inner (struct type *type,
     {
       int idx = part.discriminant_index;
 
-      if (TYPE_FIELD_LOC_KIND (type, idx) != FIELD_LOC_KIND_BITPOS)
+      if (type->field (idx).loc_kind () != FIELD_LOC_KIND_BITPOS)
 	error (_("Cannot determine struct field location"
 		 " (invalid location kind)"));
 
@@ -2586,7 +2586,7 @@ resolve_dynamic_struct (struct type *type,
       if (field_is_static (&resolved_type->field (i)))
 	continue;
 
-      if (TYPE_FIELD_LOC_KIND (resolved_type, i) == FIELD_LOC_KIND_DWARF_BLOCK)
+      if (resolved_type->field (i).loc_kind () == FIELD_LOC_KIND_DWARF_BLOCK)
 	{
 	  struct dwarf2_property_baton baton;
 	  baton.property_type
@@ -2610,7 +2610,7 @@ resolve_dynamic_struct (struct type *type,
 	 that verification indicates a bug in our code, the error
 	 is not severe enough to suggest to the user he stops
 	 his debugging session because of it.  */
-      if (TYPE_FIELD_LOC_KIND (resolved_type, i) != FIELD_LOC_KIND_BITPOS)
+      if (resolved_type->field (i).loc_kind () != FIELD_LOC_KIND_BITPOS)
 	error (_("Cannot determine struct field location"
 		 " (invalid location kind)"));
 
@@ -2625,7 +2625,7 @@ resolve_dynamic_struct (struct type *type,
       resolved_type->field (i).set_type
 	(resolve_dynamic_type_internal (resolved_type->field (i).type (),
 					&pinfo, 0));
-      gdb_assert (TYPE_FIELD_LOC_KIND (resolved_type, i)
+      gdb_assert (resolved_type->field (i).loc_kind ()
 		  == FIELD_LOC_KIND_BITPOS);
 
       new_bit_length = TYPE_FIELD_BITPOS (resolved_type, i);
@@ -5558,7 +5558,8 @@ copy_type_recursive (struct objfile *objfile,
 				    copied_types));
 	  if (type->field (i).name ())
 	    new_type->field (i).set_name (xstrdup (type->field (i).name ()));
-	  switch (TYPE_FIELD_LOC_KIND (type, i))
+
+	  switch (type->field (i).loc_kind ())
 	    {
 	    case FIELD_LOC_KIND_BITPOS:
 	      new_type->field (i).set_loc_bitpos (TYPE_FIELD_BITPOS (type, i));
@@ -5581,7 +5582,7 @@ copy_type_recursive (struct objfile *objfile,
 	    default:
 	      internal_error (__FILE__, __LINE__,
 			      _("Unexpected type field location kind: %d"),
-			      TYPE_FIELD_LOC_KIND (type, i));
+			      type->field (i).loc_kind ());
 	    }
 	}
     }

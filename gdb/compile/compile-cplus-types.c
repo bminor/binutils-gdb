@@ -599,7 +599,7 @@ compile_cplus_convert_struct_or_union_members
 	{
 	  CORE_ADDR physaddr;
 
-	  switch (TYPE_FIELD_LOC_KIND (type, i))
+	  switch (type->field (i).loc_kind ())
 	    {
 	    case FIELD_LOC_KIND_PHYSADDR:
 	      {
@@ -939,7 +939,7 @@ compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
       gdb::unique_xmalloc_ptr<char> fname
 	= compile_cplus_instance::decl_name (type->field (i).name ());
 
-      if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_ENUMVAL
+      if (type->field (i).loc_kind () != FIELD_LOC_KIND_ENUMVAL
 	  || fname == nullptr)
 	continue;
 

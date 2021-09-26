@@ -2952,7 +2952,7 @@ value_static_field (struct type *type, int fieldno)
 {
   struct value *retval;
 
-  switch (TYPE_FIELD_LOC_KIND (type, fieldno))
+  switch (type->field (fieldno).loc_kind ())
     {
     case FIELD_LOC_KIND_PHYSADDR:
       retval = value_at_lazy (type->field (fieldno).type (),
