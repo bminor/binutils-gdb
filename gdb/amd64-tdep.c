@@ -563,7 +563,7 @@ amd64_has_unaligned_fields (struct type *type)
 	      || TYPE_FIELD_PACKED (type, i))
 	    continue;
 
-	  int bitpos = TYPE_FIELD_BITPOS (type, i);
+	  int bitpos = type->field (i).loc_bitpos ();
 
 	  if (bitpos % 8 != 0)
 	    return true;
@@ -604,7 +604,7 @@ amd64_classify_aggregate_field (struct type *type, int i,
   if (field_is_static (&type->field (i)) || bitsize == 0)
     return;
 
-  int bitpos = bitoffset + TYPE_FIELD_BITPOS (type, i);
+  int bitpos = bitoffset + type->field (i).loc_bitpos ();
   int pos = bitpos / 64;
   int endpos = (bitpos + bitsize - 1) / 64;
 

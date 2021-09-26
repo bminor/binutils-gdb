@@ -372,7 +372,7 @@ c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
       /* Print vtable entry - we only get here if NOT using
 	 -fvtable_thunks.  (Otherwise, look under
 	 TYPE_CODE_PTR.)  */
-      int offset = TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8;
+      int offset = type->field (VTBL_FNADDR_OFFSET).loc_bitpos () / 8;
       struct type *field_type = type->field (VTBL_FNADDR_OFFSET).type ();
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       CORE_ADDR addr = extract_typed_address (valaddr + offset, field_type);

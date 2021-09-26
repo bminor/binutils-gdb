@@ -4858,11 +4858,11 @@ mips_n32n64_fp_arg_chunk_p (struct gdbarch *gdbarch, struct type *arg_type,
 
       /* We're only looking at normal fields.  */
       if (field_is_static (&arg_type->field (i))
-	  || (TYPE_FIELD_BITPOS (arg_type, i) % 8) != 0)
+	  || (arg_type->field (i).loc_bitpos () % 8) != 0)
 	continue;
 
       /* If we have gone past the offset, there is no double to pass.  */
-      pos = TYPE_FIELD_BITPOS (arg_type, i) / 8;
+      pos = arg_type->field (i).loc_bitpos () / 8;
       if (pos > offset)
 	return 0;
 

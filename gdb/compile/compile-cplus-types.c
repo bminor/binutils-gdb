@@ -652,7 +652,7 @@ compile_cplus_convert_struct_or_union_members
 
 	  instance->plugin ().build_field
 	    (field_name, field_type, field_flags, bitsize,
-	     TYPE_FIELD_BITPOS (type, i));
+	     type->field (i).loc_bitpos ());
 	}
     }
 }

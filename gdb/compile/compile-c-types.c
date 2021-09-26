@@ -115,7 +115,7 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
 					  type->field (i).name (),
 					  field_type,
 					  bitsize,
-					  TYPE_FIELD_BITPOS (type, i));
+					  type->field (i).loc_bitpos ());
     }
 
   context->plugin ().finish_record_or_union (result, TYPE_LENGTH (type));

@@ -1537,7 +1537,7 @@ desc_bounds (struct value *arr)
 static int
 fat_pntr_bounds_bitpos (struct type *type)
 {
-  return TYPE_FIELD_BITPOS (desc_base_type (type), 1);
+  return desc_base_type (type)->field (1).loc_bitpos ();
 }
 
 /* If TYPE is the type of an array-descriptor (fat pointer), the bit
@@ -1603,7 +1603,7 @@ desc_data (struct value *arr)
 static int
 fat_pntr_data_bitpos (struct type *type)
 {
-  return TYPE_FIELD_BITPOS (desc_base_type (type), 0);
+  return desc_base_type (type)->field (0).loc_bitpos ();
 }
 
 /* If TYPE is the type of an array-descriptor (fat pointer), the bit
@@ -1641,7 +1641,7 @@ desc_one_bound (struct value *bounds, int i, int which)
 static int
 desc_bound_bitpos (struct type *type, int i, int which)
 {
-  return TYPE_FIELD_BITPOS (desc_base_type (type), 2 * i + which - 2);
+  return desc_base_type (type)->field (2 * i + which - 2).loc_bitpos ();
 }
 
 /* If BOUNDS is an array-bounds structure type, return the bit field size
@@ -6555,7 +6555,7 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
      packed; in this case we must take the bit-field path.  */
   if (TYPE_FIELD_BITSIZE (arg_type, fieldno) != 0 || value_bitpos (arg1) != 0)
     {
-      int bit_pos = TYPE_FIELD_BITPOS (arg_type, fieldno);
+      int bit_pos = arg_type->field (fieldno).loc_bitpos ();
       int bit_size = TYPE_FIELD_BITSIZE (arg_type, fieldno);
 
       return ada_value_primitive_packed_val (arg1,
@@ -6660,7 +6660,7 @@ find_struct_field (const char *name, struct type *type, int offset,
       int bit_pos = 0, fld_offset = 0;
       if (byte_offset_p != nullptr || bit_offset_p != nullptr)
 	{
-	  bit_pos = TYPE_FIELD_BITPOS (type, i);
+	  bit_pos = type->field (i).loc_bitpos ();
 	  fld_offset = offset + bit_pos / 8;
 	}
 
@@ -6716,7 +6716,7 @@ find_struct_field (const char *name, struct type *type, int offset,
 	    {
 	      if (find_struct_field (name, field_type->field (j).type (),
 				     fld_offset
-				     + TYPE_FIELD_BITPOS (field_type, j) / 8,
+				     + field_type->field (j).loc_bitpos () / 8,
 				     field_type_p, byte_offset_p,
 				     bit_offset_p, bit_size_p, index_p))
 		return 1;
@@ -6735,7 +6735,7 @@ find_struct_field (const char *name, struct type *type, int offset,
       int fld_offset = offset;
       if (byte_offset_p != nullptr || bit_offset_p != nullptr)
 	{
-	  int bit_pos = TYPE_FIELD_BITPOS (type, parent_offset);
+	  int bit_pos = type->field (parent_offset).loc_bitpos ();
 	  fld_offset += bit_pos / 8;
 	}
 
@@ -6805,7 +6805,7 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
 	{
 	  struct value *v =     /* Do not let indent join lines here.  */
 	    ada_search_struct_field (name, arg,
-				     offset + TYPE_FIELD_BITPOS (type, i) / 8,
+				     offset + type->field (i).loc_bitpos () / 8,
 				     type->field (i).type ());
 
 	  if (v != NULL)
@@ -6817,14 +6817,14 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
 	  /* PNH: Do we ever get here?  See find_struct_field.  */
 	  int j;
 	  struct type *field_type = ada_check_typedef (type->field (i).type ());
-	  int var_offset = offset + TYPE_FIELD_BITPOS (type, i) / 8;
+	  int var_offset = offset + type->field (i).loc_bitpos () / 8;
 
 	  for (j = 0; j < field_type->num_fields (); j += 1)
 	    {
 	      struct value *v = ada_search_struct_field /* Force line
 							   break.  */
 		(name, arg,
-		 var_offset + TYPE_FIELD_BITPOS (field_type, j) / 8,
+		 var_offset + field_type->field (j).loc_bitpos () / 8,
 		 field_type->field (j).type ());
 
 	      if (v != NULL)
@@ -6839,7 +6839,7 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
   if (parent_offset != -1)
     {
       struct value *v = ada_search_struct_field (
-	name, arg, offset + TYPE_FIELD_BITPOS (type, parent_offset) / 8,
+	name, arg, offset + type->field (parent_offset).loc_bitpos () / 8,
 	type->field (parent_offset).type ());
 
       if (v != NULL)
@@ -6885,7 +6885,7 @@ ada_index_struct_field_1 (int *index_p, struct value *arg, int offset,
 	{
 	  struct value *v =     /* Do not let indent join lines here.  */
 	    ada_index_struct_field_1 (index_p, arg,
-				      offset + TYPE_FIELD_BITPOS (type, i) / 8,
+				      offset + type->field (i).loc_bitpos () / 8,
 				      type->field (i).type ());
 
 	  if (v != NULL)
@@ -7525,7 +7525,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   for (f = 0; f < nfields; f += 1)
     {
       off = align_up (off, field_alignment (type, f))
-	+ TYPE_FIELD_BITPOS (type, f);
+	+ type->field (f).loc_bitpos ();
       rtype->field (f).set_loc_bitpos (off);
       TYPE_FIELD_BITSIZE (rtype, f) = 0;
 
@@ -7562,7 +7562,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     that follow this one.  */
 	  if (ada_is_aligner_type (field_type))
 	    {
-	      long field_offset = TYPE_FIELD_BITPOS (type, f);
+	      long field_offset = type->field (f).loc_bitpos ();
 
 	      field_valaddr = cond_offset_host (field_valaddr, field_offset);
 	      field_address = cond_offset_target (field_address, field_offset);
@@ -7642,7 +7642,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
     {
       struct type *branch_type;
 
-      off = TYPE_FIELD_BITPOS (rtype, variant_field);
+      off = rtype->field (variant_field).loc_bitpos ();
 
       if (dval0 == NULL)
 	{
@@ -7837,10 +7837,10 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   branch_type = to_fixed_variant_branch_type
     (type->field (variant_field).type (),
      cond_offset_host (valaddr,
-		       TYPE_FIELD_BITPOS (type, variant_field)
+		       type->field (variant_field).loc_bitpos ()
 		       / TARGET_CHAR_BIT),
      cond_offset_target (address,
-			 TYPE_FIELD_BITPOS (type, variant_field)
+			 type->field (variant_field).loc_bitpos ()
 			 / TARGET_CHAR_BIT), dval);
   if (branch_type == NULL)
     {
@@ -8742,10 +8742,9 @@ const gdb_byte *
 ada_aligned_value_addr (struct type *type, const gdb_byte *valaddr)
 {
   if (ada_is_aligner_type (type))
-    return ada_aligned_value_addr (type->field (0).type (),
-				   valaddr +
-				   TYPE_FIELD_BITPOS (type,
-						      0) / TARGET_CHAR_BIT);
+    return ada_aligned_value_addr
+      (type->field (0).type (),
+       valaddr + type->field (0).loc_bitpos () / TARGET_CHAR_BIT);
   else
     return valaddr;
 }

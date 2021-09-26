@@ -9076,7 +9076,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	    }
 	  ++name;
 
-	  bit_offset += TYPE_FIELD_BITPOS (field_type, index);
+	  bit_offset += field_type->field (index).loc_bitpos ();
 	  field_type = field_type->field (index).type ();
 	}
 
@@ -16530,7 +16530,7 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
 	  bounds->num_fields () * sizeof (struct field));
 
   int last_fieldno = range_fields.size () - 1;
-  int bounds_size = (TYPE_FIELD_BITPOS (bounds, last_fieldno) / 8
+  int bounds_size = (bounds->field (last_fieldno).loc_bitpos () / 8
 		     + TYPE_LENGTH (bounds->field (last_fieldno).type ()));
   TYPE_LENGTH (bounds) = align_up (bounds_size, max_align);
 

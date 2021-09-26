@@ -637,7 +637,7 @@ print_field_values (struct value *value, struct value *outer_value,
 	  else
 	    {
 	      struct value *v;
-	      int bit_pos = TYPE_FIELD_BITPOS (type, i);
+	      int bit_pos = type->field (i).loc_bitpos ();
 	      int bit_size = TYPE_FIELD_BITSIZE (type, i);
 	      struct value_print_options opts;
 

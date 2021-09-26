@@ -2030,8 +2030,8 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 		   have to add the offset of the union here.  */
 		if (field_type->code () == TYPE_CODE_STRUCT
 		    || (field_type->num_fields () > 0
-			&& TYPE_FIELD_BITPOS (field_type, 0) == 0))
-		  new_offset += TYPE_FIELD_BITPOS (type, i) / 8;
+			&& field_type->field (0).loc_bitpos () == 0))
+		  new_offset += type->field (i).loc_bitpos () / 8;
 
 		search (arg1, new_offset, field_type);
 	      }
@@ -2430,7 +2430,7 @@ value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
   for (i = TYPE_N_BASECLASSES (t); i < t->num_fields (); i++)
     {
       if (!field_is_static (&t->field (i))
-	  && bitpos == TYPE_FIELD_BITPOS (t, i)
+	  && bitpos == t->field (i).loc_bitpos ()
 	  && types_equal (ftype, t->field (i).type ()))
 	return value_primitive_field (*argp, 0, i, t);
     }
@@ -3518,7 +3518,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  if (want_address)
 	    return value_from_longest
 	      (lookup_memberptr_type (t->field (i).type (), domain),
-	       offset + (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
+	       offset + (LONGEST) (t->field (i).loc_bitpos () >> 3));
 	  else if (noside != EVAL_NORMAL)
 	    return allocate_value (t->field (i).type ());
 	  else

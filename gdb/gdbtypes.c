@@ -1851,7 +1851,7 @@ lookup_struct_elt (struct type *type, const char *name, int noerr)
 
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
-	  return {&type->field (i), TYPE_FIELD_BITPOS (type, i)};
+	  return {&type->field (i), type->field (i).loc_bitpos ()};
 	}
       else if (!t_field_name || *t_field_name == '\0')
 	{
@@ -1859,7 +1859,7 @@ lookup_struct_elt (struct type *type, const char *name, int noerr)
 	    = lookup_struct_elt (type->field (i).type (), name, 1);
 	  if (elt.field != NULL)
 	    {
-	      elt.offset += TYPE_FIELD_BITPOS (type, i);
+	      elt.offset += type->field (i).loc_bitpos ();
 	      return elt;
 	    }
 	}
@@ -2464,7 +2464,7 @@ compute_variant_fields_inner (struct type *type,
       else
 	{
 	  CORE_ADDR addr = (addr_stack->addr
-			    + (TYPE_FIELD_BITPOS (type, idx)
+			    + (type->field (idx).loc_bitpos ()
 			       / TARGET_CHAR_BIT));
 
 	  LONGEST bitsize = TYPE_FIELD_BITSIZE (type, idx);
@@ -2475,7 +2475,7 @@ compute_variant_fields_inner (struct type *type,
 	  gdb_byte bits[sizeof (ULONGEST)];
 	  read_memory (addr, bits, size);
 
-	  LONGEST bitpos = (TYPE_FIELD_BITPOS (type, idx)
+	  LONGEST bitpos = (type->field (idx).loc_bitpos ()
 			    % TARGET_CHAR_BIT);
 
 	  discr_value = unpack_bits_as_long (type->field (idx).type (),
@@ -2615,7 +2615,7 @@ resolve_dynamic_struct (struct type *type,
 		 " (invalid location kind)"));
 
       pinfo.type = check_typedef (resolved_type->field (i).type ());
-      size_t offset = TYPE_FIELD_BITPOS (resolved_type, i) / TARGET_CHAR_BIT;
+      size_t offset = resolved_type->field (i).loc_bitpos () / TARGET_CHAR_BIT;
       pinfo.valaddr = addr_stack->valaddr;
       if (!pinfo.valaddr.empty ())
 	pinfo.valaddr = pinfo.valaddr.slice (offset);
@@ -2628,7 +2628,7 @@ resolve_dynamic_struct (struct type *type,
       gdb_assert (resolved_type->field (i).loc_kind ()
 		  == FIELD_LOC_KIND_BITPOS);
 
-      new_bit_length = TYPE_FIELD_BITPOS (resolved_type, i);
+      new_bit_length = resolved_type->field (i).loc_bitpos ();
       if (TYPE_FIELD_BITSIZE (resolved_type, i) != 0)
 	new_bit_length += TYPE_FIELD_BITSIZE (resolved_type, i);
       else
@@ -5340,7 +5340,7 @@ recursive_dump_type (struct type *type, int spaces)
 			 idx, plongest (TYPE_FIELD_ENUMVAL (type, idx)));
       else
 	printf_filtered ("%*s[%d] bitpos %s bitsize %d type ", spaces + 2, "",
-			 idx, plongest (TYPE_FIELD_BITPOS (type, idx)),
+			 idx, plongest (type->field (idx).loc_bitpos ()),
 			 TYPE_FIELD_BITSIZE (type, idx));
       gdb_print_host_address (type->field (idx).type (), gdb_stdout);
       printf_filtered (" name '%s' (",
@@ -5562,7 +5562,7 @@ copy_type_recursive (struct objfile *objfile,
 	  switch (type->field (i).loc_kind ())
 	    {
 	    case FIELD_LOC_KIND_BITPOS:
-	      new_type->field (i).set_loc_bitpos (TYPE_FIELD_BITPOS (type, i));
+	      new_type->field (i).set_loc_bitpos (type->field (i).loc_bitpos ());
 	      break;
 	    case FIELD_LOC_KIND_ENUMVAL:
 	      new_type->field (i).set_loc_enumval (TYPE_FIELD_ENUMVAL (type, i));

@@ -270,11 +270,9 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		  fputs_styled ("<optimized out or zero length>",
 				metadata_style.style (), stream);
 		}
-	      else if (value_bits_synthetic_pointer (val,
-						     TYPE_FIELD_BITPOS (type,
-									i),
-						     TYPE_FIELD_BITSIZE (type,
-									 i)))
+	      else if (value_bits_synthetic_pointer
+			 (val, type->field (i).loc_bitpos (),
+			  TYPE_FIELD_BITSIZE (type, i)))
 		{
 		  fputs_styled (_("<synthetic pointer>"),
 				metadata_style.style (), stream);
@@ -316,7 +314,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		}
 	      else if (i == vptr_fieldno && type == vptr_basetype)
 		{
-		  int i_offset = TYPE_FIELD_BITPOS (type, i) / 8;
+		  int i_offset = type->field (i).loc_bitpos () / 8;
 		  struct type *i_type = type->field (i).type ();
 
 		  if (valprint_check_validity (stream, i_type, i_offset, val))
@@ -638,7 +636,7 @@ cp_find_class_member (struct type **self_p, int *fieldno,
 
   for (i = TYPE_N_BASECLASSES (self); i < len; i++)
     {
-      LONGEST bitpos = TYPE_FIELD_BITPOS (self, i);
+      LONGEST bitpos = self->field (i).loc_bitpos ();
 
       QUIT;
       if (offset == bitpos)
@@ -650,7 +648,7 @@ cp_find_class_member (struct type **self_p, int *fieldno,
 
   for (i = 0; i < TYPE_N_BASECLASSES (self); i++)
     {
-      LONGEST bitpos = TYPE_FIELD_BITPOS (self, i);
+      LONGEST bitpos = self->field (i).loc_bitpos ();
       LONGEST bitsize = 8 * TYPE_LENGTH (self->field (i).type ());
 
       if (offset >= bitpos && offset < bitpos + bitsize)

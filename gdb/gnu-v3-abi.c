@@ -195,7 +195,7 @@ vtable_address_point_offset (struct gdbarch *gdbarch)
   struct type *vtable_type
     = (struct type *) gdbarch_data (gdbarch, vtable_type_gdbarch_data);
 
-  return (TYPE_FIELD_BITPOS (vtable_type, vtable_field_virtual_functions)
+  return (vtable_type->field (vtable_field_virtual_functions).loc_bitpos ()
 	  / TARGET_CHAR_BIT);
 }
 

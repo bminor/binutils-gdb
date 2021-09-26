@@ -8127,7 +8127,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 		}
 
 	      /* If bitpos != 0, then we have to care about it.  */
-	      if (TYPE_FIELD_BITPOS (type, i) != 0)
+	      if (type->field (i).loc_bitpos () != 0)
 		{
 		  /* Bitfields are not addressable.  If the field bitsize is 
 		     zero, then the field is not packed.  Hence it cannot be

@@ -192,7 +192,7 @@ convert_field (struct type *type, int field)
 	  if (type->field (field).loc_kind () == FIELD_LOC_KIND_DWARF_BLOCK)
 	    arg = gdbpy_ref<>::new_reference (Py_None);
 	  else
-	    arg = gdb_py_object_from_longest (TYPE_FIELD_BITPOS (type, field));
+	    arg = gdb_py_object_from_longest (type->field (field).loc_bitpos ());
 	  attrstring = "bitpos";
 	}
 

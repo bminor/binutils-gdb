@@ -2116,7 +2116,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_BASECLASS(thistype,index) ((thistype)->field (index).type ())
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
 #define TYPE_BASECLASS_NAME(thistype,index) (thistype->field (index).name ())
-#define TYPE_BASECLASS_BITPOS(thistype,index) TYPE_FIELD_BITPOS(thistype,index)
+#define TYPE_BASECLASS_BITPOS(thistype,index) (thistype->field (index).loc_bitpos ())
 #define BASETYPE_VIA_PUBLIC(thistype, index) \
   ((!TYPE_FIELD_PRIVATE(thistype, index)) && (!TYPE_FIELD_PROTECTED(thistype, index)))
 #define TYPE_CPLUS_DYNAMIC(thistype) TYPE_CPLUS_SPECIFIC (thistype)->is_dynamic
@@ -2128,7 +2128,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD_BITPOS(thistype, n) ((thistype)->field (n).loc_bitpos ())
 #define TYPE_FIELD_ENUMVAL(thistype, n) ((thistype)->field (n).loc_enumval ())
 #define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) ((thistype)->field (n).loc_physname ())
 #define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) ((thistype)->field (n).loc_physaddr ())

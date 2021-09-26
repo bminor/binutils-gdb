@@ -1214,7 +1214,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 		 int.  */
 	      && TYPE_FIELD_BITSIZE (type, field) == 1)
 	    {
-	      if (val & ((ULONGEST)1 << TYPE_FIELD_BITPOS (type, field)))
+	      if (val & ((ULONGEST)1 << type->field (field).loc_bitpos ()))
 		fprintf_filtered
 		  (stream, " %ps",
 		   styled_string (variable_name_style.style (),
@@ -1223,7 +1223,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 	  else
 	    {
 	      unsigned field_len = TYPE_FIELD_BITSIZE (type, field);
-	      ULONGEST field_val = val >> TYPE_FIELD_BITPOS (type, field);
+	      ULONGEST field_val = val >> type->field (field).loc_bitpos ();
 
 	      if (field_len < sizeof (ULONGEST) * TARGET_CHAR_BIT)
 		field_val &= ((ULONGEST) 1 << field_len) - 1;

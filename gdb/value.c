@@ -3044,7 +3044,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	 bit.  Assume that the address, offset, and embedded offset
 	 are sufficiently aligned.  */
 
-      LONGEST bitpos = TYPE_FIELD_BITPOS (arg_type, fieldno);
+      LONGEST bitpos = arg_type->field (fieldno).loc_bitpos ();
       LONGEST container_bitsize = TYPE_LENGTH (type) * 8;
 
       v = allocate_value_lazy (type);
@@ -3082,7 +3082,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 				    value_address (arg1),
 				    arg1);
       else
-	boffset = TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
+	boffset = arg_type->field (fieldno).loc_bitpos () / 8;
 
       if (value_lazy (arg1))
 	v = allocate_value_lazy (value_enclosing_type (arg1));
@@ -3110,7 +3110,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
   else
     {
       /* Plain old data member */
-      offset += (TYPE_FIELD_BITPOS (arg_type, fieldno)
+      offset += (arg_type->field (fieldno).loc_bitpos ()
 		 / (HOST_CHAR_BIT * unit_size));
 
       /* Lazy register values with offsets are not supported.  */
@@ -3274,7 +3274,7 @@ unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
 			    LONGEST embedded_offset, int fieldno,
 			    const struct value *val, LONGEST *result)
 {
-  int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
+  int bitpos = type->field (fieldno).loc_bitpos ();
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   struct type *field_type = type->field (fieldno).type ();
   int bit_offset;
@@ -3297,7 +3297,7 @@ unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
 LONGEST
 unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
 {
-  int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
+  int bitpos = type->field (fieldno).loc_bitpos ();
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   struct type *field_type = type->field (fieldno).type ();
 
@@ -3362,7 +3362,7 @@ value_field_bitfield (struct type *type, int fieldno,
 		      const gdb_byte *valaddr,
 		      LONGEST embedded_offset, const struct value *val)
 {
-  int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
+  int bitpos = type->field (fieldno).loc_bitpos ();
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
   struct value *res_val = allocate_value (type->field (fieldno).type ());
 

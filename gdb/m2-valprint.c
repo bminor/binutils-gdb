@@ -102,7 +102,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
       for (i = low_bound; i <= high_bound; i++)
 	{
 	  bitval = value_bit_index (type->field (field).type (),
-				    (TYPE_FIELD_BITPOS (type, field) / 8) +
+				    (type->field (field).loc_bitpos () / 8) +
 				    valaddr + embedded_offset, i);
 	  if (bitval < 0)
 	    error (_("bit test is out of range"));
@@ -168,7 +168,7 @@ m2_print_unbounded_array (struct value *value,
   const gdb_byte *valaddr = value_contents_for_printing (value).data ();
 
   addr = unpack_pointer (type->field (0).type (),
-			 (TYPE_FIELD_BITPOS (type, 0) / 8) +
+			 (type->field (0).loc_bitpos () / 8) +
 			 valaddr);
 
   val = value_at_lazy (TYPE_TARGET_TYPE (type->field (0).type ()),

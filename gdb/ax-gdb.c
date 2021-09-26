@@ -1310,14 +1310,14 @@ gen_primitive_field (struct agent_expr *ax, struct axs_value *value,
   if (TYPE_FIELD_PACKED (type, fieldno))
     gen_bitfield_ref (ax, value, type->field (fieldno).type (),
 		      (offset * TARGET_CHAR_BIT
-		       + TYPE_FIELD_BITPOS (type, fieldno)),
+		       + type->field (fieldno).loc_bitpos ()),
 		      (offset * TARGET_CHAR_BIT
-		       + TYPE_FIELD_BITPOS (type, fieldno)
+		       + type->field (fieldno).loc_bitpos ()
 		       + TYPE_FIELD_BITSIZE (type, fieldno)));
   else
     {
       gen_offset (ax, offset
-		  + TYPE_FIELD_BITPOS (type, fieldno) / TARGET_CHAR_BIT);
+		  + type->field (fieldno).loc_bitpos () / TARGET_CHAR_BIT);
       value->kind = axs_lvalue_memory;
       value->type = type->field (fieldno).type ();
     }

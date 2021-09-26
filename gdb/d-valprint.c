@@ -55,7 +55,7 @@ dynamic_array_type (struct type *type,
       ptr_type = type->field (1).type ();
       elttype = check_typedef (TYPE_TARGET_TYPE (ptr_type));
       addr = unpack_pointer (ptr_type,
-			     valaddr + TYPE_FIELD_BITPOS (type, 1) / 8
+			     valaddr + type->field (1).loc_bitpos () / 8
 			     + embedded_offset);
       true_type = check_typedef (elttype);
 

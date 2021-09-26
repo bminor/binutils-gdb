@@ -686,8 +686,8 @@ rust_print_struct_def (struct type *type, const char *varstring,
     std::sort (fields.begin (), fields.end (),
 	       [&] (int a, int b)
 	       {
-		 return (TYPE_FIELD_BITPOS (type, a)
-			 < TYPE_FIELD_BITPOS (type, b));
+		 return (type->field (a).loc_bitpos ()
+			 < type->field (b).loc_bitpos ());
 	       });
 
   for (int i : fields)
@@ -943,7 +943,7 @@ rust_composite_type (struct type *original,
 
   if (i > 0)
     TYPE_LENGTH (result)
-      = (TYPE_FIELD_BITPOS (result, i - 1) / TARGET_CHAR_BIT +
+      = (result->field (i - 1).loc_bitpos () / TARGET_CHAR_BIT +
 	 TYPE_LENGTH (result->field (i - 1).type ()));
   return result;
 }

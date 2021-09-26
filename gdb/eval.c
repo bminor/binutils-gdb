@@ -2321,7 +2321,7 @@ array_operation::evaluate_struct_tuple (struct value *struct_val,
 	val = value_cast (field_type, val);
 
       bitsize = TYPE_FIELD_BITSIZE (struct_type, fieldno);
-      bitpos = TYPE_FIELD_BITPOS (struct_type, fieldno);
+      bitpos = struct_type->field (fieldno).loc_bitpos ();
       addr = value_contents_writeable (struct_val).data () + bitpos / 8;
       if (bitsize)
 	modify_field (struct_type, addr,
