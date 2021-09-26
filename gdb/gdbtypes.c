@@ -1068,12 +1068,12 @@ get_discrete_low_bound (struct type *type)
 	  {
 	    /* The enums may not be sorted by value, so search all
 	       entries.  */
-	    LONGEST low = TYPE_FIELD_ENUMVAL (type, 0);
+	    LONGEST low = type->field (0).loc_enumval ();
 
 	    for (int i = 0; i < type->num_fields (); i++)
 	      {
-		if (TYPE_FIELD_ENUMVAL (type, i) < low)
-		  low = TYPE_FIELD_ENUMVAL (type, i);
+		if (type->field (i).loc_enumval () < low)
+		  low = type->field (i).loc_enumval ();
 	      }
 
 	    /* Set unsigned indicator if warranted.  */
@@ -1139,12 +1139,12 @@ get_discrete_high_bound (struct type *type)
 	  {
 	    /* The enums may not be sorted by value, so search all
 	       entries.  */
-	    LONGEST high = TYPE_FIELD_ENUMVAL (type, 0);
+	    LONGEST high = type->field (0).loc_enumval ();
 
 	    for (int i = 0; i < type->num_fields (); i++)
 	      {
-		if (TYPE_FIELD_ENUMVAL (type, i) > high)
-		  high = TYPE_FIELD_ENUMVAL (type, i);
+		if (type->field (i).loc_enumval () > high)
+		  high = type->field (i).loc_enumval ();
 	      }
 
 	    return high;
@@ -1250,7 +1250,7 @@ discrete_position (struct type *type, LONGEST val)
 
       for (i = 0; i < type->num_fields (); i += 1)
 	{
-	  if (val == TYPE_FIELD_ENUMVAL (type, i))
+	  if (val == type->field (i).loc_enumval ())
 	    return i;
 	}
 
@@ -5337,7 +5337,7 @@ recursive_dump_type (struct type *type, int spaces)
     {
       if (type->code () == TYPE_CODE_ENUM)
 	printf_filtered ("%*s[%d] enumval %s type ", spaces + 2, "",
-			 idx, plongest (TYPE_FIELD_ENUMVAL (type, idx)));
+			 idx, plongest (type->field (idx).loc_enumval ()));
       else
 	printf_filtered ("%*s[%d] bitpos %s bitsize %d type ", spaces + 2, "",
 			 idx, plongest (type->field (idx).loc_bitpos ()),
@@ -5565,7 +5565,7 @@ copy_type_recursive (struct objfile *objfile,
 	      new_type->field (i).set_loc_bitpos (type->field (i).loc_bitpos ());
 	      break;
 	    case FIELD_LOC_KIND_ENUMVAL:
-	      new_type->field (i).set_loc_enumval (TYPE_FIELD_ENUMVAL (type, i));
+	      new_type->field (i).set_loc_enumval (type->field (i).loc_enumval ());
 	      break;
 	    case FIELD_LOC_KIND_PHYSADDR:
 	      new_type->field (i).set_loc_physaddr

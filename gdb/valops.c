@@ -3343,7 +3343,7 @@ enum_constant_from_type (struct type *type, const char *name)
 	  && fname[len - name_len - 2] == ':'
 	  && fname[len - name_len - 1] == ':'
 	  && strcmp (&fname[len - name_len], name) == 0)
-	return value_from_longest (type, TYPE_FIELD_ENUMVAL (type, i));
+	return value_from_longest (type, type->field (i).loc_enumval ());
     }
 
   error (_("no constant named \"%s\" in enum \"%s\""),

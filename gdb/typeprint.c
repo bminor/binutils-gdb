@@ -626,7 +626,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       len = type->num_fields ();
       for (i = 0; i < len; i++)
 	{
-	  if (TYPE_FIELD_ENUMVAL (type, i) == val)
+	  if (type->field (i).loc_enumval () == val)
 	    {
 	      break;
 	    }

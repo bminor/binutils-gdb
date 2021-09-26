@@ -94,7 +94,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
     case TYPE_CODE_ENUM:
       if (low_bound == 0)
 	return 0;
-      low_bound = TYPE_FIELD_ENUMVAL (index_type, low_bound);
+      low_bound = index_type->field (low_bound).loc_enumval ();
       break;
     case TYPE_CODE_UNDEF:
       index_type = NULL;
@@ -381,7 +381,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       len = type->num_fields ();
       for (i = 0; i < len; i++)
 	{
-	  if (TYPE_FIELD_ENUMVAL (type, i) == val)
+	  if (type->field (i).loc_enumval () == val)
 	    {
 	      break;
 	    }
@@ -835,7 +835,7 @@ ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
   for (i = 0; i < len; i++)
     {
       QUIT;
-      if (val == TYPE_FIELD_ENUMVAL (type, i))
+      if (val == type->field (i).loc_enumval ())
 	break;
     }
 

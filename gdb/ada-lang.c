@@ -651,7 +651,7 @@ ada_discrete_type_high_bound (struct type *type)
 	  }
       }
     case TYPE_CODE_ENUM:
-      return TYPE_FIELD_ENUMVAL (type, type->num_fields () - 1);
+      return type->field (type->num_fields () - 1).loc_enumval ();
     case TYPE_CODE_BOOL:
       return 1;
     case TYPE_CODE_CHAR:
@@ -686,7 +686,7 @@ ada_discrete_type_low_bound (struct type *type)
 	  }
       }
     case TYPE_CODE_ENUM:
-      return TYPE_FIELD_ENUMVAL (type, 0);
+      return type->field (0).loc_enumval ();
     case TYPE_CODE_BOOL:
       return 0;
     case TYPE_CODE_CHAR:
@@ -4617,7 +4617,7 @@ ada_identical_enum_types_p (struct type *type1, struct type *type2)
 
   /* All enums in the type should have an identical underlying value.  */
   for (i = 0; i < type1->num_fields (); i++)
-    if (TYPE_FIELD_ENUMVAL (type1, i) != TYPE_FIELD_ENUMVAL (type2, i))
+    if (type1->field (i).loc_enumval () != type2->field (i).loc_enumval ())
       return 0;
 
   /* All enumerals should also have the same name (modulo any numerical
@@ -8578,7 +8578,7 @@ val_atr (struct type *type, LONGEST val)
     {
       if (val < 0 || val >= type->num_fields ())
 	error (_("argument to 'VAL out of range"));
-      val = TYPE_FIELD_ENUMVAL (type, val);
+      val = type->field (val).loc_enumval ();
     }
   return value_from_longest (type, val);
 }
@@ -10214,7 +10214,7 @@ convert_char_literal (struct type *type, LONGEST val)
       size_t elen = strlen (ename);
 
       if (elen >= len && strcmp (name, ename + elen - len) == 0)
-	return TYPE_FIELD_ENUMVAL (type, f);
+	return type->field (f).loc_enumval ();
     }
   return val;
 }

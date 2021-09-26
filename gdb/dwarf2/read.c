@@ -9201,7 +9201,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	    {
 	      const char *name
 		= rust_last_path_segment (enum_type->field (i).name ());
-	      discriminant_map[name] = TYPE_FIELD_ENUMVAL (enum_type, i);
+	      discriminant_map[name] = enum_type->field (i).loc_enumval ();
 	    }
 	}
 

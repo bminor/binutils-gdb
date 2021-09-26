@@ -944,7 +944,7 @@ compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
 	continue;
 
       instance->plugin ().build_enum_constant (result, fname.get (),
-					       TYPE_FIELD_ENUMVAL (type, i));
+					       type->field (i).loc_enumval ());
     }
 
   /* Finish enum definition and pop scopes.  */

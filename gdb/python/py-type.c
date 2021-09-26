@@ -184,7 +184,7 @@ convert_field (struct type *type, int field)
 
       if (type->code () == TYPE_CODE_ENUM)
 	{
-	  arg = gdb_py_object_from_longest (TYPE_FIELD_ENUMVAL (type, field));
+	  arg = gdb_py_object_from_longest (type->field (field).loc_enumval ());
 	  attrstring = "enumval";
 	}
       else

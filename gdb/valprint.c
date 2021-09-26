@@ -608,7 +608,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
   for (i = 0; i < len; i++)
     {
       QUIT;
-      if (val == TYPE_FIELD_ENUMVAL (type, i))
+      if (val == type->field (i).loc_enumval ())
 	{
 	  break;
 	}
@@ -630,7 +630,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 	{
 	  QUIT;
 
-	  ULONGEST enumval = TYPE_FIELD_ENUMVAL (type, i);
+	  ULONGEST enumval = type->field (i).loc_enumval ();
 	  int nbits = count_one_bits_ll (enumval);
 
 	  gdb_assert (nbits == 0 || nbits == 1);
@@ -645,7 +645,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 	      else
 		fputs_filtered (" | ", stream);
 
-	      val &= ~TYPE_FIELD_ENUMVAL (type, i);
+	      val &= ~type->field (i).loc_enumval ();
 	      fputs_styled (type->field (i).name (),
 			    variable_name_style.style (), stream);
 	    }

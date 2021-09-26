@@ -711,12 +711,12 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		fprintf_filtered (stream, ", ");
 	      wrap_here ("    ");
 	      fputs_filtered (type->field (i).name (), stream);
-	      if (lastval != TYPE_FIELD_ENUMVAL (type, i))
+	      if (lastval != type->field (i).loc_enumval ())
 		{
 		  fprintf_filtered (stream,
 				    " := %s",
-				    plongest (TYPE_FIELD_ENUMVAL (type, i)));
-		  lastval = TYPE_FIELD_ENUMVAL (type, i);
+				    plongest (type->field (i).loc_enumval ()));
+		  lastval = type->field (i).loc_enumval ();
 		}
 	      lastval++;
 	    }

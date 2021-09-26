@@ -611,11 +611,11 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
 	  wrap_here ("    ");
 	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
-	  if (lastval != TYPE_FIELD_ENUMVAL (type, i))
+	  if (lastval != type->field (i).loc_enumval ())
 	    {
 	      fprintf_filtered (stream, " = %s",
-				plongest (TYPE_FIELD_ENUMVAL (type, i)));
-	      lastval = TYPE_FIELD_ENUMVAL (type, i);
+				plongest (type->field (i).loc_enumval ()));
+	      lastval = type->field (i).loc_enumval ();
 	    }
 	  lastval++;
 	}

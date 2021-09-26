@@ -328,11 +328,11 @@ print_enum_type (struct type *type, struct ui_file *stream)
       wrap_here ("    ");
       fputs_styled (ada_enum_name (type->field (i).name ()),
 		    variable_name_style.style (), stream);
-      if (lastval != TYPE_FIELD_ENUMVAL (type, i))
+      if (lastval != type->field (i).loc_enumval ())
 	{
 	  fprintf_filtered (stream, " => %s",
-			    plongest (TYPE_FIELD_ENUMVAL (type, i)));
-	  lastval = TYPE_FIELD_ENUMVAL (type, i);
+			    plongest (type->field (i).loc_enumval ()));
+	  lastval = type->field (i).loc_enumval ();
 	}
       lastval += 1;
     }
