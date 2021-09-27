@@ -1,5 +1,10 @@
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	PR libctf/27967
 	* configure.ac (VERSION_FLAGS): Replace with...
 	(ac_cv_libctf_version_script): ... this multiple test.

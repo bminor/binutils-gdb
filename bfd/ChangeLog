@@ -1,3 +1,7 @@
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure: Regenerate.
+
 2021-09-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* archures.c (bfd_arch_list): Use 'char *' instead of 'char **'

@@ -386,6 +386,7 @@ STRIP = @STRIP@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 VERSION_FLAGS = @VERSION_FLAGS@
+VERSION_FLAGS_NOBFD = @VERSION_FLAGS_NOBFD@
 WARN_PEDANTIC = @WARN_PEDANTIC@
 WERROR = @WERROR@
 XGETTEXT = @XGETTEXT@
@@ -470,7 +471,8 @@ AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @
 @INSTALL_LIBBFD_TRUE@include_HEADERS = $(INCDIR)/ctf.h $(INCDIR)/ctf-api.h
 @INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libctf.la libctf-nobfd.la
 libctf_nobfd_la_LIBADD = @CTF_LIBADD@ $(ZLIB)
-libctf_nobfd_la_LDFLAGS = -version-info 0:0:0 @SHARED_LDFLAGS@ @VERSION_FLAGS@
+libctf_ldflags_nover = -version-info 0:0:0 @SHARED_LDFLAGS@
+libctf_nobfd_la_LDFLAGS = $(libctf_ldflags_nover) @VERSION_FLAGS_NOBFD@
 libctf_nobfd_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=1
 libctf_nobfd_la_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c \
 	ctf-decl.c ctf-error.c ctf-hash.c ctf-labels.c ctf-dedup.c \
@@ -483,7 +485,7 @@ libctf_nobfd_la_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c \
 # references in there get picked up.
 libctf_la_LIBADD = @CTF_LIBADD@ ../bfd/libbfd.la $(libctf_nobfd_la_LIBADD)
 libctf_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=0
-libctf_la_LDFLAGS = $(libctf_nobfd_la_LDFLAGS)
+libctf_la_LDFLAGS = $(libctf_ldflags_nover) @VERSION_FLAGS@
 libctf_la_SOURCES = $(libctf_nobfd_la_SOURCES) ctf-open-bfd.c
 RUNTEST = runtest
 RUNTESTFLAGS = 

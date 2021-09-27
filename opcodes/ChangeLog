@@ -1,3 +1,7 @@
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure: Regenerate.
+
 2021-09-25  Peter Bergner  <bergner@linux.ibm.com>
 
 	* ppc-opc.c (powerpc_opcodes) <mfppr, mfppr32, mtppr, mtppr32>: Enable
