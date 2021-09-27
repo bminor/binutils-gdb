@@ -1852,7 +1852,7 @@ lookup_struct_elt (struct type *type, const char *name, int noerr)
 	{
 	  return {&type->field (i), TYPE_FIELD_BITPOS (type, i)};
 	}
-     else if (!t_field_name || *t_field_name == '\0')
+      else if (!t_field_name || *t_field_name == '\0')
 	{
 	  struct_elt elt
 	    = lookup_struct_elt (type->field (i).type (), name, 1);
