@@ -1,5 +1,12 @@
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open.c (ctf_bufopen_internal): Don't complain about corrupt
+	function index symtypetab sections if this is an old-format
+	function symtypetab section (which should be ignored in any case).
+	Fix bad grammar.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* configure: Regenerate.
 	* Makefile.in: Regenerate.
 

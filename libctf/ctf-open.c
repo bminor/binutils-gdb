@@ -1449,7 +1449,7 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
        != hp->cth_funcoff - hp->cth_objtoff))
     {
       ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Object index section exists is neither empty nor the "
+		    _("Object index section is neither empty nor the "
 		      "same length as the object section: %u versus %u "
 		      "bytes"), hp->cth_funcoff - hp->cth_objtoff,
 		    hp->cth_funcidxoff - hp->cth_objtidxoff);
@@ -1458,10 +1458,11 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 
   if ((hp->cth_varoff - hp->cth_funcidxoff != 0) &&
       (hp->cth_varoff - hp->cth_funcidxoff
-       != hp->cth_objtidxoff - hp->cth_funcoff))
+       != hp->cth_objtidxoff - hp->cth_funcoff) &&
+      (hp->cth_flags & CTF_F_NEWFUNCINFO))
     {
       ctf_err_warn (NULL, 0, ECTF_CORRUPT,
-		    _("Function index section exists is neither empty nor the "
+		    _("Function index section is neither empty nor the "
 		      "same length as the function section: %u versus %u "
 		      "bytes"), hp->cth_objtidxoff - hp->cth_funcoff,
 		    hp->cth_varoff - hp->cth_funcidxoff);
