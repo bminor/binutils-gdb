@@ -920,8 +920,8 @@ struct partial_die_info : public allocate_on_obstack
       /* If HAS_PC_INFO, the PC range associated with this DIE.  */
       struct
       {
-	CORE_ADDR lowpc = 0;
-	CORE_ADDR highpc = 0;
+	CORE_ADDR lowpc;
+	CORE_ADDR highpc;
       };
       /* If HAS_RANGE_INFO, the ranges offset associated with this DIE.  */
       ULONGEST ranges_offset;
@@ -974,6 +974,10 @@ struct partial_die_info : public allocate_on_obstack
       is_dwz = 0;
       spec_is_dwz = 0;
       canonical_name = 0;
+      /* Don't set these using NSDMI (Non-static data member initialisation),
+	 because g++-4.8 will error out.  */
+      lowpc = 0;
+      highpc = 0;
     }
   };
 
