@@ -443,7 +443,7 @@ stamp-modules: Makefile $(SIM_OBJS:.o=.c)
 	echo '/* It is created automatically by the Makefile.  */'; \
 	echo '#include "libiberty.h"'; \
 	echo '#include "sim-module.h"'; \
-	sed -e 's:\(.*\):extern __attribute__((__weak__)) MODULE_INIT_FN \1;:' $@.l-tmp; \
+	sed -e 's:\(.*\):extern MODULE_INIT_FN \1;:' $@.l-tmp; \
 	echo 'MODULE_INSTALL_FN * const sim_modules_detected[] = {'; \
 	sed -e 's:\(.*\):  \1,:' $@.l-tmp; \
 	echo '};'; \
