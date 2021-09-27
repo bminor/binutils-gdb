@@ -2591,7 +2591,7 @@ resolve_dynamic_struct (struct type *type,
 	  struct dwarf2_property_baton baton;
 	  baton.property_type
 	    = lookup_pointer_type (resolved_type->field (i).type ());
-	  baton.locexpr = *TYPE_FIELD_DWARF_BLOCK (resolved_type, i);
+	  baton.locexpr = *resolved_type->field (i).loc_dwarf_block ();
 
 	  struct dynamic_prop prop;
 	  prop.set_locexpr (&baton);
@@ -5577,7 +5577,7 @@ copy_type_recursive (struct objfile *objfile,
 	      break;
             case FIELD_LOC_KIND_DWARF_BLOCK:
               new_type->field (i).set_loc_dwarf_block
-		(TYPE_FIELD_DWARF_BLOCK (type, i));
+		(type->field (i).loc_dwarf_block ());
               break;
 	    default:
 	      internal_error (__FILE__, __LINE__,

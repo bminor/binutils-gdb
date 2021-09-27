@@ -469,7 +469,7 @@ gnuv3_baseclass_offset (struct type *type, int index,
       struct dwarf2_property_baton baton;
       baton.property_type
 	= lookup_pointer_type (type->field (index).type ());
-      baton.locexpr = *TYPE_FIELD_DWARF_BLOCK (type, index);
+      baton.locexpr = *type->field (index).loc_dwarf_block ();
 
       struct dynamic_prop prop;
       prop.set_locexpr (&baton);
