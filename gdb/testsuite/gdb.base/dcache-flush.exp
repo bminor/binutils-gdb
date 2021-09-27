@@ -34,7 +34,7 @@ gdb_test "p var2" " = 3"
 gdb_test "info dcache" \
     [multi_line \
 	 "Dcache $decimal lines of $decimal bytes each." \
-	 "Contains data for process $decimal" \
+	 "Contains data for (process $decimal|Thread \[^\r\n\]*)" \
 	 "Line 0: address $hex \[$decimal hits\].*" \
 	 "Cache state: $decimal active lines, $decimal hits" ] \
     "check dcache before flushing"
@@ -58,7 +58,7 @@ with_test_prefix "refilling" {
 gdb_test "info dcache" \
     [multi_line \
 	 "Dcache $decimal lines of $decimal bytes each." \
-	 "Contains data for process $decimal" \
+	 "Contains data for (process $decimal|Thread \[^\r\n\]*)" \
 	 "Line 0: address $hex \[$decimal hits\].*" \
 	 "Cache state: $decimal active lines, $decimal hits" ] \
     "check dcache before refilling"
