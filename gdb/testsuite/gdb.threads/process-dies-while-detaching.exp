@@ -235,8 +235,12 @@ proc test_detach {multi_process cmd} {
 
 # Same as test_detach, except set a watchpoint before detaching.
 
-proc test_detach_watch {multi_process cmd} {
-    with_test_prefix "watchpoint" {
+proc test_detach_watch {wp multi_process cmd} {
+    if { $wp == "hw" && [skip_hw_watchpoint_tests] } {
+	unsupported "hw watchpoint"
+	return
+    }
+    with_test_prefix "watchpoint:$wp" {
 	global binfile decimal
 
 	clean_restart ${binfile}
@@ -254,15 +258,28 @@ proc test_detach_watch {multi_process cmd} {
 	    gdb_continue_to_breakpoint "child_function" ".*"
 	}
 
-	# Set a watchpoint in the child.
-	gdb_test "watch globalvar" ".* watchpoint $decimal: globalvar"
+	if { $wp == "hw" } {
+	    # Set a watchpoint in the child.
+	    gdb_test "watch globalvar" ".* watchpoint $decimal: globalvar"
 
-	# Continue to the _exit breakpoint.  This arms the watchpoint
-	# registers in all threads.  Detaching will thus need to clear
-	# them out, and handle the case of the thread disappearing
-	# while doing that (on targets that need to detach from each
-	# thread individually).
-	continue_to_exit_bp
+	    # Continue to the _exit breakpoint.  This arms the watchpoint
+	    # registers in all threads.  Detaching will thus need to clear
+	    # them out, and handle the case of the thread disappearing
+	    # while doing that (on targets that need to detach from each
+	    # thread individually).
+	    continue_to_exit_bp
+	} else {
+	    # Force software watchpoints.
+	    gdb_test_no_output "set can-use-hw-watchpoints 0"
+
+	    # As above, but flip order, other wise things take too long.
+	    continue_to_exit_bp
+	    gdb_test "watch globalvar" "Watchpoint $decimal: globalvar"
+
+	    if { $multi_process == 0 && $cmd == "continue" } {
+		setup_kfail "gdb/28375" "*-*-*"
+	    }
+	}
 
 	do_detach $multi_process $cmd "normal"
     }
@@ -332,7 +349,9 @@ proc do_test {multi_process cmd} {
     }
 
     test_detach $multi_process $cmd
-    test_detach_watch $multi_process $cmd
+    foreach wp {"sw" "hw"} {
+	test_detach_watch $wp $multi_process $cmd
+    }
     test_detach_killed_outside $multi_process $cmd
 }
 
