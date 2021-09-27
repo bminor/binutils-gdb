@@ -151,11 +151,10 @@ SECTIONS
     ${RELOCATING+ PROVIDE (_data_end = .) ; }
   } ${RELOCATING+ > dmem }
 
-  .resource_table ${RELOCATING-0} :
+  /* Linux remoteproc loader requires the resource_table section
+     start address to be aligned to 8 bytes.  */
+  .resource_table ${RELOCATING-0} ${RELOCATING+ ALIGN(8)} :
   {
-    /* Linux remoteproc loader requires the resource table address
-       to be aligned to 8 bytes.  */
-    ${RELOCATING+. = ALIGN(8);}
     KEEP (*(.resource_table))
   } ${RELOCATING+ > dmem}
 
