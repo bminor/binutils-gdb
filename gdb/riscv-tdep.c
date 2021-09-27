@@ -1411,6 +1411,7 @@ public:
       SW,
       LD,
       LW,
+      MV,
       /* These are needed for software breakpoint support.  */
       JAL,
       JALR,
@@ -1789,9 +1790,11 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
       else if (xlen != 4 && is_c_sdsp_insn (ival))
 	decode_css_type_insn (SD, ival, EXTRACT_CSSTYPE_SDSP_IMM (ival));
       /* C_JR and C_MV have the same opcode.  If RS2 is 0, then this is a C_JR.
-	 So must try to match C_JR first as it ahs more bits in mask.  */
+	 So must try to match C_JR first as it has more bits in mask.  */
       else if (is_c_jr_insn (ival))
 	decode_cr_type_insn (JALR, ival);
+      else if (is_c_mv_insn (ival))
+	decode_cr_type_insn (MV, ival);
       else if (is_c_j_insn (ival))
 	decode_cj_type_insn (JAL, ival);
       else if (is_c_beqz_insn (ival))
@@ -1963,6 +1966,14 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	    = stack.fetch (pv_add_constant (regs[insn.rs1 ()],
 					    insn.imm_signed ()),
 			   (insn.opcode () == riscv_insn::LW ? 4 : 8));
+	}
+      else if (insn.opcode () == riscv_insn::MV)
+	{
+	  /* Handle: c.mv RD, RS2  */
+	  gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
+	  gdb_assert (insn.rs2 () < RISCV_NUM_INTEGER_REGS);
+	  gdb_assert (insn.rs2 () > 0);
+	  regs[insn.rd ()] = regs[insn.rs2 ()];
 	}
       else
 	{
