@@ -25,6 +25,8 @@
 #include "libbfd.h"
 #include "cpu-riscv.h"
 
+const char *riscv_vendor_name = RISCV_TARGET_VENDOR;
+
 static const bfd_arch_info_type *
 riscv_compatible (const bfd_arch_info_type *a, const bfd_arch_info_type *b)
 {

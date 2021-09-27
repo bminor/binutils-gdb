@@ -1109,7 +1109,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
 /* For default_enable field, decide if the extension should
    be enbaled by default.  */
 
-#define EXT_DEFAULT   0x1
+#define EXT_DEFAULT	0x1
+#define EXT_SIFIVE	(0x1 << 2)
 
 /* List all extensions that binutils should know about.  */
 
@@ -1134,7 +1135,7 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
   {"i",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
   /* The g is a special case which we don't want to output it,
      but still need it when adding implicit extensions.  */
-  {"g",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, EXT_DEFAULT },
+  {"g",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, EXT_DEFAULT|EXT_SIFIVE },
   {"m",		ISA_SPEC_CLASS_20191213,	2, 0, 0 },
   {"m",		ISA_SPEC_CLASS_20190608,	2, 0, 0 },
   {"m",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
@@ -1223,6 +1224,14 @@ static struct riscv_supported_ext riscv_supported_vendor_thead_ext[] =
   {NULL, 0, 0, 0, 0}
 };
 
+static struct riscv_supported_ext riscv_supported_vendor_sifive_ext[] =
+{
+  {"xsfcdiscarddlone",	VENDOR_SPEC_CLASS_SIFIVE,	0, 1, EXT_SIFIVE},
+  {"xsfcflushdlone",	VENDOR_SPEC_CLASS_SIFIVE,	0, 1, EXT_SIFIVE},
+  {"xsfcflushilone",	VENDOR_SPEC_CLASS_SIFIVE,	0, 1, EXT_SIFIVE},
+  {NULL, 0, 0, 0, 0}
+};
+
 const struct riscv_supported_ext *riscv_all_supported_ext[] =
 {
   riscv_supported_std_ext,
@@ -1231,6 +1240,7 @@ const struct riscv_supported_ext *riscv_all_supported_ext[] =
   riscv_supported_std_h_ext,
   riscv_supported_std_zxm_ext,
   riscv_supported_vendor_thead_ext,
+  riscv_supported_vendor_sifive_ext,
   NULL
 };
 
@@ -1495,7 +1505,10 @@ riscv_get_default_ext_version (enum riscv_spec_class default_isa_spec,
     case RV_ISA_CLASS_S: table = riscv_supported_std_s_ext; break;
     case RV_ISA_CLASS_H: table = riscv_supported_std_h_ext; break;
     case RV_ISA_CLASS_X:
-      table = riscv_supported_vendor_thead_ext;
+      if (strncmp (name, "xsf", 3) == 0)
+	table = riscv_supported_vendor_sifive_ext;
+      else
+	table = riscv_supported_vendor_thead_ext;
       break;
     default:
       table = riscv_supported_std_ext;
@@ -1507,6 +1520,7 @@ riscv_get_default_ext_version (enum riscv_spec_class default_isa_spec,
       if (strcmp (table[i].name, name) == 0
 	  && (table[i].isa_spec_class == ISA_SPEC_CLASS_DRAFT
 	      || table[i].isa_spec_class == VENDOR_SPEC_CLASS_THEAD
+	      || table[i].isa_spec_class == VENDOR_SPEC_CLASS_SIFIVE
 	      || table[i].isa_spec_class == default_isa_spec))
 	{
 	  *major_version = table[i].major_version;
@@ -1917,8 +1931,14 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
 static void
 riscv_set_default_arch (riscv_parse_subset_t *rps)
 {
-  unsigned long enable = EXT_DEFAULT;
+  unsigned long enable;
   int i, j;
+
+  if (strcmp (riscv_vendor_name, "sifive") == 0)
+    enable = EXT_SIFIVE;
+  else
+    enable = EXT_DEFAULT;
+
   for (i = 0; riscv_all_supported_ext[i] != NULL; i++)
     {
       const struct riscv_supported_ext *table = riscv_all_supported_ext[i];

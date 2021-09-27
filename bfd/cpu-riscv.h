@@ -18,6 +18,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+extern const char *riscv_vendor_name;
+
 enum riscv_spec_class
 {
   /* ISA spec.  */
@@ -36,6 +38,9 @@ enum riscv_spec_class
 
   /* Vendor spec for T_HEAD XuanTie.  */
   VENDOR_SPEC_CLASS_THEAD,
+
+  /* Vendor spec for SiFive.  */
+  VENDOR_SPEC_CLASS_SIFIVE,
 };
 
 struct riscv_spec

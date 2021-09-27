@@ -529,6 +529,11 @@ enum riscv_extended_insn_class
   INSN_CLASS_THEADC_OR_THEADE_OR_THEADSE,
   INSN_CLASS_THEADE,
   INSN_CLASS_THEADSE,
+
+  /* SiFive.  */
+  INSN_CLASS_XSF_CDISCARDDLONE,
+  INSN_CLASS_XSF_CFLUSHDLONE,
+  INSN_CLASS_XSF_CFLUSHILONE,
 };
 
 /* This is a list of macro expanded instructions for extended

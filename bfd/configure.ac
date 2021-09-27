@@ -822,6 +822,12 @@ AC_SUBST(bfd_default_target_size)
 AC_SUBST(tdefaults)
 AC_SUBST(havevecs)
 
+case "${target_cpu}" in
+  riscv*)
+    AC_DEFINE_UNQUOTED(RISCV_TARGET_VENDOR, "${target_vendor}", [RISCV target vendor.])
+    ;;
+esac
+
 # If we are configured native, pick a core file support file.
 COREFILE=
 COREFLAG=

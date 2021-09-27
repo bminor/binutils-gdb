@@ -13658,6 +13658,16 @@ test -n "${selarchs}" && tdefaults="${tdefaults} -DSELECT_ARCHITECTURES='${selar
 
 
 
+case "${target_cpu}" in
+  riscv*)
+
+cat >>confdefs.h <<_ACEOF
+#define RISCV_TARGET_VENDOR "${target_vendor}"
+_ACEOF
+
+    ;;
+esac
+
 # If we are configured native, pick a core file support file.
 COREFILE=
 COREFLAG=

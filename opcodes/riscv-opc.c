@@ -2302,10 +2302,24 @@ struct riscv_opcode riscv_vendor_thead_opcodes[] =
 
 };
 
+/* Vendor SiFive extensions.  */
+const struct riscv_opcode riscv_vendor_sifive_opcodes[] =
+{
+/* name, xlen, isa, operands, match, mask, match_func, pinfo.  */
+/* Half-precision floating-point instruction subset.  */
+{"cflush.d.l1",		0, INSN_CLASS_XSF_CFLUSHDLONE,   "s", MATCH_CFLUSH_D_L1, MASK_CFLUSH_D_L1, match_opcode, 0 },
+{"cdiscard.d.l1",	0, INSN_CLASS_XSF_CDISCARDDLONE, "s", MATCH_CDISCARD_D_L1, MASK_CDISCARD_D_L1, match_opcode, 0 },
+{"cflush.i.l1",		0, INSN_CLASS_XSF_CFLUSHILONE,   "",  MATCH_CFLUSH_I_L1, MASK_CFLUSH_I_L1, match_opcode, 0 },
+
+/* Terminate the list.  */
+{0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0 },
+};
+
 /* The supported extended extensions.  */
 const struct riscv_opcode *riscv_extended_opcodes[] =
 {
   riscv_draft_opcodes,
   riscv_vendor_thead_opcodes,
+  riscv_vendor_sifive_opcodes,
   NULL
 };

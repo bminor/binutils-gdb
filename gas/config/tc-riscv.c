@@ -40,6 +40,7 @@ enum
 {
   DRAFT_EXT = 0,
   VENDOR_THEAD_EXT,
+  VENDOR_SIFIVE_EXT,
   EXTENDED_EXT_NUM
 };
 
@@ -310,6 +311,13 @@ riscv_extended_subset_supports (int insn_class)
     case INSN_CLASS_THEADSE:
       return riscv_subset_supports ("xtheadse");
 
+    case INSN_CLASS_XSF_CDISCARDDLONE:
+      return riscv_subset_supports ("xsfcdiscarddlone");
+    case INSN_CLASS_XSF_CFLUSHDLONE:
+      return riscv_subset_supports ("xsfcflushdlone");
+    case INSN_CLASS_XSF_CFLUSHILONE:
+      return riscv_subset_supports ("xsfcflushilone");
+
     default:
       as_fatal ("internal: unknown INSN_CLASS (0x%x)", insn_class);
       return false;
@@ -460,6 +468,9 @@ static htab_t op_draft_hash = NULL;
 
 /* Handle of the T-HEAD OPCODE hash table.  */
 static htab_t op_vendor_thead_hash = NULL;
+
+/* Handle of the sifive OPCODE hash table.  */
+static htab_t op_vendor_sifive_hash = NULL;
 
 /* Handle of the type of .insn hash table.  */
 static htab_t insn_type_hash = NULL;
@@ -1481,7 +1492,10 @@ md_begin (void)
   hash_reg_names (RCLASS_VECR, riscv_vecr_names_numeric, NVECR);
   hash_reg_names (RCLASS_VECM, riscv_vecm_names_numeric, NVECM);
   op_draft_hash = init_opcode_hash (riscv_extended_opcodes[DRAFT_EXT], false);
-  op_vendor_thead_hash = init_opcode_hash (riscv_extended_opcodes[VENDOR_THEAD_EXT], false);
+  op_vendor_thead_hash =
+	init_opcode_hash (riscv_extended_opcodes[VENDOR_THEAD_EXT], false);
+  op_vendor_sifive_hash =
+	init_opcode_hash (riscv_extended_opcodes[VENDOR_SIFIVE_EXT], false);
 }
 
 static insn_t
@@ -1593,6 +1607,8 @@ riscv_find_extended_opcode_hash (char *str ATTRIBUTE_UNUSED)
 	case VENDOR_THEAD_EXT:
 	  insn = (struct riscv_opcode *) str_hash_find (op_vendor_thead_hash, str);
 	  break;
+	case VENDOR_SIFIVE_EXT:
+	  insn = (struct riscv_opcode *) str_hash_find (op_vendor_sifive_hash, str);
 	default:
 	  break;
 	}
