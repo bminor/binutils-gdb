@@ -603,7 +603,7 @@ compile_cplus_convert_struct_or_union_members
 	    {
 	    case FIELD_LOC_KIND_PHYSADDR:
 	      {
-		physaddr = TYPE_FIELD_STATIC_PHYSADDR (type, i);
+		physaddr = type->field (i).loc_physaddr ();
 
 		instance->plugin ().build_decl
 		  ("field physaddr", field_name,

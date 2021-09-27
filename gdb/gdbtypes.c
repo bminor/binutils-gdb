@@ -5569,7 +5569,7 @@ copy_type_recursive (struct objfile *objfile,
 	      break;
 	    case FIELD_LOC_KIND_PHYSADDR:
 	      new_type->field (i).set_loc_physaddr
-		(TYPE_FIELD_STATIC_PHYSADDR (type, i));
+		(type->field (i).loc_physaddr ());
 	      break;
 	    case FIELD_LOC_KIND_PHYSNAME:
 	      new_type->field (i).set_loc_physname

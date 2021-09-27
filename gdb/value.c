@@ -2956,7 +2956,7 @@ value_static_field (struct type *type, int fieldno)
     {
     case FIELD_LOC_KIND_PHYSADDR:
       retval = value_at_lazy (type->field (fieldno).type (),
-			      TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
+			      type->field (fieldno).loc_physaddr ());
       break;
     case FIELD_LOC_KIND_PHYSNAME:
     {

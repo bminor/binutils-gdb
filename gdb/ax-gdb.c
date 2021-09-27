@@ -1440,7 +1440,7 @@ gen_static_field (struct agent_expr *ax, struct axs_value *value,
 {
   if (type->field (fieldno).loc_kind () == FIELD_LOC_KIND_PHYSADDR)
     {
-      ax_const_l (ax, TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
+      ax_const_l (ax, type->field (fieldno).loc_physaddr ());
       value->kind = axs_lvalue_memory;
       value->type = type->field (fieldno).type ();
       value->optimized_out = 0;
