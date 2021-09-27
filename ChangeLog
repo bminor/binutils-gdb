@@ -1,6 +1,15 @@
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	PR libctf/27967
+	* libtool.m4 (LT_PATH_NM): Try BSDization flags with a user-provided
+	NM, if there is one.  Run nm on itself, not on /dev/null, to avoid
+	errors from nms that refuse to work on non-regular files.  Remove
+	other workarounds for this problem.  Strip out blank lines from the
+	nm output.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	PR libctf/27967
 	* libtool.m4 (lt_cv_sys_global_symbol_pipe): Augment symcode for
 	Solaris 11.
 
