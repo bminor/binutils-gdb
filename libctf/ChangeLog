@@ -1,5 +1,17 @@
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	PR libctf/27967
+	* configure.ac (VERSION_FLAGS): Replace with...
+	(ac_cv_libctf_version_script): ... this multiple test.
+	(VERSION_FLAGS_NOBFD): Substitute this too.
+	* Makefile.am (libctf_nobfd_la_LDFLAGS): Use it.  Split out...
+	(libctf_ldflags_nover): ... non-versioning flags here.
+	(libctf_la_LDFLAGS): Use it.
+	* libctf.ver: Give every symbol not in libctf-nobfd a comment on
+	the same line noting as much.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	PR libctf/27360
 	* Makefile.am (libctf_la_LIBADD): Link against libiberty
 	before pulling in libbfd.la or pulling in libctf-nobfd.la.
