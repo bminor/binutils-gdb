@@ -1,5 +1,23 @@
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/libctf-lookup/enum-symbol.c: Remove unused label.
+	* testsuite/libctf-lookup/conflicting-type-syms.c: Remove unused
+	variables.
+	* testsuite/libctf-regression/pptrtab.c: Likewise.
+	* testsuite/libctf-regression/type-add-unnamed-struct.c: Likewise.
+	* testsuite/libctf-writable/pptrtab.c: Likewise.
+	* testsuite/libctf-writable/reserialize-strtab-corruption.c:
+	Likewise.
+	* testsuite/libctf-regression/nonstatic-var-section-ld-r.c: Fix
+	format string.
+	* testsuite/libctf-regression/nonstatic-var-section-ld.c:
+	Likewise.
+	* testsuite/libctf-regression/nonstatic-var-section-ld.lk: Adjust.
+	* testsuite/libctf-writable/symtypetab-nonlinker-writeout.c: Fix
+	initializer.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open.c (ctf_bufopen_internal): Don't complain about corrupt
 	function index symtypetab sections if this is an old-format
 	function symtypetab section (which should be ignored in any case).

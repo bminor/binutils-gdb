@@ -57,9 +57,6 @@ main (int argc, char *argv[])
   fprintf (stderr, "%s: Symbol re-lookup error (caching bug): %s\n", argv[0],
 	   ctf_errmsg (err));
   return 1;
- err:
-  fprintf (stderr, "Lookup failed: %s\n", ctf_errmsg (ctf_errno (fp)));
-  return 1;
  nerr:
   fprintf (stderr, "iteration failed: %s\n", ctf_errmsg (ctf_errno (fp)));
   return 1;

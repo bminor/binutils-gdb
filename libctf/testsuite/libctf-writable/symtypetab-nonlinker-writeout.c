@@ -174,10 +174,12 @@ try_maybe_reporting (int report)
   } *expected;
   struct ctf_symtype_expected expected_obj[] = { { "data_a", base2 },
 						 { "data_b", base3 },
-						 { "data_c", base }, NULL };
+						 { "data_c", base },
+						 { NULL, 0 } };
   struct ctf_symtype_expected expected_func[] = { { "func_a", func2 },
 						  { "func_b", func3 },
-						  { "func_c", func }, NULL };
+						  { "func_c", func },
+						  { NULL, 0 } };
   expected = expected_obj;
 
   while ((symtype = ctf_symbol_next (fp, &i, &symname, 0)) != CTF_ERR)

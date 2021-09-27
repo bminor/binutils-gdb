@@ -7,7 +7,7 @@ main (int argc, char *argv[])
 {
   ctf_dict_t *pfp;
   ctf_dict_t *cfp;
-  ctf_id_t base, base2, ptr, ptr2, type, last_type;
+  ctf_id_t base, base2, ptr, type, last_type;
   ctf_encoding_t encoding = { CTF_INT_SIGNED, 0, sizeof (int) };
   ctf_encoding_t encoding2 = { CTF_INT_SIGNED, 0, sizeof (long) };
   char *type_name;
