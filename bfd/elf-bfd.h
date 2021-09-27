@@ -1814,7 +1814,7 @@ struct bfd_elf_section_data
 #define LEAST_KNOWN_OBJ_ATTRIBUTE 2
 
 /* The maximum number of known object attributes for any target.  */
-#define NUM_KNOWN_OBJ_ATTRIBUTES 71
+#define NUM_KNOWN_OBJ_ATTRIBUTES 77
 
 /* The value of an object attribute.  The type indicates whether the attribute
    holds and integer, a string, or both.  It can also indicate that there can
