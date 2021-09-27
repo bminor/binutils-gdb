@@ -614,7 +614,7 @@ compile_cplus_convert_struct_or_union_members
 
 	    case FIELD_LOC_KIND_PHYSNAME:
 	      {
-		const char *physname = TYPE_FIELD_STATIC_PHYSNAME (type, i);
+		const char *physname = type->field (i).loc_physname ();
 		struct block_symbol sym
 		  = lookup_symbol (physname, instance->block (),
 				   VAR_DOMAIN, nullptr);

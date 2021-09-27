@@ -1447,7 +1447,7 @@ gen_static_field (struct agent_expr *ax, struct axs_value *value,
     }
   else
     {
-      const char *phys_name = TYPE_FIELD_STATIC_PHYSNAME (type, fieldno);
+      const char *phys_name = type->field (fieldno).loc_physname ();
       struct symbol *sym = lookup_symbol (phys_name, 0, VAR_DOMAIN, 0).symbol;
 
       if (sym)

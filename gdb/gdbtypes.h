@@ -2128,7 +2128,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) ((thistype)->field (n).loc_physname ())
 #define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) ((thistype)->field (n).loc_physaddr ())
 #define TYPE_FIELD_DWARF_BLOCK(thistype, n) ((thistype)->field (n).loc_dwarf_block ())
 #define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL((thistype)->field (n))

@@ -5573,7 +5573,7 @@ copy_type_recursive (struct objfile *objfile,
 	      break;
 	    case FIELD_LOC_KIND_PHYSNAME:
 	      new_type->field (i).set_loc_physname
-		(xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type, i)));
+		(xstrdup (type->field (i).loc_physname ()));
 	      break;
             case FIELD_LOC_KIND_DWARF_BLOCK:
               new_type->field (i).set_loc_dwarf_block
