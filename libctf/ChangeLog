@@ -1,5 +1,11 @@
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-lookup.c (ctf_lookup_by_name_internal): Fix pptrtab bounds.
+	* testsuite/libctf-writable/pptrtab-writable-page-deep-lookup.*:
+	New test.
+
+2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* testsuite/libctf-lookup/enum-symbol.c: Remove unused label.
 	* testsuite/libctf-lookup/conflicting-type-syms.c: Remove unused
 	variables.
