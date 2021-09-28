@@ -3600,6 +3600,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 
       if (preserve_dates)
 	{
+	  memset (&buf, 0, sizeof (buf));
 	  stat_status = bfd_stat_arch_elt (this_element, &buf);
 
 	  if (stat_status != 0)
