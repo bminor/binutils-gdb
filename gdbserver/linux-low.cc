@@ -897,11 +897,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
 lwp_info *
 linux_process_target::add_lwp (ptid_t ptid)
 {
-  struct lwp_info *lwp;
-
-  lwp = new lwp_info {};
-
-  lwp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
+  lwp_info *lwp = new lwp_info;
 
   lwp->thread = add_thread (ptid, lwp);
 

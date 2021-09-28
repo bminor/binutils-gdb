@@ -721,8 +721,13 @@ struct pending_signal
 
 struct lwp_info
 {
+  lwp_info ()
+  {
+    this->waitstatus.kind = TARGET_WAITKIND_IGNORE;
+  }
+
   /* Backlink to the parent object.  */
-  struct thread_info *thread;
+  struct thread_info *thread = nullptr;
 
   /* If this flag is set, the next SIGSTOP will be ignored (the
      process will be immediately resumed).  This means that either we
@@ -730,25 +735,25 @@ struct lwp_info
      (so the SIGSTOP is still pending), or that we stopped the
      inferior implicitly via PTRACE_ATTACH and have not waited for it
      yet.  */
-  int stop_expected;
+  int stop_expected = 0;
 
   /* When this is true, we shall not try to resume this thread, even
      if last_resume_kind isn't resume_stop.  */
-  int suspended;
+  int suspended = 0;
 
   /* If this flag is set, the lwp is known to be stopped right now (stop
      event already received in a wait()).  */
-  int stopped;
+  int stopped = 0;
 
   /* Signal whether we are in a SYSCALL_ENTRY or
      in a SYSCALL_RETURN event.
      Values:
      - TARGET_WAITKIND_SYSCALL_ENTRY
      - TARGET_WAITKIND_SYSCALL_RETURN */
-  enum target_waitkind syscall_state;
+  enum target_waitkind syscall_state = TARGET_WAITKIND_SYSCALL_ENTRY;
 
   /* When stopped is set, the last wait status recorded for this lwp.  */
-  int last_status;
+  int last_status = 0;
 
   /* If WAITSTATUS->KIND != TARGET_WAITKIND_IGNORE, the waitstatus for
      this LWP's last event, to pass to GDB without any further
@@ -760,58 +765,59 @@ struct lwp_info
      the parent fork event is not reported to higher layers.  Used to
      avoid wildcard vCont actions resuming a fork child before GDB is
      notified about the parent's fork event.  */
-  struct lwp_info *fork_relative;
+  struct lwp_info *fork_relative = nullptr;
 
   /* When stopped is set, this is where the lwp last stopped, with
      decr_pc_after_break already accounted for.  If the LWP is
      running, this is the address at which the lwp was resumed.  */
-  CORE_ADDR stop_pc;
+  CORE_ADDR stop_pc = 0;
 
   /* If this flag is set, STATUS_PENDING is a waitstatus that has not yet
      been reported.  */
-  int status_pending_p;
-  int status_pending;
+  int status_pending_p = 0;
+  int status_pending = 0;
 
   /* The reason the LWP last stopped, if we need to track it
      (breakpoint, watchpoint, etc.)  */
-  enum target_stop_reason stop_reason;
+  enum target_stop_reason stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
   /* On architectures where it is possible to know the data address of
      a triggered watchpoint, STOPPED_DATA_ADDRESS is non-zero, and
      contains such data address.  Only valid if STOPPED_BY_WATCHPOINT
      is true.  */
-  CORE_ADDR stopped_data_address;
+  CORE_ADDR stopped_data_address = 0;
 
   /* If this is non-zero, it is a breakpoint to be reinserted at our next
      stop (SIGTRAP stops only).  */
-  CORE_ADDR bp_reinsert;
+  CORE_ADDR bp_reinsert = 0;
 
   /* If this flag is set, the last continue operation at the ptrace
      level on this process was a single-step.  */
-  int stepping;
+  int stepping = 0;
 
   /* Range to single step within.  This is a copy of the step range
      passed along the last resume request.  See 'struct
      thread_resume'.  */
-  CORE_ADDR step_range_start;	/* Inclusive */
-  CORE_ADDR step_range_end;	/* Exclusive */
+  CORE_ADDR step_range_start = 0; /* Inclusive */
+  CORE_ADDR step_range_end = 0; /* Exclusive */
 
   /* If this flag is set, we need to set the event request flags the
      next time we see this LWP stop.  */
-  int must_set_ptrace_flags;
+  int must_set_ptrace_flags = 0;
 
   /* A chain of signals that need to be delivered to this process.  */
   std::list<pending_signal> pending_signals;
 
   /* A link used when resuming.  It is initialized from the resume request,
      and then processed and cleared in linux_resume_one_lwp.  */
-  struct thread_resume *resume;
+  struct thread_resume *resume = nullptr;
 
   /* Information bout this lwp's fast tracepoint collection status (is it
      currently stopped in the jump pad, and if so, before or at/after the
      relocated instruction).  Normally, we won't care about this, but we will
      if a signal arrives to this lwp while it is collecting.  */
-  fast_tpoint_collect_result collecting_fast_tracepoint;
+  fast_tpoint_collect_result collecting_fast_tracepoint
+    = fast_tpoint_collect_result::not_collecting;
 
   /* A chain of signals that need to be reported to GDB.  These were
      deferred because the thread was doing a fast tracepoint collect
@@ -820,20 +826,20 @@ struct lwp_info
 
   /* When collecting_fast_tracepoint is first found to be 1, we insert
      a exit-jump-pad-quickly breakpoint.  This is it.  */
-  struct breakpoint *exit_jump_pad_bkpt;
+  struct breakpoint *exit_jump_pad_bkpt = nullptr;
 
 #ifdef USE_THREAD_DB
-  int thread_known;
+  int thread_known = 0;
   /* The thread handle, used for e.g. TLS access.  Only valid if
      THREAD_KNOWN is set.  */
-  td_thrhandle_t th;
+  td_thrhandle_t th {};
 
   /* The pthread_t handle.  */
-  thread_t thread_handle;
+  thread_t thread_handle {};
 #endif
 
   /* Arch-specific additions.  */
-  struct arch_lwp_info *arch_private;
+  struct arch_lwp_info *arch_private = nullptr;
 };
 
 int linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine);
