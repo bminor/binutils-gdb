@@ -5283,6 +5283,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	    handle_solib_event ();
 
+	    ecs->event_thread->set_stop_pc (regcache_read_pc (regcache));
 	    ecs->event_thread->control.stop_bpstat
 	      = bpstat_stop_status (regcache->aspace (),
 				    ecs->event_thread->stop_pc (),
