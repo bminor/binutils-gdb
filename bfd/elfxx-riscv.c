@@ -1236,11 +1236,11 @@ riscv_known_prefixed_ext (const char *ext,
   return false;
 }
 
-/* Check whether the prefixed extension is valid or not.  Return
-   true if valid, otehrwise return false.  */
+/* Check whether the prefixed extension is recognized or not.  Return
+   true if recognized, otehrwise return false.  */
 
 static bool
-riscv_valid_prefixed_ext (const char *ext)
+riscv_recognized_prefixed_ext (const char *ext)
 {
   enum riscv_prefix_ext_class class = riscv_get_prefix_class (ext);
   switch (class)
@@ -1254,7 +1254,7 @@ riscv_valid_prefixed_ext (const char *ext)
   case RV_ISA_CLASS_H:
     return riscv_known_prefixed_ext (ext, riscv_supported_std_h_ext);
   case RV_ISA_CLASS_X:
-    /* Only the single x is invalid.  */
+    /* Only the single x is unrecognized.  */
     if (strcmp (ext, "x") != 0)
       return true;
   default:
@@ -1515,20 +1515,14 @@ riscv_release_subset_list (riscv_subset_list_t *subset_list)
      Points to the end of version
 
    Arguments:
-     `rps`: Hooks and status for parsing extensions.
-     `arch`: Full ISA string.
      `p`: Curent parsing position.
      `major_version`: Parsed major version.
-     `minor_version`: Parsed minor version.
-     `std_ext_p`: True if parsing standard extension.  */
+     `minor_version`: Parsed minor version.  */
 
 static const char *
-riscv_parsing_subset_version (riscv_parse_subset_t *rps,
-			      const char *arch,
-			      const char *p,
+riscv_parsing_subset_version (const char *p,
 			      int *major_version,
-			      int *minor_version,
-			      bool std_ext_p)
+			      int *minor_version)
 {
   bool major_p = true;
   int version = 0;
@@ -1545,19 +1539,9 @@ riscv_parsing_subset_version (riscv_parse_subset_t *rps,
 	  if (!ISDIGIT (np))
 	    {
 	      /* Might be beginning of `p` extension.  */
-	      if (std_ext_p)
-		{
-		  *major_version = version;
-		  *minor_version = 0;
-		  return p;
-		}
-	      else
-		{
-		  rps->error_handler
-		    (_("%s: expect number after `%dp'"),
-		     arch, version);
-		  return NULL;
-		}
+	      *major_version = version;
+	      *minor_version = 0;
+	      return p;
 	    }
 
 	  *major_version = version;
@@ -1648,7 +1632,7 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 	  return NULL;
 	}
 
-      p = riscv_parsing_subset_version (rps, arch, ++p, &major, &minor, true);
+      p = riscv_parsing_subset_version (++p, &major, &minor);
       /* Added g as an implicit extension.  */
       if (subset[0] == 'g')
 	{
@@ -1703,29 +1687,51 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
       char *q = subset;
       const char *end_of_version;
 
-      while (*++q != '\0' && *q != '_' && !ISDIGIT (*q))
+      /* Extract the whole prefixed extension by '_'.  */
+      while (*++q != '\0' && *q != '_')
 	;
+      /* Look forward to the first letter which is not <major>p<minor>.  */
+      bool find_any_version = false;
+      bool find_minor_version = false;
+      while (1)
+	{
+	  q--;
+	  if (ISDIGIT (*q))
+	    find_any_version = true;
+	  else if (find_any_version
+		   && !find_minor_version
+		   && *q == 'p'
+		   && ISDIGIT (*(q - 1)))
+	    find_minor_version = true;
+	  else
+	    break;
+	}
+      q++;
+
+      /* Check if the end of extension is 'p' or not.  If yes, then
+	 the second letter from the end cannot be number.  */
+      if (*(q - 1) == 'p' && ISDIGIT (*(q - 2)))
+	{
+	  *q = '\0';
+	  rps->error_handler
+	    (_("%s: invalid prefixed ISA extension `%s' ends with <number>p"),
+	     arch, subset);
+	  free (subset);
+	  return NULL;
+	}
 
       end_of_version =
-	riscv_parsing_subset_version (rps, arch, q,
-				      &major_version,
-				      &minor_version, false);
+	riscv_parsing_subset_version (q, &major_version, &minor_version);
       *q = '\0';
-
       if (end_of_version == NULL)
 	{
 	  free (subset);
 	  return NULL;
 	}
 
-      /* Check if the prefix extension is known.
-	 For 'x', anything goes but it cannot simply be 'x'.
-	 For other prefixed extensions, it must be known from a list
-	 and cannot simply be the prefixed name.  */
-
       /* Check that the extension name is well-formed.  */
       if (rps->check_unknown_prefixed_ext
-	  && !riscv_valid_prefixed_ext (subset))
+	  && !riscv_recognized_prefixed_ext (subset))
 	{
 	  rps->error_handler
 	    (_("%s: unknown prefixed ISA extension `%s'"),
