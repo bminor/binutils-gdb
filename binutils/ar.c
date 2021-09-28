@@ -1180,6 +1180,9 @@ extract_file (bfd *abfd)
   bfd_size_type size;
   struct stat buf;
 
+  if (preserve_dates)
+    memset (&buf, 0, sizeof (buf));
+
   if (bfd_stat_arch_elt (abfd, &buf) != 0)
     /* xgettext:c-format */
     fatal (_("internal stat error on %s"), bfd_get_filename (abfd));
