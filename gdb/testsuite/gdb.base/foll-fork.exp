@@ -193,10 +193,17 @@ proc_with_prefix test_follow_fork { follow-fork-mode detach-on-fork cmd } {
 		pass $gdb_test_name
 	    }
 	}
+
+	set any {[^\r\n]+}
+
+	set loc1_inf1 "$bpnum\\.1 $any inf 1"
+	set loc1_inf2 "$bpnum\\.1 $any inf 2"
+
+	set loc2_inf1 "$bpnum\\.2 $any inf 1"
+	set loc2_inf2 "$bpnum\\.2 $any inf 2"
+
 	gdb_test "info breakpoints $bpnum" \
-	    [multi_line \
-		"$bpnum\\.1 .* inf 1" \
-		"$bpnum\\.2 .* inf 2"] \
+	    "($loc1_inf1\r\n$loc2_inf2|$loc1_inf2\r\n$loc2_inf1)" \
 	    "info breakpoints"
     }
 }
