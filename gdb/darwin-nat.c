@@ -906,8 +906,8 @@ darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   int nsignal;
 
   inferior_debug
-    (2, _("darwin_resume: pid=%d, tid=0x%lx, step=%d, signal=%d\n"),
-     ptid.pid (), ptid.tid (), step, signal);
+    (2, _("darwin_resume: ptid=%s, step=%d, signal=%d\n"),
+     ptid.to_string ().c_str (), step, signal);
 
   if (signal == GDB_SIGNAL_0)
     nsignal = 0;
@@ -1171,8 +1171,8 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
   darwin_thread_t *thread;
 
   inferior_debug
-    (2, _("darwin_wait: waiting for a message pid=%d thread=%lx\n"),
-     ptid.pid (), ptid.tid ());
+    (2, _("darwin_wait: waiting for a message ptid=%s thread=%lx\n"),
+     ptid.to_string ().c_str ());
 
   /* Handle fake stop events at first.  */
   if (darwin_inf_fake_stop != NULL)
