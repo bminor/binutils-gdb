@@ -1171,7 +1171,7 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
   darwin_thread_t *thread;
 
   inferior_debug
-    (2, _("darwin_wait: waiting for a message ptid=%s thread=%lx\n"),
+    (2, _("darwin_wait: waiting for a message ptid=%s\n"),
      ptid.to_string ().c_str ());
 
   /* Handle fake stop events at first.  */
