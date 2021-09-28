@@ -1,3 +1,12 @@
+2021-11-25  Andrew Burgess  <aburgess@redhat.com>
+	    Simon Cook  <simon.cook@embecosm.com>
+
+	* riscv-dis.c (enum riscv_option_arg_t): New enum typedef.
+	(riscv_options): New static global.
+	(disassembler_options_riscv): New function.
+	(print_riscv_disassembler_options): Rewrite to use
+	disassembler_options_riscv.
+
 2021-11-25  Nick Clifton  <nickc@redhat.com>
 
 	PR 28614

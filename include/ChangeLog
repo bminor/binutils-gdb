@@ -1,3 +1,8 @@
+2021-11-25  Andrew Burgess  <aburgess@redhat.com>
+	    Simon Cook  <simon.cook@embecosm.com>
+
+	* dis-asm.h (disassembler_options_riscv): Declare.
+
 2021-11-16  Fangrui Song  <maskray@google.com>
 
 	* elf/common.h (DT_ENCODING): Bump to 38.

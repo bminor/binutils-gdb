@@ -990,24 +990,153 @@ riscv_symbol_is_valid (asymbol * sym,
   return (strcmp (name, RISCV_FAKE_LABEL_NAME) != 0
 	  && !riscv_elf_is_mapping_symbols (name));
 }
+
+
+/* Indices into option argument vector for options accepting an argument.
+   Use RISCV_OPTION_ARG_NONE for options accepting no argument.  */
+
+typedef enum
+{
+  RISCV_OPTION_ARG_NONE = -1,
+  RISCV_OPTION_ARG_PRIV_SPEC,
+
+  RISCV_OPTION_ARG_COUNT
+} riscv_option_arg_t;
+
+/* Valid RISCV disassembler options.  */
+
+static struct
+{
+  const char *name;
+  const char *description;
+  riscv_option_arg_t arg;
+} riscv_options[] =
+{
+  { "numeric",
+    N_("Print numeric register names, rather than ABI names."),
+    RISCV_OPTION_ARG_NONE },
+  { "no-aliases",
+    N_("Disassemble only into canonical instructions."),
+    RISCV_OPTION_ARG_NONE },
+  { "priv-spec=",
+    N_("Print the CSR according to the chosen privilege spec."),
+    RISCV_OPTION_ARG_PRIV_SPEC }
+};
+
+/* Build the structure representing valid RISCV disassembler options.
+   This is done dynamically for maintenance ease purpose; a static
+   initializer would be unreadable.  */
+
+const disasm_options_and_args_t *
+disassembler_options_riscv (void)
+{
+  static disasm_options_and_args_t *opts_and_args;
+
+  if (opts_and_args == NULL)
+    {
+      size_t num_options = ARRAY_SIZE (riscv_options);
+      size_t num_args = RISCV_OPTION_ARG_COUNT;
+      disasm_option_arg_t *args;
+      disasm_options_t *opts;
+      size_t i, priv_spec_count;
+
+      args = XNEWVEC (disasm_option_arg_t, num_args + 1);
+
+      args[RISCV_OPTION_ARG_PRIV_SPEC].name = "SPEC";
+      priv_spec_count = PRIV_SPEC_CLASS_DRAFT - PRIV_SPEC_CLASS_NONE - 1;
+      args[RISCV_OPTION_ARG_PRIV_SPEC].values
+        = XNEWVEC (const char *, priv_spec_count + 1);
+      for (i = 0; i < priv_spec_count; i++)
+	args[RISCV_OPTION_ARG_PRIV_SPEC].values[i]
+          = riscv_priv_specs[i].name;
+      /* The array we return must be NULL terminated.  */
+      args[RISCV_OPTION_ARG_PRIV_SPEC].values[i] = NULL;
+
+      /* The array we return must be NULL terminated.  */
+      args[num_args].name = NULL;
+      args[num_args].values = NULL;
+
+      opts_and_args = XNEW (disasm_options_and_args_t);
+      opts_and_args->args = args;
+
+      opts = &opts_and_args->options;
+      opts->name = XNEWVEC (const char *, num_options + 1);
+      opts->description = XNEWVEC (const char *, num_options + 1);
+      opts->arg = XNEWVEC (const disasm_option_arg_t *, num_options + 1);
+      for (i = 0; i < num_options; i++)
+	{
+	  opts->name[i] = riscv_options[i].name;
+	  opts->description[i] = _(riscv_options[i].description);
+	  if (riscv_options[i].arg != RISCV_OPTION_ARG_NONE)
+	    opts->arg[i] = &args[riscv_options[i].arg];
+	  else
+	    opts->arg[i] = NULL;
+	}
+      /* The array we return must be NULL terminated.  */
+      opts->name[i] = NULL;
+      opts->description[i] = NULL;
+      opts->arg[i] = NULL;
+    }
+
+  return opts_and_args;
+}
 
 void
 print_riscv_disassembler_options (FILE *stream)
 {
+  const disasm_options_and_args_t *opts_and_args;
+  const disasm_option_arg_t *args;
+  const disasm_options_t *opts;
+  size_t max_len = 0;
+  size_t i;
+  size_t j;
+
+  opts_and_args = disassembler_options_riscv ();
+  opts = &opts_and_args->options;
+  args = opts_and_args->args;
+
   fprintf (stream, _("\n\
-The following RISC-V-specific disassembler options are supported for use\n\
+The following RISC-V specific disassembler options are supported for use\n\
 with the -M switch (multiple options should be separated by commas):\n"));
+  fprintf (stream, "\n");
 
-  fprintf (stream, _("\n\
-  numeric         Print numeric register names, rather than ABI names.\n"));
+  /* Compute the length of the longest option name.  */
+  for (i = 0; opts->name[i] != NULL; i++)
+    {
+      size_t len = strlen (opts->name[i]);
 
-  fprintf (stream, _("\n\
-  no-aliases      Disassemble only into canonical instructions, rather\n\
-                  than into pseudoinstructions.\n"));
+      if (opts->arg[i] != NULL)
+	len += strlen (opts->arg[i]->name);
+      if (max_len < len)
+	max_len = len;
+    }
 
-  fprintf (stream, _("\n\
-  priv-spec=PRIV  Print the CSR according to the chosen privilege spec\n\
-                  (1.9, 1.9.1, 1.10, 1.11).\n"));
+  for (i = 0, max_len++; opts->name[i] != NULL; i++)
+    {
+      fprintf (stream, "  %s", opts->name[i]);
+      if (opts->arg[i] != NULL)
+	fprintf (stream, "%s", opts->arg[i]->name);
+      if (opts->description[i] != NULL)
+	{
+	  size_t len = strlen (opts->name[i]);
+
+	  if (opts->arg != NULL && opts->arg[i] != NULL)
+	    len += strlen (opts->arg[i]->name);
+	  fprintf (stream, "%*c %s", (int) (max_len - len), ' ',
+                   opts->description[i]);
+	}
+      fprintf (stream, "\n");
+    }
+
+  for (i = 0; args[i].name != NULL; i++)
+    {
+      fprintf (stream, _("\n\
+  For the options above, the following values are supported for \"%s\":\n   "),
+	       args[i].name);
+      for (j = 0; args[i].values[j] != NULL; j++)
+	fprintf (stream, " %s", args[i].values[j]);
+      fprintf (stream, _("\n"));
+    }
 
   fprintf (stream, _("\n"));
 }

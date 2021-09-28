@@ -320,6 +320,7 @@ extern const disasm_options_and_args_t *disassembler_options_arc (void);
 extern const disasm_options_and_args_t *disassembler_options_arm (void);
 extern const disasm_options_and_args_t *disassembler_options_mips (void);
 extern const disasm_options_and_args_t *disassembler_options_powerpc (void);
+extern const disasm_options_and_args_t *disassembler_options_riscv (void);
 extern const disasm_options_and_args_t *disassembler_options_s390 (void);
 
 /* Fetch the disassembler for a given architecture ARC, endianess (big
