@@ -101,6 +101,9 @@ static const char *riscv_feature_name_fpu = "org.gnu.gdb.riscv.fpu";
 static const char *riscv_feature_name_virtual = "org.gnu.gdb.riscv.virtual";
 static const char *riscv_feature_name_vector = "org.gnu.gdb.riscv.vector";
 
+/* The current set of options to be passed to the disassembler.  */
+static char *riscv_disassembler_options;
+
 /* Cached information about a frame.  */
 
 struct riscv_unwind_cache
@@ -3802,6 +3805,11 @@ riscv_gdbarch_init (struct gdbarch_info info,
   /* Compile command hooks.  */
   set_gdbarch_gcc_target_options (gdbarch, riscv_gcc_target_options);
   set_gdbarch_gnu_triplet_regexp (gdbarch, riscv_gnu_triplet_regexp);
+
+  /* Disassembler options support.  */
+  set_gdbarch_valid_disassembler_options (gdbarch,
+					  disassembler_options_riscv ());
+  set_gdbarch_disassembler_options (gdbarch, &riscv_disassembler_options);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
