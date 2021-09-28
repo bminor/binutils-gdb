@@ -2422,6 +2422,7 @@ static struct
     int zeroing;
     int ll;
     int b;
+    int no_broadcast;
   }
 vex;
 static unsigned char need_vex;
@@ -11059,23 +11060,25 @@ intel_operand_size (int bytemode, int sizeflag)
 {
   if (vex.b)
     {
-      switch (bytemode)
-	{
-	case x_mode:
-	case evex_half_bcst_xmmq_mode:
-	  if (vex.w)
-	    oappend ("QWORD PTR ");
-	  else
-	    oappend ("DWORD PTR ");
-	  break;
-	case xh_mode:
-	case evex_half_bcst_xmmqh_mode:
-	case evex_half_bcst_xmmqdh_mode:
-	  oappend ("WORD PTR ");
-	  break;
-	default:
-	  abort ();
-	}
+      if (!vex.no_broadcast)
+	switch (bytemode)
+	  {
+	  case x_mode:
+	  case evex_half_bcst_xmmq_mode:
+	    if (vex.w)
+	      oappend ("QWORD PTR ");
+	    else
+	      oappend ("DWORD PTR ");
+	    break;
+	  case xh_mode:
+	  case evex_half_bcst_xmmqh_mode:
+	  case evex_half_bcst_xmmqdh_mode:
+	    oappend ("WORD PTR ");
+	    break;
+	  default:
+	    vex.no_broadcast = 1;
+	    break;
+	  }
       return;
     }
   switch (bytemode)
@@ -11908,69 +11911,71 @@ OP_E_memory (int bytemode, int sizeflag)
   if (vex.b)
     {
       evex_used |= EVEX_b_used;
-      if (bytemode == xh_mode)
-        {
-          if (vex.w)
-            {
-	      oappend ("{bad}");
-            }
-          else
-            {
-              switch (vex.length)
-                {
-                case 128:
-                  oappend ("{1to8}");
-                  break;
-                case 256:
-                  oappend ("{1to16}");
-                  break;
-                case 512:
-                  oappend ("{1to32}");
-                  break;
-                default:
+      if (!vex.no_broadcast)
+	{
+	  if (bytemode == xh_mode)
+	    {
+	      if (vex.w)
+		oappend ("{bad}");
+	      else
+		{
+		  switch (vex.length)
+		    {
+		    case 128:
+		      oappend ("{1to8}");
+		      break;
+		    case 256:
+		      oappend ("{1to16}");
+		      break;
+		    case 512:
+		      oappend ("{1to32}");
+		      break;
+		    default:
+		      abort ();
+		    }
+		}
+	    }
+	  else if (vex.w
+		   || bytemode == evex_half_bcst_xmmqdh_mode
+		   || bytemode == evex_half_bcst_xmmq_mode)
+	    {
+	      switch (vex.length)
+		{
+		case 128:
+		  oappend ("{1to2}");
+		  break;
+		case 256:
+		  oappend ("{1to4}");
+		  break;
+		case 512:
+		  oappend ("{1to8}");
+		  break;
+		default:
 		  abort ();
-                }
-            }
-        }
-      else if (vex.w
-	  || bytemode == evex_half_bcst_xmmqdh_mode
-	  || bytemode == evex_half_bcst_xmmq_mode)
-	{
-	  switch (vex.length)
-	    {
-	    case 128:
-	      oappend ("{1to2}");
-	      break;
-	    case 256:
-	      oappend ("{1to4}");
-	      break;
-	    case 512:
-	      oappend ("{1to8}");
-	      break;
-	    default:
-	      abort ();
+		}
 	    }
-	}
-      else if (bytemode == x_mode
-	  || bytemode == evex_half_bcst_xmmqh_mode)
-	{
-	  switch (vex.length)
+	  else if (bytemode == x_mode
+		   || bytemode == evex_half_bcst_xmmqh_mode)
 	    {
-	    case 128:
-	      oappend ("{1to4}");
-	      break;
-	    case 256:
-	      oappend ("{1to8}");
-	      break;
-	    case 512:
-	      oappend ("{1to16}");
-	      break;
-	    default:
-	      abort ();
+	      switch (vex.length)
+		{
+		case 128:
+		  oappend ("{1to4}");
+		  break;
+		case 256:
+		  oappend ("{1to8}");
+		  break;
+		case 512:
+		  oappend ("{1to16}");
+		  break;
+		default:
+		  abort ();
+		}
 	    }
+	  else
+	    vex.no_broadcast = 1;
 	}
-      else
-	/* If operand doesn't allow broadcast, vex.b should be 0.  */
+      if (vex.no_broadcast)
 	oappend ("{bad}");
     }
 }
@@ -12685,6 +12690,8 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 
   if (bytemode == tmm_mode)
     modrm.reg = reg;
+  else if (bytemode == scalar_mode)
+    vex.no_broadcast = 1;
 
   print_vector_reg (reg, bytemode);
 }
