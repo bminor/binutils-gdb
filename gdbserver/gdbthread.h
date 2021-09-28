@@ -29,20 +29,31 @@ struct regcache;
 
 struct thread_info
 {
+  thread_info (ptid_t id, void *target_data)
+    : id (id), target_data (target_data)
+  {
+    this->last_status.kind = TARGET_WAITKIND_IGNORE;
+  }
+
+  ~thread_info ()
+  {
+    free_register_cache (this->regcache_data);
+  }
+
   /* The id of this thread.  */
   ptid_t id;
 
   void *target_data;
-  struct regcache *regcache_data;
+  struct regcache *regcache_data = nullptr;
 
   /* The last resume GDB requested on this thread.  */
-  enum resume_kind last_resume_kind;
+  enum resume_kind last_resume_kind = resume_continue;
 
   /* The last wait status reported for this thread.  */
   struct target_waitstatus last_status;
 
   /* True if LAST_STATUS hasn't been reported to GDB yet.  */
-  int status_pending_p;
+  int status_pending_p = 0;
 
   /* Given `while-stepping', a thread may be collecting data for more
      than one tracepoint simultaneously.  E.g.:
@@ -67,10 +78,10 @@ struct thread_info
    tracepoint actions this thread is now collecting; NULL if empty.
    Each item in the list holds the current step of the while-stepping
    action.  */
-  struct wstep_state *while_stepping;
+  struct wstep_state *while_stepping = nullptr;
 
   /* Branch trace target information for this thread.  */
-  struct btrace_target_info *btrace;
+  struct btrace_target_info *btrace = nullptr;
 };
 
 extern std::list<thread_info *> all_threads;

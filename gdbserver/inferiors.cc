@@ -36,18 +36,12 @@ static std::string current_inferior_cwd;
 struct thread_info *
 add_thread (ptid_t thread_id, void *target_data)
 {
-  struct thread_info *new_thread = XCNEW (struct thread_info);
-
-  new_thread->id = thread_id;
-  new_thread->last_resume_kind = resume_continue;
-  new_thread->last_status.kind = TARGET_WAITKIND_IGNORE;
+  thread_info *new_thread = new thread_info (thread_id, target_data);
 
   all_threads.push_back (new_thread);
 
   if (current_thread == NULL)
     current_thread = new_thread;
-
-  new_thread->target_data = target_data;
 
   return new_thread;
 }
@@ -93,8 +87,7 @@ find_any_thread_of_pid (int pid)
 static void
 free_one_thread (thread_info *thread)
 {
-  free_register_cache (thread_regcache_data (thread));
-  free (thread);
+  delete thread;
 }
 
 void
