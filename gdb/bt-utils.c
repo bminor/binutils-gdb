@@ -161,9 +161,11 @@ gdb_internal_backtrace ()
 
   sig_write (_("----- Backtrace -----\n"));
 
+#ifdef GDB_PRINT_INTERNAL_BACKTRACE
   if (gdb_stderr->fd () > -1)
     gdb_internal_backtrace_1 ();
   else
+#endif
     sig_write (_("Backtrace unavailable\n"));
 
   sig_write ("---------------------\n");
