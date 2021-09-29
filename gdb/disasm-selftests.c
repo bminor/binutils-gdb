@@ -85,8 +85,19 @@ print_one_insn_test (struct gdbarch *gdbarch)
       /* PR 21003 */
       if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_arc_arc601)
 	return;
+      goto generic_case;
+    case bfd_arch_i386:
+      {
+	const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
+	/* The disassembly tests will fail on x86-linux because
+	   opcodes rejects an attempt to disassemble for an arch with
+	   a 64-bit address size when bfd_vma is 32-bit.  */
+	if (info->bits_per_address > sizeof (bfd_vma) * CHAR_BIT)
+	  return;
+      }
       /* fall through */
     default:
+    generic_case:
       {
 	/* Test disassemble breakpoint instruction.  */
 	CORE_ADDR pc = 0;
@@ -186,6 +197,16 @@ memory_error_test (struct gdbarch *gdbarch)
       return -1;
     }
   };
+
+  if (gdbarch_bfd_arch_info (gdbarch)->arch == bfd_arch_i386)
+    {
+      const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
+      /* This test will fail on x86-linux because opcodes rejects an
+	 attempt to disassemble for an arch with a 64-bit address size
+	 when bfd_vma is 32-bit.  */
+      if (info->bits_per_address > sizeof (bfd_vma) * CHAR_BIT)
+	return;
+    }
 
   gdb_disassembler_test di (gdbarch);
   bool saw_memory_error = false;
