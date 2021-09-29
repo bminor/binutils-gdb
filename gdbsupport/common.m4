@@ -163,6 +163,27 @@ AC_DEFUN([GDB_AC_COMMON], [
     fi
   fi
 
+  # Check if the compiler and runtime support printing long longs.
+
+  AC_CACHE_CHECK([for long long support in printf],
+		 gdb_cv_printf_has_long_long,
+		 [AC_RUN_IFELSE([AC_LANG_PROGRAM([AC_INCLUDES_DEFAULT],
+  [[char buf[32];
+    long long l = 0;
+    l = (l << 16) + 0x0123;
+    l = (l << 16) + 0x4567;
+    l = (l << 16) + 0x89ab;
+    l = (l << 16) + 0xcdef;
+    sprintf (buf, "0x%016llx", l);
+    return (strcmp ("0x0123456789abcdef", buf));]])],
+				gdb_cv_printf_has_long_long=yes,
+				gdb_cv_printf_has_long_long=no,
+				gdb_cv_printf_has_long_long=no)])
+  if test "$gdb_cv_printf_has_long_long" = yes; then
+    AC_DEFINE(PRINTF_HAS_LONG_LONG, 1,
+	      [Define to 1 if the "%ll" format works to print long longs.])
+  fi
+
   BFD_SYS_PROCFS_H
   if test "$ac_cv_header_sys_procfs_h" = yes; then
     BFD_HAVE_SYS_PROCFS_TYPE(gregset_t)

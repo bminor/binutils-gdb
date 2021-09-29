@@ -9571,6 +9571,52 @@ fi
     fi
   fi
 
+  # Check if the compiler and runtime support printing long longs.
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for long long support in printf" >&5
+$as_echo_n "checking for long long support in printf... " >&6; }
+if ${gdb_cv_printf_has_long_long+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  gdb_cv_printf_has_long_long=no
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+char buf[32];
+    long long l = 0;
+    l = (l << 16) + 0x0123;
+    l = (l << 16) + 0x4567;
+    l = (l << 16) + 0x89ab;
+    l = (l << 16) + 0xcdef;
+    sprintf (buf, "0x%016llx", l);
+    return (strcmp ("0x0123456789abcdef", buf));
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  gdb_cv_printf_has_long_long=yes
+else
+  gdb_cv_printf_has_long_long=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_printf_has_long_long" >&5
+$as_echo "$gdb_cv_printf_has_long_long" >&6; }
+  if test "$gdb_cv_printf_has_long_long" = yes; then
+
+$as_echo "#define PRINTF_HAS_LONG_LONG 1" >>confdefs.h
+
+  fi
+
 
 $as_echo "#define _STRUCTURED_PROC 1" >>confdefs.h
 
