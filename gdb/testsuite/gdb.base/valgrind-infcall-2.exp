@@ -29,6 +29,11 @@
 # terminate called after throwing an instance of 'gdb_exception_error'
 # Aborted (core dumped)
 
+if { [gdb_skip_xml_test] } {
+    # Valgrind gdbserver requires gdb with xml support.
+    return 0
+}
+
 load_lib valgrind.exp
 
 if [is_remote target] {

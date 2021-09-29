@@ -18,6 +18,11 @@
 # really tests is that GDB falls back to in-line stepping
 # automatically instead of getting stuck or crashing.
 
+if { [gdb_skip_xml_test] } {
+    # Valgrind gdbserver requires gdb with xml support.
+    return 0
+}
+
 load_lib valgrind.exp
 
 if [is_remote target] {
