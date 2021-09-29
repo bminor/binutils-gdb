@@ -92,7 +92,7 @@ proc test_python_helper {} {
     # just created.
     send_inferior "print 1\n"
     gdb_test_multiple "" "hit breakpoint in inner gdb" {
-	-re "hit Breakpoint $decimal, value_print.*\\(xgdb\\) $" {
+	-re "Breakpoint $decimal, value_print.*\\(xgdb\\) $" {
 	    pass $gdb_test_name
 	}
     }
