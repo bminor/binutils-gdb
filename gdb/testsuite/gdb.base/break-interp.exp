@@ -90,6 +90,9 @@ gdb_test_multiple "info addr dl_main" "" {
     -re -wrap "Symbol \"dl_main\" is a function at address $hex\\." {
 	set dl_main_found 1
     }
+    -re -wrap "Symbol \"dl_main\" is at $hex in a file compiled without debugging\\." {
+	set dl_main_found 1
+    }
     -re -wrap "No symbol \"dl_main\" in current context\\." {
     }
 }
