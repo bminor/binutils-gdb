@@ -39266,9 +39266,9 @@ disabled.
 @itemx maint set internal-warning backtrace @r{[}on|off@r{]}
 @itemx maint show internal-warning backtrace
 When @value{GDBN} reports an internal problem (error or warning) it is
-possible to have a backtrace of @value{GDBN} printed to stderr.  This
-is @samp{on} by default for @code{internal-error} and @samp{off} by
-default for @code{internal-warning}.
+possible to have a backtrace of @value{GDBN} printed to the standard
+error stream.  This is @samp{on} by default for @code{internal-error}
+and @samp{off} by default for @code{internal-warning}.
 
 @kindex maint packet
 @item maint packet @var{text}
@@ -39768,9 +39768,9 @@ the settings infrastructure.
 @itemx maint show backtrace-on-fatal-signal
 When this setting is @code{on}, if @value{GDBN} itself terminates with
 a fatal signal (e.g.@: SIGSEGV), then a limited backtrace will be
-printed to stderr.  This backtrace can be used to help diagnose
-crashes within @value{GDBN} in situations where a user is unable to
-share a corefile with the @value{GDBN} developers.
+printed to the standard error stream.  This backtrace can be used to
+help diagnose crashes within @value{GDBN} in situations where a user
+is unable to share a corefile with the @value{GDBN} developers.
 
 If the functionality to provide this backtrace is not available for
 the platform on which GDB is running then this feature will be
