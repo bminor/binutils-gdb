@@ -49,7 +49,7 @@
 #endif
 
 /* Print a backtrace of the current GDB process to the current
-   gdb_stderr.  The output is done in a signal async manor, so it is safe
+   gdb_stderr.  The output is done in a signal async manner, so it is safe
    to call from signal handlers.  */
 
 extern void gdb_internal_backtrace ();

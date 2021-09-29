@@ -108,7 +108,7 @@ libbacktrace_print (void *data, uintptr_t pc, const char *filename,
   return function != nullptr && strcmp (function, "main") == 0;
 }
 
-/* Write a backtrace to GDB's stderr in an async safe manor.  This is a
+/* Write a backtrace to GDB's stderr in an async safe manner.  This is a
    backtrace of GDB, not any running inferior, and is to be used when GDB
    crashes or hits some other error condition.  */
 

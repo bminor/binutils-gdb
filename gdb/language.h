@@ -574,7 +574,7 @@ struct language_defn
   /* Return false if the language has first-class arrays.  Return true if
      there are no array values, and array objects decay to pointers, as in
      C.  The default is true as currently most supported languages behave
-     in this manor.  */
+     in this manner.  */
 
   virtual bool c_style_arrays_p () const
   { return true; }
