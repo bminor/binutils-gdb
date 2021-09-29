@@ -816,7 +816,15 @@ proc_with_prefix test_bkpt_auto_disable { } {
     set mult_line [gdb_get_line_number "Break at multiply."]
     gdb_breakpoint ${mult_line}
     gdb_test_no_output "enable count 1 2" "one shot enable"
-    gdb_test_no_output "python gdb.events.breakpoint_modified.connect(lambda bp: print(bp.enabled))" \
+    # Python 2 doesn't support print in lambda function, so use a named
+    # function instead.
+    gdb_test_multiline "Define print_bp_enabled" \
+	"python" "" \
+	"def print_bp_enabled (bp):" "" \
+	"    print (bp.enabled)" "" \
+	"end" ""
+    gdb_test_no_output \
+	"python gdb.events.breakpoint_modified.connect(print_bp_enabled)" \
 	"trap breakpoint_modified event"
     gdb_test "continue" "False.*" "auto-disabling after enable count reached"
 }
