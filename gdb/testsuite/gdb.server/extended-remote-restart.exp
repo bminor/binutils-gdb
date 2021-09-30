@@ -61,7 +61,6 @@ proc test_reload { do_kill_p follow_child_p } {
     clean_restart ${binfile}
 
     if ![runto_main] then {
-	fail "can't run to main"
 	return 0
     }
 

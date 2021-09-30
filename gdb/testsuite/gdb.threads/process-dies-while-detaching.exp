@@ -217,7 +217,6 @@ proc test_detach {multi_process cmd} {
 	clean_restart ${binfile}
 
 	if ![runto_main] {
-	    fail "can't run to main"
 	    return -1
 	}
 
@@ -246,7 +245,6 @@ proc test_detach_watch {wp multi_process cmd} {
 	clean_restart ${binfile}
 
 	if ![runto_main] {
-	    fail "can't run to main"
 	    return -1
 	}
 
@@ -295,7 +293,6 @@ proc test_detach_killed_outside {multi_process cmd} {
 	clean_restart ${binfile}
 
 	if ![runto_main] {
-	    fail "can't run to main"
 	    return -1
 	}
 

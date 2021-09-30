@@ -35,7 +35,6 @@ if { [use_gdb_stub] || [target_info gdb_protocol] == "extended-remote" } {
 }
 
 if { ![runto_main] } {
-    untested "could not run to main"
     return -1
 }
 

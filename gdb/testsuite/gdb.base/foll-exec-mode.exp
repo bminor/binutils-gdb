@@ -69,7 +69,6 @@ proc do_catch_exec_test { } {
     # Start the program running, and stop at main.
     #
     if ![runto_main] then {
-	fail "couldn't run ${testfile}"
 	return
     }
 
@@ -109,7 +108,6 @@ proc do_follow_exec_mode_tests { mode cmd infswitch } {
 	# Start the program running, and stop at main.
 	#
 	if ![runto_main] then {
-	    fail "couldn't run ${testfile}"
 	    return
 	}
 

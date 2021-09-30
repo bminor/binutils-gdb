@@ -45,7 +45,6 @@ if { [gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $optio
 clean_restart ${testfile}
 
 if ![runto_main] {
-    fail "can't run to main to check for trace support"
     return -1
 }
 
@@ -68,7 +67,6 @@ if { [gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $optio
 clean_restart ${executable}
 
 if ![runto_main] {
-    fail "can't run to main to check for trace support"
     return -1
 }
 

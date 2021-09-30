@@ -67,7 +67,6 @@ proc do_setup { detach-on-fork follow-fork-mode } {
 	gdb_test_no_output "set follow-fork-mode ${follow-fork-mode}"
 
 	if { ![runto_main] } {
-		fail "can't run to main"
 		return -1
 	}
 

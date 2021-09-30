@@ -30,7 +30,6 @@ proc test_call_register_class {} {
     global gdb_prompt
 
     if ![runto_main] {
-	fail "couldn't run to main"
 	return
     }
 

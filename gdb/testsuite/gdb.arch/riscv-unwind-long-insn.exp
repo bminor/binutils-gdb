@@ -38,7 +38,6 @@ foreach_with_prefix {insn_size} {6 8} {
     }
 
     if ![runto_main] then {
-	fail "can't run to main"
 	return 0
     }
 

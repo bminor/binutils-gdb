@@ -34,7 +34,6 @@ proc_with_prefix test_tilde_expansion { } {
     gdb_test_no_output "set cwd ~/" "set inferior cwd to ~/ dir"
 
     if { ![runto_main] } {
-	untested "could not run to main"
 	return -1
     }
 
@@ -105,7 +104,6 @@ proc_with_prefix test_cd_into_dir { } {
     gdb_test_no_output "set cwd $tmpdir" "set inferior cwd to temp dir"
 
     if { ![runto_main] } {
-	untested "could not run to main"
 	return -1
     }
 
@@ -162,7 +160,6 @@ proc_with_prefix test_cwd_reset { } {
 
     with_test_prefix "running with set cwd" {
 	if { ![runto_main] } {
-	    untested "could not run to main"
 	    return -1
 	}
     }
@@ -178,7 +175,6 @@ proc_with_prefix test_cwd_reset { } {
 
     with_test_prefix "running without set cwd" {
 	if { ![runto_main] } {
-	    untested "could not run to main"
 	    return -1
 	}
     }

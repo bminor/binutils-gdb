@@ -62,7 +62,6 @@ proc altivec_abi_tests { extra_flags force_abi } {
 
     # Run to `main' where we begin our tests.
     if ![runto_main] then {
-	untested "could not run to main"
 	return -1
     }
 

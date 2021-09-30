@@ -36,7 +36,6 @@ foreach_with_prefix scenario {none all minimal} {
     mi_clean_restart $binfile
 
     if {[mi_runto_main] < 0} {
-	fail "cannot run to main, testcase aborted"
 	return 0
     }
 

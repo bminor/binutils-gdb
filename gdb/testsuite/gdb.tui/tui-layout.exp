@@ -36,7 +36,6 @@ proc test_layout {layout execution} {
 
     if {$execution} {
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return 0
 	}
     }

@@ -29,7 +29,6 @@ if [target_info exists gdb,no_hardware_watchpoints] {
 }
 
 if ![runto_main] then {
-    fail "can't run to main"
     return
 }
 
@@ -49,7 +48,6 @@ if [target_info exists gdb,no_hardware_watchpoints] {
 }
 
 if ![runto_main] then {
-    fail "can't run to main"
     return
 }
 
@@ -69,7 +67,6 @@ if [target_info exists gdb,no_hardware_watchpoints] {
 }
 
 if ![runto_main] then {
-    fail "can't run to main"
     return
 }
 

@@ -29,12 +29,10 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile \
 # Set it up at a breakpoint so we can play with the variable values.
 #
 if {![runto_main]} {
-    untested "couldn't run to breakpoint"
     return -1
 }
 
 if {![runto 'marker1']} {
-    untested "couldn't run to marker1"
     return -1
 }
 

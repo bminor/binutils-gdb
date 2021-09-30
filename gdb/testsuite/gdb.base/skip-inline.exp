@@ -25,7 +25,6 @@ set srcfile skip-inline.c
 set srcfile1 skip1.c
 
 if ![runto_main] {
-    fail "can't run to main"
     return
 }
 
@@ -48,7 +47,6 @@ gdb_test "step" ".*" "step back to main, again"
 gdb_test "bt" "\\s*\\#0\\s+main.*" "again back to main"
 
 if ![runto_main] {
-    fail "can't run to main"
     return
 }
 
@@ -65,7 +63,6 @@ with_test_prefix "double step" {
 }
 
 if ![runto_main] {
-    fail "can't run to main"
     return
 }
 
@@ -78,7 +75,6 @@ with_test_prefix "triple step" {
 }
 
 if ![runto_main] {
-    fail "can't run to main"
     return
 }
 

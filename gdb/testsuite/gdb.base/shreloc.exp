@@ -77,7 +77,6 @@ gdb_load_shlib $lib2_sl
 
 # Load up the shared objects
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

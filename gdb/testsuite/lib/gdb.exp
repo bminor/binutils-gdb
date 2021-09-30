@@ -707,7 +707,7 @@ proc runto { function args } {
 # If you don't want that, use gdb_start_cmd.
 
 proc runto_main { } {
-    return [runto main no-message qualified]
+    return [runto main qualified]
 }
 
 ### Continue, and expect to hit a breakpoint.

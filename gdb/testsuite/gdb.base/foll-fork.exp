@@ -32,7 +32,6 @@ proc setup {} {
     clean_restart $::testfile
 
     if { ![runto_main] } {
-	fail "could not run to main"
 	return 0
     }
 

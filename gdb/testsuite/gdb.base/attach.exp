@@ -493,7 +493,6 @@ proc_with_prefix test_command_line_attach_run {} {
     clean_restart $binfile
 
     if { ![runto_main] } {
-	fail "could not run to main"
 	return
     }
 

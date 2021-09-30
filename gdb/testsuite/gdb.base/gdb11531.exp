@@ -32,7 +32,6 @@ if [target_info exists gdb,no_hardware_watchpoints] {
 }
 
 if { ![runto_main] } then {
-    fail "run to main"
     return
 }
 

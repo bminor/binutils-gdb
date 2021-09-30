@@ -58,7 +58,6 @@ foreach_with_prefix n_flag { 0 1 } {
 	clean_restart $executable
 
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return 0
 	}
 

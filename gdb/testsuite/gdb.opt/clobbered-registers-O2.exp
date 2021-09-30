@@ -32,7 +32,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 }
 
 if { ![runto start_sequence] } then {
-   fail "run to start_sequence"
    return
 }
 

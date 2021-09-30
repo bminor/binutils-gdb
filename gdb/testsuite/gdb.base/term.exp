@@ -26,7 +26,6 @@ gdb_test "info terminal" \
     "test info terminal pre-execution"
 
 if ![runto break_here] then {
-    fail "can't run to break_here"
     return 0
 }
 

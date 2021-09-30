@@ -26,7 +26,6 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 }
 
 if ![runto_main] then {
-    untested "maint info sections"
     return -1
 }
 

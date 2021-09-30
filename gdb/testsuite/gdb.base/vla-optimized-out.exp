@@ -33,7 +33,6 @@ proc vla_optimized_out {exe_suffix options} {
     }
 
     if ![runto f1] {
-	fail "can't run to f1"
 	return
     }
 

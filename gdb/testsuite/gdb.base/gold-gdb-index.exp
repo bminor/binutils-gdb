@@ -35,7 +35,6 @@ if { [have_index $binfile] != "gdb_index" } {
 gdb_test_no_output "set auto-solib-add off"
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

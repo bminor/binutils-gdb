@@ -159,7 +159,6 @@ set sizeof_random_data [get_sizeof "random_data" 48*1024]
 # Part THREE: Check the upload behavour
 #
 if ![runto_main] then {
-    fail "cannot run to main"
     return
 }
 

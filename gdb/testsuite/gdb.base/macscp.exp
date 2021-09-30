@@ -341,7 +341,6 @@ proc maybe_kfail { func test_name } {
 
 # Start the program running.
 if {! [runto_main]} {
-    fail "macro tests suppressed: couldn't run to main"
     return 0
 }
 

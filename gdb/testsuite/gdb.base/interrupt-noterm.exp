@@ -24,7 +24,6 @@ if [prepare_for_testing "failed to prepare for testing" \
 gdb_test_no_output "set interactive-mode off"
 
 if ![runto_main] {
-    fail "can't run to main"
     return -1
 }
 

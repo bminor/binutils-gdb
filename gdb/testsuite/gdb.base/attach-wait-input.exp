@@ -48,7 +48,6 @@ proc start_program {binfile} {
     clean_restart $binfile
 
     if ![runto setup_done] then {
-	fail "can't run to setup_done"
 	return 0
     }
 

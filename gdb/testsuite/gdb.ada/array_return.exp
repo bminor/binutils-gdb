@@ -28,7 +28,6 @@ clean_restart ${testfile}
 # Start the inferior
 
 if ![runto_main] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 

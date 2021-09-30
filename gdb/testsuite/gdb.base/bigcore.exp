@@ -59,7 +59,6 @@ if {![is_remote host]} {
 }
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 set print_core_line [gdb_get_line_number "Dump core"]

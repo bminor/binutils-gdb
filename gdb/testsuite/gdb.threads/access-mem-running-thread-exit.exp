@@ -53,7 +53,6 @@ proc test { non_stop } {
     }
 
     if ![runto_main] {
-	fail "cannot run to main"
 	return -1
     }
 
@@ -84,7 +83,6 @@ proc test { non_stop } {
 	gdb_load $binfile
 
 	if ![runto_main] {
-	    fail "cannot run to main"
 	    return -1
 	}
     }

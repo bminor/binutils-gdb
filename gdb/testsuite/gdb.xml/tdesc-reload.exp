@@ -28,7 +28,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 }
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
@@ -64,7 +63,6 @@ gdb_load ${binfile}
 
 # Run to `main' where we begin our tests.
 if ![runto_main] then {
-    untested "could not run to main"
     return -1
 }
 

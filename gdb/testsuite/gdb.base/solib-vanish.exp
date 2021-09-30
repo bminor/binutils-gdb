@@ -86,7 +86,6 @@ if { [gdb_compile_shlib ${srcfile_lib2} ${binfile_lib2} $lib2_flags] != ""
 clean_restart $testfile
 
 if { ![runto_main] } {
-    fail "can't run to main"
     return
 }
 

@@ -87,7 +87,6 @@ proc run_style_tests { } {
 	set readnow [readnow]
 
 	if {![runto_main]} {
-	    fail "style tests failed"
 	    return
 	}
 

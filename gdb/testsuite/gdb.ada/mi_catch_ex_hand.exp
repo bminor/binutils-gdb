@@ -34,7 +34,6 @@ set eol "\[\r\n\]+"
 clean_restart ${testfile}
 
 if ![runto_main] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 
@@ -65,7 +64,6 @@ mi_clean_restart $binfile
 
 with_test_prefix "scenario 1" {
     if {[mi_runto_main] < 0} {
-	fail "cannot run to main, testcase aborted"
 	return 0
     }
 }
@@ -118,7 +116,6 @@ continue_to_exception_handler \
 with_test_prefix "scenario 2" {
     mi_delete_breakpoints
     if {[mi_runto_main] < 0} {
-	fail "cannot run to main, testcase aborted"
 	return 0
     }
 }

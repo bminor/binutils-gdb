@@ -410,7 +410,6 @@ proc test_add_rn_pc {} {
 gdb_test_no_output "set displaced-stepping off"
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

@@ -52,7 +52,6 @@ PerfTest::assemble {
 	clean_restart $binfile
 
 	if ![runto_main] {
-		fail "can't run to main"
 		return -1
 	}
 

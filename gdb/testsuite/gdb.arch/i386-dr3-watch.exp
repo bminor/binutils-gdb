@@ -30,7 +30,6 @@ if [prepare_for_testing "failed to prepare" ${binfile} ${srcfile} {debug $additi
 }
 
 if ![runto_main] then {
-    untested "could not run to main"
     return -1
 }
 

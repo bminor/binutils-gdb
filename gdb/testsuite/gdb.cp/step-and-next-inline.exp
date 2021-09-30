@@ -59,7 +59,6 @@ proc do_test { use_header } {
     with_test_prefix $prefix {
 
     if ![runto_main] {
-	fail "can't run to main"
 	return
     }
 
@@ -176,7 +175,6 @@ proc do_test { use_header } {
     clean_restart ${executable}
 
     if ![runto_main] {
-	fail "can't run to main pass 2"
 	return
     }
 

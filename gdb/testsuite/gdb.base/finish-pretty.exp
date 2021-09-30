@@ -24,7 +24,6 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 
 proc finish_pretty { } {
     if ![runto foo] {
-	fail "can't run to foo"
 	return
     }
     gdb_test_no_output "set print pretty" \

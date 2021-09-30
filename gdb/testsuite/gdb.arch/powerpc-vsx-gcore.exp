@@ -40,7 +40,6 @@ if {[build_executable "compile" $binfile $gen_src] == -1} {
 clean_restart $binfile
 
 if ![runto_main] then {
-    fail "could not run to main"
     return -1
 }
 

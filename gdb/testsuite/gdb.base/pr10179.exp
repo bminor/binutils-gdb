@@ -23,7 +23,6 @@ if {[build_executable ${testname}.exp $testname $sources {debug}] == -1} {
 clean_restart ${testname}
 
 if ![runto_main] {
-    untested pr10179
     return -1
 }
 

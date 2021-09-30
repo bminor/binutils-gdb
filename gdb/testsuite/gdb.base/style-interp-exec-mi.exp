@@ -33,7 +33,6 @@ save_vars { env(TERM) } {
     }
 
     if { ![runto_main] } {
-	untested "could not run to main"
 	return
     }
 

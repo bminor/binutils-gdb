@@ -27,7 +27,6 @@ if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
 }
 
 if ![runto_main] {
-    untested "could not run to main"
     return -1
 }
 

@@ -28,7 +28,6 @@ if { [prepare_for_testing "failed to prepare" commands run.c {debug additional_f
 
 proc runto_or_return {function} {
     if { ![runto factorial] } {
-	fail "cannot run to $function"
 	return -code return
     }
 }

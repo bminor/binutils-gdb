@@ -71,7 +71,6 @@ proc test_create_delete_modify_tsv { } {
 	clean_restart $testfile
 
 	if ![runto_main] {
-	    fail "can't run to main to check for trace support"
 	    return -1
 	}
 
@@ -153,7 +152,6 @@ proc test_upload_tsv { } {
 
 	clean_restart $testfile
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return 0
 	}
 
@@ -239,7 +237,6 @@ proc test_upload_tsv { } {
 clean_restart $testfile
 
 if ![runto_main] {
-    fail "can't run to main to check for trace support"
     return -1
 }
 

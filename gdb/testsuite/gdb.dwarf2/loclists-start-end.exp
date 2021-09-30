@@ -118,7 +118,6 @@ foreach_with_prefix is_64 {false true} {
     }
 
     if { ![runto_main] } {
-	fail "can't run to main"
 	return
     }
 

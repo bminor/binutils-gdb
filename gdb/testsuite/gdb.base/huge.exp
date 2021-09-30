@@ -43,7 +43,6 @@ set prev_timeout $timeout
 set timeout 30
 
 if { ! [ runto_main ] } then {
-    untested "couldn't run to main"
     return -1
 }
 

@@ -22,7 +22,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nopie}]} 
 }
 
 if ![runto_main] {
-    fail "can't run to main to check for trace support"
     return -1
 }
 
@@ -39,7 +38,6 @@ proc set_tracepoint_and_collect { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
     if ![runto_main] {
-	fail "can't run to main"
 	return -1
     }
     gdb_breakpoint "end" qualified

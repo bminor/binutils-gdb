@@ -56,7 +56,6 @@ set nl "\[\r\n\]+"
 set timeout 30
 
 if { ! [ runto_main ] } then {
-    untested "could not run to main"
     return -1
 }
 

@@ -85,7 +85,6 @@ if { [gdb_compile $srcdir/$subdir/${srcfile} ${binfile} \
 clean_restart $testfile
 
 if { ![runto_main] } {
-    fail "can't run to main"
     return
 }
 

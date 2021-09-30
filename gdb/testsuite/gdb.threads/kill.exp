@@ -39,7 +39,6 @@ proc test {threaded} {
 	}
 
 	if { ![runto_main] } then {
-	    fail "run to main"
 	    return
 	}
 

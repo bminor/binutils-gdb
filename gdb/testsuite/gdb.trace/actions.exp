@@ -247,7 +247,6 @@ gdb_load $binfile
 gdb_breakpoint "main"
 gdb_run_cmd
 if {[gdb_test "" "Breakpoint .*"] != 0} {
-    fail "can't run to main"
     return -1
 }
 

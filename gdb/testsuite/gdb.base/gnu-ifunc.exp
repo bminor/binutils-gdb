@@ -110,7 +110,6 @@ proc_with_prefix set-break {resolver_attr resolver_debug final_debug} {
     gdb_load_shlib ${lib_so}
 
     if ![runto_main] then {
-	fail "can't run to main"
 	return 1
     }
 
@@ -233,7 +232,6 @@ proc misc_tests {resolver_attr resolver_debug final_debug} {
     gdb_load_shlib ${lib_so}
 
     if ![runto_main] then {
-	fail "can't run to main"
 	return 1
     }
 

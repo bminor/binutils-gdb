@@ -181,7 +181,6 @@ gdb_caching_proc gnat_runtime_has_debug_info {
     clean_restart $dst
 
     if { ! [runto "GNAT_Debug_Info_Test"] } {
-	fail "failed to run to GNAT_Debug_Info_Test"
 	return 0
     }
 

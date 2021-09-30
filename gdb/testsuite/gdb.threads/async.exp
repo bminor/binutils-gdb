@@ -35,7 +35,6 @@ proc test_current_thread {expected_thr} {
     clean_restart $binfile
 
     if {![runto "all_started"]} {
-	fail "could not run to all_started"
 	return
     }
 

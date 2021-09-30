@@ -191,7 +191,6 @@ foreach_with_prefix cmd [list "break" "tbreak"] {
     # Start with a clean state.
     delete_breakpoints
     if {![runto_main]} {
-	untested "could not run to main"
 	return -1
     }
 
@@ -247,7 +246,6 @@ foreach_with_prefix func {
     clean_restart $binfile
 
     if {![runto_main]} {
-	untested "could not run to main"
 	continue
     }
 
@@ -265,7 +263,6 @@ with_test_prefix "line number" {
     clean_restart $binfile
 
     if {![runto_main]} {
-	untested "could not run to main"
 	continue
     }
 
@@ -290,7 +287,6 @@ with_test_prefix "address" {
     clean_restart $binfile
 
     if {![runto_main]} {
-	untested "could not run to main"
 	continue
     }
 
@@ -309,7 +305,6 @@ with_test_prefix "check alignment" {
     clean_restart $binfile
 
     if {![runto_main]} {
-	untested "could not run to main"
 	continue
     }
 

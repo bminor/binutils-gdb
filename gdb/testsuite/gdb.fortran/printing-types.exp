@@ -23,7 +23,6 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug f90}]} {
 }
 
 if {![fortran_runto_main]} then {
-    untested "could not run to main"
     return -1
 }
 

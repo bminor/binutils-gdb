@@ -21,7 +21,6 @@ if { ![istarget "x86_64-*-*"] || ![is_lp64_target] } {
 proc test_probe { probe_name } {
     with_test_prefix "probe: ${probe_name}" {
 	if { ![runto "-pstap $probe_name"] } {
-	    fail "run to probe $probe_name"
 	    return
 	}
 

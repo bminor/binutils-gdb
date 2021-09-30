@@ -105,7 +105,6 @@ proc gdb_install_guile_module { } {
 
 proc gdb_guile_runto_main { } {
     if ![runto_main] {
-	fail "can't run to main"
 	return 0
     }
 

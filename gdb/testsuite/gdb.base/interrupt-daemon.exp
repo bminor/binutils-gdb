@@ -33,7 +33,6 @@ proc do_test {} {
     gdb_test "set follow-fork-mode child" ".*"
 
     if ![runto "daemon_main"] {
-	fail "can't run to daemon_main function"
 	return
     }
 

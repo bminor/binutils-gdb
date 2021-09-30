@@ -29,7 +29,6 @@ proc check_selected_frame_after_bt { bt_cmd stack_pattern } {
     with_test_prefix $bt_cmd {
 
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return 0
 	}
 

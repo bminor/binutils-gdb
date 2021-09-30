@@ -30,7 +30,6 @@ proc setup_test {detach_on_fork {follow_fork_mode "parent"}} {
     clean_restart ${binfile}
 
     if ![runto_main] {
-	fail "can't run to main"
 	return
     }
 

@@ -23,7 +23,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile nodebug]} {
 }
 
 if ![runto_main] {
-    fail "can't run to main"
     return 0
 }
 

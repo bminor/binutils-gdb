@@ -310,7 +310,6 @@ proc test_subscript_regression {exefile lang} {
     clean_restart ${exefile}
 
     if ![gdb_guile_runto_main ] {
-	fail "can't run to main"
 	return
     }
 
@@ -440,7 +439,6 @@ test_value_hash
 # The following tests require execution.
 
 if ![gdb_guile_runto_main] {
-    fail "can't run to main"
     return
 }
 

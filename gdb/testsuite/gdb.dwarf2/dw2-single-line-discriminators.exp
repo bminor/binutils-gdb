@@ -36,7 +36,6 @@ if { [prepare_for_testing "failed to prepare" "${testfile}" $srcfile {nodebug no
 }
 
 if ![runto_main] then {
-    fail "cannot run to main."
     continue
 }
 

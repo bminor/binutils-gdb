@@ -30,7 +30,6 @@ if {[prepare_for_testing $testfile $testfile $srcfile \
 }
 
 if {![runto_main]} {
-    untested "could not run to main"
     return -1
 }
 

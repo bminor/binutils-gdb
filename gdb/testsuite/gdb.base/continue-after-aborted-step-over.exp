@@ -51,7 +51,6 @@ proc do_test {displaced breakpoint_always_inserted} {
     gdb_test_no_output "set breakpoint always-inserted $breakpoint_always_inserted"
 
     if ![runto_main] {
-	fail "run to main"
 	return -1
     }
 

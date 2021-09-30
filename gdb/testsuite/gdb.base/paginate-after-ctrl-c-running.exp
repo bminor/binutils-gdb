@@ -37,7 +37,6 @@ proc test_ctrlc_while_target_running_does_not_paginate {} {
 	clean_restart $binfile
 
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return 0
 	}
 

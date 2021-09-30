@@ -34,7 +34,6 @@ if [target_info exists gdb,cannot_call_functions] {
 clean_restart ${binfile}
 
 if { ![runto_main] } {
-    fail "can't run to main"
     return 0
 }
 

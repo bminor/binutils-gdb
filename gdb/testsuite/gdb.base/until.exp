@@ -26,7 +26,6 @@ set bp_location20 [gdb_get_line_number "set breakpoint 20 here"]
 set bp_location21 [gdb_get_line_number "set breakpoint 21 here"]
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

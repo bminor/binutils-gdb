@@ -42,7 +42,6 @@ if { [gdb_file_cmd $binfile] != 0 } {
 
 gdb_breakpoint "bar"
 if { ![runto "bar"] } {
-    fail "failed to run to bar"
     return -1
 }
 

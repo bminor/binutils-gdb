@@ -23,7 +23,6 @@ proc noreturn_test { } {
     global gdb_prompt
 
     if { ! [ runto_main ] } then {
-	untested "could not run to main"
 	return -1
     }
 

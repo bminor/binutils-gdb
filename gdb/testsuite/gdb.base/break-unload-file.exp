@@ -60,7 +60,6 @@ proc test_break { initial_load always_inserted break_command } {
 	set GDBFLAGS $saved_gdbflags
 
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return
 	}
 

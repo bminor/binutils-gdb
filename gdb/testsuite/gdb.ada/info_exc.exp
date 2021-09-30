@@ -26,7 +26,6 @@ if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } 
 clean_restart ${testfile}
 
 if ![runto_main] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 

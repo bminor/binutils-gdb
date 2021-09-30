@@ -69,7 +69,6 @@ if { $topmost != "exec" } {
 # Check which target this board connects to.  If testing with a native
 # target board, this should cause the native target to auto connect.
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

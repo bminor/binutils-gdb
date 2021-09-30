@@ -32,7 +32,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90}]} {
 }
 
 if ![fortran_runto_main] {
-    fail "run to main"
     return -1
 }
 

@@ -45,7 +45,6 @@ proc simple_func_break_test { protection } {
     }
 
     if { ![runto_main] } then {
-	fail "can't run to main"
 	return -1
     }
 

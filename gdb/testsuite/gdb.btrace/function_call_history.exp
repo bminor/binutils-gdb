@@ -30,7 +30,6 @@ if [prepare_for_testing "failed to prepare" $testfile {} {nopie debug}] {
 }
 
 if ![runto_main] {
-    untested "failed to run to main"
     return -1
 }
 
@@ -231,7 +230,6 @@ gdb_test "record function-call-history /c 21, +11" [multi_line \
 
 # make sure we can handle incomplete trace with respect to indentation
 if ![runto_main] {
-    untested "failed to run to main"
     return -1
 }
 # navigate to the fib in line 24 above

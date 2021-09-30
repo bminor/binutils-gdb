@@ -48,7 +48,6 @@ proc do_exec_tests {} {
    # Start the program running, and stop at main.
    #
    if ![runto_main] then {
-     fail "couldn't run ${testfile}"
      return
    }
 
@@ -75,7 +74,6 @@ proc do_exec_tests {} {
    # Start the program running, and stop at main.
    #
    if ![runto_main] then {
-     fail "couldn't run ${testfile}"
      return
    }
 
@@ -165,7 +163,6 @@ proc do_exec_tests {} {
    # Start the program running, and stop at main.
    #
    if ![runto_main] then {
-     fail "couldn't run ${testfile} (2nd try)"
      return
    }
 
@@ -234,7 +231,6 @@ proc do_exec_tests {} {
    # Start the program running, and stop at main.
    #
    if ![runto_main] then {
-     fail "couldn't run ${testfile} (3rd try)"
      return
    }
 
@@ -302,7 +298,6 @@ proc do_exec_tests {} {
    # Start the program running, and stop at main.
    #
    if ![runto_main] then {
-     fail "couldn't run ${testfile} (4th try)"
      return
    }
 
@@ -364,7 +359,6 @@ proc do_exec_tests {} {
    # Start the program running, and stop at main.
    #
    if ![runto_main] then {
-     fail "couldn't run ${testfile} (5th try)"
      return
    }
 

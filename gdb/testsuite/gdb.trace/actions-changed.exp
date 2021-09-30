@@ -165,7 +165,6 @@ proc test_actions_changed { } {
 clean_restart $testfile
 
 if ![runto_main] {
-    fail "can't run to main to check for trace support"
     return -1
 }
 

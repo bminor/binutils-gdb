@@ -82,7 +82,6 @@ proc test {hidden dlopen version_id_main lang} {
     gdb_load_shlib $libobj2
 
     if ![runto_main] {
-	untested "could not run to main"
 	return -1
     }
 

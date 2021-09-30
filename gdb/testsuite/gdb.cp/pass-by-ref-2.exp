@@ -38,7 +38,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile $options]} {
 }
 
 if {![runto_main]} {
-    untested "failed to run to main"
     return -1
 }
 

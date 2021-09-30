@@ -46,7 +46,6 @@ proc run_tests { lang } {
 	clean_restart ${binfile}
 
 	if ![runto_main] {
-	    untested "could not run to main"
 	    return -1
 	}
 

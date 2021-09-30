@@ -22,7 +22,6 @@ if { [prepare_for_testing "failed to prepare" "structs3" "" {debug}] } {
 }
 
 if ![runto_main] {
-    untested "could not run to main"
     return -1
 }
 

@@ -41,7 +41,6 @@ proc do_test { displaced } {
     global gdb_prompt inferior_exited_re srcfile srcfile2
 
     if ![runto_main] then {
-	untested "could not run to main"
 	return -1
     }
 

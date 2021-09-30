@@ -47,7 +47,6 @@ gdb_load ${binfile}
 gdb_load_shlib ${lib_sl}
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 1
 }
 

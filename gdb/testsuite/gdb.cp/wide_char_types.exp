@@ -48,7 +48,6 @@ proc wide_char_types_program {lang} {
     }
 
     if ![runto_main] then {
-	fail "can't run to main"
 	return 0
     }
     do_test_wide_char $lang "u16" "u32" "wchar"

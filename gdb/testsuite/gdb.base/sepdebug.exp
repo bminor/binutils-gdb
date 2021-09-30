@@ -278,7 +278,9 @@ gdb_test "info break" "Num     Type.*Disp Enb Address.*What.*\[\r\n\]
 # inappropriately.  (There are no calls to those system functions
 # in this test program.)
 #
-if ![runto_main] then { fail "sepdebug tests suppressed" }
+if ![runto_main] then { 
+    return
+}
 
 gdb_test "catch fork" "Catchpoint \[0-9\]+ \\(fork\\)" \
     "set catch fork, never expected to trigger"
@@ -327,7 +329,9 @@ gdb_test "break" \
 # Verify that a "silent" breakpoint can be set, and that GDB is indeed
 # "silent" about its triggering.
 #
-if ![runto_main] then { fail "sepdebug tests suppressed" }
+if ![runto_main] then {
+    return
+}
 
 gdb_test_multiple "break $bp_location1" \
     "set to-be-silent break bp_location1" {
@@ -447,7 +451,9 @@ gdb_test_multiple "finish" "finish from called function" {
 # Verify that GDB responds gracefully to a "finish" command with
 # arguments.
 #
-if ![runto_main] then { fail "sepdebug tests suppressed" }
+if ![runto_main] then {
+    return
+}
 
 gdb_test "finish 123" \
     "The \"finish\" command does not take any arguments.*" \

@@ -26,7 +26,6 @@ save_vars { GDBFLAGS } {
 }
 
 if ![runto_main] {
-    fail "can't run to main"
     return
 }
 

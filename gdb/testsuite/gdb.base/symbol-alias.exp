@@ -21,7 +21,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} [list $srcfile $srcfil
 }
 
 if ![runto_main] then {
-    fail "can't run to main"
     continue
 }
 

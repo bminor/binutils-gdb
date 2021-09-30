@@ -34,7 +34,9 @@ set bp_location14 [gdb_get_line_number "set breakpoint 14 here" $srcfile2]
 set bp_location15 [gdb_get_line_number "set breakpoint 15 here" $srcfile2]
 set bp_location17 [gdb_get_line_number "set breakpoint 17 here" $srcfile2]
 
-if ![runto_main] then { fail "enable/disable break tests suppressed" }
+if ![runto_main] then {
+    return
+}
 
 # Verify that we can set a breakpoint (the location is irrelevant),
 # then enable it (yes, it's already enabled by default), then hit it.
@@ -115,7 +117,7 @@ gdb_continue_to_end "no stop at auto-disabled break marker2"
 # Verify that we can set a breakpoint to be self-deleting after the
 # first time it triggers.
 if ![runto_main] then {
-    fail "enable/disable break tests suppressed"
+    return
 }
 
 set bp [break_at "marker3" " line $bp_location17"]
@@ -146,7 +148,7 @@ gdb_test "info break $bp" \
     "info break marker4"
 
 if ![runto_main] then {
-    fail "enable/disable break tests suppressed"
+    return
 }
 
 # Test enable count by stopping at a location until it is disabled
@@ -185,7 +187,7 @@ gdb_test "continue" \
 # a flavor of enablement/disablement, after all.)
 
 if ![runto_main] then {
-    fail "enable/disable break tests suppressed"
+    return
 }
 
 with_test_prefix "ignore count" {
@@ -246,7 +248,7 @@ gdb_test_multiple "continue" "$test" {
 # Verify that we can specify both an ignore count and an auto-delete.
 
 if ![runto_main] then {
-    fail "enable/disable break tests suppressed"
+    return
 }
 
 with_test_prefix "ignore count and auto-delete" {
@@ -278,7 +280,7 @@ gdb_test "continue" \
 # the bp is encountered.
 
 if ![runto_main] then {
-    fail "enable/disable break tests suppressed"
+    return
 }
 
 with_test_prefix "disabled breakpoint ignore count" {
@@ -306,7 +308,9 @@ gdb_test "info break $bp" \
 # (Also verify that GDB gracefully handles the case where the inferior
 # isn't stopped at a breakpoint.)
 #
-if ![runto_main] then { fail "enable/disable break tests suppressed" }
+if ![runto_main] then {
+    return
+}
 
 gdb_test "break $bp_location1" \
     "Breakpoint \[0-9\]*.*, line $bp_location1.*" \
@@ -332,7 +336,9 @@ gdb_test_multiple "continue 2" "$test" {
 # Verify that GDB correctly handles the "enable/disable" command
 # with arguments, that include multiple locations.
 #
-if ![runto_main] then { fail "enable/disable break tests suppressed" }
+if ![runto_main] then {
+    return
+}
 
 set b1 0
 set b2 0

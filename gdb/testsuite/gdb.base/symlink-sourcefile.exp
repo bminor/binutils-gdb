@@ -36,7 +36,6 @@ if {[prepare_for_testing $testfile $testfile $srcfilelink]} {
 }
 
 if {![runto_main]} {
-    untested "could not run to main"
     return -1
 }
 

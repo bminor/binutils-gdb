@@ -56,7 +56,6 @@ proc run_test { repack } {
     clean_restart ${binfile}
 
     if ![fortran_runto_main] {
-	untested "could not run to main"
 	return -1
     }
 

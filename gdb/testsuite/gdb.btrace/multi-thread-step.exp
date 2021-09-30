@@ -30,7 +30,6 @@ if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" "$binfile" executable {debu
 clean_restart $testfile
 
 if ![runto_main] {
-    untested "failed to run to main"
     return -1
 }
 

@@ -21,7 +21,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 
 # We need to start the inferior to place the breakpoints in the memory at all.
 if ![runto_main] {
-    untested start
     return -1
 }
 

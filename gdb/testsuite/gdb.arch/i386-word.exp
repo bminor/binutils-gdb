@@ -38,7 +38,6 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list
 clean_restart ${binfile}
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

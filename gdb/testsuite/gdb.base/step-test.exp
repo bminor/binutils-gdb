@@ -27,7 +27,6 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debu
 clean_restart ${binfile}
 
 if ![runto_main] then {
-   fail "can't run to main"
    return 0
 }
 
@@ -143,11 +142,9 @@ gdb_test_multiple "finish" "$test" {
     -re ".*(Program received|$inferior_exited_re).*$gdb_prompt $" {
 	# Oops... We ran to the end of the program...  Better reset     
 	if {![runto_main]} then {
-	    fail "$test (Can't run to main)"
 	    return 0
 	}
 	if {![runto step-test.c:45]} {
-	    fail "$test (Can't run to line 45)"
 	    return 0
 	}
 	fail "$test"

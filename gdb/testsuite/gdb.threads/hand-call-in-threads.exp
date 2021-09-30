@@ -50,7 +50,6 @@ proc get_dummy_frame_number { } {
 clean_restart ${binfile}
 
 if { ![runto_main] } {
-    fail "can't run to main"
     return 0
 }
 

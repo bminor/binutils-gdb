@@ -45,7 +45,6 @@ gdb_test "handle SIGPROF print pass nostop"
 
 # Advance to main
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

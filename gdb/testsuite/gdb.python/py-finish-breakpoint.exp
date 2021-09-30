@@ -54,7 +54,6 @@ clean_restart ${testfile}
 gdb_load_shlib ${lib_sl}
 
 if ![runto_main] then {
-    fail "cannot run to main."
     return 0
 }
 
@@ -105,7 +104,6 @@ gdb_test "source $python_file" "Python script imported.*" \
 set cond_line [gdb_get_line_number "Condition Break."]
 
 if ![runto_main] then {
-    fail "cannot run to main."
     return 0
 }
 
@@ -131,8 +129,7 @@ gdb_test "source $python_file" "Python script imported.*" \
          "import python scripts, 3"
 
 if ![runto call_longjmp_1] then {
-    perror "couldn't run to breakpoint call_longjmp"
-    continue
+    return
 }
 
 gdb_test "python finishbp = SimpleFinishBreakpoint(gdb.newest_frame())" \
@@ -158,7 +155,6 @@ gdb_test "source $python_file" "Python script imported.*" \
 
 
 if ![runto_main] then {
-    fail "cannot run to main."
     return 0
 }
          
@@ -184,7 +180,6 @@ gdb_test "source $python_file" "Python script imported.*" \
          "import python scripts, 5"
 
 if ![runto_main] then {
-    fail "cannot run to main."
     return 0
 }
 
@@ -212,7 +207,6 @@ gdb_test "source $python_file" "Python script imported.*" \
          "import python scripts, 6"
 
 if ![runto_main] then {
-    fail "cannot run to main."
     return 0
 }
 
@@ -239,7 +233,6 @@ gdb_test "print increase(&i)" \
 #
 
 if ![runto "test_exec_exit"] then {
-    fail "cannot run to test_exec_exit."
     return 0
 }
 
@@ -252,7 +245,6 @@ gdb_test "continue" "SimpleFinishBreakpoint out of scope.*" "catch out of scope 
 #
 
 if ![runto "test_exec_exit"] then {
-    fail "cannot run to test_exec_exit."
     return 0
 }     
 

@@ -25,7 +25,10 @@ if { [prepare_for_testing "failed to prepare" "hbreak2" {break.c break1.c} {debu
 set srcfile break.c
 set srcfile1 break1.c
 
-if ![runto_main] then { fail "break tests suppressed" }
+if ![runto_main] then {
+    return
+}
+
 delete_breakpoints
 
 #
@@ -284,7 +287,9 @@ gdb_test "info break" \
 
 #***********
 
-if ![runto_main] then { fail "break tests suppressed" }
+if ![runto_main] then {
+    return
+}
 
 # Verify that GDB responds gracefully when asked to set a breakpoint
 # on a nonexistent source line.
@@ -310,7 +315,9 @@ gdb_test "hbreak" "Hardware assisted breakpoint \[0-9\]*.*" \
 # Verify that a "silent" breakpoint can be set, and that GDB is indeed
 # "silent" about its triggering.
 #
-if ![runto_main] then { fail "break tests suppressed" }
+if ![runto_main] then {
+    return
+}
 
 gdb_test_multiple "hbreak $bp_location1" \
     "set to-be-silent hardware break bp_location1" {
@@ -513,7 +520,10 @@ if { [prepare_for_testing "failed to prepare" "hbreak2o2" {break.c break1.c} {de
     return -1
 }
 
-if ![runto_main] then { fail "break tests suppressed" }
+if ![runto_main] then {
+    return
+}
+
 delete_breakpoints
 
 #

@@ -35,7 +35,6 @@ proc test { command } {
 	clean_restart ${binfile}
 
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return 0
 	}
 

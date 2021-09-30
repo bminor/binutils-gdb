@@ -43,7 +43,6 @@ clean_restart $binfile
 gdb_load_shlib $lib1
 
 if ![runto_main] {
-    fail "can't run to main"
     return -1
 }
 

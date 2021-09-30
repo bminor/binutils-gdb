@@ -150,7 +150,6 @@ proc do_test {lang} {
     }
 
     if ![runto_main] then {
-	fail "couldn't run to breakpoint"
 	return
     }
 

@@ -96,7 +96,6 @@ proc one_jit_test {jit_solibs_target match_str reattach} {
 	}
 
 	if { ![runto_main] } {
-	    fail "can't run to main"
 	    return
 	}
 

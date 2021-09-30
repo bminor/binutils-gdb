@@ -33,7 +33,6 @@ set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 set bp_location2 [gdb_get_line_number "set breakpoint 2 here"]
 
 if { [go_runto_main] < 0 } {
-    untested "could not run to main"
     return -1
 }
 

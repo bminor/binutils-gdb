@@ -183,7 +183,6 @@ proc_with_prefix test-print {{prefix ""}} {
     clean_restart $binfile
 
     if ![runto_main] {
-	fail "cannot run to main"
 	return
     }
 
@@ -296,7 +295,6 @@ proc_with_prefix test-backtrace {} {
     clean_restart $binfile
 
     if ![runto_main] {
-	fail "cannot run to main"
 	return
     }
 

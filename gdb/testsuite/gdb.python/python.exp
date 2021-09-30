@@ -218,7 +218,6 @@ clean_restart ${testfile}
 # The following tests require execution.
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
@@ -433,7 +432,6 @@ clean_restart ${testfile}
 # The following tests require execution.
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
@@ -489,7 +487,6 @@ clean_restart ${testfile}
 # The following tests require execution.
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

@@ -175,7 +175,6 @@ with_test_prefix "renamed binfile" {
 clean_restart $binfile
 
 if ![runto_main] then {
-    fail "can't run to main"
     return
 }
 

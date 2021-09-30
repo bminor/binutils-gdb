@@ -36,7 +36,6 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
 }
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

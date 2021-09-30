@@ -43,7 +43,6 @@ gdb_test "tstart" "Target returns error code.*\."
 
 with_test_prefix "after tstart" {
     if ![runto_main] {
-	fail "can't run to main, target may have died unexpectedly"
 	return -1
     }
 }

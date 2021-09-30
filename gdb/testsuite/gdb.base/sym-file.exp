@@ -76,7 +76,6 @@ if {[prepare_for_testing "failed to prepare"  $binfile "$srcfile $srcfile2" $exe
 gdb_load_shlib ${lib_so}
 
 if ![runto_main] then {
-    fail "can't run to main"
     return
 }
 

@@ -39,7 +39,6 @@ mi_gdb_load ${binfile}
 mi_gdb_test "-gdb-set debug-file-directory \"\"" ".*"
 
 if ![mi_runto "task_switch.break_me"] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 

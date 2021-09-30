@@ -190,7 +190,6 @@ set options [list debug nowarnings]
 gdb_compile ${objfiles} ${binfile} executable ${options}
 clean_restart ${testname}
 if ![runto_main] then {
-    fail "running test program, MIPS16 thunk tests aborted"
     return
 }
 

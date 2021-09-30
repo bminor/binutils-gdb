@@ -35,7 +35,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile]} {
 # Check we can run to main.  If this works this time then we just
 # assume that it will work later on (when we repeatedly restart GDB).
 if ![runto_main] then {
-    untested $testfile
     return -1
 }
 

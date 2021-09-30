@@ -119,7 +119,6 @@ foreach_with_prefix ranges_sect {ranges rnglists} {
     gdb_test_no_output "set auto-solib-add off"
 
     if { ![runto_main] } {
-	fail "cannot run to main."
 	return -1
     }
 

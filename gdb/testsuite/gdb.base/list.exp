@@ -492,7 +492,6 @@ proc test_list {command listsize1 listsize2 linerange1 linerange2} {
 
 	clean_restart $binfile
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return
 	}
 

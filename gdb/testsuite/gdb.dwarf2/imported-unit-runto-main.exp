@@ -80,4 +80,4 @@ if { [ensure_gdb_index $binfile] == -1 } {
 
 clean_restart ${binfile}
 
-runto main message
+runto main

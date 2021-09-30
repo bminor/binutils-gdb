@@ -32,7 +32,6 @@ proc_with_prefix test_setshow_annotate {} {
     clean_restart $::binfile
 
     if ![runto_main] then {
-	fail "can't run to main"
 	return
     }
 
@@ -82,7 +81,6 @@ proc_with_prefix test_setshow_args {} {
     clean_restart $::binfile
 
     if ![runto_main] then {
-	fail "can't run to main"
 	return
     }
 

@@ -20,7 +20,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 }
 
 if ![runto_main] {
-    untested destrprint
     return -1
 }
 

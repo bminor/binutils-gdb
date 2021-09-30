@@ -41,7 +41,6 @@ set catch_exception_info \
 ####################################
 
 if ![runto_main] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 
@@ -90,7 +89,6 @@ gdb_test "continue" \
 #  - continue, the program exits.
 
 if ![runto_main] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 
@@ -151,7 +149,6 @@ gdb_test "continue" \
 #     the program.
 
 if ![runto_main] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 

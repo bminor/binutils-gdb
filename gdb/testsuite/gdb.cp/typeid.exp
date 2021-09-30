@@ -58,7 +58,6 @@ with_test_prefix "before starting" {
 }
 
 if ![runto_main] {
-    untested typeid
     return -1
 }
 

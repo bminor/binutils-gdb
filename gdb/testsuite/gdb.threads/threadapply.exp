@@ -32,7 +32,6 @@ clean_restart ${binfile}
 #
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
@@ -77,7 +76,6 @@ proc thr_apply_detach {thread_set} {
 	clean_restart ${binfile}
 
 	if ![runto_main] {
-	    fail "can't run to main"
 	    return -1
 	}
 

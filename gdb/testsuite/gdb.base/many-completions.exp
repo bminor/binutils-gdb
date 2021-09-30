@@ -72,7 +72,6 @@ if {[prepare_for_testing "failed to prepare" "$testfile" $srcfile \
 
 # Start the test.
 if {![runto_main]} {
-    fail "couldn't run to main"
     return
 }
 

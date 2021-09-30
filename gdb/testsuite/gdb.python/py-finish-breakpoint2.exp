@@ -28,7 +28,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 if { [skip_python_tests] } { continue }
 
 if ![runto_main] then {
-    fail "cannot run to main."
     return 0
 }
 

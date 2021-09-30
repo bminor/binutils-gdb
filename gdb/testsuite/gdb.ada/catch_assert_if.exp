@@ -33,7 +33,6 @@ set eol "\[\r\n\]+"
 set sp "\[ \t\]*"
 
 if ![runto_main] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 
@@ -62,7 +61,6 @@ gdb_test_multiple "catch exception" $msg {
 #  - continue, the program exits.
 
 if ![runto_main] then {
-   fail "cannot run to main, testcase aborted"
    return 0
 }
 

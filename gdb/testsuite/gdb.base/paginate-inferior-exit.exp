@@ -32,7 +32,6 @@ proc test_paginate_inferior_exited {} {
 	clean_restart $binfile
 
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return 0
 	}
 

@@ -35,7 +35,6 @@ gdb_test_no_output "set args ${pattern}"	\
     "set buffer exceeding arguments"
 
 if { ! [ runto_main ] } then {
-    untested "could not run to main"
     return -1
 }
 

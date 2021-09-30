@@ -29,8 +29,7 @@ if { [skip_python_tests] } { continue }
 
 clean_restart "${testfile}"
 if ![runto_main] {
-    perror "could not run to main"
-    continue
+    return
 }
 
 # The following will create a breakpoint Python wrapper whose construction will

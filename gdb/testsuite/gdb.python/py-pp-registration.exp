@@ -31,7 +31,6 @@ set remote_python_file [gdb_remote_download host \
 			    ${srcdir}/${subdir}/${testfile}.py]
 
 if ![runto_main ] {
-    fail "can't run to main"
     return -1
 }
 
@@ -42,7 +41,7 @@ proc prepare_test { } {
     clean_restart ${testfile}
 
     set run_to_here [gdb_get_line_number {break to inspect} ${testfile}.c ]
-    if ![runto ${testfile}.c:$run_to_here message] {
+    if ![runto ${testfile}.c:$run_to_here] {
 	return 0
     }
 

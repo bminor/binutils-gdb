@@ -40,7 +40,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 }
 
 if ![runto_main] {
-    fail "can't run to main to check for trace support"
     return -1
 }
 
@@ -67,7 +66,6 @@ if { [istarget "i\[34567\]86-*-linux*"] || [istarget "x86_64-*-linux*"] } {
 # Start with a fresh gdb.
 clean_restart ${testfile}
 if ![runto_main] {
-    fail "can't run to main"
     return -1
 }
 

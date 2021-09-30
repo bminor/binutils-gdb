@@ -38,7 +38,6 @@ proc test_stepi {function } {
     # of the previous tests, this makes sure that it doesn't affect
     # this series of tests.
     if ![runto_main] then {
-        fail "can't run to main"
         return 0
     }
 

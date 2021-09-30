@@ -56,7 +56,6 @@ proc test_remove_bp { initial_load } {
 	set GDBFLAGS $saved_gdbflags
 
 	if ![runto start] {
-	    fail "can't run to start"
 	    return
 	}
 

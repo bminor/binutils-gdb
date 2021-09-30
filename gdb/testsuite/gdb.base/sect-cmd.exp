@@ -23,7 +23,6 @@ set srcfile break.c
 set srcfile1 break1.c
 
 if ![runto_main] then {
-    fail "couldn't run to main"
     return
 }
 

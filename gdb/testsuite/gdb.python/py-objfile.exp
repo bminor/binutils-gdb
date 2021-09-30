@@ -28,7 +28,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 if { [skip_python_tests] } { continue }
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
@@ -121,7 +120,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile}2 ${srcfile} {nodebug l
 }
 
 if ![runto_main] {
-    fail "can't run to main"
     return 0
 }
 

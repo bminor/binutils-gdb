@@ -28,7 +28,6 @@ proc test_watchpoint_across_vfork { hw teststr } {
     clean_restart ${testfile}
 
     if { ![runto_main] } then {
-	fail "run to main ($teststr)"
 	return
     }
 

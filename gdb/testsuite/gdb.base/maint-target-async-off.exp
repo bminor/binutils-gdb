@@ -34,7 +34,6 @@ save_vars { GDBFLAGS } {
 gdb_test "maintenance show target-async" "Controlling the inferior in asynchronous mode is off\\."
 
 if { ![runto_main] } {
-    fail "can't run to main"
     return
 }
 

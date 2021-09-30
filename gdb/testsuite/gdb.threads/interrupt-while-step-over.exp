@@ -24,7 +24,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 }
 
 if {![runto_main]} {
-    fail "can't run to main"
     return -1
 }
 
@@ -175,7 +174,6 @@ proc testdriver {displaced} {
     gdb_test_no_output "set displaced-stepping $displaced"
 
     if ![runto all_started] {
-	fail "couldn't run to all_started"
 	return
     }
     set break_line [gdb_get_line_number "set breakpoint here"]

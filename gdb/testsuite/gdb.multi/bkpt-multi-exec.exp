@@ -50,7 +50,6 @@ clean_restart ${exec1}
 # Start the program running, and stop at main.
 #
 if ![runto_main] then {
-    perror "Couldn't run ${binfile1}"
     return
 }
 

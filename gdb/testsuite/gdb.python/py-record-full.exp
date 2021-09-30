@@ -36,7 +36,6 @@ if { [skip_python_tests] } {
 }
 
 if ![runto_main ] then {
-    fail "can't run to main"
     return -1
 }
 

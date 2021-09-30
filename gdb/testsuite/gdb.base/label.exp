@@ -25,7 +25,6 @@ if { [prepare_for_testing "failed to prepare" $testfile ${srcfile} debug] } {
 
 
 if {![runto_main]} {
-  fail "label tests suppressed"
   return -1
 }
 

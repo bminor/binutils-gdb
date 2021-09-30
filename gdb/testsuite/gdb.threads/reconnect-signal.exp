@@ -34,7 +34,6 @@ if { [gdb_compile_pthreads \
 clean_restart $executable
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

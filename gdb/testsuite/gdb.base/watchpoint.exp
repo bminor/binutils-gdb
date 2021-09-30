@@ -805,7 +805,9 @@ proc test_no_hw_watchpoints {} {
     # (This proves rather little on kernels that don't support
     # fast watchpoints, but still...)
     #
-    if ![runto_main] then { fail "watch tests suppressed" }
+    if ![runto_main] then {
+	return
+    }
 
     gdb_test_no_output "set can-use-hw-watchpoints 0" "disable fast watches"
 

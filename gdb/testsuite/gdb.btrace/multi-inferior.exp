@@ -39,7 +39,6 @@ if [prepare_for_testing "failed to prepare" $testfile {} {debug}] {
 
 with_test_prefix "inferior 1" {
     if ![runto_main] {
-	untested "failed to run to main"
 	return -1
     }
 }
@@ -50,7 +49,6 @@ with_test_prefix "inferior 2" {
     gdb_test "inferior 2" "Switching to inferior 2.*"
 
     if ![runto_main] {
-	untested "inferior 2: failed to run to main"
 	return -1
     }
 
@@ -70,7 +68,6 @@ with_test_prefix "inferior 3" {
     gdb_test "inferior 3" "Switching to inferior 3.*"
 
     if ![runto_main] {
-	untested "inferior 3: failed to run to main"
 	return -1
     }
 

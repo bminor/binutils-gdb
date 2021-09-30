@@ -113,7 +113,6 @@ proc test_thread_messages {enabled} {
   # The initial thread may log a 'New Thread' message, but we don't
   # check for it.
   if ![runto_main] then {
-     fail "can't run to main $enabled_string"
      return 1
   }
 

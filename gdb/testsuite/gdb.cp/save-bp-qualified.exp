@@ -27,7 +27,6 @@ proc restart {} {
     clean_restart $testfile
 
     if ![runto_main] {
-	untested "could not run to main"
 	return 0
     }
     # Delete all breakpoints so that the "runto_main" breakpoint above

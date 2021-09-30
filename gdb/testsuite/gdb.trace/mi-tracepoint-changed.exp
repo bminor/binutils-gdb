@@ -70,7 +70,6 @@ proc test_reconnect { } {
 	gdb_load_shlib $lib_sl1
 	gdb_load_shlib $lib_sl2
 	if ![runto_main] then {
-	    fail "can't run to main"
 	    return 0
 	}
 	# Create tracepoints on marker and main, and leave them in the
@@ -251,7 +250,6 @@ gdb_load_shlib $lib_sl1
 gdb_load_shlib $lib_sl2
 
 if ![runto_main] {
-    fail "can't run to main to check for trace support"
     return -1
 }
 

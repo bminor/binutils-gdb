@@ -26,7 +26,6 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 
 proc goto_probe { probe_name } {
     if { ![runto "-pstap $probe_name"] } {
-	fail "run to probe $probe_name"
 	return
     }
 }

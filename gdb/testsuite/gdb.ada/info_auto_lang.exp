@@ -46,7 +46,6 @@ clean_restart ${testfile}
 
 set bp_location [gdb_get_line_number "STOP" ${testdir}/some_c.c]
 if ![runto "some_c.c:$bp_location"] then {
-    fail "can't run to some_c.c STOP location"
     return
 }
 

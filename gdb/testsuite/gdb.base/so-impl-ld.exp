@@ -44,7 +44,9 @@ gdb_load_shlib $lib_sl
 
 # This program implicitly loads SOM shared libraries.
 #
-if ![runto_main] then { fail "implicit solibs tests suppressed" }
+if ![runto_main] then {
+    return
+}
 
 # Verify that we can step over the first shlib call.
 #

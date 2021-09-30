@@ -36,7 +36,6 @@ proc run_test { opt_level } {
     }
 
     if { ![runto_main] } then {
-	unsupported "runto main"
 	return
     }
 

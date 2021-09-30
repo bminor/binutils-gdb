@@ -74,7 +74,6 @@ proc build_and_run_test { lang symbols } {
     clean_restart $binfile
 
     if ![runto_main] then {
-	fail "can't run to main"
 	return
     }
 

@@ -64,7 +64,6 @@ proc_with_prefix test { non-stop threaded run-or-attach } {
     }
 
     if { ![runto_main] } {
-	untested "could not run to main"
 	return
     }
 

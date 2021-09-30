@@ -33,7 +33,6 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads
 }
 
 if ![runto_main] then {
-    fail "cannot run to main"
     return -1
 }
 

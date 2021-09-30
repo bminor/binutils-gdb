@@ -50,7 +50,6 @@ proc check_thread_specific_breakpoint {mode} {
 	global gdb_prompt
 
 	if ![runto_main] {
-	    untested "could not run to main"
 	    return -1
 	}
 

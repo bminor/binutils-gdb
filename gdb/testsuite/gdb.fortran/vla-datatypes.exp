@@ -27,7 +27,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 # handled correctly when using as VLA's
 
 if ![fortran_runto_main] {
-    untested "could not run to main"
     return -1
 }
 

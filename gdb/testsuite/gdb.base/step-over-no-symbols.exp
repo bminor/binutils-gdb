@@ -50,8 +50,6 @@ proc test_step_over { displaced } {
     clean_restart $binfile
 
     if ![runto_main] {
-	fail "couldn't run to main"
-	untested "stepping over breakpoint with displaced=$displaced"
 	return -1
     }
 

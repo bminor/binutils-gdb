@@ -30,7 +30,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 }
 
 if { ![runto_main] } {
-    unsupported "could not run to main"
     return -1
 }
 

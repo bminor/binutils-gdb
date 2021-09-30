@@ -28,7 +28,6 @@ if {[prepare_for_testing "failed to prepare" $exefile $srcfile {debug c++}]} {
 }
 
 if {![runto_main]} {
-    fail "can't run to main"
     return 0
 }
 

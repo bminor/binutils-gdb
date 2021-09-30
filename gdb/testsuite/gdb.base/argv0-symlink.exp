@@ -54,7 +54,6 @@ with_test_prefix "file symlink" {
     clean_restart "$filelink"
 
     if ![runto_main] {
-	untested "could not run to main"
 	return -1
     }
 
@@ -95,7 +94,6 @@ with_test_prefix "dir symlink" {
     clean_restart "$dirlink/$filelink"
 
     if ![runto_main] {
-	untested "could not run to main"
 	return -1
     }
 

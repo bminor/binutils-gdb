@@ -54,7 +54,6 @@ gdb_load_shlib $lib_sl1
 gdb_load_shlib $lib_sl2
 
 if ![runto_main] {
-    fail "can't run to main to check for trace support"
     return -1
 }
 
@@ -75,7 +74,6 @@ proc tracepoint_change_loc_1 { trace_type } {
 
 	clean_restart ${testfile}
 	if ![runto_main] {
-	    fail "can't run to main"
 	    return -1
 	}
 	gdb_test_no_output "delete break 1"
@@ -303,7 +301,6 @@ proc tracepoint_install_in_trace_disabled { trace_type } {
 
 	clean_restart ${testfile}
 	if ![runto_main] {
-	    fail "can't run to main"
 	    return -1
 	}
 

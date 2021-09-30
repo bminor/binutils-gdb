@@ -31,7 +31,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 }
 
 if { ![runto_main] } {
-    untested "failed to runto main"
     return -1
 }
 

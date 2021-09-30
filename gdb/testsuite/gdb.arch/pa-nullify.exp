@@ -89,7 +89,6 @@ proc get_addr_of_sym { sym } {
 }
 
 if  ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 
@@ -126,7 +125,6 @@ proc test_core_bt { test } {
 
 set test "core at last insn in foo"
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 gdb_breakpoint "*$foo_last"
@@ -137,7 +135,6 @@ if [gen_core $test] {
 
 set test "core at nullified insn"
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 gdb_breakpoint "*$foo_last"

@@ -60,7 +60,6 @@ proc test_multi_libstdcpp {static_bin static_lib} {
     gdb_load_shlib $binfile_lib
 
     if ![runto_main] {
-	fail "can't run to main"
 	return 0
     }
 

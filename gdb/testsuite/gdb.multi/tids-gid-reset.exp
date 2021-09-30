@@ -67,7 +67,6 @@ with_test_prefix "multi-inferior" {
     gdb_load ${binfile}
 
     if ![runto_main] then {
-	fail "starting inferior 2"
 	return
     }
 

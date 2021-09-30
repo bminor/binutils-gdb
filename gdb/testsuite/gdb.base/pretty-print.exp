@@ -23,7 +23,6 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
 }
 
 if ![runto_main] {
-    untested $testfile.exp
     return -1
 }
 

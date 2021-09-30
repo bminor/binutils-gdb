@@ -98,7 +98,6 @@ proc test {dwarf_unwinder} {
     gdb_test_no_output "maint set dwarf unwinder $dwarf_unwinder"
 
     if ![runto_main] then {
-	fail "can't run to main"
 	return 0
     }
 

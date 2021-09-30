@@ -33,7 +33,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 if { [skip_python_tests] } { continue }
 
 if ![runto_main ] then {
-    fail "can't run to main"
     return -1
 }
 

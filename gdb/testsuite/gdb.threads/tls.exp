@@ -165,7 +165,6 @@ gdb_test_multiple "print a_thread_local" "" {
 }
 
 if ![runto_main] then {
-   fail "can't run to main"
    return 0
 }
 

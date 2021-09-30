@@ -37,7 +37,6 @@ proc do_test { displaced } {
     global decimal hex
 
     if ![runto_main] then {
-	untested "could not run to main"
 	return -1
     }
 

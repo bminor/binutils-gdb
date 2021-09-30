@@ -22,7 +22,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 }
 
 if {![runto_main]} {
-    untested "could not run to main"
     return -1
 }
 

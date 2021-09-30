@@ -57,7 +57,6 @@ proc test_info_sources {args expect_seen_info_sources expect_seen_info_sources_b
 }
 
 if ![runto_main] {
-    untested $testfile.exp
     return -1
 }
 

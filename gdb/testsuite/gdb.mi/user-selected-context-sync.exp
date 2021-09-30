@@ -402,7 +402,6 @@ proc_with_prefix test_setup { mode } {
     mi_gdb_load $binfile
 
     if { [mi_runto_main] < 0 } {
-	fail "can't run to main"
 	return
     }
 

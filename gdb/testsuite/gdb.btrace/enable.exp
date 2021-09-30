@@ -43,7 +43,6 @@ if [prepare_for_testing "failed to prepare" $testfile {} {debug}] {
 }
 
 if ![runto_main] {
-    untested "failed to run to main"
     return -1
 }
 
@@ -86,23 +85,19 @@ if [skip_gdbserver_tests] {
 }
 clean_restart $testfile
 if ![runto_main] {
-    untested "failed to run to main"
     return -1
 }
 if ![runto_main] {
-    untested "failed to run to main"
     return -1
 }
 
 # make sure record-btrace can be enabled after re-run
 clean_restart $testfile
 if ![runto_main] {
-    untested "failed to run to main"
     return -1
 }
 gdb_test_no_output "record btrace" "enable after restart"
 if ![runto_main] {
-    untested "failed to run to main"
     return -1
 }
 gdb_test_no_output "record btrace" "enable after re-run"

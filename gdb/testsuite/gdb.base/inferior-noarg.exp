@@ -26,7 +26,6 @@ if { [prepare_for_testing "failed to prepare" \
 gdb_test "inferior" "\[Current inferior is 1 \[<null>\] (.*)\]" "inferior not running"
 
 if { ![runto_main] } {
-    untested "could not run to main"
     return
 }
 

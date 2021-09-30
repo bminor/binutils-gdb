@@ -80,7 +80,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 }
 
 if { ![runto_main] } then {
-    fail "run to main"
     return
 }
 
@@ -135,7 +134,6 @@ proc test {always_inserted} {
 	clean_restart $binfile
 
 	if { ![runto_main] } then {
-	    fail "run to main"
 	    return
 	}
 

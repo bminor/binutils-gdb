@@ -24,7 +24,6 @@ if { [prepare_for_testing "failed to prepare" ${test} ${srcfile}] } {
 }
 
 if ![runto_main] {
-    untested ${test}.exp
     return -1
 }
 

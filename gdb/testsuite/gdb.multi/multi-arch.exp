@@ -79,7 +79,7 @@ if { [build_executable "failed to prepare" ${exec2} "${srcfile2}" \
 
 clean_restart ${exec1}
 if ![runto_main] then {
-    fail "starting inferior 1"
+    return
 }
 
 # Add and start inferior 2
@@ -89,7 +89,7 @@ gdb_test "inferior 2" "Switching to inferior 2.*" "switch to inferior 2"
 gdb_load ${binfile2}
 
 if ![runto_main] then {
-    fail "starting inferior 2"
+    return
 }
 
 # Check we do have two inferiors loaded.

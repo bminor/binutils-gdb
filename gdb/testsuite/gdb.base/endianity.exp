@@ -26,7 +26,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 
 set bp_location [gdb_get_line_number "START"]
 if ![runto "endianity.c:$bp_location" ] then {
-  fail "couldn't run to start"
   return -1
 }
 

@@ -492,7 +492,6 @@ proc_with_prefix test_bkpt_temporary { } {
     clean_restart ${testfile}
 
     if ![gdb_guile_runto_main] {
-	fail "cannot run to main."
 	return 0
     }
     delete_breakpoints

@@ -26,7 +26,6 @@ gdb_test "maint expand-symtabs"
 gdb_test "p a" { = \{1, 2\}}
 
 if ![runto_main] then {
-    fail "can't run to main"
     return 0
 }
 

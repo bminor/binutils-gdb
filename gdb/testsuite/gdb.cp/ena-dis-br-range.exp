@@ -30,7 +30,6 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 }
 
 if ![runto 'marker'] then {
-    fail "run to marker"
     return -1
 }
 

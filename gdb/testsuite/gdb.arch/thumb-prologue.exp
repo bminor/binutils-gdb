@@ -40,7 +40,6 @@ gdb_load ${binfile}
 #
 
 if ![runto_main] then {
-    untested "ARM prologue tests"
     return -1
 }
 

@@ -68,7 +68,6 @@ set some_func [find_mangled_name "some_func"]
 set string_func [find_mangled_name "string_func"]
 
 if ![fortran_runto_main] {
-    untested "could not run to main"
     return -1
 }
 

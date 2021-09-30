@@ -83,7 +83,6 @@ delete_breakpoints
 set bp_location [gdb_get_line_number "set multi-line breakpoint here" $hdrfile]
 
 if { ![runto_main] } {
-    fail "can't run to main for multi_line_foo tests."
     return 0
 }
 
