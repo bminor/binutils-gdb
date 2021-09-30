@@ -123,8 +123,7 @@ proc build_test_program {} {
     }
     
     set sources "$srcfile $asm_file"
-    if {[build_executable $testfile.exp $testfile $sources {nodebug}]} { 
-	untested "failed to compile"
+    if {[build_executable "failed to compile" $testfile $sources {nodebug}]} {
 	return -1
     }
 }
@@ -245,6 +244,9 @@ proc do_mi_test {} {
     }
 }
 
-build_test_program
+if { [build_test_program] == -1 } {
+    return -1
+}
+
 do_console_test
 do_mi_test
