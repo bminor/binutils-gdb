@@ -57,7 +57,7 @@ puts $f "int main (void) { return 0; }"
 close $f
 
 if { [gdb_compile "$srcfileabs" "${binfile}" executable {debug}] != "" } {
-    untested $testname
+    untested "failed to compile"
     return -1
 }
 

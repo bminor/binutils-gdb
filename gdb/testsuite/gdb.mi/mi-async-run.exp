@@ -18,7 +18,7 @@ load_lib mi-support.exp
 standard_testfile
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested "mi-async-run.exp"
+     untested "failed to compile"
      return -1
 }
 
