@@ -155,9 +155,9 @@ automatically cause those extensions to be disabled.
 @item @code{i8mm} @tab ARMv8.2-A @tab ARMv8.6-A or later
  @tab Enable Int8 Matrix Multiply extension.
 @item @code{f32mm} @tab ARMv8.2-A @tab No
- @tab Enable F32 Matrix Multiply extension.
+ @tab Enable F32 Matrix Multiply extension.  This implies @code{sve}.
 @item @code{f64mm} @tab ARMv8.2-A @tab No
- @tab Enable F64 Matrix Multiply extension.
+ @tab Enable F64 Matrix Multiply extension.  This implies @code{sve}.
 @item @code{bf16} @tab ARMv8.2-A @tab ARMv8.6-A or later
  @tab Enable BFloat16 extension.
 @item @code{compnum} @tab ARMv8.2-A @tab ARMv8.3-A or later
@@ -204,7 +204,7 @@ automatically cause those extensions to be disabled.
  @tab Enable the Dot Product extension.  This implies @code{simd}.
 @item @code{fp16fml} @tab ARMv8.2-A @tab ARMv8.4-A or later
  @tab Enable ARMv8.2 16-bit floating-point multiplication variant support.
- This implies @code{fp16}.
+ This implies @code{fp} and  @code{fp16}.
 @item @code{sb} @tab ARMv8-A @tab ARMv8.5-A or later
  @tab Enable the speculation barrier instruction sb.
 @item @code{predres} @tab ARMv8-A @tab ARMv8.5-A or later
@@ -218,16 +218,17 @@ automatically cause those extensions to be disabled.
 @item @code{tme} @tab ARMv8-A @tab No
  @tab Enable Transactional Memory Extensions.
 @item @code{sve2} @tab ARMv8-A @tab Armv9-A or later
- @tab Enable the SVE2 Extension.
+ @tab Enable the SVE2 Extension.  This implies @code{sve}.
 @item @code{sve2-bitperm} @tab ARMv8-A @tab No
  @tab Enable SVE2 BITPERM Extension.
 @item @code{sve2-sm4} @tab ARMv8-A @tab No
- @tab Enable SVE2 SM4 Extension.
+ @tab Enable SVE2 SM4 Extension.  This implies @code{sm4} and @code{sve2}.
 @item @code{sve2-aes} @tab ARMv8-A @tab No
  @tab Enable SVE2 AES Extension.  This also enables the .Q->.B form of the
- @code{pmullt} and @code{pmullb} instructions.
+ @code{pmullt} and @code{pmullb} instructions.  This implies @code{aes} and
+ @code{sve2}.
 @item @code{sve2-sha3} @tab ARMv8-A @tab No
- @tab Enable SVE2 SHA3 Extension.
+ @tab Enable SVE2 SHA3 Extension.  This implies @code{sha3} and @code{sve2}.
 @item @code{flagm} @tab ARMv8-A @tab ARMv8.4-A or later
  @tab Enable Flag Manipulation instructions.
 @item @code{ls64} @tab ARMv8.6-A @tab ARMv8.7-A or later
