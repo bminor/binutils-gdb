@@ -141,6 +141,7 @@ recognized:
 @code{cortex-r7},
 @code{cortex-r8},
 @code{cortex-r52},
+@code{cortex-r52plus},
 @code{cortex-m35p},
 @code{cortex-m33},
 @code{cortex-m23},

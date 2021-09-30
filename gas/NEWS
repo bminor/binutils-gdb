@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Cortex-R52+ for Arm.
+
 * Add support for Cortex-A510, Cortex-A710, Cortex-X2 for AArch64.
 
 * Outputs of .ds.x directive and .tfloat directive with hex input from
