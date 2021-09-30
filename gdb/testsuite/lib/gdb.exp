@@ -7917,22 +7917,36 @@ proc add_gdb_index { program {style ""} } {
 # string (the default) means .gdb_index; "-dwarf-5" means .debug_names.
 
 proc ensure_gdb_index { binfile {style ""} } {
+    global decimal
+
     set testfile [file tail $binfile]
     set test "check if index present"
-    gdb_test_multiple "mt print objfiles ${testfile}" $test {
-	-re -wrap "gdb_index.*" {
-	    return 0
+    set has_index 0
+    gdb_test_multiple "mt print objfiles ${testfile}" $test -lbl {
+	-re "\r\n\\.gdb_index: version ${decimal}(?=\r\n)" {
+	    set has_index 1
+	    gdb_test_lines "" $gdb_test_name ".*"
 	}
-	-re -wrap "debug_names.*" {
-	    return 0
+	-re "\r\n\\.debug_names: exists(?=\r\n)" {
+	    set has_index 1
+	    gdb_test_lines "" $gdb_test_name ".*"
 	}
-	-re -wrap "Psymtabs.*" {
-	    if { [add_gdb_index $binfile $style] != "1" } {
-		return -1
-	    }
-	    return 1
+	-re "\r\nPsymtabs:(?=\r\n)" {
+	    gdb_test_lines "" $gdb_test_name ".*"
+	}
+	-re -wrap "" {
+	    fail $gdb_test_name
 	}
     }
+
+    if { $has_index } {
+	return 0
+    }
+
+    if { [add_gdb_index $binfile $style] == "1" } {
+	return 1
+    }
+
     return -1
 }
 
