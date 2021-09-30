@@ -29,7 +29,6 @@ if [gdb_skip_xml_test] then {
 
 # Compile test program.
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}] } {
-    fail "cannot compile test program"
     return -1
 }
 
