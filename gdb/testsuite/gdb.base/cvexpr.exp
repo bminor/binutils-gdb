@@ -514,7 +514,9 @@ gdb_test "ptype int * restrict" "type = int \\* restrict"
 
 # C++ does not have "restrict".
 gdb_test_no_output "set lang c++"
-gdb_test "ptype int * restrict" "A syntax error in expression.*"
+with_test_prefix c++ {
+    gdb_test "ptype int * restrict" "A syntax error in expression.*"
 
-# There is a GCC extension for __restrict__, though.
-gdb_test "ptype int * __restrict__" "type = int \\* __restrict__"
+    # There is a GCC extension for __restrict__, though.
+    gdb_test "ptype int * __restrict__" "type = int \\* __restrict__"
+}
