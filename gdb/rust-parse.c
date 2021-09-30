@@ -695,9 +695,16 @@ rust_parser::lex_string ()
 	  if (is_byte)
 	    obstack_1grow (&obstack, value);
 	  else
-	    convert_between_encodings ("UTF-32", "UTF-8", (gdb_byte *) &value,
-				       sizeof (value), sizeof (value),
-				       &obstack, translit_none);
+	    {
+#if WORDS_BIGENDIAN
+#define UTF32 "UTF-32BE"
+#else
+#define UTF32 "UTF-32LE"
+#endif
+	      convert_between_encodings (UTF32, "UTF-8", (gdb_byte *) &value,
+					 sizeof (value), sizeof (value),
+					 &obstack, translit_none);
+	    }
 	}
       else if (pstate->lexptr[0] == '\0')
 	error (_("Unexpected EOF in string"));
