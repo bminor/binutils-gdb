@@ -90,6 +90,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_F32MM	     (1ULL << 53)
 #define AARCH64_FEATURE_F64MM	     (1ULL << 54)
 #define AARCH64_FEATURE_FLAGM	     (1ULL << 55) /* v8.4 Flag Manipulation.  */
+#define AARCH64_FEATURE_V9	     (1ULL << 56) /* Armv9.0-A processors.  */
 
 /* Crypto instructions are the combination of AES and SHA2.  */
 #define AARCH64_FEATURE_CRYPTO	(AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_AES)
@@ -140,6 +141,10 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_ARCH_V8_R	(AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
 						 AARCH64_FEATURE_V8_R)	\
 			      & ~(AARCH64_FEATURE_V8_A | AARCH64_FEATURE_LOR))
+#define AARCH64_ARCH_V9		AARCH64_FEATURE (AARCH64_ARCH_V8_5,	\
+						 AARCH64_FEATURE_SVE   \
+						 | AARCH64_FEATURE_SVE2 \
+						 | AARCH64_FEATURE_V9)
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */

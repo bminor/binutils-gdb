@@ -107,7 +107,8 @@ issue an error message if an attempt is made to assemble an
 instruction which will not execute on the target architecture.  The
 following architecture names are recognized: @code{armv8-a},
 @code{armv8.1-a}, @code{armv8.2-a}, @code{armv8.3-a}, @code{armv8.4-a}
-@code{armv8.5-a}, @code{armv8.6-a}, @code{armv8.7-a}, and @code{armv8-r}.
+@code{armv8.5-a}, @code{armv8.6-a}, @code{armv8.7-a}, @code{armv8-r}, and
+@code{armv9-a}.
 
 If both @option{-mcpu} and @option{-march} are specified, the
 assembler will use the setting for @option{-mcpu}.  If neither are
@@ -196,7 +197,7 @@ automatically cause those extensions to be disabled.
  @tab Enable ARMv8.1 Advanced SIMD extensions.  This implies @code{simd}.
 @item @code{simd} @tab ARMv8-A @tab ARMv8-A or later
  @tab Enable Advanced SIMD extensions.  This implies @code{fp}.
-@item @code{sve} @tab ARMv8.2-A @tab No
+@item @code{sve} @tab ARMv8.2-A @tab Armv9-A or later
  @tab Enable the Scalable Vector Extensions.  This implies @code{fp16},
  @code{simd} and @code{compnum}.
 @item @code{dotprod} @tab ARMv8.2-A @tab ARMv8.4-A or later
@@ -216,7 +217,7 @@ automatically cause those extensions to be disabled.
  @tab Enable ARMv8.5-A Memory Tagging Extensions.
 @item @code{tme} @tab ARMv8-A @tab No
  @tab Enable Transactional Memory Extensions.
-@item @code{sve2} @tab ARMv8-A @tab No
+@item @code{sve2} @tab ARMv8-A @tab Armv9-A or later
  @tab Enable the SVE2 Extension.
 @item @code{sve2-bitperm} @tab ARMv8-A @tab No
  @tab Enable SVE2 BITPERM Extension.
