@@ -9132,6 +9132,12 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
                 | AARCH64_FEATURE_SSBS
                 | AARCH64_FEATURE_PROFILE),
                 "Cortex-X1"},
+  {"cortex-x2", AARCH64_FEATURE (AARCH64_ARCH_V9,
+                AARCH64_FEATURE_BFLOAT16
+                | AARCH64_FEATURE_I8MM
+                | AARCH64_FEATURE_MEMTAG
+                | AARCH64_FEATURE_SVE2_BITPERM),
+                "Cortex-X2"},
   {"generic", AARCH64_ARCH_V8, NULL},
 
   {NULL, AARCH64_ARCH_NONE, NULL}
