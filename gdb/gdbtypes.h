@@ -1793,9 +1793,7 @@ struct call_site_parameter
 
 struct call_site
   {
-    /* * Address of the first instruction after this call.  It must be
-       the first field as we overload core_addr_hash and core_addr_eq
-       for it.  */
+    /* Address of the first instruction after this call.  */
 
     CORE_ADDR pc;
 
