@@ -90,7 +90,7 @@ libbacktrace_print (void *data, uintptr_t pc, const char *filename,
      files.  We are also careful to ensure we don't overflow this buffer.  */
   char buf[20];
 
-  snprintf (buf, sizeof (buf), "0x%lx ", pc);
+  snprintf (buf, sizeof (buf), "0x%" PRIxPTR " ", pc);
   buf[sizeof (buf) - 1] = '\0';
   sig_write (buf);
   sig_write (function == nullptr ? "???" : function);
