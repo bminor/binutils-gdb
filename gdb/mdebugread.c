@@ -1056,7 +1056,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		if (tsym.st != stMember)
 		  break;
 
-		SET_FIELD_ENUMVAL (*f, tsym.value);
+		f->set_loc_enumval (tsym.value);
 		f->set_type (t);
 		f->set_name (debug_info->ss + cur_fdr->issBase + tsym.iss);
 		FIELD_BITSIZE (*f) = 0;
@@ -1242,7 +1242,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	struct field *f = &top_stack->cur_type->field (top_stack->cur_field);
 	top_stack->cur_field++;
 	f->set_name (name);
-	SET_FIELD_BITPOS (*f, sh->value);
+	f->set_loc_bitpos (sh->value);
 	bitsize = 0;
 	f->set_type (parse_type (cur_fd, ax, sh->index, &bitsize, bigend,
 				 name));

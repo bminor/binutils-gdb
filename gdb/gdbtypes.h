@@ -664,7 +664,74 @@ struct field
     m_name = name;
   }
 
-  union field_location loc;
+  /* Location getters / setters.  */
+
+  field_loc_kind loc_kind () const
+  {
+    return m_loc_kind;
+  }
+
+  LONGEST loc_bitpos () const
+  {
+    gdb_assert (m_loc_kind == FIELD_LOC_KIND_BITPOS);
+    return m_loc.bitpos;
+  }
+
+  void set_loc_bitpos (LONGEST bitpos)
+  {
+    m_loc_kind = FIELD_LOC_KIND_BITPOS;
+    m_loc.bitpos = bitpos;
+  }
+
+  LONGEST loc_enumval () const
+  {
+    gdb_assert (m_loc_kind == FIELD_LOC_KIND_ENUMVAL);
+    return m_loc.enumval;
+  }
+
+  void set_loc_enumval (LONGEST enumval)
+  {
+    m_loc_kind = FIELD_LOC_KIND_ENUMVAL;
+    m_loc.enumval = enumval;
+  }
+
+  CORE_ADDR loc_physaddr () const
+  {
+    gdb_assert (m_loc_kind == FIELD_LOC_KIND_PHYSADDR);
+    return m_loc.physaddr;
+  }
+
+  void set_loc_physaddr (CORE_ADDR physaddr)
+  {
+    m_loc_kind = FIELD_LOC_KIND_PHYSADDR;
+    m_loc.physaddr = physaddr;
+  }
+
+  const char *loc_physname () const
+  {
+    gdb_assert (m_loc_kind == FIELD_LOC_KIND_PHYSNAME);
+    return m_loc.physname;
+  }
+
+  void set_loc_physname (const char *physname)
+  {
+    m_loc_kind = FIELD_LOC_KIND_PHYSNAME;
+    m_loc.physname = physname;
+  }
+
+  dwarf2_locexpr_baton *loc_dwarf_block () const
+  {
+    gdb_assert (m_loc_kind == FIELD_LOC_KIND_DWARF_BLOCK);
+    return m_loc.dwarf_block;
+  }
+
+  void set_loc_dwarf_block (dwarf2_locexpr_baton *dwarf_block)
+  {
+    m_loc_kind = FIELD_LOC_KIND_DWARF_BLOCK;
+    m_loc.dwarf_block = dwarf_block;
+  }
+
+  union field_location m_loc;
 
   /* * For a function or member type, this is 1 if the argument is
      marked artificial.  Artificial arguments should not be shown
@@ -675,7 +742,7 @@ struct field
 
   /* * Discriminant for union field_location.  */
 
-  ENUM_BITFIELD(field_loc_kind) loc_kind : 3;
+  ENUM_BITFIELD(field_loc_kind) m_loc_kind : 3;
 
   /* * Size of this field, in bits, or zero if not packed.
      If non-zero in an array type, indicates the element size in
@@ -1742,11 +1809,52 @@ enum call_site_parameter_kind
 
 struct call_site_target
 {
-  union field_location loc;
+  field_loc_kind loc_kind () const
+  {
+    return m_loc_kind;
+  }
+
+  CORE_ADDR loc_physaddr () const
+  {
+    gdb_assert (m_loc_kind == FIELD_LOC_KIND_PHYSADDR);
+    return m_loc.physaddr;
+  }
+
+  void set_loc_physaddr (CORE_ADDR physaddr)
+  {
+    m_loc_kind = FIELD_LOC_KIND_PHYSADDR;
+    m_loc.physaddr = physaddr;
+  }
+
+  const char *loc_physname () const
+  {
+    gdb_assert (m_loc_kind == FIELD_LOC_KIND_PHYSNAME);
+    return m_loc.physname;
+  }
+
+  void set_loc_physname (const char *physname)
+    {
+      m_loc_kind = FIELD_LOC_KIND_PHYSNAME;
+      m_loc.physname = physname;
+    }
+
+  dwarf2_locexpr_baton *loc_dwarf_block () const
+  {
+    gdb_assert (m_loc_kind == FIELD_LOC_KIND_DWARF_BLOCK);
+    return m_loc.dwarf_block;
+  }
+
+  void set_loc_dwarf_block (dwarf2_locexpr_baton *dwarf_block)
+    {
+      m_loc_kind = FIELD_LOC_KIND_DWARF_BLOCK;
+      m_loc.dwarf_block = dwarf_block;
+    }
+
+  union field_location m_loc;
 
   /* * Discriminant for union field_location.  */
 
-  ENUM_BITFIELD(field_loc_kind) loc_kind : 3;
+  ENUM_BITFIELD(field_loc_kind) m_loc_kind : 3;
 };
 
 union call_site_parameter_u
@@ -2016,29 +2124,12 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind)
-#define FIELD_BITPOS_LVAL(thisfld) ((thisfld).loc.bitpos)
-#define FIELD_BITPOS(thisfld) (FIELD_BITPOS_LVAL (thisfld) + 0)
-#define FIELD_ENUMVAL_LVAL(thisfld) ((thisfld).loc.enumval)
-#define FIELD_ENUMVAL(thisfld) (FIELD_ENUMVAL_LVAL (thisfld) + 0)
-#define FIELD_STATIC_PHYSNAME(thisfld) ((thisfld).loc.physname)
-#define FIELD_STATIC_PHYSADDR(thisfld) ((thisfld).loc.physaddr)
-#define FIELD_DWARF_BLOCK(thisfld) ((thisfld).loc.dwarf_block)
-#define SET_FIELD_BITPOS(thisfld, bitpos)			\
-  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_BITPOS,		\
-   FIELD_BITPOS_LVAL (thisfld) = (bitpos))
-#define SET_FIELD_ENUMVAL(thisfld, enumval)			\
-  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_ENUMVAL,		\
-   FIELD_ENUMVAL_LVAL (thisfld) = (enumval))
-#define SET_FIELD_PHYSNAME(thisfld, name)			\
-  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_PHYSNAME,		\
-   FIELD_STATIC_PHYSNAME (thisfld) = (name))
-#define SET_FIELD_PHYSADDR(thisfld, addr)			\
-  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_PHYSADDR,		\
-   FIELD_STATIC_PHYSADDR (thisfld) = (addr))
-#define SET_FIELD_DWARF_BLOCK(thisfld, addr)			\
-  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_DWARF_BLOCK,	\
-   FIELD_DWARF_BLOCK (thisfld) = (addr))
+#define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind ())
+#define FIELD_BITPOS(thisfld) ((thisfld).loc_bitpos ())
+#define FIELD_ENUMVAL(thisfld) ((thisfld).loc_enumval ())
+#define FIELD_STATIC_PHYSNAME(thisfld) ((thisfld).loc_physname ())
+#define FIELD_STATIC_PHYSADDR(thisfld) ((thisfld).loc_physaddr ())
+#define FIELD_DWARF_BLOCK(thisfld) ((thisfld).loc_dwarf_block ())
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 

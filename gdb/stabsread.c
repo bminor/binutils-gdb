@@ -2755,8 +2755,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
       {
 	int nbits;
 
-	SET_FIELD_BITPOS (fip->list->field,
-			  read_huge_number (pp, ';', &nbits, 0));
+	fip->list->field.set_loc_bitpos (read_huge_number (pp, ';', &nbits, 0));
 	if (nbits != 0)
 	  return 0;
       }
@@ -2817,7 +2816,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 	  p++;
 	}
       /* Static class member.  */
-      SET_FIELD_PHYSNAME (fip->list->field, savestring (*pp, p - *pp));
+      fip->list->field.set_loc_physname (savestring (*pp, p - *pp));
       *pp = p + 1;
       return;
     }
@@ -2833,8 +2832,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
   {
     int nbits;
 
-    SET_FIELD_BITPOS (fip->list->field,
-		      read_huge_number (pp, ',', &nbits, 0));
+    fip->list->field.set_loc_bitpos (read_huge_number (pp, ',', &nbits, 0));
     if (nbits != 0)
       {
 	stabs_general_complaint ("bad structure-type format");
@@ -3110,7 +3108,7 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
 	   corresponding to this baseclass.  Always zero in the absence of
 	   multiple inheritance.  */
 
-	SET_FIELD_BITPOS (newobj->field, read_huge_number (pp, ',', &nbits, 0));
+	newobj->field.set_loc_bitpos (read_huge_number (pp, ',', &nbits, 0));
 	if (nbits != 0)
 	  return 0;
       }
@@ -3639,7 +3637,7 @@ read_enum_type (const char **pp, struct type *type,
 
 	  SYMBOL_TYPE (xsym) = type;
 	  type->field (n).set_name (xsym->linkage_name ());
-	  SET_FIELD_ENUMVAL (type->field (n), SYMBOL_VALUE (xsym));
+	  type->field (n).set_loc_enumval (SYMBOL_VALUE (xsym));
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
       if (syms == osyms)

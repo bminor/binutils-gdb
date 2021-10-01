@@ -553,7 +553,6 @@ amd64_has_unaligned_fields (struct type *type)
       for (int i = 0; i < type->num_fields (); i++)
 	{
 	  struct type *subtype = check_typedef (type->field (i).type ());
-	  int bitpos = TYPE_FIELD_BITPOS (type, i);
 
 	  /* Ignore static fields, empty fields (for example nested
 	     empty structures), and bitfields (these are handled by
@@ -563,6 +562,8 @@ amd64_has_unaligned_fields (struct type *type)
 		  && TYPE_LENGTH (subtype) == 0)
 	      || TYPE_FIELD_PACKED (type, i))
 	    continue;
+
+	  int bitpos = TYPE_FIELD_BITPOS (type, i);
 
 	  if (bitpos % 8 != 0)
 	    return true;
@@ -592,20 +593,20 @@ amd64_classify_aggregate_field (struct type *type, int i,
 				unsigned int bitoffset)
 {
   struct type *subtype = check_typedef (type->field (i).type ());
-  int bitpos = bitoffset + TYPE_FIELD_BITPOS (type, i);
-  int pos = bitpos / 64;
   enum amd64_reg_class subclass[2];
   int bitsize = TYPE_FIELD_BITSIZE (type, i);
-  int endpos;
 
   if (bitsize == 0)
     bitsize = TYPE_LENGTH (subtype) * 8;
-  endpos = (bitpos + bitsize - 1) / 64;
 
   /* Ignore static fields, or empty fields, for example nested
      empty structures.*/
   if (field_is_static (&type->field (i)) || bitsize == 0)
     return;
+
+  int bitpos = bitoffset + TYPE_FIELD_BITPOS (type, i);
+  int pos = bitpos / 64;
+  int endpos = (bitpos + bitsize - 1) / 64;
 
   if (subtype->code () == TYPE_CODE_STRUCT
       || subtype->code () == TYPE_CODE_UNION)

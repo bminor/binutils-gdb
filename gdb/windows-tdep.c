@@ -762,7 +762,7 @@ create_enum (struct gdbarch *gdbarch, int bit, const char *name,
   for (i = 0; i < count; i++)
     {
       type->field (i).set_name (values[i].name);
-      SET_FIELD_ENUMVAL (type->field (i), values[i].value);
+      type->field (i).set_loc_enumval (values[i].value);
     }
 
   return type;

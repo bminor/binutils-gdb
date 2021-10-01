@@ -2599,8 +2599,8 @@ resolve_dynamic_struct (struct type *type,
 	  CORE_ADDR addr;
 	  if (dwarf2_evaluate_property (&prop, nullptr, addr_stack, &addr,
 					true))
-	    SET_FIELD_BITPOS (resolved_type->field (i),
-			      TARGET_CHAR_BIT * (addr - addr_stack->addr));
+	    resolved_type->field (i).set_loc_bitpos
+	      (TARGET_CHAR_BIT * (addr - addr_stack->addr));
 	}
 
       /* As we know this field is not a static field, the field's
@@ -5561,25 +5561,22 @@ copy_type_recursive (struct objfile *objfile,
 	  switch (TYPE_FIELD_LOC_KIND (type, i))
 	    {
 	    case FIELD_LOC_KIND_BITPOS:
-	      SET_FIELD_BITPOS (new_type->field (i),
-				TYPE_FIELD_BITPOS (type, i));
+	      new_type->field (i).set_loc_bitpos (TYPE_FIELD_BITPOS (type, i));
 	      break;
 	    case FIELD_LOC_KIND_ENUMVAL:
-	      SET_FIELD_ENUMVAL (new_type->field (i),
-				 TYPE_FIELD_ENUMVAL (type, i));
+	      new_type->field (i).set_loc_enumval (TYPE_FIELD_ENUMVAL (type, i));
 	      break;
 	    case FIELD_LOC_KIND_PHYSADDR:
-	      SET_FIELD_PHYSADDR (new_type->field (i),
-				  TYPE_FIELD_STATIC_PHYSADDR (type, i));
+	      new_type->field (i).set_loc_physaddr
+		(TYPE_FIELD_STATIC_PHYSADDR (type, i));
 	      break;
 	    case FIELD_LOC_KIND_PHYSNAME:
-	      SET_FIELD_PHYSNAME (new_type->field (i),
-				  xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type,
-								       i)));
+	      new_type->field (i).set_loc_physname
+		(xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type, i)));
 	      break;
             case FIELD_LOC_KIND_DWARF_BLOCK:
-              SET_FIELD_DWARF_BLOCK (new_type->field (i),
-                                     TYPE_FIELD_DWARF_BLOCK (type, i));
+              new_type->field (i).set_loc_dwarf_block
+		(TYPE_FIELD_DWARF_BLOCK (type, i));
               break;
 	    default:
 	      internal_error (__FILE__, __LINE__,
@@ -5846,7 +5843,7 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
 
   type->field (field_nr).set_name (xstrdup (name));
   type->field (field_nr).set_type (field_type);
-  SET_FIELD_BITPOS (type->field (field_nr), start_bitpos);
+  type->field (field_nr).set_loc_bitpos (start_bitpos);
   TYPE_FIELD_BITSIZE (type, field_nr) = nr_bits;
   type->set_num_fields (type->num_fields () + 1);
 }
@@ -5918,10 +5915,8 @@ append_composite_type_field_aligned (struct type *t, const char *name,
       TYPE_LENGTH (t) = TYPE_LENGTH (t) + TYPE_LENGTH (field);
       if (t->num_fields () > 1)
 	{
-	  SET_FIELD_BITPOS (f[0],
-			    (FIELD_BITPOS (f[-1])
-			     + (TYPE_LENGTH (f[-1].type ())
-				* TARGET_CHAR_BIT)));
+	  f->set_loc_bitpos
+	    ((FIELD_BITPOS (f[-1]) + (TYPE_LENGTH (f[-1].type ()) * TARGET_CHAR_BIT)));
 
 	  if (alignment)
 	    {
@@ -5932,7 +5927,7 @@ append_composite_type_field_aligned (struct type *t, const char *name,
 
 	      if (left)
 		{
-		  SET_FIELD_BITPOS (f[0], FIELD_BITPOS (f[0]) + (alignment - left));
+		  f->set_loc_bitpos (FIELD_BITPOS (f[0]) + (alignment - left));
 		  TYPE_LENGTH (t) += (alignment - left) / TARGET_CHAR_BIT;
 		}
 	    }

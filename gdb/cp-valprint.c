@@ -735,13 +735,13 @@ test_print_fields (gdbarch *arch)
   if (gdbarch_byte_order (arch) == BFD_ENDIAN_LITTLE)
     {
       f = append_composite_type_field_raw (the_struct, "A", bool_type);
-      SET_FIELD_BITPOS (*f, 1);
+      f->set_loc_bitpos (1);
       FIELD_BITSIZE (*f) = 1;
       f = append_composite_type_field_raw (the_struct, "B", uint8_type);
-      SET_FIELD_BITPOS (*f, 3);
+      f->set_loc_bitpos (3);
       FIELD_BITSIZE (*f) = 3;
       f = append_composite_type_field_raw (the_struct, "C", bool_type);
-      SET_FIELD_BITPOS (*f, 7);
+      f->set_loc_bitpos (7);
       FIELD_BITSIZE (*f) = 1;
     }
   /* According to the logic commented in "make_gdb_type_struct ()" of
@@ -750,13 +750,13 @@ test_print_fields (gdbarch *arch)
   else
     {
       f = append_composite_type_field_raw (the_struct, "A", bool_type);
-      SET_FIELD_BITPOS (*f, 30);
+      f->set_loc_bitpos (30);
       FIELD_BITSIZE (*f) = 1;
       f = append_composite_type_field_raw (the_struct, "B", uint8_type);
-      SET_FIELD_BITPOS (*f, 26);
+      f->set_loc_bitpos (26);
       FIELD_BITSIZE (*f) = 3;
       f = append_composite_type_field_raw (the_struct, "C", bool_type);
-      SET_FIELD_BITPOS (*f, 24);
+      f->set_loc_bitpos (24);
       FIELD_BITSIZE (*f) = 1;
     }
 
