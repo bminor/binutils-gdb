@@ -65,8 +65,8 @@ initialised data (.data) and uninitialised data sections (.bss).
 
 @cindex @samp{-muse-renesas-section-names}
 @item -muse-renesas-section-names
-This option controls the default names given to the code (.P),
-initialised data (.D_1) and uninitialised data sections (.B_1).
+This option controls the default names given to the code (P),
+initialised data (D_1) and uninitialised data sections (B_1).
 This is the default.
 
 @cindex @samp{-msmall-data-limit}
