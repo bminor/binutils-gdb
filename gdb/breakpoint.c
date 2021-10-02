@@ -7192,7 +7192,7 @@ set_breakpoint_location_function (struct bp_location *loc)
 	find_pc_partial_function (loc->address, &function_name, NULL, NULL);
 
       if (function_name)
-	loc->function_name = xstrdup (function_name);
+	loc->function_name = make_unique_xstrdup (function_name);
     }
 }
 
@@ -12234,11 +12234,6 @@ say_where (struct breakpoint *b)
     }
 }
 
-bp_location::~bp_location ()
-{
-  xfree (function_name);
-}
-
 /* Destructor for the breakpoint base class.  */
 
 breakpoint::~breakpoint ()
@@ -13323,7 +13318,7 @@ ambiguous_names_p (struct bp_location *loc)
   for (l = loc; l != NULL; l = l->next)
     {
       const char **slot;
-      const char *name = l->function_name;
+      const char *name = l->function_name.get ();
 
       /* Allow for some names to be NULL, ignore them.  */
       if (name == NULL)
@@ -13642,7 +13637,8 @@ update_breakpoint_locations (struct breakpoint *b,
 	      {
 		for (bp_location *l : b->locations ())
 		  if (l->function_name
-		      && strcmp (e->function_name, l->function_name) == 0)
+		      && strcmp (e->function_name.get (),
+				 l->function_name.get ()) == 0)
 		    {
 		      l->enabled = e->enabled;
 		      l->disabled_by_cond = e->disabled_by_cond;

@@ -328,7 +328,7 @@ public:
   /* Construct a bp_location with type TYPE.  */
   bp_location (breakpoint *owner, bp_loc_type type);
 
-  virtual ~bp_location ();
+  virtual ~bp_location () = default;
 
   /* Chain pointer to the next breakpoint location for
      the same parent breakpoint.  */
@@ -467,7 +467,7 @@ public:
      with it.  */
   bound_probe probe {};
 
-  char *function_name = NULL;
+  gdb::unique_xmalloc_ptr<char> function_name;
 
   /* Details of the placed breakpoint, when inserted.  */
   bp_target_info target_info {};
