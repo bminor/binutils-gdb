@@ -720,7 +720,7 @@ using bp_location_range = next_range<bp_location>;
 
 struct breakpoint
 {
-  virtual ~breakpoint ();
+  virtual ~breakpoint () = default;
 
   /* Return a range of this breakpoint's locations.  */
   bp_location_range locations ();
@@ -785,11 +785,11 @@ struct breakpoint
   int input_radix = 0;
   /* String form of the breakpoint condition (malloc'd), or NULL if
      there is no condition.  */
-  char *cond_string = NULL;
+  gdb::unique_xmalloc_ptr<char> cond_string;
 
   /* String form of extra parameters, or NULL if there are none.
      Malloc'd.  */
-  char *extra_string = NULL;
+  gdb::unique_xmalloc_ptr<char> extra_string;
 
   /* Holds the address of the related watchpoint_scope breakpoint when
      using watchpoints on local variables (might the concept of a

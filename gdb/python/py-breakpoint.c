@@ -449,7 +449,7 @@ bppy_get_condition (PyObject *self, void *closure)
 
   BPPY_REQUIRE_VALID (obj);
 
-  str = obj->bp->cond_string;
+  str = obj->bp->cond_string.get ();
   if (! str)
     Py_RETURN_NONE;
 

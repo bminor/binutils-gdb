@@ -899,7 +899,7 @@ gdbscm_breakpoint_condition (SCM self)
     = bpscm_get_valid_breakpoint_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   char *str;
 
-  str = bp_smob->bp->cond_string;
+  str = bp_smob->bp->cond_string.get ();
   if (! str)
     return SCM_BOOL_F;
 

@@ -3094,7 +3094,7 @@ find_matching_tracepoint_location (struct uploaded_tp *utp)
       if (b->type == utp->type
 	  && t->step_count == utp->step
 	  && t->pass_count == utp->pass
-	  && cond_string_is_same (t->cond_string,
+	  && cond_string_is_same (t->cond_string.get (),
 				  utp->cond_string.get ())
 	  /* FIXME also test actions.  */
 	  )

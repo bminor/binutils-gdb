@@ -13344,7 +13344,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
 	    error ("%s", err_msg);
 
 	  encode_source_string (b->number, loc->address,
-				"cond", b->cond_string,
+				"cond", b->cond_string.get (),
 				buf.data () + strlen (buf.data ()),
 				buf.size () - strlen (buf.data ()));
 	  putpkt (buf.data ());
