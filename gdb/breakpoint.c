@@ -1844,7 +1844,9 @@ update_watchpoint (struct watchpoint *b, int reparse)
       const char *s;
 
       b->exp.reset ();
-      s = b->exp_string_reparse ? b->exp_string_reparse : b->exp_string;
+      s = (b->exp_string_reparse
+	   ? b->exp_string_reparse.get ()
+	   : b->exp_string.get ());
       b->exp = parse_exp_1 (&s, 0, b->exp_valid_block, 0);
       /* If the meaning of expression itself changed, the old value is
 	 no longer relevant.  We don't want to report a watchpoint hit
@@ -6131,7 +6133,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  if (opts.addressprint)
 	    uiout->field_skip ("addr");
 	  annotate_field (5);
-	  uiout->field_string ("what", w->exp_string);
+	  uiout->field_string ("what", w->exp_string.get ());
 	}
       else if (!is_catchpoint (b) || is_exception_catchpoint (b)
 	       || is_ada_exception_catchpoint (b))
@@ -6358,7 +6360,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	{
 	  struct watchpoint *w = (struct watchpoint *) b;
 
-	  uiout->field_string ("original-location", w->exp_string);
+	  uiout->field_string ("original-location", w->exp_string.get ());
 	}
       else if (b->location != NULL
 	       && event_location_to_string (b->location.get ()) != NULL)
@@ -10053,14 +10055,6 @@ watchpoint_exp_is_const (const struct expression *exp)
   return exp->op->constant_p ();
 }
 
-/* Watchpoint destructor.  */
-
-watchpoint::~watchpoint ()
-{
-  xfree (this->exp_string);
-  xfree (this->exp_string_reparse);
-}
-
 /* Implement the "re_set" breakpoint_ops method for watchpoints.  */
 
 static void
@@ -10295,7 +10289,7 @@ print_mention_watchpoint (struct breakpoint *b)
   ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
   uiout->field_signed ("number", b->number);
   uiout->text (": ");
-  uiout->field_string ("exp", w->exp_string);
+  uiout->field_string ("exp", w->exp_string.get ());
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for
@@ -10323,7 +10317,7 @@ print_recreate_watchpoint (struct breakpoint *b, struct ui_file *fp)
 		      _("Invalid watchpoint type."));
     }
 
-  fprintf_unfiltered (fp, " %s", w->exp_string);
+  fprintf_unfiltered (fp, " %s", w->exp_string.get ());
   print_recreate_thread (b, fp);
 }
 
@@ -10488,7 +10482,7 @@ print_mention_masked_watchpoint (struct breakpoint *b)
   ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
   uiout->field_signed ("number", b->number);
   uiout->text (": ");
-  uiout->field_string ("exp", w->exp_string);
+  uiout->field_string ("exp", w->exp_string.get ());
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for
@@ -10515,7 +10509,7 @@ print_recreate_masked_watchpoint (struct breakpoint *b, struct ui_file *fp)
 		      _("Invalid hardware watchpoint type."));
     }
 
-  fprintf_unfiltered (fp, " %s mask 0x%s", w->exp_string,
+  fprintf_unfiltered (fp, " %s mask 0x%s", w->exp_string.get (),
 		      phex (w->hw_wp_mask, sizeof (CORE_ADDR)));
   print_recreate_thread (b, fp);
 }
@@ -10794,13 +10788,14 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
       CORE_ADDR addr = value_as_address (val.get ());
 
       w->exp_string_reparse
-	= current_language->watch_location_expression (t, addr).release ();
+	= current_language->watch_location_expression (t, addr);
 
-      w->exp_string = xstrprintf ("-location %.*s",
-				  (int) (exp_end - exp_start), exp_start);
+      w->exp_string.reset (xstrprintf ("-location %.*s",
+				       (int) (exp_end - exp_start),
+				       exp_start));
     }
   else
-    w->exp_string = savestring (exp_start, exp_end - exp_start);
+    w->exp_string.reset (savestring (exp_start, exp_end - exp_start));
 
   if (use_mask)
     {

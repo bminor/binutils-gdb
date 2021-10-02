@@ -831,13 +831,11 @@ struct breakpoint
 
 struct watchpoint : public breakpoint
 {
-  ~watchpoint () override;
-
   /* String form of exp to use for displaying to the user (malloc'd),
      or NULL if none.  */
-  char *exp_string;
+  gdb::unique_xmalloc_ptr<char> exp_string;
   /* String form to use for reparsing of EXP (malloc'd) or NULL.  */
-  char *exp_string_reparse;
+  gdb::unique_xmalloc_ptr<char> exp_string_reparse;
 
   /* The expression we are watching, or NULL if not a watchpoint.  */
   expression_up exp;

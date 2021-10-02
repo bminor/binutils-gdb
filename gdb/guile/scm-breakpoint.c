@@ -883,7 +883,7 @@ gdbscm_breakpoint_expression (SCM self)
 
   wp = (struct watchpoint *) bp_smob->bp;
 
-  const char *str = wp->exp_string;
+  const char *str = wp->exp_string.get ();
   if (! str)
     str = "";
 
