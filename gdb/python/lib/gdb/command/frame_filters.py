@@ -18,11 +18,7 @@
 
 import sys
 import gdb
-import copy
-from gdb.FrameIterator import FrameIterator
-from gdb.FrameDecorator import FrameDecorator
 import gdb.frames
-import itertools
 
 # GDB Commands.
 class SetFilterPrefixCmd(gdb.Command):
@@ -176,7 +172,7 @@ def _complete_frame_filter_list(text, word, all_flag):
         from text/word analysis.  This list can be empty when there
         are no suggestions for completion.
     """
-    if all_flag == True:
+    if all_flag:
         filter_locations = ["all", "global", "progspace"]
     else:
         filter_locations = ["global", "progspace"]

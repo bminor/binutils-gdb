@@ -13,9 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gdb
-import itertools
-
 
 class FrameIterator(object):
     """A gdb.Frame iterator.  Iterates over gdb.Frames or objects that

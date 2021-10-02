@@ -52,7 +52,7 @@ class _ExtendedPrompt(gdb.Parameter):
             return "The extended prompt is not set."
 
     def get_set_string(self):
-        if self.hook_set == False:
+        if self.hook_set is False:
             gdb.prompt_hook = self.before_prompt_hook
             self.hook_set = True
         return ""
