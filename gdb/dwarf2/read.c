@@ -9510,7 +9510,7 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
       if (gcc_4_minor >= 5)
 	cust->epilogue_unwind_valid = 1;
 
-      cust->call_site_htab = cu->call_site_htab;
+      cust->set_call_site_htab (cu->call_site_htab);
     }
 
   per_objfile->set_symtab (cu->per_cu, cust);

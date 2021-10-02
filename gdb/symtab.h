@@ -1449,6 +1449,12 @@ struct symtab
 
 struct compunit_symtab
 {
+  /* Set m_call_site_htab.  */
+  void set_call_site_htab (htab_t call_site_htab);
+
+  /* Find call_site info for PC.  */
+  call_site *find_call_site (CORE_ADDR pc) const;
+
   /* Unordered chain of all compunit symtabs of this objfile.  */
   struct compunit_symtab *next;
 
@@ -1503,7 +1509,7 @@ struct compunit_symtab
   unsigned int epilogue_unwind_valid : 1;
 
   /* struct call_site entries for this compilation unit or NULL.  */
-  htab_t call_site_htab;
+  htab_t m_call_site_htab;
 
   /* The macro table for this symtab.  Like the blockvector, this
      is shared between different symtabs in a given compilation unit.
@@ -1538,7 +1544,6 @@ using compunit_symtab_range = next_range<compunit_symtab>;
 #define COMPUNIT_BLOCK_LINE_SECTION(cust) ((cust)->block_line_section)
 #define COMPUNIT_LOCATIONS_VALID(cust) ((cust)->locations_valid)
 #define COMPUNIT_EPILOGUE_UNWIND_VALID(cust) ((cust)->epilogue_unwind_valid)
-#define COMPUNIT_CALL_SITE_HTAB(cust) ((cust)->call_site_htab)
 #define COMPUNIT_MACRO_TABLE(cust) ((cust)->macro_table)
 
 /* A range adapter to allowing iterating over all the file tables

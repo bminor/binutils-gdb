@@ -331,6 +331,30 @@ search_domain_name (enum search_domain e)
 
 /* See symtab.h.  */
 
+call_site *
+compunit_symtab::find_call_site (CORE_ADDR pc) const
+{
+  if (m_call_site_htab == nullptr)
+    return nullptr;
+
+  void **slot = htab_find_slot (m_call_site_htab, &pc, NO_INSERT);
+  if (slot == nullptr)
+    return nullptr;
+
+  return (call_site *) *slot;
+}
+
+/* See symtab.h.  */
+
+void
+compunit_symtab::set_call_site_htab (htab_t call_site_htab)
+{
+  gdb_assert (m_call_site_htab == nullptr);
+  m_call_site_htab = call_site_htab;
+}
+
+/* See symtab.h.  */
+
 struct symtab *
 compunit_primary_filetab (const struct compunit_symtab *cust)
 {
