@@ -13004,9 +13004,6 @@ dprintf_print_recreate (struct breakpoint *tp, struct ui_file *fp)
 static void
 dprintf_after_condition_true (struct bpstat *bs)
 {
-  struct bpstat tmp_bs;
-  struct bpstat *tmp_bs_p = &tmp_bs;
-
   /* dprintf's never cause a stop.  This wasn't set in the
      check_status hook instead because that would make the dprintf's
      condition not be evaluated.  */
@@ -13017,14 +13014,9 @@ dprintf_after_condition_true (struct bpstat *bs)
      bpstat_do_actions, if a breakpoint that causes a stop happens to
      be set at same address as this dprintf, or even if running the
      commands here throws.  */
-  tmp_bs.commands = bs->commands;
-  bs->commands = NULL;
-
-  bpstat_do_actions_1 (&tmp_bs_p);
-
-  /* 'tmp_bs.commands' will usually be NULL by now, but
-     bpstat_do_actions_1 may return early without processing the whole
-     list.  */
+  counted_command_line cmds = std::move (bs->commands);
+  gdb_assert (cmds != nullptr);
+  execute_control_commands (cmds.get (), 0);
 }
 
 /* The breakpoint_ops structure to be used on static tracepoints with
