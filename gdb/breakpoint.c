@@ -7973,21 +7973,14 @@ static struct breakpoint_ops catch_vfork_breakpoint_ops;
 
 struct solib_catchpoint : public breakpoint
 {
-  ~solib_catchpoint () override;
-
   /* True for "catch load", false for "catch unload".  */
   bool is_load;
 
   /* Regular expression to match, if any.  COMPILED is only valid when
      REGEX is non-NULL.  */
-  char *regex;
+  gdb::unique_xmalloc_ptr<char> regex;
   std::unique_ptr<compiled_regex> compiled;
 };
-
-solib_catchpoint::~solib_catchpoint ()
-{
-  xfree (this->regex);
-}
 
 static int
 insert_catch_solib (struct bp_location *ignore)
@@ -8104,14 +8097,16 @@ print_one_catch_solib (struct breakpoint *b, struct bp_location **locs)
   if (self->is_load)
     {
       if (self->regex)
-	msg = string_printf (_("load of library matching %s"), self->regex);
+	msg = string_printf (_("load of library matching %s"),
+			     self->regex.get ());
       else
 	msg = _("load of library");
     }
   else
     {
       if (self->regex)
-	msg = string_printf (_("unload of library matching %s"), self->regex);
+	msg = string_printf (_("unload of library matching %s"),
+			     self->regex.get ());
       else
 	msg = _("unload of library");
     }
@@ -8139,7 +8134,7 @@ print_recreate_catch_solib (struct breakpoint *b, struct ui_file *fp)
 		      b->disposition == disp_del ? "tcatch" : "catch",
 		      self->is_load ? "load" : "unload");
   if (self->regex)
-    fprintf_unfiltered (fp, " %s", self->regex);
+    fprintf_unfiltered (fp, " %s", self->regex.get ());
   fprintf_unfiltered (fp, "\n");
 }
 
@@ -8162,7 +8157,7 @@ add_solib_catchpoint (const char *arg, bool is_load, bool is_temp, bool enabled)
     {
       c->compiled.reset (new compiled_regex (arg, REG_NOSUB,
 					     _("Invalid regexp")));
-      c->regex = xstrdup (arg);
+      c->regex = make_unique_xstrdup (arg);
     }
 
   c->is_load = is_load;
