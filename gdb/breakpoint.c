@@ -8250,20 +8250,11 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 
 struct exec_catchpoint : public breakpoint
 {
-  ~exec_catchpoint () override;
-
   /* Filename of a program whose exec triggered this catchpoint.
      This field is only valid immediately after this catchpoint has
      triggered.  */
-  char *exec_pathname;
+  gdb::unique_xmalloc_ptr<char> exec_pathname;
 };
-
-/* Exec catchpoint destructor.  */
-
-exec_catchpoint::~exec_catchpoint ()
-{
-  xfree (this->exec_pathname);
-}
 
 static int
 insert_catch_exec (struct bp_location *bl)
@@ -8287,7 +8278,7 @@ breakpoint_hit_catch_exec (const struct bp_location *bl,
   if (ws->kind != TARGET_WAITKIND_EXECD)
     return 0;
 
-  c->exec_pathname = xstrdup (ws->value.execd_pathname);
+  c->exec_pathname = make_unique_xstrdup (ws->value.execd_pathname);
   return 1;
 }
 
@@ -8311,7 +8302,7 @@ print_it_catch_exec (bpstat bs)
     }
   uiout->field_signed ("bkptno", b->number);
   uiout->text (" (exec'd ");
-  uiout->field_string ("new-exec", c->exec_pathname);
+  uiout->field_string ("new-exec", c->exec_pathname.get ());
   uiout->text ("), ");
 
   return PRINT_SRC_AND_LOC;
@@ -8336,7 +8327,7 @@ print_one_catch_exec (struct breakpoint *b, struct bp_location **last_loc)
   if (c->exec_pathname != NULL)
     {
       uiout->text (", program \"");
-      uiout->field_string ("what", c->exec_pathname);
+      uiout->field_string ("what", c->exec_pathname.get ());
       uiout->text ("\" ");
     }
 
@@ -11324,7 +11315,7 @@ catch_exec_command_1 (const char *arg, int from_tty,
   std::unique_ptr<exec_catchpoint> c (new exec_catchpoint ());
   init_catchpoint (c.get (), gdbarch, temp, cond_string,
 		   &catch_exec_breakpoint_ops);
-  c->exec_pathname = NULL;
+  c->exec_pathname.reset ();
 
   install_breakpoint (0, std::move (c), 1);
 }
