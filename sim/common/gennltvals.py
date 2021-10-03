@@ -67,6 +67,7 @@ FILE_HEADER = f"""\
 def gentvals(output: TextIO, cpp: str, srctype: str, srcdir: Path,
              headers: Iterable[str],
              pattern: str,
+             filter: str = r'^$',
              target: str = None):
     """Extract constants from the specified files using a regular expression.
 
@@ -94,12 +95,13 @@ def gentvals(output: TextIO, cpp: str, srctype: str, srcdir: Path,
     srcfile = ''.join(f'#include <{x}>\n' for x in headers)
     syms = set()
     define_pattern = re.compile(r'^#\s*define\s+(' + pattern + ')')
+    filter_pattern = re.compile(filter)
     for header in headers:
         with open(srcdir / header, 'r', encoding='utf-8') as fp:
             data = fp.read()
         for line in data.splitlines():
             m = define_pattern.match(line)
-            if m:
+            if m and not filter_pattern.search(line):
                 syms.add(m.group(1))
     for sym in sorted(syms):
         srcfile += f'#ifdef {sym}\nDEFVAL {{ "{sym}", {sym} }},\n#endif\n'
@@ -129,7 +131,7 @@ def gen_common(output: TextIO, newlib: Path, cpp: str):
              ('errno.h', 'sys/errno.h'), 'E[A-Z0-9]*')
 
     gentvals(output, cpp, 'signal', newlib / 'newlib/libc/include',
-             ('signal.h', 'sys/signal.h'), r'SIG[A-Z0-9]*')
+             ('signal.h', 'sys/signal.h'), r'SIG[A-Z0-9]*', filter=r'SIGSTKSZ')
 
     gentvals(output, cpp, 'open', newlib / 'newlib/libc/include',
              ('fcntl.h', 'sys/fcntl.h', 'sys/_default_fcntl.h'), r'O_[A-Z0-9]*')
