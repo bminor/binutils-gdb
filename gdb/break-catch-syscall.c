@@ -250,28 +250,24 @@ print_one_catch_syscall (struct breakpoint *b,
 
   if (!c->syscalls_to_be_caught.empty ())
     {
-      char *text = xstrprintf ("%s", "");
+      std::string text;
 
+      bool first = true;
       for (int iter : c->syscalls_to_be_caught)
 	{
-	  char *previous_text = text;
 	  struct syscall s;
 	  get_syscall_by_number (gdbarch, iter, &s);
 
-	  if (s.name != NULL)
-	    text = xstrprintf ("%s%s, ", text, s.name);
-	  else
-	    text = xstrprintf ("%s%d, ", text, iter);
+	  if (!first)
+	    text += ", ";
+	  first = false;
 
-	  /* We have to xfree previous_text because xstrprintf dynamically
-	     allocates new space for text on every call.  */
-	  xfree (previous_text);
+	  if (s.name != NULL)
+	    text += s.name;
+	  else
+	    text += std::to_string (iter);
 	}
-      /* Remove the last comma.  */
-      text[strlen (text) - 2] = '\0';
-      uiout->field_string ("what", text);
-      /* xfree last text.  */
-      xfree (text);
+      uiout->field_string ("what", text.c_str ());
     }
   else
     uiout->field_string ("what", "<any syscall>", metadata_style.style ());
