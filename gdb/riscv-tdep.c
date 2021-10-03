@@ -1947,7 +1947,7 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 	}
       else if (insn.opcode () == riscv_insn::ADD)
 	{
-	  /* Handle: addi REG1, REG2, IMM  */
+	  /* Handle: add REG1, REG2, REG3  */
 	  gdb_assert (insn.rd () < RISCV_NUM_INTEGER_REGS);
 	  gdb_assert (insn.rs1 () < RISCV_NUM_INTEGER_REGS);
 	  gdb_assert (insn.rs2 () < RISCV_NUM_INTEGER_REGS);
