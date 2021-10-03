@@ -116,7 +116,6 @@
  { "SIGPROF", 27 },
  { "SIGQUIT", 3 },
  { "SIGSEGV", 11 },
- { "SIGSTKSZ", 8192 },
  { "SIGSTOP", 17 },
  { "SIGSYS", 12 },
  { "SIGTERM", 15 },
