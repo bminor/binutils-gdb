@@ -522,8 +522,8 @@ psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
 
 run$(EXEEXT): psim$(EXEEXT)
-	rm -f run$(EXEEXT)
-	ln psim$(EXEEXT) run$(EXEEXT)
+	rm -f $@
+	ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
 
 $(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-pk tmp-defines $(LIB_OBJ) $(GDB_OBJ)
 	rm -f $(TARGETLIB)
