@@ -6443,6 +6443,9 @@ struct link_map_offsets
     /* Offset and size of r_debug.r_map.  */
     int r_map_offset;
 
+    /* Offset of r_debug_extended.r_next.  */
+    int r_next_offset;
+
     /* Offset to l_addr field in struct link_map.  */
     int l_addr_offset;
 
@@ -6459,6 +6462,98 @@ struct link_map_offsets
     int l_prev_offset;
   };
 
+static const link_map_offsets lmo_32bit_offsets =
+  {
+    0,     /* r_version offset.  */
+    4,     /* r_debug.r_map offset.  */
+    20,    /* r_debug_extended.r_next.  */
+    0,     /* l_addr offset in link_map.  */
+    4,     /* l_name offset in link_map.  */
+    8,     /* l_ld offset in link_map.  */
+    12,    /* l_next offset in link_map.  */
+    16     /* l_prev offset in link_map.  */
+  };
+
+static const link_map_offsets lmo_64bit_offsets =
+  {
+    0,     /* r_version offset.  */
+    8,     /* r_debug.r_map offset.  */
+    40,    /* r_debug_extended.r_next.  */
+    0,     /* l_addr offset in link_map.  */
+    8,     /* l_name offset in link_map.  */
+    16,    /* l_ld offset in link_map.  */
+    24,    /* l_next offset in link_map.  */
+    32     /* l_prev offset in link_map.  */
+  };
+
+/* Get the loaded shared libraries from one namespace.  */
+
+static void
+read_link_map (std::string &document, CORE_ADDR lm_addr, CORE_ADDR lm_prev,
+	       int ptr_size, const link_map_offsets *lmo, bool ignore_first,
+	       int &header_done)
+{
+  CORE_ADDR l_name, l_addr, l_ld, l_next, l_prev;
+
+  while (lm_addr
+	 && read_one_ptr (lm_addr + lmo->l_name_offset,
+			  &l_name, ptr_size) == 0
+	 && read_one_ptr (lm_addr + lmo->l_addr_offset,
+			  &l_addr, ptr_size) == 0
+	 && read_one_ptr (lm_addr + lmo->l_ld_offset,
+			  &l_ld, ptr_size) == 0
+	 && read_one_ptr (lm_addr + lmo->l_prev_offset,
+			  &l_prev, ptr_size) == 0
+	 && read_one_ptr (lm_addr + lmo->l_next_offset,
+			  &l_next, ptr_size) == 0)
+    {
+      unsigned char libname[PATH_MAX];
+
+      if (lm_prev != l_prev)
+	{
+	  warning ("Corrupted shared library list: 0x%s != 0x%s",
+		   paddress (lm_prev), paddress (l_prev));
+	  break;
+	}
+
+      /* Ignore the first entry even if it has valid name as the first entry
+	 corresponds to the main executable.  The first entry should not be
+	 skipped if the dynamic loader was loaded late by a static executable
+	 (see solib-svr4.c parameter ignore_first).  But in such case the main
+	 executable does not have PT_DYNAMIC present and this function already
+	 exited above due to failed get_r_debug.  */
+      if (ignore_first && lm_prev == 0)
+	string_appendf (document, " main-lm=\"0x%s\"", paddress (lm_addr));
+      else
+	{
+	  /* Not checking for error because reading may stop before
+	     we've got PATH_MAX worth of characters.  */
+	  libname[0] = '\0';
+	  linux_read_memory (l_name, libname, sizeof (libname) - 1);
+	  libname[sizeof (libname) - 1] = '\0';
+	  if (libname[0] != '\0')
+	    {
+	      if (!header_done)
+		{
+		  /* Terminate `<library-list-svr4'.  */
+		  document += '>';
+		  header_done = 1;
+		}
+
+	      string_appendf (document, "<library name=\"");
+	      xml_escape_text_append (&document, (char *) libname);
+	      string_appendf (document, "\" lm=\"0x%s\" l_addr=\"0x%s\" "
+			      "l_ld=\"0x%s\"/>",
+			      paddress (lm_addr), paddress (l_addr),
+			      paddress (l_ld));
+	    }
+	}
+
+      lm_prev = lm_addr;
+      lm_addr = l_next;
+    }
+}
+
 /* Construct qXfer:libraries-svr4:read reply.  */
 
 int
@@ -6470,33 +6565,8 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
   struct process_info_private *const priv = current_process ()->priv;
   char filename[PATH_MAX];
   int pid, is_elf64;
-
-  static const struct link_map_offsets lmo_32bit_offsets =
-    {
-      0,     /* r_version offset. */
-      4,     /* r_debug.r_map offset.  */
-      0,     /* l_addr offset in link_map.  */
-      4,     /* l_name offset in link_map.  */
-      8,     /* l_ld offset in link_map.  */
-      12,    /* l_next offset in link_map.  */
-      16     /* l_prev offset in link_map.  */
-    };
-
-  static const struct link_map_offsets lmo_64bit_offsets =
-    {
-      0,     /* r_version offset. */
-      8,     /* r_debug.r_map offset.  */
-      0,     /* l_addr offset in link_map.  */
-      8,     /* l_name offset in link_map.  */
-      16,    /* l_ld offset in link_map.  */
-      24,    /* l_next offset in link_map.  */
-      32     /* l_prev offset in link_map.  */
-    };
-  const struct link_map_offsets *lmo;
   unsigned int machine;
-  int ptr_size;
   CORE_ADDR lm_addr = 0, lm_prev = 0;
-  CORE_ADDR l_name, l_addr, l_ld, l_next, l_prev;
   int header_done = 0;
 
   if (writebuf != NULL)
@@ -6507,8 +6577,18 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
   pid = lwpid_of (current_thread);
   xsnprintf (filename, sizeof filename, "/proc/%d/exe", pid);
   is_elf64 = elf_64_file_p (filename, &machine);
-  lmo = is_elf64 ? &lmo_64bit_offsets : &lmo_32bit_offsets;
-  ptr_size = is_elf64 ? 8 : 4;
+  const link_map_offsets *lmo;
+  int ptr_size;
+  if (is_elf64)
+    {
+      lmo = &lmo_64bit_offsets;
+      ptr_size = 8;
+    }
+  else
+    {
+      lmo = &lmo_32bit_offsets;
+      ptr_size = 4;
+    }
 
   while (annex[0] != '\0')
     {
@@ -6537,95 +6617,74 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
       annex = decode_address_to_semicolon (addrp, sep + 1);
     }
 
-  if (lm_addr == 0)
-    {
-      int r_version = 0;
+  std::string document = "<library-list-svr4 version=\"1.0\"";
 
-      if (priv->r_debug == 0)
-	priv->r_debug = get_r_debug (pid, is_elf64);
+  /* When the starting LM_ADDR is passed in the annex, only traverse that
+     namespace.
+
+     Otherwise, start with R_DEBUG and traverse all namespaces we find.  */
+  if (lm_addr != 0)
+    read_link_map (document, lm_addr, lm_prev, ptr_size, lmo, false,
+		   header_done);
+  else
+    {
+      if (lm_prev != 0)
+	warning ("ignoring prev=0x%s without start", paddress (lm_prev));
+
+      CORE_ADDR r_debug = priv->r_debug;
+      if (r_debug == 0)
+	r_debug = priv->r_debug = get_r_debug (pid, is_elf64);
 
       /* We failed to find DT_DEBUG.  Such situation will not change
 	 for this inferior - do not retry it.  Report it to GDB as
 	 E01, see for the reasons at the GDB solib-svr4.c side.  */
-      if (priv->r_debug == (CORE_ADDR) -1)
+      if (r_debug == (CORE_ADDR) -1)
 	return -1;
 
-      if (priv->r_debug != 0)
+      bool ignore_first = true;
+      while (r_debug != 0)
 	{
-	  if (linux_read_memory (priv->r_debug + lmo->r_version_offset,
+	  int r_version = 0;
+	  if (linux_read_memory (r_debug + lmo->r_version_offset,
 				 (unsigned char *) &r_version,
-				 sizeof (r_version)) != 0
-	      || r_version < 1)
+				 sizeof (r_version)) != 0)
+	    {
+	      warning ("unable to read r_version from 0x%s",
+		       paddress (r_debug + lmo->r_version_offset));
+	      break;
+	    }
+
+	  if (r_version < 1)
 	    {
 	      warning ("unexpected r_debug version %d", r_version);
+	      break;
 	    }
-	  else if (read_one_ptr (priv->r_debug + lmo->r_map_offset,
-				 &lm_addr, ptr_size) != 0)
+
+	  if (read_one_ptr (r_debug + lmo->r_map_offset, &lm_addr,
+			    ptr_size) != 0)
 	    {
-	      warning ("unable to read r_map from 0x%lx",
-		       (long) priv->r_debug + lmo->r_map_offset);
+	      warning ("unable to read r_map from 0x%s",
+		       paddress (r_debug + lmo->r_map_offset));
+	      break;
 	    }
-	}
-    }
 
-  std::string document = "<library-list-svr4 version=\"1.0\"";
+	  read_link_map (document, lm_addr, 0, ptr_size, lmo,
+			 ignore_first, header_done);
 
-  while (lm_addr
-	 && read_one_ptr (lm_addr + lmo->l_name_offset,
-			  &l_name, ptr_size) == 0
-	 && read_one_ptr (lm_addr + lmo->l_addr_offset,
-			  &l_addr, ptr_size) == 0
-	 && read_one_ptr (lm_addr + lmo->l_ld_offset,
-			  &l_ld, ptr_size) == 0
-	 && read_one_ptr (lm_addr + lmo->l_prev_offset,
-			  &l_prev, ptr_size) == 0
-	 && read_one_ptr (lm_addr + lmo->l_next_offset,
-			  &l_next, ptr_size) == 0)
-    {
-      unsigned char libname[PATH_MAX];
+	  if (r_version < 2)
+	    break;
 
-      if (lm_prev != l_prev)
-	{
-	  warning ("Corrupted shared library list: 0x%lx != 0x%lx",
-		   (long) lm_prev, (long) l_prev);
-	  break;
-	}
+	  /* Only applies to the default namespace.  */
+	  ignore_first = false;
 
-      /* Ignore the first entry even if it has valid name as the first entry
-	 corresponds to the main executable.  The first entry should not be
-	 skipped if the dynamic loader was loaded late by a static executable
-	 (see solib-svr4.c parameter ignore_first).  But in such case the main
-	 executable does not have PT_DYNAMIC present and this function already
-	 exited above due to failed get_r_debug.  */
-      if (lm_prev == 0)
-	string_appendf (document, " main-lm=\"0x%lx\"", (unsigned long) lm_addr);
-      else
-	{
-	  /* Not checking for error because reading may stop before
-	     we've got PATH_MAX worth of characters.  */
-	  libname[0] = '\0';
-	  linux_read_memory (l_name, libname, sizeof (libname) - 1);
-	  libname[sizeof (libname) - 1] = '\0';
-	  if (libname[0] != '\0')
+	  if (read_one_ptr (r_debug + lmo->r_next_offset, &r_debug,
+			    ptr_size) != 0)
 	    {
-	      if (!header_done)
-		{
-		  /* Terminate `<library-list-svr4'.  */
-		  document += '>';
-		  header_done = 1;
-		}
-
-	      string_appendf (document, "<library name=\"");
-	      xml_escape_text_append (&document, (char *) libname);
-	      string_appendf (document, "\" lm=\"0x%lx\" "
-			      "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
-			      (unsigned long) lm_addr, (unsigned long) l_addr,
-			      (unsigned long) l_ld);
+	      warning ("unable to read r_next from 0x%s",
+		       paddress (r_debug + lmo->r_next_offset));
+	      break;
 	    }
 	}
-
-      lm_prev = lm_addr;
-      lm_addr = l_next;
     }
 
   if (!header_done)

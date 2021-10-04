@@ -2826,6 +2826,7 @@ linux_ilp32_fetch_link_map_offsets ()
       lmo.r_map_offset = 4;
       lmo.r_brk_offset = 8;
       lmo.r_ldsomap_offset = -1;
+      lmo.r_next_offset = 20;
 
       /* Everything we need is in the first 20 bytes.  */
       lmo.link_map_size = 20;
@@ -2854,6 +2855,7 @@ linux_lp64_fetch_link_map_offsets ()
       lmo.r_map_offset = 8;
       lmo.r_brk_offset = 16;
       lmo.r_ldsomap_offset = -1;
+      lmo.r_next_offset = 40;
 
       /* Everything we need is in the first 40 bytes.  */
       lmo.link_map_size = 40;

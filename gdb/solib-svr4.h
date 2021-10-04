@@ -66,6 +66,9 @@ struct link_map_offsets
     /* Offset of r_debug.r_ldsomap.  */
     int r_ldsomap_offset;
 
+    /* Offset of r_debug_extended.r_next.  */
+    int r_next_offset;
+
     /* Size of struct link_map (or equivalent), or at least enough of it
        to be able to obtain the fields below.  */
     int link_map_size;

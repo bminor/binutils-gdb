@@ -495,6 +495,7 @@ mips_fbsd_ilp32_fetch_link_map_offsets (void)
       lmo.r_map_offset = 4;
       lmo.r_brk_offset = 8;
       lmo.r_ldsomap_offset = -1;
+      lmo.r_next_offset = -1;
 
       lmo.link_map_size = 24;
       lmo.l_addr_offset = 0;
@@ -522,6 +523,7 @@ mips_fbsd_lp64_fetch_link_map_offsets (void)
       lmo.r_map_offset = 8;
       lmo.r_brk_offset = 16;
       lmo.r_ldsomap_offset = -1;
+      lmo.r_next_offset = -1;
 
       lmo.link_map_size = 48;
       lmo.l_addr_offset = 0;
