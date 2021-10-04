@@ -274,11 +274,17 @@ riscv_extended_subset_supports (int insn_class)
 {
   switch (insn_class)
     {
-    case INSN_CLASS_V: return riscv_subset_supports ("v");
+    case INSN_CLASS_V:
+      return (riscv_subset_supports ("v")
+	      || riscv_subset_supports ("zve64x")
+	      || riscv_subset_supports ("zve32x"));
     case INSN_CLASS_V_AND_F:
-      return riscv_subset_supports ("v") && riscv_subset_supports ("f");
+      return (riscv_subset_supports ("v")
+	      || riscv_subset_supports ("zve64d")
+	      || riscv_subset_supports ("zve64f")
+	      || riscv_subset_supports ("zve32f"));
     case INSN_CLASS_ZVAMO:
-      return riscv_subset_supports ("a") && riscv_subset_supports ("zvamo");
+      return riscv_subset_supports ("zvamo");
 
     case INSN_CLASS_ZFH:
       return riscv_subset_supports ("zfh");
@@ -2453,6 +2459,13 @@ my_getVsetvliExpression (expressionS *ep, char *str)
 	++str;
       if (vsew_found)
 	as_bad (_("multiple vsew constants"));
+      /* The zve32x is the implicit extension of zve32f, and the zve64x is
+	 the implicit extension of zve64f.  */
+      else if (riscv_subset_supports ("zve32x")
+	       && !riscv_subset_supports ("zve64x")
+	       && vsew_value > 2)
+	as_bad (_("illegal vsew %s for zve32x and zve32f"),
+		riscv_vsew[vsew_value]);
       vsew_found = true;
     }
   if (arg_lookup (&str, riscv_vlmul, ARRAY_SIZE (riscv_vlmul), &vlmul_value))
@@ -2861,6 +2874,16 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			*(asargStart - 1) = save_c;
 		      as_warn (_("read-only CSR is written `%s'"), str);
 		      insn_with_csr = false;
+		    }
+
+		  /* The (segmant) load and store with EEW 64 cannot be used
+		     when zve32x is enabled.  */
+		  if (ip->insn_mo->pinfo & INSN_V_EEW64
+		      && riscv_subset_supports ("zve32x")
+		      && !riscv_subset_supports ("zve64x"))
+		    {
+		      error = _("illegal opcode for zve32x");
+		      break;
 		    }
 		}
 	      if (*asarg != '\0')

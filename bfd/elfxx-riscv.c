@@ -1073,6 +1073,32 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"g", "zicsr",	check_implicit_always},
   {"g", "zifencei",	check_implicit_always},
   {"q", "d",		check_implicit_always},
+  {"v", "d",		check_implicit_always},
+  {"v", "zve64d",	check_implicit_always},
+  {"v", "zvl128b",	check_implicit_always},
+  {"zvamo", "a",	check_implicit_always},
+  {"zve64d", "d",	check_implicit_always},
+  {"zve64d", "zve64f",	check_implicit_always},
+  {"zve64f", "zve32f",	check_implicit_always},
+  {"zve64f", "zve64x",	check_implicit_always},
+  {"zve64f", "zvl64b",	check_implicit_always},
+  {"zve32f", "f",	check_implicit_always},
+  {"zve32f", "zvl32b",	check_implicit_always},
+  {"zve32f", "zve32x",	check_implicit_always},
+  {"zve64x", "zve32x",	check_implicit_always},
+  {"zve64x", "zvl64b",	check_implicit_always},
+  {"zve32x", "zvl32b",	check_implicit_always},
+  {"zvl65536b", "zvl32768b",	check_implicit_always},
+  {"zvl32768b", "zvl16384b",	check_implicit_always},
+  {"zvl16384b", "zvl8192b",	check_implicit_always},
+  {"zvl8192b", "zvl4096b",	check_implicit_always},
+  {"zvl4096b", "zvl2048b",	check_implicit_always},
+  {"zvl2048b", "zvl1024b",	check_implicit_always},
+  {"zvl1024b", "zvl512b",	check_implicit_always},
+  {"zvl512b", "zvl256b",	check_implicit_always},
+  {"zvl256b", "zvl128b",	check_implicit_always},
+  {"zvl128b", "zvl64b",		check_implicit_always},
+  {"zvl64b", "zvl32b",		check_implicit_always},
   {"d", "f",		check_implicit_always},
   {"f", "zicsr",	check_implicit_always},
   {"zfh", "f",		check_implicit_always},
@@ -1148,6 +1174,24 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zba",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbs",               ISA_SPEC_CLASS_DRAFT,           1, 0,  0 },
+  {"zve32x",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zve32f",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zve32d",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zve64x",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zve64f",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zve64d",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl32b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl64b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl128b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl256b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl512b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl1024b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl2048b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl4096b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl8192b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl16384b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl32768b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zvl65536b",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zvamo",		ISA_SPEC_CLASS_DRAFT,		0, 10, 0 },	/* draft.  */
   {"zfh",		ISA_SPEC_CLASS_DRAFT,		0, 1,  0 },	/* draft.  */
   {NULL, 0, 0, 0, 0}
@@ -1842,6 +1886,28 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
         (_("rv32e does not support the `f' extension"));
       no_conflict = false;
     }
+
+  bool support_zve = false;
+  bool support_zvl = false;
+  riscv_subset_t *s = rps->subset_list->head;
+  for (; s != NULL; s = s->next)
+    {
+      if (!support_zve
+	  && strncmp (s->name, "zve", 3) == 0)
+	support_zve = true;
+      if (!support_zvl
+	  && strncmp (s->name, "zvl", 3) == 0)
+	support_zvl = true;
+      if (support_zve && support_zvl)
+	break;
+    }
+  if (support_zvl && !support_zve)
+    {
+      rps->error_handler
+	(_("zvl*b extensions need to enable either `v' or `zve' extension"));
+      no_conflict = false;
+    }
+
   return no_conflict;
 }
 

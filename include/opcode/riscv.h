@@ -446,6 +446,8 @@ extern const struct riscv_opcode riscv_insn_types[];
 
 /* Extended extensions.  */
 
+/* The insn_info fields.  */
+#define INSN_V_EEW64		0x10000000
 /* RVV IMM encodings.  */
 #define EXTRACT_RVV_VI_IMM(x) \
   (RV_X(x, 15, 5) | (-RV_X(x, 19, 1) << 5))
