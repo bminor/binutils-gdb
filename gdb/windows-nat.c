@@ -1492,7 +1492,7 @@ windows_nat_target::get_windows_debug_event (int pid,
 
       ptid_t ptid (current_event.dwProcessId, thread_id);
       windows_thread_info *th = thread_rec (ptid, INVALIDATE_CONTEXT);
-      th->reload_context = 1;
+      th->reload_context = true;
 
       return thread_id;
     }
