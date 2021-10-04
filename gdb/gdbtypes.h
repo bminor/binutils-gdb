@@ -1795,19 +1795,19 @@ struct call_site
   {
     call_site (CORE_ADDR pc, dwarf2_per_cu_data *per_cu,
 	       dwarf2_per_objfile *per_objfile)
-      : per_cu (per_cu), per_objfile (per_objfile), m_pc (pc)
+      : per_cu (per_cu), per_objfile (per_objfile), m_unrelocated_pc (pc)
     {}
 
     static int
     eq (const call_site *a, const call_site *b)
     {
-      return core_addr_eq (&a->m_pc, &b->m_pc);
+      return core_addr_eq (&a->m_unrelocated_pc, &b->m_unrelocated_pc);
     }
 
     static hashval_t
     hash (const call_site *a)
     {
-      return core_addr_hash (&a->m_pc);
+      return core_addr_hash (&a->m_unrelocated_pc);
     }
 
     static int
@@ -1849,8 +1849,8 @@ struct call_site
     dwarf2_per_objfile *const per_objfile = nullptr;
 
   private:
-    /* Address of the first instruction after this call.  */
-    const CORE_ADDR m_pc;
+    /* Unrelocated address of the first instruction after this call.  */
+    const CORE_ADDR m_unrelocated_pc;
 
   public:
     /* * Describe DW_TAG_call_site's DW_TAG_formal_parameter.  */

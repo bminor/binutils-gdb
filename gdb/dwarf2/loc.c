@@ -713,7 +713,14 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
       }
 
     case FIELD_LOC_KIND_PHYSADDR:
-      return FIELD_STATIC_PHYSADDR (call_site->target);
+      {
+	dwarf2_per_objfile *per_objfile = call_site->per_objfile;
+	compunit_symtab *cust = per_objfile->get_symtab (call_site->per_cu);
+	int sect_idx = COMPUNIT_BLOCK_LINE_SECTION (cust);
+	CORE_ADDR delta = per_objfile->objfile->section_offsets[sect_idx];
+
+	return FIELD_STATIC_PHYSADDR (call_site->target) + delta;
+      }
 
     default:
       internal_error (__FILE__, __LINE__, _("invalid call site target kind"));

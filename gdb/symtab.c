@@ -337,7 +337,11 @@ compunit_symtab::find_call_site (CORE_ADDR pc) const
   if (m_call_site_htab == nullptr)
     return nullptr;
 
-  struct call_site call_site_local (pc, nullptr, nullptr);
+  CORE_ADDR delta
+    = this->objfile->section_offsets[COMPUNIT_BLOCK_LINE_SECTION (this)];
+  CORE_ADDR unrelocated_pc = pc - delta;
+
+  struct call_site call_site_local (unrelocated_pc, nullptr, nullptr);
   void **slot
     = htab_find_slot (m_call_site_htab, &call_site_local, NO_INSERT);
   if (slot == nullptr)

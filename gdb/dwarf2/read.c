@@ -13363,6 +13363,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
   pc = attr->as_address () + baseaddr;
   pc = gdbarch_adjust_dwarf2_addr (gdbarch, pc);
+  pc -= baseaddr;
 
   if (cu->call_site_htab == NULL)
     cu->call_site_htab = htab_create_alloc_ex (16, call_site::hash,
@@ -13519,7 +13520,8 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		       sect_offset_str (die->sect_off), objfile_name (objfile));
 	  else
 	    {
-	      lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
+	      lowpc = (gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr)
+		       - baseaddr);
 	      SET_FIELD_PHYSADDR (call_site->target, lowpc);
 	    }
 	}
