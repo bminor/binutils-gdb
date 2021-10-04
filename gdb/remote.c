@@ -760,7 +760,8 @@ public: /* Remote specific methods.  */
   void print_one_stopped_thread (thread_info *thread);
   void process_initial_stop_replies (int from_tty);
 
-  thread_info *remote_add_thread (ptid_t ptid, bool running, bool executing);
+  thread_info *remote_add_thread (ptid_t ptid, bool running, bool executing,
+				  bool silent_p);
 
   void btrace_sync_conf (const btrace_config *conf);
 
@@ -2551,10 +2552,13 @@ static remote_thread_info *get_remote_thread_info (remote_target *target,
 						   ptid_t ptid);
 
 /* Add thread PTID to GDB's thread list.  Tag it as executing/running
-   according to RUNNING.  */
+   according to EXECUTING and RUNNING respectively.  If SILENT_P (or the
+   remote_state::starting_up flag) is true then the new thread is added
+   silently, otherwise the new thread will be announced to the user.  */
 
 thread_info *
-remote_target::remote_add_thread (ptid_t ptid, bool running, bool executing)
+remote_target::remote_add_thread (ptid_t ptid, bool running, bool executing,
+				  bool silent_p)
 {
   struct remote_state *rs = get_remote_state ();
   struct thread_info *thread;
@@ -2565,7 +2569,7 @@ remote_target::remote_add_thread (ptid_t ptid, bool running, bool executing)
      consider that a single-threaded target, mentioning a new thread
      might be confusing to the user.  Be silent then, preserving the
      age old behavior.  */
-  if (rs->starting_up)
+  if (rs->starting_up || silent_p)
     thread = add_thread_silent (this, ptid);
   else
     thread = add_thread (this, ptid);
@@ -2603,7 +2607,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
     {
       /* We're seeing an event on a thread id we knew had exited.
 	 This has to be a new thread reusing the old id.  Add it.  */
-      remote_add_thread (currthread, running, executing);
+      remote_add_thread (currthread, running, executing, false);
       return;
     }
 
@@ -2625,7 +2629,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
 	  else
 	    {
 	      thread_info *thr
-		= remote_add_thread (currthread, running, executing);
+		= remote_add_thread (currthread, running, executing, false);
 	      switch_to_thread (thr);
 	    }
 	  return;
@@ -2657,7 +2661,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, bool executing)
 
       /* This is really a new thread.  Add it.  */
       thread_info *new_thr
-	= remote_add_thread (currthread, running, executing);
+	= remote_add_thread (currthread, running, executing, false);
 
       /* If we found a new inferior, let the common code do whatever
 	 it needs to with it (e.g., read shared libraries, insert
@@ -6171,14 +6175,11 @@ extended_remote_target::attach (const char *args, int from_tty)
 	 ptid.  */
       ptid_t curr_ptid = remote_current_thread (ptid_t (pid));
 
-      /* Add the main thread to the thread list.  */
-      thread_info *thr = add_thread_silent (this, curr_ptid);
+      /* Add the main thread to the thread list.  We add the thread
+	 silently in this case (the final true parameter).  */
+      thread_info *thr = remote_add_thread (curr_ptid, true, true, true);
 
       switch_to_thread (thr);
-
-      /* Don't consider the thread stopped until we've processed the
-	 saved stop reply.  */
-      set_executing (this, thr->ptid, true);
     }
 
   /* Next, if the target can specify a description, read it.  We do
@@ -8010,11 +8011,11 @@ remote_target::select_thread_for_ambiguous_stop_reply
 	ambiguous = true;
     }
 
+  gdb_assert (first_resumed_thread != nullptr);
+
   remote_debug_printf ("first resumed thread is %s",
 		       pid_to_str (first_resumed_thread->ptid).c_str ());
   remote_debug_printf ("is this guess ambiguous? = %d", ambiguous);
-
-  gdb_assert (first_resumed_thread != nullptr);
 
   /* Warn if the remote target is sending ambiguous stop replies.  */
   if (ambiguous)
