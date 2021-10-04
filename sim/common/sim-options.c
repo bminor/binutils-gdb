@@ -93,6 +93,7 @@ typedef enum {
   OPTION_DO_COMMAND,
   OPTION_ARCHITECTURE,
   OPTION_TARGET,
+  OPTION_TARGET_INFO,
   OPTION_ARCHITECTURE_INFO,
   OPTION_ENVIRONMENT,
   OPTION_ALIGNMENT,
@@ -161,6 +162,10 @@ static const OPTION standard_options[] =
   { {"target", required_argument, NULL, OPTION_TARGET},
       '\0', "BFDNAME", "Specify the object-code format for the object files",
       standard_option_handler },
+  { {"target-info", no_argument, NULL, OPTION_TARGET_INFO},
+      '\0', NULL, "List supported targets", standard_option_handler },
+  { {"info-target", no_argument, NULL, OPTION_TARGET_INFO},
+      '\0', NULL, NULL, standard_option_handler },
 
   { {"load-lma", no_argument, NULL, OPTION_LOAD_LMA},
       '\0', NULL,
@@ -362,6 +367,20 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
     case OPTION_TARGET:
       {
 	STATE_TARGET (sd) = xstrdup (arg);
+	break;
+      }
+
+    case OPTION_TARGET_INFO:
+      {
+	const char **list = bfd_target_list ();
+	const char **lp;
+	if (list == NULL)
+	  abort ();
+	sim_io_printf (sd, "Possible targets:");
+	for (lp = list; *lp != NULL; lp++)
+	  sim_io_printf (sd, " %s", *lp);
+	sim_io_printf (sd, "\n");
+	free (list);
 	break;
       }
 
