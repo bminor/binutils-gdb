@@ -1,3 +1,8 @@
+2021-10-04  Tom de Vries  <tdevries@suse.de>
+
+	PR build/28318
+	* configure: Regenerate.
+
 2021-07-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* config.in, configure: Re-generate.
