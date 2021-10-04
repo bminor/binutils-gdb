@@ -333,12 +333,9 @@ unpack_mangled_go_symbol (const char *mangled_name,
    This demangler can't work in all situations,
    thus not too much effort is currently put into it.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 go_language::demangle_symbol (const char *mangled_name, int options) const
 {
-  struct obstack tempbuf;
-  char *result;
-  char *name_buf;
   const char *package_name;
   const char *object_name;
   const char *method_type_package_name;
@@ -348,15 +345,16 @@ go_language::demangle_symbol (const char *mangled_name, int options) const
   if (mangled_name == NULL)
     return NULL;
 
-  name_buf = unpack_mangled_go_symbol (mangled_name,
-				       &package_name, &object_name,
-				       &method_type_package_name,
-				       &method_type_object_name,
-				       &method_type_is_pointer);
+  gdb::unique_xmalloc_ptr<char> name_buf
+    (unpack_mangled_go_symbol (mangled_name,
+			       &package_name, &object_name,
+			       &method_type_package_name,
+			       &method_type_object_name,
+			       &method_type_is_pointer));
   if (name_buf == NULL)
     return NULL;
 
-  obstack_init (&tempbuf);
+  auto_obstack tempbuf;
 
   /* Print methods as they appear in "method expressions".  */
   if (method_type_package_name != NULL)
@@ -380,10 +378,7 @@ go_language::demangle_symbol (const char *mangled_name, int options) const
     }
   obstack_grow_str0 (&tempbuf, "");
 
-  result = xstrdup ((const char *) obstack_finish (&tempbuf));
-  obstack_free (&tempbuf, NULL);
-  xfree (name_buf);
-  return result;
+  return make_unique_xstrdup ((const char *) obstack_finish (&tempbuf));
 }
 
 /* Given a Go symbol, return its package or NULL if unknown.

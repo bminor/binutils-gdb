@@ -10174,9 +10174,8 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 	     to look up their definition from their declaration so
 	     the only disadvantage remains the minimal symbol variant
 	     `long name(params)' does not have the proper inferior type.  */
-	  demangled.reset (gdb_demangle (mangled,
-					 (DMGL_PARAMS | DMGL_ANSI
-					  | DMGL_RET_DROP)));
+	  demangled = gdb_demangle (mangled, (DMGL_PARAMS | DMGL_ANSI
+					      | DMGL_RET_DROP));
 	}
       if (demangled)
 	canon = demangled.get ();

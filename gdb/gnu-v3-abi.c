@@ -644,17 +644,14 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 	 possible paths to the method based on the adjustment.  */
       if (physname)
 	{
-	  char *demangled_name = gdb_demangle (physname,
-					       DMGL_ANSI | DMGL_PARAMS);
+	  gdb::unique_xmalloc_ptr<char> demangled_name
+	    = gdb_demangle (physname, DMGL_ANSI | DMGL_PARAMS);
 
 	  fprintf_filtered (stream, "&virtual ");
 	  if (demangled_name == NULL)
 	    fputs_filtered (physname, stream);
 	  else
-	    {
-	      fputs_filtered (demangled_name, stream);
-	      xfree (demangled_name);
-	    }
+	    fputs_filtered (demangled_name.get (), stream);
 	  return;
 	}
     }

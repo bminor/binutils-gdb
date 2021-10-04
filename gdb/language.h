@@ -430,15 +430,16 @@ struct language_defn
 
      The resulting string should be of the form that will be
      installed into a symbol.  */
-  virtual bool sniff_from_mangled_name (const char *mangled,
-					char **demangled) const
+  virtual bool sniff_from_mangled_name
+       (const char *mangled, gdb::unique_xmalloc_ptr<char> *demangled) const
   {
     *demangled = nullptr;
     return false;
   }
 
   /* Return demangled language symbol version of MANGLED, or NULL.  */
-  virtual char *demangle_symbol (const char *mangled, int options) const
+  virtual gdb::unique_xmalloc_ptr<char> demangle_symbol (const char *mangled,
+							 int options) const
   {
     return nullptr;
   }
@@ -791,8 +792,9 @@ extern const char *language_str (enum language);
 extern CORE_ADDR skip_language_trampoline (struct frame_info *, CORE_ADDR pc);
 
 /* Return demangled language symbol, or NULL.  */
-extern char *language_demangle (const struct language_defn *current_language, 
-				const char *mangled, int options);
+extern gdb::unique_xmalloc_ptr<char> language_demangle
+     (const struct language_defn *current_language,
+      const char *mangled, int options);
 
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */

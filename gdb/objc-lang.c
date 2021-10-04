@@ -251,8 +251,9 @@ public:
   }
 
   /* See language.h.  */
-  bool sniff_from_mangled_name (const char *mangled,
-				char **demangled) const override
+  bool sniff_from_mangled_name
+       (const char *mangled, gdb::unique_xmalloc_ptr<char> *demangled)
+       const override
   {
     *demangled = demangle_symbol (mangled, 0);
     return *demangled != NULL;
@@ -260,7 +261,8 @@ public:
 
   /* See language.h.  */
 
-  char *demangle_symbol (const char *mangled, int options) const override;
+  gdb::unique_xmalloc_ptr<char> demangle_symbol (const char *mangled,
+						 int options) const override;
 
   /* See language.h.  */
 
@@ -318,7 +320,7 @@ public:
 
 /* See declaration of objc_language::demangle_symbol above.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 objc_language::demangle_symbol (const char *mangled, int options) const
 {
   char *demangled, *cp;
@@ -376,7 +378,7 @@ objc_language::demangle_symbol (const char *mangled, int options) const
 
       *cp++ = ']';		/* closing right brace */
       *cp++ = 0;		/* string terminator */
-      return demangled;
+      return gdb::unique_xmalloc_ptr<char> (demangled);
     }
   else
     return nullptr;	/* Not an objc mangled name.  */

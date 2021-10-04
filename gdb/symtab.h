@@ -592,8 +592,8 @@ extern CORE_ADDR get_symbol_address (const struct symbol *sym);
    then set the language appropriately.  The returned name is allocated
    by the demangler and should be xfree'd.  */
 
-extern char *symbol_find_demangled_name (struct general_symbol_info *gsymbol,
-					 const char *mangled);
+extern gdb::unique_xmalloc_ptr<char> symbol_find_demangled_name
+     (struct general_symbol_info *gsymbol, const char *mangled);
 
 /* Return true if NAME matches the "search" name of SYMBOL, according
    to the symbol's language.  */

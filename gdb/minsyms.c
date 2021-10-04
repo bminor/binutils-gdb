@@ -1473,10 +1473,11 @@ minimal_symbol_reader::install ()
 	       if (!msym->name_set)
 		 {
 		   /* This will be freed later, by compute_and_set_names.  */
-		   char *demangled_name
+		   gdb::unique_xmalloc_ptr<char> demangled_name
 		     = symbol_find_demangled_name (msym, msym->linkage_name ());
 		   msym->set_demangled_name
-		     (demangled_name, &m_objfile->per_bfd->storage_obstack);
+		     (demangled_name.release (),
+		      &m_objfile->per_bfd->storage_obstack);
 		   msym->name_set = 1;
 		 }
 	       /* This mangled_name_hash computation has to be outside of

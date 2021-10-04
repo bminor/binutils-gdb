@@ -67,7 +67,8 @@ public:
 
   /* See language.h.  */
 
-  char *demangle_symbol (const char *mangled, int options) const override
+  gdb::unique_xmalloc_ptr<char> demangle_symbol (const char *mangled,
+						 int options) const override
   {
       /* We could support demangling here to provide module namespaces
 	 also for inferiors with only minimal symbol table (ELF symbols).

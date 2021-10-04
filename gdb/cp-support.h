@@ -188,6 +188,6 @@ extern struct cmd_list_element *maint_cplus_cmd_list;
 
 /* A wrapper for bfd_demangle.  */
 
-char *gdb_demangle (const char *name, int options);
+gdb::unique_xmalloc_ptr<char> gdb_demangle (const char *name, int options);
 
 #endif /* CP_SUPPORT_H */

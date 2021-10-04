@@ -674,16 +674,16 @@ is_type_conversion_operator (struct type *type, int i, int j)
    form.  Even the author of this function feels that writing little
    parsers like this everywhere is stupid.  */
 
-static char *
-remove_qualifiers (char *qid)
+static const char *
+remove_qualifiers (const char *qid)
 {
   int quoted = 0;	/* Zero if we're not in quotes;
 			   '"' if we're in a double-quoted string;
 			   '\'' if we're in a single-quoted string.  */
   int depth = 0;	/* Number of unclosed parens we've seen.  */
   char *parenstack = (char *) alloca (strlen (qid));
-  char *scan;
-  char *last = 0;	/* The character after the rightmost
+  const char *scan;
+  const char *last = 0;	/* The character after the rightmost
 			   `::' token we've seen so far.  */
 
   for (scan = qid; *scan; scan++)
@@ -1257,7 +1257,6 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	    {
 	      const char *mangled_name;
 	      gdb::unique_xmalloc_ptr<char> mangled_name_holder;
-	      char *demangled_name;
 	      const char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
 	      int is_full_physname_constructor =
 		TYPE_FN_FIELD_CONSTRUCTOR (f, j)
@@ -1311,9 +1310,9 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	      else
 		mangled_name = TYPE_FN_FIELD_PHYSNAME (f, j);
 
-	      demangled_name =
-		gdb_demangle (mangled_name,
-			      DMGL_ANSI | DMGL_PARAMS);
+	      gdb::unique_xmalloc_ptr<char> demangled_name
+		= gdb_demangle (mangled_name,
+				DMGL_ANSI | DMGL_PARAMS);
 	      if (demangled_name == NULL)
 		{
 		  /* In some cases (for instance with the HP
@@ -1340,9 +1339,9 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		}
 	      else
 		{
-		  char *p;
-		  char *demangled_no_class
-		    = remove_qualifiers (demangled_name);
+		  const char *p;
+		  const char *demangled_no_class
+		    = remove_qualifiers (demangled_name.get ());
 
 		  /* Get rid of the `static' appended by the
 		     demangler.  */
@@ -1350,19 +1349,12 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		  if (p != NULL)
 		    {
 		      int length = p - demangled_no_class;
-		      char *demangled_no_static;
-
-		      demangled_no_static
-			= (char *) xmalloc (length + 1);
-		      strncpy (demangled_no_static,
-			       demangled_no_class, length);
-		      *(demangled_no_static + length) = '\0';
-		      fputs_filtered (demangled_no_static, stream);
-		      xfree (demangled_no_static);
+		      std::string demangled_no_static (demangled_no_class,
+						       length);
+		      fputs_filtered (demangled_no_static.c_str (), stream);
 		    }
 		  else
 		    fputs_filtered (demangled_no_class, stream);
-		  xfree (demangled_name);
 		}
 
 	      fprintf_filtered (stream, ";\n");

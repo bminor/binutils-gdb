@@ -2345,8 +2345,6 @@ void
 fprintf_symbol_filtered (struct ui_file *stream, const char *name,
 			 enum language lang, int arg_mode)
 {
-  char *demangled;
-
   if (name != NULL)
     {
       /* If user wants to see raw output, no problem.  */
@@ -2356,12 +2354,9 @@ fprintf_symbol_filtered (struct ui_file *stream, const char *name,
 	}
       else
 	{
-	  demangled = language_demangle (language_def (lang), name, arg_mode);
-	  fputs_filtered (demangled ? demangled : name, stream);
-	  if (demangled != NULL)
-	    {
-	      xfree (demangled);
-	    }
+	  gdb::unique_xmalloc_ptr<char> demangled
+	    = language_demangle (language_def (lang), name, arg_mode);
+	  fputs_filtered (demangled ? demangled.get () : name, stream);
 	}
     }
 }

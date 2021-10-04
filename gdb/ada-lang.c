@@ -1324,12 +1324,6 @@ ada_decode_symbol (const struct general_symbol_info *arg)
   return *resultp;
 }
 
-static char *
-ada_la_decode (const char *encoded, int options)
-{
-  return xstrdup (ada_decode (encoded).c_str ());
-}
-
 
 
 				/* Arrays */
@@ -13116,8 +13110,9 @@ public:
   }
 
   /* See language.h.  */
-  bool sniff_from_mangled_name (const char *mangled,
-				char **out) const override
+  bool sniff_from_mangled_name
+       (const char *mangled,
+	gdb::unique_xmalloc_ptr<char> *out) const override
   {
     std::string demangled = ada_decode (mangled);
 
@@ -13155,9 +13150,10 @@ public:
 
   /* See language.h.  */
 
-  char *demangle_symbol (const char *mangled, int options) const override
+  gdb::unique_xmalloc_ptr<char> demangle_symbol (const char *mangled,
+						 int options) const override
   {
-    return ada_la_decode (mangled, options);
+    return make_unique_xstrdup (ada_decode (mangled).c_str ());
   }
 
   /* See language.h.  */
