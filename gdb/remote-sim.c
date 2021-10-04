@@ -682,7 +682,7 @@ gdbsim_target_open (const char *args, int from_tty)
   struct sim_inferior_data *sim_data;
   SIM_DESC gdbsim_desc;
 
-  const std::string &sysroot = gdb_sysroot;
+  const char *sysroot = gdb_sysroot.c_str ();
   if (is_target_filename (sysroot))
     sysroot += strlen (TARGET_SYSROOT_PREFIX);
 
@@ -703,7 +703,7 @@ gdbsim_target_open (const char *args, int from_tty)
   len = (7 + 1			/* gdbsim */
 	 + strlen (" -E little")
 	 + strlen (" --architecture=xxxxxxxxxx")
-	 + strlen (" --sysroot=") + sysroot.length () +
+	 + strlen (" --sysroot=") + strlen (sysroot) +
 	 + (args ? strlen (args) : 0)
 	 + 50) /* slack */ ;
   arg_buf = (char *) alloca (len);
@@ -730,7 +730,7 @@ gdbsim_target_open (const char *args, int from_tty)
     }
   /* Pass along gdb's concept of the sysroot.  */
   strcat (arg_buf, " --sysroot=");
-  strcat (arg_buf, sysroot.c_str ());
+  strcat (arg_buf, sysroot);
   /* finally, any explicit args */
   if (args)
     {
