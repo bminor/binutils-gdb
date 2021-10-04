@@ -100,11 +100,18 @@ struct gdbarch_tdep
   /* The number of VFP registers reported by the target.  It is zero
      if VFP registers are not supported.  */
   int vfp_register_count;
-  bool have_vfp_pseudos;	/* Are we synthesizing the single precision
+  bool have_s_pseudos;		/* Are we synthesizing the single precision
 				   VFP registers?  */
-  bool have_neon_pseudos;	/* Are we synthesizing the quad precision
-				   NEON registers?  Requires
-				   have_vfp_pseudos.  */
+  int s_pseudo_base;		/* Register number for the first S pseudo
+				   register.  */
+  int s_pseudo_count;		/* Number of S pseudo registers.  */
+  bool have_q_pseudos;		/* Are we synthesizing the quad precision
+				   Q (NEON or MVE) registers?  Requires
+				   have_s_pseudos.  */
+  int q_pseudo_base;		/* Register number for the first quad
+				   precision pseudo register.  */
+  int q_pseudo_count;		/* Number of quad precision pseudo
+				   registers.  */
   bool have_neon;		/* Do we have a NEON unit?  */
 
   bool is_m;			/* Does the target follow the "M" profile.  */

@@ -4122,20 +4122,57 @@ arm_neon_quad_type (struct gdbarch *gdbarch)
   return tdep->neon_quad_type;
 }
 
+/* Return true if REGNUM is a Q pseudo register.  Return false
+   otherwise.
+
+   REGNUM is the raw register number and not a pseudo-relative register
+   number.  */
+
+static bool
+is_q_pseudo (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  /* Q pseudo registers are available for NEON (Q0~Q15).  */
+  if (tdep->have_q_pseudos
+      && regnum >= tdep->q_pseudo_base
+      && regnum < (tdep->q_pseudo_base + tdep->q_pseudo_count))
+    return true;
+
+  return false;
+}
+
+/* Return true if REGNUM is a VFP S pseudo register.  Return false
+   otherwise.
+
+   REGNUM is the raw register number and not a pseudo-relative register
+   number.  */
+
+static bool
+is_s_pseudo (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (tdep->have_s_pseudos
+      && regnum >= tdep->s_pseudo_base
+      && regnum < (tdep->s_pseudo_base + tdep->s_pseudo_count))
+    return true;
+
+  return false;
+}
+
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */
 
 static struct type *
 arm_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  int num_regs = gdbarch_num_regs (gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (gdbarch_tdep (gdbarch)->have_vfp_pseudos
-      && regnum >= num_regs && regnum < num_regs + 32)
+  if (is_s_pseudo (gdbarch, regnum))
     return builtin_type (gdbarch)->builtin_float;
 
-  if (gdbarch_tdep (gdbarch)->have_neon_pseudos
-      && regnum >= num_regs + 32 && regnum < num_regs + 32 + 16)
+  if (is_q_pseudo (gdbarch, regnum))
     return arm_neon_quad_type (gdbarch);
 
   /* If the target description has register information, we are only
@@ -4147,7 +4184,7 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
 
       if (regnum >= ARM_D0_REGNUM && regnum < ARM_D0_REGNUM + 32
 	  && t->code () == TYPE_CODE_FLT
-	  && gdbarch_tdep (gdbarch)->have_neon)
+	  && tdep->have_neon)
 	return arm_neon_double_type (gdbarch);
       else
 	return t;
@@ -4155,7 +4192,7 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
 
   if (regnum >= ARM_F0_REGNUM && regnum < ARM_F0_REGNUM + NUM_FREGS)
     {
-      if (!gdbarch_tdep (gdbarch)->have_fpa_registers)
+      if (!tdep->have_fpa_registers)
 	return builtin_type (gdbarch)->builtin_void;
 
       return arm_ext_type (gdbarch);
@@ -8551,30 +8588,28 @@ show_disassembly_style_sfunc (struct ui_file *file, int from_tty,
 static const char *
 arm_register_name (struct gdbarch *gdbarch, int i)
 {
-  const int num_regs = gdbarch_num_regs (gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (gdbarch_tdep (gdbarch)->have_vfp_pseudos
-      && i >= num_regs && i < num_regs + 32)
+  if (is_s_pseudo (gdbarch, i))
     {
-      static const char *const vfp_pseudo_names[] = {
+      static const char *const s_pseudo_names[] = {
 	"s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
 	"s8", "s9", "s10", "s11", "s12", "s13", "s14", "s15",
 	"s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23",
 	"s24", "s25", "s26", "s27", "s28", "s29", "s30", "s31",
       };
 
-      return vfp_pseudo_names[i - num_regs];
+      return s_pseudo_names[i - tdep->s_pseudo_base];
     }
 
-  if (gdbarch_tdep (gdbarch)->have_neon_pseudos
-      && i >= num_regs + 32 && i < num_regs + 32 + 16)
+  if (is_q_pseudo (gdbarch, i))
     {
-      static const char *const neon_pseudo_names[] = {
+      static const char *const q_pseudo_names[] = {
 	"q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7",
 	"q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15",
       };
 
-      return neon_pseudo_names[i - num_regs - 32];
+      return q_pseudo_names[i - tdep->q_pseudo_base];
     }
 
   if (i >= ARRAY_SIZE (arm_register_names))
@@ -8582,6 +8617,7 @@ arm_register_name (struct gdbarch *gdbarch, int i)
        an XML description.  */
     return "";
 
+  /* Non-pseudo registers.  */
   return arm_register_names[i];
 }
 
@@ -8719,15 +8755,20 @@ arm_pseudo_read (struct gdbarch *gdbarch, readable_regcache *regcache,
   int offset, double_regnum;
 
   gdb_assert (regnum >= num_regs);
-  regnum -= num_regs;
 
-  if (gdbarch_tdep (gdbarch)->have_neon_pseudos && regnum >= 32 && regnum < 48)
-    /* Quad-precision register.  */
-    return arm_neon_quad_read (gdbarch, regcache, regnum - 32, buf);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (is_q_pseudo (gdbarch, regnum))
+    {
+      /* Quad-precision register.  */
+      return arm_neon_quad_read (gdbarch, regcache,
+				 regnum - tdep->q_pseudo_base, buf);
+    }
   else
     {
       enum register_status status;
 
+      regnum -= tdep->s_pseudo_base;
       /* Single-precision register.  */
       gdb_assert (regnum < 32);
 
@@ -8787,13 +8828,18 @@ arm_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
   int offset, double_regnum;
 
   gdb_assert (regnum >= num_regs);
-  regnum -= num_regs;
 
-  if (gdbarch_tdep (gdbarch)->have_neon_pseudos && regnum >= 32 && regnum < 48)
-    /* Quad-precision register.  */
-    arm_neon_quad_write (gdbarch, regcache, regnum - 32, buf);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (is_q_pseudo (gdbarch, regnum))
+    {
+      /* Quad-precision register.  */
+      arm_neon_quad_write (gdbarch, regcache,
+			   regnum - tdep->q_pseudo_base, buf);
+    }
   else
     {
+      regnum -= tdep->s_pseudo_base;
       /* Single-precision register.  */
       gdb_assert (regnum < 32);
 
@@ -8940,11 +8986,12 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int i;
   bool is_m = false;
   int vfp_register_count = 0;
-  bool have_vfp_pseudos = false, have_neon_pseudos = false;
+  bool have_s_pseudos = false, have_q_pseudos = false;
   bool have_wmmx_registers = false;
   bool have_neon = false;
   bool have_fpa_registers = true;
   const struct target_desc *tdesc = info.target_desc;
+  int register_count = ARM_NUM_REGS;
 
   /* If we have an object to base this architecture on, try to determine
      its ABI.  */
@@ -9229,7 +9276,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    return NULL;
 
 	  if (tdesc_unnumbered_register (feature, "s0") == 0)
-	    have_vfp_pseudos = true;
+	    have_s_pseudos = true;
 
 	  vfp_register_count = i;
 
@@ -9248,7 +9295,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		 their type; otherwise (normally) provide them with
 		 the default type.  */
 	      if (tdesc_unnumbered_register (feature, "q0") == 0)
-		have_neon_pseudos = true;
+		have_q_pseudos = true;
 
 	      have_neon = true;
 	    }
@@ -9298,8 +9345,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      || vfp_register_count == 16
 	      || vfp_register_count == 32);
   tdep->vfp_register_count = vfp_register_count;
-  tdep->have_vfp_pseudos = have_vfp_pseudos;
-  tdep->have_neon_pseudos = have_neon_pseudos;
+  tdep->have_s_pseudos = have_s_pseudos;
+  tdep->have_q_pseudos = have_q_pseudos;
   tdep->have_neon = have_neon;
 
   arm_register_g_packet_guesses (gdbarch);
@@ -9387,7 +9434,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Information about registers, etc.  */
   set_gdbarch_sp_regnum (gdbarch, ARM_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, ARM_PC_REGNUM);
-  set_gdbarch_num_regs (gdbarch, ARM_NUM_REGS);
+  set_gdbarch_num_regs (gdbarch, register_count);
   set_gdbarch_register_type (gdbarch, arm_register_type);
   set_gdbarch_register_reggroup_p (gdbarch, arm_register_reggroup_p);
 
@@ -9475,21 +9522,29 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_tdesc_pseudo_register_name (gdbarch, arm_register_name);
 
       tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
+      register_count = gdbarch_num_regs (gdbarch);
 
       /* Override tdesc_register_type to adjust the types of VFP
 	 registers for NEON.  */
       set_gdbarch_register_type (gdbarch, arm_register_type);
     }
 
-  if (have_vfp_pseudos)
+  /* Initialize the pseudo register data.  */
+  if (tdep->have_s_pseudos)
     {
-      /* NOTE: These are the only pseudo registers used by
-	 the ARM target at the moment.  If more are added, a
-	 little more care in numbering will be needed.  */
+      /* VFP single precision pseudo registers (S0~S31).  */
+      tdep->s_pseudo_base = register_count;
+      tdep->s_pseudo_count = 32;
+      int num_pseudos = tdep->s_pseudo_count;
 
-      int num_pseudos = 32;
-      if (have_neon_pseudos)
-	num_pseudos += 16;
+      if (tdep->have_q_pseudos)
+	{
+	  /* NEON quad precision pseudo registers (Q0~Q15).  */
+	  tdep->q_pseudo_base = register_count + num_pseudos;
+	  tdep->q_pseudo_count = 16;
+	  num_pseudos += tdep->q_pseudo_count;
+	}
+
       set_gdbarch_num_pseudo_regs (gdbarch, num_pseudos);
       set_gdbarch_pseudo_register_read (gdbarch, arm_pseudo_read);
       set_gdbarch_pseudo_register_write (gdbarch, arm_pseudo_write);
@@ -9526,10 +9581,18 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 		      (int) tdep->have_wmmx_registers);
   fprintf_unfiltered (file, _("arm_dump_tdep: vfp_register_count = %i\n"),
 		      (int) tdep->vfp_register_count);
-  fprintf_unfiltered (file, _("arm_dump_tdep: have_vfp_pseudos = %i\n"),
-		      (int) tdep->have_vfp_pseudos);
-  fprintf_unfiltered (file, _("arm_dump_tdep: have_neon_pseudos = %i\n"),
-		      (int) tdep->have_neon_pseudos);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_s_pseudos = %s\n"),
+		      tdep->have_s_pseudos? "true" : "false");
+  fprintf_unfiltered (file, _("arm_dump_tdep: s_pseudo_base = %i\n"),
+		      (int) tdep->s_pseudo_base);
+  fprintf_unfiltered (file, _("arm_dump_tdep: s_pseudo_count = %i\n"),
+		      (int) tdep->s_pseudo_count);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_q_pseudos = %s\n"),
+		      tdep->have_q_pseudos? "true" : "false");
+  fprintf_unfiltered (file, _("arm_dump_tdep: q_pseudo_base = %i\n"),
+		      (int) tdep->q_pseudo_base);
+  fprintf_unfiltered (file, _("arm_dump_tdep: q_pseudo_count = %i\n"),
+		      (int) tdep->q_pseudo_count);
   fprintf_unfiltered (file, _("arm_dump_tdep: have_neon = %i\n"),
 		      (int) tdep->have_neon);
   fprintf_unfiltered (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
