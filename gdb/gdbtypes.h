@@ -1793,51 +1793,70 @@ struct call_site_parameter
 
 struct call_site
   {
-    /* Address of the first instruction after this call.  */
+    call_site (CORE_ADDR pc, dwarf2_per_cu_data *per_cu,
+	       dwarf2_per_objfile *per_objfile)
+      : per_cu (per_cu), per_objfile (per_objfile), m_pc (pc)
+    {}
 
-    CORE_ADDR pc;
+    static int
+    eq (const call_site *a, const call_site *b)
+    {
+      return core_addr_eq (&a->m_pc, &b->m_pc);
+    }
+
+    static hashval_t
+    hash (const call_site *a)
+    {
+      return core_addr_hash (&a->m_pc);
+    }
+
+    static int
+    eq (const void *a, const void *b)
+    {
+      return eq ((const call_site *)a, (const call_site *)b);
+    }
+
+    static hashval_t
+    hash (const void *a)
+    {
+      return hash ((const call_site *)a);
+    }
+
+    /* Return the address of the first instruction after this call.  */
+
+    CORE_ADDR pc () const;
 
     /* * List successor with head in FUNC_TYPE.TAIL_CALL_LIST.  */
 
-    struct call_site *tail_call_next;
+    struct call_site *tail_call_next = nullptr;
 
     /* * Describe DW_AT_call_target.  Missing attribute uses
        FIELD_LOC_KIND_DWARF_BLOCK with FIELD_DWARF_BLOCK == NULL.  */
 
-    struct call_site_target target;
+    struct call_site_target target {};
 
     /* * Size of the PARAMETER array.  */
 
-    unsigned parameter_count;
+    unsigned parameter_count = 0;
 
     /* * CU of the function where the call is located.  It gets used
        for DWARF blocks execution in the parameter array below.  */
 
-    dwarf2_per_cu_data *per_cu;
+    dwarf2_per_cu_data *const per_cu = nullptr;
 
     /* objfile of the function where the call is located.  */
 
-    dwarf2_per_objfile *per_objfile;
+    dwarf2_per_objfile *const per_objfile = nullptr;
 
+  private:
+    /* Address of the first instruction after this call.  */
+    const CORE_ADDR m_pc;
+
+  public:
     /* * Describe DW_TAG_call_site's DW_TAG_formal_parameter.  */
 
-    struct call_site_parameter parameter[1];
+    struct call_site_parameter parameter[];
   };
-
-static inline int
-call_site_eq (const void *a_, const void *b_)
-{
-  const struct call_site *a = (const call_site *)a_;
-  const struct call_site *b = (const call_site *)b_;
-  return core_addr_eq (&a->pc, &b->pc);
-}
-
-static inline hashval_t
-call_site_hash (const void *a_)
-{
-  const struct call_site *a = (const call_site *)a_;
-  return core_addr_hash (&a->pc);
-}
 
 /* The type-specific info for TYPE_CODE_FIXED_POINT types.  */
 

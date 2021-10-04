@@ -240,14 +240,14 @@ pretend_pc (struct frame_info *this_frame, struct tailcall_cache *cache)
   gdb_assert (next_levels >= 0);
 
   if (next_levels < chain->callees)
-    return chain->call_site[chain->length - next_levels - 1]->pc;
+    return chain->call_site[chain->length - next_levels - 1]->pc ();
   next_levels -= chain->callees;
 
   /* Otherwise CHAIN->CALLEES are already covered by CHAIN->CALLERS.  */
   if (chain->callees != chain->length)
     {
       if (next_levels < chain->callers)
-	return chain->call_site[chain->callers - next_levels - 1]->pc;
+	return chain->call_site[chain->callers - next_levels - 1]->pc ();
       next_levels -= chain->callers;
     }
 

@@ -13341,7 +13341,6 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   struct gdbarch *gdbarch = objfile->arch ();
   CORE_ADDR pc, baseaddr;
   struct attribute *attr;
-  struct call_site *call_site, call_site_local;
   void **slot;
   int nparams;
   struct die_info *child_die;
@@ -13366,10 +13365,11 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   pc = gdbarch_adjust_dwarf2_addr (gdbarch, pc);
 
   if (cu->call_site_htab == NULL)
-    cu->call_site_htab = htab_create_alloc_ex (16, call_site_hash, call_site_eq,
-					       NULL, &objfile->objfile_obstack,
+    cu->call_site_htab = htab_create_alloc_ex (16, call_site::hash,
+					       call_site::eq, NULL,
+					       &objfile->objfile_obstack,
 					       hashtab_obstack_allocate, NULL);
-  call_site_local.pc = pc;
+  struct call_site call_site_local (pc, nullptr, nullptr);
   slot = htab_find_slot (cu->call_site_htab, &call_site_local, INSERT);
   if (*slot != NULL)
     {
@@ -13399,14 +13399,16 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       nparams++;
     }
 
-  call_site
-    = ((struct call_site *)
-       obstack_alloc (&objfile->objfile_obstack,
-		      sizeof (*call_site)
-		      + (sizeof (*call_site->parameter) * (nparams - 1))));
+  struct call_site *call_site
+    = new (XOBNEWVAR (&objfile->objfile_obstack,
+		      struct call_site,
+		      sizeof (*call_site) + sizeof (call_site->parameter[0]) * nparams))
+    struct call_site (pc, cu->per_cu, per_objfile);
   *slot = call_site;
-  memset (call_site, 0, sizeof (*call_site) - sizeof (*call_site->parameter));
-  call_site->pc = pc;
+
+  /* We never call the destructor of call_site, so we must ensure it is
+     trivially destructible.  */
+  gdb_static_assert(std::is_trivially_destructible<struct call_site>::value);
 
   if (dwarf2_flag_true_p (die, DW_AT_call_tail_call, cu)
       || dwarf2_flag_true_p (die, DW_AT_GNU_tail_call, cu))
@@ -13526,9 +13528,6 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
     complaint (_("DW_TAG_call_site DW_AT_call_target is neither "
 		 "block nor reference, for DIE %s [in module %s]"),
 	       sect_offset_str (die->sect_off), objfile_name (objfile));
-
-  call_site->per_cu = cu->per_cu;
-  call_site->per_objfile = per_objfile;
 
   for (child_die = die->child;
        child_die && child_die->tag;

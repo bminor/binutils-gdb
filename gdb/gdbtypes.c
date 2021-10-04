@@ -37,6 +37,7 @@
 #include "cp-support.h"
 #include "bcache.h"
 #include "dwarf2/loc.h"
+#include "dwarf2/read.h"
 #include "gdbcore.h"
 #include "floatformat.h"
 #include "f-lang.h"
@@ -6306,6 +6307,14 @@ objfile_type (struct objfile *objfile)
 
   objfile_type_data.set (objfile, objfile_type);
   return objfile_type;
+}
+
+/* See gdbtypes.h.  */
+
+CORE_ADDR
+call_site::pc () const
+{
+  return m_pc;
 }
 
 void _initialize_gdbtypes ();
