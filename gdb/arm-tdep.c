@@ -9470,6 +9470,17 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
     }
 
+  if (tdesc_data != nullptr)
+    {
+      set_tdesc_pseudo_register_name (gdbarch, arm_register_name);
+
+      tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
+
+      /* Override tdesc_register_type to adjust the types of VFP
+	 registers for NEON.  */
+      set_gdbarch_register_type (gdbarch, arm_register_type);
+    }
+
   if (have_vfp_pseudos)
     {
       /* NOTE: These are the only pseudo registers used by
@@ -9482,17 +9493,6 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_pseudo_regs (gdbarch, num_pseudos);
       set_gdbarch_pseudo_register_read (gdbarch, arm_pseudo_read);
       set_gdbarch_pseudo_register_write (gdbarch, arm_pseudo_write);
-    }
-
-  if (tdesc_data != nullptr)
-    {
-      set_tdesc_pseudo_register_name (gdbarch, arm_register_name);
-
-      tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
-
-      /* Override tdesc_register_type to adjust the types of VFP
-	 registers for NEON.  */
-      set_gdbarch_register_type (gdbarch, arm_register_type);
     }
 
   /* Add standard register aliases.  We add aliases even for those
