@@ -1,3 +1,17 @@
+2021-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/28405
+	* remote.c (remote_target::remote_add_thread): Add new silent_p
+	argument, use as needed.
+	(remote_target::remote_notice_new_inferior): Pass additional
+	argument to remote_add_thread.
+	(remote_target::remote_notice_new_inferior): Likewise.
+	(extended_remote_target::attach): Call remote_add_thread instead
+	of add_thred_silent directly.
+	(remote_target::select_thread_for_ambiguous_stop_reply): Move
+	assert earlier, before we use the thing we're asserting is not
+	nullptr.
+
 2021-12-11  Bruno Larsen  <blarsen@redhat.com>
 
 	PR gdb/28480

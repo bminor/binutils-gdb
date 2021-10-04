@@ -1,3 +1,10 @@
+2021-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/28405
+	* gdb.server/ext-attach.exp (run_test): New proc containing all of
+	the old code for running the core of the test.  This proc is then
+	called multiple times from the global scope.
+
 2021-12-11  Bruno Larsen  <blarsen@redhat.com>
 
 	PR gdb/28480
