@@ -1824,6 +1824,21 @@ struct call_site
     struct call_site_parameter parameter[1];
   };
 
+static inline int
+call_site_eq (const void *a_, const void *b_)
+{
+  const struct call_site *a = (const call_site *)a_;
+  const struct call_site *b = (const call_site *)b_;
+  return core_addr_eq (&a->pc, &b->pc);
+}
+
+static inline hashval_t
+call_site_hash (const void *a_)
+{
+  const struct call_site *a = (const call_site *)a_;
+  return core_addr_hash (&a->pc);
+}
+
 /* The type-specific info for TYPE_CODE_FIXED_POINT types.  */
 
 struct fixed_point_type_info

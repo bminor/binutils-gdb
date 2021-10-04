@@ -13341,7 +13341,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   struct gdbarch *gdbarch = objfile->arch ();
   CORE_ADDR pc, baseaddr;
   struct attribute *attr;
-  struct call_site *call_site;
+  struct call_site *call_site, call_site_local;
   void **slot;
   int nparams;
   struct die_info *child_die;
@@ -13366,10 +13366,11 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   pc = gdbarch_adjust_dwarf2_addr (gdbarch, pc);
 
   if (cu->call_site_htab == NULL)
-    cu->call_site_htab = htab_create_alloc_ex (16, core_addr_hash, core_addr_eq,
+    cu->call_site_htab = htab_create_alloc_ex (16, call_site_hash, call_site_eq,
 					       NULL, &objfile->objfile_obstack,
 					       hashtab_obstack_allocate, NULL);
-  slot = htab_find_slot (cu->call_site_htab, &pc, INSERT);
+  call_site_local.pc = pc;
+  slot = htab_find_slot (cu->call_site_htab, &call_site_local, INSERT);
   if (*slot != NULL)
     {
       complaint (_("Duplicate PC %s for DW_TAG_call_site "

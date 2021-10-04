@@ -334,10 +334,13 @@ search_domain_name (enum search_domain e)
 call_site *
 compunit_symtab::find_call_site (CORE_ADDR pc) const
 {
+  struct call_site call_site_local;
   if (m_call_site_htab == nullptr)
     return nullptr;
 
-  void **slot = htab_find_slot (m_call_site_htab, &pc, NO_INSERT);
+  call_site_local.pc = pc;
+  void **slot
+    = htab_find_slot (m_call_site_htab, &call_site_local, NO_INSERT);
   if (slot == nullptr)
     return nullptr;
 
