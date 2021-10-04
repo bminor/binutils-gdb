@@ -123,8 +123,6 @@ enum
 	| CONTEXT_EXTENDED_REGISTERS
 
 static uintptr_t dr[8];
-static int debug_registers_changed;
-static int debug_registers_used;
 
 static int windows_initialization_done;
 #define DR6_CLEAR_VALUE 0xffff0ff0
@@ -386,40 +384,10 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
   else
     add_thread (&the_windows_nat_target, ptid);
 
-  /* Set the debug registers for the new thread if they are used.  */
-  if (debug_registers_used)
-    {
-#ifdef __x86_64__
-      if (wow64_process)
-	{
-	  /* Only change the value of the debug registers.  */
-	  th->wow64_context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
-	  CHECK (Wow64GetThreadContext (th->h, &th->wow64_context));
-	  th->wow64_context.Dr0 = dr[0];
-	  th->wow64_context.Dr1 = dr[1];
-	  th->wow64_context.Dr2 = dr[2];
-	  th->wow64_context.Dr3 = dr[3];
-	  th->wow64_context.Dr6 = DR6_CLEAR_VALUE;
-	  th->wow64_context.Dr7 = dr[7];
-	  CHECK (Wow64SetThreadContext (th->h, &th->wow64_context));
-	  th->wow64_context.ContextFlags = 0;
-	}
-      else
-#endif
-	{
-	  /* Only change the value of the debug registers.  */
-	  th->context.ContextFlags = CONTEXT_DEBUG_REGISTERS;
-	  CHECK (GetThreadContext (th->h, &th->context));
-	  th->context.Dr0 = dr[0];
-	  th->context.Dr1 = dr[1];
-	  th->context.Dr2 = dr[2];
-	  th->context.Dr3 = dr[3];
-	  th->context.Dr6 = DR6_CLEAR_VALUE;
-	  th->context.Dr7 = dr[7];
-	  CHECK (SetThreadContext (th->h, &th->context));
-	  th->context.ContextFlags = 0;
-	}
-    }
+  /* It's simplest to always set this and update the debug
+     registers.  */
+  th->debug_registers_changed = true;
+
   return th;
 }
 
@@ -593,7 +561,7 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 	  /* Copy dr values from that thread.
 	     But only if there were not modified since last stop.
 	     PR gdb/2388 */
-	  if (!debug_registers_changed)
+	  if (!th->debug_registers_changed)
 	    {
 	      dr[0] = th->wow64_context.Dr0;
 	      dr[1] = th->wow64_context.Dr1;
@@ -611,7 +579,7 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 	  /* Copy dr values from that thread.
 	     But only if there were not modified since last stop.
 	     PR gdb/2388 */
-	  if (!debug_registers_changed)
+	  if (!th->debug_registers_changed)
 	    {
 	      dr[0] = th->context.Dr0;
 	      dr[1] = th->context.Dr1;
@@ -1193,12 +1161,10 @@ windows_continue (DWORD continue_status, int id, int killed)
   for (windows_thread_info *th : thread_list)
     if (id == -1 || id == (int) th->tid)
       {
-	if (!th->suspended)
-	  continue;
 #ifdef __x86_64__
 	if (wow64_process)
 	  {
-	    if (debug_registers_changed)
+	    if (th->debug_registers_changed)
 	      {
 		th->wow64_context.ContextFlags |= CONTEXT_DEBUG_REGISTERS;
 		th->wow64_context.Dr0 = dr[0];
@@ -1207,6 +1173,7 @@ windows_continue (DWORD continue_status, int id, int killed)
 		th->wow64_context.Dr3 = dr[3];
 		th->wow64_context.Dr6 = DR6_CLEAR_VALUE;
 		th->wow64_context.Dr7 = dr[7];
+		th->debug_registers_changed = false;
 	      }
 	    if (th->wow64_context.ContextFlags)
 	      {
@@ -1227,7 +1194,7 @@ windows_continue (DWORD continue_status, int id, int killed)
 	else
 #endif
 	  {
-	    if (debug_registers_changed)
+	    if (th->debug_registers_changed)
 	      {
 		th->context.ContextFlags |= CONTEXT_DEBUG_REGISTERS;
 		th->context.Dr0 = dr[0];
@@ -1236,6 +1203,7 @@ windows_continue (DWORD continue_status, int id, int killed)
 		th->context.Dr3 = dr[3];
 		th->context.Dr6 = DR6_CLEAR_VALUE;
 		th->context.Dr7 = dr[7];
+		th->debug_registers_changed = false;
 	      }
 	    if (th->context.ContextFlags)
 	      {
@@ -1268,7 +1236,6 @@ windows_continue (DWORD continue_status, int id, int killed)
 	     " (ContinueDebugEvent failed, error %u)"),
 	   (unsigned int) GetLastError ());
 
-  debug_registers_changed = 0;
   return res;
 }
 
@@ -1365,7 +1332,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 
 	  if (th->wow64_context.ContextFlags)
 	    {
-	      if (debug_registers_changed)
+	      if (th->debug_registers_changed)
 		{
 		  th->wow64_context.Dr0 = dr[0];
 		  th->wow64_context.Dr1 = dr[1];
@@ -1373,6 +1340,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 		  th->wow64_context.Dr3 = dr[3];
 		  th->wow64_context.Dr6 = DR6_CLEAR_VALUE;
 		  th->wow64_context.Dr7 = dr[7];
+		  th->debug_registers_changed = false;
 		}
 	      CHECK (Wow64SetThreadContext (th->h, &th->wow64_context));
 	      th->wow64_context.ContextFlags = 0;
@@ -1392,7 +1360,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 
 	  if (th->context.ContextFlags)
 	    {
-	      if (debug_registers_changed)
+	      if (th->debug_registers_changed)
 		{
 		  th->context.Dr0 = dr[0];
 		  th->context.Dr1 = dr[1];
@@ -1400,6 +1368,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 		  th->context.Dr3 = dr[3];
 		  th->context.Dr6 = DR6_CLEAR_VALUE;
 		  th->context.Dr7 = dr[7];
+		  th->debug_registers_changed = false;
 		}
 	      CHECK (SetThreadContext (th->h, &th->context));
 	      th->context.ContextFlags = 0;
@@ -1798,8 +1767,6 @@ windows_nat_target::do_initial_windows_stuff (DWORD pid, bool attaching)
 
   last_sig = GDB_SIGNAL_0;
   open_process_used = 0;
-  debug_registers_changed = 0;
-  debug_registers_used = 0;
   for (i = 0; i < sizeof (dr) / sizeof (dr[0]); i++)
     dr[i] = 0;
 #ifdef __CYGWIN__
@@ -3203,8 +3170,9 @@ cygwin_set_dr (int i, CORE_ADDR addr)
     internal_error (__FILE__, __LINE__,
 		    _("Invalid register %d in cygwin_set_dr.\n"), i);
   dr[i] = addr;
-  debug_registers_changed = 1;
-  debug_registers_used = 1;
+
+  for (windows_thread_info *th : thread_list)
+    th->debug_registers_changed = true;
 }
 
 /* Pass the value VAL to the inferior in the DR7 debug control
@@ -3214,8 +3182,9 @@ static void
 cygwin_set_dr7 (unsigned long val)
 {
   dr[7] = (CORE_ADDR) val;
-  debug_registers_changed = 1;
-  debug_registers_used = 1;
+
+  for (windows_thread_info *th : thread_list)
+    th->debug_registers_changed = true;
 }
 
 /* Get the value of debug register I from the inferior.  */
