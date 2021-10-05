@@ -34,7 +34,7 @@ namespace eval Term {
     variable _resize_count
 
     proc _log { what } {
-	verbose -log "+++ $what"
+	verbose "+++ $what"
     }
 
     # Call BODY, then log WHAT along with the original and new cursor position.
@@ -754,11 +754,11 @@ namespace eval Term {
 
     # Check for a box at the given coordinates.
     proc check_box {test_name x y width height} {
+	dump_box $x $y $width $height
 	set why [_check_box $x $y $width $height]
 	if {$why == ""} {
 	    pass $test_name
 	} else {
-	    dump_screen
 	    fail "$test_name ($why)"
 	}
     }
@@ -766,10 +766,9 @@ namespace eval Term {
     # Check whether the text contents of the terminal match the
     # regular expression.  Note that text styling is not considered.
     proc check_contents {test_name regexp} {
+	dump_screen
 	set contents [get_all_lines]
-	if {![gdb_assert {[regexp -- $regexp $contents]} $test_name]} {
-	    dump_screen
-	}
+	gdb_assert {[regexp -- $regexp $contents]} $test_name
     }
 
     # Get the region of the screen described by X, Y, WIDTH,
@@ -800,13 +799,12 @@ namespace eval Term {
     # choice for boxes with a border).
     proc check_region_contents { test_name x y width height regexp } {
 	variable _chars
+	dump_box $x $y $width $height
 
 	# Now grab the contents of the box, join each line together
 	# with a '\r\n' sequence and match against REGEXP.
 	set result [get_region $x $y $width $height "\r\n"]
-	if {![gdb_assert {[regexp -- $regexp $result]} $test_name]} {
-	    dump_screen
-	}
+	gdb_assert {[regexp -- $regexp $result]} $test_name
     }
 
     # Check the contents of a box on the screen.  This is a little
@@ -818,9 +816,9 @@ namespace eval Term {
     proc check_box_contents {test_name x y width height regexp} {
 	variable _chars
 
+	dump_box $x $y $width $height
 	set why [_check_box $x $y $width $height]
 	if {$why != ""} {
-	    dump_screen
 	    fail "$test_name (box check: $why)"
 	    return
 	}
