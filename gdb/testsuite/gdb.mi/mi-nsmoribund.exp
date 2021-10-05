@@ -121,7 +121,11 @@ set re [list \
 	    [string_list_to_regexp " = 1" \\ n {"} \r\n ^ done]]
 set re [join $re ""]
 mi_gdb_test "print done = 1" $re
-mi_gdb_test "103-exec-continue --all" "\[^\n\]*\r\n$running_re"
+
+# Command exec-continue --all attempts to resume all threads, but only
+# thread 5 was stopped, so only that one is reported as running.
+set running_re "\\*running,thread-id=\"5\""
+mi_gdb_test "103-exec-continue --all" "\[^\n\]*\r\n$running_re" \
 
 gdb_expect {
     -re "\\*stopped,reason=\"exited-normally\"" {
