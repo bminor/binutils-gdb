@@ -1020,7 +1020,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
 
   value = allocate_value (value_type);
   gdbarch_return_value (gdbarch, func_func, value_type, regcache,
-			value_contents_raw (value), NULL);
+			value_contents_raw (value).data (), NULL);
   resolved_address = value_as_address (value);
   resolved_pc = gdbarch_convert_from_func_ptr_addr
     (gdbarch, resolved_address, current_inferior ()->top_target ());

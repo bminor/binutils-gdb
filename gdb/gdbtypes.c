@@ -3878,7 +3878,7 @@ is_unique_ancestor (struct type *base, struct value *val)
   int offset = -1;
 
   return is_unique_ancestor_worker (base, value_type (val), &offset,
-				    value_contents_for_printing (val),
+				    value_contents_for_printing (val).data (),
 				    value_embedded_offset (val),
 				    value_address (val), val) == 1;
 }

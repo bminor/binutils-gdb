@@ -451,7 +451,7 @@ get_call_return_value (struct call_return_meta_info *ri)
 	{
 	  retval = allocate_value (ri->value_type);
 	  read_value_memory (retval, 0, 1, ri->struct_addr,
-			     value_contents_raw (retval),
+			     value_contents_raw (retval).data (),
 			     TYPE_LENGTH (ri->value_type));
 	}
     }
@@ -460,7 +460,7 @@ get_call_return_value (struct call_return_meta_info *ri)
       retval = allocate_value (ri->value_type);
       gdbarch_return_value (ri->gdbarch, ri->function, ri->value_type,
 			    get_current_regcache (),
-			    value_contents_raw (retval), NULL);
+			    value_contents_raw (retval).data (), NULL);
       if (stack_temporaries && class_or_union_p (ri->value_type))
 	{
 	  /* Values of class type returned in registers are copied onto
@@ -1083,7 +1083,7 @@ call_function_by_hand_dummy (struct value *function,
       if (info.trivially_copy_constructible)
 	{
 	  int length = TYPE_LENGTH (param_type);
-	  write_memory (addr, value_contents (args[i]), length);
+	  write_memory (addr, value_contents (args[i]).data (), length);
 	}
       else
 	{

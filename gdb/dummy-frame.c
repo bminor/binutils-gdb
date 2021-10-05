@@ -353,8 +353,8 @@ dummy_frame_prev_register (struct frame_info *this_frame,
   /* Use the regcache_cooked_read() method so that it, on the fly,
      constructs either a raw or pseudo register from the raw
      register cache.  */
-  cache->prev_regcache->cooked_read (regnum,
-				     value_contents_writeable (reg_val));
+  cache->prev_regcache->cooked_read
+    (regnum, value_contents_writeable (reg_val).data ());
   return reg_val;
 }
 

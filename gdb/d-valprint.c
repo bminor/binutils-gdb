@@ -48,7 +48,7 @@ dynamic_array_type (struct type *type,
       struct type *ptr_type;
       struct value *ival;
       int length;
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
 
       length = unpack_field_as_long (type, valaddr + embedded_offset, 0);
 

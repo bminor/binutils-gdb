@@ -408,7 +408,7 @@ tlb_value_read (struct value *val)
 
   if (!target_get_tib_address (inferior_ptid, &tlb))
     error (_("Unable to read tlb"));
-  store_typed_address (value_contents_raw (val), type, tlb);
+  store_typed_address (value_contents_raw (val).data (), type, tlb);
 }
 
 /* This function implements the lval_computed support for writing a

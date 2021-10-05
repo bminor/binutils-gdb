@@ -8998,7 +8998,7 @@ siginfo_value_read (struct value *v)
     target_read (current_inferior ()->top_target (),
 		 TARGET_OBJECT_SIGNAL_INFO,
 		 NULL,
-		 value_contents_all_raw (v),
+		 value_contents_all_raw (v).data (),
 		 value_offset (v),
 		 TYPE_LENGTH (value_type (v)));
 
@@ -9021,7 +9021,7 @@ siginfo_value_write (struct value *v, struct value *fromval)
   transferred = target_write (current_inferior ()->top_target (),
 			      TARGET_OBJECT_SIGNAL_INFO,
 			      NULL,
-			      value_contents_all_raw (fromval),
+			      value_contents_all_raw (fromval).data (),
 			      value_offset (v),
 			      TYPE_LENGTH (value_type (fromval)));
 

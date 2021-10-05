@@ -518,9 +518,9 @@ rx_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 
 	  psw_val = rx_frame_prev_register (this_frame, this_cache,
 					    RX_PSW_REGNUM);
-	  psw = extract_unsigned_integer (value_contents_all (psw_val), 4, 
-					  gdbarch_byte_order (
-					    get_frame_arch (this_frame)));
+	  psw = extract_unsigned_integer
+	    (value_contents_all (psw_val).data (), 4,
+	     gdbarch_byte_order (get_frame_arch (this_frame)));
 
 	  if ((psw & 0x20000 /* U bit */) != 0)
 	    return rx_frame_prev_register (this_frame, this_cache,
@@ -724,7 +724,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       for (i = 0; i < nargs; i++)
 	{
 	  struct value *arg = args[i];
-	  const gdb_byte *arg_bits = value_contents_all (arg);
+	  const gdb_byte *arg_bits = value_contents_all (arg).data ();
 	  struct type *arg_type = check_typedef (value_type (arg));
 	  ULONGEST arg_size = TYPE_LENGTH (arg_type);
 

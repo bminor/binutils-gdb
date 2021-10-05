@@ -2729,7 +2729,7 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		args_space_used = align_up (args_space_used, 16);
 
 	      write_memory (sp + args_space_used,
-			    value_contents_all (args[i]), len);
+			    value_contents_all (args[i]).data (), len);
 	      /* The System V ABI says that:
 
 	      "An argument's size is increased, if necessary, to make it a
@@ -2773,7 +2773,8 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* The 'this' pointer needs to be in ECX.  */
   if (thiscall)
-    regcache->cooked_write (I386_ECX_REGNUM, value_contents_all (args[0]));
+    regcache->cooked_write (I386_ECX_REGNUM,
+			    value_contents_all (args[0]).data ());
 
   /* MarkK wrote: This "+ 8" is all over the place:
      (i386_frame_this_id, i386_sigtramp_frame_this_id,
@@ -3324,7 +3325,7 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 {
   gdb_byte raw_buf[I386_MAX_REGISTER_SIZE];
   enum register_status status;
-  gdb_byte *buf = value_contents_raw (result_value);
+  gdb_byte *buf = value_contents_raw (result_value).data ();
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
     {

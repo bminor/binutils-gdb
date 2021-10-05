@@ -1621,7 +1621,7 @@ aarch64_linux_set_memtags (struct gdbarch *gdbarch, struct value *address,
 
       /* Update the value's content with the tag.  */
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-      gdb_byte *srcbuf = value_contents_raw (address);
+      gdb_byte *srcbuf = value_contents_raw (address).data ();
       store_unsigned_integer (srcbuf, sizeof (addr), byte_order, addr);
     }
   else

@@ -111,7 +111,8 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 
 	  gdb_assert (len <= 8);
 
-	  target_float_convert (value_contents (arg), type, reg_val, reg_type);
+	  target_float_convert (value_contents (arg).data (), type, reg_val,
+				reg_type);
 	  regcache->cooked_write (fp_regnum, reg_val);
 	  ++f_argno;
 	}
@@ -125,7 +126,7 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 	      gdb_byte word[PPC_MAX_REGISTER_SIZE];
 	      memset (word, 0, reg_size);
 	      memcpy (word,
-		      ((char *) value_contents (arg)) + argbytes,
+		      ((char *) value_contents (arg).data ()) + argbytes,
 		      (len - argbytes) > reg_size
 			? reg_size : len - argbytes);
 	      regcache->cooked_write (tdep->ppc_gp0_regnum + 3 + ii, word);
@@ -143,7 +144,7 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 	  gdb_byte word[PPC_MAX_REGISTER_SIZE];
 
 	  memset (word, 0, reg_size);
-	  memcpy (word, value_contents (arg), len);
+	  memcpy (word, value_contents (arg).data (), len);
 	  regcache->cooked_write (tdep->ppc_gp0_regnum + 3 +ii, word);
 	}
       ++argno;
@@ -205,7 +206,7 @@ ran_out_of_registers_for_arguments:
       if (argbytes)
 	{
 	  write_memory (sp + 24 + (ii * 4),
-			value_contents (arg) + argbytes,
+			value_contents (arg).data () + argbytes,
 			len - argbytes);
 	  ++argno;
 	  ii += align_up (len - argbytes, 4) / 4;
@@ -228,11 +229,11 @@ ran_out_of_registers_for_arguments:
 	      gdb_assert (len <= 8);
 
 	      regcache->cooked_write (tdep->ppc_fp0_regnum + 1 + f_argno,
-				      value_contents (arg));
+				      value_contents (arg).data ());
 	      ++f_argno;
 	    }
 
-	  write_memory (sp + 24 + (ii * 4), value_contents (arg), len);
+	  write_memory (sp + 24 + (ii * 4), value_contents (arg).data (), len);
 	  ii += align_up (len, 4) / 4;
 	}
     }

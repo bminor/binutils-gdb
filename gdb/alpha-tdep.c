@@ -258,7 +258,7 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
   /* Convert to VALTYPE.  */
 
   gdb_assert (TYPE_LENGTH (valtype) == 4);
-  alpha_sts (gdbarch, out, value_contents_all (value));
+  alpha_sts (gdbarch, out, value_contents_all (value).data ());
 
   release_value (value);
   return 1;
@@ -365,7 +365,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      sp = (sp & -16) - 16;
 
 	      /* Write the real data into the stack.  */
-	      write_memory (sp, value_contents (arg), 16);
+	      write_memory (sp, value_contents (arg).data (), 16);
 
 	      /* Construct the indirection.  */
 	      arg_type = lookup_pointer_type (arg_type);
@@ -386,7 +386,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      sp = (sp & -16) - 16;
 
 	      /* Write the real data into the stack.  */
-	      write_memory (sp, value_contents (arg), 32);
+	      write_memory (sp, value_contents (arg).data (), 32);
 
 	      /* Construct the indirection.  */
 	      arg_type = lookup_pointer_type (arg_type);
@@ -400,7 +400,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       m_arg->len = TYPE_LENGTH (arg_type);
       m_arg->offset = accumulate_size;
       accumulate_size = (accumulate_size + m_arg->len + 7) & ~7;
-      m_arg->contents = value_contents (arg);
+      m_arg->contents = value_contents (arg).data ();
     }
 
   /* Determine required argument register loads, loading an argument register

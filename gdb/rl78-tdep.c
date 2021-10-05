@@ -1345,7 +1345,7 @@ rl78_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       sp -= container_len;
       write_memory (rl78_make_data_address (sp),
-		    value_contents_all (args[i]), len);
+		    value_contents_all (args[i]).data (), len);
     }
 
   /* Store struct value address.  */

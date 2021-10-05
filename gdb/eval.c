@@ -2322,12 +2322,12 @@ array_operation::evaluate_struct_tuple (struct value *struct_val,
 
       bitsize = TYPE_FIELD_BITSIZE (struct_type, fieldno);
       bitpos = TYPE_FIELD_BITPOS (struct_type, fieldno);
-      addr = value_contents_writeable (struct_val) + bitpos / 8;
+      addr = value_contents_writeable (struct_val).data () + bitpos / 8;
       if (bitsize)
 	modify_field (struct_type, addr,
 		      value_as_long (val), bitpos % 8, bitsize);
       else
-	memcpy (addr, value_contents (val),
+	memcpy (addr, value_contents (val).data (),
 		TYPE_LENGTH (value_type (val)));
 
     }
@@ -2351,7 +2351,7 @@ array_operation::evaluate (struct type *expect_type,
     {
       struct value *rec = allocate_value (expect_type);
 
-      memset (value_contents_raw (rec), '\0', TYPE_LENGTH (type));
+      memset (value_contents_raw (rec).data (), '\0', TYPE_LENGTH (type));
       return evaluate_struct_tuple (rec, exp, noside, nargs);
     }
 
@@ -2370,7 +2370,7 @@ array_operation::evaluate (struct type *expect_type,
 	  high_bound = (TYPE_LENGTH (type) / element_size) - 1;
 	}
       index = low_bound;
-      memset (value_contents_raw (array), 0, TYPE_LENGTH (expect_type));
+      memset (value_contents_raw (array).data (), 0, TYPE_LENGTH (expect_type));
       for (tem = nargs; --nargs >= 0;)
 	{
 	  struct value *element;
@@ -2382,9 +2382,9 @@ array_operation::evaluate (struct type *expect_type,
 	  if (index > high_bound)
 	    /* To avoid memory corruption.  */
 	    error (_("Too many array elements"));
-	  memcpy (value_contents_raw (array)
+	  memcpy (value_contents_raw (array).data ()
 		  + (index - low_bound) * element_size,
-		  value_contents (element),
+		  value_contents (element).data (),
 		  element_size);
 	  index++;
 	}
@@ -2395,7 +2395,7 @@ array_operation::evaluate (struct type *expect_type,
       && type->code () == TYPE_CODE_SET)
     {
       struct value *set = allocate_value (expect_type);
-      gdb_byte *valaddr = value_contents_raw (set);
+      gdb_byte *valaddr = value_contents_raw (set).data ();
       struct type *element_type = type->index_type ();
       struct type *check_type = element_type;
       LONGEST low_bound, high_bound;

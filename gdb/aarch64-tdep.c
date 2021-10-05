@@ -1593,7 +1593,7 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
   int len = TYPE_LENGTH (type);
   enum type_code typecode = type->code ();
   int regnum = AARCH64_X0_REGNUM + info->ngrn;
-  const bfd_byte *buf = value_contents (arg);
+  const bfd_byte *buf = value_contents (arg).data ();
 
   info->argnum++;
 
@@ -1663,7 +1663,7 @@ static void
 pass_on_stack (struct aarch64_call_info *info, struct type *type,
 	       struct value *arg)
 {
-  const bfd_byte *buf = value_contents (arg);
+  const bfd_byte *buf = value_contents (arg).data ();
   int len = TYPE_LENGTH (type);
   int align;
   stack_item_t item;
@@ -1739,12 +1739,12 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
     {
     case TYPE_CODE_FLT:
       return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (arg_type),
-			value_contents (arg));
+			value_contents (arg).data ());
       break;
 
     case TYPE_CODE_COMPLEX:
       {
-	const bfd_byte *buf = value_contents (arg);
+	const bfd_byte *buf = value_contents (arg).data ();
 	struct type *target_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
 
 	if (!pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (target_type),
@@ -1758,7 +1758,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
     case TYPE_CODE_ARRAY:
       if (arg_type->is_vector ())
 	return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (arg_type),
-			  value_contents (arg));
+			  value_contents (arg).data ());
       /* fall through.  */
 
     case TYPE_CODE_STRUCT:
@@ -1900,7 +1900,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      sp = align_down (sp - len, 16);
 
 	      /* Write the real data into the stack.  */
-	      write_memory (sp, value_contents (arg), len);
+	      write_memory (sp, value_contents (arg).data (), len);
 
 	      /* Construct the indirection.  */
 	      arg_type = lookup_pointer_type (arg_type);
@@ -2682,7 +2682,7 @@ aarch64_pseudo_read_value_1 (struct gdbarch *gdbarch,
     mark_value_bytes_unavailable (result_value, 0,
 				  TYPE_LENGTH (value_type (result_value)));
   else
-    memcpy (value_contents_raw (result_value), reg_buf, regsize);
+    memcpy (value_contents_raw (result_value).data (), reg_buf, regsize);
 
   return result_value;
  }

@@ -1059,7 +1059,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 	  && regtype->field (2).type ()->code () == TYPE_CODE_FLT))
     {
       struct value_print_options opts;
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       enum bfd_endian byte_order = type_byte_order (regtype);
 
       get_user_print_options (&opts);
@@ -2942,7 +2942,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 
       if (info->type != arg_type)
 	arg_value = value_cast (info->type, arg_value);
-      info->contents = value_contents (arg_value);
+      info->contents = value_contents (arg_value).data ();
     }
 
   /* Adjust the stack pointer and align it.  */
@@ -3137,13 +3137,13 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	  {
 	    struct value *arg_val = value_from_contents (arg_type, writebuf);
 	    abi_val = value_cast (info.type, arg_val);
-	    writebuf = value_contents_raw (abi_val);
+	    writebuf = value_contents_raw (abi_val).data ();
 	  }
 	else
 	  {
 	    abi_val = allocate_value (info.type);
 	    old_readbuf = readbuf;
-	    readbuf = value_contents_raw (abi_val);
+	    readbuf = value_contents_raw (abi_val).data ();
 	  }
 	arg_len = TYPE_LENGTH (info.type);
 
@@ -3241,7 +3241,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	if (readbuf != nullptr)
 	  {
 	    struct value *arg_val = value_cast (arg_type, abi_val);
-	    memcpy (old_readbuf, value_contents_raw (arg_val),
+	    memcpy (old_readbuf, value_contents_raw (arg_val).data (),
 		    TYPE_LENGTH (arg_type));
 	  }
     }

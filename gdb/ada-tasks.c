@@ -401,7 +401,7 @@ iterate_over_live_ada_tasks (ada_task_list_iterator_ftype iterator)
 static void
 value_as_string (char *dest, struct value *val, int length)
 {
-  memcpy (dest, value_contents (val), length);
+  memcpy (dest, value_contents (val).data (), length);
   dest[length] = '\0';
 }
 

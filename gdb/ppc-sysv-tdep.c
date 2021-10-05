@@ -122,7 +122,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  struct value *arg = args[argno];
 	  struct type *type = check_typedef (value_type (arg));
 	  int len = TYPE_LENGTH (type);
-	  const bfd_byte *val = value_contents (arg);
+	  const bfd_byte *val = value_contents (arg).data ();
 
 	  if (type->code () == TYPE_CODE_FLT && len <= 8
 	      && !tdep->soft_float)
@@ -1633,7 +1633,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 	{
 	  struct value *arg = args[argno];
 	  struct type *type = check_typedef (value_type (arg));
-	  const bfd_byte *val = value_contents (arg);
+	  const bfd_byte *val = value_contents (arg).data ();
 
 	  if (type->code () == TYPE_CODE_COMPLEX)
 	    {

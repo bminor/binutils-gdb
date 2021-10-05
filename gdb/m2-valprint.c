@@ -165,7 +165,7 @@ m2_print_unbounded_array (struct value *value,
   struct value *val;
 
   struct type *type = check_typedef (value_type (value));
-  const gdb_byte *valaddr = value_contents_for_printing (value);
+  const gdb_byte *valaddr = value_contents_for_printing (value).data ();
 
   addr = unpack_pointer (type->field (0).type (),
 			 (TYPE_FIELD_BITPOS (type, 0) / 8) +
@@ -305,7 +305,7 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
   unsigned len;
   struct type *elttype;
   CORE_ADDR addr;
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
   const CORE_ADDR address = value_address (val);
 
   struct type *type = check_typedef (value_type (val));

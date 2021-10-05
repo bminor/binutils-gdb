@@ -729,7 +729,7 @@ static struct value *
 gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
 {
   struct gdbarch *gdbarch;
-  const gdb_byte *contents = value_contents (method_ptr);
+  const gdb_byte *contents = value_contents (method_ptr).data ();
   CORE_ADDR ptr_value;
   struct type *self_type, *final_type, *method_type;
   LONGEST adjustment;

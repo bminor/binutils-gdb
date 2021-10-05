@@ -747,7 +747,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
   struct type *type = ada_check_typedef (value_type (val));
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
 
   if (type->code () == TYPE_CODE_RANGE
       && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ENUM
@@ -827,7 +827,7 @@ ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
     }
 
   struct type *type = ada_check_typedef (value_type (value));
-  const gdb_byte *valaddr = value_contents_for_printing (value);
+  const gdb_byte *valaddr = value_contents_for_printing (value).data ();
   int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
 
   len = type->num_fields ();
@@ -895,7 +895,7 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
   if (ada_is_string_type (type)
       && (options->format == 0 || options->format == 's'))
     {
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
 
       ada_val_print_string (type, valaddr, offset_aligned, stream, recurse,
@@ -910,7 +910,7 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
     val_print_optimized_out (val, stream);
   else if (TYPE_FIELD_BITSIZE (type, 0) > 0)
     {
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
       val_print_packed_array_elements (type, valaddr, offset_aligned,
 				       stream, recurse, options);
@@ -1009,7 +1009,7 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
   type = value_type (val);
   struct type *saved_type = type;
 
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
   CORE_ADDR address = value_address (val);
   gdb::array_view<const gdb_byte> view
     = gdb::make_array_view (valaddr, TYPE_LENGTH (type));

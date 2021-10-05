@@ -1731,7 +1731,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	      break;
 	    }
 	  fprintf_unfiltered (gdb_stdlog, " %s\n",
-			      host_address_to_string (value_contents (arg)));
+			      host_address_to_string (value_contents (arg).data ()));
 	}
     }
 
@@ -1787,7 +1787,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	  break;
 	}
       info->length = TYPE_LENGTH (arg_type);
-      info->contents = value_contents (arg);
+      info->contents = value_contents (arg).data ();
 
       /* Align size and onstack_size.  */
       size = (size + info->align - 1) & ~(info->align - 1);

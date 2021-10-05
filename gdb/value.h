@@ -360,7 +360,7 @@ extern void error_value_optimized_out (void);
    get to the real subobject, if the value happens to represent
    something embedded in a larger run-time object.  */
 
-extern gdb_byte *value_contents_raw (struct value *);
+extern gdb::array_view<gdb_byte> value_contents_raw (struct value *);
 
 /* Actual contents of the value.  For use of this value; setting it
    uses the stuff above.  Not valid if lazy is nonzero.  Target
@@ -368,24 +368,24 @@ extern gdb_byte *value_contents_raw (struct value *);
    value.  Note that a value therefore extends beyond what is
    declared here.  */
 
-extern const gdb_byte *value_contents (struct value *);
-extern gdb_byte *value_contents_writeable (struct value *);
+extern gdb::array_view<const gdb_byte> value_contents (struct value *);
+extern gdb::array_view<gdb_byte> value_contents_writeable (struct value *);
 
 /* The ALL variants of the above two macros do not adjust the returned
    pointer by the embedded_offset value.  */
 
-extern gdb_byte *value_contents_all_raw (struct value *);
-extern const gdb_byte *value_contents_all (struct value *);
+extern gdb::array_view<gdb_byte> value_contents_all_raw (struct value *);
+extern gdb::array_view<const gdb_byte> value_contents_all (struct value *);
 
 /* Like value_contents_all, but does not require that the returned
    bits be valid.  This should only be used in situations where you
    plan to check the validity manually.  */
-extern const gdb_byte *value_contents_for_printing (struct value *value);
+extern gdb::array_view<const gdb_byte> value_contents_for_printing (struct value *value);
 
 /* Like value_contents_for_printing, but accepts a constant value
    pointer.  Unlike value_contents_for_printing however, the pointed
    value must _not_ be lazy.  */
-extern const gdb_byte *
+extern gdb::array_view<const gdb_byte>
   value_contents_for_printing_const (const struct value *value);
 
 extern void value_fetch_lazy (struct value *val);

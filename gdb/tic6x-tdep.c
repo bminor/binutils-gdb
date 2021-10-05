@@ -919,7 +919,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = arg_type->code ();
 
-      val = value_contents (arg);
+      val = value_contents (arg).data ();
 
       /* Copy the argument to general registers or the stack in
 	 register-sized pieces.  */

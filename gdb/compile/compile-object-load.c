@@ -585,7 +585,8 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
 	error (_("Register \"%s\" is not available."), reg_name);
 
       inferior_addr = regs_base + reg_offset;
-      if (0 != target_write_memory (inferior_addr, value_contents (regval),
+      if (0 != target_write_memory (inferior_addr,
+				    value_contents (regval).data (),
 				    reg_size))
 	error (_("Cannot write register \"%s\" to inferior memory at %s."),
 	       reg_name, paddress (gdbarch, inferior_addr));

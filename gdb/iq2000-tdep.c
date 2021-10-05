@@ -712,7 +712,7 @@ iq2000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       type = value_type (args[i]);
       typelen = TYPE_LENGTH (type);
-      val = value_contents (args[i]);
+      val = value_contents (args[i]).data ();
       if (typelen <= 4)
 	{
 	  /* Char, short, int, float, pointer, and structs <= four bytes.  */

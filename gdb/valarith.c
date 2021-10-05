@@ -716,7 +716,7 @@ value_concat (struct value *arg1, struct value *arg2)
 	      char_type = type2;
 
 	      inchar = (char) unpack_long (type2,
-					   value_contents (inval2));
+					   value_contents (inval2).data ());
 	      for (idx = 0; idx < count; idx++)
 		{
 		  ptr[idx] = inchar;
@@ -727,10 +727,8 @@ value_concat (struct value *arg1, struct value *arg2)
 	      char_type = TYPE_TARGET_TYPE (type2);
 
 	      for (idx = 0; idx < count; idx++)
-		{
-		  memcpy (&ptr[idx * inval2len], value_contents (inval2),
-			  inval2len);
-		}
+		memcpy (&ptr[idx * inval2len], value_contents (inval2).data (),
+			inval2len);
 	    }
 	  outval = value_string (ptr.data (), count * inval2len, char_type);
 	}
@@ -759,22 +757,22 @@ value_concat (struct value *arg1, struct value *arg2)
 	{
 	  char_type = type1;
 
-	  ptr[0] = (char) unpack_long (type1, value_contents (inval1));
+	  ptr[0] = (char) unpack_long (type1, value_contents (inval1).data ());
 	}
       else
 	{
 	  char_type = TYPE_TARGET_TYPE (type1);
 
-	  memcpy (ptr.data (), value_contents (inval1), inval1len);
+	  memcpy (ptr.data (), value_contents (inval1).data (), inval1len);
 	}
       if (type2->code () == TYPE_CODE_CHAR)
 	{
 	  ptr[inval1len] =
-	    (char) unpack_long (type2, value_contents (inval2));
+	    (char) unpack_long (type2, value_contents (inval2).data ());
 	}
       else
 	{
-	  memcpy (&ptr[inval1len], value_contents (inval2), inval2len);
+	  memcpy (&ptr[inval1len], value_contents (inval2).data (), inval2len);
 	}
       outval = value_string (ptr.data (), inval1len + inval2len, char_type);
     }
@@ -855,7 +853,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   if (is_floating_type (type1))
     {
       *eff_type_x = type1;
-      memcpy (x, value_contents (arg1), TYPE_LENGTH (type1));
+      memcpy (x, value_contents (arg1).data (), TYPE_LENGTH (type1));
     }
   else if (is_integral_type (type1))
     {
@@ -874,7 +872,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   if (is_floating_type (type2))
     {
       *eff_type_y = type2;
-      memcpy (y, value_contents (arg2), TYPE_LENGTH (type2));
+      memcpy (y, value_contents (arg2).data (), TYPE_LENGTH (type2));
     }
   else if (is_integral_type (type2))
     {
@@ -929,11 +927,11 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  type2 = type1;
 	}
 
-      v1.read_fixed_point (gdb::make_array_view (value_contents (arg1),
+      v1.read_fixed_point (gdb::make_array_view (value_contents (arg1).data (),
 						 TYPE_LENGTH (type1)),
 			   type_byte_order (type1), type1->is_unsigned (),
 			   type1->fixed_point_scaling_factor ());
-      v2.read_fixed_point (gdb::make_array_view (value_contents (arg2),
+      v2.read_fixed_point (gdb::make_array_view (value_contents (arg2).data (),
 						 TYPE_LENGTH (type2)),
 			   type_byte_order (type2), type2->is_unsigned (),
 			   type2->fixed_point_scaling_factor ());
@@ -944,7 +942,7 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       value *fp_val = allocate_value (type1);
 
       fp.write_fixed_point
-	(gdb::make_array_view (value_contents_raw (fp_val),
+	(gdb::make_array_view (value_contents_raw (fp_val).data (),
 			       TYPE_LENGTH (type1)),
 	 type_byte_order (type1),
 	 type1->is_unsigned (),
@@ -1204,7 +1202,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 				  v2.data (), &eff_type_v2);
       target_float_binop (op, v1.data (), eff_type_v1,
 			      v2.data (), eff_type_v2,
-			      value_contents_raw (val), result_type);
+			      value_contents_raw (val).data (), result_type);
     }
   else if (type1->code () == TYPE_CODE_BOOL
 	   || type2->code () == TYPE_CODE_BOOL)
@@ -1243,7 +1241,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       result_type = type1;
 
       val = allocate_value (result_type);
-      store_signed_integer (value_contents_raw (val),
+      store_signed_integer (value_contents_raw (val).data (),
 			    TYPE_LENGTH (result_type),
 			    type_byte_order (result_type),
 			    v);
@@ -1383,7 +1381,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    }
 
 	  val = allocate_value (result_type);
-	  store_unsigned_integer (value_contents_raw (val),
+	  store_unsigned_integer (value_contents_raw (val).data (),
 				  TYPE_LENGTH (value_type (val)),
 				  type_byte_order (result_type),
 				  v);
@@ -1512,7 +1510,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	    }
 
 	  val = allocate_value (result_type);
-	  store_signed_integer (value_contents_raw (val),
+	  store_signed_integer (value_contents_raw (val).data (),
 				TYPE_LENGTH (value_type (val)),
 				type_byte_order (result_type),
 				v);
@@ -1559,8 +1557,8 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
   val = allocate_value (vector_type);
   for (i = 0; i < high_bound - low_bound + 1; i++)
     /* Duplicate the contents of elval into the destination vector.  */
-    memcpy (value_contents_writeable (val) + (i * TYPE_LENGTH (eltype)),
-	    value_contents_all (elval), TYPE_LENGTH (eltype));
+    memcpy (value_contents_writeable (val).data () + (i * TYPE_LENGTH (eltype)),
+	    value_contents_all (elval).data (), TYPE_LENGTH (eltype));
 
   return val;
 }
@@ -1607,8 +1605,8 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
     {
       tmp = value_binop (value_subscript (val1, i),
 			 value_subscript (val2, i), op);
-      memcpy (value_contents_writeable (val) + i * elsize,
-	      value_contents_all (tmp),
+      memcpy (value_contents_writeable (val).data () + i * elsize,
+	      value_contents_all (tmp).data (),
 	      elsize);
      }
   value_free_to_mark (mark);
@@ -1666,10 +1664,10 @@ value_logical_not (struct value *arg1)
   type1 = check_typedef (value_type (arg1));
 
   if (is_floating_value (arg1))
-    return target_float_is_zero (value_contents (arg1), type1);
+    return target_float_is_zero (value_contents (arg1).data (), type1);
 
   len = TYPE_LENGTH (type1);
-  p = value_contents (arg1);
+  p = value_contents (arg1).data ();
 
   while (--len >= 0)
     {
@@ -1688,8 +1686,8 @@ value_strcmp (struct value *arg1, struct value *arg2)
 {
   int len1 = TYPE_LENGTH (value_type (arg1));
   int len2 = TYPE_LENGTH (value_type (arg2));
-  const gdb_byte *s1 = value_contents (arg1);
-  const gdb_byte *s2 = value_contents (arg2);
+  const gdb_byte *s1 = value_contents (arg1).data ();
+  const gdb_byte *s2 = value_contents (arg2).data ();
   int i, len = len1 < len2 ? len1 : len2;
 
   for (i = 0; i < len; i++)
@@ -1764,8 +1762,8 @@ value_equal (struct value *arg1, struct value *arg2)
 	   && ((len = (int) TYPE_LENGTH (type1))
 	       == (int) TYPE_LENGTH (type2)))
     {
-      p1 = value_contents (arg1);
-      p2 = value_contents (arg2);
+      p1 = value_contents (arg1).data ();
+      p2 = value_contents (arg2).data ();
       while (--len >= 0)
 	{
 	  if (*p1++ != *p2++)
@@ -1795,7 +1793,8 @@ value_equal_contents (struct value *arg1, struct value *arg2)
 
   return (type1->code () == type2->code ()
 	  && TYPE_LENGTH (type1) == TYPE_LENGTH (type2)
-	  && memcmp (value_contents (arg1), value_contents (arg2),
+	  && memcmp (value_contents (arg1).data (),
+		     value_contents (arg2).data (),
 		     TYPE_LENGTH (type1)) == 0);
 }
 
@@ -1870,7 +1869,7 @@ value_pos (struct value *arg1)
   if (is_integral_type (type) || is_floating_value (arg1)
       || (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
       || type->code () == TYPE_CODE_COMPLEX)
-    return value_from_contents (type, value_contents (arg1));
+    return value_from_contents (type, value_contents (arg1).data ());
   else
     error (_("Argument to positive operation not a number."));
 }
@@ -1900,8 +1899,9 @@ value_neg (struct value *arg1)
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
 	  tmp = value_neg (value_subscript (arg1, i));
-	  memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
-		  value_contents_all (tmp), TYPE_LENGTH (eltype));
+	  memcpy ((value_contents_writeable (val).data ()
+		   + i * TYPE_LENGTH (eltype)),
+		  value_contents_all (tmp).data (), TYPE_LENGTH (eltype));
 	}
       return val;
     }
@@ -1943,8 +1943,9 @@ value_complement (struct value *arg1)
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
 	  tmp = value_complement (value_subscript (arg1, i));
-	  memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
-		  value_contents_all (tmp), TYPE_LENGTH (eltype));
+	  memcpy ((value_contents_writeable (val).data ()
+		   + i * TYPE_LENGTH (eltype)),
+		  value_contents_all (tmp).data (), TYPE_LENGTH (eltype));
 	}
     }
   else if (type->code () == TYPE_CODE_COMPLEX)
@@ -2005,7 +2006,7 @@ value_in (struct value *element, struct value *set)
       && eltype->code () != TYPE_CODE_ENUM
       && eltype->code () != TYPE_CODE_BOOL)
     error (_("First argument of 'IN' has wrong type"));
-  member = value_bit_index (settype, value_contents (set),
+  member = value_bit_index (settype, value_contents (set).data (),
 			    value_as_long (element));
   if (member < 0)
     error (_("First argument of 'IN' not in range"));

@@ -52,7 +52,7 @@ print_go_string (struct type *type,
      unpack_value_field_as_pointer.  Do this until we can get
      unpack_value_field_as_pointer.  */
   LONGEST addr;
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
 
 
   if (! unpack_value_field_as_long (type, valaddr, embedded_offset, 0,

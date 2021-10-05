@@ -358,7 +358,7 @@ amd64_pseudo_register_read_value (struct gdbarch *gdbarch,
   value *result_value = allocate_value (register_type (gdbarch, regnum));
   VALUE_LVAL (result_value) = lval_register;
   VALUE_REGNUM (result_value) = regnum;
-  gdb_byte *buf = value_contents_raw (result_value);
+  gdb_byte *buf = value_contents_raw (result_value).data ();
 
   if (i386_byte_regnum_p (gdbarch, regnum))
     {
@@ -977,7 +977,7 @@ if (return_method == return_method_struct)
       else
 	{
 	  /* The argument will be passed in registers.  */
-	  const gdb_byte *valbuf = value_contents (args[i]);
+	  const gdb_byte *valbuf = value_contents (args[i]).data ();
 	  gdb_byte buf[8];
 
 	  gdb_assert (len <= 16);
@@ -1029,7 +1029,7 @@ if (return_method == return_method_struct)
   for (i = 0; i < num_stack_args; i++)
     {
       struct type *type = value_type (stack_args[i]);
-      const gdb_byte *valbuf = value_contents (stack_args[i]);
+      const gdb_byte *valbuf = value_contents (stack_args[i]).data ();
       int len = TYPE_LENGTH (type);
 
       write_memory (sp + element * 8, valbuf, len);

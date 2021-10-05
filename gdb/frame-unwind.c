@@ -300,7 +300,7 @@ frame_unwind_got_constant (struct frame_info *frame, int regnum,
   struct value *reg_val;
 
   reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
-  store_unsigned_integer (value_contents_writeable (reg_val),
+  store_unsigned_integer (value_contents_writeable (reg_val).data (),
 			  register_size (gdbarch, regnum), byte_order, val);
   return reg_val;
 }
@@ -312,7 +312,8 @@ frame_unwind_got_bytes (struct frame_info *frame, int regnum, const gdb_byte *bu
   struct value *reg_val;
 
   reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
-  memcpy (value_contents_raw (reg_val), buf, register_size (gdbarch, regnum));
+  memcpy (value_contents_raw (reg_val).data (), buf,
+	  register_size (gdbarch, regnum));
   return reg_val;
 }
 
@@ -328,7 +329,7 @@ frame_unwind_got_address (struct frame_info *frame, int regnum,
   struct value *reg_val;
 
   reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
-  pack_long (value_contents_writeable (reg_val),
+  pack_long (value_contents_writeable (reg_val).data (),
 	     register_type (gdbarch, regnum), addr);
   return reg_val;
 }

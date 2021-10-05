@@ -1695,7 +1695,7 @@ extract_bitfield_from_watchpoint_value (struct watchpoint *w, struct value *val)
   unpack_value_bitfield (bit_val,
 			 w->val_bitpos,
 			 w->val_bitsize,
-			 value_contents_for_printing (val),
+			 value_contents_for_printing (val).data (),
 			 value_offset (val),
 			 val);
 

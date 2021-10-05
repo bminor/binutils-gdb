@@ -2447,7 +2447,7 @@ printf_c_string (struct ui_file *stream, const char *format,
 	 null terminated) to be printed without problems.  */
       gdb_byte *tem_str = (gdb_byte *) alloca (len + 1);
 
-      memcpy (tem_str, value_contents (value), len);
+      memcpy (tem_str, value_contents (value).data (), len);
       tem_str [len] = 0;
       str = tem_str;
     }
@@ -2511,7 +2511,7 @@ printf_wide_c_string (struct ui_file *stream, const char *format,
   if (VALUE_LVAL (value) == lval_internalvar
       && c_is_string_type_p (value_type (value)))
     {
-      str = value_contents (value);
+      str = value_contents (value).data ();
       len = TYPE_LENGTH (value_type (value));
     }
   else
@@ -2620,14 +2620,15 @@ printf_floating (struct ui_file *stream, const char *format,
     {
       param_type = float_type_from_length (param_type);
       if (param_type != value_type (value))
-	value = value_from_contents (param_type, value_contents (value));
+	value = value_from_contents (param_type,
+				     value_contents (value).data ());
     }
 
   value = value_cast (fmt_type, value);
 
   /* Convert the value to a string and print it.  */
   std::string str
-    = target_float_to_string (value_contents (value), fmt_type, format);
+    = target_float_to_string (value_contents (value).data (), fmt_type, format);
   fputs_filtered (str.c_str (), stream);
 }
 
@@ -2788,7 +2789,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 		  || valtype->code () != TYPE_CODE_INT)
 		error (_("expected wchar_t argument for %%lc"));
 
-	      bytes = value_contents (val_args[i]);
+	      bytes = value_contents (val_args[i]).data ();
 
 	      auto_obstack output;
 

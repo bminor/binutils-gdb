@@ -2043,7 +2043,7 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (i = nargs - 1; i >= 0; i--)
     {
       struct value *arg = args[i];
-      const gdb_byte *arg_bits = value_contents (arg);
+      const gdb_byte *arg_bits = value_contents (arg).data ();
       struct type *arg_type = value_type (arg);
       ULONGEST arg_size = TYPE_LENGTH (arg_type);
 

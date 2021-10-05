@@ -169,7 +169,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
   gdb_assert (!check_optimized || from == nullptr);
   if (from != nullptr)
     {
-      from_contents = value_contents (from);
+      from_contents = value_contents (from).data ();
       v_contents = nullptr;
     }
   else
@@ -181,7 +181,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
       if (check_optimized)
 	v_contents = nullptr;
       else
-	v_contents = value_contents_raw (v);
+	v_contents = value_contents_raw (v).data ();
       from_contents = nullptr;
     }
 
@@ -394,7 +394,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 	      bits_to_skip += p->offset;
 
 	    copy_bitwise (v_contents, offset,
-			  value_contents_all (p->v.value),
+			  value_contents_all (p->v.value).data (),
 			  bits_to_skip,
 			  this_size_bits, bits_big_endian);
 	  }
@@ -577,7 +577,7 @@ indirect_pieced_value (value *value)
      encode address spaces and other things in CORE_ADDR.  */
   bfd_endian byte_order = gdbarch_byte_order (get_frame_arch (frame));
   LONGEST byte_offset
-    = extract_signed_integer (value_contents (value),
+    = extract_signed_integer (value_contents (value).data (),
 			      TYPE_LENGTH (type), byte_order);
   byte_offset += piece->v.ptr.offset;
 
@@ -1037,8 +1037,8 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
 	      subobj_offset += n - max;
 
-	    memcpy (value_contents_raw (retval),
-		    value_contents_all (val) + subobj_offset, len);
+	    memcpy (value_contents_raw (retval).data (),
+		    value_contents_all (val).data () + subobj_offset, len);
 	  }
 	  break;
 
@@ -1050,7 +1050,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	      invalid_synthetic_pointer ();
 
 	    retval = allocate_value (subobj_type);
-	    bfd_byte *contents = value_contents_raw (retval);
+	    bfd_byte *contents = value_contents_raw (retval).data ();
 	    memcpy (contents, this->m_data + subobj_offset, n);
 	  }
 	  break;
@@ -1157,7 +1157,7 @@ dwarf_expr_context::fetch_address (int n)
   ULONGEST result;
 
   dwarf_require_integral (value_type (result_val));
-  result = extract_unsigned_integer (value_contents (result_val),
+  result = extract_unsigned_integer (value_contents (result_val).data (),
 				     TYPE_LENGTH (value_type (result_val)),
 				     byte_order);
 
@@ -2366,7 +2366,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    else
 	      result_val
 		= value_from_contents (type,
-				       value_contents_all (result_val));
+				       value_contents_all (result_val).data ());
 	  }
 	  break;
 

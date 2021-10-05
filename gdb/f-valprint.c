@@ -223,7 +223,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
   struct type *elttype;
   CORE_ADDR addr;
   int index;
-  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
   const CORE_ADDR address = value_address (val);
 
   switch (type->code ())

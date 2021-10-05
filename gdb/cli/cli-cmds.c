@@ -2075,7 +2075,7 @@ setting_cmd (const char *fnname, struct cmd_list_element *showlist,
       && type0->code () != TYPE_CODE_STRING)
     error (_("First argument of %s must be a string."), fnname);
 
-  const char *a0 = (const char *) value_contents (argv[0]);
+  const char *a0 = (const char *) value_contents (argv[0]).data ();
   cmd_list_element *cmd = lookup_cmd (&a0, showlist, "", NULL, -1, 0);
 
   if (cmd == nullptr || cmd->type != show_cmd)

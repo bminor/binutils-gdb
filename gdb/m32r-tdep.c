@@ -710,11 +710,11 @@ m32r_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  /* Value gets right-justified in the register or stack word.  */
 	  memcpy (valbuf + (register_size (gdbarch, argreg) - len),
-		  (gdb_byte *) value_contents (args[argnum]), len);
+		  (gdb_byte *) value_contents (args[argnum]).data (), len);
 	  val = valbuf;
 	}
       else
-	val = (gdb_byte *) value_contents (args[argnum]);
+	val = (gdb_byte *) value_contents (args[argnum]).data ();
 
       while (len > 0)
 	{

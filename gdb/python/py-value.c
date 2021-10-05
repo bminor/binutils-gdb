@@ -1500,8 +1500,8 @@ valpy_nonzero (PyObject *self)
       if (is_integral_type (type) || type->code () == TYPE_CODE_PTR)
 	nonzero = !!value_as_long (self_value->value);
       else if (is_floating_value (self_value->value))
-	nonzero = !target_float_is_zero (value_contents (self_value->value),
-					 type);
+	nonzero = !target_float_is_zero
+	  (value_contents (self_value->value).data (), type);
       else
 	/* All other values are True.  */
 	nonzero = 1;
@@ -1754,7 +1754,7 @@ valpy_float (PyObject *self)
       type = check_typedef (type);
 
       if (type->code () == TYPE_CODE_FLT && is_floating_value (value))
-	d = target_float_to_host_double (value_contents (value), type);
+	d = target_float_to_host_double (value_contents (value).data (), type);
       else if (type->code () == TYPE_CODE_INT)
 	{
 	  /* Note that valpy_long accepts TYPE_CODE_PTR and some

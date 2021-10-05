@@ -530,7 +530,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
       int container_len = align_up (TYPE_LENGTH (arg_type), 4);
 
       sp -= container_len;
-      write_memory (sp, value_contents (args[i]), container_len);
+      write_memory (sp, value_contents (args[i]).data (), container_len);
     }
 
   /* Initialize R0, R1, and R2 to the first 3 words of parameters.  */
