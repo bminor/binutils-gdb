@@ -1862,7 +1862,8 @@ pdp11_aout_swap_reloc_out (bfd *abfd, arelent *g, bfd_byte *natptr)
   if (r_extern)								\
     {									\
       /* Undefined symbol.  */						\
-      cache_ptr->sym_ptr_ptr = symbols + r_index;			\
+      if (r_index < bfd_get_symcount (abfd))				\
+	cache_ptr->sym_ptr_ptr = symbols + r_index;			\
       cache_ptr->addend = ad;						\
     }									\
   else									\
