@@ -288,7 +288,6 @@ struct setting
   const T &get () const
   {
     gdb_assert (var_type_uses<T> (m_var_type));
-    gdb_assert (m_var != nullptr);
 
     if (m_var == nullptr)
       {
