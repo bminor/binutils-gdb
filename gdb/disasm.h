@@ -75,7 +75,12 @@ private:
      using this field.  */
   std::string m_disassembler_options_holder;
 
-  CORE_ADDR m_err_memaddr;
+  /* This member variable is given a value by calling dis_asm_memory_error.
+     If after calling into the libopcodes disassembler we get back a
+     negative value (which indicates an error), then, if this variable has
+     a value, we report a memory error to the user, otherwise, we report a
+     non-memory error.  */
+  gdb::optional<CORE_ADDR> m_err_memaddr;
 
   static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 				  unsigned int len,
