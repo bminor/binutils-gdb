@@ -9419,6 +9419,8 @@ decode_arm_unwind_bytecode (Filedata *                 filedata,
 	    printf ("-D%d", first + last);
 	  printf ("}");
 	}
+      else if (op == 0xb4)
+	printf (_("     pop {ra_auth_code}"));
       else if ((op & 0xf8) == 0xb8 || (op & 0xf8) == 0xd0)
 	{
 	  unsigned int count = op & 0x07;
