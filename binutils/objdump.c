@@ -3711,6 +3711,7 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   struct dwarf_section *section = &debug_displays [debug].section;
   bfd *abfd = (bfd *) file;
   asection *sec;
+  const char *name;
 
   /* If it is already loaded, do nothing.  */
   if (section->start != NULL)
@@ -3719,24 +3720,24 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
 	return true;
     }
   /* Locate the debug section.  */
-  sec = bfd_get_section_by_name (abfd, section->uncompressed_name);
-  if (sec != NULL)
-    section->name = section->uncompressed_name;
-  else
+  name = section->uncompressed_name;
+  sec = bfd_get_section_by_name (abfd, name);
+  if (sec == NULL)
     {
-      sec = bfd_get_section_by_name (abfd, section->compressed_name);
-      if (sec != NULL)
-        section->name = section->compressed_name;
-      else
-	{
-	  sec = bfd_get_section_by_name (abfd, section->xcoff_name);
-	  if (sec != NULL)
-	    section->name = section->xcoff_name;
-	}
+      name = section->compressed_name;
+      if (*name)
+	sec = bfd_get_section_by_name (abfd, name);
+    }
+  if (sec == NULL)
+    {
+      name = section->xcoff_name;
+      if (*name)
+	sec = bfd_get_section_by_name (abfd, name);
     }
   if (sec == NULL)
     return false;
 
+  section->name = name;
   return load_specific_debug_section (debug, sec, file);
 }
 
@@ -3808,6 +3809,9 @@ dump_dwarf_section (bfd *abfd, asection *section,
   const char *name = bfd_section_name (section);
   const char *match;
   int i;
+
+  if (*name == 0)
+    return;
 
   if (startswith (name, ".gnu.linkonce.wi."))
     match = ".debug_info";
