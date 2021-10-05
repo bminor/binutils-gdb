@@ -772,6 +772,27 @@ namespace eval Term {
 	}
     }
 
+    # Get the region of the screen described by X, Y, WIDTH,
+    # and HEIGHT, and separate the lines using SEP.
+    proc get_region { x y width height sep } {
+	variable _chars
+
+	# Grab the contents of the box, join each line together
+	# using $sep.
+	set result ""
+	for {set yy $y} {$yy < [expr {$y + $height}]} {incr yy} {
+	    if {$yy > $y} {
+		# Add the end of line sequence only if this isn't the
+		# first line.
+		append result $sep
+	    }
+	    for {set xx $x} {$xx < [expr {$x + $width}]} {incr xx} {
+		append result [lindex $_chars($xx,$yy) 0]
+	    }
+	}
+	return $result
+    }
+
     # Check that the region of the screen described by X, Y, WIDTH,
     # and HEIGHT match REGEXP.  This is like check_contents except
     # only part of the screen is checked.  This can be used to check
@@ -782,18 +803,7 @@ namespace eval Term {
 
 	# Now grab the contents of the box, join each line together
 	# with a '\r\n' sequence and match against REGEXP.
-	set result ""
-	for {set yy $y} {$yy < [expr {$y + $height}]} {incr yy} {
-	    if {$yy > $y} {
-		# Add the end of line sequence only if this isn't the
-		# first line.
-		append result "\r\n"
-	    }
-	    for {set xx $x} {$xx < [expr {$x + $width}]} {incr xx} {
-		append result [lindex $_chars($xx,$yy) 0]
-	    }
-	}
-
+	set result [get_region $x $y $width $height "\r\n"]
 	if {![gdb_assert {[regexp -- $regexp $result]} $test_name]} {
 	    dump_screen
 	}
@@ -828,6 +838,20 @@ namespace eval Term {
 	for {set y 0} {$y < $_rows} {incr y} {
 	    set fmt [format %5d $y]
 	    verbose -log "$fmt [get_line $y]"
+	}
+    }
+
+    # A debugging function to dump a box from the current screen, with line
+    # numbers.
+    proc dump_box { x y width height } {
+	verbose -log "Box Dump ($width x $height) @ ($x, $y):"
+	set region [get_region $x $y $width $height "\n"]
+	set lines [split $region "\n"]
+	set nr $y
+	foreach line $lines {
+	    set fmt [format %5d $nr]
+	    verbose -log "$fmt $line"
+	    incr nr
 	}
     }
 
