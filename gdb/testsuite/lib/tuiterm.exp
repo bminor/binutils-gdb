@@ -595,6 +595,7 @@ namespace eval Term {
 	    } else {
 		::clean_restart $executable
 	    }
+	    ::gdb_test_no_output "set pagination off"
 	}
     }
 
