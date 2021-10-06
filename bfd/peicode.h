@@ -1474,7 +1474,7 @@ pe_bfd_object_p (bfd * abfd)
   if (opt_hdr_size != 0)
     {
       bfd_size_type amt = opt_hdr_size;
-      void * opthdr;
+      bfd_byte * opthdr;
 
       /* PR 17521 file: 230-131433-0.004.  */
       if (amt < sizeof (PEAOUTHDR))
