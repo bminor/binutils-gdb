@@ -151,6 +151,7 @@ bfd_reinit (bfd *abfd, unsigned int section_id, bfd_cleanup cleanup)
   abfd->tdata.any = NULL;
   abfd->arch_info = &bfd_default_arch_struct;
   abfd->flags &= BFD_FLAGS_SAVED;
+  abfd->build_id = NULL;
   bfd_section_list_clear (abfd);
 }
 
