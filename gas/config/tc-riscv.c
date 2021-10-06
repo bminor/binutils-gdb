@@ -283,6 +283,9 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
     case INSN_CLASS_ZBC:
       return riscv_subset_supports ("zbc");
 
+    case INSN_CLASS_ZBS:
+      return riscv_subset_supports ("zbs");
+
     default:
       as_fatal ("internal: unreachable");
       return false;
