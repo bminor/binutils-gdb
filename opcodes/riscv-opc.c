@@ -782,6 +782,8 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sfence.vma", 0, INSN_CLASS_I,    "s",        MATCH_SFENCE_VMA, MASK_SFENCE_VMA|MASK_RS2, match_opcode, INSN_ALIAS },
 {"sfence.vma", 0, INSN_CLASS_I,    "s,t",      MATCH_SFENCE_VMA, MASK_SFENCE_VMA, match_opcode, 0 },
 {"wfi",        0, INSN_CLASS_I,    "",         MATCH_WFI, MASK_WFI, match_opcode, 0 },
+
+/* Zbb instructions */
 {"clz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CLZ, MASK_CLZ, match_opcode, 0 },
 {"ctz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CTZ, MASK_CTZ, match_opcode, 0 },
 {"cpop",       0, INSN_CLASS_ZBB,  "d,s",   MATCH_CPOP, MASK_CPOP, match_opcode, 0 },
@@ -813,6 +815,8 @@ const struct riscv_opcode riscv_opcodes[] =
 {"roriw",     64, INSN_CLASS_ZBB,  "d,s,<", MATCH_RORIW, MASK_RORIW, match_opcode, 0 },
 {"rorw",      64, INSN_CLASS_ZBB,  "d,s,t", MATCH_RORW, MASK_RORW, match_opcode, 0 },
 {"rorw",      64, INSN_CLASS_ZBB,  "d,s,<", MATCH_RORIW, MASK_RORIW, match_opcode, 0 },
+
+/* Zba instructions */
 {"sh1add",     0, INSN_CLASS_ZBA,  "d,s,t", MATCH_SH1ADD, MASK_SH1ADD, match_opcode, 0 },
 {"sh2add",     0, INSN_CLASS_ZBA,  "d,s,t", MATCH_SH2ADD, MASK_SH2ADD, match_opcode, 0 },
 {"sh3add",     0, INSN_CLASS_ZBA,  "d,s,t", MATCH_SH3ADD, MASK_SH3ADD, match_opcode, 0 },
@@ -823,6 +827,8 @@ const struct riscv_opcode riscv_opcodes[] =
 {"zext.w",    64, INSN_CLASS_I, "d,s",       0, (int) M_ZEXTW, match_never, INSN_MACRO },
 {"add.uw",    64, INSN_CLASS_ZBA,  "d,s,t", MATCH_ADD_UW, MASK_ADD_UW, match_opcode, 0 },
 {"slli.uw",   64, INSN_CLASS_ZBA,  "d,s,>", MATCH_SLLI_UW, MASK_SLLI_UW, match_opcode, 0 },
+
+/* Zbc instructions */
 {"clmul",      0, INSN_CLASS_ZBC,  "d,s,t", MATCH_CLMUL, MASK_CLMUL, match_opcode, 0 },
 {"clmulh",     0, INSN_CLASS_ZBC,  "d,s,t", MATCH_CLMULH, MASK_CLMULH, match_opcode, 0 },
 {"clmulr",     0, INSN_CLASS_ZBC,  "d,s,t", MATCH_CLMULR, MASK_CLMULR, match_opcode, 0 },
