@@ -11376,7 +11376,6 @@ that the number of elements to print is unlimited.
 
 @item show print elements
 Display the number of elements of a large array that @value{GDBN} will print.
-If the number is 0, then the printing is unlimited.
 
 @anchor{set print frame-arguments}
 @item set print frame-arguments @var{value}
