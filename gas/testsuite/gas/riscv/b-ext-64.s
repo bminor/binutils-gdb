@@ -53,3 +53,12 @@ target:
 	bset    a0, a1, a2
 	binv    a0, a1, a2
 	bext    a0, a1, a2
+	#aliases
+	bclr    a0, a1, 31
+	bset    a0, a1, 31
+	binv    a0, a1, 31
+	bext    a0, a1, 31
+	bclr    a0, a1, 63
+	bset    a0, a1, 63
+	binv    a0, a1, 63
+	bext    a0, a1, 63

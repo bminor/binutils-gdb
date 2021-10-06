@@ -839,9 +839,13 @@ const struct riscv_opcode riscv_opcodes[] =
 {"binvi",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BINVI, MASK_BINVI, match_opcode, 0 },
 {"bexti",     0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BEXTI, MASK_BEXTI, match_opcode, 0 },
 {"bclr",      0, INSN_CLASS_ZBS,   "d,s,t",  MATCH_BCLR, MASK_BCLR, match_opcode, 0 },
+{"bclr",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BCLRI, MASK_BCLRI, match_opcode, INSN_ALIAS },
 {"bset",      0, INSN_CLASS_ZBS,   "d,s,t",  MATCH_BSET, MASK_BSET, match_opcode, 0 },
+{"bset",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BSETI, MASK_BSETI, match_opcode, INSN_ALIAS },
 {"binv",      0, INSN_CLASS_ZBS,   "d,s,t",  MATCH_BINV, MASK_BINV, match_opcode, 0 },
+{"binv",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BINVI, MASK_BINVI, match_opcode, INSN_ALIAS },
 {"bext",      0, INSN_CLASS_ZBS,   "d,s,t",  MATCH_BEXT, MASK_BEXT, match_opcode, 0 },
+{"bext",      0, INSN_CLASS_ZBS,   "d,s,>",  MATCH_BEXTI, MASK_BEXTI, match_opcode, INSN_ALIAS },
 
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
