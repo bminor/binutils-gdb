@@ -58,7 +58,9 @@ with_test_prefix "user-initiated check" {
 
     # User-initiated check with NPTL possibly uninitialized.
     gdb_test "continue" \
-	".*Stopped due to shared library event.*Inferior loaded .*libpthread.*"
+	[multi_line \
+	     "Stopped due to shared library event:" \
+	     "  Inferior loaded .*(libpthread|libc).*"]
 
     gdb_test_sequence "maint check libthread-db" \
 	"libpthread.so possibly not initialized" \
