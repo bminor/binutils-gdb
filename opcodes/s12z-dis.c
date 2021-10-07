@@ -61,6 +61,9 @@ abstract_read_memory (struct mem_read_abstraction_base *b,
 
   int status = (*mra->info->read_memory_func) (mra->memaddr + offset,
 					       bytes, n, mra->info);
+  if (status != 0)
+    (*mra->info->memory_error_func) (status, mra->memaddr + offset,
+                                     mra->info);
   return status != 0 ? -1 : 0;
 }
 
