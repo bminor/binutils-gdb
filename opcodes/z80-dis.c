@@ -95,6 +95,8 @@ fetch_data (struct buffer *buf, disassemble_info * info, int n)
 			      n, info);
   if (r == 0)
     buf->n_fetch += n;
+  else
+    info->memory_error_func (r, buf->base + buf->n_fetch, info);
   return !r;
 }
 
