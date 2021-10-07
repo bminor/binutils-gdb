@@ -136,6 +136,10 @@ set warning_gdb_index_re \
 	 "to use the section anyway\\."]
 set reading_re \
     "Reading \[^\r\n\]+"
+set libthread_db_re \
+    [multi_line \
+	 "\\\[Thread debugging using libthread_db enabled\\\]" \
+	 "Using host libthread_db library \[^\r\n\]+"]
 
 set run_re \
     [list \
@@ -143,7 +147,7 @@ set run_re \
 	 "\(\(\r\n$reading_re\)|\(\r\n$warning_slow_re\)\)*" \
 	 "\(\r\n$warning_gdb_index_re\)?" \
 	 "\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n" \
-	 "\032\032starting\(\(\r\n$reading_re\)|\(\r\n$warning_slow_re\)\)*" \
+	 "\032\032starting\(\(\r\n$reading_re\)|\(\r\n$warning_slow_re\)|\r\n$libthread_db_re\)*" \
 	 "\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n" \
 	 "\032\032breakpoint 1\r\n\r\n" \
 	 "Breakpoint 1, \r\n" \
