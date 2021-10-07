@@ -1938,8 +1938,6 @@ xcoff64_archive_p (bfd *abfd)
 static bfd *
 xcoff64_openr_next_archived_file (bfd *archive, bfd *last_file)
 {
-  bfd_vma filestart;
-
   if ((xcoff_ardata (archive) == NULL)
       || ! xcoff_big_format_p (archive))
     {
@@ -1947,27 +1945,7 @@ xcoff64_openr_next_archived_file (bfd *archive, bfd *last_file)
       return NULL;
     }
 
-  if (last_file == NULL)
-    {
-      filestart = bfd_ardata (archive)->first_file_filepos;
-    }
-  else
-    {
-      filestart = bfd_scan_vma (arch_xhdr_big (last_file)->nextoff,
-				(const char **) NULL, 10);
-    }
-
-  if (filestart == 0
-      || filestart == bfd_scan_vma (xcoff_ardata_big (archive)->memoff,
-				    (const char **) NULL, 10)
-      || filestart == bfd_scan_vma (xcoff_ardata_big (archive)->symoff,
-				    (const char **) NULL, 10))
-    {
-      bfd_set_error (bfd_error_no_more_archived_files);
-      return NULL;
-    }
-
-  return _bfd_get_elt_at_filepos (archive, (file_ptr) filestart);
+  return _bfd_xcoff_openr_next_archived_file (archive, last_file);
 }
 
 /* We can't use the usual coff_sizeof_headers routine, because AIX
