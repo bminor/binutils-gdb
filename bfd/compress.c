@@ -264,7 +264,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	    {
 	      /* PR 24708: Avoid attempts to allocate a ridiculous amount
 		 of memory.  */
-	      bfd_set_error (bfd_error_no_memory);
+	      bfd_set_error (bfd_error_file_truncated);
 	      _bfd_error_handler
 		/* xgettext:c-format */
 		(_("error: %pB(%pA) section size (%#" PRIx64 " bytes) is larger than file size (%#" PRIx64 " bytes)"),
