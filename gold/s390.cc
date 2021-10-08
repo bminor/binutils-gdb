@@ -401,13 +401,16 @@ class Target_s390 : public Sized_target<size, true>
   int64_t
   do_tls_offset_for_local(const Relobj* object,
 			  unsigned int symndx,
+			  Output_data_got_base* got,
 			  unsigned int got_indx,
 			  uint64_t addend) const;
 
   // Return the offset to use for the GOT_INDX'th got entry which is
   // for global tls symbol GSYM.
   int64_t
-  do_tls_offset_for_global(Symbol* gsym, unsigned int got_indx,
+  do_tls_offset_for_global(Symbol* gsym,
+			   Output_data_got_base* got,
+			   unsigned int got_indx,
 			   uint64_t addend) const;
 
   // This function should be defined in targets that can use relocation
@@ -4220,6 +4223,7 @@ int64_t
 Target_s390<size>::do_tls_offset_for_local(
     const Relobj*,
     unsigned int,
+    Output_data_got_base*,
     unsigned int,
     uint64_t) const
 {
@@ -4235,6 +4239,7 @@ template<int size>
 int64_t
 Target_s390<size>::do_tls_offset_for_global(
     Symbol*,
+    Output_data_got_base*,
     unsigned int,
     uint64_t) const
 {
