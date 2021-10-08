@@ -1774,6 +1774,10 @@ static void
 maint_print_cap_from_addr_cmd (const char *args, int from_tty)
 {
   gdb::byte_vector cap;
+
+  if (args == nullptr)
+    error (_("Missing argument <address> (64-bit hex)."));
+
   CORE_ADDR addr = parse_and_eval_address (args);
   cap = target_read_capability (addr);
 
@@ -1808,12 +1812,32 @@ static void
 maint_set_capability_in_memory_cmd (const char *args, int from_tty)
 {
   std::string addr_str, tag_str, upper_str, lower_str;
+
+  if (args == nullptr)
+    error (_("Arguments must be <address> <tag> <upper 64 bits>"
+	     " <lower 64 bits>"));
+
   const char *args_ptr = args;
 
   addr_str = extract_string_maybe_quoted (&args_ptr);
+
+  if (addr_str.empty ())
+    error (_("Missing <address> argument (64-bit hex)"));
+
   tag_str = extract_string_maybe_quoted (&args_ptr);
+
+  if (tag_str.empty ())
+    error (_("Missing <tag> argument (0 or 1)"));
+
   upper_str = extract_string_maybe_quoted (&args_ptr);
+
+  if (upper_str.empty ())
+    error (_("Missing <upper 64 bits> argument (64-bit hex)"));
+
   lower_str = extract_string_maybe_quoted (&args_ptr);
+
+  if (lower_str.empty ())
+    error (_("Missing <lower 64 bits> argument (64-bit hex)"));
 
   CORE_ADDR addr = parse_and_eval_address (addr_str.c_str ());
   CORE_ADDR tag_part = parse_and_eval_address (tag_str.c_str ());
@@ -2103,12 +2127,16 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       set_gdbarch_decode_memtag_note (gdbarch,
 				      aarch64_linux_decode_memtag_note);
 
-      add_cmd ("cap_from_addr", class_maintenance, maint_print_cap_from_addr_cmd,
-	       _("Print the capability from addr."), &maintenanceprintlist);
+      add_cmd ("cap_from_addr", class_maintenance,
+	       maint_print_cap_from_addr_cmd,
+	       _("Print a capability contained in a memory address.\n"
+		 "Syntax is <address> (64-bit hex)"), &maintenanceprintlist);
 
       add_cmd ("cap_in_memory", class_maintenance,
 	       maint_set_capability_in_memory_cmd,
-	       _("Print the capability from addr."), &maintenancelist);
+	       _("Write capability data to a memory address.\n"
+		 "Syntax is <address> <tag> <upper 64 bits> <lower 64 bits>"),
+		 &maintenancelist);
     }
   else
     {
