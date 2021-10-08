@@ -25,6 +25,8 @@ if [info exists COMPILE] {
     return
 }
 
+lappend opts nopie
+
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $opts] } {
     return -1
 }

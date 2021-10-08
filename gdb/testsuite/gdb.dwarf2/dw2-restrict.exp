@@ -27,7 +27,8 @@ if {![istarget x86_64-*] || ![is_lp64_target]} {
 
 standard_testfile .S
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {nodebug}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {nodebug nopie}]} {
     return -1
 }
 
