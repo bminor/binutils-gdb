@@ -289,16 +289,19 @@ class Target
   int64_t
   tls_offset_for_local(const Relobj* object,
 		       unsigned int symndx,
+		       Output_data_got_base* got,
 		       unsigned int got_indx,
 		       uint64_t addend) const
-  { return do_tls_offset_for_local(object, symndx, got_indx, addend); }
+  { return do_tls_offset_for_local(object, symndx, got, got_indx, addend); }
 
   // Return the offset to use for the GOT_INDX'th got entry which is
   // for global tls symbol GSYM.
   int64_t
-  tls_offset_for_global(Symbol* gsym, unsigned int got_indx,
+  tls_offset_for_global(Symbol* gsym,
+			Output_data_got_base* got,
+			unsigned int got_indx,
 			uint64_t addend) const
-  { return do_tls_offset_for_global(gsym, got_indx, addend); }
+  { return do_tls_offset_for_global(gsym, got, got_indx, addend); }
 
   // For targets that use function descriptors, if LOC is the location
   // of a function, modify it to point at the function entry location.
@@ -650,12 +653,14 @@ class Target
   { gold_unreachable(); }
 
   virtual int64_t
-  do_tls_offset_for_local(const Relobj*, unsigned int, unsigned int,
+  do_tls_offset_for_local(const Relobj*, unsigned int,
+			  Output_data_got_base*, unsigned int,
 			  uint64_t) const
   { gold_unreachable(); }
 
   virtual int64_t
-  do_tls_offset_for_global(Symbol*, unsigned int, uint64_t) const
+  do_tls_offset_for_global(Symbol*, Output_data_got_base*, unsigned int,
+			   uint64_t) const
   { gold_unreachable(); }
 
   virtual void

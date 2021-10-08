@@ -2633,7 +2633,8 @@ class Output_data_got : public Output_data_got_base
 
     // Write the GOT entry to an output view.
     void
-    write(unsigned int got_indx, unsigned char* pov) const;
+    write(Output_data_got_base* got, unsigned int got_indx,
+	  unsigned char* pov) const;
 
    private:
     enum
