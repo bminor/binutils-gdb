@@ -70,11 +70,11 @@ proc run_test {problem_type mode} {
 		incr header_lines
 		exp_continue
 	    }
-	    -early -re "^A problem internal to GDB has been detected,\r\n" {
+	    -early -re "^A problem internal to GDB has been detected" {
 		incr header_lines
 		exp_continue
 	    }
-	    -early -re "^further debugging may prove unreliable\\.\r\n" {
+	    -early -re "^,\r\nfurther debugging may prove unreliable\\.\r\n" {
 		incr header_lines
 		exp_continue
 	    }
