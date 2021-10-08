@@ -4993,20 +4993,20 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
       switch (ext)
 	{
 	case 167:	/* Store Vector Element Halfword Indexed */
-	  addr = addr & ~0x1ULL;
+	  ea = ea & ~0x1ULL;
 	  break;
 
 	case 199:	/* Store Vector Element Word Indexed */
-	  addr = addr & ~0x3ULL;
+	  ea = ea & ~0x3ULL;
 	  break;
 
 	case 231:	/* Store Vector Indexed */
 	case 487:	/* Store Vector Indexed LRU */
-	  addr = addr & ~0xfULL;
+	  ea = ea & ~0xfULL;
 	  break;
 	}
 
-      record_full_arch_list_add_mem (addr, size);
+      record_full_arch_list_add_mem (ea, size);
       return 0;
 
     case 397:		/* Store VSX Vector with Length */
