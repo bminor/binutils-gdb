@@ -167,7 +167,7 @@ static void check_parameter_typelist (std::vector<struct type *> *);
 static void write_destructor_name (struct parser_state *par_state,
 				   struct stoken);
 
-#ifdef YYBISON
+#if defined(YYBISON) && YYBISON < 30800
 static void c_print_token (FILE *file, int type, YYSTYPE value);
 #define YYPRINT(FILE, TYPE, VALUE) c_print_token (FILE, TYPE, VALUE)
 #endif
@@ -3429,7 +3429,8 @@ c_parse (struct parser_state *par_state)
   return yyparse ();
 }
 
-#ifdef YYBISON
+#if defined(YYBISON) && YYBISON < 30800
+
 
 /* This is called via the YYPRINT macro when parser debugging is
    enabled.  It prints a token's value.  */
