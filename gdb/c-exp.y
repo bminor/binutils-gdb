@@ -167,7 +167,7 @@ static struct stoken operator_stoken (const char *);
 static struct stoken typename_stoken (const char *);
 static void check_parameter_typelist (std::vector<struct type *> *);
 
-#ifdef YYBISON
+#if defined(YYBISON) && YYBISON < 30800
 static void c_print_token (FILE *file, int type, YYSTYPE value);
 #define YYPRINT(FILE, TYPE, VALUE) c_print_token (FILE, TYPE, VALUE)
 #endif
@@ -3446,7 +3446,8 @@ c_parse (struct parser_state *par_state)
   return result;
 }
 
-#ifdef YYBISON
+#if defined(YYBISON) && YYBISON < 30800
+
 
 /* This is called via the YYPRINT macro when parser debugging is
    enabled.  It prints a token's value.  */
