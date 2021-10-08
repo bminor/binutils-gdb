@@ -68,6 +68,7 @@ proc run_info_sources { extra_args args } {
 	# Run the command and extract the results into INFO_SOURCES.
 	set objfile_name ""
 	set source_files {}
+	set files {}
 	gdb_test_multiple $cmd "" {
 	    -re "${command_regex}\r\n" {
 		exp_continue
@@ -81,6 +82,9 @@ proc run_info_sources { extra_args args } {
 	    -re "^\\(Full debug information has not yet been read for this file\\.\\)\r\n" {
 		exp_continue
 	    }
+	    -re "^\\(Objfile has no debug information\\.\\)\r\n" {
+		exp_continue
+	    }
 
 	    -re "^\r\n" {
 		exp_continue
@@ -90,18 +94,22 @@ proc run_info_sources { extra_args args } {
 		pass $gdb_test_name
 	    }
 
+	    -re "^(\[^,\r\n\]+), " {
+		set f $expect_out(1,string)
+		lappend files $f
+		exp_continue
+	    }
 	    -re "^(\[^\r\n\]+)\r\n" {
 		if { $objfile_name == "" } {
 		    fail "${gdb_test_name} (no objfile name)"
 		    return
 		}
 
-		set files {}
-		foreach f [split $expect_out(1,string) ,] {
-		    lappend files [string trim $f]
-		}
+		set f $expect_out(1,string)
+		lappend files $f
 		set info_sources($objfile_name) $files
 		set $objfile_name ""
+		set files {}
 		exp_continue
 	    }
 	}
