@@ -28,10 +28,16 @@ if { [prepare_for_testing "failed to prepare" $testfile \
     return -1
 }
 
+# Avoid shared lib symbols.
+gdb_test_no_output "set auto-solib-add off"
+
 if { ![fortran_runto_main] } {
     perror "Could not run to main."
     continue
 }
+
+# Avoid libc symbols.
+gdb_test "nosharedlibrary"
 
 set logical4 [fortran_logical4]
 set integer4 [fortran_int4]
