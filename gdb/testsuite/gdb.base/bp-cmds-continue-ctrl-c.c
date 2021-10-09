@@ -26,7 +26,7 @@ foo (void)
 int
 main ()
 {
-  alarm (60);
+  alarm (120);
 
   while (1)
     foo ();

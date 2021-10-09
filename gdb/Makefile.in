@@ -1681,12 +1681,12 @@ check-perf: force
 	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check-perf; \
 	else true; fi
 
-check-read1: force
+check-read1 check-readmore: force
 	@if [ -f testsuite/Makefile ]; then \
 	  rootme=`pwd`; export rootme; \
 	  rootsrc=`cd $(srcdir); pwd`; export rootsrc; \
 	  cd testsuite; \
-	  $(MAKE) $(TARGET_FLAGS_TO_PASS) check-read1; \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS) $@; \
 	else true; fi
 
 check-parallel: force

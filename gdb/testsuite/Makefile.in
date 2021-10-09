@@ -39,6 +39,8 @@ CC=@CC@
 
 EXPECT = `if [ "$${READ1}" != "" ] ; then \
             echo $${rootme}/expect-read1; \
+          elif [ "$${READMORE}" != "" ] ; then \
+            echo $${rootme}/expect-readmore; \
           elif [ -f $${rootme}/../../expect/expect ] ; then \
             echo $${rootme}/../../expect/expect ; \
           else \
@@ -160,6 +162,9 @@ check: all $(abs_builddir)/site.exp
 
 check-read1: read1.so expect-read1
 	$(MAKE) READ1="1" check
+
+check-readmore: readmore.so expect-readmore
+	$(MAKE) READMORE="1" check
 
 # Check whether we need to print the timestamp for each line of
 # status.
@@ -344,7 +349,7 @@ clean mostlyclean:
 	-rm -f *.dwo *.dwp
 	-rm -rf outputs temp cache
 	-rm -rf gdb.perf/workers gdb.perf/outputs gdb.perf/temp gdb.perf/cache
-	-rm -f read1.so expect-read1
+	-rm -f read1.so expect-read1 readmore.so expect-readmore
 
 distclean maintainer-clean realclean: clean
 	-rm -f *~ core
@@ -367,18 +372,22 @@ TAGS: force
 		-
 
 # Build the expect wrapper script that preloads the read1.so library.
-expect-read1:
+expect-read1 expect-readmore:
 	$(ECHO_GEN) \
-	rm -f expect-read1-tmp; \
-	touch expect-read1-tmp; \
-	echo "# THIS FILE IS GENERATED -*- buffer-read-only: t -*- \n" >>expect-read1-tmp; \
-	echo "# vi:set ro: */\n\n" >>expect-read1-tmp; \
-	echo "# To regenerate this file, run:\n" >>expect-read1-tmp; \
-	echo "#      make clean; make/\n" >>expect-read1-tmp; \
-	echo "export LD_PRELOAD=`pwd`/read1.so" >>expect-read1-tmp; \
-	echo 'exec expect "$$@"' >>expect-read1-tmp; \
-	chmod +x expect-read1-tmp; \
-	mv expect-read1-tmp expect-read1
+	rm -f $@-tmp; \
+	touch $@-tmp; \
+	echo "# THIS FILE IS GENERATED -*- buffer-read-only: t -*- \n" >>$@-tmp; \
+	echo "# vi:set ro: */\n\n" >>$@-tmp; \
+	echo "# To regenerate this file, run:\n" >>$@-tmp; \
+	echo "#      make clean; make/\n" >>$@-tmp; \
+	if [ $@ = expect-read1 ]; then \
+	  echo "export LD_PRELOAD=`pwd`/read1.so" >>$@-tmp; \
+	else \
+	  echo "export LD_PRELOAD=`pwd`/readmore.so" >>$@-tmp; \
+	fi; \
+	echo 'exec expect "$$@"' >>$@-tmp; \
+	chmod +x $@-tmp; \
+	mv $@-tmp $@
 
 # Build the read1.so preload library.  This overrides the `read'
 # function, making it read one byte at a time.  Running the testsuite
@@ -386,9 +395,17 @@ expect-read1:
 read1.so: lib/read1.c
 	$(ECHO_CC) $(CC) -o $@ ${srcdir}/lib/read1.c -Wall -g -shared -fPIC $(CFLAGS)
 
+# Build the readmore.so preload library.  This overrides the `read'
+# function, making it try harder to read more at a time.  Running the
+# testsuite with this catches racy tests.
+readmore.so: lib/read1.c
+	$(ECHO_CC) $(CC) -o $@ ${srcdir}/lib/read1.c -Wall -g -shared -fPIC \
+	  $(CFLAGS) -DREADMORE
+
 # Build the read1 machinery.
-.PHONY: read1
+.PHONY: read1 readmore
 read1: read1.so expect-read1
+readmore: readmore.so expect-readmore
 
 # Disable implicit make rules.
 include $(srcdir)/../disable-implicit-rules.mk

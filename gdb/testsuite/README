@@ -361,7 +361,7 @@ fail, it can also have the effect of making otherwise failing tests pass.
 This happens f.i. if the test is trying to match a gdb prompt using an end of
 input marker "${gdb_prompt} $" and there is output after the gdb prompt.  This
 may either pass or fail in normal operation, but using check-read1 will ensure
-that it passes.
+that it passes.  Use check-readmore to detect this type of failure.
 
 Testsuite Configuration
 ***********************
