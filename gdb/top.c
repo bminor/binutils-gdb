@@ -724,13 +724,25 @@ execute_fn_to_ui_file (struct ui_file *file, std::function<void(void)> fn)
 
 /* See gdbcmd.h.  */
 
-std::string
-execute_fn_to_string (std::function<void(void)> fn, bool term_out)
+void
+execute_fn_to_string (std::string &res, std::function<void(void)> fn,
+		      bool term_out)
 {
   string_file str_file (term_out);
 
-  execute_fn_to_ui_file (&str_file, fn);
-  return std::move (str_file.string ());
+  try
+    {
+      execute_fn_to_ui_file (&str_file, fn);
+    }
+  catch (...)
+    {
+      /* Finally.  */
+      res = std::move (str_file.string ());
+      throw;
+    }
+
+  /* And finally.  */
+  res = std::move (str_file.string ());
 }
 
 /* See gdbcmd.h.  */
@@ -744,12 +756,23 @@ execute_command_to_ui_file (struct ui_file *file,
 
 /* See gdbcmd.h.  */
 
-std::string
+void
+execute_command_to_string (std::string &res, const char *p, int from_tty,
+			   bool term_out)
+{
+  execute_fn_to_string (res, [=]() { execute_command (p, from_tty); },
+			term_out);
+}
+
+/* See gdbcmd.h.  */
+
+void
 execute_command_to_string (const char *p, int from_tty,
 			   bool term_out)
 {
-  return
-    execute_fn_to_string ([=]() { execute_command (p, from_tty); }, term_out);
+  std::string dummy;
+  execute_fn_to_string (dummy, [=]() { execute_command (p, from_tty); },
+			term_out);
 }
 
 /* When nonzero, cause dont_repeat to do nothing.  This should only be

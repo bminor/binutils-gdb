@@ -91,7 +91,7 @@ test_complaints ()
   do									\
     {									\
       std::string output;						\
-      output = execute_fn_to_string ([]() { complaint (STR); }, false);	\
+      execute_fn_to_string (output, []() { complaint (STR); }, false);	\
       std::string expected						\
 	= _("During symbol reading: ") + std::string (STR "\n");	\
       SELF_CHECK (output == expected);					\
@@ -102,7 +102,7 @@ test_complaints ()
   do									\
     {									\
       std::string output;						\
-      output = execute_fn_to_string ([]() { complaint (STR); }, false);	\
+      execute_fn_to_string (output, []() { complaint (STR); }, false);	\
       SELF_CHECK (output.empty ());					\
       SELF_CHECK (counters[STR] == CNT);				\
     } while (0)

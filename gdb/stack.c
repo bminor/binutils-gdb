@@ -3028,8 +3028,8 @@ frame_apply_command_count (const char *which_command,
 	       set to the selected frame.  */
 	    scoped_restore_current_thread restore_fi_current_frame;
 
-	    cmd_result = execute_command_to_string
-	      (cmd, from_tty, gdb_stdout->term_out ());
+	    execute_command_to_string
+	      (cmd_result, cmd, from_tty, gdb_stdout->term_out ());
 	  }
 	  fi = get_selected_frame (_("frame apply "
 				     "unable to get selected frame."));

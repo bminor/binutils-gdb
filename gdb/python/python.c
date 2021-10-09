@@ -1924,11 +1924,11 @@ namespace selftests {
 static void
 test_python ()
 {
-#define CMD execute_command_to_string ("python print(5)", 0, true);
+#define CMD(S) execute_command_to_string (S, "python print(5)", 0, true)
 
   std::string output;
 
-  output = CMD;
+  CMD (output);
   SELF_CHECK (output == "5\n");
   output.clear ();
 
@@ -1937,7 +1937,7 @@ test_python ()
     = make_scoped_restore (&gdb_python_initialized, 0);
   try
     {
-      output = CMD;
+      CMD (output);
     }
   catch (const gdb_exception &e)
     {

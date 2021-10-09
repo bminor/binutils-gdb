@@ -302,7 +302,7 @@ gdbscm_execute_gdb_command (SCM command_scm, SCM rest)
 
       scoped_restore preventer = prevent_dont_repeat ();
       if (to_string)
-	to_string_res = execute_command_to_string (command, from_tty, false);
+	execute_command_to_string (to_string_res, command, from_tty, false);
       else
 	execute_command (command, from_tty);
 
