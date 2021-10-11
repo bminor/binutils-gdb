@@ -22,6 +22,19 @@ if {![dwarf2_support]} {
 
 standard_testfile main.c
 
+# First check whether we can actually handle the non-symlink case.
+with_test_prefix non-symlink {
+    if { [prepare_for_testing "failed to prepare" "${testfile}" \
+	      [list ${srcfile}]] } {
+	return -1
+    }
+
+    if { [ensure_gdb_index $binfile] == -1 } {
+	return -1
+    }
+}
+
+# Regenerate exec without index.
 if { [prepare_for_testing "failed to prepare" "${testfile}" \
 	  [list ${srcfile}]] } {
     return -1
