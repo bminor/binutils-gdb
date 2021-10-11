@@ -74,9 +74,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-if { [ensure_gdb_index $binfile] == -1 } {
-    return -1
-}
+require {ensure_gdb_index $binfile} != -1
 
 clean_restart ${binfile}
 
