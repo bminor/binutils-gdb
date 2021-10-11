@@ -36,7 +36,13 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
+# Avoid shared lib symbols.
+mi_gdb_test "-gdb-set auto-solib-add off" "\\^done"
+
 mi_runto prog_array
+
+# Avoid libc symbols, in particular the 'array' type.
+mi_gdb_test "nosharedlibrary" ".*\\^done"
 
 mi_create_varobj "array" "array" "create local variable array"
 
