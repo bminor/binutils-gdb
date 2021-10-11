@@ -1631,6 +1631,75 @@ show_user (const char *args, int from_tty)
     }
 }
 
+/* Return true if COMMAND or any of its sub-commands is a user defined command.
+   This is a helper function for show_user_completer.  */
+
+static bool
+has_user_subcmd (struct cmd_list_element *command)
+{
+  if (cli_user_command_p (command))
+    return true;
+
+  /* Alias command can yield false positive.  Ignore them as the targeted
+     command should be reachable anyway.  */
+  if (command->is_alias ())
+    return false;
+
+  if (command->is_prefix ())
+    for (struct cmd_list_element *subcommand = *command->subcommands;
+	 subcommand != nullptr;
+	 subcommand = subcommand->next)
+      if (has_user_subcmd (subcommand))
+	return true;
+
+  return false;
+}
+
+/* Implement completer for the 'show user' command.  */
+
+static void
+show_user_completer (cmd_list_element *,
+		     completion_tracker &tracker, const char *text,
+		     const char *word)
+{
+  struct cmd_list_element *cmd_group = cmdlist;
+
+  /* TEXT can contain a chain of commands and subcommands.  Follow the
+     commands chain until we reach the point where the user wants a
+     completion.  */
+  while (word > text)
+    {
+      const char *curr_cmd = text;
+      const char *after = skip_to_space (text);
+      const size_t curr_cmd_len = after - text;
+      text = skip_spaces (after);
+
+      for (struct cmd_list_element *c = cmd_group; c != nullptr; c = c->next)
+	{
+	  if (strlen (c->name) == curr_cmd_len
+	      && strncmp (c->name, curr_cmd, curr_cmd_len) == 0)
+	    {
+	      if (c->subcommands == nullptr)
+		/* We arrived after a command with no child, so nothing more
+		   to complete.  */
+		return;
+
+	      cmd_group = *c->subcommands;
+	      break;
+	    }
+	}
+    }
+
+  const int wordlen = strlen (word);
+  for (struct cmd_list_element *c = cmd_group; c != nullptr; c = c->next)
+    if (has_user_subcmd (c))
+      {
+	if (strncmp (c->name, word, wordlen) == 0)
+	  tracker.add_completion
+	    (gdb::unique_xmalloc_ptr<char> (xstrdup (c->name)));
+      }
+}
+
 /* Search through names of commands and documentations for a certain
    regular expression.  */
 
@@ -2593,10 +2662,11 @@ you must type \"disassemble 'foo.c'::bar\" and not \"disassemble foo.c:bar\"."))
   c = add_com ("make", class_support, make_command, _("\
 Run the ``make'' program using the rest of the line as arguments."));
   set_cmd_completer (c, filename_completer);
-  add_cmd ("user", no_class, show_user, _("\
+  c = add_cmd ("user", no_class, show_user, _("\
 Show definitions of non-python/scheme user defined commands.\n\
 Argument is the name of the user defined command.\n\
 With no argument, show definitions of all user defined commands."), &showlist);
+  set_cmd_completer (c, show_user_completer);
   add_com ("apropos", class_support, apropos_command, _("\
 Search for commands matching a REGEXP.\n\
 Usage: apropos [-v] REGEXP\n\
