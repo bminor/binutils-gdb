@@ -483,6 +483,21 @@ public:
     return nullptr;
   }
 
+  /* Check if location description resolves into optimized out.
+
+     The check operation is performed in the context of a FRAME.
+     BIG_ENDIAN defines the endianness of the target, BIT_SIZE is the
+     number of bits to read and BITS_TO_SKIP is a bit offset into the
+     location.  LOCATION_BIT_LIMIT is a maximum number of bits that
+     location can hold, where value zero signifies that there is
+     no such restriction.  */
+  virtual bool is_optimized_out (frame_info *frame, bool big_endian,
+				 LONGEST bits_to_skip, size_t bit_size,
+				 size_t location_bit_limit) const
+  {
+    return false;
+  }
+
 protected:
   /* Architecture of the location.  */
   gdbarch *m_arch;
@@ -661,6 +676,13 @@ public:
   {
     *unavailable = 0;
     *optimized = 1;
+  }
+
+  bool is_optimized_out (frame_info *frame, bool big_endian,
+			 LONGEST bits_to_skip, size_t bit_size,
+			 size_t location_bit_limit) const override
+  {
+    return true;
   }
 };
 
@@ -902,6 +924,10 @@ public:
 	      size_t location_bit_limit, bool big_endian,
 	      int *optimized, int *unavailable) const override;
 
+  bool is_optimized_out (frame_info *frame, bool big_endian,
+			 LONGEST bits_to_skip, size_t bit_size,
+			 size_t location_bit_limit) const override;
+
 private:
   /* DWARF register number.  */
   unsigned int m_regnum;
@@ -995,6 +1021,24 @@ dwarf_register::write (frame_info *frame, const gdb_byte *buf,
 		     temp_buf, optimized, unavailable);
 }
 
+bool
+dwarf_register::is_optimized_out (frame_info *frame, bool big_endian,
+				  LONGEST bits_to_skip, size_t bit_size,
+				  size_t location_bit_limit) const
+{
+  int optimized, unavailable;
+  gdb::byte_vector temp_buf (bit_size);
+
+  this->read (frame, temp_buf.data (), 0, bit_size,
+	      bits_to_skip, location_bit_limit,
+	      big_endian, &optimized, &unavailable);
+
+  if (optimized)
+    return true;
+
+  return false;
+}
+
 /* Implicit location description entry.  Describes a location
    description not found on the target but instead saved in a
    gdb-allocated buffer.  */
@@ -1021,6 +1065,13 @@ public:
   {
     *optimized = 1;
     *unavailable = 0;
+  }
+
+  bool is_optimized_out (frame_info *frame, bool big_endian,
+			 LONGEST bits_to_skip, size_t bit_size,
+			 size_t location_bit_limit) const override
+  {
+    return true;
   }
 
 private:
@@ -1227,6 +1278,10 @@ public:
 				LONGEST pointer_offset = 0,
 				LONGEST bit_offset = 0,
 				int bit_length = 0) const override;
+
+  bool is_optimized_out (frame_info *frame, bool big_endian,
+			 LONGEST bits_to_skip, size_t bit_size,
+			 size_t location_bit_limit) const override;
 
 private:
   /* Composite piece that contains a piece location
@@ -1493,6 +1548,48 @@ dwarf_composite::indirect_implicit_ptr (frame_info *frame, struct type *type,
     }
 
   return nullptr;
+}
+
+bool
+dwarf_composite::is_optimized_out (frame_info *frame, bool big_endian,
+				   LONGEST bits_to_skip, size_t bit_size,
+				   size_t location_bit_limit) const
+{
+  ULONGEST total_bits_to_skip
+    = bits_to_skip + HOST_CHAR_BIT * m_offset + m_bit_suboffset;
+  ULONGEST remaining_bit_size = bit_size;
+  unsigned int pieces_num = m_pieces.size ();
+  unsigned int i;
+
+  /* Advance to the first non-skipped piece.  */
+  for (i = 0; i < pieces_num; i++)
+    {
+      ULONGEST piece_bit_size = m_pieces[i].size;
+
+      if (total_bits_to_skip < piece_bit_size)
+	break;
+
+      total_bits_to_skip -= piece_bit_size;
+    }
+
+  for (; i < pieces_num; i++)
+    {
+      const dwarf_location &location = *m_pieces[i].location;
+      ULONGEST piece_bit_size = m_pieces[i].size;
+      size_t this_bit_size = piece_bit_size - total_bits_to_skip;
+
+      if (this_bit_size > remaining_bit_size)
+	this_bit_size = remaining_bit_size;
+
+      if (location.is_optimized_out (frame, big_endian, total_bits_to_skip,
+				     this_bit_size, piece_bit_size))
+	return true;
+
+      remaining_bit_size -= this_bit_size;
+      total_bits_to_skip = 0;
+    }
+
+  return false;
 }
 
 struct piece_closure
