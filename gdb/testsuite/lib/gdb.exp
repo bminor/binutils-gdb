@@ -8215,5 +8215,35 @@ gdb_caching_proc have_avx {
     return $status
 }
 
+# Called as either:
+# - require EXPR VAL
+# - require EXPR OP VAL
+# In the first case, OP is ==.
+#
+# Require EXPR OP VAL, where EXPR is evaluated in caller context.  If not,
+# return in the caller's context.
+
+proc require { fn arg1 {arg2 ""} } {
+    if { $arg2 == "" } {
+	set op ==
+	set val $arg1
+    } else {
+	set op $arg1
+	set val $arg2
+    }
+    set res [uplevel 1 $fn]
+    if { [expr $res $op $val] } {
+	return
+    }
+
+    switch "$fn $op $val" {
+	"gdb_skip_xml_test == 0" { set msg "missing xml support" }
+	default { set msg "$fn != $val" }
+    }
+
+    untested $msg
+    return -code return 0
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

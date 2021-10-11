@@ -13,11 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if { [gdb_skip_xml_test] } {
-    # Valgrind gdbserver requires gdb with xml support.
-    untested "missing xml support"
-    return 0
-}
+# Valgrind gdbserver requires gdb with xml support.
+require gdb_skip_xml_test 0
 
 load_lib valgrind.exp
 
