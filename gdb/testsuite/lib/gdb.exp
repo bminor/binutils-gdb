@@ -7922,6 +7922,7 @@ proc ensure_gdb_index { binfile {style ""} } {
     set testfile [file tail $binfile]
     set test "check if index present"
     set has_index 0
+    set has_readnow 0
     gdb_test_multiple "mt print objfiles ${testfile}" $test -lbl {
 	-re "\r\n\\.gdb_index: version ${decimal}(?=\r\n)" {
 	    set has_index 1
@@ -7934,6 +7935,10 @@ proc ensure_gdb_index { binfile {style ""} } {
 	-re "\r\nPsymtabs:(?=\r\n)" {
 	    gdb_test_lines "" $gdb_test_name ".*"
 	}
+	-re ".gdb_index: faked for \"readnow\"" {
+	    set has_readnow 1
+	    gdb_test_lines "" $gdb_test_name ".*"
+	}
 	-re -wrap "" {
 	    fail $gdb_test_name
 	}
@@ -7941,6 +7946,10 @@ proc ensure_gdb_index { binfile {style ""} } {
 
     if { $has_index } {
 	return 0
+    }
+
+    if { $has_readnow } {
+	return -1
     }
 
     if { [add_gdb_index $binfile $style] == "1" } {
