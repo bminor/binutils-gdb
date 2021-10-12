@@ -341,12 +341,6 @@ public:
 	}
   }
 
-  // Return offset in output GOT section that this object will use
-  // as a TOC pointer.  Won't be just a constant with multi-toc support.
-  Address
-  toc_base_offset() const
-  { return 0x8000; }
-
   void
   set_has_small_toc_reloc()
   { has_small_toc_reloc_ = true; }
@@ -1001,6 +995,20 @@ class Target_powerpc : public Sized_target<size, big_endian>
   // Get the GOT section, creating it if necessary.
   Output_data_got_powerpc<size, big_endian>*
   got_section(Symbol_table*, Layout*);
+
+  // The toc/got pointer reg will be set to this value.
+  Address
+  toc_pointer() const
+  {
+    return this->got_->address() + this->got_->g_o_t();
+  }
+
+  // Offset of base used to access the GOT/TOC relative to the GOT section.
+  Address
+  got_base_offset() const
+  {
+    return this->got_->g_o_t();
+  }
 
   Object*
   do_make_elf_object(const std::string&, Input_file*, off_t,
@@ -2444,15 +2452,15 @@ Powerpc_relobj<size, big_endian>::make_toc_relative(
   // With -mcmodel=medium code it is quite possible to have
   // toc-relative relocs referring to objects outside the TOC.
   // Don't try to look at a non-existent TOC.
-  if (this->toc_shndx() == 0)
+  if (this->toc_shndx() == 0
+      || this->output_section(this->toc_shndx()) == 0)
     return false;
 
   // Convert VALUE back to an address by adding got_base (see below),
   // then to an offset in the TOC by subtracting the TOC output
-  // section address and the TOC output offset.  Since this TOC output
-  // section and the got output section are one and the same, we can
-  // omit adding and subtracting the output section address.
-  Address off = (*value + this->toc_base_offset()
+  // section address and the TOC output offset.
+  Address off = (*value + target->toc_pointer()
+		 - this->output_section(this->toc_shndx())->address()
 		 - this->output_section_offset(this->toc_shndx()));
   // Is this offset in the TOC?  -mcmodel=medium code may be using
   // TOC relative access to variables outside the TOC.  Those of
@@ -2468,8 +2476,7 @@ Powerpc_relobj<size, big_endian>::make_toc_relative(
   unsigned char* view = this->get_output_view(this->toc_shndx(), &vlen);
   Address addr = elfcpp::Swap<size, big_endian>::readval(view + off);
   // The TOC pointer
-  Address got_base = (target->got_section()->output_section()->address()
-		      + this->toc_base_offset());
+  Address got_base = target->toc_pointer();
   addr -= got_base;
   if (addr + (uint64_t) 0x80008000 >= (uint64_t) 1 << 32)
     return false;
@@ -2487,8 +2494,7 @@ Powerpc_relobj<size, big_endian>::make_got_relative(
     Address* value)
 {
   Address addr = psymval->value(this, addend);
-  Address got_base = (target->got_section()->output_section()->address()
-		      + this->toc_base_offset());
+  Address got_base = target->toc_pointer();
   addr -= got_base;
   if (addr + 0x80008000 > 0xffffffff)
     return false;
@@ -2961,10 +2967,12 @@ public:
     : Output_data_got<size, big_endian>(),
       symtab_(symtab), layout_(layout),
       header_ent_cnt_(size == 32 ? 3 : 1),
-      header_index_(size == 32 ? 0x2000 : 0)
+      header_index_(size == 32 ? 0x2000 : -1u)
   {
     if (size == 64)
       this->set_addralign(256);
+    if (size == 64)
+      this->make_header();
   }
 
   // Override all the Output_data_got methods we use so as to first call
@@ -3065,31 +3073,21 @@ public:
     return Output_data_got<size, big_endian>::add_constant_pair(c1, c2);
   }
 
-  // Offset of _GLOBAL_OFFSET_TABLE_.
+  // Offset of _GLOBAL_OFFSET_TABLE_ and .TOC. in this section.
   unsigned int
   g_o_t() const
   {
-    return this->got_offset(this->header_index_);
-  }
-
-  // Offset of base used to access the GOT/TOC.
-  // The got/toc pointer reg will be set to this value.
-  Valtype
-  got_base_offset(const Powerpc_relobj<size, big_endian>* object) const
-  {
     if (size == 32)
-      return this->g_o_t();
+      return this->got_offset(this->header_index_);
     else
-      return (this->output_section()->address()
-	      + object->toc_base_offset()
-	      - this->address());
+      return this->got_offset(this->header_index_) + 0x8000;
   }
 
   // Ensure our GOT has a header.
   void
   set_final_data_size()
   {
-    if (this->header_ent_cnt_ != 0)
+    if (size == 32 && this->header_ent_cnt_ != 0)
       this->make_header();
     Output_data_got<size, big_endian>::set_final_data_size();
   }
@@ -3104,7 +3102,7 @@ public:
     if (size == 32 && this->layout_->dynamic_data() != NULL)
       val = this->layout_->dynamic_section()->address();
     if (size == 64)
-      val = this->output_section()->address() + 0x8000;
+      val = this->address() + this->g_o_t();
     this->replace_constant(this->header_index_, val);
     Output_data_got<size, big_endian>::do_write(of);
   }
@@ -3113,7 +3111,7 @@ private:
   void
   reserve_ent(unsigned int cnt = 1)
   {
-    if (this->header_ent_cnt_ == 0)
+    if (size != 32 || this->header_ent_cnt_ == 0)
       return;
     if (this->num_entries() + cnt > this->header_index_)
       this->make_header();
@@ -3668,8 +3666,7 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 			   && gsym != NULL
 			   && gsym->source() == Symbol::IN_OUTPUT_DATA
 			   && gsym->output_data() == target->savres_section());
-	  ok = stub_table->add_long_branch_entry(this->object_,
-						 this->r_type_,
+	  ok = stub_table->add_long_branch_entry(this->r_type_,
 						 from, to, other, save_res);
 	}
     }
@@ -4811,12 +4808,10 @@ class Stub_table : public Output_relaxed_input_section
 
   // Add a long branch stub.
   bool
-  add_long_branch_entry(const Powerpc_relobj<size, big_endian>*,
-			unsigned int, Address, Address, unsigned int, bool);
+  add_long_branch_entry(unsigned int, Address, Address, unsigned int, bool);
 
   const Branch_stub_ent*
-  find_long_branch_entry(const Powerpc_relobj<size, big_endian>*,
-			 Address) const;
+  find_long_branch_entry(Address) const;
 
   bool
   can_reach_stub(Address from, unsigned int off, unsigned int r_type)
@@ -5096,29 +5091,23 @@ class Stub_table : public Output_relaxed_input_section
   class Branch_stub_key
   {
   public:
-    Branch_stub_key(const Powerpc_relobj<size, big_endian>* obj, Address to)
-      : dest_(to), toc_base_off_(0)
-    {
-      if (size == 64)
-	toc_base_off_ = obj->toc_base_offset();
-    }
+    Branch_stub_key(Address to)
+      : dest_(to)
+    { }
 
     bool operator==(const Branch_stub_key& that) const
     {
-      return (this->dest_ == that.dest_
-	      && (size == 32
-		  || this->toc_base_off_ == that.toc_base_off_));
+      return this->dest_ == that.dest_;
     }
 
     Address dest_;
-    unsigned int toc_base_off_;
   };
 
   class Branch_stub_key_hash
   {
   public:
     size_t operator()(const Branch_stub_key& key) const
-    { return key.dest_ ^ key.toc_base_off_; }
+    { return key.dest_; }
   };
 
   // In a sane world this would be a global.
@@ -5328,14 +5317,13 @@ Stub_table<size, big_endian>::find_plt_call_entry(
 template<int size, bool big_endian>
 bool
 Stub_table<size, big_endian>::add_long_branch_entry(
-    const Powerpc_relobj<size, big_endian>* object,
     unsigned int r_type,
     Address from,
     Address to,
     unsigned int other,
     bool save_res)
 {
-  Branch_stub_key key(object, to);
+  Branch_stub_key key(to);
   bool notoc = (size == 64 && r_type == elfcpp::R_PPC64_REL24_NOTOC);
   Branch_stub_ent ent(this->branch_size_, notoc, save_res);
   std::pair<typename Branch_stub_entries::iterator, bool> p
@@ -5380,11 +5368,9 @@ Stub_table<size, big_endian>::add_long_branch_entry(
 
 template<int size, bool big_endian>
 const typename Stub_table<size, big_endian>::Branch_stub_ent*
-Stub_table<size, big_endian>::find_long_branch_entry(
-    const Powerpc_relobj<size, big_endian>* object,
-    Address to) const
+Stub_table<size, big_endian>::find_long_branch_entry(Address to) const
 {
-  Branch_stub_key key(object, to);
+  Branch_stub_key key(to);
   typename Branch_stub_entries::const_iterator p
     = this->long_branch_stubs_.find(key);
   if (p == this->long_branch_stubs_.end())
@@ -6104,11 +6090,7 @@ Stub_table<size, big_endian>::plt_call_size(
 	    }
 	  if (p->second.r2save_)
 	    bytes += 4;
-	  uint64_t got_addr
-	    = this->targ_->got_section()->output_section()->address();
-	  const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
-	    <const Powerpc_relobj<size, big_endian>*>(p->first.object_);
-	  got_addr += ppcobj->toc_base_offset();
+	  uint64_t got_addr = this->targ_->toc_pointer();
 	  uint64_t off = plt_addr - got_addr;
 	  bytes += 3 * 4 + 4 * (ha(off) != 0);
 	}
@@ -6169,10 +6151,7 @@ Stub_table<size, big_endian>::plt_call_size(
 	  return bytes + tail;
 	}
 
-      uint64_t got_addr = this->targ_->got_section()->output_section()->address();
-      const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
-	<const Powerpc_relobj<size, big_endian>*>(p->first.object_);
-      got_addr += ppcobj->toc_base_offset();
+      uint64_t got_addr = this->targ_->toc_pointer();
       uint64_t off = plt_addr - got_addr;
       bytes += 3 * 4 + 4 * (ha(off) != 0);
       if (this->targ_->abiversion() < 2)
@@ -6293,10 +6272,6 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
   if (size == 64
       && this->targ_->power10_stubs())
     {
-      const Output_data_got_powerpc<size, big_endian>* got
-	= this->targ_->got_section();
-      Address got_os_addr = got->output_section()->address();
-
       if (!this->plt_call_stubs_.empty())
 	{
 	  // Write out plt call stubs.
@@ -6333,10 +6308,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 			    = cs->second.r2save_ && !cs->second.localentry0_;
 			  this->build_tls_opt_head(&p, save_lr);
 			}
-		      const Powerpc_relobj<size, big_endian>* ppcobj
-			= static_cast<const Powerpc_relobj<size, big_endian>*>(
-			    cs->first.object_);
-		      Address got_addr = got_os_addr + ppcobj->toc_base_offset();
+		      Address got_addr = this->targ_->toc_pointer();
 		      Address off = plt_addr - got_addr;
 
 		      if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
@@ -6438,7 +6410,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 			= this->targ_->find_branch_lookup_table(bs->first.dest_);
 		      gold_assert(brlt_addr != invalid_address);
 		      brlt_addr += this->targ_->brlt_section()->address();
-		      Address got_addr = got_os_addr + bs->first.toc_base_off_;
+		      Address got_addr = this->targ_->toc_pointer();
 		      Address brltoff = brlt_addr - got_addr;
 		      if (ha(brltoff) == 0)
 			{
@@ -6487,9 +6459,6 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
     }
   else if (size == 64)
     {
-      const Output_data_got_powerpc<size, big_endian>* got
-	= this->targ_->got_section();
-      Address got_os_addr = got->output_section()->address();
 
       if (!this->plt_call_stubs_.empty()
 	  && this->targ_->abiversion() >= 2)
@@ -6523,9 +6492,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		}
 	      else
 		{
-		  const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
-		    <const Powerpc_relobj<size, big_endian>*>(cs->first.object_);
-		  Address got_addr = got_os_addr + ppcobj->toc_base_offset();
+		  Address got_addr = this->targ_->toc_pointer();
 		  Address off = plt_addr - got_addr;
 
 		  if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
@@ -6565,9 +6532,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      const Output_data_plt_powerpc<size, big_endian>* plt;
 	      Address pltoff = this->plt_off(cs, &plt);
 	      Address plt_addr = pltoff + plt->address();
-	      const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
-		<const Powerpc_relobj<size, big_endian>*>(cs->first.object_);
-	      Address got_addr = got_os_addr + ppcobj->toc_base_offset();
+	      Address got_addr = this->targ_->toc_pointer();
 	      Address off = plt_addr - got_addr;
 
 	      if (off + 0x80008000 > 0xffffffff || (off & 7) != 0
@@ -6711,7 +6676,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		= this->targ_->find_branch_lookup_table(bs->first.dest_);
 	      gold_assert(brlt_addr != invalid_address);
 	      brlt_addr += this->targ_->brlt_section()->address();
-	      Address got_addr = got_os_addr + bs->first.toc_base_off_;
+	      Address got_addr = this->targ_->toc_pointer();
 	      Address brltoff = brlt_addr - got_addr;
 	      if (ha(brltoff) == 0)
 		{
@@ -6773,11 +6738,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		  else
 		    {
 		      if (g_o_t == invalid_address)
-			{
-			  const Output_data_got_powerpc<size, big_endian>* got
-			    = this->targ_->got_section();
-			  g_o_t = got->address() + got->g_o_t();
-			}
+			g_o_t = this->targ_->toc_pointer();
 		      got_addr = g_o_t;
 		    }
 
@@ -6979,10 +6940,8 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
     }
   else
     {
-      const Output_data_got_powerpc<size, big_endian>* got
-	= this->targ_->got_section();
       // The address of _GLOBAL_OFFSET_TABLE_.
-      Address g_o_t = got->address() + got->g_o_t();
+      Address g_o_t = this->targ_->toc_pointer();
 
       // Write out pltresolve branch table.
       p = oview;
@@ -8016,12 +7975,13 @@ Target_powerpc<size, big_endian>::Scan::local(
 	      break;
 
 	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-	    Powerpc_relobj<size, big_endian>* symobj = ppc_object;
+	    Address got_off = (target->toc_pointer()
+			       - got->output_section()->address());
 	    rela_dyn->add_output_section_relative(got->output_section(),
 						  elfcpp::R_POWERPC_RELATIVE,
 						  output_section,
 						  object, data_shndx, off,
-						  symobj->toc_base_offset());
+						  got_off);
 	  }
       }
       break;
@@ -8729,15 +8689,13 @@ Target_powerpc<size, big_endian>::Scan::global(
 	      break;
 
 	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-	    Powerpc_relobj<size, big_endian>* symobj = ppc_object;
-	    if (data_shndx != ppc_object->opd_shndx())
-	      symobj = static_cast
-		<Powerpc_relobj<size, big_endian>*>(gsym->object());
+	    Address got_off = (target->toc_pointer()
+			       - got->output_section()->address());
 	    rela_dyn->add_output_section_relative(got->output_section(),
 						  elfcpp::R_POWERPC_RELATIVE,
 						  output_section,
 						  object, data_shndx, off,
-						  symobj->toc_base_offset());
+						  got_off);
 	  }
       }
       break;
@@ -10638,8 +10596,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	{
 	  if (r_type != elfcpp::R_PPC64_PLT_PCREL34
 	      && r_type != elfcpp::R_PPC64_PLT_PCREL34_NOTOC)
-	    value -= (target->got_section()->output_section()->address()
-		      + object->toc_base_offset());
+	    value -= target->toc_pointer();
 	}
       else if (parameters->options().output_is_position_independent())
 	{
@@ -10651,8 +10608,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 			+ rela.get_r_addend());
 	    }
 	  else
-	    value -= (target->got_section()->address()
-		      + target->got_section()->g_o_t());
+	    value -= target->toc_pointer();
 	}
     }
   else if (!has_plt_offset
@@ -10683,12 +10639,11 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (r_type == elfcpp::R_PPC64_GOT_PCREL34)
 	value += target->got_section()->address();
       else
-	value -= target->got_section()->got_base_offset(object);
+	value -= target->got_base_offset();
     }
   else if (r_type == elfcpp::R_PPC64_TOC)
     {
-      value = (target->got_section()->output_section()->address()
-	       + object->toc_base_offset());
+      value = target->toc_pointer();
     }
   else if (gsym != NULL
 	   && (r_type == elfcpp::R_POWERPC_REL24
@@ -10787,7 +10742,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  if (r_type == elfcpp::R_PPC64_GOT_TLSGD_PCREL34)
 	    value += target->got_section()->address();
 	  else
-	    value -= target->got_section()->got_base_offset(object);
+	    value -= target->got_base_offset();
 	}
       if (tls_type == tls::TLSOPT_TO_IE)
 	{
@@ -10880,7 +10835,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  if (r_type == elfcpp::R_PPC64_GOT_TLSLD_PCREL34)
 	    value += target->got_section()->address();
 	  else
-	    value -= target->got_section()->got_base_offset(object);
+	    value -= target->got_base_offset();
 	}
       else
 	{
@@ -10938,7 +10893,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       if (r_type == elfcpp::R_PPC64_GOT_DTPREL_PCREL34)
 	value += target->got_section()->address();
       else
-	value -= target->got_section()->got_base_offset(object);
+	value -= target->got_base_offset();
     }
   else if (r_type == elfcpp::R_POWERPC_GOT_TPREL16
 	   || r_type == elfcpp::R_POWERPC_GOT_TPREL16_LO
@@ -10959,7 +10914,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  if (r_type == elfcpp::R_PPC64_GOT_TPREL_PCREL34)
 	    value += target->got_section()->address();
 	  else
-	    value -= target->got_section()->got_base_offset(object);
+	    value -= target->got_base_offset();
 	}
       else
 	{
@@ -11198,7 +11153,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  if (stub_table != NULL)
 	    {
 	      const typename Stub_table<size, big_endian>::Branch_stub_ent* ent
-		= stub_table->find_long_branch_entry(object, value);
+		= stub_table->find_long_branch_entry(value);
 	      if (ent != NULL)
 		{
 		  if (ent->save_res_)
@@ -11271,8 +11226,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_PPC64_TOC16_DS:
     case elfcpp::R_PPC64_TOC16_LO_DS:
       // Subtract the TOC base address.
-      value -= (target->got_section()->output_section()->address()
-		+ object->toc_base_offset());
+      value -= target->toc_pointer();
       break;
 
     case elfcpp::R_POWERPC_SECTOFF:
@@ -11595,8 +11549,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	case elfcpp::R_PPC64_ENTRY:
 	  if (size == 64)
 	    {
-	      value = (target->got_section()->output_section()->address()
-		       + object->toc_base_offset());
+	      value = target->toc_pointer();
 	      if (value + 0x80008000 <= 0xffffffff
 		  && !parameters->options().output_is_position_independent())
 		{
