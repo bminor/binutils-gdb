@@ -82,6 +82,9 @@ private:
      non-memory error.  */
   gdb::optional<CORE_ADDR> m_err_memaddr;
 
+  static int dis_asm_fprintf (void *stream, const char *format, ...)
+    ATTRIBUTE_PRINTF(2,3);
+
   static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 				  unsigned int len,
 				  struct disassemble_info *info);

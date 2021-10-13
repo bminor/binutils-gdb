@@ -163,6 +163,20 @@ gdb_disassembler::dis_asm_print_address (bfd_vma addr,
   print_address (self->arch (), addr, self->stream ());
 }
 
+/* Format disassembler output to STREAM.  */
+
+int
+gdb_disassembler::dis_asm_fprintf (void *stream, const char *format, ...)
+{
+  va_list args;
+
+  va_start (args, format);
+  vfprintf_filtered ((struct ui_file *) stream, format, args);
+  va_end (args);
+  /* Something non -ve.  */
+  return 0;
+}
+
 static bool
 line_is_less_than (const deprecated_dis_line_entry &mle1,
 		   const deprecated_dis_line_entry &mle2)
@@ -711,21 +725,6 @@ do_assembly_only (struct gdbarch *gdbarch, struct ui_out *uiout,
   dump_insns (gdbarch, uiout, low, high, how_many, flags, NULL);
 }
 
-/* Initialize the disassemble info struct ready for the specified
-   stream.  */
-
-static int ATTRIBUTE_PRINTF (2, 3)
-fprintf_disasm (void *stream, const char *format, ...)
-{
-  va_list args;
-
-  va_start (args, format);
-  vfprintf_filtered ((struct ui_file *) stream, format, args);
-  va_end (args);
-  /* Something non -ve.  */
-  return 0;
-}
-
 /* Combine implicit and user disassembler options and return them
    in a newly-created string.  */
 
@@ -756,7 +755,7 @@ gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
 				    di_read_memory_ftype read_memory_func)
   : m_gdbarch (gdbarch)
 {
-  init_disassemble_info (&m_di, file, fprintf_disasm);
+  init_disassemble_info (&m_di, file, dis_asm_fprintf);
   m_di.flavour = bfd_target_unknown_flavour;
   m_di.memory_error_func = dis_asm_memory_error;
   m_di.print_address_func = dis_asm_print_address;
