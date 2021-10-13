@@ -1955,6 +1955,7 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
 
 	case DW_OP_bit_piece:
 	case DW_OP_LLVM_extend:
+	case DW_OP_LLVM_select_bit_piece:
 	  op_ptr = safe_skip_leb128 (op_ptr, expr_end);
 	  op_ptr = safe_skip_leb128 (op_ptr, expr_end);
 	  break;
@@ -3677,6 +3678,17 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    data = safe_read_uleb128 (data, end, &count);
 	    fprintf_filtered (stream, " piece size %s (bits) pieces count %s",
 	                      pulongest (ul), pulongest (count));
+	  }
+	  break;
+
+	case DW_OP_LLVM_select_bit_piece:
+	  {
+	    uint64_t count;
+
+	    data = safe_read_uleb128 (data, end, &ul);
+	    data = safe_read_uleb128 (data, end, &count);
+	    fprintf_filtered (stream, " piece size %s (bits) pieces count %s",
+			      pulongest (ul), pulongest (count));
 	  }
 	  break;
 	}

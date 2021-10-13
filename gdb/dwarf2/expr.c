@@ -461,6 +461,15 @@ public:
     ill_formed_expression ();
   }
 
+  /* Make a slice of a location description with an added bit offset
+     BIT_OFFSET and BIT_SIZE size in bits.
+
+     In the case of a composite location description, function returns
+     a minimum subset of that location description that starts on a
+     given offset of a given size.  */
+  virtual std::unique_ptr<dwarf_location> slice (LONGEST bit_offset,
+						 LONGEST bit_size) const;
+
   /* Read contents from the described location.
 
      The read operation is performed in the context of a FRAME.
@@ -615,6 +624,17 @@ protected:
 };
 
 using dwarf_location_up = std::unique_ptr<dwarf_location>;
+
+/* This is a default implementation used for
+   non-composite location descriptions.  */
+
+std::unique_ptr<dwarf_location>
+dwarf_location::slice (LONGEST bit_offset, LONGEST bit_size) const
+{
+  dwarf_location_up location_slice = this->clone_location ();
+  location_slice->add_bit_offset (bit_offset);
+  return location_slice;
+}
 
 void
 dwarf_location::read_from_gdb_value (frame_info *frame, struct value *value,
@@ -1573,6 +1593,9 @@ public:
     return make_unique<dwarf_composite> (*this);
   }
 
+  std::unique_ptr<dwarf_location> slice (LONGEST bit_offset,
+					 LONGEST bit_size) const override;
+
   void add_piece (std::unique_ptr<dwarf_location> location, ULONGEST bit_size)
   {
     gdb_assert (location != nullptr);
@@ -1658,6 +1681,64 @@ private:
   /* True if location description is completed.  */
   bool m_completed = false;
 };
+
+std::unique_ptr<dwarf_location>
+dwarf_composite::slice (LONGEST bit_offset, LONGEST bit_size) const
+{
+  /* Size 0 is never expected at this point.  */
+  gdb_assert (bit_size != 0);
+
+  unsigned int pieces_num = m_pieces.size ();
+  LONGEST total_bit_size = bit_size;
+  LONGEST total_bits_to_skip = m_offset * HOST_CHAR_BIT
+			       + m_bit_suboffset + bit_offset;
+  std::vector<piece> piece_slices;
+  unsigned int i;
+
+  for (i = 0; i < pieces_num; i++)
+    {
+      LONGEST piece_bit_size = m_pieces[i].size;
+
+      if (total_bits_to_skip < piece_bit_size)
+	break;
+
+      total_bits_to_skip -= piece_bit_size;
+    }
+
+  for (; i < pieces_num; i++)
+    {
+      if (total_bit_size == 0)
+	break;
+
+      gdb_assert (total_bit_size > 0);
+      LONGEST slice_bit_size = m_pieces[i].size - total_bits_to_skip;
+
+      if (total_bit_size < slice_bit_size)
+	slice_bit_size = total_bit_size;
+
+      std::unique_ptr<dwarf_location> slice
+	= m_pieces[i].location->slice (total_bits_to_skip, slice_bit_size);
+      piece_slices.emplace_back (std::move (slice), slice_bit_size);
+
+      total_bit_size -= slice_bit_size;
+      total_bits_to_skip = 0;
+    }
+
+  unsigned int slices_num = piece_slices.size ();
+
+  /* Only one piece found, so there is no reason to
+      make a composite location description.  */
+  if (slices_num == 1)
+    return std::move (piece_slices[0].location);
+
+  std::unique_ptr<dwarf_composite> composite_slice
+    = make_unique<dwarf_composite> (m_arch, m_per_cu);
+
+  for (piece &piece : piece_slices)
+    composite_slice->add_piece (std::move (piece.location), piece.size);
+
+  return composite_slice;
+}
 
 void
 dwarf_composite::read (frame_info *frame, gdb_byte *buf,
@@ -2534,6 +2615,20 @@ private:
   void create_extend_composite (ULONGEST piece_bit_size,
 				ULONGEST pieces_count);
 
+  /* It pops three stack entries.  The first must be an integral type
+     value that represents a bit mask.  The second must be a location
+     description that represents the one-location description.  The
+     third must be a location description that represents the
+     zero-location description.
+
+     A complete composite location description created with parts from
+     either of the two location description, based on the bit mask,
+     is pushed on top of the DWARF stack.  PIECE_BIT_SIZE represent
+     a size in bits of each piece and PIECES_COUNT represents a number
+     of pieces required.  */
+  void create_select_composite (ULONGEST piece_bit_size,
+				ULONGEST pieces_count);
+
   /* The engine for the expression evaluator.  Using the context in this
      object, evaluate the expression between OP_PTR and OP_END.  */
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
@@ -2914,6 +3009,60 @@ dwarf_expr_context::create_extend_composite (ULONGEST piece_bit_size,
     {
       dwarf_location_up piece = location->clone_location ();
       composite->add_piece (std::move (piece), piece_bit_size);
+    }
+
+  composite->set_completed (true);
+  push (std::move (composite));
+}
+
+void
+dwarf_expr_context::create_select_composite (ULONGEST piece_bit_size,
+					     ULONGEST pieces_count)
+{
+  gdb::byte_vector mask_buf;
+  gdbarch *arch = this->m_per_objfile->objfile->arch ();
+
+  if (stack_empty_p () || piece_bit_size == 0 || pieces_count == 0)
+    ill_formed_expression ();
+
+  dwarf_value_up mask = to_value (pop (), address_type ());
+
+  type *mask_type = mask->type ();
+  ULONGEST mask_size = TYPE_LENGTH (mask_type);
+  dwarf_require_integral (mask_type);
+
+  if (mask_size * HOST_CHAR_BIT < pieces_count)
+    ill_formed_expression ();
+
+  mask_buf.resize (mask_size);
+
+  copy_bitwise (mask_buf.data (), 0, mask->contents ().data (),
+		0, mask_size * HOST_CHAR_BIT,
+		type_byte_order (mask_type) == BFD_ENDIAN_BIG);
+
+  if (stack_empty_p ())
+    ill_formed_expression ();
+
+  dwarf_location_up one = to_location (pop (), arch);
+
+  if (stack_empty_p ())
+    ill_formed_expression ();
+
+  dwarf_location_up zero = to_location (pop (), arch);
+
+  std::unique_ptr<dwarf_composite> composite
+    = make_unique<dwarf_composite> (arch, this->m_per_cu);
+
+  for (ULONGEST i = 0; i < pieces_count; i++)
+    {
+      std::unique_ptr<dwarf_location> slice;
+
+      if ((mask_buf.data ()[i / HOST_CHAR_BIT] >> (i % HOST_CHAR_BIT)) & 1)
+	slice = one->slice (i * piece_bit_size, piece_bit_size);
+      else
+	slice = zero->slice (i * piece_bit_size, piece_bit_size);
+
+      composite->add_piece (std::move (slice), piece_bit_size);
     }
 
   composite->set_completed (true);
@@ -4158,6 +4307,17 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &piece_bit_size);
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &pieces_count);
 	    create_extend_composite (piece_bit_size, pieces_count);
+	    break;
+	  }
+
+	case DW_OP_LLVM_select_bit_piece:
+	  {
+	    uint64_t piece_bit_size, pieces_count;
+
+	    /* Record the piece.  */
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &piece_bit_size);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &pieces_count);
+	    create_select_composite (piece_bit_size, pieces_count);
 	    break;
 	  }
 
