@@ -1371,7 +1371,7 @@ static struct linux_record_tdep ppc64_linux_record_tdep;
    SYSCALL.  */
 
 static enum gdb_syscall
-ppc_canonicalize_syscall (int syscall)
+ppc_canonicalize_syscall (int syscall, int wordsize)
 {
   int result = -1;
 
@@ -1391,6 +1391,15 @@ ppc_canonicalize_syscall (int syscall)
     result = syscall += 259 - 240;
   else if (syscall >= 250 && syscall <= 251)	/* tgkill */
     result = syscall + 270 - 250;
+  else if (syscall == 286)
+    result = gdb_sys_openat;
+  else if (syscall == 291)
+    {
+      if (wordsize == 64)
+	result = gdb_sys_newfstatat;
+      else
+	result = gdb_sys_fstatat64;
+    }
   else if (syscall == 336)
     result = gdb_sys_recv;
   else if (syscall == 337)
@@ -1414,7 +1423,7 @@ ppc_linux_syscall_record (struct regcache *regcache)
   int ret;
 
   regcache_raw_read_unsigned (regcache, tdep->ppc_gp0_regnum, &scnum);
-  syscall_gdb = ppc_canonicalize_syscall (scnum);
+  syscall_gdb = ppc_canonicalize_syscall (scnum, tdep->wordsize);
 
   if (syscall_gdb < 0)
     {
