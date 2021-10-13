@@ -2525,6 +2525,15 @@ private:
       - Otherwise, the DWARF expression is ill-formed  */
   void add_piece (ULONGEST bit_size, ULONGEST bit_offset);
 
+  /* It pops one stack entry that must be a location description and is
+     treated as a piece location description.
+
+     A complete composite location storage is created with PIECES_COUNT
+     identical pieces and pushed on the DWARF stack.  Each pieces has a
+     bit size of PIECE_BIT_SIZE.  */
+  void create_extend_composite (ULONGEST piece_bit_size,
+				ULONGEST pieces_count);
+
   /* The engine for the expression evaluator.  Using the context in this
      object, evaluate the expression between OP_PTR and OP_END.  */
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
@@ -2885,6 +2894,30 @@ dwarf_expr_context::add_piece (ULONGEST bit_size, ULONGEST bit_offset)
     }
 
   composite->add_piece (std::move (piece), bit_size);
+}
+
+void
+dwarf_expr_context::create_extend_composite (ULONGEST piece_bit_size,
+					     ULONGEST pieces_count)
+{
+  gdbarch *arch = this->m_per_objfile->objfile->arch ();
+
+  if (stack_empty_p () || piece_bit_size == 0 || pieces_count == 0)
+    ill_formed_expression ();
+
+  dwarf_location_up location = to_location (pop (), arch);
+
+  std::unique_ptr<dwarf_composite> composite
+    = make_unique<dwarf_composite> (arch, this->m_per_cu);
+
+  for (ULONGEST i = 0; i < pieces_count; i++)
+    {
+      dwarf_location_up piece = location->clone_location ();
+      composite->add_piece (std::move (piece), piece_bit_size);
+    }
+
+  composite->set_completed (true);
+  push (std::move (composite));
 }
 
 void
@@ -4114,6 +4147,17 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	      ill_formed_expression ();
 
 	    composite->set_completed (true);
+	    break;
+	  }
+
+	case DW_OP_LLVM_extend:
+	  {
+	    uint64_t piece_bit_size, pieces_count;
+
+	    /* Record the piece.  */
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &piece_bit_size);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &pieces_count);
+	    create_extend_composite (piece_bit_size, pieces_count);
 	    break;
 	  }
 

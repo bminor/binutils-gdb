@@ -366,6 +366,7 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  ++stack_depth;
 	  break;
 
+	case DW_OP_LLVM_extend:
 	case DW_OP_LLVM_piece_end:
 	case DW_OP_LLVM_offset_constu:
 	case DW_OP_nop:
