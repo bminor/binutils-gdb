@@ -47181,14 +47181,7 @@ Show the current verbosity setting.
 @c man title gdb The GNU Debugger
 
 @c man begin SYNOPSIS gdb
-gdb [@option{-help}] [@option{-nh}] [@option{-nx}] [@option{-q}]
-[@option{-batch}] [@option{-cd=}@var{dir}] [@option{-f}]
-[@option{-b}@w{ }@var{bps}]
-    [@option{-tty=}@var{dev}] [@option{-s} @var{symfile}]
-[@option{-e}@w{ }@var{prog}] [@option{-se}@w{ }@var{prog}]
-[@option{-c}@w{ }@var{core}] [@option{-p}@w{ }@var{procID}]
-    [@option{-x}@w{ }@var{cmds}] [@option{-d}@w{ }@var{dir}]
-[@var{prog}|@var{prog} @var{procID}|@var{prog} @var{core}]
+gdb [OPTIONS] [@var{prog}|@var{prog} @var{procID}|@var{prog} @var{core}]
 @c man end
 
 @c man begin DESCRIPTION gdb
@@ -47252,8 +47245,8 @@ Here are some of the most frequently needed @value{GDBN} commands:
 
 @c pod2man highlights the right hand side of the @item lines.
 @table @env
-@item break [@var{file}:]@var{function}
-Set a breakpoint at @var{function} (in @var{file}).
+@item break [@var{file}:][@var{function}|@var{line}]
+Set a breakpoint at @var{function} or @var{line} (in @var{file}).
 
 @item run [@var{arglist}]
 Start your program (with @var{arglist}, if specified).
@@ -47301,72 +47294,91 @@ as the @code{gdb} entry in the @code{info} program.
 Any arguments other than options specify an executable
 file and core file (or process ID); that is, the first argument
 encountered with no
-associated option flag is equivalent to a @option{-se} option, and the second,
+associated option flag is equivalent to a @option{--se} option, and the second,
 if any, is equivalent to a @option{-c} option if it's the name of a file.
 Many options have
-both long and short forms; both are shown here.  The long forms are also
+both long and abbreviated forms; both are shown here.  The long forms are also
 recognized if you truncate them, so long as enough of the option is
-present to be unambiguous.  (If you prefer, you can flag option
-arguments with @option{+} rather than @option{-}, though we illustrate the
-more usual convention.)
+present to be unambiguous.
+
+The abbreviated forms are shown here with @samp{-} and long forms are shown
+with @samp{--} to reflect how they are shown in @option{--help}. However,
+@value{GDBN} recognizes all of the following conventions for most options:
+
+@table @code
+@item --option=@var{value}
+@item --option @var{value}
+@item -option=@var{value}
+@item -option @var{value}
+@item --o=@var{value}
+@item --o @var{value}
+@item -o=@var{value}
+@item -o @var{value}
+@end table
 
 All the options and command line arguments you give are processed
 in sequential order.  The order makes a difference when the @option{-x}
 option is used.
 
 @table @env
-@item -help
+@item --help
 @itemx -h
 List all options, with brief explanations.
 
-@item -symbols=@var{file}
+@item --symbols=@var{file}
 @itemx -s @var{file}
-Read symbol table from file @var{file}.
+Read symbol table from @var{file}.
 
-@item -write
+@item --write
 Enable writing into executable and core files.
 
-@item -exec=@var{file}
+@item --exec=@var{file}
 @itemx -e @var{file}
-Use file @var{file} as the executable file to execute when
+Use @var{file} as the executable file to execute when
 appropriate, and for examining pure data in conjunction with a core
 dump.
 
-@item -se=@var{file}
-Read symbol table from file @var{file} and use it as the executable
+@item --se=@var{file}
+Read symbol table from @var{file} and use it as the executable
 file.
 
-@item -core=@var{file}
+@item --core=@var{file}
 @itemx -c @var{file}
-Use file @var{file} as a core dump to examine.
+Use @var{file} as a core dump to examine.
 
-@item -command=@var{file}
+@item --command=@var{file}
 @itemx -x @var{file}
-Execute @value{GDBN} commands from file @var{file}.
+Execute @value{GDBN} commands from @var{file}.
 
+@item --eval-command=@var{command}
 @item -ex @var{command}
 Execute given @value{GDBN} @var{command}.
 
-@item -directory=@var{directory}
+@item --init-eval-command=@var{command}
+@item -iex
+Execute @value{GDBN} @var{command} before loading the inferior.
+
+@item --directory=@var{directory}
 @itemx -d @var{directory}
 Add @var{directory} to the path to search for source files.
 
-@item -nh
+@item --nh
 Do not execute commands from @file{~/.config/gdb/gdbinit},
 @file{~/.gdbinit}, @file{~/.config/gdb/gdbearlyinit}, or
 @file{~/.gdbearlyinit}
 
-@item -nx
+@item --nx
 @itemx -n
 Do not execute commands from any @file{.gdbinit} or
 @file{.gdbearlyinit} initialization files.
 
-@item -quiet
+@item --quiet
+@item --silent
 @itemx -q
 ``Quiet''.  Do not print the introductory and copyright messages.  These
 messages are also suppressed in batch mode.
 
-@item -batch
+@item --batch
 Run in batch mode.  Exit with status @code{0} after processing all the command
 files specified with @option{-x} (and @file{.gdbinit}, if not inhibited).
 Exit with nonzero status if an error occurs in executing the @value{GDBN}
@@ -47384,11 +47396,71 @@ Program exited normally.
 (which is ordinarily issued whenever a program running under @value{GDBN} control
 terminates) is not issued when running in batch mode.
 
-@item -cd=@var{directory}
+@item --batch-silent
+Run in batch mode, just like @option{--batch}, but totally silent.  All @value{GDBN}
+output is supressed (stderr is unaffected).  This is much quieter than
+@option{--silent} and would be useless for an interactive session.
+
+This is particularly useful when using targets that give @samp{Loading section}
+messages, for example.
+
+Note that targets that give their output via @value{GDBN}, as opposed to writing
+directly to @code{stdout}, will also be made silent.
+
+@item --args @var{prog} [@var{arglist}]
+Change interpretation of command line so that arguments following this
+option are passed as arguments to the inferior.  As an example, take
+the following command:
+
+@smallexample
+gdb ./a.out -q
+@end smallexample
+
+@noindent
+It would start @value{GDBN} with @option{-q}, not printing the introductory message.  On
+the other hand, using:
+
+@smallexample
+gdb --args ./a.out -q
+@end smallexample
+
+@noindent
+starts @value{GDBN} with the introductory message, and passes the option to the inferior.
+
+@item --pid=@var{pid}
+Attach @value{GDBN} to an already running program, with the PID @var{pid}.
+
+@item --tui
+Open the terminal user interface.
+
+@item --readnow
+Read all symbols from the given symfile on the first access.
+
+@item --readnever
+Do not read symbol files.
+
+@item --dbx
+Run in DBX compatibility mode.
+
+@item --return-child-result
+@value{GDBN}'s exit code will be the same as the child's exit code.
+
+@item --configuration
+Print details about GDB configuration and then exit.
+
+@item --version
+Print version information and then exit.
+
+@item --cd=@var{directory}
 Run @value{GDBN} using @var{directory} as its working directory,
 instead of the current directory.
 
-@item -fullname
+@item --data-directory=@var{directory}
+@item -D
+Run @value{GDBN} using @var{directory} as its data directory.  The data
+directory is where @value{GDBN} searches for its auxiliary files.
+
+@item --fullname
 @itemx -f
 Emacs sets this option when it runs @value{GDBN} as a subprocess.  It tells
 @value{GDBN} to output the full file name and line number in a standard,
@@ -47399,11 +47471,14 @@ and character position separated by colons, and a newline.  The
 Emacs-to-@value{GDBN} interface program uses the two @samp{\032}
 characters as a signal to display the source code for the frame.
 
-@item -b @var{bps}
+@item -b @var{baudrate}
 Set the line speed (baud rate or bits per second) of any serial
 interface used by @value{GDBN} for remote debugging.
 
-@item -tty=@var{device}
+@item -l @var{timeout}
+Set timeout, in seconds, for remote debugging.
+
+@item --tty=@var{device}
 Run using @var{device} for your program's standard input and output.
 @end table
 @c man end
