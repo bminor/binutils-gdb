@@ -25,6 +25,9 @@
 # Because of (1), the test has to be written in assembly with explicit CFI
 # directives.
 
+# Check if starti command is supported.
+require use_gdb_stub 0
+
 load_lib dwarf.exp
 
 if {![dwarf2_support]} {

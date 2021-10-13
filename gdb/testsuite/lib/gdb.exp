@@ -8251,6 +8251,9 @@ proc require { fn arg1 {arg2 ""} } {
 	"ensure_gdb_index $binfile -dwarf-5 != -1" {
 	    set msg "Couldn't ensure index in binfile"
 	}
+	"use_gdb_stub == 0" {
+	    set msg "Remote stub used"
+	}
 	default { set msg "$fn != $val" }
     }
 
