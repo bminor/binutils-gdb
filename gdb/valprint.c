@@ -1050,7 +1050,7 @@ do_val_print (struct value *value, struct ui_file *stream, int recurse,
   catch (const gdb_exception_error &except)
     {
       fprintf_styled (stream, metadata_style.style (),
-		      _("<error reading variable>"));
+		      _("<error reading variable: %s>"), except.what ());
     }
 }
 
