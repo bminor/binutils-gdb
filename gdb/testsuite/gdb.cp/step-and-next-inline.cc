@@ -61,6 +61,6 @@ tree xx;
 int
 main()
 {
-  get_alias_set (&xx);
+  get_alias_set (&xx);  /* Beginning of main */
   return 0;
 } // main
