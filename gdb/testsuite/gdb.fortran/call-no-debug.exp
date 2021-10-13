@@ -102,5 +102,7 @@ if { $symbol_name == "" } {
     gdb_test "ptype ${symbol_name}" "type = <unknown return type> \\(\\)"
     gdb_test "print ${symbol_name} (&'abcdefg', 3)" \
 	"'${symbol_name}' has unknown return type; cast the call to its declared return type"
-    gdb_test "call (integer) ${symbol_name} (&'abcdefg', 3)" " abc\r\n\\\$\\d+ = 0"
+    gdb_test_stdio "call (integer) ${symbol_name} (&'abcdefg', 3)" \
+	" abc" \
+	"\\\$\\d+ = 0"
 }
