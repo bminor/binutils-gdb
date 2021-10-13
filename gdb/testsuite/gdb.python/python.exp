@@ -542,12 +542,19 @@ gdb_test "python gdb.execute(\"show commands\")" "$decimal  print \\\$cvar3.*"
 # Test that the from_tty argument to gdb.execute is effective. If
 # False, the user is not prompted for decisions such as restarting the
 # program, and "yes" is assumed. If True, the user is prompted.
+# Case 1, from_tty=False.
 gdb_test "python gdb.execute('starti', from_tty=False)" \
     "Program stopped.*" \
     "starti via gdb.execute, not from tty"
-gdb_test_multiple "python gdb.execute('starti', from_tty=True)" \
-    "starti via gdb.execute, from tty" {
-    -re {The program being debugged has been started already\.\r\nStart it from the beginning\? \(y or n\) $} {
-	gdb_test "y" "Starting program:.*" "starti via interactive input"
+
+# Case 2, from_tty=True.
+set test "starti via gdb.execute, from tty"
+set question \
+    [multi_line \
+	 {The program being debugged has been started already\.} \
+	 {Start it from the beginning\? \(y or n\) $}]
+gdb_test_multiple "python gdb.execute('starti', from_tty=True)" $test {
+    -re $question {
+	gdb_test "y" "Starting program:.*" $gdb_test_name
     }
 }
