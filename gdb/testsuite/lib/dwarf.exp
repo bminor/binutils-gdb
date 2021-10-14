@@ -2369,6 +2369,105 @@ namespace eval Dwarf {
 	aranges_end:
     }
 
+    # Emit a .debug_loc entry.
+
+    proc _loc_entry { start end location_description } {
+	# Determine how to emit addresses.
+	variable _addr_size
+	if { $_addr_size == 8 } {
+	    set addr_op .8byte
+	} elseif { $_addr_size == 4 } {
+	    set addr_op .4byte
+	}
+
+	# Emit start and end address.
+	_op $addr_op $start "Start address"
+	_op $addr_op $end "End address"
+
+	declare_labels location_description_start
+	declare_labels location_description_end
+
+	# Emit length of location description.
+	set len "$location_description_end - $location_description_start"
+	_op .2byte $len "Location description length"
+
+	# Tag start of location description.
+	define_label $location_description_start
+
+	# Emit location description.
+	variable _cu_version
+	variable _cu_offset_size
+	_location $location_description $_cu_version $_addr_size \
+	    $_cu_offset_size
+
+	# Tag end of location description.
+	define_label $location_description_end
+    }
+
+    # Emit a DWARF .debug_loc contribution.
+    #
+    # OPTIONS is a list with an even number of elements containing
+    # option-name and option-value pairs.
+    # Current options are:
+    # cu_is_64 0|1 - boolean indicating if references from location
+    #                descriptions refer to a 64-bit DWARF CU.
+    #                default = 0 (32-bit)
+    # cu_version n - section version of DWARF CU referenced from location
+    #                descriptions.
+    #                default = 4
+    #
+    # BODY is Tcl code that emits the parts which make up the body of
+    # the debug_loc contribution.  It is evaluated in the caller's context.
+    # The following command is available for the BODY section:
+    #
+    #   entry <start> <end> <location description>
+    #     -- emit a .debug_loc entry
+
+    proc loc { options body } {
+	# Handle options.
+	parse_options {
+	    { cu_version 4 }
+	    { cu_is_64 0 }
+	}
+
+	# Export for use in BODY.
+	variable _addr_size
+	if { [is_64_target] } {
+	    set _addr_size 8
+	} else {
+	    set _addr_size 4
+	}
+	variable _cu_version
+	set _cu_version $cu_version
+	variable _cu_offset_size
+	if { $cu_is_64 == 1 } {
+	    set _cu_offset_size 8
+	} else {
+	    set _cu_offset_size 4
+	}
+
+	# Switch to .debug_loc section.
+	_section .debug_loc
+
+	# Introduce command 'entry'.
+	with_override Dwarf::entry Dwarf::_loc_entry {
+	    # Emit entries.
+	    uplevel $body
+	}
+
+	# Determine how to emit addresses.
+	if { $_addr_size == 8 } {
+	    set addr_op .8byte
+	} elseif { $_addr_size == 4 } {
+	    set addr_op .4byte
+	}
+
+	# Emit <End of list>.
+	set comment "<End of list>"
+	_op $addr_op 0 "$comment (Part 1/2)"
+	_op $addr_op 0 "$comment (Part 2/2)"
+    }
+
     proc _empty_array {name} {
 	upvar $name the_array
 
