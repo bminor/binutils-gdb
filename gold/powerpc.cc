@@ -8013,8 +8013,7 @@ Target_powerpc<size, big_endian>::Scan::local(
 	      break;
 
 	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-	    Address got_off = (target->toc_pointer()
-			       - got->output_section()->address());
+	    Address got_off = got->g_o_t();
 	    rela_dyn->add_output_section_relative(got->output_section(),
 						  elfcpp::R_POWERPC_RELATIVE,
 						  output_section,
@@ -8740,8 +8739,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 	      break;
 
 	    Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-	    Address got_off = (target->toc_pointer()
-			       - got->output_section()->address());
+	    Address got_off = got->g_o_t();
 	    rela_dyn->add_output_section_relative(got->output_section(),
 						  elfcpp::R_POWERPC_RELATIVE,
 						  output_section,
