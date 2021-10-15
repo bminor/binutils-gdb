@@ -107,6 +107,7 @@ static void ppc_es (int);
 static void ppc_csect (int);
 static void ppc_dwsect (int);
 static void ppc_change_csect (symbolS *, offsetT);
+static void ppc_file (int);
 static void ppc_function (int);
 static void ppc_extern (int);
 static void ppc_lglobl (int);
@@ -227,6 +228,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "ei",	ppc_biei,	1 },
   { "es",	ppc_es,		0 },
   { "extern",	ppc_extern,	0 },
+  { "file",	ppc_file,	0 },
   { "function",	ppc_function,	0 },
   { "lglobl",	ppc_lglobl,	0 },
   { "ref",	ppc_ref,	0 },
@@ -5071,6 +5073,67 @@ ppc_stabx (int ignore ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
+}
+
+/* The .file pseudo-op. On XCOFF, .file can have several parameters
+   which are being added to the symbol table to provide additional
+   information.  */
+
+static void
+ppc_file (int ignore ATTRIBUTE_UNUSED)
+{
+  char *sfname, *s1 = NULL, *s2 = NULL, *s3 = NULL;
+  int length, auxnb = 1;
+
+  /* Some assemblers tolerate immediately following '"'.  */
+  if ((sfname = demand_copy_string (&length)) != 0)
+    {
+      coff_symbol_type *coffsym;
+      if (*input_line_pointer == ',')
+	{
+	  ++input_line_pointer;
+	  s1 = demand_copy_string (&length);
+	  auxnb++;
+
+	  if (*input_line_pointer == ',')
+	    {
+	      ++input_line_pointer;
+	      s2 = demand_copy_string (&length);
+	      auxnb++;
+
+	      if (*input_line_pointer == ',')
+		{
+		  ++input_line_pointer;
+		  s3 = demand_copy_string (&length);
+		  auxnb++;
+		}
+	    }
+	}
+
+      /* Use coff dot_file creation and adjust auxiliary entries.  */
+      c_dot_file_symbol (sfname, 0);
+      S_SET_NUMBER_AUXILIARY (symbol_rootP, auxnb);
+      coffsym = coffsymbol (symbol_get_bfdsym (symbol_rootP));
+      coffsym->native[1].u.auxent.x_file.x_ftype = XFT_FN;
+
+      if (s1)
+	{
+	  coffsym->native[2].u.auxent.x_file.x_ftype = XFT_CT;
+	  coffsym->native[2].extrap = s1;
+	}
+      if (s2)
+	{
+	  coffsym->native[3].u.auxent.x_file.x_ftype = XFT_CV;
+	  coffsym->native[3].extrap = s2;
+	}
+      if (s3)
+	{
+	  coffsym->native[4].u.auxent.x_file.x_ftype = XFT_CD;
+	  coffsym->native[4].extrap = s3;
+	}
+
+      demand_empty_rest_of_line ();
+    }
 }
 
 /* The .function pseudo-op.  This takes several arguments.  The first

@@ -326,6 +326,10 @@ CODE_FRAGMENT
 .
 . {* Selector for the union above.  *}
 . bool is_sym;
+.
+. {* An extra pointer which can used by format based on COFF (like XCOFF)
+.    to provide extra information to their backend.  *}
+. void *extrap;
 .} combined_entry_type;
 .
 .
@@ -5663,11 +5667,11 @@ coff_bigobj_swap_aux_in (bfd *abfd,
       if (numaux > 1)
 	{
 	  if (indx == 0)
-	    memcpy (in->x_file.x_fname, ext->File.Name,
+	    memcpy (in->x_file.x_n.x_fname, ext->File.Name,
 		    numaux * sizeof (AUXENT_BIGOBJ));
 	}
       else
-	memcpy (in->x_file.x_fname, ext->File.Name, sizeof (ext->File.Name));
+	memcpy (in->x_file.x_n.x_fname, ext->File.Name, sizeof (ext->File.Name));
       break;
 
     case C_STAT:
@@ -5712,7 +5716,7 @@ coff_bigobj_swap_aux_out (bfd * abfd,
   switch (in_class)
     {
     case C_FILE:
-      memcpy (ext->File.Name, in->x_file.x_fname, sizeof (ext->File.Name));
+      memcpy (ext->File.Name, in->x_file.x_n.x_fname, sizeof (ext->File.Name));
 
       return AUXESZ;
 

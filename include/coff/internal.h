@@ -578,18 +578,21 @@ union internal_auxent
     unsigned short x_tvndx;	/* tv index */
   }      x_sym;
 
-  union
+  struct
   {
-    /* PR 17754: We use to FILNMLEN for the size of the x_fname
-       array, but that causes problems as PE targets use a larger
-       value.  We cannot use their definition of E_FILNMLEN as this
-       header can be used without including any PE headers.  */
-    char x_fname[20];
-    struct
-    {
-      long x_zeroes;
-      long x_offset;
-    }      x_n;
+    union {
+      /* PR 17754: We use to FILNMLEN for the size of the x_fname
+	 array, but that causes problems as PE targets use a larger
+	 value.  We cannot use their definition of E_FILNMLEN as this
+	 header can be used without including any PE headers.  */
+      char x_fname[20];
+      struct
+      {
+	long x_zeroes;
+	long x_offset;
+      }      x_n;
+    } x_n;
+    unsigned char x_ftype;
   }     x_file;
 
   struct

@@ -4550,13 +4550,13 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 		  /* This is the file name (or some comment put in by
 		     the compiler).  If it is long, we must put it in
 		     the string table.  */
-		  if (aux.x_file.x_n.x_zeroes == 0
-		      && aux.x_file.x_n.x_offset != 0)
+		  if (aux.x_file.x_n.x_n.x_zeroes == 0
+		      && aux.x_file.x_n.x_n.x_offset != 0)
 		    {
 		      const char *filename;
 		      bfd_size_type indx;
 
-		      BFD_ASSERT (aux.x_file.x_n.x_offset
+		      BFD_ASSERT (aux.x_file.x_n.x_n.x_offset
 				  >= STRING_SIZE_SIZE);
 		      if (strings == NULL)
 			{
@@ -4564,15 +4564,15 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			  if (strings == NULL)
 			    return false;
 			}
-		      if ((bfd_size_type) aux.x_file.x_n.x_offset >= obj_coff_strings_len (input_bfd))
+		      if ((bfd_size_type) aux.x_file.x_n.x_n.x_offset >= obj_coff_strings_len (input_bfd))
 			filename = _("<corrupt>");
 		      else
-			filename = strings + aux.x_file.x_n.x_offset;
+			filename = strings + aux.x_file.x_n.x_n.x_offset;
 		      indx = _bfd_stringtab_add (flinfo->strtab, filename,
 						 hash, copy);
 		      if (indx == (bfd_size_type) -1)
 			return false;
-		      aux.x_file.x_n.x_offset = STRING_SIZE_SIZE + indx;
+		      aux.x_file.x_n.x_n.x_offset = STRING_SIZE_SIZE + indx;
 		    }
 		}
 	      else if (CSECT_SYM_P (isymp->n_sclass)

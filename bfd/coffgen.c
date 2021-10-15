@@ -848,6 +848,34 @@ coff_mangle_symbols (bfd *bfd_ptr)
 }
 
 static void
+coff_write_auxent_fname (bfd *abfd,
+			 char *str,
+			 union internal_auxent *auxent,
+			 bfd_size_type *string_size_p)
+{
+  unsigned int str_length = strlen (str);
+  unsigned int filnmlen = bfd_coff_filnmlen (abfd);
+
+  if (bfd_coff_long_filenames (abfd))
+    {
+      if (str_length <= filnmlen)
+	strncpy (auxent->x_file.x_n.x_fname, str, filnmlen);
+      else
+	{
+	  auxent->x_file.x_n.x_n.x_offset = *string_size_p + STRING_SIZE_SIZE;
+	  auxent->x_file.x_n.x_n.x_zeroes = 0;
+	  *string_size_p += str_length + 1;
+	}
+    }
+  else
+    {
+      strncpy (auxent->x_file.x_n.x_fname, str, filnmlen);
+      if (str_length > filnmlen)
+	str[filnmlen] = '\0';
+    }
+}
+
+static void
 coff_fix_symbol_name (bfd *abfd,
 		      asymbol *symbol,
 		      combined_entry_type *native,
@@ -856,7 +884,6 @@ coff_fix_symbol_name (bfd *abfd,
 		      bfd_size_type *debug_string_size_p)
 {
   unsigned int name_length;
-  union internal_auxent *auxent;
   char *name = (char *) (symbol->name);
 
   if (name == NULL)
@@ -871,8 +898,6 @@ coff_fix_symbol_name (bfd *abfd,
   if (native->u.syment.n_sclass == C_FILE
       && native->u.syment.n_numaux > 0)
     {
-      unsigned int filnmlen;
-
       if (bfd_coff_force_symnames_in_strings (abfd))
 	{
 	  native->u.syment._n._n_n._n_offset =
@@ -884,27 +909,8 @@ coff_fix_symbol_name (bfd *abfd,
 	strncpy (native->u.syment._n._n_name, ".file", SYMNMLEN);
 
       BFD_ASSERT (! (native + 1)->is_sym);
-      auxent = &(native + 1)->u.auxent;
-
-      filnmlen = bfd_coff_filnmlen (abfd);
-
-      if (bfd_coff_long_filenames (abfd))
-	{
-	  if (name_length <= filnmlen)
-	    strncpy (auxent->x_file.x_fname, name, filnmlen);
-	  else
-	    {
-	      auxent->x_file.x_n.x_offset = *string_size_p + STRING_SIZE_SIZE;
-	      auxent->x_file.x_n.x_zeroes = 0;
-	      *string_size_p += name_length + 1;
-	    }
-	}
-      else
-	{
-	  strncpy (auxent->x_file.x_fname, name, filnmlen);
-	  if (name_length > filnmlen)
-	    name[filnmlen] = '\0';
-	}
+      coff_write_auxent_fname (abfd, name, &(native + 1)->u.auxent,
+			       string_size_p);
     }
   else
     {
@@ -1029,6 +1035,11 @@ coff_write_symbol (bfd *abfd,
       for (j = 0; j < native->u.syment.n_numaux; j++)
 	{
 	  BFD_ASSERT (! (native + j + 1)->is_sym);
+
+	  if (native->u.syment.n_sclass == C_FILE && j > 0)
+	    coff_write_auxent_fname (abfd, (char *) (native + j + 1)->extrap,
+				     &(native + j + 1)->u.auxent, string_size_p);
+
 	  bfd_coff_swap_aux_out (abfd,
 				 &((native + j + 1)->u.auxent),
 				 type, n_sclass, (int) j,
@@ -1358,6 +1369,7 @@ coff_write_symbols (bfd *abfd)
 	  size_t name_length = strlen (q->name);
 	  coff_symbol_type *c_symbol = coff_symbol_from (q);
 	  size_t maxlen;
+	  bool is_c_file = false;
 
 	  /* Figure out whether the symbol name should go in the string
 	     table.  Symbol names that are short enough are stored
@@ -1384,6 +1396,7 @@ coff_write_symbols (bfd *abfd)
 	  else if (c_symbol->native->u.syment.n_sclass == C_FILE
 		   && c_symbol->native->u.syment.n_numaux > 0)
 	    {
+	      is_c_file=true;
 	      if (bfd_coff_force_symnames_in_strings (abfd))
 		{
 		  if (bfd_bwrite (".file", (bfd_size_type) 6, abfd) != 6)
@@ -1399,6 +1412,30 @@ coff_write_symbols (bfd *abfd)
 	      if (bfd_bwrite ((void *) (q->name), (bfd_size_type) name_length + 1,
 			     abfd) != name_length + 1)
 		return false;
+	    }
+
+	  /* Add strings for C_FILE aux entries. */
+	  if (is_c_file
+	      && c_symbol->native->u.syment.n_numaux > 1)
+	    {
+	      for (int j = 1; j < c_symbol->native->u.syment.n_numaux; j++)
+		{
+		  char *str;
+		  size_t str_length;
+
+		  if (c_symbol->native[j + 1].u.auxent.x_file.x_n.x_fname[0] != 0)
+		    continue;
+
+		  str = (char *) c_symbol->native[j + 1].extrap;
+		  str_length = strlen (str);
+		  if (str_length > maxlen)
+		    {
+		      if (bfd_bwrite ((void *) (str), (bfd_size_type) str_length + 1,
+				      abfd) != str_length + 1)
+			return false;
+		    }
+
+		}
 	    }
 	}
     }
@@ -1872,7 +1909,7 @@ coff_get_normalized_symtab (bfd *abfd)
 	     the text ".file" is redundant.  */
 	  BFD_ASSERT (! aux->is_sym);
 
-	  if (aux->u.auxent.x_file.x_n.x_zeroes == 0)
+	  if (aux->u.auxent.x_file.x_n.x_n.x_zeroes == 0)
 	    {
 	      /* The filename is a long one, point into the string table.  */
 	      if (string_table == NULL)
@@ -1882,12 +1919,12 @@ coff_get_normalized_symtab (bfd *abfd)
 		    return NULL;
 		}
 
-	      if ((bfd_size_type)(aux->u.auxent.x_file.x_n.x_offset)
+	      if ((bfd_size_type)(aux->u.auxent.x_file.x_n.x_n.x_offset)
 		  >= obj_coff_strings_len (abfd))
 		internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) _("<corrupt>");
 	      else
 		internal_ptr->u.syment._n._n_n._n_offset =
-		  (bfd_hostptr_t) (string_table + (aux->u.auxent.x_file.x_n.x_offset));
+		  (bfd_hostptr_t) (string_table + (aux->u.auxent.x_file.x_n.x_n.x_offset));
 	    }
 	  else
 	    {
@@ -1899,15 +1936,48 @@ coff_get_normalized_symtab (bfd *abfd)
 		internal_ptr->u.syment._n._n_n._n_offset =
 		  (bfd_hostptr_t)
 		  copy_name (abfd,
-			     aux->u.auxent.x_file.x_fname,
+			     aux->u.auxent.x_file.x_n.x_fname,
 			     internal_ptr->u.syment.n_numaux * symesz);
 	      else
 		internal_ptr->u.syment._n._n_n._n_offset =
 		  ((bfd_hostptr_t)
 		   copy_name (abfd,
-			      aux->u.auxent.x_file.x_fname,
+			      aux->u.auxent.x_file.x_n.x_fname,
 			      (size_t) bfd_coff_filnmlen (abfd)));
 	    }
+
+	  /* Normalize other strings available in C_FILE aux entries.  */
+	  if (!coff_data (abfd)->pe)
+	    for (int numaux = 1; numaux < internal_ptr->u.syment.n_numaux; numaux++)
+	      {
+		aux = internal_ptr + numaux + 1;
+		BFD_ASSERT (! aux->is_sym);
+
+		if (aux->u.auxent.x_file.x_n.x_n.x_zeroes == 0)
+		  {
+		    /* The string information is a long one, point into the string table.  */
+		    if (string_table == NULL)
+		      {
+			string_table = _bfd_coff_read_string_table (abfd);
+			if (string_table == NULL)
+			  return NULL;
+		      }
+
+		    if ((bfd_size_type)(aux->u.auxent.x_file.x_n.x_n.x_offset)
+			>= obj_coff_strings_len (abfd))
+		      aux->u.auxent.x_file.x_n.x_n.x_offset = (bfd_hostptr_t) _("<corrupt>");
+		    else
+		      aux->u.auxent.x_file.x_n.x_n.x_offset =
+			(bfd_hostptr_t) (string_table + (aux->u.auxent.x_file.x_n.x_n.x_offset));
+		  }
+		else
+		  aux->u.auxent.x_file.x_n.x_n.x_offset =
+		    ((bfd_hostptr_t)
+		     copy_name (abfd,
+				aux->u.auxent.x_file.x_n.x_fname,
+				(size_t) bfd_coff_filnmlen (abfd)));
+	      }
+
 	}
       else
 	{
@@ -2135,6 +2205,12 @@ coff_print_symbol (bfd *abfd,
 		{
 		case C_FILE:
 		  fprintf (file, "File ");
+		  /* Add additional information if this isn't the filename
+		     auxiliary entry.  */
+		  if (aux)
+		    fprintf (file, "ftype %d fname \"%s\"",
+			     auxp->u.auxent.x_file.x_ftype,
+			     (char *) auxp->u.auxent.x_file.x_n.x_n.x_offset);
 		  break;
 
 		case C_DWARF:

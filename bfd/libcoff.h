@@ -658,6 +658,10 @@ typedef struct coff_ptr_struct
 
  /* Selector for the union above.  */
  bool is_sym;
+
+ /* An extra pointer which can used by format based on COFF (like XCOFF)
+    to provide extra information to their backend.  */
+ void *extrap;
 } combined_entry_type;
 
 

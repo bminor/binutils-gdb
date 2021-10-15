@@ -190,6 +190,12 @@
 #define XMC_UL     21          /* Read-write uninitialized TLS data */
 #define XMC_TE     22          /* Same as XMC_TC but mapped after it */
 
+/* x_ftype values:  */
+#define XFT_FN 0    /* Specifies the source-file name */
+#define XFT_CT 1    /* Specifies the compiler time stamp */
+#define XFT_CV 2    /* Specifies the compiler version number */
+#define XFT_CD 128  /*Specifies compiler-defined information */
+
 /* The ldhdr structure.  This appears at the start of the .loader
    section.  */
 

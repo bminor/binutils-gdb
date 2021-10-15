@@ -176,6 +176,7 @@ union external_auxent {
       } x_n;
     } x_n;
     char x_ftype[1];
+    char x_resv[3];
   } x_file;
 
   struct {

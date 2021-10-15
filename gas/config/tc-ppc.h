@@ -146,7 +146,7 @@ struct ppc_tc_sy
 #define TC_SYMFIELD_TYPE struct ppc_tc_sy
 
 /* We need an additional auxent for function symbols.  */
-#define OBJ_COFF_MAX_AUXENTRIES 2
+#define OBJ_COFF_MAX_AUXENTRIES 4
 
 /* Square and curly brackets are permitted in symbol names.  */
 #define LEX_BR 3
