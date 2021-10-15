@@ -29,6 +29,11 @@
 #include "gdbsupport/byte-vector.h"
 #include "gdbarch.h"
 
+/* Forward declarations.  */
+static struct value *value_subscripted_rvalue (struct value *array,
+					       LONGEST index,
+					       LONGEST lowerbound);
+
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).  */
 
@@ -190,8 +195,9 @@ value_subscript (struct value *array, LONGEST index)
    (eg, a vector register).  This routine used to promote floats
    to doubles, but no longer does.  */
 
-struct value *
-value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound)
+static struct value *
+value_subscripted_rvalue (struct value *array, LONGEST index,
+			  LONGEST lowerbound)
 {
   struct type *array_type = check_typedef (value_type (array));
   struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
