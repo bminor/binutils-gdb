@@ -162,17 +162,17 @@ value_subscript (struct value *array, LONGEST index)
       if (VALUE_LVAL (array) != lval_memory)
 	return value_subscripted_rvalue (array, index, *lowerbound);
 
+      gdb::optional<LONGEST> upperbound
+	= get_discrete_high_bound (range_type);
+
+      if (!upperbound.has_value ())
+	upperbound = -1;
+
+      if (index >= *lowerbound && index <= *upperbound)
+	return value_subscripted_rvalue (array, index, *lowerbound);
+
       if (!c_style)
 	{
-	  gdb::optional<LONGEST> upperbound
-	    = get_discrete_high_bound (range_type);
-
-	  if (!upperbound.has_value ())
-	    upperbound = 0;
-
-	  if (index >= *lowerbound && index <= *upperbound)
-	    return value_subscripted_rvalue (array, index, *lowerbound);
-
 	  /* Emit warning unless we have an array of unknown size.
 	     An array of unknown size has lowerbound 0 and upperbound -1.  */
 	  if (*upperbound > -1)
@@ -200,7 +200,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index,
 			  LONGEST lowerbound)
 {
   struct type *array_type = check_typedef (value_type (array));
-  struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
+  struct type *elt_type = TYPE_TARGET_TYPE (array_type);
   LONGEST elt_size = type_length_units (elt_type);
 
   /* Fetch the bit stride and convert it to a byte stride, assuming 8 bits
