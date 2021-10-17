@@ -7730,7 +7730,6 @@ display_debug_ranges (struct dwarf_section *section,
 	      return 0;
 	    }
 	}
-      finish = start + initial_length;
 
       /* Get and check the version number.  */
       SAFE_BYTE_GET_AND_INC (version, start, 2, finish);
