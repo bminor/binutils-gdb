@@ -1047,6 +1047,7 @@ struct type
   /* Get the field at index IDX.  */
   struct field &field (int idx) const
   {
+    gdb_assert (idx >= 0 && idx < num_fields ());
     return this->fields ()[idx];
   }
 

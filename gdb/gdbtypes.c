@@ -5842,11 +5842,11 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
   gdb_assert (nr_bits >= 1 && (start_bitpos + nr_bits) <= type_bitsize);
   gdb_assert (name != NULL);
 
+  type->set_num_fields (type->num_fields () + 1);
   type->field (field_nr).set_name (xstrdup (name));
   type->field (field_nr).set_type (field_type);
   type->field (field_nr).set_loc_bitpos (start_bitpos);
   TYPE_FIELD_BITSIZE (type, field_nr) = nr_bits;
-  type->set_num_fields (type->num_fields () + 1);
 }
 
 /* Special version of append_flags_type_field to add a flag field.

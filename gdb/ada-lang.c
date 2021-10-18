@@ -7539,7 +7539,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     that follow this one.  */
 	  if (ada_is_aligner_type (field_type))
 	    {
-	      long field_offset = TYPE_FIELD_BITPOS (field_type, f);
+	      long field_offset = TYPE_FIELD_BITPOS (type, f);
 
 	      field_valaddr = cond_offset_host (field_valaddr, field_offset);
 	      field_address = cond_offset_target (field_address, field_offset);
