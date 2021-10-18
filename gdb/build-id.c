@@ -81,9 +81,15 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
     }
 
   /* lrealpath() is expensive even for the usually non-existent files.  */
-  gdb::unique_xmalloc_ptr<char> filename;
-  if (access (link.c_str (), F_OK) == 0)
-    filename.reset (lrealpath (link.c_str ()));
+  gdb::unique_xmalloc_ptr<char> filename_holder;
+  const char *filename = nullptr;
+  if (startswith (link, TARGET_SYSROOT_PREFIX))
+    filename = link.c_str ();
+  else if (access (link.c_str (), F_OK) == 0)
+    {
+      filename_holder.reset (lrealpath (link.c_str ()));
+      filename = filename_holder.get ();
+    }
 
   if (filename == NULL)
     {
@@ -94,7 +100,7 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
     }
 
   /* We expect to be silent on the non-existing files.  */
-  gdb_bfd_ref_ptr debug_bfd = gdb_bfd_open (filename.get (), gnutarget);
+  gdb_bfd_ref_ptr debug_bfd = gdb_bfd_open (filename, gnutarget);
 
   if (debug_bfd == NULL)
     {
@@ -162,12 +168,9 @@ build_id_to_bfd_suffix (size_t build_id_len, const bfd_byte *build_id,
 
       /* Try to look under the sysroot as well.  If the sysroot is
 	 "/the/sysroot", it will give
-	 "/the/sysroot/usr/lib/debug/.build-id/ab/cdef.debug".
+	 "/the/sysroot/usr/lib/debug/.build-id/ab/cdef.debug".  */
 
-	 Don't do it if the sysroot is the target system ("target:").  It
-	 could work in theory, but the lrealpath in build_id_to_debug_bfd_1
-	 only works with local paths.  */
-      if (gdb_sysroot != TARGET_SYSROOT_PREFIX)
+      if (!gdb_sysroot.empty ())
 	{
 	  link = gdb_sysroot + link;
 	  debug_bfd = build_id_to_debug_bfd_1 (link, build_id_len, build_id);
