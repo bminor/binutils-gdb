@@ -537,10 +537,6 @@ struct dwarf2_per_objfile
   void set_type_for_signatured_type (signatured_type *sig_type,
 				     struct type *type);
 
-  /* Find an integer type SIZE_IN_BYTES bytes in size and return it.
-     UNSIGNED_P controls if the integer is unsigned or not.  */
-  struct type *int_type (int size_in_bytes, bool unsigned_p) const;
-
   /* Get the dwarf2_cu matching PER_CU for this objfile.  */
   dwarf2_cu *get_cu (dwarf2_per_cu_data *per_cu);
 

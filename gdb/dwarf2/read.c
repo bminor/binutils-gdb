@@ -17429,7 +17429,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
 	  /* Pass 0 as the default as we know this attribute is constant
 	     and the default value will not be returned.  */
 	  LONGEST sz = len->constant_value (0);
-	  prop_type = cu->per_objfile->int_type (sz, true);
+	  prop_type = objfile_int_type (objfile, sz, true);
 	}
       else
 	{
@@ -18479,30 +18479,6 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 }
 
 /* See read.h.  */
-
-struct type *
-dwarf2_per_objfile::int_type (int size_in_bytes, bool unsigned_p) const
-{
-  struct type *int_type;
-
-  /* Helper macro to examine the various builtin types.  */
-#define TRY_TYPE(F)							\
-  int_type = (unsigned_p						\
-	      ? objfile_type (objfile)->builtin_unsigned_ ## F		\
-	      : objfile_type (objfile)->builtin_ ## F);			\
-  if (int_type != NULL && TYPE_LENGTH (int_type) == size_in_bytes)	\
-    return int_type
-
-  TRY_TYPE (char);
-  TRY_TYPE (short);
-  TRY_TYPE (int);
-  TRY_TYPE (long);
-  TRY_TYPE (long_long);
-
-#undef TRY_TYPE
-
-  gdb_assert_not_reached ("unable to find suitable integer type");
-}
 
 /* Read the DW_AT_type attribute for a sub-range.  If this attribute is not
    present (which is valid) then compute the default type based on the

@@ -46,7 +46,7 @@ struct type *
 dwarf2_cu::addr_sized_int_type (bool unsigned_p) const
 {
   int addr_size = this->per_cu->addr_size ();
-  return this->per_objfile->int_type (addr_size, unsigned_p);
+  return objfile_int_type (this->per_objfile->objfile, addr_size, unsigned_p);
 }
 
 /* Start a symtab for DWARF.  NAME, COMP_DIR, LOW_PC are passed to the

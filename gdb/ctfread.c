@@ -691,7 +691,12 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
   type = alloc_type (of);
 
   type->set_code (TYPE_CODE_FUNC);
-  ctf_func_type_info (fp, tid, &cfi);
+  if (ctf_func_type_info (fp, tid, &cfi) < 0)
+    {
+      const char *fname = ctf_type_name_raw (fp, tid);
+      error (_("Error getting function type info: %s"),
+	     fname == nullptr ? "noname" : fname);
+    }
   rettype = fetch_tid_type (ccp, cfi.ctc_return);
   TYPE_TARGET_TYPE (type) = rettype;
   set_type_align (type, ctf_type_align (fp, tid));
@@ -733,8 +738,7 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
 {
   struct objfile *of = ccp->of;
   ctf_dict_t *fp = ccp->fp;
-  struct type *type, *target_type;
-  ctf_funcinfo_t fi;
+  struct type *type;
 
   type = alloc_type (of);
 
@@ -744,9 +748,8 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
 
   type->set_code (TYPE_CODE_ENUM);
   TYPE_LENGTH (type) = ctf_type_size (fp, tid);
-  ctf_func_type_info (fp, tid, &fi);
-  target_type = get_tid_type (of, fi.ctc_return);
-  TYPE_TARGET_TYPE (type) = target_type;
+  /* Set the underlying type based on its ctf_type_size bits.  */
+  TYPE_TARGET_TYPE (type) = objfile_int_type (of, TYPE_LENGTH (type), false);
   set_type_align (type, ctf_type_align (fp, tid));
 
   return set_tid_type (of, tid, type);
