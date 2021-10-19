@@ -101,7 +101,6 @@ public:
     : Sized_relobj_file<size, big_endian>(name, input_file, offset, ehdr),
       uniq_(object_id++), special_(0), relatoc_(0), toc_(0),
       has_small_toc_reloc_(false), opd_valid_(false),
-      no_tls_marker_(false), tls_marker_(false), tls_opt_error_(false),
       e_flags_(ehdr.get_e_flags()), no_toc_opt_(), opd_ent_(),
       access_from_map_(), has14_(), stub_table_index_(), st_other_(),
       attributes_section_data_(NULL)
@@ -161,30 +160,6 @@ public:
       return true;
     return this->no_toc_opt_[off];
   }
-
-  void
-  set_no_tls_marker()
-  {
-    if (!this->no_tls_marker_ && this->tls_marker_)
-      this->tls_opt_error_ = true;
-    this->no_tls_marker_ = true;
-  }
-
-  bool
-  no_tls_marker() const
-  { return this->no_tls_marker_; }
-
-  void
-  set_tls_marker()
-  { this->tls_marker_ = true; }
-
-  bool
-  tls_marker() const
-  { return this->tls_marker_; }
-
-  bool
-  tls_opt_error() const
-  { return this->tls_opt_error_; }
 
   // The .got2 section shndx.
   unsigned int
@@ -472,19 +447,6 @@ private:
   // memory_order_acquire, potentially resulting in fewer entries in
   // access_from_map_.
   bool opd_valid_;
-
-  // Set when finding a __tls_get_addr call without marker relocs.
-  // Such a call disables GD and LD tls optimisations for the object file.
-  bool no_tls_marker_;
-
-  // Set when finding a __tls_get_addr call with marker relocs, or
-  // when finding a relocation that needs __tls_get_addr calls with
-  // marker relocs.
-  bool tls_marker_;
-
-  // Set when seeing a __tls_get_addr call without marker relocs after
-  // seeing some __tls_get_addr calls with marker relocs.
-  bool tls_opt_error_;
 
   // Header e_flags
   elfcpp::Elf_Word e_flags_;
@@ -7911,42 +7873,23 @@ Target_powerpc<size, big_endian>::Scan::local(
   Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<Powerpc_relobj<size, big_endian>*>(object);
 
-  switch (this->maybe_skip_tls_get_addr_call(target, r_type, NULL))
-    {
-    case Track_tls::NOT_EXPECTED:
-      ppc_object->set_no_tls_marker();
-      break;
-    default:
-      break;
-    }
+  this->maybe_skip_tls_get_addr_call(target, r_type, NULL);
 
   if ((size == 64 && r_type == elfcpp::R_PPC64_TLSGD)
       || (size == 32 && r_type == elfcpp::R_PPC_TLSGD))
     {
       this->expect_tls_get_addr_call();
-      if (!ppc_object->no_tls_marker())
-	{
-	  tls::Tls_optimization tls_type = target->optimize_tls_gd(true);
-	  if (tls_type != tls::TLSOPT_NONE)
-	    {
-	      this->skip_next_tls_get_addr_call();
-	      ppc_object->set_tls_marker();
-	    }
-	}
+      tls::Tls_optimization tls_type = target->optimize_tls_gd(true);
+      if (tls_type != tls::TLSOPT_NONE)
+	this->skip_next_tls_get_addr_call();
     }
   else if ((size == 64 && r_type == elfcpp::R_PPC64_TLSLD)
 	   || (size == 32 && r_type == elfcpp::R_PPC_TLSLD))
     {
       this->expect_tls_get_addr_call();
-      if (!ppc_object->no_tls_marker())
-	{
-	  tls::Tls_optimization tls_type = target->optimize_tls_ld();
-	  if (tls_type != tls::TLSOPT_NONE)
-	    {
-	      this->skip_next_tls_get_addr_call();
-	      ppc_object->set_tls_marker();
-	    }
-	}
+      tls::Tls_optimization tls_type = target->optimize_tls_ld();
+      if (tls_type != tls::TLSOPT_NONE)
+	this->skip_next_tls_get_addr_call();
     }
 
   if (is_discarded)
@@ -8248,9 +8191,7 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_GOT_TLSGD16_HI:
     case elfcpp::R_POWERPC_GOT_TLSGD16_HA:
       {
-	tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-	if (!ppc_object->no_tls_marker())
-	  tls_type = target->optimize_tls_gd(true);
+	tls::Tls_optimization tls_type = target->optimize_tls_gd(true);
 	if (tls_type == tls::TLSOPT_NONE)
 	  {
 	    Got_type got_type = ((size == 32
@@ -8268,7 +8209,6 @@ Target_powerpc<size, big_endian>::Scan::local(
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
 	    // no GOT relocs needed for Local Exec.
-	    ppc_object->set_tls_marker();
 	  }
 	else
 	  gold_unreachable();
@@ -8281,9 +8221,7 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_GOT_TLSLD16_HI:
     case elfcpp::R_POWERPC_GOT_TLSLD16_HA:
       {
-	tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-	if (!ppc_object->no_tls_marker())
-	  tls_type = target->optimize_tls_ld();
+	tls::Tls_optimization tls_type = target->optimize_tls_ld();
 	if (tls_type == tls::TLSOPT_NONE)
 	  target->tlsld_got_offset(symtab, layout, object);
 	else if (tls_type == tls::TLSOPT_TO_LE)
@@ -8295,7 +8233,6 @@ Target_powerpc<size, big_endian>::Scan::local(
 		gold_assert(os != NULL);
 		os->set_needs_symtab_index();
 	      }
-	    ppc_object->set_tls_marker();
 	  }
 	else
 	  gold_unreachable();
@@ -8638,9 +8575,6 @@ Target_powerpc<size, big_endian>::Scan::global(
 
   switch (this->maybe_skip_tls_get_addr_call(target, r_type, gsym))
     {
-    case Track_tls::NOT_EXPECTED:
-      ppc_object->set_no_tls_marker();
-      break;
     case Track_tls::SKIP:
       return;
     default:
@@ -8656,30 +8590,18 @@ Target_powerpc<size, big_endian>::Scan::global(
       || (size == 32 && r_type == elfcpp::R_PPC_TLSGD))
     {
       this->expect_tls_get_addr_call();
-      if (!ppc_object->no_tls_marker())
-	{
-	  bool final = gsym->final_value_is_known();
-	  tls::Tls_optimization tls_type = target->optimize_tls_gd(final);
-	  if (tls_type != tls::TLSOPT_NONE)
-	    {
-	      this->skip_next_tls_get_addr_call();
-	      ppc_object->set_tls_marker();
-	    }
-	}
+      bool final = gsym->final_value_is_known();
+      tls::Tls_optimization tls_type = target->optimize_tls_gd(final);
+      if (tls_type != tls::TLSOPT_NONE)
+	this->skip_next_tls_get_addr_call();
     }
   else if ((size == 64 && r_type == elfcpp::R_PPC64_TLSLD)
 	   || (size == 32 && r_type == elfcpp::R_PPC_TLSLD))
     {
       this->expect_tls_get_addr_call();
-      if (!ppc_object->no_tls_marker())
-	{
-	  tls::Tls_optimization tls_type = target->optimize_tls_ld();
-	  if (tls_type != tls::TLSOPT_NONE)
-	    {
-	      this->skip_next_tls_get_addr_call();
-	      ppc_object->set_tls_marker();
-	    }
-	}
+      tls::Tls_optimization tls_type = target->optimize_tls_ld();
+      if (tls_type != tls::TLSOPT_NONE)
+	this->skip_next_tls_get_addr_call();
     }
 
   // A STT_GNU_IFUNC symbol may require a PLT entry.
@@ -9061,12 +8983,8 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_GOT_TLSGD16_HI:
     case elfcpp::R_POWERPC_GOT_TLSGD16_HA:
       {
-	tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-	if (!ppc_object->no_tls_marker())
-	  {
-	    bool final = gsym->final_value_is_known();
-	    tls_type = target->optimize_tls_gd(final);
-	  }
+	bool final = gsym->final_value_is_known();
+	tls::Tls_optimization tls_type = target->optimize_tls_gd(final);
 	if (tls_type == tls::TLSOPT_NONE)
 	  {
 	    Got_type got_type = ((size == 32
@@ -9107,12 +9025,10 @@ Target_powerpc<size, big_endian>::Scan::global(
 							   got, off, addend);
 		  }
 	      }
-	    ppc_object->set_tls_marker();
 	  }
 	else if (tls_type == tls::TLSOPT_TO_LE)
 	  {
 	    // no GOT relocs needed for Local Exec.
-	    ppc_object->set_tls_marker();
 	  }
 	else
 	  gold_unreachable();
@@ -9125,9 +9041,7 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_GOT_TLSLD16_HI:
     case elfcpp::R_POWERPC_GOT_TLSLD16_HA:
       {
-	tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-	if (!ppc_object->no_tls_marker())
-	  tls_type = target->optimize_tls_ld();
+	tls::Tls_optimization tls_type = target->optimize_tls_ld();
 	if (tls_type == tls::TLSOPT_NONE)
 	  target->tlsld_got_offset(symtab, layout, object);
 	else if (tls_type == tls::TLSOPT_TO_LE)
@@ -9139,7 +9053,6 @@ Target_powerpc<size, big_endian>::Scan::global(
 		gold_assert(os != NULL);
 		os->set_needs_symtab_index();
 	      }
-	    ppc_object->set_tls_marker();
 	  }
 	else
 	  gold_unreachable();
@@ -10515,20 +10428,11 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   switch (this->maybe_skip_tls_get_addr_call(target, r_type, gsym))
     {
     case Track_tls::NOT_EXPECTED:
-      if (!parameters->options().shared()
-	  && parameters->options().tls_optimize())
-	{
-	  // It is a hard error to see a __tls_get_addr call without
-	  // marker relocs after seeing calls with marker relocs in the
-	  // same object file, because dynamic relocation accounting
-	  // will be wrong.
-	  if (object->tls_opt_error())
-	    gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
-				   _("__tls_get_addr call lacks marker reloc"));
-	  else
-	    gold_warning_at_location(relinfo, relnum, rela.get_r_offset(),
-				     _("__tls_get_addr call lacks marker reloc"));
-	}
+      // No warning.  This will result in really old code without tls
+      // marker relocs being mis-optimised, but there shouldn't be too
+      // much of that code around.  The problem with warning is that
+      // glibc and libphobos both construct direct calls to
+      // __tls_get_addr in a way that is harmless.
       break;
     case Track_tls::EXPECTED:
       // We have already complained.
@@ -10807,12 +10711,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	   || r_type == elfcpp::R_PPC64_GOT_TLSGD_PCREL34)
     {
       // First instruction of a global dynamic sequence, arg setup insn.
-      tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-      if (!object->no_tls_marker())
-	{
-	  bool final = gsym == NULL || gsym->final_value_is_known();
-	  tls_type = target->optimize_tls_gd(final);
-	}
+      bool final = gsym == NULL || gsym->final_value_is_known();
+      tls::Tls_optimization tls_type = target->optimize_tls_gd(final);
       Got_type got_type = ((size == 32
 			    || r_type == elfcpp::R_POWERPC_GOT_TLSGD16)
 			   ? GOT_TYPE_SMALL : GOT_TYPE_STANDARD);
@@ -10914,9 +10814,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	   || r_type == elfcpp::R_PPC64_GOT_TLSLD_PCREL34)
     {
       // First instruction of a local dynamic sequence, arg setup insn.
-      tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-      if (!object->no_tls_marker())
-	tls_type = target->optimize_tls_ld();
+      tls::Tls_optimization tls_type = target->optimize_tls_ld();
       if (tls_type == tls::TLSOPT_NONE)
 	{
 	  value = target->tlsld_got_offset();
@@ -11057,12 +10955,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       // Second instruction of a global dynamic sequence,
       // the __tls_get_addr call
       this->expect_tls_get_addr_call(relinfo, relnum, rela.get_r_offset());
-      tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-      if (!object->no_tls_marker())
-	{
-	  bool final = gsym == NULL || gsym->final_value_is_known();
-	  tls_type = target->optimize_tls_gd(final);
-	}
+      bool final = gsym == NULL || gsym->final_value_is_known();
+      tls::Tls_optimization tls_type =  target->optimize_tls_gd(final);
       if (tls_type != tls::TLSOPT_NONE)
 	{
 	  if (tls_type == tls::TLSOPT_TO_IE)
@@ -11113,9 +11007,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       // Second instruction of a local dynamic sequence,
       // the __tls_get_addr call
       this->expect_tls_get_addr_call(relinfo, relnum, rela.get_r_offset());
-      tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-      if (!object->no_tls_marker())
-	tls_type = target->optimize_tls_ld();
+      tls::Tls_optimization tls_type = target->optimize_tls_ld();
       if (tls_type == tls::TLSOPT_TO_LE)
 	{
 	  bool is_pcrel = false;
@@ -12605,12 +12497,8 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 	    {
 	      // First instruction of a global dynamic sequence,
 	      // arg setup insn.
-	      tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-	      if (!object->no_tls_marker())
-		{
-		  bool final = gsym == NULL || gsym->final_value_is_known();
-		  tls_type = this->optimize_tls_gd(final);
-		}
+	      bool final = gsym == NULL || gsym->final_value_is_known();
+	      tls::Tls_optimization tls_type = this->optimize_tls_gd(final);
 	      switch (tls_type)
 		{
 		case tls::TLSOPT_TO_IE:
@@ -12638,9 +12526,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 	    {
 	      // First instruction of a local dynamic sequence,
 	      // arg setup insn.
-	      tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-	      if (!object->no_tls_marker())
-		tls_type = this->optimize_tls_ld();
+	      tls::Tls_optimization tls_type = this->optimize_tls_ld();
 	      if (tls_type == tls::TLSOPT_TO_LE)
 		{
 		  if (r_type == elfcpp::R_POWERPC_GOT_TLSLD16
@@ -12685,12 +12571,8 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 	    {
 	      // Second instruction of a global dynamic sequence,
 	      // the __tls_get_addr call
-	      tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-	      if (!object->no_tls_marker())
-		{
-		  bool final = gsym == NULL || gsym->final_value_is_known();
-		  tls_type = this->optimize_tls_gd(final);
-		}
+	      bool final = gsym == NULL || gsym->final_value_is_known();
+	      tls::Tls_optimization tls_type = this->optimize_tls_gd(final);
 	      switch (tls_type)
 		{
 		case tls::TLSOPT_TO_IE:
@@ -12711,9 +12593,7 @@ Target_powerpc<size, big_endian>::relocate_relocs(
 	    {
 	      // Second instruction of a local dynamic sequence,
 	      // the __tls_get_addr call
-	      tls::Tls_optimization tls_type = tls::TLSOPT_NONE;
-	      if (!object->no_tls_marker())
-		tls_type = this->optimize_tls_ld();
+	      tls::Tls_optimization tls_type = this->optimize_tls_ld();
 	      if (tls_type == tls::TLSOPT_TO_LE)
 		{
 		  const Output_section* os = relinfo->layout->tls_segment()
