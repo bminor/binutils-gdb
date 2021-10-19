@@ -162,9 +162,19 @@ public:
   constexpr const T *end () const noexcept { return m_array + m_size; }
 
   /*constexpr14*/ reference operator[] (size_t index) noexcept
-  { return m_array[index]; }
+  {
+#if defined(_GLIBCXX_DEBUG)
+    gdb_assert (index < m_size);
+#endif
+    return m_array[index];
+  }
   constexpr const_reference operator[] (size_t index) const noexcept
-  { return m_array[index]; }
+  {
+#if defined(_GLIBCXX_DEBUG)
+    gdb_assert (index < m_size);
+#endif
+    return m_array[index];
+  }
 
   constexpr size_type size () const noexcept { return m_size; }
   constexpr bool empty () const noexcept { return m_size == 0; }
@@ -173,12 +183,22 @@ public:
 
   /* Return a new array view over SIZE elements starting at START.  */
   constexpr array_view<T> slice (size_type start, size_type size) const noexcept
-  { return {m_array + start, size}; }
+  {
+#if defined(_GLIBCXX_DEBUG)
+    gdb_assert (start + size <= m_size);
+#endif
+    return {m_array + start, size};
+  }
 
   /* Return a new array view over all the elements after START,
      inclusive.  */
   constexpr array_view<T> slice (size_type start) const noexcept
-  { return {m_array + start, size () - start}; }
+  {
+#if defined(_GLIBCXX_DEBUG)
+    gdb_assert (start <= m_size);
+#endif
+    return {m_array + start, size () - start};
+  }
 
 private:
   T *m_array;
