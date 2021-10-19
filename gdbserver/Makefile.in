@@ -326,7 +326,10 @@ install-strip:
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
-	rm -f $(DESTDIR)/$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(man1dir)/$$n.1
+	if [ x"$(IPA_DEPFILES)" != x ]; then \
+		rm -f $(DESTDIR)$(libdir)/$(IPA_LIB); \
+	fi; \
+	rm -f $(DESTDIR)/$(bindir)/$$n$(EXEEXT)
 
 installcheck:
 check:
