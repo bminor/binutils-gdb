@@ -319,4 +319,10 @@ extern void get_matching_xmethod_workers
 extern gdb::optional<std::string> ext_lang_colorize
   (const std::string &filename, const std::string &contents);
 
+#if GDB_SELF_TEST
+namespace selftests {
+extern void (*hook_set_active_ext_lang) ();
+}
+#endif
+
 #endif /* EXTENSION_H */

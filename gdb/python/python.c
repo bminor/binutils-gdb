@@ -1933,21 +1933,46 @@ test_python ()
   output.clear ();
 
   bool saw_exception = false;
-  scoped_restore reset_gdb_python_initialized
-    = make_scoped_restore (&gdb_python_initialized, 0);
-  try
-    {
-      CMD (output);
-    }
-  catch (const gdb_exception &e)
-    {
-      saw_exception = true;
-      SELF_CHECK (e.reason == RETURN_ERROR);
-      SELF_CHECK (e.error == GENERIC_ERROR);
-      SELF_CHECK (*e.message == "Python not initialized");
-    }
-  SELF_CHECK (saw_exception);
-  SELF_CHECK (output.empty ());
+  {
+    scoped_restore reset_gdb_python_initialized
+      = make_scoped_restore (&gdb_python_initialized, 0);
+    try
+      {
+	CMD (output);
+      }
+    catch (const gdb_exception &e)
+      {
+	saw_exception = true;
+	SELF_CHECK (e.reason == RETURN_ERROR);
+	SELF_CHECK (e.error == GENERIC_ERROR);
+	SELF_CHECK (*e.message == "Python not initialized");
+      }
+    SELF_CHECK (saw_exception);
+    SELF_CHECK (output.empty ());
+  }
+
+  saw_exception = false;
+  {
+    scoped_restore save_hook
+      = make_scoped_restore (&hook_set_active_ext_lang,
+			     []() { raise (SIGINT); });
+    try
+      {
+	CMD (output);
+      }
+    catch (const gdb_exception &e)
+      {
+	saw_exception = true;
+	SELF_CHECK (e.reason == RETURN_ERROR);
+	SELF_CHECK (e.error == GENERIC_ERROR);
+	SELF_CHECK (*e.message == "Error while executing Python code.");
+      }
+    SELF_CHECK (saw_exception);
+    std::string ref_output("Traceback (most recent call last):\n"
+			   "  File \"<string>\", line 1, in <module>\n"
+			   "KeyboardInterrupt\n");
+    SELF_CHECK (output == ref_output);
+  }
 
 #undef CMD
 }

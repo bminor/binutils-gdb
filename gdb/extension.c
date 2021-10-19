@@ -682,6 +682,12 @@ install_gdb_sigint_handler (struct signal_handler *previous)
     previous->handler_saved = 0;
 }
 
+#if GDB_SELF_TEST
+namespace selftests {
+void (*hook_set_active_ext_lang) () = nullptr;
+}
+#endif
+
 /* Set the currently active extension language to NOW_ACTIVE.
    The result is a pointer to a malloc'd block of memory to pass to
    restore_active_ext_lang.
@@ -708,6 +714,11 @@ install_gdb_sigint_handler (struct signal_handler *previous)
 struct active_ext_lang_state *
 set_active_ext_lang (const struct extension_language_defn *now_active)
 {
+#if GDB_SELF_TEST
+  if (selftests::hook_set_active_ext_lang)
+    selftests::hook_set_active_ext_lang ();
+#endif
+
   struct active_ext_lang_state *previous
     = XCNEW (struct active_ext_lang_state);
 
