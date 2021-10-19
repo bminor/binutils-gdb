@@ -2286,7 +2286,7 @@ Sized_relobj_incr<size, big_endian>::do_section_name(unsigned int shndx) const
   const Output_sections& out_sections(this->output_sections());
   const Output_section* os = out_sections[shndx];
   if (os == NULL)
-    return NULL;
+    return std::string();
   return os->name();
 }
 
