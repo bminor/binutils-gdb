@@ -195,6 +195,11 @@ public:
     return m_argv;
   }
 
+  const char * const * get () const
+  {
+    return m_argv;
+  }
+
   /* Return the underlying array, transferring ownership to the
      caller.  */
 
@@ -225,6 +230,11 @@ public:
   gdb::array_view<char *> as_array_view ()
   {
     return gdb::array_view<char *> (this->get (), this->count ());
+  }
+
+  gdb::array_view<const char * const> as_array_view () const
+  {
+    return gdb::array_view<const char * const> (this->get (), this->count ());
   }
 
   /* Append arguments to this array.  */
