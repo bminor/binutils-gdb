@@ -2666,12 +2666,21 @@ extern CORE_ADDR get_pointer_type_max (struct type *);
 /* * Resolve all dynamic values of a type e.g. array bounds to static values.
    ADDR specifies the location of the variable the type is bound to.
    If TYPE has no dynamic properties return TYPE; otherwise a new type with
-   static properties is returned.  */
+   static properties is returned.
+
+   For an array type, if the element type is dynamic, then that will
+   not be resolved.  This is done because each individual element may
+   have a different type when resolved (depending on the contents of
+   memory).  In this situation, 'is_dynamic_type' will still return
+   true for the return value of this function.  */
 extern struct type *resolve_dynamic_type
   (struct type *type, gdb::array_view<const gdb_byte> valaddr,
    CORE_ADDR addr);
 
-/* * Predicate if the type has dynamic values, which are not resolved yet.  */
+/* * Predicate if the type has dynamic values, which are not resolved yet.
+   See the caveat in 'resolve_dynamic_type' to understand a scenario
+   where an apparently-resolved type may still be considered
+   "dynamic".  */
 extern int is_dynamic_type (struct type *type);
 
 extern struct type *check_typedef (struct type *);
