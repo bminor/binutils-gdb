@@ -4095,8 +4095,8 @@ ada_value_struct_elt (struct value *arg, const char *name, int no_err)
 	     If not found then let's look in the fixed type.  */
 
 	  if (!find_struct_field (name, t1, 0,
-				  &field_type, &byte_offset, &bit_offset,
-				  &bit_size, NULL))
+				  nullptr, nullptr, nullptr,
+				  nullptr, nullptr))
 	    check_tag = 1;
 	  else
 	    check_tag = 0;
@@ -6041,7 +6041,11 @@ value_tag_from_contents_and_address (struct type *type,
   int tag_byte_offset;
   struct type *tag_type;
 
-  if (find_struct_field ("_tag", type, 0, &tag_type, &tag_byte_offset,
+  gdb::array_view<const gdb_byte> contents;
+  if (valaddr != nullptr)
+    contents = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
+  struct type *resolved_type = resolve_dynamic_type (type, contents, address);
+  if (find_struct_field ("_tag", resolved_type, 0, &tag_type, &tag_byte_offset,
 			 NULL, NULL, NULL))
     {
       const gdb_byte *valaddr1 = ((valaddr == NULL)
@@ -6644,8 +6648,16 @@ find_struct_field (const char *name, struct type *type, int offset,
 
   for (i = 0; i < type->num_fields (); i += 1)
     {
-      int bit_pos = TYPE_FIELD_BITPOS (type, i);
-      int fld_offset = offset + bit_pos / 8;
+      /* These can't be computed using TYPE_FIELD_BITPOS for a dynamic
+	 type.  However, we only need the values to be correct when
+	 the caller asks for them.  */
+      int bit_pos = 0, fld_offset = 0;
+      if (byte_offset_p != nullptr || bit_offset_p != nullptr)
+	{
+	  bit_pos = TYPE_FIELD_BITPOS (type, i);
+	  fld_offset = offset + bit_pos / 8;
+	}
+
       const char *t_field_name = type->field (i).name ();
 
       if (t_field_name == NULL)
@@ -6713,8 +6725,13 @@ find_struct_field (const char *name, struct type *type, int offset,
 
   if (parent_offset != -1)
     {
-      int bit_pos = TYPE_FIELD_BITPOS (type, parent_offset);
-      int fld_offset = offset + bit_pos / 8;
+      /* As above, only compute the offset when truly needed.  */
+      int fld_offset = offset;
+      if (byte_offset_p != nullptr || bit_offset_p != nullptr)
+	{
+	  int bit_pos = TYPE_FIELD_BITPOS (type, parent_offset);
+	  fld_offset += bit_pos / 8;
+	}
 
       if (find_struct_field (name, type->field (parent_offset).type (),
 			     fld_offset, field_type_p, byte_offset_p,
