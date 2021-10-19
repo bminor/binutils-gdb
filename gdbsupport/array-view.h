@@ -139,9 +139,10 @@ public:
   template<typename Container,
 	   typename = Requires<gdb::Not<IsDecayedT<Container>>>,
 	   typename
-	     = Requires<std::is_convertible
-			<decltype (std::declval<Container> ().data ()),
-			 T *>>,
+	     = Requires<DecayedConvertible
+			<typename std::remove_pointer
+			 <decltype (std::declval<Container> ().data ())
+			 >::type>>,
 	   typename
 	     = Requires<std::is_convertible
 			<decltype (std::declval<Container> ().size ()),

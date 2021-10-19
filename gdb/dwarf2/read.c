@@ -14936,7 +14936,7 @@ add_variant_property (struct field_info *fip, struct type *type,
     offset_map[fip->fields[i].offset] = i;
 
   struct objfile *objfile = cu->per_objfile->objfile;
-  gdb::array_view<variant_part> parts
+  gdb::array_view<const variant_part> parts
     = create_variant_parts (&objfile->objfile_obstack, offset_map, fip,
 			    fip->variant_parts);
 

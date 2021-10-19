@@ -1158,7 +1158,7 @@ maintenance_selftest (const char *args, int from_tty)
   auto grp = make_maintenance_selftest_option_group (&opts);
   gdb::option::process_options
     (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp);
-  gdb_argv argv (args);
+  const gdb_argv argv (args);
   selftests::run_tests (argv.as_array_view (), opts.verbose);
 #else
   printf_filtered (_("\

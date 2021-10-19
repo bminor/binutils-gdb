@@ -21,6 +21,7 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/array-view.h"
 #include <array>
+#include <vector>
 
 namespace selftests {
 namespace array_view_tests {
@@ -86,8 +87,8 @@ struct A { int i; };
 struct B : A { int j; };
 struct C : A { int l; };
 
-/* Check that there's no array->view conversion for arrays of derived
-   types or subclasses.  */
+/* Check that there's no array->view conversion for arrays of derived types or
+   subclasses.  */
 static constexpr bool
 check ()
 {
@@ -116,9 +117,29 @@ check ()
 	  && !is_convertible <C, array_view<B>> ());
 }
 
+/* Check that there's no container->view conversion for containers of derived
+   types or subclasses.  */
+
+template<template<typename ...> typename Container>
+static constexpr bool
+check_ctor_from_container ()
+{
+  using gdb::array_view;
+
+  return (    is_convertible <Container<A>, array_view<A>> ()
+	  && !is_convertible <Container<B>, array_view<A>> ()
+	  && !is_convertible <Container<C>, array_view<A>> ()
+
+	  && !is_convertible <Container<A>, array_view<B>> ()
+	  &&  is_convertible <Container<B>, array_view<B>> ()
+	  && !is_convertible <Container<C>, array_view<B>> ());
+}
+
 } /* namespace no_slicing */
 
 static_assert (no_slicing::check (), "");
+static_assert (no_slicing::check_ctor_from_container<std::vector> (), "");
+static_assert (no_slicing::check_ctor_from_container<gdb::array_view> (), "");
 
 /* Check that array_view implicitly converts from std::vector.  */
 
