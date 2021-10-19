@@ -2357,7 +2357,8 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 			  map = new_map;
 			}
 
-		      if (syms[src_count]->name[0] == '_'
+		      if (syms[src_count]->name != NULL
+			  && syms[src_count]->name[0] == '_'
 			  && syms[src_count]->name[1] == '_'
 			  && strcmp (syms[src_count]->name
 				     + (syms[src_count]->name[2] == '_'),

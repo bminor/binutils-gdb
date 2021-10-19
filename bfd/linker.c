@@ -1420,6 +1420,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
     {
       row = COMMON_ROW;
       if (!bfd_link_relocatable (info)
+	  && name != NULL
 	  && name[0] == '_'
 	  && name[1] == '_'
 	  && strcmp (name + (name[2] == '_'), "__gnu_lto_slim") == 0)

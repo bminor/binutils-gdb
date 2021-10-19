@@ -1,3 +1,9 @@
+2021-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* linker.c (_bfd_generic_link_add_one_symbol): Test for a NULL
+	name before checking to see if the symbol is __gnu_lto_slim.
+	* archive.c (_bfd_compute_and_write_armap): Likewise.
+
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure: Regenerate.

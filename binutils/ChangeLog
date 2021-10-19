@@ -1,3 +1,9 @@
+2021-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* nm.c (filter_symbols): Test for a NULL name before checking to
+	see if the symbol is __gnu_lto_slim.
+	* objcopy.c (filter_symbols): Likewise.
+
 2021-09-30  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (filter_symbols): Fail if attempting to dredefine
