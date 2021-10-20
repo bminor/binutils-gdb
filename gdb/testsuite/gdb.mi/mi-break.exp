@@ -389,7 +389,7 @@ proc_with_prefix test_explicit_breakpoints {} {
     # linespecs.
     mi_gdb_test \
 	"-break-insert -c \"foo == 3\" --source $srcfile --function main --label label" \
-	".*No symbol \"foo\" in current context.*"
+	".*No label .*label.* defined in function .*main.*"
 
     mi_gdb_test \
 	"-break-insert --source foobar.c --line 3" \
@@ -397,15 +397,15 @@ proc_with_prefix test_explicit_breakpoints {} {
 
     mi_gdb_test \
 	"-break-insert --source $srcfile --function foobar" \
-	".*Function \"foobar\" not defined in \"$srcfile\".*"
+	".*Function .*foobar.* not defined in .*$srcfile.*"
 
     mi_gdb_test \
 	"-break-insert --source $srcfile --function main --label foobar" \
-	".*No label \"foobar\" defined in function \"main\".*"
+	".*No label .*foobar.* defined in function .*main.*"
 
     mi_gdb_test \
 	"-break-insert --source $srcfile" \
-	".*Source filename requires function, label, or line offset.*"
+	".*-break-insert: --source option requires --function, --label, or --line.*"
 }
 
 # Test forcing an invalid condition.
