@@ -978,12 +978,12 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
 }
 
 /* See the comment on ada_value_print.  This function differs in that
-   it does not catch evaluation errors (leaving that to
-   ada_value_print).  */
+   it does not catch evaluation errors (leaving that to its
+   caller).  */
 
-static void
-ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
-		   const struct value_print_options *options)
+void
+ada_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
+		       const struct value_print_options *options)
 {
   struct type *type = ada_check_typedef (value_type (val));
 
@@ -1068,25 +1068,6 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
 			 address, stream, recurse, val,
 			 options);
       break;
-    }
-}
-
-/* See ada-lang.h.  */
-
-void
-ada_value_print_inner (struct value *val, struct ui_file *stream,
-		       int recurse,
-		       const struct value_print_options *options)
-{
-  try
-    {
-      ada_value_print_1 (val, stream, recurse, options);
-    }
-  catch (const gdb_exception_error &except)
-    {
-      fprintf_styled (stream, metadata_style.style (),
-		      _("<error reading variable: %s>"),
-		      except.what ());
     }
 }
 
