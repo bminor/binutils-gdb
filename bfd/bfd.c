@@ -1738,6 +1738,7 @@ bfd_get_sign_extend_vma (bfd *abfd)
       || strcmp (name, "pei-i386") == 0
       || strcmp (name, "pe-x86-64") == 0
       || strcmp (name, "pei-x86-64") == 0
+      || strcmp (name, "pei-aarch64-little") == 0
       || strcmp (name, "pe-arm-wince-little") == 0
       || strcmp (name, "pei-arm-wince-little") == 0
       || strcmp (name, "aixcoff-rs6000") == 0

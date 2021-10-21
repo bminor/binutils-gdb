@@ -231,7 +231,7 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
     {
       scnhdr_int->s_vaddr += pe_data (abfd)->pe_opthdr.ImageBase;
       /* Do not cut upper 32-bits for 64-bit vma.  */
-#ifndef COFF_WITH_pex64
+#if !defined(COFF_WITH_pex64) && !defined(COFF_WITH_peAArch64)
       scnhdr_int->s_vaddr &= 0xffffffff;
 #endif
     }
@@ -738,6 +738,16 @@ static const jump_table jtab[] =
   },
 #endif
 
+#ifdef AARCH64MAGIC
+/* We don't currently support jumping to DLLs, so if
+   someone does try emit a runtime trap.  Through UDF #0.  */
+  { AARCH64MAGIC,
+    { 0x00, 0x00, 0x00, 0x00 },
+    4, 0
+  },
+
+#endif
+
 #ifdef  ARMPEMAGIC
   { ARMPEMAGIC,
     { 0x00, 0xc0, 0x9f, 0xe5, 0x00, 0xf0,
@@ -910,7 +920,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 	/* See PR 20907 for a reproducer.  */
 	goto error_return;
 
-#ifdef COFF_WITH_pex64
+#if defined(COFF_WITH_pex64) || defined(COFF_WITH_peAArch64)
       ((unsigned int *) id4->contents)[0] = ordinal;
       ((unsigned int *) id4->contents)[1] = 0x80000000;
       ((unsigned int *) id5->contents)[0] = ordinal;
@@ -1203,6 +1213,12 @@ pe_ILF_object_p (bfd * abfd)
     case IMAGE_FILE_MACHINE_ARM:
 #ifdef ARMPEMAGIC
       magic = ARMPEMAGIC;
+#endif
+      break;
+
+    case IMAGE_FILE_MACHINE_ARM64:
+#ifdef AARCH64MAGIC
+      magic = AARCH64MAGIC;
 #endif
       break;
 

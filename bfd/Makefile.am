@@ -570,8 +570,10 @@ BFD64_BACKENDS = \
 	pe-x86_64.lo \
 	pei-ia64.lo \
 	pei-x86_64.lo \
+	pei-aarch64lo \
 	pepigen.lo \
 	pex64igen.lo \
+	pe-aarch64igen.lo \
 	vms-alpha.lo
 
 BFD64_BACKENDS_CFILES = \
@@ -609,6 +611,7 @@ BFD64_BACKENDS_CFILES = \
 	pe-x86_64.c \
 	pei-ia64.c \
 	pei-x86_64.c \
+	pei-aarch64.c \
 	vms-alpha.c
 
 OPTIONAL_BACKENDS = \
@@ -666,7 +669,7 @@ BUILD_CFILES = \
 	elf32-aarch64.c elf64-aarch64.c \
 	elf32-ia64.c elf64-ia64.c \
 	elf32-riscv.c elf64-riscv.c \
-	peigen.c pepigen.c pex64igen.c
+	peigen.c pepigen.c pex64igen.c pe-aarch64igen.c
 
 CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 
@@ -861,6 +864,10 @@ pepigen.c : peXXigen.c
 pex64igen.c: peXXigen.c
 	echo "#line 1 \"peXXigen.c\"" > $@
 	$(SED) -e s/XX/pex64/g < $< >> $@
+
+pe-aarch64igen.c: peXXigen.c
+	echo "#line 1 \"peXXigen.c\"" > $@
+	$(SED) -e s/XX/peAArch64/g < $< >> $@
 
 BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
 LOCAL_H_DEPS= libbfd.h sysdep.h config.h

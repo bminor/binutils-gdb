@@ -247,7 +247,7 @@ case "${targ}" in
     ;;
   aarch64-*-elf | aarch64-*-rtems* | aarch64-*-genode*)
     targ_defvec=aarch64_elf64_le_vec
-    targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec"
+    targ_selvecs="aarch64_elf64_be_vec aarch64_elf32_le_vec aarch64_elf32_be_vec arm_elf32_le_vec arm_elf32_be_vec aarch64_pei_vec"
     want64=true
     ;;
   aarch64_be-*-elf)
