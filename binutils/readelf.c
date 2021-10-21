@@ -342,31 +342,54 @@ static const char * get_symbol_version_string
 
 #define UNKNOWN -1
 
-#define SECTION_NAME(X) \
-  (filedata->string_table + (X)->sh_name)
+static inline const char *
+section_name (const Filedata *filedata, const Elf_Internal_Shdr *hdr)
+{
+  return filedata->string_table + hdr->sh_name;
+}
 
-#define SECTION_NAME_VALID(X) \
-  ((X) != NULL								\
-   && filedata->string_table != NULL					\
-   && (X)->sh_name < filedata->string_table_length)
+static inline bool
+section_name_valid (const Filedata *filedata, const Elf_Internal_Shdr *hdr)
+{
+  return (hdr != NULL
+	  && filedata->string_table != NULL
+	  && hdr->sh_name < filedata->string_table_length);
+}
 
-#define SECTION_NAME_PRINT(X) \
-  ((X) == NULL ? _("<none>")						\
-   : filedata->string_table == NULL ? _("<no-strings>")			\
-   : (X)->sh_name >= filedata->string_table_length ? _("<corrupt>")	\
-   : filedata->string_table + (X)->sh_name)
+static inline const char *
+section_name_print (const Filedata *filedata, const Elf_Internal_Shdr *hdr)
+{
+  if (hdr == NULL)
+    return _("<none>");
+  if (filedata->string_table == NULL)
+    return _("<no-strings>");
+  if (hdr->sh_name >= filedata->string_table_length)
+    return _("<corrupt>");
+  return section_name (filedata, hdr);
+}
 
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order!  */
 
-#define VALID_SYMBOL_NAME(strtab, strtab_size, offset) \
-   (strtab != NULL && offset < strtab_size)
-#define VALID_DYNAMIC_NAME(filedata, offset) \
-  VALID_SYMBOL_NAME (filedata->dynamic_strings, \
-		     filedata->dynamic_strings_length, offset)
+static inline bool
+valid_symbol_name (const char *strtab, size_t strtab_size, uint64_t offset)
+{
+  return strtab != NULL && offset < strtab_size;
+}
+
+static inline bool
+valid_dynamic_name (const Filedata *filedata, uint64_t offset)
+{
+  return valid_symbol_name (filedata->dynamic_strings,
+			    filedata->dynamic_strings_length, offset);
+}
+
 /* GET_DYNAMIC_NAME asssumes that VALID_DYNAMIC_NAME has
    already been called and verified that the string exists.  */
-#define GET_DYNAMIC_NAME(filedata, offset) \
-  (filedata->dynamic_strings + offset)
+static inline const char *
+get_dynamic_name (const Filedata *filedata, size_t offset)
+{
+  return filedata->dynamic_strings + offset;
+}
 
 #define REMOVE_ARCH_BITS(ADDR)			\
   do						\
@@ -696,7 +719,7 @@ printable_section_name (Filedata * filedata, const Elf_Internal_Shdr * sec)
 {
 #define MAX_PRINT_SEC_NAME_LEN 256
   static char  sec_name_buf [MAX_PRINT_SEC_NAME_LEN + 1];
-  const char * name = SECTION_NAME_PRINT (sec);
+  const char * name = section_name_print (filedata, sec);
   char *       buf = sec_name_buf;
   char         c;
   unsigned int remaining = MAX_PRINT_SEC_NAME_LEN;
@@ -758,8 +781,9 @@ find_section (Filedata * filedata, const char * name)
     return NULL;
 
   for (i = 0; i < filedata->file_header.e_shnum; i++)
-    if (SECTION_NAME_VALID (filedata->section_headers + i)
-	&& streq (SECTION_NAME (filedata->section_headers + i), name))
+    if (section_name_valid (filedata, filedata->section_headers + i)
+	&& streq (section_name (filedata, filedata->section_headers + i),
+		  name))
       return filedata->section_headers + i;
 
   return NULL;
@@ -825,8 +849,9 @@ find_section_in_set (Filedata * filedata, const char * name, unsigned int * set)
 	  if (i >= filedata->file_header.e_shnum)
 	    continue; /* FIXME: Should we issue an error message ?  */
 
-	  if (SECTION_NAME_VALID (filedata->section_headers + i)
-	      && streq (SECTION_NAME (filedata->section_headers + i), name))
+	  if (section_name_valid (filedata, filedata->section_headers + i)
+	      && streq (section_name (filedata, filedata->section_headers + i),
+			name))
 	    return filedata->section_headers + i;
 	}
     }
@@ -1758,7 +1783,8 @@ dump_relocations (Filedata *          filedata,
 		  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION)
 		    {
 		      if (psym->st_shndx < filedata->file_header.e_shnum)
-			sec_name = SECTION_NAME_PRINT (filedata->section_headers
+			sec_name = section_name_print (filedata,
+						       filedata->section_headers
 						       + psym->st_shndx);
 		      else if (psym->st_shndx == SHN_ABS)
 			sec_name = "ABS";
@@ -6697,7 +6723,7 @@ process_section_headers (Filedata * filedata)
        i < filedata->file_header.e_shnum;
        i++, section++)
     {
-      char * name = SECTION_NAME_PRINT (section);
+      const char *name = section_name_print (filedata, section);
 
       /* Run some sanity checks on the headers and
 	 possibly fill in some file data as well.  */
@@ -7040,7 +7066,7 @@ process_section_headers (Filedata * filedata)
       if (do_section_details)
 	printf ("%s\n      ", printable_section_name (filedata, section));
       else
-	print_symbol (-17, SECTION_NAME_PRINT (section));
+	print_symbol (-17, section_name_print (filedata, section));
 
       printf (do_wide ? " %-15s " : " %-15.15s ",
 	      get_section_type_name (filedata, section->sh_type));
@@ -7464,7 +7490,8 @@ process_section_groups (Filedata * filedata)
 		  continue;
 		}
 
-	      group_name = SECTION_NAME_PRINT (filedata->section_headers
+	      group_name = section_name_print (filedata,
+					       filedata->section_headers
 					       + sym->st_shndx);
 	      strtab_sec = NULL;
 	      free (strtab);
@@ -8385,7 +8412,7 @@ ia64_process_unwind (Filedata * filedata)
 
   while (unwcount-- > 0)
     {
-      char * suffix;
+      const char *suffix;
       size_t len, len2;
 
       for (i = unwstart, sec = filedata->section_headers + unwstart, unwsec = NULL;
@@ -8418,8 +8445,9 @@ ia64_process_unwind (Filedata * filedata)
 		{
 		  sec = filedata->section_headers + g->section_index;
 
-		  if (SECTION_NAME_VALID (sec)
-		      && streq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info))
+		  if (section_name_valid (filedata, sec)
+		      && streq (section_name (filedata, sec),
+				ELF_STRING_ia64_unwind_info))
 		    break;
 		}
 
@@ -8427,20 +8455,20 @@ ia64_process_unwind (Filedata * filedata)
 		i = filedata->file_header.e_shnum;
 	    }
 	}
-      else if (SECTION_NAME_VALID (unwsec)
-	       && startswith (SECTION_NAME (unwsec),
+      else if (section_name_valid (filedata, unwsec)
+	       && startswith (section_name (filedata, unwsec),
 			      ELF_STRING_ia64_unwind_once))
 	{
 	  /* .gnu.linkonce.ia64unw.FOO -> .gnu.linkonce.ia64unwi.FOO.  */
 	  len2 = sizeof (ELF_STRING_ia64_unwind_info_once) - 1;
-	  suffix = SECTION_NAME (unwsec) + len;
+	  suffix = section_name (filedata, unwsec) + len;
 	  for (i = 0, sec = filedata->section_headers;
 	       i < filedata->file_header.e_shnum;
 	       ++i, ++sec)
-	    if (SECTION_NAME_VALID (sec)
-		&& startswith (SECTION_NAME (sec),
+	    if (section_name_valid (filedata, sec)
+		&& startswith (section_name (filedata, sec),
 			       ELF_STRING_ia64_unwind_info_once)
-		&& streq (SECTION_NAME (sec) + len2, suffix))
+		&& streq (section_name (filedata, sec) + len2, suffix))
 	      break;
 	}
       else
@@ -8450,15 +8478,17 @@ ia64_process_unwind (Filedata * filedata)
 	  len = sizeof (ELF_STRING_ia64_unwind) - 1;
 	  len2 = sizeof (ELF_STRING_ia64_unwind_info) - 1;
 	  suffix = "";
-	  if (SECTION_NAME_VALID (unwsec)
-	      && startswith (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind))
-	    suffix = SECTION_NAME (unwsec) + len;
+	  if (section_name_valid (filedata, unwsec)
+	      && startswith (section_name (filedata, unwsec),
+			     ELF_STRING_ia64_unwind))
+	    suffix = section_name (filedata, unwsec) + len;
 	  for (i = 0, sec = filedata->section_headers;
 	       i < filedata->file_header.e_shnum;
 	       ++i, ++sec)
-	    if (SECTION_NAME_VALID (sec)
-		&& startswith (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info)
-		&& streq (SECTION_NAME (sec) + len2, suffix))
+	    if (section_name_valid (filedata, sec)
+		&& startswith (section_name (filedata, sec),
+			       ELF_STRING_ia64_unwind_info)
+		&& streq (section_name (filedata, sec) + len2, suffix))
 	      break;
 	}
 
@@ -8840,8 +8870,8 @@ hppa_process_unwind (Filedata * filedata)
 			   &aux.strtab, &aux.strtab_size))
 	    return false;
 	}
-      else if (SECTION_NAME_VALID (sec)
-	       && streq (SECTION_NAME (sec), ".PARISC.unwind"))
+      else if (section_name_valid (filedata, sec)
+	       && streq (section_name (filedata, sec), ".PARISC.unwind"))
 	unwsec = sec;
     }
 
@@ -8850,8 +8880,8 @@ hppa_process_unwind (Filedata * filedata)
 
   for (i = 0, sec = filedata->section_headers; i < filedata->file_header.e_shnum; ++i, ++sec)
     {
-      if (SECTION_NAME_VALID (sec)
-	  && streq (SECTION_NAME (sec), ".PARISC.unwind"))
+      if (section_name_valid (filedata, sec)
+	  && streq (section_name (filedata, sec), ".PARISC.unwind"))
 	{
 	  unsigned long num_unwind = sec->sh_size / 16;
 
@@ -10064,9 +10094,9 @@ dynamic_section_mips_val (Filedata * filedata, Elf_Internal_Dyn * entry)
       break;
 
     case DT_MIPS_IVERSION:
-      if (VALID_DYNAMIC_NAME (filedata, entry->d_un.d_val))
+      if (valid_dynamic_name (filedata, entry->d_un.d_val))
 	printf (_("Interface Version: %s"),
-		GET_DYNAMIC_NAME (filedata, entry->d_un.d_val));
+		get_dynamic_name (filedata, entry->d_un.d_val));
       else
 	{
 	  char buf[40];
@@ -11012,9 +11042,9 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		  break;
 		}
 
-	      if (VALID_DYNAMIC_NAME (filedata, entry->d_un.d_val))
+	      if (valid_dynamic_name (filedata, entry->d_un.d_val))
 		printf (": [%s]\n",
-			GET_DYNAMIC_NAME (filedata, entry->d_un.d_val));
+			get_dynamic_name (filedata, entry->d_un.d_val));
 	      else
 		{
 		  printf (": ");
@@ -11279,10 +11309,10 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 
 	  if (do_dynamic)
 	    {
-	      char * name;
+	      const char *name;
 
-	      if (VALID_DYNAMIC_NAME (filedata, entry->d_un.d_val))
-		name = GET_DYNAMIC_NAME (filedata, entry->d_un.d_val);
+	      if (valid_dynamic_name (filedata, entry->d_un.d_val))
+		name = get_dynamic_name (filedata, entry->d_un.d_val);
 	      else
 		name = NULL;
 
@@ -11365,9 +11395,10 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 	  if (do_dynamic)
 	    {
 	      if (entry->d_tag == DT_USED
-		  && VALID_DYNAMIC_NAME (filedata, entry->d_un.d_val))
+		  && valid_dynamic_name (filedata, entry->d_un.d_val))
 		{
-		  char * name = GET_DYNAMIC_NAME (filedata, entry->d_un.d_val);
+		  const char *name
+		    = get_dynamic_name (filedata, entry->d_un.d_val);
 
 		  if (*name)
 		    {
@@ -11610,9 +11641,9 @@ process_version_sections (Filedata * filedata)
 		aux.vda_name = BYTE_GET (eaux->vda_name);
 		aux.vda_next = BYTE_GET (eaux->vda_next);
 
-		if (VALID_DYNAMIC_NAME (filedata, aux.vda_name))
+		if (valid_dynamic_name (filedata, aux.vda_name))
 		  printf (_("Name: %s\n"),
-			  GET_DYNAMIC_NAME (filedata, aux.vda_name));
+			  get_dynamic_name (filedata, aux.vda_name));
 		else
 		  printf (_("Name index: %ld\n"), aux.vda_name);
 
@@ -11642,10 +11673,10 @@ process_version_sections (Filedata * filedata)
 		    aux.vda_name = BYTE_GET (eaux->vda_name);
 		    aux.vda_next = BYTE_GET (eaux->vda_next);
 
-		    if (VALID_DYNAMIC_NAME (filedata, aux.vda_name))
+		    if (valid_dynamic_name (filedata, aux.vda_name))
 		      printf (_("  %#06lx: Parent %d: %s\n"),
 			      isum, j,
-			      GET_DYNAMIC_NAME (filedata, aux.vda_name));
+			      get_dynamic_name (filedata, aux.vda_name));
 		    else
 		      printf (_("  %#06lx: Parent %d, name index: %ld\n"),
 			      isum, j, aux.vda_name);
@@ -11737,9 +11768,9 @@ process_version_sections (Filedata * filedata)
 
 		printf (_("  %#06lx: Version: %d"), idx, ent.vn_version);
 
-		if (VALID_DYNAMIC_NAME (filedata, ent.vn_file))
+		if (valid_dynamic_name (filedata, ent.vn_file))
 		  printf (_("  File: %s"),
-			  GET_DYNAMIC_NAME (filedata, ent.vn_file));
+			  get_dynamic_name (filedata, ent.vn_file));
 		else
 		  printf (_("  File: %lx"), ent.vn_file);
 
@@ -11765,9 +11796,9 @@ process_version_sections (Filedata * filedata)
 		    aux.vna_name  = BYTE_GET (eaux->vna_name);
 		    aux.vna_next  = BYTE_GET (eaux->vna_next);
 
-		    if (VALID_DYNAMIC_NAME (filedata, aux.vna_name))
+		    if (valid_dynamic_name (filedata, aux.vna_name))
 		      printf (_("  %#06lx:   Name: %s"),
-			      isum, GET_DYNAMIC_NAME (filedata, aux.vna_name));
+			      isum, get_dynamic_name (filedata, aux.vna_name));
 		    else
 		      printf (_("  %#06lx:   Name index: %lx"),
 			      isum, aux.vna_name);
@@ -12632,14 +12663,17 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
       && psym->st_shndx < filedata->file_header.e_shnum
       && psym->st_name == 0)
     {
-      is_valid = SECTION_NAME_VALID (filedata->section_headers + psym->st_shndx);
+      is_valid
+	= section_name_valid (filedata,
+			      filedata->section_headers + psym->st_shndx);
       sstr = is_valid ?
-	SECTION_NAME_PRINT (filedata->section_headers + psym->st_shndx)
+	section_name_print (filedata,
+			    filedata->section_headers + psym->st_shndx)
 	: _("<corrupt>");
     }
   else
     {
-      is_valid = VALID_SYMBOL_NAME (strtab, strtab_size, psym->st_name);
+      is_valid = valid_symbol_name (strtab, strtab_size, psym->st_name);
       sstr = is_valid  ? strtab + psym->st_name : _("<corrupt>");
     }
 
@@ -12787,7 +12821,8 @@ display_lto_symtab (Filedata *           filedata,
   char * ext_name = NULL;
 
   if (asprintf (& ext_name, ".gnu.lto_.ext_symtab.%s",
-		SECTION_NAME (section) + sizeof (".gnu.lto_.symtab.") - 1) > 0
+		(section_name (filedata, section)
+		 + sizeof (".gnu.lto_.symtab.") - 1)) > 0
       && ext_name != NULL /* Paranoia.  */
       && (ext = find_section (filedata, ext_name)) != NULL)
     {
@@ -12940,8 +12975,8 @@ process_lto_symbol_tables (Filedata * filedata)
   for (i = 0, section = filedata->section_headers;
        i < filedata->file_header.e_shnum;
        i++, section++)
-    if (SECTION_NAME_VALID (section)
-	&& startswith (SECTION_NAME (section), ".gnu.lto_.symtab."))
+    if (section_name_valid (filedata, section)
+	&& startswith (section_name (filedata, section), ".gnu.lto_.symtab."))
       res &= display_lto_symtab (filedata, section);
 
   return res;
@@ -13290,8 +13325,8 @@ process_syminfo (Filedata * filedata)
       printf ("%4d: ", i);
       if (i >= filedata->num_dynamic_syms)
 	printf (_("<corrupt index>"));
-      else if (VALID_DYNAMIC_NAME (filedata, filedata->dynamic_symbols[i].st_name))
-	print_symbol (30, GET_DYNAMIC_NAME (filedata,
+      else if (valid_dynamic_name (filedata, filedata->dynamic_symbols[i].st_name))
+	print_symbol (30, get_dynamic_name (filedata,
 					    filedata->dynamic_symbols[i].st_name));
       else
 	printf (_("<corrupt: %19ld>"), filedata->dynamic_symbols[i].st_name);
@@ -13308,10 +13343,10 @@ process_syminfo (Filedata * filedata)
 	default:
 	  if (filedata->dynamic_syminfo[i].si_boundto > 0
 	      && filedata->dynamic_syminfo[i].si_boundto < filedata->dynamic_nent
-	      && VALID_DYNAMIC_NAME (filedata,
+	      && valid_dynamic_name (filedata,
 				     filedata->dynamic_section[filedata->dynamic_syminfo[i].si_boundto].d_un.d_val))
 	    {
-	      print_symbol (10, GET_DYNAMIC_NAME (filedata,
+	      print_symbol (10, get_dynamic_name (filedata,
 						  filedata->dynamic_section[filedata->dynamic_syminfo[i].si_boundto].d_un.d_val));
 	      putchar (' ' );
 	    }
@@ -15060,7 +15095,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 static ctf_sect_t *
 shdr_to_ctf_sect (ctf_sect_t *buf, Elf_Internal_Shdr *shdr, Filedata *filedata)
 {
-  buf->cts_name = SECTION_NAME_PRINT (shdr);
+  buf->cts_name = section_name_print (filedata, shdr);
   buf->cts_size = shdr->sh_size;
   buf->cts_entsize = shdr->sh_entsize;
 
@@ -15636,8 +15671,9 @@ free_debug_section (enum dwarf_section_display_enum debug)
 static bool
 display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * filedata)
 {
-  char * name = SECTION_NAME_VALID (section) ? SECTION_NAME (section) : "";
-  const char * print_name = printable_section_name (filedata, section);
+  const char *name = (section_name_valid (filedata, section)
+		      ? section_name (filedata, section) : "");
+  const char *print_name = printable_section_name (filedata, section);
   bfd_size_type length;
   bool result = true;
   int i;
@@ -15725,8 +15761,9 @@ initialise_dumps_byname (Filedata * filedata)
       bool any = false;
 
       for (i = 0; i < filedata->file_header.e_shnum; i++)
-	if (SECTION_NAME_VALID (filedata->section_headers + i)
-	    && streq (SECTION_NAME (filedata->section_headers + i), cur->name))
+	if (section_name_valid (filedata, filedata->section_headers + i)
+	    && streq (section_name (filedata, filedata->section_headers + i),
+		      cur->name))
 	  {
 	    request_dump_bynumber (&filedata->dump, i, cur->type);
 	    any = true;
@@ -18004,8 +18041,8 @@ process_mips_specific (Filedata * filedata)
 			tmp->tm_hour, tmp->tm_min, tmp->tm_sec);
 
 	      printf ("%3lu: ", (unsigned long) cnt);
-	      if (VALID_DYNAMIC_NAME (filedata, liblist.l_name))
-		print_symbol (20, GET_DYNAMIC_NAME (filedata, liblist.l_name));
+	      if (valid_dynamic_name (filedata, liblist.l_name))
+		print_symbol (20, get_dynamic_name (filedata, liblist.l_name));
 	      else
 		printf (_("<corrupt: %9ld>"), liblist.l_name);
 	      printf (" %s %#10lx %-7ld", timebuf, liblist.l_checksum,
@@ -18384,8 +18421,8 @@ process_mips_specific (Filedata * filedata)
 	      psym = & filedata->dynamic_symbols[iconf[cnt]];
 	      print_vma (psym->st_value, FULL_HEX);
 	      putchar (' ');
-	      if (VALID_DYNAMIC_NAME (filedata, psym->st_name))
-		print_symbol (25, GET_DYNAMIC_NAME (filedata, psym->st_name));
+	      if (valid_dynamic_name (filedata, psym->st_name))
+		print_symbol (25, get_dynamic_name (filedata, psym->st_name));
 	      else
 		printf (_("<corrupt: %14ld>"), psym->st_name);
 	    }
@@ -18509,9 +18546,9 @@ process_mips_specific (Filedata * filedata)
 			  get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)),
 			  get_symbol_index_type (filedata, psym->st_shndx));
 
-		  if (VALID_DYNAMIC_NAME (filedata, psym->st_name))
+		  if (valid_dynamic_name (filedata, psym->st_name))
 		    print_symbol (sym_width,
-				  GET_DYNAMIC_NAME (filedata, psym->st_name));
+				  get_dynamic_name (filedata, psym->st_name));
 		  else
 		    printf (_("<corrupt: %14ld>"), psym->st_name);
 		}
@@ -18597,9 +18634,9 @@ process_mips_specific (Filedata * filedata)
 	      printf (" %-7s %3s ",
 		      get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)),
 		      get_symbol_index_type (filedata, psym->st_shndx));
-	      if (VALID_DYNAMIC_NAME (filedata, psym->st_name))
+	      if (valid_dynamic_name (filedata, psym->st_name))
 		print_symbol (sym_width,
-			      GET_DYNAMIC_NAME (filedata, psym->st_name));
+			      get_dynamic_name (filedata, psym->st_name));
 	      else
 		printf (_("<corrupt: %14ld>"), psym->st_name);
 	    }
