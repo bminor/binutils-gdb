@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add a command-line option, -muse-unaligned-vector-move, for x86 target
+  to encode aligned vector move as unaligned vector move.
+
 * Add support for Cortex-R52+ for Arm.
 
 * Add support for Cortex-A510, Cortex-A710, Cortex-X2 for AArch64.

@@ -800,6 +800,9 @@ static unsigned int no_cond_jump_promotion = 0;
 /* Encode SSE instructions with VEX prefix.  */
 static unsigned int sse2avx;
 
+/* Encode aligned vector move as unaligned vector move.  */
+static unsigned int use_unaligned_vector_move;
+
 /* Encode scalar AVX instructions with specific vector length.  */
 static enum
   {
@@ -4073,6 +4076,30 @@ check_hle (void)
     }
 }
 
+/* Encode aligned vector move as unaligned vector move.  */
+
+static void
+encode_with_unaligned_vector_move (void)
+{
+  switch (i.tm.base_opcode)
+    {
+    case 0x28:
+      /* movaps/movapd/vmovaps/vmovapd.  */
+      if (i.tm.opcode_modifier.opcodespace == SPACE_0F
+	  && i.tm.opcode_modifier.opcodeprefix <= PREFIX_0X66)
+	i.tm.base_opcode = 0x10;
+      break;
+    case 0x6f:
+      /* movdqa/vmovdqa/vmovdqa64/vmovdqa32. */
+      if (i.tm.opcode_modifier.opcodespace == SPACE_0F
+	  && i.tm.opcode_modifier.opcodeprefix == PREFIX_0X66)
+	i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
+      break;
+    default:
+      break;
+    }
+}
+
 /* Try the shortest encoding by shortening operand size.  */
 
 static void
@@ -5055,6 +5082,9 @@ md_assemble (char *line)
 
   if (optimize && !i.no_optimize && i.tm.opcode_modifier.optimize)
     optimize_encoding ();
+
+  if (use_unaligned_vector_move)
+    encode_with_unaligned_vector_move ();
 
   if (!process_suffix ())
     return;
@@ -13060,6 +13090,7 @@ const char *md_shortopts = "qnO::";
 #define OPTION_MLFENCE_AFTER_LOAD (OPTION_MD_BASE + 31)
 #define OPTION_MLFENCE_BEFORE_INDIRECT_BRANCH (OPTION_MD_BASE + 32)
 #define OPTION_MLFENCE_BEFORE_RET (OPTION_MD_BASE + 33)
+#define OPTION_MUSE_UNALIGNED_VECTOR_MOVE (OPTION_MD_BASE + 34)
 
 struct option md_longopts[] =
 {
@@ -13081,6 +13112,7 @@ struct option md_longopts[] =
   {"mindex-reg", no_argument, NULL, OPTION_MINDEX_REG},
   {"mnaked-reg", no_argument, NULL, OPTION_MNAKED_REG},
   {"msse2avx", no_argument, NULL, OPTION_MSSE2AVX},
+  {"muse-unaligned-vector-move", no_argument, NULL, OPTION_MUSE_UNALIGNED_VECTOR_MOVE},
   {"msse-check", required_argument, NULL, OPTION_MSSE_CHECK},
   {"moperand-check", required_argument, NULL, OPTION_MOPERAND_CHECK},
   {"mavxscalar", required_argument, NULL, OPTION_MAVXSCALAR},
@@ -13379,6 +13411,10 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MSSE2AVX:
       sse2avx = 1;
+      break;
+
+    case OPTION_MUSE_UNALIGNED_VECTOR_MOVE:
+      use_unaligned_vector_move = 1;
       break;
 
     case OPTION_MSSE_CHECK:
@@ -13795,6 +13831,9 @@ md_show_usage (FILE *stream)
   show_arch (stream, 0, 0);
   fprintf (stream, _("\
   -msse2avx               encode SSE instructions with VEX prefix\n"));
+  fprintf (stream, _("\
+  -muse-unaligned-vector-move\n\
+                          encode aligned vector move as unaligned vector move\n"));
   fprintf (stream, _("\
   -msse-check=[none|error|warning] (default: warning)\n\
                           check SSE instructions\n"));
