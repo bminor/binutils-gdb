@@ -310,8 +310,10 @@ get_image_name (HANDLE h, void *address, int unicode)
 /* See nat/windows-nat.h.  */
 
 bool
-windows_process_info::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
+windows_process_info::handle_ms_vc_exception (const DEBUG_EVENT &current_event)
 {
+  const EXCEPTION_RECORD *rec = &current_event.u.Exception.ExceptionRecord;
+
   if (rec->NumberParameters >= 3
       && (rec->ExceptionInformation[0] & 0xffffffff) == 0x1000)
     {
@@ -352,7 +354,8 @@ windows_process_info::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
 #define MS_VC_EXCEPTION 0x406d1388
 
 handle_exception_result
-windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
+windows_process_info::handle_exception (DEBUG_EVENT &current_event,
+					struct target_waitstatus *ourstatus,
 					bool debug_exceptions)
 {
 #define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
@@ -480,7 +483,7 @@ windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
       break;
     case MS_VC_EXCEPTION:
       DEBUG_EXCEPTION_SIMPLE ("MS_VC_EXCEPTION");
-      if (handle_ms_vc_exception (rec))
+      if (handle_ms_vc_exception (current_event))
 	{
 	  ourstatus->set_stopped (GDB_SIGNAL_TRAP);
 	  result = HANDLE_EXCEPTION_IGNORED;
@@ -634,11 +637,11 @@ windows_process_info::add_dll (LPVOID load_addr)
 /* See nat/windows-nat.h.  */
 
 void
-windows_process_info::dll_loaded_event ()
+windows_process_info::dll_loaded_event (const DEBUG_EVENT &current_event)
 {
   gdb_assert (current_event.dwDebugEventCode == LOAD_DLL_DEBUG_EVENT);
 
-  LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
+  const LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   const char *dll_name;
 
   /* Try getting the DLL name via the lpImageName field of the event.

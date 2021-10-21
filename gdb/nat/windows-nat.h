@@ -40,10 +40,6 @@ struct pending_stop
   /* The target waitstatus we computed.  TARGET_WAITKIND_IGNORE if the
      thread does not have a pending stop.  */
   target_waitstatus status;
-
-  /* The event.  A few fields of this can be referenced after a stop,
-     and it seemed simplest to store the entire event.  */
-  DEBUG_EVENT event;
 };
 
 
@@ -98,6 +94,10 @@ struct windows_thread_info
    process them once the step has completed.  See PR gdb/22992.  */
   struct pending_stop pending_stop {};
 
+  /* The last Windows event returned by WaitForDebugEvent for this
+     thread.  */
+  DEBUG_EVENT last_event {};
+
   /* The context of the thread, including any manipulations.  */
   union
   {
@@ -143,10 +143,6 @@ struct windows_process_info
   DWORD main_thread_id = 0;
   enum gdb_signal last_sig = GDB_SIGNAL_0;
 
-  /* The current debug event from WaitForDebugEvent or from a pending
-     stop.  */
-  DEBUG_EVENT current_event {};
-
   /* Contents of $_siginfo */
   EXCEPTION_RECORD siginfo_er {};
 
@@ -170,7 +166,8 @@ struct windows_process_info
      a Cygwin signal.  Otherwise just print the string as a warning.
 
      This function must be supplied by the embedding application.  */
-  virtual DWORD handle_output_debug_string (struct target_waitstatus *ourstatus) = 0;
+  virtual DWORD handle_output_debug_string (const DEBUG_EVENT &current_event,
+					    struct target_waitstatus *ourstatus) = 0;
 
   /* Handle a DLL load event.
 
@@ -191,7 +188,7 @@ struct windows_process_info
 
      This function must be supplied by the embedding application.  */
 
-  virtual void handle_unload_dll () = 0;
+  virtual void handle_unload_dll (const DEBUG_EVENT &current_event) = 0;
 
   /* When EXCEPTION_ACCESS_VIOLATION is processed, we give the embedding
      application a chance to change it to be considered "unhandled".
@@ -201,11 +198,12 @@ struct windows_process_info
   virtual bool handle_access_violation (const EXCEPTION_RECORD *rec) = 0;
 
   handle_exception_result handle_exception
-       (struct target_waitstatus *ourstatus, bool debug_exceptions);
+      (DEBUG_EVENT &current_event,
+       struct target_waitstatus *ourstatus, bool debug_exceptions);
 
   /* Call to indicate that a DLL was loaded.  */
 
-  void dll_loaded_event ();
+  void dll_loaded_event (const DEBUG_EVENT &current_event);
 
   /* Iterate over all DLLs currently mapped by our inferior, and
      add them to our list of solibs.  */
@@ -222,7 +220,7 @@ private:
 
      Return true if the exception was handled; return false otherwise.  */
 
-  bool handle_ms_vc_exception (const EXCEPTION_RECORD *rec);
+  bool handle_ms_vc_exception (const DEBUG_EVENT &current_event);
 
   /* Iterate over all DLLs currently mapped by our inferior, looking for
      a DLL which is loaded at LOAD_ADDR.  If found, add the DLL to our
