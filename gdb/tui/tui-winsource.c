@@ -460,7 +460,7 @@ tui_source_window_base::update_breakpoint_info
       for (breakpoint *bp : all_breakpoints ())
 	{
 	  if (bp == being_deleted)
-	    return false;
+	    continue;
 
 	  for (bp_location *loc : bp->locations ())
 	    {
@@ -478,7 +478,6 @@ tui_source_window_base::update_breakpoint_info
 		    mode |= TUI_BP_HARDWARE;
 		}
 	    }
-	  return false;
 	}
 
       if (line->break_mode != mode)
