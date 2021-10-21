@@ -119,6 +119,7 @@ proc run_relax_twice_test {} {
 }
 
 if [istarget "riscv*-*-*"] {
+    run_dump_test "align-small-region"
     run_dump_test "call-relax"
     run_dump_test "pcgp-relax"
     run_dump_test "c-lui"
@@ -130,7 +131,6 @@ if [istarget "riscv*-*-*"] {
     run_dump_test "pcrel-lo-addend-3a"
     run_dump_test "pcrel-lo-addend-3b"
     run_dump_test "pcrel-lo-addend-3c"
-    run_dump_test "restart-relax"
     run_dump_test "attr-merge-arch-01"
     run_dump_test "attr-merge-arch-02"
     run_dump_test "attr-merge-arch-03"

@@ -131,9 +131,6 @@ struct riscv_elf_link_hash_table
   /* The index of the last unused .rel.iplt slot.  */
   bfd_vma last_iplt_index;
 
-  /* Re-run the relaxations from relax pass 0 if TRUE.  */
-  bool restart_relax;
-
   /* The data segment phase, don't relax the section
      when it is exp_seg_relro_adjust.  */
   int *data_segment_phase;
@@ -405,7 +402,6 @@ riscv_elf_link_hash_table_create (bfd *abfd)
     }
 
   ret->max_alignment = (bfd_vma) -1;
-  ret->restart_relax = false;
 
   /* Create hash table for local ifunc.  */
   ret->loc_hash_table = htab_try_create (1024,
@@ -3923,115 +3919,6 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   return false;
 }
 
-/* Delete some bytes from a section while relaxing.  */
-
-static bool
-riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count,
-			  struct bfd_link_info *link_info)
-{
-  unsigned int i, symcount;
-  bfd_vma toaddr = sec->size;
-  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (abfd);
-  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  unsigned int sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
-  struct bfd_elf_section_data *data = elf_section_data (sec);
-  bfd_byte *contents = data->this_hdr.contents;
-
-  /* Actually delete the bytes.  */
-  sec->size -= count;
-  memmove (contents + addr, contents + addr + count, toaddr - addr - count);
-
-  /* Adjust the location of all of the relocs.  Note that we need not
-     adjust the addends, since all PC-relative references must be against
-     symbols, which we will adjust below.  */
-  for (i = 0; i < sec->reloc_count; i++)
-    if (data->relocs[i].r_offset > addr && data->relocs[i].r_offset < toaddr)
-      data->relocs[i].r_offset -= count;
-
-  /* Adjust the local symbols defined in this section.  */
-  for (i = 0; i < symtab_hdr->sh_info; i++)
-    {
-      Elf_Internal_Sym *sym = (Elf_Internal_Sym *) symtab_hdr->contents + i;
-      if (sym->st_shndx == sec_shndx)
-	{
-	  /* If the symbol is in the range of memory we just moved, we
-	     have to adjust its value.  */
-	  if (sym->st_value > addr && sym->st_value <= toaddr)
-	    sym->st_value -= count;
-
-	  /* If the symbol *spans* the bytes we just deleted (i.e. its
-	     *end* is in the moved bytes but its *start* isn't), then we
-	     must adjust its size.
-
-	     This test needs to use the original value of st_value, otherwise
-	     we might accidentally decrease size when deleting bytes right
-	     before the symbol.  But since deleted relocs can't span across
-	     symbols, we can't have both a st_value and a st_size decrease,
-	     so it is simpler to just use an else.  */
-	  else if (sym->st_value <= addr
-		   && sym->st_value + sym->st_size > addr
-		   && sym->st_value + sym->st_size <= toaddr)
-	    sym->st_size -= count;
-	}
-    }
-
-  /* Now adjust the global symbols defined in this section.  */
-  symcount = ((symtab_hdr->sh_size / sizeof (ElfNN_External_Sym))
-	      - symtab_hdr->sh_info);
-
-  for (i = 0; i < symcount; i++)
-    {
-      struct elf_link_hash_entry *sym_hash = sym_hashes[i];
-
-      /* The '--wrap SYMBOL' option is causing a pain when the object file,
-	 containing the definition of __wrap_SYMBOL, includes a direct
-	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference
-	 the same symbol (which is __wrap_SYMBOL), but still exist as two
-	 different symbols in 'sym_hashes', we don't want to adjust
-	 the global symbol __wrap_SYMBOL twice.
-
-	 The same problem occurs with symbols that are versioned_hidden, as
-	 foo becomes an alias for foo@BAR, and hence they need the same
-	 treatment.  */
-      if (link_info->wrap_hash != NULL
-	  || sym_hash->versioned != unversioned)
-	{
-	  struct elf_link_hash_entry **cur_sym_hashes;
-
-	  /* Loop only over the symbols which have already been checked.  */
-	  for (cur_sym_hashes = sym_hashes; cur_sym_hashes < &sym_hashes[i];
-	       cur_sym_hashes++)
-	    {
-	      /* If the current symbol is identical to 'sym_hash', that means
-		 the symbol was already adjusted (or at least checked).  */
-	      if (*cur_sym_hashes == sym_hash)
-		break;
-	    }
-	  /* Don't adjust the symbol again.  */
-	  if (cur_sym_hashes < &sym_hashes[i])
-	    continue;
-	}
-
-      if ((sym_hash->root.type == bfd_link_hash_defined
-	   || sym_hash->root.type == bfd_link_hash_defweak)
-	  && sym_hash->root.u.def.section == sec)
-	{
-	  /* As above, adjust the value if needed.  */
-	  if (sym_hash->root.u.def.value > addr
-	      && sym_hash->root.u.def.value <= toaddr)
-	    sym_hash->root.u.def.value -= count;
-
-	  /* As above, adjust the size if needed.  */
-	  else if (sym_hash->root.u.def.value <= addr
-		   && sym_hash->root.u.def.value + sym_hash->size > addr
-		   && sym_hash->root.u.def.value + sym_hash->size <= toaddr)
-	    sym_hash->size -= count;
-	}
-    }
-
-  return true;
-}
-
 /* A second format for recording PC-relative hi relocations.  This stores the
    information required to relax them to GP-relative addresses.  */
 
@@ -4162,6 +4049,155 @@ riscv_find_pcgp_lo_reloc (riscv_pcgp_relocs *p, bfd_vma hi_sec_off)
   return false;
 }
 
+static void
+riscv_update_pcgp_relocs (riscv_pcgp_relocs *p, asection *deleted_sec,
+			  bfd_vma deleted_addr, size_t deleted_count)
+{
+  /* Bytes have already been deleted and toaddr should match the old section
+     size for our checks, so adjust it here.  */
+  bfd_vma toaddr = deleted_sec->size + deleted_count;
+  riscv_pcgp_lo_reloc *l;
+  riscv_pcgp_hi_reloc *h;
+
+  /* Update section offsets of corresponding pcrel_hi relocs for the pcrel_lo
+     entries where they occur after the deleted bytes.  */
+  for (l = p->lo; l != NULL; l = l->next)
+    if (l->hi_sec_off > deleted_addr
+	&& l->hi_sec_off < toaddr)
+      l->hi_sec_off -= deleted_count;
+
+  /* Update both section offsets, and symbol values of pcrel_hi relocs where
+     these values occur after the deleted bytes.  */
+  for (h = p->hi; h != NULL; h = h->next)
+    {
+      if (h->hi_sec_off > deleted_addr
+	  && h->hi_sec_off < toaddr)
+	h->hi_sec_off -= deleted_count;
+      if (h->sym_sec == deleted_sec
+	  && h->hi_addr > deleted_addr
+	  && h->hi_addr < toaddr)
+      h->hi_addr -= deleted_count;
+    }
+}
+
+/* Delete some bytes from a section while relaxing.  */
+
+static bool
+riscv_relax_delete_bytes (bfd *abfd,
+			  asection *sec,
+			  bfd_vma addr,
+			  size_t count,
+			  struct bfd_link_info *link_info,
+			  riscv_pcgp_relocs *p)
+{
+  unsigned int i, symcount;
+  bfd_vma toaddr = sec->size;
+  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (abfd);
+  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  unsigned int sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
+  struct bfd_elf_section_data *data = elf_section_data (sec);
+  bfd_byte *contents = data->this_hdr.contents;
+
+  /* Actually delete the bytes.  */
+  sec->size -= count;
+  memmove (contents + addr, contents + addr + count, toaddr - addr - count);
+
+  /* Adjust the location of all of the relocs.  Note that we need not
+     adjust the addends, since all PC-relative references must be against
+     symbols, which we will adjust below.  */
+  for (i = 0; i < sec->reloc_count; i++)
+    if (data->relocs[i].r_offset > addr && data->relocs[i].r_offset < toaddr)
+      data->relocs[i].r_offset -= count;
+
+  /* Adjust the hi_sec_off, and the hi_addr of any entries in the pcgp relocs
+     table for which these values occur after the deleted bytes.  */
+  if (p)
+    riscv_update_pcgp_relocs (p, sec, addr, count);
+
+  /* Adjust the local symbols defined in this section.  */
+  for (i = 0; i < symtab_hdr->sh_info; i++)
+    {
+      Elf_Internal_Sym *sym = (Elf_Internal_Sym *) symtab_hdr->contents + i;
+      if (sym->st_shndx == sec_shndx)
+	{
+	  /* If the symbol is in the range of memory we just moved, we
+	     have to adjust its value.  */
+	  if (sym->st_value > addr && sym->st_value <= toaddr)
+	    sym->st_value -= count;
+
+	  /* If the symbol *spans* the bytes we just deleted (i.e. its
+	     *end* is in the moved bytes but its *start* isn't), then we
+	     must adjust its size.
+
+	     This test needs to use the original value of st_value, otherwise
+	     we might accidentally decrease size when deleting bytes right
+	     before the symbol.  But since deleted relocs can't span across
+	     symbols, we can't have both a st_value and a st_size decrease,
+	     so it is simpler to just use an else.  */
+	  else if (sym->st_value <= addr
+		   && sym->st_value + sym->st_size > addr
+		   && sym->st_value + sym->st_size <= toaddr)
+	    sym->st_size -= count;
+	}
+    }
+
+  /* Now adjust the global symbols defined in this section.  */
+  symcount = ((symtab_hdr->sh_size / sizeof (ElfNN_External_Sym))
+	      - symtab_hdr->sh_info);
+
+  for (i = 0; i < symcount; i++)
+    {
+      struct elf_link_hash_entry *sym_hash = sym_hashes[i];
+
+      /* The '--wrap SYMBOL' option is causing a pain when the object file,
+	 containing the definition of __wrap_SYMBOL, includes a direct
+	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference
+	 the same symbol (which is __wrap_SYMBOL), but still exist as two
+	 different symbols in 'sym_hashes', we don't want to adjust
+	 the global symbol __wrap_SYMBOL twice.
+
+	 The same problem occurs with symbols that are versioned_hidden, as
+	 foo becomes an alias for foo@BAR, and hence they need the same
+	 treatment.  */
+      if (link_info->wrap_hash != NULL
+	  || sym_hash->versioned != unversioned)
+	{
+	  struct elf_link_hash_entry **cur_sym_hashes;
+
+	  /* Loop only over the symbols which have already been checked.  */
+	  for (cur_sym_hashes = sym_hashes; cur_sym_hashes < &sym_hashes[i];
+	       cur_sym_hashes++)
+	    {
+	      /* If the current symbol is identical to 'sym_hash', that means
+		 the symbol was already adjusted (or at least checked).  */
+	      if (*cur_sym_hashes == sym_hash)
+		break;
+	    }
+	  /* Don't adjust the symbol again.  */
+	  if (cur_sym_hashes < &sym_hashes[i])
+	    continue;
+	}
+
+      if ((sym_hash->root.type == bfd_link_hash_defined
+	   || sym_hash->root.type == bfd_link_hash_defweak)
+	  && sym_hash->root.u.def.section == sec)
+	{
+	  /* As above, adjust the value if needed.  */
+	  if (sym_hash->root.u.def.value > addr
+	      && sym_hash->root.u.def.value <= toaddr)
+	    sym_hash->root.u.def.value -= count;
+
+	  /* As above, adjust the size if needed.  */
+	  else if (sym_hash->root.u.def.value <= addr
+		   && sym_hash->root.u.def.value + sym_hash->size > addr
+		   && sym_hash->root.u.def.value + sym_hash->size <= toaddr)
+	    sym_hash->size -= count;
+	}
+    }
+
+  return true;
+}
+
 typedef bool (*relax_func_t) (bfd *, asection *, asection *,
 			      struct bfd_link_info *,
 			      Elf_Internal_Rela *,
@@ -4179,7 +4215,7 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 		       bfd_vma max_alignment,
 		       bfd_vma reserve_size ATTRIBUTE_UNUSED,
 		       bool *again,
-		       riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
+		       riscv_pcgp_relocs *pcgp_relocs,
 		       bool undefined_weak ATTRIBUTE_UNUSED)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
@@ -4243,7 +4279,7 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
   /* Delete unnecessary JALR.  */
   *again = true;
   return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + len, 8 - len,
-				   link_info);
+				   link_info, pcgp_relocs);
 }
 
 /* Traverse all output sections and return the max alignment.  */
@@ -4275,7 +4311,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
 		      bfd_vma max_alignment,
 		      bfd_vma reserve_size,
 		      bool *again,
-		      riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
+		      riscv_pcgp_relocs *pcgp_relocs,
 		      bool undefined_weak)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
@@ -4337,7 +4373,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
 	  *again = true;
 	  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4,
-					   link_info);
+					   link_info, pcgp_relocs);
 
 	default:
 	  abort ();
@@ -4370,7 +4406,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
 
       *again = true;
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 2,
-				       link_info);
+				       link_info, pcgp_relocs);
     }
 
   return true;
@@ -4388,7 +4424,7 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
 			 bfd_vma max_alignment ATTRIBUTE_UNUSED,
 			 bfd_vma reserve_size ATTRIBUTE_UNUSED,
 			 bool *again,
-			 riscv_pcgp_relocs *prcel_relocs ATTRIBUTE_UNUSED,
+			 riscv_pcgp_relocs *pcgp_relocs,
 			 bool undefined_weak ATTRIBUTE_UNUSED)
 {
   /* See if this symbol is in range of tp.  */
@@ -4411,7 +4447,8 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
       /* We can delete the unnecessary instruction and reloc.  */
       rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
       *again = true;
-      return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info);
+      return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
+				       pcgp_relocs);
 
     default:
       abort ();
@@ -4430,7 +4467,7 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 			bfd_vma max_alignment ATTRIBUTE_UNUSED,
 			bfd_vma reserve_size ATTRIBUTE_UNUSED,
 			bool *again ATTRIBUTE_UNUSED,
-			riscv_pcgp_relocs *pcrel_relocs ATTRIBUTE_UNUSED,
+			riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
 			bool undefined_weak ATTRIBUTE_UNUSED)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
@@ -4441,6 +4478,9 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
   symval -= rel->r_addend;
   bfd_vma aligned_addr = ((symval - 1) & ~(alignment - 1)) + alignment;
   bfd_vma nop_bytes = aligned_addr - symval;
+
+  /* Once we've handled an R_RISCV_ALIGN, we can't relax anything else.  */
+  sec->sec_flg0 = true;
 
   /* Make sure there are enough NOPs to actually achieve the alignment.  */
   if (rel->r_addend < nop_bytes)
@@ -4471,7 +4511,8 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 
   /* Delete the excess bytes.  */
   return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + nop_bytes,
-				   rel->r_addend - nop_bytes, link_info);
+				   rel->r_addend - nop_bytes, link_info,
+				   NULL);
 }
 
 /* Relax PC-relative references to GP-relative references.  */
@@ -4637,15 +4678,14 @@ _bfd_riscv_relax_delete (bfd *abfd,
 			 bfd_vma symval ATTRIBUTE_UNUSED,
 			 bfd_vma max_alignment ATTRIBUTE_UNUSED,
 			 bfd_vma reserve_size ATTRIBUTE_UNUSED,
-			 bool *again,
+			 bool *again ATTRIBUTE_UNUSED,
 			 riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
 			 bool undefined_weak ATTRIBUTE_UNUSED)
 {
   if (!riscv_relax_delete_bytes (abfd, sec, rel->r_offset, rel->r_addend,
-				 link_info))
+				 link_info, NULL))
     return false;
   rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
-  *again = true;
   return true;
 }
 
@@ -4660,35 +4700,11 @@ bfd_elfNN_riscv_set_data_segment_info (struct bfd_link_info *info,
   htab->data_segment_phase = data_segment_phase;
 }
 
-/* Called by after_allocation to check if we need to run the whole
-   relaxations again.  */
-
-bool
-bfd_elfNN_riscv_restart_relax_sections (struct bfd_link_info *info)
-{
-  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
-  bool restart = htab->restart_relax;
-  /* Reset the flag.  */
-  htab->restart_relax = false;
-  return restart;
-}
-
 /* Relax a section.
 
-   Pass 0: Shortens code sequences for LUI/CALL/TPREL relocs.
-   Pass 1: Shortens code sequences for PCREL relocs.
-   Pass 2: Deletes the bytes that pass 1 made obsolete.
-   Pass 3: Which cannot be disabled, handles code alignment directives.
-
-   The `again` is used to determine whether the relax pass itself needs to
-   run again.  And the `restart_relax` is used to determine if we need to
-   run the whole relax passes again from 0 to 2.  Once we have deleted the
-   code between relax pass 0 to 2, the restart_relax will be set to TRUE,
-   and we should run the whole relaxations again to give them more chances
-   to shorten the code.
-
-   Since we can't relax anything else once we start to handle the alignments,
-   we will only enter into the relax pass 3 when the restart_relax is FALSE.  */
+   Pass 0: Shortens code sequences for LUI/CALL/TPREL/PCREL relocs.
+   Pass 1: Deletes the bytes that PCREL relaxation in pass 0 made obsolete.
+   Pass 2: Which cannot be disabled, handles code alignment directives.  */
 
 static bool
 _bfd_riscv_relax_section (bfd *abfd, asection *sec,
@@ -4707,12 +4723,11 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   *again = false;
 
   if (bfd_link_relocatable (info)
+      || sec->sec_flg0
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (info->disable_target_specific_optimizations
-	  && info->relax_pass < 2)
-      || (htab->restart_relax
-	  && info->relax_pass == 3)
+	  && info->relax_pass == 0)
       /* The exp_seg_relro_adjust is enum phase_enum (0x4),
 	 and defined in ld/ldexp.h.  */
       || *(htab->data_segment_phase) == 4)
@@ -4765,24 +4780,14 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		   || type == R_RISCV_TPREL_LO12_I
 		   || type == R_RISCV_TPREL_LO12_S)
 	    relax_func = _bfd_riscv_relax_tls_le;
+	  else if (!bfd_link_pic (info)
+		   && (type == R_RISCV_PCREL_HI20
+		       || type == R_RISCV_PCREL_LO12_I
+		       || type == R_RISCV_PCREL_LO12_S))
+	    relax_func = _bfd_riscv_relax_pc;
 	  else
 	    continue;
-	}
-      else if (info->relax_pass == 1
-	       && !bfd_link_pic (info)
-	       && (type == R_RISCV_PCREL_HI20
-		   || type == R_RISCV_PCREL_LO12_I
-		   || type == R_RISCV_PCREL_LO12_S))
-	relax_func = _bfd_riscv_relax_pc;
-      else if (info->relax_pass == 2 && type == R_RISCV_DELETE)
-	relax_func = _bfd_riscv_relax_delete;
-      else if (info->relax_pass == 3 && type == R_RISCV_ALIGN)
-	relax_func = _bfd_riscv_relax_align;
-      else
-	continue;
 
-      if (info->relax_pass < 2)
-	{
 	  /* Only relax this reloc if it is paired with R_RISCV_RELAX.  */
 	  if (i == sec->reloc_count - 1
 	      || ELFNN_R_TYPE ((rel + 1)->r_info) != R_RISCV_RELAX
@@ -4792,6 +4797,12 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  /* Skip over the R_RISCV_RELAX.  */
 	  i++;
 	}
+      else if (info->relax_pass == 1 && type == R_RISCV_DELETE)
+	relax_func = _bfd_riscv_relax_delete;
+      else if (info->relax_pass == 2 && type == R_RISCV_ALIGN)
+	relax_func = _bfd_riscv_relax_align;
+      else
+	continue;
 
       data->relocs = relocs;
 
@@ -4953,9 +4964,6 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   if (relocs != data->relocs)
     free (relocs);
   riscv_free_pcgp_relocs (&pcgp_relocs, abfd, sec);
-
-  if (*again)
-    htab->restart_relax = true;
 
   return ret;
 }
