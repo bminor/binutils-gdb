@@ -7764,10 +7764,10 @@ breakpoint_hit_catch_fork (const struct bp_location *bl,
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
 
-  if (ws->kind != TARGET_WAITKIND_FORKED)
+  if (ws->kind () != TARGET_WAITKIND_FORKED)
     return 0;
 
-  c->forked_inferior_pid = ws->value.related_pid;
+  c->forked_inferior_pid = ws->child_ptid ();
   return 1;
 }
 
@@ -7880,10 +7880,10 @@ breakpoint_hit_catch_vfork (const struct bp_location *bl,
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
 
-  if (ws->kind != TARGET_WAITKIND_VFORKED)
+  if (ws->kind () != TARGET_WAITKIND_VFORKED)
     return 0;
 
-  c->forked_inferior_pid = ws->value.related_pid;
+  c->forked_inferior_pid = ws->child_ptid ();
   return 1;
 }
 
@@ -8002,7 +8002,7 @@ breakpoint_hit_catch_solib (const struct bp_location *bl,
 {
   struct solib_catchpoint *self = (struct solib_catchpoint *) bl->owner;
 
-  if (ws->kind == TARGET_WAITKIND_LOADED)
+  if (ws->kind () == TARGET_WAITKIND_LOADED)
     return 1;
 
   for (breakpoint *other : all_breakpoints ())
@@ -8278,10 +8278,10 @@ breakpoint_hit_catch_exec (const struct bp_location *bl,
 {
   struct exec_catchpoint *c = (struct exec_catchpoint *) bl->owner;
 
-  if (ws->kind != TARGET_WAITKIND_EXECD)
+  if (ws->kind () != TARGET_WAITKIND_EXECD)
     return 0;
 
-  c->exec_pathname = make_unique_xstrdup (ws->value.execd_pathname);
+  c->exec_pathname = make_unique_xstrdup (ws->execd_pathname ());
   return 1;
 }
 
@@ -9783,8 +9783,8 @@ breakpoint_hit_ranged_breakpoint (const struct bp_location *bl,
 				  CORE_ADDR bp_addr,
 				  const struct target_waitstatus *ws)
 {
-  if (ws->kind != TARGET_WAITKIND_STOPPED
-      || ws->value.sig != GDB_SIGNAL_TRAP)
+  if (ws->kind () != TARGET_WAITKIND_STOPPED
+      || ws->sig () != GDB_SIGNAL_TRAP)
     return 0;
 
   return breakpoint_address_match_range (bl->pspace->aspace, bl->address,
@@ -12450,8 +12450,8 @@ bkpt_breakpoint_hit (const struct bp_location *bl,
 		     const address_space *aspace, CORE_ADDR bp_addr,
 		     const struct target_waitstatus *ws)
 {
-  if (ws->kind != TARGET_WAITKIND_STOPPED
-      || ws->value.sig != GDB_SIGNAL_TRAP)
+  if (ws->kind () != TARGET_WAITKIND_STOPPED
+      || ws->sig () != GDB_SIGNAL_TRAP)
     return 0;
 
   if (!breakpoint_address_match (bl->pspace->aspace, bl->address,

@@ -575,7 +575,7 @@ linux_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 		 will notice a pending event, and bypasses actually
 		 resuming the inferior.  */
 	      parent_lp->status = 0;
-	      parent_lp->waitstatus.kind = TARGET_WAITKIND_VFORK_DONE;
+	      parent_lp->waitstatus.set_vfork_done ();
 	      parent_lp->stopped = 1;
 
 	      /* If we're in async mode, need to tell the event loop
@@ -1257,7 +1257,7 @@ get_detach_signal (struct lwp_info *lp)
      signal pass state).  Normally SIGTRAP isn't set to pass state, so
      this is really a corner case.  */
 
-  if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
+  if (lp->waitstatus.kind () != TARGET_WAITKIND_IGNORE)
     signo = GDB_SIGNAL_0; /* a pending ptrace event, not a real signal.  */
   else if (lp->status)
     signo = gdb_signal_from_host (WSTOPSIG (lp->status));
@@ -1268,7 +1268,7 @@ get_detach_signal (struct lwp_info *lp)
       if (target_is_non_stop_p () && !tp->executing ())
 	{
 	  if (tp->has_pending_waitstatus ())
-	    signo = tp->pending_waitstatus ().value.sig;
+	    signo = tp->pending_waitstatus ().sig ();
 	  else
 	    signo = tp->stop_signal ();
 	}
@@ -1520,7 +1520,7 @@ check_ptrace_stopped_lwp_gone (struct lwp_info *lp)
     {
       lp->stop_reason = TARGET_STOPPED_BY_NO_REASON;
       lp->status = 0;
-      lp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
+      lp->waitstatus.set_ignore ();
       return 1;
     }
   return 0;
@@ -1793,8 +1793,12 @@ linux_handle_syscall_trap (struct lwp_info *lp, int stopping)
       if (catching_syscall_number (syscall_number))
 	{
 	  /* Alright, an event to report.  */
-	  ourstatus->kind = lp->syscall_state;
-	  ourstatus->value.syscall_number = syscall_number;
+	  if (lp->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY)
+	    ourstatus->set_syscall_entry (syscall_number);
+	  else if (lp->syscall_state == TARGET_WAITKIND_SYSCALL_RETURN)
+	    ourstatus->set_syscall_return (syscall_number);
+	  else
+	    gdb_assert_not_reached ("unexpected syscall state");
 
 	  linux_nat_debug_printf
 	    ("stopping for %s of syscall %d for LWP %ld",
@@ -1886,7 +1890,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 			    _("wait returned unexpected status 0x%x"), status);
 	}
 
-      ourstatus->value.related_pid = ptid_t (new_pid, new_pid);
+      ptid_t child_ptid (new_pid, new_pid);
 
       if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK)
 	{
@@ -1918,21 +1922,21 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	  /* Report as spurious, so that infrun doesn't want to follow
 	     this fork.  We're actually doing an infcall in
 	     linux-fork.c.  */
-	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  ourstatus->set_spurious ();
 
 	  /* Report the stop to the core.  */
 	  return 0;
 	}
 
       if (event == PTRACE_EVENT_FORK)
-	ourstatus->kind = TARGET_WAITKIND_FORKED;
+	ourstatus->set_forked (child_ptid);
       else if (event == PTRACE_EVENT_VFORK)
-	ourstatus->kind = TARGET_WAITKIND_VFORKED;
+	ourstatus->set_vforked (child_ptid);
       else if (event == PTRACE_EVENT_CLONE)
 	{
 	  struct lwp_info *new_lp;
 
-	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	  ourstatus->set_ignore ();
 
 	  linux_nat_debug_printf
 	    ("Got clone event from LWP %d, new child is LWP %ld", pid, new_pid);
@@ -1981,7 +1985,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	    }
 	  else if (report_thread_events)
 	    {
-	      new_lp->waitstatus.kind = TARGET_WAITKIND_THREAD_CREATED;
+	      new_lp->waitstatus.set_thread_created ();
 	      new_lp->status = status;
 	    }
 
@@ -1999,9 +2003,8 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	 inferior.  */
       maybe_close_proc_mem_file (lp->ptid.pid ());
 
-      ourstatus->kind = TARGET_WAITKIND_EXECD;
-      ourstatus->value.execd_pathname
-	= xstrdup (linux_proc_pid_to_exec_file (pid));
+      ourstatus->set_execd
+	(make_unique_xstrdup (linux_proc_pid_to_exec_file (pid)));
 
       /* The thread that execed must have been resumed, but, when a
 	 thread execs, it changes its tid to the tgid, and the old
@@ -2018,7 +2021,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	    ("Got expected PTRACE_EVENT_VFORK_DONE from LWP %ld: stopping",
 	     lp->ptid.lwp ());
 
-	  ourstatus->kind = TARGET_WAITKIND_VFORK_DONE;
+	  ourstatus->set_vfork_done ();
 	  return 0;
 	}
 
@@ -2538,7 +2541,7 @@ lwp_status_pending_p (struct lwp_info *lp)
   /* We check for lp->waitstatus in addition to lp->status, because we
      can have pending process exits recorded in lp->status and
      W_EXITCODE(0,0) happens to be 0.  */
-  return lp->status != 0 || lp->waitstatus.kind != TARGET_WAITKIND_IGNORE;
+  return lp->status != 0 || lp->waitstatus.kind () != TARGET_WAITKIND_IGNORE;
 }
 
 /* Select the Nth LWP that has had an event.  */
@@ -3085,9 +3088,9 @@ filter_exit_event (struct lwp_info *event_child,
   if (num_lwps (ptid.pid ()) > 1)
     {
       if (report_thread_events)
-	ourstatus->kind = TARGET_WAITKIND_THREAD_EXITED;
+	ourstatus->set_thread_exited (0);
       else
-	ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	ourstatus->set_ignore ();
 
       exit_lwp (event_child);
     }
@@ -3195,7 +3198,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 	{
 	  linux_nat_debug_printf ("exit (no resumed LWP)");
 
-	  ourstatus->kind = TARGET_WAITKIND_NO_RESUMED;
+	  ourstatus->set_no_resumed ();
 
 	  restore_child_signals_mask (&prev_mask);
 	  return minus_one_ptid;
@@ -3207,7 +3210,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 	{
 	  linux_nat_debug_printf ("exit (ignore)");
 
-	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	  ourstatus->set_ignore ();
 	  restore_child_signals_mask (&prev_mask);
 	  return minus_one_ptid;
 	}
@@ -3283,10 +3286,10 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 			      target_pid_to_str (lp->ptid).c_str ());
     }
 
-  if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
+  if (lp->waitstatus.kind () != TARGET_WAITKIND_IGNORE)
     {
       *ourstatus = lp->waitstatus;
-      lp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
+      lp->waitstatus.set_ignore ();
     }
   else
     store_waitstatus (ourstatus, status);
@@ -3296,22 +3299,22 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
   restore_child_signals_mask (&prev_mask);
 
   if (last_resume_kind == resume_stop
-      && ourstatus->kind == TARGET_WAITKIND_STOPPED
+      && ourstatus->kind () == TARGET_WAITKIND_STOPPED
       && WSTOPSIG (status) == SIGSTOP)
     {
       /* A thread that has been requested to stop by GDB with
 	 target_stop, and it stopped cleanly, so report as SIG0.  The
 	 use of SIGSTOP is an implementation detail.  */
-      ourstatus->value.sig = GDB_SIGNAL_0;
+      ourstatus->set_stopped (GDB_SIGNAL_0);
     }
 
-  if (ourstatus->kind == TARGET_WAITKIND_EXITED
-      || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
+  if (ourstatus->kind () == TARGET_WAITKIND_EXITED
+      || ourstatus->kind () == TARGET_WAITKIND_SIGNALLED)
     lp->core = -1;
   else
     lp->core = linux_common_core_of_thread (lp->ptid);
 
-  if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+  if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
     return filter_exit_event (lp, ourstatus);
 
   return lp->ptid;
@@ -3409,8 +3412,8 @@ linux_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
      may be more.  If we requested a specific lwp or process, also
      assume there may be more.  */
   if (target_is_async_p ()
-      && ((ourstatus->kind != TARGET_WAITKIND_IGNORE
-	   && ourstatus->kind != TARGET_WAITKIND_NO_RESUMED)
+      && ((ourstatus->kind () != TARGET_WAITKIND_IGNORE
+	   && ourstatus->kind () != TARGET_WAITKIND_NO_RESUMED)
 	  || ptid != minus_one_ptid))
     async_file_mark ();
 
@@ -3508,10 +3511,10 @@ kill_unfollowed_fork_children (struct inferior *inf)
     {
       struct target_waitstatus *ws = &thread->pending_follow;
 
-      if (ws->kind == TARGET_WAITKIND_FORKED
-	  || ws->kind == TARGET_WAITKIND_VFORKED)
+      if (ws->kind () == TARGET_WAITKIND_FORKED
+	  || ws->kind () == TARGET_WAITKIND_VFORKED)
 	{
-	  ptid_t child_ptid = ws->value.related_pid;
+	  ptid_t child_ptid = ws->child_ptid ();
 	  int child_pid = child_ptid.pid ();
 	  int child_lwp = child_ptid.lwp ();
 

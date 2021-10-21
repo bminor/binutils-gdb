@@ -520,8 +520,7 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			      safe_strerror (save_errno));
 
 	  /* Claim it exited with unknown signal.  */
-	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-	  ourstatus->value.sig = GDB_SIGNAL_UNKNOWN;
+	  ourstatus->set_signalled (GDB_SIGNAL_UNKNOWN);
 	  return inferior_ptid;
 	}
 
@@ -535,10 +534,10 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   /* stop after load" status.  */
   if (status == 0x57c)
-    ourstatus->kind = TARGET_WAITKIND_LOADED;
+    ourstatus->set_loaded ();
   /* signal 0.  I have no idea why wait(2) returns with this status word.  */
   else if (status == 0x7f)
-    ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+    ourstatus->set_spurious ();
   /* A normal waitstatus.  Let the usual macros deal with it.  */
   else
     store_waitstatus (ourstatus, status);

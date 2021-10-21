@@ -626,13 +626,13 @@ gnu_nat_target::_proc_free (struct proc *proc)
 static struct inf *
 make_inf (void)
 {
-  struct inf *inf = XNEW (struct inf);
+  struct inf *inf = new struct inf;
 
   inf->task = 0;
   inf->threads = 0;
   inf->threads_up_to_date = 0;
   inf->pid = 0;
-  inf->wait.status.kind = TARGET_WAITKIND_SPURIOUS;
+  inf->wait.status.set_spurious ();
   inf->wait.thread = 0;
   inf->wait.exc.handler = MACH_PORT_NULL;
   inf->wait.exc.reply = MACH_PORT_NULL;
@@ -661,7 +661,7 @@ void
 gnu_nat_target::inf_clear_wait (struct inf *inf)
 {
   inf_debug (inf, "clearing wait");
-  inf->wait.status.kind = TARGET_WAITKIND_SPURIOUS;
+  inf->wait.status.set_spurious ();
   inf->wait.thread = 0;
   inf->wait.suppress = 0;
   if (inf->wait.exc.handler != MACH_PORT_NULL)
@@ -1326,8 +1326,8 @@ gnu_nat_target::inf_signal (struct inf *inf, enum gdb_signal sig)
     {
       struct inf_wait *w = &inf->wait;
 
-      if (w->status.kind == TARGET_WAITKIND_STOPPED
-	  && w->status.value.sig == sig
+      if (w->status.kind () == TARGET_WAITKIND_STOPPED
+	  && w->status.sig () == sig
 	  && w->thread && !w->thread->aborted)
 	/* We're passing through the last exception we received.  This is
 	   kind of bogus, because exceptions are per-thread whereas gdb
@@ -1549,7 +1549,7 @@ rewait:
     /* We're waiting for the inferior to finish execing.  */
     {
       struct inf_wait *w = &inf->wait;
-      enum target_waitkind kind = w->status.kind;
+      enum target_waitkind kind = w->status.kind ();
 
       if (kind == TARGET_WAITKIND_SPURIOUS)
 	/* Since gdb is actually counting the number of times the inferior
@@ -1560,7 +1560,7 @@ rewait:
 	  inf_debug (inf, "pending_execs, ignoring minor event");
 	}
       else if (kind == TARGET_WAITKIND_STOPPED
-	       && w->status.value.sig == GDB_SIGNAL_TRAP)
+	       && w->status.sig () == GDB_SIGNAL_TRAP)
 	/* Ah hah!  A SIGTRAP from the inferior while starting up probably
 	   means we've succesfully completed an exec!  */
 	{
@@ -1585,7 +1585,7 @@ rewait:
     }
 
   /* Pass back out our results.  */
-  memcpy (status, &inf->wait.status, sizeof (*status));
+  *status = inf->wait.status;
 
   thread = inf->wait.thread;
   if (thread)
@@ -1608,7 +1608,7 @@ rewait:
 
   if (thread
       && ptid != minus_one_ptid
-      && status->kind != TARGET_WAITKIND_SPURIOUS
+      && status->kind () != TARGET_WAITKIND_SPURIOUS
       && inf->pause_sc == 0 && thread->pause_sc == 0)
     /* If something actually happened to THREAD, make sure we
        suspend it.  */
@@ -1658,12 +1658,10 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
       /* Store away the details; this will destroy any previous info.  */
       inf->wait.thread = thread;
 
-      inf->wait.status.kind = TARGET_WAITKIND_STOPPED;
-
       if (exception == EXC_BREAKPOINT)
 	/* GDB likes to get SIGTRAP for breakpoints.  */
 	{
-	  inf->wait.status.value.sig = GDB_SIGNAL_TRAP;
+	  inf->wait.status.set_stopped (GDB_SIGNAL_TRAP);
 	  mach_port_deallocate (mach_task_self (), reply_port);
 	}
       else
@@ -1696,8 +1694,8 @@ S_exception_raise_request (mach_port_t port, mach_port_t reply_port,
 	  /* Exceptions are encoded in the signal space by putting
 	     them after _NSIG; this assumes they're positive (and not
 	     extremely large)!  */
-	  inf->wait.status.value.sig =
-	    gdb_signal_from_host (_NSIG + exception);
+	  inf->wait.status.set_stopped
+	    (gdb_signal_from_host (_NSIG + exception));
 	}
     }
   else
@@ -1718,8 +1716,7 @@ inf_task_died_status (struct inf *inf)
 {
   warning (_("Pid %d died with unknown exit status, using SIGKILL."),
 	   inf->pid);
-  inf->wait.status.kind = TARGET_WAITKIND_SIGNALLED;
-  inf->wait.status.value.sig = GDB_SIGNAL_KILL;
+  inf->wait.status.set_signalled (GDB_SIGNAL_KILL);
 }
 
 /* Notify server routines.  The only real one is dead name notification.  */
@@ -1825,7 +1822,7 @@ S_proc_wait_reply (mach_port_t reply, kern_return_t err,
   else if (pid == inf->pid)
     {
       store_waitstatus (&inf->wait.status, status);
-      if (inf->wait.status.kind == TARGET_WAITKIND_STOPPED)
+      if (inf->wait.status.kind () == TARGET_WAITKIND_STOPPED)
 	/* The process has sent us a signal, and stopped itself in a sane
 	   state pending our actions.  */
 	{
@@ -1915,10 +1912,7 @@ S_msg_sig_post_untraced_reply (mach_port_t reply, kern_return_t err)
        like the process stopped (using a signal of 0 should mean that the
        *next* time the user continues, it will pass signal 0, which the crash
        server should like).  */
-    {
-      inf->wait.status.kind = TARGET_WAITKIND_STOPPED;
-      inf->wait.status.value.sig = GDB_SIGNAL_0;
-    }
+    inf->wait.status.set_stopped (GDB_SIGNAL_0);
   else if (err)
     warning (_("Signal delivery failed: %s"), safe_strerror (err));
 
@@ -1994,7 +1988,7 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
       proc_abort (inf->wait.thread, 1);
       warning (_("Aborting %s with unforwarded exception %s."),
 	       proc_string (inf->wait.thread),
-	       gdb_signal_to_name (inf->wait.status.value.sig));
+	       gdb_signal_to_name (inf->wait.status.sig ()));
     }
 
   if (port_msgs_queued (inf->event_port))

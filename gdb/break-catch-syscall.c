@@ -152,11 +152,11 @@ breakpoint_hit_catch_syscall (const struct bp_location *bl,
   const struct syscall_catchpoint *c
     = (const struct syscall_catchpoint *) bl->owner;
 
-  if (ws->kind != TARGET_WAITKIND_SYSCALL_ENTRY
-      && ws->kind != TARGET_WAITKIND_SYSCALL_RETURN)
+  if (ws->kind () != TARGET_WAITKIND_SYSCALL_ENTRY
+      && ws->kind () != TARGET_WAITKIND_SYSCALL_RETURN)
     return 0;
 
-  syscall_number = ws->value.syscall_number;
+  syscall_number = ws->syscall_number ();
 
   /* Now, checking if the syscall is the same.  */
   if (!c->syscalls_to_be_caught.empty ())
@@ -189,7 +189,7 @@ print_it_catch_syscall (bpstat bs)
 
   get_last_target_status (nullptr, nullptr, &last);
 
-  get_syscall_by_number (gdbarch, last.value.syscall_number, &s);
+  get_syscall_by_number (gdbarch, last.syscall_number (), &s);
 
   annotate_catchpoint (b->number);
   maybe_print_thread_hit_breakpoint (uiout);
@@ -201,20 +201,20 @@ print_it_catch_syscall (bpstat bs)
   if (uiout->is_mi_like_p ())
     {
       uiout->field_string ("reason",
-			   async_reason_lookup (last.kind == TARGET_WAITKIND_SYSCALL_ENTRY
+			   async_reason_lookup (last.kind () == TARGET_WAITKIND_SYSCALL_ENTRY
 						? EXEC_ASYNC_SYSCALL_ENTRY
 						: EXEC_ASYNC_SYSCALL_RETURN));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
   uiout->field_signed ("bkptno", b->number);
 
-  if (last.kind == TARGET_WAITKIND_SYSCALL_ENTRY)
+  if (last.kind () == TARGET_WAITKIND_SYSCALL_ENTRY)
     uiout->text (" (call to syscall ");
   else
     uiout->text (" (returned from syscall ");
 
   if (s.name == NULL || uiout->is_mi_like_p ())
-    uiout->field_signed ("syscall-number", last.value.syscall_number);
+    uiout->field_signed ("syscall-number", last.syscall_number ());
   if (s.name != NULL)
     uiout->field_string ("syscall-name", s.name);
 

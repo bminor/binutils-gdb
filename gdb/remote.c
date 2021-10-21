@@ -4497,8 +4497,7 @@ remote_target::print_one_stopped_thread (thread_info *thread)
     }
   else
     {
-      ws.kind = TARGET_WAITKIND_STOPPED;
-      ws.value.sig = GDB_SIGNAL_0;
+      ws.set_stopped (GDB_SIGNAL_0);
     }
 
   switch_to_thread (thread);
@@ -4508,9 +4507,9 @@ remote_target::print_one_stopped_thread (thread_info *thread)
   /* For "info program".  */
   set_last_target_status (this, thread->ptid, ws);
 
-  if (ws.kind == TARGET_WAITKIND_STOPPED)
+  if (ws.kind () == TARGET_WAITKIND_STOPPED)
     {
-      enum gdb_signal sig = ws.value.sig;
+      enum gdb_signal sig = ws.sig ();
 
       if (signal_print_state (sig))
 	gdb::observers::signal_received.notify (sig);
@@ -4542,12 +4541,11 @@ remote_target::process_initial_stop_replies (int from_tty)
       struct target_waitstatus ws;
       int ignore_event = 0;
 
-      memset (&ws, 0, sizeof (ws));
       event_ptid = target_wait (waiton_ptid, &ws, TARGET_WNOHANG);
       if (remote_debug)
 	print_target_wait_results (waiton_ptid, event_ptid, &ws);
 
-      switch (ws.kind)
+      switch (ws.kind ())
 	{
 	case TARGET_WAITKIND_IGNORE:
 	case TARGET_WAITKIND_NO_RESUMED:
@@ -4558,9 +4556,6 @@ remote_target::process_initial_stop_replies (int from_tty)
 	  ignore_event = 1;
 	  break;
 
-	case TARGET_WAITKIND_EXECD:
-	  xfree (ws.value.execd_pathname);
-	  break;
 	default:
 	  break;
 	}
@@ -4570,20 +4565,20 @@ remote_target::process_initial_stop_replies (int from_tty)
 
       thread_info *evthread = find_thread_ptid (this, event_ptid);
 
-      if (ws.kind == TARGET_WAITKIND_STOPPED)
+      if (ws.kind () == TARGET_WAITKIND_STOPPED)
 	{
-	  enum gdb_signal sig = ws.value.sig;
+	  enum gdb_signal sig = ws.sig ();
 
 	  /* Stubs traditionally report SIGTRAP as initial signal,
 	     instead of signal 0.  Suppress it.  */
 	  if (sig == GDB_SIGNAL_TRAP)
 	    sig = GDB_SIGNAL_0;
 	  evthread->set_stop_signal (sig);
-	  ws.value.sig = sig;
+	  ws.set_stopped (sig);
 	}
 
-      if (ws.kind != TARGET_WAITKIND_STOPPED
-	  || ws.value.sig != GDB_SIGNAL_0)
+      if (ws.kind () != TARGET_WAITKIND_STOPPED
+	  || ws.sig () != GDB_SIGNAL_0)
 	evthread->set_pending_waitstatus (ws);
 
       set_executing (this, event_ptid, false);
@@ -5887,7 +5882,7 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
   /* Check to see if we are detaching a fork parent.  Note that if we
      are detaching a fork child, tp == NULL.  */
   is_fork_parent = (tp != NULL
-		    && tp->pending_follow.kind == TARGET_WAITKIND_FORKED);
+		    && tp->pending_follow.kind () == TARGET_WAITKIND_FORKED);
 
   /* If doing detach-on-fork, we don't mourn, because that will delete
      breakpoints that should be available for the followed inferior.  */
@@ -6930,8 +6925,7 @@ remote_target::remote_stop_ns (ptid_t ptid)
 	    stop_reply *sr = new stop_reply ();
 	    sr->ptid = tp->ptid;
 	    sr->rs = rs;
-	    sr->ws.kind = TARGET_WAITKIND_STOPPED;
-	    sr->ws.value.sig = GDB_SIGNAL_0;
+	    sr->ws.set_stopped (GDB_SIGNAL_0);
 	    sr->arch = tp->inf->gdbarch;
 	    sr->stop_reason = TARGET_STOPPED_BY_NO_REASON;
 	    sr->watch_data_address = 0;
@@ -7183,7 +7177,7 @@ remote_notif_stop_ack (remote_target *remote,
   /* Kind can be TARGET_WAITKIND_IGNORE if we have meanwhile discarded
      the notification.  It was left in the queue because we need to
      acknowledge it and pull the rest of the notifications out.  */
-  if (stop_reply->ws.kind != TARGET_WAITKIND_IGNORE)
+  if (stop_reply->ws.kind () != TARGET_WAITKIND_IGNORE)
     remote->push_stop_reply (stop_reply);
 }
 
@@ -7234,8 +7228,8 @@ static int
 is_pending_fork_parent (const target_waitstatus *ws, int event_pid,
 			ptid_t thread_ptid)
 {
-  if (ws->kind == TARGET_WAITKIND_FORKED
-      || ws->kind == TARGET_WAITKIND_VFORKED)
+  if (ws->kind () == TARGET_WAITKIND_FORKED
+      || ws->kind () == TARGET_WAITKIND_VFORKED)
     {
       if (event_pid == -1 || event_pid == thread_ptid.pid ())
 	return 1;
@@ -7286,7 +7280,7 @@ remote_target::remove_new_fork_children (threads_listing_context *context)
       const target_waitstatus *ws = thread_pending_fork_status (thread);
 
       if (is_pending_fork_parent (ws, pid, thread->ptid))
-	context->remove_thread (ws->value.related_pid);
+	context->remove_thread (ws->child_ptid ());
     }
 
   /* Check for any pending fork events (not reported or processed yet)
@@ -7294,10 +7288,10 @@ remote_target::remove_new_fork_children (threads_listing_context *context)
      CONTEXT list as well.  */
   remote_notif_get_pending_events (notif);
   for (auto &event : get_remote_state ()->stop_reply_queue)
-    if (event->ws.kind == TARGET_WAITKIND_FORKED
-	|| event->ws.kind == TARGET_WAITKIND_VFORKED
-	|| event->ws.kind == TARGET_WAITKIND_THREAD_EXITED)
-      context->remove_thread (event->ws.value.related_pid);
+    if (event->ws.kind () == TARGET_WAITKIND_FORKED
+	|| event->ws.kind () == TARGET_WAITKIND_VFORKED
+	|| event->ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
+      context->remove_thread (event->ws.child_ptid ());
 }
 
 /* Check whether any event pending in the vStopped queue would prevent a
@@ -7315,12 +7309,12 @@ remote_target::check_pending_events_prevent_wildcard_vcont
   remote_notif_get_pending_events (notif);
   for (auto &event : get_remote_state ()->stop_reply_queue)
     {
-      if (event->ws.kind == TARGET_WAITKIND_NO_RESUMED
-	  || event->ws.kind == TARGET_WAITKIND_NO_HISTORY)
+      if (event->ws.kind () == TARGET_WAITKIND_NO_RESUMED
+	  || event->ws.kind () == TARGET_WAITKIND_NO_HISTORY)
 	continue;
 
-      if (event->ws.kind == TARGET_WAITKIND_FORKED
-	  || event->ws.kind == TARGET_WAITKIND_VFORKED)
+      if (event->ws.kind () == TARGET_WAITKIND_FORKED
+	  || event->ws.kind () == TARGET_WAITKIND_VFORKED)
 	*may_global_wildcard = false;
 
       /* This may be the first time we heard about this process.
@@ -7358,7 +7352,7 @@ remote_target::discard_pending_stop_replies (struct inferior *inf)
       /* Leave the notification pending, since the server expects that
 	 we acknowledge it with vStopped.  But clear its contents, so
 	 that later on when we acknowledge it, we also discard it.  */
-      reply->ws.kind = TARGET_WAITKIND_IGNORE;
+      reply->ws.set_ignore ();
 
       if (remote_debug)
 	fprintf_unfiltered (gdb_stdlog,
@@ -7472,7 +7466,7 @@ remote_target::peek_stop_reply (ptid_t ptid)
   remote_state *rs = get_remote_state ();
   for (auto &event : rs->stop_reply_queue)
     if (ptid == event->ptid
-	&& event->ws.kind == TARGET_WAITKIND_STOPPED)
+	&& event->ws.kind () == TARGET_WAITKIND_STOPPED)
       return 1;
   return 0;
 }
@@ -7502,8 +7496,7 @@ remote_target::remote_parse_stop_reply (const char *buf, stop_reply *event)
 
   event->ptid = null_ptid;
   event->rs = get_remote_state ();
-  event->ws.kind = TARGET_WAITKIND_IGNORE;
-  event->ws.value.integer = 0;
+  event->ws.set_ignore ();
   event->stop_reason = TARGET_STOPPED_BY_NO_REASON;
   event->regcache.clear ();
   event->core = -1;
@@ -7547,17 +7540,15 @@ Packet: '%s'\n"),
 	    {
 	      ULONGEST sysno;
 
-	      event->ws.kind = TARGET_WAITKIND_SYSCALL_ENTRY;
 	      p = unpack_varlen_hex (++p1, &sysno);
-	      event->ws.value.syscall_number = (int) sysno;
+	      event->ws.set_syscall_entry ((int) sysno);
 	    }
 	  else if (strprefix (p, p1, "syscall_return"))
 	    {
 	      ULONGEST sysno;
 
-	      event->ws.kind = TARGET_WAITKIND_SYSCALL_RETURN;
 	      p = unpack_varlen_hex (++p1, &sysno);
-	      event->ws.value.syscall_number = (int) sysno;
+	      event->ws.set_syscall_return ((int) sysno);
 	    }
 	  else if (strprefix (p, p1, "watch")
 		   || strprefix (p, p1, "rwatch")
@@ -7595,12 +7586,12 @@ Packet: '%s'\n"),
 	    }
 	  else if (strprefix (p, p1, "library"))
 	    {
-	      event->ws.kind = TARGET_WAITKIND_LOADED;
+	      event->ws.set_loaded ();
 	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "replaylog"))
 	    {
-	      event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
+	      event->ws.set_no_history ();
 	      /* p1 will indicate "begin" or "end", but it makes
 		 no difference for now, so ignore it.  */
 	      p = strchrnul (p1 + 1, ';');
@@ -7613,18 +7604,12 @@ Packet: '%s'\n"),
 	      event->core = c;
 	    }
 	  else if (strprefix (p, p1, "fork"))
-	    {
-	      event->ws.value.related_pid = read_ptid (++p1, &p);
-	      event->ws.kind = TARGET_WAITKIND_FORKED;
-	    }
+	    event->ws.set_forked (read_ptid (++p1, &p));
 	  else if (strprefix (p, p1, "vfork"))
-	    {
-	      event->ws.value.related_pid = read_ptid (++p1, &p);
-	      event->ws.kind = TARGET_WAITKIND_VFORKED;
-	    }
+	    event->ws.set_vforked (read_ptid (++p1, &p));
 	  else if (strprefix (p, p1, "vforkdone"))
 	    {
-	      event->ws.kind = TARGET_WAITKIND_VFORK_DONE;
+	      event->ws.set_vfork_done ();
 	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else if (strprefix (p, p1, "exec"))
@@ -7638,14 +7623,13 @@ Packet: '%s'\n"),
 
 	      /* Save the pathname for event reporting and for
 		 the next run command.  */
-	      gdb::unique_xmalloc_ptr<char[]> pathname
+	      gdb::unique_xmalloc_ptr<char> pathname
 		((char *) xmalloc (pathlen + 1));
 	      hex2bin (p1, (gdb_byte *) pathname.get (), pathlen);
-	      pathname[pathlen] = '\0';
+	      pathname.get ()[pathlen] = '\0';
 
 	      /* This is freed during event handling.  */
-	      event->ws.value.execd_pathname = pathname.release ();
-	      event->ws.kind = TARGET_WAITKIND_EXECD;
+	      event->ws.set_execd (std::move (pathname));
 
 	      /* Skip the registers included in this packet, since
 		 they may be for an architecture different from the
@@ -7654,7 +7638,7 @@ Packet: '%s'\n"),
 	    }
 	  else if (strprefix (p, p1, "create"))
 	    {
-	      event->ws.kind = TARGET_WAITKIND_THREAD_CREATED;
+	      event->ws.set_thread_created ();
 	      p = strchrnul (p1 + 1, ';');
 	    }
 	  else
@@ -7753,7 +7737,7 @@ Packet: '%s'\n"),
 	  ++p;
 	}
 
-      if (event->ws.kind != TARGET_WAITKIND_IGNORE)
+      if (event->ws.kind () != TARGET_WAITKIND_IGNORE)
 	break;
 
       /* fall through */
@@ -7761,21 +7745,19 @@ Packet: '%s'\n"),
       {
 	int sig;
 
-	event->ws.kind = TARGET_WAITKIND_STOPPED;
 	sig = (fromhex (buf[1]) << 4) + fromhex (buf[2]);
 	if (GDB_SIGNAL_FIRST <= sig && sig < GDB_SIGNAL_LAST)
-	  event->ws.value.sig = (enum gdb_signal) sig;
+	  event->ws.set_stopped ((enum gdb_signal) sig);
 	else
-	  event->ws.value.sig = GDB_SIGNAL_UNKNOWN;
+	  event->ws.set_stopped (GDB_SIGNAL_UNKNOWN);
       }
       break;
     case 'w':		/* Thread exited.  */
       {
 	ULONGEST value;
 
-	event->ws.kind = TARGET_WAITKIND_THREAD_EXITED;
 	p = unpack_varlen_hex (&buf[1], &value);
-	event->ws.value.integer = value;
+	event->ws.set_thread_exited (value);
 	if (*p != ';')
 	  error (_("stop reply packet badly formatted: %s"), buf);
 	event->ptid = read_ptid (++p, NULL);
@@ -7794,17 +7776,15 @@ Packet: '%s'\n"),
 	if (buf[0] == 'W')
 	  {
 	    /* The remote process exited.  */
-	    event->ws.kind = TARGET_WAITKIND_EXITED;
-	    event->ws.value.integer = value;
+	    event->ws.set_exited (value);
 	  }
 	else
 	  {
 	    /* The remote process exited with a signal.  */
-	    event->ws.kind = TARGET_WAITKIND_SIGNALLED;
 	    if (GDB_SIGNAL_FIRST <= value && value < GDB_SIGNAL_LAST)
-	      event->ws.value.sig = (enum gdb_signal) value;
+	      event->ws.set_signalled ((enum gdb_signal) value);
 	    else
-	      event->ws.value.sig = GDB_SIGNAL_UNKNOWN;
+	      event->ws.set_signalled (GDB_SIGNAL_UNKNOWN);
 	  }
 
 	/* If no process is specified, return null_ptid, and let the
@@ -7835,7 +7815,7 @@ Packet: '%s'\n"),
       }
       break;
     case 'N':
-      event->ws.kind = TARGET_WAITKIND_NO_RESUMED;
+      event->ws.set_no_resumed ();
       event->ptid = minus_one_ptid;
       break;
     }
@@ -7968,8 +7948,8 @@ remote_target::select_thread_for_ambiguous_stop_reply
   /* Some stop events apply to all threads in an inferior, while others
      only apply to a single thread.  */
   bool process_wide_stop
-    = (status->kind == TARGET_WAITKIND_EXITED
-       || status->kind == TARGET_WAITKIND_SIGNALLED);
+    = (status->kind () == TARGET_WAITKIND_EXITED
+       || status->kind () == TARGET_WAITKIND_SIGNALLED);
 
   remote_debug_printf ("process_wide_stop = %d", process_wide_stop);
 
@@ -8054,9 +8034,9 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
     ptid = select_thread_for_ambiguous_stop_reply (status);
   gdb_assert (ptid != null_ptid);
 
-  if (status->kind != TARGET_WAITKIND_EXITED
-      && status->kind != TARGET_WAITKIND_SIGNALLED
-      && status->kind != TARGET_WAITKIND_NO_RESUMED)
+  if (status->kind () != TARGET_WAITKIND_EXITED
+      && status->kind () != TARGET_WAITKIND_SIGNALLED
+      && status->kind () != TARGET_WAITKIND_NO_RESUMED)
     {
       /* Expedited registers.  */
       if (!stop_reply->regcache.empty ())
@@ -8146,7 +8126,7 @@ remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status,
 	 return to the event loop.  */
       if (options & TARGET_WNOHANG)
 	{
-	  status->kind = TARGET_WAITKIND_IGNORE;
+	  status->set_ignore ();
 	  return minus_one_ptid;
 	}
 
@@ -8180,8 +8160,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 
  again:
 
-  status->kind = TARGET_WAITKIND_IGNORE;
-  status->value.integer = 0;
+  status->set_ignore ();
 
   stop_reply = queued_stop_reply (ptid);
   if (stop_reply != NULL)
@@ -8199,7 +8178,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 
       if (!rs->waiting_for_stop_reply)
 	{
-	  status->kind = TARGET_WAITKIND_NO_RESUMED;
+	  status->set_no_resumed ();
 	  return minus_one_ptid;
 	}
 
@@ -8233,8 +8212,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
       rs->waiting_for_stop_reply = 0;
 
       warning (_("Remote failure reply: %s"), buf);
-      status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.sig = GDB_SIGNAL_0;
+      status->set_stopped (GDB_SIGNAL_0);
       break;
     case 'F':		/* File-I/O request.  */
       /* GDB may access the inferior memory while handling the File-I/O
@@ -8286,9 +8264,9 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
       break;
     }
 
-  if (status->kind == TARGET_WAITKIND_NO_RESUMED)
+  if (status->kind () == TARGET_WAITKIND_NO_RESUMED)
     return minus_one_ptid;
-  else if (status->kind == TARGET_WAITKIND_IGNORE)
+  else if (status->kind () == TARGET_WAITKIND_IGNORE)
     {
       /* Nothing interesting happened.  If we're doing a non-blocking
 	 poll, we're done.  Otherwise, go back to waiting.  */
@@ -8297,8 +8275,8 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
       else
 	goto again;
     }
-  else if (status->kind != TARGET_WAITKIND_EXITED
-	   && status->kind != TARGET_WAITKIND_SIGNALLED)
+  else if (status->kind () != TARGET_WAITKIND_EXITED
+	   && status->kind () != TARGET_WAITKIND_SIGNALLED)
     {
       if (event_ptid != null_ptid)
 	record_currthread (rs, event_ptid);
@@ -10083,7 +10061,7 @@ remote_target::kill_new_fork_children (int pid)
 
       if (is_pending_fork_parent (ws, pid, thread->ptid))
 	{
-	  int child_pid = ws->value.related_pid.pid ();
+	  int child_pid = ws->child_ptid ().pid ();
 	  int res;
 
 	  res = remote_vkill (child_pid);
@@ -10098,7 +10076,7 @@ remote_target::kill_new_fork_children (int pid)
   for (auto &event : rs->stop_reply_queue)
     if (is_pending_fork_parent (&event->ws, pid, event->ptid))
       {
-	int child_pid = event->ws.value.related_pid.pid ();
+	int child_pid = event->ws.child_ptid ().pid ();
 	int res;
 
 	res = remote_vkill (child_pid);

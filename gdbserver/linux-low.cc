@@ -450,7 +450,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
   struct thread_info *event_thr = get_lwp_thread (event_lwp);
   struct lwp_info *new_lwp;
 
-  gdb_assert (event_lwp->waitstatus.kind == TARGET_WAITKIND_IGNORE);
+  gdb_assert (event_lwp->waitstatus.kind () == TARGET_WAITKIND_IGNORE);
 
   /* All extended events we currently use are mid-syscall.  Only
      PTRACE_EVENT_STOP is delivered more like a signal-stop, but
@@ -515,7 +515,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	  child_lwp->status_pending_p = 0;
 	  child_thr = get_lwp_thread (child_lwp);
 	  child_thr->last_resume_kind = resume_stop;
-	  child_thr->last_status.kind = TARGET_WAITKIND_STOPPED;
+	  child_thr->last_status.set_stopped (GDB_SIGNAL_0);
 
 	  /* If we're suspending all threads, leave this one suspended
 	     too.  If the fork/clone parent is stepping over a breakpoint,
@@ -554,11 +554,9 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 
 	  /* Save fork info in the parent thread.  */
 	  if (event == PTRACE_EVENT_FORK)
-	    event_lwp->waitstatus.kind = TARGET_WAITKIND_FORKED;
+	    event_lwp->waitstatus.set_forked (ptid);
 	  else if (event == PTRACE_EVENT_VFORK)
-	    event_lwp->waitstatus.kind = TARGET_WAITKIND_VFORKED;
-
-	  event_lwp->waitstatus.value.related_pid = ptid;
+	    event_lwp->waitstatus.set_vforked (ptid);
 
 	  /* The status_pending field contains bits denoting the
 	     extended event, so when the pending event is handled,
@@ -625,7 +623,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	}
       else if (cs.report_thread_events)
 	{
-	  new_lwp->waitstatus.kind = TARGET_WAITKIND_THREAD_CREATED;
+	  new_lwp->waitstatus.set_thread_created ();
 	  new_lwp->status_pending_p = 1;
 	  new_lwp->status_pending = status;
 	}
@@ -639,7 +637,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
     }
   else if (event == PTRACE_EVENT_VFORK_DONE)
     {
-      event_lwp->waitstatus.kind = TARGET_WAITKIND_VFORK_DONE;
+      event_lwp->waitstatus.set_vfork_done ();
 
       if (event_lwp->bp_reinsert != 0 && supports_software_single_step ())
 	{
@@ -684,16 +682,16 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
       arch_setup_thread (event_thr);
 
       /* Set the event status.  */
-      event_lwp->waitstatus.kind = TARGET_WAITKIND_EXECD;
-      event_lwp->waitstatus.value.execd_pathname
-	= xstrdup (linux_proc_pid_to_exec_file (lwpid_of (event_thr)));
+      event_lwp->waitstatus.set_execd
+	(make_unique_xstrdup
+	   (linux_proc_pid_to_exec_file (lwpid_of (event_thr))));
 
       /* Mark the exec status as pending.  */
       event_lwp->stopped = 1;
       event_lwp->status_pending_p = 1;
       event_lwp->status_pending = wstat;
       event_thr->last_resume_kind = resume_continue;
-      event_thr->last_status.kind = TARGET_WAITKIND_IGNORE;
+      event_thr->last_status.set_ignore ();
 
       /* Update syscall state in the new lwp, effectively mid-syscall too.  */
       event_lwp->syscall_state = TARGET_WAITKIND_SYSCALL_ENTRY;
@@ -1388,8 +1386,8 @@ get_detach_signal (struct thread_info *thread)
       /* If the thread had been suspended by gdbserver, and it stopped
 	 cleanly, then it'll have stopped with SIGSTOP.  But we don't
 	 want to deliver that SIGSTOP.  */
-      if (thread->last_status.kind != TARGET_WAITKIND_STOPPED
-	  || thread->last_status.value.sig == GDB_SIGNAL_0)
+      if (thread->last_status.kind () != TARGET_WAITKIND_STOPPED
+	  || thread->last_status.sig () == GDB_SIGNAL_0)
 	return 0;
 
       /* Otherwise, we may need to deliver the signal we
@@ -1712,7 +1710,7 @@ lwp_resumed (struct lwp_info *lwp)
      corresponding stop to gdb yet?  If so, the thread is still
      resumed/running from gdb's perspective.  */
   if (thread->last_resume_kind == resume_stop
-      && thread->last_status.kind == TARGET_WAITKIND_IGNORE)
+      && thread->last_status.kind () == TARGET_WAITKIND_IGNORE)
     return 1;
 
   return 0;
@@ -2464,7 +2462,7 @@ linux_process_target::resume_stopped_resumed_lwps (thread_info *thread)
   if (lp->stopped
       && !lp->suspended
       && !lp->status_pending_p
-      && thread->last_status.kind == TARGET_WAITKIND_IGNORE)
+      && thread->last_status.kind () == TARGET_WAITKIND_IGNORE)
     {
       int step = 0;
 
@@ -2710,7 +2708,7 @@ select_event_lwp (struct lwp_info **orig_lp)
 	{
 	  lwp_info *lp = get_thread_lwp (thread);
 
-	  return (thread->last_status.kind == TARGET_WAITKIND_IGNORE
+	  return (thread->last_status.kind () == TARGET_WAITKIND_IGNORE
 		  && thread->last_resume_kind == resume_step
 		  && lp->status_pending_p);
 	});
@@ -2732,7 +2730,7 @@ select_event_lwp (struct lwp_info **orig_lp)
 	  lwp_info *lp = get_thread_lwp (thread);
 
 	  /* Only resumed LWPs that have an event pending. */
-	  return (thread->last_status.kind == TARGET_WAITKIND_IGNORE
+	  return (thread->last_status.kind () == TARGET_WAITKIND_IGNORE
 		  && lp->status_pending_p);
 	});
     }
@@ -2831,17 +2829,17 @@ linux_process_target::stabilize_threads ()
 	 over internal breakpoints and such.  */
       wait_1 (minus_one_ptid, &ourstatus, 0);
 
-      if (ourstatus.kind == TARGET_WAITKIND_STOPPED)
+      if (ourstatus.kind () == TARGET_WAITKIND_STOPPED)
 	{
 	  lwp = get_thread_lwp (current_thread);
 
 	  /* Lock it.  */
 	  lwp_suspended_inc (lwp);
 
-	  if (ourstatus.value.sig != GDB_SIGNAL_0
+	  if (ourstatus.sig () != GDB_SIGNAL_0
 	      || current_thread->last_resume_kind == resume_stop)
 	    {
-	      wstat = W_STOPCODE (gdb_signal_to_host (ourstatus.value.sig));
+	      wstat = W_STOPCODE (gdb_signal_to_host (ourstatus.sig ()));
 	      enqueue_one_deferred_signal (lwp, &wstat);
 	    }
 	}
@@ -2877,7 +2875,7 @@ ignore_event (struct target_waitstatus *ourstatus)
      another target_wait call.  */
   async_file_mark ();
 
-  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+  ourstatus->set_ignore ();
   return null_ptid;
 }
 
@@ -2892,9 +2890,9 @@ linux_process_target::filter_exit_event (lwp_info *event_child,
   if (!last_thread_of_process_p (pid_of (thread)))
     {
       if (cs.report_thread_events)
-	ourstatus->kind = TARGET_WAITKIND_THREAD_EXITED;
+	ourstatus->set_thread_exited (0);
       else
-	ourstatus->kind = TARGET_WAITKIND_IGNORE;
+	ourstatus->set_ignore ();
 
       delete_lwp (event_child);
     }
@@ -2965,7 +2963,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   bp_explains_trap = 0;
   trace_event = 0;
   in_step_range = 0;
-  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+  ourstatus->set_ignore ();
 
   auto status_pending_p_any = [&] (thread_info *thread)
     {
@@ -3006,7 +3004,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	  debug_exit ();
 	}
 
-      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+      ourstatus->set_ignore ();
       return null_ptid;
     }
   else if (pid == -1)
@@ -3018,7 +3016,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	  debug_exit ();
 	}
 
-      ourstatus->kind = TARGET_WAITKIND_NO_RESUMED;
+      ourstatus->set_no_resumed ();
       return null_ptid;
     }
 
@@ -3030,8 +3028,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
     {
       if (WIFEXITED (w))
 	{
-	  ourstatus->kind = TARGET_WAITKIND_EXITED;
-	  ourstatus->value.integer = WEXITSTATUS (w);
+	  ourstatus->set_exited (WEXITSTATUS (w));
 
 	  if (debug_threads)
 	    {
@@ -3044,8 +3041,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	}
       else
 	{
-	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-	  ourstatus->value.sig = gdb_signal_from_host (WTERMSIG (w));
+	  ourstatus->set_signalled (gdb_signal_from_host (WTERMSIG (w)));
 
 	  if (debug_threads)
 	    {
@@ -3057,7 +3053,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	    }
 	}
 
-      if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+      if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
 	return filter_exit_event (event_child, ourstatus);
 
       return ptid_of (current_thread);
@@ -3252,8 +3248,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
 	      if (stabilizing_threads)
 		{
-		  ourstatus->kind = TARGET_WAITKIND_STOPPED;
-		  ourstatus->value.sig = GDB_SIGNAL_0;
+		  ourstatus->set_stopped (GDB_SIGNAL_0);
 
 		  if (debug_threads)
 		    {
@@ -3378,7 +3373,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 		   || (gdb_breakpoint_here (event_child->stop_pc)
 		       && gdb_condition_true_at_breakpoint (event_child->stop_pc)
 		       && gdb_no_commands_at_breakpoint (event_child->stop_pc))
-		   || event_child->waitstatus.kind != TARGET_WAITKIND_IGNORE);
+		   || event_child->waitstatus.kind () != TARGET_WAITKIND_IGNORE);
 
   run_breakpoint_commands (event_child->stop_pc);
 
@@ -3448,7 +3443,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
   if (debug_threads)
     {
-      if (event_child->waitstatus.kind != TARGET_WAITKIND_IGNORE)
+      if (event_child->waitstatus.kind () != TARGET_WAITKIND_IGNORE)
 	{
 	  std::string str
 	    = target_waitstatus_to_string (&event_child->waitstatus);
@@ -3589,14 +3584,14 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	unstop_all_lwps (1, event_child);
     }
 
-  if (event_child->waitstatus.kind != TARGET_WAITKIND_IGNORE)
+  if (event_child->waitstatus.kind () != TARGET_WAITKIND_IGNORE)
     {
       /* If the reported event is an exit, fork, vfork or exec, let
 	 GDB know.  */
 
       /* Break the unreported fork relationship chain.  */
-      if (event_child->waitstatus.kind == TARGET_WAITKIND_FORKED
-	  || event_child->waitstatus.kind == TARGET_WAITKIND_VFORKED)
+      if (event_child->waitstatus.kind () == TARGET_WAITKIND_FORKED
+	  || event_child->waitstatus.kind () == TARGET_WAITKIND_VFORKED)
 	{
 	  event_child->fork_relative->fork_relative = NULL;
 	  event_child->fork_relative = NULL;
@@ -3604,10 +3599,13 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
       *ourstatus = event_child->waitstatus;
       /* Clear the event lwp's waitstatus since we handled it already.  */
-      event_child->waitstatus.kind = TARGET_WAITKIND_IGNORE;
+      event_child->waitstatus.set_ignore ();
     }
   else
-    ourstatus->kind = TARGET_WAITKIND_STOPPED;
+    {
+      /* The actual stop signal is overwritten below.  */
+      ourstatus->set_stopped (GDB_SIGNAL_0);
+    }
 
   /* Now that we've selected our final event LWP, un-adjust its PC if
      it was a software breakpoint, and the client doesn't know we can
@@ -3627,9 +3625,15 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
   if (WSTOPSIG (w) == SYSCALL_SIGTRAP)
     {
-      get_syscall_trapinfo (event_child,
-			    &ourstatus->value.syscall_number);
-      ourstatus->kind = event_child->syscall_state;
+      int syscall_number;
+
+      get_syscall_trapinfo (event_child, &syscall_number);
+      if (event_child->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY)
+	ourstatus->set_syscall_entry (syscall_number);
+      else if (event_child->syscall_state == TARGET_WAITKIND_SYSCALL_RETURN)
+	ourstatus->set_syscall_return (syscall_number);
+      else
+	gdb_assert_not_reached ("unexpected syscall state");
     }
   else if (current_thread->last_resume_kind == resume_stop
 	   && WSTOPSIG (w) == SIGSTOP)
@@ -3637,19 +3641,17 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
       /* A thread that has been requested to stop by GDB with vCont;t,
 	 and it stopped cleanly, so report as SIG0.  The use of
 	 SIGSTOP is an implementation detail.  */
-      ourstatus->value.sig = GDB_SIGNAL_0;
+      ourstatus->set_stopped (GDB_SIGNAL_0);
     }
   else if (current_thread->last_resume_kind == resume_stop
 	   && WSTOPSIG (w) != SIGSTOP)
     {
       /* A thread that has been requested to stop by GDB with vCont;t,
 	 but, it stopped for other reasons.  */
-      ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (w));
+      ourstatus->set_stopped (gdb_signal_from_host (WSTOPSIG (w)));
     }
-  else if (ourstatus->kind == TARGET_WAITKIND_STOPPED)
-    {
-      ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (w));
-    }
+  else if (ourstatus->kind () == TARGET_WAITKIND_STOPPED)
+    ourstatus->set_stopped (gdb_signal_from_host (WSTOPSIG (w)));
 
   gdb_assert (step_over_bkpt == null_ptid);
 
@@ -3657,11 +3659,11 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
     {
       debug_printf ("wait_1 ret = %s, %d, %d\n",
 		    target_pid_to_str (ptid_of (current_thread)),
-		    ourstatus->kind, ourstatus->value.sig);
+		    ourstatus->kind (), ourstatus->sig ());
       debug_exit ();
     }
 
-  if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+  if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
     return filter_exit_event (event_child, ourstatus);
 
   return ptid_of (current_thread);
@@ -3712,7 +3714,7 @@ linux_process_target::wait (ptid_t ptid,
     }
   while ((target_options & TARGET_WNOHANG) == 0
 	 && event_ptid == null_ptid
-	 && ourstatus->kind == TARGET_WAITKIND_IGNORE);
+	 && ourstatus->kind () == TARGET_WAITKIND_IGNORE);
 
   /* If at least one stop was reported, there may be more.  A single
      SIGCHLD can signal more than one child stop.  */
@@ -3813,15 +3815,9 @@ mark_lwp_dead (struct lwp_info *lwp, int wstat)
   /* Store in waitstatus as well, as there's nothing else to process
      for this event.  */
   if (WIFEXITED (wstat))
-    {
-      lwp->waitstatus.kind = TARGET_WAITKIND_EXITED;
-      lwp->waitstatus.value.integer = WEXITSTATUS (wstat);
-    }
+    lwp->waitstatus.set_exited (WEXITSTATUS (wstat));
   else if (WIFSIGNALED (wstat))
-    {
-      lwp->waitstatus.kind = TARGET_WAITKIND_SIGNALLED;
-      lwp->waitstatus.value.sig = gdb_signal_from_host (WTERMSIG (wstat));
-    }
+    lwp->waitstatus.set_signalled (gdb_signal_from_host (WTERMSIG (wstat)));
 
   /* Prevent trying to stop it.  */
   lwp->stopped = 1;
@@ -4087,7 +4083,7 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
   if (lwp->stopped == 0)
     return;
 
-  gdb_assert (lwp->waitstatus.kind == TARGET_WAITKIND_IGNORE);
+  gdb_assert (lwp->waitstatus.kind () == TARGET_WAITKIND_IGNORE);
 
   fast_tpoint_collect_result fast_tp_collecting
     = lwp->collecting_fast_tracepoint;
@@ -4351,7 +4347,7 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
 	    {
 	      if (debug_threads)
 		debug_printf ("already %s LWP %ld at GDB's request\n",
-			      (thread->last_status.kind
+			      (thread->last_status.kind ()
 			       == TARGET_WAITKIND_STOPPED)
 			      ? "stopped"
 			      : "stopping",
@@ -4382,8 +4378,8 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
 	      struct lwp_info *rel = lwp->fork_relative;
 
 	      if (rel->status_pending_p
-		  && (rel->waitstatus.kind == TARGET_WAITKIND_FORKED
-		      || rel->waitstatus.kind == TARGET_WAITKIND_VFORKED))
+		  && (rel->waitstatus.kind () == TARGET_WAITKIND_FORKED
+		      || rel->waitstatus.kind () == TARGET_WAITKIND_VFORKED))
 		{
 		  if (debug_threads)
 		    debug_printf ("not resuming LWP %ld: has queued stop reply\n",
@@ -4771,7 +4767,7 @@ linux_process_target::resume_one_thread (thread_info *thread,
 
       /* For stop requests, we're done.  */
       lwp->resume = NULL;
-      thread->last_status.kind = TARGET_WAITKIND_IGNORE;
+      thread->last_status.set_ignore ();
       return;
     }
 
@@ -4818,7 +4814,7 @@ linux_process_target::resume_one_thread (thread_info *thread,
 	debug_printf ("leaving LWP %ld stopped\n", lwpid_of (thread));
     }
 
-  thread->last_status.kind = TARGET_WAITKIND_IGNORE;
+  thread->last_status.set_ignore ();
   lwp->resume = NULL;
 }
 
@@ -4918,7 +4914,7 @@ linux_process_target::proceed_one_lwp (thread_info *thread, lwp_info *except)
     }
 
   if (thread->last_resume_kind == resume_stop
-      && thread->last_status.kind != TARGET_WAITKIND_IGNORE)
+      && thread->last_status.kind () != TARGET_WAITKIND_IGNORE)
     {
       if (debug_threads)
 	debug_printf ("   client wants LWP to remain %ld stopped\n",

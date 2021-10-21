@@ -31,9 +31,7 @@ struct thread_info
 {
   thread_info (ptid_t id, void *target_data)
     : id (id), target_data (target_data)
-  {
-    this->last_status.kind = TARGET_WAITKIND_IGNORE;
-  }
+  {}
 
   ~thread_info ()
   {

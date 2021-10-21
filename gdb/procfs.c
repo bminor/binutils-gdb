@@ -1311,8 +1311,8 @@ proc_set_current_signal (procinfo *pi, int signo)
   get_last_target_status (&wait_target, &wait_ptid, &wait_status);
   if (wait_target == &the_procfs_target
       && wait_ptid == inferior_ptid
-      && wait_status.kind == TARGET_WAITKIND_STOPPED
-      && wait_status.value.sig == gdb_signal_from_host (signo)
+      && wait_status.kind () == TARGET_WAITKIND_STOPPED
+      && wait_status.sig () == gdb_signal_from_host (signo)
       && proc_get_status (pi)
       && pi->prstatus.pr_lwp.pr_info.si_signo == signo
       )
@@ -2256,7 +2256,7 @@ wait_again:
 		      printf_unfiltered (_("[%s exited]\n"),
 					 target_pid_to_str (retval).c_str ());
 		    delete_thread (find_thread_ptid (this, retval));
-		    status->kind = TARGET_WAITKIND_SPURIOUS;
+		    status->set_spurious ();
 		    return retval;
 		  }
 		else
@@ -2306,8 +2306,7 @@ wait_again:
 		    if (!in_thread_list (this, temp_ptid))
 		      add_thread (this, temp_ptid);
 
-		    status->kind = TARGET_WAITKIND_STOPPED;
-		    status->value.sig = GDB_SIGNAL_0;
+		    status->set_stopped (GDB_SIGNAL_0);
 		    return retval;
 		  }
 #endif

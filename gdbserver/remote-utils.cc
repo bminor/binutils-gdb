@@ -1087,9 +1087,9 @@ prepare_resume_reply (char *buf, ptid_t ptid,
   client_state &cs = get_client_state ();
   if (debug_threads)
     debug_printf ("Writing resume reply for %s:%d\n",
-		  target_pid_to_str (ptid), status->kind);
+		  target_pid_to_str (ptid), status->kind ());
 
-  switch (status->kind)
+  switch (status->kind ())
     {
     case TARGET_WAITKIND_STOPPED:
     case TARGET_WAITKIND_FORKED:
@@ -1104,27 +1104,27 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	const char **regp;
 	struct regcache *regcache;
 
-	if ((status->kind == TARGET_WAITKIND_FORKED && cs.report_fork_events)
-	    || (status->kind == TARGET_WAITKIND_VFORKED 
+	if ((status->kind () == TARGET_WAITKIND_FORKED && cs.report_fork_events)
+	    || (status->kind () == TARGET_WAITKIND_VFORKED
 		&& cs.report_vfork_events))
 	  {
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
-	    const char *event = (status->kind == TARGET_WAITKIND_FORKED
+	    const char *event = (status->kind () == TARGET_WAITKIND_FORKED
 				 ? "fork" : "vfork");
 
 	    sprintf (buf, "T%02x%s:", signal, event);
 	    buf += strlen (buf);
-	    buf = write_ptid (buf, status->value.related_pid);
+	    buf = write_ptid (buf, status->child_ptid ());
 	    strcat (buf, ";");
 	  }
-	else if (status->kind == TARGET_WAITKIND_VFORK_DONE 
+	else if (status->kind () == TARGET_WAITKIND_VFORK_DONE
 		 && cs.report_vfork_events)
 	  {
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
 
 	    sprintf (buf, "T%02xvforkdone:;", signal);
 	  }
-	else if (status->kind == TARGET_WAITKIND_EXECD && cs.report_exec_events)
+	else if (status->kind () == TARGET_WAITKIND_EXECD && cs.report_exec_events)
 	  {
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
 	    const char *event = "exec";
@@ -1134,34 +1134,32 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    buf += strlen (buf);
 
 	    /* Encode pathname to hexified format.  */
-	    bin2hex ((const gdb_byte *) status->value.execd_pathname,
+	    bin2hex ((const gdb_byte *) status->execd_pathname (),
 		     hexified_pathname,
-		     strlen (status->value.execd_pathname));
+		     strlen (status->execd_pathname ()));
 
 	    sprintf (buf, "%s;", hexified_pathname);
-	    xfree (status->value.execd_pathname);
-	    status->value.execd_pathname = NULL;
 	    buf += strlen (buf);
 	  }
-	else if (status->kind == TARGET_WAITKIND_THREAD_CREATED
+	else if (status->kind () == TARGET_WAITKIND_THREAD_CREATED
 		 && cs.report_thread_events)
 	  {
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
 
 	    sprintf (buf, "T%02xcreate:;", signal);
 	  }
-	else if (status->kind == TARGET_WAITKIND_SYSCALL_ENTRY
-		 || status->kind == TARGET_WAITKIND_SYSCALL_RETURN)
+	else if (status->kind () == TARGET_WAITKIND_SYSCALL_ENTRY
+		 || status->kind () == TARGET_WAITKIND_SYSCALL_RETURN)
 	  {
 	    enum gdb_signal signal = GDB_SIGNAL_TRAP;
-	    const char *event = (status->kind == TARGET_WAITKIND_SYSCALL_ENTRY
+	    const char *event = (status->kind () == TARGET_WAITKIND_SYSCALL_ENTRY
 				 ? "syscall_entry" : "syscall_return");
 
 	    sprintf (buf, "T%02x%s:%x;", signal, event,
-		     status->value.syscall_number);
+		     status->syscall_number ());
 	  }
 	else
-	  sprintf (buf, "T%02x", status->value.sig);
+	  sprintf (buf, "T%02x", status->sig ());
 
 	if (disable_packet_T)
 	  {
@@ -1283,19 +1281,19 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     case TARGET_WAITKIND_EXITED:
       if (cs.multi_process)
 	sprintf (buf, "W%x;process:%x",
-		 status->value.integer, ptid.pid ());
+		 status->exit_status (), ptid.pid ());
       else
-	sprintf (buf, "W%02x", status->value.integer);
+	sprintf (buf, "W%02x", status->exit_status ());
       break;
     case TARGET_WAITKIND_SIGNALLED:
       if (cs.multi_process)
 	sprintf (buf, "X%x;process:%x",
-		 status->value.sig, ptid.pid ());
+		 status->sig (), ptid.pid ());
       else
-	sprintf (buf, "X%02x", status->value.sig);
+	sprintf (buf, "X%02x", status->sig ());
       break;
     case TARGET_WAITKIND_THREAD_EXITED:
-      sprintf (buf, "w%x;", status->value.integer);
+      sprintf (buf, "w%x;", status->exit_status ());
       buf += strlen (buf);
       buf = write_ptid (buf, ptid);
       break;

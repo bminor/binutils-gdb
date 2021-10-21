@@ -324,8 +324,7 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			      safe_strerror (save_errno));
 
 	  /* Claim it exited with unknown signal.  */
-	  ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-	  ourstatus->value.sig = GDB_SIGNAL_UNKNOWN;
+	  ourstatus->set_signalled (GDB_SIGNAL_UNKNOWN);
 	  return inferior_ptid;
 	}
 

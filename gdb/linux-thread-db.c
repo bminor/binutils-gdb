@@ -1407,7 +1407,7 @@ thread_db_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   ptid = beneath->wait (ptid, ourstatus, options);
 
-  switch (ourstatus->kind)
+  switch (ourstatus->kind ())
     {
     case TARGET_WAITKIND_IGNORE:
     case TARGET_WAITKIND_EXITED:

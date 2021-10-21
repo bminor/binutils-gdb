@@ -404,12 +404,12 @@ show_follow_fork_mode_string (struct ui_file *file, int from_tty,
 static bool
 follow_fork_inferior (bool follow_child, bool detach_fork)
 {
-  target_waitkind fork_kind = inferior_thread ()->pending_follow.kind;
+  target_waitkind fork_kind = inferior_thread ()->pending_follow.kind ();
   gdb_assert (fork_kind == TARGET_WAITKIND_FORKED
 	      || fork_kind == TARGET_WAITKIND_VFORKED);
   bool has_vforked = fork_kind == TARGET_WAITKIND_VFORKED;
   ptid_t parent_ptid = inferior_ptid;
-  ptid_t child_ptid = inferior_thread ()->pending_follow.value.related_pid;
+  ptid_t child_ptid = inferior_thread ()->pending_follow.child_ptid ();
 
   if (has_vforked
       && !non_stop /* Non-stop always resumes both branches.  */
@@ -697,8 +697,8 @@ follow_fork ()
 
       /* If not stopped at a fork event, then there's nothing else to
 	 do.  */
-      if (wait_status.kind != TARGET_WAITKIND_FORKED
-	  && wait_status.kind != TARGET_WAITKIND_VFORKED)
+      if (wait_status.kind () != TARGET_WAITKIND_FORKED
+	  && wait_status.kind () != TARGET_WAITKIND_VFORKED)
 	return 1;
 
       /* Check if we switched over from WAIT_PTID, since the event was
@@ -721,7 +721,7 @@ follow_fork ()
 
   /* If there were any forks/vforks that were caught and are now to be
      followed, then do so now.  */
-  switch (tp->pending_follow.kind)
+  switch (tp->pending_follow.kind ())
     {
     case TARGET_WAITKIND_FORKED:
     case TARGET_WAITKIND_VFORKED:
@@ -757,7 +757,7 @@ follow_fork ()
 	  }
 
 	parent = inferior_ptid;
-	child = tp->pending_follow.value.related_pid;
+	child = tp->pending_follow.child_ptid ();
 
 	process_stratum_target *parent_targ = tp->inf->process_target ();
 	/* Set up inferior(s) as specified by the caller, and tell the
@@ -777,7 +777,7 @@ follow_fork ()
 	       to clear the pending follow request.  */
 	    tp = find_thread_ptid (parent_targ, parent);
 	    if (tp)
-	      tp->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
+	      tp->pending_follow.set_spurious ();
 
 	    /* This makes sure we don't try to apply the "Switched
 	       over from WAIT_PID" logic above.  */
@@ -829,7 +829,7 @@ follow_fork ()
     default:
       internal_error (__FILE__, __LINE__,
 		      "Unexpected pending_follow.kind %d\n",
-		      tp->pending_follow.kind);
+		      tp->pending_follow.kind ());
       break;
     }
 
@@ -1785,6 +1785,25 @@ displaced_step_finish (thread_info *event_thread, enum gdb_signal signal)
    discarded between events.  */
 struct execution_control_state
 {
+  execution_control_state ()
+  {
+    this->reset ();
+  }
+
+  void reset ()
+  {
+    this->target = nullptr;
+    this->ptid = null_ptid;
+    this->event_thread = nullptr;
+    ws = target_waitstatus ();
+    stop_func_filled_in = 0;
+    stop_func_start = 0;
+    stop_func_end = 0;
+    stop_func_name = nullptr;
+    wait_some_more = 0;
+    hit_singlestep_breakpoint = 0;
+  }
+
   process_stratum_target *target;
   ptid_t ptid;
   /* The thread that got the event, if this was a thread event; NULL
@@ -1810,7 +1829,7 @@ struct execution_control_state
 static void
 reset_ecs (struct execution_control_state *ecs, struct thread_info *tp)
 {
-  memset (ecs, 0, sizeof (*ecs));
+  ecs->reset ();
   ecs->event_thread = tp;
   ecs->ptid = tp->ptid;
 }
@@ -3367,8 +3386,7 @@ infrun_thread_stop_requested (ptid_t ptid)
       if (!tp->has_pending_waitstatus ())
 	{
 	  target_waitstatus ws;
-	  ws.kind = TARGET_WAITKIND_STOPPED;
-	  ws.value.sig = GDB_SIGNAL_0;
+	  ws.set_stopped (GDB_SIGNAL_0);
 	  tp->set_pending_waitstatus (ws);
 	}
 
@@ -3562,7 +3580,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
 
 	  tp->clear_pending_waitstatus ();
 	  target_waitstatus ws;
-	  ws.kind = TARGET_WAITKIND_SPURIOUS;
+	  ws.set_spurious ();
 	  tp->set_pending_waitstatus (ws);
 	  tp->set_stop_reason (TARGET_STOPPED_BY_NO_REASON);
 	}
@@ -3651,7 +3669,7 @@ do_target_wait (execution_control_state *ecs, target_wait_flags options)
 
   if (num_inferiors == 0)
     {
-      ecs->ws.kind = TARGET_WAITKIND_IGNORE;
+      ecs->ws.set_ignore ();
       return false;
     }
 
@@ -3682,7 +3700,7 @@ do_target_wait (execution_control_state *ecs, target_wait_flags options)
   {
     ecs->ptid = do_target_wait_1 (inf, minus_one_ptid, &ecs->ws, options);
     ecs->target = inf->process_target ();
-    return (ecs->ws.kind != TARGET_WAITKIND_IGNORE);
+    return (ecs->ws.kind () != TARGET_WAITKIND_IGNORE);
   };
 
   /* Needed in 'all-stop + target-non-stop' mode, because we end up
@@ -3713,7 +3731,7 @@ do_target_wait (execution_control_state *ecs, target_wait_flags options)
 	return true;
     }
 
-  ecs->ws.kind = TARGET_WAITKIND_IGNORE;
+  ecs->ws.set_ignore ();
   return false;
 }
 
@@ -3856,8 +3874,6 @@ wait_for_inferior (inferior *inf)
       struct execution_control_state ecss;
       struct execution_control_state *ecs = &ecss;
 
-      memset (ecs, 0, sizeof (*ecs));
-
       overlay_cache_invalid = 1;
 
       /* Flush target cache before starting to handle each event.
@@ -3999,8 +4015,6 @@ fetch_inferior_event ()
   struct execution_control_state *ecs = &ecss;
   int cmd_done = 0;
 
-  memset (ecs, 0, sizeof (*ecs));
-
   /* Events are always processed with the main UI as current UI.  This
      way, warnings, debug output, etc. are always consistently sent to
      the main console.  */
@@ -4055,7 +4069,7 @@ fetch_inferior_event ()
 	return;
       }
 
-    gdb_assert (ecs->ws.kind != TARGET_WAITKIND_IGNORE);
+    gdb_assert (ecs->ws.kind () != TARGET_WAITKIND_IGNORE);
 
     /* Switch to the target that generated the event, so we can do
        target calls.  */
@@ -4133,7 +4147,7 @@ fetch_inferior_event ()
 	       selected.".  */
 	    if (!non_stop
 		&& cmd_done
-		&& ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED)
+		&& ecs->ws.kind () != TARGET_WAITKIND_NO_RESUMED)
 	      restore_thread.dont_restore ();
 	  }
       }
@@ -4194,7 +4208,7 @@ init_thread_stepping_state (struct thread_info *tss)
 
 void
 set_last_target_status (process_stratum_target *target, ptid_t ptid,
-			target_waitstatus status)
+			const target_waitstatus &status)
 {
   target_last_proc_target = target;
   target_last_wait_ptid = ptid;
@@ -4276,10 +4290,10 @@ adjust_pc_after_break (struct thread_info *thread,
      target with both of these set in GDB history, and it seems unlikely to be
      correct, so gdbarch_have_nonsteppable_watchpoint is not checked here.  */
 
-  if (ws->kind != TARGET_WAITKIND_STOPPED)
+  if (ws->kind () != TARGET_WAITKIND_STOPPED)
     return;
 
-  if (ws->value.sig != GDB_SIGNAL_TRAP)
+  if (ws->sig () != GDB_SIGNAL_TRAP)
     return;
 
   /* In reverse execution, when a breakpoint is hit, the instruction
@@ -4454,8 +4468,7 @@ handle_stop_requested (struct execution_control_state *ecs)
 {
   if (ecs->event_thread->stop_requested)
     {
-      ecs->ws.kind = TARGET_WAITKIND_STOPPED;
-      ecs->ws.value.sig = GDB_SIGNAL_0;
+      ecs->ws.set_stopped (GDB_SIGNAL_0);
       handle_signal_stop (ecs);
       return true;
     }
@@ -4476,7 +4489,7 @@ handle_syscall_event (struct execution_control_state *ecs)
   context_switch (ecs);
 
   regcache = get_thread_regcache (ecs->event_thread);
-  syscall_number = ecs->ws.value.syscall_number;
+  syscall_number = ecs->ws.syscall_number ();
   ecs->event_thread->set_stop_pc (regcache_read_pc (regcache));
 
   if (catch_syscall_enabled () > 0
@@ -4612,13 +4625,13 @@ wait_one ()
 	  event.target = target;
 	  event.ptid = poll_one_curr_target (&event.ws);
 
-	  if (event.ws.kind == TARGET_WAITKIND_NO_RESUMED)
+	  if (event.ws.kind () == TARGET_WAITKIND_NO_RESUMED)
 	    {
 	      /* If nothing is resumed, remove the target from the
 		 event loop.  */
 	      target_async (0);
 	    }
-	  else if (event.ws.kind != TARGET_WAITKIND_IGNORE)
+	  else if (event.ws.kind () != TARGET_WAITKIND_IGNORE)
 	    return event;
 	}
 
@@ -4646,7 +4659,9 @@ wait_one ()
       if (nfds == 0)
 	{
 	  /* No waitable targets left.  All must be stopped.  */
-	  return {NULL, minus_one_ptid, {TARGET_WAITKIND_NO_RESUMED}};
+	  target_waitstatus ws;
+	  ws.set_no_resumed ();
+	  return {NULL, minus_one_ptid, std::move (ws)};
 	}
 
       QUIT;
@@ -4674,8 +4689,8 @@ save_waitstatus (struct thread_info *tp, const target_waitstatus *ws)
   /* Record for later.  */
   tp->set_pending_waitstatus (*ws);
 
-  if (ws->kind == TARGET_WAITKIND_STOPPED
-      && ws->value.sig == GDB_SIGNAL_TRAP)
+  if (ws->kind () == TARGET_WAITKIND_STOPPED
+      && ws->sig () == GDB_SIGNAL_TRAP)
     {
       struct regcache *regcache = get_thread_regcache (tp);
       const address_space *aspace = regcache->aspace ();
@@ -4713,14 +4728,14 @@ save_waitstatus (struct thread_info *tp, const target_waitstatus *ws)
 static void
 mark_non_executing_threads (process_stratum_target *target,
 			    ptid_t event_ptid,
-			    struct target_waitstatus ws)
+			    const target_waitstatus &ws)
 {
   ptid_t mark_ptid;
 
   if (!target_is_non_stop_p ())
     mark_ptid = minus_one_ptid;
-  else if (ws.kind == TARGET_WAITKIND_SIGNALLED
-	   || ws.kind == TARGET_WAITKIND_EXITED)
+  else if (ws.kind () == TARGET_WAITKIND_SIGNALLED
+	   || ws.kind () == TARGET_WAITKIND_EXITED)
     {
       /* If we're handling a process exit in non-stop mode, even
 	 though threads haven't been deleted yet, one would think
@@ -4762,14 +4777,14 @@ handle_one (const wait_one_event &event)
     ("%s %s", target_waitstatus_to_string (&event.ws).c_str (),
      target_pid_to_str (event.ptid).c_str ());
 
-  if (event.ws.kind == TARGET_WAITKIND_NO_RESUMED)
+  if (event.ws.kind () == TARGET_WAITKIND_NO_RESUMED)
     {
       /* All resumed threads exited.  */
       return true;
     }
-  else if (event.ws.kind == TARGET_WAITKIND_THREAD_EXITED
-	   || event.ws.kind == TARGET_WAITKIND_EXITED
-	   || event.ws.kind == TARGET_WAITKIND_SIGNALLED)
+  else if (event.ws.kind () == TARGET_WAITKIND_THREAD_EXITED
+	   || event.ws.kind () == TARGET_WAITKIND_EXITED
+	   || event.ws.kind () == TARGET_WAITKIND_SIGNALLED)
     {
       /* One thread/process exited/signalled.  */
 
@@ -4804,7 +4819,7 @@ handle_one (const wait_one_event &event)
 	  /* Check if this is the first time we see this thread.
 	     Don't bother adding if it individually exited.  */
 	  if (t == nullptr
-	      && event.ws.kind != TARGET_WAITKIND_THREAD_EXITED)
+	      && event.ws.kind () != TARGET_WAITKIND_THREAD_EXITED)
 	    t = add_thread (event.target, event.ptid);
 	}
 
@@ -4839,8 +4854,8 @@ handle_one (const wait_one_event &event)
 	  setup_inferior (0);
 	}
 
-      if (event.ws.kind == TARGET_WAITKIND_STOPPED
-	  && event.ws.value.sig == GDB_SIGNAL_0)
+      if (event.ws.kind () == TARGET_WAITKIND_STOPPED
+	  && event.ws.sig () == GDB_SIGNAL_0)
 	{
 	  /* We caught the event that we intended to catch, so
 	     there's no event to save as pending.  */
@@ -4871,8 +4886,8 @@ handle_one (const wait_one_event &event)
 	  /* Record for later.  */
 	  save_waitstatus (t, &event.ws);
 
-	  sig = (event.ws.kind == TARGET_WAITKIND_STOPPED
-		 ? event.ws.value.sig : GDB_SIGNAL_0);
+	  sig = (event.ws.kind () == TARGET_WAITKIND_STOPPED
+		 ? event.ws.sig () : GDB_SIGNAL_0);
 
 	  if (displaced_step_finish (t, sig)
 	      == DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED)
@@ -5174,7 +5189,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   infrun_debug_printf ("%s", target_waitstatus_to_string (&ecs->ws).c_str ());
 
-  if (ecs->ws.kind == TARGET_WAITKIND_IGNORE)
+  if (ecs->ws.kind () == TARGET_WAITKIND_IGNORE)
     {
       /* We had an event in the inferior, but we are not interested in
 	 handling it at this level.  The lower layers have already
@@ -5189,13 +5204,13 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
     }
 
-  if (ecs->ws.kind == TARGET_WAITKIND_THREAD_EXITED)
+  if (ecs->ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
     {
       prepare_to_wait (ecs);
       return;
     }
 
-  if (ecs->ws.kind == TARGET_WAITKIND_NO_RESUMED
+  if (ecs->ws.kind () == TARGET_WAITKIND_NO_RESUMED
       && handle_no_resumed (ecs))
     return;
 
@@ -5205,7 +5220,7 @@ handle_inferior_event (struct execution_control_state *ecs)
   /* Always clear state belonging to the previous time we stopped.  */
   stop_stack_dummy = STOP_NONE;
 
-  if (ecs->ws.kind == TARGET_WAITKIND_NO_RESUMED)
+  if (ecs->ws.kind () == TARGET_WAITKIND_NO_RESUMED)
     {
       /* No unwaited-for children left.  IOW, all resumed children
 	 have exited.  */
@@ -5214,8 +5229,8 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
     }
 
-  if (ecs->ws.kind != TARGET_WAITKIND_EXITED
-      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
+  if (ecs->ws.kind () != TARGET_WAITKIND_EXITED
+      && ecs->ws.kind () != TARGET_WAITKIND_SIGNALLED)
     {
       ecs->event_thread = find_thread_ptid (ecs->target, ecs->ptid);
       /* If it's a new thread, add it to the thread database.  */
@@ -5245,10 +5260,10 @@ handle_inferior_event (struct execution_control_state *ecs)
      non-executable stack.  This happens for call dummy breakpoints
      for architectures like SPARC that place call dummies on the
      stack.  */
-  if (ecs->ws.kind == TARGET_WAITKIND_STOPPED
-      && (ecs->ws.value.sig == GDB_SIGNAL_ILL
-	  || ecs->ws.value.sig == GDB_SIGNAL_SEGV
-	  || ecs->ws.value.sig == GDB_SIGNAL_EMT))
+  if (ecs->ws.kind () == TARGET_WAITKIND_STOPPED
+      && (ecs->ws.sig () == GDB_SIGNAL_ILL
+	  || ecs->ws.sig () == GDB_SIGNAL_SEGV
+	  || ecs->ws.sig () == GDB_SIGNAL_EMT))
     {
       struct regcache *regcache = get_thread_regcache (ecs->event_thread);
 
@@ -5256,13 +5271,13 @@ handle_inferior_event (struct execution_control_state *ecs)
 				      regcache_read_pc (regcache)))
 	{
 	  infrun_debug_printf ("Treating signal as SIGTRAP");
-	  ecs->ws.value.sig = GDB_SIGNAL_TRAP;
+	  ecs->ws.set_stopped (GDB_SIGNAL_TRAP);
 	}
     }
 
   mark_non_executing_threads (ecs->target, ecs->ptid, ecs->ws);
 
-  switch (ecs->ws.kind)
+  switch (ecs->ws.kind ())
     {
     case TARGET_WAITKIND_LOADED:
       {
@@ -5382,21 +5397,21 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* Clearing any previous state of convenience variables.  */
       clear_exit_convenience_vars ();
 
-      if (ecs->ws.kind == TARGET_WAITKIND_EXITED)
+      if (ecs->ws.kind () == TARGET_WAITKIND_EXITED)
 	{
 	  /* Record the exit code in the convenience variable $_exitcode, so
 	     that the user can inspect this again later.  */
 	  set_internalvar_integer (lookup_internalvar ("_exitcode"),
-				   (LONGEST) ecs->ws.value.integer);
+				   (LONGEST) ecs->ws.exit_status ());
 
 	  /* Also record this in the inferior itself.  */
 	  current_inferior ()->has_exit_code = 1;
-	  current_inferior ()->exit_code = (LONGEST) ecs->ws.value.integer;
+	  current_inferior ()->exit_code = (LONGEST) ecs->ws.exit_status ();
 
 	  /* Support the --return-child-result option.  */
-	  return_child_result_value = ecs->ws.value.integer;
+	  return_child_result_value = ecs->ws.exit_status ();
 
-	  gdb::observers::exited.notify (ecs->ws.value.integer);
+	  gdb::observers::exited.notify (ecs->ws.exit_status ());
 	}
       else
 	{
@@ -5408,7 +5423,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 		 which holds the signal uncaught by the inferior.  */
 	      set_internalvar_integer (lookup_internalvar ("_exitsignal"),
 				       gdbarch_gdb_signal_to_target (gdbarch,
-							  ecs->ws.value.sig));
+							  ecs->ws.sig ()));
 	    }
 	  else
 	    {
@@ -5423,7 +5438,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 				   "signal number.");
 	    }
 
-	  gdb::observers::signal_exited.notify (ecs->ws.value.sig);
+	  gdb::observers::signal_exited.notify (ecs->ws.sig ());
 	}
 
       gdb_flush (gdb_stdout);
@@ -5450,10 +5465,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	   gdbarch_displaced_step_restore_all_in_ptid.  This is not
 	   enforced during gdbarch validation to support architectures
 	   which support displaced stepping but not forks.  */
-	if (ecs->ws.kind == TARGET_WAITKIND_FORKED
+	if (ecs->ws.kind () == TARGET_WAITKIND_FORKED
 	    && gdbarch_supports_displaced_stepping (gdbarch))
 	  gdbarch_displaced_step_restore_all_in_ptid
-	    (gdbarch, parent_inf, ecs->ws.value.related_pid);
+	    (gdbarch, parent_inf, ecs->ws.child_ptid ());
 
 	/* If displaced stepping is supported, and thread ecs->ptid is
 	   displaced stepping.  */
@@ -5481,7 +5496,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	    child_regcache
 	      = get_thread_arch_aspace_regcache (parent_inf->process_target (),
-						 ecs->ws.value.related_pid,
+						 ecs->ws.child_ptid (),
 						 gdbarch,
 						 parent_inf->aspace);
 	    /* Read PC value of parent process.  */
@@ -5510,11 +5525,11 @@ handle_inferior_event (struct execution_control_state *ecs)
 	 need to unpatch at follow/detach time instead to be certain
 	 that new breakpoints added between catchpoint hit time and
 	 vfork follow are detached.  */
-      if (ecs->ws.kind != TARGET_WAITKIND_VFORKED)
+      if (ecs->ws.kind () != TARGET_WAITKIND_VFORKED)
 	{
 	  /* This won't actually modify the breakpoint list, but will
 	     physically remove the breakpoints from the child.  */
-	  detach_breakpoints (ecs->ws.value.related_pid);
+	  detach_breakpoints (ecs->ws.child_ptid ());
 	}
 
       delete_just_stopped_threads_single_step_breakpoints ();
@@ -5554,8 +5569,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  /* Note that one of these may be an invalid pointer,
 	     depending on detach_fork.  */
 	  thread_info *parent = ecs->event_thread;
-	  thread_info *child
-	    = find_thread_ptid (targ, ecs->ws.value.related_pid);
+	  thread_info *child = find_thread_ptid (targ, ecs->ws.child_ptid ());
 
 	  /* At this point, the parent is marked running, and the
 	     child is marked stopped.  */
@@ -5629,7 +5643,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* This causes the eventpoints and symbol table to be reset.
 	 Must do this now, before trying to determine whether to
 	 stop.  */
-      follow_exec (inferior_ptid, ecs->ws.value.execd_pathname);
+      follow_exec (inferior_ptid, ecs->ws.execd_pathname ());
 
       /* In follow_exec we may have deleted the original thread and
 	 created a new one.  Make sure that the event thread is the
@@ -5643,11 +5657,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	= bpstat_stop_status (get_current_regcache ()->aspace (),
 			      ecs->event_thread->stop_pc (),
 			      ecs->event_thread, &ecs->ws);
-
-      /* Note that this may be referenced from inside
-	 bpstat_stop_status above, through inferior_has_execd.  */
-      xfree (ecs->ws.value.execd_pathname);
-      ecs->ws.value.execd_pathname = NULL;
 
       if (handle_stop_requested (ecs))
 	return;
@@ -5928,9 +5937,9 @@ handle_signal_stop (struct execution_control_state *ecs)
   enum stop_kind stop_soon;
   int random_signal;
 
-  gdb_assert (ecs->ws.kind == TARGET_WAITKIND_STOPPED);
+  gdb_assert (ecs->ws.kind () == TARGET_WAITKIND_STOPPED);
 
-  ecs->event_thread->set_stop_signal (ecs->ws.value.sig);
+  ecs->event_thread->set_stop_signal (ecs->ws.sig ());
 
   /* Do we need to clean up the state of a thread that has
      completed a displaced single-step?  (Doing so usually affects
@@ -8265,7 +8274,7 @@ print_stop_location (struct target_waitstatus *ws)
   int do_frame_printing = 1;
   struct thread_info *tp = inferior_thread ();
 
-  bpstat_ret = bpstat_print (tp->control.stop_bpstat, ws->kind);
+  bpstat_ret = bpstat_print (tp->control.stop_bpstat, ws->kind ());
   switch (bpstat_ret)
     {
     case PRINT_UNKNOWN:
@@ -8440,8 +8449,8 @@ normal_stop (void)
 
   if (!non_stop)
     finish_ptid = minus_one_ptid;
-  else if (last.kind == TARGET_WAITKIND_SIGNALLED
-	   || last.kind == TARGET_WAITKIND_EXITED)
+  else if (last.kind () == TARGET_WAITKIND_SIGNALLED
+	   || last.kind () == TARGET_WAITKIND_EXITED)
     {
       /* On some targets, we may still have live threads in the
 	 inferior when we get a process exit event.  E.g., for
@@ -8451,7 +8460,7 @@ normal_stop (void)
       if (inferior_ptid != null_ptid)
 	finish_ptid = ptid_t (inferior_ptid.pid ());
     }
-  else if (last.kind != TARGET_WAITKIND_NO_RESUMED)
+  else if (last.kind () != TARGET_WAITKIND_NO_RESUMED)
     finish_ptid = inferior_ptid;
 
   gdb::optional<scoped_finish_thread_state> maybe_finish_thread_state;
@@ -8471,7 +8480,7 @@ normal_stop (void)
      instead of after.  */
   update_thread_list ();
 
-  if (last.kind == TARGET_WAITKIND_STOPPED && stopped_by_random_signal)
+  if (last.kind () == TARGET_WAITKIND_STOPPED && stopped_by_random_signal)
     gdb::observers::signal_received.notify (inferior_thread ()->stop_signal ());
 
   /* As with the notification of thread events, we want to delay
@@ -8493,9 +8502,9 @@ normal_stop (void)
   if (!non_stop
       && previous_inferior_ptid != inferior_ptid
       && target_has_execution ()
-      && last.kind != TARGET_WAITKIND_SIGNALLED
-      && last.kind != TARGET_WAITKIND_EXITED
-      && last.kind != TARGET_WAITKIND_NO_RESUMED)
+      && last.kind () != TARGET_WAITKIND_SIGNALLED
+      && last.kind () != TARGET_WAITKIND_EXITED
+      && last.kind () != TARGET_WAITKIND_NO_RESUMED)
     {
       SWITCH_THRU_ALL_UIS ()
 	{
@@ -8507,7 +8516,7 @@ normal_stop (void)
       previous_inferior_ptid = inferior_ptid;
     }
 
-  if (last.kind == TARGET_WAITKIND_NO_RESUMED)
+  if (last.kind () == TARGET_WAITKIND_NO_RESUMED)
     {
       SWITCH_THRU_ALL_UIS ()
 	if (current_ui->prompt_state == PROMPT_BLOCKED)
@@ -8599,9 +8608,9 @@ normal_stop (void)
 
   if (target_has_execution ())
     {
-      if (last.kind != TARGET_WAITKIND_SIGNALLED
-	  && last.kind != TARGET_WAITKIND_EXITED
-	  && last.kind != TARGET_WAITKIND_NO_RESUMED)
+      if (last.kind () != TARGET_WAITKIND_SIGNALLED
+	  && last.kind () != TARGET_WAITKIND_EXITED
+	  && last.kind () != TARGET_WAITKIND_NO_RESUMED)
 	/* Delete the breakpoint we stopped at, if it wants to be deleted.
 	   Delete any breakpoint that is to be deleted at the next stop.  */
 	breakpoint_auto_delete (inferior_thread ()->control.stop_bpstat);

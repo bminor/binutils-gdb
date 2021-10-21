@@ -180,7 +180,7 @@ struct thread_suspend_state
   enum target_stop_reason stop_reason = TARGET_STOPPED_BY_NO_REASON;
 
   /* The waitstatus for this thread's last event.  */
-  struct target_waitstatus waitstatus {};
+  struct target_waitstatus waitstatus;
   /* If true WAITSTATUS hasn't been handled yet.  */
   int waitstatus_pending_p = 0;
 

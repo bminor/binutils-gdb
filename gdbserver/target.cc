@@ -172,8 +172,8 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   /* We don't expose _LOADED events to gdbserver core.  See the
      `dlls_changed' global.  */
-  if (ourstatus->kind == TARGET_WAITKIND_LOADED)
-    ourstatus->kind = TARGET_WAITKIND_STOPPED;
+  if (ourstatus->kind () == TARGET_WAITKIND_LOADED)
+    ourstatus->set_stopped (GDB_SIGNAL_0);
 
   /* If GDB is connected through TCP/serial, then GDBserver will most
      probably be running on its own terminal/console, so it's nice to
@@ -183,13 +183,13 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
      regular GDB output, in that same terminal.  */
   if (!remote_connection_is_stdio ())
     {
-      if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+      if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
 	fprintf (stderr,
-		 "\nChild exited with status %d\n", ourstatus->value.integer);
-      else if (ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
+		 "\nChild exited with status %d\n", ourstatus->exit_status ());
+      else if (ourstatus->kind () == TARGET_WAITKIND_SIGNALLED)
 	fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
-		 gdb_signal_to_host (ourstatus->value.sig),
-		 gdb_signal_to_name (ourstatus->value.sig));
+		 gdb_signal_to_host (ourstatus->sig ()),
+		 gdb_signal_to_name (ourstatus->sig ()));
     }
 
   if (connected_wait)

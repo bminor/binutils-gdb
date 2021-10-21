@@ -576,7 +576,7 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   ptid_t wptid = ptid_t (pid);
 
   /* If the child stopped, keep investigating its status.  */
-  if (ourstatus->kind != TARGET_WAITKIND_STOPPED)
+  if (ourstatus->kind () != TARGET_WAITKIND_STOPPED)
     return wptid;
 
   /* Extract the event and thread that received a signal.  */
@@ -620,12 +620,11 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	 Ignore exited events for an unknown LWP.  */
       thread_info *thr = find_thread_ptid (this, wptid);
       if (thr == nullptr)
-	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  ourstatus->set_spurious ();
       else
 	{
-	  ourstatus->kind = TARGET_WAITKIND_THREAD_EXITED;
 	  /* NetBSD does not store an LWP exit status.  */
-	  ourstatus->value.integer = 0;
+	  ourstatus->set_thread_exited (0);
 
 	  if (print_thread_events)
 	    printf_unfiltered (_("[%s exited]\n"),
@@ -650,19 +649,18 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	 not yet reported their PTRACE_LWP_CREATE event.  Ignore
 	 born events for an already-known LWP.  */
       if (in_thread_list (this, wptid))
-	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  ourstatus->set_spurious ();
       else
 	{
 	  add_thread (this, wptid);
-	  ourstatus->kind = TARGET_WAITKIND_THREAD_CREATED;
+	  ourstatus->set_thread_created ();
 	}
       return wptid;
     }
 
   if (code == TRAP_EXEC)
     {
-      ourstatus->kind = TARGET_WAITKIND_EXECD;
-      ourstatus->value.execd_pathname = xstrdup (pid_to_exec_file (pid));
+      ourstatus->set_execd (make_unique_xstrdup (pid_to_exec_file (pid)));
       return wptid;
     }
 
@@ -679,14 +677,14 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       if (!catch_syscall_enabled () || !catching_syscall_number (sysnum))
 	{
 	  /* If the core isn't interested in this event, ignore it.  */
-	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  ourstatus->set_spurious ();
 	  return wptid;
 	}
 
-      ourstatus->kind =
-	(code == TRAP_SCE) ? TARGET_WAITKIND_SYSCALL_ENTRY :
-	TARGET_WAITKIND_SYSCALL_RETURN;
-      ourstatus->value.syscall_number = sysnum;
+      if (code == TRAP_SCE)
+	ourstatus->set_syscall_entry (sysnum);
+      else
+	ourstatus->set_syscall_return (sysnum);
       return wptid;
     }
 
@@ -697,7 +695,7 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     }
 
   /* Unclassified SIGTRAP event.  */
-  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  ourstatus->set_spurious ();
   return wptid;
 }
 

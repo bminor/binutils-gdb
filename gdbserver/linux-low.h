@@ -721,11 +721,6 @@ struct pending_signal
 
 struct lwp_info
 {
-  lwp_info ()
-  {
-    this->waitstatus.kind = TARGET_WAITKIND_IGNORE;
-  }
-
   /* Backlink to the parent object.  */
   struct thread_info *thread = nullptr;
 

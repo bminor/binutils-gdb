@@ -155,10 +155,10 @@ signal_catchpoint_breakpoint_hit (const struct bp_location *bl,
     = (const struct signal_catchpoint *) bl->owner;
   gdb_signal signal_number;
 
-  if (ws->kind != TARGET_WAITKIND_STOPPED)
+  if (ws->kind () != TARGET_WAITKIND_STOPPED)
     return 0;
 
-  signal_number = ws->value.sig;
+  signal_number = ws->sig ();
 
   /* If we are catching specific signals in this breakpoint, then we
      must guarantee that the called signal is the same signal we are
@@ -188,7 +188,7 @@ signal_catchpoint_print_it (bpstat bs)
 
   get_last_target_status (nullptr, nullptr, &last);
 
-  signal_name = signal_to_name_or_int (last.value.sig);
+  signal_name = signal_to_name_or_int (last.sig ());
 
   annotate_catchpoint (b->number);
   maybe_print_thread_hit_breakpoint (uiout);

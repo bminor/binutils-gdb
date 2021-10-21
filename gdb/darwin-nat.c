@@ -980,12 +980,12 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 	  printf_unfiltered
 	    (_("darwin_wait: ill-formatted message (id=0x%x)\n"), hdr->msgh_id);
 	  /* FIXME: send a failure reply?  */
-	  status->kind = TARGET_WAITKIND_IGNORE;
+	  status->set_ignore ();
 	  return minus_one_ptid;
 	}
       if (inf == NULL)
 	{
-	  status->kind = TARGET_WAITKIND_IGNORE;
+	  status->set_ignore ();
 	  return minus_one_ptid;
 	}
       *pinf = inf;
@@ -995,7 +995,6 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 
       priv->pending_messages++;
 
-      status->kind = TARGET_WAITKIND_STOPPED;
       thread->msg_state = DARWIN_MESSAGE;
 
       inferior_debug (4, _("darwin_wait: thread=0x%x, got %s\n"),
@@ -1005,25 +1004,25 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
       switch (thread->event.ex_type)
 	{
 	case EXC_BAD_ACCESS:
-	  status->value.sig = GDB_EXC_BAD_ACCESS;
+	  status->set_stopped (GDB_EXC_BAD_ACCESS);
 	  break;
 	case EXC_BAD_INSTRUCTION:
-	  status->value.sig = GDB_EXC_BAD_INSTRUCTION;
+	  status->set_stopped (GDB_EXC_BAD_INSTRUCTION);
 	  break;
 	case EXC_ARITHMETIC:
-	  status->value.sig = GDB_EXC_ARITHMETIC;
+	  status->set_stopped (GDB_EXC_ARITHMETIC);
 	  break;
 	case EXC_EMULATION:
-	  status->value.sig = GDB_EXC_EMULATION;
+	  status->set_stopped (GDB_EXC_EMULATION);
 	  break;
 	case EXC_SOFTWARE:
 	  if (thread->event.ex_data[0] == EXC_SOFT_SIGNAL)
 	    {
-	      status->value.sig =
-		gdb_signal_from_host (thread->event.ex_data[1]);
+	      status->set_stopped
+		(gdb_signal_from_host (thread->event.ex_data[1]));
 	      inferior_debug (5, _("  (signal %d: %s)\n"),
 			      thread->event.ex_data[1],
-			      gdb_signal_to_name (status->value.sig));
+			      gdb_signal_to_name (status->sig ()));
 
 	      /* If the thread is stopped because it has received a signal
 		 that gdb has just sent, continue.  */
@@ -1032,20 +1031,20 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 		  thread->signaled = 0;
 		  darwin_send_reply (inf, thread);
 		  thread->msg_state = DARWIN_RUNNING;
-		  status->kind = TARGET_WAITKIND_IGNORE;
+		  status->set_ignore ();
 		}
 	    }
 	  else
-	    status->value.sig = GDB_EXC_SOFTWARE;
+	    status->set_stopped (GDB_EXC_SOFTWARE);
 	  break;
 	case EXC_BREAKPOINT:
 	  /* Many internal GDB routines expect breakpoints to be reported
 	     as GDB_SIGNAL_TRAP, and will report GDB_EXC_BREAKPOINT
 	     as a spurious signal.  */
-	  status->value.sig = GDB_SIGNAL_TRAP;
+	  status->set_stopped (GDB_SIGNAL_TRAP);
 	  break;
 	default:
-	  status->value.sig = GDB_SIGNAL_UNKNOWN;
+	  status->set_stopped (GDB_SIGNAL_UNKNOWN);
 	  break;
 	}
 
@@ -1071,7 +1070,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 
       if (res < 0 || inf == NULL)
 	{
-	  status->kind = TARGET_WAITKIND_IGNORE;
+	  status->set_ignore ();
 	  return minus_one_ptid;
 	}
 
@@ -1089,18 +1088,15 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 		{
 		  printf_unfiltered (_("wait4: res=%d: %s\n"),
 				     res_pid, safe_strerror (errno));
-		  status->kind = TARGET_WAITKIND_IGNORE;
+		  status->set_ignore ();
 		  return minus_one_ptid;
 		}
 	      if (WIFEXITED (wstatus))
-		{
-		  status->kind = TARGET_WAITKIND_EXITED;
-		  status->value.integer = WEXITSTATUS (wstatus);
-		}
+		status->set_exited (WEXITSTATUS (wstatus));
 	      else
 		{
-		  status->kind = TARGET_WAITKIND_SIGNALLED;
-		  status->value.sig = gdb_signal_from_host (WTERMSIG (wstatus));
+		  status->set_signalled
+		    (gdb_signal_from_host (WTERMSIG (wstatus)));
 		}
 
 	      inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
@@ -1114,8 +1110,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 	  else
 	    {
 	      inferior_debug (4, _("darwin_wait: pid=%d\n"), inf->pid);
-	      status->kind = TARGET_WAITKIND_EXITED;
-	      status->value.integer = 0; /* Don't know.  */
+	      status->set_exited (0 /* Don't know.  */);
 	      return ptid_t (inf->pid, 0, 0);
 	    }
 	}
@@ -1123,7 +1118,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 
   /* Unknown message.  */
   warning (_("darwin: got unknown message, id: 0x%x"), hdr->msgh_id);
-  status->kind = TARGET_WAITKIND_IGNORE;
+  status->set_ignore ();
   return minus_one_ptid;
 }
 
@@ -1182,8 +1177,7 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
 
       darwin_inferior *priv = get_darwin_inferior (inf);
 
-      status->kind = TARGET_WAITKIND_STOPPED;
-      status->value.sig = GDB_SIGNAL_TRAP;
+      status->set_stopped (GDB_SIGNAL_TRAP);
       thread = priv->threads[0];
       thread->msg_state = DARWIN_STOPPED;
       return ptid_t (inf->pid, 0, thread->gdb_port);
@@ -1201,14 +1195,14 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
 
       if (kret == MACH_RCV_INTERRUPTED)
 	{
-	  status->kind = TARGET_WAITKIND_IGNORE;
+	  status->set_ignore ();
 	  return minus_one_ptid;
 	}
 
       if (kret != MACH_MSG_SUCCESS)
 	{
 	  inferior_debug (5, _("mach_msg: ret=0x%x\n"), kret);
-	  status->kind = TARGET_WAITKIND_SPURIOUS;
+	  status->set_spurious ();
 	  return minus_one_ptid;
 	}
 
@@ -1225,7 +1219,7 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
       if (inf == NULL)
 	return res;
     }
-  while (status->kind == TARGET_WAITKIND_IGNORE);
+  while (status->kind () == TARGET_WAITKIND_IGNORE);
 
   /* Stop all tasks.  */
   for (inferior *inf : all_inferiors (this))
@@ -1400,8 +1394,8 @@ darwin_nat_target::stop_inferior (inferior *inf)
   while (1)
     {
       ptid = wait_1 (ptid_t (inf->pid), &wstatus);
-      if (wstatus.kind == TARGET_WAITKIND_STOPPED
-	  && wstatus.value.sig == GDB_SIGNAL_STOP)
+      if (wstatus.kind () == TARGET_WAITKIND_STOPPED
+	  && wstatus.sig () == GDB_SIGNAL_STOP)
 	break;
     }
 }

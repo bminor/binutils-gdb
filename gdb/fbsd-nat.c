@@ -1181,7 +1181,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	}
 #endif
       wptid = inf_ptrace_target::wait (ptid, ourstatus, target_options);
-      if (ourstatus->kind == TARGET_WAITKIND_STOPPED)
+      if (ourstatus->kind () == TARGET_WAITKIND_STOPPED)
 	{
 	  struct ptrace_lwpinfo pl;
 	  pid_t pid;
@@ -1252,7 +1252,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 					 pl.pl_lwpid);
 		  add_thread (this, wptid);
 		}
-	      ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	      ourstatus->set_spurious ();
 	      return wptid;
 	    }
 #endif
@@ -1263,14 +1263,14 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 #ifndef PTRACE_VFORK
 	      struct kinfo_proc kp;
 #endif
+	      bool is_vfork = false;
 	      ptid_t child_ptid;
 	      pid_t child;
 
 	      child = pl.pl_child_pid;
-	      ourstatus->kind = TARGET_WAITKIND_FORKED;
 #ifdef PTRACE_VFORK
 	      if (pl.pl_flags & PL_FLAG_VFORKED)
-		ourstatus->kind = TARGET_WAITKIND_VFORKED;
+		is_vfork = true;
 #endif
 
 	      /* Make sure the other end of the fork is stopped too.  */
@@ -1299,12 +1299,16 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	      if (fbsd_fetch_kinfo_proc (child, &kp))
 		{
 		  if (kp.ki_flag & P_PPWAIT)
-		    ourstatus->kind = TARGET_WAITKIND_VFORKED;
+		    is_vfork = true;
 		}
 	      else
 		warning (_("Failed to fetch process information"));
 #endif
-	      ourstatus->value.related_pid = child_ptid;
+
+	      if (is_vfork)
+		ourstatus->set_vforked (child_ptid);
+	      else
+		ourstatus->set_forked (child_ptid);
 
 	      return wptid;
 	    }
@@ -1321,7 +1325,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 #ifdef PTRACE_VFORK
 	  if (pl.pl_flags & PL_FLAG_VFORK_DONE)
 	    {
-	      ourstatus->kind = TARGET_WAITKIND_VFORK_DONE;
+	      ourstatus->set_vfork_done ();
 	      return wptid;
 	    }
 #endif
@@ -1329,9 +1333,8 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 	  if (pl.pl_flags & PL_FLAG_EXEC)
 	    {
-	      ourstatus->kind = TARGET_WAITKIND_EXECD;
-	      ourstatus->value.execd_pathname
-		= xstrdup (pid_to_exec_file (pid));
+	      ourstatus->set_execd
+		(make_unique_xstrdup (pid_to_exec_file (pid)));
 	      return wptid;
 	    }
 
@@ -1348,7 +1351,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	     SIGTRAP, so only treat SIGTRAP events as system call
 	     entry/exit events.  */
 	  if (pl.pl_flags & (PL_FLAG_SCE | PL_FLAG_SCX)
-	      && ourstatus->value.sig == SIGTRAP)
+	      && ourstatus->sig () == SIGTRAP)
 	    {
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
 	      if (catch_syscall_enabled ())
@@ -1356,10 +1359,10 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		  if (catching_syscall_number (pl.pl_syscall_code))
 		    {
 		      if (pl.pl_flags & PL_FLAG_SCE)
-			ourstatus->kind = TARGET_WAITKIND_SYSCALL_ENTRY;
+			ourstatus->set_syscall_entry (pl.pl_syscall_code);
 		      else
-			ourstatus->kind = TARGET_WAITKIND_SYSCALL_RETURN;
-		      ourstatus->value.syscall_number = pl.pl_syscall_code;
+			ourstatus->set_syscall_return (pl.pl_syscall_code);
+
 		      return wptid;
 		    }
 		}
@@ -1490,7 +1493,7 @@ fbsd_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 	perror_with_name (("ptrace"));
 
 #ifndef PTRACE_VFORK
-      if (fork_kind == TARGET_WAITKIND_VFORKED)
+      if (fork_kind () == TARGET_WAITKIND_VFORKED)
 	{
 	  /* We can't insert breakpoints until the child process has
 	     finished with the shared memory region.  The parent

@@ -58,20 +58,11 @@ void
 store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
 {
   if (WIFEXITED (hoststatus))
-    {
-      ourstatus->kind = TARGET_WAITKIND_EXITED;
-      ourstatus->value.integer = WEXITSTATUS (hoststatus);
-    }
+    ourstatus->set_exited (WEXITSTATUS (hoststatus));
   else if (!WIFSTOPPED (hoststatus))
-    {
-      ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-      ourstatus->value.sig = gdb_signal_from_host (WTERMSIG (hoststatus));
-    }
+    ourstatus->set_signalled (gdb_signal_from_host (WTERMSIG (hoststatus)));
   else
-    {
-      ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = gdb_signal_from_host (WSTOPSIG (hoststatus));
-    }
+    ourstatus->set_stopped (gdb_signal_from_host (WSTOPSIG (hoststatus)));
 }
 
 inf_child_target::~inf_child_target ()

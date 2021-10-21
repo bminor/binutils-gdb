@@ -297,9 +297,7 @@ thread_info::thread_info (struct inferior *inf_, ptid_t ptid_)
   this->per_inf_num = ++inf_->highest_thread_num;
 
   /* Nothing to follow yet.  */
-  memset (&this->pending_follow, 0, sizeof (this->pending_follow));
-  this->pending_follow.kind = TARGET_WAITKIND_SPURIOUS;
-  this->m_suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
+  this->pending_follow.set_spurious ();
 }
 
 /* See gdbthread.h.  */

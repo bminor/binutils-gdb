@@ -374,7 +374,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
   if (the_low_target.initial_stuff != NULL)
     (*the_low_target.initial_stuff) ();
 
-  cached_status.kind = TARGET_WAITKIND_IGNORE;
+  cached_status.set_ignore ();
 
   /* Flush all currently pending debug events (thread and dll list) up
      to the initial breakpoint.  */
@@ -385,7 +385,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
       the_target->wait (minus_one_ptid, &status, 0);
 
       /* Note win32_wait doesn't return thread events.  */
-      if (status.kind != TARGET_WAITKIND_LOADED)
+      if (status.kind () != TARGET_WAITKIND_LOADED)
 	{
 	  cached_status = status;
 	  break;
@@ -1081,7 +1081,7 @@ get_child_debug_event (DWORD *continue_status,
   ptid_t ptid;
 
   last_sig = GDB_SIGNAL_0;
-  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  ourstatus->set_spurious ();
   *continue_status = DBG_CONTINUE;
 
   /* Check if GDB sent us an interrupt request.  */
@@ -1119,8 +1119,7 @@ get_child_debug_event (DWORD *continue_status,
 	       load the application, e.g., if the main executable
 	       tries to pull in a non-existing export from a
 	       DLL.  */
-	    ourstatus->kind = TARGET_WAITKIND_EXITED;
-	    ourstatus->value.integer = 1;
+	    ourstatus->set_exited (1);
 	    return 1;
 	  }
 
@@ -1192,15 +1191,9 @@ get_child_debug_event (DWORD *continue_status,
 	int exit_signal
 	  = WIFSIGNALED (exit_status) ? WTERMSIG (exit_status) : -1;
 	if (exit_signal == -1)
-	  {
-	    ourstatus->kind = TARGET_WAITKIND_EXITED;
-	    ourstatus->value.integer = exit_status;
-	  }
+	  ourstatus->set_exited (exit_status);
 	else
-	  {
-	    ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-	    ourstatus->value.sig = gdb_signal_from_host (exit_signal);
-	  }
+	  ourstatus->set_signalled (gdb_signal_from_host (exit_signal));
       }
       child_continue (DBG_CONTINUE, desired_stop_thread_id);
       break;
@@ -1215,8 +1208,7 @@ get_child_debug_event (DWORD *continue_status,
 	break;
       dll_loaded_event ();
 
-      ourstatus->kind = TARGET_WAITKIND_LOADED;
-      ourstatus->value.sig = GDB_SIGNAL_TRAP;
+      ourstatus->set_loaded ();
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
@@ -1227,8 +1219,7 @@ get_child_debug_event (DWORD *continue_status,
       if (! child_initialization_done)
 	break;
       handle_unload_dll ();
-      ourstatus->kind = TARGET_WAITKIND_LOADED;
-      ourstatus->value.sig = GDB_SIGNAL_TRAP;
+      ourstatus->set_loaded ();
       break;
 
     case EXCEPTION_DEBUG_EVENT:
@@ -1270,7 +1261,7 @@ get_child_debug_event (DWORD *continue_status,
 		ptid.lwp (), desired_stop_thread_id));
       maybe_adjust_pc ();
       pending_stops.push_back ({(DWORD) ptid.lwp (), *ourstatus, current_event});
-      ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+      ourstatus->set_spurious ();
     }
   else
     current_thread = find_thread_ptid (ptid);
@@ -1285,14 +1276,14 @@ ptid_t
 win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 			    target_wait_flags options)
 {
-  if (cached_status.kind != TARGET_WAITKIND_IGNORE)
+  if (cached_status.kind () != TARGET_WAITKIND_IGNORE)
     {
       /* The core always does a wait after creating the inferior, and
 	 do_initial_child_stuff already ran the inferior to the
 	 initial breakpoint (or an exit, if creating the process
 	 fails).  Report it now.  */
       *ourstatus = cached_status;
-      cached_status.kind = TARGET_WAITKIND_IGNORE;
+      cached_status.set_ignore ();
       return debug_event_ptid (&current_event);
     }
 
@@ -1302,11 +1293,11 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
       if (!get_child_debug_event (&continue_status, ourstatus))
 	continue;
 
-      switch (ourstatus->kind)
+      switch (ourstatus->kind ())
 	{
 	case TARGET_WAITKIND_EXITED:
 	  OUTMSG2 (("Child exited with retcode = %x\n",
-		    ourstatus->value.integer));
+		    ourstatus->exit_status ()));
 	  win32_clear_inferiors ();
 	  return ptid_t (current_event.dwProcessId);
 	case TARGET_WAITKIND_STOPPED:
@@ -1314,12 +1305,13 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	case TARGET_WAITKIND_LOADED:
 	  {
 	    OUTMSG2 (("Child Stopped with signal = %d \n",
-		      ourstatus->value.sig));
+		      ourstatus->sig ()));
 	    maybe_adjust_pc ();
 	    return debug_event_ptid (&current_event);
 	  }
 	default:
-	  OUTMSG (("Ignoring unknown internal event, %d\n", ourstatus->kind));
+	  OUTMSG (("Ignoring unknown internal event, %d\n",
+		  ourstatus->kind ()));
 	  /* fall-through */
 	case TARGET_WAITKIND_SPURIOUS:
 	  /* do nothing, just continue */

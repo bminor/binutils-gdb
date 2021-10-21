@@ -2235,7 +2235,7 @@ btrace_step_no_history (void)
 {
   struct target_waitstatus status;
 
-  status.kind = TARGET_WAITKIND_NO_HISTORY;
+  status.set_no_history ();
 
   return status;
 }
@@ -2247,8 +2247,7 @@ btrace_step_stopped (void)
 {
   struct target_waitstatus status;
 
-  status.kind = TARGET_WAITKIND_STOPPED;
-  status.value.sig = GDB_SIGNAL_TRAP;
+  status.set_stopped (GDB_SIGNAL_TRAP);
 
   return status;
 }
@@ -2261,8 +2260,7 @@ btrace_step_stopped_on_request (void)
 {
   struct target_waitstatus status;
 
-  status.kind = TARGET_WAITKIND_STOPPED;
-  status.value.sig = GDB_SIGNAL_0;
+  status.set_stopped (GDB_SIGNAL_0);
 
   return status;
 }
@@ -2274,7 +2272,7 @@ btrace_step_spurious (void)
 {
   struct target_waitstatus status;
 
-  status.kind = TARGET_WAITKIND_SPURIOUS;
+  status.set_spurious ();
 
   return status;
 }
@@ -2286,7 +2284,7 @@ btrace_step_no_resumed (void)
 {
   struct target_waitstatus status;
 
-  status.kind = TARGET_WAITKIND_NO_RESUMED;
+  status.set_no_resumed ();
 
   return status;
 }
@@ -2298,7 +2296,7 @@ btrace_step_again (void)
 {
   struct target_waitstatus status;
 
-  status.kind = TARGET_WAITKIND_IGNORE;
+  status.set_ignore ();
 
   return status;
 }
@@ -2466,21 +2464,21 @@ record_btrace_step_thread (struct thread_info *tp)
 
     case BTHR_STEP:
       status = record_btrace_single_step_forward (tp);
-      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+      if (status.kind () != TARGET_WAITKIND_SPURIOUS)
 	break;
 
       return btrace_step_stopped ();
 
     case BTHR_RSTEP:
       status = record_btrace_single_step_backward (tp);
-      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+      if (status.kind () != TARGET_WAITKIND_SPURIOUS)
 	break;
 
       return btrace_step_stopped ();
 
     case BTHR_CONT:
       status = record_btrace_single_step_forward (tp);
-      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+      if (status.kind () != TARGET_WAITKIND_SPURIOUS)
 	break;
 
       btinfo->flags |= flags;
@@ -2488,7 +2486,7 @@ record_btrace_step_thread (struct thread_info *tp)
 
     case BTHR_RCONT:
       status = record_btrace_single_step_backward (tp);
-      if (status.kind != TARGET_WAITKIND_SPURIOUS)
+      if (status.kind () != TARGET_WAITKIND_SPURIOUS)
 	break;
 
       btinfo->flags |= flags;
@@ -2497,7 +2495,7 @@ record_btrace_step_thread (struct thread_info *tp)
 
   /* We keep threads moving at the end of their execution history.  The wait
      method will stop the thread for whom the event is reported.  */
-  if (status.kind == TARGET_WAITKIND_NO_HISTORY)
+  if (status.kind () == TARGET_WAITKIND_NO_HISTORY)
     btinfo->flags |= flags;
 
   return status;
@@ -2589,7 +2587,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
 	  *status = record_btrace_step_thread (tp);
 
-	  switch (status->kind)
+	  switch (status->kind ())
 	    {
 	    case TARGET_WAITKIND_IGNORE:
 	      ix++;

@@ -133,7 +133,7 @@ extern void get_last_target_status (process_stratum_target **target,
 
 /* Set the cached copy of the last target/ptid/waitstatus.  */
 extern void set_last_target_status (process_stratum_target *target, ptid_t ptid,
-				    struct target_waitstatus status);
+				    const target_waitstatus &status);
 
 /* Clear the cached copy of the last ptid/waitstatus returned by
    target_wait().  */

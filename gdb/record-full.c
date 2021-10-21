@@ -1155,7 +1155,7 @@ record_full_wait_1 (struct target_ops *ops,
       gdb_assert ((options & TARGET_WNOHANG) != 0);
 
       /* No interesting event.  */
-      status->kind = TARGET_WAITKIND_IGNORE;
+      status->set_ignore ();
       return minus_one_ptid;
     }
 
@@ -1182,7 +1182,7 @@ record_full_wait_1 (struct target_ops *ops,
 	  while (1)
 	    {
 	      ret = ops->beneath ()->wait (ptid, status, options);
-	      if (status->kind == TARGET_WAITKIND_IGNORE)
+	      if (status->kind () == TARGET_WAITKIND_IGNORE)
 		{
 		  if (record_debug)
 		    fprintf_unfiltered (gdb_stdlog,
@@ -1198,8 +1198,8 @@ record_full_wait_1 (struct target_ops *ops,
 		return ret;
 
 	      /* Is this a SIGTRAP?  */
-	      if (status->kind == TARGET_WAITKIND_STOPPED
-		  && status->value.sig == GDB_SIGNAL_TRAP)
+	      if (status->kind () == TARGET_WAITKIND_STOPPED
+		  && status->sig () == GDB_SIGNAL_TRAP)
 		{
 		  struct regcache *regcache;
 		  enum target_stop_reason *stop_reason_p
@@ -1237,8 +1237,7 @@ record_full_wait_1 (struct target_ops *ops,
 		      if (!record_full_message_wrapper_safe (regcache,
 							     GDB_SIGNAL_0))
 			{
-			   status->kind = TARGET_WAITKIND_STOPPED;
-			   status->value.sig = GDB_SIGNAL_0;
+			   status->set_stopped (GDB_SIGNAL_0);
 			   break;
 			}
 
@@ -1292,7 +1291,7 @@ record_full_wait_1 (struct target_ops *ops,
 	  CORE_ADDR tmp_pc;
 
 	  record_full_stop_reason = TARGET_STOPPED_BY_NO_REASON;
-	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->set_stopped (GDB_SIGNAL_0);
 
 	  /* Check breakpoint when forward execute.  */
 	  if (execution_direction == EXEC_FORWARD)
@@ -1330,14 +1329,14 @@ record_full_wait_1 (struct target_ops *ops,
 		  && record_full_list == &record_full_first)
 		{
 		  /* Hit beginning of record log in reverse.  */
-		  status->kind = TARGET_WAITKIND_NO_HISTORY;
+		  status->set_no_history ();
 		  break;
 		}
 	      if (execution_direction != EXEC_REVERSE
 		  && !record_full_list->next)
 		{
 		  /* Hit end of record log going forward.  */
-		  status->kind = TARGET_WAITKIND_NO_HISTORY;
+		  status->set_no_history ();
 		  break;
 		}
 
@@ -1422,13 +1421,16 @@ record_full_wait_1 (struct target_ops *ops,
 	  while (continue_flag);
 
 	replay_out:
-	  if (record_full_get_sig)
-	    status->value.sig = GDB_SIGNAL_INT;
-	  else if (record_full_list->u.end.sigval != GDB_SIGNAL_0)
-	    /* FIXME: better way to check */
-	    status->value.sig = record_full_list->u.end.sigval;
-	  else
-	    status->value.sig = GDB_SIGNAL_TRAP;
+	  if (status->kind () == TARGET_WAITKIND_STOPPED)
+	    {
+	      if (record_full_get_sig)
+		status->set_stopped (GDB_SIGNAL_INT);
+	      else if (record_full_list->u.end.sigval != GDB_SIGNAL_0)
+		/* FIXME: better way to check */
+		status->set_stopped (record_full_list->u.end.sigval);
+	      else
+		status->set_stopped (GDB_SIGNAL_TRAP);
+	    }
 	}
       catch (const gdb_exception &ex)
 	{
@@ -1458,7 +1460,7 @@ record_full_base_target::wait (ptid_t ptid, struct target_waitstatus *status,
   clear_async_event_handler (record_full_async_inferior_event_token);
 
   return_ptid = record_full_wait_1 (this, ptid, status, options);
-  if (status->kind != TARGET_WAITKIND_IGNORE)
+  if (status->kind () != TARGET_WAITKIND_IGNORE)
     {
       /* We're reporting a stop.  Make sure any spurious
 	 target_wait(WNOHANG) doesn't advance the target until the

@@ -239,9 +239,9 @@ in_queued_stop_replies_ptid (struct notif_event *event, ptid_t filter_ptid)
     return true;
 
   /* Don't resume fork children that GDB does not know about yet.  */
-  if ((vstop_event->status.kind == TARGET_WAITKIND_FORKED
-       || vstop_event->status.kind == TARGET_WAITKIND_VFORKED)
-      && vstop_event->status.value.related_pid.matches (filter_ptid))
+  if ((vstop_event->status.kind () == TARGET_WAITKIND_FORKED
+       || vstop_event->status.kind () == TARGET_WAITKIND_VFORKED)
+      && vstop_event->status.child_ptid ().matches (filter_ptid))
     return true;
 
   return false;
@@ -327,9 +327,9 @@ attach_inferior (int pid)
       /* GDB knows to ignore the first SIGSTOP after attaching to a running
 	 process using the "attach" command, but this is different; it's
 	 just using "target remote".  Pretend it's just starting up.  */
-      if (cs.last_status.kind == TARGET_WAITKIND_STOPPED
-	  && cs.last_status.value.sig == GDB_SIGNAL_STOP)
-	cs.last_status.value.sig = GDB_SIGNAL_TRAP;
+      if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED
+	  && cs.last_status.sig () == GDB_SIGNAL_STOP)
+	cs.last_status.set_stopped (GDB_SIGNAL_TRAP);
 
       current_thread->last_resume_kind = resume_stop;
       current_thread->last_status = cs.last_status;
@@ -1262,8 +1262,7 @@ handle_detach (char *own_buf)
 	  /* There is still at least one inferior remaining or
 	     we are in extended mode, so don't terminate gdbserver,
 	     and instead treat this like a normal program exit.  */
-	  cs.last_status.kind = TARGET_WAITKIND_EXITED;
-	  cs.last_status.value.integer = 0;
+	  cs.last_status.set_exited (0);
 	  cs.last_ptid = ptid_t (pid);
 
 	  current_thread = NULL;
@@ -2944,7 +2943,7 @@ resume (struct thread_resume *actions, size_t num_actions)
     {
       cs.last_ptid = mywait (minus_one_ptid, &cs.last_status, 0, 1);
 
-      if (cs.last_status.kind == TARGET_WAITKIND_NO_RESUMED
+      if (cs.last_status.kind () == TARGET_WAITKIND_NO_RESUMED
 	  && !report_no_resumed)
 	{
 	  /* The client does not support this stop reply.  At least
@@ -2954,9 +2953,9 @@ resume (struct thread_resume *actions, size_t num_actions)
 	  return;
 	}
 
-      if (cs.last_status.kind != TARGET_WAITKIND_EXITED
-	  && cs.last_status.kind != TARGET_WAITKIND_SIGNALLED
-	  && cs.last_status.kind != TARGET_WAITKIND_NO_RESUMED)
+      if (cs.last_status.kind () != TARGET_WAITKIND_EXITED
+	  && cs.last_status.kind () != TARGET_WAITKIND_SIGNALLED
+	  && cs.last_status.kind () != TARGET_WAITKIND_NO_RESUMED)
 	current_thread->last_status = cs.last_status;
 
       /* From the client's perspective, all-stop mode always stops all
@@ -2967,8 +2966,8 @@ resume (struct thread_resume *actions, size_t num_actions)
       prepare_resume_reply (cs.own_buf, cs.last_ptid, &cs.last_status);
       disable_async_io ();
 
-      if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-	  || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
+      if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
+	  || cs.last_status.kind () == TARGET_WAITKIND_SIGNALLED)
 	target_mourn_inferior (cs.last_ptid);
     }
 }
@@ -3113,7 +3112,7 @@ handle_v_run (char *own_buf)
 
   target_create_inferior (program_path.get (), program_args);
 
-  if (cs.last_status.kind == TARGET_WAITKIND_STOPPED)
+  if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
     {
       prepare_resume_reply (own_buf, cs.last_ptid, &cs.last_status);
 
@@ -3143,8 +3142,7 @@ handle_v_kill (char *own_buf)
 
   if (proc != nullptr && kill_inferior (proc) == 0)
     {
-      cs.last_status.kind = TARGET_WAITKIND_SIGNALLED;
-      cs.last_status.value.sig = GDB_SIGNAL_KILL;
+      cs.last_status.set_signalled (GDB_SIGNAL_KILL);
       cs.last_ptid = ptid_t (pid);
       discard_queued_stop_replies (cs.last_ptid);
       write_ok (own_buf);
@@ -3316,7 +3314,7 @@ queue_stop_reply_callback (thread_info *thread)
 			    status_string.c_str ());
 	    }
 
-	  gdb_assert (thread->last_status.kind != TARGET_WAITKIND_IGNORE);
+	  gdb_assert (thread->last_status.kind () != TARGET_WAITKIND_IGNORE);
 
 	  /* Pass the last stop reply back to GDB, but don't notify
 	     yet.  */
@@ -3334,12 +3332,11 @@ gdb_wants_thread_stopped (thread_info *thread)
 {
   thread->last_resume_kind = resume_stop;
 
-  if (thread->last_status.kind == TARGET_WAITKIND_IGNORE)
+  if (thread->last_status.kind () == TARGET_WAITKIND_IGNORE)
     {
       /* Most threads are stopped implicitly (all-stop); tag that with
 	 signal 0.  */
-      thread->last_status.kind = TARGET_WAITKIND_STOPPED;
-      thread->last_status.value.sig = GDB_SIGNAL_0;
+      thread->last_status.set_stopped (GDB_SIGNAL_0);
     }
 }
 
@@ -3357,15 +3354,15 @@ gdb_wants_all_threads_stopped (void)
 static void
 set_pending_status_callback (thread_info *thread)
 {
-  if (thread->last_status.kind != TARGET_WAITKIND_STOPPED
-      || (thread->last_status.value.sig != GDB_SIGNAL_0
+  if (thread->last_status.kind () != TARGET_WAITKIND_STOPPED
+      || (thread->last_status.sig () != GDB_SIGNAL_0
 	  /* A breakpoint, watchpoint or finished step from a previous
 	     GDB run isn't considered interesting for a new GDB run.
 	     If we left those pending, the new GDB could consider them
 	     random SIGTRAPs.  This leaves out real async traps.  We'd
 	     have to peek into the (target-specific) siginfo to
 	     distinguish those.  */
-	  && thread->last_status.value.sig != GDB_SIGNAL_TRAP))
+	  && thread->last_status.sig () != GDB_SIGNAL_TRAP))
     thread->status_pending_p = 1;
 }
 
@@ -3412,9 +3409,9 @@ handle_status (char *own_buf)
 
       /* Prefer the last thread that reported an event to GDB (even if
 	 that was a GDB_SIGNAL_TRAP).  */
-      if (cs.last_status.kind != TARGET_WAITKIND_IGNORE
-	  && cs.last_status.kind != TARGET_WAITKIND_EXITED
-	  && cs.last_status.kind != TARGET_WAITKIND_SIGNALLED)
+      if (cs.last_status.kind () != TARGET_WAITKIND_IGNORE
+	  && cs.last_status.kind () != TARGET_WAITKIND_EXITED
+	  && cs.last_status.kind () != TARGET_WAITKIND_SIGNALLED)
 	thread = find_thread_ptid (cs.last_ptid);
 
       /* If the last event thread is not found for some reason, look
@@ -3443,7 +3440,7 @@ handle_status (char *own_buf)
 	  cs.general_thread = thread->id;
 	  set_desired_thread ();
 
-	  gdb_assert (tp->last_status.kind != TARGET_WAITKIND_IGNORE);
+	  gdb_assert (tp->last_status.kind () != TARGET_WAITKIND_IGNORE);
 	  prepare_resume_reply (own_buf, tp->id, &tp->last_status);
 	}
       else
@@ -3989,8 +3986,7 @@ captured_main (int argc, char *argv[])
     }
   else
     {
-      cs.last_status.kind = TARGET_WAITKIND_EXITED;
-      cs.last_status.value.integer = 0;
+      cs.last_status.set_exited (0);
       cs.last_ptid = minus_one_ptid;
     }
 
@@ -4002,8 +3998,8 @@ captured_main (int argc, char *argv[])
   if (current_thread != nullptr)
     current_process ()->dlls_changed = false;
 
-  if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-      || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
+  if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
+      || cs.last_status.kind () == TARGET_WAITKIND_SIGNALLED)
     was_running = 0;
   else
     was_running = 1;
@@ -4456,8 +4452,7 @@ process_serial_event (void)
 	 running.  The traditional protocol will exit instead.  */
       if (extended_protocol)
 	{
-	  cs.last_status.kind = TARGET_WAITKIND_EXITED;
-	  cs.last_status.value.sig = GDB_SIGNAL_KILL;
+	  cs.last_status.set_exited (GDB_SIGNAL_KILL);
 	  return 0;
 	}
       else
@@ -4497,7 +4492,7 @@ process_serial_event (void)
 	    {
 	      target_create_inferior (program_path.get (), program_args);
 
-	      if (cs.last_status.kind == TARGET_WAITKIND_STOPPED)
+	      if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
 		{
 		  /* Stopped at the first instruction of the target
 		     process.  */
@@ -4511,8 +4506,7 @@ process_serial_event (void)
 	    }
 	  else
 	    {
-	      cs.last_status.kind = TARGET_WAITKIND_EXITED;
-	      cs.last_status.value.sig = GDB_SIGNAL_KILL;
+	      cs.last_status.set_exited (GDB_SIGNAL_KILL);
 	    }
 	  return 0;
 	}
@@ -4595,24 +4589,24 @@ handle_target_event (int err, gdb_client_data client_data)
   cs.last_ptid = mywait (minus_one_ptid, &cs.last_status,
 		      TARGET_WNOHANG, 1);
 
-  if (cs.last_status.kind == TARGET_WAITKIND_NO_RESUMED)
+  if (cs.last_status.kind () == TARGET_WAITKIND_NO_RESUMED)
     {
       if (gdb_connected () && report_no_resumed)
 	push_stop_notification (null_ptid, &cs.last_status);
     }
-  else if (cs.last_status.kind != TARGET_WAITKIND_IGNORE)
+  else if (cs.last_status.kind () != TARGET_WAITKIND_IGNORE)
     {
       int pid = cs.last_ptid.pid ();
       struct process_info *process = find_process_pid (pid);
       int forward_event = !gdb_connected () || process->gdb_detached;
 
-      if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-	  || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
+      if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
+	  || cs.last_status.kind () == TARGET_WAITKIND_SIGNALLED)
 	{
 	  mark_breakpoints_out (process);
 	  target_mourn_inferior (cs.last_ptid);
 	}
-      else if (cs.last_status.kind == TARGET_WAITKIND_THREAD_EXITED)
+      else if (cs.last_status.kind () == TARGET_WAITKIND_THREAD_EXITED)
 	;
       else
 	{
@@ -4631,9 +4625,9 @@ handle_target_event (int err, gdb_client_data client_data)
 	      exit (0);
 	    }
 
-	  if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-	      || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED
-	      || cs.last_status.kind == TARGET_WAITKIND_THREAD_EXITED)
+	  if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
+	      || cs.last_status.kind () == TARGET_WAITKIND_SIGNALLED
+	      || cs.last_status.kind () == TARGET_WAITKIND_THREAD_EXITED)
 	    ;
 	  else
 	    {
@@ -4645,11 +4639,11 @@ handle_target_event (int err, gdb_client_data client_data)
 	      if (debug_threads)
 		debug_printf ("GDB not connected; forwarding event %d for"
 			      " [%s]\n",
-			      (int) cs.last_status.kind,
+			      (int) cs.last_status.kind (),
 			      target_pid_to_str (cs.last_ptid));
 
-	      if (cs.last_status.kind == TARGET_WAITKIND_STOPPED)
-		signal = cs.last_status.value.sig;
+	      if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
+		signal = cs.last_status.sig ();
 	      else
 		signal = GDB_SIGNAL_0;
 	      target_continue (cs.last_ptid, signal);

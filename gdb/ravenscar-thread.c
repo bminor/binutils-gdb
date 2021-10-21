@@ -401,8 +401,8 @@ ravenscar_thread_target::wait (ptid_t ptid,
      this causes problems when debugging through the remote protocol,
      because we might try switching threads (and thus sending packets)
      after the remote has disconnected.  */
-  if (status->kind != TARGET_WAITKIND_EXITED
-      && status->kind != TARGET_WAITKIND_SIGNALLED
+  if (status->kind () != TARGET_WAITKIND_EXITED
+      && status->kind () != TARGET_WAITKIND_SIGNALLED
       && runtime_initialized ())
     {
       m_base_ptid = event_ptid;

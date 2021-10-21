@@ -202,9 +202,7 @@ struct lwp_info : intrusive_list_node<lwp_info>
 {
   lwp_info (ptid_t ptid)
     : ptid (ptid)
-  {
-    waitstatus.kind = TARGET_WAITKIND_IGNORE;
-  }
+  {}
 
   ~lwp_info ();
 
@@ -212,7 +210,7 @@ struct lwp_info : intrusive_list_node<lwp_info>
 
   /* The process id of the LWP.  This is a combination of the LWP id
      and overall process id.  */
-  ptid_t ptid;
+  ptid_t ptid = null_ptid;
 
   /* If this flag is set, we need to set the event request flags the
      next time we see this LWP stop.  */

@@ -511,24 +511,20 @@ go32_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
     chdir (current_directory);
 
   if (a_tss.tss_irqn == 0x21)
-    {
-      status->kind = TARGET_WAITKIND_EXITED;
-      status->value.integer = a_tss.tss_eax & 0xff;
-    }
+    status->set_exited (a_tss.tss_eax & 0xff);
   else
     {
-      status->value.sig = GDB_SIGNAL_UNKNOWN;
-      status->kind = TARGET_WAITKIND_STOPPED;
+      status->set_stopped (GDB_SIGNAL_UNKNOWN);
       for (i = 0; sig_map[i].go32_sig != -1; i++)
 	{
 	  if (a_tss.tss_irqn == sig_map[i].go32_sig)
 	    {
 #if __DJGPP_MINOR__ < 3
-	      if ((status->value.sig = sig_map[i].gdb_sig) !=
-		  GDB_SIGNAL_TRAP)
-		status->kind = TARGET_WAITKIND_SIGNALLED;
+	      status->set_stopped (sig_map[i].gdb_sig);
+	      if (status->sig () != GDB_SIGNAL_TRAP)
+		status->set_signalled (status->sig ());
 #else
-	      status->value.sig = sig_map[i].gdb_sig;
+	      status->set_stopped (sig_map[i].gdb_sig);
 #endif
 	      break;
 	    }

@@ -1092,8 +1092,8 @@ aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
     return ptid_t (-1);
 
   /* Check whether libpthdebug might be ready to be initialized.  */
-  if (!pd_active && status->kind == TARGET_WAITKIND_STOPPED
-      && status->value.sig == GDB_SIGNAL_TRAP)
+  if (!pd_active && status->kind () == TARGET_WAITKIND_STOPPED
+      && status->sig () == GDB_SIGNAL_TRAP)
     {
       process_stratum_target *proc_target
 	= current_inferior ()->process_target ();

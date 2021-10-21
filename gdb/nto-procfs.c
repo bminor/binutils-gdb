@@ -802,12 +802,11 @@ nto_procfs_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   procfs_status status;
   static int exit_signo = 0;	/* To track signals that cause termination.  */
 
-  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  ourstatus->set_spurious ();
 
   if (inferior_ptid == null_ptid)
     {
-      ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = GDB_SIGNAL_0;
+      ourstatus->set_stopped (GDB_SIGNAL_0);
       exit_signo = 0;
       return null_ptid;
     }
@@ -828,38 +827,29 @@ nto_procfs_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   nto_inferior_data (NULL)->stopped_pc = status.ip;
 
   if (status.flags & _DEBUG_FLAG_SSTEP)
-    {
-      ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = GDB_SIGNAL_TRAP;
-    }
+    ourstatus->set_stopped (GDB_SIGNAL_TRAP);
   /* Was it a breakpoint?  */
   else if (status.flags & _DEBUG_FLAG_TRACE)
-    {
-      ourstatus->kind = TARGET_WAITKIND_STOPPED;
-      ourstatus->value.sig = GDB_SIGNAL_TRAP;
-    }
+    ourstatus->set_stopped (GDB_SIGNAL_TRAP);
   else if (status.flags & _DEBUG_FLAG_ISTOP)
     {
       switch (status.why)
 	{
 	case _DEBUG_WHY_SIGNALLED:
-	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
-	  ourstatus->value.sig =
-	    gdb_signal_from_host (status.info.si_signo);
+	  ourstatus->set_stopped (gdb_signal_from_host (status.info.si_signo));
 	  exit_signo = 0;
 	  break;
 	case _DEBUG_WHY_FAULTED:
-	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
 	  if (status.info.si_signo == SIGTRAP)
 	    {
-	      ourstatus->value.sig = 0;
+	      ourstatus->set_stopped (0);
 	      exit_signo = 0;
 	    }
 	  else
 	    {
-	      ourstatus->value.sig =
-		gdb_signal_from_host (status.info.si_signo);
-	      exit_signo = ourstatus->value.sig;
+	      ourstatus->set_stopped
+		(gdb_signal_from_host (status.info.si_signo));
+	      exit_signo = ourstatus->sig ();
 	    }
 	  break;
 
@@ -871,14 +861,12 @@ nto_procfs_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	    if (exit_signo)
 	      {
 		/* Abnormal death.  */
-		ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-		ourstatus->value.sig = exit_signo;
+		ourstatus->set_signalled (exit_signo);
 	      }
 	    else
 	      {
 		/* Normal death.  */
-		ourstatus->kind = TARGET_WAITKIND_EXITED;
-		ourstatus->value.integer = WEXITSTATUS (waitval);
+		ourstatus->set_exited (WEXITSTATUS (waitval));
 	      }
 	    exit_signo = 0;
 	    break;
@@ -886,8 +874,7 @@ nto_procfs_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 	case _DEBUG_WHY_REQUESTED:
 	  /* We are assuming a requested stop is due to a SIGINT.  */
-	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
-	  ourstatus->value.sig = GDB_SIGNAL_INT;
+	  ourstatus->set_stopped (GDB_SIGNAL_INT);
 	  exit_signo = 0;
 	  break;
 	}

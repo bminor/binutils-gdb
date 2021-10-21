@@ -389,8 +389,8 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   /* If the process is no longer alive, there's no point in figuring
      out the thread ID.  It will fail anyway.  */
-  if (status->kind == TARGET_WAITKIND_SIGNALLED
-      || status->kind == TARGET_WAITKIND_EXITED)
+  if (status->kind () == TARGET_WAITKIND_SIGNALLED
+      || status->kind () == TARGET_WAITKIND_EXITED)
     return ptid;
 
   /* Fetch the corresponding thread ID, and augment the returned

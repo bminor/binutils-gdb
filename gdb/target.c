@@ -2615,7 +2615,7 @@ default_target_wait (struct target_ops *ops,
 		     ptid_t ptid, struct target_waitstatus *status,
 		     target_wait_flags options)
 {
-  status->kind = TARGET_WAITKIND_IGNORE;
+  status->set_ignore ();
   return minus_one_ptid;
 }
 
@@ -3851,7 +3851,6 @@ target_stop_and_wait (ptid_t ptid)
   non_stop = true;
   target_stop (ptid);
 
-  memset (&status, 0, sizeof (status));
   target_wait (ptid, &status, 0);
 
   non_stop = was_non_stop;

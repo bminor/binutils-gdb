@@ -482,8 +482,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
     {
       thread_info *thr = inferior_thread ();
       target_waitstatus ws;
-      ws.kind = TARGET_WAITKIND_STOPPED;
-      ws.value.sig = GDB_SIGNAL_0;
+      ws.set_stopped (GDB_SIGNAL_0);
       thr->set_pending_waitstatus (ws);
     }
 

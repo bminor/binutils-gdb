@@ -441,7 +441,7 @@ sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   ptid_t rtnval = beneath ()->wait (ptid, ourstatus, options);
 
-  if (ourstatus->kind != TARGET_WAITKIND_EXITED)
+  if (ourstatus->kind () != TARGET_WAITKIND_EXITED)
     {
       /* Map the LWP of interest back to the appropriate thread ID.  */
       ptid_t thr_ptid = lwp_to_thread (rtnval);

@@ -937,13 +937,12 @@ windows_nat::handle_output_debug_string (struct target_waitstatus *ourstatus)
       int sig = strtol (s.get () + sizeof (_CYGWIN_SIGNAL_STRING) - 1, &p, 0);
       gdb_signal gotasig = gdb_signal_from_host (sig);
 
-      ourstatus->value.sig = gotasig;
       if (gotasig)
 	{
 	  LPCVOID x;
 	  SIZE_T n;
 
-	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
+	  ourstatus->set_stopped (gotasig);
 	  retval = strtoul (p, &p, 0);
 	  if (!retval)
 	    retval = current_event.dwThreadId;
@@ -1505,7 +1504,7 @@ windows_nat_target::get_windows_debug_event (int pid,
   continue_status = DBG_CONTINUE;
 
   event_code = current_event.dwDebugEventCode;
-  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  ourstatus->set_spurious ();
   have_saved_context = 0;
 
   switch (event_code)
@@ -1595,15 +1594,10 @@ windows_nat_target::get_windows_debug_event (int pid,
 	  int exit_signal
 	    = WIFSIGNALED (exit_status) ? WTERMSIG (exit_status) : -1;
 	  if (exit_signal == -1)
-	    {
-	      ourstatus->kind = TARGET_WAITKIND_EXITED;
-	      ourstatus->value.integer = exit_status;
-	    }
+	    ourstatus->set_exited (exit_status);
 	  else
-	    {
-	      ourstatus->kind = TARGET_WAITKIND_SIGNALLED;
-	      ourstatus->value.sig = gdb_signal_from_host (exit_signal);
-	    }
+	    ourstatus->set_signalled (gdb_signal_from_host (exit_signal));
+
 	  thread_id = current_event.dwThreadId;
 	}
       break;
@@ -1617,8 +1611,7 @@ windows_nat_target::get_windows_debug_event (int pid,
       if (saw_create != 1 || ! windows_initialization_done)
 	break;
       catch_errors (dll_loaded_event);
-      ourstatus->kind = TARGET_WAITKIND_LOADED;
-      ourstatus->value.integer = 0;
+      ourstatus->set_loaded ();
       thread_id = current_event.dwThreadId;
       break;
 
@@ -1630,8 +1623,7 @@ windows_nat_target::get_windows_debug_event (int pid,
       if (saw_create != 1 || ! windows_initialization_done)
 	break;
       catch_errors (handle_unload_dll);
-      ourstatus->kind = TARGET_WAITKIND_LOADED;
-      ourstatus->value.integer = 0;
+      ourstatus->set_loaded ();
       thread_id = current_event.dwThreadId;
       break;
 
@@ -1762,8 +1754,8 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	{
 	  ptid_t result = ptid_t (current_event.dwProcessId, retval, 0);
 
-	  if (ourstatus->kind != TARGET_WAITKIND_EXITED
-	      && ourstatus->kind !=  TARGET_WAITKIND_SIGNALLED)
+	  if (ourstatus->kind () != TARGET_WAITKIND_EXITED
+	      && ourstatus->kind () !=  TARGET_WAITKIND_SIGNALLED)
 	    {
 	      windows_thread_info *th = thread_rec (result, INVALIDATE_CONTEXT);
 
@@ -1856,8 +1848,8 @@ windows_nat_target::do_initial_windows_stuff (DWORD pid, bool attaching)
 
       /* Note windows_wait returns TARGET_WAITKIND_SPURIOUS for thread
 	 events.  */
-      if (status.kind != TARGET_WAITKIND_LOADED
-	  && status.kind != TARGET_WAITKIND_SPURIOUS)
+      if (status.kind () != TARGET_WAITKIND_LOADED
+	  && status.kind () != TARGET_WAITKIND_SPURIOUS)
 	break;
 
       this->resume (minus_one_ptid, 0, GDB_SIGNAL_0);
