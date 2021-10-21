@@ -1,3 +1,9 @@
+2021-10-22  Tom de Vries  <tdevries@suse.de>
+
+	PR tui/28483
+	* tui/tui-winsource.c (tui_source_window_base::update_breakpoint_info):
+	Fix returns in loop body.
+
 2021-10-04  Tom de Vries  <tdevries@suse.de>
 
 	PR build/28318
