@@ -1745,16 +1745,32 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
   if ((valtype->code () == TYPE_CODE_INT
        || valtype->code () == TYPE_CODE_ENUM
        || valtype->code () == TYPE_CODE_CHAR
-       || valtype->code () == TYPE_CODE_BOOL)
+       || valtype->code () == TYPE_CODE_BOOL
+       || valtype->code () == TYPE_CODE_RANGE
+       || is_fixed_point_type (valtype))
       && TYPE_LENGTH (valtype) <= 8)
     {
       int regnum = tdep->ppc_gp0_regnum + 3 + index;
 
       if (writebuf != NULL)
 	{
+	  LONGEST return_val;
+
+	  if (is_fixed_point_type (valtype))
+	    {
+	      /* Fixed point type values need to be returned unscaled.  */
+	      gdb_mpz unscaled;
+
+	      unscaled.read ({writebuf, TYPE_LENGTH (valtype)},
+			     type_byte_order (valtype),
+			     valtype->is_unsigned ());
+	      return_val = unscaled.as_integer<LONGEST> ();
+	    }
+	  else
+	    return_val = unpack_long (valtype, writebuf);
+
 	  /* Be careful to sign extend the value.  */
-	  regcache_cooked_write_unsigned (regcache, regnum,
-					  unpack_long (valtype, writebuf));
+	  regcache_cooked_write_unsigned (regcache, regnum, return_val);
 	}
       if (readbuf != NULL)
 	{
