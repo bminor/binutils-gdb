@@ -781,6 +781,8 @@ compatible_debug_arch (unsigned int debug_arch)
     return true;
   if (debug_arch == AARCH64_DEBUG_ARCH_V8_2)
     return true;
+  if (debug_arch == AARCH64_DEBUG_ARCH_V8_4)
+    return true;
 
   return false;
 }
