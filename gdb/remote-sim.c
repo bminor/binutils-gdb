@@ -980,8 +980,7 @@ gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status,
   switch (reason)
     {
     case sim_exited:
-      status->kind = TARGET_WAITKIND_EXITED;
-      status->value.integer = sigrc;
+      status->set_exited (sigrc);
       break;
     case sim_stopped:
       switch (sigrc)
@@ -992,14 +991,12 @@ gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status,
 	case GDB_SIGNAL_INT:
 	case GDB_SIGNAL_TRAP:
 	default:
-	  status->kind = TARGET_WAITKIND_STOPPED;
-	  status->sig () = (enum gdb_signal) sigrc;
+	  status->set_stopped ((gdb_signal) sigrc);
 	  break;
 	}
       break;
     case sim_signalled:
-      status->kind = TARGET_WAITKIND_SIGNALLED;
-      status->sig () = (enum gdb_signal) sigrc;
+      status->set_signalled ((gdb_signal) sigrc);
       break;
     case sim_running:
     case sim_polling:
