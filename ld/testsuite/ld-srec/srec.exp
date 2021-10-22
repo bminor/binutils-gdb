@@ -291,6 +291,12 @@ proc run_srec_test { test objs } {
 	setup_xfail "riscv*-*-*"
     }
 
+    # LoongArch targets cannot convert format in the linker
+    # using the --oformat command line switch
+    if [istarget loongarch*-*-*] {
+	setup_xfail "loongarch*-*-*"
+    }
+
     # V850 targets need libgcc.a
     if [istarget v850*-*-elf] {
 	set objs "$objs -L ../gcc -lgcc"

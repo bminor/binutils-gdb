@@ -408,6 +408,7 @@ ALL_64_EMULATION_SOURCES = \
 	eelf32elmip.c \
 	eelf32elmipvxworks.c \
 	eelf32l4300.c \
+	eelf32loongarch.c \
 	eelf32lmip.c \
 	eelf32lr5900.c \
 	eelf32lr5900n32.c \
@@ -441,6 +442,7 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64hppa.c \
 	eelf64lppc.c \
 	eelf64lppc_fbsd.c \
+	eelf64loongarch.c \
 	eelf64lriscv.c \
 	eelf64lriscv_lp64.c \
 	eelf64lriscv_lp64f.c \
@@ -901,6 +903,7 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32elmip.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32elmipvxworks.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32l4300.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32loongarch.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lmip.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lr5900.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lr5900n32.Pc@am__quote@
@@ -934,6 +937,7 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64hppa.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lppc.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lppc_fbsd.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64loongarch.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lriscv.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lriscv_lp64.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lriscv_lp64f.Pc@am__quote@
