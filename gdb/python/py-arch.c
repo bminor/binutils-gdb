@@ -271,6 +271,55 @@ archpy_register_groups (PyObject *self, PyObject *args)
   return gdbpy_new_reggroup_iterator (gdbarch);
 }
 
+/* Implementation of gdb.integer_type.  */
+static PyObject *
+archpy_integer_type (PyObject *self, PyObject *args, PyObject *kw)
+{
+  static const char *keywords[] = { "size", "signed", NULL };
+  int size, is_signed = 1;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "i|p", keywords,
+					&size, &is_signed))
+    return nullptr;
+
+  struct gdbarch *gdbarch;
+  ARCHPY_REQUIRE_VALID (self, gdbarch);
+
+  const struct builtin_type *builtins = builtin_type (gdbarch);
+  struct type *type = nullptr;
+  switch (size)
+    {
+    case 0:
+      type = builtins->builtin_int0;
+      break;
+    case 8:
+      type = is_signed ? builtins->builtin_int8 : builtins->builtin_uint8;
+      break;
+    case 16:
+      type = is_signed ? builtins->builtin_int16 : builtins->builtin_uint16;
+      break;
+    case 24:
+      type = is_signed ? builtins->builtin_int24 : builtins->builtin_uint24;
+      break;
+    case 32:
+      type = is_signed ? builtins->builtin_int32 : builtins->builtin_uint32;
+      break;
+    case 64:
+      type = is_signed ? builtins->builtin_int64 : builtins->builtin_uint64;
+      break;
+    case 128:
+      type = is_signed ? builtins->builtin_int128 : builtins->builtin_uint128;
+      break;
+
+    default:
+      PyErr_SetString (PyExc_ValueError,
+		       _("no integer type of that size is available"));
+      return nullptr;
+    }
+
+  return type_to_type_object (type);
+}
+
 /* Implementation of gdb.architecture_names().  Return a list of all the
    BFD architecture names that GDB understands.  */
 
@@ -323,6 +372,11 @@ Return the name of the architecture as a string value." },
     "disassemble (start_pc [, end_pc [, count]]) -> List.\n\
 Return a list of at most COUNT disassembled instructions from START_PC to\n\
 END_PC." },
+  { "integer_type", (PyCFunction) archpy_integer_type,
+    METH_VARARGS | METH_KEYWORDS,
+    "integer_type (size [, signed]) -> type\n\
+Return an integer Type corresponding to the given bitsize and signed-ness.\n\
+If not specified, the type defaults to signed." },
   { "registers", (PyCFunction) archpy_registers,
     METH_VARARGS | METH_KEYWORDS,
     "registers ([ group-name ]) -> Iterator.\n\

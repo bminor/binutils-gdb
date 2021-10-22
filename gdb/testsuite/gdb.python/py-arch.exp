@@ -63,6 +63,20 @@ if { ![is_address_zero_readable] } {
 	"test bad memory access"
 }
 
+foreach size {0 1 2 3 4 8 16} {
+    foreach sign {"" ", True" ", False"} {
+	set fullsize [expr 8 * $size]
+	gdb_test_no_output "python t = arch.integer_type($fullsize$sign)" \
+	    "get integer type for $size$sign"
+	gdb_test "python print(t.sizeof)" "$size" \
+	    "print size of integer type for $size$sign"
+    }
+}
+
+gdb_test "python arch.integer_type(95)" \
+    ".*ValueError: no integer type of that size is available.*" \
+    "call integer_type with invalid size"
+
 # Test for gdb.architecture_names().  First we're going to grab the
 # complete list of architecture names using the 'complete' command.
 set arch_names []

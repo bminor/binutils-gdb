@@ -1125,6 +1125,9 @@ Ordinarily, this function will return an instance of @code{gdb.Type}.
 If the named type cannot be found, it will throw an exception.
 @end defun
 
+Integer types can be found without looking them up by name.
+@xref{Architectures In Python}, for the @code{integer_type} method.
+
 If the type is a structure or class type, or an enum type, the fields
 of that type can be accessed using the Python @dfn{dictionary syntax}.
 For example, if @code{some_type} is a @code{gdb.Type} instance holding
@@ -5881,6 +5884,21 @@ The value corresponding to this key is the length (integer value) of the
 instruction in bytes.
 
 @end table
+@end defun
+
+@findex Architecture.integer_type
+@defun Architecture.integer_type (size @r{[}, signed@r{]})
+This function looks up an integer type by its @var{size}, and
+optionally whether or not it is signed.
+
+@var{size} is the size, in bits, of the desired integer type.  Only
+certain sizes are currently supported: 0, 8, 16, 24, 32, 64, and 128.
+
+If @var{signed} is not specified, it defaults to @code{True}.  If
+@var{signed} is @code{False}, the returned type will be unsigned.
+
+If the indicated type cannot be found, this function will throw a
+@code{ValueError} exception.
 @end defun
 
 @anchor{gdbpy_architecture_registers}
