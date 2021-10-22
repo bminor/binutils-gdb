@@ -446,6 +446,19 @@ changequote([,])dnl
 	using_cgen=yes
 	;;
 
+      loongarch)
+	for f in config/loongarch-parse.o config/loongarch-lex-wrapper.o; do
+	  case " $extra_objects " in
+	    *" $f "*) ;;
+	    *) extra_objects="$extra_objects $f" ;;
+	  esac
+	done
+        # --target=loongarch[32|64]-*-*.  */
+        if test $this_target = $target ; then
+          AC_DEFINE_UNQUOTED(DEFAULT_ARCH, "${arch}", [Default architecture.])
+        fi
+	;;
+
       m32c)
 	using_cgen=yes
 	;;

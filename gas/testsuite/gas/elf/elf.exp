@@ -178,6 +178,7 @@ if { [is_elf_format] } then {
 	rl78-*-* { }
 	riscv*-*-* { }
 	rx-*-* { }
+	loongarch*-*-* { }
 	default {
 	    # The next test can fail if the target does not convert fixups
 	    # against ordinary symbols into relocations against section symbols.

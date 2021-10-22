@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the LoongArch instruction set.
+
 * Add a command-line option, -muse-unaligned-vector-move, for x86 target
   to encode aligned vector move as unaligned vector move.
 

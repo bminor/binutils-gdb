@@ -379,6 +379,11 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @emph{Target IP2K options:}
    [@b{-mip2022}|@b{-mip2022ext}]
 @end ifset
+@ifset LOONGARCH
+
+@emph{Target LOONGARCH options:}
+   [@b{-fpic}|@b{-fPIC}|@b{-fno-pic}]
+@end ifset
 @ifset M32C
 
 @emph{Target M32C options:}
@@ -1755,6 +1760,25 @@ Assemble for a little endian target.
 @end table
 @end ifset
 @c man end
+
+@ifset LOONGARCH
+
+@ifclear man
+@xref{LoongArch-Options}, for the options available when @value{AS} is configured
+for a LoongArch processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for a
+LoongArch processor.
+@c man end
+@c man begin INCLUDE
+@include c-loongarch.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
 
 @ifset METAG
 
@@ -7837,6 +7861,9 @@ subject, see the hardware manufacturer's manual.
 @ifset IP2K
 * IP2K-Dependent::              IP2K Dependent Features
 @end ifset
+@ifset LOONGARCH
+* LoongArch-Dependent::         LoongArch Dependent Features
+@end ifset
 @ifset LM32
 * LM32-Dependent::              LM32 Dependent Features
 @end ifset
@@ -8059,6 +8086,10 @@ family.
 
 @ifset LM32
 @include c-lm32.texi
+@end ifset
+
+@ifset LOONGARCH
+@include c-loongarch.texi
 @end ifset
 
 @ifset M32C
