@@ -162,6 +162,7 @@
 #include "elf/xstormy16.h"
 #include "elf/xtensa.h"
 #include "elf/z80.h"
+#include "elf/loongarch.h"
 
 #include "getopt.h"
 #include "libiberty.h"
@@ -1678,6 +1679,11 @@ dump_relocations (Filedata *          filedata,
 	case EM_Z80:
 	  rtype = elf_z80_reloc_type (type);
 	  break;
+
+	case EM_LOONGARCH:
+	  rtype = elf_loongarch_reloc_type (type);
+	  break;
+
 	}
 
       if (rtype == NULL)
@@ -3970,6 +3976,20 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 	    default:
 	      strcat (buf, _(", unknown")); break;
 	    }
+	  break;
+	case EM_LOONGARCH:
+	  if (EF_LOONGARCH_IS_LP64 (e_flags))
+	    strcat (buf, ", LP64");
+	  else if (EF_LOONGARCH_IS_ILP32 (e_flags))
+	    strcat (buf, ", ILP32");
+
+	  if (EF_LOONGARCH_IS_SOFT_FLOAT (e_flags))
+	    strcat (buf, ", SOFT-FLOAT");
+	  else if (EF_LOONGARCH_IS_SINGLE_FLOAT (e_flags))
+	    strcat (buf, ", SINGLE-FLOAT");
+	  else if (EF_LOONGARCH_IS_DOUBLE_FLOAT (e_flags))
+	    strcat (buf, ", DOUBLE-FLOAT");
+
 	  break;
 	}
     }
@@ -13708,6 +13728,8 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 2; /* R_IQ2000_32.  */
     case EM_LATTICEMICO32:
       return reloc_type == 3; /* R_LM32_32.  */
+    case EM_LOONGARCH:
+      return reloc_type == 1; /* R_LARCH_32. */
     case EM_M32C_OLD:
     case EM_M32C:
       return reloc_type == 3; /* R_M32C_32.  */
@@ -13925,6 +13947,8 @@ is_64bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_IA_64:
       return (reloc_type == 0x26    /* R_IA64_DIR64MSB.  */
 	      || reloc_type == 0x27 /* R_IA64_DIR64LSB.  */);
+    case EM_LOONGARCH:
+      return reloc_type == 2;      /* R_LARCH_64 */
     case EM_PARISC:
       return reloc_type == 80; /* R_PARISC_DIR64.  */
     case EM_PPC64:

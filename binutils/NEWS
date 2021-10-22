@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the LoongArch instruction set.
+
 Changes in 2.37:
 
 * The readelf tool has a new command line option which can be used to specify
