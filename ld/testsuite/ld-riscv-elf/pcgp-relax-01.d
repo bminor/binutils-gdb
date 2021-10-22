@@ -1,4 +1,4 @@
-#source: pcgp-relax.s
+#source: pcgp-relax-01.s
 #ld: --relax
 #objdump: -d -Mno-aliases
 

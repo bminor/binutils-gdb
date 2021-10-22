@@ -121,7 +121,8 @@ proc run_relax_twice_test {} {
 if [istarget "riscv*-*-*"] {
     run_dump_test "align-small-region"
     run_dump_test "call-relax"
-    run_dump_test "pcgp-relax"
+    run_dump_test "pcgp-relax-01"
+    run_dump_test "pcgp-relax-02"
     run_dump_test "c-lui"
     run_dump_test "c-lui-2"
     run_dump_test "disas-jalr"
