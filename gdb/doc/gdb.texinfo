@@ -898,14 +898,17 @@ debugger attached to a bare board, there may not be any notion of
 ``process'', and there is often no way to get a core dump.  @value{GDBN}
 will warn you if it is unable to attach or to read core dumps.
 
-You can optionally have @code{@value{GDBP}} pass any arguments after the
-executable file to the inferior using @code{--args}.  This option stops
-option processing.
+You can optionally have @code{@value{GDBP}} pass any arguments after
+the executable file to the inferior using @code{--args} or
+@code{--no-escape-args}.  These options stop option processing.
 @smallexample
 @value{GDBP} --args gcc -O2 -c foo.c
 @end smallexample
 This will cause @code{@value{GDBP}} to debug @code{gcc}, and to set
-@code{gcc}'s command-line arguments (@pxref{Arguments}) to @samp{-O2 -c foo.c}.
+@code{gcc}'s command-line arguments (@pxref{Arguments}) to @samp{-O2
+-c foo.c}.  For the differences between @code{--args} and
+@code{--no-escape-args}, see @ref{--args and --no-escape-args options,
+,@code{--args} and @code{--no-escape-args}}.
 
 You can run @code{@value{GDBP}} without printing the front material, which describes
 @value{GDBN}'s non-warranty, by specifying @code{--silent}
@@ -1240,11 +1243,66 @@ that control @value{GDBN}, and level 2 has been deprecated.
 The annotation mechanism has largely been superseded by @sc{gdb/mi}
 (@pxref{GDB/MI}).
 
+@anchor{--args and --no-escape-args options}
 @item --args
 @cindex @code{--args}
 Change interpretation of command line so that arguments following the
 executable file are passed as command line arguments to the inferior.
 This option stops option processing.
+
+Arguments supplied using @code{--args} will have backslashes applied
+to escape any special shell characters.  This ensures that when the
+inferior starts it is passed arguments exactly as @value{GDBN}
+receives them.
+
+For example, consider the following command run under a shell:
+
+@smallexample
+$ @value{GDBP} --args ls *.c
+@end smallexample
+
+@noindent
+In this case the shell will expand @kbd{*.c} at the time @value{GDBN}
+is invoked, not at the time that the inferior is invoked.  As a
+result, if an additional @kbd{.c} file is created after @value{GDBN}
+is started, but before the inferior is started, then the inferior will
+not show the file in its output; the list of matching files was
+resolved at the time @value{GDBN} was started.
+
+If you quote the @kbd{*} character used on the @value{GDBN} command
+line argument then this will prevent the shell that starts
+@value{GDBN} from expanding the @kbd{*.c} pattern, however, this
+quoting will also be passed to the shell that @value{GDBN} invokes in
+order to start the inferior (@pxref{set startup-with-shell}), and this
+will prevent the @kbd{*.c} pattern being expanded at this point either:
+
+@smallexample
+$ @value{GDBP} --args ls '*.c'
+(@value{GDBP}) show args
+Argument list to give program being debugged when it is started is "\*.log".
+@end smallexample
+
+@noindent
+If this quoting behaviour does not meet your needs, then you could use
+@code{--no-escape-args} instead, which is described below.
+
+@item --no-escape-args
+@cindex @code{--no-escape-args}
+Change interpretation of command line so that arguments following the
+executable file are passed as command line arguments to the inferior.
+This option stops option processing.
+
+Unlike @code{--args}, arguments after the executable name will not
+have any escaping applied to them.  As a result, any special shell
+characters that are not expanded by the shell that invokes
+@value{GDBN} will be expanded by the shell that @value{GDBN} uses to
+start the inferior.
+
+@smallexample
+$ @value{GDBP} --no-escape-args ls '*.c'
+(@value{GDBP}) show args
+Argument list to give program being debugged when it is started is "*.log".
+@end smallexample
 
 @item -baud @var{bps}
 @itemx -b @var{bps}
@@ -51236,9 +51294,10 @@ Note that targets that give their output via @value{GDBN}, as opposed to writing
 directly to @code{stdout}, will also be made silent.
 
 @item --args @var{prog} [@var{arglist}]
-Change interpretation of command line so that arguments following this
-option are passed as arguments to the inferior.  As an example, take
-the following command:
+@itemx --no-escape-args @var{prog} [@var{arglist}]
+Change interpretation of command line so that arguments following
+either of these options are passed as arguments to the inferior.  As
+an example, take the following command:
 
 @smallexample
 gdb ./a.out -q
@@ -51253,7 +51312,44 @@ gdb --args ./a.out -q
 @end smallexample
 
 @noindent
-starts @value{GDBN} with the introductory message, and passes the option to the inferior.
+starts @value{GDBN} with the introductory message, and passes the
+option @code{-q} to the inferior.
+
+The difference between @option{--args} and @option{--no-escape-args}
+is whether @value{GDBN} applies escapes to the arguments it sees:
+
+@smallexample
+gdb --args ./a.out *.c
+@end smallexample
+
+@noindent
+in this case the @code{*.c} is expanded by the shell that invokes
+@value{GDBN}, the list of matching files will be fixed in the inferior
+argument list.  If instead this is used:
+
+@smallexample
+gdb --args ./a.out '*.c'
+@end smallexample
+
+@noindent
+then the shell that invokes @value{GDBN} will not expand @code{*.c},
+instead @value{GDBN} will escape the @code{*} character, so when a.out
+is invoked it will be passed a literal @code{*.c}.  If instead this is
+used:
+
+@smallexample
+gdb --no-escape-args ./a.out '*.c'
+@end smallexample
+
+@noindent
+now @value{GDBN} will not escape the @code{*} character.  When the
+inferior is invoked the @code{*.c} will be expanded, and the inferior
+will be passed the list of files as present at the time the inferior
+is invoked.
+
+This change of behaviour can be important if the list of matching
+files could change between the time that @value{GDBN} is started, and
+the time the inferior is started.
 
 @item --pid=@var{pid}
 Attach @value{GDBN} to an already running program, with the PID @var{pid}.
@@ -51594,6 +51690,18 @@ By default, @command{gdbserver} keeps the listening TCP port open, so that
 additional connections are possible.  However, if you start @code{gdbserver}
 with the @option{--once} option, it will stop listening for any further
 connection attempts after connecting to the first @value{GDBN} session.
+
+@item --no-escape-args
+By default, inferior arguments passed on the @command{gdbserver}
+command line will have any special shell characters escaped by
+@command{gdbserver}.  This ensures that when @command{gdbserver}
+invokes the inferior, the arguments passed to the inferior are
+identical to the arguments passed to @command{gdbserver}.
+
+To disable this escaping, use @option{--no-escape-args}.  With this
+option special shell characters will not be escaped.  When
+@command{gdbserver} starts a new shell in order to invoke the
+inferior, this new shell will expand any special shell characters.
 
 @c --disable-packet is not documented for users.
 

@@ -33,42 +33,87 @@ if {[build_executable $testfile.exp $testfile $srcfile] == -1} {
 # NAME is the name to use for the tests and ARGLIST is the list of
 # arguments that are passed to GDB when it is started.
 #
-# The optional RE_LIST is the list of patterns to check the arguments
-# against, these patterns should match ARGLIST.  If the arguments are
-# expected to show up unmodified in the test output then RE_LIST can
-# be dropped, and this proc will reuse ARGLIST.
+# The optional RE_ESC_LIST is the list of patterns to check the
+# inferior arguments against when GDB is started using --args.  If
+# RE_ESC_LIST is not given then ARGLIST is reused, this implies that
+# the inferior arguments appear unchanged in the test output.
+#
+# The optional RE_NO_ESC_LIST is the list of patterns to check the
+# inferior arguments against when GDB is started using
+# --no-escape-args.  If RE_NO_ESC_LIST is not given then RE_ESC_LIST
+# is reused, this implies that there's no difference between the test
+# output when the arguments are escaped or not.
 
-proc args_test { name arglist {re_list {}} } {
+proc args_test { name arglist {re_esc_list {}} {re_no_esc_list {}} } {
 
-    # If RE_LIST is not supplied then we can reuse ARGLIST, this
-    # implies that the arguments will appear unmodified in the test
-    # output.
-    if {[llength $re_list] == 0} {
-	set re_list $arglist
+    # If either of the two regexp lists are not specificed then we can
+    # use an earlier argument value instead.
+    #
+    # For the first regexp list, if this is missing then we use the
+    # argument list, this assumes that the arguments will appear
+    # unmodified in the output.
+    if {[llength $re_esc_list] == 0} {
+	set re_esc_list $arglist
+    }
+
+    # If the second regexp list is missing then we reuse the first
+    # regexp list.  This assumes there's no difference between escaped
+    # and unescaped arguments in the output.
+    if {[llength $re_no_esc_list] == 0} {
+	set re_no_esc_list $re_esc_list
     }
 
     foreach_with_prefix startup_with_shell { on off } {
-	save_vars { ::GDBFLAGS } {
-	    set ::GDBFLAGS "$::GDBFLAGS --args $::binfile $arglist"
+	foreach_with_prefix arg_flag { args no-escape-args } {
+	    save_vars { ::GDBFLAGS } {
+		set ::GDBFLAGS "$::GDBFLAGS --${arg_flag} $::binfile $arglist"
 
-	    clean_restart
-	    gdb_load $::binfile
+		clean_restart $::testfile
 
-	    gdb_test_no_output "set startup-with-shell ${startup_with_shell}" \
-		"set startup-with-shell for $name"
+		gdb_test_no_output \
+		    "set startup-with-shell ${startup_with_shell}" \
+		    "set startup-with-shell for $name"
 
-	    runto_main
-	    gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
-	    gdb_continue_to_breakpoint "breakpoint for $name"
+		runto_main
+		gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
+		gdb_continue_to_breakpoint "breakpoint for $name"
 
-	    set expected_len [expr 1 + [llength $re_list]]
-	    gdb_test "print argc" "\\\$$::decimal = $expected_len" "argc for $name"
+		if { $arg_flag eq "args" || $startup_with_shell eq "off" } {
+		    set re_list $re_esc_list
+		} else {
+		    set re_list $re_no_esc_list
+		}
 
-	    set i 1
-	    foreach arg $re_list {
-		gdb_test "print argv\[$i\]" "\\\$$::decimal = $::hex \"$arg\"" \
-		    "argv\[$i\] for $name"
-		set i [expr $i + 1]
+		set expected_len [expr 1 + [llength $re_list]]
+		gdb_test "print argc" \
+		    "\\\$$::decimal = $expected_len" "argc for $name"
+
+		set i 1
+		foreach arg $re_list {
+		    if { $arg eq "\n" } {
+			set arg {\\n}
+		    } elseif { $arg eq "\"" } {
+			set arg {\\\"}
+		    }
+
+		    # If we are starting with a shell, we're not escaping
+		    # special shell characters in arguments passed to GDB,
+		    # we're using a remote target, and the arguments contain
+		    # a shell variable (indicated with a '$'), then this
+		    # test will currently fail if we are splitting the
+		    # arguments.
+		    if { $startup_with_shell eq "on"
+			 && $arg_flag eq "no-escape-args"
+			 && [gdb_protocol_is_remote]
+			 && [string first "\$" $arglist] != -1 } {
+			setup_xfail "*-*-*" gdb/28392
+		    }
+
+		    gdb_test "print argv\[$i\]" \
+			"\\\$$::decimal = $::hex \"$arg\"" \
+			"argv\[$i\] for $name"
+		    set i [expr $i + 1]
+		}
 	    }
 	}
     }
@@ -102,3 +147,8 @@ args_test "two newlines" {{1} "\n" "\n" {3}} {1 \\\\n \\\\n 3}
 args_test "lone single quote" {{1} \' {3}}
 
 args_test "lone double quote" {{1} \" {3}} {1 \\\\\" 3}
+
+save_vars { ::env(TEST) } {
+    set ::env(TEST) "ABCD"
+    args_test "shell variable" {{$TEST}} {\\$TEST} {{ABCD}}
+}

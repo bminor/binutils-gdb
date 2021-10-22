@@ -3851,10 +3851,20 @@ gdbserver_usage (FILE *stream)
 	   "  --startup-with-shell\n"
 	   "                        Start PROG using a shell.  I.e., execs a shell that\n"
 	   "                        then execs PROG.  (default)\n"
+	   "                        To make use of globbing and variable subsitution for\n"
+	   "                        arguments passed directly on gdbserver invocation,\n"
+	   "                        see the --no-escape-args command line option in\n"
+	   "                        addition\n"
 	   "  --no-startup-with-shell\n"
 	   "                        Exec PROG directly instead of using a shell.\n"
-	   "                        Disables argument globbing and variable substitution\n"
-	   "                        on UNIX-like systems.\n"
+	   "  --no-escape-args\n"
+	   "                        If PROG is started using a shell (see the\n"
+	   "                        --[no-]startup-with-shell option),\n"
+	   "                        ARGS passed directly on gdbserver invocation are\n"
+	   "                        escaped, so no globbing or variable substitution\n"
+	   "                        happens for those. This option disables escaping, so\n"
+	   "                        globbing and variable substituation in the shell\n"
+	   "                        are done for ARGS on UNIX-like systems.\n"
 	   "\n"
 	   "Debug options:\n"
 	   "\n"
@@ -4110,6 +4120,7 @@ captured_main (int argc, char *argv[])
   volatile bool multi_mode = false;
   volatile bool attach = false;
   bool selftest = false;
+  bool escape_args = true;
 #if GDB_SELF_TEST
   std::vector<const char *> selftest_filters;
 
@@ -4132,7 +4143,7 @@ captured_main (int argc, char *argv[])
     OPT_DEBUG, OPT_DEBUG_FILE, OPT_DEBUG_FORMAT, OPT_DISABLE_PACKET,
     OPT_DISABLE_RANDOMIZATION, OPT_NO_DISABLE_RANDOMIZATION,
     OPT_STARTUP_WITH_SHELL, OPT_NO_STARTUP_WITH_SHELL, OPT_ONCE,
-    OPT_SELFTEST,
+    OPT_SELFTEST, OPT_NO_ESCAPE
   };
 
   static struct option longopts[] =
@@ -4157,6 +4168,7 @@ captured_main (int argc, char *argv[])
        OPT_NO_STARTUP_WITH_SHELL},
       {"once", no_argument, nullptr, OPT_ONCE},
       {"selftest", optional_argument, nullptr, OPT_SELFTEST},
+      {"no-escape-args", no_argument, nullptr, OPT_NO_ESCAPE},
       {nullptr, no_argument, nullptr, 0}
     };
 
@@ -4360,6 +4372,10 @@ captured_main (int argc, char *argv[])
 	  }
 	  break;
 
+	case OPT_NO_ESCAPE:
+	  escape_args = false;
+	  break;
+
 	case '?':
 	  /* Figuring out which element of ARGV contained the invalid
 	     argument is not simple.  There are a couple of cases we need
@@ -4475,7 +4491,8 @@ captured_main (int argc, char *argv[])
 
       int n = argc - (next_arg - argv);
       program_args
-	= construct_inferior_arguments ({&next_arg[1], &next_arg[n]}, true);
+	= construct_inferior_arguments ({&next_arg[1], &next_arg[n]},
+					escape_args);
 
       /* Wait till we are at first instruction in program.  */
       target_create_inferior (program_path.get (), program_args);

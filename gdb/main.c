@@ -617,8 +617,19 @@ captured_main_1 (struct captured_main_args *context)
   char **argv = context->argv;
 
   static int quiet = 0;
-  static int set_args = 0;
   static int inhibit_home_gdbinit = 0;
+
+  /* Has the user passed inferior arguments on the command line.  */
+  enum {
+    /* No arguments passed.  */
+    NO_ARGS,
+
+    /* Arguments passed with --args.  */
+    SET_ESC_ARGS,
+
+    /* Arguments passed with --no-escape-args.  */
+    SET_NO_ESC_ARGS
+  } set_args = NO_ARGS;
 
   /* Pointers to various arguments from command line.  */
   char *symarg = NULL;
@@ -769,7 +780,9 @@ captured_main_1 (struct captured_main_args *context)
       OPT_EIX,
       OPT_EIEX,
       OPT_READNOW,
-      OPT_READNEVER
+      OPT_READNEVER,
+      OPT_SET_ESC_ARGS,
+      OPT_SET_NO_ESC_ARGS,
     };
     /* This struct requires int* in the struct, but write_files is a bool.
        So use this temporary int that we write back after argument parsing.  */
@@ -842,7 +855,8 @@ captured_main_1 (struct captured_main_args *context)
       {"windows", no_argument, NULL, OPT_WINDOWS},
       {"statistics", no_argument, 0, OPT_STATISTICS},
       {"write", no_argument, &write_files_1, 1},
-      {"args", no_argument, &set_args, 1},
+      {"args", no_argument, nullptr, OPT_SET_ESC_ARGS},
+      {"no-escape-args", no_argument, nullptr, OPT_SET_NO_ESC_ARGS},
       {"l", required_argument, 0, 'l'},
       {"return-child-result", no_argument, &return_child_result, 1},
       {0, no_argument, 0, 0}
@@ -854,7 +868,7 @@ captured_main_1 (struct captured_main_args *context)
 
 	c = getopt_long_only (argc, argv, "",
 			      long_options, &option_index);
-	if (c == EOF || set_args)
+	if (c == EOF || set_args != NO_ARGS)
 	  break;
 
 	/* Long option that takes an argument.  */
@@ -934,6 +948,12 @@ captured_main_1 (struct captured_main_args *context)
 	    break;
 	  case OPT_EIEX:
 	    cmdarg_vec.emplace_back (CMDARG_EARLYINIT_COMMAND, optarg);
+	    break;
+	  case OPT_SET_ESC_ARGS:
+	    set_args = SET_ESC_ARGS;
+	    break;
+	  case OPT_SET_NO_ESC_ARGS:
+	    set_args = SET_NO_ESC_ARGS;
 	    break;
 	  case 'B':
 	    batch_flag = batch_silent = 1;
@@ -1068,7 +1088,7 @@ captured_main_1 (struct captured_main_args *context)
 
   /* Now that gdb_init has created the initial inferior, we're in
      position to set args for that inferior.  */
-  if (set_args)
+  if (set_args != NO_ARGS)
     {
       /* The remaining options are the command-line options for the
 	 inferior.  The first one is the sym/exec file, and the rest
@@ -1080,10 +1100,9 @@ captured_main_1 (struct captured_main_args *context)
       symarg = argv[optind];
       execarg = argv[optind];
       ++optind;
-      current_inferior ()->set_args
-	(gdb::array_view<char * const> (&argv[optind], argc - optind),
-	 startup_with_shell);
-    }
+      gdb::array_view<char * const> arg_view (&argv[optind], argc - optind);
+      current_inferior ()->set_args (arg_view, (set_args == SET_ESC_ARGS));
+   }
   else
     {
       /* OK, that's all the options.  */
@@ -1400,7 +1419,8 @@ This is the GNU debugger.  Usage:\n\n\
   gdb_puts (_("\
 Selection of debuggee and its files:\n\n\
   --args             Arguments after executable-file are passed to inferior.\n\
-  --core=COREFILE    Analyze the core dump COREFILE.\n\
+  --no-escape-args   Like --args, but arguments are not escaped.\n							\
+  --core=COREFILE    Analyze the core dump COREFILE.\n	\
   --exec=EXECFILE    Use EXECFILE as the executable.\n\
   --pid=PID          Attach to running process PID.\n\
   --directory=DIR    Search for source files in DIR.\n\
