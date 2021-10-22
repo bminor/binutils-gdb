@@ -226,7 +226,7 @@ gdb_continue_to_breakpoint "thread 5's print"
 # If you do have debug info, the output obviously depends more on the
 # exact library in use; under NPTL, you get:
 #    #2  0x0012b7fc in start_thread (arg=0x21) at pthread_create.c:264
-gdb_test "where" "print_philosopher.*philosopher.* \(from .*libpthread\|at pthread_create\|in pthread_create\).*" \
+gdb_test "where" "print_philosopher.*philosopher.* \(from .*libpthread\|at pthread_create\|in pthread_create|from .*libc\\.\).*" \
 	"first thread-specific breakpoint hit"
 
 # Make sure it's catching the right thread.  Try hitting the
