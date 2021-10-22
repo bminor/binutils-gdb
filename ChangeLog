@@ -1,3 +1,8 @@
+2021-10-29  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb/doc/gdb.texinfo (Command Options): (Data): Document
+	'-memory-tag-violations'.  Update the example.
+
 2021-09-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* src-release.sh (GDB_SUPPPORT_DIRS): Add libbacktrace.

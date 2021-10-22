@@ -2141,10 +2141,10 @@ on @code{-} after the command name.  For example:
 
 @smallexample
 (@value{GDBP}) print -@key{TAB}@key{TAB}
--address         -max-depth       -raw-values      -union
--array           -null-stop       -repeats         -vtbl
--array-indexes   -object          -static-members
--elements        -pretty          -symbol
+-address         -max-depth               -pretty          -symbol
+-array           -memory-tag-violations   -raw-values      -union
+-array-indexes   -null-stop               -repeats         -vtbl
+-elements        -object                  -static-members
 @end smallexample
 
 Completion will in some cases guide you with a suggestion of what kind
@@ -10002,6 +10002,10 @@ Set limit on string chars or array elements to print.  The value
 @item -max-depth @var{depth}|@code{unlimited}
 Set the threshold after which nested structures are replaced with
 ellipsis.  Related setting: @ref{set print max-depth}.
+
+@item -memory-tag-violations [@code{on}|@code{off}]
+Set printing of additional information about memory tag violations.
+@xref{set print memory-tag-violations}.
 
 @item -null-stop [@code{on}|@code{off}]
 Set printing of char arrays to stop at first null char.  Related
