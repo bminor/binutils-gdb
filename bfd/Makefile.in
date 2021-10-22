@@ -543,6 +543,7 @@ ALL_MACHINES = \
 	cpu-ip2k.lo \
 	cpu-iq2000.lo \
 	cpu-lm32.lo \
+	cpu-loongarch.lo \
 	cpu-m10200.lo \
 	cpu-m10300.lo \
 	cpu-m32c.lo \
@@ -627,6 +628,7 @@ ALL_MACHINES_CFILES = \
 	cpu-ip2k.c \
 	cpu-iq2000.c \
 	cpu-lm32.c \
+	cpu-loongarch.c \
 	cpu-m10200.c \
 	cpu-m10300.c \
 	cpu-m32c.c \
@@ -975,6 +977,9 @@ BFD64_BACKENDS = \
 	elf64-ia64.lo \
 	elf64-ia64-vms.lo \
 	elfxx-ia64.lo \
+	elf32-loongarch.lo \
+	elf64-loongarch.lo \
+	elfxx-loongarch.lo \
 	elfn32-mips.lo \
 	elf64-mips.lo \
 	elfxx-mips.lo \
@@ -1028,6 +1033,7 @@ BFD64_BACKENDS_CFILES = \
 	elfn32-mips.c \
 	elfxx-aarch64.c \
 	elfxx-ia64.c \
+	elfxx-loongarch.c \
 	elfxx-mips.c \
 	elfxx-riscv.c \
 	mach-o-aarch64.c \
@@ -1091,6 +1097,7 @@ SOURCE_CFILES = \
 BUILD_CFILES = \
 	elf32-aarch64.c elf64-aarch64.c \
 	elf32-ia64.c elf64-ia64.c \
+	elf32-loongarch.c elf64-loongarch.c \
 	elf32-riscv.c elf64-riscv.c \
 	peigen.c pepigen.c pex64igen.c
 
@@ -1109,7 +1116,7 @@ SOURCE_HFILES = \
 	elf-bfd.h elfcode.h elfcore.h elf-hppa.h elf-linker-x86.h \
 	elf-linux-core.h elf-nacl.h elf-s390.h elf-vxworks.h \
 	elfxx-aarch64.h elfxx-ia64.h elfxx-mips.h elfxx-riscv.h \
-	elfxx-sparc.h elfxx-tilegx.h elfxx-x86.h \
+	elfxx-sparc.h elfxx-tilegx.h elfxx-x86.h elfxx-loongarch.h \
 	genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h \
 	libpei.h libxcoff.h \
@@ -1349,6 +1356,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-k1om.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-l1om.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-lm32.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-loongarch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-m10200.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-m10300.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpu-m32c.Plo@am__quote@
@@ -1442,6 +1450,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-ip2k.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-iq2000.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-lm32.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-loongarch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-m32c.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-m32r.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf32-m68hc11.Plo@am__quote@
@@ -1492,6 +1501,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-hppa.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-ia64-vms.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-ia64.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-loongarch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-mips.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-mmix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf64-nfp.Plo@am__quote@
@@ -1506,6 +1516,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfn32-mips.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-aarch64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-ia64.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-loongarch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-mips.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-riscv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elfxx-sparc.Plo@am__quote@
@@ -1970,6 +1981,14 @@ elf32-ia64.c : elfnn-ia64.c
 
 elf64-ia64.c : elfnn-ia64.c
 	echo "#line 1 \"elfnn-ia64.c\"" > $@
+	$(SED) -e s/NN/64/g < $< >> $@
+
+elf32-loongarch.c : elfnn-loongarch.c
+	echo "#line 1 \"elfnn-loongarch.c\"" > $@
+	$(SED) -e s/NN/32/g < $< >> $@
+
+elf64-loongarch.c : elfnn-loongarch.c
+	echo "#line 1 \"elfnn-loongarch.c\"" > $@
 	$(SED) -e s/NN/64/g < $< >> $@
 
 elf32-riscv.c : elfnn-riscv.c
