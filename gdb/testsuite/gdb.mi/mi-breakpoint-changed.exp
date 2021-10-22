@@ -273,11 +273,11 @@ proc test_auto_disable { } {
 
     # Set the breakpoint.
     mi_gdb_test "-break-insert -f pendfunc1" \
-	{(&.*)*.*~"Breakpoint 2 at.*\\n".*=breakpoint-created,bkpt=\{number="2",type="breakpoint".*\}.*\n\^done}
+	{\^done,bkpt=\{number="2",type="breakpoint".*\}.*}
 
     # Enable for one shot only.
     mi_gdb_test "-break-enable count 1 2" \
-	{=breakpoint-modified,bkpt=\{number="2",type="breakpoint",disp="dis",enabled="y".*\}.*\n\^done}
+	{\^done}
 
     mi_send_resuming_command "exec-continue" "continuing execution to breakpoint"
 
