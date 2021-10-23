@@ -1333,8 +1333,6 @@ aout_get_external_symbols (bfd *abfd)
 
 	  if (stringsize >= BYTES_IN_LONG)
 	    {
-	      /* Keep the string count in the buffer for convenience
-		 when indexing with e_strx.  */
 	      amt = stringsize - BYTES_IN_LONG;
 	      if (bfd_bread (strings + BYTES_IN_LONG, amt, abfd) != amt)
 		{
@@ -1344,7 +1342,8 @@ aout_get_external_symbols (bfd *abfd)
 	    }
 	}
       /* Ensure that a zero index yields an empty string.  */
-      memset (strings, 0, BYTES_IN_LONG);
+      if (stringsize >= BYTES_IN_WORD)
+	memset (strings, 0, BYTES_IN_LONG);
 
       /* Ensure that the string buffer is NUL terminated.  */
       strings[stringsize] = 0;
