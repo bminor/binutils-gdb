@@ -4083,13 +4083,15 @@ encode_with_unaligned_vector_move (void)
 {
   switch (i.tm.base_opcode)
     {
-    case 0x28:
+    case 0x28:	/* Load instructions.  */
+    case 0x29:	/* Store instructions.  */
       /* movaps/movapd/vmovaps/vmovapd.  */
       if (i.tm.opcode_modifier.opcodespace == SPACE_0F
 	  && i.tm.opcode_modifier.opcodeprefix <= PREFIX_0X66)
-	i.tm.base_opcode = 0x10;
+	i.tm.base_opcode = 0x10 | (i.tm.base_opcode & 1);
       break;
-    case 0x6f:
+    case 0x6f:	/* Load instructions.  */
+    case 0x7f:	/* Store instructions.  */
       /* movdqa/vmovdqa/vmovdqa64/vmovdqa32. */
       if (i.tm.opcode_modifier.opcodespace == SPACE_0F
 	  && i.tm.opcode_modifier.opcodeprefix == PREFIX_0X66)
