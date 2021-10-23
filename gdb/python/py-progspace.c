@@ -504,6 +504,23 @@ pspace_to_pspace_object (struct program_space *pspace)
   return gdbpy_ref<>::new_reference (result);
 }
 
+/* See python-internal.h.  */
+
+struct program_space *
+progspace_object_to_program_space (PyObject *obj)
+{
+  gdb_assert (gdbpy_is_progspace (obj));
+  return ((pspace_object *) obj)->pspace;
+}
+
+/* See python-internal.h.  */
+
+bool
+gdbpy_is_progspace (PyObject *obj)
+{
+  return PyObject_TypeCheck (obj, &pspace_object_type);
+}
+
 void _initialize_py_progspace ();
 void
 _initialize_py_progspace ()

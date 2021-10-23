@@ -615,6 +615,60 @@ currently active connection (@pxref{Connections In Python}).  The
 connection objects are in no particular order in the returned list.
 @end defun
 
+@defun gdb.format_address (@var{address} @r{[}, @var{progspace}, @var{architecture}@r{]})
+Return a string in the format @samp{@var{addr}
+<@var{symbol}+@var{offset}>}, where @var{addr} is @var{address}
+formatted in hexadecimal, @var{symbol} is the symbol whose address is
+the nearest to @var{address} and below it in memory, and @var{offset}
+is the offset from @var{symbol} to @var{address} in decimal.
+
+If no suitable @var{symbol} was found, then the
+<@var{symbol}+@var{offset}> part is not included in the returned
+string, instead the returned string will just contain the
+@var{address} formatted as hexadecimal.  How far @value{GDBN} looks
+back for a suitable symbol can be controlled with @kbd{set print
+max-symbolic-offset} (@pxref{Print Settings}).
+
+Additionally, the returned string can include file name and line
+number information when @kbd{set print symbol-filename on}
+(@pxref{Print Settings}), in this case the format of the returned
+string is @samp{@var{addr} <@var{symbol}+@var{offset}> at
+@var{filename}:@var{line-number}}.
+
+
+The @var{progspace} is the gdb.Progspace in which @var{symbol} is
+looked up, and @var{architecture} is used when formatting @var{addr},
+e.g.@: in order to determine the size of an address in bytes.
+
+If neither @var{progspace} or @var{architecture} are passed, then by
+default @value{GDBN} will use the program space and architecture of
+the currently selected inferior, thus, the following two calls are
+equivalent:
+
+@smallexample
+gdb.format_address(address)
+gdb.format_address(address,
+                   gdb.selected_inferior().progspace,
+                   gdb.selected_inferior().architecture())
+@end smallexample
+
+It is not valid to only pass one of @var{progspace} or
+@var{architecture}, either they must both be provided, or neither must
+be provided (and the defaults will be used).
+
+This method uses the same mechanism for formatting address, symbol,
+and offset information as core @value{GDBN} does in commands such as
+@kbd{disassemble}.
+
+Here are some examples of the possible string formats:
+
+@smallexample
+0x00001042
+0x00001042 <symbol+16>
+0x00001042 <symbol+16 at file.c:123>
+@end smallexample
+@end defun
+
 @node Exception Handling
 @subsubsection Exception Handling
 @cindex python exceptions

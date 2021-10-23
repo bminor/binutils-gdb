@@ -3,6 +3,14 @@
 
 *** Changes since GDB 12
 
+* Python API
+
+  ** New function gdb.format_address(ADDRESS, PROGSPACE, ARCHITECTURE),
+     that formats ADDRESS as 'address <symbol+offset>', where symbol is
+     looked up in PROGSPACE, and ARCHITECTURE is used to format address.
+     This is the same format that GDB uses when printing address, symbol,
+     and offset information from the disassembler.
+
 *** Changes in GDB 12
 
 * DBX mode is deprecated, and will be removed in GDB 13

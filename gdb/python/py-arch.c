@@ -62,14 +62,23 @@ arch_object_data_init (struct gdbarch *gdbarch)
 }
 
 /* Returns the struct gdbarch value corresponding to the given Python
-   architecture object OBJ.  */
+   architecture object OBJ, which must be a gdb.Architecture object.  */
 
 struct gdbarch *
 arch_object_to_gdbarch (PyObject *obj)
 {
-  arch_object *py_arch = (arch_object *) obj;
+  gdb_assert (gdbpy_is_architecture (obj));
 
+  arch_object *py_arch = (arch_object *) obj;
   return py_arch->gdbarch;
+}
+
+/* See python-internal.h.  */
+
+bool
+gdbpy_is_architecture (PyObject *obj)
+{
+  return PyObject_TypeCheck (obj, &arch_object_type);
 }
 
 /* Returns the Python architecture object corresponding to GDBARCH.

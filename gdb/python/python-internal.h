@@ -497,6 +497,13 @@ struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
 struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
+/* Convert Python object OBJ to a program_space pointer.  OBJ must be a
+   gdb.Progspace reference.  Return nullptr if the gdb.Progspace is not
+   valid (see gdb.Progspace.is_valid), otherwise return the program_space
+   pointer.  */
+
+extern struct program_space *progspace_object_to_program_space (PyObject *obj);
+
 void gdbpy_initialize_gdb_readline (void);
 int gdbpy_initialize_auto_load (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
@@ -837,5 +844,14 @@ typedef std::unique_ptr<Py_buffer, Py_buffer_deleter> Py_buffer_up;
 
 extern bool gdbpy_parse_register_id (struct gdbarch *gdbarch,
 				     PyObject *pyo_reg_id, int *reg_num);
+
+/* Return true if OBJ is a gdb.Architecture object, otherwise, return
+   false.  */
+
+extern bool gdbpy_is_architecture (PyObject *obj);
+
+/* Return true if OBJ is a gdb.Progspace object, otherwise, return false.  */
+
+extern bool gdbpy_is_progspace (PyObject *obj);
 
 #endif /* PYTHON_PYTHON_INTERNAL_H */

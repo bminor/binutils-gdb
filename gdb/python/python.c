@@ -1294,6 +1294,107 @@ gdbpy_colorize_disasm (const std::string &content, gdbarch *gdbarch)
 
 
 
+/* Implement gdb.format_address(ADDR,P_SPACE,ARCH).  Provide access to
+   GDB's print_address function from Python.  The returned address will
+   have the format '0x..... <symbol+offset>'.  */
+
+static PyObject *
+gdbpy_format_address (PyObject *self, PyObject *args, PyObject *kw)
+{
+  static const char *keywords[] =
+    {
+      "address", "progspace", "architecture", nullptr
+    };
+  PyObject *addr_obj = nullptr, *pspace_obj = nullptr, *arch_obj = nullptr;
+  CORE_ADDR addr;
+  struct gdbarch *gdbarch = nullptr;
+  struct program_space *pspace = nullptr;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O|OO", keywords,
+					&addr_obj, &pspace_obj, &arch_obj))
+    return nullptr;
+
+  if (get_addr_from_python (addr_obj, &addr) < 0)
+    return nullptr;
+
+  /* If the user passed None for progspace or architecture, then we
+     consider this to mean "the default".  Here we replace references to
+     None with nullptr, this means that in the following code we only have
+     to handle the nullptr case.  These are only borrowed references, so
+     no decref is required here.  */
+  if (pspace_obj == Py_None)
+    pspace_obj = nullptr;
+  if (arch_obj == Py_None)
+    arch_obj = nullptr;
+
+  if (pspace_obj == nullptr && arch_obj == nullptr)
+    {
+      /* Grab both of these from the current inferior, and its associated
+	 default architecture.  */
+      pspace = current_inferior ()->pspace;
+      gdbarch = current_inferior ()->gdbarch;
+    }
+  else if (arch_obj == nullptr || pspace_obj == nullptr)
+    {
+      /* If the user has only given one of program space or architecture,
+	 then don't use the default for the other.  Sure we could use the
+	 default, but it feels like there's too much scope of mistakes in
+	 this case, so better to require the user to provide both
+	 arguments.  */
+      PyErr_SetString (PyExc_ValueError,
+		       _("The architecture and progspace arguments must both be supplied"));
+      return nullptr;
+    }
+  else
+    {
+      /* The user provided an address, program space, and architecture.
+	 Just check that these objects are valid.  */
+      if (!gdbpy_is_progspace (pspace_obj))
+	{
+	  PyErr_SetString (PyExc_TypeError,
+			   _("The progspace argument is not a gdb.Progspace object"));
+	  return nullptr;
+	}
+
+      pspace = progspace_object_to_program_space (pspace_obj);
+      if (pspace == nullptr)
+	{
+	  PyErr_SetString (PyExc_ValueError,
+			   _("The progspace argument is not valid"));
+	  return nullptr;
+	}
+
+      if (!gdbpy_is_architecture (arch_obj))
+	{
+	  PyErr_SetString (PyExc_TypeError,
+			   _("The architecture argument is not a gdb.Architecture object"));
+	  return nullptr;
+	}
+
+      /* Architectures are never deleted once created, so gdbarch should
+	 never come back as nullptr.  */
+      gdbarch = arch_object_to_gdbarch (arch_obj);
+      gdb_assert (gdbarch != nullptr);
+    }
+
+  /* By this point we should know the program space and architecture we are
+     going to use.  */
+  gdb_assert (pspace != nullptr);
+  gdb_assert (gdbarch != nullptr);
+
+  /* Unfortunately print_address relies on the current program space for
+     its symbol lookup.  Temporarily switch now.  */
+  scoped_restore_current_program_space restore_progspace;
+  set_current_program_space (pspace);
+
+  /* Format the address, and return it as a string.  */
+  string_file buf;
+  print_address (gdbarch, addr, &buf);
+  return PyString_FromString (buf.c_str ());
+}
+
+
+
 /* Printing.  */
 
 /* A python function to write a single string using gdb's filtered
@@ -2444,6 +2545,13 @@ Return a list of all the architecture names GDB understands." },
   { "connections", gdbpy_connections, METH_NOARGS,
     "connections () -> List.\n\
 Return a list of gdb.TargetConnection objects." },
+
+  { "format_address", (PyCFunction) gdbpy_format_address,
+    METH_VARARGS | METH_KEYWORDS,
+    "format_address (ADDRESS, PROG_SPACE, ARCH) -> String.\n\
+Format ADDRESS, an address within PROG_SPACE, a gdb.Progspace, using\n\
+ARCH, a gdb.Architecture to determine the address size.  The format of\n\
+the returned string is 'ADDRESS <SYMBOL+OFFSET>' without the quotes." },
 
   {NULL, NULL, 0, NULL}
 };
