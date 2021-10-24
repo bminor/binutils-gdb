@@ -1807,7 +1807,7 @@ coff_get_normalized_symtab (bfd *abfd)
 
   /* Mark the end of the symbols.  */
   symesz = bfd_coff_symesz (abfd);
-  raw_end = (char *) raw_src + obj_raw_syment_count (abfd) * symesz;
+  raw_end = PTR_ADD (raw_src, obj_raw_syment_count (abfd) * symesz);
 
   /* FIXME SOMEDAY.  A string table size of zero is very weird, but
      probably possible.  If one shows up, it will probably kill us.  */

@@ -1948,7 +1948,7 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
       if (bfd_bread (& dst, relsz, abfd) != relsz)
 	return;
 
-      coff_swap_reloc_in (abfd, &dst, &n);
+      bfd_coff_swap_reloc_in (abfd, &dst, &n);
       if (bfd_seek (abfd, oldpos, 0) != 0)
 	return;
       if (n.r_vaddr < 0x10000)
@@ -2019,7 +2019,7 @@ coff_set_alignment_hook (bfd * abfd, asection * section, void * scnhdr)
       if (bfd_bread (& dst, relsz, abfd) != relsz)
 	return;
 
-      coff_swap_reloc_in (abfd, &dst, &n);
+      bfd_coff_swap_reloc_in (abfd, &dst, &n);
       if (bfd_seek (abfd, oldpos, 0) != 0)
 	return;
       section->reloc_count = hdr->s_nreloc = n.r_vaddr - 1;
@@ -5070,7 +5070,7 @@ SUBSUBSECTION
 static bool
 coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
 {
-  RELOC *native_relocs;
+  bfd_byte *native_relocs;
   arelent *reloc_cache;
   arelent *cache_ptr;
   unsigned int idx;
@@ -5085,9 +5085,9 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
   if (!coff_slurp_symbol_table (abfd))
     return false;
 
-  native_relocs = (RELOC *) buy_and_read (abfd, asect->rel_filepos,
-					  asect->reloc_count,
-					  bfd_coff_relsz (abfd));
+  native_relocs = (bfd_byte *) buy_and_read (abfd, asect->rel_filepos,
+					     asect->reloc_count,
+					     bfd_coff_relsz (abfd));
   if (native_relocs == NULL)
     return false;
 
@@ -5106,16 +5106,16 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
   for (idx = 0; idx < asect->reloc_count; idx++)
     {
       struct internal_reloc dst;
-      struct external_reloc *src;
+      void *src;
 #ifndef RELOC_PROCESSING
       asymbol *ptr;
 #endif
 
       cache_ptr = reloc_cache + idx;
-      src = native_relocs + idx;
+      src = native_relocs + idx * (size_t) bfd_coff_relsz (abfd);
 
       dst.r_offset = 0;
-      coff_swap_reloc_in (abfd, src, &dst);
+      bfd_coff_swap_reloc_in (abfd, src, &dst);
 
 #ifdef RELOC_PROCESSING
       RELOC_PROCESSING (cache_ptr, &dst, symbols, abfd, asect);
@@ -5444,7 +5444,7 @@ static bfd_coff_backend_data ticoff0_swap_table =
 {
   coff_SWAP_aux_in, coff_SWAP_sym_in, coff_SWAP_lineno_in,
   coff_SWAP_aux_out, coff_SWAP_sym_out,
-  coff_SWAP_lineno_out, coff_SWAP_reloc_out,
+  coff_SWAP_lineno_out, coff_swap_reloc_v0_out,
   coff_SWAP_filehdr_out, coff_SWAP_aouthdr_out,
   coff_SWAP_scnhdr_out,
   FILHSZ_V0, AOUTSZ, SCNHSZ_V01, SYMESZ, AUXESZ, RELSZ_V0, LINESZ, FILNMLEN,
@@ -5467,7 +5467,7 @@ static bfd_coff_backend_data ticoff0_swap_table =
 #endif
   32768,
   coff_SWAP_filehdr_in, coff_SWAP_aouthdr_in, coff_SWAP_scnhdr_in,
-  coff_SWAP_reloc_in, ticoff0_bad_format_hook, coff_set_arch_mach_hook,
+  coff_swap_reloc_v0_in, ticoff0_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,
   coff_slurp_symbol_table, symname_in_debug_hook, coff_pointerize_aux_hook,
   coff_print_aux, coff_reloc16_extra_cases, coff_reloc16_estimate,

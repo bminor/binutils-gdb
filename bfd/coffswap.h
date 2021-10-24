@@ -246,6 +246,33 @@ coff_swap_reloc_out (bfd * abfd, void * src, void * dst)
   return bfd_coff_relsz (abfd);
 }
 
+#ifdef TICOFF
+static void
+coff_swap_reloc_v0_in (bfd *abfd, void *src, void *dst)
+{
+  struct external_reloc_v0 *reloc_src = (struct external_reloc_v0 *) src;
+  struct internal_reloc *reloc_dst = (struct internal_reloc *) dst;
+
+  reloc_dst->r_vaddr  = GET_RELOC_VADDR (abfd, reloc_src->r_vaddr);
+  reloc_dst->r_symndx = H_GET_16 (abfd, reloc_src->r_symndx);
+  reloc_dst->r_type   = H_GET_16 (abfd, reloc_src->r_type);
+}
+
+static unsigned int
+coff_swap_reloc_v0_out (bfd *abfd, void *src, void *dst)
+{
+  struct internal_reloc *reloc_src = (struct internal_reloc *) src;
+  struct external_reloc_v0 *reloc_dst = (struct external_reloc_v0 *) dst;
+
+  PUT_RELOC_VADDR (abfd, reloc_src->r_vaddr, reloc_dst->r_vaddr);
+  H_PUT_16 (abfd, reloc_src->r_symndx, reloc_dst->r_symndx);
+  H_PUT_16 (abfd, reloc_src->r_type, reloc_dst->r_type);
+  SWAP_OUT_RELOC_EXTRA (abfd, reloc_src, reloc_dst);
+
+  return bfd_coff_relsz (abfd);
+}
+#endif
+
 #endif /* NO_COFF_RELOCS */
 
 static void

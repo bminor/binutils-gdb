@@ -278,7 +278,7 @@ tic54x_lookup_howto (bfd *abfd,
 
   _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 		      abfd, (unsigned int) dst->r_type);
-  abort ();
+  internal->howto = NULL;
 }
 
 #define RELOC_PROCESSING(RELENT,RELOC,SYMS,ABFD,SECT)\
