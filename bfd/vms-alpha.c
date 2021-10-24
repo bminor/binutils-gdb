@@ -6754,34 +6754,35 @@ evax_bfd_print_eobj (struct bfd *abfd, FILE *file)
 }
 
 static void
-evax_bfd_print_relocation_records (FILE *file, const unsigned char *rel,
+evax_bfd_print_relocation_records (FILE *file, const unsigned char *buf,
+				   size_t buf_size, size_t off,
 				   unsigned int stride)
 {
-  while (1)
+  while (off <= buf_size - 8)
     {
       unsigned int base;
       unsigned int count;
       unsigned int j;
 
-      count = bfd_getl32 (rel + 0);
+      count = bfd_getl32 (buf + off + 0);
 
       if (count == 0)
 	break;
-      base = bfd_getl32 (rel + 4);
+      base = bfd_getl32 (buf + off + 4);
 
       /* xgettext:c-format */
       fprintf (file, _("  bitcount: %u, base addr: 0x%08x\n"),
 	       count, base);
 
-      rel += 8;
-      for (j = 0; count > 0; j += 4, count -= 32)
+      off += 8;
+      for (j = 0; count > 0 && off <= buf_size - 4; j += 4, count -= 32)
 	{
 	  unsigned int k;
 	  unsigned int n = 0;
 	  unsigned int val;
 
-	  val = bfd_getl32 (rel);
-	  rel += 4;
+	  val = bfd_getl32 (buf + off);
+	  off += 4;
 
 	  /* xgettext:c-format */
 	  fprintf (file, _("   bitmap: 0x%08x (count: %u):\n"), val, count);
@@ -6806,60 +6807,62 @@ evax_bfd_print_relocation_records (FILE *file, const unsigned char *rel,
 }
 
 static void
-evax_bfd_print_address_fixups (FILE *file, const unsigned char *rel)
+evax_bfd_print_address_fixups (FILE *file, const unsigned char *buf,
+			       size_t buf_size, size_t off)
 {
-  while (1)
+  while (off <= buf_size - 8)
     {
       unsigned int j;
       unsigned int count;
 
-      count = bfd_getl32 (rel + 0);
+      count = bfd_getl32 (buf + off + 0);
       if (count == 0)
 	return;
       /* xgettext:c-format */
       fprintf (file, _("  image %u (%u entries)\n"),
-	       (unsigned)bfd_getl32 (rel + 4), count);
-      rel += 8;
-      for (j = 0; j < count; j++)
+	       (unsigned) bfd_getl32 (buf + off + 4), count);
+      off += 8;
+      for (j = 0; j < count && off <= buf_size - 8; j++)
 	{
 	  /* xgettext:c-format */
 	  fprintf (file, _("   offset: 0x%08x, val: 0x%08x\n"),
-		   (unsigned)bfd_getl32 (rel + 0),
-		   (unsigned)bfd_getl32 (rel + 4));
-	  rel += 8;
+		   (unsigned) bfd_getl32 (buf + off + 0),
+		   (unsigned) bfd_getl32 (buf + off + 4));
+	  off += 8;
 	}
     }
 }
 
 static void
-evax_bfd_print_reference_fixups (FILE *file, const unsigned char *rel)
+evax_bfd_print_reference_fixups (FILE *file, const unsigned char *buf,
+				 size_t buf_size, size_t off)
 {
   unsigned int count;
 
-  while (1)
+  while (off <= buf_size - 8)
     {
       unsigned int j;
       unsigned int n = 0;
 
-      count = bfd_getl32 (rel + 0);
+      count = bfd_getl32 (buf + off + 0);
       if (count == 0)
 	break;
       /* xgettext:c-format */
       fprintf (file, _("  image %u (%u entries), offsets:\n"),
-	       (unsigned)bfd_getl32 (rel + 4), count);
-      rel += 8;
-      for (j = 0; j < count; j++)
+	       (unsigned) bfd_getl32 (buf + off + 4), count);
+      off += 8;
+      for (j = 0; j < count && off <= buf_size - 4; j++)
 	{
 	  if (n == 0)
 	    fputs ("   ", file);
-	  fprintf (file, _(" 0x%08x"), (unsigned)bfd_getl32 (rel));
+	  fprintf (file, _(" 0x%08x"), (unsigned) bfd_getl32 (buf + off));
 	  n++;
 	  if (n == 7)
 	    {
 	      fputs ("\n", file);
 	      n = 0;
 	    }
-	  rel += 4;
+	  off += 4;
 	}
       if (n)
 	fputs ("\n", file);
@@ -8111,7 +8114,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       fprintf (file, _("Global symbol table:\n"));
       evax_bfd_print_eobj (abfd, file);
     }
-  if (eiaf_vbn != 0)
+  if (eiaf_vbn != 0 && eiaf_size >= sizeof (struct vms_eiaf))
     {
       unsigned char *buf;
       struct vms_eiaf *eiaf;
@@ -8183,12 +8186,14 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 
       if (shlstoff)
 	{
-	  struct vms_shl *shl = (struct vms_shl *)(buf + shlstoff);
 	  unsigned int j;
 
 	  fprintf (file, _(" Shareable images:\n"));
-	  for (j = 0; j < shrimgcnt; j++, shl++)
+	  for (j = 0;
+	       j < shrimgcnt && shlstoff <= eiaf_size - sizeof (struct vms_shl);
+	       j++, shlstoff += sizeof (struct vms_shl))
 	    {
+	      struct vms_shl *shl = (struct vms_shl *) (buf + shlstoff);
 	      fprintf (file,
 		       /* xgettext:c-format */
 		       _("  %u: size: %u, flags: 0x%02x, name: %.*s\n"),
@@ -8199,50 +8204,54 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       if (qrelfixoff != 0)
 	{
 	  fprintf (file, _(" quad-word relocation fixups:\n"));
-	  evax_bfd_print_relocation_records (file, buf + qrelfixoff, 8);
+	  evax_bfd_print_relocation_records (file, buf, eiaf_size,
+					     qrelfixoff, 8);
 	}
       if (lrelfixoff != 0)
 	{
 	  fprintf (file, _(" long-word relocation fixups:\n"));
-	  evax_bfd_print_relocation_records (file, buf + lrelfixoff, 4);
+	  evax_bfd_print_relocation_records (file, buf, eiaf_size,
+					     lrelfixoff, 4);
 	}
       if (qdotadroff != 0)
 	{
 	  fprintf (file, _(" quad-word .address reference fixups:\n"));
-	  evax_bfd_print_address_fixups (file, buf + qdotadroff);
+	  evax_bfd_print_address_fixups (file, buf, eiaf_size, qdotadroff);
 	}
       if (ldotadroff != 0)
 	{
 	  fprintf (file, _(" long-word .address reference fixups:\n"));
-	  evax_bfd_print_address_fixups (file, buf + ldotadroff);
+	  evax_bfd_print_address_fixups (file, buf, eiaf_size, ldotadroff);
 	}
       if (codeadroff != 0)
 	{
 	  fprintf (file, _(" Code Address Reference Fixups:\n"));
-	  evax_bfd_print_reference_fixups (file, buf + codeadroff);
+	  evax_bfd_print_reference_fixups (file, buf, eiaf_size, codeadroff);
 	}
       if (lpfixoff != 0)
 	{
 	  fprintf (file, _(" Linkage Pairs Reference Fixups:\n"));
-	  evax_bfd_print_reference_fixups (file, buf + lpfixoff);
+	  evax_bfd_print_reference_fixups (file, buf, eiaf_size, lpfixoff);
 	}
-      if (chgprtoff)
+      if (chgprtoff && chgprtoff <= eiaf_size - 4)
 	{
-	  unsigned int count = (unsigned)bfd_getl32 (buf + chgprtoff);
-	  struct vms_eicp *eicp = (struct vms_eicp *)(buf + chgprtoff + 4);
+	  unsigned int count = (unsigned) bfd_getl32 (buf + chgprtoff);
 	  unsigned int j;
 
 	  fprintf (file, _(" Change Protection (%u entries):\n"), count);
-	  for (j = 0; j < count; j++, eicp++)
+	  for (j = 0, chgprtoff += 4;
+	       j < count && chgprtoff <= eiaf_size - sizeof (struct vms_eicp);
+	       j++, chgprtoff += sizeof (struct vms_eicp))
 	    {
+	      struct vms_eicp *eicp = (struct vms_eicp *) (buf + chgprtoff);
 	      unsigned int prot = bfd_getl32 (eicp->newprt);
 	      fprintf (file,
 		       /* xgettext:c-format */
 		       _("  base: 0x%08x %08x, size: 0x%08x, prot: 0x%08x "),
-		       (unsigned)bfd_getl32 (eicp->baseva + 4),
-		       (unsigned)bfd_getl32 (eicp->baseva + 0),
-		       (unsigned)bfd_getl32 (eicp->size),
-		       (unsigned)bfd_getl32 (eicp->newprt));
+		       (unsigned) bfd_getl32 (eicp->baseva + 4),
+		       (unsigned) bfd_getl32 (eicp->baseva + 0),
+		       (unsigned) bfd_getl32 (eicp->size),
+		       (unsigned) bfd_getl32 (eicp->newprt));
 	      switch (prot)
 		{
 		case PRT__C_NA:
