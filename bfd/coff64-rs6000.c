@@ -410,11 +410,8 @@ _bfd_xcoff64_swap_aux_in (bfd *abfd, void *ext1, int type ATTRIBUTE_UNUSED,
 	  if (auxtype != _AUX_CSECT)
 	    goto error;
 
-	  bfd_signed_vma h = 0;
-	  bfd_vma l = 0;
-
-	  h = H_GET_S32 (abfd, ext->x_csect.x_scnlen_hi);
-	  l = H_GET_32 (abfd, ext->x_csect.x_scnlen_lo);
+	  bfd_vma h = H_GET_S32 (abfd, ext->x_csect.x_scnlen_hi);
+	  bfd_vma l = H_GET_32 (abfd, ext->x_csect.x_scnlen_lo);
 
 	  in->x_csect.x_scnlen.l = h << 32 | (l & 0xffffffff);
 
