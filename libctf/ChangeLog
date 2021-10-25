@@ -1,5 +1,9 @@
 2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_type_rvisit): Handle nonrepresentable types.
+
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dump.c (ctf_dump_type): Do not abort on error.
 
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
