@@ -201,9 +201,8 @@ static hashval_t
 hash_typedef_field (const void *p)
 {
   const struct decl_field *tf = (const struct decl_field *) p;
-  struct type *t = check_typedef (tf->type);
 
-  return htab_hash_string (TYPE_SAFE_NAME (t));
+  return htab_hash_string (TYPE_SAFE_NAME (tf->type));
 }
 
 /* An equality function for a typedef field.  */

@@ -38,7 +38,30 @@ public:
   double method(void) { return 23.0; }
 };
 
+namespace ns
+{
+  typedef double scoped_double;
+}
+
+typedef double global_double;
+
+class TypedefHolder
+{
+public:
+  double a;
+  ns::scoped_double b;
+  global_double c;
+
+private:
+  typedef double class_double;
+  class_double d;
+
+  double method1(ns::scoped_double) { return 24.0; }
+  double method2(global_double) { return 24.0; }
+};
+
 Holder<int> value;
+TypedefHolder value2;
 
 int main()
 {
