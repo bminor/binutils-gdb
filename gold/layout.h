@@ -399,8 +399,13 @@ enum Output_section_order
   // linker can pick it up quickly.
   ORDER_INTERP,
 
-  // Loadable read-only note sections come next so that the PT_NOTE
-  // segment is on the first page of the executable.
+  // The .note.gnu.property section comes next so that the PT_NOTE
+  // segment is on the first page of the executable and it won't be
+  // placed between other note sections with different alignments.
+  ORDER_PROPERTY_NOTE,
+
+  // Loadable read-only note sections come after the .note.gnu.property
+  // section.
   ORDER_RO_NOTE,
 
   // Put read-only sections used by the dynamic linker early in the
