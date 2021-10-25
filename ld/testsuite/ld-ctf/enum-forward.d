@@ -1,6 +1,6 @@
 #as:
 #source: enum-forward.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: Forwards to enums
 

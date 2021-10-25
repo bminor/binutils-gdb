@@ -1,7 +1,7 @@
 #as:
 #source: enum.c
 #source: enum-2.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: Conflicting Enums
 

@@ -1,13 +1,15 @@
 @c This file contains the entry for the --ctf, --ctf-parent, --ctf-symbols, -and
 @c --ctf-strings options that are common to both readelf and objdump.
 
-@item --ctf=@var{section}
+@item --ctf[=@var{section}]
 @cindex CTF
 @cindex Compact Type Format
 
 Display the contents of the specified CTF section.  CTF sections themselves
 contain many subsections, all of which are displayed in order.
 
+By default, display the name of the section named @var{.ctf}, which is the
+name emitted by @command{ld}.
 
 @item --ctf-parent=@var{member}
 

@@ -4,7 +4,7 @@
 #source: B.c
 #source: B-2.c
 #source: C.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared --ctf-variables
 #name: Conflicting cycle 1.parent
 

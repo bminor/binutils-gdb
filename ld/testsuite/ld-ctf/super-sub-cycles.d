@@ -1,6 +1,6 @@
 #as:
 #source: super-sub-cycles.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: Super- and sub-cycles
 

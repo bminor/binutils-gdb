@@ -273,7 +273,7 @@ usage (FILE *stream, int status)
                             separate debuginfo files.  (Implies -WK)\n"));
 #ifdef ENABLE_LIBCTF
   fprintf (stream, _("\
-      --ctf=SECTION        Display CTF info from SECTION\n"));
+      --ctf[=SECTION]      Display CTF info from SECTION, (default `.ctf')\n"));
 #endif
   fprintf (stream, _("\
   -t, --syms               Display the contents of the symbol table(s)\n"));
@@ -460,7 +460,7 @@ static struct option long_options[]=
   {"include", required_argument, NULL, 'I'},
   {"dwarf", optional_argument, NULL, OPTION_DWARF},
 #ifdef ENABLE_LIBCTF
-  {"ctf", required_argument, NULL, OPTION_CTF},
+  {"ctf", optional_argument, NULL, OPTION_CTF},
   {"ctf-parent", required_argument, NULL, OPTION_CTF_PARENT},
 #endif
   {"stabs", no_argument, NULL, 'G'},
@@ -4218,6 +4218,8 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
   size_t member = 0;
   int err;
 
+  if (sect_name == NULL)
+    sect_name = ".ctf";
 
   if ((ctfdata = read_section_stabs (abfd, sect_name, &ctfsize, NULL)) == NULL)
       bfd_fatal (bfd_get_filename (abfd));
@@ -5449,7 +5451,8 @@ main (int argc, char **argv)
 #ifdef ENABLE_LIBCTF
 	case OPTION_CTF:
 	  dump_ctf_section_info = true;
-	  dump_ctf_section_name = xstrdup (optarg);
+	  if (optarg)
+	    dump_ctf_section_name = xstrdup (optarg);
 	  seenflag = true;
 	  break;
 	case OPTION_CTF_PARENT:

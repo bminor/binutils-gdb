@@ -1,7 +1,7 @@
 #as:
 #source: array-char.c
 #source: array-int.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared --ctf-variables --hash-style=sysv
 #name: Arrays
 

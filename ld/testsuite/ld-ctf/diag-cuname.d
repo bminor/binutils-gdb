@@ -1,6 +1,6 @@
 #as:
 #source: diag-cuname.s
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared --ctf-variables
 #name: Diagnostics - Invalid CU name offset
 

@@ -1,7 +1,7 @@
 #as:
 #source: typedef-int.c
 #source: typedef-long.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: Conflicting Typedefs
 

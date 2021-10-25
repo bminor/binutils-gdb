@@ -1,5 +1,12 @@
 2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
 
+	* objdump.c (usage): --ctf now has an optional argument.
+	(main): Adjust accordingly.
+	(dump_ctf): Default it.
+	* doc/ctf.options.texi: Adjust.
+
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
 	* objdump.c (usage): --ctf-parent now takes a name, not a section.
 	(dump_ctf): Don't open a separate section; use the parent_name in
 	ctf_dict_open instead.  Use ctf_archive_next, not ctf_archive_iter,

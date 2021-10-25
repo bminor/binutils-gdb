@@ -1,6 +1,6 @@
 #as:
 #source: function.c
-#objdump: --ctf=.ctf
+#objdump: --ctf
 #ld: -shared
 #name: Function
 
