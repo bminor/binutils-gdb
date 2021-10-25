@@ -4869,8 +4869,7 @@ usage (FILE * stream)
   fprintf (stream, _("\
   --ctf=<number|name>    Display CTF info from section <number|name>\n"));
   fprintf (stream, _("\
-  --ctf-parent=<number|name>\n\
-                         Use section <number|name> as the CTF parent\n"));
+  --ctf-parent=<name>    Use CTF archive member <name> as the CTF parent\n"));
   fprintf (stream, _("\
   --ctf-symbols=<number|name>\n\
                          Use section <number|name> as the CTF external symtab\n"));
@@ -15164,30 +15163,27 @@ dump_ctf_errs (ctf_dict_t *fp)
 
 /* Dump one CTF archive member.  */
 
-static int
-dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
+static void
+dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, ctf_dict_t *parent,
+			 size_t member)
 {
-  ctf_dict_t *parent = (ctf_dict_t *) arg;
   const char *things[] = {"Header", "Labels", "Data objects",
 			  "Function objects", "Variables", "Types", "Strings",
 			  ""};
   const char **thing;
   size_t i;
-  int err = 0;
 
-  /* Only print out the name of non-default-named archive members.
-     The name .ctf appears everywhere, even for things that aren't
-     really archives, so printing it out is liable to be confusing.
+  /* Don't print out the name of the default-named archive member if it appears
+     first in the list.  The name .ctf appears everywhere, even for things that
+     aren't really archives, so printing it out is liable to be confusing; also,
+     the common case by far is for only one archive member to exist, and hiding
+     it in that case seems worthwhile.  */
 
-     The parent, if there is one, is the default-owned archive member:
-     avoid importing it into itself.  (This does no harm, but looks
-     confusing.)  */
+  if (strcmp (name, ".ctf") != 0 || member != 0)
+    printf (_("\nCTF archive member: %s:\n"), name);
 
-  if (strcmp (name, ".ctf") != 0)
-    {
-      printf (_("\nCTF archive member: %s:\n"), name);
-      ctf_import (ctf, parent);
-    }
+  if (ctf_parent_name (ctf) != NULL)
+    ctf_import (ctf, parent);
 
   for (i = 0, thing = things; *thing[0]; thing++, i++)
     {
@@ -15206,33 +15202,31 @@ dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
 	{
 	  error (_("Iteration failed: %s, %s\n"), *thing,
 		 ctf_errmsg (ctf_errno (ctf)));
-	  err = 1;
-	  goto out;
+	  break;
 	}
     }
 
- out:
   dump_ctf_errs (ctf);
-  return err;
 }
 
 static bool
 dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
 {
-  Elf_Internal_Shdr *  parent_sec = NULL;
   Elf_Internal_Shdr *  symtab_sec = NULL;
   Elf_Internal_Shdr *  strtab_sec = NULL;
   void *	       data = NULL;
   void *	       symdata = NULL;
   void *	       strdata = NULL;
-  void *	       parentdata = NULL;
-  ctf_sect_t	       ctfsect, symsect, strsect, parentsect;
+  ctf_sect_t	       ctfsect, symsect, strsect;
   ctf_sect_t *	       symsectp = NULL;
   ctf_sect_t *	       strsectp = NULL;
   ctf_archive_t *      ctfa = NULL;
-  ctf_archive_t *      parenta = NULL, *lookparent;
   ctf_dict_t *         parent = NULL;
+  ctf_dict_t *         fp;
 
+  ctf_next_t *i = NULL;
+  const char *name;
+  size_t member = 0;
   int err;
   bool ret = false;
 
@@ -15279,25 +15273,9 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
       strsect.cts_data = strdata;
     }
 
-  if (dump_ctf_parent_name)
-    {
-      if ((parent_sec = find_section (filedata, dump_ctf_parent_name)) == NULL)
-	{
-	  error (_("No CTF parent section named %s\n"), dump_ctf_parent_name);
-	  goto fail;
-	}
-      if ((parentdata = (void *) get_data (NULL, filedata,
-					   parent_sec->sh_offset, 1,
-					   parent_sec->sh_size,
-					   _("CTF parent"))) == NULL)
-	goto fail;
-      shdr_to_ctf_sect (&parentsect, parent_sec, filedata);
-      parentsect.cts_data = parentdata;
-    }
-
   /* Load the CTF file and dump it.  It may be a raw CTF section, or an archive:
      libctf papers over the difference, so we can pretend it is always an
-     archive.  Possibly open the parent as well, if one was specified.  */
+     archive.  */
 
   if ((ctfa = ctf_arc_bufopen (&ctfsect, symsectp, strsectp, &err)) == NULL)
     {
@@ -15309,24 +15287,9 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   ctf_arc_symsect_endianness (ctfa, filedata->file_header.e_ident[EI_DATA]
 			      != ELFDATA2MSB);
 
-  if (parentdata)
-    {
-      if ((parenta = ctf_arc_bufopen (&parentsect, symsectp, strsectp,
-				      &err)) == NULL)
-	{
-	  dump_ctf_errs (NULL);
-	  error (_("CTF open failure: %s\n"), ctf_errmsg (err));
-	  goto fail;
-	}
-      lookparent = parenta;
-    }
-  else
-    lookparent = ctfa;
-
-  /* Assume that the applicable parent archive member is the default one.
-     (This is what all known implementations are expected to do, if they
-     put CTFs and their parents in archives together.)  */
-  if ((parent = ctf_dict_open (lookparent, NULL, &err)) == NULL)
+  /* Preload the parent dict, since it will need to be imported into every
+     child in turn.  */
+  if ((parent = ctf_dict_open (ctfa, dump_ctf_parent_name, &err)) == NULL)
     {
       dump_ctf_errs (NULL);
       error (_("CTF open failure: %s\n"), ctf_errmsg (err));
@@ -15343,18 +15306,18 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
     printf (_("\nDump of CTF section '%s':\n"),
 	    printable_section_name (filedata, section));
 
-  if ((err = ctf_archive_iter (ctfa, dump_ctf_archive_member, parent)) != 0)
-    {
-      dump_ctf_errs (NULL);
-      error (_("CTF member open failure: %s\n"), ctf_errmsg (err));
-      ret = false;
-    }
+ while ((fp = ctf_archive_next (ctfa, &i, &name, 0, &err)) != NULL)
+    dump_ctf_archive_member (fp, name, parent, member++);
+ if (err != ECTF_NEXT_END)
+   {
+     dump_ctf_errs (NULL);
+     error (_("CTF member open failure: %s\n"), ctf_errmsg (err));
+     ret = false;
+   }
 
  fail:
   ctf_dict_close (parent);
   ctf_close (ctfa);
-  ctf_close (parenta);
-  free (parentdata);
   free (data);
   free (symdata);
   free (strdata);

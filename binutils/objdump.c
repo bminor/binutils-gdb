@@ -361,7 +361,7 @@ usage (FILE *stream, int status)
       --dwarf-check              Make additional dwarf consistency checks.\n"));
 #ifdef ENABLE_LIBCTF
       fprintf (stream, _("\
-      --ctf-parent=SECTION       Use SECTION as the CTF parent\n"));
+      --ctf-parent=NAME          Use CTF archive member NAME as the CTF parent\n"));
 #endif
       fprintf (stream, _("\
       --visualize-jumps          Visualize jumps by drawing ASCII art lines\n"));
@@ -4156,29 +4156,27 @@ dump_ctf_errs (ctf_dict_t *fp)
 
 /* Dump one CTF archive member.  */
 
-static int
-dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
+static void
+dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, ctf_dict_t *parent,
+			 size_t member)
 {
-  ctf_dict_t *parent = (ctf_dict_t *) arg;
   const char *things[] = {"Header", "Labels", "Data objects",
 			  "Function objects", "Variables", "Types", "Strings",
 			  ""};
   const char **thing;
   size_t i;
 
-  /* Only print out the name of non-default-named archive members.
-     The name .ctf appears everywhere, even for things that aren't
-     really archives, so printing it out is liable to be confusing.
+  /* Don't print out the name of the default-named archive member if it appears
+     first in the list.  The name .ctf appears everywhere, even for things that
+     aren't really archives, so printing it out is liable to be confusing; also,
+     the common case by far is for only one archive member to exist, and hiding
+     it in that case seems worthwhile.  */
 
-     The parent, if there is one, is the default-owned archive member:
-     avoid importing it into itself.  (This does no harm, but looks
-     confusing.)  */
+  if (strcmp (name, ".ctf") != 0 || member != 0)
+    printf (_("\nCTF archive member: %s:\n"), sanitize_string (name));
 
-  if (strcmp (name, ".ctf") != 0)
-    {
-      printf (_("\nCTF archive member: %s:\n"), sanitize_string (name));
-      ctf_import (ctf, parent);
-    }
+  if (ctf_parent_name (ctf) != NULL)
+    ctf_import (ctf, parent);
 
   for (i = 0, thing = things; *thing[0]; thing++, i++)
     {
@@ -4202,8 +4200,6 @@ dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
     }
 
   dump_ctf_errs (ctf);
-
-  return 0;
 }
 
 /* Dump the CTF debugging information.  */
@@ -4211,22 +4207,23 @@ dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
 static void
 dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 {
-  ctf_archive_t *ctfa, *parenta = NULL, *lookparent;
-  bfd_byte *ctfdata, *parentdata = NULL;
-  bfd_size_type ctfsize, parentsize;
+  ctf_archive_t *ctfa = NULL;
+  bfd_byte *ctfdata = NULL;
+  bfd_size_type ctfsize;
   ctf_sect_t ctfsect;
-  ctf_dict_t *parent = NULL;
+  ctf_dict_t *parent;
+  ctf_dict_t *fp;
+  ctf_next_t *i = NULL;
+  const char *name;
+  size_t member = 0;
   int err;
+
 
   if ((ctfdata = read_section_stabs (abfd, sect_name, &ctfsize, NULL)) == NULL)
       bfd_fatal (bfd_get_filename (abfd));
 
-  if (parent_name
-      && (parentdata = read_section_stabs (abfd, parent_name, &parentsize,
-					   NULL)) == NULL)
-      bfd_fatal (bfd_get_filename (abfd));
-
-  /* Load the CTF file and dump it.  */
+  /* Load the CTF file and dump it.  Preload the parent dict, since it will
+     need to be imported into every child in turn. */
 
   ctfsect = make_ctfsect (sect_name, ctfdata, ctfsize);
   if ((ctfa = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
@@ -4236,25 +4233,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
       bfd_fatal (bfd_get_filename (abfd));
     }
 
-  if (parentdata)
-    {
-      ctfsect = make_ctfsect (parent_name, parentdata, parentsize);
-      if ((parenta = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
-	{
-	  dump_ctf_errs (NULL);
-	  non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
-	  bfd_fatal (bfd_get_filename (abfd));
-	}
-
-      lookparent = parenta;
-    }
-  else
-    lookparent = ctfa;
-
-  /* Assume that the applicable parent archive member is the default one.
-     (This is what all known implementations are expected to do, if they
-     put CTFs and their parents in archives together.)  */
-  if ((parent = ctf_dict_open (lookparent, NULL, &err)) == NULL)
+  if ((parent = ctf_dict_open (ctfa, parent_name, &err)) == NULL)
     {
       dump_ctf_errs (NULL);
       non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
@@ -4263,7 +4242,9 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 
   printf (_("Contents of CTF section %s:\n"), sanitize_string (sect_name));
 
-  if ((err = ctf_archive_iter (ctfa, dump_ctf_archive_member, parent)) != 0)
+  while ((fp = ctf_archive_next (ctfa, &i, &name, 0, &err)) != NULL)
+    dump_ctf_archive_member (fp, name, parent, member++);
+  if (err != ECTF_NEXT_END)
     {
       dump_ctf_errs (NULL);
       non_fatal (_("CTF archive member open failure: %s"), ctf_errmsg (err));
@@ -4271,8 +4252,6 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
     }
   ctf_dict_close (parent);
   ctf_close (ctfa);
-  ctf_close (parenta);
-  free (parentdata);
   free (ctfdata);
 }
 #else

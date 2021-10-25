@@ -1,3 +1,19 @@
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* objdump.c (usage): --ctf-parent now takes a name, not a section.
+	(dump_ctf): Don't open a separate section; use the parent_name in
+	ctf_dict_open instead.  Use ctf_archive_next, not ctf_archive_iter,
+	so we can pass down a member count.
+	(dump_ctf_archive_member): Add the member count; don't return
+	anything.  Import parents into children no matter what the
+	parent's name, while still avoiding displaying the header for the
+	common parent name of ".ctf".
+	* readelf.c (usage): Adjust similarly.
+	(dump_section_as_ctf): Likewise.
+	(dump_ctf_archive_member): Likewise.  Never stop iterating over
+	archive members, even if ctf_dump of one member fails.
+	* doc/ctf.options.texi: Adjust.
+
 2021-10-19  Nick Clifton  <nickc@redhat.com>
 
 	* nm.c (filter_symbols): Test for a NULL name before checking to
