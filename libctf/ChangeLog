@@ -1,3 +1,7 @@
+2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-dump.c (ctf_dump_type): Do not abort on error.
+
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-lookup.c (ctf_lookup_by_name_internal): Fix pptrtab bounds.
