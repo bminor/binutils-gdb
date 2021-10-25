@@ -264,7 +264,20 @@ try:
         except:
             return None
 
+    def colorize_disasm(content, gdbarch):
+        # Don't want any errors.
+        try:
+            lexer = lexers.get_lexer_by_name("asm")
+            formatter = formatters.TerminalFormatter()
+            return highlight(content, lexer, formatter).rstrip().encode()
+        except:
+            return None
+
+
 except:
 
     def colorize(filename, contents):
+        return None
+
+    def colorize_disasm(content, gdbarch):
         return None

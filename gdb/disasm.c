@@ -782,9 +782,12 @@ get_all_disassembler_options (struct gdbarch *gdbarch)
 gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
 				    struct ui_file *file,
 				    di_read_memory_ftype read_memory_func)
-  : m_gdbarch (gdbarch)
+  : m_gdbarch (gdbarch),
+    m_buffer (!use_ext_lang_colorization_p && disassembler_styling
+	      && file->can_emit_style_escape ()),
+    m_dest (file)
 {
-  init_disassemble_info (&m_di, file, dis_asm_fprintf);
+  init_disassemble_info (&m_di, &m_buffer, dis_asm_fprintf);
   m_di.flavour = bfd_target_unknown_flavour;
   m_di.memory_error_func = dis_asm_memory_error;
   m_di.print_address_func = dis_asm_print_address;
@@ -813,14 +816,65 @@ gdb_disassembler::~gdb_disassembler ()
   disassemble_free_target (&m_di);
 }
 
+/* See disasm.h.  */
+
+bool gdb_disassembler::use_ext_lang_colorization_p = true;
+
+/* See disasm.h.  */
+
 int
 gdb_disassembler::print_insn (CORE_ADDR memaddr,
 			      int *branch_delay_insns)
 {
   m_err_memaddr.reset ();
+  m_buffer.clear ();
 
   int length = gdbarch_print_insn (arch (), memaddr, &m_di);
 
+  /* If we have successfully disassembled an instruction, styling is on, we
+     think that the extension language might be able to perform styling for
+     us, and the destination can support styling, then lets call into the
+     extension languages in order to style this output.  */
+  if (length > 0 && disassembler_styling
+      && use_ext_lang_colorization_p
+      && m_dest->can_emit_style_escape ())
+    {
+      gdb::optional<std::string> ext_contents;
+      ext_contents = ext_lang_colorize_disasm (m_buffer.string (), arch ());
+      if (ext_contents.has_value ())
+	m_buffer = std::move (*ext_contents);
+      else
+	{
+	  /* The extension language failed to add styling to the
+	     disassembly output.  Set the static flag so that next time we
+	     disassemble we don't even bother attempting to use the
+	     extension language for styling.  */
+	  use_ext_lang_colorization_p = false;
+
+	  /* The instruction we just disassembled, and the extension
+	     languages failed to style, might have otherwise had some
+	     minimal styling applied by GDB.  To regain that styling we
+	     need to recreate m_buffer, but this time with styling support.
+
+	     To do this we perform an in-place new, but this time turn on
+	     the styling support, then we can re-disassembly the
+	     instruction, and gain any minimal styling GDB might add.  */
+	  gdb_static_assert ((std::is_same<decltype (m_buffer),
+			      string_file>::value));
+	  gdb_assert (!m_buffer.term_out ());
+	  m_buffer.~string_file ();
+	  new (&m_buffer) string_file (true);
+	  length = gdbarch_print_insn (arch (), memaddr, &m_di);
+	  gdb_assert (length > 0);
+	}
+    }
+
+  /* Push any disassemble output to the real destination stream.  We do
+     this even if the disassembler reported failure (-1) as the
+     disassembler may have printed something to its output stream.  */
+  m_di.fprintf_func (m_dest, "%s", m_buffer.c_str ());
+
+  /* If the disassembler failed then report an appropriate error.  */
   if (length < 0)
     {
       if (m_err_memaddr.has_value ())

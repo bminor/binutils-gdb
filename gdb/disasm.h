@@ -82,6 +82,31 @@ private:
      non-memory error.  */
   gdb::optional<CORE_ADDR> m_err_memaddr;
 
+  /* Disassembler output is built up into this buffer.  Whether this
+     string_file is created with styling support or not depends on the
+     value of use_ext_lang_colorization_p, as well as whether disassembler
+     styling in general is turned on, and also, whether *m_dest supports
+     styling or not.  */
+  string_file m_buffer;
+
+  /* The stream to which disassembler output will be written.  */
+  ui_file *m_dest;
+
+  /* When true, m_buffer will be created without styling support,
+     otherwise, m_buffer will be created with styling support.
+
+     This field will initially be true, but will be set to false if
+     ext_lang_colorize_disasm fails to add styling at any time.
+
+     If the extension language is going to add the styling then m_buffer
+     should be created without styling support, the extension language will
+     then add styling at the end of the disassembly process.
+
+     If the extension language is not going to add the styling, then we
+     create m_buffer with styling support, and GDB will add minimal styling
+     (currently just to addresses and symbols) as it goes.  */
+  static bool use_ext_lang_colorization_p;
+
   static int dis_asm_fprintf (void *stream, const char *format, ...)
     ATTRIBUTE_PRINTF(2,3);
 

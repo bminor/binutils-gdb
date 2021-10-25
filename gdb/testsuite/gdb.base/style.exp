@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+load_lib gdb-python.exp
+
 # Test CLI output styling.
 
 standard_testfile
@@ -187,8 +189,16 @@ proc run_style_tests { } {
 
 	gdb_test_no_output "set width 0"
 
+	# If disassembler styling is being done by the Python pygments
+	# module, then we can't be sure how the 'some_called_function'
+	# symbol will be styled.  However, if pygments is not being
+	# used then we can know how the symbol name will be styled.
 	set main [limited_style main function]
-	set func [limited_style some_called_function function]
+	if { $::python_disassembly_styling } {
+	    set func "some_called_function"
+	} else {
+	    set func [limited_style some_called_function function]
+	}
 	# Somewhere should see the call to the function.
 	gdb_test "disassemble main" \
 	    [concat "Dump of assembler code for function $main:.*" \
@@ -304,6 +314,62 @@ proc run_style_tests { } {
     }
 }
 
+# Check that disassembler styling can be disabled.  The function that
+# we are disassembling has some minimal styling applied even if the
+# Python pygments module is not available, so, when we disable
+# disassembler styling, we should always see a change in output.
+proc test_disable_disassembler_styling { } {
+    save_vars { env(TERM) } {
+	# We need an ANSI-capable terminal to get the output.
+	setenv TERM ansi
+
+	# Restart GDB with the correct TERM variable setting, this
+	# means that GDB will enable styling.
+	clean_restart_and_disable $::binfile
+
+	set styled_hex [limited_style $::hex address]
+	set main [limited_style main function]
+
+	foreach_with_prefix disasm_styling { on off } {
+	    gdb_test_no_output "set style disassembler enabled ${disasm_styling}"
+
+	    set saw_header_line false
+	    set saw_styled_output_line false
+	    set saw_unstyled_output_line false
+	    gdb_test_multiple "disassemble main" "" {
+		-re "disassemble main\r\n" {
+		    exp_continue
+		}
+		-re "^Dump of assembler code for function $main:" {
+		    set saw_header_line true
+		    exp_continue
+		}
+		-re "^\\s+${styled_hex}\\s+<\[^>\]+>:\\s+\[^\r\n\033\]+\r\n" {
+		    set saw_unstyled_output_line true
+		    exp_continue
+		}
+		-re "^\\s+${styled_hex}\\s+<\[^>\]+>:\\s+\[^\r\n\]+\033\[^\r\n\]+\r\n" {
+		    set saw_styled_output_line true
+		    exp_continue
+		}
+		-re "^End of assembler dump\\.\r\n" {
+		    exp_continue
+		}
+		-re "^$::gdb_prompt $" {
+		    gdb_assert { $saw_header_line }
+		    if { $disasm_styling } {
+			gdb_assert { $saw_styled_output_line }
+			gdb_assert { !$saw_unstyled_output_line }
+		    } else {
+			gdb_assert { !$saw_styled_output_line }
+			gdb_assert { $saw_unstyled_output_line }
+		    }
+		}
+	    }
+	}
+    }
+}
+
 # A separate test from the above as the styled text this checks can't
 # currently be disabled (the text is printed too early in GDB's
 # startup process).
@@ -317,6 +383,15 @@ proc test_startup_version_string { } {
     gdb_test "" "${vers}.*" "version is styled at startup"
 }
 
+# Check to see if the Python styling of disassembler output is
+# expected or not, this styling requires Python support in GDB, and
+# the Python pygments module to be available.
+clean_restart ${binfile}
+if {![skip_python_tests] && [gdb_py_module_available "pygments"]} {
+    set python_disassembly_styling true
+} else {
+    set python_disassembly_styling false
+}
 
 # Run tests with all styles in their default state.
 with_test_prefix "all styles enabled" {
@@ -331,6 +406,11 @@ foreach style { title file function highlight variable \
     with_test_prefix "disable style $style" {
 	run_style_tests
     }
+}
+
+# Check that the disassembler styling can be disabled.
+if { $python_disassembly_styling } {
+    test_disable_disassembler_styling
 }
 
 # Finally, check the styling of the version string during startup.

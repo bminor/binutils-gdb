@@ -121,6 +121,8 @@ static enum ext_lang_rc gdbpy_before_prompt_hook
   (const struct extension_language_defn *, const char *current_gdb_prompt);
 static gdb::optional<std::string> gdbpy_colorize
   (const std::string &filename, const std::string &contents);
+static gdb::optional<std::string> gdbpy_colorize_disasm
+  (const std::string &content, gdbarch *gdbarch);
 
 /* The interface between gdb proper and loading of python scripts.  */
 
@@ -162,6 +164,8 @@ static const struct extension_language_ops python_extension_ops =
   gdbpy_get_matching_xmethod_workers,
 
   gdbpy_colorize,
+
+  gdbpy_colorize_disasm,
 };
 
 #endif /* HAVE_PYTHON */
@@ -1206,6 +1210,69 @@ gdbpy_colorize (const std::string &filename, const std::string &contents)
     {
       PyErr_SetString (PyExc_TypeError,
 		       _("Return value from gdb.colorize should be a bytes object or None."));
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  return std::string (PyBytes_AsString (result.get ()));
+}
+
+/* This is the extension_language_ops.colorize_disasm "method".  */
+
+static gdb::optional<std::string>
+gdbpy_colorize_disasm (const std::string &content, gdbarch *gdbarch)
+{
+  if (!gdb_python_initialized)
+    return {};
+
+  gdbpy_enter enter_py;
+
+  if (gdb_python_module == nullptr
+      || !PyObject_HasAttrString (gdb_python_module, "colorize_disasm"))
+    return {};
+
+  gdbpy_ref<> hook (PyObject_GetAttrString (gdb_python_module,
+					    "colorize_disasm"));
+  if (hook == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  if (!PyCallable_Check (hook.get ()))
+    return {};
+
+  gdbpy_ref<> content_arg (PyBytes_FromString (content.c_str ()));
+  if (content_arg == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  gdbpy_ref<> gdbarch_arg (gdbarch_to_arch_object (gdbarch));
+  if (gdbarch_arg == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  gdbpy_ref<> result (PyObject_CallFunctionObjArgs (hook.get (),
+						    content_arg.get (),
+						    gdbarch_arg.get (),
+						    nullptr));
+  if (result == nullptr)
+    {
+      gdbpy_print_stack ();
+      return {};
+    }
+
+  if (result == Py_None)
+    return {};
+
+  if (!PyBytes_Check (result.get ()))
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Return value from gdb.colorize_disasm should be a bytes object or None."));
       gdbpy_print_stack ();
       return {};
     }

@@ -89,6 +89,12 @@ show suppress-cli-notifications
   the program being debugged stops (e.g., because of hitting a
   breakpoint, completing source-stepping, an interrupt, etc.).
 
+set style disassembler enabled on|off
+show style disassembler enabled
+  If GDB is compiled with Python support, and the Python Pygments
+  package is available, then, when this setting is on, disassembler
+  output will have styling applied.
+
 * Changed commands
 
 maint packet

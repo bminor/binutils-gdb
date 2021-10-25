@@ -191,6 +191,14 @@ public:
     return ret;
   }
 
+  /* Set the internal buffer contents to STR.  Any existing contents are
+     discarded.  */
+  string_file &operator= (std::string &&str)
+  {
+    m_string = std::move (str);
+    return *this;
+  }
+
   /* Provide a few convenience methods with the same API as the
      underlying std::string.  */
   const char *data () const { return m_string.data (); }
