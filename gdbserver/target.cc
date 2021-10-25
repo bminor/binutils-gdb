@@ -276,26 +276,23 @@ set_target_ops (process_stratum_target *target)
 
 /* Convert pid to printable format.  */
 
-const char *
+std::string
 target_pid_to_str (ptid_t ptid)
 {
-  static char buf[80];
-
   if (ptid == minus_one_ptid)
-    xsnprintf (buf, sizeof (buf), "<all threads>");
+    return string_printf("<all threads>");
   else if (ptid == null_ptid)
-    xsnprintf (buf, sizeof (buf), "<null thread>");
+    return string_printf("<null thread>");
   else if (ptid.tid () != 0)
-    xsnprintf (buf, sizeof (buf), "Thread %d.0x%s",
-	       ptid.pid (), phex_nz (ptid.tid (), sizeof (ULONGEST)));
+    return string_printf("Thread %d.0x%s",
+			 ptid.pid (),
+			 phex_nz (ptid.tid (), sizeof (ULONGEST)));
   else if (ptid.lwp () != 0)
-    xsnprintf (buf, sizeof (buf), "LWP %d.%ld",
-	       ptid.pid (), ptid.lwp ());
+    return string_printf("LWP %d.%ld",
+			 ptid.pid (), ptid.lwp ());
   else
-    xsnprintf (buf, sizeof (buf), "Process %d",
-	       ptid.pid ());
-
-  return buf;
+    return string_printf("Process %d",
+			 ptid.pid ());
 }
 
 int

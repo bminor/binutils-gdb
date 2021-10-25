@@ -1087,7 +1087,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
   client_state &cs = get_client_state ();
   if (debug_threads)
     debug_printf ("Writing resume reply for %s:%d\n",
-		  target_pid_to_str (ptid), status->kind ());
+		  target_pid_to_str (ptid).c_str (), status->kind ());
 
   switch (status->kind ())
     {

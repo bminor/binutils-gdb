@@ -3310,7 +3310,7 @@ queue_stop_reply_callback (thread_info *thread)
 		= target_waitstatus_to_string (&thread->last_status);
 
 	      debug_printf ("Reporting thread %s as already stopped with %s\n",
-			    target_pid_to_str (thread->id),
+			    target_pid_to_str (thread->id).c_str (),
 			    status_string.c_str ());
 	    }
 
@@ -4640,7 +4640,7 @@ handle_target_event (int err, gdb_client_data client_data)
 		debug_printf ("GDB not connected; forwarding event %d for"
 			      " [%s]\n",
 			      (int) cs.last_status.kind (),
-			      target_pid_to_str (cs.last_ptid));
+			      target_pid_to_str (cs.last_ptid).c_str ());
 
 	      if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
 		signal = cs.last_status.sig ();

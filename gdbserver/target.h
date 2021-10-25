@@ -702,6 +702,6 @@ int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 
 int set_desired_thread ();
 
-const char *target_pid_to_str (ptid_t);
+std::string target_pid_to_str (ptid_t);
 
 #endif /* GDBSERVER_TARGET_H */

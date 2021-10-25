@@ -842,7 +842,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
 	  struct thread_info *thr = get_lwp_thread (lwp);
 
 	  debug_printf ("CSBB: %s stopped by software breakpoint\n",
-			target_pid_to_str (ptid_of (thr)));
+			target_pid_to_str (ptid_of (thr)).c_str ());
 	}
 
       /* Back up the PC if necessary.  */
@@ -863,7 +863,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
 	  struct thread_info *thr = get_lwp_thread (lwp);
 
 	  debug_printf ("CSBB: %s stopped by hardware breakpoint\n",
-			target_pid_to_str (ptid_of (thr)));
+			target_pid_to_str (ptid_of (thr)).c_str ());
 	}
     }
   else if (lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT)
@@ -873,7 +873,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
 	  struct thread_info *thr = get_lwp_thread (lwp);
 
 	  debug_printf ("CSBB: %s stopped by hardware watchpoint\n",
-			target_pid_to_str (ptid_of (thr)));
+			target_pid_to_str (ptid_of (thr)).c_str ());
 	}
     }
   else if (lwp->stop_reason == TARGET_STOPPED_BY_SINGLE_STEP)
@@ -883,7 +883,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
 	  struct thread_info *thr = get_lwp_thread (lwp);
 
 	  debug_printf ("CSBB: %s stopped by trace\n",
-			target_pid_to_str (ptid_of (thr)));
+			target_pid_to_str (ptid_of (thr)).c_str ());
 	}
     }
 
@@ -1249,7 +1249,7 @@ linux_kill_one_lwp (struct lwp_info *lwp)
       int save_errno = errno;
 
       debug_printf ("LKL:  kill_lwp (SIGKILL) %s, 0, 0 (%s)\n",
-		    target_pid_to_str (ptid_of (thr)),
+		    target_pid_to_str (ptid_of (thr)).c_str (),
 		    save_errno ? safe_strerror (save_errno) : "OK");
     }
 
@@ -1260,7 +1260,7 @@ linux_kill_one_lwp (struct lwp_info *lwp)
       int save_errno = errno;
 
       debug_printf ("LKL:  PTRACE_KILL %s, 0, 0 (%s)\n",
-		    target_pid_to_str (ptid_of (thr)),
+		    target_pid_to_str (ptid_of (thr)).c_str (),
 		    save_errno ? safe_strerror (save_errno) : "OK");
     }
 }
@@ -1325,7 +1325,7 @@ kill_one_lwp_callback (thread_info *thread, int pid)
     {
       if (debug_threads)
 	debug_printf ("lkop: is last of process %s\n",
-		      target_pid_to_str (thread->id));
+		      target_pid_to_str (thread->id).c_str ());
       return;
     }
 
@@ -1399,7 +1399,7 @@ get_detach_signal (struct thread_info *thread)
     {
       if (debug_threads)
 	debug_printf ("GPS: lwp %s hasn't stopped: no pending signal\n",
-		      target_pid_to_str (ptid_of (thread)));
+		      target_pid_to_str (ptid_of (thread)).c_str ());
       return 0;
     }
 
@@ -1409,7 +1409,7 @@ get_detach_signal (struct thread_info *thread)
       if (debug_threads)
 	debug_printf ("GPS: lwp %s had stopped with extended "
 		      "status: no pending signal\n",
-		      target_pid_to_str (ptid_of (thread)));
+		      target_pid_to_str (ptid_of (thread)).c_str ());
       return 0;
     }
 
@@ -1419,7 +1419,7 @@ get_detach_signal (struct thread_info *thread)
     {
       if (debug_threads)
 	debug_printf ("GPS: lwp %s had signal %s, but it is in nopass state\n",
-		      target_pid_to_str (ptid_of (thread)),
+		      target_pid_to_str (ptid_of (thread)).c_str (),
 		      gdb_signal_to_string (signo));
       return 0;
     }
@@ -1433,7 +1433,7 @@ get_detach_signal (struct thread_info *thread)
 	debug_printf ("GPS: lwp %s had signal %s, "
 		      "but we don't know if we should pass it. "
 		      "Default to not.\n",
-		      target_pid_to_str (ptid_of (thread)),
+		      target_pid_to_str (ptid_of (thread)).c_str (),
 		      gdb_signal_to_string (signo));
       return 0;
     }
@@ -1441,7 +1441,7 @@ get_detach_signal (struct thread_info *thread)
     {
       if (debug_threads)
 	debug_printf ("GPS: lwp %s has pending signal %s: delivering it.\n",
-		      target_pid_to_str (ptid_of (thread)),
+		      target_pid_to_str (ptid_of (thread)).c_str (),
 		      gdb_signal_to_string (signo));
 
       return WSTOPSIG (status);
@@ -1460,7 +1460,7 @@ linux_process_target::detach_one_lwp (lwp_info *lwp)
     {
       if (debug_threads)
 	debug_printf ("Sending SIGCONT to %s\n",
-		      target_pid_to_str (ptid_of (thread)));
+		      target_pid_to_str (ptid_of (thread)).c_str ());
 
       kill_lwp (lwpid_of (thread), SIGCONT);
       lwp->stop_expected = 0;
@@ -1516,14 +1516,14 @@ linux_process_target::detach_one_lwp (lwp_info *lwp)
       else
 	{
 	  error (_("Can't detach %s: %s"),
-		 target_pid_to_str (ptid_of (thread)),
+		 target_pid_to_str (ptid_of (thread)).c_str (),
 		 safe_strerror (save_errno));
 	}
     }
   else if (debug_threads)
     {
       debug_printf ("PTRACE_DETACH (%s, %s, 0) (OK)\n",
-		    target_pid_to_str (ptid_of (thread)),
+		    target_pid_to_str (ptid_of (thread)).c_str (),
 		    strsignal (sig));
     }
 
@@ -2410,7 +2410,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	     SIGSTOP as a normal event.  */
 	  if (debug_threads)
 	    debug_printf ("LLW: resume_stop SIGSTOP caught for %s.\n",
-			  target_pid_to_str (ptid_of (thread)));
+			  target_pid_to_str (ptid_of (thread)).c_str ());
 	}
       else if (stopping_threads != NOT_STOPPING_THREADS)
 	{
@@ -2419,7 +2419,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	  if (debug_threads)
 	    debug_printf ("LLW: SIGSTOP caught for %s "
 			  "while stopping threads.\n",
-			  target_pid_to_str (ptid_of (thread)));
+			  target_pid_to_str (ptid_of (thread)).c_str ());
 	  return;
 	}
       else
@@ -2428,7 +2428,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	  if (debug_threads)
 	    debug_printf ("LLW: %s %s, 0, 0 (discard delayed SIGSTOP)\n",
 			  child->stepping ? "step" : "continue",
-			  target_pid_to_str (ptid_of (thread)));
+			  target_pid_to_str (ptid_of (thread)).c_str ());
 
 	  resume_one_lwp (child, child->stepping, 0, NULL);
 	  return;
@@ -2471,7 +2471,7 @@ linux_process_target::resume_stopped_resumed_lwps (thread_info *thread)
 
       if (debug_threads)
 	debug_printf ("RSRL: resuming stopped-resumed LWP %s at %s: step=%d\n",
-		      target_pid_to_str (ptid_of (thread)),
+		      target_pid_to_str (ptid_of (thread)).c_str (),
 		      paddress (lp->stop_pc),
 		      step);
 
@@ -2717,7 +2717,7 @@ select_event_lwp (struct lwp_info **orig_lp)
 	{
 	  if (debug_threads)
 	    debug_printf ("SEL: Select single-step %s\n",
-			  target_pid_to_str (ptid_of (event_thread)));
+			  target_pid_to_str (ptid_of (event_thread)).c_str ());
 	}
     }
   if (event_thread == NULL)
@@ -2952,7 +2952,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   if (debug_threads)
     {
       debug_enter ();
-      debug_printf ("wait_1: [%s]\n", target_pid_to_str (ptid));
+      debug_printf ("wait_1: [%s]\n", target_pid_to_str (ptid).c_str ());
     }
 
   /* Translate generic target options into linux options.  */
@@ -2989,7 +2989,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
     {
       if (debug_threads)
 	debug_printf ("step_over_bkpt set [%s], doing a blocking wait\n",
-		      target_pid_to_str (step_over_bkpt));
+		      target_pid_to_str (step_over_bkpt).c_str ());
       pid = wait_for_event (step_over_bkpt, &w, options & ~WNOHANG);
     }
 
@@ -3034,7 +3034,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	    {
 	      debug_printf ("wait_1 ret = %s, exited with "
 			    "retcode %d\n",
-			    target_pid_to_str (ptid_of (current_thread)),
+			    target_pid_to_str (ptid_of (current_thread)).c_str (),
 			    WEXITSTATUS (w));
 	      debug_exit ();
 	    }
@@ -3047,7 +3047,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	    {
 	      debug_printf ("wait_1 ret = %s, terminated with "
 			    "signal %d\n",
-			    target_pid_to_str (ptid_of (current_thread)),
+			    target_pid_to_str (ptid_of (current_thread)).c_str (),
 			    WTERMSIG (w));
 	      debug_exit ();
 	    }
@@ -3085,7 +3085,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
       if (debug_threads)
 	{
 	  debug_printf ("step-over for %s executed software breakpoint\n",
-			target_pid_to_str (ptid_of (current_thread)));
+			target_pid_to_str (ptid_of (current_thread)).c_str ());
 	}
 
       if (increment_pc != 0)
@@ -3254,7 +3254,8 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 		    {
 		      debug_printf ("wait_1 ret = %s, stopped "
 				    "while stabilizing threads\n",
-				    target_pid_to_str (ptid_of (current_thread)));
+				    target_pid_to_str
+				      (ptid_of (current_thread)).c_str ());
 		      debug_exit ();
 		    }
 
@@ -3658,7 +3659,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   if (debug_threads)
     {
       debug_printf ("wait_1 ret = %s, %d, %d\n",
-		    target_pid_to_str (ptid_of (current_thread)),
+		    target_pid_to_str (ptid_of (current_thread)).c_str (),
 		    ourstatus->kind (), ourstatus->sig ());
       debug_exit ();
     }
@@ -3969,9 +3970,10 @@ linux_process_target::stop_all_lwps (int suspend, lwp_info *except)
       debug_enter ();
       debug_printf ("stop_all_lwps (%s, except=%s)\n",
 		    suspend ? "stop-and-suspend" : "stop",
-		    except != NULL
-		    ? target_pid_to_str (ptid_of (get_lwp_thread (except)))
-		    : "none");
+		    (except != NULL
+		     ? target_pid_to_str
+			 (ptid_of (get_lwp_thread (except))).c_str ()
+		     : "none"));
     }
 
   stopping_threads = (suspend
