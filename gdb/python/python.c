@@ -58,33 +58,6 @@ static const char *const python_excp_enums[] =
    the default.  */
 static const char *gdbpy_should_print_stack = python_excp_message;
 
-#ifdef HAVE_PYTHON
-/* Forward decls, these are defined later.  */
-extern const struct extension_language_script_ops python_extension_script_ops;
-extern const struct extension_language_ops python_extension_ops;
-#endif
-
-/* The main struct describing GDB's interface to the Python
-   extension language.  */
-const struct extension_language_defn extension_language_python =
-{
-  EXT_LANG_PYTHON,
-  "python",
-  "Python",
-
-  ".py",
-  "-gdb.py",
-
-  python_control,
-
-#ifdef HAVE_PYTHON
-  &python_extension_script_ops,
-  &python_extension_ops
-#else
-  NULL,
-  NULL
-#endif
-};
 
 #ifdef HAVE_PYTHON
 
@@ -151,7 +124,7 @@ static gdb::optional<std::string> gdbpy_colorize
 
 /* The interface between gdb proper and loading of python scripts.  */
 
-const struct extension_language_script_ops python_extension_script_ops =
+static const struct extension_language_script_ops python_extension_script_ops =
 {
   gdbpy_source_script,
   gdbpy_source_objfile_script,
@@ -161,7 +134,7 @@ const struct extension_language_script_ops python_extension_script_ops =
 
 /* The interface between gdb proper and python extensions.  */
 
-const struct extension_language_ops python_extension_ops =
+static const struct extension_language_ops python_extension_ops =
 {
   gdbpy_initialize,
   gdbpy_initialized,
@@ -189,6 +162,28 @@ const struct extension_language_ops python_extension_ops =
   gdbpy_get_matching_xmethod_workers,
 
   gdbpy_colorize,
+};
+
+/* The main struct describing GDB's interface to the Python
+   extension language.  */
+const struct extension_language_defn extension_language_python =
+{
+  EXT_LANG_PYTHON,
+  "python",
+  "Python",
+
+  ".py",
+  "-gdb.py",
+
+  python_control,
+
+#ifdef HAVE_PYTHON
+  &python_extension_script_ops,
+  &python_extension_ops
+#else
+  NULL,
+  NULL
+#endif
 };
 
 /* Architecture and language to be used in callbacks from
