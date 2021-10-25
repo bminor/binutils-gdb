@@ -5224,7 +5224,7 @@ main (int argc, char **argv)
   set_default_bfd_target ();
 
   while ((c = getopt_long (argc, argv,
-			   "pP:ib:m:M:VvCdDlfFaHhrRtTxsSI:j:wE:zgeGW::",
+			   "CDE:FGHI:LM:P:RSTVW::ab:defghij:lm:prstvwxz",
 			   long_options, (int *) 0))
 	 != EOF)
     {
