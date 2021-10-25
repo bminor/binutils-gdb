@@ -278,7 +278,7 @@ static void
 set_style_enabled  (const char *args, int from_tty, struct cmd_list_element *c)
 {
   g_source_cache.clear ();
-  gdb::observers::source_styling_changed.notify ();
+  gdb::observers::styling_changed.notify ();
 }
 
 static void

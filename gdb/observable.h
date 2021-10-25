@@ -241,9 +241,9 @@ extern observable<struct frame_info */* frame */, int /* regnum */>
 extern observable<user_selected_what /* selection */>
     user_selected_context_changed;
 
-/* This is notified when the source styling setting has changed and
-   should be reconsulted.  */
-extern observable<> source_styling_changed;
+/* This is notified when a styling setting has changed, content may need
+   to be updated based on the new settings.  */
+extern observable<> styling_changed;
 
 /* The CLI's notion of the current source has changed.  This differs
    from user_selected_context_changed in that it is also set by the

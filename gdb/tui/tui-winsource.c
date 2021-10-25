@@ -292,14 +292,14 @@ tui_source_window_base::tui_source_window_base ()
   m_start_line_or_addr.loa = LOA_ADDRESS;
   m_start_line_or_addr.u.addr = 0;
 
-  gdb::observers::source_styling_changed.attach
+  gdb::observers::styling_changed.attach
     (std::bind (&tui_source_window::style_changed, this),
      m_observable, "tui-winsource");
 }
 
 tui_source_window_base::~tui_source_window_base ()
 {
-  gdb::observers::source_styling_changed.detach (m_observable);
+  gdb::observers::styling_changed.detach (m_observable);
 }
 
 /* See tui-data.h.  */
