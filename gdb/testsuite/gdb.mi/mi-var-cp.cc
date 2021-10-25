@@ -104,7 +104,7 @@ int reference_to_struct ()
   S& r = s;
   /*:
     mi_create_varobj S s "create varobj for s"
-    mi_create_varobj R r "create varobj for s"
+    mi_create_varobj R r "create varobj for r"
     mi_gdb_test "-var-show-attributes S" \
 	"\\^done,attr=\"noneditable\"" \
 	"check attributes of S"
