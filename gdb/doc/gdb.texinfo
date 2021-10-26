@@ -3395,7 +3395,7 @@ control use @w{@code{set print inferior-events}}:
 The @code{set print inferior-events} command allows you to enable or
 disable printing of messages when @value{GDBN} notices that new
 inferiors have started or that inferiors have exited or have been
-detached.  By default, these messages will not be printed.
+detached.  By default, these messages will be printed.
 
 @kindex show print inferior-events
 @item show print inferior-events
