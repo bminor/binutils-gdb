@@ -10714,7 +10714,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 			if (!bitend)
 			  abort ();
 			reg = given >> bitstart;
-			reg &= (2 << (bitend - bitstart)) - 1;
+			reg &= ((bfd_vma) 2 << (bitend - bitstart)) - 1;
 
 			switch (*c)
 			  {
