@@ -587,8 +587,7 @@ value_cast (struct type *type, struct value *arg2)
 	 bits.  */
       if (code2 == TYPE_CODE_PTR)
 	longest = extract_unsigned_integer
-		    (value_contents (arg2).data (), TYPE_LENGTH (type2),
-		     type_byte_order (type2));
+		    (value_contents (arg2), type_byte_order (type2));
       else
 	longest = value_as_long (arg2);
       return value_from_longest (to_type, convert_to_boolean ?

@@ -48,14 +48,11 @@ you lose
 
 template<typename T, typename>
 T
-extract_integer (const gdb_byte *addr, int len, enum bfd_endian byte_order)
+extract_integer (gdb::array_view<const gdb_byte> buf, enum bfd_endian byte_order)
 {
   typename std::make_unsigned<T>::type retval = 0;
-  const unsigned char *p;
-  const unsigned char *startaddr = addr;
-  const unsigned char *endaddr = startaddr + len;
 
-  if (len > (int) sizeof (T))
+  if (buf.size () > (int) sizeof (T))
     error (_("\
 That operation is not available on integers of more than %d bytes."),
 	   (int) sizeof (T));
@@ -64,36 +61,38 @@ That operation is not available on integers of more than %d bytes."),
      the least significant.  */
   if (byte_order == BFD_ENDIAN_BIG)
     {
-      p = startaddr;
+      size_t i = 0;
+
       if (std::is_signed<T>::value)
 	{
 	  /* Do the sign extension once at the start.  */
-	  retval = ((LONGEST) * p ^ 0x80) - 0x80;
-	  ++p;
+	  retval = ((LONGEST) buf[i] ^ 0x80) - 0x80;
+	  ++i;
 	}
-      for (; p < endaddr; ++p)
-	retval = (retval << 8) | *p;
+      for (; i < buf.size (); ++i)
+	retval = (retval << 8) | buf[i];
     }
   else
     {
-      p = endaddr - 1;
+      ssize_t i = buf.size () - 1;
+
       if (std::is_signed<T>::value)
 	{
 	  /* Do the sign extension once at the start.  */
-	  retval = ((LONGEST) * p ^ 0x80) - 0x80;
-	  --p;
+	  retval = ((LONGEST) buf[i] ^ 0x80) - 0x80;
+	  --i;
 	}
-      for (; p >= startaddr; --p)
-	retval = (retval << 8) | *p;
+      for (; i >= 0; --i)
+	retval = (retval << 8) | buf[i];
     }
   return retval;
 }
 
 /* Explicit instantiations.  */
-template LONGEST extract_integer<LONGEST> (const gdb_byte *addr, int len,
+template LONGEST extract_integer<LONGEST> (gdb::array_view<const gdb_byte> buf,
 					   enum bfd_endian byte_order);
-template ULONGEST extract_integer<ULONGEST> (const gdb_byte *addr, int len,
-					     enum bfd_endian byte_order);
+template ULONGEST extract_integer<ULONGEST>
+  (gdb::array_view<const gdb_byte> buf, enum bfd_endian byte_order);
 
 /* Sometimes a long long unsigned integer can be extracted as a
    LONGEST value.  This is done so that we can print these values

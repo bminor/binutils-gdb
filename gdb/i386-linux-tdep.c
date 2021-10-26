@@ -549,7 +549,7 @@ i386_linux_get_syscall_number_from_regcache (struct regcache *regcache)
      is stored at %eax register.  */
   regcache->cooked_read (I386_LINUX_ORIG_EAX_REGNUM, buf);
 
-  ret = extract_signed_integer (buf, 4, byte_order);
+  ret = extract_signed_integer (buf, byte_order);
 
   return ret;
 }

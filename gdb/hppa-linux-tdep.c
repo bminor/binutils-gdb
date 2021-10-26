@@ -384,7 +384,7 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
 	      status = target_read_memory (addr, buf, sizeof (buf));
 	      if (status != 0)
 		break;
-	      tag = extract_signed_integer (buf, sizeof (buf), byte_order);
+	      tag = extract_signed_integer (buf, byte_order);
 
 	      if (tag == DT_PLTGOT)
 		{

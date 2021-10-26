@@ -299,7 +299,7 @@ write_and_extract (T val, size_t buf_len, enum bfd_endian byte_order)
   gdb_byte *buf = (gdb_byte *) alloca (buf_len);
   v.write ({buf, buf_len}, byte_order, !std::is_signed<T>::value);
 
-  return extract_integer<T> (buf, buf_len, byte_order);
+  return extract_integer<T> ({buf, buf_len}, byte_order);
 }
 
 /* Test the gdb_mpz::write method over a reasonable range of values.

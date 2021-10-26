@@ -577,8 +577,7 @@ indirect_pieced_value (value *value)
      encode address spaces and other things in CORE_ADDR.  */
   bfd_endian byte_order = gdbarch_byte_order (get_frame_arch (frame));
   LONGEST byte_offset
-    = extract_signed_integer (value_contents (value).data (),
-			      TYPE_LENGTH (type), byte_order);
+    = extract_signed_integer (value_contents (value), byte_order);
   byte_offset += piece->v.ptr.offset;
 
   return indirect_synthetic_pointer (piece->v.ptr.die_sect_off,
@@ -1157,9 +1156,7 @@ dwarf_expr_context::fetch_address (int n)
   ULONGEST result;
 
   dwarf_require_integral (value_type (result_val));
-  result = extract_unsigned_integer (value_contents (result_val).data (),
-				     TYPE_LENGTH (value_type (result_val)),
-				     byte_order);
+  result = extract_unsigned_integer (value_contents (result_val), byte_order);
 
   /* For most architectures, calling extract_unsigned_integer() alone
      is sufficient for extracting an address.  However, some

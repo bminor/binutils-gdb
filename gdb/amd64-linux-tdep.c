@@ -237,7 +237,7 @@ amd64_linux_get_syscall_number (struct gdbarch *gdbarch,
      is stored at %rax register.  */
   regcache->cooked_read (AMD64_LINUX_ORIG_RAX_REGNUM, buf);
 
-  ret = extract_signed_integer (buf, 8, byte_order);
+  ret = extract_signed_integer (buf, byte_order);
 
   return ret;
 }

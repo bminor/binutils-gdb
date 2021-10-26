@@ -620,15 +620,12 @@ template<typename T, typename>
 enum register_status
 readable_regcache::raw_read (int regnum, T *val)
 {
-  gdb_byte *buf;
-  enum register_status status;
-
   assert_regnum (regnum);
-  buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
-  status = raw_read (regnum, buf);
+  size_t len = m_descr->sizeof_register[regnum];
+  gdb_byte *buf = (gdb_byte *) alloca (len);
+  register_status status = raw_read (regnum, buf);
   if (status == REG_VALID)
-    *val = extract_integer<T> (buf,
-			       m_descr->sizeof_register[regnum],
+    *val = extract_integer<T> ({buf, len},
 			       gdbarch_byte_order (m_descr->gdbarch));
   else
     *val = 0;
@@ -772,14 +769,12 @@ template<typename T, typename>
 enum register_status
 readable_regcache::cooked_read (int regnum, T *val)
 {
-  enum register_status status;
-  gdb_byte *buf;
-
   gdb_assert (regnum >= 0 && regnum < m_descr->nr_cooked_registers);
-  buf = (gdb_byte *) alloca (m_descr->sizeof_register[regnum]);
-  status = cooked_read (regnum, buf);
+  size_t len = m_descr->sizeof_register[regnum];
+  gdb_byte *buf = (gdb_byte *) alloca (len);
+  register_status status = cooked_read (regnum, buf);
   if (status == REG_VALID)
-    *val = extract_integer<T> (buf, m_descr->sizeof_register[regnum],
+    *val = extract_integer<T> ({buf, len},
 			       gdbarch_byte_order (m_descr->gdbarch));
   else
     *val = 0;

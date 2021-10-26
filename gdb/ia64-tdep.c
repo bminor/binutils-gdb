@@ -3450,7 +3450,7 @@ ia64_find_global_pointer_from_dynamic_section (struct gdbarch *gdbarch,
 	      status = target_read_memory (addr, buf, sizeof (buf));
 	      if (status != 0)
 		break;
-	      tag = extract_signed_integer (buf, sizeof (buf), byte_order);
+	      tag = extract_signed_integer (buf, byte_order);
 
 	      if (tag == DT_PLTGOT)
 		{
@@ -3531,7 +3531,7 @@ find_extant_func_descr (struct gdbarch *gdbarch, CORE_ADDR faddr)
 	      status = target_read_memory (addr, buf, sizeof (buf));
 	      if (status != 0)
 		break;
-	      faddr2 = extract_signed_integer (buf, sizeof (buf), byte_order);
+	      faddr2 = extract_signed_integer (buf, byte_order);
 
 	      if (faddr == faddr2)
 		return addr;

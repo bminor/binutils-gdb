@@ -611,7 +611,7 @@ fbsd_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf,
 				 LWPINFO_OFFSET + LWPINFO_PL_FLAGS, 4))
     return -1;
 
-  int pl_flags = extract_signed_integer (buf, 4, gdbarch_byte_order (gdbarch));
+  int pl_flags = extract_signed_integer (buf, gdbarch_byte_order (gdbarch));
   if (!(pl_flags & PL_FLAG_SI))
     return -1;
 
@@ -1933,7 +1933,7 @@ fbsd_read_integer_by_name (struct gdbarch *gdbarch, const char *name)
   if (target_read_memory (BMSYMBOL_VALUE_ADDRESS (ms), buf, sizeof buf) != 0)
     error (_("Unable to read value of '%s'"), name);
 
-  return extract_signed_integer (buf, sizeof buf, gdbarch_byte_order (gdbarch));
+  return extract_signed_integer (buf, gdbarch_byte_order (gdbarch));
 }
 
 /* Lookup offsets of fields in the runtime linker's 'Obj_Entry'
@@ -2004,7 +2004,7 @@ fbsd_get_tls_index (struct gdbarch *gdbarch, CORE_ADDR lm_addr)
     throw_error (TLS_GENERIC_ERROR,
 		 _("Cannot find thread-local variables on this target"));
 
-  return extract_signed_integer (buf, sizeof buf, gdbarch_byte_order (gdbarch));
+  return extract_signed_integer (buf, gdbarch_byte_order (gdbarch));
 }
 
 /* See fbsd-tdep.h.  */

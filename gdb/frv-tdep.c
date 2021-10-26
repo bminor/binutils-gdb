@@ -596,7 +596,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 
       if (target_read_memory (pc, buf, sizeof buf) != 0)
 	break;
-      op = extract_signed_integer (buf, sizeof buf, byte_order);
+      op = extract_signed_integer (buf, byte_order);
 
       next_pc = pc + 4;
 
