@@ -63,12 +63,17 @@ std::string source_path;
 
 struct substitute_path_rule
 {
-  char *from;
-  char *to;
-  struct substitute_path_rule *next;
+  substitute_path_rule (const char *from_, const char *to_)
+    : from (from_),
+      to (to_)
+  {
+  }
+
+  std::string from;
+  std::string to;
 };
 
-static struct substitute_path_rule *substitute_path_rules = NULL;
+static std::list<substitute_path_rule> substitute_path_rules;
 
 /* An instance of this is attached to each program space.  */
 
@@ -988,7 +993,7 @@ static int
 substitute_path_rule_matches (const struct substitute_path_rule *rule,
 			      const char *path)
 {
-  const int from_len = strlen (rule->from);
+  const int from_len = rule->from.length ();
   const int path_len = strlen (path);
 
   if (path_len < from_len)
@@ -997,7 +1002,7 @@ substitute_path_rule_matches (const struct substitute_path_rule *rule,
   /* The substitution rules are anchored at the start of the path,
      so the path should start with rule->from.  */
 
-  if (filename_ncmp (path, rule->from, from_len) != 0)
+  if (filename_ncmp (path, rule->from.c_str (), from_len) != 0)
     return 0;
 
   /* Make sure that the region in the path that matches the substitution
@@ -1016,12 +1021,11 @@ substitute_path_rule_matches (const struct substitute_path_rule *rule,
 static struct substitute_path_rule *
 get_substitute_path_rule (const char *path)
 {
-  struct substitute_path_rule *rule = substitute_path_rules;
+  for (substitute_path_rule &rule : substitute_path_rules)
+    if (substitute_path_rule_matches (&rule, path))
+      return &rule;
 
-  while (rule != NULL && !substitute_path_rule_matches (rule, path))
-    rule = rule->next;
-
-  return rule;
+  return nullptr;
 }
 
 /* If the user specified a source path substitution rule that applies
@@ -1034,22 +1038,14 @@ gdb::unique_xmalloc_ptr<char>
 rewrite_source_path (const char *path)
 {
   const struct substitute_path_rule *rule = get_substitute_path_rule (path);
-  char *new_path;
-  int from_len;
-  
-  if (rule == NULL)
-    return NULL;
 
-  from_len = strlen (rule->from);
+  if (rule == nullptr)
+    return nullptr;
 
   /* Compute the rewritten path and return it.  */
 
-  new_path =
-    (char *) xmalloc (strlen (path) + 1 + strlen (rule->to) - from_len);
-  strcpy (new_path, rule->to);
-  strcat (new_path, path + from_len);
-
-  return gdb::unique_xmalloc_ptr<char> (new_path);
+  return (gdb::unique_xmalloc_ptr<char>
+	  (concat (rule->to.c_str (), path + rule->from.length (), nullptr)));
 }
 
 /* See source.h.  */
@@ -1730,79 +1726,13 @@ strip_trailing_directory_separator (char *path)
     path[last] = '\0';
 }
 
-/* Return the path substitution rule that matches FROM.
-   Return NULL if no rule matches.  */
-
-static struct substitute_path_rule *
-find_substitute_path_rule (const char *from)
-{
-  struct substitute_path_rule *rule = substitute_path_rules;
-
-  while (rule != NULL)
-    {
-      if (FILENAME_CMP (rule->from, from) == 0)
-	return rule;
-      rule = rule->next;
-    }
-
-  return NULL;
-}
-
 /* Add a new substitute-path rule at the end of the current list of rules.
    The new rule will replace FROM into TO.  */
 
 void
-add_substitute_path_rule (char *from, char *to)
+add_substitute_path_rule (const char *from, const char *to)
 {
-  struct substitute_path_rule *rule;
-  struct substitute_path_rule *new_rule = XNEW (struct substitute_path_rule);
-
-  new_rule->from = xstrdup (from);
-  new_rule->to = xstrdup (to);
-  new_rule->next = NULL;
-
-  /* If the list of rules are empty, then insert the new rule
-     at the head of the list.  */
-
-  if (substitute_path_rules == NULL)
-    {
-      substitute_path_rules = new_rule;
-      return;
-    }
-
-  /* Otherwise, skip to the last rule in our list and then append
-     the new rule.  */
-
-  rule = substitute_path_rules;
-  while (rule->next != NULL)
-    rule = rule->next;
-
-  rule->next = new_rule;
-}
-
-/* Remove the given source path substitution rule from the current list
-   of rules.  The memory allocated for that rule is also deallocated.  */
-
-static void
-delete_substitute_path_rule (struct substitute_path_rule *rule)
-{
-  if (rule == substitute_path_rules)
-    substitute_path_rules = rule->next;
-  else
-    {
-      struct substitute_path_rule *prev = substitute_path_rules;
-
-      while (prev != NULL && prev->next != rule)
-	prev = prev->next;
-
-      gdb_assert (prev != NULL);
-
-      prev->next = rule->next;
-    }
-
-  xfree (rule->from);
-  xfree (rule->to);
-  xfree (rule);
+  substitute_path_rules.emplace_back (from, to);
 }
 
 /* Implement the "show substitute-path" command.  */
@@ -1810,7 +1740,6 @@ delete_substitute_path_rule (struct substitute_path_rule *rule)
 static void
 show_substitute_path_command (const char *args, int from_tty)
 {
-  struct substitute_path_rule *rule = substitute_path_rules;
   char *from = NULL;
   
   gdb_argv argv (args);
@@ -1831,11 +1760,11 @@ show_substitute_path_command (const char *args, int from_tty)
   else
     printf_filtered (_("List of all source path substitution rules:\n"));
 
-  while (rule != NULL)
+  for (substitute_path_rule &rule : substitute_path_rules)
     {
-      if (from == NULL || substitute_path_rule_matches (rule, from) != 0)
-	printf_filtered ("  `%s' -> `%s'.\n", rule->from, rule->to);
-      rule = rule->next;
+      if (from == NULL || substitute_path_rule_matches (&rule, from) != 0)
+	printf_filtered ("  `%s' -> `%s'.\n", rule.from.c_str (),
+			 rule.to.c_str ());
     }
 }
 
@@ -1844,10 +1773,8 @@ show_substitute_path_command (const char *args, int from_tty)
 static void
 unset_substitute_path_command (const char *args, int from_tty)
 {
-  struct substitute_path_rule *rule = substitute_path_rules;
   gdb_argv argv (args);
   char *from = NULL;
-  int rule_found = 0;
 
   /* This function takes either 0 or 1 argument.  */
 
@@ -1868,24 +1795,27 @@ unset_substitute_path_command (const char *args, int from_tty)
   /* Delete the rule matching the argument.  No argument means that
      all rules should be deleted.  */
 
-  while (rule != NULL)
+  if (from == nullptr)
+    substitute_path_rules.clear ();
+  else
     {
-      struct substitute_path_rule *next = rule->next;
+      auto iter
+	= std::remove_if (substitute_path_rules.begin (),
+			  substitute_path_rules.end (),
+			  [&] (const substitute_path_rule &rule)
+			  {
+			    return FILENAME_CMP (from,
+						 rule.from.c_str ()) == 0;
+			  });
+      bool rule_found = iter != substitute_path_rules.end ();
+      substitute_path_rules.erase (iter, substitute_path_rules.end ());
 
-      if (from == NULL || FILENAME_CMP (from, rule->from) == 0)
-	{
-	  delete_substitute_path_rule (rule);
-	  rule_found = 1;
-	}
+      /* If the user asked for a specific rule to be deleted but
+	 we could not find it, then report an error.  */
 
-      rule = next;
+      if (!rule_found)
+	error (_("No substitution rule defined for `%s'"), from);
     }
-  
-  /* If the user asked for a specific rule to be deleted but
-     we could not find it, then report an error.  */
-
-  if (from != NULL && !rule_found)
-    error (_("No substitution rule defined for `%s'"), from);
 
   forget_cached_source_info ();
 }
@@ -1895,8 +1825,6 @@ unset_substitute_path_command (const char *args, int from_tty)
 static void
 set_substitute_path_command (const char *args, int from_tty)
 {
-  struct substitute_path_rule *rule;
-  
   gdb_argv argv (args);
 
   if (argv == NULL || argv[0] == NULL || argv [1] == NULL)
@@ -1916,10 +1844,15 @@ set_substitute_path_command (const char *args, int from_tty)
   /* If a rule with the same "from" was previously defined, then
      delete it.  This new rule replaces it.  */
 
-  rule = find_substitute_path_rule (argv[0]);
-  if (rule != NULL)
-    delete_substitute_path_rule (rule);
-      
+  auto iter
+    = std::remove_if (substitute_path_rules.begin (),
+		      substitute_path_rules.end (),
+		      [&] (const substitute_path_rule &rule)
+		      {
+			return FILENAME_CMP (argv[0], rule.from.c_str ()) == 0;
+		      });
+  substitute_path_rules.erase (iter, substitute_path_rules.end ());
+
   /* Insert the new substitution rule.  */
 
   add_substitute_path_rule (argv[0], argv[1]);

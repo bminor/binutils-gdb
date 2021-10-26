@@ -128,7 +128,7 @@ extern symtab_and_line set_current_source_symtab_and_line
 extern void clear_current_source_symtab_and_line (void);
 
 /* Add a source path substitution rule.  */
-extern void add_substitute_path_rule (char *, char *);
+extern void add_substitute_path_rule (const char *, const char *);
 
 /* Flags passed as 4th argument to print_source_lines.  */
 enum print_source_lines_flag
