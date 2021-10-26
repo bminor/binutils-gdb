@@ -4011,7 +4011,7 @@ value_fetch_lazy_register (struct value *val)
       else
 	{
 	  int i;
-	  const gdb_byte *buf = value_contents (new_val).data ();
+	  gdb::array_view<const gdb_byte> buf = value_contents (new_val);
 
 	  if (VALUE_LVAL (new_val) == lval_register)
 	    fprintf_unfiltered (&debug_file, " register=%d",

@@ -933,12 +933,10 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  type2 = type1;
 	}
 
-      v1.read_fixed_point (gdb::make_array_view (value_contents (arg1).data (),
-						 TYPE_LENGTH (type1)),
+      v1.read_fixed_point (value_contents (arg1),
 			   type_byte_order (type1), type1->is_unsigned (),
 			   type1->fixed_point_scaling_factor ());
-      v2.read_fixed_point (gdb::make_array_view (value_contents (arg2).data (),
-						 TYPE_LENGTH (type2)),
+      v2.read_fixed_point (value_contents (arg2),
 			   type_byte_order (type2), type2->is_unsigned (),
 			   type2->fixed_point_scaling_factor ());
     }
@@ -948,8 +946,7 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       value *fp_val = allocate_value (type1);
 
       fp.write_fixed_point
-	(gdb::make_array_view (value_contents_raw (fp_val).data (),
-			       TYPE_LENGTH (type1)),
+	(value_contents_raw (fp_val),
 	 type_byte_order (type1),
 	 type1->is_unsigned (),
 	 type1->fixed_point_scaling_factor ());

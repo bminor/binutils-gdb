@@ -351,9 +351,8 @@ value_to_gdb_mpq (struct value *value)
 		  || is_fixed_point_type (type));
 
       gdb_mpz vz;
-      vz.read (gdb::make_array_view (value_contents (value).data (),
-				     TYPE_LENGTH (type)),
-	       type_byte_order (type), type->is_unsigned ());
+      vz.read (value_contents (value), type_byte_order (type),
+	       type->is_unsigned ());
       mpq_set_z (result.val, vz.val);
 
       if (is_fixed_point_type (type))
@@ -392,8 +391,7 @@ value_cast_to_fixed_point (struct type *to_type, struct value *from_val)
   /* Finally, create the result value, and pack the unscaled value
      in it.  */
   struct value *result = allocate_value (to_type);
-  unscaled.write (gdb::make_array_view (value_contents_raw (result).data (),
-					TYPE_LENGTH (to_type)),
+  unscaled.write (value_contents_raw (result),
 		  type_byte_order (to_type),
 		  to_type->is_unsigned ());
 
@@ -554,11 +552,10 @@ value_cast (struct type *type, struct value *arg2)
 	{
 	  gdb_mpq fp_val;
 
-	  fp_val.read_fixed_point
-	    (gdb::make_array_view (value_contents (arg2).data (),
-				   TYPE_LENGTH (type2)),
-	     type_byte_order (type2), type2->is_unsigned (),
-	     type2->fixed_point_scaling_factor ());
+	  fp_val.read_fixed_point (value_contents (arg2),
+				   type_byte_order (type2),
+				   type2->is_unsigned (),
+				   type2->fixed_point_scaling_factor ());
 
 	  struct value *v = allocate_value (to_type);
 	  target_float_from_host_double (value_contents_raw (v).data (),
@@ -1255,14 +1252,9 @@ value_assign (struct value *toval, struct value *fromval)
 					   value_contents (fromval).data ());
 	      }
 	    else
-	      {
-		gdb::array_view<const gdb_byte> contents
-		  = gdb::make_array_view (value_contents (fromval).data (),
-					  TYPE_LENGTH (type));
-		put_frame_register_bytes (frame, value_reg,
-					  value_offset (toval),
-					  contents);
-	      }
+	      put_frame_register_bytes (frame, value_reg,
+					value_offset (toval),
+					value_contents (fromval));
 	  }
 
 	gdb::observers::register_changed.notify (frame, value_reg);

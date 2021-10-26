@@ -1261,7 +1261,7 @@ frame_unwind_register_value (frame_info *next_frame, int regnum)
 	  else
 	    {
 	      int i;
-	      const gdb_byte *buf = value_contents (value).data ();
+	      gdb::array_view<const gdb_byte> buf = value_contents (value);
 
 	      fprintf_unfiltered (&debug_file, " bytes=");
 	      fprintf_unfiltered (&debug_file, "[");

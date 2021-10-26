@@ -1317,9 +1317,8 @@ eval_op_rust_struct_anon (struct type *expect_type, struct expression *exp,
 
       if (rust_enum_p (type))
 	{
-	  gdb::array_view<const gdb_byte> view (value_contents (lhs).data (),
-						TYPE_LENGTH (type));
-	  type = resolve_dynamic_type (type, view, value_address (lhs));
+	  type = resolve_dynamic_type (type, value_contents (lhs),
+				       value_address (lhs));
 
 	  if (rust_empty_enum_p (type))
 	    error (_("Cannot access field %d of empty enum %s"),
@@ -1380,9 +1379,8 @@ eval_op_rust_structop (struct type *expect_type, struct expression *exp,
   struct type *type = value_type (lhs);
   if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
     {
-      gdb::array_view<const gdb_byte> view (value_contents (lhs).data (),
-					    TYPE_LENGTH (type));
-      type = resolve_dynamic_type (type, view, value_address (lhs));
+      type = resolve_dynamic_type (type, value_contents (lhs),
+				   value_address (lhs));
 
       if (rust_empty_enum_p (type))
 	error (_("Cannot access field %s of empty enum %s"),
