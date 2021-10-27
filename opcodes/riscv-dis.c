@@ -177,22 +177,24 @@ maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
 /* Print insn arguments for 32/64-bit code.  */
 
 static void
-print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
+print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info)
 {
   struct riscv_private_data *pd = info->private_data;
   int rs1 = (l >> OP_SH_RS1) & OP_MASK_RS1;
   int rd = (l >> OP_SH_RD) & OP_MASK_RD;
   fprintf_ftype print = info->fprintf_func;
+  const char *opargStart;
 
-  if (*d != '\0')
+  if (*oparg != '\0')
     print (info->stream, "\t");
 
-  for (; *d != '\0'; d++)
+  for (; *oparg != '\0'; oparg++)
     {
-      switch (*d)
+      opargStart = oparg;
+      switch (*oparg)
 	{
 	case 'C': /* RVC */
-	  switch (*++d)
+	  switch (*++oparg)
 	    {
 	    case 's': /* RS1 x8-x15.  */
 	    case 'w': /* RS1 x8-x15.  */
@@ -281,12 +283,12 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	case ')':
 	case '[':
 	case ']':
-	  print (info->stream, "%c", *d);
+	  print (info->stream, "%c", *oparg);
 	  break;
 
 	case '0':
 	  /* Only print constant 0 if it is the last argument.  */
-	  if (!d[1])
+	  if (!oparg[1])
 	    print (info->stream, "0");
 	  break;
 
@@ -432,7 +434,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	default:
 	  /* xgettext:c-format */
 	  print (info->stream, _("# internal error, undefined modifier (%c)"),
-		 *d);
+		 *opargStart);
 	  return;
 	}
     }
