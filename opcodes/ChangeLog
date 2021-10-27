@@ -1,3 +1,11 @@
+2021-10-27  Maciej W. Rozycki  <macro@embecosm.com>
+
+	* Makefile.am: Remove obsolete comment.
+	* configure.ac: Refer `libbfd.la' to link shared BFD library
+	except for Cygwin.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure: Regenerate.
