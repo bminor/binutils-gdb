@@ -6098,16 +6098,18 @@ static void
 evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
 {
   unsigned int off = sizeof (struct vms_egsd);
-  unsigned int n;
+  unsigned int n = 0;
 
   fprintf (file, _("  EGSD (len=%u):\n"), rec_len);
+  if (rec_len < sizeof (struct vms_egsd) + sizeof (struct vms_egsd_entry))
+    return;
 
-  n = 0;
-  for (off = sizeof (struct vms_egsd); off < rec_len; )
+  while (off <= rec_len - sizeof (struct vms_egsd_entry))
     {
       struct vms_egsd_entry *e = (struct vms_egsd_entry *)(rec + off);
       unsigned int type;
       unsigned int len;
+      unsigned int rest;
 
       type = (unsigned)bfd_getl16 (e->gsdtyp);
       len = (unsigned)bfd_getl16 (e->gsdsiz);
@@ -6117,174 +6119,212 @@ evax_bfd_print_egsd (FILE *file, unsigned char *rec, unsigned int rec_len)
 	       n, type, len);
       n++;
 
-      if (off + len > rec_len || off + len < off)
+      if (len < sizeof (struct vms_egsd_entry) || len > rec_len - off)
 	{
-	  fprintf (file, _("   Error: length larger than remaining space in record\n"));
+	  fprintf (file, _("   Erroneous length\n"));
 	  return;
 	}
 
       switch (type)
 	{
 	case EGSD__C_PSC:
-	  {
-	    struct vms_egps *egps = (struct vms_egps *)e;
-	    unsigned int flags = bfd_getl16 (egps->flags);
-	    unsigned int l;
+	  if (len >= offsetof (struct vms_egps, name))
+	    {
+	      struct vms_egps *egps = (struct vms_egps *) e;
+	      unsigned int flags = bfd_getl16 (egps->flags);
+	      unsigned int l;
 
-	    fprintf (file, _("PSC - Program section definition\n"));
-	    fprintf (file, _("   alignment  : 2**%u\n"), egps->align);
-	    fprintf (file, _("   flags      : 0x%04x"), flags);
-	    evax_bfd_print_egsd_flags (file, flags);
-	    fputc ('\n', file);
-	    l = bfd_getl32 (egps->alloc);
-	    fprintf (file, _("   alloc (len): %u (0x%08x)\n"), l, l);
-	    fprintf (file, _("   name       : %.*s\n"),
-		     egps->namlng, egps->name);
-	  }
+	      fprintf (file, _("PSC - Program section definition\n"));
+	      fprintf (file, _("   alignment  : 2**%u\n"), egps->align);
+	      fprintf (file, _("   flags      : 0x%04x"), flags);
+	      evax_bfd_print_egsd_flags (file, flags);
+	      fputc ('\n', file);
+	      l = bfd_getl32 (egps->alloc);
+	      fprintf (file, _("   alloc (len): %u (0x%08x)\n"), l, l);
+	      rest = len - offsetof (struct vms_egps, name);
+	      fprintf (file, _("   name       : %.*s\n"),
+		       egps->namlng > rest ? rest : egps->namlng,
+		       egps->name);
+	    }
 	  break;
 	case EGSD__C_SPSC:
-	  {
-	    struct vms_esgps *esgps = (struct vms_esgps *)e;
-	    unsigned int flags = bfd_getl16 (esgps->flags);
-	    unsigned int l;
+	  if (len >= offsetof (struct vms_esgps, name))
+	    {
+	      struct vms_esgps *esgps = (struct vms_esgps *) e;
+	      unsigned int flags = bfd_getl16 (esgps->flags);
+	      unsigned int l;
 
-	    fprintf (file, _("SPSC - Shared Image Program section def\n"));
-	    fprintf (file, _("   alignment  : 2**%u\n"), esgps->align);
-	    fprintf (file, _("   flags      : 0x%04x"), flags);
-	    evax_bfd_print_egsd_flags (file, flags);
-	    fputc ('\n', file);
-	    l = bfd_getl32 (esgps->alloc);
-	    fprintf (file, _("   alloc (len)   : %u (0x%08x)\n"), l, l);
-	    fprintf (file, _("   image offset  : 0x%08x\n"),
-		     (unsigned int)bfd_getl32 (esgps->base));
-	    fprintf (file, _("   symvec offset : 0x%08x\n"),
-		     (unsigned int)bfd_getl32 (esgps->value));
-	    fprintf (file, _("   name          : %.*s\n"),
-		     esgps->namlng, esgps->name);
-	  }
+	      fprintf (file, _("SPSC - Shared Image Program section def\n"));
+	      fprintf (file, _("   alignment  : 2**%u\n"), esgps->align);
+	      fprintf (file, _("   flags      : 0x%04x"), flags);
+	      evax_bfd_print_egsd_flags (file, flags);
+	      fputc ('\n', file);
+	      l = bfd_getl32 (esgps->alloc);
+	      fprintf (file, _("   alloc (len)   : %u (0x%08x)\n"), l, l);
+	      fprintf (file, _("   image offset  : 0x%08x\n"),
+		       (unsigned int) bfd_getl32 (esgps->base));
+	      fprintf (file, _("   symvec offset : 0x%08x\n"),
+		       (unsigned int) bfd_getl32 (esgps->value));
+	      rest = len - offsetof (struct vms_esgps, name);
+	      fprintf (file, _("   name          : %.*s\n"),
+		       esgps->namlng > rest ? rest : esgps->namlng,
+		       esgps->name);
+	    }
 	  break;
 	case EGSD__C_SYM:
-	  {
-	    struct vms_egsy *egsy = (struct vms_egsy *)e;
-	    unsigned int flags = bfd_getl16 (egsy->flags);
+	  if (len >= sizeof (struct vms_egsy))
+	    {
+	      struct vms_egsy *egsy = (struct vms_egsy *) e;
+	      unsigned int flags = bfd_getl16 (egsy->flags);
 
-	    if (flags & EGSY__V_DEF)
-	      {
-		struct vms_esdf *esdf = (struct vms_esdf *)e;
+	      if ((flags & EGSY__V_DEF) != 0
+		  && len >= offsetof (struct vms_esdf, name))
+		{
+		  struct vms_esdf *esdf = (struct vms_esdf *) e;
 
-		fprintf (file, _("SYM - Global symbol definition\n"));
-		fprintf (file, _("   flags: 0x%04x"), flags);
-		exav_bfd_print_egsy_flags (flags, file);
-		fputc ('\n', file);
-		fprintf (file, _("   psect offset: 0x%08x\n"),
-			 (unsigned)bfd_getl32 (esdf->value));
-		if (flags & EGSY__V_NORM)
-		  {
-		    fprintf (file, _("   code address: 0x%08x\n"),
-			     (unsigned)bfd_getl32 (esdf->code_address));
-		    fprintf (file, _("   psect index for entry point : %u\n"),
-			     (unsigned)bfd_getl32 (esdf->ca_psindx));
-		  }
-		fprintf (file, _("   psect index : %u\n"),
-			 (unsigned)bfd_getl32 (esdf->psindx));
-		fprintf (file, _("   name        : %.*s\n"),
-			 esdf->namlng, esdf->name);
-	      }
-	    else
-	      {
-		struct vms_esrf *esrf = (struct vms_esrf *)e;
+		  fprintf (file, _("SYM - Global symbol definition\n"));
+		  fprintf (file, _("   flags: 0x%04x"), flags);
+		  exav_bfd_print_egsy_flags (flags, file);
+		  fputc ('\n', file);
+		  fprintf (file, _("   psect offset: 0x%08x\n"),
+			   (unsigned) bfd_getl32 (esdf->value));
+		  if (flags & EGSY__V_NORM)
+		    {
+		      fprintf (file, _("   code address: 0x%08x\n"),
+			       (unsigned) bfd_getl32 (esdf->code_address));
+		      fprintf (file, _("   psect index for entry point : %u\n"),
+			       (unsigned) bfd_getl32 (esdf->ca_psindx));
+		    }
+		  fprintf (file, _("   psect index : %u\n"),
+			   (unsigned) bfd_getl32 (esdf->psindx));
+		  rest = len - offsetof (struct vms_esdf, name);
+		  fprintf (file, _("   name        : %.*s\n"),
+			   esdf->namlng > rest ? rest : esdf->namlng,
+			   esdf->name);
+		}
+	      else if (len >= offsetof (struct vms_esrf, name))
+		{
+		  struct vms_esrf *esrf = (struct vms_esrf *)e;
 
-		fprintf (file, _("SYM - Global symbol reference\n"));
-		fprintf (file, _("   name       : %.*s\n"),
-			 esrf->namlng, esrf->name);
-	      }
-	  }
+		  fprintf (file, _("SYM - Global symbol reference\n"));
+		  rest = len - offsetof (struct vms_esrf, name);
+		  fprintf (file, _("   name       : %.*s\n"),
+			   esrf->namlng > rest ? rest : esrf->namlng,
+			   esrf->name);
+		}
+	    }
 	  break;
 	case EGSD__C_IDC:
-	  {
-	    struct vms_eidc *eidc = (struct vms_eidc *)e;
-	    unsigned int flags = bfd_getl32 (eidc->flags);
-	    unsigned char *p;
+	  if (len >= sizeof (struct vms_eidc))
+	    {
+	      struct vms_eidc *eidc = (struct vms_eidc *) e;
+	      unsigned int flags = bfd_getl32 (eidc->flags);
+	      unsigned char *p;
 
-	    fprintf (file, _("IDC - Ident Consistency check\n"));
-	    fprintf (file, _("   flags         : 0x%08x"), flags);
-	    if (flags & EIDC__V_BINIDENT)
-	      fputs (" BINDENT", file);
-	    fputc ('\n', file);
-	    fprintf (file, _("   id match      : %x\n"),
-		     (flags >> EIDC__V_IDMATCH_SH) & EIDC__V_IDMATCH_MASK);
-	    fprintf (file, _("   error severity: %x\n"),
-		     (flags >> EIDC__V_ERRSEV_SH) & EIDC__V_ERRSEV_MASK);
-	    p = eidc->name;
-	    fprintf (file, _("   entity name   : %.*s\n"), p[0], p + 1);
-	    p += 1 + p[0];
-	    fprintf (file, _("   object name   : %.*s\n"), p[0], p + 1);
-	    p += 1 + p[0];
-	    if (flags & EIDC__V_BINIDENT)
-	      fprintf (file, _("   binary ident  : 0x%08x\n"),
-		       (unsigned)bfd_getl32 (p + 1));
-	    else
-	      fprintf (file, _("   ascii ident   : %.*s\n"), p[0], p + 1);
-	  }
+	      fprintf (file, _("IDC - Ident Consistency check\n"));
+	      fprintf (file, _("   flags         : 0x%08x"), flags);
+	      if (flags & EIDC__V_BINIDENT)
+		fputs (" BINDENT", file);
+	      fputc ('\n', file);
+	      fprintf (file, _("   id match      : %x\n"),
+		       (flags >> EIDC__V_IDMATCH_SH) & EIDC__V_IDMATCH_MASK);
+	      fprintf (file, _("   error severity: %x\n"),
+		       (flags >> EIDC__V_ERRSEV_SH) & EIDC__V_ERRSEV_MASK);
+	      p = eidc->name;
+	      rest = len - (p - (unsigned char *) e);
+	      fprintf (file, _("   entity name   : %.*s\n"),
+		       p[0] > rest - 1 ? rest - 1 : p[0], p + 1);
+	      if (rest > 1u + p[0])
+		{
+		  rest -= 1 + p[0];
+		  p += 1 + p[0];
+		  fprintf (file, _("   object name   : %.*s\n"),
+			   p[0] > rest - 1 ? rest - 1 : p[0], p + 1);
+		  if (rest > 1u + p[0])
+		    {
+		      rest -= 1 + p[0];
+		      p += 1 + p[0];
+		      if (flags & EIDC__V_BINIDENT)
+			{
+			  if (rest >= 4)
+			    fprintf (file, _("   binary ident  : 0x%08x\n"),
+				     (unsigned) bfd_getl32 (p));
+			}
+		      else
+			fprintf (file, _("   ascii ident   : %.*s\n"),
+				 p[0] > rest - 1 ? rest - 1 : p[0], p + 1);
+		    }
+		}
+	    }
 	  break;
 	case EGSD__C_SYMG:
-	  {
-	    struct vms_egst *egst = (struct vms_egst *)e;
-	    unsigned int flags = bfd_getl16 (egst->header.flags);
+	  if (len >= offsetof (struct vms_egst, name))
+	    {
+	      struct vms_egst *egst = (struct vms_egst *) e;
+	      unsigned int flags = bfd_getl16 (egst->header.flags);
 
-	    fprintf (file, _("SYMG - Universal symbol definition\n"));
-	    fprintf (file, _("   flags: 0x%04x"), flags);
-	    exav_bfd_print_egsy_flags (flags, file);
-	    fputc ('\n', file);
-	    fprintf (file, _("   symbol vector offset: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (egst->value));
-	    fprintf (file, _("   entry point: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (egst->lp_1));
-	    fprintf (file, _("   proc descr : 0x%08x\n"),
-		     (unsigned)bfd_getl32 (egst->lp_2));
-	    fprintf (file, _("   psect index: %u\n"),
-		     (unsigned)bfd_getl32 (egst->psindx));
-	    fprintf (file, _("   name       : %.*s\n"),
-		     egst->namlng, egst->name);
-	  }
+	      fprintf (file, _("SYMG - Universal symbol definition\n"));
+	      fprintf (file, _("   flags: 0x%04x"), flags);
+	      exav_bfd_print_egsy_flags (flags, file);
+	      fputc ('\n', file);
+	      fprintf (file, _("   symbol vector offset: 0x%08x\n"),
+		       (unsigned) bfd_getl32 (egst->value));
+	      fprintf (file, _("   entry point: 0x%08x\n"),
+		       (unsigned) bfd_getl32 (egst->lp_1));
+	      fprintf (file, _("   proc descr : 0x%08x\n"),
+		       (unsigned) bfd_getl32 (egst->lp_2));
+	      fprintf (file, _("   psect index: %u\n"),
+		       (unsigned) bfd_getl32 (egst->psindx));
+	      rest = len - offsetof (struct vms_egst, name);
+	      fprintf (file, _("   name       : %.*s\n"),
+		       egst->namlng > rest ? rest : egst->namlng,
+		       egst->name);
+	    }
 	  break;
 	case EGSD__C_SYMV:
-	  {
-	    struct vms_esdfv *esdfv = (struct vms_esdfv *)e;
-	    unsigned int flags = bfd_getl16 (esdfv->flags);
+	  if (len >= offsetof (struct vms_esdfv, name))
+	    {
+	      struct vms_esdfv *esdfv = (struct vms_esdfv *) e;
+	      unsigned int flags = bfd_getl16 (esdfv->flags);
 
-	    fprintf (file, _("SYMV - Vectored symbol definition\n"));
-	    fprintf (file, _("   flags: 0x%04x"), flags);
-	    exav_bfd_print_egsy_flags (flags, file);
-	    fputc ('\n', file);
-	    fprintf (file, _("   vector      : 0x%08x\n"),
-		     (unsigned)bfd_getl32 (esdfv->vector));
-	    fprintf (file, _("   psect offset: %u\n"),
-		     (unsigned)bfd_getl32 (esdfv->value));
-	    fprintf (file, _("   psect index : %u\n"),
-		     (unsigned)bfd_getl32 (esdfv->psindx));
-	    fprintf (file, _("   name        : %.*s\n"),
-		     esdfv->namlng, esdfv->name);
-	  }
+	      fprintf (file, _("SYMV - Vectored symbol definition\n"));
+	      fprintf (file, _("   flags: 0x%04x"), flags);
+	      exav_bfd_print_egsy_flags (flags, file);
+	      fputc ('\n', file);
+	      fprintf (file, _("   vector      : 0x%08x\n"),
+		       (unsigned) bfd_getl32 (esdfv->vector));
+	      fprintf (file, _("   psect offset: %u\n"),
+		       (unsigned) bfd_getl32 (esdfv->value));
+	      fprintf (file, _("   psect index : %u\n"),
+		       (unsigned) bfd_getl32 (esdfv->psindx));
+	      rest = len - offsetof (struct vms_esdfv, name);
+	      fprintf (file, _("   name        : %.*s\n"),
+		       esdfv->namlng > rest ? rest : esdfv->namlng,
+		       esdfv->name);
+	    }
 	  break;
 	case EGSD__C_SYMM:
-	  {
-	    struct vms_esdfm *esdfm = (struct vms_esdfm *)e;
-	    unsigned int flags = bfd_getl16 (esdfm->flags);
+	  if (len >= offsetof (struct vms_esdfm, name))
+	    {
+	      struct vms_esdfm *esdfm = (struct vms_esdfm *) e;
+	      unsigned int flags = bfd_getl16 (esdfm->flags);
 
-	    fprintf (file, _("SYMM - Global symbol definition with version\n"));
-	    fprintf (file, _("   flags: 0x%04x"), flags);
-	    exav_bfd_print_egsy_flags (flags, file);
-	    fputc ('\n', file);
-	    fprintf (file, _("   version mask: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (esdfm->version_mask));
-	    fprintf (file, _("   psect offset: %u\n"),
-		     (unsigned)bfd_getl32 (esdfm->value));
-	    fprintf (file, _("   psect index : %u\n"),
-		     (unsigned)bfd_getl32 (esdfm->psindx));
-	    fprintf (file, _("   name        : %.*s\n"),
-		     esdfm->namlng, esdfm->name);
-	  }
+	      fprintf (file,
+		       _("SYMM - Global symbol definition with version\n"));
+	      fprintf (file, _("   flags: 0x%04x"), flags);
+	      exav_bfd_print_egsy_flags (flags, file);
+	      fputc ('\n', file);
+	      fprintf (file, _("   version mask: 0x%08x\n"),
+		       (unsigned)bfd_getl32 (esdfm->version_mask));
+	      fprintf (file, _("   psect offset: %u\n"),
+		       (unsigned)bfd_getl32 (esdfm->value));
+	      fprintf (file, _("   psect index : %u\n"),
+		       (unsigned)bfd_getl32 (esdfm->psindx));
+	      rest = len - offsetof (struct vms_esdfm, name);
+	      fprintf (file, _("   name        : %.*s\n"),
+		       esdfm->namlng > rest ? rest : esdfm->namlng,
+		       esdfm->name);
+	    }
 	  break;
 	default:
 	  fprintf (file, _("unhandled egsd entry type %u\n"), type);
@@ -6319,8 +6359,12 @@ evax_bfd_print_hex (FILE *file, const char *pfx,
 }
 
 static void
-evax_bfd_print_etir_stc_ir (FILE *file, const unsigned char *buf, int is_ps)
+evax_bfd_print_etir_stc_ir (FILE *file, const unsigned char *buf,
+			    unsigned int len, int is_ps)
 {
+  if (is_ps ? len < 44 : len < 33)
+    return;
+
   /* xgettext:c-format */
   fprintf (file, _("    linkage index: %u, replacement insn: 0x%08x\n"),
 	   (unsigned)bfd_getl32 (buf),
@@ -6342,62 +6386,71 @@ evax_bfd_print_etir_stc_ir (FILE *file, const unsigned char *buf, int is_ps)
 	     (unsigned)bfd_getl32 (buf + 40),
 	     (unsigned)bfd_getl32 (buf + 36));
   else
-    fprintf (file, _("    global name: %.*s\n"), buf[32], buf + 33);
+    fprintf (file, _("    global name: %.*s\n"),
+	     buf[32] > len - 33 ? len - 33 : buf[32],
+	     buf + 33);
 }
 
 static void
 evax_bfd_print_etir (FILE *file, const char *name,
 		     unsigned char *rec, unsigned int rec_len)
 {
-  unsigned int off = sizeof (struct vms_egsd);
-  unsigned int sec_len = 0;
+  unsigned int off = sizeof (struct vms_eobjrec);
 
   /* xgettext:c-format */
-  fprintf (file, _("  %s (len=%u+%u):\n"), name,
-	   (unsigned)(rec_len - sizeof (struct vms_eobjrec)),
-	   (unsigned)sizeof (struct vms_eobjrec));
+  fprintf (file, _("  %s (len=%u):\n"), name, (unsigned) rec_len);
+  if (rec_len < sizeof (struct vms_eobjrec) + sizeof (struct vms_etir))
+    return;
 
-  for (off = sizeof (struct vms_eobjrec); off < rec_len; )
+  while (off <= rec_len - sizeof (struct vms_etir))
     {
       struct vms_etir *etir = (struct vms_etir *)(rec + off);
       unsigned char *buf;
       unsigned int type;
       unsigned int size;
+      unsigned int rest;
 
       type = bfd_getl16 (etir->rectyp);
       size = bfd_getl16 (etir->size);
       buf = rec + off + sizeof (struct vms_etir);
 
-      if (off + size > rec_len || off + size < off)
+      if (size < sizeof (struct vms_etir) || size > rec_len - off)
 	{
-	  fprintf (file, _("   Error: length larger than remaining space in record\n"));
+	  fprintf (file, _("   Erroneous length\n"));
 	  return;
 	}
 
       /* xgettext:c-format */
-      fprintf (file, _("   (type: %3u, size: 4+%3u): "), type, size - 4);
+      fprintf (file, _("   (type: %3u, size: %3u): "), type, size);
+      rest = size - sizeof (struct vms_etir);
       switch (type)
 	{
 	case ETIR__C_STA_GBL:
-	  fprintf (file, _("STA_GBL (stack global) %.*s\n"),
-		   buf[0], buf + 1);
+	  if (rest >= 1)
+	    fprintf (file, _("STA_GBL (stack global) %.*s\n"),
+		     buf[0] > rest - 1 ? rest - 1 : buf[0], buf + 1);
 	  break;
 	case ETIR__C_STA_LW:
-	  fprintf (file, _("STA_LW (stack longword) 0x%08x\n"),
-		   (unsigned)bfd_getl32 (buf));
+	  fprintf (file, _("STA_LW (stack longword)"));
+	  if (rest >= 4)
+	    fprintf (file, " 0x%08x\n",
+		     (unsigned) bfd_getl32 (buf));
 	  break;
 	case ETIR__C_STA_QW:
-	  fprintf (file, _("STA_QW (stack quadword) 0x%08x %08x\n"),
-		   (unsigned)bfd_getl32 (buf + 4),
-		   (unsigned)bfd_getl32 (buf + 0));
+	  fprintf (file, _("STA_QW (stack quadword)"));
+	  if (rest >= 8)
+	    fprintf (file, " 0x%08x %08x\n",
+		     (unsigned) bfd_getl32 (buf + 4),
+		     (unsigned) bfd_getl32 (buf + 0));
 	  break;
 	case ETIR__C_STA_PQ:
 	  fprintf (file, _("STA_PQ (stack psect base + offset)\n"));
-	  /* xgettext:c-format */
-	  fprintf (file, _("    psect: %u, offset: 0x%08x %08x\n"),
-		   (unsigned)bfd_getl32 (buf + 0),
-		   (unsigned)bfd_getl32 (buf + 8),
-		   (unsigned)bfd_getl32 (buf + 4));
+	  if (rest >= 12)
+	    /* xgettext:c-format */
+	    fprintf (file, _("    psect: %u, offset: 0x%08x %08x\n"),
+		     (unsigned) bfd_getl32 (buf + 0),
+		     (unsigned) bfd_getl32 (buf + 8),
+		     (unsigned) bfd_getl32 (buf + 4));
 	  break;
 	case ETIR__C_STA_LI:
 	  fprintf (file, _("STA_LI (stack literal)\n"));
@@ -6422,22 +6475,26 @@ evax_bfd_print_etir (FILE *file, const char *name,
 	  fprintf (file, _("STO_QW (store quadword)\n"));
 	  break;
 	case ETIR__C_STO_IMMR:
-	  {
-	    unsigned int len = bfd_getl32 (buf);
-	    fprintf (file,
-		     _("STO_IMMR (store immediate repeat) %u bytes\n"),
-		     len);
-	    evax_bfd_print_hex (file, "   ", buf + 4, len);
-	    sec_len += len;
-	  }
+	  if (rest >= 4)
+	    {
+	      unsigned int rpt = bfd_getl32 (buf);
+	      fprintf (file,
+		       _("STO_IMMR (store immediate repeat) %u bytes\n"),
+		       rpt);
+	      if (rpt > rest - 4)
+		rpt = rest - 4;
+	      evax_bfd_print_hex (file, "   ", buf + 4, rpt);
+	    }
 	  break;
 	case ETIR__C_STO_GBL:
-	  fprintf (file, _("STO_GBL (store global) %.*s\n"),
-		   buf[0], buf + 1);
+	  if (rest >= 1)
+	    fprintf (file, _("STO_GBL (store global) %.*s\n"),
+		     buf[0] > rest - 1 ? rest - 1 : buf[0], buf + 1);
 	  break;
 	case ETIR__C_STO_CA:
-	  fprintf (file, _("STO_CA (store code address) %.*s\n"),
-		   buf[0], buf + 1);
+	  if (rest >= 1)
+	    fprintf (file, _("STO_CA (store code address) %.*s\n"),
+		     buf[0] > rest - 1 ? rest - 1 : buf[0], buf + 1);
 	  break;
 	case ETIR__C_STO_RB:
 	  fprintf (file, _("STO_RB (store relative branch)\n"));
@@ -6449,18 +6506,21 @@ evax_bfd_print_etir (FILE *file, const char *name,
 	  fprintf (file, _("STO_OFF (store offset to psect)\n"));
 	  break;
 	case ETIR__C_STO_IMM:
-	  {
-	    unsigned int len = bfd_getl32 (buf);
-	    fprintf (file,
-		     _("STO_IMM (store immediate) %u bytes\n"),
-		     len);
-	    evax_bfd_print_hex (file, "   ", buf + 4, len);
-	    sec_len += len;
-	  }
+	  if (rest >= 4)
+	    {
+	      unsigned int rpt = bfd_getl32 (buf);
+	      fprintf (file,
+		       _("STO_IMM (store immediate) %u bytes\n"),
+		       rpt);
+	      if (rpt > rest - 4)
+		rpt = rest - 4;
+	      evax_bfd_print_hex (file, "   ", buf + 4, rpt);
+	    }
 	  break;
 	case ETIR__C_STO_GBL_LW:
-	  fprintf (file, _("STO_GBL_LW (store global longword) %.*s\n"),
-		   buf[0], buf + 1);
+	  if (rest >= 1)
+	    fprintf (file, _("STO_GBL_LW (store global longword) %.*s\n"),
+		     buf[0] > rest - 1 ? rest - 1 : buf[0], buf + 1);
 	  break;
 	case ETIR__C_STO_LP_PSB:
 	  fprintf (file, _("STO_OFF (store LP with procedure signature)\n"));
@@ -6530,65 +6590,79 @@ evax_bfd_print_etir (FILE *file, const char *name,
 	case ETIR__C_STC_LP_PSB:
 	  fprintf (file,
 		   _("STC_LP_PSB (store cond linkage pair + signature)\n"));
-	  /* xgettext:c-format */
-	  fprintf (file, _("   linkage index: %u, procedure: %.*s\n"),
-		   (unsigned)bfd_getl32 (buf), buf[4], buf + 5);
-	  buf += 4 + 1 + buf[4];
-	  fprintf (file, _("   signature: %.*s\n"), buf[0], buf + 1);
+	  if (rest >= 5)
+	    {
+	      /* xgettext:c-format */
+	      fprintf (file, _("   linkage index: %u, procedure: %.*s\n"),
+		       (unsigned) bfd_getl32 (buf),
+		       buf[4] > rest - 5 ? rest - 5 : buf[4], buf + 5);
+	      if (rest > 4 + 1u + buf[4])
+		{
+		  rest -= 4 + 1 + buf[4];
+		  buf += 4 + 1 + buf[4];
+		  fprintf (file, _("   signature: %.*s\n"),
+			   buf[0] > rest - 1 ? rest - 1: buf[0], buf + 1);
+		}
+	    }
 	  break;
 	case ETIR__C_STC_GBL:
 	  fprintf (file, _("STC_GBL (store cond global)\n"));
-	  /* xgettext:c-format */
-	  fprintf (file, _("   linkage index: %u, global: %.*s\n"),
-		   (unsigned)bfd_getl32 (buf), buf[4], buf + 5);
+	  if (rest >= 5)
+	    /* xgettext:c-format */
+	    fprintf (file, _("   linkage index: %u, global: %.*s\n"),
+		     (unsigned) bfd_getl32 (buf),
+		     buf[4] > rest - 5 ? rest - 5 : buf[4], buf + 5);
 	  break;
 	case ETIR__C_STC_GCA:
 	  fprintf (file, _("STC_GCA (store cond code address)\n"));
-	  /* xgettext:c-format */
-	  fprintf (file, _("   linkage index: %u, procedure name: %.*s\n"),
-		   (unsigned)bfd_getl32 (buf), buf[4], buf + 5);
+	  if (rest >= 5)
+	    /* xgettext:c-format */
+	    fprintf (file, _("   linkage index: %u, procedure name: %.*s\n"),
+		     (unsigned) bfd_getl32 (buf),
+		     buf[4] > rest - 5 ? rest - 5 : buf[4], buf + 5);
 	  break;
 	case ETIR__C_STC_PS:
 	  fprintf (file, _("STC_PS (store cond psect + offset)\n"));
-	  fprintf (file,
-		   /* xgettext:c-format */
-		   _("   linkage index: %u, psect: %u, offset: 0x%08x %08x\n"),
-		   (unsigned)bfd_getl32 (buf),
-		   (unsigned)bfd_getl32 (buf + 4),
-		   (unsigned)bfd_getl32 (buf + 12),
-		   (unsigned)bfd_getl32 (buf + 8));
+	  if (rest >= 16)
+	    fprintf (file,
+		     /* xgettext:c-format */
+		     _("   linkage index: %u, psect: %u, offset: 0x%08x %08x\n"),
+		     (unsigned)bfd_getl32 (buf),
+		     (unsigned)bfd_getl32 (buf + 4),
+		     (unsigned)bfd_getl32 (buf + 12),
+		     (unsigned)bfd_getl32 (buf + 8));
 	  break;
 	case ETIR__C_STC_NOP_GBL:
 	  fprintf (file, _("STC_NOP_GBL (store cond NOP at global addr)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 0);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 0);
 	  break;
 	case ETIR__C_STC_NOP_PS:
 	  fprintf (file, _("STC_NOP_PS (store cond NOP at psect + offset)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 1);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 1);
 	  break;
 	case ETIR__C_STC_BSR_GBL:
 	  fprintf (file, _("STC_BSR_GBL (store cond BSR at global addr)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 0);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 0);
 	  break;
 	case ETIR__C_STC_BSR_PS:
 	  fprintf (file, _("STC_BSR_PS (store cond BSR at psect + offset)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 1);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 1);
 	  break;
 	case ETIR__C_STC_LDA_GBL:
 	  fprintf (file, _("STC_LDA_GBL (store cond LDA at global addr)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 0);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 0);
 	  break;
 	case ETIR__C_STC_LDA_PS:
 	  fprintf (file, _("STC_LDA_PS (store cond LDA at psect + offset)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 1);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 1);
 	  break;
 	case ETIR__C_STC_BOH_GBL:
 	  fprintf (file, _("STC_BOH_GBL (store cond BOH at global addr)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 0);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 0);
 	  break;
 	case ETIR__C_STC_BOH_PS:
 	  fprintf (file, _("STC_BOH_PS (store cond BOH at psect + offset)\n"));
-	  evax_bfd_print_etir_stc_ir (file, buf, 1);
+	  evax_bfd_print_etir_stc_ir (file, buf, rest, 1);
 	  break;
 	case ETIR__C_STC_NBH_GBL:
 	  fprintf (file,
@@ -6601,13 +6675,14 @@ evax_bfd_print_etir (FILE *file, const char *name,
 
 	case ETIR__C_CTL_SETRB:
 	  fprintf (file, _("CTL_SETRB (set relocation base)\n"));
-	  sec_len += 4;
 	  break;
 	case ETIR__C_CTL_AUGRB:
-	  {
-	    unsigned int val = bfd_getl32 (buf);
-	    fprintf (file, _("CTL_AUGRB (augment relocation base) %u\n"), val);
-	  }
+	  if (rest >= 4)
+	    {
+	      unsigned int val = bfd_getl32 (buf);
+	      fprintf (file, _("CTL_AUGRB (augment relocation base) %u\n"),
+		       val);
+	    }
 	  break;
 	case ETIR__C_CTL_DFLOC:
 	  fprintf (file, _("CTL_DFLOC (define location)\n"));
