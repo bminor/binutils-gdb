@@ -6481,32 +6481,34 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 	    os = &(s->output_section_statement);
 	    os->after_end = *found_end;
 	    init_opb (os->bfd_section);
-	    if (os->bfd_section != NULL && !os->ignored)
+	    newdot = dot;
+	    if (os->bfd_section != NULL)
 	      {
-		if ((os->bfd_section->flags & SEC_ALLOC) != 0)
+		if (!os->ignored && (os->bfd_section->flags & SEC_ALLOC) != 0)
 		  {
 		    current_section = os;
 		    prefer_next_section = false;
 		  }
-		dot = os->bfd_section->vma;
+		newdot = os->bfd_section->vma;
 	      }
 	    newdot = lang_do_assignments_1 (os->children.head,
-					    os, os->fill, dot, found_end);
+					    os, os->fill, newdot, found_end);
 	    if (!os->ignored)
 	      {
 		if (os->bfd_section != NULL)
 		  {
+		    newdot = os->bfd_section->vma;
+
 		    /* .tbss sections effectively have zero size.  */
 		    if (!IS_TBSS (os->bfd_section)
 			|| bfd_link_relocatable (&link_info))
-		      dot += TO_ADDR (os->bfd_section->size);
+		      newdot += TO_ADDR (os->bfd_section->size);
 
 		    if (os->update_dot_tree != NULL)
 		      exp_fold_tree (os->update_dot_tree,
-				     bfd_abs_section_ptr, &dot);
+				     bfd_abs_section_ptr, &newdot);
 		  }
-		else
-		  dot = newdot;
+		dot = newdot;
 	      }
 	  }
 	  break;

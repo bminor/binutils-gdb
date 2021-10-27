@@ -32,5 +32,6 @@ run_dump_test empty-address-2b
 run_dump_test empty-address-3a
 run_dump_test empty-address-3b
 run_dump_test empty-address-3c
+run_dump_test empty-address-4
 
 set LDFLAGS $old_LDFLAGS
