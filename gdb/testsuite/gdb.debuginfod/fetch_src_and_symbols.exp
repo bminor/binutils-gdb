@@ -180,11 +180,16 @@ proc local_url { } {
 	spawn debuginfod -vvvv -d $db -p $port -F $debugdir
 	expect {
 	    "started http server on IPv4 IPv6 port=$port" { set found 1 }
-	    "failed to bind to port" { kill_wait_spawned_process $spawn_id }
+	    "started http server on IPv4 port=$port" { set found 1 }
+	    "started http server on IPv6 port=$port" {}
+	    "failed to bind to port" {}
 	    timeout {
 		fail "find port timeout"
 		return -1
 	    }
+	}
+	if { ! $found } {
+	    kill_wait_spawned_process $spawn_id
 	}
     }
 
