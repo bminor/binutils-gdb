@@ -166,7 +166,8 @@ gdb_disassembler::dis_asm_print_address (bfd_vma addr,
 /* Format disassembler output to STREAM.  */
 
 int
-gdb_disassembler::dis_asm_fprintf (void *stream, const char *format, ...)
+gdb_printing_disassembler::fprintf_func (void *stream,
+					 const char *format, ...)
 {
   va_list args;
 
@@ -180,9 +181,9 @@ gdb_disassembler::dis_asm_fprintf (void *stream, const char *format, ...)
 /* See disasm.h.  */
 
 int
-gdb_disassembler::dis_asm_styled_fprintf (void *stream,
-					  enum disassembler_style style,
-					  const char *format, ...)
+gdb_printing_disassembler::fprintf_styled_func (void *stream,
+						enum disassembler_style style,
+						const char *format, ...)
 {
   va_list args;
 
@@ -797,26 +798,41 @@ get_all_disassembler_options (struct gdbarch *gdbarch)
 
 gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
 				    struct ui_file *file,
-				    di_read_memory_ftype read_memory_func)
-  : m_gdbarch (gdbarch),
+				    read_memory_ftype func)
+  : gdb_printing_disassembler (gdbarch, &m_buffer, func,
+			       dis_asm_memory_error, dis_asm_print_address),
     m_buffer (!use_ext_lang_colorization_p && disassembler_styling
 	      && file->can_emit_style_escape ()),
     m_dest (file)
+{ /* Nothing.  */ }
+
+/* See disasm.h.  */
+
+gdb_disassemble_info::gdb_disassemble_info
+  (struct gdbarch *gdbarch, struct ui_file *stream,
+   read_memory_ftype read_memory_func, memory_error_ftype memory_error_func,
+   print_address_ftype print_address_func, fprintf_ftype fprintf_func,
+   fprintf_styled_ftype fprintf_styled_func)
+    : m_gdbarch (gdbarch)
 {
-  init_disassemble_info (&m_di, &m_buffer, dis_asm_fprintf,
-			 dis_asm_styled_fprintf);
+  gdb_assert (fprintf_func != nullptr);
+  gdb_assert (fprintf_styled_func != nullptr);
+  init_disassemble_info (&m_di, stream, fprintf_func,
+			 fprintf_styled_func);
   m_di.flavour = bfd_target_unknown_flavour;
-  m_di.memory_error_func = dis_asm_memory_error;
-  m_di.print_address_func = dis_asm_print_address;
-  /* NOTE: cagney/2003-04-28: The original code, from the old Insight
-     disassembler had a local optimization here.  By default it would
-     access the executable file, instead of the target memory (there
-     was a growing list of exceptions though).  Unfortunately, the
-     heuristic was flawed.  Commands like "disassemble &variable"
-     didn't work as they relied on the access going to the target.
-     Further, it has been superseeded by trust-read-only-sections
-     (although that should be superseeded by target_trust..._p()).  */
-  m_di.read_memory_func = read_memory_func;
+
+  /* The memory_error_func, print_address_func, and read_memory_func are
+     all initialized to a default (non-nullptr) value by the call to
+     init_disassemble_info above.  If the user is overriding these fields
+     (by passing non-nullptr values) then do that now, otherwise, leave
+     these fields as the defaults.  */
+  if (memory_error_func != nullptr)
+    m_di.memory_error_func = memory_error_func;
+  if (print_address_func != nullptr)
+    m_di.print_address_func = print_address_func;
+  if (read_memory_func != nullptr)
+    m_di.read_memory_func = read_memory_func;
+
   m_di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
   m_di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   m_di.endian = gdbarch_byte_order (gdbarch);
@@ -828,7 +844,9 @@ gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
   disassemble_init_for_target (&m_di);
 }
 
-gdb_disassembler::~gdb_disassembler ()
+/* See disasm.h.  */
+
+gdb_disassemble_info::~gdb_disassemble_info ()
 {
   disassemble_free_target (&m_di);
 }
