@@ -382,10 +382,7 @@ static bool mmo_scan (bfd *);
 static asection *mmo_decide_section (bfd *, bfd_vma);
 static asection *mmo_get_generic_spec_data_section (bfd *, int);
 static asection *mmo_get_spec_section (bfd *, int);
-static inline bfd_byte *mmo_get_loc (asection *, bfd_vma, int);
-static void mmo_xore_64 (asection *, bfd_vma vma, bfd_vma value);
-static void mmo_xore_32 (asection *, bfd_vma vma, unsigned int);
-static void mmo_xore_16 (asection *, bfd_vma vma, unsigned int);
+static bfd_byte *mmo_get_loc (asection *, bfd_vma, int);
 static bfd_cleanup mmo_object_p (bfd *);
 static void mmo_map_set_sizes (bfd *, asection *, void *);
 static bool mmo_get_symbols (bfd *);
@@ -741,38 +738,50 @@ mmo_decide_section (bfd *abfd, bfd_vma vma)
 
 /* Xor in a 64-bit value VALUE at VMA.  */
 
-static inline void
+static inline bfd_byte *
 mmo_xore_64 (asection *sec, bfd_vma vma, bfd_vma value)
 {
   bfd_byte *loc = mmo_get_loc (sec, vma, 8);
-  bfd_vma prev = bfd_get_64 (sec->owner, loc);
+  if (loc)
+    {
+      bfd_vma prev = bfd_get_64 (sec->owner, loc);
 
-  value ^= prev;
-  bfd_put_64 (sec->owner, value, loc);
+      value ^= prev;
+      bfd_put_64 (sec->owner, value, loc);
+    }
+  return loc;
 }
 
 /* Xor in a 32-bit value VALUE at VMA.  */
 
-static inline void
+static inline bfd_byte *
 mmo_xore_32 (asection *sec, bfd_vma vma, unsigned int value)
 {
   bfd_byte *loc = mmo_get_loc (sec, vma, 4);
-  unsigned int prev = bfd_get_32 (sec->owner, loc);
+  if (loc)
+    {
+      unsigned int prev = bfd_get_32 (sec->owner, loc);
 
-  value ^= prev;
-  bfd_put_32 (sec->owner, value, loc);
+      value ^= prev;
+      bfd_put_32 (sec->owner, value, loc);
+    }
+  return loc;
 }
 
 /* Xor in a 16-bit value VALUE at VMA.  */
 
-static inline void
+static inline bfd_byte *
 mmo_xore_16 (asection *sec, bfd_vma vma, unsigned int value)
 {
   bfd_byte *loc = mmo_get_loc (sec, vma, 2);
-  unsigned int prev = bfd_get_16 (sec->owner, loc);
+  if (loc)
+    {
+      unsigned int prev = bfd_get_16 (sec->owner, loc);
 
-  value ^= prev;
-  bfd_put_16 (sec->owner, value, loc);
+      value ^= prev;
+      bfd_put_16 (sec->owner, value, loc);
+    }
+  return loc;
 }
 
 /* Write a 32-bit word to output file, no lop_quote generated.  */
@@ -1472,7 +1481,7 @@ SUBSECTION
    If there's new contents, allocate to the next multiple of
    MMO_SEC_CONTENTS_CHUNK_SIZE.  */
 
-static inline bfd_byte *
+static bfd_byte *
 mmo_get_loc (asection *sec, bfd_vma vma, int size)
 {
   bfd_size_type allocated_size;
@@ -1647,7 +1656,11 @@ mmo_scan (bfd *abfd)
 	      vma &= ~3;
 	      if (sec == NULL)
 		sec = bfd_make_section_old_way (abfd, MMO_TEXT_SECTION_NAME);
-	      mmo_xore_32 (sec, vma, bfd_get_32 (abfd, buf));
+	      if (!mmo_xore_32 (sec, vma, bfd_get_32 (abfd, buf)))
+		{
+		  bfd_set_error (bfd_error_bad_value);
+		  goto error_return;
+		}
 	      vma += 4;
 	      lineno++;
 	      break;
@@ -1738,7 +1751,11 @@ mmo_scan (bfd *abfd)
 		fixosec = mmo_decide_section (abfd, p);
 		if (fixosec == NULL)
 		  goto error_return;
-		mmo_xore_64 (fixosec, p, vma);
+		if (!mmo_xore_64 (fixosec, p, vma))
+		  {
+		    bfd_set_error (bfd_error_bad_value);
+		    goto error_return;
+		  }
 	      }
 	    break;
 
@@ -1750,7 +1767,11 @@ mmo_scan (bfd *abfd)
 		asection *fixrsec = mmo_decide_section (abfd, p);
 		if (fixrsec == NULL)
 		  goto error_return;
-		mmo_xore_16 (fixrsec, p, yz);
+		if (!mmo_xore_16 (fixrsec, p, yz))
+		  {
+		    bfd_set_error (bfd_error_bad_value);
+		    goto error_return;
+		  }
 	      }
 	    break;
 
@@ -1813,7 +1834,11 @@ mmo_scan (bfd *abfd)
 		fixrsec = mmo_decide_section (abfd, vma);
 		if (fixrsec == NULL)
 		  goto error_return;
-		mmo_xore_32 (fixrsec, p, delta);
+		if (!mmo_xore_32 (fixrsec, p, delta))
+		  {
+		    bfd_set_error (bfd_error_bad_value);
+		    goto error_return;
+		  }
 	      }
 	    break;
 
@@ -1937,6 +1962,11 @@ mmo_scan (bfd *abfd)
 		    rsec->flags |= SEC_LINKER_CREATED;
 		    rsec->vma = z * 8;
 		    loc = mmo_get_loc (rsec, z * 8, (255 - z) * 8);
+		    if (!loc)
+		      {
+			bfd_set_error (bfd_error_bad_value);
+			goto error_return;
+		      }
 		    bfd_put_64 (abfd, first_octa, loc);
 
 		    for (i = z + 1; i < 255; i++)
@@ -2041,7 +2071,11 @@ mmo_scan (bfd *abfd)
 	  /* This wasn't a lopcode, so store it in the current section.  */
 	  if (sec == NULL)
 	    sec = bfd_make_section_old_way (abfd, MMO_TEXT_SECTION_NAME);
-	  mmo_xore_32 (sec, vma & ~3, bfd_get_32 (abfd, buf));
+	  if (!mmo_xore_32 (sec, vma & ~3, bfd_get_32 (abfd, buf)))
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      goto error_return;
+	    }
 	  vma += 4;
 	  vma &= ~3;
 	  lineno++;
