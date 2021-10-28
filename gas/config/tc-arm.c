@@ -688,7 +688,8 @@ enum arm_reg_type
   REG_TYPE_MMXWCG,
   REG_TYPE_XSCALE,
   REG_TYPE_RNB,
-  REG_TYPE_ZR
+  REG_TYPE_ZR,
+  REG_TYPE_PSEUDO
 };
 
 /* Structure for a hash table entry for a register.
@@ -733,6 +734,7 @@ const char * const reg_expected_msgs[] =
   [REG_TYPE_MQ]	    = N_("MVE vector register expected"),
   [REG_TYPE_RNB]    = "",
   [REG_TYPE_ZR]     = N_("ZR register expected"),
+  [REG_TYPE_PSEUDO] = N_("Pseudo register expected"),
 };
 
 /* Some well known registers that we refer to directly elsewhere.  */
@@ -1893,6 +1895,7 @@ parse_scalar (char **ccp, int elsize, struct neon_type_el *type, enum
 enum reg_list_els
 {
   REGLIST_RN,
+  REGLIST_PSEUDO,
   REGLIST_CLRM,
   REGLIST_VFP_S,
   REGLIST_VFP_S_VPR,
@@ -1910,7 +1913,8 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
   long range = 0;
   int another_range;
 
-  gas_assert (etype == REGLIST_RN || etype == REGLIST_CLRM);
+  gas_assert (etype == REGLIST_RN || etype == REGLIST_CLRM
+	      || etype == REGLIST_PSEUDO);
 
   /* We come back here if we get ranges concatenated by '+' or '|'.  */
   do
@@ -1930,8 +1934,14 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 	      int reg;
 	      const char apsr_str[] = "apsr";
 	      int apsr_str_len = strlen (apsr_str);
+	      enum arm_reg_type rt;
 
-	      reg = arm_reg_parse (&str, REG_TYPE_RN);
+	      if (etype == REGLIST_RN || etype == REGLIST_CLRM)
+		rt = REG_TYPE_RN;
+	      else
+		rt = REG_TYPE_PSEUDO;
+
+	      reg = arm_reg_parse (&str, rt);
 	      if (etype == REGLIST_CLRM)
 		{
 		  if (reg == REG_SP || reg == REG_PC)
@@ -1947,6 +1957,14 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 		  if (reg == FAIL)
 		    {
 		      first_error (_("r0-r12, lr or APSR expected"));
+		      return FAIL;
+		    }
+		}
+	      else if (etype == REGLIST_PSEUDO)
+		{
+		  if (reg == FAIL)
+		    {
+		      first_error (_(reg_expected_msgs[REG_TYPE_PSEUDO]));
 		      return FAIL;
 		    }
 		}
@@ -4258,6 +4276,32 @@ s_arm_unwind_personality (int ignored ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Parse a directive saving pseudo registers.  */
+
+static void
+s_arm_unwind_save_pseudo (void)
+{
+  valueT op;
+  long range;
+
+  range = parse_reg_list (&input_line_pointer, REGLIST_PSEUDO);
+  if (range == FAIL)
+    {
+      as_bad (_("expected pseudo register list"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+
+  if (range & (1 << 9))
+    {
+      /* Opcode for restoring RA_AUTH_CODE.  */
+      op = 0xb4;
+      add_unwind_opcode (op, 1);
+    }
+}
+
 
 /* Parse a directive saving core registers.  */
 
@@ -4723,6 +4767,10 @@ s_arm_unwind_save (int arch_v6)
 
     case REG_TYPE_RN:
       s_arm_unwind_save_core ();
+      return;
+
+    case REG_TYPE_PSEUDO:
+      s_arm_unwind_save_pseudo ();
       return;
 
     case REG_TYPE_VFD:
@@ -23915,8 +23963,12 @@ static const struct reg_entry reg_names[] =
   /* XScale accumulator registers.  */
   REGNUM(acc,0,XSCALE), REGNUM(ACC,0,XSCALE),
 
-  /* Alias 'ra_auth_code' to r12 for pacbti.  */
-  REGDEF(ra_auth_code,12,RN),
+  /* DWARF ABI defines RA_AUTH_CODE to 143. It also reserves 134-142 for future
+     expansion.  RA_AUTH_CODE here is given the value 143 % 134 to make it easy
+     for tc_arm_regname_to_dw2regnum to translate to DWARF reg number using
+     134 + reg_number should the range 134 to 142 be used for more pseudo regs
+     in the future.  This also helps fit RA_AUTH_CODE into a bitmask.  */
+  REGDEF(ra_auth_code,9,PSEUDO),
 };
 #undef REGDEF
 #undef REGNUM
