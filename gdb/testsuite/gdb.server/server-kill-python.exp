@@ -27,6 +27,14 @@ if {[skip_gdbserver_tests]} {
     return 0
 }
 
+# Gdb needs to be running for skip_python_tests, but exit once we're done,
+# we'll start a custom gdb after this.
+clean_restart
+if { [skip_python_tests] } {
+    return 0
+}
+gdb_exit
+
 if {[build_executable "failed to prepare" ${testfile} \
 	 ${srcfile}] == -1} {
     return -1
