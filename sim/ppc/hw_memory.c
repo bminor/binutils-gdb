@@ -25,6 +25,9 @@
 #define STATIC_INLINE_HW_MEMORY STATIC_INLINE
 #endif
 
+/* This must come before any other includes.  */
+#include "defs.h"
+
 #include <stdlib.h>
 
 #include "device_table.h"
