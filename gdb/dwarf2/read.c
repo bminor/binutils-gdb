@@ -18468,14 +18468,30 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
     }
   else if (attr->form_is_constant ())
     prop->set_const_val (attr->constant_value (0));
-  else
+  else if (attr->form_is_section_offset ())
     {
-      dwarf2_invalid_attrib_class_complaint (dwarf_form_name (attr->form),
-					     dwarf2_name (die, cu));
-      return 0;
+      switch (attr->name)
+	{
+	case DW_AT_string_length:
+	  baton = XOBNEW (obstack, struct dwarf2_property_baton);
+	  baton->property_type = default_type;
+	  fill_in_loclist_baton (cu, &baton->loclist, attr);
+	  prop->set_loclist (baton);
+	  gdb_assert (prop->baton () != NULL);
+	  break;
+	default:
+	  goto invalid;
+	}
     }
+  else
+    goto invalid;
 
   return 1;
+
+ invalid:
+  dwarf2_invalid_attrib_class_complaint (dwarf_form_name (attr->form),
+					 dwarf2_name (die, cu));
+  return 0;
 }
 
 /* See read.h.  */
