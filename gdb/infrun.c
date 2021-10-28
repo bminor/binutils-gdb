@@ -888,7 +888,7 @@ proceed_after_vfork_done (thread_info *thread)
       && thread->stop_signal () == GDB_SIGNAL_0)
     {
       infrun_debug_printf ("resuming vfork parent thread %s",
-			   target_pid_to_str (thread->ptid).c_str ());
+			   thread->ptid.to_string ().c_str ());
 
       switch_to_thread (thread);
       clear_proceed_status (0);
@@ -1652,14 +1652,14 @@ displaced_step_prepare_throw (thread_info *tp)
 	 it is likely that it will return unavailable, so don't bother asking.  */
 
       displaced_debug_printf ("deferring step of %s",
-			      target_pid_to_str (tp->ptid).c_str ());
+			      tp->ptid.to_string ().c_str ());
 
       global_thread_step_over_chain_enqueue (tp);
       return DISPLACED_STEP_PREPARE_STATUS_UNAVAILABLE;
     }
 
   displaced_debug_printf ("displaced-stepping %s now",
-			  target_pid_to_str (tp->ptid).c_str ());
+			  tp->ptid.to_string ().c_str ());
 
   scoped_restore_current_thread restore_thread;
 
@@ -1674,7 +1674,7 @@ displaced_step_prepare_throw (thread_info *tp)
   if (status == DISPLACED_STEP_PREPARE_STATUS_CANT)
     {
       displaced_debug_printf ("failed to prepare (%s)",
-			      target_pid_to_str (tp->ptid).c_str ());
+			      tp->ptid.to_string ().c_str ());
 
       return DISPLACED_STEP_PREPARE_STATUS_CANT;
     }
@@ -1685,7 +1685,7 @@ displaced_step_prepare_throw (thread_info *tp)
 
       displaced_debug_printf ("not enough resources available, "
 			      "deferring step of %s",
-			      target_pid_to_str (tp->ptid).c_str ());
+			      tp->ptid.to_string ().c_str ());
 
       global_thread_step_over_chain_enqueue (tp);
 
@@ -1702,7 +1702,7 @@ displaced_step_prepare_throw (thread_info *tp)
 
   displaced_debug_printf ("prepared successfully thread=%s, "
 			  "original_pc=%s, displaced_pc=%s",
-			  target_pid_to_str (tp->ptid).c_str (),
+			  tp->ptid.to_string ().c_str (),
 			  paddress (gdbarch, original_pc),
 			  paddress (gdbarch, displaced_pc));
 
@@ -1930,14 +1930,14 @@ start_step_over (void)
 	  internal_error (__FILE__, __LINE__,
 			  "[%s] has inconsistent state: "
 			  "trap_expected=%d, resumed=%d, executing=%d\n",
-			  target_pid_to_str (tp->ptid).c_str (),
+			  tp->ptid.to_string ().c_str (),
 			  tp->control.trap_expected,
 			  tp->resumed (),
 			  tp->executing ());
 	}
 
       infrun_debug_printf ("resuming [%s] for step-over",
-			   target_pid_to_str (tp->ptid).c_str ());
+			   tp->ptid.to_string ().c_str ());
 
       /* keep_going_pass_signal skips the step-over if the breakpoint
 	 is no longer inserted.  In all-stop, we want to keep looking
@@ -1960,13 +1960,13 @@ start_step_over (void)
       if (tp->resumed  ())
 	{
 	  infrun_debug_printf ("[%s] was resumed.",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  gdb_assert (!thread_is_in_step_over_chain (tp));
 	}
       else
 	{
 	  infrun_debug_printf ("[%s] was NOT resumed.",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  gdb_assert (thread_is_in_step_over_chain (tp));
 	}
 
@@ -2218,7 +2218,7 @@ resume_1 (enum gdb_signal sig)
       infrun_debug_printf
 	("thread %s has pending wait "
 	 "status %s (currently_stepping=%d).",
-	 target_pid_to_str (tp->ptid).c_str (),
+	 tp->ptid.to_string ().c_str (),
 	 target_waitstatus_to_string (&tp->pending_waitstatus ()).c_str (),
 	 currently_stepping (tp));
 
@@ -2232,7 +2232,7 @@ resume_1 (enum gdb_signal sig)
 	{
 	  warning (_("Couldn't deliver signal %s to %s."),
 		   gdb_signal_to_name (sig),
-		   target_pid_to_str (tp->ptid).c_str ());
+		   tp->ptid.to_string ().c_str ());
 	}
 
       tp->set_stop_signal (GDB_SIGNAL_0);
@@ -2274,7 +2274,7 @@ resume_1 (enum gdb_signal sig)
 		       "current thread [%s] at %s",
 		       step, gdb_signal_to_symbol_string (sig),
 		       tp->control.trap_expected,
-		       target_pid_to_str (inferior_ptid).c_str (),
+		       inferior_ptid.to_string ().c_str (),
 		       paddress (gdbarch, pc));
 
   /* Normally, by the time we reach `resume', the breakpoints are either
@@ -2515,7 +2515,7 @@ resume_1 (enum gdb_signal sig)
 	 do displaced stepping.  */
 
       infrun_debug_printf ("resume: [%s] stepped breakpoint",
-			   target_pid_to_str (tp->ptid).c_str ());
+			   tp->ptid.to_string ().c_str ());
 
       tp->stepped_breakpoint = 1;
 
@@ -2617,7 +2617,7 @@ new_stop_id (void)
 static void
 clear_proceed_status_thread (struct thread_info *tp)
 {
-  infrun_debug_printf ("%s", target_pid_to_str (tp->ptid).c_str ());
+  infrun_debug_printf ("%s", tp->ptid.to_string ().c_str ());
 
   /* If we're starting a new sequence, then the previous finished
      single-step is no longer relevant.  */
@@ -2627,7 +2627,7 @@ clear_proceed_status_thread (struct thread_info *tp)
 	{
 	  infrun_debug_printf ("pending event of %s was a finished step. "
 			       "Discarding.",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 
 	  tp->clear_pending_waitstatus ();
 	  tp->set_stop_reason (TARGET_STOPPED_BY_NO_REASON);
@@ -2636,7 +2636,7 @@ clear_proceed_status_thread (struct thread_info *tp)
 	{
 	  infrun_debug_printf
 	    ("thread %s has pending wait status %s (currently_stepping=%d).",
-	     target_pid_to_str (tp->ptid).c_str (),
+	     tp->ptid.to_string ().c_str (),
 	     target_waitstatus_to_string (&tp->pending_waitstatus ()).c_str (),
 	     currently_stepping (tp));
 	}
@@ -3179,7 +3179,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	  gdb_assert (!thread_is_in_step_over_chain (tp));
 
 	  infrun_debug_printf ("need to step-over [%s] first",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 
 	  global_thread_step_over_chain_enqueue (tp);
 	}
@@ -3230,14 +3230,14 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	    if (!tp->inf->has_execution ())
 	      {
 		infrun_debug_printf ("[%s] target has no execution",
-				     target_pid_to_str (tp->ptid).c_str ());
+				     tp->ptid.to_string ().c_str ());
 		continue;
 	      }
 
 	    if (tp->resumed ())
 	      {
 		infrun_debug_printf ("[%s] resumed",
-				     target_pid_to_str (tp->ptid).c_str ());
+				     tp->ptid.to_string ().c_str ());
 		gdb_assert (tp->executing () || tp->has_pending_waitstatus ());
 		continue;
 	      }
@@ -3245,12 +3245,12 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	    if (thread_is_in_step_over_chain (tp))
 	      {
 		infrun_debug_printf ("[%s] needs step-over",
-				     target_pid_to_str (tp->ptid).c_str ());
+				     tp->ptid.to_string ().c_str ());
 		continue;
 	      }
 
 	    infrun_debug_printf ("resuming %s",
-				 target_pid_to_str (tp->ptid).c_str ());
+				 tp->ptid.to_string ().c_str ());
 
 	    reset_ecs (ecs, tp);
 	    switch_to_thread (tp);
@@ -3502,7 +3502,7 @@ random_pending_event_thread (inferior *inf, ptid_t waiton_ptid)
       return nullptr;
     }
 
-  infrun_debug_printf ("Found %s.", target_pid_to_str (thread->ptid).c_str ());
+  infrun_debug_printf ("Found %s.", thread->ptid.to_string ().c_str ());
   gdb_assert (thread->resumed ());
   gdb_assert (thread->has_pending_waitstatus ());
 
@@ -3536,7 +3536,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
   else
     {
       infrun_debug_printf ("Waiting for specific thread %s.",
-			   target_pid_to_str (ptid).c_str ());
+			   ptid.to_string ().c_str ());
 
       /* We have a specific thread to check.  */
       tp = find_thread_ptid (inf, ptid);
@@ -3559,7 +3559,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
       if (pc != tp->stop_pc ())
 	{
 	  infrun_debug_printf ("PC of %s changed.  was=%s, now=%s",
-			       target_pid_to_str (tp->ptid).c_str (),
+			       tp->ptid.to_string ().c_str (),
 			       paddress (gdbarch, tp->stop_pc ()),
 			       paddress (gdbarch, pc));
 	  discard = 1;
@@ -3567,7 +3567,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
       else if (!breakpoint_inserted_here_p (regcache->aspace (), pc))
 	{
 	  infrun_debug_printf ("previous breakpoint of %s, at %s gone",
-			       target_pid_to_str (tp->ptid).c_str (),
+			       tp->ptid.to_string ().c_str (),
 			       paddress (gdbarch, pc));
 
 	  discard = 1;
@@ -3576,7 +3576,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
       if (discard)
 	{
 	  infrun_debug_printf ("pending event of %s cancelled.",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 
 	  tp->clear_pending_waitstatus ();
 	  target_waitstatus ws;
@@ -3591,7 +3591,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
       infrun_debug_printf ("Using pending wait status %s for %s.",
 			   target_waitstatus_to_string
 			     (&tp->pending_waitstatus ()).c_str (),
-			   target_pid_to_str (tp->ptid).c_str ());
+			   tp->ptid.to_string ().c_str ());
 
       /* Now that we've selected our final event LWP, un-adjust its PC
 	 if it was a software breakpoint (and the target doesn't
@@ -3775,7 +3775,7 @@ prepare_for_detach (void)
     if (tp->inf == inf)
       {
 	infrun_debug_printf ("removing thread %s from global step over chain",
-			     target_pid_to_str (tp->ptid).c_str ());
+			     tp->ptid.to_string ().c_str ());
 	global_thread_step_over_chain_remove (tp);
       }
 
@@ -4249,8 +4249,8 @@ context_switch (execution_control_state *ecs)
 	  || ecs->event_thread != inferior_thread ()))
     {
       infrun_debug_printf ("Switching context from %s to %s",
-			   target_pid_to_str (inferior_ptid).c_str (),
-			   target_pid_to_str (ecs->ptid).c_str ());
+			   inferior_ptid.to_string ().c_str (),
+			   ecs->ptid.to_string ().c_str ());
     }
 
   switch_to_thread (ecs->event_thread);
@@ -4775,7 +4775,7 @@ handle_one (const wait_one_event &event)
 {
   infrun_debug_printf
     ("%s %s", target_waitstatus_to_string (&event.ws).c_str (),
-     target_pid_to_str (event.ptid).c_str ());
+     event.ptid.to_string ().c_str ());
 
   if (event.ws.kind () == TARGET_WAITKIND_NO_RESUMED)
     {
@@ -4811,7 +4811,7 @@ handle_one (const wait_one_event &event)
 	  gdb_assert (t != nullptr);
 
 	  infrun_debug_printf
-	    ("using %s", target_pid_to_str (t->ptid).c_str ());
+	    ("using %s", t->ptid.to_string ().c_str ());
 	}
       else
 	{
@@ -4866,7 +4866,7 @@ handle_one (const wait_one_event &event)
 	      /* Add it back to the step-over queue.  */
 	      infrun_debug_printf
 		("displaced-step of %s canceled",
-		 target_pid_to_str (t->ptid).c_str ());
+		 t->ptid.to_string ().c_str ());
 
 	      t->control.trap_expected = 0;
 	      if (!t->inf->detaching)
@@ -4904,7 +4904,7 @@ handle_one (const wait_one_event &event)
 	  infrun_debug_printf ("saved stop_pc=%s for %s "
 			       "(currently_stepping=%d)",
 			       paddress (target_gdbarch (), t->stop_pc ()),
-			       target_pid_to_str (t->ptid).c_str (),
+			       t->ptid.to_string ().c_str (),
 			       currently_stepping (t));
 	}
     }
@@ -4989,14 +4989,14 @@ stop_all_threads (void)
 		  if (!t->stop_requested)
 		    {
 		      infrun_debug_printf ("  %s executing, need stop",
-					   target_pid_to_str (t->ptid).c_str ());
+					   t->ptid.to_string ().c_str ());
 		      target_stop (t->ptid);
 		      t->stop_requested = 1;
 		    }
 		  else
 		    {
 		      infrun_debug_printf ("  %s executing, already stopping",
-					   target_pid_to_str (t->ptid).c_str ());
+					   t->ptid.to_string ().c_str ());
 		    }
 
 		  if (t->stop_requested)
@@ -5005,7 +5005,7 @@ stop_all_threads (void)
 	      else
 		{
 		  infrun_debug_printf ("  %s not executing",
-				       target_pid_to_str (t->ptid).c_str ());
+				       t->ptid.to_string ().c_str ());
 
 		  /* The thread may be not executing, but still be
 		     resumed with a pending status to process.  */
@@ -5728,7 +5728,7 @@ restart_threads (struct thread_info *event_thread)
       if (tp->inf->detaching)
 	{
 	  infrun_debug_printf ("restart threads: [%s] inferior detaching",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  continue;
 	}
 
@@ -5737,21 +5737,21 @@ restart_threads (struct thread_info *event_thread)
       if (tp == event_thread)
 	{
 	  infrun_debug_printf ("restart threads: [%s] is event thread",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  continue;
 	}
 
       if (!(tp->state == THREAD_RUNNING || tp->control.in_infcall))
 	{
 	  infrun_debug_printf ("restart threads: [%s] not meant to be running",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  continue;
 	}
 
       if (tp->resumed ())
 	{
 	  infrun_debug_printf ("restart threads: [%s] resumed",
-			      target_pid_to_str (tp->ptid).c_str ());
+			      tp->ptid.to_string ().c_str ());
 	  gdb_assert (tp->executing () || tp->has_pending_waitstatus ());
 	  continue;
 	}
@@ -5759,7 +5759,7 @@ restart_threads (struct thread_info *event_thread)
       if (thread_is_in_step_over_chain (tp))
 	{
 	  infrun_debug_printf ("restart threads: [%s] needs step-over",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  gdb_assert (!tp->resumed ());
 	  continue;
 	}
@@ -5768,7 +5768,7 @@ restart_threads (struct thread_info *event_thread)
       if (tp->has_pending_waitstatus ())
 	{
 	  infrun_debug_printf ("restart threads: [%s] has pending status",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  tp->set_resumed (true);
 	  continue;
 	}
@@ -5783,13 +5783,13 @@ restart_threads (struct thread_info *event_thread)
 	  internal_error (__FILE__, __LINE__,
 			  "thread [%s] needs a step-over, but not in "
 			  "step-over queue\n",
-			  target_pid_to_str (tp->ptid).c_str ());
+			  tp->ptid.to_string ().c_str ());
 	}
 
       if (currently_stepping (tp))
 	{
 	  infrun_debug_printf ("restart threads: [%s] was stepping",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  keep_going_stepped_thread (tp);
 	}
       else
@@ -5798,7 +5798,7 @@ restart_threads (struct thread_info *event_thread)
 	  struct execution_control_state *ecs = &ecss;
 
 	  infrun_debug_printf ("restart threads: [%s] continuing",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  reset_ecs (ecs, tp);
 	  switch_to_thread (tp);
 	  keep_going_pass_signal (ecs);
@@ -5907,7 +5907,7 @@ finish_step_over (struct execution_control_state *ecs)
 	  infrun_debug_printf ("saved stop_pc=%s for %s "
 			       "(currently_stepping=%d)",
 			       paddress (target_gdbarch (), tp->stop_pc ()),
-			       target_pid_to_str (tp->ptid).c_str (),
+			       tp->ptid.to_string ().c_str (),
 			       currently_stepping (tp));
 
 	  /* This in-line step-over finished; clear this so we won't
@@ -6051,14 +6051,14 @@ handle_signal_stop (struct execution_control_state *ecs)
 	    {
 	      infrun_debug_printf ("[%s] hit another thread's single-step "
 				   "breakpoint",
-				   target_pid_to_str (ecs->ptid).c_str ());
+				   ecs->ptid.to_string ().c_str ());
 	      ecs->hit_singlestep_breakpoint = 1;
 	    }
 	}
       else
 	{
 	  infrun_debug_printf ("[%s] hit its single-step breakpoint",
-			       target_pid_to_str (ecs->ptid).c_str ());
+			       ecs->ptid.to_string ().c_str ());
 	}
     }
   delete_just_stopped_threads_single_step_breakpoints ();
@@ -7304,7 +7304,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	{
 	  infrun_debug_printf
 	    ("need to finish step-over of [%s]",
-	     target_pid_to_str (ecs->event_thread->ptid).c_str ());
+	     ecs->event_thread->ptid.to_string ().c_str ());
 	  keep_going (ecs);
 	  return true;
 	}
@@ -7314,7 +7314,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
       if (ecs->hit_singlestep_breakpoint)
        {
 	 infrun_debug_printf ("need to step [%s] over single-step breakpoint",
-			      target_pid_to_str (ecs->ptid).c_str ());
+			      ecs->ptid.to_string ().c_str ());
 	 keep_going (ecs);
 	 return true;
        }
@@ -7326,7 +7326,7 @@ switch_back_to_stepped_thread (struct execution_control_state *ecs)
 	{
 	  infrun_debug_printf
 	    ("thread [%s] still needs step-over",
-	     target_pid_to_str (ecs->event_thread->ptid).c_str ());
+	     ecs->event_thread->ptid.to_string ().c_str ());
 	  keep_going (ecs);
 	  return true;
 	}
@@ -7986,7 +7986,7 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 
       infrun_debug_printf ("%s has trap_expected set, "
 			   "resuming to collect trap",
-			   target_pid_to_str (tp->ptid).c_str ());
+			   tp->ptid.to_string ().c_str ());
 
       /* We haven't yet gotten our trap, and either: intercepted a
 	 non-signal event (e.g., a fork); or took a signal which we
@@ -8006,14 +8006,12 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 	{
 	  infrun_debug_printf ("step-over already in progress: "
 			       "step-over for %s deferred",
-			       target_pid_to_str (tp->ptid).c_str ());
+			       tp->ptid.to_string ().c_str ());
 	  global_thread_step_over_chain_enqueue (tp);
 	}
       else
-	{
-	  infrun_debug_printf ("step-over in progress: resume of %s deferred",
-			       target_pid_to_str (tp->ptid).c_str ());
-	}
+	infrun_debug_printf ("step-over in progress: resume of %s deferred",
+			     tp->ptid.to_string ().c_str ());
     }
   else
     {
