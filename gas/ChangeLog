@@ -1,3 +1,12 @@
+2021-10-28  Markus Klein  <markus.klein@sma.de>
+
+	PR 28436
+	* config/tc-arm.c (do_vfp_nsyn_push_pop_check): New function.
+	(do_vfp_nsyn_pop): Use the new function.
+	(do_vfp_nsyn_push): Use the new function.
+	* testsuite/gas/arm/v8_1m-mve.s: Add new instructions.
+	* testsuite/gas/arm/v8_1m-mve.d: Updated expected disassembly.
+
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure: Regenerate.

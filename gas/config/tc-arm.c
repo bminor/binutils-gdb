@@ -20737,19 +20737,31 @@ do_neon_ldm_stm (void)
 }
 
 static void
+do_vfp_nsyn_push_pop_check (void)
+{
+  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd), _(BAD_FPU));
+
+  if (inst.operands[1].issingle)
+    {
+      constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 32,
+		  _("register list must contain at least 1 and at most 32 registers"));
+    }
+  else
+    {
+      constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
+		  _("register list must contain at least 1 and at most 16 registers"));
+    }
+}
+
+static void
 do_vfp_nsyn_pop (void)
 {
   nsyn_insert_sp ();
-  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)) {
+
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
     return do_vfp_nsyn_opcode ("vldm");
-  }
 
-  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd),
-	      _(BAD_FPU));
-
-  constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
-	      _("register list must contain at least 1 and at most 16 "
-		"registers"));
+  do_vfp_nsyn_push_pop_check ();
 
   if (inst.operands[1].issingle)
     do_vfp_nsyn_opcode ("fldmias");
@@ -20761,23 +20773,17 @@ static void
 do_vfp_nsyn_push (void)
 {
   nsyn_insert_sp ();
-  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)) {
+
+  if (ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
     return do_vfp_nsyn_opcode ("vstmdb");
-  }
 
-  constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v1xd),
-	      _(BAD_FPU));
-
-  constraint (inst.operands[1].imm < 1 || inst.operands[1].imm > 16,
-	      _("register list must contain at least 1 and at most 16 "
-		"registers"));
+  do_vfp_nsyn_push_pop_check ();
 
   if (inst.operands[1].issingle)
     do_vfp_nsyn_opcode ("fstmdbs");
   else
     do_vfp_nsyn_opcode ("fstmdbd");
 }
-
 
 static void
 do_neon_ldr_str (void)
