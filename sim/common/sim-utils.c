@@ -20,9 +20,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "sim-main.h"
-#include "sim-assert.h"
-
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h> /* needed by sys/resource.h */
@@ -34,6 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "libiberty.h"
 #include "bfd.h"
+#include "sim-main.h"
+#include "sim-assert.h"
 #include "sim-utils.h"
 
 /* Allocate zero filled memory with xcalloc - xcalloc aborts if the

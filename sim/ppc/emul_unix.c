@@ -25,8 +25,7 @@
 /* Note: this module is called via a table.  There is no benefit in
    making it inline */
 
-#include "emul_generic.h"
-#include "emul_unix.h"
+#include "defs.h"
 
 #include <string.h>
 #ifdef HAVE_SYS_TYPES_H
@@ -123,6 +122,9 @@ int getrusage();
 
 #include <stdlib.h>
 #include <time.h>
+
+#include "emul_generic.h"
+#include "emul_unix.h"
 
 #ifndef STATIC_INLINE_EMUL_UNIX
 #define STATIC_INLINE_EMUL_UNIX STATIC_INLINE

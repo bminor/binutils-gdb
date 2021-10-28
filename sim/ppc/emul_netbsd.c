@@ -25,8 +25,7 @@
 /* Note: this module is called via a table.  There is no benefit in
    making it inline */
 
-#include "emul_generic.h"
-#include "emul_netbsd.h"
+#include "defs.h"
 
 #include <string.h>
 #include <sys/types.h>
@@ -37,6 +36,9 @@
 #include <errno.h>
 #include <sys/param.h>
 #include <sys/time.h>
+
+#include "emul_generic.h"
+#include "emul_netbsd.h"
 
 #ifdef HAVE_GETRUSAGE
 #ifndef HAVE_SYS_RESOURCE_H
