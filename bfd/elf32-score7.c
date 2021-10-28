@@ -878,7 +878,7 @@ static const struct score_reloc_map elf32_score_reloc_map[] =
   {BFD_RELOC_SCORE_DUMMY_HI16,	 R_SCORE_DUMMY_HI16},
 };
 
-static INLINE hashval_t
+static inline hashval_t
 score_elf_hash_bfd_vma (bfd_vma addr)
 {
 #ifdef BFD64

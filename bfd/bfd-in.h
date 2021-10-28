@@ -84,14 +84,6 @@ typedef BFD_HOST_U_64_BIT bfd_uint64_t;
 #define BFD64
 #endif
 
-#ifndef INLINE
-#if __GNUC__ >= 2
-#define INLINE __inline__
-#else
-#define INLINE
-#endif
-#endif
-
 /* Declaring a type wide enough to hold a host long and a host pointer.  */
 #define BFD_HOSTPTR_T @BFD_HOSTPTR_T@
 typedef BFD_HOSTPTR_T bfd_hostptr_t;

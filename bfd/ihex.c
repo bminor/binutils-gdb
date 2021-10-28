@@ -189,7 +189,7 @@ ihex_mkobject (bfd *abfd)
 /* Read a byte from a BFD.  Set *ERRORPTR if an error occurred.
    Return EOF on error or end of file.  */
 
-static INLINE int
+static inline int
 ihex_get_byte (bfd *abfd, bool *errorptr)
 {
   bfd_byte c;

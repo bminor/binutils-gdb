@@ -282,7 +282,7 @@ cie_compute_hash (struct cie *c)
 /* Return the number of extra bytes that we'll be inserting into
    ENTRY's augmentation string.  */
 
-static INLINE unsigned int
+static inline unsigned int
 extra_augmentation_string_bytes (struct eh_cie_fde *entry)
 {
   unsigned int size = 0;
@@ -298,7 +298,7 @@ extra_augmentation_string_bytes (struct eh_cie_fde *entry)
 
 /* Likewise ENTRY's augmentation data.  */
 
-static INLINE unsigned int
+static inline unsigned int
 extra_augmentation_data_bytes (struct eh_cie_fde *entry)
 {
   unsigned int size = 0;

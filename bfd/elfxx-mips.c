@@ -3075,7 +3075,7 @@ gptab_compare (const void *p1, const void *p2)
 /* Use all 64 bits of a bfd_vma for the computation of a 32-bit
    hash number.  */
 
-static INLINE hashval_t
+static inline hashval_t
 mips_elf_hash_bfd_vma (bfd_vma addr)
 {
 #ifdef BFD64
@@ -7024,7 +7024,7 @@ _bfd_elf_mips_mach (flagword flags)
 
 /* Return printable name for ABI.  */
 
-static INLINE char *
+static inline char *
 elf_mips_abi_name (bfd *abfd)
 {
   flagword flags;

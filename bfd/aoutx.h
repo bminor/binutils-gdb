@@ -3964,7 +3964,7 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
 
 /* Get the section corresponding to a reloc index.  */
 
-static INLINE asection *
+static inline asection *
 aout_reloc_index_to_section (bfd *abfd, int indx)
 {
   switch (indx & N_TYPE)

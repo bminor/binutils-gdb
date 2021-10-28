@@ -66,7 +66,7 @@ bfd_mach_o_valid (bfd *abfd)
   return true;
 }
 
-static INLINE bool
+static inline bool
 mach_o_wide_p (bfd_mach_o_header *header)
 {
   switch (header->version)
@@ -81,7 +81,7 @@ mach_o_wide_p (bfd_mach_o_header *header)
     }
 }
 
-static INLINE bool
+static inline bool
 bfd_mach_o_wide_p (bfd *abfd)
 {
   return mach_o_wide_p (&bfd_mach_o_get_data (abfd)->header);

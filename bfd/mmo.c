@@ -382,7 +382,7 @@ static bool mmo_scan (bfd *);
 static asection *mmo_decide_section (bfd *, bfd_vma);
 static asection *mmo_get_generic_spec_data_section (bfd *, int);
 static asection *mmo_get_spec_section (bfd *, int);
-static INLINE bfd_byte *mmo_get_loc (asection *, bfd_vma, int);
+static inline bfd_byte *mmo_get_loc (asection *, bfd_vma, int);
 static void mmo_xore_64 (asection *, bfd_vma vma, bfd_vma value);
 static void mmo_xore_32 (asection *, bfd_vma vma, unsigned int);
 static void mmo_xore_16 (asection *, bfd_vma vma, unsigned int);
@@ -741,7 +741,7 @@ mmo_decide_section (bfd *abfd, bfd_vma vma)
 
 /* Xor in a 64-bit value VALUE at VMA.  */
 
-static INLINE void
+static inline void
 mmo_xore_64 (asection *sec, bfd_vma vma, bfd_vma value)
 {
   bfd_byte *loc = mmo_get_loc (sec, vma, 8);
@@ -753,7 +753,7 @@ mmo_xore_64 (asection *sec, bfd_vma vma, bfd_vma value)
 
 /* Xor in a 32-bit value VALUE at VMA.  */
 
-static INLINE void
+static inline void
 mmo_xore_32 (asection *sec, bfd_vma vma, unsigned int value)
 {
   bfd_byte *loc = mmo_get_loc (sec, vma, 4);
@@ -765,7 +765,7 @@ mmo_xore_32 (asection *sec, bfd_vma vma, unsigned int value)
 
 /* Xor in a 16-bit value VALUE at VMA.  */
 
-static INLINE void
+static inline void
 mmo_xore_16 (asection *sec, bfd_vma vma, unsigned int value)
 {
   bfd_byte *loc = mmo_get_loc (sec, vma, 2);
@@ -777,7 +777,7 @@ mmo_xore_16 (asection *sec, bfd_vma vma, unsigned int value)
 
 /* Write a 32-bit word to output file, no lop_quote generated.  */
 
-static INLINE void
+static inline void
 mmo_write_tetra_raw (bfd *abfd, unsigned int value)
 {
   bfd_byte buf[4];
@@ -790,7 +790,7 @@ mmo_write_tetra_raw (bfd *abfd, unsigned int value)
 
 /* Write a 32-bit word to output file; lop_quote if necessary.  */
 
-static INLINE void
+static inline void
 mmo_write_tetra (bfd *abfd, unsigned int value)
 {
   if (((value >> 24) & 0xff) == LOP)
@@ -801,7 +801,7 @@ mmo_write_tetra (bfd *abfd, unsigned int value)
 
 /* Write a 64-bit word to output file, perhaps with lop_quoting.  */
 
-static INLINE void
+static inline void
 mmo_write_octa (bfd *abfd, bfd_vma value)
 {
   mmo_write_tetra (abfd, (unsigned int) (value >> 32));
@@ -810,7 +810,7 @@ mmo_write_octa (bfd *abfd, bfd_vma value)
 
 /* Write a 64-bit word to output file, without lop_quoting.  */
 
-static INLINE void
+static inline void
 mmo_write_octa_raw (bfd *abfd, bfd_vma value)
 {
   mmo_write_tetra_raw (abfd, (unsigned int) (value >> 32));
@@ -820,7 +820,7 @@ mmo_write_octa_raw (bfd *abfd, bfd_vma value)
 /* Write quoted contents.  Intended to be called multiple times in
    sequence, followed by a call to mmo_flush_chunk.  */
 
-static INLINE bool
+static inline bool
 mmo_write_chunk (bfd *abfd, const bfd_byte *loc, unsigned int len)
 {
   bool retval = true;
@@ -872,7 +872,7 @@ mmo_write_chunk (bfd *abfd, const bfd_byte *loc, unsigned int len)
 /* Flush remaining bytes, from a previous mmo_write_chunk, zero-padded to
    4 bytes.  */
 
-static INLINE bool
+static inline bool
 mmo_flush_chunk (bfd *abfd)
 {
   if (abfd->tdata.mmo_data->byte_no != 0)
@@ -889,7 +889,7 @@ mmo_flush_chunk (bfd *abfd)
 
 /* Same, but from a list.  */
 
-static INLINE bool
+static inline bool
 mmo_write_chunk_list (bfd *abfd, mmo_data_list_type *datap)
 {
   for (; datap != NULL; datap = datap->next)
@@ -970,7 +970,7 @@ mmo_write_loc_chunk (bfd *abfd, bfd_vma vma, const bfd_byte *loc,
 
 /* Same, but from a list.  */
 
-static INLINE bool
+static inline bool
 mmo_write_loc_chunk_list (bfd *abfd, mmo_data_list_type *datap)
 {
   /* Get an address different than the address of the first chunk.  */
@@ -1472,7 +1472,7 @@ SUBSECTION
    If there's new contents, allocate to the next multiple of
    MMO_SEC_CONTENTS_CHUNK_SIZE.  */
 
-static INLINE bfd_byte *
+static inline bfd_byte *
 mmo_get_loc (asection *sec, bfd_vma vma, int size)
 {
   bfd_size_type allocated_size;
