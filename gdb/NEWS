@@ -49,6 +49,14 @@ maint show internal-warning backtrace
      containing all of the possible Architecture.name() values.  Each
      entry is a string.
 
+* New features in the GDB remote stub, GDBserver
+
+  ** GDBserver is now supported on OpenRISC GNU/Linux.
+
+* New native configurations
+
+GNU/Linux/OpenRISC		or1k*-*-linux*
+
 *** Changes in GDB 11
 
 * The 'set disassembler-options' command now supports specifying options
