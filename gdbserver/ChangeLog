@@ -1,3 +1,17 @@
+2021-11-03  Luis Machado  <luis.machado@linaro.org>
+
+	PR gdb/28355
+
+	* linux-aarch64-low.cc (is_sve_tdesc): Remove.
+	(aarch64_target::low_arch_setup): Rework to adjust the register sets.
+	(aarch64_regsets): Update to list all register sets.
+	(aarch64_regsets_info, regs_info_aarch64): Replace NULL with nullptr.
+	(aarch64_sve_regsets, aarch64_sve_regsets_info)
+	(regs_info_aarch64_sve): Remove.
+	(aarch64_adjust_register_sets): New.
+	(aarch64_target::get_regs_info): Remove references to removed structs.
+	(initialize_low_arch): Likewise.
+
 2021-10-04  Tom de Vries  <tdevries@suse.de>
 
 	PR build/28318

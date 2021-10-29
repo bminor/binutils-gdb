@@ -22,6 +22,15 @@
 
 #include "gdbsupport/tdesc.h"
 
+/* Holds information on what architectural features are available.  This is
+   used to select register sets.  */
+struct aarch64_features
+{
+  bool sve = false;
+  bool pauth = false;
+  bool mte = false;
+};
+
 /* Create the aarch64 target description.  A non zero VQ value indicates both
    the presence of SVE and the Vector Quotient - the number of 128bit chunks in
    an SVE Z register.  HAS_PAUTH_P indicates the presence of the PAUTH

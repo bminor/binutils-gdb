@@ -1,3 +1,9 @@
+2021-11-03  Luis Machado  <luis.machado@linaro.org>
+
+	PR gdb/28355
+
+	* arch/aarch64.h (struct aarch64_features): New struct.
+
 2021-10-22  Tom de Vries  <tdevries@suse.de>
 
 	PR tui/28483
