@@ -44,11 +44,11 @@ gdb_test_multiple "file $binfile" "file command" {
     -re "\r\nReading symbols from \[^\r\n\]*\\.\\.\\." {
 	exp_continue
     }
-    -re "\r\nDuring symbol reading: location description stack underflow" {
+    -re "^\r\nDuring symbol reading: location description stack underflow" {
 	set w1 1
 	exp_continue
     }
-    -re "\r\nDuring symbol reading: location description stack overflow" {
+    -re "^\r\nDuring symbol reading: location description stack overflow" {
 	set w2 1
 	exp_continue
     }
