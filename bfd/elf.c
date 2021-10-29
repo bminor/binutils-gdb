@@ -6953,9 +6953,14 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
    && !(SEGMENT_AFTER_SEGMENT (seg1, seg2, p_paddr)			\
 	|| SEGMENT_AFTER_SEGMENT (seg2, seg1, p_paddr)))
 
-  /* Initialise the segment mark field.  */
+  /* Initialise the segment mark field, and discard stupid alignment.  */
   for (section = ibfd->sections; section != NULL; section = section->next)
-    section->segment_mark = false;
+    {
+      asection *o = section->output_section;
+      if (o != NULL && o->alignment_power >= (sizeof (bfd_vma) * 8) - 1)
+	o->alignment_power = 0;
+      section->segment_mark = false;
+    }
 
   /* The Solaris linker creates program headers in which all the
      p_paddr fields are zero.  When we try to objcopy or strip such a
