@@ -292,8 +292,7 @@ static uint32	gpt_counter_read (void);
 static void	gpt_scaler_set (uint32 val);
 static void	gpt_reload_set (uint32 val);
 static void	timer_ctrl (uint32 val);
-static unsigned char *
-		get_mem_ptr (uint32 addr, uint32 size);
+static void *	get_mem_ptr (uint32 addr, uint32 size);
 static void	store_bytes (unsigned char *mem, uint32 waddr,
 			uint32 *data, int sz, int32 *ws);
 
@@ -1541,7 +1540,7 @@ store_bytes (unsigned char *mem, uint32 waddr, uint32 *data, int32 sz,
 /* Memory emulation */
 
 int
-memory_iread (uint32 addr, uint32 *data, int32 *ws)
+memory_iread (uint32 addr, uint32 *data, uint32 *ws)
 {
     uint32          asi;
     if ((addr >= mem_ramstart) && (addr < (mem_ramstart + mem_ramsz))) {
@@ -1566,7 +1565,7 @@ memory_iread (uint32 addr, uint32 *data, int32 *ws)
 }
 
 int
-memory_read(int32 asi, uint32 addr, uint32 *data, int32 sz, int32 *ws)
+memory_read(int32 asi, uint32 addr, void *data, int32 sz, int32 *ws)
 {
     int32           mexc;
 
@@ -1607,7 +1606,7 @@ memory_read(int32 asi, uint32 addr, uint32 *data, int32 sz, int32 *ws)
 	} else if ((addr >= 0x10000000) && 
 		   (addr < (0x10000000 + (512 << (mec_iocr & 0x0f)))) &&
 		   (mec_iocr & 0x10))  {
-	    *data = erareg;
+	    memcpy (data, &erareg, 4);
 	    return 0;
 	}
 	
@@ -1739,7 +1738,7 @@ memory_write(int32 asi, uint32 addr, uint32 *data, int32 sz, int32 *ws)
     return 1;
 }
 
-static unsigned char  *
+static void  *
 get_mem_ptr(uint32 addr, uint32 size)
 {
     if ((addr + size) < ROM_SZ) {
@@ -1755,15 +1754,15 @@ get_mem_ptr(uint32 addr, uint32 size)
     }
 #endif
 
-    return (char *) -1;
+    return (void *) -1;
 }
 
 int
-sis_memory_write(uint32 addr, const unsigned char *data, uint32 length)
+sis_memory_write(uint32 addr, const void *data, uint32 length)
 {
-    char           *mem;
+    void           *mem;
 
-    if ((mem = get_mem_ptr(addr, length)) == ((char *) -1))
+    if ((mem = get_mem_ptr(addr, length)) == ((void *) -1))
 	return 0;
 
     memcpy(mem, data, length);
@@ -1771,11 +1770,11 @@ sis_memory_write(uint32 addr, const unsigned char *data, uint32 length)
 }
 
 int
-sis_memory_read(uint32 addr, char *data, uint32 length)
+sis_memory_read(uint32 addr, void *data, uint32 length)
 {
     char           *mem;
 
-    if ((mem = get_mem_ptr(addr, length)) == ((char *) -1))
+    if ((mem = get_mem_ptr(addr, length)) == ((void *) -1))
 	return 0;
 
     memcpy(data, mem, length);

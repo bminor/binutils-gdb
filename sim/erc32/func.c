@@ -139,7 +139,7 @@ set_regi(struct pstate *sregs, int32 reg, uint32 rval)
 }
 
 void
-get_regi(struct pstate * sregs, int32 reg, char *buf)
+get_regi(struct pstate * sregs, int32 reg, unsigned char *buf)
 {
     uint32          cwp;
     uint32          rval = 0;
@@ -996,7 +996,9 @@ sys_halt(void)
 #include "libiberty.h"
 #include "bfd.h"
 
+#ifndef min
 #define min(A, B) (((A) < (B)) ? (A) : (B))
+#endif
 #define LOAD_ADDRESS 0
 
 int

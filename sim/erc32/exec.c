@@ -395,11 +395,11 @@ dispatch_instruction(struct pstate *sregs)
 
     uint32          cwp, op, op2, op3, asi, rd, cond, rs1,
                     rs2;
-    uint32          ldep, icc;
-    int32           operand1, operand2, *rdd, result, eicc,
+    uint32          ldep, icc, data, *rdd;
+    int32           operand1, operand2, result, eicc,
                     new_cwp;
-    int32           pc, npc, data, address, ws, mexc, fcc;
-    int32	    ddata[2];
+    int32           pc, npc, address, ws, mexc, fcc;
+    uint32	    ddata[2];
 
     sregs->ninst++;
     cwp = ((sregs->psr & PSR_CWP) << 4);
@@ -1096,7 +1096,7 @@ dispatch_instruction(struct pstate *sregs)
 		    break;
 		}
 		sregs->psr = (sregs->psr & 0xff000000) |
-			(rs1 ^ operand2) & 0x00f03fff;
+			((rs1 ^ operand2) & 0x00f03fff);
 		break;
 	    case WRWIM:
 		if (!(sregs->psr & PSR_S)) {
@@ -1528,7 +1528,7 @@ dispatch_instruction(struct pstate *sregs)
 		if (sregs->frd == rd)
 		    sregs->fhold += (sregs->ftime - ebase.simtime);
 	    }
-	    mexc = memory_write(asi, address, &sregs->fsi[rd], 2, &ws);
+	    mexc = memory_write(asi, address, (uint32 *)&sregs->fsi[rd], 2, &ws);
 	    sregs->hold += ws;
 	    if (mexc) {
 		sregs->trap = TRAP_DEXC;
@@ -1548,7 +1548,7 @@ dispatch_instruction(struct pstate *sregs)
 		if ((sregs->frd == rd) || (sregs->frd + 1 == rd))
 		    sregs->fhold += (sregs->ftime - ebase.simtime);
 	    }
-	    mexc = memory_write(asi, address, &sregs->fsi[rd], 3, &ws);
+	    mexc = memory_write(asi, address, (uint32 *)&sregs->fsi[rd], 3, &ws);
 	    sregs->hold += ws;
 	    sregs->icnt = T_STD;
 #ifdef STAT
