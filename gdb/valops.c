@@ -1962,6 +1962,34 @@ struct_field_searcher::update_result (struct value *v, LONGEST boffset)
 	     space.  */
 	  if (m_fields.empty () || m_last_boffset != boffset)
 	    m_fields.push_back ({m_struct_path, v});
+	  else
+	    {
+	    /*Fields can occupy the same space and have the same name (be
+	      ambiguous).  This can happen when fields in two different base
+	      classes are marked [[no_unique_address]] and have the same name.
+	      The C++ standard says that such fields can only occupy the same
+	      space if they are of different type, but we don't rely on that in
+	      the following code. */
+	      bool ambiguous = false, insert = true;
+	      for (const found_field &field: m_fields)
+		{
+		  if(field.path.back () != m_struct_path.back ())
+		    {
+		    /* Same boffset points to members of different classes.
+		       We have found an ambiguity and should record it.  */
+		      ambiguous = true;
+		    }
+		  else
+		    {
+		    /* We don't need to insert this value again, because a
+		       non-ambiguous path already leads to it.  */
+		      insert = false;
+		      break;
+		    }
+		}
+	      if (ambiguous && insert)
+		m_fields.push_back ({m_struct_path, v});
+	    }
 	}
     }
 }

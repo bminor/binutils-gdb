@@ -1,3 +1,4 @@
+class empty { };
 
 class A1 {
 public:
@@ -15,6 +16,17 @@ class A3 {
 public:
   int x;
   int y;
+};
+
+#if !defined (__GNUC__) || __GNUC__ > 7
+# define NO_UNIQUE_ADDRESS [[no_unique_address]]
+#else
+# define NO_UNIQUE_ADDRESS
+#endif
+
+class A4 {
+public:
+    NO_UNIQUE_ADDRESS empty x;
 };
 
 class X : public A1, public A2 {
@@ -77,6 +89,10 @@ public:
   int jva1v;
 };
 
+class JE : public A1, public A4 {
+public:
+};
+
 int main()
 {
   A1 a1;
@@ -92,6 +108,7 @@ int main()
   JVA1 jva1;
   JVA2 jva2;
   JVA1V jva1v;
+  JE je;
   
   int i;
 
@@ -172,6 +189,8 @@ int main()
   jva1v.z = 3;
   jva1v.i = 4;
   jva1v.jva1v = 5;
+
+  je.A1::x = 1;
 
   return 0; /* set breakpoint here */
 }
