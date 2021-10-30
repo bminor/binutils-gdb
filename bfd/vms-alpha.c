@@ -7845,7 +7845,7 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
 	}
       mask = bfd_getl32 (eihvn.subsystem_mask);
       for (j = 0; j < 32; j++)
-	if (mask & (1 << j))
+	if (mask & (1u << j))
 	  {
 	    struct vms_eihvn_subversion ver;
 	    if (bfd_bread (&ver, sizeof (ver), abfd) != sizeof (ver))
