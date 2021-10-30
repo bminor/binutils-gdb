@@ -1606,7 +1606,7 @@ ecoff_slurp_reloc_table (bfd *abfd,
       (*backend->swap_reloc_in) (abfd,
 				 external_relocs + i * external_reloc_size,
 				 &intern);
-      rptr->sym_ptr_ptr = NULL;
+      rptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       rptr->addend = 0;
 
       if (intern.r_extern)
@@ -1617,9 +1617,6 @@ ecoff_slurp_reloc_table (bfd *abfd,
 		  < (ecoff_data (abfd)->debug_info.symbolic_header.iextMax)))
 	    rptr->sym_ptr_ptr = symbols + intern.r_symndx;
 	}
-      else if (intern.r_symndx == RELOC_SECTION_NONE
-	       || intern.r_symndx == RELOC_SECTION_ABS)
-	rptr->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
       else
 	{
 	  const char *sec_name;
