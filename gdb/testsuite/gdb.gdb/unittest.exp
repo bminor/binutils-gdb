@@ -73,13 +73,13 @@ proc_with_prefix test_completion {} {
     clean_restart
 
     if { $self_tests_enabled } {
-	test_gdb_complete_tab_multiple "maintenance selftest string_v" "" \
-	    {string_vappendf string_view string_vprintf}
-	test_gdb_complete_tab_unique "maintenance selftest string_vie" \
-	    "maintenance selftest string_view" " "
+	test_gdb_complete_tab_multiple "maintenance selftest copy" "_" \
+	    {copy_bitwise copy_integer_to_size}
+	test_gdb_complete_tab_unique "maintenance selftest copy_bit" \
+	    "maintenance selftest copy_bitwise" " "
     } else {
-	test_gdb_complete_tab_none "maintenance selftest string_v"
-	test_gdb_complete_tab_none "maintenance selftest string_vie"
+	test_gdb_complete_tab_none "maintenance selftest copy_"
+	test_gdb_complete_tab_none "maintenance selftest copy_bit"
     }
     test_gdb_complete_tab_unique "maintenance selftest -ver" "maintenance selftest -verbose" " "
     test_gdb_complete_tab_none "maintenance selftest name_that_does_not_exist"
