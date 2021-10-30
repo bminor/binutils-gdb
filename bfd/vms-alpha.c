@@ -4794,26 +4794,26 @@ build_module_list (bfd *abfd)
 	 since we can compute the start address and the end address
 	 of every module from the section contents.  */
       bfd_size_type size = bfd_section_size (dmt);
-      unsigned char *ptr, *end;
+      unsigned char *buf, *ptr, *end;
 
-      if (! bfd_malloc_and_get_section (abfd, dmt, &ptr))
+      if (! bfd_malloc_and_get_section (abfd, dmt, &buf))
 	return NULL;
 
       vms_debug2 ((2, "DMT\n"));
 
+      ptr = buf;
       end = ptr + size;
-
       while (end - ptr >= DBG_S_C_DMT_HEADER_SIZE)
 	{
 	  /* Each header declares a module with its start offset and size
 	     of debug info in the DST section, as well as the count of
 	     program sections (i.e. address spans) it contains.  */
-	  int modbeg = bfd_getl32 (ptr + DBG_S_L_DMT_MODBEG);
-	  int msize = bfd_getl32 (ptr + DBG_S_L_DST_SIZE);
+	  unsigned int modbeg = bfd_getl32 (ptr + DBG_S_L_DMT_MODBEG);
+	  unsigned int msize = bfd_getl32 (ptr + DBG_S_L_DST_SIZE);
 	  int count = bfd_getl16 (ptr + DBG_S_W_DMT_PSECT_COUNT);
 	  ptr += DBG_S_C_DMT_HEADER_SIZE;
 
-	  vms_debug2 ((3, "module: modbeg = %d, size = %d, count = %d\n",
+	  vms_debug2 ((3, "module: modbeg = %u, size = %u, count = %d\n",
 		       modbeg, msize, count));
 
 	  /* We create a 'module' structure for each program section since
@@ -4823,8 +4823,8 @@ build_module_list (bfd *abfd)
 	     cause problems in practice.  */
 	  while (count-- > 0 && end - ptr >= DBG_S_C_DMT_PSECT_SIZE)
 	    {
-	      int start = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_START);
-	      int length = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_LENGTH);
+	      unsigned int start = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_START);
+	      unsigned int length = bfd_getl32 (ptr + DBG_S_L_DMT_PSECT_LENGTH);
 	      module = new_module (abfd);
 	      module->modbeg = modbeg;
 	      module->size = msize;
@@ -4834,11 +4834,11 @@ build_module_list (bfd *abfd)
 	      list = module;
 	      ptr += DBG_S_C_DMT_PSECT_SIZE;
 
-	      vms_debug2 ((4, "section: start = 0x%x, length = %d\n",
+	      vms_debug2 ((4, "section: start = 0x%x, length = %u\n",
 			   start, length));
 	    }
 	}
-      free (ptr);
+      free (buf);
     }
   else
     {
