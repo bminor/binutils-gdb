@@ -14,10 +14,10 @@ OFFSET   TYPE              VALUE
 
 
 Contents of section .text:
- 0000 10b54df8 04cd5df8 04cb10bd  .*
+ 0000 (10b54df8 04cd5df8 04cb10bd|b510f84d cd04f85d cb04bd10)  .*
 Contents of section .ARM.exidx:
- 0000 00000000 b0a8b480  .*
+ 0000 00000000 (b0a8b480|80b4a8b0)  .*
 Contents of section .ARM.attributes:
- 0000 41290000 00616561 62690001 1f000000  .*
+ 0000 41(290000 00|000000 29)616561 62690001 (1f000000|0000001f)  .*
  0010 05382e31 2d4d2e4d 41494e00 0615074d  .*
  0020 09033202 34024a01 4c01               .*
