@@ -20,10 +20,6 @@
 
    Written by Kai Tietz, OneVision Software GmbH&CoKg.  */
 
-#ifndef COFF_WITH_pex64
-#define COFF_WITH_pex64
-#endif
-
 /* Note we have to make sure not to include headers twice.
    Not all headers are wrapped in #ifdef guards, so we define
    PEI_HEADERS to prevent double including here.  */
@@ -33,7 +29,6 @@
 #include "libbfd.h"
 #include "coff/x86_64.h"
 #include "coff/internal.h"
-#include "coff/pe.h"
 #include "libcoff.h"
 #include "libiberty.h"
 #endif

@@ -20,9 +20,14 @@
 
    Written by Kai Tietz, OneVision Software GmbH&CoKg.  */
 
+#define PEI_HEADERS
 #include "sysdep.h"
 #include "bfd.h"
+#include "libbfd.h"
+#include "libiberty.h"
+#include "coff/x86_64.h"
 #include "coff/internal.h"
+#include "coff/pe.h"
 #include "libcoff.h"
 
 #define TARGET_SYM		x86_64_pe_vec
