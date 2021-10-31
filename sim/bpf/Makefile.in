@@ -161,33 +161,7 @@ $(srcdir)/sem-be.c $(srcdir)/decode-be.c $(srcdir)/decode-be.h: \
               $(CGEN_MAINT) stamp-decode-be
 	@true
 
-# Note the following files are generated in objdir, not srcdir.
-
-stamp-mloop: stamp-mloop-le stamp-mloop-be
-
-stamp-mloop-le: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(ECHO_STAMP) mloop-le.c eng-le.h
-	$(SILENCE) $(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
-		-mono -scache -prefix bpfbf_ebpfle -cpu bpfbf \
-                -infile $(srcdir)/mloop.in -outfile-suffix -le
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng-le.hin eng-le.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop-le.cin mloop-le.c
-	$(SILENCE) touch $@
-mloop-le.c eng-le.h: stamp-mloop-le
-	@true
-
-stamp-mloop-be: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(ECHO_STAMP) mloop-be.c eng-be.h
-	$(SILENCE) $(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
-		-mono -scache -prefix bpfbf_ebpfbe -cpu bpfbf \
-                -infile $(srcdir)/mloop.in -outfile-suffix -be
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng-be.hin eng-be.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop-be.cin mloop-be.c
-	$(SILENCE) touch $@
-mloop-be.c eng-be.h: stamp-mloop-be
-	@true
-
 .PHONY = bpf-clean
 
 bpf-clean:
-	rm -f stamp-arch stamp-cpu stamp-decode stamp-defs stamp-mloop
+	rm -f stamp-arch stamp-cpu stamp-decode stamp-defs

@@ -18,6 +18,7 @@
 AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 
+srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
 
 SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
@@ -55,7 +56,7 @@ SIM_ALL_RECURSIVE_DEPS =
 # An alternative is to slurp in the tables at runtime.
 .PHONY: nltvals
 nltvals:
-	$(srcdir)/common/gennltvals.py --cpp "$(CPP)"
+	$(srccom)/gennltvals.py --cpp "$(CPP)"
 
 pkginclude_HEADERS = \
 	$(srcroot)/include/sim/callback.h \
@@ -67,20 +68,41 @@ include igen/local.mk
 endif
 include testsuite/local.mk
 
+if SIM_ENABLE_ARCH_bpf
+include bpf/local.mk
+endif
 if SIM_ENABLE_ARCH_cr16
 include cr16/local.mk
+endif
+if SIM_ENABLE_ARCH_cris
+include cris/local.mk
 endif
 if SIM_ENABLE_ARCH_d10v
 include d10v/local.mk
 endif
+if SIM_ENABLE_ARCH_frv
+include frv/local.mk
+endif
+if SIM_ENABLE_ARCH_iq2000
+include iq2000/local.mk
+endif
+if SIM_ENABLE_ARCH_lm32
+include lm32/local.mk
+endif
 if SIM_ENABLE_ARCH_m32c
 include m32c/local.mk
+endif
+if SIM_ENABLE_ARCH_m32r
+include m32r/local.mk
 endif
 if SIM_ENABLE_ARCH_m68hc11
 include m68hc11/local.mk
 endif
 if SIM_ENABLE_ARCH_mn10300
 include mn10300/local.mk
+endif
+if SIM_ENABLE_ARCH_or1k
+include or1k/local.mk
 endif
 if SIM_ENABLE_ARCH_sh
 include sh/local.mk

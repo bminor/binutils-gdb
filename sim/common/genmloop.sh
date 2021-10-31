@@ -140,6 +140,7 @@ switch=
 cpu="unknown"
 infile=""
 prefix="unknown"
+outprefix=""
 outsuffix=""
 
 while test $# -gt 0
@@ -154,6 +155,7 @@ do
 	-scache) scache=yes ;;
 	-pbb) pbb=yes ;;
 	-no-parallel) ;;
+	-outfile-prefix) shift ; outprefix=$1 ;;
 	-outfile-suffix) shift ; outsuffix=$1 ;;
 	-parallel-read) parallel=read ;;
 	-parallel-write) parallel=write ;;
@@ -197,8 +199,8 @@ PREFIX=`echo ${prefix} | tr "${lowercase}" "${uppercase}"`
 
 ##########################################################################
 
-rm -f eng${outsuffix}.hin
-exec 1>eng${outsuffix}.hin
+rm -f ${outprefix}eng${outsuffix}.hin
+exec 1>${outprefix}eng${outsuffix}.hin
 
 echo "/* engine configuration for ${cpu} */"
 echo ""
@@ -291,8 +293,8 @@ fi
 
 ##########################################################################
 
-rm -f tmp-mloop-$$.cin mloop${outsuffix}.cin
-exec 1>tmp-mloop-$$.cin
+rm -f ${outprefix}tmp-mloop-$$.cin ${outprefix}mloop${outsuffix}.cin
+exec 1>${outprefix}tmp-mloop-$$.cin
 
 # We use @cpu@ instead of ${cpu} because we still need to run sed to handle
 # transformation of @cpu@ for mainloop.in, so there's no need to use ${cpu}
@@ -1334,8 +1336,9 @@ fi # -pbb
 # Expand @..@ macros appearing in tmp-mloop-{pid}.cin.
 sed \
   -e "s/@cpu@/$cpu/g" -e "s/@CPU@/$CPU/g" \
-  -e "s/@prefix@/$prefix/g" -e "s/@PREFIX@/$PREFIX/g" < tmp-mloop-$$.cin > mloop${outsuffix}.cin
+  -e "s/@prefix@/$prefix/g" -e "s/@PREFIX@/$PREFIX/g" \
+  < ${outprefix}tmp-mloop-$$.cin > ${outprefix}mloop${outsuffix}.cin
 rc=$?
-rm -f tmp-mloop-$$.cin
+rm -f ${outprefix}tmp-mloop-$$.cin
 
 exit $rc
