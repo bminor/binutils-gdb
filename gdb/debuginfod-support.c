@@ -406,8 +406,8 @@ _initialize_debuginfod ()
 {
   /* set/show debuginfod */
   add_setshow_prefix_cmd ("debuginfod", class_run,
-			  _("Set debuginfod options"),
-			  _("Show debuginfod options"),
+			  _("Set debuginfod options."),
+			  _("Show debuginfod options."),
 			  &set_debuginfod_prefix_list,
 			  &show_debuginfod_prefix_list,
 			  &setlist, &showlist);
