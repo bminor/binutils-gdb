@@ -72,7 +72,8 @@ OR1K32BF_INCLUDE_DEPS = \
 
 mloop.c eng.h: stamp-mloop ; @true
 stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+	$(ECHO_STAMP) mloop.c eng.h
+	$(SILENCE) $(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -fast -pbb -switch sem-switch.c \
 		-cpu or1k32bf -infile $(srcdir)/mloop.in
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin eng.h

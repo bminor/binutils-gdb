@@ -57,7 +57,8 @@ FRVBF_INCLUDE_DEPS = \
 # FIXME: Use of `mono' is wip.
 mloop.c eng.h: stamp-mloop
 stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+	$(ECHO_STAMP) mloop.c eng.h
+	$(SILENCE) $(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -scache -parallel-generic-write -parallel-only \
 		-cpu frvbf -infile $(srcdir)/mloop.in
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin eng.h

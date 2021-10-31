@@ -57,7 +57,8 @@ IQ2000BF_INCLUDE_DEPS = \
 # FIXME: Use of `mono' is wip.
 mloop.c eng.h: stamp-mloop
 stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
+	$(ECHO_STAMP) mloop.c eng.h
+	$(SILENCE) $(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -fast -pbb -switch sem-switch.c \
 		-cpu iq2000bf -infile $(srcdir)/mloop.in
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin eng.h
