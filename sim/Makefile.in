@@ -101,6 +101,96 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# See sim/Makefile.am
+#
+# Copyright (C) 2008-2021 Free Software Foundation, Inc.
+# Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
+# Copyright (C) 1996-2021 Free Software Foundation, Inc.
+# Written by Cygnus Support.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
+# Copyright (C) 2005-2021 Free Software Foundation, Inc.
+# Contributed by Red Hat, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
+# Copyright (C) 1999-2021 Free Software Foundation, Inc.
+# Written by Cygnus Support.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
+# Copyright (C) 1990-2021 Free Software Foundation, Inc.
+# Written by Cygnus Support.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -177,9 +267,11 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-check_PROGRAMS = $(am__EXEEXT_3)
+check_PROGRAMS = $(am__EXEEXT_8)
 EXTRA_PROGRAMS = $(am__EXEEXT_2) testsuite/common/bits-gen$(EXEEXT) \
-	testsuite/common/fpu-tst$(EXEEXT)
+	testsuite/common/fpu-tst$(EXEEXT) $(am__EXEEXT_3) \
+	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6) \
+	$(am__EXEEXT_7)
 
 # This makes sure igen is available before building the arch-subdirs which
 # need to run the igen tool.
@@ -192,6 +284,35 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 	testsuite/common/bits64m0$(EXEEXT) \
 	testsuite/common/bits64m63$(EXEEXT) \
 	testsuite/common/alu-tst$(EXEEXT)
+
+# This makes sure build tools are available before building the arch-subdirs.
+@SIM_ENABLE_ARCH_cr16_TRUE@am__append_5 = $(cr16_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_cr16_TRUE@am__append_6 = cr16/gencode
+@SIM_ENABLE_ARCH_cr16_TRUE@am__append_7 = $(cr16_BUILD_OUTPUTS)
+
+# This makes sure build tools are available before building the arch-subdirs.
+@SIM_ENABLE_ARCH_d10v_TRUE@am__append_8 = $(d10v_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_d10v_TRUE@am__append_9 = d10v/gencode
+@SIM_ENABLE_ARCH_d10v_TRUE@am__append_10 = $(d10v_BUILD_OUTPUTS)
+
+# This makes sure build tools are available before building the arch-subdirs.
+@SIM_ENABLE_ARCH_m32c_TRUE@am__append_11 = $(m32c_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_m32c_TRUE@am__append_12 = m32c/opc2c
+@SIM_ENABLE_ARCH_m32c_TRUE@am__append_13 = \
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(m32c_BUILD_OUTPUTS) \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/m32c.c.log \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/r8c.c.log
+
+
+# This makes sure build tools are available before building the arch-subdirs.
+@SIM_ENABLE_ARCH_m68hc11_TRUE@am__append_14 = $(m68hc11_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_m68hc11_TRUE@am__append_15 = m68hc11/gencode
+@SIM_ENABLE_ARCH_m68hc11_TRUE@am__append_16 = $(m68hc11_BUILD_OUTPUTS)
+
+# This makes sure build tools are available before building the arch-subdirs.
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_17 = $(sh_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_18 = sh/gencode
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_19 = $(sh_BUILD_OUTPUTS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
@@ -285,19 +406,34 @@ igen_libigen_a_OBJECTS = $(am_igen_libigen_a_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@	igen/ld-insn$(EXEEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/table$(EXEEXT)
 @SIM_ENABLE_IGEN_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
-am__EXEEXT_3 = testsuite/common/bits32m0$(EXEEXT) \
+@SIM_ENABLE_ARCH_cr16_TRUE@am__EXEEXT_3 = cr16/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_d10v_TRUE@am__EXEEXT_4 = d10v/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_m32c_TRUE@am__EXEEXT_5 = m32c/opc2c$(EXEEXT)
+@SIM_ENABLE_ARCH_m68hc11_TRUE@am__EXEEXT_6 = m68hc11/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_sh_TRUE@am__EXEEXT_7 = sh/gencode$(EXEEXT)
+am__EXEEXT_8 = testsuite/common/bits32m0$(EXEEXT) \
 	testsuite/common/bits32m31$(EXEEXT) \
 	testsuite/common/bits64m0$(EXEEXT) \
 	testsuite/common/bits64m63$(EXEEXT) \
 	testsuite/common/alu-tst$(EXEEXT)
-am_igen_filter_OBJECTS =
-igen_filter_OBJECTS = $(am_igen_filter_OBJECTS)
-@SIM_ENABLE_IGEN_TRUE@igen_filter_DEPENDENCIES = igen/filter-main.o \
-@SIM_ENABLE_IGEN_TRUE@	igen/libigen.a
+@SIM_ENABLE_ARCH_cr16_TRUE@am_cr16_gencode_OBJECTS =  \
+@SIM_ENABLE_ARCH_cr16_TRUE@	cr16/gencode.$(OBJEXT)
+cr16_gencode_OBJECTS = $(am_cr16_gencode_OBJECTS)
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16_gencode_DEPENDENCIES =  \
+@SIM_ENABLE_ARCH_cr16_TRUE@	cr16/cr16-opc.o
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+@SIM_ENABLE_ARCH_d10v_TRUE@am_d10v_gencode_OBJECTS =  \
+@SIM_ENABLE_ARCH_d10v_TRUE@	d10v/gencode.$(OBJEXT)
+d10v_gencode_OBJECTS = $(am_d10v_gencode_OBJECTS)
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_DEPENDENCIES =  \
+@SIM_ENABLE_ARCH_d10v_TRUE@	d10v/d10v-opc.o
+am_igen_filter_OBJECTS =
+igen_filter_OBJECTS = $(am_igen_filter_OBJECTS)
+@SIM_ENABLE_IGEN_TRUE@igen_filter_DEPENDENCIES = igen/filter-main.o \
+@SIM_ENABLE_IGEN_TRUE@	igen/libigen.a
 am_igen_gen_OBJECTS =
 igen_gen_OBJECTS = $(am_igen_gen_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@igen_gen_DEPENDENCIES = igen/gen-main.o \
@@ -321,6 +457,17 @@ am_igen_table_OBJECTS =
 igen_table_OBJECTS = $(am_igen_table_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@igen_table_DEPENDENCIES = igen/table-main.o \
 @SIM_ENABLE_IGEN_TRUE@	igen/libigen.a
+@SIM_ENABLE_ARCH_m32c_TRUE@am_m32c_opc2c_OBJECTS =  \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/opc2c.$(OBJEXT)
+m32c_opc2c_OBJECTS = $(am_m32c_opc2c_OBJECTS)
+m32c_opc2c_LDADD = $(LDADD)
+@SIM_ENABLE_ARCH_m68hc11_TRUE@am_m68hc11_gencode_OBJECTS =  \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/gencode.$(OBJEXT)
+m68hc11_gencode_OBJECTS = $(am_m68hc11_gencode_OBJECTS)
+m68hc11_gencode_LDADD = $(LDADD)
+@SIM_ENABLE_ARCH_sh_TRUE@am_sh_gencode_OBJECTS = sh/gencode.$(OBJEXT)
+sh_gencode_OBJECTS = $(am_sh_gencode_OBJECTS)
+sh_gencode_LDADD = $(LDADD)
 testsuite_common_alu_tst_SOURCES = testsuite/common/alu-tst.c
 testsuite_common_alu_tst_OBJECTS = testsuite/common/alu-tst.$(OBJEXT)
 testsuite_common_alu_tst_LDADD = $(LDADD)
@@ -382,13 +529,16 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(common_libcommon_a_SOURCES) $(igen_libigen_a_SOURCES) \
+	$(cr16_gencode_SOURCES) $(d10v_gencode_SOURCES) \
 	$(igen_filter_SOURCES) $(igen_gen_SOURCES) \
 	$(igen_igen_SOURCES) $(igen_ld_cache_SOURCES) \
 	$(igen_ld_decode_SOURCES) $(igen_ld_insn_SOURCES) \
-	$(igen_table_SOURCES) testsuite/common/alu-tst.c \
-	testsuite/common/bits-gen.c testsuite/common/bits32m0.c \
-	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
-	testsuite/common/bits64m63.c testsuite/common/fpu-tst.c
+	$(igen_table_SOURCES) $(m32c_opc2c_SOURCES) \
+	$(m68hc11_gencode_SOURCES) $(sh_gencode_SOURCES) \
+	testsuite/common/alu-tst.c testsuite/common/bits-gen.c \
+	testsuite/common/bits32m0.c testsuite/common/bits32m31.c \
+	testsuite/common/bits64m0.c testsuite/common/bits64m63.c \
+	testsuite/common/fpu-tst.c
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -822,7 +972,8 @@ CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits64m63.c
 DISTCLEANFILES = 
 MOSTLYCLEANFILES = core $(am__append_4) site-srcdir.exp testrun.log \
-	testrun.sum
+	testrun.sum $(am__append_7) $(am__append_10) $(am__append_13) \
+	$(am__append_16) $(am__append_19)
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(srcroot)/include $(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
@@ -833,7 +984,9 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 
 # This makes sure common parts are available before building the arch-subdirs
 # which will refer to these.
-SIM_ALL_RECURSIVE_DEPS = common/libcommon.a $(am__append_1)
+SIM_ALL_RECURSIVE_DEPS = common/libcommon.a $(am__append_1) \
+	$(am__append_5) $(am__append_8) $(am__append_11) \
+	$(am__append_14) $(am__append_17)
 pkginclude_HEADERS = \
 	$(srcroot)/include/sim/callback.h \
 	$(srcroot)/include/sim/sim.h
@@ -902,6 +1055,43 @@ testsuite_common_CPPFLAGS = \
 	-I$(srcroot)/include \
 	-I../bfd
 
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16_BUILD_OUTPUTS = \
+@SIM_ENABLE_ARCH_cr16_TRUE@	cr16/gencode$(EXEEXT) \
+@SIM_ENABLE_ARCH_cr16_TRUE@	cr16/simops.h \
+@SIM_ENABLE_ARCH_cr16_TRUE@	cr16/table.c
+
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16_gencode_SOURCES = cr16/gencode.c
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16_gencode_LDADD = cr16/cr16-opc.o
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v_BUILD_OUTPUTS = \
+@SIM_ENABLE_ARCH_d10v_TRUE@	d10v/gencode$(EXEEXT) \
+@SIM_ENABLE_ARCH_d10v_TRUE@	d10v/simops.h \
+@SIM_ENABLE_ARCH_d10v_TRUE@	d10v/table.c
+
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_SOURCES = d10v/gencode.c
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_LDADD = d10v/d10v-opc.o
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c_BUILD_OUTPUTS = \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/opc2c$(EXEEXT) \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/m32c.c \
+@SIM_ENABLE_ARCH_m32c_TRUE@	m32c/r8c.c
+
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c_opc2c_SOURCES = m32c/opc2c.c
+
+# opc2c leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
+# leak detection while running it.
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c_OPC2C_RUN = ASAN_OPTIONS=detect_leaks=0 m32c/opc2c$(EXEEXT)
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_BUILD_OUTPUTS = \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/gencode$(EXEEXT) \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/m68hc11int.c \
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/m68hc12int.c
+
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_gencode_SOURCES = m68hc11/gencode.c
+@SIM_ENABLE_ARCH_sh_TRUE@sh_BUILD_OUTPUTS = \
+@SIM_ENABLE_ARCH_sh_TRUE@	sh/gencode$(EXEEXT) \
+@SIM_ENABLE_ARCH_sh_TRUE@	sh/code.c \
+@SIM_ENABLE_ARCH_sh_TRUE@	sh/ppi.c \
+@SIM_ENABLE_ARCH_sh_TRUE@	sh/table.c
+
+@SIM_ENABLE_ARCH_sh_TRUE@sh_gencode_SOURCES = sh/gencode.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -909,7 +1099,7 @@ all: config.h
 .SUFFIXES: .c .lo .log .o .obj .test .test$(EXEEXT) .trs
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/cr16/local.mk $(srcdir)/d10v/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/sh/local.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -931,7 +1121,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__empty):
+$(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/cr16/local.mk $(srcdir)/d10v/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/sh/local.mk $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -1089,6 +1279,30 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
+cr16/$(am__dirstamp):
+	@$(MKDIR_P) cr16
+	@: > cr16/$(am__dirstamp)
+cr16/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) cr16/$(DEPDIR)
+	@: > cr16/$(DEPDIR)/$(am__dirstamp)
+cr16/gencode.$(OBJEXT): cr16/$(am__dirstamp) \
+	cr16/$(DEPDIR)/$(am__dirstamp)
+
+@SIM_ENABLE_ARCH_cr16_FALSE@cr16/gencode$(EXEEXT): $(cr16_gencode_OBJECTS) $(cr16_gencode_DEPENDENCIES) $(EXTRA_cr16_gencode_DEPENDENCIES) cr16/$(am__dirstamp)
+@SIM_ENABLE_ARCH_cr16_FALSE@	@rm -f cr16/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_cr16_FALSE@	$(AM_V_CCLD)$(LINK) $(cr16_gencode_OBJECTS) $(cr16_gencode_LDADD) $(LIBS)
+d10v/$(am__dirstamp):
+	@$(MKDIR_P) d10v
+	@: > d10v/$(am__dirstamp)
+d10v/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) d10v/$(DEPDIR)
+	@: > d10v/$(DEPDIR)/$(am__dirstamp)
+d10v/gencode.$(OBJEXT): d10v/$(am__dirstamp) \
+	d10v/$(DEPDIR)/$(am__dirstamp)
+
+@SIM_ENABLE_ARCH_d10v_FALSE@d10v/gencode$(EXEEXT): $(d10v_gencode_OBJECTS) $(d10v_gencode_DEPENDENCIES) $(EXTRA_d10v_gencode_DEPENDENCIES) d10v/$(am__dirstamp)
+@SIM_ENABLE_ARCH_d10v_FALSE@	@rm -f d10v/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_d10v_FALSE@	$(AM_V_CCLD)$(LINK) $(d10v_gencode_OBJECTS) $(d10v_gencode_LDADD) $(LIBS)
 
 igen/filter$(EXEEXT): $(igen_filter_OBJECTS) $(igen_filter_DEPENDENCIES) $(EXTRA_igen_filter_DEPENDENCIES) igen/$(am__dirstamp)
 	@rm -f igen/filter$(EXEEXT)
@@ -1119,6 +1333,41 @@ igen/ld-insn$(EXEEXT): $(igen_ld_insn_OBJECTS) $(igen_ld_insn_DEPENDENCIES) $(EX
 igen/table$(EXEEXT): $(igen_table_OBJECTS) $(igen_table_DEPENDENCIES) $(EXTRA_igen_table_DEPENDENCIES) igen/$(am__dirstamp)
 	@rm -f igen/table$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(igen_table_OBJECTS) $(igen_table_LDADD) $(LIBS)
+m32c/$(am__dirstamp):
+	@$(MKDIR_P) m32c
+	@: > m32c/$(am__dirstamp)
+m32c/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) m32c/$(DEPDIR)
+	@: > m32c/$(DEPDIR)/$(am__dirstamp)
+m32c/opc2c.$(OBJEXT): m32c/$(am__dirstamp) \
+	m32c/$(DEPDIR)/$(am__dirstamp)
+
+@SIM_ENABLE_ARCH_m32c_FALSE@m32c/opc2c$(EXEEXT): $(m32c_opc2c_OBJECTS) $(m32c_opc2c_DEPENDENCIES) $(EXTRA_m32c_opc2c_DEPENDENCIES) m32c/$(am__dirstamp)
+@SIM_ENABLE_ARCH_m32c_FALSE@	@rm -f m32c/opc2c$(EXEEXT)
+@SIM_ENABLE_ARCH_m32c_FALSE@	$(AM_V_CCLD)$(LINK) $(m32c_opc2c_OBJECTS) $(m32c_opc2c_LDADD) $(LIBS)
+m68hc11/$(am__dirstamp):
+	@$(MKDIR_P) m68hc11
+	@: > m68hc11/$(am__dirstamp)
+m68hc11/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) m68hc11/$(DEPDIR)
+	@: > m68hc11/$(DEPDIR)/$(am__dirstamp)
+m68hc11/gencode.$(OBJEXT): m68hc11/$(am__dirstamp) \
+	m68hc11/$(DEPDIR)/$(am__dirstamp)
+
+@SIM_ENABLE_ARCH_m68hc11_FALSE@m68hc11/gencode$(EXEEXT): $(m68hc11_gencode_OBJECTS) $(m68hc11_gencode_DEPENDENCIES) $(EXTRA_m68hc11_gencode_DEPENDENCIES) m68hc11/$(am__dirstamp)
+@SIM_ENABLE_ARCH_m68hc11_FALSE@	@rm -f m68hc11/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_m68hc11_FALSE@	$(AM_V_CCLD)$(LINK) $(m68hc11_gencode_OBJECTS) $(m68hc11_gencode_LDADD) $(LIBS)
+sh/$(am__dirstamp):
+	@$(MKDIR_P) sh
+	@: > sh/$(am__dirstamp)
+sh/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) sh/$(DEPDIR)
+	@: > sh/$(DEPDIR)/$(am__dirstamp)
+sh/gencode.$(OBJEXT): sh/$(am__dirstamp) sh/$(DEPDIR)/$(am__dirstamp)
+
+@SIM_ENABLE_ARCH_sh_FALSE@sh/gencode$(EXEEXT): $(sh_gencode_OBJECTS) $(sh_gencode_DEPENDENCIES) $(EXTRA_sh_gencode_DEPENDENCIES) sh/$(am__dirstamp)
+@SIM_ENABLE_ARCH_sh_FALSE@	@rm -f sh/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_sh_FALSE@	$(AM_V_CCLD)$(LINK) $(sh_gencode_OBJECTS) $(sh_gencode_LDADD) $(LIBS)
 testsuite/common/$(am__dirstamp):
 	@$(MKDIR_P) testsuite/common
 	@: > testsuite/common/$(am__dirstamp)
@@ -1145,7 +1394,12 @@ testsuite/common/fpu-tst.$(OBJEXT): testsuite/common/$(am__dirstamp) \
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f common/*.$(OBJEXT)
+	-rm -f cr16/*.$(OBJEXT)
+	-rm -f d10v/*.$(OBJEXT)
 	-rm -f igen/*.$(OBJEXT)
+	-rm -f m32c/*.$(OBJEXT)
+	-rm -f m68hc11/*.$(OBJEXT)
+	-rm -f sh/*.$(OBJEXT)
 	-rm -f testsuite/common/*.$(OBJEXT)
 
 distclean-compile:
@@ -1158,6 +1412,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-target-newlib-open.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-target-newlib-signal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-version.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@cr16/$(DEPDIR)/gencode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@d10v/$(DEPDIR)/gencode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/filter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/filter_host.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/gen-engine.Po@am__quote@
@@ -1175,6 +1431,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/lf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@m32c/$(DEPDIR)/opc2c.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@m68hc11/$(DEPDIR)/gencode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@sh/$(DEPDIR)/gencode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/alu-tst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/bits-gen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/bits32m0.Po@am__quote@
@@ -1310,7 +1569,12 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+	-rm -rf cr16/.libs cr16/_libs
+	-rm -rf d10v/.libs d10v/_libs
 	-rm -rf igen/.libs igen/_libs
+	-rm -rf m32c/.libs m32c/_libs
+	-rm -rf m68hc11/.libs m68hc11/_libs
+	-rm -rf sh/.libs sh/_libs
 	-rm -rf testsuite/common/.libs testsuite/common/_libs
 
 distclean-libtool:
@@ -1708,8 +1972,18 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f common/$(DEPDIR)/$(am__dirstamp)
 	-rm -f common/$(am__dirstamp)
+	-rm -f cr16/$(DEPDIR)/$(am__dirstamp)
+	-rm -f cr16/$(am__dirstamp)
+	-rm -f d10v/$(DEPDIR)/$(am__dirstamp)
+	-rm -f d10v/$(am__dirstamp)
 	-rm -f igen/$(DEPDIR)/$(am__dirstamp)
 	-rm -f igen/$(am__dirstamp)
+	-rm -f m32c/$(DEPDIR)/$(am__dirstamp)
+	-rm -f m32c/$(am__dirstamp)
+	-rm -f m68hc11/$(DEPDIR)/$(am__dirstamp)
+	-rm -f m68hc11/$(am__dirstamp)
+	-rm -f sh/$(DEPDIR)/$(am__dirstamp)
+	-rm -f sh/$(am__dirstamp)
 	-rm -f testsuite/common/$(DEPDIR)/$(am__dirstamp)
 	-rm -f testsuite/common/$(am__dirstamp)
 	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
@@ -1724,7 +1998,7 @@ clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf common/$(DEPDIR) igen/$(DEPDIR) testsuite/common/$(DEPDIR)
+	-rm -rf common/$(DEPDIR) cr16/$(DEPDIR) d10v/$(DEPDIR) igen/$(DEPDIR) m32c/$(DEPDIR) m68hc11/$(DEPDIR) sh/$(DEPDIR) testsuite/common/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-DEJAGNU distclean-compile \
 	distclean-generic distclean-hdr distclean-libtool \
@@ -1773,7 +2047,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf common/$(DEPDIR) igen/$(DEPDIR) testsuite/common/$(DEPDIR)
+	-rm -rf common/$(DEPDIR) cr16/$(DEPDIR) d10v/$(DEPDIR) igen/$(DEPDIR) m32c/$(DEPDIR) m68hc11/$(DEPDIR) sh/$(DEPDIR) testsuite/common/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -1907,6 +2181,85 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen testsuite/common/bits-ts
 	$(AM_V_GEN)$< 64 63 little > $@.tmp
 	$(AM_V_at)cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
 	$(AM_V_at)mv $@.tmp $@
+
+# These rules are copied from automake, but tweaked to use FOR_BUILD variables.
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16/gencode$(EXEEXT): $(cr16_gencode_OBJECTS) $(cr16_gencode_DEPENDENCIES) cr16/$(am__dirstamp)
+@SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(cr16_gencode_OBJECTS) $(cr16_gencode_LDADD)
+
+# gencode is a build-time only tool.  Override the default rules for it.
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16/gencode.o: cr16/gencode.c
+@SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $< -o $@
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16/cr16-opc.o: ../opcodes/cr16-opc.c
+@SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $< -o $@
+
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16/simops.h: cr16/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_GEN)$< -h >$@
+
+@SIM_ENABLE_ARCH_cr16_TRUE@cr16/table.c: cr16/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_GEN)$< >$@
+
+# These rules are copied from automake, but tweaked to use FOR_BUILD variables.
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v/gencode$(EXEEXT): $(d10v_gencode_OBJECTS) $(d10v_gencode_DEPENDENCIES) d10v/$(am__dirstamp)
+@SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(d10v_gencode_OBJECTS) $(d10v_gencode_LDADD)
+
+# gencode is a build-time only tool.  Override the default rules for it.
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v/gencode.o: d10v/gencode.c
+@SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $< -o $@
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v/d10v-opc.o: ../opcodes/d10v-opc.c
+@SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $< -o $@
+
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v/simops.h: d10v/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_GEN)$< -h >$@
+
+@SIM_ENABLE_ARCH_d10v_TRUE@d10v/table.c: d10v/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_GEN)$< >$@
+
+# These rules are copied from automake, but tweaked to use FOR_BUILD variables.
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c/opc2c$(EXEEXT): $(m32c_opc2c_OBJECTS) $(m32c_opc2c_DEPENDENCIES) m32c/$(am__dirstamp)
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(m32c_opc2c_OBJECTS) $(m32c_opc2c_LDADD)
+
+# opc2c is a build-time only tool.  Override the default rules for it.
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c/opc2c.o: m32c/opc2c.c
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $< -o $@
+
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c/m32c.c: m32c/m32c.opc m32c/opc2c$(EXEEXT)
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_GEN)$(m32c_OPC2C_RUN) -l $@.log $< > $@.tmp
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_at)mv $@.tmp $@
+
+@SIM_ENABLE_ARCH_m32c_TRUE@m32c/r8c.c: m32c/r8c.opc m32c/opc2c$(EXEEXT)
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_GEN)$(m32c_OPC2C_RUN) -l $@.log $< > $@.tmp
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_at)mv $@.tmp $@
+
+# These rules are copied from automake, but tweaked to use FOR_BUILD variables.
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/gencode$(EXEEXT): $(m68hc11_gencode_OBJECTS) $(m68hc11_gencode_DEPENDENCIES) m68hc11/$(am__dirstamp)
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(m68hc11_gencode_OBJECTS) $(m68hc11_gencode_LDADD)
+
+# gencode is a build-time only tool.  Override the default rules for it.
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/gencode.o: m68hc11/gencode.c
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $< -o $@
+
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/m68hc11int.c: m68hc11/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_GEN)$< -m6811 >$@
+
+@SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/m68hc12int.c: m68hc11/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_GEN)$< -m6812 >$@
+
+# These rules are copied from automake, but tweaked to use FOR_BUILD variables.
+@SIM_ENABLE_ARCH_sh_TRUE@sh/gencode$(EXEEXT): $(sh_gencode_OBJECTS) $(sh_gencode_DEPENDENCIES) sh/$(am__dirstamp)
+@SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(sh_gencode_OBJECTS) $(sh_gencode_LDADD)
+
+# gencode is a build-time only tool.  Override the default rules for it.
+@SIM_ENABLE_ARCH_sh_TRUE@sh/gencode.o: sh/gencode.c
+@SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $< -o $@
+
+@SIM_ENABLE_ARCH_sh_TRUE@sh/code.c: sh/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_GEN)$< -x >$@
+
+@SIM_ENABLE_ARCH_sh_TRUE@sh/ppi.c: sh/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_GEN)$< -p >$@
+
+@SIM_ENABLE_ARCH_sh_TRUE@sh/table.c: sh/gencode$(EXEEXT)
+@SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_GEN)$< -s >$@
 
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
 

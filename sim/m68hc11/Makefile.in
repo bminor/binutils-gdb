@@ -36,22 +36,5 @@ SIM_EXTRA_CFLAGS = -DWITH_TARGET_WORD_BITSIZE=32 \
 		   -DWITH_TARGET_CELL_BITSIZE=32 \
 		   -DWITH_TARGET_ADDRESS_BITSIZE=32 \
 		   -DWITH_TARGET_WORD_MSB=31
-SIM_EXTRA_CLEAN = clean-extra
-
 
 ## COMMON_POST_CONFIG_FRAG
-
-m68hc11int.c: gencode
-	$(ECHO_GEN) ./gencode -m6811 > $@
-
-m68hc12int.c: gencode
-	$(ECHO_GEN) ./gencode -m6812 > $@
-
-gencode.o: gencode.c
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $< -o $@
-
-gencode: gencode.o
-	$(ECHO_CCLD) $(LINK_FOR_BUILD) $^
-
-clean-extra:
-	rm -f gencode m68hc11int.c

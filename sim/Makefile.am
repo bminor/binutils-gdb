@@ -67,4 +67,20 @@ include igen/local.mk
 endif
 include testsuite/local.mk
 
+if SIM_ENABLE_ARCH_cr16
+include cr16/local.mk
+endif
+if SIM_ENABLE_ARCH_d10v
+include d10v/local.mk
+endif
+if SIM_ENABLE_ARCH_m32c
+include m32c/local.mk
+endif
+if SIM_ENABLE_ARCH_m68hc11
+include m68hc11/local.mk
+endif
+if SIM_ENABLE_ARCH_sh
+include sh/local.mk
+endif
+
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
