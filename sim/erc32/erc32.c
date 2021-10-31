@@ -879,7 +879,7 @@ mec_write(uint32 addr, uint32 data)
 
     case MEC_ERSR:		/* 0xB0 */
 	if (mec_tcr & 0x100000)
-            if (data & 0xFFFFEFC0) mecparerror();
+	  if (data & 0xFFFFEFC0) mecparerror();
 	    mec_ersr = data & 0x103f;
 	break;
 
@@ -971,7 +971,7 @@ port_init(void)
     f1out = stdout;
     f2out = NULL;
     }
-    if (uart_dev1[0] != 0)
+    if (uart_dev1[0] != 0) {
 	if ((fd1 = open(uart_dev1, O_RDWR | O_NONBLOCK)) < 0) {
 	    printf("Warning, couldn't open output device %s\n", uart_dev1);
 	} else {
@@ -981,6 +981,7 @@ port_init(void)
 	    setbuf(f1out, NULL);
 	    f1open = 1;
 	}
+    }
     if (f1in) ifd1 = fileno(f1in);
     if (ifd1 == 0) {
 	if (sis_verbose)
@@ -1002,7 +1003,7 @@ port_init(void)
     	if (!dumbio && ofd1 == 1) setbuf(f1out, NULL);
     }
 
-    if (uart_dev2[0] != 0)
+    if (uart_dev2[0] != 0) {
 	if ((fd2 = open(uart_dev2, O_RDWR | O_NONBLOCK)) < 0) {
 	    printf("Warning, couldn't open output device %s\n", uart_dev2);
 	} else {
@@ -1012,6 +1013,7 @@ port_init(void)
 	    setbuf(f2out, NULL);
 	    f2open = 1;
 	}
+    }
     if (f2in)  ifd2 = fileno(f2in);
     if (ifd2 == 0) {
 	if (sis_verbose)
@@ -1241,8 +1243,7 @@ flush_uart(void)
 	wnumb -= fwrite(wbufb, 1, wnumb, f2out);
 }
 
-
-
+ATTRIBUTE_UNUSED
 static void
 uarta_tx(void)
 {
@@ -1258,6 +1259,7 @@ uarta_tx(void)
     mec_irq(4);
 }
 
+ATTRIBUTE_UNUSED
 static void
 uartb_tx(void)
 {
@@ -1272,6 +1274,7 @@ uartb_tx(void)
     mec_irq(5);
 }
 
+ATTRIBUTE_UNUSED
 static void
 uart_rx(void *arg)
 {
