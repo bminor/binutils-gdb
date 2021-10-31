@@ -1873,6 +1873,9 @@ struct packet_config
        have an associated command always have this set to auto.  */
     enum auto_boolean detect;
 
+    /* The "show remote foo-packet" command created for this packet.  */
+    cmd_list_element *show_cmd;
+
     /* Does the target support this packet?  */
     enum packet_support support;
   };
@@ -1936,6 +1939,7 @@ add_packet_config_cmd (struct packet_config *config, const char *name,
 				    NULL,
 				    show_remote_protocol_packet_cmd,
 				    &remote_set_cmdlist, &remote_show_cmdlist);
+  config->show_cmd = cmds.show;
 
   /* The command code copies the documentation strings.  */
   xfree (set_doc);
@@ -2245,7 +2249,7 @@ show_remote_protocol_packet_cmd (struct ui_file *file, int from_tty,
        packet < &remote_protocol_packets[PACKET_MAX];
        packet++)
     {
-      if (&packet->detect == &c->var->get<enum auto_boolean> ())
+      if (c == packet->show_cmd)
 	{
 	  show_packet_config_cmd (packet);
 	  return;
