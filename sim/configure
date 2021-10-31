@@ -652,7 +652,69 @@ cgendir
 CGEN_MAINT
 SIM_ENABLE_IGEN_FALSE
 SIM_ENABLE_IGEN_TRUE
+SIM_ENABLE_ARCH_v850_FALSE
+SIM_ENABLE_ARCH_v850_TRUE
+SIM_ENABLE_ARCH_erc32_FALSE
+SIM_ENABLE_ARCH_erc32_TRUE
+SIM_ENABLE_ARCH_sh_FALSE
+SIM_ENABLE_ARCH_sh_TRUE
+SIM_ENABLE_ARCH_rx_FALSE
+SIM_ENABLE_ARCH_rx_TRUE
+SIM_ENABLE_ARCH_rl78_FALSE
+SIM_ENABLE_ARCH_rl78_TRUE
+SIM_ENABLE_ARCH_riscv_FALSE
+SIM_ENABLE_ARCH_riscv_TRUE
+SIM_ENABLE_ARCH_pru_FALSE
+SIM_ENABLE_ARCH_pru_TRUE
+SIM_ENABLE_ARCH_ppc_FALSE
+SIM_ENABLE_ARCH_ppc_TRUE
+SIM_ENABLE_ARCH_or1k_FALSE
+SIM_ENABLE_ARCH_or1k_TRUE
+SIM_ENABLE_ARCH_msp430_FALSE
+SIM_ENABLE_ARCH_msp430_TRUE
+SIM_ENABLE_ARCH_moxie_FALSE
+SIM_ENABLE_ARCH_moxie_TRUE
+SIM_ENABLE_ARCH_mn10300_FALSE
+SIM_ENABLE_ARCH_mn10300_TRUE
+SIM_ENABLE_ARCH_mips_FALSE
+SIM_ENABLE_ARCH_mips_TRUE
+SIM_ENABLE_ARCH_microblaze_FALSE
+SIM_ENABLE_ARCH_microblaze_TRUE
+SIM_ENABLE_ARCH_mcore_FALSE
+SIM_ENABLE_ARCH_mcore_TRUE
+SIM_ENABLE_ARCH_m68hc11_FALSE
+SIM_ENABLE_ARCH_m68hc11_TRUE
+SIM_ENABLE_ARCH_m32r_FALSE
+SIM_ENABLE_ARCH_m32r_TRUE
+SIM_ENABLE_ARCH_m32c_FALSE
+SIM_ENABLE_ARCH_m32c_TRUE
+SIM_ENABLE_ARCH_lm32_FALSE
+SIM_ENABLE_ARCH_lm32_TRUE
+SIM_ENABLE_ARCH_iq2000_FALSE
+SIM_ENABLE_ARCH_iq2000_TRUE
+SIM_ENABLE_ARCH_h8300_FALSE
+SIM_ENABLE_ARCH_h8300_TRUE
+SIM_ENABLE_ARCH_ft32_FALSE
+SIM_ENABLE_ARCH_ft32_TRUE
+SIM_ENABLE_ARCH_frv_FALSE
+SIM_ENABLE_ARCH_frv_TRUE
+SIM_ENABLE_ARCH_d10v_FALSE
+SIM_ENABLE_ARCH_d10v_TRUE
+SIM_ENABLE_ARCH_cris_FALSE
+SIM_ENABLE_ARCH_cris_TRUE
+SIM_ENABLE_ARCH_cr16_FALSE
+SIM_ENABLE_ARCH_cr16_TRUE
+SIM_ENABLE_ARCH_bpf_FALSE
+SIM_ENABLE_ARCH_bpf_TRUE
 subdirs
+SIM_ENABLE_ARCH_bfin_FALSE
+SIM_ENABLE_ARCH_bfin_TRUE
+SIM_ENABLE_ARCH_avr_FALSE
+SIM_ENABLE_ARCH_avr_TRUE
+SIM_ENABLE_ARCH_arm_FALSE
+SIM_ENABLE_ARCH_arm_TRUE
+SIM_ENABLE_ARCH_aarch64_FALSE
+SIM_ENABLE_ARCH_aarch64_TRUE
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
 SIM_SUBDIRS
@@ -12183,7 +12245,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12186 "configure"
+#line 12248 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12289,7 +12351,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12292 "configure"
+#line 12354 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13927,7 +13989,8 @@ if test "${enable_sim}" != no; then
   sim_igen=no
   for targ in `echo $target $enable_targets | sed 's/,/ /g'`
   do
-      case "${targ}" in
+      sim_enable_arch_aarch64=false
+  case "${targ}" in
     all|aarch64*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=aarch64
@@ -13941,11 +14004,21 @@ if test "${enable_sim}" != no; then
     ac_config_commands="$ac_config_commands depdir-aarch64"
 
 
+      sim_enable_arch_aarch64=true
 
       ;;
   esac
+   if ${sim_enable_arch_aarch64}; then
+  SIM_ENABLE_ARCH_aarch64_TRUE=
+  SIM_ENABLE_ARCH_aarch64_FALSE='#'
+else
+  SIM_ENABLE_ARCH_aarch64_TRUE='#'
+  SIM_ENABLE_ARCH_aarch64_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_arm=false
+  case "${targ}" in
     all|arm*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=arm
@@ -13959,11 +14032,21 @@ if test "${enable_sim}" != no; then
     ac_config_commands="$ac_config_commands depdir-arm"
 
 
+      sim_enable_arch_arm=true
 
       ;;
   esac
+   if ${sim_enable_arch_arm}; then
+  SIM_ENABLE_ARCH_arm_TRUE=
+  SIM_ENABLE_ARCH_arm_FALSE='#'
+else
+  SIM_ENABLE_ARCH_arm_TRUE='#'
+  SIM_ENABLE_ARCH_arm_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_avr=false
+  case "${targ}" in
     all|avr*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=avr
@@ -13977,11 +14060,21 @@ if test "${enable_sim}" != no; then
     ac_config_commands="$ac_config_commands depdir-avr"
 
 
+      sim_enable_arch_avr=true
 
       ;;
   esac
+   if ${sim_enable_arch_avr}; then
+  SIM_ENABLE_ARCH_avr_TRUE=
+  SIM_ENABLE_ARCH_avr_FALSE='#'
+else
+  SIM_ENABLE_ARCH_avr_TRUE='#'
+  SIM_ENABLE_ARCH_avr_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_bfin=false
+  case "${targ}" in
     all|bfin-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bfin
@@ -13995,11 +14088,21 @@ if test "${enable_sim}" != no; then
     ac_config_commands="$ac_config_commands depdir-bfin"
 
 
+      sim_enable_arch_bfin=true
 
       ;;
   esac
+   if ${sim_enable_arch_bfin}; then
+  SIM_ENABLE_ARCH_bfin_TRUE=
+  SIM_ENABLE_ARCH_bfin_FALSE='#'
+else
+  SIM_ENABLE_ARCH_bfin_TRUE='#'
+  SIM_ENABLE_ARCH_bfin_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_bpf=false
+  case "${targ}" in
     all|bpf-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bpf
@@ -14012,11 +14115,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-bpf"
 
 
+      sim_enable_arch_bpf=true
 
       ;;
   esac
+   if ${sim_enable_arch_bpf}; then
+  SIM_ENABLE_ARCH_bpf_TRUE=
+  SIM_ENABLE_ARCH_bpf_FALSE='#'
+else
+  SIM_ENABLE_ARCH_bpf_TRUE='#'
+  SIM_ENABLE_ARCH_bpf_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_cr16=false
+  case "${targ}" in
     all|cr16*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cr16
@@ -14030,11 +14143,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-cr16"
 
 
+      sim_enable_arch_cr16=true
 
       ;;
   esac
+   if ${sim_enable_arch_cr16}; then
+  SIM_ENABLE_ARCH_cr16_TRUE=
+  SIM_ENABLE_ARCH_cr16_FALSE='#'
+else
+  SIM_ENABLE_ARCH_cr16_TRUE='#'
+  SIM_ENABLE_ARCH_cr16_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_cris=false
+  case "${targ}" in
     all|cris-*-* | crisv32-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cris
@@ -14048,11 +14171,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-cris"
 
 
+      sim_enable_arch_cris=true
 
       ;;
   esac
+   if ${sim_enable_arch_cris}; then
+  SIM_ENABLE_ARCH_cris_TRUE=
+  SIM_ENABLE_ARCH_cris_FALSE='#'
+else
+  SIM_ENABLE_ARCH_cris_TRUE='#'
+  SIM_ENABLE_ARCH_cris_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_d10v=false
+  case "${targ}" in
     all|d10v-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=d10v
@@ -14066,11 +14199,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-d10v"
 
 
+      sim_enable_arch_d10v=true
 
       ;;
   esac
+   if ${sim_enable_arch_d10v}; then
+  SIM_ENABLE_ARCH_d10v_TRUE=
+  SIM_ENABLE_ARCH_d10v_FALSE='#'
+else
+  SIM_ENABLE_ARCH_d10v_TRUE='#'
+  SIM_ENABLE_ARCH_d10v_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_frv=false
+  case "${targ}" in
     all|frv-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=frv
@@ -14084,11 +14227,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-frv"
 
 
+      sim_enable_arch_frv=true
 
       ;;
   esac
+   if ${sim_enable_arch_frv}; then
+  SIM_ENABLE_ARCH_frv_TRUE=
+  SIM_ENABLE_ARCH_frv_FALSE='#'
+else
+  SIM_ENABLE_ARCH_frv_TRUE='#'
+  SIM_ENABLE_ARCH_frv_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_ft32=false
+  case "${targ}" in
     all|ft32-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ft32
@@ -14102,11 +14255,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-ft32"
 
 
+      sim_enable_arch_ft32=true
 
       ;;
   esac
+   if ${sim_enable_arch_ft32}; then
+  SIM_ENABLE_ARCH_ft32_TRUE=
+  SIM_ENABLE_ARCH_ft32_FALSE='#'
+else
+  SIM_ENABLE_ARCH_ft32_TRUE='#'
+  SIM_ENABLE_ARCH_ft32_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_h8300=false
+  case "${targ}" in
     all|h8300*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=h8300
@@ -14120,11 +14283,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-h8300"
 
 
+      sim_enable_arch_h8300=true
 
       ;;
   esac
+   if ${sim_enable_arch_h8300}; then
+  SIM_ENABLE_ARCH_h8300_TRUE=
+  SIM_ENABLE_ARCH_h8300_FALSE='#'
+else
+  SIM_ENABLE_ARCH_h8300_TRUE='#'
+  SIM_ENABLE_ARCH_h8300_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_iq2000=false
+  case "${targ}" in
     all|iq2000-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=iq2000
@@ -14138,11 +14311,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-iq2000"
 
 
+      sim_enable_arch_iq2000=true
 
       ;;
   esac
+   if ${sim_enable_arch_iq2000}; then
+  SIM_ENABLE_ARCH_iq2000_TRUE=
+  SIM_ENABLE_ARCH_iq2000_FALSE='#'
+else
+  SIM_ENABLE_ARCH_iq2000_TRUE='#'
+  SIM_ENABLE_ARCH_iq2000_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_lm32=false
+  case "${targ}" in
     all|lm32-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=lm32
@@ -14156,11 +14339,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-lm32"
 
 
+      sim_enable_arch_lm32=true
 
       ;;
   esac
+   if ${sim_enable_arch_lm32}; then
+  SIM_ENABLE_ARCH_lm32_TRUE=
+  SIM_ENABLE_ARCH_lm32_FALSE='#'
+else
+  SIM_ENABLE_ARCH_lm32_TRUE='#'
+  SIM_ENABLE_ARCH_lm32_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_m32c=false
+  case "${targ}" in
     all|m32c-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32c
@@ -14174,11 +14367,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-m32c"
 
 
+      sim_enable_arch_m32c=true
 
       ;;
   esac
+   if ${sim_enable_arch_m32c}; then
+  SIM_ENABLE_ARCH_m32c_TRUE=
+  SIM_ENABLE_ARCH_m32c_FALSE='#'
+else
+  SIM_ENABLE_ARCH_m32c_TRUE='#'
+  SIM_ENABLE_ARCH_m32c_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_m32r=false
+  case "${targ}" in
     all|m32r-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32r
@@ -14192,11 +14395,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-m32r"
 
 
+      sim_enable_arch_m32r=true
 
       ;;
   esac
+   if ${sim_enable_arch_m32r}; then
+  SIM_ENABLE_ARCH_m32r_TRUE=
+  SIM_ENABLE_ARCH_m32r_FALSE='#'
+else
+  SIM_ENABLE_ARCH_m32r_TRUE='#'
+  SIM_ENABLE_ARCH_m32r_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_m68hc11=false
+  case "${targ}" in
     all|m68hc11-*-*|m6811-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m68hc11
@@ -14210,11 +14423,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-m68hc11"
 
 
+      sim_enable_arch_m68hc11=true
 
       ;;
   esac
+   if ${sim_enable_arch_m68hc11}; then
+  SIM_ENABLE_ARCH_m68hc11_TRUE=
+  SIM_ENABLE_ARCH_m68hc11_FALSE='#'
+else
+  SIM_ENABLE_ARCH_m68hc11_TRUE='#'
+  SIM_ENABLE_ARCH_m68hc11_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_mcore=false
+  case "${targ}" in
     all|mcore-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mcore
@@ -14228,11 +14451,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-mcore"
 
 
+      sim_enable_arch_mcore=true
 
       ;;
   esac
+   if ${sim_enable_arch_mcore}; then
+  SIM_ENABLE_ARCH_mcore_TRUE=
+  SIM_ENABLE_ARCH_mcore_FALSE='#'
+else
+  SIM_ENABLE_ARCH_mcore_TRUE='#'
+  SIM_ENABLE_ARCH_mcore_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_microblaze=false
+  case "${targ}" in
     all|microblaze*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=microblaze
@@ -14246,11 +14479,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-microblaze"
 
 
+      sim_enable_arch_microblaze=true
 
       ;;
   esac
+   if ${sim_enable_arch_microblaze}; then
+  SIM_ENABLE_ARCH_microblaze_TRUE=
+  SIM_ENABLE_ARCH_microblaze_FALSE='#'
+else
+  SIM_ENABLE_ARCH_microblaze_TRUE='#'
+  SIM_ENABLE_ARCH_microblaze_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_mips=false
+  case "${targ}" in
     all|mips*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mips
@@ -14261,11 +14504,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-mips"
 
 
+      sim_enable_arch_mips=true
       sim_igen=yes
       ;;
   esac
+   if ${sim_enable_arch_mips}; then
+  SIM_ENABLE_ARCH_mips_TRUE=
+  SIM_ENABLE_ARCH_mips_FALSE='#'
+else
+  SIM_ENABLE_ARCH_mips_TRUE='#'
+  SIM_ENABLE_ARCH_mips_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_mn10300=false
+  case "${targ}" in
     all|mn10300*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mn10300
@@ -14276,11 +14529,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-mn10300"
 
 
+      sim_enable_arch_mn10300=true
       sim_igen=yes
       ;;
   esac
+   if ${sim_enable_arch_mn10300}; then
+  SIM_ENABLE_ARCH_mn10300_TRUE=
+  SIM_ENABLE_ARCH_mn10300_FALSE='#'
+else
+  SIM_ENABLE_ARCH_mn10300_TRUE='#'
+  SIM_ENABLE_ARCH_mn10300_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_moxie=false
+  case "${targ}" in
     all|moxie-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=moxie
@@ -14294,11 +14557,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-moxie"
 
 
+      sim_enable_arch_moxie=true
 
       ;;
   esac
+   if ${sim_enable_arch_moxie}; then
+  SIM_ENABLE_ARCH_moxie_TRUE=
+  SIM_ENABLE_ARCH_moxie_FALSE='#'
+else
+  SIM_ENABLE_ARCH_moxie_TRUE='#'
+  SIM_ENABLE_ARCH_moxie_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_msp430=false
+  case "${targ}" in
     all|msp430*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=msp430
@@ -14312,11 +14585,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-msp430"
 
 
+      sim_enable_arch_msp430=true
 
       ;;
   esac
+   if ${sim_enable_arch_msp430}; then
+  SIM_ENABLE_ARCH_msp430_TRUE=
+  SIM_ENABLE_ARCH_msp430_FALSE='#'
+else
+  SIM_ENABLE_ARCH_msp430_TRUE='#'
+  SIM_ENABLE_ARCH_msp430_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_or1k=false
+  case "${targ}" in
     all|or1k*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=or1k
@@ -14327,11 +14610,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-or1k"
 
 
+      sim_enable_arch_or1k=true
 
       ;;
   esac
+   if ${sim_enable_arch_or1k}; then
+  SIM_ENABLE_ARCH_or1k_TRUE=
+  SIM_ENABLE_ARCH_or1k_FALSE='#'
+else
+  SIM_ENABLE_ARCH_or1k_TRUE='#'
+  SIM_ENABLE_ARCH_or1k_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_ppc=false
+  case "${targ}" in
     all|powerpc*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ppc
@@ -14342,11 +14635,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-ppc"
 
 
+      sim_enable_arch_ppc=true
 
       ;;
   esac
+   if ${sim_enable_arch_ppc}; then
+  SIM_ENABLE_ARCH_ppc_TRUE=
+  SIM_ENABLE_ARCH_ppc_FALSE='#'
+else
+  SIM_ENABLE_ARCH_ppc_TRUE='#'
+  SIM_ENABLE_ARCH_ppc_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_pru=false
+  case "${targ}" in
     all|pru*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=pru
@@ -14360,11 +14663,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-pru"
 
 
+      sim_enable_arch_pru=true
 
       ;;
   esac
+   if ${sim_enable_arch_pru}; then
+  SIM_ENABLE_ARCH_pru_TRUE=
+  SIM_ENABLE_ARCH_pru_FALSE='#'
+else
+  SIM_ENABLE_ARCH_pru_TRUE='#'
+  SIM_ENABLE_ARCH_pru_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_riscv=false
+  case "${targ}" in
     all|riscv*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=riscv
@@ -14375,11 +14688,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-riscv"
 
 
+      sim_enable_arch_riscv=true
 
       ;;
   esac
+   if ${sim_enable_arch_riscv}; then
+  SIM_ENABLE_ARCH_riscv_TRUE=
+  SIM_ENABLE_ARCH_riscv_FALSE='#'
+else
+  SIM_ENABLE_ARCH_riscv_TRUE='#'
+  SIM_ENABLE_ARCH_riscv_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_rl78=false
+  case "${targ}" in
     all|rl78-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rl78
@@ -14393,11 +14716,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-rl78"
 
 
+      sim_enable_arch_rl78=true
 
       ;;
   esac
+   if ${sim_enable_arch_rl78}; then
+  SIM_ENABLE_ARCH_rl78_TRUE=
+  SIM_ENABLE_ARCH_rl78_FALSE='#'
+else
+  SIM_ENABLE_ARCH_rl78_TRUE='#'
+  SIM_ENABLE_ARCH_rl78_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_rx=false
+  case "${targ}" in
     all|rx-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rx
@@ -14411,11 +14744,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-rx"
 
 
+      sim_enable_arch_rx=true
 
       ;;
   esac
+   if ${sim_enable_arch_rx}; then
+  SIM_ENABLE_ARCH_rx_TRUE=
+  SIM_ENABLE_ARCH_rx_FALSE='#'
+else
+  SIM_ENABLE_ARCH_rx_TRUE='#'
+  SIM_ENABLE_ARCH_rx_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_sh=false
+  case "${targ}" in
     all|sh*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=sh
@@ -14429,11 +14772,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-sh"
 
 
+      sim_enable_arch_sh=true
 
       ;;
   esac
+   if ${sim_enable_arch_sh}; then
+  SIM_ENABLE_ARCH_sh_TRUE=
+  SIM_ENABLE_ARCH_sh_FALSE='#'
+else
+  SIM_ENABLE_ARCH_sh_TRUE='#'
+  SIM_ENABLE_ARCH_sh_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_erc32=false
+  case "${targ}" in
     all|sparc-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=erc32
@@ -14447,11 +14800,21 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-erc32"
 
 
+      sim_enable_arch_erc32=true
 
       ;;
   esac
+   if ${sim_enable_arch_erc32}; then
+  SIM_ENABLE_ARCH_erc32_TRUE=
+  SIM_ENABLE_ARCH_erc32_FALSE='#'
+else
+  SIM_ENABLE_ARCH_erc32_TRUE='#'
+  SIM_ENABLE_ARCH_erc32_FALSE=
+fi
 
-      case "${targ}" in
+
+      sim_enable_arch_v850=false
+  case "${targ}" in
     all|v850*-*-*)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=v850
@@ -14462,9 +14825,18 @@ subdirs="$subdirs bpf"
     ac_config_commands="$ac_config_commands depdir-v850"
 
 
+      sim_enable_arch_v850=true
       sim_igen=yes
       ;;
   esac
+   if ${sim_enable_arch_v850}; then
+  SIM_ENABLE_ARCH_v850_TRUE=
+  SIM_ENABLE_ARCH_v850_FALSE='#'
+else
+  SIM_ENABLE_ARCH_v850_TRUE='#'
+  SIM_ENABLE_ARCH_v850_FALSE=
+fi
+
 
   done
 
@@ -15121,6 +15493,130 @@ else
   am__EXEEXT_FALSE=
 fi
 
+if test -z "${SIM_ENABLE_ARCH_aarch64_TRUE}" && test -z "${SIM_ENABLE_ARCH_aarch64_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_aarch64\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_arm_TRUE}" && test -z "${SIM_ENABLE_ARCH_arm_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_arm\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_avr_TRUE}" && test -z "${SIM_ENABLE_ARCH_avr_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_avr\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_bfin_TRUE}" && test -z "${SIM_ENABLE_ARCH_bfin_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_bfin\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_bpf_TRUE}" && test -z "${SIM_ENABLE_ARCH_bpf_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_bpf\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_cr16_TRUE}" && test -z "${SIM_ENABLE_ARCH_cr16_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_cr16\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_cris_TRUE}" && test -z "${SIM_ENABLE_ARCH_cris_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_cris\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_d10v_TRUE}" && test -z "${SIM_ENABLE_ARCH_d10v_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_d10v\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_frv_TRUE}" && test -z "${SIM_ENABLE_ARCH_frv_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_frv\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_ft32_TRUE}" && test -z "${SIM_ENABLE_ARCH_ft32_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_ft32\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_h8300_TRUE}" && test -z "${SIM_ENABLE_ARCH_h8300_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_h8300\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_iq2000_TRUE}" && test -z "${SIM_ENABLE_ARCH_iq2000_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_iq2000\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_lm32_TRUE}" && test -z "${SIM_ENABLE_ARCH_lm32_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_lm32\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_m32c_TRUE}" && test -z "${SIM_ENABLE_ARCH_m32c_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_m32c\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_m32r_TRUE}" && test -z "${SIM_ENABLE_ARCH_m32r_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_m32r\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_m68hc11_TRUE}" && test -z "${SIM_ENABLE_ARCH_m68hc11_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_m68hc11\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_mcore_TRUE}" && test -z "${SIM_ENABLE_ARCH_mcore_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_mcore\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_microblaze_TRUE}" && test -z "${SIM_ENABLE_ARCH_microblaze_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_microblaze\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_mips_TRUE}" && test -z "${SIM_ENABLE_ARCH_mips_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_mips\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_mn10300_TRUE}" && test -z "${SIM_ENABLE_ARCH_mn10300_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_mn10300\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_moxie_TRUE}" && test -z "${SIM_ENABLE_ARCH_moxie_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_moxie\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_msp430_TRUE}" && test -z "${SIM_ENABLE_ARCH_msp430_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_msp430\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_or1k_TRUE}" && test -z "${SIM_ENABLE_ARCH_or1k_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_or1k\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_ppc_TRUE}" && test -z "${SIM_ENABLE_ARCH_ppc_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_ppc\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_pru_TRUE}" && test -z "${SIM_ENABLE_ARCH_pru_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_pru\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_riscv_TRUE}" && test -z "${SIM_ENABLE_ARCH_riscv_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_riscv\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_rl78_TRUE}" && test -z "${SIM_ENABLE_ARCH_rl78_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_rl78\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_rx_TRUE}" && test -z "${SIM_ENABLE_ARCH_rx_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_rx\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_sh_TRUE}" && test -z "${SIM_ENABLE_ARCH_sh_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_sh\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_erc32_TRUE}" && test -z "${SIM_ENABLE_ARCH_erc32_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_erc32\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_v850_TRUE}" && test -z "${SIM_ENABLE_ARCH_v850_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_v850\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${SIM_ENABLE_IGEN_TRUE}" && test -z "${SIM_ENABLE_IGEN_FALSE}"; then
   as_fn_error $? "conditional \"SIM_ENABLE_IGEN\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5

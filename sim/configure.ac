@@ -92,15 +92,18 @@ dnl arg[2] is the arch subdir name.
 dnl arg[3] is whether the arch has a dedicated configure script.
 dnl arg[4] is any additional shell code to run for this arch.
 m4_define([SIM_TARGET], [dnl
+  sim_enable_arch_$2=false
   case "${targ}" in
     all|$1)
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=$2
       fi
       SIM_BUILD_TARGET($2, $3)
+      sim_enable_arch_$2=true
       $4
       ;;
   esac
+  AM_CONDITIONAL([SIM_ENABLE_ARCH_$2], [${sim_enable_arch_$2}])
 ])
 
 dnl WHEN ADDING ENTRIES TO THIS MATRIX:
