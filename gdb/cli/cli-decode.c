@@ -1351,16 +1351,11 @@ static void
 fput_aliases_definition_styled (struct cmd_list_element *cmd,
 				struct ui_file *stream)
 {
-  if (cmd->aliases != nullptr)
-    {
-      for (cmd_list_element *iter = cmd->aliases;
-	   iter;
-	   iter = iter->alias_chain)
-	{
-	  if (!iter->default_args.empty ())
-	    fput_alias_definition_styled (iter, stream);
-	}
-    }
+  for (cmd_list_element *iter = cmd->aliases;
+       iter != nullptr;
+       iter = iter->alias_chain)
+    if (!iter->default_args.empty ())
+      fput_alias_definition_styled (iter, stream);
 }
 
 
@@ -1377,15 +1372,14 @@ fput_command_names_styled (struct cmd_list_element *c,
 {
   if (always_fput_c_name ||  c->aliases != nullptr)
     fput_command_name_styled (c, stream);
-  if (c->aliases != nullptr)
+
+  for (cmd_list_element *iter = c->aliases; iter; iter = iter->alias_chain)
     {
-      for (cmd_list_element *iter = c->aliases; iter; iter = iter->alias_chain)
-	{
-	  fputs_filtered (", ", stream);
-	  wrap_here ("   ");
-	  fput_command_name_styled (iter, stream);
-	}
+      fputs_filtered (", ", stream);
+      wrap_here ("   ");
+      fput_command_name_styled (iter, stream);
     }
+
   if (always_fput_c_name ||  c->aliases != nullptr)
     fputs_filtered (postfix, stream);
 }
