@@ -46,7 +46,6 @@ enum command_class
      Note that help accepts unambiguous abbreviated class names.  */
 
   /* Special classes to help_list */
-  class_deprecated = -3,
   all_classes = -2,  /* help without <classname> */
   all_commands = -1, /* all */
 

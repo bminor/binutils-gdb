@@ -37,11 +37,7 @@ notify_command_param_changed_p (bool param_changed, struct cmd_list_element *c)
   if (!param_changed)
     return false;
 
-  if (c->theclass == class_maintenance || c->theclass == class_deprecated
-      || c->theclass == class_obscure)
-    return false;
-
-  return true;
+  return c->theclass != class_maintenance && c->theclass != class_obscure;
 }
 
 
