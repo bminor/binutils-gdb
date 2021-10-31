@@ -175,7 +175,43 @@
 
 # See sim/Makefile.am
 #
+# Copyright (C) 1996-2021 Free Software Foundation, Inc.
+# Written by Cygnus Support.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
 # Copyright (C) 1990-2021 Free Software Foundation, Inc.
+# Written by Cygnus Support.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
+# Copyright (C) 1996-2021 Free Software Foundation, Inc.
 # Written by Cygnus Support.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -275,7 +311,7 @@ EXTRA_PROGRAMS = $(am__EXEEXT_2) testsuite/common/bits-gen$(EXEEXT) \
 
 # This makes sure igen is available before building the arch-subdirs which
 # need to run the igen tool.
-@SIM_ENABLE_IGEN_TRUE@am__append_1 = igen/igen$(EXEEXT)
+@SIM_ENABLE_IGEN_TRUE@am__append_1 = $(IGEN)
 @SIM_ENABLE_IGEN_TRUE@am__append_2 = igen/libigen.a
 @SIM_ENABLE_IGEN_TRUE@am__append_3 = $(igen_IGEN_TOOLS)
 @SIM_ENABLE_IGEN_TRUE@am__append_4 = $(igen_IGEN_TOOLS)
@@ -310,9 +346,17 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@am__append_16 = $(m68hc11_BUILD_OUTPUTS)
 
 # This makes sure build tools are available before building the arch-subdirs.
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_17 = $(sh_BUILD_OUTPUTS)
-@SIM_ENABLE_ARCH_sh_TRUE@am__append_18 = sh/gencode
+@SIM_ENABLE_ARCH_mn10300_TRUE@am__append_17 = $(mn10300_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_mn10300_TRUE@am__append_18 = $(mn10300_BUILD_OUTPUTS)
+
+# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_sh_TRUE@am__append_19 = $(sh_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_20 = sh/gencode
+@SIM_ENABLE_ARCH_sh_TRUE@am__append_21 = $(sh_BUILD_OUTPUTS)
+
+# This makes sure build tools are available before building the arch-subdirs.
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_22 = $(v850_BUILD_OUTPUTS)
+@SIM_ENABLE_ARCH_v850_TRUE@am__append_23 = $(v850_BUILD_OUTPUTS)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
@@ -399,9 +443,8 @@ igen_libigen_a_LIBADD =
 @SIM_ENABLE_IGEN_TRUE@	igen/gen-engine.$(OBJEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/gen.$(OBJEXT)
 igen_libigen_a_OBJECTS = $(am_igen_libigen_a_OBJECTS)
-@SIM_ENABLE_IGEN_TRUE@am__EXEEXT_1 = igen/igen$(EXEEXT) \
-@SIM_ENABLE_IGEN_TRUE@	igen/filter$(EXEEXT) igen/gen$(EXEEXT) \
-@SIM_ENABLE_IGEN_TRUE@	igen/ld-cache$(EXEEXT) \
+@SIM_ENABLE_IGEN_TRUE@am__EXEEXT_1 = $(IGEN) igen/filter$(EXEEXT) \
+@SIM_ENABLE_IGEN_TRUE@	igen/gen$(EXEEXT) igen/ld-cache$(EXEEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/ld-decode$(EXEEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/ld-insn$(EXEEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/table$(EXEEXT)
@@ -973,7 +1016,8 @@ CLEANFILES = common/version.c common/version.c-stamp \
 DISTCLEANFILES = 
 MOSTLYCLEANFILES = core $(am__append_4) site-srcdir.exp testrun.log \
 	testrun.sum $(am__append_7) $(am__append_10) $(am__append_13) \
-	$(am__append_16) $(am__append_19)
+	$(am__append_16) $(am__append_18) $(am__append_21) \
+	$(am__append_23)
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(srcroot)/include $(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
@@ -986,7 +1030,8 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 # which will refer to these.
 SIM_ALL_RECURSIVE_DEPS = common/libcommon.a $(am__append_1) \
 	$(am__append_5) $(am__append_8) $(am__append_11) \
-	$(am__append_14) $(am__append_17)
+	$(am__append_14) $(am__append_17) $(am__append_19) \
+	$(am__append_22)
 pkginclude_HEADERS = \
 	$(srcroot)/include/sim/callback.h \
 	$(srcroot)/include/sim/sim.h
@@ -1006,6 +1051,11 @@ common_libcommon_a_SOURCES = \
 	common/target-newlib-signal.c \
 	common/version.c
 
+
+# igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
+# leak detection while running it.
+@SIM_ENABLE_IGEN_TRUE@IGEN = igen/igen$(EXEEXT)
+@SIM_ENABLE_IGEN_TRUE@IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN)
 @SIM_ENABLE_IGEN_TRUE@igen_libigen_a_SOURCES = \
 @SIM_ENABLE_IGEN_TRUE@	igen/table.c \
 @SIM_ENABLE_IGEN_TRUE@	igen/lf.c \
@@ -1039,7 +1089,7 @@ common_libcommon_a_SOURCES = \
 @SIM_ENABLE_IGEN_TRUE@igen_table_SOURCES = 
 @SIM_ENABLE_IGEN_TRUE@igen_table_LDADD = igen/table-main.o igen/libigen.a
 @SIM_ENABLE_IGEN_TRUE@igen_IGEN_TOOLS = \
-@SIM_ENABLE_IGEN_TRUE@	igen/igen \
+@SIM_ENABLE_IGEN_TRUE@	$(IGEN) \
 @SIM_ENABLE_IGEN_TRUE@	igen/filter \
 @SIM_ENABLE_IGEN_TRUE@	igen/gen \
 @SIM_ENABLE_IGEN_TRUE@	igen/ld-cache \
@@ -1085,6 +1135,31 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	m68hc11/m68hc12int.c
 
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11_gencode_SOURCES = m68hc11/gencode.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_BUILT_SRC_FROM_IGEN = \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/icache.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/icache.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/idecode.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/idecode.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/semantics.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/semantics.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/model.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/model.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/support.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/support.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/itable.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/itable.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/engine.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/engine.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/irun.c
+
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_BUILD_OUTPUTS = \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(mn10300_BUILT_SRC_FROM_IGEN) \
+@SIM_ENABLE_ARCH_mn10300_TRUE@	mn10300/stamp-igen
+
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_TRACE = # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_INSN = $(srcdir)/mn10300/mn10300.igen
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_INSN_INC = mn10300/am33.igen mn10300/am33-2.igen
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_DC = $(srcdir)/mn10300/mn10300.dc
 @SIM_ENABLE_ARCH_sh_TRUE@sh_BUILD_OUTPUTS = \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/gencode$(EXEEXT) \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/code.c \
@@ -1092,6 +1167,30 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/table.c
 
 @SIM_ENABLE_ARCH_sh_TRUE@sh_gencode_SOURCES = sh/gencode.c
+@SIM_ENABLE_ARCH_v850_TRUE@v850_BUILT_SRC_FROM_IGEN = \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/icache.h \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/icache.c \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/idecode.h \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/idecode.c \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/semantics.h \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/semantics.c \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/model.h \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/model.c \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/support.h \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/support.c \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/itable.h \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/itable.c \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/engine.h \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/engine.c \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/irun.c
+
+@SIM_ENABLE_ARCH_v850_TRUE@v850_BUILD_OUTPUTS = \
+@SIM_ENABLE_ARCH_v850_TRUE@	$(v850_BUILT_SRC_FROM_IGEN) \
+@SIM_ENABLE_ARCH_v850_TRUE@	v850/stamp-igen
+
+@SIM_ENABLE_ARCH_v850_TRUE@v850_IGEN_TRACE = # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
+@SIM_ENABLE_ARCH_v850_TRUE@v850_IGEN_INSN = $(srcdir)/v850/v850.igen
+@SIM_ENABLE_ARCH_v850_TRUE@v850_IGEN_DC = $(srcdir)/v850/v850-dc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -1099,7 +1198,7 @@ all: config.h
 .SUFFIXES: .c .lo .log .o .obj .test .test$(EXEEXT) .trs
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/cr16/local.mk $(srcdir)/d10v/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/sh/local.mk $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/cr16/local.mk $(srcdir)/d10v/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/mn10300/local.mk $(srcdir)/sh/local.mk $(srcdir)/v850/local.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1121,7 +1220,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/cr16/local.mk $(srcdir)/d10v/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/sh/local.mk $(am__empty):
+$(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/cr16/local.mk $(srcdir)/d10v/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/mn10300/local.mk $(srcdir)/sh/local.mk $(srcdir)/v850/local.mk $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -2106,7 +2205,7 @@ common/version.c-stamp: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(src
 	$(AM_V_at)touch $@
 
 # Alias for developers.
-@SIM_ENABLE_IGEN_TRUE@igen: igen/igen$(EXEEXT)
+@SIM_ENABLE_IGEN_TRUE@igen: $(IGEN)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_IGEN_TRUE@igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA_igen_libigen_a_DEPENDENCIES) igen/$(am__dirstamp)
@@ -2244,6 +2343,49 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen testsuite/common/bits-ts
 @SIM_ENABLE_ARCH_m68hc11_TRUE@m68hc11/m68hc12int.c: m68hc11/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@	$(AM_V_GEN)$< -m6812 >$@
 
+@SIM_ENABLE_ARCH_mn10300_TRUE@$(mn10300_BUILT_SRC_FROM_IGEN): mn10300/stamp-igen
+@SIM_ENABLE_ARCH_mn10300_TRUE@mn10300/stamp-igen: $(mn10300_IGEN_INSN) $(mn10300_IGEN_INSN_INC) $(mn10300_IGEN_DC) $(IGEN)
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_GEN)$(IGEN_RUN) \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		$(mn10300_IGEN_TRACE) \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-G gen-direct-access \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-M mn10300,am33 -G gen-multi-sim=am33 \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-M am33_2 \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-I $(srcdir)/mn10300 \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-i $(mn10300_IGEN_INSN) \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-o $(mn10300_IGEN_DC) \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-x \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n icache.h    -hc mn10300/tmp-icache.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n icache.c    -c  mn10300/tmp-icache.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n semantics.h -hs mn10300/tmp-semantics.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n semantics.c -s  mn10300/tmp-semantics.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n idecode.h   -hd mn10300/tmp-idecode.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n idecode.c   -d  mn10300/tmp-idecode.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n model.h     -hm mn10300/tmp-model.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n model.c     -m  mn10300/tmp-model.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n support.h   -hf mn10300/tmp-support.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n support.c   -f  mn10300/tmp-support.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n itable.h    -ht mn10300/tmp-itable.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n itable.c    -t  mn10300/tmp-itable.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n engine.h    -he mn10300/tmp-engine.h \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n engine.c    -e  mn10300/tmp-engine.c \
+@SIM_ENABLE_ARCH_mn10300_TRUE@		-n irun.c      -r  mn10300/tmp-irun.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-icache.h mn10300/icache.h
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-icache.c mn10300/icache.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-idecode.h mn10300/idecode.h
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-idecode.c mn10300/idecode.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-semantics.h mn10300/semantics.h
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-semantics.c mn10300/semantics.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-model.h mn10300/model.h
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-model.c mn10300/model.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-support.h mn10300/support.h
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-support.c mn10300/support.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-itable.h mn10300/itable.h
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-itable.c mn10300/itable.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-engine.h mn10300/engine.h
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-engine.c mn10300/engine.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change mn10300/tmp-irun.c mn10300/irun.c
+@SIM_ENABLE_ARCH_mn10300_TRUE@	$(AM_V_at)touch $@
+
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_sh_TRUE@sh/gencode$(EXEEXT): $(sh_gencode_OBJECTS) $(sh_gencode_DEPENDENCIES) sh/$(am__dirstamp)
 @SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(sh_gencode_OBJECTS) $(sh_gencode_LDADD)
@@ -2260,6 +2402,47 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen testsuite/common/bits-ts
 
 @SIM_ENABLE_ARCH_sh_TRUE@sh/table.c: sh/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_sh_TRUE@	$(AM_V_GEN)$< -s >$@
+
+@SIM_ENABLE_ARCH_v850_TRUE@$(v850_BUILT_SRC_FROM_IGEN): v850/stamp-igen
+@SIM_ENABLE_ARCH_v850_TRUE@v850/stamp-igen: $(v850_IGEN_INSN) $(v850_IGEN_DC) $(IGEN)
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_GEN)$(IGEN_RUN) \
+@SIM_ENABLE_ARCH_v850_TRUE@		$(v850_IGEN_TRACE) \
+@SIM_ENABLE_ARCH_v850_TRUE@		-G gen-direct-access \
+@SIM_ENABLE_ARCH_v850_TRUE@		-G gen-zero-r0 \
+@SIM_ENABLE_ARCH_v850_TRUE@		-i $(v850_IGEN_INSN) \
+@SIM_ENABLE_ARCH_v850_TRUE@		-o $(v850_IGEN_DC) \
+@SIM_ENABLE_ARCH_v850_TRUE@		-x \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n icache.h    -hc v850/tmp-icache.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n icache.c    -c  v850/tmp-icache.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n semantics.h -hs v850/tmp-semantics.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n semantics.c -s  v850/tmp-semantics.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n idecode.h   -hd v850/tmp-idecode.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n idecode.c   -d  v850/tmp-idecode.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n model.h     -hm v850/tmp-model.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n model.c     -m  v850/tmp-model.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n support.h   -hf v850/tmp-support.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n support.c   -f  v850/tmp-support.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n itable.h    -ht v850/tmp-itable.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n itable.c    -t  v850/tmp-itable.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n engine.h    -he v850/tmp-engine.h \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n engine.c    -e  v850/tmp-engine.c \
+@SIM_ENABLE_ARCH_v850_TRUE@		-n irun.c      -r  v850/tmp-irun.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-icache.h v850/icache.h
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-icache.c v850/icache.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-idecode.h v850/idecode.h
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-idecode.c v850/idecode.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-semantics.h v850/semantics.h
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-semantics.c v850/semantics.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-model.h v850/model.h
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-model.c v850/model.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-support.h v850/support.h
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-support.c v850/support.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-itable.h v850/itable.h
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-itable.c v850/itable.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-engine.h v850/engine.h
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-engine.c v850/engine.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change v850/tmp-irun.c v850/irun.c
+@SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)touch $@
 
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
 

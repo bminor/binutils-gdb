@@ -19,12 +19,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
+# leak detection while running it.
+IGEN = %D%/igen$(EXEEXT)
+IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN)
+
 # This makes sure igen is available before building the arch-subdirs which
 # need to run the igen tool.
-SIM_ALL_RECURSIVE_DEPS += igen/igen$(EXEEXT)
+SIM_ALL_RECURSIVE_DEPS += $(IGEN)
 
 # Alias for developers.
-igen: %D%/igen$(EXEEXT)
+igen: $(IGEN)
 
 noinst_LIBRARIES += %D%/libigen.a
 %C%_libigen_a_SOURCES = \
@@ -84,7 +89,7 @@ igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA
 %C%_table_LDADD = %D%/table-main.o %D%/libigen.a
 
 %C%_IGEN_TOOLS = \
-	%D%/igen \
+	$(IGEN) \
 	%D%/filter \
 	%D%/gen \
 	%D%/ld-cache \

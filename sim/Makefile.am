@@ -79,8 +79,14 @@ endif
 if SIM_ENABLE_ARCH_m68hc11
 include m68hc11/local.mk
 endif
+if SIM_ENABLE_ARCH_mn10300
+include mn10300/local.mk
+endif
 if SIM_ENABLE_ARCH_sh
 include sh/local.mk
+endif
+if SIM_ENABLE_ARCH_v850
+include v850/local.mk
 endif
 
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
