@@ -532,15 +532,15 @@ distclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)
 force:
 
 Makefile: Makefile.in $(srccom)/Make-common.in $(config.status)
-@SIM_COMMON_BUILD_FALSE@	CONFIG_HEADERS= $(SHELL) ./config.status
-@SIM_COMMON_BUILD_TRUE@	pwd=`pwd` && subdir=`basename "$$pwd"` && cd .. && \
+@SIM_COMMON_BUILD_FALSE@	$(ECHO_GEN) CONFIG_HEADERS= $(SHELL) ./config.status
+@SIM_COMMON_BUILD_TRUE@	$(ECHO_GEN) pwd=`pwd` && subdir=`basename "$$pwd"` && cd .. && \
 @SIM_COMMON_BUILD_TRUE@		$(SHELL) ./config.status Make-common.sim $$subdir/Makefile.sim $$subdir/Makefile
 
 @SIM_COMMON_BUILD_FALSE@config.status: configure
-@SIM_COMMON_BUILD_FALSE@	$(SHELL) ./config.status --recheck
+@SIM_COMMON_BUILD_FALSE@	$(ECHO_GEN) $(SHELL) ./config.status --recheck
 
 .gdbinit: # config.status $(srccom)/gdbinit.in
-@SIM_COMMON_BUILD_FALSE@	CONFIG_FILES=$@:../common/gdbinit.in CONFIG_HEADERS= $(SHELL) ./config.status
+@SIM_COMMON_BUILD_FALSE@	$(ECHO_GEN) CONFIG_FILES=$@:../common/gdbinit.in CONFIG_HEADERS= $(SHELL) ./config.status
 
 
 # CGEN support
