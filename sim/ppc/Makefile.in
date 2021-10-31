@@ -636,7 +636,7 @@ defines.h: tmp-defines; @true
 tmp-defines: config.h Makefile
 	sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > tmp-defines.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-defines.h defines.h
-	touch tmp-defines
+	$(SILENCE) touch $@
 
 #
 # Rules to create the built c source code files
@@ -649,7 +649,7 @@ tmp-dgen: dgen ppc-spr-table $(srcroot)/move-if-change
 		-n spreg.c -p  tmp-spreg.c
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-spreg.h spreg.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-spreg.c spreg.c
-	touch tmp-dgen
+	$(SILENCE) touch $@
 
 tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
 	$(IGEN) $(IGEN_FLAGS) \
@@ -679,7 +679,7 @@ tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c model.c
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h support.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c support.c
-	touch tmp-igen
+	$(SILENCE) touch $@
 
 # NOTE: Some versions of make don't handle files created as side-effects
 # uncomment the below if that is the case.
@@ -785,7 +785,7 @@ tmp-hw: Makefile $(HW_SRC) $(srcroot)/move-if-change
 		> tmp-hw.c
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-hw.h hw.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-hw.c hw.c
-	touch tmp-hw
+	$(SILENCE) touch $@
 
 hw_cpu.o: hw_cpu.c $(DEVICE_TABLE_H) $(HW_CPU_H) $(INTERRUPTS_H) $(CPU_H)
 hw_com.o: hw_com.c $(DEVICE_TABLE_H)
@@ -828,7 +828,7 @@ tmp-pk: Makefile $(PACKAGE_SRC) $(srcroot)/move-if-change
 		-e 's/$$/_create_instance;/' \
 		> tmp-pk.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-pk.h pk.h
-	touch tmp-pk
+	$(SILENCE) touch $@
 
 pk_disklabel.o: pk_disklabel.c $(DEVICE_TABLE_H) $(PK_H)
 # ignore this line, it stops make from getting confused

@@ -179,7 +179,7 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-engine.h engine.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-engine.c engine.c
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-irun.c irun.c
-	touch tmp-igen
+	$(SILENCE) touch $@
 
 BUILT_SRC_FROM_M16 = \
 	m16_icache.h \
@@ -292,7 +292,7 @@ tmp-m16: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		#
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
-	touch tmp-m16
+	$(SILENCE) touch $@
 
 BUILT_SRC_FROM_MICROMIPS = \
 	micromips16_icache.h \
@@ -451,7 +451,7 @@ tmp-micromips: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		#
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
-	touch tmp-micromips
+	$(SILENCE) touch $@
 
 BUILT_SRC_FROM_MULTI = @sim_multi_src@
 SIM_MULTI_IGEN_CONFIGS = @sim_multi_igen_configs@
@@ -527,7 +527,7 @@ tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 	  $(SHELL) $(srcdir)/../../move-if-change tmp-engine.c \
 						  $${p}_engine.c ; \
 	done
-	touch tmp-mach-multi
+	$(SILENCE) touch $@
 tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 	$(IGEN_RUN) \
 		$(IGEN_TRACE) \
@@ -545,7 +545,7 @@ tmp-itable-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 		#
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
-	touch tmp-itable-multi
+	$(SILENCE) touch $@
 tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	for t in $(SIM_MULTI_IGEN_CONFIGS); do \
 	  case $${t} in \
@@ -580,7 +580,7 @@ tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
              ;;\
 	  esac \
 	done
-	touch tmp-run-multi
+	$(SILENCE) touch $@
 
 clean-extra:
 	rm -f $(BUILT_SRC_FROM_GEN)

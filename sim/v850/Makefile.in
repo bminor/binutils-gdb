@@ -102,7 +102,7 @@ tmp-igen: $(IGEN_INSN) $(IGEN_DC) $(IGEN)
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-engine.h engine.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-engine.c engine.c
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-irun.c irun.c
-	touch tmp-igen
+	$(SILENCE) touch $@
 
 clean-extra: clean-igen
 	rm -f table.c simops.h gencode

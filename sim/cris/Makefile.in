@@ -75,7 +75,7 @@ stamp-v10fmloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 		-cpu crisv10f -infile $(srcdir)/mloop.in
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin engv10.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloopv10f.c
-	touch stamp-v10fmloop
+	$(SILENCE) touch $@
 
 # CRISV32 objs
 
@@ -94,7 +94,7 @@ stamp-v32fmloop: stamp-v10fmloop $(srcdir)/../common/genmloop.sh mloop.in Makefi
 		-cpu crisv32f -infile $(srcdir)/mloop.in
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin engv32.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloopv32f.c
-	touch stamp-v32fmloop
+	$(SILENCE) touch $@
 
 cris-clean:
 	for v in 10 32; do \
@@ -111,7 +111,7 @@ stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CPU_DIR)/cris.cpu Makefile
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=crisv10,crisv32 \
 	  archfile=$(CPU_DIR)/cris.cpu \
 	  FLAGS="with-scache with-profile=fn"
-	touch stamp-arch
+	$(SILENCE) touch $@
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 
 # The sed-hack is supposed to be temporary, until we get CGEN to emit it.
@@ -120,7 +120,7 @@ stamp-v10fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/cr
 	  archfile=$(CPU_DIR)/cris.cpu \
 	  cpu=crisv10f mach=crisv10 SUFFIX=v10 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $(srcdir)/semv10-switch.c $(srcdir)/semcrisv10f-switch.c
-	touch stamp-v10fcpu
+	$(SILENCE) touch $@
 cpuv10.h cpuv10.c semcrisv10f-switch.c modelv10.c decodev10.c decodev10.h: $(CGEN_MAINT) stamp-v10fcpu
 
 stamp-v32fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/cris.cpu Makefile
@@ -128,5 +128,5 @@ stamp-v32fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/cr
 	  archfile=$(CPU_DIR)/cris.cpu \
 	  cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $(srcdir)/semv32-switch.c $(srcdir)/semcrisv32f-switch.c
-	touch stamp-v32fcpu
+	$(SILENCE) touch $@
 cpuv32.h cpuv32.c semcrisv32f-switch.c modelv32.c decodev32.c decodev32.h: $(CGEN_MAINT) stamp-v32fcpu

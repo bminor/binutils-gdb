@@ -62,7 +62,7 @@ stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 		-cpu frvbf -infile $(srcdir)/mloop.in
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin eng.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
-	touch stamp-mloop
+	$(SILENCE) touch $@
 
 frv-clean:
 	rm -f mloop.c eng.h stamp-mloop
@@ -73,7 +73,7 @@ stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(srcdir)/../../cpu/frv.cpu
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
 	  archfile=$(srcdir)/../../cpu/frv.cpu \
 	  FLAGS="with-scache"
-	touch stamp-arch
+	$(SILENCE) touch $@
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 #	@true
 
@@ -83,6 +83,6 @@ stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(srcdir)/../../c
 	  archfile=$(srcdir)/../../cpu/frv.cpu \
 	  FLAGS="with-scache with-profile=fn with-generic-write with-parallel-only" \
 	  EXTRAFILES="$(CGEN_CPU_SEM)"
-	touch stamp-cpu
+	$(SILENCE) touch $@
 cpu.h sem.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu
 #	@true

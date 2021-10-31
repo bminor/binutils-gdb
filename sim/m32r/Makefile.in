@@ -64,7 +64,7 @@ stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 		-cpu m32rbf -infile $(srcdir)/mloop.in
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin eng.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
-	touch stamp-mloop
+	$(SILENCE) touch $@
 
 # M32RX objs
 
@@ -81,7 +81,7 @@ stamp-xmloop: $(srcdir)/../common/genmloop.sh mloopx.in Makefile
 		-outfile-suffix x
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change engx.hin engx.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloopx.cin mloopx.c
-	touch stamp-xmloop
+	$(SILENCE) touch $@
 
 # M32R2 objs
 
@@ -98,7 +98,7 @@ stamp-2mloop: $(srcdir)/../common/genmloop.sh mloop2.in Makefile
 		-outfile-suffix 2
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng2.hin eng2.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop2.cin mloop2.c
-	touch stamp-2mloop
+	$(SILENCE) touch $@
 
 m32r-clean:
 	rm -f mloop.c eng.h stamp-mloop
@@ -115,7 +115,7 @@ stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CPU_DIR)/m32r.cpu Makefile
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
 	  archfile=$(CPU_DIR)/m32r.cpu \
 	  FLAGS="with-scache with-profile=fn"
-	touch stamp-arch
+	$(SILENCE) touch $@
 $(srcdir)/arch.h $(srcdir)/arch.c $(srcdir)/cpuall.h: $(CGEN_MAINT) stamp-arch
 	@true
 
@@ -125,7 +125,7 @@ stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/m32r.c
 	  archfile=$(CPU_DIR)/m32r.cpu \
 	  FLAGS="with-scache with-profile=fn" \
 	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
-	touch stamp-cpu
+	$(SILENCE) touch $@
 $(srcdir)/cpu.h $(srcdir)/sem.c $(srcdir)/sem-switch.c $(srcdir)/model.c $(srcdir)/decode.c $(srcdir)/decode.h: $(CGEN_MAINT) stamp-cpu
 	@true
 
@@ -135,7 +135,7 @@ stamp-xcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/m32r.
 	  archfile=$(CPU_DIR)/m32r.cpu \
 	  FLAGS="with-scache with-profile=fn" \
 	  EXTRAFILES="$(CGEN_CPU_SEMSW)"
-	touch stamp-xcpu
+	$(SILENCE) touch $@
 $(srcdir)/cpux.h $(srcdir)/semx-switch.c $(srcdir)/modelx.c $(srcdir)/decodex.c $(srcdir)/decodex.h: $(CGEN_MAINT) stamp-xcpu
 	@true
 
@@ -145,6 +145,6 @@ stamp-2cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/m32r.
 	  archfile=$(CPU_DIR)/m32r.cpu \
 	  FLAGS="with-scache with-profile=fn" \
 	  EXTRAFILES="$(CGEN_CPU_SEMSW)"
-	touch stamp-2cpu
+	$(SILENCE) touch $@
 $(srcdir)/cpu2.h $(srcdir)/sem2-switch.c $(srcdir)/model2.c $(srcdir)/decode2.c $(srcdir)/decode2.h: $(CGEN_MAINT) stamp-2cpu
 	@true

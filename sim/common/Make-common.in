@@ -266,7 +266,7 @@ stamp-tvals: gentmap
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-tvals.h targ-vals.h
 	./gentmap -c >tmp-tmap.c
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
-	touch stamp-tvals
+	$(SILENCE) touch $@
 
 #
 # Rules for building sim-* components.  Triggered by listing the corresponding
@@ -425,7 +425,7 @@ stamp-hw: Makefile.in $(srccom)/Make-common.in $(config.status) Makefile
 	echo "  NULL," >> tmp-hw.h
 	echo "};" >> tmp-hw.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-hw.h hw-config.h
-	@echo stamp > stamp-hw
+	$(SILENCE) touch $@
 
 test-hw-events: $(srccom)/hw-events.c libsim.a
 	$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
@@ -451,7 +451,7 @@ stamp-modules: Makefile $(SIM_OBJS:.o=.c)
 	) >$@.tmp
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $@.tmp modules.c
 	@rm -f $@.l-tmp $@.tmp
-	touch $@
+	$(SILENCE) touch $@
 
 # CGEN support.
 

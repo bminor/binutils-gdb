@@ -43,7 +43,7 @@ stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 		-cpu lm32bf -infile $(srcdir)/mloop.in
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin eng.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
-	touch stamp-mloop
+	$(SILENCE) touch $@
 
 lm32-clean:
 	rm -f mloop.c eng.h stamp-mloop
@@ -54,7 +54,7 @@ stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(CPU_DIR)/lm32.cpu
 	$(MAKE) cgen-arch $(CGEN_FLAGS_TO_PASS) mach=all \
 	  archfile=$(CPU_DIR)/lm32.cpu \
 	  FLAGS="with-scache with-profile=fn"
-	touch stamp-arch
+	$(SILENCE) touch $@
 arch.h arch.c cpuall.h: $(CGEN_MAINT) stamp-arch
 
 stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/lm32.cpu
@@ -63,5 +63,5 @@ stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/lm32.c
 	  archfile=$(CPU_DIR)/lm32.cpu \
 	  FLAGS="with-scache with-profile=fn" \
 	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
-	touch stamp-cpu
+	$(SILENCE) touch $@
 cpu.h sem.c sem-switch.c model.c decode.c decode.h: $(CGEN_MAINT) stamp-cpu

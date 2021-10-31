@@ -77,7 +77,7 @@ stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 		-cpu or1k32bf -infile $(srcdir)/mloop.in
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin eng.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
-	touch stamp-mloop
+	$(SILENCE) touch $@
 or1k.o: or1k.c $(OR1K32BF_INCLUDE_DEPS)
 	$(COMPILE) $<
 	$(POSTCOMPILE)
@@ -112,7 +112,7 @@ stamp-arch: $(CGEN_READ_SCM) $(CGEN_ARCH_SCM) $(OR1K_CGEN_DEPS)
 	  mach=or32,or32nd \
 	  archfile=$(CPU_DIR)/or1k.cpu \
 	  FLAGS="with-scache"
-	touch $@
+	$(SILENCE) touch $@
 $(srcdir)/arch.h $(srcdir)/arch.c $(srcdir)/cpuall.h: $(CGEN_MAINT) stamp-arch
 	@true
 
@@ -123,6 +123,6 @@ stamp-cpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(OR1K_CGEN_DEPS)
 	  archfile=$(CPU_DIR)/or1k.cpu \
 	  FLAGS="with-scache" \
 	  EXTRAFILES="$(CGEN_CPU_SEM) $(CGEN_CPU_SEMSW)"
-	touch $@
+	$(SILENCE) touch $@
 $(srcdir)/cpu.h $(srcdir)/cpu.c $(srcdir)/model.c $(srcdir)/sem.c $(srcdir)/sem-switch.c $(srcdir)/decode.c $(srcdir)/decode.h: $(CGEN_MAINT) stamp-cpu
 	@true
