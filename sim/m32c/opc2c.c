@@ -513,7 +513,6 @@ main (int argc, char **argv)
   if (argc > 2 && strcmp (argv[1], "-l") == 0)
     {
       sim_log = fopen (argv[2], "w");
-      fprintf (stderr, "sim_log: %s\n", argv[2]);
       argc -= 2;
       argv += 2;
     }
