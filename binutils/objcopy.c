@@ -1894,9 +1894,8 @@ static bool
 copy_unknown_object (bfd *ibfd, bfd *obfd)
 {
   char *cbuf;
-  int tocopy;
-  long ncopied;
-  long size;
+  bfd_size_type tocopy;
+  off_t size;
   struct stat buf;
 
   if (bfd_stat_arch_elt (ibfd, &buf) != 0)
@@ -1924,30 +1923,28 @@ copy_unknown_object (bfd *ibfd, bfd *obfd)
 	    bfd_get_archive_filename (ibfd), bfd_get_filename (obfd));
 
   cbuf = (char *) xmalloc (BUFSIZE);
-  ncopied = 0;
-  while (ncopied < size)
+  while (size != 0)
     {
-      tocopy = size - ncopied;
-      if (tocopy > BUFSIZE)
+      if (size > BUFSIZE)
 	tocopy = BUFSIZE;
+      else
+	tocopy = size;
 
-      if (bfd_bread (cbuf, (bfd_size_type) tocopy, ibfd)
-	  != (bfd_size_type) tocopy)
+      if (bfd_bread (cbuf, tocopy, ibfd) != tocopy)
 	{
 	  bfd_nonfatal_message (NULL, ibfd, NULL, NULL);
 	  free (cbuf);
 	  return false;
 	}
 
-      if (bfd_bwrite (cbuf, (bfd_size_type) tocopy, obfd)
-	  != (bfd_size_type) tocopy)
+      if (bfd_bwrite (cbuf, tocopy, obfd) != tocopy)
 	{
 	  bfd_nonfatal_message (NULL, obfd, NULL, NULL);
 	  free (cbuf);
 	  return false;
 	}
 
-      ncopied += tocopy;
+      size -= tocopy;
     }
 
   /* We should at least to be able to read it back when copying an
