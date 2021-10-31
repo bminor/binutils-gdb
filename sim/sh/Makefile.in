@@ -34,21 +34,21 @@ SIM_WERROR_CFLAGS =
 ## COMMON_POST_CONFIG_FRAG
 
 code.c: gencode
-	./gencode -x >code.c
+	$(ECHO_GEN) ./gencode -x >code.c
 #	indent code.c
 
 table.c: gencode
-	./gencode -s >table.c
+	$(ECHO_GEN) ./gencode -s >table.c
 #	indent table.c
 
 ppi.c: gencode
-	./gencode -p >ppi.c
+	$(ECHO_GEN) ./gencode -p >ppi.c
 
 gencode.o: gencode.c
-	$(COMPILE_FOR_BUILD) -c $< -o $@
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $< -o $@
 
 gencode: gencode.o
-	$(LINK_FOR_BUILD) $^
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) $^
 
 sh-clean:
 	rm -f gencode code.c table.c

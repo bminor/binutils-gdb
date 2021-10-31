@@ -42,16 +42,16 @@ SIM_EXTRA_CLEAN = clean-extra
 ## COMMON_POST_CONFIG_FRAG
 
 m68hc11int.c: gencode
-	./gencode -m6811 > $@
+	$(ECHO_GEN) ./gencode -m6811 > $@
 
 m68hc12int.c: gencode
-	./gencode -m6812 > $@
+	$(ECHO_GEN) ./gencode -m6812 > $@
 
 gencode.o: gencode.c
-	$(COMPILE_FOR_BUILD) -c $< -o $@
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $< -o $@
 
 gencode: gencode.o
-	$(LINK_FOR_BUILD) $^
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) $^
 
 clean-extra:
 	rm -f gencode m68hc11int.c

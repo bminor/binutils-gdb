@@ -36,19 +36,19 @@ NL_TARGET = -DNL_TARGET_cr16
 ## COMMON_POST_CONFIG_FRAG
 
 simops.h: gencode
-	./gencode -h >$@
+	$(ECHO_GEN) ./gencode -h >$@
 
 table.c: gencode simops.h
-	./gencode >$@
+	$(ECHO_GEN) ./gencode >$@
 
 gencode.o: gencode.c $(INCLUDE)
-	$(COMPILE_FOR_BUILD) $(WARN_CFLAGS) -c $(srcdir)/gencode.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) $(WARN_CFLAGS) -c $(srcdir)/gencode.c
 
 cr16-opc.o: $(srcdir)/../../opcodes/cr16-opc.c
-	$(COMPILE_FOR_BUILD) $(WARN_CFLAGS) -c $(srcdir)/../../opcodes/cr16-opc.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) $(WARN_CFLAGS) -c $(srcdir)/../../opcodes/cr16-opc.c
 
 gencode: gencode.o cr16-opc.o
-	$(LINK_FOR_BUILD) gencode.o cr16-opc.o
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) gencode.o cr16-opc.o
 
 clean-extra:
 	rm -f table.c simops.h gencode
