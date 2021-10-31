@@ -1,12 +1,7 @@
 #    Makefile template for Configure for the MIPS simulator.
 #    Written by Cygnus Support.
 
-SHELL = @SHELL@
-
 ## COMMON_PRE_CONFIG_FRAG
-
-srcdir=@srcdir@
-srcroot=$(srcdir)/../../
 
 # Object files created by various simulator generators.
 
