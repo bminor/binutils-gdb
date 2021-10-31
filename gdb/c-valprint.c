@@ -438,6 +438,7 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       c_value_print_struct (val, stream, recurse, options);
       break;
 
+    case TYPE_CODE_CHAR:
     case TYPE_CODE_INT:
       c_value_print_int (val, stream, options);
       break;
@@ -458,7 +459,6 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
     case TYPE_CODE_ERROR:
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_COMPLEX:
-    case TYPE_CODE_CHAR:
     default:
       generic_value_print (val, stream, recurse, options, &c_decorations);
       break;

@@ -88,7 +88,7 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
     {
       const char *name = elttype->name ();
 
-      if (elttype->code () == TYPE_CODE_CHAR || !name)
+      if (name == nullptr)
 	{
 	  result = C_CHAR;
 	  goto done;
