@@ -141,7 +141,7 @@ TARGETLIB	= libsim.a
 all:	run$(EXEEXT) $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
-	$(CC) -c $(STD_CFLAGS) $<
+	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) $<
 
 
 # Headers outside sim/ppc.
@@ -521,16 +521,15 @@ PACKAGE_OBJ = @sim_pk_obj@
 
 
 psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
+	$(ECHO_CCLD) $(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
 
 run$(EXEEXT): psim$(EXEEXT)
-	rm -f $@
-	ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
+	$(SILENCE) rm -f $@
+	$(ECHO_GEN) ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
 
 $(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-pk tmp-defines $(LIB_OBJ) $(GDB_OBJ)
-	rm -f $(TARGETLIB)
-	$(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
-	$(RANLIB) $(TARGETLIB)
+	$(ECHO_AR) $(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
+	$(ECHO_RANLIB) $(RANLIB) $(TARGETLIB)
 
 psim.o: psim.c $(CPU_H) $(IDECODE_H) $(OPTIONS_H) $(TREE_H) $(BFD_H)
 
@@ -598,43 +597,40 @@ mon.o: mon.c $(BASICS_H) $(CPU_H) $(MON_H)
 # GDB after 4.16 expects the default_callback structure to be setup.
 # As a kludge, build the common stuff here for now.
 gentmap: $(srcdir)/../common/gentmap.c Makefile targ-vals.def
-	$(LINK_FOR_BUILD) -I. -I../common -I$(srcdir)/../common \
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) -I. -I../common -I$(srcdir)/../common \
 		$(srcdir)/../common/gentmap.c -DUSE_CONFIG_H
 
 targ-vals.def: $(srcdir)/../common/nltvals.def
-	rm -f targ-vals.def tmp-def
-	cat $(srcdir)/../common/nltvals.def > tmp-vals.def
+	$(ECHO_GEN) cat $(srcdir)/../common/nltvals.def > tmp-vals.def
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-vals.def targ-vals.def
 
 targ-vals.h: stamp-vals ; @true
 stamp-vals: Makefile gentmap $(srcroot)/move-if-change
-	rm -f tmp-vals.h
-	./gentmap -h > tmp-vals.h
+	$(ECHO_GEN) ./gentmap -h > tmp-vals.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-vals.h targ-vals.h
-	@echo stamp > stamp-vals
+	$(SILENCE) touch $@
 
 targ-map.c: stamp-map; @true
 stamp-map: Makefile gentmap $(srcroot)/move-if-change
-	rm -f tmp-map.c
-	./gentmap -c > tmp-map.c
+	$(ECHO_GEN) ./gentmap -c > tmp-map.c
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-map.c targ-map.c
-	@echo stamp > stamp-map
+	$(SILENCE) touch $@
 
 callback.o: $(srcdir)/../common/callback.c $(TARG_VALS_H) $(CONFIG_H)
-	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/callback.c
+	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/callback.c
 
 targ-map.o: targ-map.c $(ANSIDECL_H) $(GDB_CALLBACK_H) $(TARG_VALS_H)
 
 sim-fpu.o: $(srcdir)/../common/sim-fpu.c $(CONFIG_H)
-	$(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-fpu.c 
+	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-fpu.c 
 
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile
-	$(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' '-DDGEN_FLAGS="$(DGEN_FLAGS)"' $(srcdir)/options.c
+	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' '-DDGEN_FLAGS="$(DGEN_FLAGS)"' $(srcdir)/options.c
 
 defines.h: tmp-defines; @true
 tmp-defines: config.h Makefile
-	sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > tmp-defines.h
+	$(ECHO_GEN) sed -n -e '/^#define HAVE_/s/ 1$$/",/' -e '/^#define HAVE_/s//"HAVE_/p' < config.h > tmp-defines.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-defines.h defines.h
 	$(SILENCE) touch $@
 
@@ -643,7 +639,7 @@ tmp-defines: config.h Makefile
 #
 
 tmp-dgen: dgen ppc-spr-table $(srcroot)/move-if-change
-	$(DGEN) $(DGEN_FLAGS) \
+	$(ECHO_GEN) $(DGEN) $(DGEN_FLAGS) \
 		-r $(srcdir)/ppc-spr-table \
 		-n spreg.h -hp tmp-spreg.h \
 		-n spreg.c -p  tmp-spreg.c
@@ -652,7 +648,7 @@ tmp-dgen: dgen ppc-spr-table $(srcroot)/move-if-change
 	$(SILENCE) touch $@
 
 tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
-	$(IGEN) $(IGEN_FLAGS) \
+	$(ECHO_GEN) $(IGEN) $(IGEN_FLAGS) \
 		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
 		-I $(srcdir) -i $(srcdir)/ppc-instructions \
 		-n icache.h    -hc tmp-icache.h \
@@ -689,77 +685,77 @@ itable.h itable.c icache.h icache.c idecode.h idecode.c semantics.h semantics.c 
 spreg.h spreg.c: tmp-dgen
 
 dgen: dgen.o table.o lf.o misc.o filter_host.o
-	$(LINK_FOR_BUILD) dgen.o table.o lf.o misc.o filter_host.o
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) dgen.o table.o lf.o misc.o filter_host.o
 
 igen: igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
-	$(LINK_FOR_BUILD) igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
 
 filter_host.c: filter_filename.c
-	cat $(srcdir)/filter_filename.c > filter_host.c
+	$(ECHO_GEN) cat $(srcdir)/filter_filename.c > filter_host.c
 
 filter_host.o: filter_host.c $(CONFIG_H) $(FILTER_FILENAME_H)
-	$(COMPILE_FOR_BUILD) -c filter_host.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c filter_host.c
 
 table.o: table.c $(CONFIG_H) $(MISC_H) $(LF_H) $(TABLE_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/table.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/table.c
 
 lf.o: lf.c $(CONFIG_H) $(MISC_H) $(LF_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/lf.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/lf.c
 
 filter.o: filter.c $(CONFIG_H) $(MISC_H) $(FILTER_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/filter.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/filter.c
 tmp-filter: filter.c $(MISC_H) misc.o
-	$(LINK_FOR_BUILD) -DMAIN $(srcdir)/filter.c misc.o
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) -DMAIN $(srcdir)/filter.c misc.o
 
 ld-decode.o: ld-decode.c $(MISC_H) $(LF_H) $(TABLE_H) $(LD_DECODE_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/ld-decode.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/ld-decode.c
 tmp-ld-decode: ld-decode.c misc.o lf.o table.o filter_host.o 
-	$(LINK_FOR_BUILD) -DMAIN $(srcdir)/ld-decode.c misc.o lf.o table.o filter_host.o
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) -DMAIN $(srcdir)/ld-decode.c misc.o lf.o table.o filter_host.o
 
 ld-cache.o: ld-cache.c $(MISC_H) $(LF_H) $(TABLE_H) $(LD_CACHE_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/ld-cache.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/ld-cache.c
 tmp-ld-cache: ld-cache.c misc.o lf.o table.o filter_host.o 
-	$(LINK_FOR_BUILD) -DMAIN $(srcdir)/ld-cache.c misc.o lf.o table.o filter_host.o
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) -DMAIN $(srcdir)/ld-cache.c misc.o lf.o table.o filter_host.o
 
 ld-insn.o: ld-insn.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/ld-insn.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/ld-insn.c
 tmp-ld-insn: ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o
-	$(LINK_FOR_BUILD) -DMAIN $(srcdir)/ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o
+	$(ECHO_CCLD) $(LINK_FOR_BUILD) -DMAIN $(srcdir)/ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o
 
 gen-model.o: gen-model.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_CACHE_H) $(LD_DECODE_H) $(LD_INSN_H) $(GEN_MODEL_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/gen-model.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-model.c
 
 gen-itable.o: gen-itable.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_CACHE_H) $(LD_DECODE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_ITABLE_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/gen-itable.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-itable.c
 
 gen-icache.o: gen-icache.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_SEMANTICS_H) $(GEN_IDECODE_H) $(GEN_ICACHE_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/gen-icache.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-icache.c
 
 gen-semantics.o: gen-semantics.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_SEMANTICS_H) $(GEN_ICACHE_H) $(GEN_IDECODE_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/gen-semantics.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-semantics.c
 
 gen-idecode.o: gen-idecode.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_IDECODE_H) $(GEN_ICACHE_H) $(GEN_SEMANTICS_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/gen-idecode.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-idecode.c
 
 gen-support.o: gen-support.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_SEMANTICS_H) $(GEN_SUPPORT_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/gen-support.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-support.c
 
 dgen.o: dgen.c $(CONFIG_H) $(MISC_H) $(LF_H) $(TABLE_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/dgen.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/dgen.c
 
 igen.o: igen.c $(MISC_H) $(LF_H) $(TABLE_H) $(CONFIG_H) $(FILTER_H) $(LD_CACHE_H) $(LD_DECODE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_MODEL_H) $(GEN_ICACHE_H) $(GEN_ITABLE_H) $(GEN_IDECODE_H) $(GEN_SEMANTICS_H) $(GEN_SUPPORT_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/igen.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/igen.c
 
 misc.o: misc.c $(CONFIG_H) $(MISC_H)
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/misc.c
+	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/misc.c
 
 
 
 # real hardware
 hw.c hw.h: tmp-hw; @true
 tmp-hw: Makefile $(HW_SRC) $(srcroot)/move-if-change
-	# The first for loop is to remove duplicates.
-	f=""; \
+	$(ECHO_GEN)# The first for loop is to remove duplicates.
+	$(SILENCE) f=""; \
 	for i in $(HW_SRC) ; do \
 	  case " $$f " in \
 	    *" $$i "*) ;; \
@@ -771,7 +767,7 @@ tmp-hw: Makefile $(HW_SRC) $(srcroot)/move-if-change
 		-e 's/^/extern const device_descriptor /' \
 		-e 's/$$/_device_descriptor\[\];/' \
 		> tmp-hw.h
-	f=""; \
+	$(SILENCE) f=""; \
 	for i in $(HW_SRC) ; do \
 	  case " $$f " in \
 	    *" $$i "*) ;; \
@@ -814,8 +810,8 @@ hw_vm.o: hw_vm.c $(DEVICE_TABLE_H) $(CPU_H)
 # real packages
 pk.h: tmp-pk; @true
 tmp-pk: Makefile $(PACKAGE_SRC) $(srcroot)/move-if-change
-	# The first for loop is to remove duplicates.
-	f=""; \
+	$(ECHO_GEN)# The first for loop is to remove duplicates.
+	$(SILENCE) f=""; \
 	for i in $(PACKAGE_SRC) ; do \
 	  case " $$f " in \
 	    *" $$i "*) ;; \
