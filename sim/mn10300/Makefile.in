@@ -65,7 +65,7 @@ IGEN_INSN=$(srcdir)/mn10300.igen
 IGEN_INSN_INC=$(srcdir)/am33.igen $(srcdir)/am33-2.igen
 IGEN_DC=$(srcdir)/mn10300.dc
 tmp-igen: $(IGEN_INSN) $(IGEN_INSN_INC) $(IGEN_DC) $(IGEN)
-	$(IGEN_RUN) \
+	$(ECHO_IGEN) $(IGEN_RUN) \
 		$(IGEN_TRACE) \
 		-G gen-direct-access \
                 -M mn10300,am33 -G gen-multi-sim=am33 \

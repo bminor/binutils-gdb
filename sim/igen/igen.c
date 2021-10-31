@@ -1166,10 +1166,12 @@ main (int argc, char **argv, char **envp)
 		       "B:D:F:G:H:I:M:N:P:T:W:o:k:i:n:hc:d:e:m:r:s:t:f:x"))
 	 != -1)
     {
+#if 0  /* For debugging.  */
       fprintf (stderr, "  -%c ", ch);
       if (optarg)
 	fprintf (stderr, "%s ", optarg);
       fprintf (stderr, "\\\n");
+#endif
 
       switch (ch)
 	{
