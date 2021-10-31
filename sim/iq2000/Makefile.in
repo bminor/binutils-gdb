@@ -60,8 +60,8 @@ stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -fast -pbb -switch sem-switch.c \
 		-cpu iq2000bf -infile $(srcdir)/mloop.in
-	$(SHELL) $(srcroot)/move-if-change eng.hin eng.h
-	$(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin eng.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
 	touch stamp-mloop
 
 iq2000-clean:

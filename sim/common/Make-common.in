@@ -263,9 +263,9 @@ targ-vals.h targ-map.c: stamp-tvals
 stamp-tvals: gentmap
 	rm -f tmp-tvals.h tmp-tmap.c
 	./gentmap -h >tmp-tvals.h
-	$(SHELL) $(srcroot)/move-if-change tmp-tvals.h targ-vals.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-tvals.h targ-vals.h
 	./gentmap -c >tmp-tmap.c
-	$(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
 	touch stamp-tvals
 
 #
@@ -424,7 +424,7 @@ stamp-hw: Makefile.in $(srccom)/Make-common.in $(config.status) Makefile
 	done >> tmp-hw.h
 	echo "  NULL," >> tmp-hw.h
 	echo "};" >> tmp-hw.h
-	$(SHELL) $(srcroot)/move-if-change tmp-hw.h hw-config.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-hw.h hw-config.h
 	@echo stamp > stamp-hw
 
 test-hw-events: $(srccom)/hw-events.c libsim.a
@@ -449,7 +449,7 @@ stamp-modules: Makefile $(SIM_OBJS:.o=.c)
 	echo '};'; \
 	echo 'const int sim_modules_detected_len = ARRAY_SIZE (sim_modules_detected);'; \
 	) >$@.tmp
-	$(SHELL) $(srcroot)/move-if-change $@.tmp modules.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $@.tmp modules.c
 	@rm -f $@.l-tmp $@.tmp
 	touch $@
 

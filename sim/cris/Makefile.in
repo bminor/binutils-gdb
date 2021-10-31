@@ -73,8 +73,8 @@ stamp-v10fmloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -no-fast -pbb -switch semcrisv10f-switch.c \
 		-cpu crisv10f -infile $(srcdir)/mloop.in
-	$(SHELL) $(srcroot)/move-if-change eng.hin engv10.h
-	$(SHELL) $(srcroot)/move-if-change mloop.cin mloopv10f.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin engv10.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloopv10f.c
 	touch stamp-v10fmloop
 
 # CRISV32 objs
@@ -92,8 +92,8 @@ stamp-v32fmloop: stamp-v10fmloop $(srcdir)/../common/genmloop.sh mloop.in Makefi
 	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -no-fast -pbb -switch semcrisv32f-switch.c \
 		-cpu crisv32f -infile $(srcdir)/mloop.in
-	$(SHELL) $(srcroot)/move-if-change eng.hin engv32.h
-	$(SHELL) $(srcroot)/move-if-change mloop.cin mloopv32f.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin engv32.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloopv32f.c
 	touch stamp-v32fmloop
 
 cris-clean:
@@ -119,7 +119,7 @@ stamp-v10fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/cr
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
 	  archfile=$(CPU_DIR)/cris.cpu \
 	  cpu=crisv10f mach=crisv10 SUFFIX=v10 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
-	$(SHELL) $(srcroot)/move-if-change $(srcdir)/semv10-switch.c $(srcdir)/semcrisv10f-switch.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $(srcdir)/semv10-switch.c $(srcdir)/semcrisv10f-switch.c
 	touch stamp-v10fcpu
 cpuv10.h cpuv10.c semcrisv10f-switch.c modelv10.c decodev10.c decodev10.h: $(CGEN_MAINT) stamp-v10fcpu
 
@@ -127,6 +127,6 @@ stamp-v32fcpu: $(CGEN_READ_SCM) $(CGEN_CPU_SCM) $(CGEN_DECODE_SCM) $(CPU_DIR)/cr
 	$(MAKE) cgen-cpu-decode $(CGEN_FLAGS_TO_PASS) \
 	  archfile=$(CPU_DIR)/cris.cpu \
 	  cpu=crisv32f mach=crisv32 SUFFIX=v32 FLAGS="with-scache with-profile=fn" EXTRAFILES="$(CGEN_CPU_SEMSW)"
-	$(SHELL) $(srcroot)/move-if-change $(srcdir)/semv32-switch.c $(srcdir)/semcrisv32f-switch.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $(srcdir)/semv32-switch.c $(srcdir)/semcrisv32f-switch.c
 	touch stamp-v32fcpu
 cpuv32.h cpuv32.c semcrisv32f-switch.c modelv32.c decodev32.c decodev32.h: $(CGEN_MAINT) stamp-v32fcpu

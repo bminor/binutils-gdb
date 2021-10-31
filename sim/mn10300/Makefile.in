@@ -89,19 +89,19 @@ tmp-igen: $(IGEN_INSN) $(IGEN_INSN_INC) $(IGEN_DC) $(IGEN)
 		-n engine.h    -he tmp-engine.h \
 		-n engine.c    -e  tmp-engine.c \
 		-n irun.c      -r  tmp-irun.c
-	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.h icache.h
-	$(SHELL) $(srcdir)/../../move-if-change tmp-icache.c icache.c
-	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.h idecode.h
-	$(SHELL) $(srcdir)/../../move-if-change tmp-idecode.c idecode.c
-	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.h semantics.h
-	$(SHELL) $(srcdir)/../../move-if-change tmp-semantics.c semantics.c
-	$(SHELL) $(srcdir)/../../move-if-change tmp-model.h model.h
-	$(SHELL) $(srcdir)/../../move-if-change tmp-model.c model.c
-	$(SHELL) $(srcdir)/../../move-if-change tmp-support.h support.h
-	$(SHELL) $(srcdir)/../../move-if-change tmp-support.c support.c
-	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.h itable.h
-	$(SHELL) $(srcdir)/../../move-if-change tmp-itable.c itable.c
-	$(SHELL) $(srcdir)/../../move-if-change tmp-engine.h engine.h
-	$(SHELL) $(srcdir)/../../move-if-change tmp-engine.c engine.c
-	$(SHELL) $(srcdir)/../../move-if-change tmp-irun.c irun.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.h icache.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-icache.c icache.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.h idecode.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-idecode.c idecode.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.h semantics.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-semantics.c semantics.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.h model.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-model.c model.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.h support.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-support.c support.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.h itable.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-itable.c itable.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-engine.h engine.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-engine.c engine.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-irun.c irun.c
 	touch tmp-igen

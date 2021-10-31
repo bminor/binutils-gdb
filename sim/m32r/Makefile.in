@@ -62,8 +62,8 @@ stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -fast -pbb -switch sem-switch.c \
 		-cpu m32rbf -infile $(srcdir)/mloop.in
-	$(SHELL) $(srcroot)/move-if-change eng.hin eng.h
-	$(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng.hin eng.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop.cin mloop.c
 	touch stamp-mloop
 
 # M32RX objs
@@ -79,8 +79,8 @@ stamp-xmloop: $(srcdir)/../common/genmloop.sh mloopx.in Makefile
 		-mono -no-fast -pbb -parallel-write -switch semx-switch.c \
 		-cpu m32rxf -infile $(srcdir)/mloopx.in \
 		-outfile-suffix x
-	$(SHELL) $(srcroot)/move-if-change engx.hin engx.h
-	$(SHELL) $(srcroot)/move-if-change mloopx.cin mloopx.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change engx.hin engx.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloopx.cin mloopx.c
 	touch stamp-xmloop
 
 # M32R2 objs
@@ -96,8 +96,8 @@ stamp-2mloop: $(srcdir)/../common/genmloop.sh mloop2.in Makefile
 		-mono -no-fast -pbb -parallel-write -switch sem2-switch.c \
 		-cpu m32r2f -infile $(srcdir)/mloop2.in \
 		-outfile-suffix 2
-	$(SHELL) $(srcroot)/move-if-change eng2.hin eng2.h
-	$(SHELL) $(srcroot)/move-if-change mloop2.cin mloop2.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng2.hin eng2.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop2.cin mloop2.c
 	touch stamp-2mloop
 
 m32r-clean:

@@ -169,8 +169,8 @@ stamp-mloop-le: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -scache -prefix bpfbf_ebpfle -cpu bpfbf \
                 -infile $(srcdir)/mloop.in -outfile-suffix -le
-	$(SHELL) $(srcroot)/move-if-change eng-le.hin eng-le.h
-	$(SHELL) $(srcroot)/move-if-change mloop-le.cin mloop-le.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng-le.hin eng-le.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop-le.cin mloop-le.c
 	touch $@
 mloop-le.c eng-le.h: stamp-mloop-le
 	@true
@@ -179,8 +179,8 @@ stamp-mloop-be: $(srcdir)/../common/genmloop.sh mloop.in Makefile
 	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -scache -prefix bpfbf_ebpfbe -cpu bpfbf \
                 -infile $(srcdir)/mloop.in -outfile-suffix -be
-	$(SHELL) $(srcroot)/move-if-change eng-be.hin eng-be.h
-	$(SHELL) $(srcroot)/move-if-change mloop-be.cin mloop-be.c
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change eng-be.hin eng-be.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change mloop-be.cin mloop-be.c
 	touch $@
 mloop-be.c eng-be.h: stamp-mloop-be
 	@true
