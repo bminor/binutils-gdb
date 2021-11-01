@@ -158,8 +158,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 	      free_state (sd);
 	      return 0;
 	    }
-	  /*sim_io_printf (sd, "Allocating memory at 0x%x size 0x%x\n", base, limit); */
-	  sim_do_commandf (sd, "memory region 0x%x,0x%x", base, limit);
+	  /*sim_io_printf (sd, "Allocating memory at 0x%lx size 0x%lx\n", base, limit); */
+	  sim_do_commandf (sd, "memory region 0x%lx,0x%lx", base, limit);
 	}
     }
 

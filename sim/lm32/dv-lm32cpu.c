@@ -141,7 +141,7 @@ deliver_lm32cpu_interrupt (struct hw *me, void *data)
   SIM_DESC sd = hw_system (me);
   sim_cpu *cpu = STATE_CPU (sd, 0);	/* NB: fix CPU 0.  */
   address_word cia = CPU_PC_GET (cpu);
-  int interrupt = (int) data;
+  int interrupt = (uintptr_t) data;
 
 
   HW_TRACE ((me, "interrupt-check event"));
