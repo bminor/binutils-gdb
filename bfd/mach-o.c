@@ -5509,6 +5509,7 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
   struct mach_o_fat_header_external hdr;
   unsigned long i;
   size_t amt;
+  ufile_ptr filesize;
 
   if (bfd_seek (abfd, 0, SEEK_SET) != 0
       || bfd_bread (&hdr, sizeof (hdr), abfd) != sizeof (hdr))
@@ -5538,6 +5539,7 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
   if (adata->archentries == NULL)
     goto error;
 
+  filesize = bfd_get_file_size (abfd);
   for (i = 0; i < adata->nfat_arch; i++)
     {
       struct mach_o_fat_arch_external arch;
@@ -5548,6 +5550,15 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
       adata->archentries[i].offset = bfd_getb32 (arch.offset);
       adata->archentries[i].size = bfd_getb32 (arch.size);
       adata->archentries[i].align = bfd_getb32 (arch.align);
+      if (filesize != 0
+	  && (adata->archentries[i].offset > filesize
+	      || (adata->archentries[i].size
+		  > filesize - adata->archentries[i].offset)))
+	{
+	  bfd_release (abfd, adata);
+	  bfd_set_error (bfd_error_malformed_archive);
+	  return NULL;
+	}
     }
 
   abfd->tdata.mach_o_fat_data = adata;
