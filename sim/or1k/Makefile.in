@@ -55,9 +55,6 @@ SIM_EXTRA_LIBS = -lm
 
 SIM_EXTRA_CLEAN = or1k-clean
 
-# Code doesn't build cleanly yet.
-SIM_WERROR_CFLAGS =
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = or1k
