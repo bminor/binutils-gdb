@@ -40,8 +40,8 @@ SIM_EXTRA_CFLAGS = @SIM_FRV_TRAPDUMP_FLAGS@
 
 SIM_EXTRA_CLEAN = frv-clean
 
-# Code doesn't build cleanly yet.
-SIM_WERROR_CFLAGS =
+# Some modules don't build cleanly yet.
+memory.o sem.o: SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
 
