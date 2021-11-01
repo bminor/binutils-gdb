@@ -46,31 +46,30 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdint.h>
+
 /* bit based */
 typedef char natural8;
 typedef short natural16;
 typedef int natural32;
 
-typedef signed char signed8;
-typedef signed short signed16;
-typedef signed int signed32;
-
-typedef unsigned char unsigned8;
-typedef unsigned short unsigned16;
-typedef unsigned int unsigned32;
-
 #ifdef __GNUC__
 typedef long long natural64;
-typedef signed long long signed64;
-typedef unsigned long long unsigned64;
 #endif
 
 #ifdef _MSC_VER
 typedef __int64 natural64;
-typedef signed __int64 signed64;
-typedef unsigned __int64 unsigned64;
 #endif 
 
+typedef int8_t signed8;
+typedef int16_t signed16;
+typedef int32_t signed32;
+typedef int64_t signed64;
+
+typedef uint8_t unsigned8;
+typedef uint16_t unsigned16;
+typedef uint32_t unsigned32;
+typedef uint64_t unsigned64;
 
 /* byte based */
 typedef natural8 natural_1;
