@@ -682,11 +682,11 @@ xfer_mem (SIM_DESC sd,
     {
       sim_io_printf
 	(sd,
-	 "sim_%s %d bytes: 0x%08" PRIxTA " (%s) -> 0x%08lx (%s) -> 0x%08lx (%s)\n",
+	 "sim_%s %d bytes: 0x%08" PRIxTA " (%s) -> 0x%08lx (%s) -> %p (%s)\n",
 	 write_p ? "write" : "read",
 	 phys_size, virt, last_from,
 	 phys, last_to,
-	 (long) memory, last_segname);
+	 memory, last_segname);
     }
 #endif
 
@@ -887,10 +887,10 @@ dmem_addr (SIM_DESC sd, SIM_CPU *cpu, uint16 offset)
     {
       sim_io_printf
 	(sd,
-	 "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> 0x%08lx (%s)\n",
+	 "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> %p (%s)\n",
 	 offset, last_from,
 	 phys, phys_size, last_to,
-	 (long) mem, last_segname);
+	 mem, last_segname);
     }
 #endif
   return mem;
@@ -911,10 +911,10 @@ imem_addr (SIM_DESC sd, SIM_CPU *cpu, uint32 offset)
     {
       sim_io_printf
 	(sd,
-	 "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> 0x%08lx (%s)\n",
+	 "mem: 0x%08x (%s) -> 0x%08lx %d (%s) -> %p (%s)\n",
 	 offset, last_from,
 	 phys, phys_size, last_to,
-	 (long) mem, last_segname);
+	 mem, last_segname);
     }
 #endif
   return mem;
