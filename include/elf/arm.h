@@ -111,8 +111,12 @@
 #define TAG_CPU_ARCH_V8R	15
 #define TAG_CPU_ARCH_V8M_BASE	16
 #define TAG_CPU_ARCH_V8M_MAIN	17
+#define TAG_CPU_ARCH_8_1A       18
+#define TAG_CPU_ARCH_8_2A       19
+#define TAG_CPU_ARCH_8_3A       20
 #define TAG_CPU_ARCH_V8_1M_MAIN 21
-#define MAX_TAG_CPU_ARCH	TAG_CPU_ARCH_V8_1M_MAIN
+#define TAG_CPU_ARCH_V9         22
+#define MAX_TAG_CPU_ARCH	TAG_CPU_ARCH_V9
 /* Pseudo-architecture to allow objects to be compatible with the subset of
    armv4t and armv6-m.  This value should never be stored in object files.  */
 #define TAG_CPU_ARCH_V4T_PLUS_V6_M (MAX_TAG_CPU_ARCH + 1)

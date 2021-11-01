@@ -3941,7 +3941,7 @@ using_thumb2_bl (struct elf32_arm_link_hash_table *globals)
     bfd_elf_get_obj_attr_int (globals->obfd, OBJ_ATTR_PROC, Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8_1M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V9);
 
   /* Architecture was introduced after ARMv6T2 (eg. ARMv6-M).  */
   return (arch == TAG_CPU_ARCH_V6T2
@@ -4130,13 +4130,14 @@ arch_has_arm_nop (struct elf32_arm_link_hash_table *globals)
 					     Tag_CPU_arch);
 
   /* Force return logic to be reviewed for each new architecture.  */
-  BFD_ASSERT (arch <= TAG_CPU_ARCH_V8_1M_MAIN);
+  BFD_ASSERT (arch <= TAG_CPU_ARCH_V9);
 
   return (arch == TAG_CPU_ARCH_V6T2
 	  || arch == TAG_CPU_ARCH_V6K
 	  || arch == TAG_CPU_ARCH_V7
 	  || arch == TAG_CPU_ARCH_V8
-	  || arch == TAG_CPU_ARCH_V8R);
+	  || arch == TAG_CPU_ARCH_V8R
+	  || arch == TAG_CPU_ARCH_V9);
 }
 
 static bool
@@ -13852,6 +13853,8 @@ bfd_arm_get_mach_from_attributes (bfd * abfd)
 	return bfd_mach_arm_8M_MAIN;
     case TAG_CPU_ARCH_V8_1M_MAIN:
 	return bfd_mach_arm_8_1M_MAIN;
+    case TAG_CPU_ARCH_V9:
+	return bfd_mach_arm_9;
 
     default:
       /* Force entry to be added for any new known Tag_CPU_arch value.  */
@@ -14202,7 +14205,14 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       T(V8),		/* V6_M.  */
       T(V8),		/* V6S_M.  */
       T(V8),		/* V7E_M.  */
-      T(V8)		/* V8.  */
+      T(V8),		/* V8.  */
+      T(V8),		/* V8-R.  */
+      T(V8),		/* V8-M.BASE.  */
+      T(V8),		/* V8-M.MAIN.  */
+      T(V8),		/* V8.1.  */
+      T(V8),		/* V8.2.  */
+      T(V8),		/* V8.3.  */
+      T(V8),		/* V8.1-M.MAIN.  */
     };
   const int v8r[] =
     {
@@ -14289,6 +14299,32 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       -1,		/* Unused (20).  */
       T(V8_1M_MAIN)	/* V8.1-M MAINLINE.  */
     };
+  const int v9[] =
+    {
+      T(V9),		/* PRE_V4.  */
+      T(V9),		/* V4.  */
+      T(V9),		/* V4T.  */
+      T(V9),		/* V5T.  */
+      T(V9),		/* V5TE.  */
+      T(V9),		/* V5TEJ.  */
+      T(V9),		/* V6.  */
+      T(V9),		/* V6KZ.  */
+      T(V9),		/* V6T2.  */
+      T(V9),		/* V6K.  */
+      T(V9),		/* V7.  */
+      T(V9),		/* V6_M.  */
+      T(V9),		/* V6S_M.  */
+      T(V9),		/* V7E_M.  */
+      T(V9),		/* V8.  */
+      T(V9),		/* V8-R.  */
+      T(V9),		/* V8-M.BASE.  */
+      T(V9),		/* V8-M.MAIN.  */
+      T(V9),		/* V8.1.  */
+      T(V9),		/* V8.2.  */
+      T(V9),		/* V8.3.  */
+      T(V9),		/* V8.1-M.MAIN.  */
+      T(V9),		/* V9.  */
+     };
   const int v4t_plus_v6_m[] =
     {
       -1,		/* PRE_V4.  */
@@ -14313,6 +14349,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       -1,		/* Unused (19).  */
       -1,		/* Unused (20).  */
       T(V8_1M_MAIN),	/* V8.1-M MAINLINE.  */
+      T(V9),		/* V9.  */
       T(V4T_PLUS_V6_M)	/* V4T plus V6_M.  */
     };
   const int *comb[] =
@@ -14331,6 +14368,7 @@ tag_cpu_arch_combine (bfd *ibfd, int oldtag, int *secondary_compat_out,
       NULL,
       NULL,
       v8_1m_mainline,
+      v9,
       /* Pseudo-architecture.  */
       v4t_plus_v6_m
     };
@@ -14547,10 +14585,16 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 		"ARM v7",
 		"ARM v6-M",
 		"ARM v6S-M",
+		"ARM v7E-M",
 		"ARM v8",
-		"",
+		"ARM v8-R",
 		"ARM v8-M.baseline",
 		"ARM v8-M.mainline",
+		"ARM v8.1-A",
+		"ARM v8.2-A",
+		"ARM v8.3-A",
+		"ARM v8.1-M.mainline",
+		"ARM v9",
 	    };
 
 	    /* Merge Tag_CPU_arch and Tag_also_compatible_with.  */

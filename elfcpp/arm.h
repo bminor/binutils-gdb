@@ -254,7 +254,15 @@ enum
   TAG_CPU_ARCH_V6S_M,
   TAG_CPU_ARCH_V7E_M,
   TAG_CPU_ARCH_V8,
-  MAX_TAG_CPU_ARCH = TAG_CPU_ARCH_V8,
+  TAG_CPU_ARCH_V8R,
+  TAG_CPU_ARCH_V8M_BASE,
+  TAG_CPU_ARCH_V8M_MAIN,
+  TAG_CPU_ARCH_8_1A,
+  TAG_CPU_ARCH_8_2A,
+  TAG_CPU_ARCH_8_3A,
+  TAG_CPU_ARCH_V8_1M_MAIN,
+  TAG_CPU_ARCH_V9,
+  MAX_TAG_CPU_ARCH = TAG_CPU_ARCH_V9,
   // Pseudo-architecture to allow objects to be compatible with the subset of
   // armv4t and armv6-m.  This value should never be stored in object files.
   TAG_CPU_ARCH_V4T_PLUS_V6_M = (MAX_TAG_CPU_ARCH + 1)

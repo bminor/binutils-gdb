@@ -15,6 +15,8 @@
 
 * Add support for 'armv9-a' for -march in AArch64 GAS.
 
+* Add support for 'armv9-a' for -march in Arm GAS.
+
 * Add support for Intel AVX512_FP16 instructions.
 
 Changes in 2.37:

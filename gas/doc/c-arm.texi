@@ -264,6 +264,7 @@ names are recognized:
 @code{armv8-m.main},
 @code{armv8.1-m.main},
 @code{armv8.6-a},
+@code{armv9-a},
 @code{iwmmxt},
 @code{iwmmxt2}
 and

@@ -31949,6 +31949,21 @@ static const struct arm_ext_table armv86a_ext_table[] =
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
+static const struct arm_ext_table armv9a_ext_table[] =
+{
+  ARM_ADD ("simd", FPU_ARCH_DOTPROD_NEON_VFP_ARMV8),
+  ARM_ADD ("fp16", FPU_ARCH_NEON_VFP_ARMV8_4_FP16FML),
+  ARM_ADD ("bf16", ARM_FEATURE_CORE_HIGH (ARM_EXT2_BF16)),
+  ARM_ADD ("i8mm", ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM)),
+  ARM_EXT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4,
+	   ARM_FEATURE_COPROC (FPU_CRYPTO_ARMV8)),
+
+  /* Armv9-a does not allow an FP implementation without SIMD, so the user
+     should use the +simd option to turn on FP.  */
+  ARM_REMOVE ("fp", ALL_FP),
+  { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
+};
+
 #define CDE_EXTENSIONS \
   ARM_ADD ("cdecp0", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE0)), \
   ARM_ADD ("cdecp1", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE1)), \
@@ -32071,6 +32086,7 @@ static const struct arm_arch_option_table arm_archs[] =
   ARM_ARCH_OPT2 ("armv8.4-a",	  ARM_ARCH_V8_4A,	FPU_ARCH_VFP, armv84a),
   ARM_ARCH_OPT2 ("armv8.5-a",	  ARM_ARCH_V8_5A,	FPU_ARCH_VFP, armv85a),
   ARM_ARCH_OPT2 ("armv8.6-a",	  ARM_ARCH_V8_6A,	FPU_ARCH_VFP, armv86a),
+  ARM_ARCH_OPT2 ("armv9-a",	  ARM_ARCH_V9A,	FPU_ARCH_VFP, armv9a),
   ARM_ARCH_OPT ("xscale",	  ARM_ARCH_XSCALE,	FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt",	  ARM_ARCH_IWMMXT,	FPU_ARCH_VFP),
   ARM_ARCH_OPT ("iwmmxt2",	  ARM_ARCH_IWMMXT2,	FPU_ARCH_VFP),
@@ -32854,6 +32870,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {TAG_CPU_ARCH_V8,	      ARM_ARCH_V8_5A},
     {TAG_CPU_ARCH_V8_1M_MAIN, ARM_ARCH_V8_1M_MAIN},
     {TAG_CPU_ARCH_V8,	    ARM_ARCH_V8_6A},
+    {TAG_CPU_ARCH_V9,	    ARM_ARCH_V9A},
     {-1,		    ARM_ARCH_NONE}
 };
 
@@ -32937,9 +32954,9 @@ get_aeabi_cpu_arch_from_fset (const arm_feature_set *arch_ext_fset,
   if (ARM_FEATURE_EQUAL (*arch_ext_fset, arm_arch_any))
     {
       /* Force revisiting of decision for each new architecture.  */
-      gas_assert (MAX_TAG_CPU_ARCH <= TAG_CPU_ARCH_V8_1M_MAIN);
+      gas_assert (MAX_TAG_CPU_ARCH <= TAG_CPU_ARCH_V9);
       *profile = 'A';
-      return TAG_CPU_ARCH_V8;
+      return TAG_CPU_ARCH_V9;
     }
 
   ARM_CLEAR_FEATURE (arch_fset, *arch_ext_fset, *ext_fset);
@@ -33215,7 +33232,7 @@ aeabi_set_public_attributes (void)
      by the base architecture.
 
      For new architectures we will have to check these tests.  */
-  gas_assert (arch <= TAG_CPU_ARCH_V8_1M_MAIN);
+  gas_assert (arch <= TAG_CPU_ARCH_V9);
   if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v8)
       || ARM_CPU_HAS_FEATURE (flags, arm_ext_v8m))
     aeabi_set_attribute_int (Tag_DIV_use, 0);

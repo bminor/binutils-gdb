@@ -12028,12 +12028,11 @@ select_arm_features (unsigned long mach,
       ARM_MERGE_FEATURE_SETS (arch_fset, arch_fset, mve_all);
       force_thumb = 1;
       break;
+    case bfd_mach_arm_9:         ARM_SET_FEATURES (ARM_ARCH_V9A); break;
       /* If the machine type is unknown allow all architecture types and all
 	 extensions, with the exception of MVE as that clashes with NEON.  */
     case bfd_mach_arm_unknown:
-      ARM_SET_FEATURES (ARM_FEATURE (-1,
-				     -1 & ~(ARM_EXT2_MVE | ARM_EXT2_MVE_FP),
-				     -1));
+      ARM_SET_FEATURES (ARM_ARCH_UNKNOWN);
       break;
     default:
       abort ();

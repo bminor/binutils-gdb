@@ -16098,7 +16098,8 @@ typedef struct
 static const char *const arm_attr_tag_CPU_arch[] =
   {"Pre-v4", "v4", "v4T", "v5T", "v5TE", "v5TEJ", "v6", "v6KZ", "v6T2",
    "v6K", "v7", "v6-M", "v6S-M", "v7E-M", "v8", "v8-R", "v8-M.baseline",
-   "v8-M.mainline", "", "", "", "v8.1-M.mainline"};
+   "v8-M.mainline", "v8.1-A", "v8.2-A", "v8.3-A",
+   "v8.1-M.mainline", "v9"};
 static const char *const arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
 static const char *const arm_attr_tag_THUMB_ISA_use[] =
   {"No", "Thumb-1", "Thumb-2", "Yes"};
