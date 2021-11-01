@@ -131,7 +131,7 @@ bfin_cec_io_read_buffer (struct hw *me, void *dest,
     return 0;
 
   mmr_off = addr - cec->base;
-  valuep = (void *)((unsigned long)cec + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)cec + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
 

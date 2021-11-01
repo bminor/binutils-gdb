@@ -61,7 +61,7 @@ bfin_jtag_io_write_buffer (struct hw *me, const void *source, int space,
 
   value = dv_load_4 (source);
   mmr_off = addr - jtag->base;
-  valuep = (void *)((unsigned long)jtag + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)jtag + mmr_base() + mmr_off);
 
   HW_TRACE_WRITE ();
 
@@ -95,7 +95,7 @@ bfin_jtag_io_read_buffer (struct hw *me, void *dest, int space,
     return 0;
 
   mmr_off = addr - jtag->base;
-  valuep = (void *)((unsigned long)jtag + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)jtag + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
 

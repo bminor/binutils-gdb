@@ -145,7 +145,7 @@ bfin_uart_io_write_buffer (struct hw *me, const void *source,
 
   value = dv_load_2 (source);
   mmr_off = addr - uart->base;
-  valuep = (void *)((unsigned long)uart + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)uart + mmr_base() + mmr_off);
 
   HW_TRACE_WRITE ();
 
@@ -268,7 +268,7 @@ bfin_uart_io_read_buffer (struct hw *me, void *dest,
     return 0;
 
   mmr_off = addr - uart->base;
-  valuep = (void *)((unsigned long)uart + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)uart + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
 

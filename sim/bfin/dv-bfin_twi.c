@@ -88,7 +88,7 @@ bfin_twi_io_write_buffer (struct hw *me, const void *source, int space,
 
   value = dv_load_2 (source);
   mmr_off = addr - twi->base;
-  valuep = (void *)((unsigned long)twi + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)twi + mmr_base() + mmr_off);
 
   HW_TRACE_WRITE ();
 
@@ -142,7 +142,7 @@ bfin_twi_io_read_buffer (struct hw *me, void *dest, int space,
     return 0;
 
   mmr_off = addr - twi->base;
-  valuep = (void *)((unsigned long)twi + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)twi + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
 

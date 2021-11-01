@@ -134,7 +134,7 @@ bfin_ctimer_io_write_buffer (struct hw *me, const void *source,
 
   value = dv_load_4 (source);
   mmr_off = addr - ctimer->base;
-  valuep = (void *)((unsigned long)ctimer + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)ctimer + mmr_base() + mmr_off);
 
   HW_TRACE_WRITE ();
 
@@ -202,7 +202,7 @@ bfin_ctimer_io_read_buffer (struct hw *me, void *dest,
     return 0;
 
   mmr_off = addr - ctimer->base;
-  valuep = (void *)((unsigned long)ctimer + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)ctimer + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
 

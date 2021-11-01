@@ -185,7 +185,7 @@ bfin_emac_io_write_buffer (struct hw *me, const void *source,
   value = dv_load_4 (source);
 
   mmr_off = addr - emac->base;
-  valuep = (void *)((unsigned long)emac + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)emac + mmr_base() + mmr_off);
 
   HW_TRACE_WRITE ();
 
@@ -286,7 +286,7 @@ bfin_emac_io_read_buffer (struct hw *me, void *dest,
     return 0;
 
   mmr_off = addr - emac->base;
-  valuep = (void *)((unsigned long)emac + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)emac + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
 

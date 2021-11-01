@@ -67,7 +67,7 @@ bfin_ebiu_sdc_io_write_buffer (struct hw *me, const void *source,
     value = dv_load_2 (source);
 
   mmr_off = addr - sdc->base;
-  valuep = (void *)((unsigned long)sdc + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)sdc + mmr_base() + mmr_off);
   value16p = valuep;
   value32p = valuep;
 
@@ -123,7 +123,7 @@ bfin_ebiu_sdc_io_read_buffer (struct hw *me, void *dest,
     return 0;
 
   mmr_off = addr - sdc->base;
-  valuep = (void *)((unsigned long)sdc + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)sdc + mmr_base() + mmr_off);
   value16p = valuep;
   value32p = valuep;
 

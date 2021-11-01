@@ -84,7 +84,7 @@ bfin_spi_io_write_buffer (struct hw *me, const void *source, int space,
 
   value = dv_load_2 (source);
   mmr_off = addr - spi->base;
-  valuep = (void *)((unsigned long)spi + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)spi + mmr_base() + mmr_off);
 
   HW_TRACE_WRITE ();
 
@@ -129,7 +129,7 @@ bfin_spi_io_read_buffer (struct hw *me, void *dest, int space,
     return 0;
 
   mmr_off = addr - spi->base;
-  valuep = (void *)((unsigned long)spi + mmr_base() + mmr_off);
+  valuep = (void *)((uintptr_t)spi + mmr_base() + mmr_off);
 
   HW_TRACE_READ ();
 
