@@ -32,8 +32,8 @@ SIM_EXTRA_CLEAN = clean-sis
 # behaviour of UART interrupt routines ...
 SIM_EXTRA_CFLAGS += -DFAST_UART -I$(srcroot)
 
-# Code doesn't build cleanly yet.
-SIM_WERROR_CFLAGS =
+# Some modules don't build cleanly yet.
+exec.o: SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
 
