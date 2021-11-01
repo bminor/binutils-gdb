@@ -238,7 +238,14 @@ COMMON_OBJS_NAMES = \
 	version.o
 COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
 
-LIB_OBJS = modules.o syscall.o targ-map.o $(COMMON_OBJS) $(SIM_OBJS)
+LIB_OBJS = modules.o syscall.o $(COMMON_OBJS) $(SIM_OBJS)
+
+# TODO: Migrate everyone to target-newlib-syscall.o.
+ifeq ($(NL_TARGET),)
+COMMON_OBJS_NAMES += target-newlib-syscall.o
+else
+LIB_OBJS += targ-map.o
+endif
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
@@ -275,9 +282,11 @@ stamp-tvals: gentmap
 	$(ECHO_STAMP) targ-vals.h
 	$(SILENCE) ./gentmap -h >tmp-tvals.h
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-tvals.h targ-vals.h
+ifneq ($(NL_TARGET),)
 	$(ECHO_STAMP) targ-tmap.c
 	$(SILENCE) ./gentmap -c >tmp-tmap.c
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
+endif
 	$(SILENCE) touch $@
 
 #
@@ -405,8 +414,10 @@ generated_files = \
 	$(SIM_EXTRA_DEPS) \
 	hw-config.h \
 	modules.c \
-	targ-map.c \
 	targ-vals.h
+ifneq ($(NL_TARGET),)
+generated_files += targ-map.c
+endif
 
 # Ensure that generated files are created early.  Use order-only
 # dependencies if available.  They require GNU make 3.80 or newer,

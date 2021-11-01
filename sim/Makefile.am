@@ -49,12 +49,9 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 # into any subdirs.
 SIM_ALL_RECURSIVE_DEPS =
 
-# Generate nltvals.def for newlib/libgloss using devo and build tree.
+# Generate target constants for newlib/libgloss from its source tree.
 # This file is shipped with distributions so we build in the source dir.
 # Use `make nltvals' to rebuild.
-# Note: If gdb releases begin to contain target header files (not a good idea,
-# but if they did ...), nltvals.def coud be generated at build time.
-# An alternative is to slurp in the tables at runtime.
 .PHONY: nltvals
 nltvals:
 	$(srccom)/gennltvals.py --cpp "$(CPP)"

@@ -177,15 +177,80 @@ def gen_common(output_dir: Path, output: TextIO, newlib: Path, cpp: str):
              ('fcntl.h', 'sys/fcntl.h', 'sys/_default_fcntl.h'), r'O_[A-Z0-9]*')
 
 
-def gen_targets(output_dir: Path, output: TextIO, newlib: Path, cpp: str):
-    """Generate the target-specific lists."""
+def gen_target_syscall(output_dir: Path, newlib: Path, cpp: str):
+    """Generate the target-specific syscall lists."""
+    target_map_c = output_dir / 'target-newlib-syscall.c'
+    old_lines_c = target_map_c.read_text().splitlines()
+    start_i = end_i = None
+    for i, line in enumerate(old_lines_c):
+        if START_MARKER in line:
+            start_i = i
+        if END_MARKER in line:
+            end_i = i
+    assert start_i and end_i, f'{target_map_c}: Unable to find markers'
+    new_lines_c = old_lines_c[0:start_i + 1]
+    new_lines_c_end = old_lines_c[end_i:]
+
+    target_map_h = output_dir / 'target-newlib-syscall.h'
+    old_lines_h = target_map_h.read_text().splitlines()
+    start_i = end_i = None
+    for i, line in enumerate(old_lines_h):
+        if START_MARKER in line:
+            start_i = i
+        if END_MARKER in line:
+            end_i = i
+    assert start_i and end_i, f'{target_map_h}: Unable to find markers'
+    new_lines_h = old_lines_h[0:start_i + 1]
+    new_lines_h_end = old_lines_h[end_i:]
+
+    headers = ('syscall.h',)
+    pattern = r'SYS_[_a-zA-Z0-9]*'
+
+    # Output the target-specific syscalls.
     for target, subdir in sorted(TARGET_DIRS.items()):
-        gentvals(output_dir, output, cpp, 'sys', newlib / subdir,
-                 ('syscall.h',), r'SYS_[_a-zA-Z0-9]*', target=target)
+        syms = extract_syms(cpp, newlib / subdir, headers, pattern)
+        new_lines_c.append(f'CB_TARGET_DEFS_MAP cb_{target}_syscall_map[] = {{')
+        new_lines_c.extend(
+            f'#ifdef CB_{sym}\n'
+            '  { '
+            f'"{sym[4:]}", CB_{sym}, TARGET_NEWLIB_{target.upper()}_{sym}'
+            ' },\n'
+            '#endif' for sym in sorted(syms))
+        new_lines_c.append('  {NULL, -1, -1},')
+        new_lines_c.append('};\n')
+
+        new_lines_h.append(
+            f'extern CB_TARGET_DEFS_MAP cb_{target}_syscall_map[];')
+        new_lines_h.extend(
+            f'#define TARGET_NEWLIB_{target.upper()}_{sym} {val}'
+            for sym, val in sorted(syms.items()))
+        new_lines_h.append('')
 
     # Then output the common syscall targets.
-    gentvals(output_dir, output, cpp, 'sys', newlib / 'libgloss',
-             ('syscall.h',), r'SYS_[_a-zA-Z0-9]*')
+    syms = extract_syms(cpp, newlib / 'libgloss', headers, pattern)
+    new_lines_c.append(f'CB_TARGET_DEFS_MAP cb_init_syscall_map[] = {{')
+    new_lines_c.extend(
+        f'#ifdef CB_{sym}\n'
+        f'  {{ "{sym[4:]}", CB_{sym}, TARGET_NEWLIB_{sym} }},\n'
+        f'#endif' for sym in sorted(syms))
+    new_lines_c.append('  {NULL, -1, -1},')
+    new_lines_c.append('};')
+
+    new_lines_h.append('extern CB_TARGET_DEFS_MAP cb_init_syscall_map[];')
+    new_lines_h.extend(
+        f'#define TARGET_NEWLIB_{sym} {val}'
+        for sym, val in sorted(syms.items()))
+
+    new_lines_c.extend(new_lines_c_end)
+    target_map_c.write_text('\n'.join(new_lines_c) + '\n')
+
+    new_lines_h.extend(new_lines_h_end)
+    target_map_h.write_text('\n'.join(new_lines_h) + '\n')
+
+
+def gen_targets(output_dir: Path, output: TextIO, newlib: Path, cpp: str):
+    """Generate the target-specific lists."""
+    gen_target_syscall(output_dir, newlib, cpp)
 
 
 def gen(output_dir: Path, output: TextIO, newlib: Path, cpp: str):

@@ -411,9 +411,6 @@ SUPPORT_H = \
         support.h \
         support.c
 
-TARG_VALS_H = \
-        targ-vals.h
-
 INLINE = \
 	inline.h \
 	inline.c
@@ -429,8 +426,7 @@ BUILT_SRC_WO_CONFIG = \
 	support.h support.c \
 	pk.h \
 	hw.h hw.c \
-	filter_host.c \
-	targ-vals.h targ-map.c targ-vals.def
+	filter_host.c
 
 BUILT_SRC = \
 	$(BUILT_SRC_WO_CONFIG) \
@@ -473,6 +469,7 @@ COMMON_OBJS_NAMES = \
 	target-newlib-errno.o \
 	target-newlib-open.o \
 	target-newlib-signal.o \
+	target-newlib-syscall.o \
 	version.o
 COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
 
@@ -515,7 +512,7 @@ LIB_OBJ = \
 	options.o
 
 
-GDB_OBJ = gdb-sim.o sim_calls.o targ-map.o
+GDB_OBJ = gdb-sim.o sim_calls.o
 
 HW_SRC = @sim_hw_src@
 HW_OBJ = @sim_hw_obj@
@@ -597,30 +594,6 @@ support.o: support.c $(CPU_H) $(IDECODE_H) $(COMMON_SIM_INLINE_H) $(COMMON_SIM_F
 itable.o: itable.c $(ITABLE_H)
 
 mon.o: mon.c $(BASICS_H) $(CPU_H) $(MON_H)
-
-# GDB after 4.16 expects the default_callback structure to be setup.
-# As a kludge, build the common stuff here for now.
-gentmap: $(srcdir)/../common/gentmap.c Makefile targ-vals.def
-	$(ECHO_CCLD) $(LINK_FOR_BUILD) -I. -I../common -I$(srcdir)/../common \
-		$(srcdir)/../common/gentmap.c -DUSE_CONFIG_H
-
-targ-vals.def: $(srcdir)/../common/nltvals.def
-	$(ECHO_GEN) cat $(srcdir)/../common/nltvals.def > tmp-vals.def
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-vals.def targ-vals.def
-
-targ-vals.h: stamp-vals ; @true
-stamp-vals: Makefile gentmap $(srcroot)/move-if-change
-	$(ECHO_GEN) ./gentmap -h > tmp-vals.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-vals.h targ-vals.h
-	$(SILENCE) touch $@
-
-targ-map.c: stamp-map; @true
-stamp-map: Makefile gentmap $(srcroot)/move-if-change
-	$(ECHO_GEN) ./gentmap -c > tmp-map.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-map.c targ-map.c
-	$(SILENCE) touch $@
-
-targ-map.o: targ-map.c $(ANSIDECL_H) $(GDB_CALLBACK_H) $(TARG_VALS_H)
 
 sim-fpu.o: $(srcdir)/../common/sim-fpu.c $(CONFIG_H)
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/sim-fpu.c 
@@ -838,8 +811,7 @@ TAGS: $(BUILT_SRC)
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
 clean mostlyclean:
-	rm -f tmp-* *.[oasi] core psim$(EXEEXT) run$(EXEEXT) igen dgen $(BUILT_SRC_WO_CONFIG) gentmap
-	rm -f stamp-vals targ-vals.h stamp-map targ-map.c
+	rm -f tmp-* *.[oasi] core psim$(EXEEXT) run$(EXEEXT) igen dgen $(BUILT_SRC_WO_CONFIG)
 
 distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log
