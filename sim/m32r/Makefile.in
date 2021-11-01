@@ -43,8 +43,8 @@ SIM_EXTRA_DEPS = \
 
 SIM_EXTRA_CLEAN = m32r-clean
 
-# Code doesn't build cleanly yet.
-SIM_WERROR_CFLAGS =
+# Some modules don't build cleanly yet.
+cpu.o cpu2.o cpux.o m32r.o m32r2.o m32rx.o mloop.o mloop2.o mloopx.o sem.o sim-if.o traps.o: SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
 
