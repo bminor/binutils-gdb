@@ -21,6 +21,19 @@
 
 #include "gdbsupport/tdesc.h"
 
+/* Prologue helper macros for ARMv8.1-m PACBTI.  */
+#define IS_PAC(instruction)	(instruction == 0xf3af801d)
+#define IS_PACBTI(instruction)	(instruction == 0xf3af800d)
+#define IS_BTI(instruction)	(instruction == 0xf3af800f)
+#define IS_PACG(instruction)	((instruction & 0xfff0f0f0) == 0xfb60f000)
+#define IS_AUT(instruction)	(instruction == 0xf3af802d)
+#define IS_AUTG(instruction)	((instruction & 0xfff00ff0) == 0xfb500f00)
+
+/* DWARF register numbers according to the AADWARF32 document.  */
+enum arm_dwarf_regnum {
+  ARM_DWARF_RA_AUTH_CODE = 143
+};
+
 /* Register numbers of various important registers.  */
 
 enum gdb_regnum {

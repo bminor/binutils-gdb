@@ -25409,6 +25409,7 @@ target process.
 
 @subsubsection AArch64 Pointer Authentication.
 @cindex AArch64 Pointer Authentication.
+@anchor{AArch64 PAC}
 
 When @value{GDBN} is debugging the AArch64 architecture, and the program is
 using the v8.3-A feature Pointer Authentication (PAC), then whenever the link
@@ -46603,6 +46604,12 @@ VFP double-precision registers as vectors and to synthesize the
 quad-precision registers from pairs of double-precision registers.
 If this feature is present, @samp{org.gnu.gdb.arm.vfp} must also
 be present and include 32 double-precision registers.
+
+The @samp{org.gnu.gdb.arm.m-profile-pacbti} feature is optional, and
+acknowledges support for the ARMv8.1-m PACBTI extensions.  @value{GDBN}
+will track return address signing states and will decorate backtraces using
+the [PAC] marker, similar to AArch64's PAC extension.
+@xref{AArch64 PAC}.
 
 @node i386 Features
 @subsection i386 Features

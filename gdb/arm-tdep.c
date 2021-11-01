@@ -38,6 +38,7 @@
 #include "frame-base.h"
 #include "trad-frame.h"
 #include "objfiles.h"
+#include "dwarf2.h"
 #include "dwarf2/frame.h"
 #include "gdbtypes.h"
 #include "prologue-value.h"
@@ -285,6 +286,9 @@ struct arm_prologue_cache
 
   /* The register used to hold the frame pointer for this frame.  */
   int framereg;
+
+  /* True if the return address is signed, false otherwise.  */
+  gdb::optional<bool> ra_signed_state;
 
   /* Saved register offsets.  */
   trad_frame_saved_reg *saved_regs;
@@ -713,6 +717,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
   while (start < limit)
     {
       unsigned short insn;
+      gdb::optional<bool> ra_signed_state;
 
       insn = read_code_unsigned_integer (start, 2, byte_order_for_code);
 
@@ -847,6 +852,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 
 	  inst2 = read_code_unsigned_integer (start + 2, 2,
 					      byte_order_for_code);
+	  uint32_t whole_insn = (insn << 16) | inst2;
 
 	  if ((insn & 0xf800) == 0xf000 && (inst2 & 0xe800) == 0xe800)
 	    {
@@ -1100,7 +1106,37 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      constant = read_memory_unsigned_integer (loc + 4, 4, byte_order);
 	      regs[bits (inst2, 8, 11)] = pv_constant (constant);
 	    }
-
+	  /* Start of ARMv8.1-m PACBTI extension instructions.  */
+	  else if (IS_PAC (whole_insn))
+	    {
+	      /* LR and SP are input registers.  PAC is in R12.  LR is
+		 signed from this point onwards.  NOP space.  */
+	      ra_signed_state = true;
+	    }
+	  else if (IS_PACBTI (whole_insn))
+	    {
+	      /* LR and SP are input registers.  PAC is in R12 and PC is a
+		 valid BTI landing pad.  LR is signed from this point onwards.
+		 NOP space.  */
+	      ra_signed_state = true;
+	    }
+	  else if (IS_BTI (whole_insn))
+	    {
+	      /* Valid BTI landing pad.  NOP space.  */
+	    }
+	  else if (IS_PACG (whole_insn))
+	    {
+	      /* Sign Rn using Rm and store the PAC in Rd.  Rd is signed from
+		 this point onwards.  */
+	      ra_signed_state = true;
+	    }
+	  else if (IS_AUT (whole_insn) || IS_AUTG (whole_insn))
+	    {
+	      /* These instructions appear close to the epilogue, when signed
+		 pointers are getting authenticated.  */
+	      ra_signed_state = false;
+	    }
+	  /* End of ARMv8.1-m PACBTI extension instructions */
 	  else if (thumb2_instruction_changes_pc (insn, inst2))
 	    {
 	      /* Don't scan past anything that might change control flow.  */
@@ -1111,6 +1147,21 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      /* The optimizer might shove anything into the prologue,
 		 so we just skip what we don't recognize.  */
 	      unrecognized_pc = start;
+	    }
+
+	  arm_gdbarch_tdep *tdep
+	    = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+	  /* Make sure we are dealing with a target that supports ARMv8.1-m
+	     PACBTI.  */
+	  if (cache != nullptr && tdep->have_pacbti
+	      && ra_signed_state.has_value ())
+	    {
+	      arm_debug_printf ("Found pacbti instruction at %s",
+				paddress (gdbarch, start));
+	      arm_debug_printf ("RA is %s",
+				*ra_signed_state? "signed" : "not signed");
+	      cache->ra_signed_state = ra_signed_state;
 	    }
 
 	  start += 2;
@@ -1987,6 +2038,13 @@ arm_prologue_prev_register (struct frame_info *this_frame,
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
   cache = (struct arm_prologue_cache *) *this_cache;
+
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  /* If this frame has signed the return address, mark it as so.  */
+  if (tdep->have_pacbti && cache->ra_signed_state.has_value ()
+      && *cache->ra_signed_state)
+    set_frame_previous_pc_masked (this_frame);
 
   /* If we are asked to unwind the PC, then we need to return the LR
      instead.  The prologue may save PC, but it will point into this
@@ -3216,6 +3274,7 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 			  int regnum)
 {
   struct gdbarch * gdbarch = get_frame_arch (this_frame);
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   CORE_ADDR lr, cpsr;
   ULONGEST t_bit = arm_psr_thumb_bit (gdbarch);
 
@@ -3226,6 +3285,18 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 	 describes saves of LR.  However, that version may have an
 	 extra bit set to indicate Thumb state.  The bit is not
 	 part of the PC.  */
+
+      /* Record in the frame whether the return address was signed.  */
+      if (tdep->have_pacbti)
+	{
+	  CORE_ADDR ra_auth_code
+	    = frame_unwind_register_unsigned (this_frame,
+					      tdep->pacbti_pseudo_base);
+
+	  if (ra_auth_code != 0)
+	    set_frame_previous_pc_masked (this_frame);
+	}
+
       lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
       return frame_unwind_got_constant (this_frame, regnum,
 					arm_addr_bits_remove (gdbarch, lr));
@@ -3243,24 +3314,6 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Unexpected register %d"), regnum);
-    }
-}
-
-static void
-arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
-			   struct dwarf2_frame_state_reg *reg,
-			   struct frame_info *this_frame)
-{
-  switch (regnum)
-    {
-    case ARM_PC_REGNUM:
-    case ARM_PS_REGNUM:
-      reg->how = DWARF2_FRAME_REG_FN;
-      reg->loc.fn = arm_dwarf2_prev_register;
-      break;
-    case ARM_SP_REGNUM:
-      reg->how = DWARF2_FRAME_REG_CFA;
-      break;
     }
 }
 
@@ -4193,6 +4246,25 @@ is_mve_pseudo (struct gdbarch *gdbarch, int regnum)
   return false;
 }
 
+/* Return true if REGNUM is a PACBTI pseudo register (ra_auth_code).  Return
+   false otherwise.
+
+   REGNUM is the raw register number and not a pseudo-relative register
+   number.  */
+
+static bool
+is_pacbti_pseudo (struct gdbarch *gdbarch, int regnum)
+{
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  if (tdep->have_pacbti
+      && regnum >= tdep->pacbti_pseudo_base
+      && regnum < tdep->pacbti_pseudo_base + tdep->pacbti_pseudo_count)
+    return true;
+
+  return false;
+}
+
 /* Return the GDB type object for the "standard" data type of data in
    register N.  */
 
@@ -4209,6 +4281,9 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
 
   if (is_mve_pseudo (gdbarch, regnum))
     return builtin_type (gdbarch)->builtin_int16;
+
+  if (is_pacbti_pseudo (gdbarch, regnum))
+    return builtin_type (gdbarch)->builtin_uint32;
 
   /* If the target description has register information, we are only
      in this function so that we can override the types of
@@ -4271,6 +4346,17 @@ arm_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 
   if (reg >= 112 && reg <= 127)
     return ARM_WR0_REGNUM + reg - 112;
+
+  /* PACBTI register containing the Pointer Authentication Code.  */
+  if (reg == ARM_DWARF_RA_AUTH_CODE)
+    {
+      arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+      if (tdep->have_pacbti)
+	return tdep->pacbti_pseudo_base;
+
+      return -1;
+    }
 
   if (reg >= 192 && reg <= 199)
     return ARM_WC0_REGNUM + reg - 192;
@@ -4335,6 +4421,35 @@ arm_register_sim_regno (struct gdbarch *gdbarch, int regnum)
   reg -= NUM_SREGS;
 
   internal_error (__FILE__, __LINE__, _("Bad REGNUM %d"), regnum);
+}
+
+static const unsigned char op_lit0 = DW_OP_lit0;
+
+static void
+arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+			   struct dwarf2_frame_state_reg *reg,
+			   struct frame_info *this_frame)
+{
+  if (is_pacbti_pseudo (gdbarch, regnum))
+    {
+      /* Initialize RA_AUTH_CODE to zero.  */
+      reg->how = DWARF2_FRAME_REG_SAVED_VAL_EXP;
+      reg->loc.exp.start = &op_lit0;
+      reg->loc.exp.len = 1;
+      return;
+    }
+
+  switch (regnum)
+    {
+    case ARM_PC_REGNUM:
+    case ARM_PS_REGNUM:
+      reg->how = DWARF2_FRAME_REG_FN;
+      reg->loc.fn = arm_dwarf2_prev_register;
+      break;
+    case ARM_SP_REGNUM:
+      reg->how = DWARF2_FRAME_REG_CFA;
+      break;
+    }
 }
 
 /* Given BUF, which is OLD_LEN bytes ending at ENDADDR, expand
@@ -8683,6 +8798,10 @@ arm_register_name (struct gdbarch *gdbarch, int i)
   if (is_mve_pseudo (gdbarch, i))
     return "p0";
 
+  /* RA_AUTH_CODE is used for unwinding only.  Do not assign it a name.  */
+  if (is_pacbti_pseudo (gdbarch, i))
+    return "";
+
   if (i >= ARRAY_SIZE (arm_register_names))
     /* These registers are only supported on targets which supply
        an XML description.  */
@@ -9073,6 +9192,17 @@ arm_gnu_triplet_regexp (struct gdbarch *gdbarch)
   return gdbarch_bfd_arch_info (gdbarch)->arch_name;
 }
 
+/* Implement the "get_pc_address_flags" gdbarch method.  */
+
+static std::string
+arm_get_pc_address_flags (frame_info *frame, CORE_ADDR pc)
+{
+  if (get_frame_pc_masked (frame))
+    return "PAC";
+
+  return "";
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -9098,6 +9228,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct target_desc *tdesc = info.target_desc;
   bool have_vfp = false;
   bool have_mve = false;
+  bool have_pacbti = false;
   int mve_vpr_regnum = -1;
   int register_count = ARM_NUM_REGS;
 
@@ -9220,6 +9351,31 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		      || attr_arch == TAG_CPU_ARCH_V8_1M_MAIN
 		      || attr_profile == 'M'))
 		is_m = true;
+
+	      /* Look for attributes that indicate support for ARMv8.1-m
+		 PACBTI.  */
+	      if (!tdesc_has_registers (tdesc) && is_m)
+		{
+		  int attr_pac_extension
+		    = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
+						Tag_PAC_extension);
+
+		  int attr_bti_extension
+		    = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
+						Tag_BTI_extension);
+
+		  int attr_pacret_use
+		    = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
+						Tag_PACRET_use);
+
+		  int attr_bti_use
+		    = bfd_elf_get_obj_attr_int (info.abfd, OBJ_ATTR_PROC,
+						Tag_BTI_use);
+
+		  if (attr_pac_extension != 0 || attr_bti_extension != 0
+		      || attr_pacret_use != 0 || attr_bti_use != 0)
+		    have_pacbti = true;
+		}
 #endif
 	    }
 
@@ -9446,6 +9602,22 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      if (have_vfp)
 		have_q_pseudos = true;
 	    }
+
+	  /* Do we have the ARMv8.1-m PACBTI feature?  */
+	  feature = tdesc_find_feature (tdesc,
+					"org.gnu.gdb.arm.m-profile-pacbti");
+	  if (feature != nullptr)
+	    {
+	      /* By advertising this feature, the target acknowledges the
+		 presence of the ARMv8.1-m PACBTI extensions.
+
+		 We don't care for any particular registers in this group, so
+		 the target is free to include whatever it deems appropriate.
+
+		 The expectation is for this feature to include the PAC
+		 keys.  */
+	      have_pacbti = true;
+	    }
 	}
     }
 
@@ -9470,6 +9642,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       /* Do check is_m, though, since it might come from the binary.  */
       if (is_m != tdep->is_m)
+	continue;
+
+      /* Also check for ARMv8.1-m PACBTI support, since it might come from
+	 the binary.  */
+      if (have_pacbti != tdep->have_pacbti)
 	continue;
 
       /* Found a match.  */
@@ -9503,6 +9680,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdep->have_mve = true;
       tdep->mve_vpr_regnum = mve_vpr_regnum;
     }
+
+  /* Adjust the PACBTI feature settings.  */
+  tdep->have_pacbti = have_pacbti;
 
   arm_register_g_packet_guesses (gdbarch);
 
@@ -9672,6 +9852,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
     }
 
+  /* Hook used to decorate frames with signed return addresses, only available
+     for ARMv8.1-m PACBTI.  */
+  if (is_m && have_pacbti)
+    set_gdbarch_get_pc_address_flags (gdbarch, arm_get_pc_address_flags);
+
   if (tdesc_data != nullptr)
     {
       set_tdesc_pseudo_register_name (gdbarch, arm_register_name);
@@ -9715,8 +9900,16 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       num_pseudos += tdep->mve_pseudo_count;
     }
 
+  /* Do we have any ARMv8.1-m PACBTI pseudo registers.  */
+  if (have_pacbti)
+    {
+      tdep->pacbti_pseudo_base = register_count + num_pseudos;
+      tdep->pacbti_pseudo_count = 1;
+      num_pseudos += tdep->pacbti_pseudo_count;
+    }
+
   /* Set some pseudo register hooks, if we have pseudo registers.  */
-  if (tdep->have_s_pseudos || have_mve)
+  if (tdep->have_s_pseudos || have_mve || have_pacbti)
     {
       set_gdbarch_num_pseudo_regs (gdbarch, num_pseudos);
       set_gdbarch_pseudo_register_read (gdbarch, arm_pseudo_read);
@@ -9778,6 +9971,14 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 	      tdep->mve_pseudo_count);
   gdb_printf (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
 	      (unsigned long) tdep->lowest_pc);
+  gdb_printf (file, _("arm_dump_tdep: have_pacbti = %s\n"),
+	      tdep->have_pacbti? "yes" : "no");
+  gdb_printf (file, _("arm_dump_tdep: pacbti_pseudo_base = %i\n"),
+	      tdep->pacbti_pseudo_base);
+  gdb_printf (file, _("arm_dump_tdep: pacbti_pseudo_count = %i\n"),
+	      tdep->pacbti_pseudo_count);
+  gdb_printf (file, _("arm_dump_tdep: is_m = %s\n"),
+	      tdep->is_m? "yes" : "no");
 }
 
 #if GDB_SELF_TEST

@@ -119,6 +119,12 @@ struct arm_gdbarch_tdep : gdbarch_tdep
   int mve_pseudo_base = 0;	/* Number of the first MVE pseudo register.  */
   int mve_pseudo_count = 0;	/* Total number of MVE pseudo registers.  */
 
+  bool have_pacbti = false;	/* True if we have the ARMv8.1-m PACBTI
+				   extensions.  */
+  int pacbti_pseudo_base = 0;	/* Number of the first PACBTI pseudo
+				   register.  */
+  int pacbti_pseudo_count = 0;	/* Total number of PACBTI pseudo registers.  */
+
   bool is_m = false;		/* Does the target follow the "M" profile.  */
   CORE_ADDR lowest_pc = 0;	/* Lowest address at which instructions
 				   will appear.  */
