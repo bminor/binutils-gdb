@@ -392,9 +392,9 @@ INLINE_TREE\
 tree_init(device *root,
 	  psim *system)
 {
-  TRACE(trace_device_tree, ("tree_init(root=0x%lx, system=0x%lx)\n",
-			    (long)root,
-			    (long)system));
+  TRACE(trace_device_tree, ("tree_init(root=%p, system=%p)\n",
+			    root,
+			    system));
   /* remove the old, rebuild the new */
   tree_traverse(root, device_clean, NULL, system);
   tree_traverse(root, device_init_static_properties, NULL, system);

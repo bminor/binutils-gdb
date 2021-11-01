@@ -129,8 +129,8 @@ sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 {
   int result = psim_read_memory(simulator, MAX_NR_PROCESSORS,
 				buf, mem, length);
-  TRACE(trace_gdb, ("sim_read(mem=0x%lx, buf=0x%lx, length=%d) = %d\n",
-		    (long)mem, (long)buf, length, result));
+  TRACE(trace_gdb, ("sim_read(mem=0x%lx, buf=%p, length=%d) = %d\n",
+		    (long)mem, buf, length, result));
   return result;
 }
 
@@ -141,8 +141,8 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
   int result = psim_write_memory(simulator, MAX_NR_PROCESSORS,
 				 buf, mem, length,
 				 1/*violate_ro*/);
-  TRACE(trace_gdb, ("sim_write(mem=0x%lx, buf=0x%lx, length=%d) = %d\n",
-		    (long)mem, (long)buf, length, result));
+  TRACE(trace_gdb, ("sim_write(mem=0x%lx, buf=%p, length=%d) = %d\n",
+		    (long)mem, buf, length, result));
   return result;
 }
 
@@ -208,8 +208,8 @@ sim_stop_reason (SIM_DESC sd, enum sim_stop *reason, int *sigrc)
     break;
   }
 
-  TRACE(trace_gdb, ("sim_stop_reason(reason=0x%lx(%ld), sigrc=0x%lx(%ld))\n",
-		    (long)reason, (long)*reason, (long)sigrc, (long)*sigrc));
+  TRACE(trace_gdb, ("sim_stop_reason(reason=%p(%ld), sigrc=%p(%ld))\n",
+		    reason, (long)*reason, sigrc, (long)*sigrc));
 }
 
 

@@ -882,9 +882,8 @@ psim_read_register(psim *system,
 #endif
 
   default:
-    printf_filtered("psim_read_register(processor=0x%lx,buf=0x%lx,reg=%s) %s\n",
-		    (unsigned long)processor, (unsigned long)buf, reg,
-		    "read of this register unimplemented");
+    printf_filtered("psim_read_register(processor=%p,buf=%p,reg=%s) %s\n",
+		    processor, buf, reg, "read of this register unimplemented");
     break;
 
   }
@@ -1070,8 +1069,8 @@ psim_write_register(psim *system,
 #endif
 
   default:
-    printf_filtered("psim_write_register(processor=0x%lx,cooked_buf=0x%lx,reg=%s) %s\n",
-		    (unsigned long)processor, (unsigned long)cooked_buf, reg,
+    printf_filtered("psim_write_register(processor=%p,cooked_buf=%p,reg=%s) %s\n",
+		    processor, cooked_buf, reg,
 		    "read of this register unimplemented");
     break;
 

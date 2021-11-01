@@ -169,14 +169,14 @@ update_time_from_event(event_queue *events)
 	   event != NULL;
 	   event = event->next, i++)
 	{
-	  TRACE(trace_events, ("event time-from-event - time %ld, delta %ld - event %d, tag 0x%lx, time %ld, handler 0x%lx, data 0x%lx\n",
-			       (long)current_time,
-			       (long)events->time_from_event,
+	  TRACE(trace_events, ("event time-from-event - time %" PRIi64 ", delta %ld - event %d, tag %p, time %" PRIi64 ", handler %p, data %p\n",
+			       current_time,
+			       events->time_from_event,
 			       i,
-			       (long)event,
-			       (long)event->time_of_event,
-			       (long)event->handler,
-			       (long)event->data));
+			       event,
+			       event->time_of_event,
+			       event->handler,
+			       event->data));
 	}
     }
   ASSERT(current_time == event_queue_time(events));
@@ -229,12 +229,12 @@ event_queue_schedule(event_queue *events,
   new_event->data = data;
   new_event->handler = handler;
   insert_event_entry(events, new_event, delta_time);
-  TRACE(trace_events, ("event scheduled at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
-		       (long)event_queue_time(events),
-		       (long)new_event,
-		       (long)new_event->time_of_event,
-		       (long)new_event->handler,
-		       (long)new_event->data));
+  TRACE(trace_events, ("event scheduled at %" PRIi64 " - tag %p - time %" PRIi64 ", handler %p, data %p\n",
+		       event_queue_time(events),
+		       new_event,
+		       new_event->time_of_event,
+		       new_event->handler,
+		       new_event->data));
   return (event_entry_tag)new_event;
 }
 
@@ -272,12 +272,12 @@ event_queue_schedule_after_signal(event_queue *events,
 #endif
   }
 
-  TRACE(trace_events, ("event scheduled at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
-		       (long)event_queue_time(events),
-		       (long)new_event,
-		       (long)new_event->time_of_event,
-		       (long)new_event->handler,
-		       (long)new_event->data));
+  TRACE(trace_events, ("event scheduled at %" PRIi64 " - tag %p - time %" PRIi64 ", handler %p, data %p\n",
+		       event_queue_time(events),
+		       new_event,
+		       new_event->time_of_event,
+		       new_event->handler,
+		       new_event->data));
 
   return (event_entry_tag)new_event;
 }
@@ -298,19 +298,19 @@ event_queue_deschedule(event_queue *events,
 	 ptr_to_current = &current->next, current = *ptr_to_current);
     if (current == to_remove) {
       *ptr_to_current = current->next;
-      TRACE(trace_events, ("event descheduled at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
-			   (long)event_queue_time(events),
-			   (long)event_to_remove,
-			   (long)current->time_of_event,
-			   (long)current->handler,
-			   (long)current->data));
+      TRACE(trace_events, ("event descheduled at %" PRIi64 " - tag %p - time %" PRIi64 ", handler %p, data %p\n",
+			   event_queue_time(events),
+			   event_to_remove,
+			   current->time_of_event,
+			   current->handler,
+			   current->data));
       free(current);
       update_time_from_event(events);
     }
     else {
-      TRACE(trace_events, ("event descheduled at %ld - tag 0x%lx - not found\n",
-			   (long)event_queue_time(events),
-			   (long)event_to_remove));
+      TRACE(trace_events, ("event descheduled at %" PRIi64 " - tag %p - not found\n",
+			   event_queue_time(events),
+			   event_to_remove));
     }
   }
   ASSERT((events->time_from_event >= 0) == (events->queue != NULL));
@@ -386,12 +386,12 @@ event_queue_process(event_queue *events)
     event_handler *handler = to_do->handler;
     void *data = to_do->data;
     events->queue = to_do->next;
-    TRACE(trace_events, ("event issued at %ld - tag 0x%lx - time %ld, handler 0x%lx, data 0x%lx\n",
-			 (long)event_time,
-			 (long)to_do,
-			 (long)to_do->time_of_event,
-			 (long)handler,
-			 (long)data));
+    TRACE(trace_events, ("event issued at %" PRIi64 " - tag %p - time %" PRIi64 ", handler %p, data %p\n",
+			 event_time,
+			 to_do,
+			 to_do->time_of_event,
+			 handler,
+			 data));
     free(to_do);
     /* Always re-compute the time to the next event so that HANDLER()
        can safely insert new events into the queue. */

@@ -1276,8 +1276,8 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
   if (simulator == NULL || regname == NULL)
     return -1;
 
-  TRACE(trace_gdb, ("sim_fetch_register(regno=%d(%s), buf=0x%lx)\n",
-		    regno, regname, (long)buf));
+  TRACE(trace_gdb, ("sim_fetch_register(regno=%d(%s), buf=%p)\n",
+		    regno, regname, buf));
   return psim_read_register(simulator, MAX_NR_PROCESSORS,
 			    buf, regname, raw_transfer);
 }
@@ -1291,8 +1291,8 @@ sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
   if (simulator == NULL || regname == NULL)
     return 0;
 
-  TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=0x%lx)\n",
-		    regno, regname, (long)buf));
+  TRACE(trace_gdb, ("sim_store_register(regno=%d(%s), buf=%p)\n",
+		    regno, regname, buf));
   return psim_write_register(simulator, MAX_NR_PROCESSORS,
 			     buf, regname, raw_transfer);
 }
