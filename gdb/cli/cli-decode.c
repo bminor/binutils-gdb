@@ -1345,7 +1345,7 @@ fput_aliases_definition_styled (const cmd_list_element &cmd,
 				struct ui_file *stream)
 {
   for (const cmd_list_element &alias : cmd.aliases)
-    if (!alias.default_args.empty ())
+    if (!alias.cmd_deprecated && !alias.default_args.empty ())
       fput_alias_definition_styled (alias, stream);
 }
 
@@ -1361,17 +1361,40 @@ fput_command_names_styled (const cmd_list_element &c,
 			   bool always_fput_c_name, const char *postfix,
 			   struct ui_file *stream)
 {
-  if (always_fput_c_name || !c.aliases.empty ())
+  /* First, check if we are going to print something.  That is, either if
+     ALWAYS_FPUT_C_NAME is true or if there exists at least one non-deprecated
+     alias.  */
+
+  auto print_alias = [] (const cmd_list_element &alias)
+    {
+      return !alias.cmd_deprecated;
+    };
+
+  bool print_something = always_fput_c_name;
+  if (!print_something)
+    for (const cmd_list_element &alias : c.aliases)
+      {
+	if (!print_alias (alias))
+	  continue;
+
+	print_something = true;
+	break;
+      }
+
+  if (print_something)
     fput_command_name_styled (c, stream);
 
   for (const cmd_list_element &alias : c.aliases)
     {
+      if (!print_alias (alias))
+	continue;
+
       fputs_filtered (", ", stream);
       wrap_here ("   ");
       fput_command_name_styled (alias, stream);
     }
 
-  if (always_fput_c_name || !c.aliases.empty ())
+  if (print_something)
     fputs_filtered (postfix, stream);
 }
 
