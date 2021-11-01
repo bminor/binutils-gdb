@@ -77,9 +77,9 @@ insn_table_depth(insn_table *table)
 
 static insn_fields *
 parse_insn_format(table_entry *entry,
-		  char *format)
+		  const char *format)
 {
-  char *chp;
+  const char *chp;
   insn_fields *fields = ZALLOC(insn_fields);
 
   /* create a leading sentinal */
@@ -102,8 +102,8 @@ parse_insn_format(table_entry *entry,
   chp = format;
 
   while (*chp != '\0') {
-    char *start_pos;
-    char *start_val;
+    const char *start_pos;
+    const char *start_val;
     int strlen_val;
     int strlen_pos;
     insn_field *new_field;
@@ -208,7 +208,7 @@ parse_insn_format(table_entry *entry,
 }
 
 
-void
+static void
 parse_include_entry (table *file,
                      table_entry *file_entry,
 		     filter *filters,
@@ -304,7 +304,7 @@ insn_table_insert_insn(insn_table *table,
   /* Check out any model information returned to make sure the model
      is correct.  */
   for(insn_model_ptr = file_entry->model_first; insn_model_ptr; insn_model_ptr = insn_model_ptr->next) {
-    char *name = insn_model_ptr->fields[insn_model_name];
+    const char *name = insn_model_ptr->fields[insn_model_name];
     int len = strlen (insn_model_ptr->fields[insn_model_fields]);
 
     while (len > 0 && isspace(*insn_model_ptr->fields[insn_model_fields])) {
@@ -544,10 +544,10 @@ insn_field_is_constant(insn_field *field,
     return field_constant_slash;
   /* field, though variable is on the list */
   if (field->is_string && rule->force_expansion != NULL) {
-    char *forced_fields = rule->force_expansion;
+    const char *forced_fields = rule->force_expansion;
     while (*forced_fields != '\0') {
       int field_len;
-      char *end = strchr(forced_fields, ',');
+      const char *end = strchr(forced_fields, ',');
       if (end == NULL)
 	field_len = strlen(forced_fields);
       else

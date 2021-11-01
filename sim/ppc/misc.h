@@ -31,7 +31,7 @@
 #include "filter_filename.h"
 
 extern void error
-(char *msg, ...);
+(const char *msg, ...);
 
 #define ASSERT(EXPRESSION) \
 do { \
@@ -48,7 +48,7 @@ extern void *zalloc
 (long size);
 
 extern void dumpf
-(int indent, char *msg, ...);
+(int indent, const char *msg, ...);
 
 extern unsigned target_a2i
 (int ms_bit_nr,
