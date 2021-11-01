@@ -47,7 +47,7 @@ include $(srcroot)/gdb/silent-rules.mk
 
 ifeq ($(V),0)
 ECHO_STAMP = @echo "  GEN   "
-ECHO_IGEN  = @echo "  IGEN  $(<F)";
+ECHO_IGEN  = @echo "  IGEN   $(<F)";
 else
 ECHO_STAMP = @:
 endif
