@@ -32,7 +32,7 @@ static void free_state (SIM_DESC);
 
 /* Cover function for sim_cgen_disassemble_insn.  */
 
-void
+static void
 iq2000bf_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
 			  const ARGBUF *abuf, IADDR pc, char *buf)
 {
@@ -89,8 +89,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     }
 
   /* Allocate core managed memory.  */
-  sim_do_commandf (sd, "memory region 0x%lx,0x%lx", IQ2000_INSN_VALUE, IQ2000_INSN_MEM_SIZE); 
-  sim_do_commandf (sd, "memory region 0x%lx,0x%lx", IQ2000_DATA_VALUE, IQ2000_DATA_MEM_SIZE); 
+  sim_do_commandf (sd, "memory region 0x%x,0x%x", IQ2000_INSN_VALUE, IQ2000_INSN_MEM_SIZE); 
+  sim_do_commandf (sd, "memory region 0x%x,0x%x", IQ2000_DATA_VALUE, IQ2000_DATA_MEM_SIZE); 
 
   /* check for/establish the reference program image */
   if (sim_analyze_program (sd,
