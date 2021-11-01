@@ -422,11 +422,11 @@ pending_tick (SIM_DESC SD,
 	      if (PENDING_SLOT_DELAY[index] == 0)			
 		{							
 		  if (PENDING_TRACE)
-		    sim_io_eprintf (SD, "PENDING_DRAIN - drained - index %d, dest 0x%lx, bit %d, val 0x%lx, size %d\n",
+		    sim_io_eprintf (SD, "PENDING_DRAIN - drained - index %d, dest %p, bit %d, val %" PRIx64 ", size %d\n",
 				    index,
-				    (unsigned long) PENDING_SLOT_DEST[index],
+				    PENDING_SLOT_DEST[index],
 				    PENDING_SLOT_BIT[index],
-				    (unsigned long) PENDING_SLOT_VALUE[index],
+				    PENDING_SLOT_VALUE[index],
 				    PENDING_SLOT_SIZE[index]);
 		  if (PENDING_SLOT_BIT[index] >= 0)			
 		    switch (PENDING_SLOT_SIZE[index])                 
@@ -468,11 +468,11 @@ pending_tick (SIM_DESC SD,
 		    }
 		}							
 	      else if (PENDING_TRACE && PENDING_SLOT_DELAY[index] > 0)
-		sim_io_eprintf (SD, "PENDING_DRAIN - queued - index %d, delay %d, dest 0x%lx, bit %d, val 0x%lx, size %d\n",
+		sim_io_eprintf (SD, "PENDING_DRAIN - queued - index %d, delay %d, dest %p, bit %d, val %" PRIx64 ", size %d\n",
 				index, PENDING_SLOT_DELAY[index],
-				(unsigned long) PENDING_SLOT_DEST[index],
+				PENDING_SLOT_DEST[index],
 				PENDING_SLOT_BIT[index],
-				(unsigned long) PENDING_SLOT_VALUE[index],
+				PENDING_SLOT_VALUE[index],
 				PENDING_SLOT_SIZE[index]);
 
 	    }								
