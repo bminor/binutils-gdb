@@ -169,7 +169,7 @@ update_time_from_event(event_queue *events)
 	   event != NULL;
 	   event = event->next, i++)
 	{
-	  TRACE(trace_events, ("event time-from-event - time %" PRIi64 ", delta %ld - event %d, tag %p, time %" PRIi64 ", handler %p, data %p\n",
+	  TRACE(trace_events, ("event time-from-event - time %" PRIi64 ", delta %" PRIi64 " - event %d, tag %p, time %" PRIi64 ", handler %p, data %p\n",
 			       current_time,
 			       events->time_from_event,
 			       i,
