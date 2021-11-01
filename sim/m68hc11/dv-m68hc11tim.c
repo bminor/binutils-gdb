@@ -260,7 +260,7 @@ m68hc11tim_timer_event (struct hw *me, void *data)
   controller = hw_data (me);
   sd         = hw_system (me);
   cpu        = STATE_CPU (sd, 0);
-  type       = (enum event_type) ((long) data) & 0x0FF;
+  type       = (enum event_type) ((uintptr_t) data) & 0x0FF;
   events     = STATE_EVENTS (sd);
 
   delay = 0;
@@ -280,7 +280,7 @@ m68hc11tim_timer_event (struct hw *me, void *data)
       eventp = &controller->rti_timer_event;
       delay  = controller->rti_prev_interrupt + controller->rti_delay;
       
-      if (((long) (data) & 0x0100) == 0)
+      if (((uintptr_t) data & 0x0100) == 0)
         {
           cpu->ios[M6811_TFLG2] |= M6811_RTIF;
           check_interrupt = 1;
@@ -308,7 +308,7 @@ m68hc11tim_timer_event (struct hw *me, void *data)
       delay += events->nr_ticks_to_process;
 
       eventp = &controller->tof_timer_event;
-      if (((long) (data) & 0x100) == 0)
+      if (((uintptr_t) data & 0x100) == 0)
         {
           cpu->ios[M6811_TFLG2] |= M6811_TOF;
           check_interrupt = 1;
