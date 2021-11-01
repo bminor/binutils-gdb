@@ -238,7 +238,7 @@ do_polling_event (struct hw *me,
 {
   SIM_DESC sd = hw_system (me);
   struct mn103ser *serial = hw_data(me);
-  long serial_reg = (long) data;
+  long serial_reg = (uintptr_t) data;
   char c;
   int count, status;
 
@@ -280,7 +280,7 @@ do_polling_event (struct hw *me,
   /* Schedule next polling event */
   serial->device[serial_reg].event
     = hw_event_queue_schedule (me, 1000,
-			       do_polling_event, (void *)serial_reg);
+			       do_polling_event, (void *)(uintptr_t)serial_reg);
 
 }
 
@@ -424,7 +424,7 @@ read_status_reg (struct hw *me,
       serial->device[serial_reg].event
 	= hw_event_queue_schedule (me, 1000,
 				   do_polling_event,
-				   (void *) (long) serial_reg);
+				   (void *)(uintptr_t)serial_reg);
     }
 
   if ( nr_bytes == 1 )

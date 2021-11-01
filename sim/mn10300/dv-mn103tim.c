@@ -570,7 +570,7 @@ do_counter_event (struct hw *me,
 		  void *data)
 {
   struct mn103tim *timers = hw_data(me);
-  long timer_nr = (long) data;
+  long timer_nr = (uintptr_t) data;
   int next_timer;
 
   /* Check if counting is still enabled. */
@@ -596,7 +596,7 @@ do_counter_event (struct hw *me,
       /* FIX: Check if div_ratio has changed and if it's now 0. */
       timers->timer[timer_nr].event
 	= hw_event_queue_schedule (me, timers->timer[timer_nr].div_ratio,
-				   do_counter_event, (void *)timer_nr);
+				   do_counter_event, (void *)(uintptr_t)timer_nr);
     }
   else
     {
@@ -611,7 +611,7 @@ do_counter6_event (struct hw *me,
 		  void *data)
 {
   struct mn103tim *timers = hw_data(me);
-  long timer_nr = (long) data;
+  long timer_nr = (uintptr_t) data;
   int next_timer;
 
   /* Check if counting is still enabled. */
@@ -625,7 +625,7 @@ do_counter6_event (struct hw *me,
       /* FIX: Check if div_ratio has changed and if it's now 0. */
       timers->timer[timer_nr].event
 	= hw_event_queue_schedule (me, timers->timer[timer_nr].div_ratio,
-				   do_counter6_event, (void *)timer_nr);
+				   do_counter6_event, (void *)(uintptr_t)timer_nr);
     }
   else
     {
@@ -808,7 +808,7 @@ write_mode_reg (struct hw *me,
 	      timers->timer[timer_nr].event
 		= hw_event_queue_schedule(me, div_ratio,
 					  do_counter_event,
-					  (void *)(timer_nr)); 
+					  (void *)(uintptr_t)timer_nr);
 	    }
 	}
     }
@@ -908,7 +908,7 @@ write_tm6md (struct hw *me,
 	  timers->timer[timer_nr].event
 	    = hw_event_queue_schedule(me, div_ratio,
 				      do_counter6_event,
-				      (void *)(timer_nr)); 
+				      (void *)(uintptr_t)timer_nr);
 	}
     }
   else
