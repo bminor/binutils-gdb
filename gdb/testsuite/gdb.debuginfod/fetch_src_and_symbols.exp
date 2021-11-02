@@ -30,8 +30,13 @@ if { [which curl] == 0 } {
 }
 
 # Skip testing if gdb was not configured with debuginfod
+#
+# If GDB is built with ASan, it warns that some signal handlers (installed by
+# ASan) exist on startup.  That makes TCL's exec throw an error.  Disable that
+# by passing --quiet.
+
 if { [string first "with-debuginfod" \
-	 [eval exec $GDB $INTERNAL_GDBFLAGS --configuration]] == -1 } {
+	 [eval exec $GDB --quiet $INTERNAL_GDBFLAGS --configuration]] == -1 } {
     untested "gdb not configured with debuginfod"
     return -1
 }
