@@ -151,7 +151,7 @@ The current global maintainers are (in alphabetical order):
 Pedro Alves                     pedro@palves.net
 Joel Brobecker			brobecker@adacore.com
 Kevin Buettner			kevinb@redhat.com
-Andrew Burgess			andrew.burgess@embecosm.com
+Andrew Burgess			aburgess@redhat.com
 Doug Evans			dje@google.com
 Simon Marchi			simon.marchi@polymtl.ca
 Yao Qi				qiyao@sourceware.org
@@ -311,7 +311,7 @@ the native maintainer when resolving ABI issues.
 
 	riscv		--target=riscv32-elf ,-Werror
 			--target=riscv64-elf ,-Werror
-			Andrew Burgess		andrew.burgess@embecosm.com
+			Andrew Burgess		aburgess@redhat.com
 			Palmer Dabbelt		palmer@dabbelt.com
 
 	rl78		--target=rl78-elf ,-Werror
@@ -476,7 +476,7 @@ Paul Brook					paul@codesourcery.com
 Julian Brown					julian@codesourcery.com
 Iain Buclaw					ibuclaw@gdcproject.org
 Kevin Buettner					kevinb@redhat.com
-Andrew Burgess					andrew.burgess@embecosm.com
+Andrew Burgess					aburgess@redhat.com
 David Carlton					carlton@bactrian.org
 Stephane Carrez					Stephane.Carrez@gmail.com
 Michael Chastain				mec.gnu@mindspring.com
