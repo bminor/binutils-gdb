@@ -50,7 +50,19 @@ gdb_breakpoint $bp1
 gdb_breakpoint $bp2
 gdb_breakpoint $bp3
 
-gdb_test "stepi" "" "set r3 "
+set insn_supported 1
+gdb_test_multiple "stepi" "set r3" {
+    -re "Program received signal SIGILL, Illegal instruction\\..*" {
+	set insn_supported 0
+    }
+    -re -wrap "" {
+	pass $gdb_test_name
+    }
+}
+if { ! $insn_supported } {
+    unsupported "illegal instruction"
+    return
+}
 set check_r3 [get_hexadecimal_valueof "\$r3" "default0"]
 gdb_test "stepi" "" "set r4"
 set check_r4 [get_hexadecimal_valueof "\$r4" "default0"]
