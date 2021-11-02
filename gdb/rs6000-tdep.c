@@ -2137,6 +2137,12 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	    /* Never skip branches.  */
 	    break;
 
+	  /* Test based on opcode and mask values of
+	     powerpc_opcodes[svc..svcla] in opcodes/ppc-opc.c.  */
+	  if ((op & 0xffff0000) == 0x44000000)
+	    /* Never skip system calls.  */
+	    break;
+
 	  if (num_skip_non_prologue_insns++ > max_skip_non_prologue_insns)
 	    /* Do not scan too many insns, scanning insns is expensive with
 	       remote targets.  */
