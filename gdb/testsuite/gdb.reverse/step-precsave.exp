@@ -124,6 +124,8 @@ gdb_test_multiple "stepi" "$test_message" {
 
 # stepi into a function call
 
+set alphanum_re "\[a-zA-Z0-9\]"
+set pic_thunk_re  "__$alphanum_re*\\.get_pc_thunk\\.$alphanum_re* \\(\\)"
 set test_message "stepi into function call"
 gdb_test_multiple "stepi" "$test_message" {
     -re "ARRIVED IN CALLEE.*$gdb_prompt $" {
@@ -140,6 +142,10 @@ gdb_test_multiple "stepi" "$test_message" {
 	exp_continue
     }
     -re "STEPI TEST.*$gdb_prompt $" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+    -re "$pic_thunk_re.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
@@ -214,6 +220,10 @@ gdb_test_multiple "stepi" "$test_message" {
     }
     -re "ENTER CALLEE.*$gdb_prompt $" {
 	send_gdb "stepi\n" 
+	exp_continue
+    }
+    -re "$pic_thunk_re.*$gdb_prompt $" {
+	send_gdb "stepi\n"
 	exp_continue
     }
     -re "${hex} in main .*:$stepi_location.*STEPI TEST.*$gdb_prompt $" {

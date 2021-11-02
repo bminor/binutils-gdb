@@ -64,9 +64,12 @@ gdb_test "step" "inc\.2.*" "step through call thunk into inc"
 gdb_test "step" "inc\.3.*" "step inside inc"
 gdb_test "step" "thrice\.4.*" "step through return thunk back into thrice"
 
+set alphanum_re "\[a-zA-Z0-9\]"
+set pic_thunk_re  "__$alphanum_re*\\.get_pc_thunk\\.$alphanum_re* \\(\\)"
+
 # We can use instruction stepping to step into thunks.
 stepi_until "thrice" "indirect_thunk" "stepi into call thunk"
 stepi_until "indirect_thunk" "inc." "stepi out of call thunk into inc"
-stepi_until "inc" "return_thunk" "stepi into return thunk"
+stepi_until "(inc|$pic_thunk_re)" "return_thunk" "stepi into return thunk"
 stepi_until "return_thunk" "thrice" \
     "stepi out of return thunk back into thrice"
