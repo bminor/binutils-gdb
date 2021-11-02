@@ -6281,7 +6281,8 @@ tls_get_addr_epilogue (bfd *obfd, bfd_byte *p, struct ppc_link_hash_table *htab)
 
 /* Called via elf_link_hash_traverse to transfer dynamic linking
    information on function code symbol entries to their corresponding
-   function descriptor symbol entries.  */
+   function descriptor symbol entries.  Must not be called twice for
+   any given code symbol.  */
 
 static bool
 func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
@@ -6339,7 +6340,11 @@ func_desc_adjust (struct elf_link_hash_entry *h, void *inf)
 	if (ent->plt.refcount > 0)
 	  break;
       if (ent == NULL)
-	return true;
+	{
+	  if (fdh != NULL && fdh->fake)
+	    _bfd_elf_link_hash_hide_symbol (info, &fdh->elf, true);
+	  return true;
+	}
     }
 
   /* Create a descriptor as undefined if necessary.  */
@@ -6462,12 +6467,6 @@ ppc64_elf_edit (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
       htab->elf.hgot->type = STT_OBJECT;
       htab->elf.hgot->other
 	= (htab->elf.hgot->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
-    }
-
-  if (htab->need_func_desc_adj)
-    {
-      elf_link_hash_traverse (&htab->elf, func_desc_adjust, info);
-      htab->need_func_desc_adj = 0;
     }
 
   return true;
@@ -7783,6 +7782,13 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
   if (htab == NULL)
     return false;
 
+  /* Move dynamic linking info to the function descriptor sym.  */
+  if (htab->need_func_desc_adj)
+    {
+      elf_link_hash_traverse (&htab->elf, func_desc_adjust, info);
+      htab->need_func_desc_adj = 0;
+    }
+
   if (abiversion (info->output_bfd) == 1)
     htab->opd_abi = 1;
 
@@ -7830,10 +7836,6 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
   tga = elf_link_hash_lookup (&htab->elf, ".__tls_get_addr",
 			      false, false, true);
   htab->tls_get_addr = ppc_elf_hash_entry (tga);
-
-  /* Move dynamic linking info to the function descriptor sym.  */
-  if (tga != NULL)
-    func_desc_adjust (tga, info);
   tga_fd = elf_link_hash_lookup (&htab->elf, "__tls_get_addr",
 				 false, false, true);
   htab->tls_get_addr_fd = ppc_elf_hash_entry (tga_fd);
@@ -7841,8 +7843,6 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
   desc = elf_link_hash_lookup (&htab->elf, ".__tls_get_addr_desc",
 			       false, false, true);
   htab->tga_desc = ppc_elf_hash_entry (desc);
-  if (desc != NULL)
-    func_desc_adjust (desc, info);
   desc_fd = elf_link_hash_lookup (&htab->elf, "__tls_get_addr_desc",
 				  false, false, true);
   htab->tga_desc_fd = ppc_elf_hash_entry (desc_fd);
@@ -7853,8 +7853,6 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 
       opt = elf_link_hash_lookup (&htab->elf, ".__tls_get_addr_opt",
 				  false, false, true);
-      if (opt != NULL)
-	func_desc_adjust (opt, info);
       opt_fd = elf_link_hash_lookup (&htab->elf, "__tls_get_addr_opt",
 				     false, false, true);
       if (opt_fd != NULL
