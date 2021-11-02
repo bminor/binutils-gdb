@@ -32,8 +32,22 @@ static const char debuginfod_on[] = "on";
 static const char debuginfod_off[] = "off";
 static const char debuginfod_ask[] = "ask";
 
-static const char *debuginfod_enable = debuginfod_ask;
-static unsigned debuginfod_verbose = 1;
+static const char *debuginfod_enabled_enum[] =
+{
+  debuginfod_on,
+  debuginfod_off,
+  debuginfod_ask,
+  nullptr
+};
+
+static const char *debuginfod_enabled =
+#if defined(HAVE_LIBDEBUGINFOD)
+  debuginfod_ask;
+#else
+  debuginfod_off;
+#endif
+
+static unsigned int debuginfod_verbose = 1;
 
 #ifndef HAVE_LIBDEBUGINFOD
 scoped_fd
@@ -56,70 +70,6 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 
 #define NO_IMPL _("Support for debuginfod is not compiled into GDB.")
 
-/* Stub set/show commands that indicate debuginfod is not supported.  */
-
-static void
-set_debuginfod_on_command (const char *args, int from_tty)
-{
-  error (NO_IMPL);
-  debuginfod_enable = debuginfod_off;
-}
-
-static void
-set_debuginfod_off_command (const char *args, int from_tty)
-{
-  error (NO_IMPL);
-  debuginfod_enable = debuginfod_off;
-}
-
-static void
-set_debuginfod_ask_command (const char *args, int from_tty)
-{
-  error (NO_IMPL);
-  debuginfod_enable = debuginfod_off;
-}
-
-static void
-show_debuginfod_status_command (const char *args, int from_tty)
-{
-  error (NO_IMPL);
-}
-
-static void
-set_debuginfod_urls_command (const std::string& urls)
-{
-  error (NO_IMPL);
-}
-
-static const std::string&
-get_debuginfod_urls_command ()
-{
-  static std::string empty;
-  return empty;
-}
-
-static void
-show_debuginfod_urls_command (struct ui_file *file, int from_tty,
-			      struct cmd_list_element *cmd, const char *value)
-{
-  error (NO_IMPL);
-}
-
-static void
-set_debuginfod_verbose_command (const char *args, int from_tty,
-				struct cmd_list_element *c)
-{
-  error (NO_IMPL);
-  debuginfod_verbose = 0;
-}
-
-static void
-show_debuginfod_verbose_command (struct ui_file *file, int from_tty,
-				 struct cmd_list_element *cmd,
-				 const char *value)
-{
-  error (NO_IMPL);
-}
 #else
 #include <elfutils/debuginfod.h>
 
@@ -146,96 +96,6 @@ struct debuginfod_client_deleter
 
 using debuginfod_client_up
   = std::unique_ptr<debuginfod_client, debuginfod_client_deleter>;
-
-/* Enable debuginfod.  */
-
-static void
-set_debuginfod_on_command (const char *args, int from_tty)
-{
-  debuginfod_enable = debuginfod_on;
-}
-
-/* Disable debuginfod.  */
-
-static void
-set_debuginfod_off_command (const char *args, int from_tty)
-{
-  debuginfod_enable = debuginfod_off;
-}
-
-/* Before next query, ask user whether to enable debuginfod.  */
-
-static void
-set_debuginfod_ask_command (const char *args, int from_tty)
-{
-  debuginfod_enable = debuginfod_ask;
-}
-
-/* Show whether debuginfod is enabled.  */
-
-static void
-show_debuginfod_status_command (const char *args, int from_tty)
-{
-  printf_unfiltered (_("Debuginfod functionality is currently set to " \
-		     "\"%s\".\n"), debuginfod_enable);
-}
-
-/* Set the URLs that debuginfod will query.  */
-
-static void
-set_debuginfod_urls_command (const std::string& urls)
-{
-  if (setenv ("DEBUGINFOD_URLS", urls.c_str (), 1) != 0)
-    warning (_("Unable to set debuginfod URLs: %s"), safe_strerror (errno));
-}
-
-/* Get current debuginfod URLs.  */
-
-static const std::string&
-get_debuginfod_urls_command ()
-{
-  static std::string urls;
-  const char *envvar = getenv (DEBUGINFOD_URLS_ENV_VAR);
-
-  if (envvar != nullptr)
-    urls = envvar;
-  else
-    urls.clear ();
-
-  return urls;
-}
-
-/* Show the URLs that debuginfod will query.  */
-
-static void
-show_debuginfod_urls_command (struct ui_file *file, int from_tty,
-			      struct cmd_list_element *cmd, const char *value)
-{
-  if (value == nullptr || value[0] == '\0')
-    fprintf_unfiltered (file, _("Debuginfod URLs have not been set.\n"));
-  else
-    fprintf_filtered (file, _("Debuginfod URLs are currently set to:\n%s\n"),
-		      value);
-}
-
-/* No-op setter used for compatibility when gdb is built without debuginfod.  */
-
-static void
-set_debuginfod_verbose_command (const char *args, int from_tty,
-				struct cmd_list_element *c)
-{
-  return;
-}
-
-/* Show verbosity.  */
-
-static void
-show_debuginfod_verbose_command (struct ui_file *file, int from_tty,
-				 struct cmd_list_element *cmd, const char *value)
-{
-  fprintf_filtered (file, _("Debuginfod verbose output is set to %s.\n"),
-		    value);
-}
 
 static int
 progressfn (debuginfod_client *c, long cur, long total)
@@ -293,15 +153,15 @@ get_debuginfod_client ()
    whether to enable debuginfod.  */
 
 static bool
-debuginfod_enabled ()
+debuginfod_is_enabled ()
 {
   const char *urls = getenv (DEBUGINFOD_URLS_ENV_VAR);
 
   if (urls == nullptr || urls[0] == '\0'
-      || debuginfod_enable == debuginfod_off)
+      || debuginfod_enabled == debuginfod_off)
     return false;
 
-  if (debuginfod_enable == debuginfod_ask)
+  if (debuginfod_enabled == debuginfod_ask)
     {
       int resp = nquery (_("\nThis GDB supports auto-downloading debuginfo " \
 			   "from the following URLs:\n%s\nEnable debuginfod " \
@@ -310,16 +170,16 @@ debuginfod_enabled ()
       if (!resp)
 	{
 	  printf_filtered (_("Debuginfod has been disabled.\nTo make this " \
-			     "setting permanent, add \'set debuginfod off\' " \
-			     "to .gdbinit.\n"));
-	  debuginfod_enable = debuginfod_off;
+			     "setting permanent, add \'set debuginfod " \
+			     "enabled off\' to .gdbinit.\n"));
+	  debuginfod_enabled = debuginfod_off;
 	  return false;
 	}
 
       printf_filtered (_("Debuginfod has been enabled.\nTo make this " \
-			 "setting permanent, add \'set debuginfod on\' " \
-			 "to .gdbinit.\n"));
-      debuginfod_enable = debuginfod_on;
+			 "setting permanent, add \'set debuginfod enabled " \
+			 "on\' to .gdbinit.\n"));
+      debuginfod_enabled = debuginfod_on;
     }
 
   return true;
@@ -333,7 +193,7 @@ debuginfod_source_query (const unsigned char *build_id,
 			 const char *srcpath,
 			 gdb::unique_xmalloc_ptr<char> *destname)
 {
-  if (!debuginfod_enabled ())
+  if (!debuginfod_is_enabled ())
     return scoped_fd (-ENOSYS);
 
   debuginfod_client *c = get_debuginfod_client ();
@@ -370,7 +230,7 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 			    const char *filename,
 			    gdb::unique_xmalloc_ptr<char> *destname)
 {
-  if (!debuginfod_enabled ())
+  if (!debuginfod_is_enabled ())
     return scoped_fd (-ENOSYS);
 
   debuginfod_client *c = get_debuginfod_client ();
@@ -398,6 +258,90 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 }
 #endif
 
+/* Set callback for "set debuginfod enabled".  */
+
+static void
+set_debuginfod_enabled (const char *value)
+{
+#if defined(HAVE_LIBDEBUGINFOD)
+  debuginfod_enabled = value;
+#else
+  error (NO_IMPL);
+#endif
+}
+
+/* Get callback for "set debuginfod enabled".  */
+
+static const char *
+get_debuginfod_enabled ()
+{
+  return debuginfod_enabled;
+}
+
+/* Show callback for "set debuginfod enabled".  */
+
+static void
+show_debuginfod_enabled (ui_file *file, int from_tty, cmd_list_element *cmd,
+			 const char *value)
+{
+  printf_unfiltered (_("Debuginfod functionality is currently set to "
+		       "\"%s\".\n"), debuginfod_enabled);
+}
+
+/* Set callback for "set debuginfod urls".  */
+
+static void
+set_debuginfod_urls (const std::string &urls)
+{
+#if defined(HAVE_LIBDEBUGINFOD)
+  if (setenv (DEBUGINFOD_URLS_ENV_VAR, urls.c_str (), 1) != 0)
+    warning (_("Unable to set debuginfod URLs: %s"), safe_strerror (errno));
+#else
+  error (NO_IMPL);
+#endif
+}
+
+/* Get callback for "set debuginfod urls".  */
+
+static const std::string&
+get_debuginfod_urls ()
+{
+  static std::string urls;
+#if defined(HAVE_LIBDEBUGINFOD)
+  const char *envvar = getenv (DEBUGINFOD_URLS_ENV_VAR);
+
+  if (envvar != nullptr)
+    urls = envvar;
+  else
+    urls.clear ();
+#endif
+
+  return urls;
+}
+
+/* Show callback for "set debuginfod urls".  */
+
+static void
+show_debuginfod_urls (ui_file *file, int from_tty, cmd_list_element *cmd,
+		      const char *value)
+{
+  if (value[0] == '\0')
+    fprintf_unfiltered (file, _("Debuginfod URLs have not been set.\n"));
+  else
+    fprintf_filtered (file, _("Debuginfod URLs are currently set to:\n%s\n"),
+		      value);
+}
+
+/* Show callback for "set debuginfod verbose".  */
+
+static void
+show_debuginfod_verbose_command (ui_file *file, int from_tty,
+				 cmd_list_element *cmd, const char *value)
+{
+  fprintf_filtered (file, _("Debuginfod verbose output is set to %s.\n"),
+		    value);
+}
+
 /* Register debuginfod commands.  */
 
 void _initialize_debuginfod ();
@@ -412,23 +356,17 @@ _initialize_debuginfod ()
 			  &show_debuginfod_prefix_list,
 			  &setlist, &showlist);
 
-  /* set debuginfod on */
-  add_cmd ("on", class_run, set_debuginfod_on_command,
-	   _("Enable debuginfod."), &set_debuginfod_prefix_list);
-
-  /* set debuginfod off */
-  add_cmd ("off", class_run, set_debuginfod_off_command,
-	   _("Disable debuginfod."), &set_debuginfod_prefix_list);
-
-  /* set debuginfod ask */
-  add_cmd ("ask", class_run, set_debuginfod_ask_command, _("\
-Ask the user whether to enable debuginfod before performing the next query."),
-	   &set_debuginfod_prefix_list);
-
-  /* show debuginfod status */
-  add_cmd ("status", class_run, show_debuginfod_status_command,
-	   _("Show whether debuginfod is set to \"on\", \"off\" or \"ask\"."),
-	   &show_debuginfod_prefix_list);
+  add_setshow_enum_cmd ("enabled", class_run, debuginfod_enabled_enum,
+			_("Set whether to use debuginfod."),
+			_("Show whether to use debuginfod."),
+			_("\
+When on, enable the use of debuginfod to download missing debug info and\n\
+source files."),
+			set_debuginfod_enabled,
+			get_debuginfod_enabled,
+			show_debuginfod_enabled,
+			&set_debuginfod_prefix_list,
+			&show_debuginfod_prefix_list);
 
   /* set/show debuginfod urls */
   add_setshow_string_noescape_cmd ("urls", class_run, _("\
@@ -437,9 +375,9 @@ Show the list of debuginfod server URLs."), _("\
 Manage the space-separated list of debuginfod server URLs that GDB will query \
 when missing debuginfo, executables or source files.\nThe default value is \
 copied from the DEBUGINFOD_URLS environment variable."),
-				   set_debuginfod_urls_command,
-				   get_debuginfod_urls_command,
-				   show_debuginfod_urls_command,
+				   set_debuginfod_urls,
+				   get_debuginfod_urls,
+				   show_debuginfod_urls,
 				   &set_debuginfod_prefix_list,
 				   &show_debuginfod_prefix_list);
 
@@ -450,7 +388,7 @@ Set verbosity of debuginfod output."), _("\
 Show debuginfod debugging."), _("\
 When set to a non-zero value, display verbose output for each debuginfod \
 query.\nTo disable, set to zero.  Verbose output is displayed by default."),
-			     set_debuginfod_verbose_command,
+			     nullptr,
 			     show_debuginfod_verbose_command,
 			     &set_debuginfod_prefix_list,
 			     &show_debuginfod_prefix_list);

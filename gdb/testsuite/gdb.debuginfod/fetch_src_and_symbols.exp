@@ -246,7 +246,7 @@ proc local_url { } {
     clean_restart
     gdb_test "file $binfile" ".*No debugging symbols.*" \
 	"file [file tail $binfile] cmd"
-    gdb_test_no_output "set debuginfod off"
+    gdb_test_no_output "set debuginfod enabled off"
     gdb_test_no_output "set debuginfod urls http://127.0.0.1:$port"
 
     # gdb shouldn't find the debuginfo since debuginfod has been disabled
@@ -254,7 +254,7 @@ proc local_url { } {
 	"file [file tail $binfile] cmd off"
 
     # Enable debuginfod and fetch the debuginfo
-    gdb_test_no_output "set debuginfod on"
+    gdb_test_no_output "set debuginfod enabled on"
     gdb_test "file $binfile" ".*Reading symbols from.*debuginfo.*" \
 	"file [file tail $binfile] cmd on"
 }

@@ -47114,27 +47114,28 @@ regarding @code{debuginfod}.
 @value{GDBN} provides the following commands for configuring @code{debuginfod}.
 
 @table @code
-@kindex set debuginfod
-@anchor{set debuginfod}
-@item set debuginfod
-@itemx set debuginfod on
+@kindex set debuginfod enabled
+@anchor{set debuginfod enabled}
+@item set debuginfod enabled
+@itemx set debuginfod enabled on
 @cindex enable debuginfod
 @value{GDBN} will attempt to query @code{debuginfod} servers when missing debug
 info or source files.
 
-@item set debuginfod off
+@item set debuginfod enabled off
 @value{GDBN} will not attempt to query @code{debuginfod} servers when missing
-debug info or source files.  By default, @code{debuginfod} is set to @code{off}
-for non-interactive sessions.
+debug info or source files.  By default, @code{debuginfod enabled} is set to
+@code{off} for non-interactive sessions.
 
-@item set debuginfod ask
+@item set debuginfod enabled ask
 @value{GDBN} will prompt the user to enable or disable @code{debuginfod} before
-attempting to perform the next query.  By default, @code{debuginfod} is set to
-@code{ask} for interactive sessions.
+attempting to perform the next query.  By default, @code{debuginfod enabled}
+is set to @code{ask} for interactive sessions.
 
-@kindex show debuginfod status
-@item show debuginfod status
-Show whether @code{debuginfod} is set to @code{on}, @code{off} or @code{ask}.
+@kindex show debuginfod enabled
+@item show debuginfod enabled
+Display whether @code{debuginfod enabled} is set to @code{on}, @code{off} or
+@code{ask}.
 
 @kindex set debuginfod urls
 @cindex configure debuginfod URLs
