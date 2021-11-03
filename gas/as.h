@@ -484,9 +484,7 @@ void add_debug_prefix_map (const char *);
 static inline char *
 xmemdup0 (const char *in, size_t len)
 {
-  char *out = (char *) xmalloc (len + 1);
-  out[len] = 0;
-  return (char *) memcpy (out, in, len);
+  return xmemdup (in, len, len + 1);
 }
 
 struct expressionS;

@@ -69,14 +69,12 @@ int linenumber;
 		}
 
 "\""[^\"]*"\"" {
-		yylval.id = xstrdup (yytext+1);
-		yylval.id[yyleng-2] = 0;
+		yylval.id = xmemdup (yytext + 1, yyleng - 2, yyleng - 1);
 		return ID;
 		}
 
 "\'"[^\']*"\'" {
-		yylval.id = xstrdup (yytext+1);
-		yylval.id[yyleng-2] = 0;
+		yylval.id = xmemdup (yytext + 1, yyleng - 2, yyleng - 1);
 		return ID;
 		}
 "*".* 		{ }
