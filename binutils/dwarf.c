@@ -7192,7 +7192,6 @@ display_debug_aranges (struct dwarf_section *section,
       dwarf_vma address;
       unsigned long sec_off;
       unsigned char address_size;
-      int excess;
       unsigned int offset_size;
       unsigned char *end_ranges;
 
@@ -7277,22 +7276,22 @@ display_debug_aranges (struct dwarf_section *section,
       addr_ranges = hdrptr;
 
       /* Must pad to an alignment boundary that is twice the address size.  */
-      excess = (hdrptr - start) % (2 * address_size);
-      if (excess)
-	addr_ranges += (2 * address_size) - excess;
+      addr_ranges += (2 * address_size - 1
+		      - (hdrptr - start - 1) % (2 * address_size));
 
-      start = end_ranges;
-
-      while (2u * address_size <= (size_t) (start - addr_ranges))
+      while (2 * address_size <= end_ranges - addr_ranges)
 	{
-	  SAFE_BYTE_GET_AND_INC (address, addr_ranges, address_size, start);
-	  SAFE_BYTE_GET_AND_INC (length, addr_ranges, address_size, start);
-
+	  SAFE_BYTE_GET_AND_INC (address, addr_ranges, address_size,
+				 end_ranges);
+	  SAFE_BYTE_GET_AND_INC (length, addr_ranges, address_size,
+				 end_ranges);
 	  printf ("    ");
 	  print_dwarf_vma (address, address_size);
 	  print_dwarf_vma (length, address_size);
 	  putchar ('\n');
 	}
+
+      start = end_ranges;
     }
 
   printf ("\n");
