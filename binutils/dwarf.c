@@ -7022,28 +7022,32 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	  else
 	    {
 	      if (start < next)
-		warn (_("There is a hole [0x%lx - 0x%lx] in .debug_loc section.\n"),
+		warn (_("There is a hole [0x%lx - 0x%lx] in %s section.\n"),
 		      (unsigned long) (start - section_begin),
-		      (unsigned long) offset);
+		      (unsigned long) offset,
+		      section->name);
 	      else if (start > next)
-		warn (_("There is an overlap [0x%lx - 0x%lx] in .debug_loc section.\n"),
+		warn (_("There is an overlap [0x%lx - 0x%lx] in %s section.\n"),
 		      (unsigned long) (start - section_begin),
-		      (unsigned long) offset);
+		      (unsigned long) offset,
+		      section->name);
 	    }
 	  start = next;
 	  vstart = vnext;
 
 	  if (offset >= bytes)
 	    {
-	      warn (_("Offset 0x%lx is bigger than .debug_loc section size.\n"),
-		    (unsigned long) offset);
+	      warn (_("Offset 0x%lx is bigger than %s section size.\n"),
+		    (unsigned long) offset,
+		    section->name);
 	      continue;
 	    }
 
 	  if (vnext && voffset >= bytes)
 	    {
-	      warn (_("View Offset 0x%lx is bigger than .debug_loc section size.\n"),
-		    (unsigned long) voffset);
+	      warn (_("View Offset 0x%lx is bigger than %s section size.\n"),
+		    (unsigned long) voffset,
+		    section->name);
 	      continue;
 	    }
 
