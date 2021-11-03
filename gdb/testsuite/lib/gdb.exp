@@ -25,6 +25,13 @@ if {$tool == ""} {
     exit 2
 }
 
+# If GDB is built with ASAN (and because there are leaks), it will output a
+# leak report when exiting as well as exit with a non-zero (failure) status.
+# This can affect tests that are sensitive to what GDB prints on stderr or its
+# exit status.  Add `detect_leaks=0` to the ASAN_OPTIONS environment variable
+# (which will affect any spawned sub-process) to avoid this.
+append ::env(ASAN_OPTIONS) ",detect_leaks=0"
+
 # List of procs to run in gdb_finish.
 set gdb_finish_hooks [list]
 
