@@ -149,7 +149,7 @@ struct inf_wait
     int suppress;		/* Something trivial happened.  */
   };
 
-/* The state of an inferior.  */
+/* Further Hurd-specific state of an inferior.  */
 struct inf
   {
     /* Fields describing the current inferior.  */
@@ -2108,8 +2108,8 @@ gnu_nat_target::create_inferior (const char *exec_file,
 
   inf_debug (inf, "creating inferior");
 
-  if (!inf->target_is_pushed (this))
-    inf->push_target (this);
+  if (!inferior->target_is_pushed (this))
+    inferior->push_target (this);
 
   pid = fork_inferior (exec_file, allargs, env, gnu_ptrace_me,
 		       NULL, NULL, NULL, NULL);
