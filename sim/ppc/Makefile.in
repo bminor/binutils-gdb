@@ -86,7 +86,7 @@ CONFIG_CFLAGS = \
   $(MODEL_CFLAGS) \
   $(TERMIO_CFLAGS) \
   $(DEVZERO_CFLAGS)
-SIM_FPU_CFLAGS = @sim_fpu_cflags@
+SIM_FPU_CFLAGS = -DHAVE_COMMON_FPU -I../common -I${srcdir}/../common
 
 STD_CFLAGS	= $(CFLAGS) $(WERROR_CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARN_CFLAGS) $(INCLUDES) $(INCGNU) $(INTL_CFLAGS) $(SIM_FPU_CFLAGS)
 NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(INCLUDES) $(SIM_FPU_CFLAGS)
@@ -507,7 +507,7 @@ LIB_OBJ = \
 	semantics.o \
 	idecode.o \
 	support.o \
-	@sim_fpu@ \
+	sim-fpu.o \
 	psim.o \
 	$(COMMON_OBJS) \
 	$(PACKAGE_OBJ) \

@@ -545,17 +545,6 @@ else
   sim_devzero=""
 fi
 
-AC_MSG_CHECKING(for common simulator directory fpu implementation)
-if test -f "${srcdir}/../common/sim-fpu.c"; then
-  AC_MSG_RESULT(yes)
-  sim_fpu_cflags="-DHAVE_COMMON_FPU -I../common -I${srcdir}/../common"
-  sim_fpu="sim-fpu.o"
-else
-  AC_MSG_RESULT(no)
-  sim_fpu_cflags=
-  sim_fpu=
-fi
-
 # Since we run commands on the build system, we have to create a
 # separate config header for the build system if build != host.
 if test x$host = x$build; then
@@ -612,8 +601,6 @@ AC_SUBST(sim_default_model)
 AC_SUBST(sim_model_issue)
 AC_SUBST(sim_termio)
 AC_SUBST(sim_devzero)
-AC_SUBST(sim_fpu_cflags)
-AC_SUBST(sim_fpu)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])

@@ -621,8 +621,6 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-sim_fpu
-sim_fpu_cflags
 sim_devzero
 sim_termio
 sim_model_issue
@@ -4121,20 +4119,6 @@ else
   sim_devzero=""
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for common simulator directory fpu implementation" >&5
-$as_echo_n "checking for common simulator directory fpu implementation... " >&6; }
-if test -f "${srcdir}/../common/sim-fpu.c"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-  sim_fpu_cflags="-DHAVE_COMMON_FPU -I../common -I${srcdir}/../common"
-  sim_fpu="sim-fpu.o"
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-  sim_fpu_cflags=
-  sim_fpu=
-fi
-
 # Since we run commands on the build system, we have to create a
 # separate config header for the build system if build != host.
 if test x$host = x$build; then
@@ -4166,8 +4150,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
-
 
 
 
