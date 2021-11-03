@@ -430,7 +430,7 @@ BUILT_SRC_WO_CONFIG = \
 	pk.h \
 	hw.h hw.c \
 	filter_host.c \
-	@sim_targ_vals@
+	targ-vals.h targ-map.c targ-vals.def
 
 BUILT_SRC = \
 	$(BUILT_SRC_WO_CONFIG) \
@@ -469,6 +469,10 @@ MAIN_SRC = \
 	sim_calls.c
 
 COMMON_OBJS_NAMES = \
+	callback.o \
+	target-newlib-errno.o \
+	target-newlib-open.o \
+	target-newlib-signal.o \
 	version.o
 COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
 
@@ -511,7 +515,7 @@ LIB_OBJ = \
 	options.o
 
 
-GDB_OBJ = gdb-sim.o sim_calls.o @sim_callback@
+GDB_OBJ = gdb-sim.o sim_calls.o targ-map.o
 
 HW_SRC = @sim_hw_src@
 HW_OBJ = @sim_hw_obj@
@@ -615,9 +619,6 @@ stamp-map: Makefile gentmap $(srcroot)/move-if-change
 	$(ECHO_GEN) ./gentmap -c > tmp-map.c
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-map.c targ-map.c
 	$(SILENCE) touch $@
-
-callback.o: $(srcdir)/../common/callback.c $(TARG_VALS_H) $(CONFIG_H)
-	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) -DHAVE_CONFIG_H $(srcdir)/../common/callback.c
 
 targ-map.o: targ-map.c $(ANSIDECL_H) $(GDB_CALLBACK_H) $(TARG_VALS_H)
 

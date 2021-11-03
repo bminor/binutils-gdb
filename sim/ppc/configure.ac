@@ -545,18 +545,6 @@ else
   sim_devzero=""
 fi
 
-dnl Figure out if we are in the new Cygnus tree with a common directory or not
-AC_MSG_CHECKING(for common simulator directory)
-if test -f "${srcdir}/../common/callback.c"; then
-  AC_MSG_RESULT(yes)
-  sim_callback="callback.o targ-map.o"
-  sim_targ_vals="targ-vals.h targ-map.c targ-vals.def"
-else
-  AC_MSG_RESULT(no)
-  sim_callback=""
-  sim_targ_vals=""
-fi
-
 AC_MSG_CHECKING(for common simulator directory fpu implementation)
 if test -f "${srcdir}/../common/sim-fpu.c"; then
   AC_MSG_RESULT(yes)
@@ -624,8 +612,6 @@ AC_SUBST(sim_default_model)
 AC_SUBST(sim_model_issue)
 AC_SUBST(sim_termio)
 AC_SUBST(sim_devzero)
-AC_SUBST(sim_callback)
-AC_SUBST(sim_targ_vals)
 AC_SUBST(sim_fpu_cflags)
 AC_SUBST(sim_fpu)
 
