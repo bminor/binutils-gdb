@@ -67,7 +67,8 @@ extract (SIM_CPU *current_cpu, PCADDR pc, CGEN_INSN_INT insn, ARGBUF *abuf,
   return id;
 }
 
-static INLINE SEM_PC
+/* This might not be used directly depending on the fast compile mode.  */
+ATTRIBUTE_UNUSED static INLINE SEM_PC
 execute (SIM_CPU *current_cpu, SCACHE *sc, int fast_p)
 {
   SEM_PC vpc;

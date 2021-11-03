@@ -349,7 +349,7 @@ static INLINE void
    This is as opposed to x-after which is only emitted at the end of a group
    of parallel insns.  */
 
-static INLINE void
+ATTRIBUTE_UNUSED static INLINE void
 @prefix@_emit_before (SIM_CPU *current_cpu, SCACHE *sc, PCADDR pc, int first_p)
 {
   ARGBUF *abuf = &sc[0].argbuf;
@@ -364,7 +364,7 @@ static INLINE void
    x-after is emitted after a serial insn or at the end of a group of
    parallel insns.  */
 
-static INLINE void
+ATTRIBUTE_UNUSED static INLINE void
 @prefix@_emit_after (SIM_CPU *current_cpu, SCACHE *sc, PCADDR pc)
 {
   ARGBUF *abuf = &sc[0].argbuf;
