@@ -92,4 +92,46 @@ operator new[] (std::size_t sz, const std::nothrow_t&) noexcept
 {
   return ::operator new (sz, std::nothrow);
 }
+
+/* Define also operators delete as one can LD_PRELOAD=libasan.so.*
+   without recompiling the program with -fsanitize=address and then one would
+   get false positive alloc-dealloc-mismatch (malloc vs operator delete [])
+   errors from AddressSanitizers.  */
+
+void
+operator delete (void *p)
+{
+  free (p);
+}
+
+void
+operator delete (void *p, const std::nothrow_t&) noexcept
+{
+  return ::operator delete (p);
+}
+
+void
+operator delete (void *p, std::size_t) noexcept
+{
+  return ::operator delete (p, std::nothrow);
+}
+
+void
+operator delete[] (void *p)
+{
+  return ::operator delete (p);
+}
+
+void
+operator delete[] (void *p, const std::nothrow_t&) noexcept
+{
+  return ::operator delete (p, std::nothrow);
+}
+
+void
+operator delete[] (void *p, std::size_t) noexcept
+{
+  return ::operator delete[] (p, std::nothrow);
+}
+
 #endif
