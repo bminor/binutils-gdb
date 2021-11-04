@@ -398,6 +398,9 @@
 /* Additional package description */
 #undef PKGVERSION
 
+/* Define to 1 if the "%ll" format works to print long longs. */
+#undef PRINTF_HAS_LONG_LONG
+
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
 #undef PTHREAD_CREATE_JOINABLE
