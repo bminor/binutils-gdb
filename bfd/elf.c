@@ -1773,6 +1773,9 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 	    case DT_REL: name = "REL"; break;
 	    case DT_RELSZ: name = "RELSZ"; break;
 	    case DT_RELENT: name = "RELENT"; break;
+	    case DT_RELR: name = "RELR"; break;
+	    case DT_RELRSZ: name = "RELRSZ"; break;
+	    case DT_RELRENT: name = "RELRENT"; break;
 	    case DT_PLTREL: name = "PLTREL"; break;
 	    case DT_DEBUG: name = "DEBUG"; break;
 	    case DT_TEXTREL: name = "TEXTREL"; break;
