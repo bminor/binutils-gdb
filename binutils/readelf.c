@@ -2228,6 +2228,9 @@ get_dynamic_type (Filedata * filedata, unsigned long type)
     case DT_REL:	return "REL";
     case DT_RELSZ:	return "RELSZ";
     case DT_RELENT:	return "RELENT";
+    case DT_RELR:	return "RELR";
+    case DT_RELRSZ:	return "RELRSZ";
+    case DT_RELRENT:	return "RELRENT";
     case DT_PLTREL:	return "PLTREL";
     case DT_DEBUG:	return "DEBUG";
     case DT_TEXTREL:	return "TEXTREL";
@@ -4535,6 +4538,7 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
     case SHT_SYMTAB:		return "SYMTAB";
     case SHT_STRTAB:		return "STRTAB";
     case SHT_RELA:		return "RELA";
+    case SHT_RELR:		return "RELR";
     case SHT_HASH:		return "HASH";
     case SHT_DYNAMIC:		return "DYNAMIC";
     case SHT_NOTE:		return "NOTE";
@@ -11385,6 +11389,8 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 	case DT_PLTPADSZ:
 	case DT_MOVEENT	:
 	case DT_MOVESZ	:
+	case DT_RELRENT	:
+	case DT_RELRSZ	:
 	case DT_PREINIT_ARRAYSZ:
 	case DT_INIT_ARRAYSZ:
 	case DT_FINI_ARRAYSZ:
