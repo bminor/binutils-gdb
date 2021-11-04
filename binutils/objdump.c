@@ -4869,7 +4869,7 @@ dump_bfd (bfd *abfd, bool is_mainfile)
      
      The test on is_mainfile is there because the chain of separate debug
      info files is a global variable shared by all invocations of dump_bfd.  */
-  if (is_mainfile)
+  if (byte_get != NULL && is_mainfile)
     {
       load_separate_debug_files (abfd, bfd_get_filename (abfd));
 
