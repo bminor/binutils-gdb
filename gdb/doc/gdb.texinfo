@@ -21795,14 +21795,14 @@ Indices only work when using DWARF debugging information, not stabs.
 @cindex automatic symbol index cache
 It is possible for @value{GDBN} to automatically save a copy of this index in a
 cache on disk and retrieve it from there when loading the same binary in the
-future.  This feature can be turned on with @kbd{set index-cache on}.  The
-following commands can be used to tweak the behavior of the index cache.
+future.  This feature can be turned on with @kbd{set index-cache enabled on}.
+The following commands can be used to tweak the behavior of the index cache.
 
 @table @code
 
 @kindex set index-cache
-@item set index-cache on
-@itemx set index-cache off
+@item set index-cache enabled on
+@itemx set index-cache enabled off
 Enable or disable the use of the symbol index cache.
 
 @item set index-cache directory @var{directory}

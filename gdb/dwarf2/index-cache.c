@@ -22,6 +22,7 @@
 
 #include "build-id.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-decode.h"
 #include "command.h"
 #include "gdbsupport/scoped_mmap.h"
 #include "gdbsupport/pathstuff.h"
@@ -267,20 +268,32 @@ show_index_cache_command (const char *arg, int from_tty)
      global_index_cache.enabled () ? _("enabled") : _("disabled"));
 }
 
-/* "set index-cache on" handler.  */
+/* "set/show index-cache enabled" set callback.  */
 
 static void
-set_index_cache_on_command (const char *arg, int from_tty)
+set_index_cache_enabled_command (bool value)
 {
-  global_index_cache.enable ();
+  if (value)
+    global_index_cache.enable ();
+  else
+    global_index_cache.disable ();
 }
 
-/* "set index-cache off" handler.  */
+/* "set/show index-cache enabled" get callback.  */
+
+static bool
+get_index_cache_enabled_command ()
+{
+  return global_index_cache.enabled ();
+}
+
+/* "set/show index-cache enabled" show callback.  */
 
 static void
-set_index_cache_off_command (const char *arg, int from_tty)
+show_index_cache_enabled_command (ui_file *stream, int from_tty,
+				  cmd_list_element *cmd, const char *value)
 {
-  global_index_cache.disable ();
+  fprintf_filtered (stream, _("The index cache is %s.\n"), value);
 }
 
 /* "set index-cache directory" handler.  */
@@ -342,13 +355,31 @@ _initialize_index_cache ()
 		  _("Show index-cache options."), &show_index_cache_prefix_list,
 		  false, &showlist);
 
+  /* set/show index-cache enabled */
+  set_show_commands setshow_index_cache_enabled_cmds
+    = add_setshow_boolean_cmd ("enabled", class_files,
+			       _("Enable the index cache."),
+			       _("Show whether the index cache is enabled."),
+			       _("help doc"),
+			       set_index_cache_enabled_command,
+			       get_index_cache_enabled_command,
+			       show_index_cache_enabled_command,
+			       &set_index_cache_prefix_list,
+			       &show_index_cache_prefix_list);
+
   /* set index-cache on */
-  add_cmd ("on", class_files, set_index_cache_on_command,
-	   _("Enable the index cache."), &set_index_cache_prefix_list);
+  cmd_list_element *set_index_cache_on_cmd
+    = add_alias_cmd ("on", setshow_index_cache_enabled_cmds.set, class_files,
+		     false, &set_index_cache_prefix_list);
+  deprecate_cmd (set_index_cache_on_cmd, "set index-cache enabled on");
+  set_index_cache_on_cmd->default_args = "on";
 
   /* set index-cache off */
-  add_cmd ("off", class_files, set_index_cache_off_command,
-	   _("Disable the index cache."), &set_index_cache_prefix_list);
+  cmd_list_element *set_index_cache_off_cmd
+    = add_alias_cmd ("off", setshow_index_cache_enabled_cmds.set, class_files,
+		     false, &set_index_cache_prefix_list);
+  deprecate_cmd (set_index_cache_off_cmd, "set index-cache enabled off");
+  set_index_cache_off_cmd->default_args = "off";
 
   /* set index-cache directory */
   add_setshow_filename_cmd ("directory", class_files, &index_cache_directory,

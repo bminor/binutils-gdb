@@ -131,11 +131,11 @@ gdb_test_multiple "show index-cache stats" "check index cache stats" {
 }
 
 set using_index_cache 0
-gdb_test_multiple "show index-cache" "check index cache status" {
-    -re ".*is currently disabled.\r\n$gdb_prompt $" {
+gdb_test_multiple "show index-cache enabled" "check index cache status" {
+    -re ".*is off.\r\n$gdb_prompt $" {
 	set using_index_cache 0
     }
-    -re ".*is currently enabled.\r\n$gdb_prompt $" {
+    -re ".*is on.\r\n$gdb_prompt $" {
 	set using_index_cache 1
     }
 }
