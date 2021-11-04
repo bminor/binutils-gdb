@@ -203,7 +203,6 @@ struct riscv_set_options
 {
   int pic; /* Generate position-independent code.  */
   int rvc; /* Generate RVC code.  */
-  int rve; /* Generate RVE code.  */
   int relax; /* Emit relocs the linker is allowed to relax.  */
   int arch_attr; /* Emit architecture and privileged elf attributes.  */
   int csr_check; /* Enable the CSR checking.  */
@@ -213,7 +212,6 @@ static struct riscv_set_options riscv_opts =
 {
   0, /* pic */
   0, /* rvc */
-  0, /* rve */
   1, /* relax */
   DEFAULT_RISCV_ATTR, /* arch_attr */
   0, /* csr_check */
@@ -231,14 +229,6 @@ riscv_set_rvc (bool rvc_value)
   riscv_opts.rvc = rvc_value;
 }
 
-/* Enable or disable the rve flags for riscv_opts.  */
-
-static void
-riscv_set_rve (bool rve_value)
-{
-  riscv_opts.rve = rve_value;
-}
-
 /* This linked list records all enabled extensions, which are parsed from
    the architecture string.  The architecture string can be set by the
    -march option, the elf architecture attributes, and the --with-arch
@@ -252,10 +242,6 @@ static bool
 riscv_subset_supports (const char *feature)
 {
   struct riscv_subset_t *subset;
-
-  if (riscv_opts.rvc && (strcasecmp (feature, "c") == 0))
-    return true;
-
   return riscv_lookup_subset (&riscv_subsets, feature, &subset);
 }
 
@@ -329,13 +315,9 @@ riscv_set_arch (const char *s)
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&rps, s);
 
-  /* To support .option rvc and rve.  */
   riscv_set_rvc (false);
   if (riscv_subset_supports ("c"))
     riscv_set_rvc (true);
-  riscv_set_rve (false);
-  if (riscv_subset_supports ("e"))
-    riscv_set_rve (true);
 }
 
 /* Indicate -mabi option is explictly set.  */
@@ -1013,7 +995,9 @@ reg_lookup_internal (const char *s, enum reg_class class)
   if (r == NULL || DECODE_REG_CLASS (r) != class)
     return -1;
 
-  if (riscv_opts.rve && class == RCLASS_GPR && DECODE_REG_NUM (r) > 15)
+  if (riscv_subset_supports ("e")
+      && class == RCLASS_GPR
+      && DECODE_REG_NUM (r) > 15)
     return -1;
 
   return DECODE_REG_NUM (r);
@@ -3380,10 +3364,23 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
 
+  riscv_parse_subset_t rps;
+  rps.subset_list = &riscv_subsets;
+  rps.error_handler = as_bad;
+  rps.xlen = &xlen;
+  rps.isa_spec = default_isa_spec;
+  rps.check_unknown_prefixed_ext = true;
+
   if (strcmp (name, "rvc") == 0)
-    riscv_set_rvc (true);
+    {
+      riscv_update_subset (&rps, "c", false);
+      riscv_set_rvc (true);
+    }
   else if (strcmp (name, "norvc") == 0)
-    riscv_set_rvc (false);
+    {
+      riscv_update_subset (&rps, "c", true);
+      riscv_set_rvc (false);
+    }
   else if (strcmp (name, "pic") == 0)
     riscv_opts.pic = true;
   else if (strcmp (name, "nopic") == 0)

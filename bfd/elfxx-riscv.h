@@ -92,6 +92,9 @@ riscv_estimate_digit (unsigned);
 extern int
 riscv_compare_subsets (const char *, const char *);
 
+extern bool
+riscv_update_subset (riscv_parse_subset_t *, const char *, bool);
+
 extern void
 bfd_elf32_riscv_set_data_segment_info (struct bfd_link_info *, int *);
 extern void

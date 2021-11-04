@@ -2030,3 +2030,68 @@ riscv_arch_str (unsigned xlen, const riscv_subset_list_t *subset)
 
   return attr_str;
 }
+
+/* Remove the SUBSET from the subset list.  */
+
+static void
+riscv_remove_subset (riscv_subset_list_t *subset_list,
+		     const char *subset)
+{
+  riscv_subset_t *current = subset_list->head;
+  riscv_subset_t *pre = NULL;
+  for (; current != NULL; pre = current, current = current->next)
+    {
+      if (strcmp (current->name, subset) == 0)
+	{
+	  if (pre == NULL)
+	    subset_list->head = current->next;
+	  else
+	    pre->next = current->next;
+	  if (current->next == NULL)
+	    subset_list->tail = pre;
+	  free ((void *) current->name);
+	  free (current);
+	  break;
+	}
+    }
+}
+
+/* Add/Remove an extension to/from the subset list.  This is used for
+   the .option rvc or norvc.  */
+
+bool
+riscv_update_subset (riscv_parse_subset_t *rps,
+		     const char *subset,
+		     bool removed)
+{
+  if (strlen (subset) == 0
+      || (strlen (subset) == 1
+	  && riscv_ext_order[(*subset - 'a')] == 0)
+      || (strlen (subset) > 1
+	  && rps->check_unknown_prefixed_ext
+	  && !riscv_recognized_prefixed_ext (subset)))
+    {
+      rps->error_handler
+	(_("riscv_update_subset: unknown ISA extension `%s'"), subset);
+      return false;
+    }
+
+  if (removed)
+    {
+      if (strcmp (subset, "i") == 0)
+	{
+	  rps->error_handler
+	    (_("riscv_update_subset: cannot remove extension i from "
+	       "the subset list"));
+	  return false;
+	}
+      riscv_remove_subset (rps->subset_list, subset);
+    }
+  else
+    riscv_parse_add_subset (rps, subset,
+			    RISCV_UNKNOWN_VERSION,
+			    RISCV_UNKNOWN_VERSION, true);
+
+  riscv_parse_add_implicit_subsets (rps);
+  return riscv_parse_check_conflicts (rps);
+}
