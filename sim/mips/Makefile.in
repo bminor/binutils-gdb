@@ -553,6 +553,7 @@ tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	      m=`echo $${t} | sed -e 's/^m16//' -e 's/:.*//'`; \
 	      sed <  $(srcdir)/m16run.c > tmp-run \
 		    -e "s/^sim_/m16$${m}_/" \
+		    -e "/include/s/sim-engine/m16$${m}_engine/" \
 		    -e "s/m16_/m16$${m}_/" \
 		    -e "s/m32_/m32$${m}_/" ; \
 	      $(SHELL) $(srcdir)/../../move-if-change tmp-run \
@@ -562,6 +563,7 @@ tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	      m=`echo $${t} | sed -e 's/^micromips32//' -e 's/:.*//'`; \
 	      sed <  $(srcdir)/micromipsrun.c > tmp-run \
 		    -e "s/^sim_/micromips32$${m}_/" \
+		    -e "/include/s/sim-engine/micromips32$${m}_engine/" \
 		    -e "s/micromips16_/micromips16$${m}_/" \
 		    -e "s/micromips32_/micromips32$${m}_/" \
 		    -e "s/m32_/m32$${m}_/" ; \
@@ -572,6 +574,7 @@ tmp-run-multi: $(srcdir)/m16run.c $(srcdir)/micromipsrun.c
 	      m=`echo $${t} | sed -e 's/^micromips64//' -e 's/:.*//'`; \
 	      sed <  $(srcdir)/micromipsrun.c > tmp-run \
 		    -e "s/^sim_/micromips64$${m}_/" \
+		    -e "/include/s/sim-engine/micromips64$${m}_engine/" \
 		    -e "s/micromips16_/micromips16$${m}_/" \
 		    -e "s/micromips32_/micromips64$${m}_/" \
 		    -e "s/m32_/m64$${m}_/" ; \

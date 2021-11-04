@@ -24,6 +24,7 @@
 #include "m16_idecode.h"
 #include "m32_idecode.h"
 #include "bfd.h"
+#include "sim-engine.h"
 
 
 #define SD sd
