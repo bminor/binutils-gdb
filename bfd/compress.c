@@ -46,6 +46,11 @@ decompress_contents (bfd_byte *compressed_buffer,
   strm.avail_in = compressed_size;
   strm.next_in = (Bytef*) compressed_buffer;
   strm.avail_out = uncompressed_size;
+  /* FIXME: strm.avail_in and strm.avail_out are typically unsigned
+     int.  Supporting sizes that don't fit in an unsigned int is
+     possible but will require some rewriting of this function.  */
+  if (strm.avail_in != compressed_size || strm.avail_out != uncompressed_size)
+    return false;
 
   BFD_ASSERT (Z_OK == 0);
   rc = inflateInit (&strm);
@@ -516,6 +521,7 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
   int header_size;
   bfd_size_type uncompressed_size;
   unsigned int uncompressed_alignment_power = 0;
+  z_stream strm;
 
   compression_header_size = bfd_get_compression_header_size (abfd, sec);
   if (compression_header_size > MAX_COMPRESSION_HEADER_SIZE)
@@ -548,6 +554,15 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
 					  &uncompressed_alignment_power))
     {
       bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
+
+  /* PR28530, reject sizes unsupported by decompress_contents.  */
+  strm.avail_in = sec->size;
+  strm.avail_out = uncompressed_size;
+  if (strm.avail_in != sec->size || strm.avail_out != uncompressed_size)
+    {
+      bfd_set_error (bfd_error_nonrepresentable_section);
       return false;
     }
 
