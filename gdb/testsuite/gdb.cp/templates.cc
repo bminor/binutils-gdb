@@ -801,5 +801,5 @@ int main()
 
   arg.method(empty);
 
-  return 0;
+  return 0;	/* Final breakpoint.  */
 }
