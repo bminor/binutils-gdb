@@ -7040,8 +7040,12 @@ evax_bfd_get_dsc_name (unsigned int v)
 }
 
 static void
-evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
+evax_bfd_print_desc (const unsigned char *buf, unsigned int bufsize,
+		     int indent, FILE *file)
 {
+  if (bufsize < 8)
+    return;
+
   unsigned char bclass = buf[3];
   unsigned char dtype = buf[2];
   unsigned int len = (unsigned)bfd_getl16 (buf);
@@ -7070,38 +7074,47 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
 	    evax_bfd_print_indent (indent, file);
 	    fprintf (file, _("non-contiguous array of %s\n"),
 		     evax_bfd_get_dsc_name (dsc->dtype));
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file,
-		     /* xgettext:c-format */
-		     _("dimct: %u, aflags: 0x%02x, digits: %u, scale: %u\n"),
-		     dsc->dimct, dsc->aflags, dsc->digits, dsc->scale);
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file,
-		     /* xgettext:c-format */
-		     _("arsize: %u, a0: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (dsc->arsize),
-		     (unsigned)bfd_getl32 (dsc->a0));
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file, _("Strides:\n"));
-	    b = buf + sizeof (*dsc);
-	    for (i = 0; i < dsc->dimct; i++)
+	    if (bufsize >= sizeof (*dsc))
 	      {
-		evax_bfd_print_indent (indent + 2, file);
-		fprintf (file, "[%u]: %u\n", i + 1,
-			 (unsigned)bfd_getl32 (b));
-		b += 4;
-	      }
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file, _("Bounds:\n"));
-	    b = buf + sizeof (*dsc);
-	    for (i = 0; i < dsc->dimct; i++)
-	      {
-		evax_bfd_print_indent (indent + 2, file);
-		/* xgettext:c-format */
-		fprintf (file, _("[%u]: Lower: %u, upper: %u\n"), i + 1,
-			 (unsigned)bfd_getl32 (b + 0),
-			 (unsigned)bfd_getl32 (b + 4));
-		b += 8;
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file,
+			 /* xgettext:c-format */
+			 _("dimct: %u, aflags: 0x%02x, digits: %u, scale: %u\n"),
+			 dsc->dimct, dsc->aflags, dsc->digits, dsc->scale);
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file,
+			 /* xgettext:c-format */
+			 _("arsize: %u, a0: 0x%08x\n"),
+			 (unsigned) bfd_getl32 (dsc->arsize),
+			 (unsigned) bfd_getl32 (dsc->a0));
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file, _("Strides:\n"));
+		b = buf + sizeof (*dsc);
+		bufsize -= sizeof (*dsc);
+		for (i = 0; i < dsc->dimct; i++)
+		  {
+		    if (bufsize < 4)
+		      break;
+		    evax_bfd_print_indent (indent + 2, file);
+		    fprintf (file, "[%u]: %u\n", i + 1,
+			     (unsigned) bfd_getl32 (b));
+		    b += 4;
+		    bufsize -= 4;
+		  }
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file, _("Bounds:\n"));
+		for (i = 0; i < dsc->dimct; i++)
+		  {
+		    if (bufsize < 8)
+		      break;
+		    evax_bfd_print_indent (indent + 2, file);
+		    /* xgettext:c-format */
+		    fprintf (file, _("[%u]: Lower: %u, upper: %u\n"), i + 1,
+			     (unsigned) bfd_getl32 (b + 0),
+			     (unsigned) bfd_getl32 (b + 4));
+		    b += 8;
+		    bufsize -= 8;
+		  }
 	      }
 	  }
 	  break;
@@ -7112,12 +7125,15 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
 	    evax_bfd_print_indent (indent, file);
 	    fprintf (file, _("unaligned bit-string of %s\n"),
 		     evax_bfd_get_dsc_name (ubs->dtype));
-	    evax_bfd_print_indent (indent + 1, file);
-	    fprintf (file,
-		     /* xgettext:c-format */
-		     _("base: %u, pos: %u\n"),
-		     (unsigned)bfd_getl32 (ubs->base),
-		     (unsigned)bfd_getl32 (ubs->pos));
+	    if (bufsize >= sizeof (*ubs))
+	      {
+		evax_bfd_print_indent (indent + 1, file);
+		fprintf (file,
+			 /* xgettext:c-format */
+			 _("base: %u, pos: %u\n"),
+			 (unsigned) bfd_getl32 (ubs->base),
+			 (unsigned) bfd_getl32 (ubs->pos));
+	      }
 	  }
 	  break;
 	default:
@@ -7128,16 +7144,21 @@ evax_bfd_print_desc (const unsigned char *buf, int indent, FILE *file)
 }
 
 static unsigned int
-evax_bfd_print_valspec (const unsigned char *buf, int indent, FILE *file)
+evax_bfd_print_valspec (const unsigned char *buf, unsigned int bufsize,
+			int indent, FILE *file)
 {
+  if (bufsize < 5)
+    return bufsize;
+
   unsigned int vflags = buf[0];
-  unsigned int value = (unsigned)bfd_getl32 (buf + 1);
+  unsigned int value = (unsigned) bfd_getl32 (buf + 1);
   unsigned int len = 5;
 
   evax_bfd_print_indent (indent, file);
   /* xgettext:c-format */
   fprintf (file, _("vflags: 0x%02x, value: 0x%08x "), vflags, value);
   buf += 5;
+  bufsize -= 5;
 
   switch (vflags)
     {
@@ -7152,7 +7173,8 @@ evax_bfd_print_valspec (const unsigned char *buf, int indent, FILE *file)
       break;
     case DST__K_VFLAGS_DSC:
       fprintf (file, _("(descriptor)\n"));
-      evax_bfd_print_desc (buf + value, indent + 1, file);
+      if (value <= bufsize)
+	evax_bfd_print_desc (buf + value, bufsize - value, indent + 1, file);
       break;
     case DST__K_VFLAGS_TVS:
       fprintf (file, _("(trailing value)\n"));
@@ -7191,29 +7213,36 @@ evax_bfd_print_valspec (const unsigned char *buf, int indent, FILE *file)
 }
 
 static void
-evax_bfd_print_typspec (const unsigned char *buf, int indent, FILE *file)
+evax_bfd_print_typspec (const unsigned char *buf, unsigned int bufsize,
+			int indent, FILE *file)
 {
+  if (bufsize < 3)
+    return;
+
   unsigned char kind = buf[2];
-  unsigned int len = (unsigned)bfd_getl16 (buf);
+  unsigned int len = (unsigned) bfd_getl16 (buf);
 
   evax_bfd_print_indent (indent, file);
   /* xgettext:c-format */
   fprintf (file, _("len: %2u, kind: %2u "), len, kind);
   buf += 3;
+  bufsize -= 3;
   switch (kind)
     {
     case DST__K_TS_ATOM:
     /* xgettext:c-format */
-      fprintf (file, _("atomic, type=0x%02x %s\n"),
-	       buf[0], evax_bfd_get_dsc_name (buf[0]));
+      if (bufsize >= 1)
+	fprintf (file, _("atomic, type=0x%02x %s\n"),
+		 buf[0], evax_bfd_get_dsc_name (buf[0]));
       break;
     case DST__K_TS_IND:
-      fprintf (file, _("indirect, defined at 0x%08x\n"),
-	       (unsigned)bfd_getl32 (buf));
+      if (bufsize >= 4)
+	fprintf (file, _("indirect, defined at 0x%08x\n"),
+		 (unsigned) bfd_getl32 (buf));
       break;
     case DST__K_TS_TPTR:
       fprintf (file, _("typed pointer\n"));
-      evax_bfd_print_typspec (buf, indent + 1, file);
+      evax_bfd_print_typspec (buf, bufsize, indent + 1, file);
       break;
     case DST__K_TS_PTR:
       fprintf (file, _("pointer\n"));
@@ -7221,29 +7250,51 @@ evax_bfd_print_typspec (const unsigned char *buf, int indent, FILE *file)
     case DST__K_TS_ARRAY:
       {
 	const unsigned char *vs;
+	unsigned int vs_len;
 	unsigned int vec_len;
 	unsigned int i;
 
+	if (bufsize == 0)
+	  return;
 	fprintf (file, _("array, dim: %u, bitmap: "), buf[0]);
+	--bufsize;
 	vec_len = (buf[0] + 1 + 7) / 8;
 	for (i = 0; i < vec_len; i++)
-	  fprintf (file, " %02x", buf[i + 1]);
+	  {
+	    if (bufsize == 0)
+	      break;
+	    fprintf (file, " %02x", buf[i + 1]);
+	    --bufsize;
+	  }
 	fputc ('\n', file);
+	if (bufsize == 0)
+	  return;
 	vs = buf + 1 + vec_len;
 	evax_bfd_print_indent (indent, file);
 	fprintf (file, _("array descriptor:\n"));
-	vs += evax_bfd_print_valspec (vs, indent + 1, file);
-	for (i = 0; i < buf[0] + 1U; i++)
-	  if (buf[1 + i / 8] & (1 << (i % 8)))
-	    {
-	      evax_bfd_print_indent (indent, file);
-	      if (i == 0)
-		fprintf (file, _("type spec for element:\n"));
-	      else
-		fprintf (file, _("type spec for subscript %u:\n"), i);
-	      evax_bfd_print_typspec (vs, indent + 1, file);
-	      vs += bfd_getl16 (vs);
-	    }
+	vs_len = evax_bfd_print_valspec (vs, bufsize, indent + 1, file);
+	vs += vs_len;
+	if (bufsize > vs_len)
+	  {
+	    bufsize -= vs_len;
+	    for (i = 0; i < buf[0] + 1U; i++)
+	      if (buf[1 + i / 8] & (1 << (i % 8)))
+		{
+		  evax_bfd_print_indent (indent, file);
+		  if (i == 0)
+		    fprintf (file, _("type spec for element:\n"));
+		  else
+		    fprintf (file, _("type spec for subscript %u:\n"), i);
+		  evax_bfd_print_typspec (vs, bufsize, indent + 1, file);
+		  if (bufsize < 2)
+		    break;
+		  vs_len = bfd_getl16 (vs);
+		  if (bufsize <= vs_len)
+		    break;
+		  vs += vs_len;
+		  bufsize -= vs_len;
+		}
+	  }
       }
       break;
     default:
@@ -7277,20 +7328,24 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
       /* xgettext:c-format */
       fprintf (file, _(" type: %3u, len: %3u (at 0x%08x): "),
 	       type, len, off);
-      if (len == 0)
+      if (len < sizeof (dsth))
 	{
 	  fputc ('\n', file);
 	  break;
 	}
-      len++;
       dst_size -= len;
       off += len;
       len -= sizeof (dsth);
-      buf = _bfd_malloc_and_read (abfd, len, len);
-      if (buf == NULL)
+      if (len == 0)
+	buf = NULL;
+      else
 	{
-	  fprintf (file, _("cannot read DST symbol\n"));
-	  return;
+	  buf = _bfd_malloc_and_read (abfd, len, len);
+	  if (buf == NULL)
+	    {
+	      fprintf (file, _("cannot read DST symbol\n"));
+	      return;
+	    }
 	}
       switch (type)
 	{
@@ -7334,7 +7389,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DSC__K_DTYPE_VT2:
 	  fprintf (file, _("standard data: %s\n"),
 		   evax_bfd_get_dsc_name (type));
-	  evax_bfd_print_valspec (buf, 4, file);
+	  evax_bfd_print_valspec (buf, len, 4, file);
 	  fprintf (file, _("    name: %.*s\n"), buf[5], buf + 6);
 	  break;
 	case DST__K_MODBEG:
@@ -7343,6 +7398,8 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	    const char *name = (const char *)buf + sizeof (*dst);
 
 	    fprintf (file, _("modbeg\n"));
+	    if (len < sizeof (*dst))
+	      break;
 	    /* xgettext:c-format */
 	    fprintf (file, _("   flags: %d, language: %u, "
 			     "major: %u, minor: %u\n"),
@@ -7350,11 +7407,21 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 		     (unsigned)bfd_getl32 (dst->language),
 		     (unsigned)bfd_getl16 (dst->major),
 		     (unsigned)bfd_getl16 (dst->minor));
-	    fprintf (file, _("   module name: %.*s\n"),
-		     name[0], name + 1);
-	    name += name[0] + 1;
-	    fprintf (file, _("   compiler   : %.*s\n"),
-		     name[0], name + 1);
+	    len -= sizeof (*dst);
+	    if (len > 0)
+	      {
+		int nlen = len - 1;
+		fprintf (file, _("   module name: %.*s\n"),
+			 name[0] > nlen ? nlen : name[0], name + 1);
+		if (name[0] < nlen)
+		  {
+		    len -= name[0] + 1;
+		    name += name[0] + 1;
+		    nlen = len - 1;
+		    fprintf (file, _("   compiler   : %.*s\n"),
+			     name[0] > nlen ? nlen: name[0], name + 1);
+		  }
+	      }
 	  }
 	  break;
 	case DST__K_MODEND:
@@ -7366,39 +7433,51 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	    const char *name = (const char *)buf + sizeof (*dst);
 
 	    fputs (_("rtnbeg\n"), file);
-	    /* xgettext:c-format */
-	    fprintf (file, _("    flags: %u, address: 0x%08x, "
-			     "pd-address: 0x%08x\n"),
-		     dst->flags,
-		     (unsigned)bfd_getl32 (dst->address),
-		     (unsigned)bfd_getl32 (dst->pd_address));
-	    fprintf (file, _("    routine name: %.*s\n"),
-		     name[0], name + 1);
+	    if (len >= sizeof (*dst))
+	      {
+		/* xgettext:c-format */
+		fprintf (file, _("    flags: %u, address: 0x%08x, "
+				 "pd-address: 0x%08x\n"),
+			 dst->flags,
+			 (unsigned) bfd_getl32 (dst->address),
+			 (unsigned) bfd_getl32 (dst->pd_address));
+		len -= sizeof (*dst);
+		if (len > 0)
+		  {
+		    int nlen = len - 1;
+		    fprintf (file, _("    routine name: %.*s\n"),
+			     name[0] > nlen ? nlen : name[0], name + 1);
+		  }
+	      }
 	  }
 	  break;
 	case DST__K_RTNEND:
 	  {
 	    struct vms_dst_rtnend *dst = (void *)buf;
 
-	    fprintf (file, _("rtnend: size 0x%08x\n"),
-		     (unsigned)bfd_getl32 (dst->size));
+	    if (len >= sizeof (*dst))
+	      fprintf (file, _("rtnend: size 0x%08x\n"),
+		       (unsigned) bfd_getl32 (dst->size));
 	  }
 	  break;
 	case DST__K_PROLOG:
 	  {
 	    struct vms_dst_prolog *dst = (void *)buf;
 
-	    fprintf (file, _("prolog: bkpt address 0x%08x\n"),
-		     (unsigned)bfd_getl32 (dst->bkpt_addr));
+	    if (len >= sizeof (*dst))
+	      /* xgettext:c-format */
+	      fprintf (file, _("prolog: bkpt address 0x%08x\n"),
+		       (unsigned) bfd_getl32 (dst->bkpt_addr));
 	  }
 	  break;
 	case DST__K_EPILOG:
 	  {
 	    struct vms_dst_epilog *dst = (void *)buf;
 
-	    /* xgettext:c-format */
-	    fprintf (file, _("epilog: flags: %u, count: %u\n"),
-		     dst->flags, (unsigned)bfd_getl32 (dst->count));
+	    if (len >= sizeof (*dst))
+	      /* xgettext:c-format */
+	      fprintf (file, _("epilog: flags: %u, count: %u\n"),
+		       dst->flags, (unsigned) bfd_getl32 (dst->count));
 	  }
 	  break;
 	case DST__K_BLKBEG:
@@ -7406,31 +7485,50 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	    struct vms_dst_blkbeg *dst = (void *)buf;
 	    const char *name = (const char *)buf + sizeof (*dst);
 
-	    /* xgettext:c-format */
-	    fprintf (file, _("blkbeg: address: 0x%08x, name: %.*s\n"),
-		     (unsigned)bfd_getl32 (dst->address),
-		     name[0], name + 1);
+	    if (len > sizeof (*dst))
+	      {
+		int nlen;
+		len -= sizeof (*dst);
+		nlen = len - 1;
+		/* xgettext:c-format */
+		fprintf (file, _("blkbeg: address: 0x%08x, name: %.*s\n"),
+			 (unsigned) bfd_getl32 (dst->address),
+			 name[0] > nlen ? nlen : name[0], name + 1);
+	      }
 	  }
 	  break;
 	case DST__K_BLKEND:
 	  {
 	    struct vms_dst_blkend *dst = (void *)buf;
 
-	    fprintf (file, _("blkend: size: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (dst->size));
+	    if (len >= sizeof (*dst))
+	      /* xgettext:c-format */
+	      fprintf (file, _("blkend: size: 0x%08x\n"),
+		       (unsigned) bfd_getl32 (dst->size));
 	  }
 	  break;
 	case DST__K_TYPSPEC:
 	  {
 	    fprintf (file, _("typspec (len: %u)\n"), len);
-	    fprintf (file, _("    name: %.*s\n"), buf[0], buf + 1);
-	    evax_bfd_print_typspec (buf + 1 + buf[0], 5, file);
+	    if (len >= 1)
+	      {
+		int nlen = len - 1;
+		fprintf (file, _("    name: %.*s\n"),
+			 buf[0] > nlen ? nlen : buf[0], buf + 1);
+		if (nlen > buf[0])
+		  evax_bfd_print_typspec (buf + 1 + buf[0], len - (1 + buf[0]),
+					  5, file);
+	      }
 	  }
 	  break;
 	case DST__K_SEPTYP:
 	  {
-	    fprintf (file, _("septyp, name: %.*s\n"), buf[5], buf + 6);
-	    evax_bfd_print_valspec (buf, 4, file);
+	    if (len >= 6)
+	      {
+		fprintf (file, _("septyp, name: %.*s\n"),
+			 buf[5] > len - 6 ? len - 6 : buf[5], buf + 6);
+		evax_bfd_print_valspec (buf, len, 4, file);
+	      }
 	  }
 	  break;
 	case DST__K_RECBEG:
@@ -7438,23 +7536,36 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	    struct vms_dst_recbeg *recbeg = (void *)buf;
 	    const char *name = (const char *)buf + sizeof (*recbeg);
 
-	    fprintf (file, _("recbeg: name: %.*s\n"), name[0], name + 1);
-	    evax_bfd_print_valspec (buf, 4, file);
-	    fprintf (file, _("    len: %u bits\n"),
-		     (unsigned)bfd_getl32 (name + 1 + name[0]));
+	    if (len > sizeof (*recbeg))
+	      {
+		int nlen = len - sizeof (*recbeg) - 1;
+		if (name[0] < nlen)
+		  nlen = name[0];
+		fprintf (file, _("recbeg: name: %.*s\n"), nlen, name + 1);
+		evax_bfd_print_valspec (buf, len, 4, file);
+		len -= 1 + nlen;
+		if (len >= 4)
+		  fprintf (file, _("    len: %u bits\n"),
+			   (unsigned) bfd_getl32 (name + 1 + nlen));
+	      }
 	  }
 	  break;
 	case DST__K_RECEND:
 	  fprintf (file, _("recend\n"));
 	  break;
 	case DST__K_ENUMBEG:
-	  /* xgettext:c-format */
-	  fprintf (file, _("enumbeg, len: %u, name: %.*s\n"),
-		   buf[0], buf[1], buf + 2);
+	  if (len >= 2)
+	    /* xgettext:c-format */
+	    fprintf (file, _("enumbeg, len: %u, name: %.*s\n"),
+		     buf[0], buf[1] > len - 2 ? len - 2 : buf[1], buf + 2);
 	  break;
 	case DST__K_ENUMELT:
-	  fprintf (file, _("enumelt, name: %.*s\n"), buf[5], buf + 6);
-	  evax_bfd_print_valspec (buf, 4, file);
+	  if (len >= 6)
+	    {
+	      fprintf (file, _("enumelt, name: %.*s\n"),
+		       buf[5] > len - 6 ? len - 6 : buf[5], buf + 6);
+	      evax_bfd_print_valspec (buf, len, 4, file);
+	    }
 	  break;
 	case DST__K_ENUMEND:
 	  fprintf (file, _("enumend\n"));
@@ -7462,26 +7573,36 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DST__K_LABEL:
 	  {
 	    struct vms_dst_label *lab = (void *)buf;
-	    fprintf (file, _("label, name: %.*s\n"),
-		     lab->name[0], lab->name + 1);
-	    fprintf (file, _("    address: 0x%08x\n"),
-		     (unsigned)bfd_getl32 (lab->value));
+	    if (len >= sizeof (*lab))
+	      {
+		fprintf (file, _("label, name: %.*s\n"),
+			 lab->name[0] > len - 1 ? len - 1 : lab->name[0],
+			 lab->name + 1);
+		fprintf (file, _("    address: 0x%08x\n"),
+			 (unsigned) bfd_getl32 (lab->value));
+	      }
 	  }
 	  break;
 	case DST__K_DIS_RANGE:
-	  {
-	    unsigned int cnt = bfd_getl32 (buf);
-	    unsigned char *rng = buf + 4;
-	    unsigned int i;
+	  if (len >= 4)
+	    {
+	      unsigned int cnt = bfd_getl32 (buf);
+	      unsigned char *rng = buf + 4;
+	      unsigned int i;
 
-	    fprintf (file, _("discontiguous range (nbr: %u)\n"), cnt);
-	    for (i = 0; i < cnt; i++, rng += 8)
-	      /* xgettext:c-format */
-	      fprintf (file, _("    address: 0x%08x, size: %u\n"),
-		       (unsigned)bfd_getl32 (rng),
-		       (unsigned)bfd_getl32 (rng + 4));
-
-	  }
+	      fprintf (file, _("discontiguous range (nbr: %u)\n"), cnt);
+	      len -= 4;
+	      for (i = 0; i < cnt; i++, rng += 8)
+		{
+		  if (len < 8)
+		    break;
+		  /* xgettext:c-format */
+		  fprintf (file, _("    address: 0x%08x, size: %u\n"),
+			   (unsigned) bfd_getl32 (rng),
+			   (unsigned) bfd_getl32 (rng + 4));
+		  len -= 8;
+		}
+	    }
 	  break;
 	case DST__K_LINE_NUM:
 	  {
@@ -7491,79 +7612,101 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 
 	    while (len > 0)
 	      {
-		signed char cmd;
-		unsigned char cmdlen;
+		int cmd;
 		unsigned int val;
+		int cmdlen = -1;
 
-		cmd = buf[0];
-		cmdlen = 0;
+		cmd = *buf++;
+		len--;
 
 		fputs ("    ", file);
 
 		switch (cmd)
 		  {
 		  case DST__K_DELTA_PC_W:
-		    val = bfd_getl16 (buf + 1);
+		    if (len < 2)
+		      break;
+		    val = bfd_getl16 (buf);
 		    fprintf (file, _("delta_pc_w %u\n"), val);
 		    pc += val;
 		    line++;
-		    cmdlen = 3;
+		    cmdlen = 2;
 		    break;
 		  case DST__K_INCR_LINUM:
-		    val = buf[1];
+		    if (len < 1)
+		      break;
+		    val = *buf;
 		    fprintf (file, _("incr_linum(b): +%u\n"), val);
 		    line += val;
-		    cmdlen = 2;
+		    cmdlen = 1;
 		    break;
 		  case DST__K_INCR_LINUM_W:
-		    val = bfd_getl16 (buf + 1);
+		    if (len < 2)
+		      break;
+		    val = bfd_getl16 (buf);
 		    fprintf (file, _("incr_linum_w: +%u\n"), val);
 		    line += val;
-		    cmdlen = 3;
+		    cmdlen = 2;
 		    break;
 		  case DST__K_INCR_LINUM_L:
-		    val = bfd_getl32 (buf + 1);
+		    if (len < 4)
+		      break;
+		    val = bfd_getl32 (buf);
 		    fprintf (file, _("incr_linum_l: +%u\n"), val);
 		    line += val;
-		    cmdlen = 5;
+		    cmdlen = 4;
 		    break;
 		  case DST__K_SET_LINUM:
-		    line = bfd_getl16 (buf + 1);
+		    if (len < 2)
+		      break;
+		    line = bfd_getl16 (buf);
 		    fprintf (file, _("set_line_num(w) %u\n"), line);
-		    cmdlen = 3;
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SET_LINUM_B:
-		    line = buf[1];
+		    if (len < 1)
+		      break;
+		    line = *buf;
 		    fprintf (file, _("set_line_num_b %u\n"), line);
-		    cmdlen = 2;
+		    cmdlen = 1;
 		    break;
 		  case DST__K_SET_LINUM_L:
-		    line = bfd_getl32 (buf + 1);
+		    if (len < 4)
+		      break;
+		    line = bfd_getl32 (buf);
 		    fprintf (file, _("set_line_num_l %u\n"), line);
-		    cmdlen = 5;
+		    cmdlen = 4;
 		    break;
 		  case DST__K_SET_ABS_PC:
-		    pc = bfd_getl32 (buf + 1);
+		    if (len < 4)
+		      break;
+		    pc = bfd_getl32 (buf);
 		    fprintf (file, _("set_abs_pc: 0x%08x\n"), pc);
-		    cmdlen = 5;
+		    cmdlen = 4;
 		    break;
 		  case DST__K_DELTA_PC_L:
+		    if (len < 4)
+		      break;
 		    fprintf (file, _("delta_pc_l: +0x%08x\n"),
-			     (unsigned)bfd_getl32 (buf + 1));
-		    cmdlen = 5;
+			     (unsigned) bfd_getl32 (buf));
+		    cmdlen = 4;
 		    break;
 		  case DST__K_TERM:
-		    fprintf (file, _("term(b): 0x%02x"), buf[1]);
-		    pc += buf[1];
+		    if (len < 1)
+		      break;
+		    fprintf (file, _("term(b): 0x%02x"), *buf);
+		    pc += *buf;
 		    fprintf (file, _("        pc: 0x%08x\n"), pc);
-		    cmdlen = 2;
+		    cmdlen = 1;
 		    break;
 		  case DST__K_TERM_W:
-		    val = bfd_getl16 (buf + 1);
+		    if (len < 2)
+		      break;
+		    val = bfd_getl16 (buf);
 		    fprintf (file, _("term_w: 0x%04x"), val);
 		    pc += val;
 		    fprintf (file, _("    pc: 0x%08x\n"), pc);
-		    cmdlen = 3;
+		    cmdlen = 2;
 		    break;
 		  default:
 		    if (cmd <= 0)
@@ -7574,13 +7717,13 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 			/* xgettext:c-format */
 			fprintf (file, _("    pc: 0x%08x line: %5u\n"),
 				 pc, line);
-			cmdlen = 1;
+			cmdlen = 0;
 		      }
 		    else
 		      fprintf (file, _("    *unhandled* cmd %u\n"), cmd);
 		    break;
 		  }
-		if (cmdlen == 0)
+		if (cmdlen < 0)
 		  break;
 		len -= cmdlen;
 		buf += cmdlen;
@@ -7596,16 +7739,20 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 
 	    while (len > 0)
 	      {
-		signed char cmd = buf[0];
-		unsigned char cmdlen = 0;
+		int cmd = *buf++;
+		int cmdlen = -1;
 
+		len--;
 		switch (cmd)
 		  {
 		  case DST__K_SRC_DECLFILE:
 		    {
-		      struct vms_dst_src_decl_src *src = (void *)(buf + 1);
+		      struct vms_dst_src_decl_src *src = (void *) buf;
 		      const char *name;
+		      int nlen;
 
+		      if (len < sizeof (*src))
+			break;
 		      /* xgettext:c-format */
 		      fprintf (file, _("   declfile: len: %u, flags: %u, "
 				       "fileid: %u\n"),
@@ -7620,58 +7767,80 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 			       (unsigned)bfd_getl32 (src->rms_ebk),
 			       (unsigned)bfd_getl16 (src->rms_ffb),
 			       src->rms_rfo);
-		      name = (const char *)buf + 1 + sizeof (*src);
+		      if (src->length > len || src->length <= sizeof (*src))
+			break;
+		      nlen = src->length - sizeof (*src) - 1;
+		      name = (const char *) buf + sizeof (*src);
 		      fprintf (file, _("   filename   : %.*s\n"),
-			       name[0], name + 1);
+			       name[0] > nlen ? nlen : name[0], name + 1);
+		      if (name[0] >= nlen)
+			break;
+		      nlen -= name[0] + 1;
 		      name += name[0] + 1;
 		      fprintf (file, _("   module name: %.*s\n"),
-			       name[0], name + 1);
-		      cmdlen = 2 + src->length;
+			       name[0] > nlen ? nlen : name[0], name + 1);
+		      if (name[0] > nlen)
+			break;
+		      cmdlen = src->length;
 		    }
 		    break;
 		  case DST__K_SRC_SETFILE:
+		    if (len < 2)
+		      break;
 		    fprintf (file, _("   setfile %u\n"),
-			     (unsigned)bfd_getl16 (buf + 1));
-		    cmdlen = 3;
+			     (unsigned) bfd_getl16 (buf));
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SRC_SETREC_W:
+		    if (len < 2)
+		      break;
 		    fprintf (file, _("   setrec %u\n"),
-			     (unsigned)bfd_getl16 (buf + 1));
-		    cmdlen = 3;
+			     (unsigned) bfd_getl16 (buf));
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SRC_SETREC_L:
+		    if (len < 4)
+		      break;
 		    fprintf (file, _("   setrec %u\n"),
-			     (unsigned)bfd_getl32 (buf + 1));
-		    cmdlen = 5;
+			     (unsigned) bfd_getl32 (buf));
+		    cmdlen = 4;
 		    break;
 		  case DST__K_SRC_SETLNUM_W:
+		    if (len < 2)
+		      break;
 		    fprintf (file, _("   setlnum %u\n"),
-			     (unsigned)bfd_getl16 (buf + 1));
-		    cmdlen = 3;
+			     (unsigned) bfd_getl16 (buf));
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SRC_SETLNUM_L:
+		    if (len < 4)
+		      break;
 		    fprintf (file, _("   setlnum %u\n"),
-			     (unsigned)bfd_getl32 (buf + 1));
-		    cmdlen = 5;
+			     (unsigned) bfd_getl32 (buf));
+		    cmdlen = 4;
 		    break;
 		  case DST__K_SRC_DEFLINES_W:
+		    if (len < 2)
+		      break;
 		    fprintf (file, _("   deflines %u\n"),
-			     (unsigned)bfd_getl16 (buf + 1));
-		    cmdlen = 3;
+			     (unsigned) bfd_getl16 (buf));
+		    cmdlen = 2;
 		    break;
 		  case DST__K_SRC_DEFLINES_B:
-		    fprintf (file, _("   deflines %u\n"), buf[1]);
-		    cmdlen = 2;
+		    if (len < 1)
+		      break;
+		    fprintf (file, _("   deflines %u\n"), *buf);
+		    cmdlen = 1;
 		    break;
 		  case DST__K_SRC_FORMFEED:
 		    fprintf (file, _("   formfeed\n"));
-		    cmdlen = 1;
+		    cmdlen = 0;
 		    break;
 		  default:
 		    fprintf (file, _("   *unhandled* cmd %u\n"), cmd);
 		    break;
 		  }
-		if (cmdlen == 0)
+		if (cmdlen < 0)
 		  break;
 		len -= cmdlen;
 		buf += cmdlen;
