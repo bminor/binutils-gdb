@@ -8777,9 +8777,6 @@ display_debug_frames (struct dwarf_section *section,
 
 	  if (!cie)
 	    {
-	      warn ("Invalid CIE pointer 0x%s in FDE at %#08lx\n",
-		    dwarf_vmatoa_1 (NULL, cie_id, offset_size),
-		    (unsigned long) (saved_start - section_start));
 	      fc->ncols = 0;
 	      fc->col_type = (short int *) xmalloc (sizeof (short int));
 	      fc->col_offset = (int *) xmalloc (sizeof (int));
@@ -8862,12 +8859,20 @@ display_debug_frames (struct dwarf_section *section,
 	      start += augmentation_data_len;
 	    }
 
-	  printf ("\n%08lx %s %s FDE cie=%08lx pc=",
+	  printf ("\n%08lx %s %s FDE ",
 		  (unsigned long)(saved_start - section_start),
 		  dwarf_vmatoa_1 (NULL, length, fc->ptr_size),
-		  dwarf_vmatoa_1 (NULL, cie_id, offset_size),
-		  (unsigned long)(cie->chunk_start - section_start));
+		  dwarf_vmatoa_1 (NULL, cie_id, offset_size));
 
+	  if (cie->chunk_start)
+	    printf ("cie=%08lx",
+		    (unsigned long) (cie->chunk_start - section_start));
+	  else
+	    /* Ideally translate "invalid " to 8 chars, trailing space
+	       is optional.  */
+	    printf (_("cie=invalid "));
+
+	  printf (" pc=");
 	  if (fc->segment_size)
 	    printf ("%04lx:", segment_selector);
 
