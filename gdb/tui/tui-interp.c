@@ -79,7 +79,7 @@ tui_exit (void)
 /* Observer for the normal_stop notification.  */
 
 static void
-tui_on_normal_stop (struct bpstats *bs, int print_frame)
+tui_on_normal_stop (struct bpstat *bs, int print_frame)
 {
   if (!print_frame)
     return;

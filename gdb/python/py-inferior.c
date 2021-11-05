@@ -74,7 +74,7 @@ static const struct inferior_data *infpy_inf_data_key;
   } while (0)
 
 static void
-python_on_normal_stop (struct bpstats *bs, int print_frame)
+python_on_normal_stop (struct bpstat *bs, int print_frame)
 {
   enum gdb_signal stop_signal;
 

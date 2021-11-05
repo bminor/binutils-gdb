@@ -35,12 +35,12 @@ create_stop_event_object (PyTypeObject *py_type)
    returns -1.  */
 
 int
-emit_stop_event (struct bpstats *bs, enum gdb_signal stop_signal)
+emit_stop_event (struct bpstat *bs, enum gdb_signal stop_signal)
 {
   gdbpy_ref<> stop_event_obj;
   gdbpy_ref<> list;
   PyObject *first_bp = NULL;
-  struct bpstats *current_bs;
+  struct bpstat *current_bs;
 
   if (evregpy_no_listeners_p (gdb_py_events.stop))
     return 0;

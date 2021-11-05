@@ -25,7 +25,7 @@
 extern gdbpy_ref<> create_stop_event_object (PyTypeObject *py_type);
 extern void stop_evpy_dealloc (PyObject *self);
 
-extern int emit_stop_event (struct bpstats *bs,
+extern int emit_stop_event (struct bpstat *bs,
 			    enum gdb_signal stop_signal);
 
 extern gdbpy_ref<> create_breakpoint_event_object (PyObject *breakpoint_list,

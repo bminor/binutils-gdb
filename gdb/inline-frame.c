@@ -308,9 +308,9 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
    set at FRAME_BLOCK.  */
 
 static bool
-stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
+stopped_by_user_bp_inline_frame (const block *frame_block, bpstat *stop_chain)
 {
-  for (bpstat s = stop_chain; s != NULL; s = s->next)
+  for (bpstat *s = stop_chain; s != nulltr; s = s->next)
     {
       struct breakpoint *bpt = s->breakpoint_at;
 
@@ -341,7 +341,7 @@ stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
 /* See inline-frame.h.  */
 
 void
-skip_inline_frames (thread_info *thread, bpstat stop_chain)
+skip_inline_frames (thread_info *thread, bpstat *stop_chain)
 {
   const struct block *frame_block, *cur_block;
   std::vector<struct symbol *> skipped_syms;

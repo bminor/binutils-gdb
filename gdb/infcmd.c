@@ -669,7 +669,7 @@ continue_command (const char *args, int from_tty)
      stopped at.  */
   if (args != NULL)
     {
-      bpstat bs = NULL;
+      bpstat *bs = nullptr;
       int num, stat;
       int stopped = 0;
       struct thread_info *tp;
@@ -1827,7 +1827,7 @@ finish_command (const char *arg, int from_tty)
 static void
 info_program_command (const char *args, int from_tty)
 {
-  bpstat bs;
+  bpstat *bs;
   int num, stat;
   ptid_t ptid;
   process_stratum_target *proc_target;

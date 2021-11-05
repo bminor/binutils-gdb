@@ -64,7 +64,7 @@ static void mi_on_signal_received (enum gdb_signal siggnal);
 static void mi_on_end_stepping_range (void);
 static void mi_on_signal_exited (enum gdb_signal siggnal);
 static void mi_on_exited (int exitstatus);
-static void mi_on_normal_stop (struct bpstats *bs, int print_frame);
+static void mi_on_normal_stop (struct bpstat *bs, int print_frame);
 static void mi_on_no_history (void);
 
 static void mi_new_thread (struct thread_info *t);
@@ -614,7 +614,7 @@ mi_on_no_history (void)
 }
 
 static void
-mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
+mi_on_normal_stop_1 (struct bpstat *bs, int print_frame)
 {
   /* Since this can be called when CLI command is executing,
      using cli interpreter, be sure to use MI uiout for output,
@@ -673,7 +673,7 @@ mi_on_normal_stop_1 (struct bpstats *bs, int print_frame)
 }
 
 static void
-mi_on_normal_stop (struct bpstats *bs, int print_frame)
+mi_on_normal_stop (struct bpstat *bs, int print_frame)
 {
   SWITCH_THRU_ALL_UIS ()
     {

@@ -22,7 +22,7 @@
 
 #include "gdbsupport/observable.h"
 
-struct bpstats;
+struct bpstat;
 struct so_list;
 struct objfile;
 struct thread_info;
@@ -50,7 +50,7 @@ namespace observers
    condition that is not met.  If the breakpoint has any associated
    commands list, the commands are executed after the notification is
    emitted.  */
-extern observable<struct bpstats */* bs */, int /* print_frame */> normal_stop;
+extern observable<struct bpstat */* bs */, int /* print_frame */> normal_stop;
 
 /* The inferior was stopped by a signal.  */
 extern observable<enum gdb_signal /* siggnal */> signal_received;

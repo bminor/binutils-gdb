@@ -190,7 +190,7 @@ tui_before_prompt (const char *current_gdb_prompt)
 /* Observer for the normal_stop notification.  */
 
 static void
-tui_normal_stop (struct bpstats *bs, int print_frame)
+tui_normal_stop (struct bpstat *bs, int print_frame)
 {
   from_stack = true;
 }

@@ -175,7 +175,7 @@ breakpoint_hit_catch_syscall (const struct bp_location *bl,
    catchpoints.  */
 
 static enum print_stop_action
-print_it_catch_syscall (bpstat bs)
+print_it_catch_syscall (bpstat *bs)
 {
   struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;

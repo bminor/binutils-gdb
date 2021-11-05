@@ -295,7 +295,7 @@ struct block;
 struct value;
 struct language_defn;
 struct program_space;
-struct bpstats;
+struct bpstat;
 struct inferior;
 
 extern int gdb_python_initialized;

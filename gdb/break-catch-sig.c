@@ -179,7 +179,7 @@ signal_catchpoint_breakpoint_hit (const struct bp_location *bl,
    catchpoints.  */
 
 static enum print_stop_action
-signal_catchpoint_print_it (bpstat bs)
+signal_catchpoint_print_it (bpstat *bs)
 {
   struct breakpoint *b = bs->breakpoint_at;
   struct target_waitstatus last;

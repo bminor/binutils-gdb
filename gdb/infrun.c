@@ -6114,7 +6114,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   ecs->event_thread->control.stop_step = 0;
   stop_print_frame = true;
   stopped_by_random_signal = 0;
-  bpstat stop_chain = NULL;
+  bpstat *stop_chain = nullptr;
 
   /* Hide inlined functions starting here, unless we just performed stepi or
      nexti.  After stepi and nexti, always show the innermost frame (not any

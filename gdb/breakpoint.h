@@ -41,7 +41,7 @@ struct gdbpy_breakpoint_object;
 struct gdbscm_breakpoint_object;
 struct number_or_range_parser;
 struct thread_info;
-struct bpstats;
+struct bpstat;
 struct bp_location;
 struct linespec_result;
 struct linespec_sals;
@@ -591,7 +591,7 @@ struct breakpoint_ops
 
   /* Check internal conditions of the breakpoint referred to by BS.
      If we should not stop for this breakpoint, set BS->stop to 0.  */
-  void (*check_status) (struct bpstats *bs);
+  void (*check_status) (struct bpstat *bs);
 
   /* Tell how many hardware resources (debug registers) are needed
      for this breakpoint.  If this function is not provided, then
@@ -605,7 +605,7 @@ struct breakpoint_ops
 
   /* The normal print routine for this breakpoint, called when we
      hit it.  */
-  enum print_stop_action (*print_it) (struct bpstats *bs);
+  enum print_stop_action (*print_it) (struct bpstat *bs);
 
   /* Display information about this breakpoint, for "info
      breakpoints".  */
@@ -674,7 +674,7 @@ struct breakpoint_ops
 
   /* Called after evaluating the breakpoint's condition,
      and only if it evaluated true.  */
-  void (*after_condition_true) (struct bpstats *bs);
+  void (*after_condition_true) (struct bpstat *bs);
 };
 
 /* Helper for breakpoint_ops->print_recreate implementations.  Prints
@@ -935,20 +935,18 @@ struct tracepoint : public breakpoint
    status").  This provides the ability to determine whether we have
    stopped at a breakpoint, and what we should do about it.  */
 
-typedef struct bpstats *bpstat;
-
 /* Clears a chain of bpstat, freeing storage
    of each.  */
-extern void bpstat_clear (bpstat *);
+extern void bpstat_clear (bpstat **);
 
 /* Return a copy of a bpstat.  Like "bs1 = bs2" but all storage that
    is part of the bpstat is copied as well.  */
-extern bpstat bpstat_copy (bpstat);
+extern bpstat *bpstat_copy (bpstat *);
 
 /* Build the (raw) bpstat chain for the stop information given by ASPACE,
    BP_ADDR, and WS.  Returns the head of the bpstat chain.  */
 
-extern bpstat build_bpstat_chain (const address_space *aspace,
+extern bpstat *build_bpstat_chain (const address_space *aspace,
 				  CORE_ADDR bp_addr,
 				  const struct target_waitstatus *ws);
 
@@ -972,10 +970,10 @@ extern bpstat build_bpstat_chain (const address_space *aspace,
    Each element of the chain has valid next, breakpoint_at,
    commands, FIXME??? fields.  */
 
-extern bpstat bpstat_stop_status (const address_space *aspace,
+extern bpstat *bpstat_stop_status (const address_space *aspace,
 				  CORE_ADDR pc, thread_info *thread,
 				  const struct target_waitstatus *ws,
-				  bpstat stop_chain = NULL);
+				  bpstat *stop_chain = nullptr);
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
    breakpoint (a challenging task).
@@ -1073,22 +1071,22 @@ struct bpstat_what
   };
 
 /* Tell what to do about this bpstat.  */
-struct bpstat_what bpstat_what (bpstat);
+struct bpstat_what bpstat_what (bpstat *);
 
 /* Run breakpoint event callbacks associated with the breakpoints that
    triggered.  */
-extern void bpstat_run_callbacks (bpstat bs_head);
+extern void bpstat_run_callbacks (bpstat *bs_head);
 
 /* Find the bpstat associated with a breakpoint.  NULL otherwise.  */
-bpstat bpstat_find_breakpoint (bpstat, struct breakpoint *);
+bpstat *bpstat_find_breakpoint (bpstat *, struct breakpoint *);
 
 /* True if a signal that we got in target_wait() was due to
    circumstances explained by the bpstat; the signal is therefore not
    random.  */
-extern bool bpstat_explains_signal (bpstat, enum gdb_signal);
+extern bool bpstat_explains_signal (bpstat *, enum gdb_signal);
 
 /* True if this bpstat causes a stop.  */
-extern bool bpstat_causes_stop (bpstat);
+extern bool bpstat_causes_stop (bpstat *);
 
 /* True if we should step constantly (e.g. watchpoints on machines
    without hardware support).  This isn't related to a specific bpstat,
@@ -1098,7 +1096,7 @@ extern bool bpstat_should_step ();
 /* Print a message indicating what happened.  Returns nonzero to
    say that only the source line should be printed after this (zero
    return means print the frame as well as the source line).  */
-extern enum print_stop_action bpstat_print (bpstat, int);
+extern enum print_stop_action bpstat_print (bpstat *, int);
 
 /* Put in *NUM the breakpoint number of the first breakpoint we are
    stopped at.  *BSP upon return is a bpstat which points to the
@@ -1109,7 +1107,7 @@ extern enum print_stop_action bpstat_print (bpstat, int);
    Return -1 if stopped at a breakpoint that has been deleted since
    we set it.
    Return 1 otherwise.  */
-extern int bpstat_num (bpstat *, int *);
+extern int bpstat_num (bpstat **, int *);
 
 /* Perform actions associated with the stopped inferior.  Actually, we
    just use this for breakpoint commands.  Perhaps other actions will
@@ -1140,18 +1138,18 @@ enum bp_print_how
     print_it_done
   };
 
-struct bpstats
+struct bpstat
   {
-    bpstats ();
-    bpstats (struct bp_location *bl, bpstat **bs_link_pointer);
+    bpstat ();
+    bpstat (struct bp_location *bl, bpstat ***bs_link_pointer);
 
-    bpstats (const bpstats &);
-    bpstats &operator= (const bpstats &) = delete;
+    bpstat (const bpstat &);
+    bpstat &operator= (const bpstat &) = delete;
 
     /* Linked list because there can be more than one breakpoint at
        the same place, and a bpstat reflects the fact that all have
        been hit.  */
-    bpstat next;
+    bpstat *next;
 
     /* Location that caused the stop.  Locations are refcounted, so
        this will never be NULL.  Note that this location may end up
@@ -1297,7 +1295,7 @@ extern void set_ignore_count (int, int, int);
 
 extern void breakpoint_init_inferior (enum inf_context);
 
-extern void breakpoint_auto_delete (bpstat);
+extern void breakpoint_auto_delete (bpstat *);
 
 /* Return the chain of command lines to execute when this breakpoint
    is hit.  */

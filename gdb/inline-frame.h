@@ -22,7 +22,7 @@
 
 struct frame_info;
 struct frame_unwind;
-struct bpstats;
+struct bpstat;
 struct process_stratum_target;
 
 /* The inline frame unwinder.  */
@@ -37,7 +37,7 @@ extern const struct frame_unwind inline_frame_unwind;
    user's perspective.  GDB will stop "in" the inlined frame instead of
    the caller.  */
 
-void skip_inline_frames (thread_info *thread, struct bpstats *stop_chain);
+void skip_inline_frames (thread_info *thread, struct bpstat *stop_chain);
 
 /* Forget about any hidden inlined functions in PTID, which is new or
    about to be resumed.  PTID may be minus_one_ptid (all processes of

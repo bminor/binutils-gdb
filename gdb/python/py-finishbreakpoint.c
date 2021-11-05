@@ -378,7 +378,7 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
    out of the scope of any FinishBreakpoint before it has been hit.  */
 
 static void
-bpfinishpy_handle_stop (struct bpstats *bs, int print_frame)
+bpfinishpy_handle_stop (struct bpstat *bs, int print_frame)
 {
   gdbpy_enter enter_py (get_current_arch (), current_language);
 

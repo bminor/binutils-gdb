@@ -696,7 +696,7 @@ solib_aix_get_toc_value (CORE_ADDR pc)
 /* This module's normal_stop observer.  */
 
 static void
-solib_aix_normal_stop_observer (struct bpstats *unused_1, int unused_2)
+solib_aix_normal_stop_observer (struct bpstat *unused_1, int unused_2)
 {
   struct solib_aix_inferior_data *data
     = get_solib_aix_inferior_data (current_inferior ());
