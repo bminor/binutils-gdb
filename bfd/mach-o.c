@@ -36,7 +36,7 @@
 #define bfd_mach_o_mkobject bfd_mach_o_gen_mkobject
 
 #define FILE_ALIGN(off, algn) \
-  (((off) + ((file_ptr) 1 << (algn)) - 1) & ((file_ptr) -1U << (algn)))
+  (((off) + ((ufile_ptr) 1 << (algn)) - 1) & ((ufile_ptr) -1 << (algn)))
 
 static bool
 bfd_mach_o_read_dyld_content (bfd *abfd, bfd_mach_o_dyld_info_command *cmd);
