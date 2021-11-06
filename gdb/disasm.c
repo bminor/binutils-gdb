@@ -270,7 +270,39 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
     else
       m_uiout->text (":\t");
 
+    /* Clear the buffer into which we will disassemble the instruction.  */
     m_insn_stb.clear ();
+
+    /* A helper function to write the M_INSN_STB buffer, followed by a
+       newline.  This can be called in a couple of situations.  */
+    auto write_out_insn_buffer = [&] ()
+    {
+      m_uiout->field_stream ("inst", m_insn_stb);
+      m_uiout->text ("\n");
+    };
+
+    try
+      {
+	/* Now we can disassemble the instruction.  If the disassembler
+	   returns a negative value this indicates an error and is handled
+	   within the print_insn call, resulting in an exception being
+	   thrown.  Returning zero makes no sense, as this indicates we
+	   disassembled something successfully, but it was something of no
+	   size?  */
+	size = m_di.print_insn (pc);
+	gdb_assert (size > 0);
+      }
+    catch (const gdb_exception &ex)
+      {
+	/* An exception was thrown while disassembling the instruction.
+	   However, the disassembler might still have written something
+	   out, so ensure that we flush the instruction buffer before
+	   rethrowing the exception.  We can't perform this write from an
+	   object destructor as the write itself might throw an exception
+	   if the pager kicks in, and the user selects quit.  */
+	write_out_insn_buffer ();
+	throw ex;
+      }
 
     if (flags & DISASSEMBLY_RAW_INSN)
       {
@@ -282,7 +314,6 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	   write them out in a single go for the MI.  */
 	m_opcode_stb.clear ();
 
-	size = m_di.print_insn (pc);
 	end_pc = pc + size;
 
 	for (;pc < end_pc; ++pc)
@@ -295,12 +326,10 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	m_uiout->field_stream ("opcodes", m_opcode_stb);
 	m_uiout->text ("\t");
       }
-    else
-      size = m_di.print_insn (pc);
 
-    m_uiout->field_stream ("inst", m_insn_stb);
+    /* Disassembly was a success, write out the instruction buffer.  */
+    write_out_insn_buffer ();
   }
-  m_uiout->text ("\n");
 
   return size;
 }
