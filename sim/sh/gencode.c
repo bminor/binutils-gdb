@@ -354,7 +354,7 @@ static op tab[] =
 
   /* sh4a */
   { "", "", "clrdmxy", "0000000010001000",
-    "saved_state.asregs.cregs.named.sr &= ~(SR_MASK_DMX | SR_MASK_DMY);"
+    "saved_state.asregs.sr &= ~(SR_MASK_DMX | SR_MASK_DMY);"
   },
 
   { "", "0", "cmp/eq #<imm>,R0", "10001000i8*1....",
@@ -1342,14 +1342,14 @@ static op tab[] =
 
   /* sh4a */
   { "", "", "setdmx", "0000000010011000",
-    "saved_state.asregs.cregs.named.sr |=  SR_MASK_DMX;"
-    "saved_state.asregs.cregs.named.sr &= ~SR_MASK_DMY;"
+    "saved_state.asregs.sr |=  SR_MASK_DMX;"
+    "saved_state.asregs.sr &= ~SR_MASK_DMY;"
   },
 
   /* sh4a */
   { "", "", "setdmy", "0000000011001000",
-    "saved_state.asregs.cregs.named.sr |=  SR_MASK_DMY;"
-    "saved_state.asregs.cregs.named.sr &= ~SR_MASK_DMX;"
+    "saved_state.asregs.sr |=  SR_MASK_DMY;"
+    "saved_state.asregs.sr &= ~SR_MASK_DMX;"
   },
 
   /* sh-dsp */

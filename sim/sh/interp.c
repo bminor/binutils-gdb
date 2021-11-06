@@ -120,23 +120,23 @@ static int maskl = 0;
 #define UR 	(unsigned int) R
 #define UR 	(unsigned int) R
 #define SR0 	saved_state.asregs.regs[0]
-#define CREG(n)	(saved_state.asregs.cregs.i[(n)])
-#define GBR 	saved_state.asregs.cregs.named.gbr
-#define VBR 	saved_state.asregs.cregs.named.vbr
-#define DBR 	saved_state.asregs.cregs.named.dbr
-#define TBR 	saved_state.asregs.cregs.named.tbr
-#define IBCR	saved_state.asregs.cregs.named.ibcr
-#define IBNR	saved_state.asregs.cregs.named.ibnr
-#define BANKN	(saved_state.asregs.cregs.named.ibnr & 0x1ff)
-#define ME	((saved_state.asregs.cregs.named.ibnr >> 14) & 0x3)
-#define SSR	saved_state.asregs.cregs.named.ssr
-#define SPC	saved_state.asregs.cregs.named.spc
-#define SGR 	saved_state.asregs.cregs.named.sgr
-#define SREG(n)	(saved_state.asregs.sregs.i[(n)])
-#define MACH 	saved_state.asregs.sregs.named.mach
-#define MACL 	saved_state.asregs.sregs.named.macl
-#define PR	saved_state.asregs.sregs.named.pr
-#define FPUL	saved_state.asregs.sregs.named.fpul
+#define CREG(n)	(saved_state.asregs.cregs[(n)])
+#define GBR 	saved_state.asregs.gbr
+#define VBR 	saved_state.asregs.vbr
+#define DBR 	saved_state.asregs.dbr
+#define TBR 	saved_state.asregs.tbr
+#define IBCR	saved_state.asregs.ibcr
+#define IBNR	saved_state.asregs.ibnr
+#define BANKN	(saved_state.asregs.ibnr & 0x1ff)
+#define ME	((saved_state.asregs.ibnr >> 14) & 0x3)
+#define SSR	saved_state.asregs.ssr
+#define SPC	saved_state.asregs.spc
+#define SGR 	saved_state.asregs.sgr
+#define SREG(n)	(saved_state.asregs.sregs[(n)])
+#define MACH 	saved_state.asregs.mach
+#define MACL 	saved_state.asregs.macl
+#define PR	saved_state.asregs.pr
+#define FPUL	saved_state.asregs.fpul
 
 #define PC insn_ptr
 
@@ -145,8 +145,8 @@ static int maskl = 0;
 /* Alternate bank of registers r0-r7 */
 
 /* Note: code controling SR handles flips between BANK0 and BANK1 */
-#define Rn_BANK(n) (saved_state.asregs.cregs.named.bank[(n)])
-#define SET_Rn_BANK(n, EXP) do { saved_state.asregs.cregs.named.bank[(n)] = (EXP); } while (0)
+#define Rn_BANK(n) (saved_state.asregs.bank[(n)])
+#define SET_Rn_BANK(n, EXP) do { saved_state.asregs.bank[(n)] = (EXP); } while (0)
 
 
 /* Manipulate SR */
@@ -167,28 +167,28 @@ static int maskl = 0;
 #define SR_MASK_RC 0x0fff0000
 #define SR_RC_INCREMENT -0x00010000
 
-#define BO	((saved_state.asregs.cregs.named.sr & SR_MASK_BO) != 0)
-#define CS	((saved_state.asregs.cregs.named.sr & SR_MASK_CS) != 0)
-#define M 	((saved_state.asregs.cregs.named.sr & SR_MASK_M) != 0)
-#define Q 	((saved_state.asregs.cregs.named.sr & SR_MASK_Q) != 0)
-#define S 	((saved_state.asregs.cregs.named.sr & SR_MASK_S) != 0)
-#define T 	((saved_state.asregs.cregs.named.sr & SR_MASK_T) != 0)
-#define LDST	((saved_state.asregs.cregs.named.ldst) != 0)
+#define BO	((saved_state.asregs.sr & SR_MASK_BO) != 0)
+#define CS	((saved_state.asregs.sr & SR_MASK_CS) != 0)
+#define M 	((saved_state.asregs.sr & SR_MASK_M) != 0)
+#define Q 	((saved_state.asregs.sr & SR_MASK_Q) != 0)
+#define S 	((saved_state.asregs.sr & SR_MASK_S) != 0)
+#define T 	((saved_state.asregs.sr & SR_MASK_T) != 0)
+#define LDST	((saved_state.asregs.ldst) != 0)
 
-#define SR_BL ((saved_state.asregs.cregs.named.sr & SR_MASK_BL) != 0)
-#define SR_RB ((saved_state.asregs.cregs.named.sr & SR_MASK_RB) != 0)
-#define SR_MD ((saved_state.asregs.cregs.named.sr & SR_MASK_MD) != 0)
-#define SR_DMY ((saved_state.asregs.cregs.named.sr & SR_MASK_DMY) != 0)
-#define SR_DMX ((saved_state.asregs.cregs.named.sr & SR_MASK_DMX) != 0)
-#define SR_RC ((saved_state.asregs.cregs.named.sr & SR_MASK_RC))
+#define SR_BL ((saved_state.asregs.sr & SR_MASK_BL) != 0)
+#define SR_RB ((saved_state.asregs.sr & SR_MASK_RB) != 0)
+#define SR_MD ((saved_state.asregs.sr & SR_MASK_MD) != 0)
+#define SR_DMY ((saved_state.asregs.sr & SR_MASK_DMY) != 0)
+#define SR_DMX ((saved_state.asregs.sr & SR_MASK_DMX) != 0)
+#define SR_RC ((saved_state.asregs.sr & SR_MASK_RC))
 
 /* Note: don't use this for privileged bits */
 #define SET_SR_BIT(EXP, BIT) \
 do { \
   if ((EXP) & 1) \
-    saved_state.asregs.cregs.named.sr |= (BIT); \
+    saved_state.asregs.sr |= (BIT); \
   else \
-    saved_state.asregs.cregs.named.sr &= ~(BIT); \
+    saved_state.asregs.sr &= ~(BIT); \
 } while (0)
 
 #define SET_SR_BO(EXP) SET_SR_BIT ((EXP), SR_MASK_BO)
@@ -205,16 +205,16 @@ do { \
 #define SET_SR_Q(EXP) SET_SR_BIT ((EXP), SR_MASK_Q)
 #define SET_SR_S(EXP) SET_SR_BIT ((EXP), SR_MASK_S)
 #define SET_SR_T(EXP) SET_SR_BIT ((EXP), SR_MASK_T)
-#define SET_LDST(EXP) (saved_state.asregs.cregs.named.ldst = ((EXP) != 0))
+#define SET_LDST(EXP) (saved_state.asregs.ldst = ((EXP) != 0))
 
 /* stc currently relies on being able to read SR without modifications.  */
-#define GET_SR() (saved_state.asregs.cregs.named.sr - 0)
+#define GET_SR() (saved_state.asregs.sr - 0)
 
 #define SET_SR(x) set_sr (x)
 
 #define SET_RC(x) \
-  (saved_state.asregs.cregs.named.sr \
-   = (saved_state.asregs.cregs.named.sr & 0xf000ffff) | ((x) & 0xfff) << 16)
+  (saved_state.asregs.sr \
+   = (saved_state.asregs.sr & 0xf000ffff) | ((x) & 0xfff) << 16)
 
 /* Manipulate FPSCR */
 
@@ -229,10 +229,10 @@ do { \
 static void
 set_fpscr1 (int x)
 {
-  int old = saved_state.asregs.sregs.named.fpscr;
-  saved_state.asregs.sregs.named.fpscr = (x);
+  int old = saved_state.asregs.fpscr;
+  saved_state.asregs.fpscr = (x);
   /* swap the floating point register banks */
-  if ((saved_state.asregs.sregs.named.fpscr ^ old) & FPSCR_MASK_FR
+  if ((saved_state.asregs.fpscr ^ old) & FPSCR_MASK_FR
       /* Ignore bit change if simulating sh-dsp.  */
       && ! target_dsp)
     {
@@ -243,13 +243,13 @@ set_fpscr1 (int x)
 }
 
 /* sts relies on being able to read fpscr directly.  */
-#define GET_FPSCR()  (saved_state.asregs.sregs.named.fpscr)
+#define GET_FPSCR()  (saved_state.asregs.fpscr)
 #define SET_FPSCR(x) \
 do { \
   set_fpscr1 (x); \
 } while (0)
 
-#define DSR  (saved_state.asregs.sregs.named.fpscr)
+#define DSR  (saved_state.asregs.fpscr)
 
 #define RAISE_EXCEPTION(x) \
   (saved_state.asregs.exception = x, saved_state.asregs.insn_end = 0)
@@ -410,15 +410,15 @@ set_dr (int n, double exp)
 #define XF(n) (saved_state.asregs.fregs[(n) >> 5].i[(n) & 0x1f])
 #define SET_XF(n,EXP) (saved_state.asregs.fregs[(n) >> 5].i[(n) & 0x1f] = (EXP))
 
-#define RS saved_state.asregs.cregs.named.rs
-#define RE saved_state.asregs.cregs.named.re
-#define MOD (saved_state.asregs.cregs.named.mod)
+#define RS saved_state.asregs.rs
+#define RE saved_state.asregs.re
+#define MOD (saved_state.asregs.mod)
 #define SET_MOD(i) \
 (MOD = (i), \
  MOD_ME = (unsigned) MOD >> 16 | (SR_DMY ? ~0xffff : (SR_DMX ? 0 : 0x10000)), \
  MOD_DELTA = (MOD & 0xffff) - ((unsigned) MOD >> 16))
 
-#define DSP_R(n) saved_state.asregs.sregs.i[(n)]
+#define DSP_R(n) saved_state.asregs.sregs[(n)]
 #define DSP_GRD(n) DSP_R ((n) + 8)
 #define GET_DSP_GRD(n) ((n | 2) == 7 ? SEXT (DSP_GRD (n)) : SIGN32 (DSP_R (n)))
 #define A1 DSP_R (5)
@@ -485,12 +485,12 @@ set_sr (int new_sr)
       int i, tmp;
       for (i = 0; i < 8; i++)
 	{
-	  tmp = saved_state.asregs.cregs.named.bank[i];
-	  saved_state.asregs.cregs.named.bank[i] = saved_state.asregs.regs[i];
+	  tmp = saved_state.asregs.bank[i];
+	  saved_state.asregs.bank[i] = saved_state.asregs.regs[i];
 	  saved_state.asregs.regs[i] = tmp;
 	}
     }
-  saved_state.asregs.cregs.named.sr = new_sr;
+  saved_state.asregs.sr = new_sr;
   SET_MOD (MOD);
 }
 
@@ -1768,7 +1768,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   CHECK_INSN_PTR (insn_ptr);
 
 #ifndef PR
-  PR = saved_state.asregs.sregs.named.pr;
+  PR = saved_state.asregs.pr;
 #endif
   /*T = GET_SR () & SR_MASK_T;*/
   prevlock = saved_state.asregs.prevlock;
@@ -1849,7 +1849,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
     }
   if (saved_state.asregs.insn_end == loop.end)
     {
-      saved_state.asregs.cregs.named.sr += SR_RC_INCREMENT;
+      saved_state.asregs.sr += SR_RC_INCREMENT;
       if (SR_RC)
 	insn_ptr = loop.start;
       else
@@ -1876,7 +1876,7 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   saved_state.asregs.insts += insts;
   saved_state.asregs.pc = PH2T (insn_ptr);
 #ifndef PR
-  saved_state.asregs.sregs.named.pr = PR;
+  saved_state.asregs.pr = PR;
 #endif
 
   saved_state.asregs.prevlock = prevlock;
