@@ -1239,17 +1239,17 @@ static op tab[] =
   },
 
   { "", "n", "ocbi @<REG_N>", "0000nnnn10010011",
-    "RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
+    "(void) RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
     "/* FIXME: Cache not implemented */",
   },
 
   { "", "n", "ocbp @<REG_N>", "0000nnnn10100011",
-    "RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
+    "(void) RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
     "/* FIXME: Cache not implemented */",
   },
 
   { "", "n", "ocbwb @<REG_N>", "0000nnnn10110011",
-    "RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
+    "(void) RSBAT (R[n]); /* Take exceptions like byte load, otherwise noop.  */",
     "/* FIXME: Cache not implemented */",
   },
 
