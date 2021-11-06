@@ -1422,11 +1422,11 @@ convert (sim_cpu *cpu,
       sim_fpu_to64 (&result64, &wop);
       break;
     case fmt_word:
-      status |= sim_fpu_to32i (&result32, &wop, round);
+      status |= sim_fpu_to32u (&result32, &wop, round);
       result64 = result32;
       break;
     case fmt_long:
-      status |= sim_fpu_to64i (&result64, &wop, round);
+      status |= sim_fpu_to64u (&result64, &wop, round);
       break;
     default:
       result64 = 0;
@@ -1525,8 +1525,8 @@ convert_ps (sim_cpu *cpu,
   switch (to)
     {
     case fmt_word:   /* fmt_pw */
-      status_u |= sim_fpu_to32i (&res_u, &wop_u, round);
-      status_l |= sim_fpu_to32i (&res_l, &wop_l, round);
+      status_u |= sim_fpu_to32u (&res_u, &wop_u, round);
+      status_l |= sim_fpu_to32u (&res_l, &wop_l, round);
       result = (((unsigned64)res_u) << 32) | (unsigned64)res_l;
       break;
     case fmt_ps:
