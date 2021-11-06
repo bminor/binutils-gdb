@@ -2363,7 +2363,7 @@ op ppi_tab[] =
   },
   { "","", "(if cc) pdmsb Sy,Dz",	"101111cc..yyzzzz",
     "unsigned Sy = DSP_R (y);",
-    "int i;",
+    "int i = 16;",
     "",
     "if (Sy < 0)",
     "  Sy = ~Sy;",
