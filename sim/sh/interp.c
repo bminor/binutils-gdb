@@ -195,11 +195,11 @@ do { \
 #define SET_SR_CS(EXP) SET_SR_BIT ((EXP), SR_MASK_CS)
 #define SET_BANKN(EXP) \
 do { \
-  IBNR = (IBNR & 0xfe00) | (EXP & 0x1f); \
+  IBNR = (IBNR & 0xfe00) | ((EXP) & 0x1f); \
 } while (0)
 #define SET_ME(EXP) \
 do { \
-  IBNR = (IBNR & 0x3fff) | ((EXP & 0x3) << 14); \
+  IBNR = (IBNR & 0x3fff) | (((EXP) & 0x3) << 14); \
 } while (0)
 #define SET_SR_M(EXP) SET_SR_BIT ((EXP), SR_MASK_M)
 #define SET_SR_Q(EXP) SET_SR_BIT ((EXP), SR_MASK_Q)

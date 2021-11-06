@@ -1863,7 +1863,7 @@ op ppi_tab[] =
     "if (i <= 16)",
     "  res = Sz << i;",
     "else if (i >= 128 - 16)",
-    "  res = (unsigned) Sz >> 128 - i;	/* no sign extension */",
+    "  res = (unsigned) Sz >> (128 - i);	/* no sign extension */",
     "else",
     "  {",
     "    RAISE_EXCEPTION (SIGILL);",
@@ -1887,7 +1887,7 @@ op ppi_tab[] =
     "    else",
     "      {",
     "        res = Sz << i;",
-    "        res_grd = Sz_grd << i | (unsigned) Sz >> 32 - i;",
+    "        res_grd = Sz_grd << i | (unsigned) Sz >> (32 - i);",
     "      }",
     "    res_grd = SEXT (res_grd);",
     "    carry = res_grd & 1;",
@@ -1902,7 +1902,7 @@ op ppi_tab[] =
     "      }",
     "    else",
     "      {",
-    "        res = Sz >> i | Sz_grd << 32 - i;",
+    "        res = Sz >> i | Sz_grd << (32 - i);",
     "        res_grd = Sz_grd >> i;",
     "      }",
     "    carry = Sz >> (i - 1) & 1;",
@@ -1973,7 +1973,7 @@ op ppi_tab[] =
     "ADD_SUB_GE;",
     "DSR &= ~0xf1;\n",
     "if (res || res_grd)\n",
-    "  DSR |= greater_equal | res_grd >> 2 & DSR_MASK_N | overflow;\n",
+    "  DSR |= greater_equal | (res_grd >> 2 & DSR_MASK_N) | overflow;\n",
     "else\n",
     "  DSR |= DSR_MASK_Z | overflow;\n",
     "DSR |= carry;\n",
@@ -1992,7 +1992,7 @@ op ppi_tab[] =
     "ADD_SUB_GE;",
     "DSR &= ~0xf1;\n",
     "if (res || res_grd)\n",
-    "  DSR |= greater_equal | res_grd >> 2 & DSR_MASK_N | overflow;\n",
+    "  DSR |= greater_equal | (res_grd >> 2 & DSR_MASK_N) | overflow;\n",
     "else\n",
     "  DSR |= DSR_MASK_Z | overflow;\n",
     "DSR |= carry;\n",
@@ -2148,7 +2148,7 @@ op ppi_tab[] =
     "if (Sy <= 16)",
     "  res = Sx << Sy;",
     "else if (Sy >= 128 - 16)",
-    "  res = (unsigned) Sx >> 128 - Sy;	/* no sign extension */",
+    "  res = (unsigned) Sx >> (128 - Sy);	/* no sign extension */",
     "else",
     "  {",
     "    RAISE_EXCEPTION (SIGILL);",
@@ -2171,7 +2171,7 @@ op ppi_tab[] =
     "    else",
     "      {",
     "        res = Sx << Sy;",
-    "        res_grd = Sx_grd << Sy | (unsigned) Sx >> 32 - Sy;",
+    "        res_grd = Sx_grd << Sy | (unsigned) Sx >> (32 - Sy);",
     "      }",
     "    res_grd = SEXT (res_grd);",
     "    carry = res_grd & 1;",
@@ -2186,7 +2186,7 @@ op ppi_tab[] =
     "      }",
     "    else",
     "      {",
-    "        res = Sx >> Sy | Sx_grd << 32 - Sy;",
+    "        res = Sx >> Sy | Sx_grd << (32 - Sy);",
     "        res_grd = Sx_grd >> Sy;",
     "      }",
     "    carry = Sx >> (Sy - 1) & 1;",
@@ -3347,7 +3347,7 @@ ppi_gensim (void)
   printf ("  }\n");
   printf ("  DSR &= ~0xf1;\n");
   printf ("  if (res || res_grd)\n");
-  printf ("    DSR |= greater_equal | res_grd >> 2 & DSR_MASK_N | overflow;\n");
+  printf ("    DSR |= greater_equal | (res_grd >> 2 & DSR_MASK_N) | overflow;\n");
   printf ("  else\n");
   printf ("    DSR |= DSR_MASK_Z | overflow;\n");
   printf (" assign_dc:\n");
