@@ -103,14 +103,19 @@ mc_fatal (const char *s, ...)
 }
 
 
-int
-yyerror (const char *s, ...)
+static void
+mc_error (const char *s, ...)
 {
   va_list argp;
   va_start (argp, s);
   show_msg ("parser", s, argp);
   va_end (argp);
-  return 1;
+}
+
+void
+yyerror (const char *s)
+{
+  mc_error (s);
 }
 
 static unichar *
@@ -451,7 +456,7 @@ yylex (void)
 	yylval.ustr = get_diff (input_stream_pos, start_token);
 	return MCIDENT;
       }
-    yyerror ("illegal character 0x%x.", ch);
+    mc_error ("illegal character 0x%x.", ch);
   }
   return -1;
 }

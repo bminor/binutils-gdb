@@ -33,7 +33,7 @@ static int rdepth;
 static char *names[] = {" ","[n]","[n][m]"};
 static char *pnames[]= {"","*","**"};
 
-static int yyerror (char *s);
+static void yyerror (const char *s);
 extern int yylex (void);
 %}
 
@@ -434,9 +434,8 @@ if (writecode == 'd')
 return 0;
 }
 
-static int
-yyerror (char *s)
+static void
+yyerror (const char *s)
 {
   fprintf(stderr, "%s\n" , s);
-  return 0;
 }

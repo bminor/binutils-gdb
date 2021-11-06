@@ -990,13 +990,11 @@ static int d_nforwards = 0;	/* Number of forwarded exports.  */
 static int d_is_dll;
 static int d_is_exe;
 
-int
+void
 yyerror (const char * err ATTRIBUTE_UNUSED)
 {
   /* xgettext:c-format */
   non_fatal (_("Syntax error in def file %s:%d"), def_file, linenumber);
-
-  return 0;
 }
 
 void
