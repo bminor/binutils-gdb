@@ -5022,13 +5022,6 @@ character may be used to specify a range of characters, as in
 quotes the following character
 @end table
 
-When a file name is matched with a wildcard, the wildcard characters
-will not match a @samp{/} character (used to separate directory names on
-Unix).  A pattern consisting of a single @samp{*} character is an
-exception; it will always match any file name, whether it contains a
-@samp{/} or not.  In a section name, the wildcard characters will match
-a @samp{/} character.
-
 File name wildcard patterns only match files which are explicitly
 specified on the command line or in an @code{INPUT} command.  The linker
 does not search directories to expand wildcards.
