@@ -761,7 +761,7 @@ IOMEM (int addr, int write, int value)
 static int
 get_now (void)
 {
-  return time ((long *) 0);
+  return time (NULL);
 }
 
 static int
