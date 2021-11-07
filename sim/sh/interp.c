@@ -65,7 +65,9 @@
 
 #ifdef _WIN32
 #include <float.h>		/* Needed for _isnan() */
+#ifndef isnan
 #define isnan _isnan
+#endif
 #endif
 
 #ifndef SIGBUS
