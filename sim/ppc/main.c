@@ -42,13 +42,13 @@
 #include <string.h>
 #include <errno.h>
 
+#include "environ.h"
+
 #if !defined(O_NONBLOCK) || !defined(F_GETFL) || !defined(F_SETFL)
 #undef WITH_STDIO
 #define WITH_STDIO DO_USE_STDIO
 #endif
 
-
-extern char **environ;
 
 static psim *simulation = NULL;
 
