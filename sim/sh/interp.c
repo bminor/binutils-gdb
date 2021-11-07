@@ -45,8 +45,10 @@
 #endif
 #include <time.h>
 #include <sys/time.h>
-#ifndef _WIN32
+#ifdef HAVE_UTIME_H
 #include <utime.h>
+#endif
+#ifndef _WIN32
 #include <sys/wait.h>
 #endif
 
@@ -1024,7 +1026,12 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	      int len = strswaplen (regs[5]);
 
 	      strnswap (regs[5], len);
+#ifdef HAVE_UTIME_H
 	      regs[0] = utime (ptr (regs[5]), (void *) ptr (regs[6]));
+#else
+	      errno = ENOSYS;
+	      regs[0] = -1;
+#endif
 	      strnswap (regs[5], len);
 	      break;
 	    }
