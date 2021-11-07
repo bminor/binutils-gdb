@@ -879,7 +879,6 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
       }
     case 34:
       {
-	extern int errno;
 	int perrno = errno;
 	errno = 0;
 
