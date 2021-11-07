@@ -21,6 +21,8 @@
 #ifndef DV_BFIN_MMU_H
 #define DV_BFIN_MMU_H
 
+#undef PAGE_SIZE	/* Cleanup system headers.  */
+
 void mmu_check_addr (SIM_CPU *, bu32 addr, bool write, bool inst, int size);
 void mmu_check_cache_addr (SIM_CPU *, bu32 addr, bool write, bool inst);
 void mmu_process_fault (SIM_CPU *, bu32 addr, bool write, bool inst, bool unaligned, bool miss);

@@ -37,6 +37,8 @@ void init_mem (void);
 void mem_usage_stats (void);
 unsigned long mem_usage_cycles (void);
 
+#undef PAGE_SIZE	/* Cleanup system headers.  */
+
 /* rx_mem_ptr returns a pointer which is valid as long as the address
    requested remains within the same page.  */
 #define PAGE_BITS 12
