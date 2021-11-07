@@ -701,7 +701,7 @@ do { \
 #else
 
 #define MA(n) \
-  do { memstalls += ((((long) PC & 3) != 0) ? (n) : ((n) - 1)); } while (0)
+  do { memstalls += ((((uintptr_t) PC & 3) != 0) ? (n) : ((n) - 1)); } while (0)
 
 #define L(x)   thislock = x;
 #define TL(x)  if ((x) == prevlock) stalls++;
