@@ -139,7 +139,9 @@ decode_debug_loc_addresses (const gdb_byte *loc_ptr, const gdb_byte *buf_end,
   if (*low == 0 && *high == 0)
     return DEBUG_LOC_END_OF_LIST;
 
-  return DEBUG_LOC_START_END;
+  /* We want the caller to apply the base address, so we must return
+     DEBUG_LOC_OFFSET_PAIR here.  */
+  return DEBUG_LOC_OFFSET_PAIR;
 }
 
 /* Decode the addresses in .debug_loclists entry.
@@ -416,13 +418,15 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	 .debug_addr which already has the DWARF "base address". We still add
 	 base_offset in case we're debugging a PIE executable. However, if the
 	 entry is DW_LLE_offset_pair from a DWO, add the base address as the
-	 operands are offsets relative to the applicable base address.  */
+	 operands are offsets relative to the applicable base address.
+	 If the entry is DW_LLE_start_end or DW_LLE_start_length, then
+	 it already is an address, and we don't need to add the base.  */
       if (baton->from_dwo && kind != DEBUG_LOC_OFFSET_PAIR)
 	{
 	  low += base_offset;
 	  high += base_offset;
 	}
-      else
+      else if (kind == DEBUG_LOC_OFFSET_PAIR)
 	{
 	  low += base_address;
 	  high += base_address;
@@ -3983,8 +3987,11 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	}
 
       /* Otherwise, a location expression entry.  */
-      low += base_address;
-      high += base_address;
+      if (kind == DEBUG_LOC_OFFSET_PAIR)
+	{
+	  low += base_address;
+	  high += base_address;
+	}
 
       low = gdbarch_adjust_dwarf2_addr (gdbarch, low);
       high = gdbarch_adjust_dwarf2_addr (gdbarch, high);

@@ -1894,9 +1894,10 @@ namespace eval Dwarf {
 	define_label $list_label
 
 	with_override Dwarf::start_length Dwarf::_loclists_start_length {
+	with_override Dwarf::base_address Dwarf::_loclists_base_address {
 	with_override Dwarf::start_end Dwarf::_loclists_start_end {
 	    uplevel $body
-	}}
+	}}}
 
 	# Emit end of list.
 	_op .byte 0x00 "DW_LLE_end_of_list"
@@ -1969,6 +1970,15 @@ namespace eval Dwarf {
 	_location $locdesc $dwarf_version $_debug_loclists_addr_size $_debug_loclists_offset_size
 	define_label $locdesc_end_label
 
+	incr _debug_loclists_locdesc_count
+    }
+
+    # Emit a DW_LLE_base_address entry.
+    proc _loclists_base_address {addr} {
+	variable _debug_loclists_addr_size
+	variable _debug_loclists_locdesc_count
+	_op .byte 0x06 "DW_LLE_base_address"
+	_op .${_debug_loclists_addr_size}byte $addr "base_address"
 	incr _debug_loclists_locdesc_count
     }
 

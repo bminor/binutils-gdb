@@ -96,6 +96,9 @@ foreach_with_prefix is_64 {false true} {
 
 		# For variable foo.
 		list_ {
+		    # This should not affect the following addresses.
+		    base_address 0xffff
+
 		    # When in func1.
 		    start_end $func1_addr "$func1_addr + $func1_len" {
 			DW_OP_constu 0x123456

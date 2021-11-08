@@ -1,4 +1,4 @@
-# Copyright 2020 Free Software Foundation, Inc.
+# Copyright 2020, 2021 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -105,6 +105,9 @@ foreach_with_prefix is_64 {false true} {
 
 		# For variable foo.
 		list_ {
+		    # This should not affect the following addresses.
+		    base_address 0xffff
+
 		    # When in func1.
 		    start_length $func1_addr $func1_len {
 			DW_OP_constu 0x123456
