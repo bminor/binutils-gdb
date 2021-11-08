@@ -141,17 +141,17 @@ extern mi_cmd_argv_ftype mi_cmd_complete;
 
 /* The abstract base class for all MI command types.  */
 
-struct mi_cmd
+struct mi_command
 {
   /* Constructor.  NAME is the name of this MI command, excluding any
      leading dash, that is the initial string the user will enter to run
      this command.  The SUPPRESS_NOTIFICATION pointer is a flag which will
      be set to 1 when this command is invoked, and reset to its previous
      value once the command invocation has completed.  */
-  mi_cmd (const char *name, int *suppress_notification);
+  mi_command (const char *name, int *suppress_notification);
 
   /* Destructor.  */
-  virtual ~mi_cmd () = default;
+  virtual ~mi_command () = default;
 
   /* Return the name of this command.  This is the command that the user
      will actually type in, without any arguments, and without the leading
@@ -190,7 +190,7 @@ private:
 /* Lookup a command in the MI command table, returns nullptr if COMMAND is
    not found.  */
 
-extern mi_cmd *mi_cmd_lookup (const char *command);
+extern mi_command *mi_cmd_lookup (const char *command);
 
 /* Debug flag */
 extern int mi_debug_p;

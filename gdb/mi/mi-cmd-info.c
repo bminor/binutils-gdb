@@ -67,7 +67,7 @@ void
 mi_cmd_info_gdb_mi_command (const char *command, char **argv, int argc)
 {
   const char *cmd_name;
-  struct mi_cmd *cmd;
+  mi_command *cmd;
   struct ui_out *uiout = current_uiout;
 
   /* This command takes exactly one argument.  */

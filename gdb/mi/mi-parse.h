@@ -49,7 +49,7 @@ struct mi_parse
     enum mi_command_type op;
     char *command;
     char *token;
-    const struct mi_cmd *cmd;
+    const struct mi_command *cmd;
     struct mi_timestamp *cmd_start;
     char *args;
     char **argv;
