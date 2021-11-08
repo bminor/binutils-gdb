@@ -21,6 +21,10 @@ ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
 AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex
 
+if BUILD_INFO
+SUBDIRS = doc
+endif
+
 # This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
 # -I../zlib, unless we were configured with --with-system-zlib, in which
 # case both are empty.
