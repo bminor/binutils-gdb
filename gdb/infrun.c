@@ -5138,8 +5138,7 @@ handle_no_resumed (struct execution_control_state *ecs)
 	  swap_terminal = false;
 	}
 
-      if (!ignore_event
-	  && (thread->executing () || thread->has_pending_waitstatus ()))
+      if (!ignore_event && thread->resumed ())
 	{
 	  /* Either there were no unwaited-for children left in the
 	     target at some point, but there are now, or some target
