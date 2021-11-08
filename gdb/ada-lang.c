@@ -2586,9 +2586,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       write_memory_with_notification (to_addr, buffer, len);
 
       val = value_copy (toval);
-      memcpy (value_contents_raw (val).data (),
-	      value_contents (fromval).data (),
-	      TYPE_LENGTH (type));
+      copy (value_contents (fromval), value_contents_raw (val));
       deprecated_set_value_type (val, type);
 
       return val;
@@ -4184,9 +4182,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0)
 
 	      actual_type = ada_check_typedef (value_type (actual));
 	      val = allocate_value (actual_type);
-	      memcpy ((char *) value_contents_raw (val).data (),
-		      (char *) value_contents (actual).data (),
-		      TYPE_LENGTH (actual_type));
+	      copy (value_contents (actual), value_contents_raw (val));
 	      actual = ensure_lval (val);
 	    }
 	  result = value_addr (actual);
@@ -8898,7 +8894,6 @@ ada_promote_array_of_integrals (struct type *type, struct value *val)
 {
   struct type *elt_type = TYPE_TARGET_TYPE (type);
   LONGEST lo, hi;
-  struct value *res;
   LONGEST i;
 
   /* Verify that both val and type are arrays of scalars, and
@@ -8914,16 +8909,16 @@ ada_promote_array_of_integrals (struct type *type, struct value *val)
   if (!get_array_bounds (type, &lo, &hi))
     error (_("unable to determine array bounds"));
 
-  res = allocate_value (type);
+  value *res = allocate_value (type);
+  gdb::array_view<gdb_byte> res_contents = value_contents_writeable (res);
 
   /* Promote each array element.  */
   for (i = 0; i < hi - lo + 1; i++)
     {
       struct value *elt = value_cast (elt_type, value_subscript (val, lo + i));
+      int elt_len = TYPE_LENGTH (elt_type);
 
-      memcpy ((value_contents_writeable (res).data ()
-	       + (i * TYPE_LENGTH (elt_type))),
-	      value_contents_all (elt).data (), TYPE_LENGTH (elt_type));
+      copy (value_contents_all (elt), res_contents.slice (elt_len * i, elt_len));
     }
 
   return res;

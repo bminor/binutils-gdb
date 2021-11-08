@@ -1537,7 +1537,7 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
 {
   /* Widen the scalar to a vector.  */
   struct type *eltype, *scalar_type;
-  struct value *val, *elval;
+  struct value *elval;
   LONGEST low_bound, high_bound;
   int i;
 
@@ -1560,11 +1560,14 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
       && !value_equal (elval, scalar_value))
     error (_("conversion of scalar to vector involves truncation"));
 
-  val = allocate_value (vector_type);
+  value *val = allocate_value (vector_type);
+  gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+  int elt_len = TYPE_LENGTH (eltype);
+
   for (i = 0; i < high_bound - low_bound + 1; i++)
     /* Duplicate the contents of elval into the destination vector.  */
-    memcpy (value_contents_writeable (val).data () + (i * TYPE_LENGTH (eltype)),
-	    value_contents_all (elval).data (), TYPE_LENGTH (eltype));
+    copy (value_contents_all (elval),
+	  val_contents.slice (i * elt_len, elt_len));
 
   return val;
 }
@@ -1575,7 +1578,6 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
 static struct value *
 vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
 {
-  struct value *val, *tmp, *mark;
   struct type *type1, *type2, *eltype1, *eltype2;
   int t1_is_vec, t2_is_vec, elsize, i;
   LONGEST low_bound1, high_bound1, low_bound2, high_bound2;
@@ -1605,15 +1607,15 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
       || low_bound1 != low_bound2 || high_bound1 != high_bound2)
     error (_("Cannot perform operation on vectors with different types"));
 
-  val = allocate_value (type1);
-  mark = value_mark ();
+  value *val = allocate_value (type1);
+  gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+  value *mark = value_mark ();
   for (i = 0; i < high_bound1 - low_bound1 + 1; i++)
     {
-      tmp = value_binop (value_subscript (val1, i),
-			 value_subscript (val2, i), op);
-      memcpy (value_contents_writeable (val).data () + i * elsize,
-	      value_contents_all (tmp).data (),
-	      elsize);
+      value *tmp = value_binop (value_subscript (val1, i),
+				value_subscript (val2, i), op);
+      copy (value_contents_all (tmp),
+	    val_contents.slice (i * elsize, elsize));
      }
   value_free_to_mark (mark);
 
@@ -1894,7 +1896,7 @@ value_neg (struct value *arg1)
     return value_binop (value_zero (type, not_lval), arg1, BINOP_SUB);
   else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
-      struct value *tmp, *val = allocate_value (type);
+      struct value *val = allocate_value (type);
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
       int i;
       LONGEST low_bound, high_bound;
@@ -1902,12 +1904,14 @@ value_neg (struct value *arg1)
       if (!get_array_bounds (type, &low_bound, &high_bound))
 	error (_("Could not determine the vector bounds"));
 
+      gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+      int elt_len = TYPE_LENGTH (eltype);
+
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
-	  tmp = value_neg (value_subscript (arg1, i));
-	  memcpy ((value_contents_writeable (val).data ()
-		   + i * TYPE_LENGTH (eltype)),
-		  value_contents_all (tmp).data (), TYPE_LENGTH (eltype));
+	  value *tmp = value_neg (value_subscript (arg1, i));
+	  copy (value_contents_all (tmp),
+		val_contents.slice (i * elt_len, elt_len));
 	}
       return val;
     }
@@ -1937,7 +1941,6 @@ value_complement (struct value *arg1)
     val = value_from_longest (type, ~value_as_long (arg1));
   else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
-      struct value *tmp;
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
       int i;
       LONGEST low_bound, high_bound;
@@ -1946,12 +1949,14 @@ value_complement (struct value *arg1)
 	error (_("Could not determine the vector bounds"));
 
       val = allocate_value (type);
+      gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+      int elt_len = TYPE_LENGTH (eltype);
+
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
-	  tmp = value_complement (value_subscript (arg1, i));
-	  memcpy ((value_contents_writeable (val).data ()
-		   + i * TYPE_LENGTH (eltype)),
-		  value_contents_all (tmp).data (), TYPE_LENGTH (eltype));
+	  value *tmp = value_complement (value_subscript (arg1, i));
+	  copy (value_contents_all (tmp),
+		val_contents.slice (i * elt_len, elt_len));
 	}
     }
   else if (type->code () == TYPE_CODE_COMPLEX)

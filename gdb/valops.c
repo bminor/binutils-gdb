@@ -954,18 +954,19 @@ value_one (struct type *type)
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type1));
       int i;
       LONGEST low_bound, high_bound;
-      struct value *tmp;
 
       if (!get_array_bounds (type1, &low_bound, &high_bound))
 	error (_("Could not determine the vector bounds"));
 
       val = allocate_value (type);
+      gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
+      int elt_len = TYPE_LENGTH (eltype);
+
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
-	  tmp = value_one (eltype);
-	  memcpy ((value_contents_writeable (val).data ()
-		   + i * TYPE_LENGTH (eltype)),
-		  value_contents_all (tmp).data (), TYPE_LENGTH (eltype));
+	  value *tmp = value_one (eltype);
+	  copy (value_contents_all (tmp),
+		val_contents.slice (i * elt_len, elt_len));
 	}
     }
   else
@@ -1342,8 +1343,7 @@ value_assign (struct value *toval, struct value *fromval)
      implies the returned value is not lazy, even if TOVAL was.  */
   val = value_copy (toval);
   set_value_lazy (val, 0);
-  memcpy (value_contents_raw (val).data (), value_contents (fromval).data (),
-	  TYPE_LENGTH (type));
+  copy (value_contents (fromval), value_contents_raw (val));
 
   /* We copy over the enclosing type and pointed-to offset from FROMVAL
      in the case of pointer types.  For object types, the enclosing type
@@ -4058,10 +4058,13 @@ value_literal_complex (struct value *arg1,
   arg1 = value_cast (real_type, arg1);
   arg2 = value_cast (real_type, arg2);
 
-  memcpy (value_contents_raw (val).data (),
-	  value_contents (arg1).data (), TYPE_LENGTH (real_type));
-  memcpy (value_contents_raw (val).data () + TYPE_LENGTH (real_type),
-	  value_contents (arg2).data (), TYPE_LENGTH (real_type));
+  int len = TYPE_LENGTH (real_type);
+
+  copy (value_contents (arg1),
+	value_contents_raw (val).slice (0, len));
+  copy (value_contents (arg2),
+	value_contents_raw (val).slice (len, len));
+
   return val;
 }
 
@@ -4102,12 +4105,12 @@ cast_into_complex (struct type *type, struct value *val)
       struct type *val_real_type = TYPE_TARGET_TYPE (value_type (val));
       struct value *re_val = allocate_value (val_real_type);
       struct value *im_val = allocate_value (val_real_type);
+      int len = TYPE_LENGTH (val_real_type);
 
-      memcpy (value_contents_raw (re_val).data (),
-	      value_contents (val).data (), TYPE_LENGTH (val_real_type));
-      memcpy (value_contents_raw (im_val).data (),
-	      value_contents (val).data () + TYPE_LENGTH (val_real_type),
-	      TYPE_LENGTH (val_real_type));
+      copy (value_contents (val).slice (0, len),
+	    value_contents_raw (re_val));
+      copy (value_contents (val).slice (len, len),
+	    value_contents_raw (im_val));
 
       return value_literal_complex (re_val, im_val, type);
     }

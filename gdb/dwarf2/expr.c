@@ -1037,8 +1037,8 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
 	      subobj_offset += n - max;
 
-	    memcpy (value_contents_raw (retval).data (),
-		    value_contents_all (val).data () + subobj_offset, len);
+	    copy (value_contents_all (val).slice (subobj_offset, len),
+		  value_contents_raw (retval));
 	  }
 	  break;
 

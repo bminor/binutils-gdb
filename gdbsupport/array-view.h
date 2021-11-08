@@ -19,6 +19,7 @@
 #define COMMON_ARRAY_VIEW_H
 
 #include "traits.h"
+#include <algorithm>
 #include <type_traits>
 
 /* An array_view is an abstraction that provides a non-owning view
@@ -205,6 +206,20 @@ private:
   T *m_array;
   size_type m_size;
 };
+
+/* Copy the contents referenced by the array view SRC to the array view DEST.
+
+   The two array views must have the same length.  */
+
+template <typename U, typename T>
+void copy (gdb::array_view<U> src, gdb::array_view<T> dest)
+{
+  gdb_assert (dest.size () == src.size ());
+  if (dest.data () < src.data ())
+    std::copy (src.begin (), src.end (), dest.begin ());
+  else if (dest.data () > src.data ())
+    std::copy_backward (src.begin (), src.end (), dest.end ());
+}
 
 /* Compare LHS and RHS for (deep) equality.  That is, whether LHS and
    RHS have the same sizes, and whether each pair of elements of LHS

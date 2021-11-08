@@ -546,6 +546,108 @@ run_tests ()
   }
 }
 
+template <typename T>
+void
+run_copy_test ()
+{
+  /* Test non-overlapping copy.  */
+  {
+    const std::vector<T> src_v = {1, 2, 3, 4};
+    std::vector<T> dest_v (4, -1);
+
+    SELF_CHECK (dest_v != src_v);
+    copy (gdb::array_view<const T> (src_v), gdb::array_view<T> (dest_v));
+    SELF_CHECK (dest_v == src_v);
+  }
+
+  /* Test overlapping copy, where the source is before the destination.  */
+  {
+    std::vector<T> vec = {1, 2, 3, 4, 5, 6, 7, 8};
+    gdb::array_view<T> v = vec;
+
+    copy (v.slice (1, 4),
+	  v.slice (2, 4));
+
+    std::vector<T> expected = {1, 2, 2, 3, 4, 5, 7, 8};
+    SELF_CHECK (vec == expected);
+  }
+
+  /* Test overlapping copy, where the source is after the destination.  */
+  {
+    std::vector<T> vec = {1, 2, 3, 4, 5, 6, 7, 8};
+    gdb::array_view<T> v = vec;
+
+    copy (v.slice (2, 4),
+	  v.slice (1, 4));
+
+    std::vector<T> expected = {1, 3, 4, 5, 6, 6, 7, 8};
+    SELF_CHECK (vec == expected);
+  }
+
+  /* Test overlapping copy, where the source is the same as the destination.  */
+  {
+    std::vector<T> vec = {1, 2, 3, 4, 5, 6, 7, 8};
+    gdb::array_view<T> v = vec;
+
+    copy (v.slice (2, 4),
+	  v.slice (2, 4));
+
+    std::vector<T> expected = {1, 2, 3, 4, 5, 6, 7, 8};
+    SELF_CHECK (vec == expected);
+  }
+}
+
+/* Class with a non-trivial copy assignment operator, used to test the
+   array_view copy function.  */
+struct foo
+{
+  /* Can be implicitly constructed from an int, such that we can use the same
+     templated test function to test against array_view<int> and
+     array_view<foo>.  */
+  foo (int n)
+    : n (n)
+  {}
+
+  /* Needed to avoid -Wdeprecated-copy-with-user-provided-copy error with
+     Clang.  */
+  foo (const foo &other) = default;
+
+  void operator= (const foo &other)
+  {
+    this->n = other.n;
+    this->n_assign_op_called++;
+  }
+
+  bool operator==(const foo &other) const
+  {
+    return this->n == other.n;
+  }
+
+  int n;
+
+  /* Number of times the assignment operator has been called.  */
+  static int n_assign_op_called;
+};
+
+int foo::n_assign_op_called = 0;
+
+/* Test the array_view copy free function.  */
+
+static void
+run_copy_tests ()
+{
+  /* Test with a trivial type.  */
+  run_copy_test<int> ();
+
+  /* Test with a non-trivial type.  */
+  foo::n_assign_op_called = 0;
+  run_copy_test<foo> ();
+
+  /* Make sure that for the non-trivial type foo, the assignment operator was
+     called an amount of times that makes sense.  */
+  SELF_CHECK (foo::n_assign_op_called == 12);
+}
+
 } /* namespace array_view_tests */
 } /* namespace selftests */
 
@@ -555,4 +657,6 @@ _initialize_array_view_selftests ()
 {
   selftests::register_test ("array_view",
 			    selftests::array_view_tests::run_tests);
+  selftests::register_test ("array_view-copy",
+			    selftests::array_view_tests::run_copy_tests);
 }
