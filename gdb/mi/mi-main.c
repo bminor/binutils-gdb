@@ -266,7 +266,6 @@ exec_continue (char **argv, int argc)
 {
   prepare_execution_command (current_inferior ()->top_target (), mi_async_p ());
 
-  scoped_disable_commit_resumed disable_commit_resumed ("mi continue");
 
   if (non_stop)
     {
@@ -279,6 +278,8 @@ exec_continue (char **argv, int argc)
       if (current_context->all || current_context->thread_group != -1)
 	{
 	  scoped_restore_current_thread restore_thread;
+	  scoped_disable_commit_resumed disable_commit_resumed
+	    ("MI continue all threads in non-stop");
 	  int pid = 0;
 
 	  if (!current_context->all)
@@ -288,7 +289,9 @@ exec_continue (char **argv, int argc)
 
 	      pid = inf->pid;
 	    }
+
 	  iterate_over_threads (proceed_thread_callback, &pid);
+	  disable_commit_resumed.reset_and_commit ();
 	}
       else
 	{
@@ -313,8 +316,6 @@ exec_continue (char **argv, int argc)
 	  continue_1 (1);
 	}
     }
-
-  disable_commit_resumed.reset_and_commit ();
 }
 
 static void

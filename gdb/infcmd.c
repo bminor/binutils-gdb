@@ -603,6 +603,8 @@ continue_1 (int all_threads)
       /* Backup current thread and selected frame and restore on scope
 	 exit.  */
       scoped_restore_current_thread restore_thread;
+      scoped_disable_commit_resumed disable_commit_resumed
+	("continue all threads in non-stop");
 
       iterate_over_threads (proceed_thread_callback, NULL);
 
@@ -623,6 +625,8 @@ continue_1 (int all_threads)
 	  */
 	  target_terminal::inferior ();
 	}
+
+      disable_commit_resumed.reset_and_commit ();
     }
   else
     {
