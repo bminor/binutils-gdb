@@ -1934,7 +1934,8 @@ dump_relocations (Filedata *          filedata,
 
 		  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION)
 		    {
-		      if (psym->st_shndx < filedata->file_header.e_shnum)
+		      if (psym->st_shndx < filedata->file_header.e_shnum
+			  && filedata->section_headers != NULL)
 			sec_name = section_name_print (filedata,
 						       filedata->section_headers
 						       + psym->st_shndx);
@@ -12861,6 +12862,7 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
 
   if (ELF_ST_TYPE (psym->st_info) == STT_SECTION
       && psym->st_shndx < filedata->file_header.e_shnum
+      && filedata->section_headers != NULL
       && psym->st_name == 0)
     {
       is_valid
@@ -18262,7 +18264,6 @@ process_mips_specific (Filedata * filedata)
       Elf_External_Options * eopt;
       size_t offset;
       int cnt;
-      sect = filedata->section_headers;
 
       /* Find the section header so that we get the size.  */
       sect = find_section_by_type (filedata, SHT_MIPS_OPTIONS);
