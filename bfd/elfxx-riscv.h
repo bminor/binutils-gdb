@@ -72,7 +72,7 @@ typedef struct
   void (*error_handler) (const char *,
 			 ...) ATTRIBUTE_PRINTF_1;
   unsigned *xlen;
-  enum riscv_spec_class isa_spec;
+  enum riscv_spec_class *isa_spec;
   bool check_unknown_prefixed_ext;
 } riscv_parse_subset_t;
 
@@ -94,6 +94,12 @@ riscv_compare_subsets (const char *, const char *);
 
 extern bool
 riscv_update_subset (riscv_parse_subset_t *, const char *, bool);
+
+extern bool
+riscv_subset_supports (riscv_parse_subset_t *, const char *);
+
+extern bool
+riscv_multi_subset_supports (riscv_parse_subset_t *, enum riscv_insn_class);
 
 extern void
 bfd_elf32_riscv_set_data_segment_info (struct bfd_link_info *, int *);

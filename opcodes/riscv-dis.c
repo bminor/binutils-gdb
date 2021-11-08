@@ -27,12 +27,25 @@
 #include "opintl.h"
 #include "elf-bfd.h"
 #include "elf/riscv.h"
-#include "cpu-riscv.h"
+#include "elfxx-riscv.h"
 
 #include <stdint.h>
 #include <ctype.h>
 
+static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
 static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+
+unsigned xlen = 0;
+
+static riscv_subset_list_t riscv_subsets;
+static riscv_parse_subset_t riscv_rps_dis =
+{
+  &riscv_subsets,	/* subset_list.  */
+  opcodes_error_handler,/* error_handler.  */
+  &xlen,		/* xlen.  */
+  &default_isa_spec,	/* isa_spec.  */
+  false,		/* check_unknown_prefixed_ext.  */
+};
 
 struct riscv_private_data
 {
@@ -502,8 +515,6 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   op = riscv_hash[OP_HASH_IDX (word)];
   if (op != NULL)
     {
-      unsigned xlen = 0;
-
       /* If XLEN is not known, get its value from the ELF class.  */
       if (info->mach == bfd_mach_riscv64)
 	xlen = 64;
@@ -525,6 +536,9 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 	    continue;
 	  /* Is this instruction restricted to a certain value of XLEN?  */
 	  if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
+	    continue;
+
+	  if (!riscv_multi_subset_supports (&riscv_rps_dis, op->insn_class))
 	    continue;
 
 	  /* It's a match.  */
@@ -852,11 +866,13 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 disassembler_ftype
 riscv_get_disassembler (bfd *abfd)
 {
+  const char *default_arch = "rv64gc";
+
   if (abfd)
     {
       const struct elf_backend_data *ebd = get_elf_backend_data (abfd);
       if (ebd)
-        {
+	{
 	  const char *sec_name = ebd->obj_attrs_section;
 	  if (bfd_get_section_by_name (abfd, sec_name) != NULL)
 	    {
@@ -868,10 +884,14 @@ riscv_get_disassembler (bfd *abfd)
 						      attr[Tag_b].i,
 						      attr[Tag_c].i,
 						      &default_priv_spec);
+	      default_arch = attr[Tag_RISCV_arch].s;
 	    }
-        }
+	}
     }
-   return print_insn_riscv;
+
+  riscv_release_subset_list (&riscv_subsets);
+  riscv_parse_subset (&riscv_rps_dis, default_arch);
+  return print_insn_riscv;
 }
 
 /* Prevent use of the fake labels that are generated as part of the DWARF

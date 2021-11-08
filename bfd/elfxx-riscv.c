@@ -1418,12 +1418,14 @@ riscv_add_subset (riscv_subset_list_t *subset_list,
 /* Get the default versions from the riscv_supported_*ext tables.  */
 
 static void
-riscv_get_default_ext_version (enum riscv_spec_class default_isa_spec,
+riscv_get_default_ext_version (enum riscv_spec_class *default_isa_spec,
 			       const char *name,
 			       int *major_version,
 			       int *minor_version)
 {
-  if (name == NULL || default_isa_spec == ISA_SPEC_CLASS_NONE)
+  if (name == NULL
+      || default_isa_spec == NULL
+      || *default_isa_spec == ISA_SPEC_CLASS_NONE)
     return;
 
   struct riscv_supported_ext *table = NULL;
@@ -1445,7 +1447,7 @@ riscv_get_default_ext_version (enum riscv_spec_class default_isa_spec,
     {
       if (strcmp (table[i].name, name) == 0
 	  && (table[i].isa_spec_class == ISA_SPEC_CLASS_DRAFT
-	      || table[i].isa_spec_class == default_isa_spec))
+	      || table[i].isa_spec_class == *default_isa_spec))
 	{
 	  *major_version = table[i].major_version;
 	  *minor_version = table[i].minor_version;
@@ -2094,4 +2096,65 @@ riscv_update_subset (riscv_parse_subset_t *rps,
 
   riscv_parse_add_implicit_subsets (rps);
   return riscv_parse_check_conflicts (rps);
+}
+
+/* Check if the FEATURE subset is supported or not in the subset list.
+   Return true if it is supported; Otherwise, return false.  */
+
+bool
+riscv_subset_supports (riscv_parse_subset_t *rps,
+		       const char *feature)
+{
+  struct riscv_subset_t *subset;
+  return riscv_lookup_subset (rps->subset_list, feature, &subset);
+}
+
+/* Each instuction is belonged to an instruction class INSN_CLASS_*.
+   Call riscv_subset_supports to make sure if the instuction is valid.  */
+
+bool
+riscv_multi_subset_supports (riscv_parse_subset_t *rps,
+			     enum riscv_insn_class insn_class)
+{
+  switch (insn_class)
+    {
+    case INSN_CLASS_I:
+      return riscv_subset_supports (rps, "i");
+    case INSN_CLASS_ZICSR:
+      return riscv_subset_supports (rps, "zicsr");
+    case INSN_CLASS_ZIFENCEI:
+      return riscv_subset_supports (rps, "zifencei");
+    case INSN_CLASS_ZIHINTPAUSE:
+      return riscv_subset_supports (rps, "zihintpause");
+    case INSN_CLASS_M:
+      return riscv_subset_supports (rps, "m");
+    case INSN_CLASS_A:
+      return riscv_subset_supports (rps, "a");
+    case INSN_CLASS_F:
+      return riscv_subset_supports (rps, "f");
+    case INSN_CLASS_D:
+      return riscv_subset_supports (rps, "d");
+    case INSN_CLASS_Q:
+      return riscv_subset_supports (rps, "q");
+    case INSN_CLASS_C:
+      return riscv_subset_supports (rps, "c");
+    case INSN_CLASS_F_AND_C:
+      return (riscv_subset_supports (rps, "f")
+	      && riscv_subset_supports (rps, "c"));
+    case INSN_CLASS_D_AND_C:
+      return (riscv_subset_supports (rps, "d")
+	      && riscv_subset_supports (rps, "c"));
+    case INSN_CLASS_ZBA:
+      return riscv_subset_supports (rps, "zba");
+    case INSN_CLASS_ZBB:
+      return riscv_subset_supports (rps, "zbb");
+    case INSN_CLASS_ZBC:
+      return riscv_subset_supports (rps, "zbc");
+    case INSN_CLASS_ZBS:
+      return riscv_subset_supports (rps, "zbs");
+    default:
+      rps->error_handler
+        (_("internal: unreachable INSN_CLASS_*"));
+      return false;
+    }
 }

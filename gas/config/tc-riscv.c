@@ -234,77 +234,20 @@ riscv_set_rvc (bool rvc_value)
    -march option, the elf architecture attributes, and the --with-arch
    configure option.  */
 static riscv_subset_list_t riscv_subsets;
-
-/* Check if the FEATURE subset is supported or not in the subset list.
-   Return true if it is supported; Otherwise, return false.  */
-
-static bool
-riscv_subset_supports (const char *feature)
+static riscv_parse_subset_t riscv_rps_as =
 {
-  struct riscv_subset_t *subset;
-  return riscv_lookup_subset (&riscv_subsets, feature, &subset);
-}
-
-/* Each instuction is belonged to an instruction class INSN_CLASS_*.
-   Call riscv_subset_supports to make sure if the instuction is valid.  */
-
-static bool
-riscv_multi_subset_supports (enum riscv_insn_class insn_class)
-{
-  switch (insn_class)
-    {
-    case INSN_CLASS_I:
-      return riscv_subset_supports ("i");
-    case INSN_CLASS_ZICSR:
-      return riscv_subset_supports ("zicsr");
-    case INSN_CLASS_ZIFENCEI:
-      return riscv_subset_supports ("zifencei");
-    case INSN_CLASS_ZIHINTPAUSE:
-      return riscv_subset_supports ("zihintpause");
-    case INSN_CLASS_M:
-      return riscv_subset_supports ("m");
-    case INSN_CLASS_A:
-      return riscv_subset_supports ("a");
-    case INSN_CLASS_F:
-      return riscv_subset_supports ("f");
-    case INSN_CLASS_D:
-      return riscv_subset_supports ("d");
-    case INSN_CLASS_Q:
-      return riscv_subset_supports ("q");
-    case INSN_CLASS_C:
-      return riscv_subset_supports ("c");
-    case INSN_CLASS_F_AND_C:
-      return (riscv_subset_supports ("f")
-	      && riscv_subset_supports ("c"));
-    case INSN_CLASS_D_AND_C:
-      return (riscv_subset_supports ("d")
-	      && riscv_subset_supports ("c"));
-    case INSN_CLASS_ZBA:
-      return riscv_subset_supports ("zba");
-    case INSN_CLASS_ZBB:
-      return riscv_subset_supports ("zbb");
-    case INSN_CLASS_ZBC:
-      return riscv_subset_supports ("zbc");
-    case INSN_CLASS_ZBS:
-      return riscv_subset_supports ("zbs");
-    default:
-      as_fatal ("internal: unreachable");
-      return false;
-    }
-}
+  &riscv_subsets,	/* subset_list.  */
+  as_bad,		/* error_handler.  */
+  &xlen,		/* xlen.  */
+  &default_isa_spec,	/* isa_spec.  */
+  true,			/* check_unknown_prefixed_ext.  */
+};
 
 /* Set which ISA and extensions are available.  */
 
 static void
 riscv_set_arch (const char *s)
 {
-  riscv_parse_subset_t rps;
-  rps.subset_list = &riscv_subsets;
-  rps.error_handler = as_bad;
-  rps.xlen = &xlen;
-  rps.isa_spec = default_isa_spec;
-  rps.check_unknown_prefixed_ext = true;
-
   if (s != NULL && strcmp (s, "") == 0)
     {
       as_bad (_("the architecture string of -march and elf architecture "
@@ -313,10 +256,10 @@ riscv_set_arch (const char *s)
     }
 
   riscv_release_subset_list (&riscv_subsets);
-  riscv_parse_subset (&rps, s);
+  riscv_parse_subset (&riscv_rps_as, s);
 
   riscv_set_rvc (false);
-  if (riscv_subset_supports ("c"))
+  if (riscv_subset_supports (&riscv_rps_as, "c"))
     riscv_set_rvc (true);
 }
 
@@ -341,11 +284,11 @@ riscv_set_abi_by_arch (void)
 {
   if (!explicit_mabi)
     {
-      if (riscv_subset_supports ("q"))
+      if (riscv_subset_supports (&riscv_rps_as, "q"))
 	riscv_set_abi (xlen, FLOAT_ABI_QUAD, false);
-      else if (riscv_subset_supports ("d"))
+      else if (riscv_subset_supports (&riscv_rps_as, "d"))
 	riscv_set_abi (xlen, FLOAT_ABI_DOUBLE, false);
-      else if (riscv_subset_supports ("e"))
+      else if (riscv_subset_supports (&riscv_rps_as, "e"))
 	riscv_set_abi (xlen, FLOAT_ABI_SOFT, true);
       else
 	riscv_set_abi (xlen, FLOAT_ABI_SOFT, false);
@@ -358,19 +301,19 @@ riscv_set_abi_by_arch (void)
       else if (abi_xlen < xlen)
 	as_bad ("%d-bit ABI not yet supported on %d-bit ISA", abi_xlen, xlen);
 
-      if (riscv_subset_supports ("e") && !rve_abi)
+      if (riscv_subset_supports (&riscv_rps_as, "e") && !rve_abi)
 	as_bad ("only the ilp32e ABI is supported for e extension");
 
       if (float_abi == FLOAT_ABI_SINGLE
-	  && !riscv_subset_supports ("f"))
+	  && !riscv_subset_supports (&riscv_rps_as, "f"))
 	as_bad ("ilp32f/lp64f ABI can't be used when f extension "
 		"isn't supported");
       else if (float_abi == FLOAT_ABI_DOUBLE
-	       && !riscv_subset_supports ("d"))
+	       && !riscv_subset_supports (&riscv_rps_as, "d"))
 	as_bad ("ilp32d/lp64d ABI can't be used when d extension "
 		"isn't supported");
       else if (float_abi == FLOAT_ABI_QUAD
-	       && !riscv_subset_supports ("q"))
+	       && !riscv_subset_supports (&riscv_rps_as, "q"))
 	as_bad ("ilp32q/lp64q ABI can't be used when q extension "
 		"isn't supported");
     }
@@ -923,13 +866,13 @@ riscv_csr_address (const char *csr_name,
   switch (csr_class)
     {
     case CSR_CLASS_I:
-      result = riscv_subset_supports ("i");
+      result = riscv_subset_supports (&riscv_rps_as, "i");
       break;
     case CSR_CLASS_I_32:
-      result = (xlen == 32 && riscv_subset_supports ("i"));
+      result = (xlen == 32 && riscv_subset_supports (&riscv_rps_as, "i"));
       break;
     case CSR_CLASS_F:
-      result = riscv_subset_supports ("f");
+      result = riscv_subset_supports (&riscv_rps_as, "f");
       need_check_version = false;
       break;
     case CSR_CLASS_DEBUG:
@@ -995,7 +938,7 @@ reg_lookup_internal (const char *s, enum reg_class class)
   if (r == NULL || DECODE_REG_CLASS (r) != class)
     return -1;
 
-  if (riscv_subset_supports ("e")
+  if (riscv_subset_supports (&riscv_rps_as, "e")
       && class == RCLASS_GPR
       && DECODE_REG_NUM (r) > 15)
     return -1;
@@ -2061,7 +2004,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
       if ((insn->xlen_requirement != 0) && (xlen != insn->xlen_requirement))
 	continue;
 
-      if (!riscv_multi_subset_supports (insn->insn_class))
+      if (!riscv_multi_subset_supports (&riscv_rps_as, insn->insn_class))
 	continue;
 
       create_insn (ip, insn);
@@ -3364,21 +3307,14 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
   ch = *input_line_pointer;
   *input_line_pointer = '\0';
 
-  riscv_parse_subset_t rps;
-  rps.subset_list = &riscv_subsets;
-  rps.error_handler = as_bad;
-  rps.xlen = &xlen;
-  rps.isa_spec = default_isa_spec;
-  rps.check_unknown_prefixed_ext = true;
-
   if (strcmp (name, "rvc") == 0)
     {
-      riscv_update_subset (&rps, "c", false);
+      riscv_update_subset (&riscv_rps_as, "c", false);
       riscv_set_rvc (true);
     }
   else if (strcmp (name, "norvc") == 0)
     {
-      riscv_update_subset (&rps, "c", true);
+      riscv_update_subset (&riscv_rps_as, "c", true);
       riscv_set_rvc (false);
     }
   else if (strcmp (name, "pic") == 0)

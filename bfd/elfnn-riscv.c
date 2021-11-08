@@ -3574,37 +3574,22 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
   merged_subsets.head = NULL;
   merged_subsets.tail = NULL;
 
-  riscv_parse_subset_t rpe_in;
-  riscv_parse_subset_t rpe_out;
-
-  /* Only assembler needs to check the default version of ISA, so just set
-     the rpe_in.get_default_version and rpe_out.get_default_version to NULL.  */
-  rpe_in.subset_list = &in_subsets;
-  rpe_in.error_handler = _bfd_error_handler;
-  rpe_in.xlen = &xlen_in;
-  rpe_in.isa_spec = ISA_SPEC_CLASS_NONE;
-  rpe_in.check_unknown_prefixed_ext = false;
-
-  rpe_out.subset_list = &out_subsets;
-  rpe_out.error_handler = _bfd_error_handler;
-  rpe_out.xlen = &xlen_out;
-  rpe_out.isa_spec = ISA_SPEC_CLASS_NONE;
-  rpe_out.check_unknown_prefixed_ext = false;
+  riscv_parse_subset_t riscv_rps_ld_in =
+    {&in_subsets, _bfd_error_handler, &xlen_in, NULL, false};
+  riscv_parse_subset_t riscv_rps_ld_out =
+    {&out_subsets, _bfd_error_handler, &xlen_out, NULL, false};
 
   if (in_arch == NULL && out_arch == NULL)
     return NULL;
-
   if (in_arch == NULL && out_arch != NULL)
     return out_arch;
-
   if (in_arch != NULL && out_arch == NULL)
     return in_arch;
 
   /* Parse subset from ISA string.  */
-  if (!riscv_parse_subset (&rpe_in, in_arch))
+  if (!riscv_parse_subset (&riscv_rps_ld_in, in_arch))
     return NULL;
-
-  if (!riscv_parse_subset (&rpe_out, out_arch))
+  if (!riscv_parse_subset (&riscv_rps_ld_out, out_arch))
     return NULL;
 
   /* Checking XLEN.  */
