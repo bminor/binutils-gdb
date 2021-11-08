@@ -82,7 +82,7 @@ mi_cmd_info_gdb_mi_command (const char *command, char **argv, int argc)
   if (cmd_name[0] == '-')
     cmd_name++;
 
-  cmd = mi_lookup (cmd_name);
+  cmd = mi_cmd_lookup (cmd_name);
 
   ui_out_emit_tuple tuple_emitter (uiout, "command");
   uiout->field_string ("exists", cmd != NULL ? "true" : "false");

@@ -272,7 +272,7 @@ mi_parse (const char *cmd, char **token)
   }
 
   /* Find the command in the MI table.  */
-  parse->cmd = mi_lookup (parse->command);
+  parse->cmd = mi_cmd_lookup (parse->command);
   if (parse->cmd == NULL)
     throw_error (UNDEFINED_COMMAND_ERROR,
 		 _("Undefined MI command: %s"), parse->command);

@@ -164,9 +164,10 @@ struct mi_cmd
   int *suppress_notification;
 };
 
-/* Lookup a command in the MI command table.  */
+/* Lookup a command in the MI command table, returns nullptr if COMMAND is
+   not found.  */
 
-extern struct mi_cmd *mi_lookup (const char *command);
+extern struct mi_cmd *mi_cmd_lookup (const char *command);
 
 /* Debug flag */
 extern int mi_debug_p;

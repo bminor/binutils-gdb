@@ -211,9 +211,10 @@ enum
     MI_TABLE_SIZE = 227
   };
 
-/* Exported function used to obtain info from the table.  */
+/* See mi-cmds.h.  */
+
 struct mi_cmd *
-mi_lookup (const char *command)
+mi_cmd_lookup (const char *command)
 {
   return *lookup_table (command);
 }
