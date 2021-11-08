@@ -310,7 +310,7 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
 static bool
 stopped_by_user_bp_inline_frame (const block *frame_block, bpstat *stop_chain)
 {
-  for (bpstat *s = stop_chain; s != nulltr; s = s->next)
+  for (bpstat *s = stop_chain; s != nullptr; s = s->next)
     {
       struct breakpoint *bpt = s->breakpoint_at;
 
