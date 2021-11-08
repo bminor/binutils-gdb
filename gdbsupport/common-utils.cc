@@ -21,6 +21,7 @@
 #include "common-utils.h"
 #include "host-defs.h"
 #include "safe-ctype.h"
+#include "gdbsupport/gdb-xfree.h"
 
 void *
 xzalloc (size_t size)

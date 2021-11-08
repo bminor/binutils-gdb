@@ -52,22 +52,6 @@
 /* Like xmalloc, but zero the memory.  */
 void *xzalloc (size_t);
 
-template <typename T>
-static void
-xfree (T *ptr)
-{
-  static_assert (IsFreeable<T>::value, "Trying to use xfree with a non-POD \
-data type.  Use operator delete instead.");
-
-  if (ptr != NULL)
-#ifdef GNULIB_NAMESPACE
-    GNULIB_NAMESPACE::free (ptr);	/* ARI: free */
-#else
-    free (ptr);				/* ARI: free */
-#endif
-}
-
-
 /* Like asprintf and vasprintf, but return the string, throw an error
    if no memory.  */
 char *xstrprintf (const char *format, ...) ATTRIBUTE_PRINTF (1, 2);

@@ -21,6 +21,7 @@
 #define COMMON_GDB_UNIQUE_PTR_H
 
 #include <memory>
+#include "gdbsupport/gdb-xfree.h"
 
 namespace gdb
 {
