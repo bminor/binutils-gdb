@@ -90,7 +90,7 @@ int mi_proceeded;
 
 static void mi_cmd_execute (struct mi_parse *parse);
 
-static void mi_execute_cli_command (const char *cmd, int args_p,
+static void mi_execute_cli_command (const char *cmd, bool args_p,
 				    const char *args);
 static void mi_execute_async_cli_command (const char *cli_command,
 					  char **argv, int argc);
@@ -408,7 +408,7 @@ run_one_inferior (inferior *inf, bool start_p)
 {
   const char *run_cmd = start_p ? "start" : "run";
   struct target_ops *run_target = find_run_target ();
-  int async_p = mi_async && target_can_async_p (run_target);
+  bool async_p = mi_async && target_can_async_p (run_target);
 
   if (inf->pid != 0)
     {
@@ -473,7 +473,7 @@ mi_cmd_exec_run (const char *command, char **argv, int argc)
     {
       const char *run_cmd = start_p ? "start" : "run";
       struct target_ops *run_target = find_run_target ();
-      int async_p = mi_async && target_can_async_p (run_target);
+      bool async_p = mi_async && target_can_async_p (run_target);
 
       mi_execute_cli_command (run_cmd, async_p,
 			      async_p ? "&" : NULL);
@@ -2088,8 +2088,9 @@ mi_cmd_execute (struct mi_parse *parse)
       /* FIXME: DELETE THIS. */
       /* The operation is still implemented by a cli command.  */
       /* Must be a synchronous one.  */
-      mi_execute_cli_command (parse->cmd->cli.cmd, parse->cmd->cli.args_p,
-			      parse->args);
+      bool args_p = parse->cmd->cli.args_p != 0;
+      const char *args = args_p ? parse->args : nullptr;
+      mi_execute_cli_command (parse->cmd->cli.cmd, args_p, args);
     }
   else
     {
@@ -2109,18 +2110,21 @@ mi_cmd_execute (struct mi_parse *parse)
    Use only for synchronous commands.  */
 
 void
-mi_execute_cli_command (const char *cmd, int args_p, const char *args)
+mi_execute_cli_command (const char *cmd, bool args_p, const char *args)
 {
-  if (cmd != 0)
+  if (cmd != nullptr)
     {
-      std::string run = cmd;
+      std::string run (cmd);
 
       if (args_p)
 	run = run + " " + args;
+      else
+	gdb_assert (args == nullptr);
+
       if (mi_debug_p)
-	/* FIXME: gdb_???? */
 	fprintf_unfiltered (gdb_stdout, "cli=%s run=%s\n",
 			    cmd, run.c_str ());
+
       execute_command (run.c_str (), 0 /* from_tty */ );
     }
 }
