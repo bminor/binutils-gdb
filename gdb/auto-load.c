@@ -1489,8 +1489,8 @@ void
 _initialize_auto_load ()
 {
   struct cmd_list_element *cmd;
-  char *scripts_directory_help, *gdb_name_help, *python_name_help;
-  char *guile_name_help;
+  gdb::unique_xmalloc_ptr<char> scripts_directory_help, gdb_name_help,
+    python_name_help, guile_name_help;
   const char *suffix;
 
   gdb::observers::new_objfile.attach (auto_load_new_objfile,
@@ -1565,23 +1565,18 @@ having 'set auto-load ... off'.\n\
 Directories listed here need to be present also \
 in the 'set auto-load safe-path'\n\
 option."),
-		  gdb_name_help,
-		  python_name_help ? python_name_help : "",
-		  guile_name_help ? guile_name_help : "");
+		  gdb_name_help.get (),
+		  python_name_help.get () ? python_name_help.get () : "",
+		  guile_name_help.get () ? guile_name_help.get () : "");
 
   add_setshow_optional_filename_cmd ("scripts-directory", class_support,
 				     &auto_load_dir, _("\
 Set the list of directories from which to load auto-loaded scripts."), _("\
 Show the list of directories from which to load auto-loaded scripts."),
-				     scripts_directory_help,
+				     scripts_directory_help.get (),
 				     set_auto_load_dir, show_auto_load_dir,
 				     auto_load_set_cmdlist_get (),
 				     auto_load_show_cmdlist_get ());
-  xfree (scripts_directory_help);
-  xfree (python_name_help);
-  xfree (gdb_name_help);
-  xfree (guile_name_help);
-
   auto_load_safe_path_vec_update ();
   add_setshow_optional_filename_cmd ("safe-path", class_support,
 				     &auto_load_safe_path, _("\

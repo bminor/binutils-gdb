@@ -1919,41 +1919,36 @@ static void
 add_packet_config_cmd (struct packet_config *config, const char *name,
 		       const char *title, int legacy)
 {
-  char *set_doc;
-  char *show_doc;
-  char *cmd_name;
-
   config->name = name;
   config->title = title;
-  set_doc = xstrprintf ("Set use of remote protocol `%s' (%s) packet.",
-			name, title);
-  show_doc = xstrprintf ("Show current use of remote "
-			 "protocol `%s' (%s) packet.",
-			 name, title);
+  gdb::unique_xmalloc_ptr<char> set_doc
+    = xstrprintf ("Set use of remote protocol `%s' (%s) packet.",
+		  name, title);
+  gdb::unique_xmalloc_ptr<char> show_doc
+    = xstrprintf ("Show current use of remote protocol `%s' (%s) packet.",
+		  name, title);
   /* set/show TITLE-packet {auto,on,off} */
-  cmd_name = xstrprintf ("%s-packet", title);
+  gdb::unique_xmalloc_ptr<char> cmd_name = xstrprintf ("%s-packet", title);
   set_show_commands cmds
-    = add_setshow_auto_boolean_cmd (cmd_name, class_obscure,
-				    &config->detect, set_doc,
-				    show_doc, NULL, /* help_doc */
+    = add_setshow_auto_boolean_cmd (cmd_name.release (), class_obscure,
+				    &config->detect, set_doc.get (),
+				    show_doc.get (), NULL, /* help_doc */
 				    NULL,
 				    show_remote_protocol_packet_cmd,
 				    &remote_set_cmdlist, &remote_show_cmdlist);
   config->show_cmd = cmds.show;
 
-  /* The command code copies the documentation strings.  */
-  xfree (set_doc);
-  xfree (show_doc);
-
   /* set/show remote NAME-packet {auto,on,off} -- legacy.  */
   if (legacy)
     {
-      char *legacy_name;
-
-      legacy_name = xstrprintf ("%s-packet", name);
-      add_alias_cmd (legacy_name, cmds.set, class_obscure, 0,
+      /* It's not clear who should take ownership of this string, so, for
+	 now, make it static, and give copies to each of the add_alias_cmd
+	 calls below.  */
+      static gdb::unique_xmalloc_ptr<char> legacy_name
+	= xstrprintf ("%s-packet", name);
+      add_alias_cmd (legacy_name.get (), cmds.set, class_obscure, 0,
 		     &remote_set_cmdlist);
-      add_alias_cmd (legacy_name, cmds.show, class_obscure, 0,
+      add_alias_cmd (legacy_name.get (), cmds.show, class_obscure, 0,
 		     &remote_show_cmdlist);
     }
 }

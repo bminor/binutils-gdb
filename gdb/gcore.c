@@ -136,7 +136,7 @@ gcore_command (const char *args, int from_tty)
   else
     {
       /* Default corefile name is "core.PID".  */
-      corefilename.reset (xstrprintf ("core.%d", inferior_ptid.pid ()));
+      corefilename = xstrprintf ("core.%d", inferior_ptid.pid ());
     }
 
   if (info_verbose)

@@ -534,8 +534,8 @@ add_setshow_cmd_full_erased (const char *name,
 {
   struct cmd_list_element *set;
   struct cmd_list_element *show;
-  char *full_set_doc;
-  char *full_show_doc;
+  gdb::unique_xmalloc_ptr<char> full_set_doc;
+  gdb::unique_xmalloc_ptr<char> full_show_doc;
 
   if (help_doc != NULL)
     {
@@ -544,18 +544,18 @@ add_setshow_cmd_full_erased (const char *name,
     }
   else
     {
-      full_set_doc = xstrdup (set_doc);
-      full_show_doc = xstrdup (show_doc);
+      full_set_doc = make_unique_xstrdup (set_doc);
+      full_show_doc = make_unique_xstrdup (show_doc);
     }
   set = add_set_or_show_cmd (name, set_cmd, theclass, var_type, args,
-			     full_set_doc, set_list);
+			     full_set_doc.release (), set_list);
   set->doc_allocated = 1;
 
   if (set_func != NULL)
     set->func = set_func;
 
   show = add_set_or_show_cmd (name, show_cmd, theclass, var_type, args,
-			      full_show_doc, show_list);
+			      full_show_doc.release (), show_list);
   show->doc_allocated = 1;
   show->show_value_func = show_func;
   /* Disable the default symbol completer.  Doesn't make much sense

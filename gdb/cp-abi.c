@@ -265,7 +265,6 @@ register_cp_abi (struct cp_abi_ops *abi)
 void
 set_cp_abi_as_auto_default (const char *short_name)
 {
-  char *new_longname, *new_doc;
   struct cp_abi_ops *abi = find_cp_abi (short_name);
 
   if (abi == NULL)
@@ -279,12 +278,10 @@ set_cp_abi_as_auto_default (const char *short_name)
   auto_cp_abi = *abi;
 
   auto_cp_abi.shortname = "auto";
-  new_longname = xstrprintf ("currently \"%s\"", abi->shortname);
-  auto_cp_abi.longname = new_longname;
-
-  new_doc = xstrprintf ("Automatically selected; currently \"%s\"",
-	     abi->shortname);
-  auto_cp_abi.doc = new_doc;
+  auto_cp_abi.longname = xstrprintf ("currently \"%s\"",
+				     abi->shortname).release ();
+  auto_cp_abi.doc = xstrprintf ("Automatically selected; currently \"%s\"",
+				abi->shortname).release ();
 
   /* Since we copy the current ABI into current_cp_abi instead of
      using a pointer, if auto is currently the default, we need to

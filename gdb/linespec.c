@@ -1078,11 +1078,12 @@ add_sal_to_sals (struct linespec_state *self,
 	     the time being.  */
 	  if (symname != NULL && sal->line != 0
 	      && self->language->la_language == language_ada)
-	    canonical->suffix = xstrprintf ("%s:%d", symname, sal->line);
+	    canonical->suffix = xstrprintf ("%s:%d", symname,
+					    sal->line).release ();
 	  else if (symname != NULL)
 	    canonical->suffix = xstrdup (symname);
 	  else
-	    canonical->suffix = xstrprintf ("%d", sal->line);
+	    canonical->suffix = xstrprintf ("%d", sal->line).release ();
 	  canonical->symtab = sal->symtab;
 	}
       else

@@ -164,8 +164,8 @@ jit_reader_load_command (const char *args, int from_tty)
     error (_("JIT reader already loaded.  Run jit-reader-unload first."));
 
   if (!IS_ABSOLUTE_PATH (file.get ()))
-    file.reset (xstrprintf ("%s%s%s", jit_reader_dir.c_str (), SLASH_STRING,
-			    file.get ()));
+    file = xstrprintf ("%s%s%s", jit_reader_dir.c_str (),
+		       SLASH_STRING, file.get ());
 
   loaded_jit_reader = jit_reader_load (file.get ());
   reinit_frame_cache ();

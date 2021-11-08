@@ -209,7 +209,7 @@ The flag -q disables the production of these headers and messages.%s"),
 		     prefix, entity_kind, entity_kind, entity_kind,
 		     (document_n_flag ? _("\n\
 By default, the command will include non-debug symbols in the output;\n\
-these can be excluded using the -n flag.") : ""));
+these can be excluded using the -n flag.") : "")).release ();
 }
 
 /* See documentation in cli-utils.h.  */

@@ -727,7 +727,8 @@ xtensa_init_reggroups (void)
   xtensa_vectra_reggroup = reggroup_new ("vectra", USER_REGGROUP);
 
   for (i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
-    xtensa_cp[i] = reggroup_new (xstrprintf ("cp%d", i), USER_REGGROUP);
+    xtensa_cp[i] = reggroup_new (xstrprintf ("cp%d", i).release (),
+				 USER_REGGROUP);
 }
 
 static void

@@ -943,7 +943,6 @@ edit_command (const char *arg, int from_tty)
   struct symtab_and_line sal;
   struct symbol *sym;
   const char *editor;
-  char *p;
   const char *fn;
 
   /* Pull in the current default source line if necessary.  */
@@ -1032,9 +1031,9 @@ edit_command (const char *arg, int from_tty)
 
   /* Quote the file name, in case it has whitespace or other special
      characters.  */
-  p = xstrprintf ("%s +%d \"%s\"", editor, sal.line, fn);
-  shell_escape (p, from_tty);
-  xfree (p);
+  gdb::unique_xmalloc_ptr<char> p
+    = xstrprintf ("%s +%d \"%s\"", editor, sal.line, fn);
+  shell_escape (p.get (), from_tty);
 }
 
 /* The options for the "pipe" command.  */
@@ -2730,7 +2729,7 @@ Usage: source [-s] [-v] FILE\n\
 -v: each command in FILE is echoed as it is executed.\n\
 \n\
 Note that the file \"%s\" is read automatically in this way\n\
-when GDB is started."), GDBINIT);
+when GDB is started."), GDBINIT).release ();
   c = add_cmd ("source", class_support, source_command,
 	       source_help_text, &cmdlist);
   set_cmd_completer (c, filename_completer);

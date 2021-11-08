@@ -2809,7 +2809,7 @@ all_tracepoint_actions (struct breakpoint *t)
   if (!default_collect.empty ())
     {
       gdb::unique_xmalloc_ptr<char> default_collect_line
-	(xstrprintf ("collect %s", default_collect.c_str ()));
+	= xstrprintf ("collect %s", default_collect.c_str ());
 
       validate_actionline (default_collect_line.get (), t);
       actions.reset (new struct command_line (simple_control,

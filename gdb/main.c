@@ -702,7 +702,7 @@ captured_main_1 (struct captured_main_args *context)
 
   /* Prefix warning messages with the command name.  */
   gdb::unique_xmalloc_ptr<char> tmp_warn_preprint
-    (xstrprintf ("%s: warning: ", gdb_program_name));
+    = xstrprintf ("%s: warning: ", gdb_program_name);
   warning_pre_print = tmp_warn_preprint.get ();
 
   current_directory = getcwd (NULL, 0);

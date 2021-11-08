@@ -32,19 +32,18 @@ xzalloc (size_t size)
 /* Like asprintf/vasprintf but get an internal_error if the call
    fails. */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 xstrprintf (const char *format, ...)
 {
-  char *ret;
   va_list args;
 
   va_start (args, format);
-  ret = xstrvprintf (format, args);
+  gdb::unique_xmalloc_ptr<char> ret = xstrvprintf (format, args);
   va_end (args);
   return ret;
 }
 
-char *
+gdb::unique_xmalloc_ptr<char>
 xstrvprintf (const char *format, va_list ap)
 {
   char *ret = NULL;
@@ -56,7 +55,7 @@ xstrvprintf (const char *format, va_list ap)
      happen, but just to be sure.  */
   if (ret == NULL || status < 0)
     internal_error (__FILE__, __LINE__, _("vasprintf call failed"));
-  return ret;
+  return gdb::unique_xmalloc_ptr<char> (ret);
 }
 
 int

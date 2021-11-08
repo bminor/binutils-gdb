@@ -887,15 +887,15 @@ void
 add_deprecated_target_alias (const target_info &tinfo, const char *alias)
 {
   struct cmd_list_element *c;
-  char *alt;
 
   /* If we use add_alias_cmd, here, we do not get the deprecated warning,
      see PR cli/15104.  */
   c = add_cmd (alias, no_class, tinfo.doc, &targetlist);
   c->func = open_target;
   c->set_context ((void *) &tinfo);
-  alt = xstrprintf ("target %s", tinfo.shortname);
-  deprecate_cmd (c, alt);
+  gdb::unique_xmalloc_ptr<char> alt
+    = xstrprintf ("target %s", tinfo.shortname);
+  deprecate_cmd (c, alt.release ());
 }
 
 /* Stub functions */

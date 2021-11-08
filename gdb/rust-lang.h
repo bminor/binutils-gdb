@@ -113,9 +113,8 @@ public:
   {
     type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
     std::string name = type_to_string (type);
-    return gdb::unique_xmalloc_ptr<char>
-      (xstrprintf ("*(%s as *mut %s)", core_addr_to_string (addr),
-		   name.c_str ()));
+    return xstrprintf ("*(%s as *mut %s)", core_addr_to_string (addr),
+		       name.c_str ());
   }
 
   /* See language.h.  */

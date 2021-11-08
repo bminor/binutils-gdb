@@ -182,11 +182,8 @@ new_variant (void)
      in the G packet.  If we need more in the future, we'll add them
      elsewhere.  */
   for (r = acc0_regnum; r <= acc7_regnum; r++)
-    {
-      char *buf;
-      buf = xstrprintf ("acc%d", r - acc0_regnum);
-      var->register_names[r] = buf;
-    }
+    var->register_names[r]
+      = xstrprintf ("acc%d", r - acc0_regnum).release ();
 
   /* accg0 - accg7: These are one byte registers.  The remote protocol
      provides the raw values packed four into a slot.  accg0123 and
@@ -195,11 +192,8 @@ new_variant (void)
      likely not want to see these raw values.  */
 
   for (r = accg0_regnum; r <= accg7_regnum; r++)
-    {
-      char *buf;
-      buf = xstrprintf ("accg%d", r - accg0_regnum);
-      var->register_names[r] = buf;
-    }
+    var->register_names[r]
+      = xstrprintf ("accg%d", r - accg0_regnum).release ();
 
   /* msr0 and msr1.  */
 

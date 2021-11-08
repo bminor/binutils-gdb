@@ -650,7 +650,7 @@ complete_skip_number (cmd_list_element *cmd,
 
   for (const skiplist_entry &entry : skiplist_entries)
     {
-      gdb::unique_xmalloc_ptr<char> name (xstrprintf ("%d", entry.number ()));
+      gdb::unique_xmalloc_ptr<char> name = xstrprintf ("%d", entry.number ());
       if (strncmp (word, name.get (), word_len) == 0)
 	completer.add_completion (std::move (name));
     }

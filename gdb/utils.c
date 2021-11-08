@@ -534,10 +534,10 @@ add_internal_problem_command (struct internal_problem *problem)
      set_doc and show_doc in this function.  */
   const char *set_doc
     = xstrprintf (_("Configure what GDB does when %s is detected."),
-		  problem->name);
+		  problem->name).release ();
   const char *show_doc
     = xstrprintf (_("Show what GDB does when %s is detected."),
-		  problem->name);
+		  problem->name).release ();
 
   add_setshow_prefix_cmd (problem->name, class_maintenance,
 			  set_doc, show_doc, set_cmd_list, show_cmd_list,

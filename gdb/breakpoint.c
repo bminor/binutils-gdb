@@ -8728,7 +8728,7 @@ static void
 update_dprintf_command_list (struct breakpoint *b)
 {
   const char *dprintf_args = b->extra_string.get ();
-  char *printf_line = NULL;
+  gdb::unique_xmalloc_ptr<char> printf_line = nullptr;
 
   if (!dprintf_args)
     return;
@@ -8779,7 +8779,7 @@ update_dprintf_command_list (struct breakpoint *b)
 
   /* Manufacture a printf sequence.  */
   struct command_line *printf_cmd_line
-    = new struct command_line (simple_control, printf_line);
+    = new struct command_line (simple_control, printf_line.release ());
   breakpoint_set_commands (b, counted_command_line (printf_cmd_line,
 						    command_lines_deleter ()));
 }
@@ -10798,9 +10798,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
       w->exp_string_reparse
 	= current_language->watch_location_expression (t, addr);
 
-      w->exp_string.reset (xstrprintf ("-location %.*s",
-				       (int) (exp_end - exp_start),
-				       exp_start));
+      w->exp_string = xstrprintf ("-location %.*s",
+				  (int) (exp_end - exp_start), exp_start);
     }
   else
     w->exp_string.reset (savestring (exp_start, exp_end - exp_start));

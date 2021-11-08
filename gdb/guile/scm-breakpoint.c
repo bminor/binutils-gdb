@@ -968,7 +968,7 @@ gdbscm_set_breakpoint_stop_x (SCM self, SCM newvalue)
 	= xstrprintf (_("Only one stop condition allowed.  There is"
 			" currently a %s stop condition defined for"
 			" this breakpoint."),
-		      ext_lang_capitalized_name (extlang));
+		      ext_lang_capitalized_name (extlang)).release ();
 
       scm_dynwind_begin ((scm_t_dynwind_flags) 0);
       gdbscm_dynwind_xfree (error_text);

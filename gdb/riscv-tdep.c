@@ -566,8 +566,8 @@ private:
     for (auto &reg : m_registers)
       {
 	int csr_num = reg.regnum - RISCV_FIRST_CSR_REGNUM;
-	const char *alias = xstrprintf ("csr%d", csr_num);
-	reg.names.push_back (alias);
+	gdb::unique_xmalloc_ptr<char> alias = xstrprintf ("csr%d", csr_num);
+	reg.names.push_back (alias.release ());
       }
   }
 };

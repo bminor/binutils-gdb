@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include "gdbsupport/byte-vector.h"
+#include "gdbsupport/gdb_unique_ptr.h"
 
 #include "poison.h"
 
@@ -54,8 +55,9 @@ void *xzalloc (size_t);
 
 /* Like asprintf and vasprintf, but return the string, throw an error
    if no memory.  */
-char *xstrprintf (const char *format, ...) ATTRIBUTE_PRINTF (1, 2);
-char *xstrvprintf (const char *format, va_list ap)
+gdb::unique_xmalloc_ptr<char> xstrprintf (const char *format, ...)
+     ATTRIBUTE_PRINTF (1, 2);
+gdb::unique_xmalloc_ptr<char> xstrvprintf (const char *format, va_list ap)
      ATTRIBUTE_PRINTF (1, 0);
 
 /* Like snprintf, but throw an error if the output buffer is too small.  */

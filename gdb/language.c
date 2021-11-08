@@ -602,8 +602,7 @@ language_defn::watch_location_expression (struct type *type,
   /* Generates an expression that assumes a C like syntax is valid.  */
   type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
   std::string name = type_to_string (type);
-  return gdb::unique_xmalloc_ptr<char>
-    (xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr)));
+  return xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr));
 }
 
 /* See language.h.  */

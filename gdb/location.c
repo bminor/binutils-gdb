@@ -415,9 +415,12 @@ event_location_to_string (struct event_location *location)
 	  break;
 
 	case ADDRESS_LOCATION:
-	  EL_STRING (location)
-	    = xstrprintf ("*%s",
-			  core_addr_to_string (EL_ADDRESS (location)));
+	  {
+	    const char *addr_string
+	      = core_addr_to_string (EL_ADDRESS (location));
+	    EL_STRING (location)
+	      = xstrprintf ("*%s", addr_string).release ();
+	  }
 	  break;
 
 	case EXPLICIT_LOCATION:

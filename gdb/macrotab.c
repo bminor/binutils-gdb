@@ -893,7 +893,7 @@ fixup_definition (const char *filename, int line, struct macro_definition *def)
 	}
       else if (def->argc == macro_LINE)
 	{
-	  saved_expansion.reset (xstrprintf ("%d", line));
+	  saved_expansion = xstrprintf ("%d", line);
 	  def->replacement = saved_expansion.get ();
 	}
     }

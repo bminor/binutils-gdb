@@ -48,7 +48,7 @@ env_execute_cli_command (const char *cmd, const char *args)
       gdb::unique_xmalloc_ptr<char> run;
 
       if (args != NULL)
-	run.reset (xstrprintf ("%s %s", cmd, args));
+	run = xstrprintf ("%s %s", cmd, args);
       else
 	run.reset (xstrdup (cmd));
       execute_command ( /*ui */ run.get (), 0 /*from_tty */ );

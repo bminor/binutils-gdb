@@ -781,7 +781,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   if (lineobj != NULL)
     {
       if (PyInt_Check (lineobj))
-	line.reset (xstrprintf ("%ld", PyInt_AsLong (lineobj)));
+	line = xstrprintf ("%ld", PyInt_AsLong (lineobj));
       else if (PyString_Check (lineobj))
 	line = python_string_to_host_string (lineobj);
       else
