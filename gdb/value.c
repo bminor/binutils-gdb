@@ -1164,7 +1164,7 @@ value_contents_all_raw (struct value *value)
 {
   allocate_value_contents (value);
 
-  ULONGEST length = TYPE_LENGTH (value_type (value));
+  ULONGEST length = TYPE_LENGTH (value_enclosing_type (value));
   return gdb::make_array_view (value->contents.get (), length);
 }
 
@@ -1250,7 +1250,7 @@ value_contents_for_printing (struct value *value)
   if (value->lazy)
     value_fetch_lazy (value);
 
-  ULONGEST length = TYPE_LENGTH (value_type (value));
+  ULONGEST length = TYPE_LENGTH (value_enclosing_type (value));
   return gdb::make_array_view (value->contents.get (), length);
 }
 
@@ -1259,7 +1259,7 @@ value_contents_for_printing_const (const struct value *value)
 {
   gdb_assert (!value->lazy);
 
-  ULONGEST length = TYPE_LENGTH (value_type (value));
+  ULONGEST length = TYPE_LENGTH (value_enclosing_type (value));
   return gdb::make_array_view (value->contents.get (), length);
 }
 
