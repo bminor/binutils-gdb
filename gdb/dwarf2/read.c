@@ -1450,7 +1450,7 @@ static int partial_die_eq (const void *item_lhs, const void *item_rhs);
 
 static struct dwarf2_per_cu_data *dwarf2_find_containing_comp_unit
   (sect_offset sect_off, unsigned int offset_in_dwz,
-   dwarf2_per_objfile *per_objfile);
+   dwarf2_per_bfd *per_bfd);
 
 static void prepare_one_comp_unit (struct dwarf2_cu *cu,
 				   struct die_info *comp_unit_die,
@@ -7732,7 +7732,8 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 		  }
 
 		per_cu = dwarf2_find_containing_comp_unit
-			   (pdi->d.sect_off, pdi->is_dwz, cu->per_objfile);
+			   (pdi->d.sect_off, pdi->is_dwz,
+			    cu->per_objfile->per_bfd);
 
 		/* Go read the partial unit, if needed.  */
 		if (per_cu->v.psymtab == NULL)
@@ -9612,7 +9613,8 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
       bool is_dwz = (attr->form == DW_FORM_GNU_ref_alt || cu->per_cu->is_dwz);
       dwarf2_per_objfile *per_objfile = cu->per_objfile;
       dwarf2_per_cu_data *per_cu
-	= dwarf2_find_containing_comp_unit (sect_off, is_dwz, per_objfile);
+	= dwarf2_find_containing_comp_unit (sect_off, is_dwz,
+					    per_objfile->per_bfd);
 
       /* We're importing a C++ compilation unit with tag DW_TAG_compile_unit
 	 into another compilation unit, at root level.  Regard this as a hint,
@@ -19542,7 +19544,7 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
 	}
       dwarf2_per_cu_data *per_cu
 	= dwarf2_find_containing_comp_unit (sect_off, offset_in_dwz,
-					    per_objfile);
+					    per_objfile->per_bfd);
 
       cu = per_objfile->get_cu (per_cu);
       if (cu == NULL || cu->partial_dies == NULL)
@@ -22374,7 +22376,8 @@ lookup_die_type (struct die_info *die, const struct attribute *attr,
       struct dwarf2_per_cu_data *per_cu;
       sect_offset sect_off = attr->get_ref_die_offset ();
 
-      per_cu = dwarf2_find_containing_comp_unit (sect_off, 1, per_objfile);
+      per_cu = dwarf2_find_containing_comp_unit (sect_off, 1,
+						 per_objfile->per_bfd);
       this_type = get_die_type_at_offset (sect_off, per_cu, per_objfile);
     }
   else if (attr->form_is_ref ())
@@ -23240,7 +23243,7 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
       struct dwarf2_per_cu_data *per_cu;
 
       per_cu = dwarf2_find_containing_comp_unit (sect_off, offset_in_dwz,
-						 per_objfile);
+						 per_objfile->per_bfd);
 
       dwarf_read_debug_printf_v ("target CU offset: %s, "
 				 "target CU DIEs loaded: %d",
@@ -24472,12 +24475,11 @@ dwarf2_find_containing_comp_unit
 static struct dwarf2_per_cu_data *
 dwarf2_find_containing_comp_unit (sect_offset sect_off,
 				  unsigned int offset_in_dwz,
-				  dwarf2_per_objfile *per_objfile)
+				  dwarf2_per_bfd *per_bfd)
 {
   int low = dwarf2_find_containing_comp_unit
-    (sect_off, offset_in_dwz, per_objfile->per_bfd->all_comp_units);
-  dwarf2_per_cu_data *this_cu
-    = per_objfile->per_bfd->all_comp_units[low].get ();
+    (sect_off, offset_in_dwz, per_bfd->all_comp_units);
+  dwarf2_per_cu_data *this_cu = per_bfd->all_comp_units[low].get ();
 
   if (this_cu->is_dwz != offset_in_dwz || this_cu->sect_off > sect_off)
     {
@@ -24485,15 +24487,15 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
 	error (_("Dwarf Error: could not find partial DIE containing "
 	       "offset %s [in module %s]"),
 	       sect_offset_str (sect_off),
-	       bfd_get_filename (per_objfile->objfile->obfd));
+	       bfd_get_filename (per_bfd->obfd));
 
-      gdb_assert (per_objfile->per_bfd->all_comp_units[low-1]->sect_off
+      gdb_assert (per_bfd->all_comp_units[low-1]->sect_off
 		  <= sect_off);
-      return per_objfile->per_bfd->all_comp_units[low - 1].get ();
+      return per_bfd->all_comp_units[low - 1].get ();
     }
   else
     {
-      if (low == per_objfile->per_bfd->all_comp_units.size () - 1
+      if (low == per_bfd->all_comp_units.size () - 1
 	  && sect_off >= this_cu->sect_off + this_cu->length)
 	error (_("invalid dwarf2 offset %s"), sect_offset_str (sect_off));
       gdb_assert (sect_off < this_cu->sect_off + this_cu->length);
