@@ -2,7 +2,6 @@
 @setfilename ctf-spec.info
 @settitle The CTF File Format
 @ifnottex
-@validatemenus off
 @xrefautomaticsectiontitle on
 @end ifnottex
 @synindex fn cp
