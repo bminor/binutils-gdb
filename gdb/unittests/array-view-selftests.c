@@ -137,8 +137,13 @@ check_ctor_from_container ()
 
 } /* namespace no_slicing */
 
+/* std::array with only one template argument, so we can pass it to
+   check_ctor_from_container.  */
+template<typename T> using StdArray1 = std::array<T, 1>;
+
 static_assert (no_slicing::check (), "");
 static_assert (no_slicing::check_ctor_from_container<std::vector> (), "");
+static_assert (no_slicing::check_ctor_from_container<StdArray1> (), "");
 static_assert (no_slicing::check_ctor_from_container<gdb::array_view> (), "");
 
 /* Check that array_view implicitly converts from std::vector.  */
