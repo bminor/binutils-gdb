@@ -214,7 +214,7 @@ core_target::build_file_mappings ()
     /* read_core_file_mappings will invoke this lambda for each mapping
        that it finds.  */
     [&] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
-	 const char *filename)
+	 const char *filename, const bfd_build_id *build_id)
       {
 	/* Architecture-specific read_core_mapping methods are expected to
 	   weed out non-file-backed mappings.  */

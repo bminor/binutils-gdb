@@ -5411,7 +5411,7 @@ set_gdbarch_get_pc_address_flags (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd, gdb::function_view<void (ULONGEST count)> pre_loop_cb, gdb::function_view<void (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs, const char *filename)> loop_cb)
+gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd, read_core_file_mappings_pre_loop_ftype pre_loop_cb, read_core_file_mappings_loop_ftype loop_cb)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->read_core_file_mappings != NULL);

@@ -1097,16 +1097,11 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
    for each mapping.  */
 
 static void
-linux_read_core_file_mappings (struct gdbarch *gdbarch,
-			       struct bfd *cbfd,
-			       gdb::function_view<void (ULONGEST count)>
-				 pre_loop_cb,
-			       gdb::function_view<void (int num,
-							ULONGEST start,
-							ULONGEST end,
-							ULONGEST file_ofs,
-							const char *filename)>
-				 loop_cb)
+linux_read_core_file_mappings
+  (struct gdbarch *gdbarch,
+   struct bfd *cbfd,
+   read_core_file_mappings_pre_loop_ftype pre_loop_cb,
+   read_core_file_mappings_loop_ftype  loop_cb)
 {
   /* Ensure that ULONGEST is big enough for reading 64-bit core files.  */
   gdb_static_assert (sizeof (ULONGEST) >= 8);
@@ -1189,7 +1184,7 @@ linux_read_core_file_mappings (struct gdbarch *gdbarch,
       char * filename = filenames;
       filenames += strlen ((char *) filenames) + 1;
 
-      loop_cb (i, start, end, file_ofs, filename);
+      loop_cb (i, start, end, file_ofs, filename, nullptr);
     }
 }
 
@@ -1218,7 +1213,7 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 	  }
       },
     [=] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
-	 const char *filename)
+	 const char *filename, const bfd_build_id *build_id)
       {
 	if (gdbarch_addr_bit (gdbarch) == 32)
 	  printf_filtered ("\t%10s %10s %10s %10s %s\n",
