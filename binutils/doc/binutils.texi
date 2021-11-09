@@ -812,6 +812,7 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}]
    [@option{-s}|@option{--print-armap}]
    [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
    [@option{-u}|@option{--undefined-only}]
+   [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
    [@option{-V}|@option{--version}]
    [@option{-X 32_64}]
    [@option{--defined-only}]
@@ -1131,6 +1132,21 @@ Use @var{radix} as the radix for printing the symbol values.  It must be
 @cindex external symbols
 @cindex undefined symbols
 Display only undefined symbols (those external to each object file).
+
+@item -U @var{[d|i|l|e|x|h]}
+@itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
+Controls the display of UTF-8 encoded mulibyte characters in strings.
+The default (@option{--unicode=default}) is to give them no special
+treatment.  The @option{--unicode=locale} option displays the sequence
+in the current locale, which may or may not support them.  The options
+@option{--unicode=hex} and @option{--unicode=invalid} display them as
+hex byte sequences enclosed by either angle brackets or curly braces.
+
+The @option{--unicode=escape} option displays them as escape sequences
+(@var{\uxxxx}) and the @option{--unicode=highlight} option displays
+them as escape sequences highlighted in red (if supported by the
+output device).  The colouring is intended to draw attention to the
+presence of unicode sequences where they might not be expected.
 
 @item -V
 @itemx --version
@@ -2247,6 +2263,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix-strip=}@var{level}]
         [@option{--insn-width=}@var{width}]
         [@option{--visualize-jumps[=color|=extended-color|=off]}
+        [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
         @var{objfile}@dots{}
@@ -2921,6 +2938,21 @@ When displaying symbols include those which the target considers to be
 special in some way and which would not normally be of interest to the
 user.
 
+@item -U @var{[d|i|l|e|x|h]}
+@itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
+Controls the display of UTF-8 encoded mulibyte characters in strings.
+The default (@option{--unicode=default}) is to give them no special
+treatment.  The @option{--unicode=locale} option displays the sequence
+in the current locale, which may or may not support them.  The options
+@option{--unicode=hex} and @option{--unicode=invalid} display them as
+hex byte sequences enclosed by either angle brackets or curly braces.
+
+The @option{--unicode=escape} option displays them as escape sequences
+(@var{\uxxxx}) and the @option{--unicode=highlight} option displays
+them as escape sequences highlighted in red (if supported by the
+output device).  The colouring is intended to draw attention to the
+presence of unicode sequences where they might not be expected.
+
 @item -V
 @itemx --version
 Print the version number of @command{objdump} and exit.
@@ -3197,6 +3229,7 @@ strings [@option{-afovV}] [@option{-}@var{min-len}]
         [@option{-n} @var{min-len}] [@option{--bytes=}@var{min-len}]
         [@option{-t} @var{radix}] [@option{--radix=}@var{radix}]
         [@option{-e} @var{encoding}] [@option{--encoding=}@var{encoding}]
+        [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
         [@option{-}] [@option{--all}] [@option{--print-file-name}]
         [@option{-T} @var{bfdname}] [@option{--target=}@var{bfdname}]
         [@option{-w}] [@option{--include-all-whitespace}]
@@ -3287,6 +3320,28 @@ single-8-bit-byte characters, @samp{b} = 16-bit bigendian, @samp{l} =
 16-bit littleendian, @samp{B} = 32-bit bigendian, @samp{L} = 32-bit
 littleendian.  Useful for finding wide character strings. (@samp{l}
 and @samp{b} apply to, for example, Unicode UTF-16/UCS-2 encodings).
+
+@item -U @var{[d|i|l|e|x|h]}
+@itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
+Controls the display of UTF-8 encoded mulibyte characters in strings.
+The default (@option{--unicode=default}) is to give them no special
+treatment, and instead rely upon the setting of the
+@option{--encoding} option.  The other values for this option
+automatically enable @option{--encoding=S}.
+
+The @option{--unicode=invalid} option treats them as non-graphic
+characters and hence not part of a valid string.  All the remaining
+options treat them as valid string characters.
+
+The @option{--unicode=locale} option displays them in the current
+locale, which may or may not support UTF-8 encoding.  The
+@option{--unicode=hex} option displays them as hex byte sequences
+enclosed between @var{<>} characters.  The @option{--unicode=escape}
+option displays them as escape sequences (@var{\uxxxx}) and the
+@option{--unicode=highlight} option displays them as escape sequences
+highlighted in red (if supported by the output device).  The colouring
+is intended to draw attention to the presence of unicode sequences
+where they might not be expected.
 
 @item -T @var{bfdname}
 @itemx --target=@var{bfdname}
@@ -4796,6 +4851,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{--demangle@var{=style}}|@option{--no-demangle}]
         [@option{--quiet}]
         [@option{--recurse-limit}|@option{--no-recurse-limit}]
+        [@option{-U} @var{method}|@option{--unicode=}@var{method}]
         [@option{-n}|@option{--notes}]
         [@option{-r}|@option{--relocs}]
         [@option{-u}|@option{--unwind}]
@@ -4961,6 +5017,28 @@ The default is for this limit to be enabled, but disabling it may be
 necessary in order to demangle truly complicated names.  Note however
 that if the recursion limit is disabled then stack exhaustion is
 possible and any bug reports about such an event will be rejected.
+
+@item -U @var{[d|i|l|e|x|h]}
+@itemx --unicode=[default|invalid|locale|escape|hex|highlight]
+Controls the display of non-ASCII characters in identifier names.
+The default (@option{--unicode=locale} or @option{--unicode=default}) is
+to treat them as multibyte characters and display them in the current
+locale.  All other versions of this option treat the bytes as UTF-8
+encoded values and attempt to interpret them.  If they cannot be
+interpreted or if the @option{--unicode=invalid} option is used then
+they are displayed as a sequence of hex bytes, encloses in curly
+parethesis characters.
+
+Using the @option{--unicode=escape} option will display the characters
+as as unicode escape sequences (@var{\uxxxx}).  Using the
+@option{--unicode=hex} will display the characters as hex byte
+sequences enclosed between angle brackets.
+
+Using the @option{--unicode=highlight} will display the characters as 
+unicode escape sequences but it will also highlighted them in red,
+assuming that colouring is supported by the output device.  The
+colouring is intended to draw attention to the presence of unicode
+sequences when they might not be expected.
 
 @item -e
 @itemx --headers

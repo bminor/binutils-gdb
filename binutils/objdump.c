@@ -204,6 +204,18 @@ static const struct objdump_private_desc * const objdump_private_vectors[] =
 
 /* The list of detected jumps inside a function.  */
 static struct jump_info *detected_jumps = NULL;
+
+typedef enum unicode_display_type
+{
+  unicode_default = 0,
+  unicode_locale,
+  unicode_escape,
+  unicode_hex,
+  unicode_highlight,
+  unicode_invalid
+} unicode_display_type;
+
+static unicode_display_type unicode_display = unicode_default;
 
 static void usage (FILE *, int) ATTRIBUTE_NORETURN;
 static void
@@ -330,6 +342,9 @@ usage (FILE *stream, int status)
       fprintf (stream, _("\
   -w, --wide                     Format output for more than 80 columns\n"));
       fprintf (stream, _("\
+  -U[d|l|i|x|e|h]                Controls the display of UTF-8 unicode characters\n\
+  --unicode=[default|locale|invalid|hex|escape|highlight]\n"));
+      fprintf (stream, _("\
   -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n"));
       fprintf (stream, _("\
       --start-address=ADDR       Only process data whose address is >= ADDR\n"));
@@ -420,17 +435,23 @@ static struct option long_options[]=
 {
   {"adjust-vma", required_argument, NULL, OPTION_ADJUST_VMA},
   {"all-headers", no_argument, NULL, 'x'},
-  {"private-headers", no_argument, NULL, 'p'},
-  {"private", required_argument, NULL, 'P'},
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
+#ifdef ENABLE_LIBCTF
+  {"ctf", required_argument, NULL, OPTION_CTF},
+  {"ctf-parent", required_argument, NULL, OPTION_CTF_PARENT},
+#endif
   {"debugging", no_argument, NULL, 'g'},
   {"debugging-tags", no_argument, NULL, 'e'},
   {"demangle", optional_argument, NULL, 'C'},
   {"disassemble", optional_argument, NULL, 'd'},
   {"disassemble-all", no_argument, NULL, 'D'},
-  {"disassembler-options", required_argument, NULL, 'M'},
   {"disassemble-zeroes", no_argument, NULL, 'z'},
+  {"disassembler-options", required_argument, NULL, 'M'},
+  {"dwarf", optional_argument, NULL, OPTION_DWARF},
+  {"dwarf-check", no_argument, 0, OPTION_DWARF_CHECK},
+  {"dwarf-depth", required_argument, 0, OPTION_DWARF_DEPTH},
+  {"dwarf-start", required_argument, 0, OPTION_DWARF_START},
   {"dynamic-reloc", no_argument, NULL, 'R'},
   {"dynamic-syms", no_argument, NULL, 'T'},
   {"endian", required_argument, NULL, OPTION_ENDIAN},
@@ -440,16 +461,23 @@ static struct option long_options[]=
   {"full-contents", no_argument, NULL, 's'},
   {"headers", no_argument, NULL, 'h'},
   {"help", no_argument, NULL, 'H'},
+  {"include", required_argument, NULL, 'I'},
   {"info", no_argument, NULL, 'i'},
+  {"inlines", no_argument, 0, OPTION_INLINES},
+  {"insn-width", required_argument, NULL, OPTION_INSN_WIDTH},
   {"line-numbers", no_argument, NULL, 'l'},
-  {"no-show-raw-insn", no_argument, &show_raw_insn, -1},
   {"no-addresses", no_argument, &no_addresses, 1},
-  {"process-links", no_argument, &process_links, true},
-  {"prefix-addresses", no_argument, &prefix_addresses, 1},
-  {"recurse-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
-  {"recursion-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
   {"no-recurse-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
   {"no-recursion-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
+  {"no-show-raw-insn", no_argument, &show_raw_insn, -1},
+  {"prefix", required_argument, NULL, OPTION_PREFIX},
+  {"prefix-addresses", no_argument, &prefix_addresses, 1},
+  {"prefix-strip", required_argument, NULL, OPTION_PREFIX_STRIP},
+  {"private", required_argument, NULL, 'P'},
+  {"private-headers", no_argument, NULL, 'p'},
+  {"process-links", no_argument, &process_links, true},
+  {"recurse-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
+  {"recursion-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
   {"reloc", no_argument, NULL, 'r'},
   {"section", required_argument, NULL, 'j'},
   {"section-headers", no_argument, NULL, 'h'},
@@ -457,28 +485,16 @@ static struct option long_options[]=
   {"source", no_argument, NULL, 'S'},
   {"source-comment", optional_argument, NULL, OPTION_SOURCE_COMMENT},
   {"special-syms", no_argument, &dump_special_syms, 1},
-  {"include", required_argument, NULL, 'I'},
-  {"dwarf", optional_argument, NULL, OPTION_DWARF},
-#ifdef ENABLE_LIBCTF
-  {"ctf", optional_argument, NULL, OPTION_CTF},
-  {"ctf-parent", required_argument, NULL, OPTION_CTF_PARENT},
-#endif
   {"stabs", no_argument, NULL, 'G'},
   {"start-address", required_argument, NULL, OPTION_START_ADDRESS},
   {"stop-address", required_argument, NULL, OPTION_STOP_ADDRESS},
   {"syms", no_argument, NULL, 't'},
   {"target", required_argument, NULL, 'b'},
+  {"unicode", required_argument, NULL, 'U'},
   {"version", no_argument, NULL, 'V'},
-  {"wide", no_argument, NULL, 'w'},
-  {"prefix", required_argument, NULL, OPTION_PREFIX},
-  {"prefix-strip", required_argument, NULL, OPTION_PREFIX_STRIP},
-  {"insn-width", required_argument, NULL, OPTION_INSN_WIDTH},
-  {"dwarf-depth", required_argument, 0, OPTION_DWARF_DEPTH},
-  {"dwarf-start", required_argument, 0, OPTION_DWARF_START},
-  {"dwarf-check", no_argument, 0, OPTION_DWARF_CHECK},
-  {"inlines", no_argument, 0, OPTION_INLINES},
   {"visualize-jumps", optional_argument, 0, OPTION_VISUALIZE_JUMPS},
-  {0, no_argument, 0, 0}
+  {"wide", no_argument, NULL, 'w'},
+  {NULL, no_argument, NULL, 0}
 };
 
 static void
@@ -488,9 +504,121 @@ nonfatal (const char *msg)
   exit_status = 1;
 }
 
+/* Convert a potential UTF-8 encoded sequence in IN into characters in OUT.
+   The conversion format is controlled by the unicode_display variable.
+   Returns the number of characters added to OUT.
+   Returns the number of bytes consumed from IN in CONSUMED.
+   Always consumes at least one byte and displays at least one character.  */
+   
+static unsigned int
+display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
+{
+  char *        orig_out = out;
+  unsigned int  nchars = 0;
+  unsigned int j;
+
+  if (unicode_display == unicode_default)
+    goto invalid;
+
+  if (in[0] < 0xc0)
+    goto invalid;
+
+  if ((in[1] & 0xc0) != 0x80)
+    goto invalid;
+
+  if ((in[0] & 0x20) == 0)
+    {
+      nchars = 2;
+      goto valid;
+    }
+
+  if ((in[2] & 0xc0) != 0x80)
+    goto invalid;
+
+  if ((in[0] & 0x10) == 0)
+    {
+      nchars = 3;
+      goto valid;
+    }
+
+  if ((in[3] & 0xc0) != 0x80)
+    goto invalid;
+
+  nchars = 4;
+
+ valid:
+  switch (unicode_display)
+    {
+    case unicode_locale:
+      /* Copy the bytes into the output buffer as is.  */
+      memcpy (out, in, nchars);
+      out += nchars;
+      break;
+
+    case unicode_invalid:
+    case unicode_hex:
+      out += sprintf (out, "%c", unicode_display == unicode_hex ? '<' : '{');
+      out += sprintf (out, "0x");
+      for (j = 0; j < nchars; j++)
+	out += sprintf (out, "%02x", in [j]);
+      out += sprintf (out, "%c", unicode_display == unicode_hex ? '>' : '}');
+      break;
+      
+    case unicode_highlight:
+      if (isatty (1))
+	out += sprintf (out, "\x1B[31;47m"); /* Red.  */
+      /* Fall through.  */
+    case unicode_escape:
+      switch (nchars)
+	{
+	case 2:
+	  out += sprintf (out, "\\u%02x%02x",
+		  ((in[0] & 0x1c) >> 2), 
+		  ((in[0] & 0x03) << 6) | (in[1] & 0x3f));
+	  break;
+
+	case 3:
+	  out += sprintf (out, "\\u%02x%02x",
+		  ((in[0] & 0x0f) << 4) | ((in[1] & 0x3c) >> 2),
+		  ((in[1] & 0x03) << 6) | ((in[2] & 0x3f)));
+	  break;
+
+	case 4:
+	  out += sprintf (out, "\\u%02x%02x%02x",
+		  ((in[0] & 0x07) << 6) | ((in[1] & 0x3c) >> 2),
+		  ((in[1] & 0x03) << 6) | ((in[2] & 0x3c) >> 2),
+		  ((in[2] & 0x03) << 6) | ((in[3] & 0x3f)));
+	  break;
+	default:
+	  /* URG.  */
+	  break;
+	}
+
+      if (unicode_display == unicode_highlight && isatty (1))
+	out += sprintf (out, "\033[0m"); /* Default colour.  */
+      break;
+
+    default:
+      /* URG */
+      break;
+    }
+
+  * consumed = nchars;
+  return out - orig_out;
+
+ invalid:
+  /* Not a valid UTF-8 sequence.  */
+  *out = *in;
+  * consumed = 1;
+  return 1;
+}
+
 /* Returns a version of IN with any control characters
    replaced by escape sequences.  Uses a static buffer
-   if necessary.  */
+   if necessary.
+
+   If unicode display is enabled, then also handles the
+   conversion of unicode characters.  */
 
 static const char *
 sanitize_string (const char * in)
@@ -508,40 +636,50 @@ sanitize_string (const char * in)
      of cases it will not be needed.  */
   do
     {
-      char c = *in++;
+      unsigned char c = *in++;
 
       if (c == 0)
 	return original;
 
       if (ISCNTRL (c))
 	break;
+
+      if (unicode_display != unicode_default && c >= 0xc0)
+	break;
     }
   while (1);
 
   /* Copy the input, translating as needed.  */
   in = original;
-  if (buffer_len < (strlen (in) * 2))
+  if (buffer_len < (strlen (in) * 9))
     {
       free ((void *) buffer);
-      buffer_len = strlen (in) * 2;
+      buffer_len = strlen (in) * 9;
       buffer = xmalloc (buffer_len + 1);
     }
 
   out = buffer;
   do
     {
-      char c = *in++;
+      unsigned char c = *in++;
 
       if (c == 0)
 	break;
 
-      if (!ISCNTRL (c))
-	*out++ = c;
-      else
+      if (ISCNTRL (c))
 	{
 	  *out++ = '^';
 	  *out++ = c + 0x40;
 	}
+      else if (unicode_display != unicode_default && c >= 0xc0)
+	{
+	  unsigned int num_consumed;
+
+	  out += display_utf8 ((const unsigned char *)(in - 1), out, & num_consumed);
+	  in += num_consumed - 1;
+	}
+      else
+	*out++ = c;
     }
   while (1);
 
@@ -4522,6 +4660,24 @@ dump_symbols (bfd *abfd ATTRIBUTE_UNUSED, bool dynamic)
 		  free (alloc);
 		}
 	    }
+	  else if (unicode_display != unicode_default
+		   && name != NULL && *name != '\0')
+	    {
+	      const char * sanitized_name;
+
+	      /* If we want to sanitize the name, we do it here, and
+		 temporarily clobber it while calling bfd_print_symbol.
+		 FIXME: This is a gross hack.  */
+	      sanitized_name = sanitize_string (name);
+	      if (sanitized_name != name)
+		(*current)->name = sanitized_name;
+	      else
+		sanitized_name = NULL;
+	      bfd_print_symbol (cur_bfd, stdout, *current,
+				bfd_print_symbol_all);
+	      if (sanitized_name != NULL)
+		(*current)->name = name;
+	    }
 	  else
 	    bfd_print_symbol (cur_bfd, stdout, *current,
 			      bfd_print_symbol_all);
@@ -5205,7 +5361,7 @@ main (int argc, char **argv)
   set_default_bfd_target ();
 
   while ((c = getopt_long (argc, argv,
-			   "CDE:FGHI:LM:P:RSTVW::ab:defghij:lm:prstvwxz",
+			   "CDE:FGHI:LM:P:RSTU:VW::ab:defghij:lm:prstvwxz",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -5487,6 +5643,23 @@ main (int argc, char **argv)
 	case 'V':
 	  show_version = true;
 	  seenflag = true;
+	  break;
+
+	case 'U':
+	  if (streq (optarg, "default") || streq (optarg, "d"))
+	    unicode_display = unicode_default;
+	  else if (streq (optarg, "locale") || streq (optarg, "l"))
+	    unicode_display = unicode_locale;
+	  else if (streq (optarg, "escape") || streq (optarg, "e"))
+	    unicode_display = unicode_escape;
+	  else if (streq (optarg, "invalid") || streq (optarg, "i"))
+	    unicode_display = unicode_invalid;
+	  else if (streq (optarg, "hex") || streq (optarg, "x"))
+	    unicode_display = unicode_hex;
+	  else if (streq (optarg, "highlight") || streq (optarg, "h"))
+	    unicode_display = unicode_highlight;
+	  else
+	    fatal (_("invalid argument to -U/--unicode: %s"), optarg);
 	  break;
 
 	case 'H':

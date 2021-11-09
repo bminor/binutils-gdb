@@ -329,6 +329,19 @@ typedef enum print_mode
 }
 print_mode;
 
+typedef enum unicode_display_type
+{
+  unicode_default = 0,
+  unicode_locale,
+  unicode_escape,
+  unicode_hex,
+  unicode_highlight,
+  unicode_invalid
+} unicode_display_type;
+
+static unicode_display_type unicode_display = unicode_default;
+
+  
 /* Versioned symbol info.  */
 enum versioned_symbol_info
 {
@@ -656,11 +669,18 @@ print_symbol (signed int width, const char * symbol)
       if (c == 0)
 	break;
 
-      /* Do not print control characters directly as they can affect terminal
-	 settings.  Such characters usually appear in the names generated
-	 by the assembler for local labels.  */
-      if (ISCNTRL (c))
+      if (ISPRINT (c))
 	{
+	  putchar (c);
+	  width_remaining --;
+	  num_printed ++;
+	}
+      else if (ISCNTRL (c))
+	{
+	  /* Do not print control characters directly as they can affect terminal
+	     settings.  Such characters usually appear in the names generated
+	     by the assembler for local labels.  */
+
 	  if (width_remaining < 2)
 	    break;
 
@@ -668,11 +688,137 @@ print_symbol (signed int width, const char * symbol)
 	  width_remaining -= 2;
 	  num_printed += 2;
 	}
-      else if (ISPRINT (c))
+      else if (c == 0x7f)
 	{
-	  putchar (c);
-	  width_remaining --;
-	  num_printed ++;
+	  if (width_remaining < 5)
+	    break;
+	  printf ("<DEL>");
+	  width_remaining -= 5;
+	  num_printed += 5;
+	}
+      else if (unicode_display != unicode_locale
+	       && unicode_display != unicode_default)
+	{
+	  /* Display unicode characters as something else.  */
+	  unsigned char bytes[4];
+	  bool          is_utf8;
+	  uint          nbytes;
+
+	  bytes[0] = c;
+
+	  if (bytes[0] < 0xc0)
+	    {
+	      nbytes = 1;
+	      is_utf8 = false;
+	    }
+	  else
+	    {
+	      bytes[1] = *symbol++;
+
+	      if ((bytes[1] & 0xc0) != 0x80)
+		{
+		  is_utf8 = false;
+		  /* Do not consume this character.  It may only
+		     be the first byte in the sequence that was
+		     corrupt.  */
+		  --symbol;
+		  nbytes = 1;
+		}
+	      else if ((bytes[0] & 0x20) == 0)
+		{
+		  is_utf8 = true;
+		  nbytes = 2;
+		}
+	      else
+		{
+		  bytes[2] = *symbol++;
+
+		  if ((bytes[2] & 0xc0) != 0x80)
+		    {
+		      is_utf8 = false;
+		      symbol -= 2;
+		      nbytes = 1;
+		    }
+		  else if ((bytes[0] & 0x10) == 0)
+		    {
+		      is_utf8 = true;
+		      nbytes = 3;
+		    }
+		  else
+		    {
+		      bytes[3] = *symbol++;
+
+		      nbytes = 4;
+
+		      if ((bytes[3] & 0xc0) != 0x80)
+			{
+			  is_utf8 = false;
+			  symbol -= 3;
+			  nbytes = 1;
+			}
+		      else
+			is_utf8 = true;
+		    }
+		}
+	    }
+
+	  if (unicode_display == unicode_invalid)
+	    is_utf8 = false;
+
+	  if (unicode_display == unicode_hex || ! is_utf8)
+	    {
+	      uint i;
+
+	      if (width_remaining < (nbytes * 2) + 2)
+		break;
+	  
+	      putchar (is_utf8 ? '<' : '{');
+	      printf ("0x");
+	      for (i = 0; i < nbytes; i++)
+		printf ("%02x", bytes[i]);
+	      putchar (is_utf8 ? '>' : '}');
+	    }
+	  else
+	    {
+	      if (unicode_display == unicode_highlight && isatty (1))
+		printf ("\x1B[31;47m"); /* Red.  */
+	      
+	      switch (nbytes)
+		{
+		case 2:
+		  if (width_remaining < 6)
+		    break;
+		  printf ("\\u%02x%02x",
+			  (bytes[0] & 0x1c) >> 2, 
+			  ((bytes[0] & 0x03) << 6) | (bytes[1] & 0x3f));
+		  break;
+		case 3:
+		  if (width_remaining < 6)
+		    break;
+		  printf ("\\u%02x%02x",
+			  ((bytes[0] & 0x0f) << 4) | ((bytes[1] & 0x3c) >> 2),
+			  ((bytes[1] & 0x03) << 6) | (bytes[2] & 0x3f));
+		  break;
+		case 4:
+		  if (width_remaining < 8)
+		    break;
+		  printf ("\\u%02x%02x%02x",
+			  ((bytes[0] & 0x07) << 6) | ((bytes[1] & 0x3c) >> 2),
+			  ((bytes[1] & 0x03) << 6) | ((bytes[2] & 0x3c) >> 2),
+			  ((bytes[2] & 0x03) << 6) | (bytes[3] & 0x3f));
+		  
+		  break;
+		default:
+		  /* URG.  */
+		  break;
+		}
+
+	      if (unicode_display == unicode_highlight && isatty (1))
+		printf ("\033[0m"); /* Default colour.  */
+	    }
+	  
+	  if (bytes[nbytes - 1] == 0)
+	    break;
 	}
       else
 	{
@@ -4731,6 +4877,7 @@ static struct option options[] =
   {"syms",	       no_argument, 0, 's'},
   {"silent-truncation",no_argument, 0, 'T'},
   {"section-details",  no_argument, 0, 't'},
+  {"unicode",          required_argument, NULL, 'U'},
   {"unwind",	       no_argument, 0, 'u'},
   {"version-info",     no_argument, 0, 'V'},
   {"version",	       no_argument, 0, 'v'},
@@ -4806,6 +4953,12 @@ usage (FILE * stream)
      --recurse-limit     Enable a demangling recursion limit.  (default)\n"));
   fprintf (stream, _("\
      --no-recurse-limit  Disable a demangling recursion limit\n"));
+  fprintf (stream, _("\
+     -U[dlexhi] --unicode=[default|locale|escape|hex|highlight|invalid]\n\
+                         Display unicode characters as determined by the current locale\n\
+                          (default), escape sequences, \"<hex sequences>\", highlighted\n\
+                          escape sequences, or treat them as invalid and display as\n\
+                          \"{hex sequences}\"\n"));
   fprintf (stream, _("\
   -n --notes             Display the core notes (if present)\n"));
   fprintf (stream, _("\
@@ -4990,7 +5143,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ACDHILNPR:STVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
+	  (argc, argv, "ACDHILNPR:STU:VWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -5190,6 +5343,25 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  break;
 	case OPTION_WITH_SYMBOL_VERSIONS:
 	  /* Ignored for backward compatibility.  */
+	  break;
+
+	case 'U':
+	  if (optarg == NULL)
+	    error (_("Missing arg to -U/--unicode")); /* Can this happen ?  */
+	  else if (streq (optarg, "default") || streq (optarg, "d"))
+	    unicode_display = unicode_default;
+	  else if (streq (optarg, "locale") || streq (optarg, "l"))
+	    unicode_display = unicode_locale;
+	  else if (streq (optarg, "escape") || streq (optarg, "e"))
+	    unicode_display = unicode_escape;
+	  else if (streq (optarg, "invalid") || streq (optarg, "i"))
+	    unicode_display = unicode_invalid;
+	  else if (streq (optarg, "hex") || streq (optarg, "x"))
+	    unicode_display = unicode_hex;
+	  else if (streq (optarg, "highlight") || streq (optarg, "h"))
+	    unicode_display = unicode_highlight;
+	  else
+	    error (_("invalid argument to -U/--unicode: %s"), optarg);
 	  break;
 
 	case OPTION_SYM_BASE:

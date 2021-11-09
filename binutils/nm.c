@@ -38,6 +38,11 @@
 #include "bucomm.h"
 #include "plugin-api.h"
 #include "plugin.h"
+#include "safe-ctype.h"
+
+#ifndef streq
+#define streq(a,b) (strcmp ((a),(b)) == 0)
+#endif
 
 /* When sorting by size, we use this structure to hold the size and a
    pointer to the minisymbol.  */
@@ -216,6 +221,18 @@ static const char *plugin_target = NULL;
 static bfd *lineno_cache_bfd;
 static bfd *lineno_cache_rel_bfd;
 
+typedef enum unicode_display_type
+{
+  unicode_default = 0,
+  unicode_locale,
+  unicode_escape,
+  unicode_hex,
+  unicode_highlight,
+  unicode_invalid
+} unicode_display_type;
+
+static unicode_display_type unicode_display = unicode_default;
+
 enum long_option_values
 {
   OPTION_TARGET = 200,
@@ -260,6 +277,7 @@ static struct option long_options[] =
   {"target", required_argument, 0, OPTION_TARGET},
   {"defined-only", no_argument, &defined_only, 1},
   {"undefined-only", no_argument, &undefined_only, 1},
+  {"unicode", required_argument, NULL, 'U'},
   {"version", no_argument, &show_version, 1},
   {"with-symbol-versions", no_argument, &with_symbol_versions, 1},
   {"without-symbol-versions", no_argument, &with_symbol_versions, 0},
@@ -313,6 +331,8 @@ usage (FILE *stream, int status)
   -t, --radix=RADIX      Use RADIX for printing symbol values\n\
       --target=BFDNAME   Specify the target object format as BFDNAME\n\
   -u, --undefined-only   Display only undefined symbols\n\
+  -U {d|s|i|x|e|h}       Specify how to treat UTF-8 encoded unicode characters\n\
+      --unicode={default|show|invalid|hex|escape|highlight}\n\
       --with-symbol-versions  Display version strings after symbol names\n\
   -X 32_64               (ignored)\n\
   @FILE                  Read options from FILE\n\
@@ -432,6 +452,187 @@ get_coff_symbol_type (const struct internal_syment *sym)
   return bufp;
 }
 
+/* Convert a potential UTF-8 encoded sequence in IN into characters in OUT.
+   The conversion format is controlled by the unicode_display variable.
+   Returns the number of characters added to OUT.
+   Returns the number of bytes consumed from IN in CONSUMED.
+   Always consumes at least one byte and displays at least one character.  */
+   
+static unsigned int
+display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
+{
+  char *        orig_out = out;
+  unsigned int  nchars = 0;
+  unsigned int j;
+
+  if (unicode_display == unicode_default)
+    goto invalid;
+
+  if (in[0] < 0xc0)
+    goto invalid;
+
+  if ((in[1] & 0xc0) != 0x80)
+    goto invalid;
+
+  if ((in[0] & 0x20) == 0)
+    {
+      nchars = 2;
+      goto valid;
+    }
+
+  if ((in[2] & 0xc0) != 0x80)
+    goto invalid;
+
+  if ((in[0] & 0x10) == 0)
+    {
+      nchars = 3;
+      goto valid;
+    }
+
+  if ((in[3] & 0xc0) != 0x80)
+    goto invalid;
+
+  nchars = 4;
+
+ valid:
+  switch (unicode_display)
+    {
+    case unicode_locale:
+      /* Copy the bytes into the output buffer as is.  */
+      memcpy (out, in, nchars);
+      out += nchars;
+      break;
+
+    case unicode_invalid:
+    case unicode_hex:
+      out += sprintf (out, "%c", unicode_display == unicode_hex ? '<' : '{');
+      out += sprintf (out, "0x");
+      for (j = 0; j < nchars; j++)
+	out += sprintf (out, "%02x", in [j]);
+      out += sprintf (out, "%c", unicode_display == unicode_hex ? '>' : '}');
+      break;
+      
+    case unicode_highlight:
+      if (isatty (1))
+	out += sprintf (out, "\x1B[31;47m"); /* Red.  */
+      /* Fall through.  */
+    case unicode_escape:
+      switch (nchars)
+	{
+	case 2:
+	  out += sprintf (out, "\\u%02x%02x",
+		  ((in[0] & 0x1c) >> 2), 
+		  ((in[0] & 0x03) << 6) | (in[1] & 0x3f));
+	  break;
+
+	case 3:
+	  out += sprintf (out, "\\u%02x%02x",
+		  ((in[0] & 0x0f) << 4) | ((in[1] & 0x3c) >> 2),
+		  ((in[1] & 0x03) << 6) | ((in[2] & 0x3f)));
+	  break;
+
+	case 4:
+	  out += sprintf (out, "\\u%02x%02x%02x",
+		  ((in[0] & 0x07) << 6) | ((in[1] & 0x3c) >> 2),
+		  ((in[1] & 0x03) << 6) | ((in[2] & 0x3c) >> 2),
+		  ((in[2] & 0x03) << 6) | ((in[3] & 0x3f)));
+	  break;
+	default:
+	  /* URG.  */
+	  break;
+	}
+
+      if (unicode_display == unicode_highlight && isatty (1))
+	out += sprintf (out, "\033[0m"); /* Default colour.  */
+      break;
+
+    default:
+      /* URG */
+      break;
+    }
+
+  * consumed = nchars;
+  return out - orig_out;
+
+ invalid:
+  /* Not a valid UTF-8 sequence.  */
+  *out = *in;
+  * consumed = 1;
+  return 1;
+}
+
+/* Convert any UTF-8 encoded characters in NAME into the form specified by
+   unicode_display.  Also converts control characters.  Returns a static
+   buffer if conversion was necessary.
+   Code stolen from objdump.c:sanitize_string().  */
+
+static const char *
+convert_utf8 (const char * in)
+{
+  static char *  buffer = NULL;
+  static size_t  buffer_len = 0;
+  const char *   original = in;
+  char *         out;
+
+  /* Paranoia.  */
+  if (in == NULL)
+    return "";
+
+  /* See if any conversion is necessary.
+     In the majority of cases it will not be needed.  */
+  do
+    {
+      unsigned char c = *in++;
+
+      if (c == 0)
+	return original;
+
+      if (ISCNTRL (c))
+	break;
+
+      if (unicode_display != unicode_default && c >= 0xc0)
+	break;
+    }
+  while (1);
+
+  /* Copy the input, translating as needed.  */
+  in = original;
+  if (buffer_len < (strlen (in) * 9))
+    {
+      free ((void *) buffer);
+      buffer_len = strlen (in) * 9;
+      buffer = xmalloc (buffer_len + 1);
+    }
+
+  out = buffer;
+  do
+    {
+      unsigned char c = *in++;
+
+      if (c == 0)
+	break;
+
+      if (ISCNTRL (c))
+	{
+	  *out++ = '^';
+	  *out++ = c + 0x40;
+	}
+      else if (unicode_display != unicode_default && c >= 0xc0)
+	{
+	  unsigned int num_consumed;
+
+	  out += display_utf8 ((const unsigned char *)(in - 1), out, & num_consumed);
+	  in += num_consumed - 1;
+	}
+      else
+	*out++ = c;
+    }
+  while (1);
+
+  *out = 0;
+  return buffer;
+}
+
 /* Print symbol name NAME, read from ABFD, with printf format FORM,
    demangling it if requested.  */
 
@@ -444,6 +645,7 @@ print_symname (const char *form, struct extended_symbol_info *info,
 
   if (name == NULL)
     name = info->sinfo->name;
+
   if (!with_symbol_versions
       && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
@@ -451,11 +653,17 @@ print_symname (const char *form, struct extended_symbol_info *info,
       if (atver)
 	*atver = 0;
     }
+
   if (do_demangle && *name)
     {
       alloc = bfd_demangle (abfd, name, demangle_flags);
       if (alloc != NULL)
 	name = alloc;
+    }
+
+  if (unicode_display != unicode_default)
+    {
+      name = convert_utf8 (name);
     }
 
   if (info != NULL && info->elfinfo && with_symbol_versions)
@@ -1808,7 +2016,7 @@ main (int argc, char **argv)
     fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uvVvX:",
+  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uU:vVvX:",
 			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1901,6 +2109,24 @@ main (int argc, char **argv)
 	case 'u':
 	  undefined_only = 1;
 	  break;
+
+	case 'U':
+	  if (streq (optarg, "default") || streq (optarg, "d"))
+	    unicode_display = unicode_default;
+	  else if (streq (optarg, "locale") || streq (optarg, "l"))
+	    unicode_display = unicode_locale;
+	  else if (streq (optarg, "escape") || streq (optarg, "e"))
+	    unicode_display = unicode_escape;
+	  else if (streq (optarg, "invalid") || streq (optarg, "i"))
+	    unicode_display = unicode_invalid;
+	  else if (streq (optarg, "hex") || streq (optarg, "x"))
+	    unicode_display = unicode_hex;
+	  else if (streq (optarg, "highlight") || streq (optarg, "h"))
+	    unicode_display = unicode_highlight;
+	  else
+	    fatal (_("invalid argument to -U/--unicode: %s"), optarg);
+	  break;
+
 	case 'V':
 	  show_version = 1;
 	  break;

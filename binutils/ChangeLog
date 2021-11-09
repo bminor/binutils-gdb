@@ -1,3 +1,18 @@
+2021-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* nm.c: Add --unicode option to control how unicode characters are
+	handled.
+	* objdump.c: Likewise.
+	* readelf.c: Likewise.
+	* strings.c: Likewise.
+	* binutils.texi: Document the new feature.
+	* NEWS: Document the new feature.
+	* testsuite/binutils-all/unicode.exp: New file.
+	* testsuite/binutils-all/nm.hex.unicode
+	* testsuite/binutils-all/strings.escape.unicode
+	* testsuite/binutils-all/objdump.highlight.unicode
+	* testsuite/binutils-all/readelf.invalid.unicode
+
 2021-11-03  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf.c (display_debug_loc): Use section name in warnings.
