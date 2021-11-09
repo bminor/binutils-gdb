@@ -1221,7 +1221,7 @@ value_actual_type (struct value *value, int resolve_simple_types,
 void
 error_value_optimized_out (void)
 {
-  error (_("value has been optimized out"));
+  throw_error (OPTIMIZED_OUT_ERROR, _("value has been optimized out"));
 }
 
 static void
@@ -1230,7 +1230,8 @@ require_not_optimized_out (const struct value *value)
   if (!value->optimized_out.empty ())
     {
       if (value->lval == lval_register)
-	error (_("register has not been saved in frame"));
+	throw_error (OPTIMIZED_OUT_ERROR,
+		     _("register has not been saved in frame"));
       else
 	error_value_optimized_out ();
     }
