@@ -371,6 +371,10 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
   HOW (R_PPC64_REL24_NOTOC, 2, 26, 0x03fffffc, 0, true, signed,
        ppc64_elf_branch_reloc),
 
+  /* Another variant, when p10 insns can't be used on stubs.  */
+  HOW (R_PPC64_REL24_P9NOTOC, 2, 26, 0x03fffffc, 0, true, signed,
+       ppc64_elf_branch_reloc),
+
   /* A relative 16 bit branch; the lower two bits must be zero.  */
   HOW (R_PPC64_REL14, 2, 16, 0x0000fffc, 0, true, signed,
        ppc64_elf_branch_reloc),
@@ -1052,6 +1056,8 @@ ppc64_elf_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
     case BFD_RELOC_PPC_B26:			r = R_PPC64_REL24;
       break;
     case BFD_RELOC_PPC64_REL24_NOTOC:		r = R_PPC64_REL24_NOTOC;
+      break;
+    case BFD_RELOC_PPC64_REL24_P9NOTOC:		r = R_PPC64_REL24_P9NOTOC;
       break;
     case BFD_RELOC_PPC_B16:			r = R_PPC64_REL14;
       break;
@@ -2884,7 +2890,7 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    Used to call a function in a shared library.  If it so happens that
    the plt entry referenced crosses a 64k boundary, then an extra
    "addi %r11,%r11,xxx@toc@l" will be inserted before the "mtctr".
-   ppc_stub_plt_call_r2save starts with "std %r2,40(%r1)".
+   An r2save variant starts with "std %r2,40(%r1)".
    .	addis	%r11,%r2,xxx@toc@ha
    .	ld	%r12,xxx+0@toc@l(%r11)
    .	mtctr	%r12
@@ -2913,13 +2919,8 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    variants exist too, simpler for plt calls since a new toc pointer
    and static chain are not loaded by the stub.  In addition, ELFv2
    has some more complex stubs to handle calls marked with NOTOC
-   relocs from functions where r2 is not a valid toc pointer.  These
-   come in two flavours, the ones shown below, and _both variants that
-   start with "std %r2,24(%r1)" to save r2 in the unlikely event that
-   one call is from a function where r2 is used as the toc pointer but
-   needs a toc adjusting stub for small-model multi-toc, and another
-   call is from a function where r2 is not valid.
-   ppc_stub_long_branch_notoc:
+   relocs from functions where r2 is not a valid toc pointer.
+   ppc_stub_long_branch_p9notoc:
    .	mflr	%r12
    .	bcl	20,31,1f
    .  1:
@@ -2929,7 +2930,7 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    .	addi	%r12,%r12,dest-1b@l
    .	b	dest
 
-   ppc_stub_plt_branch_notoc:
+   ppc_stub_plt_branch_p9notoc:
    .	mflr	%r12
    .	bcl	20,31,1f
    .  1:
@@ -2944,7 +2945,7 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    .	mtctr	%r12
    .	bctr
 
-   ppc_stub_plt_call_notoc:
+   ppc_stub_plt_call_p9notoc:
    .	mflr	%r12
    .	bcl	20,31,1f
    .  1:
@@ -2988,9 +2989,7 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    .	mtctr	%r12
    .	bctr
 
-   For a given stub group (a set of sections all using the same toc
-   pointer value) there will be just one stub type used for any
-   particular function symbol.  For example, if printf is called from
+   Stub variants may be merged.  For example, if printf is called from
    code with the tocsave optimization (ie. r2 saved in function
    prologue) and therefore calls use a ppc_stub_plt_call linkage stub,
    and from other code without the tocsave optimization requiring a
@@ -3001,31 +3000,34 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    relocations.  These require a ppc_stub_plt_call_notoc linkage stub
    to call an external function like printf.  If other calls to printf
    require a ppc_stub_plt_call linkage stub then a single
-   ppc_stub_plt_call_notoc linkage stub will be used for both types of
-   call.  If other calls to printf require a ppc_stub_plt_call_r2save
-   linkage stub then a single ppc_stub_plt_call_both linkage stub will
-   be created and calls not requiring r2 to be saved will enter the
-   stub after the r2 save instruction.  There is an analogous
-   hierarchy of long branch and plt branch stubs for local call
-   linkage.  */
+   ppc_stub_plt_call_notoc linkage stub may be used for both types of
+   call.  */
 
-enum ppc_stub_type
+enum ppc_stub_main_type
 {
   ppc_stub_none,
   ppc_stub_long_branch,
-  ppc_stub_long_branch_r2off,
-  ppc_stub_long_branch_notoc,
-  ppc_stub_long_branch_both, /* r2off and notoc variants both needed.  */
   ppc_stub_plt_branch,
-  ppc_stub_plt_branch_r2off,
-  ppc_stub_plt_branch_notoc,
-  ppc_stub_plt_branch_both,
   ppc_stub_plt_call,
-  ppc_stub_plt_call_r2save,
-  ppc_stub_plt_call_notoc,
-  ppc_stub_plt_call_both,
   ppc_stub_global_entry,
   ppc_stub_save_res
+};
+
+/* ppc_stub_long_branch, ppc_stub_plt_branch and ppc_stub_plt_call have
+   these variations.  */
+
+enum ppc_stub_sub_type
+{
+  ppc_stub_toc,
+  ppc_stub_notoc,
+  ppc_stub_p9notoc
+};
+
+struct ppc_stub_type
+{
+  ENUM_BITFIELD (ppc_stub_main_type) main : 3;
+  ENUM_BITFIELD (ppc_stub_sub_type) sub : 2;
+  unsigned int r2save : 1;
 };
 
 /* Information on stub grouping.  */
@@ -3056,7 +3058,7 @@ struct ppc_stub_hash_entry
   /* Base hash table entry structure.  */
   struct bfd_hash_entry root;
 
-  enum ppc_stub_type stub_type;
+  struct ppc_stub_type type;
 
   /* Group information.  */
   struct map_stub *group;
@@ -3249,7 +3251,7 @@ struct ppc_link_hash_table
   bfd_size_type got_reli_size;
 
   /* Statistics.  */
-  unsigned long stub_count[ppc_stub_global_entry];
+  unsigned long stub_count[ppc_stub_save_res];
 
   /* Number of stubs against global syms.  */
   unsigned long stub_globals;
@@ -3348,7 +3350,9 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
 
       /* Initialize the local fields.  */
       eh = (struct ppc_stub_hash_entry *) entry;
-      eh->stub_type = ppc_stub_none;
+      eh->type.main = ppc_stub_none;
+      eh->type.sub = ppc_stub_toc;
+      eh->type.r2save = 0;
       eh->group = NULL;
       eh->stub_offset = 0;
       eh->target_value = 0;
@@ -3717,24 +3721,33 @@ ppc_stub_name (const asection *input_section,
 }
 
 /* If mixing power10 with non-power10 code and --power10-stubs is not
-   specified (or is auto) then calls using @notoc relocations that
-   need a stub will utilize power10 instructions in the stub, and
-   calls without @notoc relocations will not use power10 instructions.
-   The two classes of stubs are stored in separate stub_hash_table
-   entries having the same key string.  The two entries will always be
-   adjacent on entry->root.next chain, even if hash table resizing
-   occurs.  This function selects the correct entry to use.  */
+   specified (or is auto) then there may be multiple stub types for any
+   given symbol.  Up to three classes of stubs are stored in separate
+   stub_hash_table entries having the same key string.  The entries
+   will always be adjacent on entry->root.next chain, even if hash
+   table resizing occurs.  This function selects the correct entry to
+   use.  */
 
 static struct ppc_stub_hash_entry *
-select_alt_stub (struct ppc_stub_hash_entry *entry, bool notoc)
+select_alt_stub (struct ppc_stub_hash_entry *entry,
+		 enum elf_ppc64_reloc_type r_type)
 {
-  bool have_notoc;
+  enum ppc_stub_sub_type subt;
 
-  have_notoc = (entry->stub_type == ppc_stub_plt_call_notoc
-		|| entry->stub_type == ppc_stub_plt_branch_notoc
-		|| entry->stub_type == ppc_stub_long_branch_notoc);
+  switch (r_type)
+    {
+    case R_PPC64_REL24_NOTOC:
+      subt = ppc_stub_notoc;
+      break;
+    case R_PPC64_REL24_P9NOTOC:
+      subt = ppc_stub_p9notoc;
+      break;
+    default:
+      subt = ppc_stub_toc;
+      break;
+    }
 
-  if (have_notoc != notoc)
+  while (entry != NULL && entry->type.sub != subt)
     {
       const char *stub_name = entry->root.string;
 
@@ -3792,11 +3805,7 @@ ppc_get_stub_entry (const asection *input_section,
     }
 
   if (stub_entry != NULL && htab->params->power10_stubs == -1)
-    {
-      bool notoc = ELF64_R_TYPE (rel->r_info) == R_PPC64_REL24_NOTOC;
-
-      stub_entry = select_alt_stub (stub_entry, notoc);
-    }
+    stub_entry = select_alt_stub (stub_entry, ELF64_R_TYPE (rel->r_info));
 
   return stub_entry;
 }
@@ -3852,6 +3861,75 @@ ppc_add_stub (const char *stub_name,
   stub_entry->group = group;
   stub_entry->stub_offset = 0;
   return stub_entry;
+}
+
+/* A stub has already been created, but it may not be the required
+   type.  We shouldn't be transitioning from plt_call to long_branch
+   stubs or vice versa, but we might be upgrading from plt_call to
+   plt_call with r2save for example.  */
+
+static bool
+ppc_merge_stub (struct ppc_link_hash_table *htab,
+		struct ppc_stub_hash_entry *stub_entry,
+		struct ppc_stub_type stub_type,
+		enum elf_ppc64_reloc_type r_type)
+{
+  struct ppc_stub_type old_type = stub_entry->type;
+
+  if (old_type.main == ppc_stub_save_res)
+    return true;
+
+  if (htab->params->power10_stubs == -1)
+    {
+      /* For --power10-stubs=auto, don't merge _notoc and other
+	 varieties of stubs.  */
+      struct ppc_stub_hash_entry *alt_stub;
+
+      alt_stub = select_alt_stub (stub_entry, r_type);
+      if (alt_stub == NULL)
+	{
+	  alt_stub = ((struct ppc_stub_hash_entry *)
+		      stub_hash_newfunc (NULL,
+					 &htab->stub_hash_table,
+					 stub_entry->root.string));
+	  if (alt_stub == NULL)
+	    return false;
+
+	  *alt_stub = *stub_entry;
+	  stub_entry->root.next = &alt_stub->root;
+
+	  /* Sort notoc stubs first, then toc stubs, then p9notoc.
+	     Not that it matters, this just puts smaller stubs first.  */
+	  if (stub_type.sub == ppc_stub_notoc)
+	    alt_stub = stub_entry;
+	  else if (stub_type.sub == ppc_stub_p9notoc
+		   && alt_stub->root.next
+		   && alt_stub->root.next->string == alt_stub->root.string)
+	    {
+	      struct ppc_stub_hash_entry *next
+		= (struct ppc_stub_hash_entry *) alt_stub->root.next;
+	      alt_stub->type = next->type;
+	      alt_stub = next;
+	    }
+	  alt_stub->type = stub_type;
+	  return true;
+	}
+      stub_entry = alt_stub;
+    }
+
+  old_type = stub_entry->type;
+  if (old_type.main == ppc_stub_plt_branch)
+    old_type.main += ppc_stub_long_branch - ppc_stub_plt_branch;
+
+  if (old_type.main != stub_type.main
+      || (old_type.sub != stub_type.sub
+	  && old_type.sub != ppc_stub_toc
+	  && stub_type.sub != ppc_stub_toc))
+    abort ();
+
+  stub_entry->type.sub |= stub_type.sub;
+  stub_entry->type.r2save |= stub_type.r2save;
+  return true;
 }
 
 /* Create .got and .rela.got sections in ABFD, and .got in dynobj if
@@ -4575,6 +4653,7 @@ is_branch_reloc (enum elf_ppc64_reloc_type r_type)
 {
   return (r_type == R_PPC64_REL24
 	  || r_type == R_PPC64_REL24_NOTOC
+	  || r_type == R_PPC64_REL24_P9NOTOC
 	  || r_type == R_PPC64_REL14
 	  || r_type == R_PPC64_REL14_BRTAKEN
 	  || r_type == R_PPC64_REL14_BRNTAKEN
@@ -5031,6 +5110,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_PPC64_REL24:
 	case R_PPC64_REL24_NOTOC:
+	case R_PPC64_REL24_P9NOTOC:
 	rel24:
 	  plt_list = ifunc;
 	  if (h != NULL)
@@ -10454,7 +10534,7 @@ ppc64_elf_hash_symbol (struct elf_link_hash_entry *h)
 
 /* Determine the type of stub needed, if any, for a call.  */
 
-static inline enum ppc_stub_type
+static inline enum ppc_stub_main_type
 ppc_type_of_stub (asection *input_sec,
 		  const Elf_Internal_Rela *rel,
 		  struct ppc_link_hash_entry **hash,
@@ -10947,20 +11027,22 @@ plt_stub_size (struct ppc_link_hash_table *htab,
 {
   unsigned size;
 
-  if (stub_entry->stub_type >= ppc_stub_plt_call_notoc)
+  if (stub_entry->type.sub == ppc_stub_notoc)
     {
-      if (htab->params->power10_stubs != 0)
-	size = 8 + size_power10_offset (off, odd);
-      else
-	size = 8 + size_offset (off - 8);
-      if (stub_entry->stub_type > ppc_stub_plt_call_notoc)
+      size = 8 + size_power10_offset (off, odd);
+      if (stub_entry->type.r2save)
+	size += 4;
+    }
+  else if (stub_entry->type.sub == ppc_stub_p9notoc)
+    {
+      size = 8 + size_offset (off - 8);
+      if (stub_entry->type.r2save)
 	size += 4;
     }
   else
     {
       size = 12;
-      if (ALWAYS_EMIT_R2SAVE
-	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+      if (ALWAYS_EMIT_R2SAVE || stub_entry->type.r2save)
 	size += 4;
       if (PPC_HA (off) != 0)
 	size += 4;
@@ -10986,15 +11068,13 @@ plt_stub_size (struct ppc_link_hash_table *htab,
       if (!htab->params->no_tls_get_addr_regsave)
 	{
 	  size += 30 * 4;
-	  if (stub_entry->stub_type == ppc_stub_plt_call_r2save
-	      || stub_entry->stub_type == ppc_stub_plt_call_both)
+	  if (stub_entry->type.r2save)
 	    size += 4;
 	}
       else
 	{
 	  size += 7 * 4;
-	  if (stub_entry->stub_type == ppc_stub_plt_call_r2save
-	      || stub_entry->stub_type == ppc_stub_plt_call_both)
+	  if (stub_entry->type.r2save)
 	    size += 6 * 4;
 	}
     }
@@ -11033,7 +11113,7 @@ plt_stub_pad (struct ppc_link_hash_table *htab,
   return 0;
 }
 
-/* Build a .plt call stub.  */
+/* Build a toc using .plt call stub.  */
 
 static inline bfd_byte *
 build_plt_stub (struct ppc_link_hash_table *htab,
@@ -11069,8 +11149,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
 	    + htab->glink->output_offset
 	    + htab->glink->output_section->vma);
       from = (p - stub_entry->group->stub_sec->contents
-	      + 4 * (ALWAYS_EMIT_R2SAVE
-		     || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+	      + 4 * (ALWAYS_EMIT_R2SAVE || stub_entry->type.r2save)
 	      + 4 * (PPC_HA (offset) != 0)
 	      + 4 * (PPC_HA (offset + 8 + 8 * plt_static_chain)
 		     != PPC_HA (offset))
@@ -11086,8 +11165,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
     {
       if (r != NULL)
 	{
-	  if (ALWAYS_EMIT_R2SAVE
-	      || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+	  if (ALWAYS_EMIT_R2SAVE || stub_entry->type.r2save)
 	    r[0].r_offset += 4;
 	  r[0].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_HA);
 	  r[1].r_offset = r[0].r_offset + 4;
@@ -11115,8 +11193,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
 		}
 	    }
 	}
-      if (ALWAYS_EMIT_R2SAVE
-	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+      if (ALWAYS_EMIT_R2SAVE || stub_entry->type.r2save)
 	bfd_put_32 (obfd, STD_R2_0R1 + STK_TOC (htab), p),	p += 4;
       if (plt_load_toc)
 	{
@@ -11151,8 +11228,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
     {
       if (r != NULL)
 	{
-	  if (ALWAYS_EMIT_R2SAVE
-	      || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+	  if (ALWAYS_EMIT_R2SAVE || stub_entry->type.r2save)
 	    r[0].r_offset += 4;
 	  r[0].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_DS);
 	  if (plt_load_toc)
@@ -11177,8 +11253,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
 		}
 	    }
 	}
-      if (ALWAYS_EMIT_R2SAVE
-	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
+      if (ALWAYS_EMIT_R2SAVE || stub_entry->type.r2save)
 	bfd_put_32 (obfd, STD_R2_0R1 + STK_TOC (htab), p),	p += 4;
       bfd_put_32 (obfd, LD_R12_0R2 | PPC_LO (offset), p),	p += 4;
       if (plt_load_toc
@@ -11239,8 +11314,7 @@ build_tls_get_addr_head (struct ppc_link_hash_table *htab,
 
   if (!htab->params->no_tls_get_addr_regsave)
     p = tls_get_addr_prologue (obfd, p, htab);
-  else if (stub_entry->stub_type == ppc_stub_plt_call_r2save
-	   || stub_entry->stub_type == ppc_stub_plt_call_both)
+  else if (stub_entry->type.r2save)
     {
       bfd_put_32 (obfd, MFLR_R0, p);
       p += 4;
@@ -11262,16 +11336,14 @@ build_tls_get_addr_tail (struct ppc_link_hash_table *htab,
     {
       bfd_put_32 (obfd, BCTRL, p - 4);
 
-      if (stub_entry->stub_type == ppc_stub_plt_call_r2save
-	  || stub_entry->stub_type == ppc_stub_plt_call_both)
+      if (stub_entry->type.r2save)
 	{
 	  bfd_put_32 (obfd, LD_R2_0R1 + STK_TOC (htab), p);
 	  p += 4;
 	}
       p = tls_get_addr_epilogue (obfd, p, htab);
     }
-  else if (stub_entry->stub_type == ppc_stub_plt_call_r2save
-	   || stub_entry->stub_type == ppc_stub_plt_call_both)
+  else if (stub_entry->type.r2save)
     {
       bfd_put_32 (obfd, BCTRL, p - 4);
 
@@ -11339,8 +11411,7 @@ build_tls_get_addr_tail (struct ppc_link_hash_table *htab,
 	  *eh++ = 65;
 	  stub_entry->group->eh_size = eh - base;
 	}
-      else if (stub_entry->stub_type == ppc_stub_plt_call_r2save
-	       || stub_entry->stub_type == ppc_stub_plt_call_both)
+      else if (stub_entry->type.r2save)
 	{
 	  unsigned int lr_used, delta;
 
@@ -11529,11 +11600,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   BFD_ASSERT (stub_entry->stub_offset >= stub_entry->group->stub_sec->size);
   loc = stub_entry->group->stub_sec->contents + stub_entry->stub_offset;
 
-  htab->stub_count[stub_entry->stub_type - 1] += 1;
-  switch (stub_entry->stub_type)
+  htab->stub_count[stub_entry->type.main - 1] += 1;
+  if (stub_entry->type.main == ppc_stub_long_branch
+      && stub_entry->type.sub == ppc_stub_toc)
     {
-    case ppc_stub_long_branch:
-    case ppc_stub_long_branch_r2off:
       /* Branches are relative.  This is where we are going to.  */
       targ = (stub_entry->target_value
 	      + stub_entry->target_section->output_offset
@@ -11548,7 +11618,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       p = loc;
       obfd = htab->params->stub_bfd;
-      if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
+      if (stub_entry->type.r2save)
 	{
 	  bfd_vma r2off = get_r2off (info, stub_entry);
 
@@ -11595,10 +11665,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      && !use_global_in_relocs (htab, stub_entry, r, 1))
 	    return false;
 	}
-      break;
-
-    case ppc_stub_plt_branch:
-    case ppc_stub_plt_branch_r2off:
+    }
+  else if (stub_entry->type.main == ppc_stub_plt_branch
+	   && stub_entry->type.sub == ppc_stub_toc)
+    {
       br_entry = ppc_branch_hash_lookup (&htab->branch_hash_table,
 					 stub_entry->root.string + 9,
 					 false, false);
@@ -11613,7 +11683,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       targ = (stub_entry->target_value
 	      + stub_entry->target_section->output_offset
 	      + stub_entry->target_section->output_section->vma);
-      if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
+      if (!stub_entry->type.r2save)
 	targ += PPC64_LOCAL_ENTRY_OFFSET (stub_entry->other);
 
       bfd_put_64 (htab->brlt->owner, targ,
@@ -11683,7 +11753,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  r[0].r_offset = loc - stub_entry->group->stub_sec->contents;
 	  if (bfd_big_endian (info->output_bfd))
 	    r[0].r_offset += 2;
-	  if (stub_entry->stub_type == ppc_stub_plt_branch_r2off)
+	  if (stub_entry->type.r2save)
 	    r[0].r_offset += 4;
 	  r[0].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_DS);
 	  r[0].r_addend = targ;
@@ -11698,7 +11768,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       p = loc;
       obfd = htab->params->stub_bfd;
-      if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
+      if (!stub_entry->type.r2save)
 	{
 	  if (PPC_HA (off) != 0)
 	    {
@@ -11746,21 +11816,16 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       p += 4;
       bfd_put_32 (obfd, BCTR, p);
       p += 4;
-      break;
-
-    case ppc_stub_long_branch_notoc:
-    case ppc_stub_long_branch_both:
-    case ppc_stub_plt_branch_notoc:
-    case ppc_stub_plt_branch_both:
-    case ppc_stub_plt_call_notoc:
-    case ppc_stub_plt_call_both:
+    }
+  else if (stub_entry->type.sub >= ppc_stub_notoc)
+    {
+      bool is_plt = stub_entry->type.main == ppc_stub_plt_call;
       p = loc;
       off = (stub_entry->stub_offset
 	     + stub_entry->group->stub_sec->output_offset
 	     + stub_entry->group->stub_sec->output_section->vma);
       obfd = htab->params->stub_bfd;
-      is_tga = ((stub_entry->stub_type == ppc_stub_plt_call_notoc
-		 || stub_entry->stub_type == ppc_stub_plt_call_both)
+      is_tga = (is_plt
 		&& stub_entry->h != NULL
 		&& is_tls_get_addr (&stub_entry->h->elf, htab)
 		&& htab->params->tls_get_addr_opt);
@@ -11769,15 +11834,13 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  p = build_tls_get_addr_head (htab, stub_entry, p);
 	  off += p - loc;
 	}
-      if (stub_entry->stub_type == ppc_stub_long_branch_both
-	  || stub_entry->stub_type == ppc_stub_plt_branch_both
-	  || stub_entry->stub_type == ppc_stub_plt_call_both)
+      if (stub_entry->type.r2save)
 	{
 	  off += 4;
 	  bfd_put_32 (obfd, STD_R2_0R1 + STK_TOC (htab), p);
 	  p += 4;
 	}
-      if (stub_entry->stub_type >= ppc_stub_plt_call_notoc)
+      if (is_plt)
 	{
 	  targ = stub_entry->plt_ent->plt.offset & ~1;
 	  if (targ >= (bfd_vma) -2)
@@ -11802,11 +11865,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       relp = p;
       num_rel = 0;
-      if (htab->params->power10_stubs != 0)
-	{
-	  bool load = stub_entry->stub_type >= ppc_stub_plt_call_notoc;
-	  p = build_power10_offset (obfd, p, off, odd, load);
-	}
+      if (stub_entry->type.sub == ppc_stub_notoc)
+	p = build_power10_offset (obfd, p, off, odd, is_plt);
       else
 	{
 	  if (htab->glink_eh_frame != NULL
@@ -11837,11 +11897,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	     sequence emitted by build_offset.  The offset is therefore 8
 	     less than calculated from the start of the sequence.  */
 	  off -= 8;
-	  p = build_offset (obfd, p, off,
-			    stub_entry->stub_type >= ppc_stub_plt_call_notoc);
+	  p = build_offset (obfd, p, off, is_plt);
 	}
 
-      if (stub_entry->stub_type <= ppc_stub_long_branch_both)
+      if (stub_entry->type.main == ppc_stub_long_branch)
 	{
 	  bfd_vma from;
 	  num_rel = 1;
@@ -11865,7 +11924,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  bfd_vma roff = relp - stub_entry->group->stub_sec->contents;
-	  if (htab->params->power10_stubs != 0)
+	  if (stub_entry->type.sub == ppc_stub_notoc)
 	    num_rel += num_relocs_for_power10_offset (off, odd);
 	  else
 	    {
@@ -11875,12 +11934,11 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  r = get_relocs (stub_entry->group->stub_sec, num_rel);
 	  if (r == NULL)
 	    return false;
-	  if (htab->params->power10_stubs != 0)
+	  if (stub_entry->type.sub == ppc_stub_notoc)
 	    r = emit_relocs_for_power10_offset (info, r, roff, targ, off, odd);
 	  else
 	    r = emit_relocs_for_offset (info, r, roff, targ, off);
-	  if (stub_entry->stub_type == ppc_stub_long_branch_notoc
-	      || stub_entry->stub_type == ppc_stub_long_branch_both)
+	  if (stub_entry->type.main == ppc_stub_long_branch)
 	    {
 	      ++r;
 	      roff = p - 4 - stub_entry->group->stub_sec->contents;
@@ -11892,10 +11950,9 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 		return false;
 	    }
 	}
-      break;
-
-    case ppc_stub_plt_call:
-    case ppc_stub_plt_call_r2save:
+    }
+  else if (stub_entry->type.main == ppc_stub_plt_call)
+    {
       if (stub_entry->h != NULL
 	  && stub_entry->h->is_func_descriptor
 	  && stub_entry->h->oh != NULL)
@@ -11972,12 +12029,11 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       p = build_plt_stub (htab, stub_entry, p, off, r);
       if (is_tga)
 	p = build_tls_get_addr_tail (htab, stub_entry, p, loc);
-      break;
-
-    case ppc_stub_save_res:
-      return true;
-
-    default:
+    }
+  else if (stub_entry->type.main == ppc_stub_save_res)
+    return true;
+  else
+    {
       BFD_FAIL ();
       return false;
     }
@@ -11990,25 +12046,16 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       size_t len1, len2;
       char *name;
       const char *const stub_str[] = { "long_branch",
-				       "long_branch",
-				       "long_branch",
-				       "long_branch",
 				       "plt_branch",
-				       "plt_branch",
-				       "plt_branch",
-				       "plt_branch",
-				       "plt_call",
-				       "plt_call",
-				       "plt_call",
 				       "plt_call" };
 
-      len1 = strlen (stub_str[stub_entry->stub_type - 1]);
+      len1 = strlen (stub_str[stub_entry->type.main - 1]);
       len2 = strlen (stub_entry->root.string);
       name = bfd_malloc (len1 + len2 + 2);
       if (name == NULL)
 	return false;
       memcpy (name, stub_entry->root.string, 9);
-      memcpy (name + 9, stub_str[stub_entry->stub_type - 1], len1);
+      memcpy (name + 9, stub_str[stub_entry->type.main - 1], len1);
       memcpy (name + len1 + 9, stub_entry->root.string + 8, len2 - 8 + 1);
       h = elf_link_hash_lookup (&htab->elf, name, true, false, false);
       if (h == NULL)
@@ -12082,20 +12129,22 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       /* Don't make stubs to out-of-line register save/restore
 	 functions.  Instead, emit copies of the functions.  */
       stub_entry->group->needs_save_res = 1;
-      stub_entry->stub_type = ppc_stub_save_res;
+      stub_entry->type.main = ppc_stub_save_res;
+      stub_entry->type.sub = ppc_stub_toc;
+      stub_entry->type.r2save = 0;
       return true;
     }
 
-  switch (stub_entry->stub_type)
+  if (stub_entry->type.main == ppc_stub_plt_branch)
     {
-    case ppc_stub_plt_branch:
-    case ppc_stub_plt_branch_r2off:
       /* Reset the stub type from the plt branch variant in case we now
 	 can reach with a shorter stub.  */
-      stub_entry->stub_type += ppc_stub_long_branch - ppc_stub_plt_branch;
-      /* Fall through.  */
-    case ppc_stub_long_branch:
-    case ppc_stub_long_branch_r2off:
+      stub_entry->type.main += ppc_stub_long_branch - ppc_stub_plt_branch;
+    }
+
+  if (stub_entry->type.main == ppc_stub_long_branch
+      && stub_entry->type.sub == ppc_stub_toc)
+    {
       targ = (stub_entry->target_value
 	      + stub_entry->target_section->output_offset
 	      + stub_entry->target_section->output_section->vma);
@@ -12106,7 +12155,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       size = 4;
       r2off = 0;
-      if (stub_entry->stub_type == ppc_stub_long_branch_r2off)
+      if (stub_entry->type.r2save)
 	{
 	  r2off = get_r2off (info, stub_entry);
 	  if (r2off == (bfd_vma) -1)
@@ -12125,7 +12174,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       /* If the branch offset is too big, use a ppc_stub_plt_branch.
 	 Do the same for -R objects without function descriptors.  */
-      if ((stub_entry->stub_type == ppc_stub_long_branch_r2off
+      if ((stub_entry->type.r2save
 	   && r2off == 0
 	   && htab->sec_info[stub_entry->target_section->id].toc_off == 0)
 	  || off + (1 << 25) >= (bfd_vma) (1 << 26))
@@ -12172,8 +12221,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      stub_entry->group->stub_sec->flags |= SEC_RELOC;
 	    }
 
-	  stub_entry->stub_type += ppc_stub_plt_branch - ppc_stub_long_branch;
-	  if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
+	  stub_entry->type.main += ppc_stub_plt_branch - ppc_stub_long_branch;
+	  if (!stub_entry->type.r2save)
 	    {
 	      size = 12;
 	      if (PPC_HA (off) != 0)
@@ -12196,19 +12245,14 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  stub_entry->group->stub_sec->reloc_count += 1;
 	  stub_entry->group->stub_sec->flags |= SEC_RELOC;
 	}
-      break;
-
-    case ppc_stub_plt_branch_notoc:
-    case ppc_stub_plt_branch_both:
-      stub_entry->stub_type += ppc_stub_long_branch - ppc_stub_plt_branch;
-      /* Fall through.  */
-    case ppc_stub_long_branch_notoc:
-    case ppc_stub_long_branch_both:
+    }
+  else if (stub_entry->type.main == ppc_stub_long_branch)
+    {
       off = (stub_entry->stub_offset
 	     + stub_entry->group->stub_sec->output_offset
 	     + stub_entry->group->stub_sec->output_section->vma);
       size = 0;
-      if (stub_entry->stub_type == ppc_stub_long_branch_both)
+      if (stub_entry->type.r2save)
 	size = 4;
       off += size;
       targ = (stub_entry->target_value
@@ -12220,7 +12264,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  unsigned int num_rel;
-	  if (htab->params->power10_stubs != 0)
+	  if (stub_entry->type.sub == ppc_stub_notoc)
 	    num_rel = num_relocs_for_power10_offset (off, odd);
 	  else
 	    num_rel = num_relocs_for_offset (off - 8);
@@ -12228,7 +12272,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  stub_entry->group->stub_sec->flags |= SEC_RELOC;
 	}
 
-      if (htab->params->power10_stubs != 0)
+      if (stub_entry->type.sub == ppc_stub_notoc)
 	extra = size_power10_offset (off, odd);
       else
 	extra = size_offset (off - 8);
@@ -12239,12 +12283,12 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	 calculated.  */
       off -= extra;
 
-      if (htab->params->power10_stubs == 0)
+      if (stub_entry->type.sub != ppc_stub_notoc)
 	{
 	  /* After the bcl, lr has been modified so we need to emit
 	     .eh_frame info saying the return address is in r12.  */
 	  lr_used = stub_entry->stub_offset + 8;
-	  if (stub_entry->stub_type == ppc_stub_long_branch_both)
+	  if (stub_entry->type.r2save)
 	    lr_used += 4;
 	  /* The eh_frame info will consist of a DW_CFA_advance_loc or
 	     variant, DW_CFA_register, 65, 12, DW_CFA_advance_loc+2,
@@ -12257,16 +12301,15 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       /* If the branch can't reach, use a plt_branch.  */
       if (off + (1 << 25) >= (bfd_vma) (1 << 26))
 	{
-	  stub_entry->stub_type += (ppc_stub_plt_branch_notoc
-				    - ppc_stub_long_branch_notoc);
+	  stub_entry->type.main += ppc_stub_plt_branch - ppc_stub_long_branch;
 	  size += 4;
 	}
       else if (info->emitrelocations)
 	stub_entry->group->stub_sec->reloc_count +=1;
-      break;
-
-    case ppc_stub_plt_call_notoc:
-    case ppc_stub_plt_call_both:
+    }
+  else if (stub_entry->type.sub >= ppc_stub_notoc)
+    {
+      BFD_ASSERT (stub_entry->type.main == ppc_stub_plt_call);
       lr_used = 0;
       if (stub_entry->h != NULL
 	  && is_tls_get_addr (&stub_entry->h->elf, htab)
@@ -12275,10 +12318,10 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  lr_used += 7 * 4;
 	  if (!htab->params->no_tls_get_addr_regsave)
 	    lr_used += 11 * 4;
-	  else if (stub_entry->stub_type == ppc_stub_plt_call_both)
+	  else if (stub_entry->type.r2save)
 	    lr_used += 2 * 4;
 	}
-      if (stub_entry->stub_type == ppc_stub_plt_call_both)
+      if (stub_entry->type.r2save)
 	lr_used += 4;
       targ = stub_entry->plt_ent->plt.offset & ~1;
       if (targ >= (bfd_vma) -2)
@@ -12313,7 +12356,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  unsigned int num_rel;
-	  if (htab->params->power10_stubs != 0)
+	  if (stub_entry->type.sub == ppc_stub_notoc)
 	    num_rel = num_relocs_for_power10_offset (off, odd);
 	  else
 	    num_rel = num_relocs_for_offset (off - 8);
@@ -12323,7 +12366,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       size = plt_stub_size (htab, stub_entry, off, odd);
 
-      if (htab->params->power10_stubs == 0)
+      if (stub_entry->type.sub != ppc_stub_notoc)
 	{
 	  /* After the bcl, lr has been modified so we need to emit
 	     .eh_frame info saying the return address is in r12.  */
@@ -12335,9 +12378,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  stub_entry->group->eh_size += eh_advance_size (delta) + 6;
 	  stub_entry->group->lr_restore = lr_used + 8;
 	}
-      if ((stub_entry->stub_type == ppc_stub_plt_call_notoc
-	   || stub_entry->stub_type == ppc_stub_plt_call_both)
-	  && stub_entry->h != NULL
+      if (stub_entry->h != NULL
 	  && is_tls_get_addr (&stub_entry->h->elf, htab)
 	  && htab->params->tls_get_addr_opt)
 	{
@@ -12350,7 +12391,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      stub_entry->group->lr_restore
 		= stub_entry->stub_offset + size - 4;
 	    }
-	  else if (stub_entry->stub_type == ppc_stub_plt_call_both)
+	  else if (stub_entry->type.r2save)
 	    {
 	      lr_used = stub_entry->stub_offset + size - 20;
 	      delta = lr_used - stub_entry->group->lr_restore;
@@ -12359,10 +12400,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 		= stub_entry->stub_offset + size - 4;
 	    }
 	}
-      break;
-
-    case ppc_stub_plt_call:
-    case ppc_stub_plt_call_r2save:
+    }
+  else if (stub_entry->type.main == ppc_stub_plt_call)
+    {
       targ = stub_entry->plt_ent->plt.offset & ~(bfd_vma) 1;
       if (targ >= (bfd_vma) -2)
 	abort ();
@@ -12404,7 +12444,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (stub_entry->h != NULL
 	  && is_tls_get_addr (&stub_entry->h->elf, htab)
 	  && htab->params->tls_get_addr_opt
-	  && stub_entry->stub_type == ppc_stub_plt_call_r2save)
+	  && stub_entry->type.r2save)
 	{
 	  if (!htab->params->no_tls_get_addr_regsave)
 	    {
@@ -12425,9 +12465,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    }
 	  stub_entry->group->lr_restore = stub_entry->stub_offset + size - 4;
 	}
-      break;
-
-    default:
+    }
+  else
+    {
       BFD_FAIL ();
       return false;
     }
@@ -12837,6 +12877,7 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
 	  r_type = ELF64_R_TYPE (rel->r_info);
 	  if (r_type != R_PPC64_REL24
 	      && r_type != R_PPC64_REL24_NOTOC
+	      && r_type != R_PPC64_REL24_P9NOTOC
 	      && r_type != R_PPC64_REL14
 	      && r_type != R_PPC64_REL14_BRTAKEN
 	      && r_type != R_PPC64_REL14_BRNTAKEN
@@ -13425,7 +13466,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		{
 		  enum elf_ppc64_reloc_type r_type;
 		  unsigned int r_indx;
-		  enum ppc_stub_type stub_type;
+		  struct ppc_stub_type stub_type;
 		  struct ppc_stub_hash_entry *stub_entry;
 		  asection *sym_sec, *code_sec;
 		  bfd_vma sym_value, code_value;
@@ -13453,6 +13494,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		  /* Only look for stubs on branch instructions.  */
 		  if (r_type != R_PPC64_REL24
 		      && r_type != R_PPC64_REL24_NOTOC
+		      && r_type != R_PPC64_REL24_P9NOTOC
 		      && r_type != R_PPC64_REL14
 		      && r_type != R_PPC64_REL14_BRTAKEN
 		      && r_type != R_PPC64_REL14_BRNTAKEN)
@@ -13556,23 +13598,35 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 
 		  /* Determine what (if any) linker stub is needed.  */
 		  plt_ent = NULL;
-		  stub_type = ppc_type_of_stub (section, irela, &hash,
-						&plt_ent, destination,
-						local_off);
+		  stub_type.main = ppc_type_of_stub (section, irela, &hash,
+						     &plt_ent, destination,
+						     local_off);
+		  stub_type.sub = ppc_stub_toc;
+		  stub_type.r2save = 0;
 
-		  if (r_type == R_PPC64_REL24_NOTOC)
+		  if (r_type == R_PPC64_REL24_NOTOC
+		      || r_type == R_PPC64_REL24_P9NOTOC)
 		    {
-		      if (stub_type == ppc_stub_plt_call)
-			stub_type = ppc_stub_plt_call_notoc;
-		      else if (stub_type == ppc_stub_long_branch
+		      enum ppc_stub_sub_type notoc = ppc_stub_notoc;
+		      if (htab->params->power10_stubs == 0
+			  || (r_type == R_PPC64_REL24_P9NOTOC
+			      && htab->params->power10_stubs != 1))
+			notoc = ppc_stub_p9notoc;
+		      if (stub_type.main == ppc_stub_plt_call)
+			stub_type.sub = notoc;
+		      else if (stub_type.main == ppc_stub_long_branch
 			       || (code_sec != NULL
 				   && code_sec->output_section != NULL
 				   && (((hash ? hash->elf.other : sym->st_other)
 					& STO_PPC64_LOCAL_MASK)
 				       > 1 << STO_PPC64_LOCAL_BIT)))
-			stub_type = ppc_stub_long_branch_notoc;
+			{
+			  stub_type.main = ppc_stub_long_branch;
+			  stub_type.sub = notoc;
+			  stub_type.r2save = 0;
+			}
 		    }
-		  else if (stub_type != ppc_stub_plt_call)
+		  else if (stub_type.main != ppc_stub_plt_call)
 		    {
 		      /* Check whether we need a TOC adjusting stub.
 			 Since the linker pastes together pieces from
@@ -13589,15 +13643,18 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			  || (((hash ? hash->elf.other : sym->st_other)
 			       & STO_PPC64_LOCAL_MASK)
 			      == 1 << STO_PPC64_LOCAL_BIT))
-			stub_type = ppc_stub_long_branch_r2off;
+			{
+			  stub_type.main = ppc_stub_long_branch;
+			  stub_type.sub = ppc_stub_toc;
+			  stub_type.r2save = 1;
+			}
 		    }
 
-		  if (stub_type == ppc_stub_none)
+		  if (stub_type.main == ppc_stub_none)
 		    continue;
 
 		  /* __tls_get_addr calls might be eliminated.  */
-		  if (stub_type != ppc_stub_plt_call
-		      && stub_type != ppc_stub_plt_call_notoc
+		  if (stub_type.main != ppc_stub_plt_call
 		      && hash != NULL
 		      && is_tls_get_addr (&hash->elf, htab)
 		      && section->has_tls_reloc
@@ -13614,7 +13671,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			continue;
 		    }
 
-		  if (stub_type == ppc_stub_plt_call)
+		  if (stub_type.main == ppc_stub_plt_call
+		      && stub_type.sub == ppc_stub_toc)
 		    {
 		      if (!htab->opd_abi
 			  && htab->params->plt_localentry0 != 0
@@ -13630,7 +13688,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			    goto error_ret_free_internal;
 			}
 		      else
-			stub_type = ppc_stub_plt_call_r2save;
+			stub_type.r2save = 1;
 		    }
 
 		  /* Support for grouping stub sections.  */
@@ -13645,106 +13703,15 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 						     stub_name, false, false);
 		  if (stub_entry != NULL)
 		    {
-		      enum ppc_stub_type old_type;
-
-		      /* A stub has already been created, but it may
-			 not be the required type.  We shouldn't be
-			 transitioning from plt_call to long_branch
-			 stubs or vice versa, but we might be
-			 upgrading from plt_call to plt_call_r2save or
-			 from long_branch to long_branch_r2off.  */
 		      free (stub_name);
-		      if (htab->params->power10_stubs == -1)
+		      if (!ppc_merge_stub (htab, stub_entry, stub_type, r_type))
 			{
-			  /* For --power10-stubs=auto, don't merge _notoc
-			     and other varieties of stubs.  (The _both
-			     variety won't be created.)  */
-			  bool notoc = r_type == R_PPC64_REL24_NOTOC;
-			  struct ppc_stub_hash_entry *alt_stub
-			    = select_alt_stub (stub_entry, notoc);
-
-			  if (alt_stub == NULL)
-			    {
-			      alt_stub = (struct ppc_stub_hash_entry *)
-				stub_hash_newfunc (NULL,
-						   &htab->stub_hash_table,
-						   stub_entry->root.string);
-			      if (alt_stub == NULL)
-				{
-				  /* xgettext:c-format */
-				  _bfd_error_handler
-				    (_("%pB: cannot create stub entry %s"),
-				     section->owner, stub_entry->root.string);
-				  goto error_ret_free_internal;
-				}
-			      *alt_stub = *stub_entry;
-			      stub_entry->root.next = &alt_stub->root;
-			      if (notoc)
-				/* Sort notoc stubs first, for no good
-				   reason.  */
-				alt_stub = stub_entry;
-			      alt_stub->stub_type = stub_type;
-			    }
-			  stub_entry = alt_stub;
+			  /* xgettext:c-format */
+			  _bfd_error_handler
+			    (_("%pB: cannot create stub entry %s"),
+			     section->owner, stub_entry->root.string);
+			  goto error_ret_free_internal;
 			}
-		      old_type = stub_entry->stub_type;
-		      switch (old_type)
-			{
-			default:
-			  abort ();
-
-			case ppc_stub_save_res:
-			  continue;
-
-			case ppc_stub_plt_call:
-			case ppc_stub_plt_call_r2save:
-			case ppc_stub_plt_call_notoc:
-			case ppc_stub_plt_call_both:
-			  if (stub_type == ppc_stub_plt_call)
-			    continue;
-			  else if (stub_type == ppc_stub_plt_call_r2save)
-			    {
-			      if (old_type == ppc_stub_plt_call_notoc)
-				stub_type = ppc_stub_plt_call_both;
-			    }
-			  else if (stub_type == ppc_stub_plt_call_notoc)
-			    {
-			      if (old_type == ppc_stub_plt_call_r2save)
-				stub_type = ppc_stub_plt_call_both;
-			    }
-			  else
-			    abort ();
-			  break;
-
-			case ppc_stub_plt_branch:
-			case ppc_stub_plt_branch_r2off:
-			case ppc_stub_plt_branch_notoc:
-			case ppc_stub_plt_branch_both:
-			  old_type += (ppc_stub_long_branch
-				       - ppc_stub_plt_branch);
-			  /* Fall through.  */
-			case ppc_stub_long_branch:
-			case ppc_stub_long_branch_r2off:
-			case ppc_stub_long_branch_notoc:
-			case ppc_stub_long_branch_both:
-			  if (stub_type == ppc_stub_long_branch)
-			    continue;
-			  else if (stub_type == ppc_stub_long_branch_r2off)
-			    {
-			      if (old_type == ppc_stub_long_branch_notoc)
-				stub_type = ppc_stub_long_branch_both;
-			    }
-			  else if (stub_type == ppc_stub_long_branch_notoc)
-			    {
-			      if (old_type == ppc_stub_long_branch_r2off)
-				stub_type = ppc_stub_long_branch_both;
-			    }
-			  else
-			    abort ();
-			  break;
-			}
-		      if (old_type < stub_type)
-			stub_entry->stub_type = stub_type;
 		      continue;
 		    }
 
@@ -13762,9 +13729,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		      return false;
 		    }
 
-		  stub_entry->stub_type = stub_type;
-		  if (stub_type >= ppc_stub_plt_call
-		      && stub_type <= ppc_stub_plt_call_both)
+		  stub_entry->type = stub_type;
+		  if (stub_type.main == ppc_stub_plt_call)
 		    {
 		      stub_entry->target_value = sym_value;
 		      stub_entry->target_section = sym_sec;
@@ -14815,31 +14781,13 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	{
 	  if (asprintf (stats, _("%s"
 				 "  branch         %lu\n"
-				 "  branch toc adj %lu\n"
-				 "  branch notoc   %lu\n"
-				 "  branch both    %lu\n"
 				 "  long branch    %lu\n"
-				 "  long toc adj   %lu\n"
-				 "  long notoc     %lu\n"
-				 "  long both      %lu\n"
 				 "  plt call       %lu\n"
-				 "  plt call save  %lu\n"
-				 "  plt call notoc %lu\n"
-				 "  plt call both  %lu\n"
 				 "  global entry   %lu"),
 			groupmsg,
 			htab->stub_count[ppc_stub_long_branch - 1],
-			htab->stub_count[ppc_stub_long_branch_r2off - 1],
-			htab->stub_count[ppc_stub_long_branch_notoc - 1],
-			htab->stub_count[ppc_stub_long_branch_both - 1],
 			htab->stub_count[ppc_stub_plt_branch - 1],
-			htab->stub_count[ppc_stub_plt_branch_r2off - 1],
-			htab->stub_count[ppc_stub_plt_branch_notoc - 1],
-			htab->stub_count[ppc_stub_plt_branch_both - 1],
 			htab->stub_count[ppc_stub_plt_call - 1],
-			htab->stub_count[ppc_stub_plt_call_r2save - 1],
-			htab->stub_count[ppc_stub_plt_call_notoc - 1],
-			htab->stub_count[ppc_stub_plt_call_both - 1],
 			htab->stub_count[ppc_stub_global_entry - 1]) < 0)
 	    *stats = NULL;
 	  free (groupmsg);
@@ -15626,6 +15574,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      rel->r_addend = toc_addend;
 		    }
 		  if (r_type1 == R_PPC64_REL24_NOTOC
+		      || r_type1 == R_PPC64_REL24_P9NOTOC
 		      || r_type1 == R_PPC64_PLTCALL_NOTOC)
 		    {
 		      r_type = R_PPC64_NONE;
@@ -15675,6 +15624,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		bfd_put_32 (output_bfd, NOP, contents + offset + 4);
 
 	      if (r_type1 == R_PPC64_REL24_NOTOC
+		  || r_type1 == R_PPC64_REL24_P9NOTOC
 		  || r_type1 == R_PPC64_PLTCALL_NOTOC)
 		{
 		  r_type = R_PPC64_NONE;
@@ -15871,6 +15821,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC64_REL24:
 	case R_PPC64_REL24_NOTOC:
+	case R_PPC64_REL24_P9NOTOC:
 	case R_PPC64_PLTCALL:
 	case R_PPC64_PLTCALL_NOTOC:
 	  /* Calls to functions with a different TOC, such as calls to
@@ -15889,32 +15840,28 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if ((r_type == R_PPC64_PLTCALL
 	       || r_type == R_PPC64_PLTCALL_NOTOC)
 	      && stub_entry != NULL
-	      && stub_entry->stub_type >= ppc_stub_plt_call
-	      && stub_entry->stub_type <= ppc_stub_plt_call_both)
+	      && stub_entry->type.main == ppc_stub_plt_call)
 	    stub_entry = NULL;
 
 	  if (stub_entry != NULL
-	      && ((stub_entry->stub_type >= ppc_stub_plt_call
-		   && stub_entry->stub_type <= ppc_stub_plt_call_both)
-		  || stub_entry->stub_type == ppc_stub_plt_branch_r2off
-		  || stub_entry->stub_type == ppc_stub_plt_branch_both
-		  || stub_entry->stub_type == ppc_stub_long_branch_r2off
-		  || stub_entry->stub_type == ppc_stub_long_branch_both))
+	      && (stub_entry->type.main == ppc_stub_plt_call
+		  || stub_entry->type.r2save))
 	    {
 	      bool can_plt_call = false;
 
-	      if (stub_entry->stub_type == ppc_stub_plt_call
-		  && !htab->opd_abi
-		  && htab->params->plt_localentry0 != 0
-		  && h != NULL
-		  && is_elfv2_localentry0 (&h->elf))
-		{
-		  /* The function doesn't use or change r2.  */
-		  can_plt_call = true;
-		}
-	      else if (r_type == R_PPC64_REL24_NOTOC)
+	      if (r_type == R_PPC64_REL24_NOTOC
+		  || r_type == R_PPC64_REL24_P9NOTOC)
 		{
 		  /* NOTOC calls don't need to restore r2.  */
+		  can_plt_call = true;
+		}
+	      else if (stub_entry->type.main == ppc_stub_plt_call
+		       && !htab->opd_abi
+		       && htab->params->plt_localentry0 != 0
+		       && h != NULL
+		       && is_elfv2_localentry0 (&h->elf))
+		{
+		  /* The function doesn't use or change r2.  */
 		  can_plt_call = true;
 		}
 
@@ -15997,8 +15944,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	      if (!can_plt_call)
 		{
-		  if (stub_entry->stub_type >= ppc_stub_plt_call
-		      && stub_entry->stub_type <= ppc_stub_plt_call_both)
+		  if (stub_entry->type.main == ppc_stub_plt_call)
 		    info->callbacks->einfo
 		      /* xgettext:c-format */
 		      (_("%H: call to `%pT' lacks nop, can't restore toc; "
@@ -16016,14 +15962,13 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		}
 
 	      if (can_plt_call
-		  && stub_entry->stub_type >= ppc_stub_plt_call
-		  && stub_entry->stub_type <= ppc_stub_plt_call_both)
+		  && stub_entry->type.main == ppc_stub_plt_call)
 		unresolved_reloc = false;
 	    }
 
 	  if ((stub_entry == NULL
-	       || stub_entry->stub_type == ppc_stub_long_branch
-	       || stub_entry->stub_type == ppc_stub_plt_branch)
+	       || stub_entry->type.main == ppc_stub_long_branch
+	       || stub_entry->type.main == ppc_stub_plt_branch)
 	      && get_opd_info (sec) != NULL)
 	    {
 	      /* The branch destination is the value of the opd entry. */
@@ -16050,36 +15995,36 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 						  : sym->st_other);
 
 	  if (stub_entry != NULL
-	      && (stub_entry->stub_type == ppc_stub_long_branch
-		  || stub_entry->stub_type == ppc_stub_plt_branch)
-	      && (r_type == R_PPC64_ADDR14_BRTAKEN
-		  || r_type == R_PPC64_ADDR14_BRNTAKEN
-		  || (relocation + addend - from + max_br_offset
-		      < 2 * max_br_offset)))
-	    /* Don't use the stub if this branch is in range.  */
-	    stub_entry = NULL;
+	      && (stub_entry->type.main == ppc_stub_long_branch
+		  || stub_entry->type.main == ppc_stub_plt_branch))
+	    {
+	      if (stub_entry->type.sub == ppc_stub_toc
+		  && !stub_entry->type.r2save
+		  && (r_type == R_PPC64_ADDR14_BRTAKEN
+		      || r_type == R_PPC64_ADDR14_BRNTAKEN
+		      || (relocation + addend - from + max_br_offset
+			  < 2 * max_br_offset)))
+		/* Don't use the stub if this branch is in range.  */
+		stub_entry = NULL;
 
-	  if (stub_entry != NULL
-	      && (stub_entry->stub_type == ppc_stub_long_branch_notoc
-		  || stub_entry->stub_type == ppc_stub_long_branch_both
-		  || stub_entry->stub_type == ppc_stub_plt_branch_notoc
-		  || stub_entry->stub_type == ppc_stub_plt_branch_both)
-	      && (r_type != R_PPC64_REL24_NOTOC
-		  || ((fdh ? fdh->elf.other : sym->st_other)
-		      & STO_PPC64_LOCAL_MASK) <= 1 << STO_PPC64_LOCAL_BIT)
-	      && (relocation + addend - from + max_br_offset
-		  < 2 * max_br_offset))
-	    stub_entry = NULL;
+	      if (stub_entry != NULL
+		  && stub_entry->type.sub >= ppc_stub_notoc
+		  && ((r_type != R_PPC64_REL24_NOTOC
+		       && r_type != R_PPC64_REL24_P9NOTOC)
+		      || ((fdh ? fdh->elf.other : sym->st_other)
+			  & STO_PPC64_LOCAL_MASK) <= 1 << STO_PPC64_LOCAL_BIT)
+		  && (relocation + addend - from + max_br_offset
+		      < 2 * max_br_offset))
+		stub_entry = NULL;
 
-	  if (stub_entry != NULL
-	      && (stub_entry->stub_type == ppc_stub_long_branch_r2off
-		  || stub_entry->stub_type == ppc_stub_long_branch_both
-		  || stub_entry->stub_type == ppc_stub_plt_branch_r2off
-		  || stub_entry->stub_type == ppc_stub_plt_branch_both)
-	      && r_type == R_PPC64_REL24_NOTOC
-	      && (relocation + addend - from + max_br_offset
-		  < 2 * max_br_offset))
-	    stub_entry = NULL;
+	      if (stub_entry != NULL
+		  && stub_entry->type.r2save
+		  && (r_type == R_PPC64_REL24_NOTOC
+		      || r_type == R_PPC64_REL24_P9NOTOC)
+		  && (relocation + addend - from + max_br_offset
+		      < 2 * max_br_offset))
+		stub_entry = NULL;
+	    }
 
 	  if (stub_entry != NULL)
 	    {
@@ -16087,7 +16032,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		 rather than the procedure directly.  */
 	      asection *stub_sec = stub_entry->group->stub_sec;
 
-	      if (stub_entry->stub_type == ppc_stub_save_res)
+	      if (stub_entry->type.main == ppc_stub_save_res)
 		relocation += (stub_sec->output_offset
 			       + stub_sec->output_section->vma
 			       + stub_sec->size - htab->sfpr->size
@@ -16100,29 +16045,27 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      addend = 0;
 	      reloc_dest = DEST_STUB;
 
-	      if ((((stub_entry->stub_type == ppc_stub_plt_call
-		     && ALWAYS_EMIT_R2SAVE)
-		    || stub_entry->stub_type == ppc_stub_plt_call_r2save
-		    || stub_entry->stub_type == ppc_stub_plt_call_both)
-		   && rel + 1 < relend
-		   && rel[1].r_offset == rel->r_offset + 4
-		   && ELF64_R_TYPE (rel[1].r_info) == R_PPC64_TOCSAVE)
-		  || ((stub_entry->stub_type == ppc_stub_long_branch_both
-		       || stub_entry->stub_type == ppc_stub_plt_branch_both
-		       || stub_entry->stub_type == ppc_stub_plt_call_both)
-		      && r_type == R_PPC64_REL24_NOTOC))
+	      if (((stub_entry->type.r2save
+		    && (r_type == R_PPC64_REL24_NOTOC
+			|| r_type == R_PPC64_REL24_P9NOTOC))
+		   || ((stub_entry->type.main == ppc_stub_plt_call
+			&& (ALWAYS_EMIT_R2SAVE || stub_entry->type.r2save))
+		       && rel + 1 < relend
+		       && rel[1].r_offset == rel->r_offset + 4
+		       && ELF64_R_TYPE (rel[1].r_info) == R_PPC64_TOCSAVE))
+		  && !(stub_entry->type.main == ppc_stub_plt_call
+		       && htab->params->tls_get_addr_opt
+		       && h != NULL
+		       && is_tls_get_addr (&h->elf, htab)))
 		{
 		  /* Skip over the r2 store at the start of the stub.  */
-		  if (!(stub_entry->stub_type >= ppc_stub_plt_call
-			&& htab->params->tls_get_addr_opt
-			&& h != NULL
-			&& is_tls_get_addr (&h->elf, htab)))
-		    relocation += 4;
+		  relocation += 4;
 		}
 
-	      if (r_type == R_PPC64_REL24_NOTOC
-		  && (stub_entry->stub_type == ppc_stub_plt_call_notoc
-		      || stub_entry->stub_type == ppc_stub_plt_call_both))
+	      if ((r_type == R_PPC64_REL24_NOTOC
+		   || r_type == R_PPC64_REL24_P9NOTOC)
+		  && stub_entry->type.main == ppc_stub_plt_call
+		  && stub_entry->type.sub >= ppc_stub_notoc)
 		htab->notoc_plt = 1;
 	    }
 
@@ -16157,7 +16100,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		   && h->elf.root.type == bfd_link_hash_undefweak
 		   && h->elf.dynindx == -1
 		   && (r_type == R_PPC64_REL24
-		       || r_type == R_PPC64_REL24_NOTOC)
+		       || r_type == R_PPC64_REL24_NOTOC
+		       || r_type == R_PPC64_REL24_P9NOTOC)
 		   && relocation == 0
 		   && addend == 0
 		   && offset_in_range (input_section, rel->r_offset, 4))
@@ -16694,6 +16638,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_REL14_BRTAKEN:
 	case R_PPC64_REL24:
 	case R_PPC64_REL24_NOTOC:
+	case R_PPC64_REL24_P9NOTOC:
 	case R_PPC64_PCREL34:
 	case R_PPC64_PCREL28:
 	  break;

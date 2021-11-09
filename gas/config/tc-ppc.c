@@ -2255,6 +2255,10 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
 	    exp_p->X_add_symbol = &abs_symbol;
 	  }
 
+	if (reloc == BFD_RELOC_PPC64_REL24_NOTOC
+	    && (ppc_cpu & PPC_OPCODE_POWER10) == 0)
+	  reloc = BFD_RELOC_PPC64_REL24_P9NOTOC;
+
 	return (bfd_reloc_code_real_type) reloc;
       }
 
@@ -3128,6 +3132,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bool *pc_relative)
     case BFD_RELOC_32_PCREL:
     case BFD_RELOC_32_PLT_PCREL:
     case BFD_RELOC_PPC64_REL24_NOTOC:
+    case BFD_RELOC_PPC64_REL24_P9NOTOC:
 #ifndef OBJ_XCOFF
     case BFD_RELOC_PPC_B16:
 #endif
@@ -6557,6 +6562,7 @@ ppc_force_relocation (fixS *fix)
     case BFD_RELOC_PPC_B16:
     case BFD_RELOC_PPC_BA16:
     case BFD_RELOC_PPC64_REL24_NOTOC:
+    case BFD_RELOC_PPC64_REL24_P9NOTOC:
       /* All branch fixups targeting a localentry symbol must
          force a relocation.  */
       if (fix->fx_addsy)
@@ -6595,6 +6601,7 @@ ppc_fix_adjustable (fixS *fix)
     case BFD_RELOC_PPC_BA16_BRTAKEN:
     case BFD_RELOC_PPC_BA16_BRNTAKEN:
     case BFD_RELOC_PPC64_REL24_NOTOC:
+    case BFD_RELOC_PPC64_REL24_P9NOTOC:
       if (fix->fx_addsy)
 	{
 	  asymbol *bfdsym = symbol_get_bfdsym (fix->fx_addsy);
