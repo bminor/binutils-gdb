@@ -924,7 +924,7 @@ print_unicode_stream_body (const char *     filename,
   uint num_read = 0;
   uint num_chars = 0;
   uint num_print = 0;
-  int c;
+  int c = 0;
 
   /* Find a series of string_min characters.  Put them into print_buf.  */
   do
