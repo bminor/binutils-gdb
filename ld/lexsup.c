@@ -333,7 +333,8 @@ static const struct ld_option ld_options[] =
   { {"disable-multiple-abs-defs", no_argument, NULL,
      OPTION_DISABLE_MULTIPLE_DEFS_ABS},
     '\0', NULL, N_("Do not allow multiple definitions with symbols included\n"
-		   "           in filename invoked by -R or --just-symbols"),
+		   "                                in filename invoked by -R "
+		   "or --just-symbols"),
     TWO_DASHES},
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
     '\0', NULL, N_("Generate embedded relocs"), TWO_DASHES},

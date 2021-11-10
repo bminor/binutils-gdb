@@ -1501,7 +1501,7 @@ msgstr "Desenreda los nombres de los símbolos [utilizando el ESTILO]"
 #: lexsup.c:331
 msgid ""
 "Do not allow multiple definitions with symbols included\n"
-"           in filename invoked by -R or --just-symbols"
+"                                in filename invoked by -R or --just-symbols"
 msgstr ""
 "No permite definiciones múltiples con símbolos incluidos\n"
 "           en el nombre de fichero invocado por -R o --just-symbols"

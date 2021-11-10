@@ -1542,7 +1542,7 @@ msgstr "Recouvrir les noms des symboles encodés par mutilisation [utilisant le 
 #: lexsup.c:335
 msgid ""
 "Do not allow multiple definitions with symbols included\n"
-"           in filename invoked by -R or --just-symbols"
+"                                in filename invoked by -R or --just-symbols"
 msgstr ""
 "Ne pas autoriser les définitions multiples avec des symboles inclus\n"
 "           depuis des noms de fichier invoqués par -R ou --just-symbols"

@@ -1495,7 +1495,7 @@ msgstr "    Прекрштава називе симбола [користећи
 #: lexsup.c:331
 msgid ""
 "Do not allow multiple definitions with symbols included\n"
-"           in filename invoked by -R or --just-symbols"
+"                                in filename invoked by -R or --just-symbols"
 msgstr ""
 "Не допушта више дефиниција са симболима укљученим\n"
 "           у називу датотеке призване са „-R“ или „--just-symbols“"

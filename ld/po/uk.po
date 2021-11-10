@@ -1545,7 +1545,7 @@ msgstr "розкодовувати назви символів [з викори�
 #: lexsup.c:335
 msgid ""
 "Do not allow multiple definitions with symbols included\n"
-"           in filename invoked by -R or --just-symbols"
+"                                in filename invoked by -R or --just-symbols"
 msgstr ""
 "Забороняти кратні визначення визначень із символами, включеними\n"
 "           до назви файла, що викликається -R або --just-symbols"
