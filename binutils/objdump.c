@@ -438,7 +438,7 @@ static struct option long_options[]=
   {"architecture", required_argument, NULL, 'm'},
   {"archive-headers", no_argument, NULL, 'a'},
 #ifdef ENABLE_LIBCTF
-  {"ctf", required_argument, NULL, OPTION_CTF},
+  {"ctf", optional_argument, NULL, OPTION_CTF},
   {"ctf-parent", required_argument, NULL, OPTION_CTF_PARENT},
 #endif
   {"debugging", no_argument, NULL, 'g'},
@@ -509,7 +509,7 @@ nonfatal (const char *msg)
    Returns the number of characters added to OUT.
    Returns the number of bytes consumed from IN in CONSUMED.
    Always consumes at least one byte and displays at least one character.  */
-   
+
 static unsigned int
 display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
 {
@@ -563,7 +563,7 @@ display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
 	out += sprintf (out, "%02x", in [j]);
       out += sprintf (out, "%c", unicode_display == unicode_hex ? '>' : '}');
       break;
-      
+
     case unicode_highlight:
       if (isatty (1))
 	out += sprintf (out, "\x1B[31;47m"); /* Red.  */
@@ -573,7 +573,7 @@ display_utf8 (const unsigned char * in, char * out, unsigned int * consumed)
 	{
 	case 2:
 	  out += sprintf (out, "\\u%02x%02x",
-		  ((in[0] & 0x1c) >> 2), 
+		  ((in[0] & 0x1c) >> 2),
 		  ((in[0] & 0x03) << 6) | (in[1] & 0x3f));
 	  break;
 
@@ -915,7 +915,7 @@ dump_headers (bfd *abfd)
 
   if (wide_output)
     bfd_map_over_sections (abfd, find_longest_section_name,
-                           &max_section_name_length);
+			   &max_section_name_length);
 
   printf (_("Idx %-*s Size      %-*s%-*sFile off  Algn"),
 	  max_section_name_length, "Name",
@@ -927,7 +927,7 @@ dump_headers (bfd *abfd)
   printf ("\n");
 
   bfd_map_over_sections (abfd, dump_section_header,
-                         &max_section_name_length);
+			 &max_section_name_length);
 }
 
 static asymbol **
@@ -1297,7 +1297,7 @@ sym_ok (bool want_section,
   if (want_section)
     {
       /* NB: An object file can have different sections with the same
-         section name.  Compare compare section pointers if they have
+	 section name.  Compare compare section pointers if they have
 	 the same owner.  */
       if (sorted_syms[place]->section->owner == sec->owner
 	  && sorted_syms[place]->section != sec)
@@ -1417,7 +1417,7 @@ find_symbol_for_address (bfd_vma vma,
 		      && vma >= bfd_section_vma (sec)
 		      && vma < (bfd_section_vma (sec)
 				+ bfd_section_size (sec) / opb)));
-  
+
   if (! sym_ok (want_section, abfd, thisplace, sec, inf))
     {
       long i;
@@ -1488,7 +1488,7 @@ find_symbol_for_address (bfd_vma vma,
 	  if (rel->address == vma)
 	    {
 	      /* Absolute relocations do not provide a more helpful
-	         symbolic address.  Find a non-absolute relocation
+		 symbolic address.  Find a non-absolute relocation
 		 with the same address.  */
 	      arelent **rel_vma = rel_mid;
 	      for (rel_mid--;
@@ -1978,7 +1978,7 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	    {
 	      /* Demangle the name.  */
 	      demangle_alloc = bfd_demangle (abfd, functionname,
-	                                          demangle_flags);
+					     demangle_flags);
 	    }
 
 	  /* Demangling adds trailing parens, so don't print those.  */
@@ -2565,7 +2565,7 @@ disassemble_jumps (struct disassemble_info * inf,
       inf->bytes_per_line = 0;
       inf->bytes_per_chunk = 0;
       inf->flags = ((disassemble_all ? DISASSEMBLE_DATA : 0)
-        | (wide_output ? WIDE_OUTPUT : 0));
+		    | (wide_output ? WIDE_OUTPUT : 0));
       if (machine)
 	inf->flags |= USER_SPECIFIED_MACHINE_TYPE;
 
@@ -3376,8 +3376,8 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   /* Find the nearest symbol forwards from our current position.  */
   paux->require_sec = true;
   sym = (asymbol *) find_symbol_for_address (section->vma + addr_offset,
-                                             (struct disassemble_info *) inf,
-                                             &place);
+					     (struct disassemble_info *) inf,
+					     &place);
   paux->require_sec = false;
 
   /* PR 9774: If the target used signed addresses then we must make
@@ -3629,7 +3629,7 @@ disassemble_data (bfd *abfd)
      because that will screw up the relocs.  */
   sorted_symcount = symcount ? symcount : dynsymcount;
   sorted_syms = (asymbol **) xmalloc ((sorted_symcount + synthcount)
-                                      * sizeof (asymbol *));
+				      * sizeof (asymbol *));
   if (sorted_symcount != 0)
     {
       memcpy (sorted_syms, symcount ? syms : dynsyms,
@@ -3909,7 +3909,7 @@ open_debug_file (const char * pathname)
 
   if (! bfd_check_format (data, bfd_object))
     return NULL;
-  
+
   return data;
 }
 
@@ -3972,7 +3972,7 @@ dump_dwarf_section (bfd *abfd, asection *section,
 	else
 	  sec->name = sec->xcoff_name;
 	if (load_specific_debug_section ((enum dwarf_section_display_enum) i,
-                                         section, abfd))
+					 section, abfd))
 	  {
 	    debug_displays [i].display (sec, abfd);
 
@@ -4438,22 +4438,22 @@ dump_target_specific (bfd *abfd)
       e = strchr (b, ',');
 
       if (e)
-        *e = 0;
+	*e = 0;
 
       for (opt = (*desc)->options; opt->name; opt++)
-        if (strcmp (opt->name, b) == 0)
-          {
-            opt->selected = true;
-            break;
-          }
+	if (strcmp (opt->name, b) == 0)
+	  {
+	    opt->selected = true;
+	    break;
+	  }
       if (opt->name == NULL)
-        non_fatal (_("target specific dump '%s' not supported"), b);
+	non_fatal (_("target specific dump '%s' not supported"), b);
 
       if (e)
-        {
-          *e = ',';
-          b = e + 1;
-        }
+	{
+	  *e = ',';
+	  b = e + 1;
+	}
     }
   while (e != NULL);
 
@@ -4736,8 +4736,8 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
       if (with_line_numbers
 	  && sec != NULL
 	  && bfd_find_nearest_line_discriminator (abfd, sec, syms, q->address,
-                                                  &filename, &functionname,
-                                                  &linenumber, &discriminator))
+						  &filename, &functionname,
+						  &linenumber, &discriminator))
 	{
 	  if (functionname != NULL
 	      && (last_functionname == NULL
@@ -4754,15 +4754,15 @@ dump_reloc_set (bfd *abfd, asection *sec, arelent **relpp, long relcount)
 		  || (filename != NULL
 		      && last_filename != NULL
 		      && filename_cmp (filename, last_filename) != 0)
-                  || (discriminator != last_discriminator)))
+		  || (discriminator != last_discriminator)))
 	    {
-              if (discriminator > 0)
-                printf ("%s:%u\n", filename == NULL ? "???" :
+	      if (discriminator > 0)
+		printf ("%s:%u\n", filename == NULL ? "???" :
 			sanitize_string (filename), linenumber);
-              else
-                printf ("%s:%u (discriminator %u)\n",
+	      else
+		printf ("%s:%u (discriminator %u)\n",
 			filename == NULL ? "???" : sanitize_string (filename),
-                        linenumber, discriminator);
+			linenumber, discriminator);
 	      last_line = linenumber;
 	      last_discriminator = discriminator;
 	      if (last_filename != NULL)
@@ -5015,7 +5015,7 @@ dump_bfd (bfd *abfd, bool is_mainfile)
      displaying information about the main file.  Any memory allocated by
      load_separate_debug_files will be released when we call
      free_debug_memory below.
-     
+
      The test on is_mainfile is there because the chain of separate debug
      info files is a global variable shared by all invocations of dump_bfd.  */
   if (byte_get != NULL && is_mainfile)
@@ -5088,7 +5088,7 @@ dump_bfd (bfd *abfd, bool is_mainfile)
 	    {
 	      asymbol **  extra_syms;
 	      long        old_symcount = symcount;
-	      
+
 	      extra_syms = slurp_symtab (i->handle);
 
 	      if (extra_syms)
@@ -5253,7 +5253,7 @@ display_any_bfd (bfd *file, int level)
       bfd *last_arfile = NULL;
 
       if (level == 0)
-        printf (_("In archive %s:\n"), sanitize_string (bfd_get_filename (file)));
+	printf (_("In archive %s:\n"), sanitize_string (bfd_get_filename (file)));
       else if (level > 100)
 	{
 	  /* Prevent corrupted files from spinning us into an
@@ -5262,7 +5262,7 @@ display_any_bfd (bfd *file, int level)
 	  return;
 	}
       else
-        printf (_("In nested archive %s:\n"),
+	printf (_("In nested archive %s:\n"),
 		sanitize_string (bfd_get_filename (file)));
 
       for (;;)
