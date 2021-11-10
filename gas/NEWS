@@ -9,6 +9,8 @@
 
 * Add support for Cortex-A510, Cortex-A710, Cortex-X2 for AArch64.
 
+* Add support for Cortex-A710 for Arm.
+
 * Outputs of .ds.x directive and .tfloat directive with hex input from
   x86 assembler have been reduced from 12 bytes to 10 bytes to match the
   output of .tfloat directive.

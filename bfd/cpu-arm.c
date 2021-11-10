@@ -193,6 +193,7 @@ processors[] =
   { bfd_mach_arm_XScale,  "xscale"	    },
   { bfd_mach_arm_8,	  "xgene1"	    },
   { bfd_mach_arm_8,	  "xgene2"	    },
+  { bfd_mach_arm_9,	  "cortex-a710"	    },
   { bfd_mach_arm_ep9312,  "ep9312"	    },
   { bfd_mach_arm_iWMMXt,  "iwmmxt"	    },
   { bfd_mach_arm_iWMMXt2, "iwmmxt2"	    },
