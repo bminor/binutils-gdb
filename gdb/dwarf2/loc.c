@@ -356,9 +356,9 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = baton->per_cu->addr_size ();
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
-  /* Adjust base_address for relocatable objects.  */
-  CORE_ADDR base_offset = baton->per_objfile->objfile->text_section_offset ();
-  CORE_ADDR base_address = baton->base_address + base_offset;
+  /* Adjustment for relocatable objects.  */
+  CORE_ADDR text_offset = baton->per_objfile->objfile->text_section_offset ();
+  CORE_ADDR base_address = baton->base_address;
   const gdb_byte *loc_ptr, *buf_end;
 
   loc_ptr = baton->data;
@@ -396,7 +396,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  return NULL;
 
 	case DEBUG_LOC_BASE_ADDRESS:
-	  base_address = high + base_offset;
+	  base_address = high;
 	  continue;
 
 	case DEBUG_LOC_START_END:
@@ -416,17 +416,14 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
       /* Otherwise, a location expression entry.
 	 If the entry is from a DWO, don't add base address: the entry is from
 	 .debug_addr which already has the DWARF "base address". We still add
-	 base_offset in case we're debugging a PIE executable. However, if the
+	 text offset in case we're debugging a PIE executable. However, if the
 	 entry is DW_LLE_offset_pair from a DWO, add the base address as the
 	 operands are offsets relative to the applicable base address.
 	 If the entry is DW_LLE_start_end or DW_LLE_start_length, then
 	 it already is an address, and we don't need to add the base.  */
-      if (baton->from_dwo && kind != DEBUG_LOC_OFFSET_PAIR)
-	{
-	  low += base_offset;
-	  high += base_offset;
-	}
-      else if (kind == DEBUG_LOC_OFFSET_PAIR)
+      low += text_offset;
+      high += text_offset;
+      if (!baton->from_dwo && kind == DEBUG_LOC_OFFSET_PAIR)
 	{
 	  low += base_address;
 	  high += base_address;
@@ -3925,9 +3922,9 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
   int offset_size = dlbaton->per_cu->offset_size ();
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
-  /* Adjust base_address for relocatable objects.  */
-  CORE_ADDR base_offset = objfile->text_section_offset ();
-  CORE_ADDR base_address = dlbaton->base_address + base_offset;
+  /* Adjustment for relocatable objects.  */
+  CORE_ADDR text_offset = objfile->text_section_offset ();
+  CORE_ADDR base_address = dlbaton->base_address;
   int done = 0;
 
   loc_ptr = dlbaton->data;
@@ -3967,7 +3964,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	  continue;
 
 	case DEBUG_LOC_BASE_ADDRESS:
-	  base_address = high + base_offset;
+	  base_address = high;
 	  fprintf_filtered (stream, _("  Base address %s"),
 			    paddress (gdbarch, base_address));
 	  continue;
@@ -3987,7 +3984,9 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	}
 
       /* Otherwise, a location expression entry.  */
-      if (kind == DEBUG_LOC_OFFSET_PAIR)
+      low += text_offset;
+      high += text_offset;
+      if (!dlbaton->from_dwo && kind == DEBUG_LOC_OFFSET_PAIR)
 	{
 	  low += base_address;
 	  high += base_address;
