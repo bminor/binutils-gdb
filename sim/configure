@@ -15317,7 +15317,7 @@ yes|no) ;;
 esac
 fi
 
-if test "x${enable_sim_frv_trapdump}" != xno; then
+if test "x${enable_sim_frv_trapdump}" = xyes; then
   SIM_FRV_TRAPDUMP_FLAGS="-DTRAPDUMP=1"
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }

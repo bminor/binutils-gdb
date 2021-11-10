@@ -24,7 +24,7 @@ AC_ARG_ENABLE(sim-frv-trapdump,
 yes|no) ;;
 *) AC_MSG_ERROR("Unknown value $enableval passed to --enable-sim-trapdump");;
 esac])
-if test "x${enable_sim_frv_trapdump}" != xno; then
+if test "x${enable_sim_frv_trapdump}" = xyes; then
   SIM_FRV_TRAPDUMP_FLAGS="-DTRAPDUMP=1"
   AC_MSG_RESULT([yes])
 else
