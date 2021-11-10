@@ -4,6 +4,8 @@ if [istarget *] {
     # All machines.
     set all_machs "example"
 
+    set global_ld_options "-Ttext=0"
+
     foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.s]] {
 	# If we're only testing specific files and this isn't one of them,
 	# skip it.
@@ -12,4 +14,6 @@ if [istarget *] {
 	}
 	run_sim_test $src $all_machs
     }
+
+    unset global_ld_options
 }

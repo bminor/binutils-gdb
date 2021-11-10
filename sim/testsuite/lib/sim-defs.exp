@@ -390,13 +390,6 @@ proc run_sim_test { name requested_machs } {
 	    set options "$options timeout=$opts(timeout)"
 	}
 
-	if [string match "example" "$mach"] {
-	    set objcopy [find_binutils_prog objcopy]
-	    set comp_output [remote_exec host $objcopy "-O binary -j .text ${name}.x ${name}.bin"]
-	    file rename -force "${name}.bin" "${name}.x"
-	    append opts(sim,$mach) " --target binary"
-	}
-
 	set result [sim_run ${name}.x "$opts(sim,$mach) $global_sim_options" "$opts(progopts)" "" "$options"]
 	set return_code [lindex $result 0]
 	set output [lindex $result 1]
