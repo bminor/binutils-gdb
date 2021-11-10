@@ -57,7 +57,7 @@
 
   --unicode={default|locale|invalid|hex|escape|highlight}
   -u {d|l|i|x|e|h}
-                Determine how to handle UTF-8 unicode characters.  The default
+		Determine how to handle UTF-8 unicode characters.  The default
 		is no special treatment.  All other versions of this option
 		only apply if the encoding is valid and enabling the option
 		implies --encoding=S.
@@ -123,7 +123,7 @@ extern int errno;
 static int address_radix;
 
 /* Minimum length of sequence of graphic chars to trigger output.  */
-static uint string_min;
+static unsigned int string_min;
 
 /* Whether or not we include all whitespace as a graphic char.   */
 static bool include_all_whitespace;
@@ -272,7 +272,7 @@ main (int argc, char **argv)
 
 	case 's':
 	  output_separator = optarg;
-          break;
+	  break;
 
 	case 'U':
 	  if (streq (optarg, "default") || streq (optarg, "d"))
@@ -677,7 +677,7 @@ is_valid_utf8 (const unsigned char * buffer, unsigned long buflen)
 
   if ((buffer[2] & 0xc0) != 0x80)
     return 0;
-  
+
   if ((buffer[0] & 0x10) == 0)
     return 3;
 
@@ -694,11 +694,11 @@ is_valid_utf8 (const unsigned char * buffer, unsigned long buflen)
    of unicode_display.  The character is known to be valid.
    Returns the number of bytes consumed.  */
 
-static uint
+static unsigned int
 display_utf8_char (const unsigned char * buffer)
 {
-  uint j;
-  uint utf8_len;
+  unsigned int j;
+  unsigned int utf8_len;
 
   switch (buffer[0] & 0x30)
     {
@@ -712,7 +712,7 @@ display_utf8_char (const unsigned char * buffer)
     default:
       utf8_len = 4;
     }
-      
+
   switch (unicode_display)
     {
     default:
@@ -728,7 +728,7 @@ display_utf8_char (const unsigned char * buffer)
 	{
 	case 2:
 	  printf ("\\u%02x%02x",
-		  ((buffer[0] & 0x1c) >> 2), 
+		  ((buffer[0] & 0x1c) >> 2),
 		  ((buffer[0] & 0x03) << 6) | (buffer[1] & 0x3f));
 	  break;
 
@@ -857,7 +857,7 @@ print_unicode_buffer (const char *            filename,
     return;
 
   print_filename_and_address (filename, address + start_point);
-  
+
   /* We have found string_min characters.  Display them and any
      more that follow.  */
   for (i = start_point; i < buflen; i += char_len)
@@ -888,7 +888,10 @@ print_unicode_buffer (const char *            filename,
 }
 
 static int
-get_unicode_byte (FILE * stream, unsigned char * putback, uint * num_putback, uint * num_read)
+get_unicode_byte (FILE *          stream,
+		  unsigned char * putback,
+		  unsigned int *  num_putback,
+		  unsigned int *  num_read)
 {
   if (* num_putback > 0)
     {
@@ -912,7 +915,7 @@ print_unicode_stream_body (const char *     filename,
 			   file_ptr         address,
 			   FILE *           stream,
 			   unsigned char *  putback_buf,
-			   uint             num_putback,
+			   unsigned int     num_putback,
 			   unsigned char *  print_buf)
 {
   /* It would be nice if we could just read the stream into a buffer
@@ -921,9 +924,9 @@ print_unicode_stream_body (const char *     filename,
      we go one byte at a time...  */
 
   file_ptr start_point = 0;
-  uint num_read = 0;
-  uint num_chars = 0;
-  uint num_print = 0;
+  unsigned int num_read = 0;
+  unsigned int num_chars = 0;
+  unsigned int num_print = 0;
   int c = 0;
 
   /* Find a series of string_min characters.  Put them into print_buf.  */
@@ -1064,7 +1067,7 @@ print_unicode_stream_body (const char *     filename,
 
       print_filename_and_address (filename, address + start_point);
 
-      uint i;
+      unsigned int i;
       for (i = 0; i < num_print;)
 	{
 	  if (print_buf[i] < 127)
@@ -1075,7 +1078,7 @@ print_unicode_stream_body (const char *     filename,
 
       /* OK so now we have to start read unchecked bytes.  */
 
-        /* Find a series of string_min characters.  Put them into print_buf.  */
+      /* Find a series of string_min characters.  Put them into print_buf.  */
       do
 	{
 	  c = get_unicode_byte (stream, putback_buf, & num_putback, & num_read);
@@ -1213,7 +1216,7 @@ print_unicode_stream (const char * filename,
   unsigned char * print_buf = xmalloc ((4 * string_min) + 1);
   /* We should never have to put back more than 4 bytes.  */
   unsigned char putback_buf[5];
-  uint num_putback = 0;
+  unsigned int num_putback = 0;
 
   print_unicode_stream_body (filename, address, stream, putback_buf, num_putback, print_buf);
   free (print_buf);
@@ -1250,7 +1253,7 @@ print_strings (const char *filename, FILE *stream, file_ptr address,
   while (1)
     {
       file_ptr start;
-      uint i;
+      unsigned int i;
       long c;
 
       /* See if the next `string_min' chars are all graphic chars.  */

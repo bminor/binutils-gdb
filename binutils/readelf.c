@@ -702,7 +702,7 @@ print_symbol (signed int width, const char * symbol)
 	  /* Display unicode characters as something else.  */
 	  unsigned char bytes[4];
 	  bool          is_utf8;
-	  uint          nbytes;
+	  unsigned int  nbytes;
 
 	  bytes[0] = c;
 
@@ -767,7 +767,7 @@ print_symbol (signed int width, const char * symbol)
 
 	  if (unicode_display == unicode_hex || ! is_utf8)
 	    {
-	      uint i;
+	      unsigned int i;
 
 	      if (width_remaining < (nbytes * 2) + 2)
 		break;
