@@ -1,3 +1,16 @@
+2021-11-11  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-aarch64.c (parse_shift): Improve error message for
+	O_big expressions.
+	(parse_operands): In AARCH64_OPND_A64C_IMM6_EXT case, handle
+	parse_shifter_operand_imm returning non-O_constant
+	expressions; fix logic for coercion to the shifted form.
+	* testsuite/gas/aarch64/scbnds-immed.d: New test.
+	* testsuite/gas/aarch64/scbnds-immed.s: Assembly thereof.
+	* testsuite/gas/aarch64/scbnds-invalid.d: New test.
+	* testsuite/gas/aarch64/scbnds-invalid.l: Error output thereof.
+	* testsuite/gas/aarch64/scbnds-invalid.s: Assembly thereof.
+
 2021-09-24  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-aarch64.c (md_begin): Set the ELF header flag
