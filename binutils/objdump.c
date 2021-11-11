@@ -55,6 +55,7 @@
 #include "progress.h"
 #include "bucomm.h"
 #include "elfcomm.h"
+#include "demanguse.h"
 #include "dwarf.h"
 #include "ctf-api.h"
 #include "getopt.h"
@@ -330,10 +331,9 @@ usage (FILE *stream, int status)
       fprintf (stream, _("\
   -F, --file-offsets             Include file offsets when displaying information\n"));
       fprintf (stream, _("\
-  -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n\
-                                  The STYLE, if specified, can be `auto', `gnu',\n\
-                                  `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
-                                  or `gnat'\n"));
+  -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n"));
+      display_demangler_styles (stream, _("\
+                                   STYLE can be "));
       fprintf (stream, _("\
       --recurse-limit            Enable a limit on recursion whilst demangling\n\
                                   (default)\n"));

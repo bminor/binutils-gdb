@@ -57,6 +57,7 @@
 #include "bfd.h"
 #include "bucomm.h"
 #include "elfcomm.h"
+#include "demanguse.h"
 #include "dwarf.h"
 #include "ctf-api.h"
 #include "demangle.h"
@@ -4944,10 +4945,9 @@ usage (FILE * stream)
                          Force base for symbol sizes.  The options are \n\
                          mixed (the default), octal, decimal, hexadecimal.\n"));
   fprintf (stream, _("\
-  -C --demangle[=STYLE]  Decode low-level symbol names into user-level names\n\
-                          The STYLE, if specified, can be `auto' (the default),\n\
-                          `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
-                          or `gnat'\n"));
+  -C --demangle[=STYLE]  Decode mangled/processed symbol names\n"));
+  display_demangler_styles (stream, _("\
+                           STYLE can be "));
   fprintf (stream, _("\
      --no-demangle       Do not demangle low-level symbol names.  (default)\n"));
   fprintf (stream, _("\

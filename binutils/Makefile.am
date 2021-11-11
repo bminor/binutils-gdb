@@ -122,7 +122,7 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 
 HFILES = \
 	arsup.h binemul.h bucomm.h budbg.h \
-	coffgrok.h debug.h dlltool.h dwarf.h elfcomm.h \
+	coffgrok.h debug.h demanguse.h dlltool.h dwarf.h elfcomm.h \
 	objdump.h sysdep.h unwind-ia64.h windres.h winduni.h windint.h \
 	windmc.h
 
@@ -132,7 +132,7 @@ BUILT_SOURCES = $(GENERATED_HFILES)
 CFILES = \
 	addr2line.c ar.c arsup.c bin2c.c binemul.c bucomm.c \
 	coffdump.c coffgrok.c cxxfilt.c \
-	dwarf.c debug.c dlltool.c dllwrap.c \
+	dwarf.c debug.c demanguse.c dlltool.c dllwrap.c \
 	elfcomm.c emul_aix.c emul_vanilla.c filemode.c \
 	is-ranlib.c is-strip.c maybe-ranlib.c maybe-strip.c \
 	nm.c not-ranlib.c not-strip.c \
@@ -252,7 +252,7 @@ objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
 strings_SOURCES = strings.c $(BULIBS)
 
-readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c $(ELFLIBS)
+readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c demanguse.c $(ELFLIBS)
 readelf_LDADD   = $(LIBCTF_NOBFD) $(LIBINTL) $(LIBIBERTY) $(ZLIB) $(DEBUGINFOD_LIBS)
 
 elfedit_SOURCES = elfedit.c version.c $(ELFLIBS)
@@ -260,9 +260,9 @@ elfedit_LDADD = $(LIBINTL) $(LIBIBERTY)
 
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 
-nm_new_SOURCES = nm.c $(BULIBS)
+nm_new_SOURCES = nm.c demanguse.c $(BULIBS)
 
-objdump_SOURCES = objdump.c dwarf.c prdbg.c $(DEBUG_SRCS) $(BULIBS) $(ELFLIBS)
+objdump_SOURCES = objdump.c dwarf.c prdbg.c demanguse.c $(DEBUG_SRCS) $(BULIBS) $(ELFLIBS)
 EXTRA_objdump_SOURCES = od-xcoff.c
 objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(LIBCTF) $(BFDLIB) $(LIBIBERTY) $(LIBINTL) $(DEBUGINFOD_LIBS)
 

@@ -36,6 +36,7 @@
 #include "coff/internal.h"
 #include "libcoff.h"
 #include "bucomm.h"
+#include "demanguse.h"
 #include "plugin-api.h"
 #include "plugin.h"
 #include "safe-ctype.h"
@@ -291,54 +292,88 @@ usage (FILE *stream, int status)
 {
   fprintf (stream, _("Usage: %s [option(s)] [file(s)]\n"), program_name);
   fprintf (stream, _(" List symbols in [file(s)] (a.out by default).\n"));
-  fprintf (stream, _(" The options are:\n\
-  -a, --debug-syms       Display debugger-only symbols\n\
-  -A, --print-file-name  Print name of the input file before every symbol\n\
-  -B                     Same as --format=bsd\n\
-  -C, --demangle[=STYLE] Decode low-level symbol names into user-level names\n\
-                          The STYLE, if specified, can be `auto' (the default),\n\
-                          `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
-                          or `gnat'\n\
-      --no-demangle      Do not demangle low-level symbol names\n\
-      --recurse-limit    Enable a demangling recursion limit.  This is the default.\n\
-      --no-recurse-limit Disable a demangling recursion limit.\n\
-  -D, --dynamic          Display dynamic symbols instead of normal symbols\n\
-      --defined-only     Display only defined symbols\n\
-  -e                     (ignored)\n\
+  fprintf (stream, _(" The options are:\n"));
+  fprintf (stream, _("\
+  -a, --debug-syms       Display debugger-only symbols\n"));
+  fprintf (stream, _("\
+  -A, --print-file-name  Print name of the input file before every symbol\n"));
+  fprintf (stream, _("\
+  -B                     Same as --format=bsd\n"));
+  fprintf (stream, _("\
+  -C, --demangle[=STYLE] Decode mangled/processed symbol names\n"));
+  display_demangler_styles (stream, _("\
+                           STYLE can be "));
+  fprintf (stream, _("\
+      --no-demangle      Do not demangle low-level symbol names\n"));
+  fprintf (stream, _("\
+      --recurse-limit    Enable a demangling recursion limit.  (default)\n"));
+  fprintf (stream, _("\
+      --no-recurse-limit Disable a demangling recursion limit.\n"));
+  fprintf (stream, _("\
+  -D, --dynamic          Display dynamic symbols instead of normal symbols\n"));
+  fprintf (stream, _("\
+      --defined-only     Display only defined symbols\n"));
+  fprintf (stream, _("\
+  -e                     (ignored)\n"));
+  fprintf (stream, _("\
   -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be `bsd',\n\
-                           `sysv', `posix' or 'just-symbols'.  The default is `bsd'\n\
-  -g, --extern-only      Display only external symbols\n\
-    --ifunc-chars=CHARS  Characters to use when displaying ifunc symbols\n\
-  -j, --just-symbols     Same as --format=just-symbols\n\
+                           `sysv', `posix' or 'just-symbols'.\n\
+                           The default is `bsd'\n"));
+  fprintf (stream, _("\
+  -g, --extern-only      Display only external symbols\n"));
+  fprintf (stream, _("\
+    --ifunc-chars=CHARS  Characters to use when displaying ifunc symbols\n"));
+  fprintf (stream, _("\
+  -j, --just-symbols     Same as --format=just-symbols\n"));
+  fprintf (stream, _("\
   -l, --line-numbers     Use debugging information to find a filename and\n\
-                           line number for each symbol\n\
-  -n, --numeric-sort     Sort symbols numerically by address\n\
-  -o                     Same as -A\n\
-  -p, --no-sort          Do not sort the symbols\n\
-  -P, --portability      Same as --format=posix\n\
+                           line number for each symbol\n"));
+  fprintf (stream, _("\
+  -n, --numeric-sort     Sort symbols numerically by address\n"));
+  fprintf (stream, _("\
+  -o                     Same as -A\n"));
+  fprintf (stream, _("\
+  -p, --no-sort          Do not sort the symbols\n"));
+  fprintf (stream, _("\
+  -P, --portability      Same as --format=posix\n"));
+  fprintf (stream, _("\
   -r, --reverse-sort     Reverse the sense of the sort\n"));
 #if BFD_SUPPORTS_PLUGINS
   fprintf (stream, _("\
       --plugin NAME      Load the specified plugin\n"));
 #endif
   fprintf (stream, _("\
-  -S, --print-size       Print size of defined symbols\n\
-  -s, --print-armap      Include index for symbols from archive members\n\
-      --quiet            Suppress \"no symbols\" diagnostic\n\
-      --size-sort        Sort symbols by size\n\
-      --special-syms     Include special symbols in the output\n\
-      --synthetic        Display synthetic symbols as well\n\
-  -t, --radix=RADIX      Use RADIX for printing symbol values\n\
-      --target=BFDNAME   Specify the target object format as BFDNAME\n\
-  -u, --undefined-only   Display only undefined symbols\n\
+  -S, --print-size       Print size of defined symbols\n"));
+  fprintf (stream, _("\
+  -s, --print-armap      Include index for symbols from archive members\n"));
+  fprintf (stream, _("\
+      --quiet            Suppress \"no symbols\" diagnostic\n"));
+  fprintf (stream, _("\
+      --size-sort        Sort symbols by size\n"));
+  fprintf (stream, _("\
+      --special-syms     Include special symbols in the output\n"));
+  fprintf (stream, _("\
+      --synthetic        Display synthetic symbols as well\n"));
+  fprintf (stream, _("\
+  -t, --radix=RADIX      Use RADIX for printing symbol values\n"));
+  fprintf (stream, _("\
+      --target=BFDNAME   Specify the target object format as BFDNAME\n"));
+  fprintf (stream, _("\
+  -u, --undefined-only   Display only undefined symbols\n"));
+  fprintf (stream, _("\
   -U {d|s|i|x|e|h}       Specify how to treat UTF-8 encoded unicode characters\n\
-      --unicode={default|show|invalid|hex|escape|highlight}\n\
-      --with-symbol-versions  Display version strings after symbol names\n\
-  -X 32_64               (ignored)\n\
-  @FILE                  Read options from FILE\n\
-  -h, --help             Display this information\n\
-  -V, --version          Display this program's version number\n\
-\n"));
+      --unicode={default|show|invalid|hex|escape|highlight}\n"));
+  fprintf (stream, _("\
+      --with-symbol-versions  Display version strings after symbol names\n"));
+  fprintf (stream, _("\
+  -X 32_64               (ignored)\n"));
+  fprintf (stream, _("\
+  @FILE                  Read options from FILE\n"));
+  fprintf (stream, _("\
+  -h, --help             Display this information\n"));
+  fprintf (stream, _("\
+  -V, --version          Display this program's version number\n"));
+
   list_supported_targets (program_name, stream);
   if (REPORT_BUGS_TO[0] && status == 0)
     fprintf (stream, _("Report bugs to %s.\n"), REPORT_BUGS_TO);
