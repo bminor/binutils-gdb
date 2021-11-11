@@ -104,7 +104,7 @@ operator new[] (std::size_t sz, const std::nothrow_t&) noexcept
    errors from AddressSanitizers.  */
 
 void
-operator delete (void *p)
+operator delete (void *p) noexcept
 {
   free (p);
 }
@@ -122,7 +122,7 @@ operator delete (void *p, std::size_t) noexcept
 }
 
 void
-operator delete[] (void *p)
+operator delete[] (void *p) noexcept
 {
   return ::operator delete (p);
 }
