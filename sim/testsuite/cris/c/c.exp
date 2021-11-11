@@ -33,11 +33,8 @@ if [istarget cris*-*-elf] {
 }
 
 # Using target_compile, since it is less noisy,
-global objdir
-if { [target_compile $srcdir/$subdir/hello.c $objdir/compilercheck.x \
-	  "executable" "" ] == "" } {
-    set has_cc 1
-
+global global_cc_works
+if { $global_cc_works == 1 } {
     # Now check if we can link a program dynamically, and where
     # libc.so is located.  If it is, we provide a sym link to the
     # directory (which must end in /lib) in [pwd], so /lib/ld.so.1 is
@@ -45,8 +42,9 @@ if { [target_compile $srcdir/$subdir/hello.c $objdir/compilercheck.x \
     # replacing the board ldflags like below as we don't care about
     # detrimental effects on the executable from the specs and
     # -static in the board ldflags, we just add -Bdynamic.
+    global objdir
     if [regexp "(.*/lib)/libc.so" \
-	    [target_compile $srcdir/$subdir/hello.c $objdir/compilercheck.x \
+	    [target_compile $srcdir/lib/compilercheck.c $objdir/compilercheck.x \
 		 "executable" \
 		 "ldflags=-print-file-name=libc.so -Wl,-Bdynamic"] \
 	    xxx libcsodir]  {
@@ -54,9 +52,7 @@ if { [target_compile $srcdir/$subdir/hello.c $objdir/compilercheck.x \
 	verbose -log "Creating link to $libcsodir in [pwd]"
 	file link lib $libcsodir
     }
-} {
-    verbose -log "Can't execute C compiler"
-    set has_cc 0
+    file delete $objdir/compilercheck.x
 }
 
 # Like istarget, except take a list of targets as a string.
@@ -92,7 +88,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     }
 
     # Note absence of CC in results, but don't make a big fuss over it.
-    if { $has_cc == 0 } {
+    if { $global_cc_works == 0 } {
 	untested $testname
 	continue
     }

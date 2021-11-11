@@ -33,9 +33,33 @@ proc sim_init { args } {
     # all simulators.
     unset_currtarget_info ldscript
 
+    sim_init_toolchain
+
     # Need to return an empty string.  This tells dejagnu to *not* re-run us
     # with the exact test that we're about to run.
     return ""
+}
+
+# Initialize the toolchain settings for this port.
+# Needs to be called once per-port.
+
+proc sim_init_toolchain {} {
+    global objdir
+    global srcdir
+    global global_cpp_works
+    global global_cc_works
+
+    # See if we have a preprocessor available.
+    set result [target_compile $srcdir/lib/compilercheck.c \
+		$objdir/compilercheck.x "preprocess" ""]
+    set global_cpp_works [string equal "" "$result"]
+
+    # See if we have a compiler available.
+    set result [target_compile $srcdir/lib/compilercheck.c \
+		$objdir/compilercheck.x "executable" ""]
+    set global_cc_works [string equal "" "$result"]
+
+    file delete $objdir/compilercheck.x
 }
 
 # Print the version of the simulator being tested.
@@ -185,6 +209,8 @@ proc run_sim_test { name requested_machs } {
     global cpu_option
     global cpu_option_sep
     global SIMFLAGS_FOR_TARGET
+    global global_cpp_works
+    global global_cc_works
 
     if ![file exists $sim_path] {
 	unsupported "$name: missing simulator $sim_path"
@@ -327,11 +353,23 @@ proc run_sim_test { name requested_machs } {
 	}
 
 	if [string match "*.c" $sourcefile] {
+	    # If we don't have a compiler available, skip tests :(.
+	    if { $global_cc_works == 0 } {
+		untested $subdir/$name
+		return
+	    }
+
 	    set comp_output [target_compile $sourcefile $objdir/${name}.x "executable" \
 		[list "incdir=$srcdir/$subdir" "additional_flags=$c_as_options $c_ld_options $opts(cc,$mach)"]]
 	    set method "compiling/linking"
 	} else {
 	    if [string match "*.S" $sourcefile] {
+		# If we don't have a preprocessor available, skip tests :(.
+		if { $global_cpp_works == 0 } {
+		    untested $subdir/$name
+		    return
+		}
+
 		set comp_output [target_compile $sourcefile $objdir/${name}.o "object" \
 		    [list "incdir=$srcdir/$subdir" "additional_flags=$c_as_options"]]
 		set method "compiling"
