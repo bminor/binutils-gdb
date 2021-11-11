@@ -189,7 +189,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     verbose -log "Compiling $src with $opts(cc)"
 
     set dest "$opts(dest)"
-    if { [sim_compile $src $dest "executable" "$opts(cc)" ] != "" } {
+    if { [target_compile $src $dest "executable" "$opts(cc)" ] != "" } {
 	unresolved $testname
 	continue
     }

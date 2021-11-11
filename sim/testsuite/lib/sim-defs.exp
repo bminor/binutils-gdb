@@ -35,19 +35,6 @@ proc sim_version {} {
     clone_output "$sim_path $version\n"
 }
 
-# Cover function to target_compile.
-# Copied from gdb_compile.
-
-proc sim_compile { source dest type options } {
-    set result [target_compile $source $dest $type $options]
-    regsub "\[\r\n\]*$" "$result" "" result
-    regsub "^\[\r\n\]*" "$result" "" result
-    if { $result != "" } {
-	clone_output "sim compile output: $result"
-    }
-    return $result
-}
-
 # Find the path to the simulator for executing.
 proc sim_tool_path {} {
     global sim_path
