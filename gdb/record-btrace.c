@@ -1980,9 +1980,6 @@ record_btrace_resume_thread (struct thread_info *tp,
 static struct frame_id
 get_thread_current_frame_id (struct thread_info *tp)
 {
-  struct frame_id id;
-  bool executing;
-
   /* Set current thread, which is implicitly used by
      get_current_frame.  */
   scoped_restore_current_thread restore_thread;
@@ -1998,26 +1995,13 @@ get_thread_current_frame_id (struct thread_info *tp)
      For the former, EXECUTING is true and we're in wait, about to
      move the thread.  Since we need to recompute the stack, we temporarily
      set EXECUTING to false.  */
-  executing = tp->executing ();
+  bool executing = tp->executing ();
   set_executing (proc_target, inferior_ptid, false);
-
-  id = null_frame_id;
-  try
+  SCOPE_EXIT
     {
-      id = get_frame_id (get_current_frame ());
-    }
-  catch (const gdb_exception &except)
-    {
-      /* Restore the previous execution state.  */
       set_executing (proc_target, inferior_ptid, executing);
-
-      throw;
-    }
-
-  /* Restore the previous execution state.  */
-  set_executing (proc_target, inferior_ptid, executing);
-
-  return id;
+    };
+  return get_frame_id (get_current_frame ());
 }
 
 /* Start replaying a thread.  */

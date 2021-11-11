@@ -1249,11 +1249,13 @@ record_full_wait_1 (struct target_ops *ops,
 			  /* Try to insert the software single step breakpoint.
 			     If insert success, set step to 0.  */
 			  set_executing (proc_target, inferior_ptid, false);
+			  SCOPE_EXIT
+			    {
+			      set_executing (proc_target, inferior_ptid, true);
+			    };
+
 			  reinit_frame_cache ();
-
 			  step = !insert_single_step_breakpoints (gdbarch);
-
-			  set_executing (proc_target, inferior_ptid, true);
 			}
 
 		      if (record_debug)
