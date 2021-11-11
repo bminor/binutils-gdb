@@ -42,6 +42,11 @@ extern bool aarch64_debug;
 #define sbits(obj,st,fn) \
   ((long) (bits(obj,st,fn) | ((long) bit(obj,fn) * ~ submask (fn - st))))
 
+/* Prologue analyzer helper macros.  */
+
+/* Is the instruction "bti"?  */
+#define IS_BTI(instruction) ((instruction & 0xffffff3f) == 0xd503241f)
+
 /* List of opcodes that we need for building the jump pad and relocating
    an instruction.  */
 

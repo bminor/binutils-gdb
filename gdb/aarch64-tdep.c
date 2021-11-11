@@ -516,6 +516,9 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	      /* Return addresses are not mangled.  */
 	      ra_state_val = 0;
 	    }
+	  else if (IS_BTI (insn))
+	    /* We don't need to do anything special for a BTI instruction.  */
+	    continue;
 	  else
 	    {
 	      aarch64_debug_printf ("prologue analysis gave up addr=%s"
@@ -868,6 +871,39 @@ aarch64_analyze_prologue_test (void)
 	{
 	  int regnum = tdep->pauth_ra_state_regnum;
 	  SELF_CHECK (cache.saved_regs[regnum].is_value ());
+	}
+    }
+
+  /* Test a prologue with a BTI instruction.  */
+    {
+      static const uint32_t insns[] = {
+	0xd503245f, /* bti */
+	0xa9bd7bfd, /* stp	x29, x30, [sp, #-48]! */
+	0x910003fd, /* mov	x29, sp */
+	0xf801c3f3, /* str	x19, [sp, #28] */
+	0xb9401fa0, /* ldr	x19, [x29, #28] */
+      };
+      instruction_reader_test reader (insns);
+
+      trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
+      CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache,
+						reader);
+
+      SELF_CHECK (end == 4 * 4);
+      SELF_CHECK (cache.framereg == AARCH64_FP_REGNUM);
+      SELF_CHECK (cache.framesize == 48);
+
+      for (int i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
+	{
+	  if (i == 19)
+	    SELF_CHECK (cache.saved_regs[i].addr () == -20);
+	  else if (i == AARCH64_FP_REGNUM)
+	    SELF_CHECK (cache.saved_regs[i].addr () == -48);
+	  else if (i == AARCH64_LR_REGNUM)
+	    SELF_CHECK (cache.saved_regs[i].addr () == -40);
+	  else
+	    SELF_CHECK (cache.saved_regs[i].is_realreg ()
+			&& cache.saved_regs[i].realreg () == i);
 	}
     }
 }
