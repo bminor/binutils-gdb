@@ -4,10 +4,6 @@ if { [istarget arm*-*-*] } {
     # all machines
     set all_machs "xscale"
 
-    if [is_remote host] {
-      remote_download host $srcdir/$subdir/testutils.inc
-    }
-
     # The .cgs suffix is for "cgen .s".
     foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.cgs]] {
 	# If we're only testing specific files and this isn't one of them,
@@ -17,9 +13,5 @@ if { [istarget arm*-*-*] } {
 	}
 
 	run_sim_test $src $all_machs
-    }
-
-    if [is_remote host] {
-      remote_file host delete testutils.inc
     }
 }
