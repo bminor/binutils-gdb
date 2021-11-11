@@ -1,3 +1,8 @@
+2021-11-11  Alex Coplan  <alex.coplan@arm.com>
+
+	* aarch64-opc.c (operand_general_constraint_met_p): Always check
+	if the immediate is in range for AARCH64_OPND_A64C_IMM6_EXT.
+
 2021-09-24  Alex Coplan  <alex.coplan@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode_table): Update A64C_INSNs

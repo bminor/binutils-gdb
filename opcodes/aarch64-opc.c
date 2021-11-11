@@ -2239,13 +2239,13 @@ operand_general_constraint_met_p (aarch64_feature_set features,
 				   _("shift amount must be 4"));
 		  return 0;
 		}
-	      if (!value_fit_unsigned_field_p (opnd->imm.value, 6))
-		{
-		  set_other_error (mismatch_detail, idx,
-				   _("immediate out of range"));
-		  return 0;
-		}
 	    }
+	    if (!value_fit_unsigned_field_p (opnd->imm.value, 6))
+	      {
+		set_other_error (mismatch_detail, idx,
+				 _("immediate out of range"));
+		return 0;
+	      }
 	  break;
 
 	case AARCH64_OPND_AIMM:

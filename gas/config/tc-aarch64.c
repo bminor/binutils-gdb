@@ -3394,6 +3394,11 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	}
       operand->shifter.amount = 0;
     }
+  else if (exp.X_op == O_big)
+    {
+      set_fatal_syntax_error (_("shift amount out of range"));
+      return FALSE;
+    }
   else if (exp.X_op != O_constant)
     {
       set_syntax_error (_("constant shift amount required"));
@@ -6438,10 +6443,19 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  po_misc_or_fail (parse_shifter_operand_imm (&str, info,
 						      SHIFTED_ARITH_IMM));
 
+	  if (inst.reloc.exp.X_op != O_constant)
+	    {
+	      set_fatal_syntax_error (_(inst.reloc.exp.X_op == O_big
+					? "immediate out of range"
+					: "expected constant expression"));
+	      goto failure;
+	    }
+
 	  /* Try to coerce into shifted form if the immediate is out of
 	     range.  */
-	  if (inst.reloc.exp.X_add_number > 63 && (info->imm.value & 16) == 0
-	      && (inst.reloc.exp.X_add_number >> 4) <= 64
+	  if (inst.reloc.exp.X_add_number > 63
+	      && (inst.reloc.exp.X_add_number & 0xf) == 0
+	      && (inst.reloc.exp.X_add_number >> 4) <= 63
 	      && info->shifter.amount == 0)
 	    {
 	      info->shifter.amount = 4;
