@@ -1,5 +1,5 @@
 /* Check that TRT happens for pipe corner cases (for our definition of TRT).
-#notarget: cris*-*-elf
+#progos: linux
 #xerror:
 #output: Terminating simulation due to writing pipe * from one single thread\n
 #output: program stopped with signal 4 (*).\n

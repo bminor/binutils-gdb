@@ -1,5 +1,5 @@
 /* Check that rare readlink calls don't cause the simulator to abort.
-#notarget: cris*-*-elf
+#progos: linux
 #sim: --sysroot=$pwd --env-unset PWD
  */
 #define SYSROOTED 1

@@ -1,5 +1,5 @@
 /* Check for corner case: readlink of too-long name.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <unistd.h>

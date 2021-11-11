@@ -1,5 +1,5 @@
 /* Check that TRT happens for pipe corner cases.
-#notarget: cris*-*-elf
+#progos: linux
 */
 #include <stddef.h>
 #include <signal.h>

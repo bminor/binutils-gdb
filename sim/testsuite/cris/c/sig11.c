@@ -1,5 +1,5 @@
 /* Check that TRT happens when getting a non-standard (realtime) signal, more than one thread.
-#notarget: cris*-*-elf
+#progos: linux
 #cc: additional_flags=-pthread
 #xerror:
 #output: Unimplemented signal: 77\n

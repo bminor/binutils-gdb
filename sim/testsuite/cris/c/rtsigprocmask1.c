@@ -1,5 +1,5 @@
 /* Compiler options:
-#notarget: cris*-*-elf
+#progos: linux
 #cc: additional_flags=-pthread
 #xerror:
 #output: Unimplemented rt_sigprocmask syscall (0x3, 0x0, 0x3dff*\n

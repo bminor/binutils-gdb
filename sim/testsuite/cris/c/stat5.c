@@ -1,5 +1,5 @@
 /* Check that lstat:ing an nonexistent file works as expected.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <sys/types.h>

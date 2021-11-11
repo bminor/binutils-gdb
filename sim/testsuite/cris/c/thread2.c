@@ -1,6 +1,6 @@
 /* Compiler options:
 #cc: additional_flags=-pthread
-#notarget: cris*-*-elf
+#progos: linux
 
    A sanity check for syscalls resulting from
    pthread_getschedparam and pthread_setschedparam.  */

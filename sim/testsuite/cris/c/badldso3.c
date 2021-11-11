@@ -1,5 +1,5 @@
 /*
-#notarget: cris*-*-elf
+#progos: linux
 #xerror:
 #cc: additional_flags=-Wl,-dynamic-linker,/compilercheck.x
 #sim: --sysroot=$pwd

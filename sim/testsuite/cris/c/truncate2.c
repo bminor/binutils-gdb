@@ -1,6 +1,6 @@
 /*
 #sim: --sysroot=$pwd
-#notarget: cris*-*-elf
+#progos: linux
 */
 #define PREFIX "/"
 #include "truncate1.c"

@@ -1,5 +1,5 @@
 /* Check that the truncate syscall works trivially.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <stdio.h>

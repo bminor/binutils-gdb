@@ -1,6 +1,6 @@
 /* Check that TRT happens for a signal sent to a non-existent process/thread, more than one thread.
 #cc: additional_flags=-pthread
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <stdlib.h>

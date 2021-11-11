@@ -2,7 +2,7 @@
 #xerror:
 #output: Unimplemented _sysctl syscall *\n
 #output: program stopped with signal 4 (*).\n
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <unistd.h>

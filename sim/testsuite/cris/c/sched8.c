@@ -1,5 +1,5 @@
 /* Check corner error case: specifying invalid PID.
-#notarget: cris*-*-elf
+#progos: linux
 */
 #include <string.h>
 #include <sched.h>

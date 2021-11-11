@@ -1,5 +1,5 @@
 /*
-#notarget: cris*-*-elf
+#progos: linux
 #output: got: a\nthen: bc\nexit: 0\n
 */
 

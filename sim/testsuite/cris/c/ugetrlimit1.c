@@ -1,5 +1,5 @@
 /* Check corner error case: specifying unimplemented resource.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <sys/time.h>

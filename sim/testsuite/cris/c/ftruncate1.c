@@ -1,5 +1,5 @@
 /* Check that the ftruncate syscall works trivially.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <stdio.h>

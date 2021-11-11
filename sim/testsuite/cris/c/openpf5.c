@@ -1,5 +1,5 @@
 /* Check that TRT happens when error on too many opened files.
-#notarget: cris*-*-elf
+#progos: linux
 #sim: --sysroot=$pwd
 */
 #include <stddef.h>

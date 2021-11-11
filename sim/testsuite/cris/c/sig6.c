@@ -1,5 +1,5 @@
 /* Check that TRT happens at an non-abort non-caught signal, more than one thread.
-#notarget: cris*-*-elf
+#progos: linux
 #cc: additional_flags=-pthread
 #xerror:
 #output: Exiting pid 42 due to signal 7\n

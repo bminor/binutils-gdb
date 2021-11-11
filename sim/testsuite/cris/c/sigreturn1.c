@@ -1,5 +1,5 @@
 /* Test that TRT happens for spurious sigreturn calls.  Single-thread.
-#notarget: cris*-*-elf
+#progos: linux
 #xerror:
 #output: Invalid sigreturn syscall: no signal handler active (0x1, 0x2, 0x3, 0x4, 0x5, 0x6)\n
 #output: program stopped with signal 4 (*).\n

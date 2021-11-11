@@ -1,5 +1,5 @@
 /* Simulator options:
-#notarget: cris*-*-elf
+#progos: linux
 #sim: --sysroot=$pwd
 */
 #define SYSROOTED 1

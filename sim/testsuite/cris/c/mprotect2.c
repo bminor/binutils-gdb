@@ -1,5 +1,5 @@
 /* As the included file, but specifying silent ENOSYS.
-#notarget: cris*-*-elf
+#progos: linux
 #sim: --cris-unknown-syscall=enosys-quiet
 #output: ENOSYS\n
 #output: xyzzy\n

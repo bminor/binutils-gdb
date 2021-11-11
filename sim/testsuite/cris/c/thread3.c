@@ -1,6 +1,6 @@
 /* Compiler options:
 #cc: additional_flags=-pthread
-#notarget: cris*-*-elf
+#progos: linux
 
    To test sched_yield in the presencs of threads.  Core from ex1.c.  */
 

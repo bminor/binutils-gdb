@@ -1,5 +1,5 @@
 /* Check that TRT happens when error on pipe call.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <stddef.h>

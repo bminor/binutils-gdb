@@ -1,5 +1,5 @@
 /* Check that odd cases of readlink work.
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #include <unistd.h>

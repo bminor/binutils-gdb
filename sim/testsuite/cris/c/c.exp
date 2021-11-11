@@ -34,6 +34,7 @@ if [istarget cris*-*-elf] {
 
 # Using target_compile, since it is less noisy,
 global global_cc_works
+global global_cc_os
 if { $global_cc_works == 1 } {
     # Now check if we can link a program dynamically, and where
     # libc.so is located.  If it is, we provide a sym link to the
@@ -103,6 +104,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     set opts(sim) ""
     set opts(output) ""
     set opts(progoptions) ""
+    set opts(progos) ""
     set opts(timeout) ""
     set opts(mach) ""
     set opts(xerror) "no"
@@ -161,6 +163,11 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     }
 
     if { $opts(notarget) != "" && [anytarget $opts(notarget)] } {
+	continue
+    }
+
+    if { $opts(progos) != "" && $opts(progos) != $global_cc_os } {
+	untested $testname
 	continue
     }
 

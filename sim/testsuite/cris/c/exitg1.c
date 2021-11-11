@@ -1,7 +1,7 @@
 /* Check exit_group(2) trivially.  Newlib doesn't have it and the
    pre-v32 glibc requires updated headers we'd have to check or adjust
    for.
-#notarget: cris-*-* *-*-elf
+#progos: linux
 #output: exit_group\n
 */
 #include <unistd.h>

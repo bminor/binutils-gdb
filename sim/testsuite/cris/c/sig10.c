@@ -1,5 +1,5 @@
 /* Check that TRT happens when trying to IGN an non-ignorable signal, more than one thread.
-#notarget: cris*-*-elf
+#progos: linux
 #cc: additional_flags=-pthread
 #xerror:
 #output: Exiting pid 42 due to signal 9\n

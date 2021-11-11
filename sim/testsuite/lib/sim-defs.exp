@@ -48,16 +48,33 @@ proc sim_init_toolchain {} {
     global srcdir
     global global_cpp_works
     global global_cc_works
+    global global_cc_os
 
     # See if we have a preprocessor available.
     set result [target_compile $srcdir/lib/compilercheck.c \
 		$objdir/compilercheck.x "preprocess" ""]
     set global_cpp_works [string equal "" "$result"]
 
-    # See if we have a compiler available.
-    set result [target_compile $srcdir/lib/compilercheck.c \
-		$objdir/compilercheck.x "executable" ""]
-    set global_cc_works [string equal "" "$result"]
+    # See if we have a compiler available, and which environment it's targeting.
+    if { [target_compile $srcdir/lib/newlibcheck.c \
+	  $objdir/compilercheck.x "executable" ""] == "" } {
+	verbose -log "Found newlib C compiler"
+	set global_cc_works 1
+	set global_cc_os "newlib"
+    } elseif { [target_compile $srcdir/lib/linuxcheck.c \
+		$objdir/compilercheck.x "executable" ""] == "" } {
+	verbose -log "Found Linux C compiler"
+	set global_cc_works 1
+	set global_cc_os "linux"
+    } elseif { [target_compile $srcdir/lib/compilercheck.c \
+		$objdir/compilercheck.x "executable" ""] == "" } {
+	verbose -log "Found C compiler, but unknown OS"
+	set global_cc_works 1
+	set global_cc_os ""
+    } {
+	verbose -log "Can't execute C compiler"
+	set global_cc_works 0
+    }
 
     file delete $objdir/compilercheck.x
 }
@@ -189,6 +206,7 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 # cc[(mach-list)]: <compiler options>
 # sim[(mach-list)]: <simulator options>
 # progopts: <arguments to the program being simulated>
+# progos: OS required for the test
 # status: program exit status to treat as "pass"
 # output: program output pattern to match with string-match
 # xerror: program is expected to return with a "failure" exit code
@@ -211,6 +229,7 @@ proc run_sim_test { name requested_machs } {
     global SIMFLAGS_FOR_TARGET
     global global_cpp_works
     global global_cc_works
+    global global_cc_os
 
     if ![file exists $sim_path] {
 	unsupported "$name: missing simulator $sim_path"
@@ -234,6 +253,7 @@ proc run_sim_test { name requested_machs } {
     set opts(ld) ""
     set opts(cc) ""
     set opts(progopts) ""
+    set opts(progos) ""
     set opts(sim) ""
     set opts(status) "0"
     set opts(output) ""
@@ -289,6 +309,11 @@ proc run_sim_test { name requested_machs } {
 	if { "$opt_machs" == "" } {
 	    set opts($opt_name) $opt_val
 	}
+    }
+
+    if { $opts(progos) != "" && $opts(progos) != $global_cc_os } {
+	untested $subdir/$name
+	return
     }
 
     set testname $name

@@ -1,5 +1,5 @@
 /* Check that unsupported readlink calls don't cause the simulator to abort.
-#notarget: cris*-*-elf
+#progos: linux
 #sim: --argv0 ./readlink5.c.x
 #xerror:
 #output: Unimplemented readlink syscall (*)\n

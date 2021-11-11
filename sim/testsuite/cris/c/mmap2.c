@@ -1,5 +1,5 @@
 /*
-#notarget: cris*-*-elf
+#progos: linux
 */
 
 #define _GNU_SOURCE

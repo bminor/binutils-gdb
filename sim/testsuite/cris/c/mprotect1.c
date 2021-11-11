@@ -1,5 +1,5 @@
 /* Check unimplemented-output for mprotect call.
-#notarget: cris*-*-elf
+#progos: linux
 #xerror:
 #output: Unimplemented mprotect call (0x0, 0x2001, 0x4)\n
 #output: program stopped with signal 4 (*).\n

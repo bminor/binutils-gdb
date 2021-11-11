@@ -1,5 +1,5 @@
 /* Check that writing an inordinate amount of data works (somewhat).
-#notarget: cris*-*-elf
+#progos: linux
 #output: got: a\nexit: 0\n
    This test-case will *not* work on host (or for real): the first
    pipemax+1 bytes will be successfully written.  It's just for
