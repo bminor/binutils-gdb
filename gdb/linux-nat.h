@@ -129,6 +129,8 @@ public:
 
   void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool) override;
 
+  void follow_clone (ptid_t) override;
+
   std::vector<static_tracepoint_marker>
     static_tracepoint_markers_by_strid (const char *id) override;
 

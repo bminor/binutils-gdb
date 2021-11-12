@@ -642,6 +642,13 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     virtual void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool)
       TARGET_DEFAULT_FUNC (default_follow_fork);
+
+    /* Add CHILD_PTID to the thread list, after handling a
+       TARGET_WAITKIND_THREAD_CLONE event for the clone parent.  The
+       parent is inferior_ptid.  */
+    virtual void follow_clone (ptid_t child_ptid)
+      TARGET_DEFAULT_FUNC (default_follow_clone);
+
     virtual int insert_exec_catchpoint (int)
       TARGET_DEFAULT_RETURN (1);
     virtual int remove_exec_catchpoint (int)

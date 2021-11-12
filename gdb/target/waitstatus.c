@@ -45,6 +45,7 @@ DIAGNOSTIC_ERROR_SWITCH
 
     case TARGET_WAITKIND_FORKED:
     case TARGET_WAITKIND_VFORKED:
+    case TARGET_WAITKIND_THREAD_CLONED:
       return string_appendf (str, ", child_ptid = %s",
 			     this->child_ptid ().to_string ().c_str ());
 
