@@ -374,13 +374,13 @@ proc vfork_relations_in_info_inferiors { variant } {
 
    set test "vfork relation no longer appears in info inferiors"
    gdb_test_multiple "info inferiors" $test {
-       -re "is vfork child of inferior 1.*$gdb_prompt $" {
+       -re "is vfork child of inferior 1.*$gdb_prompt " {
 	   fail $test
        }
-       -re "is vfork parent of inferior 2.*$gdb_prompt $" {
+       -re "is vfork parent of inferior 2.*$gdb_prompt " {
 	   fail $test
        }
-       -re "$gdb_prompt $" {
+       -re "$gdb_prompt " {
 	   pass $test
        }
    }
