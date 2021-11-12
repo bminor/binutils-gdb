@@ -1548,7 +1548,7 @@ fbsd_nat_target::remove_vfork_catchpoint (int pid)
 }
 #endif
 
-/* Implement the "post_startup_inferior" target_ops method.  */
+/* Implement the virtual inf_ptrace_target::post_startup_inferior method.  */
 
 void
 fbsd_nat_target::post_startup_inferior (ptid_t pid)

@@ -51,7 +51,6 @@ struct dummy_target : public target_ops
   void terminal_info (const char *arg0, int arg1) override;
   void kill () override;
   void load (const char *arg0, int arg1) override;
-  void post_startup_inferior (ptid_t arg0) override;
   int insert_fork_catchpoint (int arg0) override;
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
@@ -226,7 +225,6 @@ struct debug_target : public target_ops
   void terminal_info (const char *arg0, int arg1) override;
   void kill () override;
   void load (const char *arg0, int arg1) override;
-  void post_startup_inferior (ptid_t arg0) override;
   int insert_fork_catchpoint (int arg0) override;
   int remove_fork_catchpoint (int arg0) override;
   int insert_vfork_catchpoint (int arg0) override;
@@ -1390,27 +1388,6 @@ debug_target::load (const char *arg0, int arg1)
   target_debug_print_const_char_p (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_int (arg1);
-  fputs_unfiltered (")\n", gdb_stdlog);
-}
-
-void
-target_ops::post_startup_inferior (ptid_t arg0)
-{
-  this->beneath ()->post_startup_inferior (arg0);
-}
-
-void
-dummy_target::post_startup_inferior (ptid_t arg0)
-{
-}
-
-void
-debug_target::post_startup_inferior (ptid_t arg0)
-{
-  fprintf_unfiltered (gdb_stdlog, "-> %s->post_startup_inferior (...)\n", this->beneath ()->shortname ());
-  this->beneath ()->post_startup_inferior (arg0);
-  fprintf_unfiltered (gdb_stdlog, "<- %s->post_startup_inferior (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 

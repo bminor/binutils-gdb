@@ -202,13 +202,6 @@ inf_child_target::maybe_unpush_target ()
     current_inferior ()->unpush_target (this);
 }
 
-void
-inf_child_target::post_startup_inferior (ptid_t ptid)
-{
-  /* This target doesn't require a meaningful "post startup inferior"
-     operation by a debugger.  */
-}
-
 bool
 inf_child_target::can_run ()
 {

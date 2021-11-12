@@ -145,6 +145,8 @@ obsd_nat_target::post_attach (int pid)
   obsd_enable_proc_events (pid);
 }
 
+/* Implement the virtual inf_ptrace_target::post_startup_inferior method.  */
+
 void
 obsd_nat_target::post_startup_inferior (ptid_t pid)
 {

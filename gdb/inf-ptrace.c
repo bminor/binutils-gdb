@@ -103,7 +103,7 @@ inf_ptrace_target::create_inferior (const char *exec_file,
 
   /* On some targets, there must be some explicit actions taken after
      the inferior has been started up.  */
-  target_post_startup_inferior (ptid);
+  post_startup_inferior (ptid);
 }
 
 /* Clean up a rotting corpse of an inferior after it died.  */

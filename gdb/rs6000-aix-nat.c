@@ -91,6 +91,11 @@ public:
 
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
+protected:
+
+  void post_startup_inferior (ptid_t ptid) override
+  { /* Nothing.  */ }
+
 private:
   enum target_xfer_status
     xfer_shared_libraries (enum target_object object,

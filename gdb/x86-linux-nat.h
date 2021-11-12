@@ -29,9 +29,6 @@ struct x86_linux_nat_target : public x86_nat_target<linux_nat_target>
 {
   virtual ~x86_linux_nat_target () override = 0;
 
-  /* Override the GNU/Linux inferior startup hook.  */
-  void post_startup_inferior (ptid_t) override;
-
   /* Add the description reader.  */
   const struct target_desc *read_description () override;
 
@@ -73,6 +70,10 @@ struct x86_linux_nat_target : public x86_nat_target<linux_nat_target>
 
   void low_delete_thread (struct arch_lwp_info *lwp) override
   { x86_linux_delete_thread (lwp); }
+
+protected:
+  /* Override the GNU/Linux inferior startup hook.  */
+  void post_startup_inferior (ptid_t) override;
 };
 
 

@@ -129,8 +129,6 @@ public:
 
   char *pid_to_exec_file (int pid) override;
 
-  void post_startup_inferior (ptid_t) override;
-
   void post_attach (int) override;
 
   void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool) override;
@@ -189,6 +187,10 @@ public:
   /* SIGTRAP-like breakpoint status events recognizer.  The default
      recognizes SIGTRAP only.  */
   virtual bool low_status_is_event (int status);
+
+protected:
+
+    void post_startup_inferior (ptid_t) override;
 };
 
 /* The final/concrete instance.  */

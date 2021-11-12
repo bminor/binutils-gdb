@@ -302,14 +302,6 @@ target_files_info ()
 
 /* See target.h.  */
 
-void
-target_post_startup_inferior (ptid_t ptid)
-{
-  return current_inferior ()->top_target ()->post_startup_inferior (ptid);
-}
-
-/* See target.h.  */
-
 int
 target_insert_fork_catchpoint (int pid)
 {

@@ -626,8 +626,6 @@ struct target_ops
     virtual bool can_create_inferior ();
     virtual void create_inferior (const char *, const std::string &,
 				  char **, int);
-    virtual void post_startup_inferior (ptid_t)
-      TARGET_DEFAULT_IGNORE ();
     virtual int insert_fork_catchpoint (int)
       TARGET_DEFAULT_RETURN (1);
     virtual int remove_fork_catchpoint (int)
@@ -1687,18 +1685,6 @@ extern void target_kill (void);
    arguments, as it pleases.  */
 
 extern void target_load (const char *arg, int from_tty);
-
-/* Some targets (such as ttrace-based HPUX) don't allow us to request
-   notification of inferior events such as fork and vork immediately
-   after the inferior is created.  (This because of how gdb gets an
-   inferior created via invoking a shell to do it.  In such a scenario,
-   if the shell init file has commands in it, the shell will fork and
-   exec for each of those commands, and we will see each such fork
-   event.  Very bad.)
-
-   Such targets will supply an appropriate definition for this function.  */
-
-extern void target_post_startup_inferior (ptid_t ptid);
 
 /* On some targets, we can catch an inferior fork or vfork event when
    it occurs.  These functions insert/remove an already-created

@@ -411,6 +411,8 @@ linux_nat_target::post_attach (int pid)
   linux_init_ptrace_procfs (pid, 1);
 }
 
+/* Implement the virtual inf_ptrace_target::post_startup_inferior method.  */
+
 void
 linux_nat_target::post_startup_inferior (ptid_t ptid)
 {

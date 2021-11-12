@@ -55,8 +55,6 @@ public:
   void interrupt () override;
   void pass_ctrlc () override;
 
-  void post_startup_inferior (ptid_t) override;
-
   void follow_exec (inferior *follow_inf, ptid_t ptid,
 		    const char *execd_pathname) override;
 

@@ -81,6 +81,8 @@ x86_linux_nat_target::~x86_linux_nat_target ()
 {
 }
 
+/* Implement the virtual inf_ptrace_target::post_startup_inferior method.  */
+
 void
 x86_linux_nat_target::post_startup_inferior (ptid_t ptid)
 {
