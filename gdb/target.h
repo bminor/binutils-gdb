@@ -637,6 +637,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     virtual void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool)
       TARGET_DEFAULT_FUNC (default_follow_fork);
+    virtual void follow_clone (ptid_t)
+      TARGET_DEFAULT_FUNC (default_follow_clone);
     virtual int insert_exec_catchpoint (int)
       TARGET_DEFAULT_RETURN (1);
     virtual int remove_exec_catchpoint (int)
