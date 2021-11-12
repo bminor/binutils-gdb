@@ -1104,74 +1104,51 @@ div1 (int *R, int iRn2, int iRn1/*, int T*/)
   R[iRn1] <<= 1;
   R[iRn1] |= (unsigned long) T;
 
-  switch (old_q)
+  if (!old_q)
     {
-    case 0:
-      switch (M)
+      if (!M)
 	{
-	case 0:
 	  tmp0 = R[iRn1];
 	  R[iRn1] -= R[iRn2];
 	  tmp1 = (R[iRn1] > tmp0);
-	  switch (Q)
-	    {
-	    case 0:
-	      SET_SR_Q (tmp1);
-	      break;
-	    case 1:
-	      SET_SR_Q ((unsigned char) (tmp1 == 0));
-	      break;
-	    }
-	  break;
-	case 1:
-	  tmp0 = R[iRn1];
-	  R[iRn1] += R[iRn2];
-	  tmp1 = (R[iRn1] < tmp0);
-	  switch (Q)
-	    {
-	    case 0:
-	      SET_SR_Q ((unsigned char) (tmp1 == 0));
-	      break;
-	    case 1:
-	      SET_SR_Q (tmp1);
-	      break;
-	    }
-	  break;
+	  if (!Q)
+	    SET_SR_Q (tmp1);
+	  else
+	    SET_SR_Q ((unsigned char) (tmp1 == 0));
 	}
-      break;
-    case 1:
-      switch (M)
+      else
 	{
-	case 0:
 	  tmp0 = R[iRn1];
 	  R[iRn1] += R[iRn2];
 	  tmp1 = (R[iRn1] < tmp0);
-	  switch (Q)
-	    {
-	    case 0:
-	      SET_SR_Q (tmp1);
-	      break;
-	    case 1:
-	      SET_SR_Q ((unsigned char) (tmp1 == 0));
-	      break;
-	    }
-	  break;
-	case 1:
+	  if (!Q)
+	    SET_SR_Q ((unsigned char) (tmp1 == 0));
+	  else
+	    SET_SR_Q (tmp1);
+	}
+    }
+  else
+    {
+      if (!M)
+	{
+	  tmp0 = R[iRn1];
+	  R[iRn1] += R[iRn2];
+	  tmp1 = (R[iRn1] < tmp0);
+	  if (!Q)
+	    SET_SR_Q (tmp1);
+	  else
+	    SET_SR_Q ((unsigned char) (tmp1 == 0));
+	}
+      else
+	{
 	  tmp0 = R[iRn1];
 	  R[iRn1] -= R[iRn2];
 	  tmp1 = (R[iRn1] > tmp0);
-	  switch (Q)
-	    {
-	    case 0:
-	      SET_SR_Q ((unsigned char) (tmp1 == 0));
-	      break;
-	    case 1:
-	      SET_SR_Q (tmp1);
-	      break;
-	    }
-	  break;
+	  if (!Q)
+	    SET_SR_Q ((unsigned char) (tmp1 == 0));
+	  else
+	    SET_SR_Q (tmp1);
 	}
-      break;
     }
   /*T = (Q == M);*/
   SET_SR_T (Q == M);
