@@ -1584,6 +1584,7 @@ step_over_info_valid_p (void)
 /* Return true if THREAD is doing a displaced step.  */
 
 static bool
+ATTRIBUTE_UNUSED
 displaced_step_in_progress_thread (thread_info *thread)
 {
   gdb_assert (thread != nullptr);
@@ -1898,6 +1899,31 @@ static displaced_step_finish_status
 displaced_step_finish (thread_info *event_thread,
 		       const target_waitstatus &event_status)
 {
+  /* Check whether the parent is displaced stepping.  */
+  struct regcache *regcache = get_thread_regcache (event_thread);
+  struct gdbarch *gdbarch = regcache->arch ();
+  inferior *parent_inf = event_thread->inf;
+
+  /* If this was a fork/vfork/clone, this event indicates that the
+     displaced stepping of the syscall instruction has been done, so
+     we perform cleanup for parent here.  Also note that this
+     operation also cleans up the child for vfork, because their pages
+     are shared.  */
+
+  /* If this is a fork (child gets its own address space copy) and
+     some displaced step buffers were in use at the time of the fork,
+     restore the displaced step buffer bytes in the child process.
+
+     Architectures which support displaced stepping and fork events
+     must supply an implementation of
+     gdbarch_displaced_step_restore_all_in_ptid.  This is not enforced
+     during gdbarch validation to support architectures which support
+     displaced stepping but not forks.  */
+  if (event_status.kind () == TARGET_WAITKIND_FORKED
+      && gdbarch_supports_displaced_stepping (gdbarch))
+    gdbarch_displaced_step_restore_all_in_ptid
+      (gdbarch, parent_inf, event_status.child_ptid ());
+
   displaced_step_thread_state *displaced = &event_thread->displaced_step_state;
 
   /* Was this thread performing a displaced step?  */
@@ -1917,8 +1943,39 @@ displaced_step_finish (thread_info *event_thread,
 
   /* Do the fixup, and release the resources acquired to do the displaced
      step. */
-  return gdbarch_displaced_step_finish (displaced->get_original_gdbarch (),
-					event_thread, event_status);
+  displaced_step_finish_status status
+    = gdbarch_displaced_step_finish (displaced->get_original_gdbarch (),
+				     event_thread, event_status);
+
+  if (event_status.kind () == TARGET_WAITKIND_FORKED
+      || event_status.kind () == TARGET_WAITKIND_VFORKED
+      || event_status.kind () == TARGET_WAITKIND_THREAD_CLONED)
+    {
+      /* Since the vfork/fork/clone syscall instruction was executed
+	 in the scratchpad, the child's PC is also within the
+	 scratchpad.  Set the child's PC to the parent's PC value,
+	 which has already been fixed up.  Note: we use the parent's
+	 aspace here, although we're touching the child, because the
+	 child hasn't been added to the inferior list yet at this
+	 point.  */
+
+      struct regcache *child_regcache
+	= get_thread_arch_aspace_regcache (parent_inf->process_target (),
+					   event_status.child_ptid (),
+					   gdbarch,
+					   parent_inf->aspace);
+      /* Read PC value of parent.  */
+      CORE_ADDR parent_pc = regcache_read_pc (regcache);
+
+      displaced_debug_printf ("write child pc from %s to %s",
+			      paddress (gdbarch,
+					regcache_read_pc (child_regcache)),
+			      paddress (gdbarch, parent_pc));
+
+      regcache_write_pc (child_regcache, parent_pc);
+    }
+
+  return status;
 }
 
 /* Data to be passed around while handling an event.  This data is
@@ -5717,67 +5774,13 @@ handle_inferior_event (struct execution_control_state *ecs)
 
     case TARGET_WAITKIND_FORKED:
     case TARGET_WAITKIND_VFORKED:
-      /* Check whether the inferior is displaced stepping.  */
-      {
-	struct regcache *regcache = get_thread_regcache (ecs->event_thread);
-	struct gdbarch *gdbarch = regcache->arch ();
-	inferior *parent_inf = find_inferior_ptid (ecs->target, ecs->ptid);
+    case TARGET_WAITKIND_THREAD_CLONED:
 
-	/* If this is a fork (child gets its own address space copy)
-	   and some displaced step buffers were in use at the time of
-	   the fork, restore the displaced step buffer bytes in the
-	   child process.
+      displaced_step_finish (ecs->event_thread, ecs->ws);
 
-	   Architectures which support displaced stepping and fork
-	   events must supply an implementation of
-	   gdbarch_displaced_step_restore_all_in_ptid.  This is not
-	   enforced during gdbarch validation to support architectures
-	   which support displaced stepping but not forks.  */
-	if (ecs->ws.kind () == TARGET_WAITKIND_FORKED
-	    && gdbarch_supports_displaced_stepping (gdbarch))
-	  gdbarch_displaced_step_restore_all_in_ptid
-	    (gdbarch, parent_inf, ecs->ws.child_ptid ());
-
-	/* If displaced stepping is supported, and thread ecs->ptid is
-	   displaced stepping.  */
-	if (displaced_step_in_progress_thread (ecs->event_thread))
-	  {
-	    struct regcache *child_regcache;
-	    CORE_ADDR parent_pc;
-
-	    /* GDB has got TARGET_WAITKIND_FORKED or TARGET_WAITKIND_VFORKED,
-	       indicating that the displaced stepping of syscall instruction
-	       has been done.  Perform cleanup for parent process here.  Note
-	       that this operation also cleans up the child process for vfork,
-	       because their pages are shared.  */
-	    displaced_step_finish (ecs->event_thread, ecs->ws);
-	    /* Start a new step-over in another thread if there's one
-	       that needs it.  */
-	    start_step_over ();
-
-	    /* Since the vfork/fork syscall instruction was executed in the scratchpad,
-	       the child's PC is also within the scratchpad.  Set the child's PC
-	       to the parent's PC value, which has already been fixed up.
-	       FIXME: we use the parent's aspace here, although we're touching
-	       the child, because the child hasn't been added to the inferior
-	       list yet at this point.  */
-
-	    child_regcache
-	      = get_thread_arch_aspace_regcache (parent_inf->process_target (),
-						 ecs->ws.child_ptid (),
-						 gdbarch,
-						 parent_inf->aspace);
-	    /* Read PC value of parent process.  */
-	    parent_pc = regcache_read_pc (regcache);
-
-	    displaced_debug_printf ("write child pc from %s to %s",
-				    paddress (gdbarch,
-					      regcache_read_pc (child_regcache)),
-				    paddress (gdbarch, parent_pc));
-
-	    regcache_write_pc (child_regcache, parent_pc);
-	  }
-      }
+      /* Start a new step-over in another thread if there's one that
+	 needs it.  */
+      start_step_over ();
 
       context_switch (ecs);
 
@@ -5793,7 +5796,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	 need to unpatch at follow/detach time instead to be certain
 	 that new breakpoints added between catchpoint hit time and
 	 vfork follow are detached.  */
-      if (ecs->ws.kind () != TARGET_WAITKIND_VFORKED)
+      if (ecs->ws.kind () == TARGET_WAITKIND_FORKED)
 	{
 	  /* This won't actually modify the breakpoint list, but will
 	     physically remove the breakpoints from the child.  */
@@ -5825,14 +5828,24 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (!bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	{
 	  bool follow_child
-	    = (follow_fork_mode_string == follow_fork_mode_child);
+	    = (ecs->ws.kind () != TARGET_WAITKIND_THREAD_CLONED
+	       && follow_fork_mode_string == follow_fork_mode_child);
 
 	  ecs->event_thread->set_stop_signal (GDB_SIGNAL_0);
 
 	  process_stratum_target *targ
 	    = ecs->event_thread->inf->process_target ();
 
-	  bool should_resume = follow_fork ();
+	  bool should_resume;
+	  if (ecs->ws.kind () != TARGET_WAITKIND_THREAD_CLONED)
+	    should_resume = follow_fork ();
+	  else
+	    {
+	      should_resume = true;
+	      inferior *inf = ecs->event_thread->inf;
+	      inf->top_target ()->follow_clone (ecs->ws.child_ptid ());
+	      ecs->event_thread->pending_follow.set_spurious ();
+	    }
 
 	  /* Note that one of these may be an invalid pointer,
 	     depending on detach_fork.  */
@@ -5843,16 +5856,21 @@ handle_inferior_event (struct execution_control_state *ecs)
 	     child is marked stopped.  */
 
 	  /* If not resuming the parent, mark it stopped.  */
-	  if (follow_child && !detach_fork && !non_stop && !sched_multi)
+	  if (ecs->ws.kind () != TARGET_WAITKIND_THREAD_CLONED
+	      && follow_child && !detach_fork && !non_stop && !sched_multi)
 	    parent->set_running (false);
 
 	  /* If resuming the child, mark it running.  */
-	  if (follow_child || (!detach_fork && (non_stop || sched_multi)))
+	  if (ecs->ws.kind () == TARGET_WAITKIND_THREAD_CLONED
+	      || (follow_child || (!detach_fork && (non_stop || sched_multi))))
 	    child->set_running (true);
 
 	  /* In non-stop mode, also resume the other branch.  */
-	  if (!detach_fork && (non_stop
-			       || (sched_multi && target_is_non_stop_p ())))
+	  if ((ecs->ws.kind () == TARGET_WAITKIND_THREAD_CLONED
+	       && target_is_non_stop_p ())
+	      || (!detach_fork && (non_stop
+				   || (sched_multi
+				       && target_is_non_stop_p ()))))
 	    {
 	      if (follow_child)
 		switch_to_thread (parent);
