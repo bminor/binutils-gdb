@@ -2717,6 +2717,14 @@ default_follow_fork (struct target_ops *self, inferior *child_inf,
 		  _("could not find a target to follow fork"));
 }
 
+static void
+default_follow_clone (struct target_ops *self, ptid_t child_ptid)
+{
+  /* Some target returned a clone event, but did not know how to follow it.  */
+  internal_error (__FILE__, __LINE__,
+		  _("could not find a target to follow clone"));
+}
+
 /* See target.h.  */
 
 void

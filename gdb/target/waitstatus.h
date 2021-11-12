@@ -95,6 +95,13 @@ enum target_waitkind
   /* There are no resumed children left in the program.  */
   TARGET_WAITKIND_NO_RESUMED,
 
+  /* The thread was cloned.  The event's ptid corresponds to the
+     cloned parent.  The cloned child is held stopped at its entry
+     point, and its ptid is in the event's m_child_ptid.  The target
+     must not add the cloned child to GDB's thread list until
+     target_ops::follow_clone() is called.  */
+  TARGET_WAITKIND_THREAD_CLONED,
+
   /* The thread was created.  */
   TARGET_WAITKIND_THREAD_CREATED,
 
@@ -125,6 +132,8 @@ DIAGNOSTIC_ERROR_SWITCH
       return "FORKED";
     case TARGET_WAITKIND_VFORKED:
       return "VFORKED";
+    case TARGET_WAITKIND_THREAD_CLONED:
+      return "THREAD_CLONED";
     case TARGET_WAITKIND_EXECD:
       return "EXECD";
     case TARGET_WAITKIND_VFORK_DONE:
@@ -325,6 +334,14 @@ struct target_waitstatus
     return *this;
   }
 
+  target_waitstatus &set_thread_cloned (ptid_t child_ptid)
+  {
+    this->reset ();
+    m_kind = TARGET_WAITKIND_THREAD_CLONED;
+    m_value.child_ptid = child_ptid;
+    return *this;
+  }
+
   target_waitstatus &set_thread_created ()
   {
     this->reset ();
@@ -370,7 +387,8 @@ struct target_waitstatus
   ptid_t child_ptid () const
   {
     gdb_assert (m_kind == TARGET_WAITKIND_FORKED
-		|| m_kind == TARGET_WAITKIND_VFORKED);
+		|| m_kind == TARGET_WAITKIND_VFORKED
+		|| m_kind == TARGET_WAITKIND_THREAD_CLONED);
     return m_value.child_ptid;
   }
 
