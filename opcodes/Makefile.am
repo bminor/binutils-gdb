@@ -88,7 +88,7 @@ HFILES = \
 
 # C source files that correspond to .o's ending up in libopcodes
 # for all machines.
-TARGET_LIBOPCODES_CFILES = \
+TARGET64_LIBOPCODES_CFILES = \
 	aarch64-asm.c \
 	aarch64-asm-2.c \
 	aarch64-dis.c \
@@ -97,6 +97,27 @@ TARGET_LIBOPCODES_CFILES = \
 	aarch64-opc-2.c \
 	alpha-dis.c \
 	alpha-opc.c \
+	bpf-asm.c \
+	bpf-desc.c \
+	bpf-dis.c \
+	bpf-ibld.c \
+	bpf-opc.c \
+	ia64-dis.c \
+	ia64-opc.c \
+	loongarch-opc.c \
+	loongarch-dis.c \
+	loongarch-coder.c \
+	mips-dis.c \
+	mips-opc.c \
+	mips16-opc.c \
+	micromips-opc.c \
+	mmix-dis.c \
+	mmix-opc.c \
+	nfp-dis.c \
+	riscv-dis.c \
+	riscv-opc.c
+
+TARGET32_LIBOPCODES_CFILES = \
 	arc-dis.c \
 	arc-ext.c \
 	arc-opc.c \
@@ -120,11 +141,6 @@ TARGET_LIBOPCODES_CFILES = \
 	d30v-dis.c \
 	d30v-opc.c \
 	dlx-dis.c \
-	bpf-asm.c \
-	bpf-desc.c \
-	bpf-dis.c \
-	bpf-ibld.c \
-	bpf-opc.c \
 	epiphany-asm.c \
 	epiphany-desc.c \
 	epiphany-dis.c \
@@ -146,8 +162,6 @@ TARGET_LIBOPCODES_CFILES = \
 	hppa-dis.c \
 	i386-dis.c \
 	i386-opc.c \
-	ia64-dis.c \
-	ia64-opc.c \
 	ip2k-asm.c \
 	ip2k-desc.c \
 	ip2k-dis.c \
@@ -164,9 +178,6 @@ TARGET_LIBOPCODES_CFILES = \
 	lm32-ibld.c \
 	lm32-opc.c \
 	lm32-opinst.c \
-	loongarch-opc.c \
-	loongarch-dis.c \
-	loongarch-coder.c \
 	m10200-dis.c \
 	m10200-opc.c \
 	m10300-dis.c \
@@ -196,12 +207,6 @@ TARGET_LIBOPCODES_CFILES = \
 	mep-opc.c \
 	metag-dis.c \
 	microblaze-dis.c \
-	micromips-opc.c \
-	mips-dis.c \
-	mips-opc.c \
-	mips16-opc.c \
-	mmix-dis.c \
-	mmix-opc.c \
 	moxie-dis.c \
 	moxie-opc.c \
 	msp430-decode.c \
@@ -213,7 +218,6 @@ TARGET_LIBOPCODES_CFILES = \
 	mt-opc.c \
 	nds32-asm.c \
 	nds32-dis.c \
-	nfp-dis.c \
 	nios2-dis.c \
 	nios2-opc.c \
 	ns32k-dis.c \
@@ -230,8 +234,6 @@ TARGET_LIBOPCODES_CFILES = \
 	ppc-opc.c \
 	pru-dis.c \
 	pru-opc.c \
-	riscv-dis.c \
-	riscv-opc.c \
 	rl78-decode.c \
 	rl78-dis.c \
 	rx-decode.c \
@@ -278,7 +280,8 @@ TARGET_LIBOPCODES_CFILES = \
 
 # C source files that correspond to .o's ending up in libopcodes.
 LIBOPCODES_CFILES = \
-	$(TARGET_LIBOPCODES_CFILES) \
+	$(TARGET32_LIBOPCODES_CFILES) \
+	$(TARGET64_LIBOPCODES_CFILES) \
 	dis-buf.c \
 	dis-init.c \
 	disassemble.c
@@ -299,7 +302,8 @@ CFILES = \
 	s390-mkopc.c \
 	z8kgen.c
 
-ALL_MACHINES = $(TARGET_LIBOPCODES_CFILES:.c=.lo)
+ALL32_MACHINES = $(TARGET32_LIBOPCODES_CFILES:.c=.lo)
+ALL64_MACHINES = $(TARGET64_LIBOPCODES_CFILES:.c=.lo)
 
 OFILES = @BFD_MACHINES@
 

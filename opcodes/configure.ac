@@ -379,7 +379,11 @@ if test x${all_targets} = xfalse ; then
 
 else	# all_targets is true
     archdefs=-DARCH_all
-    BFD_MACHINES='$(ALL_MACHINES)'
+    if grep '#define BFD_ARCH_SIZE 64' ../bfd/bfd-in3.h > /dev/null; then
+	BFD_MACHINES='$(ALL32_MACHINES) $(ALL64_MACHINES)'
+    else
+	BFD_MACHINES='$(ALL32_MACHINES)'
+    fi
 fi
 
 AC_SUBST(archdefs)
