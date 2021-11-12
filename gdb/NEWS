@@ -60,6 +60,10 @@ exit
   You can now exit GDB by using the new command "exit", in addition to
   the existing "quit" command.
 
+set debug threads on|off
+show debug threads
+  Print additional debug messages about thread creation and deletion.
+
 * Changed commands
 
 maint packet

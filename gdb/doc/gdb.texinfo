@@ -3899,6 +3899,14 @@ Display current libthread_db search path.
 @itemx show debug libthread-db
 Turns on or off display of @code{libthread_db}-related events.
 Use @code{1} to enable, @code{0} to disable.
+
+@kindex set debug threads
+@kindex show debug threads
+@cindex debugging @code{threads}
+@item set debug threads @r{[}on@r{|}off@r{]}
+@itemx show debug threads
+When @samp{on} @value{GDBN} will print additional messages when
+threads are created and deleted.
 @end table
 
 @node Forks

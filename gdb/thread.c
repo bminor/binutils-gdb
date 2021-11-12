@@ -49,6 +49,19 @@
 #include "inline-frame.h"
 #include "stack.h"
 
+/* See gdbthread.h.  */
+
+bool debug_threads = false;
+
+/* Implement 'show debug threads'.  */
+
+static void
+show_debug_threads (struct ui_file *file, int from_tty,
+		    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Thread debugging is \"%s\".\n"), value);
+}
+
 /* Definition of struct thread_info exported to gdbthread.h.  */
 
 /* Prototypes for local functions.  */
@@ -234,6 +247,9 @@ new_thread (struct inferior *inf, ptid_t ptid)
 {
   thread_info *tp = new thread_info (inf, ptid);
 
+  threads_debug_printf ("creating a new thread object, inferior %d, ptid %s",
+			inf->num, ptid.to_string ().c_str ());
+
   inf->thread_list.push_back (*tp);
 
   /* A thread with this ptid should not exist in the map yet.  */
@@ -250,6 +266,10 @@ add_thread_silent (process_stratum_target *targ, ptid_t ptid)
   gdb_assert (targ != nullptr);
 
   inferior *inf = find_inferior_ptid (targ, ptid);
+
+  threads_debug_printf ("add thread to inferior %d, ptid %s, target %s",
+			inf->num, ptid.to_string ().c_str (),
+			targ->shortname ());
 
   /* We may have an old thread with the same id in the thread list.
      If we do, it must be dead, otherwise we wouldn't be adding a new
@@ -298,6 +318,13 @@ thread_info::thread_info (struct inferior *inf_, ptid_t ptid_)
 
   /* Nothing to follow yet.  */
   this->pending_follow.set_spurious ();
+}
+
+/* See gdbthread.h.  */
+
+thread_info::~thread_info ()
+{
+  threads_debug_printf ("thread %s", this->ptid.to_string ().c_str ());
 }
 
 /* See gdbthread.h.  */
@@ -433,6 +460,9 @@ static void
 delete_thread_1 (thread_info *thr, bool silent)
 {
   gdb_assert (thr != nullptr);
+
+  threads_debug_printf ("deleting thread %s, silent = %d",
+			thr->ptid.to_string ().c_str (), silent);
 
   set_thread_exited (thr, silent);
 
@@ -2191,6 +2221,14 @@ Show printing of thread events (such as thread start and exit)."), NULL,
 			   NULL,
 			   show_print_thread_events,
 			   &setprintlist, &showprintlist);
+
+  add_setshow_boolean_cmd ("threads", class_maintenance, &debug_threads, _("\
+Set thread debugging."), _("\
+Show thread debugging."), _("\
+When on messages about thread creation and deletion are printed."),
+			   nullptr,
+			   show_debug_threads,
+			   &setdebuglist, &showdebuglist);
 
   create_internalvar_type_lazy ("_thread", &thread_funcs, NULL);
   create_internalvar_type_lazy ("_gthread", &gthread_funcs, NULL);

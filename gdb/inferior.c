@@ -179,6 +179,8 @@ inferior::clear_thread_list (bool silent)
 {
   thread_list.clear_and_dispose ([=] (thread_info *thr)
     {
+      threads_debug_printf ("deleting thread %s, silent = %d",
+			    thr->ptid.to_string ().c_str (), silent);
       set_thread_exited (thr, silent);
       if (thr->deletable ())
 	delete thr;
