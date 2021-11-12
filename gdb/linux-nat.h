@@ -232,7 +232,9 @@ struct lwp_info : intrusive_list_node<lwp_info>
   /* The last resume GDB requested on this thread.  */
   resume_kind last_resume_kind = resume_continue;
 
-  /* If non-zero, a pending wait status.  */
+  /* If non-zero, a pending wait status.  A pending process exit is
+     recorded in WAITSTATUS, because W_EXITCODE(0,0) happens to be
+     0.  */
   int status = 0;
 
   /* When 'stopped' is set, this is where the lwp last stopped, with
@@ -260,9 +262,10 @@ struct lwp_info : intrusive_list_node<lwp_info>
   /* Non-zero if we expect a duplicated SIGINT.  */
   int ignore_sigint = 0;
 
-  /* If WAITSTATUS->KIND != TARGET_WAITKIND_SPURIOUS, the waitstatus
-     for this LWP's last event.  This may correspond to STATUS above,
-     or to a local variable in lin_lwp_wait.  */
+  /* If WAITSTATUS->KIND != TARGET_WAITKIND_IGNORE, the waitstatus for
+     this LWP's last event.  This usually corresponds to STATUS above,
+     however because W_EXITCODE(0,0) happens to be 0, a process exit
+     will be recorded here, while 'status == 0' is ambiguous.  */
   struct target_waitstatus waitstatus;
 
   /* Signal whether we are in a SYSCALL_ENTRY or
