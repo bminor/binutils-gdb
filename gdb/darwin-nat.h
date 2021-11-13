@@ -200,14 +200,8 @@ extern mach_port_t darwin_port_set;
 /* A copy of mach_host_self ().  */
 extern mach_port_t darwin_host_self;
 
-/* FUNCTION_NAME is defined in common-utils.h (or not).  */
-#ifdef FUNCTION_NAME
 #define MACH_CHECK_ERROR(ret) \
-  mach_check_error (ret, __FILE__, __LINE__, FUNCTION_NAME)
-#else
-#define MACH_CHECK_ERROR(ret) \
-  mach_check_error (ret, __FILE__, __LINE__, "??")
-#endif
+  mach_check_error (ret, __FILE__, __LINE__, __func__)
 
 extern void mach_check_error (kern_return_t ret, const char *file,
 			      unsigned int line, const char *func);
