@@ -2735,7 +2735,8 @@ extern int compare_badness (const badness_vector &,
 			    const badness_vector &);
 
 extern badness_vector rank_function (gdb::array_view<type *> parms,
-				     gdb::array_view<value *> args);
+				     gdb::array_view<value *> args,
+				     bool varargs = false);
 
 extern struct rank rank_one_type (struct type *, struct type *,
 				  struct value *);

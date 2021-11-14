@@ -76,6 +76,7 @@ const struct rank REFERENCE_SEE_THROUGH_BADNESS = {0,1};
 const struct rank NULL_POINTER_CONVERSION_BADNESS = {2,0};
 const struct rank NS_POINTER_CONVERSION_BADNESS = {10,0};
 const struct rank NS_INTEGER_POINTER_CONVERSION_BADNESS = {3,0};
+const struct rank VARARG_BADNESS = {4, 0};
 
 /* Floatformat pairs.  */
 const struct floatformat *floatformats_ieee_half[BFD_ENDIAN_UNKNOWN] = {
@@ -4038,7 +4039,8 @@ compare_badness (const badness_vector &a, const badness_vector &b)
 
 badness_vector
 rank_function (gdb::array_view<type *> parms,
-	       gdb::array_view<value *> args)
+	       gdb::array_view<value *> args,
+	       bool varargs)
 {
   /* add 1 for the length-match rank.  */
   badness_vector bv;
@@ -4051,7 +4053,8 @@ rank_function (gdb::array_view<type *> parms,
      arguments and ellipsis parameter lists, we should consider those
      and rank the length-match more finely.  */
 
-  bv.push_back ((args.size () != parms.size ())
+  bv.push_back ((args.size () != parms.size ()
+		 && (! varargs || args.size () < parms.size ()))
 		? LENGTH_MISMATCH_BADNESS
 		: EXACT_MATCH_BADNESS);
 
@@ -4064,7 +4067,7 @@ rank_function (gdb::array_view<type *> parms,
 
   /* If more arguments than parameters, add dummy entries.  */
   for (size_t i = min_len; i < args.size (); i++)
-    bv.push_back (TOO_FEW_PARAMS_BADNESS);
+    bv.push_back (varargs ? VARARG_BADNESS : TOO_FEW_PARAMS_BADNESS);
 
   return bv;
 }
