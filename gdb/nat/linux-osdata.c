@@ -302,7 +302,7 @@ linux_xfer_osdata_processes (struct buffer *buffer)
 	  char *command_line;
 	  int *cores;
 	  int task_count;
-	  char *cores_str;
+	  std::string cores_str;
 	  int i;
 
 	  if (!isdigit (dp->d_name[0])
@@ -320,19 +320,15 @@ linux_xfer_osdata_processes (struct buffer *buffer)
 	  /* Find CPU cores used by the process.  */
 	  cores = XCNEWVEC (int, num_cores);
 	  task_count = get_cores_used_by_process (pid, cores, num_cores);
-	  cores_str = (char *) xcalloc (task_count, sizeof ("4294967295") + 1);
 
 	  for (i = 0; i < num_cores && task_count > 0; ++i)
 	    if (cores[i])
 	      {
-		char core_str[sizeof ("4294967295")];
-
-		sprintf (core_str, "%d", i);
-		strcat (cores_str, core_str);
+		string_appendf (cores_str, "%d", i);
 
 		task_count -= cores[i];
 		if (task_count > 0)
-		  strcat (cores_str, ",");
+		  cores_str += ",";
 	      }
 
 	  xfree (cores);
@@ -348,10 +344,9 @@ linux_xfer_osdata_processes (struct buffer *buffer)
 	     pid,
 	     user,
 	     command_line ? command_line : "",
-	     cores_str);
+	     cores_str.c_str());
 
 	  xfree (command_line);
-	  xfree (cores_str);
 	}
 
       closedir (dirp);
