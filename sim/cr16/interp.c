@@ -86,8 +86,7 @@ lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint64 ins, int size)
   mask = (((1 << (32 - h->mask)) -1) << h->mask);
 
  /* Adjuest mask for branch with 2 word instructions.  */
-  if ((h->ops->mnimonic != NULL) &&
-      ((streq(h->ops->mnimonic,"b") && h->size == 2)))
+  if (streq(h->ops->mnemonic,"b") && h->size == 2)
     mask = 0xff0f0000;
 
 
@@ -99,7 +98,7 @@ lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint64 ins, int size)
 
       mask = (((1 << (32 - h->mask)) -1) << h->mask);
      /* Adjuest mask for branch with 2 word instructions.  */
-     if ((streq(h->ops->mnimonic,"b")) && h->size == 2)
+     if ((streq(h->ops->mnemonic,"b")) && h->size == 2)
        mask = 0xff0f0000;
 
      }

@@ -59,7 +59,7 @@ typedef uint32 creg_t;
 
 struct simops 
 {
-  char mnimonic[12];
+  char mnemonic[12];
   uint32 size;
   uint32 mask;
   uint32 opcode;
