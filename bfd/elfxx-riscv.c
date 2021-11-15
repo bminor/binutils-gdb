@@ -2180,6 +2180,31 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zbc");
     case INSN_CLASS_ZBS:
       return riscv_subset_supports (rps, "zbs");
+    case INSN_CLASS_ZBKB:
+      return riscv_subset_supports (rps, "zbkb");
+    case INSN_CLASS_ZBKC:
+      return riscv_subset_supports (rps, "zbkc");
+    case INSN_CLASS_ZBKX:
+      return riscv_subset_supports (rps, "zbkx");
+    case INSN_CLASS_ZBB_OR_ZBKB:
+      return (riscv_subset_supports (rps, "zbb")
+	      || riscv_subset_supports (rps, "zbkb"));
+    case INSN_CLASS_ZBC_OR_ZBKC:
+      return (riscv_subset_supports (rps, "zbc")
+	      || riscv_subset_supports (rps, "zbkc"));
+    case INSN_CLASS_ZKND:
+      return riscv_subset_supports (rps, "zknd");
+    case INSN_CLASS_ZKNE:
+      return riscv_subset_supports (rps, "zkne");
+    case INSN_CLASS_ZKNH:
+      return riscv_subset_supports (rps, "zknh");
+    case INSN_CLASS_ZKND_OR_ZKNE:
+      return (riscv_subset_supports (rps, "zknd")
+	      || riscv_subset_supports (rps, "zkne"));
+    case INSN_CLASS_ZKSED:
+      return riscv_subset_supports (rps, "zksed");
+    case INSN_CLASS_ZKSH:
+      return riscv_subset_supports (rps, "zksh");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));

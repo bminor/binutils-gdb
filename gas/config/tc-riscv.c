@@ -63,6 +63,7 @@ enum riscv_csr_class
   CSR_CLASS_I,
   CSR_CLASS_I_32, /* rv32 only */
   CSR_CLASS_F, /* f-ext only */
+  CSR_CLASS_ZKR, /* zkr only */
   CSR_CLASS_DEBUG /* debug CSR */
 };
 
@@ -875,6 +876,10 @@ riscv_csr_address (const char *csr_name,
       result = riscv_subset_supports (&riscv_rps_as, "f");
       need_check_version = false;
       break;
+    case CSR_CLASS_ZKR:
+      result = riscv_subset_supports (&riscv_rps_as, "zkr");
+      need_check_version = false;
+      break;
     case CSR_CLASS_DEBUG:
       need_check_version = false;
       break;
@@ -1085,6 +1090,8 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	case 'I': break; /* Macro operand, must be constant.  */
 	case 'D': /* RD, floating point.  */
 	case 'd': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
+	case 'y': USE_BITS (OP_MASK_BS,	OP_SH_BS); break;
+	case 'Y': USE_BITS (OP_MASK_RNUM, OP_SH_RNUM); break;
 	case 'Z': /* RS1, CSR number.  */
 	case 'S': /* RS1, floating point.  */
 	case 's': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
@@ -2705,6 +2712,28 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  goto unknown_riscv_ip_operand;
 		}
 	      break;
+
+	    case 'y': /* bs immediate */
+	      my_getExpression (imm_expr, asarg);
+	      check_absolute_expr (ip, imm_expr, FALSE);
+	      if ((unsigned long)imm_expr->X_add_number > 3)
+		as_bad(_("Improper bs immediate (%lu)"),
+		       (unsigned long)imm_expr->X_add_number);
+	      INSERT_OPERAND(BS, *ip, imm_expr->X_add_number);
+	      imm_expr->X_op = O_absent;
+	      asarg = expr_end;
+	      continue;
+
+	    case 'Y': /* rnum immediate */
+	      my_getExpression (imm_expr, asarg);
+	      check_absolute_expr (ip, imm_expr, FALSE);
+	      if ((unsigned long)imm_expr->X_add_number > 10)
+		as_bad(_("Improper rnum immediate (%lu)"),
+		       (unsigned long)imm_expr->X_add_number);
+	      INSERT_OPERAND(RNUM, *ip, imm_expr->X_add_number);
+	      imm_expr->X_op = O_absent;
+	      asarg = expr_end;
+	      continue;
 
 	    case 'z':
 	      if (my_getSmallExpression (imm_expr, imm_reloc, asarg, p)

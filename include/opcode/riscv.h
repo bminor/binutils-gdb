@@ -261,6 +261,13 @@ static const char * const riscv_pred_succ[16] =
 #define OP_MASK_CFUNCT2		0x3
 #define OP_SH_CFUNCT2		5
 
+/* Scalar crypto fields. */
+
+#define OP_SH_BS        30
+#define OP_MASK_BS      3
+#define OP_SH_RNUM      20
+#define OP_MASK_RNUM    0xf
+
 /* ABI names for selected x-registers.  */
 
 #define X_RA 1
@@ -320,6 +327,17 @@ enum riscv_insn_class
   INSN_CLASS_ZBB,
   INSN_CLASS_ZBC,
   INSN_CLASS_ZBS,
+  INSN_CLASS_ZBKB,
+  INSN_CLASS_ZBKC,
+  INSN_CLASS_ZBKX,
+  INSN_CLASS_ZKND,
+  INSN_CLASS_ZKNE,
+  INSN_CLASS_ZKNH,
+  INSN_CLASS_ZKSED,
+  INSN_CLASS_ZKSH,
+  INSN_CLASS_ZBB_OR_ZBKB,
+  INSN_CLASS_ZBC_OR_ZBKC,
+  INSN_CLASS_ZKND_OR_ZKNE,
 };
 
 /* This structure holds information for a particular instruction.  */

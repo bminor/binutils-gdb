@@ -375,6 +375,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	  print (info->stream, "%s", riscv_gpr_names[rd]);
 	  break;
 
+	case 'y':
+	  print (info->stream, "0x%x", (int)EXTRACT_OPERAND (BS, l));
+	  break;
+
 	case 'z':
 	  print (info->stream, "%s", riscv_gpr_names[0]);
 	  break;
@@ -439,6 +443,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      print (info->stream, "0x%x", csr);
 	    break;
 	  }
+
+	case 'Y':
+	  print (info->stream, "0x%x", (int)EXTRACT_OPERAND (RNUM, l));
+	  break;
 
 	case 'Z':
 	  print (info->stream, "%d", rs1);
