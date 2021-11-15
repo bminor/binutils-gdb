@@ -438,4 +438,14 @@ extern int ppc_process_record (struct gdbarch *gdbarch,
 /* Estimate for the maximum number of instructions in a function epilogue.  */
 #define PPC_MAX_EPILOGUE_INSTRUCTIONS  52
 
+struct ppc_inferior_data
+{
+  /* This is an optional in case we add more fields to ppc_inferior_data, we
+     don't want it instantiated as soon as we get the ppc_inferior_data for an
+     inferior.  */
+  gdb::optional<displaced_step_buffers> disp_step_buf;
+};
+
+extern ppc_inferior_data * get_ppc_per_inferior (inferior *inf);
+
 #endif /* ppc-tdep.h */

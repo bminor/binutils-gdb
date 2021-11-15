@@ -2014,6 +2014,23 @@ ppc64_linux_gcc_target_options (struct gdbarch *gdbarch)
   return "";
 }
 
+static displaced_step_prepare_status
+ppc_linux_displaced_step_prepare  (gdbarch *arch, thread_info *thread,
+				   CORE_ADDR &displaced_pc)
+{
+  ppc_inferior_data *per_inferior = get_ppc_per_inferior (thread->inf);
+  if (!per_inferior->disp_step_buf.has_value ())
+    {
+      /* Figure out where the displaced step buffer is.  */
+      CORE_ADDR disp_step_buf_addr
+	= linux_displaced_step_location (thread->inf->gdbarch);
+
+      per_inferior->disp_step_buf.emplace (disp_step_buf_addr);
+    }
+
+  return per_inferior->disp_step_buf->prepare (thread, displaced_pc);
+}
+
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
 		    struct gdbarch *gdbarch)
@@ -2190,6 +2207,11 @@ ppc_linux_init_abi (struct gdbarch_info info,
 
   ppc_init_linux_record_tdep (&ppc_linux_record_tdep, 4);
   ppc_init_linux_record_tdep (&ppc64_linux_record_tdep, 8);
+
+  /* Setup displaced stepping.  */
+  set_gdbarch_displaced_step_prepare (gdbarch,
+				      ppc_linux_displaced_step_prepare);
+
 }
 
 void _initialize_ppc_linux_tdep ();

@@ -155,19 +155,11 @@ static const char *powerpc_vector_abi_string = "auto";
 
 /* PowerPC-related per-inferior data.  */
 
-struct ppc_inferior_data
-{
-  /* This is an optional in case we add more fields to ppc_inferior_data, we
-     don't want it instantiated as soon as we get the ppc_inferior_data for an
-     inferior.  */
-  gdb::optional<displaced_step_buffers> disp_step_buf;
-};
-
 static inferior_key<ppc_inferior_data> ppc_inferior_data_key;
 
 /* Get the per-inferior PowerPC data for INF.  */
 
-static ppc_inferior_data *
+ppc_inferior_data *
 get_ppc_per_inferior (inferior *inf)
 {
   ppc_inferior_data *per_inf = ppc_inferior_data_key.get (inf);
