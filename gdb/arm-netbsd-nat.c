@@ -50,7 +50,7 @@ static arm_netbsd_nat_target the_arm_netbsd_nat_target;
 static void
 arm_supply_vfpregset (struct regcache *regcache, struct fpreg *fpregset)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
   if (tdep->vfp_register_count == 0)
     return;
 
@@ -97,7 +97,7 @@ fetch_fp_register (struct regcache *regcache, int regno)
       return;
     }
 
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
   if (regno == ARM_FPSCR_REGNUM && tdep->vfp_register_count != 0)
     regcache->raw_supply (ARM_FPSCR_REGNUM, (char *) &vfp.vfp_fpscr);
   else if (regno >= ARM_D0_REGNUM
@@ -279,7 +279,7 @@ store_fp_register (const struct regcache *regcache, int regno)
       return;
     }
 
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
   if (regno == ARM_FPSCR_REGNUM && tdep->vfp_register_count != 0)
     regcache->raw_collect (ARM_FPSCR_REGNUM, (char *) &vfp.vfp_fpscr);
   else if (regno >= ARM_D0_REGNUM
@@ -301,7 +301,7 @@ store_fp_register (const struct regcache *regcache, int regno)
 static void
 store_fp_regs (const struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
   int lwp = regcache->ptid ().lwp ();
   if (tdep->vfp_register_count == 0)
     return;

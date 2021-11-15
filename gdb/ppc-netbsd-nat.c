@@ -52,7 +52,7 @@ static ppc_nbsd_nat_target the_ppc_nbsd_nat_target;
 static int
 getregs_supplies (struct gdbarch *gdbarch, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   return ((regnum >= tdep->ppc_gp0_regnum
 	   && regnum < tdep->ppc_gp0_regnum + ppc_num_gprs)
@@ -68,7 +68,7 @@ getregs_supplies (struct gdbarch *gdbarch, int regnum)
 static int
 getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* FIXME: jimb/2004-05-05: Some PPC variants don't have floating
      point registers.  Traditionally, GDB's register set has still
@@ -159,7 +159,7 @@ ppcnbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
   struct switchframe sf;
   struct callframe cf;
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int i;
 
   /* The stack pointer shouldn't be zero.  */

@@ -60,7 +60,7 @@ amd64bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
   struct gdbarch *gdbarch = regcache->arch ();
   ptid_t ptid = regcache->ptid ();
 #if defined(PT_GETFSBASE) || defined(PT_GETGSBASE)
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 #endif
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
@@ -136,7 +136,7 @@ amd64bsd_store_inferior_registers (struct regcache *regcache, int regnum)
   struct gdbarch *gdbarch = regcache->arch ();
   ptid_t ptid = regcache->ptid ();
 #if defined(PT_SETFSBASE) || defined(PT_SETGSBASE)
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 #endif
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))

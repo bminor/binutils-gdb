@@ -454,7 +454,8 @@ store_sveregs_to_thread (struct regcache *regcache)
 static void
 fetch_pauth_masks_from_thread (struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  aarch64_gdbarch_tdep *tdep
+    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
   int ret;
   struct iovec iovec;
   uint64_t pauth_regset[2] = {0, 0};
@@ -479,7 +480,8 @@ fetch_pauth_masks_from_thread (struct regcache *regcache)
 static void
 fetch_mteregs_from_thread (struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  aarch64_gdbarch_tdep *tdep
+    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
   int regno = tdep->mte_reg_base;
 
   gdb_assert (regno != -1);
@@ -503,7 +505,8 @@ fetch_mteregs_from_thread (struct regcache *regcache)
 static void
 store_mteregs_to_thread (struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  aarch64_gdbarch_tdep *tdep
+    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
   int regno = tdep->mte_reg_base;
 
   gdb_assert (regno != -1);
@@ -531,7 +534,8 @@ void
 aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
 					   int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  aarch64_gdbarch_tdep *tdep
+    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
 
   if (regno == -1)
     {
@@ -573,7 +577,8 @@ void
 aarch64_linux_nat_target::store_registers (struct regcache *regcache,
 					   int regno)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  aarch64_gdbarch_tdep *tdep
+    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
 
   if (regno == -1)
     {
@@ -1052,7 +1057,9 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
      return it if the current vector length matches the one in the tdep.  */
   inferior *inf = find_inferior_ptid (this, ptid);
   gdb_assert (inf != NULL);
-  if (vq == gdbarch_tdep (inf->gdbarch)->vq)
+  aarch64_gdbarch_tdep *tdep
+    = (aarch64_gdbarch_tdep *) gdbarch_tdep (inf->gdbarch);
+  if (vq == tdep->vq)
     return inf->gdbarch;
 
   /* We reach here if the vector length for the thread is different from its

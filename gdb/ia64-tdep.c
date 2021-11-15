@@ -2485,6 +2485,7 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
   unw_word_t bsp, sof, cfm, psr, ip;
   struct frame_info *this_frame = (struct frame_info *) arg;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -2506,7 +2507,7 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
 	   the current register frame.  */
 	bsp = get_frame_register_unsigned (this_frame, IA64_BSP_REGNUM);
 	cfm = get_frame_register_unsigned (this_frame, IA64_CFM_REGNUM);
-	sof = gdbarch_tdep (gdbarch)->size_of_register_frame (this_frame, cfm);
+	sof = tdep->size_of_register_frame (this_frame, cfm);
 	*val = ia64_rse_skip_regs (bsp, -sof);
 	break;
 

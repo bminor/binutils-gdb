@@ -475,7 +475,7 @@ windows_fetch_one_register (struct regcache *regcache,
 
   char *context_offset = context_ptr + mappings[r];
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   gdb_assert (!gdbarch_read_pc_p (gdbarch));
   gdb_assert (gdbarch_pc_regnum (gdbarch) >= 0);

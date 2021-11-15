@@ -649,7 +649,7 @@ static int
 ppc_register_u_addr (struct gdbarch *gdbarch, int regno)
 {
   int u_addr = -1;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   /* NOTE: cagney/2003-11-25: This is the word size used by the ptrace
      interface, and not the wordsize of the program's ABI.  */
   int wordsize = sizeof (long);
@@ -802,7 +802,7 @@ static void
 fetch_spe_register (struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct gdb_evrregset_t evrregs;
 
   gdb_assert (sizeof (evrregs.evr[0])
@@ -911,7 +911,7 @@ static void
 fetch_register (struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int bytes_transferred;
@@ -1156,7 +1156,7 @@ static void
 fetch_gp_regs (struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int i;
 
   if (have_ptrace_getsetregs)
@@ -1208,7 +1208,7 @@ static void
 fetch_fp_regs (struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int i;
 
   if (have_ptrace_getsetfpregs)
@@ -1226,7 +1226,7 @@ static void
 fetch_ppc_registers (struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   fetch_gp_regs (regcache, tid);
   if (tdep->ppc_fp0_regnum >= 0)
@@ -1425,7 +1425,7 @@ static void
 store_spe_register (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct gdb_evrregset_t evrregs;
 
   gdb_assert (sizeof (evrregs.evr[0])
@@ -1477,7 +1477,7 @@ static void
 store_register (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int i;
@@ -1718,7 +1718,7 @@ static void
 store_gp_regs (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int i;
 
   if (have_ptrace_getsetregs)
@@ -1780,7 +1780,7 @@ static void
 store_fp_regs (const struct regcache *regcache, int tid, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int i;
 
   if (have_ptrace_getsetfpregs)
@@ -1798,7 +1798,7 @@ static void
 store_ppc_registers (const struct regcache *regcache, int tid)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
  
   store_gp_regs (regcache, tid, -1);
   if (tdep->ppc_fp0_regnum >= 0)
