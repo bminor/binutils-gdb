@@ -1,5 +1,5 @@
-#as: --gdwarf-3
-#name: DWARF5 .line 0
+#as: --gdwarf-5
+#name: DWARF5 .file 0 (no directory)
 #readelf: -wl
 
 #...

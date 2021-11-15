@@ -641,11 +641,9 @@ get_directory_table_entry (const char *dirname,
 		 expected to be the same as the DW_AT_comp_dir (which
 		 is set to the current build directory).  Since we are
 		 about to create a directory entry that is not the
-		 same, allocate the current directory first.
-		 FIXME: Alternatively we could generate an error
-		 message here.  */
-	      (void) get_directory_table_entry (pwd, NULL, strlen (pwd),
-						true);
+		 same, allocate the current directory first.  */
+	      (void) get_directory_table_entry (pwd, file0_dirname,
+						strlen (pwd), true);
 	      d = 1;
 	    }
 	  else
@@ -827,7 +825,7 @@ allocate_filename_to_slot (const char *dirname,
   const char *file;
   size_t dirlen;
   unsigned int i, d;
-  const char *file0_dirname = dirname;
+  const char *file0_dirname;
 
   /* Short circuit the common case of adding the same pathname
      as last time.  */
@@ -906,20 +904,40 @@ allocate_filename_to_slot (const char *dirname,
       return false;
     }
 
-  if (dirname == NULL)
+  /* For file .0, the directory name is the current directory and the file
+     may be in another directory contained in the file name.  */
+  if (num == 0)
     {
-      dirname = filename;
+      file0_dirname = dirname;
+
       file = get_basename (filename);
-      dirlen = file - filename;
+
+      if (dirname && file == filename)
+	dirlen = strlen (dirname);
+      else
+	{
+	  dirname = filename;
+	  dirlen = file - filename;
+	}
     }
   else
     {
-      dirlen = strlen (dirname);
-      file = filename;
+      file0_dirname = NULL;
+
+      if (dirname == NULL)
+	{
+	  dirname = filename;
+	  file = get_basename (filename);
+	  dirlen = file - filename;
+	}
+      else
+	{
+	  dirlen = strlen (dirname);
+	  file = filename;
+	}
     }
 
-  d = get_directory_table_entry (dirname, file0_dirname, dirlen,
-				 num == 0);
+  d = get_directory_table_entry (dirname, file0_dirname, dirlen, num == 0);
   i = num;
 
   if (! assign_file_to_slot (i, file, d))

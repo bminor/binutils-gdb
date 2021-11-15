@@ -5416,19 +5416,22 @@ table is shared with the @code{.debug_info} section of the DWARF2 debugging
 information, and thus the user must know the exact indices that table
 entries will have.
 
-If DWARF-5 support has been enabled via the @option{-gdwarf-5} option then
-an extended version of the @code{file} is also allowed:
+If DWARF5 support has been enabled via the @option{-gdwarf-5} option then
+an extended version of @code{.file} is also allowed:
 
 @smallexample
 .file @var{fileno} [@var{dirname}] @var{filename} [md5 @var{value}]
 @end smallexample
 
 With this version a separate directory name is allowed, although if this is
-used then @var{filename} should not contain any directory components.  In
-addtion an md5 hash value of the contents of @var{filename} can be provided.
-This will be stored in the the file table as well, and can be used by tools
-reading the debug information to verify that the contents of the source file
-match the contents of the compiled file.
+used then @var{filename} should not contain any directory component, except
+for @var{fileno} equal to 0: in this case, @var{dirname} is expected to be
+the current directory and @var{filename} the currently processed file, and
+the latter need not be located in the former. In addtion an MD5 hash value
+of the contents of @var{filename} can be provided. This will be stored in
+the the file table as well, and can be used by tools reading the debug
+information to verify that the contents of the source file match the
+contents of the compiled file.
 
 @node Fill
 @section @code{.fill @var{repeat} , @var{size} , @var{value}}
