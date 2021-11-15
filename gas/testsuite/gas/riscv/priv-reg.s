@@ -282,3 +282,6 @@
 	csr etrigger		# 0x7a1, alias to tdata1
 	csr textra32		# 0x7a3, alias to tdata3
 	csr textra64		# 0x7a3, alias to tdata3
+
+	# Scalar crypto
+	csr seed		# 0x015, Entropy Source

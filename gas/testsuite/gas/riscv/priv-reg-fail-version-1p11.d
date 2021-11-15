@@ -1,4 +1,4 @@
-#as: -march=rv32if -mcsr-check -mpriv-spec=1.11 -march-attr
+#as: -march=rv32if_zkr -mcsr-check -mpriv-spec=1.11 -march-attr
 #source: priv-reg.s
 #warning_output: priv-reg-fail-version-1p11.l
 #readelf: -A
