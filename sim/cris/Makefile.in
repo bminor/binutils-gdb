@@ -53,7 +53,7 @@ all: rvdummy$(EXEEXT)
 check: rvdummy$(EXEEXT)
 
 rvdummy$(EXEEXT): rvdummy.o $(EXTRA_LIBDEPS)
-	$(CC) $(ALL_CFLAGS) -o rvdummy$(EXEEXT) rvdummy.o $(EXTRA_LIBS)
+	$(ECHO_CCLD) $(CC) $(ALL_CFLAGS) -o rvdummy$(EXEEXT) rvdummy.o $(EXTRA_LIBS)
 
 rvdummy.o: rvdummy.c $(remote_sim_h) $(callback_h)
 
@@ -71,7 +71,7 @@ CRISV32F_INCLUDE_DEPS = \
 
 cris-clean:
 	-rm -f stamp-arch
-	-rm -f tmp-*
+	-rm -f tmp-* rvdummy$(EXEEXT)
 
 # Useful when making CGEN-generated files manually, without --enable-cgen-maint.
 stamps: stamp-arch stamp-v10fcpu stamp-v32fcpu
