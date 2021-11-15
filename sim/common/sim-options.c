@@ -104,7 +104,8 @@ typedef enum {
   OPTION_VERSION,
   OPTION_LOAD_LMA,
   OPTION_LOAD_VMA,
-  OPTION_SYSROOT
+  OPTION_SYSROOT,
+  OPTION_ARGV0,
 } STANDARD_OPTIONS;
 
 static const OPTION standard_options[] =
@@ -177,6 +178,10 @@ static const OPTION standard_options[] =
   { {"sysroot", required_argument, NULL, OPTION_SYSROOT},
       '\0', "SYSROOT",
     "Root for system calls with absolute file-names and cwd at start",
+      standard_option_handler, NULL },
+
+  { {"argv0", required_argument, NULL, OPTION_ARGV0},
+      '\0', "ARGV0", "Set argv[0] to the specified string",
       standard_option_handler, NULL },
 
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
@@ -420,6 +425,11 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
       else
 	simulator_sysroot = "";
       break;
+
+    case OPTION_ARGV0:
+      free (STATE_PROG_ARGV0 (sd));
+      STATE_PROG_ARGV0 (sd) = xstrdup (arg);
+      break;
     }
 
   return SIM_RC_OK;
@@ -605,8 +615,16 @@ sim_parse_args (SIM_DESC sd, char * const *argv)
 	{
 	  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
 	    {
+	      char **new_argv = dupargv (argv + optind);
+
 	      STATE_PROG_FILE (sd) = xstrdup (argv[optind]);
-	      STATE_PROG_ARGV (sd) = dupargv (argv + optind);
+	      if (STATE_PROG_ARGV0 (sd) != NULL)
+		{
+		  free (new_argv[0]);
+		  new_argv[0] = xstrdup (STATE_PROG_ARGV0 (sd));
+		}
+	      freeargv (STATE_PROG_ARGV (sd));
+	      STATE_PROG_ARGV (sd) = new_argv;
 	    }
 	  break;
 	}
@@ -787,7 +805,7 @@ void
 sim_print_help (SIM_DESC sd, int is_command)
 {
   if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
-    sim_io_printf (sd, "Usage: %s [options] program [program args]\n",
+    sim_io_printf (sd, "Usage: %s [options] [--] program [program args]\n",
 		   STATE_MY_NAME (sd));
 
   /* Initialize duplicate argument checker.  */

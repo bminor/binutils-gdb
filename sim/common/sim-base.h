@@ -161,6 +161,10 @@ struct sim_state {
   char **prog_argv;
 #define STATE_PROG_ARGV(sd) ((sd)->prog_argv)
 
+  /* Thie is the program's argv[0] override.  */
+  char *prog_argv0;
+#define STATE_PROG_ARGV0(sd) ((sd)->prog_argv0)
+
   /* The program's bfd.  */
   struct bfd *prog_bfd;
 #define STATE_PROG_BFD(sd) ((sd)->prog_bfd)
