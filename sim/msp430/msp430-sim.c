@@ -152,10 +152,7 @@ sim_open (SIM_OPEN_KIND kind,
     sim_do_commandf (sd, "memory-region 0x90000,0x70000"); /* HIGH ROM.  */
 
   /* Check for/establish the a reference program image.  */
-  if (sim_analyze_program (sd,
-			   (STATE_PROG_ARGV (sd) != NULL
-			    ? *STATE_PROG_ARGV (sd)
-			    : NULL), abfd) != SIM_RC_OK)
+  if (sim_analyze_program (sd, STATE_PROG_FILE (sd), abfd) != SIM_RC_OK)
     {
       sim_state_free (sd);
       return 0;

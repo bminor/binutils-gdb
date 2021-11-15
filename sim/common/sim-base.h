@@ -151,6 +151,11 @@ struct sim_state {
   const char *model_name;
 #define STATE_MODEL_NAME(sd) ((sd)->model_name)
 
+  /* In standalone simulator, this is the program to run.  Not to be confused
+     with argv which are the strings passed to the program itself.  */
+  char *prog_file;
+#define STATE_PROG_FILE(sd) ((sd)->prog_file)
+
   /* In standalone simulator, this is the program's arguments passed
      on the command line.  */
   char **prog_argv;

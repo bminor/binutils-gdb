@@ -103,7 +103,7 @@ main (int argc, char **argv)
   if (prog_argv == NULL || *prog_argv == NULL)
     usage ();
 
-  name = *prog_argv;
+  name = STATE_PROG_FILE (sd);
 
   /* For simulators that don't open prog during sim_open() */
   if (prog_bfd == NULL)

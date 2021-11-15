@@ -604,7 +604,10 @@ sim_parse_args (SIM_DESC sd, char * const *argv)
       if (optc == -1)
 	{
 	  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
-	    STATE_PROG_ARGV (sd) = dupargv (argv + optind);
+	    {
+	      STATE_PROG_FILE (sd) = xstrdup (argv[optind]);
+	      STATE_PROG_ARGV (sd) = dupargv (argv + optind);
+	    }
 	  break;
 	}
       if (optc == '?')

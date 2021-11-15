@@ -147,10 +147,7 @@ sim_open (SIM_OPEN_KIND kind,
   if (sim_parse_args (sd, argv) != SIM_RC_OK)
     goto error;
 
-  if (sim_analyze_program (sd,
-                           (STATE_PROG_ARGV (sd) != NULL
-                            ? *STATE_PROG_ARGV (sd)
-                            : NULL), abfd) != SIM_RC_OK)
+  if (sim_analyze_program (sd, STATE_PROG_FILE (sd), abfd) != SIM_RC_OK)
     goto error;
 
   if (sim_config (sd) != SIM_RC_OK)

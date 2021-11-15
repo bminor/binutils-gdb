@@ -690,11 +690,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     }
 
   /* check for/establish the reference program image */
-  if (sim_analyze_program (sd,
-			   (STATE_PROG_ARGV (sd) != NULL
-			    ? *STATE_PROG_ARGV (sd)
-			    : NULL),
-			   abfd) != SIM_RC_OK)
+  if (sim_analyze_program (sd, STATE_PROG_FILE (sd), abfd) != SIM_RC_OK)
     {
       /* When there's an error, sim_analyze_program has already output
 	 a message.  Let's just clarify it, as "not an object file"
@@ -717,9 +713,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   if (abfd != NULL && bfd_get_arch (abfd) == bfd_arch_unknown)
     {
-      if (STATE_PROG_ARGV (sd) != NULL)
+      if (STATE_PROG_FILE (sd) != NULL)
 	sim_io_eprintf (sd, "%s: `%s' is not a CRIS program\n",
-			STATE_MY_NAME (sd), *STATE_PROG_ARGV (sd));
+			STATE_MY_NAME (sd), STATE_PROG_FILE (sd));
       else
 	sim_io_eprintf (sd, "%s: program to be run is not a CRIS program\n",
 			STATE_MY_NAME (sd));

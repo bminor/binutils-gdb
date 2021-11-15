@@ -1226,10 +1226,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   sim_do_command(sd," memory region 0xE0000000,0x10000") ; 
 
   /* Check for/establish the a reference program image.  */
-  if (sim_analyze_program (sd,
-			   (STATE_PROG_ARGV (sd) != NULL
-			    ? *STATE_PROG_ARGV (sd)
-			    : NULL), abfd) != SIM_RC_OK)
+  if (sim_analyze_program (sd, STATE_PROG_FILE (sd), abfd) != SIM_RC_OK)
     {
       free_state (sd);
       return 0;

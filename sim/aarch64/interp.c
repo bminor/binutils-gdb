@@ -339,10 +339,7 @@ sim_open (SIM_OPEN_KIND                  kind,
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK
       || sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK
       || sim_parse_args (sd, argv) != SIM_RC_OK
-      || sim_analyze_program (sd,
-			      (STATE_PROG_ARGV (sd) != NULL
-			       ? *STATE_PROG_ARGV (sd)
-			       : NULL), abfd) != SIM_RC_OK
+      || sim_analyze_program (sd, STATE_PROG_FILE (sd), abfd) != SIM_RC_OK
       || sim_config (sd) != SIM_RC_OK
       || sim_post_argv_init (sd) != SIM_RC_OK)
     {
