@@ -25,13 +25,6 @@ if {![istarget "*-linux*"]} then {
     continue
 }
 
-# Test relies on checking follow-fork output. Do not run if gdb debug is
-# enabled as it will be redirected to the log.
-if [gdb_debug_enabled] {
-    untested "debug is enabled"
-    return 0
-}
-
 standard_testfile
 
 set compile_options debug
