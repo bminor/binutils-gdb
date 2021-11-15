@@ -615,16 +615,26 @@ sim_parse_args (SIM_DESC sd, char * const *argv)
 	{
 	  if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
 	    {
-	      char **new_argv = dupargv (argv + optind);
+	      char **new_argv;
 
-	      STATE_PROG_FILE (sd) = xstrdup (argv[optind]);
-	      if (STATE_PROG_ARGV0 (sd) != NULL)
-		{
-		  free (new_argv[0]);
-		  new_argv[0] = xstrdup (STATE_PROG_ARGV0 (sd));
-		}
+	      free (STATE_PROG_FILE (sd));
+	      STATE_PROG_FILE (sd) = NULL;
+
+	      new_argv = dupargv (argv + optind);
 	      freeargv (STATE_PROG_ARGV (sd));
 	      STATE_PROG_ARGV (sd) = new_argv;
+
+	      /* Skip steps when argc == 0.  */
+	      if (argv[optind] != NULL)
+		{
+		  STATE_PROG_FILE (sd) = xstrdup (argv[optind]);
+
+		  if (STATE_PROG_ARGV0 (sd) != NULL)
+		    {
+		      free (new_argv[0]);
+		      new_argv[0] = xstrdup (STATE_PROG_ARGV0 (sd));
+		    }
+		}
 	    }
 	  break;
 	}
