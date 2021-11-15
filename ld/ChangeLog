@@ -1,3 +1,10 @@
+2021-11-15  Roland McGrath  <mcgrathr@google.com>
+
+	* testsuite/ld-aarch64/dt_textrel.d: Pass explicit -z notext in
+	case ld was configured with --enable-textrel-check=error.
+	* testsuite/ld-aarch64/pr22764.d: Likewise.
+	* testsuite/ld-aarch64/pr20402.d: Likewise.
+
 2021-10-25  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/ld-ctf/nonrepresentable-member.*: New test.
