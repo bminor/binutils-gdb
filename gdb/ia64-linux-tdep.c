@@ -216,7 +216,7 @@ ia64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 static void
 ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   static const char *const stap_register_prefixes[] = { "r", NULL };
   static const char *const stap_register_indirection_prefixes[] = { "[",
 								    NULL };

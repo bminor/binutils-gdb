@@ -36,7 +36,7 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 				function_call_return_method return_method,
 				CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int ii;
   int len = 0;
@@ -44,7 +44,7 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
   int argbytes;			/* current argument byte */
   gdb_byte tmp_buffer[50];
   int f_argno = 0;		/* current floating point argno */
-  int wordsize = gdbarch_tdep (gdbarch)->wordsize;
+  int wordsize = tdep->wordsize;
 
   struct value *arg = 0;
   struct type *type;
@@ -265,7 +265,7 @@ rs6000_lynx178_return_value (struct gdbarch *gdbarch, struct value *function,
 			     struct type *valtype, struct regcache *regcache,
 			     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* The calling convention this function implements assumes the

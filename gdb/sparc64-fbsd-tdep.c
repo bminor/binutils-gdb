@@ -222,7 +222,7 @@ static const struct regset sparc64fbsd_fpregset =
 static void
 sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Generic FreeBSD support. */
   fbsd_init_abi (info, gdbarch);

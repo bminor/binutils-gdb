@@ -1045,7 +1045,7 @@ s390_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static int
 s390_register_call_saved (struct gdbarch *gdbarch, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   switch (tdep->abi)
     {
@@ -1076,7 +1076,7 @@ s390_guess_tracepoint_registers (struct gdbarch *gdbarch,
 				 struct regcache *regcache,
 				 CORE_ADDR addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int sz = register_size (gdbarch, S390_PSWA_REGNUM);
   gdb_byte *reg = (gdb_byte *) alloca (sz);
   ULONGEST pswm, pswa;
@@ -1172,7 +1172,7 @@ enum { s390_dwarf_reg_r0l = ARRAY_SIZE (s390_dwarf_regmap) - 16 };
 static int
 s390_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int gdb_reg = -1;
 
   /* In a 32-on-64 debug scenario, debug info refers to the full
@@ -1205,7 +1205,7 @@ s390_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
    These pseudo-registers are composed of two adjacent gprs.  */
 
 static int
-regnum_is_gpr_full (struct gdbarch_tdep *tdep, int regnum)
+regnum_is_gpr_full (s390_gdbarch_tdep *tdep, int regnum)
 {
   return (tdep->gpr_full_regnum != -1
 	  && regnum >= tdep->gpr_full_regnum
@@ -1216,7 +1216,7 @@ regnum_is_gpr_full (struct gdbarch_tdep *tdep, int regnum)
    These pseudo-registers are composed of f0-f15 and v0l-v15l.  */
 
 static int
-regnum_is_vxr_full (struct gdbarch_tdep *tdep, int regnum)
+regnum_is_vxr_full (s390_gdbarch_tdep *tdep, int regnum)
 {
   return (tdep->v0_full_regnum != -1
 	  && regnum >= tdep->v0_full_regnum
@@ -1231,7 +1231,7 @@ static struct value *
 s390_value_from_register (struct gdbarch *gdbarch, struct type *type,
 			  int regnum, struct frame_id frame_id)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct value *value = default_value_from_register (gdbarch, type,
 						     regnum, frame_id);
   check_typedef (type);
@@ -1250,7 +1250,7 @@ s390_value_from_register (struct gdbarch *gdbarch, struct type *type,
 static const char *
 s390_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (regnum == tdep->pc_regnum)
     return "pc";
@@ -1284,7 +1284,7 @@ s390_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 static struct type *
 s390_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (regnum == tdep->pc_regnum)
     return builtin_type (gdbarch)->builtin_func_ptr;
@@ -1308,7 +1308,7 @@ static enum register_status
 s390_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 			   int regnum, gdb_byte *buf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int regsize = register_size (gdbarch, regnum);
   ULONGEST val;
@@ -1383,7 +1383,7 @@ static void
 s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 			    int regnum, const gdb_byte *buf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int regsize = register_size (gdbarch, regnum);
   ULONGEST val, psw;
@@ -1442,7 +1442,7 @@ static int
 s390_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 				 struct reggroup *group)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* We usually save/restore the whole PSW, which includes PC and CC.
      However, some older gdbservers may not support saving/restoring
@@ -1470,7 +1470,7 @@ static int
 s390_ax_pseudo_register_collect (struct gdbarch *gdbarch,
 				 struct agent_expr *ax, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   if (regnum == tdep->pc_regnum)
     {
       ax_reg_mask (ax, S390_PSWA_REGNUM);
@@ -1504,7 +1504,7 @@ static int
 s390_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
 				    struct agent_expr *ax, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   if (regnum == tdep->pc_regnum)
     {
       ax_reg (ax, S390_PSWA_REGNUM);
@@ -1746,7 +1746,7 @@ struct s390_arg_state
 
 static void
 s390_handle_arg (struct s390_arg_state *as, struct value *arg,
-		 struct gdbarch_tdep *tdep, int word_size,
+		 s390_gdbarch_tdep *tdep, int word_size,
 		 enum bfd_endian byte_order, int is_unnamed)
 {
   struct type *type = check_typedef (value_type (arg));
@@ -1905,7 +1905,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
@@ -2083,11 +2083,14 @@ s390_return_value (struct gdbarch *gdbarch, struct value *function,
       rvc = RETURN_VALUE_STRUCT_CONVENTION;
       break;
     case TYPE_CODE_ARRAY:
-      rvc = (gdbarch_tdep (gdbarch)->vector_abi == S390_VECTOR_ABI_128
-	     && TYPE_LENGTH (type) <= 16 && type->is_vector ())
-	? RETURN_VALUE_REGISTER_CONVENTION
-	: RETURN_VALUE_STRUCT_CONVENTION;
-      break;
+      {
+	s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+	rvc = (tdep->vector_abi == S390_VECTOR_ABI_128
+	       && TYPE_LENGTH (type) <= 16 && type->is_vector ())
+	  ? RETURN_VALUE_REGISTER_CONVENTION
+	  : RETURN_VALUE_STRUCT_CONVENTION;
+	break;
+      }
     default:
       rvc = TYPE_LENGTH (type) <= 8
 	? RETURN_VALUE_REGISTER_CONVENTION
@@ -2165,7 +2168,7 @@ s390_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 static CORE_ADDR
 s390_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   ULONGEST pc;
   pc = frame_unwind_register_unsigned (next_frame, tdep->pc_regnum);
   return gdbarch_addr_bits_remove (gdbarch, pc);
@@ -2187,7 +2190,7 @@ static struct value *
 s390_unwind_pseudo_register (struct frame_info *this_frame, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct type *type = register_type (gdbarch, regnum);
 
   /* Unwind PC via PSW address.  */
@@ -2772,7 +2775,7 @@ static CORE_ADDR
 s390_record_address_mask (struct gdbarch *gdbarch, struct regcache *regcache,
 			  CORE_ADDR val)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   ULONGEST pswm, pswa;
   int am;
   if (tdep->abi == ABI_LINUX_S390)
@@ -2839,7 +2842,7 @@ s390_record_calc_disp_vsce (struct gdbarch *gdbarch, struct regcache *regcache,
 			    uint8_t vx, uint8_t el, uint8_t es, uint16_t bd,
 			    int8_t dh, CORE_ADDR *res)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST x;
   gdb_byte buf[16];
@@ -2882,7 +2885,7 @@ static int s390_popcnt (unsigned int x) {
 static int
 s390_record_gpr_g (struct gdbarch *gdbarch, struct regcache *regcache, int i)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   if (record_full_arch_list_add_reg (regcache, S390_R0_REGNUM + i))
     return -1;
   if (tdep->abi == ABI_LINUX_S390)
@@ -2896,7 +2899,7 @@ s390_record_gpr_g (struct gdbarch *gdbarch, struct regcache *regcache, int i)
 static int
 s390_record_gpr_h (struct gdbarch *gdbarch, struct regcache *regcache, int i)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   if (tdep->abi == ABI_LINUX_S390)
     {
       if (record_full_arch_list_add_reg (regcache, S390_R0_UPPER_REGNUM + i))
@@ -2936,7 +2939,7 @@ static int
 s390_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		     CORE_ADDR addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   uint16_t insn[3] = {0};
   /* Instruction as bytes.  */
   uint8_t ibyte[6];
@@ -6831,7 +6834,7 @@ while (0)
    tdesc.  */
 
 static bool
-s390_tdesc_valid (struct gdbarch_tdep *tdep,
+s390_tdesc_valid (s390_gdbarch_tdep *tdep,
 		  struct tdesc_arch_data *tdesc_data)
 {
   static const char *const psw[] = {
@@ -6983,10 +6986,10 @@ s390_tdesc_valid (struct gdbarch_tdep *tdep,
 /* Allocate and initialize new gdbarch_tdep.  Caller is responsible to free
    memory after use.  */
 
-static struct gdbarch_tdep *
+static s390_gdbarch_tdep *
 s390_gdbarch_tdep_alloc ()
 {
-  struct gdbarch_tdep *tdep = XCNEW (struct gdbarch_tdep);
+  s390_gdbarch_tdep *tdep = new s390_gdbarch_tdep;
 
   tdep->tdesc = NULL;
 
@@ -7023,7 +7026,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   static const char *const stap_register_indirection_suffixes[] = { ")",
 								    NULL };
 
-  struct gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
+  s390_gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
   tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
   info.tdesc_data = tdesc_data.get ();
@@ -7153,7 +7156,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Check any target description for validity.  */
   if (!s390_tdesc_valid (tdep, tdesc_data.get ()))
     {
-      xfree (tdep);
+      delete tdep;
       gdbarch_free (gdbarch);
       return NULL;
     }
@@ -7174,16 +7177,19 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      struct gdbarch_tdep *tmp = gdbarch_tdep (arches->gdbarch);
+      s390_gdbarch_tdep *tmp
+	= (s390_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+
       if (!tmp)
 	continue;
+
       /* A program can 'choose' not to use the vector registers when they
 	 are present.  Leading to the same tdesc but different tdep and
 	 thereby a different gdbarch.  */
       if (tmp->vector_abi != tdep->vector_abi)
 	continue;
 
-      xfree (tdep);
+      delete tdep;
       gdbarch_free (gdbarch);
       return arches->gdbarch;
     }

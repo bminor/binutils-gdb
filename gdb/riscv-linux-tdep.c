@@ -179,7 +179,7 @@ riscv_linux_syscall_next_pc (struct frame_info *frame)
 static void
 riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  riscv_gdbarch_tdep *tdep = (riscv_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   linux_init_abi (info, gdbarch, 0);
 

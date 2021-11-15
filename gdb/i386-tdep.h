@@ -57,206 +57,206 @@ enum struct_return
 };
 
 /* i386 architecture specific information.  */
-struct gdbarch_tdep
+struct i386_gdbarch_tdep : gdbarch_tdep
 {
   /* General-purpose registers.  */
-  int *gregset_reg_offset;
-  int gregset_num_regs;
-  size_t sizeof_gregset;
+  int *gregset_reg_offset = 0;
+  int gregset_num_regs = 0;
+  size_t sizeof_gregset = 0;
 
   /* Floating-point registers.  */
-  size_t sizeof_fpregset;
+  size_t sizeof_fpregset = 0;
 
   /* Register number for %st(0).  The register numbers for the other
      registers follow from this one.  Set this to -1 to indicate the
      absence of an FPU.  */
-  int st0_regnum;
+  int st0_regnum = 0;
 
   /* Number of MMX registers.  */
-  int num_mmx_regs;
+  int num_mmx_regs = 0;
 
   /* Register number for %mm0.  Set this to -1 to indicate the absence
      of MMX support.  */
-  int mm0_regnum;
+  int mm0_regnum = 0;
 
   /* Number of pseudo YMM registers.  */
-  int num_ymm_regs;
+  int num_ymm_regs = 0;
 
   /* Register number for %ymm0.  Set this to -1 to indicate the absence
      of pseudo YMM register support.  */
-  int ymm0_regnum;
+  int ymm0_regnum = 0;
 
   /* Number of AVX512 OpMask registers (K-registers)  */
-  int num_k_regs;
+  int num_k_regs = 0;
 
   /* Register number for %k0.  Set this to -1 to indicate the absence
      of AVX512 OpMask register support.  */
-  int k0_regnum;
+  int k0_regnum = 0;
 
   /* Number of pseudo ZMM registers ($zmm0-$zmm31).  */
-  int num_zmm_regs;
+  int num_zmm_regs = 0;
 
   /* Register number for %zmm0.  Set this to -1 to indicate the absence
      of pseudo ZMM register support.  */
-  int zmm0_regnum;
+  int zmm0_regnum = 0;
 
   /* Number of byte registers.  */
-  int num_byte_regs;
+  int num_byte_regs = 0;
 
   /* Register pseudo number for %al.  */
-  int al_regnum;
+  int al_regnum = 0;
 
   /* Number of pseudo word registers.  */
-  int num_word_regs;
+  int num_word_regs = 0;
 
   /* Register number for %ax.  */
-  int ax_regnum;
+  int ax_regnum = 0;
 
   /* Number of pseudo dword registers.  */
-  int num_dword_regs;
+  int num_dword_regs = 0;
 
   /* Register number for %eax.  Set this to -1 to indicate the absence
      of pseudo dword register support.  */
-  int eax_regnum;
+  int eax_regnum = 0;
 
   /* Number of core registers.  */
-  int num_core_regs;
+  int num_core_regs = 0;
 
   /* Number of SSE registers.  */
-  int num_xmm_regs;
+  int num_xmm_regs = 0;
 
   /* Number of SSE registers added in AVX512.  */
-  int num_xmm_avx512_regs;
+  int num_xmm_avx512_regs = 0;
 
   /* Register number of XMM16, the first XMM register added in AVX512.  */
-  int xmm16_regnum;
+  int xmm16_regnum = 0;
 
   /* Number of YMM registers added in AVX512.  */
-  int num_ymm_avx512_regs;
+  int num_ymm_avx512_regs = 0;
 
   /* Register number of YMM16, the first YMM register added in AVX512.  */
-  int ymm16_regnum;
+  int ymm16_regnum = 0;
 
   /* Bits of the extended control register 0 (the XFEATURE_ENABLED_MASK
      register), excluding the x87 bit, which are supported by this GDB.  */
 
-  uint64_t xcr0;
+  uint64_t xcr0 = 0;
 
   /* Offset of XCR0 in XSAVE extended state.  */
-  int xsave_xcr0_offset;
+  int xsave_xcr0_offset = 0;
 
   /* Register names.  */
-  const char * const *register_names;
+  const char * const *register_names = nullptr;
 
   /* Register number for %ymm0h.  Set this to -1 to indicate the absence
      of upper YMM register support.  */
-  int ymm0h_regnum;
+  int ymm0h_regnum = 0;
 
   /* Upper YMM register names.  Only used for tdesc_numbered_register.  */
-  const char * const *ymmh_register_names;
+  const char * const *ymmh_register_names = nullptr;
 
   /* Register number for %ymm16h.  Set this to -1 to indicate the absence
   of support for YMM16-31.  */
-  int ymm16h_regnum;
+  int ymm16h_regnum = 0;
 
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char * const *ymm16h_register_names;
+  const char * const *ymm16h_register_names = nullptr;
 
   /* Register number for %bnd0r.  Set this to -1 to indicate the absence
      bound registers.  */
-  int bnd0r_regnum;
+  int bnd0r_regnum = 0;
 
   /* Register number for pseudo register %bnd0.  Set this to -1 to indicate the absence
      bound registers.  */
-  int bnd0_regnum;
+  int bnd0_regnum = 0;
 
   /* Register number for %bndcfgu. Set this to -1 to indicate the absence
      bound control registers.  */
-  int bndcfgu_regnum;
+  int bndcfgu_regnum = 0;
 
   /* MPX register names.  Only used for tdesc_numbered_register.  */
-  const char * const *mpx_register_names;
+  const char * const *mpx_register_names = nullptr;
 
   /* Register number for %zmm0h.  Set this to -1 to indicate the absence
      of ZMM_HI256 register support.  */
-  int zmm0h_regnum;
+  int zmm0h_regnum = 0;
 
   /* OpMask register names.  */
-  const char * const *k_register_names;
+  const char * const *k_register_names = nullptr;
 
   /* ZMM register names.  Only used for tdesc_numbered_register.  */
-  const char * const *zmmh_register_names;
+  const char * const *zmmh_register_names = nullptr;
 
   /* XMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char * const *xmm_avx512_register_names;
+  const char * const *xmm_avx512_register_names = nullptr;
 
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char * const *ymm_avx512_register_names;
+  const char * const *ymm_avx512_register_names = nullptr;
 
   /* Number of PKEYS registers.  */
-  int num_pkeys_regs;
+  int num_pkeys_regs = 0;
 
   /* Register number for PKRU register.  */
-  int pkru_regnum;
+  int pkru_regnum = 0;
 
   /* PKEYS register names.  */
-  const char * const *pkeys_register_names;
+  const char * const *pkeys_register_names = nullptr;
 
   /* Register number for %fsbase.  Set this to -1 to indicate the
      absence of segment base registers.  */
-  int fsbase_regnum;
+  int fsbase_regnum = 0;
 
   /* Target description.  */
-  const struct target_desc *tdesc;
+  const struct target_desc *tdesc = nullptr;
 
   /* Register group function.  */
-  gdbarch_register_reggroup_p_ftype *register_reggroup_p;
+  gdbarch_register_reggroup_p_ftype *register_reggroup_p = nullptr;
 
   /* Offset of saved PC in jmp_buf.  */
-  int jb_pc_offset;
+  int jb_pc_offset = 0;
 
   /* Convention for returning structures.  */
-  enum struct_return struct_return;
+  enum struct_return struct_return {};
 
   /* Address range where sigtramp lives.  */
-  CORE_ADDR sigtramp_start;
-  CORE_ADDR sigtramp_end;
+  CORE_ADDR sigtramp_start = 0;
+  CORE_ADDR sigtramp_end = 0;
 
   /* Detect sigtramp.  */
-  int (*sigtramp_p) (struct frame_info *);
+  int (*sigtramp_p) (struct frame_info *) = nullptr;
 
   /* Get address of sigcontext for sigtramp.  */
-  CORE_ADDR (*sigcontext_addr) (struct frame_info *);
+  CORE_ADDR (*sigcontext_addr) (struct frame_info *) = nullptr;
 
   /* Offset of registers in `struct sigcontext'.  */
-  int *sc_reg_offset;
-  int sc_num_regs;
+  int *sc_reg_offset = 0;
+  int sc_num_regs = 0;
 
   /* Offset of saved PC and SP in `struct sigcontext'.  Usage of these
      is deprecated, please use `sc_reg_offset' instead.  */
-  int sc_pc_offset;
-  int sc_sp_offset;
+  int sc_pc_offset = 0;
+  int sc_sp_offset = 0;
 
   /* ISA-specific data types.  */
-  struct type *i386_mmx_type;
-  struct type *i386_ymm_type;
-  struct type *i386_zmm_type;
-  struct type *i387_ext_type;
-  struct type *i386_bnd_type;
+  struct type *i386_mmx_type = nullptr;
+  struct type *i386_ymm_type = nullptr;
+  struct type *i386_zmm_type = nullptr;
+  struct type *i387_ext_type = nullptr;
+  struct type *i386_bnd_type = nullptr;
 
   /* Process record/replay target.  */
   /* The map for registers because the AMD64's registers order
      in GDB is not same as I386 instructions.  */
-  const int *record_regmap;
+  const int *record_regmap = nullptr;
   /* Parse intx80 args.  */
-  int (*i386_intx80_record) (struct regcache *regcache);
+  int (*i386_intx80_record) (struct regcache *regcache) = nullptr;
   /* Parse sysenter args.  */
-  int (*i386_sysenter_record) (struct regcache *regcache);
+  int (*i386_sysenter_record) (struct regcache *regcache) = nullptr;
   /* Parse syscall args.  */
-  int (*i386_syscall_record) (struct regcache *regcache);
+  int (*i386_syscall_record) (struct regcache *regcache) = nullptr;
 
   /* Regsets. */
-  const struct regset *fpregset;
+  const struct regset *fpregset = nullptr;
 };
 
 /* Floating-point registers.  */

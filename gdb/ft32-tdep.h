@@ -20,10 +20,10 @@
 #ifndef FT32_TDEP_H
 #define FT32_TDEP_H
 
-struct gdbarch_tdep
+struct ft32_gdbarch_tdep : gdbarch_tdep
 {
   /* Type for a pointer to a function.  Used for the type of PC.  */
-  struct type *pc_type;
+  struct type *pc_type = nullptr;
 };
 
 #endif /* FT32_TDEP_H */

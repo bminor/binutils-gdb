@@ -410,7 +410,7 @@ static std::vector<CORE_ADDR>
 arc_linux_software_single_step (struct regcache *regcache)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct disassemble_info di = arc_disassemble_info (gdbarch);
 
   /* Read current instruction.  */
@@ -692,7 +692,7 @@ arc_linux_core_read_description (struct gdbarch *gdbarch,
 static void
 arc_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   arc_linux_debug_printf ("GNU/Linux OS/ABI initialization.");
 

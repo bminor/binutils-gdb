@@ -2164,7 +2164,6 @@ static struct gdbarch *
 csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
 
   /* Find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -2173,7 +2172,7 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = XCNEW (struct gdbarch_tdep);
+  csky_gdbarch_tdep *tdep = new csky_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Target data types.  */

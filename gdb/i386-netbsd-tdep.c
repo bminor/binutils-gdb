@@ -372,7 +372,7 @@ i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
 static void 
 i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Obviously NetBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);
@@ -407,7 +407,7 @@ i386nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static void
 i386nbsdelf_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* It's still NetBSD.  */
   i386nbsd_init_abi (info, gdbarch);

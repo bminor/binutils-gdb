@@ -20,6 +20,8 @@
 #ifndef IA64_TDEP_H
 #define IA64_TDEP_H
 
+#include "gdbarch.h"
+
 #ifdef HAVE_LIBUNWIND_IA64_H
 #include "libunwind-ia64.h"
 #include "ia64-libunwind-tdep.h"
@@ -214,30 +216,33 @@ struct ia64_infcall_ops
 
      Should do nothing if this operation is not permitted by the OS.  */
   void (*allocate_new_rse_frame) (struct regcache *regcache, ULONGEST bsp,
-				  int sof);
+				  int sof) = nullptr;
 
   /* Store the argument stored in BUF into the appropriate location
      given the BSP and the SLOTNUM.  */
   void (*store_argument_in_slot) (struct regcache *regcache, CORE_ADDR bsp,
-				  int slotnum, gdb_byte *buf);
+				  int slotnum, gdb_byte *buf) = nullptr;
 
   /* For targets where we cannot call the function directly, store
      the address of the function we want to call at the location
      expected by the calling sequence.  */
-  void (*set_function_addr) (struct regcache *regcache, CORE_ADDR func_addr);
+  void (*set_function_addr) (struct regcache *regcache, CORE_ADDR func_addr)
+    = nullptr;
 };
 
-struct gdbarch_tdep
+struct ia64_gdbarch_tdep : gdbarch_tdep
 {
-  CORE_ADDR (*sigcontext_register_address) (struct gdbarch *, CORE_ADDR, int);
-  int (*pc_in_sigtramp) (CORE_ADDR);
+  CORE_ADDR (*sigcontext_register_address) (struct gdbarch *, CORE_ADDR, int)
+    = nullptr;
+  int (*pc_in_sigtramp) (CORE_ADDR) = nullptr;
 
   /* Return the total size of THIS_FRAME's register frame.
      CFM is THIS_FRAME's cfm register value.
 
      Normally, the size of the register frame is always obtained by
      extracting the lowest 7 bits ("cfm & 0x7f").  */
-  int (*size_of_register_frame) (struct frame_info *this_frame, ULONGEST cfm);
+  int (*size_of_register_frame) (struct frame_info *this_frame, ULONGEST cfm)
+    = nullptr;
 
   /* Determine the function address FADDR belongs to a shared library.
      If it does, then return the associated global pointer.  If no shared
@@ -245,10 +250,10 @@ struct gdbarch_tdep
 
      This pointer may be NULL.  */
   CORE_ADDR (*find_global_pointer_from_solib) (struct gdbarch *gdbarch,
-					       CORE_ADDR faddr);
+					       CORE_ADDR faddr) = nullptr;
 
   /* ISA-specific data types.  */
-  struct type *ia64_ext_type;
+  struct type *ia64_ext_type = nullptr;
 
   struct ia64_infcall_ops infcall_ops;
 };

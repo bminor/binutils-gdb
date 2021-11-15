@@ -80,7 +80,7 @@ amd64_sol2_mcontext_addr (struct frame_info *this_frame)
 static void
 amd64_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   tdep->gregset_reg_offset = amd64_sol2_gregset_reg_offset;
   tdep->gregset_num_regs = ARRAY_SIZE (amd64_sol2_gregset_reg_offset);

@@ -62,11 +62,11 @@ show_or1k_debug (struct ui_file *file, int from_tty,
 
 /* The target-dependent structure for gdbarch.  */
 
-struct gdbarch_tdep
+struct or1k_gdbarch_tdep : gdbarch_tdep
 {
-  int bytes_per_word;
-  int bytes_per_address;
-  CGEN_CPU_DESC gdb_cgen_cpu_desc;
+  int bytes_per_word = 0;
+  int bytes_per_address = 0;
+  CGEN_CPU_DESC gdb_cgen_cpu_desc = nullptr;
 };
 
 /* Support functions for the architecture definition.  */
@@ -247,7 +247,8 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code rv_type = valtype->code ();
   unsigned int rv_size = TYPE_LENGTH (valtype);
-  int bpw = (gdbarch_tdep (gdbarch))->bytes_per_word;
+  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int bpw = tdep->bytes_per_word;
 
   /* Deal with struct/union as addresses.  If an array won't fit in a
      single register it is returned as address.  Anything larger than 2
@@ -351,7 +352,7 @@ or1k_delay_slot_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   const CGEN_INSN *insn;
   CGEN_FIELDS tmp_fields;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   insn = cgen_lookup_insn (tdep->gdb_cgen_cpu_desc,
 			   NULL,
@@ -633,8 +634,9 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int heap_offset = 0;
   CORE_ADDR heap_sp = sp - 128;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int bpa = (gdbarch_tdep (gdbarch))->bytes_per_address;
-  int bpw = (gdbarch_tdep (gdbarch))->bytes_per_word;
+  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int bpa = tdep->bytes_per_address;
+  int bpw = tdep->bytes_per_word;
   struct type *func_type = value_type (function);
 
   /* Return address */
@@ -1140,7 +1142,6 @@ static struct gdbarch *
 or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   const struct bfd_arch_info *binfo;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
@@ -1155,7 +1156,7 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      actually know which target we are talking to, but put in some defaults
      for now.  */
   binfo = info.bfd_arch_info;
-  tdep = XCNEW (struct gdbarch_tdep);
+  or1k_gdbarch_tdep *tdep = new or1k_gdbarch_tdep;
   tdep->bytes_per_word = binfo->bits_per_word / binfo->bits_per_byte;
   tdep->bytes_per_address = binfo->bits_per_address / binfo->bits_per_byte;
   gdbarch = gdbarch_alloc (&info, tdep);
@@ -1283,7 +1284,7 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 or1k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (NULL == tdep)
     return; /* Nothing to report */

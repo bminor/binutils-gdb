@@ -97,7 +97,7 @@ alphaobsd_sigcontext_addr (struct frame_info *this_frame)
 static void
 alphaobsd_init_abi(struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Hook into the DWARF CFI frame unwinder.  */
   alpha_dwarf2_init_abi (info, gdbarch);

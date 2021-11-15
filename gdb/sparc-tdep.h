@@ -20,6 +20,8 @@
 #ifndef SPARC_TDEP_H
 #define SPARC_TDEP_H 1
 
+#include "gdbarch.h"
+
 #define SPARC_CORE_REGISTERS                      \
   "g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7", \
   "o0", "o1", "o2", "o3", "o4", "o5", "sp", "o7", \
@@ -55,43 +57,44 @@ struct sparc_fpregmap
 
 /* SPARC architecture-specific information.  */
 
-struct gdbarch_tdep
+struct sparc_gdbarch_tdep : gdbarch_tdep
 {
   /* Register numbers for the PN and nPC registers.  The definitions
      for (64-bit) UltraSPARC differ from the (32-bit) SPARC
      definitions.  */
-  int pc_regnum;
-  int npc_regnum;
+  int pc_regnum = 0;
+  int npc_regnum = 0;
 
   /* Register names specific for architecture (sparc32 vs. sparc64) */
-  const char * const *fpu_register_names;
-  size_t fpu_registers_num;
-  const char * const *cp0_register_names;
-  size_t cp0_registers_num;
+  const char * const *fpu_register_names = nullptr;
+  size_t fpu_registers_num = 0;
+  const char * const *cp0_register_names = nullptr;
+  size_t cp0_registers_num = 0;
 
   /* Register sets.  */
-  const struct regset *gregset;
-  size_t sizeof_gregset;
-  const struct regset *fpregset;
-  size_t sizeof_fpregset;
+  const struct regset *gregset = nullptr;
+  size_t sizeof_gregset = 0;
+  const struct regset *fpregset = nullptr;
+  size_t sizeof_fpregset = 0;
 
   /* Offset of saved PC in jmp_buf.  */
-  int jb_pc_offset;
+  int jb_pc_offset = 0;
 
   /* Size of an Procedure Linkage Table (PLT) entry, 0 if we shouldn't
      treat the PLT special when doing prologue analysis.  */
-  size_t plt_entry_size;
+  size_t plt_entry_size = 0;
 
   /* Alternative location for trap return.  Used for single-stepping.  */
-  CORE_ADDR (*step_trap) (struct frame_info *frame, unsigned long insn);
+  CORE_ADDR (*step_trap) (struct frame_info *frame, unsigned long insn)
+    = nullptr;
 
   /* ISA-specific data types.  */
-  struct type *sparc_psr_type;
-  struct type *sparc_fsr_type;
-  struct type *sparc64_ccr_type;
-  struct type *sparc64_pstate_type;
-  struct type *sparc64_fsr_type;
-  struct type *sparc64_fprs_type;
+  struct type *sparc_psr_type = nullptr;
+  struct type *sparc_fsr_type = nullptr;
+  struct type *sparc64_ccr_type = nullptr;
+  struct type *sparc64_pstate_type = nullptr;
+  struct type *sparc64_fsr_type = nullptr;
+  struct type *sparc64_fprs_type = nullptr;
 };
 
 /* Register numbers of various important registers.  */

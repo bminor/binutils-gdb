@@ -20,6 +20,8 @@
 #ifndef NIOS2_TDEP_H
 #define NIOS2_TDEP_H
 
+#include "gdbarch.h"
+
 /* Nios II ISA specific encodings and macros.  */
 #include "opcode/nios2.h"
 
@@ -67,19 +69,19 @@
 #define NIOS2_CDX_OPCODE_SIZE 2
 
 /* Target-dependent structure in gdbarch.  */
-struct gdbarch_tdep
+struct nios2_gdbarch_tdep : gdbarch_tdep
 {
   /* Assumes FRAME is stopped at a syscall (trap) instruction; returns
      the expected next PC.  */
   CORE_ADDR (*syscall_next_pc) (struct frame_info *frame,
-				const struct nios2_opcode *op);
+				const struct nios2_opcode *op) = nullptr;
 
   /* Returns true if PC points to a kernel helper function.  */
-  bool (*is_kernel_helper) (CORE_ADDR pc);
+  bool (*is_kernel_helper) (CORE_ADDR pc) = nullptr;
 
   /* Offset to PC value in jump buffer.
      If this is negative, longjmp support will be disabled.  */
-  int jb_pc;
+  int jb_pc = 0;
 };
 
 extern struct target_desc *tdesc_nios2_linux;

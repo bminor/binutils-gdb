@@ -20,6 +20,8 @@
 #ifndef HPPA_TDEP_H
 #define HPPA_TDEP_H
 
+#include "gdbarch.h"
+
 struct trad_frame_saved_reg;
 struct objfile;
 struct so_list;
@@ -82,24 +84,25 @@ enum hppa_regnum
 #define HPPA_INSN_SIZE 4
 
 /* Target-dependent structure in gdbarch.  */
-struct gdbarch_tdep
+struct hppa_gdbarch_tdep : gdbarch_tdep
 {
   /* The number of bytes in an address.  For now, this field is designed
      to allow us to differentiate hppa32 from hppa64 targets.  */
-  int bytes_per_address;
+  int bytes_per_address = 0;
 
   /* Is this an ELF target? This can be 64-bit HP-UX, or a 32/64-bit GNU/Linux
      system.  */
-  int is_elf;
+  int is_elf = 0;
 
   /* Given a function address, try to find the global pointer for the 
      corresponding shared object.  */
-  CORE_ADDR (*find_global_pointer) (struct gdbarch *, struct value *);
+  CORE_ADDR (*find_global_pointer) (struct gdbarch *, struct value *) = nullptr;
 
   /* For shared libraries, each call goes through a small piece of
      trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE
      evaluates to nonzero if we are currently stopped in one of these.  */
-  int (*in_solib_call_trampoline) (struct gdbarch *gdbarch, CORE_ADDR pc);
+  int (*in_solib_call_trampoline) (struct gdbarch *gdbarch,
+				   CORE_ADDR pc) = nullptr;
 
   /* For targets that support multiple spaces, we may have additional stubs
      in the return path.  These stubs are internal to the ABI, and users are
@@ -107,14 +110,14 @@ struct gdbarch_tdep
      adjust the pc to the real caller.  This improves the behavior of commands
      that traverse frames such as "up" and "finish".  */
   void (*unwind_adjust_stub) (struct frame_info *this_frame, CORE_ADDR base,
-			      trad_frame_saved_reg *saved_regs);
+			      trad_frame_saved_reg *saved_regs) = nullptr;
 
   /* These are solib-dependent methods.  They are really HPUX only, but
      we don't have a HPUX-specific tdep vector at the moment.  */
-  CORE_ADDR (*solib_thread_start_addr) (struct so_list *so);
-  CORE_ADDR (*solib_get_got_by_pc) (CORE_ADDR addr);
-  CORE_ADDR (*solib_get_solib_by_pc) (CORE_ADDR addr);
-  CORE_ADDR (*solib_get_text_base) (struct objfile *objfile);
+  CORE_ADDR (*solib_thread_start_addr) (struct so_list *so) = nullptr;
+  CORE_ADDR (*solib_get_got_by_pc) (CORE_ADDR addr) = nullptr;
+  CORE_ADDR (*solib_get_solib_by_pc) (CORE_ADDR addr) = nullptr;
+  CORE_ADDR (*solib_get_text_base) (struct objfile *objfile) = nullptr;
 };
 
 /*

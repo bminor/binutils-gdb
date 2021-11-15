@@ -20,7 +20,9 @@
 #ifndef M32R_TDEP_H
 #define M32R_TDEP_H
 
-struct gdbarch_tdep
+#include "gdbarch.h"
+
+struct m32r_gdbarch_tdep : gdbarch_tdep
 {
   /* gdbarch target dependent data here.  Currently unused for M32R.  */
 };

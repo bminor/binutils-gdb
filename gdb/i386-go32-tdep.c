@@ -26,7 +26,7 @@
 static void
 i386_go32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* DJGPP doesn't have any special frames for signal handlers.  */
   tdep->sigtramp_p = NULL;

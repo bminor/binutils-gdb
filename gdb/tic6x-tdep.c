@@ -325,7 +325,7 @@ tic6x_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 static const gdb_byte *
 tic6x_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  tic6x_gdbarch_tdep *tdep = (tic6x_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   *size = kind;
 
@@ -598,7 +598,8 @@ tic6x_get_next_pc (struct regcache *regcache, CORE_ADDR pc)
 
       if (inst == TIC6X_INST_SWE)
 	{
-	  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+	  tic6x_gdbarch_tdep *tdep
+	    = (tic6x_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
 	  if (tdep->syscall_next_pc != NULL)
 	    return tdep->syscall_next_pc (get_current_frame ());
@@ -1141,7 +1142,6 @@ static struct gdbarch *
 tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
   int has_gp = 0;
@@ -1216,7 +1216,8 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      tdep = gdbarch_tdep (arches->gdbarch);
+      tic6x_gdbarch_tdep *tdep
+	= (tic6x_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
 
       if (has_gp != tdep->has_gp)
 	continue;
@@ -1225,7 +1226,7 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	return arches->gdbarch;
     }
 
-  tdep = XCNEW (struct gdbarch_tdep);
+  tic6x_gdbarch_tdep *tdep = new tic6x_gdbarch_tdep;
 
   tdep->has_gp = has_gp;
   gdbarch = gdbarch_alloc (&info, tdep);

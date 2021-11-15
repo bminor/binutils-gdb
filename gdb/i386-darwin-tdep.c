@@ -156,7 +156,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			     function_call_return_method return_method,
 			     CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
   int i;
@@ -248,7 +248,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static void
 i386_darwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* We support the SSE registers.  */
   tdep->num_xmm_regs = I386_NUM_XREGS - 1;

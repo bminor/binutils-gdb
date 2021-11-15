@@ -204,7 +204,7 @@ void
 i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 		       struct frame_info *frame, const char *args)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   ULONGEST fctrl;
   int fctrl_p;
   ULONGEST fstat;
@@ -440,7 +440,7 @@ void
 i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) fsave;
   int i;
@@ -494,7 +494,8 @@ i387_supply_fsave (struct regcache *regcache, int regnum, const void *fsave)
 void
 i387_collect_fsave (const struct regcache *regcache, int regnum, void *fsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  gdbarch *arch = regcache->arch ();
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (arch);
   gdb_byte *regs = (gdb_byte *) fsave;
   int i;
 
@@ -587,7 +588,8 @@ static int i387_tag (const gdb_byte *raw);
 void
 i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  gdbarch *arch = regcache->arch ();
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (arch);
   const gdb_byte *regs = (const gdb_byte *) fxsave;
   int i;
 
@@ -670,7 +672,8 @@ i387_supply_fxsave (struct regcache *regcache, int regnum, const void *fxsave)
 void
 i387_collect_fxsave (const struct regcache *regcache, int regnum, void *fxsave)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  gdbarch *arch = regcache->arch ();
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (arch);
   gdb_byte *regs = (gdb_byte *) fxsave;
   int i;
 
@@ -903,7 +906,7 @@ i387_xsave_get_clear_bv (struct gdbarch *gdbarch, const void *xsave)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) xsave;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Get `xstat_bv'.  The supported bits in `xstat_bv' are 8 bytes.  */
   ULONGEST xstate_bv = extract_unsigned_integer (XSAVE_XSTATE_BV_ADDR (regs),
@@ -923,7 +926,7 @@ i387_supply_xsave (struct regcache *regcache, int regnum,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   const gdb_byte *regs = (const gdb_byte *) xsave;
   int i;
   /* In 64-bit mode the split between "low" and "high" ZMM registers is at
@@ -1346,7 +1349,7 @@ i387_collect_xsave (const struct regcache *regcache, int regnum,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   gdb_byte *p, *regs = (gdb_byte *) xsave;
   gdb_byte raw[I386_MAX_REGISTER_SIZE];
   ULONGEST initial_xstate_bv, clear_bv, xstate_bv = 0;
@@ -1931,7 +1934,7 @@ i387_tag (const gdb_byte *raw)
 void
 i387_return_value (struct gdbarch *gdbarch, struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   ULONGEST fstat;
 
   /* Set the top of the floating-point register stack to 7.  The
@@ -1954,7 +1957,7 @@ i387_return_value (struct gdbarch *gdbarch, struct regcache *regcache)
 void
 i387_reset_bnd_regs (struct gdbarch *gdbarch, struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (I387_BND0R_REGNUM (tdep) > 0)
     {

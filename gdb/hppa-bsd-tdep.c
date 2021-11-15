@@ -118,7 +118,7 @@ hppabsd_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 void
 hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* OpenBSD and NetBSD have a 64-bit 'long double'.  */
   set_gdbarch_long_double_bit (gdbarch, 64);

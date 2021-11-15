@@ -209,21 +209,21 @@ enum
 
 /* Architecture specific data.  */
 
-struct gdbarch_tdep
+struct rl78_gdbarch_tdep : gdbarch_tdep
 {
   /* The ELF header flags specify the multilib used.  */
-  int elf_flags;
+  int elf_flags = 0;
 
-  struct type *rl78_void,
-	      *rl78_uint8,
-	      *rl78_int8,
-	      *rl78_uint16,
-	      *rl78_int16,
-	      *rl78_uint32,
-	      *rl78_int32,
-	      *rl78_data_pointer,
-	      *rl78_code_pointer,
-	      *rl78_psw_type;
+  struct type *rl78_void = nullptr,
+	      *rl78_uint8 = nullptr,
+	      *rl78_int8 = nullptr,
+	      *rl78_uint16 = nullptr,
+	      *rl78_int16 = nullptr,
+	      *rl78_uint32 = nullptr,
+	      *rl78_int32 = nullptr,
+	      *rl78_data_pointer = nullptr,
+	      *rl78_code_pointer = nullptr,
+	      *rl78_psw_type = nullptr;
 };
 
 /* This structure holds the results of a prologue analysis.  */
@@ -266,7 +266,7 @@ struct rl78_prologue
 static struct type *
 rl78_psw_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  rl78_gdbarch_tdep *tdep = (rl78_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (tdep->rl78_psw_type == NULL)
     {
@@ -290,7 +290,7 @@ rl78_psw_type (struct gdbarch *gdbarch)
 static struct type *
 rl78_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  rl78_gdbarch_tdep *tdep = (rl78_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (reg_nr == RL78_PC_REGNUM)
     return tdep->rl78_code_pointer;
@@ -1247,7 +1247,8 @@ rl78_return_value (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST valtype_len = TYPE_LENGTH (valtype);
-  int is_g10 = gdbarch_tdep (gdbarch)->elf_flags & E_FLAG_RL78_G10;
+  rl78_gdbarch_tdep *tdep = (rl78_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int is_g10 = tdep->elf_flags & E_FLAG_RL78_G10;
 
   if (valtype_len > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -1375,7 +1376,6 @@ static struct gdbarch *
 rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   int elf_flags;
 
   /* Extract the elf_flags if available.  */
@@ -1392,7 +1392,10 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      if (gdbarch_tdep (arches->gdbarch)->elf_flags != elf_flags)
+      rl78_gdbarch_tdep *tdep
+	= (rl78_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+
+      if (tdep->elf_flags != elf_flags)
 	continue;
 
       return arches->gdbarch;
@@ -1400,7 +1403,7 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = XCNEW (struct gdbarch_tdep);
+  rl78_gdbarch_tdep * tdep = new rl78_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
 

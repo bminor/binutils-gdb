@@ -615,11 +615,12 @@ alpha_return_value (struct gdbarch *gdbarch, struct value *function,
 		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum type_code code = type->code ();
+  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if ((code == TYPE_CODE_STRUCT
        || code == TYPE_CODE_UNION
        || code == TYPE_CODE_ARRAY)
-      && gdbarch_tdep (gdbarch)->return_in_memory (type))
+      && tdep->return_in_memory (type))
     {
       if (readbuf)
 	{
@@ -850,7 +851,7 @@ static int
 alpha_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR jb_addr;
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
@@ -882,7 +883,6 @@ alpha_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 				   void **this_prologue_cache)
 {
   struct alpha_sigtramp_unwind_cache *info;
-  struct gdbarch_tdep *tdep;
 
   if (*this_prologue_cache)
     return (struct alpha_sigtramp_unwind_cache *) *this_prologue_cache;
@@ -890,7 +890,8 @@ alpha_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   info = FRAME_OBSTACK_ZALLOC (struct alpha_sigtramp_unwind_cache);
   *this_prologue_cache = info;
 
-  tdep = gdbarch_tdep (get_frame_arch (this_frame));
+  gdbarch *arch = get_frame_arch (this_frame);
+  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (arch);
   info->sigcontext_addr = tdep->sigcontext_addr (this_frame);
 
   return info;
@@ -903,7 +904,7 @@ static CORE_ADDR
 alpha_sigtramp_register_address (struct gdbarch *gdbarch,
 				 CORE_ADDR sigcontext_addr, int regnum)
 { 
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (regnum >= 0 && regnum < 32)
     return sigcontext_addr + tdep->sc_regs_offset + regnum * 8;
@@ -924,7 +925,7 @@ alpha_sigtramp_frame_this_id (struct frame_info *this_frame,
 			      struct frame_id *this_id)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct alpha_sigtramp_unwind_cache *info
     = alpha_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
   CORE_ADDR stack_addr, code_addr;
@@ -999,14 +1000,16 @@ alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
   /* We shouldn't even bother to try if the OSABI didn't register a
      sigcontext_addr handler or pc_in_sigtramp handler.  */
-  if (gdbarch_tdep (gdbarch)->sigcontext_addr == NULL)
+  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  if (tdep->sigcontext_addr == NULL)
     return 0;
-  if (gdbarch_tdep (gdbarch)->pc_in_sigtramp == NULL)
+
+  if (tdep->pc_in_sigtramp == NULL)
     return 0;
 
   /* Otherwise we should be in a signal frame.  */
   find_pc_partial_function (pc, &name, NULL, NULL);
-  if (gdbarch_tdep (gdbarch)->pc_in_sigtramp (gdbarch, pc, name))
+  if (tdep->pc_in_sigtramp (gdbarch, pc, name))
     return 1;
 
   return 0;
@@ -1038,7 +1041,7 @@ static int heuristic_fence_post = 0;
 static CORE_ADDR
 alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   CORE_ADDR last_non_nop = pc;
   CORE_ADDR fence = pc - heuristic_fence_post;
   CORE_ADDR orig_pc = pc;
@@ -1724,7 +1727,6 @@ alpha_software_single_step (struct regcache *regcache)
 static struct gdbarch *
 alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
 
   /* Find a candidate among extant architectures.  */
@@ -1732,7 +1734,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = XCNEW (struct gdbarch_tdep);
+  alpha_gdbarch_tdep *tdep = new alpha_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Lowest text address.  This is used by heuristic_proc_start()

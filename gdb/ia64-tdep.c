@@ -310,7 +310,7 @@ static const struct floatformat *floatformats_ia64_ext[2] =
 static struct type *
 ia64_ext_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (!tdep->ia64_ext_type)
     tdep->ia64_ext_type
@@ -2177,7 +2177,7 @@ ia64_sigtramp_frame_init_saved_regs (struct frame_info *this_frame,
 				     struct ia64_frame_cache *cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (tdep->sigcontext_register_address)
     {
@@ -2335,7 +2335,8 @@ ia64_sigtramp_frame_sniffer (const struct frame_unwind *self,
 			     struct frame_info *this_frame,
 			     void **this_cache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
+  gdbarch *arch = get_frame_arch (this_frame);
+  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (arch);
   if (tdep->pc_in_sigtramp)
     {
       CORE_ADDR pc = get_frame_pc (this_frame);
@@ -3482,7 +3483,7 @@ ia64_find_global_pointer_from_dynamic_section (struct gdbarch *gdbarch,
 static CORE_ADDR
 ia64_find_global_pointer (struct gdbarch *gdbarch, CORE_ADDR faddr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   CORE_ADDR addr = 0;
 
   if (tdep->find_global_pointer_from_solib)
@@ -3677,7 +3678,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argno;
   struct value *arg;
@@ -3917,14 +3918,13 @@ static struct gdbarch *
 ia64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = XCNEW (struct gdbarch_tdep);
+  ia64_gdbarch_tdep *tdep = new ia64_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   tdep->size_of_register_frame = ia64_size_of_register_frame;

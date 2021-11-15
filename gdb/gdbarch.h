@@ -62,6 +62,8 @@ struct inferior;
 
 #include "regcache.h"
 
+struct gdbarch_tdep {};
+
 /* The architecture associated with the inferior through the
    connection to the target.
 

@@ -20,6 +20,8 @@
 #ifndef MN10300_TDEP_H
 #define MN10300_TDEP_H
 
+#include "gdbarch.h"
+
 enum {
   E_D0_REGNUM = 0,
   E_D1_REGNUM = 1,
@@ -74,11 +76,16 @@ enum frame_kind {
 };
 
 /* mn10300 private data.  */
-struct gdbarch_tdep
+struct mn10300_gdbarch_tdep : gdbarch_tdep
 {
   int am33_mode;
 };
 
-#define AM33_MODE(gdbarch) (gdbarch_tdep (gdbarch)->am33_mode)
+static inline int
+get_am33_mode (gdbarch *arch)
+{
+  mn10300_gdbarch_tdep *tdep = (mn10300_gdbarch_tdep *) gdbarch_tdep (arch);
+  return tdep->am33_mode;
+}
 
 #endif /* MN10300_TDEP_H */

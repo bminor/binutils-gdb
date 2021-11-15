@@ -45,7 +45,7 @@ static const gdb_byte tic6x_bkpt_bnop_le[] = { 0x22, 0xa1, 0x00, 0x00 };
 static unsigned int
 tic6x_register_sigcontext_offset (unsigned int regnum, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  tic6x_gdbarch_tdep *tdep = (tic6x_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (regnum == TIC6X_A4_REGNUM || regnum == TIC6X_A4_REGNUM + 2
       || regnum == TIC6X_A4_REGNUM + 4)
@@ -92,7 +92,7 @@ tic6x_linux_rt_sigreturn_init (const struct tramp_frame *self,
 		    + TIC6X_SIGINFO_SIZE
 		    + 4 + 4 /* uc_flags and *uc_link in struct ucontext.  */
 		    + TIC6X_STACK_T_SIZE);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  tic6x_gdbarch_tdep *tdep = (tic6x_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   unsigned int reg_offset;
   unsigned int i;
 
@@ -165,7 +165,7 @@ extern struct target_so_ops dsbt_so_ops;
 static void
 tic6x_uclinux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  tic6x_gdbarch_tdep *tdep = (tic6x_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   linux_init_abi (info, gdbarch, 0);
 

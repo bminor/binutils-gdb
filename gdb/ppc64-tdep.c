@@ -89,7 +89,7 @@ ppc64_plt_entry_point (struct frame_info *frame, CORE_ADDR plt_off)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   CORE_ADDR tocp;
 
   if (execution_direction == EXEC_REVERSE)

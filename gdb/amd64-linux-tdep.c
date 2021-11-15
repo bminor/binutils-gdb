@@ -1650,7 +1650,7 @@ amd64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					  void *cb_data,
 					  const struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   cb (".reg", 27 * 8, 27 * 8, &i386_gregset, NULL, cb_data);
   cb (".reg2", 512, 512, &amd64_fpregset, NULL, cb_data);
@@ -1787,7 +1787,7 @@ static void
 amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
 			    int num_disp_step_buffers)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   linux_init_abi (info, gdbarch, num_disp_step_buffers);
 
@@ -1840,7 +1840,7 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
 static void
 amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct tdesc_arch_data *tdesc_data = info.tdesc_data;
   const struct tdesc_feature *feature;
   int valid_p;
@@ -2054,7 +2054,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 static void
 amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct tdesc_arch_data *tdesc_data = info.tdesc_data;
   const struct tdesc_feature *feature;
   int valid_p;

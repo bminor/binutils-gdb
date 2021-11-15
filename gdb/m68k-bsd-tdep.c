@@ -133,7 +133,7 @@ m68kbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 static void
 m68kbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  m68k_gdbarch_tdep *tdep = (m68k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   tdep->jb_pc = 5;
   tdep->jb_elt_size = 4;

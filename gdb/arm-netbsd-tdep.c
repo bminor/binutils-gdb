@@ -111,7 +111,7 @@ static void
 arm_netbsd_init_abi_common (struct gdbarch_info info,
 			    struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   tdep->lowest_pc = 0x8000;
   switch (info.byte_order)
@@ -148,7 +148,7 @@ static void
 arm_netbsd_elf_init_abi (struct gdbarch_info info,
 			 struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   arm_netbsd_init_abi_common (info, gdbarch);
 

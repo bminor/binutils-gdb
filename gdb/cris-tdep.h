@@ -24,11 +24,11 @@
 #define CRIS_TDEP_H
 
 /* CRIS architecture specific information.  */
-struct gdbarch_tdep
+struct cris_gdbarch_tdep : gdbarch_tdep
 {
-  unsigned int cris_version;
-  const char *cris_mode;
-  int cris_dwarf2_cfi;
+  unsigned int cris_version = 0;
+  const char *cris_mode = nullptr;
+  int cris_dwarf2_cfi = 0;
 };
 
 #endif /* CRIS_TDEP_H */

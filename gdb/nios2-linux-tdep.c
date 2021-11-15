@@ -217,7 +217,7 @@ nios2_linux_is_kernel_helper (CORE_ADDR pc)
 static void
 nios2_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  nios2_gdbarch_tdep *tdep = (nios2_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   linux_init_abi (info, gdbarch, 0);
 

@@ -1317,7 +1317,7 @@ mips_linux_get_syscall_number (struct gdbarch *gdbarch,
 			       thread_info *thread)
 {
   struct regcache *regcache = get_thread_regcache (thread);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  mips_gdbarch_tdep *tdep = (mips_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int regsize = register_size (gdbarch, MIPS_V0_REGNUM);
   /* The content of a register */
@@ -1527,7 +1527,7 @@ static void
 mips_linux_init_abi (struct gdbarch_info info,
 		     struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  mips_gdbarch_tdep *tdep = (mips_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum mips_abi abi = mips_abi (gdbarch);
   struct tdesc_arch_data *tdesc_data = info.tdesc_data;
 

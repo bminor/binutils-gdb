@@ -126,7 +126,7 @@ ppcfbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				      void *cb_data,
 				      const struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (tdep->wordsize == 4)
     cb (".reg", 148, 148, &ppc32_fbsd_gregset, NULL, cb_data);
@@ -200,7 +200,7 @@ static struct trad_frame_cache *
 ppcfbsd_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct trad_frame_cache *cache;
   CORE_ADDR addr, base, func;
   gdb_byte buf[PPC_INSN_SIZE];
@@ -287,7 +287,7 @@ static CORE_ADDR
 ppcfbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 				  CORE_ADDR lm_addr, CORE_ADDR offset)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct regcache *regcache;
   int tp_offset, tp_regnum;
 
@@ -319,7 +319,7 @@ ppcfbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 static void
 ppcfbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Generic FreeBSD support. */
   fbsd_init_abi (info, gdbarch);

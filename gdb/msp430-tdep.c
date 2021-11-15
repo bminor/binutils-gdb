@@ -104,19 +104,19 @@ enum
 
 /* Architecture specific data.  */
 
-struct gdbarch_tdep
+struct msp430_gdbarch_tdep : gdbarch_tdep
 {
   /* The ELF header flags specify the multilib used.  */
-  int elf_flags;
+  int elf_flags = 0;
 
   /* One of MSP_ISA_MSP430 or MSP_ISA_MSP430X.  */
-  int isa;
+  int isa = 0;
 
   /* One of MSP_SMALL_CODE_MODEL or MSP_LARGE_CODE_MODEL.  If, at
      some point, we support different data models too, we'll probably
      structure things so that we can combine values using logical
      "or".  */
-  int code_model;
+  int code_model = 0;
 };
 
 /* This structure holds the results of a prologue analysis.  */
@@ -340,7 +340,8 @@ msp430_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
   int rn;
   pv_t reg[MSP430_NUM_TOTAL_REGS];
   CORE_ADDR after_last_frame_setup_insn = start_pc;
-  int code_model = gdbarch_tdep (gdbarch)->code_model;
+  msp430_gdbarch_tdep *tdep = (msp430_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int code_model = tdep->code_model;
   int sz;
 
   memset (result, 0, sizeof (*result));
@@ -568,7 +569,8 @@ msp430_return_value (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   LONGEST valtype_len = TYPE_LENGTH (valtype);
-  int code_model = gdbarch_tdep (gdbarch)->code_model;
+  msp430_gdbarch_tdep *tdep = (msp430_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int code_model = tdep->code_model;
 
   if (TYPE_LENGTH (valtype) > 8
       || valtype->code () == TYPE_CODE_STRUCT
@@ -648,7 +650,8 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int write_pass;
   int sp_off = 0;
   CORE_ADDR cfa;
-  int code_model = gdbarch_tdep (gdbarch)->code_model;
+  msp430_gdbarch_tdep *tdep = (msp430_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int code_model = tdep->code_model;
 
   struct type *func_type = value_type (function);
 
@@ -766,8 +769,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Push the return address.  */
   {
-    int sz = (gdbarch_tdep (gdbarch)->code_model == MSP_SMALL_CODE_MODEL)
-      ? 2 : 4;
+    int sz = tdep->code_model == MSP_SMALL_CODE_MODEL ? 2 : 4;
     sp = sp - sz;
     write_memory_unsigned_integer (sp, sz, byte_order, bp_addr);
   }
@@ -811,7 +813,8 @@ msp430_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
   stub_name = bms.minsym->linkage_name ();
 
-  if (gdbarch_tdep (gdbarch)->code_model == MSP_SMALL_CODE_MODEL
+  msp430_gdbarch_tdep *tdep = (msp430_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  if (tdep->code_model == MSP_SMALL_CODE_MODEL
       && msp430_in_return_stub (gdbarch, pc, stub_name))
     {
       CORE_ADDR sp = get_frame_register_unsigned (frame, MSP430_SP_REGNUM);
@@ -830,7 +833,6 @@ static struct gdbarch *
 msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   int elf_flags, isa, code_model;
 
   /* Extract the elf_flags if available.  */
@@ -873,7 +875,8 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  struct gdbarch *ca = get_current_arch ();
 	  if (ca && gdbarch_bfd_arch_info (ca)->arch == bfd_arch_msp430)
 	    {
-	      struct gdbarch_tdep *ca_tdep = gdbarch_tdep (ca);
+	      msp430_gdbarch_tdep *ca_tdep
+		= (msp430_gdbarch_tdep *) gdbarch_tdep (ca);
 
 	      elf_flags = ca_tdep->elf_flags;
 	      isa = ca_tdep->isa;
@@ -899,7 +902,8 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      struct gdbarch_tdep *candidate_tdep = gdbarch_tdep (arches->gdbarch);
+      msp430_gdbarch_tdep *candidate_tdep
+	= (msp430_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
 
       if (candidate_tdep->elf_flags != elf_flags
 	  || candidate_tdep->isa != isa
@@ -911,7 +915,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = XCNEW (struct gdbarch_tdep);
+  msp430_gdbarch_tdep *tdep = new msp430_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
   tdep->isa = isa;

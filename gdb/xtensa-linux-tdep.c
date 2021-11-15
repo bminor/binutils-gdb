@@ -99,7 +99,7 @@ xtensa_linux_gdb_signal_to_target (struct gdbarch *gdbarch,
 static void
 xtensa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  xtensa_gdbarch_tdep *tdep = (xtensa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (tdep->num_nopriv_regs < tdep->num_regs)
     {

@@ -123,27 +123,38 @@ enum insn_return_kind {
 #define M68HC12_HARD_PC_REGNUM  (SOFT_D32_REGNUM+1)
 
 struct insn_sequence;
-struct gdbarch_tdep
+struct m68gc11_gdbarch_tdep : gdbarch_tdep
   {
     /* Stack pointer correction value.  For 68hc11, the stack pointer points
        to the next push location.  An offset of 1 must be applied to obtain
        the address where the last value is saved.  For 68hc12, the stack
        pointer points to the last value pushed.  No offset is necessary.  */
-    int stack_correction;
+    int stack_correction = 0;
 
     /* Description of instructions in the prologue.  */
-    struct insn_sequence *prologue;
+    struct insn_sequence *prologue = nullptr;
 
     /* True if the page memory bank register is available
        and must be used.  */
-    int use_page_register;
+    int use_page_register = 0;
 
     /* ELF flags for ABI.  */
-    int elf_flags;
+    int elf_flags = 0;
   };
 
-#define STACK_CORRECTION(gdbarch) (gdbarch_tdep (gdbarch)->stack_correction)
-#define USE_PAGE_REGISTER(gdbarch) (gdbarch_tdep (gdbarch)->use_page_register)
+static int
+stack_correction (gdbarch *arch)
+{
+  m68gc11_gdbarch_tdep *tdep = (m68gc11_gdbarch_tdep *) gdbarch_tdep (arch);
+  return tdep->stack_correction;
+}
+
+static int
+use_page_register (gdbarch *arch)
+{
+  m68gc11_gdbarch_tdep *tdep = (m68gc11_gdbarch_tdep *) gdbarch_tdep (arch);
+  return tdep->stack_correction;
+}
 
 struct m68hc11_unwind_cache
 {
@@ -371,13 +382,15 @@ m68hc11_pseudo_register_write (struct gdbarch *gdbarch,
 static const char *
 m68hc11_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  if (reg_nr == M68HC12_HARD_PC_REGNUM && USE_PAGE_REGISTER (gdbarch))
+  if (reg_nr == M68HC12_HARD_PC_REGNUM && use_page_register (gdbarch))
     return "pc";
-  if (reg_nr == HARD_PC_REGNUM && USE_PAGE_REGISTER (gdbarch))
+
+  if (reg_nr == HARD_PC_REGNUM && use_page_register (gdbarch))
     return "ppc";
   
   if (reg_nr < 0)
     return NULL;
+
   if (reg_nr >= M68HC11_ALL_REGS)
     return NULL;
 
@@ -387,6 +400,7 @@ m68hc11_register_name (struct gdbarch *gdbarch, int reg_nr)
      does not exist.  */
   if (reg_nr > M68HC11_LAST_HARD_REG && soft_regs[reg_nr].name == 0)
     return NULL;
+
   return m68hc11_register_names[reg_nr];
 }
 
@@ -627,7 +641,8 @@ m68hc11_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
       return pc;
     }
 
-  seq_table = gdbarch_tdep (gdbarch)->prologue;
+  m68gc11_gdbarch_tdep *tdep = (m68gc11_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  seq_table = tdep->prologue;
   
   /* The 68hc11 stack is as follows:
 
@@ -807,7 +822,7 @@ m68hc11_frame_unwind_cache (struct frame_info *this_frame,
       info->saved_regs[HARD_PC_REGNUM].set_addr (info->sp_offset);
       this_base = get_frame_register_unsigned (this_frame, HARD_SP_REGNUM);
       prev_sp = this_base + info->sp_offset + 2;
-      this_base += STACK_CORRECTION (gdbarch);
+      this_base += stack_correction (gdbarch);
     }
   else
     {
@@ -815,7 +830,7 @@ m68hc11_frame_unwind_cache (struct frame_info *this_frame,
 	 to before the first saved register giving the SP.  */
       prev_sp = this_base + info->size + 2;
 
-      this_base += STACK_CORRECTION (gdbarch);
+      this_base += stack_correction (gdbarch);
       if (soft_regs[SOFT_FP_REGNUM].name)
 	info->saved_regs[SOFT_FP_REGNUM].set_addr (info->size - 2);
    }
@@ -898,7 +913,7 @@ m68hc11_frame_prev_register (struct frame_info *this_frame,
   /* Take into account the 68HC12 specific call (PC + page).  */
   if (regnum == HARD_PC_REGNUM
       && info->return_kind == RETURN_RTC
-      && USE_PAGE_REGISTER (get_frame_arch (this_frame)))
+      && use_page_register (get_frame_arch (this_frame)))
     {
       CORE_ADDR pc = value_as_long (value);
       if (pc >= 0x08000 && pc < 0x0c000)
@@ -1003,7 +1018,10 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
     }
   else
     {
-      if (regno == HARD_PC_REGNUM && gdbarch_tdep (gdbarch)->use_page_register)
+      m68gc11_gdbarch_tdep *tdep
+	= (m68gc11_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+      if (regno == HARD_PC_REGNUM && tdep->use_page_register)
 	{
 	  ULONGEST page;
 
@@ -1106,7 +1124,9 @@ m68hc11_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
       fprintf_filtered (file, " Y=");
       m68hc11_print_register (gdbarch, file, frame, HARD_Y_REGNUM);
   
-      if (gdbarch_tdep (gdbarch)->use_page_register)
+      m68gc11_gdbarch_tdep *tdep = (m68gc11_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+      if (tdep->use_page_register)
 	{
 	  fprintf_filtered (file, "\nPage=");
 	  m68hc11_print_register (gdbarch, file, frame, HARD_PAGE_REGNUM);
@@ -1194,7 +1214,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   write_memory (sp, buf, 2);
 
   /* Finally, update the stack pointer...  */
-  sp -= STACK_CORRECTION (gdbarch);
+  sp -= stack_correction (gdbarch);
   regcache_cooked_write_unsigned (regcache, HARD_SP_REGNUM, sp);
 
   /* ...and fake a frame pointer.  */
@@ -1386,7 +1406,6 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
 		      struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   int elf_flags;
 
   soft_reg_initialized = 0;
@@ -1403,14 +1422,17 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      if (gdbarch_tdep (arches->gdbarch)->elf_flags != elf_flags)
+      m68gc11_gdbarch_tdep *tdep
+	= (m68gc11_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+
+      if (tdep->elf_flags != elf_flags)
 	continue;
 
       return arches->gdbarch;
     }
 
   /* Need a new architecture.  Fill in a target specific vector.  */
-  tdep = XCNEW (struct gdbarch_tdep);
+  m68gc11_gdbarch_tdep *tdep = new m68gc11_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
 

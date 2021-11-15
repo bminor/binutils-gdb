@@ -248,7 +248,7 @@ static const struct regset sparc64nbsd_fpregset =
 static void
 sparc64nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   nbsd_init_abi (info, gdbarch);
 

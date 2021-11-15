@@ -68,16 +68,16 @@ enum rx_frame_type {
 };
 
 /* Architecture specific data.  */
-struct gdbarch_tdep
+struct rx_gdbarch_tdep : gdbarch_tdep
 {
   /* The ELF header flags specify the multilib used.  */
-  int elf_flags;
+  int elf_flags = 0;
 
   /* Type of PSW and BPSW.  */
-  struct type *rx_psw_type;
+  struct type *rx_psw_type = nullptr;
 
   /* Type of FPSW.  */
-  struct type *rx_fpsw_type;
+  struct type *rx_fpsw_type = nullptr;
 };
 
 /* This structure holds the results of a prologue analysis.  */
@@ -944,7 +944,6 @@ static struct gdbarch *
 rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   int elf_flags;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
@@ -963,7 +962,10 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
-      if (gdbarch_tdep (arches->gdbarch)->elf_flags != elf_flags)
+      rx_gdbarch_tdep *tdep
+	= (rx_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+
+      if (tdep->elf_flags != elf_flags)
 	continue;
 
       return arches->gdbarch;
@@ -994,7 +996,7 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdb_assert(tdesc_data != NULL);
 
-  tdep = XCNEW (struct gdbarch_tdep);
+  rx_gdbarch_tdep *tdep = new rx_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
 

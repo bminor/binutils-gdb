@@ -25,6 +25,7 @@
 #include "arch/aarch64.h"
 #include "displaced-stepping.h"
 #include "infrun.h"
+#include "gdbarch.h"
 
 /* Forward declarations.  */
 struct gdbarch;
@@ -60,31 +61,32 @@ struct regset;
 #define AARCH64_DISPLACED_MODIFIED_INSNS 1
 
 /* Target-dependent structure in gdbarch.  */
-struct gdbarch_tdep
+struct aarch64_gdbarch_tdep : gdbarch_tdep
 {
   /* Lowest address at which instructions will appear.  */
-  CORE_ADDR lowest_pc;
+  CORE_ADDR lowest_pc = 0;
 
   /* Offset to PC value in jump buffer.  If this is negative, longjmp
      support will be disabled.  */
-  int jb_pc;
+  int jb_pc = 0;
 
   /* And the size of each entry in the buf.  */
-  size_t jb_elt_size;
+  size_t jb_elt_size = 0;
 
   /* Types for AdvSISD registers.  */
-  struct type *vnq_type;
-  struct type *vnd_type;
-  struct type *vns_type;
-  struct type *vnh_type;
-  struct type *vnb_type;
-  struct type *vnv_type;
+  struct type *vnq_type = nullptr;
+  struct type *vnd_type = nullptr;
+  struct type *vns_type = nullptr;
+  struct type *vnh_type = nullptr;
+  struct type *vnb_type = nullptr;
+  struct type *vnv_type = nullptr;
 
   /* syscall record.  */
-  int (*aarch64_syscall_record) (struct regcache *regcache, unsigned long svc_number);
+  int (*aarch64_syscall_record) (struct regcache *regcache,
+				 unsigned long svc_number) = nullptr;
 
   /* The VQ value for SVE targets, or zero if SVE is not supported.  */
-  uint64_t vq;
+  uint64_t vq = 0;
 
   /* Returns true if the target supports SVE.  */
   bool has_sve () const
@@ -92,8 +94,8 @@ struct gdbarch_tdep
     return vq != 0;
   }
 
-  int pauth_reg_base;
-  int pauth_ra_state_regnum;
+  int pauth_reg_base = 0;
+  int pauth_ra_state_regnum = 0;
 
   /* Returns true if the target supports pauth.  */
   bool has_pauth () const
@@ -102,7 +104,7 @@ struct gdbarch_tdep
   }
 
   /* First MTE register.  This is -1 if no MTE registers are available.  */
-  int mte_reg_base;
+  int mte_reg_base = 0;
 
   /* Returns true if the target supports MTE.  */
   bool has_mte () const

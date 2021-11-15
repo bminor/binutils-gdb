@@ -136,7 +136,7 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static void
 i386_windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   set_gdbarch_skip_trampoline_code (gdbarch, i386_windows_skip_trampoline_code);
 

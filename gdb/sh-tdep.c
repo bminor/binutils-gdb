@@ -1554,7 +1554,7 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 static struct type *
 sh_littlebyte_bigword_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (tdep->sh_littlebyte_bigword_type == NULL)
     tdep->sh_littlebyte_bigword_type
@@ -2146,7 +2146,7 @@ sh_corefile_supply_regset (const struct regset *regset,
 			   int regnum, const void *regs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
 					     ? tdep->core_gregmap
 					     : tdep->core_fpregmap);
@@ -2172,7 +2172,7 @@ sh_corefile_collect_regset (const struct regset *regset,
 			    int regnum, void *regs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
 					     ? tdep->core_gregmap
 					     : tdep->core_fpregmap);
@@ -2210,7 +2210,7 @@ sh_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				 void *cb_data,
 				 const struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (tdep->core_gregmap != NULL)
     cb (".reg", tdep->sizeof_gregset, tdep->sizeof_gregset,
@@ -2237,7 +2237,6 @@ static struct gdbarch *
 sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -2246,7 +2245,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  tdep = XCNEW (struct gdbarch_tdep);
+  sh_gdbarch_tdep *tdep = new sh_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);

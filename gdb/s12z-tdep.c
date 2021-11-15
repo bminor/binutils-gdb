@@ -482,7 +482,7 @@ constexpr gdb_byte s12z_break_insn[] = {0x00};
 
 typedef BP_MANIPULATION (s12z_break_insn) s12z_breakpoint;
 
-struct gdbarch_tdep
+struct s12z_gdbarch_tdep : gdbarch_tdep
 {
 };
 
@@ -640,7 +640,7 @@ show_bdccsr_command (const char *args, int from_tty)
 static struct gdbarch *
 s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch_tdep *tdep = XNEW (struct gdbarch_tdep);
+  s12z_gdbarch_tdep *tdep = new s12z_gdbarch_tdep;
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
 
   add_cmd ("bdccsr", class_support, show_bdccsr_command,

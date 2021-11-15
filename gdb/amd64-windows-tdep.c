@@ -1277,7 +1277,7 @@ amd64_windows_auto_wide_charset (void)
 static void
 amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* The dwarf2 unwinder (appended very early by i386_gdbarch_init) is
      preferred over the SEH one.  The reasons are:

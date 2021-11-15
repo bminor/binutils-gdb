@@ -372,7 +372,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch,
   int rn;
   pv_t regs[MN10300_MAX_NUM_REGS];
   CORE_ADDR after_last_frame_setup_insn = start_pc;
-  int am33_mode = AM33_MODE (gdbarch);
+  int am33_mode = get_am33_mode (gdbarch);
 
   memset (result, 0, sizeof (*result));
   result->gdbarch = gdbarch;
@@ -1337,14 +1337,13 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 		      struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   int num_regs;
 
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
-  tdep = XCNEW (struct gdbarch_tdep);
+  mn10300_gdbarch_tdep *tdep = new mn10300_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   switch (info.bfd_arch_info->mach)
@@ -1413,7 +1412,7 @@ mn10300_gdbarch_init (struct gdbarch_info info,
 static void
 mn10300_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  mn10300_gdbarch_tdep *tdep = (mn10300_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   fprintf_unfiltered (file, "mn10300_dump_tdep: am33_mode = %d\n",
 		      tdep->am33_mode);
 }

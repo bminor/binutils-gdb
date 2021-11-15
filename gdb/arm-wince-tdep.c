@@ -115,7 +115,7 @@ arm_wince_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static void
 arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   windows_init_abi (info, gdbarch);
 

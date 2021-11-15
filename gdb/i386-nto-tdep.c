@@ -77,7 +77,7 @@ static void
 i386nto_supply_gregset (struct regcache *regcache, char *gpregs)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   gdb_assert (tdep->gregset_reg_offset == i386nto_gregset_reg_offset);
   i386_gregset.supply_regset (&i386_gregset, regcache, -1,
@@ -126,7 +126,7 @@ static int
 i386nto_register_area (struct gdbarch *gdbarch,
 		       int regno, int regset, unsigned *off)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   *off = 0;
   if (regset == NTO_REG_GENERAL)
@@ -315,7 +315,7 @@ init_i386nto_ops (void)
 static void
 i386nto_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   static struct target_so_ops nto_svr4_so_ops;
 
   /* Deal with our strange signals.  */

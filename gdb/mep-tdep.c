@@ -116,7 +116,7 @@
      options are present on the current processor.  */
 
 
-struct gdbarch_tdep
+struct mep_gdbarch_tdep : gdbarch_tdep
 {
   /* A CGEN cpu descriptor for this BFD architecture and machine.
 
@@ -124,7 +124,7 @@ struct gdbarch_tdep
      MeP libopcodes machinery actually puts off module-specific
      customization until the last minute.  So this contains
      information about all supported me_modules.  */
-  CGEN_CPU_DESC cpu_desc;
+  CGEN_CPU_DESC cpu_desc = nullptr;
 
   /* The me_module index from the ELF file we used to select this
      architecture, or CONFIG_NONE if there was none.
@@ -140,7 +140,7 @@ struct gdbarch_tdep
      create a separate instance of the gdbarch structure for each
      me_module value mep_gdbarch_init sees, and store the me_module
      value from the ELF file here.  */
-  CONFIG_ATTR me_module;
+  CONFIG_ATTR me_module {};
 };
 
 
@@ -259,7 +259,9 @@ me_module_register_set (CONFIG_ATTR me_module,
        mask contains any of the me_module's coprocessor ISAs,
        specifically excluding the generic coprocessor register sets.  */
 
-  CGEN_CPU_DESC desc = gdbarch_tdep (target_gdbarch ())->cpu_desc;
+  mep_gdbarch_tdep *tdep
+    = (mep_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
+  CGEN_CPU_DESC desc = tdep->cpu_desc;
   const CGEN_HW_ENTRY *hw;
 
   if (me_module == CONFIG_NONE)
@@ -852,7 +854,11 @@ current_me_module (void)
       return (CONFIG_ATTR) regval;
     }
   else
-    return gdbarch_tdep (target_gdbarch ())->me_module;
+    {
+      mep_gdbarch_tdep *tdep
+	= (mep_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
+      return tdep->me_module;
+    }
 }
 
 
@@ -2326,7 +2332,6 @@ static struct gdbarch *
 mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
 
   /* Which me_module are we building a gdbarch object for?  */
   CONFIG_ATTR me_module;
@@ -2384,10 +2389,15 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   for (arches = gdbarch_list_lookup_by_info (arches, &info); 
        arches != NULL;
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
-    if (gdbarch_tdep (arches->gdbarch)->me_module == me_module)
-      return arches->gdbarch;
+    {
+      mep_gdbarch_tdep *tdep
+	= (mep_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
 
-  tdep = XCNEW (struct gdbarch_tdep);
+      if (tdep->me_module == me_module)
+	return arches->gdbarch;
+    }
+
+  mep_gdbarch_tdep *tdep = new mep_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Get a CGEN CPU descriptor for this architecture.  */

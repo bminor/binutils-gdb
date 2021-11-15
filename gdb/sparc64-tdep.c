@@ -648,7 +648,7 @@ sparc64_structure_or_union_p (const struct type *type)
 static struct type *
 sparc64_pstate_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (!tdep->sparc64_pstate_type)
     {
@@ -675,7 +675,7 @@ sparc64_pstate_type (struct gdbarch *gdbarch)
 static struct type *
 sparc64_ccr_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (tdep->sparc64_ccr_type == NULL)
     {
@@ -700,7 +700,7 @@ sparc64_ccr_type (struct gdbarch *gdbarch)
 static struct type *
 sparc64_fsr_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (!tdep->sparc64_fsr_type)
     {
@@ -733,7 +733,7 @@ sparc64_fsr_type (struct gdbarch *gdbarch)
 static struct type *
 sparc64_fprs_type (struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (!tdep->sparc64_fprs_type)
     {
@@ -1806,7 +1806,7 @@ sparc64_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 void
 sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  sparc_gdbarch_tdep *tdep = (sparc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   tdep->pc_regnum = SPARC64_PC_REGNUM;
   tdep->npc_regnum = SPARC64_NPC_REGNUM;

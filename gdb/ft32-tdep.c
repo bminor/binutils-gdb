@@ -109,7 +109,10 @@ static struct type *
 ft32_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == FT32_PC_REGNUM)
-    return gdbarch_tdep (gdbarch)->pc_type;
+    {
+      ft32_gdbarch_tdep *tdep = (ft32_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      return tdep->pc_type;
+    }
   else if (reg_nr == FT32_SP_REGNUM || reg_nr == FT32_FP_REGNUM)
     return builtin_type (gdbarch)->builtin_data_ptr;
   else
@@ -559,7 +562,6 @@ static struct gdbarch *
 ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
-  struct gdbarch_tdep *tdep;
   struct type *void_type;
   struct type *func_void_type;
 
@@ -569,7 +571,7 @@ ft32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  tdep = XCNEW (struct gdbarch_tdep);
+  ft32_gdbarch_tdep *tdep = new ft32_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Create a type for PC.  We can't use builtin types here, as they may not

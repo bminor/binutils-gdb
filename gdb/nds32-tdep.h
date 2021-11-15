@@ -40,15 +40,15 @@ enum nds32_regnum
   NDS32_FD0_REGNUM = NDS32_NUM_REGS,
 };
 
-struct gdbarch_tdep
+struct nds32_gdbarch_tdep : gdbarch_tdep
 {
   /* The guessed FPU configuration.  */
-  int fpu_freg;
+  int fpu_freg = 0;
   /* FSRs are defined as pseudo registers.  */
-  int use_pseudo_fsrs;
+  int use_pseudo_fsrs = 0;
   /* Cached regnum of the first FSR (FS0).  */
-  int fs0_regnum;
+  int fs0_regnum = 0;
   /* ELF ABI info.  */
-  int elf_abi;
+  int elf_abi = 0;
 };
 #endif /* NDS32_TDEP_H */

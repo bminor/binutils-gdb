@@ -29,7 +29,7 @@ enum lr_type_t
 };
 
 /* Target-dependent structure in gdbarch.  */
-struct gdbarch_tdep
+struct csky_gdbarch_tdep : gdbarch_tdep
 {
   /* This is Unused.  */
 };

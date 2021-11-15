@@ -308,7 +308,7 @@ i386fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				       void *cb_data,
 				       const struct regcache *regcache)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   cb (".reg", tdep->sizeof_gregset, tdep->sizeof_gregset, &i386_gregset, NULL,
       cb_data);
@@ -327,7 +327,7 @@ static CORE_ADDR
 i386fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 				   CORE_ADDR lm_addr, CORE_ADDR offset)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct regcache *regcache;
 
   if (tdep->fsbase_regnum == -1)
@@ -349,7 +349,7 @@ i386fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 static void
 i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Obviously FreeBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);
@@ -418,7 +418,7 @@ int i386fbsd4_sc_reg_offset[] =
 static void
 i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Generic FreeBSD support. */
   fbsd_init_abi (info, gdbarch);
