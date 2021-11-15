@@ -1036,7 +1036,10 @@ coff_write_symbol (bfd *abfd,
 	{
 	  BFD_ASSERT (! (native + j + 1)->is_sym);
 
-	  if (native->u.syment.n_sclass == C_FILE && j > 0)
+	  /* Adjust auxent only if this isn't the filename
+	     auxiliary entry.  */
+	  if (native->u.syment.n_sclass == C_FILE
+	      && (native + j + 1)->u.auxent.x_file.x_ftype)
 	    coff_write_auxent_fname (abfd, (char *) (native + j + 1)->extrap,
 				     &(native + j + 1)->u.auxent, string_size_p);
 
@@ -1422,6 +1425,11 @@ coff_write_symbols (bfd *abfd)
 		{
 		  char *str;
 		  size_t str_length;
+
+		  /* Add strings from aux entries only if this isn't the
+		     filename auxiliary entry.  */
+		  if (!c_symbol->native[j + 1].u.auxent.x_file.x_ftype)
+		    continue;
 
 		  if (c_symbol->native[j + 1].u.auxent.x_file.x_n.x_fname[0] != 0)
 		    continue;
@@ -2207,7 +2215,7 @@ coff_print_symbol (bfd *abfd,
 		  fprintf (file, "File ");
 		  /* Add additional information if this isn't the filename
 		     auxiliary entry.  */
-		  if (aux)
+		  if (auxp->u.auxent.x_file.x_ftype)
 		    fprintf (file, "ftype %d fname \"%s\"",
 			     auxp->u.auxent.x_file.x_ftype,
 			     (char *) auxp->u.auxent.x_file.x_n.x_n.x_offset);
