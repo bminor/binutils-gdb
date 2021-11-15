@@ -2,7 +2,7 @@
 # ld: -N --oformat binary --section-start=.text=0x10000000
 # sim: --cris-naked --memory-mapfile
 # xerror:
-# output: Usage: run \[options\] program \[program args\]\n*\n
+# output: Usage: run *\n*\n
 # progopts: --memory-region 0x10000000,0x1000
  .include "bare3.ms"
 
