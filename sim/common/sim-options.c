@@ -25,10 +25,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "libiberty.h"
 #include "sim-options.h"
 #include "sim-io.h"
 #include "sim-assert.h"
+#include "environ.h"
 #include "version.h"
 #include "hashtab.h"
 
@@ -106,6 +108,9 @@ typedef enum {
   OPTION_LOAD_VMA,
   OPTION_SYSROOT,
   OPTION_ARGV0,
+  OPTION_ENV_SET,
+  OPTION_ENV_UNSET,
+  OPTION_ENV_CLEAR,
 } STANDARD_OPTIONS;
 
 static const OPTION standard_options[] =
@@ -184,8 +189,62 @@ static const OPTION standard_options[] =
       '\0', "ARGV0", "Set argv[0] to the specified string",
       standard_option_handler, NULL },
 
+  { {"env-set", required_argument, NULL, OPTION_ENV_SET},
+      '\0', "VAR=VAL", "Set the variable in the program's environment",
+      standard_option_handler, NULL },
+  { {"env-unset", required_argument, NULL, OPTION_ENV_UNSET},
+      '\0', "VAR", "Unset the variable in the program's environment",
+      standard_option_handler, NULL },
+  { {"env-clear", no_argument, NULL, OPTION_ENV_CLEAR},
+      '\0', NULL, "Clear the program's environment",
+      standard_option_handler, NULL },
+
   { {NULL, no_argument, NULL, 0}, '\0', NULL, NULL, NULL, NULL }
 };
+
+static SIM_RC
+env_set (SIM_DESC sd, const char *arg)
+{
+  int i, varlen;
+  char *eq;
+  char **envp;
+
+  if (STATE_PROG_ENVP (sd) == NULL)
+    STATE_PROG_ENVP (sd) = dupargv (environ);
+
+  eq = strchr (arg, '=');
+  if (eq == NULL)
+    {
+      sim_io_eprintf (sd, "invalid syntax when setting env var `%s'"
+		      ": missing value", arg);
+      return SIM_RC_FAIL;
+    }
+  /* Include the = in the comparison below.  */
+  varlen = eq - arg + 1;
+
+  /* If we can find an existing variable, replace it.  */
+  envp = STATE_PROG_ENVP (sd);
+  for (i = 0; envp[i]; ++i)
+    {
+      if (strncmp (envp[i], arg, varlen) == 0)
+	{
+	  free (envp[i]);
+	  envp[i] = xstrdup (arg);
+	  break;
+	}
+    }
+
+  /* If we didn't find the var, add it.  */
+  if (envp[i] == NULL)
+    {
+      envp = xrealloc (envp, (i + 2) * sizeof (char *));
+      envp[i] = xstrdup (arg);
+      envp[i + 1] = NULL;
+      STATE_PROG_ENVP (sd) = envp;
+  }
+
+  return SIM_RC_OK;
+}
 
 static SIM_RC
 standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
@@ -429,6 +488,46 @@ standard_option_handler (SIM_DESC sd, sim_cpu *cpu, int opt,
     case OPTION_ARGV0:
       free (STATE_PROG_ARGV0 (sd));
       STATE_PROG_ARGV0 (sd) = xstrdup (arg);
+      break;
+
+    case OPTION_ENV_SET:
+      return env_set (sd, arg);
+
+    case OPTION_ENV_UNSET:
+      {
+	int i, varlen;
+	char **envp;
+
+	if (STATE_PROG_ENVP (sd) == NULL)
+	  STATE_PROG_ENVP (sd) = dupargv (environ);
+
+	varlen = strlen (arg);
+
+	/* If we can find an existing variable, replace it.  */
+	envp = STATE_PROG_ENVP (sd);
+	for (i = 0; envp[i]; ++i)
+	  {
+	    char *env = envp[i];
+
+	    if (strncmp (env, arg, varlen) == 0
+		&& (env[varlen] == '\0' || env[varlen] == '='))
+	      {
+		free (envp[i]);
+		break;
+	      }
+	  }
+
+	/* If we clear the var, shift the array down.  */
+	for (; envp[i]; ++i)
+	  envp[i] = envp[i + 1];
+
+	break;
+      }
+
+    case OPTION_ENV_CLEAR:
+      freeargv (STATE_PROG_ENVP (sd));
+      STATE_PROG_ENVP (sd) = xmalloc (sizeof (char *));
+      STATE_PROG_ENVP (sd)[0] = NULL;
       break;
     }
 

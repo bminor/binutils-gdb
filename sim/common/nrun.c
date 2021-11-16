@@ -62,6 +62,7 @@ main (int argc, char **argv)
 {
   const char *name;
   char **prog_argv = NULL;
+  char **prog_envp = NULL;
   struct bfd *prog_bfd;
   enum sim_stop reason;
   int sigrc = 0;
@@ -99,6 +100,7 @@ main (int argc, char **argv)
 
   /* Was there a program to run?  */
   prog_argv = STATE_PROG_ARGV (sd);
+  prog_envp = STATE_PROG_ENVP (sd) ? : environ;
   prog_bfd = STATE_PROG_BFD (sd);
   if (prog_argv == NULL || *prog_argv == NULL)
     usage ();
@@ -131,7 +133,7 @@ main (int argc, char **argv)
     exit (1);
 
   /* Prepare the program for execution.  */
-  sim_create_inferior (sd, prog_bfd, prog_argv, environ);
+  sim_create_inferior (sd, prog_bfd, prog_argv, prog_envp);
 
   /* To accommodate relative file paths, chdir to sysroot now.  We
      mustn't do this until BFD has opened the program, else we wouldn't

@@ -101,7 +101,6 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     set opts(timeout) ""
     set opts(mach) ""
     set opts(xerror) "no"
-    set opts(simenv) ""
     set opts(kfail) ""
     set opts(xfail) ""
     set opts(target) ""
@@ -211,7 +210,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     }
 
     set result [sim_run "$testname.x" "$opts(sim,$mach)" "$opts(progoptions)" \
-	"" "$opts(simenv)"]
+	"" ""]
     set return_code [lindex $result 0]
     set output [lindex $result 1]
 
