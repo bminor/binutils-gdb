@@ -616,6 +616,7 @@ if [gas_32_check] then {
 	run_dump_test "tlsd"
 	run_dump_test "tlspic"
 	run_dump_test "tlsnopic"
+	run_list_test "inval-tls"
 	run_dump_test "bss"
 	run_dump_test "reloc32"
 	run_list_test "reloc32" "--defsym _bad_=1"
@@ -1276,6 +1277,7 @@ if [gas_64_check] then {
 
 	run_dump_test "reloc64"
 	run_list_test "reloc64" "--defsym _bad_=1"
+	run_list_test "x86-64-inval-tls"
 	run_dump_test "mixed-mode-reloc64"
 	run_dump_test "rela"
 	run_dump_test "x86-64-ifunc"

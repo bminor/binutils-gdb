@@ -6639,11 +6639,25 @@ match_template (char mnem_suffix)
 	    }
 	}
 
-      /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
-      if (i.reloc[0] == BFD_RELOC_386_GOT32
-	  && t->base_opcode == 0xa0
-	  && t->opcode_modifier.opcodespace == SPACE_BASE)
-	continue;
+      switch (i.reloc[0])
+	{
+	case BFD_RELOC_386_GOT32:
+	  /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
+	  if (t->base_opcode == 0xa0
+	      && t->opcode_modifier.opcodespace == SPACE_BASE)
+	    continue;
+	  break;
+	case BFD_RELOC_386_TLS_GOTIE:
+	case BFD_RELOC_386_TLS_LE_32:
+	case BFD_RELOC_X86_64_GOTTPOFF:
+	case BFD_RELOC_X86_64_TLSLD:
+	  /* Don't allow KMOV in TLS code sequences.  */
+	  if (t->opcode_modifier.vex)
+	    continue;
+	  break;
+	default:
+	  break;
+	}
 
       /* We check register size if needed.  */
       if (t->opcode_modifier.checkregsize)
