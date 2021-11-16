@@ -19,6 +19,6 @@
 
 int main (void)
 {
-  printf("Hello from vforked-prog...\n");
+  const char *volatile s = "Hello from vforked-prog";
   return 0;
 }

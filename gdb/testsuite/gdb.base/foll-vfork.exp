@@ -119,7 +119,7 @@ proc vfork_parent_follow_to_bp {} {
 
    gdb_test_no_output "set follow-fork parent"
 
-   set bp_location [gdb_get_line_number "printf (\"I'm the proud parent of child"]
+   set bp_location [gdb_get_line_number "I'm the proud parent of child"]
    gdb_test "break ${srcfile}:${bp_location}" ".*" "break, vfork to bp"
 
    set test "continue to bp"
@@ -169,7 +169,7 @@ proc vfork_and_exec_child_follow_to_main_bp {} {
 
    gdb_test_no_output "set follow-fork child"
 
-   set linenum [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
+   set linenum [gdb_get_line_number "Hello from vforked-prog" ${srcfile2}]
 
    set test "continue to bp"
    gdb_test_multiple "continue" $test {
@@ -271,7 +271,7 @@ proc tcatch_vfork_then_child_follow_exec {} {
    continue_to_vfork
 
    set linenum1 [gdb_get_line_number "pid = vfork ();"]
-   set linenum2 [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
+   set linenum2 [gdb_get_line_number "Hello from vforked-prog" ${srcfile2}]
 
    set test "finish"
    gdb_test_multiple "finish" $test {
@@ -349,7 +349,7 @@ proc vfork_relations_in_info_inferiors { variant } {
    if { $variant == "exec" } {
        global srcfile2
 
-       set linenum [gdb_get_line_number "printf(\"Hello from vforked-prog" ${srcfile2}]
+       set linenum [gdb_get_line_number "Hello from vforked-prog" ${srcfile2}]
        set test "continue to bp"
        gdb_test_multiple "continue" $test {
 	   -re ".*xecuting new program.*Breakpoint.*vforked-prog.c:${linenum}.*$gdb_prompt " {
@@ -367,13 +367,13 @@ proc vfork_relations_in_info_inferiors { variant } {
 
    set test "vfork relation no longer appears in info inferiors"
    gdb_test_multiple "info inferiors" $test {
-       -re "is vfork child of inferior 1.*$gdb_prompt " {
+       -re -wrap "is vfork child of inferior 1.*" {
 	   fail $test
        }
-       -re "is vfork parent of inferior 2.*$gdb_prompt " {
+       -re -wrap "is vfork parent of inferior 2.*" {
 	   fail $test
        }
-       -re "$gdb_prompt " {
+       -re -wrap "" {
 	   pass $test
        }
    }
