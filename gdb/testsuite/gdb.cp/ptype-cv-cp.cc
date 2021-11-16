@@ -26,6 +26,10 @@ __attribute__((used)) const_my_int v_const_my_int (1);
 volatile_my_int v_volatile_my_int (2);
 const_volatile_my_int v_const_volatile_my_int (3);
 volatile_const_my_int v_volatile_const_my_int (4);
+__attribute__((used)) const my_int v2_const_my_int (5);
+volatile my_int v2_volatile_my_int (6);
+const volatile my_int v2_const_volatile_my_int (7);
+volatile const my_int v2_volatile_const_my_int (8);
 
 int
 main ()
