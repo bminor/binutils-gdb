@@ -3261,7 +3261,7 @@ For example,
   2    process 2307      2 (extended-remote host:10000)  hello
 @end smallexample
 
-To get informations about the current inferior, use @code{inferior}:
+To get information about the current inferior, use @code{inferior}:
 
 @table @code
 @kindex inferior
@@ -19098,7 +19098,7 @@ Name of the task in the program.
 
 @kindex info task @var{taskno}
 @item info task @var{taskno}
-This command shows detailed informations on the specified task, as in
+This command shows detailed information on the specified task, as in
 the following example:
 @smallexample
 @iftex
