@@ -141,6 +141,46 @@ cb_syscall (host_callback *cb, CB_SYSCALL *sc)
 
   switch (cb_target_to_host_syscall (cb, sc->func))
     {
+    case CB_SYS_argc:
+      result = countargv (cb->argv);
+      break;
+
+    case CB_SYS_argnlen:
+      {
+	if (sc->arg1 >= 0 && sc->arg1 < countargv (cb->argv))
+	  result = strlen (cb->argv[sc->arg1]);
+	else
+	  {
+	    result = -1;
+	    errcode = EINVAL;
+	  }
+      }
+      break;
+
+    case CB_SYS_argn:
+      {
+	if (sc->arg1 >= 0 && sc->arg1 < countargv (cb->argv))
+	  {
+	    const char *argn = cb->argv[sc->arg1];
+	    int len = strlen (argn);
+	    int written = sc->write_mem (cb, sc, sc->arg2, argn, len + 1);
+
+	    if (written == len + 1)
+	      result = sc->arg2;
+	    else
+	      {
+		result = -1;
+		errcode = EINVAL;
+	      }
+	  }
+	else
+	  {
+	    result = -1;
+	    errcode = EINVAL;
+	  }
+      }
+      break;
+
     case CB_SYS_argvlen :
       {
 	/* Compute how much space is required to store the argv,envp

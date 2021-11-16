@@ -144,39 +144,6 @@ bfin_syscall (SIM_CPU *cpu)
       tbuf += sprintf (tbuf, "exit(%i)", args[0]);
       sim_engine_halt (sd, cpu, NULL, PCREG, sim_exited, sc.arg1);
 
-#ifdef CB_SYS_argc
-    case CB_SYS_argc:
-      tbuf += sprintf (tbuf, "argc()");
-      sc.result = countargv ((char **)argv);
-      break;
-    case CB_SYS_argnlen:
-      {
-      tbuf += sprintf (tbuf, "argnlen(%u)", args[0]);
-	if (sc.arg1 < countargv ((char **)argv))
-	  sc.result = strlen (argv[sc.arg1]);
-	else
-	  sc.result = -1;
-      }
-      break;
-    case CB_SYS_argn:
-      {
-	tbuf += sprintf (tbuf, "argn(%u)", args[0]);
-	if (sc.arg1 < countargv ((char **)argv))
-	  {
-	    const char *argn = argv[sc.arg1];
-	    int len = strlen (argn);
-	    int written = sc.write_mem (cb, &sc, sc.arg2, argn, len + 1);
-	    if (written == len + 1)
-	      sc.result = sc.arg2;
-	    else
-	      sc.result = -1;
-	  }
-	else
-	  sc.result = -1;
-      }
-      break;
-#endif
-
     case CB_SYS_gettimeofday:
       {
 	struct timeval _tv, *tv = &_tv;
