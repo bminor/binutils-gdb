@@ -2185,7 +2185,7 @@ coff_print_symbol (bfd *abfd,
 		    - (bfd_hostptr_t) root)
 		   / sizeof (combined_entry_type));
 
-	  fprintf (file, "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d) 0x",
+	  fprintf (file, "(sec %2d)(fl 0x%02x)(ty %4x)(scl %3d) (nx %d) 0x",
 		   combined->u.syment.n_scnum,
 		   combined->u.syment.n_flags,
 		   combined->u.syment.n_type,

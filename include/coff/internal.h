@@ -536,6 +536,13 @@ struct internal_syment
 #define DECREF(x) \
   ((((x) >> N_TSHIFT) & ~ N_BTMASK) | ((x) & N_BTMASK))
 
+/* Visibility flag, in XCOFF n_type.  */
+#define SYM_V_INTERNAL		0x1000
+#define SYM_V_HIDDEN		0x2000
+#define SYM_V_PROTECTED 	0x3000
+#define SYM_V_EXPORTED		0x4000
+#define SYM_V_MASK		0xF000
+
 union internal_auxent
 {
   struct

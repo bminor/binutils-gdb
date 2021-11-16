@@ -3994,8 +3994,13 @@ coff_write_object_contents (bfd * abfd)
 #endif
   }
 
+#ifdef RS6000COFF_C
+  /* XCOFF 32bit needs this to have new behaviour for n_type field.  */
+  internal_a.vstamp = 2;
+#else
   /* FIXME: Does anybody ever set this to another value?  */
   internal_a.vstamp = 0;
+#endif
 
   /* Now should write relocs, strings, syms.  */
   obj_sym_filepos (abfd) = sym_base;
@@ -4070,7 +4075,7 @@ coff_write_object_contents (bfd * abfd)
       bfd_vma toc;
       asection *loader_sec;
 
-      internal_a.vstamp = 1;
+      internal_a.vstamp = 2;
 
       internal_a.o_snentry = xcoff_data (abfd)->snentry;
       if (internal_a.o_snentry == 0)

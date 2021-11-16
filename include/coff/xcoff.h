@@ -349,6 +349,9 @@ struct xcoff_link_hash_entry
   /* Some linker flags.  */
   unsigned long flags;
 
+  /* Symbol visibility, using the same define than n_type.  */
+  unsigned short visibility;
+
   /* The storage mapping class.  */
   unsigned char smclas;
 };
