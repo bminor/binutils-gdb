@@ -204,7 +204,6 @@ fetch_gregs (struct regcache *regcache, int regnum)
 {
   int tid = regcache->ptid ().lwp ();
   gdb_gregset_t regs;
-  int areg;
   
   if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
     {
@@ -223,7 +222,6 @@ store_gregs (struct regcache *regcache, int regnum)
 {
   int tid = regcache->ptid ().lwp ();
   gdb_gregset_t regs;
-  int areg;
 
   if (ptrace (PTRACE_GETREGS, tid, 0, (long) &regs) < 0)
     {
