@@ -719,6 +719,22 @@ sim_parse_args (SIM_DESC sd, char * const *argv)
 	      free (STATE_PROG_FILE (sd));
 	      STATE_PROG_FILE (sd) = NULL;
 
+	      /* Handle any inline variables if -- wasn't used.  */
+	      if (argv[optind] != NULL && optind > 0
+		  && strcmp (argv[optind - 1], "--") != 0)
+		{
+		  while (1)
+		    {
+		      const char *arg = argv[optind];
+
+		      if (strchr (arg, '=') == NULL)
+			break;
+
+		      env_set (sd, arg);
+		      ++optind;
+		    }
+		}
+
 	      new_argv = dupargv (argv + optind);
 	      freeargv (STATE_PROG_ARGV (sd));
 	      STATE_PROG_ARGV (sd) = new_argv;
@@ -914,7 +930,8 @@ void
 sim_print_help (SIM_DESC sd, int is_command)
 {
   if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
-    sim_io_printf (sd, "Usage: %s [options] [--] program [program args]\n",
+    sim_io_printf (sd,
+		   "Usage: %s [options] [VAR=VAL|--] program [program args]\n",
 		   STATE_MY_NAME (sd));
 
   /* Initialize duplicate argument checker.  */
@@ -950,6 +967,9 @@ sim_print_help (SIM_DESC sd, int is_command)
   if (STATE_OPEN_KIND (sd) == SIM_OPEN_STANDALONE)
     {
       sim_io_printf (sd, "\n");
+      sim_io_printf (sd,
+		     "VAR=VAL         Environment variables to set.  "
+		     "Ignored if -- is used.\n");
       sim_io_printf (sd, "program args    Arguments to pass to simulated program.\n");
       sim_io_printf (sd, "                Note: Very few simulators support this.\n");
     }
