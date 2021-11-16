@@ -2602,8 +2602,9 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
     {
       /* A TU will not need aranges, and skipping them here is an easy
 	 way of ignoring .debug_types -- and possibly seeing a
-	 duplicate section offset -- entirely.  */
-      if (per_cu->is_debug_types)
+	 duplicate section offset -- entirely.  The same applies to
+	 units coming from a dwz file.  */
+      if (per_cu->is_debug_types || per_cu->is_dwz)
 	continue;
 
       const auto insertpair
