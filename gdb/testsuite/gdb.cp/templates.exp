@@ -547,6 +547,42 @@ gdb_test_multiple "ptype/r siip" "ptype siip" {
     }
 }
 
+# Check cv qualifiers and substitute parameters.
+
+if {[test_compiler_info {clang-*}]} {
+	setup_kfail "llvm/52262 " "*-*-*"
+}
+gdb_test "ptype cfoo" [multi_line \
+"type = (class |)Cfoo<double> \\\[with DataT = double\\\] \\{" \
+  "\[ \t\]*public:" \
+    "\[ \t\]*DataT me0;" \
+    "\[ \t\]*const DataT me1;" \
+    "\[ \t\]*const myfloat me2;" \
+    "\[ \t\]*const int me3;" \
+    "" \
+  "\[ \t\]*private:" \
+    "\[ \t\]*typedef float myfloat;" \
+"\\}" \
+] "print type of cfoo"
+
+# Check cv qualifiers and do not substitute.
+
+if {[test_compiler_info {clang-*}]} {
+	setup_kfail "llvm/52262 " "*-*-*"
+}
+gdb_test "ptype/r cfoo" [multi_line \
+"type = (class |)Cfoo<double> \\{" \
+  "\[ \t\]*public:" \
+    "\[ \t\]*double me0;" \
+    "\[ \t\]*const double me1;" \
+    "\[ \t\]*const Cfoo<double>::myfloat me2;" \
+    "\[ \t\]*const int me3;" \
+    "" \
+  "\[ \t\]*private:" \
+    "\[ \t\]*typedef float myfloat;" \
+"\\}" \
+] "print raw type of cfoo"
+
 # pt Garply<int>
 
 gdb_test_multiple "ptype/r Garply<int>" "ptype Garply<int>" {

@@ -119,6 +119,7 @@ c_print_type_1 (struct type *type,
   code = type->code ();
   if (local_name != NULL)
     {
+      c_type_print_modifier (type, stream, 0, 1, language);
       fputs_filtered (local_name, stream);
       if (varstring != NULL && *varstring != '\0')
 	fputs_filtered (" ", stream);
