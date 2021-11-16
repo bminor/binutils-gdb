@@ -38,7 +38,7 @@ ALL_CPU_CFLAGS = -DHAVE_CPU_IQ2000BF -DHAVE_CPU_IQ10BF
 SIM_EXTRA_CLEAN = iq2000-clean
 
 # Some modules don't build cleanly yet.
-cpu.o iq2000.o mloop.o sem.o: SIM_WERROR_CFLAGS =
+iq2000.o mloop.o: SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
 
