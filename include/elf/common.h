@@ -1102,13 +1102,13 @@
 #define DT_FINI_ARRAYSZ 28
 #define DT_RUNPATH	29
 #define DT_FLAGS	30
-#define DT_ENCODING	32
 #define DT_PREINIT_ARRAY   32
 #define DT_PREINIT_ARRAYSZ 33
 #define DT_SYMTAB_SHNDX    34
 #define DT_RELRSZ	35
 #define DT_RELR		36
 #define DT_RELRENT	37
+#define DT_ENCODING	38
 
 /* Note, the Oct 4, 1999 draft of the ELF ABI changed the values
    for DT_LOOS and DT_HIOS.  Some implementations however, use

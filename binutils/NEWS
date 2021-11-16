@@ -11,6 +11,8 @@
   using --unicode=highlight will display them as unicode escape sequences
   highlighted in red (if supported by the output device).
 
+* readelf -r dumps RELR relative relocations now.
+
 Changes in 2.37:
 
 * The readelf tool has a new command line option which can be used to specify

@@ -1,3 +1,9 @@
+2021-11-16  Fangrui Song  <maskray@google.com>
+
+	* elf/common.h (DT_ENCODING): Bump to 38.
+	* elf/external.h (Elf32_External_Relr): New.
+	(Elf64_External_Relr): New.
+
 2021-09-07  Luis Machado  <luis.machado@linaro.org>
 
 	Revert: [AArch64] MTE corefile support

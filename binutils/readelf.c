@@ -342,7 +342,14 @@ typedef enum unicode_display_type
 
 static unicode_display_type unicode_display = unicode_default;
 
-  
+typedef enum
+{
+  reltype_unknown,
+  reltype_rel,
+  reltype_rela,
+  reltype_relr
+} relocation_type;
+
 /* Versioned symbol info.  */
 enum versioned_symbol_info
 {
@@ -1354,6 +1361,76 @@ slurp_rel_relocs (Filedata *            filedata,
   return true;
 }
 
+static bool
+slurp_relr_relocs (Filedata * filedata,
+		   unsigned long relr_offset,
+		   unsigned long relr_size,
+		   bfd_vma ** relrsp,
+		   unsigned long * nrelrsp)
+{
+  void *relrs;
+  size_t size = 0, nentries, i;
+  bfd_vma base = 0, addr, entry;
+
+  relrs = get_data (NULL, filedata, relr_offset, 1, relr_size,
+		    _("RELR relocation data"));
+  if (!relrs)
+    return false;
+
+  if (is_32bit_elf)
+    nentries = relr_size / sizeof (Elf32_External_Relr);
+  else
+    nentries = relr_size / sizeof (Elf64_External_Relr);
+  for (i = 0; i < nentries; i++)
+    {
+      if (is_32bit_elf)
+	entry = BYTE_GET (((Elf32_External_Relr *)relrs)[i].r_data);
+      else
+	entry = BYTE_GET (((Elf64_External_Relr *)relrs)[i].r_data);
+      if ((entry & 1) == 0)
+	size++;
+      else
+	while ((entry >>= 1) != 0)
+	  if ((entry & 1) == 1)
+	    size++;
+    }
+
+  *relrsp = (bfd_vma *) xmalloc (size * sizeof (bfd_vma));
+  if (*relrsp == NULL)
+    {
+      free (relrs);
+      error (_("out of memory parsing relocs\n"));
+      return false;
+    }
+
+  size = 0;
+  for (i = 0; i < nentries; i++)
+    {
+      const bfd_vma entry_bytes = is_32bit_elf ? 4 : 8;
+
+      if (is_32bit_elf)
+	entry = BYTE_GET (((Elf32_External_Relr *)relrs)[i].r_data);
+      else
+	entry = BYTE_GET (((Elf64_External_Relr *)relrs)[i].r_data);
+      if ((entry & 1) == 0)
+	{
+	  (*relrsp)[size++] = entry;
+	  base = entry + entry_bytes;
+	}
+      else
+	{
+	  for (addr = base; (entry >>= 1) != 0; addr += entry_bytes)
+	    if ((entry & 1) != 0)
+	      (*relrsp)[size++] = addr;
+	  base += entry_bytes * (entry_bytes * CHAR_BIT - 1);
+	}
+    }
+
+  *nrelrsp = size;
+  free (relrs);
+  return true;
+}
+
 /* Returns the reloc type extracted from the reloc info field.  */
 
 static unsigned int
@@ -1406,30 +1483,46 @@ dump_relocations (Filedata *          filedata,
 		  unsigned long       nsyms,
 		  char *              strtab,
 		  unsigned long       strtablen,
-		  int                 is_rela,
+		  relocation_type     rel_type,
 		  bool                is_dynsym)
 {
   unsigned long i;
   Elf_Internal_Rela * rels;
   bool res = true;
 
-  if (is_rela == UNKNOWN)
-    is_rela = guess_is_rela (filedata->file_header.e_machine);
+  if (rel_type == reltype_unknown)
+    rel_type = guess_is_rela (filedata->file_header.e_machine) ? reltype_rela : reltype_rel;
 
-  if (is_rela)
+  if (rel_type == reltype_rela)
     {
       if (!slurp_rela_relocs (filedata, rel_offset, rel_size, &rels, &rel_size))
 	return false;
     }
-  else
+  else if (rel_type == reltype_rel)
     {
       if (!slurp_rel_relocs (filedata, rel_offset, rel_size, &rels, &rel_size))
 	return false;
     }
+  else if (rel_type == reltype_relr)
+    {
+      bfd_vma * relrs;
+      const char *format
+	  = is_32bit_elf ? "%08" BFD_VMA_FMT "x\n" : "%016" BFD_VMA_FMT "x\n";
+
+      if (!slurp_relr_relocs (filedata, rel_offset, rel_size, &relrs,
+			      &rel_size))
+	return false;
+
+      printf (ngettext ("  %lu offset\n", "  %lu offsets\n", rel_size), rel_size);
+      for (i = 0; i < rel_size; i++)
+	printf (format, relrs[i]);
+      free (relrs);
+      return true;
+    }
 
   if (is_32bit_elf)
     {
-      if (is_rela)
+      if (rel_type == reltype_rela)
 	{
 	  if (do_wide)
 	    printf (_(" Offset     Info    Type                Sym. Value  Symbol's Name + Addend\n"));
@@ -1446,7 +1539,7 @@ dump_relocations (Filedata *          filedata,
     }
   else
     {
-      if (is_rela)
+      if (rel_type == reltype_rela)
 	{
 	  if (do_wide)
 	    printf (_("    Offset             Info             Type               Symbol's Value  Symbol's Name + Addend\n"));
@@ -1841,7 +1934,7 @@ dump_relocations (Filedata *          filedata,
       if (filedata->file_header.e_machine == EM_ALPHA
 	  && rtype != NULL
 	  && streq (rtype, "R_ALPHA_LITUSE")
-	  && is_rela)
+	  && rel_type == reltype_rela)
 	{
 	  switch (rels[i].r_addend)
 	    {
@@ -1989,7 +2082,7 @@ dump_relocations (Filedata *          filedata,
 			    version_string);
 		}
 
-	      if (is_rela)
+	      if (rel_type == reltype_rela)
 		{
 		  bfd_vma off = rels[i].r_addend;
 
@@ -2000,7 +2093,7 @@ dump_relocations (Filedata *          filedata,
 		}
 	    }
 	}
-      else if (is_rela)
+      else if (rel_type == reltype_rela)
 	{
 	  bfd_vma off = rels[i].r_addend;
 
@@ -8021,13 +8114,14 @@ static struct
   const char * name;
   int reloc;
   int size;
-  int rela;
+  relocation_type rel_type;
 }
   dynamic_relocations [] =
 {
-  { "REL", DT_REL, DT_RELSZ, false },
-  { "RELA", DT_RELA, DT_RELASZ, true },
-  { "PLT", DT_JMPREL, DT_PLTRELSZ, UNKNOWN }
+  { "REL", DT_REL, DT_RELSZ, reltype_rel },
+  { "RELA", DT_RELA, DT_RELASZ, reltype_rela },
+  { "RELR", DT_RELR, DT_RELRSZ, reltype_relr },
+  { "PLT", DT_JMPREL, DT_PLTRELSZ, reltype_unknown }
 };
 
 /* Process the reloc section.  */
@@ -8043,7 +8137,7 @@ process_relocs (Filedata * filedata)
 
   if (do_using_dynamic)
     {
-      int          is_rela;
+      relocation_type rel_type;
       const char * name;
       bool  has_dynamic_reloc;
       unsigned int i;
@@ -8052,7 +8146,7 @@ process_relocs (Filedata * filedata)
 
       for (i = 0; i < ARRAY_SIZE (dynamic_relocations); i++)
 	{
-	  is_rela = dynamic_relocations [i].rela;
+	  rel_type = dynamic_relocations [i].rel_type;
 	  name = dynamic_relocations [i].name;
 	  rel_size = filedata->dynamic_info[dynamic_relocations [i].size];
 	  rel_offset = filedata->dynamic_info[dynamic_relocations [i].reloc];
@@ -8060,16 +8154,16 @@ process_relocs (Filedata * filedata)
 	  if (rel_size)
 	    has_dynamic_reloc = true;
 
-	  if (is_rela == UNKNOWN)
+	  if (rel_type == reltype_unknown)
 	    {
 	      if (dynamic_relocations [i].reloc == DT_JMPREL)
 		switch (filedata->dynamic_info[DT_PLTREL])
 		  {
 		  case DT_REL:
-		    is_rela = false;
+		    rel_type = reltype_rel;
 		    break;
 		  case DT_RELA:
-		    is_rela = true;
+		    rel_type = reltype_rela;
 		    break;
 		  }
 	    }
@@ -8092,7 +8186,7 @@ process_relocs (Filedata * filedata)
 				filedata->num_dynamic_syms,
 				filedata->dynamic_strings,
 				filedata->dynamic_strings_length,
-				is_rela, true /* is_dynamic */);
+				rel_type, true /* is_dynamic */);
 	    }
 	}
 
@@ -8120,7 +8214,8 @@ process_relocs (Filedata * filedata)
 	   i++, section++)
 	{
 	  if (   section->sh_type != SHT_RELA
-	      && section->sh_type != SHT_REL)
+	      && section->sh_type != SHT_REL
+	      && section->sh_type != SHT_RELR)
 	    continue;
 
 	  rel_offset = section->sh_offset;
@@ -8128,7 +8223,7 @@ process_relocs (Filedata * filedata)
 
 	  if (rel_size)
 	    {
-	      int is_rela;
+	      relocation_type rel_type;
 	      unsigned long num_rela;
 
 	      if (filedata->is_separate)
@@ -8148,7 +8243,8 @@ process_relocs (Filedata * filedata)
 				num_rela),
 		      rel_offset, num_rela);
 
-	      is_rela = section->sh_type == SHT_RELA;
+	      rel_type = section->sh_type == SHT_RELA ? reltype_rela :
+		section->sh_type == SHT_REL ? reltype_rel : reltype_relr;
 
 	      if (section->sh_link != 0
 		  && section->sh_link < filedata->file_header.e_shnum)
@@ -8170,15 +8266,14 @@ process_relocs (Filedata * filedata)
 
 		  dump_relocations (filedata, rel_offset, rel_size,
 				    symtab, nsyms, strtab, strtablen,
-				    is_rela,
+				    rel_type,
 				    symsec->sh_type == SHT_DYNSYM);
 		  free (strtab);
 		  free (symtab);
 		}
 	      else
 		dump_relocations (filedata, rel_offset, rel_size,
-				  NULL, 0, NULL, 0, is_rela,
-				  false /* is_dynamic */);
+				  NULL, 0, NULL, 0, rel_type, false /* is_dynamic */);
 
 	      found = true;
 	    }
@@ -11499,6 +11594,7 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 	case DT_RPATH	:
 	case DT_SYMBOLIC:
 	case DT_REL	:
+	case DT_RELR    :
 	case DT_DEBUG	:
 	case DT_TEXTREL	:
 	case DT_JMPREL	:
@@ -11555,6 +11651,8 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 	case DT_STRSZ	:
 	case DT_RELSZ	:
 	case DT_RELAENT	:
+	case DT_RELRENT	:
+	case DT_RELRSZ	:
 	case DT_SYMENT	:
 	case DT_RELENT	:
 	  filedata->dynamic_info[entry->d_tag] = entry->d_un.d_val;
@@ -11562,8 +11660,6 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 	case DT_PLTPADSZ:
 	case DT_MOVEENT	:
 	case DT_MOVESZ	:
-	case DT_RELRENT	:
-	case DT_RELRSZ	:
 	case DT_PREINIT_ARRAYSZ:
 	case DT_INIT_ARRAYSZ:
 	case DT_FINI_ARRAYSZ:

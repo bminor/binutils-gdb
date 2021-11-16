@@ -1,3 +1,14 @@
+2021-11-16  Fangrui Song  <maskray@google.com>
+
+	* readelf.c (enum relocation_type): New.
+	(slurp_relr_relocs): New.
+	(dump_relocations): Change is_rela to rel_type.
+	Dump RELR.
+	(dynamic_relocations): Add DT_RELR.
+	(process_relocs): Check SHT_RELR and DT_RELR.
+	(process_dynamic_section): Store into dynamic_info for
+	DT_RELR/DT_RELRENT/DT_RELRSZ.
+
 2021-11-09  Nick Clifton  <nickc@redhat.com>
 
 	* nm.c: Add --unicode option to control how unicode characters are
