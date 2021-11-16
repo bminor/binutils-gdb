@@ -412,8 +412,7 @@ mostlyclean clean:
 	done
 
 maintainer-clean realclean distclean: clean
-	rm -f Makefile config.status config.h stamp-h config.log
-	rm -f Makefile
+	rm -f Makefile config.status config.h stamp-h config.log config.cache
 	for i in $(CONFIG_SRC_SUBDIR); do \
 		rmdir $$i/$(DEPDIR); \
 	done
