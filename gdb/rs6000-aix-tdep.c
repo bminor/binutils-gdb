@@ -30,7 +30,6 @@
 #include "infcall.h"
 #include "objfiles.h"
 #include "breakpoint.h"
-#include "rs6000-tdep.h"
 #include "ppc-tdep.h"
 #include "rs6000-aix-tdep.h"
 #include "xcoffread.h"
@@ -65,6 +64,9 @@
 #define SIG_FRAME_LR_OFFSET64 424
 /* STKMIN64+grp1 offset. 112+56=168 */
 #define SIG_FRAME_FP_OFFSET64 168
+
+/* Minimum possible text address in AIX.  */
+#define AIX_TEXT_SEGMENT_BASE 0x10000000
 
 static struct trad_frame_cache *
 aix_sighandle_frame_cache (struct frame_info *this_frame,

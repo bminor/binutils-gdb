@@ -30,7 +30,6 @@
 #include "inf-child.h"
 #include "inf-ptrace.h"
 #include "ppc-tdep.h"
-#include "rs6000-tdep.h"
 #include "rs6000-aix-tdep.h"
 #include "exec.h"
 #include "observable.h"
