@@ -126,6 +126,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 		     char * const *argv, char * const *env)
 {
   sim_cpu *cpu = STATE_CPU (sd, 0);
+  host_callback *cb = STATE_CALLBACK (sd);
   bfd_vma addr = 0;
 
   if (abfd != NULL)
@@ -149,6 +150,9 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       freeargv (STATE_PROG_ENVP (sd));
       STATE_PROG_ENVP (sd) = dupargv (env);
     }
+
+  cb->argv = STATE_PROG_ARGV (sd);
+  cb->envp = STATE_PROG_ENVP (sd);
 
   if (trace_load_symbols (sd))
     {

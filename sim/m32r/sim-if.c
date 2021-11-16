@@ -20,13 +20,14 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <string.h>
+#include <stdlib.h>
+
+#include "sim/callback.h"
 #include "sim-main.h"
 #include "sim-options.h"
 #include "libiberty.h"
 #include "bfd.h"
-
-#include <string.h>
-#include <stdlib.h>
 
 #include "dv-m32r_uart.h"
 
@@ -148,6 +149,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char * const *argv,
 		     char * const *env)
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
+  host_callback *cb = STATE_CALLBACK (sd);
   SIM_ADDR addr;
 
   if (abfd != NULL)
@@ -179,6 +181,9 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char * const *argv,
       freeargv (STATE_PROG_ENVP (sd));
       STATE_PROG_ENVP (sd) = dupargv (env);
     }
+
+  cb->argv = STATE_PROG_ARGV (sd);
+  cb->envp = STATE_PROG_ENVP (sd);
 
   return SIM_RC_OK;
 }

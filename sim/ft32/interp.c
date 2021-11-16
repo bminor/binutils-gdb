@@ -884,6 +884,7 @@ sim_create_inferior (SIM_DESC sd,
 {
   uint32_t addr;
   sim_cpu *cpu = STATE_CPU (sd, 0);
+  host_callback *cb = STATE_CALLBACK (sd);
 
   /* Set the PC.  */
   if (abfd != NULL)
@@ -906,6 +907,9 @@ sim_create_inferior (SIM_DESC sd,
       freeargv (STATE_PROG_ENVP (sd));
       STATE_PROG_ENVP (sd) = dupargv (env);
     }
+
+  cb->argv = STATE_PROG_ARGV (sd);
+  cb->envp = STATE_PROG_ENVP (sd);
 
   cpu->state.regs[FT32_HARD_SP] = addr;
   cpu->state.num_i = 0;

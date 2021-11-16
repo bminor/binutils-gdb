@@ -21,6 +21,7 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include "sim/callback.h"
 #include "sim-main.h"
 #include "sim-options.h"
 
@@ -134,6 +135,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 		     char * const *argv, char * const *env)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
+  host_callback *cb = STATE_CALLBACK (sd);
   SIM_ADDR addr;
 
   /* Set the PC.  */
@@ -158,6 +160,9 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       freeargv (STATE_PROG_ENVP (sd));
       STATE_PROG_ENVP (sd) = dupargv (env);
     }
+
+  cb->argv = STATE_PROG_ARGV (sd);
+  cb->envp = STATE_PROG_ENVP (sd);
 
   initialize_env (sd, (void *)argv, (void *)env);
 

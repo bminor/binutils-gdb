@@ -770,6 +770,8 @@ host_callback default_callback =
 
   /* Defaults expected to be overridden at initialization, where needed.  */
   BFD_ENDIAN_UNKNOWN, /* target_endian */
+  NULL, /* argv */
+  NULL, /* envp */
   4, /* target_sizeof_int */
 
   HOST_CALLBACK_MAGIC,

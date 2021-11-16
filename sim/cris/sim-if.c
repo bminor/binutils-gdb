@@ -23,14 +23,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+
 #include "libiberty.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 
+#include "sim/callback.h"
 #include "sim-main.h"
-#include <stdlib.h>
-#include <errno.h>
-#include <unistd.h>
 #include "sim-options.h"
 #include "sim-hw.h"
 #include "dis-asm.h"
@@ -741,7 +743,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 
   /* Find out how much room is needed for the environment and argv, create
      that memory and fill it.  Only do this when there's a program
-     specified.  */
+     specified.
+
+     TODO: Move this to sim_create_inferior and use STATE_PROG_ENVP.  */
   if (abfd != NULL && !cris_bare_iron)
     {
       const char *name = bfd_get_filename (abfd);
@@ -955,6 +959,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 		     char * const *env)
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
+  host_callback *cb = STATE_CALLBACK (sd);
   SIM_ADDR addr;
 
   if (sd != NULL)
@@ -982,6 +987,9 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       freeargv (STATE_PROG_ENVP (sd));
       STATE_PROG_ENVP (sd) = dupargv (env);
     }
+
+  cb->argv = STATE_PROG_ARGV (sd);
+  cb->envp = STATE_PROG_ENVP (sd);
 
   return SIM_RC_OK;
 }

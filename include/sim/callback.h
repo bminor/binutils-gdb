@@ -178,6 +178,12 @@ struct host_callback_struct
 
   enum bfd_endian target_endian;
 
+  /* Program command line options.  */
+  char **argv;
+
+  /* Program environment.  */
+  char **envp;
+
   /* Size of an "int" on the target (for syscalls whose ABI uses "int").
      This must include padding, and only padding-at-higher-address is
      supported.  For example, a 64-bit target with 32-bit int:s which
