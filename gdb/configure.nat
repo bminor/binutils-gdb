@@ -103,7 +103,7 @@ case ${gdb_host} in
 		# Host: IBM PowerPC running AIX aix-thread.o is not
 		# listed in NATDEPFILES as it is pulled in by
 		# configure.
-		NATDEPFILES="${NATDEPFILES} rs6000-nat.o"
+		NATDEPFILES="${NATDEPFILES} rs6000-aix-nat.o"
 
 		# When compiled with cc, for debugging, this argument
 		# should be passed.  We have no idea who our current

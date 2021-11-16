@@ -2288,8 +2288,8 @@ ALLDEPFILES = \
 	riscv-ravenscar-thread.c \
 	riscv-tdep.c \
 	rl78-tdep.c \
+	rs6000-aix-nat.c \
 	rs6000-lynx178-tdep.c \
-	rs6000-nat.c \
 	rs6000-tdep.c \
 	rx-tdep.c \
 	s390-linux-nat.c \
