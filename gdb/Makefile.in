@@ -724,6 +724,7 @@ ALL_64_TARGET_OBS = \
 ALL_TARGET_OBS = \
 	aarch32-tdep.o \
 	arc-linux-tdep.o \
+	arc-newlib-tdep.o \
 	arc-tdep.o \
 	arch/aarch32.o \
 	arch/arc.o \
