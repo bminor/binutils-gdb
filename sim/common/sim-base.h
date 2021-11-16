@@ -165,6 +165,10 @@ struct sim_state {
   char *prog_argv0;
 #define STATE_PROG_ARGV0(sd) ((sd)->prog_argv0)
 
+  /* The program's environment.  */
+  char **prog_envp;
+#define STATE_PROG_ENVP(sd) ((sd)->prog_envp)
+
   /* The program's bfd.  */
   struct bfd *prog_bfd;
 #define STATE_PROG_BFD(sd) ((sd)->prog_bfd)

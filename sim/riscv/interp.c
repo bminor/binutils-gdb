@@ -153,6 +153,12 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
       STATE_PROG_ARGV (sd) = dupargv (argv);
     }
 
+  if (STATE_PROG_ENVP (sd) != env)
+    {
+      freeargv (STATE_PROG_ENVP (sd));
+      STATE_PROG_ENVP (sd) = dupargv (env);
+    }
+
   initialize_env (sd, (void *)argv, (void *)env);
 
   return SIM_RC_OK;
