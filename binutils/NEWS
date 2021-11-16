@@ -1,5 +1,7 @@
 -*- text -*-
 
+* elfedit: Add --output-abiversion option to update ABIVERSION.
+
 * Add support for the LoongArch instruction set.
 
 * Tools which display symbols or strings (readelf, strings, nm, objdump)
