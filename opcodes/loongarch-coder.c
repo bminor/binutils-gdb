@@ -106,11 +106,13 @@ loongarch_decode_imm (const char *bit_field, insn_t insn, int si)
   else if (*bit_field_1 == '+')
     ret += atoi (bit_field_1 + 1);
 
+  /* Extend signed bit.  */
   if (si)
     {
-      ret <<= sizeof (ret) * 8 - len;
-      ret >>= sizeof (ret) * 8 - len;
+      uint32_t sign = 1u << (len - 1);
+      ret = (ret ^ sign) - sign;
     }
+
   return ret;
 }
 
@@ -133,7 +135,8 @@ loongarch_encode_imm (const char *bit_field, int32_t imm)
   else if (*t == '+')
     uimm -= atoi (t + 1);
 
-  uimm <<= sizeof (uimm) * 8 - width;
+  uimm = width ? (uimm << (sizeof (uimm) * 8 - width)) : 0;
+
   while (1)
     {
       b_start = strtol (bit_field_1, &bit_field_1, 10);
@@ -141,10 +144,10 @@ loongarch_encode_imm (const char *bit_field, int32_t imm)
 	break;
       width = strtol (bit_field_1 + 1, &bit_field_1, 10);
       i = uimm;
-      i >>= sizeof (i) * 8 - width;
-      i <<= b_start;
+      i = width ? (i >> (sizeof (i) * 8 - width)) : 0;
+      i = (b_start == 32) ? 0 : (i << b_start);
       ret |= i;
-      uimm <<= width;
+      uimm = (width == 32) ? 0 : (uimm << width);
 
       if (*bit_field_1 != '|')
 	break;
