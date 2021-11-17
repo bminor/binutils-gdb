@@ -197,6 +197,8 @@ aarch64_select_operand_for_sizeq_field_coding (const aarch64_opcode *opcode)
     significant_operand_index [get_data_pattern (opcode->qualifiers_list[0])];
 }
 
+/* Instruction bit-fields.
++   Keep synced with 'enum aarch64_field_kind'.  */
 const aarch64_field fields[] =
 {
     {  0,  0 },	/* NIL.  */
@@ -1835,6 +1837,14 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	    }
 	  break;
 
+	case AARCH64_OPND_SME_ADDR_RI_U4xVL:
+	  if (!value_in_range_p (opnd->addr.offset.imm, 0, 15))
+	    {
+	      set_offset_out_of_range_error (mismatch_detail, idx, 0, 15);
+	      return 0;
+	    }
+	  break;
+
 	case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
@@ -1932,6 +1942,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_ADDR_RR_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL2:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL4:
 	case AARCH64_OPND_SVE_ADDR_RX:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL2:
@@ -2750,21 +2761,51 @@ aarch64_match_operands_constraint (aarch64_inst *inst,
 
   DEBUG_TRACE ("enter");
 
-  /* Check for cases where a source register needs to be the same as the
-     destination register.  Do this before matching qualifiers since if
-     an instruction has both invalid tying and invalid qualifiers,
-     the error about qualifiers would suggest several alternative
-     instructions that also have invalid tying.  */
   i = inst->opcode->tied_operand;
-  if (i > 0 && (inst->operands[0].reg.regno != inst->operands[i].reg.regno))
+
+  if (i > 0)
     {
-      if (mismatch_detail)
-	{
-	  mismatch_detail->kind = AARCH64_OPDE_UNTIED_OPERAND;
-	  mismatch_detail->index = i;
-	  mismatch_detail->error = NULL;
-	}
-      return 0;
+      /* Check for tied_operands with specific opcode iclass.  */
+      switch (inst->opcode->iclass)
+        {
+        /* For SME LDR and STR instructions #imm must have the same numerical
+           value for both operands.
+        */
+        case sme_ldr:
+        case sme_str:
+          assert (inst->operands[0].type == AARCH64_OPND_SME_ZA_array);
+          assert (inst->operands[1].type == AARCH64_OPND_SME_ADDR_RI_U4xVL);
+          if (inst->operands[0].za_tile_vector.index.imm
+              != inst->operands[1].addr.offset.imm)
+            {
+              if (mismatch_detail)
+                {
+                  mismatch_detail->kind = AARCH64_OPDE_UNTIED_IMMS;
+                  mismatch_detail->index = i;
+                }
+              return 0;
+            }
+          break;
+
+        default:
+          /* Check for cases where a source register needs to be the same as the
+             destination register.  Do this before matching qualifiers since if
+             an instruction has both invalid tying and invalid qualifiers,
+             the error about qualifiers would suggest several alternative
+             instructions that also have invalid tying.  */
+          if (inst->operands[0].reg.regno
+              != inst->operands[i].reg.regno)
+            {
+              if (mismatch_detail)
+                {
+                  mismatch_detail->kind = AARCH64_OPDE_UNTIED_OPERAND;
+                  mismatch_detail->index = i;
+                  mismatch_detail->error = NULL;
+                }
+              return 0;
+            }
+          break;
+        }
     }
 
   /* Match operands' qualifier.
@@ -3403,16 +3444,25 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_SME_ZA_HV_idx_src:
     case AARCH64_OPND_SME_ZA_HV_idx_dest:
-      snprintf (buf, size, "za%d%c.%s[w%d, %d]",
+    case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
+      snprintf (buf, size, "%sza%d%c.%s[w%d, %d]%s",
+                opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "{" : "",
                 opnd->za_tile_vector.regno,
                 opnd->za_tile_vector.v == 1 ? 'v' : 'h',
                 aarch64_get_qualifier_name (opnd->qualifier),
                 opnd->za_tile_vector.index.regno,
-                opnd->za_tile_vector.index.imm);
+                opnd->za_tile_vector.index.imm,
+                opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "}" : "");
       break;
 
     case AARCH64_OPND_SME_list_of_64bit_tiles:
       print_sme_za_list (buf, size, opnd->reg.regno);
+      break;
+
+    case AARCH64_OPND_SME_ZA_array:
+      snprintf (buf, size, "za[w%d, %d]",
+                opnd->za_tile_vector.index.regno,
+                opnd->za_tile_vector.index.imm);
       break;
 
     case AARCH64_OPND_CRn:
@@ -3678,6 +3728,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_ADDR_RR_LSL1:
     case AARCH64_OPND_SVE_ADDR_RR_LSL2:
     case AARCH64_OPND_SVE_ADDR_RR_LSL3:
+    case AARCH64_OPND_SVE_ADDR_RR_LSL4:
     case AARCH64_OPND_SVE_ADDR_RX:
     case AARCH64_OPND_SVE_ADDR_RX_LSL1:
     case AARCH64_OPND_SVE_ADDR_RX_LSL2:
@@ -3718,6 +3769,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_ADDR_SIMM11:
     case AARCH64_OPND_ADDR_SIMM13:
     case AARCH64_OPND_ADDR_OFFSET:
+    case AARCH64_OPND_SME_ADDR_RI_U4xVL:
     case AARCH64_OPND_SVE_ADDR_RI_S4x16:
     case AARCH64_OPND_SVE_ADDR_RI_S4x32:
     case AARCH64_OPND_SVE_ADDR_RI_S4xVL:

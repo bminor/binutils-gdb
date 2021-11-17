@@ -337,7 +337,6 @@ enum aarch64_opnd
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
   AARCH64_OPND_BTI_TARGET,	/* BTI {<target>}.  */
-
   AARCH64_OPND_SVE_ADDR_RI_S4x16,   /* SVE [<Xn|SP>, #<simm4>*16].  */
   AARCH64_OPND_SVE_ADDR_RI_S4x32,   /* SVE [<Xn|SP>, #<simm4>*32].  */
   AARCH64_OPND_SVE_ADDR_RI_S4xVL,   /* SVE [<Xn|SP>, #<simm4>, MUL VL].  */
@@ -355,6 +354,7 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ADDR_RR_LSL1,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #1].  */
   AARCH64_OPND_SVE_ADDR_RR_LSL2,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #2].  */
   AARCH64_OPND_SVE_ADDR_RR_LSL3,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #3].  */
+  AARCH64_OPND_SVE_ADDR_RR_LSL4,    /* SVE [<Xn|SP>, <Xm|XZR>, LSL #4].  */
   AARCH64_OPND_SVE_ADDR_RX,	    /* SVE [<Xn|SP>, <Xm>].  */
   AARCH64_OPND_SVE_ADDR_RX_LSL1,    /* SVE [<Xn|SP>, <Xm>, LSL #1].  */
   AARCH64_OPND_SVE_ADDR_RX_LSL2,    /* SVE [<Xn|SP>, <Xm>, LSL #2].  */
@@ -451,6 +451,9 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ZA_HV_idx_dest,	/* SME destination ZA tile vector.  */
   AARCH64_OPND_SME_Pm,		/* SME scalable predicate register, bits [15:13].  */
   AARCH64_OPND_SME_list_of_64bit_tiles, /* SME list of ZA tiles.  */
+  AARCH64_OPND_SME_ZA_HV_idx_ldstr,	/* SME destination ZA tile vector.  */
+  AARCH64_OPND_SME_ZA_array,        /* SME ZA[<Wv>{, #<imm>}].  */
+  AARCH64_OPND_SME_ADDR_RI_U4xVL,   /* SME [<Xn|SP>{, #<imm>, MUL VL}].  */
   AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
 };
@@ -616,6 +619,8 @@ enum aarch64_insn_class
   pcreladdr,
   ic_system,
   sme_misc,
+  sme_ldr,
+  sme_str,
   sve_cpy,
   sve_index,
   sve_limm,
@@ -1215,6 +1220,10 @@ struct aarch64_inst
      No syntax error, but the operands are not a valid combination, e.g.
      FMOV D0,S0
 
+   AARCH64_OPDE_UNTIED_IMMS
+     The asm failed to use the same immediate for a destination operand
+     and a tied source operand.
+
    AARCH64_OPDE_UNTIED_OPERAND
      The asm failed to use the same register for a destination operand
      and a tied source operand.
@@ -1255,6 +1264,7 @@ enum aarch64_operand_error_kind
   AARCH64_OPDE_SYNTAX_ERROR,
   AARCH64_OPDE_FATAL_SYNTAX_ERROR,
   AARCH64_OPDE_INVALID_VARIANT,
+  AARCH64_OPDE_UNTIED_IMMS,
   AARCH64_OPDE_UNTIED_OPERAND,
   AARCH64_OPDE_OUT_OF_RANGE,
   AARCH64_OPDE_UNALIGNED,

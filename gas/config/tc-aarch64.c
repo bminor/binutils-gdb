@@ -4460,6 +4460,38 @@ parse_sme_za_hv_tiles_operand (char **str,
   return regno;
 }
 
+
+static int
+parse_sme_za_hv_tiles_operand_with_braces (char **str,
+                                           enum sme_hv_slice *slice_indicator,
+                                           int *vector_select_register,
+                                           int *imm,
+                                           aarch64_opnd_qualifier_t *qualifier)
+{
+  int regno;
+
+  if (!skip_past_char (str, '{'))
+    {
+      set_syntax_error (_("expected '{'"));
+      return PARSE_FAIL;
+    }
+
+  regno = parse_sme_za_hv_tiles_operand (str, slice_indicator,
+                                         vector_select_register, imm,
+                                         qualifier);
+
+  if (regno == PARSE_FAIL)
+    return PARSE_FAIL;
+
+  if (!skip_past_char (str, '}'))
+    {
+      set_syntax_error (_("expected '}'"));
+      return PARSE_FAIL;
+    }
+
+  return regno;
+}
+
 /* Parse list of up to eight 64-bit element tile names separated by commas in
    SME's ZERO instruction:
 
@@ -4555,6 +4587,45 @@ parse_sme_list_of_64bit_tiles (char **str)
   else
     regno = 0x00;
 
+  return regno;
+}
+
+/* Parse ZA array operand used in e.g. STR and LDR instruction.
+   Operand format:
+
+   ZA[<Wv>, <imm>]
+   ZA[<Wv>, #<imm>]
+
+   Function returns <Wv> or PARSE_FAIL.
+*/
+static int
+parse_sme_za_array (char **str, int *imm)
+{
+  char *p, *q;
+  int regno;
+  int64_t imm_value;
+
+  p = q = *str;
+  while (ISALPHA (*q))
+    q++;
+
+  if ((q - p != 2) || strncasecmp ("za", p, q - p) != 0)
+    {
+      set_syntax_error (_("expected ZA array"));
+      return PARSE_FAIL;
+    }
+
+  if (! parse_sme_za_hv_tiles_operand_index (&q, &regno, &imm_value))
+    return PARSE_FAIL;
+
+  if (imm_value < 0 || imm_value > 15)
+    {
+      set_syntax_error (_("offset out of range"));
+      return PARSE_FAIL;
+    }
+
+  *imm = imm_value;
+  *str = q;
   return regno;
 }
 
@@ -5364,9 +5435,15 @@ output_operand_error_record (const operand_error_record *record, char *str)
 	}
       break;
 
+    case AARCH64_OPDE_UNTIED_IMMS:
+      handler (_("operand %d must have the same immediate value "
+                 "as operand 1 -- `%s'"),
+               detail->index + 1, str);
+      break;
+
     case AARCH64_OPDE_UNTIED_OPERAND:
       handler (_("operand %d must be the same register as operand 1 -- `%s'"),
-	       detail->index + 1, str);
+               detail->index + 1, str);
       break;
 
     case AARCH64_OPDE_OUT_OF_RANGE:
@@ -6958,6 +7035,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_ADDR_RI_S4x16:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x32:
 	case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
+	case AARCH64_OPND_SME_ADDR_RI_U4xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x2xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x3xVL:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x4xVL:
@@ -7013,11 +7091,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      goto failure;
 	    }
 	  goto regoff_addr;
-	  
+
 	case AARCH64_OPND_SVE_ADDR_RR:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL2:
 	case AARCH64_OPND_SVE_ADDR_RR_LSL3:
+	case AARCH64_OPND_SVE_ADDR_RR_LSL4:
 	case AARCH64_OPND_SVE_ADDR_RX:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL1:
 	case AARCH64_OPND_SVE_ADDR_RX_LSL2:
@@ -7273,20 +7352,29 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_SME_ZA_HV_idx_src:
 	case AARCH64_OPND_SME_ZA_HV_idx_dest:
+	case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
 	  {
-	    enum sme_hv_slice vector_indicator;
+	    enum sme_hv_slice slice_indicator;
 	    int vector_select_register;
 	    int imm;
-	    val = parse_sme_za_hv_tiles_operand (&str, &vector_indicator,
-	                                         &vector_select_register,
-	                                         &imm,
-	                                         &qualifier);
+
+	    if (operands[i] == AARCH64_OPND_SME_ZA_HV_idx_ldstr)
+	      val = parse_sme_za_hv_tiles_operand_with_braces (&str,
+	                                                       &slice_indicator,
+	                                                       &vector_select_register,
+	                                                       &imm,
+	                                                       &qualifier);
+	    else
+	      val = parse_sme_za_hv_tiles_operand (&str, &slice_indicator,
+	                                           &vector_select_register,
+	                                           &imm,
+	                                           &qualifier);
 	    if (val == PARSE_FAIL)
 	      goto failure;
 	    info->za_tile_vector.regno = val;
 	    info->za_tile_vector.index.regno = vector_select_register;
 	    info->za_tile_vector.index.imm = imm;
-	    info->za_tile_vector.v = vector_indicator;
+	    info->za_tile_vector.v = slice_indicator;
 	    info->qualifier = qualifier;
 	    break;
 	  }
@@ -7297,6 +7385,17 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      goto failure;
 	    info->imm.value = val;
 	    break;
+
+	  case AARCH64_OPND_SME_ZA_array:
+	    {
+	      int imm;
+	      val = parse_sme_za_array (&str, &imm);
+	      if (val == PARSE_FAIL)
+	        goto failure;
+	      info->za_tile_vector.index.regno = val;
+	      info->za_tile_vector.index.imm = imm;
+	      break;
+	    }
 
 	default:
 	  as_fatal (_("unhandled operand code %d"), operands[i]);

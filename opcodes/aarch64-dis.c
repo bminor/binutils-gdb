@@ -1806,6 +1806,56 @@ aarch64_ext_sme_za_hv_tiles (const aarch64_operand *self,
   return true;
 }
 
+/* Decode in SME instruction ZERO list of up to eight 64-bit element tile names
+   separated by commas, encoded in the "imm8" field.
+
+   For programmer convenience an assembler must also accept the names of
+   32-bit, 16-bit and 8-bit element tiles which are converted into the
+   corresponding set of 64-bit element tiles.
+*/
+bool
+aarch64_ext_sme_za_list (const aarch64_operand *self,
+                         aarch64_opnd_info *info, aarch64_insn code,
+                         const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                         aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int mask = extract_field (self->fields[0], code, 0);
+  info->imm.value = mask;
+  return true;
+}
+
+/* Decode ZA array vector select register (Rv field), optional vector and
+   memory offset (imm4 field).
+*/
+bool
+aarch64_ext_sme_za_array (const aarch64_operand *self,
+                          aarch64_opnd_info *info, aarch64_insn code,
+                          const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                          aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int regno = extract_field (self->fields[0], code, 0) + 12;
+  int imm = extract_field (self->fields[1], code, 0);
+  info->za_tile_vector.index.regno = regno;
+  info->za_tile_vector.index.imm = imm;
+  return true;
+}
+
+bool
+aarch64_ext_sme_addr_ri_u4xvl (const aarch64_operand *self,
+                               aarch64_opnd_info *info, aarch64_insn code,
+                               const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                               aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int regno = extract_field (self->fields[0], code, 0);
+  int imm = extract_field (self->fields[1], code, 0);
+  info->addr.base_regno = regno;
+  info->addr.offset.imm = imm;
+  /* MUL VL operator is always present for this operand.  */
+  info->shifter.kind = AARCH64_MOD_MUL_VL;
+  info->shifter.operator_present = (imm != 0);
+  return true;
+}
+
 /* Decode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
    array specifies which field to use for Zn.  MM is encoded in the
    concatenation of imm5 and SVE_tszh, with imm5 being the less

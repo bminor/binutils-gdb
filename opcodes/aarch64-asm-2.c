@@ -640,7 +640,6 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 29:
     case 30:
     case 31:
-    case 166:
     case 167:
     case 168:
     case 169:
@@ -650,7 +649,7 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 173:
     case 174:
     case 175:
-    case 190:
+    case 176:
     case 191:
     case 192:
     case 193:
@@ -659,11 +658,12 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 196:
     case 197:
     case 198:
-    case 204:
-    case 207:
-    case 209:
+    case 199:
+    case 205:
+    case 208:
     case 210:
-    case 213:
+    case 211:
+    case 214:
       return aarch64_ins_regno (self, info, code, inst, errors);
     case 15:
       return aarch64_ins_reg_extended (self, info, code, inst, errors);
@@ -675,7 +675,7 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 33:
     case 34:
     case 35:
-    case 216:
+    case 220:
       return aarch64_ins_reglane (self, info, code, inst, errors);
     case 36:
       return aarch64_ins_reglist (self, info, code, inst, errors);
@@ -710,9 +710,8 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 82:
     case 83:
     case 84:
-    case 163:
-    case 165:
-    case 182:
+    case 164:
+    case 166:
     case 183:
     case 184:
     case 185:
@@ -720,8 +719,9 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 187:
     case 188:
     case 189:
-    case 214:
+    case 190:
     case 215:
+    case 219:
       return aarch64_ins_imm (self, info, code, inst, errors);
     case 44:
     case 45:
@@ -731,10 +731,10 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 48:
       return aarch64_ins_advsimd_imm_modified (self, info, code, inst, errors);
     case 52:
-    case 153:
+    case 154:
       return aarch64_ins_fpimm (self, info, code, inst, errors);
     case 70:
-    case 161:
+    case 162:
       return aarch64_ins_limm (self, info, code, inst, errors);
     case 71:
       return aarch64_ins_aimm (self, info, code, inst, errors);
@@ -744,11 +744,11 @@ aarch64_insert_operand (const aarch64_operand *self,
       return aarch64_ins_fbits (self, info, code, inst, errors);
     case 75:
     case 76:
-    case 158:
+    case 159:
       return aarch64_ins_imm_rotate2 (self, info, code, inst, errors);
     case 77:
-    case 157:
-    case 159:
+    case 158:
+    case 160:
       return aarch64_ins_imm_rotate1 (self, info, code, inst, errors);
     case 78:
     case 79:
@@ -824,8 +824,8 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 133:
     case 134:
     case 135:
-      return aarch64_ins_sve_addr_rr_lsl (self, info, code, inst, errors);
     case 136:
+      return aarch64_ins_sve_addr_rr_lsl (self, info, code, inst, errors);
     case 137:
     case 138:
     case 139:
@@ -833,56 +833,62 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 141:
     case 142:
     case 143:
-      return aarch64_ins_sve_addr_rz_xtw (self, info, code, inst, errors);
     case 144:
+      return aarch64_ins_sve_addr_rz_xtw (self, info, code, inst, errors);
     case 145:
     case 146:
     case 147:
-      return aarch64_ins_sve_addr_zi_u5 (self, info, code, inst, errors);
     case 148:
-      return aarch64_ins_sve_addr_zz_lsl (self, info, code, inst, errors);
+      return aarch64_ins_sve_addr_zi_u5 (self, info, code, inst, errors);
     case 149:
-      return aarch64_ins_sve_addr_zz_sxtw (self, info, code, inst, errors);
+      return aarch64_ins_sve_addr_zz_lsl (self, info, code, inst, errors);
     case 150:
-      return aarch64_ins_sve_addr_zz_uxtw (self, info, code, inst, errors);
+      return aarch64_ins_sve_addr_zz_sxtw (self, info, code, inst, errors);
     case 151:
-      return aarch64_ins_sve_aimm (self, info, code, inst, errors);
+      return aarch64_ins_sve_addr_zz_uxtw (self, info, code, inst, errors);
     case 152:
+      return aarch64_ins_sve_aimm (self, info, code, inst, errors);
+    case 153:
       return aarch64_ins_sve_asimm (self, info, code, inst, errors);
-    case 154:
-      return aarch64_ins_sve_float_half_one (self, info, code, inst, errors);
     case 155:
-      return aarch64_ins_sve_float_half_two (self, info, code, inst, errors);
+      return aarch64_ins_sve_float_half_one (self, info, code, inst, errors);
     case 156:
+      return aarch64_ins_sve_float_half_two (self, info, code, inst, errors);
+    case 157:
       return aarch64_ins_sve_float_zero_one (self, info, code, inst, errors);
-    case 160:
+    case 161:
       return aarch64_ins_inv_limm (self, info, code, inst, errors);
-    case 162:
+    case 163:
       return aarch64_ins_sve_limm_mov (self, info, code, inst, errors);
-    case 164:
+    case 165:
       return aarch64_ins_sve_scale (self, info, code, inst, errors);
-    case 176:
     case 177:
     case 178:
-      return aarch64_ins_sve_shlimm (self, info, code, inst, errors);
     case 179:
+      return aarch64_ins_sve_shlimm (self, info, code, inst, errors);
     case 180:
     case 181:
+    case 182:
       return aarch64_ins_sve_shrimm (self, info, code, inst, errors);
-    case 199:
     case 200:
     case 201:
     case 202:
     case 203:
+    case 204:
       return aarch64_ins_sve_quad_index (self, info, code, inst, errors);
-    case 205:
-      return aarch64_ins_sve_index (self, info, code, inst, errors);
     case 206:
-    case 208:
+      return aarch64_ins_sve_index (self, info, code, inst, errors);
+    case 207:
+    case 209:
       return aarch64_ins_sve_reglist (self, info, code, inst, errors);
-    case 211:
     case 212:
+    case 213:
+    case 216:
       return aarch64_ins_sme_za_hv_tiles (self, info, code, inst, errors);
+    case 217:
+      return aarch64_ins_sme_za_array (self, info, code, inst, errors);
+    case 218:
+      return aarch64_ins_sme_addr_ri_u4xvl (self, info, code, inst, errors);
     default: assert (0); abort ();
     }
 }

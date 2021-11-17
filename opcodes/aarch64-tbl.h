@@ -1557,6 +1557,10 @@
 {                                                       \
   QLF3(S_D,NIL,NIL),                                    \
 }
+#define OP_SVE_QUU                                      \
+{                                                       \
+  QLF3(S_Q,NIL,NIL),                                    \
+}
 #define OP_SVE_DUV_BHS                                  \
 {                                                       \
   QLF3(S_D,NIL,S_B),                                    \
@@ -1577,6 +1581,10 @@
 #define OP_SVE_DZU                                      \
 {                                                       \
   QLF3(S_D,P_Z,NIL),                                    \
+}
+#define OP_SVE_QZU                                      \
+{                                                       \
+  QLF3(S_Q,P_Z,NIL),                                    \
 }
 #define OP_SVE_HB                                       \
 {                                                       \
@@ -5138,6 +5146,33 @@ const struct aarch64_opcode aarch64_opcode_table[] =
 
   SME_INSN ("zero", 0xc0080000, 0xffffff00, sme_misc, 0, OP1 (SME_list_of_64bit_tiles), {}, 0, 0),
 
+  SME_INSN ("ld1b", 0xe0000000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR), OP_SVE_BZU, 0, 0),
+  SME_INSN ("ld1h", 0xe0400000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR_LSL1), OP_SVE_HZU, 0, 0),
+  SME_INSN ("ld1w", 0xe0800000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR_LSL2), OP_SVE_SZU, 0, 0),
+  SME_INSN ("ld1d", 0xe0c00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR_LSL3), OP_SVE_DZU, 0, 0),
+  SME_INSN ("ld1q", 0xe1c00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QZU, 0, 0),
+
+  SME_INSN ("ld1b", 0xe0000000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_BZU, 0, 0),
+  SME_INSN ("ld1h", 0xe0400000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_HZU, 0, 0),
+  SME_INSN ("ld1w", 0xe0800000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_SZU, 0, 0),
+  SME_INSN ("ld1d", 0xe0c00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_DZU, 0, 0),
+  SME_INSN ("ld1q", 0xe1c00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_QZU, 0, 0),
+
+  SME_INSN ("st1b", 0xe0200000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR), OP_SVE_BUU, 0, 0),
+  SME_INSN ("st1h", 0xe0600000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR_LSL1), OP_SVE_HUU, 0, 0),
+  SME_INSN ("st1w", 0xe0a00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR_LSL2), OP_SVE_SUU, 0, 0),
+  SME_INSN ("st1d", 0xe0e00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR_LSL3), OP_SVE_DUU, 0, 0),
+  SME_INSN ("st1q", 0xe1e00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_RR_LSL4), OP_SVE_QUU, 0, 0),
+
+  SME_INSN ("st1b", 0xe0200000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_BUU, 0, 0),
+  SME_INSN ("st1h", 0xe0600000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_HUU, 0, 0),
+  SME_INSN ("st1w", 0xe0a00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_SUU, 0, 0),
+  SME_INSN ("st1d", 0xe0e00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_DUU, 0, 0),
+  SME_INSN ("st1q", 0xe1e00000, 0xffe00010, sve_misc, 0, OP3 (SME_ZA_HV_idx_ldstr, SVE_Pg3, SVE_ADDR_R), OP_SVE_QUU, 0, 0),
+
+  SME_INSN ("ldr", 0xe1000000, 0xffff9c10, sme_ldr, 0, OP2 (SME_ZA_array, SME_ADDR_RI_U4xVL), {}, 0, 1),
+  SME_INSN ("str", 0xe1200000, 0xffff9c10, sme_str, 0, OP2 (SME_ZA_array, SME_ADDR_RI_U4xVL), {}, 0, 1),
+
   /* SIMD Dot Product (optional in v8.2-A).  */
   DOT_INSN ("udot", 0x2e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
   DOT_INSN ("sdot", 0xe009400,  0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
@@ -5512,6 +5547,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_Rn,FLD_Rm), "an address with a scalar register offset")	\
     Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RR_LSL3", 3 << OPD_F_OD_LSB,	\
       F(FLD_Rn,FLD_Rm), "an address with a scalar register offset")	\
+    Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RR_LSL4", 4 << OPD_F_OD_LSB,	\
+      F(FLD_Rn,FLD_Rm), "an address with a scalar register offset")	\
     Y(ADDRESS, sve_addr_rr_lsl, "SVE_ADDR_RX",				\
       (0 << OPD_F_OD_LSB) | OPD_F_NO_ZR, F(FLD_Rn,FLD_Rm),		\
       "an address with a scalar register offset")			\
@@ -5719,6 +5756,15 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an SVE predicate register")					\
     Y(SVE_REG, imm, "SME_list_of_64bit_tiles", 0,	\
       F(FLD_SME_zero_mask), "list of 64-bit ZA element tiles")					\
+    Y(SVE_REG, sme_za_hv_tiles, "SME_ZA_HV_idx_ldstr", 0,				\
+      F(FLD_SME_size_10,FLD_index2,FLD_SME_V,FLD_SME_Rv,FLD_imm4_2),	\
+      "an SME horizontal or vertical vector access register")	\
+    Y(SVE_REG, sme_za_array, "SME_ZA_array", 0,				\
+      F(FLD_SME_Rv,FLD_imm4_2),	\
+      "ZA array")	\
+    Y(ADDRESS, sme_addr_ri_u4xvl, "SME_ADDR_RI_U4xVL", 0 << OPD_F_OD_LSB, \
+      F(FLD_Rn,FLD_imm4_2),					\
+      "memory offset")	\
     Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16),			\
       "a 16-bit unsigned immediate for TME tcancel")			\
     Y(SIMD_ELEMENT, reglane, "SM3_IMM2", 0, F(FLD_SM3_imm2),		\

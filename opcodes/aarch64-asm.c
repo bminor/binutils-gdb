@@ -1380,6 +1380,53 @@ aarch64_ins_sme_za_hv_tiles (const aarch64_operand *self,
   return true;
 }
 
+/* Encode in SME instruction ZERO list of up to eight 64-bit element tile names
+   separated by commas, encoded in the "imm8" field.
+
+   For programmer convenience an assembler must also accept the names of
+   32-bit, 16-bit and 8-bit element tiles which are converted into the
+   corresponding set of 64-bit element tiles.
+*/
+bool
+aarch64_ins_sme_za_list (const aarch64_operand *self,
+                         const aarch64_opnd_info *info,
+                         aarch64_insn *code,
+                         const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                         aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int fld_mask = info->imm.value;
+  insert_field (self->fields[0], code, fld_mask, 0);
+  return true;
+}
+
+bool
+aarch64_ins_sme_za_array (const aarch64_operand *self,
+                          const aarch64_opnd_info *info,
+                          aarch64_insn *code,
+                          const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                          aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int regno = info->za_tile_vector.index.regno - 12;
+  int imm = info->za_tile_vector.index.imm;
+  insert_field (self->fields[0], code, regno, 0);
+  insert_field (self->fields[1], code, imm, 0);
+  return true;
+}
+
+bool
+aarch64_ins_sme_addr_ri_u4xvl (const aarch64_operand *self,
+                               const aarch64_opnd_info *info,
+                               aarch64_insn *code,
+                               const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                               aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int regno = info->addr.base_regno;
+  int imm = info->addr.offset.imm;
+  insert_field (self->fields[0], code, regno, 0);
+  insert_field (self->fields[1], code, imm, 0);
+  return true;
+}
+
 /* Miscellaneous encoding functions.  */
 
 /* Encode size[0], i.e. bit 22, for
