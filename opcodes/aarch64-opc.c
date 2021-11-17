@@ -4826,7 +4826,17 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("gpccr_el3",     CPENC (3,6,C2,C1,6), 0),
   SR_CORE ("gptbr_el3",     CPENC (3,6,C2,C1,4), 0),
 
-  SR_SME ("svcr",           CPENC (3,3,C4,C2,2), 0),
+  SR_SME ("svcr",             CPENC (3,3,C4,C2,2),  0),
+  SR_SME ("id_aa64smfr0_el1", CPENC (3,0,C0,C4,5),  F_REG_READ),
+  SR_SME ("smcr_el1",         CPENC (3,0,C1,C2,6),  0),
+  SR_SME ("smcr_el12",        CPENC (3,5,C1,C2,6),  0),
+  SR_SME ("smcr_el2",         CPENC (3,4,C1,C2,6),  0),
+  SR_SME ("smcr_el3",         CPENC (3,6,C1,C2,6),  0),
+  SR_SME ("smpri_el1",        CPENC (3,0,C1,C2,4),  0),
+  SR_SME ("smprimap_el2",     CPENC (3,4,C1,C2,5),  0),
+  SR_SME ("smidr_el1",        CPENC (3,1,C0,C0,6),  F_REG_READ),
+  SR_SME ("tpidr2_el0",       CPENC (3,3,C13,C0,5), 0),
+  SR_SME ("mpamsm_el1",       CPENC (3,0,C10,C5,3), 0),
 
   { 0, CPENC (0,0,0,0,0), 0, 0 }
 };
