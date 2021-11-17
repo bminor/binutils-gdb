@@ -285,3 +285,12 @@
 
 	# Scalar crypto
 	csr seed		# 0x015, Entropy Source
+
+	# Vector
+	csr vstart
+	csr vxsat
+	csr vxrm
+	csr vcsr
+	csr vl
+	csr vtype
+	csr vlenb

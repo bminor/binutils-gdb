@@ -61,10 +61,11 @@ enum riscv_csr_class
   CSR_CLASS_NONE,
 
   CSR_CLASS_I,
-  CSR_CLASS_I_32, /* rv32 only */
-  CSR_CLASS_F, /* f-ext only */
-  CSR_CLASS_ZKR, /* zkr only */
-  CSR_CLASS_DEBUG /* debug CSR */
+  CSR_CLASS_I_32,	/* rv32 only */
+  CSR_CLASS_F,		/* f-ext only */
+  CSR_CLASS_ZKR,	/* zkr only */
+  CSR_CLASS_V,		/* rvv only */
+  CSR_CLASS_DEBUG	/* debug CSR */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -773,6 +774,8 @@ enum reg_class
 {
   RCLASS_GPR,
   RCLASS_FPR,
+  RCLASS_VECR,
+  RCLASS_VECM,
   RCLASS_MAX,
 
   RCLASS_CSR
@@ -878,6 +881,10 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_ZKR:
       result = riscv_subset_supports (&riscv_rps_as, "zkr");
+      need_check_version = false;
+      break;
+    case CSR_CLASS_V:
+      result = riscv_subset_supports (&riscv_rps_as, "v");
       need_check_version = false;
       break;
     case CSR_CLASS_DEBUG:
@@ -1068,14 +1075,38 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	    case 'F': /* Compressed funct for .insn directive.  */
 	      switch (*++oparg)
 		{
-		  case '6': USE_BITS (OP_MASK_CFUNCT6, OP_SH_CFUNCT6); break;
-		  case '4': USE_BITS (OP_MASK_CFUNCT4, OP_SH_CFUNCT4); break;
-		  case '3': USE_BITS (OP_MASK_CFUNCT3, OP_SH_CFUNCT3); break;
-		  case '2': USE_BITS (OP_MASK_CFUNCT2, OP_SH_CFUNCT2); break;
-		  default:
-		    goto unknown_validate_operand;
+		case '6': USE_BITS (OP_MASK_CFUNCT6, OP_SH_CFUNCT6); break;
+		case '4': USE_BITS (OP_MASK_CFUNCT4, OP_SH_CFUNCT4); break;
+		case '3': USE_BITS (OP_MASK_CFUNCT3, OP_SH_CFUNCT3); break;
+		case '2': USE_BITS (OP_MASK_CFUNCT2, OP_SH_CFUNCT2); break;
+		default:
+		  goto unknown_validate_operand;
 		}
 	      break;
+	    default:
+	      goto unknown_validate_operand;
+	    }
+	  break;
+	case 'V': /* RVV */
+	  switch (*++oparg)
+	    {
+	    case 'd':
+	    case 'f': USE_BITS (OP_MASK_VD, OP_SH_VD); break;
+	    case 'e': USE_BITS (OP_MASK_VWD, OP_SH_VWD); break;
+	    case 's': USE_BITS (OP_MASK_VS1, OP_SH_VS1); break;
+	    case 't': USE_BITS (OP_MASK_VS2, OP_SH_VS2); break;
+	    case 'u': USE_BITS (OP_MASK_VS1, OP_SH_VS1);
+		      USE_BITS (OP_MASK_VS2, OP_SH_VS2); break;
+	    case 'v': USE_BITS (OP_MASK_VD, OP_SH_VD);
+		      USE_BITS (OP_MASK_VS1, OP_SH_VS1);
+		      USE_BITS (OP_MASK_VS2, OP_SH_VS2); break;
+	    case '0': break;
+	    case 'b': used_bits |= ENCODE_RVV_VB_IMM (-1U); break;
+	    case 'c': used_bits |= ENCODE_RVV_VC_IMM (-1U); break;
+	    case 'i':
+	    case 'j':
+	    case 'k': USE_BITS (OP_MASK_VIMM, OP_SH_VIMM); break;
+	    case 'm': USE_BITS (OP_MASK_VMASK, OP_SH_VMASK); break;
 	    default:
 	      goto unknown_validate_operand;
 	    }
@@ -1221,6 +1252,8 @@ md_begin (void)
   hash_reg_names (RCLASS_GPR, riscv_gpr_names_abi, NGPR);
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_numeric, NFPR);
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_abi, NFPR);
+  hash_reg_names (RCLASS_VECR, riscv_vecr_names_numeric, NVECR);
+  hash_reg_names (RCLASS_VECM, riscv_vecm_names_numeric, NVECM);
   /* Add "fp" as an alias for "s0".  */
   hash_reg_name (RCLASS_GPR, "fp", 8);
 
@@ -1360,6 +1393,39 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
       fmtStart = fmt;
       switch (*fmt)
 	{
+	case 'V': /* RVV */
+	  switch (*++fmt)
+	    {
+	    case 'd':
+	      INSERT_OPERAND (VD, insn, va_arg (args, int));
+	      continue;
+	    case 's':
+	      INSERT_OPERAND (VS1, insn, va_arg (args, int));
+	      continue;
+	    case 't':
+	      INSERT_OPERAND (VS2, insn, va_arg (args, int));
+	      continue;
+	    case 'm':
+	      {
+		int reg = va_arg (args, int);
+		if (reg == -1)
+		  {
+		    INSERT_OPERAND (VMASK, insn, 1);
+		    continue;
+		  }
+		else if (reg == 0)
+		  {
+		    INSERT_OPERAND (VMASK, insn, 0);
+		    continue;
+		  }
+		else
+		  goto unknown_macro_argument;
+	      }
+	    default:
+	      goto unknown_macro_argument;
+	    }
+	  break;
+
 	case 'd':
 	  INSERT_OPERAND (RD, insn, va_arg (args, int));
 	  continue;
@@ -1382,6 +1448,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	case ',':
 	  continue;
 	default:
+	unknown_macro_argument:
 	  as_fatal (_("internal: invalid macro argument `%s'"), fmtStart);
 	}
       break;
@@ -1570,6 +1637,95 @@ riscv_ext (int destreg, int srcreg, unsigned shift, bool sign)
     }
 }
 
+/* Expand RISC-V Vector macros into one or more instructions.  */
+
+static void
+vector_macro (struct riscv_cl_insn *ip)
+{
+  int vd = (ip->insn_opcode >> OP_SH_VD) & OP_MASK_VD;
+  int vs1 = (ip->insn_opcode >> OP_SH_VS1) & OP_MASK_VS1;
+  int vs2 = (ip->insn_opcode >> OP_SH_VS2) & OP_MASK_VS2;
+  int vm = (ip->insn_opcode >> OP_SH_VMASK) & OP_MASK_VMASK;
+  int vtemp = (ip->insn_opcode >> OP_SH_VFUNCT6) & OP_MASK_VFUNCT6;
+  int mask = ip->insn_mo->mask;
+
+  switch (mask)
+    {
+    case M_VMSGE:
+      if (vm)
+	{
+	  /* Unmasked.  */
+	  macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vd, vs2, vs1, -1);
+	  macro_build (NULL, "vmnand.mm", "Vd,Vt,Vs", vd, vd, vd);
+	  break;
+	}
+      if (vtemp != 0)
+	{
+	  /* Masked.  Have vtemp to avoid overlap constraints.  */
+	  if (vd == vm)
+	    {
+	      macro_build (NULL, "vmslt.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vm, vtemp);
+	    }
+	  else
+	    {
+	      /* Preserve the value of vd if not updating by vm.  */
+	      macro_build (NULL, "vmslt.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vtemp, vm, vtemp);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vd, vm);
+	      macro_build (NULL, "vmor.mm", "Vd,Vt,Vs", vd, vtemp, vd);
+	    }
+	}
+      else if (vd != vm)
+	{
+	  /* Masked.  This may cause the vd overlaps vs2, when LMUL > 1.  */
+	  macro_build (NULL, "vmslt.vx", "Vd,Vt,sVm", vd, vs2, vs1, vm);
+	  macro_build (NULL, "vmxor.mm", "Vd,Vt,Vs", vd, vd, vm);
+	}
+      else
+	as_bad (_("must provide temp if destination overlaps mask"));
+      break;
+
+    case M_VMSGEU:
+      if (vm)
+	{
+	  /* Unmasked.  */
+	  macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vd, vs2, vs1, -1);
+	  macro_build (NULL, "vmnand.mm", "Vd,Vt,Vs", vd, vd, vd);
+	  break;
+	}
+      if (vtemp != 0)
+	{
+	  /* Masked.  Have vtemp to avoid overlap constraints.  */
+	  if (vd == vm)
+	    {
+	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vm, vtemp);
+	    }
+	  else
+	    {
+	      /* Preserve the value of vd if not updating by vm.  */
+	      macro_build (NULL, "vmsltu.vx", "Vd,Vt,s", vtemp, vs2, vs1);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vtemp, vm, vtemp);
+	      macro_build (NULL, "vmandnot.mm", "Vd,Vt,Vs", vd, vd, vm);
+	      macro_build (NULL, "vmor.mm", "Vd,Vt,Vs", vd, vtemp, vd);
+	    }
+	}
+      else if (vd != vm)
+	{
+	  /* Masked.  This may cause the vd overlaps vs2, when LMUL > 1.  */
+	  macro_build (NULL, "vmsltu.vx", "Vd,Vt,sVm", vd, vs2, vs1, vm);
+	  macro_build (NULL, "vmxor.mm", "Vd,Vt,Vs", vd, vd, vm);
+	}
+      else
+	as_bad (_("must provide temp if destination overlaps mask"));
+      break;
+
+    default:
+      break;
+    }
+}
+
 /* Expand RISC-V assembly macros into one or more instructions.  */
 
 static void
@@ -1706,6 +1862,11 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
 
     case M_SEXTH:
       riscv_ext (rd, rs1, xlen - 16, true);
+      break;
+
+    case M_VMSGE:
+    case M_VMSGEU:
+      vector_macro (ip);
       break;
 
     default:
@@ -1879,6 +2040,66 @@ my_getOpcodeExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
   return my_getSmallExpression (ep, reloc, str, percent_op);
 }
 
+/* Parse string STR as a vsetvli operand.  Store the expression in *EP.
+   On exit, EXPR_END points to the first character after the expression.  */
+
+static void
+my_getVsetvliExpression (expressionS *ep, char *str)
+{
+  unsigned int vsew_value = 0, vlmul_value = 0;
+  unsigned int vta_value = 0, vma_value = 0;
+  bfd_boolean vsew_found = FALSE, vlmul_found = FALSE;
+  bfd_boolean vta_found = FALSE, vma_found = FALSE;
+
+  if (arg_lookup (&str, riscv_vsew, ARRAY_SIZE (riscv_vsew), &vsew_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vsew_found)
+	as_bad (_("multiple vsew constants"));
+      vsew_found = TRUE;
+    }
+  if (arg_lookup (&str, riscv_vlmul, ARRAY_SIZE (riscv_vlmul), &vlmul_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vlmul_found)
+	as_bad (_("multiple vlmul constants"));
+      vlmul_found = TRUE;
+    }
+  if (arg_lookup (&str, riscv_vta, ARRAY_SIZE (riscv_vta), &vta_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vta_found)
+	as_bad (_("multiple vta constants"));
+      vta_found = TRUE;
+    }
+  if (arg_lookup (&str, riscv_vma, ARRAY_SIZE (riscv_vma), &vma_value))
+    {
+      if (*str == ',')
+	++str;
+      if (vma_found)
+	as_bad (_("multiple vma constants"));
+      vma_found = TRUE;
+    }
+
+  if (vsew_found || vlmul_found || vta_found || vma_found)
+    {
+      ep->X_op = O_constant;
+      ep->X_add_number = (vlmul_value << OP_SH_VLMUL)
+			 | (vsew_value << OP_SH_VSEW)
+			 | (vta_value << OP_SH_VTA)
+			 | (vma_value << OP_SH_VMA);
+      expr_end = str;
+    }
+  else
+    {
+      my_getExpression (ep, str);
+      str = expr_end;
+    }
+}
+
 /* Detect and handle implicitly zero load-store offsets.  For example,
    "lw t0, (t1)" is shorthand for "lw t0, 0(t1)".  Return true if such
    an implicit offset was detected.  */
@@ -2014,6 +2235,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
       if (!riscv_multi_subset_supports (&riscv_rps_as, insn->insn_class))
 	continue;
 
+      /* Reset error message of the previous round.  */
+      error = _("illegal operands");
       create_insn (ip, insn);
       argnum = 1;
 
@@ -2055,6 +2278,16 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			*(asargStart - 1) = save_c;
 		      as_warn (_("read-only CSR is written `%s'"), str);
 		      insn_with_csr = false;
+		    }
+
+		  /* The (segmant) load and store with EEW 64 cannot be used
+		     when zve32x is enabled.  */
+		  if (ip->insn_mo->pinfo & INSN_V_EEW64
+		      && riscv_subset_supports (&riscv_rps_as, "zve32x")
+		      && !riscv_subset_supports (&riscv_rps_as, "zve64x"))
+		    {
+		      error = _("illegal opcode for zve32x");
+		      break;
 		    }
 		}
 	      if (*asarg != '\0')
@@ -2350,6 +2583,172 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			goto unknown_riscv_ip_operand;
 		    }
 		  break;
+
+		default:
+		  goto unknown_riscv_ip_operand;
+		}
+	      break;
+
+	    case 'V': /* RVV */
+	      switch (*++oparg)
+		{
+		case 'd': /* VD */
+		  if (!reg_lookup (&asarg, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VD, *ip, regno);
+		  continue;
+
+		case 'e': /* AMO VD */
+		  if (reg_lookup (&asarg, RCLASS_GPR, &regno) && regno == 0)
+		    INSERT_OPERAND (VWD, *ip, 0);
+		  else if (reg_lookup (&asarg, RCLASS_VECR, &regno))
+		    {
+		      INSERT_OPERAND (VWD, *ip, 1);
+		      INSERT_OPERAND (VD, *ip, regno);
+		    }
+		  else
+		    break;
+		  continue;
+
+		case 'f': /* AMO VS3 */
+		  if (!reg_lookup (&asarg, RCLASS_VECR, &regno))
+		    break;
+		  if (!EXTRACT_OPERAND (VWD, ip->insn_opcode))
+		    INSERT_OPERAND (VD, *ip, regno);
+		  else
+		    {
+		      /* VS3 must match VD.  */
+		      if (EXTRACT_OPERAND (VD, ip->insn_opcode) != regno)
+			break;
+		    }
+		  continue;
+
+		case 's': /* VS1 */
+		  if (!reg_lookup (&asarg, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VS1, *ip, regno);
+		  continue;
+
+		case 't': /* VS2 */
+		  if (!reg_lookup (&asarg, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VS2, *ip, regno);
+		  continue;
+
+		case 'u': /* VS1 == VS2 */
+		  if (!reg_lookup (&asarg, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VS1, *ip, regno);
+		  INSERT_OPERAND (VS2, *ip, regno);
+		  continue;
+
+		case 'v': /* VD == VS1 == VS2 */
+		  if (!reg_lookup (&asarg, RCLASS_VECR, &regno))
+		    break;
+		  INSERT_OPERAND (VD, *ip, regno);
+		  INSERT_OPERAND (VS1, *ip, regno);
+		  INSERT_OPERAND (VS2, *ip, regno);
+		  continue;
+
+		/* The `V0` is carry-in register for v[m]adc and v[m]sbc,
+		   and is used to choose vs1/rs1/frs1/imm or vs2 for
+		   v[f]merge.  It use the same encoding as the vector mask
+		   register.  */
+		case '0':
+		  if (reg_lookup (&asarg, RCLASS_VECR, &regno) && regno == 0)
+		    continue;
+		  break;
+
+		case 'b': /* vtypei for vsetivli */
+		  my_getVsetvliExpression (imm_expr, asarg);
+		  check_absolute_expr (ip, imm_expr, FALSE);
+		  if (!VALID_RVV_VB_IMM (imm_expr->X_add_number))
+		    as_bad (_("bad value for vsetivli immediate field, "
+			      "value must be 0..1023"));
+		  ip->insn_opcode
+		    |= ENCODE_RVV_VB_IMM (imm_expr->X_add_number);
+		  imm_expr->X_op = O_absent;
+		  asarg = expr_end;
+		  continue;
+
+		case 'c': /* vtypei for vsetvli */
+		  my_getVsetvliExpression (imm_expr, asarg);
+		  check_absolute_expr (ip, imm_expr, FALSE);
+		  if (!VALID_RVV_VC_IMM (imm_expr->X_add_number))
+		    as_bad (_("bad value for vsetvli immediate field, "
+			      "value must be 0..2047"));
+		  ip->insn_opcode
+		    |= ENCODE_RVV_VC_IMM (imm_expr->X_add_number);
+		  imm_expr->X_op = O_absent;
+		  asarg = expr_end;
+		  continue;
+
+		case 'i': /* vector arith signed immediate */
+		  my_getExpression (imm_expr, asarg);
+		  check_absolute_expr (ip, imm_expr, FALSE);
+		  if (imm_expr->X_add_number > 15
+		      || imm_expr->X_add_number < -16)
+		    as_bad (_("bad value for vector immediate field, "
+			      "value must be -16...15"));
+		  INSERT_OPERAND (VIMM, *ip, imm_expr->X_add_number);
+		  imm_expr->X_op = O_absent;
+		  asarg = expr_end;
+		  continue;
+
+		case 'j': /* vector arith unsigned immediate */
+		  my_getExpression (imm_expr, asarg);
+		  check_absolute_expr (ip, imm_expr, FALSE);
+		  if (imm_expr->X_add_number < 0
+		      || imm_expr->X_add_number >= 32)
+		    as_bad (_("bad value for vector immediate field, "
+			      "value must be 0...31"));
+		  INSERT_OPERAND (VIMM, *ip, imm_expr->X_add_number);
+		  imm_expr->X_op = O_absent;
+		  asarg = expr_end;
+		  continue;
+
+		case 'k': /* vector arith signed immediate, minus 1 */
+		  my_getExpression (imm_expr, asarg);
+		  check_absolute_expr (ip, imm_expr, FALSE);
+		  if (imm_expr->X_add_number > 16
+		      || imm_expr->X_add_number < -15)
+		    as_bad (_("bad value for vector immediate field, "
+			      "value must be -15...16"));
+		  INSERT_OPERAND (VIMM, *ip, imm_expr->X_add_number - 1);
+		  imm_expr->X_op = O_absent;
+		  asarg = expr_end;
+		  continue;
+
+		case 'm': /* optional vector mask */
+		  if (*asarg == '\0')
+		    {
+		      INSERT_OPERAND (VMASK, *ip, 1);
+		      continue;
+		    }
+		  else if (*asarg == ',' && asarg++
+			   && reg_lookup (&asarg, RCLASS_VECM, &regno)
+			   && regno == 0)
+		    {
+		      INSERT_OPERAND (VMASK, *ip, 0);
+		      continue;
+		    }
+		  break;
+
+		case 'M': /* required vector mask */
+		  if (reg_lookup (&asarg, RCLASS_VECM, &regno) && regno == 0)
+		    {
+		      INSERT_OPERAND (VMASK, *ip, 0);
+		      continue;
+		    }
+		  break;
+
+		case 'T': /* vector macro temporary register */
+		  if (!reg_lookup (&asarg, RCLASS_VECR, &regno) || regno == 0)
+		    break;
+		  /* Store it in the FUNCT6 field as we don't have anyplace
+		     else to store it.  */
+		  INSERT_OPERAND (VFUNCT6, *ip, regno);
+		  continue;
 
 		default:
 		  goto unknown_riscv_ip_operand;
@@ -2752,7 +3151,6 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	  break;
 	}
       asarg = asargStart;
-      error = _("illegal operands");
       insn_with_csr = false;
     }
 
