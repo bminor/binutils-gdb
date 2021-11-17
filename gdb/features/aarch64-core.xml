@@ -61,6 +61,9 @@
     <!-- Debug exception mask.  -->
     <field name="D" start="9" end="9"/>
 
+    <!-- ARMv8.5-A: Branch Target Identification BTYPE.  -->
+    <field name="BTYPE" start="10" end="11"/>
+
     <!-- ARMv8.0-A: Speculative Store Bypass.  -->
     <field name="SSBS" start="12" end="12"/>
 
