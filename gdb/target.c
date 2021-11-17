@@ -409,7 +409,9 @@ target_can_async_p (struct target_ops *target)
 bool
 target_is_async_p ()
 {
-  return current_inferior ()->top_target ()->is_async_p ();
+  bool result = current_inferior ()->top_target ()->is_async_p ();
+  gdb_assert (target_async_permitted || !result);
+  return result;
 }
 
 exec_direction_kind
@@ -4338,6 +4340,9 @@ maintenance_print_target_stack (const char *cmd, int from_tty)
 void
 target_async (int enable)
 {
+  /* If we are trying to enable async mode then it must be the case that
+     async mode is possible for this target.  */
+  gdb_assert (!enable || target_can_async_p ());
   infrun_async (enable);
   current_inferior ()->top_target ()->async (enable);
 }
