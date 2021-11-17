@@ -827,6 +827,9 @@ This second form of the @code{gdb.Value} constructor returns a
 from the Python buffer object specified by @var{val}.  The number of
 bytes in the Python buffer object must be greater than or equal to the
 size of @var{type}.
+
+If @var{type} is @code{None} then this version of @code{__init__}
+behaves as though @var{type} was not passed at all.
 @end defun
 
 @defun Value.cast (type)

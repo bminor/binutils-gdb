@@ -51,6 +51,7 @@ proc test_value_creation {} {
 
   gdb_py_test_silent_cmd "python i = gdb.Value (True)" "create boolean value" 1
   gdb_py_test_silent_cmd "python i = gdb.Value (5)" "create integer value" 1
+  gdb_py_test_silent_cmd "python i = gdb.Value (3,None)" "create integer value, with None type" 1
   if { $gdb_py_is_py3k == 0 } {
     gdb_py_test_silent_cmd "python i = gdb.Value (5L)" "create long value" 1
   }
@@ -75,6 +76,18 @@ proc test_value_creation {} {
 
   # Test address attribute is None in a non-addressable value
   gdb_test "python print ('result = %s' % i.address)" "= None" "test address attribute in non-addressable value"
+}
+
+# Check that we can call gdb.Value.__init__ to change a value.
+proc test_value_reinit {} {
+    gdb_py_test_silent_cmd "python v = gdb.Value (3)" \
+	"create initial integer value" 1
+    gdb_test "python print(v)" "3" \
+	"check initial value contents"
+    gdb_py_test_silent_cmd "python v.__init__(5)" \
+	"call gdb.Value.__init__ manually" 1
+    gdb_test "python print(v)" "5" \
+	"check new value contents"
 }
 
 proc test_value_numeric_ops {} {
@@ -531,10 +544,14 @@ proc test_float_conversion {} {
     gdb_test "python print(float(gdb.Value(0)))" "0\\.0"
 }
 
-proc test_value_from_buffer {} {
-  global gdb_prompt
-  global gdb_py_is_py3k
-
+# Setup some Python variables:
+#   tp      : a gdb.Type for 'int',
+#   size_a  : the size of array 'a' from the inferior,
+#   size_a0 : the size of array element 'a[0] from the inferior,
+#   addr    : the address of 'a[0]' from the inferior,
+#   b       : a buffer containing the full contents of array 'a' from the
+#             inferior.
+proc prepare_type_and_buffer {} {
   gdb_py_test_silent_cmd "python tp=gdb.lookup_type('int')" "look up int type" 0
   gdb_py_test_silent_cmd "python size_a=gdb.parse_and_eval('sizeof(a)')" \
                          "find size of a" 0
@@ -543,7 +560,14 @@ proc test_value_from_buffer {} {
   gdb_py_test_silent_cmd "python addr=gdb.parse_and_eval('&a')" \
                          "find address of a" 0
   gdb_py_test_silent_cmd "python b=gdb.selected_inferior().read_memory(addr,size_a)" \
-                         "read buffer from memory" 1
+                         "read buffer from memory" 0
+}
+
+proc test_value_from_buffer {} {
+  global gdb_prompt
+  global gdb_py_is_py3k
+
+  prepare_type_and_buffer
   gdb_test "python v=gdb.Value(b,tp); print(v)" "1" \
             "construct value from buffer"
   gdb_test "python v=gdb.Value(b\[size_a0:\],tp); print(v)" "2" \
@@ -600,6 +624,29 @@ proc test_add_to_history {} {
 	"TypeError: Could not convert Python object: .*"
 }
 
+# Check we can create sub-classes of gdb.Value.
+proc test_value_sub_classes {} {
+    prepare_type_and_buffer
+
+    gdb_test_multiline "Create sub-class of gdb.Value" \
+	"python" "" \
+	"class MyValue(gdb.Value):" "" \
+	"  def __init__(self,val,type=None):" "" \
+	"    gdb.Value.__init__(self,val,type)" "" \
+	"    print(\"In MyValue.__init__\")" "" \
+	"end"
+
+    gdb_test "python obj = MyValue (123)" "In MyValue.__init__" \
+	"create instance of MyValue"
+    gdb_test "python print(obj)" "123" \
+	"check printing of MyValue"
+
+    gdb_test "python obj = MyValue(b\[size_a0:\],tp)" "In MyValue.__init__" \
+	"convert 2nd elem of buffer to a MyValue"
+    gdb_test "python print(obj)" "2" \
+	"check printing of MyValue when initiaized with a type"
+}
+
 # Build C version of executable.  C++ is built later.
 if { [build_inferior "${binfile}" "c"] < 0 } {
     return -1
@@ -612,6 +659,7 @@ clean_restart ${binfile}
 if { [skip_python_tests] } { continue }
 
 test_value_creation
+test_value_reinit
 test_value_numeric_ops
 test_value_boolean
 test_value_compare
@@ -629,6 +677,7 @@ if ![runto_main] then {
 
 test_value_in_inferior
 test_value_from_buffer
+test_value_sub_classes
 test_inferior_function_call
 test_value_after_death
 
