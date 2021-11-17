@@ -3,7 +3,6 @@
    ld.so.cache (having no absolute path specified for the executable
    falls back on loading through the same mechanisms as a DSO).
 #notarget: *-*-elf
-#dynamic:
 #sim: --sysroot=@exedir@ @exedir@/lib/ld.so.1 --library-path /
  */
 #include "hello.c"

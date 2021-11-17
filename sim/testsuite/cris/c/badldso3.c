@@ -1,6 +1,5 @@
 /*
 #notarget: cris*-*-elf
-#dynamic:
 #xerror:
 #cc: additional_flags=-Wl,-dynamic-linker,/compilercheck.x
 #sim: --sysroot=@exedir@

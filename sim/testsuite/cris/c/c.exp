@@ -105,7 +105,6 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     set opts(xfail) ""
     set opts(target) ""
     set opts(notarget) ""
-    set opts(dynamic) ""
 
     # Clear any machine specific options specified in a previous test case
     if [info exists opts(sim,$mach)] {
@@ -140,16 +139,6 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	    if { $opts($opt_name) != "" } {
 		set opt_val "$opts($opt_name) $opt_val"
 	    }
-	}
-
-	if { $opt_name == "dynamic" \
-		 && [info exists board_info([target_info name],ldflags)] } {
-	    # Weed out -static from ldflags, but keep the original in
-	    # $orig_ldflags.
-	    set orig_ldflags $board_info([target_info name],ldflags)
-	    set ldflags " $orig_ldflags "
-	    regsub -all " -static " $ldflags " " ldflags
-	    set board_info([target_info name],ldflags) $ldflags
 	}
 
 	foreach m $opt_machs {
