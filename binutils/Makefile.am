@@ -46,14 +46,15 @@ am__skipyacc =
 ZLIB = @zlibdir@ -lz
 ZLIBINC = @zlibinc@
 
+DEBUGINFOD_CFLAGS = @DEBUGINFOD_CFLAGS@
+DEBUGINFOD_LIBS = @DEBUGINFOD_LIBS@
+
 WARN_CFLAGS = @WARN_CFLAGS@
 WARN_CFLAGS_FOR_BUILD = @WARN_CFLAGS_FOR_BUILD@
 NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
 AM_CFLAGS_FOR_BUILD = $(WARN_CFLAGS_FOR_BUILD) $(ZLIBINC)
 LIBICONV = @LIBICONV@
-
-DEBUGINFOD_LIBS = @DEBUGINFOD_LIBS@
 
 # these two are almost the same program
 AR_PROG=ar
@@ -364,6 +365,18 @@ if AMDEP
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
 	$(COMPILE) -c `test -f arlex.c || echo $(srcdir)/`arlex.c $(NO_WERROR)
+endif
+
+dwarf.@OBJEXT@: dwarf.c
+if am__fastdepCC
+	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo $(DEBUGINFOD_CFLAGS) -c -o $@ $(srcdir)/dwarf.c
+	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+else
+if AMDEP
+	source='dwarf.c' object='$@' libtool=no @AMDEPBACKSLASH@
+	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+endif
+	$(COMPILE) $(DEBUGINFOD_CFLAGS) -c -o $@ $(srcdir)/dwarf.c
 endif
 
 sysroff.@OBJEXT@: sysroff.c
