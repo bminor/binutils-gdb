@@ -215,7 +215,7 @@ unmark_fd_no_cloexec (int fd)
   if (it != open_fds.end ())
     open_fds.erase (it);
   else
-    gdb_assert_not_reached (_("fd not found in open_fds"));
+    gdb_assert_not_reached ("fd not found in open_fds");
 }
 
 /* Helper function for close_most_fds that closes the file descriptor
@@ -378,7 +378,7 @@ gdb_socketpair_cloexec (int domain, int style, int protocol,
 
   return result;
 #else
-  gdb_assert_not_reached (_("socketpair not available on this host"));
+  gdb_assert_not_reached ("socketpair not available on this host");
 #endif
 }
 
@@ -419,7 +419,7 @@ gdb_pipe_cloexec (int filedes[2])
       mark_cloexec (filedes[1]);
     }
 #else /* HAVE_PIPE */
-  gdb_assert_not_reached (_("pipe not available on this host"));
+  gdb_assert_not_reached ("pipe not available on this host");
 #endif /* HAVE_PIPE */
 #endif /* HAVE_PIPE2 */
 

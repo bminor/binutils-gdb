@@ -352,7 +352,7 @@ struct c_add_code_header
 	break;
 
       default:
-	gdb_assert_not_reached (_("Unknown compiler scope reached."));
+	gdb_assert_not_reached ("Unknown compiler scope reached.");
       }
   }
 };
@@ -376,7 +376,7 @@ struct c_add_code_footer
 	break;
 
       default:
-	gdb_assert_not_reached (_("Unknown compiler scope reached."));
+	gdb_assert_not_reached ("Unknown compiler scope reached.");
       }
   }
 };
@@ -477,7 +477,7 @@ struct cplus_add_code_header
       break;
 
     default:
-      gdb_assert_not_reached (_("Unknown compiler scope reached."));
+      gdb_assert_not_reached ("Unknown compiler scope reached.");
     }
   }
 };

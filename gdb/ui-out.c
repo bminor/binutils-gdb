@@ -638,10 +638,10 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 	  }
 	  break;
 	case wide_string_arg:
-	  gdb_assert_not_reached (_("wide_string_arg not supported in vmessage"));
+	  gdb_assert_not_reached ("wide_string_arg not supported in vmessage");
 	  break;
 	case wide_char_arg:
-	  gdb_assert_not_reached (_("wide_char_arg not supported in vmessage"));
+	  gdb_assert_not_reached ("wide_char_arg not supported in vmessage");
 	  break;
 	case long_long_arg:
 	  call_do_message (style, current_substring, va_arg (args, long long));
@@ -704,16 +704,16 @@ ui_out::vmessage (const ui_file_style &in_style, const char *format,
 	  call_do_message (style, current_substring, va_arg (args, double));
 	  break;
 	case long_double_arg:
-	  gdb_assert_not_reached (_("long_double_arg not supported in vmessage"));
+	  gdb_assert_not_reached ("long_double_arg not supported in vmessage");
 	  break;
 	case dec32float_arg:
-	  gdb_assert_not_reached (_("dec32float_arg not supported in vmessage"));
+	  gdb_assert_not_reached ("dec32float_arg not supported in vmessage");
 	  break;
 	case dec64float_arg:
-	  gdb_assert_not_reached (_("dec64float_arg not supported in vmessage"));
+	  gdb_assert_not_reached ("dec64float_arg not supported in vmessage");
 	  break;
 	case dec128float_arg:
-	  gdb_assert_not_reached (_("dec128float_arg not supported in vmessage"));
+	  gdb_assert_not_reached ("dec128float_arg not supported in vmessage");
 	  break;
 	case ptr_arg:
 	  switch (current_substring[2])

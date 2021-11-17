@@ -364,7 +364,7 @@ symbol_read_needs (struct symbol *sym)
       /* All cases listed explicitly so that gcc -Wall will detect it if
 	 we failed to consider one.  */
     case LOC_COMPUTED:
-      gdb_assert_not_reached (_("LOC_COMPUTED variable missing a method"));
+      gdb_assert_not_reached ("LOC_COMPUTED variable missing a method");
 
     case LOC_REGISTER:
     case LOC_ARG:
@@ -744,7 +744,7 @@ language_defn::read_var_value (struct symbol *var,
       break;
 
     case LOC_COMPUTED:
-      gdb_assert_not_reached (_("LOC_COMPUTED variable missing a method"));
+      gdb_assert_not_reached ("LOC_COMPUTED variable missing a method");
 
     case LOC_UNRESOLVED:
       {

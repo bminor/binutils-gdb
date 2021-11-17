@@ -163,7 +163,7 @@ find_layout (tui_layout_split *layout)
       if (layout == layouts[i].get ())
 	return i;
     }
-  gdb_assert_not_reached (_("layout not found!?"));
+  gdb_assert_not_reached ("layout not found!?");
 }
 
 /* Function to set the layout. */

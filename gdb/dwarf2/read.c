@@ -19979,7 +19979,7 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
 	  break;
 	}
       default:
-	gdb_assert_not_reached (_("Unexpected DWARF form."));
+	gdb_assert_not_reached ("Unexpected DWARF form.");
     }
 }
 

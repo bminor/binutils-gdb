@@ -106,7 +106,7 @@ protected:
      FSM finishes successfully.  */
   virtual enum async_reply_reason do_async_reply_reason ()
   {
-    gdb_assert_not_reached (_("should not call async_reply_reason here"));
+    gdb_assert_not_reached ("should not call async_reply_reason here");
   }
 };
 

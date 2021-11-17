@@ -54,7 +54,7 @@ arc_create_target_description (const struct arc_arch_features &features)
       std::string msg = string_printf
 	("Cannot determine architecture: ISA=%d; bitness=%d",
 	 features.isa, 8 * features.reg_size);
-      gdb_assert_not_reached (msg.c_str ());
+      gdb_assert_not_reached ("%s", msg.c_str ());
     }
 
   set_tdesc_architecture (tdesc.get (), arch_name.c_str ());
@@ -75,7 +75,7 @@ arc_create_target_description (const struct arc_arch_features &features)
     default:
       std::string msg = string_printf
 	("Cannot choose target description XML: %d", features.isa);
-      gdb_assert_not_reached (msg.c_str ());
+      gdb_assert_not_reached ("%s", msg.c_str ());
     }
 
   return tdesc;

@@ -587,8 +587,8 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	      error (_("Local symbol unhandled when generating C code."));
 
 	    case LOC_COMPUTED:
-	      gdb_assert_not_reached (_("LOC_COMPUTED variable "
-					"missing a method."));
+	      gdb_assert_not_reached ("LOC_COMPUTED variable "
+				      "missing a method.");
 
 	    default:
 	      /* Nothing to do for all other cases, as they don't represent

@@ -864,7 +864,7 @@ riscv_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     case 4:
       return ebreak;
     default:
-      gdb_assert_not_reached (_("unhandled breakpoint kind"));
+      gdb_assert_not_reached ("unhandled breakpoint kind");
     }
 }
 
@@ -2877,7 +2877,7 @@ riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
       break;
 
     default:
-      gdb_assert_not_reached (_("unknown argument location type"));
+      gdb_assert_not_reached ("unknown argument location type");
     }
 }
 
@@ -3039,7 +3039,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 	  break;
 
 	default:
-	  gdb_assert_not_reached (_("unknown argument location type"));
+	  gdb_assert_not_reached ("unknown argument location type");
 	}
 
       if (second_arg_length > 0)

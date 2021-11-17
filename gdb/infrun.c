@@ -2401,8 +2401,8 @@ resume_1 (enum gdb_signal sig)
 	  step = gdbarch_displaced_step_hw_singlestep (gdbarch);
 	}
       else
-	gdb_assert_not_reached (_("Invalid displaced_step_prepare_status "
-				  "value."));
+	gdb_assert_not_reached ("Invalid displaced_step_prepare_status "
+				"value.");
     }
 
   /* Do we need to do it the hard way, w/temp breakpoints?  */

@@ -661,8 +661,7 @@ varobj_get_iterator (struct varobj *var)
     return py_varobj_get_iterator (var, var->dynamic->pretty_printer);
 #endif
 
-  gdb_assert_not_reached (_("\
-requested an iterator from a non-dynamic varobj"));
+  gdb_assert_not_reached ("requested an iterator from a non-dynamic varobj");
 }
 
 static bool

@@ -1724,7 +1724,7 @@ info_address_command (const char *exp, int from_tty)
       break;
 
     case LOC_COMPUTED:
-      gdb_assert_not_reached (_("LOC_COMPUTED variable missing a method"));
+      gdb_assert_not_reached ("LOC_COMPUTED variable missing a method");
 
     case LOC_REGISTER:
       /* GDBARCH is the architecture associated with the objfile the symbol

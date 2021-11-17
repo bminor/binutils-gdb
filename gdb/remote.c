@@ -2217,7 +2217,7 @@ packet_config_support (struct packet_config *config)
     case AUTO_BOOLEAN_AUTO:
       return config->support;
     default:
-      gdb_assert_not_reached (_("bad switch"));
+      gdb_assert_not_reached ("bad switch");
     }
 }
 
@@ -10316,7 +10316,7 @@ remote_target::extended_remote_run (const std::string &args)
 	error (_("Running \"%s\" on the remote target failed"),
 	       remote_exec_file);
     default:
-      gdb_assert_not_reached (_("bad switch"));
+      gdb_assert_not_reached ("bad switch");
     }
 }
 
