@@ -447,6 +447,8 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ZtxN,	/* SVE vector register list in Zt.  */
   AARCH64_OPND_SME_ZAda_2b,	/* SME <ZAda>.S, 2-bits.  */
   AARCH64_OPND_SME_ZAda_3b,	/* SME <ZAda>.D, 3-bits.  */
+  AARCH64_OPND_SME_ZA_HV_idx_src,	/* SME source ZA tile vector.  */
+  AARCH64_OPND_SME_ZA_HV_idx_dest,	/* SME destination ZA tile vector.  */
   AARCH64_OPND_SME_Pm,		/* SME scalable predicate register, bits [15:13].  */
   AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
@@ -1113,6 +1115,18 @@ struct aarch64_opnd_info
 	  /* The system register flags.  */
 	  uint32_t flags;
 	} sysreg;
+
+      /* ZA tile vector, e.g. <ZAn><HV>.D[<Wv>{, <imm>}]  */
+      struct
+	{
+	  int regno;      /* <ZAn> */
+	  struct
+	  {
+	    int regno;    /* <Wv>  */
+	    int imm;      /* <imm>  */
+	  } index;
+	  unsigned v : 1;	/* <HV> horizontal or vertical vector indicator.  */
+	} za_tile_vector;
 
       const aarch64_cond *cond;
       /* The encoding of the PSTATE field.  */

@@ -1748,6 +1748,64 @@ aarch64_ext_sve_float_zero_one (const aarch64_operand *self,
   return true;
 }
 
+/* Decode ZA tile vector, vector indicator, vector selector, qualifier and
+   immediate on numerous SME instruction fields such as MOVA.  */
+bool
+aarch64_ext_sme_za_hv_tiles (const aarch64_operand *self,
+                             aarch64_opnd_info *info, aarch64_insn code,
+                             const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                             aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int fld_size = extract_field (self->fields[0], code, 0);
+  int fld_q = extract_field (self->fields[1], code, 0);
+  int fld_v = extract_field (self->fields[2], code, 0);
+  int fld_rv = extract_field (self->fields[3], code, 0);
+  int fld_zan_imm = extract_field (self->fields[4], code, 0);
+
+  /* Deduce qualifier encoded in size and Q fields.  */
+  if (fld_size == 0)
+    info->qualifier = AARCH64_OPND_QLF_S_B;
+  else if (fld_size == 1)
+    info->qualifier = AARCH64_OPND_QLF_S_H;
+  else if (fld_size == 2)
+    info->qualifier = AARCH64_OPND_QLF_S_S;
+  else if (fld_size == 3 && fld_q == 0)
+    info->qualifier = AARCH64_OPND_QLF_S_D;
+  else if (fld_size == 3 && fld_q == 1)
+    info->qualifier = AARCH64_OPND_QLF_S_Q;
+
+  info->za_tile_vector.index.regno = fld_rv + 12;
+  info->za_tile_vector.v = fld_v;
+
+  switch (info->qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      info->za_tile_vector.regno = 0;
+      info->za_tile_vector.index.imm = fld_zan_imm;
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      info->za_tile_vector.regno = fld_zan_imm >> 3;
+      info->za_tile_vector.index.imm = fld_zan_imm & 0x07;
+      break;
+    case AARCH64_OPND_QLF_S_S:
+      info->za_tile_vector.regno = fld_zan_imm >> 2;
+      info->za_tile_vector.index.imm = fld_zan_imm & 0x03;
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      info->za_tile_vector.regno = fld_zan_imm >> 1;
+      info->za_tile_vector.index.imm = fld_zan_imm & 0x01;
+      break;
+    case AARCH64_OPND_QLF_S_Q:
+      info->za_tile_vector.regno = fld_zan_imm;
+      info->za_tile_vector.index.imm = 0;
+      break;
+    default:
+      assert (0);
+    }
+
+  return true;
+}
+
 /* Decode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
    array specifies which field to use for Zn.  MM is encoded in the
    concatenation of imm5 and SVE_tszh, with imm5 being the less

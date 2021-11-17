@@ -1325,6 +1325,61 @@ aarch64_ins_sve_float_zero_one (const aarch64_operand *self,
   return true;
 }
 
+/* Encode in SME instruction such as MOVA ZA tile vector register number,
+   vector indicator, vector selector and immediate.  */
+bool
+aarch64_ins_sme_za_hv_tiles (const aarch64_operand *self,
+                             const aarch64_opnd_info *info,
+                             aarch64_insn *code,
+                             const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                             aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int fld_size;
+  int fld_q;
+  int fld_v = info->za_tile_vector.v;
+  int fld_rv = info->za_tile_vector.index.regno - 12;
+  int fld_zan_imm = info->za_tile_vector.index.imm;
+  int regno = info->za_tile_vector.regno;
+
+  switch (info->qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      fld_size = 0;
+      fld_q = 0;
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      fld_size = 1;
+      fld_q = 0;
+      fld_zan_imm |= regno << 3;
+      break;
+    case AARCH64_OPND_QLF_S_S:
+      fld_size = 2;
+      fld_q = 0;
+      fld_zan_imm |= regno << 2;
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      fld_size = 3;
+      fld_q = 0;
+      fld_zan_imm |= regno << 1;
+      break;
+    case AARCH64_OPND_QLF_S_Q:
+      fld_size = 3;
+      fld_q = 1;
+      fld_zan_imm = regno;
+      break;
+    default:
+      assert (0);
+    }
+
+  insert_field (self->fields[0], code, fld_size, 0);
+  insert_field (self->fields[1], code, fld_q, 0);
+  insert_field (self->fields[2], code, fld_v, 0);
+  insert_field (self->fields[3], code, fld_rv, 0);
+  insert_field (self->fields[4], code, fld_zan_imm, 0);
+
+  return true;
+}
+
 /* Miscellaneous encoding functions.  */
 
 /* Encode size[0], i.e. bit 22, for

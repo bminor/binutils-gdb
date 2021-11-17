@@ -242,6 +242,7 @@ const aarch64_field fields[] =
     { 11,  4 },	/* imm4: in advsimd ext and advsimd ins instructions.  */
     {  0,  4 },	/* imm4_2: in rmif instructions.  */
     { 10,  4 },	/* imm4_3: in adddg/subg instructions.  */
+    {  5,  4 }, /* imm4_5: in SME instructions.  */
     { 16,  5 },	/* imm5: in conditional compare (immediate) instructions.  */
     { 15,  7 },	/* imm7: in load/store pair pre/post index instructions.  */
     { 13,  8 },	/* imm8: in floating-point scalar move immediate inst.  */
@@ -323,6 +324,10 @@ const aarch64_field fields[] =
     { 22,  1 }, /* SVE_xs_22: UXTW/SXTW select (bit 22).  */
     {  0,  2 }, /* SME ZAda tile ZA0-ZA3.  */
     {  0,  3 }, /* SME ZAda tile ZA0-ZA7.  */
+    { 22,  2 }, /* SME_size_10: size<1>, size<0> class field, [23:22].  */
+    { 16,  1 }, /* SME_Q: Q class bit, bit 16.  */
+    { 15,  1 }, /* SME_V: (horizontal / vertical tiles), bit 15.  */
+    { 13,  2 }, /* SME_Rv: vector select register W12-W15, bits [14:13].  */
     { 13,  3 }, /* SME Pm second source scalable predicate register P0-P7.  */
     { 11,  2 }, /* rotate1: FCMLA immediate rotate.  */
     { 13,  2 }, /* rotate2: Indexed element FCMLA immediate rotate.  */
@@ -3353,6 +3358,16 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SME_ZAda_3b:
       snprintf (buf, size, "za%d.%s", opnd->reg.regno,
                 aarch64_get_qualifier_name (opnd->qualifier));
+      break;
+
+    case AARCH64_OPND_SME_ZA_HV_idx_src:
+    case AARCH64_OPND_SME_ZA_HV_idx_dest:
+      snprintf (buf, size, "za%d%c.%s[w%d, %d]",
+                opnd->za_tile_vector.regno,
+                opnd->za_tile_vector.v == 1 ? 'v' : 'h',
+                aarch64_get_qualifier_name (opnd->qualifier),
+                opnd->za_tile_vector.index.regno,
+                opnd->za_tile_vector.index.imm);
       break;
 
     case AARCH64_OPND_CRn:

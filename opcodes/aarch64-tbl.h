@@ -2203,6 +2203,14 @@
 {                                                       \
   QLF5(S_D,P_M,P_M,S_H,S_H)                             \
 }
+#define OP_SME_BHSDQ_PM_BHSDQ                           \
+{                                                       \
+  QLF3(S_B,P_M,S_B),                                    \
+  QLF3(S_H,P_M,S_H),                                    \
+  QLF3(S_S,P_M,S_S),                                    \
+  QLF3(S_D,P_M,S_D),                                    \
+  QLF3(S_Q,P_M,S_Q)                                     \
+}
 
 /* e.g. UDOT <Vd>.2S, <Vn>.8B, <Vm>.8B.  */
 #define QL_V3DOT	   \
@@ -5123,6 +5131,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("usmops", 0xa1800010, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_S_PM_PM_B_B, 0, 0),
   SME_I64_INSN ("usmops", 0xa1c00010, 0xffe00018, sme_misc, 0, OP5 (SME_ZAda_3b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_D_PM_PM_H_H, 0, 0),
 
+  SME_INSN ("mov", 0xc0020000, 0xff3e0200, sme_misc, 0, OP3 (SVE_Zd, SVE_Pg3, SME_ZA_HV_idx_src), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
+  SME_INSN ("mov", 0xc0000000, 0xff3e0010, sme_misc, 0, OP3 (SME_ZA_HV_idx_dest, SVE_Pg3, SVE_Zn), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
+  SME_INSN ("mova", 0xc0020000, 0xff3e0200, sme_misc, 0, OP3 (SVE_Zd, SVE_Pg3, SME_ZA_HV_idx_src), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
+  SME_INSN ("mova", 0xc0000000, 0xff3e0010, sme_misc, 0, OP3 (SME_ZA_HV_idx_dest, SVE_Pg3, SVE_Zn), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
+
   /* SIMD Dot Product (optional in v8.2-A).  */
   DOT_INSN ("udot", 0x2e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
   DOT_INSN ("sdot", 0xe009400,  0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
@@ -5694,6 +5707,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an SME ZA tile ZA0-ZA3")					\
     Y(SVE_REG, regno, "SME_ZAda_3b", 0, F(FLD_SME_ZAda_3b),		\
       "an SME ZA tile ZA0-ZA7")					\
+    Y(SVE_REG, sme_za_hv_tiles, "SME_ZA_HV_idx_src", 0,				\
+      F(FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_5),\
+      "an SME horizontal or vertical vector access register")	\
+    Y(SVE_REG, sme_za_hv_tiles, "SME_ZA_HV_idx_dest", 0,				\
+      F(FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_2),\
+      "an SME horizontal or vertical vector access register")	\
     Y(PRED_REG, regno, "SME_Pm", 0, F(FLD_SME_Pm),			\
       "an SVE predicate register")					\
     Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16),			\

@@ -235,6 +235,8 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_SVE_REG, "SVE_ZtxN", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SVE_Zt}, "a list of SVE vector registers"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_ZAda_2b", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_ZAda_2b}, "an SME ZA tile ZA0-ZA3"},
   {AARCH64_OPND_CLASS_SVE_REG, "SME_ZAda_3b", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_ZAda_3b}, "an SME ZA tile ZA0-ZA7"},
+  {AARCH64_OPND_CLASS_SVE_REG, "SME_ZA_HV_idx_src", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_5}, "an SME horizontal or vertical vector access register"},
+  {AARCH64_OPND_CLASS_SVE_REG, "SME_ZA_HV_idx_dest", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_size_10,FLD_SME_Q,FLD_SME_V,FLD_SME_Rv,FLD_imm4_2}, "an SME horizontal or vertical vector access register"},
   {AARCH64_OPND_CLASS_PRED_REG, "SME_Pm", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Pm}, "an SVE predicate register"},
   {AARCH64_OPND_CLASS_IMMEDIATE, "TME_UIMM16", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_imm16}, "a 16-bit unsigned immediate for TME tcancel"},
   {AARCH64_OPND_CLASS_SIMD_ELEMENT, "SM3_IMM2", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SM3_imm2}, "an indexed SM3 vector immediate"},

@@ -122,6 +122,7 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_sve_reglist);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_scale);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_shlimm);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sve_shrimm);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sme_za_hv_tiles);
 AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate1);
 AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate2);
 

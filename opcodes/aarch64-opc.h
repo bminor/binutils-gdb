@@ -71,6 +71,7 @@ enum aarch64_field_kind
   FLD_imm4,
   FLD_imm4_2,
   FLD_imm4_3,
+  FLD_imm4_5,
   FLD_imm5,
   FLD_imm7,
   FLD_imm8,
@@ -152,6 +153,10 @@ enum aarch64_field_kind
   FLD_SVE_xs_22,
   FLD_SME_ZAda_2b,
   FLD_SME_ZAda_3b,
+  FLD_SME_size_10,
+  FLD_SME_Q,
+  FLD_SME_V,
+  FLD_SME_Rv,
   FLD_SME_Pm,
   FLD_rotate1,
   FLD_rotate2,
@@ -186,7 +191,7 @@ struct aarch64_operand
 
   /* The associated instruction bit-fields; no operand has more than 4
      bit-fields */
-  enum aarch64_field_kind fields[4];
+  enum aarch64_field_kind fields[5];
 
   /* Brief description */
   const char *desc;
