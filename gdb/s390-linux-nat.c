@@ -29,6 +29,7 @@
 #include "regset.h"
 #include "nat/linux-ptrace.h"
 #include "gdbcmd.h"
+#include "gdbarch.h"
 
 #include "s390-tdep.h"
 #include "s390-linux-tdep.h"
@@ -43,7 +44,6 @@
 #include <algorithm>
 #include "inf-ptrace.h"
 #include "linux-tdep.h"
-#include "gdbarch.h"
 
 /* Per-thread arch-specific data.  */
 
