@@ -450,6 +450,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ZA_HV_idx_src,	/* SME source ZA tile vector.  */
   AARCH64_OPND_SME_ZA_HV_idx_dest,	/* SME destination ZA tile vector.  */
   AARCH64_OPND_SME_Pm,		/* SME scalable predicate register, bits [15:13].  */
+  AARCH64_OPND_SME_list_of_64bit_tiles, /* SME list of ZA tiles.  */
   AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
 };

@@ -4460,6 +4460,103 @@ parse_sme_za_hv_tiles_operand (char **str,
   return regno;
 }
 
+/* Parse list of up to eight 64-bit element tile names separated by commas in
+   SME's ZERO instruction:
+
+     ZERO { <mask> }
+
+   Function returns <mask>:
+
+     an 8-bit list of 64-bit element tiles named ZA0.D to ZA7.D.
+*/
+static int
+parse_sme_zero_mask(char **str)
+{
+  char *q;
+  int mask;
+  aarch64_opnd_qualifier_t qualifier;
+
+  mask = 0x00;
+  q = *str;
+  do
+    {
+      const reg_entry *reg = parse_reg_with_qual (&q, REG_TYPE_ZA, &qualifier);
+      if (reg)
+        {
+          int regno = reg->number;
+          if (qualifier == AARCH64_OPND_QLF_S_B && regno == 0)
+            {
+              /* { ZA0.B } is assembled as all-ones immediate.  */
+              mask = 0xff;
+            }
+          else if (qualifier == AARCH64_OPND_QLF_S_H && regno < 2)
+            mask |= 0x55 << regno;
+          else if (qualifier == AARCH64_OPND_QLF_S_S && regno < 4)
+            mask |= 0x11 << regno;
+          else if (qualifier == AARCH64_OPND_QLF_S_D && regno < 8)
+            mask |= 0x01 << regno;
+          else
+            {
+              set_syntax_error (_("wrong ZA tile element format"));
+              return PARSE_FAIL;
+            }
+          continue;
+        }
+      else if (strncasecmp (q, "za", 2) == 0
+               && !ISALNUM (q[2]))
+        {
+          /* { ZA } is assembled as all-ones immediate.  */
+          mask = 0xff;
+          q += 2;
+          continue;
+        }
+      else
+        {
+          set_syntax_error (_("wrong ZA tile element format"));
+          return PARSE_FAIL;
+        }
+    }
+  while (skip_past_char (&q, ','));
+
+  *str = q;
+  return mask;
+}
+
+/* Wraps in curly braces <mask> operand ZERO instruction:
+
+   ZERO { <mask> }
+
+   Function returns value of <mask> bit-field.
+*/
+static int
+parse_sme_list_of_64bit_tiles (char **str)
+{
+  int regno;
+
+  if (!skip_past_char (str, '{'))
+    {
+      set_syntax_error (_("expected '{'"));
+      return PARSE_FAIL;
+    }
+
+  /* Empty <mask> list is an all-zeros immediate.  */
+  if (!skip_past_char (str, '}'))
+    {
+      regno = parse_sme_zero_mask (str);
+      if (regno == PARSE_FAIL)
+         return PARSE_FAIL;
+
+      if (!skip_past_char (str, '}'))
+        {
+          set_syntax_error (_("expected '}'"));
+          return PARSE_FAIL;
+        }
+    }
+  else
+    regno = 0x00;
+
+  return regno;
+}
 
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
    Returns the encoding for the option, or PARSE_FAIL.
@@ -7193,6 +7290,13 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    info->qualifier = qualifier;
 	    break;
 	  }
+
+	  case AARCH64_OPND_SME_list_of_64bit_tiles:
+	    val = parse_sme_list_of_64bit_tiles (&str);
+	    if (val == PARSE_FAIL)
+	      goto failure;
+	    info->imm.value = val;
+	    break;
 
 	default:
 	  as_fatal (_("unhandled operand code %d"), operands[i]);

@@ -158,6 +158,7 @@ enum aarch64_field_kind
   FLD_SME_V,
   FLD_SME_Rv,
   FLD_SME_Pm,
+  FLD_SME_zero_mask,
   FLD_rotate1,
   FLD_rotate2,
   FLD_rotate3,

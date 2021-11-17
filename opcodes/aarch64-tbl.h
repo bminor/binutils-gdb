@@ -5136,6 +5136,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("mova", 0xc0020000, 0xff3e0200, sme_misc, 0, OP3 (SVE_Zd, SVE_Pg3, SME_ZA_HV_idx_src), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
   SME_INSN ("mova", 0xc0000000, 0xff3e0010, sme_misc, 0, OP3 (SME_ZA_HV_idx_dest, SVE_Pg3, SVE_Zn), OP_SME_BHSDQ_PM_BHSDQ, 0, 0),
 
+  SME_INSN ("zero", 0xc0080000, 0xffffff00, sme_misc, 0, OP1 (SME_list_of_64bit_tiles), {}, 0, 0),
+
   /* SIMD Dot Product (optional in v8.2-A).  */
   DOT_INSN ("udot", 0x2e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
   DOT_INSN ("sdot", 0xe009400,  0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
@@ -5715,6 +5717,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an SME horizontal or vertical vector access register")	\
     Y(PRED_REG, regno, "SME_Pm", 0, F(FLD_SME_Pm),			\
       "an SVE predicate register")					\
+    Y(SVE_REG, imm, "SME_list_of_64bit_tiles", 0,	\
+      F(FLD_SME_zero_mask), "list of 64-bit ZA element tiles")					\
     Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16),			\
       "a 16-bit unsigned immediate for TME tcancel")			\
     Y(SIMD_ELEMENT, reglane, "SM3_IMM2", 0, F(FLD_SM3_imm2),		\

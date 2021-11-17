@@ -329,6 +329,7 @@ const aarch64_field fields[] =
     { 15,  1 }, /* SME_V: (horizontal / vertical tiles), bit 15.  */
     { 13,  2 }, /* SME_Rv: vector select register W12-W15, bits [14:13].  */
     { 13,  3 }, /* SME Pm second source scalable predicate register P0-P7.  */
+    { 0,   8 }, /* SME_zero_mask: list of up to 8 tile names separated by commas [7:0].  */
     { 11,  2 }, /* rotate1: FCMLA immediate rotate.  */
     { 13,  2 }, /* rotate2: Indexed element FCMLA immediate rotate.  */
     { 12,  1 }, /* rotate3: FCADD immediate rotate.  */
@@ -3139,6 +3140,46 @@ print_register_offset_address (char *buf, size_t size,
   snprintf (buf, size, "[%s, %s%s]", base, offset, tb);
 }
 
+/* Print ZA tiles from imm8 in ZERO instruction.
+
+   The preferred disassembly of this instruction uses the shortest list of tile
+   names that represent the encoded immediate mask.
+
+   For example:
+    * An all-ones immediate is disassembled as {ZA}.
+    * An all-zeros immediate is disassembled as an empty list { }.
+*/
+static void
+print_sme_za_list(char *buf, size_t size, int mask)
+{
+  const char* zan[] = { "za",    "za0.h", "za1.h", "za0.s",
+                        "za1.s", "za2.s", "za3.s", "za0.d",
+                        "za1.d", "za2.d", "za3.d", "za4.d",
+                        "za5.d", "za6.d", "za7.d", " " };
+  const int zan_v[] = { 0xff, 0x55, 0xaa, 0x11,
+                        0x22, 0x44, 0x88, 0x01,
+                        0x02, 0x04, 0x08, 0x10,
+                        0x20, 0x40, 0x80, 0x00 };
+  int i, k;
+  const int ZAN_SIZE = sizeof(zan) / sizeof(zan[0]);
+
+  k = snprintf (buf, size, "{");
+  for (i = 0; i < ZAN_SIZE; i++)
+    {
+      if ((mask & zan_v[i]) == zan_v[i])
+        {
+          mask &= ~zan_v[i];
+          if (k > 1)
+            k += snprintf (buf + k, size - k, ", %s", zan[i]);
+          else
+            k += snprintf (buf + k, size - k, "%s", zan[i]);
+        }
+      if (mask == 0)
+        break;
+    }
+  snprintf (buf + k, size - k, "}");
+}
+
 /* Generate the string representation of the operand OPNDS[IDX] for OPCODE
    in *BUF.  The caller should pass in the maximum size of *BUF in SIZE.
    PC, PCREL_P and ADDRESS are used to pass in and return information about
@@ -3368,6 +3409,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
                 aarch64_get_qualifier_name (opnd->qualifier),
                 opnd->za_tile_vector.index.regno,
                 opnd->za_tile_vector.index.imm);
+      break;
+
+    case AARCH64_OPND_SME_list_of_64bit_tiles:
+      print_sme_za_list (buf, size, opnd->reg.regno);
       break;
 
     case AARCH64_OPND_CRn:
