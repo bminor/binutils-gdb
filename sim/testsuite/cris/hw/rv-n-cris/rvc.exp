@@ -80,6 +80,7 @@ proc sim_has_rv_and_cris {} {
 # including parameters may not contain ":".
 
 proc slurp_rv { file } {
+    global subdir srcdir
     if [catch { set f [open $file r] } x] {
 	#perror "couldn't open `$file': $x"
 	perror "$x"
@@ -97,6 +98,10 @@ proc slurp_rv { file } {
 	# Whitespace here is space-tab.
 	if [regexp $pat $line xxx cmd] {
 	    # match!
+	    set cmd [string map [list \
+		{$srcdir} "$srcdir" \
+		{$subdir} "$subdir" \
+	    ] "$cmd"]
 	    lappend rv_array $cmd
 	    set seen_opt 1
 	} else {
@@ -204,11 +209,6 @@ if [istarget cris*-*-*] {
 		    error "$x"
 		} {
 		    set contents [join $hostcmds "\n"]
-
-		    # Make it possible to use files from the test
-		    # source directory; expected with the @-command.
-		    regsub -all "@srcdir@" $contents "$srcdir/$subdir" contents
-
 		    verbose "rv: $contents" 2
 		    puts $f $contents
 		    close $f

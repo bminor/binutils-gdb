@@ -3,6 +3,6 @@
 
 # Check that we trivially resolve a hostname.
 
-#r @,@srcdir@/trivial4.r
+#r @,$srcdir/$subdir/trivial4.r
 
  .include "trivial4.ms"

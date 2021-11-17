@@ -124,8 +124,6 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	# Replace specific substitutions:
 	# @exedir@ is where the test-program is located.
 	regsub -all "@exedir@" $opt_val "[pwd]" opt_val
-	# @srcdir@ is where the source of the test-program is located.
-	regsub -all "@srcdir@" $opt_val "$srcdir/$subdir" opt_val
 
 	# Multiple of these options concatenate, they don't override.
 	if { $opt_name == "output" || $opt_name == "progoptions" } {

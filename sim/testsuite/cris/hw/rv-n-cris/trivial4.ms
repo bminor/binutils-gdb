@@ -1,5 +1,5 @@
 #mach: crisv32
-#r @,@srcdir@/trivial4.r
+#r @,$srcdir/$subdir/trivial4.r
 
 # Test read and writes.
 
