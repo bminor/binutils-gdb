@@ -2879,7 +2879,9 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	    case 'T': /* Floating point RS2.  */
 	    case 'U': /* Floating point RS1 and RS2.  */
 	    case 'R': /* Floating point RS3.  */
-	      if (reg_lookup (&asarg, RCLASS_FPR, &regno))
+	      if (reg_lookup (&asarg,
+			      (riscv_subset_supports (&riscv_rps_as, "zfinx")
+			      ? RCLASS_GPR : RCLASS_FPR), &regno))
 		{
 		  char c = *oparg;
 		  if (*asarg == ' ')

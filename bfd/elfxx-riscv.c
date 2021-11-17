@@ -2249,6 +2249,15 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     case INSN_CLASS_D_AND_C:
       return (riscv_subset_supports (rps, "d")
 	      && riscv_subset_supports (rps, "c"));
+    case INSN_CLASS_F_OR_ZFINX:
+      return (riscv_subset_supports (rps, "f")
+	      || riscv_subset_supports (rps, "zfinx"));
+    case INSN_CLASS_D_OR_ZDINX:
+      return (riscv_subset_supports (rps, "d")
+	      || riscv_subset_supports (rps, "zdinx"));
+    case INSN_CLASS_Q_OR_ZQINX:
+      return (riscv_subset_supports (rps, "q")
+	      || riscv_subset_supports (rps, "zqinx"));
     case INSN_CLASS_ZBA:
       return riscv_subset_supports (rps, "zba");
     case INSN_CLASS_ZBB:
