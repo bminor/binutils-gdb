@@ -121,6 +121,7 @@ static void ppc_toc (int);
 static void ppc_xcoff_cons (int);
 static void ppc_vbyte (int);
 static void ppc_weak (int);
+static void ppc_GNU_visibility (int);
 #endif
 
 #ifdef OBJ_ELF
@@ -246,6 +247,11 @@ const pseudo_typeS md_pseudo_table[] =
   { "short",	ppc_xcoff_cons,	1 },
   { "vbyte",    ppc_vbyte,	0 },
   { "weak",     ppc_weak,	0 },
+
+  /* Enable GNU syntax for symbol visibility.  */
+  {"internal",  ppc_GNU_visibility, SYM_V_INTERNAL},
+  {"hidden",    ppc_GNU_visibility, SYM_V_HIDDEN},
+  {"protected", ppc_GNU_visibility, SYM_V_PROTECTED},
 #endif
 
 #ifdef OBJ_ELF
@@ -4321,6 +4327,38 @@ ppc_xcoff_get_visibility (void) {
   return 0;
 }
 
+/* Retrieve visiblity using GNU syntax.  */
+static void ppc_GNU_visibility (int visibility) {
+  int c;
+  char *name;
+  symbolS *symbolP;
+  coff_symbol_type *coffsym;
+
+  do
+    {
+      if ((name = read_symbol_name ()) == NULL)
+	break;
+      symbolP = symbol_find_or_make (name);
+      coffsym = coffsymbol (symbol_get_bfdsym (symbolP));
+
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
+
+      c = *input_line_pointer;
+      if (c == ',')
+	{
+	  input_line_pointer ++;
+
+	  SKIP_WHITESPACE ();
+
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+
+  demand_empty_rest_of_line ();
+}
 
 /* The .comm and .lcomm pseudo-ops for XCOFF.  XCOFF puts common
    symbols in the .bss segment as though they were local common
