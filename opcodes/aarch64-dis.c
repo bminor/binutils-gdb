@@ -1890,6 +1890,49 @@ aarch64_ext_sme_sm_za (const aarch64_operand *self,
   return true;
 }
 
+bool
+aarch64_ext_sme_pred_reg_with_index (const aarch64_operand *self,
+				     aarch64_opnd_info *info, aarch64_insn code,
+				     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+				     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  aarch64_insn fld_rm = extract_field (self->fields[0], code, 0);
+  aarch64_insn fld_pn = extract_field (self->fields[1], code, 0);
+  aarch64_insn fld_i1 = extract_field (self->fields[2], code, 0);
+  aarch64_insn fld_tszh = extract_field (self->fields[3], code, 0);
+  aarch64_insn fld_tszl = extract_field (self->fields[4], code, 0);
+  int imm;
+
+  info->za_tile_vector.regno = fld_pn;
+  info->za_tile_vector.index.regno = fld_rm + 12;
+
+  if (fld_tszh == 0x1 && fld_tszl == 0x0)
+    {
+      info->qualifier = AARCH64_OPND_QLF_S_D;
+      imm = fld_i1;
+    }
+  else if (fld_tszl == 0x4)
+    {
+      info->qualifier = AARCH64_OPND_QLF_S_S;
+      imm = (fld_i1 << 1) | fld_tszh;
+    }
+  else if ((fld_tszl & 0x3) == 0x2)
+    {
+      info->qualifier = AARCH64_OPND_QLF_S_H;
+      imm = (fld_i1 << 2) | (fld_tszh << 1) | (fld_tszl >> 2);
+    }
+  else if (fld_tszl & 0x1)
+    {
+      info->qualifier = AARCH64_OPND_QLF_S_B;
+      imm = (fld_i1 << 3) | (fld_tszh << 2) | (fld_tszl >> 1);
+    }
+  else
+    return false;
+
+  info->za_tile_vector.index.imm = imm;
+  return true;
+}
+
 /* Decode Zn[MM], where MM has a 7-bit triangular encoding.  The fields
    array specifies which field to use for Zn.  MM is encoded in the
    concatenation of imm5 and SVE_tszh, with imm5 being the less

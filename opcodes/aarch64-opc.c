@@ -332,6 +332,10 @@ const aarch64_field fields[] =
     { 13,  2 }, /* SME_Rv: vector select register W12-W15, bits [14:13].  */
     { 13,  3 }, /* SME Pm second source scalable predicate register P0-P7.  */
     { 0,   8 }, /* SME_zero_mask: list of up to 8 tile names separated by commas [7:0].  */
+    { 16,  2 }, /* SME_Rm: index base register W12-W15 [17:16].  */
+    { 23,  1 }, /* SME_i1: immediate field, bit 23.  */
+    { 22,  1 }, /* SME_tszh: immediate and qualifier field, bit 22.  */
+    { 18,  3 }, /* SME_tshl: immediate and qualifier field, bits [20:18].  */
     { 11,  2 }, /* rotate1: FCMLA immediate rotate.  */
     { 13,  2 }, /* rotate2: Indexed element FCMLA immediate rotate.  */
     { 12,  1 }, /* rotate3: FCADD immediate rotate.  */
@@ -3471,6 +3475,14 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_SME_SM_ZA:
       snprintf (buf, size, "%s", opnd->reg.regno == 's' ? "sm" : "za");
+      break;
+
+    case AARCH64_OPND_SME_PnT_Wm_imm:
+      snprintf (buf, size, "p%d.%s[w%d, %d]",
+                opnd->za_tile_vector.regno,
+                aarch64_get_qualifier_name (opnd->qualifier),
+                opnd->za_tile_vector.index.regno,
+                opnd->za_tile_vector.index.imm);
       break;
 
     case AARCH64_OPND_CRn:

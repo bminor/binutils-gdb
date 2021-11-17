@@ -1509,6 +1509,13 @@
 {                                                       \
   QLF3(S_B,P_Z,S_B),                                    \
 }
+#define OP_SVE_NN_BHSD                                  \
+{                                                       \
+  QLF3(NIL,NIL,S_B),                                    \
+  QLF3(NIL,NIL,S_H),                                    \
+  QLF3(NIL,NIL,S_S),                                    \
+  QLF3(NIL,NIL,S_D)                                     \
+}
 #define OP_SVE_BZBB                                     \
 {                                                       \
   QLF4(S_B,P_Z,S_B,S_B),                                \
@@ -1536,6 +1543,10 @@
 #define OP_SVE_DMD                                      \
 {                                                       \
   QLF3(S_D,P_M,S_D),                                    \
+}
+#define OP_SVE_QMQ                                      \
+{                                                       \
+  QLF3(S_Q,P_M,S_Q),                                    \
 }
 #define OP_SVE_DMH                                      \
 {                                                       \
@@ -5178,6 +5189,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("ldr", 0xe1000000, 0xffff9c10, sme_ldr, 0, OP2 (SME_ZA_array, SME_ADDR_RI_U4xVL), {}, 0, 1),
   SME_INSN ("str", 0xe1200000, 0xffff9c10, sme_str, 0, OP2 (SME_ZA_array, SME_ADDR_RI_U4xVL), {}, 0, 1),
 
+  SME_INSNC ("revd", 0x52e8000, 0xffffe000, sme_misc, 0, OP3 (SVE_Zd, SVE_Pg3, SVE_Zn), OP_SVE_QMQ, 0, C_SCAN_MOVPRFX, 0),
+  SME_INSNC ("sclamp", 0x4400c000, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, C_SCAN_MOVPRFX, 0),
+  SME_INSNC ("uclamp", 0x4400c400, 0xff20fc00, sve_size_bhsd, 0, OP3 (SVE_Zd, SVE_Zn, SVE_Zm_16), OP_SVE_VVV_BHSD, 0, C_SCAN_MOVPRFX, 0),
+  SME_INSN ("psel", 0x25204000, 0xff20c000, sme_misc, 0, OP3 (SVE_Pd, SVE_Pg4_10, SME_PnT_Wm_imm), OP_SVE_NN_BHSD, 0, 0),
+
   /* SIMD Dot Product (optional in v8.2-A).  */
   DOT_INSN ("udot", 0x2e009400, 0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
   DOT_INSN ("sdot", 0xe009400,  0xbf20fc00, dotproduct, OP3 (Vd, Vn, Vm), QL_V3DOT, F_SIZEQ),
@@ -5773,6 +5789,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, sme_sm_za, "SME_SM_ZA", 0, \
       F(FLD_CRm),					\
       "streaming mode")	\
+    Y(SVE_REG, sme_pred_reg_with_index, "SME_PnT_Wm_imm", 0,			\
+      F(FLD_SME_Rm,FLD_SVE_Pn,FLD_SME_i1,FLD_SME_tszh,FLD_SME_tszl),	\
+      "Source scalable predicate register with index ")	\
     Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16),			\
       "a 16-bit unsigned immediate for TME tcancel")			\
     Y(SIMD_ELEMENT, reglane, "SM3_IMM2", 0, F(FLD_SM3_imm2),		\

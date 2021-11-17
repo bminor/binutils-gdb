@@ -244,6 +244,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_SVE_REG, "SME_ZA_array", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Rv,FLD_imm4_2}, "ZA array"},
   {AARCH64_OPND_CLASS_ADDRESS, "SME_ADDR_RI_U4xVL", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn,FLD_imm4_2}, "memory offset"},
   {AARCH64_OPND_CLASS_ADDRESS, "SME_SM_ZA", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_CRm}, "streaming mode"},
+  {AARCH64_OPND_CLASS_SVE_REG, "SME_PnT_Wm_imm", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Rm,FLD_SVE_Pn,FLD_SME_i1,FLD_SME_tszh,FLD_SME_tszl}, "Source scalable predicate register with index "},
   {AARCH64_OPND_CLASS_IMMEDIATE, "TME_UIMM16", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_imm16}, "a 16-bit unsigned immediate for TME tcancel"},
   {AARCH64_OPND_CLASS_SIMD_ELEMENT, "SM3_IMM2", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SM3_imm2}, "an indexed SM3 vector immediate"},
   {AARCH64_OPND_CLASS_NIL, "", 0, {0}, "DUMMY"},

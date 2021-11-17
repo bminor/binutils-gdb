@@ -455,6 +455,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ZA_array,        /* SME ZA[<Wv>{, #<imm>}].  */
   AARCH64_OPND_SME_ADDR_RI_U4xVL,   /* SME [<Xn|SP>{, #<imm>, MUL VL}].  */
   AARCH64_OPND_SME_SM_ZA,           /* SME {SM | ZA}.  */
+  AARCH64_OPND_SME_PnT_Wm_imm,           /* SME <Pn>.<T>[<Wm>, #<imm>].  */
   AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
 };

@@ -4655,6 +4655,65 @@ parse_sme_sm_za (char **str)
   return TOLOWER (p[0]);
 }
 
+/* Parse the name of the source scalable predicate register, the index base
+   register W12-W15 and the element index. Function performs element index
+   limit checks as well as qualifier type checks.
+
+   <Pn>.<T>[<Wv>, <imm>]
+   <Pn>.<T>[<Wv>, #<imm>]
+
+   On success function sets <Wv> to INDEX_BASE_REG, <T> to QUALIFIER and
+   <imm> to IMM.
+   Function returns <Pn>, or PARSE_FAIL.
+*/
+static int
+parse_sme_pred_reg_with_index(char **str,
+                              int *index_base_reg,
+                              int *imm,
+                              aarch64_opnd_qualifier_t *qualifier)
+{
+  int regno;
+  int64_t imm_limit;
+  int64_t imm_value;
+  const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_PN, qualifier);
+
+  if (reg == NULL)
+    return PARSE_FAIL;
+  regno = reg->number;
+
+  switch (*qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      imm_limit = 15;
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      imm_limit = 7;
+      break;
+    case AARCH64_OPND_QLF_S_S:
+      imm_limit = 3;
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      imm_limit = 1;
+      break;
+    default:
+      set_syntax_error (_("wrong predicate register element size, allowed b, h, s and d"));
+      return PARSE_FAIL;
+    }
+
+  if (! parse_sme_za_hv_tiles_operand_index (str, index_base_reg, &imm_value))
+    return PARSE_FAIL;
+
+  if (imm_value < 0 || imm_value > imm_limit)
+    {
+      set_syntax_error (_("element index out of range for given variant"));
+      return PARSE_FAIL;
+    }
+
+  *imm = imm_value;
+
+  return regno;
+}
+
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
    Returns the encoding for the option, or PARSE_FAIL.
 
@@ -7067,6 +7126,25 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  info->reg.regno = val;
 	  break;
+
+	case AARCH64_OPND_SME_PnT_Wm_imm:
+	  /* <Pn>.<T>[<Wm>, #<imm>]  */
+	  {
+	    int index_base_reg;
+	    int imm;
+	    val = parse_sme_pred_reg_with_index (&str,
+	                                         &index_base_reg,
+	                                         &imm,
+	                                         &qualifier);
+	    if (val == PARSE_FAIL)
+	        goto failure;
+
+	    info->za_tile_vector.regno = val;
+	    info->za_tile_vector.index.regno = index_base_reg;
+	    info->za_tile_vector.index.imm = imm;
+	    info->qualifier = qualifier;
+	    break;
+	  }
 
 	case AARCH64_OPND_SVE_ADDR_RI_S4x16:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x32:

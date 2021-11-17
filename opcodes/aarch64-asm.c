@@ -1452,6 +1452,73 @@ aarch64_ins_sme_sm_za (const aarch64_operand *self,
   return true;
 }
 
+/* Encode source scalable predicate register (Pn), name of the index base
+   register W12-W15 (Rm), and optional element index, defaulting to 0, in the
+   range 0 to one less than the number of vector elements in a 128-bit vector
+   register, encoded in "i1:tszh:tszl".
+*/
+bool
+aarch64_ins_sme_pred_reg_with_index (const aarch64_operand *self,
+                                     const aarch64_opnd_info *info,
+                                     aarch64_insn *code,
+                                     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                                     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  int fld_pn = info->za_tile_vector.regno;
+  int fld_rm = info->za_tile_vector.index.regno - 12;
+  int imm = info->za_tile_vector.index.imm;
+  int fld_i1, fld_tszh, fld_tshl;
+
+  insert_field (self->fields[0], code, fld_rm, 0);
+  insert_field (self->fields[1], code, fld_pn, 0);
+
+  /* Optional element index, defaulting to 0, in the range 0 to one less than
+     the number of vector elements in a 128-bit vector register, encoded in
+     "i1:tszh:tszl".
+
+        i1  tszh  tszl  <T>
+        0   0     000   RESERVED
+        x   x     xx1   B
+        x   x     x10   H
+        x   x     100   S
+        x   1     000   D
+  */
+  switch (info->qualifier)
+  {
+    case AARCH64_OPND_QLF_S_B:
+      /* <imm> is 4 bit value.  */
+      fld_i1 = (imm >> 3) & 0x1;
+      fld_tszh = (imm >> 2) & 0x1;
+      fld_tshl = ((imm << 1) | 0x1) & 0x7;
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      /* <imm> is 3 bit value.  */
+      fld_i1 = (imm >> 2) & 0x1;
+      fld_tszh = (imm >> 1) & 0x1;
+      fld_tshl = ((imm << 2) | 0x2) & 0x7;
+      break;
+    case AARCH64_OPND_QLF_S_S:
+      /* <imm> is 2 bit value.  */
+      fld_i1 = (imm >> 1) & 0x1;
+      fld_tszh = imm & 0x1;
+      fld_tshl = 0x4;
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      /* <imm> is 1 bit value.  */
+      fld_i1 = imm & 0x1;
+      fld_tszh = 0x1;
+      fld_tshl = 0x0;
+      break;
+    default:
+      assert (0);
+  }
+
+  insert_field (self->fields[2], code, fld_i1, 0);
+  insert_field (self->fields[3], code, fld_tszh, 0);
+  insert_field (self->fields[4], code, fld_tshl, 0);
+  return true;
+}
+
 /* Miscellaneous encoding functions.  */
 
 /* Encode size[0], i.e. bit 22, for
