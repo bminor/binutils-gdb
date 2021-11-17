@@ -348,7 +348,9 @@ proc test_catch_syscall_execve {} {
 	# Check for entry/return across the execve, making sure that the
 	# syscall_state isn't lost when turning into a new process.
 	insert_catch_syscall_with_arg "execve"
-	check_continue "execve"
+
+	# Check that the execve is called.
+	check_call_to_syscall "execve"
 
 	# Continue to main so extended-remote can read files as needed.
 	# (Otherwise that "Reading" output confuses gdb_continue_to_end.)
@@ -550,7 +552,7 @@ proc test_catch_syscall_multi_arch {} {
 	set syscall2_name "write"
 	set syscall_number 1
     } elseif { [istarget "powerpc-*-linux*"] \
-		   || [istarget "powerpc64-*-linux*"] } {
+		   || [istarget "powerpc64*-linux*"] } {
 	set arch1 "powerpc:common"
 	set arch2 "powerpc:common64"
 	set syscall1_name "openat"
