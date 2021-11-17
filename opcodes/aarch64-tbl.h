@@ -2401,6 +2401,14 @@ static const aarch64_feature_set aarch64_feature_sve2sm4 =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_SM4, 0);
 static const aarch64_feature_set aarch64_feature_sve2bitperm =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_BITPERM, 0);
+static const aarch64_feature_set aarch64_feature_sme =
+  AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SME, 0);
+static const aarch64_feature_set aarch64_feature_sme_f64 =
+  AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SME
+       | AARCH64_FEATURE_SME_F64, 0);
+static const aarch64_feature_set aarch64_feature_sme_i64 =
+  AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SME
+       | AARCH64_FEATURE_SME_I64, 0);
 static const aarch64_feature_set aarch64_feature_v8_6 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_6, 0);
 static const aarch64_feature_set aarch64_feature_v8_7 =
@@ -2458,6 +2466,9 @@ static const aarch64_feature_set aarch64_feature_flagm =
 #define SVE2_SHA3	&aarch64_feature_sve2sha3
 #define SVE2_SM4		&aarch64_feature_sve2sm4
 #define SVE2_BITPERM	&aarch64_feature_sve2bitperm
+#define SME		&aarch64_feature_sme
+#define SME_F64		&aarch64_feature_sme_f64
+#define SME_I64		&aarch64_feature_sme_i64
 #define ARMV8_6		&aarch64_feature_v8_6
 #define ARMV8_6_SVE		&aarch64_feature_v8_6
 #define BFLOAT16_SVE	&aarch64_feature_bfloat16_sve

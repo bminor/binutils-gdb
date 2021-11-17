@@ -51,6 +51,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_V8_4	     (1ULL << 11) /* ARMv8.4 processors.  */
 #define AARCH64_FEATURE_V8_R	     (1ULL << 12) /* Armv8-R processors.  */
 #define AARCH64_FEATURE_V8_7	     (1ULL << 13) /* Armv8.7 processors.  */
+#define AARCH64_FEATURE_SME	     (1ULL << 14) /* Scalable Matrix Extension.  */
 #define AARCH64_FEATURE_LS64	     (1ULL << 15) /* Atomic 64-byte load/store.  */
 #define AARCH64_FEATURE_PAC	     (1ULL << 16) /* v8.3 Pointer Authentication.  */
 #define AARCH64_FEATURE_FP	     (1ULL << 17) /* FP instructions.  */
@@ -91,6 +92,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_F64MM	     (1ULL << 54)
 #define AARCH64_FEATURE_FLAGM	     (1ULL << 55) /* v8.4 Flag Manipulation.  */
 #define AARCH64_FEATURE_V9	     (1ULL << 56) /* Armv9.0-A processors.  */
+#define AARCH64_FEATURE_SME_F64	     (1ULL << 57) /* SME F64.  */
+#define AARCH64_FEATURE_SME_I64	     (1ULL << 58) /* SME I64.  */
 
 /* Crypto instructions are the combination of AES and SHA2.  */
 #define AARCH64_FEATURE_CRYPTO	(AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_AES)
