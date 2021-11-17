@@ -1,4 +1,4 @@
 /*
-#sim: --sysroot=@exedir@
+#sim: --sysroot=$pwd
  */
 #include "hello.c"

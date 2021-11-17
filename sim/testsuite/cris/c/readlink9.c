@@ -1,6 +1,6 @@
 /* Check that odd cases of readlink work.
 #notarget: cris*-*-elf
-#cc: additional_flags=-DX="@exedir@"
+#cc: additional_flags=-DX="$pwd"
 */
 
 #include <unistd.h>

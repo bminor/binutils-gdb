@@ -1,5 +1,5 @@
 /* Simulator options:
-#sim: --sysroot=@exedir@
+#sim: --sysroot=$pwd
 */
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -1,5 +1,5 @@
 /*
-#sim: --sysroot=@exedir@
+#sim: --sysroot=$pwd
 #notarget: cris*-*-elf
 */
 #define PREFIX "/"

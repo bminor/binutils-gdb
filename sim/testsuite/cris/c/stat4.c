@@ -1,6 +1,6 @@
 /* Simulator options:
 #notarget: cris*-*-elf
-#sim: --sysroot=@exedir@
+#sim: --sysroot=$pwd
 */
 
 #include <sys/types.h>

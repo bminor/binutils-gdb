@@ -447,6 +447,7 @@ proc slurp_options { file } {
 	if [regexp $pat $line xxx opt_name opt_machs opt_val] {
 	    # match!
 	    set opt_val [string map [list \
+		{$pwd} [pwd] \
 		{$srcdir} "$srcdir" \
 		{$subdir} "$subdir" \
 	    ] "$opt_val"]

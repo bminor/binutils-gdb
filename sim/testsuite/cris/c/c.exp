@@ -121,10 +121,6 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	    return
 	}
 
-	# Replace specific substitutions:
-	# @exedir@ is where the test-program is located.
-	regsub -all "@exedir@" $opt_val "[pwd]" opt_val
-
 	# Multiple of these options concatenate, they don't override.
 	if { $opt_name == "output" || $opt_name == "progoptions" } {
 	    set opt_val "$opts($opt_name)$opt_val"

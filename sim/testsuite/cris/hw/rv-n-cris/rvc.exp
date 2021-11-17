@@ -99,6 +99,7 @@ proc slurp_rv { file } {
 	if [regexp $pat $line xxx cmd] {
 	    # match!
 	    set cmd [string map [list \
+		{$pwd} [pwd] \
 		{$srcdir} "$srcdir" \
 		{$subdir} "$subdir" \
 	    ] "$cmd"]

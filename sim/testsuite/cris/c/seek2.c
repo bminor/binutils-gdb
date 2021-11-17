@@ -1,4 +1,4 @@
 /* Simulator options:
-#sim: --sysroot=@exedir@/
+#sim: --sysroot=$pwd/
 */
 #include "seek1.c"
