@@ -5,6 +5,16 @@ if [ -z "$MACHINE" ]; then
 else
   OUTPUT_ARCH=${ARCH}:${MACHINE}
 fi
+
+case ${target} in
+  *-*-cygwin*)
+    cygwin_behavior=1
+    ;;
+  *)
+    cygwin_behavior=0;
+    ;;
+esac
+
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
@@ -104,7 +114,8 @@ fragment <<EOF
 #define DEFAULT_PSEUDO_RELOC_VERSION 1
 #endif
 
-#define DEFAULT_DLL_CHARACTERISTICS	(IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE \
+#define DEFAULT_DLL_CHARACTERISTICS	(${cygwin_behavior} ? 0 : \
+					   IMAGE_DLL_CHARACTERISTICS_DYNAMIC_BASE \
 					 | IMAGE_DLL_CHARACTERISTICS_NX_COMPAT)
 
 #if defined(TARGET_IS_i386pe) || ! defined(DLL_SUPPORT)

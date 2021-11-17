@@ -1,3 +1,9 @@
+2021-11-17  Jeremy Drake  <cygwin@jdrake.com>
+
+	* emultempl/pep.em (DEFAULT_DLL_CHARACTERISTICS): Set to 0 for
+	Cygwin targets.
+	* emultempl/pep.em (DEFAULT_DLL_CHARACTERISTICS): Likewise.
+
 2021-11-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 28452
