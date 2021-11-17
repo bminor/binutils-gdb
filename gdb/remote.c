@@ -258,15 +258,6 @@ public: /* data */
      Otherwise zero, meaning to use the guessed size.  */
   long explicit_packet_size = 0;
 
-  /* remote_wait is normally called when the target is running and
-     waits for a stop reply packet.  But sometimes we need to call it
-     when the target is already stopped.  We can send a "?" packet
-     and have remote_wait read the response.  Or, if we already have
-     the response, we can stash it in BUF and tell remote_wait to
-     skip calling getpkt.  This flag is set when BUF contains a
-     stop reply packet and the target is not waiting.  */
-  int cached_wait_status = 0;
-
   /* True, if in no ack mode.  That is, neither GDB nor the stub will
      expect acks from each other.  The connection is assumed to be
      reliable.  */
@@ -4969,8 +4960,9 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 
       /* Use the previously fetched status.  */
       gdb_assert (wait_status != NULL);
-      strcpy (rs->buf.data (), wait_status);
-      rs->cached_wait_status = 1;
+      struct notif_event *reply
+	= remote_notif_parse (this, &notif_client_stop, wait_status);
+      push_stop_reply ((struct stop_reply *) reply);
 
       ::start_remote (from_tty); /* Initialize gdb process mechanisms.  */
     }
@@ -5804,7 +5796,6 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
   /* Reset the target state; these things will be queried either by
      remote_query_supported or as they are needed.  */
   reset_all_packet_configs_support ();
-  rs->cached_wait_status = 0;
   rs->explicit_packet_size = 0;
   rs->noack_mode = 0;
   rs->extended = extended_p;
@@ -6199,21 +6190,13 @@ extended_remote_target::attach (const char *args, int from_tty)
       /* Use the previously fetched status.  */
       gdb_assert (wait_status != NULL);
 
+      struct notif_event *reply
+	=  remote_notif_parse (this, &notif_client_stop, wait_status);
+
+      push_stop_reply ((struct stop_reply *) reply);
+
       if (target_can_async_p ())
-	{
-	  struct notif_event *reply
-	    =  remote_notif_parse (this, &notif_client_stop, wait_status);
-
-	  push_stop_reply ((struct stop_reply *) reply);
-
-	  target_async (1);
-	}
-      else
-	{
-	  gdb_assert (wait_status != NULL);
-	  strcpy (rs->buf.data (), wait_status);
-	  rs->cached_wait_status = 1;
-	}
+	target_async (1);
     }
   else
     {
@@ -7084,9 +7067,9 @@ remote_target::remote_interrupt_as ()
   rs->ctrlc_pending_p = 1;
 
   /* If the inferior is stopped already, but the core didn't know
-     about it yet, just ignore the request.  The cached wait status
+     about it yet, just ignore the request.  The pending stop events
      will be collected in remote_wait.  */
-  if (rs->cached_wait_status)
+  if (stop_reply_queue_length () > 0)
     return;
 
   /* Send interrupt_sequence to remote target.  */
@@ -7480,7 +7463,7 @@ remote_target::queued_stop_reply (ptid_t ptid)
   remote_state *rs = get_remote_state ();
   struct stop_reply *r = remote_notif_remove_queued_reply (ptid);
 
-  if (!rs->stop_reply_queue.empty ())
+  if (!rs->stop_reply_queue.empty () && target_can_async_p ())
     {
       /* There's still at least an event left.  */
       mark_async_event_handler (rs->remote_async_inferior_event_token);
@@ -7505,7 +7488,12 @@ remote_target::push_stop_reply (struct stop_reply *new_event)
 			target_pid_to_str (new_event->ptid).c_str (),
 			int (rs->stop_reply_queue.size ()));
 
-  mark_async_event_handler (rs->remote_async_inferior_event_token);
+  /* Mark the pending event queue only if async mode is currently enabled.
+     If async mode is not currently enabled, then, if it later becomes
+     enabled, and there are events in this queue, we will mark the event
+     token at that point, see remote_target::async.  */
+  if (target_is_async_p ())
+    mark_async_event_handler (rs->remote_async_inferior_event_token);
 }
 
 /* Returns true if we have a stop reply for PTID.  */
@@ -8214,15 +8202,14 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 
   stop_reply = queued_stop_reply (ptid);
   if (stop_reply != NULL)
-    return process_stop_reply (stop_reply, status);
-
-  if (rs->cached_wait_status)
-    /* Use the cached wait status, but only once.  */
-    rs->cached_wait_status = 0;
+    {
+      /* None of the paths that push a stop reply onto the queue should
+	 have set the waiting_for_stop_reply flag.  */
+      gdb_assert (!rs->waiting_for_stop_reply);
+      event_ptid = process_stop_reply (stop_reply, status);
+    }
   else
     {
-      int ret;
-      int is_notif;
       int forever = ((options & TARGET_WNOHANG) == 0
 		     && rs->wait_forever_enabled_p);
 
@@ -8236,7 +8223,8 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 	 _never_ wait for ever -> test on target_is_async_p().
 	 However, before we do that we need to ensure that the caller
 	 knows how to take the target into/out of async mode.  */
-      ret = getpkt_or_notif_sane (&rs->buf, forever, &is_notif);
+      int is_notif;
+      int ret = getpkt_or_notif_sane (&rs->buf, forever, &is_notif);
 
       /* GDB gets a notification.  Return to core as this event is
 	 not interesting.  */
@@ -8245,73 +8233,73 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 
       if (ret == -1 && (options & TARGET_WNOHANG) != 0)
 	return minus_one_ptid;
-    }
 
-  buf = rs->buf.data ();
+      buf = rs->buf.data ();
 
-  /* Assume that the target has acknowledged Ctrl-C unless we receive
-     an 'F' or 'O' packet.  */
-  if (buf[0] != 'F' && buf[0] != 'O')
-    rs->ctrlc_pending_p = 0;
+      /* Assume that the target has acknowledged Ctrl-C unless we receive
+	 an 'F' or 'O' packet.  */
+      if (buf[0] != 'F' && buf[0] != 'O')
+	rs->ctrlc_pending_p = 0;
 
-  switch (buf[0])
-    {
-    case 'E':		/* Error of some sort.	*/
-      /* We're out of sync with the target now.  Did it continue or
-	 not?  Not is more likely, so report a stop.  */
-      rs->waiting_for_stop_reply = 0;
-
-      warning (_("Remote failure reply: %s"), buf);
-      status->set_stopped (GDB_SIGNAL_0);
-      break;
-    case 'F':		/* File-I/O request.  */
-      /* GDB may access the inferior memory while handling the File-I/O
-	 request, but we don't want GDB accessing memory while waiting
-	 for a stop reply.  See the comments in putpkt_binary.  Set
-	 waiting_for_stop_reply to 0 temporarily.  */
-      rs->waiting_for_stop_reply = 0;
-      remote_fileio_request (this, buf, rs->ctrlc_pending_p);
-      rs->ctrlc_pending_p = 0;
-      /* GDB handled the File-I/O request, and the target is running
-	 again.  Keep waiting for events.  */
-      rs->waiting_for_stop_reply = 1;
-      break;
-    case 'N': case 'T': case 'S': case 'X': case 'W':
-      {
-	/* There is a stop reply to handle.  */
-	rs->waiting_for_stop_reply = 0;
-
-	stop_reply
-	  = (struct stop_reply *) remote_notif_parse (this,
-						      &notif_client_stop,
-						      rs->buf.data ());
-
-	event_ptid = process_stop_reply (stop_reply, status);
-	break;
-      }
-    case 'O':		/* Console output.  */
-      remote_console_output (buf + 1);
-      break;
-    case '\0':
-      if (rs->last_sent_signal != GDB_SIGNAL_0)
+      switch (buf[0])
 	{
-	  /* Zero length reply means that we tried 'S' or 'C' and the
-	     remote system doesn't support it.  */
-	  target_terminal::ours_for_output ();
-	  printf_filtered
-	    ("Can't send signals to this remote system.  %s not sent.\n",
-	     gdb_signal_to_name (rs->last_sent_signal));
-	  rs->last_sent_signal = GDB_SIGNAL_0;
-	  target_terminal::inferior ();
+	case 'E':		/* Error of some sort.	*/
+	  /* We're out of sync with the target now.  Did it continue or
+	     not?  Not is more likely, so report a stop.  */
+	  rs->waiting_for_stop_reply = 0;
 
-	  strcpy (buf, rs->last_sent_step ? "s" : "c");
-	  putpkt (buf);
+	  warning (_("Remote failure reply: %s"), buf);
+	  status->set_stopped (GDB_SIGNAL_0);
+	  break;
+	case 'F':		/* File-I/O request.  */
+	  /* GDB may access the inferior memory while handling the File-I/O
+	     request, but we don't want GDB accessing memory while waiting
+	     for a stop reply.  See the comments in putpkt_binary.  Set
+	     waiting_for_stop_reply to 0 temporarily.  */
+	  rs->waiting_for_stop_reply = 0;
+	  remote_fileio_request (this, buf, rs->ctrlc_pending_p);
+	  rs->ctrlc_pending_p = 0;
+	  /* GDB handled the File-I/O request, and the target is running
+	     again.  Keep waiting for events.  */
+	  rs->waiting_for_stop_reply = 1;
+	  break;
+	case 'N': case 'T': case 'S': case 'X': case 'W':
+	  {
+	    /* There is a stop reply to handle.  */
+	    rs->waiting_for_stop_reply = 0;
+
+	    stop_reply
+	      = (struct stop_reply *) remote_notif_parse (this,
+							  &notif_client_stop,
+							  rs->buf.data ());
+
+	    event_ptid = process_stop_reply (stop_reply, status);
+	    break;
+	  }
+	case 'O':		/* Console output.  */
+	  remote_console_output (buf + 1);
+	  break;
+	case '\0':
+	  if (rs->last_sent_signal != GDB_SIGNAL_0)
+	    {
+	      /* Zero length reply means that we tried 'S' or 'C' and the
+		 remote system doesn't support it.  */
+	      target_terminal::ours_for_output ();
+	      printf_filtered
+		("Can't send signals to this remote system.  %s not sent.\n",
+		 gdb_signal_to_name (rs->last_sent_signal));
+	      rs->last_sent_signal = GDB_SIGNAL_0;
+	      target_terminal::inferior ();
+
+	      strcpy (buf, rs->last_sent_step ? "s" : "c");
+	      putpkt (buf);
+	      break;
+	    }
+	  /* fallthrough */
+	default:
+	  warning (_("Invalid remote reply: %s"), buf);
 	  break;
 	}
-      /* fallthrough */
-    default:
-      warning (_("Invalid remote reply: %s"), buf);
-      break;
     }
 
   if (status->kind () == TARGET_WAITKIND_NO_RESUMED)
@@ -9596,10 +9584,6 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 	       "and then try again."));
     }
 
-  /* We're sending out a new packet.  Make sure we don't look at a
-     stale cached response.  */
-  rs->cached_wait_status = 0;
-
   /* Copy the packet into buffer BUF2, encapsulating it
      and giving it a checksum.  */
 
@@ -9936,10 +9920,6 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
   int tries;
   int timeout;
   int val = -1;
-
-  /* We're reading a new response.  Make sure we don't look at a
-     previously cached response.  */
-  rs->cached_wait_status = 0;
 
   strcpy (buf->data (), "timeout");
 
