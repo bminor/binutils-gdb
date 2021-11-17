@@ -1100,6 +1100,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zvl64b", "zvl32b",		check_implicit_always},
   {"d", "f",		check_implicit_always},
   {"f", "zicsr",	check_implicit_always},
+  {"zqinx", "zdinx",	check_implicit_always},
+  {"zdinx", "zfinx",	check_implicit_always},
   {"zk", "zkn",		check_implicit_always},
   {"zk", "zkr",		check_implicit_always},
   {"zk", "zkt",		check_implicit_always},
@@ -1182,6 +1184,9 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zfinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zdinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zqinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zba",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -1895,6 +1900,13 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
     {
       rps->error_handler
         (_("rv32e does not support the `f' extension"));
+      no_conflict = false;
+    }
+  if (riscv_lookup_subset (rps->subset_list, "zfinx", &subset)
+      && riscv_lookup_subset (rps->subset_list, "f", &subset))
+    {
+      rps->error_handler
+	(_("`zfinx' is conflict with the `f/d/q' extension"));
       no_conflict = false;
     }
 
