@@ -278,6 +278,7 @@ struct reloc_entry
   BASIC_REG_TYPE(VN)	/* v[0-31] */	\
   BASIC_REG_TYPE(ZN)	/* z[0-31] */	\
   BASIC_REG_TYPE(PN)	/* p[0-15] */	\
+  BASIC_REG_TYPE(ZA)	/* za[0-15] */	\
   /* Typecheck: any 64-bit int reg         (inc SP exc XZR).  */	\
   MULTI_REG_TYPE(R64_SP, REG_TYPE(R_64) | REG_TYPE(SP_64))		\
   /* Typecheck: same, plus SVE registers.  */				\
@@ -4164,6 +4165,117 @@ parse_bti_operand (char **str,
   return 0;
 }
 
+/* Parse STR for reg of REG_TYPE and following '.' and QUALIFIER.
+   Function returns REG_ENTRY struct and QUALIFIER [bhsdq] or NULL
+   on failure. Format:
+
+     REG_TYPE.QUALIFIER
+
+   Side effect: Update STR with current parse position of success.
+*/
+
+static const reg_entry *
+parse_reg_with_qual (char **str, aarch64_reg_type reg_type,
+                     aarch64_opnd_qualifier_t *qualifier)
+{
+  char *q;
+
+  reg_entry *reg = parse_reg (str);
+  if (reg != NULL && reg->type == reg_type)
+    {
+      if (!skip_past_char (str, '.'))
+        {
+          set_syntax_error (_("missing ZA tile element size separator"));
+          return NULL;
+        }
+
+      q = *str;
+      switch (TOLOWER (*q))
+        {
+        case 'b':
+          *qualifier = AARCH64_OPND_QLF_S_B;
+          break;
+        case 'h':
+          *qualifier = AARCH64_OPND_QLF_S_H;
+          break;
+        case 's':
+          *qualifier = AARCH64_OPND_QLF_S_S;
+          break;
+        case 'd':
+          *qualifier = AARCH64_OPND_QLF_S_D;
+          break;
+        case 'q':
+          *qualifier = AARCH64_OPND_QLF_S_Q;
+          break;
+        default:
+          return NULL;
+        }
+      q++;
+
+      *str = q;
+      return reg;
+    }
+
+  return NULL;
+}
+
+/* Parse SME ZA tile encoded in <ZAda> assembler symbol.
+   Function return tile QUALIFIER on success.
+
+   Tiles are in example format: za[0-9]\.[bhsd]
+
+   Function returns <ZAda> register number or PARSE_FAIL.
+*/
+static int
+parse_sme_zada_operand (char **str, aarch64_opnd_qualifier_t *qualifier)
+{
+  int regno;
+  const reg_entry *reg = parse_reg_with_qual (str, REG_TYPE_ZA, qualifier);
+
+  if (reg == NULL)
+    return PARSE_FAIL;
+  regno = reg->number;
+
+  switch (*qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B:
+      if (regno != 0x00)
+      {
+        set_syntax_error (_("invalid ZA tile register number, expected za0"));
+        return PARSE_FAIL;
+      }
+      break;
+    case AARCH64_OPND_QLF_S_H:
+      if (regno > 0x01)
+      {
+        set_syntax_error (_("invalid ZA tile register number, expected za0-za1"));
+        return PARSE_FAIL;
+      }
+      break;
+    case AARCH64_OPND_QLF_S_S:
+      if (regno > 0x03)
+      {
+        /* For the 32-bit variant: is the name of the ZA tile ZA0-ZA3.  */
+        set_syntax_error (_("invalid ZA tile register number, expected za0-za3"));
+        return PARSE_FAIL;
+      }
+      break;
+    case AARCH64_OPND_QLF_S_D:
+      if (regno > 0x07)
+      {
+        /* For the 64-bit variant: is the name of the ZA tile ZA0-ZA7  */
+        set_syntax_error (_("invalid ZA tile register number, expected za0-za7"));
+        return PARSE_FAIL;
+      }
+      break;
+    default:
+      set_syntax_error (_("invalid ZA tile element size, allowed b, h, s and d"));
+      return PARSE_FAIL;
+    }
+
+  return regno;
+}
+
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
    Returns the encoding for the option, or PARSE_FAIL.
 
@@ -5801,6 +5913,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Pm:
 	case AARCH64_OPND_SVE_Pn:
 	case AARCH64_OPND_SVE_Pt:
+	case AARCH64_OPND_SME_Pm:
 	  reg_type = REG_TYPE_PN;
 	  goto vector_reg;
 
@@ -6867,6 +6980,15 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 	  break;
 
+	case AARCH64_OPND_SME_ZAda_2b:
+	case AARCH64_OPND_SME_ZAda_3b:
+	  val = parse_sme_zada_operand (&str, &qualifier);
+	  if (val == PARSE_FAIL)
+	    goto failure;
+	  info->reg.regno = val;
+	  info->qualifier = qualifier;
+	  break;
+
 	default:
 	  as_fatal (_("unhandled operand code %d"), operands[i]);
 	}
@@ -7463,7 +7585,10 @@ static const reg_entry reg_names[] = {
   REGSET (z, ZN), REGSET (Z, ZN),
 
   /* SVE predicate registers.  */
-  REGSET16 (p, PN), REGSET16 (P, PN)
+  REGSET16 (p, PN), REGSET16 (P, PN),
+
+  /* SME ZA tile registers.  */
+  REGSET16 (za, ZA), REGSET16 (ZA, ZA)
 };
 
 #undef REGDEF

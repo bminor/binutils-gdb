@@ -445,6 +445,9 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ZnxN,	/* SVE vector register list in Zn.  */
   AARCH64_OPND_SVE_Zt,		/* SVE vector register in Zt.  */
   AARCH64_OPND_SVE_ZtxN,	/* SVE vector register list in Zt.  */
+  AARCH64_OPND_SME_ZAda_2b,	/* SME <ZAda>.S, 2-bits.  */
+  AARCH64_OPND_SME_ZAda_3b,	/* SME <ZAda>.D, 3-bits.  */
+  AARCH64_OPND_SME_Pm,		/* SME scalable predicate register, bits [15:13].  */
   AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
 };
@@ -609,6 +612,7 @@ enum aarch64_insn_class
   movewide,
   pcreladdr,
   ic_system,
+  sme_misc,
   sve_cpy,
   sve_index,
   sve_limm,

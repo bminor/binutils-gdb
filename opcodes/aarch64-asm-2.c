@@ -661,6 +661,9 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 198:
     case 204:
     case 207:
+    case 209:
+    case 210:
+    case 211:
       return aarch64_ins_regno (self, info, code, inst, errors);
     case 15:
       return aarch64_ins_reg_extended (self, info, code, inst, errors);
@@ -672,7 +675,7 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 33:
     case 34:
     case 35:
-    case 210:
+    case 213:
       return aarch64_ins_reglane (self, info, code, inst, errors);
     case 36:
       return aarch64_ins_reglist (self, info, code, inst, errors);
@@ -717,7 +720,7 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 187:
     case 188:
     case 189:
-    case 209:
+    case 212:
       return aarch64_ins_imm (self, info, code, inst, errors);
     case 44:
     case 45:

@@ -321,6 +321,9 @@ const aarch64_field fields[] =
     { 19,  2 }, /* SVE_tszl_19: triangular size select low, bits [20,19].  */
     { 14,  1 }, /* SVE_xs_14: UXTW/SXTW select (bit 14).  */
     { 22,  1 }, /* SVE_xs_22: UXTW/SXTW select (bit 22).  */
+    {  0,  2 }, /* SME ZAda tile ZA0-ZA3.  */
+    {  0,  3 }, /* SME ZAda tile ZA0-ZA7.  */
+    { 13,  3 }, /* SME Pm second source scalable predicate register P0-P7.  */
     { 11,  2 }, /* rotate1: FCMLA immediate rotate.  */
     { 13,  2 }, /* rotate2: Indexed element FCMLA immediate rotate.  */
     { 12,  1 }, /* rotate3: FCADD immediate rotate.  */
@@ -3304,6 +3307,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Pm:
     case AARCH64_OPND_SVE_Pn:
     case AARCH64_OPND_SVE_Pt:
+    case AARCH64_OPND_SME_Pm:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
 	snprintf (buf, size, "p%d", opnd->reg.regno);
       else if (opnd->qualifier == AARCH64_OPND_QLF_P_Z
@@ -3343,6 +3347,12 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "z%d.%s[%" PRIi64 "]", opnd->reglane.regno,
 		aarch64_get_qualifier_name (opnd->qualifier),
 		opnd->reglane.index);
+      break;
+
+    case AARCH64_OPND_SME_ZAda_2b:
+    case AARCH64_OPND_SME_ZAda_3b:
+      snprintf (buf, size, "za%d.%s", opnd->reg.regno,
+                aarch64_get_qualifier_name (opnd->qualifier));
       break;
 
     case AARCH64_OPND_CRn:
@@ -5277,6 +5287,7 @@ verify_constraints (const struct aarch64_inst *inst,
 		  case AARCH64_OPND_SVE_Pm:
 		  case AARCH64_OPND_SVE_Pn:
 		  case AARCH64_OPND_SVE_Pt:
+		  case AARCH64_OPND_SME_Pm:
 		    inst_pred = inst_op;
 		    inst_pred_idx = i;
 		    break;
