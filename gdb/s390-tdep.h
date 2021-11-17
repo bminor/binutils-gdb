@@ -21,6 +21,7 @@
 #define S390_TDEP_H
 
 #include "prologue-value.h"
+#include "gdbarch.h"
 
 enum s390_abi_kind
 {

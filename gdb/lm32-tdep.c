@@ -34,6 +34,7 @@
 #include "reggroups.h"
 #include "opcodes/lm32-desc.h"
 #include <algorithm>
+#include "gdbarch.h"
 
 /* Macros to extract fields from an instruction.  */
 #define LM32_OPCODE(insn)       ((insn >> 26) & 0x3f)

@@ -20,6 +20,8 @@
 #ifndef CSKY_TDEP_H
 #define CSKY_TDEP_H
 
+#include "gdbarch.h"
+
 /* How to interpret the contents of the link register.  */
 enum lr_type_t
 {

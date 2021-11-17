@@ -21,6 +21,7 @@
 #define MIPS_TDEP_H
 
 #include "objfiles.h"
+#include "gdbarch.h"
 
 struct gdbarch;
 

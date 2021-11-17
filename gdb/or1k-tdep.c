@@ -42,6 +42,7 @@
 #include "target-descriptions.h"
 #include <inttypes.h>
 #include "dis-asm.h"
+#include "gdbarch.h"
 
 /* OpenRISC specific includes.  */
 #include "or1k-tdep.h"

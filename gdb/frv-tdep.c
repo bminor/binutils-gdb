@@ -38,6 +38,7 @@
 #include "solib.h"
 #include "frv-tdep.h"
 #include "objfiles.h"
+#include "gdbarch.h"
 
 struct frv_unwind_cache		/* was struct frame_extra_info */
   {

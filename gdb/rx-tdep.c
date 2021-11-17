@@ -35,6 +35,7 @@
 #include "dwarf2/frame.h"
 #include "remote.h"
 #include "target-descriptions.h"
+#include "gdbarch.h"
 
 #include "elf/rx.h"
 #include "elf-bfd.h"

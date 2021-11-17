@@ -32,6 +32,7 @@
 #include "osabi.h"
 #include "elf-bfd.h"
 #include "elf/v850.h"
+#include "gdbarch.h"
 
 enum
   {

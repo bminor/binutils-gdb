@@ -23,6 +23,8 @@
 #ifndef CRIS_TDEP_H
 #define CRIS_TDEP_H
 
+#include "gdbarch.h"
+
 /* CRIS architecture specific information.  */
 struct cris_gdbarch_tdep : gdbarch_tdep
 {

@@ -20,6 +20,8 @@
 #ifndef MOXIE_TDEP_H
 #define MOXIE_TDEP_H
 
+#include "gdbarch.h"
+
 struct moxie_gdbarch_tdep : gdbarch_tdep
 {
   /* gdbarch target dependent data here.  Currently unused for MOXIE.  */

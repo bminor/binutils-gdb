@@ -31,6 +31,7 @@
 #include "trad-frame.h"
 #include "remote.h"
 #include "opcodes/s12z-opc.h"
+#include "gdbarch.h"
 
 /* Two of the registers included in S12Z_N_REGISTERS are
    the CCH and CCL "registers" which are just views into

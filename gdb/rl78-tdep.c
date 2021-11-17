@@ -34,6 +34,7 @@
 #include "gdbcore.h"
 #include "dwarf2/frame.h"
 #include "reggroups.h"
+#include "gdbarch.h"
 
 #include "elf/rl78.h"
 #include "elf-bfd.h"

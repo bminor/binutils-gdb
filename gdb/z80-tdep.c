@@ -30,6 +30,7 @@
 #include "inferior.h"
 #include "objfiles.h"
 #include "symfile.h"
+#include "gdbarch.h"
 
 #include "z80-tdep.h"
 #include "features/z80.c"

@@ -20,6 +20,8 @@
 #ifndef FT32_TDEP_H
 #define FT32_TDEP_H
 
+#include "gdbarch.h"
+
 struct ft32_gdbarch_tdep : gdbarch_tdep
 {
   /* Type for a pointer to a function.  Used for the type of PC.  */

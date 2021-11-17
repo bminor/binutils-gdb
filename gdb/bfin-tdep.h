@@ -22,6 +22,8 @@
 #ifndef BFIN_TDEP_H
 #define BFIN_TDEP_H
 
+#include "gdbarch.h"
+
 enum gdb_regnum {
   /* Core Registers */
   BFIN_R0_REGNUM = 0,

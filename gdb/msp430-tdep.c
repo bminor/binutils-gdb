@@ -34,6 +34,7 @@
 #include "gdbcore.h"
 #include "dwarf2/frame.h"
 #include "reggroups.h"
+#include "gdbarch.h"
 
 #include "elf/msp430.h"
 #include "opcode/msp430-decode.h"

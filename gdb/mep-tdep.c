@@ -45,6 +45,7 @@
 #include "prologue-value.h"
 #include "cgen/bitset.h"
 #include "infcall.h"
+#include "gdbarch.h"
 
 /* Get the user's customized MeP coprocessor register names from
    libopcodes.  */

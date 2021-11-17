@@ -38,6 +38,7 @@
 #include "arch-utils.h"
 #include "regcache.h"
 #include "reggroups.h"
+#include "gdbarch.h"
 
 #include "target.h"
 #include "opcode/m68hc11.h"

@@ -37,6 +37,7 @@
 #include "dis-asm.h"
 #include "objfiles.h"
 #include <algorithm>
+#include "gdbarch.h"
 
 /* AVR Background:
 

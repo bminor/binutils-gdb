@@ -21,6 +21,8 @@
 #ifndef NDS32_TDEP_H
 #define NDS32_TDEP_H
 
+#include "gdbarch.h"
+
 enum nds32_regnum
 {
   /* General purpose registers.  */

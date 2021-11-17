@@ -34,6 +34,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 #include "remote.h"
+#include "gdbarch.h"
 
 
 /* eBPF registers.  */

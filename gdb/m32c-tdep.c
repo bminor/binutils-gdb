@@ -30,6 +30,7 @@
 #include "reggroups.h"
 #include "prologue-value.h"
 #include "objfiles.h"
+#include "gdbarch.h"
 
 
 /* The m32c tdep structure.  */

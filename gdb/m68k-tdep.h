@@ -20,6 +20,8 @@
 #ifndef M68K_TDEP_H
 #define M68K_TDEP_H
 
+#include "gdbarch.h"
+
 struct frame_info;
 
 /* Register numbers of various important registers.  */
