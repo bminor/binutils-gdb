@@ -18,11 +18,17 @@
 # Tweak the site.exp so it works with plain `runtest` from user.
 EXTRA_DEJAGNU_SITE_CONFIG = site-srcdir.exp
 
+# Custom verbose test variables that automake doesn't provide (yet?).
+AM_V_RUNTEST = $(AM_V_RUNTEST_@AM_V@)
+AM_V_RUNTEST_ = $(AM_V_RUNTEST_@AM_DEFAULT_V@)
+AM_V_RUNTEST_0 =  @echo "  RUNTEST  $(RUNTESTFLAGS)";
+AM_V_RUNTEST_1 =
+
 site-srcdir.exp: Makefile
-	echo "set srcdir \"$(srcdir)/testsuite\"" > $@
+	$(AM_V_GEN)echo "set srcdir \"$(srcdir)/testsuite\"" > $@
 
 check-DEJAGNU: site.exp
-	LC_ALL=C; export LC_ALL; \
+	$(AM_V_RUNTEST)LC_ALL=C; export LC_ALL; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
