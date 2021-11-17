@@ -1,3 +1,9 @@
+2021-11-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 28452
+	* ldgram.y: Add support for PT_GNU_RELRO and PT_GNU_PROPERTY.
+	* ldgram.c: Regenerate.
+
 2021-11-15  Roland McGrath  <mcgrathr@google.com>
 
 	* testsuite/ld-aarch64/dt_textrel.d: Pass explicit -z notext in

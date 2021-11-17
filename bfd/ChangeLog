@@ -1,3 +1,9 @@
+2021-11-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 28452
+	* elf.c (assign_file_positions_for_non_load_sections): Replace
+	assertion with a warning message.
+
 2021-10-19  Nick Clifton  <nickc@redhat.com>
 
 	* linker.c (_bfd_generic_link_add_one_symbol): Test for a NULL

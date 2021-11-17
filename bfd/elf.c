@@ -6261,10 +6261,15 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		    }
 		}
 	    }
-	  if (link_info != NULL)
-	    BFD_ASSERT (ok);
+
 	  if (!ok)
-	    memset (p, 0, sizeof *p);
+	    {
+	      if (link_info != NULL)
+		_bfd_error_handler
+		  (_("%pB: warning: unable to allocate any sections to PT_GNU_RELRO segment"),
+		   abfd);
+	      memset (p, 0, sizeof *p);
+	    }
 	}
       else if (p->p_type == PT_GNU_STACK)
 	{
