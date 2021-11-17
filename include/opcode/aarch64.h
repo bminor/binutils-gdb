@@ -454,6 +454,7 @@ enum aarch64_opnd
   AARCH64_OPND_SME_ZA_HV_idx_ldstr,	/* SME destination ZA tile vector.  */
   AARCH64_OPND_SME_ZA_array,        /* SME ZA[<Wv>{, #<imm>}].  */
   AARCH64_OPND_SME_ADDR_RI_U4xVL,   /* SME [<Xn|SP>{, #<imm>, MUL VL}].  */
+  AARCH64_OPND_SME_SM_ZA,           /* SME {SM | ZA}.  */
   AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
 };
@@ -621,6 +622,8 @@ enum aarch64_insn_class
   sme_misc,
   sme_ldr,
   sme_str,
+  sme_start,
+  sme_stop,
   sve_cpy,
   sve_index,
   sve_limm,

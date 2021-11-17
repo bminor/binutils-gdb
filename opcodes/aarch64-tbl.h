@@ -3933,6 +3933,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
   _TME_INSN ("ttest", 0xd5233160, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcancel", 0xd4600000, 0xffe0001f, 0, 0, OP1 (TME_UIMM16), QL_IMM_NIL, 0),
+  /* SME instructions (aliases for MSR <sysreg> operations.  */
+  SME_INSN ("smstart", 0xd503477f, 0xffffffff, sme_start, 0, OP0 (), {}, F_SYS_WRITE, 0),
+  SME_INSN ("smstop",  0xd503467f, 0xffffffff, sme_stop,  0, OP0 (), {}, F_SYS_WRITE, 0),
+  SME_INSN ("smstart", 0xd503417f, 0xfffff1ff, sme_start, 0, OP1 (SME_SM_ZA), {}, F_SYS_WRITE, 0),
+  SME_INSN ("smstop",  0xd503407f, 0xfffff1ff, sme_stop,  0, OP1 (SME_SM_ZA), {}, F_SYS_WRITE, 0),
   /* System.  */
   CORE_INSN ("msr", 0xd500401f, 0xfff8f01f, ic_system, 0, OP2 (PSTATEFIELD, UIMM4), {}, F_SYS_WRITE),
   CORE_INSN ("hint",0xd503201f, 0xfffff01f, ic_system, 0, OP1 (UIMM7), {}, F_HAS_ALIAS),
@@ -5765,6 +5770,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, sme_addr_ri_u4xvl, "SME_ADDR_RI_U4xVL", 0 << OPD_F_OD_LSB, \
       F(FLD_Rn,FLD_imm4_2),					\
       "memory offset")	\
+    Y(ADDRESS, sme_sm_za, "SME_SM_ZA", 0, \
+      F(FLD_CRm),					\
+      "streaming mode")	\
     Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16),			\
       "a 16-bit unsigned immediate for TME tcancel")			\
     Y(SIMD_ELEMENT, reglane, "SM3_IMM2", 0, F(FLD_SM3_imm2),		\

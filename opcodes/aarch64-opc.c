@@ -1520,7 +1520,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  if (!aarch64_stack_pointer_p (opnd))
 	    {
 	      set_other_error (mismatch_detail, idx,
-			       _("stack pointer register expected"));
+		       _("stack pointer register expected"));
 	      return 0;
 	    }
 	  break;
@@ -2592,11 +2592,15 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	  /* MSR UAO, #uimm4
 	     MSR PAN, #uimm4
 	     MSR SSBS,#uimm4
+	     MSR SVCRSM, #uimm4
+	     MSR SVCRZA, #uimm4
+	     MSR SVCRSMZA, #uimm4
 	     The immediate must be #0 or #1.  */
 	  if ((opnd->pstatefield == 0x03	/* UAO.  */
 	       || opnd->pstatefield == 0x04	/* PAN.  */
 	       || opnd->pstatefield == 0x19     /* SSBS.  */
-	       || opnd->pstatefield == 0x1a)	/* DIT.  */
+	       || opnd->pstatefield == 0x1a	/* DIT.  */
+	       || opnd->pstatefield == 0x1b)	/* SVCRSM, SVCRZA or SVCRSMZA.  */
 	      && opnds[1].imm.value > 1)
 	    {
 	      set_imm_out_of_range_error (mismatch_detail, idx, 0, 1);
@@ -3465,6 +3469,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
                 opnd->za_tile_vector.index.imm);
       break;
 
+    case AARCH64_OPND_SME_SM_ZA:
+      snprintf (buf, size, "%s", opnd->reg.regno == 's' ? "sm" : "za");
+      break;
+
     case AARCH64_OPND_CRn:
     case AARCH64_OPND_CRm:
       snprintf (buf, size, "C%" PRIi64, opnd->imm.value);
@@ -3861,8 +3869,17 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_PSTATEFIELD:
       for (i = 0; aarch64_pstatefields[i].name; ++i)
-	if (aarch64_pstatefields[i].value == opnd->pstatefield)
-	  break;
+        if (aarch64_pstatefields[i].value == opnd->pstatefield)
+          {
+            /* PSTATEFIELD name is encoded partially in CRm[3:1] for SVCRSM,
+               SVCRZA and SVCRSMZA.  */
+            uint32_t flags = aarch64_pstatefields[i].flags;
+            if (flags & F_REG_IN_CRM
+                && (PSTATE_DECODE_CRM (opnd->sysreg.flags)
+                    != PSTATE_DECODE_CRM (flags)))
+              continue;
+            break;
+          }
       assert (aarch64_pstatefields[i].name);
       snprintf (buf, size, "%s", aarch64_pstatefields[i].name);
       break;
@@ -3958,6 +3975,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 #define SR_V8_4(n,e,f)	  SR_FEAT (n,e,f,V8_4)
 #define SR_PAN(n,e,f)	  SR_FEAT (n,e,f,PAN)
 #define SR_RAS(n,e,f)	  SR_FEAT (n,e,f,RAS)
+#define SR_SME(n,e,f)	  SR_FEAT (n,e,f,SME)
 #define SR_SSBS(n,e,f)	  SR_FEAT (n,e,f,SSBS)
 #define SR_SVE(n,e,f)	  SR_FEAT (n,e,f,SVE)
 #define SR_ID_PFR2(n,e,f) SR_FEAT (n,e,f,ID_PFR2)
@@ -4808,6 +4826,8 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("gpccr_el3",     CPENC (3,6,C2,C1,6), 0),
   SR_CORE ("gptbr_el3",     CPENC (3,6,C2,C1,4), 0),
 
+  SR_SME ("svcr",           CPENC (3,3,C4,C2,2), 0),
+
   { 0, CPENC (0,0,0,0,0), 0, 0 }
 };
 
@@ -4834,6 +4854,9 @@ const aarch64_sys_reg aarch64_pstatefields [] =
   SR_SSBS ("ssbs",	  0x19, 0),
   SR_V8_4 ("dit",	  0x1a,	0),
   SR_MEMTAG ("tco",	  0x1c,	0),
+  SR_SME  ("svcrsm",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x2,0x1)),
+  SR_SME  ("svcrza",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x4,0x1)),
+  SR_SME  ("svcrsmza",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x6,0x1)),
   { 0,	  CPENC (0,0,0,0,0), 0, 0 },
 };
 

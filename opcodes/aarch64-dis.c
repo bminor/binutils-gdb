@@ -664,7 +664,7 @@ aarch64_ext_shll_imm (const aarch64_operand *self ATTRIBUTE_UNUSED,
 bool
 aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 		 const aarch64_insn code,
-		 const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		 const aarch64_inst *inst,
 		 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   uint64_t imm;
@@ -681,6 +681,10 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 
   if (info->type == AARCH64_OPND_ADDR_ADRP)
     imm <<= 12;
+
+  if (inst->operands[0].type == AARCH64_OPND_PSTATEFIELD
+      && inst->operands[0].sysreg.flags & F_IMM_IN_CRM)
+    imm &= PSTATE_DECODE_CRM_IMM (inst->operands[0].sysreg.flags);
 
   info->imm.value = imm;
   return true;
@@ -1226,11 +1230,20 @@ aarch64_ext_pstatefield (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   int i;
+  aarch64_insn fld_crm = extract_field (FLD_CRm, code, 0);
   /* op1:op2 */
   info->pstatefield = extract_fields (code, 0, 2, FLD_op1, FLD_op2);
   for (i = 0; aarch64_pstatefields[i].name != NULL; ++i)
     if (aarch64_pstatefields[i].value == (aarch64_insn)info->pstatefield)
-      return true;
+      {
+        /* PSTATEFIELD name can be encoded partially in CRm[3:1].  */
+        uint32_t flags = aarch64_pstatefields[i].flags;
+        if ((flags & F_REG_IN_CRM)
+            && ((fld_crm & 0xe) != PSTATE_DECODE_CRM (flags)))
+          continue;
+        info->sysreg.flags = flags;
+        return true;
+      }
   /* Reserved value in <pstatefield>.  */
   return false;
 }
@@ -1853,6 +1866,27 @@ aarch64_ext_sme_addr_ri_u4xvl (const aarch64_operand *self,
   /* MUL VL operator is always present for this operand.  */
   info->shifter.kind = AARCH64_MOD_MUL_VL;
   info->shifter.operator_present = (imm != 0);
+  return true;
+}
+
+/* Decode {SM|ZA} filed for SMSTART and SMSTOP instructions.  */
+bool
+aarch64_ext_sme_sm_za (const aarch64_operand *self,
+                       aarch64_opnd_info *info, aarch64_insn code,
+                       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  info->pstatefield = 0x1b;
+  aarch64_insn fld_crm = extract_field (self->fields[0], code, 0);
+  fld_crm >>= 1;    /* CRm[3:1].  */
+
+  if (fld_crm == 0x1)
+    info->reg.regno = 's';
+  else if (fld_crm == 0x2)
+    info->reg.regno = 'z';
+  else
+    assert (0);
+
   return true;
 }
 

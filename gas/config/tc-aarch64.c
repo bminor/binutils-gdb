@@ -4629,6 +4629,32 @@ parse_sme_za_array (char **str, int *imm)
   return regno;
 }
 
+/* Parse streaming mode operand for SMSTART and SMSTOP.
+
+   {SM | ZA}
+
+   Function returns 's' if SM or 'z' if ZM is parsed. Otherwise PARSE_FAIL.
+*/
+static int
+parse_sme_sm_za (char **str)
+{
+  char *p, *q;
+
+  p = q = *str;
+  while (ISALPHA (*q))
+    q++;
+
+  if ((q - p != 2)
+      || (strncasecmp ("sm", p, 2) != 0 && strncasecmp ("za", p, 2) != 0))
+    {
+      set_syntax_error (_("expected SM or ZA operand"));
+      return PARSE_FAIL;
+    }
+
+  *str = q;
+  return TOLOWER (p[0]);
+}
+
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
    Returns the encoding for the option, or PARSE_FAIL.
 
@@ -7032,6 +7058,16 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  /* No qualifier.  */
 	  break;
 
+	case AARCH64_OPND_SME_SM_ZA:
+	  /* { SM | ZA }  */
+	  if ((val = parse_sme_sm_za (&str)) == PARSE_FAIL)
+	    {
+	      set_syntax_error (_("unknown or missing PSTATE field name"));
+	      goto failure;
+	    }
+	  info->reg.regno = val;
+	  break;
+
 	case AARCH64_OPND_SVE_ADDR_RI_S4x16:
 	case AARCH64_OPND_SVE_ADDR_RI_S4x32:
 	case AARCH64_OPND_SVE_ADDR_RI_S4xVL:
@@ -7221,14 +7257,18 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  }
 
 	case AARCH64_OPND_PSTATEFIELD:
-	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0, 1, NULL))
-	      == PARSE_FAIL)
-	    {
-	      set_syntax_error (_("unknown or missing PSTATE field name"));
-	      goto failure;
-	    }
-	  inst.base.operands[i].pstatefield = val;
-	  break;
+	  {
+	    uint32_t sysreg_flags;
+	    if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0, 1,
+				      &sysreg_flags)) == PARSE_FAIL)
+	      {
+	        set_syntax_error (_("unknown or missing PSTATE field name"));
+	        goto failure;
+	      }
+	    inst.base.operands[i].pstatefield = val;
+	    inst.base.operands[i].sysreg.flags = sysreg_flags;
+	    break;
+	  }
 
 	case AARCH64_OPND_SYSREG_IC:
 	  inst.base.operands[i].sysins_op =

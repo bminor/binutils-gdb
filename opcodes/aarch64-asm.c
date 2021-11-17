@@ -848,6 +848,10 @@ aarch64_ins_pstatefield (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* op1:op2 */
   insert_fields (code, info->pstatefield, inst->opcode->mask, 2,
 		 FLD_op2, FLD_op1);
+
+  /* Extra CRm mask.  */
+  if (info->sysreg.flags | F_REG_IN_CRM)
+    insert_field (FLD_CRm, code, PSTATE_DECODE_CRM (info->sysreg.flags), 0);
   return true;
 }
 
@@ -1424,6 +1428,27 @@ aarch64_ins_sme_addr_ri_u4xvl (const aarch64_operand *self,
   int imm = info->addr.offset.imm;
   insert_field (self->fields[0], code, regno, 0);
   insert_field (self->fields[1], code, imm, 0);
+  return true;
+}
+
+/* Encode in SMSTART and SMSTOP {SM | ZA } mode.  */
+bool
+aarch64_ins_sme_sm_za (const aarch64_operand *self,
+                       const aarch64_opnd_info *info,
+                       aarch64_insn *code,
+                       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+                       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  aarch64_insn fld_crm;
+  /* Set CRm[3:1] bits.  */
+  if (info->reg.regno == 's')
+    fld_crm = 0x02 ; /* SVCRSM.  */
+  else if (info->reg.regno == 'z')
+    fld_crm = 0x04; /* SVCRZA.  */
+  else
+    assert (0);
+
+  insert_field (self->fields[0], code, fld_crm, 0);
   return true;
 }
 

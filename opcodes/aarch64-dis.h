@@ -126,6 +126,7 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_sme_za_hv_tiles);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sme_za_list);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sme_za_array);
 AARCH64_DECL_OPD_EXTRACTOR (ext_sme_addr_ri_u4xvl);
+AARCH64_DECL_OPD_EXTRACTOR (ext_sme_sm_za);
 AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate1);
 AARCH64_DECL_OPD_EXTRACTOR (ext_imm_rotate2);
 
