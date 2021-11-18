@@ -1,3 +1,25 @@
+2021-11-18  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (parse_args): Add support for --multibyte-handling.
+	* as.h (multibyte_handling): Declare.
+	* app.c (scan_for_multibyte_characters): New function.
+	(do_scrub_chars): Call the new function if multibyte warning is
+	enabled.
+	* input-scrub,c (input_scrub_next_buffer): Call the multibyte
+	scanning function if multibyte warnings are enabled.
+	* symbols.c (struct symbol_flags): Add multibyte_warned bit.
+	(symbol_init): Call the multibyte scanning function if multibyte
+	symbol warnings are enabled.
+	(S_SET_SEGMENT): Likewise.
+	* NEWS: Mention the new feature.
+	* doc/as.texi: Document the new feature.
+	* testsuite/gas/all/multibyte.s: New test source file.
+	* testsuite/gas/all/multibyte1.d: New test driver file.
+	* testsuite/gas/all/multibyte1.l: New test expected output.
+	* testsuite/gas/all/multibyte2.d: New test driver file.
+	* testsuite/gas/all/multibyte2.l: New test expected output.
+	* testsuite/gas/all/gas.exp: Run the new tests.
+
 2021-11-15  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* doc/as.texi (File): Update description of .file 0 directive.

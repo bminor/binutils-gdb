@@ -245,6 +245,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--sectname-subst}] [@b{--size-check=[error|warning]}]
  [@b{--elf-stt-common=[no|yes]}]
  [@b{--generate-missing-build-notes=[no|yes]}]
+ [@b{--multibyte-handling=[allow|warn|warn-sym-only]}]
  [@b{--target-help}] [@var{target-options}]
  [@b{--}|@var{files} @dots{}]
 @c
@@ -870,6 +871,18 @@ Set the maximum width of an input source line, as displayed in a listing, to
 @item --listing-cont-lines=@var{number}
 Set the maximum number of lines printed in a listing for a single line of input
 to @var{number} + 1.
+
+@item --multibyte-handling=allow
+@itemx --multibyte-handling=warn
+@itemx --multibyte-handling=warn-sym-only
+Controls how the assembler handles multibyte characters in the input.  The
+default (which can be restored by using the @option{allow} argument) is to
+allow such characters without complaint.  Using the @option{warn} argument will
+make the assembler generate a warning message whenever any multibyte character
+is encountered.  Using the @option{warn-sym-only} argument will only cause a
+warning to be generated when a symbol is defined with a name that contains
+multibyte characters.  (References to undefined symbols will not generate a
+warning).
 
 @item --no-pad-sections
 Stop the assembler for padding the ends of output sections to the alignment
@@ -2966,9 +2979,11 @@ are noted in @ref{Machine Dependencies}.
 @end ifset
 No symbol may begin with a digit.  Case is significant.
 There is no length limit; all characters are significant.  Multibyte characters
-are supported.  Symbols are delimited by characters not in that set, or by the
-beginning of a file (since the source program must end with a newline, the end
-of a file is not a possible symbol delimiter).  @xref{Symbols}.
+are supported, but note that the setting of the
+@option{--multibyte-handling} option might prevent their use.  Symbols
+are delimited by characters not in that set, or by the beginning of a file
+(since the source program must end with a newline, the end of a file is not a
+possible symbol delimiter).  @xref{Symbols}.
 
 Symbol names may also be enclosed in double quote @code{"} characters.  In such
 cases any characters are allowed, except for the NUL character.  If a double
@@ -3858,10 +3873,17 @@ than @code{Foo}.
 Symbol names do not start with a digit.  An exception to this rule is made for
 Local Labels.  See below.
 
-Multibyte characters are supported.  To generate a symbol name containing
+Multibyte characters are supported, but note that the setting of the
+@option{multibyte-handling} option might prevent their use.
+To generate a symbol name containing
 multibyte characters enclose it within double quotes and use escape codes. cf
 @xref{Strings}.  Generating a multibyte symbol name from a label is not
 currently supported.
+
+Since multibyte symbol names are unusual, and could possibly be used
+maliciously, @command{@value{AS}} provides a command line option
+(@option{--multibyte-handling=warn-sym-only}) which can be used to generate a
+warning message whenever a symbol name containing multibyte characters is defined.
 
 Each symbol has exactly one name.  Each name in an assembly language program
 refers to exactly one symbol.  You may use that symbol name any number of times

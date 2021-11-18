@@ -345,6 +345,55 @@ process_escape (int ch)
     }
 }
 
+#define MULTIBYTE_WARN_COUNT_LIMIT 10
+static unsigned int multibyte_warn_count = 0;
+
+bool
+scan_for_multibyte_characters (const unsigned char *  start,
+			       const unsigned char *  end,
+			       bool                   warn)
+{
+  if (end <= start)
+    return false;
+
+  if (warn && multibyte_warn_count > MULTIBYTE_WARN_COUNT_LIMIT)
+    return false;
+
+  bool found = false;
+
+  while (start < end)
+    {
+      unsigned char c;
+
+      if ((c = * start++) <= 0x7f)
+	continue;
+
+      if (!warn)
+	return true;
+
+      found = true;
+
+      const char * filename;
+      unsigned int lineno;
+
+      filename = as_where (& lineno);
+      if (filename == NULL)
+	as_warn (_("multibyte character (%#x) encountered in input"), c);
+      else if (lineno == 0)
+	as_warn (_("multibyte character (%#x) encountered in %s"), c, filename);
+      else
+	as_warn (_("multibyte character (%#x) encountered in %s at or near line %u"), c, filename, lineno);
+
+      if (++ multibyte_warn_count == MULTIBYTE_WARN_COUNT_LIMIT)
+	{
+	  as_warn (_("further multibyte character warnings suppressed"));
+	  break;
+	}
+    }
+
+  return found;
+}
+
 /* This function is called to process input characters.  The GET
    parameter is used to retrieve more input characters.  GET should
    set its parameter to point to a buffer, and return the length of
@@ -463,6 +512,11 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 	return 0;
       from = input_buffer;
       fromend = from + fromlen;
+
+      if (multibyte_handling == multibyte_warn)
+	(void) scan_for_multibyte_characters ((const unsigned char *) from,
+					      (const unsigned char* ) fromend,
+					      true /* Generate warnings.  */);
     }
 
   while (1)

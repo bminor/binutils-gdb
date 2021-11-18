@@ -13,6 +13,14 @@
 
 * Add support for Scalable Matrix Extension (SME) for AArch64.
 
+* The --multibyte-handling=[allow|warn|warn-sym-only] option tells the
+  assembler what to when it encoutners multibyte characters in the input.  The
+  default is to allow them.  Setting the option to "warn" will generate a
+  warning message whenever any multibyte character is encountered.  Using the
+  option to "warn-sym-only" will make the assembler generate a warning whenever a
+  symbol is defined containing multibyte characters.  (References to undefined
+  symbols will not generate warnings).
+
 * Outputs of .ds.x directive and .tfloat directive with hex input from
   x86 assembler have been reduced from 12 bytes to 10 bytes to match the
   output of .tfloat directive.

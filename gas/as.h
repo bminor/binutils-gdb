@@ -344,6 +344,14 @@ COMMON int linkrelax;
 
 COMMON int do_not_pad_sections_to_alignment;
 
+enum multibyte_input_handling
+{
+  multibyte_allow = 0,
+  multibyte_warn,
+  multibyte_warn_syms
+};
+COMMON enum multibyte_input_handling multibyte_handling;
+
 /* TRUE if we should produce a listing.  */
 extern int listing;
 
@@ -450,6 +458,7 @@ void   input_scrub_insert_file (char *);
 char * input_scrub_new_file (const char *);
 char * input_scrub_next_buffer (char **bufp);
 size_t do_scrub_chars (size_t (*get) (char *, size_t), char *, size_t);
+bool   scan_for_multibyte_characters (const unsigned char *, const unsigned char *, bool);
 int    gen_to_words (LITTLENUM_TYPE *, int, long);
 int    had_err (void);
 int    ignore_input (void);
