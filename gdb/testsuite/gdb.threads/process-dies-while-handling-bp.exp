@@ -58,15 +58,18 @@ proc do_test { non_stop cond_bp_target } {
 	if {!$cond_bp_target} {
 	    # Leaving breakpoint evaluation to GDB exposes failures
 	    # similar to native debugging.
-	    gdb_test_no_output "set remote conditional-breakpoints-packet off"
+	    gdb_test \
+		"set remote conditional-breakpoints-packet off" \
+		"Support for the 'ConditionalBreakpoints' packet on the current remote target is set to \"off\"."
+
 	    set should_kfail 1
 	} else {
 	    set test "show remote conditional-breakpoints-packet"
 	    gdb_test_multiple $test $test {
-		-re "currently enabled\.\r\n$gdb_prompt $" {
+		-re "\, currently enabled.*\r\n$gdb_prompt $" {
 		    pass $test
 		}
-		-re "currently disabled\.\r\n$gdb_prompt $" {
+		-re "\, currently disabled.*\r\n$gdb_prompt $" {
 		    unsupported "no support for target-side conditional breakpoints"
 		    return
 		}

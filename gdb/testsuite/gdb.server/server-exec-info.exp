@@ -29,7 +29,10 @@ if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] {
 # extended-remote board, therefore already connected.
 gdb_test "disconnect" ".*"
 
-gdb_test_no_output "set remote pid-to-exec-file-packet off"
+gdb_test \
+    "set remote pid-to-exec-file-packet off" \
+    "Support for the 'qXfer:exec-file:read' packet on future remote targets is set to \"off\"."
+
 gdb_test "file" ".*" "file" \
 	 {Discard symbol table from `.*'\? \(y or n\) } "y"
 gdbserver_run ""

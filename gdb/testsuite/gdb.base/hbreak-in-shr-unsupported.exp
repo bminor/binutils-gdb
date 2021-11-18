@@ -52,7 +52,9 @@ gdb_test_no_output "set breakpoint always-inserted on"
 # Force-disable Z1 packets, in case the target actually supports
 # these.
 if {$is_target_remote} {
-    gdb_test_no_output "set remote Z-packet off"
+    gdb_test \
+	"set remote Z-packet off" \
+	"Use of Z packets on the current remote target is set to \"off\"."
 }
 
 # Probe for hw breakpoints support.  With Z packets disabled, this

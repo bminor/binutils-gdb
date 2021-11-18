@@ -56,8 +56,13 @@ proc run_test { disable_feature target_nonstop } {
     set gdbserver_gdbport [lindex $res 1]
 
     # Disable XML-based thread listing, and multi-process extensions.
-    gdb_test_no_output "set remote threads-packet off"
-    gdb_test_no_output "set remote multiprocess-feature-packet off"
+    gdb_test \
+	"set remote threads-packet off" \
+	"Support for the 'qXfer:threads:read' packet on future remote targets is set to \"off\"."
+
+    gdb_test \
+	"set remote multiprocess-feature-packet off" \
+	"Support for the 'multiprocess-feature' packet on future remote targets is set to \"off\"."
 
     # Set target-nonstop mode.
     gdb_test_no_output "maint set target-non-stop ${target_nonstop}"

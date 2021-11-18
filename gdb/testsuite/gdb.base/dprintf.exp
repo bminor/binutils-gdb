@@ -214,7 +214,10 @@ gdb_test "set dprintf-style foobar" "Undefined item: \"foobar\"." \
 # as expected.  dprintf relies on support for target-side breakpoint
 # commands --- use it as proxy.
 if [gdb_is_target_remote] {
-    gdb_test_no_output "set remote breakpoint-commands-packet off"
+    gdb_test \
+	"set remote breakpoint-commands-packet off" \
+	"Support for the 'BreakpointCommands' packet on the current remote target is set to \"off\"."
+
     gdb_test "set dprintf-style agent" \
 	"warning: Target cannot run dprintf commands.*" \
 	"set dprintf-style agent, with feature disabled"

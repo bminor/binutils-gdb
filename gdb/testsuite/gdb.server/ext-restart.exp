@@ -51,7 +51,10 @@ gdb_test "run" "Breakpoint.* main .*" "run to main"
 with_test_prefix "restart" {
     # Disable vRun packet and clear remote exec-file, so that GDB will
     # use R packet to restart the process.
-    gdb_test_no_output "set remote run-packet off"
+    gdb_test \
+	"set remote run-packet off" \
+	"Support for the 'vRun' packet on the current remote target is set to \"off\"."
+
     gdb_test_no_output "set remote exec-file"
 
     set test "run to main"

@@ -114,7 +114,9 @@ proc_with_prefix test_tstatus {} {
     # Enable trace status packet which is disabled after the
     # connection if the remote target doesn't support tracepoint at
     # all.  Otherwise, no RSP packet is sent out.
-    gdb_test_no_output "set remote trace-status-packet on"
+    gdb_test \
+	"set remote trace-status-packet on" \
+	"Support for the 'qTStatus' packet on the current remote target is set to \"on\"."
 
     # Force GDB to talk with GDBserver, so that we can get the
     # "connection closed" error.

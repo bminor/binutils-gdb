@@ -23880,8 +23880,14 @@ in @value{GDBN}.  You may want to report the problem to the
 @value{GDBN} developers.
 
 For each packet @var{name}, the command to enable or disable the
-packet is @code{set remote @var{name}-packet}.  The available settings
-are:
+packet is @code{set remote @var{name}-packet}.  If you configure a packet, the
+configuration will apply for all future remote targets if no target is selected.
+In case there is a target selected, only the configuration of the current target
+is changed.  All other existing remote targets' features are not affected.
+The command to print the current configuration of a packet is
+@code{show remote @var{name}-packet}.  It displays the current remote target's
+configuration.  If no remote target is selected, the default configuration for
+future connections is shown.  The available settings are:
 
 @multitable @columnfractions 0.28 0.32 0.25
 @item Command Name

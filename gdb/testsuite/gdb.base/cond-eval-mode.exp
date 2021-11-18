@@ -59,13 +59,18 @@ gdb_test_multiple $test_target $test_target {
 # evaluation.  Now make sure we can force-disable the
 # ConditionalBreakpoints RSP feature.
 if [gdb_is_target_remote] {
-    gdb_test_no_output "set remote conditional-breakpoints-packet off"
+    gdb_test \
+	"set remote conditional-breakpoints-packet off" \
+	"Support for the 'ConditionalBreakpoints' packet on the current remote target is set to \"off\"."
 
     gdb_test $test_target "$warning" \
 	"set breakpoint condition-evaluation target, with support disabled"
 
     # Confirm we can re-enable it.
-    gdb_test_no_output "set remote conditional-breakpoints-packet on"
+    gdb_test \
+	"set remote conditional-breakpoints-packet on" \
+	"Support for the 'ConditionalBreakpoints' packet on the current remote target is set to \"on\"."
+
     gdb_test_no_output $test_target "restore $test_target"
 }
 

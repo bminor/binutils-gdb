@@ -198,7 +198,7 @@ gdb_test_no_output "set remote hardware-breakpoint-limit 2147483647"
 
 # Check the X/P/p alias commands display the correct packet names.
 foreach pkt {X P p} {
-    gdb_test "show remote ${pkt}-packet" "Support for the `${pkt}' packet is.*"
+    gdb_test "show remote ${pkt}-packet" "Support for the '${pkt}' packet on the current remote target is .*"
 }
 
 gdb_exit

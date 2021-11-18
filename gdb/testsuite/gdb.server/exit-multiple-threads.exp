@@ -54,9 +54,14 @@ proc prepare_for_test { executable disable_multi_process } {
 
     # Disable XML-based thread listing, and possible the multi-process
     # extensions.
-    gdb_test_no_output "set remote threads-packet off"
+    gdb_test \
+	"set remote threads-packet off" \
+	"Support for the 'qXfer:threads:read' packet on future remote targets is set to \"off\"."
+
     if { $disable_multi_process } {
-	gdb_test_no_output "set remote multiprocess-feature-packet off"
+	gdb_test \
+	    "set remote multiprocess-feature-packet off" \
+	    "Support for the 'multiprocess-feature' packet on future remote targets is set to \"off\"."
     }
 
     # Start gdbserver and connect.
