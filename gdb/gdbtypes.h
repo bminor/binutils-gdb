@@ -1824,52 +1824,70 @@ enum call_site_parameter_kind
 
 struct call_site_target
 {
-  field_loc_kind loc_kind () const
+  /* The kind of location held by this call site target.  */
+  enum kind
+  {
+    /* An address.  */
+    PHYSADDR,
+    /* A name.  */
+    PHYSNAME,
+    /* A DWARF block.  */
+    DWARF_BLOCK,
+  };
+
+  kind loc_kind () const
   {
     return m_loc_kind;
   }
 
   CORE_ADDR loc_physaddr () const
   {
-    gdb_assert (m_loc_kind == FIELD_LOC_KIND_PHYSADDR);
+    gdb_assert (m_loc_kind == PHYSADDR);
     return m_loc.physaddr;
   }
 
   void set_loc_physaddr (CORE_ADDR physaddr)
   {
-    m_loc_kind = FIELD_LOC_KIND_PHYSADDR;
+    m_loc_kind = PHYSADDR;
     m_loc.physaddr = physaddr;
   }
 
   const char *loc_physname () const
   {
-    gdb_assert (m_loc_kind == FIELD_LOC_KIND_PHYSNAME);
+    gdb_assert (m_loc_kind == PHYSNAME);
     return m_loc.physname;
   }
 
   void set_loc_physname (const char *physname)
     {
-      m_loc_kind = FIELD_LOC_KIND_PHYSNAME;
+      m_loc_kind = PHYSNAME;
       m_loc.physname = physname;
     }
 
   dwarf2_locexpr_baton *loc_dwarf_block () const
   {
-    gdb_assert (m_loc_kind == FIELD_LOC_KIND_DWARF_BLOCK);
+    gdb_assert (m_loc_kind == DWARF_BLOCK);
     return m_loc.dwarf_block;
   }
 
   void set_loc_dwarf_block (dwarf2_locexpr_baton *dwarf_block)
     {
-      m_loc_kind = FIELD_LOC_KIND_DWARF_BLOCK;
+      m_loc_kind = DWARF_BLOCK;
       m_loc.dwarf_block = dwarf_block;
     }
 
-  union field_location m_loc;
+  union
+  {
+    /* Address.  */
+    CORE_ADDR physaddr;
+    /* Mangled name.  */
+    const char *physname;
+    /* DWARF block.  */
+    struct dwarf2_locexpr_baton *dwarf_block;
+  } m_loc;
 
   /* * Discriminant for union field_location.  */
-
-  ENUM_BITFIELD(field_loc_kind) m_loc_kind : 3;
+  enum kind m_loc_kind;
 };
 
 union call_site_parameter_u

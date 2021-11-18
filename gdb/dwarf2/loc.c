@@ -643,7 +643,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 {
   switch (call_site->target.loc_kind ())
     {
-    case FIELD_LOC_KIND_DWARF_BLOCK:
+    case call_site_target::DWARF_BLOCK:
       {
 	struct dwarf2_locexpr_baton *dwarf_block;
 	struct value *val;
@@ -690,7 +690,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	  return value_as_address (val);
       }
 
-    case FIELD_LOC_KIND_PHYSNAME:
+    case call_site_target::PHYSNAME:
       {
 	const char *physname;
 	struct bound_minimal_symbol msym;
@@ -713,7 +713,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	return BMSYMBOL_VALUE_ADDRESS (msym);
       }
 
-    case FIELD_LOC_KIND_PHYSADDR:
+    case call_site_target::PHYSADDR:
       {
 	dwarf2_per_objfile *per_objfile = call_site->per_objfile;
 	compunit_symtab *cust = per_objfile->get_symtab (call_site->per_cu);
