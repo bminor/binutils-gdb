@@ -10912,7 +10912,7 @@ words (@samp{w}) of memory above the stack pointer (here, @samp{$sp};
 
 You can also specify a negative repeat count to examine memory backward
 from the given address.  For example, @samp{x/-3uh 0x54320} prints three
-halfwords (@code{h}) at @code{0x54314}, @code{0x54328}, and @code{0x5431c}.
+halfwords (@code{h}) at @code{0x5431a}, @code{0x5431c}, and @code{0x5431e}.
 
 Since the letters indicating unit sizes are all distinct from the
 letters specifying output formats, you do not have to remember whether
