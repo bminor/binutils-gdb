@@ -4677,6 +4677,14 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 
   if (htab->elf.splt && htab->elf.splt->size > 0)
     {
+      if (bfd_is_abs_section (htab->elf.splt->output_section))
+	{
+	  info->callbacks->einfo
+	    (_("%F%P: discarded output section: `%pA'\n"),
+	     htab->elf.splt);
+	  return false;
+	}
+
       elf_section_data (htab->elf.splt->output_section)
 	->this_hdr.sh_entsize = htab->plt.plt_entry_size;
 

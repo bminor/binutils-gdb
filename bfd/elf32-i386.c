@@ -4017,6 +4017,14 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 
   if (htab->elf.splt && htab->elf.splt->size > 0)
     {
+      if (bfd_is_abs_section (htab->elf.splt->output_section))
+	{
+	  info->callbacks->einfo
+	    (_("%F%P: discarded output section: `%pA'\n"),
+	     htab->elf.splt);
+	  return false;
+	}
+
       /* UnixWare sets the entsize of .plt to 4, although that doesn't
 	 really seem like the right value.  */
       elf_section_data (htab->elf.splt->output_section)
