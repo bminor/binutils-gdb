@@ -39,7 +39,7 @@ proc do_test { name {opts {}} } {
 
     # Run to the breakpoint at return.
     gdb_breakpoint [gdb_get_line_number "return"]
-    gdb_continue_to_breakpoint "return"
+    gdb_continue_to_breakpoint "return test: $name"
 
     # Print the value of ld
     gdb_test "print ld" ".* = 1\\.375.*" "the value of ld is 1.375 ($name)"
