@@ -120,7 +120,7 @@ check ()
 /* Check that there's no container->view conversion for containers of derived
    types or subclasses.  */
 
-template<template<typename ...> typename Container>
+template<template<typename ...> class Container>
 static constexpr bool
 check_ctor_from_container ()
 {
