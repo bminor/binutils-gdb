@@ -67,7 +67,28 @@ set b "Breakpoint ., inc_vi"
 set pat "${d}0.*?$b.*?${d}1.*?$b.*?${d}2.*?$b.*?"
 
 proc do_test {cmd test} {
-    gdb_test $cmd "$::pat$::inferior_exited_re normally.*" $test
+    gdb_test_multiple $cmd $test {
+	-re "$::pat$::inferior_exited_re normally.*$::gdb_prompt $" {
+	    pass $test
+	}
+	-re "Don't know how to run.*$::gdb_prompt $" {
+	    # Even though we bailed out at the beginning of this test case
+	    # for targets which can't use the "run" command, there are
+	    # still targets, e.g. native-extended-gdbserver, which can
+	    # run, but will still print the "Don't know how to run"
+	    # message.  In the case of native-extended-gdbserver, it would
+	    # first need to connect to the target in order to run.  For
+	    # that particular target, the very first test which attempts
+	    # to use the "run" command from a command line script is
+	    # the one that is unsupported.  The other two tests will
+	    # pass because, after reaching the (gdb) prompt, a gdbserver
+	    # is spawned and then connected to.  (The command line which
+	    # spawns GDB for this target has a "-iex set
+	    # auto-connect-native-target off" which prevents it from
+	    # attempting to "run" using the native target.)
+	    unsupported $test
+	}
+    }
 }
 
 # Check output from running script with -x
