@@ -171,7 +171,7 @@ public:
   }
   constexpr const_reference operator[] (size_t index) const noexcept
   {
-#if defined(_GLIBCXX_DEBUG)
+#if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
     gdb_assert (index < m_size);
 #endif
     return m_array[index];
@@ -185,7 +185,7 @@ public:
   /* Return a new array view over SIZE elements starting at START.  */
   constexpr array_view<T> slice (size_type start, size_type size) const noexcept
   {
-#if defined(_GLIBCXX_DEBUG)
+#if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
     gdb_assert (start + size <= m_size);
 #endif
     return {m_array + start, size};
@@ -195,7 +195,7 @@ public:
      inclusive.  */
   constexpr array_view<T> slice (size_type start) const noexcept
   {
-#if defined(_GLIBCXX_DEBUG)
+#if defined(_GLIBCXX_DEBUG) && __cplusplus >= 201402L
     gdb_assert (start <= m_size);
 #endif
     return {m_array + start, size () - start};
