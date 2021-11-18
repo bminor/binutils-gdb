@@ -596,6 +596,10 @@ AC_ARG_WITH([system-readline],
                   [use installed readline library])])
 
 if test "$with_system_readline" = yes; then
+  AC_CHECK_HEADERS(readline/readline.h, [readline_h=yes], [readline_h=no])
+  if test "$readline_h" = "no"; then
+    AC_MSG_ERROR([readline development packages are probably missing])
+  fi
   AC_CACHE_CHECK(
     [whether system readline is new enough],
     [gdb_cv_readline_ok],

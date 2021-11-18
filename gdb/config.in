@@ -382,6 +382,9 @@
 /* Define if Python interpreter is being linked in. */
 #undef HAVE_PYTHON
 
+/* Define to 1 if you have the <readline/readline.h> header file. */
+#undef HAVE_READLINE_READLINE_H
+
 /* Define to 1 if you have the `resize_term' function. */
 #undef HAVE_RESIZE_TERM
 
