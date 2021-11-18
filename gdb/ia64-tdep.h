@@ -216,18 +216,17 @@ struct ia64_infcall_ops
 
      Should do nothing if this operation is not permitted by the OS.  */
   void (*allocate_new_rse_frame) (struct regcache *regcache, ULONGEST bsp,
-				  int sof) = nullptr;
+				  int sof);
 
   /* Store the argument stored in BUF into the appropriate location
      given the BSP and the SLOTNUM.  */
   void (*store_argument_in_slot) (struct regcache *regcache, CORE_ADDR bsp,
-				  int slotnum, gdb_byte *buf) = nullptr;
+				  int slotnum, gdb_byte *buf);
 
   /* For targets where we cannot call the function directly, store
      the address of the function we want to call at the location
      expected by the calling sequence.  */
-  void (*set_function_addr) (struct regcache *regcache, CORE_ADDR func_addr)
-    = nullptr;
+  void (*set_function_addr) (struct regcache *regcache, CORE_ADDR func_addr);
 };
 
 struct ia64_gdbarch_tdep : gdbarch_tdep
@@ -255,7 +254,7 @@ struct ia64_gdbarch_tdep : gdbarch_tdep
   /* ISA-specific data types.  */
   struct type *ia64_ext_type = nullptr;
 
-  struct ia64_infcall_ops infcall_ops;
+  struct ia64_infcall_ops infcall_ops {};
 };
 
 extern void ia64_write_pc (struct regcache *, CORE_ADDR);
