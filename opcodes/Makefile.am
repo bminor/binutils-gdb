@@ -97,11 +97,6 @@ TARGET64_LIBOPCODES_CFILES = \
 	aarch64-opc-2.c \
 	alpha-dis.c \
 	alpha-opc.c \
-	bpf-asm.c \
-	bpf-desc.c \
-	bpf-dis.c \
-	bpf-ibld.c \
-	bpf-opc.c \
 	ia64-dis.c \
 	ia64-opc.c \
 	loongarch-opc.c \
@@ -124,6 +119,11 @@ TARGET32_LIBOPCODES_CFILES = \
 	arm-dis.c \
 	avr-dis.c \
 	bfin-dis.c \
+	bpf-asm.c \
+	bpf-desc.c \
+	bpf-dis.c \
+	bpf-ibld.c \
+	bpf-opc.c \
 	cgen-asm.c \
 	cgen-bitset.c \
 	cgen-dis.c \
