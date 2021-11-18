@@ -632,16 +632,14 @@ show_entry_values_debug (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* Find DW_TAG_call_site's DW_AT_call_target address.
-   CALLER_FRAME (for registers) can be NULL if it is not known.  This function
-   always returns valid address or it throws NO_ENTRY_VALUE_ERROR.  */
+/* See gdbtypes.h.  */
 
-static CORE_ADDR
-call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
-			  struct call_site *call_site,
-			  struct frame_info *caller_frame)
+CORE_ADDR
+call_site_target::address (struct gdbarch *call_site_gdbarch,
+			   const struct call_site *call_site,
+			   struct frame_info *caller_frame) const
 {
-  switch (call_site->target.loc_kind ())
+  switch (m_loc_kind)
     {
     case call_site_target::DWARF_BLOCK:
       {
@@ -650,7 +648,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	struct type *caller_core_addr_type;
 	struct gdbarch *caller_arch;
 
-	dwarf_block = call_site->target.loc_dwarf_block ();
+	dwarf_block = m_loc.dwarf_block;
 	if (dwarf_block == NULL)
 	  {
 	    struct bound_minimal_symbol msym;
@@ -695,7 +693,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	const char *physname;
 	struct bound_minimal_symbol msym;
 
-	physname = call_site->target.loc_physname ();
+	physname = m_loc.physname;
 
 	/* Handle both the mangled and demangled PHYSNAME.  */
 	msym = lookup_minimal_symbol (physname, NULL, NULL);
@@ -720,7 +718,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	int sect_idx = cust->block_line_section ();
 	CORE_ADDR delta = per_objfile->objfile->section_offsets[sect_idx];
 
-	return call_site->target.loc_physaddr () + delta;
+	return m_loc.physaddr + delta;
       }
 
     default:
@@ -790,7 +788,7 @@ func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
 
 	  /* CALLER_FRAME with registers is not available for tail-call jumped
 	     frames.  */
-	  target_addr = call_site_to_target_addr (gdbarch, call_site, NULL);
+	  target_addr = call_site->address (gdbarch, nullptr);
 
 	  if (target_addr == verify_addr)
 	    {
@@ -968,7 +966,7 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 
       /* CALLER_FRAME with registers is not available for tail-call jumped
 	 frames.  */
-      target_func_addr = call_site_to_target_addr (gdbarch, call_site, NULL);
+      target_func_addr = call_site->address (gdbarch, nullptr);
 
       if (target_func_addr == callee_pc)
 	{
@@ -1159,7 +1157,7 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
   caller_pc = get_frame_pc (caller_frame);
   call_site = call_site_for_pc (gdbarch, caller_pc);
 
-  target_addr = call_site_to_target_addr (gdbarch, call_site, caller_frame);
+  target_addr = call_site->address (gdbarch, caller_frame);
   if (target_addr != func_addr)
     {
       struct minimal_symbol *target_msym, *func_msym;

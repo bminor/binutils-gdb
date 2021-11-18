@@ -1835,27 +1835,10 @@ struct call_site_target
     DWARF_BLOCK,
   };
 
-  kind loc_kind () const
-  {
-    return m_loc_kind;
-  }
-
-  CORE_ADDR loc_physaddr () const
-  {
-    gdb_assert (m_loc_kind == PHYSADDR);
-    return m_loc.physaddr;
-  }
-
   void set_loc_physaddr (CORE_ADDR physaddr)
   {
     m_loc_kind = PHYSADDR;
     m_loc.physaddr = physaddr;
-  }
-
-  const char *loc_physname () const
-  {
-    gdb_assert (m_loc_kind == PHYSNAME);
-    return m_loc.physname;
   }
 
   void set_loc_physname (const char *physname)
@@ -1864,17 +1847,22 @@ struct call_site_target
       m_loc.physname = physname;
     }
 
-  dwarf2_locexpr_baton *loc_dwarf_block () const
-  {
-    gdb_assert (m_loc_kind == DWARF_BLOCK);
-    return m_loc.dwarf_block;
-  }
-
   void set_loc_dwarf_block (dwarf2_locexpr_baton *dwarf_block)
     {
       m_loc_kind = DWARF_BLOCK;
       m_loc.dwarf_block = dwarf_block;
     }
+
+  /* Find DW_TAG_call_site's DW_AT_call_target address.  CALLER_FRAME
+     (for registers) can be NULL if it is not known.  This function
+     always returns valid address or it throws
+     NO_ENTRY_VALUE_ERROR.  */
+
+  CORE_ADDR address (struct gdbarch *call_site_gdbarch,
+		     const struct call_site *call_site,
+		     struct frame_info *caller_frame) const;
+
+private:
 
   union
   {
@@ -1966,6 +1954,16 @@ struct call_site
     /* Return the address of the first instruction after this call.  */
 
     CORE_ADDR pc () const;
+
+    /* Find the target address.  CALLER_FRAME (for registers) can be
+       NULL if it is not known.  This function always returns valid
+       address or it throws NO_ENTRY_VALUE_ERROR.  */
+
+    CORE_ADDR address (struct gdbarch *call_site_gdbarch,
+		       struct frame_info *caller_frame) const
+    {
+      return target.address (call_site_gdbarch, this, caller_frame);
+    }
 
     /* * List successor with head in FUNC_TYPE.TAIL_CALL_LIST.  */
 
