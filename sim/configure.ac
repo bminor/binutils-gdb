@@ -155,6 +155,7 @@ if test "${enable_sim}" != no; then
   fi
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
+AM_CONDITIONAL([ENABLE_SIM], [test -n "$SIM_SUBDIRS"])
 
 dnl Standard (and optional) simulator options.
 dnl Eventually all simulators will support these.

@@ -28,6 +28,7 @@ AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
 
 # We don't set some of these vars here, but we need to define them so they may
 # be used consistently in local.mk files we include below.
+pkginclude_HEADERS =
 check_PROGRAMS =
 noinst_LIBRARIES =
 EXTRA_PROGRAMS =
@@ -58,9 +59,11 @@ SIM_ALL_RECURSIVE_DEPS =
 nltvals:
 	$(srccom)/gennltvals.py --cpp "$(CPP)"
 
-pkginclude_HEADERS = \
+if ENABLE_SIM
+pkginclude_HEADERS += \
 	$(srcroot)/include/sim/callback.h \
 	$(srcroot)/include/sim/sim.h
+endif
 
 include common/local.mk
 if SIM_ENABLE_IGEN

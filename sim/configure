@@ -650,6 +650,8 @@ SIM_ENABLE_HW_TRUE
 cgen
 cgendir
 CGEN_MAINT
+ENABLE_SIM_FALSE
+ENABLE_SIM_TRUE
 SIM_ENABLE_IGEN_FALSE
 SIM_ENABLE_IGEN_TRUE
 SIM_ENABLE_ARCH_v850_FALSE
@@ -12245,7 +12247,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12248 "configure"
+#line 12250 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12351,7 +12353,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12354 "configure"
+#line 12356 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14860,6 +14862,14 @@ else
   SIM_ENABLE_IGEN_FALSE=
 fi
 
+ if test -n "$SIM_SUBDIRS"; then
+  ENABLE_SIM_TRUE=
+  ENABLE_SIM_FALSE='#'
+else
+  ENABLE_SIM_TRUE='#'
+  ENABLE_SIM_FALSE=
+fi
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to force sim alignment" >&5
 $as_echo_n "checking whether to force sim alignment... " >&6; }
@@ -15619,6 +15629,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SIM_ENABLE_IGEN_TRUE}" && test -z "${SIM_ENABLE_IGEN_FALSE}"; then
   as_fn_error $? "conditional \"SIM_ENABLE_IGEN\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ENABLE_SIM_TRUE}" && test -z "${ENABLE_SIM_FALSE}"; then
+  as_fn_error $? "conditional \"ENABLE_SIM\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SIM_ENABLE_HW_TRUE}" && test -z "${SIM_ENABLE_HW_FALSE}"; then
