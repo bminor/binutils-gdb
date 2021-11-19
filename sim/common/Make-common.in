@@ -479,7 +479,7 @@ install-common: installdirs
 	n=`echo run | sed '$(program_transform_name)'`; \
 	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
 	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-	n="$(target_alias)-sim"; \
+	n=`echo sim | sed '$(program_transform_name)'`; \
 	a=`basename "$$(pwd)"`; \
 	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
 	n="lib$$n.a"; \
