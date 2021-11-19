@@ -65,6 +65,16 @@
 	swi 0x0
 .endm
 
+#elif defined __powerpc64__
+
+# define RETURN_ADDRESS_REGNO 65
+
+.macro exit_0
+	li 0, __NR_exit  /* r0 - contains system call number */
+	li 3, 0          /* r3 - contains first argument for sys call */
+	sc
+.endm
+
 #else
 # error "Unsupported architecture"
 #endif
@@ -90,6 +100,20 @@
    16 }
 */
 
+#if defined __powerpc64__
+#  if _CALL_ELF == 2
+.abiversion 2   /* Tell gdb what ELF version to use. */
+#  else
+.abiversion 1   /* Tell gdb what ELF version to use. */
+.align 2
+.section ".opd", "aw"
+.align 3
+.quad ._start,.TOC.@tocbase,0
+.previous
+.type ._start,@function
+._start:
+#  endif
+#endif
 .global _start
 _start:
 .cfi_startproc
