@@ -10722,7 +10722,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 	  gdb_assert (m_builder == nullptr);
 	  struct compunit_symtab *cust = tug_unshare->compunit_symtab;
 	  m_builder.reset (new struct buildsym_compunit
-			   (COMPUNIT_OBJFILE (cust), "",
+			   (cust->objfile (), "",
 			    COMPUNIT_DIRNAME (cust),
 			    compunit_language (cust),
 			    0, cust));
@@ -10744,7 +10744,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 	 time.  */
 
       tug_unshare->symtabs
-	= XOBNEWVEC (&COMPUNIT_OBJFILE (cust)->objfile_obstack,
+	= XOBNEWVEC (&cust->objfile ()->objfile_obstack,
 		     struct symtab *, line_header->file_names_size ());
 
       auto &file_names = line_header->file_names ();
@@ -10774,7 +10774,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
       gdb_assert (m_builder == nullptr);
       struct compunit_symtab *cust = tug_unshare->compunit_symtab;
       m_builder.reset (new struct buildsym_compunit
-		       (COMPUNIT_OBJFILE (cust), "",
+		       (cust->objfile (), "",
 			COMPUNIT_DIRNAME (cust),
 			compunit_language (cust),
 			0, cust));

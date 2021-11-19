@@ -1407,7 +1407,7 @@ struct symtab
 #define SYMTAB_BLOCKVECTOR(symtab) \
   COMPUNIT_BLOCKVECTOR (SYMTAB_COMPUNIT (symtab))
 #define SYMTAB_OBJFILE(symtab) \
-  COMPUNIT_OBJFILE (SYMTAB_COMPUNIT (symtab))
+  (SYMTAB_COMPUNIT (symtab)->objfile ())
 #define SYMTAB_PSPACE(symtab) (SYMTAB_OBJFILE (symtab)->pspace)
 #define SYMTAB_DIRNAME(symtab) \
   COMPUNIT_DIRNAME (SYMTAB_COMPUNIT (symtab))
@@ -1545,7 +1545,6 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_OBJFILE(cust) ((cust)->objfile ())
 #define COMPUNIT_FILETABS(cust) ((cust)->filetabs)
 #define COMPUNIT_DEBUGFORMAT(cust) ((cust)->debugformat)
 #define COMPUNIT_PRODUCER(cust) ((cust)->producer)

@@ -51,7 +51,7 @@ block_objfile (const struct block *block)
     return symbol_objfile (BLOCK_FUNCTION (block));
 
   global_block = (struct global_block *) block_global_block (block);
-  return COMPUNIT_OBJFILE (global_block->compunit_symtab);
+  return global_block->compunit_symtab->objfile ();
 }
 
 /* See block.  */

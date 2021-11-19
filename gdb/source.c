@@ -1186,7 +1186,7 @@ open_source_file (struct symtab *s)
     {
       if (SYMTAB_COMPUNIT (s) != nullptr)
 	{
-	  const objfile *ofp = COMPUNIT_OBJFILE (SYMTAB_COMPUNIT (s));
+	  const objfile *ofp = SYMTAB_COMPUNIT (s)->objfile ();
 
 	  std::string srcpath;
 	  if (IS_ABSOLUTE_PATH (s->filename))

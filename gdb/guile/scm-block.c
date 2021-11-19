@@ -685,7 +685,7 @@ gdbscm_lookup_block (SCM pc_scm)
     {
       cust = find_pc_compunit_symtab (pc);
 
-      if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
+      if (cust != NULL && cust->objfile () != NULL)
 	block = block_for_pc (pc);
     }
   catch (const gdb_exception &except)
@@ -694,14 +694,14 @@ gdbscm_lookup_block (SCM pc_scm)
     }
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
-  if (cust == NULL || COMPUNIT_OBJFILE (cust) == NULL)
+  if (cust == NULL || cust->objfile () == NULL)
     {
       gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, pc_scm,
 				 _("cannot locate object file for block"));
     }
 
   if (block != NULL)
-    return bkscm_scm_from_block (block, COMPUNIT_OBJFILE (cust));
+    return bkscm_scm_from_block (block, cust->objfile ());
   return SCM_BOOL_F;
 }
 
