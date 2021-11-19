@@ -244,8 +244,8 @@ gdb_test "continue" \
 # be 3 then.
 #
 
-gdb_test "disable 7" "" "disable other breakpoints"
-gdb_test "disable 5" "" "disable other breakpoints"
+gdb_test "disable 7" "" "disable breakpoint 7"
+gdb_test "disable 5" "" "disable breakpoint 5"
 
 gdb_test "continue" \
 	 ".*Breakpoint.*pendfunc1.*\\\(x=3\\\) at.*pendshr.c:$bp3_loc.*printf.*;" \
