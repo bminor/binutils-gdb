@@ -103,6 +103,23 @@
 
 # See sim/Makefile.am
 #
+# Copyright (C) 1995-2021 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
 # Copyright (C) 2020-2021 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -158,6 +175,23 @@
 #
 # Copyright (C) 1996-2021 Free Software Foundation, Inc.
 # Written by Cygnus Support.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
+# Copyright (C) 1993-2021 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -317,6 +351,40 @@
 
 # See sim/Makefile.am
 #
+# Copyright (C) 1994-2021 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
+# Copyright (C) 2008-2021 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# See sim/Makefile.am
+#
 # Copyright (C) 1990-2021 Free Software Foundation, Inc.
 # Written by Cygnus Support.
 #
@@ -350,6 +418,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 
 VPATH = @srcdir@
@@ -751,8 +820,6 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__pkginclude_HEADERS_DIST = $(srcroot)/include/sim/callback.h \
-	$(srcroot)/include/sim/sim.h
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -780,7 +847,14 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(pkgincludedir)"
+am__installdirs = "$(DESTDIR)$(armdocdir)" "$(DESTDIR)$(erc32docdir)" \
+	"$(DESTDIR)$(frvdocdir)" "$(DESTDIR)$(or1kdocdir)" \
+	"$(DESTDIR)$(ppcdocdir)" "$(DESTDIR)$(rxdocdir)" \
+	"$(DESTDIR)$(pkgincludedir)"
+DATA = $(armdoc_DATA) $(erc32doc_DATA) $(frvdoc_DATA) $(or1kdoc_DATA) \
+	$(ppcdoc_DATA) $(rxdoc_DATA)
+am__pkginclude_HEADERS_DIST = $(srcroot)/include/sim/callback.h \
+	$(srcroot)/include/sim/sim.h
 HEADERS = $(pkginclude_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
@@ -1274,6 +1348,8 @@ testsuite_common_CPPFLAGS = \
 	-I$(srcroot)/include \
 	-I../bfd
 
+@SIM_ENABLE_ARCH_arm_TRUE@armdocdir = $(docdir)/arm
+@SIM_ENABLE_ARCH_arm_TRUE@armdoc_DATA = arm/README
 @SIM_ENABLE_ARCH_bpf_TRUE@bpf_BUILD_OUTPUTS = \
 @SIM_ENABLE_ARCH_bpf_TRUE@	bpf/eng-le.h \
 @SIM_ENABLE_ARCH_bpf_TRUE@	bpf/mloop-le.c \
@@ -1304,6 +1380,10 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_SOURCES = d10v/gencode.c
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v_gencode_LDADD = d10v/d10v-opc.o
+@SIM_ENABLE_ARCH_erc32_TRUE@erc32docdir = $(docdir)/erc32
+@SIM_ENABLE_ARCH_erc32_TRUE@erc32doc_DATA = erc32/README.erc32 erc32/README.gdb erc32/README.sis
+@SIM_ENABLE_ARCH_frv_TRUE@frvdocdir = $(docdir)/frv
+@SIM_ENABLE_ARCH_frv_TRUE@frvdoc_DATA = frv/README
 @SIM_ENABLE_ARCH_frv_TRUE@frv_BUILD_OUTPUTS = \
 @SIM_ENABLE_ARCH_frv_TRUE@	frv/eng.h \
 @SIM_ENABLE_ARCH_frv_TRUE@	frv/mloop.c \
@@ -1371,11 +1451,17 @@ testsuite_common_CPPFLAGS = \
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_INSN = $(srcdir)/mn10300/mn10300.igen
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_INSN_INC = mn10300/am33.igen mn10300/am33-2.igen
 @SIM_ENABLE_ARCH_mn10300_TRUE@mn10300_IGEN_DC = $(srcdir)/mn10300/mn10300.dc
+@SIM_ENABLE_ARCH_or1k_TRUE@or1kdocdir = $(docdir)/or1k
+@SIM_ENABLE_ARCH_or1k_TRUE@or1kdoc_DATA = or1k/README
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k_BUILD_OUTPUTS = \
 @SIM_ENABLE_ARCH_or1k_TRUE@	or1k/eng.h \
 @SIM_ENABLE_ARCH_or1k_TRUE@	or1k/mloop.c \
 @SIM_ENABLE_ARCH_or1k_TRUE@	or1k/stamp-mloop
 
+@SIM_ENABLE_ARCH_ppc_TRUE@ppcdocdir = $(docdir)/ppc
+@SIM_ENABLE_ARCH_ppc_TRUE@ppcdoc_DATA = ppc/BUGS ppc/INSTALL ppc/README ppc/RUN
+@SIM_ENABLE_ARCH_rx_TRUE@rxdocdir = $(docdir)/rx
+@SIM_ENABLE_ARCH_rx_TRUE@rxdoc_DATA = rx/README.txt
 @SIM_ENABLE_ARCH_sh_TRUE@sh_BUILD_OUTPUTS = \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/gencode$(EXEEXT) \
 @SIM_ENABLE_ARCH_sh_TRUE@	sh/code.c \
@@ -1414,7 +1500,7 @@ all: config.h
 .SUFFIXES: .c .lo .log .o .obj .test .test$(EXEEXT) .trs
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/bpf/local.mk $(srcdir)/cr16/local.mk $(srcdir)/cris/local.mk $(srcdir)/d10v/local.mk $(srcdir)/frv/local.mk $(srcdir)/iq2000/local.mk $(srcdir)/lm32/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m32r/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/mn10300/local.mk $(srcdir)/or1k/local.mk $(srcdir)/sh/local.mk $(srcdir)/v850/local.mk $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/arm/local.mk $(srcdir)/bpf/local.mk $(srcdir)/cr16/local.mk $(srcdir)/cris/local.mk $(srcdir)/d10v/local.mk $(srcdir)/erc32/local.mk $(srcdir)/frv/local.mk $(srcdir)/iq2000/local.mk $(srcdir)/lm32/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m32r/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/mn10300/local.mk $(srcdir)/or1k/local.mk $(srcdir)/ppc/local.mk $(srcdir)/rx/local.mk $(srcdir)/sh/local.mk $(srcdir)/v850/local.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -1436,7 +1522,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/bpf/local.mk $(srcdir)/cr16/local.mk $(srcdir)/cris/local.mk $(srcdir)/d10v/local.mk $(srcdir)/frv/local.mk $(srcdir)/iq2000/local.mk $(srcdir)/lm32/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m32r/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/mn10300/local.mk $(srcdir)/or1k/local.mk $(srcdir)/sh/local.mk $(srcdir)/v850/local.mk $(am__empty):
+$(srcdir)/common/local.mk $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(srcdir)/arm/local.mk $(srcdir)/bpf/local.mk $(srcdir)/cr16/local.mk $(srcdir)/cris/local.mk $(srcdir)/d10v/local.mk $(srcdir)/erc32/local.mk $(srcdir)/frv/local.mk $(srcdir)/iq2000/local.mk $(srcdir)/lm32/local.mk $(srcdir)/m32c/local.mk $(srcdir)/m32r/local.mk $(srcdir)/m68hc11/local.mk $(srcdir)/mn10300/local.mk $(srcdir)/or1k/local.mk $(srcdir)/ppc/local.mk $(srcdir)/rx/local.mk $(srcdir)/sh/local.mk $(srcdir)/v850/local.mk $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -1894,6 +1980,132 @@ clean-libtool:
 
 distclean-libtool:
 	-rm -f libtool config.lt
+install-armdocDATA: $(armdoc_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(armdoc_DATA)'; test -n "$(armdocdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(armdocdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(armdocdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(armdocdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(armdocdir)" || exit $$?; \
+	done
+
+uninstall-armdocDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(armdoc_DATA)'; test -n "$(armdocdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(armdocdir)'; $(am__uninstall_files_from_dir)
+install-erc32docDATA: $(erc32doc_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(erc32doc_DATA)'; test -n "$(erc32docdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(erc32docdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(erc32docdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(erc32docdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(erc32docdir)" || exit $$?; \
+	done
+
+uninstall-erc32docDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(erc32doc_DATA)'; test -n "$(erc32docdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(erc32docdir)'; $(am__uninstall_files_from_dir)
+install-frvdocDATA: $(frvdoc_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(frvdoc_DATA)'; test -n "$(frvdocdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(frvdocdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(frvdocdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(frvdocdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(frvdocdir)" || exit $$?; \
+	done
+
+uninstall-frvdocDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(frvdoc_DATA)'; test -n "$(frvdocdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(frvdocdir)'; $(am__uninstall_files_from_dir)
+install-or1kdocDATA: $(or1kdoc_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(or1kdoc_DATA)'; test -n "$(or1kdocdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(or1kdocdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(or1kdocdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(or1kdocdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(or1kdocdir)" || exit $$?; \
+	done
+
+uninstall-or1kdocDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(or1kdoc_DATA)'; test -n "$(or1kdocdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(or1kdocdir)'; $(am__uninstall_files_from_dir)
+install-ppcdocDATA: $(ppcdoc_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(ppcdoc_DATA)'; test -n "$(ppcdocdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(ppcdocdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(ppcdocdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(ppcdocdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(ppcdocdir)" || exit $$?; \
+	done
+
+uninstall-ppcdocDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(ppcdoc_DATA)'; test -n "$(ppcdocdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(ppcdocdir)'; $(am__uninstall_files_from_dir)
+install-rxdocDATA: $(rxdoc_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(rxdoc_DATA)'; test -n "$(rxdocdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(rxdocdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(rxdocdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(rxdocdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(rxdocdir)" || exit $$?; \
+	done
+
+uninstall-rxdocDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(rxdoc_DATA)'; test -n "$(rxdocdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(rxdocdir)'; $(am__uninstall_files_from_dir)
 install-pkgincludeHEADERS: $(pkginclude_HEADERS)
 	@$(NORMAL_INSTALL)
 	@list='$(pkginclude_HEADERS)'; test -n "$(pkgincludedir)" || list=; \
@@ -2248,10 +2460,10 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU check-TESTS
 check: check-recursive
-all-am: Makefile $(LIBRARIES) $(HEADERS) config.h
+all-am: Makefile $(LIBRARIES) $(DATA) $(HEADERS) config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(pkgincludedir)"; do \
+	for dir in "$(DESTDIR)$(armdocdir)" "$(DESTDIR)$(erc32docdir)" "$(DESTDIR)$(frvdocdir)" "$(DESTDIR)$(or1kdocdir)" "$(DESTDIR)$(ppcdocdir)" "$(DESTDIR)$(rxdocdir)" "$(DESTDIR)$(pkgincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-recursive
@@ -2331,7 +2543,9 @@ info: info-recursive
 
 info-am:
 
-install-data-am: install-pkgincludeHEADERS
+install-data-am: install-armdocDATA install-erc32docDATA \
+	install-frvdocDATA install-or1kdocDATA \
+	install-pkgincludeHEADERS install-ppcdocDATA install-rxdocDATA
 
 install-dvi: install-dvi-recursive
 
@@ -2379,7 +2593,10 @@ ps: ps-recursive
 
 ps-am:
 
-uninstall-am: uninstall-pkgincludeHEADERS
+uninstall-am: uninstall-armdocDATA uninstall-erc32docDATA \
+	uninstall-frvdocDATA uninstall-or1kdocDATA \
+	uninstall-pkgincludeHEADERS uninstall-ppcdocDATA \
+	uninstall-rxdocDATA
 
 .MAKE: $(am__recursive_targets) all check-am install-am install-strip
 
@@ -2390,16 +2607,21 @@ uninstall-am: uninstall-pkgincludeHEADERS
 	distclean distclean-DEJAGNU distclean-compile \
 	distclean-generic distclean-hdr distclean-libtool \
 	distclean-tags dvi dvi-am html html-am info info-am install \
-	install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
+	install-am install-armdocDATA install-data install-data-am \
+	install-dvi install-dvi-am install-erc32docDATA install-exec \
+	install-exec-am install-frvdocDATA install-html \
 	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-pkgincludeHEADERS \
-	install-ps install-ps-am install-strip installcheck \
+	install-or1kdocDATA install-pdf install-pdf-am \
+	install-pkgincludeHEADERS install-ppcdocDATA install-ps \
+	install-ps-am install-rxdocDATA install-strip installcheck \
 	installcheck-am installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	recheck tags tags-am uninstall uninstall-am \
-	uninstall-pkgincludeHEADERS
+	uninstall-armdocDATA uninstall-erc32docDATA \
+	uninstall-frvdocDATA uninstall-or1kdocDATA \
+	uninstall-pkgincludeHEADERS uninstall-ppcdocDATA \
+	uninstall-rxdocDATA
 
 .PRECIOUS: Makefile
 

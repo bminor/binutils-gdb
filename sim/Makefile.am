@@ -71,6 +71,9 @@ include igen/local.mk
 endif
 include testsuite/local.mk
 
+if SIM_ENABLE_ARCH_arm
+include arm/local.mk
+endif
 if SIM_ENABLE_ARCH_bpf
 include bpf/local.mk
 endif
@@ -82,6 +85,9 @@ include cris/local.mk
 endif
 if SIM_ENABLE_ARCH_d10v
 include d10v/local.mk
+endif
+if SIM_ENABLE_ARCH_erc32
+include erc32/local.mk
 endif
 if SIM_ENABLE_ARCH_frv
 include frv/local.mk
@@ -106,6 +112,12 @@ include mn10300/local.mk
 endif
 if SIM_ENABLE_ARCH_or1k
 include or1k/local.mk
+endif
+if SIM_ENABLE_ARCH_ppc
+include ppc/local.mk
+endif
+if SIM_ENABLE_ARCH_rx
+include rx/local.mk
 endif
 if SIM_ENABLE_ARCH_sh
 include sh/local.mk

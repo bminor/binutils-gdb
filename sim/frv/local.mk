@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%C%docdir = $(docdir)/%C%
+%C%doc_DATA = %D%/README
+
 %C%_BUILD_OUTPUTS = \
 	%D%/eng.h \
 	%D%/mloop.c \
