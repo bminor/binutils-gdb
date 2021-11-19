@@ -957,10 +957,8 @@ usage (FILE *stream, int exit_status)
                               Set input OSABI\n\
   --output-osabi [%s]\n\
                               Set output OSABI\n\
-  --input-abiversion [0-255]\n\
-                              Set input ABIVERSION\n\
-  --output-abiversion [0-255]\n\
-                              Set output ABIVERSION\n"),
+  --input-abiversion [0-255]  Set input ABIVERSION\n\
+  --output-abiversion [0-255] Set output ABIVERSION\n"),
 	   osabi, osabi);
 #ifdef HAVE_MMAP
   fprintf (stream, _("\
