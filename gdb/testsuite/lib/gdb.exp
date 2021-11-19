@@ -7085,6 +7085,29 @@ proc get_endianness { } {
     return "little"
 }
 
+# Get the target's default endianness and return it.
+gdb_caching_proc target_endianness {
+    global gdb_prompt
+
+    set me "target_endianness"
+
+    set src { int main() { return 0; } }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 0
+    }
+
+    clean_restart $obj
+    if ![runto_main] {
+        return 0
+    }
+    set res [get_endianness]
+
+    gdb_exit
+    remote_file build delete $obj
+
+    return $res
+}
+
 # ROOT and FULL are file names.  Returns the relative path from ROOT
 # to FULL.  Note that FULL must be in a subdirectory of ROOT.
 # For example, given ROOT = /usr/bin and FULL = /usr/bin/ls, this

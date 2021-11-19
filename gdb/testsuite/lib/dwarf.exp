@@ -580,7 +580,7 @@ namespace eval Dwarf {
 	    DW_FORM_GNU_strp_alt -
 	    DW_FORM_sec_offset {
 		variable _cu_offset_size
-		_op .${_cu_offset_size}byte $value
+		_op_offset $_cu_offset_size $value
 	    }
 
 	    DW_FORM_ref1 -
@@ -645,7 +645,7 @@ namespace eval Dwarf {
 		    }
 		}
 
-		_op .${_cu_offset_size}byte $_strings($value) "strp: $value"
+		_op_offset $_cu_offset_size $_strings($value) "strp: $value"
 	    }
 
 	    SPECIAL_expr {
@@ -971,6 +971,28 @@ namespace eval Dwarf {
 	_emit $text
     }
 
+    proc _op_offset { size offset {comment ""} } {
+	if { $size == 4 } {
+	    _op .4byte $offset $comment
+	} elseif { $size == 8 } {
+	    if {[is_64_target]} {
+		_op .8byte $offset $comment
+	    } else {
+		# This allows us to emit 64-bit dwarf for
+		# 32-bit targets.
+		if { [target_endianness] == "little" } {
+		    _op .4byte $offset "$comment (lsw)"
+		    _op .4byte 0 "$comment (msw)"
+		} else {
+		    _op .4byte 0 "$comment (msw)"
+		    _op .4byte $offset "$comment (lsw)"
+		}
+	    }
+	} else {
+	    error "Don't know how to handle offset size $size"
+	}
+    }
+
     proc _compute_label {name} {
 	return ".L${name}"
     }
@@ -1185,7 +1207,7 @@ namespace eval Dwarf {
 		    if { $dwarf_version == 2 } {
 			_op .${addr_size}byte $argvec(label)
 		    } else {
-			_op .${offset_size}byte $argvec(label)
+			_op_offset $offset_size $argvec(label)
 		    }
 		    _op .sleb128 $argvec(offset)
 		}
@@ -1197,7 +1219,7 @@ namespace eval Dwarf {
 		    if { $dwarf_version == 2 } {
 			_op .${addr_size}byte $argvec(label)
 		    } else {
-			_op .${offset_size}byte $argvec(label)
+			_op_offset $offset_size $argvec(label)
 		    }
 		}
 
@@ -1344,9 +1366,9 @@ namespace eval Dwarf {
 	if { $_cu_version == 5 } {
 	    _op .byte 0x1 "DW_UT_compile"
 	    _op .byte $_cu_addr_size "Pointer size"
-	    _op .${_cu_offset_size}byte $my_abbrevs Abbrevs
+	    _op_offset $_cu_offset_size $my_abbrevs Abbrevs
 	} else {
-	    _op .${_cu_offset_size}byte $my_abbrevs Abbrevs
+	    _op_offset $_cu_offset_size $my_abbrevs Abbrevs
 	    _op .byte $_cu_addr_size "Pointer size"
 	}
 
@@ -1440,7 +1462,7 @@ namespace eval Dwarf {
 	}
 	define_label $start_label
 	_op .2byte $_cu_version Version
-	_op .${_cu_offset_size}byte $my_abbrevs Abbrevs
+	_op_offset $_cu_offset_size $my_abbrevs Abbrevs
 	_op .byte $_cu_addr_size "Pointer size"
 	_op .8byte $signature Signature
 	if { $type_label != "" } {
@@ -1666,7 +1688,9 @@ namespace eval Dwarf {
 	if { ${with-offset-array} } {
 	    for {set list_idx 0} {$list_idx < $_debug_rnglists_list_count} {incr list_idx} {
 		set list_label [_compute_list_label $list_idx]
-		_op .${_debug_rnglists_offset_size}byte "$list_label - $post_header_label" "offset of list $list_idx"
+		_op_offset $_debug_rnglists_offset_size \
+		    "$list_label - $post_header_label" \
+		    "offset of list $list_idx"
 	    }
 	}
 
@@ -1852,7 +1876,9 @@ namespace eval Dwarf {
 	if { ${with-offset-array} } {
 	    for {set list_idx 0} {$list_idx < $_debug_loclists_list_count} {incr list_idx} {
 		set list_label [_compute_list_label $list_idx]
-		_op .${_debug_loclists_offset_size}byte "$list_label - $post_header_label" "offset of list $list_idx"
+		_op_offset $_debug_loclists_offset_size \
+		    "$list_label - $post_header_label" \
+		    "offset of list $list_idx"
 	    }
 	}
 
