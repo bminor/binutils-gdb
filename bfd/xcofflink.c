@@ -3313,8 +3313,6 @@ xcoff_mark_auto_exports (struct xcoff_link_hash_entry *h, void *data)
   return true;
 }
 
-/* Add a symbol to the .loader symbols, if necessary.  */
-
 /* INPUT_BFD has an external symbol associated with hash table entry H
    and csect CSECT.   Return true if INPUT_BFD defines H.  */
 
