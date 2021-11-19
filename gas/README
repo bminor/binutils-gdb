@@ -155,11 +155,7 @@ REPORTING BUGS IN GAS
 
 Bugs in gas should be reported to:
 
-   bug-binutils@gnu.org.
-
-They may be cross-posted to gcc-bugs@gnu.org if they affect the use of
-gas with gcc.  They should not be reported just to gcc-bugs, since not
-all of the maintainers read that list.
+   https://sourceware.org/bugzilla/
 
 See ../binutils/README for what we need in a bug report.
 

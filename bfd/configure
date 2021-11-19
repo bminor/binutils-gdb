@@ -11941,7 +11941,7 @@ if test "${with_bugurl+set}" = set; then :
 	   ;;
      esac
 else
-  BUGURL="https://www.sourceware.org/bugzilla/"
+  BUGURL="https://sourceware.org/bugzilla/"
 
 fi
 
