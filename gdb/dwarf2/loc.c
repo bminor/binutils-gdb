@@ -835,9 +835,9 @@ tailcall_dump (struct gdbarch *gdbarch, const struct call_site *call_site)
 static void
 chain_candidate (struct gdbarch *gdbarch,
 		 gdb::unique_xmalloc_ptr<struct call_site_chain> *resultp,
-		 std::vector<struct call_site *> *chain)
+		 const std::vector<struct call_site *> &chain)
 {
-  long length = chain->size ();
+  long length = chain.size ();
   int callers, callees, idx;
 
   if (*resultp == NULL)
@@ -850,8 +850,8 @@ chain_candidate (struct gdbarch *gdbarch,
 		    + sizeof (*result->call_site) * (length - 1)));
       result->length = length;
       result->callers = result->callees = length;
-      if (!chain->empty ())
-	memcpy (result->call_site, chain->data (),
+      if (!chain.empty ())
+	memcpy (result->call_site, chain.data (),
 		sizeof (*result->call_site) * length);
       resultp->reset (result);
 
@@ -870,7 +870,7 @@ chain_candidate (struct gdbarch *gdbarch,
     {
       fprintf_unfiltered (gdb_stdlog, "tailcall: compare:");
       for (idx = 0; idx < length; idx++)
-	tailcall_dump (gdbarch, chain->at (idx));
+	tailcall_dump (gdbarch, chain[idx]);
       fputc_unfiltered ('\n', gdb_stdlog);
     }
 
@@ -878,7 +878,7 @@ chain_candidate (struct gdbarch *gdbarch,
 
   callers = std::min ((long) (*resultp)->callers, length);
   for (idx = 0; idx < callers; idx++)
-    if ((*resultp)->call_site[idx] != chain->at (idx))
+    if ((*resultp)->call_site[idx] != chain[idx])
       {
 	(*resultp)->callers = idx;
 	break;
@@ -889,7 +889,7 @@ chain_candidate (struct gdbarch *gdbarch,
   callees = std::min ((long) (*resultp)->callees, length);
   for (idx = 0; idx < callees; idx++)
     if ((*resultp)->call_site[(*resultp)->length - 1 - idx]
-	!= chain->at (length - 1 - idx))
+	!= chain[length - 1 - idx])
       {
 	(*resultp)->callees = idx;
 	break;
@@ -970,7 +970,7 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 
       if (target_func_addr == callee_pc)
 	{
-	  chain_candidate (gdbarch, &retval, &chain);
+	  chain_candidate (gdbarch, &retval, chain);
 	  if (retval == NULL)
 	    break;
 
