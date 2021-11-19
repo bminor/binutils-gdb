@@ -194,7 +194,7 @@ command-line options are respected for the bulk of the file being assembled.
 @itemx norvc
 Enables or disables the generation of compressed instructions.  Instructions
 are opportunistically compressed by the RISC-V assembler when possible, but
-sometimes this behavior is not desirable.
+sometimes this behavior is not desirable, especially when handling alignments.
 
 @item pic
 @itemx nopic
@@ -211,6 +211,19 @@ desirable.
 @item csr-check
 @itemx no-csr-check
 Enables or disables the CSR checking.
+
+@item arch, @var{+extension[version]} [,...,@var{+extension_n[version_n]}]
+@itemx arch, @var{-extension} [,...,@var{-extension_n}]
+@itemx arch, @var{=ISA}
+Enables or disables the extensions for specific code region.  For example,
+@samp{.option arch, +m2p0} means add m extension with version 2.0, and
+@samp{.option arch, -f, -d} means remove extensions, f and d, from the
+architecture string.  Note that, @samp{.option arch, +c, -c} have the same
+behavior as @samp{.option rvc, norvc}.  However, they are also undesirable
+sometimes.  Besides, @samp{.option arch, -i} is illegal, since we cannot
+remove the base i extension anytime.  If you want to reset the whole ISA
+string, you can also use @samp{.option arch, =rv32imac} to overwrite the
+previous settings.
 
 @cindex INSN directives
 @item .insn @var{type}, @var{operand} [,...,@var{operand_n}]

@@ -92,8 +92,11 @@ riscv_estimate_digit (unsigned);
 extern int
 riscv_compare_subsets (const char *, const char *);
 
+extern riscv_subset_list_t *
+riscv_copy_subset_list (riscv_subset_list_t *);
+
 extern bool
-riscv_update_subset (riscv_parse_subset_t *, const char *, bool);
+riscv_update_subset (riscv_parse_subset_t *, const char *);
 
 extern bool
 riscv_subset_supports (riscv_parse_subset_t *, const char *);

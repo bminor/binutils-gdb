@@ -1468,7 +1468,15 @@ riscv_add_subset (riscv_subset_list_t *subset_list,
   riscv_subset_t *current, *new;
 
   if (riscv_lookup_subset (subset_list, subset, &current))
-    return;
+    {
+      if (major != RISCV_UNKNOWN_VERSION
+	  && minor != RISCV_UNKNOWN_VERSION)
+	{
+	  current->major_version = major;
+	  current->minor_version = minor;
+	}
+      return;
+    }
 
   new = xmalloc (sizeof *new);
   new->name = xstrdup (subset);
@@ -2138,6 +2146,37 @@ riscv_arch_str (unsigned xlen, const riscv_subset_list_t *subset)
   return attr_str;
 }
 
+/* Copy the subset in the subset list.  */
+
+static struct riscv_subset_t *
+riscv_copy_subset (riscv_subset_list_t *subset_list,
+		   riscv_subset_t *subset)
+{
+  if (subset == NULL)
+    return NULL;
+
+  riscv_subset_t *new = xmalloc (sizeof *new);
+  new->name = xstrdup (subset->name);
+  new->major_version = subset->major_version;
+  new->minor_version = subset->minor_version;
+  new->next = riscv_copy_subset (subset_list, subset->next);
+
+  if (subset->next == NULL)
+    subset_list->tail = new;
+
+  return new;
+}
+
+/* Copy the subset list.  */
+
+riscv_subset_list_t *
+riscv_copy_subset_list (riscv_subset_list_t *subset_list)
+{
+  riscv_subset_list_t *new = xmalloc (sizeof *new);
+  new->head = riscv_copy_subset (new, subset_list->head);
+  return new;
+}
+
 /* Remove the SUBSET from the subset list.  */
 
 static void
@@ -2164,40 +2203,111 @@ riscv_remove_subset (riscv_subset_list_t *subset_list,
 }
 
 /* Add/Remove an extension to/from the subset list.  This is used for
-   the .option rvc or norvc.  */
+   the .option rvc or norvc, and .option arch directives.  */
 
 bool
 riscv_update_subset (riscv_parse_subset_t *rps,
-		     const char *subset,
-		     bool removed)
+		     const char *str)
 {
-  if (strlen (subset) == 0
-      || (strlen (subset) == 1
-	  && riscv_ext_order[(*subset - 'a')] == 0)
-      || (strlen (subset) > 1
-	  && rps->check_unknown_prefixed_ext
-	  && !riscv_recognized_prefixed_ext (subset)))
-    {
-      rps->error_handler
-	(_("riscv_update_subset: unknown ISA extension `%s'"), subset);
-      return false;
-    }
+  const char *p = str;
 
-  if (removed)
+  do
     {
-      if (strcmp (subset, "i") == 0)
+      int major_version = RISCV_UNKNOWN_VERSION;
+      int minor_version = RISCV_UNKNOWN_VERSION;
+
+      bool removed = false;
+      switch (*p++)
 	{
+	case '+': removed = false; break;
+	case '-': removed = true; break;
+	case '=':
+	  riscv_release_subset_list (rps->subset_list);
+	  return riscv_parse_subset (rps, p);
+	default:
 	  rps->error_handler
-	    (_("riscv_update_subset: cannot remove extension i from "
-	       "the subset list"));
+	    (_("extensions must begin with +/-/= in .option arch `%s'"), str);
 	  return false;
 	}
-      riscv_remove_subset (rps->subset_list, subset);
+
+      char *subset = xstrdup (p);
+      char *q = subset;
+      const char *end_of_version;
+      /* Extract the whole prefixed extension by ','.  */
+      while (*q != '\0' && *q != ',')
+        q++;
+      /* Look forward to the first letter which is not <major>p<minor>.  */
+      bool find_any_version = false;
+      bool find_minor_version = false;
+      while (1)
+        {
+	  q--;
+	  if (ISDIGIT (*q))
+	    find_any_version = true;
+	  else if (find_any_version
+		   && !find_minor_version
+		   && *q == 'p'
+		   && ISDIGIT (*(q - 1)))
+	    find_minor_version = true;
+	  else
+	    break;
+	}
+      q++;
+      /* Check if the end of extension is 'p' or not.  If yes, then
+	 the second letter from the end cannot be number.  */
+      if (*(q - 1) == 'p' && ISDIGIT (*(q - 2)))
+	{
+	  *q = '\0';
+	  rps->error_handler
+	    (_("invalid ISA extension ends with <number>p "
+	       "in .option arch `%s'"), str);
+	  free (subset);
+	  return false;
+	}
+      end_of_version =
+	riscv_parsing_subset_version (q, &major_version, &minor_version);
+      *q = '\0';
+      if (end_of_version == NULL)
+	{
+	  free (subset);
+	  return false;
+	}
+
+      if (strlen (subset) == 0
+	  || (strlen (subset) == 1
+	      && riscv_ext_order[(*subset - 'a')] == 0)
+	  || (strlen (subset) > 1
+	      && rps->check_unknown_prefixed_ext
+	      && !riscv_recognized_prefixed_ext (subset)))
+	{
+	  rps->error_handler
+	    (_("unknown ISA extension `%s' in .option arch `%s'"),
+	     subset, str);
+	  free (subset);
+	  return false;
+	}
+
+      if (removed)
+	{
+	  if (strcmp (subset, "i") == 0)
+	    {
+	      rps->error_handler
+		(_("cannot remove extension `i' in .option arch `%s'"), str);
+	      free (subset);
+	      return false;
+	    }
+	  riscv_remove_subset (rps->subset_list, subset);
+	}
+      else
+	riscv_parse_add_subset (rps, subset, major_version, minor_version, true);
+      p += end_of_version - subset;
+      free (subset);
     }
-  else
-    riscv_parse_add_subset (rps, subset,
-			    RISCV_UNKNOWN_VERSION,
-			    RISCV_UNKNOWN_VERSION, true);
+  while (*p++ == ',');
+
+  if (*(--p) != '\0')
+    rps->error_handler
+      (_("unexpected value in .option arch `%s'"), str);
 
   riscv_parse_add_implicit_subsets (rps);
   return riscv_parse_check_conflicts (rps);

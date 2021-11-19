@@ -235,15 +235,26 @@ riscv_set_rvc (bool rvc_value)
    the architecture string.  The architecture string can be set by the
    -march option, the elf architecture attributes, and the --with-arch
    configure option.  */
-static riscv_subset_list_t riscv_subsets;
+static riscv_subset_list_t *riscv_subsets = NULL;
 static riscv_parse_subset_t riscv_rps_as =
 {
-  &riscv_subsets,	/* subset_list.  */
+  NULL,			/* subset_list, we will set it later once
+			   riscv_opts_stack is created or updated.  */
   as_bad,		/* error_handler.  */
   &xlen,		/* xlen.  */
   &default_isa_spec,	/* isa_spec.  */
   true,			/* check_unknown_prefixed_ext.  */
 };
+
+/* This structure is used to hold a stack of .option values.  */
+struct riscv_option_stack
+{
+  struct riscv_option_stack *next;
+  struct riscv_set_options options;
+  riscv_subset_list_t *subset_list;
+};
+
+static struct riscv_option_stack *riscv_opts_stack = NULL;
 
 /* Set which ISA and extensions are available.  */
 
@@ -257,7 +268,14 @@ riscv_set_arch (const char *s)
       return;
     }
 
-  riscv_release_subset_list (&riscv_subsets);
+  if (riscv_subsets == NULL)
+    {
+      riscv_subsets = XNEW (riscv_subset_list_t);
+      riscv_subsets->head = NULL;
+      riscv_subsets->tail = NULL;
+      riscv_rps_as.subset_list = riscv_subsets;
+    }
+  riscv_release_subset_list (riscv_subsets);
   riscv_parse_subset (&riscv_rps_as, s);
 
   riscv_set_rvc (false);
@@ -3715,15 +3733,6 @@ riscv_pre_output_hook (void)
   subseg_set (seg, subseg);
 }
 
-/* This structure is used to hold a stack of .option values.  */
-struct riscv_option_stack
-{
-  struct riscv_option_stack *next;
-  struct riscv_set_options options;
-};
-
-static struct riscv_option_stack *riscv_opts_stack;
-
 /* Handle the .option pseudo-op.  */
 
 static void
@@ -3738,12 +3747,12 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
 
   if (strcmp (name, "rvc") == 0)
     {
-      riscv_update_subset (&riscv_rps_as, "c", false);
+      riscv_update_subset (&riscv_rps_as, "+c");
       riscv_set_rvc (true);
     }
   else if (strcmp (name, "norvc") == 0)
     {
-      riscv_update_subset (&riscv_rps_as, "c", true);
+      riscv_update_subset (&riscv_rps_as, "-c");
       riscv_set_rvc (false);
     }
   else if (strcmp (name, "pic") == 0)
@@ -3758,14 +3767,24 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
     riscv_opts.csr_check = true;
   else if (strcmp (name, "no-csr-check") == 0)
     riscv_opts.csr_check = false;
+  else if (strncmp (name, "arch,", 5) == 0)
+    {
+      name += 5;
+      if (ISSPACE (*name) && *name != '\0')
+	name++;
+      riscv_update_subset (&riscv_rps_as, name);
+    }
   else if (strcmp (name, "push") == 0)
     {
       struct riscv_option_stack *s;
 
-      s = (struct riscv_option_stack *) xmalloc (sizeof *s);
+      s = XNEW (struct riscv_option_stack);
       s->next = riscv_opts_stack;
       s->options = riscv_opts;
+      s->subset_list = riscv_subsets;
       riscv_opts_stack = s;
+      riscv_subsets = riscv_copy_subset_list (s->subset_list);
+      riscv_rps_as.subset_list = riscv_subsets;
     }
   else if (strcmp (name, "pop") == 0)
     {
@@ -3776,8 +3795,12 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
 	as_bad (_(".option pop with no .option push"));
       else
 	{
-	  riscv_opts = s->options;
+	  riscv_subset_list_t *release_subsets = riscv_subsets;
 	  riscv_opts_stack = s->next;
+	  riscv_opts = s->options;
+	  riscv_subsets = s->subset_list;
+	  riscv_rps_as.subset_list = riscv_subsets;
+	  riscv_release_subset_list (release_subsets);
 	  free (s);
 	}
     }
@@ -4262,7 +4285,7 @@ riscv_write_out_attrs (void)
   unsigned int i;
 
   /* Re-write architecture elf attribute.  */
-  arch_str = riscv_arch_str (xlen, &riscv_subsets);
+  arch_str = riscv_arch_str (xlen, riscv_subsets);
   bfd_elf_add_proc_attr_string (stdoutput, Tag_RISCV_arch, arch_str);
   xfree ((void *) arch_str);
 
