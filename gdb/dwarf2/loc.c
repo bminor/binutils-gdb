@@ -924,11 +924,65 @@ chain_candidate (struct gdbarch *gdbarch,
   gdb_assert ((*resultp)->callers + (*resultp)->callees <= (*resultp)->length);
 }
 
-/* Create and return call_site_chain for CALLER_PC and CALLEE_PC.  All the
-   assumed frames between them use GDBARCH.  Use depth first search so we can
-   keep single CHAIN of call_site's back to CALLER_PC.  Function recursion
-   would have needless GDB stack overhead.  Any unreliability results
-   in thrown NO_ENTRY_VALUE_ERROR.  */
+/* Recursively try to construct the call chain.  GDBARCH, RESULTP, and
+   CHAIN are passed to chain_candidate.  ADDR_HASH tracks which
+   addresses have already been seen along the current chain.
+   CALL_SITE is the call site to visit, and CALLEE_PC is the PC we're
+   trying to "reach".  Returns false if an error has already been
+   detected and so an early return can be done.  If it makes sense to
+   keep trying (even if no answer has yet been found), returns
+   true.  */
+
+static bool
+call_site_find_chain_2
+     (struct gdbarch *gdbarch,
+      gdb::unique_xmalloc_ptr<struct call_site_chain> *resultp,
+      std::vector<struct call_site *> &chain,
+      std::unordered_set<CORE_ADDR> &addr_hash,
+      struct call_site *call_site,
+      CORE_ADDR callee_pc)
+{
+  /* CALLER_FRAME with registers is not available for tail-call jumped
+     frames.  */
+  CORE_ADDR target_func_addr = call_site->address (gdbarch, nullptr);
+
+  if (target_func_addr == callee_pc)
+    {
+      chain_candidate (gdbarch, resultp, chain);
+      /* If RESULTP was reset, then chain_candidate failed, and so we
+	 can tell our callers to early-return.  */
+      return *resultp != nullptr;
+    }
+
+  struct symbol *target_func
+    = func_addr_to_tail_call_list (gdbarch, target_func_addr);
+  for (struct call_site *target_call_site
+	 = TYPE_TAIL_CALL_LIST (target_func->type ());
+       target_call_site != nullptr;
+       target_call_site = target_call_site->tail_call_next)
+    {
+      if (addr_hash.insert (target_call_site->pc ()).second)
+	{
+	  /* Successfully entered TARGET_CALL_SITE.  */
+	  chain.push_back (target_call_site);
+
+	  if (!call_site_find_chain_2 (gdbarch, resultp, chain,
+				       addr_hash, target_call_site,
+				       callee_pc))
+	    return false;
+
+	  size_t removed = addr_hash.erase (target_call_site->pc ());
+	  gdb_assert (removed == 1);
+	  chain.pop_back ();
+	}
+    }
+
+  return true;
+}
+
+/* Create and return call_site_chain for CALLER_PC and CALLEE_PC.  All
+   the assumed frames between them use GDBARCH.  Any unreliability
+   results in thrown NO_ENTRY_VALUE_ERROR.  */
 
 static gdb::unique_xmalloc_ptr<call_site_chain>
 call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
@@ -958,74 +1012,10 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
      target's function will get iterated as already pushed into CHAIN via their
      TAIL_CALL_NEXT.  */
   call_site = call_site_for_pc (gdbarch, caller_pc);
-
-  while (call_site)
-    {
-      CORE_ADDR target_func_addr;
-      struct call_site *target_call_site;
-
-      /* CALLER_FRAME with registers is not available for tail-call jumped
-	 frames.  */
-      target_func_addr = call_site->address (gdbarch, nullptr);
-
-      if (target_func_addr == callee_pc)
-	{
-	  chain_candidate (gdbarch, &retval, chain);
-	  if (retval == NULL)
-	    break;
-
-	  /* There is no way to reach CALLEE_PC again as we would prevent
-	     entering it twice as being already marked in ADDR_HASH.  */
-	  target_call_site = NULL;
-	}
-      else
-	{
-	  struct symbol *target_func;
-
-	  target_func = func_addr_to_tail_call_list (gdbarch, target_func_addr);
-	  target_call_site = TYPE_TAIL_CALL_LIST (target_func->type ());
-	}
-
-      do
-	{
-	  /* Attempt to visit TARGET_CALL_SITE.  */
-
-	  if (target_call_site)
-	    {
-	      if (addr_hash.insert (target_call_site->pc ()).second)
-		{
-		  /* Successfully entered TARGET_CALL_SITE.  */
-
-		  chain.push_back (target_call_site);
-		  break;
-		}
-	    }
-
-	  /* Backtrack (without revisiting the originating call_site).  Try the
-	     callers's sibling; if there isn't any try the callers's callers's
-	     sibling etc.  */
-
-	  target_call_site = NULL;
-	  while (!chain.empty ())
-	    {
-	      call_site = chain.back ();
-	      chain.pop_back ();
-
-	      size_t removed = addr_hash.erase (call_site->pc ());
-	      gdb_assert (removed == 1);
-
-	      target_call_site = call_site->tail_call_next;
-	      if (target_call_site)
-		break;
-	    }
-	}
-      while (target_call_site);
-
-      if (chain.empty ())
-	call_site = NULL;
-      else
-	call_site = chain.back ();
-    }
+  /* No need to check the return value here, because we no longer care
+     about possible early returns.  */
+  call_site_find_chain_2 (gdbarch, &retval, chain, addr_hash, call_site,
+			  callee_pc);
 
   if (retval == NULL)
     {
