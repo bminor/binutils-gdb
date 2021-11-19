@@ -13311,6 +13311,11 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
   cu->get_builder ()->set_local_using_directives (cstk.local_using_directives);
 }
 
+static void dwarf2_ranges_read_low_addrs (unsigned offset,
+					  struct dwarf2_cu *cu,
+					  dwarf_tag tag,
+					  std::vector<CORE_ADDR> &result);
+
 /* Read in DW_TAG_call_site and insert it to CU->call_site_htab.  */
 
 static void
@@ -13474,6 +13479,10 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       target_die = follow_die_ref (die, attr, &target_cu);
       gdb_assert (target_cu->per_objfile->objfile == objfile);
+
+      struct attribute *ranges_attr
+	= dwarf2_attr (target_die, DW_AT_ranges, target_cu);
+
       if (die_is_declaration (target_die, target_cu))
 	{
 	  const char *target_physname;
@@ -13488,6 +13497,18 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		       sect_offset_str (die->sect_off), objfile_name (objfile));
 	  else
 	    call_site->target.set_loc_physname (target_physname);
+	}
+      else if (ranges_attr != nullptr && ranges_attr->form_is_unsigned ())
+	{
+	  ULONGEST ranges_offset = (ranges_attr->as_unsigned ()
+				    + target_cu->gnu_ranges_base);
+	  std::vector<CORE_ADDR> addresses;
+	  dwarf2_ranges_read_low_addrs (ranges_offset, target_cu,
+					target_die->tag, addresses);
+	  CORE_ADDR *saved = XOBNEWVAR (&objfile->objfile_obstack, CORE_ADDR,
+					addresses.size ());
+	  std::copy (addresses.begin (), addresses.end (), saved);
+	  call_site->target.set_loc_array (addresses.size (), saved);
 	}
       else
 	{
@@ -14060,6 +14081,20 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
   if (high_return)
     *high_return = high;
   return 1;
+}
+
+/* Process ranges and fill in a vector of the low PC values only.  */
+
+static void
+dwarf2_ranges_read_low_addrs (unsigned offset, struct dwarf2_cu *cu,
+			      dwarf_tag tag,
+			      std::vector<CORE_ADDR> &result)
+{
+  dwarf2_ranges_process (offset, cu, tag,
+			 [&] (CORE_ADDR start, CORE_ADDR end)
+    {
+      result.push_back (start);
+    });
 }
 
 /* Get low and high pc attributes from a die.  See enum pc_bounds_kind

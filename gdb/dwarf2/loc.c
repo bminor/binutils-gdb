@@ -726,6 +726,18 @@ call_site_target::iterate_over_addresses
       }
       break;
 
+    case call_site_target::ADDRESSES:
+      {
+	dwarf2_per_objfile *per_objfile = call_site->per_objfile;
+	compunit_symtab *cust = per_objfile->get_symtab (call_site->per_cu);
+	int sect_idx = cust->block_line_section ();
+	CORE_ADDR delta = per_objfile->objfile->section_offsets[sect_idx];
+
+	for (unsigned i = 0; i < m_loc.addresses.length; ++i)
+	  callback (m_loc.addresses.values[i] + delta);
+      }
+      break;
+
     default:
       internal_error (__FILE__, __LINE__, _("invalid call site target kind"));
     }

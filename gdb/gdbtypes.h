@@ -1834,6 +1834,8 @@ struct call_site_target
     PHYSNAME,
     /* A DWARF block.  */
     DWARF_BLOCK,
+    /* An array of addresses.  */
+    ADDRESSES,
   };
 
   void set_loc_physaddr (CORE_ADDR physaddr)
@@ -1853,6 +1855,13 @@ struct call_site_target
       m_loc_kind = DWARF_BLOCK;
       m_loc.dwarf_block = dwarf_block;
     }
+
+  void set_loc_array (unsigned length, const CORE_ADDR *data)
+  {
+    m_loc_kind = ADDRESSES;
+    m_loc.addresses.length = length;
+    m_loc.addresses.values = data;
+  }
 
   /* Callback type for iterate_over_addresses.  */
 
@@ -1877,6 +1886,12 @@ private:
     const char *physname;
     /* DWARF block.  */
     struct dwarf2_locexpr_baton *dwarf_block;
+    /* Array of addresses.  */
+    struct
+    {
+      unsigned length;
+      const CORE_ADDR *values;
+    } addresses;
   } m_loc;
 
   /* * Discriminant for union field_location.  */
