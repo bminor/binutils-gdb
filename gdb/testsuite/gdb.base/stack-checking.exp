@@ -31,8 +31,10 @@ if ![runto_main] then {
 # Test that the debugger is able to unwind to "main" at the next breakpoint
 # hit. The frame number of "main" should be passed into MAIN_FRAME_NUMBER."
 proc backtrace_test {name main_frame_number} {
-    gdb_continue_to_breakpoint "breakpoint for $name"
-    gdb_test "bt" "#${main_frame_number}.*in main ().*"
+    with_test_prefix $name {
+	gdb_continue_to_breakpoint "test location"
+	gdb_test "bt" "#${main_frame_number}.*in main ().*"
+    }
 }
 
 gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
