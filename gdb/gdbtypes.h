@@ -52,6 +52,7 @@
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/print-utils.h"
+#include "gdbsupport/function-view.h"
 #include "dwarf2.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gmp-utils.h"
@@ -1853,14 +1854,18 @@ struct call_site_target
       m_loc.dwarf_block = dwarf_block;
     }
 
-  /* Find DW_TAG_call_site's DW_AT_call_target address.  CALLER_FRAME
-     (for registers) can be NULL if it is not known.  This function
-     always returns valid address or it throws
-     NO_ENTRY_VALUE_ERROR.  */
+  /* Callback type for iterate_over_addresses.  */
 
-  CORE_ADDR address (struct gdbarch *call_site_gdbarch,
-		     const struct call_site *call_site,
-		     struct frame_info *caller_frame) const;
+  using iterate_ftype = gdb::function_view<void (CORE_ADDR)>;
+
+  /* Call CALLBACK for each DW_TAG_call_site's DW_AT_call_target
+     address.  CALLER_FRAME (for registers) can be NULL if it is not
+     known.  This function always may throw NO_ENTRY_VALUE_ERROR.  */
+
+  void iterate_over_addresses (struct gdbarch *call_site_gdbarch,
+			       const struct call_site *call_site,
+			       struct frame_info *caller_frame,
+			       iterate_ftype callback) const;
 
 private:
 
@@ -1955,14 +1960,17 @@ struct call_site
 
     CORE_ADDR pc () const;
 
-    /* Find the target address.  CALLER_FRAME (for registers) can be
-       NULL if it is not known.  This function always returns valid
-       address or it throws NO_ENTRY_VALUE_ERROR.  */
+    /* Call CALLBACK for each target address.  CALLER_FRAME (for
+       registers) can be NULL if it is not known.  This function may
+       throw NO_ENTRY_VALUE_ERROR.  */
 
-    CORE_ADDR address (struct gdbarch *call_site_gdbarch,
-		       struct frame_info *caller_frame) const
+    void iterate_over_addresses (struct gdbarch *call_site_gdbarch,
+				 struct frame_info *caller_frame,
+				 call_site_target::iterate_ftype callback)
+      const
     {
-      return target.address (call_site_gdbarch, this, caller_frame);
+      return target.iterate_over_addresses (call_site_gdbarch, this,
+					    caller_frame, callback);
     }
 
     /* * List successor with head in FUNC_TYPE.TAIL_CALL_LIST.  */
