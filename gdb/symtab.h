@@ -1449,6 +1449,16 @@ struct symtab
 
 struct compunit_symtab
 {
+  struct objfile *objfile () const
+  {
+    return m_objfile;
+  }
+
+  void set_objfile (struct objfile *objfile)
+  {
+    m_objfile = objfile;
+  }
+
   /* Set m_call_site_htab.  */
   void set_call_site_htab (htab_t call_site_htab);
 
@@ -1459,7 +1469,7 @@ struct compunit_symtab
   struct compunit_symtab *next;
 
   /* Object file from which this symtab information was read.  */
-  struct objfile *objfile;
+  struct objfile *m_objfile;
 
   /* Name of the symtab.
      This is *not* intended to be a usable filename, and is
@@ -1535,7 +1545,7 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_OBJFILE(cust) ((cust)->objfile)
+#define COMPUNIT_OBJFILE(cust) ((cust)->objfile ())
 #define COMPUNIT_FILETABS(cust) ((cust)->filetabs)
 #define COMPUNIT_DEBUGFORMAT(cust) ((cust)->debugformat)
 #define COMPUNIT_PRODUCER(cust) ((cust)->producer)

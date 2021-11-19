@@ -957,7 +957,7 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
   struct linetable *linetable;
   struct objfile *objfile;
 
-  objfile = symtab->compunit_symtab->objfile;
+  objfile = symtab->compunit_symtab->objfile ();
   printf_filtered (_("objfile: %ps ((struct objfile *) %s)\n"),
 		   styled_string (file_name_style.style (),
 				  objfile_name (objfile)),

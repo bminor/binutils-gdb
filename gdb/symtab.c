@@ -338,7 +338,7 @@ compunit_symtab::find_call_site (CORE_ADDR pc) const
     return nullptr;
 
   CORE_ADDR delta
-    = this->objfile->section_offsets[COMPUNIT_BLOCK_LINE_SECTION (this)];
+    = this->objfile ()->section_offsets[COMPUNIT_BLOCK_LINE_SECTION (this)];
   CORE_ADDR unrelocated_pc = pc - delta;
 
   struct call_site call_site_local (unrelocated_pc, nullptr, nullptr);

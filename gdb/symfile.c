@@ -2774,7 +2774,7 @@ deduce_language_from_filename (const char *filename)
 struct symtab *
 allocate_symtab (struct compunit_symtab *cust, const char *filename)
 {
-  struct objfile *objfile = cust->objfile;
+  struct objfile *objfile = cust->objfile ();
   struct symtab *symtab
     = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symtab);
 
@@ -2832,7 +2832,7 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
 					       struct compunit_symtab);
   const char *saved_name;
 
-  cu->objfile = objfile;
+  cu->set_objfile (objfile);
 
   /* The name we record here is only for display/debugging purposes.
      Just save the basename to avoid path issues (too long for display,
@@ -2858,8 +2858,8 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
 void
 add_compunit_symtab_to_objfile (struct compunit_symtab *cu)
 {
-  cu->next = cu->objfile->compunit_symtabs;
-  cu->objfile->compunit_symtabs = cu;
+  cu->next = cu->objfile ()->compunit_symtabs;
+  cu->objfile ()->compunit_symtabs = cu;
 }
 
 
