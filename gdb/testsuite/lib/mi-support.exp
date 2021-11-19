@@ -1955,7 +1955,9 @@ proc mi_run_inline_test { testcase } {
 	if {$first==1} {
 	    # Start the program afresh.
 	    mi_tbreak "$mi_autotest_source:$line"
-	    mi_run_cmd
+	    if { [mi_run_cmd] < 0 } {
+		return -1
+	    }
 	    set line_now [mi_get_stop_line "$testcase: step to $line"]
 	    set first 0
 	} elseif {$line_now!=$line} {
@@ -1982,6 +1984,8 @@ proc mi_run_inline_test { testcase } {
 	# will need more experience to be sure.
 	eval $statements
     }
+
+    return 0
 }
 
 proc get_mi_thread_list {name} {

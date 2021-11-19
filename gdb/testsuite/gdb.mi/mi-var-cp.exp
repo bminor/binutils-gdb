@@ -38,11 +38,19 @@ mi_gdb_load ${binfile}
 
 mi_prepare_inline_tests $srcfile
 
-mi_run_inline_test reference_update
-mi_run_inline_test base_in_reference
-mi_run_inline_test reference_to_pointer
-mi_run_inline_test reference_to_struct
-mi_run_inline_test path_expression
+set inline_tests {
+    reference_update
+    base_in_reference
+    reference_to_pointer
+    reference_to_struct
+    path_expression
+}
+
+foreach inline_test $inline_tests {
+    if { [mi_run_inline_test $inline_test] < 0 } {
+	return -1
+    }
+}
 
 set lineno [gdb_get_line_number "/* anonymous_structs_and_unions */"]
 mi_create_breakpoint "$srcfile:$lineno" \

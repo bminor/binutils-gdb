@@ -1205,7 +1205,9 @@ mi_varobj_update * {psnp->ptrs.0.next.next.long_ptr} \
 
 mi_prepare_inline_tests $srcfile
 
-mi_run_inline_test child_deletion
+if { [mi_run_inline_test child_deletion] < 0 } {
+    return -1
+}
 
 
 mi_gdb_exit

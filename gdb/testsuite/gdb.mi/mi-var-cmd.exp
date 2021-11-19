@@ -587,14 +587,24 @@ proc set_frozen {varobjs flag} {
 }
 
 mi_prepare_inline_tests $srcfile
-mi_run_inline_test frozen
 
-mi_run_inline_test bitfield
+set inline_tests {
+    frozen
+    bitfield
+}
+
+# Needs to be last, following tests rely on this.
+lappend inline_tests floating
+
+foreach inline_test $inline_tests {
+    if { [mi_run_inline_test $inline_test] < 0 } {
+	return -1
+    }
+}
 
 # Since the inline test framework does not really work with
-# function calls, first to inline tests and then do the reminder
+# function calls, first to inline tests and then do the remainder
 # manually.
-mi_run_inline_test floating
 set do_at_tests_callee_breakpoint [gdb_get_line_number "breakpoint inside callee"]
 mi_gdb_test "-break-insert var-cmd.c:$do_at_tests_callee_breakpoint" ".*" \
     "inside breakpoint inside callee"
