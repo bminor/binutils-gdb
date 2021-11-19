@@ -23,10 +23,10 @@ if {[prepare_for_testing "failed to prepare" $testfile $sources]} {
 # This is required due to PR25764.
 gdb_test "maint expand-symtabs"
 
-gdb_test "p a" { = \{1, 2\}}
+gdb_test "p a" { = \{1, 2\}} "no running process: p a"
 
 if ![runto_main] then {
     return 0
 }
 
-gdb_test "p a" { = \{1, 2\}}
+gdb_test "p a" { = \{1, 2\}} "running process: p a"
