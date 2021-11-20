@@ -1541,6 +1541,16 @@ struct compunit_symtab
     m_locations_valid = locations_valid;
   }
 
+  bool epilogue_unwind_valid () const
+  {
+    return m_epilogue_unwind_valid;
+  }
+
+  void set_epilogue_unwind_valid (bool epilogue_unwind_valid)
+  {
+    m_epilogue_unwind_valid = epilogue_unwind_valid;
+  }
+
   /* Make PRIMARY_FILETAB the primary filetab of this compunit symtab.
 
      PRIMARY_FILETAB must already be a filetab of this compunit symtab.  */
@@ -1607,7 +1617,7 @@ struct compunit_symtab
 
   /* DWARF unwinder for this CU is valid even for epilogues (PC at the return
      instruction).  This is supported by GCC since 4.5.0.  */
-  unsigned int epilogue_unwind_valid : 1;
+  unsigned int m_epilogue_unwind_valid : 1;
 
   /* struct call_site entries for this compilation unit or NULL.  */
   htab_t m_call_site_htab;
@@ -1636,7 +1646,6 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_EPILOGUE_UNWIND_VALID(cust) ((cust)->epilogue_unwind_valid)
 #define COMPUNIT_MACRO_TABLE(cust) ((cust)->macro_table)
 
 /* Return the language of CUST.  */

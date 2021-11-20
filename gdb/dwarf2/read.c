@@ -9496,7 +9496,7 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
 	cust->set_locations_valid (true);
 
       if (gcc_4_minor >= 5)
-	cust->epilogue_unwind_valid = 1;
+	cust->set_epilogue_unwind_valid (true);
 
       cust->set_call_site_htab (cu->call_site_htab);
     }
