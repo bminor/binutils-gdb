@@ -26,6 +26,7 @@ AM_V_RUNTEST_1 =
 
 site-sim-config.exp: Makefile
 	$(AM_V_GEN)( \
+	echo "set SIM_PRIMARY_TARGET \"$(SIM_PRIMARY_TARGET)\""; \
 	echo "set builddir \"$(builddir)\""; \
 	echo "set srcdir \"$(srcdir)/testsuite\""; \
 	$(foreach V,$(SIM_TOOLCHAIN_VARS),echo "set $(V) \"$($(V))\"";) \

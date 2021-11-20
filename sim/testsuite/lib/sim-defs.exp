@@ -6,6 +6,17 @@
 # [Presumubly because the target has been "popped" by then.  Odd though.]
 set sim_path "unknown-run"
 
+# Find the simulator arch.
+
+proc sim_arch {} {
+    global subdir
+    set arch "$subdir"
+    while { [file dirname $arch] != "." } {
+	set arch [file dirname $arch]
+    }
+    return "$arch"
+}
+
 # Initialize the testrun.
 #
 # Normally dejagnu will execute ${tool}_init automatically, but since we set
@@ -18,11 +29,7 @@ proc sim_init { args } {
     global sim_path
 
     # Find the path to the simulator for executing.
-    set arch "$subdir"
-    while { [file dirname $arch] != "." } {
-	set arch [file dirname $arch]
-    }
-    set sim_path "$builddir/$arch/run"
+    set sim_path "$builddir/[sim_arch]/run"
 
     # As gross as it is, we unset the linker script specified by the target
     # board.  The simulator board file mips-sim.exp, sets ldscript to the
@@ -52,6 +59,7 @@ proc sim_init_toolchain {} {
     global CFLAGS_FOR_TARGET
     global LDFLAGS_FOR_TARGET
     global SIMFLAGS_FOR_TARGET
+    global global_as_works
     global global_cpp_works
     global global_cc_works
     global global_cc_os
@@ -65,6 +73,42 @@ proc sim_init_toolchain {} {
     set SIMFLAGS_FOR_TARGET ""
     unset -nocomplain cpu_option cpu_option_sep
 
+    # The configure script created XXX_FOR_TARGET_$ARCH for us, so merge those
+    # into plain XXX_FOR_TARGET for this particular arch run.
+    global SIM_PRIMARY_TARGET
+    set arch [sim_arch]
+    set ARCH [string map {- _} [string toupper $arch]]
+    foreach var {AS LD CC} {
+	set var_for_target "${var}_FOR_TARGET"
+	global $var_for_target
+	set var_for_target_arch "${var_for_target}_${ARCH}"
+	global $var_for_target_arch
+
+	if [info exists $var_for_target_arch] {
+	    set $var_for_target [set $var_for_target_arch]
+	} else {
+	    set $var_for_target ""
+	}
+
+	if { [set $var_for_target] == "" } {
+	    # If building for the primary target, use the default settings.
+	    if { $arch == $SIM_PRIMARY_TARGET } {
+		unset -nocomplain $var_for_target
+	    } {
+		set $var_for_target false
+	    }
+	}
+    }
+
+    # See if an assembler is available.
+    if { $arch != $SIM_PRIMARY_TARGET && $AS_FOR_TARGET == "false" } {
+	verbose -log "Can't find a compatible assembler"
+	set global_as_works 0
+    } {
+	verbose -log "Found a compatible assembler"
+	set global_as_works 1
+    }
+
     # Merge per-test settings if available.
     if ![info exists CFLAGS_FOR_TARGET_init] {
 	set CFLAGS_FOR_TARGET_init ""
@@ -77,8 +121,11 @@ proc sim_init_toolchain {} {
     set global_cpp_works [string equal "" "$result"]
 
     # See if we have a compiler available, and which environment it's targeting.
-    if { [target_compile $srcdir/lib/newlibcheck.c \
-	  $objdir/compilercheck.x "executable" $cc_options] == "" } {
+    if { $arch != $SIM_PRIMARY_TARGET && $CC_FOR_TARGET == "false" } {
+	verbose -log "Can't find a compatible C compiler"
+	set global_cc_works 0
+    } elseif { [target_compile $srcdir/lib/newlibcheck.c \
+		$objdir/compilercheck.x "executable" $cc_options] == "" } {
 	verbose -log "Found newlib C compiler"
 	set global_cc_works 1
 	set global_cc_os "newlib"
@@ -250,6 +297,7 @@ proc run_sim_test { name requested_machs } {
     global cpu_option
     global cpu_option_sep
     global SIMFLAGS_FOR_TARGET
+    global global_as_works
     global global_cpp_works
     global global_cc_works
     global global_cc_os
@@ -411,6 +459,12 @@ proc run_sim_test { name requested_machs } {
 		[list "incdir=$srcdir/$subdir" "additional_flags=$c_as_options $c_ld_options $opts(cc,$mach)"]]
 	    set method "compiling/linking"
 	} else {
+	    # If we don't have an assembler available, skip tests :(.
+	    if { $global_as_works == 0 } {
+		untested $subdir/$name
+		return
+	    }
+
 	    if [string match "*.S" $sourcefile] {
 		# If we don't have a preprocessor available, skip tests :(.
 		if { $global_cpp_works == 0 } {
