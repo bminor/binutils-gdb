@@ -1179,7 +1179,7 @@ iterate_over_all_matching_symtabs
 
 	  for (compunit_symtab *cu : objfile->compunits ())
 	    {
-	      struct symtab *symtab = COMPUNIT_FILETABS (cu);
+	      struct symtab *symtab = cu->primary_filetab ();
 
 	      iterate_over_file_blocks (symtab, lookup_name, name_domain,
 					callback);

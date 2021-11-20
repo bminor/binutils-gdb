@@ -1031,7 +1031,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
     int block_i;
 
     /* The main source file's symtab.  */
-    struct symtab *symtab = COMPUNIT_FILETABS (cu);
+    struct symtab *symtab = cu->primary_filetab ();
 
     for (block_i = 0; block_i < BLOCKVECTOR_NBLOCKS (blockvector); block_i++)
       {
@@ -1150,7 +1150,7 @@ set_missing_symtab (struct pending *pending_list,
       for (i = 0; i < pending->nsyms; ++i)
 	{
 	  if (symbol_symtab (pending->symbol[i]) == NULL)
-	    symbol_set_symtab (pending->symbol[i], COMPUNIT_FILETABS (cu));
+	    symbol_set_symtab (pending->symbol[i], cu->primary_filetab ());
 	}
     }
 }

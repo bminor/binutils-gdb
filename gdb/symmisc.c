@@ -329,8 +329,9 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
     }
   else
     {
+      compunit_symtab *compunit = SYMTAB_COMPUNIT (symtab);
       const char *compunit_filename
-	= symtab_to_filename_for_display (COMPUNIT_FILETABS (SYMTAB_COMPUNIT (symtab)));
+	= symtab_to_filename_for_display (compunit->primary_filetab ());
 
       fprintf_filtered (outfile,
 			"\nBlockvector same as owning compunit: %s\n\n",
@@ -346,7 +347,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
       if (cust->user != nullptr)
 	{
 	  const char *addr
-	    = host_address_to_string (COMPUNIT_FILETABS (cust->user));
+	    = host_address_to_string (cust->user->primary_filetab ());
 	  fprintf_filtered (outfile, "Compunit user: %s\n", addr);
 	}
       if (cust->includes != nullptr)
@@ -356,7 +357,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	    if (include == nullptr)
 	      break;
 	    const char *addr
-	      = host_address_to_string (COMPUNIT_FILETABS (include));
+	      = host_address_to_string (include->primary_filetab ());
 	    fprintf_filtered (outfile, "Compunit include: %s\n", addr);
 	  }
     }

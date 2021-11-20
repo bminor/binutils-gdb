@@ -1577,7 +1577,6 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_FILETABS(cust) (*(cust)->filetabs ().begin ())
 #define COMPUNIT_DEBUGFORMAT(cust) ((cust)->debugformat)
 #define COMPUNIT_PRODUCER(cust) ((cust)->producer)
 #define COMPUNIT_DIRNAME(cust) ((cust)->dirname)
@@ -1596,7 +1595,7 @@ extern enum language compunit_language (const struct compunit_symtab *cust);
 static inline bool
 is_main_symtab_of_compunit_symtab (struct symtab *symtab)
 {
-  return symtab == COMPUNIT_FILETABS (SYMTAB_COMPUNIT (symtab));
+  return symtab == SYMTAB_COMPUNIT (symtab)->primary_filetab ();
 }
 
 

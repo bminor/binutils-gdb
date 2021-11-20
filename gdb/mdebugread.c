@@ -4084,17 +4084,17 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 
 	  /* The proper language was already determined when building
 	     the psymtab, use it.  */
-	  COMPUNIT_FILETABS (cust)->language = PST_PRIVATE (pst)->pst_language;
+	  cust->primary_filetab ()->language = PST_PRIVATE (pst)->pst_language;
 	}
 
-      psymtab_language = COMPUNIT_FILETABS (cust)->language;
+      psymtab_language = cust->primary_filetab ()->language;
 
-      lines = SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust));
+      lines = SYMTAB_LINETABLE (cust->primary_filetab ());
 
       /* Get a new lexical context.  */
 
       push_parse_stack ();
-      top_stack->cur_st = COMPUNIT_FILETABS (cust);
+      top_stack->cur_st = cust->primary_filetab ();
       top_stack->cur_block
 	= BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);
       BLOCK_START (top_stack->cur_block) = pst->text_low (objfile);
@@ -4173,7 +4173,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
       size = lines->nitems;
       if (size > 1)
 	--size;
-      SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust))
+      SYMTAB_LINETABLE (cust->primary_filetab ())
 	= ((struct linetable *)
 	   obstack_copy (&mdebugread_objfile->objfile_obstack,
 			 lines, (sizeof (struct linetable)
@@ -4183,7 +4183,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
       /* .. and our share of externals.
 	 XXX use the global list to speed up things here.  How?
 	 FIXME, Maybe quit once we have found the right number of ext's?  */
-      top_stack->cur_st = COMPUNIT_FILETABS (cust);
+      top_stack->cur_st = cust->primary_filetab ();
       top_stack->cur_block
 	= BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (top_stack->cur_st),
 			     GLOBAL_BLOCK);
@@ -4201,7 +4201,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 	{
 	  printf_filtered (_("File %s contains %d unresolved references:"),
 			   symtab_to_filename_for_display
-			     (COMPUNIT_FILETABS (cust)),
+			     (cust->primary_filetab ()),
 			   n_undef_symbols);
 	  printf_filtered ("\n\t%4d variables\n\t%4d "
 			   "procedures\n\t%4d labels\n",
@@ -4211,7 +4211,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 	}
       pop_parse_stack ();
 
-      sort_blocks (COMPUNIT_FILETABS (cust));
+      sort_blocks (cust->primary_filetab ());
     }
 
   /* Now link the psymtab and the symtab.  */

@@ -509,7 +509,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
     });
 
   cust = allocate_compunit_symtab (objfile, stab->file_name.c_str ());
-  allocate_symtab (cust, stab->file_name.c_str ());
+  symtab *filetab = allocate_symtab (cust, stab->file_name.c_str ());
   add_compunit_symtab_to_objfile (cust);
 
   /* JIT compilers compile in memory.  */
@@ -521,9 +521,9 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       size_t size = ((stab->linetable->nitems - 1)
 		     * sizeof (struct linetable_entry)
 		     + sizeof (struct linetable));
-      SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust))
+      SYMTAB_LINETABLE (filetab)
 	= (struct linetable *) obstack_alloc (&objfile->objfile_obstack, size);
-      memcpy (SYMTAB_LINETABLE (COMPUNIT_FILETABS (cust)),
+      memcpy (SYMTAB_LINETABLE (filetab),
 	      stab->linetable.get (), size);
     }
 
@@ -562,7 +562,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       /* The name.  */
       SYMBOL_DOMAIN (block_name) = VAR_DOMAIN;
       SYMBOL_ACLASS_INDEX (block_name) = LOC_BLOCK;
-      symbol_set_symtab (block_name, COMPUNIT_FILETABS (cust));
+      symbol_set_symtab (block_name, filetab);
       SYMBOL_TYPE (block_name) = lookup_function_type (block_type);
       SYMBOL_BLOCK_VALUE (block_name) = new_block;
 
