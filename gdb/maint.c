@@ -947,8 +947,8 @@ count_symtabs_and_blocks (int *nr_symtabs_ptr, int *nr_compunit_symtabs_ptr,
 	    {
 	      ++nr_compunit_symtabs;
 	      nr_blocks += BLOCKVECTOR_NBLOCKS (COMPUNIT_BLOCKVECTOR (cu));
-	      nr_symtabs += std::distance (compunit_filetabs (cu).begin (),
-					   compunit_filetabs (cu).end ());
+	      nr_symtabs += std::distance (cu->filetabs ().begin (),
+					   cu->filetabs ().end ());
 	    }
 	}
     }

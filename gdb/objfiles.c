@@ -651,7 +651,7 @@ objfile_relocate1 (struct objfile *objfile,
   {
     for (compunit_symtab *cust : objfile->compunits ())
       {
-	for (symtab *s : compunit_filetabs (cust))
+	for (symtab *s : cust->filetabs ())
 	  {
 	    struct linetable *l;
 

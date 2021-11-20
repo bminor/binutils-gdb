@@ -1401,6 +1401,10 @@ struct symtab
   char *fullname;
 };
 
+/* A range adapter to allowing iterating over all the file tables in a list.  */
+
+using symtab_range = next_range<symtab>;
+
 #define SYMTAB_COMPUNIT(symtab) ((symtab)->compunit_symtab)
 #define SYMTAB_LINETABLE(symtab) ((symtab)->linetable)
 #define SYMTAB_LANGUAGE(symtab) ((symtab)->language)
@@ -1459,17 +1463,22 @@ struct compunit_symtab
     m_objfile = objfile;
   }
 
+  symtab_range filetabs () const
+  {
+    return symtab_range (m_filetabs);
+  }
+
   void add_filetab (symtab *filetab)
   {
-    if (this->filetabs == nullptr)
+    if (m_filetabs == nullptr)
       {
-	this->filetabs = filetab;
-	this->last_filetab = filetab;
+	m_filetabs = filetab;
+	m_last_filetab = filetab;
       }
     else
       {
-	this->last_filetab->next = filetab;
-	this->last_filetab = filetab;
+	m_last_filetab->next = filetab;
+	m_last_filetab = filetab;
       }
   }
 
@@ -1503,14 +1512,14 @@ struct compunit_symtab
      source file (e.g., .c, .cc) is guaranteed to be first.
      Each symtab is a file, either the "main" source file (e.g., .c, .cc)
      or header (e.g., .h).  */
-  struct symtab *filetabs;
+  symtab *m_filetabs;
 
   /* Last entry in FILETABS list.
      Subfiles are added to the end of the list so they accumulate in order,
      with the main source subfile living at the front.
      The main reason is so that the main source file symtab is at the head
      of the list, and the rest appear in order for debugging convenience.  */
-  struct symtab *last_filetab;
+  symtab *m_last_filetab;
 
   /* Non-NULL string that identifies the format of the debugging information,
      such as "stabs", "dwarf 1", "dwarf 2", "coff", etc.  This is mostly useful
@@ -1568,7 +1577,7 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_FILETABS(cust) ((cust)->filetabs)
+#define COMPUNIT_FILETABS(cust) (*(cust)->filetabs ().begin ())
 #define COMPUNIT_DEBUGFORMAT(cust) ((cust)->debugformat)
 #define COMPUNIT_PRODUCER(cust) ((cust)->producer)
 #define COMPUNIT_DIRNAME(cust) ((cust)->dirname)
@@ -1577,17 +1586,6 @@ using compunit_symtab_range = next_range<compunit_symtab>;
 #define COMPUNIT_LOCATIONS_VALID(cust) ((cust)->locations_valid)
 #define COMPUNIT_EPILOGUE_UNWIND_VALID(cust) ((cust)->epilogue_unwind_valid)
 #define COMPUNIT_MACRO_TABLE(cust) ((cust)->macro_table)
-
-/* A range adapter to allowing iterating over all the file tables
-   within a compunit.  */
-
-using symtab_range = next_range<symtab>;
-
-static inline symtab_range
-compunit_filetabs (compunit_symtab *cu)
-{
-  return symtab_range (cu->filetabs);
-}
 
 /* Return the language of CUST.  */
 

@@ -1177,7 +1177,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
   {
     for (compunit_symtab *cu : objfile->compunits ())
       {
-	for (symtab *s : compunit_filetabs (cu))
+	for (symtab *s : cu->filetabs ())
 	  patch_opaque_types (s);
       }
   }

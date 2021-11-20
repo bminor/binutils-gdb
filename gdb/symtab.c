@@ -367,15 +367,15 @@ compunit_symtab::set_primary_filetab (symtab *primary_filetab)
   symtab *prev_filetab = nullptr;
 
   /* Move PRIMARY_FILETAB to the head of the filetab list.  */
-  for (symtab *filetab : compunit_filetabs (this))
+  for (symtab *filetab : this->filetabs ())
     {
       if (filetab == primary_filetab)
 	{
 	  if (prev_filetab != nullptr)
 	    {
 	      prev_filetab->next = primary_filetab->next;
-	      primary_filetab->next = this->filetabs;
-	      this->filetabs = primary_filetab;
+	      primary_filetab->next = m_filetabs;
+	      m_filetabs = primary_filetab;
 	    }
 
 	  break;
@@ -384,7 +384,7 @@ compunit_symtab::set_primary_filetab (symtab *primary_filetab)
       prev_filetab = filetab;
     }
 
-  gdb_assert (primary_filetab == this->filetabs);
+  gdb_assert (primary_filetab == m_filetabs);
 }
 
 /* See symtab.h.  */
@@ -392,10 +392,10 @@ compunit_symtab::set_primary_filetab (symtab *primary_filetab)
 struct symtab *
 compunit_symtab::primary_filetab () const
 {
-  gdb_assert (this->filetabs != nullptr);
+  gdb_assert (m_filetabs != nullptr);
 
   /* The primary file symtab is the first one in the list.  */
-  return this->filetabs;
+  return m_filetabs;
 }
 
 /* See symtab.h.  */
@@ -533,7 +533,7 @@ iterate_over_some_symtabs (const char *name,
 
   for (cust = first; cust != NULL && cust != after_last; cust = cust->next)
     {
-      for (symtab *s : compunit_filetabs (cust))
+      for (symtab *s : cust->filetabs ())
 	{
 	  if (compare_filenames_for_search (s->filename, name))
 	    {
@@ -3282,7 +3282,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
      They all have the same apriori range, that we found was right;
      but they have different line tables.  */
 
-  for (symtab *iter_s : compunit_filetabs (cust))
+  for (symtab *iter_s : cust->filetabs ())
     {
       /* Find the best line in this symtab.  */
       l = SYMTAB_LINETABLE (iter_s);
@@ -3483,7 +3483,7 @@ find_line_symtab (struct symtab *sym_tab, int line,
 	{
 	  for (compunit_symtab *cu : objfile->compunits ())
 	    {
-	      for (symtab *s : compunit_filetabs (cu))
+	      for (symtab *s : cu->filetabs ())
 		{
 		  struct linetable *l;
 		  int ind;
@@ -4531,7 +4531,7 @@ info_sources_worker (struct ui_out *uiout,
 
       for (compunit_symtab *cu : objfile->compunits ())
 	{
-	  for (symtab *s : compunit_filetabs (cu))
+	  for (symtab *s : cu->filetabs ())
 	    {
 	      const char *file = symtab_to_filename_for_display (s);
 	      const char *fullname = symtab_to_fullname (s);
@@ -6190,7 +6190,7 @@ make_source_files_completion_list (const char *text, const char *word)
     {
       for (compunit_symtab *cu : objfile->compunits ())
 	{
-	  for (symtab *s : compunit_filetabs (cu))
+	  for (symtab *s : cu->filetabs ())
 	    {
 	      if (not_interesting_fname (s->filename))
 		continue;

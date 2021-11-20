@@ -344,7 +344,7 @@ select_source_symtab (struct symtab *s)
     {
       for (compunit_symtab *cu : ofp->compunits ())
 	{
-	  for (symtab *symtab : compunit_filetabs (cu))
+	  for (symtab *symtab : cu->filetabs ())
 	    {
 	      const char *name = symtab->filename;
 	      int len = strlen (name);
@@ -424,7 +424,7 @@ forget_cached_source_info_for_objfile (struct objfile *objfile)
 {
   for (compunit_symtab *cu : objfile->compunits ())
     {
-      for (symtab *s : compunit_filetabs (cu))
+      for (symtab *s : cu->filetabs ())
 	{
 	  if (s->fullname != NULL)
 	    {

@@ -74,7 +74,7 @@ print_objfile_statistics (void)
 	i = linetables = 0;
 	for (compunit_symtab *cu : objfile->compunits ())
 	  {
-	    for (symtab *s : compunit_filetabs (cu))
+	    for (symtab *s : cu->filetabs ())
 	      {
 		i++;
 		if (SYMTAB_LINETABLE (s) != NULL)
@@ -126,7 +126,7 @@ dump_objfile (struct objfile *objfile)
       printf_filtered ("Symtabs:\n");
       for (compunit_symtab *cu : objfile->compunits ())
 	{
-	  for (symtab *symtab : compunit_filetabs (cu))
+	  for (symtab *symtab : cu->filetabs ())
 	    {
 	      printf_filtered ("%s at %s",
 			       symtab_to_filename_for_display (symtab),
@@ -469,7 +469,7 @@ maintenance_print_symbols (const char *args, int from_tty)
 
 	  for (compunit_symtab *cu : objfile->compunits ())
 	    {
-	      for (symtab *s : compunit_filetabs (cu))
+	      for (symtab *s : cu->filetabs ())
 		{
 		  int print_for_source = 0;
 
@@ -756,7 +756,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 	  {
 	    int printed_compunit_symtab_start = 0;
 
-	    for (symtab *symtab : compunit_filetabs (cust))
+	    for (symtab *symtab : cust->filetabs ())
 	      {
 		QUIT;
 
@@ -1025,7 +1025,7 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
       {
 	for (compunit_symtab *cust : objfile->compunits ())
 	  {
-	    for (symtab *symtab : compunit_filetabs (cust))
+	    for (symtab *symtab : cust->filetabs ())
 	      {
 		QUIT;
 
