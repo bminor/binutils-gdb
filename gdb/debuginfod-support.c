@@ -202,6 +202,7 @@ debuginfod_source_query (const unsigned char *build_id,
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
+  char *dname = nullptr;
   user_data data ("source file", srcpath);
 
   debuginfod_set_user_data (c, &data);
@@ -216,7 +217,7 @@ debuginfod_source_query (const unsigned char *build_id,
 					build_id,
 					build_id_len,
 					srcpath,
-					nullptr));
+					&dname));
   debuginfod_set_user_data (c, nullptr);
 
   if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
@@ -225,7 +226,7 @@ debuginfod_source_query (const unsigned char *build_id,
 		     styled_string (file_name_style.style (),  srcpath));
 
   if (fd.get () >= 0)
-    *destname = make_unique_xstrdup (srcpath);
+    destname->reset (dname);
 
   return fd;
 }
