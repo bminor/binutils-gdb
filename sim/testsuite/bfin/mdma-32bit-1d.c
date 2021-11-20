@@ -1,7 +1,7 @@
 /* Basic MDMA device tests.
 # mach: bfin
 # cc: -mcpu=bf537 -nostdlib -lc
-# sim: --env operating --model bf537
+# sim: --environment operating --model bf537
 */
 
 #include "test.h"
