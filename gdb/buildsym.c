@@ -1013,7 +1013,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
   cu->set_debugformat (m_debugformat);
 
   /* Similarly for the producer.  */
-  COMPUNIT_PRODUCER (cu) = m_producer;
+  cu->set_producer (m_producer);
 
   COMPUNIT_BLOCKVECTOR (cu) = blockvector;
   {

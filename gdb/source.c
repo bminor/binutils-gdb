@@ -724,8 +724,8 @@ info_source_command (const char *ignore, int from_tty)
 
   printf_filtered (_("Source language is %s.\n"), language_str (s->language));
   printf_filtered (_("Producer is %s.\n"),
-		   COMPUNIT_PRODUCER (cust) != NULL
-		   ? COMPUNIT_PRODUCER (cust) : _("unknown"));
+		   (cust->producer ()) != nullptr
+		    ? cust->producer () : _("unknown"));
   printf_filtered (_("Compiled with %s debugging format.\n"),
 		   cust->debugformat ());
   printf_filtered (_("%s preprocessor macro info.\n"),

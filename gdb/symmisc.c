@@ -779,9 +779,8 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 			printf_filtered ("    debugformat %s\n",
 					 cust->debugformat ());
 			printf_filtered ("    producer %s\n",
-					 COMPUNIT_PRODUCER (cust) != NULL
-					 ? COMPUNIT_PRODUCER (cust)
-					 : "(null)");
+					 (cust->producer () != nullptr
+					  ? cust->producer () : "(null)"));
 			printf_filtered ("    dirname %s\n",
 					 COMPUNIT_DIRNAME (cust) != NULL
 					 ? COMPUNIT_DIRNAME (cust)

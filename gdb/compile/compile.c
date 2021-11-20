@@ -561,11 +561,11 @@ get_selected_pc_producer_options (void)
   struct compunit_symtab *symtab = find_pc_compunit_symtab (pc);
   const char *cs;
 
-  if (symtab == NULL || symtab->producer == NULL
-      || !startswith (symtab->producer, "GNU "))
+  if (symtab == NULL || symtab->producer () == NULL
+      || !startswith (symtab->producer (), "GNU "))
     return NULL;
 
-  cs = symtab->producer;
+  cs = symtab->producer ();
   while (*cs != 0 && *cs != '-')
     cs = skip_spaces (skip_to_space (cs));
   if (*cs != '-')

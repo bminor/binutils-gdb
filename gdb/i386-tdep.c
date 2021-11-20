@@ -1853,9 +1853,9 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	 compilers to emit usable line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
-	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && (producer_is_llvm (COMPUNIT_PRODUCER (cust))
-	      || producer_is_icc_ge_19 (COMPUNIT_PRODUCER (cust)))))
+	      && cust->producer () != NULL
+	      && (producer_is_llvm (cust->producer ())
+	      || producer_is_icc_ge_19 (cust->producer ()))))
         return std::max (start_pc, post_prologue_pc);
     }
  

@@ -745,7 +745,7 @@ dwarf2_frame_find_quirks (struct dwarf2_frame_state *fs,
   if (cust == NULL)
     return;
 
-  if (producer_is_realview (COMPUNIT_PRODUCER (cust)))
+  if (producer_is_realview (cust->producer ()))
     {
       if (fde->cie->version == 1)
 	fs->armcc_cfa_offsets_sf = 1;

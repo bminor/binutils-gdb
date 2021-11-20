@@ -1492,6 +1492,16 @@ struct compunit_symtab
     m_debugformat = debugformat;
   }
 
+  const char *producer () const
+  {
+    return m_producer;
+  }
+
+  void set_producer (const char *producer)
+  {
+    m_producer = producer;
+  }
+
   /* Make PRIMARY_FILETAB the primary filetab of this compunit symtab.
 
      PRIMARY_FILETAB must already be a filetab of this compunit symtab.  */
@@ -1538,7 +1548,7 @@ struct compunit_symtab
   const char *m_debugformat;
 
   /* String of producer version information, or NULL if we don't know.  */
-  const char *producer;
+  const char *m_producer;
 
   /* Directory in which it was compiled, or NULL if we don't know.  */
   const char *dirname;
@@ -1587,7 +1597,6 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_PRODUCER(cust) ((cust)->producer)
 #define COMPUNIT_DIRNAME(cust) ((cust)->dirname)
 #define COMPUNIT_BLOCKVECTOR(cust) ((cust)->blockvector)
 #define COMPUNIT_BLOCK_LINE_SECTION(cust) ((cust)->block_line_section)

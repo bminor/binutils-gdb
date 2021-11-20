@@ -1394,9 +1394,9 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	 missing (e.g. for -gstabs), assuming the GNU tools.  */
       if (post_prologue_pc
 	  && (cust == NULL
-	      || COMPUNIT_PRODUCER (cust) == NULL
-	      || startswith (COMPUNIT_PRODUCER (cust), "GNU ")
-	      || producer_is_llvm (COMPUNIT_PRODUCER (cust))))
+	      || cust->producer () == NULL
+	      || startswith (cust->producer (), "GNU ")
+	      || producer_is_llvm (cust->producer ())))
 	return post_prologue_pc;
 
       if (post_prologue_pc != 0)

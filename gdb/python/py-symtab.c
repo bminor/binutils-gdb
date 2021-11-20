@@ -132,9 +132,9 @@ stpy_get_producer (PyObject *self, void *closure)
 
   STPY_REQUIRE_VALID (self, symtab);
   cust = SYMTAB_COMPUNIT (symtab);
-  if (COMPUNIT_PRODUCER (cust) != NULL)
+  if (cust->producer () != nullptr)
     {
-      const char *producer = COMPUNIT_PRODUCER (cust);
+      const char *producer = cust->producer ();
 
       return host_string_to_python_string (producer).release ();
     }
