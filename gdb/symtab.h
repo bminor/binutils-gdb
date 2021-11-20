@@ -1459,6 +1459,9 @@ struct compunit_symtab
     m_objfile = objfile;
   }
 
+  /* Return the primary filetab of the compunit.  */
+  symtab *primary_filetab () const;
+
   /* Set m_call_site_htab.  */
   void set_call_site_htab (htab_t call_site_htab);
 
@@ -1565,11 +1568,6 @@ compunit_filetabs (compunit_symtab *cu)
 {
   return symtab_range (cu->filetabs);
 }
-
-/* Return the primary symtab of CUST.  */
-
-extern struct symtab *
-  compunit_primary_filetab (const struct compunit_symtab *cust);
 
 /* Return the language of CUST.  */
 

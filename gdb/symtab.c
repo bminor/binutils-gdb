@@ -362,12 +362,12 @@ compunit_symtab::set_call_site_htab (htab_t call_site_htab)
 /* See symtab.h.  */
 
 struct symtab *
-compunit_primary_filetab (const struct compunit_symtab *cust)
+compunit_symtab::primary_filetab () const
 {
-  gdb_assert (COMPUNIT_FILETABS (cust) != NULL);
+  gdb_assert (this->filetabs != nullptr);
 
   /* The primary file symtab is the first one in the list.  */
-  return COMPUNIT_FILETABS (cust);
+  return this->filetabs;
 }
 
 /* See symtab.h.  */
@@ -375,7 +375,7 @@ compunit_primary_filetab (const struct compunit_symtab *cust)
 enum language
 compunit_language (const struct compunit_symtab *cust)
 {
-  struct symtab *symtab = compunit_primary_filetab (cust);
+  struct symtab *symtab = cust->primary_filetab ();
 
 /* The language of the compunit symtab is the language of its primary
    source file.  */
@@ -2376,7 +2376,7 @@ Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
 (if a template, try specifying an instantiation: %s<type>)."),
 	 block_index == GLOBAL_BLOCK ? "global" : "static",
 	 name,
-	 symtab_to_filename_for_display (compunit_primary_filetab (cust)),
+	 symtab_to_filename_for_display (cust->primary_filetab ()),
 	 name, name);
 }
 

@@ -554,7 +554,7 @@ bkscm_print_block_syms_progress_smob (SCM self, SCM port,
 		    : i_smob->iter.d.compunit_symtab->includes[i_smob->iter.idx]);
 	    gdbscm_printf (port, " %s",
 			   symtab_to_filename_for_display
-			     (compunit_primary_filetab (cust)));
+			     (cust->primary_filetab ()));
 	    break;
 	  }
 	case FIRST_LOCAL_BLOCK:

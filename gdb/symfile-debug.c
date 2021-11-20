@@ -289,7 +289,7 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog, "qf->lookup_symbol (...) = %s\n",
 		      retval
-		      ? debug_symtab_name (compunit_primary_filetab (retval))
+		      ? debug_symtab_name (retval->primary_filetab ())
 		      : "NULL");
 
   return retval;
@@ -454,7 +454,7 @@ objfile::find_pc_sect_compunit_symtab (struct bound_minimal_symbol msymbol,
     fprintf_filtered (gdb_stdlog,
 		      "qf->find_pc_sect_compunit_symtab (...) = %s\n",
 		      retval
-		      ? debug_symtab_name (compunit_primary_filetab (retval))
+		      ? debug_symtab_name (retval->primary_filetab ())
 		      : "NULL");
 
   return retval;
@@ -495,7 +495,7 @@ objfile::find_compunit_symtab_by_address (CORE_ADDR address)
     fprintf_filtered (gdb_stdlog,
 		      "qf->find_compunit_symtab_by_address (...) = %s\n",
 		      result
-		      ? debug_symtab_name (compunit_primary_filetab (result))
+		      ? debug_symtab_name (result->primary_filetab ())
 		      : "NULL");
 
   return result;

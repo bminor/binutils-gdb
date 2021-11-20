@@ -3113,7 +3113,7 @@ dwarf2_base_index_functions::find_last_source_symtab (struct objfile *objfile)
   if (cust == NULL)
     return NULL;
 
-  return compunit_primary_filetab (cust);
+  return cust->primary_filetab ();
 }
 
 /* See read.h.  */

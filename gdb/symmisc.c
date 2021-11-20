@@ -860,7 +860,7 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 	for (compunit_symtab *cust : objfile->compunits ())
 	  {
 	    int found_something = 0;
-	    struct symtab *symtab = compunit_primary_filetab (cust);
+	    struct symtab *symtab = cust->primary_filetab ();
 
 	    QUIT;
 

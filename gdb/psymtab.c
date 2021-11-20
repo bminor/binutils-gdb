@@ -631,7 +631,7 @@ psymbol_functions::find_last_source_symtab (struct objfile *ofp)
 
 	  if (cust == NULL)
 	    return NULL;
-	  return compunit_primary_filetab (cust);
+	  return cust->primary_filetab ();
 	}
     }
   return NULL;
