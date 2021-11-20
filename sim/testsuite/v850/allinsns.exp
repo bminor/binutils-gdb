@@ -21,6 +21,4 @@ if [istarget v850*-*] {
 	}
 	run_sim_test $src $all_machs
     }
-
-    unset cpu_option cpu_option_sep
 }

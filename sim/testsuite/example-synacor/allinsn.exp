@@ -17,6 +17,4 @@ if [istarget *] {
 	}
 	run_sim_test $src $all_machs
     }
-
-    unset LDFLAGS_FOR_TARGET
 }

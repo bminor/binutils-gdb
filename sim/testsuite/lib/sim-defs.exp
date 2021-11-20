@@ -46,9 +46,23 @@ proc sim_init { args } {
 proc sim_init_toolchain {} {
     global objdir
     global srcdir
+    global cpu_option
+    global cpu_option_sep
+    global ASFLAGS_FOR_TARGET
+    global CFLAGS_FOR_TARGET
+    global LDFLAGS_FOR_TARGET
+    global SIMFLAGS_FOR_TARGET
     global global_cpp_works
     global global_cc_works
     global global_cc_os
+
+    # Reset all the toolchain settings.  This provides a clean slate when
+    # starting the next set of tests.
+    set ASFLAGS_FOR_TARGET ""
+    set CFLAGS_FOR_TARGET ""
+    set LDFLAGS_FOR_TARGET ""
+    set SIMFLAGS_FOR_TARGET ""
+    unset -nocomplain cpu_option cpu_option_sep
 
     # See if we have a preprocessor available.
     set result [target_compile $srcdir/lib/compilercheck.c \
