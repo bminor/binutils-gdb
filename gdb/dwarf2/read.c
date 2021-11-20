@@ -9493,7 +9493,7 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
 	 options - this waits on GCC PR other/32998 (-frecord-gcc-switches).
 	 */
       if (cu->has_loclist && gcc_4_minor >= 5)
-	cust->locations_valid = 1;
+	cust->set_locations_valid (true);
 
       if (gcc_4_minor >= 5)
 	cust->epilogue_unwind_valid = 1;

@@ -1531,6 +1531,16 @@ struct compunit_symtab
     m_block_line_section = block_line_section;
   }
 
+  bool locations_valid () const
+  {
+    return m_locations_valid;
+  }
+
+  void set_locations_valid (bool locations_valid)
+  {
+    m_locations_valid = locations_valid;
+  }
+
   /* Make PRIMARY_FILETAB the primary filetab of this compunit symtab.
 
      PRIMARY_FILETAB must already be a filetab of this compunit symtab.  */
@@ -1593,7 +1603,7 @@ struct compunit_symtab
   /* Symtab has been compiled with both optimizations and debug info so that
      GDB may stop skipping prologues as variables locations are valid already
      at function entry points.  */
-  unsigned int locations_valid : 1;
+  unsigned int m_locations_valid : 1;
 
   /* DWARF unwinder for this CU is valid even for epilogues (PC at the return
      instruction).  This is supported by GCC since 4.5.0.  */
@@ -1626,7 +1636,6 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_LOCATIONS_VALID(cust) ((cust)->locations_valid)
 #define COMPUNIT_EPILOGUE_UNWIND_VALID(cust) ((cust)->epilogue_unwind_valid)
 #define COMPUNIT_MACRO_TABLE(cust) ((cust)->macro_table)
 
