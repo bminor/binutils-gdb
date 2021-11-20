@@ -531,7 +531,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 		      + (actual_nblocks - 1) * sizeof (struct block *));
   bv = (struct blockvector *) obstack_alloc (&objfile->objfile_obstack,
 					     blockvector_size);
-  COMPUNIT_BLOCKVECTOR (cust) = bv;
+  cust->set_blockvector (bv);
 
   /* At the end of this function, (begin, end) will contain the PC range this
      entire blockvector spans.  */

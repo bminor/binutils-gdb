@@ -1464,7 +1464,7 @@ add_symbol_overload_list_qualified (const char *func_name,
       for (compunit_symtab *cust : objfile->compunits ())
 	{
 	  QUIT;
-	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), GLOBAL_BLOCK);
+	  b = BLOCKVECTOR_BLOCK (cust->blockvector (), GLOBAL_BLOCK);
 	  add_symbol_overload_list_block (func_name, b, overload_list);
 	}
     }
@@ -1474,7 +1474,7 @@ add_symbol_overload_list_qualified (const char *func_name,
       for (compunit_symtab *cust : objfile->compunits ())
 	{
 	  QUIT;
-	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);
+	  b = BLOCKVECTOR_BLOCK (cust->blockvector (), STATIC_BLOCK);
 	  /* Don't do this block twice.  */
 	  if (b == surrounding_static_block)
 	    continue;

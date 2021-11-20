@@ -1965,7 +1965,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 #else
       s = mylookup_symbol
 	(sh_name,
-	 BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (search_symtab),
+	 BLOCKVECTOR_BLOCK (search_symtab->blockvector (),
 			    STATIC_BLOCK),
 	 VAR_DOMAIN,
 	 LOC_BLOCK);
@@ -4096,7 +4096,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
       push_parse_stack ();
       top_stack->cur_st = cust->primary_filetab ();
       top_stack->cur_block
-	= BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), STATIC_BLOCK);
+	= BLOCKVECTOR_BLOCK (cust->blockvector (), STATIC_BLOCK);
       BLOCK_START (top_stack->cur_block) = pst->text_low (objfile);
       BLOCK_END (top_stack->cur_block) = 0;
       top_stack->blocktype = stFile;
@@ -4502,7 +4502,7 @@ add_block (struct block *b, struct symtab *s)
 					 + BLOCKVECTOR_NBLOCKS (bv)
 					 * sizeof (bv->block)));
   if (bv != SYMTAB_BLOCKVECTOR (s))
-    SYMTAB_BLOCKVECTOR (s) = bv;
+    SYMTAB_COMPUNIT (s)->set_blockvector (bv);
 
   BLOCKVECTOR_BLOCK (bv, BLOCKVECTOR_NBLOCKS (bv)++) = b;
 }
@@ -4632,7 +4632,7 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = new_block (NON_FUNCTION_BLOCK, lang);
   BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) =
     BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-  COMPUNIT_BLOCKVECTOR (cust) = bv;
+  cust->set_blockvector (bv);
 
   cust->set_debugformat ("ECOFF");
   return cust;

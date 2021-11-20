@@ -787,7 +787,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 			printf_filtered ("    blockvector"
 					 " ((struct blockvector *) %s)\n",
 					 host_address_to_string
-					 (COMPUNIT_BLOCKVECTOR (cust)));
+					   (cust->blockvector ()));
 			printf_filtered ("    user"
 					 " ((struct compunit_symtab *) %s)\n",
 					 cust->user != nullptr
@@ -863,7 +863,7 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 
 	    QUIT;
 
-	    if (COMPUNIT_BLOCKVECTOR (cust) == NULL)
+	    if (cust->blockvector () == NULL)
 	      found_something = 1;
 	    /* Add more checks here.  */
 
@@ -879,7 +879,7 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 		  }
 		printf_filtered ("  { symtab %s\n",
 				 symtab_to_filename_for_display (symtab));
-		if (COMPUNIT_BLOCKVECTOR (cust) == NULL)
+		if (cust->blockvector () == NULL)
 		  printf_filtered ("    NULL blockvector\n");
 		printf_filtered ("  }\n");
 	      }

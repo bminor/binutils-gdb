@@ -1015,7 +1015,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
   /* Similarly for the producer.  */
   cu->set_producer (m_producer);
 
-  COMPUNIT_BLOCKVECTOR (cu) = blockvector;
+  cu->set_blockvector (blockvector);
   {
     struct block *b = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
 
@@ -1163,7 +1163,7 @@ void
 buildsym_compunit::augment_type_symtab ()
 {
   struct compunit_symtab *cust = m_compunit_symtab;
-  const struct blockvector *blockvector = COMPUNIT_BLOCKVECTOR (cust);
+  const struct blockvector *blockvector = cust->blockvector ();
 
   if (!m_context_stack.empty ())
     complaint (_("Context stack not empty in augment_type_symtab"));

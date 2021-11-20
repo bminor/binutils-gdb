@@ -1409,7 +1409,7 @@ using symtab_range = next_range<symtab>;
 #define SYMTAB_LINETABLE(symtab) ((symtab)->linetable)
 #define SYMTAB_LANGUAGE(symtab) ((symtab)->language)
 #define SYMTAB_BLOCKVECTOR(symtab) \
-  COMPUNIT_BLOCKVECTOR (SYMTAB_COMPUNIT (symtab))
+  (SYMTAB_COMPUNIT (symtab)->blockvector ())
 #define SYMTAB_OBJFILE(symtab) \
   (SYMTAB_COMPUNIT (symtab)->objfile ())
 #define SYMTAB_PSPACE(symtab) (SYMTAB_OBJFILE (symtab)->pspace)
@@ -1511,6 +1511,16 @@ struct compunit_symtab
     m_dirname = dirname;
   }
 
+  const struct blockvector *blockvector () const
+  {
+    return m_blockvector;
+  }
+
+  void set_blockvector (const struct blockvector *blockvector)
+  {
+    m_blockvector = blockvector;
+  }
+
   /* Make PRIMARY_FILETAB the primary filetab of this compunit symtab.
 
      PRIMARY_FILETAB must already be a filetab of this compunit symtab.  */
@@ -1564,7 +1574,7 @@ struct compunit_symtab
 
   /* List of all symbol scope blocks for this symtab.  It is shared among
      all symtabs in a given compilation unit.  */
-  const struct blockvector *blockvector;
+  const struct blockvector *m_blockvector;
 
   /* Section in objfile->section_offsets for the blockvector and
      the linetable.  Probably always SECT_OFF_TEXT.  */
@@ -1606,7 +1616,6 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_BLOCKVECTOR(cust) ((cust)->blockvector)
 #define COMPUNIT_BLOCK_LINE_SECTION(cust) ((cust)->block_line_section)
 #define COMPUNIT_LOCATIONS_VALID(cust) ((cust)->locations_valid)
 #define COMPUNIT_EPILOGUE_UNWIND_VALID(cust) ((cust)->epilogue_unwind_valid)

@@ -571,7 +571,7 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
 	      const struct blockvector *bv;
 	      const struct block *block;
 
-	      bv = COMPUNIT_BLOCKVECTOR (cust);
+	      bv = cust->blockvector ();
 	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 
 	      if (block != nullptr)

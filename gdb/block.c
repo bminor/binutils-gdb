@@ -197,7 +197,7 @@ blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
 	return 0;
     }
 
-  bl = COMPUNIT_BLOCKVECTOR (cust);
+  bl = cust->blockvector ();
 
   /* Then search that symtab for the smallest block that wins.  */
   b = find_block_in_blockvector (bl, pc);
@@ -543,7 +543,7 @@ block_iterator_step (struct block_iterator *iterator, int first)
 	  if (cust == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
+	  block = BLOCKVECTOR_BLOCK (cust->blockvector (),
 				     iterator->which);
 	  sym = mdict_iterator_first (BLOCK_MULTIDICT (block),
 				      &iterator->mdict_iter);
@@ -612,7 +612,7 @@ block_iter_match_step (struct block_iterator *iterator,
 	  if (cust == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust),
+	  block = BLOCKVECTOR_BLOCK (cust->blockvector (),
 				     iterator->which);
 	  sym = mdict_iter_match_first (BLOCK_MULTIDICT (block), name,
 					&iterator->mdict_iter);

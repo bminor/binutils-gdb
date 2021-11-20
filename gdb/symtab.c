@@ -2309,7 +2309,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
       const struct block *block;
       struct block_symbol result;
 
-      bv = COMPUNIT_BLOCKVECTOR (cust);
+      bv = cust->blockvector ();
       block = BLOCKVECTOR_BLOCK (bv, block_index);
       result.symbol = block_lookup_symbol_primary (block, name, domain);
       result.block = block;
@@ -2442,7 +2442,7 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
       return {};
     }
 
-  bv = COMPUNIT_BLOCKVECTOR (cust);
+  bv = cust->blockvector ();
   block = BLOCKVECTOR_BLOCK (bv, block_index);
   result.symbol = block_lookup_symbol (block, name,
 				       symbol_name_match_type::FULL, domain);
@@ -2792,7 +2792,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile,
   if (cust == NULL)
     return NULL;
 
-  bv = COMPUNIT_BLOCKVECTOR (cust);
+  bv = cust->blockvector ();
   block = BLOCKVECTOR_BLOCK (bv, block_index);
   sym = block_find_symbol (block, name, STRUCT_DOMAIN,
 			   block_find_non_opaque_type, NULL);
@@ -2817,7 +2817,7 @@ basic_lookup_transparent_type_1 (struct objfile *objfile,
 
   for (compunit_symtab *cust : objfile->compunits ())
     {
-      bv = COMPUNIT_BLOCKVECTOR (cust);
+      bv = cust->blockvector ();
       block = BLOCKVECTOR_BLOCK (bv, block_index);
       sym = block_find_symbol (block, name, STRUCT_DOMAIN,
 			       block_find_non_opaque_type, NULL);
@@ -2962,7 +2962,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
     {
       for (compunit_symtab *cust : obj_file->compunits ())
 	{
-	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (cust);
+	  const struct blockvector *bv = cust->blockvector ();
 	  const struct block *global_block
 	    = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	  CORE_ADDR start = BLOCK_START (global_block);
@@ -3068,7 +3068,7 @@ find_symbol_at_address (CORE_ADDR address)
      ADDR.  */
   auto search_symtab = [] (compunit_symtab *symtab, CORE_ADDR addr) -> symbol *
     {
-      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (symtab);
+      const struct blockvector *bv = symtab->blockvector ();
 
       for (int i = GLOBAL_BLOCK; i <= STATIC_BLOCK; ++i)
 	{
@@ -3276,7 +3276,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       return val;
     }
 
-  bv = COMPUNIT_BLOCKVECTOR (cust);
+  bv = cust->blockvector ();
 
   /* Look at all the symtabs that share this blockvector.
      They all have the same apriori range, that we found was right;
@@ -4793,7 +4793,7 @@ global_symbol_searcher::add_matching_symbols
   /* Add matching symbols (if not already present).  */
   for (compunit_symtab *cust : objfile->compunits ())
     {
-      const struct blockvector *bv  = COMPUNIT_BLOCKVECTOR (cust);
+      const struct blockvector *bv  = cust->blockvector ();
 
       for (block_enum block : { GLOBAL_BLOCK, STATIC_BLOCK })
 	{
@@ -5773,7 +5773,7 @@ add_symtab_completions (struct compunit_symtab *cust,
   for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
     {
       QUIT;
-      b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), i);
+      b = BLOCKVECTOR_BLOCK (cust->blockvector (), i);
       ALL_BLOCK_SYMBOLS (b, iter, sym)
 	{
 	  if (completion_skip_symbol (mode, sym))

@@ -5237,7 +5237,7 @@ map_matching_symbols (struct objfile *objfile,
   for (compunit_symtab *symtab : objfile->compunits ())
     {
       const struct block *block
-	= BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (symtab), block_kind);
+	= BLOCKVECTOR_BLOCK (symtab->blockvector (), block_kind);
       if (!iterate_over_symbols_terminated (block, lookup_name,
 					    domain, data))
 	break;
@@ -5266,7 +5266,7 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
       for (compunit_symtab *cu : objfile->compunits ())
 	{
 	  const struct block *global_block
-	    = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cu), GLOBAL_BLOCK);
+	    = BLOCKVECTOR_BLOCK (cu->blockvector (), GLOBAL_BLOCK);
 
 	  if (ada_add_block_renamings (result, global_block, lookup_name,
 				       domain))
@@ -12617,7 +12617,7 @@ ada_add_global_exceptions (compiled_regex *preg,
     {
       for (compunit_symtab *s : objfile->compunits ())
 	{
-	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (s);
+	  const struct blockvector *bv = s->blockvector ();
 	  int i;
 
 	  for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
@@ -13204,7 +13204,7 @@ public:
 	for (compunit_symtab *s : objfile->compunits ())
 	  {
 	    QUIT;
-	    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
+	    b = BLOCKVECTOR_BLOCK (s->blockvector (), GLOBAL_BLOCK);
 	    ALL_BLOCK_SYMBOLS (b, iter, sym)
 	      {
 		if (completion_skip_symbol (mode, sym))
@@ -13223,7 +13223,7 @@ public:
 	for (compunit_symtab *s : objfile->compunits ())
 	  {
 	    QUIT;
-	    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), STATIC_BLOCK);
+	    b = BLOCKVECTOR_BLOCK (s->blockvector (), STATIC_BLOCK);
 	    /* Don't do this block twice.  */
 	    if (b == surrounding_static_block)
 	      continue;

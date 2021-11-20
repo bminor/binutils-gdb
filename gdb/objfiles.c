@@ -667,7 +667,7 @@ objfile_relocate1 (struct objfile *objfile,
 
     for (compunit_symtab *cust : objfile->compunits ())
       {
-	const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (cust);
+	const struct blockvector *bv = cust->blockvector ();
 	int block_line_section = COMPUNIT_BLOCK_LINE_SECTION (cust);
 
 	if (BLOCKVECTOR_MAP (bv))

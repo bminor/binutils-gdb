@@ -245,7 +245,7 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
   auto search_one_symtab = [&] (compunit_symtab *stab)
   {
     struct symbol *sym, *with_opaque = NULL;
-    const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (stab);
+    const struct blockvector *bv = stab->blockvector ();
     const struct block *block = BLOCKVECTOR_BLOCK (bv, kind);
 
     sym = block_find_symbol (block, name, domain,
