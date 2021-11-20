@@ -1248,11 +1248,48 @@ either use --disable-source-highlight or dnl
           ;;
       esac
 
-      SRCHIGH_CFLAGS=`${pkg_config_prog_path} --cflags source-highlight`
-      SRCHIGH_LIBS=`${pkg_config_prog_path} --libs source-highlight`
-      AC_DEFINE([HAVE_SOURCE_HIGHLIGHT], 1,
-                [Define to 1 if the source-highlight library is available])
-      AC_MSG_RESULT([yes])
+      srchigh_pkg_cflags=`${pkg_config_prog_path} --cflags source-highlight`
+      srchigh_pkg_libs=`${pkg_config_prog_path} --libs source-highlight`
+
+      # Now that we have found a source-highlight library, check if we can use
+      # it.  In particular, we're trying to detect the situation that the
+      # library is using the new libstdc++ library abi ( see
+      # https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html )
+      # while the compiler being used to compile gdb is using the old abi.
+      # Such a situation will result in an undefined reference to
+      # srchilite::SourceHighlight::SourceHighlight(std::string const&).
+      # This situation can occur for instance when using a source highlight
+      # library compiled with g++ 7.5.0 while building gdb with g++ 4.8.5.
+      AC_LANG_PUSH(C++)
+      save_CFLAGS=$CFLAGS
+      save_LDFLAGS=$LDFLAGS
+      CFLAGS="$CFLAGS $srchigh_pkg_cflags"
+      LDFLAGS="$LDFLAGS $srchigh_pkg_libs"
+      AC_LINK_IFELSE(
+        [AC_LANG_PROGRAM(
+          [#include <srchilite/sourcehighlight.h>],
+          [std::string outlang = "esc.outlang";
+           new srchilite::SourceHighlight (outlang);]
+        )],
+        [have_usable_source_highlight=yes],
+        [have_usable_source_highlight=no]
+      )
+      CFLAGS="$SAVE_CFLAGS"
+      LDFLAGS="$SAVE_LDFLAGS"
+      AC_LANG_POP(C++)
+
+      if test "${have_usable_source_highlight}" = "yes"; then
+        AC_DEFINE([HAVE_SOURCE_HIGHLIGHT], 1,
+                  [Define to 1 if the source-highlight library is available])
+        AC_MSG_RESULT([yes])
+        SRCHIGH_CFLAGS="$srchigh_pkg_cflags"
+        SRCHIGH_LIBS="$srchigh_pkg_libs"
+      else
+        AC_MSG_RESULT([no])
+        if test "${enable_source_highlight}" = "yes"; then
+          AC_MSG_ERROR([source-highlight in your system could not be used])
+        fi
+      fi
     else
       AC_MSG_RESULT([no])
       if test "${enable_source_highlight}" = "yes"; then
