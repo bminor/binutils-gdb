@@ -777,7 +777,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 			printf_filtered ("  { ((struct compunit_symtab *) %s)\n",
 					 host_address_to_string (cust));
 			printf_filtered ("    debugformat %s\n",
-					 COMPUNIT_DEBUGFORMAT (cust));
+					 cust->debugformat ());
 			printf_filtered ("    producer %s\n",
 					 COMPUNIT_PRODUCER (cust) != NULL
 					 ? COMPUNIT_PRODUCER (cust)

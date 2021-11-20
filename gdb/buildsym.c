@@ -1010,7 +1010,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
     }
 
   /* Save the debug format string (if any) in the symtab.  */
-  COMPUNIT_DEBUGFORMAT (cu) = m_debugformat;
+  cu->set_debugformat (m_debugformat);
 
   /* Similarly for the producer.  */
   COMPUNIT_PRODUCER (cu) = m_producer;

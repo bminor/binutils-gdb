@@ -4634,7 +4634,7 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
     BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
   COMPUNIT_BLOCKVECTOR (cust) = bv;
 
-  COMPUNIT_DEBUGFORMAT (cust) = "ECOFF";
+  cust->set_debugformat ("ECOFF");
   return cust;
 }
 

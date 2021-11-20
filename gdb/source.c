@@ -727,7 +727,7 @@ info_source_command (const char *ignore, int from_tty)
 		   COMPUNIT_PRODUCER (cust) != NULL
 		   ? COMPUNIT_PRODUCER (cust) : _("unknown"));
   printf_filtered (_("Compiled with %s debugging format.\n"),
-		   COMPUNIT_DEBUGFORMAT (cust));
+		   cust->debugformat ());
   printf_filtered (_("%s preprocessor macro info.\n"),
 		   COMPUNIT_MACRO_TABLE (cust) != NULL
 		   ? "Includes" : "Does not include");

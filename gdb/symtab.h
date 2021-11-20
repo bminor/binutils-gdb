@@ -1482,6 +1482,16 @@ struct compunit_symtab
       }
   }
 
+  const char *debugformat () const
+  {
+    return m_debugformat;
+  }
+
+  void set_debugformat (const char *debugformat)
+  {
+    m_debugformat = debugformat;
+  }
+
   /* Make PRIMARY_FILETAB the primary filetab of this compunit symtab.
 
      PRIMARY_FILETAB must already be a filetab of this compunit symtab.  */
@@ -1525,7 +1535,7 @@ struct compunit_symtab
      such as "stabs", "dwarf 1", "dwarf 2", "coff", etc.  This is mostly useful
      for automated testing of gdb but may also be information that is
      useful to the user.  */
-  const char *debugformat;
+  const char *m_debugformat;
 
   /* String of producer version information, or NULL if we don't know.  */
   const char *producer;
@@ -1577,7 +1587,6 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_DEBUGFORMAT(cust) ((cust)->debugformat)
 #define COMPUNIT_PRODUCER(cust) ((cust)->producer)
 #define COMPUNIT_DIRNAME(cust) ((cust)->dirname)
 #define COMPUNIT_BLOCKVECTOR(cust) ((cust)->blockvector)

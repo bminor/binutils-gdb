@@ -2831,7 +2831,7 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
   saved_name = lbasename (name);
   cu->name = obstack_strdup (&objfile->objfile_obstack, saved_name);
 
-  COMPUNIT_DEBUGFORMAT (cu) = "unknown";
+  cu->set_debugformat ("unknown");
 
   if (symtab_create_debug)
     {
