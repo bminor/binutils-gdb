@@ -407,7 +407,7 @@ compunit_language (const struct compunit_symtab *cust)
 
 /* The language of the compunit symtab is the language of its primary
    source file.  */
-  return SYMTAB_LANGUAGE (symtab);
+  return symtab->language ();
 }
 
 /* See symtab.h.  */
@@ -3710,7 +3710,7 @@ find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
 
   if (funfirstline && sal.symtab != NULL
       && (sal.symtab->compunit ()->locations_valid ()
-	  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
+	  || sal.symtab->language () == language_asm))
     {
       struct gdbarch *gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
 
@@ -3840,7 +3840,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
      is likely to be the wrong choice.  */
   if (sal->symtab != nullptr
       && sal->explicit_line
-      && SYMTAB_LANGUAGE (sal->symtab) == language_asm)
+      && sal->symtab->language () == language_asm)
     return;
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
@@ -4023,7 +4023,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 	 The GNU assembler emits separate line notes for each instruction
 	 in a multi-instruction macro, but compilers generally will not
 	 do this.  */
-      if (prologue_sal.symtab->language != language_asm)
+      if (prologue_sal.symtab->language () != language_asm)
 	{
 	  struct linetable *linetable = prologue_sal.symtab->linetable ();
 	  int idx = 0;

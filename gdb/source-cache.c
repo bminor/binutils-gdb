@@ -231,7 +231,7 @@ source_cache::ensure (struct symtab *s)
     {
 #ifdef HAVE_SOURCE_HIGHLIGHT
       bool already_styled = false;
-      const char *lang_name = get_language_name (SYMTAB_LANGUAGE (s));
+      const char *lang_name = get_language_name (s->language ());
       if (lang_name != nullptr && use_gnu_source_highlight)
 	{
 	  /* The global source highlight object, or null if one was

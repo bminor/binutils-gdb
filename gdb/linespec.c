@@ -4424,7 +4424,7 @@ add_matching_symbols_to_info (const char *name,
 	     which we don't have debug info.  Check for a minimal symbol in
 	     this case.  */
 	  if (prev_len == info->result.symbols->size ()
-	      && elt->language == language_asm)
+	      && elt->language () == language_asm)
 	    search_minsyms_for_name (info, lookup_name, pspace, elt);
 	}
     }

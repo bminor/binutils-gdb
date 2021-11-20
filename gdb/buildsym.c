@@ -991,7 +991,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 	 we created the subfile, and we may have altered our
 	 opinion of what language it is from things we found in
 	 the symbols.  */
-      symtab->language = subfile->language;
+      symtab->set_language (subfile->language);
     }
 
   /* Make sure the filetab of main_subfile is the primary filetab of the CU.  */

@@ -1638,7 +1638,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 
   if (s)
     printf_filtered (" source language %s.\n",
-		     language_str (s->language));
+		     language_str (s->language ()));
 
   {
     /* Address of the argument list for this frame, or 0.  */

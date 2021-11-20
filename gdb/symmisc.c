@@ -256,7 +256,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 		    objfile_name (objfile),
 		    host_address_to_string (objfile));
   fprintf_filtered (outfile, "Language: %s\n",
-		    language_str (symtab->language));
+		    language_str (symtab->language ()));
 
   /* First print the line table.  */
   l = symtab->linetable ();
@@ -370,11 +370,11 @@ dump_symtab (struct symtab *symtab, struct ui_file *outfile)
      because certain routines used during dump_symtab() use the current
      language to print an image of the symbol.  We'll restore it later.
      But use only real languages, not placeholders.  */
-  if (symtab->language != language_unknown
-      && symtab->language != language_auto)
+  if (symtab->language () != language_unknown
+      && symtab->language () != language_auto)
     {
       scoped_restore_current_language save_lang;
-      set_language (symtab->language);
+      set_language (symtab->language ());
       dump_symtab_1 (symtab, outfile);
     }
   else

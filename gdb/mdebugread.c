@@ -4084,10 +4084,11 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 
 	  /* The proper language was already determined when building
 	     the psymtab, use it.  */
-	  cust->primary_filetab ()->language = PST_PRIVATE (pst)->pst_language;
+	  cust->primary_filetab ()->set_language
+	    (PST_PRIVATE (pst)->pst_language);
 	}
 
-      psymtab_language = cust->primary_filetab ()->language;
+      psymtab_language = cust->primary_filetab ()->language ();
 
       lines = cust->primary_filetab ()->linetable ();
 

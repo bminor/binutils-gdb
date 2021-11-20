@@ -722,7 +722,8 @@ info_source_command (const char *ignore, int from_tty)
     printf_filtered (_("Contains %d line%s.\n"), (int) offsets->size (),
 		     offsets->size () == 1 ? "" : "s");
 
-  printf_filtered (_("Source language is %s.\n"), language_str (s->language));
+  printf_filtered (_("Source language is %s.\n"),
+		   language_str (s->language ()));
   printf_filtered (_("Producer is %s.\n"),
 		   (cust->producer ()) != nullptr
 		    ? cust->producer () : _("unknown"));

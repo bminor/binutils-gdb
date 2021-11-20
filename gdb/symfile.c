@@ -2780,7 +2780,7 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename)
 
   symtab->filename = objfile->intern (filename);
   symtab->fullname = NULL;
-  symtab->language = deduce_language_from_filename (filename);
+  symtab->set_language (deduce_language_from_filename (filename));
 
   /* This can be very verbose with lots of headers.
      Only print at higher debug levels.  */

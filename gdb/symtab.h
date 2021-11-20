@@ -1393,6 +1393,16 @@ struct symtab
     m_linetable = linetable;
   }
 
+  enum language language () const
+  {
+    return m_language;
+  }
+
+  void set_language (enum language language)
+  {
+    m_language = language;
+  }
+
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 
@@ -1413,7 +1423,7 @@ struct symtab
 
   /* Language of this source file.  */
 
-  enum language language;
+  enum language m_language;
 
   /* Full name of file as found by searching the source path.
      NULL if not yet known.  */
@@ -1425,7 +1435,6 @@ struct symtab
 
 using symtab_range = next_range<symtab>;
 
-#define SYMTAB_LANGUAGE(symtab) ((symtab)->language)
 #define SYMTAB_BLOCKVECTOR(symtab) \
   (symtab->compunit ()->blockvector ())
 #define SYMTAB_OBJFILE(symtab) \
