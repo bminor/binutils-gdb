@@ -53,12 +53,12 @@ mi_cmd_symbol_list_lines (const char *command, char **argv, int argc)
   gdbarch = SYMTAB_OBJFILE (s)->arch ();
 
   ui_out_emit_list list_emitter (uiout, "lines");
-  if (SYMTAB_LINETABLE (s) != NULL && SYMTAB_LINETABLE (s)->nitems > 0)
-    for (i = 0; i < SYMTAB_LINETABLE (s)->nitems; i++)
+  if (s->linetable () != NULL && s->linetable ()->nitems > 0)
+    for (i = 0; i < s->linetable ()->nitems; i++)
       {
 	ui_out_emit_tuple tuple_emitter (uiout, NULL);
-	uiout->field_core_addr ("pc", gdbarch, SYMTAB_LINETABLE (s)->item[i].pc);
-	uiout->field_signed ("line", SYMTAB_LINETABLE (s)->item[i].line);
+	uiout->field_core_addr ("pc", gdbarch, s->linetable ()->item[i].pc);
+	uiout->field_signed ("line", s->linetable ()->item[i].line);
       }
 }
 

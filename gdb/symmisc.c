@@ -77,7 +77,7 @@ print_objfile_statistics (void)
 	    for (symtab *s : cu->filetabs ())
 	      {
 		i++;
-		if (SYMTAB_LINETABLE (s) != NULL)
+		if (s->linetable () != NULL)
 		  linetables++;
 	      }
 	  }
@@ -259,7 +259,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 		    language_str (symtab->language));
 
   /* First print the line table.  */
-  l = SYMTAB_LINETABLE (symtab);
+  l = symtab->linetable ();
   if (l)
     {
       fprintf_filtered (outfile, "\nLine table:\n\n");
@@ -824,7 +824,8 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 				     : "(null)");
 		    printf_filtered ("\t  "
 				     "linetable ((struct linetable *) %s)\n",
-				     host_address_to_string (symtab->linetable));
+				     host_address_to_string
+				       (symtab->linetable ()));
 		    printf_filtered ("\t}\n");
 		  }
 	      }
@@ -968,7 +969,7 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
 		   styled_string (file_name_style.style (),
 				  symtab_to_fullname (symtab)),
 		   host_address_to_string (symtab));
-  linetable = SYMTAB_LINETABLE (symtab);
+  linetable = symtab->linetable ();
   printf_filtered (_("linetable: ((struct linetable *) %s):\n"),
 		   host_address_to_string (linetable));
 

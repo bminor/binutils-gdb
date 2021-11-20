@@ -4089,7 +4089,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 
       psymtab_language = cust->primary_filetab ()->language;
 
-      lines = SYMTAB_LINETABLE (cust->primary_filetab ());
+      lines = cust->primary_filetab ()->linetable ();
 
       /* Get a new lexical context.  */
 
@@ -4173,11 +4173,11 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
       size = lines->nitems;
       if (size > 1)
 	--size;
-      SYMTAB_LINETABLE (cust->primary_filetab ())
-	= ((struct linetable *)
-	   obstack_copy (&mdebugread_objfile->objfile_obstack,
-			 lines, (sizeof (struct linetable)
-				 + size * sizeof (lines->item))));
+      cust->primary_filetab ()->set_linetable
+	((struct linetable *)
+	 obstack_copy (&mdebugread_objfile->objfile_obstack,
+		       lines, (sizeof (struct linetable)
+			       + size * sizeof (lines->item))));
       xfree (lines);
 
       /* .. and our share of externals.
@@ -4623,7 +4623,7 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   add_compunit_symtab_to_objfile (cust);
   symtab = allocate_symtab (cust, name);
 
-  SYMTAB_LINETABLE (symtab) = new_linetable (maxlines);
+  symtab->set_linetable (new_linetable (maxlines));
   lang = compunit_language (cust);
 
   /* All symtabs must have at least two blocks.  */

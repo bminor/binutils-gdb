@@ -713,7 +713,7 @@ btrace_find_line_range (CORE_ADDR pc)
   if (symtab == NULL)
     return btrace_mk_line_range (NULL, 0, 0);
 
-  ltable = SYMTAB_LINETABLE (symtab);
+  ltable = symtab->linetable ();
   if (ltable == NULL)
     return btrace_mk_line_range (symtab, 0, 0);
 

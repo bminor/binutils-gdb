@@ -977,15 +977,13 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
       if (subfile->line_vector)
 	{
 	  /* Reallocate the line table on the symbol obstack.  */
-	  SYMTAB_LINETABLE (symtab) = (struct linetable *)
-	    obstack_alloc (&m_objfile->objfile_obstack, linetablesize);
-	  memcpy (SYMTAB_LINETABLE (symtab), subfile->line_vector,
-		  linetablesize);
+	  symtab->set_linetable
+	    ((struct linetable *)
+	     obstack_alloc (&m_objfile->objfile_obstack, linetablesize));
+	  memcpy (symtab->linetable (), subfile->line_vector, linetablesize);
 	}
       else
-	{
-	  SYMTAB_LINETABLE (symtab) = NULL;
-	}
+	symtab->set_linetable (nullptr);
 
       /* Use whatever language we have been using for this
 	 subfile, not the one that was deduced in allocate_symtab

@@ -656,7 +656,7 @@ objfile_relocate1 (struct objfile *objfile,
 	    struct linetable *l;
 
 	    /* First the line table.  */
-	    l = SYMTAB_LINETABLE (s);
+	    l = s->linetable ();
 	    if (l)
 	      {
 		for (int i = 0; i < l->nitems; ++i)

@@ -3285,7 +3285,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   for (symtab *iter_s : cust->filetabs ())
     {
       /* Find the best line in this symtab.  */
-      l = SYMTAB_LINETABLE (iter_s);
+      l = iter_s->linetable ();
       if (!l)
 	continue;
       len = l->nitems;
@@ -3454,7 +3454,7 @@ find_line_symtab (struct symtab *sym_tab, int line,
   struct symtab *best_symtab;
 
   /* First try looking it up in the given symtab.  */
-  best_linetable = SYMTAB_LINETABLE (sym_tab);
+  best_linetable = sym_tab->linetable ();
   best_symtab = sym_tab;
   best_index = find_line_common (best_linetable, line, &exact, 0);
   if (best_index < 0 || !exact)
@@ -3493,7 +3493,7 @@ find_line_symtab (struct symtab *sym_tab, int line,
 		  if (FILENAME_CMP (symtab_to_fullname (sym_tab),
 				    symtab_to_fullname (s)) != 0)
 		    continue;	
-		  l = SYMTAB_LINETABLE (s);
+		  l = s->linetable ();
 		  ind = find_line_common (l, line, &exact, 0);
 		  if (ind >= 0)
 		    {
@@ -3545,14 +3545,14 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
       int was_exact;
       int idx;
 
-      idx = find_line_common (SYMTAB_LINETABLE (symtab), line, &was_exact,
+      idx = find_line_common (symtab->linetable (), line, &was_exact,
 			      start);
       if (idx < 0)
 	break;
 
       if (!was_exact)
 	{
-	  struct linetable_entry *item = &SYMTAB_LINETABLE (symtab)->item[idx];
+	  struct linetable_entry *item = &symtab->linetable ()->item[idx];
 
 	  if (*best_item == NULL
 	      || (item->line < (*best_item)->line && item->is_stmt))
@@ -3561,7 +3561,7 @@ find_pcs_for_symtab_line (struct symtab *symtab, int line,
 	  break;
 	}
 
-      result.push_back (SYMTAB_LINETABLE (symtab)->item[idx].pc);
+      result.push_back (symtab->linetable ()->item[idx].pc);
       start = idx + 1;
     }
 
@@ -3586,7 +3586,7 @@ find_line_pc (struct symtab *symtab, int line, CORE_ADDR *pc)
   symtab = find_line_symtab (symtab, line, &ind, NULL);
   if (symtab != NULL)
     {
-      l = SYMTAB_LINETABLE (symtab);
+      l = symtab->linetable ();
       *pc = l->item[ind].pc;
       return true;
     }
@@ -3783,7 +3783,7 @@ skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
   int i;
 
   /* Give up if this symbol has no lineinfo table.  */
-  l = SYMTAB_LINETABLE (symtab);
+  l = symtab->linetable ();
   if (l == NULL)
     return func_addr;
 
@@ -4025,7 +4025,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 	 do this.  */
       if (prologue_sal.symtab->language != language_asm)
 	{
-	  struct linetable *linetable = SYMTAB_LINETABLE (prologue_sal.symtab);
+	  struct linetable *linetable = prologue_sal.symtab->linetable ();
 	  int idx = 0;
 
 	  /* Skip any earlier lines, and any end-of-sequence marker

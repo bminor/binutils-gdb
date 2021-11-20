@@ -521,10 +521,9 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       size_t size = ((stab->linetable->nitems - 1)
 		     * sizeof (struct linetable_entry)
 		     + sizeof (struct linetable));
-      SYMTAB_LINETABLE (filetab)
-	= (struct linetable *) obstack_alloc (&objfile->objfile_obstack, size);
-      memcpy (SYMTAB_LINETABLE (filetab),
-	      stab->linetable.get (), size);
+      filetab->set_linetable ((struct linetable *)
+			      obstack_alloc (&objfile->objfile_obstack, size));
+      memcpy (filetab->linetable (), stab->linetable.get (), size);
     }
 
   blockvector_size = (sizeof (struct blockvector)

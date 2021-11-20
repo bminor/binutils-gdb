@@ -1383,6 +1383,16 @@ struct symtab
     m_compunit = compunit;
   }
 
+  struct linetable *linetable () const
+  {
+    return m_linetable;
+  }
+
+  void set_linetable (struct linetable *linetable)
+  {
+    m_linetable = linetable;
+  }
+
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 
@@ -1395,7 +1405,7 @@ struct symtab
   /* Table mapping core addresses to line numbers for this file.
      Can be NULL if none.  Never shared between different symtabs.  */
 
-  struct linetable *linetable;
+  struct linetable *m_linetable;
 
   /* Name of this source file.  This pointer is never NULL.  */
 
@@ -1415,7 +1425,6 @@ struct symtab
 
 using symtab_range = next_range<symtab>;
 
-#define SYMTAB_LINETABLE(symtab) ((symtab)->linetable)
 #define SYMTAB_LANGUAGE(symtab) ((symtab)->language)
 #define SYMTAB_BLOCKVECTOR(symtab) \
   (symtab->compunit ()->blockvector ())
