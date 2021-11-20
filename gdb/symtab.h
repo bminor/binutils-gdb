@@ -1373,6 +1373,16 @@ typedef std::vector<CORE_ADDR> section_offsets;
 
 struct symtab
 {
+  struct compunit_symtab *compunit () const
+  {
+    return m_compunit;
+  }
+
+  void set_compunit (struct compunit_symtab *compunit)
+  {
+    m_compunit = compunit;
+  }
+
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 
@@ -1380,7 +1390,7 @@ struct symtab
 
   /* Backlink to containing compunit symtab.  */
 
-  struct compunit_symtab *compunit_symtab;
+  struct compunit_symtab *m_compunit;
 
   /* Table mapping core addresses to line numbers for this file.
      Can be NULL if none.  Never shared between different symtabs.  */
@@ -1405,15 +1415,14 @@ struct symtab
 
 using symtab_range = next_range<symtab>;
 
-#define SYMTAB_COMPUNIT(symtab) ((symtab)->compunit_symtab)
 #define SYMTAB_LINETABLE(symtab) ((symtab)->linetable)
 #define SYMTAB_LANGUAGE(symtab) ((symtab)->language)
 #define SYMTAB_BLOCKVECTOR(symtab) \
-  (SYMTAB_COMPUNIT (symtab)->blockvector ())
+  (symtab->compunit ()->blockvector ())
 #define SYMTAB_OBJFILE(symtab) \
-  (SYMTAB_COMPUNIT (symtab)->objfile ())
+  (symtab->compunit ()->objfile ())
 #define SYMTAB_PSPACE(symtab) (SYMTAB_OBJFILE (symtab)->pspace)
-#define SYMTAB_DIRNAME(symtab) (SYMTAB_COMPUNIT (symtab)->dirname ())
+#define SYMTAB_DIRNAME(symtab) ((symtab)->compunit ()->dirname ())
 
 /* Compunit symtabs contain the actual "symbol table", aka blockvector, as well
    as the list of all source files (what gdb has historically associated with
@@ -1665,7 +1674,7 @@ extern enum language compunit_language (const struct compunit_symtab *cust);
 static inline bool
 is_main_symtab_of_compunit_symtab (struct symtab *symtab)
 {
-  return symtab == SYMTAB_COMPUNIT (symtab)->primary_filetab ();
+  return symtab == symtab->compunit ()->primary_filetab ();
 }
 
 

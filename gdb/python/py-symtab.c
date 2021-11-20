@@ -131,7 +131,7 @@ stpy_get_producer (PyObject *self, void *closure)
   struct compunit_symtab *cust;
 
   STPY_REQUIRE_VALID (self, symtab);
-  cust = SYMTAB_COMPUNIT (symtab);
+  cust = symtab->compunit ();
   if (cust->producer () != nullptr)
     {
       const char *producer = cust->producer ();

@@ -329,7 +329,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
     }
   else
     {
-      compunit_symtab *compunit = SYMTAB_COMPUNIT (symtab);
+      compunit_symtab *compunit = symtab->compunit ();
       const char *compunit_filename
 	= symtab_to_filename_for_display (compunit->primary_filetab ());
 
@@ -342,7 +342,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
      compunit_symtabs included by this one. */
   if (is_main_symtab_of_compunit_symtab (symtab))
     {
-      struct compunit_symtab *cust = SYMTAB_COMPUNIT (symtab);
+      struct compunit_symtab *cust = symtab->compunit ();
 
       if (cust->user != nullptr)
 	{
@@ -956,14 +956,14 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
   struct linetable *linetable;
   struct objfile *objfile;
 
-  objfile = symtab->compunit_symtab->objfile ();
+  objfile = symtab->compunit ()->objfile ();
   printf_filtered (_("objfile: %ps ((struct objfile *) %s)\n"),
 		   styled_string (file_name_style.style (),
 				  objfile_name (objfile)),
 		   host_address_to_string (objfile));
   printf_filtered (_("compunit_symtab: %s ((struct compunit_symtab *) %s)\n"),
-		   symtab->compunit_symtab->name,
-		   host_address_to_string (symtab->compunit_symtab));
+		   symtab->compunit ()->name,
+		   host_address_to_string (symtab->compunit ()));
   printf_filtered (_("symtab: %ps ((struct symtab *) %s)\n"),
 		   styled_string (file_name_style.style (),
 				  symtab_to_fullname (symtab)),

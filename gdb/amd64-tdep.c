@@ -2474,8 +2474,8 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
 
   start_pc_sal = find_pc_sect_line (start_pc, NULL, 0);
   if (start_pc_sal.symtab == NULL
-      || producer_is_gcc_ge_4 (SYMTAB_COMPUNIT
-				 (start_pc_sal.symtab)->producer ()) < 6
+      || producer_is_gcc_ge_4 (start_pc_sal.symtab->compunit ()
+			       ->producer ()) < 6
       || start_pc_sal.pc != start_pc || pc >= start_pc_sal.end)
     return pc;
 

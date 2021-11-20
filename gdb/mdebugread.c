@@ -4502,7 +4502,7 @@ add_block (struct block *b, struct symtab *s)
 					 + BLOCKVECTOR_NBLOCKS (bv)
 					 * sizeof (bv->block)));
   if (bv != SYMTAB_BLOCKVECTOR (s))
-    SYMTAB_COMPUNIT (s)->set_blockvector (bv);
+    s->compunit ()->set_blockvector (bv);
 
   BLOCKVECTOR_BLOCK (bv, BLOCKVECTOR_NBLOCKS (bv)++) = b;
 }

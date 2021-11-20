@@ -495,7 +495,7 @@ z80_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (prologue_end != 0)
     {
       struct symtab_and_line prologue_sal = find_pc_line (func_addr, 0);
-      struct compunit_symtab *compunit = SYMTAB_COMPUNIT (prologue_sal.symtab);
+      struct compunit_symtab *compunit = prologue_sal.symtab->compunit ();
       const char *debug_format = compunit->debugformat ();
 
       if (debug_format != NULL &&

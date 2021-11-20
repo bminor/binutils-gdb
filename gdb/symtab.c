@@ -3709,7 +3709,7 @@ find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
   symtab_and_line sal = find_pc_sect_line (func_addr, section, 0);
 
   if (funfirstline && sal.symtab != NULL
-      && (SYMTAB_COMPUNIT (sal.symtab)->locations_valid ()
+      && (sal.symtab->compunit ()->locations_valid ()
 	  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
     {
       struct gdbarch *gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
@@ -3885,7 +3885,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
      have proven the CU (Compilation Unit) supports it.  sal->SYMTAB does not
      have to be set by the caller so we use SYM instead.  */
   if (sym != NULL
-      && SYMTAB_COMPUNIT (symbol_symtab (sym))->locations_valid ())
+      && symbol_symtab (sym)->compunit ()->locations_valid ())
     force_skip = 0;
 
   saved_pc = pc;
@@ -6095,7 +6095,7 @@ collect_file_symbol_completion_matches (completion_tracker &tracker,
      for symbols which match.  */
   iterate_over_symtabs (srcfile, [&] (symtab *s)
     {
-      add_symtab_completions (SYMTAB_COMPUNIT (s),
+      add_symtab_completions (s->compunit (),
 			      tracker, mode, lookup_name,
 			      sym_text, word, TYPE_CODE_UNDEF);
       return false;

@@ -711,7 +711,7 @@ info_source_command (const char *ignore, int from_tty)
       return;
     }
 
-  cust = SYMTAB_COMPUNIT (s);
+  cust = s->compunit ();
   printf_filtered (_("Current source file is %s\n"), s->filename);
   if (SYMTAB_DIRNAME (s) != NULL)
     printf_filtered (_("Compilation directory is %s\n"), SYMTAB_DIRNAME (s));
@@ -1184,9 +1184,9 @@ open_source_file (struct symtab *s)
 
   if (fd.get () < 0)
     {
-      if (SYMTAB_COMPUNIT (s) != nullptr)
+      if (s->compunit () != nullptr)
 	{
-	  const objfile *ofp = SYMTAB_COMPUNIT (s)->objfile ();
+	  const objfile *ofp = s->compunit ()->objfile ();
 
 	  std::string srcpath;
 	  if (IS_ABSOLUTE_PATH (s->filename))
