@@ -6285,7 +6285,7 @@ call_site::pc () const
 {
   compunit_symtab *cust = this->per_objfile->get_symtab (this->per_cu);
   CORE_ADDR delta
-	= this->per_objfile->objfile->section_offsets[COMPUNIT_BLOCK_LINE_SECTION (cust)];
+	= this->per_objfile->objfile->section_offsets[cust->block_line_section ()];
   return m_unrelocated_pc + delta;
 }
 

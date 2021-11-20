@@ -1521,6 +1521,16 @@ struct compunit_symtab
     m_blockvector = blockvector;
   }
 
+  int block_line_section () const
+  {
+    return m_block_line_section;
+  }
+
+  void set_block_line_section (int block_line_section)
+  {
+    m_block_line_section = block_line_section;
+  }
+
   /* Make PRIMARY_FILETAB the primary filetab of this compunit symtab.
 
      PRIMARY_FILETAB must already be a filetab of this compunit symtab.  */
@@ -1578,7 +1588,7 @@ struct compunit_symtab
 
   /* Section in objfile->section_offsets for the blockvector and
      the linetable.  Probably always SECT_OFF_TEXT.  */
-  int block_line_section;
+  int m_block_line_section;
 
   /* Symtab has been compiled with both optimizations and debug info so that
      GDB may stop skipping prologues as variables locations are valid already
@@ -1616,7 +1626,6 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_BLOCK_LINE_SECTION(cust) ((cust)->block_line_section)
 #define COMPUNIT_LOCATIONS_VALID(cust) ((cust)->locations_valid)
 #define COMPUNIT_EPILOGUE_UNWIND_VALID(cust) ((cust)->epilogue_unwind_valid)
 #define COMPUNIT_MACRO_TABLE(cust) ((cust)->macro_table)

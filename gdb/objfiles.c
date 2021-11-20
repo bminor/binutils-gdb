@@ -660,7 +660,7 @@ objfile_relocate1 (struct objfile *objfile,
 	    if (l)
 	      {
 		for (int i = 0; i < l->nitems; ++i)
-		  l->item[i].pc += delta[COMPUNIT_BLOCK_LINE_SECTION (cust)];
+		  l->item[i].pc += delta[cust->block_line_section ()];
 	      }
 	  }
       }
@@ -668,7 +668,7 @@ objfile_relocate1 (struct objfile *objfile,
     for (compunit_symtab *cust : objfile->compunits ())
       {
 	const struct blockvector *bv = cust->blockvector ();
-	int block_line_section = COMPUNIT_BLOCK_LINE_SECTION (cust);
+	int block_line_section = cust->block_line_section ();
 
 	if (BLOCKVECTOR_MAP (bv))
 	  addrmap_relocate (BLOCKVECTOR_MAP (bv), delta[block_line_section]);

@@ -1022,7 +1022,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
     set_block_compunit_symtab (b, cu);
   }
 
-  COMPUNIT_BLOCK_LINE_SECTION (cu) = section;
+  cu->set_block_line_section (section);
 
   COMPUNIT_MACRO_TABLE (cu) = release_macros ();
 
