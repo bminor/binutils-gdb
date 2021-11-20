@@ -1066,7 +1066,7 @@ macro_source_fullname (struct macro_source_file *file)
   const char *comp_dir = NULL;
 
   if (file->table->compunit_symtab != NULL)
-    comp_dir = COMPUNIT_DIRNAME (file->table->compunit_symtab);
+    comp_dir = file->table->compunit_symtab->dirname ();
 
   if (comp_dir == NULL || IS_ABSOLUTE_PATH (file->filename))
     return file->filename;

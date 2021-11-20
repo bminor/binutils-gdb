@@ -1413,8 +1413,7 @@ using symtab_range = next_range<symtab>;
 #define SYMTAB_OBJFILE(symtab) \
   (SYMTAB_COMPUNIT (symtab)->objfile ())
 #define SYMTAB_PSPACE(symtab) (SYMTAB_OBJFILE (symtab)->pspace)
-#define SYMTAB_DIRNAME(symtab) \
-  COMPUNIT_DIRNAME (SYMTAB_COMPUNIT (symtab))
+#define SYMTAB_DIRNAME(symtab) (SYMTAB_COMPUNIT (symtab)->dirname ())
 
 /* Compunit symtabs contain the actual "symbol table", aka blockvector, as well
    as the list of all source files (what gdb has historically associated with
@@ -1502,6 +1501,16 @@ struct compunit_symtab
     m_producer = producer;
   }
 
+  const char *dirname () const
+  {
+    return m_dirname;
+  }
+
+  void set_dirname (const char *dirname)
+  {
+    m_dirname = dirname;
+  }
+
   /* Make PRIMARY_FILETAB the primary filetab of this compunit symtab.
 
      PRIMARY_FILETAB must already be a filetab of this compunit symtab.  */
@@ -1551,7 +1560,7 @@ struct compunit_symtab
   const char *m_producer;
 
   /* Directory in which it was compiled, or NULL if we don't know.  */
-  const char *dirname;
+  const char *m_dirname;
 
   /* List of all symbol scope blocks for this symtab.  It is shared among
      all symtabs in a given compilation unit.  */
@@ -1597,7 +1606,6 @@ struct compunit_symtab
 
 using compunit_symtab_range = next_range<compunit_symtab>;
 
-#define COMPUNIT_DIRNAME(cust) ((cust)->dirname)
 #define COMPUNIT_BLOCKVECTOR(cust) ((cust)->blockvector)
 #define COMPUNIT_BLOCK_LINE_SECTION(cust) ((cust)->block_line_section)
 #define COMPUNIT_LOCATIONS_VALID(cust) ((cust)->locations_valid)

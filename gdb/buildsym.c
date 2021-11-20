@@ -1005,8 +1005,8 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
     {
       /* Reallocate the dirname on the symbol obstack.  */
       const char *comp_dir = m_comp_dir.get ();
-      COMPUNIT_DIRNAME (cu) = obstack_strdup (&m_objfile->objfile_obstack,
-					      comp_dir);
+      cu->set_dirname (obstack_strdup (&m_objfile->objfile_obstack,
+				       comp_dir));
     }
 
   /* Save the debug format string (if any) in the symtab.  */

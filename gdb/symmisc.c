@@ -782,9 +782,8 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 					 (cust->producer () != nullptr
 					  ? cust->producer () : "(null)"));
 			printf_filtered ("    dirname %s\n",
-					 COMPUNIT_DIRNAME (cust) != NULL
-					 ? COMPUNIT_DIRNAME (cust)
-					 : "(null)");
+					 (cust->dirname () != NULL
+					  ? cust->dirname () : "(null)"));
 			printf_filtered ("    blockvector"
 					 " ((struct blockvector *) %s)\n",
 					 host_address_to_string

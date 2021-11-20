@@ -303,7 +303,7 @@ restart_symtab (struct compunit_symtab *cust,
   buildsym_compunit
     = new struct buildsym_compunit (cust->objfile (),
 				    name,
-				    COMPUNIT_DIRNAME (cust),
+				    cust->dirname (),
 				    compunit_language (cust),
 				    start_addr,
 				    cust);

@@ -10723,7 +10723,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 	  struct compunit_symtab *cust = tug_unshare->compunit_symtab;
 	  m_builder.reset (new struct buildsym_compunit
 			   (cust->objfile (), "",
-			    COMPUNIT_DIRNAME (cust),
+			    cust->dirname (),
 			    compunit_language (cust),
 			    0, cust));
 	  list_in_scope = get_builder ()->get_file_symbols ();
@@ -10775,7 +10775,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
       struct compunit_symtab *cust = tug_unshare->compunit_symtab;
       m_builder.reset (new struct buildsym_compunit
 		       (cust->objfile (), "",
-			COMPUNIT_DIRNAME (cust),
+			cust->dirname (),
 			compunit_language (cust),
 			0, cust));
       list_in_scope = get_builder ()->get_file_symbols ();

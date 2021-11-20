@@ -513,7 +513,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   add_compunit_symtab_to_objfile (cust);
 
   /* JIT compilers compile in memory.  */
-  COMPUNIT_DIRNAME (cust) = NULL;
+  cust->set_dirname (nullptr);
 
   /* Copy over the linetable entry if one was provided.  */
   if (stab->linetable)
