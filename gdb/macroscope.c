@@ -44,12 +44,12 @@ sal_macro_scope (struct symtab_and_line sal)
   if (sal.symtab == NULL)
     return NULL;
   cust = SYMTAB_COMPUNIT (sal.symtab);
-  if (COMPUNIT_MACRO_TABLE (cust) == NULL)
+  if (cust->macro_table () == NULL)
     return NULL;
 
   gdb::unique_xmalloc_ptr<struct macro_scope> ms (XNEW (struct macro_scope));
 
-  main_file = macro_main (COMPUNIT_MACRO_TABLE (cust));
+  main_file = macro_main (cust->macro_table ());
   inclusion = macro_lookup_inclusion (main_file, sal.symtab->filename);
 
   if (inclusion)

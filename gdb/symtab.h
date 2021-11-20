@@ -1551,6 +1551,16 @@ struct compunit_symtab
     m_epilogue_unwind_valid = epilogue_unwind_valid;
   }
 
+  struct macro_table *macro_table () const
+  {
+    return m_macro_table;
+  }
+
+  void set_macro_table (struct macro_table *macro_table)
+  {
+    m_macro_table = macro_table;
+  }
+
   /* Make PRIMARY_FILETAB the primary filetab of this compunit symtab.
 
      PRIMARY_FILETAB must already be a filetab of this compunit symtab.  */
@@ -1626,7 +1636,7 @@ struct compunit_symtab
      is shared between different symtabs in a given compilation unit.
      It's debatable whether it *should* be shared among all the symtabs in
      the given compilation unit, but it currently is.  */
-  struct macro_table *macro_table;
+  struct macro_table *m_macro_table;
 
   /* If non-NULL, then this points to a NULL-terminated vector of
      included compunits.  When searching the static or global
@@ -1645,8 +1655,6 @@ struct compunit_symtab
 };
 
 using compunit_symtab_range = next_range<compunit_symtab>;
-
-#define COMPUNIT_MACRO_TABLE(cust) ((cust)->macro_table)
 
 /* Return the language of CUST.  */
 

@@ -1024,7 +1024,7 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 
   cu->set_block_line_section (section);
 
-  COMPUNIT_MACRO_TABLE (cu) = release_macros ();
+  cu->set_macro_table (release_macros ());
 
   /* Default any symbols without a specified symtab to the primary symtab.  */
   {
