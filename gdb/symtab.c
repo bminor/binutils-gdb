@@ -361,6 +361,34 @@ compunit_symtab::set_call_site_htab (htab_t call_site_htab)
 
 /* See symtab.h.  */
 
+void
+compunit_symtab::set_primary_filetab (symtab *primary_filetab)
+{
+  symtab *prev_filetab = nullptr;
+
+  /* Move PRIMARY_FILETAB to the head of the filetab list.  */
+  for (symtab *filetab : compunit_filetabs (this))
+    {
+      if (filetab == primary_filetab)
+	{
+	  if (prev_filetab != nullptr)
+	    {
+	      prev_filetab->next = primary_filetab->next;
+	      primary_filetab->next = this->filetabs;
+	      this->filetabs = primary_filetab;
+	    }
+
+	  break;
+	}
+
+      prev_filetab = filetab;
+    }
+
+  gdb_assert (primary_filetab == this->filetabs);
+}
+
+/* See symtab.h.  */
+
 struct symtab *
 compunit_symtab::primary_filetab () const
 {

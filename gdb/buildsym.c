@@ -996,28 +996,8 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
       symtab->language = subfile->language;
     }
 
-  /* Make sure the symtab of main_subfile is the first in its list.  */
-  {
-    struct symtab *main_symtab, *prev_symtab;
-
-    main_symtab = m_main_subfile->symtab;
-    prev_symtab = NULL;
-    for (symtab *symtab : compunit_filetabs (cu))
-      {
-	if (symtab == main_symtab)
-	  {
-	    if (prev_symtab != NULL)
-	      {
-		prev_symtab->next = main_symtab->next;
-		main_symtab->next = COMPUNIT_FILETABS (cu);
-		COMPUNIT_FILETABS (cu) = main_symtab;
-	      }
-	    break;
-	  }
-	prev_symtab = symtab;
-      }
-    gdb_assert (main_symtab == COMPUNIT_FILETABS (cu));
-  }
+  /* Make sure the filetab of main_subfile is the primary filetab of the CU.  */
+  cu->set_primary_filetab (m_main_subfile->symtab);
 
   /* Fill out the compunit symtab.  */
 

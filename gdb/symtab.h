@@ -1473,6 +1473,12 @@ struct compunit_symtab
       }
   }
 
+  /* Make PRIMARY_FILETAB the primary filetab of this compunit symtab.
+
+     PRIMARY_FILETAB must already be a filetab of this compunit symtab.  */
+
+  void set_primary_filetab (symtab *primary_filetab);
+
   /* Return the primary filetab of the compunit.  */
   symtab *primary_filetab () const;
 
