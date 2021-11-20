@@ -2804,16 +2804,7 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename)
     }
 
   /* Add it to CUST's list of symtabs.  */
-  if (cust->filetabs == NULL)
-    {
-      cust->filetabs = symtab;
-      cust->last_filetab = symtab;
-    }
-  else
-    {
-      cust->last_filetab->next = symtab;
-      cust->last_filetab = symtab;
-    }
+  cust->add_filetab (symtab);
 
   /* Backlink to the containing compunit symtab.  */
   symtab->compunit_symtab = cust;

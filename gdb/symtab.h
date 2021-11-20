@@ -1459,6 +1459,20 @@ struct compunit_symtab
     m_objfile = objfile;
   }
 
+  void add_filetab (symtab *filetab)
+  {
+    if (this->filetabs == nullptr)
+      {
+	this->filetabs = filetab;
+	this->last_filetab = filetab;
+      }
+    else
+      {
+	this->last_filetab->next = filetab;
+	this->last_filetab = filetab;
+      }
+  }
+
   /* Return the primary filetab of the compunit.  */
   symtab *primary_filetab () const;
 
