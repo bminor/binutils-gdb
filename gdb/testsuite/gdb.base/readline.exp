@@ -193,7 +193,7 @@ save_vars { env(TERM) } {
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
 
-	operate_and_get_next "Simple operate-and-get-next" \
+	operate_and_get_next "Simple operate-and-get-next, two" \
 	    "p 7" ".* = 7" \
 	    "p 8" ".* = 8" \
 	    "p 9" ".* = 9"
