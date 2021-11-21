@@ -1,5 +1,7 @@
 # Miscellaneous M32R simulator testcases
 
+sim_init
+
 if [istarget m32r*-*-*] {
     # all machines
     set all_machs "m32r"

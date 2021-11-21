@@ -1,5 +1,7 @@
 # Analog Devices Blackfin simulator testsuite
 
+sim_init
+
 if [istarget bfin-*-elf] {
     # all machines
     set all_machs "bfin"

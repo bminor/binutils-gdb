@@ -1,5 +1,7 @@
 # Miscellaneous ARM simulator testcases
 
+sim_init
+
 if { [istarget arm*-*-*] } {
     # all machines
     set all_machs "arm7tdmi"

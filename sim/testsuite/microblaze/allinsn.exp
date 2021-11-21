@@ -1,5 +1,7 @@
 # microblaze simulator testsuite
 
+sim_init
+
 if [istarget microblaze-*] {
     # all machines
     set all_machs "microblaze"

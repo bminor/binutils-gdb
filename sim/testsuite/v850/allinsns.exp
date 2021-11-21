@@ -1,5 +1,7 @@
 # v850 simulator testsuite.
 
+sim_init
+
 if [istarget v850*-*] {
     # All machines.
     # Should add more cpus if the testsuite adds coverage for their insns, but

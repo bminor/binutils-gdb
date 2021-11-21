@@ -15,6 +15,8 @@
 
 # Miscellaneous CRIS simulator testcases in assembly code.
 
+sim_init
+
 if [istarget cris*-*-*] {
     global ASFLAGS_FOR_TARGET
     # All machines we test and the corresponding assembler option.  Needs

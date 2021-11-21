@@ -1,5 +1,7 @@
 # Miscellaneous FRV simulator testcases.
 
+sim_init
+
 if [istarget frv*-*] {
     # all machines
     set all_machs "frv fr500 fr550 fr400 fr405 fr450"

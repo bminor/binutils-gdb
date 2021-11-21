@@ -1,5 +1,7 @@
 # eBPF simulator testsuite
 
+sim_init
+
 if [istarget bpf-unknown-none] {
     # all machines
     set all_machs "bpf"

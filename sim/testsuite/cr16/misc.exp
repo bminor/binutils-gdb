@@ -1,5 +1,7 @@
 # Miscellaneous CR16 simulator testcases
 
+sim_init
+
 if [istarget cr16*-*-*] {
     # all machines
     set all_machs "cr16"

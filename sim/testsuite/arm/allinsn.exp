@@ -1,5 +1,7 @@
 # ARM simulator testsuite.
 
+sim_init
+
 if { [istarget arm*-*-*] } {
     # all machines
     set all_machs "xscale"

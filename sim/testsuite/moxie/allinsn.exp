@@ -1,5 +1,7 @@
 # moxie simulator testsuite
 
+sim_init
+
 if [istarget moxie-*] {
     # all machines
     set all_machs "moxie"

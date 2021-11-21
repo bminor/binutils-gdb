@@ -7,12 +7,22 @@
 set sim_path "unknown-run"
 
 # Initialize the testrun.
-# Required by dejagnu.
+#
+# Normally dejagnu will execute ${tool}_init automatically, but since we set
+# --tool '' (for a simpler testsuite/ layout), we have each test call this
+# itself.
 
 proc sim_init { args } {
+    global builddir
+    global subdir
     global sim_path
-    set sim_path [board_info target sim]
-    # Need to return an empty string (copied from GAS).
+
+    # Find the path to the simulator for executing.
+    set arch "$subdir"
+    while { [file dirname $arch] != "." } {
+	set arch [file dirname $arch]
+    }
+    set sim_path "$builddir/$arch/run"
 
     # As gross as it is, we unset the linker script specified by the target
     # board.  The simulator board file mips-sim.exp, sets ldscript to the
@@ -23,6 +33,8 @@ proc sim_init { args } {
     # all simulators.
     unset_currtarget_info ldscript
 
+    # Need to return an empty string.  This tells dejagnu to *not* re-run us
+    # with the exact test that we're about to run.
     return ""
 }
 
@@ -33,22 +45,6 @@ proc sim_version {} {
     global sim_path
     set version 0.5
     clone_output "$sim_path $version\n"
-}
-
-# Find the path to the simulator for executing.
-proc sim_tool_path {} {
-    global sim_path
-    set sim "$sim_path"
-    if [string equal "" $sim] {
-	global builddir
-	global subdir
-	set arch "$subdir"
-	while { [file dirname $arch] != "." } {
-	    set arch [file dirname $arch]
-	}
-	return "$builddir/$arch/run"
-    }
-    return "$sim"
 }
 
 # Run a program on the simulator.
@@ -73,6 +69,8 @@ proc sim_tool_path {} {
 # simulator (not the simulated program, the simulator) with sim_load.
 
 proc sim_run { prog sim_opts prog_opts redir options } {
+    global sim_path
+
     # Set the default value of the timeout.
     # FIXME: The timeout value we actually want is a function of
     # host, target, and testcase.
@@ -99,7 +97,7 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 	
     verbose "testcase timeout is set to $testcase_timeout" 1
 
-    set sim [sim_tool_path]
+    set sim $sim_path
 
     if [is_remote host] {
 	set prog [remote_download host $prog]
@@ -182,13 +180,14 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 
 proc run_sim_test { name requested_machs } {
     global subdir srcdir objdir
+    global sim_path
     global opts
     global cpu_option
     global cpu_option_sep
     global SIMFLAGS_FOR_TARGET
 
-    if ![file exists [sim_tool_path]] {
-	unsupported "$name: missing simulator [sim_tool_path]"
+    if ![file exists $sim_path] {
+	unsupported "$name: missing simulator $sim_path"
 	return
     }
 

@@ -1,5 +1,7 @@
 # Hitachi H8/300 (h, s, sx) simulator testsuite
 
+sim_init
+
 if {[istarget h8300*-*-*] || [istarget h8sx*-*-*]} then {
     set all_machs "h8300 h8300h h8300s h8sx"
 

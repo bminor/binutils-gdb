@@ -1,5 +1,7 @@
 # sh tests
 
+sim_init
+
 set all_machs "sh shdsp"
 
 global ASFLAGS_FOR_TARGET

@@ -1,5 +1,7 @@
 # Example synacor simulator testsuite.
 
+sim_init
+
 if [istarget *] {
     # All machines.
     set all_machs "example"

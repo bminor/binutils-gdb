@@ -1,5 +1,7 @@
 # mn10300 simulator testsuite
 
+sim_init
+
 if [istarget mn10300-*] {
     # all machines
     set all_machs "mn10300"

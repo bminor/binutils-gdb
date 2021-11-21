@@ -1,5 +1,7 @@
 # MIPS simulator instruction tests
 
+sim_init
+
 # Do "run_sim_test TESTFILE MODELS" for each combination of the
 # mf{lo,hi} -> mult/div/mt{lo,hi} hazard described in mips.igen.
 # Insert NOPS nops after the mflo or mfhi.

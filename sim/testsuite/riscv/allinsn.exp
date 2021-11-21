@@ -1,5 +1,7 @@
 # RISC-V simulator testsuite.
 
+sim_init
+
 if [istarget riscv*-*] {
     # all machines
     set all_machs "riscv"

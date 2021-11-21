@@ -1,5 +1,7 @@
 # avr simulator testsuite
 
+sim_init
+
 if [istarget avr-*] {
     # all machines
     set all_machs "avr"
