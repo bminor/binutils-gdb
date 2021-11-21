@@ -28,8 +28,9 @@ if {[which curl] == 0} {
     return
 }
 
-if { ![is_elf_format] } {
+if { ![is_elf_format] || ![isnative] } {
     unsupported "$test (unsupported target)"
+    return
 }
 
 if { [which $OBJDUMP] == 0} {
