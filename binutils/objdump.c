@@ -3942,13 +3942,18 @@ get_build_id (void * data)
 
 static void
 dump_dwarf_section (bfd *abfd, asection *section,
-		    void *arg ATTRIBUTE_UNUSED)
+		    void *arg)
 {
   const char *name = bfd_section_name (section);
   const char *match;
   int i;
+  bool is_mainfile = *(bool *) arg;
 
   if (*name == 0)
+    return;
+
+  if (!is_mainfile && !process_links
+      && (section->flags & SEC_DEBUGGING) == 0)
     return;
 
   if (startswith (name, ".gnu.linkonce.wi."))
@@ -3986,7 +3991,7 @@ dump_dwarf_section (bfd *abfd, asection *section,
 /* Dump the dwarf debugging information.  */
 
 static void
-dump_dwarf (bfd *abfd)
+dump_dwarf (bfd *abfd, bool is_mainfile)
 {
   /* The byte_get pointer should have been set at the start of dump_bfd().  */
   if (byte_get == NULL)
@@ -4012,7 +4017,7 @@ dump_dwarf (bfd *abfd)
   init_dwarf_regnames_by_bfd_arch_and_mach (bfd_get_arch (abfd),
 					    bfd_get_mach (abfd));
 
-  bfd_map_over_sections (abfd, dump_dwarf_section, NULL);
+  bfd_map_over_sections (abfd, dump_dwarf_section, (void *) &is_mainfile);
 }
 
 /* Read ABFD's stabs section STABSECT_NAME, and return a pointer to
@@ -5053,23 +5058,23 @@ dump_bfd (bfd *abfd, bool is_mainfile)
       bfd_map_over_sections (abfd, adjust_addresses, &has_reloc);
     }
 
-  if (! is_mainfile && ! process_links)
-    return;
-
-  if (! dump_debugging_tags && ! suppress_bfd_header)
-    printf (_("\n%s:     file format %s\n"),
-	    sanitize_string (bfd_get_filename (abfd)),
-	    abfd->xvec->name);
-  if (dump_ar_hdrs)
-    print_arelt_descr (stdout, abfd, true, false);
-  if (dump_file_header)
-    dump_bfd_header (abfd);
-  if (dump_private_headers)
-    dump_bfd_private_header (abfd);
-  if (dump_private_options != NULL)
-    dump_target_specific (abfd);
-  if (! dump_debugging_tags && ! suppress_bfd_header)
-    putchar ('\n');
+  if (is_mainfile || process_links)
+    {
+      if (! dump_debugging_tags && ! suppress_bfd_header)
+	printf (_("\n%s:     file format %s\n"),
+		sanitize_string (bfd_get_filename (abfd)),
+		abfd->xvec->name);
+      if (dump_ar_hdrs)
+	print_arelt_descr (stdout, abfd, true, false);
+      if (dump_file_header)
+	dump_bfd_header (abfd);
+      if (dump_private_headers)
+	dump_bfd_private_header (abfd);
+      if (dump_private_options != NULL)
+	dump_target_specific (abfd);
+      if (! dump_debugging_tags && ! suppress_bfd_header)
+	putchar ('\n');
+    }
 
   if (dump_symtab
       || dump_reloc_info
@@ -5112,39 +5117,46 @@ dump_bfd (bfd *abfd, bool is_mainfile)
 	}
     }
 
-  if (dump_section_headers)
-    dump_headers (abfd);
-
-  if (dump_dynamic_symtab || dump_dynamic_reloc_info
-      || (disassemble && bfd_get_dynamic_symtab_upper_bound (abfd) > 0))
-    dynsyms = slurp_dynamic_symtab (abfd);
-
-  if (disassemble)
+  if (is_mainfile || process_links)
     {
-      synthcount = bfd_get_synthetic_symtab (abfd, symcount, syms,
-					     dynsymcount, dynsyms, &synthsyms);
-      if (synthcount < 0)
-	synthcount = 0;
-    }
+      if (dump_section_headers)
+	dump_headers (abfd);
 
-  if (dump_symtab)
-    dump_symbols (abfd, false);
-  if (dump_dynamic_symtab)
-    dump_symbols (abfd, true);
+      if (dump_dynamic_symtab || dump_dynamic_reloc_info
+	  || (disassemble && bfd_get_dynamic_symtab_upper_bound (abfd) > 0))
+	dynsyms = slurp_dynamic_symtab (abfd);
+
+      if (disassemble)
+	{
+	  synthcount = bfd_get_synthetic_symtab (abfd, symcount, syms,
+						 dynsymcount, dynsyms,
+						 &synthsyms);
+	  if (synthcount < 0)
+	    synthcount = 0;
+	}
+
+      if (dump_symtab)
+	dump_symbols (abfd, false);
+      if (dump_dynamic_symtab)
+	dump_symbols (abfd, true);
+    }
   if (dump_dwarf_section_info)
-    dump_dwarf (abfd);
-  if (dump_ctf_section_info)
-    dump_ctf (abfd, dump_ctf_section_name, dump_ctf_parent_name);
-  if (dump_stab_section_info)
-    dump_stabs (abfd);
-  if (dump_reloc_info && ! disassemble)
-    dump_relocs (abfd);
-  if (dump_dynamic_reloc_info && ! disassemble)
-    dump_dynamic_relocs (abfd);
-  if (dump_section_contents)
-    dump_data (abfd);
-  if (disassemble)
-    disassemble_data (abfd);
+    dump_dwarf (abfd, is_mainfile);
+  if (is_mainfile || process_links)
+    {
+      if (dump_ctf_section_info)
+	dump_ctf (abfd, dump_ctf_section_name, dump_ctf_parent_name);
+      if (dump_stab_section_info)
+	dump_stabs (abfd);
+      if (dump_reloc_info && ! disassemble)
+	dump_relocs (abfd);
+      if (dump_dynamic_reloc_info && ! disassemble)
+	dump_dynamic_relocs (abfd);
+      if (dump_section_contents)
+	dump_data (abfd);
+      if (disassemble)
+	disassemble_data (abfd);
+    }
 
   if (dump_debugging)
     {
@@ -5169,7 +5181,7 @@ dump_bfd (bfd *abfd, bool is_mainfile)
       else if (! dump_dwarf_section_info)
 	{
 	  dwarf_select_sections_all ();
-	  dump_dwarf (abfd);
+	  dump_dwarf (abfd, is_mainfile);
 	}
     }
 
