@@ -1407,6 +1407,8 @@ struct symtab
 
   struct objfile *objfile () const;
 
+  program_space *pspace () const;
+
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 
@@ -1439,7 +1441,6 @@ struct symtab
 
 using symtab_range = next_range<symtab>;
 
-#define SYMTAB_PSPACE(symtab) ((symtab)->objfile ()->pspace)
 #define SYMTAB_DIRNAME(symtab) ((symtab)->compunit ()->dirname ())
 
 /* Compunit symtabs contain the actual "symbol table", aka blockvector, as well

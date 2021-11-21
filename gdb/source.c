@@ -311,7 +311,7 @@ select_source_symtab (struct symtab *s)
   if (s)
     {
       current_source_location *loc
-	= get_source_location (SYMTAB_PSPACE (s));
+	= get_source_location (s->pspace ());
       loc->set (s, 1);
       return;
     }
