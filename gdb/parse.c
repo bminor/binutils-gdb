@@ -462,7 +462,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
       if (cursal.symtab)
 	expression_context_block
-	  = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (cursal.symtab),
+	  = BLOCKVECTOR_BLOCK (cursal.symtab->blockvector (),
 			       STATIC_BLOCK);
       if (expression_context_block)
 	expression_context_pc = BLOCK_ENTRY_PC (expression_context_block);

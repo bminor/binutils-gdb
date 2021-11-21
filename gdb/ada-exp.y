@@ -1302,7 +1302,7 @@ block_lookup (const struct block *context, const char *raw_name)
     symtab = NULL;
 
   if (symtab != NULL)
-    result = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
+    result = BLOCKVECTOR_BLOCK (symtab->blockvector (), STATIC_BLOCK);
   else if (syms.empty () || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK)
     {
       if (context == NULL)

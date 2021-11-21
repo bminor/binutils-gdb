@@ -1403,6 +1403,8 @@ struct symtab
     m_language = language;
   }
 
+  const struct blockvector *blockvector () const;
+
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 
@@ -1435,8 +1437,6 @@ struct symtab
 
 using symtab_range = next_range<symtab>;
 
-#define SYMTAB_BLOCKVECTOR(symtab) \
-  (symtab->compunit ()->blockvector ())
 #define SYMTAB_OBJFILE(symtab) \
   (symtab->compunit ()->objfile ())
 #define SYMTAB_PSPACE(symtab) (SYMTAB_OBJFILE (symtab)->pspace)
@@ -1682,6 +1682,12 @@ struct compunit_symtab
 };
 
 using compunit_symtab_range = next_range<compunit_symtab>;
+
+inline const struct blockvector *
+symtab::blockvector () const
+{
+  return this->compunit ()->blockvector ();
+}
 
 /* Return the language of CUST.  */
 

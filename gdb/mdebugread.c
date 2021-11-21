@@ -628,7 +628,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       break;
 
     case stGlobal:		/* External symbol, goes into global block.  */
-      b = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (top_stack->cur_st),
+      b = BLOCKVECTOR_BLOCK (top_stack->cur_st->blockvector (),
 			     GLOBAL_BLOCK);
       s = new_symbol (name);
       SET_SYMBOL_VALUE_ADDRESS (s, (CORE_ADDR) sh->value);
@@ -771,7 +771,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       if (sh->st == stProc)
 	{
 	  const struct blockvector *bv
-	    = SYMTAB_BLOCKVECTOR (top_stack->cur_st);
+	    = top_stack->cur_st->blockvector ();
 
 	  /* The next test should normally be true, but provides a
 	     hook for nested functions (which we don't want to make
@@ -1144,7 +1144,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	{
 	  /* Finished with procedure */
 	  const struct blockvector *bv
-	    = SYMTAB_BLOCKVECTOR (top_stack->cur_st);
+	    = top_stack->cur_st->blockvector ();
 	  struct mdebug_extra_func_info *e;
 	  struct block *cblock = top_stack->cur_block;
 	  struct type *ftype = top_stack->cur_type;
@@ -4186,7 +4186,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 	 FIXME, Maybe quit once we have found the right number of ext's?  */
       top_stack->cur_st = cust->primary_filetab ();
       top_stack->cur_block
-	= BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (top_stack->cur_st),
+	= BLOCKVECTOR_BLOCK (top_stack->cur_st->blockvector (),
 			     GLOBAL_BLOCK);
       top_stack->blocktype = stFile;
 
@@ -4496,13 +4496,13 @@ add_block (struct block *b, struct symtab *s)
 {
   /* Cast away "const", but that's ok because we're building the
      symtab and blockvector here.  */
-  struct blockvector *bv = (struct blockvector *) SYMTAB_BLOCKVECTOR (s);
+  struct blockvector *bv = (struct blockvector *) s->blockvector ();
 
   bv = (struct blockvector *) xrealloc ((void *) bv,
 					(sizeof (struct blockvector)
 					 + BLOCKVECTOR_NBLOCKS (bv)
 					 * sizeof (bv->block)));
-  if (bv != SYMTAB_BLOCKVECTOR (s))
+  if (bv != s->blockvector ())
     s->compunit ()->set_blockvector (bv);
 
   BLOCKVECTOR_BLOCK (bv, BLOCKVECTOR_NBLOCKS (bv)++) = b;
@@ -4566,7 +4566,7 @@ sort_blocks (struct symtab *s)
 {
   /* We have to cast away const here, but this is ok because we're
      constructing the blockvector in this code.  */
-  struct blockvector *bv = (struct blockvector *) SYMTAB_BLOCKVECTOR (s);
+  struct blockvector *bv = (struct blockvector *) s->blockvector ();
 
   if (BLOCKVECTOR_NBLOCKS (bv) <= FIRST_LOCAL_BLOCK)
     {
