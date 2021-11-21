@@ -1251,12 +1251,12 @@ CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
 	testsuite/common/bits64m63.c
 DISTCLEANFILES = 
-MOSTLYCLEANFILES = core $(am__append_5) site-srcdir.exp testrun.log \
-	testrun.sum $(am__append_7) $(am__append_10) $(am__append_12) \
-	$(am__append_15) $(am__append_17) $(am__append_19) \
-	$(am__append_21) $(am__append_24) $(am__append_26) \
-	$(am__append_29) $(am__append_31) $(am__append_33) \
-	$(am__append_36) $(am__append_38)
+MOSTLYCLEANFILES = core $(am__append_5) site-sim-config.exp \
+	testrun.log testrun.sum $(am__append_7) $(am__append_10) \
+	$(am__append_12) $(am__append_15) $(am__append_17) \
+	$(am__append_19) $(am__append_21) $(am__append_24) \
+	$(am__append_26) $(am__append_29) $(am__append_31) \
+	$(am__append_33) $(am__append_36) $(am__append_38)
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(srcroot)/include $(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
@@ -1336,7 +1336,7 @@ common_libcommon_a_SOURCES = \
 
 
 # Tweak the site.exp so it works with plain `runtest` from user.
-EXTRA_DEJAGNU_SITE_CONFIG = site-srcdir.exp
+EXTRA_DEJAGNU_SITE_CONFIG = site-sim-config.exp
 
 # Custom verbose test variables that automake doesn't provide (yet?).
 AM_V_RUNTEST = $(AM_V_RUNTEST_@AM_V@)
@@ -2662,8 +2662,11 @@ common/version.c-stamp: $(srcroot)/gdb/version.in $(srcroot)/bfd/version.h $(src
 @SIM_ENABLE_IGEN_TRUE@igen/%-main.o: igen/%.c
 @SIM_ENABLE_IGEN_TRUE@	$(AM_V_CC)$(COMPILE_FOR_BUILD) -DMAIN -c $< -o $@
 
-site-srcdir.exp: Makefile
-	$(AM_V_GEN)echo "set srcdir \"$(srcdir)/testsuite\"" > $@
+site-sim-config.exp: Makefile
+	$(AM_V_GEN)( \
+	echo "set builddir \"$(builddir)\""; \
+	echo "set srcdir \"$(srcdir)/testsuite\""; \
+	) > $@
 
 check-DEJAGNU: site.exp
 	$(AM_V_RUNTEST)LC_ALL=C; export LC_ALL; \

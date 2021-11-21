@@ -31,7 +31,8 @@ if [istarget cris*-*-elf] {
 }
 
 # Using target_compile, since it is less noisy,
-if { [target_compile $srcdir/$subdir/hello.c compilercheck.x \
+global objdir
+if { [target_compile $srcdir/$subdir/hello.c $objdir/compilercheck.x \
 	  "executable" "" ] == "" } {
     set has_cc 1
 
@@ -43,7 +44,7 @@ if { [target_compile $srcdir/$subdir/hello.c compilercheck.x \
     # detrimental effects on the executable from the specs and
     # -static in the board ldflags, we just add -Bdynamic.
     if [regexp "(.*/lib)/libc.so" \
-	    [target_compile $srcdir/$subdir/hello.c compilercheck.x \
+	    [target_compile $srcdir/$subdir/hello.c $objdir/compilercheck.x \
 		 "executable" \
 		 "ldflags=-print-file-name=libc.so -Wl,-Bdynamic"] \
 	    xxx libcsodir]  {
@@ -169,7 +170,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 
     verbose -log "Compiling $src with $opts(cc)"
 
-    if { [target_compile $src "$testname.x" "executable" "$opts(cc)" ] != "" } {
+    if { [target_compile $src "$objdir/$testname.x" "executable" "$opts(cc)" ] != "" } {
 	unresolved $testname
 	continue
     }
@@ -192,7 +193,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	eval setup_kfail $opts(kfail)
     }
 
-    set result [sim_run "$testname.x" "$opts(sim,$mach)" "$opts(progoptions)" \
+    set result [sim_run "$objdir/$testname.x" "$opts(sim,$mach)" "$opts(progoptions)" \
 	"" ""]
     set return_code [lindex $result 0]
     set output [lindex $result 1]

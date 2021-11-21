@@ -4,8 +4,10 @@ if [istarget bfin-*-elf] {
     # all machines
     set all_machs "bfin"
 
+    global objdir
+
     # See if we have a preprocessor available.
-    if { [target_compile $srcdir/$subdir/usp.S compilercheck.x "preprocess" \
+    if { [target_compile $srcdir/$subdir/usp.S $objdir/compilercheck.x "preprocess" \
 	  [list "incdir=$srcdir/$subdir"]] == "" } {
 	set has_cpp 1
     } {
@@ -14,7 +16,7 @@ if [istarget bfin-*-elf] {
     }
 
     # See if we have a compiler available.
-    if { [target_compile $srcdir/$subdir/argc.c compilercheck.x "executable" \
+    if { [target_compile $srcdir/$subdir/argc.c $objdir/compilercheck.x "executable" \
 	  [list "incdir=$srcdir/$subdir" "additional_flags=-msim"]] == "" } {
 	set has_cc 1
     } {

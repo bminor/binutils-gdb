@@ -21,6 +21,7 @@
 proc sim_has_rv_and_cris {} {
     global srcdir
     global subdir
+    global objdir
     global SIMFLAGS_FOR_TARGET
 
     # We need to assemble and link a trivial program and pass that, in
@@ -34,7 +35,7 @@ proc sim_has_rv_and_cris {} {
 	set SIMFLAGS_FOR_TARGET ""
     }
 
-    set comp_output [target_assemble $srcdir/$subdir/quit.s quit.o \
+    set comp_output [target_assemble $srcdir/$subdir/quit.s $objdir/quit.o \
 			 "-I$srcdir/$subdir"]
 
     if ![string match "" $comp_output] {
@@ -43,7 +44,7 @@ proc sim_has_rv_and_cris {} {
 	return 0
     }
 
-    set comp_output [target_link quit.o quit.x ""]
+    set comp_output [target_link $objdir/quit.o $objdir/quit.x ""]
 
     if ![string match "" $comp_output] {
 	verbose -log "$comp_output" 3
@@ -52,7 +53,7 @@ proc sim_has_rv_and_cris {} {
     }
 
     set result \
-	[sim_run quit.x \
+	[sim_run $objdir/quit.x \
 	     "$SIMFLAGS_FOR_TARGET --hw-device rv --hw-device cris --hw-info" \
 	     "" "" ""]
     set return_code [lindex $result 0]
@@ -117,8 +118,8 @@ if [istarget cris*-*-*] {
     # See the logic in sim-defs.exp for more details.
     set sim [board_info target sim]
     if [string equal "" $sim] {
-	global objdir
-	set rvdummy "$objdir/cris/rvdummy"
+	global builddir
+	set rvdummy "$builddir/cris/rvdummy"
     } else {
 	set rvdummy "[file dirname [board_info target sim]]/rvdummy"
     }

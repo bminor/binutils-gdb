@@ -21,7 +21,7 @@ int main (int argc, char *argv[])
       if (fnam == NULL)
 	abort ();
       strcpy (fnam, "/");
-      strcat (fnam, argv[0]);
+      strcat (fnam, basename (argv[0]));
     }
 
   f = fopen (fnam, "rb");

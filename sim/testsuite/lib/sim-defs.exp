@@ -40,13 +40,13 @@ proc sim_tool_path {} {
     global sim_path
     set sim "$sim_path"
     if [string equal "" $sim] {
-	global objdir
+	global builddir
 	global subdir
 	set arch "$subdir"
 	while { [file dirname $arch] != "." } {
 	    set arch [file dirname $arch]
 	}
-	return "$objdir/$arch/run"
+	return "$builddir/$arch/run"
     }
     return "$sim"
 }
@@ -181,7 +181,7 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 # optional for xfail.
 
 proc run_sim_test { name requested_machs } {
-    global subdir srcdir
+    global subdir srcdir objdir
     global opts
     global cpu_option
     global cpu_option_sep
@@ -328,16 +328,16 @@ proc run_sim_test { name requested_machs } {
 	}
 
 	if [string match "*.c" $sourcefile] {
-	    set comp_output [target_compile $sourcefile ${name}.x "executable" \
+	    set comp_output [target_compile $sourcefile $objdir/${name}.x "executable" \
 		[list "incdir=$srcdir/$subdir" "additional_flags=$c_as_options $c_ld_options $opts(cc,$mach)"]]
 	    set method "compiling/linking"
 	} else {
 	    if [string match "*.S" $sourcefile] {
-		set comp_output [target_compile $sourcefile ${name}.o "object" \
+		set comp_output [target_compile $sourcefile $objdir/${name}.o "object" \
 		    [list "incdir=$srcdir/$subdir" "additional_flags=$c_as_options"]]
 		set method "compiling"
 	    } else {
-		set comp_output [target_assemble $sourcefile ${name}.o "$as_options"]
+		set comp_output [target_assemble $sourcefile $objdir/${name}.o "$as_options"]
 		set method "assembling"
 	    }
 
@@ -347,7 +347,7 @@ proc run_sim_test { name requested_machs } {
 		continue
 	    }
 
-	    set comp_output [target_link ${name}.o ${name}.x "$opts(ld,$mach)"]
+	    set comp_output [target_link $objdir/${name}.o $objdir/${name}.x "$opts(ld,$mach)"]
 	    set method "linking"
 	}
 
@@ -368,7 +368,7 @@ proc run_sim_test { name requested_machs } {
 	    set options "$options timeout=$opts(timeout)"
 	}
 
-	set result [sim_run ${name}.x "$opts(sim,$mach) $SIMFLAGS_FOR_TARGET" "$opts(progopts)" "" "$options"]
+	set result [sim_run $objdir/${name}.x "$opts(sim,$mach) $SIMFLAGS_FOR_TARGET" "$opts(progopts)" "" "$options"]
 	set return_code [lindex $result 0]
 	set output [lindex $result 1]
 
@@ -383,7 +383,7 @@ proc run_sim_test { name requested_machs } {
 	    if { "$opts(xerror)" == "no" } {
 		if [string match $opts(output) $output] {
 		    pass "$mach $testname"
-		    file delete ${name}.o ${name}.x
+		    file delete $objdir/${name}.o $objdir/${name}.x
 		} else {
 		    verbose -log "status:  $return_code" 3
 		    verbose -log "output:  $output" 3
@@ -400,7 +400,7 @@ proc run_sim_test { name requested_machs } {
 	    } else {
 		if [string match $opts(output) $output] {
 		    pass "$mach $testname"
-		    file delete ${name}.o ${name}.x
+		    file delete $objdir/${name}.o $objdir/${name}.x
 		} else {
 		    verbose -log "status:  $return_code" 3
 		    verbose -log "output:  $output" 3
