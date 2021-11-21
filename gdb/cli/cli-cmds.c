@@ -2046,8 +2046,8 @@ ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
 static int
 cmp_symtabs (const symtab_and_line &sala, const symtab_and_line &salb)
 {
-  const char *dira = SYMTAB_DIRNAME (sala.symtab);
-  const char *dirb = SYMTAB_DIRNAME (salb.symtab);
+  const char *dira = sala.symtab->dirname ();
+  const char *dirb = salb.symtab->dirname ();
   int r;
 
   if (dira == NULL)

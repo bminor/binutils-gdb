@@ -713,8 +713,8 @@ info_source_command (const char *ignore, int from_tty)
 
   cust = s->compunit ();
   printf_filtered (_("Current source file is %s\n"), s->filename);
-  if (SYMTAB_DIRNAME (s) != NULL)
-    printf_filtered (_("Compilation directory is %s\n"), SYMTAB_DIRNAME (s));
+  if (s->dirname () != NULL)
+    printf_filtered (_("Compilation directory is %s\n"), s->dirname ());
   if (s->fullname)
     printf_filtered (_("Located in %s\n"), s->fullname);
   const std::vector<off_t> *offsets;
@@ -1180,7 +1180,7 @@ open_source_file (struct symtab *s)
 
   gdb::unique_xmalloc_ptr<char> fullname (s->fullname);
   s->fullname = NULL;
-  scoped_fd fd = find_and_open_source (s->filename, SYMTAB_DIRNAME (s),
+  scoped_fd fd = find_and_open_source (s->filename, s->dirname (),
 				       &fullname);
 
   if (fd.get () < 0)
@@ -1192,9 +1192,9 @@ open_source_file (struct symtab *s)
 	  std::string srcpath;
 	  if (IS_ABSOLUTE_PATH (s->filename))
 	    srcpath = s->filename;
-	  else if (SYMTAB_DIRNAME (s) != nullptr)
+	  else if (s->dirname () != nullptr)
 	    {
-	      srcpath = SYMTAB_DIRNAME (s);
+	      srcpath = s->dirname ();
 	      srcpath += SLASH_STRING;
 	      srcpath += s->filename;
 	    }
@@ -1268,10 +1268,10 @@ symtab_to_fullname (struct symtab *s)
 	  /* rewrite_source_path would be applied by find_and_open_source, we
 	     should report the pathname where GDB tried to find the file.  */
 
-	  if (SYMTAB_DIRNAME (s) == NULL || IS_ABSOLUTE_PATH (s->filename))
+	  if (s->dirname () == NULL || IS_ABSOLUTE_PATH (s->filename))
 	    fullname.reset (xstrdup (s->filename));
 	  else
-	    fullname.reset (concat (SYMTAB_DIRNAME (s), SLASH_STRING,
+	    fullname.reset (concat (s->dirname (), SLASH_STRING,
 				    s->filename, (char *) NULL));
 
 	  s->fullname = rewrite_source_path (fullname.get ()).release ();

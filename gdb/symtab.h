@@ -1409,6 +1409,8 @@ struct symtab
 
   program_space *pspace () const;
 
+  const char *dirname () const;
+
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 
@@ -1440,8 +1442,6 @@ struct symtab
 /* A range adapter to allowing iterating over all the file tables in a list.  */
 
 using symtab_range = next_range<symtab>;
-
-#define SYMTAB_DIRNAME(symtab) ((symtab)->compunit ()->dirname ())
 
 /* Compunit symtabs contain the actual "symbol table", aka blockvector, as well
    as the list of all source files (what gdb has historically associated with
@@ -1694,6 +1694,12 @@ inline struct objfile *
 symtab::objfile () const
 {
   return this->compunit ()->objfile ();
+}
+
+inline const char *
+symtab::dirname () const
+{
+  return this->compunit ()->dirname ();
 }
 
 /* Return the language of CUST.  */
