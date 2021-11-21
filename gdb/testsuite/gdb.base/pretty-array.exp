@@ -44,7 +44,8 @@ gdb_test "print nums" \
 	 "    22," \
 	 "    23" \
 	 "  }" \
-	 "}" ]
+	 "}" ] \
+    "print nums with print array on"
 
 gdb_test_no_output "set print array-indexes on"
 
@@ -61,4 +62,5 @@ gdb_test "print nums" \
 	 "    \\\[1\\\] = 22," \
 	 "    \\\[2\\\] = 23" \
 	 "  }" \
-	 "}" ]
+	 "}" ] \
+    "print nums with print array on, print array-indexes on"
