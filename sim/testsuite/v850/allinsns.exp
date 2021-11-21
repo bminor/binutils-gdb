@@ -1,19 +1,14 @@
 # v850 simulator testsuite.
 
 if [istarget v850*-*] {
-    global opt
+    # All machines.
+    # Should add more cpus if the testsuite adds coverage for their insns, but
+    # at the core level, there's no deviation beyond these two.
+    set all_machs "v850e v850"
 
-    # all machines
-    switch -regexp -- $opt {
-	.*v850e.* {
-	    set all_machs "v850e"
-	}
-	default {
-	    set all_machs "v850"
-	}
-    }
     # gas doesn't support any '=' option for v850.
-    #set cpu_option -m
+    set cpu_option_sep ""
+    set cpu_option -m
 
     # The .cgs suffix is for "cgen .s".
     foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.cgs]] {
@@ -24,12 +19,6 @@ if [istarget v850*-*] {
 	}
 	run_sim_test $src $all_machs
     }
-}
 
-#foreach var [lsort [info globals]] {
-#    if [array exists ::$var] {
-#	puts [format "%-27s %s" $var Array:]
-#	continue
-#    }
-#    puts [format "%-30s %s" $var "[set ::$var]"]
-#}
+    unset cpu_option cpu_option_sep
+}

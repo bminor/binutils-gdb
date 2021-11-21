@@ -187,6 +187,7 @@ proc run_sim_test { name requested_machs } {
     global SIMFLAGS
     global opts
     global cpu_option
+    global cpu_option_sep
     global global_as_options
     global global_ld_options
     global global_cc_options
@@ -323,7 +324,12 @@ proc run_sim_test { name requested_machs } {
 
 	set as_options "$opts(as,$mach) -I$srcdir/$subdir"
 	if [info exists cpu_option] {
-	    set as_options "$as_options $cpu_option=$mach"
+	    if ![info exists cpu_option_sep] {
+		set sep "="
+	    } {
+		set sep $cpu_option_sep
+	    }
+	    set as_options "$as_options $cpu_option$sep$mach"
 	}
 	regsub {(^ *| +)([^ ]+)} "$as_options $global_as_options" { -Wa,\2} c_as_options
 
