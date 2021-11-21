@@ -95,10 +95,10 @@ with_test_prefix "redirect" {
     gdb_test_no_output "userdefined"
     gdb_test "set logging enabled off" "Done logging to /dev/null\\."
     gdb_test "help" "List of classes of commands:.*"
+    gdb_test_no_output "set logging redirect off"
 }
 
 with_test_prefix "redirect while already logging" {
-    gdb_test_no_output "set logging redirect off"
     gdb_test "set logging enabled on" \
     "Copying output to /dev/null.*Copying debug output to /dev/null\\."
     gdb_test "set logging redirect on" \
