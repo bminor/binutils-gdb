@@ -1264,7 +1264,7 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
 	  struct symbol *sym = slot->value.found.symbol;
 	  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
-	  if (!SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
+	  if (!symbol_matches_search_name (sym, lookup_name))
 	    return 0;
 
 	  if (!symbol_matches_domain (sym->language (), slot_domain, domain))

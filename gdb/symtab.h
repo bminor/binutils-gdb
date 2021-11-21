@@ -595,13 +595,8 @@ extern CORE_ADDR get_symbol_address (const struct symbol *sym);
 extern gdb::unique_xmalloc_ptr<char> symbol_find_demangled_name
      (struct general_symbol_info *gsymbol, const char *mangled);
 
-/* Return true if NAME matches the "search" name of SYMBOL, according
+/* Return true if NAME matches the "search" name of GSYMBOL, according
    to the symbol's language.  */
-#define SYMBOL_MATCHES_SEARCH_NAME(symbol, name)                       \
-  symbol_matches_search_name ((symbol), (name))
-
-/* Helper for SYMBOL_MATCHES_SEARCH_NAME that works with both symbols
-   and psymbols.  */
 extern bool symbol_matches_search_name
   (const struct general_symbol_info *gsymbol,
    const lookup_name_info &name);

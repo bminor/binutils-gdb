@@ -257,14 +257,14 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
        information (but NAME might contain it).  */
 
     if (sym != NULL
-	&& SYMBOL_MATCHES_SEARCH_NAME (sym, lookup_name))
+	&& symbol_matches_search_name (sym, lookup_name))
       {
 	retval = stab;
 	/* Found it.  */
 	return false;
       }
     if (with_opaque != NULL
-	&& SYMBOL_MATCHES_SEARCH_NAME (with_opaque, lookup_name))
+	&& symbol_matches_search_name (with_opaque, lookup_name))
       retval = stab;
 
     /* Keep looking through other psymtabs.  */
