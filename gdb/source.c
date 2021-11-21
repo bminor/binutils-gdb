@@ -1559,7 +1559,7 @@ info_line_command (const char *arg, int from_tty)
       else if (sal.line > 0
 	       && find_line_pc_range (sal, &start_pc, &end_pc))
 	{
-	  struct gdbarch *gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
+	  struct gdbarch *gdbarch = sal.symtab->objfile ()->arch ();
 
 	  if (start_pc == end_pc)
 	    {

@@ -3712,7 +3712,7 @@ find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
       && (sal.symtab->compunit ()->locations_valid ()
 	  || sal.symtab->language () == language_asm))
     {
-      struct gdbarch *gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
+      struct gdbarch *gdbarch = sal.symtab->objfile ()->arch ();
 
       sal.pc = func_addr;
       if (gdbarch_skip_entrypoint_p (gdbarch))
@@ -6527,7 +6527,7 @@ struct objfile *
 symbol_objfile (const struct symbol *symbol)
 {
   gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
-  return SYMTAB_OBJFILE (symbol->owner.symtab);
+  return symbol->owner.symtab->objfile ();
 }
 
 /* See symtab.h.  */
@@ -6537,7 +6537,7 @@ symbol_arch (const struct symbol *symbol)
 {
   if (!SYMBOL_OBJFILE_OWNED (symbol))
     return symbol->owner.arch;
-  return SYMTAB_OBJFILE (symbol->owner.symtab)->arch ();
+  return symbol->owner.symtab->objfile ()->arch ();
 }
 
 /* See symtab.h.  */

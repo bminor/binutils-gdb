@@ -50,7 +50,7 @@ mi_cmd_symbol_list_lines (const char *command, char **argv, int argc)
      already sorted by increasing values in the symbol table, so no
      need to perform any other sorting.  */
 
-  gdbarch = SYMTAB_OBJFILE (s)->arch ();
+  gdbarch = s->objfile ()->arch ();
 
   ui_out_emit_list list_emitter (uiout, "lines");
   if (s->linetable () != NULL && s->linetable ()->nitems > 0)

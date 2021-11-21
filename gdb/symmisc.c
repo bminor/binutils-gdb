@@ -131,7 +131,7 @@ dump_objfile (struct objfile *objfile)
 	      printf_filtered ("%s at %s",
 			       symtab_to_filename_for_display (symtab),
 			       host_address_to_string (symtab));
-	      if (SYMTAB_OBJFILE (symtab) != objfile)
+	      if (symtab->objfile () != objfile)
 		printf_filtered (", NOT ON CHAIN!");
 	      printf_filtered ("\n");
 	    }
@@ -234,7 +234,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 static void
 dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 {
-  struct objfile *objfile = SYMTAB_OBJFILE (symtab);
+  struct objfile *objfile = symtab->objfile ();
   struct gdbarch *gdbarch = objfile->arch ();
   int i;
   struct mdict_iterator miter;

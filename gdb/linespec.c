@@ -4323,10 +4323,10 @@ search_minsyms_for_name (struct collect_info *info,
 	{
 	  set_current_program_space (SYMTAB_PSPACE (symtab));
 	  iterate_over_minimal_symbols
-	    (SYMTAB_OBJFILE (symtab), name,
+	    (symtab->objfile (), name,
 	     [&] (struct minimal_symbol *msym)
 	       {
-		 add_minsym (msym, SYMTAB_OBJFILE (symtab), symtab,
+		 add_minsym (msym, symtab->objfile (), symtab,
 			     info->state->list_mode, &minsyms);
 		 return false;
 	       });

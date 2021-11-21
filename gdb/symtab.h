@@ -1405,6 +1405,8 @@ struct symtab
 
   const struct blockvector *blockvector () const;
 
+  struct objfile *objfile () const;
+
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 
@@ -1437,9 +1439,7 @@ struct symtab
 
 using symtab_range = next_range<symtab>;
 
-#define SYMTAB_OBJFILE(symtab) \
-  (symtab->compunit ()->objfile ())
-#define SYMTAB_PSPACE(symtab) (SYMTAB_OBJFILE (symtab)->pspace)
+#define SYMTAB_PSPACE(symtab) ((symtab)->objfile ()->pspace)
 #define SYMTAB_DIRNAME(symtab) ((symtab)->compunit ()->dirname ())
 
 /* Compunit symtabs contain the actual "symbol table", aka blockvector, as well
@@ -1687,6 +1687,12 @@ inline const struct blockvector *
 symtab::blockvector () const
 {
   return this->compunit ()->blockvector ();
+}
+
+inline struct objfile *
+symtab::objfile () const
+{
+  return this->compunit ()->objfile ();
 }
 
 /* Return the language of CUST.  */
