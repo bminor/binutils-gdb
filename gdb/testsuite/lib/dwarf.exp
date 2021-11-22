@@ -2158,6 +2158,9 @@ namespace eval Dwarf {
     #                default = 4
     # addr_size n  - the size of addresses in bytes: 4, 8, or default
     #                default = default
+    # seg_sel_size n
+    #              - the size of segment selector_size in bytes:
+    #                default = 0
     #
     # LABEL is the label of the current unit (which is probably
     # referenced by a DW_AT_stmt_list), or "" if there is no such
@@ -2181,10 +2184,11 @@ namespace eval Dwarf {
 	variable _line_header_finalized
 	variable _line_saw_program
 	variable _line_header_end_label
+	variable _line_unit_version
 
 	# Establish the defaults.
 	set is_64 0
-	set _unit_version 4
+	set _line_unit_version 4
 	set _unit_addr_size default
 	set _line_saw_program 0
 	set _line_saw_file 0
@@ -2192,12 +2196,14 @@ namespace eval Dwarf {
 	set _line_file_names {}
 	set _line_header_finalized 0
 	set _default_is_stmt 1
+	set _seg_sel_size 0
 
 	foreach { name value } $options {
 	    switch -exact -- $name {
 		is_64 { set is_64 $value }
-		version { set _unit_version $value }
+		version { set _line_unit_version $value }
 		addr_size { set _unit_addr_size $value }
+		seg_sel_size { set _seg_sel_size $value }
 		default_is_stmt { set _default_is_stmt $value }
 		default { error "unknown option $name" }
 	    }
@@ -2234,7 +2240,13 @@ namespace eval Dwarf {
 
 	define_label $unit_len_label
 
-	_op .2byte $_unit_version version
+	_op .2byte $_line_unit_version version
+
+	if { $_line_unit_version >= 5 } {
+	    _op .byte $_unit_addr_size "address_size"
+	    # Hardcode to 0 for now.
+	    _op .byte $_seg_sel_size "seg_sel_size"
+	}
 
 	if {$is_64} {
 	    _op .8byte "$_line_header_end_label - $header_len_label" "header_length"
@@ -2245,7 +2257,7 @@ namespace eval Dwarf {
 	define_label $header_len_label
 
 	_op .byte 1 "minimum_instruction_length"
-	if { $_unit_version >= 4 } {
+	if { $_line_unit_version >= 4 } {
 	    # Assume non-VLIW for now.
 	    _op .byte 1 "maximum_operations_per_instruction"
 	}
@@ -2293,7 +2305,54 @@ namespace eval Dwarf {
 	    variable _line_include_dirs
 	    variable _line_file_names
 
-	    if { 1 } {
+	    variable _line_unit_version
+	    if { $_line_unit_version >= 5 } {
+		_op .byte 1 "directory_entry_format_count"
+		_op .uleb128 1 \
+		    "directory_entry_format (content type code: DW_LNCT_path)"
+		_op .uleb128 0x08 \
+		    "directory_entry_format (form: DW_FORM_string)"
+
+		set nr_dirs [llength $_line_include_dirs]
+		# For entry 0.
+		set nr_dirs [expr $nr_dirs + 1]
+		_op .byte $nr_dirs "directory_count"
+
+		# Entry 0.
+		set dirname [lindex $_line_include_dirs 0]
+		set _line_include_dirs \
+		    [concat [list $dirname] $_line_include_dirs]
+
+		foreach dirname $_line_include_dirs {
+		    _op .ascii [_quote $dirname]
+		}
+
+		_op .byte 2 "file_name_entry_format_count"
+		_op .uleb128 1 \
+		    "file_name_entry_format (content type code: DW_LNCT_path)"
+		_op .uleb128 0x08 \
+		    "file_name_entry_format (form: DW_FORM_string)"
+		_op .uleb128 2 \
+		    "file_name_entry_format (content type code: DW_LNCT_directory_index)"
+		_op .uleb128 0x0f \
+		    "file_name_entry_format (form: DW_FORM_udata)"
+
+		set nr_files [expr [llength $_line_file_names] / 2]
+		# For entry 0.
+		set nr_files [expr $nr_files + 1]
+		_op .byte $nr_files "file_names_count"
+
+		# Entry 0.
+		set filename [lindex $_line_file_names 0]
+		set diridx [lindex $_line_file_names 1]
+		set _line_file_names \
+		    [concat [list $filename $diridx] $_line_file_names]
+
+		foreach { filename diridx } $_line_file_names {
+		    _op .ascii [_quote $filename]
+		    _op .uleb128 $diridx
+		}
+	    } else {
 		foreach dirname $_line_include_dirs {
 		    _op .ascii [_quote $dirname]
 		}
