@@ -1575,7 +1575,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	lookup_function_type (decode_function_type (cs, cs->c_type,
 						    aux, objfile));
 
-      SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
+      sym->set_aclass_index (LOC_BLOCK);
       if (cs->c_sclass == C_STAT || cs->c_sclass == C_THUMBSTAT
 	  || cs->c_sclass == C_THUMBSTATFUNC)
 	add_symbol_to_list (sym, get_file_symbols ());
@@ -1592,14 +1592,14 @@ process_coff_symbol (struct coff_symbol *cs,
 	  break;
 
 	case C_AUTO:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_LOCAL;
+	  sym->set_aclass_index (LOC_LOCAL);
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_THUMBEXT:
 	case C_THUMBEXTFUNC:
 	case C_EXT:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
+	  sym->set_aclass_index (LOC_STATIC);
 	  SET_SYMBOL_VALUE_ADDRESS (sym,
 				    (CORE_ADDR) cs->c_value
 				    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
@@ -1609,7 +1609,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_THUMBSTAT:
 	case C_THUMBSTATFUNC:
 	case C_STAT:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
+	  sym->set_aclass_index (LOC_STATIC);
 	  SET_SYMBOL_VALUE_ADDRESS (sym,
 				    (CORE_ADDR) cs->c_value
 				    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
@@ -1629,7 +1629,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_GLBLREG:
 #endif
 	case C_REG:
-	  SYMBOL_ACLASS_INDEX (sym) = coff_register_index;
+	  sym->set_aclass_index (coff_register_index);
 	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
@@ -1639,20 +1639,20 @@ process_coff_symbol (struct coff_symbol *cs,
 	  break;
 
 	case C_ARG:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_ARG;
+	  sym->set_aclass_index (LOC_ARG);
 	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_REGPARM:
-	  SYMBOL_ACLASS_INDEX (sym) = coff_register_index;
+	  sym->set_aclass_index (coff_register_index);
 	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_TPDEF:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
+	  sym->set_aclass_index (LOC_TYPEDEF);
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
 	  /* If type has no name, give it one.  */
@@ -1707,7 +1707,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_STRTAG:
 	case C_UNTAG:
 	case C_ENTAG:
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
+	  sym->set_aclass_index (LOC_TYPEDEF);
 	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
 
 	  /* Some compilers try to be helpful by inventing "fake"
@@ -2098,7 +2098,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 
 	  name = obstack_strdup (&objfile->objfile_obstack, name);
 	  sym->set_linkage_name (name);
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
+	  sym->set_aclass_index (LOC_CONST);
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;
 	  add_symbol_to_list (sym, symlist);

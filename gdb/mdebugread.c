@@ -563,7 +563,7 @@ add_data_symbol (SYMR *sh, union aux_ext *ax, int bigend,
 		 struct objfile *objfile, const char *name)
 {
   SYMBOL_DOMAIN (s) = VAR_DOMAIN;
-  SYMBOL_ACLASS_INDEX (s) = aclass_index;
+  s->set_aclass_index (aclass_index);
   add_symbol (s, top_stack->cur_st, b);
 
   /* Type could be missing if file is compiled without debugging info.  */
@@ -681,19 +681,19 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	{
 	case scRegister:
 	  /* Pass by value in register.  */
-	  SYMBOL_ACLASS_INDEX (s) = mdebug_register_index;
+	  s->set_aclass_index (mdebug_register_index);
 	  break;
 	case scVar:
 	  /* Pass by reference on stack.  */
-	  SYMBOL_ACLASS_INDEX (s) = LOC_REF_ARG;
+	  s->set_aclass_index (LOC_REF_ARG);
 	  break;
 	case scVarRegister:
 	  /* Pass by reference in register.  */
-	  SYMBOL_ACLASS_INDEX (s) = mdebug_regparm_index;
+	  s->set_aclass_index (mdebug_regparm_index);
 	  break;
 	default:
 	  /* Pass by value on stack.  */
-	  SYMBOL_ACLASS_INDEX (s) = LOC_ARG;
+	  s->set_aclass_index (LOC_ARG);
 	  break;
 	}
       SYMBOL_VALUE (s) = svalue;
@@ -704,7 +704,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
     case stLabel:		/* label, goes into current block.  */
       s = new_symbol (name);
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;	/* So that it can be used */
-      SYMBOL_ACLASS_INDEX (s) = LOC_LABEL;	/* but not misused.  */
+      s->set_aclass_index (LOC_LABEL);	/* but not misused.  */
       SET_SYMBOL_VALUE_ADDRESS (s, (CORE_ADDR) sh->value);
       SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_int;
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -745,7 +745,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	}
       s = new_symbol (name);
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
-      SYMBOL_ACLASS_INDEX (s) = LOC_BLOCK;
+      s->set_aclass_index (LOC_BLOCK);
       /* Type of the return value.  */
       if (SC_IS_UNDEF (sh->sc) || sh->sc == scNil)
 	t = objfile_type (objfile)->builtin_int;
@@ -1065,7 +1065,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		enum_sym->set_linkage_name
 		  (obstack_strdup (&mdebugread_objfile->objfile_obstack,
 				   f->name ()));
-		SYMBOL_ACLASS_INDEX (enum_sym) = LOC_CONST;
+		enum_sym->set_aclass_index (LOC_CONST);
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_DOMAIN (enum_sym) = VAR_DOMAIN;
 		SYMBOL_VALUE (enum_sym) = tsym.value;
@@ -1098,7 +1098,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	s = new_symbol (name);
 	SYMBOL_DOMAIN (s) = STRUCT_DOMAIN;
-	SYMBOL_ACLASS_INDEX (s) = LOC_TYPEDEF;
+	s->set_aclass_index (LOC_TYPEDEF);
 	SYMBOL_VALUE (s) = 0;
 	SYMBOL_TYPE (s) = t;
 	add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -1155,7 +1155,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  /* Make up special symbol to contain procedure specific info.  */
 	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 	  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
-	  SYMBOL_ACLASS_INDEX (s) = LOC_CONST;
+	  s->set_aclass_index (LOC_CONST);
 	  SYMBOL_TYPE (s) = objfile_type (mdebugread_objfile)->builtin_void;
 	  e = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
 			      mdebug_extra_func_info);
@@ -1296,7 +1296,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	break;
       s = new_symbol (name);
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
-      SYMBOL_ACLASS_INDEX (s) = LOC_TYPEDEF;
+      s->set_aclass_index (LOC_TYPEDEF);
       SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
       SYMBOL_TYPE (s) = t;
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -3988,7 +3988,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 		  struct symbol *s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 
 		  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
-		  SYMBOL_ACLASS_INDEX (s) = LOC_CONST;
+		  s->set_aclass_index (LOC_CONST);
 		  SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_void;
 		  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
 		  e->pdr.framereg = -1;

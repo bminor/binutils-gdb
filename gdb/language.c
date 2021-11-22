@@ -1002,7 +1002,7 @@ language_arch_info::type_and_symbol::alloc_type_symbol
   symbol->set_section_index (0);
   SYMBOL_TYPE (symbol) = type;
   SYMBOL_DOMAIN (symbol) = VAR_DOMAIN;
-  SYMBOL_ACLASS_INDEX (symbol) = LOC_TYPEDEF;
+  symbol->set_aclass_index (LOC_TYPEDEF);
   return symbol;
 }
 

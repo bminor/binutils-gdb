@@ -1112,7 +1112,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   symbol ()
     /* Class-initialization of bitfields is only allowed in C++20.  */
     : domain (UNDEF_DOMAIN),
-      aclass_index (0),
+      m_aclass_index (0),
       is_objfile_owned (1),
       is_argument (0),
       is_inlined (0),
@@ -1135,6 +1135,16 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   symbol (const symbol &) = default;
   symbol &operator= (const symbol &) = default;
+
+  unsigned int aclass_index () const
+  {
+    return m_aclass_index;
+  }
+
+  void set_aclass_index (unsigned int aclass_index)
+  {
+    m_aclass_index = aclass_index;
+  }
 
   /* Data type of value */
 
@@ -1162,7 +1172,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
      table.  The actual enum address_class value is stored there,
      alongside any per-class ops vectors.  */
 
-  unsigned int aclass_index : SYMBOL_ACLASS_BITS;
+  unsigned int m_aclass_index : SYMBOL_ACLASS_BITS;
 
   /* If non-zero then symbol is objfile-owned, use owner.symtab.
        Otherwise symbol is arch-owned, use owner.arch.  */
@@ -1241,8 +1251,7 @@ extern const struct symbol_impl *symbol_impls;
    "private".  */
 
 #define SYMBOL_DOMAIN(symbol)	(symbol)->domain
-#define SYMBOL_IMPL(symbol)		(symbol_impls[(symbol)->aclass_index])
-#define SYMBOL_ACLASS_INDEX(symbol)	(symbol)->aclass_index
+#define SYMBOL_IMPL(symbol)		(symbol_impls[(symbol)->aclass_index ()])
 #define SYMBOL_CLASS(symbol)		(SYMBOL_IMPL (symbol).aclass)
 #define SYMBOL_OBJFILE_OWNED(symbol)	((symbol)->is_objfile_owned)
 #define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
