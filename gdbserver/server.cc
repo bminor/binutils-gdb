@@ -173,12 +173,12 @@ get_client_state ()
 /* Put a stop reply to the stop reply queue.  */
 
 static void
-queue_stop_reply (ptid_t ptid, struct target_waitstatus *status)
+queue_stop_reply (ptid_t ptid, const target_waitstatus &status)
 {
   struct vstop_notif *new_notif = new struct vstop_notif;
 
   new_notif->ptid = ptid;
-  new_notif->status = *status;
+  new_notif->status = status;
 
   notif_event_enque (&notif_stop, new_notif);
 }
@@ -225,7 +225,7 @@ vstop_notif_reply (struct notif_event *event, char *own_buf)
 {
   struct vstop_notif *vstop = (struct vstop_notif *) event;
 
-  prepare_resume_reply (own_buf, vstop->ptid, &vstop->status);
+  prepare_resume_reply (own_buf, vstop->ptid, vstop->status);
 }
 
 /* Helper for in_queued_stop_replies.  */
@@ -2795,7 +2795,7 @@ handle_pending_status (const struct thread_resume *resumption,
 
       cs.last_status = thread->last_status;
       cs.last_ptid = thread->id;
-      prepare_resume_reply (cs.own_buf, cs.last_ptid, &cs.last_status);
+      prepare_resume_reply (cs.own_buf, cs.last_ptid, cs.last_status);
       return 1;
     }
   return 0;
@@ -2963,7 +2963,7 @@ resume (struct thread_resume *actions, size_t num_actions)
 	 so by now).  Tag all threads as "want-stopped", so we don't
 	 resume them implicitly without the client telling us to.  */
       gdb_wants_all_threads_stopped ();
-      prepare_resume_reply (cs.own_buf, cs.last_ptid, &cs.last_status);
+      prepare_resume_reply (cs.own_buf, cs.last_ptid, cs.last_status);
       disable_async_io ();
 
       if (cs.last_status.kind () == TARGET_WAITKIND_EXITED
@@ -2996,7 +2996,7 @@ handle_v_attach (char *own_buf)
 	  write_ok (own_buf);
 	}
       else
-	prepare_resume_reply (own_buf, cs.last_ptid, &cs.last_status);
+	prepare_resume_reply (own_buf, cs.last_ptid, cs.last_status);
     }
   else
     write_enn (own_buf);
@@ -3114,7 +3114,7 @@ handle_v_run (char *own_buf)
 
   if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
     {
-      prepare_resume_reply (own_buf, cs.last_ptid, &cs.last_status);
+      prepare_resume_reply (own_buf, cs.last_ptid, cs.last_status);
 
       /* In non-stop, sending a resume reply doesn't set the general
 	 thread, but GDB assumes a vRun sets it (this is so GDB can
@@ -3313,7 +3313,7 @@ queue_stop_reply_callback (thread_info *thread)
 
 	  /* Pass the last stop reply back to GDB, but don't notify
 	     yet.  */
-	  queue_stop_reply (thread->id, &thread->last_status);
+	  queue_stop_reply (thread->id, thread->last_status);
 	}
     }
 }
@@ -3436,7 +3436,7 @@ handle_status (char *own_buf)
 	  set_desired_thread ();
 
 	  gdb_assert (tp->last_status.kind () != TARGET_WAITKIND_IGNORE);
-	  prepare_resume_reply (own_buf, tp->id, &tp->last_status);
+	  prepare_resume_reply (own_buf, tp->id, tp->last_status);
 	}
       else
 	strcpy (own_buf, "W00");
@@ -4562,11 +4562,11 @@ handle_serial_event (int err, gdb_client_data client_data)
 /* Push a stop notification on the notification queue.  */
 
 static void
-push_stop_notification (ptid_t ptid, struct target_waitstatus *status)
+push_stop_notification (ptid_t ptid, const target_waitstatus &status)
 {
   struct vstop_notif *vstop_notif = new struct vstop_notif;
 
-  vstop_notif->status = *status;
+  vstop_notif->status = status;
   vstop_notif->ptid = ptid;
   /* Push Stop notification.  */
   notif_push (&notif_stop, vstop_notif);
@@ -4587,7 +4587,7 @@ handle_target_event (int err, gdb_client_data client_data)
   if (cs.last_status.kind () == TARGET_WAITKIND_NO_RESUMED)
     {
       if (gdb_connected () && report_no_resumed)
-	push_stop_notification (null_ptid, &cs.last_status);
+	push_stop_notification (null_ptid, cs.last_status);
     }
   else if (cs.last_status.kind () != TARGET_WAITKIND_IGNORE)
     {
@@ -4645,7 +4645,7 @@ handle_target_event (int err, gdb_client_data client_data)
 	    }
 	}
       else
-	push_stop_notification (cs.last_ptid, &cs.last_status);
+	push_stop_notification (cs.last_ptid, cs.last_status);
     }
 
   /* Be sure to not change the selected thread behind GDB's back.

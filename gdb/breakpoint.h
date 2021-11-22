@@ -587,7 +587,7 @@ struct breakpoint_ops
   int (*breakpoint_hit) (const struct bp_location *bl,
 			 const address_space *aspace,
 			 CORE_ADDR bp_addr,
-			 const struct target_waitstatus *ws);
+			 const target_waitstatus &ws);
 
   /* Check internal conditions of the breakpoint referred to by BS.
      If we should not stop for this breakpoint, set BS->stop to 0.  */
@@ -948,7 +948,7 @@ extern bpstat *bpstat_copy (bpstat *);
 
 extern bpstat *build_bpstat_chain (const address_space *aspace,
 				  CORE_ADDR bp_addr,
-				  const struct target_waitstatus *ws);
+				  const target_waitstatus &ws);
 
 /* Get a bpstat associated with having just stopped at address
    BP_ADDR in thread PTID.  STOP_CHAIN may be supplied as a previously
@@ -972,7 +972,7 @@ extern bpstat *build_bpstat_chain (const address_space *aspace,
 
 extern bpstat *bpstat_stop_status (const address_space *aspace,
 				  CORE_ADDR pc, thread_info *thread,
-				  const struct target_waitstatus *ws,
+				  const target_waitstatus &ws,
 				  bpstat *stop_chain = nullptr);
 
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
@@ -1609,7 +1609,7 @@ extern int insert_single_step_breakpoints (struct gdbarch *);
 
 /* Check if any hardware watchpoints have triggered, according to the
    target.  */
-int watchpoints_triggered (struct target_waitstatus *);
+int watchpoints_triggered (const target_waitstatus &);
 
 /* Helper for transparent breakpoint hiding for memory read and write
    routines.
@@ -1745,7 +1745,7 @@ const std::vector<bp_location *> &all_bp_locations ();
 
 extern int pc_at_non_inline_function (const address_space *aspace,
 				      CORE_ADDR pc,
-				      const struct target_waitstatus *ws);
+				      const target_waitstatus &ws);
 
 extern int user_breakpoint_p (struct breakpoint *);
 

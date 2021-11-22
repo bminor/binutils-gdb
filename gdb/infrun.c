@@ -3470,7 +3470,7 @@ delete_just_stopped_threads_single_step_breakpoints (void)
 
 void
 print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
-			   const struct target_waitstatus *ws)
+			   const struct target_waitstatus &ws)
 {
   infrun_debug_printf ("target_wait (%s [%s], status) =",
 		       waiton_ptid.to_string ().c_str (),
@@ -3478,7 +3478,7 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
   infrun_debug_printf ("  %s [%s],",
 		       result_ptid.to_string ().c_str (),
 		       target_pid_to_str (result_ptid).c_str ());
-  infrun_debug_printf ("  %s", ws->to_string ().c_str ());
+  infrun_debug_printf ("  %s", ws.to_string ().c_str ());
 }
 
 /* Select a thread at random, out of those which are resumed and have
@@ -3833,7 +3833,7 @@ prepare_for_detach (void)
 	  event.ptid = do_target_wait_1 (inf, pid_ptid, &event.ws, 0);
 
 	  if (debug_infrun)
-	    print_target_wait_results (pid_ptid, event.ptid, &event.ws);
+	    print_target_wait_results (pid_ptid, event.ptid, event.ws);
 
 	  handle_one (event);
 	}
@@ -3880,7 +3880,7 @@ wait_for_inferior (inferior *inf)
       ecs->target = inf->process_target ();
 
       if (debug_infrun)
-	print_target_wait_results (minus_one_ptid, ecs->ptid, &ecs->ws);
+	print_target_wait_results (minus_one_ptid, ecs->ptid, ecs->ws);
 
       /* Now figure out what to do with the result of the result.  */
       handle_inferior_event (ecs);
@@ -4070,7 +4070,7 @@ fetch_inferior_event ()
     switch_to_target_no_thread (ecs->target);
 
     if (debug_infrun)
-      print_target_wait_results (minus_one_ptid, ecs->ptid, &ecs->ws);
+      print_target_wait_results (minus_one_ptid, ecs->ptid, ecs->ws);
 
     /* If an error happens while handling the event, propagate GDB's
        knowledge of the executing state to the frontend/user running
@@ -4257,7 +4257,7 @@ context_switch (execution_control_state *ecs)
 
 static void
 adjust_pc_after_break (struct thread_info *thread,
-		       const target_waitstatus *ws)
+		       const target_waitstatus &ws)
 {
   struct regcache *regcache;
   struct gdbarch *gdbarch;
@@ -4284,10 +4284,10 @@ adjust_pc_after_break (struct thread_info *thread,
      target with both of these set in GDB history, and it seems unlikely to be
      correct, so gdbarch_have_nonsteppable_watchpoint is not checked here.  */
 
-  if (ws->kind () != TARGET_WAITKIND_STOPPED)
+  if (ws.kind () != TARGET_WAITKIND_STOPPED)
     return;
 
-  if (ws->sig () != GDB_SIGNAL_TRAP)
+  if (ws.sig () != GDB_SIGNAL_TRAP)
     return;
 
   /* In reverse execution, when a breakpoint is hit, the instruction
@@ -4494,7 +4494,7 @@ handle_syscall_event (struct execution_control_state *ecs)
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (regcache->aspace (),
 			      ecs->event_thread->stop_pc (),
-			      ecs->event_thread, &ecs->ws);
+			      ecs->event_thread, ecs->ws);
 
       if (handle_stop_requested (ecs))
 	return false;
@@ -4593,7 +4593,7 @@ poll_one_curr_target (struct target_waitstatus *ws)
     event_ptid = target_wait (minus_one_ptid, ws, TARGET_WNOHANG);
 
   if (debug_infrun)
-    print_target_wait_results (minus_one_ptid, event_ptid, ws);
+    print_target_wait_results (minus_one_ptid, event_ptid, *ws);
 
   return event_ptid;
 }
@@ -4674,23 +4674,23 @@ wait_one ()
 /* Save the thread's event and stop reason to process it later.  */
 
 static void
-save_waitstatus (struct thread_info *tp, const target_waitstatus *ws)
+save_waitstatus (struct thread_info *tp, const target_waitstatus &ws)
 {
   infrun_debug_printf ("saving status %s for %s",
-		       ws->to_string ().c_str (),
+		       ws.to_string ().c_str (),
 		       tp->ptid.to_string ().c_str ());
 
   /* Record for later.  */
-  tp->set_pending_waitstatus (*ws);
+  tp->set_pending_waitstatus (ws);
 
-  if (ws->kind () == TARGET_WAITKIND_STOPPED
-      && ws->sig () == GDB_SIGNAL_TRAP)
+  if (ws.kind () == TARGET_WAITKIND_STOPPED
+      && ws.sig () == GDB_SIGNAL_TRAP)
     {
       struct regcache *regcache = get_thread_regcache (tp);
       const address_space *aspace = regcache->aspace ();
       CORE_ADDR pc = regcache_read_pc (regcache);
 
-      adjust_pc_after_break (tp, &tp->pending_waitstatus ());
+      adjust_pc_after_break (tp, tp->pending_waitstatus ());
 
       scoped_restore_current_thread restore_thread;
       switch_to_thread (tp);
@@ -4824,7 +4824,7 @@ handle_one (const wait_one_event &event)
 	  switch_to_thread_no_regs (t);
 	  mark_non_executing_threads (event.target, event.ptid,
 				      event.ws);
-	  save_waitstatus (t, &event.ws);
+	  save_waitstatus (t, event.ws);
 	  t->stop_requested = false;
 	}
     }
@@ -4878,7 +4878,7 @@ handle_one (const wait_one_event &event)
 	     t->ptid.to_string ().c_str ());
 
 	  /* Record for later.  */
-	  save_waitstatus (t, &event.ws);
+	  save_waitstatus (t, event.ws);
 
 	  sig = (event.ws.kind () == TARGET_WAITKIND_STOPPED
 		 ? event.ws.sig () : GDB_SIGNAL_0);
@@ -5236,7 +5236,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     }
 
   /* Dependent on valid ECS->EVENT_THREAD.  */
-  adjust_pc_after_break (ecs->event_thread, &ecs->ws);
+  adjust_pc_after_break (ecs->event_thread, ecs->ws);
 
   /* Dependent on the current PC value modified by adjust_pc_after_break.  */
   reinit_frame_cache ();
@@ -5295,7 +5295,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    ecs->event_thread->control.stop_bpstat
 	      = bpstat_stop_status (regcache->aspace (),
 				    ecs->event_thread->stop_pc (),
-				    ecs->event_thread, &ecs->ws);
+				    ecs->event_thread, ecs->ws);
 
 	    if (handle_stop_requested (ecs))
 	      return;
@@ -5538,7 +5538,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_current_regcache ()->aspace (),
 			      ecs->event_thread->stop_pc (),
-			      ecs->event_thread, &ecs->ws);
+			      ecs->event_thread, ecs->ws);
 
       if (handle_stop_requested (ecs))
 	return;
@@ -5649,7 +5649,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_current_regcache ()->aspace (),
 			      ecs->event_thread->stop_pc (),
-			      ecs->event_thread, &ecs->ws);
+			      ecs->event_thread, ecs->ws);
 
       if (handle_stop_requested (ecs))
 	return;
@@ -5886,7 +5886,7 @@ finish_step_over (struct execution_control_state *ecs)
 	  gdb_assert (pending != tp);
 
 	  /* Record the event thread's event for later.  */
-	  save_waitstatus (tp, &ecs->ws);
+	  save_waitstatus (tp, ecs->ws);
 	  /* This was cleared early, by handle_inferior_event.  Set it
 	     so this pending event is considered by
 	     do_target_wait.  */
@@ -6061,7 +6061,7 @@ handle_signal_stop (struct execution_control_state *ecs)
       && ecs->event_thread->stepping_over_watchpoint)
     stopped_by_watchpoint = 0;
   else
-    stopped_by_watchpoint = watchpoints_triggered (&ecs->ws);
+    stopped_by_watchpoint = watchpoints_triggered (ecs->ws);
 
   /* If necessary, step over this watchpoint.  We'll be back to display
      it in a moment.  */
@@ -6134,16 +6134,16 @@ handle_signal_stop (struct execution_control_state *ecs)
 	 that's an extremely unlikely scenario.  */
       if (!pc_at_non_inline_function (aspace,
 				      ecs->event_thread->stop_pc (),
-				      &ecs->ws)
+				      ecs->ws)
 	  && !(ecs->event_thread->stop_signal () == GDB_SIGNAL_TRAP
 	       && ecs->event_thread->control.trap_expected
 	       && pc_at_non_inline_function (aspace,
 					     ecs->event_thread->prev_pc,
-					     &ecs->ws)))
+					     ecs->ws)))
 	{
 	  stop_chain = build_bpstat_chain (aspace,
 					   ecs->event_thread->stop_pc (),
-					   &ecs->ws);
+					   ecs->ws);
 	  skip_inline_frames (ecs->event_thread, stop_chain);
 
 	  /* Re-fetch current thread's frame in case that invalidated
@@ -6195,7 +6195,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   ecs->event_thread->control.stop_bpstat
     = bpstat_stop_status (get_current_regcache ()->aspace (),
 			  ecs->event_thread->stop_pc (),
-			  ecs->event_thread, &ecs->ws, stop_chain);
+			  ecs->event_thread, ecs->ws, stop_chain);
 
   /* Following in case break condition called a
      function.  */
@@ -8258,14 +8258,14 @@ print_no_history_reason (struct ui_out *uiout)
    based on the event(s) that just occurred.  */
 
 static void
-print_stop_location (struct target_waitstatus *ws)
+print_stop_location (const target_waitstatus &ws)
 {
   int bpstat_ret;
   enum print_what source_flag;
   int do_frame_printing = 1;
   struct thread_info *tp = inferior_thread ();
 
-  bpstat_ret = bpstat_print (tp->control.stop_bpstat, ws->kind ());
+  bpstat_ret = bpstat_print (tp->control.stop_bpstat, ws.kind ());
   switch (bpstat_ret)
     {
     case PRINT_UNKNOWN:
@@ -8325,7 +8325,7 @@ print_stop_event (struct ui_out *uiout, bool displays)
   {
     scoped_restore save_uiout = make_scoped_restore (&current_uiout, uiout);
 
-    print_stop_location (&last);
+    print_stop_location (last);
 
     /* Display the auto-display expressions.  */
     if (displays)

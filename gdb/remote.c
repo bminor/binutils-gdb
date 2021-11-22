@@ -762,7 +762,7 @@ public: /* Remote specific methods.  */
 			     target_waitstatus *status);
 
   ptid_t select_thread_for_ambiguous_stop_reply
-    (const struct target_waitstatus *status);
+    (const struct target_waitstatus &status);
 
   void remote_notice_new_inferior (ptid_t currthread, bool executing);
 
@@ -4542,7 +4542,7 @@ remote_target::process_initial_stop_replies (int from_tty)
 
       event_ptid = target_wait (waiton_ptid, &ws, TARGET_WNOHANG);
       if (remote_debug)
-	print_target_wait_results (waiton_ptid, event_ptid, &ws);
+	print_target_wait_results (waiton_ptid, event_ptid, ws);
 
       switch (ws.kind ())
 	{
@@ -7224,11 +7224,11 @@ struct notif_client notif_client_stop =
    -1 if we want to check all threads.  */
 
 static int
-is_pending_fork_parent (const target_waitstatus *ws, int event_pid,
+is_pending_fork_parent (const target_waitstatus &ws, int event_pid,
 			ptid_t thread_ptid)
 {
-  if (ws->kind () == TARGET_WAITKIND_FORKED
-      || ws->kind () == TARGET_WAITKIND_VFORKED)
+  if (ws.kind () == TARGET_WAITKIND_FORKED
+      || ws.kind () == TARGET_WAITKIND_VFORKED)
     {
       if (event_pid == -1 || event_pid == thread_ptid.pid ())
 	return 1;
@@ -7240,13 +7240,13 @@ is_pending_fork_parent (const target_waitstatus *ws, int event_pid,
 /* Return the thread's pending status used to determine whether the
    thread is a fork parent stopped at a fork event.  */
 
-static const target_waitstatus *
+static const target_waitstatus &
 thread_pending_fork_status (struct thread_info *thread)
 {
   if (thread->has_pending_waitstatus ())
-    return &thread->pending_waitstatus ();
+    return thread->pending_waitstatus ();
   else
-    return &thread->pending_follow;
+    return thread->pending_follow;
 }
 
 /* Determine if THREAD is a pending fork parent thread.  */
@@ -7254,7 +7254,7 @@ thread_pending_fork_status (struct thread_info *thread)
 static int
 is_pending_fork_parent_thread (struct thread_info *thread)
 {
-  const target_waitstatus *ws = thread_pending_fork_status (thread);
+  const target_waitstatus &ws = thread_pending_fork_status (thread);
   int pid = -1;
 
   return is_pending_fork_parent (ws, pid, thread->ptid);
@@ -7276,10 +7276,10 @@ remote_target::remove_new_fork_children (threads_listing_context *context)
      fork child threads from the CONTEXT list.  */
   for (thread_info *thread : all_non_exited_threads (this))
     {
-      const target_waitstatus *ws = thread_pending_fork_status (thread);
+      const target_waitstatus &ws = thread_pending_fork_status (thread);
 
       if (is_pending_fork_parent (ws, pid, thread->ptid))
-	context->remove_thread (ws->child_ptid ());
+	context->remove_thread (ws.child_ptid ());
     }
 
   /* Check for any pending fork events (not reported or processed yet)
@@ -7940,15 +7940,15 @@ remote_notif_get_pending_events (remote_target *remote, notif_client *nc)
 
 ptid_t
 remote_target::select_thread_for_ambiguous_stop_reply
-  (const struct target_waitstatus *status)
+  (const target_waitstatus &status)
 {
   REMOTE_SCOPED_DEBUG_ENTER_EXIT;
 
   /* Some stop events apply to all threads in an inferior, while others
      only apply to a single thread.  */
   bool process_wide_stop
-    = (status->kind () == TARGET_WAITKIND_EXITED
-       || status->kind () == TARGET_WAITKIND_SIGNALLED);
+    = (status.kind () == TARGET_WAITKIND_EXITED
+       || status.kind () == TARGET_WAITKIND_SIGNALLED);
 
   remote_debug_printf ("process_wide_stop = %d", process_wide_stop);
 
@@ -8030,7 +8030,7 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
   /* If no thread/process was reported by the stub then select a suitable
      thread/process.  */
   if (ptid == null_ptid)
-    ptid = select_thread_for_ambiguous_stop_reply (status);
+    ptid = select_thread_for_ambiguous_stop_reply (*status);
   gdb_assert (ptid != null_ptid);
 
   if (status->kind () != TARGET_WAITKIND_EXITED
@@ -10056,11 +10056,11 @@ remote_target::kill_new_fork_children (int pid)
      that are stopped at a fork event.  */
   for (thread_info *thread : all_non_exited_threads (this))
     {
-      struct target_waitstatus *ws = &thread->pending_follow;
+      const target_waitstatus &ws = thread->pending_follow;
 
       if (is_pending_fork_parent (ws, pid, thread->ptid))
 	{
-	  int child_pid = ws->child_ptid ().pid ();
+	  int child_pid = ws.child_ptid ().pid ();
 	  int res;
 
 	  res = remote_vkill (child_pid);
@@ -10073,7 +10073,7 @@ remote_target::kill_new_fork_children (int pid)
      in process PID and kill those fork child threads as well.  */
   remote_notif_get_pending_events (notif);
   for (auto &event : rs->stop_reply_queue)
-    if (is_pending_fork_parent (&event->ws, pid, event->ptid))
+    if (is_pending_fork_parent (event->ws, pid, event->ptid))
       {
 	int child_pid = event->ws.child_ptid ().pid ();
 	int res;

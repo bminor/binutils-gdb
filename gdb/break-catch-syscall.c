@@ -143,7 +143,7 @@ remove_catch_syscall (struct bp_location *bl, enum remove_bp_reason reason)
 static int
 breakpoint_hit_catch_syscall (const struct bp_location *bl,
 			      const address_space *aspace, CORE_ADDR bp_addr,
-			      const struct target_waitstatus *ws)
+			      const target_waitstatus &ws)
 {
   /* We must check if we are catching specific syscalls in this
      breakpoint.  If we are, then we must guarantee that the called
@@ -152,11 +152,11 @@ breakpoint_hit_catch_syscall (const struct bp_location *bl,
   const struct syscall_catchpoint *c
     = (const struct syscall_catchpoint *) bl->owner;
 
-  if (ws->kind () != TARGET_WAITKIND_SYSCALL_ENTRY
-      && ws->kind () != TARGET_WAITKIND_SYSCALL_RETURN)
+  if (ws.kind () != TARGET_WAITKIND_SYSCALL_ENTRY
+      && ws.kind () != TARGET_WAITKIND_SYSCALL_RETURN)
     return 0;
 
-  syscall_number = ws->syscall_number ();
+  syscall_number = ws.syscall_number ();
 
   /* Now, checking if the syscall is the same.  */
   if (!c->syscalls_to_be_caught.empty ())

@@ -4771,7 +4771,7 @@ bpstat::bpstat ()
    watchpoints have triggered, according to the target.  */
 
 int
-watchpoints_triggered (struct target_waitstatus *ws)
+watchpoints_triggered (const target_waitstatus &ws)
 {
   bool stopped_by_watchpoint = target_stopped_by_watchpoint ();
   CORE_ADDR addr;
@@ -5014,7 +5014,7 @@ watchpoint_check (bpstat *bs)
 static int
 bpstat_check_location (const struct bp_location *bl,
 		       const address_space *aspace, CORE_ADDR bp_addr,
-		       const struct target_waitstatus *ws)
+		       const target_waitstatus &ws)
 {
   struct breakpoint *b = bl->owner;
 
@@ -5349,7 +5349,7 @@ need_moribund_for_location_type (struct bp_location *loc)
 
 bpstat *
 build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
-		    const struct target_waitstatus *ws)
+		    const target_waitstatus &ws)
 {
   bpstat *bs_head = nullptr, **bs_link = &bs_head;
 
@@ -5425,7 +5425,7 @@ build_bpstat_chain (const address_space *aspace, CORE_ADDR bp_addr,
 bpstat *
 bpstat_stop_status (const address_space *aspace,
 		    CORE_ADDR bp_addr, thread_info *thread,
-		    const struct target_waitstatus *ws,
+		    const target_waitstatus &ws,
 		    bpstat *stop_chain)
 {
   struct breakpoint *b = NULL;
@@ -7760,14 +7760,14 @@ remove_catch_fork (struct bp_location *bl, enum remove_bp_reason reason)
 static int
 breakpoint_hit_catch_fork (const struct bp_location *bl,
 			   const address_space *aspace, CORE_ADDR bp_addr,
-			   const struct target_waitstatus *ws)
+			   const target_waitstatus &ws)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
 
-  if (ws->kind () != TARGET_WAITKIND_FORKED)
+  if (ws.kind () != TARGET_WAITKIND_FORKED)
     return 0;
 
-  c->forked_inferior_pid = ws->child_ptid ();
+  c->forked_inferior_pid = ws.child_ptid ();
   return 1;
 }
 
@@ -7876,14 +7876,14 @@ remove_catch_vfork (struct bp_location *bl, enum remove_bp_reason reason)
 static int
 breakpoint_hit_catch_vfork (const struct bp_location *bl,
 			    const address_space *aspace, CORE_ADDR bp_addr,
-			    const struct target_waitstatus *ws)
+			    const target_waitstatus &ws)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
 
-  if (ws->kind () != TARGET_WAITKIND_VFORKED)
+  if (ws.kind () != TARGET_WAITKIND_VFORKED)
     return 0;
 
-  c->forked_inferior_pid = ws->child_ptid ();
+  c->forked_inferior_pid = ws.child_ptid ();
   return 1;
 }
 
@@ -7998,11 +7998,11 @@ static int
 breakpoint_hit_catch_solib (const struct bp_location *bl,
 			    const address_space *aspace,
 			    CORE_ADDR bp_addr,
-			    const struct target_waitstatus *ws)
+			    const target_waitstatus &ws)
 {
   struct solib_catchpoint *self = (struct solib_catchpoint *) bl->owner;
 
-  if (ws->kind () == TARGET_WAITKIND_LOADED)
+  if (ws.kind () == TARGET_WAITKIND_LOADED)
     return 1;
 
   for (breakpoint *other : all_breakpoints ())
@@ -8274,14 +8274,14 @@ remove_catch_exec (struct bp_location *bl, enum remove_bp_reason reason)
 static int
 breakpoint_hit_catch_exec (const struct bp_location *bl,
 			   const address_space *aspace, CORE_ADDR bp_addr,
-			   const struct target_waitstatus *ws)
+			   const target_waitstatus &ws)
 {
   struct exec_catchpoint *c = (struct exec_catchpoint *) bl->owner;
 
-  if (ws->kind () != TARGET_WAITKIND_EXECD)
+  if (ws.kind () != TARGET_WAITKIND_EXECD)
     return 0;
 
-  c->exec_pathname = make_unique_xstrdup (ws->execd_pathname ());
+  c->exec_pathname = make_unique_xstrdup (ws.execd_pathname ());
   return 1;
 }
 
@@ -9781,10 +9781,10 @@ static int
 breakpoint_hit_ranged_breakpoint (const struct bp_location *bl,
 				  const address_space *aspace,
 				  CORE_ADDR bp_addr,
-				  const struct target_waitstatus *ws)
+				  const target_waitstatus &ws)
 {
-  if (ws->kind () != TARGET_WAITKIND_STOPPED
-      || ws->sig () != GDB_SIGNAL_TRAP)
+  if (ws.kind () != TARGET_WAITKIND_STOPPED
+      || ws.sig () != GDB_SIGNAL_TRAP)
     return 0;
 
   return breakpoint_address_match_range (bl->pspace->aspace, bl->address,
@@ -10125,7 +10125,7 @@ remove_watchpoint (struct bp_location *bl, enum remove_bp_reason reason)
 static int
 breakpoint_hit_watchpoint (const struct bp_location *bl,
 			   const address_space *aspace, CORE_ADDR bp_addr,
-			   const struct target_waitstatus *ws)
+			   const target_waitstatus &ws)
 {
   struct breakpoint *b = bl->owner;
   struct watchpoint *w = (struct watchpoint *) b;
@@ -12280,7 +12280,7 @@ static int
 base_breakpoint_breakpoint_hit (const struct bp_location *bl,
 				const address_space *aspace,
 				CORE_ADDR bp_addr,
-				const struct target_waitstatus *ws)
+				const target_waitstatus &ws)
 {
   internal_error_pure_virtual_called ();
 }
@@ -12447,10 +12447,10 @@ bkpt_remove_location (struct bp_location *bl, enum remove_bp_reason reason)
 static int
 bkpt_breakpoint_hit (const struct bp_location *bl,
 		     const address_space *aspace, CORE_ADDR bp_addr,
-		     const struct target_waitstatus *ws)
+		     const target_waitstatus &ws)
 {
-  if (ws->kind () != TARGET_WAITKIND_STOPPED
-      || ws->sig () != GDB_SIGNAL_TRAP)
+  if (ws.kind () != TARGET_WAITKIND_STOPPED
+      || ws.sig () != GDB_SIGNAL_TRAP)
     return 0;
 
   if (!breakpoint_address_match (bl->pspace->aspace, bl->address,
@@ -12468,7 +12468,7 @@ bkpt_breakpoint_hit (const struct bp_location *bl,
 static int
 dprintf_breakpoint_hit (const struct bp_location *bl,
 			const address_space *aspace, CORE_ADDR bp_addr,
-			const struct target_waitstatus *ws)
+			const target_waitstatus &ws)
 {
   if (dprintf_style == dprintf_style_agent
       && target_can_run_breakpoint_commands ())
@@ -12822,7 +12822,7 @@ tracepoint_re_set (struct breakpoint *b)
 static int
 tracepoint_breakpoint_hit (const struct bp_location *bl,
 			   const address_space *aspace, CORE_ADDR bp_addr,
-			   const struct target_waitstatus *ws)
+			   const target_waitstatus &ws)
 {
   /* By definition, the inferior does not report stops at
      tracepoints.  */
@@ -15194,7 +15194,7 @@ is_non_inline_function (struct breakpoint *b)
 
 int
 pc_at_non_inline_function (const address_space *aspace, CORE_ADDR pc,
-			   const struct target_waitstatus *ws)
+			   const target_waitstatus &ws)
 {
   for (breakpoint *b : all_breakpoints ())
     {

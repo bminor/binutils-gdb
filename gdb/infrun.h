@@ -209,7 +209,7 @@ extern void print_stop_event (struct ui_out *uiout, bool displays = true);
 /* Pretty print the results of target_wait, for debugging purposes.  */
 
 extern void print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
-				       const struct target_waitstatus *ws);
+				       const struct target_waitstatus &ws);
 
 extern int signal_stop_state (int);
 

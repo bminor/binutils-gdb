@@ -149,16 +149,16 @@ static int
 signal_catchpoint_breakpoint_hit (const struct bp_location *bl,
 				  const address_space *aspace,
 				  CORE_ADDR bp_addr,
-				  const struct target_waitstatus *ws)
+				  const target_waitstatus &ws)
 {
   const struct signal_catchpoint *c
     = (const struct signal_catchpoint *) bl->owner;
   gdb_signal signal_number;
 
-  if (ws->kind () != TARGET_WAITKIND_STOPPED)
+  if (ws.kind () != TARGET_WAITKIND_STOPPED)
     return 0;
 
-  signal_number = ws->sig ();
+  signal_number = ws.sig ();
 
   /* If we are catching specific signals in this breakpoint, then we
      must guarantee that the called signal is the same signal we are
