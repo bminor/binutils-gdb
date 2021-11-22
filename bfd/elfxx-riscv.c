@@ -2211,6 +2211,9 @@ riscv_update_subset (riscv_parse_subset_t *rps,
 {
   const char *p = str;
 
+  if (p == NULL)
+    return false;
+
   do
     {
       int major_version = RISCV_UNKNOWN_VERSION;
@@ -2236,10 +2239,13 @@ riscv_update_subset (riscv_parse_subset_t *rps,
       /* Extract the whole prefixed extension by ','.  */
       while (*q != '\0' && *q != ',')
         q++;
+
       /* Look forward to the first letter which is not <major>p<minor>.  */
       bool find_any_version = false;
       bool find_minor_version = false;
-      while (1)
+      size_t len = q - subset;
+      size_t i;
+      for (i = len; i > 0; i--)
         {
 	  q--;
 	  if (ISDIGIT (*q))
@@ -2252,10 +2258,12 @@ riscv_update_subset (riscv_parse_subset_t *rps,
 	  else
 	    break;
 	}
-      q++;
+      if (len > 0)
+	q++;
+
       /* Check if the end of extension is 'p' or not.  If yes, then
 	 the second letter from the end cannot be number.  */
-      if (*(q - 1) == 'p' && ISDIGIT (*(q - 2)))
+      if (len > 1 && *(q - 1) == 'p' && ISDIGIT (*(q - 2)))
 	{
 	  *q = '\0';
 	  rps->error_handler
@@ -2264,6 +2272,7 @@ riscv_update_subset (riscv_parse_subset_t *rps,
 	  free (subset);
 	  return false;
 	}
+
       end_of_version =
 	riscv_parsing_subset_version (q, &major_version, &minor_version);
       *q = '\0';
@@ -2304,10 +2313,6 @@ riscv_update_subset (riscv_parse_subset_t *rps,
       free (subset);
     }
   while (*p++ == ',');
-
-  if (*(--p) != '\0')
-    rps->error_handler
-      (_("unexpected value in .option arch `%s'"), str);
 
   riscv_parse_add_implicit_subsets (rps);
   return riscv_parse_check_conflicts (rps);
