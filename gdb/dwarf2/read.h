@@ -517,6 +517,11 @@ struct dwarf2_per_objfile
 				const struct comp_unit_head *cu_header,
 				unsigned int *bytes_read_ptr);
 
+  /* Return pointer to string at .debug_line_str offset as read from BUF.
+     The offset_size is OFFSET_SIZE.  */
+  const char *read_line_string (const gdb_byte *buf,
+				unsigned int offset_size);
+
   /* Return true if the symtab corresponding to PER_CU has been set,
      false otherwise.  */
   bool symtab_set_p (const dwarf2_per_cu_data *per_cu) const;

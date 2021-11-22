@@ -2185,9 +2185,11 @@ namespace eval Dwarf {
 	variable _line_saw_program
 	variable _line_header_end_label
 	variable _line_unit_version
+	variable _line_is_64
+	variable _line_string_form
 
 	# Establish the defaults.
-	set is_64 0
+	set _line_is_64 0
 	set _line_unit_version 4
 	set _unit_addr_size default
 	set _line_saw_program 0
@@ -2197,14 +2199,17 @@ namespace eval Dwarf {
 	set _line_header_finalized 0
 	set _default_is_stmt 1
 	set _seg_sel_size 0
+	#set _line_string_form string
+	set _line_string_form line_strp
 
 	foreach { name value } $options {
 	    switch -exact -- $name {
-		is_64 { set is_64 $value }
+		is_64 { set _line_is_64 $value }
 		version { set _line_unit_version $value }
 		addr_size { set _unit_addr_size $value }
 		seg_sel_size { set _seg_sel_size $value }
 		default_is_stmt { set _default_is_stmt $value }
+		string_form { set $_line_string_form $value }
 		default { error "unknown option $name" }
 	    }
 	}
@@ -2231,7 +2236,7 @@ namespace eval Dwarf {
 	set header_len_label [_compute_label "line${_line_count}_header_start"]
 	set _line_header_end_label [_compute_label "line${_line_count}_header_end"]
 
-	if {$is_64} {
+	if {$_line_is_64} {
 	    _op .4byte 0xffffffff
 	    _op .8byte "$unit_end_label - $unit_len_label" "unit_length"
 	} else {
@@ -2248,7 +2253,7 @@ namespace eval Dwarf {
 	    _op .byte $_seg_sel_size "seg_sel_size"
 	}
 
-	if {$is_64} {
+	if {$_line_is_64} {
 	    _op .8byte "$_line_header_end_label - $header_len_label" "header_length"
 	} else {
 	    _op .4byte "$_line_header_end_label - $header_len_label" "header_length"
@@ -2306,12 +2311,22 @@ namespace eval Dwarf {
 	    variable _line_file_names
 
 	    variable _line_unit_version
+	    variable _line_is_64
+	    variable _line_string_form
 	    if { $_line_unit_version >= 5 } {
 		_op .byte 1 "directory_entry_format_count"
 		_op .uleb128 1 \
 		    "directory_entry_format (content type code: DW_LNCT_path)"
-		_op .uleb128 0x08 \
-		    "directory_entry_format (form: DW_FORM_string)"
+		switch $_line_string_form {
+		    string {
+			_op .uleb128 0x08 \
+			    "directory_entry_format (form: DW_FORM_string)"
+		    }
+		    line_strp {
+			_op .uleb128 0x1f \
+			    "directory_entry_format (form: DW_FORM_line_strp)"
+		    }
+		}
 
 		set nr_dirs [llength $_line_include_dirs]
 		# For entry 0.
@@ -2324,14 +2339,38 @@ namespace eval Dwarf {
 		    [concat [list $dirname] $_line_include_dirs]
 
 		foreach dirname $_line_include_dirs {
-		    _op .ascii [_quote $dirname]
+		    switch $_line_string_form {
+			string {
+			    _op .ascii [_quote $dirname]
+			}
+			line_strp {
+			    declare_labels string_ptr
+			    _defer_output .debug_line_str {
+				string_ptr:
+				_op .ascii [_quote $dirname]
+			    }
+			    if { $_line_is_64 } {
+				_op .8byte $string_ptr
+			    } else {
+				_op .4byte $string_ptr
+			    }
+			}
+		    }
 		}
 
 		_op .byte 2 "file_name_entry_format_count"
 		_op .uleb128 1 \
 		    "file_name_entry_format (content type code: DW_LNCT_path)"
-		_op .uleb128 0x08 \
-		    "file_name_entry_format (form: DW_FORM_string)"
+		switch $_line_string_form {
+		    string {
+			_op .uleb128 0x08 \
+			    "directory_entry_format (form: DW_FORM_string)"
+		    }
+		    line_strp {
+			_op .uleb128 0x1f \
+			    "directory_entry_format (form: DW_FORM_line_strp)"
+		    }
+		}
 		_op .uleb128 2 \
 		    "file_name_entry_format (content type code: DW_LNCT_directory_index)"
 		_op .uleb128 0x0f \
@@ -2349,7 +2388,23 @@ namespace eval Dwarf {
 		    [concat [list $filename $diridx] $_line_file_names]
 
 		foreach { filename diridx } $_line_file_names {
-		    _op .ascii [_quote $filename]
+		    switch $_line_string_form {
+			string {
+			    _op .ascii [_quote $filename]
+			}
+			line_strp {
+			    declare_labels string_ptr
+			    _defer_output .debug_line_str {
+				string_ptr:
+				_op .ascii [_quote $filename]
+			    }
+			    if { $_line_is_64 } {
+				_op .8byte $string_ptr
+			    } else {
+				_op .4byte $string_ptr
+			    }
+			}
+		    }
 		    _op .uleb128 $diridx
 		}
 	    } else {

@@ -20306,6 +20306,18 @@ read_indirect_string (dwarf2_per_objfile *per_objfile, bfd *abfd,
 
 const char *
 dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
+				      unsigned int offset_size)
+{
+  bfd *abfd = objfile->obfd;
+  ULONGEST str_offset = read_offset (abfd, buf, offset_size);
+
+  return per_bfd->line_str.read_string (objfile, str_offset, "DW_FORM_line_strp");
+}
+
+/* See read.h.  */
+
+const char *
+dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
 				      const struct comp_unit_head *cu_header,
 				      unsigned int *bytes_read_ptr)
 {

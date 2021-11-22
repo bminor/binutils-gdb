@@ -37,18 +37,19 @@ proc line_for { l } {
 }
 
 # Execute test.
-proc test_1 { _cv _cdw64 _lv _ldw64 } {
+proc test_1 { _cv _cdw64 _lv _ldw64 {_string_form ""}} {
     global srcfile srcfile2 testfile
-    global cv cdw64 lv ldw64
+    global cv cdw64 lv ldw64 string_form
     set cv $_cv
     set cdw64 $_cdw64
     set lv $_lv
     set ldw64 $_ldw64
+    set string_form $_string_form
 
     set asm_file [standard_output_file $srcfile2]
     Dwarf::assemble $asm_file {
 	declare_labels Llines
-	global srcdir subdir srcfile cv cdw64 lv ldw64
+	global srcdir subdir srcfile cv cdw64 lv ldw64 string_form
 	global func_info_vars
 	foreach var $func_info_vars {
 	    global $var
@@ -75,7 +76,7 @@ proc test_1 { _cv _cdw64 _lv _ldw64 } {
 	    }
 	}
 
-	lines [list version $lv is_64 $ldw64] Llines {
+	lines [list version $lv is_64 $ldw64 string_form $string_form] Llines {
 	    include_dir "${srcdir}/${subdir}"
 	    file_name "$srcfile" 1
 
@@ -121,12 +122,18 @@ proc test_1 { _cv _cdw64 _lv _ldw64 } {
 
 
 # Add unique test prefix.
-proc test { cv cdw64 lv ldw64 } {
+proc test { cv cdw64 lv ldw64 {string_form ""}} {
     with_test_prefix cv=$cv {
 	with_test_prefix cdw=[expr $cdw64 ? 64 : 32] {
 	    with_test_prefix lv=$lv {
 		with_test_prefix ldw=[expr $ldw64 ? 64 : 32] {
-		    test_1 $cv $cdw64 $lv $ldw64
+		    if { $string_form == "" } {
+			test_1 $cv $cdw64 $lv $ldw64
+		    } else {
+			with_test_prefix string_form=$string_form {
+			    test_1 $cv $cdw64 $lv $ldw64 $string_form
+			}
+		    }
 		}
 	    }
 	}
@@ -157,6 +164,7 @@ for { set cv $cv_low } { $cv <= $cv_high } { incr cv } {
 
 foreach cdw64 { 0 1 } {
     foreach ldw64 { 0 1 } {
-	test 5 $cdw64 5 $ldw64
+	test 5 $cdw64 5 $ldw64 string
+	test 5 $cdw64 5 $ldw64 line_strp
     }
 }
