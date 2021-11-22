@@ -58,6 +58,14 @@ struct dwarf_scanner_base
   /* Return a quick_symbol_functions instance that refers back to this
      dwarf_scanner_base.  */
   virtual quick_symbol_functions_up make_quick_functions () const = 0;
+
+  /* An ad hoc version check.  This is needed for .gdb_index to check
+     whether a version 8 or above index is in use.  Returns true if
+     the index is usable, false otherwise.  */
+  virtual bool version_check () const
+  {
+    return true;
+  }
 };
 
 /* Base class containing bits shared by both .gdb_index and

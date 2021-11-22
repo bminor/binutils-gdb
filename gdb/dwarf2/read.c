@@ -245,6 +245,11 @@ struct mapped_index final : public mapped_index_base
   { return this->symbol_table.size () / 2; }
 
   quick_symbol_functions_up make_quick_functions () const override;
+
+  bool version_check () const override
+  {
+    return version >= 8;
+  }
 };
 
 /* A description of the mapped .debug_names.
@@ -2038,7 +2043,7 @@ dw2_do_instantiate_symtab (dwarf2_per_cu_data *per_cu,
 	    && cu != NULL
 	    && cu->dwo_unit != NULL
 	    && per_objfile->per_bfd->index_table != NULL
-	    && per_objfile->per_bfd->index_table->version <= 7
+	    && !per_objfile->per_bfd->index_table->version_check ()
 	    /* DWP files aren't supported yet.  */
 	    && get_dwp_file (per_objfile) == NULL)
 	  queue_and_load_all_dwo_tus (cu);
@@ -22576,7 +22581,7 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
       /* For .gdb_index version 7 keep track of included TUs.
 	 http://sourceware.org/bugzilla/show_bug.cgi?id=15021.  */
       if (per_objfile->per_bfd->index_table != NULL
-	  && per_objfile->per_bfd->index_table->version <= 7)
+	  && !per_objfile->per_bfd->index_table->version_check ())
 	{
 	  (*ref_cu)->per_cu->imported_symtabs_push (sig_cu->per_cu);
 	}
