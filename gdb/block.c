@@ -665,7 +665,7 @@ bool
 best_symbol (struct symbol *a, const domain_enum domain)
 {
   return (SYMBOL_DOMAIN (a) == domain
-	  && SYMBOL_CLASS (a) != LOC_UNRESOLVED);
+	  && a->aclass () != LOC_UNRESOLVED);
 }
 
 /* See block.h.  */
@@ -685,11 +685,10 @@ better_symbol (struct symbol *a, struct symbol *b, const domain_enum domain)
       && SYMBOL_DOMAIN (a) != domain)
     return b;
 
-  if (SYMBOL_CLASS (a) != LOC_UNRESOLVED
-      && SYMBOL_CLASS (b) == LOC_UNRESOLVED)
+  if (a->aclass () != LOC_UNRESOLVED && b->aclass () == LOC_UNRESOLVED)
     return a;
-  if (SYMBOL_CLASS (b) != LOC_UNRESOLVED
-      && SYMBOL_CLASS (a) == LOC_UNRESOLVED)
+
+  if (b->aclass () != LOC_UNRESOLVED && a->aclass () == LOC_UNRESOLVED)
     return b;
 
   return a;

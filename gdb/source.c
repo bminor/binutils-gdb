@@ -323,7 +323,7 @@ select_source_symtab (struct symtab *s)
   /* Make the default place to list be the function `main'
      if one exists.  */
   block_symbol bsym = lookup_symbol (main_name (), 0, VAR_DOMAIN, 0);
-  if (bsym.symbol != nullptr && SYMBOL_CLASS (bsym.symbol) == LOC_BLOCK)
+  if (bsym.symbol != nullptr && bsym.symbol->aclass () == LOC_BLOCK)
     {
       symtab_and_line sal = find_function_start_sal (bsym.symbol, true);
       if (sal.symtab == NULL)

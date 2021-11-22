@@ -1690,7 +1690,7 @@ lookup_typename (const struct language_defn *language,
 
   sym = lookup_symbol_in_language (name, block, VAR_DOMAIN,
 				   language->la_language, NULL).symbol;
-  if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+  if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
     return SYMBOL_TYPE (sym);
 
   if (noerr)

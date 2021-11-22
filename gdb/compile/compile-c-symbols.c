@@ -62,7 +62,7 @@ convert_one_symbol (compile_c_instance *context,
 
   context->error_symbol_once (sym.symbol);
 
-  if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
+  if (sym.symbol->aclass () == LOC_LABEL)
     sym_type = 0;
   else
     sym_type = context->convert_type (SYMBOL_TYPE (sym.symbol));
@@ -80,7 +80,7 @@ convert_one_symbol (compile_c_instance *context,
       CORE_ADDR addr = 0;
       gdb::unique_xmalloc_ptr<char> symbol_name;
 
-      switch (SYMBOL_CLASS (sym.symbol))
+      switch (sym.symbol->aclass ())
 	{
 	case LOC_TYPEDEF:
 	  kind = GCC_C_SYMBOL_TYPEDEF;
@@ -398,7 +398,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 
       /* We only need global functions here.  */
       sym = lookup_symbol (identifier, NULL, VAR_DOMAIN, NULL).symbol;
-      if (sym != NULL && SYMBOL_CLASS (sym) == LOC_BLOCK)
+      if (sym != NULL && sym->aclass () == LOC_BLOCK)
 	{
 	  if (compile_debug)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -577,7 +577,7 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	}
       else
 	{
-	  switch (SYMBOL_CLASS (sym))
+	  switch (sym->aclass ())
 	    {
 	    case LOC_REGISTER:
 	    case LOC_ARG:

@@ -1155,8 +1155,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      struct symbol *prev_sym;
 
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
-	      if ((SYMBOL_CLASS (prev_sym) == LOC_REF_ARG
-		   || SYMBOL_CLASS (prev_sym) == LOC_ARG)
+	      if ((prev_sym->aclass () == LOC_REF_ARG
+		   || prev_sym->aclass () == LOC_ARG)
 		  && strcmp (prev_sym->linkage_name (),
 			     sym->linkage_name ()) == 0)
 		{
@@ -1398,11 +1398,11 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     {
       /* We have to convert LOC_REGISTER to LOC_REGPARM_ADDR (for
 	 variables passed in a register).  */
-      if (SYMBOL_CLASS (sym) == LOC_REGISTER)
+      if (sym->aclass () == LOC_REGISTER)
 	sym->set_aclass_index (LOC_REGPARM_ADDR);
       /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th
 	 and subsequent arguments on SPARC, for example).  */
-      else if (SYMBOL_CLASS (sym) == LOC_ARG)
+      else if (sym->aclass () == LOC_ARG)
 	sym->set_aclass_index (LOC_REF_ARG);
     }
 
@@ -1628,7 +1628,7 @@ again:
 	    {
 	      struct symbol *sym = ppt->symbol[i];
 
-	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+	      if (sym->aclass () == LOC_TYPEDEF
 		  && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 		  && (SYMBOL_TYPE (sym)->code () == code)
 		  && strcmp (sym->linkage_name (), type_name) == 0)
@@ -4466,7 +4466,7 @@ cleanup_undefined_types_1 (void)
 		      {
 			struct symbol *sym = ppt->symbol[i];
 
-			if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+			if (sym->aclass () == LOC_TYPEDEF
 			    && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 			    && (SYMBOL_TYPE (sym)->code () == (*type)->code ())
 			    && ((*type)->instance_flags ()
@@ -4576,7 +4576,7 @@ scan_file_globals (struct objfile *objfile)
 		     the same symbol if there are multiple references.  */
 		  if (sym)
 		    {
-		      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+		      if (sym->aclass () == LOC_BLOCK)
 			{
 			  fix_common_block (sym,
 					    MSYMBOL_VALUE_ADDRESS (resolve_objfile,
@@ -4627,7 +4627,7 @@ scan_file_globals (struct objfile *objfile)
 	  SET_SYMBOL_VALUE_ADDRESS (prev, 0);
 
 	  /* Complain about unresolved common block symbols.  */
-	  if (SYMBOL_CLASS (prev) == LOC_STATIC)
+	  if (prev->aclass () == LOC_STATIC)
 	    prev->set_aclass_index (LOC_UNRESOLVED);
 	  else
 	    complaint (_("%s: common block `%s' from "

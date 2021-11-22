@@ -169,7 +169,7 @@ mi_should_print (struct symbol *sym, enum mi_print_types type)
 {
   int print_me = 0;
 
-  switch (SYMBOL_CLASS (sym))
+  switch (sym->aclass ())
     {
     default:
     case LOC_UNDEF:	/* catches errors        */

@@ -1338,7 +1338,7 @@ package_name_p (const char *name, const struct block *block)
   sym = lookup_symbol (name, block, STRUCT_DOMAIN, &is_a_field_of_this).symbol;
 
   if (sym
-      && SYMBOL_CLASS (sym) == LOC_TYPEDEF
+      && sym->aclass () == LOC_TYPEDEF
       && SYMBOL_TYPE (sym)->code () == TYPE_CODE_MODULE)
     return 1;
 

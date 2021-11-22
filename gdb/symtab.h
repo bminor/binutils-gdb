@@ -1153,6 +1153,11 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     return symbol_impls[this->aclass_index ()];
   }
 
+  address_class aclass () const
+  {
+    return this->impl ().aclass;
+  }
+
   /* Data type of value */
 
   struct type *type = nullptr;
@@ -1256,7 +1261,6 @@ struct block_symbol
    "private".  */
 
 #define SYMBOL_DOMAIN(symbol)	(symbol)->domain
-#define SYMBOL_CLASS(symbol)		((symbol)->impl ().aclass)
 #define SYMBOL_OBJFILE_OWNED(symbol)	((symbol)->is_objfile_owned)
 #define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 #define SYMBOL_INLINED(symbol)		(symbol)->is_inlined

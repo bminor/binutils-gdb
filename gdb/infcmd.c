@@ -976,7 +976,7 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 	  if (inline_skipped_frames (tp) > 0)
 	    {
 	      symbol *sym = inline_skipped_symbol (tp);
-	      if (SYMBOL_CLASS (sym) == LOC_BLOCK)
+	      if (sym->aclass () == LOC_BLOCK)
 		{
 		  const block *block = SYMBOL_BLOCK_VALUE (sym);
 		  if (BLOCK_END (block) < tp->control.step_range_end)

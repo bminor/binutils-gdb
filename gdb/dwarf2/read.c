@@ -8879,7 +8879,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 	  struct symbol *sym = list->symbol[i];
 
 	  if (sym->language () == language_go
-	      && SYMBOL_CLASS (sym) == LOC_BLOCK)
+	      && sym->aclass () == LOC_BLOCK)
 	    {
 	      gdb::unique_xmalloc_ptr<char> this_package_name
 		(go_symbol_package_name (sym));
@@ -21844,7 +21844,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		  && die->parent->tag == DW_TAG_common_block)
 		attr2 = NULL;
 
-	      if (SYMBOL_CLASS (sym) == LOC_STATIC
+	      if (sym->aclass () == LOC_STATIC
 		  && SYMBOL_VALUE_ADDRESS (sym) == 0
 		  && !per_objfile->per_bfd->has_section_at_zero)
 		{
@@ -21855,7 +21855,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		}
 	      else if (attr2 != nullptr && attr2->as_boolean ())
 		{
-		  if (SYMBOL_CLASS (sym) == LOC_STATIC
+		  if (sym->aclass () == LOC_STATIC
 		      && (objfile->flags & OBJF_MAINLINE) == 0
 		      && per_objfile->per_bfd->can_copy)
 		    {
@@ -21918,7 +21918,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      else if (!die_is_declaration (die, cu))
 		{
 		  /* Use the default LOC_OPTIMIZED_OUT class.  */
-		  gdb_assert (SYMBOL_CLASS (sym) == LOC_OPTIMIZED_OUT);
+		  gdb_assert (sym->aclass () == LOC_OPTIMIZED_OUT);
 		  if (!suppress_add)
 		    list_to_add = cu->list_in_scope;
 		}

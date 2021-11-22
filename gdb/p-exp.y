@@ -635,7 +635,7 @@ block	:	block COLONCOLON name
 			    = lookup_symbol (copy.c_str (), $1,
 					     VAR_DOMAIN, NULL).symbol;
 
-			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
+			  if (!tem || tem->aclass () != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy.c_str ());
 			  $$ = SYMBOL_BLOCK_VALUE (tem); }
@@ -1544,7 +1544,7 @@ yylex (void)
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */
-    if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+    if ((sym && sym->aclass () == LOC_BLOCK)
 	|| lookup_symtab (tmp.c_str ()))
       {
 	yylval.ssym.sym.symbol = sym;
@@ -1553,7 +1553,7 @@ yylex (void)
 	free (uptokstart);
 	return BLOCKNAME;
       }
-    if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+    if (sym && sym->aclass () == LOC_TYPEDEF)
 	{
 #if 1
 	  /* Despite the following flaw, we need to keep this code enabled.
@@ -1622,7 +1622,7 @@ yylex (void)
 					 VAR_DOMAIN, NULL).symbol;
 		      if (cur_sym)
 			{
-			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)
+			  if (cur_sym->aclass () == LOC_TYPEDEF)
 			    {
 			      best_sym = cur_sym;
 			      pstate->lexptr = p;

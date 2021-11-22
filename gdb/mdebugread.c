@@ -4468,7 +4468,7 @@ mylookup_symbol (const char *name, const struct block *block,
     {
       if (sym->linkage_name ()[0] == inc
 	  && SYMBOL_DOMAIN (sym) == domain
-	  && SYMBOL_CLASS (sym) == theclass
+	  && sym->aclass () == theclass
 	  && strcmp (sym->linkage_name (), name) == 0)
 	return sym;
     }

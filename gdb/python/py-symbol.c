@@ -131,7 +131,7 @@ sympy_get_addr_class (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return gdb_py_object_from_longest (SYMBOL_CLASS (symbol)).release ();
+  return gdb_py_object_from_longest (symbol->aclass ()).release ();
 }
 
 static PyObject *
@@ -152,7 +152,7 @@ sympy_is_constant (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return PyBool_FromLong (theclass == LOC_CONST || theclass == LOC_CONST_BYTES);
 }
@@ -165,7 +165,7 @@ sympy_is_function (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return PyBool_FromLong (theclass == LOC_BLOCK);
 }
@@ -178,7 +178,7 @@ sympy_is_variable (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return PyBool_FromLong (!SYMBOL_IS_ARGUMENT (symbol)
 			  && (theclass == LOC_LOCAL || theclass == LOC_REGISTER
@@ -260,7 +260,7 @@ sympy_value (PyObject *self, PyObject *args)
     }
 
   SYMPY_REQUIRE_VALID (self, symbol);
-  if (SYMBOL_CLASS (symbol) == LOC_TYPEDEF)
+  if (symbol->aclass () == LOC_TYPEDEF)
     {
       PyErr_SetString (PyExc_TypeError, "cannot get the value of a typedef");
       return NULL;

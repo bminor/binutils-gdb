@@ -1157,7 +1157,7 @@ write_object_renaming (struct parser_state *par_state,
   ada_lookup_encoded_symbol (name, orig_left_context, VAR_DOMAIN, &sym_info);
   if (sym_info.symbol == NULL)
     error (_("Could not find renamed variable: %s"), ada_decode (name).c_str ());
-  else if (SYMBOL_CLASS (sym_info.symbol) == LOC_TYPEDEF)
+  else if (sym_info.symbol->aclass () == LOC_TYPEDEF)
     /* We have a renaming of an old-style renaming symbol.  Don't
        trust the block information.  */
     sym_info.block = orig_left_context;
@@ -1226,7 +1226,7 @@ write_object_renaming (struct parser_state *par_state,
 				       VAR_DOMAIN, &index_sym_info);
 	    if (index_sym_info.symbol == NULL)
 	      error (_("Could not find %s"), index_name);
-	    else if (SYMBOL_CLASS (index_sym_info.symbol) == LOC_TYPEDEF)
+	    else if (index_sym_info.symbol->aclass () == LOC_TYPEDEF)
 	      /* Index is an old-style renaming symbol.  */
 	      index_sym_info.block = orig_left_context;
 	    write_var_from_sym (par_state, index_sym_info);
@@ -1296,14 +1296,14 @@ block_lookup (const struct block *context, const char *raw_name)
     = ada_lookup_symbol_list (name, context, VAR_DOMAIN);
 
   if (context == NULL
-      && (syms.empty () || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK))
+      && (syms.empty () || syms[0].symbol->aclass () != LOC_BLOCK))
     symtab = lookup_symtab (name);
   else
     symtab = NULL;
 
   if (symtab != NULL)
     result = BLOCKVECTOR_BLOCK (symtab->blockvector (), STATIC_BLOCK);
-  else if (syms.empty () || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK)
+  else if (syms.empty () || syms[0].symbol->aclass () != LOC_BLOCK)
     {
       if (context == NULL)
 	error (_("No file or function \"%s\"."), raw_name);
@@ -1329,7 +1329,7 @@ select_possible_type_sym (const std::vector<struct block_symbol> &syms)
 	  
   preferred_index = -1; preferred_type = NULL;
   for (i = 0; i < syms.size (); i += 1)
-    switch (SYMBOL_CLASS (syms[i].symbol))
+    switch (syms[i].symbol->aclass ())
       {
       case LOC_TYPEDEF:
 	if (ada_prefer_type (SYMBOL_TYPE (syms[i].symbol), preferred_type))
@@ -1373,7 +1373,7 @@ find_primitive_type (struct parser_state *par_state, const char *name)
       strcpy (expanded_name, "standard__");
       strcat (expanded_name, name);
       sym = ada_lookup_symbol (expanded_name, NULL, VAR_DOMAIN).symbol;
-      if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+      if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
 	type = SYMBOL_TYPE (sym);
     }
 
@@ -1690,7 +1690,7 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
 				  par_state->expression_context_block,
 				  VAR_DOMAIN);
 
-      if (syms.size () != 1 || SYMBOL_CLASS (syms[0].symbol) == LOC_TYPEDEF)
+      if (syms.size () != 1 || syms[0].symbol->aclass () == LOC_TYPEDEF)
 	pstate->push_new<ada_string_operation> (copy_name (name));
       else
 	write_var_from_sym (par_state, syms[0]);

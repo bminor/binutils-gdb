@@ -2588,7 +2588,7 @@ var_value_operation::evaluate_for_address (struct expression *exp,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       struct type *type = lookup_pointer_type (SYMBOL_TYPE (var));
-      enum address_class sym_class = SYMBOL_CLASS (var);
+      enum address_class sym_class = var->aclass ();
 
       if (sym_class == LOC_CONST
 	  || sym_class == LOC_CONST_BYTES

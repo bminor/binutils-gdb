@@ -120,7 +120,7 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
   sym = lookup_symbol (name, 0, VAR_DOMAIN, 0);
   if (sym.symbol != NULL)
     {
-      if (SYMBOL_CLASS (sym.symbol) != LOC_BLOCK)
+      if (sym.symbol->aclass () != LOC_BLOCK)
 	{
 	  error (_("\"%s\" exists in this program but is not a function."),
 		 name);
@@ -3779,7 +3779,7 @@ value_maybe_namespace_elt (const struct type *curtype,
   if (sym.symbol == NULL)
     return NULL;
   else if ((noside == EVAL_AVOID_SIDE_EFFECTS)
-	   && (SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF))
+	   && (sym.symbol->aclass () == LOC_TYPEDEF))
     result = allocate_value (SYMBOL_TYPE (sym.symbol));
   else
     result = value_of_variable (sym.symbol, sym.block);

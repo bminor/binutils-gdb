@@ -1805,7 +1805,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   /* We should have an objfile by now.  */
   gdb_assert (objfile);
 
-  switch (SYMBOL_CLASS (sym))
+  switch (sym->aclass ())
     {
     case LOC_STATIC:
     case LOC_LABEL:
@@ -3086,7 +3086,7 @@ find_symbol_at_address (CORE_ADDR address)
 
 	  ALL_BLOCK_SYMBOLS (b, iter, sym)
 	    {
-	      if (SYMBOL_CLASS (sym) == LOC_STATIC
+	      if (sym->aclass () == LOC_STATIC
 		  && SYMBOL_VALUE_ADDRESS (sym) == addr)
 		return sym;
 	    }
@@ -4119,7 +4119,7 @@ find_function_alias_target (bound_minimal_symbol msymbol)
 
   symbol *sym = find_pc_function (func_addr);
   if (sym != NULL
-      && SYMBOL_CLASS (sym) == LOC_BLOCK
+      && sym->aclass () == LOC_BLOCK
       && BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym)) == func_addr)
     return sym;
 
@@ -4828,25 +4828,25 @@ global_symbol_searcher::add_matching_symbols
 		       || preg->exec (sym->natural_name (), 0,
 				      NULL, 0) == 0)
 		      && ((kind == VARIABLES_DOMAIN
-			   && SYMBOL_CLASS (sym) != LOC_TYPEDEF
-			   && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
-			   && SYMBOL_CLASS (sym) != LOC_BLOCK
+			   && sym->aclass () != LOC_TYPEDEF
+			   && sym->aclass () != LOC_UNRESOLVED
+			   && sym->aclass () != LOC_BLOCK
 			   /* LOC_CONST can be used for more than
 			      just enums, e.g., c++ static const
 			      members.  We only want to skip enums
 			      here.  */
-			   && !(SYMBOL_CLASS (sym) == LOC_CONST
+			   && !(sym->aclass () == LOC_CONST
 				&& (SYMBOL_TYPE (sym)->code ()
 				    == TYPE_CODE_ENUM))
 			   && (!treg.has_value ()
 			       || treg_matches_sym_type_name (*treg, sym)))
 			  || (kind == FUNCTIONS_DOMAIN
-			      && SYMBOL_CLASS (sym) == LOC_BLOCK
+			      && sym->aclass () == LOC_BLOCK
 			      && (!treg.has_value ()
 				  || treg_matches_sym_type_name (*treg,
 								 sym)))
 			  || (kind == TYPES_DOMAIN
-			      && SYMBOL_CLASS (sym) == LOC_TYPEDEF
+			      && sym->aclass () == LOC_TYPEDEF
 			      && SYMBOL_DOMAIN (sym) != MODULE_DOMAIN)
 			  || (kind == MODULES_DOMAIN
 			      && SYMBOL_DOMAIN (sym) == MODULE_DOMAIN
@@ -5056,7 +5056,7 @@ symbol_to_info_string (struct symbol *sym, int block,
       string_file tmp_stream;
 
       type_print (SYMBOL_TYPE (sym),
-		  (SYMBOL_CLASS (sym) == LOC_TYPEDEF
+		  (sym->aclass () == LOC_TYPEDEF
 		   ? "" : sym->print_name ()),
 		  &tmp_stream, 0);
 
@@ -5526,7 +5526,7 @@ completion_list_add_symbol (completion_tracker &tracker,
      tracker.  */
   if (sym->language () == language_cplus
       && SYMBOL_DOMAIN (sym) == VAR_DOMAIN
-      && SYMBOL_CLASS (sym) == LOC_BLOCK)
+      && sym->aclass () == LOC_BLOCK)
     {
       /* The call to canonicalize returns the empty string if the input
 	 string is already in canonical form, thanks to this we don't
@@ -5671,7 +5671,7 @@ completion_list_add_fields (completion_tracker &tracker,
 			    const lookup_name_info &lookup_name,
 			    const char *text, const char *word)
 {
-  if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+  if (sym->aclass () == LOC_TYPEDEF)
     {
       struct type *t = SYMBOL_TYPE (sym);
       enum type_code c = t->code ();
@@ -5723,7 +5723,7 @@ symbol_is_function_or_method (minimal_symbol *msymbol)
 bound_minimal_symbol
 find_gnu_ifunc (const symbol *sym)
 {
-  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+  if (sym->aclass () != LOC_BLOCK)
     return {};
 
   lookup_name_info lookup_name (sym->search_name (),
@@ -6572,7 +6572,7 @@ CORE_ADDR
 get_symbol_address (const struct symbol *sym)
 {
   gdb_assert (sym->maybe_copied);
-  gdb_assert (SYMBOL_CLASS (sym) == LOC_STATIC);
+  gdb_assert (sym->aclass () == LOC_STATIC);
 
   const char *linkage_name = sym->linkage_name ();
 

@@ -482,7 +482,7 @@ check_constant (ULONGEST cst)
 static inline bool
 check_constant (struct symbol *sym)
 {
-  enum address_class sc = SYMBOL_CLASS (sym);
+  enum address_class sc = sym->aclass ();
   return (sc == LOC_BLOCK
 	  || sc == LOC_CONST
 	  || sc == LOC_CONST_BYTES

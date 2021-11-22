@@ -507,7 +507,7 @@ fblock	:	block COLONCOLON BLOCKNAME
 			{ struct symbol *tem
 			    = lookup_symbol (copy_name ($3).c_str (), $1,
 					     VAR_DOMAIN, 0).symbol;
-			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
+			  if (!tem || tem->aclass () != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy_name ($3).c_str ());
 			  $$ = tem;
@@ -932,7 +932,7 @@ yylex (void)
       return BLOCKNAME;
     sym = lookup_symbol (tmp.c_str (), pstate->expression_context_block,
 			 VAR_DOMAIN, 0).symbol;
-    if (sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+    if (sym && sym->aclass () == LOC_BLOCK)
       return BLOCKNAME;
     if (lookup_typename (pstate->language (),
 			 tmp.c_str (), pstate->expression_context_block, 1))
@@ -940,7 +940,7 @@ yylex (void)
 
     if(sym)
     {
-      switch(SYMBOL_CLASS (sym))
+      switch(sym->aclass ())
        {
        case LOC_STATIC:
        case LOC_REGISTER:

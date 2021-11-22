@@ -1210,14 +1210,14 @@ rust_parser::name_to_operation (const std::string &name)
   struct block_symbol sym = lookup_symbol (name.c_str (),
 					   pstate->expression_context_block,
 					   VAR_DOMAIN);
-  if (sym.symbol != nullptr && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
+  if (sym.symbol != nullptr && sym.symbol->aclass () != LOC_TYPEDEF)
     return make_operation<var_value_operation> (sym);
 
   struct type *type = nullptr;
 
   if (sym.symbol != nullptr)
     {
-      gdb_assert (SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF);
+      gdb_assert (sym.symbol->aclass () == LOC_TYPEDEF);
       type = SYMBOL_TYPE (sym.symbol);
     }
   if (type == nullptr)

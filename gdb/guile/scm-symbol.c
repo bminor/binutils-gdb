@@ -412,7 +412,7 @@ gdbscm_symbol_addr_class (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return scm_from_int (SYMBOL_CLASS (symbol));
+  return scm_from_int (symbol->aclass ());
 }
 
 /* (symbol-argument? <gdb:symbol>) -> boolean */
@@ -437,7 +437,7 @@ gdbscm_symbol_constant_p (SCM self)
   const struct symbol *symbol = s_smob->symbol;
   enum address_class theclass;
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return scm_from_bool (theclass == LOC_CONST || theclass == LOC_CONST_BYTES);
 }
@@ -452,7 +452,7 @@ gdbscm_symbol_function_p (SCM self)
   const struct symbol *symbol = s_smob->symbol;
   enum address_class theclass;
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return scm_from_bool (theclass == LOC_BLOCK);
 }
@@ -467,7 +467,7 @@ gdbscm_symbol_variable_p (SCM self)
   const struct symbol *symbol = s_smob->symbol;
   enum address_class theclass;
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return scm_from_bool (!SYMBOL_IS_ARGUMENT (symbol)
 			&& (theclass == LOC_LOCAL || theclass == LOC_REGISTER
@@ -534,7 +534,7 @@ gdbscm_symbol_value (SCM self, SCM rest)
   if (!gdbscm_is_false (frame_scm))
     f_smob = frscm_get_frame_smob_arg_unsafe (frame_scm, frame_pos, FUNC_NAME);
 
-  if (SYMBOL_CLASS (symbol) == LOC_TYPEDEF)
+  if (symbol->aclass () == LOC_TYPEDEF)
     {
       gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
 				 _("cannot get the value of a typedef"));
