@@ -31,6 +31,7 @@
 #include "addrmap.h"
 #include "gdbsupport/iterator-range.h"
 #include "gdbsupport/thread-pool.h"
+#include "dwarf2/mapped-index.h"
 
 struct dwarf2_per_cu_data;
 
@@ -241,7 +242,7 @@ private:
    cooked_index_vector for storage and final indexing.  The index is
    made by iterating over the entries previously created.  */
 
-class cooked_index_vector
+class cooked_index_vector : public dwarf_scanner_base
 {
 public:
 
@@ -290,6 +291,8 @@ public:
   /* Return the entry that is believed to represent the program's
      "main".  This will return NULL if no such entry is available.  */
   const cooked_index_entry *get_main () const;
+
+  quick_symbol_functions_up make_quick_functions () const override;
 
 private:
 

@@ -5301,7 +5301,8 @@ dwarf2_initialize_objfile (struct objfile *objfile)
   if (per_bfd->cooked_index_table != nullptr)
     {
       dwarf_read_debug_printf ("re-using cooked index table");
-      objfile->qf.push_front (make_cooked_index_funcs ());
+      objfile->qf.push_front
+	(per_bfd->cooked_index_table->make_quick_functions ());
       return;
     }
 
@@ -18680,6 +18681,12 @@ static quick_symbol_functions_up
 make_cooked_index_funcs ()
 {
   return quick_symbol_functions_up (new cooked_index_functions);
+}
+
+quick_symbol_functions_up
+cooked_index_vector::make_quick_functions () const
+{
+  return make_cooked_index_funcs ();
 }
 
 

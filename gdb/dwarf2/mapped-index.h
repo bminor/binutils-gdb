@@ -47,13 +47,25 @@ struct name_component
   offset_type idx;
 };
 
+/* Base class of all DWARF scanner types.  */
+
+struct dwarf_scanner_base
+{
+  dwarf_scanner_base () = default;
+  virtual ~dwarf_scanner_base () = default;
+  DISABLE_COPY_AND_ASSIGN (dwarf_scanner_base);
+
+  /* Return a quick_symbol_functions instance that refers back to this
+     dwarf_scanner_base.  */
+  virtual quick_symbol_functions_up make_quick_functions () const = 0;
+};
+
 /* Base class containing bits shared by both .gdb_index and
    .debug_name indexes.  */
 
-struct mapped_index_base
+struct mapped_index_base : public dwarf_scanner_base
 {
   mapped_index_base () = default;
-  virtual ~mapped_index_base() = default;
   DISABLE_COPY_AND_ASSIGN (mapped_index_base);
 
   /* The name_component table (a sorted vector).  See name_component's
@@ -76,10 +88,6 @@ struct mapped_index_base
   {
     return false;
   }
-
-  /* Return a quick_symbol_functions instance that refers back to this
-     mapped_index_base.  */
-  virtual quick_symbol_functions_up make_quick_functions () const = 0;
 
   /* Build the symbol name component sorted vector, if we haven't
      yet.  */
