@@ -2949,7 +2949,8 @@ dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
 /* Return the next matching CU or NULL if there are no more.  */
 
 static struct dwarf2_per_cu_data *
-dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
+dw2_symtab_iter_next (struct dw2_symtab_iterator *iter,
+		      mapped_index &index)
 {
   dwarf2_per_objfile *per_objfile = iter->per_objfile;
 
@@ -2963,9 +2964,8 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
 	 Indices prior to version 7 don't record them,
 	 and indices >= 7 may elide them for certain symbols
 	 (gold does this).  */
-      int attrs_valid =
-	(per_objfile->per_bfd->index_table->version >= 7
-	 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
+      int attrs_valid = (index.version >= 7
+			 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
 
       /* Don't crash on bad data.  */
       if (cu_index >= per_objfile->per_bfd->all_comp_units.size ())
@@ -3141,7 +3141,7 @@ dwarf2_gdb_index::expand_matching_symbols
       struct dwarf2_per_cu_data *per_cu;
 
       dw2_symtab_iter_init (&iter, per_objfile, block_kind, domain, namei);
-      while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
+      while ((per_cu = dw2_symtab_iter_next (&iter, index)) != NULL)
 	dw2_expand_symtabs_matching_one (per_cu, per_objfile, nullptr,
 					 nullptr);
       return true;
