@@ -956,7 +956,9 @@ public: /* Remote specific methods.  */
 
   bool vcont_r_supported ();
 
-private: /* data fields */
+private:
+
+  bool start_remote_1 (int from_tty, int extended_p);
 
   /* The remote state.  Don't reference this directly.  Use the
      get_remote_state method instead.  */
@@ -4671,10 +4673,13 @@ remote_target::process_initial_stop_replies (int from_tty)
     }
 }
 
-/* Start the remote connection and sync state.  */
+/* Helper for remote_target::start_remote, start the remote connection and
+   sync state.  Return true if everything goes OK, otherwise, return false.
+   This function exists so that the scoped_restore created within it will
+   expire before we return to remote_target::start_remote.  */
 
-void
-remote_target::start_remote (int from_tty, int extended_p)
+bool
+remote_target::start_remote_1 (int from_tty, int extended_p)
 {
   REMOTE_SCOPED_DEBUG_ENTER_EXIT;
 
@@ -4687,7 +4692,8 @@ remote_target::start_remote (int from_tty, int extended_p)
      Ctrl-C before we're connected and synced up can't interrupt the
      target.  Instead, it offers to drop the (potentially wedged)
      connection.  */
-  rs->starting_up = true;
+  scoped_restore restore_starting_up_flag
+    = make_scoped_restore (&rs->starting_up, true);
 
   QUIT;
 
@@ -4825,11 +4831,7 @@ remote_target::start_remote (int from_tty, int extended_p)
 	{
 	  if (!extended_p)
 	    error (_("The target is not running (try extended-remote?)"));
-
-	  /* We're connected, but not running.  Drop out before we
-	     call start_remote.  */
-	  rs->starting_up = false;
-	  return;
+	  return false;
 	}
       else
 	{
@@ -4940,11 +4942,7 @@ remote_target::start_remote (int from_tty, int extended_p)
 	{
 	  if (!extended_p)
 	    error (_("The target is not running (try extended-remote?)"));
-
-	  /* We're connected, but not running.  Drop out before we
-	     call start_remote.  */
-	  rs->starting_up = false;
-	  return;
+	  return false;
 	}
 
       /* Report all signals during attach/startup.  */
@@ -4984,14 +4982,16 @@ remote_target::start_remote (int from_tty, int extended_p)
      previously; find out where things are at.  */
   remote_btrace_maybe_reopen ();
 
-  /* The thread and inferior lists are now synchronized with the
-     target, our symbols have been relocated, and we're merged the
-     target's tracepoints with ours.  We're done with basic start
-     up.  */
-  rs->starting_up = false;
+  return true;
+}
 
-  /* Maybe breakpoints are global and need to be inserted now.  */
-  if (breakpoints_should_be_inserted_now ())
+/* Start the remote connection and sync state.  */
+
+void
+remote_target::start_remote (int from_tty, int extended_p)
+{
+  if (start_remote_1 (from_tty, extended_p)
+      && breakpoints_should_be_inserted_now ())
     insert_breakpoints ();
 }
 
