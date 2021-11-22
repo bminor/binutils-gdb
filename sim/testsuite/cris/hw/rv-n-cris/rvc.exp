@@ -21,7 +21,6 @@
 proc sim_has_rv_and_cris {} {
     global srcdir
     global subdir
-    global SIMFLAGS
     global global_as_options
     global global_ld_options
     global global_sim_options

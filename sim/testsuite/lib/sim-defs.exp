@@ -73,8 +73,6 @@ proc sim_tool_path {} {
 # simulator (not the simulated program, the simulator) with sim_load.
 
 proc sim_run { prog sim_opts prog_opts redir options } {
-    global SIMFLAGS
-
     # Set the default value of the timeout.
     # FIXME: The timeout value we actually want is a function of
     # host, target, and testcase.
@@ -130,12 +128,12 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 	set cmd "$prog"
     }
 
-    send_log "$sim $always_opts $SIMFLAGS $sim_opts $cmd $prog_opts\n"
+    send_log "$sim $always_opts $sim_opts $cmd $prog_opts\n"
 
     if { "$redir" == "" } {
-	remote_spawn host "$sim $always_opts $SIMFLAGS $sim_opts $cmd $prog_opts"
+	remote_spawn host "$sim $always_opts $sim_opts $cmd $prog_opts"
     } else {
-	remote_spawn host "$sim $always_opts $SIMFLAGS $sim_opts $cmd $prog_opts $redir" writeonly
+	remote_spawn host "$sim $always_opts $sim_opts $cmd $prog_opts $redir" writeonly
     }
     set result [remote_wait host $testcase_timeout]
 
@@ -184,7 +182,6 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 
 proc run_sim_test { name requested_machs } {
     global subdir srcdir
-    global SIMFLAGS
     global opts
     global cpu_option
     global cpu_option_sep
