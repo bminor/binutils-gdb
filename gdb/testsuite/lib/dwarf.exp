@@ -196,6 +196,145 @@ proc build_executable_and_dwo_files { testname executable options args } {
     return 0
 }
 
+# Utility function for procs shared_gdb_*.
+
+proc init_shared_gdb {} {
+    global shared_gdb_enabled
+    global shared_gdb_started
+
+    if { ! [info exists shared_gdb_enabled] } {
+	set shared_gdb_enabled 0
+	set shared_gdb_started 0
+    }
+}
+
+# Cluster of four procs:
+# - shared_gdb_enable
+# - shared_gdb_disable
+# - shared_gdb_start_use SRC OPTIONS
+# - shared_gdb_end_use
+#
+# Can be used like so:
+#
+#   {
+#     if { $share } shared_gdb_enable
+#     ...
+#     shared_gdb_start_use $src $options
+#     ...
+#     shared_gdb_end_use
+#     ...
+#     shared_gdb_start_use $src $options
+#     ...
+#     shared_gdb_end_use
+#     ...
+#     if { $share } shared_gdb_disable
+#   }
+#
+# to write functionalty that could share ($share == 1) or could not
+# share ($share == 0) a gdb session between two uses.
+
+proc shared_gdb_enable {} {
+    set me shared_gdb_enable
+
+    init_shared_gdb
+    global shared_gdb_enabled
+    global shared_gdb_started
+
+    if { $shared_gdb_enabled } {
+	error "$me: gdb sharing already enabled"
+    }
+    set shared_gdb_enabled 1
+
+    if { $shared_gdb_started } {
+	error "$me: gdb sharing not stopped"
+    }
+}
+
+# See above.
+
+proc shared_gdb_disable {} {
+    init_shared_gdb
+    global shared_gdb_enabled
+    global shared_gdb_started
+
+    if { ! $shared_gdb_enabled } {
+	error "$me: gdb sharing not enabled"
+    }
+    set shared_gdb_enabled 0
+
+    if { $shared_gdb_started } {
+	gdb_exit
+	set shared_gdb_started 0
+    }
+}
+
+# See above.
+
+proc shared_gdb_start_use { src options } {
+    set me shared_gdb_start_use
+
+    init_shared_gdb
+    global shared_gdb_enabled
+    global shared_gdb_started
+    global shared_gdb_src
+    global shared_gdb_options
+
+    set do_start 1
+    if { $shared_gdb_enabled && $shared_gdb_started } {
+	if { $shared_gdb_src != $src
+	     || $shared_gdb_options != $options } {
+	    error "$me: gdb sharing inconsistent"
+	}
+
+	set do_start 0
+    }
+
+    if { $do_start } {
+	set exe [standard_temp_file func_addr[pid].x]
+
+	gdb_compile $src $exe executable $options
+
+	gdb_exit
+	gdb_start
+	gdb_load "$exe"
+
+	if { $shared_gdb_enabled } {
+	    set shared_gdb_started 1
+	    set shared_gdb_src $src
+	    set shared_gdb_options $options
+	}
+    }
+}
+
+# See above.
+
+proc shared_gdb_end_use {} {
+    init_shared_gdb
+    global shared_gdb_enabled
+
+    if { ! $shared_gdb_enabled } {
+	gdb_exit
+    }
+}
+
+# Enable gdb session sharing within BODY.
+
+proc with_shared_gdb { body } {
+    shared_gdb_enable
+    set code [catch { uplevel 1 $body } result]
+    shared_gdb_disable
+
+    # Return as appropriate.
+    if { $code == 1 } {
+	global errorInfo errorCode
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+    } elseif { $code > 1 } {
+	return -code $code $result
+    }
+
+    return $result
+}
+
 # Return a list of expressions about function FUNC's address and length.
 # The first expression is the address of function FUNC, and the second
 # one is FUNC's length.  SRC is the source file having function FUNC.
@@ -227,13 +366,7 @@ proc build_executable_and_dwo_files { testname executable options args } {
 proc function_range { func src {options {debug}} } {
     global decimal gdb_prompt
 
-    set exe [standard_temp_file func_addr[pid].x]
-
-    gdb_compile $src $exe executable $options
-
-    gdb_exit
-    gdb_start
-    gdb_load "$exe"
+    shared_gdb_start_use $src $options
 
     # Compute the label offset, and we can get the function start address
     # by "${func}_label - $func_label_offset".
@@ -271,7 +404,8 @@ proc function_range { func src {options {debug}} } {
 	}
     }
 
-    gdb_exit
+    shared_gdb_end_use
+
     return [list "${func}_label - $func_label_offset" $func_length]
 }
 
@@ -2624,10 +2758,12 @@ namespace eval Dwarf {
 	# the first in .debug_info.
 	dummy_cu
 
-	# Not "uplevel" here, because we want to evaluate in this
-	# namespace.  This is somewhat bad because it means we can't
-	# readily refer to outer variables.
-	eval $body
+	with_shared_gdb {
+	    # Not "uplevel" here, because we want to evaluate in this
+	    # namespace.  This is somewhat bad because it means we can't
+	    # readily refer to outer variables.
+	    eval $body
+	}
 
 	# Dummy CU at the end to ensure that the last CU in $body is not
 	# the last in .debug_info.
