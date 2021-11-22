@@ -2176,6 +2176,9 @@ namespace eval Dwarf {
     proc lines {options label body} {
 	variable _line_count
 	variable _line_saw_file
+	variable _line_include_dirs
+	variable _line_file_names
+	variable _line_header_finalized
 	variable _line_saw_program
 	variable _line_header_end_label
 
@@ -2185,6 +2188,9 @@ namespace eval Dwarf {
 	set _unit_addr_size default
 	set _line_saw_program 0
 	set _line_saw_file 0
+	set _line_include_dirs {}
+	set _line_file_names {}
+	set _line_header_finalized 0
 	set _default_is_stmt 1
 
 	foreach { name value } $options {
@@ -2265,21 +2271,50 @@ namespace eval Dwarf {
 	_op .byte 1 "standard opcode 9"
 
 	proc include_dir {dirname} {
-	    _op .ascii [_quote $dirname]
+	    variable _line_include_dirs
+	    lappend _line_include_dirs $dirname
 	}
 
 	proc file_name {filename diridx} {
-	    variable _line_saw_file
-	    if "! $_line_saw_file" {
-		# Terminate the dir list.
-		_op .byte 0 "Terminator."
-		set _line_saw_file 1
+	    variable _line_file_names
+	    lappend _line_file_names $filename $diridx
+
+	    variable _line_saw_file 1
+	    set _line_saw_file 1
+	}
+
+	proc _line_finalize_header {} {
+	    variable _line_header_finalized
+	    if { $_line_header_finalized } {
+		return
+	    }
+	    set _line_header_finalized 1
+
+	    variable _line_include_dirs
+	    variable _line_file_names
+
+	    if { 1 } {
+		foreach dirname $_line_include_dirs {
+		    _op .ascii [_quote $dirname]
+		}
+
+		_op .byte 0 "Terminator (include_directories)"
+
+		foreach { filename diridx } $_line_file_names {
+		    _op .ascii [_quote $filename]
+		    _op .sleb128 $diridx
+		    _op .sleb128 0 "mtime"
+		    _op .sleb128 0 "length"
+		}
+
+		_op .byte 0 "Terminator (file_names)"
 	    }
 
-	    _op .ascii [_quote $filename]
-	    _op .sleb128 $diridx
-	    _op .sleb128 0 "mtime"
-	    _op .sleb128 0 "length"
+	    set _line_include_dirs {}
+	    set _line_file_names {}
+
+	    variable _line_header_end_label
+	    define_label $_line_header_end_label
 	}
 
 	proc program {statements} {
@@ -2287,14 +2322,11 @@ namespace eval Dwarf {
 	    variable _line_header_end_label
 	    variable _line
 
+	    set _line_saw_program 1
+
 	    set _line 1
 
-	    if "! $_line_saw_program" {
-		# Terminate the file list.
-		_op .byte 0 "Terminator."
-		define_label $_line_header_end_label
-		set _line_saw_program 1
-	    }
+	    _line_finalize_header
 
 	    proc DW_LNE_set_address {addr} {
 		_op .byte 0
@@ -2385,16 +2417,7 @@ namespace eval Dwarf {
 	rename include_dir ""
 	rename file_name ""
 
-	# Terminate dir list if we saw no files.
-	if "! $_line_saw_file" {
-	    _op .byte 0 "Terminator."
-	}
-
-	# Terminate the file list.
-	if "! $_line_saw_program" {
-	    _op .byte 0 "Terminator."
-	    define_label $_line_header_end_label
-	}
+	_line_finalize_header
 
 	define_label $unit_end_label
     }
