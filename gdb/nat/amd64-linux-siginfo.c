@@ -330,6 +330,9 @@ compat_siginfo_from_siginfo (compat_siginfo_t *to, const siginfo_t *from)
       to->cpt_si_pid = from_ptrace.cpt_si_pid;
       to->cpt_si_uid = from_ptrace.cpt_si_uid;
     }
+#ifndef __ILP32__
+  /* The struct compat_x32_siginfo_t doesn't contain
+     cpt_si_lower/cpt_si_upper.  */
   else if (to->si_code == SEGV_BNDERR
 	   && to->si_signo == SIGSEGV)
     {
@@ -337,6 +340,7 @@ compat_siginfo_from_siginfo (compat_siginfo_t *to, const siginfo_t *from)
       to->cpt_si_lower = from_ptrace.cpt_si_lower;
       to->cpt_si_upper = from_ptrace.cpt_si_upper;
     }
+#endif
   else if (to->si_code < 0)
     {
       to->cpt_si_pid = from_ptrace.cpt_si_pid;
