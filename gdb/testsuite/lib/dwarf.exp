@@ -411,6 +411,7 @@ proc function_range { func src {options {debug}} } {
 
 # Extract the start, length, and end for function called NAME and
 # create suitable variables in the callers scope.
+# Return the list of created variables.
 proc get_func_info { name {options {debug}} } {
     global srcdir subdir srcfile
 
@@ -423,6 +424,11 @@ proc get_func_info { name {options {debug}} } {
 		 ${options}]  \
 	func_start func_len
     set func_end "$func_start + $func_len"
+
+    return [list \
+		"${name}_start" \
+		"${name}_len" \
+		"${name}_end"]
 }
 
 # A DWARF assembler.
