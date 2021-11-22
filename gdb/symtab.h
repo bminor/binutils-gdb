@@ -1105,6 +1105,8 @@ enum symbol_subclass_kind
   SYMBOL_RUST_VTABLE
 };
 
+extern const struct symbol_impl *symbol_impls;
+
 /* This structure is space critical.  See space comments at the top.  */
 
 struct symbol : public general_symbol_info, public allocate_on_obstack
@@ -1144,6 +1146,11 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   void set_aclass_index (unsigned int aclass_index)
   {
     m_aclass_index = aclass_index;
+  }
+
+  const symbol_impl &impl () const
+  {
+    return symbol_impls[this->aclass_index ()];
   }
 
   /* Data type of value */
@@ -1245,14 +1252,11 @@ struct block_symbol
   const struct block *block;
 };
 
-extern const struct symbol_impl *symbol_impls;
-
 /* Note: There is no accessor macro for symbol.owner because it is
    "private".  */
 
 #define SYMBOL_DOMAIN(symbol)	(symbol)->domain
-#define SYMBOL_IMPL(symbol)		(symbol_impls[(symbol)->aclass_index ()])
-#define SYMBOL_CLASS(symbol)		(SYMBOL_IMPL (symbol).aclass)
+#define SYMBOL_CLASS(symbol)		((symbol)->impl ().aclass)
 #define SYMBOL_OBJFILE_OWNED(symbol)	((symbol)->is_objfile_owned)
 #define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 #define SYMBOL_INLINED(symbol)		(symbol)->is_inlined
@@ -1260,9 +1264,9 @@ extern const struct symbol_impl *symbol_impls;
   (((symbol)->subclass) == SYMBOL_TEMPLATE)
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
-#define SYMBOL_COMPUTED_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_computed)
-#define SYMBOL_BLOCK_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_block)
-#define SYMBOL_REGISTER_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_register)
+#define SYMBOL_COMPUTED_OPS(symbol)	((symbol)->impl ().ops_computed)
+#define SYMBOL_BLOCK_OPS(symbol)	((symbol)->impl ().ops_block)
+#define SYMBOL_REGISTER_OPS(symbol)	((symbol)->impl ().ops_register)
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
 
 extern int register_symbol_computed_impl (enum address_class,
