@@ -2239,6 +2239,10 @@ namespace eval Dwarf {
 	define_label $header_len_label
 
 	_op .byte 1 "minimum_instruction_length"
+	if { $_unit_version >= 4 } {
+	    # Assume non-VLIW for now.
+	    _op .byte 1 "maximum_operations_per_instruction"
+	}
 	_op .byte $_default_is_stmt "default_is_stmt"
 	_op .byte 1 "line_base"
 	_op .byte 1 "line_range"

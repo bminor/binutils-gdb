@@ -137,7 +137,7 @@ set cv_low 2
 set cv_high 4
 
 set lv_low 2
-set lv_high 3
+set lv_high 4
 
 for { set cv $cv_low } { $cv <= $cv_high } { incr cv } {
     for { set lv $lv_low } { $lv <= $lv_high } { incr lv } {
