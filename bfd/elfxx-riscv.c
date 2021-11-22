@@ -2211,9 +2211,6 @@ riscv_update_subset (riscv_parse_subset_t *rps,
 {
   const char *p = str;
 
-  if (p == NULL)
-    return false;
-
   do
     {
       int major_version = RISCV_UNKNOWN_VERSION;
