@@ -8309,9 +8309,13 @@ remote_target::wait (ptid_t ptid, struct target_waitstatus *status,
   remote_state *rs = get_remote_state ();
 
   /* Start by clearing the flag that asks for our wait method to be called,
-     we'll mark it again at the end if needed.  */
+     we'll mark it again at the end if needed.  If the target is not in
+     async mode then the async token should not be marked.  */
   if (target_is_async_p ())
     clear_async_event_handler (rs->remote_async_inferior_event_token);
+  else
+    gdb_assert (!async_event_handler_marked
+		(rs->remote_async_inferior_event_token));
 
   ptid_t event_ptid;
 
