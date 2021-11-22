@@ -1,4 +1,4 @@
-	.option norvc
+	.option arch, -c
 	.text
 	add	a0, a0, a0
 	.long	0

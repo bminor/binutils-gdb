@@ -1,5 +1,5 @@
 	.text
-	.option	norvc
+	.option	arch, -c
 	.fill	2, 4, 0x1001
 	.byte	1
 	.word	0

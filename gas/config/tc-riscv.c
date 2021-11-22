@@ -3773,6 +3773,10 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
       if (ISSPACE (*name) && *name != '\0')
 	name++;
       riscv_update_subset (&riscv_rps_as, name);
+
+      riscv_set_rvc (false);
+      if (riscv_subset_supports (&riscv_rps_as, "c"))
+	riscv_set_rvc (true);
     }
   else if (strcmp (name, "push") == 0)
     {

@@ -1,4 +1,4 @@
-	.option rvc
+	.option arch, +c
 	# These are valid instructions.
 	li a0,0
 	c.li a1,0

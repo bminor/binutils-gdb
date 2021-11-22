@@ -1,4 +1,4 @@
-	.option norvc
+	.option arch, -c
 	.text
 	.global	funcA
 funcA:
