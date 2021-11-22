@@ -27,11 +27,10 @@ proc run_hilo_test {testfile models nops} {
 
 # Runs micromips tests by adding -mmicromips to as options
 proc run_micromips_test { name requested_machs } {
-    global global_as_options;
-    set gas_old $global_as_options;
-    append global_as_options " -mmicromips "
+    global ASFLAGS_FOR_TARGET
+    set ASFLAGS_FOR_TARGET "-mmicromips"
     run_sim_test $name $requested_machs
-    set global_as_options $gas_old
+    unset ASFLAGS_FOR_TARGET
 }
 
 # Runs all specified tests

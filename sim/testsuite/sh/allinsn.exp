@@ -2,12 +2,12 @@
 
 set all_machs "sh shdsp"
 
-set global_as_options ""
+global ASFLAGS_FOR_TARGET
 set global_ld_options ""
 
 foreach opt $board_variant_list {
     switch "x$opt" {
-	x-ml { set global_as_options "-little --defsym LITTLE=1"
+	x-ml { set ASFLAGS_FOR_TARGET "-little --defsym LITTLE=1"
 	       set global_ld_options "-EL" }
     }
 }

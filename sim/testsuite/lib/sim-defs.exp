@@ -185,7 +185,6 @@ proc run_sim_test { name requested_machs } {
     global opts
     global cpu_option
     global cpu_option_sep
-    global global_as_options
     global global_ld_options
     global global_sim_options
 
@@ -221,9 +220,6 @@ proc run_sim_test { name requested_machs } {
     set opts(kfail) ""
     set seen_output 0
 
-    if ![info exists global_as_options] {
-        set global_as_options ""
-    }
     if ![info exists global_ld_options] {
         set global_ld_options ""
     }
@@ -324,7 +320,7 @@ proc run_sim_test { name requested_machs } {
 	    }
 	    set as_options "$as_options $cpu_option$sep$mach"
 	}
-	regsub {(^ *| +)([^ ]+)} "$as_options $global_as_options" { -Wa,\2} c_as_options
+	regsub {(^ *| +)([^ ]+)} "$as_options" { -Wa,\2} c_as_options
 
 	if ![info exists opts(ld,$mach)] {
 	    set opts(ld,$mach) $opts(ld)
@@ -345,7 +341,7 @@ proc run_sim_test { name requested_machs } {
 		    [list "incdir=$srcdir/$subdir" "additional_flags=$c_as_options"]]
 		set method "compiling"
 	    } else {
-		set comp_output [target_assemble $sourcefile ${name}.o "$as_options $global_as_options"]
+		set comp_output [target_assemble $sourcefile ${name}.o "$as_options"]
 		set method "assembling"
 	    }
 

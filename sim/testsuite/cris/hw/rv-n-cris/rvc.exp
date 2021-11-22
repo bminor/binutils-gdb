@@ -21,7 +21,6 @@
 proc sim_has_rv_and_cris {} {
     global srcdir
     global subdir
-    global global_as_options
     global global_ld_options
     global global_sim_options
 
@@ -32,9 +31,6 @@ proc sim_has_rv_and_cris {} {
     # what we want to do it to run the simulator without affecting the
     # PASS/FAIL counters, and we can use e.g. run_sim_test for that.
 
-    if ![info exists global_as_options] {
-        set global_as_options ""
-    }
     if ![info exists global_ld_options] {
         set global_ld_options ""
     }
@@ -43,7 +39,7 @@ proc sim_has_rv_and_cris {} {
     }
 
     set comp_output [target_assemble $srcdir/$subdir/quit.s quit.o \
-			 "-I$srcdir/$subdir $global_as_options"]
+			 "-I$srcdir/$subdir"]
 
     if ![string match "" $comp_output] {
 	verbose -log "$comp_output" 3
@@ -119,7 +115,6 @@ proc slurp_rv { file } {
 if [istarget cris*-*-*] {
     global ASFLAGS_FOR_TARGET
     set has_rv_and_cris [sim_has_rv_and_cris]
-    global global_as_options
     global global_ld_options
     global global_sim_options
 
