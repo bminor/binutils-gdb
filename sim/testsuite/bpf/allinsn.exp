@@ -9,10 +9,8 @@ if [istarget bpf-unknown-none] {
 	set global_sim_options "--memory-size=4Mb"
     }
 
-    global global_ld_options
-    if ![info exists global_ld_options] {
-        set global_ld_options "-Ttext=0x0"
-    }
+    global LDFLAGS_FOR_TARGET
+    set LDFLAGS_FOR_TARGET "-Ttext=0x0"
 
     foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.s]] {
 	# If we're only testing specific files and this isn't one of them,

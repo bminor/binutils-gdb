@@ -185,7 +185,6 @@ proc run_sim_test { name requested_machs } {
     global opts
     global cpu_option
     global cpu_option_sep
-    global global_ld_options
     global global_sim_options
 
     if ![file exists [sim_tool_path]] {
@@ -220,9 +219,6 @@ proc run_sim_test { name requested_machs } {
     set opts(kfail) ""
     set seen_output 0
 
-    if ![info exists global_ld_options] {
-        set global_ld_options ""
-    }
     if ![info exists global_sim_options] {
         set global_sim_options ""
     }
@@ -325,7 +321,7 @@ proc run_sim_test { name requested_machs } {
 	if ![info exists opts(ld,$mach)] {
 	    set opts(ld,$mach) $opts(ld)
 	}
-	regsub {(^ *| +)([^ ]+)} "$opts(ld,$mach) $global_ld_options" { -Wl,\2} c_ld_options
+	regsub {(^ *| +)([^ ]+)} "$opts(ld,$mach)" { -Wl,\2} c_ld_options
 
 	if ![info exists opts(cc,$mach)] {
 	    set opts(cc,$mach) $opts(cc)
@@ -351,7 +347,7 @@ proc run_sim_test { name requested_machs } {
 		continue
 	    }
 
-	    set comp_output [target_link ${name}.o ${name}.x "$opts(ld,$mach) $global_ld_options"]
+	    set comp_output [target_link ${name}.o ${name}.x "$opts(ld,$mach)"]
 	    set method "linking"
 	}
 

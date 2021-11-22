@@ -21,7 +21,6 @@
 proc sim_has_rv_and_cris {} {
     global srcdir
     global subdir
-    global global_ld_options
     global global_sim_options
 
     # We need to assemble and link a trivial program and pass that, in
@@ -31,9 +30,6 @@ proc sim_has_rv_and_cris {} {
     # what we want to do it to run the simulator without affecting the
     # PASS/FAIL counters, and we can use e.g. run_sim_test for that.
 
-    if ![info exists global_ld_options] {
-        set global_ld_options ""
-    }
     if ![info exists global_sim_options] {
         set global_sim_options ""
     }
@@ -47,7 +43,7 @@ proc sim_has_rv_and_cris {} {
 	return 0
     }
 
-    set comp_output [target_link quit.o quit.x "$global_ld_options"]
+    set comp_output [target_link quit.o quit.x ""]
 
     if ![string match "" $comp_output] {
 	verbose -log "$comp_output" 3
@@ -114,12 +110,11 @@ proc slurp_rv { file } {
 
 if [istarget cris*-*-*] {
     global ASFLAGS_FOR_TARGET
+    global LDFLAGS_FOR_TARGET
     set has_rv_and_cris [sim_has_rv_and_cris]
-    global global_ld_options
     global global_sim_options
 
     set saved_global_sim_options $global_sim_options
-    set saved_global_ld_options $global_ld_options
 
     # See the logic in sim-defs.exp for more details.
     set sim [board_info target sim]
@@ -162,7 +157,7 @@ if [istarget cris*-*-*] {
 	    }
 
 	    set sim_defaults "--hw-file $srcdir/$subdir/std.dev"
-	    set ld_defaults "--section-start=.text=0"
+	    set LDFLAGS_FOR_TARGET "--section-start=.text=0"
 
 	    # We parse options an extra time besides in run_sim_test,
 	    # to determine if our defaults should be overridden.
@@ -177,10 +172,6 @@ if [istarget cris*-*-*] {
 		# specifying a mach.
 		if { $opt_name == "sim" && $opt_machs == "" } {
 		    set sim_defaults ""
-		}
-
-		if { $opt_name == "ld" && $opt_machs == "" } {
-		    set ld_defaults ""
 		}
 	    }
 
@@ -220,10 +211,8 @@ if [istarget cris*-*-*] {
 	    # Unfortunately this seems like the only way to pass
 	    # additional sim, ld etc. options to run_sim_test.
 	    set global_sim_options "$saved_global_sim_options $sim_defaults"
-	    set global_ld_options "$saved_global_ld_options $ld_defaults"
 	    run_sim_test $src $mach
 	    set global_sim_options $saved_global_sim_options
-	    set global_ld_options $saved_global_ld_options
 
 	    # Stop the rvdummy, if it's still running.  We need to
 	    # wait on it anyway to avoid it turning into a zombie.
