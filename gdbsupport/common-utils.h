@@ -54,11 +54,11 @@ std::string string_vprintf (const char* fmt, va_list args)
 
 /* Like string_printf, but appends to DEST instead of returning a new
    std::string.  */
-void string_appendf (std::string &dest, const char* fmt, ...)
+std::string &string_appendf (std::string &dest, const char* fmt, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
 /* Like string_appendf, but takes a va_list.  */
-void string_vappendf (std::string &dest, const char* fmt, va_list args)
+std::string &string_vappendf (std::string &dest, const char* fmt, va_list args)
   ATTRIBUTE_PRINTF (2, 0);
 
 /* Make a copy of the string at PTR with LEN characters

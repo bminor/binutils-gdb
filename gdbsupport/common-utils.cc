@@ -119,7 +119,7 @@ string_vprintf (const char* fmt, va_list args)
 
 /* See documentation in common-utils.h.  */
 
-void
+std::string &
 string_appendf (std::string &str, const char *fmt, ...)
 {
   va_list vp;
@@ -127,12 +127,14 @@ string_appendf (std::string &str, const char *fmt, ...)
   va_start (vp, fmt);
   string_vappendf (str, fmt, vp);
   va_end (vp);
+
+  return str;
 }
 
 
 /* See documentation in common-utils.h.  */
 
-void
+std::string &
 string_vappendf (std::string &str, const char *fmt, va_list args)
 {
   va_list vp;
@@ -148,6 +150,8 @@ string_vappendf (std::string &str, const char *fmt, va_list args)
   /* C++11 and later guarantee std::string uses contiguous memory and
      always includes the terminating '\0'.  */
   vsprintf (&str[curr_size], fmt, args); /* ARI: vsprintf */
+
+  return str;
 }
 
 char *

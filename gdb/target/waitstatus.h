@@ -101,6 +101,55 @@ enum target_waitkind
   TARGET_WAITKIND_THREAD_EXITED,
 };
 
+/* Return KIND as a string.  */
+
+static inline const char *
+target_waitkind_str (target_waitkind kind)
+{
+/* Make sure the compiler warns if a new TARGET_WAITKIND enumerator is added
+   but not handled here.  */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic error "-Wswitch"
+  switch (kind)
+  {
+    case TARGET_WAITKIND_EXITED:
+      return "EXITED";
+    case TARGET_WAITKIND_STOPPED:
+      return "STOPPED";
+    case TARGET_WAITKIND_SIGNALLED:
+      return "SIGNALLED";
+    case TARGET_WAITKIND_LOADED:
+      return "LOADED";
+    case TARGET_WAITKIND_FORKED:
+      return "FORKED";
+    case TARGET_WAITKIND_VFORKED:
+      return "VFORKED";
+    case TARGET_WAITKIND_EXECD:
+      return "EXECD";
+    case TARGET_WAITKIND_VFORK_DONE:
+      return "VFORK_DONE";
+    case TARGET_WAITKIND_SYSCALL_ENTRY:
+      return "SYSCALL_ENTRY";
+    case TARGET_WAITKIND_SYSCALL_RETURN:
+      return "SYSCALL_RETURN";
+    case TARGET_WAITKIND_SPURIOUS:
+      return "SPURIOUS";
+    case TARGET_WAITKIND_IGNORE:
+      return "IGNORE";
+    case TARGET_WAITKIND_NO_HISTORY:
+      return "NO_HISTORY";
+    case TARGET_WAITKIND_NO_RESUMED:
+      return "NO_RESUMED";
+    case TARGET_WAITKIND_THREAD_CREATED:
+      return "THREAD_CREATED";
+    case TARGET_WAITKIND_THREAD_EXITED:
+      return "THREAD_EXITED";
+  };
+#pragma GCC diagnostic pop
+
+  gdb_assert_not_reached ("invalid target_waitkind value: %d\n", (int) kind);
+}
+
 struct target_waitstatus
 {
   /* Default constructor.  */
