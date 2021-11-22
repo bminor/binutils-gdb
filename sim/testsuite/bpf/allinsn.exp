@@ -4,10 +4,8 @@ if [istarget bpf-unknown-none] {
     # all machines
     set all_machs "bpf"
 
-    global global_sim_options
-    if ![info exists global_sim_options] {
-	set global_sim_options "--memory-size=4Mb"
-    }
+    global SIMFLAGS_FOR_TARGET
+    set SIMFLAGS_FOR_TARGET "--memory-size=4Mb"
 
     global LDFLAGS_FOR_TARGET
     set LDFLAGS_FOR_TARGET "-Ttext=0x0"

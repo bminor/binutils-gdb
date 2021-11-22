@@ -21,7 +21,7 @@
 proc sim_has_rv_and_cris {} {
     global srcdir
     global subdir
-    global global_sim_options
+    global SIMFLAGS_FOR_TARGET
 
     # We need to assemble and link a trivial program and pass that, in
     # order to test successful exit.
@@ -30,8 +30,8 @@ proc sim_has_rv_and_cris {} {
     # what we want to do it to run the simulator without affecting the
     # PASS/FAIL counters, and we can use e.g. run_sim_test for that.
 
-    if ![info exists global_sim_options] {
-        set global_sim_options ""
+    if ![info exists SIMFLAGS_FOR_TARGET] {
+	set SIMFLAGS_FOR_TARGET ""
     }
 
     set comp_output [target_assemble $srcdir/$subdir/quit.s quit.o \
@@ -53,7 +53,7 @@ proc sim_has_rv_and_cris {} {
 
     set result \
 	[sim_run quit.x \
-	     "$global_sim_options --hw-device rv --hw-device cris --hw-info" \
+	     "$SIMFLAGS_FOR_TARGET --hw-device rv --hw-device cris --hw-info" \
 	     "" "" ""]
     set return_code [lindex $result 0]
     set output [lindex $result 1]
@@ -111,10 +111,8 @@ proc slurp_rv { file } {
 if [istarget cris*-*-*] {
     global ASFLAGS_FOR_TARGET
     global LDFLAGS_FOR_TARGET
+    global SIMFLAGS_FOR_TARGET
     set has_rv_and_cris [sim_has_rv_and_cris]
-    global global_sim_options
-
-    set saved_global_sim_options $global_sim_options
 
     # See the logic in sim-defs.exp for more details.
     set sim [board_info target sim]
@@ -156,7 +154,9 @@ if [istarget cris*-*-*] {
 		continue
 	    }
 
-	    set sim_defaults "--hw-file $srcdir/$subdir/std.dev"
+	    # Unfortunately this seems like the only way to pass
+	    # additional sim, ld etc. options to run_sim_test.
+	    set SIMFLAGS_FOR_TARGET "--hw-file $srcdir/$subdir/std.dev"
 	    set LDFLAGS_FOR_TARGET "--section-start=.text=0"
 
 	    # We parse options an extra time besides in run_sim_test,
@@ -171,7 +171,7 @@ if [istarget cris*-*-*] {
 		# Allow concatenating to the default options by
 		# specifying a mach.
 		if { $opt_name == "sim" && $opt_machs == "" } {
-		    set sim_defaults ""
+		    set SIMFLAGS_FOR_TARGET ""
 		}
 	    }
 
@@ -208,11 +208,7 @@ if [istarget cris*-*-*] {
 		set rvdummy_id $spawn_id
 	    }
 
-	    # Unfortunately this seems like the only way to pass
-	    # additional sim, ld etc. options to run_sim_test.
-	    set global_sim_options "$saved_global_sim_options $sim_defaults"
 	    run_sim_test $src $mach
-	    set global_sim_options $saved_global_sim_options
 
 	    # Stop the rvdummy, if it's still running.  We need to
 	    # wait on it anyway to avoid it turning into a zombie.
