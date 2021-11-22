@@ -3191,31 +3191,31 @@ Show whether new threads are allowed to run (once gdb has noticed them)."),
 	   _("Show the default detach-suspend-count value for new threads."),
 	   &show_thread_default_cmd_list);
 
-  cmd_list_element *set_signals_cmd
+  cmd_list_element *set_signals_cmd_
     = add_cmd ("signals", class_run, set_signals_cmd, _("\
 Set whether the inferior process's signals will be intercepted.\n\
 Mach exceptions (such as breakpoint traps) are not affected."),
 	       &setlist);
-  add_alias_cmd ("sigs", set_signals_cmd, class_run, 1, &setlist);
+  add_alias_cmd ("sigs", set_signals_cmd_, class_run, 1, &setlist);
 
-  cmd_list_element *show_signals_cmd
+  cmd_list_element *show_signals_cmd_
     = add_cmd ("signals", no_class, show_signals_cmd, _("\
 Show whether the inferior process's signals will be intercepted."),
 	       &showlist);
-  add_alias_cmd ("sigs", show_signals_cmd, no_class, 1, &showlist);
+  add_alias_cmd ("sigs", show_signals_cmd_, no_class, 1, &showlist);
 
-  cmd_list_element *set_signal_thread_cmd
+  cmd_list_element *set_signal_thread_cmd_
     = add_cmd ("signal-thread", class_run, set_sig_thread_cmd, _("\
 Set the thread that gdb thinks is the libc signal thread.\n\
 This thread is run when delivering a signal to a non-stopped process."),
 	       &setlist);
-  add_alias_cmd ("sigthread", set_signal_thread_cmd, class_run, 1, &setlist);
+  add_alias_cmd ("sigthread", set_signal_thread_cmd_, class_run, 1, &setlist);
 
-  cmd_list_element *show_signal_thread_cmd
+  cmd_list_element *show_signal_thread_cmd_
     = add_cmd ("signal-thread", no_class, show_sig_thread_cmd, _("\
 Set the thread that gdb thinks is the libc signal thread."),
 	       &showlist);
-  add_alias_cmd ("sigthread", show_signal_thread_cmd, no_class, 1, &showlist);
+  add_alias_cmd ("sigthread", show_signal_thread_cmd_, no_class, 1, &showlist);
 
   add_cmd ("stopped", class_run, set_stopped_cmd, _("\
 Set whether gdb thinks the inferior process is stopped as with SIGSTOP.\n\
@@ -3225,13 +3225,13 @@ Stopped process will be continued by sending them a signal."),
 Show whether gdb thinks the inferior process is stopped as with SIGSTOP."),
 	   &showlist);
 
-  cmd_list_element *set_exceptions_cmd
+  cmd_list_element *set_exceptions_cmd_
     = add_cmd ("exceptions", class_run, set_exceptions_cmd, _("\
 Set whether exceptions in the inferior process will be trapped.\n\
 When exceptions are turned off, neither breakpoints nor single-stepping\n\
 will work."), &setlist);
   /* Allow `set exc' despite conflict with `set exception-port'.  */
-  add_alias_cmd ("exc", set_exceptions_cmd, class_run, 1, &setlist);
+  add_alias_cmd ("exc", set_exceptions_cmd_, class_run, 1, &setlist);
 
   add_cmd ("exceptions", no_class, show_exceptions_cmd, _("\
 Show whether exceptions in the inferior process will be trapped."),
@@ -3263,14 +3263,14 @@ used to pause individual threads by default instead."),
 	     "on the thread when detaching."),
 	   &show_task_cmd_list);
 
-  cmd_list_element *set_task_exception_port_cmd
+  cmd_list_element *set_task_exception_port_cmd_
     = add_cmd ("exception-port", no_class, set_task_exc_port_cmd, _("\
 Set the task exception port to which we forward exceptions.\n\
 The argument should be the value of the send right in the task."),
 	       &set_task_cmd_list);
-  add_alias_cmd ("excp", set_task_exception_port_cmd, no_class, 1,
+  add_alias_cmd ("excp", set_task_exception_port_cmd_, no_class, 1,
 		 &set_task_cmd_list);
-  add_alias_cmd ("exc-port", set_task_exception_port_cmd, no_class, 1,
+  add_alias_cmd ("exc-port", set_task_exception_port_cmd_, no_class, 1,
 		 &set_task_cmd_list);
 
   /* A convenient way of turning on all options require to noninvasively
@@ -3458,14 +3458,15 @@ Note that this is relative to suspend count when gdb noticed the thread;\n\
 use the `thread takeover-suspend-count' to force it to an absolute value."),
 	   &show_thread_cmd_list);
 
-  add_cmd ("exception-port", no_class, set_thread_exc_port_cmd, _("\
+  cmd_list_element *set_thread_exception_port_cmd_
+    = add_cmd ("exception-port", no_class, set_thread_exc_port_cmd, _("\
 Set the thread exception port to which we forward exceptions.\n\
 This overrides the task exception port.\n\
 The argument should be the value of the send right in the task."),
 	   &set_thread_cmd_list);
-  add_alias_cmd ("excp", set_thread_exception_port_cmd, no_class, 1,
+  add_alias_cmd ("excp", set_thread_exception_port_cmd_, no_class, 1,
 		 &set_thread_cmd_list);
-  add_alias_cmd ("exc-port", set_thread_exception_port_cmd, no_class, 1,
+  add_alias_cmd ("exc-port", set_thread_exception_port_cmd_, no_class, 1,
 		 &set_thread_cmd_list);
 
   add_cmd ("takeover-suspend-count", no_class, thread_takeover_sc_cmd, _("\
