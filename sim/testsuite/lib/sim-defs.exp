@@ -187,7 +187,6 @@ proc run_sim_test { name requested_machs } {
     global cpu_option_sep
     global global_as_options
     global global_ld_options
-    global global_cc_options
     global global_sim_options
 
     if ![file exists [sim_tool_path]] {
@@ -227,9 +226,6 @@ proc run_sim_test { name requested_machs } {
     }
     if ![info exists global_ld_options] {
         set global_ld_options ""
-    }
-    if ![info exists global_cc_options] {
-        set global_cc_options ""
     }
     if ![info exists global_sim_options] {
         set global_sim_options ""
@@ -341,7 +337,7 @@ proc run_sim_test { name requested_machs } {
 
 	if [string match "*.c" $sourcefile] {
 	    set comp_output [target_compile $sourcefile ${name}.x "executable" \
-		[list "incdir=$srcdir/$subdir" "additional_flags=$c_as_options $c_ld_options $opts(cc,$mach) $global_cc_options"]]
+		[list "incdir=$srcdir/$subdir" "additional_flags=$c_as_options $c_ld_options $opts(cc,$mach)"]]
 	    set method "compiling/linking"
 	} else {
 	    if [string match "*.S" $sourcefile] {
