@@ -70,7 +70,7 @@ mi_check_thread_states {"stopped" "stopped"} "thread state, all stopped"
 mi_delete_breakpoints
 
 mi_create_breakpoint main \
-    "breakpoint at main" \
+    "insert breakpoint at main" \
     -number 3 -func main
 
 
