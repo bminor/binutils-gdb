@@ -321,6 +321,12 @@ struct target_waitstatus
     return m_value.syscall_number;
   }
 
+  /* Return a pretty printed form of target_waitstatus.
+
+     This is only meant to be used in debug messages, not for user-visible
+     messages.  */
+  std::string to_string () const;
+
 private:
   /* Reset the wait status to its original state.  */
   void reset ()
@@ -370,10 +376,5 @@ enum target_stop_reason
   /* Stopped by a single step finishing.  */
   TARGET_STOPPED_BY_SINGLE_STEP
 };
-
-/* Prototypes */
-
-/* Return a pretty printed form of target_waitstatus.  */
-std::string target_waitstatus_to_string (const struct target_waitstatus *);
 
 #endif /* TARGET_WAITSTATUS_H */

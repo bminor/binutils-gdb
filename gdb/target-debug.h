@@ -180,9 +180,7 @@
 static void
 target_debug_print_struct_target_waitstatus_p (struct target_waitstatus *status)
 {
-  std::string str = target_waitstatus_to_string (status);
-
-  fputs_unfiltered (str.c_str (), gdb_stdlog);
+  fputs_unfiltered (status->to_string ().c_str (), gdb_stdlog);
 }
 
 

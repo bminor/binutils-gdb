@@ -2214,7 +2214,7 @@ resume_1 (enum gdb_signal sig)
 	("thread %s has pending wait "
 	 "status %s (currently_stepping=%d).",
 	 tp->ptid.to_string ().c_str (),
-	 target_waitstatus_to_string (&tp->pending_waitstatus ()).c_str (),
+	 tp->pending_waitstatus ().to_string ().c_str (),
 	 currently_stepping (tp));
 
       tp->inf->process_target ()->threads_executing = true;
@@ -2632,7 +2632,7 @@ clear_proceed_status_thread (struct thread_info *tp)
 	  infrun_debug_printf
 	    ("thread %s has pending wait status %s (currently_stepping=%d).",
 	     tp->ptid.to_string ().c_str (),
-	     target_waitstatus_to_string (&tp->pending_waitstatus ()).c_str (),
+	     tp->pending_waitstatus ().to_string ().c_str (),
 	     currently_stepping (tp));
 	}
     }
@@ -3478,7 +3478,7 @@ print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
   infrun_debug_printf ("  %s [%s],",
 		       result_ptid.to_string ().c_str (),
 		       target_pid_to_str (result_ptid).c_str ());
-  infrun_debug_printf ("  %s", target_waitstatus_to_string (ws).c_str ());
+  infrun_debug_printf ("  %s", ws->to_string ().c_str ());
 }
 
 /* Select a thread at random, out of those which are resumed and have
@@ -3584,8 +3584,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
   if (tp != NULL)
     {
       infrun_debug_printf ("Using pending wait status %s for %s.",
-			   target_waitstatus_to_string
-			     (&tp->pending_waitstatus ()).c_str (),
+			   tp->pending_waitstatus ().to_string ().c_str (),
 			   tp->ptid.to_string ().c_str ());
 
       /* Now that we've selected our final event LWP, un-adjust its PC
@@ -4678,7 +4677,7 @@ static void
 save_waitstatus (struct thread_info *tp, const target_waitstatus *ws)
 {
   infrun_debug_printf ("saving status %s for %s",
-		       target_waitstatus_to_string (ws).c_str (),
+		       ws->to_string ().c_str (),
 		       tp->ptid.to_string ().c_str ());
 
   /* Record for later.  */
@@ -4769,7 +4768,7 @@ static bool
 handle_one (const wait_one_event &event)
 {
   infrun_debug_printf
-    ("%s %s", target_waitstatus_to_string (&event.ws).c_str (),
+    ("%s %s", event.ws.to_string ().c_str (),
      event.ptid.to_string ().c_str ());
 
   if (event.ws.kind () == TARGET_WAITKIND_NO_RESUMED)
@@ -4875,7 +4874,7 @@ handle_one (const wait_one_event &event)
 
 	  infrun_debug_printf
 	    ("target_wait %s, saving status for %s",
-	     target_waitstatus_to_string (&event.ws).c_str (),
+	     event.ws.to_string ().c_str (),
 	     t->ptid.to_string ().c_str ());
 
 	  /* Record for later.  */
@@ -5181,7 +5180,7 @@ handle_inferior_event (struct execution_control_state *ecs)
      end.  */
   scoped_value_mark free_values;
 
-  infrun_debug_printf ("%s", target_waitstatus_to_string (&ecs->ws).c_str ());
+  infrun_debug_printf ("%s", ecs->ws.to_string ().c_str ());
 
   if (ecs->ws.kind () == TARGET_WAITKIND_IGNORE)
     {

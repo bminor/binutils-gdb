@@ -3305,14 +3305,9 @@ queue_stop_reply_callback (thread_info *thread)
       if (target_thread_stopped (thread))
 	{
 	  if (debug_threads)
-	    {
-	      std::string status_string
-		= target_waitstatus_to_string (&thread->last_status);
-
-	      debug_printf ("Reporting thread %s as already stopped with %s\n",
-			    target_pid_to_str (thread->id).c_str (),
-			    status_string.c_str ());
-	    }
+	    debug_printf ("Reporting thread %s as already stopped with %s\n",
+			  target_pid_to_str (thread->id).c_str (),
+			  thread->last_status.to_string ().c_str ());
 
 	  gdb_assert (thread->last_status.kind () != TARGET_WAITKIND_IGNORE);
 

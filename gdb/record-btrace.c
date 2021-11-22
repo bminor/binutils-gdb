@@ -2556,7 +2556,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
       *status = btrace_step_no_resumed ();
 
       DEBUG ("wait ended by %s: %s", target_pid_to_str (null_ptid).c_str (),
-	     target_waitstatus_to_string (status).c_str ());
+	     status->to_string ().c_str ());
 
       return null_ptid;
     }
@@ -2647,7 +2647,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
   DEBUG ("wait ended by thread %s (%s): %s",
 	 print_thread_id (eventing),
 	 target_pid_to_str (eventing->ptid).c_str (),
-	 target_waitstatus_to_string (status).c_str ());
+	 status->to_string ().c_str ());
 
   return eventing->ptid;
 }

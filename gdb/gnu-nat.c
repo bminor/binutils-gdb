@@ -1619,7 +1619,7 @@ rewait:
 
   inf_debug (inf, "returning ptid = %s, %s",
 	     target_pid_to_str (ptid).c_str (),
-	     target_waitstatus_to_string (status).c_str ());
+	     status->to_string ().c_str ());
 
   return ptid;
 }

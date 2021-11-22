@@ -3445,13 +3445,9 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   if (debug_threads)
     {
       if (event_child->waitstatus.kind () != TARGET_WAITKIND_IGNORE)
-	{
-	  std::string str
-	    = target_waitstatus_to_string (&event_child->waitstatus);
-
-	  debug_printf ("LWP %ld: extended event with waitstatus %s\n",
-			lwpid_of (get_lwp_thread (event_child)), str.c_str ());
-	}
+	debug_printf ("LWP %ld: extended event with waitstatus %s\n",
+		      lwpid_of (get_lwp_thread (event_child)),
+		      event_child->waitstatus.to_string ().c_str ());
       if (current_thread->last_resume_kind == resume_step)
 	{
 	  if (event_child->step_range_start == event_child->step_range_end)

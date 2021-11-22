@@ -23,40 +23,40 @@
 /* Return a pretty printed form of target_waitstatus.  */
 
 std::string
-target_waitstatus_to_string (const struct target_waitstatus *ws)
+target_waitstatus::to_string () const
 {
   const char *kind_str = "status->kind = ";
 
-  switch (ws->kind ())
+  switch (this->kind ())
     {
     case TARGET_WAITKIND_EXITED:
       return string_printf ("%sexited, status = %d",
-			    kind_str, ws->exit_status ());
+			    kind_str, this->exit_status ());
 
     case TARGET_WAITKIND_STOPPED:
       return string_printf ("%sstopped, signal = %s",
 			    kind_str,
-			    gdb_signal_to_symbol_string (ws->sig ()));
+			    gdb_signal_to_symbol_string (this->sig ()));
 
     case TARGET_WAITKIND_SIGNALLED:
       return string_printf ("%ssignalled, signal = %s",
 			    kind_str,
-			    gdb_signal_to_symbol_string (ws->sig ()));
+			    gdb_signal_to_symbol_string (this->sig ()));
 
     case TARGET_WAITKIND_LOADED:
       return string_printf ("%sloaded", kind_str);
 
     case TARGET_WAITKIND_FORKED:
       return string_printf ("%sforked, child_ptid = %s", kind_str,
-			    ws->child_ptid ().to_string ().c_str ());
+			    this->child_ptid ().to_string ().c_str ());
 
     case TARGET_WAITKIND_VFORKED:
       return string_printf ("%svforked, child_ptid = %s", kind_str,
-			    ws->child_ptid ().to_string ().c_str ());
+			    this->child_ptid ().to_string ().c_str ());
 
     case TARGET_WAITKIND_EXECD:
       return string_printf ("%sexecd, execd_pathname = %s", kind_str,
-			    ws->execd_pathname ());
+			    this->execd_pathname ());
 
     case TARGET_WAITKIND_VFORK_DONE:
       return string_printf ("%svfork-done", kind_str);
@@ -84,7 +84,7 @@ target_waitstatus_to_string (const struct target_waitstatus *ws)
 
     case TARGET_WAITKIND_THREAD_EXITED:
       return string_printf ("%sthread exited, status = %d",
-			    kind_str, ws->exit_status ());
+			    kind_str, this->exit_status ());
 
     default:
       return string_printf ("%sunknown???", kind_str);
