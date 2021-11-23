@@ -241,7 +241,8 @@ in_queued_stop_replies_ptid (struct notif_event *event, ptid_t filter_ptid)
 
   /* Don't resume fork children that GDB does not know about yet.  */
   if ((vstop_event->status.kind () == TARGET_WAITKIND_FORKED
-       || vstop_event->status.kind () == TARGET_WAITKIND_VFORKED)
+       || vstop_event->status.kind () == TARGET_WAITKIND_VFORKED
+       || vstop_event->status.kind () == TARGET_WAITKIND_THREAD_CLONED)
       && vstop_event->status.child_ptid ().matches (filter_ptid))
     return true;
 

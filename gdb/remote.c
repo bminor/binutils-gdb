@@ -979,6 +979,7 @@ public:
   const struct btrace_config *btrace_conf (const struct btrace_target_info *) override;
   bool augmented_libraries_svr4_read () override;
   void follow_fork (inferior *, ptid_t, target_waitkind, bool, bool) override;
+  void follow_clone (ptid_t child_ptid) override;
   void follow_exec (inferior *, ptid_t, const char *) override;
   int insert_fork_catchpoint (int) override;
   int remove_fork_catchpoint (int) override;
@@ -1072,7 +1073,7 @@ public: /* Remote specific methods.  */
 
   void remote_btrace_maybe_reopen ();
 
-  void remove_new_fork_children (threads_listing_context *context);
+  void remove_new_children (threads_listing_context *context);
   void kill_new_fork_children (inferior *inf);
   void discard_pending_stop_replies (struct inferior *inf);
   int stop_reply_queue_length ();
@@ -2755,9 +2756,10 @@ remote_target::remote_add_thread (ptid_t ptid, bool running, bool executing,
   else
     thread = add_thread (this, ptid);
 
-  /* We start by assuming threads are resumed.  That state then gets updated
-     when we process a matching stop reply.  */
-  get_remote_thread_info (thread)->set_resumed ();
+  /* We start by assuming threads are resumed.  That state then gets
+     updated when we process a matching stop reply.  */
+  if (executing)
+    get_remote_thread_info (thread)->set_resumed ();
 
   set_executing (this, ptid, executing);
   set_running (this, ptid, running);
@@ -4157,10 +4159,11 @@ remote_target::update_thread_list ()
 	    }
 	}
 
-      /* Remove any unreported fork child threads from CONTEXT so
-	 that we don't interfere with follow fork, which is where
-	 creation of such threads is handled.  */
-      remove_new_fork_children (&context);
+      /* Remove any unreported fork/vfork/clone child threads from
+	 CONTEXT so that we don't interfere with follow
+	 fork/vfork/clone, which is where creation of such threads is
+	 handled.  */
+      remove_new_children (&context);
 
       /* And now add threads we don't know about yet to our list.  */
       for (thread_item &item : context.items)
@@ -5124,6 +5127,8 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 	    }
 	  else
 	    switch_to_thread (find_thread_ptid (this, curr_thread));
+
+	  get_remote_thread_info (inferior_thread ())->set_resumed ();
 	}
 
       /* init_wait_for_inferior should be called before get_offsets in order
@@ -6083,18 +6088,41 @@ is_fork_status (target_waitkind kind)
 	  || kind == TARGET_WAITKIND_VFORKED);
 }
 
-/* Return THREAD's pending status if it is a pending fork parent, else
-   return nullptr.  */
+/* Return a reference to the field where a pending child status, if
+   there's one, is recorded.  If there's no child event pending, the
+   returned waitstatus has TARGET_WAITKIND_IGNORE kind.  */
+
+static const target_waitstatus &
+thread_pending_status (struct thread_info *thread)
+{
+  return (thread->has_pending_waitstatus ()
+	  ? thread->pending_waitstatus ()
+	  : thread->pending_follow);
+}
+
+/* Return THREAD's pending status if it is a pending fork/vfork (but
+   not clone) parent, else return nullptr.  */
 
 static const target_waitstatus *
 thread_pending_fork_status (struct thread_info *thread)
 {
-  const target_waitstatus &ws
-    = (thread->has_pending_waitstatus ()
-       ? thread->pending_waitstatus ()
-       : thread->pending_follow);
+  const target_waitstatus &ws = thread_pending_status (thread);
 
   if (!is_fork_status (ws.kind ()))
+    return nullptr;
+
+  return &ws;
+}
+
+/* Return THREAD's pending status if is is a pending fork/vfork/clone
+   event, else return nullptr.  */
+
+static const target_waitstatus *
+thread_pending_child_status (thread_info *thread)
+{
+  const target_waitstatus &ws = thread_pending_status (thread);
+
+  if (!is_new_child_status (ws.kind ()))
     return nullptr;
 
   return &ws;
@@ -6263,6 +6291,12 @@ remote_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 	  remote_detach_pid (child_ptid.pid ());
 	}
     }
+}
+
+void
+remote_target::follow_clone (ptid_t child_ptid)
+{
+  remote_add_thread (child_ptid, false, false, false);
 }
 
 /* Target follow-exec function for remote targets.  Save EXECD_PATHNAME
@@ -6992,10 +7026,10 @@ remote_target::commit_resumed ()
       if (priv->get_resume_state () == resume_state::RESUMED_PENDING_VCONT)
 	any_pending_vcont_resume = true;
 
-      /* If a thread is the parent of an unfollowed fork, then we
-	 can't do a global wildcard, as that would resume the fork
-	 child.  */
-      if (thread_pending_fork_status (tp) != nullptr)
+      /* If a thread is the parent of an unfollowed fork/vfork/clone,
+	 then we can't do a global wildcard, as that would resume the
+	 pending child.  */
+      if (thread_pending_child_status (tp) != nullptr)
 	may_global_wildcard_vcont = false;
     }
 
@@ -7455,22 +7489,22 @@ const notif_client notif_client_stop =
   REMOTE_NOTIF_STOP,
 };
 
-/* If CONTEXT contains any fork child threads that have not been
-   reported yet, remove them from the CONTEXT list.  If such a
-   thread exists it is because we are stopped at a fork catchpoint
-   and have not yet called follow_fork, which will set up the
-   host-side data structures for the new process.  */
+/* If CONTEXT contains any fork/vfork/clone child threads that have
+   not been reported yet, remove them from the CONTEXT list.  If such
+   a thread exists it is because we are stopped at a fork/vfork/clone
+   catchpoint and have not yet called follow_fork/follow_clone, which
+   will set up the host-side data structures for the new child.  */
 
 void
-remote_target::remove_new_fork_children (threads_listing_context *context)
+remote_target::remove_new_children (threads_listing_context *context)
 {
   const notif_client *notif = &notif_client_stop;
 
-  /* For any threads stopped at a fork event, remove the corresponding
-     fork child threads from the CONTEXT list.  */
+  /* For any threads stopped at a (v)fork/clone event, remove the
+     corresponding child threads from the CONTEXT list.  */
   for (thread_info *thread : all_non_exited_threads (this))
     {
-      const target_waitstatus *ws = thread_pending_fork_status (thread);
+      const target_waitstatus *ws = thread_pending_child_status (thread);
 
       if (ws == nullptr)
 	continue;
@@ -7478,13 +7512,12 @@ remote_target::remove_new_fork_children (threads_listing_context *context)
       context->remove_thread (ws->child_ptid ());
     }
 
-  /* Check for any pending fork events (not reported or processed yet)
-     in process PID and remove those fork child threads from the
-     CONTEXT list as well.  */
+  /* Check for any pending (v)fork/clone events (not reported or
+     processed yet) in process PID and remove those child threads from
+     the CONTEXT list as well.  */
   remote_notif_get_pending_events (notif);
   for (auto &event : get_remote_state ()->stop_reply_queue)
-    if (event->ws.kind () == TARGET_WAITKIND_FORKED
-	|| event->ws.kind () == TARGET_WAITKIND_VFORKED)
+    if (is_new_child_status (event->ws.kind ()))
       context->remove_thread (event->ws.child_ptid ());
     else if (event->ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
       context->remove_thread (event->ptid);
@@ -7815,6 +7848,8 @@ Packet: '%s'\n"),
 	    event->ws.set_forked (read_ptid (++p1, &p));
 	  else if (strprefix (p, p1, "vfork"))
 	    event->ws.set_vforked (read_ptid (++p1, &p));
+	  else if (strprefix (p, p1, "clone"))
+	    event->ws.set_thread_cloned (read_ptid (++p1, &p));
 	  else if (strprefix (p, p1, "vforkdone"))
 	    {
 	      event->ws.set_vfork_done ();
