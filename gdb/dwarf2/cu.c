@@ -64,7 +64,18 @@ dwarf2_cu::start_symtab (const char *name, const char *comp_dir,
 
   list_in_scope = get_builder ()->get_file_symbols ();
 
-  get_builder ()->record_debugformat ("DWARF 2");
+  /* DWARF versions are restricted to [2, 5], thanks to the check in
+     read_comp_unit_head.  */
+  gdb_assert (this->header.version >= 2 && this->header.version <= 5);
+  static const char *debugformat_strings[] = {
+    "DWARF 2",
+    "DWARF 3",
+    "DWARF 4",
+    "DWARF 5",
+  };
+  const char *debugformat = debugformat_strings[this->header.version - 2];
+
+  get_builder ()->record_debugformat (debugformat);
   get_builder ()->record_producer (producer);
 
   processing_has_namespace_info = false;
