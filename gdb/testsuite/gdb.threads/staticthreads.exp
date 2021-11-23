@@ -22,7 +22,7 @@
 standard_testfile
 set static_flag "-static"
 
-foreach have_tls { "-DHAVE_TLS" "" } {
+foreach_with_prefix have_tls { "-DHAVE_TLS" "" } {
     if {[gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	     executable \
 	     [list debug "additional_flags=${static_flag} ${have_tls}" \
