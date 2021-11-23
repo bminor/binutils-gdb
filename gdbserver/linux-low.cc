@@ -491,7 +491,6 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
   struct lwp_info *event_lwp = *orig_event_lwp;
   int event = linux_ptrace_get_extended_event (wstat);
   struct thread_info *event_thr = get_lwp_thread (event_lwp);
-  struct lwp_info *new_lwp;
 
   gdb_assert (event_lwp->waitstatus.kind () == TARGET_WAITKIND_IGNORE);
 
@@ -503,7 +502,6 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
   if ((event == PTRACE_EVENT_FORK) || (event == PTRACE_EVENT_VFORK)
       || (event == PTRACE_EVENT_CLONE))
     {
-      ptid_t ptid;
       unsigned long new_pid;
       int ret, status;
 
@@ -527,60 +525,64 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	    warning ("wait returned unexpected status 0x%x", status);
 	}
 
-      if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK)
+      if (debug_threads)
 	{
-	  struct process_info *parent_proc;
-	  struct process_info *child_proc;
-	  struct lwp_info *child_lwp;
-	  struct thread_info *child_thr;
+	  debug_printf ("HEW: Got %s event from LWP %ld, new child is %ld\n",
+			(event == PTRACE_EVENT_FORK ? "fork"
+			 : event == PTRACE_EVENT_VFORK ? "vfork"
+			 : event == PTRACE_EVENT_CLONE ? "clone"
+			 : "???"),
+			ptid_of (event_thr).lwp (),
+			new_pid);
+	}
 
-	  ptid = ptid_t (new_pid, new_pid);
+      ptid_t child_ptid = (event != PTRACE_EVENT_CLONE
+			   ? ptid_t (new_pid, new_pid)
+			   : ptid_t (ptid_of (event_thr).pid (), new_pid));
 
-	  threads_debug_printf ("Got fork event from LWP %ld, "
-				"new child is %d",
-				ptid_of (event_thr).lwp (),
-				ptid.pid ());
+      lwp_info *child_lwp = add_lwp (child_ptid);
+      gdb_assert (child_lwp != NULL);
+      child_lwp->stopped = 1;
+      if (event != PTRACE_EVENT_CLONE)
+	child_lwp->must_set_ptrace_flags = 1;
+      child_lwp->status_pending_p = 0;
 
+      thread_info *child_thr = get_lwp_thread (child_lwp);
+
+      /* If we're suspending all threads, leave this one suspended
+	 too.  If the fork/clone parent is stepping over a breakpoint,
+	 all other threads have been suspended already.  Leave the
+	 child suspended too.  */
+      if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS
+	  || event_lwp->bp_reinsert != 0)
+	{
+	  threads_debug_printf ("leaving child suspended");
+	  child_lwp->suspended = 1;
+	}
+
+      if (event_lwp->bp_reinsert != 0
+	  && supports_software_single_step ()
+	  && event == PTRACE_EVENT_VFORK)
+	{
+	  /* If we leave single-step breakpoints there, child will
+	     hit it, so uninsert single-step breakpoints from parent
+	     (and child).  Once vfork child is done, reinsert
+	     them back to parent.  */
+	  uninsert_single_step_breakpoints (event_thr);
+	}
+
+      if (event != PTRACE_EVENT_CLONE)
+	{
 	  /* Add the new process to the tables and clone the breakpoint
 	     lists of the parent.  We need to do this even if the new process
 	     will be detached, since we will need the process object and the
 	     breakpoints to remove any breakpoints from memory when we
 	     detach, and the client side will access registers.  */
-	  child_proc = add_linux_process (new_pid, 0);
+	  process_info *child_proc = add_linux_process (new_pid, 0);
 	  gdb_assert (child_proc != NULL);
-	  child_lwp = add_lwp (ptid);
-	  gdb_assert (child_lwp != NULL);
-	  child_lwp->stopped = 1;
-	  child_lwp->must_set_ptrace_flags = 1;
-	  child_lwp->status_pending_p = 0;
-	  child_thr = get_lwp_thread (child_lwp);
-	  child_thr->last_resume_kind = resume_stop;
-	  child_thr->last_status.set_stopped (GDB_SIGNAL_0);
 
-	  /* If we're suspending all threads, leave this one suspended
-	     too.  If the fork/clone parent is stepping over a breakpoint,
-	     all other threads have been suspended already.  Leave the
-	     child suspended too.  */
-	  if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS
-	      || event_lwp->bp_reinsert != 0)
-	    {
-	      threads_debug_printf ("leaving child suspended");
-	      child_lwp->suspended = 1;
-	    }
-
-	  parent_proc = get_thread_process (event_thr);
+	  process_info *parent_proc = get_thread_process (event_thr);
 	  child_proc->attached = parent_proc->attached;
-
-	  if (event_lwp->bp_reinsert != 0
-	      && supports_software_single_step ()
-	      && event == PTRACE_EVENT_VFORK)
-	    {
-	      /* If we leave single-step breakpoints there, child will
-		 hit it, so uninsert single-step breakpoints from parent
-		 (and child).  Once vfork child is done, reinsert
-		 them back to parent.  */
-	      uninsert_single_step_breakpoints (event_thr);
-	    }
 
 	  clone_all_breakpoints (child_thr, event_thr);
 
@@ -590,88 +592,97 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 
 	  /* Clone arch-specific process data.  */
 	  low_new_fork (parent_proc, child_proc);
+	}
 
-	  /* Save fork info in the parent thread.  */
-	  if (event == PTRACE_EVENT_FORK)
-	    event_lwp->waitstatus.set_forked (ptid);
-	  else if (event == PTRACE_EVENT_VFORK)
-	    event_lwp->waitstatus.set_vforked (ptid);
+      /* Save fork/clone info in the parent thread.  */
+      if (event == PTRACE_EVENT_FORK)
+	event_lwp->waitstatus.set_forked (child_ptid);
+      else if (event == PTRACE_EVENT_VFORK)
+	event_lwp->waitstatus.set_vforked (child_ptid);
+      else if (event == PTRACE_EVENT_CLONE
+	       && (event_thr->thread_options & GDB_THREAD_OPTION_CLONE) != 0)
+	event_lwp->waitstatus.set_thread_cloned (child_ptid);
 
+      if (event != PTRACE_EVENT_CLONE
+	  || (event_thr->thread_options & GDB_THREAD_OPTION_CLONE) != 0)
+	{
 	  /* The status_pending field contains bits denoting the
-	     extended event, so when the pending event is handled,
-	     the handler will look at lwp->waitstatus.  */
+	     extended event, so when the pending event is handled, the
+	     handler will look at lwp->waitstatus.  */
 	  event_lwp->status_pending_p = 1;
 	  event_lwp->status_pending = wstat;
 
-	  /* Link the threads until the parent event is passed on to
-	     higher layers.  */
+	  /* Link the threads until the parent's event is passed on to
+	     GDB.  */
 	  event_lwp->fork_relative = child_lwp;
 	  child_lwp->fork_relative = event_lwp;
-
-	  /* If the parent thread is doing step-over with single-step
-	     breakpoints, the list of single-step breakpoints are cloned
-	     from the parent's.  Remove them from the child process.
-	     In case of vfork, we'll reinsert them back once vforked
-	     child is done.  */
-	  if (event_lwp->bp_reinsert != 0
-	      && supports_software_single_step ())
-	    {
-	      /* The child process is forked and stopped, so it is safe
-		 to access its memory without stopping all other threads
-		 from other processes.  */
-	      delete_single_step_breakpoints (child_thr);
-
-	      gdb_assert (has_single_step_breakpoints (event_thr));
-	      gdb_assert (!has_single_step_breakpoints (child_thr));
-	    }
-
-	  /* Report the event.  */
-	  return 0;
 	}
 
-      threads_debug_printf
-	("Got clone event from LWP %ld, new child is LWP %ld",
-	 lwpid_of (event_thr), new_pid);
+      /* If the parent thread is doing step-over with single-step
+	 breakpoints, the list of single-step breakpoints are cloned
+	 from the parent's.  Remove them from the child process.
+	 In case of vfork, we'll reinsert them back once vforked
+	 child is done.  */
+      if (event_lwp->bp_reinsert != 0
+	  && supports_software_single_step ())
+	{
+	  /* The child process is forked and stopped, so it is safe
+	     to access its memory without stopping all other threads
+	     from other processes.  */
+	  delete_single_step_breakpoints (child_thr);
 
-      ptid = ptid_t (pid_of (event_thr), new_pid);
-      new_lwp = add_lwp (ptid);
-
-      /* Either we're going to immediately resume the new thread
-	 or leave it stopped.  resume_one_lwp is a nop if it
-	 thinks the thread is currently running, so set this first
-	 before calling resume_one_lwp.  */
-      new_lwp->stopped = 1;
-
-      /* If we're suspending all threads, leave this one suspended
-	 too.  If the fork/clone parent is stepping over a breakpoint,
-	 all other threads have been suspended already.  Leave the
-	 child suspended too.  */
-      if (stopping_threads == STOPPING_AND_SUSPENDING_THREADS
-	  || event_lwp->bp_reinsert != 0)
-	new_lwp->suspended = 1;
+	  gdb_assert (has_single_step_breakpoints (event_thr));
+	  gdb_assert (!has_single_step_breakpoints (child_thr));
+	}
 
       /* Normally we will get the pending SIGSTOP.  But in some cases
 	 we might get another signal delivered to the group first.
 	 If we do get another signal, be sure not to lose it.  */
       if (WSTOPSIG (status) != SIGSTOP)
 	{
-	  new_lwp->stop_expected = 1;
-	  new_lwp->status_pending_p = 1;
-	  new_lwp->status_pending = status;
+	  child_lwp->stop_expected = 1;
+	  child_lwp->status_pending_p = 1;
+	  child_lwp->status_pending = status;
 	}
-      else if (cs.report_thread_events)
+      else if (event == PTRACE_EVENT_CLONE && cs.report_thread_events)
 	{
-	  new_lwp->waitstatus.set_thread_created ();
-	  new_lwp->status_pending_p = 1;
-	  new_lwp->status_pending = status;
+	  child_lwp->waitstatus.set_thread_created ();
+	  child_lwp->status_pending_p = 1;
+	  child_lwp->status_pending = status;
 	}
 
+      if (event == PTRACE_EVENT_CLONE)
+	{
 #ifdef USE_THREAD_DB
-      thread_db_notice_clone (event_thr, ptid);
+	  thread_db_notice_clone (event_thr, child_ptid);
 #endif
+	}
 
-      /* Don't report the event.  */
-      return 1;
+      if (event == PTRACE_EVENT_CLONE
+	  && (event_thr->thread_options & GDB_THREAD_OPTION_CLONE) == 0)
+	{
+	  threads_debug_printf
+	    ("not reporting clone event from LWP %ld, new child is %ld\n",
+	     ptid_of (event_thr).lwp (),
+	     new_pid);
+	  return 1;
+	}
+
+      /* Leave the child stopped until GDB processes the parent
+	 event.  */
+      child_thr->last_resume_kind = resume_stop;
+      child_thr->last_status.set_stopped (GDB_SIGNAL_0);
+
+      /* Report the event.  */
+      threads_debug_printf
+	("reporting %s event from LWP %ld, new child is %ld\n",
+	 (event == PTRACE_EVENT_FORK ? "fork"
+	  : event == PTRACE_EVENT_VFORK ? "vfork"
+	  : event == PTRACE_EVENT_CLONE ? "clone"
+	  : "???"),
+	 ptid_of (event_thr).lwp (),
+	 new_pid);
+      return 0;
     }
   else if (event == PTRACE_EVENT_VFORK_DONE)
     {
@@ -3527,7 +3538,8 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
       /* Break the unreported fork relationship chain.  */
       if (event_child->waitstatus.kind () == TARGET_WAITKIND_FORKED
-	  || event_child->waitstatus.kind () == TARGET_WAITKIND_VFORKED)
+	  || event_child->waitstatus.kind () == TARGET_WAITKIND_VFORKED
+	  || event_child->waitstatus.kind () == TARGET_WAITKIND_THREAD_CLONED)
 	{
 	  event_child->fork_relative->fork_relative = NULL;
 	  event_child->fork_relative = NULL;
@@ -4263,15 +4275,14 @@ linux_set_resume_request (thread_info *thread, thread_resume *resume, size_t n)
 	      continue;
 	    }
 
-	  /* Don't let wildcard resumes resume fork children that GDB
-	     does not yet know are new fork children.  */
+	  /* Don't let wildcard resumes resume fork/vfork/clone
+	     children that GDB does not yet know are new children.  */
 	  if (lwp->fork_relative != NULL)
 	    {
 	      struct lwp_info *rel = lwp->fork_relative;
 
 	      if (rel->status_pending_p
-		  && (rel->waitstatus.kind () == TARGET_WAITKIND_FORKED
-		      || rel->waitstatus.kind () == TARGET_WAITKIND_VFORKED))
+		  && is_new_child_status (rel->waitstatus.kind ()))
 		{
 		  threads_debug_printf
 		    ("not resuming LWP %ld: has queued stop reply",
@@ -5891,6 +5902,14 @@ bool
 linux_process_target::supports_vfork_events ()
 {
   return true;
+}
+
+/* Return the set of supported thread options.  */
+
+gdb_thread_options
+linux_process_target::supported_thread_options ()
+{
+  return GDB_THREAD_OPTION_CLONE;
 }
 
 /* Check if exec events are supported.  */
