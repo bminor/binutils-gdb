@@ -234,6 +234,8 @@ public:
 
   bool supports_vfork_events () override;
 
+  gdb_thread_options supported_thread_options () override;
+
   bool supports_exec_events () override;
 
   void handle_new_gdb_connection () override;
