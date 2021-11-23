@@ -36,6 +36,7 @@
 #include "dll.h"
 #include "hostio.h"
 #include <vector>
+#include <unordered_map>
 #include "gdbsupport/common-inferior.h"
 #include "gdbsupport/job-control.h"
 #include "gdbsupport/environ.h"
@@ -616,6 +617,17 @@ parse_store_memtags_request (char *request, CORE_ADDR *addr, size_t *len,
   return true;
 }
 
+/* Parse thread options starting at *P and return them.  On exit,
+   advance *P past the options.  */
+
+static gdb_thread_options
+parse_gdb_thread_options (const char **p)
+{
+  ULONGEST options = 0;
+  *p = unpack_varlen_hex (*p, &options);
+  return (gdb_thread_option) options;
+}
+
 /* Handle all of the extended 'Q' packets.  */
 
 static void
@@ -892,6 +904,114 @@ handle_general_set (char *own_buf)
 
       remote_debug_printf ("[thread events are now %s]\n",
 			   cs.report_thread_events ? "enabled" : "disabled");
+
+      write_ok (own_buf);
+      return;
+    }
+
+  if (startswith (own_buf, "QThreadOptions;"))
+    {
+      const char *p = own_buf + strlen ("QThreadOptions");
+
+      gdb_thread_options supported_options = target_supported_thread_options ();
+      if (supported_options == 0)
+	{
+	  /* Something went wrong -- we don't support any option, but
+	     GDB sent the packet anyway.  */
+	  write_enn (own_buf);
+	  return;
+	}
+
+      /* We could store the options directly in thread->thread_options
+	 without this map, but that would mean that a QThreadOptions
+	 packet with a wildcard like "QThreadOptions;0;3:TID" would
+	 result in the debug logs showing:
+
+	   [options for TID are now 0x0]
+	   [options for TID are now 0x3]
+
+	 It's nicer if we only print the final options for each TID,
+	 and if we only print about it if the options changed compared
+	 to the options that were previously set on the thread.  */
+      std::unordered_map<thread_info *, gdb_thread_options> set_options;
+
+      while (*p != '\0')
+	{
+	  if (p[0] != ';')
+	    {
+	      write_enn (own_buf);
+	      return;
+	    }
+	  p++;
+
+	  /* Read the options.  */
+
+	  gdb_thread_options options = parse_gdb_thread_options (&p);
+
+	  if ((options & ~supported_options) != 0)
+	    {
+	      /* GDB asked for an unknown or unsupported option, so
+		 error out.  */
+	      std::string err
+		= string_printf ("E.Unknown thread options requested: %s\n",
+				 to_string (options).c_str ());
+	      strcpy (own_buf, err.c_str ());
+	      return;
+	    }
+
+	  ptid_t ptid;
+
+	  if (p[0] == ';' || p[0] == '\0')
+	    ptid = minus_one_ptid;
+	  else if (p[0] == ':')
+	    {
+	      const char *q;
+
+	      ptid = read_ptid (p + 1, &q);
+
+	      if (p == q)
+		{
+		  write_enn (own_buf);
+		  return;
+		}
+	      p = q;
+	      if (p[0] != ';' && p[0] != '\0')
+		{
+		  write_enn (own_buf);
+		  return;
+		}
+	    }
+	  else
+	    {
+	      write_enn (own_buf);
+	      return;
+	    }
+
+	  /* Convert PID.-1 => PID.0 for ptid.matches.  */
+	  if (ptid.lwp () == -1)
+	    ptid = ptid_t (ptid.pid ());
+
+	  for_each_thread ([&] (thread_info *thread)
+	    {
+	      if (ptid_of (thread).matches (ptid))
+		set_options[thread] = options;
+	    });
+	}
+
+      for (const auto &iter : set_options)
+	{
+	  thread_info *thread = iter.first;
+	  gdb_thread_options options = iter.second;
+
+	  if (thread->thread_options != options)
+	    {
+	      threads_debug_printf ("[options for %s are now %s]\n",
+				    target_pid_to_str (ptid_of (thread)).c_str (),
+				    to_string (options).c_str ());
+
+	      thread->thread_options = options;
+	    }
+	}
 
       write_ok (own_buf);
       return;
@@ -2348,6 +2468,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		cs.vCont_supported = 1;
 	      else if (feature == "QThreadEvents+")
 		;
+	      else if (feature == "QThreadOptions+")
+		;
 	      else if (feature == "no-resumed+")
 		{
 		  /* GDB supports and wants TARGET_WAITKIND_NO_RESUMED
@@ -2473,6 +2595,14 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	strcat (own_buf, ";qXfer:exec-file:read+");
 
       strcat (own_buf, ";vContSupported+");
+
+      gdb_thread_options supported_options = target_supported_thread_options ();
+      if (supported_options != 0)
+	{
+	  char *end_buf = own_buf + strlen (own_buf);
+	  sprintf (end_buf, ";QThreadOptions=%s",
+		   phex_nz (supported_options, sizeof (supported_options)));
+	}
 
       strcat (own_buf, ";QThreadEvents+");
 

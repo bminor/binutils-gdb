@@ -399,6 +399,21 @@ thread_info::clear_pending_waitstatus ()
 
 /* See gdbthread.h.  */
 
+void
+thread_info::set_thread_options (gdb_thread_options thread_options)
+{
+  if (m_thread_options == thread_options)
+    return;
+
+  m_thread_options = thread_options;
+
+  infrun_debug_printf ("[options for %s are now %s]",
+		       this->ptid.to_string ().c_str (),
+		       to_string (thread_options).c_str ());
+}
+
+/* See gdbthread.h.  */
+
 int
 thread_is_in_step_over_chain (struct thread_info *tp)
 {

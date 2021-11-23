@@ -4358,6 +4358,15 @@ target_thread_events (int enable)
   current_inferior ()->top_target ()->thread_events (enable);
 }
 
+/* See target.h.  */
+
+bool
+target_supports_set_thread_options (gdb_thread_options options)
+{
+  inferior *inf = current_inferior ();
+  return inf->top_target ()->supports_set_thread_options (options);
+}
+
 /* Controls if targets can report that they can/are async.  This is
    just for maintainers to use when debugging gdb.  */
 bool target_async_permitted = true;

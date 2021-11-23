@@ -736,6 +736,10 @@ struct target_ops
       TARGET_DEFAULT_RETURN (false);
     virtual void thread_events (int)
       TARGET_DEFAULT_IGNORE ();
+    /* Returns true if the target supports setting thread options
+       OPTIONS, false otherwise.  */
+    virtual bool supports_set_thread_options (gdb_thread_options options)
+      TARGET_DEFAULT_RETURN (false);
     /* This method must be implemented in some situations.  See the
        comment on 'can_run'.  */
     virtual bool supports_non_stop ()
@@ -1894,6 +1898,10 @@ extern void target_async (bool enable);
 
 /* Enables/disables thread create and exit events.  */
 extern void target_thread_events (int enable);
+
+/* Returns true if the target supports setting thread options
+   OPTIONS.  */
+extern bool target_supports_set_thread_options (gdb_thread_options options);
 
 /* Whether support for controlling the target backends always in
    non-stop mode is enabled.  */

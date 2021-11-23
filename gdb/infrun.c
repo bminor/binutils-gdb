@@ -1584,7 +1584,6 @@ step_over_info_valid_p (void)
 /* Return true if THREAD is doing a displaced step.  */
 
 static bool
-ATTRIBUTE_UNUSED
 displaced_step_in_progress_thread (thread_info *thread)
 {
   gdb_assert (thread != nullptr);
@@ -1886,6 +1885,28 @@ displaced_step_prepare (thread_info *thread)
   return status;
 }
 
+/* Maybe disable thread-{cloned,created,exited} event reporting after
+   a step-over (either in-line or displaced) finishes.  */
+
+static void
+update_thread_events_after_step_over (thread_info *event_thread)
+{
+  if (target_supports_set_thread_options (0))
+    {
+      /* We can control per-thread options.  Disable events for the
+	 event thread.  */
+      event_thread->set_thread_options (0);
+    }
+  else
+    {
+      /* We can only control the target-wide target_thread_events
+	 setting.  Disable it, but only if other threads don't need it
+	 enabled.  */
+      if (!displaced_step_in_progress_any_thread ())
+	target_thread_events (false);
+    }
+}
+
 /* If we displaced stepped an instruction successfully, adjust registers and
    memory to yield the same effect the instruction would have had if we had
    executed it at its original address, and return
@@ -1929,6 +1950,8 @@ displaced_step_finish (thread_info *event_thread,
   /* Was this thread performing a displaced step?  */
   if (!displaced->in_progress ())
     return DISPLACED_STEP_FINISH_STATUS_OK;
+
+  update_thread_events_after_step_over (event_thread);
 
   gdb_assert (event_thread->inf->displaced_step_state.in_progress_count > 0);
   event_thread->inf->displaced_step_state.in_progress_count--;
@@ -2422,6 +2445,42 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
     target_pass_signals ({});
   else
     target_pass_signals (signal_pass);
+
+  /* Request that the target report thread-{created,cloned} events in
+     the following situations:
+
+     - If we are performing an in-line step-over-breakpoint, then we
+       will remove a breakpoint from the target and only run the
+       current thread.  We don't want any new thread (spawned by the
+       step) to start running, as it might miss the breakpoint.
+
+     - If we are stepping over a breakpoint out of line (displaced
+       stepping) then we won't remove a breakpoint from the target,
+       but, if the step spawns a new clone thread, then we will need
+       to fixup the $pc address in the clone child too, so we need it
+       to start stopped.
+  */
+  if (step_over_info_valid_p ()
+      || displaced_step_in_progress_thread (tp))
+    {
+      gdb_thread_options options = GDB_THREAD_OPTION_CLONE;
+      if (target_supports_set_thread_options (options))
+	tp->set_thread_options (options);
+      else
+	target_thread_events (true);
+    }
+
+  /* If we're resuming more than one thread simultaneously, then any
+     thread other than the leader is being set to run free.  Clear any
+     previous thread option for those threads.  */
+  if (resume_ptid != inferior_ptid && target_supports_set_thread_options (0))
+    {
+      process_stratum_target *resume_target = tp->inf->process_target ();
+      for (thread_info *thr_iter : all_non_exited_threads (resume_target,
+							   resume_ptid))
+	if (thr_iter != tp)
+	  thr_iter->set_thread_options (0);
+    }
 
   infrun_debug_printf ("resume_ptid=%s, step=%d, sig=%s",
 		       resume_ptid.to_string ().c_str (),
@@ -6143,6 +6202,8 @@ finish_step_over (struct execution_control_state *ecs)
 	 then only the thread that was stepped should be reporting
 	 back an event.  */
       gdb_assert (ecs->event_thread->control.trap_expected);
+
+      update_thread_events_after_step_over (ecs->event_thread);
 
       clear_step_over_info ();
     }
