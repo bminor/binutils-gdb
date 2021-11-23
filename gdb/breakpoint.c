@@ -5530,6 +5530,21 @@ bpstat_stop_status (const address_space *aspace,
   return bs_head;
 }
 
+/* See breakpoint.h.  */
+
+bpstat *
+bpstat_stop_status_nowatch (const address_space *aspace, CORE_ADDR bp_addr,
+			    thread_info *thread, const target_waitstatus &ws)
+{
+  gdb_assert (!target_stopped_by_watchpoint ());
+
+  /* Clear all watchpoints' 'watchpoint_triggered' value from a
+     previous stop to avoid confusing bpstat_stop_status.  */
+  watchpoints_triggered (ws);
+
+  return bpstat_stop_status (aspace, bp_addr, thread, ws);
+}
+
 static void
 handle_jit_event (CORE_ADDR address)
 {

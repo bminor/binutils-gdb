@@ -4491,9 +4491,9 @@ handle_syscall_event (struct execution_control_state *ecs)
       infrun_debug_printf ("syscall number=%d", syscall_number);
 
       ecs->event_thread->control.stop_bpstat
-	= bpstat_stop_status (regcache->aspace (),
-			      ecs->event_thread->stop_pc (),
-			      ecs->event_thread, ecs->ws);
+	= bpstat_stop_status_nowatch (regcache->aspace (),
+				      ecs->event_thread->stop_pc (),
+				      ecs->event_thread, ecs->ws);
 
       if (handle_stop_requested (ecs))
 	return false;
@@ -5288,9 +5288,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	    ecs->event_thread->set_stop_pc (regcache_read_pc (regcache));
 	    ecs->event_thread->control.stop_bpstat
-	      = bpstat_stop_status (regcache->aspace (),
-				    ecs->event_thread->stop_pc (),
-				    ecs->event_thread, ecs->ws);
+	      = bpstat_stop_status_nowatch (regcache->aspace (),
+					    ecs->event_thread->stop_pc (),
+					    ecs->event_thread, ecs->ws);
 
 	    if (handle_stop_requested (ecs))
 	      return;
@@ -5531,9 +5531,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	(regcache_read_pc (get_thread_regcache (ecs->event_thread)));
 
       ecs->event_thread->control.stop_bpstat
-	= bpstat_stop_status (get_current_regcache ()->aspace (),
-			      ecs->event_thread->stop_pc (),
-			      ecs->event_thread, ecs->ws);
+	= bpstat_stop_status_nowatch (get_current_regcache ()->aspace (),
+				      ecs->event_thread->stop_pc (),
+				      ecs->event_thread, ecs->ws);
 
       if (handle_stop_requested (ecs))
 	return;
@@ -5642,9 +5642,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	(regcache_read_pc (get_thread_regcache (ecs->event_thread)));
 
       ecs->event_thread->control.stop_bpstat
-	= bpstat_stop_status (get_current_regcache ()->aspace (),
-			      ecs->event_thread->stop_pc (),
-			      ecs->event_thread, ecs->ws);
+	= bpstat_stop_status_nowatch (get_current_regcache ()->aspace (),
+				      ecs->event_thread->stop_pc (),
+				      ecs->event_thread, ecs->ws);
 
       if (handle_stop_requested (ecs))
 	return;

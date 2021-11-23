@@ -968,13 +968,31 @@ extern bpstat *build_bpstat_chain (const address_space *aspace,
    several reasons concurrently.)
 
    Each element of the chain has valid next, breakpoint_at,
-   commands, FIXME??? fields.  */
+   commands, FIXME??? fields.
+
+   watchpoints_triggered must be called beforehand to set up each
+   watchpoint's watchpoint_triggered value.
+
+*/
 
 extern bpstat *bpstat_stop_status (const address_space *aspace,
 				  CORE_ADDR pc, thread_info *thread,
 				  const target_waitstatus &ws,
 				  bpstat *stop_chain = nullptr);
+
+/* Like bpstat_stop_status, but clears all watchpoints'
+   watchpoint_triggered flag.  Unlike with bpstat_stop_status, there's
+   no need to call watchpoint_triggered beforehand.  You'll typically
+   use this variant when handling a known-non-watchpoint event, like a
+   fork or exec event.  */
+
+extern bpstat *bpstat_stop_status_nowatch (const address_space *aspace,
+					   CORE_ADDR bp_addr,
+					   thread_info *thread,
+					   const target_waitstatus &ws);
 
+
+
 /* This bpstat_what stuff tells wait_for_inferior what to do with a
    breakpoint (a challenging task).
 
@@ -1607,8 +1625,9 @@ extern void insert_single_step_breakpoint (struct gdbarch *,
    otherwise, return false.  */
 extern int insert_single_step_breakpoints (struct gdbarch *);
 
-/* Check if any hardware watchpoints have triggered, according to the
-   target.  */
+/* Check whether any hardware watchpoints have triggered or not,
+   according to the target, and record it in each watchpoint's
+   'watchpoint_triggered' field.  */
 int watchpoints_triggered (const target_waitstatus &);
 
 /* Helper for transparent breakpoint hiding for memory read and write
