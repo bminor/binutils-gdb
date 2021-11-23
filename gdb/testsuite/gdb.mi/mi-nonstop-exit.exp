@@ -39,24 +39,15 @@ save_vars { GDBFLAGS } {
 mi_gdb_test "-gdb-set mi-async 1" ".*"
 mi_detect_async
 
-if { [mi_runto_main] < 0 } {
-    continue
+foreach_with_prefix iteration {1 2} {
+    mi_delete_breakpoints
+    if { [mi_runto_main] < 0 } {
+        continue
+    }
+
+    mi_send_resuming_command "exec-continue" "continue"
+
+    mi_expect_stop "exited-normally" "" "" "" "" "" "finished exec continue"
 }
-
-mi_send_resuming_command "exec-continue" "continue"
-
-mi_expect_stop "exited-normally" "" "" "" "" "" "finished exec continue"
-
-# Run the program again.
-
-mi_delete_breakpoints
-
-if { [mi_runto_main] < 0 } {
-    continue
-}
-
-mi_send_resuming_command "exec-continue" "continue (2)"
-
-mi_expect_stop "exited-normally" "" "" "" "" "" "finished exec continue (2)"
 
 mi_gdb_exit
