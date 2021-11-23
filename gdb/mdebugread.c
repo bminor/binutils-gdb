@@ -386,9 +386,9 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
 
 struct pst_map
 {
-  legacy_psymtab *pst;	/* the psymtab proper */
-  long n_globals;		/* exported globals (external symbols) */
-  long globals_offset;		/* cumulative */
+  legacy_psymtab *pst = nullptr;  /* the psymtab proper */
+  long n_globals = 0;		  /* exported globals (external symbols) */
+  long globals_offset = 0;	  /* cumulative */
 };
 
 
@@ -2365,7 +2365,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
   /* Allocate the map FDR -> PST.
      Minor hack: -O3 images might claim some global data belongs
      to FDR -1.  We`ll go along with that.  */
-  gdb::def_vector<struct pst_map> fdr_to_pst_holder (hdr->ifdMax + 1);
+  std::vector<struct pst_map> fdr_to_pst_holder (hdr->ifdMax + 1);
   fdr_to_pst = fdr_to_pst_holder.data ();
   fdr_to_pst++;
   {
