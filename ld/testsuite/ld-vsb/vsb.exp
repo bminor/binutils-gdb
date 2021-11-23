@@ -49,7 +49,7 @@ if { ![istarget hppa*64*-*-hpux*] \
     return
 }
 
-set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
+set test_list [lsort [glob -nocomplain $srcdir/$subdir/*-elf.d]]
 foreach t $test_list {
     # We need to strip the ".d", but can leave the dirname.
     verbose [file rootname $t]
