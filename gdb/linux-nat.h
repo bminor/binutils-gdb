@@ -82,6 +82,8 @@ public:
 
   void thread_events (int) override;
 
+  bool supports_set_thread_options (gdb_thread_options options) override;
+
   bool can_async_p () override;
 
   bool supports_non_stop () override;
