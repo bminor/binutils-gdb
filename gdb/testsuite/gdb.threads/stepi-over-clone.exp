@@ -19,12 +19,6 @@
 # disassembly output.  For now this is only implemented for x86-64.
 require {istarget x86_64-*-*}
 
-# Test only on native targets, for now.
-proc is_native_target {} {
-    return [expr {[target_info gdb_protocol] == ""}]
-}
-require is_native_target
-
 standard_testfile
 
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile \

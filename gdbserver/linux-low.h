@@ -234,6 +234,8 @@ public:
 
   bool supports_vfork_events () override;
 
+  gdb_thread_options supported_thread_options () override;
+
   bool supports_exec_events () override;
 
   void handle_new_gdb_connection () override;
@@ -732,48 +734,47 @@ struct pending_signal
 
 struct lwp_info
 {
-  /* If this LWP is a fork child that wasn't reported to GDB yet, return
-     its parent, else nullptr.  */
+  /* If this LWP is a fork/vfork/clone child that wasn't reported to
+     GDB yet, return its parent, else nullptr.  */
   lwp_info *pending_parent () const
   {
-    if (this->fork_relative == nullptr)
+    if (this->relative == nullptr)
       return nullptr;
 
-    gdb_assert (this->fork_relative->fork_relative == this);
+    gdb_assert (this->relative->relative == this);
 
-    /* In a fork parent/child relationship, the parent has a status pending and
+    /* In a parent/child relationship, the parent has a status pending and
        the child does not, and a thread can only be in one such relationship
        at most.  So we can recognize who is the parent based on which one has
        a pending status.  */
     gdb_assert (!!this->status_pending_p
-		!= !!this->fork_relative->status_pending_p);
+		!= !!this->relative->status_pending_p);
 
-    if (!this->fork_relative->status_pending_p)
+    if (!this->relative->status_pending_p)
       return nullptr;
 
     const target_waitstatus &ws
-      = this->fork_relative->waitstatus;
+      = this->relative->waitstatus;
     gdb_assert (ws.kind () == TARGET_WAITKIND_FORKED
 		|| ws.kind () == TARGET_WAITKIND_VFORKED);
 
-    return this->fork_relative;
-  }
+    return this->relative; }
 
-  /* If this LWP is the parent of a fork child we haven't reported to GDB yet,
-     return that child, else nullptr.  */
+  /* If this LWP is the parent of a fork/vfork/clone child we haven't
+     reported to GDB yet, return that child, else nullptr.  */
   lwp_info *pending_child () const
   {
-    if (this->fork_relative == nullptr)
+    if (this->relative == nullptr)
       return nullptr;
 
-    gdb_assert (this->fork_relative->fork_relative == this);
+    gdb_assert (this->relative->relative == this);
 
-    /* In a fork parent/child relationship, the parent has a status pending and
+    /* In a parent/child relationship, the parent has a status pending and
        the child does not, and a thread can only be in one such relationship
        at most.  So we can recognize who is the parent based on which one has
        a pending status.  */
     gdb_assert (!!this->status_pending_p
-		!= !!this->fork_relative->status_pending_p);
+		!= !!this->relative->status_pending_p);
 
     if (!this->status_pending_p)
       return nullptr;
@@ -782,7 +783,7 @@ struct lwp_info
     gdb_assert (ws.kind () == TARGET_WAITKIND_FORKED
 		|| ws.kind () == TARGET_WAITKIND_VFORKED);
 
-    return this->fork_relative;
+    return this->relative;
   }
 
   /* Backlink to the parent object.  */
@@ -820,11 +821,13 @@ struct lwp_info
      information or exit status until it can be reported to GDB.  */
   struct target_waitstatus waitstatus;
 
-  /* A pointer to the fork child/parent relative.  Valid only while
-     the parent fork event is not reported to higher layers.  Used to
-     avoid wildcard vCont actions resuming a fork child before GDB is
-     notified about the parent's fork event.  */
-  struct lwp_info *fork_relative = nullptr;
+  /* A pointer to the fork/vfork/clone child/parent relative (like
+     people, LWPs have relatives).  Valid only while the parent
+     fork/vfork/clone event is not reported to higher layers.  Used to
+     avoid wildcard vCont actions resuming a fork/vfork/clone child
+     before GDB is notified about the parent's fork/vfork/clone
+     event.  */
+  struct lwp_info *relative = nullptr;
 
   /* When stopped is set, this is where the lwp last stopped, with
      decr_pc_after_break already accounted for.  If the LWP is
