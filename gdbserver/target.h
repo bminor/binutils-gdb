@@ -276,6 +276,9 @@ public:
   /* Returns true if vfork events are supported.  */
   virtual bool supports_vfork_events ();
 
+  /* Returns the set of supported thread options.  */
+  virtual gdb_thread_options supported_thread_options ();
+
   /* Returns true if exec events are supported.  */
   virtual bool supports_exec_events ();
 
@@ -530,6 +533,9 @@ int kill_inferior (process_info *proc);
 
 #define target_supports_vfork_events() \
   the_target->supports_vfork_events ()
+
+#define target_supported_thread_options(options) \
+  the_target->supported_thread_options (options)
 
 #define target_supports_exec_events() \
   the_target->supports_exec_events ()

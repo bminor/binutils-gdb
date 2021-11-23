@@ -248,6 +248,9 @@ enum {
   /* Support for the QThreadEvents packet.  */
   PACKET_QThreadEvents,
 
+  /* Support for the QThreadOptions packet.  */
+  PACKET_QThreadOptions,
+
   /* Support for multi-process extensions.  */
   PACKET_multiprocess_feature,
 
@@ -596,6 +599,10 @@ public: /* data */
      this can go away.  */
   bool wait_forever_enabled_p = true;
 
+  /* The set of thread options the target reported it supports, via
+     qSupported.  */
+  gdb_thread_options supported_thread_options = 0;
+
 private:
   /* Asynchronous signal handle registered as event loop source for
      when we have pending events ready to be passed to the core.  */
@@ -760,6 +767,8 @@ public:
   void detach (inferior *, int) override;
   void disconnect (const char *, int) override;
 
+  void commit_requested_thread_options ();
+
   void commit_resumed () override;
   void resume (ptid_t, int, enum gdb_signal) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
@@ -885,6 +894,8 @@ public:
   int async_wait_fd () override;
 
   void thread_events (int) override;
+
+  bool supports_set_thread_options (gdb_thread_options) override;
 
   int can_do_single_step () override;
 
@@ -1184,6 +1195,9 @@ public: /* Remote specific methods.  */
 
   void remote_packet_size (const protocol_feature *feature,
 			   packet_support support, const char *value);
+  void remote_supported_thread_options (const protocol_feature *feature,
+					enum packet_support support,
+					const char *value);
 
   void remote_serial_quit_handler ();
 
@@ -5506,7 +5520,8 @@ remote_supported_packet (remote_target *remote,
 
 void
 remote_target::remote_packet_size (const protocol_feature *feature,
-				   enum packet_support support, const char *value)
+				   enum packet_support support,
+				   const char *value)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -5541,6 +5556,49 @@ remote_packet_size (remote_target *remote, const protocol_feature *feature,
 		    enum packet_support support, const char *value)
 {
   remote->remote_packet_size (feature, support, value);
+}
+
+void
+remote_target::remote_supported_thread_options (const protocol_feature *feature,
+						enum packet_support support,
+						const char *value)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  m_features.m_protocol_packets[feature->packet].support = support;
+
+  if (support != PACKET_ENABLE)
+    return;
+
+  if (value == nullptr || *value == '\0')
+    {
+      warning (_("Remote target reported \"%s\" without supported options."),
+	       feature->name);
+      return;
+    }
+
+  ULONGEST options = 0;
+  const char *p = unpack_varlen_hex (value, &options);
+
+  if (*p != '\0')
+    {
+      warning (_("Remote target reported \"%s\" with "
+		 "bad thread options: \"%s\"."),
+	       feature->name, value);
+      return;
+    }
+
+  /* Record the set of supported options.  */
+  rs->supported_thread_options = (gdb_thread_option) options;
+}
+
+static void
+remote_supported_thread_options (remote_target *remote,
+				 const protocol_feature *feature,
+				 enum packet_support support,
+				 const char *value)
+{
+  remote->remote_supported_thread_options (feature, support, value);
 }
 
 static const struct protocol_feature remote_protocol_features[] = {
@@ -5645,6 +5703,8 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_Qbtrace_conf_pt_size },
   { "vContSupported", PACKET_DISABLE, remote_supported_packet, PACKET_vContSupported },
   { "QThreadEvents", PACKET_DISABLE, remote_supported_packet, PACKET_QThreadEvents },
+  { "QThreadOptions", PACKET_DISABLE, remote_supported_thread_options,
+    PACKET_QThreadOptions },
   { "no-resumed", PACKET_DISABLE, remote_supported_packet, PACKET_no_resumed },
   { "memory-tagging", PACKET_DISABLE, remote_supported_packet,
     PACKET_memory_tagging_feature },
@@ -5746,6 +5806,10 @@ remote_target::remote_query_supported ()
       if (m_features.packet_set_cmd_state (PACKET_QThreadEvents)
 	  != AUTO_BOOLEAN_FALSE)
 	remote_query_supported_append (&q, "QThreadEvents+");
+
+      if (m_features.packet_set_cmd_state (PACKET_QThreadOptions)
+	  != AUTO_BOOLEAN_FALSE)
+	remote_query_supported_append (&q, "QThreadOptions+");
 
       if (m_features.packet_set_cmd_state (PACKET_no_resumed)
 	  != AUTO_BOOLEAN_FALSE)
@@ -6843,6 +6907,8 @@ remote_target::resume (ptid_t scope_ptid, int step, enum gdb_signal siggnal)
       return;
     }
 
+  commit_requested_thread_options ();
+
   /* In all-stop, we can't mark REMOTE_ASYNC_GET_PENDING_EVENTS_TOKEN
      (explained in remote-notif.c:handle_notification) so
      remote_notif_process is not called.  We need find a place where
@@ -7004,6 +7070,8 @@ remote_target::commit_resumed ()
      reverse execution.  */
   if (!target_is_non_stop_p () || ::execution_direction == EXEC_REVERSE)
     return;
+
+  commit_requested_thread_options ();
 
   /* Try to send wildcard actions ("vCont;c" or "vCont;c:pPID.-1")
      instead of resuming all threads of each process individually.
@@ -15036,6 +15104,115 @@ remote_target::thread_events (int enable)
     }
 }
 
+/* Implementation of the supports_set_thread_options target
+   method.  */
+
+bool
+remote_target::supports_set_thread_options (gdb_thread_options options)
+{
+  remote_state *rs = get_remote_state ();
+  return (m_features.packet_support (PACKET_QThreadOptions) == PACKET_ENABLE
+	  && (rs->supported_thread_options & options) == options);
+}
+
+/* For coalescing reasons, actually sending the options to the target
+   happens at resume time, via this function.  See target_resume for
+   all-stop, and target_commit_resumed for non-stop.  */
+
+void
+remote_target::commit_requested_thread_options ()
+{
+  struct remote_state *rs = get_remote_state ();
+
+  if (m_features.packet_support (PACKET_QThreadOptions) != PACKET_ENABLE)
+    return;
+
+  char *p = rs->buf.data ();
+  char *endp = p + get_remote_packet_size ();
+
+  /* Clear options for all threads by default.  Note that unlike
+     vCont, the rightmost options that match a thread apply, so we
+     don't have to worry about whether we can use wildcard ptids.  */
+  strcpy (p, "QThreadOptions;0");
+  p += strlen (p);
+
+  /* Send the QThreadOptions packet stored in P.  */
+  auto flush = [&] ()
+    {
+      *p++ = '\0';
+
+      putpkt (rs->buf);
+      getpkt (&rs->buf, 0);
+
+      switch (m_features.packet_ok (rs->buf, PACKET_QThreadOptions))
+	{
+	case PACKET_OK:
+	  if (strcmp (rs->buf.data (), "OK") != 0)
+	    error (_("Remote refused setting thread options: %s"), rs->buf.data ());
+	  break;
+	case PACKET_ERROR:
+	  error (_("Remote failure reply: %s"), rs->buf.data ());
+	case PACKET_UNKNOWN:
+	  gdb_assert_not_reached ("PACKET_UNKNOWN");
+	  break;
+	}
+    };
+
+  /* Prepare P for another QThreadOptions packet.  */
+  auto restart = [&] ()
+    {
+      p = rs->buf.data ();
+      strcpy (p, "QThreadOptions");
+      p += strlen (p);
+    };
+
+  /* Now set non-zero options for threads that need them.  We don't
+     bother with the case of all threads of a process wanting the same
+     non-zero options as that's not an expected scenario.  */
+  for (thread_info *tp : all_non_exited_threads (this))
+    {
+      gdb_thread_options options = tp->thread_options ();
+
+      if (options == 0)
+	continue;
+
+      /* It might be possible to we have more threads with options
+	 than can fit a single QThreadOptions packet.  So build each
+	 options/thread pair in this separate buffer to make sure it
+	 fits.  */
+      constexpr size_t max_options_size = 100;
+      char obuf[max_options_size];
+      char *obuf_p = obuf;
+      char *obuf_endp = obuf + max_options_size;
+
+      *obuf_p++ = ';';
+      obuf_p += xsnprintf (obuf_p, obuf_endp - obuf_p, "%s",
+			   phex_nz (options, sizeof (options)));
+      if (tp->ptid != magic_null_ptid)
+	{
+	  *obuf_p++ = ':';
+	  obuf_p = write_ptid (obuf_p, obuf_endp, tp->ptid);
+	}
+
+      size_t osize = obuf_p - obuf;
+      if (osize > endp - p)
+	{
+	  /* This new options/thread pair doesn't fit the packet
+	     buffer.  Send what we have already.  */
+	  flush ();
+	  restart ();
+
+	  /* Should now fit.  */
+	  gdb_assert (osize <= endp - p);
+	}
+
+      memcpy (p, obuf, osize);
+      p += osize;
+    }
+
+  flush ();
+}
+
 static void
 show_remote_cmd (const char *args, int from_tty)
 {
@@ -15783,6 +15960,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (PACKET_QThreadEvents, "QThreadEvents", "thread-events",
 			 0);
+
+  add_packet_config_cmd (PACKET_QThreadOptions, "QThreadOptions",
+			 "thread-options", 0);
 
   add_packet_config_cmd (PACKET_no_resumed, "N stop reply",
 			 "no-resumed-stop-reply", 0);

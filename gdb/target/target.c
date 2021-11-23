@@ -188,3 +188,14 @@ target_read_string (CORE_ADDR memaddr, int len, int *bytes_read)
 
   return gdb::unique_xmalloc_ptr<char> ((char *) buffer.release ());
 }
+
+/* See target/target.h.  */
+
+std::string
+to_string (gdb_thread_options options)
+{
+  static constexpr gdb_thread_options::string_mapping mapping[] = {
+    MAP_ENUM_FLAG (GDB_THREAD_OPTION_CLONE),
+  };
+  return options.to_string (mapping);
+}
