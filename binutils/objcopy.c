@@ -4993,6 +4993,13 @@ convert_efi_target (char *efi)
       /* Change x86_64 to x86-64.  */
       efi[7] = '-';
     }
+  else if (strcmp (efi + 4, "aarch64") == 0)
+    {
+      /* Change aarch64 to aarch64-little.  */
+      efi = (char *) xrealloc (efi, strlen (efi) + 7);
+      char *t = "aarch64-little";
+      strcpy (efi + 4, t);
+    }
 }
 
 /* Allocate and return a pointer to a struct section_add, initializing the
