@@ -80,6 +80,9 @@ struct thread_info
 
   /* Branch trace target information for this thread.  */
   struct btrace_target_info *btrace = nullptr;
+
+  /* Thread options GDB requested with QThreadOptions.  */
+  gdb_thread_options thread_options = 0;
 };
 
 extern std::list<thread_info *> all_threads;

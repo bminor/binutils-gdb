@@ -106,6 +106,7 @@ struct dummy_target : public target_ops
   int async_wait_fd () override;
   bool has_pending_events () override;
   void thread_events (int arg0) override;
+  bool supports_set_thread_options (gdb_thread_options arg0) override;
   bool supports_non_stop () override;
   bool always_non_stop_p () override;
   int find_memory_regions (find_memory_region_ftype arg0, void *arg1) override;
@@ -281,6 +282,7 @@ struct debug_target : public target_ops
   int async_wait_fd () override;
   bool has_pending_events () override;
   void thread_events (int arg0) override;
+  bool supports_set_thread_options (gdb_thread_options arg0) override;
   bool supports_non_stop () override;
   bool always_non_stop_p () override;
   int find_memory_regions (find_memory_region_ftype arg0, void *arg1) override;
@@ -2270,6 +2272,32 @@ debug_target::thread_events (int arg0)
   gdb_printf (gdb_stdlog, "<- %s->thread_events (", this->beneath ()->shortname ());
   target_debug_print_int (arg0);
   gdb_puts (")\n", gdb_stdlog);
+}
+
+bool
+target_ops::supports_set_thread_options (gdb_thread_options arg0)
+{
+  return this->beneath ()->supports_set_thread_options (arg0);
+}
+
+bool
+dummy_target::supports_set_thread_options (gdb_thread_options arg0)
+{
+  return false;
+}
+
+bool
+debug_target::supports_set_thread_options (gdb_thread_options arg0)
+{
+  bool result;
+  gdb_printf (gdb_stdlog, "-> %s->supports_set_thread_options (...)\n", this->beneath ()->shortname ());
+  result = this->beneath ()->supports_set_thread_options (arg0);
+  gdb_printf (gdb_stdlog, "<- %s->supports_set_thread_options (", this->beneath ()->shortname ());
+  target_debug_print_gdb_thread_options (arg0);
+  gdb_puts (") = ", gdb_stdlog);
+  target_debug_print_bool (result);
+  gdb_puts ("\n", gdb_stdlog);
+  return result;
 }
 
 bool
