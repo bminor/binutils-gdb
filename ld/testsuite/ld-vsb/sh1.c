@@ -6,9 +6,7 @@
    of a shared library.  */
 
 /* This variable is supplied by the main program.  */
-#ifndef XCOFF_TEST
 extern int mainvar;
-#endif
 
 /* This variable is defined in the shared library, and overridden by
    the main program.  */
@@ -33,13 +31,11 @@ extern int shlibvar2;
 /* These functions return the values of the above variables as seen in
    the shared library.  */
 
-#ifndef XCOFF_TEST
 int
 shlib_mainvar ()
 {
   return mainvar;
 }
-#endif
 
 #ifndef XCOFF_TEST
 int
@@ -95,7 +91,6 @@ shlib_overriddencall2 ()
 
 /* This function calls a function defined by the main program.  */
 
-#ifndef XCOFF_TEST
 extern int main_called ();
 
 int
@@ -103,7 +98,6 @@ shlib_maincall ()
 {
   return main_called ();
 }
-#endif
 
 /* This function is passed a function pointer to shlib_mainvar.  It
    confirms that the pointer compares equally.  */
@@ -118,14 +112,12 @@ shlib_checkfunptr1 (p)
 /* This function is passed a function pointer to main_called.  It
    confirms that the pointer compares equally.  */
 
-#ifndef XCOFF_TEST
 int
 shlib_checkfunptr2 (p)
      int (*p) ();
 {
   return p == main_called;
 }
-#endif
 
 /* This function returns a pointer to shlib_mainvar.  */
 
@@ -137,13 +129,11 @@ int
 
 /* This function returns a pointer to main_called.  */
 
-#ifndef XCOFF_TEST
 int
 (*shlib_getfunptr2 ()) ()
 {
   return main_called;
 }
-#endif
 
 /* This function makes sure that constant data and local functions
    work.  */

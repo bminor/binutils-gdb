@@ -236,8 +236,8 @@ main (void)
   printf ("mainvar == %d\n", mainvar);
   printf ("overriddenvar == %d\n", overriddenvar);
   printf ("shlibvar1 == %d\n", shlibvar1);
-#ifndef XCOFF_TEST
   printf ("shlib_mainvar () == %d\n", shlib_mainvar ());
+#ifndef XCOFF_TEST
   printf ("shlib_overriddenvar () == %d\n", shlib_overriddenvar ());
 #endif
   printf ("shlib_shlibvar1 () == %d\n", shlib_shlibvar1 ());
@@ -245,15 +245,13 @@ main (void)
   printf ("shlib_shlibcall () == %d\n", shlib_shlibcall ());
 #ifndef XCOFF_TEST
   printf ("shlib_shlibcall2 () == %d\n", shlib_shlibcall2 ());
-  printf ("shlib_maincall () == %d\n", shlib_maincall ());
 #endif
+  printf ("shlib_maincall () == %d\n", shlib_maincall ());
   printf ("main_called () == %d\n", main_called ());
   printf ("shlib_checkfunptr1 (shlib_shlibvar1) == %d\n",
 	  shlib_checkfunptr1 (shlib_shlibvar1));
-#ifndef XCOFF_TEST
   printf ("shlib_checkfunptr2 (main_called) == %d\n",
 	  shlib_checkfunptr2 (main_called));
-#endif
   p = shlib_getfunptr1 ();
   printf ("shlib_getfunptr1 () ");
   if (p == shlib_shlibvar1)
@@ -261,7 +259,6 @@ main (void)
   else
     printf ("!=");
   printf (" shlib_shlibvar1\n");
-#ifndef XCOFF_TEST
   p = shlib_getfunptr2 ();
   printf ("shlib_getfunptr2 () ");
   if (p == main_called)
@@ -269,7 +266,6 @@ main (void)
   else
     printf ("!=");
   printf (" main_called\n");
-#endif
   printf ("shlib_check () == %d\n", shlib_check ());
   printf ("visibility_check () == %d\n", visibility_check ());
   printf ("visibility_checkfunptr () == %d\n",

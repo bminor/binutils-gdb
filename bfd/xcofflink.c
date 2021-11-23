@@ -798,10 +798,14 @@ xcoff_dynamic_definition_p (struct xcoff_link_hash_entry *h,
 	  || h->root.type == bfd_link_hash_undefweak))
     return true;
 
-  /* If H is currently undefined, LDSYM defines it.  */
+  /* If H is currently undefined, LDSYM defines it.
+     However, if H has a hidden visibility, LDSYM must not
+     define it.  */
   if ((h->flags & XCOFF_DEF_DYNAMIC) == 0
       && (h->root.type == bfd_link_hash_undefined
-	  || h->root.type == bfd_link_hash_undefweak))
+	  || h->root.type == bfd_link_hash_undefweak)
+      && (h->visibility != SYM_V_HIDDEN
+	  && h->visibility != SYM_V_INTERNAL))
     return true;
 
   return false;
@@ -1243,6 +1247,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
     bfd_byte *linenos;
   } *reloc_info = NULL;
   bfd_size_type amt;
+  unsigned short visibility;
 
   keep_syms = obj_coff_keep_syms (abfd);
 
@@ -1479,6 +1484,9 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		}
 	    }
 	}
+
+      /* Record visibility.  */
+      visibility = sym.n_type & SYM_V_MASK;
 
       /* Pick up the csect auxiliary information.  */
       if (sym.n_numaux == 0)
@@ -2058,6 +2066,22 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		  /* Try not to give this error too many times.  */
 		  (*sym_hash)->flags &= ~XCOFF_MULTIPLY_DEFINED;
 		}
+
+
+	      /* If the symbol is hidden or internal, completely undo
+		 any dynamic link state.  */
+	      if ((*sym_hash)->flags & XCOFF_DEF_DYNAMIC
+		  && (visibility == SYM_V_HIDDEN
+		      || visibility == SYM_V_INTERNAL))
+		  (*sym_hash)->flags &= ~XCOFF_DEF_DYNAMIC;
+	      else
+		{
+		  /* Keep the most constraining visibility.  */
+		  unsigned short hvis = (*sym_hash)->visibility;
+		  if (visibility && ( !hvis || visibility < hvis))
+		    (*sym_hash)->visibility = visibility;
+		}
+
 	    }
 
 	  /* _bfd_generic_link_add_one_symbol may call the linker to
@@ -2648,6 +2672,11 @@ xcoff_auto_export_p (struct bfd_link_info *info,
 
   /* Don't export functions; export their descriptors instead.  */
   if (h->root.root.string[0] == '.')
+    return false;
+
+  /* Don't export hidden or internal symbols.  */
+  if (h->visibility == SYM_V_HIDDEN
+      || h->visibility == SYM_V_INTERNAL)
     return false;
 
   /* We don't export a symbol which is being defined by an object
@@ -3247,6 +3276,19 @@ bfd_xcoff_export_symbol (bfd *output_bfd,
 
   if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
     return true;
+
+  /* As AIX linker, symbols exported with hidden visibility are
+     silently ignored.  */
+  if (h->visibility == SYM_V_HIDDEN)
+    return true;
+
+  if (h->visibility == SYM_V_INTERNAL)
+    {
+      _bfd_error_handler (_("%pB: cannot export internal symbol `%s`."),
+			  output_bfd, h->root.root.string);
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
 
   h->flags |= XCOFF_EXPORT;
 
@@ -4571,6 +4613,10 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 			       + (*csectpp)->output_offset
 			       - (*csectpp)->vma);
 	    }
+
+	  /* Update visibility.  */
+	  isym.n_type &= ~SYM_V_MASK;
+	  isym.n_type |= (*sym_hash)->visibility;
 
 	  /* Output the symbol.  */
 	  bfd_coff_swap_sym_out (output_bfd, (void *) &isym, (void *) outsym);
