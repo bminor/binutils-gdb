@@ -441,14 +441,8 @@ public:
      VMA of 0.  */
   bool has_section_at_zero = false;
 
-  /* The mapped index, or NULL if .gdb_index is missing or not being used.  */
-  std::unique_ptr<mapped_index> index_table;
-
-  /* The mapped index, or NULL if .debug_names is missing or not being used.  */
-  std::unique_ptr<mapped_debug_names> debug_names_table;
-
-  /* The cooked index, or NULL if not using one.  */
-  std::unique_ptr<cooked_index_vector> cooked_index_table;
+  /* The mapped index, or NULL in the readnow case.  */
+  std::unique_ptr<dwarf_scanner_base> index_table;
 
   /* When using index_table, this keeps track of all quick_file_names entries.
      TUs typically share line table entries with a CU, so we maintain a

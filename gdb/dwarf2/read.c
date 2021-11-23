@@ -2932,7 +2932,8 @@ static void
 dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
 		      dwarf2_per_objfile *per_objfile,
 		      gdb::optional<block_enum> block_index,
-		      domain_enum domain, offset_type namei)
+		      domain_enum domain, offset_type namei,
+		      mapped_index &index)
 {
   iter->per_objfile = per_objfile;
   iter->block_index = block_index;
@@ -2942,12 +2943,10 @@ dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
   iter->vec = {};
   iter->length = 0;
 
-  mapped_index *index = per_objfile->per_bfd->index_table.get ();
+  gdb_assert (!index.symbol_name_slot_invalid (namei));
+  offset_type vec_idx = index.symbol_vec_index (namei);
 
-  gdb_assert (!index->symbol_name_slot_invalid (namei));
-  offset_type vec_idx = index->symbol_vec_index (namei);
-
-  iter->vec = offset_view (index->constant_pool.slice (vec_idx));
+  iter->vec = offset_view (index.constant_pool.slice (vec_idx));
   iter->length = iter->vec[0];
 }
 
@@ -3078,8 +3077,9 @@ dwarf2_gdb_index::dump (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  gdb_printf (".gdb_index: version %d\n",
-	      per_objfile->per_bfd->index_table->version);
+  mapped_index *index = (static_cast<mapped_index *>
+			 (per_objfile->per_bfd->index_table.get ()));
+  gdb_printf (".gdb_index: version %d\n", index->version);
   gdb_printf ("\n");
 }
 
@@ -3129,7 +3129,9 @@ dwarf2_gdb_index::expand_matching_symbols
 
   const block_enum block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
 
-  mapped_index &index = *per_objfile->per_bfd->index_table;
+  mapped_index &index
+    = (static_cast<mapped_index &>
+       (*per_objfile->per_bfd->index_table.get ()));
 
   const char *match_name = name.ada ().lookup_name ().c_str ();
   auto matcher = [&] (const char *symname)
@@ -3145,7 +3147,8 @@ dwarf2_gdb_index::expand_matching_symbols
       struct dw2_symtab_iterator iter;
       struct dwarf2_per_cu_data *per_cu;
 
-      dw2_symtab_iter_init (&iter, per_objfile, block_kind, domain, namei);
+      dw2_symtab_iter_init (&iter, per_objfile, block_kind, domain, namei,
+			    index);
       while ((per_cu = dw2_symtab_iter_next (&iter, index)) != NULL)
 	dw2_expand_symtabs_matching_one (per_cu, per_objfile, nullptr,
 					 nullptr);
@@ -3967,7 +3970,9 @@ dw2_expand_marked_cus
 {
   offset_type vec_len, vec_idx;
   bool global_seen = false;
-  mapped_index &index = *per_objfile->per_bfd->index_table;
+  mapped_index &index
+    = (static_cast<mapped_index &>
+       (*per_objfile->per_bfd->index_table.get ()));
 
   offset_view vec (index.constant_pool.slice (index.symbol_vec_index (idx)));
   vec_len = vec[0];
@@ -4185,7 +4190,9 @@ dwarf2_gdb_index::expand_symtabs_matching
       return true;
     }
 
-  mapped_index &index = *per_objfile->per_bfd->index_table;
+  mapped_index &index
+    = (static_cast<mapped_index &>
+       (*per_objfile->per_bfd->index_table.get ()));
 
   bool result
     = dw2_expand_symtabs_matching_symbol (index, *lookup_name,
@@ -4683,7 +4690,7 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 
   create_addrmap_from_aranges (per_objfile, &per_bfd->debug_aranges);
 
-  per_bfd->debug_names_table = std::move (map);
+  per_bfd->index_table = std::move (map);
   per_bfd->quick_file_names_table =
     create_quick_file_names_table (per_bfd->all_comp_units.size ());
 
@@ -5119,7 +5126,9 @@ dwarf2_debug_names_index::expand_matching_symbols
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  mapped_debug_names &map = *per_objfile->per_bfd->debug_names_table;
+  mapped_debug_names &map
+    = (static_cast<mapped_debug_names &>
+       (*per_objfile->per_bfd->index_table.get ()));
   const block_search_flags block_flags
     = global ? SEARCH_GLOBAL_BLOCK : SEARCH_STATIC_BLOCK;
 
@@ -5179,7 +5188,9 @@ dwarf2_debug_names_index::expand_symtabs_matching
       return true;
     }
 
-  mapped_debug_names &map = *per_objfile->per_bfd->debug_names_table;
+  mapped_debug_names &map
+    = (static_cast<mapped_debug_names &>
+       (*per_objfile->per_bfd->index_table.get ()));
 
   bool result
     = dw2_expand_symtabs_matching_symbol (map, *lookup_name,
@@ -5284,30 +5295,12 @@ dwarf2_initialize_objfile (struct objfile *objfile)
       return;
     }
 
-  /* Was a debug names index already read when we processed an objfile sharing
-     PER_BFD?  */
-  if (per_bfd->debug_names_table != nullptr)
-    {
-      dwarf_read_debug_printf ("re-using shared debug names table");
-      objfile->qf.push_front
-	(per_bfd->debug_names_table->make_quick_functions ());
-      return;
-    }
-
   /* Was a GDB index already read when we processed an objfile sharing
      PER_BFD?  */
   if (per_bfd->index_table != nullptr)
     {
-      dwarf_read_debug_printf ("re-using shared index table");
+      dwarf_read_debug_printf ("re-using symbols");
       objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
-      return;
-    }
-
-  if (per_bfd->cooked_index_table != nullptr)
-    {
-      dwarf_read_debug_printf ("re-using cooked index table");
-      objfile->qf.push_front
-	(per_bfd->cooked_index_table->make_quick_functions ());
       return;
     }
 
@@ -5315,7 +5308,7 @@ dwarf2_initialize_objfile (struct objfile *objfile)
     {
       dwarf_read_debug_printf ("found debug names");
       objfile->qf.push_front
-	(per_bfd->debug_names_table->make_quick_functions ());
+	(per_bfd->index_table->make_quick_functions ());
       return;
     }
 
@@ -5354,7 +5347,7 @@ dwarf2_build_psymtabs (struct objfile *objfile, bool already_attached)
 
   if (already_attached)
     {
-      if (per_objfile->per_bfd->cooked_index_table != nullptr)
+      if (per_objfile->per_bfd->index_table != nullptr)
 	return;
     }
   else
@@ -7134,11 +7127,11 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
 		     }),
      indexes.end ());
   indexes.shrink_to_fit ();
-  per_bfd->cooked_index_table.reset
-    (new cooked_index_vector (std::move (indexes)));
 
-  const cooked_index_entry *main_entry
-    = per_bfd->cooked_index_table->get_main ();
+  cooked_index_vector *vec = new cooked_index_vector (std::move (indexes));
+  per_bfd->index_table.reset (vec);
+
+  const cooked_index_entry *main_entry = vec->get_main ();
   if (main_entry != nullptr)
     set_objfile_main_name (objfile, main_entry->name,
 			   main_entry->per_cu->lang);
@@ -18478,12 +18471,14 @@ cooked_index_functions::find_pc_sect_compunit_symtab
       int warn_if_readin)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->per_bfd->cooked_index_table == nullptr)
+  if (per_objfile->per_bfd->index_table == nullptr)
     return nullptr;
 
   CORE_ADDR baseaddr = objfile->text_section_offset ();
-  dwarf2_per_cu_data *per_cu
-    = per_objfile->per_bfd->cooked_index_table->lookup (pc - baseaddr);
+  cooked_index_vector *table
+    = (static_cast<cooked_index_vector *>
+       (per_objfile->per_bfd->index_table.get ()));
+  dwarf2_per_cu_data *per_cu = table->lookup (pc - baseaddr);
   if (per_cu == nullptr)
     return nullptr;
 
@@ -18507,12 +18502,14 @@ cooked_index_functions::find_compunit_symtab_by_address
     return nullptr;
 
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->per_bfd->cooked_index_table == nullptr)
+  if (per_objfile->per_bfd->index_table == nullptr)
     return nullptr;
 
   CORE_ADDR baseaddr = objfile->data_section_offset ();
-  dwarf2_per_cu_data *per_cu
-    = per_objfile->per_bfd->cooked_index_table->lookup (address - baseaddr);
+  cooked_index_vector *table
+    = (static_cast<cooked_index_vector *>
+       (per_objfile->per_bfd->index_table.get ()));
+  dwarf2_per_cu_data *per_cu = table->lookup (address - baseaddr);
   if (per_cu == nullptr)
     return nullptr;
 
@@ -18528,7 +18525,7 @@ cooked_index_functions::expand_matching_symbols
       symbol_compare_ftype *ordered_compare)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->per_bfd->cooked_index_table == nullptr)
+  if (per_objfile->per_bfd->index_table == nullptr)
     return;
   const block_search_flags search_flags = (global
 					   ? SEARCH_GLOBAL_BLOCK
@@ -18537,8 +18534,10 @@ cooked_index_functions::expand_matching_symbols
   symbol_name_matcher_ftype *name_match
     = lang->get_symbol_name_matcher (lookup_name);
 
-  for (const cooked_index_entry *entry
-	 : per_objfile->per_bfd->cooked_index_table->all_entries ())
+  cooked_index_vector *table
+    = (static_cast<cooked_index_vector *>
+       (per_objfile->per_bfd->index_table.get ()));
+  for (const cooked_index_entry *entry : table->all_entries ())
     {
       if (entry->parent_entry != nullptr)
 	continue;
@@ -18564,7 +18563,7 @@ cooked_index_functions::expand_symtabs_matching
       enum search_domain kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->per_bfd->cooked_index_table == nullptr)
+  if (per_objfile->per_bfd->index_table == nullptr)
     return true;
 
   dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
@@ -18602,14 +18601,16 @@ cooked_index_functions::expand_symtabs_matching
     language_ada
   };
 
+  cooked_index_vector *table
+    = (static_cast<cooked_index_vector *>
+       (per_objfile->per_bfd->index_table.get ()));
   for (enum language lang : unique_styles)
     {
       std::vector<gdb::string_view> name_vec
 	= lookup_name_without_params.split_name (lang);
 
-      for (const cooked_index_entry *entry
-	   : per_objfile->per_bfd->cooked_index_table->find (name_vec.back (),
-							     completing))
+      for (const cooked_index_entry *entry : table->find (name_vec.back (),
+							  completing))
 	{
 	  /* No need to consider symbols from expanded CUs.  */
 	  if (per_objfile->symtab_set_p (entry->per_cu))
