@@ -4467,6 +4467,13 @@ linux_nat_target::thread_events (int enable)
   report_thread_events = enable;
 }
 
+bool
+linux_nat_target::supports_set_thread_options (gdb_thread_options options)
+{
+  constexpr gdb_thread_options supported_options = GDB_THREAD_OPTION_CLONE;
+  return ((options & supported_options) == options);
+}
+
 linux_nat_target::linux_nat_target ()
 {
   /* We don't change the stratum; this target will sit at
