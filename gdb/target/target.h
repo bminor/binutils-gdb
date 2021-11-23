@@ -22,8 +22,18 @@
 
 #include "target/waitstatus.h"
 #include "target/wait.h"
+#include "gdbsupport/enum-flags.h"
 
 /* This header is a stopgap until more code is shared.  */
+
+enum gdb_thread_option : unsigned
+{
+  /* Tell the target to report TARGET_WAITKIND_THREAD_CLONED events
+     for the thread.  */
+  GDB_TO_CLONE = 1 << 0,
+};
+
+DEF_ENUM_FLAGS_TYPE (enum gdb_thread_option, gdb_thread_options);
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the
    results in GDB's memory at MYADDR.  Return zero for success,

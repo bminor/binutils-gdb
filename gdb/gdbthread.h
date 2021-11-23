@@ -28,6 +28,7 @@ struct symtab;
 #include "ui-out.h"
 #include "btrace.h"
 #include "target/waitstatus.h"
+#include "target/target.h"
 #include "cli/cli-utils.h"
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/common-gdbthread.h"
@@ -470,6 +471,17 @@ public:
     m_thread_fsm = std::move (fsm);
   }
 
+  /* Record the thread options last set for this thread.  */
+
+  void set_thread_options (gdb_thread_options thread_options);
+
+  /* Get the thread options last set for this thread.  */
+
+  gdb_thread_options thread_options () const
+  {
+    return m_thread_options;
+  }
+
   int current_line = 0;
   struct symtab *current_symtab = NULL;
 
@@ -577,6 +589,10 @@ private:
      left to do for the thread's execution command after the target
      stops.  Several execution commands use it.  */
   std::unique_ptr<struct thread_fsm> m_thread_fsm;
+
+  /* The thread options as last set with a call to
+     target_set_thread_options.  */
+  gdb_thread_options m_thread_options;
 };
 
 using thread_info_resumed_with_pending_wait_status_node

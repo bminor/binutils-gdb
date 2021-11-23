@@ -531,6 +531,12 @@ process_stratum_target::supports_vfork_events ()
 }
 
 bool
+process_stratum_target::supports_set_thread_options (gdb_thread_options *)
+{
+  return false;
+}
+
+bool
 process_stratum_target::supports_exec_events ()
 {
   return false;
