@@ -464,7 +464,7 @@ if { ![ld_compile "$CC_FOR_TARGET -g $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $srcdir/$
 	if ![ld_link $ld tmpdir/sh3.so "-shared tmpdir/sh3.o"] {
 	    fail "weak hidden symbol"
 	} else {
-	    if ![ld_link $ld tmpdir/weak "tmpdir/test.o tmpdir/sh3.o"] {
+	    if ![ld_link $ld tmpdir/weak "tmpdir/test.o tmpdir/sh3.so"] {
 		fail "weak hidden symbol DSO last"
 	    } else {
 		pass "weak hidden symbol DSO last"
