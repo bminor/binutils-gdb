@@ -348,9 +348,7 @@ proc test_catch_syscall_execve {} {
 	# Check for entry/return across the execve, making sure that the
 	# syscall_state isn't lost when turning into a new process.
 	insert_catch_syscall_with_arg "execve"
-
-	# Check that the execve is called.
-	check_call_to_syscall "execve"
+	check_continue "execve"
 
 	# Continue to main so extended-remote can read files as needed.
 	# (Otherwise that "Reading" output confuses gdb_continue_to_end.)
