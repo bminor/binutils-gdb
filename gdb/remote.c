@@ -14379,14 +14379,11 @@ remote_target::thread_info_to_thread_handle (struct thread_info *tp)
 bool
 remote_target::can_async_p ()
 {
+  /* This flag should be checked in the common target.c code.  */
+  gdb_assert (target_async_permitted);
+
+  /* We're async whenever the serial device can.  */
   struct remote_state *rs = get_remote_state ();
-
-  /* We don't go async if the user has explicitly prevented it with the
-     "maint set target-async" command.  */
-  if (!target_async_permitted)
-    return false;
-
-  /* We're async whenever the serial device is.  */
   return serial_can_async_p (rs->remote_desc);
 }
 

@@ -399,6 +399,8 @@ target_can_async_p ()
 bool
 target_can_async_p (struct target_ops *target)
 {
+  if (!target_async_permitted)
+    return false;
   return target->can_async_p ();
 }
 

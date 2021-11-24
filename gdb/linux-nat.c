@@ -4088,9 +4088,11 @@ linux_nat_target::is_async_p ()
 bool
 linux_nat_target::can_async_p ()
 {
-  /* We're always async, unless the user explicitly prevented it with the
-     "maint set target-async" command.  */
-  return target_async_permitted;
+  /* This flag should be checked in the common target.c code.  */
+  gdb_assert (target_async_permitted);
+  
+  /* Otherwise, this targets is always able to support async mode.  */
+  return true;
 }
 
 bool
