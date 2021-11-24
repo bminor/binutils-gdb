@@ -127,7 +127,7 @@ interp_factory_register (const char *name, interp_factory_func func)
 
 /* Add interpreter INTERP to the gdb interpreter list.  The
    interpreter must not have previously been added.  */
-void
+static void
 interp_add (struct ui *ui, struct interp *interp)
 {
   struct ui_interp_info *ui_interp = get_interp_info (ui);

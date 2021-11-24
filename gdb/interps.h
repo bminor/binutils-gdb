@@ -94,8 +94,6 @@ public:
   bool inited;
 };
 
-extern void interp_add (struct ui *ui, struct interp *interp);
-
 /* Look up the interpreter for NAME, creating one if none exists yet.
    If NAME is not a interpreter type previously registered with
    interp_factory_register, return NULL; otherwise return a pointer to
