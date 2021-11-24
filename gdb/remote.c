@@ -14390,13 +14390,8 @@ remote_target::can_async_p ()
 bool
 remote_target::is_async_p ()
 {
-  struct remote_state *rs = get_remote_state ();
-
-  if (!target_async_permitted)
-    /* We only enable async when the user specifically asks for it.  */
-    return false;
-
   /* We're async whenever the serial device is.  */
+  struct remote_state *rs = get_remote_state ();
   return serial_is_async_p (rs->remote_desc);
 }
 
