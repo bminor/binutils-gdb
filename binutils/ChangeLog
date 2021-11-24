@@ -1,3 +1,8 @@
+2021-11-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 28564
+	* sysdump.c (getCHARS): Check for an out of bounds read.
+
 2021-11-16  Fangrui Song  <maskray@google.com>
 
 	* readelf.c (enum relocation_type): New.
