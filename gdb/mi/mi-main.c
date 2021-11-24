@@ -408,7 +408,7 @@ run_one_inferior (inferior *inf, bool start_p)
 {
   const char *run_cmd = start_p ? "start" : "run";
   struct target_ops *run_target = find_run_target ();
-  int async_p = mi_async && run_target->can_async_p ();
+  int async_p = mi_async && target_can_async_p (run_target);
 
   if (inf->pid != 0)
     {
@@ -473,7 +473,7 @@ mi_cmd_exec_run (const char *command, char **argv, int argc)
     {
       const char *run_cmd = start_p ? "start" : "run";
       struct target_ops *run_target = find_run_target ();
-      int async_p = mi_async && run_target->can_async_p ();
+      int async_p = mi_async && target_can_async_p (run_target);
 
       mi_execute_cli_command (run_cmd, async_p,
 			      async_p ? "&" : NULL);

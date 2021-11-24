@@ -1886,6 +1886,10 @@ extern bool target_async_permitted;
 /* Can the target support asynchronous execution?  */
 extern bool target_can_async_p ();
 
+/* An overload of the above that can be called when the target is not yet
+   pushed, this calls TARGET::can_async_p directly.  */
+extern bool target_can_async_p (struct target_ops *target);
+
 /* Is the target in asynchronous execution mode?  */
 extern bool target_is_async_p ();
 

@@ -336,7 +336,7 @@ prepare_execution_command (struct target_ops *target, int background)
 {
   /* If we get a request for running in the bg but the target
      doesn't support it, error out.  */
-  if (background && !target->can_async_p ())
+  if (background && !target_can_async_p (target))
     error (_("Asynchronous execution not supported on this target."));
 
   if (!background)

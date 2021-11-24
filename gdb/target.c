@@ -391,7 +391,15 @@ target_can_lock_scheduler ()
 bool
 target_can_async_p ()
 {
-  return current_inferior ()->top_target ()->can_async_p ();
+  return target_can_async_p (current_inferior ()->top_target ());
+}
+
+/* See target.h.  */
+
+bool
+target_can_async_p (struct target_ops *target)
+{
+  return target->can_async_p ();
 }
 
 /* See target.h.  */
@@ -2602,7 +2610,7 @@ target_wait (ptid_t ptid, struct target_waitstatus *status,
 
   gdb_assert (!proc_target->commit_resumed_state);
 
-  if (!target->can_async_p ())
+  if (!target_can_async_p (target))
     gdb_assert ((options & TARGET_WNOHANG) == 0);
 
   return target->wait (ptid, status, options);
