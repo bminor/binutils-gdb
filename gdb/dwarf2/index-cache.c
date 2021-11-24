@@ -360,7 +360,7 @@ _initialize_index_cache ()
     = add_setshow_boolean_cmd ("enabled", class_files,
 			       _("Enable the index cache."),
 			       _("Show whether the index cache is enabled."),
-			       _("help doc"),
+			       _("When on, enable the use of the index cache."),
 			       set_index_cache_enabled_command,
 			       get_index_cache_enabled_command,
 			       show_index_cache_enabled_command,
