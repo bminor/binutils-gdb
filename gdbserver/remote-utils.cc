@@ -1070,6 +1070,7 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
       {
 	const char **regp;
 	struct regcache *regcache;
+	char *buf_start = buf;
 
 	if ((status.kind () == TARGET_WAITKIND_FORKED && cs.report_fork_events)
 	    || (status.kind () == TARGET_WAITKIND_VFORKED
@@ -1140,11 +1141,11 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 	       An 'S' stop packet always looks like 'Sxx', so all we do
 	       here is convert the buffer from a T packet to an S packet
 	       and the avoid adding any extra content by breaking out.  */
-	    gdb_assert (*buf == 'T');
-	    gdb_assert (isxdigit (*(buf + 1)));
-	    gdb_assert (isxdigit (*(buf + 2)));
+	    gdb_assert (buf_start[0] == 'T');
+	    gdb_assert (isxdigit (buf_start[1]));
+	    gdb_assert (isxdigit (buf_start[2]));
 	    *buf = 'S';
-	    *(buf + 3) = '\0';
+	    buf_start[3] = '\0';
 	    break;
 	  }
 
