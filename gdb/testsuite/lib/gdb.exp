@@ -7661,7 +7661,7 @@ proc gdb_debug_init { } {
     }
 
     # First ensure logging is off.
-    send_gdb "set logging off\n"
+    send_gdb "set logging enabled off\n"
 
     set debugfile [standard_output_file gdb.debug]
     send_gdb "set logging file $debugfile\n"
@@ -7674,7 +7674,7 @@ proc gdb_debug_init { } {
     }
 
     # Now that everything is set, enable logging.
-    send_gdb "set logging on\n"
+    send_gdb "set logging enabled on\n"
     gdb_expect 10 {
 	-re "Copying output to $debugfile.*Redirecting debug output to $debugfile.*$gdb_prompt $" {}
 	timeout { warning "Couldn't set logging file" }

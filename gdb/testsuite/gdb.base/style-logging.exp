@@ -46,7 +46,7 @@ save_vars { env(TERM) } {
     gdb_test_no_output "set logging file $log_name" \
 	"set logging filename"
     gdb_test_no_output "set logging overwrite on"
-    gdb_test "set logging on" "Copying output to .*"
+    gdb_test "set logging enabled on" "Copying output to .*"
 
     set main_expr [style main function]
     set base_file_expr [style ".*style\\.c" file]
@@ -55,7 +55,7 @@ save_vars { env(TERM) } {
     gdb_test "frame" \
 	"$main_expr.*$arg_expr.*$arg_expr.*$file_expr.*"
 
-    gdb_test "set logging off" "Done logging to .*"
+    gdb_test "set logging enabled off" "Done logging to .*"
 
     set fd [open $log_name]
     set data [read -nonewline $fd]

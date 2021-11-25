@@ -22,6 +22,7 @@
 #include "ui-out.h"
 #include "interps.h"
 #include "cli/cli-style.h"
+#include "cli/cli-decode.h"
 
 static char *saved_filename;
 
@@ -163,18 +164,42 @@ set_logging_off (const char *args, int from_tty)
   saved_filename = NULL;
 }
 
+static bool logging_enabled;
+
+static void
+set_logging_enabled (const char *args,
+		     int from_tty, struct cmd_list_element *c)
+{
+  if (logging_enabled)
+    set_logging_on (args, from_tty);
+  else
+    set_logging_off (args, from_tty);
+}
+
+static void
+show_logging_enabled (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  if (logging_enabled)
+    printf_unfiltered (_("Logging is enabled.\n"));
+  else
+    printf_unfiltered (_("Logging is disabled.\n"));
+}
+
 void _initialize_cli_logging ();
 void
 _initialize_cli_logging ()
 {
   static struct cmd_list_element *set_logging_cmdlist, *show_logging_cmdlist;
 
+  /* Set/show logging.  */
   add_setshow_prefix_cmd ("logging", class_support,
 			  _("Set logging options."),
 			  _("Show logging options."),
 			  &set_logging_cmdlist, &show_logging_cmdlist,
 			  &setlist, &showlist);
 
+  /* Set/show logging overwrite.  */
   add_setshow_boolean_cmd ("overwrite", class_support, &logging_overwrite, _("\
 Set whether logging overwrites or appends to the log file."), _("\
 Show whether logging overwrites or appends to the log file."), _("\
@@ -182,6 +207,8 @@ If set, logging overwrites the log file."),
 			   set_logging_overwrite,
 			   show_logging_overwrite,
 			   &set_logging_cmdlist, &show_logging_cmdlist);
+
+  /* Set/show logging redirect.  */
   add_setshow_boolean_cmd ("redirect", class_support, &logging_redirect, _("\
 Set the logging output mode."), _("\
 Show the logging output mode."), _("\
@@ -190,6 +217,8 @@ If redirect is on, output will go only to the log file."),
 			   set_logging_redirect,
 			   show_logging_redirect,
 			   &set_logging_cmdlist, &show_logging_cmdlist);
+
+  /* Set/show logging debugredirect.  */
   add_setshow_boolean_cmd ("debugredirect", class_support,
 			   &debug_redirect, _("\
 Set the logging debug output mode."), _("\
@@ -200,6 +229,7 @@ If debug redirect is on, debug will go only to the log file."),
 			   show_logging_redirect,
 			   &set_logging_cmdlist, &show_logging_cmdlist);
 
+  /* Set/show logging file.  */
   add_setshow_filename_cmd ("file", class_support, &logging_filename, _("\
 Set the current logfile."), _("\
 Show the current logfile."), _("\
@@ -207,8 +237,28 @@ The logfile is used when directing GDB's output."),
 			    NULL,
 			    show_logging_filename,
 			    &set_logging_cmdlist, &show_logging_cmdlist);
-  add_cmd ("on", class_support, set_logging_on,
-	   _("Enable logging."), &set_logging_cmdlist);
-  add_cmd ("off", class_support, set_logging_off,
-	   _("Disable logging."), &set_logging_cmdlist);
+
+  /* Set/show logging enabled.  */
+  set_show_commands setshow_logging_enabled_cmds
+    = add_setshow_boolean_cmd ("enabled", class_support, &logging_enabled,
+			       _("Enable logging."),
+			       _("Show whether logging is enabled."),
+			       _("When on, enable logging."),
+			       set_logging_enabled,
+			       show_logging_enabled,
+			       &set_logging_cmdlist, &show_logging_cmdlist);
+
+  /* Set logging on, deprecated alias.  */
+  cmd_list_element *set_logging_on_cmd
+    = add_alias_cmd ("on", setshow_logging_enabled_cmds.set, class_support,
+		     false, &set_logging_cmdlist);
+  deprecate_cmd (set_logging_on_cmd, "set logging enabled on");
+  set_logging_on_cmd->default_args = "on";
+
+  /* Set logging off, deprecated alias.  */
+  cmd_list_element *set_logging_off_cmd
+    = add_alias_cmd ("off", setshow_logging_enabled_cmds.set, class_support,
+		     false, &set_logging_cmdlist);
+  deprecate_cmd (set_logging_off_cmd, "set logging enabled off");
+  set_logging_off_cmd->default_args = "off";
 }

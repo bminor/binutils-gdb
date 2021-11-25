@@ -32,6 +32,13 @@ maint show internal-warning backtrace
   internal-error, or an internal-warning.  This is on by default for
   internal-error and off by default for internal-warning.
 
+set logging on|off
+  Deprecated and replaced by "set logging enabled on|off".
+
+set logging enabled on|off
+show logging enabled
+  These commands set or show whether logging is enabled or disabled.
+
 * Python API
 
   ** New function gdb.add_history(), which takes a gdb.Value object

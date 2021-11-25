@@ -1705,17 +1705,15 @@ You may want to save the output of @value{GDBN} commands to a file.
 There are several commands to control @value{GDBN}'s logging.
 
 @table @code
-@kindex set logging
-@item set logging on
-Enable logging.
-@item set logging off
-Disable logging.
+@kindex set logging enabled
+@item set logging enabled [on|off]
+Enable or disable logging.
 @cindex logging file name
 @item set logging file @var{file}
 Change the name of the current logfile.  The default logfile is @file{gdb.txt}.
 @item set logging overwrite [on|off]
 By default, @value{GDBN} will append to the logfile.  Set @code{overwrite} if
-you want @code{set logging on} to overwrite the logfile instead.
+you want @code{set logging enabled on} to overwrite the logfile instead.
 @item set logging redirect [on|off]
 By default, @value{GDBN} output will go to both the terminal and the logfile.
 Set @code{redirect} if you want output to go only to the log file.
