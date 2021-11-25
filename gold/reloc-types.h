@@ -79,6 +79,26 @@ struct Reloc_types<elfcpp::SHT_RELA, size, big_endian>
   { p->put_r_addend(val); }
 };
 
+template<int size, bool big_endian>
+struct Reloc_types<elfcpp::SHT_RELR, size, big_endian>
+{
+  typedef void Reloc;
+  typedef void Reloc_write;
+  static const int reloc_size = elfcpp::Elf_sizes<size>::relr_size;
+
+  static inline typename elfcpp::Elf_types<size>::Elf_Swxword
+  get_reloc_addend(const Reloc*)
+  { gold_unreachable(); }
+
+  static inline typename elfcpp::Elf_types<size>::Elf_Swxword
+  get_reloc_addend_noerror(const Reloc*)
+  { return 0; }
+
+  static inline void
+  set_reloc_addend(Reloc_write*,
+		   typename elfcpp::Elf_types<size>::Elf_Swxword)
+  { gold_unreachable(); }
+};
 }; // End namespace gold.
 
 #endif // !defined(GOLD_RELOC_TYPE_SH)

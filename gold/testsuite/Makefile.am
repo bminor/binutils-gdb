@@ -3378,6 +3378,16 @@ aarch64_pr23870_bar.o: aarch64_pr23870_bar.c
 aarch64_pr23870_bar.so: aarch64_pr23870_bar.o
 	$(COMPILE) -shared -o $@ $<
 
+check_SCRIPTS += relr_aarch64.sh
+check_DATA += relr_aarch64.out
+MOSTLYCLEANFILES += relr_aarch64
+relr_aarch64.out: relr_aarch64
+	$(TEST_READELF) -W -d -r $< >$@
+relr_aarch64: relr_aarch64.o ../ld-new
+	../ld-new -pie --pack-dyn-relocs=relr -o $@ $<
+relr_aarch64.o: relr_1.s
+	$(TEST_AS) -o $@ $<
+
 endif DEFAULT_TARGET_AARCH64
 
 endif GCC
@@ -4124,6 +4134,16 @@ arm_target_lazy_init: arm_target_lazy_init.o arm_target_lazy_init.t ../ld-new
 arm_target_lazy_init.o: arm_target_lazy_init.s
 	$(TEST_AS) -EL -o $@ $<
 
+check_SCRIPTS += relr_arm.sh
+check_DATA += relr_arm.out
+MOSTLYCLEANFILES += relr_arm
+relr_arm.out: relr_arm
+	$(TEST_READELF) -W -d -r $< >$@
+relr_arm: relr_arm.o ../ld-new
+	../ld-new -pie --pack-dyn-relocs=relr -o $@ $<
+relr_arm.o: relr_1.s
+	$(TEST_AS) -o $@ $<
+
 endif DEFAULT_TARGET_ARM
 
 if DEFAULT_TARGET_AARCH64
@@ -4432,6 +4452,16 @@ retain_2.out: retain_2
 retain_2: retain_2.o ../ld-new
 	../ld-new -pie -e _start --gc-sections -o $@  retain_2.o
 retain_2.o: retain_2.s
+	$(TEST_AS) -o $@ $<
+
+check_SCRIPTS += relr_x86_64.sh
+check_DATA += relr_x86_64.out
+MOSTLYCLEANFILES += relr_x86_64
+relr_x86_64.out: relr_x86_64
+	$(TEST_READELF) -W -d -r $< >$@
+relr_x86_64: relr_x86_64.o ../ld-new
+	../ld-new -pie --pack-dyn-relocs=relr -o $@ $<
+relr_x86_64.o: relr_1.s
 	$(TEST_AS) -o $@ $<
 
 endif DEFAULT_TARGET_X86_64

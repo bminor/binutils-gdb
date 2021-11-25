@@ -358,6 +358,7 @@ enum SHT
   SHT_PREINIT_ARRAY = 16,
   SHT_GROUP = 17,
   SHT_SYMTAB_SHNDX = 18,
+  SHT_RELR = 19,
   SHT_LOOS = 0x60000000,
   SHT_HIOS = 0x6fffffff,
   SHT_LOPROC = 0x70000000,
@@ -726,6 +727,11 @@ enum DT
 
   DT_PREINIT_ARRAY = 32,
   DT_PREINIT_ARRAYSZ = 33,
+  DT_SYMTAB_SHNDX = 34,
+  DT_RELRSZ = 35,
+  DT_RELR = 36,
+  DT_RELRENT = 37,
+
   DT_LOOS = 0x6000000d,
   DT_HIOS = 0x6ffff000,
   DT_LOPROC = 0x70000000,
@@ -1071,6 +1077,7 @@ struct Elf_sizes
   // Sizes of ELF reloc entries.
   static const int rel_size = sizeof(internal::Rel_data<size>);
   static const int rela_size = sizeof(internal::Rela_data<size>);
+  static const int relr_size = sizeof(typename Elf_types<size>::Elf_WXword);
   // Size of ELF dynamic entry.
   static const int dyn_size = sizeof(internal::Dyn_data<size>);
   // Size of ELF version structures.

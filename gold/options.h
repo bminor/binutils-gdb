@@ -1102,6 +1102,10 @@ class General_options
   DEFINE_bool(p, options::ONE_DASH, 'p', false,
 	      N_("Ignored for ARM compatibility"), NULL);
 
+  DEFINE_enum(pack_dyn_relocs, options::TWO_DASHES, '\0', "none",
+	     N_("Pack dynamic relocations in the given format"),
+	     N_("[=none,relr]"), true, {"none", "relr"});
+
   DEFINE_bool(pie, options::ONE_DASH, '\0', false,
 	      N_("Create a position independent executable"),
 	      N_("Do not create a position independent executable"));
@@ -1796,6 +1800,16 @@ class General_options
   start_stop_visibility_enum() const
   { return this->start_stop_visibility_enum_; }
 
+  enum Pack_dyn_relocs
+  {
+    PACK_DYN_RELOCS_NONE,
+    PACK_DYN_RELOCS_RELR,
+  };
+
+  bool
+  relr_relocs() const
+  { return this->pack_dyn_relocs_enum_ == PACK_DYN_RELOCS_RELR; }
+
   enum Power10_stubs
   {
     // Use Power10 insns on @notoc calls/branches, non-Power10 elsewhere.
@@ -1948,6 +1962,8 @@ class General_options
   Orphan_handling orphan_handling_enum_;
   // Symbol visibility for __start_* / __stop_* magic symbols.
   elfcpp::STV start_stop_visibility_enum_;
+  // Pack dynamic relocations.
+  Pack_dyn_relocs pack_dyn_relocs_enum_;
   // Power10 stubs option
   Power10_stubs power10_stubs_enum_;
 };

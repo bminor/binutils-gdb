@@ -1028,7 +1028,8 @@ General_options::General_options()
     endianness_(ENDIANNESS_NOT_SET),
     discard_locals_(DISCARD_SEC_MERGE),
     orphan_handling_enum_(ORPHAN_PLACE),
-    start_stop_visibility_enum_(elfcpp::STV_PROTECTED)
+    start_stop_visibility_enum_(elfcpp::STV_PROTECTED),
+    pack_dyn_relocs_enum_(PACK_DYN_RELOCS_NONE)
 {
   // Turn off option registration once construction is complete.
   gold::options::ready_to_register = false;
@@ -1212,6 +1213,11 @@ General_options::finalize()
       else if (strcmp(this->start_stop_visibility(), "protected") == 0)
         this->set_start_stop_visibility_enum(elfcpp::STV_PROTECTED);
     }
+
+  if (strcmp(this->pack_dyn_relocs(), "none") == 0)
+    this->pack_dyn_relocs_enum_ = PACK_DYN_RELOCS_NONE;
+  else if (strcmp(this->pack_dyn_relocs(), "relr") == 0)
+    this->pack_dyn_relocs_enum_ = PACK_DYN_RELOCS_RELR;
 
   // Parse the --power10-stubs argument.
   if (!this->user_set_power10_stubs())

@@ -5069,7 +5069,8 @@ void
 Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
 				const Output_data* plt_rel,
 				const Output_data_reloc_generic* dyn_rel,
-				bool add_debug, bool dynrel_includes_plt)
+				bool add_debug, bool dynrel_includes_plt,
+				const Output_data_reloc_generic* dyn_relr)
 {
   Output_data_dynamic* odyn = this->dynamic_data_;
   if (odyn == NULL)
@@ -5140,6 +5141,14 @@ Layout::add_target_dynamic_tags(bool use_rel, const Output_data* plt_got,
 				: elfcpp::DT_RELACOUNT),
 			       c);
 	}
+    }
+
+  if (dyn_relr != NULL && dyn_relr->output_section() != NULL)
+    {
+      const int size = parameters->target().get_size();
+      odyn->add_section_address(elfcpp::DT_RELR, dyn_relr->output_section());
+      odyn->add_section_size(elfcpp::DT_RELRSZ, dyn_relr->output_section());
+      odyn->add_constant(elfcpp::DT_RELRENT, size / 8);
     }
 
   if (add_debug && !parameters->options().shared())
