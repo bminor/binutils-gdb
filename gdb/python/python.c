@@ -164,6 +164,8 @@ static const struct extension_language_ops python_extension_ops =
   gdbpy_colorize,
 };
 
+#endif /* HAVE_PYTHON */
+
 /* The main struct describing GDB's interface to the Python
    extension language.  */
 const struct extension_language_defn extension_language_python =
@@ -185,6 +187,8 @@ const struct extension_language_defn extension_language_python =
   NULL
 #endif
 };
+
+#ifdef HAVE_PYTHON
 
 /* Architecture and language to be used in callbacks from
    the Python interpreter.  */
