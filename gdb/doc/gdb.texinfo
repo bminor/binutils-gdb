@@ -3216,6 +3216,15 @@ embedded targets may have several inferiors running in different parts
 of a single address space.  Each inferior may in turn have multiple
 threads running in it.
 
+@cindex ID list
+The commands @code{info inferiors} and @code{info connections}, which will be
+introduced below, accept a space-separated @dfn{ID list} as their argument
+specifying one or more elements on which to operate.  A list element can be
+either a single non-negative number, like @samp{5}, or an ascending range of
+such numbers, like @samp{5-7}.  A list can consist of any combination of such
+elements, even duplicates or overlapping ranges are valid.  E.g.@:
+@samp{1 4-6 5 4-4} or @samp{1 2 4-7}.
+
 To find out what inferiors exist at any moment, use @w{@code{info
 inferiors}}:
 
@@ -3223,9 +3232,8 @@ inferiors}}:
 @kindex info inferiors [ @var{id}@dots{} ]
 @item info inferiors
 Print a list of all inferiors currently being managed by @value{GDBN}.
-By default all inferiors are printed, but the argument @var{id}@dots{}
--- a space separated list of inferior numbers -- can be used to limit
-the display to just the requested inferiors.
+By default all inferiors are printed, but the ID list @var{id}@dots{} can be
+used to limit the display to just the requested inferiors.
 
 @value{GDBN} displays for each inferior (in this order):
 
@@ -3284,9 +3292,8 @@ To find out what open target connections exist at any moment, use
 @kindex info connections [ @var{id}@dots{} ]
 @item info connections
 Print a list of all open target connections currently being managed by
-@value{GDBN}.  By default all connections are printed, but the
-argument @var{id}@dots{} -- a space separated list of connections
-numbers -- can be used to limit the display to just the requested
+@value{GDBN}.  By default all connections are printed, but the ID list
+@var{id}@dots{} can be used to limit the display to just the requested
 connections.
 
 @value{GDBN} displays for each connection (in this order):
