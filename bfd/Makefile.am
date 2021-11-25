@@ -574,7 +574,7 @@ BFD64_BACKENDS = \
 	mmo.lo \
 	pe-aarch64igen.lo \
 	pe-x86_64.lo \
-	pei-aarch64lo \
+	pei-aarch64.lo \
 	pei-ia64.lo \
 	pei-x86_64.lo \
 	pepigen.lo \
@@ -716,6 +716,15 @@ BUILD_HFILES = \
 BUILT_SOURCES = $(BUILD_HFILES)
 
 HFILES = $(SOURCE_HFILES) $(BUILD_HFILES)
+
+BFD_H_DEPS = $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
+LOCAL_H_DEPS = libbfd.h sysdep.h config.h
+$(BFD32_LIBS) \
+ $(BFD64_LIBS) \
+ $(ALL_MACHINES) \
+ $(BFD32_BACKENDS) \
+ $(BFD64_BACKENDS) \
+ $(OPTIONAL_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
 
 SRC_POTFILES = $(SOURCE_CFILES) $(SOURCE_HFILES)
 BLD_POTFILES = $(BUILD_CFILES) $(BUILD_HFILES)
@@ -883,15 +892,6 @@ pex64igen.c: peXXigen.c
 pe-aarch64igen.c: peXXigen.c
 	echo "#line 1 \"peXXigen.c\"" > $@
 	$(SED) -e s/XX/peAArch64/g < $< >> $@
-
-BFD_H_DEPS= $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/diagnostics.h
-LOCAL_H_DEPS= libbfd.h sysdep.h config.h
-$(BFD32_LIBS) \
- $(BFD64_LIBS) \
- $(ALL_MACHINES) \
- $(BFD32_BACKENDS) \
- $(BFD64_BACKENDS) \
- $(OPTIONAL_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
 
 host-aout.lo: Makefile
 

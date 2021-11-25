@@ -323,6 +323,7 @@ pe-x86_64.c
 pef-traceback.h
 pef.c
 pef.h
+pei-aarch64.c
 pei-arm-wince.c
 pei-arm.c
 pei-i386.c
