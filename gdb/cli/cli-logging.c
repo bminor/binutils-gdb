@@ -178,7 +178,7 @@ _initialize_cli_logging ()
   add_setshow_boolean_cmd ("overwrite", class_support, &logging_overwrite, _("\
 Set whether logging overwrites or appends to the log file."), _("\
 Show whether logging overwrites or appends to the log file."), _("\
-If set, logging overrides the log file."),
+If set, logging overwrites the log file."),
 			   set_logging_overwrite,
 			   show_logging_overwrite,
 			   &set_logging_cmdlist, &show_logging_cmdlist);
