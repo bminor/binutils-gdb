@@ -147,7 +147,7 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
 	  insert_fields (code, reglane_index, 0, 2, FLD_L, FLD_H);
 	  break;
 	default:
-	  assert (0);
+	  return false;
 	}
     }
   else if (inst->opcode->iclass == cryptosm3)
@@ -185,7 +185,7 @@ aarch64_ins_reglane (const aarch64_operand *self, const aarch64_opnd_info *info,
 	  insert_field (FLD_H, code, reglane_index, 0);
 	  break;
 	default:
-	  assert (0);
+	  return false;
 	}
     }
   return true;
@@ -229,7 +229,7 @@ aarch64_ins_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	case 2: value = 0xa; break;
 	case 3: value = 0x6; break;
 	case 4: value = 0x2; break;
-	default: assert (0);
+	default: return false;
 	}
       break;
     case 2:
@@ -242,7 +242,7 @@ aarch64_ins_ldst_reglist (const aarch64_operand *self ATTRIBUTE_UNUSED,
       value = 0x0;
       break;
     default:
-      assert (0);
+      return false;
     }
   insert_field (FLD_opcode, code, value, 0);
 
@@ -315,7 +315,7 @@ aarch64_ins_ldst_elemlist (const aarch64_operand *self ATTRIBUTE_UNUSED,
       opcodeh2 = 0x2;
       break;
     default:
-      assert (0);
+      return false;
     }
   insert_fields (code, QSsize, 0, 3, FLD_vldst_size, FLD_S, FLD_Q);
   gen_sub_field (FLD_asisdlso_opcode, 1, 2, &field);
@@ -605,7 +605,7 @@ aarch64_ins_ft (const aarch64_operand *self, const aarch64_opnd_info *info,
 	case AARCH64_OPND_QLF_S_S: value = 0; break;
 	case AARCH64_OPND_QLF_S_D: value = 1; break;
 	case AARCH64_OPND_QLF_S_Q: value = 2; break;
-	default: assert (0);
+	default: return false;
 	}
       insert_field (FLD_ldst_size, code, value, 0);
     }
@@ -1372,7 +1372,7 @@ aarch64_ins_sme_za_hv_tiles (const aarch64_operand *self,
       fld_zan_imm = regno;
       break;
     default:
-      assert (0);
+      return false;
     }
 
   insert_field (self->fields[0], code, fld_size, 0);
@@ -1446,7 +1446,7 @@ aarch64_ins_sme_sm_za (const aarch64_operand *self,
   else if (info->reg.regno == 'z')
     fld_crm = 0x04; /* SVCRZA.  */
   else
-    assert (0);
+    return false;
 
   insert_field (self->fields[0], code, fld_crm, 0);
   return true;
@@ -1510,7 +1510,7 @@ aarch64_ins_sme_pred_reg_with_index (const aarch64_operand *self,
       fld_tshl = 0x0;
       break;
     default:
-      assert (0);
+      return false;
   }
 
   insert_field (self->fields[2], code, fld_i1, 0);
@@ -1544,7 +1544,7 @@ encode_asimd_fcvt (aarch64_inst *inst)
       qualifier = inst->operands[0].qualifier;
       break;
     default:
-      assert (0);
+      return;
     }
   assert (qualifier == AARCH64_OPND_QLF_V_4S
 	  || qualifier == AARCH64_OPND_QLF_V_2D);
@@ -1749,7 +1749,7 @@ do_special_encoding (struct aarch64_inst *inst)
 	case AARCH64_OPND_QLF_S_S: value = 0; break;
 	case AARCH64_OPND_QLF_S_D: value = 1; break;
 	case AARCH64_OPND_QLF_S_H: value = 3; break;
-	default: assert (0);
+	default: return;
 	}
       insert_field (FLD_type, &inst->value, value, 0);
     }
@@ -2098,13 +2098,13 @@ convert_mov_to_movewide (aarch64_inst *inst)
       value = ~inst->operands[1].imm.value;
       break;
     default:
-      assert (0);
+      return;
     }
   inst->operands[1].type = AARCH64_OPND_HALF;
   is32 = inst->operands[0].qualifier == AARCH64_OPND_QLF_W;
   if (! aarch64_wide_constant_p (value, is32, &shift_amount))
     /* The constraint check should have guaranteed this wouldn't happen.  */
-    assert (0);
+    return;
   value >>= shift_amount;
   value &= 0xffff;
   inst->operands[1].imm.value = value;

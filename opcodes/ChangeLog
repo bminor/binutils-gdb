@@ -1,5 +1,12 @@
 2021-11-25  Nick Clifton  <nickc@redhat.com>
 
+	PR 28614
+	* aarch64-asm.c: Replace assert(0) with real code.
+	* aarch64-dis.c: Likewise.
+	* aarch64-opc.c: Likewise.
+
+2021-11-25  Nick Clifton  <nickc@redhat.com>
+
 	* po/fr.po; Updated French translation.
 
 2021-10-27  Maciej W. Rozycki  <macro@embecosm.com>

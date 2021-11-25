@@ -754,7 +754,7 @@ aarch64_ext_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	case 4: gen_sub_field (FLD_cmode, 1, 2, &field); break;	/* per word */
 	case 2: gen_sub_field (FLD_cmode, 1, 1, &field); break;	/* per half */
 	case 1: gen_sub_field (FLD_cmode, 1, 0, &field); break;	/* per byte */
-	default: assert (0); return false;
+	default: return false;
 	}
       /* 00: 0; 01: 8; 10:16; 11:24.  */
       info->shifter.amount = extract_field_2 (&field, code, 0) << 3;
@@ -766,7 +766,6 @@ aarch64_ext_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
       info->shifter.amount = extract_field_2 (&field, code, 0) ? 16 : 8;
       break;
     default:
-      assert (0);
       return false;
     }
 
@@ -908,7 +907,7 @@ decode_limm (uint32_t esize, aarch64_insn value, int64_t *result)
     case 32: imm = (imm << 32) | imm;
       /* Fall through.  */
     case 64: break;
-    default: assert (0); return 0;
+    default: return 0;
     }
 
   *result = imm & ~((uint64_t) -1 << (esize * 4) << (esize * 4));
@@ -1276,7 +1275,7 @@ aarch64_ext_sysins_op (const aarch64_operand *self ATTRIBUTE_UNUSED,
 	    aarch64_sys_regs_sr[].  */
 	value = value & ~(0x7);
 	break;
-    default: assert (0); return false;
+    default: return false;
     }
 
   for (i = 0; sysins_ops[i].name != NULL; ++i)
@@ -1813,7 +1812,7 @@ aarch64_ext_sme_za_hv_tiles (const aarch64_operand *self,
       info->za_tile_vector.index.imm = 0;
       break;
     default:
-      assert (0);
+      return false;
     }
 
   return true;
@@ -1885,7 +1884,7 @@ aarch64_ext_sme_sm_za (const aarch64_operand *self,
   else if (fld_crm == 0x2)
     info->reg.regno = 'z';
   else
-    assert (0);
+    return false;
 
   return true;
 }
@@ -2204,7 +2203,6 @@ decode_asimd_fcvt (aarch64_inst *inst)
       inst->operands[0].qualifier = qualifier;
       break;
     default:
-      assert (0);
       return 0;
     }
 
@@ -2915,12 +2913,16 @@ determine_disassembling_preference (struct aarch64_inst *inst,
 	     successfully converted to the form of ALIAS.  */
 	  if (convert_to_alias (&copy, alias) == 1)
 	    {
-	      int res;
 	      aarch64_replace_opcode (&copy, alias);
-	      res = aarch64_match_operands_constraint (&copy, NULL);
-	      assert (res == 1);
-	      DEBUG_TRACE ("succeed with %s via conversion", alias->name);
-	      memcpy (inst, &copy, sizeof (aarch64_inst));
+	      if (aarch64_match_operands_constraint (&copy, NULL) != 1)
+		{
+		  DEBUG_TRACE ("FAILED with alias %s ", alias->name);
+		}
+	      else
+		{
+		  DEBUG_TRACE ("succeed with %s via conversion", alias->name);
+		  memcpy (inst, &copy, sizeof (aarch64_inst));
+		}
 	      return;
 	    }
 	}
@@ -3408,13 +3410,12 @@ print_aarch64_insn (bfd_vma pc, const aarch64_inst *inst,
 					     mismatch_details, &insn_sequence);
   switch (result)
     {
-    case ERR_UND:
-    case ERR_UNP:
-    case ERR_NYI:
-      assert (0);
     case ERR_VFI:
       print_verifier_notes (mismatch_details, info);
       break;
+    case ERR_UND:
+    case ERR_UNP:
+    case ERR_NYI:
     default:
       break;
     }

@@ -3595,7 +3595,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	  snprintf (buf, size, "#0x%-20" PRIx64 "\t// #%" PRIi64,
 		    opnd->imm.value, opnd->imm.value);
 	  break;
-	default: assert (0);
+	default:
+	  snprintf (buf, size, "<invalid>");
+	  break;
 	}
       break;
 
@@ -3662,7 +3664,9 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	      snprintf (buf, size,  "#%.18e", c.d);
 	    }
 	  break;
-	default: assert (0);
+	default:
+	  snprintf (buf, size, "<invalid>");
+	  break;
 	}
       break;
 
@@ -3934,7 +3938,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     default:
-      assert (0);
+      snprintf (buf, size, "<invalid>");
+      break;
     }
 }
 
