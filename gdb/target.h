@@ -1151,10 +1151,10 @@ struct target_ops
     virtual bool can_use_agent ()
       TARGET_DEFAULT_RETURN (false);
 
-    /* Enable branch tracing for PTID using CONF configuration.
+    /* Enable branch tracing for TP using CONF configuration.
        Return a branch trace target information struct for reading and for
        disabling branch trace.  */
-    virtual struct btrace_target_info *enable_btrace (ptid_t ptid,
+    virtual struct btrace_target_info *enable_btrace (thread_info *tp,
 						      const struct btrace_config *conf)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
@@ -2502,7 +2502,7 @@ extern void update_target_permissions (void);
 
 /* See to_enable_btrace in struct target_ops.  */
 extern struct btrace_target_info *
-  target_enable_btrace (ptid_t ptid, const struct btrace_config *);
+  target_enable_btrace (thread_info *tp, const struct btrace_config *);
 
 /* See to_disable_btrace in struct target_ops.  */
 extern void target_disable_btrace (struct btrace_target_info *btinfo);

@@ -658,8 +658,8 @@ public:
   bool use_agent (bool use) override;
   bool can_use_agent () override;
 
-  struct btrace_target_info *enable_btrace (ptid_t ptid,
-					    const struct btrace_config *conf) override;
+  struct btrace_target_info *
+    enable_btrace (thread_info *tp, const struct btrace_config *conf) override;
 
   void disable_btrace (struct btrace_target_info *tinfo) override;
 
@@ -14178,7 +14178,8 @@ remote_target::remote_btrace_maybe_reopen ()
 /* Enable branch tracing.  */
 
 struct btrace_target_info *
-remote_target::enable_btrace (ptid_t ptid, const struct btrace_config *conf)
+remote_target::enable_btrace (thread_info *tp,
+			      const struct btrace_config *conf)
 {
   struct btrace_target_info *tinfo = NULL;
   struct packet_config *packet = NULL;
@@ -14202,6 +14203,7 @@ remote_target::enable_btrace (ptid_t ptid, const struct btrace_config *conf)
 
   btrace_sync_conf (conf);
 
+  ptid_t ptid = tp->ptid;
   set_general_thread (ptid);
 
   buf += xsnprintf (buf, endbuf - buf, "%s", packet->name);

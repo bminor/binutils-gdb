@@ -6669,10 +6669,10 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
 #ifdef HAVE_LINUX_BTRACE
 
 btrace_target_info *
-linux_process_target::enable_btrace (ptid_t ptid,
+linux_process_target::enable_btrace (thread_info *tp,
 				     const btrace_config *conf)
 {
-  return linux_enable_btrace (ptid, conf);
+  return linux_enable_btrace (tp->id, conf);
 }
 
 /* See to_disable_btrace target method.  */

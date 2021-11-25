@@ -145,7 +145,7 @@ struct dummy_target : public target_ops
   traceframe_info_up traceframe_info () override;
   bool use_agent (bool arg0) override;
   bool can_use_agent () override;
-  struct btrace_target_info *enable_btrace (ptid_t arg0, const struct btrace_config *arg1) override;
+  struct btrace_target_info *enable_btrace (thread_info *arg0, const struct btrace_config *arg1) override;
   void disable_btrace (struct btrace_target_info *arg0) override;
   void teardown_btrace (struct btrace_target_info *arg0) override;
   enum btrace_error read_btrace (struct btrace_data *arg0, struct btrace_target_info *arg1, enum btrace_read_type arg2) override;
@@ -319,7 +319,7 @@ struct debug_target : public target_ops
   traceframe_info_up traceframe_info () override;
   bool use_agent (bool arg0) override;
   bool can_use_agent () override;
-  struct btrace_target_info *enable_btrace (ptid_t arg0, const struct btrace_config *arg1) override;
+  struct btrace_target_info *enable_btrace (thread_info *arg0, const struct btrace_config *arg1) override;
   void disable_btrace (struct btrace_target_info *arg0) override;
   void teardown_btrace (struct btrace_target_info *arg0) override;
   enum btrace_error read_btrace (struct btrace_data *arg0, struct btrace_target_info *arg1, enum btrace_read_type arg2) override;
@@ -3761,25 +3761,25 @@ debug_target::can_use_agent ()
 }
 
 struct btrace_target_info *
-target_ops::enable_btrace (ptid_t arg0, const struct btrace_config *arg1)
+target_ops::enable_btrace (thread_info *arg0, const struct btrace_config *arg1)
 {
   return this->beneath ()->enable_btrace (arg0, arg1);
 }
 
 struct btrace_target_info *
-dummy_target::enable_btrace (ptid_t arg0, const struct btrace_config *arg1)
+dummy_target::enable_btrace (thread_info *arg0, const struct btrace_config *arg1)
 {
   tcomplain ();
 }
 
 struct btrace_target_info *
-debug_target::enable_btrace (ptid_t arg0, const struct btrace_config *arg1)
+debug_target::enable_btrace (thread_info *arg0, const struct btrace_config *arg1)
 {
   struct btrace_target_info * result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->enable_btrace (...)\n", this->beneath ()->shortname ());
   result = this->beneath ()->enable_btrace (arg0, arg1);
   fprintf_unfiltered (gdb_stdlog, "<- %s->enable_btrace (", this->beneath ()->shortname ());
-  target_debug_print_ptid_t (arg0);
+  target_debug_print_thread_info_p (arg0);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_const_struct_btrace_config_p (arg1);
   fputs_unfiltered (") = ", gdb_stdlog);

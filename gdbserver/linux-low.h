@@ -276,7 +276,7 @@ public:
   bool supports_agent () override;
 
 #ifdef HAVE_LINUX_BTRACE
-  btrace_target_info *enable_btrace (ptid_t ptid,
+  btrace_target_info *enable_btrace (thread_info *tp,
 				     const btrace_config *conf) override;
 
   int disable_btrace (btrace_target_info *tinfo) override;

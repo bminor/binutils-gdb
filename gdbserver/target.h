@@ -403,9 +403,9 @@ public:
   /* Return true if target supports debugging agent.  */
   virtual bool supports_agent ();
 
-  /* Enable branch tracing for PTID based on CONF and allocate a branch trace
+  /* Enable branch tracing for TP based on CONF and allocate a branch trace
      target information struct for reading and for disabling branch trace.  */
-  virtual btrace_target_info *enable_btrace (ptid_t ptid,
+  virtual btrace_target_info *enable_btrace (thread_info *tp,
 					     const btrace_config *conf);
 
   /* Disable branch tracing.
@@ -635,9 +635,9 @@ int kill_inferior (process_info *proc);
   the_target->supports_agent ()
 
 static inline struct btrace_target_info *
-target_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
+target_enable_btrace (thread_info *tp, const struct btrace_config *conf)
 {
-  return the_target->enable_btrace (ptid, conf);
+  return the_target->enable_btrace (tp, conf);
 }
 
 static inline int

@@ -120,12 +120,16 @@ struct ravenscar_thread_target final : public target_ops
 
   ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
-  struct btrace_target_info *enable_btrace (ptid_t ptid,
+  struct btrace_target_info *enable_btrace (thread_info *tp,
 					    const struct btrace_config *conf)
     override
   {
-    ptid = get_base_thread_from_ravenscar_task (ptid);
-    return beneath ()->enable_btrace (ptid, conf);
+    process_stratum_target *proc_target
+      = as_process_stratum_target (this->beneath ());
+    ptid_t underlying = get_base_thread_from_ravenscar_task (tp->ptid);
+    tp = find_thread_ptid (proc_target, underlying);
+
+    return beneath ()->enable_btrace (tp, conf);
   }
 
   void mourn_inferior () override;

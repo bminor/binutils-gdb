@@ -4060,9 +4060,9 @@ target_ranged_break_num_registers (void)
 /* See target.h.  */
 
 struct btrace_target_info *
-target_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
+target_enable_btrace (thread_info *tp, const struct btrace_config *conf)
 {
-  return current_inferior ()->top_target ()->enable_btrace (ptid, conf);
+  return current_inferior ()->top_target ()->enable_btrace (tp, conf);
 }
 
 /* See target.h.  */

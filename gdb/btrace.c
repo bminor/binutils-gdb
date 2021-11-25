@@ -1618,7 +1618,7 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
   DEBUG ("enable thread %s (%s)", print_thread_id (tp),
 	 tp->ptid.to_string ().c_str ());
 
-  tp->btrace.target = target_enable_btrace (tp->ptid, conf);
+  tp->btrace.target = target_enable_btrace (tp, conf);
 
   if (tp->btrace.target == NULL)
     error (_("Failed to enable recording on thread %s (%s)."),

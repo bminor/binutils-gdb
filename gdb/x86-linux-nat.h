@@ -32,7 +32,7 @@ struct x86_linux_nat_target : public x86_nat_target<linux_nat_target>
   /* Add the description reader.  */
   const struct target_desc *read_description () override;
 
-  struct btrace_target_info *enable_btrace (ptid_t ptid,
+  struct btrace_target_info *enable_btrace (thread_info *tp,
 					    const struct btrace_config *conf) override;
   void disable_btrace (struct btrace_target_info *tinfo) override;
   void teardown_btrace (struct btrace_target_info *tinfo) override;

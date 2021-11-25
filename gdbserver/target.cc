@@ -736,7 +736,8 @@ process_stratum_target::supports_agent ()
 }
 
 btrace_target_info *
-process_stratum_target::enable_btrace (ptid_t ptid, const btrace_config *conf)
+process_stratum_target::enable_btrace (thread_info *tp,
+				       const btrace_config *conf)
 {
   error (_("Target does not support branch tracing."));
 }

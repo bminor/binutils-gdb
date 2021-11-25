@@ -409,7 +409,7 @@ handle_btrace_enable_bts (struct thread_info *thread)
     error (_("Btrace already enabled."));
 
   current_btrace_conf.format = BTRACE_FORMAT_BTS;
-  thread->btrace = target_enable_btrace (thread->id, &current_btrace_conf);
+  thread->btrace = target_enable_btrace (thread, &current_btrace_conf);
 }
 
 /* Handle btrace enabling in Intel Processor Trace format.  */
@@ -421,7 +421,7 @@ handle_btrace_enable_pt (struct thread_info *thread)
     error (_("Btrace already enabled."));
 
   current_btrace_conf.format = BTRACE_FORMAT_PT;
-  thread->btrace = target_enable_btrace (thread->id, &current_btrace_conf);
+  thread->btrace = target_enable_btrace (thread, &current_btrace_conf);
 }
 
 /* Handle btrace disabling.  */
