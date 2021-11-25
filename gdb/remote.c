@@ -14103,12 +14103,15 @@ remote_target::btrace_sync_conf (const btrace_config *conf)
     }
 }
 
-/* Read the current thread's btrace configuration from the target and
-   store it into CONF.  */
+/* Read TP's btrace configuration from the target and store it into CONF.  */
 
 static void
-btrace_read_config (struct btrace_config *conf)
+btrace_read_config (thread_info *tp, struct btrace_config *conf)
 {
+  /* target_read_stralloc relies on INFERIOR_PTID.  */
+  scoped_restore_current_thread restore_thread;
+  switch_to_thread (tp);
+
   gdb::optional<gdb::char_vector> xml
     = target_read_stralloc (current_inferior ()->top_target (),
 			    TARGET_OBJECT_BTRACE_CONF, "");
@@ -14132,14 +14135,10 @@ remote_target::remote_btrace_maybe_reopen ()
   if (packet_support (PACKET_qXfer_btrace_conf) != PACKET_ENABLE)
     return;
 
-  scoped_restore_current_thread restore_thread;
-
   for (thread_info *tp : all_non_exited_threads (this))
     {
-      switch_to_thread (tp);
-
       memset (&rs->btrace_config, 0x00, sizeof (struct btrace_config));
-      btrace_read_config (&rs->btrace_config);
+      btrace_read_config (tp, &rs->btrace_config);
 
       if (rs->btrace_config.format == BTRACE_FORMAT_NONE)
 	continue;
@@ -14227,7 +14226,7 @@ remote_target::enable_btrace (thread_info *tp,
      tracing itself is not impacted.  */
   try
     {
-      btrace_read_config (&tinfo->conf);
+      btrace_read_config (tp, &tinfo->conf);
     }
   catch (const gdb_exception_error &err)
     {
