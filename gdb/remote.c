@@ -14136,7 +14136,7 @@ remote_target::remote_btrace_maybe_reopen ()
 
   for (thread_info *tp : all_non_exited_threads (this))
     {
-      set_general_thread (tp->ptid);
+      switch_to_thread (tp);
 
       memset (&rs->btrace_config, 0x00, sizeof (struct btrace_config));
       btrace_read_config (&rs->btrace_config);
