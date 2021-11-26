@@ -23,6 +23,7 @@ AC_CONFIG_SRCDIR(gold.cc)
 AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE([no-dist parallel-tests])
+AM_SILENT_RULES([yes])
 
 AM_CONFIG_HEADER(config.h:config.in)
 
