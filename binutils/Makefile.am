@@ -17,12 +17,14 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = dejagnu no-dist foreign subdir-objects
+AUTOMAKE_OPTIONS = dejagnu no-dist foreign subdir-objects info-in-builddir no-texinfo.tex
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
-SUBDIRS = doc po
+SUBDIRS = po
 
 tooldir = $(exec_prefix)/$(target_alias)
+
+MAINTAINERCLEANFILES =
 
 ## These aren't set by automake, because they appear in
 ## bfd/acinclude.m4, which is included by binutils/acinclude.m4, and
@@ -552,3 +554,5 @@ install-exec-local: install-binPROGRAMS $(bin_PROGRAMS) $(noinst_PROGRAMS)
 	  else true; \
 	  fi; \
 	done
+
+include doc/local.mk
