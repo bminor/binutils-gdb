@@ -796,102 +796,102 @@ libbfd.a: stamp-lib ; @true
 # vector names.  It is built from config.bfd.  It is not compiled by
 # itself, but is included by targets.c.
 targmatch.h: config.bfd targmatch.sed
-	rm -f targmatch.h
-	$(SED) -f $(srcdir)/targmatch.sed < $(srcdir)/config.bfd > targmatch.new
-	mv -f targmatch.new targmatch.h
+	$(AM_V_at)rm -f targmatch.h
+	$(AM_V_GEN)$(SED) -f $(srcdir)/targmatch.sed < $(srcdir)/config.bfd > targmatch.new
+	$(AM_V_at)mv -f targmatch.new targmatch.h
 
 # When compiling archures.c and targets.c, supply the default target
 # info from configure.
 
 targets.lo: targets.c Makefile
 if am__fastdepCC
-	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(TDEFAULTS) $(srcdir)/targets.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(TDEFAULTS) $(srcdir)/targets.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 else
 if AMDEP
 	source='targets.c' object='$@' libtool=yes @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(LTCOMPILE) -c -o $@ $(TDEFAULTS) $(srcdir)/targets.c
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $(TDEFAULTS) $(srcdir)/targets.c
 endif
 
 archures.lo: archures.c Makefile
 if am__fastdepCC
-	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(TDEFAULTS) $(srcdir)/archures.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(TDEFAULTS) $(srcdir)/archures.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 else
 if AMDEP
 	source='archures.c' object='$@' libtool=yes @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(LTCOMPILE) -c -o $@ $(TDEFAULTS) $(srcdir)/archures.c
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $(TDEFAULTS) $(srcdir)/archures.c
 endif
 
 dwarf2.lo: dwarf2.c Makefile
 if am__fastdepCC
-	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 else
 if AMDEP
 	source='dwarf2.c' object='$@' libtool=yes @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(LTCOMPILE) -c -o $@ -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ -DDEBUGDIR=\"$(DEBUGDIR)\" $(srcdir)/dwarf2.c
 endif
 
 elf32-target.h : elfxx-target.h
-	$(SED) -e s/NN/32/g < $< > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< > $@
 
 elf64-target.h : elfxx-target.h
-	$(SED) -e s/NN/64/g < $< > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< > $@
 
 elf32-aarch64.c : elfnn-aarch64.c
-	echo "#line 1 \"elfnn-aarch64.c\"" > $@
-	$(SED) -e s/NN/32/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-aarch64.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-aarch64.c : elfnn-aarch64.c
-	echo "#line 1 \"elfnn-aarch64.c\"" > $@
-	$(SED) -e s/NN/64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-aarch64.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< >> $@
 
 elf32-ia64.c : elfnn-ia64.c
-	echo "#line 1 \"elfnn-ia64.c\"" > $@
-	$(SED) -e s/NN/32/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-ia64.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-ia64.c : elfnn-ia64.c
-	echo "#line 1 \"elfnn-ia64.c\"" > $@
-	$(SED) -e s/NN/64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-ia64.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< >> $@
 
 elf32-loongarch.c : elfnn-loongarch.c
-	echo "#line 1 \"elfnn-loongarch.c\"" > $@
-	$(SED) -e s/NN/32/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-loongarch.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-loongarch.c : elfnn-loongarch.c
-	echo "#line 1 \"elfnn-loongarch.c\"" > $@
-	$(SED) -e s/NN/64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-loongarch.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< >> $@
 
 elf32-riscv.c : elfnn-riscv.c
-	echo "#line 1 \"elfnn-riscv.c\"" > $@
-	$(SED) -e s/NN/32/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-riscv.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/32/g < $< >> $@
 
 elf64-riscv.c : elfnn-riscv.c
-	echo "#line 1 \"elfnn-riscv.c\"" > $@
-	$(SED) -e s/NN/64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"elfnn-riscv.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/NN/64/g < $< >> $@
 
 peigen.c : peXXigen.c
-	echo "#line 1 \"peXXigen.c\"" > $@
-	$(SED) -e s/XX/pe/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/XX/pe/g < $< >> $@
 
 pepigen.c : peXXigen.c
-	echo "#line 1 \"peXXigen.c\"" > $@
-	$(SED) -e s/XX/pep/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/XX/pep/g < $< >> $@
 
 pex64igen.c: peXXigen.c
-	echo "#line 1 \"peXXigen.c\"" > $@
-	$(SED) -e s/XX/pex64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/XX/pex64/g < $< >> $@
 
 pe-aarch64igen.c: peXXigen.c
-	echo "#line 1 \"peXXigen.c\"" > $@
-	$(SED) -e s/XX/peAArch64/g < $< >> $@
+	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/XX/peAArch64/g < $< >> $@
 
 host-aout.lo: Makefile
 
@@ -984,15 +984,15 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 # Disable -Werror, if it has been enabled, since coffswap.h won't
 # compile with gcc 4.5 and above.
 coff-tic4x.lo: coff-tic4x.c
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< $(NO_WERROR)
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< $(NO_WERROR)
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)
+@am__fastdepCC_FALSE@	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)
 
 coff-tic54x.lo: coff-tic54x.c
-@am__fastdepCC_TRUE@	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< $(NO_WERROR)
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $< $(NO_WERROR)
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)
+@am__fastdepCC_FALSE@	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)

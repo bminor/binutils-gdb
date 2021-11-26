@@ -24,6 +24,7 @@ AC_CONFIG_SRCDIR([libbfd.c])
 AC_CANONICAL_TARGET
 
 AM_INIT_AUTOMAKE
+AM_SILENT_RULES([yes])
 
 dnl These must be called before LT_INIT, because it may want
 dnl to call AC_CHECK_PROG.
