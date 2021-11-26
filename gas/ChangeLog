@@ -1,3 +1,10 @@
+2021-11-26  Tom de Vries  <tdevries@suse.de>
+
+	PR 28629
+	* dwarf2dbg.c (out_dir_and_file_list): When copying file 1 to file 0,
+	also copy dir and md5 fields.
+	* testsuite/gas/i386/dwarf5-line-4.d: Adjust expected output.
+
 2021-11-18  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (parse_args): Add support for --multibyte-handling.

@@ -2123,7 +2123,7 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
   size_t size;
   const char *dir;
   char *cp;
-  unsigned int i;
+  unsigned int i, j;
   bool emit_md5 = false;
   bool emit_timestamps = true;
   bool emit_filesize = true;
@@ -2275,7 +2275,13 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 	     .file 0 directive.  If that isn't used, but file 1 is,
 	     then use that as main file name.  */
 	  if (DWARF2_LINE_VERSION >= 5 && i == 0 && files_in_use >= 1 && files[0].filename == NULL)
-	    files[0].filename = files[1].filename;
+	    {
+	      files[0].filename = files[1].filename;
+	      files[0].dir = files[1].dir;
+	      if (emit_md5)
+		for (j = 0; i < NUM_MD5_BYTES; ++j)
+		  files[0].md5[j] = files[1].md5[j];
+	    }
 	  else
 	    files[i].filename = "";
 	  if (DWARF2_LINE_VERSION < 5 || i != 0)
