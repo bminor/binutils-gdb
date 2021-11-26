@@ -147,7 +147,7 @@ proc contains_irelative_reloc { binary_file } {
     #    080496f4  0000002a R_386_IRELATIVE
 
 
-    if { ![regexp "\[0-9a-f\]+\[ \]+\[0-9a-f\]+\[ \]+R_(\[_0-9A-Z\]+_IREL(|ATIVE)|PARISC_IPLT)\[ \]*\[0-9a-f\]*\n" [file_contents readelf.out]] } {
+    if { ![regexp "\[0-9a-f\]+\[ \]+\[0-9a-f\]+\[ \]+R_(\[_0-9A-Z\]+_IREL(|ATIVE)|PARISC_IPLT).*\n" [file_contents readelf.out]] } {
 	return 0
     }
 
@@ -361,6 +361,7 @@ if {[contains_irelative_reloc tmpdir/local_prog] != 1} {
     set fails [expr $fails + 1]
 }
 if { ![string match "" $STATIC_LDFLAGS] \
+    && ![istarget hppa*-*-*] \
     && [contains_irelative_reloc tmpdir/static_prog] != 1} {
     fail "Static ifunc-using executable does not contain R_*_IRELATIVE relocation"
     set fails [expr $fails + 1]
