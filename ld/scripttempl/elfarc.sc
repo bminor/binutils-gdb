@@ -69,7 +69,7 @@ test -z "$ENTRY" && ENTRY=start
 test -z "${BIG_OUTPUT_FORMAT}" && BIG_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 test -z "${LITTLE_OUTPUT_FORMAT}" && LITTLE_OUTPUT_FORMAT=${OUTPUT_FORMAT}
 # If we request a big endian toolchain, give a big endian linker
-test "${ARC_ENDIAN}" == "big" && OUTPUT_FORMAT=${BIG_OUTPUT_FORMAT}
+test "${ARC_ENDIAN}" = "big" && OUTPUT_FORMAT=${BIG_OUTPUT_FORMAT}
 if [ -z "$MACHINE" ]; then OUTPUT_ARCH=${ARCH}; else OUTPUT_ARCH=${ARCH}:${MACHINE}; fi
 test -z "${ELFSIZE}" && ELFSIZE=32
 test -z "${ALIGNMENT}" && ALIGNMENT="${ELFSIZE} / 8"
