@@ -2279,7 +2279,7 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 	      files[0].filename = files[1].filename;
 	      files[0].dir = files[1].dir;
 	      if (emit_md5)
-		for (j = 0; i < NUM_MD5_BYTES; ++j)
+		for (j = 0; j < NUM_MD5_BYTES; ++j)
 		  files[0].md5[j] = files[1].md5[j];
 	    }
 	  else
