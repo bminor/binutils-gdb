@@ -214,7 +214,7 @@ check-DEJAGNU: site.exp
 	fi
 
 development.exp: $(BFDDIR)/development.sh
-	$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
+	$(AM_V_GEN)$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
 	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
 
 installcheck-local:
@@ -269,14 +269,14 @@ objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(LIBCTF) $(BFDLIB) $(LIBIB
 
 objdump.@OBJEXT@:objdump.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(OBJDUMP_DEFS) $(srcdir)/objdump.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(OBJDUMP_DEFS) $(srcdir)/objdump.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='objdump.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c $(OBJDUMP_DEFS) $(srcdir)/objdump.c
+	$(AM_V_CC)$(COMPILE) -c $(OBJDUMP_DEFS) $(srcdir)/objdump.c
 endif
 
 cxxfilt_SOURCES = cxxfilt.c $(BULIBS)
@@ -311,32 +311,32 @@ addr2line_SOURCES = addr2line.c $(BULIBS)
 #	-ln $(OBJCOPY_PROG) $(STRIP_PROG)
 
 sysroff.c: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info
-	./sysinfo$(EXEEXT_FOR_BUILD) -c <$(srcdir)/sysroff.info >sysroff.c
-	./sysinfo$(EXEEXT_FOR_BUILD) -i <$(srcdir)/sysroff.info >>sysroff.c
-	./sysinfo$(EXEEXT_FOR_BUILD) -g <$(srcdir)/sysroff.info >>sysroff.c
+	$(AM_V_GEN)./sysinfo$(EXEEXT_FOR_BUILD) -c <$(srcdir)/sysroff.info >sysroff.c
+	$(AM_V_at)./sysinfo$(EXEEXT_FOR_BUILD) -i <$(srcdir)/sysroff.info >>sysroff.c
+	$(AM_V_at)./sysinfo$(EXEEXT_FOR_BUILD) -g <$(srcdir)/sysroff.info >>sysroff.c
 
 sysroff.h: sysinfo$(EXEEXT_FOR_BUILD) sysroff.info
-	./sysinfo$(EXEEXT_FOR_BUILD) -d <$(srcdir)/sysroff.info >sysroff.h
+	$(AM_V_GEN)./sysinfo$(EXEEXT_FOR_BUILD) -d <$(srcdir)/sysroff.info >sysroff.h
 
 sysinfo$(EXEEXT_FOR_BUILD): sysinfo.@OBJEXT@ syslex_wrap.@OBJEXT@
-	$(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ sysinfo.@OBJEXT@ syslex_wrap.@OBJEXT@
+	$(AM_V_CCLD)$(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@ sysinfo.@OBJEXT@ syslex_wrap.@OBJEXT@
 
 syslex_wrap.@OBJEXT@: syslex_wrap.c syslex.c sysinfo.h config.h
-	$(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(NO_WERROR) $(srcdir)/syslex_wrap.c
+	$(AM_V_CC)$(CC_FOR_BUILD) -c -I. -I$(srcdir) $(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(NO_WERROR) $(srcdir)/syslex_wrap.c
 
 sysinfo.@OBJEXT@: sysinfo.c
-	if [ -r sysinfo.c ]; then \
+	$(AM_V_CC)if [ -r sysinfo.c ]; then \
 	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(NO_WERROR) sysinfo.c ; \
 	else \
 	  $(CC_FOR_BUILD) -c -I. $(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(NO_WERROR) $(srcdir)/sysinfo.c ; \
 	fi
 
 bin2c$(EXEEXT_FOR_BUILD): bin2c.c
-	$(CC_FOR_BUILD) -o $@ $(AM_CPPFLAGS) $(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) $(srcdir)/bin2c.c
+	$(AM_V_CCLD)$(CC_FOR_BUILD) -o $@ $(AM_CPPFLAGS) $(AM_CFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) $(srcdir)/bin2c.c
 
 embedspu: embedspu.sh Makefile
-	awk '/^program_transform_name=/ {print "program_transform_name=\"$(program_transform_name)\""; next} {print}' < $< > $@
-	chmod a+x $@
+	$(AM_V_GEN)awk '/^program_transform_name=/ {print "program_transform_name=\"$(program_transform_name)\""; next} {print}' < $< > $@
+	$(AM_V_at)chmod a+x $@
 
 # We need these for parallel make.
 sysinfo.h: sysinfo.c
@@ -345,122 +345,122 @@ sysinfo.h: sysinfo.c
 # yacc will produce working code which contain compile time warnings.
 arparse.@OBJEXT@: arparse.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f arparse.c || echo $(srcdir)/`arparse.c $(NO_WERROR)
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f arparse.c || echo $(srcdir)/`arparse.c $(NO_WERROR)
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='arparse.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c `test -f arparse.c || echo $(srcdir)/`arparse.c $(NO_WERROR)
+	$(AM_V_CC)$(COMPILE) -c `test -f arparse.c || echo $(srcdir)/`arparse.c $(NO_WERROR)
 endif
 
 arlex.@OBJEXT@: arlex.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f arlex.c || echo $(srcdir)/`arlex.c $(NO_WERROR)
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f arlex.c || echo $(srcdir)/`arlex.c $(NO_WERROR)
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='arlex.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c `test -f arlex.c || echo $(srcdir)/`arlex.c $(NO_WERROR)
+	$(AM_V_CC)$(COMPILE) -c `test -f arlex.c || echo $(srcdir)/`arlex.c $(NO_WERROR)
 endif
 
 dwarf.@OBJEXT@: dwarf.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo $(DEBUGINFOD_CFLAGS) -c -o $@ $(srcdir)/dwarf.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo $(DEBUGINFOD_CFLAGS) -c -o $@ $(srcdir)/dwarf.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='dwarf.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) $(DEBUGINFOD_CFLAGS) -c -o $@ $(srcdir)/dwarf.c
+	$(AM_V_CC)$(COMPILE) $(DEBUGINFOD_CFLAGS) -c -o $@ $(srcdir)/dwarf.c
 endif
 
 sysroff.@OBJEXT@: sysroff.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f sysroff.c || echo $(srcdir)/`sysroff.c $(NO_WERROR)
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f sysroff.c || echo $(srcdir)/`sysroff.c $(NO_WERROR)
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='sysroff.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c `test -f sysroff.c || echo $(srcdir)/`sysroff.c $(NO_WERROR)
+	$(AM_V_CC)$(COMPILE) -c `test -f sysroff.c || echo $(srcdir)/`sysroff.c $(NO_WERROR)
 endif
 
 defparse.@OBJEXT@: defparse.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f defparse.c || echo $(srcdir)/`defparse.c $(NO_WERROR)
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f defparse.c || echo $(srcdir)/`defparse.c $(NO_WERROR)
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='defparse.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c `test -f defparse.c || echo $(srcdir)/`defparse.c $(NO_WERROR)
+	$(AM_V_CC)$(COMPILE) -c `test -f defparse.c || echo $(srcdir)/`defparse.c $(NO_WERROR)
 endif
 
 deflex.@OBJEXT@: deflex.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f deflex.c || echo $(srcdir)/`deflex.c $(NO_WERROR)
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f deflex.c || echo $(srcdir)/`deflex.c $(NO_WERROR)
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='deflex.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c `test -f deflex.c || echo $(srcdir)/`deflex.c $(NO_WERROR)
+	$(AM_V_CC)$(COMPILE) -c `test -f deflex.c || echo $(srcdir)/`deflex.c $(NO_WERROR)
 endif
 
 rcparse.@OBJEXT@: rcparse.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f rcparse.c || echo $(srcdir)/`rcparse.c $(NO_WERROR)
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f rcparse.c || echo $(srcdir)/`rcparse.c $(NO_WERROR)
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='rcparse.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c `test -f rcparse.c || echo $(srcdir)/`rcparse.c $(NO_WERROR)
+	$(AM_V_CC)$(COMPILE) -c `test -f rcparse.c || echo $(srcdir)/`rcparse.c $(NO_WERROR)
 endif
 
 mcparse.@OBJEXT@: mcparse.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f mcparse.c || echo $(srcdir)/`mcparse.c $(NO_WERROR)
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `test -f mcparse.c || echo $(srcdir)/`mcparse.c $(NO_WERROR)
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='mcparse.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c `test -f mcparse.c || echo $(srcdir)/`mcparse.c $(NO_WERROR)
+	$(AM_V_CC)$(COMPILE) -c `test -f mcparse.c || echo $(srcdir)/`mcparse.c $(NO_WERROR)
 endif
 
 rclex.@OBJEXT@: rclex.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(srcdir)/rclex.c $(NO_WERROR)
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(srcdir)/rclex.c $(NO_WERROR)
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='rclex.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c $(srcdir)/rclex.c $(NO_WERROR)
+	$(AM_V_CC)$(COMPILE) -c $(srcdir)/rclex.c $(NO_WERROR)
 endif
 
 mclex.@OBJEXT@: mclex.c
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(srcdir)/mclex.c $(NO_WERROR)
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(srcdir)/mclex.c $(NO_WERROR)
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='mclex.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c $(srcdir)/mclex.c $(NO_WERROR)
+	$(AM_V_CC)$(COMPILE) -c $(srcdir)/mclex.c $(NO_WERROR)
 endif
 
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
@@ -471,26 +471,26 @@ dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL)
 
 dlltool.@OBJEXT@:
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@  $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@  $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='dlltool.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
+	$(AM_V_CC)$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/dlltool.c
 endif
 
 rescoff.@OBJEXT@:
 if am__fastdepCC
-	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@  $(DLLTOOL_DEFS) $(srcdir)/rescoff.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@  $(DLLTOOL_DEFS) $(srcdir)/rescoff.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 else
 if AMDEP
 	source='rescoff.c' object='$@' libtool=no @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/rescoff.c
+	$(AM_V_CC)$(COMPILE) -c $(DLLTOOL_DEFS) $(srcdir)/rescoff.c
 endif
 
 coffdump_SOURCES = coffdump.c coffgrok.c $(BULIBS)
