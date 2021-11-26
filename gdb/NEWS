@@ -73,6 +73,14 @@ show debug linux-nat
 maint flush source-cache
   Flush the contents of the source code cache.
 
+maint set gnu-source-highlight enabled on|off
+maint show gnu-source-highlight enabled
+  Whether GDB should use the GNU Source Highlight library for adding
+  styling to source code.  When off, the library will not be used, even
+  when available.  When GNU Source Highlight isn't used, or can't add
+  styling to a particular source file, then the Python Pygments
+  library will be used instead.
+
 * Changed commands
 
 maint packet

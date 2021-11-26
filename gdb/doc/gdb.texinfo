@@ -39797,6 +39797,25 @@ unload the library and continue searching for a suitable candidate as
 described in @ref{set libthread-db-search-path}.  For more information
 about the tests, see @ref{maint check libthread-db}.
 
+@kindex maint set gnu-source-highlight enabled
+@kindex maint show gnu-source-highlight enabled
+@item maint set gnu-source-highlight enabled @r{[}on|off@r{]}
+@itemx maint show gnu-source-highlight enabled
+Control whether @value{GDBN} should use the GNU Source Highlight
+library for applying styling to source code (@pxref{Output Styling}).
+This will be @samp{on} by default if the GNU Source Highlight library
+is available.  If the GNU Source Highlight library is not available,
+then this will be @samp{off} by default, and attempting to change this
+value to @samp{on} will give an error.
+
+If the GNU Source Highlight library is not being used, then
+@value{GDBN} will use the Python Pygments package for source code
+styling, if it is available.
+
+This option is useful for debugging @value{GDBN}'s use of the Pygments
+library when @value{GDBN} is linked against the GNU Source Highlight
+library.
+
 @kindex maint space
 @cindex memory used by commands
 @item maint space @var{value}
