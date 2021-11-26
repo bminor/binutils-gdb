@@ -162,9 +162,8 @@ source_cache::ensure (struct symtab *s)
     {
       if (m_source_map[i].fullname == fullname)
 	{
-	  /* This should always hold, because we create the file
-	     offsets when reading the file, and never free them
-	     without also clearing the contents cache.  */
+	  /* This should always hold, because we create the file offsets
+	     when reading the file.  */
 	  gdb_assert (m_offset_cache.find (fullname)
 		      != m_offset_cache.end ());
 	  /* Not strictly LRU, but at least ensure that the most
@@ -240,7 +239,11 @@ source_cache::ensure (struct symtab *s)
   m_source_map.push_back (std::move (result));
 
   if (m_source_map.size () > MAX_ENTRIES)
-    m_source_map.erase (m_source_map.begin ());
+    {
+      auto iter = m_source_map.begin ();
+      m_offset_cache.erase (iter->fullname);
+      m_source_map.erase (iter);
+    }
 
   return true;
 }
