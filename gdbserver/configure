@@ -7283,6 +7283,22 @@ else
 fi
 
 
+  # ----------------------- #
+  # Check for threading.    #
+  # ----------------------- #
+
+  # Check whether --enable-threading was given.
+if test "${enable_threading+set}" = set; then :
+  enableval=$enable_threading; case "$enableval" in
+    yes) want_threading=yes ;;
+    no) want_threading=no ;;
+    *) as_fn_error $? "bad value $enableval for threading" "$LINENO" 5 ;;
+    esac
+else
+  want_threading=yes
+fi
+
+
   # Check for std::thread.  This does not work on some platforms, like
   # mingw and DJGPP.
   ac_ext=cpp
