@@ -314,14 +314,14 @@ AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(INCDIR) -I$(BFDDIR) @HDEFINES@ @INCIN
 
 disassemble.lo: disassemble.c
 if am__fastdepCC
-	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ @archdefs@ $(srcdir)/disassemble.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ @archdefs@ $(srcdir)/disassemble.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 else
 if AMDEP
 	source='disassemble.c' object='$@' libtool=yes @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(LTCOMPILE) -c -o $@ @archdefs@ $(srcdir)/disassemble.c
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ @archdefs@ $(srcdir)/disassemble.c
 endif
 
 libopcodes_la_SOURCES =  dis-buf.c disassemble.c dis-init.c
@@ -554,17 +554,17 @@ aarch64-gen$(EXEEXT_FOR_BUILD): aarch64-gen.o $(BUILD_LIB_DEPS)
 
 aarch64-gen.o: aarch64-gen.c $(BFD_H) $(INCDIR)/getopt.h $(INCDIR)/libiberty.h\
 	$(INCDIR)/opcode/aarch64.h config.h aarch64-opc.h aarch64-tbl.h
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/aarch64-gen.c
+	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $(srcdir)/aarch64-gen.c
 
 $(srcdir)/aarch64-asm-2.c: @MAINT@ aarch64-gen$(exeext_for_build)
-	./aarch64-gen$(exeext_for_build) --gen-asm > $@
+	$(AM_V_GEN)./aarch64-gen$(exeext_for_build) --gen-asm > $@
 $(srcdir)/aarch64-dis-2.c: @MAINT@ aarch64-gen$(exeext_for_build)
-	./aarch64-gen$(exeext_for_build) --gen-dis > $@
+	$(AM_V_GEN)./aarch64-gen$(exeext_for_build) --gen-dis > $@
 $(srcdir)/aarch64-opc-2.c: @MAINT@ aarch64-gen$(exeext_for_build)
-	./aarch64-gen$(exeext_for_build) --gen-opc > $@
+	$(AM_V_GEN)./aarch64-gen$(exeext_for_build) --gen-opc > $@
 
 i386-gen$(EXEEXT_FOR_BUILD): i386-gen.o $(BUILD_LIB_DEPS)
-	$(LINK_FOR_BUILD) i386-gen.o $(BUILD_LIBS)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) i386-gen.o $(BUILD_LIBS)
 
 i386-gen.o: i386-gen.c i386-opc.h $(srcdir)/../include/opcode/i386.h \
 	$(INCDIR)/ansidecl.h $(INCDIR)/getopt.h $(INCDIR)/hashtab.h \
@@ -583,7 +583,7 @@ $(srcdir)/i386-init.h: @MAINT@ i386-gen$(EXEEXT_FOR_BUILD) i386-opc.tbl i386-reg
 i386-opc.lo: $(srcdir)/i386-tbl.h
 
 ia64-gen$(EXEEXT_FOR_BUILD): ia64-gen.o $(BUILD_LIB_DEPS)
-	$(LINK_FOR_BUILD) ia64-gen.o $(BUILD_LIBS)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) ia64-gen.o $(BUILD_LIBS)
 
 ia64-gen.o: ia64-gen.c $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/getopt.h \
 	$(INCDIR)/libiberty.h $(INCDIR)/opcode/ia64.h $(INCDIR)/safe-ctype.h \
@@ -597,65 +597,65 @@ ia64-gen.o: ia64-gen.c $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/getopt.h \
 ia64_asmtab_deps = ia64-gen$(EXEEXT_FOR_BUILD) ia64-ic.tbl \
 	ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
 $(srcdir)/ia64-asmtab.c: @MAINT@ $(ia64_asmtab_deps)
-	./ia64-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir) > $@
+	$(AM_V_GEN)./ia64-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir) > $@
 
 ia64-opc.lo: $(srcdir)/ia64-asmtab.c
 
 $(srcdir)/msp430-decode.c: @MAINT@ $(srcdir)/msp430-decode.opc opc2c$(EXEEXT_FOR_BUILD)
-	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/msp430-decode.opc > $(srcdir)/msp430-decode.c
+	$(AM_V_GEN)./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/msp430-decode.opc > $(srcdir)/msp430-decode.c
 
 $(srcdir)/rl78-decode.c: @MAINT@ $(srcdir)/rl78-decode.opc opc2c$(EXEEXT_FOR_BUILD)
-	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rl78-decode.opc > $(srcdir)/rl78-decode.c
+	$(AM_V_GEN)./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rl78-decode.opc > $(srcdir)/rl78-decode.c
 
 $(srcdir)/rx-decode.c: @MAINT@ $(srcdir)/rx-decode.opc opc2c$(EXEEXT_FOR_BUILD)
-	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rx-decode.opc > $(srcdir)/rx-decode.c
+	$(AM_V_GEN)./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rx-decode.opc > $(srcdir)/rx-decode.c
 
 opc2c$(EXEEXT_FOR_BUILD): opc2c.o $(BUILD_LIBS_DEPS)
-	$(LINK_FOR_BUILD) opc2c.o $(BUILD_LIBS)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) opc2c.o $(BUILD_LIBS)
 
 opc2c.o: opc2c.c $(INCDIR)/libiberty.h
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/opc2c.c
+	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $(srcdir)/opc2c.c
 
 s390-mkopc$(EXEEXT_FOR_BUILD): s390-mkopc.c
-	$(COMPILE_FOR_BUILD) -o s390-mkopc $(srcdir)/s390-mkopc.c
+	$(AM_V_CCLD)$(COMPILE_FOR_BUILD) -o s390-mkopc $(srcdir)/s390-mkopc.c
 
 s390-opc.tab: s390-mkopc$(EXEEXT_FOR_BUILD) s390-opc.txt
-	./s390-mkopc$(EXEEXT_FOR_BUILD) < $(srcdir)/s390-opc.txt > s390-opc.tab
+	$(AM_V_GEN)./s390-mkopc$(EXEEXT_FOR_BUILD) < $(srcdir)/s390-opc.txt > s390-opc.tab
 
 s390-opc.lo: s390-opc.tab
 
 z8kgen$(EXEEXT_FOR_BUILD): z8kgen.o $(BUILD_LIB_DEPS)
-	$(LINK_FOR_BUILD) z8kgen.o $(BUILD_LIBS)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) z8kgen.o $(BUILD_LIBS)
 
 z8kgen.o: z8kgen.c
-	$(COMPILE_FOR_BUILD) -c $(srcdir)/z8kgen.c
+	$(AM_V_CC)$(COMPILE_FOR_BUILD) -c $(srcdir)/z8kgen.c
 
 $(srcdir)/z8k-opc.h: @MAINT@ z8kgen$(EXEEXT_FOR_BUILD)
-	./z8kgen$(EXEEXT_FOR_BUILD) -a > $@
+	$(AM_V_GEN)./z8kgen$(EXEEXT_FOR_BUILD) -a > $@
 
 z8k-dis.lo: $(srcdir)/z8k-opc.h
 
 MIPS_DEFS=`case \`cat ../bfd/ofiles\` in *elfxx-mips*) echo "-DHAVE_BFD_MIPS_ELF_GET_ABIFLAGS=1";; esac`
 mips-dis.lo: mips-dis.c
 if am__fastdepCC
-	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(MIPS_DEFS) $<
-	$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $(MIPS_DEFS) $<
+	$(AM_V_at)$(am__mv) $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 else
 if AMDEP
 	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(LTCOMPILE) -c -o $@ $(MIPS_DEFS) $<
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $(MIPS_DEFS) $<
 endif
 
 sh-dis.lo: sh-dis.c
 if am__fastdepCC
-	$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ @archdefs@ $(srcdir)/sh-dis.c
-	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+	$(AM_V_CC)$(LTCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ @archdefs@ $(srcdir)/sh-dis.c
+	$(AM_V_at)mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
 else
 if AMDEP
 	source='sh-dis.c' object='$@' libtool=yes @AMDEPBACKSLASH@
 	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 endif
-	$(LTCOMPILE) -c -o $@ @archdefs@ $(srcdir)/sh-dis.c
+	$(AM_V_CC)$(LTCOMPILE) -c -o $@ @archdefs@ $(srcdir)/sh-dis.c
 endif
