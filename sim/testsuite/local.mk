@@ -21,7 +21,7 @@ EXTRA_DEJAGNU_SITE_CONFIG = site-sim-config.exp
 # Custom verbose test variables that automake doesn't provide (yet?).
 AM_V_RUNTEST = $(AM_V_RUNTEST_@AM_V@)
 AM_V_RUNTEST_ = $(AM_V_RUNTEST_@AM_DEFAULT_V@)
-AM_V_RUNTEST_0 =  @echo "  RUNTEST  $(RUNTESTFLAGS)";
+AM_V_RUNTEST_0 =  @echo "  RUNTEST  $(RUNTESTFLAGS) $*";
 AM_V_RUNTEST_1 =
 
 site-sim-config.exp: Makefile
@@ -32,14 +32,49 @@ site-sim-config.exp: Makefile
 	$(foreach V,$(SIM_TOOLCHAIN_VARS),echo "set $(V) \"$($(V))\"";) \
 	) > $@
 
+DO_RUNTEST = \
+	LC_ALL=C; export LC_ALL; \
+	EXPECT=${EXPECT} ; export EXPECT ; \
+	runtest=$(RUNTEST); \
+	$$runtest $(RUNTESTFLAGS)
+
+# Ignore dirs that only contain configuration settings.
+check/./config/%.exp: ; @true
+check/./lib/%.exp: ; @true
+
+check/%.exp:
+	$(AM_V_at)mkdir -p testsuite/$*
+	$(AM_V_RUNTEST)$(DO_RUNTEST) --objdir testsuite/$* --outdir testsuite/$* $*.exp
+
+check-DEJAGNU-parallel:
+	$(AM_V_at)( \
+	$(MAKE) -k \
+	  `cd $(srcdir)/testsuite && find . -name '*.exp' -printf 'check/%p '`; \
+	ret=$$?; \
+	$(SHELL) $(srcroot)/contrib/dg-extract-results.sh \
+	  `find testsuite/ -maxdepth 4 -name testrun.sum | sort` > testrun.sum; \
+	$(SHELL) $(srcroot)/contrib/dg-extract-results.sh -L \
+	  `find testsuite/ -maxdepth 4 -name testrun.log | sort` > testrun.log; \
+	echo; \
+	$(SED) -n '/^.*===.*Summary.*===/,$$p' testrun.sum; \
+	exit $$ret)
+
+check-DEJAGNU-single:
+	$(AM_V_RUNTEST)$(DO_RUNTEST)
+
+# If running a single job, invoking runtest once is faster & has nicer output.
 check-DEJAGNU: site.exp
-	$(AM_V_RUNTEST)LC_ALL=C; export LC_ALL; \
+	$(AM_V_at)(set -e; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
-	  $$runtest $(RUNTESTFLAGS); \
-	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
-	fi
+	  case "$(MAKEFLAGS)" in \
+	  *-j*) $(MAKE) check-DEJAGNU-parallel;; \
+	  *)    $(MAKE) check-DEJAGNU-single;; \
+	  esac; \
+	else \
+	  echo "WARNING: could not find \`runtest'" 1>&2; :;\
+	fi)
 
 MOSTLYCLEANFILES += \
 	site-sim-config.exp testrun.log testrun.sum
