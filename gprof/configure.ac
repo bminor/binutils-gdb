@@ -23,6 +23,7 @@ AC_CONFIG_SRCDIR([gprof.c])
 AC_CANONICAL_TARGET([])
 
 AM_INIT_AUTOMAKE
+AM_SILENT_RULES([yes])
 
 dnl For simplicity, we use the BFD configuration file for most
 dnl things.  However, we also need our own configuration file for
