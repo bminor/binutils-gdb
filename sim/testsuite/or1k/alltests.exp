@@ -17,7 +17,7 @@
 
 sim_init
 
-if [istarget or1k*-*-*] {
+if [istarget *] {
     set all_machs "or1k"
 
     global LDFLAGS_FOR_TARGET

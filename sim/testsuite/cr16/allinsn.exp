@@ -2,7 +2,7 @@
 
 sim_init
 
-if [istarget cr16*-*-*] {
+if [istarget *] {
     # all machines
     set all_machs "cr16"
 

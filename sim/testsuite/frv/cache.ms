@@ -1,6 +1,6 @@
 # mach: frv fr500 fr550
 # sim: --memory-region 0xff000000,4 --memory-region 0xfe000000,00404000
-# xfail: "crashes with bad write" frv-*
+# xfail: "crashes with bad write" *-*
 
 ; Exit with return code
 

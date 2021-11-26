@@ -2,7 +2,7 @@
 
 sim_init
 
-if [istarget riscv*-*] {
+if [istarget *] {
     # all machines
     set all_machs "riscv"
 

@@ -2,7 +2,7 @@
 
 sim_init
 
-if { [istarget arm*-*-*] } {
+if { [istarget *] } {
     # all machines
     set all_machs "arm7tdmi"
 

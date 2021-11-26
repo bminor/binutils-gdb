@@ -2,7 +2,7 @@
 
 sim_init
 
-if [istarget mn10300-*] {
+if [istarget *] {
     # all machines
     set all_machs "mn10300"
 

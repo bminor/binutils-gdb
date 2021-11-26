@@ -14,7 +14,7 @@ foreach opt $board_variant_list {
     }
 }
 
-if [istarget sh-*elf] {
+if [istarget *] {
     foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.s]] {
 	run_sim_test $src $all_machs
     }

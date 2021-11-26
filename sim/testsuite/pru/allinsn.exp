@@ -20,7 +20,7 @@
 
 sim_init
 
-if [istarget pru-*] {
+if [istarget *] {
     # all machines
     set all_machs "pru"
 

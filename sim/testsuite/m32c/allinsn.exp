@@ -3,7 +3,7 @@
 
 sim_init
 
-if [istarget m32c*-*-*] {
+if [istarget *] {
     # all machines
     set all_machs "m32c"
 

@@ -116,7 +116,7 @@ proc slurp_rv { file } {
 
 # The main test loop.
 
-if [istarget cris*-*-*] {
+if [istarget *] {
     global ASFLAGS_FOR_TARGET
     global LDFLAGS_FOR_TARGET
     global SIMFLAGS_FOR_TARGET

@@ -6,7 +6,7 @@ global CFLAGS_FOR_TARGET_init
 set CFLAGS_FOR_TARGET_init "-mcpu=bf537"
 sim_init
 
-if [istarget bfin-*-elf] {
+if [istarget *] {
     # all machines
     set all_machs "bfin"
 

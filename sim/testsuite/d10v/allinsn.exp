@@ -2,7 +2,7 @@
 
 sim_init
 
-if [istarget d10v*-*] {
+if [istarget *] {
     # all machines
     set all_machs "d10v"
 

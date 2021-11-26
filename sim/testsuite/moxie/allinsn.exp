@@ -2,7 +2,7 @@
 
 sim_init
 
-if [istarget moxie-*] {
+if [istarget *] {
     # all machines
     set all_machs "moxie"
 

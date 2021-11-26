@@ -2,7 +2,7 @@
 
 sim_init
 
-if [istarget bpf-unknown-none] {
+if [istarget *] {
     # all machines
     set all_machs "bpf"
 

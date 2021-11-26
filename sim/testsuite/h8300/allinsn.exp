@@ -2,7 +2,7 @@
 
 sim_init
 
-if {[istarget h8300*-*-*] || [istarget h8sx*-*-*]} then {
+if {[istarget *]} {
     set all_machs "h8300 h8300h h8300s h8sx"
 
     foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.s]] {

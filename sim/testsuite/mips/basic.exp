@@ -41,8 +41,7 @@ proc run_sim_tests { name requested_machs { requested_micromips_machs "" } } {
     run_micromips_test $name $requested_micromips_machs
 }
 
-# Only test mips*-*-elf (e.g., no mips*-*-linux)
-if {[istarget mips*-*-elf]} {
+if {[istarget *]} {
     set dspmodels ""
     set mdmxmodels ""
     set micromipsmodels ""

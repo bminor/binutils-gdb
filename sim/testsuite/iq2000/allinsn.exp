@@ -2,7 +2,7 @@
 
 sim_init
 
-if [istarget iq2000-*] {
+if [istarget *] {
     # all machines
     set all_machs "iq2000"
 

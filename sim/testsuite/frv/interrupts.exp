@@ -2,7 +2,7 @@
 
 sim_init
 
-if [istarget frv*-*] {
+if [istarget *] {
     # all machines
     set all_machs "frv fr500 fr550 fr400"
     set cpu_option -mcpu

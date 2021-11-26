@@ -17,10 +17,6 @@
 
 sim_init
 
-if ![istarget cris*-*-*] {
-    return
-}
-
 set CFLAGS_FOR_TARGET "-O2"
 if [istarget cris-*-*] {
     set mach "crisv10"
@@ -28,7 +24,7 @@ if [istarget cris-*-*] {
     set mach "crisv32"
 }
 
-if [istarget cris*-*-elf] {
+if [istarget *] {
     append CFLAGS_FOR_TARGET " -sim"
 }
 

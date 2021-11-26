@@ -2,7 +2,7 @@
 
 sim_init
 
-if [istarget v850*-*] {
+if [istarget *] {
     # All machines.
     # Should add more cpus if the testsuite adds coverage for their insns, but
     # at the core level, there's no deviation beyond these two.
