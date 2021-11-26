@@ -234,7 +234,7 @@ def find_pc_line(pc):
 
 def set_parameter(name, value):
     """Set the GDB parameter NAME to VALUE."""
-    execute('set ' + name + ' ' + str(value), to_string=True)
+    execute("set " + name + " " + str(value), to_string=True)
 
 
 @contextmanager
@@ -258,7 +258,9 @@ try:
         try:
             lexer = lexers.get_lexer_for_filename(filename, stripnl=False)
             formatter = formatters.TerminalFormatter()
-            return highlight(contents, lexer, formatter)
+            return highlight(contents, lexer, formatter).encode(
+                host_charset(), "backslashreplace"
+            )
         except:
             return None
 

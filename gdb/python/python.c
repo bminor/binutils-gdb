@@ -1172,13 +1172,24 @@ gdbpy_colorize (const std::string &filename, const std::string &contents)
       gdbpy_print_stack ();
       return {};
     }
-  gdbpy_ref<> contents_arg (PyString_FromString (contents.c_str ()));
+
+  /* The pygments library, which is what we currently use for applying
+     styling, is happy to take input as a bytes object, and to figure out
+     the encoding for itself.  This removes the need for us to figure out
+     (guess?) at how the content is encoded, which is probably a good
+     thing.  */
+  gdbpy_ref<> contents_arg (PyBytes_FromStringAndSize (contents.c_str (),
+						       contents.size ()));
   if (contents_arg == nullptr)
     {
       gdbpy_print_stack ();
       return {};
     }
 
+  /* Calling gdb.colorize passing in the filename (a string), and the file
+     contents (a bytes object).  This function should return either a bytes
+     object, the same contents with styling applied, or None to indicate
+     that no styling should be performed.  */
   gdbpy_ref<> result (PyObject_CallFunctionObjArgs (hook.get (),
 						    fname_arg.get (),
 						    contents_arg.get (),
@@ -1189,25 +1200,17 @@ gdbpy_colorize (const std::string &filename, const std::string &contents)
       return {};
     }
 
-  if (!gdbpy_is_string (result.get ()))
+  if (result == Py_None)
     return {};
-
-  gdbpy_ref<> unic = python_string_to_unicode (result.get ());
-  if (unic == nullptr)
+  else if (!PyBytes_Check (result.get ()))
     {
-      gdbpy_print_stack ();
-      return {};
-    }
-  gdbpy_ref<> host_str (PyUnicode_AsEncodedString (unic.get (),
-						   host_charset (),
-						   nullptr));
-  if (host_str == nullptr)
-    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Return value from gdb.colorize should be a bytes object or None."));
       gdbpy_print_stack ();
       return {};
     }
 
-  return std::string (PyBytes_AsString (host_str.get ()));
+  return std::string (PyBytes_AsString (result.get ()));
 }
 
 
