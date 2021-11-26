@@ -11,8 +11,15 @@
   configure a target's feature packet and to display its configuration,
   respectively.
 
-  The configuration of the packet itself applies to the currently selected
-  target (if available).  If no target is selected, it applies to future remote
+  The individual packet sizes can be configured and shown using the commands
+    ** 'set remote memory-read-packet-size (number of bytes|fixed|limit)'
+    ** 'set remote memory-write-packet-size (number of bytes|fixed|limit)'
+    ** 'show remote memory-read-packet-size'
+    ** 'show remote memory-write-packet-size'.
+
+  The configuration of the packet itself, as well as the size of a memory-read
+  or memory-write packet applies to the currently selected target (if
+  available).  If no target is selected, it applies to future remote
   connections.  Similarly, the show commands print the configuration of the
   currently selected target.  If no remote target is selected, the default
   configuration for future connections is shown.

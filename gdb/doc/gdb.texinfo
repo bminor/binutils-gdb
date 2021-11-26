@@ -24128,6 +24128,21 @@ future connections is shown.  The available settings are:
 
 @end multitable
 
+@cindex packet size, remote, configuring
+The number of bytes per memory-read or memory-write packet for a remote target
+can be configured using the commands
+@w{@code{set remote memory-read-packet-size}} and
+@w{@code{set remote memory-write-packet-size}}.  If set to @samp{0} (zero) the
+default packet size will be used.  The actual limit is further reduced depending
+on the target.  Specify @samp{fixed} to disable the target-dependent restriction
+and @samp{limit} to enable it.  Similar to the enabling and disabling of remote
+packets, the command applies to the currently selected target (if available).
+If no remote target is selected, it applies to all future remote connections.
+The configuration of the selected target can be displayed using the commands
+@w{@code{show remote memory-read-packet-size}} and
+@w{@code{show remote memory-write-packet-size}}.  If no remote target is
+selected, the default configuration for future connections is shown.
+
 @node Remote Stub
 @section Implementing a Remote Stub
 
