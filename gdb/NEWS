@@ -3,6 +3,17 @@
 
 *** Changes since GDB 11
 
+* Configure changes
+
+--enable-threading
+
+  Enable or disable multithreaded symbol loading.  This is enabled
+  by default, but passing --disable-threading or --enable-threading=no
+  to configure will disable it.
+
+  Disabling this can cause a performance penalty when there are a lot of
+  symbols to load, but is useful for debugging purposes.
+
 * New commands
 
 maint set backtrace-on-fatal-signal on|off

@@ -767,6 +767,7 @@ enable_silent_rules
 enable_dependency_tracking
 enable_plugins
 enable_largefile
+enable_threading
 with_intel_pt
 with_gnu_ld
 enable_rpath
@@ -1419,6 +1420,8 @@ Optional Features:
                           speeds up one-time build
   --enable-plugins        Enable support for plugins
   --disable-largefile     omit support for large files
+  --enable-threading      include support for parallel processing of data
+                          (yes/no)
   --disable-rpath         do not hardcode runtime library paths
   --enable-unit-tests     Enable the inclusion of unit tests when compiling
                           GDB
@@ -8277,6 +8280,22 @@ fi
 done
 
 
+  # ----------------------- #
+  # Check for threading.    #
+  # ----------------------- #
+
+  # Check whether --enable-threading was given.
+if test "${enable_threading+set}" = set; then :
+  enableval=$enable_threading; case "$enableval" in
+    yes) want_threading=yes ;;
+    no) want_threading=no ;;
+    *) as_fn_error $? "bad value $enableval for threading" "$LINENO" 5 ;;
+    esac
+else
+  want_threading=yes
+fi
+
+
   # Check for std::thread.  This does not work on some platforms, like
   # mingw and DJGPP.
   ac_ext=cpp
@@ -8974,10 +8993,13 @@ done
     LIBS="$save_LIBS"
     CXXFLAGS="$save_CXXFLAGS"
   fi
-  if test "$gdb_cv_cxx_std_thread" = "yes"; then
+
+  if test "$want_threading" = "yes"; then
+    if test "$gdb_cv_cxx_std_thread" = "yes"; then
 
 $as_echo "#define CXX_STD_THREAD 1" >>confdefs.h
 
+    fi
   fi
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
