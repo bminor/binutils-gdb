@@ -94,6 +94,19 @@ AC_DEFUN([GDB_AC_COMMON], [
   # Define HAVE_KINFO_GETFILE if kinfo_getfile is available.
   AC_CHECK_FUNCS(kinfo_getfile)
 
+  # ----------------------- #
+  # Check for threading.    #
+  # ----------------------- #
+
+  AC_ARG_ENABLE(threading,
+    AS_HELP_STRING([--enable-threading], [include support for parallel processing of data (yes/no)]),
+    [case "$enableval" in
+    yes) want_threading=yes ;;
+    no) want_threading=no ;;
+    *) AC_MSG_ERROR([bad value $enableval for threading]) ;;
+    esac],
+    [want_threading=yes])
+
   # Check for std::thread.  This does not work on some platforms, like
   # mingw and DJGPP.
   AC_LANG_PUSH([C++])
@@ -119,9 +132,12 @@ AC_DEFUN([GDB_AC_COMMON], [
     LIBS="$save_LIBS"
     CXXFLAGS="$save_CXXFLAGS"
   fi
-  if test "$gdb_cv_cxx_std_thread" = "yes"; then
-    AC_DEFINE(CXX_STD_THREAD, 1,
-	      [Define to 1 if std::thread works.])
+
+  if test "$want_threading" = "yes"; then
+    if test "$gdb_cv_cxx_std_thread" = "yes"; then
+      AC_DEFINE(CXX_STD_THREAD, 1,
+		[Define to 1 if std::thread works.])
+    fi
   fi
   AC_LANG_POP
 
