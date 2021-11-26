@@ -39473,6 +39473,19 @@ frame cache.  This command is useful when debugging issues related to
 register fetching, or frame unwinding.  The command @code{flushregs}
 is deprecated in favor of @code{maint flush register-cache}.
 
+@kindex maint flush source-cache
+@cindex source code, caching
+@item maint flush source-cache
+Flush @value{GDBN}'s cache of source code file contents.  After
+@value{GDBN} reads a source file, and optionally applies styling
+(@pxref{Output Styling}), the file contents are cached.  This command
+clears that cache.  The next time @value{GDBN} wants to show lines
+from a source file, the content will be re-read.
+
+This command is useful when debugging issues related to source code
+styling.  After flushing the cache any source code displayed by
+@value{GDBN} will be re-read and re-styled.
+
 @kindex maint print objfiles
 @cindex info for known object files
 @item maint print objfiles @r{[}@var{regexp}@r{]}

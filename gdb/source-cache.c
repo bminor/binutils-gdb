@@ -25,6 +25,7 @@
 #include "gdbsupport/selftest.h"
 #include "objfiles.h"
 #include "exec.h"
+#include "cli/cli-cmds.h"
 
 #ifdef HAVE_SOURCE_HIGHLIGHT
 /* If Gnulib redirects 'open' and 'close' to its replacements
@@ -323,6 +324,15 @@ source_cache::get_source_lines (struct symtab *s, int first_line,
 			first_line, last_line, lines);
 }
 
+/* Implement 'maint flush source-cache' command.  */
+
+static void
+source_cache_flush_command (const char *command, int from_tty)
+{
+  forget_cached_source_info ();
+  printf_filtered (_("Source cache flushed.\n"));
+}
+
 #if GDB_SELF_TEST
 namespace selftests
 {
@@ -346,6 +356,10 @@ void _initialize_source_cache ();
 void
 _initialize_source_cache ()
 {
+  add_cmd ("source-cache", class_maintenance, source_cache_flush_command,
+	   _("Force gdb to flush its source code cache."),
+	   &maintenanceflushlist);
+
 #if GDB_SELF_TEST
   selftests::register_test ("source-cache", selftests::extract_lines_test);
 #endif

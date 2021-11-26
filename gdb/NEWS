@@ -70,6 +70,9 @@ show debug linux-nat
   debug lin-lwp' respectively.  Turning this setting on prints debug
   messages relating to GDB's handling of native Linux inferiors.
 
+maint flush source-cache
+  Flush the contents of the source code cache.
+
 * Changed commands
 
 maint packet
