@@ -19,7 +19,7 @@
 standard_testfile
 
 # Create a source file in the output directory.
-set srcfile [standard_output_file main.c]
+set srcfile [standard_output_file list-missing-source.c]
 set fd [open "$srcfile" w]
 puts $fd {
 int
