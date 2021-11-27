@@ -122,14 +122,8 @@ if [istarget cris*-*-*] {
     global SIMFLAGS_FOR_TARGET
     set has_rv_and_cris [sim_has_rv_and_cris]
 
-    # See the logic in sim-defs.exp for more details.
-    set sim [board_info target sim]
-    if [string equal "" $sim] {
-	global builddir
-	set rvdummy "$builddir/cris/rvdummy"
-    } else {
-	set rvdummy "[file dirname [board_info target sim]]/rvdummy"
-    }
+    global builddir
+    set rvdummy "$builddir/cris/rvdummy"
 
     # All machines we test and the corresponding assembler option.
     # We'll only ever test v10 and higher here.
