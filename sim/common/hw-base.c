@@ -385,7 +385,7 @@ hw_create (struct sim_state *sd,
 
   /* locate a descriptor */
   {
-    const struct hw_descriptor **table;
+    const struct hw_descriptor * const *table;
     for (table = hw_descriptors;
 	 *table != NULL;
 	 table++)
