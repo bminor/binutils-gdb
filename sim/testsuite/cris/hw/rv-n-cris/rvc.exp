@@ -24,6 +24,10 @@ proc sim_has_rv_and_cris {} {
     global objdir
     global SIMFLAGS_FOR_TARGET
 
+    if ![file exists [sim_tool_path]] {
+	return 0
+    }
+
     # We need to assemble and link a trivial program and pass that, in
     # order to test successful exit.
 

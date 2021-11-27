@@ -94,6 +94,11 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 	continue
     }
 
+    if ![file exists [sim_tool_path]] {
+	untested $testname
+	return 0
+    }
+
     # Clear default options
     set opts(cc) ""
     set opts(sim) ""
