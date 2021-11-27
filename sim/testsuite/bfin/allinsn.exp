@@ -2,9 +2,9 @@
 
 # Set a default CPU to satisfy bfin-elf-gcc requirements.  BF537 should work
 # with all standard Blackfin toolchains.
-set CC_FOR_TARGET "[find_gcc] -mcpu=bf537"
+global CFLAGS_FOR_TARGET_init
+set CFLAGS_FOR_TARGET_init "-mcpu=bf537"
 sim_init
-unset CC_FOR_TARGET
 
 if [istarget bfin-*-elf] {
     # all machines

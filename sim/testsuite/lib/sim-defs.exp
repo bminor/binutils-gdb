@@ -55,6 +55,7 @@ proc sim_init_toolchain {} {
     global global_cpp_works
     global global_cc_works
     global global_cc_os
+    global CFLAGS_FOR_TARGET_init
 
     # Reset all the toolchain settings.  This provides a clean slate when
     # starting the next set of tests.
@@ -64,24 +65,30 @@ proc sim_init_toolchain {} {
     set SIMFLAGS_FOR_TARGET ""
     unset -nocomplain cpu_option cpu_option_sep
 
+    # Merge per-test settings if available.
+    if ![info exists CFLAGS_FOR_TARGET_init] {
+	set CFLAGS_FOR_TARGET_init ""
+    }
+    set cc_options [list "additional_flags=$CFLAGS_FOR_TARGET_init"]
+
     # See if we have a preprocessor available.
     set result [target_compile $srcdir/lib/compilercheck.c \
-		$objdir/compilercheck.x "preprocess" ""]
+		$objdir/compilercheck.x "preprocess" $cc_options]
     set global_cpp_works [string equal "" "$result"]
 
     # See if we have a compiler available, and which environment it's targeting.
     if { [target_compile $srcdir/lib/newlibcheck.c \
-	  $objdir/compilercheck.x "executable" ""] == "" } {
+	  $objdir/compilercheck.x "executable" $cc_options] == "" } {
 	verbose -log "Found newlib C compiler"
 	set global_cc_works 1
 	set global_cc_os "newlib"
     } elseif { [target_compile $srcdir/lib/linuxcheck.c \
-		$objdir/compilercheck.x "executable" ""] == "" } {
+		$objdir/compilercheck.x "executable" $cc_options] == "" } {
 	verbose -log "Found Linux C compiler"
 	set global_cc_works 1
 	set global_cc_os "linux"
     } elseif { [target_compile $srcdir/lib/compilercheck.c \
-		$objdir/compilercheck.x "executable" ""] == "" } {
+		$objdir/compilercheck.x "executable" $cc_options] == "" } {
 	verbose -log "Found C compiler, but unknown OS"
 	set global_cc_works 1
 	set global_cc_os ""
@@ -91,6 +98,8 @@ proc sim_init_toolchain {} {
     }
 
     file delete $objdir/compilercheck.x
+
+    unset CFLAGS_FOR_TARGET_init
 }
 
 # Print the version of the simulator being tested.
