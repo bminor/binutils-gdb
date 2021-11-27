@@ -2693,7 +2693,7 @@ testsuite/common/bits-gen$(EXEEXT): $(testsuite_common_bits_gen_OBJECTS) $(tests
 testsuite/common/bits32m0$(EXEEXT): $(testsuite_common_bits32m0_OBJECTS) $(testsuite_common_bits32m0_DEPENDENCIES) testsuite/common/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits32m0_OBJECTS) $(testsuite_common_bits32m0_LDADD)
 
-testsuite/common/bits32m0.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
+testsuite/common/bits32m0.c: testsuite/common/bits-gen$(EXEEXT) testsuite/common/bits-tst.c
 	$(AM_V_GEN)$< 32 0 big > $@.tmp
 	$(AM_V_at)cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
 	$(AM_V_at)mv $@.tmp $@
@@ -2701,7 +2701,7 @@ testsuite/common/bits32m0.c: testsuite/common/bits-gen testsuite/common/bits-tst
 testsuite/common/bits32m31$(EXEEXT): $(testsuite_common_bits32m31_OBJECTS) $(testsuite_common_bits32m31_DEPENDENCIES) testsuite/common/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits32m31_OBJECTS) $(testsuite_common_bits32m31_LDADD)
 
-testsuite/common/bits32m31.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
+testsuite/common/bits32m31.c: testsuite/common/bits-gen$(EXEEXT) testsuite/common/bits-tst.c
 	$(AM_V_GEN)$< 32 31 little > $@.tmp
 	$(AM_V_at)cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
 	$(AM_V_at)mv $@.tmp $@
@@ -2709,7 +2709,7 @@ testsuite/common/bits32m31.c: testsuite/common/bits-gen testsuite/common/bits-ts
 testsuite/common/bits64m0$(EXEEXT): $(testsuite_common_bits64m0_OBJECTS) $(testsuite_common_bits64m0_DEPENDENCIES) testsuite/common/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits64m0_OBJECTS) $(testsuite_common_bits64m0_LDADD)
 
-testsuite/common/bits64m0.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
+testsuite/common/bits64m0.c: testsuite/common/bits-gen$(EXEEXT) testsuite/common/bits-tst.c
 	$(AM_V_GEN)$< 64 0 big > $@.tmp
 	$(AM_V_at)cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
 	$(AM_V_at)mv $@.tmp $@
@@ -2717,7 +2717,7 @@ testsuite/common/bits64m0.c: testsuite/common/bits-gen testsuite/common/bits-tst
 testsuite/common/bits64m63$(EXEEXT): $(testsuite_common_bits64m63_OBJECTS) $(testsuite_common_bits64m63_DEPENDENCIES) testsuite/common/$(am__dirstamp)
 	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits64m63_OBJECTS) $(testsuite_common_bits64m63_LDADD)
 
-testsuite/common/bits64m63.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
+testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/common/bits-tst.c
 	$(AM_V_GEN)$< 64 63 little > $@.tmp
 	$(AM_V_at)cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
 	$(AM_V_at)mv $@.tmp $@
