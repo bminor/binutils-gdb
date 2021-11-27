@@ -12138,8 +12138,8 @@ ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-      save_CFLAGS=$CFLAGS
-      save_LDFLAGS=$LDFLAGS
+      save_CFLAGS="$CFLAGS"
+      save_LDFLAGS="$LDFLAGS"
       CFLAGS="$CFLAGS $srchigh_pkg_cflags"
       LDFLAGS="$LDFLAGS $srchigh_pkg_libs"
       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -12163,8 +12163,8 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-      CFLAGS="$SAVE_CFLAGS"
-      LDFLAGS="$SAVE_LDFLAGS"
+      CFLAGS="$save_CFLAGS"
+      LDFLAGS="$save_LDFLAGS"
       ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
