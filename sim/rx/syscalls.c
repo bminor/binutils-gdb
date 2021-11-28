@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cpu.h"
 #include "mem.h"
 #include "syscalls.h"
-#include "targ-vals.h"
+#include "target-newlib-syscall.h"
 
 /* The current syscall callbacks we're using.  */
 static struct host_callback_struct *callbacks;
@@ -146,10 +146,10 @@ rx_syscall (int id)
   argp = 0;
   stackp = 4;
   if (trace)
-    printf ("\033[31m/* SYSCALL(%d) = %s */\033[0m\n", id, id <= TARGET_SYS_link ? callnames[id] : "unknown");
+    printf ("\033[31m/* SYSCALL(%d) = %s */\033[0m\n", id, id <= TARGET_NEWLIB_SYS_link ? callnames[id] : "unknown");
   switch (id)
     {
-    case TARGET_SYS_exit:
+    case TARGET_NEWLIB_SYS_exit:
       {
 	int ec = arg ();
 	if (verbose)
@@ -158,7 +158,7 @@ rx_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_open:
+    case TARGET_NEWLIB_SYS_open:
       {
 	int oflags, cflags;
 	int path = arg ();
@@ -200,7 +200,7 @@ rx_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_close:
+    case TARGET_NEWLIB_SYS_close:
       {
 	int fd = arg ();
 
@@ -216,7 +216,7 @@ rx_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_read:
+    case TARGET_NEWLIB_SYS_read:
       {
 	int fd = arg ();
 	int addr = arg ();
@@ -236,7 +236,7 @@ rx_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_write:
+    case TARGET_NEWLIB_SYS_write:
       {
 	int fd = arg ();
 	int addr = arg ();
@@ -259,11 +259,11 @@ rx_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_getpid:
+    case TARGET_NEWLIB_SYS_getpid:
       put_reg (1, 42);
       break;
 
-    case TARGET_SYS_gettimeofday:
+    case TARGET_NEWLIB_SYS_gettimeofday:
       {
 	int tvaddr = arg ();
 	struct timeval tv;
@@ -278,7 +278,7 @@ rx_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_kill:
+    case TARGET_NEWLIB_SYS_kill:
       {
 	int pid = arg ();
 	int sig = arg ();

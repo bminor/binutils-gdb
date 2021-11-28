@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-options.h"
 #include "sim-io.h"
 #include "sim-signal.h"
-#include "targ-vals.h"
+#include "target-newlib-syscall.h"
 
 typedef int word;
 typedef unsigned int uword;
@@ -935,13 +935,13 @@ sim_engine_run (SIM_DESC sd,
 	        cpu.asregs.sregs[3] = inum;
 		switch (inum)
 		  {
-		  case TARGET_SYS_exit:
+		  case TARGET_NEWLIB_SYS_exit:
 		    {
 		      sim_engine_halt (sd, scpu, NULL, pc, sim_exited,
 				       cpu.asregs.regs[2]);
 		      break;
 		    }
-		  case TARGET_SYS_open:
+		  case TARGET_NEWLIB_SYS_open:
 		    {
 		      char fname[1024];
 		      int mode = (int) convert_target_flags ((unsigned) cpu.asregs.regs[3]);
@@ -954,7 +954,7 @@ sim_engine_run (SIM_DESC sd,
 		      cpu.asregs.regs[2] = fd;
 		      break;
 		    }
-		  case TARGET_SYS_read:
+		  case TARGET_NEWLIB_SYS_read:
 		    {
 		      int fd = cpu.asregs.regs[2];
 		      unsigned len = (unsigned) cpu.asregs.regs[4];
@@ -965,7 +965,7 @@ sim_engine_run (SIM_DESC sd,
 		      free (buf);
 		      break;
 		    }
-		  case TARGET_SYS_write:
+		  case TARGET_NEWLIB_SYS_write:
 		    {
 		      char *str;
 		      /* String length is at 0x12($fp) */
@@ -978,7 +978,7 @@ sim_engine_run (SIM_DESC sd,
 		      cpu.asregs.regs[2] = count;
 		      break;
 		    }
-		  case TARGET_SYS_unlink:
+		  case TARGET_NEWLIB_SYS_unlink:
 		    {
 		      char fname[1024];
 		      int fd;

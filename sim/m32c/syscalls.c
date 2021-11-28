@@ -32,7 +32,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cpu.h"
 #include "mem.h"
 #include "syscalls.h"
-#include "targ-vals.h"
+#include "target-newlib-syscall.h"
 
 /* The current syscall callbacks we're using.  */
 static struct host_callback_struct *callbacks;
@@ -185,7 +185,7 @@ m32c_syscall (int id)
     printf ("\033[31m/* SYSCALL(%d) = %s */\033[0m\n", id, callnames[id]);
   switch (id)
     {
-    case TARGET_SYS_exit:
+    case TARGET_NEWLIB_SYS_exit:
       {
 	int ec = arg (2);
 	if (verbose)
@@ -194,7 +194,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_open:
+    case TARGET_NEWLIB_SYS_open:
       {
 	int path = arg (PTRSZ);
 	int oflags = arg (2);
@@ -229,7 +229,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_close:
+    case TARGET_NEWLIB_SYS_close:
       {
 	int fd = arg (2);
 
@@ -245,7 +245,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_read:
+    case TARGET_NEWLIB_SYS_read:
       {
 	int fd = arg (2);
 	int addr = arg (PTRSZ);
@@ -265,7 +265,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_write:
+    case TARGET_NEWLIB_SYS_write:
       {
 	int fd = arg (2);
 	int addr = arg (PTRSZ);
@@ -288,11 +288,11 @@ m32c_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_getpid:
+    case TARGET_NEWLIB_SYS_getpid:
       put_reg (r0, 42);
       break;
 
-    case TARGET_SYS_gettimeofday:
+    case TARGET_NEWLIB_SYS_gettimeofday:
       {
 	int tvaddr = arg (PTRSZ);
 	struct timeval tv;
@@ -307,7 +307,7 @@ m32c_syscall (int id)
       }
       break;
 
-    case TARGET_SYS_kill:
+    case TARGET_NEWLIB_SYS_kill:
       {
 	int pid = arg (2);
 	int sig = arg (2);
