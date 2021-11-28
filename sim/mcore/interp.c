@@ -36,6 +36,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-syscall.h"
 #include "sim-options.h"
 
+#include "target-newlib-syscall.h"
+
 #define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BIG_ENDIAN)
 
 
@@ -1349,6 +1351,9 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
   int i;
   SIM_DESC sd = sim_state_alloc (kind, cb);
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
+
+  /* Set default options before parsing user options.  */
+  cb->syscall_map = cb_mcore_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
