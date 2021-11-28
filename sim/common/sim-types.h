@@ -23,6 +23,10 @@
 #ifndef SIM_TYPES_H
 #define SIM_TYPES_H
 
+#ifdef SIM_COMMON_BUILD
+#error "This header is unusable in common builds due to reliance on SIM_AC_OPTION_BITSIZE"
+#endif
+
 #include <stdint.h>
 
 /* INTEGER QUANTITIES:

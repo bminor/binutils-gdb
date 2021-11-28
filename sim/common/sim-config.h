@@ -23,6 +23,9 @@
 #ifndef SIM_CONFIG_H
 #define SIM_CONFIG_H
 
+#ifdef SIM_COMMON_BUILD
+#error "This header is unusable in common builds due to reliance on SIM_AC_OPTION_BITSIZE"
+#endif
 
 /* Host dependant:
 
