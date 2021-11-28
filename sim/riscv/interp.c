@@ -24,6 +24,7 @@
 #include "sim/callback.h"
 #include "sim-main.h"
 #include "sim-options.h"
+#include "target-newlib-syscall.h"
 
 void
 sim_engine_run (SIM_DESC sd,
@@ -69,6 +70,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   STATE_MACHS (sd) = riscv_sim_machs;
   STATE_MODEL_NAME (sd) = WITH_TARGET_WORD_BITSIZE == 32 ? "RV32G" : "RV64G";
   current_target_byte_order = BFD_ENDIAN_LITTLE;
+  callback->syscall_map = cb_riscv_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)

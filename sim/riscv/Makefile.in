@@ -15,9 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This selects the newlib/libgloss syscall definitions.
-NL_TARGET = -DNL_TARGET_riscv
-
 ## COMMON_PRE_CONFIG_FRAG
 
 SIM_OBJS = \
