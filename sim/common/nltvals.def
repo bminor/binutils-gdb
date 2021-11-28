@@ -71,31 +71,6 @@
 /* end d10v sys target macros */
 #endif
 #endif
-#ifdef NL_TARGET_i960
-#ifdef sys_defs
-/* from syscall.h */
-/* begin i960 sys target macros */
- { "SYS_argv", 13 },
- { "SYS_argvlen", 12 },
- { "SYS_chdir", 14 },
- { "SYS_chmod", 16 },
- { "SYS_close", 234 },
- { "SYS_exit", 257 },
- { "SYS_fstat", 10 },
- { "SYS_getpid", 8 },
- { "SYS_kill", 9 },
- { "SYS_lseek", 233 },
- { "SYS_open", 230 },
- { "SYS_read", 231 },
- { "SYS_stat", 15 },
- { "SYS_time", 18 },
- { "SYS_unlink", 7 },
- { "SYS_utime", 17 },
- { "SYS_write", 232 },
-#undef sys_defs
-/* end i960 sys target macros */
-#endif
-#endif
 #ifdef NL_TARGET_mcore
 #ifdef sys_defs
 /* from syscall.h */

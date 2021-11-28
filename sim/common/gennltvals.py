@@ -49,7 +49,8 @@ PROG = Path(__file__).name
 TARGET_DIRS = {
     'cr16': 'libgloss/cr16/sys',
     'd10v': 'newlib/libc/sys/d10v/sys',
-    'i960': 'libgloss/i960',
+    # Port removed from the tree years ago.
+    #'i960': 'libgloss/i960',
     'mcore': 'libgloss/mcore',
     'riscv': 'libgloss/riscv/machine',
     'sh': 'newlib/libc/sys/sh/sys',
