@@ -17,7 +17,7 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-dtbdir = @datadir@/gdb/dtb
+dtbdir = $(datadir)/gdb/dtb
 
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
