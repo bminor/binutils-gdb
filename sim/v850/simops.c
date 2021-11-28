@@ -18,8 +18,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "targ-vals.h"
-
 #include "libiberty.h"
 
 #include <errno.h>
@@ -28,6 +26,8 @@
 #include <sys/times.h>
 #include <sys/time.h>
 #endif
+
+#include "target-newlib-syscall.h"
 
 /* This is an array of the bit positions of registers r20 .. r31 in
    that order in a prepare/dispose instruction.  */
@@ -1626,17 +1626,14 @@ OP_10007E0 (void)
 	{
 
 #ifdef HAVE_FORK
-#ifdef TARGET_SYS_fork
-	case TARGET_SYS_fork:
+	case TARGET_NEWLIB_V850_SYS_fork:
 	  RETVAL = fork ();
 	  RETERR = errno;
 	  break;
 #endif
-#endif
 
 #ifdef HAVE_EXECVE
-#ifdef TARGET_SYS_execv
-	case TARGET_SYS_execve:
+	case TARGET_NEWLIB_V850_SYS_execve:
 	  {
 	    char *path = fetch_str (simulator, PARM1);
 	    char **argv = fetch_argv (simulator, PARM2);
@@ -1649,11 +1646,9 @@ OP_10007E0 (void)
 	    break;
 	  }
 #endif
-#endif
 
 #if HAVE_EXECV
-#ifdef TARGET_SYS_execv
-	case TARGET_SYS_execv:
+	case TARGET_NEWLIB_V850_SYS_execv:
 	  {
 	    char *path = fetch_str (simulator, PARM1);
 	    char **argv = fetch_argv (simulator, PARM2);
@@ -1664,11 +1659,9 @@ OP_10007E0 (void)
 	    break;
 	  }
 #endif
-#endif
 
 #if 0
-#ifdef TARGET_SYS_pipe
-	case TARGET_SYS_pipe:
+	case TARGET_NEWLIB_V850_SYS_pipe:
 	  {
 	    reg_t buf;
 	    int host_fd[2];
@@ -1682,11 +1675,9 @@ OP_10007E0 (void)
 	  }
 	  break;
 #endif
-#endif
 
 #if 0
-#ifdef TARGET_SYS_wait
-	case TARGET_SYS_wait:
+	case TARGET_NEWLIB_V850_SYS_wait:
 	  {
 	    int status;
 
@@ -1696,10 +1687,8 @@ OP_10007E0 (void)
 	  }
 	  break;
 #endif
-#endif
 
-#ifdef TARGET_SYS_read
-	case TARGET_SYS_read:
+	case TARGET_NEWLIB_V850_SYS_read:
 	  {
 	    char *buf = zalloc (PARM3);
 	    RETVAL = sim_io_read (simulator, PARM1, buf, PARM3);
@@ -1709,10 +1698,8 @@ OP_10007E0 (void)
 	      RETERR = sim_io_get_errno (simulator);
 	    break;
 	  }
-#endif
 
-#ifdef TARGET_SYS_write
-	case TARGET_SYS_write:
+	case TARGET_NEWLIB_V850_SYS_write:
 	  {
 	    char *buf = zalloc (PARM3);
 	    sim_read (simulator, PARM2, (unsigned char *) buf, PARM3);
@@ -1725,26 +1712,20 @@ OP_10007E0 (void)
 	      RETERR = sim_io_get_errno (simulator);
 	    break;
 	  }
-#endif
 
-#ifdef TARGET_SYS_lseek
-	case TARGET_SYS_lseek:
+	case TARGET_NEWLIB_V850_SYS_lseek:
 	  RETVAL = sim_io_lseek (simulator, PARM1, PARM2, PARM3);
 	  if ((int) RETVAL < 0)
 	    RETERR = sim_io_get_errno (simulator);
 	  break;
-#endif
 
-#ifdef TARGET_SYS_close
-	case TARGET_SYS_close:
+	case TARGET_NEWLIB_V850_SYS_close:
 	  RETVAL = sim_io_close (simulator, PARM1);
 	  if ((int) RETVAL < 0)
 	    RETERR = sim_io_get_errno (simulator);
 	  break;
-#endif
 
-#ifdef TARGET_SYS_open
-	case TARGET_SYS_open:
+	case TARGET_NEWLIB_V850_SYS_open:
 	  {
 	    char *buf = fetch_str (simulator, PARM1);
 	    RETVAL = sim_io_open (simulator, buf, PARM2);
@@ -1753,10 +1734,8 @@ OP_10007E0 (void)
 	      RETERR = sim_io_get_errno (simulator);
 	    break;
 	  }
-#endif
 
-#ifdef TARGET_SYS_exit
-	case TARGET_SYS_exit:
+	case TARGET_NEWLIB_V850_SYS_exit:
 	  if ((PARM1 & 0xffff0000) == 0xdead0000 && (PARM1 & 0xffff) != 0)
 	    /* get signal encoded by kill */
 	    sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
@@ -1770,10 +1749,8 @@ OP_10007E0 (void)
 	    sim_engine_halt (simulator, STATE_CPU (simulator, 0), NULL, PC,
 			     sim_exited, PARM1);
 	  break;
-#endif
 
-#ifdef TARGET_SYS_stat
-	case TARGET_SYS_stat:	/* added at hmsi */
+	case TARGET_NEWLIB_V850_SYS_stat:	/* added at hmsi */
 	  /* stat system call */
 	  {
 	    struct stat host_stat;
@@ -1802,10 +1779,8 @@ OP_10007E0 (void)
 	      RETERR = sim_io_get_errno (simulator);
 	  }
 	  break;
-#endif
 
-#ifdef TARGET_SYS_fstat
-	case TARGET_SYS_fstat:
+	case TARGET_NEWLIB_V850_SYS_fstat:
 	  /* fstat system call */
 	  {
 	    struct stat host_stat;
@@ -1832,10 +1807,8 @@ OP_10007E0 (void)
 	      RETERR = sim_io_get_errno (simulator);
 	  }
 	  break;
-#endif
 
-#ifdef TARGET_SYS_rename
-	case TARGET_SYS_rename:
+	case TARGET_NEWLIB_V850_SYS_rename:
 	  {
 	    char *oldpath = fetch_str (simulator, PARM1);
 	    char *newpath = fetch_str (simulator, PARM2);
@@ -1846,10 +1819,8 @@ OP_10007E0 (void)
 	      RETERR = sim_io_get_errno (simulator);
 	  }
 	  break;
-#endif
 
-#ifdef TARGET_SYS_unlink
-	case TARGET_SYS_unlink:
+	case TARGET_NEWLIB_V850_SYS_unlink:
 	  {
 	    char *path = fetch_str (simulator, PARM1);
 	    RETVAL = sim_io_unlink (simulator, path);
@@ -1858,10 +1829,8 @@ OP_10007E0 (void)
 	      RETERR = sim_io_get_errno (simulator);
 	  }
 	  break;
-#endif
 
-#ifdef TARGET_SYS_chown
-	case TARGET_SYS_chown:
+	case TARGET_NEWLIB_V850_SYS_chown:
 	  {
 	    char *path = fetch_str (simulator, PARM1);
 	    RETVAL = chown (path, PARM2, PARM3);
@@ -1869,11 +1838,9 @@ OP_10007E0 (void)
 	    RETERR = errno;
 	  }
 	  break;
-#endif
 
 #if HAVE_CHMOD
-#ifdef TARGET_SYS_chmod
-	case TARGET_SYS_chmod:
+	case TARGET_NEWLIB_V850_SYS_chmod:
 	  {
 	    char *path = fetch_str (simulator, PARM1);
 	    RETVAL = chmod (path, PARM2);
@@ -1882,11 +1849,9 @@ OP_10007E0 (void)
 	  }
 	  break;
 #endif
-#endif
 
-#ifdef TARGET_SYS_time
 #if HAVE_TIME
-	case TARGET_SYS_time:
+	case TARGET_NEWLIB_V850_SYS_time:
 	  {
 	    time_t now;
 	    RETVAL = time (&now);
@@ -1895,11 +1860,9 @@ OP_10007E0 (void)
 	  }
 	  break;
 #endif
-#endif
 
 #if !defined(__GO32__) && !defined(_WIN32)
-#ifdef TARGET_SYS_times
-	case TARGET_SYS_times:
+	case TARGET_NEWLIB_V850_SYS_times:
 	  {
 	    struct tms tms;
 	    RETVAL = times (&tms);
@@ -1911,11 +1874,9 @@ OP_10007E0 (void)
 	    break;
 	  }
 #endif
-#endif
 
-#ifdef TARGET_SYS_gettimeofday
 #if !defined(__GO32__) && !defined(_WIN32)
-	case TARGET_SYS_gettimeofday:
+	case TARGET_NEWLIB_V850_SYS_gettimeofday:
 	  {
 	    struct timeval t;
 	    struct timezone tz;
@@ -1928,11 +1889,9 @@ OP_10007E0 (void)
 	    break;
 	  }
 #endif
-#endif
 
-#ifdef TARGET_SYS_utime
 #if HAVE_UTIME
-	case TARGET_SYS_utime:
+	case TARGET_NEWLIB_V850_SYS_utime:
 	  {
 	    /* Cast the second argument to void *, to avoid type mismatch
 	       if a prototype is present.  */
@@ -1940,7 +1899,6 @@ OP_10007E0 (void)
 	    /* RETVAL = utime (path, (void *) MEMPTR (PARM2)); */
 	  }
 	  break;
-#endif
 #endif
 
 	default:

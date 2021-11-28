@@ -12,6 +12,8 @@
 
 #include "bfd.h"
 
+#include "target-newlib-syscall.h"
+
 static const char * get_insn_name (sim_cpu *, int);
 
 /* For compatibility.  */
@@ -199,6 +201,7 @@ sim_open (SIM_OPEN_KIND    kind,
 
   /* Set default options before parsing user options.  */
   current_target_byte_order = BFD_ENDIAN_LITTLE;
+  cb->syscall_map = cb_v850_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
