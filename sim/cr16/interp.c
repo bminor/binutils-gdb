@@ -36,6 +36,8 @@
 #include "gdb/signals.h"
 #include "opcode/cr16.h"
 
+#include "target-newlib-syscall.h"
+
 struct _state State;
 
 int cr16_debug;
@@ -400,6 +402,7 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb,
 
   /* Set default options before parsing user options.  */
   current_target_byte_order = BFD_ENDIAN_LITTLE;
+  cb->syscall_map = cb_cr16_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)

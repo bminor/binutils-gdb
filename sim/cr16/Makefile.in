@@ -26,7 +26,4 @@ SIM_OBJS = \
 
 SIM_EXTRA_DEPS = simops.h
 
-# This selects the cr16 newlib/libgloss syscall definitions.
-NL_TARGET = -DNL_TARGET_cr16
-
 ## COMMON_POST_CONFIG_FRAG
