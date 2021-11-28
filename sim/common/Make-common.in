@@ -235,17 +235,11 @@ COMMON_OBJS_NAMES = \
 	target-newlib-errno.o \
 	target-newlib-open.o \
 	target-newlib-signal.o \
+	target-newlib-syscall.o \
 	version.o
 COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
 
 LIB_OBJS = modules.o syscall.o $(COMMON_OBJS) $(SIM_OBJS)
-
-# TODO: Migrate everyone to target-newlib-syscall.o.
-ifeq ($(NL_TARGET),)
-COMMON_OBJS_NAMES += target-newlib-syscall.o
-else
-LIB_OBJS += targ-map.o
-endif
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
@@ -265,29 +259,6 @@ libsim.a: $(LIB_OBJS)
 run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
 	$(ECHO_CCLD) $(CC) $(ALL_CFLAGS) $(LDFLAGS) -o run$(EXEEXT) \
 	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
-
-# FIXME: Ideally, callback.o and friends live in a library outside of
-# both the gdb and simulator source trees (e.g. devo/remote.  Not
-# devo/libremote because this directory would contain more than just
-# a library).
-
-gentmap.o: Makefile $(srccom)/gentmap.c $(srccom)/nltvals.def
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -o $@ -c $(srccom)/gentmap.c $(NL_TARGET)
-
-gentmap: gentmap.o
-	$(ECHO_CC) $(LINK_FOR_BUILD) $<
-
-targ-vals.h targ-map.c: stamp-tvals
-stamp-tvals: gentmap
-	$(ECHO_STAMP) targ-vals.h
-	$(SILENCE) ./gentmap -h >tmp-tvals.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-tvals.h targ-vals.h
-ifneq ($(NL_TARGET),)
-	$(ECHO_STAMP) targ-tmap.c
-	$(SILENCE) ./gentmap -c >tmp-tmap.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
-endif
-	$(SILENCE) touch $@
 
 #
 # Rules for building sim-* components.  Triggered by listing the corresponding
@@ -413,11 +384,7 @@ all_object_files = $(LIB_OBJS) $(SIM_RUN_OBJS)
 generated_files = \
 	$(SIM_EXTRA_DEPS) \
 	hw-config.h \
-	modules.c \
-	targ-vals.h
-ifneq ($(NL_TARGET),)
-generated_files += targ-map.c
-endif
+	modules.c
 
 # Ensure that generated files are created early.  Use order-only
 # dependencies if available.  They require GNU make 3.80 or newer,
@@ -532,7 +499,6 @@ mostlyclean clean: $(SIM_EXTRA_CLEAN)
 		run$(EXEEXT) libsim.a \
 		hw-config.h stamp-hw \
 		modules.c stamp-modules \
-		gentmap targ-map.c targ-vals.h stamp-tvals \
 		tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
 
 distclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)

@@ -454,7 +454,7 @@ BUILT_SRC_FROM_MULTI = @sim_multi_src@
 SIM_MULTI_IGEN_CONFIGS = @sim_multi_igen_configs@
 
 $(BUILT_SRC_FROM_MULTI): tmp-multi
-tmp-multi: tmp-mach-multi tmp-itable-multi tmp-run-multi targ-vals.h
+tmp-multi: tmp-mach-multi tmp-itable-multi tmp-run-multi
 tmp-mach-multi: $(IGEN_INSN) $(IGEN_DC) $(IGEN) $(IGEN_INCLUDE)
 	for t in $(SIM_MULTI_IGEN_CONFIGS); do \
 	  p=`echo $${t} | sed -e 's/:.*//'` ; \

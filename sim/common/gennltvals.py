@@ -16,9 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Helper to generate nltvals.def.
+"""Helper to generate target-newlib-* files.
 
-nltvals.def is a file that describes various newlib/libgloss target values used
+target-newlib-* are files that describe various newlib/libgloss values used
 by the host/target interface.  This needs to be rerun whenever the newlib source
 changes.  Developers manually run it.
 
@@ -99,7 +99,7 @@ def extract_syms(cpp: str, srcdir: Path,
     return ret
 
 
-def gentvals(output_dir: Path, output: TextIO,
+def gentvals(output_dir: Path,
              cpp: str, srctype: str, srcdir: Path,
              headers: Iterable[str],
              pattern: str,
@@ -118,62 +118,37 @@ def gentvals(output_dir: Path, output: TextIO,
 
     syms = extract_syms(cpp, srcdir, headers, pattern, filter)
 
-    # If we have a map file, use it directly.
     target_map = output_dir / f'target-newlib-{srctype}.c'
-    if target_map.exists():
-        old_lines = target_map.read_text().splitlines()
-        start_i = end_i = None
-        for i, line in enumerate(old_lines):
-            if START_MARKER in line:
-                start_i = i
-            if END_MARKER in line:
-                end_i = i
-        assert start_i and end_i
-        new_lines = old_lines[0:start_i + 1]
-        new_lines.extend(
-            f'#ifdef {sym}\n'
-            f'  {{ "{sym}", {sym}, {val} }},\n'
-            f'#endif' for sym, val in sorted(syms.items()))
-        new_lines.extend(old_lines[end_i:])
-        target_map.write_text('\n'.join(new_lines) + '\n')
-        return
-
-    # Fallback to classic nltvals.def.
-    if target is not None:
-        print(f'#ifdef NL_TARGET_{target}', file=output)
-    print(f'#ifdef {srctype}_defs', file=output)
-
-    print('\n'.join(f'/* from {x} */' for x in headers), file=output)
-
-    if target is None:
-        print(f'/* begin {srctype} target macros */', file=output)
-    else:
-        print(f'/* begin {target} {srctype} target macros */', file=output)
-
-    for sym, val in sorted(syms.items()):
-        print(f' {{ "{sym}", {val} }},', file=output)
-
-    print(f'#undef {srctype}_defs', file=output)
-    if target is None:
-        print(f'/* end {srctype} target macros */', file=output)
-    else:
-        print(f'/* end {target} {srctype} target macros */', file=output)
-        print('#endif', file=output)
-    print('#endif', file=output)
+    assert target_map.exists(), f'{target_map}: Missing skeleton'
+    old_lines = target_map.read_text().splitlines()
+    start_i = end_i = None
+    for i, line in enumerate(old_lines):
+        if START_MARKER in line:
+            start_i = i
+        if END_MARKER in line:
+            end_i = i
+    assert start_i and end_i
+    new_lines = old_lines[0:start_i + 1]
+    new_lines.extend(
+        f'#ifdef {sym}\n'
+        f'  {{ "{sym}", {sym}, {val} }},\n'
+        f'#endif' for sym, val in sorted(syms.items()))
+    new_lines.extend(old_lines[end_i:])
+    target_map.write_text('\n'.join(new_lines) + '\n')
 
 
-def gen_common(output_dir: Path, output: TextIO, newlib: Path, cpp: str):
+def gen_common(output_dir: Path, newlib: Path, cpp: str):
     """Generate the common C library constants.
 
     No arch should override these.
     """
-    gentvals(output_dir, output, cpp, 'errno', newlib / 'newlib/libc/include',
+    gentvals(output_dir, cpp, 'errno', newlib / 'newlib/libc/include',
              ('errno.h', 'sys/errno.h'), 'E[A-Z0-9]*')
 
-    gentvals(output_dir, output, cpp, 'signal', newlib / 'newlib/libc/include',
+    gentvals(output_dir, cpp, 'signal', newlib / 'newlib/libc/include',
              ('signal.h', 'sys/signal.h'), r'SIG[A-Z0-9]*', filter=r'SIGSTKSZ')
 
-    gentvals(output_dir, output, cpp, 'open', newlib / 'newlib/libc/include',
+    gentvals(output_dir, cpp, 'open', newlib / 'newlib/libc/include',
              ('fcntl.h', 'sys/fcntl.h', 'sys/_default_fcntl.h'), r'O_[A-Z0-9]*')
 
 
@@ -248,16 +223,15 @@ def gen_target_syscall(output_dir: Path, newlib: Path, cpp: str):
     target_map_h.write_text('\n'.join(new_lines_h) + '\n')
 
 
-def gen_targets(output_dir: Path, output: TextIO, newlib: Path, cpp: str):
+def gen_targets(output_dir: Path, newlib: Path, cpp: str):
     """Generate the target-specific lists."""
     gen_target_syscall(output_dir, newlib, cpp)
 
 
-def gen(output_dir: Path, output: TextIO, newlib: Path, cpp: str):
+def gen(output_dir: Path, newlib: Path, cpp: str):
     """Generate all the things!"""
-    print(FILE_HEADER, file=output)
-    gen_common(output_dir, output, newlib, cpp)
-    gen_targets(output_dir, output, newlib, cpp)
+    gen_common(output_dir, newlib, cpp)
+    gen_targets(output_dir, newlib, cpp)
 
 
 def get_parser() -> argparse.ArgumentParser:
@@ -315,9 +289,7 @@ def main(argv: List[str]) -> int:
     """The main entry point for scripts."""
     opts = parse_args(argv)
 
-    output = (opts.output / 'nltvals.def').open('w', encoding='utf-8')
-
-    gen(opts.output, output, opts.newlib, opts.cpp)
+    gen(opts.output, opts.newlib, opts.cpp)
     return 0
 
 
