@@ -34,6 +34,7 @@
 #include "dwarf2/attribute.h"
 #include "dwarf2/comp-unit-head.h"
 #include "dwarf2/cu.h"
+#include "dwarf2/file-and-dir.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/index-common.h"
 #include "dwarf2/leb.h"
@@ -1206,7 +1207,6 @@ static struct die_info *die_specification (struct die_info *die,
 static line_header_up dwarf_decode_line_header (sect_offset sect_off,
 						struct dwarf2_cu *cu);
 
-struct file_and_directory;
 static void dwarf_decode_lines (struct line_header *,
 				const file_and_directory &,
 				struct dwarf2_cu *, dwarf2_psymtab *,
@@ -1537,21 +1537,6 @@ dwarf2_per_cu_data_deleter::operator() (dwarf2_per_cu_data *data)
   else
     delete data;
 }
-
-/* The return type of find_file_and_directory.  Note, the enclosed
-   string pointers are only valid while this object is valid.  */
-
-struct file_and_directory
-{
-  /* The filename.  This is never NULL.  */
-  const char *name;
-
-  /* The compilation directory.  NULL if not known.  If we needed to
-     compute a new string, it will be stored in the per-BFD string
-     bcache; otherwise, points directly to the DW_AT_comp_dir string
-     attribute owned by the obstack that owns the DIE.  */
-  const char *comp_dir;
-};
 
 static file_and_directory find_file_and_directory (struct die_info *die,
 						   struct dwarf2_cu *cu);
@@ -3024,7 +3009,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   file_and_directory fnd = find_file_and_directory (comp_unit_die, cu);
 
   int offset = 0;
-  if (strcmp (fnd.name, "<unknown>") != 0)
+  if (fnd.is_unknown ())
     ++offset;
   else if (lh == nullptr)
     return;
@@ -3053,12 +3038,12 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
     }
 
   qfn->num_file_names = offset + include_names.size ();
-  qfn->comp_dir = fnd.comp_dir;
+  qfn->comp_dir = fnd.intern_comp_dir (per_objfile->objfile);
   qfn->file_names =
     XOBNEWVEC (&per_objfile->per_bfd->obstack, const char *,
 	       qfn->num_file_names);
   if (offset != 0)
-    qfn->file_names[0] = xstrdup (fnd.name);
+    qfn->file_names[0] = xstrdup (fnd.get_name ());
 
   if (!include_names.empty ())
     memcpy (&qfn->file_names[offset], include_names.data (),
@@ -7005,15 +6990,15 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   gdb::unique_xmalloc_ptr<char> debug_filename;
   static const char artificial[] = "<artificial>";
   file_and_directory fnd = find_file_and_directory (comp_unit_die, cu);
-  if (strcmp (fnd.name, artificial) == 0)
+  if (strcmp (fnd.get_name (), artificial) == 0)
     {
       debug_filename.reset (concat (artificial, "@",
 				    sect_offset_str (per_cu->sect_off),
 				    (char *) NULL));
-      fnd.name = debug_filename.get ();
+      fnd.set_name (debug_filename.get ());
     }
 
-  pst = create_partial_symtab (per_cu, per_objfile, fnd.name);
+  pst = create_partial_symtab (per_cu, per_objfile, fnd.get_name ());
 
   /* This must be done before calling dwarf2_build_include_psymtabs.  */
   pst->dirname = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
@@ -10493,25 +10478,16 @@ producer_is_gcc_lt_4_3 (struct dwarf2_cu *cu)
 static file_and_directory
 find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
 {
-  file_and_directory res;
-
   /* Find the filename.  Do not use dwarf2_name here, since the filename
      is not a source language identifier.  */
-  res.name = dwarf2_string_attr (die, DW_AT_name, cu);
-  res.comp_dir = dwarf2_string_attr (die, DW_AT_comp_dir, cu);
+  file_and_directory res (dwarf2_string_attr (die, DW_AT_name, cu),
+			  dwarf2_string_attr (die, DW_AT_comp_dir, cu));
 
-  if (res.comp_dir == NULL
-      && producer_is_gcc_lt_4_3 (cu) && res.name != NULL
-      && IS_ABSOLUTE_PATH (res.name))
-    {
-      std::string comp_dir_storage = ldirname (res.name);
-      if (!comp_dir_storage.empty ())
-	res.comp_dir
-	  = cu->per_objfile->objfile->intern (comp_dir_storage.c_str ());
-    }
-
-  if (res.name == NULL)
-    res.name = "<unknown>";
+  if (res.get_comp_dir () == nullptr
+      && producer_is_gcc_lt_4_3 (cu)
+      && res.get_name () != nullptr
+      && IS_ABSOLUTE_PATH (res.get_name ()))
+    res.set_comp_dir (ldirname (res.get_name ()));
 
   return res;
 }
@@ -10643,7 +10619,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   file_and_directory fnd = find_file_and_directory (die, cu);
 
-  cu->start_symtab (fnd.name, fnd.comp_dir, lowpc);
+  cu->start_symtab (fnd.get_name (), fnd.intern_comp_dir (objfile), lowpc);
 
   gdb_assert (per_objfile->sym_cu == nullptr);
   scoped_restore restore_sym_cu
@@ -20752,7 +20728,7 @@ compute_include_file_name (const struct line_header *lh, const file_entry &fe,
 
   gdb::unique_xmalloc_ptr<char> hold_compare;
   if (!IS_ABSOLUTE_PATH (include_name)
-      && (dir_name != NULL || cu_info.comp_dir != NULL))
+      && (dir_name != nullptr || cu_info.get_comp_dir () != nullptr))
     {
       /* Avoid creating a duplicate name for CU_INFO.
 	 We do this by comparing INCLUDE_NAME and CU_INFO.
@@ -20782,19 +20758,20 @@ compute_include_file_name (const struct line_header *lh, const file_entry &fe,
 	  include_name = name_holder->get ();
 	  include_name_to_compare = include_name;
 	}
-      if (!IS_ABSOLUTE_PATH (include_name) && cu_info.comp_dir != nullptr)
+      if (!IS_ABSOLUTE_PATH (include_name)
+	  && cu_info.get_comp_dir () != nullptr)
 	{
-	  hold_compare.reset (concat (cu_info.comp_dir, SLASH_STRING,
+	  hold_compare.reset (concat (cu_info.get_comp_dir (), SLASH_STRING,
 				      include_name, (char *) NULL));
 	  include_name_to_compare = hold_compare.get ();
 	}
     }
 
   gdb::unique_xmalloc_ptr<char> copied_name;
-  const char *cu_filename = cu_info.name;
-  if (!IS_ABSOLUTE_PATH (cu_filename) && cu_info.comp_dir != nullptr)
+  const char *cu_filename = cu_info.get_name ();
+  if (!IS_ABSOLUTE_PATH (cu_filename) && cu_info.get_comp_dir () != nullptr)
     {
-      copied_name.reset (concat (cu_info.comp_dir, SLASH_STRING,
+      copied_name.reset (concat (cu_info.get_comp_dir (), SLASH_STRING,
 				 cu_filename, (char *) NULL));
       cu_filename = copied_name.get ();
     }
