@@ -27,10 +27,7 @@ SIM_OBJS = \
 
 SIM_EXTRA_DEPS = simops.h
 
-INCLUDE = d10v_sim.h $(srcroot)/include/sim/callback.h targ-vals.h endian.c \
+INCLUDE = d10v_sim.h $(srcroot)/include/sim/callback.h endian.c \
 	$(srcroot)/include/gdb/sim-d10v.h
-
-# This selects the d10v newlib/libgloss syscall definitions.
-NL_TARGET = -DNL_TARGET_d10v
 
 ## COMMON_POST_CONFIG_FRAG

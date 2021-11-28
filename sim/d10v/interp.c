@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "target-newlib-syscall.h"
+
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
 struct _state State;
@@ -758,6 +760,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 
   /* Set default options before parsing user options.  */
   current_alignment = STRICT_ALIGNMENT;
+  cb->syscall_map = cb_d10v_syscall_map;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
   if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)

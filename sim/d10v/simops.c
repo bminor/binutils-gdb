@@ -13,7 +13,7 @@
 #include "sim-main.h"
 #include "sim-signal.h"
 #include "simops.h"
-#include "targ-vals.h"
+#include "target-newlib-syscall.h"
 
 #define EXCEPTION(sig) sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, sig)
 
@@ -3207,20 +3207,20 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	switch (FUNC)
 	  {
 #if !defined(__GO32__) && !defined(_WIN32)
-	  case TARGET_SYS_fork:
+	  case TARGET_NEWLIB_D10V_SYS_fork:
 	    trace_input ("<fork>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL (fork ());
 	    trace_output_16 (sd, result);
 	    break;
 
 #define getpid() 47
-	  case TARGET_SYS_getpid:
+	  case TARGET_NEWLIB_D10V_SYS_getpid:
 	    trace_input ("<getpid>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL (getpid ());
 	    trace_output_16 (sd, result);
 	    break;
 
-	  case TARGET_SYS_kill:
+	  case TARGET_NEWLIB_D10V_SYS_kill:
 	    trace_input ("<kill>", OP_R0, OP_R1, OP_VOID);
 	    if (PARM1 == getpid ())
 	      {
@@ -3348,22 +3348,20 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	      }
 	    break;
 
-	  case TARGET_SYS_execve:
+	  case TARGET_NEWLIB_D10V_SYS_execve:
 	    trace_input ("<execve>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2),
 			     (char **)MEMPTR (PARM3)));
 	    trace_output_16 (sd, result);
 	    break;
 
-#ifdef TARGET_SYS_execv
-	  case TARGET_SYS_execv:
+	  case TARGET_NEWLIB_D10V_SYS_execv:
 	    trace_input ("<execv>", OP_R0, OP_R1, OP_VOID);
 	    RETVAL (execve (MEMPTR (PARM1), (char **) MEMPTR (PARM2), NULL));
 	    trace_output_16 (sd, result);
 	    break;
-#endif
 
-	  case TARGET_SYS_pipe:
+	  case TARGET_NEWLIB_D10V_SYS_pipe:
 	    {
 	      reg_t buf;
 	      int host_fd[2];
@@ -3379,8 +3377,7 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	  break;
 
 #if 0
-#ifdef TARGET_SYS_wait
-	  case TARGET_SYS_wait:
+	  case TARGET_NEWLIB_D10V_SYS_wait:
 	    {
 	      int status;
 	      trace_input ("<wait>", OP_R0, OP_VOID, OP_VOID);
@@ -3391,28 +3388,27 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	    }
 	  break;
 #endif
-#endif
 #else
-	  case TARGET_SYS_getpid:
+	  case TARGET_NEWLIB_D10V_SYS_getpid:
 	    trace_input ("<getpid>", OP_VOID, OP_VOID, OP_VOID);
 	    RETVAL (1);
 	    trace_output_16 (sd, result);
 	    break;
 
-	  case TARGET_SYS_kill:
+	  case TARGET_NEWLIB_D10V_SYS_kill:
 	    trace_input ("<kill>", OP_REG, OP_REG, OP_VOID);
 	    trace_output_void (sd);
 	    sim_engine_halt (sd, cpu, NULL, PC, sim_stopped, PARM2);
 	    break;
 #endif
 
-	  case TARGET_SYS_read:
+	  case TARGET_NEWLIB_D10V_SYS_read:
 	    trace_input ("<read>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (cb->read (cb, PARM1, MEMPTR (PARM2), PARM3));
 	    trace_output_16 (sd, result);
 	    break;
 
-	  case TARGET_SYS_write:
+	  case TARGET_NEWLIB_D10V_SYS_write:
 	    trace_input ("<write>", OP_R0, OP_R1, OP_R2);
 	    if (PARM1 == 1)
 	      RETVAL ((int)cb->write_stdout (cb, MEMPTR (PARM2), PARM3));
@@ -3421,7 +3417,7 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	    trace_output_16 (sd, result);
 	    break;
 
-	  case TARGET_SYS_lseek:
+	  case TARGET_NEWLIB_D10V_SYS_lseek:
 	    trace_input ("<lseek>", OP_R0, OP_R1, OP_R2);
 	    RETVAL32 (cb->lseek (cb, PARM1,
 				 ((((unsigned long) PARM2) << 16)
@@ -3430,26 +3426,25 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	    trace_output_32 (sd, result);
 	    break;
 
-	  case TARGET_SYS_close:
+	  case TARGET_NEWLIB_D10V_SYS_close:
 	    trace_input ("<close>", OP_R0, OP_VOID, OP_VOID);
 	    RETVAL (cb->close (cb, PARM1));
 	    trace_output_16 (sd, result);
 	    break;
 
-	  case TARGET_SYS_open:
+	  case TARGET_NEWLIB_D10V_SYS_open:
 	    trace_input ("<open>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (cb->open (cb, MEMPTR (PARM1), PARM2));
 	    trace_output_16 (sd, result);
 	    break;
 
-	  case TARGET_SYS_exit:
+	  case TARGET_NEWLIB_D10V_SYS_exit:
 	    trace_input ("<exit>", OP_R0, OP_VOID, OP_VOID);
 	    trace_output_void (sd);
 	    sim_engine_halt (sd, cpu, NULL, PC, sim_exited, GPR (0));
 	    break;
 
-#ifdef TARGET_SYS_stat
-	  case TARGET_SYS_stat:
+	  case TARGET_NEWLIB_D10V_SYS_stat:
 	    trace_input ("<stat>", OP_R0, OP_R1, OP_VOID);
 	    /* stat system call */
 	    {
@@ -3477,23 +3472,21 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	    }
 	    trace_output_16 (sd, result);
 	    break;
-#endif
 
-	  case TARGET_SYS_chown:
+	  case TARGET_NEWLIB_D10V_SYS_chown:
 	    trace_input ("<chown>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (chown (MEMPTR (PARM1), PARM2, PARM3));
 	    trace_output_16 (sd, result);
 	    break;
 
-	  case TARGET_SYS_chmod:
+	  case TARGET_NEWLIB_D10V_SYS_chmod:
 	    trace_input ("<chmod>", OP_R0, OP_R1, OP_R2);
 	    RETVAL (chmod (MEMPTR (PARM1), PARM2));
 	    trace_output_16 (sd, result);
 	    break;
 
 #if 0
-#ifdef TARGET_SYS_utime
-	  case TARGET_SYS_utime:
+	  case TARGET_NEWLIB_D10V_SYS_utime:
 	    trace_input ("<utime>", OP_R0, OP_R1, OP_R2);
 	    /* Cast the second argument to void *, to avoid type mismatch
 	       if a prototype is present.  */
@@ -3501,18 +3494,15 @@ OP_5F00 (SIM_DESC sd, SIM_CPU *cpu)
 	    trace_output_16 (sd, result);
 	    break;
 #endif
-#endif
 
 #if 0
-#ifdef TARGET_SYS_time
-	  case TARGET_SYS_time:
+	  case TARGET_NEWLIB_D10V_SYS_time:
 	    trace_input ("<time>", OP_R0, OP_R1, OP_R2);
 	    RETVAL32 (time (PARM1 ? MEMPTR (PARM1) : NULL));
 	    trace_output_32 (sd, result);
 	    break;
 #endif
-#endif
-	    
+
 	  default:
 	    cb->error (cb, "Unknown syscall %d", FUNC);
 	  }
