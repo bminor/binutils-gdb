@@ -37,6 +37,7 @@ noinst_LIBRARIES += %D%/libcommon.a
 	%D%/callback.c \
 	%D%/portability.c \
 	%D%/sim-load.c \
+	%D%/syscall.c \
 	%D%/target-newlib-errno.c \
 	%D%/target-newlib-open.c \
 	%D%/target-newlib-signal.c \

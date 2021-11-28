@@ -232,6 +232,7 @@ COMMON_OBJS_NAMES = \
 	callback.o \
 	portability.o \
 	sim-load.o \
+	syscall.o \
 	target-newlib-errno.o \
 	target-newlib-open.o \
 	target-newlib-signal.o \
@@ -239,7 +240,7 @@ COMMON_OBJS_NAMES = \
 	version.o
 COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
 
-LIB_OBJS = modules.o syscall.o $(COMMON_OBJS) $(SIM_OBJS)
+LIB_OBJS = modules.o $(COMMON_OBJS) $(SIM_OBJS)
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
