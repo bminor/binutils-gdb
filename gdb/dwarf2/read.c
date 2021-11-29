@@ -10509,15 +10509,6 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
 	res.comp_dir
 	  = cu->per_objfile->objfile->intern (comp_dir_storage.c_str ());
     }
-  if (res.comp_dir != NULL)
-    {
-      /* Irix 6.2 native cc prepends <machine>.: to the compilation
-	 directory, get rid of it.  */
-      const char *cp = strchr (res.comp_dir, ':');
-
-      if (cp && cp != res.comp_dir && cp[-1] == '.' && cp[1] == '/')
-	res.comp_dir = cp + 1;
-    }
 
   if (res.name == NULL)
     res.name = "<unknown>";
