@@ -127,7 +127,28 @@ proc check_return_from_syscall { syscall { pattern "" } } {
     }
 
     set thistest "syscall $syscall has returned"
-    gdb_test "continue" "Catchpoint $decimal \\(returned from syscall ${pattern}\\).*" $thistest
+    if { $pattern eq "execve" } {
+	gdb_test_multiple "continue" $thistest {
+	    -re -wrap "Catchpoint $decimal \\(returned from syscall ${pattern}\\).*" {
+		pass $thistest
+		return 1
+	    }
+	    -re -wrap ".*Breakpoint $decimal, main .*" {
+		# On Powerpc the kernel does not report the returned from
+		# syscall as expected by the test.  GDB bugzilla 28623.
+		if { [istarget "powerpc64*-linux*"] } {
+		    xfail $thistest
+		} else {
+		    fail $thistest
+		}
+		return 0
+	    }
+	}
+
+    } else {
+	gdb_test "continue" "Catchpoint $decimal \\(returned from syscall ${pattern}\\).*" $thistest
+	return 1
+    }
 }
 
 # Internal procedure that performs two 'continue' commands and checks if
@@ -142,7 +163,7 @@ proc check_continue { syscall { pattern "" } } {
     # Testing if the inferior has called the syscall.
     check_call_to_syscall $syscall $pattern
     # And now, that the syscall has returned.
-    check_return_from_syscall $syscall $pattern
+    return [check_return_from_syscall $syscall $pattern]
 }
 
 # Inserts a syscall catchpoint with an argument.
@@ -348,11 +369,15 @@ proc test_catch_syscall_execve {} {
 	# Check for entry/return across the execve, making sure that the
 	# syscall_state isn't lost when turning into a new process.
 	insert_catch_syscall_with_arg "execve"
-	check_continue "execve"
+	if [check_continue "execve"] {
+	    # The check_continue test generates an XFAIL on Powerpc.  In
+	    # that case, gdb is already at main so don't do the continue.
 
-	# Continue to main so extended-remote can read files as needed.
-	# (Otherwise that "Reading" output confuses gdb_continue_to_end.)
-	gdb_continue "main"
+
+	    # Continue to main so extended-remote can read files as needed.
+	    # (Otherwise that "Reading" output confuses gdb_continue_to_end.)
+	    gdb_continue "main"
+	}
 
 	# Now can we finish?
 	check_for_program_end
