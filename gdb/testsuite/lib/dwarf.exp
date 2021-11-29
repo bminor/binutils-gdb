@@ -2349,11 +2349,7 @@ namespace eval Dwarf {
 				string_ptr:
 				_op .ascii [_quote $dirname]
 			    }
-			    if { $_line_is_64 } {
-				_op .8byte $string_ptr
-			    } else {
-				_op .4byte $string_ptr
-			    }
+			    _op_offset [expr $_line_is_64 ? 8 : 4] $string_ptr
 			}
 		    }
 		}
@@ -2398,11 +2394,7 @@ namespace eval Dwarf {
 				string_ptr:
 				_op .ascii [_quote $filename]
 			    }
-			    if { $_line_is_64 } {
-				_op .8byte $string_ptr
-			    } else {
-				_op .4byte $string_ptr
-			    }
+			    _op_offset [expr $_line_is_64 ? 8 : 4] $string_ptr
 			}
 		    }
 		    _op .uleb128 $diridx
