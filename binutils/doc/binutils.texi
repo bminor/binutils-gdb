@@ -3297,8 +3297,13 @@ Print a summary of the program usage on the standard output and exit.
 @item -@var{min-len}
 @itemx -n @var{min-len}
 @itemx --bytes=@var{min-len}
-Print sequences of characters that are at least @var{min-len} characters
-long, instead of the default 4.
+Print sequences of displayable characters that are at least
+@var{min-len} characters long.  If not specified a default minimum
+length of 4 is used.  The distinction between displayable and
+non-displayable characters depends upon the setting of the 
+@option{-e} and @option{-U} options.  Sequences are always terminated
+at control characters such as new-line and carriage-return, but not
+the tab character.
 
 @item -o
 Like @samp{-t o}.  Some other versions of @command{strings} have @option{-o}

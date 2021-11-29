@@ -32,7 +32,8 @@
    --bytes=min-len
    -n min-len
    -min-len	Print graphic char sequences, MIN-LEN or more bytes long,
-		that are followed by a NUL or a newline.  Default is 4.
+		that are followed by a NUL or a non-displayable character.
+		Default is 4.
 
    --radix={o,x,d}
    -t {o,x,d}	Print the offset within the file before each string,
@@ -1323,8 +1324,8 @@ usage (FILE *stream, int status)
 
   fprintf (stream, _("\
   -f --print-file-name      Print the name of the file before each string\n\
-  -n --bytes=[number]       Locate & print any NUL-terminated sequence of at\n\
-  -<number>                   least [number] characters (default 4).\n\
+  -n <number>               Locate & print any sequence of at least <number>\n\
+    --bytes=<number>         displayable characters.  (The default is 4).\n\
   -t --radix={o,d,x}        Print the location of the string in base 8, 10 or 16\n\
   -w --include-all-whitespace Include all whitespace as valid string characters\n\
   -o                        An alias for --radix=o\n\

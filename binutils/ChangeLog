@@ -1,3 +1,9 @@
+2021-11-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 28632
+	* strings.c (usage): Update desciption of -n option.
+	* doc/binutils.texi: Likewise.
+
 2021-11-24  Nick Clifton  <nickc@redhat.com>
 
 	PR 28564
