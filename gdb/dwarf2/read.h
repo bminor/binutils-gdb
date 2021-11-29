@@ -23,6 +23,7 @@
 #include <queue>
 #include <unordered_map>
 #include "dwarf2/comp-unit-head.h"
+#include "dwarf2/file-and-dir.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/section.h"
 #include "filename-seen-cache.h"
@@ -178,6 +179,12 @@ struct dwarf2_per_cu_data
      Don't access this field directly, use the get_header method instead.  It
      should be private, but we can't make it private at the moment.  */
   mutable comp_unit_head m_header {};
+
+  /* The file and directory for this CU.  This is cached so that we
+     don't need to re-examine the DWO in some situations.  This may be
+     nullptr, depending on the CU; for example a partial unit won't
+     have one.  */
+  std::unique_ptr<file_and_directory> fnd;
 
   /* When dwarf2_per_bfd::using_index is true, the 'quick' field
      is active.  Otherwise, the 'psymtab' field is active.  */

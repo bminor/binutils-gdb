@@ -34,7 +34,6 @@
 #include "dwarf2/attribute.h"
 #include "dwarf2/comp-unit-head.h"
 #include "dwarf2/cu.h"
-#include "dwarf2/file-and-dir.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/index-common.h"
 #include "dwarf2/leb.h"
@@ -1538,8 +1537,8 @@ dwarf2_per_cu_data_deleter::operator() (dwarf2_per_cu_data *data)
     delete data;
 }
 
-static file_and_directory find_file_and_directory (struct die_info *die,
-						   struct dwarf2_cu *cu);
+static file_and_directory &find_file_and_directory
+     (struct die_info *die, struct dwarf2_cu *cu);
 
 static const char *compute_include_file_name
      (const struct line_header *lh,
@@ -3006,7 +3005,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
       lh = dwarf_decode_line_header (line_offset, cu);
     }
 
-  file_and_directory fnd = find_file_and_directory (comp_unit_die, cu);
+  file_and_directory &fnd = find_file_and_directory (comp_unit_die, cu);
 
   int offset = 0;
   if (fnd.is_unknown ())
@@ -6989,7 +6988,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   /* Allocate a new partial symbol table structure.  */
   gdb::unique_xmalloc_ptr<char> debug_filename;
   static const char artificial[] = "<artificial>";
-  file_and_directory fnd = find_file_and_directory (comp_unit_die, cu);
+  file_and_directory &fnd = find_file_and_directory (comp_unit_die, cu);
   if (strcmp (fnd.get_name (), artificial) == 0)
     {
       debug_filename.reset (concat (artificial, "@",
@@ -10475,9 +10474,12 @@ producer_is_gcc_lt_4_3 (struct dwarf2_cu *cu)
   return cu->producer_is_gcc_lt_4_3;
 }
 
-static file_and_directory
+static file_and_directory &
 find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
 {
+  if (cu->per_cu->fnd != nullptr)
+    return *cu->per_cu->fnd;
+
   /* Find the filename.  Do not use dwarf2_name here, since the filename
      is not a source language identifier.  */
   file_and_directory res (dwarf2_string_attr (die, DW_AT_name, cu),
@@ -10489,7 +10491,8 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
       && IS_ABSOLUTE_PATH (res.get_name ()))
     res.set_comp_dir (ldirname (res.get_name ()));
 
-  return res;
+  cu->per_cu->fnd.reset (new file_and_directory (std::move (res)));
+  return *cu->per_cu->fnd;
 }
 
 /* Handle DW_AT_stmt_list for a compilation unit.
@@ -10617,7 +10620,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
     lowpc = highpc;
   lowpc = gdbarch_adjust_dwarf2_addr (gdbarch, lowpc + baseaddr);
 
-  file_and_directory fnd = find_file_and_directory (die, cu);
+  file_and_directory &fnd = find_file_and_directory (die, cu);
 
   cu->start_symtab (fnd.get_name (), fnd.intern_comp_dir (objfile), lowpc);
 
