@@ -5787,7 +5787,10 @@ struct dwarf2_include_psymtab : public partial_symtab
 
   compunit_symtab *get_compunit_symtab (struct objfile *objfile) const override
   {
-    return nullptr;
+    compunit_symtab *cust = includer ()->get_compunit_symtab (objfile);
+    while (cust != nullptr && cust->user != nullptr)
+      cust = cust->user;
+    return cust;
   }
 
 private:
