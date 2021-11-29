@@ -25,6 +25,12 @@ clean_restart
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
+# Skip this test if the tracemalloc module is not available.
+if { ![gdb_py_module_available "tracemalloc"] } {
+    unsupported "tracemalloc module not available"
+    continue
+}
+
 set pyfile [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
 
 # Source the Python script, this runs the test (which is written
