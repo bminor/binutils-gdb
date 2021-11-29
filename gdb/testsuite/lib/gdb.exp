@@ -2498,6 +2498,32 @@ proc proc_with_prefix {name arguments body} {
     proc $name $arguments [list with_test_prefix $name $body]
 }
 
+# Return an id corresponding to the test prefix stored in $pf_prefix, which
+# is more suitable for use in a file name.
+# F.i., for a pf_prefix:
+#   gdb.dwarf2/dw2-lines.exp: \
+#     cv=5: cdw=64: lv=5: ldw=64: string_form=line_strp:
+# return an id:
+#   cv-5-cdw-32-lv-5-ldw-64-string_form-line_strp
+
+proc prefix_id {} {
+    global pf_prefix
+    set id $pf_prefix
+
+    # Strip ".exp: " prefix.
+    set id [regsub  {.*\.exp: } $id {}]
+
+    # Strip colon suffix.
+    set id [regsub  {:$} $id {}]
+
+    # Strip spaces.
+    set id [regsub -all { } $id {}]
+
+    # Replace colons, equal signs.
+    set id [regsub -all \[:=\] $id -]
+
+    return $id
+}
 
 # Run BODY in the context of the caller.  After BODY is run, the variables
 # listed in VARS will be reset to the values they had before BODY was run.
