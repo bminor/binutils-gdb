@@ -816,7 +816,9 @@ static struct regset_info aarch64_regsets[] =
   /* FIXME-Morello: Fixup the register set size.  */
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_MORELLO,
     0, OPTIONAL_REGS,
-    aarch64_fill_cregset, aarch64_store_cregset },
+    aarch64_fill_cregset, aarch64_store_cregset, nullptr,
+    "cheri.ptrace_forge_cap"
+  },
   NULL_REGSET
 };
 
@@ -874,7 +876,10 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
 	  break;
 	case NT_ARM_MORELLO:
 	  if (features.capability)
-	    regset->size = AARCH64_LINUX_CREGS_SIZE;
+	    {
+	      regset->size = AARCH64_LINUX_CREGS_SIZE;
+	      regset->sysctl_write_should_warn = true;
+	    }
 	  break;
 	default:
 	  gdb_assert_not_reached ("Unknown register set found.");
