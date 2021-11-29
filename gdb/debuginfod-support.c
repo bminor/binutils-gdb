@@ -23,6 +23,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
+#include "target.h"
 
 /* Set/show debuginfod commands.  */
 static cmd_list_element *set_debuginfod_prefix_list;
@@ -204,6 +205,13 @@ debuginfod_source_query (const unsigned char *build_id,
   user_data data ("source file", srcpath);
 
   debuginfod_set_user_data (c, &data);
+  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  if (target_supports_terminal_ours ())
+    {
+      term_state.emplace ();
+      target_terminal::ours ();
+    }
+
   scoped_fd fd (debuginfod_find_source (c,
 					build_id,
 					build_id_len,
@@ -242,6 +250,13 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   user_data data ("separate debug info for", filename);
 
   debuginfod_set_user_data (c, &data);
+  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  if (target_supports_terminal_ours ())
+    {
+      term_state.emplace ();
+      target_terminal::ours ();
+    }
+
   scoped_fd fd (debuginfod_find_debuginfo (c, build_id, build_id_len,
 					   &dname));
   debuginfod_set_user_data (c, nullptr);
