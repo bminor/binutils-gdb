@@ -576,6 +576,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  /* Stop analysis on branch.  */
 	  break;
 	}
+      else if (inst.opcode->iclass == bitfield)
+	{
+	  /* Do nothing */
+	}
       else if (inst.opcode->op == OP_MOVZ
 	       || (inst.opcode->iclass == a64c
 		   && strcmp (inst.opcode->name, "cpy") == 0))
