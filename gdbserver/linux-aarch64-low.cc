@@ -691,39 +691,6 @@ aarch64_target::low_new_fork (process_info *parent,
   *child->priv->arch_private = *parent->priv->arch_private;
 }
 
-/* Matches HWCAP_PACA in kernel header arch/arm64/include/uapi/asm/hwcap.h.  */
-#define AARCH64_HWCAP_PACA (1 << 30)
-
-/* Implementation of linux target ops method "low_arch_setup".  */
-
-void
-aarch64_target::low_arch_setup ()
-{
-  unsigned int machine;
-  int is_elf64;
-  int tid;
-
-  tid = lwpid_of (current_thread);
-
-  is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
-
-  if (is_elf64)
-    {
-      uint64_t vq = aarch64_sve_get_vq (tid);
-      unsigned long hwcap = linux_get_hwcap (8);
-      unsigned long hwcap2 = linux_get_hwcap2 (8);
-      bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
-      bool capability_p = hwcap2 & HWCAP2_MORELLO;
-
-      current_process ()->tdesc = aarch64_linux_read_description (vq, pauth_p,
-								  capability_p);
-    }
-  else
-    current_process ()->tdesc = aarch32_linux_read_description ();
-
-  aarch64_linux_get_debug_reg_capacity (lwpid_of (current_thread));
-}
-
 /* Wrapper for aarch64_sve_regs_copy_to_reg_buf.  */
 
 static void
@@ -755,7 +722,9 @@ static struct regset_info aarch64_regsets[] =
   /* FIXME-Morello: Fixup the register set size.  */
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_MORELLO,
     AARCH64_LINUX_CREGS_SIZE, OPTIONAL_REGS,
-    aarch64_fill_cregset, aarch64_store_cregset },
+    aarch64_fill_cregset, aarch64_store_cregset, nullptr,
+    "cheri.ptrace_forge_cap"
+  },
   NULL_REGSET
 };
 
@@ -788,7 +757,9 @@ static struct regset_info aarch64_sve_regsets[] =
   /* FIXME-Morello: Fixup the register set size.  */
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_MORELLO,
     AARCH64_LINUX_CREGS_SIZE, OPTIONAL_REGS,
-    aarch64_fill_cregset, aarch64_store_cregset },
+    aarch64_fill_cregset, aarch64_store_cregset, nullptr,
+    "cheri.ptrace_forge_cap"
+  },
   NULL_REGSET
 };
 
@@ -805,6 +776,45 @@ static struct regs_info regs_info_aarch64_sve =
     NULL, /* usrregs.  */
     &aarch64_sve_regsets_info,
   };
+
+/* Matches HWCAP_PACA in kernel header arch/arm64/include/uapi/asm/hwcap.h.  */
+#define AARCH64_HWCAP_PACA (1 << 30)
+
+/* Implementation of linux target ops method "low_arch_setup".  */
+
+void
+aarch64_target::low_arch_setup ()
+{
+  unsigned int machine;
+  int is_elf64;
+  int tid;
+
+  tid = lwpid_of (current_thread);
+
+  is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
+
+  if (is_elf64)
+    {
+      uint64_t vq = aarch64_sve_get_vq (tid);
+      unsigned long hwcap = linux_get_hwcap (8);
+      unsigned long hwcap2 = linux_get_hwcap2 (8);
+      bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
+      bool capability_p = hwcap2 & HWCAP2_MORELLO;
+
+      current_process ()->tdesc = aarch64_linux_read_description (vq, pauth_p,
+								  capability_p);
+
+      /* Re-enable warnings for register sets with sysctl settings.  */
+      aarch64_regsets[4].sysctl_write_should_warn = true;
+      aarch64_sve_regsets[4].sysctl_write_should_warn = true;
+    }
+  else
+    current_process ()->tdesc = aarch32_linux_read_description ();
+
+  aarch64_linux_get_debug_reg_capacity (lwpid_of (current_thread));
+}
+
+
 
 /* Implementation of linux target ops method "get_regs_info".  */
 

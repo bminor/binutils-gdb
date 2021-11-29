@@ -5242,6 +5242,16 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
 	      free (buf);
 	      return 0;
 	    }
+	  else if (errno == EPERM && regset->sysctl_write_permission != nullptr)
+	    {
+	      if (regset->sysctl_write_should_warn)
+		{
+		  warning ("Unable to store registers.\n"
+			   "Please run \"sysctl %s=1\".",
+			   regset->sysctl_write_permission);
+		  regset->sysctl_write_should_warn = false;
+		}
+	    }
 	  else
 	    {
 	      perror ("Warning: ptrace(regsets_store_inferior_registers)");
@@ -5249,6 +5259,17 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
 	}
       else if (regset->type == GENERAL_REGS)
 	saw_general_regs = 1;
+      else
+	{
+	  /* We've succeeded in writing the registers. If this register set
+	     has a sysctl permission flag and the warnings are disabled,
+	     re-enable it so we can issue a warning next time the write
+	     attempt fails.  */
+	  if (regset->sysctl_write_permission != nullptr
+	      && !regset->sysctl_write_should_warn)
+	    regset->sysctl_write_should_warn = true;
+	}
+
       free (buf);
     }
   if (saw_general_regs)
