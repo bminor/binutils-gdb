@@ -2209,7 +2209,7 @@ namespace eval Dwarf {
 		addr_size { set _unit_addr_size $value }
 		seg_sel_size { set _seg_sel_size $value }
 		default_is_stmt { set _default_is_stmt $value }
-		string_form { set $_line_string_form $value }
+		string_form { set _line_string_form $value }
 		default { error "unknown option $name" }
 	    }
 	}
