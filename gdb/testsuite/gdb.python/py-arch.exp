@@ -64,7 +64,7 @@ if { ![is_address_zero_readable] } {
 }
 
 foreach size {0 1 2 3 4 8 16} {
-    foreach sign {"" ", True" ", False"} {
+    foreach sign {"" ", True" ", False" ", None" ", \"blah\""} {
 	set fullsize [expr 8 * $size]
 	gdb_test_no_output "python t = arch.integer_type($fullsize$sign)" \
 	    "get integer type for $size$sign"

@@ -276,11 +276,16 @@ static PyObject *
 archpy_integer_type (PyObject *self, PyObject *args, PyObject *kw)
 {
   static const char *keywords[] = { "size", "signed", NULL };
-  int size, is_signed = 1;
+  int size;
+  PyObject *is_signed_obj = nullptr;
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "i|p", keywords,
-					&size, &is_signed))
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "i|O", keywords,
+					&size, &is_signed_obj))
     return nullptr;
+
+  /* Assume signed by default.  */
+  bool is_signed = (is_signed_obj == nullptr
+		    || PyObject_IsTrue (is_signed_obj));
 
   struct gdbarch *gdbarch;
   ARCHPY_REQUIRE_VALID (self, gdbarch);
