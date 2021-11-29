@@ -57,7 +57,7 @@
 		Specify a non-default object file format.
 
   --unicode={default|locale|invalid|hex|escape|highlight}
-  -u {d|l|i|x|e|h}
+  -U {d|l|i|x|e|h}
 		Determine how to handle UTF-8 unicode characters.  The default
 		is no special treatment.  All other versions of this option
 		only apply if the encoding is valid and enabling the option
@@ -1333,7 +1333,7 @@ usage (FILE *stream, int status)
   -e --encoding={s,S,b,l,B,L} Select character size and endianness:\n\
                             s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n\
   --unicode={default|show|invalid|hex|escape|highlight}\n\
-  -u {d|s|i|x|e|h}          Specify how to treat UTF-8 encoded unicode characters\n\
+  -U {d|s|i|x|e|h}          Specify how to treat UTF-8 encoded unicode characters\n\
   -s --output-separator=<string> String used to separate strings in output.\n\
   @<file>                   Read options from <file>\n\
   -h --help                 Display this information\n\
