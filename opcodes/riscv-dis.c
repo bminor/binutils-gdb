@@ -334,7 +334,9 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		    && imm_vlmul < ARRAY_SIZE (riscv_vlmul)
 		    && imm_vta < ARRAY_SIZE (riscv_vta)
 		    && imm_vma < ARRAY_SIZE (riscv_vma)
-		    && !imm_vtype_res)
+		    && !imm_vtype_res
+		    && riscv_vsew[imm_vsew] != NULL
+		    && riscv_vlmul[imm_vlmul] != NULL)
 		  print (info->stream, "%s,%s,%s,%s", riscv_vsew[imm_vsew],
 			 riscv_vlmul[imm_vlmul], riscv_vta[imm_vta],
 			 riscv_vma[imm_vma]);

@@ -76,13 +76,13 @@ const char * const riscv_vecm_names_numeric[NVECM] =
 /* The vsetvli vsew constants.  */
 const char * const riscv_vsew[8] =
 {
-  "e8", "e16", "e32", "e64", "e128", "e256", "e512", "e1024"
+  "e8", "e16", "e32", "e64", NULL, NULL, NULL, NULL
 };
 
 /* The vsetvli vlmul constants.  */
 const char * const riscv_vlmul[8] =
 {
-  "m1", "m2", "m4", "m8", 0, "mf8", "mf4", "mf2"
+  "m1", "m2", "m4", "m8", NULL, "mf8", "mf4", "mf2"
 };
 
 /* The vsetvli vta constants.  */

@@ -1,40 +1,20 @@
-	vsetvl a0, a1, a2
-	vsetvli a0, a1, 0
-	vsetvli a0, a1, 0x7ff
-	vsetvli a0, a1, e16, m2
-	vsetvli a0, a1, e256, m8
-	vsetvli a0, a1, e512, m8
-	vsetvli a0, a1, e1024, m8
-	vsetvli a0, a1, e1024, m1
-	vsetvli a0, a1, e1024, mf2
-	vsetvli a0, a1, e512, mf4
-	vsetvli a0, a1, e256, mf8
-	vsetvli a0, a1, e256, m2, ta
-	vsetvli a0, a1, e256, m2, ma
-	vsetvli a0, a1, e256, m2, tu
-	vsetvli a0, a1, e256, m2, mu
-	vsetvli a0, a1, e256, m2, ta, ma
-	vsetvli a0, a1, e256, m2, tu, ma
-	vsetvli a0, a1, e256, m2, ta, mu
-	vsetvli a0, a1, e256, m2, tu, mu
+	vsetvl   a0, a1,  a2
+	vsetvli  a0, a1,  0
+	vsetvli  a0, a1,  0x7ff
+	vsetvli  a0, a1,  0x4		# unrecognized vlmul
+	vsetvli  a0, a1,  0x20		# unrecognized vsew
+	vsetvli  a0, a1,  e8,  m2
+	vsetvli  a0, a1,  e16, m4, ta
+	vsetvli  a0, a1,  e32, mf4, mu
+	vsetvli  a0, a1,  e64, mf8, tu, ma
 	vsetivli a0, 0xb, 0
 	vsetivli a0, 0xb, 0x3ff
-	vsetivli a0, 0xb, e16, m2
-	vsetivli a0, 0xb, e256, m8
-	vsetivli a0, 0xb, e512, m8
-	vsetivli a0, 0xb, e1024, m8
-	vsetivli a0, 0xb, e1024, m1
-	vsetivli a0, 0xb, e1024, mf2
-	vsetivli a0, 0xb, e512, mf4
-	vsetivli a0, 0xb, e256, mf8
-	vsetivli a0, 0xb, e256, m2, ta
-	vsetivli a0, 0xb, e256, m2, ma
-	vsetivli a0, 0xb, e256, m2, tu
-	vsetivli a0, 0xb, e256, m2, mu
-	vsetivli a0, 0xb, e256, m2, ta, ma
-	vsetivli a0, 0xb, e256, m2, tu, ma
-	vsetivli a0, 0xb, e256, m2, ta, mu
-	vsetivli a0, 0xb, e256, m2, tu, mu
+	vsetivli a0, 0xb, 0x4		# unrecognized vlmul
+	vsetivli a0, 0xb, 0x20		# unrecognized vsew
+	vsetivli a0, 0xb, e8,  m2
+	vsetivli a0, 0xb, e16, m4, ta
+	vsetivli a0, 0xb, e32, mf4, mu
+	vsetivli a0, 0xb, e64, mf8, tu, ma
 
 	vlm.v v4, (a0)
 	vlm.v v4, 0(a0)
