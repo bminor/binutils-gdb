@@ -47,5 +47,4 @@ func:
 	msr osdtrtx_el1, x0
 	mrs x0, osdtrtx_el1
 
-	msr pmsidr_el1, x0
 	mrs x0, pmsidr_el1

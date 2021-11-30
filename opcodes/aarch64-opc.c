@@ -4346,7 +4346,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_PROFILE ("pmsfcr_el1",	CPENC (3,0,C9,C9,4),	0),
   SR_PROFILE ("pmsevfr_el1",	CPENC (3,0,C9,C9,5),	0),
   SR_PROFILE ("pmslatfr_el1",	CPENC (3,0,C9,C9,6),	0),
-  SR_PROFILE ("pmsidr_el1",	CPENC (3,0,C9,C9,7),	0),
+  SR_PROFILE ("pmsidr_el1",	CPENC (3,0,C9,C9,7),	F_REG_READ),
   SR_PROFILE ("pmscr_el2",	CPENC (3,4,C9,C9,0),	0),
   SR_PROFILE ("pmscr_el12",	CPENC (3,5,C9,C9,0),	0),
   SR_CORE ("pmcr_el0",		CPENC (3,3,C9,C12,0),	0),
