@@ -28,15 +28,6 @@ DOCFILES = aoutx.texi  archive.texi archures.texi \
 	mmo.texi \
 	bfdver.texi
 
-PROTOS = archive.p archures.p bfd.p \
-	 core.p format.p \
-	bfdio.p bfdwin.p \
-	libbfd.p opncls.p reloc.p \
-	section.p syms.p targets.p  \
-	format.p  core.p init.p
-
-IPROTOS = cache.ip libbfd.ip reloc.ip init.ip archures.ip coffcode.ip
-
 # SRCDOC, SRCPROT, SRCIPROT only used to sidestep Sun Make bug in interaction 
 # between VPATH and suffix rules.  If you use GNU Make, perhaps other Makes,
 # you don't need these three:
@@ -358,8 +349,6 @@ bfdver.texi: $(srcdir)/Makefile.in
 noinst_TEXINFOS = bfdint.texi
 
 MOSTLYCLEANFILES = $(MKDOC) *.o *.stamp
-
-CLEANFILES = *.p *.ip
 
 DISTCLEANFILES = bfd.?? bfd.??? bfd.h libbfd.h libcoff.h texput.log
 
