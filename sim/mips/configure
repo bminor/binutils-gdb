@@ -1709,7 +1709,6 @@ esac
 #
 # Select the bitsize of the target
 #
-mips_addr_bitsize=
 case "${target}" in
   mips*-sde-elf*)       mips_bitsize=64 ; mips_msb=63 ;;
   mips*-mti-elf*)       mips_bitsize=64 ; mips_msb=63 ;;
@@ -1722,7 +1721,7 @@ case "${target}" in
 esac
 wire_word_bitsize="$mips_bitsize"
 wire_word_msb="$mips_msb"
-wire_address_bitsize="$mips_addr_bitsize"
+wire_address_bitsize=""
 wire_cell_bitsize=""
 # Check whether --enable-sim-bitsize was given.
 if test "${enable_sim_bitsize+set}" = set; then :

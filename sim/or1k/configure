@@ -1676,7 +1676,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 wire_word_bitsize="32"
 wire_word_msb="31"
-wire_address_bitsize="32"
+wire_address_bitsize=""
 wire_cell_bitsize=""
 # Check whether --enable-sim-bitsize was given.
 if test "${enable_sim_bitsize+set}" = set; then :

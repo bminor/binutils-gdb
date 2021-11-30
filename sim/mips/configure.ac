@@ -24,7 +24,6 @@ AC_SUBST(SIM_SUBTARGET)
 #
 # Select the bitsize of the target
 #
-mips_addr_bitsize=
 case "${target}" in
   mips*-sde-elf*)       mips_bitsize=64 ; mips_msb=63 ;;
   mips*-mti-elf*)       mips_bitsize=64 ; mips_msb=63 ;;
@@ -35,7 +34,7 @@ case "${target}" in
   mips*-*-*)            mips_bitsize=32 ; mips_msb=31 ;;
   *)                    mips_bitsize=64 ; mips_msb=63 ;;
 esac
-SIM_AC_OPTION_BITSIZE($mips_bitsize,$mips_msb,$mips_addr_bitsize)
+SIM_AC_OPTION_BITSIZE($mips_bitsize,$mips_msb)
 
 
 
