@@ -19,11 +19,12 @@
 
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
-AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex
+AUTOMAKE_OPTIONS = dejagnu foreign info-in-builddir no-texinfo.tex
 
-if BUILD_INFO
-SUBDIRS = doc
-endif
+# Variables that we might accumulate conditionally or in subdirs.
+info_TEXINFOS =
+DISTCLEANFILES =
+MAINTAINERCLEANFILES =
 
 # This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
 # -I../zlib, unless we were configured with --with-system-zlib, in which
@@ -110,5 +111,9 @@ CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 
-DISTCLEANFILES = site.exp development.exp
+DISTCLEANFILES += site.exp development.exp
+endif
+
+if BUILD_INFO
+include doc/local.mk
 endif
