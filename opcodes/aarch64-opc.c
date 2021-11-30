@@ -3990,6 +3990,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 #define SR_V8_3(n,e,f)	  SR_FEAT (n,e,f,V8_3)
 #define SR_V8_4(n,e,f)	  SR_FEAT (n,e,f,V8_4)
 #define SR_V8_4(n,e,f)	  SR_FEAT (n,e,f,V8_4)
+#define SR_LOR(n,e,f)	  SR_FEAT (n,e,f,LOR)
 #define SR_PAN(n,e,f)	  SR_FEAT (n,e,f,PAN)
 #define SR_RAS(n,e,f)	  SR_FEAT (n,e,f,RAS)
 #define SR_SME(n,e,f)	  SR_FEAT (n,e,f,SME)
@@ -4714,10 +4715,11 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("csrptr_el2",    CPENC (2,4,C8,C0,1),  0),
   SR_CORE ("csrptridx_el2", CPENC (2,4,C8,C0,3),  F_REG_READ),
 
-  SR_CORE ("lorc_el1",      CPENC (3,0,C10,C4,3),  0),
-  SR_CORE ("lorea_el1",     CPENC (3,0,C10,C4,1),  0),
-  SR_CORE ("lorn_el1",      CPENC (3,0,C10,C4,2),  0),
-  SR_CORE ("lorsa_el1",     CPENC (3,0,C10,C4,0),  0),
+  SR_LOR ("lorc_el1",       CPENC (3,0,C10,C4,3),  0),
+  SR_LOR ("lorea_el1",      CPENC (3,0,C10,C4,1),  0),
+  SR_LOR ("lorn_el1",       CPENC (3,0,C10,C4,2),  0),
+  SR_LOR ("lorsa_el1",      CPENC (3,0,C10,C4,0),  0),
+
   SR_CORE ("icc_ctlr_el3",  CPENC (3,6,C12,C12,4), 0),
   SR_CORE ("icc_sre_el1",   CPENC (3,0,C12,C12,5), 0),
   SR_CORE ("icc_sre_el2",   CPENC (3,4,C12,C9,5),  0),
