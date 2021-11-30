@@ -4833,7 +4833,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
 
   SR_CORE ("accdata_el1",   CPENC (3,0,C13,C0,5), 0),
 
-  SR_CORE ("mfar_el3",      CPENC (3,6,C6,C0,5), F_REG_READ),
+  SR_CORE ("mfar_el3",      CPENC (3,6,C6,C0,5), 0),
   SR_CORE ("gpccr_el3",     CPENC (3,6,C2,C1,6), 0),
   SR_CORE ("gptbr_el3",     CPENC (3,6,C2,C1,4), 0),
 
