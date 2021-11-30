@@ -113,7 +113,6 @@ static struct pyty_code pyty_codes[] =
   ENTRY (TYPE_CODE_NAMESPACE),
   ENTRY (TYPE_CODE_DECFLOAT),
   ENTRY (TYPE_CODE_INTERNAL_FUNCTION),
-  { TYPE_CODE_UNDEF, NULL }
 };
 
 
@@ -1445,8 +1444,6 @@ _initialize_py_type ()
 int
 gdbpy_initialize_types (void)
 {
-  int i;
-
   if (PyType_Ready (&type_object_type) < 0)
     return -1;
   if (PyType_Ready (&field_object_type) < 0)
@@ -1454,10 +1451,9 @@ gdbpy_initialize_types (void)
   if (PyType_Ready (&type_iterator_object_type) < 0)
     return -1;
 
-  for (i = 0; pyty_codes[i].name; ++i)
+  for (const auto &item : pyty_codes)
     {
-      if (PyModule_AddIntConstant (gdb_module, pyty_codes[i].name,
-				   pyty_codes[i].code) < 0)
+      if (PyModule_AddIntConstant (gdb_module, item.name, item.code) < 0)
 	return -1;
     }
 
