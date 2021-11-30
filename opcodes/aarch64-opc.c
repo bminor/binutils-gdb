@@ -4486,12 +4486,6 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE("trbsr_el1",  	CPENC (3,0,C9,C11,3),	0),
   SR_CORE("trbtrg_el1", 	CPENC (3,0,C9,C11,6),	0),
 
-  SR_CORE ("trcextinselr0",	CPENC (2,1,C0,C8,4),	0),
-  SR_CORE ("trcextinselr1",	CPENC (2,1,C0,C9,4),	0),
-  SR_CORE ("trcextinselr2",	CPENC (2,1,C0,C10,4),	0),
-  SR_CORE ("trcextinselr3",	CPENC (2,1,C0,C11,4),	0),
-  SR_CORE ("trcrsr",		CPENC (2,1,C0,C10,0),	0),
-
   SR_CORE ("trcauthstatus", CPENC (2,1,C7,C14,6), F_REG_READ),
   SR_CORE ("trccidr0",      CPENC (2,1,C7,C12,7), F_REG_READ),
   SR_CORE ("trccidr1",      CPENC (2,1,C7,C13,7), F_REG_READ),
@@ -4612,7 +4606,6 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("trcextinselr2", CPENC (2,1,C0,C10,4), 0),
   SR_CORE ("trcextinselr3", CPENC (2,1,C0,C11,4), 0),
   SR_CORE ("trcimspec0",    CPENC (2,1,C0,C0,7),  0),
-  SR_CORE ("trcimspec0",    CPENC (2,1,C0,C0,7),  0),
   SR_CORE ("trcimspec1",    CPENC (2,1,C0,C1,7),  0),
   SR_CORE ("trcimspec2",    CPENC (2,1,C0,C2,7),  0),
   SR_CORE ("trcimspec3",    CPENC (2,1,C0,C3,7),  0),
@@ -4625,6 +4618,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("trcprgctlr",    CPENC (2,1,C0,C1,0),  0),
   SR_CORE ("trcprocselr",   CPENC (2,1,C0,C2,0),  0),
   SR_CORE ("trcqctlr",      CPENC (2,1,C0,C1,1),  0),
+  SR_CORE ("trcrsr",        CPENC (2,1,C0,C10,0), 0),
   SR_CORE ("trcrsctlr2",    CPENC (2,1,C1,C2,0),  0),
   SR_CORE ("trcrsctlr3",    CPENC (2,1,C1,C3,0),  0),
   SR_CORE ("trcrsctlr4",    CPENC (2,1,C1,C4,0),  0),
