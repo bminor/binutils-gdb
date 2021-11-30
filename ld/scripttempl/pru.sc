@@ -183,6 +183,12 @@ SECTIONS
     ${RELOCATING+ . += __STACK_SIZE ; }
   } ${RELOCATING+ > dmem}
 
+  /* Remoteproc loader in Linux kernel 5.10 and later reads this section
+     to setup the PRUSS interrupt controller.  The interrupt map section
+     is never referenced from PRU firmware, so there is no need to
+     place it in the target dmem memory.  */
+  .pru_irq_map 0 : { *(.pru_irq_map) }
+
   /* Stabs debugging sections.  */
   .stab 0 : { *(.stab) }
   .stabstr 0 : { *(.stabstr) }

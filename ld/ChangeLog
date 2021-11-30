@@ -1,3 +1,10 @@
+2021-11-30  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/pru.sc (.pru_irq_map): Define output section.
+	* testsuite/ld-pru/pru_irq_map-1.d: New test.
+	* testsuite/ld-pru/pru_irq_map-2.d: New test.
+	* testsuite/ld-pru/pru_irq_map.s: New test.
+
 2021-11-17  Jeremy Drake  <cygwin@jdrake.com>
 
 	* emultempl/pep.em (DEFAULT_DLL_CHARACTERISTICS): Set to 0 for
