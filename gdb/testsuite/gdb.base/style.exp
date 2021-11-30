@@ -169,10 +169,15 @@ proc run_style_tests { } {
 
 	    gdb_test_no_output "set width $width"
 	    gdb_test "frame" $re_styled "frame when width=$width"
-	}
 
-	# Reset width back to 0.
-	gdb_test_no_output "set width 0" ""
+	    # Reset width back to 0.  Doing this in the loop rather than
+	    # after, avoids trying to do "set width 30" while width is 20,
+	    # which causes horizontal scrolling in the case that the fallback
+	    # stub-termcap.c is used:
+	    # ^M<et width 30^M
+	    # (gdb) FAIL: gdb.base/style.exp: all styles enabled: set width 30
+	    gdb_test_no_output "set width 0" ""
+	}
 
 	if {$test_macros} {
 	    set macro_line [gdb_get_line_number "\#define SOME_MACRO"]
