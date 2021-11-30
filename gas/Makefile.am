@@ -17,10 +17,12 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
+AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects info-in-builddir no-texinfo.tex
 ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 
-SUBDIRS = doc po
+MAINTAINERCLEANFILES =
+
+SUBDIRS = po
 
 tooldir = $(exec_prefix)/$(target_alias)
 
@@ -644,3 +646,5 @@ de-stage3:
 CONFIG_STATUS_DEPENDENCIES = $(srcdir)/configure.tgt $(BFDDIR)/development.sh
 
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
+
+include doc/local.mk
