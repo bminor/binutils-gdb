@@ -3,6 +3,13 @@
 
 *** Changes since GDB 12
 
+* Scheduler-locking and new threads
+
+  When scheduler-locking is in effect, only the current thread may run
+  when the inferior is resumed.  However, previously, new threads
+  created by the resumed thread would still be able to run free.  Now,
+  they are held stopped.
+
 * "info breakpoints" now displays enabled breakpoint locations of
   disabled breakpoints as in the "y-" state.  For example:
 
