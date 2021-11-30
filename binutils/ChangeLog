@@ -1,3 +1,17 @@
+2021-11-30  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (find_debug_info_for_offset): Use dwarf_vma type for
+	offsets, sizes and ranges.
+	(display_loc_list): Likewise.  Also use print_dwarf_vma to print
+	the offset.
+	(display_loclists_list): Likewise.
+	(display_loc_list_dwo): Likewise.
+	(display_debug_str): Likewise.
+	(display_debug_aranges): Likewise.
+	(display_debug_ranges_list): Likewise.
+	(display_debug_rnglists_list): Likewise.
+	(display_debug_ranges): Likewise.
+
 2021-11-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 28632

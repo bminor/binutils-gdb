@@ -5574,7 +5574,7 @@ display_debug_lines (struct dwarf_section *section, void *file)
 }
 
 static debug_info *
-find_debug_info_for_offset (unsigned long offset)
+find_debug_info_for_offset (dwarf_vma offset)
 {
   unsigned int i;
 
@@ -6330,11 +6330,10 @@ display_loc_list (struct dwarf_section *section,
 {
   unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
   unsigned char *section_end = section->start + section->size;
-  unsigned long cu_offset;
+  dwarf_vma    cu_offset;
   unsigned int pointer_size;
   unsigned int offset_size;
   int dwarf_version;
-
   dwarf_vma begin;
   dwarf_vma end;
   unsigned short length;
@@ -6371,7 +6370,8 @@ display_loc_list (struct dwarf_section *section,
 	  break;
 	}
 
-      printf ("    %8.8lx ", (unsigned long) off);
+      printf ("    ");
+      print_dwarf_vma (off, 4);
 
       SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
       SAFE_BYTE_GET_AND_INC (end, start, pointer_size, section_end);
@@ -6475,7 +6475,7 @@ display_loclists_list (struct dwarf_section *section,
 {
   unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
   unsigned char *section_end = section->start + section->size;
-  unsigned long cu_offset;
+  dwarf_vma    cu_offset;
   unsigned int pointer_size;
   unsigned int offset_size;
   int dwarf_version;
@@ -6518,7 +6518,8 @@ display_loclists_list (struct dwarf_section *section,
 	  break;
 	}
 
-      printf ("    %8.8lx ", (unsigned long) off);
+      printf ("    ");
+      print_dwarf_vma (off, 4);
 
       SAFE_BYTE_GET_AND_INC (llet, start, 1, section_end);
 
@@ -6661,7 +6662,7 @@ display_loc_list_dwo (struct dwarf_section *section,
 {
   unsigned char *start = *start_ptr, *vstart = *vstart_ptr;
   unsigned char *section_end = section->start + section->size;
-  unsigned long cu_offset;
+  dwarf_vma    cu_offset;
   unsigned int pointer_size;
   unsigned int offset_size;
   int dwarf_version;
@@ -6691,7 +6692,8 @@ display_loc_list_dwo (struct dwarf_section *section,
 
   while (1)
     {
-      printf ("    %8.8lx ", (unsigned long) (offset + (start - *start_ptr)));
+      printf ("    ");
+      print_dwarf_vma (offset + (start - *start_ptr), 4);
 
       if (start >= section_end)
 	{
@@ -6829,11 +6831,11 @@ static int
 display_debug_loc (struct dwarf_section *section, void *file)
 {
   unsigned char *start = section->start, *vstart = NULL;
-  unsigned long bytes;
+  dwarf_vma bytes;
   unsigned char *section_begin = start;
   unsigned int num_loc_list = 0;
-  unsigned long last_offset = 0;
-  unsigned long last_view = 0;
+  dwarf_vma last_offset = 0;
+  dwarf_vma last_view = 0;
   unsigned int first = 0;
   unsigned int i;
   unsigned int j;
@@ -7105,7 +7107,7 @@ display_debug_str (struct dwarf_section *section,
 		   void *file ATTRIBUTE_UNUSED)
 {
   unsigned char *start = section->start;
-  unsigned long bytes = section->size;
+  dwarf_vma bytes = section->size;
   dwarf_vma addr = section->address;
 
   if (bytes == 0)
@@ -7196,9 +7198,9 @@ display_debug_aranges (struct dwarf_section *section,
       unsigned char *addr_ranges;
       dwarf_vma length;
       dwarf_vma address;
-      unsigned long sec_off;
+      dwarf_vma     sec_off;
       unsigned char address_size;
-      unsigned int offset_size;
+      unsigned int  offset_size;
       unsigned char *end_ranges;
 
       hdrptr = start;
@@ -7217,7 +7219,7 @@ display_debug_aranges (struct dwarf_section *section,
 	{
 	  warn (_("Debug info is corrupted, %s header at %#lx has length %s\n"),
 		section->name,
-		sec_off,
+		(unsigned long) sec_off,
 		dwarf_vmatoa ("x", arange.ar_length));
 	  break;
 	}
@@ -7556,9 +7558,11 @@ range_entry_compar (const void *ap, const void *bp)
 }
 
 static void
-display_debug_ranges_list (unsigned char *start, unsigned char *finish,
-			   unsigned int pointer_size, unsigned long offset,
-			   unsigned long base_address)
+display_debug_ranges_list (unsigned char *  start,
+			   unsigned char *  finish,
+			   unsigned int     pointer_size,
+			   dwarf_vma        offset,
+			   dwarf_vma        base_address)
 {
   while (start < finish)
     {
@@ -7570,7 +7574,8 @@ display_debug_ranges_list (unsigned char *start, unsigned char *finish,
 	break;
       SAFE_SIGNED_BYTE_GET_AND_INC (end, start, pointer_size, finish);
 
-      printf ("    %8.8lx ", offset);
+      printf ("    ");
+      print_dwarf_vma (offset, 4);
 
       if (begin == 0 && end == 0)
 	{
@@ -7602,27 +7607,30 @@ display_debug_ranges_list (unsigned char *start, unsigned char *finish,
 }
 
 static void
-display_debug_rnglists_list (unsigned char *start, unsigned char *finish,
-			     unsigned int pointer_size, unsigned long offset,
-			     unsigned long base_address)
+display_debug_rnglists_list (unsigned char * start,
+			     unsigned char * finish,
+			     unsigned int    pointer_size,
+			     dwarf_vma       offset,
+			     dwarf_vma       base_address)
 {
   unsigned char *next = start;
 
   while (1)
     {
-      unsigned long off = offset + (start - next);
+      dwarf_vma off = offset + (start - next);
       enum dwarf_range_list_entry rlet;
       /* Initialize it due to a false compiler warning.  */
       dwarf_vma begin = -1, length, end = -1;
 
       if (start >= finish)
 	{
-	  warn (_("Range list starting at offset 0x%lx is not terminated.\n"),
-		offset);
+	  warn (_("Range list starting at offset 0x%s is not terminated.\n"),
+		dwarf_vmatoa ("x", offset));
 	  break;
 	}
 
-      printf ("    %8.8lx ", off);
+      printf ("    ");
+      print_dwarf_vma (off, 4);
 
       SAFE_BYTE_GET_AND_INC (rlet, start, 1, finish);
 
@@ -7682,17 +7690,18 @@ static int
 display_debug_ranges (struct dwarf_section *section,
 		      void *file ATTRIBUTE_UNUSED)
 {
-  unsigned char *start = section->start;
-  unsigned char *last_start = start;
-  unsigned long bytes = section->size;
-  unsigned char *section_begin = start;
-  unsigned char *finish = start + bytes;
-  unsigned int num_range_list, i;
-  struct range_entry *range_entries, *range_entry_fill;
-  int is_rnglists = strstr (section->name, "debug_rnglists") != NULL;
+  unsigned char *       start = section->start;
+  unsigned char *       last_start = start;
+  dwarf_vma             bytes = section->size;
+  unsigned char *       section_begin = start;
+  unsigned char *       finish = start + bytes;
+  unsigned int          num_range_list, i;
+  struct range_entry *  range_entries;
+  struct range_entry *  range_entry_fill;
+  int                   is_rnglists = strstr (section->name, "debug_rnglists") != NULL;
   /* Initialize it due to a false compiler warning.  */
-  unsigned char address_size = 0;
-  dwarf_vma last_offset = 0;
+  unsigned char         address_size = 0;
+  dwarf_vma             last_offset = 0;
 
   if (bytes == 0)
     {
