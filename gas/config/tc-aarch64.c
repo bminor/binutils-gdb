@@ -5738,25 +5738,18 @@ lookup_mnemonic (const char *start, int len)
 }
 
 /* Subroutine of md_assemble, responsible for looking up the primary
-   opcode from the mnemonic the user wrote.  STR points to the
-   beginning of the mnemonic. */
+   opcode from the mnemonic the user wrote.  BASE points to the beginning
+   of the mnemonic, DOT points to the first '.' within the mnemonic
+   (if any) and END points to the end of the mnemonic.  */
 
 static templates *
-opcode_lookup (char **str)
+opcode_lookup (char *base, char *dot, char *end)
 {
-  char *end, *base, *dot;
   const aarch64_cond *cond;
   char condname[16];
   int len;
 
-  /* Scan up to the end of the mnemonic, which must end in white space,
-     '.', or end of string.  */
-  dot = 0;
-  for (base = end = *str; is_part_of_name(*end); end++)
-    if (*end == '.' && !dot)
-      dot = end;
-
-  if (end == base || dot == base)
+  if (dot == end)
     return 0;
 
   inst.cond = COND_ALWAYS;
@@ -5765,23 +5758,13 @@ opcode_lookup (char **str)
   if (dot)
     {
       cond = str_hash_find_n (aarch64_cond_hsh, dot + 1, end - dot - 1);
-      if (cond)
-	{
-	  inst.cond = cond->value;
-	  *str = end;
-	}
-      else
-	{
-	  *str = dot;
-	  return 0;
-	}
+      if (!cond)
+	return 0;
+      inst.cond = cond->value;
       len = dot - base;
     }
   else
-    {
-      *str = end;
-      len = end - base;
-    }
+    len = end - base;
 
   if (inst.cond == COND_ALWAYS)
     {
@@ -7870,7 +7853,6 @@ dump_opcode_operands (const aarch64_opcode *opcode)
 void
 md_assemble (char *str)
 {
-  char *p = str;
   templates *template;
   const aarch64_opcode *opcode;
   aarch64_inst *inst_base;
@@ -7893,14 +7875,28 @@ md_assemble (char *str)
   DEBUG_TRACE ("==============================");
   DEBUG_TRACE ("Enter md_assemble with %s", str);
 
-  template = opcode_lookup (&p);
+  /* Scan up to the end of the mnemonic, which must end in whitespace,
+     '.', or end of string.  */
+  char *p = str;
+  char *dot = 0;
+  for (; is_part_of_name (*p); p++)
+    if (*p == '.' && !dot)
+      dot = p;
+
+  if (p == str)
+    {
+      as_bad (_("unknown mnemonic -- `%s'"), str);
+      return;
+    }
+
+  if (!dot && create_register_alias (str, p))
+    return;
+
+  template = opcode_lookup (str, dot, p);
   if (!template)
     {
-      /* It wasn't an instruction, but it might be a register alias of
-         the form alias .req reg directive.  */
-      if (!create_register_alias (str, p))
-	as_bad (_("unknown mnemonic `%s' -- `%s'"), get_mnemonic_name (str),
-		str);
+      as_bad (_("unknown mnemonic `%s' -- `%s'"), get_mnemonic_name (str),
+	      str);
       return;
     }
 
