@@ -1269,6 +1269,16 @@ this property is @code{False}.  Examples of non-scalar types include
 structures, unions, and classes.
 @end defvar
 
+@defvar Type.is_signed
+For scalar types (those for which @code{Type.is_scalar} is
+@code{True}), this property is @code{True} if the type is signed,
+otherwise this property is @code{False}.
+
+Attempting to read this property for a non-scalar type (a type for
+which @code{Type.is_scalar} is @code{False}), will raise a
+@code{ValueError}.
+@end defvar
+
 The following methods are provided:
 
 @defun Type.fields ()

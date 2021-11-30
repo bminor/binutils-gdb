@@ -270,6 +270,32 @@ proc test_template {} {
     gdb_test "python print (ttype.template_argument(2))" "&C::c"
 }
 
+# Check the is_signed property of some types.
+proc test_is_signed {lang} {
+    if {$lang == "c++"} {
+	gdb_test "python print(gdb.parse_and_eval ('c').type.is_signed)"  \
+	"ValueError: Type must be a scalar type.*"
+	gdb_test "python print(gdb.parse_and_eval ('&c').type.is_signed == False)" "True"
+    }
+
+    gdb_test "python print(gdb.parse_and_eval('global_unsigned_char').type.is_signed == False)" "True"
+    gdb_test "python print(gdb.parse_and_eval('global_char').type.is_signed)" "True|False"
+    gdb_test "python print(gdb.parse_and_eval('global_signed_char').type.is_signed == True)" "True"
+
+    gdb_test "python print(gdb.parse_and_eval ('ss.x').type.is_signed == True)" "True"
+    gdb_test "python print(gdb.parse_and_eval ('ss').type.is_signed)" \
+	"ValueError: Type must be a scalar type.*"
+    gdb_test "python print(gdb.parse_and_eval ('uu').type.is_signed)"  \
+	"ValueError: Type must be a scalar type.*"
+    gdb_test "python print(gdb.parse_and_eval ('uu.i').type.is_signed == True)" "True"
+    gdb_test "python print(gdb.parse_and_eval ('uu.f').type.is_signed == True)" "True"
+    gdb_test "python print(gdb.parse_and_eval ('uu.a').type.is_signed)"  \
+	"ValueError: Type must be a scalar type.*"
+
+    gdb_test "python print(gdb.parse_and_eval ('&ss.x').type.is_signed == False)" "True"
+    gdb_test "python print(gdb.parse_and_eval ('&uu').type.is_signed == False)" "True"
+}
+
 # Test the gdb.Type.is_scalar property.
 proc test_is_scalar { lang } {
     if {$lang == "c++"} {
@@ -320,6 +346,7 @@ if { [build_inferior "${binfile}" "c"] == 0 } {
       test_fields "c"
       test_enums
       test_is_scalar "c"
+      test_is_signed "c"
   }
 }
 
@@ -334,5 +361,6 @@ if { [build_inferior "${binfile}-cxx" "c++"] == 0 } {
       test_template
       test_enums
       test_is_scalar "c++"
+      test_is_signed "c++"
   }
 }

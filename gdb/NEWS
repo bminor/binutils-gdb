@@ -235,6 +235,11 @@ GNU/Linux/LoongArch    loongarch*-*-linux*
   ** New read-only attribute gdb.Type.is_scalar, which is True for
      scalar types, and False for all other types.
 
+  ** New read-only attribute gdb.Type.is_signed.  This attribute
+     should only be read when Type.is_scalar is True, and will be True
+     for signed types, and False for all other types.  Attempting to
+     read this attribute for non-scalar types will raise a ValueError.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on OpenRISC GNU/Linux.
