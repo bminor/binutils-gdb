@@ -4119,7 +4119,6 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_SVE  ("zcr_el12",		CPENC (3,5,C1,C2,0),	0),
   SR_SVE  ("zcr_el2",		CPENC (3,4,C1,C2,0),	0),
   SR_SVE  ("zcr_el3",		CPENC (3,6,C1,C2,0),	0),
-  SR_SVE  ("zidr_el1",		CPENC (3,0,C0,C0,7),	0),
   SR_CORE ("ttbr0_el1",		CPENC (3,0,C2,C0,0),	0),
   SR_CORE ("ttbr1_el1",		CPENC (3,0,C2,C0,1),	0),
   SR_V8_A ("ttbr0_el2",		CPENC (3,4,C2,C0,0),	0),
