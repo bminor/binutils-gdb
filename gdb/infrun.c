@@ -104,6 +104,8 @@ static bool start_step_over (void);
 
 static bool step_over_info_valid_p (void);
 
+static bool schedlock_applies (struct thread_info *tp);
+
 /* Asynchronous signal handler registered as event loop source for
    when we have pending events ready to be passed to the core.  */
 static struct async_event_handler *infrun_async_inferior_event_token;
@@ -1892,7 +1894,13 @@ static void
 update_thread_events_after_step_over (thread_info *event_thread,
 				      const target_waitstatus &event_status)
 {
-  if (target_supports_set_thread_options (0))
+  if (schedlock_applies (event_thread))
+    {
+      /* If scheduler-locking applies, continue reporting
+	 thread-created/thread-cloned events.  */
+      return;
+    }
+  else if (target_supports_set_thread_options (0))
     {
       /* We can control per-thread options.  Disable events for the
 	 event thread, unless the thread is gone.  */
@@ -2465,9 +2473,14 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
        to start stopped.  We need to release the displaced stepping
        buffer if the stepped thread exits, so we also enable
        thread-exit events.
+
+     - If scheduler-locking applies, threads that the current thread
+       spawns should remain halted.  It's not strictly necessary to
+       enable thread-exit events in this case, but it doesn't hurt.
   */
   if (step_over_info_valid_p ()
-      || displaced_step_in_progress_thread (tp))
+      || displaced_step_in_progress_thread (tp)
+      || schedlock_applies (tp))
     {
       gdb_thread_options options
 	= GDB_THREAD_OPTION_CLONE | GDB_THREAD_OPTION_EXIT;
@@ -2475,6 +2488,13 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
 	tp->set_thread_options (options);
       else
 	target_thread_events (true);
+    }
+  else
+    {
+      if (target_supports_set_thread_options (0))
+	tp->set_thread_options (0);
+      else if (!displaced_step_in_progress_any_thread ())
+	target_thread_events (false);
     }
 
   /* If we're resuming more than one thread simultaneously, then any
@@ -6157,16 +6177,21 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    parent->set_running (false);
 
 	  /* If resuming the child, mark it running.  */
-	  if (ecs->ws.kind () == TARGET_WAITKIND_THREAD_CLONED
-	      || (follow_child || (!detach_fork && (non_stop || sched_multi))))
+	  if ((ecs->ws.kind () == TARGET_WAITKIND_THREAD_CLONED
+	       && !schedlock_applies (ecs->event_thread))
+	      || (ecs->ws.kind () != TARGET_WAITKIND_THREAD_CLONED
+		  && (follow_child
+		      || (!detach_fork && (non_stop || sched_multi)))))
 	    child->set_running (true);
 
 	  /* In non-stop mode, also resume the other branch.  */
 	  if ((ecs->ws.kind () == TARGET_WAITKIND_THREAD_CLONED
-	       && target_is_non_stop_p ())
-	      || (!detach_fork && (non_stop
-				   || (sched_multi
-				       && target_is_non_stop_p ()))))
+	       && target_is_non_stop_p ()
+	       && !schedlock_applies (ecs->event_thread))
+	      || (ecs->ws.kind () != TARGET_WAITKIND_THREAD_CLONED
+		  && (!detach_fork && (non_stop
+				       || (sched_multi
+					   && target_is_non_stop_p ())))))
 	    {
 	      if (follow_child)
 		switch_to_thread (parent);

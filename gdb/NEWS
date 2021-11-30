@@ -118,6 +118,13 @@ show always-read-ctf
   from the current process state.  GDB will show this additional information
   automatically, or through one of the memory-tag subcommands.
 
+* Scheduler-locking and new threads
+
+  When scheduler-locking is in effect, only the current thread may run
+  when the inferior is resumed.  However, previously, new threads
+  created by the resumed thread would still be able to run free.  Now,
+  they are held stopped.
+
 * "info breakpoints" now displays enabled breakpoint locations of
   disabled breakpoints as in the "y-" state.  For example:
 

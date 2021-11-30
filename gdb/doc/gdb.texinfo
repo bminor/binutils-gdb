@@ -7050,7 +7050,9 @@ the following:
 There is no locking and any thread may run at any time.
 
 @item on
-Only the current thread may run when the inferior is resumed.
+Only the current thread may run when the inferior is resumed.  New
+threads created by the resumed thread are held stopped at their entry
+point, before they execute any instruction.
 
 @item step
 Behaves like @code{on} when stepping, and @code{off} otherwise.
