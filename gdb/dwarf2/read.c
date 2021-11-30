@@ -3139,6 +3139,9 @@ dwarf2_base_index_functions::find_last_source_symtab (struct objfile *objfile)
 void
 dwarf2_per_cu_data::free_cached_file_names ()
 {
+  if (fnd != nullptr)
+    fnd->forget_fullname ();
+
   if (per_bfd == nullptr || !per_bfd->using_index || v.quick == nullptr)
     return;
 
@@ -4362,6 +4365,27 @@ dw_expand_symtabs_matching_file_matcher
       if (per_objfile->symtab_set_p (per_cu.get ()))
 	continue;
 
+      if (per_cu->fnd != nullptr)
+	{
+	  file_and_directory *fnd = per_cu->fnd.get ();
+
+	  if (file_matcher (fnd->get_name (), false))
+	    {
+	      per_cu->v.quick->mark = 1;
+	      continue;
+	    }
+
+	  /* Before we invoke realpath, which can get expensive when many
+	     files are involved, do a quick comparison of the basenames.  */
+	  if ((basenames_may_differ
+	       || file_matcher (lbasename (fnd->get_name ()), true))
+	      && file_matcher (fnd->get_fullname (), false))
+	    {
+	      per_cu->v.quick->mark = 1;
+	      continue;
+	    }
+	}
+
       quick_file_names *file_data = dw2_get_file_names (per_cu.get (),
 							per_objfile);
       if (file_data == NULL)
@@ -4555,6 +4579,24 @@ dwarf2_base_index_functions::map_symbol_filenames
       /* We only need to look at symtabs not already expanded.  */
       if (per_cu->is_debug_types || per_objfile->symtab_set_p (per_cu))
 	continue;
+
+      if (per_cu->fnd != nullptr)
+	{
+	  file_and_directory *fnd = per_cu->fnd.get ();
+
+	  const char *filename = fnd->get_name ();
+	  const char *key = filename;
+	  const char *fullname = nullptr;
+
+	  if (need_fullname)
+	    {
+	      fullname = fnd->get_fullname ();
+	      key = fullname;
+	    }
+
+	  if (!filenames_cache.seen (key))
+	    fun (filename, fullname);
+	}
 
       quick_file_names *file_data = dw2_get_file_names (per_cu, per_objfile);
       if (file_data == nullptr
