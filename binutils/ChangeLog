@@ -1,3 +1,8 @@
+2021-11-30  Roland McGrath  <mcgrathr@google.com>
+
+	* doc/local.mk: Give each man page target its missing dependency on
+	doc/$(am__dirstamp).
+
 2021-11-30  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (find_debug_info_for_offset): Use dwarf_vma type for
