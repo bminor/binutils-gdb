@@ -6939,19 +6939,33 @@ locking the OS scheduler to allow only a single thread to run.
 @cindex scheduler locking mode
 @cindex lock scheduler
 Set the scheduler locking mode.  It applies to normal execution,
-record mode, and replay mode.  If it is @code{off}, then there is no
-locking and any thread may run at any time.  If @code{on}, then only
-the current thread may run when the inferior is resumed.  The
-@code{step} mode optimizes for single-stepping; it prevents other
-threads from preempting the current thread while you are stepping, so
-that the focus of debugging does not change unexpectedly.  Other
-threads never get a chance to run when you step, and they are
-completely free to run when you use commands like @samp{continue},
-@samp{until}, or @samp{finish}.  However, unless another thread hits a
-breakpoint during its timeslice, @value{GDBN} does not change the
-current thread away from the thread that you are debugging.  The
-@code{replay} mode behaves like @code{off} in record mode and like
-@code{on} in replay mode.
+record mode, and replay mode.  @var{mode} can be one of
+the following:
+
+@table @code
+@item off
+There is no locking and any thread may run at any time.
+
+@item on
+Only the current thread may run when the inferior is resumed.
+
+@item step
+Behaves like @code{on} when stepping, and @code{off} otherwise.
+Threads other than the current never get a chance to run when you
+step, and they are completely free to run when you use commands like
+@samp{continue}, @samp{until}, or @samp{finish}.
+
+This mode optimizes for single-stepping; it prevents other threads
+from preempting the current thread while you are stepping, so that the
+focus of debugging does not change unexpectedly.  However, unless
+another thread hits a breakpoint during its timeslice, @value{GDBN}
+does not change the current thread away from the thread that you are
+debugging.
+
+@item replay
+Behaves like @code{on} in replay mode, and @code{off} in either record
+mode or during normal execution.  This is the default mode.
+@end table
 
 @item show scheduler-locking
 Display the current scheduler locking mode.
