@@ -306,8 +306,6 @@ static const char * const riscv_pred_succ[16] =
 #define OP_SH_VTA		6
 #define OP_MASK_VMA		0x1
 #define OP_SH_VMA		7
-#define OP_MASK_VTYPE_RES	0x1
-#define OP_SH_VTYPE_RES		10
 #define OP_MASK_VWD		0x1
 #define OP_SH_VWD		26
 

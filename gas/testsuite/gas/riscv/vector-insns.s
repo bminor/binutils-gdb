@@ -16,6 +16,13 @@
 	vsetivli a0, 0xb, e32, mf4, mu
 	vsetivli a0, 0xb, e64, mf8, tu, ma
 
+	vsetvli  a0, a1,  0x700
+	vsetvli  a0, a1,  0x400
+	vsetvli  a0, a1,  0x300
+	vsetvli  a0, a1,  0x100
+	vsetivli a0, 0xb, 0x300
+	vsetivli a0, 0xb, 0x100
+
 	vlm.v v4, (a0)
 	vlm.v v4, 0(a0)
 	vle1.v v4, (a0)		# Alias of vlm.v
