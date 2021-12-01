@@ -841,6 +841,12 @@ process_stratum_target::thread_pending_parent (thread_info *thread)
   return nullptr;
 }
 
+thread_info *
+process_stratum_target::thread_pending_child (thread_info *thread)
+{
+  return nullptr;
+}
+
 bool
 process_stratum_target::supports_software_single_step ()
 {

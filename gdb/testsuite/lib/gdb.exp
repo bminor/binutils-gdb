@@ -8317,5 +8317,20 @@ proc require { fn arg1 {arg2 ""} } {
     return -code return 0
 }
 
+# Wait up to ::TIMEOUT seconds for file PATH to exist on the target system.
+# Return 1 if it does exist, 0 otherwise.
+
+proc target_file_exists_with_timeout { path } {
+    for {set i 0} {$i < $::timeout} {incr i} {
+	if { [remote_file target exists $path] } {
+	    return 1
+	}
+
+	sleep 1
+    }
+
+    return 0
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

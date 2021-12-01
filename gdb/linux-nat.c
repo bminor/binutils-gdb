@@ -1315,7 +1315,16 @@ get_detach_signal (struct lwp_info *lp)
       if (target_is_non_stop_p () && !tp->executing ())
 	{
 	  if (tp->has_pending_waitstatus ())
-	    signo = tp->pending_waitstatus ().sig ();
+	    {
+	      /* If the thread has a pending event, and it was stopped with a
+	         signal, use that signal to resume it.  If it has a pending
+		 event of another kind, it was not stopped with a signal, so
+		 resume it without a signal.  */
+	      if (tp->pending_waitstatus ().kind () == TARGET_WAITKIND_STOPPED)
+		signo = tp->pending_waitstatus ().sig ();
+	      else
+		signo = GDB_SIGNAL_0;
+	    }
 	  else
 	    signo = tp->stop_signal ();
 	}
@@ -1366,6 +1375,48 @@ detach_one_lwp (struct lwp_info *lp, int *signo_p)
   int signo;
 
   gdb_assert (lp->status == 0 || WIFSTOPPED (lp->status));
+
+  /* If the lwp/thread we are about to detach has a pending fork event,
+     there is a process GDB is attached to that the core of GDB doesn't know
+     about.  Detach from it.  */
+
+  /* Check in lwp_info::status.  */
+  if (WIFSTOPPED (lp->status) && linux_is_extended_waitstatus (lp->status))
+    {
+      int event = linux_ptrace_get_extended_event (lp->status);
+
+      if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK)
+	{
+	  unsigned long child_pid;
+	  int ret = ptrace (PTRACE_GETEVENTMSG, lp->ptid.lwp (), 0, &child_pid);
+	  if (ret == 0)
+	    detach_one_pid (child_pid, 0);
+	  else
+	    perror_warning_with_name (_("Failed to detach fork child"));
+	}
+    }
+
+  /* Check in lwp_info::waitstatus.  */
+  if (lp->waitstatus.kind () == TARGET_WAITKIND_VFORKED
+      || lp->waitstatus.kind () == TARGET_WAITKIND_FORKED)
+    detach_one_pid (lp->waitstatus.child_ptid ().pid (), 0);
+
+
+  /* Check in thread_info::pending_waitstatus.  */
+  thread_info *tp = find_thread_ptid (linux_target, lp->ptid);
+  if (tp->has_pending_waitstatus ())
+    {
+      const target_waitstatus &ws = tp->pending_waitstatus ();
+
+      if (ws.kind () == TARGET_WAITKIND_VFORKED
+	  || ws.kind () == TARGET_WAITKIND_FORKED)
+	detach_one_pid (ws.child_ptid ().pid (), 0);
+    }
+
+  /* Check in thread_info::pending_follow.  */
+  if (tp->pending_follow.kind () == TARGET_WAITKIND_VFORKED
+      || tp->pending_follow.kind () == TARGET_WAITKIND_FORKED)
+    detach_one_pid (tp->pending_follow.child_ptid ().pid (), 0);
 
   if (lp->status != 0)
     linux_nat_debug_printf ("Pending %s for %s on detach.",

@@ -32,18 +32,22 @@ break_here (void)
 static void
 do_fork (void)
 {
-  pthread_barrier_wait (&barrier);
-
   while (!release_forking_thread);
 
   if (FORK_FUNCTION () == 0)
-    _exit (0);
+    {
+      /* We create the file in a separate program that we exec: if FORK_FUNCTION
+	 is vfork, we shouldn't do anything more than an exec.  */
+      execl (TOUCH_FILE_BIN, TOUCH_FILE_BIN, NULL);
+    }
 
 }
 
 static void *
 thread_func (void *p)
 {
+  pthread_barrier_wait (&barrier);
+
 #if defined(MAIN_THREAD_FORKS)
   break_here ();
 #elif defined(OTHER_THREAD_FORKS)

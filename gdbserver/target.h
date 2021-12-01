@@ -492,6 +492,10 @@ public:
      else nullptr.  */
   virtual thread_info *thread_pending_parent (thread_info *thread);
 
+  /* If THREAD is the parent of a fork child that was not reported to GDB,
+     return this child, else nullptr.  */
+  virtual thread_info *thread_pending_child (thread_info *thread);
+
   /* Returns true if the target can software single step.  */
   virtual bool supports_software_single_step ();
 
@@ -706,6 +710,12 @@ static inline thread_info *
 target_thread_pending_parent (thread_info *thread)
 {
   return the_target->thread_pending_parent (thread);
+}
+
+static inline thread_info *
+target_thread_pending_child (thread_info *thread)
+{
+  return the_target->thread_pending_child (thread);
 }
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);

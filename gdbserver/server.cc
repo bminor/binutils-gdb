@@ -1250,6 +1250,35 @@ handle_detach (char *own_buf)
   /* We'll need this after PROCESS has been destroyed.  */
   int pid = process->pid;
 
+  /* If this process has an unreported fork child, that child is not known to
+     GDB, so GDB won't take care of detaching it.  We must do it here.
+
+     Here, we specifically don't want to use "safe iteration", as detaching
+     another process might delete the next thread in the iteration, which is
+     the one saved by the safe iterator.  We will never delete the currently
+     iterated on thread, so standard iteration should be safe.  */
+  for (thread_info *thread : all_threads)
+    {
+      /* Only threads that are of the process we are detaching.  */
+      if (thread->id.pid () != pid)
+	continue;
+
+      /* Only threads that have a pending fork event.  */
+      thread_info *child = target_thread_pending_child (thread);
+      if (child == nullptr)
+	continue;
+
+      process_info *fork_child_process = get_thread_process (child);
+      gdb_assert (fork_child_process != nullptr);
+
+      int fork_child_pid = fork_child_process->pid;
+
+      if (detach_inferior (fork_child_process) != 0)
+	warning (_("Failed to detach fork child %s, child of %s"),
+		 target_pid_to_str (ptid_t (fork_child_pid)).c_str (),
+		 target_pid_to_str (thread->id).c_str ());
+    }
+
   if (detach_inferior (process) != 0)
     write_enn (own_buf);
   else

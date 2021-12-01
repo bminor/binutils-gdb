@@ -5968,6 +5968,32 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
   if (from_tty && !rs->extended && number_of_live_inferiors (this) == 1)
     puts_filtered (_("Ending remote debugging.\n"));
 
+  /* See if any thread of the inferior we are detaching has a pending fork
+     status.  In that case, we must detach from the child resulting from
+     that fork.  */
+  for (thread_info *thread : inf->non_exited_threads ())
+    {
+      const target_waitstatus *ws = thread_pending_fork_status (thread);
+
+      if (ws == nullptr)
+	continue;
+
+      remote_detach_pid (ws->child_ptid ().pid ());
+    }
+
+  /* Check also for any pending fork events in the stop reply queue.  */
+  remote_notif_get_pending_events (&notif_client_stop);
+  for (stop_reply_up &reply : rs->stop_reply_queue)
+    {
+      if (reply->ptid.pid () != pid)
+	continue;
+
+      if (!is_fork_status (reply->ws.kind ()))
+	continue;
+
+      remote_detach_pid (reply->ws.child_ptid ().pid ());
+    }
+
   thread_info *tp = find_thread_ptid (this, inferior_ptid);
 
   /* Check to see if we are detaching a fork parent.  Note that if we
@@ -7371,11 +7397,11 @@ remote_target::discard_pending_stop_replies (struct inferior *inf)
       /* Leave the notification pending, since the server expects that
 	 we acknowledge it with vStopped.  But clear its contents, so
 	 that later on when we acknowledge it, we also discard it.  */
+      remote_debug_printf
+	("discarding in-flight notification: ptid: %s, ws: %s\n",
+	 reply->ptid.to_string().c_str(),
+	 reply->ws.to_string ().c_str ());
       reply->ws.set_ignore ();
-
-      if (remote_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "discarded in-flight notification\n");
     }
 
   /* Discard the stop replies we have already pulled with
@@ -7386,6 +7412,11 @@ remote_target::discard_pending_stop_replies (struct inferior *inf)
 			      {
 				return event->ptid.pid () == inf->pid;
 			      });
+  for (auto it = iter; it != rs->stop_reply_queue.end (); ++it)
+    remote_debug_printf
+      ("discarding queued stop reply: ptid: %s, ws: %s\n",
+       reply->ptid.to_string().c_str(),
+       reply->ws.to_string ().c_str ());
   rs->stop_reply_queue.erase (iter, rs->stop_reply_queue.end ());
 }
 
