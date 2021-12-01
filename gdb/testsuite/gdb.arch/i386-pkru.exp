@@ -20,6 +20,15 @@ if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
     return
 }
 
+set default_pkru_re 0x0
+if { [istarget *-*-linux*] } {
+    # Starting with v4.9, the linux kernel contains commit acd547b29880
+    # ("x86/pkeys: Default to a restrictive init PKRU"), which sets the
+    # pkru register to 0x55555554 by default.
+    set default_pkru_re (0x0|0x55555554)
+}
+
+
 set comp_flags "-I${srcdir}/../nat/"
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
@@ -50,9 +59,7 @@ if { !$supports_pkru } {
 }
 
 # Test pkru register at startup
-# set test_string "0"
-
-gdb_test "print \$pkru" "= 0" "pkru register"
+gdb_test "print /x \$pkru" "= $default_pkru_re" "pkru register"
 
 # Read values from pseudo registers.
 gdb_breakpoint [ gdb_get_line_number "break here 1" ]
