@@ -996,6 +996,36 @@ public:
   bool supports_disable_randomization () override;
 };
 
+struct stop_reply : public notif_event
+{
+  ~stop_reply ();
+
+  /* The identifier of the thread about this event  */
+  ptid_t ptid;
+
+  /* The remote state this event is associated with.  When the remote
+     connection, represented by a remote_state object, is closed,
+     all the associated stop_reply events should be released.  */
+  struct remote_state *rs;
+
+  struct target_waitstatus ws;
+
+  /* The architecture associated with the expedited registers.  */
+  gdbarch *arch;
+
+  /* Expedited registers.  This makes remote debugging a bit more
+     efficient for those targets that provide critical registers as
+     part of their normal status mechanism (as another roundtrip to
+     fetch them is avoided).  */
+  std::vector<cached_reg_t> regcache;
+
+  enum target_stop_reason stop_reason;
+
+  CORE_ADDR watch_data_address;
+
+  int core;
+};
+
 /* See remote.h.  */
 
 bool
@@ -5846,6 +5876,47 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
     rs->wait_forever_enabled_p = 1;
 }
 
+/* Determine if THREAD_PTID is a pending fork parent thread.  ARG contains
+   the pid of the process that owns the threads we want to check, or
+   -1 if we want to check all threads.  */
+
+static int
+is_pending_fork_parent (const target_waitstatus &ws, int event_pid,
+			ptid_t thread_ptid)
+{
+  if (ws.kind () == TARGET_WAITKIND_FORKED
+      || ws.kind () == TARGET_WAITKIND_VFORKED)
+    {
+      if (event_pid == -1 || event_pid == thread_ptid.pid ())
+	return 1;
+    }
+
+  return 0;
+}
+
+/* Return the thread's pending status used to determine whether the
+   thread is a fork parent stopped at a fork event.  */
+
+static const target_waitstatus &
+thread_pending_fork_status (struct thread_info *thread)
+{
+  if (thread->has_pending_waitstatus ())
+    return thread->pending_waitstatus ();
+  else
+    return thread->pending_follow;
+}
+
+/* Determine if THREAD is a pending fork parent thread.  */
+
+static int
+is_pending_fork_parent_thread (struct thread_info *thread)
+{
+  const target_waitstatus &ws = thread_pending_fork_status (thread);
+  int pid = -1;
+
+  return is_pending_fork_parent (ws, pid, thread->ptid);
+}
+
 /* Detach the specified process.  */
 
 void
@@ -6538,8 +6609,6 @@ remote_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
     rs->waiting_for_stop_reply = 1;
 }
 
-static int is_pending_fork_parent_thread (struct thread_info *thread);
-
 /* Private per-inferior info for target remote processes.  */
 
 struct remote_inferior : public private_inferior
@@ -6558,36 +6627,6 @@ get_remote_inferior (inferior *inf)
 
   return static_cast<remote_inferior *> (inf->priv.get ());
 }
-
-struct stop_reply : public notif_event
-{
-  ~stop_reply ();
-
-  /* The identifier of the thread about this event  */
-  ptid_t ptid;
-
-  /* The remote state this event is associated with.  When the remote
-     connection, represented by a remote_state object, is closed,
-     all the associated stop_reply events should be released.  */
-  struct remote_state *rs;
-
-  struct target_waitstatus ws;
-
-  /* The architecture associated with the expedited registers.  */
-  gdbarch *arch;
-
-  /* Expedited registers.  This makes remote debugging a bit more
-     efficient for those targets that provide critical registers as
-     part of their normal status mechanism (as another roundtrip to
-     fetch them is avoided).  */
-  std::vector<cached_reg_t> regcache;
-
-  enum target_stop_reason stop_reason;
-
-  CORE_ADDR watch_data_address;
-
-  int core;
-};
 
 /* Class used to track the construction of a vCont packet in the
    outgoing packet buffer.  This is used to send multiple vCont
@@ -7254,47 +7293,6 @@ struct notif_client notif_client_stop =
   remote_notif_stop_alloc_reply,
   REMOTE_NOTIF_STOP,
 };
-
-/* Determine if THREAD_PTID is a pending fork parent thread.  ARG contains
-   the pid of the process that owns the threads we want to check, or
-   -1 if we want to check all threads.  */
-
-static int
-is_pending_fork_parent (const target_waitstatus &ws, int event_pid,
-			ptid_t thread_ptid)
-{
-  if (ws.kind () == TARGET_WAITKIND_FORKED
-      || ws.kind () == TARGET_WAITKIND_VFORKED)
-    {
-      if (event_pid == -1 || event_pid == thread_ptid.pid ())
-	return 1;
-    }
-
-  return 0;
-}
-
-/* Return the thread's pending status used to determine whether the
-   thread is a fork parent stopped at a fork event.  */
-
-static const target_waitstatus &
-thread_pending_fork_status (struct thread_info *thread)
-{
-  if (thread->has_pending_waitstatus ())
-    return thread->pending_waitstatus ();
-  else
-    return thread->pending_follow;
-}
-
-/* Determine if THREAD is a pending fork parent thread.  */
-
-static int
-is_pending_fork_parent_thread (struct thread_info *thread)
-{
-  const target_waitstatus &ws = thread_pending_fork_status (thread);
-  int pid = -1;
-
-  return is_pending_fork_parent (ws, pid, thread->ptid);
-}
 
 /* If CONTEXT contains any fork child threads that have not been
    reported yet, remove them from the CONTEXT list.  If such a
