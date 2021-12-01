@@ -334,7 +334,8 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     }
   while (pid == -1);
 
-  store_waitstatus (ourstatus, status);
+  *ourstatus = host_status_to_waitstatus (status);
+
   return ptid_t (pid);
 }
 

@@ -1821,7 +1821,7 @@ S_proc_wait_reply (mach_port_t reply, kern_return_t err,
     }
   else if (pid == inf->pid)
     {
-      store_waitstatus (&inf->wait.status, status);
+      inf->wait.status = host_status_to_waitstatus (status);
       if (inf->wait.status.kind () == TARGET_WAITKIND_STOPPED)
 	/* The process has sent us a signal, and stopped itself in a sane
 	   state pending our actions.  */

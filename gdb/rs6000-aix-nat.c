@@ -539,7 +539,7 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     ourstatus->set_spurious ();
   /* A normal waitstatus.  Let the usual macros deal with it.  */
   else
-    store_waitstatus (ourstatus, status);
+    *ourstatus = host_status_to_waitstatus (status);
 
   return ptid_t (pid);
 }

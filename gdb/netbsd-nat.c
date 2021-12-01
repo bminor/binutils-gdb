@@ -560,7 +560,7 @@ nbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   if (pid == -1)
     perror_with_name (_("Child process unexpectedly missing"));
 
-  store_waitstatus (ourstatus, status);
+  *ourstatus = host_status_to_waitstatus (status);
   return pid;
 }
 

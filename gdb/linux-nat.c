@@ -2159,7 +2159,7 @@ wait_lwp (struct lwp_info *lp)
 		 process is gone.  Store the status to report to the
 		 core.  Store it in lp->waitstatus, because lp->status
 		 would be ambiguous (W_EXITCODE(0,0) == 0).  */
-	      store_waitstatus (&lp->waitstatus, status);
+	      lp->waitstatus = host_status_to_waitstatus (status);
 	      return 0;
 	    }
 
@@ -2932,7 +2932,7 @@ linux_nat_filter_event (int lwpid, int status)
 
       /* Store the pending event in the waitstatus, because
 	 W_EXITCODE(0,0) == 0.  */
-      store_waitstatus (&lp->waitstatus, status);
+      lp->waitstatus = host_status_to_waitstatus (status);
       return;
     }
 
@@ -3306,7 +3306,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
       lp->waitstatus.set_ignore ();
     }
   else
-    store_waitstatus (ourstatus, status);
+    *ourstatus = host_status_to_waitstatus (status);
 
   linux_nat_debug_printf ("exit");
 

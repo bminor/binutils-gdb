@@ -2353,7 +2353,7 @@ wait_again:
 	}
 
       if (status)
-	store_waitstatus (status, wstat);
+	*status = host_status_to_waitstatus (wstat);
     }
 
   return retval;

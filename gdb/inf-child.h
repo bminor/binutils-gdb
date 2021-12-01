@@ -104,10 +104,9 @@ protected:
   void maybe_unpush_target ();
 };
 
-/* Functions for helping to write a native target.  */
+/* Convert the host wait(2) status to a target_waitstatus.  */
 
-/* This is for native targets which use a unix/POSIX-style waitstatus.  */
-extern void store_waitstatus (struct target_waitstatus *, int);
+extern target_waitstatus host_status_to_waitstatus (int hoststatus);
 
 /* Register TARGET as native target and set it up to respond to the
    "target native" command.  */
