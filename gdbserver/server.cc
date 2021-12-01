@@ -1656,6 +1656,12 @@ handle_qxfer_threads_worker (thread_info *thread, struct buffer *buffer)
   gdb_byte *handle;
   bool handle_status = target_thread_handle (ptid, &handle, &handle_len);
 
+  /* If this is a fork or vfork child (has a fork parent), GDB does not yet
+     know about this process, and must not know about it until it gets the
+     corresponding (v)fork event.  Exclude this thread from the list.  */
+  if (target_thread_pending_parent (thread) != nullptr)
+    return;
+
   write_ptid (ptid_s, ptid);
 
   buffer_xml_printf (buffer, "<thread id=\"%s\"", ptid_s);
