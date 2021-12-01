@@ -1335,22 +1335,11 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   int regnum = gdbarch_pc_regnum (gdbarch);
-  int reg_size = register_size (gdbarch, regnum);
 
   if (gdbarch_write_pc_p (gdbarch))
     gdbarch_write_pc (gdbarch, regcache, pc);
   else if (gdbarch_pc_regnum (gdbarch) >= 0)
-    {
-      /* If our PC is bigger than a CORE_ADDR, only modify the required
-	 bits.  Leave the unmodified bits alone.  */
-      if (reg_size > sizeof (pc))
-	regcache->cooked_write_part (regnum, 0, sizeof (pc),
-				     (const gdb_byte *) &pc);
-      else
-	{
-	  regcache_cooked_write_unsigned (regcache, regnum, pc);
-	}
-    }
+    regcache_cooked_write_unsigned (regcache, regnum, pc);
   else
     internal_error (__FILE__, __LINE__,
 		    _("regcache_write_pc: Unable to update PC"));

@@ -5298,6 +5298,33 @@ aarch64_register_tag (struct gdbarch *gdbarch,
   return true;
 }
 
+/* Morello-specific hook to write the PC.  This is mostly used when calling
+   a function by hand.  Different DSO's have different bounds for PCC, so GDB
+   would need to figure out those bounds.
+
+   Given that information is not currently available, we set maximum bounds
+   for PCC as a compromise.  */
+
+static void
+morello_write_pc (struct regcache *regs, CORE_ADDR pc)
+{
+  struct gdbarch *gdbarch = regs->arch ();
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  regs->cooked_write_part (tdep->cap_reg_pcc, 0, sizeof (pc),
+			   (const gdb_byte *) &pc);
+
+  /* Upper 64 bits of the capability with maximum bounds and reasonable
+     permissions.  We only adjust this if we are using the purecap ABI.  */
+  pc = 0xffffc00000010005;
+  regs->cooked_write_part (tdep->cap_reg_pcc, 8, sizeof (pc),
+			   (const gdb_byte *) &pc);
+
+  /* We may need to set the tag of the PCC here, but we don't do so at the
+     moment.  If this turns out to be a problem in the future, we should
+     force the tag to 1.  */
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -5605,13 +5632,21 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Set address class hooks for capabilities.  */
   if (feature_capability)
     {
-      set_gdbarch_sp_regnum (gdbarch, tdep->cap_reg_csp);
-      set_gdbarch_pc_regnum (gdbarch, tdep->cap_reg_pcc);
+      if (have_capability)
+	{
+	  /* These hooks only make sense if we are using the AAPCS64-CAP
+	     ABI.  */
+	  set_gdbarch_sp_regnum (gdbarch, tdep->cap_reg_csp);
+	  set_gdbarch_pc_regnum (gdbarch, tdep->cap_reg_pcc);
 
-      /* Morello-specific implementations for function calls and returning
-	 of results.  */
-      set_gdbarch_push_dummy_call (gdbarch, morello_push_dummy_call);
-      set_gdbarch_return_value (gdbarch, morello_return_value);
+	  /* Hook to adjust the PCC bounds.  */
+	  set_gdbarch_write_pc (gdbarch, morello_write_pc);
+
+	  /* Morello-specific implementations for function calls and returning
+	     of results.  */
+	  set_gdbarch_push_dummy_call (gdbarch, morello_push_dummy_call);
+	  set_gdbarch_return_value (gdbarch, morello_return_value);
+	}
 
       /* Address manipulation.  */
       set_gdbarch_addr_bits_remove (gdbarch, aarch64_addr_bits_remove);
