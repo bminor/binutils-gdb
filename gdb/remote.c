@@ -776,7 +776,7 @@ public: /* Remote specific methods.  */
   void remote_btrace_maybe_reopen ();
 
   void remove_new_fork_children (threads_listing_context *context);
-  void kill_new_fork_children (int pid);
+  void kill_new_fork_children (inferior *inf);
   void discard_pending_stop_replies (struct inferior *inf);
   int stop_reply_queue_length ();
 
@@ -5876,45 +5876,30 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
     rs->wait_forever_enabled_p = 1;
 }
 
-/* Determine if THREAD_PTID is a pending fork parent thread.  ARG contains
-   the pid of the process that owns the threads we want to check, or
-   -1 if we want to check all threads.  */
+/* Determine if WS represents a fork status.  */
 
-static int
-is_pending_fork_parent (const target_waitstatus &ws, int event_pid,
-			ptid_t thread_ptid)
+static bool
+is_fork_status (target_waitkind kind)
 {
-  if (ws.kind () == TARGET_WAITKIND_FORKED
-      || ws.kind () == TARGET_WAITKIND_VFORKED)
-    {
-      if (event_pid == -1 || event_pid == thread_ptid.pid ())
-	return 1;
-    }
-
-  return 0;
+  return (kind == TARGET_WAITKIND_FORKED
+	  || kind == TARGET_WAITKIND_VFORKED);
 }
 
-/* Return the thread's pending status used to determine whether the
-   thread is a fork parent stopped at a fork event.  */
+/* Return THREAD's pending status if it is a pending fork parent, else
+   return nullptr.  */
 
-static const target_waitstatus &
+static const target_waitstatus *
 thread_pending_fork_status (struct thread_info *thread)
 {
-  if (thread->has_pending_waitstatus ())
-    return thread->pending_waitstatus ();
-  else
-    return thread->pending_follow;
-}
+  const target_waitstatus &ws
+    = (thread->has_pending_waitstatus ()
+       ? thread->pending_waitstatus ()
+       : thread->pending_follow);
 
-/* Determine if THREAD is a pending fork parent thread.  */
+  if (!is_fork_status (ws.kind ()))
+    return nullptr;
 
-static int
-is_pending_fork_parent_thread (struct thread_info *thread)
-{
-  const target_waitstatus &ws = thread_pending_fork_status (thread);
-  int pid = -1;
-
-  return is_pending_fork_parent (ws, pid, thread->ptid);
+  return &ws;
 }
 
 /* Detach the specified process.  */
@@ -6828,7 +6813,7 @@ remote_target::commit_resumed ()
       /* If a thread is the parent of an unfollowed fork, then we
 	 can't do a global wildcard, as that would resume the fork
 	 child.  */
-      if (is_pending_fork_parent_thread (tp))
+      if (thread_pending_fork_status (tp) != nullptr)
 	may_global_wildcard_vcont = false;
     }
 
@@ -7303,17 +7288,18 @@ struct notif_client notif_client_stop =
 void
 remote_target::remove_new_fork_children (threads_listing_context *context)
 {
-  int pid = -1;
   struct notif_client *notif = &notif_client_stop;
 
   /* For any threads stopped at a fork event, remove the corresponding
      fork child threads from the CONTEXT list.  */
   for (thread_info *thread : all_non_exited_threads (this))
     {
-      const target_waitstatus &ws = thread_pending_fork_status (thread);
+      const target_waitstatus *ws = thread_pending_fork_status (thread);
 
-      if (is_pending_fork_parent (ws, pid, thread->ptid))
-	context->remove_thread (ws.child_ptid ());
+      if (ws == nullptr)
+	continue;
+
+      context->remove_thread (ws->child_ptid ());
     }
 
   /* Check for any pending fork events (not reported or processed yet)
@@ -10066,45 +10052,48 @@ remote_target::getpkt_or_notif_sane (gdb::char_vector *buf, int forever,
   return getpkt_or_notif_sane_1 (buf, forever, 1, is_notif);
 }
 
-/* Kill any new fork children of process PID that haven't been
+/* Kill any new fork children of inferior INF that haven't been
    processed by follow_fork.  */
 
 void
-remote_target::kill_new_fork_children (int pid)
+remote_target::kill_new_fork_children (inferior *inf)
 {
   remote_state *rs = get_remote_state ();
   struct notif_client *notif = &notif_client_stop;
 
-  /* Kill the fork child threads of any threads in process PID
-     that are stopped at a fork event.  */
-  for (thread_info *thread : all_non_exited_threads (this))
+  /* Kill the fork child threads of any threads in inferior INF that are stopped
+     at a fork event.  */
+  for (thread_info *thread : inf->non_exited_threads ())
     {
-      const target_waitstatus &ws = thread->pending_follow;
+      const target_waitstatus *ws = thread_pending_fork_status (thread);
 
-      if (is_pending_fork_parent (ws, pid, thread->ptid))
-	{
-	  int child_pid = ws.child_ptid ().pid ();
-	  int res;
+      if (ws == nullptr)
+	continue;
 
-	  res = remote_vkill (child_pid);
-	  if (res != 0)
-	    error (_("Can't kill fork child process %d"), child_pid);
-	}
+      int child_pid = ws->child_ptid ().pid ();
+      int res = remote_vkill (child_pid);
+
+      if (res != 0)
+	error (_("Can't kill fork child process %d"), child_pid);
     }
 
   /* Check for any pending fork events (not reported or processed yet)
-     in process PID and kill those fork child threads as well.  */
+     in inferior INF and kill those fork child threads as well.  */
   remote_notif_get_pending_events (notif);
   for (auto &event : rs->stop_reply_queue)
-    if (is_pending_fork_parent (event->ws, pid, event->ptid))
-      {
-	int child_pid = event->ws.child_ptid ().pid ();
-	int res;
+    {
+      if (event->ptid.pid () != inf->pid)
+	continue;
 
-	res = remote_vkill (child_pid);
-	if (res != 0)
-	  error (_("Can't kill fork child process %d"), child_pid);
-      }
+      if (!is_fork_status (event->ws.kind ()))
+	continue;
+
+      int child_pid = event->ws.child_ptid ().pid ();
+      int res = remote_vkill (child_pid);
+
+      if (res != 0)
+	error (_("Can't kill fork child process %d"), child_pid);
+    }
 }
 
 
@@ -10114,8 +10103,10 @@ void
 remote_target::kill ()
 {
   int res = -1;
-  int pid = inferior_ptid.pid ();
+  inferior *inf = find_inferior_pid (this, inferior_ptid.pid ());
   struct remote_state *rs = get_remote_state ();
+
+  gdb_assert (inf != nullptr);
 
   if (packet_support (PACKET_vKill) != PACKET_DISABLE)
     {
@@ -10123,9 +10114,9 @@ remote_target::kill ()
 	 kill the child task.  We need to do this before killing the
 	 parent task because if this is a vfork then the parent will
 	 be sleeping.  */
-      kill_new_fork_children (pid);
+      kill_new_fork_children (inf);
 
-      res = remote_vkill (pid);
+      res = remote_vkill (inf->pid);
       if (res == 0)
 	{
 	  target_mourn_inferior (inferior_ptid);
