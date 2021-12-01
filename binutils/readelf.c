@@ -19220,6 +19220,8 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("NT_SIGINFO (siginfo_t data)");
       case NT_FILE:
 	return _("NT_FILE (mapped files)");
+      case FDO_PACKAGING_METADATA:
+	return _("FDO_PACKAGING_METADATA");
       default:
 	break;
       }
@@ -20446,6 +20448,17 @@ print_stapsdt_note (Elf_Internal_Note *pnote)
   return false;
 }
 
+static bool
+print_fdo_note (Elf_Internal_Note * pnote)
+{
+  if (pnote->descsz > 0 && pnote->type == FDO_PACKAGING_METADATA)
+    {
+      printf (_("    Packaging Metadata: %.*s\n"), (int) pnote->descsz, pnote->descdata);
+      return true;
+    }
+  return false;
+}
+
 static const char *
 get_ia64_vms_note_type (unsigned e_type)
 {
@@ -21179,6 +21192,8 @@ process_note (Elf_Internal_Note *  pnote,
     return print_stapsdt_note (pnote);
   else if (startswith (pnote->namedata, "CORE"))
     return print_core_note (pnote);
+  else if (startswith (pnote->namedata, "FDO"))
+    return print_fdo_note (pnote);
   else if (((startswith (pnote->namedata, "GA")
 	     && strchr ("*$!+", pnote->namedata[2]) != NULL)
 	    || strchr ("*$!+", pnote->namedata[0]) != NULL)
