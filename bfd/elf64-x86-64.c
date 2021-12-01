@@ -1643,6 +1643,11 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 			   || h->root.type == bfd_link_hash_defweak)
 			  && h->root.u.def.section == bfd_und_section_ptr))))
 	    {
+	      /* Skip __start_SECNAME/__stop_SECNAME when --gc-sections
+	         -z start-stop-gc are used.  */
+	      if (elf_x86_start_stop_gc_p (link_info, h))
+		return true;
+
 	      /* Skip since R_X86_64_32/R_X86_64_32S may overflow.  */
 	      if (no_overflow)
 		return true;

@@ -1393,6 +1393,11 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	       || h->root.type == bfd_link_hash_defweak)
 	      && local_ref))
 	{
+	  /* Skip __start_SECNAME/__stop_SECNAME when --gc-sections
+	     -z start-stop-gc are used.  */
+	  if (elf_x86_start_stop_gc_p (link_info, h))
+	    return true;
+
 	convert_load:
 	  if (opcode == 0x8b)
 	    {

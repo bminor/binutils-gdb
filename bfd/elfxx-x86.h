@@ -731,3 +731,36 @@ extern void _bfd_x86_elf_link_report_relative_reloc
   _bfd_x86_elf_merge_gnu_properties
 #define elf_backend_fixup_gnu_properties \
   _bfd_x86_elf_link_fixup_gnu_properties
+
+/* Return true if H is a __start_SECNAME/__stop_SECNAME symbol for the
+   SECNAME section which has been garbage collected by --gc-sections
+   -z start-stop-gc.  */
+
+static inline bool
+elf_x86_start_stop_gc_p (struct bfd_link_info *link_info,
+			 struct elf_link_hash_entry *h)
+{
+  if (h->start_stop
+      && link_info->gc_sections
+      && link_info->start_stop_gc)
+    {
+      asection *s = h->root.u.def.section;
+
+      do
+	{
+	  /* Return false if any SECNAME section is kept.  */
+	  if (s->gc_mark)
+	    return false;
+	  s = bfd_get_next_section_by_name (s->owner, s);
+	}
+      while (s != NULL);
+
+      /* Return true only if all SECNAME sections have been garbage
+	 collected.  */
+      return true;
+    }
+
+  /* Return false if H isn't a __start_SECNAME/__stop_SECNAME symbol or
+     --gc-sections or -z start-stop-gc isn't used.  */
+  return false;
+}
