@@ -26,6 +26,7 @@
 #include "gdb_regex.h"
 #include "cli-script.h"
 #include "completer.h"
+#include "gdbsupport/intrusive_list.h"
 
 /* Not a set/show command.  Note that some commands which begin with
    "set" or "show" might be in this category, if their syntax does
@@ -246,11 +247,18 @@ struct cmd_list_element
      aliased command can be located in case it has been hooked.  */
   struct cmd_list_element *alias_target = nullptr;
 
-  /* Start of a linked list of all aliases of this command.  */
-  struct cmd_list_element *aliases = nullptr;
+  /* Node to link aliases on an alias list.  */
+  using aliases_list_node_type
+    = intrusive_list_node<cmd_list_element>;
+  aliases_list_node_type aliases_list_node;
 
-  /* Link pointer for aliases on an alias list.  */
-  struct cmd_list_element *alias_chain = nullptr;
+  /* Linked list of all aliases of this command.  */
+  using aliases_list_member_node_type
+    = intrusive_member_node<cmd_list_element,
+			    &cmd_list_element::aliases_list_node>;
+  using aliases_list_type
+    = intrusive_list<cmd_list_element, aliases_list_member_node_type>;
+  aliases_list_type aliases;
 
   /* If non-null, the pointer to a field in 'struct
      cli_suppress_notification', which will be set to true in cmd_func

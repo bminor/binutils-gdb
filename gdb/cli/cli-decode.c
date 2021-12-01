@@ -30,12 +30,10 @@
 
 static void undef_cmd_error (const char *, const char *);
 
-static struct cmd_list_element *delete_cmd (const char *name,
-					    struct cmd_list_element **list,
-					    struct cmd_list_element **prehook,
-					    struct cmd_list_element **prehookee,
-					    struct cmd_list_element **posthook,
-					    struct cmd_list_element **posthookee);
+static cmd_list_element::aliases_list_type delete_cmd
+  (const char *name, cmd_list_element **list, cmd_list_element **prehook,
+   cmd_list_element **prehookee, cmd_list_element **posthook,
+   cmd_list_element **posthookee);
 
 static struct cmd_list_element *find_cmd (const char *command,
 					  int len,
@@ -171,20 +169,24 @@ do_add_cmd (const char *name, enum command_class theclass,
 {
   struct cmd_list_element *c = new struct cmd_list_element (name, theclass,
 							    doc);
-  struct cmd_list_element *p, *iter;
 
   /* Turn each alias of the old command into an alias of the new
      command.  */
   c->aliases = delete_cmd (name, list, &c->hook_pre, &c->hookee_pre,
 			   &c->hook_post, &c->hookee_post);
-  for (iter = c->aliases; iter; iter = iter->alias_chain)
-    iter->alias_target = c;
+
+  for (cmd_list_element &alias : c->aliases)
+    alias.alias_target = c;
+
   if (c->hook_pre)
     c->hook_pre->hookee_pre = c;
+
   if (c->hookee_pre)
     c->hookee_pre->hook_pre = c;
+
   if (c->hook_post)
     c->hook_post->hookee_post = c;
+
   if (c->hookee_post)
     c->hookee_post->hook_post = c;
 
@@ -195,7 +197,7 @@ do_add_cmd (const char *name, enum command_class theclass,
     }
   else
     {
-      p = *list;
+      cmd_list_element *p = *list;
       while (p->next && strcmp (p->next->name, name) <= 0)
 	{
 	  p = p->next;
@@ -296,8 +298,7 @@ add_alias_cmd (const char *name, cmd_list_element *target,
   c->allow_unknown = target->allow_unknown;
   c->abbrev_flag = abbrev_flag;
   c->alias_target = target;
-  c->alias_chain = target->aliases;
-  target->aliases = c;
+  target->aliases.push_front (*c);
 
   return c;
 }
@@ -1195,14 +1196,13 @@ add_setshow_zuinteger_cmd (const char *name, command_class theclass,
 					     show_list);
 }
 
-/* Remove the command named NAME from the command list.  Return the
-   list commands which were aliased to the deleted command.  If the
-   command had no aliases, return NULL.  The various *HOOKs are set to
-   the pre- and post-hook commands for the deleted command.  If the
-   command does not have a hook, the corresponding out parameter is
-   set to NULL.  */
+/* Remove the command named NAME from the command list.  Return the list
+   commands which were aliased to the deleted command.  The various *HOOKs are
+   set to the pre- and post-hook commands for the deleted command.  If the
+   command does not have a hook, the corresponding out parameter is set to
+   NULL.  */
 
-static struct cmd_list_element *
+static cmd_list_element::aliases_list_type
 delete_cmd (const char *name, struct cmd_list_element **list,
 	    struct cmd_list_element **prehook,
 	    struct cmd_list_element **prehookee,
@@ -1211,7 +1211,7 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 {
   struct cmd_list_element *iter;
   struct cmd_list_element **previous_chain_ptr;
-  struct cmd_list_element *aliases = NULL;
+  cmd_list_element::aliases_list_type aliases;
 
   *prehook = NULL;
   *prehookee = NULL;
@@ -1238,21 +1238,14 @@ delete_cmd (const char *name, struct cmd_list_element **list,
 	  /* Update the link.  */
 	  *previous_chain_ptr = iter->next;
 
-	  aliases = iter->aliases;
+	  aliases = std::move (iter->aliases);
 
 	  /* If this command was an alias, remove it from the list of
 	     aliases.  */
 	  if (iter->is_alias ())
 	    {
-	      struct cmd_list_element **prevp = &iter->alias_target->aliases;
-	      struct cmd_list_element *a = *prevp;
-
-	      while (a != iter)
-		{
-		  prevp = &a->alias_chain;
-		  a = *prevp;
-		}
-	      *prevp = iter->alias_chain;
+	      auto it = iter->alias_target->aliases.iterator_to (*iter);
+	      iter->alias_target->aliases.erase (it);
 	    }
 
 	  delete iter;
@@ -1351,11 +1344,9 @@ static void
 fput_aliases_definition_styled (struct cmd_list_element *cmd,
 				struct ui_file *stream)
 {
-  for (cmd_list_element *iter = cmd->aliases;
-       iter != nullptr;
-       iter = iter->alias_chain)
-    if (!iter->default_args.empty ())
-      fput_alias_definition_styled (iter, stream);
+  for (cmd_list_element &alias : cmd->aliases)
+    if (!alias.default_args.empty ())
+      fput_alias_definition_styled (&alias, stream);
 }
 
 
@@ -1370,17 +1361,17 @@ fput_command_names_styled (struct cmd_list_element *c,
 			   bool always_fput_c_name, const char *postfix,
 			   struct ui_file *stream)
 {
-  if (always_fput_c_name ||  c->aliases != nullptr)
+  if (always_fput_c_name || !c->aliases.empty ())
     fput_command_name_styled (c, stream);
 
-  for (cmd_list_element *iter = c->aliases; iter; iter = iter->alias_chain)
+  for (cmd_list_element &alias : c->aliases)
     {
       fputs_filtered (", ", stream);
       wrap_here ("   ");
-      fput_command_name_styled (iter, stream);
+      fput_command_name_styled (&alias, stream);
     }
 
-  if (always_fput_c_name ||  c->aliases != nullptr)
+  if (always_fput_c_name || !c->aliases.empty ())
     fputs_filtered (postfix, stream);
 }
 
@@ -1453,14 +1444,15 @@ apropos_cmd (struct ui_file *stream,
 	    print_doc_of_command (c, prefix, verbose, regex, stream);
 
 	  /* Try to match against the name of the aliases.  */
-	  for (cmd_list_element *iter = c->aliases;
-	       returnvalue < 0 && iter;
-	       iter = iter->alias_chain)
+	  for (const cmd_list_element &alias : c->aliases)
 	    {
-	      name_len = strlen (iter->name);
-	      returnvalue = regex.search (iter->name, name_len, 0, name_len, NULL);
+	      name_len = strlen (alias.name);
+	      returnvalue = regex.search (alias.name, name_len, 0, name_len, NULL);
 	      if (returnvalue >= 0)
-		print_doc_of_command (c, prefix, verbose, regex, stream);
+		{
+		  print_doc_of_command (c, prefix, verbose, regex, stream);
+		  break;
+		}
 	    }
 	}
       if (c->doc != NULL && returnvalue < 0)
