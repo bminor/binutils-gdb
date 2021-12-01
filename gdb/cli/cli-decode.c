@@ -86,7 +86,7 @@ lookup_cmd_with_subcommands (cmd_list_element **subcommands,
 }
 
 static void
-print_help_for_command (struct cmd_list_element *c,
+print_help_for_command (const cmd_list_element &c,
 			bool recurse, struct ui_file *stream);
 
 static void
@@ -1314,39 +1314,39 @@ add_com_suppress_notification (const char *name, enum command_class theclass,
 /* Print the prefix of C followed by name of C in title style.  */
 
 static void
-fput_command_name_styled (struct cmd_list_element *c, struct ui_file *stream)
+fput_command_name_styled (const cmd_list_element &c, struct ui_file *stream)
 {
   std::string prefixname
-    = c->prefix == nullptr ? "" : c->prefix->prefixname ();
+    = c.prefix == nullptr ? "" : c.prefix->prefixname ();
 
   fprintf_styled (stream, title_style.style (), "%s%s",
-		  prefixname.c_str (), c->name);
+		  prefixname.c_str (), c.name);
 }
 
 /* Print the definition of alias C using title style for alias
    and aliased command.  */
 
 static void
-fput_alias_definition_styled (struct cmd_list_element *c,
+fput_alias_definition_styled (const cmd_list_element &c,
 			      struct ui_file *stream)
 {
-  gdb_assert (c->is_alias ());
+  gdb_assert (c.is_alias ());
   fputs_filtered ("  alias ", stream);
   fput_command_name_styled (c, stream);
   fprintf_filtered (stream, " = ");
-  fput_command_name_styled (c->alias_target, stream);
-  fprintf_filtered (stream, " %s\n", c->default_args.c_str ());
+  fput_command_name_styled (*c.alias_target, stream);
+  fprintf_filtered (stream, " %s\n", c.default_args.c_str ());
 }
 
 /* Print the definition of the aliases of CMD that have default args.  */
 
 static void
-fput_aliases_definition_styled (struct cmd_list_element *cmd,
+fput_aliases_definition_styled (const cmd_list_element &cmd,
 				struct ui_file *stream)
 {
-  for (cmd_list_element &alias : cmd->aliases)
+  for (const cmd_list_element &alias : cmd.aliases)
     if (!alias.default_args.empty ())
-      fput_alias_definition_styled (&alias, stream);
+      fput_alias_definition_styled (alias, stream);
 }
 
 
@@ -1357,21 +1357,21 @@ fput_aliases_definition_styled (struct cmd_list_element *cmd,
 */
 
 static void
-fput_command_names_styled (struct cmd_list_element *c,
+fput_command_names_styled (const cmd_list_element &c,
 			   bool always_fput_c_name, const char *postfix,
 			   struct ui_file *stream)
 {
-  if (always_fput_c_name || !c->aliases.empty ())
+  if (always_fput_c_name || !c.aliases.empty ())
     fput_command_name_styled (c, stream);
 
-  for (cmd_list_element &alias : c->aliases)
+  for (const cmd_list_element &alias : c.aliases)
     {
       fputs_filtered (", ", stream);
       wrap_here ("   ");
-      fput_command_name_styled (&alias, stream);
+      fput_command_name_styled (alias, stream);
     }
 
-  if (always_fput_c_name || !c->aliases.empty ())
+  if (always_fput_c_name || !c.aliases.empty ())
     fputs_filtered (postfix, stream);
 }
 
@@ -1380,7 +1380,7 @@ fput_command_names_styled (struct cmd_list_element *c,
    otherwise print only one-line help for command C.  */
 
 static void
-print_doc_of_command (struct cmd_list_element *c, const char *prefix,
+print_doc_of_command (const cmd_list_element &c, const char *prefix,
 		      bool verbose, compiled_regex &highlight,
 		      struct ui_file *stream)
 {
@@ -1396,12 +1396,12 @@ print_doc_of_command (struct cmd_list_element *c, const char *prefix,
     {
       fputs_filtered ("\n", stream);
       fput_aliases_definition_styled (c, stream);
-      fputs_highlighted (c->doc, highlight, stream);
+      fputs_highlighted (c.doc, highlight, stream);
       fputs_filtered ("\n", stream);
     }
   else
     {
-      print_doc_line (stream, c->doc, false);
+      print_doc_line (stream, c.doc, false);
       fputs_filtered ("\n", stream);
       fput_aliases_definition_styled (c, stream);
     }
@@ -1441,7 +1441,7 @@ apropos_cmd (struct ui_file *stream,
 	  /* Try to match against the name.  */
 	  returnvalue = regex.search (c->name, name_len, 0, name_len, NULL);
 	  if (returnvalue >= 0)
-	    print_doc_of_command (c, prefix, verbose, regex, stream);
+	    print_doc_of_command (*c, prefix, verbose, regex, stream);
 
 	  /* Try to match against the name of the aliases.  */
 	  for (const cmd_list_element &alias : c->aliases)
@@ -1450,7 +1450,7 @@ apropos_cmd (struct ui_file *stream,
 	      returnvalue = regex.search (alias.name, name_len, 0, name_len, NULL);
 	      if (returnvalue >= 0)
 		{
-		  print_doc_of_command (c, prefix, verbose, regex, stream);
+		  print_doc_of_command (*c, prefix, verbose, regex, stream);
 		  break;
 		}
 	    }
@@ -1461,7 +1461,7 @@ apropos_cmd (struct ui_file *stream,
 
 	  /* Try to match against documentation.  */
 	  if (regex.search (c->doc, doc_len, 0, doc_len, NULL) >= 0)
-	    print_doc_of_command (c, prefix, verbose, regex, stream);
+	    print_doc_of_command (*c, prefix, verbose, regex, stream);
 	}
       /* Check if this command has subcommands.  */
       if (c->is_prefix ())
@@ -1524,8 +1524,8 @@ help_cmd (const char *command, struct ui_file *stream)
 
   /* If the user asked 'help somecommand' and there is no alias,
      the false indicates to not output the (single) command name.  */
-  fput_command_names_styled (c, false, "\n", stream);
-  fput_aliases_definition_styled (c, stream);
+  fput_command_names_styled (*c, false, "\n", stream);
+  fput_aliases_definition_styled (*c, stream);
   fputs_filtered (c->doc, stream);
   fputs_filtered ("\n", stream);
 
@@ -1664,7 +1664,7 @@ help_all (struct ui_file *stream)
 	      fprintf_filtered (stream, "\nUnclassified commands\n\n");
 	      seen_unclassified = 1;
 	    }
-	  print_help_for_command (c, true, stream);
+	  print_help_for_command (*c, true, stream);
 	}
     }
 
@@ -1716,23 +1716,23 @@ print_doc_line (struct ui_file *stream, const char *str,
    If RECURSE is non-zero, also print one-line descriptions
    of all prefixed subcommands.  */
 static void
-print_help_for_command (struct cmd_list_element *c,
+print_help_for_command (const cmd_list_element &c,
 			bool recurse, struct ui_file *stream)
 {
   fput_command_names_styled (c, true, " -- ", stream);
-  print_doc_line (stream, c->doc, false);
+  print_doc_line (stream, c.doc, false);
   fputs_filtered ("\n", stream);
-  if (!c->default_args.empty ())
+  if (!c.default_args.empty ())
     fput_alias_definition_styled (c, stream);
   fput_aliases_definition_styled (c, stream);
 
   if (recurse
-      && c->is_prefix ()
-      && c->abbrev_flag == 0)
+      && c.is_prefix ()
+      && c.abbrev_flag == 0)
     /* Subcommands of a prefix command typically have 'all_commands'
        as class.  If we pass CLASS to recursive invocation,
        most often we won't see anything.  */
-    help_cmd_list (*c->subcommands, all_commands, true, stream);
+    help_cmd_list (*c.subcommands, all_commands, true, stream);
 }
 
 /*
@@ -1789,7 +1789,7 @@ help_cmd_list (struct cmd_list_element *list, enum command_class theclass,
 	     as this would show the (possibly very long) not very useful
 	     list of sub-commands of the aliased command.  */
 	  print_help_for_command
-	    (c,
+	    (*c,
 	     recurse && (theclass != class_alias || !c->is_alias ()),
 	     stream);
 	  continue;
