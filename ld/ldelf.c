@@ -1043,6 +1043,15 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
   /* Do not allow executable files to be used as inputs to the link.  */
   for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
     {
+      /* Discard input .note.gnu.build-id sections.  */
+      s = bfd_get_section_by_name (abfd, ".note.gnu.build-id");
+      while (s != NULL)
+	{
+	  if (s != elf_tdata (link_info.output_bfd)->o->build_id.sec)
+	    s->flags |= SEC_EXCLUDE;
+	  s = bfd_get_next_section_by_name (NULL, s);
+	}
+
       if (abfd->xvec->flavour == bfd_target_elf_flavour
 	  && !bfd_input_just_syms (abfd)
 	  && elf_tdata (abfd) != NULL
@@ -1386,6 +1395,9 @@ write_build_id (bfd *abfd)
   id_bits = contents + size;
   size = asec->size - size;
 
+  /* Clear the build ID field.  */
+  memset (id_bits, 0, size);
+
   bfd_h_put_32 (abfd, sizeof "GNU", &e_note->namesz);
   bfd_h_put_32 (abfd, size, &e_note->descsz);
   bfd_h_put_32 (abfd, NT_GNU_BUILD_ID, &e_note->type);
@@ -1417,7 +1429,8 @@ ldelf_setup_build_id (bfd *ibfd)
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED | SEC_READONLY | SEC_DATA);
-  s = bfd_make_section_with_flags (ibfd, ".note.gnu.build-id", flags);
+  s = bfd_make_section_anyway_with_flags (ibfd, ".note.gnu.build-id",
+					  flags);
   if (s != NULL && bfd_set_section_alignment (s, 2))
     {
       struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
