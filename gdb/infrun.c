@@ -601,6 +601,23 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
   if (child_inf != nullptr)
     gdb_assert (!child_inf->thread_list.empty ());
 
+  /* Clear the parent thread's pending follow field.  Do this before calling
+     target_detach, so that the target can differentiate the two following
+     cases:
+
+      - We continue past a fork with "follow-fork-mode == child" &&
+	"detach-on-fork on", and therefore detach the parent.  In that
+	case the target should not detach the fork child.
+      - We run to a fork catchpoint and the user types "detach".  In that
+	case, the target should detach the fork child in addition to the
+	parent.
+
+     The former case will have pending_follow cleared, the later will have
+     pending_follow set.  */
+  thread_info *parent_thread = find_thread_ptid (parent_inf, parent_ptid);
+  gdb_assert (parent_thread != nullptr);
+  parent_thread->pending_follow.set_spurious ();
+
   /* Detach the parent if needed.  */
   if (follow_child)
     {
@@ -668,7 +685,6 @@ follow_fork ()
 {
   bool follow_child = (follow_fork_mode_string == follow_fork_mode_child);
   bool should_resume = true;
-  struct thread_info *tp;
 
   /* Copy user stepping state to the new inferior thread.  FIXME: the
      followed fork child thread should have a copy of most of the
@@ -714,7 +730,7 @@ follow_fork ()
 	}
     }
 
-  tp = inferior_thread ();
+  thread_info *tp = inferior_thread ();
 
   /* If there were any forks/vforks that were caught and are now to be
      followed, then do so now.  */
@@ -768,14 +784,6 @@ follow_fork ()
 	  }
 	else
 	  {
-	    /* This pending follow fork event is now handled, one way
-	       or another.  The previous selected thread may be gone
-	       from the lists by now, but if it is still around, need
-	       to clear the pending follow request.  */
-	    tp = find_thread_ptid (parent_targ, parent);
-	    if (tp)
-	      tp->pending_follow.set_spurious ();
-
 	    /* This makes sure we don't try to apply the "Switched
 	       over from WAIT_PID" logic above.  */
 	    nullify_last_target_wait_ptid ();
