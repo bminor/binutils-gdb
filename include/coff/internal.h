@@ -540,7 +540,6 @@ union internal_auxent
 {
   struct
   {
-
     union
     {
       long l;			/* str, un, or enum tag indx */
@@ -580,18 +579,23 @@ union internal_auxent
 
   struct
   {
-    union {
-      /* PR 17754: We use to FILNMLEN for the size of the x_fname
+    union
+    {
+      /* PR 17754: We used to use FILNMLEN for the size of the x_fname
 	 array, but that causes problems as PE targets use a larger
 	 value.  We cannot use their definition of E_FILNMLEN as this
 	 header can be used without including any PE headers.  */
       char x_fname[20];
       struct
       {
-	long x_zeroes;
-	long x_offset;
+	/* PR 28630: We use bfd_hostptr_t because these fields may be
+	   used to hold pointers.  We assume that this type is at least
+	   as big as the long type.  */
+	bfd_hostptr_t x_zeroes;
+	bfd_hostptr_t x_offset;
       }      x_n;
     } x_n;
+
     unsigned char x_ftype;
   }     x_file;
 
