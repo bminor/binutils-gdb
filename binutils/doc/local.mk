@@ -174,7 +174,7 @@ MAINTAINERCLEANFILES += $(man_MANS) %D%/binutils.info %D%/cxxfilt.man
 		> %D%/$(DEMANGLER_NAME).1
 
 html-local: %D%/binutils/index.html
-binutils/index.html: %D%/binutils.texi $(binutils_TEXINFOS)
+%D%/binutils/index.html: %D%/binutils.texi $(binutils_TEXINFOS)
 	$(AM_V_GEN)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
 	  --split=node -I$(srcdir) $(srcdir)/%D%/binutils.texi
 
