@@ -3683,8 +3683,8 @@ gdb_caching_proc skip_ifunc_tests {
 # backtraces.  Requires get_compiler_info and get_debug_format.
 
 proc skip_inline_frame_tests {} {
-    # GDB only recognizes inlining information in DWARF 2 (DWARF 3).
-    if { ! [test_debug_format "DWARF 2"] } {
+    # GDB only recognizes inlining information in DWARF.
+    if { ! [test_debug_format "DWARF \[0-9\]"] } {
 	return 1
     }
 
@@ -3702,8 +3702,8 @@ proc skip_inline_frame_tests {} {
 # inlined functions.  Requires get_compiler_info and get_debug_format.
 
 proc skip_inline_var_tests {} {
-    # GDB only recognizes inlining information in DWARF 2 (DWARF 3).
-    if { ! [test_debug_format "DWARF 2"] } {
+    # GDB only recognizes inlining information in DWARF.
+    if { ! [test_debug_format "DWARF \[0-9\]"] } {
 	return 1
     }
 

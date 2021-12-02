@@ -67,7 +67,7 @@ gdb_test_multiple "print * aap" "print * aap at marker return 0" {
 	pass "print * aap at marker return 0"
     }
     -re "= {.*a1 = .*}\r\n$gdb_prompt $" {
-	if { [test_compiler_info gcc-2-*] && [test_debug_format "DWARF 2"] } {
+	if { [test_compiler_info gcc-2-*] && [test_debug_format "DWARF \[0-9\]"] } {
 	    # gcc 2.95.3 -gdwarf-2
 	    setup_kfail "gdb/1465" "*-*-*"
 	}

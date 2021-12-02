@@ -26,7 +26,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 
 if [runto f2] then {
     get_debug_format
-    if { [test_compiler_info gcc-2-*] && [test_debug_format "DWARF 2"] } then {
+    if { [test_compiler_info gcc-2-*] && [test_debug_format "DWARF \[0-9\]"] } then {
 	setup_xfail "*-*-*"
     }
     gdb_test "p *y" "\\\$\[0-9\]* = \{c = 42 '\\*', f = 1 \\+ 0i\}" \

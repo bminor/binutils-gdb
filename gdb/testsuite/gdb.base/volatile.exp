@@ -60,7 +60,7 @@ get_debug_format
 proc local_compiler_xfail_check { } {
     if { [test_compiler_info gcc-2-*] } then {
 	if { ![test_debug_format "HP"] \
-		&& ![test_debug_format "DWARF 2"] } then {
+		&& ![test_debug_format "DWARF \[0-9\]"] } then {
 	    setup_xfail "*-*-*" 
 	}
     }
