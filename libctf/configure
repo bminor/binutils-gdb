@@ -13685,7 +13685,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile doc/Makefile"
+ac_config_files="$ac_config_files Makefile"
 
 ac_config_headers="$ac_config_headers config.h"
 
@@ -14702,7 +14702,6 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
