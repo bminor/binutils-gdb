@@ -24,7 +24,7 @@
 #include "cli/cli-style.h"
 #include "cli/cli-decode.h"
 
-static char *saved_filename;
+static std::string saved_filename;
 
 static std::string logging_filename = "gdb.txt";
 static void
@@ -40,9 +40,9 @@ static bool logging_overwrite;
 static void
 maybe_warn_already_logging ()
 {
-  if (saved_filename)
+  if (!saved_filename.empty ())
     warning (_("Currently logging to %s.  Turn the logging off and on to "
-	       "make the new setting effective."), saved_filename);
+	       "make the new setting effective."), saved_filename.c_str ());
 }
 
 static void
@@ -95,10 +95,10 @@ pop_output_files (void)
 static void
 handle_redirections (int from_tty)
 {
-  if (saved_filename != NULL)
+  if (!saved_filename.empty ())
     {
       fprintf_unfiltered (gdb_stdout, "Already logging to %s.\n",
-			  saved_filename);
+			  saved_filename.c_str ());
       return;
     }
 
@@ -124,7 +124,7 @@ handle_redirections (int from_tty)
 			    logging_filename.c_str ());
     }
 
-  saved_filename = xstrdup (logging_filename.c_str ());
+  saved_filename = logging_filename;
 
   /* Let the interpreter do anything it needs.  */
   current_interp_set_logging (std::move (log), logging_redirect,
@@ -154,14 +154,14 @@ set_logging_on (const char *args, int from_tty)
 static void 
 set_logging_off (const char *args, int from_tty)
 {
-  if (saved_filename == NULL)
+  if (saved_filename.empty ())
     return;
 
   pop_output_files ();
   if (from_tty)
-    fprintf_unfiltered (gdb_stdout, "Done logging to %s.\n", saved_filename);
-  xfree (saved_filename);
-  saved_filename = NULL;
+    fprintf_unfiltered (gdb_stdout, "Done logging to %s.\n",
+			saved_filename.c_str ());
+  saved_filename.clear ();
 }
 
 static bool logging_enabled;
