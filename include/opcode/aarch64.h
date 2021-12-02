@@ -1290,15 +1290,13 @@ struct aarch64_operand_error
    dependencies for both assembler and disassembler.  */
 struct aarch64_instr_sequence
 {
-  /* The instruction that caused this sequence to be opened.  */
+  /* The instructions in the sequence, starting with the one that
+     caused it to be opened.  */
   aarch64_inst *instr;
-  /* The number of instructions the above instruction allows one to be kept in the
-     sequence before an automatic close is done.  */
-  int num_insns;
-  /* The instructions currently added to the sequence.  */
-  aarch64_inst **current_insns;
   /* The number of instructions already in the sequence.  */
-  int next_insn;
+  int num_added_insns;
+  /* The number of instructions allocated to the sequence.  */
+  int num_allocated_insns;
 };
 
 /* Encoding entrypoint.  */

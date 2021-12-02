@@ -5403,6 +5403,15 @@ verify_elem_sd (const struct aarch64_inst *inst, const aarch64_insn insn,
   return ERR_OK;
 }
 
+/* Add INST to the end of INSN_SEQUENCE.  */
+
+static void
+add_insn_to_sequence (const struct aarch64_inst *inst,
+		      aarch64_instr_sequence *insn_sequence)
+{
+  insn_sequence->instr[insn_sequence->num_added_insns++] = *inst;
+}
+
 /* Initialize an instruction sequence insn_sequence with the instruction INST.
    If INST is NULL the given insn_sequence is cleared and the sequence is left
    uninitialized.  */
@@ -5412,16 +5421,11 @@ init_insn_sequence (const struct aarch64_inst *inst,
 		    aarch64_instr_sequence *insn_sequence)
 {
   int num_req_entries = 0;
-  insn_sequence->next_insn = 0;
-  insn_sequence->num_insns = num_req_entries;
-  if (insn_sequence->instr)
-    XDELETE (insn_sequence->instr);
-  insn_sequence->instr = NULL;
 
-  if (inst)
+  if (insn_sequence->instr)
     {
-      insn_sequence->instr = XNEW (aarch64_inst);
-      memcpy (insn_sequence->instr, inst, sizeof (aarch64_inst));
+      XDELETE (insn_sequence->instr);
+      insn_sequence->instr = NULL;
     }
 
   /* Handle all the cases here.  May need to think of something smarter than
@@ -5430,16 +5434,13 @@ init_insn_sequence (const struct aarch64_inst *inst,
   if (inst && inst->opcode->constraints & C_SCAN_MOVPRFX)
     num_req_entries = 1;
 
-  if (insn_sequence->current_insns)
-    XDELETEVEC (insn_sequence->current_insns);
-  insn_sequence->current_insns = NULL;
+  insn_sequence->num_added_insns = 0;
+  insn_sequence->num_allocated_insns = num_req_entries;
 
   if (num_req_entries != 0)
     {
-      size_t size = num_req_entries * sizeof (aarch64_inst);
-      insn_sequence->current_insns
-	= (aarch64_inst**) XNEWVEC (aarch64_inst, num_req_entries);
-      memset (insn_sequence->current_insns, 0, size);
+      insn_sequence->instr = XCNEWVEC (aarch64_inst, num_req_entries);
+      add_insn_to_sequence (inst, insn_sequence);
     }
 }
 
@@ -5715,17 +5716,12 @@ verify_constraints (const struct aarch64_inst *inst,
 	}
 
     done:
-      /* Add the new instruction to the sequence.  */
-      memcpy (insn_sequence->current_insns + insn_sequence->next_insn++,
-	      inst, sizeof (aarch64_inst));
-
-      /* Check if sequence is now full.  */
-      if (insn_sequence->next_insn >= insn_sequence->num_insns)
-	{
-	  /* Sequence is full, but we don't have anything special to do for now,
-	     so clear and reset it.  */
-	  init_insn_sequence (NULL, insn_sequence);
-	}
+      if (insn_sequence->num_added_insns == insn_sequence->num_allocated_insns)
+	/* We've checked the last instruction in the sequence and so
+	   don't need the sequence any more.  */
+	init_insn_sequence (NULL, insn_sequence);
+      else
+	add_insn_to_sequence (inst, insn_sequence);
     }
 
   return res;
