@@ -1351,8 +1351,8 @@ set_out_of_range_error (aarch64_operand_error *mismatch_detail,
   if (mismatch_detail == NULL)
     return;
   set_error (mismatch_detail, AARCH64_OPDE_OUT_OF_RANGE, idx, error);
-  mismatch_detail->data[0] = lower_bound;
-  mismatch_detail->data[1] = upper_bound;
+  mismatch_detail->data[0].i = lower_bound;
+  mismatch_detail->data[1].i = upper_bound;
 }
 
 static inline void
@@ -1424,7 +1424,7 @@ set_unaligned_error (aarch64_operand_error *mismatch_detail, int idx,
   if (mismatch_detail == NULL)
     return;
   set_error (mismatch_detail, AARCH64_OPDE_UNALIGNED, idx, NULL);
-  mismatch_detail->data[0] = alignment;
+  mismatch_detail->data[0].i = alignment;
 }
 
 static inline void
@@ -1434,7 +1434,7 @@ set_reg_list_error (aarch64_operand_error *mismatch_detail, int idx,
   if (mismatch_detail == NULL)
     return;
   set_error (mismatch_detail, AARCH64_OPDE_REG_LIST, idx, NULL);
-  mismatch_detail->data[0] = expected_num;
+  mismatch_detail->data[0].i = expected_num;
 }
 
 static inline void
@@ -5480,6 +5480,8 @@ init_insn_sequence (const struct aarch64_inst *inst,
      best.  */
   if (inst && inst->opcode->constraints & C_SCAN_MOVPRFX)
     num_req_entries = 1;
+  if (inst && (inst->opcode->constraints & C_SCAN_MOPS_PME) == C_SCAN_MOPS_P)
+    num_req_entries = 2;
 
   insn_sequence->num_added_insns = 0;
   insn_sequence->num_allocated_insns = num_req_entries;
@@ -5491,6 +5493,80 @@ init_insn_sequence (const struct aarch64_inst *inst,
     }
 }
 
+/* Subroutine of verify_constraints.  Check whether the instruction
+   is part of a MOPS P/M/E sequence and, if so, whether sequencing
+   expectations are met.  Return true if the check passes, otherwise
+   describe the problem in MISMATCH_DETAIL.
+
+   IS_NEW_SECTION is true if INST is assumed to start a new section.
+   The other arguments are as for verify_constraints.  */
+
+static bool
+verify_mops_pme_sequence (const struct aarch64_inst *inst,
+			  bool is_new_section,
+			  aarch64_operand_error *mismatch_detail,
+			  aarch64_instr_sequence *insn_sequence)
+{
+  const struct aarch64_opcode *opcode;
+  const struct aarch64_inst *prev_insn;
+  int i;
+
+  opcode = inst->opcode;
+  if (insn_sequence->instr)
+    prev_insn = insn_sequence->instr + (insn_sequence->num_added_insns - 1);
+  else
+    prev_insn = NULL;
+
+  if (prev_insn
+      && (prev_insn->opcode->constraints & C_SCAN_MOPS_PME)
+      && prev_insn->opcode != opcode - 1)
+    {
+      mismatch_detail->kind = AARCH64_OPDE_EXPECTED_A_AFTER_B;
+      mismatch_detail->index = -1;
+      mismatch_detail->data[0].s = prev_insn->opcode[1].name;
+      mismatch_detail->data[1].s = prev_insn->opcode->name;
+      mismatch_detail->non_fatal = true;
+      return false;
+    }
+
+  if (opcode->constraints & C_SCAN_MOPS_PME)
+    {
+      if (is_new_section || !prev_insn || prev_insn->opcode != opcode - 1)
+	{
+	  mismatch_detail->kind = AARCH64_OPDE_A_SHOULD_FOLLOW_B;
+	  mismatch_detail->index = -1;
+	  mismatch_detail->data[0].s = opcode->name;
+	  mismatch_detail->data[1].s = opcode[-1].name;
+	  mismatch_detail->non_fatal = true;
+	  return false;
+	}
+
+      for (i = 0; i < 3; ++i)
+	/* There's no specific requirement for the data register to be
+	   the same between consecutive SET* instructions.  */
+	if ((opcode->operands[i] == AARCH64_OPND_MOPS_ADDR_Rd
+	     || opcode->operands[i] == AARCH64_OPND_MOPS_ADDR_Rs
+	     || opcode->operands[i] == AARCH64_OPND_MOPS_WB_Rn)
+	    && prev_insn->operands[i].reg.regno != inst->operands[i].reg.regno)
+	  {
+	    mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+	    if (opcode->operands[i] == AARCH64_OPND_MOPS_ADDR_Rd)
+	      mismatch_detail->error = _("destination register differs from "
+					 "preceding instruction");
+	    else if (opcode->operands[i] == AARCH64_OPND_MOPS_ADDR_Rs)
+	      mismatch_detail->error = _("source register differs from "
+					 "preceding instruction");
+	    else
+	      mismatch_detail->error = _("size register differs from "
+					 "preceding instruction");
+	    mismatch_detail->index = i;
+	    mismatch_detail->non_fatal = true;
+	    return false;
+	  }
+    }
+
+  return true;
+}
 
 /*  This function verifies that the instruction INST adheres to its specified
     constraints.  If it does then ERR_OK is returned, if not then ERR_VFI is
@@ -5540,13 +5616,22 @@ verify_constraints (const struct aarch64_inst *inst,
       return res;
     }
 
+  bool is_new_section = (!encoding && pc == 0);
+  if (!verify_mops_pme_sequence (inst, is_new_section, mismatch_detail,
+				 insn_sequence))
+    {
+      res = ERR_VFI;
+      if ((opcode->constraints & C_SCAN_MOPS_PME) != C_SCAN_MOPS_M)
+	init_insn_sequence (NULL, insn_sequence);
+    }
+
   /* Verify constraints on an existing sequence.  */
   if (insn_sequence->instr)
     {
       const struct aarch64_opcode* inst_opcode = insn_sequence->instr->opcode;
       /* If we're decoding and we hit PC=0 with an open sequence then we haven't
 	 closed a previous one that we should have.  */
-      if (!encoding && pc == 0)
+      if (is_new_section && res == ERR_OK)
 	{
 	  mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
 	  mismatch_detail->error = _("previous `movprfx' sequence not closed");

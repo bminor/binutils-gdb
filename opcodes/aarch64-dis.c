@@ -3388,10 +3388,29 @@ print_verifier_notes (aarch64_operand_error *detail,
   assert (detail->non_fatal);
   assert (detail->error);
 
-  /* If there are multiple verifier messages, concat them up to 1k.  */
-  (*info->fprintf_func) (info->stream, "  // note: %s", detail->error);
-  if (detail->index >= 0)
-     (*info->fprintf_func) (info->stream, " at operand %d", detail->index + 1);
+  (*info->fprintf_func) (info->stream, "  // note: ");
+  switch (detail->kind)
+    {
+    case AARCH64_OPDE_A_SHOULD_FOLLOW_B:
+      (*info->fprintf_func) (info->stream,
+			     _("this `%s' should have an immediately"
+			       " preceding `%s'"),
+			     detail->data[0].s, detail->data[1].s);
+      break;
+
+    case AARCH64_OPDE_EXPECTED_A_AFTER_B:
+      (*info->fprintf_func) (info->stream,
+			     _("expected `%s' after previous `%s'"),
+			     detail->data[0].s, detail->data[1].s);
+      break;
+
+    default:
+      (*info->fprintf_func) (info->stream, "%s", detail->error);
+      if (detail->index >= 0)
+	(*info->fprintf_func) (info->stream, " at operand %d",
+			       detail->index + 1);
+      break;
+    }
 }
 
 /* Print the instruction according to *INST.  */

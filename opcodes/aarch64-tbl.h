@@ -2687,10 +2687,15 @@ static const aarch64_feature_set aarch64_feature_mops_memtag =
 	     OP3 (MOPS_ADDR_Rd, MOPS_ADDR_Rs, MOPS_WB_Rn), QL_I3SAMEX, \
 	     FLAGS, CONSTRAINTS, VERIFIER (three_different_regs))
 
+/* These instructions must remain consecutive, since we rely on the order
+   when detecting invalid sequences.  */
 #define MOPS_CPY_OP1_OP2_INSN(NAME, SUFFIX, OPCODE, MASK) \
-  MOPS_CPY_OP1_OP2_PME_INSN (NAME "p" SUFFIX, OPCODE, MASK, F_SCAN, 0), \
-  MOPS_CPY_OP1_OP2_PME_INSN (NAME "m" SUFFIX, OPCODE | 0x400000, MASK, 0, 0), \
-  MOPS_CPY_OP1_OP2_PME_INSN (NAME "e" SUFFIX, OPCODE | 0x800000, MASK, 0, 0)
+  MOPS_CPY_OP1_OP2_PME_INSN (NAME "p" SUFFIX, OPCODE, MASK, F_SCAN, \
+			     C_SCAN_MOPS_P), \
+  MOPS_CPY_OP1_OP2_PME_INSN (NAME "m" SUFFIX, OPCODE | 0x400000, MASK, \
+			     0, C_SCAN_MOPS_M), \
+  MOPS_CPY_OP1_OP2_PME_INSN (NAME "e" SUFFIX, OPCODE | 0x800000, MASK, \
+			     0, C_SCAN_MOPS_E)
 
 #define MOPS_CPY_OP1_INSN(NAME, SUFFIX, OPCODE, MASK) \
   MOPS_CPY_OP1_OP2_INSN (NAME, SUFFIX, OPCODE, MASK), \
@@ -2709,12 +2714,15 @@ static const aarch64_feature_set aarch64_feature_mops_memtag =
        OP3 (MOPS_ADDR_Rd, MOPS_WB_Rn, Rm), QL_I3SAMEX, FLAGS, \
        CONSTRAINTS, VERIFIER (three_different_regs))
 
+/* These instructions must remain consecutive, since we rely on the order
+   when detecting invalid sequences.  */
 #define MOPS_SET_OP1_OP2_INSN(NAME, SUFFIX, OPCODE, MASK, ISA) \
-  MOPS_SET_OP1_OP2_PME_INSN (NAME "p" SUFFIX, OPCODE, MASK, 0, 0, ISA), \
+  MOPS_SET_OP1_OP2_PME_INSN (NAME "p" SUFFIX, OPCODE, MASK, \
+			     F_SCAN, C_SCAN_MOPS_P, ISA), \
   MOPS_SET_OP1_OP2_PME_INSN (NAME "m" SUFFIX, OPCODE | 0x4000, MASK, \
-			     0, 0, ISA), \
+			     0, C_SCAN_MOPS_M, ISA), \
   MOPS_SET_OP1_OP2_PME_INSN (NAME "e" SUFFIX, OPCODE | 0x8000, MASK, \
-			     0, 0, ISA)
+			     0, C_SCAN_MOPS_E, ISA)
 
 #define MOPS_SET_INSN(NAME, OPCODE, MASK, ISA) \
   MOPS_SET_OP1_OP2_INSN (NAME, "", OPCODE, MASK, ISA), \

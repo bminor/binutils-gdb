@@ -5019,6 +5019,8 @@ const char* operand_mismatch_kind_names[] =
 {
   "AARCH64_OPDE_NIL",
   "AARCH64_OPDE_RECOVERABLE",
+  "AARCH64_OPDE_A_SHOULD_FOLLOW_B",
+  "AARCH64_OPDE_EXPECTED_A_AFTER_B",
   "AARCH64_OPDE_SYNTAX_ERROR",
   "AARCH64_OPDE_FATAL_SYNTAX_ERROR",
   "AARCH64_OPDE_INVALID_VARIANT",
@@ -5040,7 +5042,10 @@ operand_error_higher_severity_p (enum aarch64_operand_error_kind lhs,
 				 enum aarch64_operand_error_kind rhs)
 {
   gas_assert (AARCH64_OPDE_RECOVERABLE > AARCH64_OPDE_NIL);
-  gas_assert (AARCH64_OPDE_SYNTAX_ERROR > AARCH64_OPDE_RECOVERABLE);
+  gas_assert (AARCH64_OPDE_A_SHOULD_FOLLOW_B > AARCH64_OPDE_RECOVERABLE);
+  gas_assert (AARCH64_OPDE_EXPECTED_A_AFTER_B > AARCH64_OPDE_RECOVERABLE);
+  gas_assert (AARCH64_OPDE_SYNTAX_ERROR > AARCH64_OPDE_A_SHOULD_FOLLOW_B);
+  gas_assert (AARCH64_OPDE_SYNTAX_ERROR > AARCH64_OPDE_EXPECTED_A_AFTER_B);
   gas_assert (AARCH64_OPDE_FATAL_SYNTAX_ERROR > AARCH64_OPDE_SYNTAX_ERROR);
   gas_assert (AARCH64_OPDE_INVALID_VARIANT > AARCH64_OPDE_FATAL_SYNTAX_ERROR);
   gas_assert (AARCH64_OPDE_OUT_OF_RANGE > AARCH64_OPDE_INVALID_VARIANT);
@@ -5233,9 +5238,9 @@ record_operand_error_with_data (const aarch64_opcode *opcode, int idx,
   info.index = idx;
   info.kind = kind;
   info.error = error;
-  info.data[0] = extra_data[0];
-  info.data[1] = extra_data[1];
-  info.data[2] = extra_data[2];
+  info.data[0].i = extra_data[0];
+  info.data[1].i = extra_data[1];
+  info.data[2].i = extra_data[2];
   info.non_fatal = false;
   record_operand_error_info (opcode, &info);
 }
@@ -5410,6 +5415,19 @@ output_operand_error_record (const operand_error_record *record, char *str)
     case AARCH64_OPDE_NIL:
       gas_assert (0);
       break;
+
+    case AARCH64_OPDE_A_SHOULD_FOLLOW_B:
+      handler (_("this `%s' should have an immediately preceding `%s'"
+		 " -- `%s'"),
+	       detail->data[0].s, detail->data[1].s, str);
+      break;
+
+    case AARCH64_OPDE_EXPECTED_A_AFTER_B:
+      handler (_("the preceding `%s' should be followed by `%s` rather"
+		 " than `%s` -- `%s'"),
+	       detail->data[1].s, detail->data[0].s, opcode->name, str);
+      break;
+
     case AARCH64_OPDE_SYNTAX_ERROR:
     case AARCH64_OPDE_RECOVERABLE:
     case AARCH64_OPDE_FATAL_SYNTAX_ERROR:
@@ -5541,31 +5559,31 @@ output_operand_error_record (const operand_error_record *record, char *str)
       break;
 
     case AARCH64_OPDE_OUT_OF_RANGE:
-      if (detail->data[0] != detail->data[1])
+      if (detail->data[0].i != detail->data[1].i)
 	handler (_("%s out of range %d to %d at operand %d -- `%s'"),
 		 detail->error ? detail->error : _("immediate value"),
-		 detail->data[0], detail->data[1], idx + 1, str);
+		 detail->data[0].i, detail->data[1].i, idx + 1, str);
       else
 	handler (_("%s must be %d at operand %d -- `%s'"),
 		 detail->error ? detail->error : _("immediate value"),
-		 detail->data[0], idx + 1, str);
+		 detail->data[0].i, idx + 1, str);
       break;
 
     case AARCH64_OPDE_REG_LIST:
-      if (detail->data[0] == 1)
+      if (detail->data[0].i == 1)
 	handler (_("invalid number of registers in the list; "
 		   "only 1 register is expected at operand %d -- `%s'"),
 		 idx + 1, str);
       else
 	handler (_("invalid number of registers in the list; "
 		   "%d registers are expected at operand %d -- `%s'"),
-	       detail->data[0], idx + 1, str);
+	       detail->data[0].i, idx + 1, str);
       break;
 
     case AARCH64_OPDE_UNALIGNED:
       handler (_("immediate value must be a multiple of "
 		 "%d at operand %d -- `%s'"),
-	       detail->data[0], idx + 1, str);
+	       detail->data[0].i, idx + 1, str);
       break;
 
     default:
