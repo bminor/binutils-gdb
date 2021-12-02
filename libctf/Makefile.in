@@ -578,7 +578,6 @@ RUNTESTFLAGS =
 # development.sh is used to determine -Werror default.
 @TCL_TRY_TRUE@CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 @TCL_TRY_TRUE@EXTRA_DEJAGNU_SITE_CONFIG = development.exp
-@BUILD_INFO_TRUE@libctf_TEXINFOS = $(info_TEXINFOS)
 @BUILD_INFO_TRUE@AM_MAKEINFOFLAGS = --no-split
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
