@@ -10465,7 +10465,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	 Check for integer overflow (can occur when size_t is 32-bit)
 	 with overlarge ncols or nused values.  */
       if (nused == -1u
-	  || _mul_overflow ((size_t) ncols, 4, &temp)
+	  || _mul_overflow ((size_t) ncols, 4, &temp)	  
 	  || _mul_overflow ((size_t) nused + 1, temp, &total)
 	  || total > (size_t) (limit - ppool))
 	{
@@ -10473,7 +10473,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 		section->name);
 	  return 0;
 	}
-
+      
       if (do_display)
 	{
 	  printf (_("  Offset table\n"));
@@ -10596,7 +10596,21 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	      for (j = 0; j < ncols; j++)
 		{
 		  unsigned char *p = prow + j * 4;
+
+		  /* PR 28645: Check for overflow.  Since we do not know how
+		     many populated rows there will be, we cannot just
+		     perform a single check at the start of this function.  */
+		  if (p > (limit - 4))
+		    {
+		      if (do_display)
+			printf ("\n");
+		      warn (_("Too many rows/columns in DWARF index section %s\n"),
+			    section->name);
+		      return 0;
+		    }
+
 		  SAFE_BYTE_GET (val, p, 4, limit);
+
 		  if (do_display)
 		    printf (" %8d", val);
 		  else

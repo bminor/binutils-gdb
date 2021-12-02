@@ -1,3 +1,9 @@
+2021-12-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 28645
+	* dwarf.c (process_cu_tu_index): Add test for overruning section
+	whilst processing slots.
+
 2021-11-30  Roland McGrath  <mcgrathr@google.com>
 
 	* doc/local.mk: Give each man page target its missing dependency on
