@@ -3975,6 +3975,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 #define SR_V8_4(n,e,f)	  SR_FEAT (n,e,f,V8_4)
 #define SR_V8_6(n,e,f)	  SR_FEAT (n,e,f,V8_6)
 #define SR_V8_7(n,e,f)	  SR_FEAT (n,e,f,V8_7)
+#define SR_V8_8(n,e,f)	  SR_FEAT (n,e,f,V8_8)
 /* Has no separate libopcodes feature flag, but separated out for clarity.  */
 #define SR_GIC(n,e,f)	  SR_CORE (n,e,f)
 /* Has no separate libopcodes feature flag, but separated out for clarity.  */
@@ -5000,6 +5001,9 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_V8_7 ("pmsnevfr_el1",      CPENC (3,0,C9,C9,1),    0),
   SR_V8_7 ("hcrx_el2",          CPENC (3,4,C1,C2,2),    0),
 
+  SR_V8_8 ("allint",            CPENC (3,0,C4,C3,0),    0),
+  SR_V8_8 ("icc_nmiar1_el1",    CPENC (3,0,C12,C9,5),   F_REG_READ),
+
   { 0, CPENC (0,0,0,0,0), 0, 0 }
 };
 
@@ -5032,6 +5036,7 @@ const aarch64_sys_reg aarch64_pstatefields [] =
 				| F_REG_MAX_VALUE (1)),
   SR_SME  ("svcrsmza",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x6,0x1)
 				| F_REG_MAX_VALUE (1)),
+  SR_V8_8 ("allint",	  0x08,	F_REG_MAX_VALUE (1)),
   { 0,	  CPENC (0,0,0,0,0), 0, 0 },
 };
 
