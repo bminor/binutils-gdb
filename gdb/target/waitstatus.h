@@ -219,109 +219,125 @@ struct target_waitstatus
 
   /* Setters: set the wait status kind plus any associated data.  */
 
-  void set_exited (int exit_status)
+  target_waitstatus &set_exited (int exit_status)
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_EXITED;
     m_value.exit_status = exit_status;
+    return *this;
   }
 
-  void set_stopped (gdb_signal sig)
+  target_waitstatus &set_stopped (gdb_signal sig)
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_STOPPED;
     m_value.sig = sig;
+    return *this;
   }
 
-  void set_signalled (gdb_signal sig)
+  target_waitstatus &set_signalled (gdb_signal sig)
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_SIGNALLED;
     m_value.sig = sig;
+    return *this;
   }
 
-  void set_loaded ()
+  target_waitstatus &set_loaded ()
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_LOADED;
+    return *this;
   }
 
-  void set_forked (ptid_t child_ptid)
+  target_waitstatus &set_forked (ptid_t child_ptid)
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_FORKED;
     m_value.child_ptid = child_ptid;
+    return *this;
   }
 
-  void set_vforked (ptid_t child_ptid)
+  target_waitstatus &set_vforked (ptid_t child_ptid)
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_VFORKED;
     m_value.child_ptid = child_ptid;
+    return *this;
   }
 
-  void set_execd (gdb::unique_xmalloc_ptr<char> execd_pathname)
+  target_waitstatus &set_execd (gdb::unique_xmalloc_ptr<char> execd_pathname)
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_EXECD;
     m_value.execd_pathname = execd_pathname.release ();
+    return *this;
   }
 
-  void set_vfork_done ()
+  target_waitstatus &set_vfork_done ()
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_VFORK_DONE;
+    return *this;
   }
 
-  void set_syscall_entry (int syscall_number)
+  target_waitstatus &set_syscall_entry (int syscall_number)
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_SYSCALL_ENTRY;
     m_value.syscall_number = syscall_number;
+    return *this;
   }
 
-  void set_syscall_return (int syscall_number)
+  target_waitstatus &set_syscall_return (int syscall_number)
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_SYSCALL_RETURN;
     m_value.syscall_number = syscall_number;
+    return *this;
   }
 
-  void set_spurious ()
+  target_waitstatus &set_spurious ()
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_SPURIOUS;
+    return *this;
   }
 
-  void set_ignore ()
+  target_waitstatus &set_ignore ()
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_IGNORE;
+    return *this;
   }
 
-  void set_no_history ()
+  target_waitstatus &set_no_history ()
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_NO_HISTORY;
+    return *this;
   }
 
-  void set_no_resumed ()
+  target_waitstatus &set_no_resumed ()
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_NO_RESUMED;
+    return *this;
   }
 
-  void set_thread_created ()
+  target_waitstatus &set_thread_created ()
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_THREAD_CREATED;
+    return *this;
   }
 
-  void set_thread_exited (int exit_status)
+  target_waitstatus &set_thread_exited (int exit_status)
   {
     this->reset ();
     m_kind = TARGET_WAITKIND_THREAD_EXITED;
     m_value.exit_status = exit_status;
+    return *this;
   }
 
   /* Get the kind of this wait status.  */
