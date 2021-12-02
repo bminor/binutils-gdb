@@ -14065,7 +14065,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile doc/Makefile po/Makefile.in:po/Make-in"
+ac_config_files="$ac_config_files Makefile po/Makefile.in:po/Make-in"
 
 ac_config_commands="$ac_config_commands default"
 
@@ -15082,7 +15082,6 @@ do
     ".gdbinit") CONFIG_FILES="$CONFIG_FILES .gdbinit:gdbinit.in" ;;
     "default-1") CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "po/Makefile.in") CONFIG_FILES="$CONFIG_FILES po/Makefile.in:po/Make-in" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
 
