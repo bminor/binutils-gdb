@@ -37,6 +37,7 @@
 #include "gdbcmd.h"
 #include "source.h"
 #include "readline/tilde.h"
+#include <cli/cli-style.h>
 
 /* Prototypes for local functions */
 
@@ -966,13 +967,16 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
   struct objfile *objfile;
 
   objfile = symtab->compunit_symtab->objfile;
-  printf_filtered (_("objfile: %s ((struct objfile *) %s)\n"),
-		   objfile_name (objfile),
+  printf_filtered (_("objfile: %ps ((struct objfile *) %s)\n"),
+		   styled_string (file_name_style.style (),
+				  objfile_name (objfile)),
 		   host_address_to_string (objfile));
-  printf_filtered (_("compunit_symtab: ((struct compunit_symtab *) %s)\n"),
+  printf_filtered (_("compunit_symtab: %s ((struct compunit_symtab *) %s)\n"),
+		   symtab->compunit_symtab->name,
 		   host_address_to_string (symtab->compunit_symtab));
-  printf_filtered (_("symtab: %s ((struct symtab *) %s)\n"),
-		   symtab_to_fullname (symtab),
+  printf_filtered (_("symtab: %ps ((struct symtab *) %s)\n"),
+		   styled_string (file_name_style.style (),
+				  symtab_to_fullname (symtab)),
 		   host_address_to_string (symtab));
   linetable = SYMTAB_LINETABLE (symtab);
   printf_filtered (_("linetable: ((struct linetable *) %s):\n"),
@@ -1036,7 +1040,10 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
 
 		if (regexp == NULL
 		    || re_exec (symtab_to_filename_for_display (symtab)))
-		  maintenance_print_one_line_table (symtab, NULL);
+		  {
+		    maintenance_print_one_line_table (symtab, NULL);
+		    printf_filtered ("\n");
+		  }
 	      }
 	  }
       }
