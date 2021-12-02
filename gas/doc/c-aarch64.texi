@@ -193,6 +193,8 @@ automatically cause those extensions to be disabled.
  @tab Enable Large System extensions.
 @item @code{memtag} @tab ARMv8.5-A @tab No
  @tab Enable ARMv8.5-A Memory Tagging Extensions.
+@item @code{mops} @tab @tab Armv8.8-A or later
+ @tab Enable Armv8.8-A memcpy and memset acceleration instructions
 @item @code{pan} @tab ARMv8-A @tab ARMv8.1-A or later
  @tab Enable Privileged Access Never support.
 @item @code{pauth} @tab ARMv8-A @tab No

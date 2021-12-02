@@ -893,6 +893,10 @@ aarch64_insert_operand (const aarch64_operand *self,
       return aarch64_ins_sme_sm_za (self, info, code, inst, errors);
     case 220:
       return aarch64_ins_sme_pred_reg_with_index (self, info, code, inst, errors);
+    case 223:
+    case 224:
+    case 225:
+      return aarch64_ins_x0_to_x30 (self, info, code, inst, errors);
     default: assert (0); abort ();
     }
 }

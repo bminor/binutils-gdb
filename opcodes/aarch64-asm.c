@@ -1519,6 +1519,19 @@ aarch64_ins_sme_pred_reg_with_index (const aarch64_operand *self,
   return true;
 }
 
+/* Insert X0-X30.  Register 31 is unallocated.  */
+bool
+aarch64_ins_x0_to_x30 (const aarch64_operand *self,
+		       const aarch64_opnd_info *info,
+		       aarch64_insn *code,
+		       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  assert (info->reg.regno <= 30);
+  insert_field (self->fields[0], code, info->reg.regno, 0);
+  return true;
+}
+
 /* Miscellaneous encoding functions.  */
 
 /* Encode size[0], i.e. bit 22, for

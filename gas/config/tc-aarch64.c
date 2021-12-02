@@ -3918,6 +3918,22 @@ parse_sve_address (char **str, aarch64_opnd_info *operand,
 			     SHIFTED_MUL_VL);
 }
 
+/* Parse a register X0-X30.  The register must be 64-bit and register 31
+   is unallocated.  */
+static bool
+parse_x0_to_x30 (char **str, aarch64_opnd_info *operand)
+{
+  const reg_entry *reg = parse_reg (str);
+  if (!reg || !aarch64_check_reg_type (reg, REG_TYPE_R_64))
+    {
+      set_syntax_error (_(get_reg_expected_msg (REG_TYPE_R_64)));
+      return false;
+    }
+  operand->reg.regno = reg->number;
+  operand->qualifier = AARCH64_OPND_QLF_X;
+  return true;
+}
+
 /* Parse an operand for a MOVZ, MOVN or MOVK instruction.
    Return TRUE on success; otherwise return FALSE.  */
 static bool
@@ -7491,6 +7507,21 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      break;
 	    }
 
+	case AARCH64_OPND_MOPS_ADDR_Rd:
+	case AARCH64_OPND_MOPS_ADDR_Rs:
+	  po_char_or_fail ('[');
+	  if (!parse_x0_to_x30 (&str, info))
+	    goto failure;
+	  po_char_or_fail (']');
+	  po_char_or_fail ('!');
+	  break;
+
+	case AARCH64_OPND_MOPS_WB_Rn:
+	  if (!parse_x0_to_x30 (&str, info))
+	    goto failure;
+	  po_char_or_fail ('!');
+	  break;
+
 	default:
 	  as_fatal (_("unhandled operand code %d"), operands[i]);
 	}
@@ -9928,6 +9959,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"flagm",		AARCH64_FEATURE (AARCH64_FEATURE_FLAGM, 0),
 			AARCH64_ARCH_NONE},
   {"pauth",		AARCH64_FEATURE (AARCH64_FEATURE_PAC, 0),
+			AARCH64_ARCH_NONE},
+  {"mops",		AARCH64_FEATURE (AARCH64_FEATURE_MOPS, 0),
 			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };

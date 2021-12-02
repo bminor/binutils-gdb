@@ -2493,6 +2493,10 @@ static const aarch64_feature_set aarch64_feature_ls64 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_6 | AARCH64_FEATURE_LS64, 0);
 static const aarch64_feature_set aarch64_feature_flagm =
   AARCH64_FEATURE (AARCH64_FEATURE_FLAGM, 0);
+static const aarch64_feature_set aarch64_feature_mops =
+  AARCH64_FEATURE (AARCH64_FEATURE_MOPS, 0);
+static const aarch64_feature_set aarch64_feature_mops_memtag =
+  AARCH64_FEATURE (AARCH64_FEATURE_MOPS | AARCH64_FEATURE_MEMTAG, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2544,6 +2548,8 @@ static const aarch64_feature_set aarch64_feature_flagm =
 #define ARMV8_7	  &aarch64_feature_v8_7
 #define LS64	  &aarch64_feature_ls64
 #define FLAGM	  &aarch64_feature_flagm
+#define MOPS	  &aarch64_feature_mops
+#define MOPS_MEMTAG &aarch64_feature_mops_memtag
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2669,6 +2675,52 @@ static const aarch64_feature_set aarch64_feature_flagm =
   { NAME, OPCODE, MASK, CLASS, 0, LS64, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define FLAGM_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, FLAGM, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define MOPS_INSN(NAME, OPCODE, MASK, CLASS, OPS, QUALS, FLAGS, CONSTRAINTS, VERIFIER) \
+  { NAME, OPCODE, MASK, CLASS, 0, MOPS, OPS, QUALS, FLAGS, CONSTRAINTS, \
+    0, VERIFIER }
+#define MOPS_MEMTAG_INSN(NAME, OPCODE, MASK, CLASS, OPS, QUALS, FLAGS, CONSTRAINTS, VERIFIER) \
+  { NAME, OPCODE, MASK, CLASS, 0, MOPS_MEMTAG, OPS, QUALS, FLAGS, \
+    CONSTRAINTS, 0, VERIFIER }
+
+#define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
+  MOPS_INSN (NAME, OPCODE, MASK, 0, \
+	     OP3 (MOPS_ADDR_Rd, MOPS_ADDR_Rs, MOPS_WB_Rn), QL_I3SAMEX, \
+	     FLAGS, CONSTRAINTS, VERIFIER (three_different_regs))
+
+#define MOPS_CPY_OP1_OP2_INSN(NAME, SUFFIX, OPCODE, MASK) \
+  MOPS_CPY_OP1_OP2_PME_INSN (NAME "p" SUFFIX, OPCODE, MASK, F_SCAN, 0), \
+  MOPS_CPY_OP1_OP2_PME_INSN (NAME "m" SUFFIX, OPCODE | 0x400000, MASK, 0, 0), \
+  MOPS_CPY_OP1_OP2_PME_INSN (NAME "e" SUFFIX, OPCODE | 0x800000, MASK, 0, 0)
+
+#define MOPS_CPY_OP1_INSN(NAME, SUFFIX, OPCODE, MASK) \
+  MOPS_CPY_OP1_OP2_INSN (NAME, SUFFIX, OPCODE, MASK), \
+  MOPS_CPY_OP1_OP2_INSN (NAME, SUFFIX "wn", OPCODE | 0x4000, MASK), \
+  MOPS_CPY_OP1_OP2_INSN (NAME, SUFFIX "rn", OPCODE | 0x8000, MASK), \
+  MOPS_CPY_OP1_OP2_INSN (NAME, SUFFIX "n", OPCODE | 0xc000, MASK)
+
+#define MOPS_CPY_INSN(NAME, OPCODE, MASK) \
+  MOPS_CPY_OP1_INSN (NAME, "", OPCODE, MASK), \
+  MOPS_CPY_OP1_INSN (NAME, "wt", OPCODE | 0x1000, MASK), \
+  MOPS_CPY_OP1_INSN (NAME, "rt", OPCODE | 0x2000, MASK), \
+  MOPS_CPY_OP1_INSN (NAME, "t", OPCODE | 0x3000, MASK)
+
+#define MOPS_SET_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS, ISA) \
+  ISA (NAME, OPCODE, MASK, 0, \
+       OP3 (MOPS_ADDR_Rd, MOPS_WB_Rn, Rm), QL_I3SAMEX, FLAGS, \
+       CONSTRAINTS, VERIFIER (three_different_regs))
+
+#define MOPS_SET_OP1_OP2_INSN(NAME, SUFFIX, OPCODE, MASK, ISA) \
+  MOPS_SET_OP1_OP2_PME_INSN (NAME "p" SUFFIX, OPCODE, MASK, 0, 0, ISA), \
+  MOPS_SET_OP1_OP2_PME_INSN (NAME "m" SUFFIX, OPCODE | 0x4000, MASK, \
+			     0, 0, ISA), \
+  MOPS_SET_OP1_OP2_PME_INSN (NAME "e" SUFFIX, OPCODE | 0x8000, MASK, \
+			     0, 0, ISA)
+
+#define MOPS_SET_INSN(NAME, OPCODE, MASK, ISA) \
+  MOPS_SET_OP1_OP2_INSN (NAME, "", OPCODE, MASK, ISA), \
+  MOPS_SET_OP1_OP2_INSN (NAME, "t", OPCODE | 0x1000, MASK, ISA), \
+  MOPS_SET_OP1_OP2_INSN (NAME, "n", OPCODE | 0x2000, MASK, ISA), \
+  MOPS_SET_OP1_OP2_INSN (NAME, "tn", OPCODE | 0x3000, MASK, ISA)
 
 const struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -5312,6 +5364,51 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   BFLOAT16_INSN ("bfmlalb", 0x2ec0fc00, 0xffe0fc00, bfloat16, OP3 (Vd, Vn, Vm), QL_BFMMLA, 0),
   BFLOAT16_INSN ("bfmlalt", 0x4fc0f000, 0xffc0f400, bfloat16, OP3 (Vd, Vn, Em16), QL_V3BFML4S, 0),
   BFLOAT16_INSN ("bfmlalb", 0x0fc0f000, 0xffc0f400, bfloat16, OP3 (Vd, Vn, Em16), QL_V3BFML4S, 0),
+
+  /* cpyfp cpyfprn cpyfpwn cpyfpn
+     cpyfm cpyfmrn cpyfmwn cpyfmn
+     cpyfe cpyfern cpyfewn cpyfen
+
+     cpyfprt cpyfprtrn cpyfprtwn cpyfprtn
+     cpyfmrt cpyfmrtrn cpyfmrtwn cpyfmrtn
+     cpyfert cpyfertrn cpyfertwn cpyfertn
+
+     cpyfpwt cpyfpwtrn cpyfpwtwn cpyfpwtn
+     cpyfmwt cpyfmwtrn cpyfmwtwn cpyfmwtn
+     cpyfewt cpyfewtrn cpyfewtwn cpyfewtn
+
+     cpyfpt cpyfptrn cpyfptwn cpyfptn
+     cpyfmt cpyfmtrn cpyfmtwn cpyfmtn
+     cpyfet cpyfetrn cpyfetwn cpyfetn.  */
+  MOPS_CPY_INSN ("cpyf", 0x19000400, 0xffe0fc00),
+
+  /* cpyp cpyprn cpypwn cpypn
+     cpym cpymrn cpymwn cpymn
+     cpye cpyern cpyewn cpyen
+
+     cpyprt cpyprtrn cpyprtwn cpyprtn
+     cpymrt cpymrtrn cpymrtwn cpymrtn
+     cpyert cpyertrn cpyertwn cpyertn
+
+     cpypwt cpypwtrn cpypwtwn cpypwtn
+     cpymwt cpymwtrn cpymwtwn cpymwtn
+     cpyewt cpyewtrn cpyewtwn cpyewtn
+
+     cpypt cpyptrn cpyptwn cpyptn
+     cpymt cpymtrn cpymtwn cpymtn
+     cpyet cpyetrn cpyetwn cpyetn.  */
+  MOPS_CPY_INSN ("cpy", 0x1d000400, 0xffe0fc00),
+
+  /* setp setpt setpn setptn
+     setm setmt setmn setmtn
+     sete setet seten setetn  */
+  MOPS_SET_INSN ("set", 0x19c00400, 0xffe0fc00, MOPS_INSN),
+
+  /* setgp setgpt setgpn setgptn
+     setgm setgmt setgmn setgmtn
+     setge setget setgen setgetn  */
+  MOPS_SET_INSN ("setg", 0x1dc00400, 0xffe0fc00, MOPS_MEMTAG_INSN),
+
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };
 
@@ -5795,4 +5892,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(IMMEDIATE, imm, "TME_UIMM16", 0, F(FLD_imm16),			\
       "a 16-bit unsigned immediate for TME tcancel")			\
     Y(SIMD_ELEMENT, reglane, "SM3_IMM2", 0, F(FLD_SM3_imm2),		\
-      "an indexed SM3 vector immediate")
+      "an indexed SM3 vector immediate")				\
+    /* These next two are really register fields; the [...] notation	\
+       is just syntactic sugar.  */					\
+    Y(INT_REG, x0_to_x30, "MOPS_ADDR_Rd", 0, F(FLD_Rd),			\
+      "a register destination address with writeback")			\
+    Y(INT_REG, x0_to_x30, "MOPS_ADDR_Rs", 0, F(FLD_Rs),			\
+      "a register source address with writeback")			\
+    Y(INT_REG, x0_to_x30, "MOPS_WB_Rd", 0, F(FLD_Rn),			\
+      "an integer register with writeback")

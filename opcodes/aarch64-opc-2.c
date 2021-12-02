@@ -247,6 +247,9 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_SVE_REG, "SME_PnT_Wm_imm", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SME_Rm,FLD_SVE_Pn,FLD_SME_i1,FLD_SME_tszh,FLD_SME_tszl}, "Source scalable predicate register with index "},
   {AARCH64_OPND_CLASS_IMMEDIATE, "TME_UIMM16", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_imm16}, "a 16-bit unsigned immediate for TME tcancel"},
   {AARCH64_OPND_CLASS_SIMD_ELEMENT, "SM3_IMM2", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_SM3_imm2}, "an indexed SM3 vector immediate"},
+  {AARCH64_OPND_CLASS_INT_REG, "MOPS_ADDR_Rd", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rd}, "a register destination address with writeback"},
+  {AARCH64_OPND_CLASS_INT_REG, "MOPS_ADDR_Rs", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rs}, "a register source address with writeback"},
+  {AARCH64_OPND_CLASS_INT_REG, "MOPS_WB_Rd", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an integer register with writeback"},
   {AARCH64_OPND_CLASS_NIL, "", 0, {0}, "DUMMY"},
 };
 

@@ -2053,6 +2053,17 @@ aarch64_ext_sve_shrimm (const aarch64_operand *self,
   info->imm.value = get_top_bit (info->imm.value) * 2 - info->imm.value;
   return true;
 }
+
+/* Decode X0-X30.  Register 31 is unallocated.  */
+bool
+aarch64_ext_x0_to_x30 (const aarch64_operand *self, aarch64_opnd_info *info,
+		       const aarch64_insn code,
+		       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  info->reg.regno = extract_field (self->fields[0], code, 0);
+  return info->reg.regno <= 30;
+}
 
 /* Bitfields that are commonly used to encode certain operands' information
    may be partially used as part of the base opcode in some instructions.

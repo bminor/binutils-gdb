@@ -3921,6 +3921,17 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	snprintf (buf, size, "%s", opnd->hint_option->name);
       break;
 
+    case AARCH64_OPND_MOPS_ADDR_Rd:
+    case AARCH64_OPND_MOPS_ADDR_Rs:
+      snprintf (buf, size, "[%s]!",
+		get_int_reg_name (opnd->reg.regno, AARCH64_OPND_QLF_X, 0));
+      break;
+
+    case AARCH64_OPND_MOPS_WB_Rn:
+      snprintf (buf, size, "%s!",
+		get_int_reg_name (opnd->reg.regno, AARCH64_OPND_QLF_X, 0));
+      break;
+
     default:
       snprintf (buf, size, "<invalid>");
       break;
@@ -5405,6 +5416,36 @@ verify_elem_sd (const struct aarch64_inst *inst, const aarch64_insn insn,
 
   if (undef_pattern == extract_fields (value, 0, 2, FLD_sz, FLD_L))
     return ERR_UND;
+
+  return ERR_OK;
+}
+
+/* Check an instruction that takes three register operands and that
+   requires the register numbers to be distinct from one another.  */
+
+static enum err_type
+verify_three_different_regs (const struct aarch64_inst *inst,
+			     const aarch64_insn insn ATTRIBUTE_UNUSED,
+			     bfd_vma pc ATTRIBUTE_UNUSED,
+			     bool encoding ATTRIBUTE_UNUSED,
+			     aarch64_operand_error *mismatch_detail
+			       ATTRIBUTE_UNUSED,
+			     aarch64_instr_sequence *insn_sequence
+			       ATTRIBUTE_UNUSED)
+{
+  int rd, rs, rn;
+
+  rd = inst->operands[0].reg.regno;
+  rs = inst->operands[1].reg.regno;
+  rn = inst->operands[2].reg.regno;
+  if (rd == rs || rd == rn || rs == rn)
+    {
+      mismatch_detail->kind = AARCH64_OPDE_SYNTAX_ERROR;
+      mismatch_detail->error
+	= _("the three register operands must be distinct from one another");
+      mismatch_detail->index = -1;
+      return ERR_UND;
+    }
 
   return ERR_OK;
 }
