@@ -94,6 +94,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_V9	     (1ULL << 56) /* Armv9.0-A processors.  */
 #define AARCH64_FEATURE_SME_F64	     (1ULL << 57) /* SME F64.  */
 #define AARCH64_FEATURE_SME_I64	     (1ULL << 58) /* SME I64.  */
+#define AARCH64_FEATURE_V8_8	     (1ULL << 59) /* Armv8.8 processors.  */
 
 /* Crypto instructions are the combination of AES and SHA2.  */
 #define AARCH64_FEATURE_CRYPTO	(AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_AES)
@@ -141,6 +142,8 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_ARCH_V8_7	AARCH64_FEATURE (AARCH64_ARCH_V8_6,	\
 						 AARCH64_FEATURE_V8_7	\
 						 | AARCH64_FEATURE_LS64)
+#define AARCH64_ARCH_V8_8	AARCH64_FEATURE (AARCH64_ARCH_V8_7,	\
+						 AARCH64_FEATURE_V8_8)
 #define AARCH64_ARCH_V8_R	(AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
 						 AARCH64_FEATURE_V8_R)	\
 			      & ~(AARCH64_FEATURE_V8_A | AARCH64_FEATURE_LOR))
