@@ -1,3 +1,8 @@
+2021-12-02  Marcus Nilsson  <brainbomb@gmail.com>
+
+	* avr-dis.c (avr_operand); Pass in disassemble_info and fill
+	in insn_type on branching instructions.
+
 2021-11-25  Andrew Burgess  <aburgess@redhat.com>
 	    Simon Cook  <simon.cook@embecosm.com>
 
