@@ -273,6 +273,10 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
         (F_REG_IN_CRM | PSTATE_ENCODE_CRM(CVAL) \
          | F_IMM_IN_CRM | PSTATE_ENCODE_CRM_IMM(IMASK))
 
+/* Bits [15, 18] contain the maximum value for an immediate MSR.  */
+#define F_REG_MAX_VALUE(X) ((X) << 15)
+#define F_GET_REG_MAX_VALUE(X) (((X) >> 15) & 0x0f)
+
 /* HINT operand flags.  */
 #define HINT_OPD_F_NOPRINT	(1 << 0)  /* Should not be printed.  */
 

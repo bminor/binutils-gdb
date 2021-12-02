@@ -1474,6 +1474,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
   uint64_t uvalue, mask;
   const aarch64_opnd_info *opnd = opnds + idx;
   aarch64_opnd_qualifier_t qualifier = opnd->qualifier;
+  int i;
 
   assert (opcode->operands[idx] == opnd->type && opnd->type == type);
 
@@ -2592,32 +2593,15 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
       switch (type)
 	{
 	case AARCH64_OPND_PSTATEFIELD:
+	  for (i = 0; aarch64_pstatefields[i].name; ++i)
+	    if (aarch64_pstatefields[i].value == opnd->pstatefield)
+	      break;
+	  assert (aarch64_pstatefields[i].name);
 	  assert (idx == 0 && opnds[1].type == AARCH64_OPND_UIMM4);
-	  /* MSR UAO, #uimm4
-	     MSR PAN, #uimm4
-	     MSR SSBS,#uimm4
-	     MSR SVCRSM, #uimm4
-	     MSR SVCRZA, #uimm4
-	     MSR SVCRSMZA, #uimm4
-	     The immediate must be #0 or #1.  */
-	  if ((opnd->pstatefield == 0x03	/* UAO.  */
-	       || opnd->pstatefield == 0x04	/* PAN.  */
-	       || opnd->pstatefield == 0x19     /* SSBS.  */
-	       || opnd->pstatefield == 0x1a	/* DIT.  */
-	       || opnd->pstatefield == 0x1b)	/* SVCRSM, SVCRZA or SVCRSMZA.  */
-	      && opnds[1].imm.value > 1)
+	  max_value = F_GET_REG_MAX_VALUE (aarch64_pstatefields[i].flags);
+	  if (opnds[1].imm.value < 0 || opnds[1].imm.value > max_value)
 	    {
-	      set_imm_out_of_range_error (mismatch_detail, idx, 0, 1);
-	      return 0;
-	    }
-	  /* MSR SPSel, #uimm4
-	     Uses uimm4 as a control value to select the stack pointer: if
-	     bit 0 is set it selects the current exception level's stack
-	     pointer, if bit 0 is clear it selects shared EL0 stack pointer.
-	     Bits 1 to 3 of uimm4 are reserved and should be zero.  */
-	  if (opnd->pstatefield == 0x05 /* spsel */ && opnds[1].imm.value > 1)
-	    {
-	      set_imm_out_of_range_error (mismatch_detail, idx, 0, 1);
+	      set_imm_out_of_range_error (mismatch_detail, 1, 0, max_value);
 	      return 0;
 	    }
 	  break;
@@ -5033,17 +5017,20 @@ aarch64_sys_reg_deprecated_p (const uint32_t reg_flags)
    0b011010 (0x1a).  */
 const aarch64_sys_reg aarch64_pstatefields [] =
 {
-  SR_CORE ("spsel",	  0x05,	0),
-  SR_CORE ("daifset",	  0x1e,	0),
-  SR_CORE ("daifclr",	  0x1f,	0),
-  SR_PAN  ("pan",	  0x04, 0),
-  SR_V8_2 ("uao",	  0x03, 0),
-  SR_SSBS ("ssbs",	  0x19, 0),
-  SR_V8_4 ("dit",	  0x1a,	0),
-  SR_MEMTAG ("tco",	  0x1c,	0),
-  SR_SME  ("svcrsm",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x2,0x1)),
-  SR_SME  ("svcrza",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x4,0x1)),
-  SR_SME  ("svcrsmza",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x6,0x1)),
+  SR_CORE ("spsel",	  0x05,	F_REG_MAX_VALUE (1)),
+  SR_CORE ("daifset",	  0x1e,	F_REG_MAX_VALUE (15)),
+  SR_CORE ("daifclr",	  0x1f,	F_REG_MAX_VALUE (15)),
+  SR_PAN  ("pan",	  0x04, F_REG_MAX_VALUE (1)),
+  SR_V8_2 ("uao",	  0x03, F_REG_MAX_VALUE (1)),
+  SR_SSBS ("ssbs",	  0x19, F_REG_MAX_VALUE (1)),
+  SR_V8_4 ("dit",	  0x1a,	F_REG_MAX_VALUE (1)),
+  SR_MEMTAG ("tco",	  0x1c,	F_REG_MAX_VALUE (1)),
+  SR_SME  ("svcrsm",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x2,0x1)
+				| F_REG_MAX_VALUE (1)),
+  SR_SME  ("svcrza",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x4,0x1)
+				| F_REG_MAX_VALUE (1)),
+  SR_SME  ("svcrsmza",	  0x1b, PSTATE_ENCODE_CRM_AND_IMM(0x6,0x1)
+				| F_REG_MAX_VALUE (1)),
   { 0,	  CPENC (0,0,0,0,0), 0, 0 },
 };
 

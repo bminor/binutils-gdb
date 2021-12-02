@@ -38,7 +38,7 @@ Disassembly of section \.text:
 .*:	d51d560c 	msr	tfsr_el12, x12
 .*:	d51810a1 	msr	rgsr_el1, x1
 .*:	d51810c3 	msr	gcr_el1, x3
-.*:	d503489f 	msr	tco, #0x8
+.*:	d503419f 	msr	tco, #0x1
 .*:	d5087661 	dc	igvac, x1
 .*:	d5087682 	dc	igsw, x2
 .*:	d5087a83 	dc	cgsw, x3
