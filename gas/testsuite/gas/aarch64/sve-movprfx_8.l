@@ -1,2 +1,2 @@
 [^:]*: Assembler messages:
-.*: Warning: previous `movprfx' sequence has not been closed
+.*:7: Warning: previous `movprfx' sequence has not been closed

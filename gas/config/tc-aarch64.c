@@ -160,13 +160,6 @@ static aarch64_instruction inst;
 static bool parse_operands (char *, const aarch64_opcode *);
 static bool programmer_friendly_fixup (aarch64_instruction *);
 
-#ifdef OBJ_ELF
-#  define now_instr_sequence seg_info \
-		(now_seg)->tc_segment_info_data.insn_sequence
-#else
-static struct aarch64_instr_sequence now_instr_sequence;
-#endif
-
 /* Diagnostics inline function utilities.
 
    These are lightweight utilities which should only be called by parse_operands
@@ -7801,11 +7794,15 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
 static void
 force_automatic_sequence_close (void)
 {
-  if (now_instr_sequence.instr)
+  struct aarch64_segment_info_type *tc_seg_info;
+
+  tc_seg_info = &seg_info (now_seg)->tc_segment_info_data;
+  if (tc_seg_info->insn_sequence.instr)
     {
-      as_warn (_("previous `%s' sequence has not been closed"),
-	       now_instr_sequence.instr->opcode->name);
-      init_insn_sequence (NULL, &now_instr_sequence);
+      as_warn_where (tc_seg_info->last_file, tc_seg_info->last_line,
+		     _("previous `%s' sequence has not been closed"),
+		     tc_seg_info->insn_sequence.instr->opcode->name);
+      init_insn_sequence (NULL, &tc_seg_info->insn_sequence);
     }
 }
 
@@ -7855,6 +7852,7 @@ md_assemble (char *str)
 {
   templates *template;
   const aarch64_opcode *opcode;
+  struct aarch64_segment_info_type *tc_seg_info;
   aarch64_inst *inst_base;
   unsigned saved_cond;
 
@@ -7867,7 +7865,9 @@ md_assemble (char *str)
     }
 
   /* Update the current insn_sequence from the segment.  */
-  insn_sequence = &seg_info (now_seg)->tc_segment_info_data.insn_sequence;
+  tc_seg_info = &seg_info (now_seg)->tc_segment_info_data;
+  insn_sequence = &tc_seg_info->insn_sequence;
+  tc_seg_info->last_file = as_where (&tc_seg_info->last_line);
 
   inst.reloc.type = BFD_RELOC_UNUSED;
 

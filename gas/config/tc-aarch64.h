@@ -225,6 +225,8 @@ void mapping_state (enum mstate);
 
 struct aarch64_segment_info_type
 {
+  const char *last_file;
+  unsigned last_line;
   enum mstate mapstate;
   unsigned int marked_pr_dependency;
   aarch64_instr_sequence insn_sequence;
