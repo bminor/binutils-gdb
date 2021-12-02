@@ -29,3 +29,5 @@ Disassembly of section \.text:
   54:	d5184b00 	msr	s3_0_c4_c11_0, x0
   58:	d5310300 	mrs	x0, trcstatr
   5c:	d5110300 	msr	trcstatr, x0
+  60:	d5380640 	mrs	x0, id_aa64isar2_el1
+  64:	d538065e 	mrs	x30, id_aa64isar2_el1

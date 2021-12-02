@@ -30,3 +30,6 @@
 
 	mrs x0, s2_1_c0_c3_0
 	msr s2_1_c0_c3_0, x0
+
+	mrs x0, id_aa64isar2_el1
+	mrs x30, id_aa64isar2_el1
