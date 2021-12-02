@@ -2497,6 +2497,8 @@ static const aarch64_feature_set aarch64_feature_mops =
   AARCH64_FEATURE (AARCH64_FEATURE_MOPS, 0);
 static const aarch64_feature_set aarch64_feature_mops_memtag =
   AARCH64_FEATURE (AARCH64_FEATURE_MOPS | AARCH64_FEATURE_MEMTAG, 0);
+static const aarch64_feature_set aarch64_feature_hbc =
+  AARCH64_FEATURE (AARCH64_FEATURE_HBC, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2550,6 +2552,7 @@ static const aarch64_feature_set aarch64_feature_mops_memtag =
 #define FLAGM	  &aarch64_feature_flagm
 #define MOPS	  &aarch64_feature_mops
 #define MOPS_MEMTAG &aarch64_feature_mops_memtag
+#define HBC	  &aarch64_feature_hbc
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2681,6 +2684,8 @@ static const aarch64_feature_set aarch64_feature_mops_memtag =
 #define MOPS_MEMTAG_INSN(NAME, OPCODE, MASK, CLASS, OPS, QUALS, FLAGS, CONSTRAINTS, VERIFIER) \
   { NAME, OPCODE, MASK, CLASS, 0, MOPS_MEMTAG, OPS, QUALS, FLAGS, \
     CONSTRAINTS, 0, VERIFIER }
+#define HBC_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, HBC, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 #define MOPS_CPY_OP1_OP2_PME_INSN(NAME, OPCODE, MASK, FLAGS, CONSTRAINTS) \
   MOPS_INSN (NAME, OPCODE, MASK, 0, \
@@ -5416,6 +5421,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
      setgm setgmt setgmn setgmtn
      setge setget setgen setgetn  */
   MOPS_SET_INSN ("setg", 0x1dc00400, 0xffe0fc00, MOPS_MEMTAG_INSN),
+
+  HBC_INSN ("bc.c", 0x54000010, 0xff000010, condbranch, OP1 (ADDR_PCREL19), QL_PCREL_NIL, F_COND),
 
   {0, 0, 0, 0, 0, 0, {}, {}, 0, 0, 0, NULL},
 };

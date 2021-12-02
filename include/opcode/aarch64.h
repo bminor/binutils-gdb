@@ -88,6 +88,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_MEMTAG       (1ULL << 48) /* Memory Tagging Extension.  */
 #define AARCH64_FEATURE_TME	     (1ULL << 49) /* Transactional Memory Extension.  */
 #define AARCH64_FEATURE_MOPS	     (1ULL << 50) /* Standardization of memory operations.  */
+#define AARCH64_FEATURE_HBC	     (1ULL << 51) /* Hinted conditional branches.  */
 #define AARCH64_FEATURE_I8MM	     (1ULL << 52) /* Matrix Multiply instructions.  */
 #define AARCH64_FEATURE_F32MM	     (1ULL << 53)
 #define AARCH64_FEATURE_F64MM	     (1ULL << 54)
@@ -145,7 +146,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_LS64)
 #define AARCH64_ARCH_V8_8	AARCH64_FEATURE (AARCH64_ARCH_V8_7,	\
 						 AARCH64_FEATURE_V8_8	\
-						 | AARCH64_FEATURE_MOPS)
+						 | AARCH64_FEATURE_MOPS	\
+						 | AARCH64_FEATURE_HBC)
 #define AARCH64_ARCH_V8_R	(AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
 						 AARCH64_FEATURE_V8_R)	\
 			      & ~(AARCH64_FEATURE_V8_A | AARCH64_FEATURE_LOR))
