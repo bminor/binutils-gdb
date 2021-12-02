@@ -83,7 +83,7 @@ void _initialize_maint_test_settings ();
 void
 _initialize_maint_test_settings ()
 {
-  maintenance_test_settings_filename = xstrdup ("/foo/bar");
+  maintenance_test_settings_filename = "/foo/bar";
 
   add_setshow_prefix_cmd ("test-settings", class_maintenance,
 			  _("\
