@@ -4673,6 +4673,38 @@ remote_target::process_initial_stop_replies (int from_tty)
     }
 }
 
+/* Mark a remote_target as marking (by setting the starting_up flag within
+   its remote_state) for the lifetime of this object.  The reference count
+   on the remote target is temporarily incremented, to prevent the target
+   being deleted under our feet.  */
+
+struct scoped_mark_target_starting
+{
+  /* Constructor, TARGET is the target to be marked as starting, its
+     reference count will be incremented.  */
+  scoped_mark_target_starting (remote_target *target)
+    : m_remote_target (target)
+  {
+    m_remote_target->incref ();
+    remote_state *rs = m_remote_target->get_remote_state ();
+    rs->starting_up = true;
+  }
+
+  /* Destructor, mark the target being worked on as no longer starting, and
+     decrement the reference count.  */
+  ~scoped_mark_target_starting ()
+  {
+    remote_state *rs = m_remote_target->get_remote_state ();
+    rs->starting_up = false;
+    decref_target (m_remote_target);
+  }
+
+private:
+
+  /* The target on which we are operating.  */
+  remote_target *m_remote_target;
+};
+
 /* Helper for remote_target::start_remote, start the remote connection and
    sync state.  Return true if everything goes OK, otherwise, return false.
    This function exists so that the scoped_restore created within it will
@@ -4692,8 +4724,7 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
      Ctrl-C before we're connected and synced up can't interrupt the
      target.  Instead, it offers to drop the (potentially wedged)
      connection.  */
-  scoped_restore restore_starting_up_flag
-    = make_scoped_restore (&rs->starting_up, true);
+  scoped_mark_target_starting target_is_starting (this);
 
   QUIT;
 
