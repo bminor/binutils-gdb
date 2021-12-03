@@ -1023,24 +1023,24 @@ doc/$(am__dirstamp):
 	@$(MKDIR_P) doc
 	@: > doc/$(am__dirstamp)
 
-doc/ctf-spec.info: doc/ctf-spec.texi 
-	@test -f doc/$(am__dirstamp) || $(MAKE) $(AM_MAKEFLAGS) doc/$(am__dirstamp)
-	$(AM_V_MAKEINFO)restore=: && backupdir="$(am__leading_dot)am$$$$" && \
-	rm -rf $$backupdir && mkdir $$backupdir && \
-	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
-	  for f in $@ $@-[0-9] $@-[0-9][0-9] $(@:.info=).i[0-9] $(@:.info=).i[0-9][0-9]; do \
-	    if test -f $$f; then mv $$f $$backupdir; restore=mv; else :; fi; \
-	  done; \
-	else :; fi && \
-	if $(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc \
-	 -o $@ `test -f 'doc/ctf-spec.texi' || echo '$(srcdir)/'`doc/ctf-spec.texi; \
-	then \
-	  rc=0; \
-	else \
-	  rc=$$?; \
-	  $$restore $$backupdir/* `echo "./$@" | sed 's|[^/]*$$||'`; \
-	fi; \
-	rm -rf $$backupdir; exit $$rc
+@BUILD_INFO_TRUE@doc/ctf-spec.info: doc/ctf-spec.texi 
+@BUILD_INFO_TRUE@	@test -f doc/$(am__dirstamp) || $(MAKE) $(AM_MAKEFLAGS) doc/$(am__dirstamp)
+@BUILD_INFO_TRUE@	$(AM_V_MAKEINFO)restore=: && backupdir="$(am__leading_dot)am$$$$" && \
+@BUILD_INFO_TRUE@	rm -rf $$backupdir && mkdir $$backupdir && \
+@BUILD_INFO_TRUE@	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
+@BUILD_INFO_TRUE@	  for f in $@ $@-[0-9] $@-[0-9][0-9] $(@:.info=).i[0-9] $(@:.info=).i[0-9][0-9]; do \
+@BUILD_INFO_TRUE@	    if test -f $$f; then mv $$f $$backupdir; restore=mv; else :; fi; \
+@BUILD_INFO_TRUE@	  done; \
+@BUILD_INFO_TRUE@	else :; fi && \
+@BUILD_INFO_TRUE@	if $(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I doc -I $(srcdir)/doc \
+@BUILD_INFO_TRUE@	 -o $@ `test -f 'doc/ctf-spec.texi' || echo '$(srcdir)/'`doc/ctf-spec.texi; \
+@BUILD_INFO_TRUE@	then \
+@BUILD_INFO_TRUE@	  rc=0; \
+@BUILD_INFO_TRUE@	else \
+@BUILD_INFO_TRUE@	  rc=$$?; \
+@BUILD_INFO_TRUE@	  $$restore $$backupdir/* `echo "./$@" | sed 's|[^/]*$$||'`; \
+@BUILD_INFO_TRUE@	fi; \
+@BUILD_INFO_TRUE@	rm -rf $$backupdir; exit $$rc
 
 doc/ctf-spec.dvi: doc/ctf-spec.texi  doc/$(am__dirstamp)
 	$(AM_V_TEXI2DVI)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
@@ -1708,6 +1708,10 @@ uninstall-am: uninstall-dvi-am uninstall-html-am \
 @BUILD_INFO_TRUE@doc/ctf-spec/index.html: doc/ctf-spec.texi doc/$(am__dirstamp)
 @BUILD_INFO_TRUE@	$(AM_V_GEN)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
 @BUILD_INFO_TRUE@	  --split=node -I$(srcdir) --output doc/ctf-spec $(srcdir)/doc/ctf-spec.texi
+
+# Workaround bug in automake: it can't handle conditionally building info pages
+# since GNU projects normally include info pages in the source distributions.
+@BUILD_INFO_FALSE@doc/ctf-spec.info:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

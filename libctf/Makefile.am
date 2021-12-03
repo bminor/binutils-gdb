@@ -114,6 +114,4 @@ EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 DISTCLEANFILES += site.exp development.exp
 endif
 
-if BUILD_INFO
 include doc/local.mk
-endif
