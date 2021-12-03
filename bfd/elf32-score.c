@@ -440,23 +440,14 @@ score_elf_final_gp (bfd *output_bfd,
 
 static bfd_reloc_status_type
 score_elf_gprel15_with_gp (bfd *abfd,
-			   asymbol *symbol,
 			   arelent *reloc_entry,
 			   asection *input_section,
 			   bool relocateable,
 			   void * data,
 			   bfd_vma gp ATTRIBUTE_UNUSED)
 {
-  bfd_vma relocation;
   unsigned long insn;
 
-  if (bfd_is_com_section (symbol->section))
-    relocation = 0;
-  else
-    relocation = symbol->value;
-
-  relocation += symbol->section->output_section->vma;
-  relocation += symbol->section->output_offset;
   if (reloc_entry->address > input_section->size)
     return bfd_reloc_outofrange;
 
@@ -547,8 +538,8 @@ score_elf_gprel15_reloc (bfd *abfd,
   if (ret != bfd_reloc_ok)
     return ret;
 
-  return score_elf_gprel15_with_gp (abfd, symbol, reloc_entry,
-					 input_section, relocateable, data, gp);
+  return score_elf_gprel15_with_gp (abfd, reloc_entry,
+				    input_section, relocateable, data, gp);
 }
 
 /* Do a R_SCORE_GPREL32 relocation.  This is a 32 bit value which must

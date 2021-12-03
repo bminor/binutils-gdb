@@ -795,13 +795,7 @@ mn10200_elf_relax_section (bfd *abfd,
       if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10200_PCREL8)
 	{
 	  Elf_Internal_Rela *nrel;
-	  bfd_vma value = symval;
 	  unsigned char code;
-
-	  /* Deal with pc-relative gunk.  */
-	  value -= (sec->output_section->vma + sec->output_offset);
-	  value -= (irel->r_offset + 1);
-	  value += irel->r_addend;
 
 	  /* Do nothing if this reloc is the last byte in the section.  */
 	  if (irel->r_offset == sec->size)

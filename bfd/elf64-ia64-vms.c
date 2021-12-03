@@ -2512,8 +2512,6 @@ allocate_dynrel_entries (struct elf64_ia64_dyn_sym_info *dyn_i,
 
   for (rent = dyn_i->reloc_entries; rent; rent = rent->next)
     {
-      int count = rent->count;
-
       switch (rent->type)
 	{
 	case R_IA64_FPTR32LSB:
@@ -2538,10 +2536,6 @@ allocate_dynrel_entries (struct elf64_ia64_dyn_sym_info *dyn_i,
 	case R_IA64_IPLTLSB:
 	  if (!dynamic_symbol && !shared)
 	    continue;
-	  /* Use two REL relocations for IPLT relocations
-	     against local symbols.  */
-	  if (!dynamic_symbol)
-	    count *= 2;
 	  break;
 	case R_IA64_DTPREL32LSB:
 	case R_IA64_TPREL64LSB:
