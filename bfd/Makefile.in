@@ -1176,6 +1176,28 @@ LIBBFD_H_FILES = libbfd-in.h libbfd.c bfdio.c bfdwin.c \
 
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 MKDOC = doc/chew$(EXEEXT_FOR_BUILD)
+
+# We only rebuild the header files automatically if we have been
+# configured with --enable-maintainer-mode.
+REGEN_HEADER = \
+	( \
+	set -e; \
+	echo "$$H_FILES" | sed -f $(srcdir)/doc/header.sed; \
+	for file in $$H_FILES; do \
+	  file="$(srcdir)/$$file"; \
+	  case $$file in \
+	    *-in.h) cat $$file;; \
+	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
+				-e 's,$$,.  */,'; \
+		$(MKDOC) $$CHEW_FLAGS -f $(srcdir)/doc/proto.str < $$file;; \
+	  esac; \
+	done; \
+	echo "\#ifdef __cplusplus"; \
+	echo "}"; \
+	echo "\#endif"; \
+	echo "\#endif"; \
+	)
+
 MOSTLYCLEANFILES = ofiles stamp-ofiles
 CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
@@ -2050,72 +2072,21 @@ $(MKDOC):
 
 headers: stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
-# We only rebuild the header files automatically if we have been
-# configured with --enable-maintainer-mode.
-
 $(srcdir)/bfd-in2.h: @MAINT@ stmp-bin2-h ; @true
 stmp-bin2-h: $(BFD_H_FILES) $(BFD64_H_FILES) $(MKDOC)
-	$(AM_V_GEN)( \
-	set -e; \
-	echo "$(BFD_H_FILES)" | sed -f $(srcdir)/doc/header.sed; \
-	for file in $(BFD_H_FILES); do \
-	  file="$(srcdir)/$$file"; \
-	  case $$file in \
-	    *-in.h) cat $$file;; \
-	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
-				-e 's,$$,.  */,'; \
-		$(MKDOC) -f $(srcdir)/doc/proto.str < $$file;; \
-	  esac; \
-	done; \
-	echo "#ifdef __cplusplus"; \
-	echo "}"; \
-	echo "#endif"; \
-	echo "#endif"; \
-	) > bfd-in2.h-new
+	$(AM_V_GEN)H_FILES="$(BFD_H_FILES)" CHEW_FLAGS= ; $(REGEN_HEADER) > bfd-in2.h-new
 	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
 	$(AM_V_at)touch stmp-bin2-h
 
 $(srcdir)/libbfd.h: @MAINT@ stmp-lbfd-h ; @true
 stmp-lbfd-h: $(LIBBFD_H_FILES) $(MKDOC)
-	$(AM_V_GEN)( \
-	set -e; \
-	echo "$(LIBBFD_H_FILES)" | sed -f $(srcdir)/doc/header.sed; \
-	for file in $(LIBBFD_H_FILES); do \
-	  file="$(srcdir)/$$file"; \
-	  case $$file in \
-	    *-in.h) cat $$file;; \
-	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
-				-e 's,$$,.  */,'; \
-		$(MKDOC) -i -f $(srcdir)/doc/proto.str < $$file;; \
-	  esac; \
-	done; \
-	echo "#ifdef __cplusplus"; \
-	echo "}"; \
-	echo "#endif"; \
-	echo "#endif"; \
-	) > libbfd.h-new
+	$(AM_V_GEN)H_FILES="$(LIBBFD_H_FILES)" CHEW_FLAGS=-i ; $(REGEN_HEADER) > libbfd.h-new
 	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
 	$(AM_V_at)touch stmp-lbfd-h
 
 $(srcdir)/libcoff.h: @MAINT@ stmp-lcoff-h ; @true
 stmp-lcoff-h: $(LIBCOFF_H_FILES) $(MKDOC)
-	$(AM_V_GEN)( \
-	set -e; \
-	echo "$(LIBCOFF_H_FILES)" | sed -f $(srcdir)/doc/header.sed; \
-	for file in $(LIBCOFF_H_FILES); do \
-	  file="$(srcdir)/$$file"; \
-	  case $$file in \
-	    *-in.h) cat $$file;; \
-	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
-				-e 's,$$,.  */,'; \
-		$(MKDOC) -i -f $(srcdir)/doc/proto.str < $$file;; \
-	  esac; \
-	done; \
-	echo "#ifdef __cplusplus"; \
-	echo "}"; \
-	echo "#endif"; \
-	echo "#endif"; \
-	) > libcoff.h-new
+	$(AM_V_GEN)H_FILES="$(LIBCOFF_H_FILES)" CHEW_FLAGS=-i ; $(REGEN_HEADER) > libcoff.h-new
 	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 	$(AM_V_at)touch stmp-lcoff-h
 
