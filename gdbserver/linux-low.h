@@ -315,7 +315,8 @@ public:
 #endif
 
   thread_info *thread_pending_parent (thread_info *thread) override;
-  thread_info *thread_pending_child (thread_info *thread) override;
+  thread_info *thread_pending_child (thread_info *thread,
+				     target_waitkind *kind) override;
 
   bool supports_catch_syscall () override;
 
@@ -756,13 +757,15 @@ struct lwp_info
     const target_waitstatus &ws
       = this->relative->waitstatus;
     gdb_assert (ws.kind () == TARGET_WAITKIND_FORKED
-		|| ws.kind () == TARGET_WAITKIND_VFORKED);
+		|| ws.kind () == TARGET_WAITKIND_VFORKED
+		|| ws.kind () == TARGET_WAITKIND_THREAD_CLONED);
 
     return this->relative; }
 
   /* If this LWP is the parent of a fork/vfork/clone child we haven't
-     reported to GDB yet, return that child, else nullptr.  */
-  lwp_info *pending_child () const
+     reported to GDB yet, return that child and fill in KIND with the
+     matching waitkind, otherwise nullptr.  */
+  lwp_info *pending_child (target_waitkind *kind) const
   {
     if (this->relative == nullptr)
       return nullptr;
@@ -781,8 +784,10 @@ struct lwp_info
 
     const target_waitstatus &ws = this->waitstatus;
     gdb_assert (ws.kind () == TARGET_WAITKIND_FORKED
-		|| ws.kind () == TARGET_WAITKIND_VFORKED);
+		|| ws.kind () == TARGET_WAITKIND_VFORKED
+		|| ws.kind () == TARGET_WAITKIND_THREAD_CLONED);
 
+    *kind = ws.kind ();
     return this->relative;
   }
 
