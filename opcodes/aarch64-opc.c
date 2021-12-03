@@ -5522,6 +5522,7 @@ verify_mops_pme_sequence (const struct aarch64_inst *inst,
       && prev_insn->opcode != opcode - 1)
     {
       mismatch_detail->kind = AARCH64_OPDE_EXPECTED_A_AFTER_B;
+      mismatch_detail->error = NULL;
       mismatch_detail->index = -1;
       mismatch_detail->data[0].s = prev_insn->opcode[1].name;
       mismatch_detail->data[1].s = prev_insn->opcode->name;
@@ -5534,6 +5535,7 @@ verify_mops_pme_sequence (const struct aarch64_inst *inst,
       if (is_new_section || !prev_insn || prev_insn->opcode != opcode - 1)
 	{
 	  mismatch_detail->kind = AARCH64_OPDE_A_SHOULD_FOLLOW_B;
+	  mismatch_detail->error = NULL;
 	  mismatch_detail->index = -1;
 	  mismatch_detail->data[0].s = opcode->name;
 	  mismatch_detail->data[1].s = opcode[-1].name;
