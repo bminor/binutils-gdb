@@ -6939,9 +6939,10 @@ linux_process_target::thread_pending_parent (thread_info *thread)
 }
 
 thread_info *
-linux_process_target::thread_pending_child (thread_info *thread)
+linux_process_target::thread_pending_child (thread_info *thread,
+					    target_waitkind *kind)
 {
-  lwp_info *child = get_thread_lwp (thread)->pending_child ();
+  lwp_info *child = get_thread_lwp (thread)->pending_child (kind);
 
   if (child == nullptr)
     return nullptr;

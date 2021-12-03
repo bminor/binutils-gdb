@@ -315,7 +315,8 @@ public:
 #endif
 
   thread_info *thread_pending_parent (thread_info *thread) override;
-  thread_info *thread_pending_child (thread_info *thread) override;
+  thread_info *thread_pending_child (thread_info *thread,
+				     target_waitkind *kind) override;
 
   bool supports_catch_syscall () override;
 
@@ -734,8 +735,8 @@ struct pending_signal
 
 struct lwp_info
 {
-  /* If this LWP is a fork child that wasn't reported to GDB yet, return
-     its parent, else nullptr.  */
+  /* If this LWP is a fork/vfork/clone child that wasn't reported to
+     GDB yet, return its parent, else nullptr.  */
   lwp_info *pending_parent () const
   {
     if (this->fork_relative == nullptr)
@@ -743,10 +744,10 @@ struct lwp_info
 
     gdb_assert (this->fork_relative->fork_relative == this);
 
-    /* In a fork parent/child relationship, the parent has a status pending and
-       the child does not, and a thread can only be in one such relationship
-       at most.  So we can recognize who is the parent based on which one has
-       a pending status.  */
+    /* In a parent/child relationship, the parent has a status pending
+       and the child does not, and a thread can only be in one such
+       relationship at most.  So we can recognize who is the parent
+       based on which one has a pending status.  */
     gdb_assert (!!this->status_pending_p
 		!= !!this->fork_relative->status_pending_p);
 
@@ -756,24 +757,25 @@ struct lwp_info
     const target_waitstatus &ws
       = this->fork_relative->waitstatus;
     gdb_assert (ws.kind () == TARGET_WAITKIND_FORKED
-		|| ws.kind () == TARGET_WAITKIND_VFORKED);
+		|| ws.kind () == TARGET_WAITKIND_VFORKED
+		|| ws.kind () == TARGET_WAITKIND_THREAD_CLONED);
 
     return this->fork_relative;
   }
 
-  /* If this LWP is the parent of a fork child we haven't reported to GDB yet,
-     return that child, else nullptr.  */
-  lwp_info *pending_child () const
+  /* If this LWP is the parent of a fork/vfork/clone child we haven't
+     reported to GDB yet, return that child, else nullptr.  */
+  lwp_info *pending_child (target_waitkind *kind) const
   {
     if (this->fork_relative == nullptr)
       return nullptr;
 
     gdb_assert (this->fork_relative->fork_relative == this);
 
-    /* In a fork parent/child relationship, the parent has a status pending and
-       the child does not, and a thread can only be in one such relationship
-       at most.  So we can recognize who is the parent based on which one has
-       a pending status.  */
+    /* In a parent/child relationship, the parent has a status pending
+       and the child does not, and a thread can only be in one such
+       relationship at most.  So we can recognize who is the parent
+       based on which one has a pending status.  */
     gdb_assert (!!this->status_pending_p
 		!= !!this->fork_relative->status_pending_p);
 
@@ -782,8 +784,10 @@ struct lwp_info
 
     const target_waitstatus &ws = this->waitstatus;
     gdb_assert (ws.kind () == TARGET_WAITKIND_FORKED
-		|| ws.kind () == TARGET_WAITKIND_VFORKED);
+		|| ws.kind () == TARGET_WAITKIND_VFORKED
+		|| ws.kind () == TARGET_WAITKIND_THREAD_CLONED);
 
+    *kind = ws.kind ();
     return this->fork_relative;
   }
 

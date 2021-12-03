@@ -1349,8 +1349,9 @@ handle_detach (char *own_buf)
 	continue;
 
       /* Only threads that have a pending fork event.  */
-      thread_info *child = target_thread_pending_child (thread);
-      if (child == nullptr)
+      target_waitkind kind;
+      thread_info *child = target_thread_pending_child (thread, &kind);
+      if (child == nullptr || kind == TARGET_WAITKIND_THREAD_CLONED)
 	continue;
 
       process_info *fork_child_process = get_thread_process (child);
@@ -1771,9 +1772,10 @@ handle_qxfer_threads_worker (thread_info *thread, std::string *buffer)
   gdb_byte *handle;
   bool handle_status = target_thread_handle (ptid, &handle, &handle_len);
 
-  /* If this is a fork or vfork child (has a fork parent), GDB does not yet
-     know about this process, and must not know about it until it gets the
-     corresponding (v)fork event.  Exclude this thread from the list.  */
+  /* If this is a (v)fork/clone child (has a (v)fork/clone parent),
+     GDB does not yet know about this thread, and must not know about
+     it until it gets the corresponding (v)fork/clone event.  Exclude
+     this thread from the list.  */
   if (target_thread_pending_parent (thread) != nullptr)
     return;
 
