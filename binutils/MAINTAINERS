@@ -95,6 +95,8 @@ responsibility among the other maintainers.
   ix86 PE/COFF	   Dave Korn <dave.korn.cygwin@gmail.com>
   ix86 INTEL MODE  Jan Beulich <jbeulich@novell.com>
   LM32             Jon Beniston <jon@beniston.com>
+  LoongArch	   Chenghua Xu <xuchenghua@loongson.cn>
+  LoongArch	   Zhensong Liu <liuzhensong@loongson.cn>
   M32R             Doug Evans <dje@sebabeach.org>
   M68HC11 M68HC12  Stephane Carrez <Stephane.Carrez@gmail.com>
   M68HC11 M68HC12  Sean Keys <skeys@ipdatasys.com>
