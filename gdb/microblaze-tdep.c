@@ -204,7 +204,6 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
   unsigned long insn;
   int rd, ra, rb, imm;
   enum microblaze_instr op;
-  int flags = 0;
   int save_hidden_pointer_found = 0;
   int non_stack_instruction_found = 0;
 
@@ -303,8 +302,6 @@ microblaze_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 	{
 	  /* We have a frame pointer.  Note the register which is 
 	     acting as the frame pointer.  */
-	  flags |= MICROBLAZE_MY_FRAME_IN_FP;
-	  flags &= ~MICROBLAZE_MY_FRAME_IN_SP;
 	  cache->fp_regnum = rd;
 	  microblaze_debug ("Found a frame pointer: r%d\n", cache->fp_regnum);
 	  save_hidden_pointer_found = 0;
