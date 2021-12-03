@@ -147,9 +147,9 @@ inspect_type (struct demangle_parse_info *info,
   name[ret_comp->u.s_name.len] = '\0';
 
   /* Ignore any typedefs that should not be substituted.  */
-  for (int i = 0; i < ARRAY_SIZE (ignore_typedefs); ++i)
+  for (const char *ignorable : ignore_typedefs)
     {
-      if (strcmp (name, ignore_typedefs[i]) == 0)
+      if (strcmp (name, ignorable) == 0)
 	return 0;
     }
 

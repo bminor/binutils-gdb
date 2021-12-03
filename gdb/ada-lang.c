@@ -12202,7 +12202,6 @@ static std::string
 ada_exception_catchpoint_cond_string (const char *excep_string,
 				      enum ada_exception_catchpoint_kind ex)
 {
-  int i;
   bool is_standard_exc = false;
   std::string result;
 
@@ -12235,9 +12234,9 @@ ada_exception_catchpoint_cond_string (const char *excep_string,
      breakpoint condition is to use its fully-qualified named:
      e.g. my_package.constraint_error.  */
 
-  for (i = 0; i < sizeof (standard_exc) / sizeof (char *); i++)
+  for (const char *name : standard_exc)
     {
-      if (strcmp (standard_exc [i], excep_string) == 0)
+      if (strcmp (name, excep_string) == 0)
 	{
 	  is_standard_exc = true;
 	  break;
@@ -12467,13 +12466,11 @@ ada_is_exception_sym (struct symbol *sym)
 static int
 ada_is_non_standard_exception_sym (struct symbol *sym)
 {
-  int i;
-
   if (!ada_is_exception_sym (sym))
     return 0;
 
-  for (i = 0; i < ARRAY_SIZE (standard_exc); i++)
-    if (strcmp (sym->linkage_name (), standard_exc[i]) == 0)
+  for (const char *name : standard_exc)
+    if (strcmp (sym->linkage_name (), name) == 0)
       return 0;  /* A standard exception.  */
 
   /* Numeric_Error is also a standard exception, so exclude it.
@@ -12538,20 +12535,17 @@ static void
 ada_add_standard_exceptions (compiled_regex *preg,
 			     std::vector<ada_exc_info> *exceptions)
 {
-  int i;
-
-  for (i = 0; i < ARRAY_SIZE (standard_exc); i++)
+  for (const char *name : standard_exc)
     {
-      if (preg == NULL
-	  || preg->exec (standard_exc[i], 0, NULL, 0) == 0)
+      if (preg == NULL || preg->exec (name, 0, NULL, 0) == 0)
 	{
 	  struct bound_minimal_symbol msymbol
-	    = ada_lookup_simple_minsym (standard_exc[i]);
+	    = ada_lookup_simple_minsym (name);
 
 	  if (msymbol.minsym != NULL)
 	    {
 	      struct ada_exc_info info
-		= {standard_exc[i], BMSYMBOL_VALUE_ADDRESS (msymbol)};
+		= {name, BMSYMBOL_VALUE_ADDRESS (msymbol)};
 
 	      exceptions->push_back (info);
 	    }

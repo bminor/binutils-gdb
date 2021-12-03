@@ -756,7 +756,6 @@ rust_parser::lex_identifier ()
 {
   unsigned int length;
   const struct token_info *token;
-  int i;
   int is_gdb_var = pstate->lexptr[0] == '$';
 
   bool is_raw = false;
@@ -787,12 +786,12 @@ rust_parser::lex_identifier ()
   token = NULL;
   if (!is_raw)
     {
-      for (i = 0; i < ARRAY_SIZE (identifier_tokens); ++i)
+      for (const auto &candidate : identifier_tokens)
 	{
-	  if (length == strlen (identifier_tokens[i].name)
-	      && strncmp (identifier_tokens[i].name, start, length) == 0)
+	  if (length == strlen (candidate.name)
+	      && strncmp (candidate.name, start, length) == 0)
 	    {
-	      token = &identifier_tokens[i];
+	      token = &candidate;
 	      break;
 	    }
 	}
@@ -845,15 +844,14 @@ int
 rust_parser::lex_operator ()
 {
   const struct token_info *token = NULL;
-  int i;
 
-  for (i = 0; i < ARRAY_SIZE (operator_tokens); ++i)
+  for (const auto &candidate : operator_tokens)
     {
-      if (strncmp (operator_tokens[i].name, pstate->lexptr,
-		   strlen (operator_tokens[i].name)) == 0)
+      if (strncmp (candidate.name, pstate->lexptr,
+		   strlen (candidate.name)) == 0)
 	{
-	  pstate->lexptr += strlen (operator_tokens[i].name);
-	  token = &operator_tokens[i];
+	  pstate->lexptr += strlen (candidate.name);
+	  token = &candidate;
 	  break;
 	}
     }
@@ -2246,8 +2244,6 @@ rust_lex_test_push_back (rust_parser *parser)
 static void
 rust_lex_tests (void)
 {
-  int i;
-
   /* Set up dummy "parser", so that rust_type works.  */
   struct parser_state ps (language_def (language_rust), target_gdbarch (),
 			  nullptr, 0, 0, nullptr, 0, nullptr, false);
@@ -2342,13 +2338,11 @@ rust_lex_tests (void)
   rust_lex_stringish_test (&parser, "br####\"\\x73tring\"####", "\\x73tring",
 			   BYTESTRING);
 
-  for (i = 0; i < ARRAY_SIZE (identifier_tokens); ++i)
-    rust_lex_test_one (&parser, identifier_tokens[i].name,
-		       identifier_tokens[i].value);
+  for (const auto &candidate : identifier_tokens)
+    rust_lex_test_one (&parser, candidate.name, candidate.value);
 
-  for (i = 0; i < ARRAY_SIZE (operator_tokens); ++i)
-    rust_lex_test_one (&parser, operator_tokens[i].name,
-		       operator_tokens[i].value);
+  for (const auto &candidate : operator_tokens)
+    rust_lex_test_one (&parser, candidate.name, candidate.value);
 
   rust_lex_test_completion (&parser);
   rust_lex_test_push_back (&parser);

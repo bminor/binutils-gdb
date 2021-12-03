@@ -1107,28 +1107,28 @@ yylex (void)
 
   /* See if it is a special token of length 3.  */
   if (explen > 2)
-    for (int i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
-      if (strncasecmp (tokstart, tokentab3[i].oper, 3) == 0
-	  && (!isalpha (tokentab3[i].oper[0]) || explen == 3
+    for (const auto &token : tokentab3)
+      if (strncasecmp (tokstart, token.oper, 3) == 0
+	  && (!isalpha (token.oper[0]) || explen == 3
 	      || (!isalpha (tokstart[3])
 		  && !isdigit (tokstart[3]) && tokstart[3] != '_')))
 	{
 	  pstate->lexptr += 3;
-	  yylval.opcode = tokentab3[i].opcode;
-	  return tokentab3[i].token;
+	  yylval.opcode = token.opcode;
+	  return token.token;
 	}
 
   /* See if it is a special token of length 2.  */
   if (explen > 1)
-  for (int i = 0; i < sizeof (tokentab2) / sizeof (tokentab2[0]); i++)
-      if (strncasecmp (tokstart, tokentab2[i].oper, 2) == 0
-	  && (!isalpha (tokentab2[i].oper[0]) || explen == 2
+    for (const auto &token : tokentab2)
+      if (strncasecmp (tokstart, token.oper, 2) == 0
+	  && (!isalpha (token.oper[0]) || explen == 2
 	      || (!isalpha (tokstart[2])
 		  && !isdigit (tokstart[2]) && tokstart[2] != '_')))
 	{
 	  pstate->lexptr += 2;
-	  yylval.opcode = tokentab2[i].opcode;
-	  return tokentab2[i].token;
+	  yylval.opcode = token.opcode;
+	  return token.token;
 	}
 
   switch (c = *tokstart)

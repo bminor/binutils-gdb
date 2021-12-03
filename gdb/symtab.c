@@ -6375,13 +6375,12 @@ producer_is_realview (const char *producer)
     "ARM/Thumb C/C++ Compiler, RVCT",
     "ARM C/C++ Compiler, RVCT"
   };
-  int i;
 
   if (producer == NULL)
     return false;
 
-  for (i = 0; i < ARRAY_SIZE (arm_idents); i++)
-    if (startswith (producer, arm_idents[i]))
+  for (const char *ident : arm_idents)
+    if (startswith (producer, ident))
       return true;
 
   return false;
