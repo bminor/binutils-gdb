@@ -77,8 +77,6 @@ chew.stamp: $(srcdir)/chew.c
 	  chw$$$$$(EXEEXT_FOR_BUILD) $(MKDOC); \
 	touch $@
 
-protos: libbfd.h libcoff.h bfd.h
-
 # We can't replace these rules with an implicit rule, because
 # makes without VPATH support couldn't find the .h files in `..'.
 
@@ -242,98 +240,6 @@ linker.stamp: $(srcdir)/../linker.c $(srcdir)/doc.str $(MKDOC)
 	test -e linker.texi || test ! -f $(srcdir)/linker.texi || $(LN_S) $(srcdir)/linker.texi .
 	$(SHELL) $(srcdir)/../../move-if-change linker.tmp linker.texi
 	touch $@
-
-LIBBFD_H_DEP = \
-	$(srcdir)/../libbfd-in.h	\
-	$(srcdir)/../libbfd.c		\
-	$(srcdir)/../bfdio.c		\
-	$(srcdir)/../bfdwin.c		\
-	$(srcdir)/../cache.c		\
-	$(srcdir)/../reloc.c		\
-	$(srcdir)/../archures.c		\
-	$(srcdir)/../linker.c		\
-	$(srcdir)/header.sed		\
-	$(srcdir)/proto.str		\
-	$(MKDOC)
-
-libbfd.h: $(LIBBFD_H_DEP)
-	echo "$(LIBBFD_H_DEP)" | sed -f $(srcdir)/header.sed > $@
-	for file in $(LIBBFD_H_DEP); do \
-	  case $$file in \
-	    *-in.h) cat $$file >> $@ ;; \
-	    */header.sed) break ;; \
-	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
-				-e 's,$$,.  */,' >> $@ ; \
-		./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
-	  esac; \
-	done
-	echo "#ifdef __cplusplus" >> $@
-	echo "}" >> $@
-	echo "#endif" >> $@
-	echo "#endif" >> $@
-
-LIBCOFF_H_DEP = \
-	$(srcdir)/../libcoff-in.h	\
-	$(srcdir)/../coffcode.h		\
-	$(srcdir)/header.sed		\
-	$(srcdir)/proto.str		\
-	$(MKDOC)
-
-libcoff.h: $(LIBCOFF_H_DEP)
-	echo "$(LIBCOFF_H_DEP)" | sed -f $(srcdir)/header.sed > $@
-	for file in $(LIBCOFF_H_DEP); do \
-	  case $$file in \
-	    *-in.h) cat $$file >> $@ ;; \
-	    */header.sed) break ;; \
-	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
-				-e 's,$$,.  */,' >> $@ ; \
-		./$(MKDOC) -i -f $(srcdir)/proto.str < $$file >> $@ ;; \
-	  esac; \
-	done
-	echo "#ifdef __cplusplus" >> $@
-	echo "}" >> $@
-	echo "#endif" >> $@
-	echo "#endif" >> $@
-
-BFD_H_DEP = \
-	$(srcdir)/../bfd-in.h 		\
-	$(srcdir)/../init.c 		\
-	$(srcdir)/../opncls.c 		\
-	$(srcdir)/../libbfd.c 		\
-	$(srcdir)/../bfdio.c		\
-	$(srcdir)/../bfdwin.c		\
-	$(srcdir)/../section.c 		\
-	$(srcdir)/../archures.c		\
-	$(srcdir)/../reloc.c		\
-	$(srcdir)/../syms.c		\
-	$(srcdir)/../bfd.c		\
-	$(srcdir)/../archive.c		\
-	$(srcdir)/../corefile.c		\
-	$(srcdir)/../targets.c		\
-	$(srcdir)/../format.c		\
-	$(srcdir)/../linker.c		\
-	$(srcdir)/../simple.c		\
-	$(srcdir)/../compress.c		\
-	$(srcdir)/header.sed		\
-	$(srcdir)/proto.str		\
-	$(srcdir)/../version.h		\
-	$(MKDOC)
-
-bfd.h: $(BFD_H_DEP)
-	echo "$(BFD_H_DEP)" | sed -f $(srcdir)/header.sed > $@
-	for file in $(BFD_H_DEP); do \
-	  case $$file in \
-	    *-in.h) cat $$file >> $@ ;; \
-	    */header.sed) break ;; \
-	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
-				-e 's,$$,.  */,' >> $@ ; \
-		./$(MKDOC) -f $(srcdir)/proto.str < $$file >> $@ ;; \
-	  esac; \
-	done
-	echo "#ifdef __cplusplus" >> $@
-	echo "}" >> $@
-	echo "#endif" >> $@
-	echo "#endif" >> $@
 
 bfdver.texi: $(srcdir)/Makefile.in
 	@echo "creating $@"; \

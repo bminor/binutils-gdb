@@ -1175,6 +1175,7 @@ LIBBFD_H_FILES = libbfd-in.h libbfd.c bfdio.c bfdwin.c \
 	cache.c reloc.c archures.c linker.c
 
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
+MKDOC = doc/chew$(EXEEXT_FOR_BUILD)
 MOSTLYCLEANFILES = ofiles stamp-ofiles
 CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
@@ -2044,39 +2045,79 @@ stmp-bfd-h: bfd-in3.h
 	rm -f bfd-tmp.h
 	touch stmp-bfd-h
 
-# Could really use a "copy-if-change"...
-headers:
-	(cd $(bfddocdir); $(MAKE) protos $(FLAGS_TO_PASS))
-	cp $(bfddocdir)/bfd.h bfd-in2.h-new
-	$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
-	cp $(bfddocdir)/libbfd.h libbfd.h-new
-	$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
-	cp $(bfddocdir)/libcoff.h libcoff.h-new
-	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
+$(MKDOC):
+	cd $(bfddocdir) && $(MAKE) chew$(EXEEXT_FOR_BUILD)
+
+headers: stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 # We only rebuild the header files automatically if we have been
 # configured with --enable-maintainer-mode.
 
 $(srcdir)/bfd-in2.h: @MAINT@ stmp-bin2-h ; @true
-stmp-bin2-h: $(BFD_H_FILES) $(BFD64_H_FILES)
-	(cd $(bfddocdir); $(MAKE) $(FLAGS_TO_PASS) bfd.h)
-	cp $(bfddocdir)/bfd.h bfd-in2.h-new
-	$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
-	touch stmp-bin2-h
+stmp-bin2-h: $(BFD_H_FILES) $(BFD64_H_FILES) $(MKDOC)
+	$(AM_V_GEN)( \
+	set -e; \
+	echo "$(BFD_H_FILES)" | sed -f $(srcdir)/doc/header.sed; \
+	for file in $(BFD_H_FILES); do \
+	  file="$(srcdir)/$$file"; \
+	  case $$file in \
+	    *-in.h) cat $$file;; \
+	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
+				-e 's,$$,.  */,'; \
+		$(MKDOC) -f $(srcdir)/doc/proto.str < $$file;; \
+	  esac; \
+	done; \
+	echo "#ifdef __cplusplus"; \
+	echo "}"; \
+	echo "#endif"; \
+	echo "#endif"; \
+	) > bfd-in2.h-new
+	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change bfd-in2.h-new $(srcdir)/bfd-in2.h
+	$(AM_V_at)touch stmp-bin2-h
 
 $(srcdir)/libbfd.h: @MAINT@ stmp-lbfd-h ; @true
-stmp-lbfd-h: $(LIBBFD_H_FILES)
-	(cd $(bfddocdir); $(MAKE) $(FLAGS_TO_PASS) libbfd.h)
-	cp $(bfddocdir)/libbfd.h libbfd.h-new
-	$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
-	touch stmp-lbfd-h
+stmp-lbfd-h: $(LIBBFD_H_FILES) $(MKDOC)
+	$(AM_V_GEN)( \
+	set -e; \
+	echo "$(LIBBFD_H_FILES)" | sed -f $(srcdir)/doc/header.sed; \
+	for file in $(LIBBFD_H_FILES); do \
+	  file="$(srcdir)/$$file"; \
+	  case $$file in \
+	    *-in.h) cat $$file;; \
+	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
+				-e 's,$$,.  */,'; \
+		$(MKDOC) -i -f $(srcdir)/doc/proto.str < $$file;; \
+	  esac; \
+	done; \
+	echo "#ifdef __cplusplus"; \
+	echo "}"; \
+	echo "#endif"; \
+	echo "#endif"; \
+	) > libbfd.h-new
+	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change libbfd.h-new $(srcdir)/libbfd.h
+	$(AM_V_at)touch stmp-lbfd-h
 
 $(srcdir)/libcoff.h: @MAINT@ stmp-lcoff-h ; @true
-stmp-lcoff-h: $(LIBCOFF_H_FILES)
-	(cd $(bfddocdir); $(MAKE) $(FLAGS_TO_PASS) libcoff.h)
-	cp $(bfddocdir)/libcoff.h libcoff.h-new
-	$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
-	touch stmp-lcoff-h
+stmp-lcoff-h: $(LIBCOFF_H_FILES) $(MKDOC)
+	$(AM_V_GEN)( \
+	set -e; \
+	echo "$(LIBCOFF_H_FILES)" | sed -f $(srcdir)/doc/header.sed; \
+	for file in $(LIBCOFF_H_FILES); do \
+	  file="$(srcdir)/$$file"; \
+	  case $$file in \
+	    *-in.h) cat $$file;; \
+	    *)	echo $$file | sed -e 's,.*/,,' -e 's,^,/* Extracted from ,' \
+				-e 's,$$,.  */,'; \
+		$(MKDOC) -i -f $(srcdir)/doc/proto.str < $$file;; \
+	  esac; \
+	done; \
+	echo "#ifdef __cplusplus"; \
+	echo "}"; \
+	echo "#endif"; \
+	echo "#endif"; \
+	) > libcoff.h-new
+	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
+	$(AM_V_at)touch stmp-lcoff-h
 
 bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	$(AM_V_GEN)\
