@@ -15106,8 +15106,7 @@ $as_echo "#define USE_MMAP 1" >>confdefs.h
  ;;
 esac
 
-rm -f doc/config.status
-ac_config_files="$ac_config_files Makefile doc/Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in"
+ac_config_files="$ac_config_files Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in"
 
 
 ac_config_commands="$ac_config_commands default"
@@ -16136,7 +16135,6 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "default-1") CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "bfd-in3.h") CONFIG_FILES="$CONFIG_FILES bfd-in3.h:bfd-in2.h" ;;
     "po/Makefile.in") CONFIG_FILES="$CONFIG_FILES po/Makefile.in:po/Make-in" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;

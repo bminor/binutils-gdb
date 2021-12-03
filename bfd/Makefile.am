@@ -17,13 +17,18 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = no-dist foreign
+AUTOMAKE_OPTIONS = no-dist foreign info-in-builddir no-texinfo.tex
 ACLOCAL_AMFLAGS = -I . -I .. -I ../config
+
+MOSTLYCLEANFILES =
+CLEANFILES =
+DISTCLEANFILES =
+MAINTAINERCLEANFILES =
 
 INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 
-SUBDIRS = doc po
+SUBDIRS = po
 
 bfddocdir = doc
 
@@ -920,11 +925,6 @@ LIBBFD_H_FILES = libbfd-in.h libbfd.c bfdio.c bfdwin.c \
 	cache.c reloc.c archures.c linker.c
 LIBCOFF_H_FILES = libcoff-in.h coffcode.h
 
-MKDOC = doc/chew$(EXEEXT_FOR_BUILD)
-
-$(MKDOC):
-	cd $(bfddocdir) && $(MAKE) chew$(EXEEXT_FOR_BUILD)
-
 headers: stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
 # We only rebuild the header files automatically if we have been
@@ -967,12 +967,12 @@ stmp-lcoff-h: $(LIBCOFF_H_FILES) $(MKDOC)
 	$(AM_V_at)$(SHELL) $(srcdir)/../move-if-change libcoff.h-new $(srcdir)/libcoff.h
 	$(AM_V_at)touch stmp-lcoff-h
 
-MOSTLYCLEANFILES = ofiles stamp-ofiles
+MOSTLYCLEANFILES += ofiles stamp-ofiles
 
-CLEANFILES = bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
+CLEANFILES += bfd.h dep.sed stmp-bfd-h DEP DEPA DEP1 DEP2 libbfd.a stamp-lib \
 	stmp-bin2-h stmp-lbfd-h stmp-lcoff-h
 
-DISTCLEANFILES = $(BUILD_CFILES) $(BUILD_HFILES) libtool-soversion
+DISTCLEANFILES += $(BUILD_CFILES) $(BUILD_HFILES) libtool-soversion
 
 bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	$(AM_V_GEN)\
@@ -1009,3 +1009,5 @@ coff-tic54x.lo: coff-tic54x.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC)$(LTCOMPILE) -c -o $@ $< $(NO_WERROR)
+
+include doc/local.mk

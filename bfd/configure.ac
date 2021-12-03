@@ -1103,8 +1103,7 @@ case ${want_mmap}+${ac_cv_func_mmap_fixed_mapped} in
   true+yes )  AC_DEFINE(USE_MMAP, 1, [Use mmap if it's available?]) ;;
 esac
 
-rm -f doc/config.status
-AC_CONFIG_FILES([Makefile doc/Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in])
+AC_CONFIG_FILES([Makefile bfd-in3.h:bfd-in2.h po/Makefile.in:po/Make-in])
 
 dnl We need this duplication, even though we use AM_PO_SUBDIRS, because of
 dnl our two separate POTFILES.  Yuck.
