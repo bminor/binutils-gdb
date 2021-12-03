@@ -479,13 +479,14 @@ public:
   virtual bool thread_handle (ptid_t ptid, gdb_byte **handle,
 			      int *handle_len);
 
-  /* If THREAD is a fork child that was not reported to GDB, return its parent
-     else nullptr.  */
+  /* If THREAD is a fork/vfork/clone child that was not reported to
+     GDB, return its parent else nullptr.  */
   virtual thread_info *thread_pending_parent (thread_info *thread);
 
-  /* If THREAD is the parent of a fork child that was not reported to GDB,
-     return this child, else nullptr.  */
-  virtual thread_info *thread_pending_child (thread_info *thread);
+  /* If THREAD is the parent of a fork/vfork/clone child that was not
+     reported to GDB, return this child, else nullptr.  */
+  virtual thread_info *thread_pending_child (thread_info *thread,
+					     target_waitkind *kind);
 
   /* Returns true if the target can software single step.  */
   virtual bool supports_software_single_step ();
@@ -701,9 +702,9 @@ target_thread_pending_parent (thread_info *thread)
 }
 
 static inline thread_info *
-target_thread_pending_child (thread_info *thread)
+target_thread_pending_child (thread_info *thread, target_waitkind *kind)
 {
-  return the_target->thread_pending_child (thread);
+  return the_target->thread_pending_child (thread, kind);
 }
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
