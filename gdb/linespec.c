@@ -2085,8 +2085,7 @@ canonicalize_linespec (struct linespec_state *state, const linespec *ls)
       if (explicit_loc->function_name == NULL)
 	{
 	  /* No function was specified, so add the symbol name.  */
-	  gdb_assert (!ls->labels.function_symbols->empty ()
-		      && (ls->labels.function_symbols->size () == 1));
+	  gdb_assert (ls->labels.function_symbols->size () == 1);
 	  block_symbol s = ls->labels.function_symbols->front ();
 	  explicit_loc->function_name = xstrdup (s.symbol->natural_name ());
 	}
