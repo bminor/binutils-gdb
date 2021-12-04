@@ -82,13 +82,12 @@ if test x$ac_checking != x ; then
   AC_DEFINE(ENABLE_CHECKING, 1, [Define if you want run-time sanity checks.])
 fi
 
-AC_ARG_ENABLE(64-bit-bfd,
-[  --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)],
-[case "${enableval}" in
-  yes)  want64=true  ;;
-  no)   want64=false ;;
-  *)    AC_MSG_ERROR(bad value ${enableval} for 64-bit-bfd option) ;;
-esac],[want64=false])dnl
+BFD_64_BIT
+if test $enable_64_bit_bfd = yes ; then
+  want64=true
+else
+  want64=false
+fi
 
 AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],

@@ -1168,6 +1168,7 @@ AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
 m4_include([../config/acx.m4])
+m4_include([../config/bfd64.m4])
 m4_include([../config/depstand.m4])
 m4_include([../config/gettext-sister.m4])
 m4_include([../config/jobserver.m4])

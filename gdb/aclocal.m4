@@ -201,6 +201,7 @@ AC_DEFUN([AM_SUBST_NOTMAKE], [_AM_SUBST_NOTMAKE($@)])
 
 m4_include([../config/acx.m4])
 m4_include([../config/ax_pthread.m4])
+m4_include([../config/bfd64.m4])
 m4_include([../config/debuginfod.m4])
 m4_include([../config/depstand.m4])
 m4_include([../config/enable.m4])

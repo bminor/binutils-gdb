@@ -685,9 +685,6 @@
 /* Define to 1 if the `setpgrp' function takes no argument. */
 #undef SETPGRP_VOID
 
-/* The size of `long', as computed by sizeof. */
-#undef SIZEOF_LONG
-
 /* The size of `long long', as computed by sizeof. */
 #undef SIZEOF_LONG_LONG
 
@@ -699,6 +696,9 @@
 
 /* The size of `unsigned __int128', as computed by sizeof. */
 #undef SIZEOF_UNSIGNED___INT128
+
+/* The size of `void *', as computed by sizeof. */
+#undef SIZEOF_VOID_P
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be

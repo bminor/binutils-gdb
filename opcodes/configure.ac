@@ -93,6 +93,7 @@ AM_PO_SUBDIRS
 . ${srcdir}/../bfd/configure.host
 
 BFD_CC_FOR_BUILD
+BFD_64_BIT
 
 AC_SUBST(HDEFINES)
 AC_PROG_INSTALL
@@ -380,7 +381,7 @@ if test x${all_targets} = xfalse ; then
 
 else	# all_targets is true
     archdefs=-DARCH_all
-    if grep '#define BFD_ARCH_SIZE 64' ../bfd/bfd-in3.h > /dev/null; then
+    if test "$enable_64_bit_bfd" = "yes" ; then
 	BFD_MACHINES='$(ALL32_MACHINES) $(ALL64_MACHINES)'
     else
 	BFD_MACHINES='$(ALL32_MACHINES)'
