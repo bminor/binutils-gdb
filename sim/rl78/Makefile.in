@@ -20,8 +20,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_EXTRA_CFLAGS = -Wall
-
 SIM_RUN_OBJS = \
 	main.o
 
