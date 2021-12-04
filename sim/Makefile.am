@@ -107,6 +107,9 @@ endif
 if SIM_ENABLE_ARCH_mn10300
 include mn10300/local.mk
 endif
+if SIM_ENABLE_ARCH_moxie
+include moxie/local.mk
+endif
 if SIM_ENABLE_ARCH_or1k
 include or1k/local.mk
 endif
