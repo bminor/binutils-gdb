@@ -173,6 +173,10 @@ gdb_test_multiple "maint info line-table gdb.dwarf2/dw2-ranges-base.c" \
 	    incr end_seq_count
 	    exp_continue
 	}
+	-re "^\r\n" {
+	    # Empty lines between tables.
+	    exp_continue
+	}
 	-re "^$gdb_prompt $" {
 	    gdb_assert [expr $end_seq_count == 3] $gdb_test_name
 	}

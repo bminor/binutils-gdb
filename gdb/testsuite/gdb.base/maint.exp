@@ -466,6 +466,10 @@ gdb_test_multiple "maint info line-table" \
 	# Matches an end marker in the above.
 	exp_continue
     }
+    -re "^\r\n" {
+	# Empty line between tables.
+	exp_continue
+    }
     -re "^$gdb_prompt $" {
 	gdb_assert $saw_srcfile $gdb_test_name
     }
