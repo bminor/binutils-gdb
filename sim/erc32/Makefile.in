@@ -52,11 +52,3 @@ install-sis: installdirs
 
 clean-sis:
 	rm -f sis
-
-configure:
-	@echo "Rebuilding configure..."
-	if [ x"${srcdir}" = x"@srcdir@" ] ; then \
-	  srcdir=. ; export srcdir ; \
-	else true ; fi ; \
-	(cd $${srcdir}; autoconf --localdir=../common)
-
