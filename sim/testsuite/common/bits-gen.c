@@ -30,8 +30,8 @@ gen_struct (void)
   printf ("  int line;\n");
   printf ("  int row;\n");
   printf ("  int col;\n");
-  printf ("  unsigned64 val;\n");
-  printf ("  unsigned64 check;\n");
+  printf ("  uint64_t val;\n");
+  printf ("  uint64_t check;\n");
   printf ("} test_tuples;\n");
   printf ("\n");
   printf ("typedef struct _test_spec {\n");
