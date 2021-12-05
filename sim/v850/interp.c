@@ -170,7 +170,7 @@ get_insn_name (sim_cpu *cpu, int i)
 
 /* These default values correspond to expected usage for the chip.  */
 
-uint32 OP[4];
+uint32_t OP[4];
 
 static sim_cia
 v850_pc_get (sim_cpu *cpu)
@@ -315,13 +315,13 @@ sim_create_inferior (SIM_DESC      sd,
 static int
 v850_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  *(unsigned32*)memory = H2T_4 (State.regs[rn]);
+  *(uint32_t*)memory = H2T_4 (State.regs[rn]);
   return -1;
 }
 
 static int
 v850_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  State.regs[rn] = T2H_4 (*(unsigned32 *) memory);
+  State.regs[rn] = T2H_4 (*(uint32_t *) memory);
   return length;
 }

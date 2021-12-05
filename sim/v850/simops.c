@@ -49,9 +49,9 @@ int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
 #endif
 
 
-unsigned32   trace_values[3];
+uint32_t   trace_values[3];
 int          trace_num_values;
-unsigned32   trace_pc;
+uint32_t   trace_pc;
 const char * trace_name;
 int          trace_module;
 
@@ -190,7 +190,7 @@ trace_input (char *name, enum op_types type, int size)
 }
 
 void
-trace_result (int has_result, unsigned32 result)
+trace_result (int has_result, uint32_t result)
 {
   char buf[1000];
   char *chp;
@@ -415,7 +415,7 @@ fetch_argv (SIM_DESC sd, address_word addr)
 
   while (1)
     {
-      unsigned32 a = sim_core_read_4 (STATE_CPU (sd, 0),
+      uint32_t a = sim_core_read_4 (STATE_CPU (sd, 0),
 				      PC, read_map, addr + nr * 4);
       if (a == 0) break;
       buf[nr] = fetch_str (sd, a);
@@ -1669,7 +1669,7 @@ OP_10007E0 (void)
 	    buf = PARM1;
 	    RETVAL = pipe (host_fd);
 	    SW (buf, host_fd[0]);
-	    buf += sizeof (uint16);
+	    buf += sizeof (uint16_t);
 	    SW (buf, host_fd[1]);
 	    RETERR = errno;
 	  }
@@ -2017,8 +2017,8 @@ divun
   unsigned int       N,
   unsigned long int  als,
   unsigned long int  sfi,
-  unsigned32 /*unsigned long int*/ *  quotient_ptr,
-  unsigned32 /*unsigned long int*/ *  remainder_ptr,
+  uint32_t /*unsigned long int*/ *  quotient_ptr,
+  uint32_t /*unsigned long int*/ *  remainder_ptr,
   int *          overflow_ptr
 )
 {
@@ -2091,8 +2091,8 @@ divn
   unsigned int       N,
   unsigned long int  als,
   unsigned long int  sfi,
-  signed32 /*signed long int*/ *  quotient_ptr,
-  signed32 /*signed long int*/ *  remainder_ptr,
+  int32_t /*signed long int*/ *  quotient_ptr,
+  int32_t /*signed long int*/ *  remainder_ptr,
   int *          overflow_ptr
 )
 {
@@ -2188,8 +2188,8 @@ divn
 int
 OP_1C207E0 (void)
 {
-  unsigned32 /*unsigned long int*/  quotient;
-  unsigned32 /*unsigned long int*/  remainder;
+  uint32_t /*unsigned long int*/  quotient;
+  uint32_t /*unsigned long int*/  remainder;
   unsigned long int  divide_by;
   unsigned long int  divide_this;
   int            overflow = 0;
@@ -2223,8 +2223,8 @@ OP_1C207E0 (void)
 int
 OP_1C007E0 (void)
 {
-  signed32 /*signed long int*/  quotient;
-  signed32 /*signed long int*/  remainder;
+  int32_t /*signed long int*/  quotient;
+  int32_t /*signed long int*/  remainder;
   signed long int  divide_by;
   signed long int  divide_this;
   int          overflow = 0;
@@ -2234,8 +2234,8 @@ OP_1C007E0 (void)
 
   imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-  divide_by   = (signed32) State.regs[ OP[0] ];
-  divide_this = (signed32) (State.regs[ OP[1] ] << imm5);
+  divide_by   = (int32_t) State.regs[ OP[0] ];
+  divide_this = (int32_t) (State.regs[ OP[1] ] << imm5);
 
   divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
   
@@ -2258,8 +2258,8 @@ OP_1C007E0 (void)
 int
 OP_18207E0 (void)
 {
-  unsigned32 /*unsigned long int*/  quotient;
-  unsigned32 /*unsigned long int*/  remainder;
+  uint32_t /*unsigned long int*/  quotient;
+  uint32_t /*unsigned long int*/  remainder;
   unsigned long int  divide_by;
   unsigned long int  divide_this;
   int            overflow = 0;
@@ -2293,8 +2293,8 @@ OP_18207E0 (void)
 int
 OP_18007E0 (void)
 {
-  signed32 /*signed long int*/  quotient;
-  signed32 /*signed long int*/  remainder;
+  int32_t /*signed long int*/  quotient;
+  int32_t /*signed long int*/  remainder;
   signed long int  divide_by;
   signed long int  divide_this;
   int          overflow = 0;
@@ -2305,7 +2305,7 @@ OP_18007E0 (void)
   imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
   divide_by   = EXTEND16 (State.regs[ OP[0] ]);
-  divide_this = (signed32) (State.regs[ OP[1] ] << imm5);
+  divide_this = (int32_t) (State.regs[ OP[1] ] << imm5);
 
   divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
   
@@ -2376,7 +2376,7 @@ OP_2C007E0 (void)
   
   /* Compute the result.  */
   
-  divide_by   = (signed32) State.regs[ OP[0] ];
+  divide_by   = (int32_t) State.regs[ OP[0] ];
   divide_this = State.regs[ OP[1] ];
   
   if (divide_by == 0)
@@ -2392,7 +2392,7 @@ OP_2C007E0 (void)
     }
   else
     {
-      divide_this = (signed32) divide_this;
+      divide_this = (int32_t) divide_this;
       State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
       State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
  
@@ -2477,7 +2477,7 @@ OP_28007E0 (void)
     }
   else
     {
-      divide_this = (signed32) divide_this;
+      divide_this = (int32_t) divide_this;
       State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
       State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
   
@@ -3378,12 +3378,12 @@ v850_satsub (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p
   *op2p = result;
 }
 
-unsigned32
+uint32_t
 load_data_mem (SIM_DESC  sd,
 	       SIM_ADDR  addr,
 	       int       len)
 {
-  uint32 data;
+  uint32_t data;
 
   switch (len)
     {
@@ -3409,7 +3409,7 @@ void
 store_data_mem (SIM_DESC    sd,
 		SIM_ADDR    addr,
 		int         len,
-		unsigned32  data)
+		uint32_t  data)
 {
   switch (len)
     {
