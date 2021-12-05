@@ -42,19 +42,19 @@ struct _state State;
 
 int cr16_debug;
 
-uint32 OP[4];
-uint32 sign_flag;
+uint32_t OP[4];
+uint32_t sign_flag;
 
-static struct hash_entry *lookup_hash (SIM_DESC, SIM_CPU *, uint64 ins, int size);
-static void get_operands (operand_desc *s, uint64 mcode, int isize, int nops);
+static struct hash_entry *lookup_hash (SIM_DESC, SIM_CPU *, uint64_t ins, int size);
+static void get_operands (operand_desc *s, uint64_t mcode, int isize, int nops);
 
 #define MAX_HASH  16
 
 struct hash_entry
 {
   struct hash_entry *next;
-  uint32 opcode;
-  uint32 mask;
+  uint32_t opcode;
+  uint32_t mask;
   int format;
   int size;
   struct simops *ops;
@@ -77,9 +77,9 @@ hash(unsigned long long insn, int format)
 
 
 INLINE static struct hash_entry *
-lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint64 ins, int size)
+lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint64_t ins, int size)
 {
-  uint32 mask;
+  uint32_t mask;
   struct hash_entry *h;
 
   h = &hash_table[hash(ins,1)];
@@ -108,10 +108,10 @@ lookup_hash (SIM_DESC sd, SIM_CPU *cpu, uint64 ins, int size)
 }
 
 INLINE static void
-get_operands (operand_desc *s, uint64 ins, int isize, int nops)
+get_operands (operand_desc *s, uint64_t ins, int isize, int nops)
 {
-  uint32 i, opn = 0, start_bit = 0, op_type = 0; 
-  int32 op_size = 0, mask = 0;
+  uint32_t i, opn = 0, start_bit = 0, op_type = 0; 
+  int32_t op_size = 0, mask = 0;
 
   if (isize == 1) /* Trunkcate the extra 16 bits of INS.  */
     ins = ins >> 16;
@@ -328,7 +328,7 @@ get_operands (operand_desc *s, uint64 ins, int isize, int nops)
 }
 
 static int
-do_run (SIM_DESC sd, SIM_CPU *cpu, uint64 mcode)
+do_run (SIM_DESC sd, SIM_CPU *cpu, uint64_t mcode)
 {
   struct hash_entry *h;
 
@@ -579,8 +579,8 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb,
 static void
 step_once (SIM_DESC sd, SIM_CPU *cpu)
 {
-  uint32 curr_ins_size = 0;
-  uint64 mcode = RLW (PC);
+  uint32_t curr_ins_size = 0;
+  uint64_t mcode = RLW (PC);
 
   State.pc_changed = 0;
 
@@ -689,10 +689,10 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
   return SIM_RC_OK;
 }
 
-static uint32
+static uint32_t
 cr16_extract_unsigned_integer (unsigned char *addr, int len)
 {
-  uint32 retval;
+  uint32_t retval;
   unsigned char * p;
   unsigned char * startaddr = (unsigned char *)addr;
   unsigned char * endaddr = startaddr + len;
@@ -706,7 +706,7 @@ cr16_extract_unsigned_integer (unsigned char *addr, int len)
 }
 
 static void
-cr16_store_unsigned_integer (unsigned char *addr, int len, uint32 val)
+cr16_store_unsigned_integer (unsigned char *addr, int len, uint32_t val)
 {
   unsigned char *p;
   unsigned char *startaddr = addr;
