@@ -60,14 +60,14 @@ extern int      sparclite;
 extern int      dumbio;
 extern char     uart_dev1[];
 extern char     uart_dev2[];
-extern uint32   last_load_addr;
+extern uint32_t   last_load_addr;
 
 #ifdef ERA
 extern int era;
 #endif
 
 int
-run_sim(struct pstate *sregs, uint64 icount, int dis)
+run_sim(struct pstate *sregs, uint64_t icount, int dis)
 {
     int             irq, mexc, deb;
 

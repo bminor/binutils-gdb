@@ -62,7 +62,7 @@ clear_accex(void)
 
 /* How to map SPARC FSR onto the host */
 void
-set_fsr(uint32 fsr)
+set_fsr(uint32_t fsr)
 {
     int fround;
 
