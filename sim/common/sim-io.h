@@ -24,6 +24,7 @@
 #define SIM_IO_H
 
 #include <stdarg.h>
+#include <stdint.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
