@@ -84,10 +84,10 @@ struct m68hc11tim
   unsigned long cop_delay;
   unsigned long rti_delay;
   unsigned long ovf_delay;
-  signed64      clock_prescaler;
-  signed64      tcnt_adjust;
-  signed64      cop_prev_interrupt;
-  signed64      rti_prev_interrupt;
+  int64_t      clock_prescaler;
+  int64_t      tcnt_adjust;
+  int64_t      cop_prev_interrupt;
+  int64_t      rti_prev_interrupt;
 
   /* Periodic timers.  */
   struct hw_event *rti_timer_event;
@@ -158,8 +158,8 @@ m68hc11tim_port_event (struct hw *me,
   SIM_DESC sd;
   struct m68hc11tim *controller;
   sim_cpu *cpu;
-  unsigned8 val;
-  unsigned16 tcnt;
+  uint8_t val;
+  uint16_t tcnt;
 
   controller = hw_data (me);
   sd         = hw_system (me);
@@ -207,7 +207,7 @@ m68hc11tim_port_event (struct hw *me,
       }
 
     case CAPTURE:
-      tcnt = (uint16) ((cpu->cpu_absolute_cycle - controller->tcnt_adjust)
+      tcnt = (uint16_t) ((cpu->cpu_absolute_cycle - controller->tcnt_adjust)
                        / controller->clock_prescaler);
       switch (level)
         {
@@ -252,8 +252,8 @@ m68hc11tim_timer_event (struct hw *me, void *data)
   unsigned flags;
   unsigned long tcnt_internal;
   unsigned long tcnt, tcnt_prev;
-  signed64 tcnt_insn_end;
-  signed64 tcnt_insn_start;
+  int64_t tcnt_insn_end;
+  int64_t tcnt_insn_start;
   int i;
   sim_events *events;
   
@@ -471,13 +471,13 @@ io_reg_desc pactl_desc[] = {
 };
 
 static double
-to_realtime (sim_cpu *cpu, signed64 t)
+to_realtime (sim_cpu *cpu, int64_t t)
 {
   return (double) (t) / (double) (cpu->cpu_frequency / 4);
 }
 
 const char*
-cycle_to_string (sim_cpu *cpu, signed64 t, int flags)
+cycle_to_string (sim_cpu *cpu, int64_t t, int flags)
 {
   char time_buf[32];
   char cycle_buf[32];
@@ -520,7 +520,7 @@ m68hc11tim_print_timer (struct hw *me, const char *name,
     }
   else
     {
-      signed64 t;
+      int64_t t;
       sim_cpu *cpu;
 
       cpu = STATE_CPU (sd, 0);
@@ -535,11 +535,11 @@ static void
 m68hc11tim_info (struct hw *me)
 {
   SIM_DESC sd;
-  uint16 base = 0;
+  uint16_t base = 0;
   sim_cpu *cpu;
   struct m68hc11tim *controller;
-  uint8 val;
-  uint16 val16;
+  uint8_t val;
+  uint16_t val16;
   
   sd = hw_system (me);
   cpu = STATE_CPU (sd, 0);
@@ -643,7 +643,7 @@ m68hc11tim_io_read_buffer (struct hw *me,
   SIM_DESC sd;
   struct m68hc11tim *controller;
   sim_cpu *cpu;
-  unsigned8 val;
+  uint8_t val;
   unsigned cnt = 0;
   
   HW_TRACE ((me, "read 0x%08lx %d", (long) base, (int) nr_bytes));
@@ -660,12 +660,12 @@ m68hc11tim_io_read_buffer (struct hw *me,
              Reading in a 16-bit register will be split in two accesses
              but this will be atomic within the simulator.  */
         case M6811_TCTN_H:
-          val = (uint8) ((cpu->cpu_absolute_cycle - controller->tcnt_adjust)
+          val = (uint8_t) ((cpu->cpu_absolute_cycle - controller->tcnt_adjust)
                          / (controller->clock_prescaler * 256));
           break;
 
         case M6811_TCTN_L:
-          val = (uint8) ((cpu->cpu_absolute_cycle - controller->tcnt_adjust)
+          val = (uint8_t) ((cpu->cpu_absolute_cycle - controller->tcnt_adjust)
                          / controller->clock_prescaler);
           break;
 
@@ -673,7 +673,7 @@ m68hc11tim_io_read_buffer (struct hw *me,
           val = cpu->ios[base];
           break;
         }
-      *((unsigned8*) dest) = val;
+      *((uint8_t*) dest) = val;
       dest = (char*) dest + 1;
       base++;
       nr_bytes--;
@@ -692,8 +692,8 @@ m68hc11tim_io_write_buffer (struct hw *me,
   SIM_DESC sd;
   struct m68hc11tim *controller;
   sim_cpu *cpu;
-  unsigned8 val, n;
-  signed64 adj;
+  uint8_t val, n;
+  int64_t adj;
   int reset_compare = 0;
   int reset_overflow = 0;
   int cnt = 0;
@@ -706,7 +706,7 @@ m68hc11tim_io_write_buffer (struct hw *me,
 
   while (nr_bytes)
     {
-      val = *((const unsigned8*) source);
+      val = *((const uint8_t*) source);
       switch (base)
         {
           /* Set the timer counter low part, trying to preserve the low part.
@@ -715,10 +715,10 @@ m68hc11tim_io_write_buffer (struct hw *me,
              in 64-bit to avoid overflow problems.  */
         case M6811_TCTN_L:
           adj = ((cpu->cpu_absolute_cycle - controller->tcnt_adjust)
-                 / (controller->clock_prescaler * (signed64) 256)) & 0x0FF;
+                 / (controller->clock_prescaler * (int64_t) 256)) & 0x0FF;
           adj = cpu->cpu_absolute_cycle
-            - (adj * controller->clock_prescaler * (signed64) 256)
-            - ((signed64) adj * controller->clock_prescaler);
+            - (adj * controller->clock_prescaler * (int64_t) 256)
+            - ((int64_t) adj * controller->clock_prescaler);
           controller->tcnt_adjust = adj;
           reset_compare = 1;
           reset_overflow = 1;
@@ -728,7 +728,7 @@ m68hc11tim_io_write_buffer (struct hw *me,
           adj = ((cpu->cpu_absolute_cycle - controller->tcnt_adjust)
                  / controller->clock_prescaler) & 0x0ff;
           adj = cpu->cpu_absolute_cycle
-            - ((signed64) val * controller->clock_prescaler * (signed64) 256)
+            - ((int64_t) val * controller->clock_prescaler * (int64_t) 256)
             - (adj * controller->clock_prescaler);
           controller->tcnt_adjust = adj;
           reset_compare = 1;

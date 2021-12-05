@@ -107,7 +107,7 @@ emul_write (sim_cpu *cpu)
   cpu->cpu_running = 0;
   while (size)
     {
-      uint8 val = memory_read8 (cpu, addr);
+      uint8_t val = memory_read8 (cpu, addr);
 
       if (write (0, &val, 1) != 1)
 	printf ("write failed: %s\n", strerror (errno));
