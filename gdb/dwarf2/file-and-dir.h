@@ -84,15 +84,19 @@ struct file_and_directory
   }
 
   /* Set the filename.  */
-  void set_name (const char *name)
+  void set_name (gdb::unique_xmalloc_ptr<char> name)
   {
-    m_name = name;
+    m_name_storage = std::move (name);
+    m_name = m_name_storage.get ();
   }
 
 private:
 
   /* The filename.  */
   const char *m_name;
+
+  /* Storage for the filename, if needed.  */
+  gdb::unique_xmalloc_ptr<char> m_name_storage;
 
   /* The compilation directory.  NULL if not known.  If we needed to
      compute a new string, it will be stored in the comp_dir_storage

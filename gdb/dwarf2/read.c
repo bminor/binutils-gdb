@@ -6986,15 +6986,15 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   prepare_one_comp_unit (cu, comp_unit_die, pretend_language);
 
   /* Allocate a new partial symbol table structure.  */
-  gdb::unique_xmalloc_ptr<char> debug_filename;
   static const char artificial[] = "<artificial>";
   file_and_directory &fnd = find_file_and_directory (comp_unit_die, cu);
   if (strcmp (fnd.get_name (), artificial) == 0)
     {
-      debug_filename.reset (concat (artificial, "@",
-				    sect_offset_str (per_cu->sect_off),
-				    (char *) NULL));
-      fnd.set_name (debug_filename.get ());
+      gdb::unique_xmalloc_ptr<char> debug_filename
+	(concat (artificial, "@",
+		 sect_offset_str (per_cu->sect_off),
+		 (char *) NULL));
+      fnd.set_name (std::move (debug_filename));
     }
 
   pst = create_partial_symtab (per_cu, per_objfile, fnd.get_name ());
