@@ -21,6 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "defs.h"
 
 #include <errno.h>
+#include <stdarg.h>
 #include <stdlib.h>
 
 #include "bfd.h"

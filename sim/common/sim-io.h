@@ -23,6 +23,7 @@
 #ifndef SIM_IO_H
 #define SIM_IO_H
 
+#include <stdarg.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 

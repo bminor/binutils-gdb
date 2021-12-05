@@ -27,6 +27,7 @@
 #include "defs.h"
 
 #include <signal.h> /* For SIGPROCMASK et al. */
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 

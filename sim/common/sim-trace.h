@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_TRACE_H
 #define SIM_TRACE_H
 
+#include <stdarg.h>
+
 #include "dis-asm.h"
 
 /* Standard traceable entities.  */

@@ -26,6 +26,7 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#include <stdarg.h>
 #include <stdlib.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
