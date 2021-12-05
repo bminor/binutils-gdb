@@ -320,7 +320,7 @@ sim_create_inferior (SIM_DESC sd,
   } else {
     PC = 0;
   }
-  CPU_PC_SET (STATE_CPU (sd, 0), (unsigned64) PC);
+  CPU_PC_SET (STATE_CPU (sd, 0), (uint64_t) PC);
 
   if (STATE_ARCHITECTURE (sd)->mach == bfd_mach_am33_2)
     PSW |= PSW_FE;
@@ -335,7 +335,7 @@ static int
 mn10300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
   reg_t reg = State.regs[rn];
-  uint8 *a = memory;
+  uint8_t *a = memory;
   a[0] = reg;
   a[1] = reg >> 8;
   a[2] = reg >> 16;
@@ -346,7 +346,7 @@ mn10300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 static int
 mn10300_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 {
-  uint8 *a = memory;
+  uint8_t *a = memory;
   State.regs[rn] = (a[3] << 24) + (a[2] << 16) + (a[1] << 8) + a[0];
   return length;
 }
