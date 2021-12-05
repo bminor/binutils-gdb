@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdarg.h>
 
+#include "ansidecl.h"
+
 /* Event manager customized for hardware models.
 
    This interface is discussed further in sim-events.h. */

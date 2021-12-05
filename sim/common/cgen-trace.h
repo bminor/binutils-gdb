@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef CGEN_TRACE_H
 #define CGEN_TRACE_H
 
+#include "ansidecl.h"
+
 void cgen_trace_insn_init (SIM_CPU *, int);
 void cgen_trace_insn_fini (SIM_CPU *, const struct argbuf *, int);
 void cgen_trace_insn (SIM_CPU *, const struct cgen_insn *,

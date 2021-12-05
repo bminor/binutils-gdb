@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <stdlib.h>
 #include <string.h>
 
+#include "ansidecl.h"
 #include "bfd.h"
 #include "dis-asm.h"
 #include "libiberty.h"

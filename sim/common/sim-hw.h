@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdarg.h>
 
+#include "ansidecl.h"
+
 /* Parse a hardware definition */
 
 struct hw *sim_hw_parse

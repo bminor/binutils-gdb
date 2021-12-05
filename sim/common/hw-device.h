@@ -25,6 +25,8 @@
 
 #include <stdarg.h>
 
+#include "ansidecl.h"
+
 /* Introduction:
 
    As explained in earlier sections, the device, device instance,

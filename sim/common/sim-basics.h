@@ -111,7 +111,6 @@ typedef enum {
 
 /* Basic definitions - ordered so that nothing calls what comes after it.  */
 
-#include "ansidecl.h"
 #include "sim/sim.h"
 
 #include "sim-config.h"

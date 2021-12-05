@@ -25,6 +25,8 @@
 
 #include <stdarg.h>
 
+#include "ansidecl.h"
+
 /* Notes:
 
    When scheduling an event, the a delta of zero/one refers to the

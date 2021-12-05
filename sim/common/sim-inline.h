@@ -23,6 +23,7 @@
 #ifndef SIM_INLINE_H
 #define SIM_INLINE_H
 
+#include "ansidecl.h"
 
 /* INLINE CODE SELECTION:
 

@@ -28,6 +28,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "ansidecl.h"
+
 /* See the file include/callbacks.h for a description */
 
 int sim_io_init (SIM_DESC sd);

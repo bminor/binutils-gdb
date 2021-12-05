@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_UTILS_H
 #define SIM_UTILS_H
 
+#include "ansidecl.h"
+
 /* Memory management with an allocator that clears memory before use. */
 
 void *zalloc (unsigned long size);

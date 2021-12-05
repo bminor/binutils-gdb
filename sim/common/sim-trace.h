@@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdarg.h>
 
+#include "ansidecl.h"
 #include "dis-asm.h"
 
 /* Standard traceable entities.  */

@@ -22,6 +22,8 @@
 
 #include <errno.h>
 
+#include "ansidecl.h"
+
 #include "sim-main.h"
 #include "sim-syscall.h"
 #include "sim/callback.h"

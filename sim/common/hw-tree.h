@@ -25,6 +25,8 @@
 
 #include <stdarg.h>
 
+#include "ansidecl.h"
+
 struct hw *hw_tree_create
 (SIM_DESC sd,
  const char *device);
