@@ -22,9 +22,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #define SCACHE_DEFINE_INLINE
 
-#include "sim-main.h"
 #include <stdlib.h>
+
 #include "libiberty.h"
+
+#include "sim-main.h"
 #include "sim-options.h"
 #include "sim-io.h"
 

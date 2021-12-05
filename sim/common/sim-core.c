@@ -26,16 +26,17 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+
+#include "libiberty.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-signal.h"
-#include "libiberty.h"
 
 #if (WITH_HW)
 #include "sim-hw.h"
 #endif
-
-#include <stdlib.h>
 
 /* "core" module install handler.
 

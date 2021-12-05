@@ -312,8 +312,9 @@ cat << EOF
 #define WANT_CPU @cpu@
 #define WANT_CPU_@CPU@
 
-#include "sim-main.h"
 #include "bfd.h"
+
+#include "sim-main.h"
 #include "cgen-mem.h"
 #include "cgen-ops.h"
 #include "sim-assert.h"

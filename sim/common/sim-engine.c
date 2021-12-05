@@ -20,12 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-signal.h"
-
-#include <stdio.h>
-#include <stdlib.h>
 
 /* Get the run state.
    REASON/SIGRC are the values returned by sim_stop_reason.

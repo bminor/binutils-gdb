@@ -21,6 +21,8 @@
 #ifndef SIM_ASSERT_H
 #define SIM_ASSERT_H
 
+#include "libiberty.h"
+
 /* The subtle difference between SIM_ASSERT and ASSERT is that
    SIM_ASSERT passes `sd' to sim_io_error for the SIM_DESC,
    ASSERT passes NULL.  */
@@ -28,7 +30,6 @@
 #if !defined (SIM_ASSERT)
 #if defined (WITH_ASSERT)
 #include "sim-io.h"
-#include "libiberty.h"
 #define SIM_ASSERT(EXPRESSION) \
 do \
   { \
@@ -51,7 +52,6 @@ while (0)
 #if !defined (ASSERT)
 #if defined (WITH_ASSERT)
 #include "sim-io.h"
-#include "libiberty.h"
 #define ASSERT(EXPRESSION) \
 do \
   { \

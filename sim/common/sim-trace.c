@@ -20,21 +20,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+#include <string.h>
+
+#include "bfd.h"
+#include "dis-asm.h"
+#include "libiberty.h"
+
 #include "sim-main.h"
+#include "sim-assert.h"
 #include "sim-io.h"
 #include "sim-options.h"
 #include "sim-fpu.h"
 #include "sim/callback.h"
-
-#include "bfd.h"
-#include "libiberty.h"
-
-#include "dis-asm.h"
-
-#include "sim-assert.h"
-
-#include <string.h>
-#include <stdlib.h>
 
 #ifndef SIZE_PHASE
 #define SIZE_PHASE 8

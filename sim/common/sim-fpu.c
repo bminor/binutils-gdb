@@ -38,13 +38,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+
 #include "sim-basics.h"
 #include "sim-fpu.h"
 
 #include "sim-io.h"
 #include "sim-assert.h"
-
-#include <stdlib.h>
 
 /* Debugging support.
    If digits is -1, then print all digits.  */

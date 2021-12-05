@@ -20,13 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "hw-main.h"
-#include "hw-base.h"
-
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
+#include "hw-main.h"
+#include "hw-base.h"
 
 struct hw_port_edge
 {

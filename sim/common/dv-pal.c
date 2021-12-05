@@ -22,6 +22,12 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <stdlib.h>
+#include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include "sim-main.h"
 #include "hw-main.h"
 #include "sim-io.h"
@@ -29,12 +35,6 @@
 /* NOTE: pal is naughty and grubs around looking at things outside of
    its immediate domain */
 #include "hw-tree.h"
-
-#include <string.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#include <stdlib.h>
 
 /* DEVICE
 

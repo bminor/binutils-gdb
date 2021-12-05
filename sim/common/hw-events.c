@@ -20,12 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <string.h>
+
 #include "hw-main.h"
 #include "hw-base.h"
 
 #include "sim-events.h"
-
-#include <string.h>
 
 /* The hw-events object is implemented using sim-events */
 
@@ -179,10 +179,11 @@ hw_event_remain_time (struct hw *me, struct hw_event *event)
    Build with `make test-hw-events' in sim/<cpu> directory*/
 
 #if defined (MAIN)
-#include "sim-main.h"
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "sim-main.h"
 
 static void
 test_handler (struct hw *me,

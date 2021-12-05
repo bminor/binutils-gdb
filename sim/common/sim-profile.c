@@ -20,14 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "sim-main.h"
 #include "sim-io.h"
 #include "sim-options.h"
 #include "sim-assert.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 
 #if !WITH_PROFILE_PC_P
 static unsigned int _profile_stub;

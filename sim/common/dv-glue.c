@@ -22,9 +22,9 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "hw-main.h"
-
 #include <string.h>
+
+#include "hw-main.h"
 
 /* DEVICE
 

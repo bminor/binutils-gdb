@@ -22,13 +22,13 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <string.h>
+
 #include "hw-main.h"
 #include "hw-base.h"
 
 #include "sim-io.h"
 #include "sim-assert.h"
-
-#include <string.h>
 
 /* property entries */
 

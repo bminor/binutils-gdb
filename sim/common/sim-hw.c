@@ -20,6 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-options.h"
@@ -31,12 +36,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "hw-device.h"
 #include "hw-main.h"
 #include "hw-base.h"
-
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <errno.h>
-
 
 struct sim_hw {
   struct hw *tree;

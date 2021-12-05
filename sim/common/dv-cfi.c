@@ -25,9 +25,9 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include <math.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <math.h>
 #include <stdbool.h>
 #include <unistd.h>
 #ifdef HAVE_SYS_MMAN_H

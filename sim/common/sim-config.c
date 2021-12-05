@@ -22,9 +22,10 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include "bfd.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
-#include "bfd.h"
 
 
 enum bfd_endian current_target_byte_order = BFD_ENDIAN_UNKNOWN;

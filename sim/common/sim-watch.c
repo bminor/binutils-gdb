@@ -20,17 +20,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "libiberty.h"
+
 #include "sim-main.h"
 #include "sim-options.h"
 #include "sim-signal.h"
-#include "libiberty.h"
-
 #include "sim-assert.h"
-
-#include <ctype.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 enum {
   OPTION_WATCH_DELETE                      = OPTION_START,

@@ -26,14 +26,15 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <signal.h> /* For SIGPROCMASK et al. */
+#include <stdlib.h>
+#include <string.h>
+
+#include "libiberty.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-cpu.h"
-#include "libiberty.h"
-
-#include <string.h>
-#include <stdlib.h>
-#include <signal.h> /* For SIGPROCMASK et al. */
 
 typedef enum {
   watch_invalid,

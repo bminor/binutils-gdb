@@ -21,12 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "ansidecl.h"
-#include <stdio.h> /* for NULL */
 #include <stdarg.h>
+#include <stdio.h> /* for NULL */
 #include <stdlib.h>
 #include <time.h>
 
+#include "ansidecl.h"
 #include "bfd.h"
 
 #include "sim/callback.h"

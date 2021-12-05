@@ -23,26 +23,27 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "ansidecl.h"
+#include <errno.h>
+#include <fcntl.h>
+/* For PIPE_BUF.  */
+#include <limits.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/* For PIPE_BUF.  */
-#include <limits.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
 #include <time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "sim/callback.h"
-/* For xmalloc.  */
-#include "libiberty.h"
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include "ansidecl.h"
+/* For xmalloc.  */
+#include "libiberty.h"
+
+#include "sim/callback.h"
 
 #ifndef PIPE_BUF
 #define PIPE_BUF 512

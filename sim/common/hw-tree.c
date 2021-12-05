@@ -22,16 +22,16 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "hw-main.h"
 #include "hw-base.h"
 #include "hw-tree.h"
 
 #include "sim-io.h"
 #include "sim-assert.h"
-
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
 
 /* manipulate/lookup device names */
 

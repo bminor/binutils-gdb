@@ -20,15 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "sim-main.h"
-#include "sim-assert.h"
-#include "sim-options.h"
-
-#include <string.h>
-#include <stdlib.h>
 #include <errno.h>
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#include <stdlib.h>
+#include <string.h>
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
@@ -36,9 +35,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+
+#include "sim-main.h"
+#include "sim-assert.h"
+#include "sim-options.h"
 
 /* Memory fill byte. */
 static unsigned8 fill_byte_value;

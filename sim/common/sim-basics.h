@@ -31,9 +31,9 @@
 /* Basic host dependant mess - hopefully <stdio.h> + <stdarg.h> will
    bring potential conflicts out in the open */
 
+#include <setjmp.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <setjmp.h>
 
 
 #ifndef min

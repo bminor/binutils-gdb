@@ -22,20 +22,18 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
-#include "sim-main.h"
-#include "sim-io.h"
-#include "sim/callback.h"
-
 #include <errno.h>
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-
+#include <stdlib.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#include <stdlib.h>
+#include "sim-main.h"
+#include "sim-io.h"
+#include "sim/callback.h"
 
 #undef open
 

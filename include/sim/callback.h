@@ -45,11 +45,12 @@
 #ifndef SIM_CALLBACK_H
 #define SIM_CALLBACK_H
 
-#include <ansidecl.h>
 #include <stdarg.h>
 #include <stdint.h>
+
+#include <ansidecl.h>
 /* Needed for enum bfd_endian.  */
-#include "bfd.h"
+#include <bfd.h>
 
 /* Mapping of host/target values.  */
 /* ??? For debugging purposes, one might want to add a string of the

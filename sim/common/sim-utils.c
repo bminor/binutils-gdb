@@ -21,16 +21,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "defs.h"
 
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
-#include <sys/time.h> /* needed by sys/resource.h */
-
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
-#include <string.h>
+#include <sys/time.h> /* needed by sys/resource.h */
 
-#include "libiberty.h"
 #include "bfd.h"
+#include "libiberty.h"
+
 #include "sim-main.h"
 #include "sim-assert.h"
 #include "sim-utils.h"
