@@ -95,8 +95,8 @@ struct _sim_events {
   /* timekeeping */
   unsigned long elapsed_wallclock;
   SIM_ELAPSED_TIME resume_wallclock;
-  signed64 time_of_event;
-  signed64 time_from_event;
+  int64_t time_of_event;
+  int64_t time_from_event;
 };
 
 
@@ -110,13 +110,13 @@ extern SIM_RC sim_events_install (SIM_DESC sd);
 
 extern sim_event *sim_events_schedule
 (SIM_DESC sd,
- signed64 delta_time,
+ int64_t delta_time,
  sim_event_handler *handler,
  void *data);
 
 extern sim_event *sim_events_schedule_tracef
 (SIM_DESC sd,
- signed64 delta_time,
+ int64_t delta_time,
  sim_event_handler *handler,
  void *data,
  const char *fmt,
@@ -124,7 +124,7 @@ extern sim_event *sim_events_schedule_tracef
 
 extern sim_event *sim_events_schedule_vtracef
 (SIM_DESC sd,
- signed64 delta_time,
+ int64_t delta_time,
  sim_event_handler *handler,
  void *data,
  const char *fmt,
@@ -133,7 +133,7 @@ extern sim_event *sim_events_schedule_vtracef
 
 extern void sim_events_schedule_after_signal
 (SIM_DESC sd,
- signed64 delta_time,
+ int64_t delta_time,
  sim_event_handler *handler,
  void *data);
 
@@ -157,8 +157,8 @@ extern sim_event *sim_events_watch_clock
 extern sim_event *sim_events_watch_pc
 (SIM_DESC sd,
  int is_within,
- unsigned64 lb,
- unsigned64 ub,
+ uint64_t lb,
+ uint64_t ub,
  sim_event_handler *handler,
  void *data);
 
@@ -177,8 +177,8 @@ extern sim_event *sim_events_watch_sim
  int nr_bytes,
  enum bfd_endian byte_order,
  int is_within,
- unsigned64 lb,
- unsigned64 ub,
+ uint64_t lb,
+ uint64_t ub,
  sim_event_handler *handler,
  void *data);
 
@@ -198,8 +198,8 @@ extern sim_event *sim_events_watch_core
  int nr_bytes,
  enum bfd_endian byte_order,
  int is_within,
- unsigned64 lb,
- unsigned64 ub,
+ uint64_t lb,
+ uint64_t ub,
  sim_event_handler *handler,
  void *data);
 
@@ -274,7 +274,7 @@ INLINE_SIM_EVENTS\
 /* local concept of elapsed target time */
 
 INLINE_SIM_EVENTS\
-(signed64) sim_events_time
+(int64_t) sim_events_time
 (SIM_DESC sd);
 
 
@@ -286,7 +286,7 @@ INLINE_SIM_EVENTS\
 
 /* Returns the time that remains before the event is raised. */
 INLINE_SIM_EVENTS\
-(signed64) sim_events_remain_time
+(int64_t) sim_events_remain_time
 (SIM_DESC sd, sim_event *event);
 
 

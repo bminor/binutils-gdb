@@ -61,15 +61,15 @@ extern const char * const cgen_mode_names[];
 #undef VOID
 typedef void VOID;
 typedef unsigned char BI;
-typedef signed8 QI;
-typedef signed16 HI;
-typedef signed32 SI;
-typedef unsigned8 UQI;
-typedef unsigned16 UHI;
-typedef unsigned32 USI;
+typedef int8_t QI;
+typedef int16_t HI;
+typedef int32_t SI;
+typedef uint8_t UQI;
+typedef uint16_t UHI;
+typedef uint32_t USI;
 
-typedef signed64 DI;
-typedef unsigned64 UDI;
+typedef int64_t DI;
+typedef uint64_t UDI;
 #define GETLODI(di) ((SI) (di))
 #define GETHIDI(di) ((SI) ((UDI) (di) >> 32))
 #define SETLODI(di, val) ((di) = (((di) & 0xffffffff00000000LL) | (val)))

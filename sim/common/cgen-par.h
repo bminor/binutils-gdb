@@ -38,7 +38,7 @@ enum cgen_write_queue_kind {
 typedef struct {
   enum cgen_write_queue_kind kind; /* Used to select union member below.  */
   IADDR insn_address;       /* Address of the insn performing the write.  */
-  unsigned32 flags;         /* Target specific flags.  */
+  uint32_t flags;         /* Target specific flags.  */
   long       word1;         /* Target specific field.  */
   union {
     struct {

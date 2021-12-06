@@ -370,9 +370,9 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
   struct disassemble_info disasm_info;
   SFILE sfile;
   union {
-    unsigned8 bytes[CGEN_MAX_INSN_SIZE];
-    unsigned16 shorts[8];
-    unsigned32 words[4];
+    uint8_t bytes[CGEN_MAX_INSN_SIZE];
+    uint16_t shorts[8];
+    uint32_t words[4];
   } insn_buf;
   SIM_DESC sd = CPU_STATE (cpu);
   CGEN_CPU_DESC cd = CPU_CPU_DESC (cpu);

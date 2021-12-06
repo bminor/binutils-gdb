@@ -91,7 +91,7 @@ typedef enum
 typedef struct _sim_fpu {
   sim_fpu_class class;
   int sign;
-  unsigned64 fraction;
+  uint64_t fraction;
   int normal_exp;
 } sim_fpu;
 
@@ -171,13 +171,13 @@ typedef enum
    emulating exact FPU behavior, sim_fpu_round_{32,64} should be
    called before packing the sim_fpu value.  */
 
-INLINE_SIM_FPU (void) sim_fpu_32to (sim_fpu *f, unsigned32 s);
-INLINE_SIM_FPU (void) sim_fpu_232to (sim_fpu *f, unsigned32 h, unsigned32 l);
-INLINE_SIM_FPU (void) sim_fpu_64to (sim_fpu *f, unsigned64 d);
+INLINE_SIM_FPU (void) sim_fpu_32to (sim_fpu *f, uint32_t s);
+INLINE_SIM_FPU (void) sim_fpu_232to (sim_fpu *f, uint32_t h, uint32_t l);
+INLINE_SIM_FPU (void) sim_fpu_64to (sim_fpu *f, uint64_t d);
 
-INLINE_SIM_FPU (void) sim_fpu_to32 (unsigned32 *s, const sim_fpu *f);
-INLINE_SIM_FPU (void) sim_fpu_to232 (unsigned32 *h, unsigned32 *l, const sim_fpu *f);
-INLINE_SIM_FPU (void) sim_fpu_to64 (unsigned64 *d, const sim_fpu *f);
+INLINE_SIM_FPU (void) sim_fpu_to32 (uint32_t *s, const sim_fpu *f);
+INLINE_SIM_FPU (void) sim_fpu_to232 (uint32_t *h, uint32_t *l, const sim_fpu *f);
+INLINE_SIM_FPU (void) sim_fpu_to64 (uint64_t *d, const sim_fpu *f);
 
 
 /* Create a sim_fpu struct using raw information.  (FRACTION & LSMASK
@@ -189,12 +189,12 @@ INLINE_SIM_FPU (void) sim_fpu_to64 (unsigned64 *d, const sim_fpu *f);
 
    You can not specify zero using this function. */
 
-INLINE_SIM_FPU (void) sim_fpu_fractionto (sim_fpu *f, int sign, int normal_exp, unsigned64 fraction, int precision);
+INLINE_SIM_FPU (void) sim_fpu_fractionto (sim_fpu *f, int sign, int normal_exp, uint64_t fraction, int precision);
 
 /* Reverse operation.  If S is a non-zero number, discards the implied
    leading one and returns PRECISION fraction bits.  No rounding is
    performed. */
-INLINE_SIM_FPU (unsigned64) sim_fpu_tofraction (const sim_fpu *s, int precision);
+INLINE_SIM_FPU (uint64_t) sim_fpu_tofraction (const sim_fpu *s, int precision);
 
 
 
@@ -250,37 +250,37 @@ INLINE_SIM_FPU (int) sim_fpu_sqrt (sim_fpu *f,
 
 /* Conversion of integer <-> floating point. */
 
-INLINE_SIM_FPU (int) sim_fpu_i32to (sim_fpu *f, signed32 i,
+INLINE_SIM_FPU (int) sim_fpu_i32to (sim_fpu *f, int32_t i,
 				    sim_fpu_round round);
-INLINE_SIM_FPU (int) sim_fpu_u32to (sim_fpu *f, unsigned32 u,
+INLINE_SIM_FPU (int) sim_fpu_u32to (sim_fpu *f, uint32_t u,
 				    sim_fpu_round round);
-INLINE_SIM_FPU (int) sim_fpu_i64to (sim_fpu *f, signed64 i,
+INLINE_SIM_FPU (int) sim_fpu_i64to (sim_fpu *f, int64_t i,
 				    sim_fpu_round round);
-INLINE_SIM_FPU (int) sim_fpu_u64to (sim_fpu *f, unsigned64 u,
+INLINE_SIM_FPU (int) sim_fpu_u64to (sim_fpu *f, uint64_t u,
 				    sim_fpu_round round);
 #if 0
-INLINE_SIM_FPU (int) sim_fpu_i232to (sim_fpu *f, signed32 h, signed32 l,
+INLINE_SIM_FPU (int) sim_fpu_i232to (sim_fpu *f, int32_t h, int32_t l,
 				     sim_fpu_round round);
 #endif
 #if 0
-INLINE_SIM_FPU (int) sim_fpu_u232to (sim_fpu *f, unsigned32 h, unsigned32 l,
+INLINE_SIM_FPU (int) sim_fpu_u232to (sim_fpu *f, uint32_t h, uint32_t l,
 				     sim_fpu_round round);
 #endif
 
-INLINE_SIM_FPU (int) sim_fpu_to32i (signed32 *i, const sim_fpu *f,
+INLINE_SIM_FPU (int) sim_fpu_to32i (int32_t *i, const sim_fpu *f,
 				    sim_fpu_round round);
-INLINE_SIM_FPU (int) sim_fpu_to32u (unsigned32 *u, const sim_fpu *f,
+INLINE_SIM_FPU (int) sim_fpu_to32u (uint32_t *u, const sim_fpu *f,
 				    sim_fpu_round round);
-INLINE_SIM_FPU (int) sim_fpu_to64i (signed64 *i, const sim_fpu *f,
+INLINE_SIM_FPU (int) sim_fpu_to64i (int64_t *i, const sim_fpu *f,
 				    sim_fpu_round round);
-INLINE_SIM_FPU (int) sim_fpu_to64u (unsigned64 *u, const sim_fpu *f,
+INLINE_SIM_FPU (int) sim_fpu_to64u (uint64_t *u, const sim_fpu *f,
 				    sim_fpu_round round);
 #if 0
-INLINE_SIM_FPU (int) sim_fpu_to232i (signed64 *h, signed64 *l, const sim_fpu *f,
+INLINE_SIM_FPU (int) sim_fpu_to232i (int64_t *h, int64_t *l, const sim_fpu *f,
 				     sim_fpu_round round);
 #endif
 #if 0
-INLINE_SIM_FPU (int) sim_fpu_to232u (unsigned64 *h, unsigned64 *l, const sim_fpu *f,
+INLINE_SIM_FPU (int) sim_fpu_to232u (uint64_t *h, uint64_t *l, const sim_fpu *f,
 				     sim_fpu_round round);
 #endif
 
@@ -320,8 +320,8 @@ INLINE_SIM_FPU (int) sim_fpu_is_denorm (const sim_fpu *s); /* !zero */
 
 INLINE_SIM_FPU (int) sim_fpu_sign (const sim_fpu *s);
 INLINE_SIM_FPU (int) sim_fpu_exp (const sim_fpu *s);
-INLINE_SIM_FPU (unsigned64) sim_fpu_fraction (const sim_fpu *s);
-INLINE_SIM_FPU (unsigned64) sim_fpu_guard (const sim_fpu *s, int is_double);
+INLINE_SIM_FPU (uint64_t) sim_fpu_fraction (const sim_fpu *s);
+INLINE_SIM_FPU (uint64_t) sim_fpu_guard (const sim_fpu *s, int is_double);
 
 
 

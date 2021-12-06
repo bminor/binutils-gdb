@@ -558,13 +558,13 @@ print_data (SIM_DESC sd,
       {
 	switch (size)
 	  {
-	  case sizeof (unsigned32):
-	    trace_printf (sd, cpu, " 0x%08lx", (long) * (unsigned32*) data);
+	  case sizeof (uint32_t):
+	    trace_printf (sd, cpu, " 0x%08lx", (long) * (uint32_t*) data);
 	    break;
-	  case sizeof (unsigned64):
+	  case sizeof (uint64_t):
 	    trace_printf (sd, cpu, " 0x%08lx%08lx",
-			  (long) ((* (unsigned64*) data) >> 32),
-			  (long) * (unsigned64*) data);
+			  (long) ((* (uint64_t*) data) >> 32),
+			  (long) * (uint64_t*) data);
 	    break;
 	  default:
 	    abort ();
@@ -585,10 +585,10 @@ print_data (SIM_DESC sd,
 	  {
 	    /* FIXME: Assumes sizeof float == 4; sizeof double == 8 */
 	  case 4:
-	    sim_fpu_32to (&fp, *(unsigned32*)data);
+	    sim_fpu_32to (&fp, *(uint32_t*)data);
 	    break;
 	  case 8:
-	    sim_fpu_64to (&fp, *(unsigned64*)data);
+	    sim_fpu_64to (&fp, *(uint64_t*)data);
 	    break;
 	  default:
 	    abort ();
@@ -598,12 +598,12 @@ print_data (SIM_DESC sd,
 	  {
 	  case 4:
 	    trace_printf (sd, cpu, " (0x%08lx)",
-			  (long) *(unsigned32*)data);
+			  (long) *(uint32_t*)data);
 	    break;
 	  case 8:
 	    trace_printf (sd, cpu, " (0x%08lx%08lx)",
-			  (long) (*(unsigned64*)data >> 32),
-			  (long) (*(unsigned64*)data));
+			  (long) (*(uint64_t*)data >> 32),
+			  (long) (*(uint64_t*)data));
 	    break;
 	  default:
 	    abort ();

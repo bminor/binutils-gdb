@@ -33,13 +33,13 @@ typedef void (hw_event_callback) (struct hw *me, void *data);
 
 struct hw_event *hw_event_queue_schedule
 (struct hw *me,
- signed64 delta_time,
+ int64_t delta_time,
  hw_event_callback *handler,
  void *data);
 
 struct hw_event *hw_event_queue_schedule_tracef
 (struct hw *me,
- signed64 delta_time,
+ int64_t delta_time,
  hw_event_callback *handler,
  void *data,
  const char *fmt,
@@ -47,7 +47,7 @@ struct hw_event *hw_event_queue_schedule_tracef
 
 struct hw_event *hw_event_queue_schedule_vtracef
 (struct hw *me,
- signed64 delta_time,
+ int64_t delta_time,
  hw_event_callback *handler,
  void *data,
  const char *fmt,
@@ -58,11 +58,11 @@ void hw_event_queue_deschedule
 (struct hw *me,
  struct hw_event *event_to_remove);
 
-signed64 hw_event_queue_time
+int64_t hw_event_queue_time
 (struct hw *me);
 
 /* Returns the time that remains before the event is raised. */
-signed64 hw_event_remain_time
+int64_t hw_event_remain_time
 (struct hw *me, struct hw_event *event);
 
 #endif

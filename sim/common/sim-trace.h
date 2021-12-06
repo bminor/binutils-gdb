@@ -179,13 +179,13 @@ typedef struct _trace_data {
   /* Buffer to save the inputs for the current instruction.  Use a
      union to force the buffer into correct alignment */
   union {
-    unsigned8 i8;
-    unsigned16 i16;
-    unsigned32 i32;
-    unsigned64 i64;
+    uint8_t i8;
+    uint16_t i16;
+    uint32_t i32;
+    uint64_t i64;
   } trace_input_data[16];
-  unsigned8 trace_input_fmt[16];
-  unsigned8 trace_input_size[16];
+  uint8_t trace_input_fmt[16];
+  uint8_t trace_input_size[16];
   int trace_input_idx;
 #define TRACE_INPUT_DATA(t) ((t)->trace_input_data)
 #define TRACE_INPUT_FMT(t) ((t)->trace_input_fmt)

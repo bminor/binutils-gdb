@@ -181,8 +181,8 @@ typedef struct _hw_pal_console_buffer {
 
 typedef struct _hw_pal_counter {
   struct hw_event *handler;
-  signed64 start;
-  unsigned32 delta;
+  int64_t start;
+  uint32_t delta;
   int periodic_p;
 } hw_pal_counter;
 
@@ -237,10 +237,10 @@ do_counter_read (struct hw *me,
 		 hw_pal_device *pal,
 		 const char *reg,
 		 hw_pal_counter *counter,
-		 unsigned32 *word,
+		 uint32_t *word,
 		 unsigned nr_bytes)
 {
-  unsigned32 val;
+  uint32_t val;
   if (nr_bytes != 4)
     hw_abort (me, "%s - bad read size must be 4 bytes", reg);
   val = counter->delta;
@@ -253,10 +253,10 @@ do_counter_value (struct hw *me,
 		  hw_pal_device *pal,
 		  const char *reg,
 		  hw_pal_counter *counter,
-		  unsigned32 *word,
+		  uint32_t *word,
 		  unsigned nr_bytes)
 {
-  unsigned32 val;
+  uint32_t val;
   if (nr_bytes != 4)
     hw_abort (me, "%s - bad read size must be 4 bytes", reg);
   if (counter->delta != 0)
@@ -273,7 +273,7 @@ do_counter_write (struct hw *me,
 		  hw_pal_device *pal,
 		  const char *reg,
 		  hw_pal_counter *counter,
-		  const unsigned32 *word,
+		  const uint32_t *word,
 		  unsigned nr_bytes)
 {
   if (nr_bytes != 4)

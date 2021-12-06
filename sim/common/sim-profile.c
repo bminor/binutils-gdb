@@ -693,7 +693,7 @@ profile_print_pc (sim_cpu *cpu, int verbose)
       {
 	int ok;
 	/* FIXME: what if the target has a 64 bit PC? */
-	unsigned32 header[3];
+	uint32_t header[3];
 	unsigned loop;
 	if (PROFILE_PC_END (profile) != 0)
 	  {
@@ -718,7 +718,7 @@ profile_print_pc (sim_cpu *cpu, int verbose)
 	     ok && (loop < PROFILE_PC_NR_BUCKETS (profile));
 	     loop++)
 	  {
-	    signed16 sample;
+	    int16_t sample;
 	    if (PROFILE_PC_COUNT (profile) [loop] >= 0xffff)
 	      sample = 0xffff;
 	    else

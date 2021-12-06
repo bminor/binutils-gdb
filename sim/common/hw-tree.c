@@ -881,7 +881,7 @@ hw_tree_vparse (struct hw *current,
 #endif
 	    case '[':
 	      {
-		unsigned8 words[1024];
+		uint8_t words[1024];
 		char *curr = spec.value + 1;
 		int nr_words = 0;
 		while (1)
@@ -1127,7 +1127,7 @@ print_properties (struct hw *me,
 		  }
 		else
 		  {
-		    unsigned8 *w = (unsigned8*)property->array;
+		    uint8_t *w = (uint8_t*)property->array;
 		    p->print (p->file, " [");
 		    while ((char*)w - (char*)property->array < property->sizeof_array)
 		      {

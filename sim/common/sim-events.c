@@ -88,7 +88,7 @@ struct _sim_event {
   void *data;
   sim_event_handler *handler;
   /* timer event */
-  signed64 time_of_event;
+  int64_t time_of_event;
   /* watch wallclock event */
   unsigned wallclock;
   /* watch core address */
@@ -100,8 +100,8 @@ struct _sim_event {
   int is_within; /* 0/1 */
   unsigned ub;
   unsigned lb;
-  unsigned64 ub64;
-  unsigned64 lb64;
+  uint64_t ub64;
+  uint64_t lb64;
   /* trace info (if any) */
   char *trace;
   /* list */
@@ -350,7 +350,7 @@ sim_events_init (SIM_DESC sd)
 
 
 INLINE_SIM_EVENTS\
-(signed64)
+(int64_t)
 sim_events_time (SIM_DESC sd)
 {
   sim_events *events = STATE_EVENTS (sd);
@@ -375,7 +375,7 @@ sim_events_elapsed_time (SIM_DESC sd)
 
 /* Returns the time that remains before the event is raised. */
 INLINE_SIM_EVENTS\
-(signed64)
+(int64_t)
 sim_events_remain_time (SIM_DESC sd, sim_event *event)
 {
   if (event == 0)
@@ -391,7 +391,7 @@ STATIC_INLINE_SIM_EVENTS\
 update_time_from_event (SIM_DESC sd)
 {
   sim_events *events = STATE_EVENTS (sd);
-  signed64 current_time = sim_events_time (sd);
+  int64_t current_time = sim_events_time (sd);
   if (events->queue != NULL)
     {
       events->time_of_event = events->queue->time_of_event;
@@ -434,12 +434,12 @@ update_time_from_event (SIM_DESC sd)
 static void
 insert_sim_event (SIM_DESC sd,
 		  sim_event *new_event,
-		  signed64 delta)
+		  int64_t delta)
 {
   sim_events *events = STATE_EVENTS (sd);
   sim_event *curr;
   sim_event **prev;
-  signed64 time_of_event;
+  int64_t time_of_event;
 
   if (delta < 0)
     sim_io_error (sd, "what is past is past!\n");
@@ -473,7 +473,7 @@ insert_sim_event (SIM_DESC sd,
 #if EXTERN_SIM_EVENTS_P
 sim_event *
 sim_events_schedule (SIM_DESC sd,
-		     signed64 delta_time,
+		     int64_t delta_time,
 		     sim_event_handler *handler,
 		     void *data)
 {
@@ -485,7 +485,7 @@ sim_events_schedule (SIM_DESC sd,
 #if EXTERN_SIM_EVENTS_P
 sim_event *
 sim_events_schedule_tracef (SIM_DESC sd,
-			    signed64 delta_time,
+			    int64_t delta_time,
 			    sim_event_handler *handler,
 			    void *data,
 			    const char *fmt,
@@ -504,7 +504,7 @@ sim_events_schedule_tracef (SIM_DESC sd,
 #if EXTERN_SIM_EVENTS_P
 sim_event *
 sim_events_schedule_vtracef (SIM_DESC sd,
-			     signed64 delta_time,
+			     int64_t delta_time,
 			     sim_event_handler *handler,
 			     void *data,
 			     const char *fmt,
@@ -535,7 +535,7 @@ sim_events_schedule_vtracef (SIM_DESC sd,
 #if EXTERN_SIM_EVENTS_P
 void
 sim_events_schedule_after_signal (SIM_DESC sd,
-				  signed64 delta_time,
+				  int64_t delta_time,
 				  sim_event_handler *handler,
 				  void *data)
 {
@@ -624,8 +624,8 @@ sim_events_watch_clock (SIM_DESC sd,
 sim_event *
 sim_events_watch_pc (SIM_DESC sd,
 		     int is_within,
-		     unsigned64 lb,
-		     unsigned64 ub,
+		     uint64_t lb,
+		     uint64_t ub,
 		     sim_event_handler *handler,
 		     void *data)
 {
@@ -667,8 +667,8 @@ sim_events_watch_sim (SIM_DESC sd,
 		      int nr_bytes,
 		      enum bfd_endian byte_order,
 		      int is_within,
-		      unsigned64 lb,
-		      unsigned64 ub,
+		      uint64_t lb,
+		      uint64_t ub,
 		      sim_event_handler *handler,
 		      void *data)
 {
@@ -747,8 +747,8 @@ sim_events_watch_core (SIM_DESC sd,
 		       int nr_bytes,
 		       enum bfd_endian byte_order,
 		       int is_within,
-		       unsigned64 lb,
-		       unsigned64 ub,
+		       uint64_t lb,
+		       uint64_t ub,
 		       sim_event_handler *handler,
 		       void *data)
 {
@@ -1147,7 +1147,7 @@ INLINE_SIM_EVENTS\
 sim_events_process (SIM_DESC sd)
 {
   sim_events *events = STATE_EVENTS (sd);
-  signed64 event_time = sim_events_time (sd);
+  int64_t event_time = sim_events_time (sd);
 
   /* Clear work_pending before checking nr_held.  Clearing
      work_pending after nr_held (with out a lock could loose an

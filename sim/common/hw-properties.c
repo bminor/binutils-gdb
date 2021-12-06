@@ -368,7 +368,7 @@ hw_add_boolean_property (struct hw *me,
 			 const char *property,
 			 int boolean)
 {
-  signed32 new_boolean = (boolean ? -1 : 0);
+  int32_t new_boolean = (boolean ? -1 : 0);
   hw_add_property (me, property, boolean_property,
 		   &new_boolean, sizeof (new_boolean),
 		   &new_boolean, sizeof (new_boolean),

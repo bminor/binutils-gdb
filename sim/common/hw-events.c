@@ -87,7 +87,7 @@ bounce_hw_event (SIM_DESC sd,
 
 struct hw_event *
 hw_event_queue_schedule (struct hw *me,
-			 signed64 delta_time,
+			 int64_t delta_time,
 			 hw_event_callback *callback,
 			 void *data)
 {
@@ -96,7 +96,7 @@ hw_event_queue_schedule (struct hw *me,
 
 struct hw_event *
 hw_event_queue_schedule_tracef (struct hw *me,
-				signed64 delta_time,
+				int64_t delta_time,
 				hw_event_callback *callback,
 				void *data,
 				const char *fmt,
@@ -112,7 +112,7 @@ hw_event_queue_schedule_tracef (struct hw *me,
 
 struct hw_event *
 hw_event_queue_schedule_vtracef (struct hw *me,
-				 signed64 delta_time,
+				 int64_t delta_time,
 				 hw_event_callback *callback,
 				 void *data,
 				 const char *fmt,
@@ -160,17 +160,17 @@ hw_event_queue_deschedule (struct hw *me,
 }
 
 
-signed64
+int64_t
 hw_event_queue_time (struct hw *me)
 {
   return sim_events_time (hw_system (me));
 }
 
 /* Returns the time that remains before the event is raised. */
-signed64
+int64_t
 hw_event_remain_time (struct hw *me, struct hw_event *event)
 {
-  signed64 t;
+  int64_t t;
 
   t = sim_events_remain_time (hw_system (me), event->real);
   return t;
