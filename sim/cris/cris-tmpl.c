@@ -123,7 +123,7 @@ MY (f_model_insn_before) (SIM_CPU *current_cpu, int first_p ATTRIBUTE_UNUSED)
   {
     int i;
     char flags[7];
-    unsigned64 cycle_count;
+    uint64_t cycle_count;
 
     SIM_DESC sd = CPU_STATE (current_cpu);
 

@@ -60,7 +60,7 @@ MY (deliver_interrupt) (SIM_CPU *current_cpu,
   unsigned char entryaddr_le[4];
   int was_user;
   SIM_DESC sd = CPU_STATE (current_cpu);
-  unsigned32 entryaddr;
+  uint32_t entryaddr;
 
   /* We haven't implemented other interrupt-types yet.  */
   if (type != CRIS_INT_INT)
