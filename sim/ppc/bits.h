@@ -89,7 +89,7 @@
 
 
 /* MakeBit */
-#define _BITn(WIDTH, pos) (((natural##WIDTH)(1)) \
+#define _BITn(WIDTH, pos) (((uint##WIDTH##_t)(1)) \
 			   << _MAKE_SHIFT(WIDTH, pos))
 
 #define BIT4(POS)  (1 << _MAKE_SHIFT(4, POS))
@@ -177,7 +177,7 @@ INLINE_BITS\
 
 /* extract the required bits aligning them with the lsb */
 #define _EXTRACTEDn(WIDTH, WORD, START, STOP) \
-((((natural##WIDTH)(WORD)) >> (WIDTH - (STOP) - 1)) \
+((((uint##WIDTH##_t)(WORD)) >> (WIDTH - (STOP) - 1)) \
  & _MASKn(WIDTH, WIDTH-1+(START)-(STOP), WIDTH-1))
 
 /* #define EXTRACTED10(WORD, START, STOP) _EXTRACTEDn(10, WORD, START, STOP) */
@@ -215,7 +215,7 @@ INLINE_BITS\
 
 /* move a group of bits around */
 #define _INSERTEDn(N, WORD, START, STOP) \
-(((natural##N)(WORD) << _MAKE_SHIFT(N, STOP)) & _MASKn(N, START, STOP))
+(((uint##N##_t)(WORD) << _MAKE_SHIFT(N, STOP)) & _MASKn(N, START, STOP))
 
 #define INSERTED32(WORD, START, STOP) _INSERTEDn(32, WORD, START, STOP)
 #define INSERTED64(WORD, START, STOP) _INSERTEDn(64, WORD, START, STOP)

@@ -65,7 +65,7 @@
 
 #define ALU_BEGIN(val) \
 { \
-  natural_word alu_val; \
+  signed_word alu_val; \
   unsigned64 alu_carry_val; \
   signed64 alu_overflow_val; \
   ALU_SET(val)

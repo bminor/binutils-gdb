@@ -27,7 +27,6 @@
 
 /* TYPES:
 
-     natural*	sign determined by host
      signed*    signed type of the given size
      unsigned*  The corresponding insigned type
 
@@ -49,18 +48,6 @@
 #include <stdint.h>
 
 /* bit based */
-typedef char natural8;
-typedef short natural16;
-typedef int natural32;
-
-#ifdef __GNUC__
-typedef long long natural64;
-#endif
-
-#ifdef _MSC_VER
-typedef __int64 natural64;
-#endif 
-
 typedef int8_t signed8;
 typedef int16_t signed16;
 typedef int32_t signed32;
@@ -72,11 +59,6 @@ typedef uint32_t unsigned32;
 typedef uint64_t unsigned64;
 
 /* byte based */
-typedef natural8 natural_1;
-typedef natural16 natural_2;
-typedef natural32 natural_4;
-typedef natural64 natural_8;
-
 typedef signed8 signed_1;
 typedef signed16 signed_2;
 typedef signed32 signed_4;
@@ -96,11 +78,9 @@ typedef unsigned64 unsigned_8;
 
 /* target architecture based */
 #if (WITH_TARGET_WORD_BITSIZE == 64)
-typedef natural64 natural_word;
 typedef unsigned64 unsigned_word;
 typedef signed64 signed_word;
 #else
-typedef natural32 natural_word;
 typedef unsigned32 unsigned_word;
 typedef signed32 signed_word;
 #endif
@@ -110,7 +90,6 @@ typedef signed32 signed_word;
 typedef unsigned32 instruction_word;
 
 /* IEEE 1275 cell size - only support 32bit mode at present */
-typedef natural32 natural_cell;
 typedef unsigned32 unsigned_cell;
 typedef signed32 signed_cell;
 
