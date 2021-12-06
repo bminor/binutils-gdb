@@ -30,12 +30,17 @@ if [get_compiler_info] {
     return -1
 }
 
-set additional_flags ""
+set flags { debug }
+
+# C11 for _Alignas, gnu for asm.
+lappend flags additional_flags=-std=gnu11
+
 if { [test_compiler_info gcc*] || [test_compiler_info clang*] } {
-    set additional_flags "additional_flags=-msse -I${srcdir}/.."
+    lappend flags "additional_flags=-msse -I${srcdir}/.."
 }
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug $additional_flags]] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
+	  $flags] != "" } {
     unsupported "compiler does not support SSE"
     return
 }

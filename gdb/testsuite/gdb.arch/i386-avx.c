@@ -20,8 +20,11 @@
 #include <stdio.h>
 #include "nat/x86-cpuid.h"
 
+/* Align sufficient to be able to use vmovaps.  */
+#define ALIGN 32
+
 typedef struct {
-  float f[8];
+  _Alignas (ALIGN) float f[8];
 } v8sf_t;
 
 

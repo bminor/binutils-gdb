@@ -20,8 +20,11 @@
 #include <stdio.h>
 #include "nat/x86-cpuid.h"
 
+/* Align sufficient to be able to use movaps.  */
+#define ALIGN 16
+
 typedef struct {
-  float f[4];
+  _Alignas (ALIGN) float f[4];
 } v4sf_t;
 
 
