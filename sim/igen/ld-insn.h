@@ -21,7 +21,7 @@
 
 
 
-typedef unsigned64 insn_uint;
+typedef uint64_t insn_uint;
 
 
 /* Common among most entries:

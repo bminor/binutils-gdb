@@ -759,7 +759,7 @@ static void
 gen_idecode_h (lf *file,
 	       gen_table *gen, insn_table *insns, cache_entry *cache_rules)
 {
-  lf_printf (file, "typedef unsigned%d %sinstruction_word;\n",
+  lf_printf (file, "typedef uint%d_t %sinstruction_word;\n",
 	     options.insn_bit_size, options.module.global.prefix.l);
   if (options.gen.delayed_branch)
     {
