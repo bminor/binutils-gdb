@@ -4678,11 +4678,16 @@ global_symbol_searcher::expand_symtabs
   enum search_domain kind = m_kind;
   bool found_msymbol = false;
 
+  auto do_file_match = [&] (const char *filename, bool basenames)
+    {
+      return file_matches (filename, filenames, basenames);
+    };
+  gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher = nullptr;
+  if (!filenames.empty ())
+    file_matcher = do_file_match;
+
   objfile->expand_symtabs_matching
-    ([&] (const char *filename, bool basenames)
-     {
-       return file_matches (filename, filenames, basenames);
-     },
+    (file_matcher,
      &lookup_name_info::match_any (),
      [&] (const char *symname)
      {
