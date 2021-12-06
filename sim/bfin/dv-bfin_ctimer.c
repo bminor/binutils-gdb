@@ -30,7 +30,7 @@ struct bfin_ctimer
 {
   bu32 base;
   struct hw_event *handler;
-  signed64 timeout;
+  int64_t timeout;
 
   /* Order after here is important -- matches hardware MMR layout.  */
   bu32 tcntl, tperiod, tscale, tcount;
@@ -84,7 +84,7 @@ static void
 bfin_ctimer_update_count (struct hw *me, struct bfin_ctimer *ctimer)
 {
   bu32 scale, ticks;
-  signed64 timeout;
+  int64_t timeout;
 
   /* If the timer was enabled w/out autoreload and has expired, then
      there's nothing to calculate here.  */
