@@ -211,14 +211,14 @@ iq2000bf_fetch_register (SIM_CPU *cpu, int nr, unsigned char *buf, int len)
       && nr < (GPR0_REGNUM + NR_GPR)
       && len == 4)
     {
-      *((unsigned32*)buf) =
+      *((uint32_t*)buf) =
 	H2T_4 (iq2000bf_h_gr_get (cpu, nr - GPR0_REGNUM));
       return 4;
     }
   else if (nr == PC_REGNUM
 	   && len == 4)
     {
-      *((unsigned32*)buf) = H2T_4 (get_h_pc (cpu));
+      *((uint32_t*)buf) = H2T_4 (get_h_pc (cpu));
       return 4;
     }
   else
@@ -232,13 +232,13 @@ iq2000bf_store_register (SIM_CPU *cpu, int nr, unsigned char *buf, int len)
       && nr < (GPR0_REGNUM + NR_GPR)
       && len == 4)
     {
-      iq2000bf_h_gr_set (cpu, nr - GPR0_REGNUM, T2H_4 (*((unsigned32*)buf)));
+      iq2000bf_h_gr_set (cpu, nr - GPR0_REGNUM, T2H_4 (*((uint32_t*)buf)));
       return 4;
     }
   else if (nr == PC_REGNUM
 	   && len == 4)
     {
-      set_h_pc (cpu, T2H_4 (*((unsigned32*)buf)));
+      set_h_pc (cpu, T2H_4 (*((uint32_t*)buf)));
       return 4;
     }
   else
