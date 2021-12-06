@@ -72,6 +72,13 @@ maint packet
   as escaped hex, e.g. \x?? where '??' is replaces with the value of
   the non-printable character.
 
+clone-inferior
+  The clone-inferior command now ensures that the TTY, CMD and ARGS
+  settings are copied from the original inferior to the new one.
+  All modifications to the environment variables done using the 'set
+  environment' or 'unset environment' commands are also copied to the new
+  inferior.
+
 * Python API
 
   ** New function gdb.add_history(), which takes a gdb.Value object

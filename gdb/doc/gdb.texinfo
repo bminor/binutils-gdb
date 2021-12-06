@@ -3331,8 +3331,12 @@ use @code{run} to spawn a local program, etc.
 @item clone-inferior [ -copies @var{n} ] [ @var{infno} ]
 Adds @var{n} inferiors ready to execute the same program as inferior
 @var{infno}; @var{n} defaults to 1, and @var{infno} defaults to the
-number of the current inferior.  This is a convenient command when you
-want to run another instance of the inferior you are debugging.
+number of the current inferior.  This command copies the values of the
+@var{args}, @w{@var{inferior-tty}} and @var{cwd} properties from the
+current inferior to the new one.  It also propagates changes the user
+made to environment variables using the @w{@code{set environment}} and
+@w{@code{unset environment}} commands.  This is a convenient command
+when you want to run another instance of the inferior you are debugging.
 
 @smallexample
 (@value{GDBP}) info inferiors

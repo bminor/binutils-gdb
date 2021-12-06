@@ -934,6 +934,23 @@ clone_inferior_command (const char *args, int from_tty)
 	copy_inferior_target_desc_info (inf, orginf);
 
       clone_program_space (pspace, orginf->pspace);
+
+      /* Copy properties from the original inferior to the new one.  */
+      inf->set_args (orginf->args ());
+      inf->set_cwd (orginf->cwd ());
+      inf->set_tty (orginf->tty ());
+      for (const std::string &set_var : orginf->environment.user_set_env ())
+	{
+	  /* set_var has the form NAME=value.  Split on the first '='.  */
+	  const std::string::size_type pos = set_var.find ('=');
+	  gdb_assert (pos != std::string::npos);
+	  const std::string varname = set_var.substr (0, pos);
+	  inf->environment.set
+	    (varname.c_str (), orginf->environment.get (varname.c_str ()));
+	}
+      for (const std::string &unset_var
+	   : orginf->environment.user_unset_env ())
+	inf->environment.unset (unset_var.c_str ());
     }
 }
 
