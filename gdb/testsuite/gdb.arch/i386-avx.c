@@ -28,7 +28,7 @@ typedef struct {
 } v8sf_t;
 
 
-v8sf_t data[] =
+v8sf_t data_orig[] =
   {
     { {  0.0,  0.125,  0.25,  0.375,  0.50,  0.625,  0.75,  0.875 } },
     { {  1.0,  1.125,  1.25,  1.375,  1.50,  1.625,  1.75,  1.875 } },
@@ -50,10 +50,16 @@ v8sf_t data[] =
 #endif
   };
 
+#include "../lib/precise-aligned-alloc.c"
 
 int
 main (int argc, char **argv)
 {
+  void *allocated_ptr;
+  v8sf_t *data
+    = precise_aligned_dup (ALIGN, sizeof (data_orig), &allocated_ptr,
+			   data_orig);
+
   asm ("vmovaps 0(%0), %%ymm0\n\t"
        "vmovaps 32(%0), %%ymm1\n\t"
        "vmovaps 64(%0), %%ymm2\n\t"
@@ -109,6 +115,8 @@ main (int argc, char **argv)
 #endif
 
   puts ("Bye!"); /* second breakpoint here */
+
+  free (allocated_ptr);
 
   return 0;
 }

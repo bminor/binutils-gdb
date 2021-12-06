@@ -28,7 +28,7 @@ typedef struct {
 } v4sf_t;
 
 
-v4sf_t data[] =
+v4sf_t data_orig[] =
   {
     { {  0.0,  0.25,  0.50,  0.75 } },
     { {  1.0,  1.25,  1.50,  1.75 } },
@@ -65,9 +65,16 @@ have_sse (void)
     return 0;
 }
 
+#include "../lib/precise-aligned-alloc.c"
+
 int
 main (int argc, char **argv)
 {
+  void *allocated_ptr;
+  v4sf_t *data
+    = precise_aligned_dup (ALIGN, sizeof (data_orig), &allocated_ptr,
+			   data_orig);
+
   if (have_sse ())
     {
       asm ("movaps 0(%0), %%xmm0\n\t"
@@ -126,6 +133,8 @@ main (int argc, char **argv)
 
       puts ("Bye!"); /* second breakpoint here */
     }
+
+  free (allocated_ptr);
 
   return 0;
 }
