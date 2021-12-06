@@ -573,7 +573,7 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 		  /* For unsigned 32-bit multiplication of 16-bit operands, an
 		     explicit cast is required to prevent any implicit
 		     sign-extension.  */
-		  HWMULT (sd, hwmult_result) = (unsigned32) a * (unsigned32) b;
+		  HWMULT (sd, hwmult_result) = (uint32_t) a * (uint32_t) b;
 		  HWMULT (sd, hwmult_signed_result) = a * b;
 		  HWMULT (sd, hwmult_accumulator) = HWMULT (sd, hwmult_signed_accumulator) = 0;
 		  break;
@@ -582,7 +582,7 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 		  a = sign_ext (HWMULT (sd, hwmult_op1), 16);
 		  b = sign_ext (HWMULT (sd, hwmult_op2), 16);
 		  HWMULT (sd, hwmult_signed_result) = a * b;
-		  HWMULT (sd, hwmult_result) = (unsigned32) a * (unsigned32) b;
+		  HWMULT (sd, hwmult_result) = (uint32_t) a * (uint32_t) b;
 		  HWMULT (sd, hwmult_accumulator) = HWMULT (sd, hwmult_signed_accumulator) = 0;
 		  break;
 
@@ -590,7 +590,7 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 		  a = HWMULT (sd, hwmult_op1);
 		  b = HWMULT (sd, hwmult_op2);
 		  HWMULT (sd, hwmult_accumulator)
-		    += (unsigned32) a * (unsigned32) b;
+		    += (uint32_t) a * (uint32_t) b;
 		  HWMULT (sd, hwmult_signed_accumulator) += a * b;
 		  HWMULT (sd, hwmult_result) = HWMULT (sd, hwmult_accumulator);
 		  HWMULT (sd, hwmult_signed_result) = HWMULT (sd, hwmult_signed_accumulator);
@@ -600,7 +600,7 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 		  a = sign_ext (HWMULT (sd, hwmult_op1), 16);
 		  b = sign_ext (HWMULT (sd, hwmult_op2), 16);
 		  HWMULT (sd, hwmult_accumulator)
-		    += (unsigned32) a * (unsigned32) b;
+		    += (uint32_t) a * (uint32_t) b;
 		  HWMULT (sd, hwmult_signed_accumulator) += a * b;
 		  HWMULT (sd, hwmult_result) = HWMULT (sd, hwmult_accumulator);
 		  HWMULT (sd, hwmult_signed_result) = HWMULT (sd, hwmult_signed_accumulator);
@@ -660,8 +660,8 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 		{
 		case UNSIGN_64:
 		  HWMULT (sd, hw32mult_result)
-		    = (unsigned64) HWMULT (sd, hw32mult_op1)
-		    * (unsigned64) HWMULT (sd, hw32mult_op2);
+		    = (uint64_t) HWMULT (sd, hw32mult_op1)
+		    * (uint64_t) HWMULT (sd, hw32mult_op2);
 		  break;
 		case SIGN_64:
 		  HWMULT (sd, hw32mult_result)
