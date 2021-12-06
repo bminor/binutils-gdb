@@ -254,7 +254,7 @@ store_memory (SIM_DESC SD,
 }
 
 
-INLINE_SIM_MAIN (unsigned32)
+INLINE_SIM_MAIN (uint32_t)
 ifetch32 (SIM_DESC SD,
 	  sim_cpu *CPU,
 	  address_word cia,
@@ -267,7 +267,7 @@ ifetch32 (SIM_DESC SD,
   address_word bigendiancpu = (BigEndianCPU ? (mask ^ access) : 0);
   unsigned int byte;
   address_word paddr = vaddr;
-  unsigned64 memval;
+  uint64_t memval;
 
   if ((vaddr & access) != 0)
     SignalExceptionInstructionFetch ();
@@ -278,7 +278,7 @@ ifetch32 (SIM_DESC SD,
 }
 
 
-INLINE_SIM_MAIN (unsigned16)
+INLINE_SIM_MAIN (uint16_t)
 ifetch16 (SIM_DESC SD,
 	  sim_cpu *CPU,
 	  address_word cia,
@@ -291,7 +291,7 @@ ifetch16 (SIM_DESC SD,
   address_word bigendiancpu = (BigEndianCPU ? (mask ^ access) : 0);
   unsigned int byte;
   address_word paddr = vaddr;
-  unsigned64 memval;
+  uint64_t memval;
 
   if ((vaddr & access) != 0)
     SignalExceptionInstructionFetch ();
@@ -433,18 +433,18 @@ pending_tick (SIM_DESC SD,
 		      {
 		      case 4:
 			if (PENDING_SLOT_VALUE[index])
-			  *(unsigned32*)PENDING_SLOT_DEST[index] |=
+			  *(uint32_t*)PENDING_SLOT_DEST[index] |=
 			    BIT32 (PENDING_SLOT_BIT[index]);
 			else
-			  *(unsigned32*)PENDING_SLOT_DEST[index] &=
+			  *(uint32_t*)PENDING_SLOT_DEST[index] &=
 			    BIT32 (PENDING_SLOT_BIT[index]);
 			break;
 		      case 8:
 			if (PENDING_SLOT_VALUE[index])
-			  *(unsigned64*)PENDING_SLOT_DEST[index] |=
+			  *(uint64_t*)PENDING_SLOT_DEST[index] |=
 			    BIT64 (PENDING_SLOT_BIT[index]);
 			else
-			  *(unsigned64*)PENDING_SLOT_DEST[index] &=
+			  *(uint64_t*)PENDING_SLOT_DEST[index] &=
 			    BIT64 (PENDING_SLOT_BIT[index]);
 			break;
 		      }
@@ -452,11 +452,11 @@ pending_tick (SIM_DESC SD,
 		    switch (PENDING_SLOT_SIZE[index])
 		      {
 		      case 4:
-			*(unsigned32*)PENDING_SLOT_DEST[index] =
+			*(uint32_t*)PENDING_SLOT_DEST[index] =
 			  PENDING_SLOT_VALUE[index];
 			break;
 		      case 8:
-			*(unsigned64*)PENDING_SLOT_DEST[index] =
+			*(uint64_t*)PENDING_SLOT_DEST[index] =
 			  PENDING_SLOT_VALUE[index];
 			break;
 		      }

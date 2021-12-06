@@ -21,7 +21,7 @@
 
 :function:::void:do_dsbh:int rd, int rt
 {
-  union { unsigned64 d; unsigned16 h[4]; } u;
+  union { uint64_t d; uint16_t h[4]; } u;
   TRACE_ALU_INPUT1 (GPR[rt]);
   u.d = GPR[rt];
   u.h[0] = SWAP_2 (u.h[0]);
@@ -34,7 +34,7 @@
 
 :function:::void:do_dshd:int rd, int rt
 {
-  unsigned64 d;
+  uint64_t d;
   TRACE_ALU_INPUT1 (GPR[rt]);
   d = GPR[rt];
   GPR[rd] = ((d >> 48)
@@ -181,7 +181,7 @@
 
 :function:::void:do_wsbh:int rd, int rt
 {
-  union { unsigned32 w; unsigned16 h[2]; } u;
+  union { uint32_t w; uint16_t h[2]; } u;
   TRACE_ALU_INPUT1 (GPR[rt]);
   u.w = GPR[rt];
   u.h[0] = SWAP_2 (u.h[0]);

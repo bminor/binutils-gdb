@@ -90,8 +90,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Extract packed single values:  */
 #define FP_PS_upper(v) (((v) >> 32) & (unsigned)0xFFFFFFFF)
 #define FP_PS_lower(v) ((v) & (unsigned)0xFFFFFFFF)
-#define FP_PS_cat(u,l) (((unsigned64)((u) & (unsigned)0xFFFFFFFF) << 32) \
-                        | (unsigned64)((l) & 0xFFFFFFFF))
+#define FP_PS_cat(u,l) (((uint64_t)((u) & (unsigned)0xFFFFFFFF) << 32) \
+                        | (uint64_t)((l) & 0xFFFFFFFF))
 
 /* Explicit QNaN values.  */
 #define FPQNaN_SINGLE   (0x7FBFFFFF)
@@ -360,7 +360,7 @@ value_fcr(sim_cpu *cpu,
 	  address_word cia,
 	  int fcr)
 {
-  unsigned32 value = 0;
+  uint32_t value = 0;
 
   switch (fcr)
     {
@@ -393,7 +393,7 @@ store_fcr(sim_cpu *cpu,
 	  int fcr,
 	  unsigned_word value)
 {
-  unsigned32 v;
+  uint32_t v;
 
   v = VL4_8(value);
   switch (fcr)
@@ -523,8 +523,8 @@ denorm_mode(sim_cpu *cpu)
 /* Comparison operations.  */
 
 static sim_fpu_status
-fp_test(unsigned64 op1,
-	unsigned64 op2,
+fp_test(uint64_t op1,
+	uint64_t op2,
 	FP_formats fmt,
 	int abs,
 	int cond,
@@ -584,8 +584,8 @@ fp_test(unsigned64 op1,
 void
 fp_cmp(sim_cpu *cpu,
        address_word cia,
-       unsigned64 op1,
-       unsigned64 op2,
+       uint64_t op1,
+       uint64_t op2,
        FP_formats fmt,
        int abs,
        int cond,
@@ -628,11 +628,11 @@ fp_cmp(sim_cpu *cpu,
 
 /* Basic arithmetic operations.  */
 
-static unsigned64
+static uint64_t
 fp_unary(sim_cpu *cpu,
 	 address_word cia,
 	 int (*sim_fpu_op)(sim_fpu *, const sim_fpu *),
-	 unsigned64 op,
+	 uint64_t op,
 	 FP_formats fmt)
 {
   sim_fpu wop;
@@ -640,14 +640,14 @@ fp_unary(sim_cpu *cpu,
   sim_fpu_round round = rounding_mode (GETRM());
   sim_fpu_denorm denorm = denorm_mode (cpu);
   sim_fpu_status status = 0;
-  unsigned64 result = 0;
+  uint64_t result = 0;
 
   /* The format type has already been checked: */
   switch (fmt)
     {
     case fmt_single:
       {
-	unsigned32 res;
+	uint32_t res;
 	sim_fpu_32to (&wop, op);
 	status |= (*sim_fpu_op) (&ans, &wop);
 	status |= sim_fpu_round_32 (&ans, round, denorm);
@@ -657,7 +657,7 @@ fp_unary(sim_cpu *cpu,
       }
     case fmt_double:
       {
-	unsigned64 res;
+	uint64_t res;
 	sim_fpu_64to (&wop, op);
 	status |= (*sim_fpu_op) (&ans, &wop);
 	status |= sim_fpu_round_64 (&ans, round, denorm);
@@ -668,7 +668,7 @@ fp_unary(sim_cpu *cpu,
     case fmt_ps:
       {
 	int status_u = 0, status_l = 0;
-	unsigned32 res_u, res_l;
+	uint32_t res_u, res_l;
 	sim_fpu_32to (&wop, FP_PS_upper(op));
 	status_u |= (*sim_fpu_op) (&ans, &wop);
 	sim_fpu_to32 (&res_u, &ans);
@@ -688,12 +688,12 @@ fp_unary(sim_cpu *cpu,
   return result;
 }
 
-static unsigned64
+static uint64_t
 fp_binary(sim_cpu *cpu,
 	  address_word cia,
 	  int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
-	  unsigned64 op1,
-	  unsigned64 op2,
+	  uint64_t op1,
+	  uint64_t op2,
 	  FP_formats fmt)
 {
   sim_fpu wop1;
@@ -702,14 +702,14 @@ fp_binary(sim_cpu *cpu,
   sim_fpu_round round = rounding_mode (GETRM());
   sim_fpu_denorm denorm = denorm_mode (cpu);
   sim_fpu_status status = 0;
-  unsigned64 result = 0;
+  uint64_t result = 0;
 
   /* The format type has already been checked: */
   switch (fmt)
     {
     case fmt_single:
       {
-	unsigned32 res;
+	uint32_t res;
 	sim_fpu_32to (&wop1, op1);
 	sim_fpu_32to (&wop2, op2);
 	status |= (*sim_fpu_op) (&ans, &wop1, &wop2);
@@ -720,7 +720,7 @@ fp_binary(sim_cpu *cpu,
       }
     case fmt_double:
       {
-	unsigned64 res;
+	uint64_t res;
 	sim_fpu_64to (&wop1, op1);
 	sim_fpu_64to (&wop2, op2);
 	status |= (*sim_fpu_op) (&ans, &wop1, &wop2);
@@ -732,7 +732,7 @@ fp_binary(sim_cpu *cpu,
     case fmt_ps:
       {
 	int status_u = 0, status_l = 0;
-	unsigned32 res_u, res_l;
+	uint32_t res_u, res_l;
 	sim_fpu_32to (&wop1, FP_PS_upper(op1));
 	sim_fpu_32to (&wop2, FP_PS_upper(op2));
 	status_u |= (*sim_fpu_op) (&ans, &wop1, &wop2);
@@ -757,28 +757,28 @@ fp_binary(sim_cpu *cpu,
 /* Common MAC code for single operands (.s or .d), defers setting FCSR.  */
 static sim_fpu_status
 inner_mac(int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
-	  unsigned64 op1,
-	  unsigned64 op2,
-	  unsigned64 op3,
+	  uint64_t op1,
+	  uint64_t op2,
+	  uint64_t op3,
 	  int scale,
 	  int negate,
 	  FP_formats fmt,
 	  sim_fpu_round round,
 	  sim_fpu_denorm denorm,
-	  unsigned64 *result)
+	  uint64_t *result)
 {
   sim_fpu wop1;
   sim_fpu wop2;
   sim_fpu ans;
   sim_fpu_status status = 0;
   sim_fpu_status op_status;
-  unsigned64 temp = 0;
+  uint64_t temp = 0;
 
   switch (fmt)
     {
     case fmt_single:
       {
-	unsigned32 res;
+	uint32_t res;
 	sim_fpu_32to (&wop1, op1);
 	sim_fpu_32to (&wop2, op2);
 	status |= sim_fpu_mul (&ans, &wop1, &wop2);
@@ -804,7 +804,7 @@ inner_mac(int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
       }
     case fmt_double:
       {
-	unsigned64 res;
+	uint64_t res;
 	sim_fpu_64to (&wop1, op1);
 	sim_fpu_64to (&wop2, op2);
 	status |= sim_fpu_mul (&ans, &wop1, &wop2);
@@ -842,13 +842,13 @@ inner_mac(int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
    argument is an adjustment to the exponent of the intermediate
    product op1*op2.  It is currently non-zero for rsqrt2 (-1), which
    requires an effective division by 2. */
-static unsigned64
+static uint64_t
 fp_mac(sim_cpu *cpu,
        address_word cia,
        int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
-       unsigned64 op1,
-       unsigned64 op2,
-       unsigned64 op3,
+       uint64_t op1,
+       uint64_t op2,
+       uint64_t op3,
        int scale,
        int negate,
        FP_formats fmt)
@@ -856,7 +856,7 @@ fp_mac(sim_cpu *cpu,
   sim_fpu_round round = rounding_mode (GETRM());
   sim_fpu_denorm denorm = denorm_mode (cpu);
   sim_fpu_status status = 0;
-  unsigned64 result = 0;
+  uint64_t result = 0;
 
   /* The format type has already been checked: */
   switch (fmt)
@@ -869,7 +869,7 @@ fp_mac(sim_cpu *cpu,
     case fmt_ps:
       {
 	int status_u, status_l;
-	unsigned64 result_u, result_l;
+	uint64_t result_u, result_l;
 	status_u = inner_mac(sim_fpu_op, FP_PS_upper(op1), FP_PS_upper(op2),
 			     FP_PS_upper(op3), scale, negate, fmt_single,
 			     round, denorm, &result_u);
@@ -891,23 +891,23 @@ fp_mac(sim_cpu *cpu,
 
 /* Common rsqrt code for single operands (.s or .d), intermediate rounding.  */
 static sim_fpu_status
-inner_rsqrt(unsigned64 op1,
+inner_rsqrt(uint64_t op1,
 	    FP_formats fmt,
 	    sim_fpu_round round,
 	    sim_fpu_denorm denorm,
-	    unsigned64 *result)
+	    uint64_t *result)
 {
   sim_fpu wop1;
   sim_fpu ans;
   sim_fpu_status status = 0;
   sim_fpu_status op_status;
-  unsigned64 temp = 0;
+  uint64_t temp = 0;
 
   switch (fmt)
     {
     case fmt_single:
       {
-	unsigned32 res;
+	uint32_t res;
 	sim_fpu_32to (&wop1, op1);
 	status |= sim_fpu_sqrt (&ans, &wop1);
 	status |= sim_fpu_round_32 (&ans, status, round);
@@ -921,7 +921,7 @@ inner_rsqrt(unsigned64 op1,
       }
     case fmt_double:
       {
-	unsigned64 res;
+	uint64_t res;
 	sim_fpu_64to (&wop1, op1);
 	status |= sim_fpu_sqrt (&ans, &wop1);
 	status |= sim_fpu_round_64 (&ans, round, denorm);
@@ -941,16 +941,16 @@ inner_rsqrt(unsigned64 op1,
   return status;
 }
 
-static unsigned64
+static uint64_t
 fp_inv_sqrt(sim_cpu *cpu,
 	    address_word cia,
-	    unsigned64 op1,
+	    uint64_t op1,
 	    FP_formats fmt)
 {
   sim_fpu_round round = rounding_mode (GETRM());
   sim_fpu_round denorm = denorm_mode (cpu);
   sim_fpu_status status = 0;
-  unsigned64 result = 0;
+  uint64_t result = 0;
 
   /* The format type has already been checked: */
   switch (fmt)
@@ -962,7 +962,7 @@ fp_inv_sqrt(sim_cpu *cpu,
     case fmt_ps:
       {
 	int status_u, status_l;
-	unsigned64 result_u, result_l;
+	uint64_t result_u, result_l;
 	status_u = inner_rsqrt (FP_PS_upper(op1), fmt_single, round, denorm,
 				&result_u);
 	status_l = inner_rsqrt (FP_PS_lower(op1), fmt_single, round, denorm,
@@ -981,130 +981,130 @@ fp_inv_sqrt(sim_cpu *cpu,
 }
 
 
-unsigned64
+uint64_t
 fp_abs(sim_cpu *cpu,
        address_word cia,
-       unsigned64 op,
+       uint64_t op,
        FP_formats fmt)
 {
   return fp_unary(cpu, cia, &sim_fpu_abs, op, fmt);
 }
 
-unsigned64
+uint64_t
 fp_neg(sim_cpu *cpu,
        address_word cia,
-       unsigned64 op,
+       uint64_t op,
        FP_formats fmt)
 {
   return fp_unary(cpu, cia, &sim_fpu_neg, op, fmt);
 }
 
-unsigned64
+uint64_t
 fp_add(sim_cpu *cpu,
        address_word cia,
-       unsigned64 op1,
-       unsigned64 op2,
+       uint64_t op1,
+       uint64_t op2,
        FP_formats fmt)
 {
   return fp_binary(cpu, cia, &sim_fpu_add, op1, op2, fmt);
 }
 
-unsigned64
+uint64_t
 fp_sub(sim_cpu *cpu,
        address_word cia,
-       unsigned64 op1,
-       unsigned64 op2,
+       uint64_t op1,
+       uint64_t op2,
        FP_formats fmt)
 {
   return fp_binary(cpu, cia, &sim_fpu_sub, op1, op2, fmt);
 }
 
-unsigned64
+uint64_t
 fp_mul(sim_cpu *cpu,
        address_word cia,
-       unsigned64 op1,
-       unsigned64 op2,
+       uint64_t op1,
+       uint64_t op2,
        FP_formats fmt)
 {
   return fp_binary(cpu, cia, &sim_fpu_mul, op1, op2, fmt);
 }
 
-unsigned64
+uint64_t
 fp_div(sim_cpu *cpu,
        address_word cia,
-       unsigned64 op1,
-       unsigned64 op2,
+       uint64_t op1,
+       uint64_t op2,
        FP_formats fmt)
 {
   return fp_binary(cpu, cia, &sim_fpu_div, op1, op2, fmt);
 }
 
-unsigned64
+uint64_t
 fp_recip(sim_cpu *cpu,
          address_word cia,
-         unsigned64 op,
+         uint64_t op,
          FP_formats fmt)
 {
   return fp_unary(cpu, cia, &sim_fpu_inv, op, fmt);
 }
 
-unsigned64
+uint64_t
 fp_sqrt(sim_cpu *cpu,
         address_word cia,
-        unsigned64 op,
+        uint64_t op,
         FP_formats fmt)
 {
   return fp_unary(cpu, cia, &sim_fpu_sqrt, op, fmt);
 }
 
-unsigned64
+uint64_t
 fp_rsqrt(sim_cpu *cpu,
          address_word cia,
-         unsigned64 op,
+         uint64_t op,
          FP_formats fmt)
 {
   return fp_inv_sqrt(cpu, cia, op, fmt);
 }
 
-unsigned64
+uint64_t
 fp_madd(sim_cpu *cpu,
         address_word cia,
-        unsigned64 op1,
-        unsigned64 op2,
-        unsigned64 op3,
+        uint64_t op1,
+        uint64_t op2,
+        uint64_t op3,
         FP_formats fmt)
 {
   return fp_mac(cpu, cia, &sim_fpu_add, op1, op2, op3, 0, 0, fmt);
 }
 
-unsigned64
+uint64_t
 fp_msub(sim_cpu *cpu,
         address_word cia,
-        unsigned64 op1,
-        unsigned64 op2,
-        unsigned64 op3,
+        uint64_t op1,
+        uint64_t op2,
+        uint64_t op3,
         FP_formats fmt)
 {
   return fp_mac(cpu, cia, &sim_fpu_sub, op1, op2, op3, 0, 0, fmt);
 }
 
-unsigned64
+uint64_t
 fp_nmadd(sim_cpu *cpu,
          address_word cia,
-         unsigned64 op1,
-         unsigned64 op2,
-         unsigned64 op3,
+         uint64_t op1,
+         uint64_t op2,
+         uint64_t op3,
          FP_formats fmt)
 {
   return fp_mac(cpu, cia, &sim_fpu_add, op1, op2, op3, 0, 1, fmt);
 }
 
-unsigned64
+uint64_t
 fp_nmsub(sim_cpu *cpu,
          address_word cia,
-         unsigned64 op1,
-         unsigned64 op2,
-         unsigned64 op3,
+         uint64_t op1,
+         uint64_t op2,
+         uint64_t op3,
          FP_formats fmt)
 {
   return fp_mac(cpu, cia, &sim_fpu_sub, op1, op2, op3, 0, 1, fmt);
@@ -1114,12 +1114,12 @@ fp_nmsub(sim_cpu *cpu,
 /* MIPS-3D ASE operations.  */
 
 /* Variant of fp_binary for *r.ps MIPS-3D operations. */
-static unsigned64
+static uint64_t
 fp_binary_r(sim_cpu *cpu,
 	    address_word cia,
 	    int (*sim_fpu_op)(sim_fpu *, const sim_fpu *, const sim_fpu *),
-	    unsigned64 op1,
-	    unsigned64 op2)
+	    uint64_t op1,
+	    uint64_t op2)
 {
   sim_fpu wop1;
   sim_fpu wop2;
@@ -1127,8 +1127,8 @@ fp_binary_r(sim_cpu *cpu,
   sim_fpu_round round = rounding_mode (GETRM ());
   sim_fpu_denorm denorm = denorm_mode (cpu);
   sim_fpu_status status_u, status_l;
-  unsigned64 result;
-  unsigned32 res_u, res_l;
+  uint64_t result;
+  uint32_t res_u, res_l;
 
   /* The format must be fmt_ps.  */
   status_u = 0;
@@ -1149,21 +1149,21 @@ fp_binary_r(sim_cpu *cpu,
   return result;
 }
 
-unsigned64
+uint64_t
 fp_add_r(sim_cpu *cpu,
          address_word cia,
-         unsigned64 op1,
-         unsigned64 op2,
+         uint64_t op1,
+         uint64_t op2,
          FP_formats fmt)
 {
   return fp_binary_r (cpu, cia, &sim_fpu_add, op1, op2);
 }
 
-unsigned64
+uint64_t
 fp_mul_r(sim_cpu *cpu,
          address_word cia,
-         unsigned64 op1,
-         unsigned64 op2,
+         uint64_t op1,
+         uint64_t op2,
          FP_formats fmt)
 {
   return fp_binary_r (cpu, cia, &sim_fpu_mul, op1, op2);
@@ -1221,10 +1221,10 @@ fpu_inv1_64(sim_fpu *f, const sim_fpu *l)
   return fpu_inv1 (f, l);
 }
 
-unsigned64
+uint64_t
 fp_recip1(sim_cpu *cpu,
           address_word cia,
-          unsigned64 op,
+          uint64_t op,
           FP_formats fmt)
 {
   switch (fmt)
@@ -1238,17 +1238,17 @@ fp_recip1(sim_cpu *cpu,
   return 0;
 }
 
-unsigned64
+uint64_t
 fp_recip2(sim_cpu *cpu,
           address_word cia,
-          unsigned64 op1,
-          unsigned64 op2,
+          uint64_t op1,
+          uint64_t op2,
           FP_formats fmt)
 {
-  static const unsigned64 one_single = UNSIGNED64 (0x3F800000);
-  static const unsigned64 one_double = UNSIGNED64 (0x3FF0000000000000);
-  static const unsigned64 one_ps = (UNSIGNED64 (0x3F800000) << 32 | UNSIGNED64 (0x3F800000));
-  unsigned64 one;
+  static const uint64_t one_single = UNSIGNED64 (0x3F800000);
+  static const uint64_t one_double = UNSIGNED64 (0x3FF0000000000000);
+  static const uint64_t one_ps = (UNSIGNED64 (0x3F800000) << 32 | UNSIGNED64 (0x3F800000));
+  uint64_t one;
 
   /* Implemented as nmsub fd, 1, fs, ft.  */
   switch (fmt)
@@ -1319,10 +1319,10 @@ fpu_inv_sqrt1_64(sim_fpu *f, const sim_fpu *l)
   return fpu_inv_sqrt1 (f, l);
 }
 
-unsigned64
+uint64_t
 fp_rsqrt1(sim_cpu *cpu,
           address_word cia,
-          unsigned64 op,
+          uint64_t op,
           FP_formats fmt)
 {
   switch (fmt)
@@ -1336,17 +1336,17 @@ fp_rsqrt1(sim_cpu *cpu,
   return 0;
 }
 
-unsigned64
+uint64_t
 fp_rsqrt2(sim_cpu *cpu,
           address_word cia,
-          unsigned64 op1,
-          unsigned64 op2,
+          uint64_t op1,
+          uint64_t op2,
           FP_formats fmt)
 {
-  static const unsigned64 half_single = UNSIGNED64 (0x3F000000);
-  static const unsigned64 half_double = UNSIGNED64 (0x3FE0000000000000);
-  static const unsigned64 half_ps = (UNSIGNED64 (0x3F000000) << 32 | UNSIGNED64 (0x3F000000));
-  unsigned64 half;
+  static const uint64_t half_single = UNSIGNED64 (0x3F000000);
+  static const uint64_t half_double = UNSIGNED64 (0x3FE0000000000000);
+  static const uint64_t half_ps = (UNSIGNED64 (0x3F000000) << 32 | UNSIGNED64 (0x3F000000));
+  uint64_t half;
 
   /* Implemented as (nmsub fd, 0.5, fs, ft)/2, where the divide is
      done by scaling the exponent during multiply.  */
@@ -1374,8 +1374,8 @@ convert (sim_cpu *cpu,
   sim_fpu wop;
   sim_fpu_round round = rounding_mode (rm);
   sim_fpu_denorm denorm = denorm_mode (cpu);
-  unsigned32 result32;
-  unsigned64 result64;
+  uint32_t result32;
+  uint64_t result64;
   sim_fpu_status status = 0;
 
   /* Convert the input to sim_fpu internal format */
@@ -1438,30 +1438,30 @@ convert (sim_cpu *cpu,
   return result64;
 }
 
-unsigned64
+uint64_t
 ps_lower(sim_cpu *cpu,
          address_word cia,
-         unsigned64 op)
+         uint64_t op)
 {
   return FP_PS_lower (op);
 }
 
-unsigned64
+uint64_t
 ps_upper(sim_cpu *cpu,
          address_word cia,
-         unsigned64 op)
+         uint64_t op)
 {
   return FP_PS_upper(op);
 }
 
-unsigned64
+uint64_t
 pack_ps(sim_cpu *cpu,
         address_word cia,
-        unsigned64 op1,
-        unsigned64 op2,
+        uint64_t op1,
+        uint64_t op2,
         FP_formats fmt)
 {
-  unsigned64 result = 0;
+  uint64_t result = 0;
 
   /* The registers must specify FPRs valid for operands of type
      "fmt". If they are not valid, the result is undefined. */
@@ -1472,7 +1472,7 @@ pack_ps(sim_cpu *cpu,
     case fmt_single:
       {
 	sim_fpu wop;
-	unsigned32 res_u, res_l;
+	uint32_t res_u, res_l;
 	sim_fpu_32to (&wop, op1);
 	sim_fpu_to32 (&res_u, &wop);
 	sim_fpu_32to (&wop, op2);
@@ -1488,19 +1488,19 @@ pack_ps(sim_cpu *cpu,
   return result;
 }
 
-unsigned64
+uint64_t
 convert_ps (sim_cpu *cpu,
             address_word cia,
             int rm,
-            unsigned64 op,
+            uint64_t op,
             FP_formats from,
             FP_formats to)
 {
   sim_fpu wop_u, wop_l;
   sim_fpu_round round = rounding_mode (rm);
   sim_fpu_denorm denorm = denorm_mode (cpu);
-  unsigned32 res_u, res_l;
-  unsigned64 result;
+  uint32_t res_u, res_l;
+  uint64_t result;
   sim_fpu_status status_u = 0, status_l = 0;
 
   /* As convert, but used only for paired values (formats PS, PW) */
@@ -1527,7 +1527,7 @@ convert_ps (sim_cpu *cpu,
     case fmt_word:   /* fmt_pw */
       status_u |= sim_fpu_to32u (&res_u, &wop_u, round);
       status_l |= sim_fpu_to32u (&res_l, &wop_l, round);
-      result = (((unsigned64)res_u) << 32) | (unsigned64)res_l;
+      result = (((uint64_t)res_u) << 32) | (uint64_t)res_l;
       break;
     case fmt_ps:
       status_u |= sim_fpu_round_32 (&wop_u, 0, round);

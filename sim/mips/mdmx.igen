@@ -188,7 +188,7 @@
 *mdmx:
 *sb1:
 {
-  unsigned64 result;
+  uint64_t result;
   int s;
   check_mdmx (SD_, instruction_0);
   check_mdmx_fmtop (SD_, instruction_0, FMTOP);
@@ -205,7 +205,7 @@
 *mdmx:
 *sb1:
 {
-  unsigned64 result;
+  uint64_t result;
   int s;
   check_mdmx (SD_, instruction_0);
   check_mdmx_fmtop (SD_, instruction_0, FMTOP);

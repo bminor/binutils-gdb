@@ -161,7 +161,7 @@
      Programmers Volume III, Revision 0.95, section 4.9.  */
   if ((SR & (status_KSU_mask|status_EXL|status_ERL|status_UX))
       == (ksu_user << status_KSU_shift))
-    return (address_word)((signed32)base + (signed32)offset);
+    return (address_word)((int32_t)base + (int32_t)offset);
 #endif
   return base + offset;
 }
@@ -263,7 +263,7 @@
 // Helper used by check_mt_hilo, check_mult_hilo, and check_div_hilo
 // to check for restrictions (2) and (3) above.
 //
-:function:::int:check_mf_cycles:hilo_history *history, signed64 time, const char *new
+:function:::int:check_mf_cycles:hilo_history *history, int64_t time, const char *new
 {
   if (history->mf.timestamp + 3 > time)
     {
@@ -289,7 +289,7 @@
 *vr4100:
 *vr5000:
 {
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   int ok = check_mf_cycles (SD_, history, time, "MT");
   history->mt.timestamp = time;
   history->mt.cia = CIA;
@@ -300,7 +300,7 @@
 *mipsIV:
 *mipsV:
 {
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   int ok = (! MIPS_MACH_HAS_MT_HILO_HAZARD (SD)
 	    || check_mf_cycles (SD_, history, time, "MT"));
   history->mt.timestamp = time;
@@ -317,7 +317,7 @@
 *micromips32:
 *micromips64:
 {
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   history->mt.timestamp = time;
   history->mt.cia = CIA;
   return 1;
@@ -345,7 +345,7 @@
 *micromips32:
 *micromips64:
 {
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   int ok = 1;
   if (peer != NULL
       && peer->mt.timestamp > history->op.timestamp
@@ -383,7 +383,7 @@
 *vr4100:
 *vr5000:
 {
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   int ok = (check_mf_cycles (SD_, hi, time, "OP")
 	    && check_mf_cycles (SD_, lo, time, "OP"));
   hi->op.timestamp = time;
@@ -397,7 +397,7 @@
 *mipsIV:
 *mipsV:
 {
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   int ok = (! MIPS_MACH_HAS_MULT_HILO_HAZARD (SD)
 	    || (check_mf_cycles (SD_, hi, time, "OP")
 	        && check_mf_cycles (SD_, lo, time, "OP")));
@@ -418,7 +418,7 @@
 *micromips64:
 {
   /* FIXME: could record the fact that a stall occured if we want */
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   hi->op.timestamp = time;
   lo->op.timestamp = time;
   hi->op.cia = CIA;
@@ -440,7 +440,7 @@
 *vr5000:
 *r3900:
 {
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   int ok = (check_mf_cycles (SD_, hi, time, "OP")
 	    && check_mf_cycles (SD_, lo, time, "OP"));
   hi->op.timestamp = time;
@@ -454,7 +454,7 @@
 *mipsIV:
 *mipsV:
 {
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   int ok = (! MIPS_MACH_HAS_DIV_HILO_HAZARD (SD)
 	    || (check_mf_cycles (SD_, hi, time, "OP")
 	        && check_mf_cycles (SD_, lo, time, "OP")));
@@ -473,7 +473,7 @@
 *micromips32:
 *micromips64:
 {
-  signed64 time = sim_events_time (SD);
+  int64_t time = sim_events_time (SD);
   hi->op.timestamp = time;
   lo->op.timestamp = time;
   hi->op.cia = CIA;
@@ -538,7 +538,7 @@
   TRACE_ALU_RESULT (GPR[rd]);
 }
 
-:function:::void:do_addi:int rs, int rt, unsigned16 immediate
+:function:::void:do_addi:int rs, int rt, uint16_t immediate
 {
   if (NotWordValue (GPR[rs]))
     Unpredictable ();
@@ -592,7 +592,7 @@
 {
   int s = 32 + shift;
   TRACE_ALU_INPUT2 (GPR[rt], s);
-  GPR[rd] = ((signed64) GPR[rt]) >> s;
+  GPR[rd] = ((int64_t) GPR[rt]) >> s;
   TRACE_ALU_RESULT (GPR[rd]);
 }
 
@@ -600,7 +600,7 @@
 {
   int s = 32 + shift;
   TRACE_ALU_INPUT2 (GPR[rt], s);
-  GPR[rd] = (unsigned64) GPR[rt] >> s;
+  GPR[rd] = (uint64_t) GPR[rt] >> s;
   TRACE_ALU_RESULT (GPR[rd]);
 }
 
@@ -655,12 +655,12 @@
 
 :function:::void:do_clo:int rd, int rs
 {
-  unsigned32 temp = GPR[rs];
-  unsigned32 i, mask;
+  uint32_t temp = GPR[rs];
+  uint32_t i, mask;
   if (NotWordValue (GPR[rs]))
     Unpredictable ();
   TRACE_ALU_INPUT1 (GPR[rs]);
-  for (mask = ((unsigned32)1<<31), i = 0; i < 32; ++i)
+  for (mask = ((uint32_t)1<<31), i = 0; i < 32; ++i)
     {
       if ((temp & mask) == 0)
 	break;
@@ -672,12 +672,12 @@
 
 :function:::void:do_clz:int rd, int rs
 {
-  unsigned32 temp = GPR[rs];
-  unsigned32 i, mask;
+  uint32_t temp = GPR[rs];
+  uint32_t i, mask;
   if (NotWordValue (GPR[rs]))
     Unpredictable ();
   TRACE_ALU_INPUT1 (GPR[rs]);
-  for (mask = ((unsigned32)1<<31), i = 0; i < 32; ++i)
+  for (mask = ((uint32_t)1<<31), i = 0; i < 32; ++i)
     {
       if ((temp & mask) != 0)
 	break;
@@ -689,11 +689,11 @@
 
 :function:::void:do_dclo:int rd, int rs
 {
-  unsigned64 temp = GPR[rs];
-  unsigned32 i;
-  unsigned64 mask;
+  uint64_t temp = GPR[rs];
+  uint32_t i;
+  uint64_t mask;
   TRACE_ALU_INPUT1 (GPR[rs]);
-  for (mask = ((unsigned64)1<<63), i = 0; i < 64; ++i)
+  for (mask = ((uint64_t)1<<63), i = 0; i < 64; ++i)
     {
       if ((temp & mask) == 0)
 	break;
@@ -705,11 +705,11 @@
 
 :function:::void:do_dclz:int rd, int rs
 {
-  unsigned64 temp = GPR[rs];
-  unsigned32 i;
-  unsigned64 mask;
+  uint64_t temp = GPR[rs];
+  uint32_t i;
+  uint64_t mask;
   TRACE_ALU_INPUT1 (GPR[rs]);
-  for (mask = ((unsigned64)1<<63), i = 0; i < 64; ++i)
+  for (mask = ((uint64_t)1<<63), i = 0; i < 64; ++i)
     {
       if ((temp & mask) != 0)
 	break;
@@ -791,9 +791,9 @@
 	}
       else
 	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+	  uint64_t memval = 0;
+	  uint64_t memval1 = 0;
+	  uint64_t mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
 	  unsigned int shift = 2;
 	  unsigned int reverse = (ReverseEndian ? (mask >> shift) : 0);
 	  unsigned int bigend = (BigEndianCPU ? (mask >> shift) : 0);
@@ -823,8 +823,8 @@
       }
     else
       {
-	unsigned64 memval = 0;
-	unsigned64 memval1 = 0;
+	uint64_t memval = 0;
+	uint64_t memval1 = 0;
 	LoadMemory (&memval, &memval1, AccessLength_DOUBLEWORD, paddr, vaddr,
 		    isDATA, isREAL);
 	GPR[rt] = memval;
@@ -842,13 +842,13 @@
 
 :function:::void:do_madd:int rs, int rt
 {
-  signed64 temp;
+  int64_t temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   temp = (U8_4 (VL4_8 (HI), VL4_8 (LO))
-	  + ((signed64) EXTEND32 (GPR[rt]) * (signed64) EXTEND32 (GPR[rs])));
+	  + ((int64_t) EXTEND32 (GPR[rt]) * (int64_t) EXTEND32 (GPR[rs])));
   LO = EXTEND32 (temp);
   HI = EXTEND32 (VH4_8 (temp));
   TRACE_ALU_RESULT2 (HI, LO);
@@ -856,14 +856,14 @@
 
 :function:::void:do_dsp_madd:int ac, int rs, int rt
 {
-  signed64 temp;
+  int64_t temp;
   if (ac == 0)
     check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   temp = (U8_4 (VL4_8 (DSPHI(ac)), VL4_8 (DSPLO(ac)))
-	  + ((signed64) EXTEND32 (GPR[rt]) * (signed64) EXTEND32 (GPR[rs])));
+	  + ((int64_t) EXTEND32 (GPR[rt]) * (int64_t) EXTEND32 (GPR[rs])));
   DSPLO(ac) = EXTEND32 (temp);
   DSPHI(ac) = EXTEND32 (VH4_8 (temp));
   if (ac == 0)
@@ -872,13 +872,13 @@
 
 :function:::void:do_maddu:int rs, int rt
 {
-  unsigned64 temp;
+  uint64_t temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   temp = (U8_4 (VL4_8 (HI), VL4_8 (LO))
-	  + ((unsigned64) VL4_8 (GPR[rs]) * (unsigned64) VL4_8 (GPR[rt])));
+	  + ((uint64_t) VL4_8 (GPR[rs]) * (uint64_t) VL4_8 (GPR[rt])));
   ACX += U8_4 (VL4_8 (HI), VL4_8 (LO)) < temp;  /* SmartMIPS */
   LO = EXTEND32 (temp);
   HI = EXTEND32 (VH4_8 (temp));
@@ -887,14 +887,14 @@
 
 :function:::void:do_dsp_maddu:int ac, int rs, int rt
 {
-  unsigned64 temp;
+  uint64_t temp;
   if (ac == 0)
     check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   temp = (U8_4 (VL4_8 (DSPHI(ac)), VL4_8 (DSPLO(ac)))
-	  + ((unsigned64) VL4_8 (GPR[rs]) * (unsigned64) VL4_8 (GPR[rt])));
+	  + ((uint64_t) VL4_8 (GPR[rs]) * (uint64_t) VL4_8 (GPR[rt])));
   if (ac == 0)
     ACX += U8_4 (VL4_8 (HI), VL4_8 (LO)) < temp;  /* SmartMIPS */
   DSPLO(ac) = EXTEND32 (temp);
@@ -939,13 +939,13 @@
 
 :function:::void:do_msub:int rs, int rt
 {
-  signed64 temp;
+  int64_t temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   temp = (U8_4 (VL4_8 (HI), VL4_8 (LO))
-	  - ((signed64) EXTEND32 (GPR[rt]) * (signed64) EXTEND32 (GPR[rs])));
+	  - ((int64_t) EXTEND32 (GPR[rt]) * (int64_t) EXTEND32 (GPR[rs])));
   LO = EXTEND32 (temp);
   HI = EXTEND32 (VH4_8 (temp));
   TRACE_ALU_RESULT2 (HI, LO);
@@ -953,14 +953,14 @@
 
 :function:::void:do_dsp_msub:int ac, int rs, int rt
 {
-  signed64 temp;
+  int64_t temp;
   if (ac == 0)
     check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   temp = (U8_4 (VL4_8 (DSPHI(ac)), VL4_8 (DSPLO(ac)))
-	  - ((signed64) EXTEND32 (GPR[rt]) * (signed64) EXTEND32 (GPR[rs])));
+	  - ((int64_t) EXTEND32 (GPR[rt]) * (int64_t) EXTEND32 (GPR[rs])));
   DSPLO(ac) = EXTEND32 (temp);
   DSPHI(ac) = EXTEND32 (VH4_8 (temp));
   if (ac == 0)
@@ -969,13 +969,13 @@
 
 :function:::void:do_msubu:int rs, int rt
 {
-  unsigned64 temp;
+  uint64_t temp;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   temp = (U8_4 (VL4_8 (HI), VL4_8 (LO))
-	  - ((unsigned64) VL4_8 (GPR[rs]) * (unsigned64) VL4_8 (GPR[rt])));
+	  - ((uint64_t) VL4_8 (GPR[rs]) * (uint64_t) VL4_8 (GPR[rt])));
   LO = EXTEND32 (temp);
   HI = EXTEND32 (VH4_8 (temp));
   TRACE_ALU_RESULT2 (HI, LO);
@@ -983,14 +983,14 @@
 
 :function:::void:do_dsp_msubu:int ac, int rs, int rt
 {
-  unsigned64 temp;
+  uint64_t temp;
   if (ac == 0)
     check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   temp = (U8_4 (VL4_8 (DSPHI(ac)), VL4_8 (DSPLO(ac)))
-	  - ((unsigned64) VL4_8 (GPR[rs]) * (unsigned64) VL4_8 (GPR[rt])));
+	  - ((uint64_t) VL4_8 (GPR[rs]) * (uint64_t) VL4_8 (GPR[rt])));
   DSPLO(ac) = EXTEND32 (temp);
   DSPHI(ac) = EXTEND32 (VH4_8 (temp));
   if (ac == 0)
@@ -1025,26 +1025,26 @@
 
 :function:::void:do_mul:int rd, int rs, int rt
 {
-  signed64 prod;
+  int64_t prod;
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  prod = (((signed64)(signed32) GPR[rs])
-	  * ((signed64)(signed32) GPR[rt]));
+  prod = (((int64_t)(int32_t) GPR[rs])
+	  * ((int64_t)(int32_t) GPR[rt]));
   GPR[rd] = EXTEND32 (VL4_8 (prod));
   TRACE_ALU_RESULT (GPR[rd]);
 }
 
 :function:::void:do_dsp_mult:int ac, int rs, int rt
 {
-  signed64 prod;
+  int64_t prod;
   if (ac == 0)
     check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  prod = ((signed64)(signed32) GPR[rs])
-	  * ((signed64)(signed32) GPR[rt]);
+  prod = ((int64_t)(int32_t) GPR[rs])
+	  * ((int64_t)(int32_t) GPR[rt]);
   DSPLO(ac) = EXTEND32 (VL4_8 (prod));
   DSPHI(ac) = EXTEND32 (VH4_8 (prod));
   if (ac == 0)
@@ -1056,14 +1056,14 @@
 
 :function:::void:do_dsp_multu:int ac, int rs, int rt
 {
-  unsigned64 prod;
+  uint64_t prod;
   if (ac == 0)
     check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  prod = ((unsigned64)(unsigned32) GPR[rs])
-          * ((unsigned64)(unsigned32) GPR[rt]);
+  prod = ((uint64_t)(uint32_t) GPR[rs])
+          * ((uint64_t)(uint32_t) GPR[rt]);
   DSPLO(ac) = EXTEND32 (VL4_8 (prod));
   DSPHI(ac) = EXTEND32 (VH4_8 (prod));
   if (ac == 0)
@@ -1083,7 +1083,7 @@
 
 :function:::void:do_sc:int rt, int offsetarg, int basereg, address_word instruction_0
 {
-  unsigned32 instruction = instruction_0;
+  uint32_t instruction = instruction_0;
   address_word base = GPR[basereg];
   address_word offset = EXTEND16 (offsetarg);
   {
@@ -1097,9 +1097,9 @@
       }
     else
       {
-	unsigned64 memval = 0;
-	unsigned64 memval1 = 0;
-	unsigned64 mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+	uint64_t memval = 0;
+	uint64_t memval1 = 0;
+	uint64_t mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
 	address_word reverseendian =
 	  (ReverseEndian ? (mask ^ AccessLength_WORD) : 0);
 	address_word bigendiancpu =
@@ -1107,7 +1107,7 @@
 	unsigned int byte;
 	paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
 	byte = ((vaddr & mask) ^ bigendiancpu);
-	memval = ((unsigned64) GPR[rt] << (8 * byte));
+	memval = ((uint64_t) GPR[rt] << (8 * byte));
 	if (LLBIT)
 	  StoreMemory (AccessLength_WORD, memval, memval1, paddr, vaddr,
 		        isREAL);
@@ -1131,8 +1131,8 @@
       }
     else
       {
-	unsigned64 memval = 0;
-	unsigned64 memval1 = 0;
+	uint64_t memval = 0;
+	uint64_t memval1 = 0;
 	memval = GPR[rt];
 	if (LLBIT)
 	  StoreMemory (AccessLength_DOUBLEWORD, memval, memval1, paddr, vaddr,
@@ -1248,9 +1248,9 @@
 
 :function:::void:do_alnv_ps:int fd, int fs, int ft, int rs, address_word instruction_0
 {
-  unsigned64 fsx;
-  unsigned64 ftx;
-  unsigned64 fdx;
+  uint64_t fsx;
+  uint64_t ftx;
+  uint64_t fdx;
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   fsx = ValueFPR (fs, fmt_ps);
@@ -1493,7 +1493,7 @@
   }
   else
   {
-    unsigned64 fdx;
+    uint64_t fdx;
     fdx = PackPS (PSUpper (ValueFPR ((GETFCC (cc+1) == tf) ? fs : fd,
 				      fmt_ps)),
                   PSLower (ValueFPR ((GETFCC (cc+0) == tf) ? fs : fd,
@@ -1730,9 +1730,9 @@
 	}
       else
 	{
-	  unsigned64 memval = 0;
-	  unsigned64 memval1 = 0;
-	  unsigned64 mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
+	  uint64_t memval = 0;
+	  uint64_t memval1 = 0;
+	  uint64_t mask = (WITH_TARGET_WORD_BITSIZE == 64 ? 0x7 : 0x3);
 	  address_word reverseendian =
 	    (ReverseEndian ? (mask ^ AccessLength_WORD) : 0);
 	  address_word bigendiancpu =
@@ -1740,7 +1740,7 @@
 	  unsigned int byte;
 	  paddr = ((paddr & ~mask) | ((paddr & mask) ^ reverseendian));
 	  byte = ((vaddr & mask) ^ bigendiancpu);
-	  memval = (((unsigned64)COP_SW(1,fs)) << (8 * byte));
+	  memval = (((uint64_t)COP_SW(1,fs)) << (8 * byte));
 	  StoreMemory (AccessLength_WORD, memval, memval1, paddr, vaddr,
 		       isREAL);
 	}
@@ -1794,7 +1794,7 @@
 
 
 
-:function:::void:do_addiu:int rs, int rt, unsigned16 immediate
+:function:::void:do_addiu:int rs, int rt, uint16_t immediate
 {
   if (NotWordValue (GPR[rs]))
     Unpredictable ();
@@ -2395,7 +2395,7 @@
 
 
 
-:function:::void:do_daddiu:int rs, int rt, unsigned16 immediate
+:function:::void:do_daddiu:int rs, int rt, uint16_t immediate
 {
   TRACE_ALU_INPUT2 (GPR[rs], EXTEND16 (immediate));
   GPR[rt] = GPR[rs] + EXTEND16 (immediate);
@@ -2474,10 +2474,10 @@
   check_div_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   {
-    signed64 n = GPR[rs];
-    signed64 d = GPR[rt];
-    signed64 hi;
-    signed64 lo;
+    int64_t n = GPR[rs];
+    int64_t d = GPR[rt];
+    int64_t hi;
+    int64_t lo;
     if (d == 0)
       {
 	lo = SIGNED64 (0x8000000000000000);
@@ -2520,10 +2520,10 @@
   check_div_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   {
-    unsigned64 n = GPR[rs];
-    unsigned64 d = GPR[rt];
-    unsigned64 hi;
-    unsigned64 lo;
+    uint64_t n = GPR[rs];
+    uint64_t d = GPR[rt];
+    uint64_t hi;
+    uint64_t lo;
     if (d == 0)
       {
 	lo = SIGNED64 (0x8000000000000000);
@@ -2559,8 +2559,8 @@
   check_div_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   {
-    signed32 n = GPR[rs];
-    signed32 d = GPR[rt];
+    int32_t n = GPR[rs];
+    int32_t d = GPR[rt];
     if (d == 0)
       {
 	LO = EXTEND32 (0x80000000);
@@ -2605,8 +2605,8 @@
   check_div_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   {
-    unsigned32 n = GPR[rs];
-    unsigned32 d = GPR[rt];
+    uint32_t n = GPR[rs];
+    uint32_t d = GPR[rt];
     if (d == 0)
       {
 	LO = EXTEND32 (0x80000000);
@@ -2642,47 +2642,47 @@
 
 :function:::void:do_dmultx:int rs, int rt, int rd, int signed_p
 {
-  unsigned64 lo;
-  unsigned64 hi;
-  unsigned64 m00;
-  unsigned64 m01;
-  unsigned64 m10;
-  unsigned64 m11;
-  unsigned64 mid;
+  uint64_t lo;
+  uint64_t hi;
+  uint64_t m00;
+  uint64_t m01;
+  uint64_t m10;
+  uint64_t m11;
+  uint64_t mid;
   int sign;
-  unsigned64 op1 = GPR[rs];
-  unsigned64 op2 = GPR[rt];
+  uint64_t op1 = GPR[rs];
+  uint64_t op2 = GPR[rt];
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
   /* make signed multiply unsigned */
   sign = 0;
   if (signed_p)
     {
-      if ((signed64) op1 < 0)
+      if ((int64_t) op1 < 0)
 	{
 	  op1 = - op1;
 	  ++sign;
 	}
-      if ((signed64) op2 < 0)
+      if ((int64_t) op2 < 0)
 	{
 	  op2 = - op2;
 	  ++sign;
 	}
     }
   /* multiply out the 4 sub products */
-  m00 = ((unsigned64) VL4_8 (op1) * (unsigned64) VL4_8 (op2));
-  m10 = ((unsigned64) VH4_8 (op1) * (unsigned64) VL4_8 (op2));
-  m01 = ((unsigned64) VL4_8 (op1) * (unsigned64) VH4_8 (op2));
-  m11 = ((unsigned64) VH4_8 (op1) * (unsigned64) VH4_8 (op2));
+  m00 = ((uint64_t) VL4_8 (op1) * (uint64_t) VL4_8 (op2));
+  m10 = ((uint64_t) VH4_8 (op1) * (uint64_t) VL4_8 (op2));
+  m01 = ((uint64_t) VL4_8 (op1) * (uint64_t) VH4_8 (op2));
+  m11 = ((uint64_t) VH4_8 (op1) * (uint64_t) VH4_8 (op2));
   /* add the products */
-  mid = ((unsigned64) VH4_8 (m00)
-	 + (unsigned64) VL4_8 (m10)
-	 + (unsigned64) VL4_8 (m01));
+  mid = ((uint64_t) VH4_8 (m00)
+	 + (uint64_t) VL4_8 (m10)
+	 + (uint64_t) VL4_8 (m01));
   lo = U8_4 (mid, m00);
   hi = (m11
-	+ (unsigned64) VH4_8 (mid)
-	+ (unsigned64) VH4_8 (m01)
-	+ (unsigned64) VH4_8 (m10));
+	+ (uint64_t) VH4_8 (mid)
+	+ (uint64_t) VH4_8 (m01)
+	+ (uint64_t) VH4_8 (m10));
   /* fix the sign */
   if (sign & 1)
     {
@@ -2757,9 +2757,9 @@
 }
 
 
-:function:::unsigned64:do_dror:unsigned64 x,unsigned64 y
+:function:::uint64_t:do_dror:uint64_t x,uint64_t y
 {
-  unsigned64 result;
+  uint64_t result;
 
   y &= 63;
   TRACE_ALU_INPUT2 (x, y);
@@ -2860,7 +2860,7 @@
 :function:::void:do_dsra:int rt, int rd, int shift
 {
   TRACE_ALU_INPUT2 (GPR[rt], shift);
-  GPR[rd] = ((signed64) GPR[rt]) >> shift;
+  GPR[rd] = ((int64_t) GPR[rt]) >> shift;
   TRACE_ALU_RESULT (GPR[rd]);
 }
 
@@ -2899,7 +2899,7 @@
 {
   int s = MASKED64 (GPR[rs], 5, 0);
   TRACE_ALU_INPUT2 (GPR[rt], s);
-  GPR[rd] = ((signed64) GPR[rt]) >> s;
+  GPR[rd] = ((int64_t) GPR[rt]) >> s;
   TRACE_ALU_RESULT (GPR[rd]);
 }
 
@@ -2920,7 +2920,7 @@
 :function:::void:do_dsrl:int rt, int rd, int shift
 {
   TRACE_ALU_INPUT2 (GPR[rt], shift);
-  GPR[rd] = (unsigned64) GPR[rt] >> shift;
+  GPR[rd] = (uint64_t) GPR[rt] >> shift;
   TRACE_ALU_RESULT (GPR[rd]);
 }
 
@@ -2959,7 +2959,7 @@
 {
   int s = MASKED64 (GPR[rs], 5, 0);
   TRACE_ALU_INPUT2 (GPR[rt], s);
-  GPR[rd] = (unsigned64) GPR[rt] >> s;
+  GPR[rd] = (uint64_t) GPR[rt] >> s;
   TRACE_ALU_RESULT (GPR[rd]);
 }
 
@@ -3126,7 +3126,7 @@
   address_word bigendiancpu = (BigEndianCPU ? (mask ^ access) : 0);
   unsigned int byte;
   address_word paddr;
-  unsigned64 memval;
+  uint64_t memval;
   address_word vaddr;
 
   paddr = vaddr = loadstore_ea (SD_, base, offset);
@@ -3148,7 +3148,7 @@
   unsigned int byte;
   unsigned int word;
   address_word paddr;
-  unsigned64 memval;
+  uint64_t memval;
   address_word vaddr;
   int nr_lhs_bits;
   int nr_rhs_bits;
@@ -3168,8 +3168,8 @@
   /* nr_lhs_bits + nr_rhs_bits == 8 * (accesss + 1) */
 
   /* fprintf (stderr, "l[wd]l: 0x%08lx%08lx 0x%08lx%08lx %d:%d %d+%d\n",
-	   (long) ((unsigned64) vaddr >> 32), (long) vaddr,
-	   (long) ((unsigned64) paddr >> 32), (long) paddr,
+	   (long) ((uint64_t) vaddr >> 32), (long) vaddr,
+	   (long) ((uint64_t) paddr >> 32), (long) paddr,
 	   word, byte, nr_lhs_bits, nr_rhs_bits); */
 
   LoadMemory (&memval, NULL, byte, paddr, vaddr, isDATA, isREAL);
@@ -3187,9 +3187,9 @@
   rt = (rt & ~lhs_mask) | (temp & lhs_mask);
 
   /* fprintf (stderr, "l[wd]l: 0x%08lx%08lx -> 0x%08lx%08lx & 0x%08lx%08lx -> 0x%08lx%08lx\n",
-	   (long) ((unsigned64) memval >> 32), (long) memval,
-	   (long) ((unsigned64) temp >> 32), (long) temp,
-	   (long) ((unsigned64) lhs_mask >> 32), (long) lhs_mask,
+	   (long) ((uint64_t) memval >> 32), (long) memval,
+	   (long) ((uint64_t) temp >> 32), (long) temp,
+	   (long) ((uint64_t) lhs_mask >> 32), (long) lhs_mask,
 	   (long) (rt >> 32), (long) rt); */
   return rt;
 }
@@ -3201,7 +3201,7 @@
   address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
   unsigned int byte;
   address_word paddr;
-  unsigned64 memval;
+  uint64_t memval;
   address_word vaddr;
 
   paddr = vaddr = loadstore_ea (SD_, base, offset);
@@ -3763,13 +3763,13 @@
 
 :function:::void:do_mult:int rs, int rt, int rd
 {
-  signed64 prod;
+  int64_t prod;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  prod = (((signed64)(signed32) GPR[rs])
-	  * ((signed64)(signed32) GPR[rt]));
+  prod = (((int64_t)(int32_t) GPR[rs])
+	  * ((int64_t)(int32_t) GPR[rt]));
   LO = EXTEND32 (VL4_8 (prod));
   HI = EXTEND32 (VH4_8 (prod));
   ACX = 0;  /* SmartMIPS */
@@ -3816,13 +3816,13 @@
 
 :function:::void:do_multu:int rs, int rt, int rd
 {
-  unsigned64 prod;
+  uint64_t prod;
   check_mult_hilo (SD_, HIHISTORY, LOHISTORY);
   if (NotWordValue (GPR[rs]) || NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rs], GPR[rt]);
-  prod = (((unsigned64)(unsigned32) GPR[rs])
-	  * ((unsigned64)(unsigned32) GPR[rt]));
+  prod = (((uint64_t)(uint32_t) GPR[rs])
+	  * ((uint64_t)(uint32_t) GPR[rt]));
   LO = EXTEND32 (VL4_8 (prod));
   HI = EXTEND32 (VH4_8 (prod));
   if (rd != 0)
@@ -3959,9 +3959,9 @@
 }
 
 
-:function:::unsigned64:do_ror:unsigned32 x,unsigned32 y
+:function:::uint64_t:do_ror:uint32_t x,uint32_t y
 {
-  unsigned64 result;
+  uint64_t result;
 
   y &= 31;
   TRACE_ALU_INPUT2 (x, y);
@@ -4000,7 +4000,7 @@
   address_word bigendiancpu = (BigEndianCPU ? (mask ^ access) : 0);
   unsigned int byte;
   address_word paddr;
-  unsigned64 memval;
+  uint64_t memval;
   address_word vaddr;
 
   paddr = vaddr = loadstore_ea (SD_, base, offset);
@@ -4022,7 +4022,7 @@
   unsigned int byte;
   unsigned int word;
   address_word paddr;
-  unsigned64 memval;
+  uint64_t memval;
   address_word vaddr;
   int nr_lhs_bits;
   int nr_rhs_bits;
@@ -4039,8 +4039,8 @@
   nr_rhs_bits = 8 * access - 8 * byte;
   /* nr_lhs_bits + nr_rhs_bits == 8 * (accesss + 1) */
   /* fprintf (stderr, "s[wd]l: 0x%08lx%08lx 0x%08lx%08lx %d:%d %d+%d\n",
-	   (long) ((unsigned64) vaddr >> 32), (long) vaddr,
-	   (long) ((unsigned64) paddr >> 32), (long) paddr,
+	   (long) ((uint64_t) vaddr >> 32), (long) vaddr,
+	   (long) ((uint64_t) paddr >> 32), (long) paddr,
 	   word, byte, nr_lhs_bits, nr_rhs_bits); */
 
   if (word == 0)
@@ -4052,8 +4052,8 @@
       memval = (rt << nr_lhs_bits);
     }
   /* fprintf (stderr, "s[wd]l: 0x%08lx%08lx -> 0x%08lx%08lx\n",
-	   (long) ((unsigned64) rt >> 32), (long) rt,
-	   (long) ((unsigned64) memval >> 32), (long) memval); */
+	   (long) ((uint64_t) rt >> 32), (long) rt,
+	   (long) ((uint64_t) memval >> 32), (long) memval); */
   StoreMemory (byte, memval, 0, paddr, vaddr, isREAL);
 }
 
@@ -4064,7 +4064,7 @@
   address_word bigendiancpu = (BigEndianCPU ? -1 : 0);
   unsigned int byte;
   address_word paddr;
-  unsigned64 memval;
+  uint64_t memval;
   address_word vaddr;
 
   paddr = vaddr = loadstore_ea (SD_, base, offset);
@@ -4212,7 +4212,7 @@
 
 :function:::void:do_sll:int rt, int rd, int shift
 {
-  unsigned32 temp = (GPR[rt] << shift);
+  uint32_t temp = (GPR[rt] << shift);
   TRACE_ALU_INPUT2 (GPR[rt], shift);
   GPR[rd] = EXTEND32 (temp);
   TRACE_ALU_RESULT (GPR[rd]);
@@ -4255,7 +4255,7 @@
 :function:::void:do_sllv:int rs, int rt, int rd
 {
   int s = MASKED (GPR[rs], 4, 0);
-  unsigned32 temp = (GPR[rt] << s);
+  uint32_t temp = (GPR[rt] << s);
   TRACE_ALU_INPUT2 (GPR[rt], s);
   GPR[rd] = EXTEND32 (temp);
   TRACE_ALU_RESULT (GPR[rd]);
@@ -4306,7 +4306,7 @@
 }
 
 
-:function:::void:do_slti:int rs, int rt, unsigned16 immediate
+:function:::void:do_slti:int rs, int rt, uint16_t immediate
 {
   TRACE_ALU_INPUT2 (GPR[rs], EXTEND16 (immediate));
   GPR[rt] = ((signed_word) GPR[rs] < (signed_word) EXTEND16 (immediate));
@@ -4332,7 +4332,7 @@
 }
 
 
-:function:::void:do_sltiu:int rs, int rt, unsigned16 immediate
+:function:::void:do_sltiu:int rs, int rt, uint16_t immediate
 {
   TRACE_ALU_INPUT2 (GPR[rs], EXTEND16 (immediate));
   GPR[rt] = ((unsigned_word) GPR[rs] < (unsigned_word) EXTEND16 (immediate));
@@ -4387,7 +4387,7 @@
 
 :function:::void:do_sra:int rt, int rd, int shift
 {
-  signed32 temp = (signed32) GPR[rt] >> shift;
+  int32_t temp = (int32_t) GPR[rt] >> shift;
   if (NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rt], shift);
@@ -4418,7 +4418,7 @@
 :function:::void:do_srav:int rs, int rt, int rd
 {
   int s = MASKED (GPR[rs], 4, 0);
-  signed32 temp = (signed32) GPR[rt] >> s;
+  int32_t temp = (int32_t) GPR[rt] >> s;
   if (NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rt], s);
@@ -4448,7 +4448,7 @@
 
 :function:::void:do_srl:int rt, int rd, int shift
 {
-  unsigned32 temp = (unsigned32) GPR[rt] >> shift;
+  uint32_t temp = (uint32_t) GPR[rt] >> shift;
   if (NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rt], shift);
@@ -4478,7 +4478,7 @@
 :function:::void:do_srlv:int rs, int rt, int rd
 {
   int s = MASKED (GPR[rs], 4, 0);
-  unsigned32 temp = (unsigned32) GPR[rt] >> s;
+  uint32_t temp = (uint32_t) GPR[rt] >> s;
   if (NotWordValue (GPR[rt]))
     Unpredictable ();
   TRACE_ALU_INPUT2 (GPR[rt], s);
@@ -4896,7 +4896,7 @@
 }
 
 
-:function:::void:do_xori:int rs, int rt, unsigned16 immediate
+:function:::void:do_xori:int rs, int rt, uint16_t immediate
 {
   TRACE_ALU_INPUT2 (GPR[rs], immediate);
   GPR[rt] = GPR[rs] ^ immediate;
@@ -5060,7 +5060,7 @@
 // unsigned_word, which is limited to the size of the machine's registers.
 //
 
-:function:::unsigned64:do_load_double:address_word base, address_word offset
+:function:::uint64_t:do_load_double:address_word base, address_word offset
 *mipsII:
 *mips32:
 *mips32r2:
@@ -5069,8 +5069,8 @@
   int bigendian = (BigEndianCPU ? ! ReverseEndian : ReverseEndian);
   address_word vaddr;
   address_word paddr;
-  unsigned64 memval;
-  unsigned64 v;
+  uint64_t memval;
+  uint64_t v;
 
   paddr = vaddr = loadstore_ea (SD_, base, offset);
   if ((vaddr & AccessLength_DOUBLEWORD) != 0)
@@ -5080,7 +5080,7 @@
 		       sim_core_unaligned_signal);
     }
   LoadMemory (&memval, NULL, AccessLength_WORD, paddr, vaddr, isDATA, isREAL);
-  v = (unsigned64)memval;
+  v = (uint64_t)memval;
   LoadMemory (&memval, NULL, AccessLength_WORD, paddr + 4, vaddr + 4, isDATA,
 	      isREAL);
   return (bigendian ? ((v << 32) | memval) : (v | (memval << 32)));
@@ -5094,7 +5094,7 @@
 // unsigned_word, which is limited to the size of the machine's registers.
 //
 
-:function:::void:do_store_double:address_word base, address_word offset, unsigned64 v
+:function:::void:do_store_double:address_word base, address_word offset, uint64_t v
 *mipsII:
 *mips32:
 *mips32r2:
@@ -5103,7 +5103,7 @@
   int bigendian = (BigEndianCPU ? ! ReverseEndian : ReverseEndian);
   address_word vaddr;
   address_word paddr;
-  unsigned64 memval;
+  uint64_t memval;
 
   paddr = vaddr = loadstore_ea (SD_, base, offset);
   if ((vaddr & AccessLength_DOUBLEWORD) != 0)
@@ -5504,7 +5504,7 @@
 "dmfc1 r<RT>, f<FS>"
 *mipsIII:
 {
-  unsigned64 v;
+  uint64_t v;
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   if (SizeFGR () == 64)
@@ -5537,7 +5537,7 @@
 "dmtc1 r<RT>, f<FS>"
 *mipsIII:
 {
-  unsigned64 v;
+  uint64_t v;
   check_fpu (SD_);
   check_u64 (SD_, instruction_0);
   if (SizeFGR () == 64)
@@ -5724,7 +5724,7 @@
 *mipsII:
 *mipsIII:
 {
-  unsigned64 v;
+  uint64_t v;
   check_fpu (SD_);
   v = EXTEND32 (FGR[FS]);
   PENDING_FILL (RT, v);

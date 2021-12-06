@@ -718,7 +718,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       for (loop = 0; (loop < idt_monitor_size); loop += 4)
 	{
 	  address_word vaddr = (idt_monitor_base + loop);
-	  unsigned32 insn = (RSVD_INSTRUCTION |
+	  uint32_t insn = (RSVD_INSTRUCTION |
 			     (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK)
 			      << RSVD_INSTRUCTION_ARG_SHIFT));
 	  H2T (insn);
@@ -737,7 +737,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       unsigned loop;
       for (loop = 0; (loop < 24); loop++)
 	{
-	  unsigned32 value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
+	  uint32_t value = ((0x500 - 8) / 8); /* default UNDEFINED reason code */
 	  switch (loop)
 	    {
             case 0: /* read */
@@ -787,7 +787,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
       (pmon_monitor_base != 0) ||
       (lsipmon_monitor_base != 0))
     {
-      unsigned32 halt[2] = { 0x2404002f /* addiu r4, r0, 47 */,
+      uint32_t halt[2] = { 0x2404002f /* addiu r4, r0, 47 */,
 			     HALT_INSTRUCTION /* BREAK */ };
       H2T (halt[0]);
       H2T (halt[1]);
@@ -869,12 +869,12 @@ mips_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 	  if (length == 8)
 	    {
 	      cpu->fgr[rn - FGR_BASE] =
-		(unsigned32) T2H_8 (*(unsigned64*)memory);
+		(uint32_t) T2H_8 (*(uint64_t*)memory);
 	      return 8;
 	    }
 	  else
 	    {
-	      cpu->fgr[rn - FGR_BASE] = T2H_4 (*(unsigned32*)memory);
+	      cpu->fgr[rn - FGR_BASE] = T2H_4 (*(uint32_t*)memory);
 	      return 4;
 	    }
 	}
@@ -882,12 +882,12 @@ mips_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 	{
           if (length == 8)
 	    {
-	      cpu->fgr[rn - FGR_BASE] = T2H_8 (*(unsigned64*)memory);
+	      cpu->fgr[rn - FGR_BASE] = T2H_8 (*(uint64_t*)memory);
 	      return 8;
 	    }
 	  else
 	    {
-	      cpu->fgr[rn - FGR_BASE] = T2H_4 (*(unsigned32*)memory);
+	      cpu->fgr[rn - FGR_BASE] = T2H_4 (*(uint32_t*)memory);
 	      return 4;
 	    }
 	}
@@ -898,12 +898,12 @@ mips_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
       if (length == 8)
 	{
 	  cpu->registers[rn] =
-	    (unsigned32) T2H_8 (*(unsigned64*)memory);
+	    (uint32_t) T2H_8 (*(uint64_t*)memory);
 	  return 8;
 	}
       else
 	{
-	  cpu->registers[rn] = T2H_4 (*(unsigned32*)memory);
+	  cpu->registers[rn] = T2H_4 (*(uint32_t*)memory);
 	  return 4;
 	}
     }
@@ -911,12 +911,12 @@ mips_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
     {
       if (length == 8)
 	{
-	  cpu->registers[rn] = T2H_8 (*(unsigned64*)memory);
+	  cpu->registers[rn] = T2H_8 (*(uint64_t*)memory);
 	  return 8;
 	}
       else
 	{
-	  cpu->registers[rn] = (signed32) T2H_4(*(unsigned32*)memory);
+	  cpu->registers[rn] = (int32_t) T2H_4(*(uint32_t*)memory);
 	  return 4;
 	}
     }
@@ -943,13 +943,13 @@ mips_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 	{
 	  if (length == 8)
 	    {
-	      *(unsigned64*)memory =
-		H2T_8 ((unsigned32) (cpu->fgr[rn - FGR_BASE]));
+	      *(uint64_t*)memory =
+		H2T_8 ((uint32_t) (cpu->fgr[rn - FGR_BASE]));
 	      return 8;
 	    }
 	  else
 	    {
-	      *(unsigned32*)memory = H2T_4 (cpu->fgr[rn - FGR_BASE]);
+	      *(uint32_t*)memory = H2T_4 (cpu->fgr[rn - FGR_BASE]);
 	      return 4;
 	    }
 	}
@@ -957,12 +957,12 @@ mips_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 	{
 	  if (length == 8)
 	    {
-	      *(unsigned64*)memory = H2T_8 (cpu->fgr[rn - FGR_BASE]);
+	      *(uint64_t*)memory = H2T_8 (cpu->fgr[rn - FGR_BASE]);
 	      return 8;
 	    }
 	  else
 	    {
-	      *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->fgr[rn - FGR_BASE]));
+	      *(uint32_t*)memory = H2T_4 ((uint32_t)(cpu->fgr[rn - FGR_BASE]));
 	      return 4;
 	    }
 	}
@@ -972,13 +972,13 @@ mips_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
     {
       if (length == 8)
 	{
-	  *(unsigned64*)memory =
-	    H2T_8 ((unsigned32) (cpu->registers[rn]));
+	  *(uint64_t*)memory =
+	    H2T_8 ((uint32_t) (cpu->registers[rn]));
 	  return 8;
 	}
       else
 	{
-	  *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->registers[rn]));
+	  *(uint32_t*)memory = H2T_4 ((uint32_t)(cpu->registers[rn]));
 	  return 4;
 	}
     }
@@ -986,13 +986,13 @@ mips_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
     {
       if (length == 8)
 	{
-	  *(unsigned64*)memory =
-	    H2T_8 ((unsigned64) (cpu->registers[rn]));
+	  *(uint64_t*)memory =
+	    H2T_8 ((uint64_t) (cpu->registers[rn]));
 	  return 8;
 	}
       else
 	{
-	  *(unsigned32*)memory = H2T_4 ((unsigned32)(cpu->registers[rn]));
+	  *(uint32_t*)memory = H2T_4 ((uint32_t)(cpu->registers[rn]));
 	  return 4;
 	}
     }
@@ -1028,7 +1028,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 	     These addresses work as is on 64-bit targets but
 	     can be truncated for 32-bit targets.  */
 	  if (WITH_TARGET_WORD_BITSIZE == 32)
-	    pc = (unsigned32) pc;
+	    pc = (uint32_t) pc;
 
 	  CPU_PC_SET (cpu, pc);
 	}
@@ -2321,7 +2321,7 @@ decode_coproc (SIM_DESC sd,
 		/* CPR[0,rd] = GPR[rt]; */
 	      default:
 		if (op == cp0_mfc0 || op == cp0_dmfc0)
-		  GPR[rt] = (signed_word) (signed32) COP0_GPR[rd];
+		  GPR[rt] = (signed_word) (int32_t) COP0_GPR[rd];
 		else
 		  COP0_GPR[rd] = GPR[rt];
 #if 0
@@ -2336,7 +2336,7 @@ decode_coproc (SIM_DESC sd,
 		 && rd == 16)
 	  {
 	    /* [D]MFC0 RT,C0_CONFIG,SEL */
-	    signed32 cfg = 0;
+	    int32_t cfg = 0;
 	    switch (sel)
 	      {
 	      case 0:

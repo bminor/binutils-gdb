@@ -33,8 +33,8 @@ mips_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ER
 /* Deprecated macros and types for manipulating 64bit values.  Use
    ../common/sim-bits.h and ../common/sim-endian.h macros instead. */
 
-typedef signed64 word64;
-typedef unsigned64 uword64;
+typedef int64_t word64;
+typedef uint64_t uword64;
 
 #define WORD64LO(t)     (unsigned int)((t)&0xFFFFFFFF)
 #define WORD64HI(t)     (unsigned int)(((uword64)(t))>>32)
@@ -115,7 +115,7 @@ typedef enum {
    more details. */
 
 typedef struct _hilo_access {
-  signed64 timestamp;
+  int64_t timestamp;
   address_word cia;
 } hilo_access;
 
@@ -135,7 +135,7 @@ typedef struct _hilo_history {
 #define ALU32_END(ANS) \
   if (ALU32_HAD_OVERFLOW) \
     SignalExceptionIntegerOverflow (); \
-  (ANS) = (signed32) ALU32_OVERFLOW_RESULT
+  (ANS) = (int32_t) ALU32_OVERFLOW_RESULT
 
 
 #define ALU64_END(ANS) \
@@ -163,7 +163,7 @@ typedef struct _pending_write_queue {
   int slot_size[PSLOTS];
   int slot_bit[PSLOTS];
   void *slot_dest[PSLOTS];
-  unsigned64 slot_value[PSLOTS];
+  uint64_t slot_value[PSLOTS];
 } pending_write_queue;
 
 #ifndef PENDING_TRACE
@@ -243,8 +243,8 @@ enum float_operation
    32 or 64 bits.  Since the accumulators are 2's complement with
    overflow suppressed, high-order bits can be ignored in most contexts.  */
 
-typedef signed32 signed24;
-typedef signed64 signed48;
+typedef int32_t signed24;
+typedef int64_t signed48;
 
 typedef union {
   signed24  ob[8];
@@ -700,15 +700,15 @@ int sim_monitor (SIM_DESC sd, sim_cpu *cpu, address_word cia, unsigned int arg);
 
 
 /* FPR access.  */
-unsigned64 value_fpr (SIM_STATE, int fpr, FP_formats);
+uint64_t value_fpr (SIM_STATE, int fpr, FP_formats);
 #define ValueFPR(FPR,FMT) value_fpr (SIM_ARGS, (FPR), (FMT))
-void store_fpr (SIM_STATE, int fpr, FP_formats fmt, unsigned64 value);
+void store_fpr (SIM_STATE, int fpr, FP_formats fmt, uint64_t value);
 #define StoreFPR(FPR,FMT,VALUE) store_fpr (SIM_ARGS, (FPR), (FMT), (VALUE))
-unsigned64 ps_lower (SIM_STATE, unsigned64 op);
+uint64_t ps_lower (SIM_STATE, uint64_t op);
 #define PSLower(op) ps_lower (SIM_ARGS, op)
-unsigned64 ps_upper (SIM_STATE, unsigned64 op);
+uint64_t ps_upper (SIM_STATE, uint64_t op);
 #define PSUpper(op) ps_upper (SIM_ARGS, op)
-unsigned64 pack_ps (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats from);
+uint64_t pack_ps (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats from);
 #define PackPS(op1,op2) pack_ps (SIM_ARGS, op1, op2, fmt_single)
 
 
@@ -722,41 +722,41 @@ void test_fcsr (SIM_STATE);
 
 
 /* FPU operations.  */
-void fp_cmp (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt, int abs, int cond, int cc);
+void fp_cmp (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt, int abs, int cond, int cc);
 #define Compare(op1,op2,fmt,cond,cc) fp_cmp(SIM_ARGS, op1, op2, fmt, 0, cond, cc)
-unsigned64 fp_abs (SIM_STATE, unsigned64 op, FP_formats fmt);
+uint64_t fp_abs (SIM_STATE, uint64_t op, FP_formats fmt);
 #define AbsoluteValue(op,fmt) fp_abs(SIM_ARGS, op, fmt)
-unsigned64 fp_neg (SIM_STATE, unsigned64 op, FP_formats fmt);
+uint64_t fp_neg (SIM_STATE, uint64_t op, FP_formats fmt);
 #define Negate(op,fmt) fp_neg(SIM_ARGS, op, fmt)
-unsigned64 fp_add (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+uint64_t fp_add (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define Add(op1,op2,fmt) fp_add(SIM_ARGS, op1, op2, fmt)
-unsigned64 fp_sub (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+uint64_t fp_sub (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define Sub(op1,op2,fmt) fp_sub(SIM_ARGS, op1, op2, fmt)
-unsigned64 fp_mul (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+uint64_t fp_mul (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define Multiply(op1,op2,fmt) fp_mul(SIM_ARGS, op1, op2, fmt)
-unsigned64 fp_div (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+uint64_t fp_div (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define Divide(op1,op2,fmt) fp_div(SIM_ARGS, op1, op2, fmt)
-unsigned64 fp_recip (SIM_STATE, unsigned64 op, FP_formats fmt);
+uint64_t fp_recip (SIM_STATE, uint64_t op, FP_formats fmt);
 #define Recip(op,fmt) fp_recip(SIM_ARGS, op, fmt)
-unsigned64 fp_sqrt (SIM_STATE, unsigned64 op, FP_formats fmt);
+uint64_t fp_sqrt (SIM_STATE, uint64_t op, FP_formats fmt);
 #define SquareRoot(op,fmt) fp_sqrt(SIM_ARGS, op, fmt)
-unsigned64 fp_rsqrt (SIM_STATE, unsigned64 op, FP_formats fmt);
+uint64_t fp_rsqrt (SIM_STATE, uint64_t op, FP_formats fmt);
 #define RSquareRoot(op,fmt) fp_rsqrt(SIM_ARGS, op, fmt)
-unsigned64 fp_madd (SIM_STATE, unsigned64 op1, unsigned64 op2,
-		    unsigned64 op3, FP_formats fmt);
+uint64_t fp_madd (SIM_STATE, uint64_t op1, uint64_t op2,
+		    uint64_t op3, FP_formats fmt);
 #define MultiplyAdd(op1,op2,op3,fmt) fp_madd(SIM_ARGS, op1, op2, op3, fmt)
-unsigned64 fp_msub (SIM_STATE, unsigned64 op1, unsigned64 op2,
-		    unsigned64 op3, FP_formats fmt);
+uint64_t fp_msub (SIM_STATE, uint64_t op1, uint64_t op2,
+		    uint64_t op3, FP_formats fmt);
 #define MultiplySub(op1,op2,op3,fmt) fp_msub(SIM_ARGS, op1, op2, op3, fmt)
-unsigned64 fp_nmadd (SIM_STATE, unsigned64 op1, unsigned64 op2,
-		     unsigned64 op3, FP_formats fmt);
+uint64_t fp_nmadd (SIM_STATE, uint64_t op1, uint64_t op2,
+		     uint64_t op3, FP_formats fmt);
 #define NegMultiplyAdd(op1,op2,op3,fmt) fp_nmadd(SIM_ARGS, op1, op2, op3, fmt)
-unsigned64 fp_nmsub (SIM_STATE, unsigned64 op1, unsigned64 op2,
-		     unsigned64 op3, FP_formats fmt);
+uint64_t fp_nmsub (SIM_STATE, uint64_t op1, uint64_t op2,
+		     uint64_t op3, FP_formats fmt);
 #define NegMultiplySub(op1,op2,op3,fmt) fp_nmsub(SIM_ARGS, op1, op2, op3, fmt)
-unsigned64 convert (SIM_STATE, int rm, unsigned64 op, FP_formats from, FP_formats to);
+uint64_t convert (SIM_STATE, int rm, uint64_t op, FP_formats from, FP_formats to);
 #define Convert(rm,op,from,to) convert (SIM_ARGS, rm, op, from, to)
-unsigned64 convert_ps (SIM_STATE, int rm, unsigned64 op, FP_formats from,
+uint64_t convert_ps (SIM_STATE, int rm, uint64_t op, FP_formats from,
 		       FP_formats to);
 #define ConvertPS(rm,op,from,to) convert_ps (SIM_ARGS, rm, op, from, to)
 
@@ -764,17 +764,17 @@ unsigned64 convert_ps (SIM_STATE, int rm, unsigned64 op, FP_formats from,
 /* MIPS-3D ASE operations.  */
 #define CompareAbs(op1,op2,fmt,cond,cc) \
 fp_cmp(SIM_ARGS, op1, op2, fmt, 1, cond, cc)
-unsigned64 fp_add_r (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+uint64_t fp_add_r (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define AddR(op1,op2,fmt) fp_add_r(SIM_ARGS, op1, op2, fmt)
-unsigned64 fp_mul_r (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+uint64_t fp_mul_r (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define MultiplyR(op1,op2,fmt) fp_mul_r(SIM_ARGS, op1, op2, fmt)
-unsigned64 fp_recip1 (SIM_STATE, unsigned64 op, FP_formats fmt);
+uint64_t fp_recip1 (SIM_STATE, uint64_t op, FP_formats fmt);
 #define Recip1(op,fmt) fp_recip1(SIM_ARGS, op, fmt)
-unsigned64 fp_recip2 (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+uint64_t fp_recip2 (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define Recip2(op1,op2,fmt) fp_recip2(SIM_ARGS, op1, op2, fmt)
-unsigned64 fp_rsqrt1 (SIM_STATE, unsigned64 op, FP_formats fmt);
+uint64_t fp_rsqrt1 (SIM_STATE, uint64_t op, FP_formats fmt);
 #define RSquareRoot1(op,fmt) fp_rsqrt1(SIM_ARGS, op, fmt)
-unsigned64 fp_rsqrt2 (SIM_STATE, unsigned64 op1, unsigned64 op2, FP_formats fmt);
+uint64_t fp_rsqrt2 (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define RSquareRoot2(op1,op2,fmt) fp_rsqrt2(SIM_ARGS, op1, op2, fmt)
 
 
@@ -802,7 +802,7 @@ typedef unsigned int MX_fmtsel;   /* MDMX format select field (5 bits).  */
 #define MX_VECT_ABSD (13)		/* SB-1 only.  */
 #define MX_VECT_AVG  (14)		/* SB-1 only.  */
 
-unsigned64 mdmx_cpr_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmtsel);
+uint64_t mdmx_cpr_op (SIM_STATE, int op, uint64_t op1, int vt, MX_fmtsel fmtsel);
 #define MX_Add(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_ADD, op1, vt, fmtsel)
 #define MX_And(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_AND, op1, vt, fmtsel)
 #define MX_Max(op1,vt,fmtsel) mdmx_cpr_op(SIM_ARGS, MX_VECT_MAX, op1, vt, fmtsel)
@@ -822,10 +822,10 @@ unsigned64 mdmx_cpr_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmt
 #define MX_C_EQ  0x1
 #define MX_C_LT  0x4
 
-void mdmx_cc_op (SIM_STATE, int cond, unsigned64 op1, int vt, MX_fmtsel fmtsel);
+void mdmx_cc_op (SIM_STATE, int cond, uint64_t op1, int vt, MX_fmtsel fmtsel);
 #define MX_Comp(op1,cond,vt,fmtsel) mdmx_cc_op(SIM_ARGS, cond, op1, vt, fmtsel)
 
-unsigned64 mdmx_pick_op (SIM_STATE, int tf, unsigned64 op1, int vt, MX_fmtsel fmtsel);
+uint64_t mdmx_pick_op (SIM_STATE, int tf, uint64_t op1, int vt, MX_fmtsel fmtsel);
 #define MX_Pick(tf,op1,vt,fmtsel) mdmx_pick_op(SIM_ARGS, tf, op1, vt, fmtsel)
 
 #define MX_VECT_ADDA  (0)
@@ -838,7 +838,7 @@ unsigned64 mdmx_pick_op (SIM_STATE, int tf, unsigned64 op1, int vt, MX_fmtsel fm
 #define MX_VECT_SUBL  (7)
 #define MX_VECT_ABSDA (8)		/* SB-1 only.  */
 
-void mdmx_acc_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmtsel);
+void mdmx_acc_op (SIM_STATE, int op, uint64_t op1, int vt, MX_fmtsel fmtsel);
 #define MX_AddA(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_ADDA, op1, vt, fmtsel)
 #define MX_AddL(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_ADDL, op1, vt, fmtsel)
 #define MX_MulA(op1,vt,fmtsel) mdmx_acc_op(SIM_ARGS, MX_VECT_MULA, op1, vt, fmtsel)
@@ -857,12 +857,12 @@ void mdmx_acc_op (SIM_STATE, int op, unsigned64 op1, int vt, MX_fmtsel fmtsel);
 #define MX_RAC_M    (1)
 #define MX_RAC_H    (2)
 
-unsigned64 mdmx_rac_op (SIM_STATE, int, int);
+uint64_t mdmx_rac_op (SIM_STATE, int, int);
 #define MX_RAC(op,fmt) mdmx_rac_op(SIM_ARGS, op, fmt)
 
-void mdmx_wacl (SIM_STATE, int, unsigned64, unsigned64);
+void mdmx_wacl (SIM_STATE, int, uint64_t, uint64_t);
 #define MX_WACL(fmt,vs,vt) mdmx_wacl(SIM_ARGS, fmt, vs, vt)
-void mdmx_wach (SIM_STATE, int, unsigned64);
+void mdmx_wach (SIM_STATE, int, uint64_t);
 #define MX_WACH(fmt,vs) mdmx_wach(SIM_ARGS, fmt, vs)
 
 #define MX_RND_AS   (0)
@@ -872,7 +872,7 @@ void mdmx_wach (SIM_STATE, int, unsigned64);
 #define MX_RND_ZS   (4)
 #define MX_RND_ZU   (5)
 
-unsigned64 mdmx_round_op (SIM_STATE, int, int, MX_fmtsel);
+uint64_t mdmx_round_op (SIM_STATE, int, int, MX_fmtsel);
 #define MX_RNAS(vt,fmt) mdmx_round_op(SIM_ARGS, MX_RND_AS, vt, fmt)
 #define MX_RNAU(vt,fmt) mdmx_round_op(SIM_ARGS, MX_RND_AU, vt, fmt)
 #define MX_RNES(vt,fmt) mdmx_round_op(SIM_ARGS, MX_RND_ES, vt, fmt)
@@ -880,7 +880,7 @@ unsigned64 mdmx_round_op (SIM_STATE, int, int, MX_fmtsel);
 #define MX_RZS(vt,fmt)  mdmx_round_op(SIM_ARGS, MX_RND_ZS, vt, fmt)
 #define MX_RZU(vt,fmt)  mdmx_round_op(SIM_ARGS, MX_RND_ZU, vt, fmt)
 
-unsigned64 mdmx_shuffle (SIM_STATE, int, unsigned64, unsigned64);
+uint64_t mdmx_shuffle (SIM_STATE, int, uint64_t, uint64_t);
 #define MX_SHFL(shop,op1,op2) mdmx_shuffle(SIM_ARGS, shop, op1, op2)
 
 
@@ -937,9 +937,9 @@ void unpredictable_action (sim_cpu *cpu, address_word cia);
 #define Unpredictable()		unpredictable (SD_)
 #define UnpredictableResult()	/* For now, do nothing.  */
 
-INLINE_SIM_MAIN (unsigned32) ifetch32 (SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr);
+INLINE_SIM_MAIN (uint32_t) ifetch32 (SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr);
 #define IMEM32(CIA) ifetch32 (SD, CPU, (CIA), (CIA))
-INLINE_SIM_MAIN (unsigned16) ifetch16 (SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr);
+INLINE_SIM_MAIN (uint16_t) ifetch16 (SIM_DESC sd, sim_cpu *cpu, address_word cia, address_word vaddr);
 #define IMEM16(CIA) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1))
 #define IMEM16_IMMED(CIA,NR) ifetch16 (SD, CPU, (CIA), ((CIA) & ~1) + 2 * (NR))
 #define IMEM32_MICROMIPS(CIA) \

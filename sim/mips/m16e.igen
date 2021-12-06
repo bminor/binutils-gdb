@@ -55,7 +55,7 @@
 *mips16e:
 {
   TRACE_ALU_INPUT1 (GPR[TRX]);
-  GPR[TRX] =  (unsigned_word)(unsigned8)(GPR[TRX]);
+  GPR[TRX] =  (unsigned_word)(uint8_t)(GPR[TRX]);
   TRACE_ALU_RESULT (GPR[TRX]);
 }
 
@@ -64,7 +64,7 @@
 *mips16e:
 {
   TRACE_ALU_INPUT1 (GPR[TRX]);
-  GPR[TRX] = (unsigned_word)(unsigned16)(GPR[TRX]);
+  GPR[TRX] = (unsigned_word)(uint16_t)(GPR[TRX]);
   TRACE_ALU_RESULT (GPR[TRX]);
 }
 
@@ -74,7 +74,7 @@
 {
   check_u64 (SD_, instruction_0);
   TRACE_ALU_INPUT1 (GPR[TRX]);
-  GPR[TRX] = (unsigned_word)(unsigned32)(GPR[TRX]);
+  GPR[TRX] = (unsigned_word)(uint32_t)(GPR[TRX]);
   TRACE_ALU_RESULT (GPR[TRX]);
 }
 

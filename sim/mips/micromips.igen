@@ -81,7 +81,7 @@
 }
 
 
-:function:::unsigned32:compute_movep_src_reg:int reg
+:function:::uint32_t:compute_movep_src_reg:int reg
 *micromips32:
 *micromips64:
 {
@@ -99,7 +99,7 @@
     }
 }
 
-:function:::unsigned32:compute_andi16_imm:int encoded_imm
+:function:::uint32_t:compute_andi16_imm:int encoded_imm
 *micromips32:
 *micromips64:
 {
