@@ -27,8 +27,8 @@
 
 /* TYPES:
 
-     signed*    signed type of the given size
-     unsigned*  The corresponding insigned type
+     intNN_t    Signed type of the given bit size
+     uintNN_t   The corresponding unsigned type
 
    SIZES
 
@@ -47,27 +47,16 @@
 
 #include <stdint.h>
 
-/* bit based */
-typedef int8_t signed8;
-typedef int16_t signed16;
-typedef int32_t signed32;
-typedef int64_t signed64;
-
-typedef uint8_t unsigned8;
-typedef uint16_t unsigned16;
-typedef uint32_t unsigned32;
-typedef uint64_t unsigned64;
-
 /* byte based */
-typedef signed8 signed_1;
-typedef signed16 signed_2;
-typedef signed32 signed_4;
-typedef signed64 signed_8;
+typedef int8_t signed_1;
+typedef int16_t signed_2;
+typedef int32_t signed_4;
+typedef int64_t signed_8;
 
-typedef unsigned8 unsigned_1;
-typedef unsigned16 unsigned_2;
-typedef unsigned32 unsigned_4;
-typedef unsigned64 unsigned_8;
+typedef uint8_t unsigned_1;
+typedef uint16_t unsigned_2;
+typedef uint32_t unsigned_4;
+typedef uint64_t unsigned_8;
 
 
 /* for general work, the following are defined */
@@ -78,19 +67,19 @@ typedef unsigned64 unsigned_8;
 
 /* target architecture based */
 #if (WITH_TARGET_WORD_BITSIZE == 64)
-typedef unsigned64 unsigned_word;
-typedef signed64 signed_word;
+typedef uint64_t unsigned_word;
+typedef int64_t signed_word;
 #else
-typedef unsigned32 unsigned_word;
-typedef signed32 signed_word;
+typedef uint32_t unsigned_word;
+typedef int32_t signed_word;
 #endif
 
 
 /* Other instructions */
-typedef unsigned32 instruction_word;
+typedef uint32_t instruction_word;
 
 /* IEEE 1275 cell size - only support 32bit mode at present */
-typedef unsigned32 unsigned_cell;
-typedef signed32 signed_cell;
+typedef uint32_t unsigned_cell;
+typedef int32_t signed_cell;
 
 #endif /* _WORDS_H_ */

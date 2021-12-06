@@ -227,7 +227,7 @@ core_attach(core *memory,
   if (attach == attach_raw_memory) {
     /* Padd out the raw buffer to ensure that ADDR starts on a
        correctly aligned boundary */
-    int padding = (addr % sizeof (unsigned64));
+    int padding = (addr % sizeof (uint64_t));
     free_buffer = zalloc(nr_bytes + padding);
     buffer = (char*)free_buffer + padding;
   }

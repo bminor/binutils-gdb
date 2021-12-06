@@ -855,7 +855,7 @@ tree_parse(device *current,
 	break;
       case '[':
 	{
-	  unsigned8 words[1024];
+	  uint8_t words[1024];
 	  char *curr = spec.value + 1;
 	  int nr_words = 0;
 	  while (1) {
@@ -1050,7 +1050,7 @@ print_properties(device *me)
 	  }
 	}
 	else {
-	  unsigned8 *w = (unsigned8*)property->array;
+	  uint8_t *w = (uint8_t*)property->array;
 	  printf_filtered(" [");
 	  while ((char*)w - (char*)property->array < property->sizeof_array) {
 	    printf_filtered(" 0x%2x", BE2H_1(*w));

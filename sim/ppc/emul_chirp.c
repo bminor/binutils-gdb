@@ -1381,7 +1381,7 @@ chirp_emul_milliseconds(os_emul_data *data,
     /*out*/
     unsigned_cell ms;
   } args;
-  unsigned64 time;
+  uint64_t time;
   /* read in the arguments */
   if (chirp_read_t2h_args(&args, sizeof(args), 1, 1, data, processor, cia))
     return -1;
@@ -1465,12 +1465,12 @@ static chirp_services services[] = {
 
 
 typedef struct _chirp_note_desc {
-  signed32 real_mode;
-  signed32 real_base;
-  signed32 real_size;
-  signed32 virt_base;
-  signed32 virt_size;
-  signed32 load_base;
+  int32_t real_mode;
+  int32_t real_base;
+  int32_t real_size;
+  int32_t virt_base;
+  int32_t virt_size;
+  int32_t load_base;
 } chirp_note_desc;
 
 typedef enum {
@@ -1484,9 +1484,9 @@ typedef struct _chirp_note {
 } chirp_note;
 
 typedef struct _chirp_note_head {
-  unsigned32 namesz;
-  unsigned32 descsz;
-  unsigned32 type;
+  uint32_t namesz;
+  uint32_t descsz;
+  uint32_t type;
 } chirp_note_head;
 
 static void
@@ -1519,7 +1519,7 @@ map_over_chirp_note(bfd *image,
       printf_filtered("chirp: note name (%s) not `PowerPC'\n", name);
     }
     /* check the size */
-    if (head.descsz == sizeof(note->desc) - sizeof(signed32)) {
+    if (head.descsz == sizeof(note->desc) - sizeof(int32_t)) {
       sim_io_printf_filtered("chirp: note descriptor missing load-base\n");
     }
     else if (head.descsz != sizeof(note->desc)) {
@@ -1543,7 +1543,7 @@ map_over_chirp_note(bfd *image,
     if (head.descsz == sizeof(note->desc))
       note->desc.load_base = bfd_get_32(image, (void*)&note->desc.load_base);
     else
-      note->desc.load_base = (signed32)-1;
+      note->desc.load_base = (int32_t)-1;
   }
 }
 
@@ -1648,7 +1648,7 @@ emul_chirp_create(device *root,
 
   /* resolve real-base */
   if (note.found == note_correct
-      && note.desc.real_base != (signed32)-1)
+      && note.desc.real_base != (int32_t)-1)
     chirp->real_base = note.desc.real_base;
   else if (tree_find_property(root, "/options/real-base") != NULL)
     chirp->real_base = tree_find_integer_property(root, "/options/real-base");
@@ -1664,7 +1664,7 @@ emul_chirp_create(device *root,
 
   /* resolve real-size */
   if (note.found == note_correct
-      && note.desc.real_size != (signed32)-1
+      && note.desc.real_size != (int32_t)-1
       && note.desc.real_size != 0
       && chirp->real_size > note.desc.real_size)
     error("chirp: insufficient physical memory for firmware\n");
@@ -1697,7 +1697,7 @@ emul_chirp_create(device *root,
   /* resolve virt-size */
   chirp->virt_size = chirp->real_size;
   if (note.found == note_correct
-     && note.desc.virt_size != (signed32)-1
+     && note.desc.virt_size != (int32_t)-1
       && note.desc.virt_size != 0
       && !chirp->real_mode
       && chirp->virt_size > note.desc.virt_size)
@@ -1712,7 +1712,7 @@ emul_chirp_create(device *root,
 
   /* resolve load-base */
   if (note.found == note_correct
-      && note.desc.load_base != (signed32)-1)
+      && note.desc.load_base != (int32_t)-1)
     chirp->load_base = note.desc.load_base;
   else if (tree_find_property(root, "/options/load-base") != NULL)
     chirp->load_base = tree_find_integer_property(root, "/options/load-base");

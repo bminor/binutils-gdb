@@ -989,7 +989,7 @@ device_add_boolean_property(device *me,
                             const char *property,
                             int boolean)
 {
-  signed32 new_boolean = (boolean ? -1 : 0);
+  int32_t new_boolean = (boolean ? -1 : 0);
   device_add_property(me, property, boolean_property,
                       &new_boolean, sizeof(new_boolean),
                       &new_boolean, sizeof(new_boolean),
@@ -1879,7 +1879,7 @@ device_instance_to_external(device_instance *instance)
 INLINE_DEVICE\
 (event_entry_tag)
 device_event_queue_schedule(device *me,
-			    signed64 delta_time,
+			    int64_t delta_time,
 			    device_event_handler *handler,
 			    void *data)
 {
@@ -1899,7 +1899,7 @@ device_event_queue_deschedule(device *me,
 }
 
 INLINE_DEVICE\
-(signed64)
+(int64_t)
 device_event_queue_time(device *me)
 {
   return event_queue_time(psim_event_queue(me->system));

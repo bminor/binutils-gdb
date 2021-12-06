@@ -873,7 +873,7 @@ psim_read_register(psim *system,
     break;
 
   case reg_evr:
-    *(unsigned64*)cooked_buf = EVR(description.index);
+    *(uint64_t*)cooked_buf = EVR(description.index);
     break;
 
   case reg_acc:
@@ -1046,8 +1046,8 @@ psim_write_register(psim *system,
 
   case reg_evr:
     {
-      unsigned64 v;
-      v = *(unsigned64*)cooked_buf;
+      uint64_t v;
+      v = *(uint64_t*)cooked_buf;
       cpu_registers(processor)->e500.gprh[description.index] = v >> 32;
       cpu_registers(processor)->gpr[description.index] = v;
       break;

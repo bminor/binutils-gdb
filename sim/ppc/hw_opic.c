@@ -305,7 +305,7 @@ typedef struct _opic_timer {
   hw_opic_device *opic; /* ditto */
   unsigned base_count;
   int inhibited;
-  signed64 count; /* *ONLY* if inhibited */
+  int64_t count; /* *ONLY* if inhibited */
   event_entry_tag timeout_event;
   opic_interrupt_source *interrupt_source;
 } opic_timer;
@@ -347,7 +347,7 @@ struct _hw_opic_device {
   unsigned timer_frequency;
 
   /* init register */
-  unsigned32 init;
+  uint32_t init;
 
   /* address maps */
   opic_idu idu;

@@ -35,49 +35,49 @@
 
 :cache::::RA:RA:
 :cache:::signed_word *:rA:RA:(cpu_registers(processor)->gpr + RA)
-:cache:::unsigned32:RA_BITMASK:RA:(1 << RA)
+:cache:::uint32_t:RA_BITMASK:RA:(1 << RA)
 :compute:::int:RA_is_0:RA:(RA == 0)
 :cache::::RT:RT:
 :cache:::signed_word *:rT:RT:(cpu_registers(processor)->gpr + RT)
-:cache:::unsigned32:RT_BITMASK:RT:(1 << RT)
+:cache:::uint32_t:RT_BITMASK:RT:(1 << RT)
 :cache::::RS:RS:
 :cache:::signed_word *:rS:RS:(cpu_registers(processor)->gpr + RS)
-:cache:::unsigned32:RS_BITMASK:RS:(1 << RS)
+:cache:::uint32_t:RS_BITMASK:RS:(1 << RS)
 :cache::::RB:RB:
 :cache:::signed_word *:rB:RB:(cpu_registers(processor)->gpr + RB)
-:cache:::unsigned32:RB_BITMASK:RB:(1 << RB)
+:cache:::uint32_t:RB_BITMASK:RB:(1 << RB)
 :scratch::::FRA:FRA:
-:cache:::unsigned64 *:frA:FRA:(cpu_registers(processor)->fpr + FRA)
-:cache:::unsigned32:FRA_BITMASK:FRA:(1 << FRA)
+:cache:::uint64_t *:frA:FRA:(cpu_registers(processor)->fpr + FRA)
+:cache:::uint32_t:FRA_BITMASK:FRA:(1 << FRA)
 :scratch::::FRB:FRB:
-:cache:::unsigned64 *:frB:FRB:(cpu_registers(processor)->fpr + FRB)
-:cache:::unsigned32:FRB_BITMASK:FRB:(1 << FRB)
+:cache:::uint64_t *:frB:FRB:(cpu_registers(processor)->fpr + FRB)
+:cache:::uint32_t:FRB_BITMASK:FRB:(1 << FRB)
 :scratch::::FRC:FRC:
-:cache:::unsigned64 *:frC:FRC:(cpu_registers(processor)->fpr + FRC)
-:cache:::unsigned32:FRC_BITMASK:FRC:(1 << FRC)
+:cache:::uint64_t *:frC:FRC:(cpu_registers(processor)->fpr + FRC)
+:cache:::uint32_t:FRC_BITMASK:FRC:(1 << FRC)
 :scratch::::FRS:FRS:
-:cache:::unsigned64 *:frS:FRS:(cpu_registers(processor)->fpr + FRS)
-:cache:::unsigned32:FRS_BITMASK:FRS:(1 << FRS)
+:cache:::uint64_t *:frS:FRS:(cpu_registers(processor)->fpr + FRS)
+:cache:::uint32_t:FRS_BITMASK:FRS:(1 << FRS)
 :scratch::::FRT:FRT:
-:cache:::unsigned64 *:frT:FRT:(cpu_registers(processor)->fpr + FRT)
-:cache:::unsigned32:FRT_BITMASK:FRT:(1 << FRT)
-:cache:::unsigned_word:EXTS_SI:SI:((signed_word)(signed16)instruction)
+:cache:::uint64_t *:frT:FRT:(cpu_registers(processor)->fpr + FRT)
+:cache:::uint32_t:FRT_BITMASK:FRT:(1 << FRT)
+:cache:::unsigned_word:EXTS_SI:SI:((signed_word)(int16_t)instruction)
 :scratch::::BI:BI:
 :cache::::BIT32_BI:BI:BIT32(BI)
 :cache::::BF:BF:
-:cache:::unsigned32:BF_BITMASK:BF:(1 << BF)
+:cache:::uint32_t:BF_BITMASK:BF:(1 << BF)
 :scratch::::BA:BA:
 :cache::::BIT32_BA:BA:BIT32(BA)
-:cache:::unsigned32:BA_BITMASK:BA:(1 << BA)
+:cache:::uint32_t:BA_BITMASK:BA:(1 << BA)
 :scratch::::BB:BB:
 :cache::::BIT32_BB:BB:BIT32(BB)
-:cache:::unsigned32:BB_BITMASK:BB:(1 << BB)
+:cache:::uint32_t:BB_BITMASK:BB:(1 << BB)
 :cache::::BT:BT:
-:cache:::unsigned32:BT_BITMASK:BT:(1 << BT)
-:cache:::unsigned_word:EXTS_BD_0b00:BD:(((signed_word)(signed16)instruction) & ~3)
-:cache:::unsigned_word:EXTS_LI_0b00:LI:((((signed_word)(signed32)(instruction << 6)) >> 6) & ~0x3)
-:cache:::unsigned_word:EXTS_D:D:((signed_word)(signed16)(instruction))
-:cache:::unsigned_word:EXTS_DS_0b00:DS:(((signed_word)(signed16)instruction) & ~0x3)
+:cache:::uint32_t:BT_BITMASK:BT:(1 << BT)
+:cache:::unsigned_word:EXTS_BD_0b00:BD:(((signed_word)(int16_t)instruction) & ~3)
+:cache:::unsigned_word:EXTS_LI_0b00:LI:((((signed_word)(int32_t)(instruction << 6)) >> 6) & ~0x3)
+:cache:::unsigned_word:EXTS_D:D:((signed_word)(int16_t)(instruction))
+:cache:::unsigned_word:EXTS_DS_0b00:DS:(((signed_word)(int16_t)instruction) & ~0x3)
 #:compute:::int:SPR_is_256:SPR:(SPR == 256)
 
 # PowerPC models
@@ -174,9 +174,9 @@
 	struct _model_time {
 	  ppc_function_unit first_unit;			/* first functional unit this insn could use */
 	  ppc_function_unit second_unit;		/* second functional unit this insn could use */
-	  signed16	    issue;			/* # cycles before function unit can process other insns */
-	  signed16	    done;			/* # cycles before insn is done */
-	  unsigned32	    flags;			/* any flags that are needed */
+	  int16_t	    issue;			/* # cycles before function unit can process other insns */
+	  int16_t	    done;			/* # cycles before insn is done */
+	  uint32_t	    flags;			/* any flags that are needed */
 	};
 
 	/* Register mappings in status masks */
@@ -193,15 +193,15 @@
 	struct _model_busy {
 	  model_busy *next;				/* next function unit */
 	  ppc_function_unit unit;			/* function unit name */
-	  unsigned32 int_busy;				/* int registers that are busy */
-	  unsigned32 fp_busy;				/* floating point registers that are busy */
-	  unsigned32 cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
-	  signed16 spr_busy;				/* SPR register that is busy or PPC_NO_SPR */
-	  unsigned32 vr_busy;				/* AltiVec registers that are busy */
-	  signed16 vscr_busy;				/* AltiVec status register busy */
-	  signed16 issue;				/* # of cycles until unit can accept another insn */
-	  signed16 done;				/* # of cycles until insn is done */
-	  signed16 nr_writebacks;			/* # of registers this unit writes back */
+	  uint32_t int_busy;				/* int registers that are busy */
+	  uint32_t fp_busy;				/* floating point registers that are busy */
+	  uint32_t cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
+	  int16_t spr_busy;				/* SPR register that is busy or PPC_NO_SPR */
+	  uint32_t vr_busy;				/* AltiVec registers that are busy */
+	  int16_t vscr_busy;				/* AltiVec status register busy */
+	  int16_t issue;				/* # of cycles until unit can accept another insn */
+	  int16_t done;				/* # of cycles until insn is done */
+	  int16_t nr_writebacks;			/* # of registers this unit writes back */
 	};
 	
 	/* Structure to hold the current state information for the simulated CPU model */
@@ -225,13 +225,13 @@
 	  count_type nr_stalls_writeback;		/* # of stalls waiting for a writeback slot */
 	  count_type nr_units[nr_ppc_function_units];	/* function unit counts */
 	  int max_nr_writebacks;			/* max # of writeback slots available */
-	  unsigned32 int_busy;				/* int registers that are busy */
-	  unsigned32 fp_busy;				/* floating point registers that are busy */
-	  unsigned32 cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
-	  unsigned8 spr_busy[nr_of_sprs];		/* SPR registers that are busy */
-	  unsigned32 vr_busy;				/* AltiVec registers that are busy */
-	  unsigned8 vscr_busy;				/* AltiVec SC register busy */
-	  unsigned8 busy[nr_ppc_function_units];	/* whether a function is busy or not */
+	  uint32_t int_busy;				/* int registers that are busy */
+	  uint32_t fp_busy;				/* floating point registers that are busy */
+	  uint32_t cr_fpscr_busy;			/* CR/FPSCR registers that are busy */
+	  uint8_t spr_busy[nr_of_sprs];		/* SPR registers that are busy */
+	  uint32_t vr_busy;				/* AltiVec registers that are busy */
+	  uint8_t vscr_busy;				/* AltiVec SC register busy */
+	  uint8_t busy[nr_ppc_function_units];	/* whether a function is busy or not */
 	};
 
 	static const char *const ppc_function_unit_name[ (int)nr_ppc_function_units ] = {
@@ -334,7 +334,7 @@ void::model-static::model_trace_release:model_data *model_ptr, model_busy *busy
 	  TRACE(trace_model, ("VSCR Register %s is now available.\n", spr_name(busy->spr_busy)));
 
 # Trace making registers busy
-void::model-static::model_trace_make_busy:model_data *model_ptr, unsigned32 int_mask, unsigned32 fp_mask, unsigned32 cr_mask
+void::model-static::model_trace_make_busy:model_data *model_ptr, uint32_t int_mask, uint32_t fp_mask, uint32_t cr_mask
 	int i;
 	if (int_mask) {
 	  for(i = 0; i < 32; i++) {
@@ -359,7 +359,7 @@ void::model-static::model_trace_make_busy:model_data *model_ptr, unsigned32 int_
 	}
 
 # Trace waiting for registers to become available
-void::model-static::model_trace_busy_p:model_data *model_ptr, unsigned32 int_busy, unsigned32 fp_busy, unsigned32 cr_or_fpscr_busy, int spr_busy
+void::model-static::model_trace_busy_p:model_data *model_ptr, uint32_t int_busy, uint32_t fp_busy, uint32_t cr_or_fpscr_busy, int spr_busy
 	int i;
 	if (int_busy) {
 	  int_busy &= model_ptr->int_busy;
@@ -520,7 +520,7 @@ void::model-function::model_serialize:itable_index index, model_data *model_ptr
 # Wait for a CR to become unbusy
 void::model-function::model_wait_for_cr:model_data *model_ptr, unsigned CRBIT
 	unsigned u;
-	unsigned32 cr_mask;
+	uint32_t cr_mask;
 	int cr_var = 0;
 	for (u = 0xc0000000; (u != 0) && (CRBIT & u) == 0; u >>= 4 )
 	  cr_var++;
@@ -533,8 +533,8 @@ void::model-function::model_wait_for_cr:model_data *model_ptr, unsigned CRBIT
 	}
 
 # Schedule an instruction that takes integer input registers and produces output registers
-void::model-function::ppc_insn_int:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask
-	const unsigned32 int_mask = out_mask | in_mask;
+void::model-function::ppc_insn_int:itable_index index, model_data *model_ptr, const uint32_t out_mask, const uint32_t in_mask
+	const uint32_t int_mask = out_mask | in_mask;
 	model_busy *busy_ptr;
 
 	if ((model_ptr->int_busy & int_mask) != 0) {
@@ -559,8 +559,8 @@ void::model-function::ppc_insn_int:itable_index index, model_data *model_ptr, co
 	  model_trace_make_busy(model_ptr, out_mask, 0, 0);
 
 # Schedule an instruction that takes integer input registers and produces output registers & sets a CR register
-void::model-function::ppc_insn_int_cr:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask, const unsigned32 cr_mask
-	const unsigned32 int_mask = out_mask | in_mask;
+void::model-function::ppc_insn_int_cr:itable_index index, model_data *model_ptr, const uint32_t out_mask, const uint32_t in_mask, const uint32_t cr_mask
+	const uint32_t int_mask = out_mask | in_mask;
 	model_busy *busy_ptr;
 
 	if ((model_ptr->int_busy & int_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
@@ -591,8 +591,8 @@ void::model-function::ppc_insn_int_cr:itable_index index, model_data *model_ptr,
 
 
 # Schedule an instruction that takes CR input registers and produces output CR registers
-void::model-function::ppc_insn_cr:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask
-	const unsigned32 cr_mask = out_mask | in_mask;
+void::model-function::ppc_insn_cr:itable_index index, model_data *model_ptr, const uint32_t out_mask, const uint32_t in_mask
+	const uint32_t cr_mask = out_mask | in_mask;
 	model_busy *busy_ptr;
 
 	if ((model_ptr->cr_fpscr_busy & cr_mask) != 0) {
@@ -618,8 +618,8 @@ void::model-function::ppc_insn_cr:itable_index index, model_data *model_ptr, con
 
 
 # Schedule an instruction that takes floating point input registers and produces an output fp register
-void::model-function::ppc_insn_float:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask
-	const unsigned32 fp_mask = out_mask | in_mask;
+void::model-function::ppc_insn_float:itable_index index, model_data *model_ptr, const uint32_t out_mask, const uint32_t in_mask
+	const uint32_t fp_mask = out_mask | in_mask;
 	model_busy *busy_ptr;
 
 	if ((model_ptr->fp_busy & fp_mask) != 0) {
@@ -643,8 +643,8 @@ void::model-function::ppc_insn_float:itable_index index, model_data *model_ptr, 
 
 
 # Schedule an instruction that takes floating point input registers and produces an output fp register & sets a CR reg
-void::model-function::ppc_insn_float_cr:itable_index index, model_data *model_ptr, const unsigned32 out_mask, const unsigned32 in_mask, const unsigned32 cr_mask
-	const unsigned32 fp_mask = out_mask | in_mask;
+void::model-function::ppc_insn_float_cr:itable_index index, model_data *model_ptr, const uint32_t out_mask, const uint32_t in_mask, const uint32_t cr_mask
+	const uint32_t fp_mask = out_mask | in_mask;
 	model_busy *busy_ptr;
 
 	if ((model_ptr->fp_busy & fp_mask) || (model_ptr->cr_fpscr_busy & cr_mask)) {
@@ -670,9 +670,9 @@ void::model-function::ppc_insn_float_cr:itable_index index, model_data *model_pt
 
 
 # Schedule an instruction that takes both int/float input registers and produces output int/float registers
-void::model-function::ppc_insn_int_float:itable_index index, model_data *model_ptr, const unsigned32 out_int_mask, const unsigned32 out_fp_mask, const unsigned32 in_int_mask, const unsigned32 in_fp_mask
-	const unsigned32 int_mask = out_int_mask | in_int_mask;
-	const unsigned32 fp_mask = out_fp_mask | in_fp_mask;
+void::model-function::ppc_insn_int_float:itable_index index, model_data *model_ptr, const uint32_t out_int_mask, const uint32_t out_fp_mask, const uint32_t in_int_mask, const uint32_t in_fp_mask
+	const uint32_t int_mask = out_int_mask | in_int_mask;
+	const uint32_t fp_mask = out_fp_mask | in_fp_mask;
 	model_busy *busy_ptr;
 
 	if ((model_ptr->int_busy & int_mask) || (model_ptr->fp_busy & fp_mask)) {
@@ -698,7 +698,7 @@ void::model-function::ppc_insn_int_float:itable_index index, model_data *model_p
 	}
 
 # Schedule an MFSPR instruction that takes 1 special purpose register and produces an integer output register
-void::model-function::ppc_insn_from_spr:itable_index index, model_data *model_ptr, const unsigned32 int_mask, const unsigned nSPR
+void::model-function::ppc_insn_from_spr:itable_index index, model_data *model_ptr, const uint32_t int_mask, const unsigned nSPR
 	model_busy *busy_ptr;
 
 	while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
@@ -717,7 +717,7 @@ void::model-function::ppc_insn_from_spr:itable_index index, model_data *model_pt
 	  model_trace_make_busy(model_ptr, int_mask, 0, 0);
 
 # Schedule an MTSPR instruction that takes 1 integer register and produces a special purpose output register
-void::model-function::ppc_insn_to_spr:itable_index index, model_data *model_ptr, const unsigned32 int_mask, const unsigned nSPR
+void::model-function::ppc_insn_to_spr:itable_index index, model_data *model_ptr, const uint32_t int_mask, const unsigned nSPR
 	model_busy *busy_ptr;
 
 	while ((model_ptr->int_busy & int_mask) != 0 || model_ptr->spr_busy[nSPR] != 0) {
@@ -735,8 +735,8 @@ void::model-function::ppc_insn_to_spr:itable_index index, model_data *model_ptr,
 	TRACE(trace_model,("Making register %s busy.\n", spr_name(nSPR)));
 
 # Schedule a MFCR instruction that moves the CR into an integer register
-void::model-function::ppc_insn_mfcr:itable_index index, model_data *model_ptr, unsigned32 int_mask
-	const unsigned32 cr_mask = 0xff;
+void::model-function::ppc_insn_mfcr:itable_index index, model_data *model_ptr, uint32_t int_mask
+	const uint32_t cr_mask = 0xff;
 	model_busy *busy_ptr;
 
 	while (((model_ptr->int_busy & int_mask) | (model_ptr->cr_fpscr_busy & cr_mask)) != 0) {
@@ -755,10 +755,10 @@ void::model-function::ppc_insn_mfcr:itable_index index, model_data *model_ptr, u
 	  model_trace_make_busy(model_ptr, int_mask, 0, 0);
 
 # Schedule a MTCR instruction that moves an integer register into the CR
-void::model-function::ppc_insn_mtcr:itable_index index, model_data *model_ptr, unsigned32 int_mask, unsigned FXM
+void::model-function::ppc_insn_mtcr:itable_index index, model_data *model_ptr, uint32_t int_mask, unsigned FXM
 	int f;
 	int nr_crs = 0;
-	unsigned32 cr_mask = 0;
+	uint32_t cr_mask = 0;
 	const model_time *normal_time = &model_ptr->timing[index];
 	static const model_time ppc604_1bit_time = { PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0 };
 	model_busy *busy_ptr;
@@ -996,8 +996,8 @@ void::model-function::model_branch_predict:model_data *model_ptr, int success
 #
 
 # Convert 32bit single to 64bit double
-unsigned64::function::DOUBLE:unsigned32 WORD
-	unsigned64 FRT;
+uint64_t::function::DOUBLE:uint32_t WORD
+	uint64_t FRT;
 	if (EXTRACTED32(WORD, 1, 8) > 0
 	    && EXTRACTED32(WORD, 1, 8) < 255) {
 	  /* normalized operand */
@@ -1013,7 +1013,7 @@ unsigned64::function::DOUBLE:unsigned32 WORD
 	  /* denormalized operand */
 	  int sign = EXTRACTED32(WORD, 0, 0);
 	  int exp = -126;
-	  unsigned64 frac = INSERTED64(EXTRACTED32(WORD, 9, 31), 1, (52 - 29));
+	  uint64_t frac = INSERTED64(EXTRACTED32(WORD, 9, 31), 1, (52 - 29));
 	  /* normalize the operand */
 	  while (MASKED64(frac, 0, 0) == 0) {
 	    frac <<= 1;
@@ -1038,8 +1038,8 @@ unsigned64::function::DOUBLE:unsigned32 WORD
 	return FRT;
 
 # Convert 64bit single to 32bit double
-unsigned32::function::SINGLE:unsigned64 FRS
-	unsigned32 WORD;
+uint32_t::function::SINGLE:uint64_t FRS
+	uint32_t WORD;
 	if (EXTRACTED64(FRS, 1, 11) > 896
 	    || EXTRACTED64(FRS, 1, 63) == 0) {
 	  /* no denormalization required (includes Zero/Infinity/NaN) */
@@ -1051,7 +1051,7 @@ unsigned32::function::SINGLE:unsigned64 FRS
 	  /* denormalization required */
 	  int sign = EXTRACTED64(FRS, 0, 0);
 	  int exp = EXTRACTED64(FRS, 1, 11) - 1023;
-	  unsigned64 frac = (BIT64(0)
+	  uint64_t frac = (BIT64(0)
 	                     | INSERTED64(EXTRACTED64(FRS, 12, 63), 1, 52));
 	  /* denormalize the operand */
 	  while (exp < -126) {
@@ -1069,9 +1069,9 @@ unsigned32::function::SINGLE:unsigned64 FRS
 
 
 # round 64bit double to 64bit but single
-void::function::Round_Single:cpu *processor, int sign, int *exp, unsigned64 *frac_grx
+void::function::Round_Single:cpu *processor, int sign, int *exp, uint64_t *frac_grx
 	/* comparisons ignore u bits */
-	unsigned64 out;
+	uint64_t out;
 	int inc = 0;
 	int lsb = EXTRACTED64(*frac_grx, 23, 23);
 	int gbit = EXTRACTED64(*frac_grx, 24, 24);
@@ -1106,7 +1106,7 @@ void::function::Round_Single:cpu *processor, int sign, int *exp, unsigned64 *fra
 
 
 #
-void::function::Round_Integer:cpu *processor, int sign, unsigned64 *frac, int *frac64, int gbit, int rbit, int xbit, fpscreg round_mode
+void::function::Round_Integer:cpu *processor, int sign, uint64_t *frac, int *frac64, int gbit, int rbit, int xbit, fpscreg round_mode
 	int inc = 0;
 	if (round_mode == fpscr_rn_round_to_nearest) {
 	  if (*frac64 == 1 && gbit == 1) inc = 1;
@@ -1130,7 +1130,7 @@ void::function::Round_Integer:cpu *processor, int sign, unsigned64 *frac, int *f
 	FPSCR_SET_FI(gbit | rbit | xbit);
 
 
-void::function::Round_Float:cpu *processor, int sign, int *exp, unsigned64 *frac, fpscreg round_mode
+void::function::Round_Float:cpu *processor, int sign, int *exp, uint64_t *frac, fpscreg round_mode
 	int carry_out;
 	int inc = 0;
 	int lsb = EXTRACTED64(*frac, 52, 52);
@@ -1163,10 +1163,10 @@ void::function::Round_Float:cpu *processor, int sign, int *exp, unsigned64 *frac
 
 
 # conversion of FP to integer
-void::function::convert_to_integer:cpu *processor, unsigned_word cia, unsigned64 *frt, unsigned64 frb, fpscreg round_mode, int tgt_precision
+void::function::convert_to_integer:cpu *processor, unsigned_word cia, uint64_t *frt, uint64_t frb, fpscreg round_mode, int tgt_precision
 	int i;
 	int exp = 0;
-	unsigned64 frac = 0;
+	uint64_t frac = 0;
 	int frac64 = 0;
 	int gbit = 0;
 	int rbit = 0;
@@ -1206,16 +1206,16 @@ void::function::convert_to_integer:cpu *processor, unsigned_word cia, unsigned64
 	    frac64 = (frac64 + 1) & 0x1;
 	  }
 	  if (tgt_precision == 32 /* can ignore frac64 in compare */
-	      && (signed64)frac > (signed64)MASK64(33+1, 63)/*2^31-1 >>1*/)
+	      && (int64_t)frac > (int64_t)MASK64(33+1, 63)/*2^31-1 >>1*/)
 	    GOTO(Large_Operand);
 	  if (tgt_precision == 64 /* can ignore frac64 in compare */
-	      && (signed64)frac > (signed64)MASK64(1+1, 63)/*2^63-1 >>1*/)
+	      && (int64_t)frac > (int64_t)MASK64(1+1, 63)/*2^63-1 >>1*/)
 	    GOTO(Large_Operand);
 	  if (tgt_precision == 32 /* can ignore frac64 in compare */
-	      && (signed64)frac < (signed64)MASK64(0, 32+1)/*-2^31 >>1*/)
+	      && (int64_t)frac < (int64_t)MASK64(0, 32+1)/*-2^31 >>1*/)
 	    GOTO(Large_Operand);
 	  if (tgt_precision == 64 /* can ignore frac64 in compare */
-	      && (signed64)frac < (signed64)MASK64(0, 0+1)/*-2^63 >>1*/)
+	      && (int64_t)frac < (int64_t)MASK64(0, 0+1)/*-2^63 >>1*/)
 	    GOTO(Large_Operand);
 	  FPSCR_SET_XX(FPSCR & fpscr_fi);
 	  if (tgt_precision == 32)
@@ -1284,16 +1284,16 @@ void::function::convert_to_integer:cpu *processor, unsigned_word cia, unsigned64
 
 
 # extract out raw fields of a FP number
-int::function::sign:unsigned64 FRS
+int::function::sign:uint64_t FRS
 	return (MASKED64(FRS, 0, 0)
 	        ? -1
 	        : 1);
-int::function::biased_exp:unsigned64 frs, int single
+int::function::biased_exp:uint64_t frs, int single
 	if (single)
 	  return EXTRACTED64(frs, 1, 8);
 	else
 	  return EXTRACTED64(frs, 1, 11);
-unsigned64::function::fraction:unsigned64 frs, int single
+uint64_t::function::fraction:uint64_t frs, int single
 	if (single)
 	  return EXTRACTED64(frs, 9, 31);
 	else
@@ -1301,50 +1301,50 @@ unsigned64::function::fraction:unsigned64 frs, int single
 
 # a number?, each of the below return +1 or -1 (based on sign bit)
 # if true.
-int::function::is_nor:unsigned64 frs, int single
+int::function::is_nor:uint64_t frs, int single
 	int exp = biased_exp(frs, single);
 	return (exp >= 1
 	        && exp <= (single ? 254 : 2046));
-int::function::is_zero:unsigned64 FRS
+int::function::is_zero:uint64_t FRS
 	return (MASKED64(FRS, 1, 63) == 0
 	        ? sign(FRS)
 	        : 0);
-int::function::is_den:unsigned64 frs, int single
+int::function::is_den:uint64_t frs, int single
 	int exp = biased_exp(frs, single);
-	unsigned64 frac = fraction(frs, single);
+	uint64_t frac = fraction(frs, single);
 	return (exp == 0 && frac != 0
 	        ? sign(frs)
 	        : 0);
-int::function::is_inf:unsigned64 frs, int single
+int::function::is_inf:uint64_t frs, int single
 	int exp = biased_exp(frs, single);
-	unsigned64 frac = fraction(frs, single);
+	uint64_t frac = fraction(frs, single);
 	return (exp == (single ? 255 : 2047) && frac == 0
 	        ? sign(frs)
 	        : 0);
-int::function::is_NaN:unsigned64 frs, int single
+int::function::is_NaN:uint64_t frs, int single
 	int exp = biased_exp(frs, single);
-	unsigned64 frac = fraction(frs, single);
+	uint64_t frac = fraction(frs, single);
 	return (exp == (single ? 255 : 2047) && frac != 0
 	        ? sign(frs)
 	        : 0);
-int::function::is_SNaN:unsigned64 frs, int single
+int::function::is_SNaN:uint64_t frs, int single
 	return (is_NaN(frs, single)
 	        && !(frs & (single ? MASK64(9, 9) : MASK64(12, 12)))
 	             ? sign(frs)
 	             : 0);
-int::function::is_QNaN:unsigned64 frs, int single
+int::function::is_QNaN:uint64_t frs, int single
 	return (is_NaN(frs, single) && !is_SNaN(frs, single));
-int::function::is_less_than:unsigned64 *fra, unsigned64 *frb
+int::function::is_less_than:uint64_t *fra, uint64_t *frb
 	return *(double*)fra < *(double*)frb;
-int::function::is_greater_than:unsigned64 *fra, unsigned64 *frb
+int::function::is_greater_than:uint64_t *fra, uint64_t *frb
 	return *(double*)fra > *(double*)frb;
-int::function::is_equan_to:unsigned64 *fra, unsigned64 *frb
+int::function::is_equan_to:uint64_t *fra, uint64_t *frb
 	return *(double*)fra == *(double*)frb;
 
 
 # which quiet nan should become the result
-unsigned64::function::select_qnan:unsigned64 fra, unsigned64 frb, unsigned64 frc, int instruction_is_frsp, int generate_qnan, int single
-	unsigned64 frt = 0;
+uint64_t::function::select_qnan:uint64_t fra, uint64_t frb, uint64_t frc, int instruction_is_frsp, int generate_qnan, int single
+	uint64_t frt = 0;
 	if (is_NaN(fra, single))
 	  frt = fra;
 	else if (is_NaN(frb, single))
@@ -1362,7 +1362,7 @@ unsigned64::function::select_qnan:unsigned64 fra, unsigned64 frb, unsigned64 frc
 
 
 # detect invalid operation
-int::function::is_invalid_operation:cpu *processor, unsigned_word cia, unsigned64 fra, unsigned64 frb, fpscreg check, int single, int negate
+int::function::is_invalid_operation:cpu *processor, unsigned_word cia, uint64_t fra, uint64_t frb, fpscreg check, int single, int negate
 	int fail = 0;
 	if ((check & fpscr_vxsnan)
 	    && (is_SNaN(fra, single) || is_SNaN(frb, single))) {
@@ -1419,7 +1419,7 @@ int::function::is_invalid_operation:cpu *processor, unsigned_word cia, unsigned6
 
 
 # handle case of invalid operation
-void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia, unsigned64 *frt, unsigned64 fra, unsigned64 frb, unsigned64 frc, int instruction_is_frsp, int instruction_is_convert_to_64bit, int instruction_is_convert_to_32bit, int single
+void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia, uint64_t *frt, uint64_t fra, uint64_t frb, uint64_t frc, int instruction_is_frsp, int instruction_is_convert_to_64bit, int instruction_is_convert_to_32bit, int single
 	if (FPSCR & fpscr_ve) {
 	  /* invalid operation exception enabled */
 	  /* FRT unchaged */
@@ -1448,7 +1448,7 @@ void::function::invalid_arithemetic_operation:cpu *processor, unsigned_word cia,
 
 
 # detect divide by zero
-int::function::is_invalid_zero_divide:cpu *processor, unsigned_word cia, unsigned64 fra, unsigned64 frb, int single
+int::function::is_invalid_zero_divide:cpu *processor, unsigned_word cia, uint64_t fra, uint64_t frb, int single
 	int fail = 0;
 	if (is_zero (frb)) {
 	  FPSCR_SET_ZX (1);
@@ -1460,7 +1460,7 @@ int::function::is_invalid_zero_divide:cpu *processor, unsigned_word cia, unsigne
 
 
 # handle case of invalid operation
-void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia, unsigned64 *frt, unsigned64 fra, unsigned64 frb, int single
+void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia, uint64_t *frt, uint64_t fra, uint64_t frb, int single
 	if (FPSCR & fpscr_ze) {
 	  /* zero-divide exception enabled */
 	  /* FRT unchaged */
@@ -2696,9 +2696,9 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  4,  4,  0
-	signed64 a = (signed32)(*rA);
-	signed64 b = (signed32)(*rB);
-	signed64 prod = a * b;
+	int64_t a = (int32_t)(*rA);
+	int64_t b = (int32_t)(*rB);
+	int64_t prod = a * b;
 	signed_word t = prod;
 	*rT = *rA * *rB;
 	if (t != prod && OE)
@@ -2713,9 +2713,9 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    5,  5,  0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  4,  4,  0
-	signed64 a = (signed32)(*rA);
-	signed64 b = (signed32)(*rB);
-	signed64 prod = a * b;
+	int64_t a = (int32_t)(*rA);
+	int64_t b = (int32_t)(*rB);
+	int64_t prod = a * b;
 	signed_word t = EXTRACTED64(prod, 0, 31);
 	*rT = t;
 	CR0_COMPARE(t, 0, Rc);
@@ -2728,9 +2728,9 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    6,  6,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    6,  6,  0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  4,  4,  0
-	unsigned64 a = (unsigned32)(*rA);
-	unsigned64 b = (unsigned32)(*rB);
-	unsigned64 prod = a * b;
+	uint64_t a = (uint32_t)(*rA);
+	uint64_t b = (uint32_t)(*rB);
+	uint64_t prod = a * b;
 	signed_word t = EXTRACTED64(prod, 0, 31);
 	*rT = t;
 	CR0_COMPARE(t, 0, Rc);
@@ -2743,8 +2743,8 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, 0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, 0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  20, 20, 0
-	signed64 dividend = (signed32)(*rA);
-	signed64 divisor = (signed32)(*rB);
+	int64_t dividend = (int32_t)(*rA);
+	int64_t divisor = (int32_t)(*rB);
 	if (divisor == 0 /* nb 0x8000..0 is sign extended */
 	    || (dividend == 0x80000000 && divisor == -1)) {
 	  if (OE)
@@ -2752,7 +2752,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	  CR0_COMPARE(0, 0, Rc);
 	}
 	else {
-	  signed64 quotent = dividend / divisor;
+	  int64_t quotent = dividend / divisor;
 	  *rT = quotent;
 	  CR0_COMPARE((signed_word)quotent, 0, Rc);
 	}
@@ -2765,15 +2765,15 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, 0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    37, 37, 0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  20, 20, 0
-	unsigned64 dividend = (unsigned32)(*rA);
-	unsigned64 divisor = (unsigned32)(*rB);
+	uint64_t dividend = (uint32_t)(*rA);
+	uint64_t divisor = (uint32_t)(*rB);
 	if (divisor == 0) {
 	  if (OE)
 	    XER |= (xer_overflow | xer_summary_overflow);
 	  CR0_COMPARE(0, 0, Rc);
 	}
 	else {
-	  unsigned64 quotent = dividend / divisor;
+	  uint64_t quotent = dividend / divisor;
 	  *rT = quotent;
 	  CR0_COMPARE((signed_word)quotent, 0, Rc);
 	}
@@ -3088,7 +3088,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-	*rA = (signed_word)(signed8)*rS;
+	*rA = (signed_word)(int8_t)*rS;
 	CR0_COMPARE(*rA, 0, Rc);
 	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
@@ -3098,7 +3098,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-	*rA = (signed_word)(signed16)*rS;
+	*rA = (signed_word)(int16_t)*rS;
 	CR0_COMPARE(*rA, 0, Rc);
 	ITRACE(trace_alu, (" Result = %ld (0x%lx)\n", (long)*rA, (long)*rA));
 	PPC_INSN_INT(RA_BITMASK, RS_BITMASK, Rc);
@@ -3108,13 +3108,13 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-#	*rA = (signed_word)(signed32)*rS;
+#	*rA = (signed_word)(int32_t)*rS;
 #	CR0_COMPARE(*rA, 0, Rc);
 
 0.31,6.RS,11.RA,16./,21.58,31.Rc:X:64::Count Leading Zeros Doubleword
 #	int count = 0;
-#	unsigned64 mask = BIT64(0);
-#	unsigned64 source = *rS;
+#	uint64_t mask = BIT64(0);
+#	uint64_t source = *rS;
 #	while (!(source & mask) && mask != 0) {
 #	  mask >>= 1;
 #	  count++;
@@ -3128,8 +3128,8 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	int count = 0;
-	unsigned32 mask = BIT32(0);
-	unsigned32 source = *rS;
+	uint32_t mask = BIT32(0);
+	uint32_t source = *rS;
 	while (!(source & mask) && mask != 0) {
 	  mask >>= 1;
 	  count++;
@@ -3177,9 +3177,9 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	long n = SH;
-	unsigned32 s = *rS;
-	unsigned32 r = ROTL32(s, n);
-	unsigned32 m = MASK(MB+32, ME+32);
+	uint32_t s = *rS;
+	uint32_t r = ROTL32(s, n);
+	uint32_t m = MASK(MB+32, ME+32);
 	signed_word result = r & m;
 	*rA = result;
 	CR0_COMPARE(result, 0, Rc);
@@ -3209,8 +3209,8 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 
 0.23,6.RS,11.RA,16.RB,21.MB,26.ME,31.Rc:M:::Rotate Left Word then AND with Mask
 	long n = MASKED(*rB, 59, 63);
-	unsigned32 r = ROTL32(*rS, n);
-	unsigned32 m = MASK(MB+32, ME+32);
+	uint32_t r = ROTL32(*rS, n);
+	uint32_t m = MASK(MB+32, ME+32);
 	signed_word result = r & m;
 	*rA = result;
 	CR0_COMPARE(result, 0, Rc);
@@ -3230,8 +3230,8 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	long n = SH;
-	unsigned32 r = ROTL32(*rS, n);
-	unsigned32 m = MASK(MB+32, ME+32);
+	uint32_t r = ROTL32(*rS, n);
+	uint32_t m = MASK(MB+32, ME+32);
 	signed_word result = (r & m) | (*rA & ~m);
 	*rA = result;
 	ITRACE(trace_alu, (": n=%ld *rS=0x%lx r=0x%lx m=0x%lx result=0x%lx\n",
@@ -3249,7 +3249,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	int n = MASKED(*rB, 58, 63);
-	unsigned32 source = *rS;
+	uint32_t source = *rS;
 	signed_word shifted;
 	if (n < 32)
 	  shifted = (source << n);
@@ -3270,7 +3270,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
 	int n = MASKED(*rB, 58, 63);
-	unsigned32 source = *rS;
+	uint32_t source = *rS;
 	signed_word shifted;
 	if (n < 32)
 	  shifted = (source >> n);
@@ -3312,18 +3312,18 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *603e:PPC_UNIT_IU,    PPC_UNIT_IU,    1,  1,  0
 *604: PPC_UNIT_SCIU1, PPC_UNIT_SCIU2, 1,  1,  0
-	unsigned64 mask;
+	uint64_t mask;
 	int n = MASKED(*rB, 59, 63);
-	signed32 source = (signed32)*rS; /* signed to keep sign bit */
+	int32_t source = (int32_t)*rS; /* signed to keep sign bit */
 	int S = (MASKED(*rS,32,32) != 0);
-	signed64 r = ((unsigned64) source);
-	r = ((unsigned64) source) << 32 | (unsigned32) source;
+	int64_t r = ((uint64_t) source);
+	r = ((uint64_t) source) << 32 | (uint32_t) source;
 	r = ROTL64(r,64-n);
 	if (MASKED(*rB,58,58) == 0)
-		mask = (unsigned64) MASK64(n+32,63);
+		mask = (uint64_t) MASK64(n+32,63);
 	else
-		mask = (unsigned64) 0;
-	*rA = (signed_word) ((r & mask) | (((signed64) -1*S) & ~mask)); /* if 64bit will sign extend */
+		mask = (uint64_t) 0;
+	*rA = (signed_word) ((r & mask) | (((int64_t) -1*S) & ~mask)); /* if 64bit will sign extend */
 	if (S && (MASKED(r & ~mask,32,63)!=0))
 	  XER |= xer_carry;
 	else
@@ -3450,7 +3450,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *603: PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *603e:PPC_UNIT_SRU,   PPC_UNIT_SRU,   1,  1,  0
 *604: PPC_UNIT_MCIU,  PPC_UNIT_MCIU,  3,  3,  0
-	*rT = (unsigned32)CR;
+	*rT = (uint32_t)CR;
 	PPC_INSN_MFCR(RT_BITMASK);
 
 #
@@ -3971,7 +3971,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         0, /*single?*/
 	                         0) /*negate?*/) {
-	  union { double d; unsigned64 u; } tmp;
+	  union { double d; uint64_t u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
 	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
@@ -4018,7 +4018,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         1, /*single?*/
 	                         0) /*negate?*/) {
-	  union { double d; unsigned64 u; } tmp;
+	  union { double d; uint64_t u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
 	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
@@ -4065,7 +4065,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         0, /*single?*/
 	                         0) /*negate?*/) {
-	  union { double d; unsigned64 u; } tmp;
+	  union { double d; uint64_t u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
 	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
@@ -4112,7 +4112,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         1, /*single?*/
 	                         0) /*negate?*/) {
-	  union { double d; unsigned64 u; } tmp;
+	  union { double d; uint64_t u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
 	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
@@ -4159,7 +4159,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         0, /*single?*/
 	                         0) /*negate?*/) {
-	  union { double d; unsigned64 u; } tmp;
+	  union { double d; uint64_t u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
 	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
@@ -4206,7 +4206,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         1, /*single?*/
 	                         0) /*negate?*/) {
-	  union { double d; unsigned64 u; } tmp;
+	  union { double d; uint64_t u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
 	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
@@ -4253,7 +4253,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         0, /*single?*/
 	                         0) /*negate?*/) {
-	  union { double d; unsigned64 u; } tmp;
+	  union { double d; uint64_t u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
 	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
@@ -4300,7 +4300,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	                         fpscr_vxsnan | fpscr_vximz,
 	                         1, /*single?*/
 	                         0) /*negate?*/) {
-	  union { double d; unsigned64 u; } tmp;
+	  union { double d; uint64_t u; } tmp;
 	  invalid_arithemetic_operation(processor, cia,
 	                                &tmp.u, *frA, 0, *frC,
 	                                0, /*instruction_is_frsp*/
@@ -4346,7 +4346,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 *604: PPC_UNIT_FPU,   PPC_UNIT_FPU,   1,  3,  0
 	int sign;
 	int exp;
-	unsigned64 frac_grx;
+	uint64_t frac_grx;
 	/***/
 	  /* split off cases for what to do */
 	  if (EXTRACTED64(*frB, 1, 11) < 897
@@ -4582,7 +4582,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 0.63,6.FRT,11./,16.FRB,21.846,31.Rc:X:64,f::Floating Convert from Integer Doubleword
 	int sign = EXTRACTED64(*frB, 0, 0);
 	int exp = 63;
-	unsigned64 frac = *frB;
+	uint64_t frac = *frB;
 	/***/
 	  if (frac == 0) GOTO(Zero_Operand);
 	  if (sign == 1) frac = ~frac + 1;
@@ -4699,13 +4699,13 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 
 0.63,6.BT,11./,16./,21.70,31.Rc:X:f::Move To FPSCR Bit 0
 	FPSCR_BEGIN;
-	unsigned32 bit = BIT32(BT);
+	uint32_t bit = BIT32(BT);
 	FPSCR &= ~bit;
 	FPSCR_END(Rc);
 
 0.63,6.BT,11./,16./,21.38,31.Rc:X:f::Move To FPSCR Bit 1
 	FPSCR_BEGIN;
-	unsigned32 bit = BIT32(BT);
+	uint32_t bit = BIT32(BT);
 	if (bit & fpscr_fi)
 	  bit |= fpscr_xx;
 	if ((bit & fpscr_vx_bits))
@@ -4744,7 +4744,7 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	if (CURRENT_MODEL == MODEL_ppc601) {
 	  program_interrupt(processor, cia, optional_instruction_program_interrupt);
 	} else {
-	  unsigned64 zero = 0;
+	  uint64_t zero = 0;
 	  FPSCR_BEGIN;
 	  if (is_NaN(*frA, 0) || is_less_than (frA, &zero)) *frT = *frB;
 	  else						    *frT = *frC;

@@ -62,7 +62,7 @@
    */
 
 typedef struct _hw_nvram_device {
-  unsigned8 *memory;
+  uint8_t *memory;
   unsigned sizeof_memory;
   time_t host_time;
   unsigned timezone;
@@ -87,8 +87,8 @@ hw_nvram_create(const char *name,
 }
 
 typedef struct _hw_nvram_reg_spec {
-  unsigned32 base;
-  unsigned32 size;
+  uint32_t base;
+  uint32_t size;
 } hw_nvram_reg_spec;
 
 static void
@@ -200,9 +200,9 @@ hw_nvram_io_read_buffer(device *me,
   hw_nvram_device *nvram = (hw_nvram_device*)device_data(me);
   for (i = 0; i < nr_bytes; i++) {
     unsigned address = (addr + i) % nvram->sizeof_memory;
-    unsigned8 data = nvram->memory[address];
+    uint8_t data = nvram->memory[address];
     hw_nvram_update_clock(nvram, processor);
-    ((unsigned8*)dest)[i] = data;
+    ((uint8_t*)dest)[i] = data;
   }
   return nr_bytes;
 }
@@ -220,7 +220,7 @@ hw_nvram_io_write_buffer(device *me,
   hw_nvram_device *nvram = (hw_nvram_device*)device_data(me);
   for (i = 0; i < nr_bytes; i++) {
     unsigned address = (addr + i) % nvram->sizeof_memory;
-    unsigned8 data = ((unsigned8*)source)[i];
+    uint8_t data = ((uint8_t*)source)[i];
     if (address == nvram->addr_control
 	&& (data & 0x80) == 0
 	&& (nvram->memory[address] & 0x80) == 0x80)

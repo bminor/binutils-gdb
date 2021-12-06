@@ -55,7 +55,7 @@ typedef struct _event_entry event_entry;
 struct _event_entry {
   void *data;
   event_handler *handler;
-  signed64 time_of_event;  
+  int64_t time_of_event;  
   event_entry *next;
 };
 
@@ -64,8 +64,8 @@ struct _event_queue {
   event_entry *queue;
   event_entry *volatile held;
   event_entry *volatile *volatile held_end;
-  signed64 time_of_event;
-  signed64 time_from_event;
+  int64_t time_of_event;
+  int64_t time_from_event;
 };
 
 
@@ -142,7 +142,7 @@ event_queue_init(event_queue *queue)
 }
 
 INLINE_EVENTS\
-(signed64)
+(int64_t)
 event_queue_time(event_queue *queue)
 {
   return queue->time_of_event - queue->time_from_event;
@@ -152,7 +152,7 @@ STATIC_INLINE_EVENTS\
 (void)
 update_time_from_event(event_queue *events)
 {
-  signed64 current_time = event_queue_time(events);
+  int64_t current_time = event_queue_time(events);
   if (events->queue != NULL) {
     events->time_from_event = (events->queue->time_of_event - current_time);
     events->time_of_event = events->queue->time_of_event;
@@ -186,11 +186,11 @@ STATIC_INLINE_EVENTS\
 (void)
 insert_event_entry(event_queue *events,
 		   event_entry *new_event,
-		   signed64 delta)
+		   int64_t delta)
 {
   event_entry *curr;
   event_entry **prev;
-  signed64 time_of_event;
+  int64_t time_of_event;
 
   if (delta < 0)
     error("what is past is past!\n");
@@ -221,7 +221,7 @@ insert_event_entry(event_queue *events,
 INLINE_EVENTS\
 (event_entry_tag)
 event_queue_schedule(event_queue *events,
-		     signed64 delta_time,
+		     int64_t delta_time,
 		     event_handler *handler,
 		     void *data)
 {
@@ -242,7 +242,7 @@ event_queue_schedule(event_queue *events,
 INLINE_EVENTS\
 (event_entry_tag)
 event_queue_schedule_after_signal(event_queue *events,
-				  signed64 delta_time,
+				  int64_t delta_time,
 				  event_handler *handler,
 				  void *data)
 {
@@ -323,7 +323,7 @@ INLINE_EVENTS\
 (int)
 event_queue_tick(event_queue *events)
 {
-  signed64 time_from_event;
+  int64_t time_from_event;
 
   /* we should only be here when the previous tick has been fully processed */
   ASSERT(!events->processing);
@@ -372,7 +372,7 @@ INLINE_EVENTS\
 (void)
 event_queue_process(event_queue *events)
 {
-  signed64 event_time = event_queue_time(events);
+  int64_t event_time = event_queue_time(events);
 
   ASSERT((events->time_from_event == -1 && events->queue != NULL)
 	 || events->processing); /* something to do */
