@@ -84,13 +84,17 @@ if { [gdb_compile "${srcfile}" "${binfile}" executable {debug}] != "" } {
 # Rerun the program.  This should not only force GDB to reload the
 # source cache, but also to break at BP_LINE again, which now has
 # different contents.
-gdb_test_multiple "run" "rerun program" {
-    -re {The program being debugged has been started already\.\r\nStart it from the beginning\? \(y or n\) $} {
-	set binregex [string_to_regexp $binfile]
-	gdb_test "y" "\\`$binregex\\' has changed; re-reading symbols\.\r\nStarting program: ${binregex}.*" \
-	    "rerun program"
-    }
-}
+set q \
+    [multi_line \
+	 "The program being debugged has been started already\\." \
+	 "Start it from the beginning\\? \\(y or n\\) "]
+set binregex [string_to_regexp $binfile]
+set re \
+    [multi_line \
+	 "\\`$binregex\\' has changed; re-reading symbols\\.(" \
+	 "Expanding full symbols from $binfile\\.\\.\\.)?" \
+	 "Starting program: ${binregex}.*"]
+gdb_test "run" $re "rerun program" $q y
 
 # Again, perform the listing and check that the line indeed has
 # changed for GDB.

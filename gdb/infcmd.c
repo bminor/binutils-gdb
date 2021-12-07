@@ -395,7 +395,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
      to check again here.  Since reopen_exec_file doesn't do anything
      if the timestamp hasn't changed, I don't see the harm.  */
   reopen_exec_file ();
-  reread_symbols ();
+  reread_symbols (from_tty);
 
   gdb::unique_xmalloc_ptr<char> stripped = strip_bg_char (args, &async_exec);
   args = stripped.get ();
@@ -2399,7 +2399,7 @@ setup_inferior (int from_tty)
   else
     {
       reopen_exec_file ();
-      reread_symbols ();
+      reread_symbols (from_tty);
     }
 
   /* Take any necessary post-attaching actions for this platform.  */

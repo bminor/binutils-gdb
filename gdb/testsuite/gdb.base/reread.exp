@@ -60,8 +60,6 @@ foreach_with_prefix opts { "" "pie" } {
 	gdb_rename_execfile ${binfile1} ${binfile}
 	gdb_load ${binfile}
 
-	set readnow_p [readnow ${binfile}]
-	
 	# Set a breakpoint at foo
 
 	gdb_test "break foo" \
@@ -92,9 +90,6 @@ foreach_with_prefix opts { "" "pie" } {
 	    unsupported $test
 	} else {
 	    gdb_run_cmd
-	    if { $readnow_p } {
-		setup_kfail "gdb/26800" *-*-*
-	    }
 	    gdb_test "" "Breakpoint.* foo .* at .*:9.*" $test
 	}
 
@@ -131,9 +126,6 @@ foreach_with_prefix opts { "" "pie" } {
 	    gdb_rename_execfile ${binfile} ${binfile1}
 	    gdb_rename_execfile ${binfile2} ${binfile}
 	    gdb_run_cmd
-	    if { $readnow_p } {
-		setup_kfail "gdb/26800" *-*-*
-	    }
 	    gdb_test "" "Breakpoint.* foo .* at .*:9.*" \
 		"second pass: run to foo() second time"
 	}

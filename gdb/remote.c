@@ -5718,7 +5718,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
 
   remote_fileio_reset ();
   reopen_exec_file ();
-  reread_symbols ();
+  reread_symbols (from_tty);
 
   remote_target *remote
     = (extended_p ? new extended_remote_target () : new remote_target ());

@@ -1847,7 +1847,7 @@ extern struct compunit_symtab *
 
 extern bool find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
-extern void reread_symbols (void);
+extern void reread_symbols (int from_tty);
 
 /* Look up a type named NAME in STRUCT_DOMAIN in the current language.
    The type returned must not be opaque -- i.e., must have at least one field

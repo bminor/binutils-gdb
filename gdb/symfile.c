@@ -1797,7 +1797,7 @@ load_command (const char *arg, int from_tty)
   /* The user might be reloading because the binary has changed.  Take
      this opportunity to check.  */
   reopen_exec_file ();
-  reread_symbols ();
+  reread_symbols (from_tty);
 
   std::string temp;
   if (arg == NULL)
@@ -2411,7 +2411,7 @@ remove_symbol_file_command (const char *args, int from_tty)
 /* Re-read symbols if a symbol-file has changed.  */
 
 void
-reread_symbols (void)
+reread_symbols (int from_tty)
 {
   long new_modtime;
   struct stat new_statbuf;
@@ -2587,6 +2587,19 @@ reread_symbols (void)
 	  objfile->sf->sym_offsets (objfile, {});
 
 	  read_symbols (objfile, 0);
+
+	  if ((objfile->flags & OBJF_READNOW))
+	    {
+	      const int mainline = objfile->flags & OBJF_MAINLINE;
+	      const int should_print = (print_symbol_loading_p (from_tty, mainline, 1)
+					&& readnow_symbol_files);
+	      if (should_print)
+		printf_filtered (_("Expanding full symbols from %ps...\n"),
+				 styled_string (file_name_style.style (),
+						objfile_name (objfile)));
+
+	      objfile->expand_all_symtabs ();
+	    }
 
 	  if (!objfile_has_symbols (objfile))
 	    {
