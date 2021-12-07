@@ -1238,6 +1238,15 @@ list_command (const char *arg, int from_tty)
     {
       event_location_up location = string_to_event_location (&arg1,
 							     current_language);
+
+      /* We know that the ARG string is not empty, yet the attempt to parse
+	 a location from the string consumed no characters.  This most
+	 likely means that the first thing in ARG looks like a location
+	 condition, and so the string_to_event_location call stopped
+	 parsing.  */
+      if (arg1 == arg)
+	error (_("Junk at end of line specification."));
+
       sals = decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
 			    NULL, NULL, 0);
       filter_sals (sals);
@@ -1285,6 +1294,9 @@ list_command (const char *arg, int from_tty)
 
 	  event_location_up location
 	    = string_to_event_location (&arg1, current_language);
+
+	  if (*arg1)
+	    error (_("Junk at end of line specification."));
 
 	  std::vector<symtab_and_line> sals_end
 	    = (dummy_beg

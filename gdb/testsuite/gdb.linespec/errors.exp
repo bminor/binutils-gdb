@@ -27,3 +27,15 @@ gdb_test "list c:/foo/bar/baz.c:1" "No source file named c:/foo/bar/baz.c."
 gdb_test "list c:/foo/bar/baz.c" "Function \"c:/foo/bar/baz.c\" not defined."
 gdb_test "list fooc:/foo/bar/baz.c:1" "No source file named fooc."
 gdb_test "list fooc:/foo/bar/baz.c" "No source file named fooc."
+
+# PR cli/28665, gdb/28797
+gdb_test "list task 123" \
+    "Junk at end of line specification\\."
+gdb_test "list if (0)" \
+    "Junk at end of line specification\\."
+gdb_test "list thread 1" \
+    "Junk at end of line specification\\."
+gdb_test "list -force-condition" \
+    "Junk at end of line specification\\."
+gdb_test "list ,," \
+    "Junk at end of line specification\\."
