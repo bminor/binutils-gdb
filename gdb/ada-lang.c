@@ -1949,6 +1949,8 @@ ada_is_unconstrained_packed_array_type (struct type *type)
       /* The structure's first field is a pointer to an array, so this
 	 fetches the array type.  */
       type = TYPE_TARGET_TYPE (type->field (0).type ());
+      if (type->code () == TYPE_CODE_TYPEDEF)
+	type = ada_typedef_target_type (type);
       /* Now we can see if the array elements are packed.  */
       return TYPE_FIELD_BITSIZE (type, 0) > 0;
     }
