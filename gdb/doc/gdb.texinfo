@@ -29402,8 +29402,12 @@ find if asynchronous execution is enabled using the
 @code{-list-target-features} command.
 
 @table @code
-@item -gdb-set mi-async on
-@item -gdb-set mi-async off
+@cindex foreground execution
+@cindex background execution
+@cindex asynchronous execution
+@cindex execution, foreground, background and asynchronous
+@kindex set mi-async
+@item -gdb-set mi-async @r{[}on@r{|}off@r{]}
 Set whether MI is in asynchronous mode.
 
 When @code{off}, which is the default, MI execution commands (e.g.,
@@ -29415,6 +29419,7 @@ commands (e.g., @code{-exec-continue} becomes the equivalent of the
 @code{c&} CLI command), and so @value{GDBN} is capable of processing
 MI commands even while the target is running.
 
+@kindex show mi-async
 @item -gdb-show mi-async
 Show whether MI asynchronous mode is enabled.
 @end table
