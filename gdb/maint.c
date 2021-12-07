@@ -329,7 +329,7 @@ print_objfile_section_info (bfd *abfd, struct obj_section *asect,
    from ABFD.  It might be that no such wrapper exists (for example debug
    sections don't have such wrappers) in which case nullptr is returned.  */
 
-static obj_section *
+obj_section *
 maint_obj_section_from_bfd_section (bfd *abfd,
 				    asection *asection,
 				    objfile *ofile)

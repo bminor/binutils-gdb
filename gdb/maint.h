@@ -63,4 +63,7 @@ class scoped_command_stats
   int m_start_nr_blocks;
 };
 
+extern obj_section *maint_obj_section_from_bfd_section (bfd *abfd,
+							asection *asection,
+							objfile *ofile);
 #endif /* MAINT_H */

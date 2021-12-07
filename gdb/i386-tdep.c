@@ -67,6 +67,8 @@
 #include <algorithm>
 #include <unordered_set>
 #include "producer.h"
+#include "infcall.h"
+#include "maint.h"
 
 /* Register names.  */
 
@@ -2777,6 +2779,47 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (thiscall)
     regcache->cooked_write (I386_ECX_REGNUM,
 			    value_contents_all (args[0]).data ());
+
+  /* If the PLT is position-independent, the SYSTEM V ABI requires %ebx to be
+     set to the address of the GOT when doing a call to a PLT address.
+     Note that we do not try to determine whether the PLT is
+     position-independent, we just set the register regardless.  */
+  CORE_ADDR func_addr = find_function_addr (function, nullptr, nullptr);
+  if (in_plt_section (func_addr))
+    {
+      struct objfile *objf = nullptr;
+      asection *asect = nullptr;
+      obj_section *osect = nullptr;
+
+      /* Get object file containing func_addr.  */
+      obj_section *func_section = find_pc_section (func_addr);
+      if (func_section != nullptr)
+	objf = func_section->objfile;
+
+      if (objf != nullptr)
+	{
+	  /* Get corresponding .got.plt or .got section.  */
+	  asect = bfd_get_section_by_name (objf->obfd, ".got.plt");
+	  if (asect == nullptr)
+	    asect = bfd_get_section_by_name (objf->obfd, ".got");
+	}
+
+      if (asect != nullptr)
+	/* Translate asection to obj_section.  */
+	osect = maint_obj_section_from_bfd_section (objf->obfd, asect, objf);
+
+      if (osect != nullptr)
+	{
+	  /* Store the section address in %ebx.  */
+	  store_unsigned_integer (buf, 4, byte_order, osect->addr ());
+	  regcache->cooked_write (I386_EBX_REGNUM, buf);
+	}
+      else
+	{
+	  /* If we would only do this for a position-independent PLT, it would
+	     make sense to issue a warning here.  */
+	}
+    }
 
   /* MarkK wrote: This "+ 8" is all over the place:
      (i386_frame_this_id, i386_sigtramp_frame_this_id,
