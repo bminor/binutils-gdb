@@ -968,6 +968,10 @@ edit_command (const char *arg, int from_tty)
       arg1 = arg;
       event_location_up location = string_to_event_location (&arg1,
 							     current_language);
+
+      if (*arg1)
+	error (_("Junk at end of line specification."));
+
       std::vector<symtab_and_line> sals = decode_line_1 (location.get (),
 							 DECODE_LINE_LIST_MODE,
 							 NULL, NULL, 0);
@@ -986,9 +990,6 @@ edit_command (const char *arg, int from_tty)
 	}
 
       sal = sals[0];
-
-      if (*arg1)
-	error (_("Junk at end of line specification."));
 
       /* If line was specified by address, first print exactly which
 	 line, and which file.  In this case, sal.symtab == 0 means
