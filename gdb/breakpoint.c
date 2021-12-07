@@ -121,10 +121,10 @@ static struct bp_location *add_location_to_breakpoint (struct breakpoint *,
 
 /* This function is used in gdbtk sources and thus can not be made
    static.  */
-struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
-				       struct symtab_and_line,
-				       enum bptype,
-				       const struct breakpoint_ops *);
+static struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
+					      struct symtab_and_line,
+					      enum bptype,
+					      const struct breakpoint_ops *);
 
 static struct breakpoint *
   momentary_breakpoint_from_master (struct breakpoint *orig,
@@ -7248,7 +7248,7 @@ init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
    prior to completing the initialization of the breakpoint.  If this
    should happen, a bogus breakpoint will be left on the chain.  */
 
-struct breakpoint *
+static struct breakpoint *
 set_raw_breakpoint (struct gdbarch *gdbarch,
 		    struct symtab_and_line sal, enum bptype bptype,
 		    const struct breakpoint_ops *ops)
