@@ -2522,14 +2522,15 @@ convert_explicit_location_to_sals (struct linespec_state *self,
    if no file is validly specified.  Callers must check that.
    Also, the line number returned may be invalid.  */
 
-/* Parse the linespec in ARG.  MATCH_TYPE indicates how function names
-   should be matched.  */
+/* Parse the linespec in ARG, which must not be nullptr.  MATCH_TYPE
+   indicates how function names should be matched.  */
 
 static std::vector<symtab_and_line>
 parse_linespec (linespec_parser *parser, const char *arg,
 		symbol_name_match_type match_type)
 {
-  linespec_token token;
+  gdb_assert (arg != nullptr);
+
   struct gdb_exception file_exception;
 
   /* A special case to start.  It has become quite popular for
@@ -2538,11 +2539,10 @@ parse_linespec (linespec_parser *parser, const char *arg,
   parser->is_quote_enclosed = 0;
   if (parser->completion_tracker == NULL
       && !is_ada_operator (arg)
+      && *arg != '\0'
       && strchr (linespec_quote_characters, *arg) != NULL)
     {
-      const char *end;
-
-      end = skip_quote_char (arg + 1, *arg);
+      const char *end = skip_quote_char (arg + 1, *arg);
       if (end != NULL && is_closing_quote_enclosed (end))
 	{
 	  /* Here's the special case.  Skip ARG past the initial
@@ -2583,7 +2583,7 @@ parse_linespec (linespec_parser *parser, const char *arg,
   /* Start parsing.  */
 
   /* Get the first token.  */
-  token = linespec_lexer_consume_token (parser);
+  linespec_token token = linespec_lexer_consume_token (parser);
 
   /* It must be either LSTOKEN_STRING or LSTOKEN_NUMBER.  */
   if (token.type == LSTOKEN_STRING && *LS_TOKEN_STOKEN (token).ptr == '$')
