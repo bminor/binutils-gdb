@@ -205,12 +205,11 @@ extern event_location_up
   copy_event_location (const struct event_location *src);
 
 /* Attempt to convert the input string in *ARGP into an event_location.
-   ARGP is advanced past any processed input.  Returns an event_location
-   (malloc'd) if an event location was successfully found in *ARGP,
-   NULL otherwise.
+   ARGP is advanced past any processed input.  Always returns a non-nullptr
+   event_location unique pointer object.
 
-   This function may call error() if *ARGP looks like properly formed,
-   but invalid, input, e.g., if it is called with missing argument parameters
+   This function may call error() if *ARGP looks like properly formed, but
+   invalid, input, e.g., if it is called with missing argument parameters
    or invalid options.
 
    This function is intended to be used by CLI commands and will parse
