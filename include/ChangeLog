@@ -1,3 +1,7 @@
+2021-12-07  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (AT_FREEBSD_FXRNG, AT_FREEBSD_KPRELOAD): Define.
+
 2021-12-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 28630
