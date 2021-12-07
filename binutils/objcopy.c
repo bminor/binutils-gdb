@@ -4974,32 +4974,55 @@ set_pe_subsystem (const char *s)
 
 /* Convert EFI target to PEI target.  */
 
-static void
-convert_efi_target (char *efi)
+static int
+convert_efi_target (char **targ)
 {
-  efi[0] = 'p';
-  efi[1] = 'e';
-  efi[2] = 'i';
+  size_t len;
+  char *pei;
+  char *efi = *targ + 4;
+  int subsys = -1;
+
+  if (startswith (efi, "app-"))
+    subsys = IMAGE_SUBSYSTEM_EFI_APPLICATION;
+  else if (startswith (efi, "bsdrv-"))
+    {
+      subsys = IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER;
+      efi += 2;
+    }
+  else if (startswith (efi, "rtdrv-"))
+    {
+      subsys = IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER;
+      efi += 2;
+    }
+  else
+    return subsys;
+
+  len = strlen (efi);
+  pei = xmalloc (len + sizeof ("-little"));
+  memcpy (pei, efi, len + 1);
+  pei[0] = 'p';
+  pei[1] = 'e';
+  pei[2] = 'i';
 
   if (strcmp (efi + 4, "ia32") == 0)
     {
       /* Change ia32 to i386.  */
-      efi[5]= '3';
-      efi[6]= '8';
-      efi[7]= '6';
+      pei[5]= '3';
+      pei[6]= '8';
+      pei[7]= '6';
     }
   else if (strcmp (efi + 4, "x86_64") == 0)
     {
       /* Change x86_64 to x86-64.  */
-      efi[7] = '-';
+      pei[7] = '-';
     }
   else if (strcmp (efi + 4, "aarch64") == 0)
     {
       /* Change aarch64 to aarch64-little.  */
-      efi = (char *) xrealloc (efi, strlen (efi) + 7);
-      char *t = "aarch64-little";
-      strcpy (efi + 4, t);
+      memcpy (pei + 4 + sizeof ("aarch64") - 1, "-little", sizeof ("-little"));
     }
+  *targ = pei;
+  return subsys;
 }
 
 /* Allocate and return a pointer to a struct section_add, initializing the
@@ -5882,53 +5905,24 @@ copy_main (int argc, char *argv[])
   if (input_target != NULL
       && startswith (input_target, "efi-"))
     {
-      char *efi;
-
-      efi = xstrdup (output_target + 4);
-      if (startswith (efi, "bsdrv-")
-	  || startswith (efi, "rtdrv-"))
-	efi += 2;
-      else if (!startswith (efi, "app-"))
+      if (convert_efi_target (&input_target) < 0)
 	fatal (_("unknown input EFI target: %s"), input_target);
-
-      input_target = efi;
-      convert_efi_target (efi);
     }
 
   /* Convert output EFI target to PEI target.  */
   if (output_target != NULL
       && startswith (output_target, "efi-"))
     {
-      char *efi;
+      int subsys = convert_efi_target (&output_target);
 
-      efi = xstrdup (output_target + 4);
-      if (startswith (efi, "app-"))
-	{
-	  if (pe_subsystem == -1)
-	    pe_subsystem = IMAGE_SUBSYSTEM_EFI_APPLICATION;
-	}
-      else if (startswith (efi, "bsdrv-"))
-	{
-	  if (pe_subsystem == -1)
-	    pe_subsystem = IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER;
-	  efi += 2;
-	}
-      else if (startswith (efi, "rtdrv-"))
-	{
-	  if (pe_subsystem == -1)
-	    pe_subsystem = IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER;
-	  efi += 2;
-	}
-      else
+      if (subsys < 0)
 	fatal (_("unknown output EFI target: %s"), output_target);
-
+      if (pe_subsystem == -1)
+	pe_subsystem = subsys;
       if (pe_file_alignment == (bfd_vma) -1)
 	pe_file_alignment = PE_DEF_FILE_ALIGNMENT;
       if (pe_section_alignment == (bfd_vma) -1)
 	pe_section_alignment = PE_DEF_SECTION_ALIGNMENT;
-
-      output_target = efi;
-      convert_efi_target (efi);
     }
 
   /* If there is no destination file, or the source and destination files
