@@ -44,7 +44,7 @@ run_ld_link_tests [list \
      "" \
      {just-symbols-0.s} \
      {} \
-     "just-symbols-0.o"] \
+     "just-symbols-r"] \
     [list "Executable for --just-symbols test" \
      "$LDFLAGS -e 0 -T just-symbols.ld" "" \
      "" \

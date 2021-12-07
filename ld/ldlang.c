@@ -3392,6 +3392,22 @@ lang_get_output_target (void)
 static void
 open_output (const char *name)
 {
+  lang_input_statement_type *f;
+  char *out = lrealpath (name);
+
+  for (f = (void *) input_file_chain.head;
+       f != NULL;
+       f = f->next_real_file)
+    if (f->flags.real)
+      {
+	char *in = lrealpath (f->filename);
+	if (filename_cmp (in, out) == 0)
+	  einfo (_("%F%P: input file '%s' is the same as output file\n"),
+		 f->filename);
+	free (in);
+      }
+  free (out);
+
   output_target = lang_get_output_target ();
 
   /* Has the user requested a particular endianness on the command
