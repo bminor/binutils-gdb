@@ -18,7 +18,7 @@
 # We don't currently need our own test case for testing, so grab
 # another one.
 
-if {[prepare_for_testing "failed to prepare" linespecs memattr.c]} {
+if {[prepare_for_testing "failed to prepare" linespecs keywords.c]} {
   return -1
 }
 
