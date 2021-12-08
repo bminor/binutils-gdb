@@ -824,8 +824,8 @@ rs6000_fetch_pointer_argument (struct frame_info *frame, int argi,
 
 /* Sequence of bytes for breakpoint instruction.  */
 
-constexpr gdb_byte big_breakpoint[] = { 0x7d, 0x82, 0x10, 0x08 };
-constexpr gdb_byte little_breakpoint[] = { 0x08, 0x10, 0x82, 0x7d };
+constexpr gdb_byte big_breakpoint[] = { 0x7f, 0xe0, 0x00, 0x08 };
+constexpr gdb_byte little_breakpoint[] = { 0x08, 0x00, 0xe0, 0x7f };
 
 typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
   rs6000_breakpoint;
