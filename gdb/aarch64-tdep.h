@@ -62,6 +62,8 @@ struct regset;
 #define AARCH64_X_REGISTER_COUNT 32
 /* Total number of D registers.  */
 #define AARCH64_D_REGISTER_COUNT 32
+/* Total number of Morello pseudo registers.  */
+#define AARCH64_C_PSEUDO_COUNT 39
 
 /* The maximum number of modified instructions generated for one
    single-stepped instruction.  */
@@ -136,6 +138,13 @@ struct gdbarch_tdep
   int cap_reg_pcc;
   /* RCSP register number.  */
   int cap_reg_rcsp;
+  /* First capability pseudo register.  */
+  int cap_pseudo_base;
+  /* Number of capability pseudo registers.  */
+  int cap_pseudo_count;
+
+  /* Types for Morello.  */
+  struct type *morello_capability_pseudo_type;
 
   /* Returns true if the target supports capabilities.  */
   bool has_capability () const
