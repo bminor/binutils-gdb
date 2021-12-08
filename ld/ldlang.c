@@ -3400,7 +3400,7 @@ open_output (const char *name)
        f = f->next_real_file)
     if (f->flags.real)
       {
-	char *in = lrealpath (f->filename);
+	char *in = lrealpath (f->local_sym_name);
 	if (filename_cmp (in, out) == 0)
 	  einfo (_("%F%P: input file '%s' is the same as output file\n"),
 		 f->filename);
