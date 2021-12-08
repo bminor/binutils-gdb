@@ -2358,16 +2358,22 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 
     case SHT_REL:
     case SHT_RELA:
+    case SHT_RELR:
       /* *These* do a lot of work -- but build no sections!  */
       {
 	asection *target_sect;
 	Elf_Internal_Shdr *hdr2, **p_hdr;
 	unsigned int num_sec = elf_numsections (abfd);
 	struct bfd_elf_section_data *esdt;
+	bfd_size_type size;
 
-	if (hdr->sh_entsize
-	    != (bfd_size_type) (hdr->sh_type == SHT_REL
-				? bed->s->sizeof_rel : bed->s->sizeof_rela))
+	if (hdr->sh_type == SHT_REL)
+	  size = bed->s->sizeof_rel;
+	else if (hdr->sh_type == SHT_RELA)
+	  size = bed->s->sizeof_rela;
+	else
+	  size = bed->s->arch_size / 8;
+	if (hdr->sh_entsize != size)
 	  goto fail;
 
 	/* Check for a bogus link to avoid crashing.  */
