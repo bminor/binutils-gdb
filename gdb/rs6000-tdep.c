@@ -6247,6 +6247,69 @@ UNKNOWN_OP:
   return 0;
 }
 
+/* Used for matching tw, twi, td and tdi instructions for POWER.  */
+
+static constexpr uint32_t TX_INSN_MASK = 0xFC0007FF;
+static constexpr uint32_t TW_INSN = 0x7C000008;
+static constexpr uint32_t TD_INSN = 0x7C000088;
+
+static constexpr uint32_t TXI_INSN_MASK = 0xFC000000;
+static constexpr uint32_t TWI_INSN = 0x0C000000;
+static constexpr uint32_t TDI_INSN = 0x08000000;
+
+static inline bool
+is_tw_insn (uint32_t insn)
+{
+  return (insn & TX_INSN_MASK) == TW_INSN;
+}
+
+static inline bool
+is_twi_insn (uint32_t insn)
+{
+  return (insn & TXI_INSN_MASK) == TWI_INSN;
+}
+
+static inline bool
+is_td_insn (uint32_t insn)
+{
+  return (insn & TX_INSN_MASK) == TD_INSN;
+}
+
+static inline bool
+is_tdi_insn (uint32_t insn)
+{
+  return (insn & TXI_INSN_MASK) == TDI_INSN;
+}
+
+/* Implementation of gdbarch_program_breakpoint_here_p for POWER.  */
+
+static bool
+rs6000_program_breakpoint_here_p (gdbarch *gdbarch, CORE_ADDR address)
+{
+  gdb_byte target_mem[PPC_INSN_SIZE];
+
+  /* Enable the automatic memory restoration from breakpoints while
+     we read the memory.  Otherwise we may find temporary breakpoints, ones
+     inserted by GDB, and flag them as permanent breakpoints.  */
+  scoped_restore restore_memory
+    = make_scoped_restore_show_memory_breakpoints (0);
+
+  if (target_read_memory (address, target_mem, PPC_INSN_SIZE) == 0)
+    {
+      uint32_t insn = (uint32_t) extract_unsigned_integer
+        (target_mem, PPC_INSN_SIZE, gdbarch_byte_order_for_code (gdbarch));
+
+      /* Check if INSN is a TW, TWI, TD or TDI instruction.  There
+         are multiple choices of such instructions with different registers
+         and / or immediate values but they all cause a break. */
+      if (is_tw_insn (insn) || is_twi_insn (insn) || is_td_insn (insn)
+          || is_tdi_insn (insn))
+        return true;
+    }
+
+  return false;
+}
+
 /* Initialize the current architecture based on INFO.  If possible, re-use an
    architecture from ARCHES, which is a list of architectures already created
    during this debugging session.
@@ -7109,6 +7172,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				       rs6000_breakpoint::kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch,
 				       rs6000_breakpoint::bp_from_kind);
+  set_gdbarch_program_breakpoint_here_p (gdbarch,
+                                         rs6000_program_breakpoint_here_p);
 
   /* The value of symbols of type N_SO and N_FUN maybe null when
      it shouldn't be.  */
