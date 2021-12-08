@@ -3008,7 +3008,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   file_and_directory &fnd = find_file_and_directory (comp_unit_die, cu);
 
   int offset = 0;
-  if (fnd.is_unknown ())
+  if (!fnd.is_unknown ())
     ++offset;
   else if (lh == nullptr)
     return;
