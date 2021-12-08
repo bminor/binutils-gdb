@@ -616,7 +616,7 @@ proc gdb_breakpoint { function args } {
 #
 # If there are additional arguments, pass them to gdb_breakpoint.
 # We recognize no-message/message ourselves.
-# The default is no-message.
+#
 # no-message is messed up here, like gdb_breakpoint: to preserve
 # historical usage fails are always printed by default.
 # no-message: turns off printing of fails (and passes, but they're already off)
@@ -627,9 +627,6 @@ proc runto { function args } {
     global decimal
 
     delete_breakpoints
-
-    # Default to "no-message".
-    set args "no-message $args"
 
     set print_pass 0
     set print_fail 1
