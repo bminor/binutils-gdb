@@ -660,8 +660,8 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	   more.  */
 	if (prefix)
 	  {
-	    std::string temp (old, prefix);
-	    *which_path = concat (temp.c_str (), tinybuf, name, &old[prefix],
+	    std::string temp = std::string (old, prefix) + tinybuf + name;
+	    *which_path = concat (temp.c_str (), &old[prefix],
 				  (char *) nullptr);
 	    prefix = temp.length ();
 	  }
