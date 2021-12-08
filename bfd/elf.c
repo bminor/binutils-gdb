@@ -3779,9 +3779,9 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
     }
 
   need_symtab = (bfd_get_symcount (abfd) > 0
-		|| (link_info == NULL
-		    && ((abfd->flags & (EXEC_P | DYNAMIC | HAS_RELOC))
-			== HAS_RELOC)));
+		 || (link_info == NULL
+		     && ((abfd->flags & (EXEC_P | DYNAMIC | HAS_RELOC))
+			 == HAS_RELOC)));
   if (need_symtab)
     {
       elf_onesymtab (abfd) = section_number++;
@@ -3935,11 +3935,17 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	     section.  sh_link is the section index of the symbol
 	     table.  sh_info is the section index of the section to
 	     which the relocation entries apply.  We assume that an
-	     allocated reloc section uses the dynamic symbol table.
-	     FIXME: How can we be sure?  */
-	  s = bfd_get_section_by_name (abfd, ".dynsym");
-	  if (s != NULL)
-	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+	     allocated reloc section uses the dynamic symbol table
+	     if there is one.  Otherwise we guess the normal symbol
+	     table.  FIXME: How can we be sure?  */
+	  if (d->this_hdr.sh_link == 0 && (sec->flags & SEC_ALLOC) != 0)
+	    {
+	      s = bfd_get_section_by_name (abfd, ".dynsym");
+	      if (s != NULL)
+		d->this_hdr.sh_link = elf_section_data (s)->this_idx;
+	    }
+	  if (d->this_hdr.sh_link == 0)
+	    d->this_hdr.sh_link = elf_onesymtab (abfd);
 
 	  s = elf_get_reloc_section (sec);
 	  if (s != NULL)
@@ -3994,8 +4000,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	  /* sh_link is the section header index of the prelink library
 	     list used for the dynamic entries, or the symbol table, or
 	     the version strings.  */
-	  s = bfd_get_section_by_name (abfd, (sec->flags & SEC_ALLOC)
-					     ? ".dynstr" : ".gnu.libstr");
+	  s = bfd_get_section_by_name (abfd, ((sec->flags & SEC_ALLOC)
+					      ? ".dynstr" : ".gnu.libstr"));
 	  if (s != NULL)
 	    d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 	  break;
