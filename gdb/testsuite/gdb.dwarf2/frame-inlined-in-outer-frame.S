@@ -103,19 +103,24 @@
 #if defined __powerpc64__
 #  if _CALL_ELF == 2
 .abiversion 2   /* Tell gdb what ELF version to use. */
+.global _start
+_start:
 #  else
 .abiversion 1   /* Tell gdb what ELF version to use. */
 .align 2
+.global _start
 .section ".opd", "aw"
 .align 3
+_start:
 .quad ._start,.TOC.@tocbase,0
 .previous
 .type ._start,@function
 ._start:
 #  endif
-#endif
+#else
 .global _start
 _start:
+#endif
 .cfi_startproc
 
 /* State that the return address for this frame is undefined. */
