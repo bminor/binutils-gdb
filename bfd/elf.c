@@ -2389,40 +2389,6 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	    goto success;
 	  }
 
-	/* For some incomprehensible reason Oracle distributes
-	   libraries for Solaris in which some of the objects have
-	   bogus sh_link fields.  It would be nice if we could just
-	   reject them, but, unfortunately, some people need to use
-	   them.  We scan through the section headers; if we find only
-	   one suitable symbol table, we clobber the sh_link to point
-	   to it.  I hope this doesn't break anything.
-
-	   Don't do it on executable nor shared library.  */
-	if ((abfd->flags & (DYNAMIC | EXEC_P)) == 0
-	    && elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_SYMTAB
-	    && elf_elfsections (abfd)[hdr->sh_link]->sh_type != SHT_DYNSYM)
-	  {
-	    unsigned int scan;
-	    int found;
-
-	    found = 0;
-	    for (scan = 1; scan < num_sec; scan++)
-	      {
-		if (elf_elfsections (abfd)[scan]->sh_type == SHT_SYMTAB
-		    || elf_elfsections (abfd)[scan]->sh_type == SHT_DYNSYM)
-		  {
-		    if (found != 0)
-		      {
-			found = 0;
-			break;
-		      }
-		    found = scan;
-		  }
-	      }
-	    if (found != 0)
-	      hdr->sh_link = found;
-	  }
-
 	/* Get the symbol table.  */
 	if ((elf_elfsections (abfd)[hdr->sh_link]->sh_type == SHT_SYMTAB
 	     || elf_elfsections (abfd)[hdr->sh_link]->sh_type == SHT_DYNSYM)
