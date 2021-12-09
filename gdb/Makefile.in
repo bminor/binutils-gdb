@@ -710,10 +710,21 @@ ALL_64_TARGET_OBS = \
 	arch/aarch64-insn.o \
 	arch/aarch64-mte-linux.o \
 	arch/amd64.o \
+	arch/riscv.o \
 	ia64-linux-tdep.o \
 	ia64-tdep.o \
 	ia64-vms-tdep.o \
+	mips-fbsd-tdep.o \
+	mips-linux-tdep.o \
+	mips-netbsd-tdep.o \
+	mips-sde-tdep.o \
+	mips-tdep.o \
 	mips64-obsd-tdep.o \
+	riscv-fbsd-tdep.o \
+	riscv-linux-tdep.o \
+	riscv-none-tdep.o \
+	riscv-ravenscar-thread.o \
+	riscv-tdep.o \
 	sparc64-fbsd-tdep.o \
 	sparc64-linux-tdep.o \
 	sparc64-netbsd-tdep.o \
@@ -734,7 +745,6 @@ ALL_TARGET_OBS = \
 	arch/arm-linux.o \
 	arch/i386.o \
 	arch/ppc-linux-common.o \
-	arch/riscv.o \
 	arm-bsd-tdep.o \
 	arm-fbsd-tdep.o \
 	arm-linux-tdep.o \
@@ -793,11 +803,6 @@ ALL_TARGET_OBS = \
 	mep-tdep.o \
 	microblaze-linux-tdep.o \
 	microblaze-tdep.o \
-	mips-fbsd-tdep.o \
-	mips-linux-tdep.o \
-	mips-netbsd-tdep.o \
-	mips-sde-tdep.o \
-	mips-tdep.o \
 	mn10300-linux-tdep.o \
 	mn10300-tdep.o \
 	moxie-tdep.o \
@@ -818,11 +823,6 @@ ALL_TARGET_OBS = \
 	ppc-sysv-tdep.o \
 	ppc64-tdep.o \
 	ravenscar-thread.o \
-	riscv-fbsd-tdep.o \
-	riscv-linux-tdep.o \
-	riscv-none-tdep.o \
-	riscv-ravenscar-thread.o \
-	riscv-tdep.o \
 	rl78-tdep.o \
 	rs6000-aix-tdep.o \
 	rs6000-lynx178-tdep.o \
