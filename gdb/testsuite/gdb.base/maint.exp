@@ -432,11 +432,11 @@ gdb_test "maint" \
 set saw_srcfile 0
 gdb_test_multiple "maint info line-table" \
     "maint info line-table w/o a file name" {
-    -re "symtab: \[^\n\r\]+${srcfile} \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS" {
+	-re "symtab: \[^\n\r\]+${srcfile} \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS\[^\r\n\]*" {
 	set saw_srcfile 1
 	exp_continue
     }
-    -re "symtab: \[^\n\r\]+ \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS" {
+    -re "symtab: \[^\n\r\]+ \\(\\(struct symtab \\*\\) $hex\\)\r\nlinetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS\[^\r\n\]*" {
 	# Match each symtab to avoid overflowing expect's buffer.
 	exp_continue
     }
@@ -444,7 +444,7 @@ gdb_test_multiple "maint info line-table" \
 	# For symtabs with no linetable.
 	exp_continue
     }
-    -re "^$decimal\[ \t\]+$decimal\[ \t\]+$hex\r\n" {
+    -re "^$decimal\[ \t\]+$decimal\[ \t\]+$hex\[^\r\n\]*\r\n" {
 	# Line table entries can be long too:
 	#
 	#  INDEX    LINE ADDRESS
@@ -462,7 +462,7 @@ gdb_test_multiple "maint info line-table" \
 	# Match each line to avoid overflowing expect's buffer.
 	exp_continue
     }
-    -re "^$decimal\[ \t\]+END\[ \t\]+$hex\r\n" {
+    -re "^$decimal\[ \t\]+END\[ \t\]+$hex\[^\r\n\]*\r\n" {
 	# Matches an end marker in the above.
 	exp_continue
     }
