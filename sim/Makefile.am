@@ -1,5 +1,5 @@
 ## Process this file with automake to generate Makefile.in
-#
+##
 #   Copyright (C) 1993-2021 Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -26,8 +26,8 @@ SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
 
-# We don't set some of these vars here, but we need to define them so they may
-# be used consistently in local.mk files we include below.
+## We don't set some of these vars here, but we need to define them so they may
+## be used consistently in local.mk files we include below.
 pkginclude_HEADERS =
 check_PROGRAMS =
 noinst_LIBRARIES =
@@ -45,8 +45,8 @@ AM_CPPFLAGS = \
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 
-# Deps to add to the all-recursive target.  These are built before descending
-# into any subdirs.
+## Deps to add to the all-recursive target.  These are built before descending
+## into any subdirs.
 SIM_ALL_RECURSIVE_DEPS =
 
 # Generate target constants for newlib/libgloss from its source tree.

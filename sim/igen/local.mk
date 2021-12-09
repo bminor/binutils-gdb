@@ -1,31 +1,31 @@
-# The IGEN simulator generator for GDB, the GNU Debugger.
-#
-# Copyright 2002-2021 Free Software Foundation, Inc.
-#
-# Contributed by Andrew Cagney.
-#
-# This file is part of GDB.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## The IGEN simulator generator for GDB, the GNU Debugger.
+##
+## Copyright 2002-2021 Free Software Foundation, Inc.
+##
+## Contributed by Andrew Cagney.
+##
+## This file is part of GDB.
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
 # leak detection while running it.
 IGEN = %D%/igen$(EXEEXT)
 IGEN_RUN = ASAN_OPTIONS=detect_leaks=0 $(IGEN)
 
-# This makes sure igen is available before building the arch-subdirs which
-# need to run the igen tool.
+## This makes sure igen is available before building the arch-subdirs which
+## need to run the igen tool.
 SIM_ALL_RECURSIVE_DEPS += $(IGEN)
 
 # Alias for developers.

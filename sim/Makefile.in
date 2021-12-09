@@ -14,414 +14,7 @@
 
 @SET_MAKE@
 
-#
 #   Copyright (C) 1993-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-#
-# Copyright (C) 1997-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# Parts of the common/ sim code that have been unified.
-# Most still lives in common/Make-common.in.
-
-# The IGEN simulator generator for GDB, the GNU Debugger.
-#
-# Copyright 2002-2021 Free Software Foundation, Inc.
-#
-# Contributed by Andrew Cagney.
-#
-# This file is part of GDB.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-#
-# Copyright (C) 1997-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# Copyright (C) 1997-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1995-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 2020-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 2008-2021 Free Software Foundation, Inc.
-# Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 2004-2021 Free Software Foundation, Inc.
-# Contributed by Axis Communications.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1996-2021 Free Software Foundation, Inc.
-# Written by Cygnus Support.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1993-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1998-2021 Free Software Foundation, Inc.
-# Contributed by Red Hat.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1998-2021 Free Software Foundation, Inc.
-# Contributed by Red Hat.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 2009-2021 Free Software Foundation, Inc.
-# Contributed by Jon Beniston <jon@beniston.com>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 2005-2021 Free Software Foundation, Inc.
-# Contributed by Red Hat, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1996-2021 Free Software Foundation, Inc.
-# Contributed by Cygnus Support.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1999-2021 Free Software Foundation, Inc.
-# Written by Cygnus Support.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1996-2021 Free Software Foundation, Inc.
-# Written by Cygnus Support.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1993-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 2017-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1994-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 2008-2021 Free Software Foundation, Inc.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1990-2021 Free Software Foundation, Inc.
-# Written by Cygnus Support.
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-# See sim/Makefile.am
-#
-# Copyright (C) 1996-2021 Free Software Foundation, Inc.
-# Written by Cygnus Support.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -522,9 +115,6 @@ EXTRA_PROGRAMS = $(am__EXEEXT_2) testsuite/common/bits-gen$(EXEEXT) \
 @ENABLE_SIM_TRUE@	$(srcroot)/include/sim/callback.h \
 @ENABLE_SIM_TRUE@	$(srcroot)/include/sim/sim.h
 
-
-# This makes sure igen is available before building the arch-subdirs which
-# need to run the igen tool.
 @SIM_ENABLE_IGEN_TRUE@am__append_2 = $(IGEN)
 @SIM_ENABLE_IGEN_TRUE@am__append_3 = igen/libigen.a
 @SIM_ENABLE_IGEN_TRUE@am__append_4 = $(igen_IGEN_TOOLS)
@@ -534,38 +124,22 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 	testsuite/common/bits64m0$(EXEEXT) \
 	testsuite/common/bits64m63$(EXEEXT) \
 	testsuite/common/alu-tst$(EXEEXT)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_bpf_TRUE@am__append_6 = $(bpf_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_bpf_TRUE@am__append_7 = $(bpf_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_cr16_TRUE@am__append_8 = $(cr16_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_cr16_TRUE@am__append_9 = cr16/gencode
 @SIM_ENABLE_ARCH_cr16_TRUE@am__append_10 = $(cr16_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_cris_TRUE@am__append_11 = $(cris_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_cris_TRUE@am__append_12 = $(cris_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_d10v_TRUE@am__append_13 = $(d10v_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_d10v_TRUE@am__append_14 = d10v/gencode
 @SIM_ENABLE_ARCH_d10v_TRUE@am__append_15 = $(d10v_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_frv_TRUE@am__append_16 = $(frv_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_frv_TRUE@am__append_17 = $(frv_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_iq2000_TRUE@am__append_18 = $(iq2000_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_iq2000_TRUE@am__append_19 = $(iq2000_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_lm32_TRUE@am__append_20 = $(lm32_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_lm32_TRUE@am__append_21 = $(lm32_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_m32c_TRUE@am__append_22 = $(m32c_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_m32c_TRUE@am__append_23 = m32c/opc2c
 @SIM_ENABLE_ARCH_m32c_TRUE@am__append_24 = \
@@ -573,30 +147,18 @@ TESTS = testsuite/common/bits32m0$(EXEEXT) \
 @SIM_ENABLE_ARCH_m32c_TRUE@	m32c/m32c.c.log \
 @SIM_ENABLE_ARCH_m32c_TRUE@	m32c/r8c.c.log
 
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_m32r_TRUE@am__append_25 = $(m32r_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_m32r_TRUE@am__append_26 = $(m32r_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_m68hc11_TRUE@am__append_27 = $(m68hc11_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_m68hc11_TRUE@am__append_28 = m68hc11/gencode
 @SIM_ENABLE_ARCH_m68hc11_TRUE@am__append_29 = $(m68hc11_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_mn10300_TRUE@am__append_30 = $(mn10300_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_mn10300_TRUE@am__append_31 = $(mn10300_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_32 = $(or1k_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_or1k_TRUE@am__append_33 = $(or1k_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_sh_TRUE@am__append_34 = $(sh_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_sh_TRUE@am__append_35 = sh/gencode
 @SIM_ENABLE_ARCH_sh_TRUE@am__append_36 = $(sh_BUILD_OUTPUTS)
-
-# This makes sure build tools are available before building the arch-subdirs.
 @SIM_ENABLE_ARCH_v850_TRUE@am__append_37 = $(v850_BUILD_OUTPUTS)
 @SIM_ENABLE_ARCH_v850_TRUE@am__append_38 = $(v850_BUILD_OUTPUTS)
 subdir = .
@@ -1354,13 +916,7 @@ srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
 SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
 AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
-
-# We don't set some of these vars here, but we need to define them so they may
-# be used consistently in local.mk files we include below.
 pkginclude_HEADERS = $(am__append_1)
-
-# NB: libcommon.a isn't used directly by ports.  We need a target for common
-# objects to be a part of, and ports use the individual objects directly.
 noinst_LIBRARIES = common/libcommon.a $(am__append_3)
 CLEANFILES = common/version.c common/version.c-stamp \
 	testsuite/common/bits-gen testsuite/common/bits32m0.c \
@@ -1377,12 +933,6 @@ AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(srcroot)/include $(SIM_INLINE) -I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
-
-# Deps to add to the all-recursive target.  These are built before descending
-# into any subdirs.
-
-# This makes sure common parts are available before building the arch-subdirs
-# which will refer to these.
 SIM_ALL_RECURSIVE_DEPS = common/libcommon.a $(am__append_2) \
 	$(am__append_6) $(am__append_8) $(am__append_11) \
 	$(am__append_13) $(am__append_16) $(am__append_18) \
@@ -1452,8 +1002,6 @@ common_libcommon_a_SOURCES = \
 @SIM_ENABLE_IGEN_TRUE@	igen/ld-insn \
 @SIM_ENABLE_IGEN_TRUE@	igen/table
 
-
-# Tweak the site.exp so it works with plain `runtest` from user.
 EXTRA_DEJAGNU_SITE_CONFIG = site-sim-config.exp
 
 # Custom verbose test variables that automake doesn't provide (yet?).
@@ -2967,8 +2515,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cr16_TRUE@cr16/table.c: cr16/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_cr16_TRUE@	$(AM_V_GEN)$< >$@
 
-# FIXME: What is mono and what does "Use of `mono' is wip" mean (other
-# than the apparent; some "mono" feature is work in progress)?
 @SIM_ENABLE_ARCH_cris_TRUE@cris/mloopv10f.c cris/engv10.h: cris/stamp-mloop-v10f ; @true
 @SIM_ENABLE_ARCH_cris_TRUE@cris/stamp-mloop-v10f: $(srccom)/genmloop.sh cris/mloop.in
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
@@ -2979,8 +2525,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change cris/mloop-v10f.cin cris/mloopv10f.c
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_at)touch $@
 
-# FIXME: What is mono and what does "Use of `mono' is wip" mean (other
-# than the apparent; some "mono" feature is work in progress)?
 @SIM_ENABLE_ARCH_cris_TRUE@cris/mloopv32f.c cris/engv32.h: cris/stamp-mloop-v32f ; @true
 @SIM_ENABLE_ARCH_cris_TRUE@cris/stamp-mloop-v32f: $(srccom)/genmloop.sh cris/mloop.in
 @SIM_ENABLE_ARCH_cris_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
@@ -3007,7 +2551,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_d10v_TRUE@d10v/table.c: d10v/gencode$(EXEEXT)
 @SIM_ENABLE_ARCH_d10v_TRUE@	$(AM_V_GEN)$< >$@
 
-# FIXME: Use of `mono' is wip.
 @SIM_ENABLE_ARCH_frv_TRUE@frv/mloop.c frv/eng.h: frv/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_frv_TRUE@frv/stamp-mloop: $(srccom)/genmloop.sh frv/mloop.in
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
@@ -3018,7 +2561,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change frv/mloop.cin frv/mloop.c
 @SIM_ENABLE_ARCH_frv_TRUE@	$(AM_V_at)touch $@
 
-# FIXME: Use of `mono' is wip.
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/mloop.c iq2000/eng.h: iq2000/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_iq2000_TRUE@iq2000/stamp-mloop: $(srccom)/genmloop.sh iq2000/mloop.in
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
@@ -3029,7 +2571,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change iq2000/mloop.cin iq2000/mloop.c
 @SIM_ENABLE_ARCH_iq2000_TRUE@	$(AM_V_at)touch $@
 
-# FIXME: Use of `mono' is wip.
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/mloop.c lm32/eng.h: lm32/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_lm32_TRUE@lm32/stamp-mloop: $(srccom)/genmloop.sh lm32/mloop.in
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
@@ -3056,7 +2597,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_GEN)$(m32c_OPC2C_RUN) -l $@.log $< > $@.tmp
 @SIM_ENABLE_ARCH_m32c_TRUE@	$(AM_V_at)mv $@.tmp $@
 
-# FIXME: Use of `mono' is wip.
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/mloop.c m32r/eng.h: m32r/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop: $(srccom)/genmloop.sh m32r/mloop.in
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
@@ -3067,7 +2607,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change m32r/mloop.cin m32r/mloop.c
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)touch $@
 
-# FIXME: Use of `mono' is wip.
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/mloopx.c m32r/engx.h: m32r/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-x: $(srccom)/genmloop.sh m32r/mloop.in
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
@@ -3078,7 +2617,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change m32r/mloopx.cin m32r/mloopx.c
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_at)touch $@
 
-# FIXME: Use of `mono' is wip.
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/mloop2.c m32r/eng2.h: m32r/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_m32r_TRUE@m32r/stamp-mloop-2: $(srccom)/genmloop.sh m32r/mloop.in
 @SIM_ENABLE_ARCH_m32r_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
@@ -3158,7 +2696,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_moxie_TRUE@	  echo "update the device tree blob."; \
 @SIM_ENABLE_ARCH_moxie_TRUE@	fi
 
-# FIXME: Use of `mono' is wip.
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/mloop.c or1k/eng.h: or1k/stamp-mloop ; @true
 @SIM_ENABLE_ARCH_or1k_TRUE@or1k/stamp-mloop: $(srccom)/genmloop.sh or1k/mloop.in
 @SIM_ENABLE_ARCH_or1k_TRUE@	$(AM_V_GEN)$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \

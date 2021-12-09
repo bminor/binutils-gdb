@@ -1,27 +1,27 @@
-# See sim/Makefile.am
-#
-# Copyright (C) 2008-2021 Free Software Foundation, Inc.
-# Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## See sim/Makefile.am
+##
+## Copyright (C) 2008-2021 Free Software Foundation, Inc.
+## Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
+##
+## This program is free software; you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation; either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %C%_BUILD_OUTPUTS = \
 	%D%/gencode$(EXEEXT) \
 	%D%/simops.h \
 	%D%/table.c
 
-# This makes sure build tools are available before building the arch-subdirs.
+## This makes sure build tools are available before building the arch-subdirs.
 SIM_ALL_RECURSIVE_DEPS += $(%C%_BUILD_OUTPUTS)
 
 %C%_gencode_SOURCES = %D%/gencode.c
