@@ -454,9 +454,6 @@ public: /* data */
 
   /* The status of the stub support for the various vCont actions.  */
   vCont_action_support supports_vCont;
-  /* Whether vCont support was probed already.  This is a workaround
-     until packet_support is per-connection.  */
-  bool supports_vCont_probed;
 
   /* True if the user has pressed Ctrl-C, but the target hasn't
      responded to that.  */
@@ -4949,6 +4946,10 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
      which later probes to skip.  */
   remote_query_supported ();
 
+  /* Check vCont support and set the remote state's vCont_action_support
+     attribute.  */
+  remote_vcont_probe ();
+
   /* If the stub wants to get a QAllow, compose one and send it.  */
   if (m_features.packet_support (PACKET_QAllow) != PACKET_DISABLE)
     set_permissions ();
@@ -6465,7 +6466,6 @@ remote_target::remote_vcont_probe ()
     }
 
   m_features.packet_ok (rs->buf, PACKET_vCont);
-  rs->supports_vCont_probed = true;
 }
 
 /* Helper function for building "vCont" resumptions.  Write a
@@ -6650,9 +6650,6 @@ remote_target::remote_resume_with_vcont (ptid_t scope_ptid, int step,
   /* No reverse execution actions defined for vCont.  */
   if (::execution_direction == EXEC_REVERSE)
     return 0;
-
-  if (m_features.packet_support (PACKET_vCont) == PACKET_SUPPORT_UNKNOWN)
-    remote_vcont_probe ();
 
   if (m_features.packet_support (PACKET_vCont) == PACKET_DISABLE)
     return 0;
@@ -7186,12 +7183,6 @@ remote_target::remote_stop_ns (ptid_t ptid)
 	    remote_thr->set_resumed ();
 	  }
       }
-
-  /* FIXME: This supports_vCont_probed check is a workaround until
-     packet_support is per-connection.  */
-  if (m_features.packet_support (PACKET_vCont) == PACKET_SUPPORT_UNKNOWN
-      || !rs->supports_vCont_probed)
-    remote_vcont_probe ();
 
   if (!rs->supports_vCont.t)
     error (_("Remote server does not support stopping threads"));
@@ -14514,9 +14505,6 @@ remote_target::can_do_single_step ()
     {
       struct remote_state *rs = get_remote_state ();
 
-      if (m_features.packet_support (PACKET_vCont) == PACKET_SUPPORT_UNKNOWN)
-	remote_vcont_probe ();
-
       return rs->supports_vCont.s && rs->supports_vCont.S;
     }
   else
@@ -14825,9 +14813,6 @@ show_range_stepping (struct ui_file *file, int from_tty,
 bool
 remote_target::vcont_r_supported ()
 {
-  if (m_features.packet_support (PACKET_vCont) == PACKET_SUPPORT_UNKNOWN)
-    remote_vcont_probe ();
-
   return (m_features.packet_support (PACKET_vCont) == PACKET_ENABLE
 	  && get_remote_state ()->supports_vCont.r);
 }
