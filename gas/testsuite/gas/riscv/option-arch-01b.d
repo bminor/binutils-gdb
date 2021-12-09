@@ -1,4 +1,4 @@
-#as:
+#as: -misa-spec=2.2
 #readelf: -A
 #source: option-arch-01.s
 

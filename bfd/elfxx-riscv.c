@@ -1468,15 +1468,7 @@ riscv_add_subset (riscv_subset_list_t *subset_list,
   riscv_subset_t *current, *new;
 
   if (riscv_lookup_subset (subset_list, subset, &current))
-    {
-      if (major != RISCV_UNKNOWN_VERSION
-	  && minor != RISCV_UNKNOWN_VERSION)
-	{
-	  current->major_version = major;
-	  current->minor_version = minor;
-	}
-      return;
-    }
+    return;
 
   new = xmalloc (sizeof *new);
   new->name = xstrdup (subset);
@@ -2217,18 +2209,15 @@ riscv_update_subset (riscv_parse_subset_t *rps,
       int minor_version = RISCV_UNKNOWN_VERSION;
 
       bool removed = false;
-      switch (*p++)
+      switch (*p)
 	{
 	case '+': removed = false; break;
 	case '-': removed = true; break;
-	case '=':
+	default:
 	  riscv_release_subset_list (rps->subset_list);
 	  return riscv_parse_subset (rps, p);
-	default:
-	  rps->error_handler
-	    (_("extensions must begin with +/-/= in .option arch `%s'"), str);
-	  return false;
 	}
+      ++p;
 
       char *subset = xstrdup (p);
       char *q = subset;
@@ -2293,17 +2282,19 @@ riscv_update_subset (riscv_parse_subset_t *rps,
 	  return false;
 	}
 
-      if (removed)
+      if (strcmp (subset, "i") == 0
+	  || strcmp (subset, "e") == 0
+	  || strcmp (subset, "g") == 0)
 	{
-	  if (strcmp (subset, "i") == 0)
-	    {
-	      rps->error_handler
-		(_("cannot remove extension `i' in .option arch `%s'"), str);
-	      free (subset);
-	      return false;
-	    }
-	  riscv_remove_subset (rps->subset_list, subset);
+	  rps->error_handler
+	    (_("cannot + or - base extension `%s' in .option "
+	       "arch `%s'"), subset, str);
+	  free (subset);
+	  return false;
 	}
+
+      if (removed)
+	riscv_remove_subset (rps->subset_list, subset);
       else
 	riscv_parse_add_subset (rps, subset, major_version, minor_version, true);
       p += end_of_version - subset;
