@@ -32,8 +32,10 @@ gdb_test_no_output "set language c"
 
 gdb_load $binfile
 
-# Verify that no CU was expanded.
-gdb_test_no_output "maint info symtab"
+if { ! [readnow] } {
+    # Verify that no CU was expanded.
+    gdb_test_no_output "maint info symtab"
+}
 
 # List a line in include-main.c.  The tricky bit is that there's no code in
 # include-main.c, so the file should not occur in the .debug_line info.
