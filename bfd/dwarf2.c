@@ -1199,7 +1199,7 @@ read_attribute_value (struct attribute *  attr,
     {
       _bfd_error_handler (_("DWARF error: info pointer extends beyond end of attributes"));
       bfd_set_error (bfd_error_bad_value);
-      return info_ptr;
+      return NULL;
     }
 
   attr->form = (enum dwarf_form) form;
