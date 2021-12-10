@@ -400,6 +400,7 @@ void print_xml_feature::visit (const tdesc_reg *r)
 
 void print_xml_feature::visit_pre (const target_desc *e)
 {
+#ifndef IN_PROCESS_AGENT
   add_line ("<?xml version=\"1.0\"?>");
   add_line ("<!DOCTYPE target SYSTEM \"gdb-target.dtd\">");
   add_line ("<target>");
@@ -417,6 +418,7 @@ void print_xml_feature::visit_pre (const target_desc *e)
   for (const auto &c : compatible_list)
     add_line ("<compatible>%s</compatible>",
 	      tdesc_compatible_info_arch_name (c));
+#endif
 }
 
 void print_xml_feature::visit_post (const target_desc *e)
