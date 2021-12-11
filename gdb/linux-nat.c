@@ -191,7 +191,12 @@ struct linux_nat_target *linux_target;
 /* Does the current host support PTRACE_GETREGSET?  */
 enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 
-static unsigned int debug_linux_nat;
+/* When true, print debug messages relating to the linux native target.  */
+
+static bool debug_linux_nat;
+
+/* Implement 'show debug lin-lwp'.  */
+
 static void
 show_debug_linux_nat (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
@@ -204,6 +209,11 @@ show_debug_linux_nat (struct ui_file *file, int from_tty,
 
 #define linux_nat_debug_printf(fmt, ...) \
   debug_prefixed_printf_cond (debug_linux_nat, "linux-nat", fmt, ##__VA_ARGS__)
+
+/* Print "linux-nat" enter/exit debug statements.  */
+
+#define LINUX_NAT_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (debug_linux_nat, "linux-nat")
 
 struct simple_pid_list
 {
@@ -4318,6 +4328,7 @@ linux_nat_stop_lwp (struct lwp_info *lwp)
 void
 linux_nat_target::stop (ptid_t ptid)
 {
+  LINUX_NAT_SCOPED_DEBUG_ENTER_EXIT;
   iterate_over_lwps (ptid, linux_nat_stop_lwp);
 }
 
@@ -4518,14 +4529,14 @@ void _initialize_linux_nat ();
 void
 _initialize_linux_nat ()
 {
-  add_setshow_zuinteger_cmd ("lin-lwp", class_maintenance,
-			     &debug_linux_nat, _("\
-Set debugging of GNU/Linux lwp module."), _("\
-Show debugging of GNU/Linux lwp module."), _("\
-Enables printf debugging output."),
-			     NULL,
-			     show_debug_linux_nat,
-			     &setdebuglist, &showdebuglist);
+  add_setshow_boolean_cmd ("lin-lwp", class_maintenance,
+			   &debug_linux_nat, _("\
+Set debugging of GNU/Linux native target."), _("	\
+Show debugging of GNU/Linux native target."), _("	\
+When on, print debug messages relating to the GNU/Linux native target."),
+			   nullptr,
+			   show_debug_linux_nat,
+			   &setdebuglist, &showdebuglist);
 
   add_setshow_boolean_cmd ("linux-namespaces", class_maintenance,
 			   &debug_linux_namespaces, _("\
