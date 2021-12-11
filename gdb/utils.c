@@ -779,12 +779,6 @@ uinteger_pow (ULONGEST v1, LONGEST v2)
     }
 }
 
-void
-print_spaces (int n, struct ui_file *file)
-{
-  fputs_unfiltered (n_spaces (n), file);
-}
-
 /* Print a host address.  */
 
 void

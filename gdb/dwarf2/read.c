@@ -22980,31 +22980,28 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 {
   unsigned int i;
 
-  print_spaces (indent, f);
-  fprintf_unfiltered (f, "Die: %s (abbrev %d, offset %s)\n",
+  fprintf_unfiltered (f, "%*sDie: %s (abbrev %d, offset %s)\n",
+		      indent, "",
 		      dwarf_tag_name (die->tag), die->abbrev,
 		      sect_offset_str (die->sect_off));
 
   if (die->parent != NULL)
-    {
-      print_spaces (indent, f);
-      fprintf_unfiltered (f, "  parent at offset: %s\n",
-			  sect_offset_str (die->parent->sect_off));
-    }
+    fprintf_unfiltered (f, "%*s  parent at offset: %s\n",
+			indent, "",
+			sect_offset_str (die->parent->sect_off));
 
-  print_spaces (indent, f);
-  fprintf_unfiltered (f, "  has children: %s\n",
-	   dwarf_bool_name (die->child != NULL));
+  fprintf_unfiltered (f, "%*s  has children: %s\n",
+		      indent, "",
+		      dwarf_bool_name (die->child != NULL));
 
-  print_spaces (indent, f);
-  fprintf_unfiltered (f, "  attributes:\n");
+  fprintf_unfiltered (f, "%*s  attributes:\n", indent, "");
 
   for (i = 0; i < die->num_attrs; ++i)
     {
-      print_spaces (indent, f);
-      fprintf_unfiltered (f, "    %s (%s) ",
-	       dwarf_attr_name (die->attrs[i].name),
-	       dwarf_form_name (die->attrs[i].form));
+      fprintf_unfiltered (f, "%*s    %s (%s) ",
+			  indent, "",
+			  dwarf_attr_name (die->attrs[i].name),
+			  dwarf_form_name (die->attrs[i].form));
 
       switch (die->attrs[i].form)
 	{
@@ -23120,8 +23117,7 @@ dump_die_1 (struct ui_file *f, int level, int max_level, struct die_info *die)
 
   if (die->child != NULL)
     {
-      print_spaces (indent, f);
-      fprintf_unfiltered (f, "  Children:");
+      fprintf_unfiltered (f, "%*s  Children:", indent, "");
       if (level + 1 < max_level)
 	{
 	  fprintf_unfiltered (f, "\n");

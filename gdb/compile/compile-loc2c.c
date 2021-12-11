@@ -675,7 +675,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
       uint64_t uoffset, reg;
       int64_t offset;
 
-      print_spaces (indent - 2, stream);
+      stream->printf ("%*s", indent - 2, "");
       if (info[op_ptr - base].label)
 	{
 	  print_label (stream, scope, op_ptr - base);

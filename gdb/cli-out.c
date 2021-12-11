@@ -206,7 +206,7 @@ cli_ui_out::do_spaces (int numspaces)
     return;
 
   if (test_flags (unfiltered_output))
-    print_spaces (numspaces, m_streams.back ());
+    fprintf_unfiltered (m_streams.back (), "%*s", numspaces, "");
   else
     print_spaces_filtered (numspaces, m_streams.back ());
 }

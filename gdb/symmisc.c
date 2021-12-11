@@ -286,8 +286,8 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	{
 	  b = BLOCKVECTOR_BLOCK (bv, i);
 	  depth = block_depth (b) * 2;
-	  print_spaces (depth, outfile);
-	  fprintf_filtered (outfile, "block #%03d, object at ", i);
+	  fprintf_filtered (outfile, "%*sblock #%03d, object at ",
+			    depth, "", i);
 	  gdb_print_host_address (b, outfile);
 	  if (BLOCK_SUPERBLOCK (b))
 	    {
@@ -510,7 +510,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
   else
     section = NULL;
 
-  print_spaces (depth, outfile);
+  print_spaces_filtered (depth, outfile);
   if (SYMBOL_DOMAIN (symbol) == LABEL_DOMAIN)
     {
       fprintf_filtered (outfile, "label %s at ", symbol->print_name ());
