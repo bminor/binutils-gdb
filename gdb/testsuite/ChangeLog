@@ -1,3 +1,11 @@
+2021-12-11  Bruno Larsen  <blarsen@redhat.com>
+
+	PR gdb/28480
+
+	Pushed by Joel Brobecker  <brobecker@adacore.com>
+	* gdb.cp/ambiguous.cc: Add code to permit ambiguous member testing.
+	* gdb.cp/ambiguous.exp: Add ambiguous member test.
+
 2021-10-22  Tom de Vries  <tdevries@suse.de>
 
 	PR tui/28483
