@@ -2303,7 +2303,7 @@ puts_unfiltered (const char *string)
 
 /* Return a pointer to N spaces and a null.  The pointer is good
    until the next call to here.  */
-char *
+const char *
 n_spaces (int n)
 {
   char *t;

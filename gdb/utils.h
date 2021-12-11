@@ -473,7 +473,7 @@ extern void print_spaces (int, struct ui_file *);
 
 extern void print_spaces_filtered (int, struct ui_file *);
 
-extern char *n_spaces (int);
+extern const char *n_spaces (int);
 
 extern void fputstr_filtered (const char *str, int quotr,
 			      struct ui_file * stream);
