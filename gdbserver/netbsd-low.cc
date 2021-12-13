@@ -310,7 +310,7 @@ netbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     }
 
   if (find_thread_ptid (ptid_t (pid)))
-    current_thread = find_thread_ptid (wptid);
+    switch_to_thread (find_thread_ptid (wptid));
 
   if (code == TRAP_LWP && pst.pe_report_event == PTRACE_LWP_CREATE)
     {

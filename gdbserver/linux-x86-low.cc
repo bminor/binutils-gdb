@@ -991,7 +991,7 @@ x86_linux_read_description (void)
 void
 x86_target::update_xmltarget ()
 {
-  struct thread_info *saved_thread = current_thread;
+  scoped_restore_current_thread restore_thread;
 
   /* Before changing the register cache's internal layout, flush the
      contents of the current valid caches back to the threads, and
@@ -1002,12 +1002,10 @@ x86_target::update_xmltarget ()
     int pid = proc->pid;
 
     /* Look up any thread of this process.  */
-    current_thread = find_any_thread_of_pid (pid);
+    switch_to_thread (find_any_thread_of_pid (pid));
 
     low_arch_setup ();
   });
-
-  current_thread = saved_thread;
 }
 
 /* Process qSupported query, "xmlRegisters=".  Update the buffer size for

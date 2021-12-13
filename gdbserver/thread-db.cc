@@ -388,7 +388,6 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   psaddr_t addr;
   td_err_e err;
   struct lwp_info *lwp;
-  struct thread_info *saved_thread;
   struct process_info *proc;
   struct thread_db *thread_db;
 
@@ -411,8 +410,8 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   if (!lwp->thread_known)
     return TD_NOTHR;
 
-  saved_thread = current_thread;
-  current_thread = thread;
+  scoped_restore_current_thread restore_thread;
+  switch_to_thread (thread);
 
   if (load_module != 0)
     {
@@ -435,7 +434,6 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
       addr = (char *) addr + offset;
     }
 
-  current_thread = saved_thread;
   if (err == TD_OK)
     {
       *address = (CORE_ADDR) (uintptr_t) addr;
@@ -788,7 +786,7 @@ disable_thread_event_reporting (struct process_info *proc)
 
       if (td_ta_clear_event_p != NULL)
 	{
-	  struct thread_info *saved_thread = current_thread;
+	  scoped_restore_current_thread restore_thread;
 	  td_thr_events_t events;
 
 	  switch_to_process (proc);
@@ -797,8 +795,6 @@ disable_thread_event_reporting (struct process_info *proc)
 	     in any events anymore.  */
 	  td_event_fillset (&events);
 	  (*td_ta_clear_event_p) (thread_db->thread_agent, &events);
-
-	  current_thread = saved_thread;
 	}
     }
 }
@@ -894,8 +890,8 @@ thread_db_notice_clone (struct thread_info *parent_thr, ptid_t child_ptid)
   /* find_one_thread calls into libthread_db which accesses memory via
      the current thread.  Temporarily switch to a thread we know is
      stopped.  */
-  scoped_restore restore_current_thread
-    = make_scoped_restore (&current_thread, parent_thr);
+  scoped_restore_current_thread restore_thread;
+  switch_to_thread (parent_thr);
 
   if (!find_one_thread (child_ptid))
     warning ("Cannot find thread after clone.");

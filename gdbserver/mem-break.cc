@@ -1501,13 +1501,12 @@ delete_single_step_breakpoints (struct thread_info *thread)
       if (bp->type == single_step_breakpoint
 	  && ((struct single_step_breakpoint *) bp)->ptid == ptid_of (thread))
 	{
-	  struct thread_info *saved_thread = current_thread;
+	  scoped_restore_current_thread restore_thread;
 
-	  current_thread = thread;
+	  switch_to_thread (thread);
 	  *bp_link = bp->next;
 	  release_breakpoint (proc, bp);
 	  bp = *bp_link;
-	  current_thread = saved_thread;
 	}
       else
 	{
@@ -1603,11 +1602,10 @@ uninsert_single_step_breakpoints (struct thread_info *thread)
 	   reinsert breakpoint.  */
 	if (bp->raw->refcount == 1)
 	  {
-	    struct thread_info *saved_thread = current_thread;
+	    scoped_restore_current_thread restore_thread;
 
-	    current_thread = thread;
+	    switch_to_thread (thread);
 	    uninsert_raw_breakpoint (bp->raw);
-	    current_thread = saved_thread;
 	  }
       }
     }
@@ -1709,11 +1707,10 @@ reinsert_single_step_breakpoints (struct thread_info *thread)
 
 	  if (bp->raw->refcount == 1)
 	    {
-	      struct thread_info *saved_thread = current_thread;
+	      scoped_restore_current_thread restore_thread;
 
-	      current_thread = thread;
+	      switch_to_thread (thread);
 	      reinsert_raw_breakpoint (bp->raw);
-	      current_thread = saved_thread;
 	    }
 	}
     }

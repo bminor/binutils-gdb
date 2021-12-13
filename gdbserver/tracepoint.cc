@@ -3975,18 +3975,14 @@ gdb_agent_about_to_close (int pid)
 
   if (!maybe_write_ipa_not_loaded (buf))
     {
-      struct thread_info *saved_thread;
-
-      saved_thread = current_thread;
+      scoped_restore_current_thread restore_thread;
 
       /* Find any thread which belongs to process PID.  */
-      current_thread = find_any_thread_of_pid (pid);
+      switch_to_thread (find_any_thread_of_pid (pid));
 
       strcpy (buf, "close");
 
       run_inferior_command (buf, strlen (buf) + 1);
-
-      current_thread = saved_thread;
     }
 }
 

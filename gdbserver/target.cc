@@ -35,7 +35,7 @@ set_desired_thread ()
   client_state &cs = get_client_state ();
   thread_info *found = find_thread_ptid (cs.general_thread);
 
-  current_thread = found;
+  switch_to_thread (found);
   return (current_thread != NULL);
 }
 
@@ -101,7 +101,7 @@ prepare_to_access_memory (void)
       return 1;
     }
 
-  current_thread = thread;
+  switch_to_thread (thread);
   cs.general_thread = ptid_of (thread);
 
   return 0;
