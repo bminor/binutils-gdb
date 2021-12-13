@@ -2096,7 +2096,9 @@ proc default_gdb_spawn { } {
 	    exit 1
 	}
     }
-    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS [host_info gdb_opts]"]
+
+    # Put GDBFLAGS last so that tests can put "--args ..." in it.
+    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS [host_info gdb_opts] $GDBFLAGS"]
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
 	return 1
