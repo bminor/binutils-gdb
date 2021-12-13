@@ -656,9 +656,19 @@ amd64_classify_aggregate_field (struct type *type, int i,
 static void
 amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
 {
-  /* 1. If the size of an object is larger than two eightbytes, or it has
-	unaligned fields, it has class memory.  */
-  if (TYPE_LENGTH (type) > 16 || amd64_has_unaligned_fields (type))
+  /* 1. If the size of an object is larger than two times eight bytes, or
+	it is a non-trivial C++ object, or it has unaligned fields, then it
+	has class memory.
+
+	It is important that the trivially_copyable check is before the
+	unaligned fields check, as C++ classes with virtual base classes
+	will have fields (for the virtual base classes) with non-constant
+	loc_bitpos attributes, which will cause an assert to trigger within
+	the unaligned field check.  As classes with virtual bases are not
+	trivially copyable, checking that first avoids this problem.  */
+  if (TYPE_LENGTH (type) > 16
+      || !language_pass_by_reference (type).trivially_copyable
+      || amd64_has_unaligned_fields (type))
     {
       theclass[0] = theclass[1] = AMD64_MEMORY;
       return;
