@@ -511,10 +511,10 @@ solib_bfd_open (const char *pathname)
   /* Check bfd arch.  */
   b = gdbarch_bfd_arch_info (target_gdbarch ());
   if (!b->compatible (b, bfd_get_arch_info (abfd.get ())))
-    warning (_("`%s': Shared library architecture %s is not compatible "
-	       "with target architecture %s."), bfd_get_filename (abfd.get ()),
-	     bfd_get_arch_info (abfd.get ())->printable_name,
-	     b->printable_name);
+    error (_("`%s': Shared library architecture %s is not compatible "
+	     "with target architecture %s."), bfd_get_filename (abfd.get ()),
+	   bfd_get_arch_info (abfd.get ())->printable_name,
+	   b->printable_name);
 
   return abfd;
 }
