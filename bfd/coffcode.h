@@ -4826,8 +4826,8 @@ coff_slurp_symbol_table (bfd * abfd)
 	      /* The value is actually a symbol index.  Save a pointer
 		 to the symbol instead of the index.  FIXME: This
 		 should use a union.  */
-	      src->u.syment.n_value =
-		(long) (intptr_t) (native_symbols + src->u.syment.n_value);
+	      src->u.syment.n_value
+		= (bfd_hostptr_t) (native_symbols + src->u.syment.n_value);
 	      dst->symbol.value = src->u.syment.n_value;
 	      src->fix_value = 1;
 	      break;
