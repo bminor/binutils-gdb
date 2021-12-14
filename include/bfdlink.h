@@ -525,6 +525,9 @@ struct bfd_link_info
   /* TRUE if all symbol names should be unique.  */
   unsigned int unique_symbol : 1;
 
+  /* TRUE if maxpagesize is set on command-line.  */
+  unsigned int maxpagesize_is_set : 1;
+
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in
      wrap_hash.  Used by PowerPC Linux for 'dot' symbols.  */

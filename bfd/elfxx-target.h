@@ -400,6 +400,10 @@
 # error ELF_MINPAGESIZE > ELF_RELROPAGESIZE
 #endif
 
+#ifndef ELF_P_ALIGN
+#define ELF_P_ALIGN 0
+#endif
+
 #ifndef ELF_DYNAMIC_SEC_FLAGS
 /* Note that we set the SEC_IN_MEMORY flag for these sections.  */
 #define ELF_DYNAMIC_SEC_FLAGS			\
@@ -813,6 +817,7 @@ static const struct elf_backend_data elfNN_bed =
   ELF_MINPAGESIZE,		/* minpagesize */
   ELF_COMMONPAGESIZE,		/* commonpagesize */
   ELF_RELROPAGESIZE,		/* commonpagesize to use with -z relro */
+  ELF_P_ALIGN,			/* p_align */
   ELF_DYNAMIC_SEC_FLAGS,	/* dynamic_sec_flags */
   elf_backend_arch_data,
   elf_info_to_howto,

@@ -945,6 +945,10 @@ struct elf_backend_data
   /* The value of commonpagesize to use when -z relro for this backend.  */
   bfd_vma relropagesize;
 
+  /* The p_align value for this backend.  If it is set, p_align of
+      PT_LOAD alignment will be to p_align by default.  */
+  bfd_vma p_align;
+
   /* The BFD flags applied to sections created for dynamic linking.  */
   flagword dynamic_sec_flags;
 

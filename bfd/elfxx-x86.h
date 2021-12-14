@@ -755,6 +755,8 @@ extern void _bfd_x86_elf_link_report_relative_reloc
 #define elf_backend_fixup_gnu_properties \
   _bfd_x86_elf_link_fixup_gnu_properties
 
+#define ELF_P_ALIGN ELF_MINPAGESIZE
+
 /* Return true if H is a __start_SECNAME/__stop_SECNAME symbol for the
    SECNAME section which has been garbage collected by --gc-sections
    -z start-stop-gc.  */

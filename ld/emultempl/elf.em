@@ -721,6 +721,7 @@ fragment <<EOF
 	      || (link_info.maxpagesize & (link_info.maxpagesize - 1)) != 0)
 	    einfo (_("%F%P: invalid maximum page size \`%s'\n"),
 		   optarg + 14);
+	  link_info.maxpagesize_is_set = true;
 	}
       else if (startswith (optarg, "common-page-size="))
 	{

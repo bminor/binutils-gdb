@@ -1,4 +1,4 @@
-#name: pru_irq_map special section for host
+#name: pru_irq_map special section for host 2
 #source: pru_irq_map.s
 #ld: --defsym=__HEAP_SIZE=0 --defsym=__STACK_SIZE=0
 #readelf: -S --wide

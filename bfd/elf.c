@@ -5407,6 +5407,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
   Elf_Internal_Phdr *p;
   file_ptr off;  /* Octets.  */
   bfd_size_type maxpagesize;
+  bfd_size_type p_align;
+  bool p_align_p = false;
   unsigned int alloc, actual;
   unsigned int i, j;
   struct elf_segment_map **sorted_seg_map;
@@ -5491,6 +5493,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
     qsort (sorted_seg_map, alloc, sizeof (*sorted_seg_map),
 	   elf_sort_segments);
 
+  p_align = bed->p_align;
   maxpagesize = 1;
   if ((abfd->flags & D_PAGED) != 0)
     {
@@ -5561,6 +5564,15 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	     segment.  */
 	  if (m->p_align_valid)
 	    maxpagesize = m->p_align;
+	  else if (p_align != 0
+		   && (link_info == NULL
+		       || !link_info->maxpagesize_is_set))
+	    /* Set p_align to the default p_align value while laying
+	       out segments aligning to the maximum page size or the
+	       largest section alignment.  The run-time loader can
+	       align segments to the default p_align value or the
+	       maximum page size, depending on system page size.  */
+	    p_align_p = true;
 
 	  p->p_align = maxpagesize;
 	}
@@ -5598,7 +5610,22 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 	      align = (bfd_size_type) 1 << align_power;
 	      if (align < maxpagesize)
-		align = maxpagesize;
+		{
+		  /* If a section requires alignment higher than the
+		     default p_align value, don't set p_align to the
+		     default p_align value.  */
+		  if (align > p_align)
+		    p_align_p = false;
+		  align = maxpagesize;
+		}
+	      else
+		{
+		  /* If a section requires alignment higher than the
+		     maximum page size, set p_align to the section
+		     alignment.  */
+		  p_align_p = true;
+		  p_align = align;
+		}
 	    }
 
 	  for (i = 0; i < m->count; i++)
@@ -5977,6 +6004,9 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		  print_segment_map (m);
 		}
 	    }
+
+	  if (p_align_p)
+	    p->p_align = p_align;
 	}
     }
 
@@ -7484,6 +7514,40 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
   return true;
 }
 
+/* Return true if p_align in the ELF program header in ABFD is valid.  */
+
+static bool
+elf_is_p_align_valid (bfd *abfd)
+{
+  unsigned int i;
+  Elf_Internal_Phdr *segment;
+  unsigned int num_segments;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  bfd_size_type maxpagesize = bed->maxpagesize;
+  bfd_size_type p_align = bed->p_align;
+
+  /* Return true if the default p_align value isn't set or the maximum
+     page size is the same as the minimum page size.  */
+  if (p_align == 0 || maxpagesize == bed->minpagesize)
+    return true;
+
+  /* When the default p_align value is set, p_align may be set to the
+     default p_align value while segments are aligned to the maximum
+     page size.  In this case, the input p_align will be ignored and
+     the maximum page size will be used to align the output segments.  */
+  segment = elf_tdata (abfd)->phdr;
+  num_segments = elf_elfheader (abfd)->e_phnum;
+  for (i = 0; i < num_segments; i++, segment++)
+    if (segment->p_type == PT_LOAD
+	&& (segment->p_align != p_align
+	    || vma_page_aligned_bias (segment->p_vaddr,
+				      segment->p_offset,
+				      maxpagesize) != 0))
+      return true;
+
+  return false;
+}
+
 /* Copy ELF program header information.  */
 
 static bool
@@ -7498,6 +7562,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
   unsigned int num_segments;
   bool phdr_included = false;
   bool p_paddr_valid;
+  bool p_palign_valid;
   unsigned int opb = bfd_octets_per_byte (ibfd, NULL);
 
   iehdr = elf_elfheader (ibfd);
@@ -7517,6 +7582,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	p_paddr_valid = true;
 	break;
       }
+
+  p_palign_valid = elf_is_p_align_valid (ibfd);
 
   for (i = 0, segment = elf_tdata (ibfd)->phdr;
        i < num_segments;
@@ -7560,7 +7627,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_paddr = segment->p_paddr;
       map->p_paddr_valid = p_paddr_valid;
       map->p_align = segment->p_align;
-      map->p_align_valid = 1;
+      map->p_align_valid = p_palign_valid;
       map->p_vaddr_offset = 0;
 
       if (map->p_type == PT_GNU_RELRO
