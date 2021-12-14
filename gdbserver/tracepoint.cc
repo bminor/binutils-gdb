@@ -6895,8 +6895,13 @@ init_named_socket (const char *name)
 
   addr.sun_family = AF_UNIX;
 
-  strncpy (addr.sun_path, name, UNIX_PATH_MAX);
-  addr.sun_path[UNIX_PATH_MAX - 1] = '\0';
+  if (strlen (name) >= ARRAY_SIZE (addr.sun_path))
+    {
+      warning ("socket name too long for sockaddr_un::sun_path field: %s", name);
+      return -1;
+    }
+
+  strcpy (addr.sun_path, name);
 
   result = access (name, F_OK);
   if (result == 0)
