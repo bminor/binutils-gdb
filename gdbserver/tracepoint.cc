@@ -6943,8 +6943,8 @@ gdb_agent_socket_init (void)
 {
   int result, fd;
 
-  result = xsnprintf (agent_socket_name, UNIX_PATH_MAX, "%s/gdb_ust%d",
-		      SOCK_DIR, getpid ());
+  result = snprintf (agent_socket_name, UNIX_PATH_MAX, "%s/gdb_ust%d",
+		     SOCK_DIR, getpid ());
   if (result >= UNIX_PATH_MAX)
     {
       trace_debug ("string overflow allocating socket name");
