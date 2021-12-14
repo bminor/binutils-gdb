@@ -1291,7 +1291,7 @@ EOF
 #
 
 exec > new-gdbarch.h
-copyright
+copyright | sed 1,3d | grep -v 'was created'
 cat <<EOF
 #ifndef GDBARCH_H
 #define GDBARCH_H
@@ -1415,70 +1415,10 @@ using read_core_file_mappings_loop_ftype =
 			   const char *filename,
 			   const bfd_build_id *build_id)>;
 EOF
-
-# function typedef's
-printf "\n"
-printf "\n"
-printf "/* The following are pre-initialized by GDBARCH.  */\n"
-function_list | while do_read
-do
-    if class_is_info_p
-    then
-	printf "\n"
-	printf "extern %s gdbarch_%s (struct gdbarch *gdbarch);\n" "$returntype" "$function"
-	printf "/* set_gdbarch_%s() - not applicable - pre-initialized.  */\n" "$function"
-    fi
-done
-
-# function typedef's
-printf "\n"
-printf "\n"
-printf "/* The following are initialized by the target dependent code.  */\n"
-function_list | while do_read
-do
-    if [ -n "${comment}" ]
-    then
-	echo "${comment}" | sed \
-	    -e '2 s,#,/*,' \
-	    -e '3,$ s,#,  ,' \
-	    -e '$ s,$, */,'
-    fi
-
-    if class_is_predicate_p
-    then
-	printf "\n"
-	printf "extern bool gdbarch_%s_p (struct gdbarch *gdbarch);\n" "$function"
-    fi
-    if class_is_variable_p
-    then
-	printf "\n"
-	printf "extern %s gdbarch_%s (struct gdbarch *gdbarch);\n" "$returntype" "$function"
-	printf "extern void set_gdbarch_%s (struct gdbarch *gdbarch, %s %s);\n" "$function" "$returntype" "$function"
-    fi
-    if class_is_function_p
-    then
-	printf "\n"
-	if [ "x${formal}" = "xvoid" ] && class_is_multiarch_p
-	then
-	    printf "typedef %s (gdbarch_%s_ftype) (struct gdbarch *gdbarch);\n" "$returntype" "$function"
-	elif class_is_multiarch_p
-	then
-	    printf "typedef %s (gdbarch_%s_ftype) (struct gdbarch *gdbarch, %s);\n" "$returntype" "$function" "$formal"
-	else
-	    printf "typedef %s (gdbarch_%s_ftype) (%s);\n" "$returntype" "$function" "$formal"
-	fi
-	if [ "x${formal}" = "xvoid" ]
-	then
-	  printf "extern %s gdbarch_%s (struct gdbarch *gdbarch);\n" "$returntype" "$function"
-	else
-	  printf "extern %s gdbarch_%s (struct gdbarch *gdbarch, %s);\n" "$returntype" "$function" "$formal"
-	fi
-	printf "extern void set_gdbarch_%s (struct gdbarch *gdbarch, gdbarch_%s_ftype *%s);\n" "$function" "$function" "$function"
-    fi
-done
-
 # close it off
 cat <<EOF
+
+#include "gdbarch-gen.h"
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
@@ -1718,9 +1658,78 @@ gdbarch_num_cooked_regs (gdbarch *arch)
 
 #endif
 EOF
+
 exec 1>&2
 ../move-if-change new-gdbarch.h gdbarch.h
 rm -f new-gdbarch.h
+
+exec > new-gdbarch-gen.h
+copyright
+
+# function typedef's
+printf "\n"
+printf "\n"
+printf "/* The following are pre-initialized by GDBARCH.  */\n"
+function_list | while do_read
+do
+    if class_is_info_p
+    then
+	printf "\n"
+	printf "extern %s gdbarch_%s (struct gdbarch *gdbarch);\n" "$returntype" "$function"
+	printf "/* set_gdbarch_%s() - not applicable - pre-initialized.  */\n" "$function"
+    fi
+done
+
+# function typedef's
+printf "\n"
+printf "\n"
+printf "/* The following are initialized by the target dependent code.  */\n"
+function_list | while do_read
+do
+    if [ -n "${comment}" ]
+    then
+	echo "${comment}" | sed \
+	    -e '2 s,#,/*,' \
+	    -e '3,$ s,#,  ,' \
+	    -e '$ s,$, */,'
+    fi
+
+    if class_is_predicate_p
+    then
+	printf "\n"
+	printf "extern bool gdbarch_%s_p (struct gdbarch *gdbarch);\n" "$function"
+    fi
+    if class_is_variable_p
+    then
+	printf "\n"
+	printf "extern %s gdbarch_%s (struct gdbarch *gdbarch);\n" "$returntype" "$function"
+	printf "extern void set_gdbarch_%s (struct gdbarch *gdbarch, %s %s);\n" "$function" "$returntype" "$function"
+    fi
+    if class_is_function_p
+    then
+	printf "\n"
+	if [ "x${formal}" = "xvoid" ] && class_is_multiarch_p
+	then
+	    printf "typedef %s (gdbarch_%s_ftype) (struct gdbarch *gdbarch);\n" "$returntype" "$function"
+	elif class_is_multiarch_p
+	then
+	    printf "typedef %s (gdbarch_%s_ftype) (struct gdbarch *gdbarch, %s);\n" "$returntype" "$function" "$formal"
+	else
+	    printf "typedef %s (gdbarch_%s_ftype) (%s);\n" "$returntype" "$function" "$formal"
+	fi
+	if [ "x${formal}" = "xvoid" ]
+	then
+	  printf "extern %s gdbarch_%s (struct gdbarch *gdbarch);\n" "$returntype" "$function"
+	else
+	  printf "extern %s gdbarch_%s (struct gdbarch *gdbarch, %s);\n" "$returntype" "$function" "$formal"
+	fi
+	printf "extern void set_gdbarch_%s (struct gdbarch *gdbarch, gdbarch_%s_ftype *%s);\n" "$function" "$function" "$function"
+    fi
+done
+
+exec 1>&2
+../move-if-change new-gdbarch-gen.h gdbarch-gen.h
+rm -f new-gdbarch-gen.h
 
 
 #
