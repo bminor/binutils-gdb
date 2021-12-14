@@ -658,12 +658,12 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 	}
       break;
     case 'r':
-      imm = (offsetT) str_hash_find (r_htab, arg);
+      imm = (intptr_t) str_hash_find (r_htab, arg);
       ip->match_now = 0 < imm;
       ret = imm - 1;
       break;
     case 'f':
-      imm = (offsetT) str_hash_find (f_htab, arg);
+      imm = (intptr_t) str_hash_find (f_htab, arg);
       ip->match_now = 0 < imm;
       ret = imm - 1;
       break;
@@ -671,21 +671,21 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
       switch (esc_ch2)
 	{
 	case 'r':
-	  imm = (offsetT) str_hash_find (cr_htab, arg);
+	  imm = (intptr_t) str_hash_find (cr_htab, arg);
 	  break;
 	default:
-	  imm = (offsetT) str_hash_find (c_htab, arg);
+	  imm = (intptr_t) str_hash_find (c_htab, arg);
 	}
       ip->match_now = 0 < imm;
       ret = imm - 1;
       break;
     case 'v':
-      imm = (offsetT) str_hash_find (v_htab, arg);
+      imm = (intptr_t) str_hash_find (v_htab, arg);
       ip->match_now = 0 < imm;
       ret = imm - 1;
       break;
     case 'x':
-      imm = (offsetT) str_hash_find (x_htab, arg);
+      imm = (intptr_t) str_hash_find (x_htab, arg);
       ip->match_now = 0 < imm;
       ret = imm - 1;
       break;
