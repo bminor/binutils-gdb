@@ -3301,7 +3301,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
     case riscv_arg_info::location::in_reg:
       return RETURN_VALUE_REGISTER_CONVENTION;
     case riscv_arg_info::location::by_ref:
-      return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+      return RETURN_VALUE_ABI_PRESERVES_ADDRESS;
     case riscv_arg_info::location::on_stack:
     default:
       error (_("invalid argument location"));
