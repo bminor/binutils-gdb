@@ -190,7 +190,7 @@ mi_command::do_suppress_notification () const
 /* Initialize the available MI commands.  */
 
 static void
-build_table ()
+add_builtin_mi_commands ()
 {
   add_mi_cmd_mi ("ada-task-info", mi_cmd_ada_task_info);
   add_mi_cmd_mi ("add-inferior", mi_cmd_add_inferior);
@@ -368,5 +368,5 @@ void _initialize_mi_cmds ();
 void
 _initialize_mi_cmds ()
 {
-  build_table ();
+  add_builtin_mi_commands ();
 }
