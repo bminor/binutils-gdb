@@ -17,6 +17,88 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# How to add to gdbarch:
+#
+# There are four kinds of fields in gdbarch:
+#
+# * Info - you should never need this; it is only for things that are
+# copied directly from the gdbarch_info.
+#
+# * Value - a variable.
+#
+# * Function - a function pointer.
+#
+# * Method - a function pointer, but the function takes a gdbarch as
+# its first parameter.
+#
+# You construct a new one with a call to one of those functions.  So,
+# for instance, you can use the function named "Value" to make a new
+# Value.
+#
+# All parameters are keyword-only.  This is done to help catch typos.
+#
+# Some parameters are shared among all types (including Info):
+#
+# * "name" - required, the name of the field.
+#
+# * "type" - required, the type of the field.  For functions and
+# methods, this is the return type.
+#
+# * "printer" - an expression to turn this field into a 'const char
+# *'.  This is used for dumping.  The string must live long enough to
+# be passed to printf.
+#
+# Value, Function, and Method share some more parameters.  Some of
+# these work in conjunction in a somewhat complicated way, so they are
+# described in a separate sub-section below.
+#
+# * "comment" - a comment that's written to the .h file.  Please
+# always use this.  (It isn't currently a required option for
+# historical reasons.)
+#
+# * "predicate" - a boolean, if True then a _p predicate function will
+# be generated.  The predicate will use the generic validation
+# function for the field.  See below.
+#
+# * "predefault", "postdefault", and "invalid" - These are used for
+# the initialization and verification steps:
+#
+# A gdbarch is zero-initialized.  Then, if a field has a pre-default,
+# the field is set to that value.  After initialization is complete
+# (that is, after the tdep code has a change to change the settings),
+# the post-initialization step is done.
+#
+# There is a generic algorithm to generate a "validation function" for
+# all fields.  If the field has an "invalid" attribute with a string
+# value, then this string is the expression (note that a string-valued
+# "invalid" and "predicate" are mutually exclusive; and the case where
+# invalid is True means to ignore this field and instead use the
+# default checking that is about to be described).  Otherwise, if
+# there is a "predefault", then the field is valid if it differs from
+# the predefault.  Otherwise, the check is done against 0 (really NULL
+# for function pointers, but same idea).
+#
+# In post-initialization / validation, there are several cases.
+#
+# * If "invalid" is False, or if the field specifies "predicate",
+# validation is skipped.  Otherwise, a validation step is emitted.
+#
+# * Otherwise, the validity is checked using the usual validation
+# function (see above).  If the field is considered valid, nothing is
+# done.
+#
+# * Otherwise, the field's value is invalid.  If there is a
+# "postdefault", then the field is assigned that value.
+#
+# * Otherwise, the gdbarch will fail validation and gdb will crash.
+#
+# Function and Method share:
+#
+# * "params" - required, a tuple of tuples.  Each inner tuple is a
+# pair of the form (TYPE, NAME), where TYPE is the type of this
+# argument, and NAME is the name.  Note that while the names could be
+# auto-generated, this approach lets the "comment" field refer to
+# arguments in a nicer way.  It is also just nicer for users.
 
 Info(
     type="const struct bfd_arch_info *",
