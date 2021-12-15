@@ -1158,18 +1158,63 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash,
 
 /* Returns true if the form is one which has a string value.  */
 
-static inline bool
-is_str_attr (enum dwarf_form form)
+static bool
+is_str_form (const struct attribute *attr)
 {
-  return (form == DW_FORM_string
-	  || form == DW_FORM_strp
-	  || form == DW_FORM_strx
-	  || form == DW_FORM_strx1
-	  || form == DW_FORM_strx2
-	  || form == DW_FORM_strx3
-	  || form == DW_FORM_strx4
-	  || form == DW_FORM_line_strp
-	  || form == DW_FORM_GNU_strp_alt);
+  switch (attr->form)
+    {
+    case DW_FORM_string:
+    case DW_FORM_strp:
+    case DW_FORM_strx:
+    case DW_FORM_strx1:
+    case DW_FORM_strx2:
+    case DW_FORM_strx3:
+    case DW_FORM_strx4:
+    case DW_FORM_line_strp:
+    case DW_FORM_GNU_strp_alt:
+      return true;
+
+    default:
+      return false;
+    }
+}
+
+/* Returns true if the form is one which has an integer value.  */
+
+static bool
+is_int_form (const struct attribute *attr)
+{
+  switch (attr->form)
+    {
+    case DW_FORM_addr:
+    case DW_FORM_data2:
+    case DW_FORM_data4:
+    case DW_FORM_data8:
+    case DW_FORM_data1:
+    case DW_FORM_flag:
+    case DW_FORM_sdata:
+    case DW_FORM_udata:
+    case DW_FORM_ref_addr:
+    case DW_FORM_ref1:
+    case DW_FORM_ref2:
+    case DW_FORM_ref4:
+    case DW_FORM_ref8:
+    case DW_FORM_ref_udata:
+    case DW_FORM_sec_offset:
+    case DW_FORM_flag_present:
+    case DW_FORM_ref_sig8:
+    case DW_FORM_addrx:
+    case DW_FORM_implicit_const:
+    case DW_FORM_addrx1:
+    case DW_FORM_addrx2:
+    case DW_FORM_addrx3:
+    case DW_FORM_addrx4:
+    case DW_FORM_GNU_ref_alt:
+      return true;
+
+    default:
+      return false;
+    }
 }
 
 static const char *
@@ -1250,6 +1295,7 @@ read_attribute_value (struct attribute *  attr,
       attr->u.val = read_1_byte (abfd, &info_ptr, info_ptr_end);
       break;
     case DW_FORM_data2:
+    case DW_FORM_addrx2:
     case DW_FORM_ref2:
       attr->u.val = read_2_bytes (abfd, &info_ptr, info_ptr_end);
       break;
@@ -3037,7 +3083,7 @@ find_abstract_instance (struct comp_unit *unit,
 		case DW_AT_name:
 		  /* Prefer DW_AT_MIPS_linkage_name or DW_AT_linkage_name
 		     over DW_AT_name.  */
-		  if (name == NULL && is_str_attr (attr.form))
+		  if (name == NULL && is_str_form (&attr))
 		    {
 		      name = attr.u.str;
 		      if (non_mangled (unit->lang))
@@ -3045,16 +3091,17 @@ find_abstract_instance (struct comp_unit *unit,
 		    }
 		  break;
 		case DW_AT_specification:
-		  if (!find_abstract_instance (unit, &attr, recur_count + 1,
-					       &name, is_linkage,
-					       filename_ptr, linenumber_ptr))
+		  if (is_int_form (&attr)
+		      && !find_abstract_instance (unit, &attr, recur_count + 1,
+						  &name, is_linkage,
+						  filename_ptr, linenumber_ptr))
 		    return false;
 		  break;
 		case DW_AT_linkage_name:
 		case DW_AT_MIPS_linkage_name:
 		  /* PR 16949:  Corrupt debug info can place
 		     non-string forms into these attributes.  */
-		  if (is_str_attr (attr.form))
+		  if (is_str_form (&attr))
 		    {
 		      name = attr.u.str;
 		      *is_linkage = true;
@@ -3063,11 +3110,13 @@ find_abstract_instance (struct comp_unit *unit,
 		case DW_AT_decl_file:
 		  if (!comp_unit_maybe_decode_line_info (unit))
 		    return false;
-		  *filename_ptr = concat_filename (unit->line_table,
-						   attr.u.val);
+		  if (is_int_form (&attr))
+		    *filename_ptr = concat_filename (unit->line_table,
+						     attr.u.val);
 		  break;
 		case DW_AT_decl_line:
-		  *linenumber_ptr = attr.u.val;
+		  if (is_int_form (&attr))
+		    *linenumber_ptr = attr.u.val;
 		  break;
 		default:
 		  break;
@@ -3452,28 +3501,31 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	      switch (attr.name)
 		{
 		case DW_AT_call_file:
-		  func->caller_file = concat_filename (unit->line_table,
-						       attr.u.val);
+		  if (is_int_form (&attr))
+		    func->caller_file = concat_filename (unit->line_table,
+							 attr.u.val);
 		  break;
 
 		case DW_AT_call_line:
-		  func->caller_line = attr.u.val;
+		  if (is_int_form (&attr))
+		    func->caller_line = attr.u.val;
 		  break;
 
 		case DW_AT_abstract_origin:
 		case DW_AT_specification:
-		  if (!find_abstract_instance (unit, &attr, 0,
-					       &func->name,
-					       &func->is_linkage,
-					       &func->file,
-					       &func->line))
+		  if (is_int_form (&attr)
+		      && !find_abstract_instance (unit, &attr, 0,
+						  &func->name,
+						  &func->is_linkage,
+						  &func->file,
+						  &func->line))
 		    goto fail;
 		  break;
 
 		case DW_AT_name:
 		  /* Prefer DW_AT_MIPS_linkage_name or DW_AT_linkage_name
 		     over DW_AT_name.  */
-		  if (func->name == NULL && is_str_attr (attr.form))
+		  if (func->name == NULL && is_str_form (&attr))
 		    {
 		      func->name = attr.u.str;
 		      if (non_mangled (unit->lang))
@@ -3485,7 +3537,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		case DW_AT_MIPS_linkage_name:
 		  /* PR 16949:  Corrupt debug info can place
 		     non-string forms into these attributes.  */
-		  if (is_str_attr (attr.form))
+		  if (is_str_form (&attr))
 		    {
 		      func->name = attr.u.str;
 		      func->is_linkage = true;
@@ -3493,26 +3545,33 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		  break;
 
 		case DW_AT_low_pc:
-		  low_pc = attr.u.val;
+		  if (is_int_form (&attr))
+		    low_pc = attr.u.val;
 		  break;
 
 		case DW_AT_high_pc:
-		  high_pc = attr.u.val;
-		  high_pc_relative = attr.form != DW_FORM_addr;
+		  if (is_int_form (&attr))
+		    {
+		      high_pc = attr.u.val;
+		      high_pc_relative = attr.form != DW_FORM_addr;
+		    }
 		  break;
 
 		case DW_AT_ranges:
-		  if (!read_rangelist (unit, &func->arange, attr.u.val))
+		  if (is_int_form (&attr)
+		      && !read_rangelist (unit, &func->arange, attr.u.val))
 		    goto fail;
 		  break;
 
 		case DW_AT_decl_file:
-		  func->file = concat_filename (unit->line_table,
-						attr.u.val);
+		  if (is_int_form (&attr))
+		    func->file = concat_filename (unit->line_table,
+						  attr.u.val);
 		  break;
 
 		case DW_AT_decl_line:
-		  func->line = attr.u.val;
+		  if (is_int_form (&attr))
+		    func->line = attr.u.val;
 		  break;
 
 		default:
@@ -3524,7 +3583,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	      switch (attr.name)
 		{
 		case DW_AT_specification:
-		  if (attr.u.val)
+		  if (is_int_form (&attr) && attr.u.val)
 		    {
 		      struct varinfo * spec_var;
 
@@ -3551,21 +3610,23 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		  break;
 
 		case DW_AT_name:
-		  if (is_str_attr (attr.form))
+		  if (is_str_form (&attr))
 		    var->name = attr.u.str;
 		  break;
 
 		case DW_AT_decl_file:
-		  var->file = concat_filename (unit->line_table,
-					       attr.u.val);
+		  if (is_int_form (&attr))
+		    var->file = concat_filename (unit->line_table,
+						 attr.u.val);
 		  break;
 
 		case DW_AT_decl_line:
-		  var->line = attr.u.val;
+		  if (is_int_form (&attr))
+		    var->line = attr.u.val;
 		  break;
 
 		case DW_AT_external:
-		  if (attr.u.val != 0)
+		  if (is_int_form (&attr) && attr.u.val != 0)
 		    var->stack = false;
 		  break;
 
@@ -3775,31 +3836,41 @@ parse_comp_unit (struct dwarf2_debug *stash,
       switch (attr.name)
 	{
 	case DW_AT_stmt_list:
-	  unit->stmtlist = 1;
-	  unit->line_offset = attr.u.val;
+	  if (is_int_form (&attr))
+	    {
+	      unit->stmtlist = 1;
+	      unit->line_offset = attr.u.val;
+	    }
 	  break;
 
 	case DW_AT_name:
-	  if (is_str_attr (attr.form))
+	  if (is_str_form (&attr))
 	    unit->name = attr.u.str;
 	  break;
 
 	case DW_AT_low_pc:
-	  low_pc = attr.u.val;
-	  /* If the compilation unit DIE has a DW_AT_low_pc attribute,
-	     this is the base address to use when reading location
-	     lists or range lists.  */
-	  if (abbrev->tag == DW_TAG_compile_unit)
-	    unit->base_address = low_pc;
+	  if (is_int_form (&attr))
+	    {
+	      low_pc = attr.u.val;
+	      /* If the compilation unit DIE has a DW_AT_low_pc attribute,
+		 this is the base address to use when reading location
+		 lists or range lists.  */
+	      if (abbrev->tag == DW_TAG_compile_unit)
+		unit->base_address = low_pc;
+	    }
 	  break;
 
 	case DW_AT_high_pc:
-	  high_pc = attr.u.val;
-	  high_pc_relative = attr.form != DW_FORM_addr;
+	  if (is_int_form (&attr))
+	    {
+	      high_pc = attr.u.val;
+	      high_pc_relative = attr.form != DW_FORM_addr;
+	    }
 	  break;
 
 	case DW_AT_ranges:
-	  if (!read_rangelist (unit, &unit->arange, attr.u.val))
+	  if (is_int_form (&attr)
+	      && !read_rangelist (unit, &unit->arange, attr.u.val))
 	    return NULL;
 	  break;
 
@@ -3808,7 +3879,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	    char *comp_dir = attr.u.str;
 
 	    /* PR 17512: file: 1fe726be.  */
-	    if (! is_str_attr (attr.form))
+	    if (!is_str_form (&attr))
 	      {
 		_bfd_error_handler
 		  (_("DWARF error: DW_AT_comp_dir attribute encountered with a non-string form"));
@@ -3829,7 +3900,8 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	  }
 
 	case DW_AT_language:
-	  unit->lang = attr.u.val;
+	  if (is_int_form (&attr))
+	    unit->lang = attr.u.val;
 	  break;
 
 	default:
