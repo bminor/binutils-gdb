@@ -1715,3 +1715,76 @@ done
 exec 1>&2
 ../move-if-change new-gdbarch.c gdbarch.c
 rm -f new-gdbarch.c
+
+exec > gdbarch-components.py
+copyright | sed 1,3d | grep -v 'was created' |
+    sed -e 's,/\*,  ,' -e 's, *\*/,,' -e 's/^  /#/'
+
+function_list | while do_read
+do
+    printf "\n"
+    if class_is_info_p; then
+	printf Info
+    elif class_is_variable_p; then
+	printf Value
+    elif class_is_multiarch_p; then
+	printf Method
+    elif class_is_function_p; then
+	printf Function
+    else
+	echo FAILURE 1>&2
+	exit 1
+    fi
+    printf "(\n"
+    if [ -n "${comment}" ]
+    then
+	printf "    comment=\"\"\""
+	echo "${comment}" | sed 's/^# *//'
+	printf "\"\"\",\n"
+    fi
+
+    # The order here is picked to be type, name, params -- that way
+    # it's relatively "C-like".
+    printf "    type=\"%s\",\n" "$returntype"
+    printf "    name=\"%s\",\n" "$function"
+    if class_is_function_p; then
+	if test -n "$formal" && test "$formal" != void; then
+	    printf "    params=[\n"
+	    # Turn TYPE NAME into ("TYPE", "NAME").
+	    echo "$formal" | sed -e "s/, */,\n/g" |
+		sed -e 's/ *\([a-zA-Z_][a-zA-Z0-9_]*\)\(,*\)$/", "\1")\2/' |
+		sed -e 's/^/        ("/'
+	    printf "    ],\n"
+	else
+	    printf "    params=(),\n"
+	fi
+    fi
+    if class_is_predicate_p; then
+	printf "    predicate=True,\n"
+    fi
+    if ! class_is_info_p; then
+	if test -n "$predefault"; then
+	    printf "    predefault=\"%s\",\n" "$predefault"
+	fi
+	# We can ignore 'actual' and 'staticdefault'.
+	if test -n "$postdefault"; then
+	    printf "    postdefault=\"%s\",\n" "$postdefault"
+	fi
+	# Let's arrange for False to mean suppress checking, and True
+	# to mean default checking.
+	if test "$invalid_p" = "0"; then
+	    printf "    invalid=False,\n"
+	elif test "$invalid_p" = ""; then
+	    printf "    invalid=True,\n"
+	else
+	    printf "    invalid=\"%s\",\n" "$invalid_p"
+	fi
+    fi
+    if test -n "$print"; then
+	printf "    printer=\"%s\",\n" "$print"
+    fi
+    printf ")\n"
+done
+
+exec 1>&2
+black gdbarch-components.py
