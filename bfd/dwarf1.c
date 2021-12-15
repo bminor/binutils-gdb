@@ -258,8 +258,7 @@ parse_die (bfd *	     abfd,
 	  if (xptr + 2 <= aDiePtrEnd)
 	    {
 	      block_len = bfd_get_16 (abfd, xptr);
-	      if (xptr + block_len > aDiePtrEnd
-		  || xptr + block_len < xptr)
+	      if ((unsigned int) (aDiePtrEnd - xptr) < block_len)
 		return false;
 	      xptr += block_len;
 	    }
@@ -269,8 +268,7 @@ parse_die (bfd *	     abfd,
 	  if (xptr + 4 <= aDiePtrEnd)
 	    {
 	      block_len = bfd_get_32 (abfd, xptr);
-	      if (xptr + block_len > aDiePtrEnd
-		  || xptr + block_len < xptr)
+	      if ((unsigned int) (aDiePtrEnd - xptr) < block_len)
 		return false;
 	      xptr += block_len;
 	    }

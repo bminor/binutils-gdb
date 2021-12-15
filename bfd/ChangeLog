@@ -1,3 +1,8 @@
+2021-12-15  Nikita Popov  <npv1310@gmail.com>
+
+	PR 28687
+	* dwarf1.c (parse_die): Fix undefined behaviour in range tests.
+
 2021-11-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 28452
