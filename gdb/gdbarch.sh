@@ -1562,7 +1562,7 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 		      "gdbarch_dump: GDB_NM_FILE = %s\\n",
 		      gdb_nm_file);
 EOF
-function_list | sort '-t;' -k 3 | while do_read
+function_list | while do_read
 do
     # First the predicate
     if class_is_predicate_p
