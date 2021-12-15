@@ -173,8 +173,9 @@ compare_link_order (const void *a, const void *b)
 
   if (! bfd_link_relocatable (&link_info))
     {
-      /* The only way we should get matching LMAs is when
-	 the first of the two sections has zero size.  */
+      /* The only way we should get matching LMAs is when the first of
+	 the two sections has zero size, or asec and bsec are the
+	 same section.  */
       if (asec->size < bsec->size)
 	return -1;
       else if (asec->size > bsec->size)
@@ -183,7 +184,7 @@ compare_link_order (const void *a, const void *b)
 
   /* If they are both zero size then they almost certainly have the same
      VMA and thus are not ordered with respect to each other.  Test VMA
-     anyway, and fall back to id to make the result reproducible across
+     anyway, and fall back to idx to make the result reproducible across
      qsort implementations.  */
   apos = asec->output_section->vma + asec->output_offset;
   bpos = bsec->output_section->vma + bsec->output_offset;
@@ -191,8 +192,8 @@ compare_link_order (const void *a, const void *b)
     return -1;
   else if (apos > bpos)
     return 1;
-
-  return asec->id - bsec->id;
+  else
+    return ai->idx - bi->idx;
 }
 
 /* Rearrange sections with SHF_LINK_ORDER into the same order as their
