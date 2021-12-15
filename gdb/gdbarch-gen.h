@@ -20,7 +20,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This file was created with the aid of ``gdbarch.sh''.  */
+/* This file was created with the aid of ``gdbarch.py''.  */
 
 
 
@@ -124,11 +124,11 @@ extern void set_gdbarch_floatformat_for_type (struct gdbarch *gdbarch, gdbarch_f
    address in GDB have the same size and "look the same".  For such a
    target, you need only set gdbarch_ptr_bit and gdbarch_addr_bit
    / addr_bit will be set from it.
-  
+
    If gdbarch_ptr_bit and gdbarch_addr_bit are different, you'll probably
    also need to set gdbarch_dwarf2_addr_size, gdbarch_pointer_to_address and
    gdbarch_address_to_pointer as well.
-  
+
    ptr_bit is the size of a pointer on the target */
 
 extern int gdbarch_ptr_bit (struct gdbarch *gdbarch);
@@ -145,10 +145,10 @@ extern void set_gdbarch_addr_bit (struct gdbarch *gdbarch, int addr_bit);
    DWARF2_ADDR_SIZE as defined by the target specific GCC back-end.
    Unfortunately there is no good way to determine this value.  Therefore
    dwarf2_addr_size simply defaults to the target pointer size.
-  
+
    dwarf2_addr_size is not used for .eh_frame FDEs, which are generally
    defined using the target's pointer size so far.
-  
+
    Note that dwarf2_addr_size only needs to be redefined by a target if the
    GCC back-end defines a DWARF2_ADDR_SIZE other than the target pointer size,
    and if Dwarf versions < 4 need to be supported. */
@@ -371,7 +371,7 @@ extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_
 
 /* Determine the address where a longjmp will land and save this address
    in PC.  Return nonzero on success.
-  
+
    FRAME corresponds to the longjmp frame. */
 
 extern bool gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch);
@@ -421,9 +421,9 @@ extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_int
 /* Return the return-value convention that will be used by FUNCTION
    to return a value of type VALTYPE.  FUNCTION may be NULL in which
    case the return convention is computed based only on VALTYPE.
-  
+
    If READBUF is not NULL, extract the return value and save it in this buffer.
-  
+
    If WRITEBUF is not NULL, it contains a return value which will be
    stored into the appropriate register.  This can be used when we want
    to force the value returned by a function (see the "return" command
@@ -663,10 +663,10 @@ extern void set_gdbarch_memtag_granule_size (struct gdbarch *gdbarch, CORE_ADDR 
 /* FIXME/cagney/2001-01-18: This should be split in two.  A target method that
    indicates if the target needs software single step.  An ISA method to
    implement it.
-  
+
    FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
    target can single step.  If not, then implement single step using breakpoints.
-  
+
    Return a vector of addresses on which the software single step
    breakpoints should be inserted.  NULL means software single step is
    not used.
@@ -956,24 +956,24 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
 
 /* Copy the instruction at FROM to TO, and make any adjustments
    necessary to single-step it at that address.
-  
+
    REGS holds the state the thread's registers will have before
    executing the copied instruction; the PC in REGS will refer to FROM,
    not the copy at TO.  The caller should update it to point at TO later.
-  
+
    Return a pointer to data of the architecture's choice to be passed
    to gdbarch_displaced_step_fixup.
-  
+
    For a general explanation of displaced stepping and how GDB uses it,
    see the comments in infrun.c.
-  
+
    The TO area is only guaranteed to have space for
    gdbarch_max_insn_length (arch) bytes, so this function must not
    write more bytes than that to that area.
-  
+
    If you do not provide this function, GDB assumes that the
    architecture does not support displaced stepping.
-  
+
    If the instruction cannot execute out of line, return NULL.  The
    core falls back to stepping past the instruction in-line instead in
    that case. */
@@ -989,7 +989,7 @@ extern void set_gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, gdbar
    displaced instruction location, and it is up to the target to ensure GDB will
    receive control again (e.g. by placing a software breakpoint instruction into
    the displaced instruction buffer).
-  
+
    The default implementation returns false on all targets that provide a
    gdbarch_software_single_step routine, and true otherwise. */
 
@@ -1000,17 +1000,17 @@ extern void set_gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch, g
 /* Fix up the state resulting from successfully single-stepping a
    displaced instruction, to give the result we would have gotten from
    stepping the instruction in its original location.
-  
+
    REGS is the register state resulting from single-stepping the
    displaced instruction.
-  
+
    CLOSURE is the result from the matching call to
    gdbarch_displaced_step_copy_insn.
-  
+
    If you provide gdbarch_displaced_step_copy_insn.but not this
    function, then GDB assumes that no fixup is needed after
    single-stepping the instruction.
-  
+
    For a general explanation of displaced stepping and how GDB uses it,
    see the comments in infrun.c. */
 
@@ -1021,7 +1021,7 @@ extern void gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, struct displa
 extern void set_gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, gdbarch_displaced_step_fixup_ftype *displaced_step_fixup);
 
 /* Prepare THREAD for it to displaced step the instruction at its current PC.
-  
+
    Throw an exception if any unexpected error happens. */
 
 extern bool gdbarch_displaced_step_prepare_p (struct gdbarch *gdbarch);
@@ -1137,7 +1137,7 @@ extern int gdbarch_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signa
 extern void set_gdbarch_gdb_signal_to_target (struct gdbarch *gdbarch, gdbarch_gdb_signal_to_target_ftype *gdb_signal_to_target);
 
 /* Extra signal info inspection.
-  
+
    Return a type suitable to inspect extra signal information. */
 
 extern bool gdbarch_get_siginfo_type_p (struct gdbarch *gdbarch);
@@ -1177,9 +1177,9 @@ extern void set_gdbarch_syscalls_info (struct gdbarch *gdbarch, struct syscalls_
    A NULL-terminated array of prefixes used to mark an integer constant
    on the architecture's assembly.
    For example, on x86 integer constants are written as:
-  
-    $10 ;; integer constant 10
-  
+
+   $10 ;; integer constant 10
+
    in this case, this prefix would be the character `$'. */
 
 extern const char *const * gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch);
@@ -1194,9 +1194,9 @@ extern void set_gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch, const ch
 /* A NULL-terminated array of prefixes used to mark a register name on
    the architecture's assembly.
    For example, on x86 the register name is written as:
-  
-    %eax ;; register eax
-  
+
+   %eax ;; register eax
+
    in this case, this prefix would be the character `%'. */
 
 extern const char *const * gdbarch_stap_register_prefixes (struct gdbarch *gdbarch);
@@ -1211,11 +1211,11 @@ extern void set_gdbarch_stap_register_suffixes (struct gdbarch *gdbarch, const c
 /* A NULL-terminated array of prefixes used to mark a register
    indirection on the architecture's assembly.
    For example, on x86 the register indirection is written as:
-  
-    (%eax) ;; indirecting eax
-  
+
+   (%eax) ;; indirecting eax
+
    in this case, this prefix would be the charater `('.
-  
+
    Please note that we use the indirection prefix also for register
    displacement, e.g., `4(%eax)' on x86. */
 
@@ -1225,11 +1225,11 @@ extern void set_gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdba
 /* A NULL-terminated array of suffixes used to mark a register
    indirection on the architecture's assembly.
    For example, on x86 the register indirection is written as:
-  
-    (%eax) ;; indirecting eax
-  
+
+   (%eax) ;; indirecting eax
+
    in this case, this prefix would be the charater `)'.
-  
+
    Please note that we use the indirection suffix also for register
    displacement, e.g., `4(%eax)' on x86. */
 
@@ -1237,7 +1237,7 @@ extern const char *const * gdbarch_stap_register_indirection_suffixes (struct gd
 extern void set_gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch, const char *const * stap_register_indirection_suffixes);
 
 /* Prefix(es) used to name a register using GDB's nomenclature.
-  
+
    For example, on PPC a register is represented by a number in the assembly
    language (e.g., `10' is the 10th general-purpose register).  However,
    inside GDB this same register has an `r' appended to its name, so the 10th
@@ -1252,13 +1252,13 @@ extern const char * gdbarch_stap_gdb_register_suffix (struct gdbarch *gdbarch);
 extern void set_gdbarch_stap_gdb_register_suffix (struct gdbarch *gdbarch, const char * stap_gdb_register_suffix);
 
 /* Check if S is a single operand.
-  
+
    Single operands can be:
-    - Literal integers, e.g. `$10' on x86
-    - Register access, e.g. `%eax' on x86
-    - Register indirection, e.g. `(%eax)' on x86
-    - Register displacement, e.g. `4(%eax)' on x86
-  
+   - Literal integers, e.g. `$10' on x86
+   - Register access, e.g. `%eax' on x86
+   - Register indirection, e.g. `(%eax)' on x86
+   - Register displacement, e.g. `4(%eax)' on x86
+
    This function should check for these patterns on the string
    and return 1 if some were found, or zero otherwise.  Please try to match
    as much info as you can from the string, i.e., if you have to match
@@ -1271,20 +1271,20 @@ extern int gdbarch_stap_is_single_operand (struct gdbarch *gdbarch, const char *
 extern void set_gdbarch_stap_is_single_operand (struct gdbarch *gdbarch, gdbarch_stap_is_single_operand_ftype *stap_is_single_operand);
 
 /* Function used to handle a "special case" in the parser.
-  
+
    A "special case" is considered to be an unknown token, i.e., a token
    that the parser does not know how to parse.  A good example of special
    case would be ARM's register displacement syntax:
-  
-    [R0, #4]  ;; displacing R0 by 4
-  
+
+   [R0, #4]  ;; displacing R0 by 4
+
    Since the parser assumes that a register displacement is of the form:
-  
-    <number> <indirection_prefix> <register_name> <indirection_suffix>
-  
+
+   <number> <indirection_prefix> <register_name> <indirection_suffix>
+
    it means that it will not be able to recognize and parse this odd syntax.
    Therefore, we should add a special case function that will handle this token.
-  
+
    This function should generate the proper expression form of the expression
    using GDB's internal expression mechanism (e.g., `write_exp_elt_opcode'
    and so on).  It should also return 1 if the parsing was successful, or zero
@@ -1299,7 +1299,7 @@ extern expr::operation_up gdbarch_stap_parse_special_token (struct gdbarch *gdba
 extern void set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, gdbarch_stap_parse_special_token_ftype *stap_parse_special_token);
 
 /* Perform arch-dependent adjustments to a register name.
-  
+
    In very specific situations, it may be necessary for the register
    name present in a SystemTap probe's argument to be handled in a
    special way.  For example, on i386, GCC may over-optimize the
@@ -1307,19 +1307,19 @@ extern void set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, gdbar
    such cases, the client that is reading and evaluating the SystemTap
    probe (ourselves) will need to actually fetch values from the wider
    version of the register in question.
-  
+
    To illustrate the example, consider the following probe argument
    (i386):
-  
-      4@%ax
-  
+
+   4@%ax
+
    This argument says that its value can be found at the %ax register,
    which is a 16-bit register.  However, the argument's prefix says
    that its type is "uint32_t", which is 32-bit in size.  Therefore, in
    this case, GDB should actually fetch the probe's value from register
    %eax, not %ax.  In this scenario, this function would actually
    replace the register name from %ax to %eax.
-  
+
    The rationale for this can be found at PR breakpoints/24541. */
 
 extern bool gdbarch_stap_adjust_register_p (struct gdbarch *gdbarch);
@@ -1403,19 +1403,19 @@ extern void set_gdbarch_guess_tracepoint_registers (struct gdbarch *gdbarch, gdb
 
 /* Return the "auto" target charset. */
 
-typedef const char * (gdbarch_auto_charset_ftype) (void);
+typedef const char * (gdbarch_auto_charset_ftype) ();
 extern const char * gdbarch_auto_charset (struct gdbarch *gdbarch);
 extern void set_gdbarch_auto_charset (struct gdbarch *gdbarch, gdbarch_auto_charset_ftype *auto_charset);
 
 /* Return the "auto" target wide charset. */
 
-typedef const char * (gdbarch_auto_wide_charset_ftype) (void);
+typedef const char * (gdbarch_auto_wide_charset_ftype) ();
 extern const char * gdbarch_auto_wide_charset (struct gdbarch *gdbarch);
 extern void set_gdbarch_auto_wide_charset (struct gdbarch *gdbarch, gdbarch_auto_wide_charset_ftype *auto_wide_charset);
 
 /* If non-empty, this is a file extension that will be opened in place
    of the file extension reported by the shared library list.
-  
+
    This is most useful for toolchains that use a post-linker tool,
    where the names of the files run on the target differ in extension
    compared to the names of the files GDB should load for debug info. */
@@ -1460,15 +1460,15 @@ extern void set_gdbarch_core_info_proc (struct gdbarch *gdbarch, gdbarch_core_in
 
 /* Iterate over all objfiles in the order that makes the most sense
    for the architecture to make global symbol searches.
-  
+
    CB is a callback function where OBJFILE is the objfile to be searched,
    and CB_DATA a pointer to user-defined data (the same data that is passed
    when calling this gdbarch method).  The iteration stops if this function
    returns nonzero.
-  
+
    CB_DATA is a pointer to some user-defined data to be passed to
    the callback.
-  
+
    If not NULL, CURRENT_OBJFILE corresponds to the objfile being
    inspected when the symbol search was requested. */
 

@@ -20,7 +20,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This file was created with the aid of ``gdbarch.sh''.  */
+/* This file was created with the aid of ``gdbarch.py''.  */
 
 
 /* Maintain the struct gdbarch object.  */
@@ -47,29 +47,6 @@ struct gdbarch
   /* per-architecture data-pointers.  */
   unsigned nr_data;
   void **data;
-
-  /* Multi-arch values.
-
-     When extending this structure you must:
-
-     Add the field below.
-
-     Declare set/get functions and define the corresponding
-     macro in gdbarch.h.
-
-     gdbarch_alloc(): If zero/NULL is not a suitable default,
-     initialize the new field.
-
-     verify_gdbarch(): Confirm that the target updated the field
-     correctly.
-
-     gdbarch_dump(): Add a fprintf_unfiltered call so that the new
-     field is dumped out
-
-     get_gdbarch(): Implement the set/get functions (probably using
-     the macro's as shortcuts).
-
-     */
 
   int short_bit;
   int int_bit;
@@ -3876,7 +3853,7 @@ gdbarch_core_xfer_siginfo (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST 
   gdb_assert (gdbarch->core_xfer_siginfo != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_core_xfer_siginfo called\n");
-  return gdbarch->core_xfer_siginfo (gdbarch,  readbuf, offset, len);
+  return gdbarch->core_xfer_siginfo (gdbarch, readbuf, offset, len);
 }
 
 void
