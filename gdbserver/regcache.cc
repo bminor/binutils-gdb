@@ -244,6 +244,13 @@ registers_from_string (struct regcache *regcache, char *buf)
 	len = tdesc->registers_size * 2;
     }
   hex2bin (buf, registers, len / 2);
+
+  /* Force registers to be written via ptrace requests.  This ensures
+     any register write side effects happen correctly.  */
+  regcache_invalidate ();
+  /* Force a register set read from ptrace, to get the side effects back,
+     if any.  */
+  get_thread_regcache (current_thread, 1);
 }
 
 int

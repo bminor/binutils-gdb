@@ -202,11 +202,31 @@ is_sve_tdesc (void)
   return tdesc_contains_feature (regcache->tdesc, "org.gnu.gdb.aarch64.sve");
 }
 
+static bool gpr_changed = false;
+
+static bool
+gpr_set_changed (struct regcache *regcache, void *buf)
+{
+  size_t gpr_size = (AARCH64_X_REGS_NUM + 2) * 8 + 4;
+  bool changed
+    = memcmp (regcache->registers, buf, gpr_size) != 0;
+
+  return changed;
+}
+
 static void
 aarch64_fill_gregset (struct regcache *regcache, void *buf)
 {
   struct user_pt_regs *regset = (struct user_pt_regs *) buf;
   int i;
+
+  /* Right now, regcache contains the updated contents of the registers.
+     Check if anything has changed in the GPR's.  If nothing has changed,
+     don't update anything.
+
+     Otherwise, update the contents.  */
+
+  gpr_changed = gpr_set_changed (regcache, buf);
 
   for (i = 0; i < AARCH64_X_REGS_NUM; i++)
     collect_register (regcache, AARCH64_X0_REGNUM + i, &regset->regs[i]);
@@ -275,6 +295,14 @@ aarch64_store_pauthregset (struct regcache *regcache, const void *buf)
 static void
 aarch64_fill_cregset (struct regcache *regcache, void *buf)
 {
+  /* If the GPR's have changed, don't attempt to change the C registers.  */
+  if (gpr_changed)
+    {
+      /* Reset the flag.  */
+      gpr_changed = false;
+      return;
+    }
+
   struct user_morello_state *cregset
       = (struct user_morello_state *) buf;
 
