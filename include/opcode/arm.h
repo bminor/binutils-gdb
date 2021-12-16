@@ -392,6 +392,13 @@
 				      ARM_AEXT2_V8_5A | ARM_EXT2_CRC,	   \
 				      ARM_EXT3_V9A,	   \
                       FPU_NEON_EXT_RDMA	| FPU_NEON_EXT_DOTPROD)
+#define ARM_ARCH_V9_1A	 ARM_FEATURE_ALL (ARM_AEXT_V8A,			   \
+				          ARM_AEXT2_V8_6A | ARM_EXT2_CRC,  \
+					  ARM_EXT3_V9A,	   		   \
+					  FPU_NEON_EXT_RDMA		   \
+					  | FPU_NEON_EXT_DOTPROD)
+#define ARM_ARCH_V9_2A   ARM_ARCH_V9_1A
+#define ARM_ARCH_V9_3A   ARM_ARCH_V9_2A
 
 /* Some useful combinations:  */
 #define ARM_ARCH_NONE	ARM_FEATURE_ALL (0, 0, 0, 0)
