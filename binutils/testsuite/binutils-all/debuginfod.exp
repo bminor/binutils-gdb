@@ -161,10 +161,10 @@ proc test_fetch_debuglink { prog progargs } {
 
     set got [binutils_run $prog "$progargs tmpdir/testprog"]
 
-    if { [regexp ".*Found separate debug info file.*Contents\[^\n\]*loaded from\[^\n\]*$cache.*" $got] } {
+    if { [regexp ".*Found separate debug info file.*Contents\[^\n\]*loaded from\[^\n\]*" $got] } {
        pass "$test ($prog debuglink)"
     } else {
-       fail "$test ($prog debuglink)"
+       fail "$test ($prog did not find debuglink to cache $cache)"
     }
 }
 
@@ -180,7 +180,7 @@ proc test_fetch_debugaltlink { prog progargs } {
     if { [regexp ".*Found separate debug info file\[^\n\]*$cache/$buildid" $got] } {
         pass "$test ($prog debugaltlink)"
     } else {
-        fail "$test ($prog debugaltlink)"
+        fail "$test ($prog could not load debugaltlink)"
     }
 }
 

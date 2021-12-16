@@ -1,3 +1,15 @@
+2021-12-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 28697
+	* dwarf.c (load_build_id_debug_file): New function.
+	(try_build_id_prefix): New function.
+	(check_for_and_load_links): Call load_build_id_debug_file.
+	(debug_displays): Add entry for .note.gnu.build-id.
+	* dwarf.h (enum dwarf_section_display_enum): Add
+	note_gnu_build_id.
+	* testsuite/binutils-all/debuginfod.exp (test_fetch_debuglink):
+	Fix regexp for loads via debuglink section.
+
 2021-12-03  Chenghua Xu  <xuchenghua@loongson.cn>
 
 	* MAINTAINERS: Add myself and Zhensong Liu

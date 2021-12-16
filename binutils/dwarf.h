@@ -122,6 +122,7 @@ enum dwarf_section_display_enum
   gnu_debugaltlink,
   debug_sup,
   separate_debug_str,
+  note_gnu_build_id,
   max
 };
 
