@@ -242,9 +242,10 @@ class StructMainTypePrettyPrinter:
                 " _mp_num and _mp_den fields if needed)"
             )
         elif type_specific_kind == "TYPE_SPECIFIC_INT":
-            img = ("int_stuff = { bit_size = %d, bit_offset = %d }"
-                   % (type_specific["int_stuff"]["bit_size"],
-                      type_specific["int_stuff"]["bit_offset"]))
+            img = "int_stuff = { bit_size = %d, bit_offset = %d }" % (
+                type_specific["int_stuff"]["bit_size"],
+                type_specific["int_stuff"]["bit_offset"],
+            )
         else:
             img = (
                 "type_specific = ??? (unknown type_specific_kind: %s)"

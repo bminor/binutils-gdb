@@ -19,6 +19,7 @@ import gdb
 def conn_num(c):
     return c.num
 
+
 # Takes a gdb.TargetConnection and return a string that is either the
 # type, or the type and details (if the details are not None).
 def make_target_connection_string(c):
@@ -26,6 +27,7 @@ def make_target_connection_string(c):
         return c.type
     else:
         return "%s %s" % (c.type, c.details)
+
 
 # A Python implementation of 'info connections'.  Produce output that
 # is identical to the output of 'info connections' so we can check
@@ -48,17 +50,19 @@ def info_connections():
         else:
             prefix = "  "
 
-        print(fmt % (prefix, c.num, make_target_connection_string(c),
-                     c.description))
+        print(fmt % (prefix, c.num, make_target_connection_string(c), c.description))
+
 
 def inf_num(i):
     return i.num
+
 
 # Print information about each inferior, and the connection it is
 # using.
 def info_inferiors():
     all_inferiors = sorted(gdb.inferiors(), key=inf_num)
     for i in gdb.inferiors():
-        print("Inferior %d, Connection #%d: %s" %
-              (i.num, i.connection_num,
-               make_target_connection_string(i.connection)))
+        print(
+            "Inferior %d, Connection #%d: %s"
+            % (i.num, i.connection_num, make_target_connection_string(i.connection))
+        )

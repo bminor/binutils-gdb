@@ -45,7 +45,7 @@ def breakpoint_stop_handler(event):
 def exit_handler(event):
     assert isinstance(event, gdb.ExitedEvent)
     print("event type: exit")
-    if hasattr(event, 'exit_code'):
+    if hasattr(event, "exit_code"):
         print("exit code: %d" % (event.exit_code))
     else:
         print("exit code: not-present")
@@ -133,6 +133,7 @@ class test_newobj_events(gdb.Command):
 
 test_newobj_events()
 
+
 def gdb_exiting_handler(event, throw_error):
     assert isinstance(event, gdb.GdbExitingEvent)
     if throw_error:
@@ -140,6 +141,7 @@ def gdb_exiting_handler(event, throw_error):
     else:
         print("event type: gdb-exiting")
         print("exit code: %d" % (event.exit_code))
+
 
 class test_exiting_event(gdb.Command):
     """GDB Exiting event."""
@@ -149,11 +151,12 @@ class test_exiting_event(gdb.Command):
 
     def invoke(self, arg, from_tty):
         if arg == "normal":
-            gdb.events.gdb_exiting.connect(lambda e: gdb_exiting_handler(e,False))
+            gdb.events.gdb_exiting.connect(lambda e: gdb_exiting_handler(e, False))
         elif arg == "error":
-            gdb.events.gdb_exiting.connect(lambda e: gdb_exiting_handler(e,True))
+            gdb.events.gdb_exiting.connect(lambda e: gdb_exiting_handler(e, True))
         else:
             raise gdb.GdbError("invalid or missing argument")
         print("GDB exiting event registered.")
+
 
 test_exiting_event()
