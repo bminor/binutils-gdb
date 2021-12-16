@@ -33,11 +33,11 @@
 #include <unistd.h>
 #endif
 
+#undef open
+
 #include "sim-main.h"
 #include "sim-io.h"
 #include "sim/callback.h"
-
-#undef open
 
 /* Define the rate at which the simulator should poll the host
    for a quit. */
