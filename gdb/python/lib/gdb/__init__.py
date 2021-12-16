@@ -243,7 +243,6 @@ try:
         except:
             return None
 
-
 except:
 
     def colorize(filename, contents):
