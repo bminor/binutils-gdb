@@ -247,3 +247,6 @@ extern void avr_frag_init (fragS *);
 
 #define tc_line_separator_chars avr_line_separator_chars
 extern const char *avr_line_separator_chars;
+
+#define tc_fix_adjustable(FIX) avr_fix_adjustable (FIX)
+extern bool avr_fix_adjustable (struct fix *);

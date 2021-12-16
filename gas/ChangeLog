@@ -1,3 +1,13 @@
+2021-12-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 28686
+	* config/tc-avr.h (tc_fix_adjustable): Define.
+	* config/tc-avr.c (avr_fix_adjustable): New function.
+	* testsuite/gas/all/gas.exp: Skip tests that need adjustable fixups.
+	* testsuite/gas/elf/elf.exp: Likewise.
+	* testsuite/gas/avr/diffreloc_withrelax.d: Adjust expected output.
+	* testsuite/gas/avr/pc-relative-reloc.d: Adjust expected output.
+
 2021-11-26  Tom de Vries  <tdevries@suse.de>
 
 	PR 28629

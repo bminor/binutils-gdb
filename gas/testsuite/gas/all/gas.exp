@@ -166,11 +166,11 @@ switch -glob $target_triplet {
 	# symbols on relocs.
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
 	setup_xfail "riscv*-*-*" "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
-	setup_xfail "loongarch*-*-*"
+	setup_xfail "loongarch*-*-*" "avr-*-*"
 	run_dump_test redef2
 	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
 	setup_xfail "riscv*-*-*" "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
-	setup_xfail "loongarch*-*-*"
+	setup_xfail "loongarch*-*-*" "avr-*-*"
 	# rs6000-aix disallows redefinition via .comm.
 	if [is_xcoff_format] {
 	    setup_xfail *-*-*
