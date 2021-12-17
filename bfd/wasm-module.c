@@ -357,7 +357,8 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
   return true;
 
  error_return:
-  bfd_release (abfd, symbols);
+  if (symbols)
+    bfd_release (abfd, symbols);
   return false;
 }
 
