@@ -1178,6 +1178,26 @@ xcoff_find_reloc (struct internal_reloc *relocs,
   return min;
 }
 
+/* Return true if the symbol has to be added to the linker hash
+   table.  */
+static bool
+xcoff_link_add_symbols_to_hash_table (struct internal_syment sym,
+				      union internal_auxent aux)
+{
+  /* External symbols must be added.  */
+  if (EXTERN_SYM_P (sym.n_sclass))
+    return true;
+
+  /* Hidden TLS symbols must be added to verify TLS relocations
+     in xcoff_reloc_type_tls.  */
+  if (sym.n_sclass == C_HIDEXT
+      && ((aux.x_csect.x_smclas == XMC_TL
+	   || aux.x_csect.x_smclas == XMC_UL)))
+    return true;
+
+  return false;
+}
+
 /* Add all the symbols from an object file to the hash table.
 
    XCOFF is a weird format.  A normal XCOFF .o files will have three
@@ -1551,6 +1571,11 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     32 bit has a csect length of 4 for TOC
 	     64 bit has a csect length of 8 for TOC
 
+	     An exception is made for TOC entries with a R_TLSML
+	     relocation.  This relocation is made for the loader.
+	     We must check that the referenced symbol is the TOC entry
+	     itself.
+
 	     The conditions to get past the if-check are not that bad.
 	     They are what is used to create the TOC csects in the first
 	     place.  */
@@ -1580,7 +1605,8 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		 64 bit R_POS r_size is 63  */
 	      if (relindx < enclosing->reloc_count
 		  && rel->r_vaddr == (bfd_vma) sym.n_value
-		  && rel->r_type == R_POS
+		  && (rel->r_type == R_POS ||
+		      rel->r_type == R_TLSML)
 		  && ((bfd_xcoff_is_xcoff32 (abfd)
 		       && rel->r_size == 31)
 		      || (bfd_xcoff_is_xcoff64 (abfd)
@@ -1651,6 +1677,22 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 			     this symbol.  */
 			  set_toc = h;
 			}
+		    }
+		  else if (rel->r_type == R_TLSML)
+		    {
+			csect_index = ((esym
+					- (bfd_byte *) obj_coff_external_syms (abfd))
+				       / symesz);
+			if (((unsigned long) rel->r_symndx) != csect_index)
+			  {
+			    _bfd_error_handler
+			      /* xgettext:c-format */
+			      (_("%pB: TOC entry `%s' has a R_TLSML"
+				 "relocation not targeting itself"),
+			       abfd, name);
+			    bfd_set_error (bfd_error_bad_value);
+			    goto error_return;
+			  }
 		    }
 		}
 	    }
@@ -1749,9 +1791,10 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	    if (first_csect == NULL)
 	      first_csect = csect;
 
-	    /* If this symbol is external, we treat it as starting at the
-	       beginning of the newly created section.  */
-	    if (EXTERN_SYM_P (sym.n_sclass))
+	    /* If this symbol must be added to the linker hash table,
+	       we treat it as starting at the beginning of the newly
+	       created section.  */
+	    if (xcoff_link_add_symbols_to_hash_table (sym, aux))
 	      {
 		section = csect;
 		value = 0;
@@ -1847,7 +1890,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (first_csect == NULL)
 	    first_csect = csect;
 
-	  if (EXTERN_SYM_P (sym.n_sclass))
+	  if (xcoff_link_add_symbols_to_hash_table (sym, aux))
 	    {
 	      csect->flags |= SEC_IS_COMMON;
 	      csect->size = 0;
@@ -1888,7 +1931,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
       /* Now we have enough information to add the symbol to the
 	 linker hash table.  */
 
-      if (EXTERN_SYM_P (sym.n_sclass))
+      if (xcoff_link_add_symbols_to_hash_table (sym, aux))
 	{
 	  bool copy, ok;
 	  flagword flags;

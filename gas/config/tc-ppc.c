@@ -7426,22 +7426,25 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC64_TLSM:
 	  gas_assert (fixP->fx_addsy != NULL);
 	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
-	  fieldval = 0;
 	  break;
 
-	  /* TLSML relocations are targeting a XMC_TC symbol named
-	     "_$TLSML". We can't check earlier because the relocation
-	     can target any symbol name which will be latter .rename
-	     to "_$TLSML".  */
+	  /* Officially, R_TLSML relocations must be from a TOC entry
+	     targeting itself. In practice, this TOC entry is always
+	     named (or .rename) "_$TLSML".
+	     Thus, as it doesn't seem possible to retrieve the symbol
+	     being relocated here, we simply check that the symbol
+	     targeted by R_TLSML is indeed a TOC entry named "_$TLSML".
+	     FIXME: Find a way to correctly check R_TLSML relocations
+	     as described above.  */
 	case BFD_RELOC_PPC_TLSML:
 	case BFD_RELOC_PPC64_TLSML:
 	  gas_assert (fixP->fx_addsy != NULL);
-	  if (strcmp (symbol_get_tc (fixP->fx_addsy)->real_name, "_$TLSML") != 0)
-	    {
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("R_TLSML relocation doesn't target a "
-			      "symbol named \"_$TLSML\". %s"), S_GET_NAME(fixP->fx_addsy));
-	    }
+	  if ((symbol_get_tc (fixP->fx_addsy)->symbol_class != XMC_TC
+	       || symbol_get_tc (fixP->fx_addsy)->symbol_class != XMC_TE)
+	      && strcmp (symbol_get_tc (fixP->fx_addsy)->real_name, "_$TLSML") != 0)
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("R_TLSML relocation doesn't target a "
+			    "TOC entry named \"_$TLSML\": %s"), S_GET_NAME(fixP->fx_addsy));
 	  fieldval = 0;
 	  break;
 
@@ -7519,12 +7522,15 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       *valP = value;
     }
   else if (fixP->fx_r_type == BFD_RELOC_PPC_TLSM
-	   || fixP->fx_r_type == BFD_RELOC_PPC64_TLSM)
+	   || fixP->fx_r_type == BFD_RELOC_PPC64_TLSM
+	   || fixP->fx_r_type == BFD_RELOC_PPC_TLSML
+	   || fixP->fx_r_type == BFD_RELOC_PPC64_TLSML)
     /* AIX ld expects the section contents for these relocations
        to be zero.  Arrange for that to occur when
        bfd_install_relocation is called.  */
     fixP->fx_addnumber = (- bfd_section_vma (S_GET_SEGMENT (fixP->fx_addsy))
-			  - S_GET_VALUE (fixP->fx_addsy));
+			  - S_GET_VALUE (fixP->fx_addsy)
+			  - fieldval);
   else
     fixP->fx_addnumber = 0;
 #endif

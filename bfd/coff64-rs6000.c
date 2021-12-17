@@ -1350,7 +1350,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
-	 "R_TLSM",		/* name */
+	 "R_TLSML",		/* name */
 	 true,			/* partial_inplace */
 	 MINUS_ONE,		/* src_mask */
 	 MINUS_ONE,		/* dst_mask */
