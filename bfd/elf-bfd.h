@@ -1914,7 +1914,7 @@ struct output_elf_obj_tdata
   /* Linker information.  */
   struct bfd_link_info *link_info;
 
-  int num_section_syms;
+  unsigned int num_section_syms;
   unsigned int shstrtab_section, strtab_section;
 
   /* Segment flags for the PT_GNU_STACK segment.  */

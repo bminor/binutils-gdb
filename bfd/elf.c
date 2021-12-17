@@ -3501,7 +3501,8 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	  /* If called from the assembler, swap_out_syms will have set up
 	     elf_section_syms.
 	     PR 25699: A corrupt input file could contain bogus group info.  */
-	  if (elf_section_syms (abfd) == NULL)
+	  if (sec->index >= elf_num_section_syms (abfd)
+	      || elf_section_syms (abfd)[sec->index] == NULL)
 	    {
 	      *failedptr = true;
 	      return;
@@ -6764,15 +6765,14 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
       && asym_ptr->section)
     {
       asection *sec;
-      int indx;
 
       sec = asym_ptr->section;
       if (sec->owner != abfd && sec->output_section != NULL)
 	sec = sec->output_section;
       if (sec->owner == abfd
-	  && (indx = sec->index) < elf_num_section_syms (abfd)
-	  && elf_section_syms (abfd)[indx] != NULL)
-	asym_ptr->udata.i = elf_section_syms (abfd)[indx]->udata.i;
+	  && sec->index < elf_num_section_syms (abfd)
+	  && elf_section_syms (abfd)[sec->index] != NULL)
+	asym_ptr->udata.i = elf_section_syms (abfd)[sec->index]->udata.i;
     }
 
   idx = asym_ptr->udata.i;
