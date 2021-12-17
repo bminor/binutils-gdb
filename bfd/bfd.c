@@ -2504,7 +2504,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 	      Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) contents;
 	      bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
 	      bfd_put_32 (abfd, sec->size, &echdr->ch_size);
-	      bfd_put_32 (abfd, 1 << sec->alignment_power,
+	      bfd_put_32 (abfd, 1u << sec->alignment_power,
 			  &echdr->ch_addralign);
 	      /* bfd_log2 (alignof (Elf32_Chdr)) */
 	      bfd_set_section_alignment (sec, 2);
@@ -2516,7 +2516,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 	      bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
 	      bfd_put_32 (abfd, 0, &echdr->ch_reserved);
 	      bfd_put_64 (abfd, sec->size, &echdr->ch_size);
-	      bfd_put_64 (abfd, 1 << sec->alignment_power,
+	      bfd_put_64 (abfd, UINT64_C (1) << sec->alignment_power,
 			  &echdr->ch_addralign);
 	      /* bfd_log2 (alignof (Elf64_Chdr)) */
 	      bfd_set_section_alignment (sec, 3);
