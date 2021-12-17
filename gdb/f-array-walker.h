@@ -176,10 +176,9 @@ public:
 			Args... args)
     : m_type (type),
       m_address (address),
-      m_impl (type, address, args...)
-  {
-    m_ndimensions =  calc_f77_array_dims (m_type);
-  }
+      m_impl (type, address, args...),
+      m_ndimensions (calc_f77_array_dims (m_type))
+  { /* Nothing.  */ }
 
   /* Walk the array.  */
   void
