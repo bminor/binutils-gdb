@@ -13242,7 +13242,26 @@ _bfd_elf_mips_get_relocated_section_contents
 
   reloc_vector = (arelent **) bfd_malloc (reloc_size);
   if (reloc_vector == NULL)
-    return NULL;
+    {
+      struct mips_hi16 **hip, *hi;
+    error_return:
+      /* If we are going to return an error, remove entries on
+	 mips_hi16_list that point into this section's data.  Data
+	 will typically be freed on return from this function.  */
+      hip = &mips_hi16_list;
+      while ((hi = *hip) != NULL)
+	{
+	  if (hi->input_section == input_section)
+	    {
+	      *hip = hi->next;
+	      free (hi);
+	    }
+	  else
+	    hip = &hi->next;
+	}
+      data = NULL;
+      goto out;
+    }
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,
@@ -13432,12 +13451,9 @@ _bfd_elf_mips_get_relocated_section_contents
 	}
     }
 
+ out:
   free (reloc_vector);
   return data;
-
- error_return:
-  free (reloc_vector);
-  return NULL;
 }
 
 static bool
