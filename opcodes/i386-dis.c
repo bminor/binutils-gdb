@@ -10307,6 +10307,7 @@ swap_operand (void)
 {
   mnemonicendp[0] = '.';
   mnemonicendp[1] = 's';
+  mnemonicendp[2] = '\0';
   mnemonicendp += 2;
 }
 
