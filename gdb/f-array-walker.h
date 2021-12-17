@@ -208,6 +208,8 @@ private:
 
     if (nss != m_ndimensions)
       {
+	struct type *subarray_type = TYPE_TARGET_TYPE (check_typedef (type));
+
 	/* For dimensions other than the inner most, walk each element and
 	   recurse while peeling off one more dimension of the array.  */
 	for (LONGEST i = lowerbound;
@@ -218,13 +220,13 @@ private:
 	    LONGEST new_offset = offset + calc.index_offset (i);
 
 	    /* Now print the lower dimension.  */
-	    struct type *subarray_type
-	      = TYPE_TARGET_TYPE (check_typedef (type));
 	    walk_1 (nss + 1, subarray_type, new_offset, (i == upperbound));
 	  }
       }
     else
       {
+	struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (type));
+
 	/* For the inner most dimension of the array, process each element
 	   within this dimension.  */
 	for (LONGEST i = lowerbound;
@@ -233,7 +235,6 @@ private:
 	  {
 	    LONGEST elt_off = offset + calc.index_offset (i);
 
-	    struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (type));
 	    if (is_dynamic_type (elt_type))
 	      {
 		CORE_ADDR e_address = m_address + elt_off;
