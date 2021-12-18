@@ -56,6 +56,10 @@ set logging enabled on|off
 show logging enabled
   These commands set or show whether logging is enabled or disabled.
 
+exit
+  You can now exit GDB by using the new command "exit", in addition to
+  the existing "quit" command.
+
 * Changed commands
 
 maint packet

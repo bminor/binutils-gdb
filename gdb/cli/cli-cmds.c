@@ -2445,7 +2445,7 @@ strict == evaluate script according to filename extension, error if not supporte
   cmd_list_element *quit_cmd
     = add_com ("quit", class_support, quit_command, _("\
 Exit gdb.\n\
-Usage: quit [EXPR]\n\
+Usage: quit [EXPR] or exit [EXPR]\n\
 The optional expression EXPR, if present, is evaluated and the result\n\
 used as GDB's exit code.  The default is zero."));
   cmd_list_element *help_cmd
@@ -2453,6 +2453,7 @@ used as GDB's exit code.  The default is zero."));
 	       _("Print list of commands."));
   set_cmd_completer (help_cmd, command_completer);
   add_com_alias ("q", quit_cmd, class_support, 1);
+  add_com_alias ("exit", quit_cmd, class_support, 1);
   add_com_alias ("h", help_cmd, class_support, 1);
 
   add_setshow_boolean_cmd ("verbose", class_support, &info_verbose, _("\

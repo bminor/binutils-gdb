@@ -841,7 +841,7 @@ The essentials are:
 @item
 type @samp{@value{GDBP}} to start @value{GDBN}.
 @item
-type @kbd{quit} or @kbd{Ctrl-d} to exit.
+type @kbd{quit}, @kbd{exit} or @kbd{Ctrl-d} to exit.
 @end itemize
 
 @menu
@@ -1580,14 +1580,16 @@ Options,,Choosing Modes}.
 
 @table @code
 @kindex quit @r{[}@var{expression}@r{]}
+@kindex exit @r{[}@var{expression}@r{]}
 @kindex q @r{(@code{quit})}
 @item quit @r{[}@var{expression}@r{]}
+@itemx exit @r{[}@var{expression}@r{]}
 @itemx q
 To exit @value{GDBN}, use the @code{quit} command (abbreviated
-@code{q}), or type an end-of-file character (usually @kbd{Ctrl-d}).  If you
-do not supply @var{expression}, @value{GDBN} will terminate normally;
-otherwise it will terminate using the result of @var{expression} as the
-error code.
+@code{q}), the @code{exit} command, or type an end-of-file
+character (usually @kbd{Ctrl-d}).  If you do not supply @var{expression},
+@value{GDBN} will terminate normally; otherwise it will terminate using
+the result of @var{expression} as the error code.
 @end table
 
 @cindex interrupt
@@ -47253,7 +47255,7 @@ Modula-2.
 
 @value{GDBN} is invoked with the shell command @code{gdb}.  Once started, it reads
 commands from the terminal until you tell it to exit with the @value{GDBN}
-command @code{quit}.  You can get online help from @value{GDBN} itself
+command @code{quit} or @code{exit}.  You can get online help from @value{GDBN} itself
 by using the command @code{help}.
 
 You can run @code{gdb} with no arguments or options; but the most
@@ -47320,6 +47322,7 @@ Show information about @value{GDBN} command @var{name}, or general information
 about using @value{GDBN}.
 
 @item quit
+@itemx exit
 Exit from @value{GDBN}.
 @end table
 
