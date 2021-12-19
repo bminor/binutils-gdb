@@ -7093,6 +7093,10 @@ process_section_headers (Filedata * filedata)
 	    warn (_("Section '%s': zero-sized relocation section\n"), name);
 	  break;
 
+	case SHT_RELR:
+	  CHECK_ENTSIZE (section, i, Relr);
+	  break;
+
 	case SHT_NOTE:
 	case SHT_PROGBITS:
 	  /* Having a zero sized section is not illegal according to the
