@@ -7537,45 +7537,6 @@ nds32_allow_local_subtract (expressionS *expr_l ATTRIBUTE_UNUSED,
   return false;
 }
 
-/* Sort relocation by address.
-
-   We didn't use qsort () in stdlib, because quick-sort is not a stable
-   sorting algorithm.  Relocations at the same address (r_offset) must keep
-   their relative order.  For example, RELAX_ENTRY must be the very first
-   relocation entry.
-
-   Currently, this function implements insertion-sort.  */
-
-static int
-compar_relent (const void *lhs, const void *rhs)
-{
-  const arelent **l = (const arelent **) lhs;
-  const arelent **r = (const arelent **) rhs;
-
-  if ((*l)->address > (*r)->address)
-    return 1;
-  else if ((*l)->address == (*r)->address)
-    return 0;
-  else
-    return -1;
-}
-
-/* SET_SECTION_RELOCS ()
-
-   Although this macro is originally used to set a relocation for each section,
-   we use it to sort relocations in the same section by the address of the
-   relocation.  */
-
-void
-nds32_set_section_relocs (asection *sec ATTRIBUTE_UNUSED,
-			  arelent **relocs, unsigned int n)
-{
-  if (n <= 1)
-    return;
-
-  nds32_insertion_sort (relocs, n, sizeof (*relocs), compar_relent);
-}
-
 long
 nds32_pcrel_from_section (fixS *fixP, segT sec ATTRIBUTE_UNUSED)
 {

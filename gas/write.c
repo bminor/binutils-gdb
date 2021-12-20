@@ -1315,7 +1315,34 @@ write_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 		}
 	      r = r->next;
 	    }
-	  relocs[n++] = *reloc;
+#ifdef GAS_SORT_RELOCS
+	  if (n != 0 && (*reloc)->address < relocs[n - 1]->address)
+	    {
+	      size_t lo = 0;
+	      size_t hi = n - 1;
+	      bfd_vma look = (*reloc)->address;
+	      while (lo < hi)
+		{
+		  size_t mid = (lo + hi) / 2;
+		  if (relocs[mid]->address > look)
+		    hi = mid;
+		  else
+		    {
+		      lo = mid + 1;
+		      if (relocs[mid]->address == look)
+			break;
+		    }
+		}
+	      while (lo < hi && relocs[lo]->address == look)
+		lo++;
+	      memmove (relocs + lo + 1, relocs + lo,
+		       (n - lo) * sizeof (*relocs));
+	      n++;
+	      relocs[lo] = *reloc;
+	    }
+	  else
+#endif
+	    relocs[n++] = *reloc;
 	  install_reloc (sec, *reloc, fixp->fx_frag,
 			 fixp->fx_file, fixp->fx_line);
 #ifndef RELOC_EXPANSION_POSSIBLE

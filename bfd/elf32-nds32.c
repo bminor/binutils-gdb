@@ -2522,7 +2522,7 @@ nds32_put_trampoline (void *contents, const unsigned long *template,
 /* nds32_insertion_sort sorts an array with nmemb elements of size size.
    This prototype is the same as qsort ().  */
 
-void
+static void
 nds32_insertion_sort (void *base, size_t nmemb, size_t size,
 		      int (*compar) (const void *lhs, const void *rhs))
 {
