@@ -447,8 +447,6 @@ extern void puts_unfiltered (const char *);
 
 extern void puts_filtered_tabular (char *string, int width, int right);
 
-extern void puts_debug (char *prefix, char *string, char *suffix);
-
 extern void vprintf_filtered (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 
 extern void vfprintf_filtered (struct ui_file *, const char *, va_list)
