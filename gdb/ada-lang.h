@@ -54,8 +54,8 @@ struct parser_state;
    "___finalizer[.$a-zA-Z0-9_]*$",
 
 /* The maximum number of frame levels searched for non-local,
- * non-global symbols.  This limit exists as a precaution to prevent
- * infinite search loops when the stack is screwed up.  */
+   non-global symbols.  This limit exists as a precaution to prevent
+   infinite search loops when the stack is screwed up.  */
 #define MAX_ENCLOSING_FRAME_LEVELS 7
 
 /* Maximum number of steps followed in looking for the ultimate
