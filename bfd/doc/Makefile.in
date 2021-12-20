@@ -399,7 +399,7 @@ zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = info-in-builddir no-texinfo.tex foreign
 DOCFILES = aoutx.texi  archive.texi archures.texi \
 	bfdt.texi  cache.texi coffcode.texi \
-	core.texi elf.texi elfcode.texi  format.texi \
+	corefile.texi elf.texi elfcode.texi  format.texi \
 	libbfd.texi bfdwin.texi bfdio.texi \
 	opncls.texi  reloc.texi  section.texi  \
 	syms.texi  targets.texi init.texi hash.texi linker.texi \
@@ -919,9 +919,6 @@ bfd.texi bfd.stamp: ; $(AM_V_at)touch $@
 # We use bfdt.texi, rather than bfd.texi, to avoid conflicting with
 # bfd.texi on an 8.3 filesystem.
 bfdt.stamp: $(srcdir)/../bfd.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-core.stamp: $(srcdir)/../corefile.c $(srcdir)/doc.str $(MKDOC)
 	$(AM_V_GEN)$(REGEN_TEXI)
 
 bfdver.texi: $(srcdir)/Makefile.in
