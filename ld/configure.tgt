@@ -436,12 +436,12 @@ lm32-*-*linux*)		targ_emul=elf32lm32fd
 lm32-*-*)		targ_emul=elf32lm32
 			targ_extra_emuls="elf32lm32fd"
 			;;
-m32c-*-elf | m32c-*-rtems*)
+m32c-*-elf)
 			targ_emul=elf32m32c
 			;;
 m32r*le-*-elf*)		targ_emul=m32rlelf
 			;;
-m32r*-*-elf* | m32r*-*-rtems*)
+m32r*-*-elf*)
 			targ_emul=m32relf
 			;;
 m32r*le-*-linux-*)	targ_emul=m32rlelf_linux

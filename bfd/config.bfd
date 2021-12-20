@@ -793,7 +793,7 @@ case "${targ}" in
     targ_selvecs=lm32_elf32_vec
     ;;
 
-  m32c-*-elf | m32c-*-rtems*)
+  m32c-*-elf)
     targ_defvec=m32c_elf32_vec
     targ_underscore=yes
     ;;
