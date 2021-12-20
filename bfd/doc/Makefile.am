@@ -96,94 +96,22 @@ REGEN_TEXI = \
 	touch $@; \
 	)
 
-aoutx.texi: aoutx.stamp ; @true
-aoutx.stamp: $(srcdir)/../aoutx.h $(srcdir)/doc.str $(MKDOC)
+.PRECIOUS: %.stamp
+%.texi: %.stamp ; @true
+%.stamp: $(srcdir)/../%.h $(srcdir)/doc.str $(MKDOC)
+	$(AM_V_GEN)$(REGEN_TEXI)
+%.stamp: $(srcdir)/../%.c $(srcdir)/doc.str $(MKDOC)
 	$(AM_V_GEN)$(REGEN_TEXI)
 
-archive.texi: archive.stamp ; @true
-archive.stamp: $(srcdir)/../archive.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-archures.texi: archures.stamp ; @true
-archures.stamp: $(srcdir)/../archures.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
+# Avoid the %.stamp generating a builddir/bfd.texi that overrides the srcdir/.
+bfd.texi bfd.stamp: ; $(AM_V_at)touch $@
 
 # We use bfdt.texi, rather than bfd.texi, to avoid conflicting with
 # bfd.texi on an 8.3 filesystem.
-bfdt.texi: bfdt.stamp ; @true
 bfdt.stamp: $(srcdir)/../bfd.c $(srcdir)/doc.str $(MKDOC)
 	$(AM_V_GEN)$(REGEN_TEXI)
 
-cache.texi: cache.stamp ; @true
-cache.stamp: $(srcdir)/../cache.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-coffcode.texi: coffcode.stamp ; @true
-coffcode.stamp: $(srcdir)/../coffcode.h $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-core.texi: core.stamp ; @true
 core.stamp: $(srcdir)/../corefile.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-elf.texi: elf.stamp ; @true
-elf.stamp: $(srcdir)/../elf.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-elfcode.texi: elfcode.stamp ; @true
-elfcode.stamp: $(srcdir)/../elfcode.h $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-mmo.texi: mmo.stamp ; @true
-mmo.stamp: $(srcdir)/../mmo.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-format.texi: format.stamp ; @true
-format.stamp: $(srcdir)/../format.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-libbfd.texi: libbfd.stamp ; @true
-libbfd.stamp: $(srcdir)/../libbfd.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-bfdio.texi: bfdio.stamp ; @true
-bfdio.stamp: $(srcdir)/../bfdio.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-bfdwin.texi: bfdwin.stamp ; @true
-bfdwin.stamp: $(srcdir)/../bfdwin.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-opncls.texi: opncls.stamp ; @true
-opncls.stamp: $(srcdir)/../opncls.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-reloc.texi: reloc.stamp ; @true
-reloc.stamp: $(srcdir)/../reloc.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-section.texi: section.stamp ; @true
-section.stamp: $(srcdir)/../section.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-syms.texi: syms.stamp ; @true
-syms.stamp: $(srcdir)/../syms.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-targets.texi: targets.stamp ; @true
-targets.stamp: $(srcdir)/../targets.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-init.texi: init.stamp ; @true
-init.stamp: $(srcdir)/../init.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-hash.texi: hash.stamp ; @true
-hash.stamp: $(srcdir)/../hash.c $(srcdir)/doc.str $(MKDOC)
-	$(AM_V_GEN)$(REGEN_TEXI)
-
-linker.texi: linker.stamp ; @true
-linker.stamp: $(srcdir)/../linker.c $(srcdir)/doc.str $(MKDOC)
 	$(AM_V_GEN)$(REGEN_TEXI)
 
 bfdver.texi: $(srcdir)/Makefile.in
