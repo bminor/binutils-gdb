@@ -117,6 +117,7 @@ const struct riscv_spec riscv_priv_specs[] =
   {"1.9.1", PRIV_SPEC_CLASS_1P9P1},
   {"1.10",  PRIV_SPEC_CLASS_1P10},
   {"1.11",  PRIV_SPEC_CLASS_1P11},
+  {"1.12",  PRIV_SPEC_CLASS_1P12},
 };
 
 /* Get the corresponding CSR version class by giving privilege

@@ -1732,6 +1732,27 @@ const struct riscv_opcode riscv_opcodes[] =
 {"hinval.vvma",     0, INSN_CLASS_SVINVAL, "s,t", MATCH_HINVAL_VVMA, MASK_HINVAL_VVMA, match_opcode, 0 },
 {"hinval.gvma",     0, INSN_CLASS_SVINVAL, "s,t", MATCH_HINVAL_GVMA, MASK_HINVAL_GVMA, match_opcode, 0 },
 
+/* Hypervisor instructions.  */
+{"hfence.vvma", 0, INSN_CLASS_I, "",       MATCH_HFENCE_VVMA, MASK_HFENCE_VVMA|MASK_RS1|MASK_RS2, match_opcode, INSN_ALIAS },
+{"hfence.vvma", 0, INSN_CLASS_I, "s",      MATCH_HFENCE_VVMA, MASK_HFENCE_VVMA|MASK_RS2, match_opcode, INSN_ALIAS },
+{"hfence.vvma", 0, INSN_CLASS_I, "s,t",    MATCH_HFENCE_VVMA, MASK_HFENCE_VVMA, match_opcode, 0 },
+{"hfence.gvma", 0, INSN_CLASS_I, "",       MATCH_HFENCE_GVMA, MASK_HFENCE_GVMA|MASK_RS1|MASK_RS2, match_opcode, INSN_ALIAS },
+{"hfence.gvma", 0, INSN_CLASS_I, "s",      MATCH_HFENCE_GVMA, MASK_HFENCE_GVMA|MASK_RS2, match_opcode, INSN_ALIAS },
+{"hfence.gvma", 0, INSN_CLASS_I, "s,t",    MATCH_HFENCE_GVMA, MASK_HFENCE_GVMA, match_opcode, 0 },
+{"hlv.b",       0, INSN_CLASS_I, "d,0(s)", MATCH_HLV_B, MASK_HLV_B, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"hlv.bu",      0, INSN_CLASS_I, "d,0(s)", MATCH_HLV_BU, MASK_HLV_BU, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"hlv.h",       0, INSN_CLASS_I, "d,0(s)", MATCH_HLV_H, MASK_HLV_H, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"hlv.hu",      0, INSN_CLASS_I, "d,0(s)", MATCH_HLV_HU, MASK_HLV_HU, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"hlvx.hu",     0, INSN_CLASS_I, "d,0(s)", MATCH_HLVX_HU, MASK_HLVX_HU, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"hlv.w",       0, INSN_CLASS_I, "d,0(s)", MATCH_HLV_W, MASK_HLV_W, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"hlv.wu",     64, INSN_CLASS_I, "d,0(s)", MATCH_HLV_WU, MASK_HLV_WU, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"hlvx.wu",     0, INSN_CLASS_I, "d,0(s)", MATCH_HLVX_WU, MASK_HLVX_WU, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"hlv.d",      64, INSN_CLASS_I, "d,0(s)", MATCH_HLV_D, MASK_HLV_D, match_opcode, INSN_DREF|INSN_8_BYTE },
+{"hsv.b",       0, INSN_CLASS_I, "t,0(s)", MATCH_HSV_B, MASK_HSV_B, match_opcode, INSN_DREF|INSN_1_BYTE },
+{"hsv.h",       0, INSN_CLASS_I, "t,0(s)", MATCH_HSV_H, MASK_HSV_H, match_opcode, INSN_DREF|INSN_2_BYTE },
+{"hsv.w",       0, INSN_CLASS_I, "t,0(s)", MATCH_HSV_W, MASK_HSV_W, match_opcode, INSN_DREF|INSN_4_BYTE },
+{"hsv.d",      64, INSN_CLASS_I, "t,0(s)", MATCH_HSV_D, MASK_HSV_D, match_opcode, INSN_DREF|INSN_8_BYTE },
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };

@@ -82,7 +82,7 @@ struct riscv_csr_extra
   enum riscv_spec_class define_version;
 
   /* Record the CSR is aborted/invalid from which versions.  If it isn't
-     aborted in the current version, then it should be CSR_CLASS_VDRAFT.  */
+     aborted in the current version, then it should be PRIV_SPEC_CLASS_DRAFT.  */
   enum riscv_spec_class abort_version;
 
   /* The CSR may have more than one setting.  */
@@ -1104,7 +1104,7 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	    default:
 	      goto unknown_validate_operand;
 	    }
-	  break;
+	  break;  /* end RVC */
 	case 'V': /* RVV */
 	  switch (*++oparg)
 	    {
@@ -1128,7 +1128,7 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	    default:
 	      goto unknown_validate_operand;
 	    }
-	  break;
+	  break; /* end RVV */
 	case ',': break;
 	case '(': break;
 	case ')': break;
@@ -2605,7 +2605,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		default:
 		  goto unknown_riscv_ip_operand;
 		}
-	      break;
+	      break; /* end RVC */
 
 	    case 'V': /* RVV */
 	      switch (*++oparg)
@@ -2771,7 +2771,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		default:
 		  goto unknown_riscv_ip_operand;
 		}
-	      break;
+	      break; /* end RVV */
 
 	    case ',':
 	      ++argnum;
