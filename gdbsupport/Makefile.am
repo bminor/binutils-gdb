@@ -52,6 +52,7 @@ libgdbsupport_a_SOURCES = \
     filestuff.cc \
     format.cc \
     gdb-dlfcn.cc \
+    gdb-hashtab.cc \
     gdb_obstack.cc \
     gdb_tilde_expand.cc \
     gdb_wait.cc \

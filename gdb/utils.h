@@ -123,27 +123,6 @@ extern int parse_escape (struct gdbarch *, const char **);
 
 /* Cleanup utilities.  */
 
-/* A deleter for a hash table.  */
-struct htab_deleter
-{
-  void operator() (htab *ptr) const
-  {
-    htab_delete (ptr);
-  }
-};
-
-/* A unique_ptr wrapper for htab_t.  */
-typedef std::unique_ptr<htab, htab_deleter> htab_up;
-
-/* A wrapper for 'delete' that can used as a hash table entry deletion
-   function.  */
-template<typename T>
-void
-htab_delete_entry (void *ptr)
-{
-  delete (T *) ptr;
-}
-
 extern void init_page_info (void);
 
 /* Temporarily set BATCH_FLAG and the associated unlimited terminal size.
@@ -383,11 +362,6 @@ extern void demangler_warning (const char *file, int line,
 
 
 /* Misc. utilities.  */
-
-/* Allocation and deallocation functions for the libiberty hash table
-   which use obstacks.  */
-void *hashtab_obstack_allocate (void *data, size_t size, size_t count);
-void dummy_obstack_deallocate (void *object, void *data);
 
 #ifdef HAVE_WAITPID
 extern pid_t wait_to_die_with_timeout (pid_t pid, int *status, int timeout);

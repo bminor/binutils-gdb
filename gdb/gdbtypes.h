@@ -46,6 +46,7 @@
 
 #include "hashtab.h"
 #include "gdbsupport/array-view.h"
+#include "gdbsupport/gdb-hashtab.h"
 #include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/offset-type.h"
 #include "gdbsupport/enum-flags.h"

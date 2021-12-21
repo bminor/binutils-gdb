@@ -17,6 +17,7 @@
 #if !defined (COMPLETER_H)
 #define COMPLETER_H 1
 
+#include "gdbsupport/gdb-hashtab.h"
 #include "gdbsupport/gdb_vecs.h"
 #include "command.h"
 

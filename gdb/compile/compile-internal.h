@@ -18,6 +18,7 @@
 #define COMPILE_COMPILE_INTERNAL_H
 
 #include "gcc-c-interface.h"
+#include "gdbsupport/gdb-hashtab.h"
 
 /* Debugging flag for the "compile" family of commands.  */
 

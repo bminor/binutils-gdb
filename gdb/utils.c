@@ -2841,30 +2841,6 @@ gdb_argv_as_array_view_test ()
 
 #endif /* GDB_SELF_TEST */
 
-/* Allocation function for the libiberty hash table which uses an
-   obstack.  The obstack is passed as DATA.  */
-
-void *
-hashtab_obstack_allocate (void *data, size_t size, size_t count)
-{
-  size_t total = size * count;
-  void *ptr = obstack_alloc ((struct obstack *) data, total);
-
-  memset (ptr, 0, total);
-  return ptr;
-}
-
-/* Trivial deallocation function for the libiberty splay tree and hash
-   table - don't deallocate anything.  Rely on later deletion of the
-   obstack.  DATA will be the obstack, although it is not needed
-   here.  */
-
-void
-dummy_obstack_deallocate (void *object, void *data)
-{
-  return;
-}
-
 /* Simple, portable version of dirname that does not modify its
    argument.  */
 
