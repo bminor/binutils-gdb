@@ -30,7 +30,7 @@
 #include "target-float.h"
 #include "extension.h"
 #include "ada-lang.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "charset.h"
 #include "typeprint.h"
 #include <ctype.h>

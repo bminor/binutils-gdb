@@ -32,7 +32,7 @@
 #include "demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include <ctype.h>
 #include "gdbcore.h"
 #include "gdbarch.h"

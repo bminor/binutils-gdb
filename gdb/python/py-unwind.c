@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "frame-unwind.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbcmd.h"
 #include "language.h"
 #include "observable.h"

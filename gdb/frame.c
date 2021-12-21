@@ -24,7 +24,7 @@
 #include "inferior.h"	/* for inferior_ptid */
 #include "regcache.h"
 #include "user-regs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "dummy-frame.h"
 #include "sentinel-frame.h"
 #include "gdbcore.h"

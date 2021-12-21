@@ -21,7 +21,7 @@
 #ifndef XML_SUPPORT_H
 #define XML_SUPPORT_H
 
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/xml-utils.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/gdb_optional.h"

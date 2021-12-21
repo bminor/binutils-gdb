@@ -29,7 +29,7 @@
 #include "symfile.h"
 #include "target.h"
 
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 
 #include "bsd-uthread.h"
 

@@ -32,7 +32,7 @@
 */
 
 #include "defs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "block.h"
 #include "symtab.h"
 #include "language.h"

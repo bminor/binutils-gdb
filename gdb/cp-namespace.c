@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include "cp-support.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "block.h"

@@ -19,7 +19,7 @@
 #include "defs.h"
 #include "buildsym-legacy.h"
 #include "bfd.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"

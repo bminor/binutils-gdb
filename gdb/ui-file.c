@@ -21,7 +21,7 @@
 
 #include "defs.h"
 #include "ui-file.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/filestuff.h"
 #include "cli/cli-style.h"

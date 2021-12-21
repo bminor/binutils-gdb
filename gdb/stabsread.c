@@ -26,7 +26,7 @@
 
 #include "defs.h"
 #include "bfd.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"

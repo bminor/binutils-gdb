@@ -45,7 +45,7 @@
 #include "gdbcore.h"
 #include "filenames.h"
 #include "objfiles.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "buildsym-legacy.h"
 #include "stabsread.h"
 #include "complaints.h"

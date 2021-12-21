@@ -35,7 +35,7 @@
 #include "breakpoint.h"
 #include "gdbcore.h"
 #include "hashtab.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "ada-lang.h"
 #include "completer.h"
 #include "ui-out.h"

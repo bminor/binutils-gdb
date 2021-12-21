@@ -40,7 +40,7 @@
 #include "regcache.h"
 #include "filenames.h"		/* for DOSish file names */
 #include "gdb-stabs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "completer.h"
 #include "bcache.h"
 #include "hashtab.h"

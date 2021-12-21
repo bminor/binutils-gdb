@@ -69,7 +69,7 @@ extern "C"
 #include "gdbcmd.h"
 #include "gdbcore.h"
 #include "gdbthread.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "tid-parse.h"
 #include "nat/fork-inferior.h"
 

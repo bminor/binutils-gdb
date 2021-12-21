@@ -47,7 +47,7 @@
 #include "hashtab.h"
 #include "typeprint.h"
 
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "block.h"
 #include "dictionary.h"
 

@@ -21,7 +21,7 @@
 #include "block.h"
 #include "symtab.h"
 #include "symfile.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "cp-support.h"
 #include "addrmap.h"
 #include "gdbtypes.h"

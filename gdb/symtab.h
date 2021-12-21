@@ -26,7 +26,7 @@
 #include <set>
 #include "gdbsupport/gdb_vecs.h"
 #include "gdbtypes.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdb_regex.h"
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/function-view.h"

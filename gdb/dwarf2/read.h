@@ -27,7 +27,7 @@
 #include "dwarf2/index-cache.h"
 #include "dwarf2/section.h"
 #include "filename-seen-cache.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
 #include "gdbsupport/function-view.h"
 #include "psympriv.h"

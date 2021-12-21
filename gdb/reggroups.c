@@ -26,7 +26,7 @@
 #include "regcache.h"
 #include "command.h"
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 
 /* Individual register groups.  */
 

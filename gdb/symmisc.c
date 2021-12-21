@@ -26,7 +26,7 @@
 #include "objfiles.h"
 #include "breakpoint.h"
 #include "command.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "language.h"
 #include "bcache.h"
 #include "block.h"

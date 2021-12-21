@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "splay-tree.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "addrmap.h"
 #include "gdbsupport/selftest.h"
 

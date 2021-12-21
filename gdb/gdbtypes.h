@@ -52,7 +52,7 @@
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/print-utils.h"
 #include "dwarf2.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gmp-utils.h"
 
 /* Forward declarations for prototypes.  */

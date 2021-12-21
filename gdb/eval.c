@@ -36,7 +36,7 @@
 #include "regcache.h"
 #include "user-regs.h"
 #include "valprint.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "objfiles.h"
 #include "typeprint.h"
 #include <ctype.h>

@@ -23,7 +23,7 @@
 #include "language.h"
 #include "namespace.h"
 #include "d-lang.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbarch.h"
 
 /* This returns the length of first component of NAME, which should be

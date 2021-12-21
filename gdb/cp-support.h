@@ -26,7 +26,7 @@
 
 #include "symtab.h"
 #include "gdbsupport/gdb_vecs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/array-view.h"
 #include <vector>
 

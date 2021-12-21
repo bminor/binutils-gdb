@@ -48,7 +48,7 @@
 #include "annotate.h"
 #include "filenames.h"
 #include "symfile.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbcore.h"
 #include "top.h"
 #include "main.h"

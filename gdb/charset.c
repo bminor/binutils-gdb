@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "charset.h"
 #include "gdbcmd.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/gdb_wait.h"
 #include "charset-list.h"
 #include "gdbsupport/environ.h"

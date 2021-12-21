@@ -17,7 +17,7 @@
 
 #include "defs.h"
 #include "windows-tdep.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "xml-support.h"
 #include "gdbarch.h"
 #include "target.h"

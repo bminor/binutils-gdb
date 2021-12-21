@@ -24,7 +24,7 @@
 #include "breakpoint.h"
 
 #include "bfd.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include <ctype.h>
 
 #include "coff/internal.h"	/* Internal format of COFF symbols in BFD */

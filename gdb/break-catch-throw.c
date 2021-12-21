@@ -27,7 +27,7 @@
 #include "valprint.h"
 #include "cli/cli-utils.h"
 #include "completer.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "mi/mi-common.h"
 #include "linespec.h"
 #include "probe.h"

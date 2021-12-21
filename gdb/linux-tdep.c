@@ -31,7 +31,7 @@
 #include "inferior.h"
 #include "cli/cli-utils.h"
 #include "arch-utils.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "observable.h"
 #include "objfiles.h"
 #include "infcall.h"

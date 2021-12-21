@@ -30,7 +30,7 @@
 #include "language.h"
 #include "location.h"
 #include "linespec.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include <ctype.h>
 #include "tracepoint.h"
 

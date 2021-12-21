@@ -48,7 +48,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdb_bfd.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include <unistd.h>
