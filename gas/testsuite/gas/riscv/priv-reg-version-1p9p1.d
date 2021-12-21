@@ -225,16 +225,6 @@ Disassembly of section .text:
 [     	]+[0-9a-f]+:[  	]+18002573[    	]+csrr[        	]+a0,sptbr
 [     	]+[0-9a-f]+:[  	]+34302573[    	]+csrr[        	]+a0,mbadaddr
 [     	]+[0-9a-f]+:[  	]+32002573[    	]+csrr[        	]+a0,mucounteren
-[     	]+[0-9a-f]+:[  	]+20002573[    	]+csrr[        	]+a0,hstatus
-[     	]+[0-9a-f]+:[  	]+20202573[    	]+csrr[        	]+a0,hedeleg
-[     	]+[0-9a-f]+:[  	]+20302573[    	]+csrr[        	]+a0,hideleg
-[     	]+[0-9a-f]+:[  	]+20402573[    	]+csrr[        	]+a0,hie
-[     	]+[0-9a-f]+:[  	]+20502573[    	]+csrr[        	]+a0,htvec
-[     	]+[0-9a-f]+:[  	]+24002573[    	]+csrr[        	]+a0,hscratch
-[     	]+[0-9a-f]+:[  	]+24102573[    	]+csrr[        	]+a0,hepc
-[     	]+[0-9a-f]+:[  	]+24202573[    	]+csrr[        	]+a0,hcause
-[     	]+[0-9a-f]+:[  	]+24302573[    	]+csrr[        	]+a0,hbadaddr
-[     	]+[0-9a-f]+:[  	]+24402573[    	]+csrr[        	]+a0,hip
 [     	]+[0-9a-f]+:[  	]+38002573[    	]+csrr[        	]+a0,mbase
 [     	]+[0-9a-f]+:[  	]+38102573[    	]+csrr[        	]+a0,mbound
 [     	]+[0-9a-f]+:[  	]+38202573[    	]+csrr[        	]+a0,mibase

@@ -234,16 +234,6 @@
 	csr mbadaddr		# 0x343 in 1.9.1, but the value is mtval since 1.10
 	csr mucounteren		# 0x320 in 1.9.1, dropped in 1.10, but the value is mcountinhibit since 1.11
 
-	csr hstatus		# 0x200, dropped in 1.10
-	csr hedeleg		# 0x202, dropped in 1.10
-	csr hideleg		# 0x203, dropped in 1.10
-	csr hie			# 0x204, dropped in 1.10
-	csr htvec		# 0x205, dropped in 1.10
-	csr hscratch		# 0x240, dropped in 1.10
-	csr hepc		# 0x241, dropped in 1.10
-	csr hcause		# 0x242, dropped in 1.10
-	csr hbadaddr		# 0x243, dropped in 1.10
-	csr hip			# 0x244, dropped in 1.10
 	csr mbase		# 0x380, dropped in 1.10
 	csr mbound		# 0x381, dropped in 1.10
 	csr mibase		# 0x382, dropped in 1.10
