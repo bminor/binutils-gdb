@@ -109,13 +109,6 @@ compare_cstrings (const char *str1, const char *str2)
   return strcmp (str1, str2) < 0;
 }
 
-/* A wrapper for bfd_errmsg to produce a more helpful error message
-   in the case of bfd_error_file_ambiguously recognized.
-   MATCHING, if non-NULL, is the corresponding argument to
-   bfd_check_format_matches, and will be freed.  */
-
-extern std::string gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
-
 /* Reset the prompt_for_continue clock.  */
 void reset_prompt_for_continue_wait_time (void);
 /* Return the time spent in prompt_for_continue.  */

@@ -1059,6 +1059,36 @@ gdb_bfd_get_full_section_contents (bfd *abfd, asection *section,
 				   section_size);
 }
 
+#define AMBIGUOUS_MESS1	".\nMatching formats:"
+#define AMBIGUOUS_MESS2	\
+  ".\nUse \"set gnutarget format-name\" to specify the format."
+
+/* See gdb_bfd.h.  */
+
+std::string
+gdb_bfd_errmsg (bfd_error_type error_tag, char **matching)
+{
+  char **p;
+
+  /* Check if errmsg just need simple return.  */
+  if (error_tag != bfd_error_file_ambiguously_recognized || matching == NULL)
+    return bfd_errmsg (error_tag);
+
+  std::string ret (bfd_errmsg (error_tag));
+  ret += AMBIGUOUS_MESS1;
+
+  for (p = matching; *p; p++)
+    {
+      ret += " ";
+      ret += *p;
+    }
+  ret += AMBIGUOUS_MESS2;
+
+  xfree (matching);
+
+  return ret;
+}
+
 /* A callback for htab_traverse that prints a single BFD.  */
 
 static int
