@@ -1135,7 +1135,7 @@ Display only undefined symbols (those external to each object file).
 
 @item -U @var{[d|i|l|e|x|h]}
 @itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
-Controls the display of UTF-8 encoded mulibyte characters in strings.
+Controls the display of UTF-8 encoded multibyte characters in strings.
 The default (@option{--unicode=default}) is to give them no special
 treatment.  The @option{--unicode=locale} option displays the sequence
 in the current locale, which may or may not support them.  The options
@@ -2940,7 +2940,7 @@ user.
 
 @item -U @var{[d|i|l|e|x|h]}
 @itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
-Controls the display of UTF-8 encoded mulibyte characters in strings.
+Controls the display of UTF-8 encoded multibyte characters in strings.
 The default (@option{--unicode=default}) is to give them no special
 treatment.  The @option{--unicode=locale} option displays the sequence
 in the current locale, which may or may not support them.  The options
@@ -3233,7 +3233,7 @@ strings [@option{-afovV}] [@option{-}@var{min-len}]
         [@option{-}] [@option{--all}] [@option{--print-file-name}]
         [@option{-T} @var{bfdname}] [@option{--target=}@var{bfdname}]
         [@option{-w}] [@option{--include-all-whitespace}]
-        [@option{-s}] [@option{--output-separator}@var{sep_string}]
+        [@option{-s}] [@option{--output-separator} @var{sep_string}]
         [@option{--help}] [@option{--version}] @var{file}@dots{}
 @c man end
 @end smallexample
@@ -3328,7 +3328,7 @@ and @samp{b} apply to, for example, Unicode UTF-16/UCS-2 encodings).
 
 @item -U @var{[d|i|l|e|x|h]}
 @itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
-Controls the display of UTF-8 encoded mulibyte characters in strings.
+Controls the display of UTF-8 encoded multibyte characters in strings.
 The default (@option{--unicode=default}) is to give them no special
 treatment, and instead rely upon the setting of the
 @option{--encoding} option.  The other values for this option
