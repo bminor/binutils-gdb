@@ -8,5 +8,5 @@
 Disassembly of section .text:
 
 0+000 <target>:
-[ 	]+.*:[ 	]+.*[ 	]+sm4ed[ 	]+a0,a1,a2,0x2
-[ 	]+.*:[ 	]+.*[ 	]+sm4ks[ 	]+a0,a1,a2,0x2
+[ 	]+[0-9a-f]+:[ 	]+b0c58533[ 	]+sm4ed[ 	]+a0,a1,a2,0x2
+[ 	]+[0-9a-f]+:[ 	]+b4c58533[ 	]+sm4ks[ 	]+a0,a1,a2,0x2
