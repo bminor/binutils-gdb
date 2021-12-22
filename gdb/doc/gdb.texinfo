@@ -27028,12 +27028,12 @@ Turn on or off debugging messages from JIT debug support.
 @item show debug jit
 Displays the current state of @value{GDBN} JIT debugging.
 
-@item set debug lin-lwp
-@cindex @sc{gnu}/Linux LWP debug messages
-@cindex Linux lightweight processes
-Turn on or off debugging messages from the Linux LWP debug support.
-@item show debug lin-lwp
-Show the current state of Linux LWP debugging messages.
+@item set debug linux-nat @r{[}on@r{|}off@r{]}
+@cindex @sc{gnu}/Linux native target debug messages
+@cindex Linux native targets
+Turn on or off debugging messages from the Linux native target debug support.
+@item show debug linux-nat
+Show the current state of Linux native target debugging messages.
 
 @item set debug linux-namespaces
 @cindex @sc{gnu}/Linux namespaces debug messages

@@ -195,13 +195,13 @@ enum tribool have_ptrace_getregset = TRIBOOL_UNKNOWN;
 
 static bool debug_linux_nat;
 
-/* Implement 'show debug lin-lwp'.  */
+/* Implement 'show debug linux-nat'.  */
 
 static void
 show_debug_linux_nat (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of GNU/Linux lwp module is %s.\n"),
+  fprintf_filtered (file, _("Debugging of GNU/Linux native targets is %s.\n"),
 		    value);
 }
 
@@ -4529,7 +4529,7 @@ void _initialize_linux_nat ();
 void
 _initialize_linux_nat ()
 {
-  add_setshow_boolean_cmd ("lin-lwp", class_maintenance,
+  add_setshow_boolean_cmd ("linux-nat", class_maintenance,
 			   &debug_linux_nat, _("\
 Set debugging of GNU/Linux native target."), _("	\
 Show debugging of GNU/Linux native target."), _("	\

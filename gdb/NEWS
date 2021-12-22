@@ -64,6 +64,12 @@ set debug threads on|off
 show debug threads
   Print additional debug messages about thread creation and deletion.
 
+set debug linux-nat on|off
+show debug linux-nat
+  These new commands replaced the old 'set debug lin-lwp' and 'show
+  debug lin-lwp' respectively.  Turning this setting on prints debug
+  messages relating to GDB's handling of native Linux inferiors.
+
 * Changed commands
 
 maint packet
@@ -78,6 +84,12 @@ clone-inferior
   All modifications to the environment variables done using the 'set
   environment' or 'unset environment' commands are also copied to the new
   inferior.
+
+set debug lin-lwp on|off
+show debug lin-lwp
+  These commands have been removed from GDB.  The new command 'set
+  debug linux-nat' and 'show debug linux-nat' should be used
+  instead.
 
 * Python API
 
