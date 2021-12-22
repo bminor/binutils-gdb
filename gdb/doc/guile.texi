@@ -1727,8 +1727,10 @@ the command to @value{GDBN} from @code{make-command}.
 There is no support for multi-line commands, that is commands that
 consist of multiple lines and are terminated with @code{end}.
 
-@c TODO: line length
-@deffn {Scheme Procedure} (make-command name @r{[}#:invoke invoke{]} @r{[}#:command-class command-class@r{]} @r{[}#:completer-class completer{]} @r{[}#:prefix? prefix@r{]} @r{[}#:doc doc-string{]})
+@deffn {Scheme Procedure} make-command name @w{@r{[}#:invoke invoke@r{]}} @
+    @w{@r{[}#:command-class command-class@r{]}} @
+    @w{@r{[}#:completer-class completer@r{]}} @
+    @w{@r{[}#:prefix? prefix@r{]}} @w{@r{[}#:doc doc-string@r{]}}
 
 The argument @var{name} is the name of the command.  If @var{name} consists of
 multiple words, then the initial words are looked for as prefix
@@ -2017,8 +2019,13 @@ the parameter to @value{GDBN} from @code{make-parameter}.
 Parameters are exposed to the user via the @code{set} and
 @code{show} commands.  @xref{Help}.
 
-@c TODO line length
-@deffn {Scheme Procedure} (make-parameter name @r{[}#:command-class command-class@r{]} @r{[}#:parameter-type parameter-type{]} @r{[}#:enum-list enum-list@r{]} @r{[}#:set-func set-func{]} @r{[}#:show-func show-func{]} @r{[}#:doc doc{]} @r{[}#:set-doc set-doc{]} @r{[}#:show-doc show-doc{]} @r{[}#:initial-value initial-value{]})
+@deffn {Scheme Procedure} make-parameter name @
+    @w{@r{[}#:command-class command-class@r{]}} @
+    @w{@r{[}#:parameter-type parameter-type@r{]}} @
+    @w{@r{[}#:enum-list enum-list@r{]}} @w{@r{[}#:set-func set-func@r{]}} @
+    @w{@r{[}#:show-func show-func@r{]}} @w{@r{[}#:doc doc@r{]}} @
+    @w{@r{[}#:set-doc set-doc@r{]}} @w{@r{[}#:show-doc show-doc@r{]}} @
+    @w{@r{[}#:initial-value initial-value@r{]}}
 
 The argument @var{name} is the name of the new parameter.  If @var{name}
 consists of multiple words, then the initial words are looked for as prefix
