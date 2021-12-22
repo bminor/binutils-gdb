@@ -541,10 +541,6 @@ extern const char *paddress (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern const char *print_core_address (struct gdbarch *gdbarch,
 				       CORE_ADDR address);
 
-/* Callback hash_f and eq_f for htab_create_alloc or htab_create_alloc_ex.  */
-extern hashval_t core_addr_hash (const void *ap);
-extern int core_addr_eq (const void *ap, const void *bp);
-
 extern CORE_ADDR string_to_core_addr (const char *my_string);
 
 extern void fprintf_symbol_filtered (struct ui_file *, const char *,

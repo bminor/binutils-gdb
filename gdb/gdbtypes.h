@@ -1910,13 +1910,13 @@ struct call_site
     static int
     eq (const call_site *a, const call_site *b)
     {
-      return core_addr_eq (&a->m_unrelocated_pc, &b->m_unrelocated_pc);
+      return a->m_unrelocated_pc == b->m_unrelocated_pc;
     }
 
     static hashval_t
     hash (const call_site *a)
     {
-      return core_addr_hash (&a->m_unrelocated_pc);
+      return a->m_unrelocated_pc;
     }
 
     static int

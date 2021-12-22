@@ -2837,27 +2837,6 @@ print_core_address (struct gdbarch *gdbarch, CORE_ADDR address)
     return hex_string_custom (address, 16);
 }
 
-/* Callback hash_f for htab_create_alloc or htab_create_alloc_ex.  */
-
-hashval_t
-core_addr_hash (const void *ap)
-{
-  const CORE_ADDR *addrp = (const CORE_ADDR *) ap;
-
-  return *addrp;
-}
-
-/* Callback eq_f for htab_create_alloc or htab_create_alloc_ex.  */
-
-int
-core_addr_eq (const void *ap, const void *bp)
-{
-  const CORE_ADDR *addr_ap = (const CORE_ADDR *) ap;
-  const CORE_ADDR *addr_bp = (const CORE_ADDR *) bp;
-
-  return *addr_ap == *addr_bp;
-}
-
 /* Convert a string back into a CORE_ADDR.  */
 CORE_ADDR
 string_to_core_addr (const char *my_string)
