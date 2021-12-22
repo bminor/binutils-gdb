@@ -4901,48 +4901,44 @@ dump_fn_fieldlists (struct type *type, int spaces)
   int overload_idx;
   struct fn_field *f;
 
-  printf_filtered ("%*sfn_fieldlists ", spaces, "");
-  gdb_print_host_address (TYPE_FN_FIELDLISTS (type), gdb_stdout);
-  printf_filtered ("\n");
+  printf_filtered ("%*sfn_fieldlists %s\n", spaces, "",
+		   host_address_to_string (TYPE_FN_FIELDLISTS (type)));
   for (method_idx = 0; method_idx < TYPE_NFN_FIELDS (type); method_idx++)
     {
       f = TYPE_FN_FIELDLIST1 (type, method_idx);
-      printf_filtered ("%*s[%d] name '%s' (", spaces + 2, "",
-		       method_idx,
-		       TYPE_FN_FIELDLIST_NAME (type, method_idx));
-      gdb_print_host_address (TYPE_FN_FIELDLIST_NAME (type, method_idx),
-			      gdb_stdout);
-      printf_filtered (_(") length %d\n"),
-		       TYPE_FN_FIELDLIST_LENGTH (type, method_idx));
+      printf_filtered
+	("%*s[%d] name '%s' (%s) length %d\n", spaces + 2, "",
+	 method_idx,
+	 TYPE_FN_FIELDLIST_NAME (type, method_idx),
+	 host_address_to_string (TYPE_FN_FIELDLIST_NAME (type, method_idx)),
+	 TYPE_FN_FIELDLIST_LENGTH (type, method_idx));
       for (overload_idx = 0;
 	   overload_idx < TYPE_FN_FIELDLIST_LENGTH (type, method_idx);
 	   overload_idx++)
 	{
-	  printf_filtered ("%*s[%d] physname '%s' (",
-			   spaces + 4, "", overload_idx,
-			   TYPE_FN_FIELD_PHYSNAME (f, overload_idx));
-	  gdb_print_host_address (TYPE_FN_FIELD_PHYSNAME (f, overload_idx),
-				  gdb_stdout);
-	  printf_filtered (")\n");
-	  printf_filtered ("%*stype ", spaces + 8, "");
-	  gdb_print_host_address (TYPE_FN_FIELD_TYPE (f, overload_idx), 
-				  gdb_stdout);
-	  printf_filtered ("\n");
+	  printf_filtered
+	    ("%*s[%d] physname '%s' (%s)\n",
+	     spaces + 4, "", overload_idx,
+	     TYPE_FN_FIELD_PHYSNAME (f, overload_idx),
+	     host_address_to_string (TYPE_FN_FIELD_PHYSNAME (f,
+							     overload_idx)));
+	  printf_filtered
+	    ("%*stype %s\n", spaces + 8, "",
+	     host_address_to_string (TYPE_FN_FIELD_TYPE (f, overload_idx)));
 
 	  recursive_dump_type (TYPE_FN_FIELD_TYPE (f, overload_idx),
 			       spaces + 8 + 2);
 
-	  printf_filtered ("%*sargs ", spaces + 8, "");
-	  gdb_print_host_address (TYPE_FN_FIELD_ARGS (f, overload_idx), 
-				  gdb_stdout);
-	  printf_filtered ("\n");
+	  printf_filtered
+	    ("%*sargs %s\n", spaces + 8, "",
+	     host_address_to_string (TYPE_FN_FIELD_ARGS (f, overload_idx)));
 	  print_args (TYPE_FN_FIELD_ARGS (f, overload_idx),
 		      TYPE_FN_FIELD_TYPE (f, overload_idx)->num_fields (),
 		      spaces + 8 + 2);
-	  printf_filtered ("%*sfcontext ", spaces + 8, "");
-	  gdb_print_host_address (TYPE_FN_FIELD_FCONTEXT (f, overload_idx),
-				  gdb_stdout);
-	  printf_filtered ("\n");
+	  printf_filtered
+	    ("%*sfcontext %s\n", spaces + 8, "",
+	     host_address_to_string (TYPE_FN_FIELD_FCONTEXT (f,
+							     overload_idx)));
 
 	  printf_filtered ("%*sis_const %d\n", spaces + 8, "",
 			   TYPE_FN_FIELD_CONST (f, overload_idx));
@@ -4969,9 +4965,8 @@ print_cplus_stuff (struct type *type, int spaces)
 {
   printf_filtered ("%*svptr_fieldno %d\n", spaces, "",
 		   TYPE_VPTR_FIELDNO (type));
-  printf_filtered ("%*svptr_basetype ", spaces, "");
-  gdb_print_host_address (TYPE_VPTR_BASETYPE (type), gdb_stdout);
-  puts_filtered ("\n");
+  printf_filtered ("%*svptr_basetype %s\n", spaces, "",
+		   host_address_to_string (TYPE_VPTR_BASETYPE (type)));
   if (TYPE_VPTR_BASETYPE (type) != NULL)
     recursive_dump_type (TYPE_VPTR_BASETYPE (type), spaces + 2);
 
@@ -4981,11 +4976,10 @@ print_cplus_stuff (struct type *type, int spaces)
 		   TYPE_NFN_FIELDS (type));
   if (TYPE_N_BASECLASSES (type) > 0)
     {
-      printf_filtered ("%*svirtual_field_bits (%d bits at *",
-		       spaces, "", TYPE_N_BASECLASSES (type));
-      gdb_print_host_address (TYPE_FIELD_VIRTUAL_BITS (type), 
-			      gdb_stdout);
-      printf_filtered (")");
+      printf_filtered
+	("%*svirtual_field_bits (%d bits at *%s)",
+	 spaces, "", TYPE_N_BASECLASSES (type),
+	 host_address_to_string (TYPE_FIELD_VIRTUAL_BITS (type)));
 
       print_bit_vector (TYPE_FIELD_VIRTUAL_BITS (type),
 			TYPE_N_BASECLASSES (type));
@@ -4995,22 +4989,20 @@ print_cplus_stuff (struct type *type, int spaces)
     {
       if (TYPE_FIELD_PRIVATE_BITS (type) != NULL)
 	{
-	  printf_filtered ("%*sprivate_field_bits (%d bits at *",
-			   spaces, "", type->num_fields ());
-	  gdb_print_host_address (TYPE_FIELD_PRIVATE_BITS (type), 
-				  gdb_stdout);
-	  printf_filtered (")");
+	  printf_filtered
+	    ("%*sprivate_field_bits (%d bits at *%s)",
+	     spaces, "", type->num_fields (),
+	     host_address_to_string (TYPE_FIELD_PRIVATE_BITS (type)));
 	  print_bit_vector (TYPE_FIELD_PRIVATE_BITS (type),
 			    type->num_fields ());
 	  puts_filtered ("\n");
 	}
       if (TYPE_FIELD_PROTECTED_BITS (type) != NULL)
 	{
-	  printf_filtered ("%*sprotected_field_bits (%d bits at *",
-			   spaces, "", type->num_fields ());
-	  gdb_print_host_address (TYPE_FIELD_PROTECTED_BITS (type), 
-				  gdb_stdout);
-	  printf_filtered (")");
+	  printf_filtered
+	    ("%*sprotected_field_bits (%d bits at *%s",
+	     spaces, "", type->num_fields (),
+	     host_address_to_string (TYPE_FIELD_PROTECTED_BITS (type)));
 	  print_bit_vector (TYPE_FIELD_PROTECTED_BITS (type),
 			    type->num_fields ());
 	  puts_filtered ("\n");
@@ -5098,8 +5090,8 @@ recursive_dump_type (struct type *type, int spaces)
 	{
 	  if (type == first_dont_print[i])
 	    {
-	      printf_filtered ("%*stype node ", spaces, "");
-	      gdb_print_host_address (type, gdb_stdout);
+	      printf_filtered ("%*stype node %s", spaces, "",
+			       host_address_to_string (type));
 	      printf_filtered (_(" <same as already seen type>\n"));
 	      return;
 	    }
@@ -5108,13 +5100,11 @@ recursive_dump_type (struct type *type, int spaces)
       obstack_ptr_grow (&dont_print_type_obstack, type);
     }
 
-  printf_filtered ("%*stype node ", spaces, "");
-  gdb_print_host_address (type, gdb_stdout);
-  printf_filtered ("\n");
-  printf_filtered ("%*sname '%s' (", spaces, "",
-		   type->name () ? type->name () : "<NULL>");
-  gdb_print_host_address (type->name (), gdb_stdout);
-  printf_filtered (")\n");
+  printf_filtered ("%*stype node %s\n", spaces, "",
+		   host_address_to_string (type));
+  printf_filtered ("%*sname '%s' (%s)\n", spaces, "",
+		   type->name () ? type->name () : "<NULL>",
+		   host_address_to_string (type->name ()));
   printf_filtered ("%*scode 0x%x ", spaces, "", type->code ());
   switch (type->code ())
     {
@@ -5201,32 +5191,23 @@ recursive_dump_type (struct type *type, int spaces)
   printf_filtered ("%*slength %s\n", spaces, "",
 		   pulongest (TYPE_LENGTH (type)));
   if (type->is_objfile_owned ())
-    {
-      printf_filtered ("%*sobjfile ", spaces, "");
-      gdb_print_host_address (type->objfile_owner (), gdb_stdout);
-    }
+    printf_filtered ("%*sobjfile %s\n", spaces, "",
+		     host_address_to_string (type->objfile_owner ()));
   else
-    {
-      printf_filtered ("%*sgdbarch ", spaces, "");
-      gdb_print_host_address (type->arch_owner (), gdb_stdout);
-    }
-  printf_filtered ("\n");
-  printf_filtered ("%*starget_type ", spaces, "");
-  gdb_print_host_address (TYPE_TARGET_TYPE (type), gdb_stdout);
-  printf_filtered ("\n");
+    printf_filtered ("%*sgdbarch %s\n", spaces, "",
+		     host_address_to_string (type->arch_owner ()));
+  printf_filtered ("%*starget_type %s\n", spaces, "",
+		   host_address_to_string (TYPE_TARGET_TYPE (type)));
   if (TYPE_TARGET_TYPE (type) != NULL)
     {
       recursive_dump_type (TYPE_TARGET_TYPE (type), spaces + 2);
     }
-  printf_filtered ("%*spointer_type ", spaces, "");
-  gdb_print_host_address (TYPE_POINTER_TYPE (type), gdb_stdout);
-  printf_filtered ("\n");
-  printf_filtered ("%*sreference_type ", spaces, "");
-  gdb_print_host_address (TYPE_REFERENCE_TYPE (type), gdb_stdout);
-  printf_filtered ("\n");
-  printf_filtered ("%*stype_chain ", spaces, "");
-  gdb_print_host_address (TYPE_CHAIN (type), gdb_stdout);
-  printf_filtered ("\n");
+  printf_filtered ("%*spointer_type %s\n", spaces, "",
+		   host_address_to_string (TYPE_POINTER_TYPE (type)));
+  printf_filtered ("%*sreference_type %s\n", spaces, "",
+		   host_address_to_string (TYPE_REFERENCE_TYPE (type)));
+  printf_filtered ("%*stype_chain %s\n", spaces, "",
+		   host_address_to_string (TYPE_CHAIN (type)));
   printf_filtered ("%*sinstance_flags 0x%x", spaces, "", 
 		   (unsigned) type->instance_flags ());
   if (TYPE_CONST (type))
@@ -5331,8 +5312,7 @@ recursive_dump_type (struct type *type, int spaces)
 	}
       printf_filtered ("\n");
     }
-  gdb_print_host_address (type->fields (), gdb_stdout);
-  puts_filtered ("\n");
+  printf ("%s\n", host_address_to_string (type->fields ()));
   for (idx = 0; idx < type->num_fields (); idx++)
     {
       if (type->code () == TYPE_CODE_ENUM)
@@ -5342,13 +5322,12 @@ recursive_dump_type (struct type *type, int spaces)
 	printf_filtered ("%*s[%d] bitpos %s bitsize %d type ", spaces + 2, "",
 			 idx, plongest (type->field (idx).loc_bitpos ()),
 			 TYPE_FIELD_BITSIZE (type, idx));
-      gdb_print_host_address (type->field (idx).type (), gdb_stdout);
-      printf_filtered (" name '%s' (",
+      printf_filtered ("%s name '%s' (%s)\n",
+		       host_address_to_string (type->field (idx).type ()),
 		       type->field (idx).name () != NULL
 		       ? type->field (idx).name ()
-		       : "<NULL>");
-      gdb_print_host_address (type->field (idx).name (), gdb_stdout);
-      printf_filtered (")\n");
+		       : "<NULL>",
+		       host_address_to_string (type->field (idx).name ()));
       if (type->field (idx).type () != NULL)
 	{
 	  recursive_dump_type (type->field (idx).type (), spaces + 4);
@@ -5366,17 +5345,14 @@ recursive_dump_type (struct type *type, int spaces)
   switch (TYPE_SPECIFIC_FIELD (type))
     {
       case TYPE_SPECIFIC_CPLUS_STUFF:
-	printf_filtered ("%*scplus_stuff ", spaces, "");
-	gdb_print_host_address (TYPE_CPLUS_SPECIFIC (type), 
-				gdb_stdout);
-	puts_filtered ("\n");
+	printf_filtered ("%*scplus_stuff %s\n", spaces, "",
+			 host_address_to_string (TYPE_CPLUS_SPECIFIC (type)));
 	print_cplus_stuff (type, spaces);
 	break;
 
       case TYPE_SPECIFIC_GNAT_STUFF:
-	printf_filtered ("%*sgnat_stuff ", spaces, "");
-	gdb_print_host_address (TYPE_GNAT_SPECIFIC (type), gdb_stdout);
-	puts_filtered ("\n");
+	printf_filtered ("%*sgnat_stuff %s\n", spaces, "",
+			 host_address_to_string (TYPE_GNAT_SPECIFIC (type)));
 	print_gnat_stuff (type, spaces);
 	break;
 
@@ -5397,9 +5373,8 @@ recursive_dump_type (struct type *type, int spaces)
 	break;
 
       case TYPE_SPECIFIC_SELF_TYPE:
-	printf_filtered ("%*sself_type ", spaces, "");
-	gdb_print_host_address (TYPE_SELF_TYPE (type), gdb_stdout);
-	puts_filtered ("\n");
+	printf_filtered ("%*sself_type %s\n", spaces, "",
+			 host_address_to_string (TYPE_SELF_TYPE (type)));
 	break;
 
       case TYPE_SPECIFIC_FIXED_POINT:

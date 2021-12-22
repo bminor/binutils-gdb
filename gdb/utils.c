@@ -779,14 +779,6 @@ uinteger_pow (ULONGEST v1, LONGEST v2)
     }
 }
 
-/* Print a host address.  */
-
-void
-gdb_print_host_address_1 (const void *addr, struct ui_file *stream)
-{
-  fprintf_filtered (stream, "%s", host_address_to_string (addr));
-}
-
 
 
 /* An RAII class that sets up to handle input and then tears down

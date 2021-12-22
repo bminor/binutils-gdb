@@ -528,13 +528,6 @@ extern void fputs_highlighted (const char *str, const compiled_regex &highlight,
 
 extern void reset_terminal_style (struct ui_file *stream);
 
-/* Display the host ADDR on STREAM formatted as ``0x%x''.  */
-extern void gdb_print_host_address_1 (const void *addr, struct ui_file *stream);
-
-/* Wrapper that avoids adding a pointless cast to all callers.  */
-#define gdb_print_host_address(ADDR, STREAM) \
-  gdb_print_host_address_1 ((const void *) ADDR, STREAM)
-
 /* Return the address only having significant bits.  */
 extern CORE_ADDR address_significant (gdbarch *gdbarch, CORE_ADDR addr);
 
