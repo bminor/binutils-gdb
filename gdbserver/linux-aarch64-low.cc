@@ -845,7 +845,7 @@ static struct regset_info aarch64_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_MORELLO,
     0, OPTIONAL_REGS,
     aarch64_fill_cregset, aarch64_store_cregset, nullptr,
-    "cheri.ptrace_forge_cap"
+    "cheri.ptrace_forge_cap", "capability"
   },
   NULL_REGSET
 };

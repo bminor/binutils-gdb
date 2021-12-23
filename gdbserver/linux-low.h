@@ -48,7 +48,8 @@ enum regset_type {
 /* The arch's regsets array initializer must be terminated with a NULL
    regset.  */
 #define NULL_REGSET \
-  { 0, 0, 0, -1, (enum regset_type) -1, nullptr, nullptr, nullptr, nullptr }
+  { 0, 0, 0, -1, (enum regset_type) -1, nullptr, nullptr, nullptr, nullptr, \
+    nullptr }
 
 struct regset_info
 {
@@ -65,6 +66,7 @@ struct regset_info
      switch.  */
   const char *sysctl_read_permission = nullptr;
   const char *sysctl_write_permission = nullptr;
+  const char *register_set_name = nullptr;
   bool sysctl_read_should_warn = true;
   bool sysctl_write_should_warn = true;
 };
