@@ -5246,9 +5246,19 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
 	    {
 	      if (regset->sysctl_write_should_warn)
 		{
-		  warning ("Unable to store registers.\n"
-			   "Please run \"sysctl %s=1\".",
-			   regset->sysctl_write_permission);
+		  if (regset->register_set_name == nullptr)
+		    {
+		      warning ("Unable to store registers.\n"
+			       "Please run \"sysctl %s=1\".",
+			       regset->sysctl_write_permission);
+		    }
+		  else
+		    {
+		      warning ("Unable to store %s registers.\n"
+			       "Please run \"sysctl %s=1\".",
+			       regset->register_set_name,
+			       regset->sysctl_write_permission);
+		    }
 		  regset->sysctl_write_should_warn = false;
 		}
 	    }
