@@ -233,7 +233,7 @@ set lto_link_tests [list \
    [list [list "nm" "$plug_opt" "pr26389.d"]]] \
 ]
 
-if { [at_least_gcc_version 10 0] } {
+if { [at_least_gcc_version 10 0] && [check_lto_shared_available] } {
     set lto_link_tests [concat $lto_link_tests [list \
 	[list "pr25355.o" \
 	 "" \
