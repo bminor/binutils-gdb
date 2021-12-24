@@ -19,6 +19,50 @@
 #include "aarch64-cap-linux.h"
 #include "gdb_ptrace.h"
 
+/* Helper function to display various possible errors when reading
+   Morello capabilities from memory.  */
+
+static void
+morello_linux_peekcap_error (int error)
+{
+  switch (error)
+    {
+    case EIO:
+    case EFAULT:
+      warning (_("PTRACE_PEEKCAP: Couldn't fetch capability"));
+      break;
+    default:
+      warning (_("PTRACE_PEEKCAP: Unknown error"));
+      break;
+    }
+}
+
+/* Helper function to display various possible errors when writing
+   Morello capabilities to memory.  */
+
+static void
+morello_linux_pokecap_error (int error)
+{
+  switch (error)
+    {
+    case EIO:
+    case EFAULT:
+      warning (_("PTRACE_POKECAP: Couldn't store capability"));
+      break;
+    case EPERM:
+      warning (_("PTRACE_POKECAP:: Couldn't store capability.\n"
+		 "Make sure the sysctl flag cheri.ptrace_forge_cap is 1"));
+      break;
+    case EOPNOTSUPP:
+      warning (_("PTRACE_POKECAP: Capability tags not enabled for"
+		 " requested address"));
+      break;
+    default:
+      warning (_("PTRACE_POKECAP: Unknown error"));
+      break;
+    }
+}
+
 /* See aarch64-cap-linux.h */
 
 bool
@@ -31,7 +75,10 @@ aarch64_linux_read_capability (int tid, CORE_ADDR address,
 
   /* Fetch the tag from ptrace.  */
   if (ptrace (PTRACE_PEEKCAP, tid, address, &cap) < 0)
-    return false;
+    {
+      morello_linux_peekcap_error (errno);
+      return false;
+    }
 
   return true;
 }
@@ -44,7 +91,10 @@ aarch64_linux_write_capability (int tid, CORE_ADDR address,
 {
   /* Fetch the tag from ptrace.  */
   if (ptrace (PTRACE_POKECAP, tid, address, &cap) < 0)
-    return false;
+    {
+      morello_linux_pokecap_error (errno);
+      return false;
+    }
 
   return true;
 }
