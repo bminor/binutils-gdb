@@ -2360,8 +2360,6 @@ proc skip_rust_tests {} {
 # PROMPT_REGEXP is the expected prompt.
 
 proc skip_python_tests_prompt { prompt_regexp } {
-    global gdb_py_is_py3k
-
     gdb_test_multiple "python print ('test')" "verify python support" \
 	-prompt "$prompt_regexp" {
 	    -re "not supported.*$prompt_regexp" {
@@ -2369,16 +2367,6 @@ proc skip_python_tests_prompt { prompt_regexp } {
 		return 1
 	    }
 	    -re "$prompt_regexp" {}
-	}
-
-    gdb_test_multiple "python print (sys.version_info\[0\])" "check if python 3" \
-	-prompt "$prompt_regexp" {
-	    -re "3.*$prompt_regexp" {
-		set gdb_py_is_py3k 1
-	    }
-	    -re ".*$prompt_regexp" {
-		set gdb_py_is_py3k 0
-	    }
 	}
 
     return 0

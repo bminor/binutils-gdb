@@ -317,11 +317,6 @@ eval_python_command (const char *command)
   if (v == NULL)
     return -1;
 
-#ifndef IS_PY3K
-  if (Py_FlushLine ())
-    PyErr_Clear ();
-#endif
-
   return 0;
 }
 
@@ -1904,7 +1899,6 @@ finalize_python (void *ignore)
   restore_active_ext_lang (previous_active);
 }
 
-#ifdef IS_PY3K
 static struct PyModuleDef python_GdbModuleDef =
 {
   PyModuleDef_HEAD_INIT,
@@ -1927,7 +1921,6 @@ init__gdb_module (void)
 {
   return PyModule_Create (&python_GdbModuleDef);
 }
-#endif
 
 /* Emit a gdb.GdbExitingEvent, return a negative value if there are any
    errors, otherwise, return 0.  */
@@ -1974,7 +1967,6 @@ do_start_initialization ()
   gdb::unique_xmalloc_ptr<char> progname
     (concat (ldirname (python_libdir.c_str ()).c_str (), SLASH_STRING, "bin",
 	      SLASH_STRING, "python", (char *) NULL));
-#ifdef IS_PY3K
   /* Python documentation indicates that the memory given
      to Py_SetProgramName cannot be freed.  However, it seems that
      at least Python 3.7.4 Py_SetProgramName takes a copy of the
@@ -2003,9 +1995,6 @@ do_start_initialization ()
 
   /* Define _gdb as a built-in module.  */
   PyImport_AppendInittab ("_gdb", init__gdb_module);
-#else
-  Py_SetProgramName (progname.release ());
-#endif
 #endif
 
   Py_Initialize ();
@@ -2016,11 +2005,7 @@ do_start_initialization ()
   PyEval_InitThreads ();
 #endif
 
-#ifdef IS_PY3K
   gdb_module = PyImport_ImportModule ("_gdb");
-#else
-  gdb_module = Py_InitModule ("_gdb", python_GdbMethods);
-#endif
   if (gdb_module == NULL)
     return false;
 
@@ -2321,11 +2306,7 @@ do_initialize (const struct extension_language_defn *extlang)
   /* If sys.path is not defined yet, define it first.  */
   if (!(sys_path && PyList_Check (sys_path)))
     {
-#ifdef IS_PY3K
       PySys_SetPath (L"");
-#else
-      PySys_SetPath ("");
-#endif
       sys_path = PySys_GetObject ("path");
     }
   if (sys_path && PyList_Check (sys_path))

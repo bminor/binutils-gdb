@@ -920,11 +920,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 
 	      function = function_to_free.get ();
 	    }
-	  else if (PyLong_Check (py_func.get ())
-#if PY_MAJOR_VERSION == 2
-		   || PyInt_Check (py_func.get ())
-#endif
-		   )
+	  else if (PyLong_Check (py_func.get ()))
 	    {
 	      CORE_ADDR addr;
 	      struct bound_minimal_symbol msymbol;

@@ -28,16 +28,6 @@
 #include "disasm.h"
 #include "gdbarch.h"
 
-#if defined (IS_PY3K)
-
-#define BTPY_PYSLICE(x) (x)
-
-#else
-
-#define BTPY_PYSLICE(x) ((PySliceObject *) x)
-
-#endif
-
 /* Python object for btrace record lists.  */
 
 struct btpy_list_object {
@@ -295,12 +285,7 @@ recpy_bt_insn_data (PyObject *self, void *closure)
   if (object == NULL)
     return NULL;
 
-#ifdef IS_PY3K
   return PyMemoryView_FromObject (object);
-#else
-  return PyBuffer_FromObject (object, 0, Py_END_OF_BUFFER);
-#endif
-
 }
 
 /* Implementation of RecordInstruction.decoded [str] for btrace.
@@ -500,7 +485,7 @@ btpy_list_slice (PyObject *self, PyObject *value)
   if (!PySlice_Check (value))
     return PyErr_Format (PyExc_TypeError, _("Index must be int or slice."));
 
-  if (0 != PySlice_GetIndicesEx (BTPY_PYSLICE (value), length, &start, &stop,
+  if (0 != PySlice_GetIndicesEx (value, length, &start, &stop,
 				 &step, &slicelength))
     return NULL;
 

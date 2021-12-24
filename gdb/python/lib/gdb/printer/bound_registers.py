@@ -18,11 +18,6 @@ import sys
 
 import gdb.printing
 
-if sys.version_info[0] > 2:
-    # Python 3 removed basestring and long
-    basestring = str
-    long = int
-
 
 class MpxBound128Printer:
     """Adds size field to a mpx __gdb_builtin_type_bound128 type."""
@@ -33,7 +28,7 @@ class MpxBound128Printer:
     def to_string(self):
         upper = self.val["ubound"]
         lower = self.val["lbound"]
-        size = (long)((upper) - (lower))
+        size = upper - lower
         if size > -1:
             size = size + 1
         result = "{lbound = %s, ubound = %s} : size %s" % (lower, upper, size)

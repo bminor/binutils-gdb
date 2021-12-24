@@ -1610,9 +1610,6 @@ static PyNumberMethods type_object_as_number = {
   NULL,			      /* nb_add */
   NULL,			      /* nb_subtract */
   NULL,			      /* nb_multiply */
-#ifndef IS_PY3K
-  NULL,			      /* nb_divide */
-#endif
   NULL,			      /* nb_remainder */
   NULL,			      /* nb_divmod */
   NULL,			      /* nb_power */
@@ -1626,19 +1623,9 @@ static PyNumberMethods type_object_as_number = {
   NULL,			      /* nb_and */
   NULL,			      /* nb_xor */
   NULL,			      /* nb_or */
-#ifdef IS_PY3K
   NULL,			      /* nb_int */
   NULL,			      /* reserved */
-#else
-  NULL,			      /* nb_coerce */
-  NULL,			      /* nb_int */
-  NULL,			      /* nb_long */
-#endif
   NULL,			      /* nb_float */
-#ifndef IS_PY3K
-  NULL,			      /* nb_oct */
-  NULL			      /* nb_hex */
-#endif
 };
 
 static PyMappingMethods typy_mapping = {

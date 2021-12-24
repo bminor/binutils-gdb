@@ -47,32 +47,18 @@ proc build_inferior {exefile lang} {
 
 proc test_value_creation {} {
   global gdb_prompt
-  global gdb_py_is_py3k
 
   gdb_py_test_silent_cmd "python i = gdb.Value (True)" "create boolean value" 1
   gdb_py_test_silent_cmd "python i = gdb.Value (5)" "create integer value" 1
   gdb_py_test_silent_cmd "python i = gdb.Value (3,None)" "create integer value, with None type" 1
-  if { $gdb_py_is_py3k == 0 } {
-    gdb_py_test_silent_cmd "python i = gdb.Value (5L)" "create long value" 1
-  }
 
   gdb_py_test_silent_cmd "python l = gdb.Value(0xffffffff12345678)" "create large unsigned 64-bit value" 1
-  if { $gdb_py_is_py3k == 0 } {
-    gdb_test "python print long(l)" "18446744069720004216" "large unsigned 64-bit int conversion to python"
-  } else {
-    gdb_test "python print (int(l))" "18446744069720004216" "large unsigned 64-bit int conversion to python"
-  }
+  gdb_test "python print (int(l))" "18446744069720004216" "large unsigned 64-bit int conversion to python"
 
   gdb_py_test_silent_cmd "python f = gdb.Value (1.25)" "create double value" 1
   gdb_py_test_silent_cmd "python a = gdb.Value ('string test')" "create 8-bit string value" 1
   gdb_test "python print (a)" "\"string test\"" "print 8-bit string"
   gdb_test "python print (a.__class__)" "<(type|class) 'gdb.Value'>" "verify type of 8-bit string"
-
-  if { $gdb_py_is_py3k == 0 } {
-    gdb_py_test_silent_cmd "python a = gdb.Value (u'unicode test')" "create unicode value" 1
-    gdb_test "python print (a)" "\"unicode test\"" "print Unicode string"
-    gdb_test "python print (a.__class__)" "<(type|class) 'gdb.Value'>" "verify type of unicode string"
-  }
 
   # Test address attribute is None in a non-addressable value
   gdb_test "python print ('result = %s' % i.address)" "= None" "test address attribute in non-addressable value"
@@ -92,7 +78,6 @@ proc test_value_reinit {} {
 
 proc test_value_numeric_ops {} {
   global gdb_prompt
-  global gdb_py_is_py3k
 
   gdb_py_test_silent_cmd "python i = gdb.Value (5)" "create first integer value" 0
   gdb_py_test_silent_cmd "python j = gdb.Value (2)" "create second integer value" 0
@@ -144,9 +129,6 @@ proc test_value_numeric_ops {} {
   gdb_test_no_output "python b = gdb.history (0)" ""
 
   gdb_test "python print(int(b))" "5" "convert pointer to int"
-  if {!$gdb_py_is_py3k} {
-    gdb_test "python print(long(b))" "5" "convert pointer to long"
-  }
 
   gdb_test "python print ('result = ' + str(a+5))" " = 0x7( <.*>)?" "add pointer value with python integer"
   gdb_test "python print ('result = ' + str(b-2))" " = 0x3( <.*>)?" "subtract python integer from pointer value"
@@ -156,17 +138,11 @@ proc test_value_numeric_ops {} {
     "result = r" "use value as string index"
   gdb_test "python print ('result = ' + str((1,2,3)\[gdb.Value(0)\]))" \
     "result = 1" "use value as tuple index"
-  if {!$gdb_py_is_py3k} {
-    gdb_test "python print ('result = ' + str(\[1,2,3\]\[gdb.Value(0)\]))" \
-      "result = 1" "use value as array index"
-  }
+  gdb_test "python print ('result = ' + str(\[1,2,3\]\[gdb.Value(0)\]))" \
+    "result = 1" "use value as array index"
 
   gdb_test "python print('%x' % int(gdb.parse_and_eval('-1ull')))" \
       "f+" "int conversion respect type sign"
-  if {!$gdb_py_is_py3k} {
-    gdb_test "python print('%x' % long(gdb.parse_and_eval('-1ull')))" \
-      "f+" "long conversion respect type sign"
-  }
 
   # Test some invalid operations.
 
@@ -242,7 +218,6 @@ proc test_value_compare {} {
 proc test_value_in_inferior {} {
   global gdb_prompt
   global testfile
-  global gdb_py_is_py3k
 
   gdb_breakpoint [gdb_get_line_number "break to inspect struct and union"]
   gdb_continue_to_breakpoint "break to inspect struct and union"
@@ -253,9 +228,6 @@ proc test_value_in_inferior {} {
   gdb_py_test_silent_cmd "python s = gdb.history (0)" "get value s from history" 1
 
   gdb_test "python print ('result = ' + str(s\['a'\]))" " = 3" "access element inside struct using 8-bit string name"
-  if { $gdb_py_is_py3k == 0 } {
-    gdb_test "python print ('result = ' + str(s\[u'a'\]))" " = 3" "access element inside struct using unicode name"
-  }
 
   # Test dereferencing the argv pointer
 
@@ -533,13 +505,8 @@ proc test_value_hash {} {
 }
 
 proc test_float_conversion {} {
-    global gdb_py_is_py3k
     gdb_test "python print(int(gdb.Value(0)))" "0"
     gdb_test "python print(int(gdb.Value(2.5)))" "2"
-    if {!$gdb_py_is_py3k} {
-	gdb_test "python print(long(gdb.Value(0)))" "0"
-	gdb_test "python print(long(gdb.Value(2.5)))" "2"
-    }
     gdb_test "python print(float(gdb.Value(2.5)))" "2\\.5"
     gdb_test "python print(float(gdb.Value(0)))" "0\\.0"
 }
@@ -565,7 +532,6 @@ proc prepare_type_and_buffer {} {
 
 proc test_value_from_buffer {} {
   global gdb_prompt
-  global gdb_py_is_py3k
 
   prepare_type_and_buffer
   gdb_test "python v=gdb.Value(b,tp); print(v)" "1" \

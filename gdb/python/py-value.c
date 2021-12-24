@@ -1695,41 +1695,6 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
   Py_RETURN_FALSE;
 }
 
-#ifndef IS_PY3K
-/* Implements conversion to int.  */
-static PyObject *
-valpy_int (PyObject *self)
-{
-  struct value *value = ((value_object *) self)->value;
-  struct type *type = value_type (value);
-  LONGEST l = 0;
-
-  try
-    {
-      if (is_floating_value (value))
-	{
-	  type = builtin_type_pylong;
-	  value = value_cast (type, value);
-	}
-
-      if (!is_integral_type (type)
-	  && type->code () != TYPE_CODE_PTR)
-	error (_("Cannot convert value to int."));
-
-      l = value_as_long (value);
-    }
-  catch (const gdb_exception &except)
-    {
-      GDB_PY_HANDLE_EXCEPTION (except);
-    }
-
-  if (type->is_unsigned ())
-    return gdb_py_object_from_ulongest (l).release ();
-  else
-    return gdb_py_object_from_longest (l).release ();
-}
-#endif
-
 /* Implements conversion to long.  */
 static PyObject *
 valpy_long (PyObject *self)
@@ -1914,15 +1879,6 @@ convert_value_from_python (PyObject *obj)
 	  else
 	    value = value_from_longest (builtin_type_pylong, l);
 	}
-#if PY_MAJOR_VERSION == 2
-      else if (PyInt_Check (obj))
-	{
-	  long l = PyInt_AsLong (obj);
-
-	  if (! PyErr_Occurred ())
-	    value = value_from_longest (builtin_type_pyint, l);
-	}
-#endif
       else if (PyFloat_Check (obj))
 	{
 	  double d = PyFloat_AsDouble (obj);
@@ -1948,14 +1904,8 @@ convert_value_from_python (PyObject *obj)
 	  value = value_copy (((value_object *) result)->value);
 	}
       else
-#ifdef IS_PY3K
 	PyErr_Format (PyExc_TypeError,
 		      _("Could not convert Python object: %S."), obj);
-#else
-	PyErr_Format (PyExc_TypeError,
-		      _("Could not convert Python object: %s."),
-		      PyString_AsString (PyObject_Str (obj)));
-#endif
     }
   catch (const gdb_exception &except)
     {
@@ -2176,9 +2126,6 @@ static PyNumberMethods value_object_as_number = {
   valpy_add,
   valpy_subtract,
   valpy_multiply,
-#ifndef IS_PY3K
-  valpy_divide,
-#endif
   valpy_remainder,
   NULL,			      /* nb_divmod */
   valpy_power,		      /* nb_power */
@@ -2192,25 +2139,12 @@ static PyNumberMethods value_object_as_number = {
   valpy_and,		      /* nb_and */
   valpy_xor,		      /* nb_xor */
   valpy_or,		      /* nb_or */
-#ifdef IS_PY3K
   valpy_long,		      /* nb_int */
   NULL,			      /* reserved */
-#else
-  NULL,			      /* nb_coerce */
-  valpy_int,		      /* nb_int */
-  valpy_long,		      /* nb_long */
-#endif
   valpy_float,		      /* nb_float */
-#ifndef IS_PY3K
-  NULL,			      /* nb_oct */
-  NULL,                       /* nb_hex */
-#endif
   NULL,                       /* nb_inplace_add */
   NULL,                       /* nb_inplace_subtract */
   NULL,                       /* nb_inplace_multiply */
-#ifndef IS_PY3K
-  NULL,                       /* nb_inplace_divide */
-#endif
   NULL,                       /* nb_inplace_remainder */
   NULL,                       /* nb_inplace_power */
   NULL,                       /* nb_inplace_lshift */

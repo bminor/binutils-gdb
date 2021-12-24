@@ -5,6 +5,9 @@
 
 * GDB now supports hardware watchpoints on FreeBSD/Aarch64.
 
+* Remove support for building against Python 2, it is now only possible to
+  build GDB against Python 3.
+
 * Python API
 
   ** New function gdb.format_address(ADDRESS, PROGSPACE, ARCHITECTURE),

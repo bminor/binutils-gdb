@@ -22,7 +22,7 @@ from contextlib import contextmanager
 # Python 3 moved "reload"
 if sys.version_info >= (3, 4):
     from importlib import reload
-elif sys.version_info[0] > 2:
+else:
     from imp import reload
 
 from _gdb import *

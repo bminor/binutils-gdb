@@ -87,11 +87,6 @@
 #include <frameobject.h>
 #include "py-ref.h"
 
-#if PY_MAJOR_VERSION >= 3
-#define IS_PY3K 1
-#endif
-
-#ifdef IS_PY3K
 #define Py_TPFLAGS_CHECKTYPES 0
 
 #define PyInt_Check PyLong_Check
@@ -102,7 +97,6 @@
 #define PyString_Decode PyUnicode_Decode
 #define PyString_FromFormat PyUnicode_FromFormat
 #define PyString_Check PyUnicode_Check
-#endif
 
 /* If Python.h does not define WITH_THREAD, then the various
    GIL-related functions will not be defined.  However,
@@ -209,11 +203,7 @@ gdb_PySys_GetObject (const char *name)
    before Python 3.6.  Hence, we wrap it in a function to avoid errors
    when compiled with -Werror.  */
 
-#ifdef IS_PY3K
 # define GDB_PYSYS_SETPATH_CHAR wchar_t
-#else
-# define GDB_PYSYS_SETPATH_CHAR char
-#endif
 
 static inline void
 gdb_PySys_SetPath (const GDB_PYSYS_SETPATH_CHAR *path)

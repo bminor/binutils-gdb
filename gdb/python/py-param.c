@@ -126,11 +126,7 @@ static PyObject *
 get_attr (PyObject *obj, PyObject *attr_name)
 {
   if (PyString_Check (attr_name)
-#ifdef IS_PY3K
       && ! PyUnicode_CompareWithASCIIString (attr_name, "value"))
-#else
-      && ! strcmp (PyString_AsString (attr_name), "value"))
-#endif
     {
       parmpy_object *self = (parmpy_object *) obj;
 
@@ -313,11 +309,7 @@ static int
 set_attr (PyObject *obj, PyObject *attr_name, PyObject *val)
 {
   if (PyString_Check (attr_name)
-#ifdef IS_PY3K
       && ! PyUnicode_CompareWithASCIIString (attr_name, "value"))
-#else
-      && ! strcmp (PyString_AsString (attr_name), "value"))
-#endif
     {
       if (!val)
 	{
