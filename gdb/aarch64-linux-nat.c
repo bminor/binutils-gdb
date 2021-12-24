@@ -1101,7 +1101,10 @@ aarch64_linux_nat_target::read_capability (CORE_ADDR addr)
   struct user_cap cap;
 
   if (!aarch64_linux_read_capability (tid, addr, cap))
-    perror_with_name (_("Unable to read capability from address."));
+    {
+      gdb::byte_vector cap_vec;
+      return cap_vec;
+    }
 
   gdb::byte_vector cap_vec (17);
   memcpy (cap_vec.data (), &cap.tag, 1);
@@ -1124,8 +1127,7 @@ aarch64_linux_nat_target::write_capability (CORE_ADDR addr,
   memcpy (&cap.val, buffer.data () + 1, 16);
 
   if (!aarch64_linux_write_capability (tid, addr, cap))
-    perror_with_name (_("Unable to write capability to address.\n"
-			"Please run \"sysctl cheri.ptrace_forge_cap=1\"."));
+    return false;
 
   return true;
 }

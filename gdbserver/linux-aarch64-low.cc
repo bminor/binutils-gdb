@@ -3338,10 +3338,7 @@ aarch64_target::qxfer_capability (const CORE_ADDR address,
   if (readbuf != nullptr)
     {
       if (!aarch64_linux_read_capability (tid, address, cap))
-	{
-	  warning (_("Unable to read capability from address."));
-	  return 0;
-	}
+	return 0;
 
       /* Copy data to readbuf.  */
       memcpy (readbuf, &cap.tag, 1);
@@ -3355,11 +3352,7 @@ aarch64_target::qxfer_capability (const CORE_ADDR address,
       memset (&cap.__reserved, 0, 15);
 
       if (!aarch64_linux_write_capability (tid, address, cap))
-	{
-	  warning (_("Unable to write capability to address.\n"
-		     "Please run \"sysctl cheri.ptrace_forge_cap=1\"."));
-	  return 0;
-	}
+	return 0;
     }
 
   return sizeof (cap.val) + 1;
