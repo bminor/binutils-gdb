@@ -1,18 +1,23 @@
 	.macro csr val
 	csrr a0,\val
+	csrw \val, a1
 	.endm
 
-	# Supported the current priv spec 1.11.
+	# Supported privileged specs from 1.9.1 to 1.11
+
+	# User Trap Setup
 	csr ustatus
 	csr uie
 	csr utvec
 
+	# User Trap Handling
 	csr uscratch
 	csr uepc
 	csr ucause
 	csr utval		# Added in 1.10
 	csr uip
 
+	# User Counter/Timers
 	csr cycle
 	csr time
 	csr instret
@@ -78,6 +83,7 @@
 	csr hpmcounter30h
 	csr hpmcounter31h
 
+	# Supervisor Trap Setup
 	csr sstatus
 	csr sedeleg
 	csr sideleg
@@ -85,33 +91,39 @@
 	csr stvec
 	csr scounteren		# Added in 1.10
 
+	# Supervisor Trap Handling
 	csr sscratch
 	csr sepc
 	csr scause
 	csr stval		# Added in 1.10
 	csr sip
 
+	# Supervisor Protection and Translation
 	csr satp		# Added in 1.10
 
+	# Machine Information Registers
 	csr mvendorid
 	csr marchid
 	csr mimpid
 	csr mhartid
 
+	# Machine Trap Setup
 	csr mstatus
-	csr misa		# 0xf10 in 1.9, but changed to 0x301 since 1.9.1.
+	csr misa
 	csr medeleg
 	csr mideleg
 	csr mie
 	csr mtvec
 	csr mcounteren		# Added in 1.10
 
+	# Machine Trap Handling
 	csr mscratch
 	csr mepc
 	csr mcause
 	csr mtval		# Added in 1.10
 	csr mip
 
+	# Machine Memory Protection
 	csr pmpcfg0		# Added in 1.10
 	csr pmpcfg1		# Added in 1.10
 	csr pmpcfg2		# Added in 1.10
@@ -133,6 +145,7 @@
 	csr pmpaddr14		# Added in 1.10
 	csr pmpaddr15		# Added in 1.10
 
+	# Machine Counter/Timer
 	csr mcycle
 	csr minstret
 	csr mhpmcounter3
@@ -196,6 +209,7 @@
 	csr mhpmcounter30h
 	csr mhpmcounter31h
 
+	# Machine Counter Setup
 	csr mcountinhibit	# Added in 1.11
 	csr mhpmevent3
 	csr mhpmevent4
@@ -227,13 +241,53 @@
 	csr mhpmevent30
 	csr mhpmevent31
 
-	# Supported in previous priv spec, but dropped now.
+	# Hypervisor Trap Setup (1.12)
+	csr hstatus
+	csr hedeleg
+	csr hideleg
+	csr hie
+	csr hcounteren
+	csr hgeie
+
+	# Hypervisor Trap Handling (1.12)
+	csr htval
+	csr hip
+	csr hvip
+	csr htinst
+	csr hgeip
+
+	# Hypervisor Configuration (1.12)
+	csr henvcfg
+	csr henvcfgh
+
+	# Hypervisor Protection and Translation (1.12)
+	csr hgatp
+
+	# Debug/Trace Registers
+	csr hcontext
+
+	# Hypervisor Counter/Timer Virtualization Registers (1.12)
+	csr htimedelta
+	csr htimedeltah
+
+	# Virtual Supervisor Registers (1.12)
+	csr vsstatus
+	csr vsie
+	csr vstvec
+	csr vsscratch
+	csr vsepc
+	csr vscause
+	csr vstval
+	csr vsip
+	csr vsatp
+
+	# Supported in previous priv spec, but dropped now
+
 	csr ubadaddr		# 0x043 in 1.9.1, but the value is utval since 1.10
 	csr sbadaddr		# 0x143 in 1.9.1, but the value is stval since 1.10
 	csr sptbr		# 0x180 in 1.9.1, but the value is satp since 1.10
 	csr mbadaddr		# 0x343 in 1.9.1, but the value is mtval since 1.10
 	csr mucounteren		# 0x320 in 1.9.1, dropped in 1.10, but the value is mcountinhibit since 1.11
-
 	csr mbase		# 0x380, dropped in 1.10
 	csr mbound		# 0x381, dropped in 1.10
 	csr mibase		# 0x382, dropped in 1.10
@@ -243,7 +297,7 @@
 	csr mscounteren		# 0x321, dropped in 1.10
 	csr mhcounteren		# 0x322, dropped in 1.10
 
-	# Unprivileged CSR which are not controlled by privilege spec.
+	# Unprivileged CSR which are not controlled by privilege spec
 
 	# Float
 	csr fflags
