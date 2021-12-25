@@ -1058,7 +1058,7 @@ cp_lookup_transparent_type_loop (const char *name,
 static void
 maintenance_cplus_namespace (const char *args, int from_tty)
 {
-  printf_unfiltered (_("The `maint namespace' command was removed.\n"));
+  printf_filtered (_("The `maint namespace' command was removed.\n"));
 }
 
 void _initialize_cp_namespace ();

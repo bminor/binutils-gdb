@@ -279,14 +279,14 @@ cmd_record_delete (const char *args, int from_tty)
 
   if (!target_record_is_replaying (inferior_ptid))
     {
-      printf_unfiltered (_("Already at end of record list.\n"));
+      printf_filtered (_("Already at end of record list.\n"));
       return;
     }
 
   if (!target_supports_delete_record ())
     {
-      printf_unfiltered (_("The current record target does not support "
-			   "this operation.\n"));
+      printf_filtered (_("The current record target does not support "
+			 "this operation.\n"));
       return;
     }
 
@@ -308,8 +308,8 @@ cmd_record_stop (const char *args, int from_tty)
   record_stop (t);
   record_unpush (t);
 
-  printf_unfiltered (_("Process record is stopped and all execution "
-		       "logs are deleted.\n"));
+  printf_filtered (_("Process record is stopped and all execution "
+		     "logs are deleted.\n"));
 
   gdb::observers::record_changed.notify (current_inferior (), 0, NULL, NULL);
 }

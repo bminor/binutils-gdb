@@ -2185,7 +2185,7 @@ first_component_command (const char *arg, int from_tty)
   memcpy (prefix, arg, len);
   prefix[len] = '\0';
 
-  printf_unfiltered ("%s\n", prefix);
+  printf_filtered ("%s\n", prefix);
 }
 
 /* Implement "info vtbl".  */

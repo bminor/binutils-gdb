@@ -501,14 +501,14 @@ pwd_command (const char *args, int from_tty)
 	   safe_strerror (errno));
 
   if (strcmp (cwd.get (), current_directory) != 0)
-    printf_unfiltered (_("Working directory %ps\n (canonically %ps).\n"),
-		       styled_string (file_name_style.style (),
-				      current_directory),
-		       styled_string (file_name_style.style (), cwd.get ()));
+    printf_filtered (_("Working directory %ps\n (canonically %ps).\n"),
+		     styled_string (file_name_style.style (),
+				    current_directory),
+		     styled_string (file_name_style.style (), cwd.get ()));
   else
-    printf_unfiltered (_("Working directory %ps.\n"),
-		       styled_string (file_name_style.style (),
-				      current_directory));
+    printf_filtered (_("Working directory %ps.\n"),
+		     styled_string (file_name_style.style (),
+				    current_directory));
 }
 
 void

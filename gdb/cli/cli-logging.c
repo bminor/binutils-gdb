@@ -115,8 +115,8 @@ handle_redirections (int from_tty)
 {
   if (!saved_filename.empty ())
     {
-      fprintf_unfiltered (gdb_stdout, "Already logging to %s.\n",
-			  saved_filename.c_str ());
+      printf_filtered ("Already logging to %s.\n",
+		       saved_filename.c_str ());
       return;
     }
 
@@ -128,18 +128,18 @@ handle_redirections (int from_tty)
   if (from_tty)
     {
       if (!logging_redirect)
-	fprintf_unfiltered (gdb_stdout, "Copying output to %s.\n",
-			    logging_filename.c_str ());
+	printf_filtered ("Copying output to %s.\n",
+			 logging_filename.c_str ());
       else
-	fprintf_unfiltered (gdb_stdout, "Redirecting output to %s.\n",
-			    logging_filename.c_str ());
+	printf_filtered ("Redirecting output to %s.\n",
+			 logging_filename.c_str ());
 
       if (!debug_redirect)
-	fprintf_unfiltered (gdb_stdout, "Copying debug output to %s.\n",
-			    logging_filename.c_str ());
+	printf_filtered ("Copying debug output to %s.\n",
+			 logging_filename.c_str ());
       else
-	fprintf_unfiltered (gdb_stdout, "Redirecting debug output to %s.\n",
-			    logging_filename.c_str ());
+	printf_filtered ("Redirecting debug output to %s.\n",
+			 logging_filename.c_str ());
     }
 
   saved_filename = logging_filename;
@@ -177,8 +177,8 @@ set_logging_off (const char *args, int from_tty)
 
   pop_output_files ();
   if (from_tty)
-    fprintf_unfiltered (gdb_stdout, "Done logging to %s.\n",
-			saved_filename.c_str ());
+    printf_filtered ("Done logging to %s.\n",
+		     saved_filename.c_str ());
   saved_filename.clear ();
 }
 

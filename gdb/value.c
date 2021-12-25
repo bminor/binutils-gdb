@@ -2649,11 +2649,11 @@ show_convenience (const char *ignore, int from_tty)
 	 The user can't create them except via Python, and if Python support
 	 is installed this message will never be printed ($_streq will
 	 exist).  */
-      printf_unfiltered (_("No debugger convenience variables now defined.\n"
-			   "Convenience variables have "
-			   "names starting with \"$\";\n"
-			   "use \"set\" as in \"set "
-			   "$foo = 5\" to define them.\n"));
+      printf_filtered (_("No debugger convenience variables now defined.\n"
+			 "Convenience variables have "
+			 "names starting with \"$\";\n"
+			 "use \"set\" as in \"set "
+			 "$foo = 5\" to define them.\n"));
     }
 }
 

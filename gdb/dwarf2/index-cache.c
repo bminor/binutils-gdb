@@ -257,8 +257,8 @@ show_index_cache_command (const char *arg, int from_tty)
   /* Call all "show index-cache" subcommands.  */
   cmd_show_list (show_index_cache_prefix_list, from_tty);
 
-  printf_unfiltered ("\n");
-  printf_unfiltered
+  printf_filtered ("\n");
+  printf_filtered
     (_("The index cache is currently %s.\n"),
      global_index_cache.enabled () ? _("enabled") : _("disabled"));
 }
@@ -316,13 +316,13 @@ show_index_cache_stats_command (const char *arg, int from_tty)
   if (in_show_index_cache_command)
     {
       indent = "  ";
-      printf_unfiltered ("\n");
+      printf_filtered ("\n");
     }
 
-  printf_unfiltered (_("%s  Cache hits (this session): %u\n"),
-		     indent, global_index_cache.n_hits ());
-  printf_unfiltered (_("%sCache misses (this session): %u\n"),
-		     indent, global_index_cache.n_misses ());
+  printf_filtered (_("%s  Cache hits (this session): %u\n"),
+		   indent, global_index_cache.n_hits ());
+  printf_filtered (_("%sCache misses (this session): %u\n"),
+		   indent, global_index_cache.n_misses ());
 }
 
 void _initialize_index_cache ();

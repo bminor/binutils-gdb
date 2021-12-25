@@ -121,7 +121,7 @@ create_user_mem_region (CORE_ADDR lo, CORE_ADDR hi,
   /* lo == hi is a useless empty region.  */
   if (lo >= hi && hi != 0)
     {
-      printf_unfiltered (_("invalid memory region: low >= high\n"));
+      printf_filtered (_("invalid memory region: low >= high\n"));
       return;
     }
 
@@ -148,7 +148,7 @@ create_user_mem_region (CORE_ADDR lo, CORE_ADDR hi,
 	  || (hi > n.lo && (hi <= n.hi || n.hi == 0))
 	  || (lo <= n.lo && ((hi >= n.hi && n.hi != 0) || hi == 0)))
 	{
-	  printf_unfiltered (_("overlapping memory region\n"));
+	  printf_filtered (_("overlapping memory region\n"));
 	  return;
 	}
     }
@@ -347,7 +347,7 @@ info_mem_command (const char *args, int from_tty)
 
   if (mem_region_list->empty ())
     {
-      printf_unfiltered (_("There are no memory regions defined.\n"));
+      printf_filtered (_("There are no memory regions defined.\n"));
       return;
     }
 
@@ -474,7 +474,7 @@ mem_enable (int num)
 	m.enabled_p = 1;
 	return;
       }
-  printf_unfiltered (_("No memory region number %d.\n"), num);
+  printf_filtered (_("No memory region number %d.\n"), num);
 }
 
 static void
@@ -512,7 +512,7 @@ mem_disable (int num)
 	m.enabled_p = 0;
 	return;
       }
-  printf_unfiltered (_("No memory region number %d.\n"), num);
+  printf_filtered (_("No memory region number %d.\n"), num);
 }
 
 static void
@@ -545,7 +545,7 @@ mem_delete (int num)
 {
   if (!mem_region_list)
     {
-      printf_unfiltered (_("No memory region number %d.\n"), num);
+      printf_filtered (_("No memory region number %d.\n"), num);
       return;
     }
 
@@ -558,7 +558,7 @@ mem_delete (int num)
   if (it != mem_region_list->end ())
     mem_region_list->erase (it);
   else
-    printf_unfiltered (_("No memory region number %d.\n"), num);
+    printf_filtered (_("No memory region number %d.\n"), num);
 }
 
 static void

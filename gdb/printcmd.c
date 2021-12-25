@@ -2058,7 +2058,7 @@ map_display_numbers (const char *args,
 				      return item->number == num;
 				    });
 	  if (iter == all_displays.end ())
-	    printf_unfiltered (_("No display number %d.\n"), num);
+	    printf_filtered (_("No display number %d.\n"), num);
 	  else
 	    function (iter->get ());
 	}
@@ -2253,7 +2253,7 @@ disable_display (int num)
 	d->enabled_p = false;
 	return;
       }
-  printf_unfiltered (_("No display number %d.\n"), num);
+  printf_filtered (_("No display number %d.\n"), num);
 }
 
 void
@@ -2274,7 +2274,7 @@ static void
 info_display_command (const char *ignore, int from_tty)
 {
   if (all_displays.empty ())
-    printf_unfiltered (_("There are no auto-display expressions now.\n"));
+    printf_filtered (_("There are no auto-display expressions now.\n"));
   else
     printf_filtered (_("Auto-display expressions now in effect:\n\
 Num Enb Expression\n"));

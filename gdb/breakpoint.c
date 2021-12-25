@@ -11535,19 +11535,19 @@ clear_command (const char *arg, int from_tty)
   if (from_tty)
     {
       if (found.size () == 1)
-	printf_unfiltered (_("Deleted breakpoint "));
+	printf_filtered (_("Deleted breakpoint "));
       else
-	printf_unfiltered (_("Deleted breakpoints "));
+	printf_filtered (_("Deleted breakpoints "));
     }
 
   for (breakpoint *iter : found)
     {
       if (from_tty)
-	printf_unfiltered ("%d ", iter->number);
+	printf_filtered ("%d ", iter->number);
       delete_breakpoint (iter);
     }
   if (from_tty)
-    putchar_unfiltered ('\n');
+    putchar_filtered ('\n');
 }
 
 /* Delete breakpoint in BS if they are `delete' breakpoints and
@@ -14010,7 +14010,7 @@ map_breakpoint_number_range (std::pair<int, int> bp_num_range,
 		break;
 	      }
 	  if (!match)
-	    printf_unfiltered (_("No breakpoint number %d.\n"), i);
+	    printf_filtered (_("No breakpoint number %d.\n"), i);
 	}
     }
 }
@@ -14948,7 +14948,7 @@ get_tracepoint_by_number (const char **arg,
     if (t->number == tpnum)
       return (struct tracepoint *) t;
 
-  printf_unfiltered ("No tracepoint number %d.\n", tpnum);
+  printf_filtered ("No tracepoint number %d.\n", tpnum);
   return NULL;
 }
 

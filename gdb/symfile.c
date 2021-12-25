@@ -2276,8 +2276,8 @@ add_symbol_file_command (const char *args, int from_tty)
      statements because hex_string returns a local static
      string.  */
 
-  printf_unfiltered (_("add symbol table from file \"%s\""),
-		     filename.get ());
+  printf_filtered (_("add symbol table from file \"%s\""),
+		   filename.get ());
   section_addr_info section_addrs;
   std::vector<sect_opt>::const_iterator it = sect_opts.begin ();
   if (!seen_addr)
@@ -2289,7 +2289,7 @@ add_symbol_file_command (const char *args, int from_tty)
       const char *sec = it->name;
 
       if (section_addrs.empty ())
-	printf_unfiltered (_(" at\n"));
+	printf_filtered (_(" at\n"));
       addr = parse_and_eval_address (val);
 
       /* Here we store the section offsets in the order they were
@@ -2309,13 +2309,13 @@ add_symbol_file_command (const char *args, int from_tty)
 	 so we can't determine what section names are valid.  */
     }
   if (seen_offset)
-      printf_unfiltered (_("%s offset by %s\n"),
-			 (section_addrs.empty ()
-			  ? _(" with all sections")
-			  : _("with other sections")),
-			 paddress (gdbarch, offset));
+    printf_filtered (_("%s offset by %s\n"),
+		     (section_addrs.empty ()
+		      ? _(" with all sections")
+		      : _("with other sections")),
+		     paddress (gdbarch, offset));
   else if (section_addrs.empty ())
-    printf_unfiltered ("\n");
+    printf_filtered ("\n");
 
   if (from_tty && (!query ("%s", "")))
     error (_("Not confirmed."));
@@ -3262,8 +3262,8 @@ map_overlay_command (const char *args, int from_tty)
 									sec2))
 		{
 		  if (info_verbose)
-		    printf_unfiltered (_("Note: section %s unmapped by overlap\n"),
-				       bfd_section_name (sec2->the_bfd_section));
+		    printf_filtered (_("Note: section %s unmapped by overlap\n"),
+				     bfd_section_name (sec2->the_bfd_section));
 		  sec2->ovly_mapped = 0; /* sec2 overlaps sec: unmap sec2.  */
 		}
 	  return;
@@ -3311,7 +3311,7 @@ overlay_auto_command (const char *args, int from_tty)
   overlay_debugging = ovly_auto;
   enable_overlay_breakpoints ();
   if (info_verbose)
-    printf_unfiltered (_("Automatic overlay debugging enabled."));
+    printf_filtered (_("Automatic overlay debugging enabled."));
 }
 
 /* Function: overlay_manual_command
@@ -3324,7 +3324,7 @@ overlay_manual_command (const char *args, int from_tty)
   overlay_debugging = ovly_on;
   disable_overlay_breakpoints ();
   if (info_verbose)
-    printf_unfiltered (_("Overlay debugging enabled."));
+    printf_filtered (_("Overlay debugging enabled."));
 }
 
 /* Function: overlay_off_command
@@ -3337,7 +3337,7 @@ overlay_off_command (const char *args, int from_tty)
   overlay_debugging = ovly_off;
   disable_overlay_breakpoints ();
   if (info_verbose)
-    printf_unfiltered (_("Overlay debugging disabled."));
+    printf_filtered (_("Overlay debugging disabled."));
 }
 
 static void

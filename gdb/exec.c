@@ -378,7 +378,7 @@ exec_file_attach (const char *filename, int from_tty)
   if (!filename)
     {
       if (from_tty)
-	printf_unfiltered (_("No executable file now.\n"));
+	printf_filtered (_("No executable file now.\n"));
 
       set_gdbarch_from_file (NULL);
     }
