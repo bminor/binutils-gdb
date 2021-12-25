@@ -2572,19 +2572,19 @@ unwind_command (const char *exp, int from_tty)
 
   if (!u)
     {
-      printf_unfiltered ("Can't find unwind table entry for %s\n", exp);
+      printf_filtered ("Can't find unwind table entry for %s\n", exp);
       return;
     }
 
-  printf_unfiltered ("unwind_table_entry (%s):\n", host_address_to_string (u));
+  printf_filtered ("unwind_table_entry (%s):\n", host_address_to_string (u));
 
-  printf_unfiltered ("\tregion_start = %s\n", hex_string (u->region_start));
+  printf_filtered ("\tregion_start = %s\n", hex_string (u->region_start));
 
-  printf_unfiltered ("\tregion_end = %s\n", hex_string (u->region_end));
+  printf_filtered ("\tregion_end = %s\n", hex_string (u->region_end));
 
-#define pif(FLD) if (u->FLD) printf_unfiltered (" "#FLD);
+#define pif(FLD) if (u->FLD) printf_filtered (" "#FLD);
 
-  printf_unfiltered ("\n\tflags =");
+  printf_filtered ("\n\tflags =");
   pif (Cannot_unwind);
   pif (Millicode);
   pif (Millicode_save_sr0);
@@ -2609,9 +2609,9 @@ unwind_command (const char *exp, int from_tty)
   pif (Large_frame);
   pif (alloca_frame);
 
-  putchar_unfiltered ('\n');
+  putchar_filtered ('\n');
 
-#define pin(FLD) printf_unfiltered ("\t"#FLD" = 0x%x\n", u->FLD);
+#define pin(FLD) printf_filtered ("\t"#FLD" = 0x%x\n", u->FLD);
 
   pin (Region_description);
   pin (Entry_FR);
@@ -2620,26 +2620,26 @@ unwind_command (const char *exp, int from_tty)
 
   if (u->stub_unwind.stub_type)
     {
-      printf_unfiltered ("\tstub type = ");
+      printf_filtered ("\tstub type = ");
       switch (u->stub_unwind.stub_type)
 	{
 	  case LONG_BRANCH:
-	    printf_unfiltered ("long branch\n");
+	    printf_filtered ("long branch\n");
 	    break;
 	  case PARAMETER_RELOCATION:
-	    printf_unfiltered ("parameter relocation\n");
+	    printf_filtered ("parameter relocation\n");
 	    break;
 	  case EXPORT:
-	    printf_unfiltered ("export\n");
+	    printf_filtered ("export\n");
 	    break;
 	  case IMPORT:
-	    printf_unfiltered ("import\n");
+	    printf_filtered ("import\n");
 	    break;
 	  case IMPORT_SHLIB:
-	    printf_unfiltered ("import shlib\n");
+	    printf_filtered ("import shlib\n");
 	    break;
 	  default:
-	    printf_unfiltered ("unknown (%d)\n", u->stub_unwind.stub_type);
+	    printf_filtered ("unknown (%d)\n", u->stub_unwind.stub_type);
 	}
     }
 }

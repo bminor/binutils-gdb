@@ -6916,7 +6916,7 @@ show_mipsfpu_command (const char *args, int from_tty)
 
   if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_mips)
     {
-      printf_unfiltered
+      printf_filtered
 	("The MIPS floating-point coprocessor is unknown "
 	 "because the current architecture is not MIPS.\n");
       return;
@@ -6937,11 +6937,11 @@ show_mipsfpu_command (const char *args, int from_tty)
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
   if (mips_fpu_type_auto)
-    printf_unfiltered ("The MIPS floating-point coprocessor "
+    printf_filtered ("The MIPS floating-point coprocessor "
 		       "is set automatically (currently %s)\n",
 		       fpu);
   else
-    printf_unfiltered
+    printf_filtered
       ("The MIPS floating-point coprocessor is assumed to be %s\n", fpu);
 }
 

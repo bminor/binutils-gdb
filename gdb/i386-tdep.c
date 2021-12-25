@@ -8992,14 +8992,14 @@ i386_mpx_info_bounds (const char *args, int from_tty)
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_i386
       || !i386_mpx_enabled ())
     {
-      printf_unfiltered (_("Intel Memory Protection Extensions not "
-			   "supported on this target.\n"));
+      printf_filtered (_("Intel Memory Protection Extensions not "
+			 "supported on this target.\n"));
       return;
     }
 
   if (args == NULL)
     {
-      printf_unfiltered (_("Address of pointer variable expected.\n"));
+      printf_filtered (_("Address of pointer variable expected.\n"));
       return;
     }
 
