@@ -508,25 +508,26 @@ mips_show_dr (const char *func, CORE_ADDR addr,
 {
   int i;
 
-  puts_unfiltered (func);
+  fputs_unfiltered (func, gdb_stdlog);
   if (addr || len)
-    printf_unfiltered (" (addr=%s, len=%d, type=%s)",
-		       paddress (target_gdbarch (), addr), len,
-		       type == hw_write ? "data-write"
-		       : (type == hw_read ? "data-read"
-			  : (type == hw_access ? "data-read/write"
-			     : (type == hw_execute ? "instruction-execute"
-				: "??unknown??"))));
-  puts_unfiltered (":\n");
+    fprintf_unfiltered (gdb_stdlog,
+			" (addr=%s, len=%d, type=%s)",
+			paddress (target_gdbarch (), addr), len,
+			type == hw_write ? "data-write"
+			: (type == hw_read ? "data-read"
+			   : (type == hw_access ? "data-read/write"
+			      : (type == hw_execute ? "instruction-execute"
+				 : "??unknown??"))));
+  fputs_unfiltered (":\n", gdb_stdlog);
 
   for (i = 0; i < MAX_DEBUG_REGISTER; i++)
-    printf_unfiltered ("\tDR%d: lo=%s, hi=%s\n", i,
-		       paddress (target_gdbarch (),
-				 mips_linux_watch_get_watchlo (&watch_mirror,
-							       i)),
-		       paddress (target_gdbarch (),
-				 mips_linux_watch_get_watchhi (&watch_mirror,
-							       i)));
+    fprintf_unfiltered (gdb_stdlog, "\tDR%d: lo=%s, hi=%s\n", i,
+			paddress (target_gdbarch (),
+				  mips_linux_watch_get_watchlo (&watch_mirror,
+								i)),
+			paddress (target_gdbarch (),
+				  mips_linux_watch_get_watchhi (&watch_mirror,
+								i)));
 }
 
 /* Target to_can_use_hw_breakpoint implementation.  Return 1 if we can
