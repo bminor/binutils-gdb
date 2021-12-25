@@ -251,8 +251,8 @@ jit_read_descriptor (gdbarch *gdbarch,
   err = target_read_memory (addr, desc_buf, desc_size);
   if (err)
     {
-      printf_unfiltered (_("Unable to read JIT descriptor from "
-			   "remote memory\n"));
+      fprintf_unfiltered (gdb_stderr, _("Unable to read JIT descriptor from "
+					"remote memory\n"));
       return false;
     }
 
@@ -719,7 +719,8 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
       (code_entry->symfile_addr, code_entry->symfile_size, gnutarget));
   if (nbfd == NULL)
     {
-      puts_unfiltered (_("Error opening JITed symbol file, ignoring it.\n"));
+      fputs_unfiltered (_("Error opening JITed symbol file, ignoring it.\n"),
+			gdb_stderr);
       return;
     }
 
@@ -727,7 +728,7 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
      We would segfault later without this line.  */
   if (!bfd_check_format (nbfd.get (), bfd_object))
     {
-      printf_unfiltered (_("\
+      fprintf_unfiltered (gdb_stderr, _("\
 JITed symbol file is not an object file, ignoring it.\n"));
       return;
     }
@@ -1138,9 +1139,10 @@ jit_inferior_init (inferior *inf)
       /* Check that the version number agrees with that we support.  */
       if (descriptor.version != 1)
 	{
-	  printf_unfiltered (_("Unsupported JIT protocol version %ld "
-			       "in descriptor (expected 1)\n"),
-			     (long) descriptor.version);
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Unsupported JIT protocol version %ld "
+				"in descriptor (expected 1)\n"),
+			      (long) descriptor.version);
 	  continue;
 	}
 
@@ -1229,9 +1231,10 @@ jit_event_handler (gdbarch *gdbarch, objfile *jiter)
       {
 	objfile *jited = jit_find_objf_with_entry_addr (entry_addr);
 	if (jited == nullptr)
-	  printf_unfiltered (_("Unable to find JITed code "
-			       "entry at address: %s\n"),
-			     paddress (gdbarch, entry_addr));
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Unable to find JITed code "
+				"entry at address: %s\n"),
+			      paddress (gdbarch, entry_addr));
 	else
 	  jited->unlink ();
 
