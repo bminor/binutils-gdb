@@ -29,6 +29,7 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-script.h"
 #include "cli/cli-style.h"
+#include "gdbcmd.h"
 
 #include "extension.h"
 #include "interps.h"
@@ -423,31 +424,14 @@ std::string
 execute_control_commands_to_string (struct command_line *commands,
 				    int from_tty)
 {
-  /* GDB_STDOUT should be better already restored during these
-     restoration callbacks.  */
-  set_batch_flag_and_restore_page_info save_page_info;
+  std::string result;
 
-  string_file str_file;
+  execute_fn_to_string (result, [&] ()
+    {
+      execute_control_commands (commands, from_tty);
+    }, false);
 
-  {
-    current_uiout->redirect (&str_file);
-    ui_out_redirect_pop redirect_popper (current_uiout);
-
-    scoped_restore save_stdout
-      = make_scoped_restore (&gdb_stdout, &str_file);
-    scoped_restore save_stderr
-      = make_scoped_restore (&gdb_stderr, &str_file);
-    scoped_restore save_stdlog
-      = make_scoped_restore (&gdb_stdlog, &str_file);
-    scoped_restore save_stdtarg
-      = make_scoped_restore (&gdb_stdtarg, &str_file);
-    scoped_restore save_stdtargerr
-      = make_scoped_restore (&gdb_stdtargerr, &str_file);
-
-    execute_control_commands (commands, from_tty);
-  }
-
-  return std::move (str_file.string ());
+  return result;
 }
 
 void
