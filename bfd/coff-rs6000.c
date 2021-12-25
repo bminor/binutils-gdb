@@ -1763,7 +1763,7 @@ _bfd_xcoff_openr_next_archived_file (bfd *archive, bfd *last_file)
 	}
     }
 
-  return _bfd_get_elt_at_filepos (archive, filestart);
+  return _bfd_get_elt_at_filepos (archive, filestart, NULL);
 }
 
 /* Stat an element in an XCOFF archive.  */

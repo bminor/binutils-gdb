@@ -651,7 +651,8 @@ _bfd_append_relative_path (bfd *arch, char *elt_name)
    element, since it handles the bookkeeping so nicely for us.  */
 
 bfd *
-_bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
+_bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos,
+			 struct bfd_link_info *info)
 {
   struct areltdata *new_areldata;
   bfd *n_bfd;
@@ -694,7 +695,8 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 	      free (new_areldata);
 	      return NULL;
 	    }
-	  n_bfd = _bfd_get_elt_at_filepos (ext_arch, new_areldata->origin);
+	  n_bfd = _bfd_get_elt_at_filepos (ext_arch,
+					   new_areldata->origin, info);
 	  if (n_bfd == NULL)
 	    {
 	      free (new_areldata);
@@ -715,8 +717,26 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 	 open the external file as a bfd.  */
       bfd_set_error (bfd_error_no_error);
       n_bfd = open_nested_file (filename, archive);
-      if (n_bfd == NULL && bfd_get_error () == bfd_error_no_error)
-	bfd_set_error (bfd_error_malformed_archive);
+      if (n_bfd == NULL)
+	{
+	  switch (bfd_get_error ())
+	    {
+	    default:
+	      break;
+	    case bfd_error_no_error:
+	      bfd_set_error (bfd_error_malformed_archive);
+	      break;
+	    case bfd_error_system_call:
+	      if (info != NULL)
+		{
+		  info->callbacks->einfo
+		    (_("%F%P: %pB(%s): error opening thin archive member: %E\n"),
+		     archive, filename);
+		  break;
+		}
+	      break;
+	    }
+	}
     }
   else
     {
@@ -772,7 +792,7 @@ _bfd_generic_get_elt_at_index (bfd *abfd, symindex sym_index)
   carsym *entry;
 
   entry = bfd_ardata (abfd)->symdefs + sym_index;
-  return _bfd_get_elt_at_filepos (abfd, entry->file_offset);
+  return _bfd_get_elt_at_filepos (abfd, entry->file_offset, NULL);
 }
 
 bfd *
@@ -841,7 +861,7 @@ bfd_generic_openr_next_archived_file (bfd *archive, bfd *last_file)
 	}
     }
 
-  return _bfd_get_elt_at_filepos (archive, filestart);
+  return _bfd_get_elt_at_filepos (archive, filestart, NULL);
 }
 
 bfd *

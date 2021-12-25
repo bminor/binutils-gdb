@@ -3470,7 +3470,7 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
   Elf_Internal_Sym *isymend;
   bool result;
 
-  abfd = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
+  abfd = _bfd_get_elt_at_filepos (abfd, symdef->file_offset, NULL);
   if (abfd == NULL)
     return false;
 
@@ -5948,7 +5948,8 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	    }
 
 	  /* We need to include this archive member.  */
-	  element = _bfd_get_elt_at_filepos (abfd, symdef->file_offset);
+	  element = _bfd_get_elt_at_filepos (abfd, symdef->file_offset,
+					     info);
 	  if (element == NULL)
 	    goto error_return;
 

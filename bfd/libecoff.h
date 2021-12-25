@@ -72,7 +72,7 @@ struct ecoff_backend_data
     (bfd *, struct internal_filehdr *, struct internal_aouthdr *);
   /* Read an element from an archive at a given file position.  This
      is needed because OSF/1 3.2 uses a weird archive format.  */
-  bfd *(*get_elt_at_filepos) (bfd *, file_ptr);
+  bfd *(*get_elt_at_filepos) (bfd *, file_ptr, struct bfd_link_info *);
 };
 
 /* ECOFF targets don't support COFF long section names, so this

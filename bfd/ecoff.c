@@ -3639,7 +3639,9 @@ ecoff_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 	  hash = srch;
 	}
 
-      element = (*backend->get_elt_at_filepos) (abfd, (file_ptr) file_offset);
+      element = (*backend->get_elt_at_filepos) (abfd,
+						(file_ptr) file_offset,
+						info);
       if (element == NULL)
 	return false;
 
