@@ -82,19 +82,10 @@ static const char * const microblaze_register_names[] =
 
 static unsigned int microblaze_debug_flag = 0;
 
-static void ATTRIBUTE_PRINTF (1, 2)
-microblaze_debug (const char *fmt, ...)
-{ 
-  if (microblaze_debug_flag)
-    {
-       va_list args;
+#define microblaze_debug(fmt, ...) \
+  debug_prefixed_printf_cond_nofunc (microblaze_debug_flag, "MICROBLAZE", \
+				     fmt, ## __VA_ARGS__)
 
-       va_start (args, fmt);
-       printf_unfiltered ("MICROBLAZE: ");
-       vprintf_unfiltered (fmt, args);
-       va_end (args);
-    }
-}
 
 /* Return the name of register REGNUM.  */
 
