@@ -1347,7 +1347,7 @@ public:
     *outp = '\0';
 
     /* Standard boilerplate.  */
-    printf_unfiltered ("/* THIS FILE IS GENERATED.  "
+    printf_filtered ("/* THIS FILE IS GENERATED.  "
 		       "-*- buffer-read-only: t -*- vi"
 		       ":set ro:\n");
   }
@@ -1359,56 +1359,56 @@ public:
 
   void visit_pre (const target_desc *e) override
   {
-    printf_unfiltered ("  Original: %s */\n\n",
-		       lbasename (m_filename_after_features.c_str ()));
+    printf_filtered ("  Original: %s */\n\n",
+		     lbasename (m_filename_after_features.c_str ()));
 
-    printf_unfiltered ("#include \"defs.h\"\n");
-    printf_unfiltered ("#include \"osabi.h\"\n");
-    printf_unfiltered ("#include \"target-descriptions.h\"\n");
-    printf_unfiltered ("\n");
+    printf_filtered ("#include \"defs.h\"\n");
+    printf_filtered ("#include \"osabi.h\"\n");
+    printf_filtered ("#include \"target-descriptions.h\"\n");
+    printf_filtered ("\n");
 
-    printf_unfiltered ("struct target_desc *tdesc_%s;\n", m_function);
-    printf_unfiltered ("static void\n");
-    printf_unfiltered ("initialize_tdesc_%s (void)\n", m_function);
-    printf_unfiltered ("{\n");
-    printf_unfiltered
+    printf_filtered ("struct target_desc *tdesc_%s;\n", m_function);
+    printf_filtered ("static void\n");
+    printf_filtered ("initialize_tdesc_%s (void)\n", m_function);
+    printf_filtered ("{\n");
+    printf_filtered
       ("  target_desc_up result = allocate_target_description ();\n");
 
     if (tdesc_architecture (e) != NULL)
       {
-	printf_unfiltered
+	printf_filtered
 	  ("  set_tdesc_architecture (result.get (), bfd_scan_arch (\"%s\"));\n",
 	   tdesc_architecture (e)->printable_name);
-	printf_unfiltered ("\n");
+	printf_filtered ("\n");
       }
     if (tdesc_osabi (e) > GDB_OSABI_UNKNOWN
 	&& tdesc_osabi (e) < GDB_OSABI_INVALID)
       {
-	printf_unfiltered
+	printf_filtered
 	  ("  set_tdesc_osabi (result.get (), osabi_from_tdesc_string (\"%s\"));\n",
 	   gdbarch_osabi_name (tdesc_osabi (e)));
-	printf_unfiltered ("\n");
+	printf_filtered ("\n");
       }
 
     for (const tdesc_compatible_info_up &compatible : e->compatible)
-      printf_unfiltered
+      printf_filtered
 	("  tdesc_add_compatible (result.get (), bfd_scan_arch (\"%s\"));\n",
 	 compatible->arch ()->printable_name);
 
     if (!e->compatible.empty ())
-      printf_unfiltered ("\n");
+      printf_filtered ("\n");
 
     for (const property &prop : e->properties)
-      printf_unfiltered ("  set_tdesc_property (result.get (), \"%s\", \"%s\");\n",
-			 prop.key.c_str (), prop.value.c_str ());
+      printf_filtered ("  set_tdesc_property (result.get (), \"%s\", \"%s\");\n",
+		       prop.key.c_str (), prop.value.c_str ());
 
-    printf_unfiltered ("  struct tdesc_feature *feature;\n");
+    printf_filtered ("  struct tdesc_feature *feature;\n");
   }
 
   void visit_pre (const tdesc_feature *e) override
   {
-    printf_unfiltered ("\n  feature = tdesc_create_feature (result.get (), \"%s\");\n",
-		       e->name.c_str ());
+    printf_filtered ("\n  feature = tdesc_create_feature (result.get (), \"%s\");\n",
+		     e->name.c_str ());
   }
 
   void visit_post (const tdesc_feature *e) override
@@ -1416,8 +1416,8 @@ public:
 
   void visit_post (const target_desc *e) override
   {
-    printf_unfiltered ("\n  tdesc_%s = result.release ();\n", m_function);
-    printf_unfiltered ("}\n");
+    printf_filtered ("\n  tdesc_%s = result.release ();\n", m_function);
+    printf_filtered ("}\n");
   }
 
   void visit (const tdesc_type_builtin *type) override
@@ -1429,25 +1429,25 @@ public:
   {
     if (!m_printed_element_type)
       {
-	printf_unfiltered ("  tdesc_type *element_type;\n");
+	printf_filtered ("  tdesc_type *element_type;\n");
 	m_printed_element_type = true;
       }
 
-    printf_unfiltered
+    printf_filtered
       ("  element_type = tdesc_named_type (feature, \"%s\");\n",
        type->element_type->name.c_str ());
-    printf_unfiltered
+    printf_filtered
       ("  tdesc_create_vector (feature, \"%s\", element_type, %d);\n",
        type->name.c_str (), type->count);
 
-    printf_unfiltered ("\n");
+    printf_filtered ("\n");
   }
 
   void visit (const tdesc_type_with_fields *type) override
   {
     if (!m_printed_type_with_fields)
       {
-	printf_unfiltered ("  tdesc_type_with_fields *type_with_fields;\n");
+	printf_filtered ("  tdesc_type_with_fields *type_with_fields;\n");
 	m_printed_type_with_fields = true;
       }
 
@@ -1457,16 +1457,16 @@ public:
       case TDESC_TYPE_FLAGS:
 	if (type->kind == TDESC_TYPE_STRUCT)
 	  {
-	    printf_unfiltered
+	    printf_filtered
 	      ("  type_with_fields = tdesc_create_struct (feature, \"%s\");\n",
 	       type->name.c_str ());
 	    if (type->size != 0)
-	      printf_unfiltered
+	      printf_filtered
 		("  tdesc_set_struct_size (type_with_fields, %d);\n", type->size);
 	  }
 	else
 	  {
-	    printf_unfiltered
+	    printf_filtered
 	      ("  type_with_fields = tdesc_create_flags (feature, \"%s\", %d);\n",
 	       type->name.c_str (), type->size);
 	  }
@@ -1485,7 +1485,7 @@ public:
 		if (f.type->kind == TDESC_TYPE_BOOL)
 		  {
 		    gdb_assert (f.start == f.end);
-		    printf_unfiltered
+		    printf_filtered
 		      ("  tdesc_add_flag (type_with_fields, %d, \"%s\");\n",
 		       f.start, f.name.c_str ());
 		  }
@@ -1493,7 +1493,7 @@ public:
 			 || (type->size == 8
 			     && f.type->kind == TDESC_TYPE_UINT64))
 		  {
-		    printf_unfiltered
+		    printf_filtered
 		      ("  tdesc_add_bitfield (type_with_fields, \"%s\", %d, %d);\n",
 		       f.name.c_str (), f.start, f.end);
 		  }
@@ -1502,7 +1502,7 @@ public:
 		    printf_field_type_assignment
 		      ("tdesc_named_type (feature, \"%s\");\n",
 		       type_name);
-		    printf_unfiltered
+		    printf_filtered
 		      ("  tdesc_add_typed_bitfield (type_with_fields, \"%s\","
 		       " %d, %d, field_type);\n",
 		       f.name.c_str (), f.start, f.end);
@@ -1514,31 +1514,31 @@ public:
 		gdb_assert (type->kind == TDESC_TYPE_STRUCT);
 		printf_field_type_assignment
 		  ("tdesc_named_type (feature, \"%s\");\n", type_name);
-		printf_unfiltered
+		printf_filtered
 		  ("  tdesc_add_field (type_with_fields, \"%s\", field_type);\n",
 		   f.name.c_str ());
 	      }
 	  }
 	break;
       case TDESC_TYPE_UNION:
-	printf_unfiltered
+	printf_filtered
 	  ("  type_with_fields = tdesc_create_union (feature, \"%s\");\n",
 	   type->name.c_str ());
 	for (const tdesc_type_field &f : type->fields)
 	  {
 	    printf_field_type_assignment
 	      ("tdesc_named_type (feature, \"%s\");\n", f.type->name.c_str ());
-	    printf_unfiltered
+	    printf_filtered
 	      ("  tdesc_add_field (type_with_fields, \"%s\", field_type);\n",
 	       f.name.c_str ());
 	  }
 	break;
       case TDESC_TYPE_ENUM:
-	printf_unfiltered
+	printf_filtered
 	  ("  type_with_fields = tdesc_create_enum (feature, \"%s\", %d);\n",
 	   type->name.c_str (), type->size);
 	for (const tdesc_type_field &f : type->fields)
-	  printf_unfiltered
+	  printf_filtered
 	    ("  tdesc_add_enum_value (type_with_fields, %d, \"%s\");\n",
 	     f.start, f.name.c_str ());
 	break;
@@ -1546,19 +1546,19 @@ public:
 	error (_("C output is not supported type \"%s\"."), type->name.c_str ());
       }
 
-    printf_unfiltered ("\n");
+    printf_filtered ("\n");
   }
 
   void visit (const tdesc_reg *reg) override
   {
-    printf_unfiltered ("  tdesc_create_reg (feature, \"%s\", %ld, %d, ",
-		       reg->name.c_str (), reg->target_regnum,
-		       reg->save_restore);
+    printf_filtered ("  tdesc_create_reg (feature, \"%s\", %ld, %d, ",
+		     reg->name.c_str (), reg->target_regnum,
+		     reg->save_restore);
     if (!reg->group.empty ())
-      printf_unfiltered ("\"%s\", ", reg->group.c_str ());
+      printf_filtered ("\"%s\", ", reg->group.c_str ());
     else
-      printf_unfiltered ("NULL, ");
-    printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
+      printf_filtered ("NULL, ");
+    printf_filtered ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
   }
 
 protected:
@@ -1573,15 +1573,15 @@ private:
   {
     if (!m_printed_field_type)
       {
-	printf_unfiltered ("  tdesc_type *field_type;\n");
+	printf_filtered ("  tdesc_type *field_type;\n");
 	m_printed_field_type = true;
       }
 
-    printf_unfiltered ("  field_type = ");
+    printf_filtered ("  field_type = ");
 
     va_list args;
     va_start (args, fmt);
-    vprintf_unfiltered (fmt, args);
+    vprintf_filtered (fmt, args);
     va_end (args);
   }
 
@@ -1613,11 +1613,11 @@ public:
 
   void visit_pre (const target_desc *e) override
   {
-    printf_unfiltered ("  Original: %s */\n\n",
-		       lbasename (m_filename_after_features.c_str ()));
+    printf_filtered ("  Original: %s */\n\n",
+		     lbasename (m_filename_after_features.c_str ()));
 
-    printf_unfiltered ("#include \"gdbsupport/tdesc.h\"\n");
-    printf_unfiltered ("\n");
+    printf_filtered ("#include \"gdbsupport/tdesc.h\"\n");
+    printf_filtered ("\n");
   }
 
   void visit_post (const target_desc *e) override
@@ -1633,22 +1633,22 @@ public:
     std::replace (name.begin (), name.end (), '/', '_');
     std::replace (name.begin (), name.end (), '-', '_');
 
-    printf_unfiltered ("static int\n");
-    printf_unfiltered ("create_feature_%s ", name.c_str ());
-    printf_unfiltered ("(struct target_desc *result, long regnum)\n");
+    printf_filtered ("static int\n");
+    printf_filtered ("create_feature_%s ", name.c_str ());
+    printf_filtered ("(struct target_desc *result, long regnum)\n");
 
-    printf_unfiltered ("{\n");
-    printf_unfiltered ("  struct tdesc_feature *feature;\n");
+    printf_filtered ("{\n");
+    printf_filtered ("  struct tdesc_feature *feature;\n");
 
-    printf_unfiltered
+    printf_filtered
       ("\n  feature = tdesc_create_feature (result, \"%s\");\n",
        e->name.c_str ());
   }
 
   void visit_post (const tdesc_feature *e) override
   {
-    printf_unfiltered ("  return regnum;\n");
-    printf_unfiltered ("}\n");
+    printf_filtered ("  return regnum;\n");
+    printf_filtered ("}\n");
   }
 
   void visit (const tdesc_reg *reg) override
@@ -1681,27 +1681,27 @@ public:
 	  and also print the message so that it can be saved in the
 	  generated c file.  */
 
-	printf_unfiltered ("ERROR: \"regnum\" attribute %ld ",
-			   reg->target_regnum);
-	printf_unfiltered ("is not the largest number (%d).\n",
-			   m_next_regnum);
+	printf_filtered ("ERROR: \"regnum\" attribute %ld ",
+			 reg->target_regnum);
+	printf_filtered ("is not the largest number (%d).\n",
+			 m_next_regnum);
 	error (_("\"regnum\" attribute %ld is not the largest number (%d)."),
 	       reg->target_regnum, m_next_regnum);
       }
 
     if (reg->target_regnum > m_next_regnum)
       {
-	printf_unfiltered ("  regnum = %ld;\n", reg->target_regnum);
+	printf_filtered ("  regnum = %ld;\n", reg->target_regnum);
 	m_next_regnum = reg->target_regnum;
       }
 
-    printf_unfiltered ("  tdesc_create_reg (feature, \"%s\", regnum++, %d, ",
-		       reg->name.c_str (), reg->save_restore);
+    printf_filtered ("  tdesc_create_reg (feature, \"%s\", regnum++, %d, ",
+		     reg->name.c_str (), reg->save_restore);
     if (!reg->group.empty ())
-      printf_unfiltered ("\"%s\", ", reg->group.c_str ());
+      printf_filtered ("\"%s\", ", reg->group.c_str ());
     else
-      printf_unfiltered ("NULL, ");
-    printf_unfiltered ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
+      printf_filtered ("NULL, ");
+    printf_filtered ("%d, \"%s\");\n", reg->bitsize, reg->type.c_str ());
 
     m_next_regnum++;
   }
@@ -1858,7 +1858,7 @@ maint_print_xml_tdesc_cmd (const char *args, int from_tty)
   std::string buf;
   print_xml_feature v (&buf);
   tdesc->accept (v);
-  puts_unfiltered (buf.c_str ());
+  puts_filtered (buf.c_str ());
 }
 
 namespace selftests {
