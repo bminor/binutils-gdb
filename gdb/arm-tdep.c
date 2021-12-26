@@ -9717,38 +9717,38 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_unfiltered (file, _("arm_dump_tdep: fp_model = %i\n"),
-		      (int) tdep->fp_model);
-  fprintf_unfiltered (file, _("arm_dump_tdep: have_fpa_registers = %i\n"),
-		      (int) tdep->have_fpa_registers);
-  fprintf_unfiltered (file, _("arm_dump_tdep: have_wmmx_registers = %i\n"),
-		      (int) tdep->have_wmmx_registers);
-  fprintf_unfiltered (file, _("arm_dump_tdep: vfp_register_count = %i\n"),
-		      (int) tdep->vfp_register_count);
-  fprintf_unfiltered (file, _("arm_dump_tdep: have_s_pseudos = %s\n"),
-		      tdep->have_s_pseudos? "true" : "false");
-  fprintf_unfiltered (file, _("arm_dump_tdep: s_pseudo_base = %i\n"),
-		      (int) tdep->s_pseudo_base);
-  fprintf_unfiltered (file, _("arm_dump_tdep: s_pseudo_count = %i\n"),
-		      (int) tdep->s_pseudo_count);
-  fprintf_unfiltered (file, _("arm_dump_tdep: have_q_pseudos = %s\n"),
-		      tdep->have_q_pseudos? "true" : "false");
-  fprintf_unfiltered (file, _("arm_dump_tdep: q_pseudo_base = %i\n"),
-		      (int) tdep->q_pseudo_base);
-  fprintf_unfiltered (file, _("arm_dump_tdep: q_pseudo_count = %i\n"),
-		      (int) tdep->q_pseudo_count);
-  fprintf_unfiltered (file, _("arm_dump_tdep: have_neon = %i\n"),
-		      (int) tdep->have_neon);
-  fprintf_unfiltered (file, _("arm_dump_tdep: have_mve = %s\n"),
-		      tdep->have_mve? "yes" : "no");
-  fprintf_unfiltered (file, _("arm_dump_tdep: mve_vpr_regnum = %i\n"),
-		      tdep->mve_vpr_regnum);
-  fprintf_unfiltered (file, _("arm_dump_tdep: mve_pseudo_base = %i\n"),
-		      tdep->mve_pseudo_base);
-  fprintf_unfiltered (file, _("arm_dump_tdep: mve_pseudo_count = %i\n"),
-		      tdep->mve_pseudo_count);
-  fprintf_unfiltered (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
-		      (unsigned long) tdep->lowest_pc);
+  fprintf_filtered (file, _("arm_dump_tdep: fp_model = %i\n"),
+		    (int) tdep->fp_model);
+  fprintf_filtered (file, _("arm_dump_tdep: have_fpa_registers = %i\n"),
+		    (int) tdep->have_fpa_registers);
+  fprintf_filtered (file, _("arm_dump_tdep: have_wmmx_registers = %i\n"),
+		    (int) tdep->have_wmmx_registers);
+  fprintf_filtered (file, _("arm_dump_tdep: vfp_register_count = %i\n"),
+		    (int) tdep->vfp_register_count);
+  fprintf_filtered (file, _("arm_dump_tdep: have_s_pseudos = %s\n"),
+		    tdep->have_s_pseudos? "true" : "false");
+  fprintf_filtered (file, _("arm_dump_tdep: s_pseudo_base = %i\n"),
+		    (int) tdep->s_pseudo_base);
+  fprintf_filtered (file, _("arm_dump_tdep: s_pseudo_count = %i\n"),
+		    (int) tdep->s_pseudo_count);
+  fprintf_filtered (file, _("arm_dump_tdep: have_q_pseudos = %s\n"),
+		    tdep->have_q_pseudos? "true" : "false");
+  fprintf_filtered (file, _("arm_dump_tdep: q_pseudo_base = %i\n"),
+		    (int) tdep->q_pseudo_base);
+  fprintf_filtered (file, _("arm_dump_tdep: q_pseudo_count = %i\n"),
+		    (int) tdep->q_pseudo_count);
+  fprintf_filtered (file, _("arm_dump_tdep: have_neon = %i\n"),
+		    (int) tdep->have_neon);
+  fprintf_filtered (file, _("arm_dump_tdep: have_mve = %s\n"),
+		    tdep->have_mve? "yes" : "no");
+  fprintf_filtered (file, _("arm_dump_tdep: mve_vpr_regnum = %i\n"),
+		    tdep->mve_vpr_regnum);
+  fprintf_filtered (file, _("arm_dump_tdep: mve_pseudo_base = %i\n"),
+		    tdep->mve_pseudo_base);
+  fprintf_filtered (file, _("arm_dump_tdep: mve_pseudo_count = %i\n"),
+		    tdep->mve_pseudo_count);
+  fprintf_filtered (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
+		    (unsigned long) tdep->lowest_pc);
 }
 
 #if GDB_SELF_TEST

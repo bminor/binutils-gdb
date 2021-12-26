@@ -1290,10 +1290,10 @@ or1k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (NULL == tdep)
     return; /* Nothing to report */
 
-  fprintf_unfiltered (file, "or1k_dump_tdep: %d bytes per word\n",
-		      tdep->bytes_per_word);
-  fprintf_unfiltered (file, "or1k_dump_tdep: %d bytes per address\n",
-		      tdep->bytes_per_address);
+  fprintf_filtered (file, "or1k_dump_tdep: %d bytes per word\n",
+		    tdep->bytes_per_word);
+  fprintf_filtered (file, "or1k_dump_tdep: %d bytes per address\n",
+		    tdep->bytes_per_address);
 }
 
 

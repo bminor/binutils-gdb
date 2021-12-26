@@ -3863,12 +3863,12 @@ cris_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   cris_gdbarch_tdep *tdep = (cris_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   if (tdep != NULL)
     {
-      fprintf_unfiltered (file, "cris_dump_tdep: tdep->cris_version = %i\n",
-			  tdep->cris_version);
-      fprintf_unfiltered (file, "cris_dump_tdep: tdep->cris_mode = %s\n",
-			  tdep->cris_mode);
-      fprintf_unfiltered (file, "cris_dump_tdep: tdep->cris_dwarf2_cfi = %i\n",
-			  tdep->cris_dwarf2_cfi);
+      fprintf_filtered (file, "cris_dump_tdep: tdep->cris_version = %i\n",
+			tdep->cris_version);
+      fprintf_filtered (file, "cris_dump_tdep: tdep->cris_mode = %s\n",
+			tdep->cris_mode);
+      fprintf_filtered (file, "cris_dump_tdep: tdep->cris_dwarf2_cfi = %i\n",
+			tdep->cris_dwarf2_cfi);
     }
 }
 

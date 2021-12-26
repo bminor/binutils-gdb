@@ -3652,8 +3652,8 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_unfiltered (file, _("aarch64_dump_tdep: Lowest pc = 0x%s"),
-		      paddress (gdbarch, tdep->lowest_pc));
+  fprintf_filtered (file, _("aarch64_dump_tdep: Lowest pc = 0x%s"),
+		    paddress (gdbarch, tdep->lowest_pc));
 }
 
 #if GDB_SELF_TEST

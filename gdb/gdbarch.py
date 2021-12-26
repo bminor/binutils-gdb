@@ -401,19 +401,19 @@ with open("gdbarch.c", "w") as f:
     print("#if defined (GDB_NM_FILE)", file=f)
     print("  gdb_nm_file = GDB_NM_FILE;", file=f)
     print("#endif", file=f)
-    print("  fprintf_unfiltered (file,", file=f)
+    print("  fprintf_filtered (file,", file=f)
     print("""		      "gdbarch_dump: GDB_NM_FILE = %s\\n",""", file=f)
     print("		      gdb_nm_file);", file=f)
     for c in components:
         if c.predicate:
-            print("  fprintf_unfiltered (file,", file=f)
+            print("  fprintf_filtered (file,", file=f)
             print(
                 f"""                      "gdbarch_dump: gdbarch_{c.name}_p() = %d\\n",""",
                 file=f,
             )
             print(f"                      gdbarch_{c.name}_p (gdbarch));", file=f)
         if isinstance(c, Function):
-            print("  fprintf_unfiltered (file,", file=f)
+            print("  fprintf_filtered (file,", file=f)
             print(
                 f"""                      "gdbarch_dump: {c.name} = <%s>\\n",""", file=f
             )
@@ -428,7 +428,7 @@ with open("gdbarch.c", "w") as f:
                 printer = f"core_addr_to_string_nz (gdbarch->{c.name})"
             else:
                 printer = f"plongest (gdbarch->{c.name})"
-            print("  fprintf_unfiltered (file,", file=f)
+            print("  fprintf_filtered (file,", file=f)
             print(
                 f"""                      "gdbarch_dump: {c.name} = %s\\n",""", file=f
             )

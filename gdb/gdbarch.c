@@ -613,805 +613,805 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
 #if defined (GDB_NM_FILE)
   gdb_nm_file = GDB_NM_FILE;
 #endif
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
 		      "gdbarch_dump: GDB_NM_FILE = %s\n",
 		      gdb_nm_file);
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: bfd_arch_info = %s\n",
                       gdbarch_bfd_arch_info (gdbarch)->printable_name);
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: byte_order = %s\n",
                       plongest (gdbarch->byte_order));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: byte_order_for_code = %s\n",
                       plongest (gdbarch->byte_order_for_code));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: osabi = %s\n",
                       plongest (gdbarch->osabi));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: target_desc = %s\n",
                       host_address_to_string (gdbarch->target_desc));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: short_bit = %s\n",
                       plongest (gdbarch->short_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: int_bit = %s\n",
                       plongest (gdbarch->int_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: long_bit = %s\n",
                       plongest (gdbarch->long_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: long_long_bit = %s\n",
                       plongest (gdbarch->long_long_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: bfloat16_bit = %s\n",
                       plongest (gdbarch->bfloat16_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: bfloat16_format = %s\n",
                       pformat (gdbarch->bfloat16_format));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: half_bit = %s\n",
                       plongest (gdbarch->half_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: half_format = %s\n",
                       pformat (gdbarch->half_format));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: float_bit = %s\n",
                       plongest (gdbarch->float_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: float_format = %s\n",
                       pformat (gdbarch->float_format));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: double_bit = %s\n",
                       plongest (gdbarch->double_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: double_format = %s\n",
                       pformat (gdbarch->double_format));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: long_double_bit = %s\n",
                       plongest (gdbarch->long_double_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: long_double_format = %s\n",
                       pformat (gdbarch->long_double_format));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: wchar_bit = %s\n",
                       plongest (gdbarch->wchar_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: wchar_signed = %s\n",
                       plongest (gdbarch->wchar_signed));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: floatformat_for_type = <%s>\n",
                       host_address_to_string (gdbarch->floatformat_for_type));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: ptr_bit = %s\n",
                       plongest (gdbarch->ptr_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: addr_bit = %s\n",
                       plongest (gdbarch->addr_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: dwarf2_addr_size = %s\n",
                       plongest (gdbarch->dwarf2_addr_size));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: char_signed = %s\n",
                       plongest (gdbarch->char_signed));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_read_pc_p() = %d\n",
                       gdbarch_read_pc_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: read_pc = <%s>\n",
                       host_address_to_string (gdbarch->read_pc));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_write_pc_p() = %d\n",
                       gdbarch_write_pc_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: write_pc = <%s>\n",
                       host_address_to_string (gdbarch->write_pc));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: virtual_frame_pointer = <%s>\n",
                       host_address_to_string (gdbarch->virtual_frame_pointer));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_pseudo_register_read_p() = %d\n",
                       gdbarch_pseudo_register_read_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: pseudo_register_read = <%s>\n",
                       host_address_to_string (gdbarch->pseudo_register_read));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_pseudo_register_read_value_p() = %d\n",
                       gdbarch_pseudo_register_read_value_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: pseudo_register_read_value = <%s>\n",
                       host_address_to_string (gdbarch->pseudo_register_read_value));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_pseudo_register_write_p() = %d\n",
                       gdbarch_pseudo_register_write_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: pseudo_register_write = <%s>\n",
                       host_address_to_string (gdbarch->pseudo_register_write));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: num_regs = %s\n",
                       plongest (gdbarch->num_regs));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: num_pseudo_regs = %s\n",
                       plongest (gdbarch->num_pseudo_regs));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_ax_pseudo_register_collect_p() = %d\n",
                       gdbarch_ax_pseudo_register_collect_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: ax_pseudo_register_collect = <%s>\n",
                       host_address_to_string (gdbarch->ax_pseudo_register_collect));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_ax_pseudo_register_push_stack_p() = %d\n",
                       gdbarch_ax_pseudo_register_push_stack_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: ax_pseudo_register_push_stack = <%s>\n",
                       host_address_to_string (gdbarch->ax_pseudo_register_push_stack));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_report_signal_info_p() = %d\n",
                       gdbarch_report_signal_info_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: report_signal_info = <%s>\n",
                       host_address_to_string (gdbarch->report_signal_info));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: sp_regnum = %s\n",
                       plongest (gdbarch->sp_regnum));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: pc_regnum = %s\n",
                       plongest (gdbarch->pc_regnum));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: ps_regnum = %s\n",
                       plongest (gdbarch->ps_regnum));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: fp0_regnum = %s\n",
                       plongest (gdbarch->fp0_regnum));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stab_reg_to_regnum = <%s>\n",
                       host_address_to_string (gdbarch->stab_reg_to_regnum));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: ecoff_reg_to_regnum = <%s>\n",
                       host_address_to_string (gdbarch->ecoff_reg_to_regnum));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: sdb_reg_to_regnum = <%s>\n",
                       host_address_to_string (gdbarch->sdb_reg_to_regnum));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: dwarf2_reg_to_regnum = <%s>\n",
                       host_address_to_string (gdbarch->dwarf2_reg_to_regnum));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: register_name = <%s>\n",
                       host_address_to_string (gdbarch->register_name));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_register_type_p() = %d\n",
                       gdbarch_register_type_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: register_type = <%s>\n",
                       host_address_to_string (gdbarch->register_type));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: dummy_id = <%s>\n",
                       host_address_to_string (gdbarch->dummy_id));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: deprecated_fp_regnum = %s\n",
                       plongest (gdbarch->deprecated_fp_regnum));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_push_dummy_call_p() = %d\n",
                       gdbarch_push_dummy_call_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: push_dummy_call = <%s>\n",
                       host_address_to_string (gdbarch->push_dummy_call));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: call_dummy_location = %s\n",
                       plongest (gdbarch->call_dummy_location));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_push_dummy_code_p() = %d\n",
                       gdbarch_push_dummy_code_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: push_dummy_code = <%s>\n",
                       host_address_to_string (gdbarch->push_dummy_code));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: code_of_frame_writable = <%s>\n",
                       host_address_to_string (gdbarch->code_of_frame_writable));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: print_registers_info = <%s>\n",
                       host_address_to_string (gdbarch->print_registers_info));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: print_float_info = <%s>\n",
                       host_address_to_string (gdbarch->print_float_info));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_print_vector_info_p() = %d\n",
                       gdbarch_print_vector_info_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: print_vector_info = <%s>\n",
                       host_address_to_string (gdbarch->print_vector_info));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: register_sim_regno = <%s>\n",
                       host_address_to_string (gdbarch->register_sim_regno));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: cannot_fetch_register = <%s>\n",
                       host_address_to_string (gdbarch->cannot_fetch_register));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: cannot_store_register = <%s>\n",
                       host_address_to_string (gdbarch->cannot_store_register));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_get_longjmp_target_p() = %d\n",
                       gdbarch_get_longjmp_target_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: get_longjmp_target = <%s>\n",
                       host_address_to_string (gdbarch->get_longjmp_target));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: believe_pcc_promotion = %s\n",
                       plongest (gdbarch->believe_pcc_promotion));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: convert_register_p = <%s>\n",
                       host_address_to_string (gdbarch->convert_register_p));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: register_to_value = <%s>\n",
                       host_address_to_string (gdbarch->register_to_value));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: value_to_register = <%s>\n",
                       host_address_to_string (gdbarch->value_to_register));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: value_from_register = <%s>\n",
                       host_address_to_string (gdbarch->value_from_register));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: pointer_to_address = <%s>\n",
                       host_address_to_string (gdbarch->pointer_to_address));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: address_to_pointer = <%s>\n",
                       host_address_to_string (gdbarch->address_to_pointer));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_integer_to_address_p() = %d\n",
                       gdbarch_integer_to_address_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: integer_to_address = <%s>\n",
                       host_address_to_string (gdbarch->integer_to_address));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_return_value_p() = %d\n",
                       gdbarch_return_value_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: return_value = <%s>\n",
                       host_address_to_string (gdbarch->return_value));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: return_in_first_hidden_param_p = <%s>\n",
                       host_address_to_string (gdbarch->return_in_first_hidden_param_p));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: skip_prologue = <%s>\n",
                       host_address_to_string (gdbarch->skip_prologue));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_skip_main_prologue_p() = %d\n",
                       gdbarch_skip_main_prologue_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: skip_main_prologue = <%s>\n",
                       host_address_to_string (gdbarch->skip_main_prologue));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_skip_entrypoint_p() = %d\n",
                       gdbarch_skip_entrypoint_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: skip_entrypoint = <%s>\n",
                       host_address_to_string (gdbarch->skip_entrypoint));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: inner_than = <%s>\n",
                       host_address_to_string (gdbarch->inner_than));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: breakpoint_from_pc = <%s>\n",
                       host_address_to_string (gdbarch->breakpoint_from_pc));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: breakpoint_kind_from_pc = <%s>\n",
                       host_address_to_string (gdbarch->breakpoint_kind_from_pc));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: sw_breakpoint_from_kind = <%s>\n",
                       host_address_to_string (gdbarch->sw_breakpoint_from_kind));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: breakpoint_kind_from_current_state = <%s>\n",
                       host_address_to_string (gdbarch->breakpoint_kind_from_current_state));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_adjust_breakpoint_address_p() = %d\n",
                       gdbarch_adjust_breakpoint_address_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: adjust_breakpoint_address = <%s>\n",
                       host_address_to_string (gdbarch->adjust_breakpoint_address));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: memory_insert_breakpoint = <%s>\n",
                       host_address_to_string (gdbarch->memory_insert_breakpoint));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: memory_remove_breakpoint = <%s>\n",
                       host_address_to_string (gdbarch->memory_remove_breakpoint));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: decr_pc_after_break = %s\n",
                       core_addr_to_string_nz (gdbarch->decr_pc_after_break));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: deprecated_function_start_offset = %s\n",
                       core_addr_to_string_nz (gdbarch->deprecated_function_start_offset));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: remote_register_number = <%s>\n",
                       host_address_to_string (gdbarch->remote_register_number));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_fetch_tls_load_module_address_p() = %d\n",
                       gdbarch_fetch_tls_load_module_address_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: fetch_tls_load_module_address = <%s>\n",
                       host_address_to_string (gdbarch->fetch_tls_load_module_address));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_get_thread_local_address_p() = %d\n",
                       gdbarch_get_thread_local_address_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: get_thread_local_address = <%s>\n",
                       host_address_to_string (gdbarch->get_thread_local_address));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: frame_args_skip = %s\n",
                       core_addr_to_string_nz (gdbarch->frame_args_skip));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: unwind_pc = <%s>\n",
                       host_address_to_string (gdbarch->unwind_pc));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: unwind_sp = <%s>\n",
                       host_address_to_string (gdbarch->unwind_sp));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_frame_num_args_p() = %d\n",
                       gdbarch_frame_num_args_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: frame_num_args = <%s>\n",
                       host_address_to_string (gdbarch->frame_num_args));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_frame_align_p() = %d\n",
                       gdbarch_frame_align_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: frame_align = <%s>\n",
                       host_address_to_string (gdbarch->frame_align));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stabs_argument_has_addr = <%s>\n",
                       host_address_to_string (gdbarch->stabs_argument_has_addr));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: frame_red_zone_size = %s\n",
                       plongest (gdbarch->frame_red_zone_size));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: convert_from_func_ptr_addr = <%s>\n",
                       host_address_to_string (gdbarch->convert_from_func_ptr_addr));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: addr_bits_remove = <%s>\n",
                       host_address_to_string (gdbarch->addr_bits_remove));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: significant_addr_bit = %s\n",
                       plongest (gdbarch->significant_addr_bit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: memtag_to_string = <%s>\n",
                       host_address_to_string (gdbarch->memtag_to_string));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: tagged_address_p = <%s>\n",
                       host_address_to_string (gdbarch->tagged_address_p));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: memtag_matches_p = <%s>\n",
                       host_address_to_string (gdbarch->memtag_matches_p));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: set_memtags = <%s>\n",
                       host_address_to_string (gdbarch->set_memtags));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: get_memtag = <%s>\n",
                       host_address_to_string (gdbarch->get_memtag));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: memtag_granule_size = %s\n",
                       core_addr_to_string_nz (gdbarch->memtag_granule_size));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_software_single_step_p() = %d\n",
                       gdbarch_software_single_step_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: software_single_step = <%s>\n",
                       host_address_to_string (gdbarch->software_single_step));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_single_step_through_delay_p() = %d\n",
                       gdbarch_single_step_through_delay_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: single_step_through_delay = <%s>\n",
                       host_address_to_string (gdbarch->single_step_through_delay));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: print_insn = <%s>\n",
                       host_address_to_string (gdbarch->print_insn));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: skip_trampoline_code = <%s>\n",
                       host_address_to_string (gdbarch->skip_trampoline_code));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: skip_solib_resolver = <%s>\n",
                       host_address_to_string (gdbarch->skip_solib_resolver));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: in_solib_return_trampoline = <%s>\n",
                       host_address_to_string (gdbarch->in_solib_return_trampoline));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: in_indirect_branch_thunk = <%s>\n",
                       host_address_to_string (gdbarch->in_indirect_branch_thunk));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stack_frame_destroyed_p = <%s>\n",
                       host_address_to_string (gdbarch->stack_frame_destroyed_p));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_elf_make_msymbol_special_p() = %d\n",
                       gdbarch_elf_make_msymbol_special_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: elf_make_msymbol_special = <%s>\n",
                       host_address_to_string (gdbarch->elf_make_msymbol_special));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: coff_make_msymbol_special = <%s>\n",
                       host_address_to_string (gdbarch->coff_make_msymbol_special));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: make_symbol_special = <%s>\n",
                       host_address_to_string (gdbarch->make_symbol_special));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: adjust_dwarf2_addr = <%s>\n",
                       host_address_to_string (gdbarch->adjust_dwarf2_addr));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: adjust_dwarf2_line = <%s>\n",
                       host_address_to_string (gdbarch->adjust_dwarf2_line));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: cannot_step_breakpoint = %s\n",
                       plongest (gdbarch->cannot_step_breakpoint));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: have_nonsteppable_watchpoint = %s\n",
                       plongest (gdbarch->have_nonsteppable_watchpoint));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_address_class_type_flags_p() = %d\n",
                       gdbarch_address_class_type_flags_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: address_class_type_flags = <%s>\n",
                       host_address_to_string (gdbarch->address_class_type_flags));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_address_class_type_flags_to_name_p() = %d\n",
                       gdbarch_address_class_type_flags_to_name_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: address_class_type_flags_to_name = <%s>\n",
                       host_address_to_string (gdbarch->address_class_type_flags_to_name));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: execute_dwarf_cfa_vendor_op = <%s>\n",
                       host_address_to_string (gdbarch->execute_dwarf_cfa_vendor_op));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_address_class_name_to_type_flags_p() = %d\n",
                       gdbarch_address_class_name_to_type_flags_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: address_class_name_to_type_flags = <%s>\n",
                       host_address_to_string (gdbarch->address_class_name_to_type_flags));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: register_reggroup_p = <%s>\n",
                       host_address_to_string (gdbarch->register_reggroup_p));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_fetch_pointer_argument_p() = %d\n",
                       gdbarch_fetch_pointer_argument_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: fetch_pointer_argument = <%s>\n",
                       host_address_to_string (gdbarch->fetch_pointer_argument));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_iterate_over_regset_sections_p() = %d\n",
                       gdbarch_iterate_over_regset_sections_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: iterate_over_regset_sections = <%s>\n",
                       host_address_to_string (gdbarch->iterate_over_regset_sections));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_make_corefile_notes_p() = %d\n",
                       gdbarch_make_corefile_notes_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: make_corefile_notes = <%s>\n",
                       host_address_to_string (gdbarch->make_corefile_notes));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_find_memory_regions_p() = %d\n",
                       gdbarch_find_memory_regions_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: find_memory_regions = <%s>\n",
                       host_address_to_string (gdbarch->find_memory_regions));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_core_xfer_shared_libraries_p() = %d\n",
                       gdbarch_core_xfer_shared_libraries_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: core_xfer_shared_libraries = <%s>\n",
                       host_address_to_string (gdbarch->core_xfer_shared_libraries));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_core_xfer_shared_libraries_aix_p() = %d\n",
                       gdbarch_core_xfer_shared_libraries_aix_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: core_xfer_shared_libraries_aix = <%s>\n",
                       host_address_to_string (gdbarch->core_xfer_shared_libraries_aix));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_core_pid_to_str_p() = %d\n",
                       gdbarch_core_pid_to_str_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: core_pid_to_str = <%s>\n",
                       host_address_to_string (gdbarch->core_pid_to_str));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_core_thread_name_p() = %d\n",
                       gdbarch_core_thread_name_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: core_thread_name = <%s>\n",
                       host_address_to_string (gdbarch->core_thread_name));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_core_xfer_siginfo_p() = %d\n",
                       gdbarch_core_xfer_siginfo_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: core_xfer_siginfo = <%s>\n",
                       host_address_to_string (gdbarch->core_xfer_siginfo));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_gcore_bfd_target_p() = %d\n",
                       gdbarch_gcore_bfd_target_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gcore_bfd_target = %s\n",
                       pstring (gdbarch->gcore_bfd_target));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: vtable_function_descriptors = %s\n",
                       plongest (gdbarch->vtable_function_descriptors));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: vbit_in_delta = %s\n",
                       plongest (gdbarch->vbit_in_delta));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: skip_permanent_breakpoint = <%s>\n",
                       host_address_to_string (gdbarch->skip_permanent_breakpoint));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_max_insn_length_p() = %d\n",
                       gdbarch_max_insn_length_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: max_insn_length = %s\n",
                       plongest (gdbarch->max_insn_length));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_displaced_step_copy_insn_p() = %d\n",
                       gdbarch_displaced_step_copy_insn_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: displaced_step_copy_insn = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_copy_insn));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: displaced_step_hw_singlestep = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_hw_singlestep));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_displaced_step_fixup_p() = %d\n",
                       gdbarch_displaced_step_fixup_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: displaced_step_fixup = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_fixup));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_displaced_step_prepare_p() = %d\n",
                       gdbarch_displaced_step_prepare_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: displaced_step_prepare = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_prepare));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: displaced_step_finish = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_finish));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_displaced_step_copy_insn_closure_by_addr_p() = %d\n",
                       gdbarch_displaced_step_copy_insn_closure_by_addr_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: displaced_step_copy_insn_closure_by_addr = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_copy_insn_closure_by_addr));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: displaced_step_restore_all_in_ptid = <%s>\n",
                       host_address_to_string (gdbarch->displaced_step_restore_all_in_ptid));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_relocate_instruction_p() = %d\n",
                       gdbarch_relocate_instruction_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: relocate_instruction = <%s>\n",
                       host_address_to_string (gdbarch->relocate_instruction));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_overlay_update_p() = %d\n",
                       gdbarch_overlay_update_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: overlay_update = <%s>\n",
                       host_address_to_string (gdbarch->overlay_update));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_core_read_description_p() = %d\n",
                       gdbarch_core_read_description_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: core_read_description = <%s>\n",
                       host_address_to_string (gdbarch->core_read_description));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: sofun_address_maybe_missing = %s\n",
                       plongest (gdbarch->sofun_address_maybe_missing));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_process_record_p() = %d\n",
                       gdbarch_process_record_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: process_record = <%s>\n",
                       host_address_to_string (gdbarch->process_record));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_process_record_signal_p() = %d\n",
                       gdbarch_process_record_signal_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: process_record_signal = <%s>\n",
                       host_address_to_string (gdbarch->process_record_signal));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_gdb_signal_from_target_p() = %d\n",
                       gdbarch_gdb_signal_from_target_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdb_signal_from_target = <%s>\n",
                       host_address_to_string (gdbarch->gdb_signal_from_target));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_gdb_signal_to_target_p() = %d\n",
                       gdbarch_gdb_signal_to_target_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdb_signal_to_target = <%s>\n",
                       host_address_to_string (gdbarch->gdb_signal_to_target));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_get_siginfo_type_p() = %d\n",
                       gdbarch_get_siginfo_type_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: get_siginfo_type = <%s>\n",
                       host_address_to_string (gdbarch->get_siginfo_type));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_record_special_symbol_p() = %d\n",
                       gdbarch_record_special_symbol_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: record_special_symbol = <%s>\n",
                       host_address_to_string (gdbarch->record_special_symbol));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_get_syscall_number_p() = %d\n",
                       gdbarch_get_syscall_number_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: get_syscall_number = <%s>\n",
                       host_address_to_string (gdbarch->get_syscall_number));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: xml_syscall_file = %s\n",
                       pstring (gdbarch->xml_syscall_file));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: syscalls_info = %s\n",
                       host_address_to_string (gdbarch->syscalls_info));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_integer_prefixes = %s\n",
                       pstring_list (gdbarch->stap_integer_prefixes));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_integer_suffixes = %s\n",
                       pstring_list (gdbarch->stap_integer_suffixes));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_register_prefixes = %s\n",
                       pstring_list (gdbarch->stap_register_prefixes));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_register_suffixes = %s\n",
                       pstring_list (gdbarch->stap_register_suffixes));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_register_indirection_prefixes = %s\n",
                       pstring_list (gdbarch->stap_register_indirection_prefixes));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_register_indirection_suffixes = %s\n",
                       pstring_list (gdbarch->stap_register_indirection_suffixes));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_gdb_register_prefix = %s\n",
                       pstring (gdbarch->stap_gdb_register_prefix));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_gdb_register_suffix = %s\n",
                       pstring (gdbarch->stap_gdb_register_suffix));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_stap_is_single_operand_p() = %d\n",
                       gdbarch_stap_is_single_operand_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_is_single_operand = <%s>\n",
                       host_address_to_string (gdbarch->stap_is_single_operand));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_stap_parse_special_token_p() = %d\n",
                       gdbarch_stap_parse_special_token_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_parse_special_token = <%s>\n",
                       host_address_to_string (gdbarch->stap_parse_special_token));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_stap_adjust_register_p() = %d\n",
                       gdbarch_stap_adjust_register_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: stap_adjust_register = <%s>\n",
                       host_address_to_string (gdbarch->stap_adjust_register));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_dtrace_parse_probe_argument_p() = %d\n",
                       gdbarch_dtrace_parse_probe_argument_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: dtrace_parse_probe_argument = <%s>\n",
                       host_address_to_string (gdbarch->dtrace_parse_probe_argument));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_dtrace_probe_is_enabled_p() = %d\n",
                       gdbarch_dtrace_probe_is_enabled_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: dtrace_probe_is_enabled = <%s>\n",
                       host_address_to_string (gdbarch->dtrace_probe_is_enabled));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_dtrace_enable_probe_p() = %d\n",
                       gdbarch_dtrace_enable_probe_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: dtrace_enable_probe = <%s>\n",
                       host_address_to_string (gdbarch->dtrace_enable_probe));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_dtrace_disable_probe_p() = %d\n",
                       gdbarch_dtrace_disable_probe_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: dtrace_disable_probe = <%s>\n",
                       host_address_to_string (gdbarch->dtrace_disable_probe));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: has_global_solist = %s\n",
                       plongest (gdbarch->has_global_solist));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: has_global_breakpoints = %s\n",
                       plongest (gdbarch->has_global_breakpoints));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: has_shared_address_space = <%s>\n",
                       host_address_to_string (gdbarch->has_shared_address_space));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: fast_tracepoint_valid_at = <%s>\n",
                       host_address_to_string (gdbarch->fast_tracepoint_valid_at));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: guess_tracepoint_registers = <%s>\n",
                       host_address_to_string (gdbarch->guess_tracepoint_registers));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: auto_charset = <%s>\n",
                       host_address_to_string (gdbarch->auto_charset));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: auto_wide_charset = <%s>\n",
                       host_address_to_string (gdbarch->auto_wide_charset));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: solib_symbols_extension = %s\n",
                       pstring (gdbarch->solib_symbols_extension));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: has_dos_based_file_system = %s\n",
                       plongest (gdbarch->has_dos_based_file_system));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gen_return_address = <%s>\n",
                       host_address_to_string (gdbarch->gen_return_address));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_info_proc_p() = %d\n",
                       gdbarch_info_proc_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: info_proc = <%s>\n",
                       host_address_to_string (gdbarch->info_proc));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_core_info_proc_p() = %d\n",
                       gdbarch_core_info_proc_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: core_info_proc = <%s>\n",
                       host_address_to_string (gdbarch->core_info_proc));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: iterate_over_objfiles_in_search_order = <%s>\n",
                       host_address_to_string (gdbarch->iterate_over_objfiles_in_search_order));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: ravenscar_ops = %s\n",
                       host_address_to_string (gdbarch->ravenscar_ops));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: insn_is_call = <%s>\n",
                       host_address_to_string (gdbarch->insn_is_call));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: insn_is_ret = <%s>\n",
                       host_address_to_string (gdbarch->insn_is_ret));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: insn_is_jump = <%s>\n",
                       host_address_to_string (gdbarch->insn_is_jump));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: program_breakpoint_here_p = <%s>\n",
                       host_address_to_string (gdbarch->program_breakpoint_here_p));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_auxv_parse_p() = %d\n",
                       gdbarch_auxv_parse_p (gdbarch));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: auxv_parse = <%s>\n",
                       host_address_to_string (gdbarch->auxv_parse));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: print_auxv_entry = <%s>\n",
                       host_address_to_string (gdbarch->print_auxv_entry));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: vsyscall_range = <%s>\n",
                       host_address_to_string (gdbarch->vsyscall_range));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: infcall_mmap = <%s>\n",
                       host_address_to_string (gdbarch->infcall_mmap));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: infcall_munmap = <%s>\n",
                       host_address_to_string (gdbarch->infcall_munmap));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gcc_target_options = <%s>\n",
                       host_address_to_string (gdbarch->gcc_target_options));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: gnu_triplet_regexp = <%s>\n",
                       host_address_to_string (gdbarch->gnu_triplet_regexp));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: addressable_memory_unit_size = <%s>\n",
                       host_address_to_string (gdbarch->addressable_memory_unit_size));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: disassembler_options_implicit = %s\n",
                       pstring (gdbarch->disassembler_options_implicit));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: disassembler_options = %s\n",
                       pstring_ptr (gdbarch->disassembler_options));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: valid_disassembler_options = %s\n",
                       host_address_to_string (gdbarch->valid_disassembler_options));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: type_align = <%s>\n",
                       host_address_to_string (gdbarch->type_align));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: get_pc_address_flags = <%s>\n",
                       host_address_to_string (gdbarch->get_pc_address_flags));
-  fprintf_unfiltered (file,
+  fprintf_filtered (file,
                       "gdbarch_dump: read_core_file_mappings = <%s>\n",
                       host_address_to_string (gdbarch->read_core_file_mappings));
   if (gdbarch->dump_tdep != NULL)

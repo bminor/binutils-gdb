@@ -3162,9 +3162,9 @@ hppa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
   hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  fprintf_unfiltered (file, "bytes_per_address = %d\n", 
-		      tdep->bytes_per_address);
-  fprintf_unfiltered (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
+  fprintf_filtered (file, "bytes_per_address = %d\n", 
+		    tdep->bytes_per_address);
+  fprintf_filtered (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
 }
 
 void _initialize_hppa_tdep ();
