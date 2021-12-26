@@ -1905,11 +1905,8 @@ windows_nat_target::attach (const char *args, int from_tty)
   pid = parse_pid_to_attach (args);
 
   if (set_process_privilege (SE_DEBUG_NAME, TRUE) < 0)
-    {
-      printf_unfiltered ("Warning: Failed to get SE_DEBUG_NAME privilege\n");
-      printf_unfiltered ("This can cause attach to "
-			 "fail on Windows NT/2K/XP\n");
-    }
+    warning ("Failed to get SE_DEBUG_NAME privilege\n"
+	     "This can cause attach to fail on Windows NT/2K/XP");
 
   windows_init_thread_list ();
   ok = DebugActiveProcess (pid);
