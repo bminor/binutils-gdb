@@ -1112,54 +1112,50 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   size_t module_name_offset;
   CORE_ADDR base_addr;
 
-  gdb_byte *buf = NULL;
-
   if (!startswith (sect->name, ".module"))
     return;
 
-  buf = (gdb_byte *) xmalloc (bfd_section_size (sect) + 1);
-  if (!buf)
-    {
-      printf_unfiltered ("memory allocation failed for %s\n", sect->name);
-      goto out;
-    }
+  gdb::byte_vector buf (bfd_section_size (sect) + 1);
   if (!bfd_get_section_contents (abfd, sect,
-				 buf, 0, bfd_section_size (sect)))
-    goto out;
-
-
+				 buf.data (), 0, bfd_section_size (sect)))
+    return;
+  /* We're going to treat part of the buffer as a string, so make sure
+     it is NUL-terminated.  */
+  buf.back () = 0;
 
   /* A DWORD (data_type) followed by struct windows_core_module_info.  */
-  data_type = extract_unsigned_integer (buf, 4, byte_order);
+  if (bfd_section_size (sect) < 4)
+    return;
+  data_type = extract_unsigned_integer (buf.data (), 4, byte_order);
 
   if (data_type == NOTE_INFO_MODULE)
     {
-      base_addr = extract_unsigned_integer (buf + 4, 4, byte_order);
-      module_name_size = extract_unsigned_integer (buf + 8, 4, byte_order);
       module_name_offset = 12;
+      if (bfd_section_size (sect) < module_name_offset)
+	return;
+      base_addr = extract_unsigned_integer (&buf[4], 4, byte_order);
+      module_name_size = extract_unsigned_integer (&buf[8], 4, byte_order);
     }
   else if (data_type == NOTE_INFO_MODULE64)
     {
-      base_addr = extract_unsigned_integer (buf + 4, 8, byte_order);
-      module_name_size = extract_unsigned_integer (buf + 12, 4, byte_order);
       module_name_offset = 16;
+      if (bfd_section_size (sect) < module_name_offset)
+	return;
+      base_addr = extract_unsigned_integer (&buf[4], 8, byte_order);
+      module_name_size = extract_unsigned_integer (&buf[12], 4, byte_order);
     }
   else
-    goto out;
+    return;
 
   if (module_name_offset + module_name_size > bfd_section_size (sect))
-    goto out;
-  module_name = (char *) buf + module_name_offset;
+    return;
+  module_name = (char *) buf.data () + module_name_offset;
 
   /* The first module is the .exe itself.  */
   if (data->module_count != 0)
     windows_xfer_shared_library (module_name, base_addr,
 				 NULL, data->gdbarch, data->obstack);
   data->module_count++;
-
-out:
-  xfree (buf);
-  return;
 }
 
 ULONGEST
