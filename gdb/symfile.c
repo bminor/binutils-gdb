@@ -1261,8 +1261,8 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 
   if (separate_debug_file_debug)
     {
-      printf_filtered (_("  Trying %s..."), name.c_str ());
-      gdb_flush (gdb_stdout);
+      fprintf_filtered (gdb_stdlog, _("  Trying %s..."), name.c_str ());
+      gdb_flush (gdb_stdlog);
     }
 
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (name.c_str (), gnutarget));
@@ -1270,7 +1270,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
   if (abfd == NULL)
     {
       if (separate_debug_file_debug)
-	printf_filtered (_(" no, unable to open.\n"));
+	fprintf_filtered (gdb_stdlog, _(" no, unable to open.\n"));
 
       return 0;
     }
@@ -1294,7 +1294,8 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 	  && abfd_stat.st_ino == parent_stat.st_ino)
 	{
 	  if (separate_debug_file_debug)
-	    printf_filtered (_(" no, same file as the objfile.\n"));
+	    fprintf_filtered (gdb_stdlog,
+			      _(" no, same file as the objfile.\n"));
 
 	  return 0;
 	}
@@ -1308,7 +1309,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
   if (!file_crc_p)
     {
       if (separate_debug_file_debug)
-	printf_filtered (_(" no, error computing CRC.\n"));
+	fprintf_filtered (gdb_stdlog, _(" no, error computing CRC.\n"));
 
       return 0;
     }
@@ -1326,7 +1327,8 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 	  if (!gdb_bfd_crc (parent_objfile->obfd, &parent_crc))
 	    {
 	      if (separate_debug_file_debug)
-		printf_filtered (_(" no, error computing CRC.\n"));
+		fprintf_filtered (gdb_stdlog,
+				  _(" no, error computing CRC.\n"));
 
 	      return 0;
 	    }
@@ -1338,13 +1340,13 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
 		 name.c_str (), objfile_name (parent_objfile));
 
       if (separate_debug_file_debug)
-	printf_filtered (_(" no, CRC doesn't match.\n"));
+	fprintf_filtered (gdb_stdlog, _(" no, CRC doesn't match.\n"));
 
       return 0;
     }
 
   if (separate_debug_file_debug)
-    printf_filtered (_(" yes!\n"));
+    fprintf_filtered (gdb_stdlog, _(" yes!\n"));
 
   return 1;
 }
@@ -1379,8 +1381,9 @@ find_separate_debug_file (const char *dir,
 			  unsigned long crc32, struct objfile *objfile)
 {
   if (separate_debug_file_debug)
-    printf_filtered (_("\nLooking for separate debug info (debug link) for "
-		       "%s\n"), objfile_name (objfile));
+    fprintf_filtered (gdb_stdlog,
+		      _("\nLooking for separate debug info (debug link) for "
+			"%s\n"), objfile_name (objfile));
 
   /* First try in the same directory as the original file.  */
   std::string debugfile = dir;
