@@ -279,9 +279,10 @@ moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
   if (target_read_memory (addr, buf, length))
     {
       if (record_debug)
-	printf_unfiltered (_("Process record: error reading memory at "
-			     "addr 0x%s len = %d.\n"),
-			   paddress (target_gdbarch (), addr), length);
+	fprintf_unfiltered (gdb_stderr,
+			    _("Process record: error reading memory at "
+			      "addr 0x%s len = %d.\n"),
+			    paddress (target_gdbarch (), addr), length);
       return -1;
     }
 

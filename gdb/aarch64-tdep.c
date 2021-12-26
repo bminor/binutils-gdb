@@ -4657,10 +4657,11 @@ aarch64_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   ret = aarch64_record_decode_insn_handler (&aarch64_record);
   if (ret == AARCH64_RECORD_UNSUPPORTED)
     {
-      printf_unfiltered (_("Process record does not support instruction "
-			   "0x%0x at address %s.\n"),
-			 aarch64_record.aarch64_insn,
-			 paddress (gdbarch, insn_addr));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record does not support instruction "
+			    "0x%0x at address %s.\n"),
+			  aarch64_record.aarch64_insn,
+			  paddress (gdbarch, insn_addr));
       ret = -1;
     }
 

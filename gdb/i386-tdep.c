@@ -6864,8 +6864,9 @@ Do you want to stop the program?"),
 
       /* XXX */
     case 0xcc:    /* int3 */
-      printf_unfiltered (_("Process record does not support instruction "
-			   "int3.\n"));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record does not support instruction "
+			    "int3.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
@@ -6881,9 +6882,10 @@ Do you want to stop the program?"),
 	if (interrupt != 0x80
 	    || tdep->i386_intx80_record == NULL)
 	  {
-	    printf_unfiltered (_("Process record does not support "
-				 "instruction int 0x%02x.\n"),
-			       interrupt);
+	    fprintf_unfiltered (gdb_stderr,
+				_("Process record does not support "
+				  "instruction int 0x%02x.\n"),
+				interrupt);
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
@@ -6895,8 +6897,9 @@ Do you want to stop the program?"),
 
       /* XXX */
     case 0xce:    /* into */
-      printf_unfiltered (_("Process record does not support "
-			   "instruction into.\n"));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record does not support "
+			    "instruction into.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
@@ -6906,8 +6909,9 @@ Do you want to stop the program?"),
       break;
 
     case 0x62:    /* bound */
-      printf_unfiltered (_("Process record does not support "
-			   "instruction bound.\n"));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record does not support "
+			    "instruction bound.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
@@ -6942,15 +6946,17 @@ Do you want to stop the program?"),
       break;
 
     case 0x0f30:    /* wrmsr */
-      printf_unfiltered (_("Process record does not support "
-			   "instruction wrmsr.\n"));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record does not support "
+			    "instruction wrmsr.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
 
     case 0x0f32:    /* rdmsr */
-      printf_unfiltered (_("Process record does not support "
-			   "instruction rdmsr.\n"));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record does not support "
+			    "instruction rdmsr.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
@@ -6970,8 +6976,9 @@ Do you want to stop the program?"),
 	  }
 	if (tdep->i386_sysenter_record == NULL)
 	  {
-	    printf_unfiltered (_("Process record does not support "
-				 "instruction sysenter.\n"));
+	    fprintf_unfiltered (gdb_stderr,
+				_("Process record does not support "
+				  "instruction sysenter.\n"));
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
@@ -6982,8 +6989,9 @@ Do you want to stop the program?"),
       break;
 
     case 0x0f35:    /* sysexit */
-      printf_unfiltered (_("Process record does not support "
-			   "instruction sysexit.\n"));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record does not support "
+			    "instruction sysexit.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
@@ -6993,8 +7001,9 @@ Do you want to stop the program?"),
 	int ret;
 	if (tdep->i386_syscall_record == NULL)
 	  {
-	    printf_unfiltered (_("Process record does not support "
-				 "instruction syscall.\n"));
+	    fprintf_unfiltered (gdb_stderr,
+				_("Process record does not support "
+				  "instruction syscall.\n"));
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
@@ -7005,8 +7014,9 @@ Do you want to stop the program?"),
       break;
 
     case 0x0f07:    /* sysret */
-      printf_unfiltered (_("Process record does not support "
-			   "instruction sysret.\n"));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record does not support "
+			    "instruction sysret.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
@@ -7019,8 +7029,9 @@ Do you want to stop the program?"),
       break;
 
     case 0xf4:    /* hlt */
-      printf_unfiltered (_("Process record does not support "
-			   "instruction hlt.\n"));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record does not support "
+			    "instruction hlt.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
@@ -8138,10 +8149,11 @@ reswitch_prefix_add:
   return 0;
 
  no_support:
-  printf_unfiltered (_("Process record does not support instruction 0x%02x "
-		       "at address %s.\n"),
-		     (unsigned int) (opcode),
-		     paddress (gdbarch, ir.orig_addr));
+  fprintf_unfiltered (gdb_stderr,
+		      _("Process record does not support instruction 0x%02x "
+			"at address %s.\n"),
+		      (unsigned int) (opcode),
+		      paddress (gdbarch, ir.orig_addr));
   return -1;
 }
 

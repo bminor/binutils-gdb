@@ -1496,9 +1496,10 @@ amd64_linux_syscall_record_common (struct regcache *regcache,
 
   if (syscall_gdb == gdb_sys_no_syscall)
     {
-      printf_unfiltered (_("Process record and replay target doesn't "
-			   "support syscall number %s\n"), 
-			 pulongest (syscall_native));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record and replay target doesn't "
+			    "support syscall number %s\n"), 
+			  pulongest (syscall_native));
       return -1;
     }
   else

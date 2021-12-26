@@ -5986,7 +5986,7 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       else
 	{
-	  printf_unfiltered (_("no syscall record support\n"));
+	  fprintf_unfiltered (gdb_stderr, _("no syscall record support\n"));
 	  return -1;
 	}
       break;

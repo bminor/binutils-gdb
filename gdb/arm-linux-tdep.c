@@ -1650,9 +1650,10 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
 
   if (syscall_gdb == gdb_sys_no_syscall)
     {
-      printf_unfiltered (_("Process record and replay target doesn't "
-			   "support syscall number %s\n"),
-			   plongest (svc_number));
+      fprintf_unfiltered (gdb_stderr,
+			  _("Process record and replay target doesn't "
+			    "support syscall number %s\n"),
+			  plongest (svc_number));
       return -1;
     }
 

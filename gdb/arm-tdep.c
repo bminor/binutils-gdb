@@ -11328,9 +11328,10 @@ arm_record_b_bl (insn_decode_record *arm_insn_r)
 static int
 arm_record_unsupported_insn (insn_decode_record *arm_insn_r)
 {
-  printf_unfiltered (_("Process record does not support instruction "
-		       "0x%0x at address %s.\n"),arm_insn_r->arm_insn,
-		     paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
+  fprintf_unfiltered (gdb_stderr,
+		      _("Process record does not support instruction "
+			"0x%0x at address %s.\n"),arm_insn_r->arm_insn,
+		      paddress (arm_insn_r->gdbarch, arm_insn_r->this_addr));
 
   return -1;
 }
@@ -11916,7 +11917,7 @@ arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
 	}
       else
 	{
-	  printf_unfiltered (_("no syscall record support\n"));
+	  fprintf_unfiltered (gdb_stderr, _("no syscall record support\n"));
 	  return -1;
 	}
     }
@@ -12348,11 +12349,12 @@ thumb_record_misc (insn_decode_record *thumb_insn_r)
 	  record_buf[1] = ARM_LR_REGNUM;
 	  thumb_insn_r->reg_rec_count = 2;
 	  /* We need to save SPSR value, which is not yet done.  */
-	  printf_unfiltered (_("Process record does not support instruction "
-			       "0x%0x at address %s.\n"),
-			     thumb_insn_r->arm_insn,
-			     paddress (thumb_insn_r->gdbarch,
-				       thumb_insn_r->this_addr));
+	  fprintf_unfiltered (gdb_stderr,
+			      _("Process record does not support instruction "
+				"0x%0x at address %s.\n"),
+			      thumb_insn_r->arm_insn,
+			      paddress (thumb_insn_r->gdbarch,
+					thumb_insn_r->this_addr));
 	  return -1;
 
 	case 0xf:
@@ -12440,7 +12442,7 @@ thumb_record_ldm_stm_swi (insn_decode_record *thumb_insn_r)
 	  }
 	else
 	  {
-	    printf_unfiltered (_("no syscall record support\n"));
+	    fprintf_unfiltered (gdb_stderr, _("no syscall record support\n"));
 	    return -1;
 	  }
     }
@@ -13351,10 +13353,11 @@ decode_insn (abstract_memory_reader &reader, insn_decode_record *arm_record,
     {
       if (record_debug)
 	{
-	  printf_unfiltered (_("Process record: error reading memory at "
-			       "addr %s len = %d.\n"),
-			     paddress (arm_record->gdbarch,
-				       arm_record->this_addr), insn_size);
+	  fprintf_unfiltered (gdb_stdlog,
+			      _("Process record: error reading memory at "
+				"addr %s len = %d.\n"),
+			      paddress (arm_record->gdbarch,
+					arm_record->this_addr), insn_size);
 	}
       return -1;
     }
@@ -13619,10 +13622,11 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       if (record_debug)
 	{
-	  printf_unfiltered (_("Process record: error reading memory at "
-			       "addr %s len = %d.\n"),
-			     paddress (arm_record.gdbarch,
-				       arm_record.this_addr), 2);
+	  fprintf_unfiltered (gdb_stdlog,
+			      _("Process record: error reading memory at "
+				"addr %s len = %d.\n"),
+			      paddress (arm_record.gdbarch,
+					arm_record.this_addr), 2);
 	}
       return -1;
     }
