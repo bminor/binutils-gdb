@@ -2349,12 +2349,11 @@ kill_command (const char *arg, int from_tty)
   int infnum = current_inferior ()->num;
 
   target_kill ();
+  bfd_cache_close_all ();
 
   if (print_inferior_events)
-    printf_unfiltered (_("[Inferior %d (%s) killed]\n"),
-		       infnum, pid_str.c_str ());
-
-  bfd_cache_close_all ();
+    printf_filtered (_("[Inferior %d (%s) killed]\n"),
+		     infnum, pid_str.c_str ());
 }
 
 /* Used in `attach&' command.  Proceed threads of inferior INF iff
