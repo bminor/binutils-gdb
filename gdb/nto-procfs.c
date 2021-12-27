@@ -656,10 +656,10 @@ nto_procfs_target::files_info ()
 {
   struct inferior *inf = current_inferior ();
 
-  printf_unfiltered ("\tUsing the running image of %s %s via %s.\n",
-		     inf->attach_flag ? "attached" : "child",
-		     target_pid_to_str (inferior_ptid).c_str (),
-		     (nodestr != NULL) ? nodestr : "local node");
+  printf_filtered ("\tUsing the running image of %s %s via %s.\n",
+		   inf->attach_flag ? "attached" : "child",
+		   target_pid_to_str (inferior_ptid).c_str (),
+		   (nodestr != NULL) ? nodestr : "local node");
 }
 
 /* Target to_pid_to_exec_file implementation.  */

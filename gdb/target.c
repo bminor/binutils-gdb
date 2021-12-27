@@ -2444,8 +2444,8 @@ info_target_command (const char *args, int from_tty)
   if (current_program_space->symfile_object_file != NULL)
     {
       objfile *objf = current_program_space->symfile_object_file;
-      printf_unfiltered (_("Symbols from \"%s\".\n"),
-			 objfile_name (objf));
+      printf_filtered (_("Symbols from \"%s\".\n"),
+		       objfile_name (objf));
     }
 
   for (target_ops *t = current_inferior ()->top_target ();
@@ -2458,9 +2458,9 @@ info_target_command (const char *args, int from_tty)
       if ((int) (t->stratum ()) <= (int) dummy_stratum)
 	continue;
       if (has_all_mem)
-	printf_unfiltered (_("\tWhile running this, "
-			     "GDB does not access memory from...\n"));
-      printf_unfiltered ("%s:\n", t->longname ());
+	printf_filtered (_("\tWhile running this, "
+			   "GDB does not access memory from...\n"));
+      printf_filtered ("%s:\n", t->longname ());
       t->files_info ();
       has_all_mem = t->has_all_memory ();
     }

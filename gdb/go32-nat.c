@@ -663,7 +663,7 @@ static cmdline_t child_cmd;	/* Parsed child's command line kept here.  */
 void
 go32_nat_target::files_info ()
 {
-  printf_unfiltered ("You are running a DJGPP V2 program.\n");
+  printf_filtered ("You are running a DJGPP V2 program.\n");
 }
 
 void

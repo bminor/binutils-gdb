@@ -1114,8 +1114,8 @@ gdbsim_target::files_info ()
 
   if (current_program_space->exec_bfd ())
     {
-      fprintf_unfiltered (gdb_stdlog, "\tAttached to %s running program %s\n",
-			  target_shortname (), file);
+      printf_filtered ("\tAttached to %s running program %s\n",
+		       target_shortname (), file);
       sim_info (sim_data->gdbsim_desc, 0);
     }
 }

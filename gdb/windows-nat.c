@@ -2090,9 +2090,9 @@ windows_nat_target::files_info ()
 {
   struct inferior *inf = current_inferior ();
 
-  printf_unfiltered ("\tUsing the running image of %s %s.\n",
-		     inf->attach_flag ? "attached" : "child",
-		     target_pid_to_str (inferior_ptid).c_str ());
+  printf_filtered ("\tUsing the running image of %s %s.\n",
+		   inf->attach_flag ? "attached" : "child",
+		   target_pid_to_str (inferior_ptid).c_str ());
 }
 
 /* Modify CreateProcess parameters for use of a new separate console.
