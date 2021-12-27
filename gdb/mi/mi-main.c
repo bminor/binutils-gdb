@@ -68,7 +68,8 @@ enum
     FROM_TTY = 0
   };
 
-int mi_debug_p;
+/* Debug flag */
+static int mi_debug_p;
 
 /* This is used to pass the current command timestamp down to
    continuation routines.  */
@@ -1785,8 +1786,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
     case MI_COMMAND:
       /* A MI command was read from the input stream.  */
       if (mi_debug_p)
-	/* FIXME: gdb_???? */
-	fprintf_unfiltered (mi->raw_stdout,
+	fprintf_unfiltered (gdb_stdlog,
 			    " token=`%s' command=`%s' args=`%s'\n",
 			    context->token, context->command, context->args);
 
@@ -2091,7 +2091,7 @@ mi_execute_cli_command (const char *cmd, bool args_p, const char *args)
 	gdb_assert (args == nullptr);
 
       if (mi_debug_p)
-	fprintf_unfiltered (gdb_stdout, "cli=%s run=%s\n",
+	fprintf_unfiltered (gdb_stdlog, "cli=%s run=%s\n",
 			    cmd, run.c_str ());
 
       execute_command (run.c_str (), 0 /* from_tty */ );
