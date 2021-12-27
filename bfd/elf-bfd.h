@@ -1088,13 +1088,11 @@ struct elf_backend_data
      that CHECK_RELOCS will properly process them.  PR 4424.  */
   bool (*relocs_compatible) (const bfd_target *, const bfd_target *);
 
-  /* The CHECK_RELOCS function is called by the add_symbols phase of
-     the ELF backend linker.  It is called once for each section with
-     relocs of an object file, just after the symbols for the object
-     file have been added to the global linker hash table.  The
-     function must look through the relocs and do any special handling
-     required.  This generally means allocating space in the global
-     offset table, and perhaps allocating space for a reloc.  The
+  /* The CHECK_RELOCS function is called after all input files have been
+     opened.  It is called once for each section with relocs of an object
+     file.  The function must look through the relocs and do any special
+     handling required.  This generally means allocating space in the
+     global offset table, and perhaps allocating space for a reloc.  The
      relocs are always passed as Rela structures; if the section
      actually uses Rel structures, the r_addend field will always be
      zero.  */
