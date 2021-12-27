@@ -2215,16 +2215,7 @@ gnu_nat_target::attach (const char *args, int from_tty)
 void
 gnu_nat_target::detach (inferior *inf, int from_tty)
 {
-  if (from_tty)
-    {
-      const char *exec_file = get_exec_file (0);
-
-      if (exec_file)
-	printf_unfiltered ("Detaching from program `%s' pid %d\n",
-			   exec_file, gnu_current_inf->pid);
-      else
-	printf_unfiltered ("Detaching from pid %d\n", gnu_current_inf->pid);
-    }
+  target_announce_detach (from_tty);
 
   inf_detach (gnu_current_inf);
 

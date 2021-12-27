@@ -1962,14 +1962,8 @@ windows_nat_target::detach (inferior *inf, int from_tty)
     }
   DebugSetProcessKillOnExit (FALSE);
 
-  if (detached && from_tty)
-    {
-      const char *exec_file = get_exec_file (0);
-      if (exec_file == 0)
-	exec_file = "";
-      printf_unfiltered ("Detaching from program: %s, Pid %u\n", exec_file,
-			 (unsigned) current_event.dwProcessId);
-    }
+  if (detached)
+    target_announce_detach (from_tty);
 
   x86_cleanup_dregs ();
   switch_to_no_thread ();

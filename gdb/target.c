@@ -3628,13 +3628,14 @@ target_announce_detach (int from_tty)
   if (!from_tty)
     return;
 
-  exec_file = get_exec_file (0);
-  if (exec_file == NULL)
-    exec_file = "";
-
   pid = inferior_ptid.pid ();
-  printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
-		     target_pid_to_str (ptid_t (pid)).c_str ());
+  exec_file = get_exec_file (0);
+  if (exec_file == nullptr)
+    printf_unfiltered ("Detaching from pid %s\n",
+		       target_pid_to_str (ptid_t (pid)).c_str ());
+  else
+    printf_unfiltered (_("Detaching from program: %s, %s\n"), exec_file,
+		       target_pid_to_str (ptid_t (pid)).c_str ());
 }
 
 /* See target.h  */
