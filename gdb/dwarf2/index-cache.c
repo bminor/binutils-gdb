@@ -37,6 +37,10 @@
 /* When set to true, show debug messages about the index cache.  */
 static bool debug_index_cache = false;
 
+#define index_cache_debug(FMT, ...)					       \
+  debug_prefixed_printf_cond_nofunc (debug_index_cache, "index-cache", \
+				     FMT, ## __VA_ARGS__)
+
 /* The index cache directory, used for "set/show index-cache directory".  */
 static std::string index_cache_directory;
 
@@ -59,8 +63,7 @@ index_cache::set_directory (std::string dir)
 
   m_dir = std::move (dir);
 
-  if (debug_index_cache)
-    printf_unfiltered ("index cache: now using directory %s\n", m_dir.c_str ());
+  index_cache_debug ("now using directory %s\n", m_dir.c_str ());
 }
 
 /* See dwarf-index-cache.h.  */
@@ -68,8 +71,7 @@ index_cache::set_directory (std::string dir)
 void
 index_cache::enable ()
 {
-  if (debug_index_cache)
-    printf_unfiltered ("index cache: enabling (%s)\n", m_dir.c_str ());
+  index_cache_debug ("enabling (%s)\n", m_dir.c_str ());
 
   m_enabled = true;
 }
@@ -79,8 +81,7 @@ index_cache::enable ()
 void
 index_cache::disable ()
 {
-  if (debug_index_cache)
-    printf_unfiltered ("index cache: disabling\n");
+  index_cache_debug ("disabling\n");
 
   m_enabled = false;
 }
@@ -99,9 +100,8 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
   const bfd_build_id *build_id = build_id_bfd_get (obj->obfd);
   if (build_id == nullptr)
     {
-      if (debug_index_cache)
-	printf_unfiltered ("index cache: objfile %s has no build id\n",
-			   objfile_name (obj));
+      index_cache_debug ("objfile %s has no build id\n",
+			 objfile_name (obj));
       return;
     }
 
@@ -118,9 +118,8 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 
       if (dwz_build_id == nullptr)
 	{
-	  if (debug_index_cache)
-	    printf_unfiltered ("index cache: dwz objfile %s has no build id\n",
-			       dwz->filename ());
+	  index_cache_debug ("dwz objfile %s has no build id\n",
+			     dwz->filename ());
 	  return;
 	}
 
@@ -144,9 +143,8 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 	  return;
 	}
 
-      if (debug_index_cache)
-	printf_unfiltered ("index cache: writing index cache for objfile %s\n",
-			   objfile_name (obj));
+      index_cache_debug ("writing index cache for objfile %s\n",
+			 objfile_name (obj));
 
       /* Write the index itself to the directory, using the build id as the
 	 filename.  */
@@ -156,9 +154,8 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
     }
   catch (const gdb_exception_error &except)
     {
-      if (debug_index_cache)
-	printf_unfiltered ("index cache: couldn't store index cache for objfile "
-			   "%s: %s", objfile_name (obj), except.what ());
+      index_cache_debug ("couldn't store index cache for objfile "
+			 "%s: %s", objfile_name (obj), except.what ());
     }
 }
 
@@ -198,9 +195,8 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
 
   try
     {
-      if (debug_index_cache)
-	printf_unfiltered ("index cache: trying to read %s\n",
-			   filename.c_str ());
+      index_cache_debug ("trying to read %s\n",
+			 filename.c_str ());
 
       /* Try to map that file.  */
       index_cache_resource_mmap *mmap_resource
@@ -215,9 +211,8 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
     }
   catch (const gdb_exception_error &except)
     {
-      if (debug_index_cache)
-	printf_unfiltered ("index cache: couldn't read %s: %s\n",
-			   filename.c_str (), except.what ());
+      index_cache_debug ("couldn't read %s: %s\n",
+			 filename.c_str (), except.what ());
     }
 
   return {};
