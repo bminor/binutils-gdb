@@ -383,7 +383,7 @@ language_info ()
     return;
 
   expected_language = current_language;
-  printf_unfiltered (_("Current language:  %s\n"), language);
+  printf_filtered (_("Current language:  %s\n"), language);
   show_language_command (NULL, 1, NULL, NULL);
 }
 
