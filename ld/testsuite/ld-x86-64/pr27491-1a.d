@@ -9,6 +9,6 @@
 Disassembly of section .text:
 
 [a-f0-9]+ <foo>:
- +[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4}[ \t]+mov +0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
- +[a-f0-9]+:	48 8b 05 ([0-9a-f]{2} ){4}[ \t]+mov +0x[a-f0-9]+\(%rip\),%rax[ \t]+# [a-f0-9]+ <_DYNAMIC\+0x[a-f0-9]+>
+ +[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
+ +[a-f0-9]+:	48 c7 c0 00 00 00 00 	mov    \$0x0,%rax
 #pass

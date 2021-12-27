@@ -2632,6 +2632,10 @@ extern int bfd_elf_add_dt_needed_tag
   (bfd *, struct bfd_link_info *);
 extern bool _bfd_elf_link_check_relocs
   (bfd *, struct bfd_link_info *);
+extern bool _bfd_elf_link_iterate_on_relocs
+ (bfd *, struct bfd_link_info *,
+  bool (*) (bfd *, struct bfd_link_info *, asection *,
+	    const Elf_Internal_Rela *));
 
 extern bool bfd_elf_link_record_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);

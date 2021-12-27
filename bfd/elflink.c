@@ -4008,10 +4008,13 @@ _bfd_elf_notice_as_needed (bfd *ibfd,
   return (*info->callbacks->notice) (info, NULL, NULL, ibfd, NULL, act, 0);
 }
 
-/* Check relocations an ELF object file.  */
+/* Call ACTION on each relocation in an ELF object file.  */
 
 bool
-_bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_link_iterate_on_relocs
+  (bfd *abfd, struct bfd_link_info *info,
+   bool (*action) (bfd *, struct bfd_link_info *, asection *,
+		   const Elf_Internal_Rela *))
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_link_hash_table *htab = elf_hash_table (info);
@@ -4035,7 +4038,6 @@ _bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
      different format.  It probably can't be done.  */
   if ((abfd->flags & DYNAMIC) == 0
       && is_elf_hash_table (&htab->root)
-      && bed->check_relocs != NULL
       && elf_object_id (abfd) == elf_hash_table_id (htab)
       && (*bed->relocs_compatible) (abfd->xvec, info->output_bfd->xvec))
     {
@@ -4070,7 +4072,7 @@ _bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 	  if (internal_relocs == NULL)
 	    return false;
 
-	  ok = (*bed->check_relocs) (abfd, info, o, internal_relocs);
+	  ok = action (abfd, info, o, internal_relocs);
 
 	  if (elf_section_data (o)->relocs != internal_relocs)
 	    free (internal_relocs);
@@ -4080,6 +4082,19 @@ _bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
+  return true;
+}
+
+/* Check relocations in an ELF object file.  This is called after
+   all input files have been opened.  */
+
+bool
+_bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  if (bed->check_relocs != NULL)
+    return _bfd_elf_link_iterate_on_relocs (abfd, info,
+					    bed->check_relocs);
   return true;
 }
 

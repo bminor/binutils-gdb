@@ -47,6 +47,25 @@
 #define X86_SIZE_TYPE_P(IS_X86_64, TYPE) \
   ((IS_X86_64) ? X86_64_SIZE_TYPE_P(TYPE) : I386_SIZE_TYPE_P (TYPE))
 
+#define X86_64_NEED_DYNAMIC_RELOC_TYPE_P(TYPE) \
+  (X86_64_SIZE_TYPE_P (TYPE) \
+   || X86_64_PCREL_TYPE_P (TYPE) \
+   || (TYPE) == R_X86_64_8 \
+   || (TYPE) == R_X86_64_16 \
+   || (TYPE) == R_X86_64_32 \
+   || (TYPE) == R_X86_64_32S \
+   || (TYPE) == R_X86_64_64)
+#define I386_NEED_DYNAMIC_RELOC_TYPE_P(TYPE) \
+  (I386_SIZE_TYPE_P (TYPE) \
+   || I386_PCREL_TYPE_P (TYPE) \
+   || (TYPE) == R_386_32 \
+   || (TYPE) == R_386_TLS_LE \
+   || (TYPE) == R_386_TLS_LE_32)
+#define X86_NEED_DYNAMIC_RELOC_TYPE_P(IS_X86_64, TYPE) \
+  ((IS_X86_64) \
+   ? X86_64_NEED_DYNAMIC_RELOC_TYPE_P (TYPE) \
+   : I386_NEED_DYNAMIC_RELOC_TYPE_P (TYPE))
+
 #define PLT_CIE_LENGTH		20
 #define PLT_FDE_LENGTH		36
 #define PLT_FDE_START_OFFSET	4 + PLT_CIE_LENGTH + 8
@@ -653,6 +672,10 @@ extern int _bfd_x86_elf_compare_relocs
 extern bool _bfd_x86_elf_link_check_relocs
   (bfd *, struct bfd_link_info *);
 
+extern bool _bfd_x86_elf_check_relocs
+  (bfd *, struct bfd_link_info *, asection *,
+   const Elf_Internal_Rela *);
+
 extern bool _bfd_elf_x86_valid_reloc_p
   (asection *, struct bfd_link_info *, struct elf_x86_link_hash_table *,
    const Elf_Internal_Rela *, struct elf_link_hash_entry *,
@@ -730,10 +753,10 @@ extern void _bfd_x86_elf_link_report_relative_reloc
 #define bfd_elf32_bfd_link_check_relocs \
   _bfd_x86_elf_link_check_relocs
 
+#define elf_backend_check_relocs \
+  _bfd_x86_elf_check_relocs
 #define elf_backend_size_dynamic_sections \
   _bfd_x86_elf_size_dynamic_sections
-#define elf_backend_always_size_sections \
-  _bfd_x86_elf_always_size_sections
 #define elf_backend_merge_symbol_attribute \
   _bfd_x86_elf_merge_symbol_attribute
 #define elf_backend_copy_indirect_symbol \
@@ -756,39 +779,6 @@ extern void _bfd_x86_elf_link_report_relative_reloc
   _bfd_x86_elf_link_fixup_gnu_properties
 
 #define ELF_P_ALIGN ELF_MINPAGESIZE
-
-/* Return true if H is a __start_SECNAME/__stop_SECNAME symbol for the
-   SECNAME section which has been garbage collected by --gc-sections
-   -z start-stop-gc.  */
-
-static inline bool
-elf_x86_start_stop_gc_p (struct bfd_link_info *link_info,
-			 struct elf_link_hash_entry *h)
-{
-  if (h->start_stop
-      && link_info->gc_sections
-      && link_info->start_stop_gc)
-    {
-      asection *s = h->root.u.def.section;
-
-      do
-	{
-	  /* Return false if any SECNAME section is kept.  */
-	  if (s->gc_mark)
-	    return false;
-	  s = bfd_get_next_section_by_name (s->owner, s);
-	}
-      while (s != NULL);
-
-      /* Return true only if all SECNAME sections have been garbage
-	 collected.  */
-      return true;
-    }
-
-  /* Return false if H isn't a __start_SECNAME/__stop_SECNAME symbol or
-     --gc-sections or -z start-stop-gc isn't used.  */
-  return false;
-}
 
 /* Allocate x86 GOT info for local symbols.  */
 

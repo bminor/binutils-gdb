@@ -9,6 +9,6 @@
 Disassembly of section .text:
 
 [a-f0-9]+ <foo>:
- +[a-f0-9]+:	8b 83 ([0-9a-f]{2} ){4}[ \t]+mov +-0x[a-f0-9]+\(%ebx\),%eax
- +[a-f0-9]+:	8b 83 ([0-9a-f]{2} ){4}[ \t]+mov +-0x[a-f0-9]+\(%ebx\),%eax
+ +[a-f0-9]+:	c7 c0 00 00 00 00    	mov    \$0x0,%eax
+ +[a-f0-9]+:	c7 c0 00 00 00 00    	mov    \$0x0,%eax
 #pass

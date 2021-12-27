@@ -522,7 +522,7 @@ elf_i386_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
    Functions named elf_i386_* are called by external routines, other
    functions are only called locally.  elf_i386_* functions appear
    in this file more or less in the order in which they are called
-   from external routines.  eg. elf_i386_check_relocs is called
+   from external routines.  eg. elf_i386_scan_relocs is called
    early in the link process, elf_i386_finish_dynamic_sections is
    one of the last functions.  */
 
@@ -1106,7 +1106,7 @@ elf_i386_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	    }
 
 	  /* We checked the transition before when we were called from
-	     elf_i386_check_relocs.  We only want to check the new
+	     elf_i386_scan_relocs.  We only want to check the new
 	     transition which hasn't been checked before.  */
 	  check = new_to_type != to_type && from_type == to_type;
 	  to_type = new_to_type;
@@ -1387,11 +1387,6 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	       || h->root.type == bfd_link_hash_defweak)
 	      && local_ref))
 	{
-	  /* Skip __start_SECNAME/__stop_SECNAME when --gc-sections
-	     -z start-stop-gc are used.  */
-	  if (elf_x86_start_stop_gc_p (link_info, h))
-	    return true;
-
 	convert_load:
 	  if (opcode == 0x8b)
 	    {
@@ -1452,21 +1447,20 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 }
 
 /* Look through the relocs for a section during the first phase, and
-   calculate needed space in the global offset table, procedure linkage
-   table, and dynamic reloc sections.  */
+   calculate needed space in the global offset table, and procedure
+   linkage table.  */
 
 static bool
-elf_i386_check_relocs (bfd *abfd,
-		       struct bfd_link_info *info,
-		       asection *sec,
-		       const Elf_Internal_Rela *relocs)
+elf_i386_scan_relocs (bfd *abfd,
+		      struct bfd_link_info *info,
+		      asection *sec,
+		      const Elf_Internal_Rela *relocs)
 {
   struct elf_x86_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
-  asection *sreloc;
   bfd_byte *contents;
   bool converted;
 
@@ -1495,8 +1489,6 @@ elf_i386_check_relocs (bfd *abfd,
   sym_hashes = elf_sym_hashes (abfd);
 
   converted = false;
-
-  sreloc = NULL;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -1818,18 +1810,6 @@ elf_i386_check_relocs (bfd *abfd,
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
 
-	      /* We must copy these reloc types into the output file.
-		 Create a reloc section in dynobj and make room for
-		 this reloc.  */
-	      if (sreloc == NULL)
-		{
-		  sreloc = _bfd_elf_make_dynamic_reloc_section
-		    (sec, htab->elf.dynobj, 2, abfd, /*rela?*/ false);
-
-		  if (sreloc == NULL)
-		    goto error_return;
-		}
-
 	      /* If this is a global symbol, we count the number of
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
@@ -1924,6 +1904,24 @@ elf_i386_check_relocs (bfd *abfd,
   return false;
 }
 
+static bool
+elf_i386_always_size_sections (bfd *output_bfd,
+			       struct bfd_link_info *info)
+{
+  bfd *abfd;
+
+  /* Scan relocations after rel_from_abs has been set on __ehdr_start.  */
+  for (abfd = info->input_bfds;
+       abfd != (bfd *) NULL;
+       abfd = abfd->link.next)
+    if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	&& !_bfd_elf_link_iterate_on_relocs (abfd, info,
+					     elf_i386_scan_relocs))
+      return false;
+
+  return _bfd_x86_elf_always_size_sections (output_bfd, info);
+}
+
 /* Set the correct type for an x86 ELF section.  We do this by the
    section name, which is a hack, but ought to work.  */
 
@@ -2000,7 +1998,7 @@ elf_i386_relocate_section (bfd *output_bfd,
   bool is_vxworks_tls;
   unsigned plt_entry_size;
 
-  /* Skip if check_relocs failed.  */
+  /* Skip if check_relocs or scan_relocs failed.  */
   if (input_section->check_relocs_failed)
     return false;
 
@@ -4390,7 +4388,7 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 #define bfd_elf32_get_synthetic_symtab	      elf_i386_get_synthetic_symtab
 
 #define elf_backend_relocs_compatible	      _bfd_elf_relocs_compatible
-#define elf_backend_check_relocs	      elf_i386_check_relocs
+#define elf_backend_always_size_sections      elf_i386_always_size_sections
 #define elf_backend_create_dynamic_sections   _bfd_elf_create_dynamic_sections
 #define elf_backend_fake_sections	      elf_i386_fake_sections
 #define elf_backend_finish_dynamic_sections   elf_i386_finish_dynamic_sections

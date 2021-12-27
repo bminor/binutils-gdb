@@ -892,6 +892,91 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
   return _bfd_elf_link_check_relocs (abfd, info);
 }
 
+/* Look through the relocs for a section before allocation to make the
+   dynamic reloc section.  */
+
+bool
+_bfd_x86_elf_check_relocs (bfd *abfd,
+			   struct bfd_link_info *info,
+			   asection *sec,
+			   const Elf_Internal_Rela *relocs)
+{
+  struct elf_x86_link_hash_table *htab;
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  const Elf_Internal_Rela *rel;
+  const Elf_Internal_Rela *rel_end;
+  asection *sreloc;
+  const struct elf_backend_data *bed;
+  bool is_x86_64;
+
+  if (bfd_link_relocatable (info))
+    return true;
+
+  bed = get_elf_backend_data (abfd);
+  htab = elf_x86_hash_table (info, bed->target_id);
+  if (htab == NULL)
+    {
+      sec->check_relocs_failed = 1;
+      return false;
+    }
+
+  is_x86_64 = bed->target_id == X86_64_ELF_DATA;
+
+  symtab_hdr = &elf_symtab_hdr (abfd);
+  sym_hashes = elf_sym_hashes (abfd);
+
+  rel_end = relocs + sec->reloc_count;
+  for (rel = relocs; rel < rel_end; rel++)
+    {
+      unsigned int r_type;
+      unsigned int r_symndx;
+      struct elf_link_hash_entry *h;
+
+      r_symndx = htab->r_sym (rel->r_info);
+      r_type = ELF32_R_TYPE (rel->r_info);
+
+      if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
+	{
+	  /* xgettext:c-format */
+	  _bfd_error_handler (_("%pB: bad symbol index: %d"),
+			      abfd, r_symndx);
+	  goto error_return;
+	}
+
+      if (r_symndx < symtab_hdr->sh_info)
+	h = NULL;
+      else
+	{
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
+
+      if (X86_NEED_DYNAMIC_RELOC_TYPE_P (is_x86_64, r_type)
+	  && NEED_DYNAMIC_RELOCATION_P (is_x86_64, info, true, h, sec,
+					r_type, htab->pointer_r_type))
+	{
+	  /* We may copy these reloc types into the output file.
+	     Create a reloc section in dynobj and make room for
+	     this reloc.  */
+	  sreloc = _bfd_elf_make_dynamic_reloc_section
+	    (sec, htab->elf.dynobj, ABI_64_P (abfd) ? 3 : 2,
+	     abfd, sec->use_rela_p);
+
+	  if (sreloc != NULL)
+	    return true;
+
+  error_return:
+	  sec->check_relocs_failed = 1;
+	  return false;
+	}
+    }
+
+  return true;
+}
+
 bool
 _bfd_elf_x86_valid_reloc_p (asection *input_section,
 			    struct bfd_link_info *info,

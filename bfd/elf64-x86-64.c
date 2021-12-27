@@ -1309,7 +1309,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	    }
 
 	  /* We checked the transition before when we were called from
-	     elf_x86_64_check_relocs.  We only want to check the new
+	     elf_x86_64_scan_relocs.  We only want to check the new
 	     transition which hasn't been checked before.  */
 	  check = new_to_type != to_type && from_type == to_type;
 	  to_type = new_to_type;
@@ -1628,11 +1628,6 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 			   || h->root.type == bfd_link_hash_defweak)
 			  && h->root.u.def.section == bfd_und_section_ptr))))
 	    {
-	      /* Skip __start_SECNAME/__stop_SECNAME when --gc-sections
-	         -z start-stop-gc are used.  */
-	      if (elf_x86_start_stop_gc_p (link_info, h))
-		return true;
-
 	      /* Skip since R_X86_64_32/R_X86_64_32S may overflow.  */
 	      if (no_overflow)
 		return true;
@@ -1823,20 +1818,19 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
 }
 
 /* Look through the relocs for a section during the first phase, and
-   calculate needed space in the global offset table, procedure
-   linkage table, and dynamic reloc sections.  */
+   calculate needed space in the global offset table, and procedure
+   linkage table.  */
 
 static bool
-elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
-			 asection *sec,
-			 const Elf_Internal_Rela *relocs)
+elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
+			asection *sec,
+			const Elf_Internal_Rela *relocs)
 {
   struct elf_x86_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
-  asection *sreloc;
   bfd_byte *contents;
   bool converted;
 
@@ -1865,8 +1859,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   sym_hashes = elf_sym_hashes (abfd);
 
   converted = false;
-
-  sreloc = NULL;
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -2263,19 +2255,6 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
 
-	      /* We must copy these reloc types into the output file.
-		 Create a reloc section in dynobj and make room for
-		 this reloc.  */
-	      if (sreloc == NULL)
-		{
-		  sreloc = _bfd_elf_make_dynamic_reloc_section
-		    (sec, htab->elf.dynobj, ABI_64_P (abfd) ? 3 : 2,
-		     abfd, /*rela?*/ true);
-
-		  if (sreloc == NULL)
-		    goto error_return;
-		}
-
 	      /* If this is a global symbol, we count the number of
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
@@ -2371,6 +2350,24 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   return false;
 }
 
+static bool
+elf_x86_64_always_size_sections (bfd *output_bfd,
+				 struct bfd_link_info *info)
+{
+  bfd *abfd;
+
+  /* Scan relocations after rel_from_abs has been set on __ehdr_start.  */
+  for (abfd = info->input_bfds;
+       abfd != (bfd *) NULL;
+       abfd = abfd->link.next)
+    if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	&& !_bfd_elf_link_iterate_on_relocs (abfd, info,
+					     elf_x86_64_scan_relocs))
+      return false;
+
+  return _bfd_x86_elf_always_size_sections (output_bfd, info);
+}
+
 /* Return the relocation value for @tpoff relocation
    if STT_TLS virtual address is ADDRESS.  */
 
@@ -2413,7 +2410,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   unsigned int plt_entry_size;
   bool status;
 
-  /* Skip if check_relocs failed.  */
+  /* Skip if check_relocs or scan_relocs failed.  */
   if (input_section->check_relocs_failed)
     return false;
 
@@ -5238,7 +5235,7 @@ elf_x86_64_special_sections[]=
   elf_x86_64_reloc_name_lookup
 
 #define elf_backend_relocs_compatible	    elf_x86_64_relocs_compatible
-#define elf_backend_check_relocs	    elf_x86_64_check_relocs
+#define elf_backend_always_size_sections    elf_x86_64_always_size_sections
 #define elf_backend_create_dynamic_sections _bfd_elf_create_dynamic_sections
 #define elf_backend_finish_dynamic_sections elf_x86_64_finish_dynamic_sections
 #define elf_backend_finish_dynamic_symbol   elf_x86_64_finish_dynamic_symbol
