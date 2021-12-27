@@ -88,6 +88,14 @@ public:
      Otherwise, return -1.  */
   virtual int fd () const
   { return -1; }
+
+  /* Return true if this object supports paging, false otherwise.  */
+  virtual bool can_page () const
+  {
+    /* Almost no file supports paging, which is why this is the
+       default.  */
+    return false;
+  }
 };
 
 typedef std::unique_ptr<ui_file> ui_file_up;
@@ -204,6 +212,11 @@ public:
   int fd () const override
   { return m_fd; }
 
+  virtual bool can_page () const override
+  {
+    return m_file == stdout;
+  }
+
 private:
   /* Sets the internal stream to FILE, and saves the FILE's file
      descriptor in M_FD.  */
@@ -277,6 +290,13 @@ public:
   bool term_out () override;
   bool can_emit_style_escape () override;
   void flush () override;
+
+  virtual bool can_page () const override
+  {
+    /* If one of the underlying files can page, then we allow it
+       here.  */
+    return m_one->can_page () || m_two->can_page ();
+  }
 
 private:
   /* The two underlying ui_files.  */
