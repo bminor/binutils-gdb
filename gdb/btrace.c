@@ -2852,122 +2852,122 @@ pt_print_packet (const struct pt_packet *packet)
   switch (packet->type)
     {
     default:
-      printf_unfiltered (("[??: %x]"), packet->type);
+      printf_filtered (("[??: %x]"), packet->type);
       break;
 
     case ppt_psb:
-      printf_unfiltered (("psb"));
+      printf_filtered (("psb"));
       break;
 
     case ppt_psbend:
-      printf_unfiltered (("psbend"));
+      printf_filtered (("psbend"));
       break;
 
     case ppt_pad:
-      printf_unfiltered (("pad"));
+      printf_filtered (("pad"));
       break;
 
     case ppt_tip:
-      printf_unfiltered (("tip %u: 0x%" PRIx64 ""),
-			 packet->payload.ip.ipc,
-			 packet->payload.ip.ip);
+      printf_filtered (("tip %u: 0x%" PRIx64 ""),
+		       packet->payload.ip.ipc,
+		       packet->payload.ip.ip);
       break;
 
     case ppt_tip_pge:
-      printf_unfiltered (("tip.pge %u: 0x%" PRIx64 ""),
-			 packet->payload.ip.ipc,
-			 packet->payload.ip.ip);
+      printf_filtered (("tip.pge %u: 0x%" PRIx64 ""),
+		       packet->payload.ip.ipc,
+		       packet->payload.ip.ip);
       break;
 
     case ppt_tip_pgd:
-      printf_unfiltered (("tip.pgd %u: 0x%" PRIx64 ""),
-			 packet->payload.ip.ipc,
-			 packet->payload.ip.ip);
+      printf_filtered (("tip.pgd %u: 0x%" PRIx64 ""),
+		       packet->payload.ip.ipc,
+		       packet->payload.ip.ip);
       break;
 
     case ppt_fup:
-      printf_unfiltered (("fup %u: 0x%" PRIx64 ""),
-			 packet->payload.ip.ipc,
-			 packet->payload.ip.ip);
+      printf_filtered (("fup %u: 0x%" PRIx64 ""),
+		       packet->payload.ip.ipc,
+		       packet->payload.ip.ip);
       break;
 
     case ppt_tnt_8:
-      printf_unfiltered (("tnt-8 %u: 0x%" PRIx64 ""),
-			 packet->payload.tnt.bit_size,
-			 packet->payload.tnt.payload);
+      printf_filtered (("tnt-8 %u: 0x%" PRIx64 ""),
+		       packet->payload.tnt.bit_size,
+		       packet->payload.tnt.payload);
       break;
 
     case ppt_tnt_64:
-      printf_unfiltered (("tnt-64 %u: 0x%" PRIx64 ""),
-			 packet->payload.tnt.bit_size,
-			 packet->payload.tnt.payload);
+      printf_filtered (("tnt-64 %u: 0x%" PRIx64 ""),
+		       packet->payload.tnt.bit_size,
+		       packet->payload.tnt.payload);
       break;
 
     case ppt_pip:
-      printf_unfiltered (("pip %" PRIx64 "%s"), packet->payload.pip.cr3,
-			 packet->payload.pip.nr ? (" nr") : (""));
+      printf_filtered (("pip %" PRIx64 "%s"), packet->payload.pip.cr3,
+		       packet->payload.pip.nr ? (" nr") : (""));
       break;
 
     case ppt_tsc:
-      printf_unfiltered (("tsc %" PRIx64 ""), packet->payload.tsc.tsc);
+      printf_filtered (("tsc %" PRIx64 ""), packet->payload.tsc.tsc);
       break;
 
     case ppt_cbr:
-      printf_unfiltered (("cbr %u"), packet->payload.cbr.ratio);
+      printf_filtered (("cbr %u"), packet->payload.cbr.ratio);
       break;
 
     case ppt_mode:
       switch (packet->payload.mode.leaf)
 	{
 	default:
-	  printf_unfiltered (("mode %u"), packet->payload.mode.leaf);
+	  printf_filtered (("mode %u"), packet->payload.mode.leaf);
 	  break;
 
 	case pt_mol_exec:
-	  printf_unfiltered (("mode.exec%s%s"),
-			     packet->payload.mode.bits.exec.csl
-			     ? (" cs.l") : (""),
-			     packet->payload.mode.bits.exec.csd
-			     ? (" cs.d") : (""));
+	  printf_filtered (("mode.exec%s%s"),
+			   packet->payload.mode.bits.exec.csl
+			   ? (" cs.l") : (""),
+			   packet->payload.mode.bits.exec.csd
+			   ? (" cs.d") : (""));
 	  break;
 
 	case pt_mol_tsx:
-	  printf_unfiltered (("mode.tsx%s%s"),
-			     packet->payload.mode.bits.tsx.intx
-			     ? (" intx") : (""),
-			     packet->payload.mode.bits.tsx.abrt
-			     ? (" abrt") : (""));
+	  printf_filtered (("mode.tsx%s%s"),
+			   packet->payload.mode.bits.tsx.intx
+			   ? (" intx") : (""),
+			   packet->payload.mode.bits.tsx.abrt
+			   ? (" abrt") : (""));
 	  break;
 	}
       break;
 
     case ppt_ovf:
-      printf_unfiltered (("ovf"));
+      printf_filtered (("ovf"));
       break;
 
     case ppt_stop:
-      printf_unfiltered (("stop"));
+      printf_filtered (("stop"));
       break;
 
     case ppt_vmcs:
-      printf_unfiltered (("vmcs %" PRIx64 ""), packet->payload.vmcs.base);
+      printf_filtered (("vmcs %" PRIx64 ""), packet->payload.vmcs.base);
       break;
 
     case ppt_tma:
-      printf_unfiltered (("tma %x %x"), packet->payload.tma.ctc,
-			 packet->payload.tma.fc);
+      printf_filtered (("tma %x %x"), packet->payload.tma.ctc,
+		       packet->payload.tma.fc);
       break;
 
     case ppt_mtc:
-      printf_unfiltered (("mtc %x"), packet->payload.mtc.ctc);
+      printf_filtered (("mtc %x"), packet->payload.mtc.ctc);
       break;
 
     case ppt_cyc:
-      printf_unfiltered (("cyc %" PRIx64 ""), packet->payload.cyc.value);
+      printf_filtered (("cyc %" PRIx64 ""), packet->payload.cyc.value);
       break;
 
     case ppt_mnt:
-      printf_unfiltered (("mnt %" PRIx64 ""), packet->payload.mnt.payload);
+      printf_filtered (("mnt %" PRIx64 ""), packet->payload.mnt.payload);
       break;
     }
 }
@@ -3149,9 +3149,9 @@ btrace_maint_print_packets (struct btrace_thread_info *btinfo,
 	  {
 	    const btrace_block &block = blocks.at (blk);
 
-	    printf_unfiltered ("%u\tbegin: %s, end: %s\n", blk,
-			       core_addr_to_string_nz (block.begin),
-			       core_addr_to_string_nz (block.end));
+	    printf_filtered ("%u\tbegin: %s, end: %s\n", blk,
+			     core_addr_to_string_nz (block.begin),
+			     core_addr_to_string_nz (block.end));
 	  }
 
 	btinfo->maint.variant.bts.packet_history.begin = begin;
@@ -3170,15 +3170,15 @@ btrace_maint_print_packets (struct btrace_thread_info *btinfo,
 	  {
 	    const struct btrace_pt_packet &packet = packets.at (pkt);
 
-	    printf_unfiltered ("%u\t", pkt);
-	    printf_unfiltered ("0x%" PRIx64 "\t", packet.offset);
+	    printf_filtered ("%u\t", pkt);
+	    printf_filtered ("0x%" PRIx64 "\t", packet.offset);
 
 	    if (packet.errcode == pte_ok)
 	      pt_print_packet (&packet.packet);
 	    else
-	      printf_unfiltered ("[error: %s]", pt_errstr (packet.errcode));
+	      printf_filtered ("[error: %s]", pt_errstr (packet.errcode));
 
-	    printf_unfiltered ("\n");
+	    printf_filtered ("\n");
 	  }
 
 	btinfo->maint.variant.pt.packet_history.begin = begin;
@@ -3256,7 +3256,7 @@ maint_btrace_packet_history_cmd (const char *arg, int from_tty)
   btrace_maint_update_packets (btinfo, &begin, &end, &from, &to);
   if (begin == end)
     {
-      printf_unfiltered (_("No trace.\n"));
+      printf_filtered (_("No trace.\n"));
       return;
     }
 
@@ -3398,8 +3398,8 @@ maint_info_btrace_cmd (const char *args, int from_tty)
   if (conf == NULL)
     error (_("No btrace configuration."));
 
-  printf_unfiltered (_("Format: %s.\n"),
-		     btrace_format_string (conf->format));
+  printf_filtered (_("Format: %s.\n"),
+		   btrace_format_string (conf->format));
 
   switch (conf->format)
     {
@@ -3407,8 +3407,8 @@ maint_info_btrace_cmd (const char *args, int from_tty)
       break;
 
     case BTRACE_FORMAT_BTS:
-      printf_unfiltered (_("Number of packets: %zu.\n"),
-			 btinfo->data.variant.bts.blocks->size ());
+      printf_filtered (_("Number of packets: %zu.\n"),
+		       btinfo->data.variant.bts.blocks->size ());
       break;
 
 #if defined (HAVE_LIBIPT)
@@ -3417,14 +3417,14 @@ maint_info_btrace_cmd (const char *args, int from_tty)
 	struct pt_version version;
 
 	version = pt_library_version ();
-	printf_unfiltered (_("Version: %u.%u.%u%s.\n"), version.major,
-			   version.minor, version.build,
-			   version.ext != NULL ? version.ext : "");
+	printf_filtered (_("Version: %u.%u.%u%s.\n"), version.major,
+			 version.minor, version.build,
+			 version.ext != NULL ? version.ext : "");
 
 	btrace_maint_update_pt_packets (btinfo);
-	printf_unfiltered (_("Number of packets: %zu.\n"),
-			   ((btinfo->maint.variant.pt.packets == nullptr)
-			    ? 0 : btinfo->maint.variant.pt.packets->size ()));
+	printf_filtered (_("Number of packets: %zu.\n"),
+			 ((btinfo->maint.variant.pt.packets == nullptr)
+			  ? 0 : btinfo->maint.variant.pt.packets->size ()));
       }
       break;
 #endif /* defined (HAVE_LIBIPT)  */

@@ -506,7 +506,7 @@ record_btrace_print_bts_conf (const struct btrace_config_bts *conf)
   if (size > 0)
     {
       suffix = record_btrace_adjust_size (&size);
-      printf_unfiltered (_("Buffer size: %u%s.\n"), size, suffix);
+      printf_filtered (_("Buffer size: %u%s.\n"), size, suffix);
     }
 }
 
@@ -522,7 +522,7 @@ record_btrace_print_pt_conf (const struct btrace_config_pt *conf)
   if (size > 0)
     {
       suffix = record_btrace_adjust_size (&size);
-      printf_unfiltered (_("Buffer size: %u%s.\n"), size, suffix);
+      printf_filtered (_("Buffer size: %u%s.\n"), size, suffix);
     }
 }
 
@@ -531,8 +531,8 @@ record_btrace_print_pt_conf (const struct btrace_config_pt *conf)
 static void
 record_btrace_print_conf (const struct btrace_config *conf)
 {
-  printf_unfiltered (_("Recording format: %s.\n"),
-		     btrace_format_string (conf->format));
+  printf_filtered (_("Recording format: %s.\n"),
+		   btrace_format_string (conf->format));
 
   switch (conf->format)
     {
@@ -602,14 +602,14 @@ record_btrace_target::info_record ()
       gaps = btinfo->ngaps;
     }
 
-  printf_unfiltered (_("Recorded %u instructions in %u functions (%u gaps) "
-		       "for thread %s (%s).\n"), insns, calls, gaps,
-		     print_thread_id (tp),
-		     target_pid_to_str (tp->ptid).c_str ());
+  printf_filtered (_("Recorded %u instructions in %u functions (%u gaps) "
+		     "for thread %s (%s).\n"), insns, calls, gaps,
+		   print_thread_id (tp),
+		   target_pid_to_str (tp->ptid).c_str ());
 
   if (btrace_is_replaying (tp))
-    printf_unfiltered (_("Replay in progress.  At instruction %u.\n"),
-		       btrace_insn_number (btinfo->replay));
+    printf_filtered (_("Replay in progress.  At instruction %u.\n"),
+		     btrace_insn_number (btinfo->replay));
 }
 
 /* Print a decode error.  */
@@ -938,9 +938,9 @@ record_btrace_target::insn_history (int size, gdb_disassembly_flags flags)
   else
     {
       if (size < 0)
-	printf_unfiltered (_("At the start of the branch trace record.\n"));
+	printf_filtered (_("At the start of the branch trace record.\n"));
       else
-	printf_unfiltered (_("At the end of the branch trace record.\n"));
+	printf_filtered (_("At the end of the branch trace record.\n"));
     }
 
   btrace_set_insn_history (btinfo, &begin, &end);
@@ -1295,9 +1295,9 @@ record_btrace_target::call_history (int size, record_print_flags flags)
   else
     {
       if (size < 0)
-	printf_unfiltered (_("At the start of the branch trace record.\n"));
+	printf_filtered (_("At the start of the branch trace record.\n"));
       else
-	printf_unfiltered (_("At the end of the branch trace record.\n"));
+	printf_filtered (_("At the end of the branch trace record.\n"));
     }
 
   btrace_set_call_history (btinfo, &begin, &end);
@@ -3037,11 +3037,11 @@ cmd_show_record_btrace_cpu (const char *args, int from_tty)
   switch (record_btrace_cpu_state)
     {
     case CS_AUTO:
-      printf_unfiltered (_("btrace cpu is 'auto'.\n"));
+      printf_filtered (_("btrace cpu is 'auto'.\n"));
       return;
 
     case CS_NONE:
-      printf_unfiltered (_("btrace cpu is 'none'.\n"));
+      printf_filtered (_("btrace cpu is 'none'.\n"));
       return;
 
     case CS_CPU:
@@ -3049,14 +3049,14 @@ cmd_show_record_btrace_cpu (const char *args, int from_tty)
 	{
 	case CV_INTEL:
 	  if (record_btrace_cpu.stepping == 0)
-	    printf_unfiltered (_("btrace cpu is 'intel: %u/%u'.\n"),
-			       record_btrace_cpu.family,
-			       record_btrace_cpu.model);
+	    printf_filtered (_("btrace cpu is 'intel: %u/%u'.\n"),
+			     record_btrace_cpu.family,
+			     record_btrace_cpu.model);
 	  else
-	    printf_unfiltered (_("btrace cpu is 'intel: %u/%u/%u'.\n"),
-			       record_btrace_cpu.family,
-			       record_btrace_cpu.model,
-			       record_btrace_cpu.stepping);
+	    printf_filtered (_("btrace cpu is 'intel: %u/%u/%u'.\n"),
+			     record_btrace_cpu.family,
+			     record_btrace_cpu.model,
+			     record_btrace_cpu.stepping);
 	  return;
 	}
     }
