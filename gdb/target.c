@@ -1127,7 +1127,7 @@ noprocess (void)
 static void
 default_terminal_info (struct target_ops *self, const char *args, int from_tty)
 {
-  printf_unfiltered (_("No saved terminal information.\n"));
+  printf_filtered (_("No saved terminal information.\n"));
 }
 
 /* A default implementation for the to_get_ada_task_ptid target method.

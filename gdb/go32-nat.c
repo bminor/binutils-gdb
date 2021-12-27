@@ -899,9 +899,9 @@ go32_nat_target::terminal_init ()
 void
 go32_nat_target::terminal_info (const char *args, int from_tty)
 {
-  printf_unfiltered ("Inferior's terminal is in %s mode.\n",
-		     !inf_mode_valid
-		     ? "default" : inf_terminal_mode ? "raw" : "cooked");
+  printf_filtered ("Inferior's terminal is in %s mode.\n",
+		   !inf_mode_valid
+		   ? "default" : inf_terminal_mode ? "raw" : "cooked");
 
 #if __DJGPP_MINOR__ > 2
   if (child_cmd.redirection)
@@ -911,15 +911,15 @@ go32_nat_target::terminal_info (const char *args, int from_tty)
       for (i = 0; i < DBG_HANDLES; i++)
 	{
 	  if (child_cmd.redirection[i]->file_name)
-	    printf_unfiltered ("\tFile handle %d is redirected to `%s'.\n",
-			       i, child_cmd.redirection[i]->file_name);
+	    printf_filtered ("\tFile handle %d is redirected to `%s'.\n",
+			     i, child_cmd.redirection[i]->file_name);
 	  else if (_get_dev_info (child_cmd.redirection[i]->inf_handle) == -1)
-	    printf_unfiltered
+	    printf_filtered
 	      ("\tFile handle %d appears to be closed by inferior.\n", i);
 	  /* Mask off the raw/cooked bit when comparing device info words.  */
 	  else if ((_get_dev_info (child_cmd.redirection[i]->inf_handle) & 0xdf)
 		   != (_get_dev_info (i) & 0xdf))
-	    printf_unfiltered
+	    printf_filtered
 	      ("\tFile handle %d appears to be redirected by inferior.\n", i);
 	}
     }
