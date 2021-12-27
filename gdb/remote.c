@@ -6115,17 +6115,7 @@ extended_remote_target::attach (const char *args, int from_tty)
   if (packet_support (PACKET_vAttach) == PACKET_DISABLE)
     error (_("This target does not support attaching to a process"));
 
-  if (from_tty)
-    {
-      const char *exec_file = get_exec_file (0);
-
-      if (exec_file)
-	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-      else
-	printf_unfiltered (_("Attaching to %s\n"),
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-    }
+  target_announce_attach (from_tty, pid);
 
   xsnprintf (rs->buf.data (), get_remote_packet_size (), "vAttach;%x", pid);
   putpkt (rs->buf);

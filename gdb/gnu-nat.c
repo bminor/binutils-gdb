@@ -2170,16 +2170,7 @@ gnu_nat_target::attach (const char *args, int from_tty)
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
 
-  if (from_tty)
-    {
-      const char *exec_file = get_exec_file (0);
-
-      if (exec_file)
-	printf_unfiltered ("Attaching to program `%s', pid %d\n",
-			   exec_file, pid);
-      else
-	printf_unfiltered ("Attaching to pid %d\n", pid);
-    }
+  target_announce_attach (from_tty, pid);
 
   inf_debug (inf, "attaching to pid: %d", pid);
 

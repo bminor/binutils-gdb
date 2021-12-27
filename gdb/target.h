@@ -1448,6 +1448,11 @@ extern bool target_attach_no_wait ();
 
 extern void target_post_attach (int pid);
 
+/* Display a message indicating we're about to attach to a given
+   process.  */
+
+extern void target_announce_attach (int from_tty, int pid);
+
 /* Display a message indicating we're about to detach from the current
    inferior process.  */
 

@@ -3637,6 +3637,24 @@ target_announce_detach (int from_tty)
 		     target_pid_to_str (ptid_t (pid)).c_str ());
 }
 
+/* See target.h  */
+
+void
+target_announce_attach (int from_tty, int pid)
+{
+  if (!from_tty)
+    return;
+
+  const char *exec_file = get_exec_file (0);
+
+  if (exec_file)
+    printf_unfiltered ("Attaching to program: %s, %s\n", exec_file,
+		       target_pid_to_str (ptid_t (pid)).c_str ());
+  else
+    printf_unfiltered ("Attaching to %s\n",
+		       target_pid_to_str (ptid_t (pid)).c_str ());
+}
+
 /* The inferior process has died.  Long live the inferior!  */
 
 void

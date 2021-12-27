@@ -2002,17 +2002,7 @@ darwin_nat_target::attach (const char *args, int from_tty)
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
 
-  if (from_tty)
-    {
-      const char *exec_file = get_exec_file (0);
-
-      if (exec_file)
-	printf_unfiltered (_("Attaching to program: %s, %s\n"), exec_file,
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-      else
-	printf_unfiltered (_("Attaching to %s\n"),
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-    }
+  target_announce_attach (from_tty, pid);
 
   if (pid == 0 || ::kill (pid, 0) < 0)
     error (_("Can't attach to process %d: %s (%d)"),

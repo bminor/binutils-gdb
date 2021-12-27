@@ -701,17 +701,8 @@ nto_procfs_target::attach (const char *args, int from_tty)
   if (pid == getpid ())
     error (_("Attaching GDB to itself is not a good idea..."));
 
-  if (from_tty)
-    {
-      const char *exec_file = get_exec_file (0);
+  target_announce_attach (from_tty, pid);
 
-      if (exec_file)
-	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-      else
-	printf_unfiltered ("Attaching to %s\n",
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-    }
   ptid_t ptid = do_attach (ptid_t (pid));
   inf = current_inferior ();
   inferior_appeared (inf, pid);

@@ -1929,17 +1929,7 @@ windows_nat_target::attach (const char *args, int from_tty)
 
   DebugSetProcessKillOnExit (FALSE);
 
-  if (from_tty)
-    {
-      const char *exec_file = get_exec_file (0);
-
-      if (exec_file)
-	printf_unfiltered ("Attaching to program `%s', %s\n", exec_file,
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-      else
-	printf_unfiltered ("Attaching to %s\n",
-			   target_pid_to_str (ptid_t (pid)).c_str ());
-    }
+  target_announce_attach (from_tty, pid);
 
 #ifdef __x86_64__
   HANDLE h = OpenProcess (PROCESS_QUERY_INFORMATION, FALSE, pid);

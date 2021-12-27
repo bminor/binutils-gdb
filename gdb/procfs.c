@@ -1775,19 +1775,7 @@ procfs_target::attach (const char *args, int from_tty)
       unpusher.reset (this);
     }
 
-  if (from_tty)
-    {
-      const char *exec_file = get_exec_file (0);
-
-      if (exec_file)
-	printf_filtered (_("Attaching to program `%s', %s\n"),
-			 exec_file, target_pid_to_str (ptid_t (pid)).c_str ());
-      else
-	printf_filtered (_("Attaching to %s\n"),
-			 target_pid_to_str (ptid_t (pid)).c_str ());
-
-      fflush (stdout);
-    }
+  target_announce_attach (from_tty, pid);
 
   do_attach (ptid_t (pid));
 
