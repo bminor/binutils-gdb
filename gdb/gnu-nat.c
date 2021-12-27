@@ -2704,29 +2704,33 @@ struct cmd_list_element *show_thread_default_cmd_list = NULL;
 static void
 set_thread_cmd (const char *args, int from_tty)
 {
-  printf_unfiltered ("\"set thread\" must be followed by the "
-		     "name of a thread property, or \"default\".\n");
+  fprintf_filtered (gdb_stderr,
+		    "\"set thread\" must be followed by the "
+		    "name of a thread property, or \"default\".\n");
 }
 
 static void
 show_thread_cmd (const char *args, int from_tty)
 {
-  printf_unfiltered ("\"show thread\" must be followed by the "
-		     "name of a thread property, or \"default\".\n");
+  fprintf_unfiltered (gdb_stderr,
+		      "\"show thread\" must be followed by the "
+		      "name of a thread property, or \"default\".\n");
 }
 
 static void
 set_thread_default_cmd (const char *args, int from_tty)
 {
-  printf_unfiltered ("\"set thread default\" must be followed "
-		     "by the name of a thread property.\n");
+  fprintf_unfiltered (gdb_stderr,
+		      "\"set thread default\" must be followed "
+		      "by the name of a thread property.\n");
 }
 
 static void
 show_thread_default_cmd (const char *args, int from_tty)
 {
-  printf_unfiltered ("\"show thread default\" must be followed "
-		     "by the name of a thread property.\n");
+  fprintf_unfiltered (gdb_stderr,
+		      "\"show thread default\" must be followed "
+		      "by the name of a thread property.\n");
 }
 
 static int
@@ -2818,10 +2822,10 @@ show_task_pause_cmd (const char *args, int from_tty)
   struct inf *inf = cur_inf ();
 
   check_empty (args, "show task pause");
-  printf_unfiltered ("The inferior task %s suspended while gdb has control.\n",
-		     inf->task
-		     ? (inf->pause_sc == 0 ? "isn't" : "is")
-		     : (inf->pause_sc == 0 ? "won't be" : "will be"));
+  printf_filtered ("The inferior task %s suspended while gdb has control.\n",
+		   inf->task
+		   ? (inf->pause_sc == 0 ? "isn't" : "is")
+		   : (inf->pause_sc == 0 ? "won't be" : "will be"));
 }
 
 static void
@@ -2835,9 +2839,9 @@ static void
 show_task_detach_sc_cmd (const char *args, int from_tty)
 {
   check_empty (args, "show task detach-suspend-count");
-  printf_unfiltered ("The inferior task will be left with a "
-		     "suspend count of %d when detaching.\n",
-		     cur_inf ()->detach_sc);
+  printf_filtered ("The inferior task will be left with a "
+		   "suspend count of %d when detaching.\n",
+		   cur_inf ()->detach_sc);
 }
 
 
@@ -2857,9 +2861,9 @@ show_thread_default_pause_cmd (const char *args, int from_tty)
   int sc = inf->default_thread_pause_sc;
 
   check_empty (args, "show thread default pause");
-  printf_unfiltered ("New threads %s suspended while gdb has control%s.\n",
-		     sc ? "are" : "aren't",
-		     !sc && inf->pause_sc ? " (but the task is)" : "");
+  printf_filtered ("New threads %s suspended while gdb has control%s.\n",
+		   sc ? "are" : "aren't",
+		   !sc && inf->pause_sc ? " (but the task is)" : "");
 }
 
 static void
@@ -2877,8 +2881,8 @@ show_thread_default_run_cmd (const char *args, int from_tty)
   struct inf *inf = cur_inf ();
 
   check_empty (args, "show thread default run");
-  printf_unfiltered ("New threads %s allowed to run.\n",
-		     inf->default_thread_run_sc == 0 ? "are" : "aren't");
+  printf_filtered ("New threads %s allowed to run.\n",
+		   inf->default_thread_run_sc == 0 ? "are" : "aren't");
 }
 
 static void
@@ -2892,8 +2896,8 @@ static void
 show_thread_default_detach_sc_cmd (const char *args, int from_tty)
 {
   check_empty (args, "show thread default detach-suspend-count");
-  printf_unfiltered ("New threads will get a detach-suspend-count of %d.\n",
-		     cur_inf ()->default_thread_detach_sc);
+  printf_filtered ("New threads will get a detach-suspend-count of %d.\n",
+		   cur_inf ()->default_thread_detach_sc);
 }
 
 
@@ -2956,8 +2960,8 @@ show_stopped_cmd (const char *args, int from_tty)
   struct inf *inf = active_inf ();
 
   check_empty (args, "show stopped");
-  printf_unfiltered ("The inferior process %s stopped.\n",
-		     inf->stopped ? "is" : "isn't");
+  printf_filtered ("The inferior process %s stopped.\n",
+		   inf->stopped ? "is" : "isn't");
 }
 
 static void
@@ -2985,10 +2989,10 @@ show_sig_thread_cmd (const char *args, int from_tty)
 
   check_empty (args, "show signal-thread");
   if (inf->signal_thread)
-    printf_unfiltered ("The signal thread is %s.\n",
-		       proc_string (inf->signal_thread));
+    printf_filtered ("The signal thread is %s.\n",
+		     proc_string (inf->signal_thread));
   else
-    printf_unfiltered ("There is no signal thread.\n");
+    printf_filtered ("There is no signal thread.\n");
 }
 
 
@@ -3016,10 +3020,10 @@ show_signals_cmd (const char *args, int from_tty)
   struct inf *inf = cur_inf ();
 
   check_empty (args, "show signals");
-  printf_unfiltered ("The inferior process's signals %s intercepted.\n",
-		     inf->task
-		     ? (inf->traced ? "are" : "aren't")
-		     : (inf->want_signals ? "will be" : "won't be"));
+  printf_filtered ("The inferior process's signals %s intercepted.\n",
+		   inf->task
+		   ? (inf->traced ? "are" : "aren't")
+		   : (inf->want_signals ? "will be" : "won't be"));
 }
 
 static void
@@ -3045,18 +3049,18 @@ show_exceptions_cmd (const char *args, int from_tty)
   struct inf *inf = cur_inf ();
 
   check_empty (args, "show exceptions");
-  printf_unfiltered ("Exceptions in the inferior %s trapped.\n",
-		     inf->task
-		     ? (inf->want_exceptions ? "are" : "aren't")
-		     : (inf->want_exceptions ? "will be" : "won't be"));
+  printf_filtered ("Exceptions in the inferior %s trapped.\n",
+		   inf->task
+		   ? (inf->want_exceptions ? "are" : "aren't")
+		   : (inf->want_exceptions ? "will be" : "won't be"));
 }
 
 
 static void
 set_task_cmd (const char *args, int from_tty)
 {
-  printf_unfiltered ("\"set task\" must be followed by the name"
-		     " of a task property.\n");
+  printf_filtered ("\"set task\" must be followed by the name"
+		   " of a task property.\n");
 }
 
 static void
@@ -3320,10 +3324,10 @@ show_thread_pause_cmd (const char *args, int from_tty)
   int sc = thread->pause_sc;
 
   check_empty (args, "show task pause");
-  printf_unfiltered ("Thread %s %s suspended while gdb has control%s.\n",
-		     proc_string (thread),
-		     sc ? "is" : "isn't",
-		     !sc && thread->inf->pause_sc ? " (but the task is)" : "");
+  printf_filtered ("Thread %s %s suspended while gdb has control%s.\n",
+		   proc_string (thread),
+		   sc ? "is" : "isn't",
+		   !sc && thread->inf->pause_sc ? " (but the task is)" : "");
 }
 
 static void
@@ -3340,9 +3344,9 @@ show_thread_run_cmd (const char *args, int from_tty)
   struct proc *thread = cur_thread ();
 
   check_empty (args, "show thread run");
-  printf_unfiltered ("Thread %s %s allowed to run.",
-		     proc_string (thread),
-		     thread->run_sc == 0 ? "is" : "isn't");
+  printf_filtered ("Thread %s %s allowed to run.",
+		   proc_string (thread),
+		   thread->run_sc == 0 ? "is" : "isn't");
 }
 
 static void
@@ -3358,10 +3362,10 @@ show_thread_detach_sc_cmd (const char *args, int from_tty)
   struct proc *thread = cur_thread ();
 
   check_empty (args, "show thread detach-suspend-count");
-  printf_unfiltered ("Thread %s will be left with a suspend count"
-		     " of %d when detaching.\n",
-		     proc_string (thread),
-		     thread->detach_sc);
+  printf_filtered ("Thread %s will be left with a suspend count"
+		   " of %d when detaching.\n",
+		   proc_string (thread),
+		   thread->detach_sc);
 }
 
 static void
@@ -3403,7 +3407,7 @@ thread_takeover_sc_cmd (const char *args, int from_tty)
     error (("%s."), safe_strerror (err));
   thread->sc = info->suspend_count;
   if (from_tty)
-    printf_unfiltered ("Suspend count was %d.\n", thread->sc);
+    printf_filtered ("Suspend count was %d.\n", thread->sc);
   if (info != &_info)
     vm_deallocate (mach_task_self (), (vm_address_t) info,
 		   info_len * sizeof (int));
