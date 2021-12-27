@@ -169,8 +169,8 @@ inferior_debug (int level, const char *fmt, ...)
     return;
 
   va_start (ap, fmt);
-  printf_unfiltered (_("[%d inferior]: "), getpid ());
-  vprintf_unfiltered (fmt, ap);
+  fprintf_unfiltered (gdb_stdlog, _("[%d inferior]: "), getpid ());
+  vfprintf_unfiltered (gdb_stdlog, fmt, ap);
   va_end (ap);
 }
 
@@ -459,13 +459,20 @@ darwin_resume_inferior (struct inferior *inf)
 static void
 darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 {
-  printf_unfiltered (_("message header:\n"));
-  printf_unfiltered (_(" bits: 0x%x\n"), hdr->msgh_bits);
-  printf_unfiltered (_(" size: 0x%x\n"), hdr->msgh_size);
-  printf_unfiltered (_(" remote-port: 0x%x\n"), hdr->msgh_remote_port);
-  printf_unfiltered (_(" local-port: 0x%x\n"), hdr->msgh_local_port);
-  printf_unfiltered (_(" reserved: 0x%x\n"), hdr->msgh_reserved);
-  printf_unfiltered (_(" id: 0x%x\n"), hdr->msgh_id);
+  fprintf_unfiltered (gdb_stdlog,
+		      _("message header:\n"));
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" bits: 0x%x\n"), hdr->msgh_bits);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" size: 0x%x\n"), hdr->msgh_size);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" remote-port: 0x%x\n"), hdr->msgh_remote_port);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" local-port: 0x%x\n"), hdr->msgh_local_port);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" reserved: 0x%x\n"), hdr->msgh_reserved);
+  fprintf_unfiltered (gdb_stdlog,
+		      _(" id: 0x%x\n"), hdr->msgh_id);
 
   if (disp_body)
     {
@@ -484,21 +491,24 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	    (mach_msg_port_descriptor_t *)(bod + 1);
 	  int k;
 	  NDR_record_t *ndr;
-	  printf_unfiltered (_("body: descriptor_count=%u\n"),
-			     bod->msgh_descriptor_count);
+	  fprintf_unfiltered (gdb_stdlog,
+			      _("body: descriptor_count=%u\n"),
+			      bod->msgh_descriptor_count);
 	  data += sizeof (mach_msg_body_t);
 	  size -= sizeof (mach_msg_body_t);
 	  for (k = 0; k < bod->msgh_descriptor_count; k++)
 	    switch (desc[k].type)
 	      {
 	      case MACH_MSG_PORT_DESCRIPTOR:
-		printf_unfiltered
-		  (_(" descr %d: type=%u (port) name=0x%x, dispo=%d\n"),
+		fprintf_unfiltered
+		  (gdb_stdlog,
+		   _(" descr %d: type=%u (port) name=0x%x, dispo=%d\n"),
 		   k, desc[k].type, desc[k].name, desc[k].disposition);
 		break;
 	      default:
-		printf_unfiltered (_(" descr %d: type=%u\n"),
-				   k, desc[k].type);
+		fprintf_unfiltered (gdb_stdlog,
+				    _(" descr %d: type=%u\n"),
+				    k, desc[k].type);
 		break;
 	      }
 	  data += bod->msgh_descriptor_count
@@ -506,8 +516,9 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	  size -= bod->msgh_descriptor_count
 	    * sizeof (mach_msg_port_descriptor_t);
 	  ndr = (NDR_record_t *)(desc + bod->msgh_descriptor_count);
-	  printf_unfiltered
-	    (_("NDR: mig=%02x if=%02x encod=%02x "
+	  fprintf_unfiltered
+	    (gdb_stdlog,
+	     _("NDR: mig=%02x if=%02x encod=%02x "
 	       "int=%02x char=%02x float=%02x\n"),
 	     ndr->mig_vers, ndr->if_vers, ndr->mig_encoding,
 	     ndr->int_rep, ndr->char_rep, ndr->float_rep);
@@ -515,11 +526,11 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	  size -= sizeof (NDR_record_t);
 	}
 
-      printf_unfiltered (_("  data:"));
+      fprintf_unfiltered (gdb_stdlog, _("  data:"));
       ldata = (const unsigned int *)data;
       for (i = 0; i < size / sizeof (unsigned int); i++)
-	printf_unfiltered (" %08x", ldata[i]);
-      printf_unfiltered (_("\n"));
+	fprintf_unfiltered (gdb_stdlog, " %08x", ldata[i]);
+      fprintf_unfiltered (gdb_stdlog, _("\n"));
     }
 }
 
@@ -977,8 +988,8 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
       if (res < 0)
 	{
 	  /* Should not happen...  */
-	  printf_unfiltered
-	    (_("darwin_wait: ill-formatted message (id=0x%x)\n"), hdr->msgh_id);
+	  warning (_("darwin_wait: ill-formatted message (id=0x%x)\n"),
+		   hdr->msgh_id);
 	  /* FIXME: send a failure reply?  */
 	  status->set_ignore ();
 	  return minus_one_ptid;
@@ -1060,7 +1071,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
       if (res < 0)
 	{
 	  /* Should not happen...  */
-	  printf_unfiltered
+	  warning
 	    (_("darwin_wait: ill-formatted message (id=0x%x, res=%d)\n"),
 	     hdr->msgh_id, res);
 	}
@@ -1086,8 +1097,8 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 	      res_pid = wait4 (inf->pid, &wstatus, 0, NULL);
 	      if (res_pid < 0 || res_pid != inf->pid)
 		{
-		  printf_unfiltered (_("wait4: res=%d: %s\n"),
-				     res_pid, safe_strerror (errno));
+		  warning (_("wait4: res=%d: %s\n"),
+			   res_pid, safe_strerror (errno));
 		  status->set_ignore ();
 		  return minus_one_ptid;
 		}
@@ -2056,8 +2067,8 @@ darwin_nat_target::detach (inferior *inf, int from_tty)
     {
       res = PTRACE (PT_DETACH, inf->pid, 0, 0);
       if (res != 0)
-	printf_unfiltered (_("Unable to detach from process-id %d: %s (%d)"),
-			   inf->pid, safe_strerror (errno), errno);
+	warning (_("Unable to detach from process-id %d: %s (%d)"),
+		 inf->pid, safe_strerror (errno), errno);
     }
 
   darwin_reply_to_all_pending_messages (inf);
