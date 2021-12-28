@@ -717,7 +717,17 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos,
 	 open the external file as a bfd.  */
       bfd_set_error (bfd_error_no_error);
       n_bfd = open_nested_file (filename, archive);
-      if (n_bfd == NULL)
+      if (n_bfd != NULL)
+	{
+	  ufile_ptr size = bfd_get_size (n_bfd);
+	  if (size != 0 && size != new_areldata->parsed_size)
+	    {
+	      bfd_set_error (bfd_error_malformed_archive);
+	      bfd_close (n_bfd);
+	      n_bfd = NULL;
+	    }
+	}
+      else
 	{
 	  switch (bfd_get_error ())
 	    {
