@@ -1303,11 +1303,13 @@ show_tdesc_filename_cmd (struct ui_file *file, int from_tty,
   value = get_tdesc_info (current_inferior ())->filename.data ();
 
   if (value != NULL && *value != '\0')
-    printf_filtered (_("The target description will be read from \"%s\".\n"),
-		     value);
+    fprintf_filtered (file,
+		      _("The target description will be read from \"%s\".\n"),
+		      value);
   else
-    printf_filtered (_("The target description will be "
-		       "read from the target.\n"));
+    fprintf_filtered (file,
+		      _("The target description will be "
+			"read from the target.\n"));
 }
 
 static void

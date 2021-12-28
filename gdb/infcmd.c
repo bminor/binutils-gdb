@@ -117,7 +117,7 @@ show_inferior_tty_command (struct ui_file *file, int from_tty,
      directly.  */
   const std::string &inferior_tty = current_inferior ()->tty ();
 
-  fprintf_filtered (gdb_stdout,
+  fprintf_filtered (file,
 		    _("Terminal for future runs of program being debugged "
 		      "is \"%s\".\n"), inferior_tty.c_str ());
 }
@@ -177,13 +177,13 @@ show_cwd_command (struct ui_file *file, int from_tty,
   const std::string &cwd = current_inferior ()->cwd ();
 
   if (cwd.empty ())
-    fprintf_filtered (gdb_stdout,
+    fprintf_filtered (file,
 		      _("\
 You have not set the inferior's current working directory.\n\
 The inferior will inherit GDB's cwd if native debugging, or the remote\n\
 server's cwd if remote debugging.\n"));
   else
-    fprintf_filtered (gdb_stdout,
+    fprintf_filtered (file,
 		      _("Current working directory that will be used "
 			"when starting the inferior is \"%s\".\n"),
 		      cwd.c_str ());

@@ -790,7 +790,7 @@ static void
 tui_show_tab_width (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (gdb_stdout, _("TUI tab width is %s spaces.\n"), value);
+  fprintf_filtered (file, _("TUI tab width is %s spaces.\n"), value);
 
 }
 
@@ -814,7 +814,7 @@ static void
 tui_show_compact_source (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  printf_filtered (_("TUI source window compactness is %s.\n"), value);
+  fprintf_filtered (file, _("TUI source window compactness is %s.\n"), value);
 }
 
 /* Set the tab width of the specified window.  */

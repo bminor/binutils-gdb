@@ -1190,14 +1190,15 @@ show_mask_address (struct ui_file *file, int from_tty,
   switch (mask_address_var)
     {
     case AUTO_BOOLEAN_TRUE:
-      printf_filtered ("The 32 bit mips address mask is enabled\n");
+      fprintf_filtered (file, "The 32 bit mips address mask is enabled\n");
       break;
     case AUTO_BOOLEAN_FALSE:
-      printf_filtered ("The 32 bit mips address mask is disabled\n");
+      fprintf_filtered (file, "The 32 bit mips address mask is disabled\n");
       break;
     case AUTO_BOOLEAN_AUTO:
-      printf_filtered
-	("The 32 bit address mask is set automatically.  Currently %s\n",
+      fprintf_filtered
+	(file,
+	 "The 32 bit address mask is set automatically.  Currently %s\n",
 	 mips_mask_address_p (tdep) ? "enabled" : "disabled");
       break;
     default:

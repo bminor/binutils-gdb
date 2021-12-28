@@ -2956,7 +2956,7 @@ static void
 cmd_show_replay_memory_access (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (gdb_stdout, _("Replay memory access is %s.\n"),
+  fprintf_filtered (file, _("Replay memory access is %s.\n"),
 		    replay_memory_access);
 }
 

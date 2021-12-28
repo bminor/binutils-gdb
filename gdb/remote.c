@@ -1065,8 +1065,6 @@ static int stub_unpack_int (const char *buff, int fieldlength);
 
 struct packet_config;
 
-static void show_packet_config_cmd (struct packet_config *config);
-
 static void show_remote_protocol_packet_cmd (struct ui_file *file,
 					     int from_tty,
 					     struct cmd_list_element *c,
@@ -1913,7 +1911,7 @@ static enum packet_support packet_config_support (struct packet_config *config);
 static enum packet_support packet_support (int packet);
 
 static void
-show_packet_config_cmd (struct packet_config *config)
+show_packet_config_cmd (ui_file *file, struct packet_config *config)
 {
   const char *support = "internal-error";
 
@@ -1932,14 +1930,16 @@ show_packet_config_cmd (struct packet_config *config)
   switch (config->detect)
     {
     case AUTO_BOOLEAN_AUTO:
-      printf_filtered (_("Support for the `%s' packet "
-			 "is auto-detected, currently %s.\n"),
-		       config->name, support);
+      fprintf_filtered (file,
+			_("Support for the `%s' packet "
+			  "is auto-detected, currently %s.\n"),
+			config->name, support);
       break;
     case AUTO_BOOLEAN_TRUE:
     case AUTO_BOOLEAN_FALSE:
-      printf_filtered (_("Support for the `%s' packet is currently %s.\n"),
-		       config->name, support);
+      fprintf_filtered (file,
+			_("Support for the `%s' packet is currently %s.\n"),
+			config->name, support);
       break;
     }
 }
@@ -2275,7 +2275,7 @@ show_remote_protocol_packet_cmd (struct ui_file *file, int from_tty,
     {
       if (c == packet->show_cmd)
 	{
-	  show_packet_config_cmd (packet);
+	  show_packet_config_cmd (file, packet);
 	  return;
 	}
     }
@@ -2319,7 +2319,7 @@ show_remote_protocol_Z_packet_cmd (struct ui_file *file, int from_tty,
 
   for (i = 0; i < NR_Z_PACKET_TYPES; i++)
     {
-      show_packet_config_cmd (&remote_protocol_packets[PACKET_Z0 + i]);
+      show_packet_config_cmd (file, &remote_protocol_packets[PACKET_Z0 + i]);
     }
 }
 

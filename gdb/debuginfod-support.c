@@ -299,8 +299,9 @@ static void
 show_debuginfod_enabled (ui_file *file, int from_tty, cmd_list_element *cmd,
 			 const char *value)
 {
-  printf_unfiltered (_("Debuginfod functionality is currently set to "
-		       "\"%s\".\n"), debuginfod_enabled);
+  fprintf_unfiltered (file,
+		      _("Debuginfod functionality is currently set to "
+			"\"%s\".\n"), debuginfod_enabled);
 }
 
 /* Set callback for "set debuginfod urls".  */

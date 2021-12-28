@@ -114,12 +114,12 @@ show_language_command (struct ui_file *file, int from_tty,
   enum language flang;		/* The language of the frame.  */
 
   if (language_mode == language_mode_auto)
-    fprintf_filtered (gdb_stdout,
+    fprintf_filtered (file,
 		      _("The current source language is "
 			"\"auto; currently %s\".\n"),
 		      current_language->name ());
   else
-    fprintf_filtered (gdb_stdout,
+    fprintf_filtered (file,
 		      _("The current source language is \"%s\".\n"),
 		      current_language->name ());
 
@@ -132,7 +132,7 @@ show_language_command (struct ui_file *file, int from_tty,
       if (flang != language_unknown
 	  && language_mode == language_mode_manual
 	  && current_language->la_language != flang)
-	printf_filtered ("%s\n", _(lang_frame_mismatch_warn));
+	fprintf_filtered (file, "%s\n", _(lang_frame_mismatch_warn));
     }
 }
 
@@ -220,12 +220,12 @@ show_range_command (struct ui_file *file, int from_tty,
 			  "Unrecognized range check setting.");
 	}
 
-      fprintf_filtered (gdb_stdout,
+      fprintf_filtered (file,
 			_("Range checking is \"auto; currently %s\".\n"),
 			tmp);
     }
   else
-    fprintf_filtered (gdb_stdout, _("Range checking is \"%s\".\n"),
+    fprintf_filtered (file, _("Range checking is \"%s\".\n"),
 		      value);
 
   if (range_check == range_check_warn
@@ -296,13 +296,13 @@ show_case_command (struct ui_file *file, int from_tty,
 			  "Unrecognized case-sensitive setting.");
 	}
 
-      fprintf_filtered (gdb_stdout,
+      fprintf_filtered (file,
 			_("Case sensitivity in "
 			  "name search is \"auto; currently %s\".\n"),
 			tmp);
     }
   else
-    fprintf_filtered (gdb_stdout,
+    fprintf_filtered (file,
 		      _("Case sensitivity in name search is \"%s\".\n"),
 		      value);
 

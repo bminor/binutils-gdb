@@ -400,11 +400,11 @@ set_directories_command (const char *args,
    function.  */
 
 static void
-show_directories_1 (char *ignore, int from_tty)
+show_directories_1 (ui_file *file, char *ignore, int from_tty)
 {
-  puts_filtered ("Source directories searched: ");
-  puts_filtered (source_path.c_str ());
-  puts_filtered ("\n");
+  fputs_filtered ("Source directories searched: ", file);
+  fputs_filtered (source_path.c_str (), file);
+  fputs_filtered ("\n", file);
 }
 
 /* Handler for "show directories" command.  */
@@ -413,7 +413,7 @@ static void
 show_directories_command (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  show_directories_1 (NULL, from_tty);
+  show_directories_1 (file, NULL, from_tty);
 }
 
 /* See source.h.  */
@@ -485,7 +485,7 @@ directory_command (const char *dirname, int from_tty)
       gdb::observers::command_param_changed.notify ("directories",
 						    source_path.c_str ());
       if (from_tty)
-	show_directories_1 ((char *) 0, from_tty);
+	show_directories_1 (gdb_stdout, (char *) 0, from_tty);
     }
 }
 

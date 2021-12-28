@@ -102,7 +102,7 @@ static void
 show_exec_file_mismatch_command (struct ui_file *file, int from_tty,
 				 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (gdb_stdout,
+  fprintf_filtered (file,
 		    _("exec-file-mismatch handling is currently \"%s\".\n"),
 		    exec_file_mismatch_names[exec_file_mismatch_mode]);
 }
