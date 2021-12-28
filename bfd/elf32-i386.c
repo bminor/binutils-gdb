@@ -2311,7 +2311,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		    {
 		      /* This references the local defitionion.  We must
 			 initialize this entry in the global offset table.
-			 Since the offset must always be a multiple of 8,
+			 Since the offset must always be a multiple of 4,
 			 we use the least significant bit to record
 			 whether we have initialized it already.
 
