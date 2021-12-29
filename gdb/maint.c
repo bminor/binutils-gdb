@@ -990,11 +990,12 @@ scoped_command_stats::~scoped_command_stats ()
       /* Subtract time spend in prompt_for_continue from walltime.  */
       wall_time -= get_prompt_for_continue_wait_time ();
 
-      printf_unfiltered (!m_msg_type
-			 ? _("Startup time: %.6f (cpu), %.6f (wall)\n")
-			 : _("Command execution time: %.6f (cpu), %.6f (wall)\n"),
-			 duration<double> (cmd_time).count (),
-			 duration<double> (wall_time).count ());
+      fprintf_unfiltered (gdb_stdlog,
+			  !m_msg_type
+			  ? _("Startup time: %.6f (cpu), %.6f (wall)\n")
+			  : _("Command execution time: %.6f (cpu), %.6f (wall)\n"),
+			  duration<double> (cmd_time).count (),
+			  duration<double> (wall_time).count ());
     }
 
   if (m_space_enabled && per_command_space)
@@ -1005,12 +1006,13 @@ scoped_command_stats::~scoped_command_stats ()
       long space_now = lim - lim_at_start;
       long space_diff = space_now - m_start_space;
 
-      printf_unfiltered (!m_msg_type
-			 ? _("Space used: %ld (%s%ld during startup)\n")
-			 : _("Space used: %ld (%s%ld for this command)\n"),
-			 space_now,
-			 (space_diff >= 0 ? "+" : ""),
-			 space_diff);
+      fprintf_unfiltered (gdb_stdlog,
+			  !m_msg_type
+			  ? _("Space used: %ld (%s%ld during startup)\n")
+			  : _("Space used: %ld (%s%ld for this command)\n"),
+			  space_now,
+			  (space_diff >= 0 ? "+" : ""),
+			  space_diff);
 #endif
     }
 
@@ -1019,16 +1021,17 @@ scoped_command_stats::~scoped_command_stats ()
       int nr_symtabs, nr_compunit_symtabs, nr_blocks;
 
       count_symtabs_and_blocks (&nr_symtabs, &nr_compunit_symtabs, &nr_blocks);
-      printf_unfiltered (_("#symtabs: %d (+%d),"
-			   " #compunits: %d (+%d),"
-			   " #blocks: %d (+%d)\n"),
-			 nr_symtabs,
-			 nr_symtabs - m_start_nr_symtabs,
-			 nr_compunit_symtabs,
-			 (nr_compunit_symtabs
-			  - m_start_nr_compunit_symtabs),
-			 nr_blocks,
-			 nr_blocks - m_start_nr_blocks);
+      fprintf_unfiltered (gdb_stdlog,
+			  _("#symtabs: %d (+%d),"
+			    " #compunits: %d (+%d),"
+			    " #blocks: %d (+%d)\n"),
+			  nr_symtabs,
+			  nr_symtabs - m_start_nr_symtabs,
+			  nr_compunit_symtabs,
+			  (nr_compunit_symtabs
+			   - m_start_nr_compunit_symtabs),
+			  nr_blocks,
+			  nr_blocks - m_start_nr_blocks);
     }
 }
 
@@ -1095,7 +1098,7 @@ scoped_command_stats::print_time (const char *msg)
   char out[100];
   strftime (out, sizeof (out), "%F %H:%M:%S", &tm);
 
-  printf_unfiltered ("%s.%03d - %s\n", out, (int) millis, msg);
+  fprintf_unfiltered (gdb_stdlog, "%s.%03d - %s\n", out, (int) millis, msg);
 }
 
 /* Handle unknown "mt set per-command" arguments.
