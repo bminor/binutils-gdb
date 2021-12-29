@@ -1417,6 +1417,59 @@ read_frame_register_unsigned (frame_info *frame, int regnum,
 
 void
 put_frame_register (struct frame_info *frame, int regnum,
+		    const gdb_byte *buf, struct value *fromval)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int realnum;
+  int optim;
+  int unavail;
+  enum lval_type lval;
+  CORE_ADDR addr;
+
+  frame_register (frame, regnum, &optim, &unavail,
+		  &lval, &addr, &realnum, NULL);
+  if (optim)
+    error (_("Attempt to assign to a register that was not saved."));
+
+  struct type *val_type = value_type (fromval);
+
+  switch (lval)
+    {
+    case lval_memory:
+      {
+	write_memory (addr, buf, register_size (gdbarch, regnum));
+
+	/* If this value is a capability, we need to handle the capability tag
+	   as well.  */
+	if ((val_type->code () == TYPE_CODE_CAPABILITY
+	    || (val_type->code () == TYPE_CODE_PTR
+		&& TYPE_CAPABILITY (val_type)))
+	    && value_tagged (fromval))
+	  gdbarch_set_cap_tag_from_address (gdbarch, addr, value_tag (fromval));
+	break;
+      }
+    case lval_register:
+      {
+	get_current_regcache ()->cooked_write (realnum, buf);
+	/* If this value is a capability, we need to handle the capability tag
+	   as well.  */
+	if ((val_type->code () == TYPE_CODE_CAPABILITY
+	    || (val_type->code () == TYPE_CODE_PTR
+		&& TYPE_CAPABILITY (val_type)))
+	    && value_tagged (fromval))
+	  {
+	    gdbarch_register_set_tag (gdbarch, get_current_regcache (),
+				      regnum, value_tag (fromval));
+	  }
+      }
+      break;
+    default:
+      error (_("Attempt to assign to an unmodifiable value."));
+    }
+}
+
+void
+put_frame_register (struct frame_info *frame, int regnum,
 		    const gdb_byte *buf)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -1549,6 +1602,53 @@ get_frame_register_bytes (frame_info *frame, int regnum,
   *unavailablep = 0;
 
   return true;
+}
+
+void
+put_frame_register_value (struct frame_info *frame, int regnum,
+			  CORE_ADDR offset, struct value *fromval)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int len = TYPE_LENGTH (value_type (fromval));
+  const gdb_byte *myaddr = value_contents (fromval);
+
+  /* Skip registers wholly inside of OFFSET.  */
+  while (offset >= register_size (gdbarch, regnum))
+    {
+      offset -= register_size (gdbarch, regnum);
+      regnum++;
+    }
+
+  /* Copy the data.  */
+  while (len > 0)
+    {
+      int curr_len = register_size (gdbarch, regnum) - offset;
+
+      if (curr_len > len)
+	curr_len = len;
+
+      if (curr_len == register_size (gdbarch, regnum))
+	{
+	  put_frame_register (frame, regnum, myaddr, fromval);
+	}
+      else
+	{
+	  struct value *value = frame_unwind_register_value (frame->next,
+							     regnum);
+	  gdb_assert (value != NULL);
+
+	  memcpy ((char *) value_contents_writeable (value) + offset, myaddr,
+		  curr_len);
+	  put_frame_register (frame, regnum, value_contents_raw (value),
+			      fromval);
+	  release_value (value);
+	}
+
+      myaddr += curr_len;
+      len -= curr_len;
+      offset = 0;
+      regnum++;
+    }
 }
 
 void

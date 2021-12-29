@@ -1175,10 +1175,9 @@ value_assign (struct value *toval, struct value *fromval)
 	      }
 	    else
 	      {
-		put_frame_register_bytes (frame, value_reg,
+		put_frame_register_value (frame, value_reg,
 					  value_offset (toval),
-					  TYPE_LENGTH (type),
-					  value_contents (fromval));
+					  fromval);
 	      }
 	  }
 

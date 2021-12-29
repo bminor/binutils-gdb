@@ -574,6 +574,9 @@ m;int;remote_register_number;int regno;regno;;default_remote_register_number;;0
 # Return the tag from a capability stored at address ADDR.
 m;bool;get_cap_tag_from_address;CORE_ADDR addr;addr;0;default_get_cap_tag_from_address;;0
 
+# Set the tag from a capability stored at address ADDR to TAG.
+m;void;set_cap_tag_from_address;CORE_ADDR addr, bool tag;addr, tag;0;default_set_cap_tag_from_address;;0
+
 # Fetch the target specific address used to represent a load module.
 F;CORE_ADDR;fetch_tls_load_module_address;struct objfile *objfile;objfile
 
@@ -1202,6 +1205,8 @@ m;bool;register_has_tag;readable_regcache *regcache, int cookednum;regcache, coo
 # Returns true if the register tag bit is 1 and false otherwise.
 # The default is to always return false.
 m;bool;register_tag;readable_regcache *regcache, int cookednum;regcache, cookednum;;default_register_tag;;0
+# Sets the register tag to TAG.
+m;void;register_set_tag;regcache *regcache, int cookednum, bool tag;regcache, cookednum, tag;;default_register_set_tag;;0
 
 EOF
 }

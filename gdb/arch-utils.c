@@ -1071,10 +1071,27 @@ default_register_tag (struct gdbarch *gdbarch,
 }
 
 /* See arch-utils.h.  */
+void
+default_register_set_tag (struct gdbarch *gdbarch,
+			  regcache *regcache,
+			  int cookednum, bool tag)
+{
+  return;
+}
+
+/* See arch-utils.h.  */
 bool default_get_cap_tag_from_address (struct gdbarch *gdbarch,
 				       CORE_ADDR addr)
 {
   return false;
+}
+
+/* See arch-utils.h.  */
+void
+default_set_cap_tag_from_address (struct gdbarch *gdbarch,
+				  CORE_ADDR addr, bool tag)
+{
+  return;
 }
 
 void _initialize_gdbarch_utils ();

@@ -8451,6 +8451,7 @@ remote_target::store_registers (struct regcache *regcache, int regnum)
 	return;
 
       store_registers_using_G (regcache);
+      fetch_registers_using_g (regcache);
       return;
     }
 

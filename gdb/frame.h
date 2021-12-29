@@ -617,6 +617,10 @@ extern void frame_register (struct frame_info *frame, int regnum,
 extern void put_frame_register (struct frame_info *frame, int regnum,
 				const gdb_byte *buf);
 
+/* Same as put_frame_register, but passing a struct value *.  */
+extern void put_frame_register (struct frame_info *frame, int regnum,
+				const gdb_byte *buf, struct value *fromval);
+
 /* Read LEN bytes from one or multiple registers starting with REGNUM
    in frame FRAME, starting at OFFSET, into BUF.  If the register
    contents are optimized out or unavailable, set *OPTIMIZEDP,
@@ -631,6 +635,10 @@ extern bool get_frame_register_bytes (frame_info *frame, int regnum,
 extern void put_frame_register_bytes (struct frame_info *frame, int regnum,
 				      CORE_ADDR offset, int len,
 				      const gdb_byte *myaddr);
+
+/* Same as put_frame_register_bytes, but passing a struct value *.  */
+extern void put_frame_register_value (struct frame_info *frame, int regnum,
+				      CORE_ADDR offset, struct value *fromval);
 
 /* Unwind the PC.  Strictly speaking return the resume address of the
    calling frame.  For GDB, `pc' is the resume address and not a

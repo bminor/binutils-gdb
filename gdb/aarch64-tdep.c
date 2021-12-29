@@ -1984,11 +1984,11 @@ struct aarch64_call_info
   std::vector<stack_item_t> si;
 };
 
-/* Helper function to set a TAG for a particular register REGNUM.  */
+/* Implementation of the gdbarch_register_set_tag hook.  */
 
 static void
-set_register_tag (struct gdbarch *gdbarch, struct regcache *regcache,
-		  int regnum, bool tag)
+aarch64_register_set_tag (struct gdbarch *gdbarch, struct regcache *regcache,
+			  int regnum, bool tag)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -2069,7 +2069,7 @@ pass_in_c (struct gdbarch *gdbarch, struct regcache *regcache,
 	  /* We need to read the tags from memory.  */
 	  gdb::byte_vector cap = target_read_capability (address);
 	  bool tag = cap[0] == 0 ? false : true;
-	  set_register_tag (gdbarch, regcache, regnum, tag);
+	  aarch64_register_set_tag (gdbarch, regcache, regnum, tag);
 
 	  if (aarch64_debug)
 	    debug_printf ("aarch64: %s Read tag %s from address %s\n",
@@ -2570,7 +2570,7 @@ morello_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 capability.  */
       struct value *clr = regcache->cooked_read_value (regnum);
       regcache->cooked_write (regnum, value_contents (clr));
-      set_register_tag (gdbarch, regcache, regnum, value_tag (clr));
+      aarch64_register_set_tag (gdbarch, regcache, regnum, value_tag (clr));
     }
 
   if (aarch64_debug)
@@ -2601,7 +2601,7 @@ morello_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     capability.  */
 	  struct value *csp = regcache->cooked_read_value (regnum);
 	  regcache->cooked_write (regnum, value_contents (csp));
-	  set_register_tag (gdbarch, regcache, regnum, value_tag (csp));
+	  aarch64_register_set_tag (gdbarch, regcache, regnum, value_tag (csp));
 	}
 
       if (aarch64_debug)
@@ -2799,7 +2799,7 @@ morello_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       struct value *csp = regcache->cooked_read_value (regnum);
       regcache->cooked_write (regnum, value_contents (csp));
-      set_register_tag (gdbarch, regcache, regnum, value_tag (csp));
+      aarch64_register_set_tag (gdbarch, regcache, regnum, value_tag (csp));
     }
 
     if (aarch64_debug)
@@ -3743,7 +3743,7 @@ morello_store_return_value (struct value *value, struct regcache *regs,
 
       /* Also store the tag if we are dealing with a capability.  */
       if (aapcs64_cap || type->code () == TYPE_CODE_CAPABILITY)
-	set_register_tag (gdbarch, regs, regno, value_tag (value));
+	aarch64_register_set_tag (gdbarch, regs, regno, value_tag (value));
     }
   else if (type->code () == TYPE_CODE_INT
 	   || type->code () == TYPE_CODE_CHAR
@@ -3821,7 +3821,7 @@ morello_store_return_value (struct value *value, struct regcache *regs,
 	      /* We need to read the tags from memory.  */
 	      gdb::byte_vector cap = target_read_capability (address);
 	      bool tag = cap[0] == 0 ? false : true;
-	      set_register_tag (gdbarch, regs, regno, tag);
+	      aarch64_register_set_tag (gdbarch, regs, regno, tag);
 
 	      if (aarch64_debug)
 		debug_printf ("aarch64: %s Read tag %s from address %s\n",
@@ -4399,8 +4399,8 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
       regcache->raw_write_part (c_real_regnum, 0, 8, lower_bytes);
       regcache->raw_write_part (c_real_regnum, 8, 8, upper_bytes);
 
-      set_register_tag (gdbarch, regcache, c_real_regnum,
-			(tag != 0)? true : false);
+      aarch64_register_set_tag (gdbarch, regcache, c_real_regnum,
+				(tag != 0)? true : false);
       return;
     }
 
@@ -5673,6 +5673,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* For fetching register tag information.  */
       set_gdbarch_register_has_tag (gdbarch, aarch64_register_has_tag);
       set_gdbarch_register_tag (gdbarch, aarch64_register_tag);
+      set_gdbarch_register_set_tag (gdbarch, aarch64_register_set_tag);
 
       /* Create the Morello register aliases.  */
       /* cip0 and cip1 */

@@ -645,6 +645,12 @@ typedef bool (gdbarch_get_cap_tag_from_address_ftype) (struct gdbarch *gdbarch, 
 extern bool gdbarch_get_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_get_cap_tag_from_address (struct gdbarch *gdbarch, gdbarch_get_cap_tag_from_address_ftype *get_cap_tag_from_address);
 
+/* Set the tag from a capability stored at address ADDR to TAG. */
+
+typedef void (gdbarch_set_cap_tag_from_address_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, bool tag);
+extern void gdbarch_set_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr, bool tag);
+extern void set_gdbarch_set_cap_tag_from_address (struct gdbarch *gdbarch, gdbarch_set_cap_tag_from_address_ftype *set_cap_tag_from_address);
+
 /* Fetch the target specific address used to represent a load module. */
 
 extern int gdbarch_fetch_tls_load_module_address_p (struct gdbarch *gdbarch);
@@ -1682,6 +1688,12 @@ extern void set_gdbarch_register_has_tag (struct gdbarch *gdbarch, gdbarch_regis
 typedef bool (gdbarch_register_tag_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
 extern bool gdbarch_register_tag (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
 extern void set_gdbarch_register_tag (struct gdbarch *gdbarch, gdbarch_register_tag_ftype *register_tag);
+
+/* Sets the register tag to TAG. */
+
+typedef void (gdbarch_register_set_tag_ftype) (struct gdbarch *gdbarch, regcache *regcache, int cookednum, bool tag);
+extern void gdbarch_register_set_tag (struct gdbarch *gdbarch, regcache *regcache, int cookednum, bool tag);
+extern void set_gdbarch_register_set_tag (struct gdbarch *gdbarch, gdbarch_register_set_tag_ftype *register_set_tag);
 
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
