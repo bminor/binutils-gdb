@@ -8623,7 +8623,7 @@ show_disassembly_style_sfunc (struct ui_file *file, int from_tty,
 	len = strcspn (style, ",");
       }
 
-  fprintf_unfiltered (file, "The disassembly style is \"%.*s\".\n", len, style);
+  fprintf_filtered (file, "The disassembly style is \"%.*s\".\n", len, style);
 }
 
 /* Return the ARM register name corresponding to register I.  */

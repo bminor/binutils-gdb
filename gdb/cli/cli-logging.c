@@ -181,9 +181,9 @@ show_logging_enabled (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
   if (logging_enabled)
-    fprintf_unfiltered (file, _("Logging is enabled.\n"));
+    fprintf_filtered (file, _("Logging is enabled.\n"));
   else
-    fprintf_unfiltered (file, _("Logging is disabled.\n"));
+    fprintf_filtered (file, _("Logging is disabled.\n"));
 }
 
 void _initialize_cli_logging ();
