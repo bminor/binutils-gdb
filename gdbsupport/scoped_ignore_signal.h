@@ -75,7 +75,12 @@ public:
 
 	    sigpending (&pending);
 	    if (sigismember (&pending, Sig))
-	      sigwait (&set, nullptr);
+	      {
+		int sig_found;
+
+		sigwait (&set, &sig_found);
+		gdb_assert (sig_found == Sig);
+	      }
 #endif
 	  }
 
