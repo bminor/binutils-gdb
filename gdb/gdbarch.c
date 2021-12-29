@@ -131,6 +131,7 @@ struct gdbarch
   CORE_ADDR deprecated_function_start_offset;
   gdbarch_remote_register_number_ftype *remote_register_number;
   gdbarch_get_cap_tag_from_address_ftype *get_cap_tag_from_address;
+  gdbarch_set_cap_tag_from_address_ftype *set_cap_tag_from_address;
   gdbarch_fetch_tls_load_module_address_ftype *fetch_tls_load_module_address;
   gdbarch_get_thread_local_address_ftype *get_thread_local_address;
   CORE_ADDR frame_args_skip;
@@ -255,6 +256,7 @@ struct gdbarch
   gdbarch_read_core_file_mappings_ftype *read_core_file_mappings;
   gdbarch_register_has_tag_ftype *register_has_tag;
   gdbarch_register_tag_ftype *register_tag;
+  gdbarch_register_set_tag_ftype *register_set_tag;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -330,6 +332,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   gdbarch->remote_register_number = default_remote_register_number;
   gdbarch->get_cap_tag_from_address = default_get_cap_tag_from_address;
+  gdbarch->set_cap_tag_from_address = default_set_cap_tag_from_address;
   gdbarch->unwind_pc = default_unwind_pc;
   gdbarch->unwind_sp = default_unwind_sp;
   gdbarch->stabs_argument_has_addr = default_stabs_argument_has_addr;
@@ -381,6 +384,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->read_core_file_mappings = default_read_core_file_mappings;
   gdbarch->register_has_tag = default_register_has_tag;
   gdbarch->register_tag = default_register_tag;
+  gdbarch->register_set_tag = default_register_set_tag;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -498,6 +502,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of deprecated_function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_register_number, invalid_p == 0 */
   /* Skip verify of get_cap_tag_from_address, invalid_p == 0 */
+  /* Skip verify of set_cap_tag_from_address, invalid_p == 0 */
   /* Skip verify of fetch_tls_load_module_address, has predicate.  */
   /* Skip verify of get_thread_local_address, has predicate.  */
   /* Skip verify of frame_args_skip, invalid_p == 0 */
@@ -623,6 +628,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of read_core_file_mappings, invalid_p == 0 */
   /* Skip verify of register_has_tag, invalid_p == 0 */
   /* Skip verify of register_tag, invalid_p == 0 */
+  /* Skip verify of register_set_tag, invalid_p == 0 */
   if (!log.empty ())
     internal_error (__FILE__, __LINE__,
 		    _("verify_gdbarch: the following are invalid ...%s"),
@@ -952,6 +958,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_filtered (file,
                       "gdbarch_dump: get_cap_tag_from_address = <%s>\n",
                       host_address_to_string (gdbarch->get_cap_tag_from_address));
+  fprintf_filtered (file,
+                      "gdbarch_dump: set_cap_tag_from_address = <%s>\n",
+                      host_address_to_string (gdbarch->set_cap_tag_from_address));
   fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_fetch_tls_load_module_address_p() = %d\n",
                       gdbarch_fetch_tls_load_module_address_p (gdbarch));
@@ -1468,6 +1477,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_filtered (file,
                       "gdbarch_dump: register_tag = <%s>\n",
                       host_address_to_string (gdbarch->register_tag));
+  fprintf_filtered (file,
+                      "gdbarch_dump: register_set_tag = <%s>\n",
+                      host_address_to_string (gdbarch->register_set_tag));
   if (gdbarch->dump_tdep != NULL)
     gdbarch->dump_tdep (gdbarch, file);
 }
@@ -3013,6 +3025,23 @@ set_gdbarch_get_cap_tag_from_address (struct gdbarch *gdbarch,
                                       gdbarch_get_cap_tag_from_address_ftype get_cap_tag_from_address)
 {
   gdbarch->get_cap_tag_from_address = get_cap_tag_from_address;
+}
+
+void
+gdbarch_set_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr, bool tag)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->set_cap_tag_from_address != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_set_cap_tag_from_address called\n");
+  gdbarch->set_cap_tag_from_address (gdbarch, addr, tag);
+}
+
+void
+set_gdbarch_set_cap_tag_from_address (struct gdbarch *gdbarch,
+                                      gdbarch_set_cap_tag_from_address_ftype set_cap_tag_from_address)
+{
+  gdbarch->set_cap_tag_from_address = set_cap_tag_from_address;
 }
 
 bool
@@ -5461,4 +5490,21 @@ set_gdbarch_register_tag (struct gdbarch *gdbarch,
                           gdbarch_register_tag_ftype register_tag)
 {
   gdbarch->register_tag = register_tag;
+}
+
+void
+gdbarch_register_set_tag (struct gdbarch *gdbarch, regcache *regcache, int cookednum, bool tag)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->register_set_tag != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_register_set_tag called\n");
+  gdbarch->register_set_tag (gdbarch, regcache, cookednum, tag);
+}
+
+void
+set_gdbarch_register_set_tag (struct gdbarch *gdbarch,
+                              gdbarch_register_set_tag_ftype register_set_tag)
+{
+  gdbarch->register_set_tag = register_set_tag;
 }

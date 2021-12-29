@@ -2130,6 +2130,24 @@ aarch64_linux_get_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr)
   return cap[0] != 0;
 }
 
+/* AArch64 Linux implementation of the set_cap_tag_from_address gdbarch
+   hook.  Sets the tag from the capability located at ADDR to TAG.  */
+
+static void
+aarch64_linux_set_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr,
+					bool tag)
+{
+  gdb::byte_vector cap;
+
+  /* Read original capability at ADDR.  */
+  cap = target_read_capability (addr);
+
+  cap[0] = tag? 1 : 0;
+
+  /* Write back the same contents but with a custom tag.  */
+  target_write_capability (addr, cap);
+}
+
 /* Implement the maintenance print capability tag command.  */
 
 static void
@@ -2520,6 +2538,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				      aarch64_linux_report_signal_info);
       set_gdbarch_get_cap_tag_from_address (gdbarch,
 					    aarch64_linux_get_cap_tag_from_address);
+      set_gdbarch_set_cap_tag_from_address (gdbarch,
+					    aarch64_linux_set_cap_tag_from_address);
 
       add_cmd ("cap_from_addr", class_maintenance,
 	       maint_print_cap_from_addr_cmd,

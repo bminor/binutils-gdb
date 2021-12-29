@@ -1034,6 +1034,17 @@ Return the tag from a capability stored at address ADDR.
     invalid=False,
 )
 
+Method(
+    comment="""
+Set the tag from a capability stored at address ADDR to TAG.
+""",
+    type="void",
+    name="set_cap_tag_from_address",
+    params=[("CORE_ADDR", "addr"), ("bool", "tag")],
+    predefault="default_set_cap_tag_from_address",
+    invalid=False,
+)
+
 Function(
     comment="""
 Fetch the target specific address used to represent a load module.
@@ -2708,5 +2719,20 @@ The default is to always return false.
         ("int", "cookednum"),
     ],
     predefault="default_register_tag",
+    invalid=False,
+)
+
+Method(
+    comment="""
+Sets the register tag to TAG.
+""",
+    type="void",
+    name="register_set_tag",
+    params=[
+        ("regcache *", "regcache"),
+        ("int", "cookednum"),
+        ("bool", "tag"),
+    ],
+    predefault="default_register_set_tag",
     invalid=False,
 )

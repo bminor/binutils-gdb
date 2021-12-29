@@ -1268,9 +1268,9 @@ value_assign (struct value *toval, struct value *fromval)
 					   value_contents (fromval).data ());
 	      }
 	    else
-	      put_frame_register_bytes (frame, value_reg,
+	      put_frame_register_value (frame, value_reg,
 					value_offset (toval),
-					value_contents (fromval));
+					fromval);
 	  }
 
 	gdb::observers::register_changed.notify (frame, value_reg);
