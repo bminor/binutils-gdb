@@ -494,7 +494,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
       if (main_ui == ui)
 	{
 	  /* If stdin died, we may as well kill gdb.  */
-	  printf_unfiltered (_("error detected on stdin\n"));
+	  fprintf_unfiltered (gdb_stderr, _("error detected on stdin\n"));
 	  quit_command ((char *) 0, 0);
 	}
       else

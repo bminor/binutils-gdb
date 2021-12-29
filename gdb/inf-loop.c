@@ -85,7 +85,7 @@ inferior_event_handler (enum inferior_event_type event_type)
       break;
 
     default:
-      printf_unfiltered (_("Event type not recognized.\n"));
+      fprintf_unfiltered (gdb_stderr, _("Event type not recognized.\n"));
       break;
     }
 }
