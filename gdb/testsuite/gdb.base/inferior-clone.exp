@@ -34,7 +34,7 @@ with_test_prefix "setup inferior 1" {
 
 # Check that properties of inferior 1 have been copied
 with_test_prefix "inferior 2" {
-    gdb_test "clone-inferior" "Added inferior 2"
+    gdb_test "clone-inferior" "Added inferior 2.*"
     gdb_test "inferior 2" "\[Switching to inferior 2 \[<null>\] (.*)\]" "change inferior"
     gdb_test "show args" \
 	"Argument list to give program being debugged when it is started is \"foo bar 'b a z'\"\."
@@ -79,7 +79,7 @@ with_test_prefix "update inferior 1" {
 # Check that the values observed on inferior 3 are those copied from
 # inferior 1.
 with_test_prefix "inferior 3" {
-    gdb_test "clone-inferior" "Added inferior 3"
+    gdb_test "clone-inferior" "Added inferior 3.*"
     gdb_test "inferior 3" "\[Switching to inferior 3 \[<null>\] (.*)\]" "change inferior"
     gdb_test "show args" \
 	"Argument list to give program being debugged when it is started is \"foo bar 'b a z'\"\."
