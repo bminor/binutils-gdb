@@ -251,7 +251,7 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
 	  name = "Group";
 	else
 	  name = reggroup_name (group);
-	fprintf_unfiltered (file, " %-10s", name);
+	fprintf_filtered (file, " %-10s", name);
       }
       
       /* Group type.  */
@@ -274,13 +274,13 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
 		internal_error (__FILE__, __LINE__, _("bad switch"));
 	      }
 	  }
-	fprintf_unfiltered (file, " %-10s", type);
+	fprintf_filtered (file, " %-10s", type);
       }
 
       /* Note: If you change this, be sure to also update the
 	 documentation.  */
       
-      fprintf_unfiltered (file, "\n");
+      fprintf_filtered (file, "\n");
 
       group = reggroup_next (gdbarch, group);
     }
