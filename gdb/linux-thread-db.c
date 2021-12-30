@@ -940,21 +940,14 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   if (!libthread_db_search_path.empty () || libthread_db_debug)
     {
-      struct ui_file *file;
       const char *library;
 
       library = dladdr_to_soname ((const void *) *info->td_ta_new_p);
       if (library == NULL)
 	library = LIBTHREAD_DB_SO;
 
-      /* If we'd print this to gdb_stdout when debug output is
-	 disabled, still print it to gdb_stdout if debug output is
-	 enabled.  User visible output should not depend on debug
-	 settings.  */
-      file = !libthread_db_search_path.empty () ? gdb_stdout : gdb_stdlog;
-      fprintf_unfiltered (file,
-			  _("Using host libthread_db library \"%ps\".\n"),
-			  styled_string (file_name_style.style (), library));
+      printf_unfiltered (_("Using host libthread_db library \"%ps\".\n"),
+			 styled_string (file_name_style.style (), library));
     }
 
   /* The thread library was detected.  Activate the thread_db target
