@@ -181,10 +181,13 @@ struct value
       initialized (1),
       stack (0),
       is_zero (false),
-      tagged (0),
       type (type_),
       enclosing_type (type_)
   {
+    if (type_ != nullptr
+	&& (type_->code () == TYPE_CODE_CAPABILITY
+	    || TYPE_CAPABILITY (type_)))
+      tagged = 1;
   }
 
   ~value ()
@@ -348,7 +351,7 @@ struct value
   LONGEST pointed_to_offset = 0;
 
   /* The tag value, if tagged.  */
-  bool tag;
+  bool tag = false;
 
   /* Actual contents of the value.  Target byte-order.
 
@@ -3964,7 +3967,6 @@ value_fetch_lazy_memory (struct value *val)
 
   if (TYPE_CAPABILITY (type))
     {
-      set_value_tagged (val, true);
       bool tag = gdbarch_get_cap_tag_from_address (get_value_arch (val), addr);
       set_value_tag (val, tag);
     }
