@@ -243,7 +243,7 @@ cli_ui_out::do_wrap_hint (int indent)
   if (m_suppress_output)
     return;
 
-  wrap_here (indent);
+  m_streams.back ()->wrap_here (indent);
 }
 
 void

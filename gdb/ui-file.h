@@ -107,6 +107,23 @@ public:
     return false;
   }
 
+  /* Indicate that if the next sequence of characters overflows the
+     line, a newline should be inserted here rather than when it hits
+     the end.  If INDENT is non-zero, it is a number of spaces to be
+     printed to indent the wrapped part on the next line.
+
+     If the line is already overfull, we immediately print a newline and
+     the indentation, and disable further wrapping.
+
+     If we don't know the width of lines, but we know the page height,
+     we must not wrap words, but should still keep track of newlines
+     that were explicitly printed.
+
+     This routine is guaranteed to force out any output which has been
+     squirreled away in the wrap_buffer, so wrap_here (0) can be
+     used to force out output from the wrap_buffer.  */
+  void wrap_here (int indent);
+
 private:
 
   /* Helper function for putstr and putstrn.  Print the character C on

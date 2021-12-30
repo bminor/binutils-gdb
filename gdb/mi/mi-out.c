@@ -174,7 +174,7 @@ mi_ui_out::do_message (const ui_file_style &style,
 void
 mi_ui_out::do_wrap_hint (int indent)
 {
-  wrap_here (indent);
+  m_streams.back ()->wrap_here (indent);
 }
 
 void

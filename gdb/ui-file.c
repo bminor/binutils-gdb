@@ -131,6 +131,12 @@ ui_file::printchar (int c, int quoter, bool async_safe)
     this->write (buf, out);
 }
 
+void
+ui_file::wrap_here (int indent)
+{
+  ::wrap_here (indent);
+}
+
 
 
 void
