@@ -250,7 +250,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	      if (i > 0)
 		{
 		  fputs_filtered (", ", stream);
-		  wrap_here (4);
+		  stream->wrap_here (4);
 		}
 	      print_type (type->field (i).type (), "", stream, -1, 0, 0);
 	    }
@@ -290,7 +290,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 
   QUIT;
 
-  wrap_here (4);
+  stream->wrap_here (4);
   if (type == NULL)
     {
       fputs_styled ("<type unknown>", metadata_style.style (), stream);

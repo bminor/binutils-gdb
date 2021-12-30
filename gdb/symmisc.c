@@ -766,7 +766,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 		    if (! printed_objfile_start)
 		      {
 			printf_filtered ("{ objfile %s ", objfile_name (objfile));
-			wrap_here (2);
+			gdb_stdout->wrap_here (2);
 			printf_filtered ("((struct objfile *) %s)\n",
 					 host_address_to_string (objfile));
 			printed_objfile_start = 1;
@@ -816,7 +816,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 
 		    printf_filtered ("\t{ symtab %s ",
 				     symtab_to_filename_for_display (symtab));
-		    wrap_here (4);
+		    gdb_stdout->wrap_here (4);
 		    printf_filtered ("((struct symtab *) %s)\n",
 				     host_address_to_string (symtab));
 		    printf_filtered ("\t  fullname %s\n",
@@ -873,7 +873,7 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 		if (! printed_objfile_start)
 		  {
 		    printf_filtered ("{ objfile %s ", objfile_name (objfile));
-		    wrap_here (2);
+		    gdb_stdout->wrap_here (2);
 		    printf_filtered ("((struct objfile *) %s)\n",
 				     host_address_to_string (objfile));
 		    printed_objfile_start = 1;

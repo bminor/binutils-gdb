@@ -222,7 +222,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	    }
 	  else
 	    {
-	      wrap_here (2 + 2 * recurse);
+	      stream->wrap_here (2 + 2 * recurse);
 	    }
 
 	  annotate_field_begin (type->field (i).type ());

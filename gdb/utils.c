@@ -154,7 +154,7 @@ vwarning (const char *string, va_list args)
 	  target_terminal::ours_for_output ();
 	}
       if (filtered_printing_initialized ())
-	wrap_here (0);		/* Force out any buffered output.  */
+	gdb_stdout->wrap_here (0);	/* Force out any buffered output.  */
       gdb_flush (gdb_stdout);
       if (warning_pre_print)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
@@ -881,7 +881,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
     {
       target_terminal::scoped_restore_terminal_state term_state;
       target_terminal::ours_for_output ();
-      wrap_here (0);
+      gdb_stdout->wrap_here (0);
       vfprintf_filtered (gdb_stdout, ctlstr, args);
 
       printf_filtered (_("(%s or %s) [answered %c; "
@@ -1795,8 +1795,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
       if (*lineptr == '\n')
 	{
 	  chars_printed = 0;
-	  wrap_here (0);	/* Spit out chars, cancel
-				   further wraps.  */
+	  stream->wrap_here (0); /* Spit out chars, cancel
+				    further wraps.  */
 	  lines_printed++;
 	  /* XXX: The ideal thing would be to call
 	     'stream->putc' here, but we can't because it

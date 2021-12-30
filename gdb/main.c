@@ -1121,7 +1121,7 @@ captured_main_1 (struct captured_main_args *context)
   if (print_version)
     {
       print_gdb_version (gdb_stdout, false);
-      wrap_here (0);
+      gdb_stdout->wrap_here (0);
       printf_filtered ("\n");
       exit (0);
     }
@@ -1135,7 +1135,7 @@ captured_main_1 (struct captured_main_args *context)
   if (print_configuration)
     {
       print_gdb_configuration (gdb_stdout);
-      wrap_here (0);
+      gdb_stdout->wrap_here (0);
       printf_filtered ("\n");
       exit (0);
     }
@@ -1151,7 +1151,7 @@ captured_main_1 (struct captured_main_args *context)
       print_gdb_version (gdb_stdout, true);
       if (symarg)
 	printf_filtered ("..");
-      wrap_here (0);
+      gdb_stdout->wrap_here (0);
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);	/* Force to screen during slow
 				   operations.  */
@@ -1172,7 +1172,7 @@ captured_main_1 (struct captured_main_args *context)
       print_gdb_version (gdb_stdout, true);
       if (symarg)
 	printf_filtered ("..");
-      wrap_here (0);
+      gdb_stdout->wrap_here (0);
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);	/* Force to screen during slow
 				   operations.  */

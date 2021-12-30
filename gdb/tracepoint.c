@@ -2395,10 +2395,10 @@ tfind_line_command (const char *args, int from_tty)
 	  printf_filtered ("Line %d of \"%s\"",
 			   sal.line,
 			   symtab_to_filename_for_display (sal.symtab));
-	  wrap_here (2);
+	  gdb_stdout->wrap_here (2);
 	  printf_filtered (" is at address ");
 	  print_address (get_current_arch (), start_pc, gdb_stdout);
-	  wrap_here (2);
+	  gdb_stdout->wrap_here (2);
 	  printf_filtered (" but contains no code.\n");
 	  sal = find_pc_line (start_pc, 0);
 	  if (sal.line > 0

@@ -1422,11 +1422,11 @@ partial_symtab::expand_dependencies (struct objfile *objfile)
 	  if (info_verbose)
 	    {
 	      puts_filtered (" ");
-	      wrap_here (0);
+	      gdb_stdout->wrap_here (0);
 	      puts_filtered ("and ");
-	      wrap_here (0);
+	      gdb_stdout->wrap_here (0);
 	      printf_filtered ("%s...", dependencies[i]->filename);
-	      wrap_here (0);	/* Flush output */
+	      gdb_stdout->wrap_here (0);	/* Flush output */
 	      gdb_flush (gdb_stdout);
 	    }
 	  dependencies[i]->expand_psymtab (objfile);
@@ -1679,14 +1679,14 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 		    if (! printed_objfile_start)
 		      {
 			printf_filtered ("{ objfile %s ", objfile_name (objfile));
-			wrap_here (2);
+			gdb_stdout->wrap_here (2);
 			printf_filtered ("((struct objfile *) %s)\n",
 					 host_address_to_string (objfile));
 			printed_objfile_start = 1;
 		      }
 
 		    printf_filtered ("  { psymtab %s ", psymtab->filename);
-		    wrap_here (4);
+		    gdb_stdout->wrap_here (4);
 		    printf_filtered ("((struct partial_symtab *) %s)\n",
 				     host_address_to_string (psymtab));
 

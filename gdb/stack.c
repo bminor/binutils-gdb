@@ -1557,13 +1557,13 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   else
     fputs_styled ("<unavailable>", metadata_style.style (), gdb_stdout);
 
-  wrap_here (3);
+  gdb_stdout->wrap_here (3);
   if (funname)
     {
       printf_filtered (" in ");
       puts_filtered (funname);
     }
-  wrap_here (3);
+  gdb_stdout->wrap_here (3);
   if (sal.symtab)
     printf_filtered
       (" (%ps:%d)",
@@ -1571,7 +1571,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 		      symtab_to_filename_for_display (sal.symtab)),
        sal.line);
   puts_filtered ("; ");
-  wrap_here (4);
+  gdb_stdout->wrap_here (4);
   printf_filtered ("saved %s = ", pc_regname);
 
   if (!frame_id_p (frame_unwind_caller_id (fi)))
@@ -1627,7 +1627,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     }
   if (get_next_frame (fi) && calling_frame_info)
     puts_filtered (",");
-  wrap_here (3);
+  gdb_stdout->wrap_here (3);
   if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
@@ -1765,7 +1765,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 		puts_filtered (" Saved registers:\n ");
 	      else
 		puts_filtered (",");
-	      wrap_here (1);
+	      gdb_stdout->wrap_here (1);
 	      printf_filtered (" %s at ",
 			       gdbarch_register_name (gdbarch, i));
 	      puts_filtered (paddress (gdbarch, addr));

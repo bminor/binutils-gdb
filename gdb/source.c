@@ -1548,7 +1548,7 @@ info_line_command (const char *arg, int from_tty)
 		 user about a source line, at least let them have the symbolic
 		 address.  */
 	      printf_filtered (" for address ");
-	      wrap_here (2);
+	      gdb_stdout->wrap_here (2);
 	      print_address (gdbarch, sal.pc, gdb_stdout);
 	    }
 	  else
@@ -1565,10 +1565,10 @@ info_line_command (const char *arg, int from_tty)
 	      printf_filtered ("Line %d of \"%s\"",
 			       sal.line,
 			       symtab_to_filename_for_display (sal.symtab));
-	      wrap_here (2);
+	      gdb_stdout->wrap_here (2);
 	      printf_filtered (" is at address ");
 	      print_address (gdbarch, start_pc, gdb_stdout);
-	      wrap_here (2);
+	      gdb_stdout->wrap_here (2);
 	      printf_filtered (" but contains no code.\n");
 	    }
 	  else
@@ -1576,10 +1576,10 @@ info_line_command (const char *arg, int from_tty)
 	      printf_filtered ("Line %d of \"%s\"",
 			       sal.line,
 			       symtab_to_filename_for_display (sal.symtab));
-	      wrap_here (2);
+	      gdb_stdout->wrap_here (2);
 	      printf_filtered (" starts at address ");
 	      print_address (gdbarch, start_pc, gdb_stdout);
-	      wrap_here (2);
+	      gdb_stdout->wrap_here (2);
 	      printf_filtered (" and ends at ");
 	      print_address (gdbarch, end_pc, gdb_stdout);
 	      printf_filtered (".\n");

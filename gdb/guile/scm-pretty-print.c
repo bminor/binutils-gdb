@@ -861,7 +861,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  else
-	    wrap_here (2 + 2 *recurse);
+	    stream->wrap_here (2 + 2 *recurse);
 	}
 
       if (is_map && i % 2 == 0)
