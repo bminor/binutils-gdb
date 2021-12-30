@@ -1562,7 +1562,9 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
 	rps->error_handler
 	  (_("x ISA extension `%s' must be set with the versions"),
 	   subset);
-      else
+      /* Allow old ISA spec can recognize zicsr and zifencei.  */
+      else if (strcmp (subset, "zicsr") != 0
+	       && strcmp (subset, "zifencei") != 0)
 	rps->error_handler
 	  (_("cannot find default versions of the ISA extension `%s'"),
 	   subset);

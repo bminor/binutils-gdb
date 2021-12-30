@@ -1,4 +1,4 @@
-#as: -march=rv64i -mcsr-check -mpriv-spec=1.12
+#as: -march=rv64i_zicsr -mcsr-check -mpriv-spec=1.12
 #source: csr.s
 #warning_output: csr-version-1p12.l
 #objdump: -dr -Mpriv-spec=1.12

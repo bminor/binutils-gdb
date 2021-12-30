@@ -1,1 +1,1 @@
-	.attribute arch, "rv32i2p0"
+	.attribute arch, "rv32i2p1"
