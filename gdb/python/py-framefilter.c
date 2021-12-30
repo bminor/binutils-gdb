@@ -501,7 +501,7 @@ enumerate_args (PyObject *iter,
 	      if (arg.entry_kind != print_entry_values_only)
 		{
 		  out->text (", ");
-		  out->wrap_hint ("    ");
+		  out->wrap_hint (4);
 		}
 
 	      py_print_single_arg (out, NULL, &entryarg, NULL, &opts,
@@ -705,7 +705,7 @@ py_print_args (PyObject *filter,
 
   ui_out_emit_list list_emitter (out, "args");
 
-  out->wrap_hint ("   ");
+  out->wrap_hint (3);
   annotate_frame_args ();
   out->text (" (");
 
@@ -984,7 +984,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	      if (filename == NULL)
 		return EXT_LANG_BT_ERROR;
 
-	      out->wrap_hint ("   ");
+	      out->wrap_hint (3);
 	      out->text (" at ");
 	      annotate_frame_source_file ();
 	      out->field_string ("file", filename.get (),

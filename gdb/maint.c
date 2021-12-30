@@ -364,9 +364,9 @@ maint_print_all_sections (const char *header, bfd *abfd, objfile *objfile,
 			  const char *arg)
 {
   puts_filtered (header);
-  wrap_here ("        ");
+  wrap_here (8);
   printf_filtered ("`%s', ", bfd_get_filename (abfd));
-  wrap_here ("        ");
+  wrap_here (8);
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
 
   int section_count = gdb_bfd_count_sections (abfd);

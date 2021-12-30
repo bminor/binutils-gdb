@@ -5788,14 +5788,13 @@ bpstat_causes_stop (bpstat *bs)
 
 
 
-/* Compute a string of spaces suitable to indent the next line
+/* Compute a number of spaces suitable to indent the next line
    so it starts at the position corresponding to the table column
    named COL_NAME in the currently active table of UIOUT.  */
 
-static char *
+static int
 wrap_indent_at_field (struct ui_out *uiout, const char *col_name)
 {
-  static char wrap_indent[80];
   int i, total_width, width, align;
   const char *text;
 
@@ -5803,18 +5802,12 @@ wrap_indent_at_field (struct ui_out *uiout, const char *col_name)
   for (i = 1; uiout->query_table_field (i, &width, &align, &text); i++)
     {
       if (strcmp (text, col_name) == 0)
-	{
-	  gdb_assert (total_width < sizeof wrap_indent);
-	  memset (wrap_indent, ' ', total_width);
-	  wrap_indent[total_width] = 0;
-
-	  return wrap_indent;
-	}
+	return total_width;
 
       total_width += width + 1;
     }
 
-  return NULL;
+  return 0;
 }
 
 /* Determine if the locations of this breakpoint will have their conditions

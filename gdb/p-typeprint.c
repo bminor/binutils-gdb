@@ -287,7 +287,7 @@ pascal_language::print_func_args (struct type *type, struct ui_file *stream,
       if (i > 0)
 	{
 	  fputs_filtered (", ", stream);
-	  wrap_here ("    ");
+	  wrap_here (4);
 	}
       /*  Can we find if it is a var parameter ??
 	  if ( TYPE_FIELD(type, i) == )
@@ -419,7 +419,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
   section_type;
 
   QUIT;
-  wrap_here ("    ");
+  wrap_here (4);
   if (type == NULL)
     {
       fputs_styled ("<type unknown>", metadata_style.style (), stream);
@@ -487,7 +487,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
       fprintf_filtered (stream, "case <?> of ");
 
     struct_union:
-      wrap_here ("    ");
+      wrap_here (4);
       if (show < 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
@@ -692,7 +692,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
       /* enum is just defined by
 	 type enume_name = (enum_member1,enum_member2,...)  */
       fprintf_filtered (stream, " = ");
-      wrap_here ("    ");
+      wrap_here (4);
       if (show < 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
@@ -709,7 +709,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	      QUIT;
 	      if (i)
 		fprintf_filtered (stream, ", ");
-	      wrap_here ("    ");
+	      wrap_here (4);
 	      fputs_filtered (type->field (i).name (), stream);
 	      if (lastval != type->field (i).loc_enumval ())
 		{

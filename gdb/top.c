@@ -1364,7 +1364,7 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
       /* Make sure that all output has been output.  Some machines may
 	 let you get away with leaving out some of the gdb_flush, but
 	 not all.  */
-      wrap_here ("");
+      wrap_here (0);
       gdb_flush (gdb_stdout);
       gdb_flush (gdb_stderr);
 

@@ -178,7 +178,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 + 2 * recurse, stream);
 	}
-      wrap_here (n_spaces (2 + 2 * recurse));
+      wrap_here (2 + 2 * recurse);
       maybe_print_array_index (index_type, i + low, stream, options);
 
       i0 = i;
@@ -235,7 +235,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 		    {
 		      fprintf_filtered (stream, ", ");
 		    }
-		  wrap_here (n_spaces (2 + 2 * recurse));
+		  wrap_here (2 + 2 * recurse);
 		  maybe_print_array_index (index_type, j + low,
 					   stream, options);
 		}
@@ -614,7 +614,7 @@ print_field_values (struct value *value, struct value *outer_value,
 	}
       else
 	{
-	  wrap_here (n_spaces (2 + 2 * recurse));
+	  wrap_here (2 + 2 * recurse);
 	}
 
       annotate_field_begin (type->field (i).type ());

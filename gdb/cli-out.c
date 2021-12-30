@@ -238,12 +238,12 @@ cli_ui_out::do_message (const ui_file_style &style,
 }
 
 void
-cli_ui_out::do_wrap_hint (const char *identstring)
+cli_ui_out::do_wrap_hint (int indent)
 {
   if (m_suppress_output)
     return;
 
-  wrap_here (identstring);
+  wrap_here (indent);
 }
 
 void

@@ -257,7 +257,7 @@ class ui_out
   void vmessage (const ui_file_style &in_style,
 		 const char *format, va_list args) ATTRIBUTE_PRINTF (3, 0);
 
-  void wrap_hint (const char *identstring);
+  void wrap_hint (int indent);
 
   void flush ();
 
@@ -343,7 +343,7 @@ class ui_out
   virtual void do_message (const ui_file_style &style,
 			   const char *format, va_list args)
     ATTRIBUTE_PRINTF (3,0) = 0;
-  virtual void do_wrap_hint (const char *identstring) = 0;
+  virtual void do_wrap_hint (int indent) = 0;
   virtual void do_flush () = 0;
   virtual void do_redirect (struct ui_file *outstream) = 0;
 

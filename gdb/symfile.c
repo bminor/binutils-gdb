@@ -2607,9 +2607,9 @@ reread_symbols (int from_tty)
 
 	  if (!objfile_has_symbols (objfile))
 	    {
-	      wrap_here ("");
+	      wrap_here (0);
 	      printf_filtered (_("(no debugging symbols found)\n"));
-	      wrap_here ("");
+	      wrap_here (0);
 	    }
 
 	  /* We're done reading the symbol file; finish off complaints.  */

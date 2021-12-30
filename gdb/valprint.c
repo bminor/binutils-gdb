@@ -1946,7 +1946,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 + 2 * recurse, stream);
 	}
-      wrap_here (n_spaces (2 + 2 * recurse));
+      wrap_here (2 + 2 * recurse);
       maybe_print_array_index (index_type, i + low_bound,
 			       stream, options);
 

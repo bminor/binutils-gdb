@@ -52,7 +52,7 @@ print_flush (void)
 
   /* 1.  The _filtered buffer.  */
   if (filtered_printing_initialized ())
-    wrap_here ("");
+    wrap_here (0);
 
   /* 2.  The stdio buffer.  */
   gdb_flush (gdb_stdout);

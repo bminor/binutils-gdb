@@ -4380,7 +4380,7 @@ output_source_filename_data::output (const char *disp_name,
     m_uiout->text (", ");
   m_first = false;
 
-  wrap_here ("");
+  wrap_here (0);
   if (m_uiout->is_mi_like_p ())
     {
       m_uiout->field_string ("file", disp_name, file_name_style.style ());

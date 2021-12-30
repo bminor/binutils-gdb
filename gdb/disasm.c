@@ -1118,7 +1118,7 @@ The following disassembler options are supported for use with the\n\
 	    fprintf_filtered (file, "%s", valid_options->arg[i]->name);
 	  if (valid_options->name[i + 1] != NULL)
 	    fprintf_filtered (file, ", ");
-	  wrap_here ("  ");
+	  wrap_here (2);
 	}
       fprintf_filtered (file, "\n");
     }
@@ -1136,7 +1136,7 @@ The following disassembler options are supported for use with the\n\
 	  for (j = 0; valid_args[i].values[j] != NULL; j++)
 	    {
 	      fprintf_filtered (file, " %s", valid_args[i].values[j]);
-	      wrap_here ("   ");
+	      wrap_here (3);
 	    }
 	  fprintf_filtered (file, "\n");
 	}

@@ -875,7 +875,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	  /* Print the current arg.  */
 	  if (!first)
 	    uiout->text (", ");
-	  uiout->wrap_hint ("    ");
+	  uiout->wrap_hint (4);
 
 	  if (!print_args)
 	    {
@@ -895,7 +895,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	      if (arg.entry_kind != print_entry_values_only)
 		{
 		  uiout->text (", ");
-		  uiout->wrap_hint ("    ");
+		  uiout->wrap_hint (4);
 		}
 
 	      print_frame_arg (fp_opts, &entryarg);
@@ -1368,7 +1368,7 @@ print_frame (const frame_print_options &fp_opts,
     string_file stb;
     fputs_filtered (funname ? funname.get () : "??", &stb);
     uiout->field_stream ("func", stb, function_name_style.style ());
-    uiout->wrap_hint ("   ");
+    uiout->wrap_hint (3);
     annotate_frame_args ();
 
     uiout->text (" (");
@@ -1406,7 +1406,7 @@ print_frame (const frame_print_options &fp_opts,
       
 	filename_display = symtab_to_filename_for_display (sal.symtab);
 	annotate_frame_source_begin ();
-	uiout->wrap_hint ("   ");
+	uiout->wrap_hint (3);
 	uiout->text (" at ");
 	annotate_frame_source_file ();
 	uiout->field_string ("file", filename_display,
@@ -1433,7 +1433,7 @@ print_frame (const frame_print_options &fp_opts,
 	if (lib)
 	  {
 	    annotate_frame_where ();
-	    uiout->wrap_hint ("  ");
+	    uiout->wrap_hint (2);
 	    uiout->text (" from ");
 	    uiout->field_string ("from", lib, file_name_style.style ());
 	  }
@@ -1557,13 +1557,13 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   else
     fputs_styled ("<unavailable>", metadata_style.style (), gdb_stdout);
 
-  wrap_here ("   ");
+  wrap_here (3);
   if (funname)
     {
       printf_filtered (" in ");
       puts_filtered (funname);
     }
-  wrap_here ("   ");
+  wrap_here (3);
   if (sal.symtab)
     printf_filtered
       (" (%ps:%d)",
@@ -1571,7 +1571,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 		      symtab_to_filename_for_display (sal.symtab)),
        sal.line);
   puts_filtered ("; ");
-  wrap_here ("    ");
+  wrap_here (4);
   printf_filtered ("saved %s = ", pc_regname);
 
   if (!frame_id_p (frame_unwind_caller_id (fi)))
@@ -1627,7 +1627,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     }
   if (get_next_frame (fi) && calling_frame_info)
     puts_filtered (",");
-  wrap_here ("   ");
+  wrap_here (3);
   if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
@@ -1765,7 +1765,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 		puts_filtered (" Saved registers:\n ");
 	      else
 		puts_filtered (",");
-	      wrap_here (" ");
+	      wrap_here (1);
 	      printf_filtered (" %s at ",
 			       gdbarch_register_name (gdbarch, i));
 	      puts_filtered (paddress (gdbarch, addr));

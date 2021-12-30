@@ -909,7 +909,7 @@ print_section_info (const target_section_table *t, bfd *abfd)
   printf_filtered ("\t`%ps', ",
 		   styled_string (file_name_style.style (),
 				  bfd_get_filename (abfd)));
-  wrap_here ("        ");
+  wrap_here (8);
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
   if (abfd == current_program_space->exec_bfd ())
     {

@@ -2395,10 +2395,10 @@ tfind_line_command (const char *args, int from_tty)
 	  printf_filtered ("Line %d of \"%s\"",
 			   sal.line,
 			   symtab_to_filename_for_display (sal.symtab));
-	  wrap_here ("  ");
+	  wrap_here (2);
 	  printf_filtered (" is at address ");
 	  print_address (get_current_arch (), start_pc, gdb_stdout);
-	  wrap_here ("  ");
+	  wrap_here (2);
 	  printf_filtered (" but contains no code.\n");
 	  sal = find_pc_line (start_pc, 0);
 	  if (sal.line > 0
@@ -3660,8 +3660,6 @@ print_one_static_tracepoint_marker (int count,
 {
   struct symbol *sym;
 
-  char wrap_indent[80];
-  char extra_field_indent[80];
   struct ui_out *uiout = current_uiout;
 
   symtab_and_line sal;
@@ -3682,14 +3680,13 @@ print_one_static_tracepoint_marker (int count,
 		    !tracepoints.empty () ? 'y' : 'n');
   uiout->spaces (2);
 
-  strcpy (wrap_indent, "                                   ");
-
+  int wrap_indent = 35;
   if (gdbarch_addr_bit (marker.gdbarch) <= 32)
-    strcat (wrap_indent, "           ");
+    wrap_indent += 11;
   else
-    strcat (wrap_indent, "                   ");
+    wrap_indent += 19;
 
-  strcpy (extra_field_indent, "         ");
+  const char *extra_field_indent = "         ";
 
   uiout->field_core_addr ("addr", marker.gdbarch, marker.address);
 

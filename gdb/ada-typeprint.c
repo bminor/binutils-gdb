@@ -317,7 +317,7 @@ print_enum_type (struct type *type, struct ui_file *stream)
   LONGEST lastval;
 
   fprintf_filtered (stream, "(");
-  wrap_here (" ");
+  wrap_here (1);
 
   lastval = 0;
   for (i = 0; i < len; i++)
@@ -325,7 +325,7 @@ print_enum_type (struct type *type, struct ui_file *stream)
       QUIT;
       if (i)
 	fprintf_filtered (stream, ", ");
-      wrap_here ("    ");
+      wrap_here (4);
       fputs_styled (ada_enum_name (type->field (i).name ()),
 		    variable_name_style.style (), stream);
       if (lastval != type->field (i).loc_enumval ())
@@ -416,7 +416,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 
   elt_type = ada_array_element_type (type, n_indices);
   fprintf_filtered (stream, ") of ");
-  wrap_here ("");
+  wrap_here (0);
   ada_print_type (elt_type, "", stream, show == 0 ? 0 : show - 1, level + 1,
 		  flags);
   /* Arrays with variable-length elements are never bit-packed in practice but
@@ -892,7 +892,7 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 	  if (i > 0)
 	    {
 	      fputs_filtered ("; ", stream);
-	      wrap_here ("    ");
+	      wrap_here (4);
 	    }
 	  fprintf_filtered (stream, "a%d: ", i + 1);
 	  ada_print_type (type->field (i).type (), "", stream, -1, 0,
