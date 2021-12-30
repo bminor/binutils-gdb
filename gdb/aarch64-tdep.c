@@ -2086,7 +2086,8 @@ pass_in_c (struct gdbarch *gdbarch, struct regcache *regcache,
       /* Write the argument to the capability register.  */
       regcache->raw_write (regnum, tmpbuf);
 
-      if (type->contains_capability ())
+      if (type->contains_capability () || type->code () == TYPE_CODE_CAPABILITY
+	  || TYPE_CAPABILITY (type))
 	{
 	  /* We need to read the tags from memory.  */
 	  gdb::byte_vector cap = target_read_capability (address);
