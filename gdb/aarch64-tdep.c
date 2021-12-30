@@ -2025,15 +2025,37 @@ struct aarch64_call_info
   std::vector<stack_item_t> si;
 };
 
+/* Helper function. Returns true if REGNUM is a tagged register, otherwise
+   returns false.  */
+
+static bool
+morello_is_tagged_register (struct gdbarch *gdbarch, int regnum)
+{
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  /* Only Morello's registers have tags.  */
+  if (!tdep->has_capability ())
+    return false;
+
+  /* The last two registers of the C register set don't have tags.  */
+  if (regnum < tdep->cap_reg_base ||
+      regnum > tdep->cap_reg_last - 2)
+    return false;
+
+  return true;
+}
+
 /* Implementation of the gdbarch_register_set_tag hook.  */
 
 static void
 aarch64_register_set_tag (struct gdbarch *gdbarch, struct regcache *regcache,
 			  int regnum, bool tag)
 {
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  if (!morello_is_tagged_register (gdbarch, regnum))
+    return;
 
   CORE_ADDR tag_map = 0;
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   /* Read the tag register, adjust and write back.  */
   regcache->cooked_read (tdep->cap_reg_last - 1, (gdb_byte *) &tag_map);
@@ -5297,15 +5319,7 @@ aarch64_register_has_tag (struct gdbarch *gdbarch,
   if (aarch64_debug)
     debug_printf ("%s: Entering\n", __func__);
 
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-
-  /* Only Morello's registers have tags.  */
-  if (!tdep->has_capability ())
-    return false;
-
-  /* The last two registers of the C register set don't have tags.  */
-  if (regnum < tdep->cap_reg_base ||
-      regnum > tdep->cap_reg_last - 2)
+  if (!morello_is_tagged_register (gdbarch, regnum))
     return false;
 
   if (aarch64_debug)
@@ -5324,16 +5338,10 @@ aarch64_register_tag (struct gdbarch *gdbarch,
   if (aarch64_debug)
     debug_printf ("%s: Entering\n", __func__);
 
+  if (!morello_is_tagged_register (gdbarch, regnum))
+    return false;
+
   aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-
-  /* Only Morello's registers have tags.  */
-  if (!tdep->has_capability ())
-    return false;
-
-  /* The last two registers of the C register set don't have tags.  */
-  if (regnum < tdep->cap_reg_base ||
-      regnum > tdep->cap_reg_last - 2)
-    return false;
 
   /* The CSP/PCC tags are swapped in the tag_map because the ordering of CSP/PCC
      in struct user_morello_state is different from GDB's register description.
