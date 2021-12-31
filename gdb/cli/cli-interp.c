@@ -413,31 +413,19 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       saved_output.log = gdb_stdlog;
       saved_output.targ = gdb_stdtarg;
       saved_output.targerr = gdb_stdtargerr;
-
-      /* If something is being redirected, then grab logfile.  */
-      ui_file *logfile_p = nullptr;
-      if (logging_redirect || debug_redirect)
-	{
-	  logfile_p = logfile.get ();
-	  saved_output.file_to_delete = logfile_p;
-	}
+      gdb_assert (saved_output.file_to_delete == nullptr);
 
       /* If something is not being redirected, then a tee containing both the
 	 logfile and stdout.  */
+      ui_file *logfile_p = logfile.get ();
       ui_file *tee = nullptr;
       if (!logging_redirect || !debug_redirect)
 	{
 	  tee = new tee_file (gdb_stdout, std::move (logfile));
 	  saved_output.file_to_delete = tee;
 	}
-
-      /* Make sure that the call to logfile's dtor does not delete the
-         underlying pointer if we still keep a reference to it.  If
-         logfile_p is not referenced as the file_to_delete, then either
-         the logfile is not used (no redirection) and it should be
-         deleted, or a tee took ownership of the pointer. */
-      if (logfile_p != nullptr && saved_output.file_to_delete == logfile_p)
-	logfile.release ();
+      else
+	saved_output.file_to_delete = logfile.release ();
 
       gdb_stdout = logging_redirect ? logfile_p : tee;
       gdb_stdlog = debug_redirect ? logfile_p : tee;
