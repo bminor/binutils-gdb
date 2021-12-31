@@ -396,9 +396,9 @@ struct saved_output_files
   ui_file *log;
   ui_file *targ;
   ui_file *targerr;
-  ui_file *file_to_delete;
+  ui_file_up file_to_delete;
 };
-static saved_output_files saved_output;
+static std::unique_ptr<saved_output_files> saved_output;
 
 /* See cli-interp.h.  */
 
@@ -408,12 +408,12 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
 {
   if (logfile != nullptr)
     {
-      saved_output.out = gdb_stdout;
-      saved_output.err = gdb_stderr;
-      saved_output.log = gdb_stdlog;
-      saved_output.targ = gdb_stdtarg;
-      saved_output.targerr = gdb_stdtargerr;
-      gdb_assert (saved_output.file_to_delete == nullptr);
+      saved_output.reset (new saved_output_files);
+      saved_output->out = gdb_stdout;
+      saved_output->err = gdb_stderr;
+      saved_output->log = gdb_stdlog;
+      saved_output->targ = gdb_stdtarg;
+      saved_output->targerr = gdb_stdtargerr;
 
       /* If something is not being redirected, then a tee containing both the
 	 logfile and stdout.  */
@@ -422,10 +422,10 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       if (!logging_redirect || !debug_redirect)
 	{
 	  tee = new tee_file (gdb_stdout, std::move (logfile));
-	  saved_output.file_to_delete = tee;
+	  saved_output->file_to_delete.reset (tee);
 	}
       else
-	saved_output.file_to_delete = logfile.release ();
+	saved_output->file_to_delete = std::move (logfile);
 
       gdb_stdout = logging_redirect ? logfile_p : tee;
       gdb_stdlog = debug_redirect ? logfile_p : tee;
@@ -435,22 +435,13 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
     }
   else
     {
-      /* Delete the correct file.  If it's the tee then the logfile will also
-	 be deleted.  */
-      delete saved_output.file_to_delete;
+      gdb_stdout = saved_output->out;
+      gdb_stderr = saved_output->err;
+      gdb_stdlog = saved_output->log;
+      gdb_stdtarg = saved_output->targ;
+      gdb_stdtargerr = saved_output->targerr;
 
-      gdb_stdout = saved_output.out;
-      gdb_stderr = saved_output.err;
-      gdb_stdlog = saved_output.log;
-      gdb_stdtarg = saved_output.targ;
-      gdb_stdtargerr = saved_output.targerr;
-
-      saved_output.out = nullptr;
-      saved_output.err = nullptr;
-      saved_output.log = nullptr;
-      saved_output.targ = nullptr;
-      saved_output.targerr = nullptr;
-      saved_output.file_to_delete = nullptr;
+      saved_output.reset (nullptr);
     }
 }
 
