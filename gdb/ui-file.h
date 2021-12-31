@@ -124,6 +124,14 @@ public:
      used to force out output from the wrap_buffer.  */
   void wrap_here (int indent);
 
+  /* Print STR, bypassing any paging that might be done by this
+     ui_file.  Note that nearly no code should call this -- it's
+     intended for use by printf_filtered, but nothing else.  */
+  virtual void puts_unfiltered (const char *str)
+  {
+    this->puts (str);
+  }
+
 private:
 
   /* Helper function for putstr and putstrn.  Print the character C on
@@ -340,6 +348,12 @@ public:
     /* If one of the underlying files can page, then we allow it
        here.  */
     return m_one->can_page () || m_two->can_page ();
+  }
+
+  void puts_unfiltered (const char *str) override
+  {
+    m_one->puts_unfiltered (str);
+    m_two->puts_unfiltered (str);
   }
 
 private:

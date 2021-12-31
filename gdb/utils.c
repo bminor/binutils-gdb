@@ -2025,7 +2025,9 @@ printf_unfiltered (const char *format, ...)
   va_list args;
 
   va_start (args, format);
-  vfprintf_unfiltered (gdb_stdout, format, args);
+  string_file file (gdb_stdout->can_emit_style_escape ());
+  file.vprintf (format, args);
+  gdb_stdout->puts_unfiltered (file.string ().c_str ());
   va_end (args);
 }
 
