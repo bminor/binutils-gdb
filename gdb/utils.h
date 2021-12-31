@@ -185,6 +185,9 @@ extern int get_chars_per_line ();
 
 extern bool pagination_enabled;
 
+/* A flag indicating whether to timestamp debugging messages.  */
+extern bool debug_timestamp;
+
 extern struct ui_file **current_ui_gdb_stdout_ptr (void);
 extern struct ui_file **current_ui_gdb_stdin_ptr (void);
 extern struct ui_file **current_ui_gdb_stderr_ptr (void);

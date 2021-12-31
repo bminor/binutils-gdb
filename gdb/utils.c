@@ -103,7 +103,7 @@ static std::chrono::steady_clock::duration prompt_for_continue_wait_time;
 
 /* A flag indicating whether to timestamp debugging messages.  */
 
-static bool debug_timestamp = false;
+bool debug_timestamp = false;
 
 /* True means that strings with character values >0x7F should be printed
    as octal escapes.  False means just print the value (e.g. it's an

@@ -364,4 +364,28 @@ public:
   void puts (const char *linebuffer) override;
 };
 
+/* A ui_file that optionally puts a timestamp at the start of each
+   line of output.  */
+
+class timestamped_file : public ui_file
+{
+public:
+  explicit timestamped_file (ui_file *stream)
+    : m_stream (stream)
+  {
+  }
+
+  DISABLE_COPY_AND_ASSIGN (timestamped_file);
+
+  void write (const char *buf, long len) override;
+
+private:
+
+  /* Output is sent here.  */
+  ui_file *m_stream;
+
+  /* True if the next output should be timestamped.  */
+  bool m_needs_timestamp = true;
+};
+
 #endif

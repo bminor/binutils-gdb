@@ -25,6 +25,7 @@
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/filestuff.h"
 #include "cli/cli-style.h"
+#include <chrono>
 
 null_file null_stream;
 
@@ -448,4 +449,32 @@ no_terminal_escape_file::puts (const char *buf)
 
   if (*buf != '\0')
     this->stdio_file::write (buf, strlen (buf));
+}
+
+void
+timestamped_file::write (const char *buf, long len)
+{
+  if (debug_timestamp)
+    {
+      /* Print timestamp if previous print ended with a \n.  */
+      if (m_needs_timestamp)
+	{
+	  using namespace std::chrono;
+
+	  steady_clock::time_point now = steady_clock::now ();
+	  seconds s = duration_cast<seconds> (now.time_since_epoch ());
+	  microseconds us = duration_cast<microseconds> (now.time_since_epoch () - s);
+	  std::string timestamp = string_printf ("%ld.%06ld ",
+						 (long) s.count (),
+						 (long) us.count ());
+	  m_stream->puts (timestamp.c_str ());
+	}
+
+      /* Print the message.  */
+      m_stream->write (buf, len);
+
+      m_needs_timestamp = (len > 0 && buf[len - 1] == '\n');
+    }
+  else
+    m_stream->write (buf, len);
 }
