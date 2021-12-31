@@ -615,6 +615,10 @@ struct elf_x86_plt
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == (htab)->elf.hash_table_id)
 
+/* Rename some of the generic section flags to better document how they
+   are used here.  */
+#define check_relocs_failed	sec_flg0
+
 extern bool _bfd_x86_elf_mkobject
   (bfd *);
 

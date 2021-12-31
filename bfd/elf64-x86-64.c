@@ -1377,10 +1377,6 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
   return true;
 }
 
-/* Rename some of the generic section flags to better document how they
-   are used here.  */
-#define check_relocs_failed	sec_flg0
-
 static bool
 elf_x86_64_need_pic (struct bfd_link_info *info,
 		     bfd *input_bfd, asection *sec,

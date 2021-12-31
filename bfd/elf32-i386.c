@@ -1451,10 +1451,6 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   return true;
 }
 
-/* Rename some of the generic section flags to better document how they
-   are used here.  */
-#define check_relocs_failed	sec_flg0
-
 /* Look through the relocs for a section during the first phase, and
    calculate needed space in the global offset table, procedure linkage
    table, and dynamic reloc sections.  */
