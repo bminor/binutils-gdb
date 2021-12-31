@@ -1587,13 +1587,13 @@ puts_filtered_tabular (char *string, int width, int right)
   gdb_assert (chars_per_line > 0);
   if (chars_per_line == UINT_MAX)
     {
-      fputs_filtered (string, gdb_stdout);
-      fputs_filtered ("\n", gdb_stdout);
+      puts_filtered (string);
+      puts_filtered ("\n");
       return;
     }
 
   if (((chars_printed - 1) / width + 2) * width >= chars_per_line)
-    fputs_filtered ("\n", gdb_stdout);
+    puts_filtered ("\n");
 
   if (width >= chars_per_line)
     width = chars_per_line - 1;
@@ -1610,8 +1610,8 @@ puts_filtered_tabular (char *string, int width, int right)
   while (spaces--)
     spacebuf[spaces] = ' ';
 
-  fputs_filtered (spacebuf, gdb_stdout);
-  fputs_filtered (string, gdb_stdout);
+  puts_filtered (spacebuf);
+  puts_filtered (string);
 }
 
 

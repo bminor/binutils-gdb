@@ -554,7 +554,7 @@ whatis_exp (const char *exp, int show)
   if (flags.print_offsets
       && (type->code () == TYPE_CODE_STRUCT
 	  || type->code () == TYPE_CODE_UNION))
-    fprintf_filtered (gdb_stdout, "/* offset      |    size */  ");
+    printf_filtered ("/* offset      |    size */  ");
 
   printf_filtered ("type = ");
 

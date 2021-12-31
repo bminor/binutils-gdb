@@ -37,9 +37,8 @@ static unsigned int nr_failed_invariants;
 static void
 broken_doc_invariant (const char *prefix, const char *name, const char *msg)
 {
-  fprintf_filtered (gdb_stdout,
-		    "help doc broken invariant: command '%s%s' help doc %s\n",
-		    prefix, name, msg);
+  printf_filtered ("help doc broken invariant: command '%s%s' help doc %s\n",
+		   prefix, name, msg);
   nr_failed_invariants++;
 }
 
@@ -130,13 +129,12 @@ traverse_command_structure (struct cmd_list_element **list,
   auto dupl = lists.find (list);
   if (dupl != lists.end ())
     {
-      fprintf_filtered (gdb_stdout,
-			"list %p duplicated,"
-			" reachable via prefix '%s' and '%s'."
-			"  Duplicated list first command is '%s'\n",
-			list,
-			prefix, dupl->second,
-			(*list)->name);
+      printf_filtered ("list %p duplicated,"
+		       " reachable via prefix '%s' and '%s'."
+		       "  Duplicated list first command is '%s'\n",
+		       list,
+		       prefix, dupl->second,
+		       (*list)->name);
       nr_duplicates++;
       return;
     }
@@ -165,17 +163,15 @@ traverse_command_structure (struct cmd_list_element **list,
 	  || (prefixcmd == nullptr && *list != cmdlist))
 	{
 	  if (c->prefix == nullptr)
-	    fprintf_filtered (gdb_stdout,
-			      "list %p reachable via prefix '%s'."
-			      "  command '%s' has null prefixcmd\n",
-			      list,
-			      prefix, c->name);
+	    printf_filtered ("list %p reachable via prefix '%s'."
+			     "  command '%s' has null prefixcmd\n",
+			     list,
+			     prefix, c->name);
 	  else
-	    fprintf_filtered (gdb_stdout,
-			      "list %p reachable via prefix '%s'."
-			      "  command '%s' has a different prefixcmd\n",
-			      list,
-			      prefix, c->name);
+	    printf_filtered ("list %p reachable via prefix '%s'."
+			     "  command '%s' has a different prefixcmd\n",
+			     list,
+			     prefix, c->name);
 	  nr_invalid_prefixcmd++;
 	}
     }

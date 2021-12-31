@@ -140,9 +140,8 @@ gcore_command (const char *args, int from_tty)
     }
 
   if (info_verbose)
-    fprintf_filtered (gdb_stdout,
-		      "Opening corefile '%s' for output.\n",
-		      corefilename.get ());
+    printf_filtered ("Opening corefile '%s' for output.\n",
+		     corefilename.get ());
 
   if (target_supports_dumpcore ())
     target_dumpcore (corefilename.get ());
@@ -161,7 +160,7 @@ gcore_command (const char *args, int from_tty)
       unlink_file.keep ();
     }
 
-  fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename.get ());
+  printf_filtered ("Saved corefile %s\n", corefilename.get ());
 }
 
 static enum bfd_architecture
@@ -385,8 +384,8 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
     {
       if (info_verbose)
 	{
-	  fprintf_filtered (gdb_stdout, "Ignore segment, %s bytes at %s\n",
-			    plongest (size), paddress (target_gdbarch (), vaddr));
+	  printf_filtered ("Ignore segment, %s bytes at %s\n",
+			   plongest (size), paddress (target_gdbarch (), vaddr));
 	}
 
       return 0;
@@ -445,8 +444,8 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
 
   if (info_verbose)
     {
-      fprintf_filtered (gdb_stdout, "Save segment, %s bytes at %s\n",
-			plongest (size), paddress (target_gdbarch (), vaddr));
+      printf_filtered ("Save segment, %s bytes at %s\n",
+		       plongest (size), paddress (target_gdbarch (), vaddr));
     }
 
   bfd_set_section_size (osec, size);

@@ -8255,10 +8255,9 @@ handle_automatic_hardware_breakpoints (bp_location *bl)
 	      bl->loc_type = new_type;
 	      if (!said)
 		{
-		  fprintf_filtered (gdb_stdout,
-				    _("Note: automatically using "
-				      "hardware breakpoints for "
-				      "read-only addresses.\n"));
+		  printf_filtered (_("Note: automatically using "
+				     "hardware breakpoints for "
+				     "read-only addresses.\n"));
 		  said = true;
 		}
 	    }

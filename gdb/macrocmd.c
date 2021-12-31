@@ -63,9 +63,9 @@ macro_expand_command (const char *exp, int from_tty)
     {
       gdb::unique_xmalloc_ptr<char> expanded = macro_expand (exp, *ms);
 
-      fputs_filtered ("expands to: ", gdb_stdout);
-      fputs_filtered (expanded.get (), gdb_stdout);
-      fputs_filtered ("\n", gdb_stdout);
+      puts_filtered ("expands to: ");
+      puts_filtered (expanded.get ());
+      puts_filtered ("\n");
     }
   else
     macro_inform_no_debuginfo ();
@@ -91,9 +91,9 @@ macro_expand_once_command (const char *exp, int from_tty)
     {
       gdb::unique_xmalloc_ptr<char> expanded = macro_expand_once (exp, *ms);
 
-      fputs_filtered ("expands to: ", gdb_stdout);
-      fputs_filtered (expanded.get (), gdb_stdout);
-      fputs_filtered ("\n", gdb_stdout);
+      puts_filtered ("expands to: ");
+      puts_filtered (expanded.get ());
+      puts_filtered ("\n");
     }
   else
     macro_inform_no_debuginfo ();
@@ -137,32 +137,32 @@ print_macro_definition (const char *name,
 			struct macro_source_file *file,
 			int line)
 {
-  fprintf_filtered (gdb_stdout, "Defined at ");
+  printf_filtered ("Defined at ");
   show_pp_source_pos (gdb_stdout, file, line);
 
   if (line != 0)
-    fprintf_filtered (gdb_stdout, "#define %s", name);
+    printf_filtered ("#define %s", name);
   else
-    fprintf_filtered (gdb_stdout, "-D%s", name);
+    printf_filtered ("-D%s", name);
 
   if (d->kind == macro_function_like)
     {
       int i;
 
-      fputs_filtered ("(", gdb_stdout);
+      puts_filtered ("(");
       for (i = 0; i < d->argc; i++)
 	{
-	  fputs_filtered (d->argv[i], gdb_stdout);
+	  puts_filtered (d->argv[i]);
 	  if (i + 1 < d->argc)
-	    fputs_filtered (", ", gdb_stdout);
+	    puts_filtered (", ");
 	}
-      fputs_filtered (")", gdb_stdout);
+      puts_filtered (")");
     }
 
   if (line != 0)
-    fprintf_filtered (gdb_stdout, " %s\n", d->replacement);
+    printf_filtered (" %s\n", d->replacement);
   else
-    fprintf_filtered (gdb_stdout, "=%s\n", d->replacement);
+    printf_filtered ("=%s\n", d->replacement);
 }
 
 /* The implementation of the `info macro' command.  */
@@ -229,10 +229,9 @@ info_macro_command (const char *args, int from_tty)
 	}
       else
 	{
-	  fprintf_filtered (gdb_stdout,
-			    "The symbol `%s' has no definition as a C/C++"
-			    " preprocessor macro\n"
-			    "at ", name);
+	  printf_filtered ("The symbol `%s' has no definition as a C/C++"
+			   " preprocessor macro\n"
+			   "at ", name);
 	  show_pp_source_pos (gdb_stdout, ms->file, ms->line);
 	}
     }
@@ -424,18 +423,18 @@ static void
 print_one_macro (const char *name, const struct macro_definition *macro,
 		 struct macro_source_file *source, int line)
 {
-  fprintf_filtered (gdb_stdout, "macro define %s", name);
+  printf_filtered ("macro define %s", name);
   if (macro->kind == macro_function_like)
     {
       int i;
 
-      fprintf_filtered (gdb_stdout, "(");
+      printf_filtered ("(");
       for (i = 0; i < macro->argc; ++i)
-	fprintf_filtered (gdb_stdout, "%s%s", (i > 0) ? ", " : "",
-			  macro->argv[i]);
-      fprintf_filtered (gdb_stdout, ")");
+	printf_filtered ("%s%s", (i > 0) ? ", " : "",
+			 macro->argv[i]);
+      printf_filtered (")");
     }
-  fprintf_filtered (gdb_stdout, " %s\n", macro->replacement);
+  printf_filtered (" %s\n", macro->replacement);
 }
 
 

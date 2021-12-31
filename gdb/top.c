@@ -873,7 +873,7 @@ gdb_readline_no_editing (const char *prompt)
       /* Don't use a _filtered function here.  It causes the assumed
 	 character position to be off, since the newline we read from
 	 the user is not accounted for.  */
-      fputs_unfiltered (prompt, gdb_stdout);
+      puts_unfiltered (prompt);
       gdb_flush (gdb_stdout);
     }
 

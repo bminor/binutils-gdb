@@ -427,7 +427,7 @@ display_gdb_prompt (const char *new_prompt)
       /* Don't use a _filtered function here.  It causes the assumed
 	 character position to be off, since the newline we read from
 	 the user is not accounted for.  */
-      fprintf_unfiltered (gdb_stdout, "%s", actual_gdb_prompt.c_str ());
+      printf_unfiltered ("%s", actual_gdb_prompt.c_str ());
       gdb_flush (gdb_stdout);
     }
 }

@@ -2567,8 +2567,8 @@ info_scope_command (const char *args_in, int from_tty)
 		  printf_filtered ("constant bytes: ");
 		  if (SYMBOL_TYPE (sym))
 		    for (j = 0; j < TYPE_LENGTH (SYMBOL_TYPE (sym)); j++)
-		      fprintf_filtered (gdb_stdout, " %02x",
-					(unsigned) SYMBOL_VALUE_BYTES (sym)[j]);
+		      printf_filtered (" %02x",
+				       (unsigned) SYMBOL_VALUE_BYTES (sym)[j]);
 		  break;
 		case LOC_STATIC:
 		  printf_filtered ("in static storage at address ");

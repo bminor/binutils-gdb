@@ -1549,11 +1549,11 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     {
       printf_filtered (_("Stack frame at "));
     }
-  fputs_filtered (paddress (gdbarch, get_frame_base (fi)), gdb_stdout);
+  puts_filtered (paddress (gdbarch, get_frame_base (fi)));
   printf_filtered (":\n");
   printf_filtered (" %s = ", pc_regname);
   if (frame_pc_p)
-    fputs_filtered (paddress (gdbarch, get_frame_pc (fi)), gdb_stdout);
+    puts_filtered (paddress (gdbarch, get_frame_pc (fi)));
   else
     fputs_styled ("<unavailable>", metadata_style.style (), gdb_stdout);
 
@@ -1561,7 +1561,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   if (funname)
     {
       printf_filtered (" in ");
-      fputs_filtered (funname, gdb_stdout);
+      puts_filtered (funname);
     }
   wrap_here ("   ");
   if (sal.symtab)
@@ -1603,7 +1603,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     }
 
   if (caller_pc_p)
-    fputs_filtered (paddress (gdbarch, caller_pc), gdb_stdout);
+    puts_filtered (paddress (gdbarch, caller_pc));
   printf_filtered ("\n");
 
   if (calling_frame_info == NULL)
@@ -1623,8 +1623,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   else
     {
       printf_filtered (" called by frame at ");
-      fputs_filtered (paddress (gdbarch, get_frame_base (calling_frame_info)),
-		      gdb_stdout);
+      puts_filtered (paddress (gdbarch, get_frame_base (calling_frame_info)));
     }
   if (get_next_frame (fi) && calling_frame_info)
     puts_filtered (",");
@@ -1632,8 +1631,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
-      fputs_filtered (paddress (gdbarch, get_frame_base (get_next_frame (fi))),
-		      gdb_stdout);
+      puts_filtered (paddress (gdbarch, get_frame_base (get_next_frame (fi))));
     }
   if (get_next_frame (fi) || calling_frame_info)
     puts_filtered ("\n");
@@ -1653,7 +1651,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     else
       {
 	printf_filtered (" Arglist at ");
-	fputs_filtered (paddress (gdbarch, arg_list), gdb_stdout);
+	puts_filtered (paddress (gdbarch, arg_list));
 	printf_filtered (",");
 
 	if (!gdbarch_frame_num_args_p (gdbarch))
@@ -1686,7 +1684,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     else
       {
 	printf_filtered (" Locals at ");
-	fputs_filtered (paddress (gdbarch, arg_list), gdb_stdout);
+	puts_filtered (paddress (gdbarch, arg_list));
 	printf_filtered (",");
       }
   }
@@ -1721,14 +1719,13 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 		  (value_contents_all (value).data (), sp_size, byte_order);
 
 		printf_filtered (" Previous frame's sp is ");
-		fputs_filtered (paddress (gdbarch, sp), gdb_stdout);
+		puts_filtered (paddress (gdbarch, sp));
 		printf_filtered ("\n");
 	      }
 	    else if (VALUE_LVAL (value) == lval_memory)
 	      {
 		printf_filtered (" Previous frame's sp at ");
-		fputs_filtered (paddress (gdbarch, value_address (value)),
-				gdb_stdout);
+		puts_filtered (paddress (gdbarch, value_address (value)));
 		printf_filtered ("\n");
 	      }
 	    else if (VALUE_LVAL (value) == lval_register)
@@ -1771,7 +1768,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 	      wrap_here (" ");
 	      printf_filtered (" %s at ",
 			       gdbarch_register_name (gdbarch, i));
-	      fputs_filtered (paddress (gdbarch, addr), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, addr));
 	      count++;
 	    }
 	}

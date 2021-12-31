@@ -1421,9 +1421,9 @@ partial_symtab::expand_dependencies (struct objfile *objfile)
 	  /* Inform about additional files to be read in.  */
 	  if (info_verbose)
 	    {
-	      fputs_filtered (" ", gdb_stdout);
+	      puts_filtered (" ");
 	      wrap_here ("");
-	      fputs_filtered ("and ", gdb_stdout);
+	      puts_filtered ("and ");
 	      wrap_here ("");
 	      printf_filtered ("%s...", dependencies[i]->filename);
 	      wrap_here ("");	/* Flush output */
@@ -1696,13 +1696,11 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 				     psymtab->fullname
 				     ? psymtab->fullname : "(null)");
 		    printf_filtered ("    text addresses ");
-		    fputs_filtered (paddress (gdbarch,
-					      psymtab->text_low (objfile)),
-				    gdb_stdout);
+		    puts_filtered (paddress (gdbarch,
+					     psymtab->text_low (objfile)));
 		    printf_filtered (" -- ");
-		    fputs_filtered (paddress (gdbarch,
-					      psymtab->text_high (objfile)),
-				    gdb_stdout);
+		    puts_filtered (paddress (gdbarch,
+					     psymtab->text_high (objfile)));
 		    printf_filtered ("\n");
 		    printf_filtered ("    psymtabs_addrmap_supported %s\n",
 				     (psymtab->psymtabs_addrmap_supported
@@ -1793,11 +1791,9 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		  printf_filtered ("Psymtab ");
 		  puts_filtered (ps->filename);
 		  printf_filtered (" covers bad range ");
-		  fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
-				  gdb_stdout);
+		  puts_filtered (paddress (gdbarch, ps->text_low (objfile)));
 		  printf_filtered (" - ");
-		  fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
-				  gdb_stdout);
+		  puts_filtered (paddress (gdbarch, ps->text_high (objfile)));
 		  printf_filtered ("\n");
 		  continue;
 		}
@@ -1849,15 +1845,13 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		  printf_filtered ("Psymtab ");
 		  puts_filtered (ps->filename);
 		  printf_filtered (" covers ");
-		  fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
-				  gdb_stdout);
+		  puts_filtered (paddress (gdbarch, ps->text_low (objfile)));
 		  printf_filtered (" - ");
-		  fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
-				  gdb_stdout);
+		  puts_filtered (paddress (gdbarch, ps->text_high (objfile)));
 		  printf_filtered (" but symtab covers only ");
-		  fputs_filtered (paddress (gdbarch, BLOCK_START (b)), gdb_stdout);
+		  puts_filtered (paddress (gdbarch, BLOCK_START (b)));
 		  printf_filtered (" - ");
-		  fputs_filtered (paddress (gdbarch, BLOCK_END (b)), gdb_stdout);
+		  puts_filtered (paddress (gdbarch, BLOCK_END (b)));
 		  printf_filtered ("\n");
 		}
 	    }

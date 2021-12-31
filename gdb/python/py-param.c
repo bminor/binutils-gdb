@@ -414,7 +414,7 @@ get_set_value (const char *args, int from_tty,
 
   const char *str = set_doc_string.get ();
   if (str != nullptr && str[0] != '\0')
-    fprintf_filtered (gdb_stdout, "%s\n", str);
+    printf_filtered ("%s\n", str);
 }
 
 /* A callback function that is registered against the respective

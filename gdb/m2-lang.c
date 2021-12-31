@@ -165,7 +165,7 @@ m2_language::printstr (struct ui_file *stream, struct type *elttype,
 
   if (length == 0)
     {
-      fputs_filtered ("\"\"", gdb_stdout);
+      puts_filtered ("\"\"");
       return;
     }
 

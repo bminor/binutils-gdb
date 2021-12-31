@@ -3211,13 +3211,13 @@ list_overlays_command (const char *args, int from_tty)
 	      name = bfd_section_name (osect->the_bfd_section);
 
 	      printf_filtered ("Section %s, loaded at ", name);
-	      fputs_filtered (paddress (gdbarch, lma), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, lma));
 	      puts_filtered (" - ");
-	      fputs_filtered (paddress (gdbarch, lma + size), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, lma + size));
 	      printf_filtered (", mapped at ");
-	      fputs_filtered (paddress (gdbarch, vma), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, vma));
 	      puts_filtered (" - ");
-	      fputs_filtered (paddress (gdbarch, vma + size), gdb_stdout);
+	      puts_filtered (paddress (gdbarch, vma + size));
 	      puts_filtered ("\n");
 
 	      nmapped++;

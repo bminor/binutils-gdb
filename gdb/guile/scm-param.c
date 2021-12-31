@@ -320,7 +320,7 @@ pascm_set_func (const char *args, int from_tty, struct cmd_list_element *c)
 
   /* GDB is usually silent when a parameter is set.  */
   if (*msg.get () != '\0')
-    fprintf_filtered (gdb_stdout, "%s\n", msg.get ());
+    printf_filtered ("%s\n", msg.get ());
 }
 
 /* A callback function that is registered against the respective

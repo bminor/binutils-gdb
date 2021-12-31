@@ -247,13 +247,12 @@ nbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
       size_t size = kve->kve_end - kve->kve_start;
       if (info_verbose)
 	{
-	  fprintf_filtered (gdb_stdout,
-			    "Save segment, %ld bytes at %s (%c%c%c)\n",
-			    (long) size,
-			    paddress (target_gdbarch (), kve->kve_start),
-			    kve->kve_protection & KVME_PROT_READ ? 'r' : '-',
-			    kve->kve_protection & KVME_PROT_WRITE ? 'w' : '-',
-			    kve->kve_protection & KVME_PROT_EXEC ? 'x' : '-');
+	  printf_filtered ("Save segment, %ld bytes at %s (%c%c%c)\n",
+			   (long) size,
+			   paddress (target_gdbarch (), kve->kve_start),
+			   kve->kve_protection & KVME_PROT_READ ? 'r' : '-',
+			   kve->kve_protection & KVME_PROT_WRITE ? 'w' : '-',
+			   kve->kve_protection & KVME_PROT_EXEC ? 'x' : '-');
 	}
 
       /* Invoke the callback function to create the corefile segment.
