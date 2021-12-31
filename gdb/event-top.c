@@ -1306,7 +1306,7 @@ gdb_setup_readline (int editing)
   if (!batch_silent)
     gdb_stdout = new stdio_file (ui->outstream);
   gdb_stderr = new stderr_file (ui->errstream);
-  gdb_stdlog = gdb_stderr;  /* for moment */
+  gdb_stdlog = new timestamped_file (gdb_stderr);
   gdb_stdtarg = gdb_stderr; /* for moment */
   gdb_stdtargerr = gdb_stderr; /* for moment */
 

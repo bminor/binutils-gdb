@@ -397,6 +397,7 @@ struct saved_output_files
   ui_file *targ;
   ui_file *targerr;
   ui_file_up file_to_delete;
+  ui_file_up log_to_delete;
 };
 static std::unique_ptr<saved_output_files> saved_output;
 
@@ -427,8 +428,11 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       else
 	saved_output->file_to_delete = std::move (logfile);
 
+      saved_output->log_to_delete.reset
+	(new timestamped_file (debug_redirect ? logfile_p : tee));
+
       gdb_stdout = logging_redirect ? logfile_p : tee;
-      gdb_stdlog = debug_redirect ? logfile_p : tee;
+      gdb_stdlog = saved_output->log_to_delete.get ();
       gdb_stderr = logging_redirect ? logfile_p : tee;
       gdb_stdtarg = logging_redirect ? logfile_p : tee;
       gdb_stdtargerr = logging_redirect ? logfile_p : tee;
