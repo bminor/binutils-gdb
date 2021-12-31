@@ -24,7 +24,6 @@
 #include "libiberty.h"
 
 #include "opcode/i386.h"
-#include "elf/x86-64.h"
 
 #ifdef CORE_HEADER
 #include <stdarg.h>
@@ -192,16 +191,6 @@ static reloc_howto_type x86_64_elf_howto_table[] =
 	bfd_elf_generic_reloc, "R_X86_64_32", false, 0, 0xffffffff,
 	false)
 };
-
-#define X86_PCREL_TYPE_P(TYPE)		\
-  (   ((TYPE) == R_X86_64_PC8)		\
-   || ((TYPE) == R_X86_64_PC16)		\
-   || ((TYPE) == R_X86_64_PC32)		\
-   || ((TYPE) == R_X86_64_PC32_BND)	\
-   || ((TYPE) == R_X86_64_PC64))
-
-#define X86_SIZE_TYPE_P(TYPE)		\
-  ((TYPE) == R_X86_64_SIZE32 || (TYPE) == R_X86_64_SIZE64)
 
 /* Map BFD relocs to the x86_64 elf relocs.  */
 struct elf_reloc_map
@@ -2284,7 +2273,8 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  size_reloc = false;
 	do_size:
 	  if (!no_dynreloc
-	      && NEED_DYNAMIC_RELOCATION_P (info, true, h, sec, r_type,
+	      && NEED_DYNAMIC_RELOCATION_P (true, info, true, h, sec,
+					    r_type,
 					    htab->pointer_r_type))
 	    {
 	      struct elf_dyn_relocs *p;
@@ -2348,7 +2338,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	      p->count += 1;
 	      /* Count size relocation as PC-relative relocation.  */
-	      if (X86_PCREL_TYPE_P (r_type) || size_reloc)
+	      if (X86_PCREL_TYPE_P (true, r_type) || size_reloc)
 		p->pc_count += 1;
 	    }
 	  break;
@@ -3235,10 +3225,11 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 					|| eh->needs_copy
 					|| (h->root.type
 					    == bfd_link_hash_undefined))
-				    && (X86_PCREL_TYPE_P (r_type)
-					|| X86_SIZE_TYPE_P (r_type)));
+				    && (X86_PCREL_TYPE_P (true, r_type)
+					|| X86_SIZE_TYPE_P (true,
+							    r_type)));
 
-	  if (GENERATE_DYNAMIC_RELOCATION_P (info, eh, r_type, sec,
+	  if (GENERATE_DYNAMIC_RELOCATION_P (true, info, eh, r_type, sec,
 					     need_copy_reloc_in_pie,
 					     resolved_to_zero, false))
 	    {
@@ -3267,7 +3258,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
 
-	      else if (COPY_INPUT_RELOC_P (info, h, r_type))
+	      else if (COPY_INPUT_RELOC_P (true, info, h, r_type))
 		{
 		  outrel.r_info = htab->r_info (h->dynindx, r_type);
 		  outrel.r_addend = rel->r_addend;

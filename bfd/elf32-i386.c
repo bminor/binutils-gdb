@@ -26,8 +26,6 @@
 /* 386 uses REL relocations instead of RELA.  */
 #define USE_REL	1
 
-#include "elf/i386.h"
-
 static reloc_howto_type elf_howto_table[]=
 {
   HOWTO(R_386_NONE, 0, 3, 0, false, 0, complain_overflow_dont,
@@ -180,10 +178,6 @@ static reloc_howto_type elf_howto_table[]=
 #define R_386_vt (R_386_GNU_VTENTRY + 1 - R_386_vt_offset)
 
 };
-
-#define X86_PCREL_TYPE_P(TYPE) ((TYPE) == R_386_PC32)
-
-#define X86_SIZE_TYPE_P(TYPE) ((TYPE) == R_386_SIZE32)
 
 #ifdef DEBUG_GEN_RELOC
 #define TRACE(str) \
@@ -1835,8 +1829,8 @@ elf_i386_check_relocs (bfd *abfd,
 	  size_reloc = false;
 	do_size:
 	  if (!no_dynreloc
-	      && NEED_DYNAMIC_RELOCATION_P (info, false, h, sec, r_type,
-					    R_386_32))
+	      && NEED_DYNAMIC_RELOCATION_P (false, info, false, h, sec,
+					    r_type, R_386_32))
 	    {
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
@@ -2725,8 +2719,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      || is_vxworks_tls)
 	    break;
 
-	  if (GENERATE_DYNAMIC_RELOCATION_P (info, eh, r_type, sec,
-					     false, resolved_to_zero,
+	  if (GENERATE_DYNAMIC_RELOCATION_P (false, info, eh, r_type,
+					     sec, false,
+					     resolved_to_zero,
 					     (r_type == R_386_PC32)))
 	    {
 	      Elf_Internal_Rela outrel;
@@ -2752,7 +2747,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      else if (COPY_INPUT_RELOC_P (info, h, r_type))
+	      else if (COPY_INPUT_RELOC_P (false, info, h, r_type))
 		outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
 	      else
 		{

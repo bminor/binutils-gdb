@@ -28,6 +28,24 @@
 #include "elf-bfd.h"
 #include "hashtab.h"
 #include "elf-linker-x86.h"
+#include "elf/i386.h"
+#include "elf/x86-64.h"
+
+#define X86_64_PCREL_TYPE_P(TYPE) \
+  ((TYPE) == R_X86_64_PC8 \
+   || (TYPE) == R_X86_64_PC16 \
+   || (TYPE) == R_X86_64_PC32 \
+   || (TYPE) == R_X86_64_PC32_BND \
+   || (TYPE) == R_X86_64_PC64)
+#define I386_PCREL_TYPE_P(TYPE) ((TYPE) == R_386_PC32)
+#define X86_PCREL_TYPE_P(IS_X86_64, TYPE) \
+  ((IS_X86_64) ? X86_64_PCREL_TYPE_P (TYPE) : I386_PCREL_TYPE_P (TYPE))
+
+#define X86_64_SIZE_TYPE_P(TYPE) \
+  ((TYPE) == R_X86_64_SIZE32 || (TYPE) == R_X86_64_SIZE64)
+#define I386_SIZE_TYPE_P(TYPE) ((TYPE) == R_386_SIZE32)
+#define X86_SIZE_TYPE_P(IS_X86_64, TYPE) \
+  ((IS_X86_64) ? X86_64_SIZE_TYPE_P(TYPE) : I386_SIZE_TYPE_P (TYPE))
 
 #define PLT_CIE_LENGTH		20
 #define PLT_FDE_LENGTH		36
@@ -91,10 +109,10 @@
 
    We also need to generate dynamic pointer relocation against
    STT_GNU_IFUNC symbol in the non-code section.  */
-#define NEED_DYNAMIC_RELOCATION_P(INFO, PCREL_PLT, H, SEC, R_TYPE, \
-				  POINTER_TYPE) \
+#define NEED_DYNAMIC_RELOCATION_P(IS_X86_64, INFO, PCREL_PLT, H, SEC, \
+				  R_TYPE, POINTER_TYPE) \
   ((bfd_link_pic (INFO) \
-    && (! X86_PCREL_TYPE_P (R_TYPE) \
+    && (! X86_PCREL_TYPE_P (IS_X86_64, R_TYPE) \
 	|| ((H) != NULL \
 	    && (! (bfd_link_pie (INFO) \
 		   || SYMBOLIC_BIND ((INFO), (H))) \
@@ -124,8 +142,8 @@
    when PC32_RELOC is TRUE.  Undefined weak symbol is bound locally
    when PIC is false.  Don't generate dynamic relocations against
    non-preemptible absolute symbol.  */
-#define GENERATE_DYNAMIC_RELOCATION_P(INFO, EH, R_TYPE, SEC, \
-				      NEED_COPY_RELOC_IN_PIE, \
+#define GENERATE_DYNAMIC_RELOCATION_P(IS_X86_64, INFO, EH, R_TYPE, \
+				      SEC, NEED_COPY_RELOC_IN_PIE, \
 				      RESOLVED_TO_ZERO, PC32_RELOC) \
   ((bfd_link_pic (INFO) \
     && !(bfd_is_abs_section (SEC) \
@@ -136,7 +154,8 @@
 	|| ((ELF_ST_VISIBILITY ((EH)->elf.other) == STV_DEFAULT \
 	     && (!(RESOLVED_TO_ZERO) || PC32_RELOC)) \
 	    || (EH)->elf.root.type != bfd_link_hash_undefweak)) \
-    && ((!X86_PCREL_TYPE_P (R_TYPE) && !X86_SIZE_TYPE_P (R_TYPE)) \
+    && ((!X86_PCREL_TYPE_P (IS_X86_64, R_TYPE) \
+	 && !X86_SIZE_TYPE_P (IS_X86_64, R_TYPE)) \
 	|| ! SYMBOL_CALLS_LOCAL ((INFO), \
 				 (struct elf_link_hash_entry *) (EH)))) \
    || (ELIMINATE_COPY_RELOCS \
@@ -151,10 +170,10 @@
 
 /* TRUE if this input relocation should be copied to output.  H->dynindx
    may be -1 if this symbol was marked to become local.  */
-#define COPY_INPUT_RELOC_P(INFO, H, R_TYPE) \
+#define COPY_INPUT_RELOC_P(IS_X86_64, INFO, H, R_TYPE) \
   ((H) != NULL \
    && (H)->dynindx != -1 \
-   && (X86_PCREL_TYPE_P (R_TYPE) \
+   && (X86_PCREL_TYPE_P (IS_X86_64, R_TYPE) \
        || !(bfd_link_executable (INFO) || SYMBOLIC_BIND ((INFO), (H))) \
        || !(H)->def_regular))
 

@@ -21,8 +21,6 @@
 #include "elfxx-x86.h"
 #include "elf-vxworks.h"
 #include "objalloc.h"
-#include "elf/i386.h"
-#include "elf/x86-64.h"
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
