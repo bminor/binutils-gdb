@@ -1866,7 +1866,7 @@ mi_print_exception (const char *token, const struct gdb_exception &exception)
   if (exception.message == NULL)
     fputs_unfiltered ("unknown error", mi->raw_stdout);
   else
-    fputstr_unfiltered (exception.what (), '"', mi->raw_stdout);
+    mi->raw_stdout->putstr (exception.what (), '"');
   fputs_unfiltered ("\"", mi->raw_stdout);
 
   switch (exception.error)

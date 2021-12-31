@@ -464,21 +464,6 @@ extern void print_spaces_filtered (int, struct ui_file *);
 
 extern const char *n_spaces (int);
 
-extern void fputstr_filtered (const char *str, int quotr,
-			      struct ui_file * stream);
-
-extern void fputstr_unfiltered (const char *str, int quotr,
-				struct ui_file * stream);
-
-extern void fputstrn_filtered (const char *str, int n, int quotr,
-			       struct ui_file * stream);
-
-typedef int (*do_fputc_ftype) (int c, ui_file *stream);
-
-extern void fputstrn_unfiltered (const char *str, int n, int quotr,
-				 do_fputc_ftype do_fputc,
-				 struct ui_file * stream);
-
 /* Return nonzero if filtered printing is initialized.  */
 extern int filtered_printing_initialized (void);
 

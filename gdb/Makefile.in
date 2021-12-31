@@ -477,6 +477,7 @@ SELFTESTS_SRCS = \
 	unittests/style-selftests.c \
 	unittests/tracepoint-selftests.c \
 	unittests/tui-selftests.c \
+	unittests/ui-file-selftests.c \
 	unittests/unpack-selftests.c \
 	unittests/utils-selftests.c \
 	unittests/vec-utils-selftests.c \

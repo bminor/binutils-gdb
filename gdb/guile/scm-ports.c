@@ -191,8 +191,8 @@ ioscm_open_port (scm_t_port_type *port_type, long mode_bits, scm_t_bits stream)
 
 /* Support for connecting Guile's stdio ports to GDB's stdio ports.  */
 
-/* Like fputstrn_filtered, but don't escape characters, except nul.
-   Also like fputs_filtered, but a length is specified.  */
+/* Print a string S, length SIZE, but don't escape characters, except
+   nul.  */
 
 static void
 fputsn_filtered (const char *s, size_t size, struct ui_file *stream)

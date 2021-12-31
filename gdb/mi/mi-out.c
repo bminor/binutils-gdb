@@ -135,7 +135,7 @@ mi_ui_out::do_field_string (int fldno, int width, ui_align align,
     fprintf_unfiltered (stream, "%s=", fldname);
   fprintf_unfiltered (stream, "\"");
   if (string)
-    fputstr_unfiltered (string, '"', stream);
+    stream->putstr (string, '"');
   fprintf_unfiltered (stream, "\"");
 }
 
