@@ -3088,7 +3088,7 @@ _bfd_XX_get_symbol_info (bfd * abfd, asymbol *symbol, symbol_info *ret)
   coff_get_symbol_info (abfd, symbol, ret);
 }
 
-#if !defined(COFF_WITH_pep) && defined(COFF_WITH_pex64) && defined(COFF_WITH_peAArch64)
+#if !defined(COFF_WITH_pep) && (defined(COFF_WITH_pex64) || defined(COFF_WITH_peAArch64))
 static int
 sort_x64_pdata (const void *l, const void *r)
 {
@@ -4516,7 +4516,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 
 /* If there is a .pdata section and we have linked pdata finally, we
      need to sort the entries ascending.  */
-#if !defined(COFF_WITH_pep) && defined(COFF_WITH_pex64) && defined(COFF_WITH_peAArch64)
+#if !defined(COFF_WITH_pep) && (defined(COFF_WITH_pex64) || defined(COFF_WITH_peAArch64))
   {
     asection *sec = bfd_get_section_by_name (abfd, ".pdata");
 
