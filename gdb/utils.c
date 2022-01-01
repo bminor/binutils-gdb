@@ -1763,17 +1763,6 @@ fputs_styled (const char *linebuffer, const ui_file_style &style,
 /* See utils.h.  */
 
 void
-fputs_styled_unfiltered (const char *linebuffer, const ui_file_style &style,
-			 struct ui_file *stream)
-{
-  stream->emit_style_escape (style);
-  stream->puts_unfiltered (linebuffer);
-  stream->emit_style_escape (ui_file_style ());
-}
-
-/* See utils.h.  */
-
-void
 fputs_highlighted (const char *str, const compiled_regex &highlight,
 		   struct ui_file *stream)
 {

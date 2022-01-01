@@ -296,12 +296,6 @@ extern void fputs_styled (const char *linebuffer,
 			  const ui_file_style &style,
 			  struct ui_file *stream);
 
-/* Unfiltered variant of fputs_styled.  */
-
-extern void fputs_styled_unfiltered (const char *linebuffer,
-				     const ui_file_style &style,
-				     struct ui_file *stream);
-
 /* Like fputs_styled, but uses highlight_style to highlight the
    parts of STR that match HIGHLIGHT.  */
 
