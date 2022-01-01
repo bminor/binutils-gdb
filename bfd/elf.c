@@ -6289,8 +6289,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		  Elf_Internal_Shdr *hdr = &elf_section_data (sect)->this_hdr;
 		  if (hdr->sh_type != SHT_NOBITS)
 		    {
-		      p->p_filesz = (sect->filepos - m->sections[0]->filepos
-				     + hdr->sh_size);
+		      p->p_filesz = sect->filepos - p->p_offset + hdr->sh_size;
 		      /* NB: p_memsz of the loadable PT_NOTE segment
 			 should be the same as p_filesz.  */
 		      if (p->p_type == PT_NOTE
