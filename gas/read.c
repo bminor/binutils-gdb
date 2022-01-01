@@ -5642,7 +5642,7 @@ next_char_of_string (void)
 	case '8':
 	case '9':
 	  {
-	    long number;
+	    unsigned number;
 	    int i;
 
 	    for (i = 0, number = 0;
@@ -5660,7 +5660,7 @@ next_char_of_string (void)
 	case 'x':
 	case 'X':
 	  {
-	    long number;
+	    unsigned number;
 
 	    number = 0;
 	    c = *input_line_pointer++;
