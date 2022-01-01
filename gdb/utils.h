@@ -308,10 +308,6 @@ extern void fputs_styled_unfiltered (const char *linebuffer,
 extern void fputs_highlighted (const char *str, const compiled_regex &highlight,
 			       struct ui_file *stream);
 
-/* Reset the terminal style to the default, if needed.  */
-
-extern void reset_terminal_style (struct ui_file *stream);
-
 /* Return the address only having significant bits.  */
 extern CORE_ADDR address_significant (gdbarch *gdbarch, CORE_ADDR addr);
 

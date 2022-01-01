@@ -99,14 +99,6 @@ public:
   virtual int fd () const
   { return -1; }
 
-  /* Return true if this object supports paging, false otherwise.  */
-  virtual bool can_page () const
-  {
-    /* Almost no file supports paging, which is why this is the
-       default.  */
-    return false;
-  }
-
   /* Indicate that if the next sequence of characters overflows the
      line, a newline should be inserted here rather than when it hits
      the end.  If INDENT is non-zero, it is a number of spaces to be
@@ -122,7 +114,9 @@ public:
      This routine is guaranteed to force out any output which has been
      squirreled away in the wrap_buffer, so wrap_here (0) can be
      used to force out output from the wrap_buffer.  */
-  void wrap_here (int indent);
+  virtual void wrap_here (int indent)
+  {
+  }
 
   /* Emit an ANSI style escape for STYLE.  */
   virtual void emit_style_escape (const ui_file_style &style);
@@ -275,11 +269,6 @@ public:
   int fd () const override
   { return m_fd; }
 
-  virtual bool can_page () const override
-  {
-    return m_file == stdout;
-  }
-
 private:
   /* Sets the internal stream to FILE, and saves the FILE's file
      descriptor in M_FD.  */
@@ -354,11 +343,16 @@ public:
   bool can_emit_style_escape () override;
   void flush () override;
 
-  virtual bool can_page () const override
+  void emit_style_escape (const ui_file_style &style) override
   {
-    /* If one of the underlying files can page, then we allow it
-       here.  */
-    return m_one->can_page () || m_two->can_page ();
+    m_one->emit_style_escape (style);
+    m_two->emit_style_escape (style);
+  }
+
+  void reset_style () override
+  {
+    m_one->reset_style ();
+    m_two->reset_style ();
   }
 
   void puts_unfiltered (const char *str) override

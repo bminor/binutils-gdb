@@ -56,6 +56,7 @@
 #include "gdbarch.h"
 #include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"
+#include "pager.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -278,7 +279,7 @@ ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
     input_fd (fileno (instream)),
     input_interactive_p (ISATTY (instream)),
     prompt_state (PROMPT_NEEDED),
-    m_gdb_stdout (new stdio_file (outstream)),
+    m_gdb_stdout (new pager_file (new stdio_file (outstream))),
     m_gdb_stdin (new stdio_file (instream)),
     m_gdb_stderr (new stderr_file (errstream)),
     m_gdb_stdlog (m_gdb_stderr),

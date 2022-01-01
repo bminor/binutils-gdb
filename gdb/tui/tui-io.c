@@ -44,6 +44,7 @@
 #include "completer.h"
 #include "gdb_curses.h"
 #include <map>
+#include "pager.h"
 
 /* This redefines CTRL if it is not already defined, so it must come
    after terminal state releated include files like <term.h> and
@@ -903,7 +904,7 @@ tui_initialize_io (void)
 #endif
 
   /* Create tui output streams.  */
-  tui_stdout = new tui_file (stdout);
+  tui_stdout = new pager_file (new tui_file (stdout));
   tui_stderr = new tui_file (stderr);
   tui_stdlog = new timestamped_file (tui_stderr);
   tui_out = tui_out_new (tui_stdout);

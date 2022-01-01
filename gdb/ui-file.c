@@ -24,6 +24,7 @@
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/filestuff.h"
+#include "cli-out.h"
 #include "cli/cli-style.h"
 #include <chrono>
 
@@ -68,7 +69,8 @@ ui_file::putc (int c)
 void
 ui_file::vprintf (const char *format, va_list args)
 {
-  vfprintf_unfiltered (this, format, args);
+  ui_out_flags flags = disallow_ui_out_field;
+  cli_ui_out (this, flags).vmessage (m_applied_style, format, args);
 }
 
 /* See ui-file.h.  */
@@ -349,8 +351,7 @@ stdio_file::isatty ()
 bool
 stdio_file::can_emit_style_escape ()
 {
-  return ((this == gdb_stdout || this == gdb_stderr)
-	  && this->isatty ()
+  return (this->isatty ()
 	  && term_cli_styling ());
 }
 
@@ -438,8 +439,7 @@ tee_file::term_out ()
 bool
 tee_file::can_emit_style_escape ()
 {
-  return ((this == gdb_stdout || this == gdb_stderr)
-	  && m_one->term_out ()
+  return (m_one->term_out ()
 	  && term_cli_styling ());
 }
 

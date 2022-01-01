@@ -843,7 +843,7 @@ echo_command (const char *text, int from_tty)
 	  printf_filtered ("%c", c);
       }
 
-  reset_terminal_style (gdb_stdout);
+  gdb_stdout->reset_style ();
 
   /* Force this output to appear now.  */
   gdb_stdout->wrap_here (0);

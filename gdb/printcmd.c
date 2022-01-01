@@ -2889,7 +2889,7 @@ static void
 printf_command (const char *arg, int from_tty)
 {
   ui_printf (arg, gdb_stdout);
-  reset_terminal_style (gdb_stdout);
+  gdb_stdout->reset_style ();
   gdb_stdout->wrap_here (0);
   gdb_stdout->flush ();
 }

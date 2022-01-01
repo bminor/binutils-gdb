@@ -42,6 +42,7 @@
 #include "gdbsupport/gdb-sigmask.h"
 #include "async-event.h"
 #include "bt-utils.h"
+#include "pager.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -1300,7 +1301,7 @@ gdb_setup_readline (int editing)
      mess it up here.  The sync stuff should really go away over
      time.  */
   if (!batch_silent)
-    gdb_stdout = new stdio_file (ui->outstream);
+    gdb_stdout = new pager_file (new stdio_file (ui->outstream));
   gdb_stderr = new stderr_file (ui->errstream);
   gdb_stdlog = new timestamped_file (gdb_stderr);
   gdb_stdtarg = gdb_stderr; /* for moment */
