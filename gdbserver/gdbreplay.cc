@@ -1,5 +1,5 @@
 /* Replay a remote debug session logfile for GDB.
-   Copyright (C) 1996-2021 Free Software Foundation, Inc.
+   Copyright (C) 1996-2022 Free Software Foundation, Inc.
    Written by Fred Fish (fnf@cygnus.com) from pieces of gdbserver.
 
    This file is part of GDB.

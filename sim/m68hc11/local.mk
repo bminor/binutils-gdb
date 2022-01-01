@@ -1,6 +1,6 @@
 ## See sim/Makefile.am
 ##
-## Copyright (C) 1999-2021 Free Software Foundation, Inc.
+## Copyright (C) 1999-2022 Free Software Foundation, Inc.
 ## Written by Cygnus Support.
 ##
 ## This program is free software; you can redistribute it and/or modify

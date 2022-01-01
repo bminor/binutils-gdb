@@ -1,6 +1,6 @@
 /* Target-dependent code for QNX Neutrino x86.
 
-   Copyright (C) 2003-2021 Free Software Foundation, Inc.
+   Copyright (C) 2003-2022 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 

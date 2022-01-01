@@ -1,6 +1,6 @@
 /* Target-dependent code for Motorola 68HC11 & 68HC12
 
-   Copyright (C) 1999-2021 Free Software Foundation, Inc.
+   Copyright (C) 1999-2022 Free Software Foundation, Inc.
 
    Contributed by Stephane Carrez, stcarrez@nerim.fr
 

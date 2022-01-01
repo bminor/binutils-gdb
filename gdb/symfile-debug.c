@@ -1,6 +1,6 @@
 /* Debug logging for the symbol file functions for the GNU debugger, GDB.
 
-   Copyright (C) 2013-2021 Free Software Foundation, Inc.
+   Copyright (C) 2013-2022 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 

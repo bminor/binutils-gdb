@@ -1,5 +1,5 @@
 /* Pthreads test program.
-   Copyright 1996-2021 Free Software Foundation, Inc.
+   Copyright 1996-2022 Free Software Foundation, Inc.
 
    Written by Keith Seitz of Red Hat.
    Copied from gdb.threads/pthreads.c.

@@ -1,6 +1,6 @@
 /* Target-dependent code for FreeBSD/arm.
 
-   Copyright (C) 2017-2021 Free Software Foundation, Inc.
+   Copyright (C) 2017-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

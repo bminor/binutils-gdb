@@ -1,6 +1,6 @@
 ## See sim/Makefile.am
 ##
-## Copyright (C) 2008-2021 Free Software Foundation, Inc.
+## Copyright (C) 2008-2022 Free Software Foundation, Inc.
 ## Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 ##
 ## This program is free software; you can redistribute it and/or modify

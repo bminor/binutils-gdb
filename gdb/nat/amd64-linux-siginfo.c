@@ -1,6 +1,6 @@
 /* Low-level siginfo manipulation for amd64.
 
-   Copyright (C) 2002-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

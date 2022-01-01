@@ -1,5 +1,5 @@
 /* Target-dependent header for the Nios II architecture, for GDB.
-   Copyright (C) 2012-2021 Free Software Foundation, Inc.
+   Copyright (C) 2012-2022 Free Software Foundation, Inc.
    Contributed by Mentor Graphics, Inc.
 
    This file is part of GDB.

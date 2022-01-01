@@ -1,5 +1,5 @@
 /* Host file transfer support for gdbserver.
-   Copyright (C) 1993-2021 Free Software Foundation, Inc.
+   Copyright (C) 1993-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

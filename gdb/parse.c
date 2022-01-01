@@ -1,6 +1,6 @@
 /* Parse expressions for GDB.
 
-   Copyright (C) 1986-2021 Free Software Foundation, Inc.
+   Copyright (C) 1986-2022 Free Software Foundation, Inc.
 
    Modified from expread.y by the Department of Computer Science at the
    State University of New York at Buffalo, 1991.

@@ -1,5 +1,5 @@
 #    Makefile template for Configure for the PRU sim library.
-#    Copyright (C) 1990-2021 Free Software Foundation, Inc.
+#    Copyright (C) 1990-2022 Free Software Foundation, Inc.
 #    Written by Dimitar Dimitrov <dimitar@dinux.eu>
 #
 #    Based on the MCore sim library

@@ -1,5 +1,5 @@
 # Makefile fragment for common parts of all simulators.
-# Copyright 1997-2021 Free Software Foundation, Inc.
+# Copyright 1997-2022 Free Software Foundation, Inc.
 # Contributed by Cygnus Support.
 
 # This program is free software; you can redistribute it and/or modify

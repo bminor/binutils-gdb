@@ -1,5 +1,5 @@
 /* Decode declarations.
-   Copyright (C) 2020-2021 Free Software Foundation, Inc.
+   Copyright (C) 2020-2022 Free Software Foundation, Inc.
    Contributed by Oracle, Inc.
 
 This file is part of the GNU simulators.

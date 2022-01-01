@@ -1,6 +1,6 @@
 ## See sim/Makefile.am
 ##
-## Copyright (C) 2009-2021 Free Software Foundation, Inc.
+## Copyright (C) 2009-2022 Free Software Foundation, Inc.
 ## Contributed by Jon Beniston <jon@beniston.com>
 ##
 ## This program is free software; you can redistribute it and/or modify

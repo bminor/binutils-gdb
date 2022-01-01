@@ -1,6 +1,6 @@
 /* scoped_fd, automatically close a file descriptor
 
-   Copyright (C) 2018-2021 Free Software Foundation, Inc.
+   Copyright (C) 2018-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

@@ -1,6 +1,6 @@
 /* Native-dependent code for BSD Unix running on ARM's, for GDB.
 
-   Copyright (C) 1988-2021 Free Software Foundation, Inc.
+   Copyright (C) 1988-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
