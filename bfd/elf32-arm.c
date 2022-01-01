@@ -20234,7 +20234,6 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #else
 #define ELF_MAXPAGESIZE			0x10000
 #endif
-#define ELF_MINPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 
 #define bfd_elf32_mkobject			elf32_arm_mkobject
@@ -20410,7 +20409,6 @@ elf32_arm_nacl_plt_sym_val (bfd_vma i, const asection *plt,
 #undef  elf_backend_final_write_processing
 #define elf_backend_final_write_processing	elf32_arm_final_write_processing
 #undef	ELF_MINPAGESIZE
-#define ELF_MINPAGESIZE			0x1000
 #undef	ELF_COMMONPAGESIZE
 #define ELF_COMMONPAGESIZE		0x1000
 

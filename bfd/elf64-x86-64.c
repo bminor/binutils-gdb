@@ -5229,7 +5229,6 @@ elf_x86_64_special_sections[]=
 #else
 # define ELF_MAXPAGESIZE		    0x200000
 #endif
-#define ELF_MINPAGESIZE			    0x1000
 #define ELF_COMMONPAGESIZE		    0x1000
 
 #define elf_backend_can_gc_sections	    1
@@ -5414,18 +5413,6 @@ elf64_l1om_elf_object_p (bfd *abfd)
 #define elf_backend_object_p		    elf64_l1om_elf_object_p
 
 /* Restore defaults.  */
-#undef	ELF_MAXPAGESIZE
-#undef	ELF_MINPAGESIZE
-#undef	ELF_COMMONPAGESIZE
-#if DEFAULT_LD_Z_SEPARATE_CODE
-# define ELF_MAXPAGESIZE		0x1000
-#else
-# define ELF_MAXPAGESIZE		0x200000
-#endif
-#define ELF_MINPAGESIZE			0x1000
-#define ELF_COMMONPAGESIZE		0x1000
-#undef	elf_backend_plt_alignment
-#define elf_backend_plt_alignment	4
 #undef ELF_TARGET_OS
 
 #include "elf64-target.h"
