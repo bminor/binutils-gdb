@@ -412,7 +412,7 @@ NOT_FSF_LIST = (
     "sim/ppc/vm.h",
     "sim/ppc/hw_iobus.c",
     "sim/ppc/inline.h",
-    "sim/testsuite/sim/mips/mips32-dsp2.s",
+    "sim/testsuite/mips/mips32-dsp2.s",
 )
 
 if __name__ == "__main__":
