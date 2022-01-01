@@ -124,6 +124,12 @@ public:
      used to force out output from the wrap_buffer.  */
   void wrap_here (int indent);
 
+  /* Emit an ANSI style escape for STYLE.  */
+  virtual void emit_style_escape (const ui_file_style &style);
+
+  /* Rest the current output style to the empty style.  */
+  virtual void reset_style ();
+
   /* Print STR, bypassing any paging that might be done by this
      ui_file.  Note that nearly no code should call this -- it's
      intended for use by printf_filtered, but nothing else.  */
@@ -131,6 +137,11 @@ public:
   {
     this->puts (str);
   }
+
+protected:
+
+  /* The currently applied style.  */
+  ui_file_style m_applied_style;
 
 private:
 
@@ -376,6 +387,14 @@ public:
      sequences.  */
   void write (const char *buf, long length_buf) override;
   void puts (const char *linebuffer) override;
+
+  void emit_style_escape (const ui_file_style &style) override
+  {
+  }
+
+  void reset_style () override
+  {
+  }
 };
 
 /* A ui_file that optionally puts a timestamp at the start of each

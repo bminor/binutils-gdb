@@ -74,6 +74,30 @@ ui_file::vprintf (const char *format, va_list args)
 /* See ui-file.h.  */
 
 void
+ui_file::emit_style_escape (const ui_file_style &style)
+{
+  if (can_emit_style_escape () && style != m_applied_style)
+    {
+      m_applied_style = style;
+      this->puts (style.to_ansi ().c_str ());
+    }
+}
+
+/* See ui-file.h.  */
+
+void
+ui_file::reset_style ()
+{
+  if (can_emit_style_escape ())
+    {
+      m_applied_style = ui_file_style ();
+      this->puts (m_applied_style.to_ansi ().c_str ());
+    }
+}
+
+/* See ui-file.h.  */
+
+void
 ui_file::printchar (int c, int quoter, bool async_safe)
 {
   char buf[4];
