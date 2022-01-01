@@ -152,14 +152,15 @@ am_libgdbsupport_a_OBJECTS = agent.$(OBJEXT) btrace-common.$(OBJEXT) \
 	environ.$(OBJEXT) errors.$(OBJEXT) event-loop.$(OBJEXT) \
 	fileio.$(OBJEXT) filestuff.$(OBJEXT) format.$(OBJEXT) \
 	gdb-dlfcn.$(OBJEXT) gdb-hashtab.$(OBJEXT) \
-	gdb_obstack.$(OBJEXT) gdb_tilde_expand.$(OBJEXT) \
-	gdb_wait.$(OBJEXT) gdb_vecs.$(OBJEXT) job-control.$(OBJEXT) \
-	netstuff.$(OBJEXT) new-op.$(OBJEXT) pathstuff.$(OBJEXT) \
-	print-utils.$(OBJEXT) ptid.$(OBJEXT) rsp-low.$(OBJEXT) \
-	run-time-clock.$(OBJEXT) safe-strerror.$(OBJEXT) \
-	scoped_mmap.$(OBJEXT) search.$(OBJEXT) signals.$(OBJEXT) \
-	signals-state-save-restore.$(OBJEXT) tdesc.$(OBJEXT) \
-	thread-pool.$(OBJEXT) xml-utils.$(OBJEXT) $(am__objects_1)
+	gdb_obstack.$(OBJEXT) gdb_regex.$(OBJEXT) \
+	gdb_tilde_expand.$(OBJEXT) gdb_wait.$(OBJEXT) \
+	gdb_vecs.$(OBJEXT) job-control.$(OBJEXT) netstuff.$(OBJEXT) \
+	new-op.$(OBJEXT) pathstuff.$(OBJEXT) print-utils.$(OBJEXT) \
+	ptid.$(OBJEXT) rsp-low.$(OBJEXT) run-time-clock.$(OBJEXT) \
+	safe-strerror.$(OBJEXT) scoped_mmap.$(OBJEXT) search.$(OBJEXT) \
+	signals.$(OBJEXT) signals-state-save-restore.$(OBJEXT) \
+	tdesc.$(OBJEXT) thread-pool.$(OBJEXT) xml-utils.$(OBJEXT) \
+	$(am__objects_1)
 libgdbsupport_a_OBJECTS = $(am_libgdbsupport_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -379,6 +380,7 @@ libgdbsupport_a_SOURCES = \
     gdb-dlfcn.cc \
     gdb-hashtab.cc \
     gdb_obstack.cc \
+    gdb_regex.cc \
     gdb_tilde_expand.cc \
     gdb_wait.cc \
     gdb_vecs.cc \
@@ -486,6 +488,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdb-dlfcn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdb-hashtab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdb_obstack.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdb_regex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdb_tilde_expand.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdb_vecs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdb_wait.Po@am__quote@

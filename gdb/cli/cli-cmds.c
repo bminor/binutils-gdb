@@ -24,7 +24,7 @@
 #include "target.h"	/* For baud_rate, remote_debug and remote_timeout.  */
 #include "gdbsupport/gdb_wait.h"	/* For shell escape implementation.  */
 #include "gdbcmd.h"
-#include "gdb_regex.h"	/* Used by apropos_command.  */
+#include "gdbsupport/gdb_regex.h"	/* Used by apropos_command.  */
 #include "gdb_vfork.h"
 #include "linespec.h"
 #include "expression.h"

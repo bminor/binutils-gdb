@@ -56,7 +56,7 @@
 #include "valprint.h"
 #include "jit.h"
 #include "parser-defs.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "probe.h"
 #include "cli/cli-utils.h"
 #include "stack.h"

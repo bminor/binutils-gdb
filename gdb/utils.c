@@ -63,7 +63,7 @@
 #include <chrono>
 
 #include "interps.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "gdbsupport/job-control.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/gdb_optional.h"

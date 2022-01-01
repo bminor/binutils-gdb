@@ -33,7 +33,7 @@
 #include "source.h"
 #include "filenames.h"
 #include "fnmatch.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "gdbsupport/gdb_optional.h"
 #include <list>
 #include "cli/cli-style.h"

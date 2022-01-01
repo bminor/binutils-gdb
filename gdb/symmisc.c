@@ -30,7 +30,7 @@
 #include "language.h"
 #include "bcache.h"
 #include "block.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include <sys/stat.h>
 #include "dictionary.h"
 #include "typeprint.h"

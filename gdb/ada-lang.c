@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "frame.h"
 #include "symtab.h"
 #include "gdbtypes.h"

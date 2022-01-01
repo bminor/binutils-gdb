@@ -29,7 +29,7 @@
 #include "command.h"
 #include "target.h"
 #include "frame.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "inferior.h"
 #include "gdbsupport/environ.h"
 #include "language.h"

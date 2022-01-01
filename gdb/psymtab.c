@@ -29,7 +29,7 @@
 #include "ui-out.h"
 #include "command.h"
 #include "readline/tilde.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "dictionary.h"
 #include "language.h"
 #include "cp-support.h"

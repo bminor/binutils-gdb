@@ -33,7 +33,7 @@
 #include "probe.h"
 #include "objfiles.h"
 #include "cp-abi.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "cp-support.h"
 #include "location.h"
 #include "cli/cli-decode.h"

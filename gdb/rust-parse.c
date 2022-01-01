@@ -23,7 +23,7 @@
 #include "charset.h"
 #include "cp-support.h"
 #include "gdbsupport/gdb_obstack.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "rust-lang.h"
 #include "parser-defs.h"
 #include "gdbsupport/selftest.h"

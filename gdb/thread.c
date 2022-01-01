@@ -40,7 +40,7 @@
 #include "annotate.h"
 #include "cli/cli-decode.h"
 #include "cli/cli-option.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "cli/cli-utils.h"
 #include "thread-fsm.h"
 #include "tid-parse.h"

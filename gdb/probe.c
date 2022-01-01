@@ -27,7 +27,7 @@
 #include "progspace.h"
 #include "filenames.h"
 #include "linespec.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "frame.h"
 #include "arch-utils.h"
 #include "value.h"

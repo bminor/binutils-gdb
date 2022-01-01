@@ -23,7 +23,7 @@
 
 /* Include the public interfaces.  */
 #include "command.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "cli-script.h"
 #include "completer.h"
 #include "gdbsupport/intrusive_list.h"

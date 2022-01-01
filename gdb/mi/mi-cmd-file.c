@@ -28,7 +28,7 @@
 #include "psymtab.h"
 #include "solib.h"
 #include "solist.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 
 /* Return to the client the absolute path and line number of the 
    current file being executed.  */

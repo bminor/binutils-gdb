@@ -37,7 +37,7 @@
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "frame.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "regcache.h"
 #include "block.h"
 #include "infcall.h"

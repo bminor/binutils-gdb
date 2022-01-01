@@ -21,7 +21,7 @@
 #include <ctype.h>
 #include "auto-load.h"
 #include "progspace.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "ui-out.h"
 #include "filenames.h"
 #include "command.h"

@@ -36,7 +36,7 @@
 #include "objfiles.h"
 #include "infcall.h"
 #include "gdbcmd.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/gdb_optional.h"
 #include "gcore.h"

@@ -1074,7 +1074,6 @@ COMMON_SFILES = \
 	gcore.c \
 	gdb-demangle.c \
 	gdb_bfd.c \
-	gdb_regex.c \
 	gdbtypes.c \
 	gmp-utils.c \
 	gnu-v2-abi.c \
@@ -1316,7 +1315,6 @@ HFILES_NO_SRCDIR = \
 	gdb_curses.h \
 	gdb_expat.h \
 	gdb_proc_service.h \
-	gdb_regex.h \
 	gdb_select.h \
 	gdb-stabs.h \
 	gdb_vfork.h \
