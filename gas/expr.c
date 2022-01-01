@@ -1959,7 +1959,12 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  switch (op_left)
 	    {
 	    default:			goto general;
-	    case O_multiply:		resultP->X_add_number *= v; break;
+	    case O_multiply:
+	      /* Do the multiply as unsigned to silence ubsan.  The
+		 result is of course the same when we throw away high
+		 bits of the result.  */
+	      resultP->X_add_number *= (valueT) v;
+	      break;
 	    case O_divide:		resultP->X_add_number /= v; break;
 	    case O_modulus:		resultP->X_add_number %= v; break;
 	    case O_left_shift:
