@@ -148,15 +148,12 @@ def may_have_copyright_notice(filename):
     # so just open the file as a byte stream. We only need to search
     # for a pattern that should be the same regardless of encoding,
     # so that should be good enough.
-    fd = open(filename, "rb")
-
-    lineno = 1
-    for line in fd:
-        if b"Copyright" in line:
-            return True
-        lineno += 1
-        if lineno > 50:
-            return False
+    with open(filename, "rb") as fd:
+        for lineno, line in enumerate(fd, start=1):
+            if b"Copyright" in line:
+                return True
+            if lineno > MAX_LINES:
+                break
     return False
 
 
