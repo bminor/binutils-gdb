@@ -245,6 +245,7 @@ MULTIPLE_COPYRIGHT_HEADERS = (
     "gdb/doc/gdb.texinfo",
     "gdb/doc/refcard.tex",
     "gdb/gdbarch.sh",
+    "gdb/syscalls/update-netbsd.sh",
 )
 
 # The list of file which have a copyright, but not head by the FSF.
