@@ -2,7 +2,7 @@
 
 # incremental_test.sh -- test that incremental linking information is correct.
 
-# Copyright (C) 2009-2021 Free Software Foundation, Inc.
+# Copyright (C) 2009-2022 Free Software Foundation, Inc.
 # Written by Rafael Avila de Espindola <espindola@google.com>
 # and Cary Coutant <ccoutant@google.com>
 

@@ -1,6 +1,6 @@
 // icf_test.cc -- a test case for gold
 
-// Copyright (C) 2009-2021 Free Software Foundation, Inc.
+// Copyright (C) 2009-2022 Free Software Foundation, Inc.
 // Test case from PR 21066 submitted by Gandhi Shaheen
 
 // This file is part of gold.

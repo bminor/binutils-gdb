@@ -2,7 +2,7 @@
 
 # ver_test_pr16504.sh -- test that undef gets correct version with LTO.
 
-# Copyright (C) 2018-2021 Free Software Foundation, Inc.
+# Copyright (C) 2018-2022 Free Software Foundation, Inc.
 # Written by Cary Coutant <ccoutant@gmail.com>.
 
 # This file is part of gold.

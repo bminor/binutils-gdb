@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright (C) 2021 Free Software Foundation, Inc.
+#   Copyright (C) 2021-2022 Free Software Foundation, Inc.
 #   Contributed by Loongson Ltd.
 #
 # This file is part of the GNU Binutils.
