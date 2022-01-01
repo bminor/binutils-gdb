@@ -243,11 +243,7 @@ extern int fputc_unfiltered (int c, struct ui_file *);
 
 extern int putchar_filtered (int c);
 
-extern int putchar_unfiltered (int c);
-
 extern void puts_filtered (const char *);
-
-extern void puts_unfiltered (const char *);
 
 extern void puts_filtered_tabular (char *string, int width, int right);
 

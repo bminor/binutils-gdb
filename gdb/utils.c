@@ -1868,12 +1868,6 @@ fputs_highlighted (const char *str, const compiled_regex &highlight,
     fputs_filtered (str, stream);
 }
 
-int
-putchar_unfiltered (int c)
-{
-  return fputc_unfiltered (c, gdb_stdout);
-}
-
 /* Write character C to gdb_stdout using GDB's paging mechanism and return C.
    May return nonlocally.  */
 
@@ -2044,12 +2038,6 @@ void
 puts_filtered (const char *string)
 {
   fputs_filtered (string, gdb_stdout);
-}
-
-void
-puts_unfiltered (const char *string)
-{
-  fputs_unfiltered (string, gdb_stdout);
 }
 
 /* Return a pointer to N spaces and a null.  The pointer is good

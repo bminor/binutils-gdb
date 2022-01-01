@@ -866,7 +866,7 @@ gdb_readline_no_editing (const char *prompt)
       /* Don't use a _filtered function here.  It causes the assumed
 	 character position to be off, since the newline we read from
 	 the user is not accounted for.  */
-      puts_unfiltered (prompt);
+      printf_unfiltered ("%s", prompt);
       gdb_flush (gdb_stdout);
     }
 
@@ -1365,11 +1365,7 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
 	++source_line_number;
 
       if (from_tty && annotation_level > 1)
-	{
-	  puts_unfiltered ("\n\032\032pre-");
-	  puts_unfiltered (annotation_suffix);
-	  puts_unfiltered ("\n");
-	}
+	printf_unfiltered ("\n\032\032pre-%s\n", annotation_suffix);
 
       /* Don't use fancy stuff if not talking to stdin.  */
       if (deprecated_readline_hook

@@ -673,11 +673,7 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
   cmd_line_buffer->used_size = 0;
 
   if (from_tty && annotation_level > 1)
-    {
-      printf_unfiltered (("\n\032\032post-"));
-      puts_unfiltered (annotation_suffix);
-      printf_unfiltered (("\n"));
-    }
+    printf_unfiltered (("\n\032\032post-%s\n"), annotation_suffix);
 
 #define SERVER_COMMAND_PREFIX "server "
   server_command = startswith (cmd, SERVER_COMMAND_PREFIX);
