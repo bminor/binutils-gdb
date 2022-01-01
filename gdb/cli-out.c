@@ -230,11 +230,14 @@ cli_ui_out::do_message (const ui_file_style &style,
   if (m_suppress_output)
     return;
 
-  /* Use the "no_gdbfmt" variant here to avoid recursion.
-     vfprintf_styled calls into cli_ui_out::message to handle the
-     gdb-specific printf formats.  */
-  vfprintf_styled_no_gdbfmt (m_streams.back (), style,
-			     !test_flags (unfiltered_output), format, args);
+  std::string str = string_vprintf (format, args);
+  if (!str.empty ())
+    {
+      if (test_flags (unfiltered_output))
+	fputs_styled_unfiltered (str.c_str (), style, m_streams.back ());
+      else
+	fputs_styled (str.c_str (), style, m_streams.back ());
+    }
 }
 
 void

@@ -1993,21 +1993,6 @@ vfprintf_styled (struct ui_file *stream, const ui_file_style &style,
   set_output_style (stream, ui_file_style ());
 }
 
-/* See utils.h.  */
-
-void
-vfprintf_styled_no_gdbfmt (struct ui_file *stream, const ui_file_style &style,
-			   bool filter, const char *format, va_list args)
-{
-  std::string str = string_vprintf (format, args);
-  if (!str.empty ())
-    {
-      set_output_style (stream, style);
-      fputs_maybe_filtered (str.c_str (), stream, filter);
-      set_output_style (stream, ui_file_style ());
-    }
-}
-
 void
 printf_filtered (const char *format, ...)
 {
