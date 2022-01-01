@@ -1970,8 +1970,8 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with -z bndplt" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,bndplt \
+		 -Wl,-z,noseparate-code,-z,max-page-size=0x200000" \
 		"-Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{objdump {-drw} plt-main-bnd.dd}} \
@@ -1980,8 +1980,9 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with PIE and -z bndplt" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -pie \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
+		 -Wl,-z,bndplt,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{objdump {-drw} plt-main-bnd.dd}} \
@@ -1990,8 +1991,8 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with -z bndplt -z now" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,bndplt \
+		 -Wl,-z,now,-z,noseparate-code,-z,max-page-size=0x200000" \
 		"-Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
@@ -2000,8 +2001,9 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with PIE and -z bndplt -z now" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now -pie \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
+		 -Wl,-z,bndplt,-z,now,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
@@ -2097,8 +2099,8 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with -z ibtplt" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,ibtplt \
+		 -Wl,-z,noseparate-code,-z,max-page-size=0x200000" \
 		"-Wa,-mx86-used-note=yes" \
 		{ plt-main5.c } \
 		$pltdump \
@@ -2107,8 +2109,9 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with PIE and -z ibtplt" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -pie \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
+		 -Wl,-z,ibtplt,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes" \
 		{ plt-main5.c } \
 		$pltdump \
@@ -2117,8 +2120,8 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with -z ibtplt -z now" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -z now \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -Wl,-z,ibtplt \
+		 -Wl,-z,now,-z,noseparate-code,-z,max-page-size=0x200000" \
 		"-Wa,-mx86-used-note=yes" \
 		{ plt-main5.c } \
 		$pltsecdump \
@@ -2127,8 +2130,9 @@ if { [isnative] && [check_compiler_available] } {
 	    [list \
 		"Build plt-main with PIE and -z ibtplt -z now" \
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
-		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z ibtplt -z now -pie \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -pie \
+		 -Wl,-z,ibtplt,-z,now,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes" \
 		{ plt-main5.c } \
 		$pltsecdump \
@@ -2136,8 +2140,8 @@ if { [isnative] && [check_compiler_available] } {
 	    ] \
 	    [list \
 		"Build libibtplt-lib.so with -z ibtplt" \
-		"-shared -z ibtplt \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		"-shared -Wl,-z,ibtplt,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes" \
 		{ plt-main1.c plt-main2.c plt-main3.c plt-main4.c} \
 		$pltdump \
@@ -2145,8 +2149,8 @@ if { [isnative] && [check_compiler_available] } {
 	    ] \
 	    [list \
 		"Build libibtplt--now-lib.so with -z ibtplt -z now" \
-		"-shared -z ibtplt -z now \
-		 -z noseparate-code -z max-page-size=0x200000" \
+		"-shared -Wl,-z,ibtplt,-z,now,-z,noseparate-code \
+		 -Wl,-z,max-page-size=0x200000" \
 		"-fPIC -Wa,-mx86-used-note=yes" \
 		{ plt-main1.c plt-main2.c plt-main3.c plt-main4.c} \
 		$pltdump \
