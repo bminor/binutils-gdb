@@ -132,7 +132,7 @@ def may_have_copyright_notice(filename):
     This function assumes that the current working directory is that root
     directory.
 
-    The algorigthm is fairly crude, meaning that it might return
+    The algorithm is fairly crude, meaning that it might return
     some false positives.  I do not think it will return any false
     negatives...  We might improve this function to handle more
     complex cases later...
@@ -248,7 +248,7 @@ MULTIPLE_COPYRIGHT_HEADERS = (
     "gdb/syscalls/update-netbsd.sh",
 )
 
-# The list of file which have a copyright, but not head by the FSF.
+# The list of file which have a copyright, but not held by the FSF.
 # Filenames are relative to the root directory.
 NOT_FSF_LIST = (
     "gdb/exc_request.defs",
