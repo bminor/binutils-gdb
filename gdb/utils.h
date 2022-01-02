@@ -271,12 +271,6 @@ extern void fprintf_styled (struct ui_file *stream,
 			    ...)
   ATTRIBUTE_PRINTF (3, 4);
 
-extern void vfprintf_styled (struct ui_file *stream,
-			     const ui_file_style &style,
-			     const char *fmt,
-			     va_list args)
-  ATTRIBUTE_PRINTF (3, 0);
-
 /* Like gdb_puts, but styles the output according to STYLE, when
    appropriate.  */
 

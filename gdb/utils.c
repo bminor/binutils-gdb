@@ -1837,17 +1837,6 @@ fprintf_styled (struct ui_file *stream, const ui_file_style &style,
   stream->emit_style_escape (ui_file_style ());
 }
 
-/* See utils.h.  */
-
-void
-vfprintf_styled (struct ui_file *stream, const ui_file_style &style,
-		 const char *format, va_list args)
-{
-  stream->emit_style_escape (style);
-  gdb_vprintf (stream, format, args);
-  stream->emit_style_escape (ui_file_style ());
-}
-
 void
 gdb_printf (const char *format, ...)
 {
