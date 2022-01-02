@@ -70,7 +70,7 @@ print_i387_ext (struct gdbarch *gdbarch,
 	fprintf_filtered (file, " %cInf", (sign ? '-' : '+'));
       else if (sign && fraction[0] == 0x00000000 && fraction[1] == 0x40000000)
 	/* Real Indefinite (QNaN).  */
-	fputs_unfiltered (" Real Indefinite (QNaN)", file);
+	fputs_filtered (" Real Indefinite (QNaN)", file);
       else if (fraction[1] & 0x40000000)
 	/* QNaN.  */
 	fputs_filtered (" QNaN", file);
