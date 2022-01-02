@@ -435,7 +435,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
   if (options->symbol_print)
     print_address_demangle (options, gdbarch, address, stream, demangle);
   else if (options->addressprint)
-    fputs_filtered (paddress (gdbarch, address), stream);
+    gdb_puts (paddress (gdbarch, address), stream);
 }
 
 /* generic_val_print helper for TYPE_CODE_ARRAY.  */
@@ -458,9 +458,9 @@ generic_val_print_array (struct value *val,
       if (!get_array_bounds (type, &low_bound, &high_bound))
 	error (_("Could not determine the array high bound"));
 
-      fputs_filtered (decorations->array_start, stream);
+      gdb_puts (decorations->array_start, stream);
       value_print_array_elements (val, stream, recurse, options, 0);
-      fputs_filtered (decorations->array_end, stream);
+      gdb_puts (decorations->array_end, stream);
     }
   else
     {
@@ -506,7 +506,7 @@ print_ref_address (struct type *type, const gdb_byte *address_buffer,
 	= extract_typed_address (address_buffer + embedded_offset, type);
 
       fprintf_filtered (stream, "@");
-      fputs_filtered (paddress (gdbarch, address), stream);
+      gdb_puts (paddress (gdbarch, address), stream);
     }
   /* Else: we have a non-addressable value, such as a DW_AT_const_value.  */
 }
@@ -581,7 +581,7 @@ generic_val_print_ref (struct type *type,
       print_ref_address (type, address, embedded_offset, stream);
 
       if (options->deref_ref)
-	fputs_filtered (": ", stream);
+	gdb_puts (": ", stream);
     }
 
   if (options->deref_ref)
@@ -590,7 +590,7 @@ generic_val_print_ref (struct type *type,
 	common_val_print (deref_val, stream, recurse, options,
 			  current_language);
       else
-	fputs_filtered ("???", stream);
+	gdb_puts ("???", stream);
     }
 }
 
@@ -639,11 +639,11 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 	    {
 	      if (first)
 		{
-		  fputs_filtered ("(", stream);
+		  gdb_puts ("(", stream);
 		  first = 0;
 		}
 	      else
-		fputs_filtered (" | ", stream);
+		gdb_puts (" | ", stream);
 
 	      val &= ~type->field (i).loc_enumval ();
 	      fputs_styled (type->field (i).name (),
@@ -655,24 +655,24 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 	{
 	  /* There are leftover bits, print them.  */
 	  if (first)
-	    fputs_filtered ("(", stream);
+	    gdb_puts ("(", stream);
 	  else
-	    fputs_filtered (" | ", stream);
+	    gdb_puts (" | ", stream);
 
-	  fputs_filtered ("unknown: 0x", stream);
+	  gdb_puts ("unknown: 0x", stream);
 	  print_longest (stream, 'x', 0, val);
-	  fputs_filtered (")", stream);
+	  gdb_puts (")", stream);
 	}
       else if (first)
 	{
 	  /* Nothing has been printed and the value is 0, the enum value must
 	     have been 0.  */
-	  fputs_filtered ("0", stream);
+	  gdb_puts ("0", stream);
 	}
       else
 	{
 	  /* Something has been printed, close the parenthesis.  */
-	  fputs_filtered (")", stream);
+	  gdb_puts (")", stream);
 	}
     }
   else
@@ -744,9 +744,9 @@ generic_value_print_bool
       struct type *type = check_typedef (value_type (value));
       LONGEST val = unpack_long (type, valaddr);
       if (val == 0)
-	fputs_filtered (decorations->false_name, stream);
+	gdb_puts (decorations->false_name, stream);
       else if (val == 1)
-	fputs_filtered (decorations->true_name, stream);
+	gdb_puts (decorations->true_name, stream);
       else
 	print_longest (stream, 'd', 0, val);
     }
@@ -790,7 +790,7 @@ generic_value_print_char (struct value *value, struct ui_file *stream,
 	fprintf_filtered (stream, "%u", (unsigned int) val);
       else
 	fprintf_filtered (stream, "%d", (int) val);
-      fputs_filtered (" ", stream);
+      gdb_puts (" ", stream);
       current_language->printchar (val, unresolved_type, stream);
     }
 }
@@ -965,7 +965,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_VOID:
-      fputs_filtered (decorations->void_name, stream);
+      gdb_puts (decorations->void_name, stream);
       break;
 
     case TYPE_CODE_ERROR:
@@ -1081,7 +1081,7 @@ val_print_check_max_depth (struct ui_file *stream, int recurse,
   if (options->max_depth > -1 && recurse >= options->max_depth)
     {
       gdb_assert (language->struct_too_deep_ellipsis () != NULL);
-      fputs_filtered (language->struct_too_deep_ellipsis (), stream);
+      gdb_puts (language->struct_too_deep_ellipsis (), stream);
       return true;
     }
 
@@ -1193,7 +1193,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
   struct gdbarch *gdbarch = type->arch ();
   struct type *bool_type = builtin_type (gdbarch)->builtin_bool;
 
-  fputs_filtered ("[", stream);
+  gdb_puts ("[", stream);
   for (field = 0; field < nfields; field++)
     {
       if (type->field (field).name ()[0] != '\0')
@@ -1230,7 +1230,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 	    }
 	}
     }
-  fputs_filtered (" ]", stream);
+  gdb_puts (" ]", stream);
 }
 
 /* See valprint.h.  */
@@ -1321,7 +1321,7 @@ print_longest (struct ui_file *stream, int format, int use_c_format,
       internal_error (__FILE__, __LINE__,
 		      _("failed internal consistency check"));
     } 
-  fputs_filtered (val, stream);
+  gdb_puts (val, stream);
 }
 
 /* This used to be a macro, but I don't think it is called often enough
@@ -1355,7 +1355,7 @@ print_floating (const gdb_byte *valaddr, struct type *type,
 		struct ui_file *stream)
 {
   std::string str = target_float_to_string (valaddr, type);
-  fputs_filtered (str.c_str (), stream);
+  gdb_puts (str.c_str (), stream);
 }
 
 void
@@ -1484,7 +1484,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
   cycle = (len * HOST_CHAR_BIT) % BITS_IN_OCTAL;
   carry = 0;
 
-  fputs_filtered ("0", stream);
+  gdb_puts ("0", stream);
   bool seen_a_one = false;
   if (byte_order == BFD_ENDIAN_BIG)
     {
@@ -1661,7 +1661,7 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
   if (is_signed
       && maybe_negate_by_bytes (valaddr, len, byte_order, &negated_bytes))
     {
-      fputs_filtered ("-", stream);
+      gdb_puts ("-", stream);
       valaddr = negated_bytes.data ();
     }
 
@@ -1781,7 +1781,7 @@ print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
 {
   const gdb_byte *p;
 
-  fputs_filtered ("0x", stream);
+  gdb_puts ("0x", stream);
   if (byte_order == BFD_ENDIAN_BIG)
     {
       p = valaddr;
@@ -1850,9 +1850,9 @@ print_function_pointer_address (const struct value_print_options *options,
      the address of the description.  */
   if (options->addressprint && func_addr != address)
     {
-      fputs_filtered ("@", stream);
-      fputs_filtered (paddress (gdbarch, address), stream);
-      fputs_filtered (": ", stream);
+      gdb_puts ("@", stream);
+      gdb_puts (paddress (gdbarch, address), stream);
+      gdb_puts (": ", stream);
     }
   print_address_demangle (options, gdbarch, func_addr, stream, demangle);
 }
@@ -2353,7 +2353,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
 			     sizeof (gdb_wchar_t), &output, translit_char);
   obstack_1grow (&output, '\0');
 
-  fputs_filtered ((const char *) obstack_base (&output), stream);
+  gdb_puts ((const char *) obstack_base (&output), stream);
 }
 
 /* Return the repeat count of the next character/byte in ITER,
@@ -2639,7 +2639,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 
   if (length == 0)
     {
-      fputs_filtered ("\"\"", stream);
+      gdb_puts ("\"\"", stream);
       return;
     }
 
@@ -2696,7 +2696,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 			     sizeof (gdb_wchar_t), &output, translit_char);
   obstack_1grow (&output, '\0');
 
-  fputs_filtered ((const char *) obstack_base (&output), stream);
+  gdb_puts ((const char *) obstack_base (&output), stream);
 }
 
 /* Print a string from the inferior, starting at ADDR and printing up to LEN

@@ -158,7 +158,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 					 demangle);
   else if (options->addressprint)
     {
-      fputs_filtered (paddress (gdbarch, address), stream);
+      gdb_puts (paddress (gdbarch, address), stream);
       want_space = 1;
     }
 
@@ -169,7 +169,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
       && address != 0)
     {
       if (want_space)
-	fputs_filtered (" ", stream);
+	gdb_puts (" ", stream);
       val_print_string (unresolved_elttype, NULL, address, -1, stream, options);
     }
   else if (cp_is_vtbl_member (type))
@@ -185,10 +185,10 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	  && (vt_address == BMSYMBOL_VALUE_ADDRESS (msymbol)))
 	{
 	  if (want_space)
-	    fputs_filtered (" ", stream);
-	  fputs_filtered (" <", stream);
-	  fputs_filtered (msymbol.minsym->print_name (), stream);
-	  fputs_filtered (">", stream);
+	    gdb_puts (" ", stream);
+	  gdb_puts (" <", stream);
+	  gdb_puts (msymbol.minsym->print_name (), stream);
+	  gdb_puts (">", stream);
 	  want_space = 1;
 	}
 
@@ -199,7 +199,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	  struct type *wtype;
 
 	  if (want_space)
-	    fputs_filtered (" ", stream);
+	    gdb_puts (" ", stream);
 
 	  if (msymbol.minsym != NULL)
 	    {
@@ -408,7 +408,7 @@ c_value_print_int (struct value *val, struct ui_file *stream,
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       if (c_textual_element_type (type, options->format))
 	{
-	  fputs_filtered (" ", stream);
+	  gdb_puts (" ", stream);
 	  current_language->printchar (unpack_long (type, valaddr), type,
 				       stream);
 	}

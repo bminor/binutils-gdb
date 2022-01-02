@@ -5102,7 +5102,7 @@ print_symbol_info (enum search_domain kind,
       if (sym->line () != 0)
 	printf_filtered ("%d:\t", sym->line ());
       else
-	puts_filtered ("\t");
+	gdb_puts ("\t");
     }
 
   std::string str = symbol_to_info_string (sym, block, kind);

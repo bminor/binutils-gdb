@@ -348,12 +348,12 @@ py_print_single_arg (struct ui_out *out,
     {
       string_file stb;
 
-      fputs_filtered (fa->sym->print_name (), &stb);
+      gdb_puts (fa->sym->print_name (), &stb);
       if (fa->entry_kind == print_entry_values_compact)
 	{
 	  stb.puts ("=");
 
-	  fputs_filtered (fa->sym->print_name (), &stb);
+	  gdb_puts (fa->sym->print_name (), &stb);
 	}
       if (fa->entry_kind == print_entry_values_only
 	  || fa->entry_kind == print_entry_values_compact)

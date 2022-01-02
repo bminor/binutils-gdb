@@ -1858,7 +1858,7 @@ maint_print_xml_tdesc_cmd (const char *args, int from_tty)
   std::string buf;
   print_xml_feature v (&buf);
   tdesc->accept (v);
-  puts_filtered (buf.c_str ());
+  gdb_puts (buf.c_str ());
 }
 
 namespace selftests {

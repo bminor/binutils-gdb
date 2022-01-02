@@ -294,7 +294,7 @@ sim_inferior_data::~sim_inferior_data ()
 static void
 dump_mem (const gdb_byte *buf, int len)
 {
-  fputs_unfiltered ("\t", gdb_stdlog);
+  gdb_puts ("\t", gdb_stdlog);
 
   if (len == 8 || len == 4)
     {
@@ -313,7 +313,7 @@ dump_mem (const gdb_byte *buf, int len)
 	fprintf_unfiltered (gdb_stdlog, "0x%02x ", buf[i]);
     }
 
-  fputs_unfiltered ("\n", gdb_stdlog);
+  gdb_puts ("\n", gdb_stdlog);
 }
 
 /* Initialize gdb_callback.  */

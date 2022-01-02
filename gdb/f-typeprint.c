@@ -69,14 +69,14 @@ f_language::print_type (struct type *type, const char *varstring,
 			  == TYPE_CODE_METHOD)
 		      || (TYPE_TARGET_TYPE (type)->code ()
 			  == TYPE_CODE_ARRAY))))))
-    fputs_filtered (" ", stream);
+    gdb_puts (" ", stream);
   f_type_print_varspec_prefix (type, stream, show, 0);
 
   if (varstring != NULL)
     {
       int demangled_args;
 
-      fputs_filtered (varstring, stream);
+      gdb_puts (varstring, stream);
 
       /* For demangled function names, we have the arglist as part of the name,
 	 so don't print an additional pair of ()'s.  */
@@ -209,7 +209,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	    {
 	      LONGEST upper_bound = f77_get_upperbound (type);
 
-	      fputs_filtered (plongest (upper_bound), stream);
+	      gdb_puts (plongest (upper_bound), stream);
 	    }
 	}
 
@@ -250,7 +250,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	    {
 	      if (i > 0)
 		{
-		  fputs_filtered (", ", stream);
+		  gdb_puts (", ", stream);
 		  stream->wrap_here (4);
 		}
 	      print_type (type->field (i).type (), "", stream, -1, 0, 0);
@@ -399,25 +399,25 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, "%*sType, C_Union :: ", level, "");
       else
 	fprintf_filtered (stream, "%*sType ", level, "");
-      fputs_filtered (type->name (), stream);
+      gdb_puts (type->name (), stream);
       /* According to the definition,
 	 we only print structure elements in case show > 0.  */
       if (show > 0)
 	{
-	  fputs_filtered ("\n", stream);
+	  gdb_puts ("\n", stream);
 	  for (index = 0; index < type->num_fields (); index++)
 	    {
 	      f_type_print_base (type->field (index).type (), stream,
 				 show - 1, level + 4);
-	      fputs_filtered (" :: ", stream);
+	      gdb_puts (" :: ", stream);
 	      fputs_styled (type->field (index).name (),
 			    variable_name_style.style (), stream);
 	      f_type_print_varspec_suffix (type->field (index).type (),
 					   stream, show - 1, 0, 0, 0, false);
-	      fputs_filtered ("\n", stream);
+	      gdb_puts ("\n", stream);
 	    }
 	  fprintf_filtered (stream, "%*sEnd Type ", level, "");
-	  fputs_filtered (type->name (), stream);
+	  gdb_puts (type->name (), stream);
 	}
       break;
 

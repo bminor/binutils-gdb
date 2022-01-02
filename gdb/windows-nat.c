@@ -944,7 +944,7 @@ display_selector (HANDLE thread, DWORD sel)
       printf_filtered ("0x%03x: ", (unsigned) sel);
       if (!info.HighWord.Bits.Pres)
 	{
-	  puts_filtered ("Segment not present\n");
+	  gdb_puts ("Segment not present\n");
 	  return 0;
 	}
       base = (info.HighWord.Bits.BaseHi << 24) +
@@ -955,50 +955,50 @@ display_selector (HANDLE thread, DWORD sel)
 	limit = (limit << 12) | 0xfff;
       printf_filtered ("base=0x%08x limit=0x%08x", base, limit);
       if (info.HighWord.Bits.Default_Big)
-	puts_filtered(" 32-bit ");
+	gdb_puts(" 32-bit ");
       else
-	puts_filtered(" 16-bit ");
+	gdb_puts(" 16-bit ");
       switch ((info.HighWord.Bits.Type & 0xf) >> 1)
 	{
 	case 0:
-	  puts_filtered ("Data (Read-Only, Exp-up");
+	  gdb_puts ("Data (Read-Only, Exp-up");
 	  break;
 	case 1:
-	  puts_filtered ("Data (Read/Write, Exp-up");
+	  gdb_puts ("Data (Read/Write, Exp-up");
 	  break;
 	case 2:
-	  puts_filtered ("Unused segment (");
+	  gdb_puts ("Unused segment (");
 	  break;
 	case 3:
-	  puts_filtered ("Data (Read/Write, Exp-down");
+	  gdb_puts ("Data (Read/Write, Exp-down");
 	  break;
 	case 4:
-	  puts_filtered ("Code (Exec-Only, N.Conf");
+	  gdb_puts ("Code (Exec-Only, N.Conf");
 	  break;
 	case 5:
-	  puts_filtered ("Code (Exec/Read, N.Conf");
+	  gdb_puts ("Code (Exec/Read, N.Conf");
 	  break;
 	case 6:
-	  puts_filtered ("Code (Exec-Only, Conf");
+	  gdb_puts ("Code (Exec-Only, Conf");
 	  break;
 	case 7:
-	  puts_filtered ("Code (Exec/Read, Conf");
+	  gdb_puts ("Code (Exec/Read, Conf");
 	  break;
 	default:
 	  printf_filtered ("Unknown type 0x%lx",
 			   (unsigned long) info.HighWord.Bits.Type);
 	}
       if ((info.HighWord.Bits.Type & 0x1) == 0)
-	puts_filtered(", N.Acc");
-      puts_filtered (")\n");
+	gdb_puts(", N.Acc");
+      gdb_puts (")\n");
       if ((info.HighWord.Bits.Type & 0x10) == 0)
-	puts_filtered("System selector ");
+	gdb_puts("System selector ");
       printf_filtered ("Priviledge level = %ld. ",
 		       (unsigned long) info.HighWord.Bits.Dpl);
       if (info.HighWord.Bits.Granularity)
-	puts_filtered ("Page granular.\n");
+	gdb_puts ("Page granular.\n");
       else
-	puts_filtered ("Byte granular.\n");
+	gdb_puts ("Byte granular.\n");
       return 1;
     }
   else
@@ -1017,7 +1017,7 @@ display_selectors (const char * args, int from_tty)
 {
   if (inferior_ptid == null_ptid)
     {
-      puts_filtered ("Impossible to display selectors now.\n");
+      gdb_puts ("Impossible to display selectors now.\n");
       return;
     }
 
@@ -1029,44 +1029,44 @@ display_selectors (const char * args, int from_tty)
 #ifdef __x86_64__
       if (wow64_process)
 	{
-	  puts_filtered ("Selector $cs\n");
+	  gdb_puts ("Selector $cs\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->wow64_context.SegCs);
-	  puts_filtered ("Selector $ds\n");
+	  gdb_puts ("Selector $ds\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->wow64_context.SegDs);
-	  puts_filtered ("Selector $es\n");
+	  gdb_puts ("Selector $es\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->wow64_context.SegEs);
-	  puts_filtered ("Selector $ss\n");
+	  gdb_puts ("Selector $ss\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->wow64_context.SegSs);
-	  puts_filtered ("Selector $fs\n");
+	  gdb_puts ("Selector $fs\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->wow64_context.SegFs);
-	  puts_filtered ("Selector $gs\n");
+	  gdb_puts ("Selector $gs\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->wow64_context.SegGs);
 	}
       else
 #endif
 	{
-	  puts_filtered ("Selector $cs\n");
+	  gdb_puts ("Selector $cs\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->context.SegCs);
-	  puts_filtered ("Selector $ds\n");
+	  gdb_puts ("Selector $ds\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->context.SegDs);
-	  puts_filtered ("Selector $es\n");
+	  gdb_puts ("Selector $es\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->context.SegEs);
-	  puts_filtered ("Selector $ss\n");
+	  gdb_puts ("Selector $ss\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->context.SegSs);
-	  puts_filtered ("Selector $fs\n");
+	  gdb_puts ("Selector $fs\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->context.SegFs);
-	  puts_filtered ("Selector $gs\n");
+	  gdb_puts ("Selector $gs\n");
 	  display_selector (current_windows_thread->h,
 			    current_windows_thread->context.SegGs);
 	}

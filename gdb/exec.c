@@ -980,7 +980,7 @@ exec_target::files_info ()
     print_section_info (&current_program_space->target_sections (),
 			current_program_space->exec_bfd ());
   else
-    puts_filtered (_("\t<no file loaded>\n"));
+    gdb_puts (_("\t<no file loaded>\n"));
 }
 
 static void

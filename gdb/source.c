@@ -403,9 +403,9 @@ set_directories_command (const char *args,
 static void
 show_directories_1 (ui_file *file, char *ignore, int from_tty)
 {
-  fputs_filtered ("Source directories searched: ", file);
-  fputs_filtered (source_path.c_str (), file);
-  fputs_filtered ("\n", file);
+  gdb_puts ("Source directories searched: ", file);
+  gdb_puts (source_path.c_str (), file);
+  gdb_puts ("\n", file);
 }
 
 /* Handler for "show directories" command.  */

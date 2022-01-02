@@ -508,7 +508,7 @@ mips_show_dr (const char *func, CORE_ADDR addr,
 {
   int i;
 
-  fputs_unfiltered (func, gdb_stdlog);
+  gdb_puts (func, gdb_stdlog);
   if (addr || len)
     fprintf_unfiltered (gdb_stdlog,
 			" (addr=%s, len=%d, type=%s)",
@@ -518,7 +518,7 @@ mips_show_dr (const char *func, CORE_ADDR addr,
 			   : (type == hw_access ? "data-read/write"
 			      : (type == hw_execute ? "instruction-execute"
 				 : "??unknown??"))));
-  fputs_unfiltered (":\n", gdb_stdlog);
+  gdb_puts (":\n", gdb_stdlog);
 
   for (i = 0; i < MAX_DEBUG_REGISTER; i++)
     fprintf_unfiltered (gdb_stdlog, "\tDR%d: lo=%s, hi=%s\n", i,

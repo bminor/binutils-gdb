@@ -1060,7 +1060,7 @@ print_mem (unsigned long datum, const char *header, int in_pages_p)
     {
       if (in_pages_p)
 	datum <<= 12;
-      puts_filtered (header);
+      gdb_puts (header);
       if (datum > 1024)
 	{
 	  printf_filtered ("%lu KB", datum >> 10);
@@ -1069,7 +1069,7 @@ print_mem (unsigned long datum, const char *header, int in_pages_p)
 	}
       else
 	printf_filtered ("%lu Bytes", datum);
-      puts_filtered ("\n");
+      gdb_puts ("\n");
     }
 }
 
@@ -1137,7 +1137,7 @@ go32_sysinfo (const char *arg, int from_tty)
   printf_filtered ("CPU Type.......................%s", u.machine);
   if (cpuid_vendor[0])
     printf_filtered (" (%s)", cpuid_vendor);
-  puts_filtered ("\n");
+  gdb_puts ("\n");
 
   /* CPUID with EAX = 1 returns processor signature and features.  */
   if (cpuid_max >= 1)
@@ -1262,39 +1262,39 @@ go32_sysinfo (const char *arg, int from_tty)
 	  || ((cpuid_edx & 1) == 0)
 	  || ((amd_p || hygon_p) && (cpuid_edx & (3 << 30)) != 0))
 	{
-	  puts_filtered ("CPU Features...................");
+	  gdb_puts ("CPU Features...................");
 	  /* We only list features which might be useful in the DPMI
 	     environment.  */
 	  if ((cpuid_edx & 1) == 0)
-	    puts_filtered ("No FPU "); /* It's unusual to not have an FPU.  */
+	    gdb_puts ("No FPU "); /* It's unusual to not have an FPU.  */
 	  if ((cpuid_edx & (1 << 1)) != 0)
-	    puts_filtered ("VME ");
+	    gdb_puts ("VME ");
 	  if ((cpuid_edx & (1 << 2)) != 0)
-	    puts_filtered ("DE ");
+	    gdb_puts ("DE ");
 	  if ((cpuid_edx & (1 << 4)) != 0)
-	    puts_filtered ("TSC ");
+	    gdb_puts ("TSC ");
 	  if ((cpuid_edx & (1 << 23)) != 0)
-	    puts_filtered ("MMX ");
+	    gdb_puts ("MMX ");
 	  if ((cpuid_edx & (1 << 25)) != 0)
-	    puts_filtered ("SSE ");
+	    gdb_puts ("SSE ");
 	  if ((cpuid_edx & (1 << 26)) != 0)
-	    puts_filtered ("SSE2 ");
+	    gdb_puts ("SSE2 ");
 	  if (amd_p || hygon_p)
 	    {
 	      if ((cpuid_edx & (1 << 31)) != 0)
-		puts_filtered ("3DNow! ");
+		gdb_puts ("3DNow! ");
 	      if ((cpuid_edx & (1 << 30)) != 0)
-		puts_filtered ("3DNow!Ext");
+		gdb_puts ("3DNow!Ext");
 	    }
-	  puts_filtered ("\n");
+	  gdb_puts ("\n");
 	}
     }
-  puts_filtered ("\n");
+  gdb_puts ("\n");
   printf_filtered ("DOS Version....................%s %s.%s",
 		   _os_flavor, u.release, u.version);
   if (true_dos_version != advertized_dos_version)
     printf_filtered (" (disguised as v%d.%d)", _osmajor, _osminor);
-  puts_filtered ("\n");
+  gdb_puts ("\n");
   if (!windows_major)
     go32_get_windows_version ();
   if (windows_major != 0xff)
@@ -1337,7 +1337,7 @@ go32_sysinfo (const char *arg, int from_tty)
   else if (true_dos_version == 0x532 && advertized_dos_version == 0x500)
     printf_filtered ("Windows Version................"
 		     "Windows NT family (W2K/XP/W2K3/Vista/W2K8)\n");
-  puts_filtered ("\n");
+  gdb_puts ("\n");
   /* On some versions of Windows, __dpmi_get_capabilities returns
      zero, but the buffer is not filled with info, so we fill the
      buffer with a known pattern and test for it afterwards.  */
@@ -1384,7 +1384,7 @@ go32_sysinfo (const char *arg, int from_tty)
 		       a_tss.tss_cs & 3, (a_tss.tss_cs & 4) ? "LDT" : "GDT",
 		       (a_tss.tss_cs & 3) > ((eflags >> 12) & 3) ? "" : "out");
     }
-  puts_filtered ("\n");
+  gdb_puts ("\n");
   __dpmi_get_free_memory_information (&mem_info);
   print_mem (mem_info.total_number_of_physical_pages,
 	     "DPMI Total Physical Memory.....", 1);
@@ -1542,7 +1542,7 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
 
   /* Get the descriptor from the table.  */
   if (idx == 0 && type == 0)
-    puts_filtered ("0x000: null descriptor\n");
+    gdb_puts ("0x000: null descriptor\n");
   else if (get_descriptor (base_addr, idx, &descr) != -1)
     {
       /* For each type of descriptor table, this has a bit set if the
@@ -1580,7 +1580,7 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
 				 descr.stype == 3 ? "" : "in");
 		break;
 	      case 2:
-		puts_filtered (" LDT");
+		gdb_puts (" LDT");
 		break;
 	      case 4:
 		memcpy (&gate, &descr, sizeof gate);
@@ -1654,7 +1654,7 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
 		printf_filtered ("Unknown type 0x%02x", descr.stype);
 		break;
 	    }
-	  puts_filtered ("\n");
+	  gdb_puts ("\n");
 	}
       else if (force)
 	{
@@ -1662,7 +1662,7 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
 			   type == 1
 			   ? idx : (idx * 8) | (type ? (cpl | 4) : 0));
 	  if (!descr.present)
-	    puts_filtered ("Segment not present\n");
+	    gdb_puts ("Segment not present\n");
 	  else
 	    printf_filtered ("Segment type 0x%02x is invalid in this table\n",
 			     descr.stype);
@@ -1700,7 +1700,7 @@ go32_sldt (const char *arg, int from_tty)
   __asm__ __volatile__ ("sldt   %0" : "=m" (ldtr) : /* no inputs */ );
   ldt_idx = ldtr / 8;
   if (ldt_idx == 0)
-    puts_filtered ("There is no LDT.\n");
+    gdb_puts ("There is no LDT.\n");
   /* LDT's entry in the GDT must have the type LDT, which is 2.  */
   else if (get_descriptor (gdtr.base, ldt_idx, &ldt_descr) != 2)
     printf_filtered ("LDT is present (at %#x), but unreadable by GDB.\n",
@@ -1941,9 +1941,9 @@ display_ptable_entry (unsigned long entry, int is_dir, int force, unsigned off)
     {
       printf_filtered ("Base=0x%05lx000", entry >> 12);
       if ((entry & 0x100) && !is_dir)
-	puts_filtered (" Global");
+	gdb_puts (" Global");
       if ((entry & 0x40) && !is_dir)
-	puts_filtered (" Dirty");
+	gdb_puts (" Dirty");
       printf_filtered (" %sAcc.", (entry & 0x20) ? "" : "Not-");
       printf_filtered (" %sCached", (entry & 0x10) ? "" : "Not-");
       printf_filtered (" Write-%s", (entry & 8) ? "Thru" : "Back");
@@ -1951,7 +1951,7 @@ display_ptable_entry (unsigned long entry, int is_dir, int force, unsigned off)
       printf_filtered (" Read-%s", (entry & 2) ? "Write" : "Only");
       if (off)
 	printf_filtered (" +0x%x", off);
-      puts_filtered ("\n");
+      gdb_puts ("\n");
     }
   else if (force)
     printf_filtered ("Page%s not present or not supported; value=0x%lx.\n",
@@ -1977,8 +1977,8 @@ go32_pde (const char *arg, int from_tty)
 
   pdbr = get_cr3 ();
   if (!pdbr)
-    puts_filtered ("Access to Page Directories is "
-		   "not supported on this system.\n");
+    gdb_puts ("Access to Page Directories is "
+	      "not supported on this system.\n");
   else if (pde_idx >= 0)
     display_ptable_entry (get_pde (pde_idx), 1, 1, 0);
   else
@@ -2002,7 +2002,7 @@ display_page_table (long n, int force)
 		       "Page Directory entry 0x%lx:\n", n);
       for (i = 0; i < 1024; i++)
 	display_ptable_entry (get_pte (pde, i), 0, 0, 0);
-      puts_filtered ("\n");
+      gdb_puts ("\n");
     }
   else if (force)
     printf_filtered ("Page Table not present; value=0x%lx.\n", pde >> 1);
@@ -2027,7 +2027,7 @@ go32_pte (const char *arg, int from_tty)
 
   pdbr = get_cr3 ();
   if (!pdbr)
-    puts_filtered ("Access to Page Tables is not supported on this system.\n");
+    gdb_puts ("Access to Page Tables is not supported on this system.\n");
   else if (pde_idx >= 0)
     display_page_table (pde_idx, 1);
   else
@@ -2052,7 +2052,7 @@ go32_pte_for_address (const char *arg, int from_tty)
 
   pdbr = get_cr3 ();
   if (!pdbr)
-    puts_filtered ("Access to Page Tables is not supported on this system.\n");
+    gdb_puts ("Access to Page Tables is not supported on this system.\n");
   else
     {
       int pde_idx = (addr >> 22) & 0x3ff;

@@ -349,13 +349,13 @@ rust_language::val_print_struct
 	return;
 
       if (type->name () != NULL)
-	fputs_filtered (" ", stream);
+	gdb_puts (" ", stream);
     }
 
   if (is_tuple || is_tuple_struct)
-    fputs_filtered ("(", stream);
+    gdb_puts ("(", stream);
   else
-    fputs_filtered ("{", stream);
+    gdb_puts ("{", stream);
 
   opts = *options;
   opts.deref_ref = 0;
@@ -367,15 +367,15 @@ rust_language::val_print_struct
 	continue;
 
       if (!first_field)
-	fputs_filtered (",", stream);
+	gdb_puts (",", stream);
 
       if (options->prettyformat)
 	{
-	  fputs_filtered ("\n", stream);
+	  gdb_puts ("\n", stream);
 	  print_spaces_filtered (2 + 2 * recurse, stream);
 	}
       else if (!first_field)
-	fputs_filtered (" ", stream);
+	gdb_puts (" ", stream);
 
       first_field = 0;
 
@@ -383,7 +383,7 @@ rust_language::val_print_struct
 	{
 	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
-	  fputs_filtered (": ", stream);
+	  gdb_puts (": ", stream);
 	}
 
       common_val_print (value_field (val, i), stream, recurse + 1, &opts,
@@ -392,14 +392,14 @@ rust_language::val_print_struct
 
   if (options->prettyformat)
     {
-      fputs_filtered ("\n", stream);
+      gdb_puts ("\n", stream);
       print_spaces_filtered (2 * recurse, stream);
     }
 
   if (is_tuple || is_tuple_struct)
-    fputs_filtered (")", stream);
+    gdb_puts (")", stream);
   else
-    fputs_filtered ("}", stream);
+    gdb_puts ("}", stream);
 }
 
 /* See rust-lang.h.  */
@@ -458,7 +458,7 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
   for (int j = 0; j < variant_type->num_fields (); j++)
     {
       if (!first_field)
-	fputs_filtered (", ", stream);
+	gdb_puts (", ", stream);
       first_field = false;
 
       if (!is_tuple)
@@ -471,9 +471,9 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
     }
 
   if (is_tuple)
-    fputs_filtered (")", stream);
+    gdb_puts (")", stream);
   else
-    fputs_filtered ("}", stream);
+    gdb_puts ("}", stream);
 }
 
 static const struct generic_val_print_decorations rust_decorations =
@@ -524,11 +524,11 @@ rust_language::value_print_inner
 
 	    if (opts.addressprint)
 	      {
-		fputs_filtered (paddress (arch, addr), stream);
-		fputs_filtered (" ", stream);
+		gdb_puts (paddress (arch, addr), stream);
+		gdb_puts (" ", stream);
 	      }
 
-	    fputs_filtered ("b", stream);
+	    gdb_puts ("b", stream);
 	    val_print_string (TYPE_TARGET_TYPE (elttype), "ASCII", addr,
 			      high_bound - low_bound + 1, stream,
 			      &opts);
@@ -542,7 +542,7 @@ rust_language::value_print_inner
       if (type->is_unsigned () && TYPE_LENGTH (type) == 0
 	  && type->name () != NULL && strcmp (type->name (), "()") == 0)
 	{
-	  fputs_filtered ("()", stream);
+	  gdb_puts ("()", stream);
 	  break;
 	}
       goto generic_print;
@@ -557,7 +557,7 @@ rust_language::value_print_inner
 	/* If we see a plain TYPE_CODE_STRING, then we're printing a
 	   byte string, hence the choice of "ASCII" as the
 	   encoding.  */
-	fputs_filtered ("b", stream);
+	gdb_puts ("b", stream);
 	printstr (stream, TYPE_TARGET_TYPE (type),
 		  value_contents_for_printing (val).data (),
 		  high_bound - low_bound + 1, "ASCII", 0, &opts);
@@ -570,7 +570,7 @@ rust_language::value_print_inner
 
 	if (get_array_bounds (type, &low_bound, &high_bound)
 	    && high_bound - low_bound + 1 == 0)
-	  fputs_filtered ("[]", stream);
+	  gdb_puts ("[]", stream);
 	else
 	  goto generic_print;
       }
@@ -617,7 +617,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
   /* Print a tuple type simply.  */
   if (rust_tuple_type_p (type))
     {
-      fputs_filtered (type->name (), stream);
+      gdb_puts (type->name (), stream);
       return;
     }
 
@@ -648,26 +648,26 @@ rust_print_struct_def (struct type *type, const char *varstring,
       /* This code path is also used by unions and enums.  */
       if (is_enum)
 	{
-	  fputs_filtered ("enum ", stream);
+	  gdb_puts ("enum ", stream);
 	  dynamic_prop *prop = type->dyn_prop (DYN_PROP_VARIANT_PARTS);
 	  if (prop != nullptr && prop->kind () == PROP_TYPE)
 	    type = prop->original_type ();
 	}
       else if (type->code () == TYPE_CODE_STRUCT)
-	fputs_filtered ("struct ", stream);
+	gdb_puts ("struct ", stream);
       else
-	fputs_filtered ("union ", stream);
+	gdb_puts ("union ", stream);
 
       if (tagname != NULL)
-	fputs_filtered (tagname, stream);
+	gdb_puts (tagname, stream);
     }
 
   if (type->num_fields () == 0 && !is_tuple)
     return;
   if (for_rust_enum && !flags->print_offsets)
-    fputs_filtered (is_tuple_struct ? "(" : "{", stream);
+    gdb_puts (is_tuple_struct ? "(" : "{", stream);
   else
-    fputs_filtered (is_tuple_struct ? " (\n" : " {\n", stream);
+    gdb_puts (is_tuple_struct ? " (\n" : " {\n", stream);
 
   /* When printing offsets, we rearrange the fields into storage
      order.  This lets us show holes more clearly.  We work using
@@ -720,12 +720,12 @@ rust_print_struct_def (struct type *type, const char *varstring,
 				stream, (is_enum ? show : show - 1),
 				level + 2, flags, is_enum, podata);
       if (!for_rust_enum || flags->print_offsets)
-	fputs_filtered (",\n", stream);
+	gdb_puts (",\n", stream);
       /* Note that this check of "I" is ok because we only sorted the
 	 fields by offset when print_offsets was set, so we won't take
 	 this branch in that case.  */
       else if (i + 1 < type->num_fields ())
-	fputs_filtered (", ", stream);
+	gdb_puts (", ", stream);
     }
 
   if (flags->print_offsets)
@@ -739,7 +739,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
     }
   if (!for_rust_enum || flags->print_offsets)
     print_spaces_filtered (level, stream);
-  fputs_filtered (is_tuple_struct ? ")" : "}", stream);
+  gdb_puts (is_tuple_struct ? ")" : "}", stream);
 }
 
 /* la_print_type implementation for Rust.  */
@@ -757,9 +757,9 @@ rust_internal_print_type (struct type *type, const char *varstring,
       /* Rust calls the unit type "void" in its debuginfo,
 	 but we don't want to print it as that.  */
       if (type->code () == TYPE_CODE_VOID)
-	fputs_filtered ("()", stream);
+	gdb_puts ("()", stream);
       else
-	fputs_filtered (type->name (), stream);
+	gdb_puts (type->name (), stream);
       return;
     }
 
@@ -771,7 +771,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	 unqualified name, and there is nothing else to print
 	 here.  */
       if (!for_rust_enum)
-	fputs_filtered ("()", stream);
+	gdb_puts ("()", stream);
       break;
 
     case TYPE_CODE_FUNC:
@@ -779,23 +779,23 @@ rust_internal_print_type (struct type *type, const char *varstring,
       if (type->has_varargs ())
 	goto c_printer;
 
-      fputs_filtered ("fn ", stream);
+      gdb_puts ("fn ", stream);
       if (varstring != NULL)
-	fputs_filtered (varstring, stream);
-      fputs_filtered ("(", stream);
+	gdb_puts (varstring, stream);
+      gdb_puts ("(", stream);
       for (int i = 0; i < type->num_fields (); ++i)
 	{
 	  QUIT;
 	  if (i > 0)
-	    fputs_filtered (", ", stream);
+	    gdb_puts (", ", stream);
 	  rust_internal_print_type (type->field (i).type (), "", stream,
 				    -1, 0, flags, false, podata);
 	}
-      fputs_filtered (")", stream);
+      gdb_puts (")", stream);
       /* If it returns unit, we can omit the return type.  */
       if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
 	{
-	  fputs_filtered (" -> ", stream);
+	  gdb_puts (" -> ", stream);
 	  rust_internal_print_type (TYPE_TARGET_TYPE (type), "", stream,
 				    -1, 0, flags, false, podata);
 	}
@@ -805,7 +805,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
       {
 	LONGEST low_bound, high_bound;
 
-	fputs_filtered ("[", stream);
+	gdb_puts ("[", stream);
 	rust_internal_print_type (TYPE_TARGET_TYPE (type), NULL,
 				  stream, show - 1, level, flags, false,
 				  podata);
@@ -816,7 +816,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	else if (get_array_bounds (type, &low_bound, &high_bound))
 	  fprintf_filtered (stream, "; %s",
 			    plongest (high_bound - low_bound + 1));
-	fputs_filtered ("]", stream);
+	gdb_puts ("]", stream);
       }
       break;
 
@@ -830,14 +830,14 @@ rust_internal_print_type (struct type *type, const char *varstring,
       {
 	int len = 0;
 
-	fputs_filtered ("enum ", stream);
+	gdb_puts ("enum ", stream);
 	if (type->name () != NULL)
 	  {
-	    fputs_filtered (type->name (), stream);
-	    fputs_filtered (" ", stream);
+	    gdb_puts (type->name (), stream);
+	    gdb_puts (" ", stream);
 	    len = strlen (type->name ());
 	  }
-	fputs_filtered ("{\n", stream);
+	gdb_puts ("{\n", stream);
 
 	for (int i = 0; i < type->num_fields (); ++i)
 	  {
@@ -856,19 +856,19 @@ rust_internal_print_type (struct type *type, const char *varstring,
 					     name));
 	  }
 
-	fputs_filtered ("}", stream);
+	gdb_puts ("}", stream);
       }
       break;
 
     case TYPE_CODE_PTR:
       {
 	if (type->name () != nullptr)
-	  fputs_filtered (type->name (), stream);
+	  gdb_puts (type->name (), stream);
 	else
 	  {
 	    /* We currently can't distinguish between pointers and
 	       references.  */
-	    fputs_filtered ("*mut ", stream);
+	    gdb_puts ("*mut ", stream);
 	    type_print (TYPE_TARGET_TYPE (type), "", stream, 0);
 	  }
       }
@@ -1600,13 +1600,13 @@ rust_language::emitchar (int ch, struct type *chtype,
   else if (ch == '\\' || ch == quoter)
     fprintf_filtered (stream, "\\%c", ch);
   else if (ch == '\n')
-    fputs_filtered ("\\n", stream);
+    gdb_puts ("\\n", stream);
   else if (ch == '\r')
-    fputs_filtered ("\\r", stream);
+    gdb_puts ("\\r", stream);
   else if (ch == '\t')
-    fputs_filtered ("\\t", stream);
+    gdb_puts ("\\t", stream);
   else if (ch == '\0')
-    fputs_filtered ("\\0", stream);
+    gdb_puts ("\\0", stream);
   else if (ch >= 32 && ch <= 127 && isprint (ch))
     fputc_filtered (ch, stream);
   else if (ch <= 255)

@@ -167,14 +167,14 @@ print_one_macro (const char *name, const struct macro_definition *macro,
     {
       int i;
 
-      fputs_filtered ("(", file);
+      gdb_puts ("(", file);
       for (i = 0; i < macro->argc; i++)
 	{
-	  fputs_filtered (macro->argv[i], file);
+	  gdb_puts (macro->argv[i], file);
 	  if (i + 1 < macro->argc)
-	    fputs_filtered (", ", file);
+	    gdb_puts (", ", file);
 	}
-      fputs_filtered (")", file);
+      gdb_puts (")", file);
     }
 
   fprintf_filtered (file, " %s\n#endif\n", macro->replacement);
@@ -218,8 +218,8 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
   int i;
   int seen = 0;
 
-  fputs_unfiltered ("struct " COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG " {\n",
-		    stream);
+  gdb_puts ("struct " COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG " {\n",
+	    stream);
 
   if (!registers_used.empty ())
     for (i = 0; i < gdbarch_num_regs (gdbarch); ++i)
@@ -241,7 +241,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 	       register types (typically flags or vectors), emit a
 	       maximally-aligned array of the correct size.  */
 
-	    fputs_unfiltered ("  ", stream);
+	    gdb_puts ("  ", stream);
 	    switch (regtype->code ())
 	      {
 	      case TYPE_CODE_PTR:
@@ -257,7 +257,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 		  if (mode != NULL)
 		    {
 		      if (regtype->is_unsigned ())
-			fputs_unfiltered ("unsigned ", stream);
+			gdb_puts ("unsigned ", stream);
 		      fprintf_unfiltered (stream,
 					  "int %s"
 					  " __attribute__ ((__mode__(__%s__)))",
@@ -277,15 +277,15 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 				    regname.c_str (),
 				    pulongest (TYPE_LENGTH (regtype)));
 	      }
-	    fputs_unfiltered (";\n", stream);
+	    gdb_puts (";\n", stream);
 	  }
       }
 
   if (!seen)
-    fputs_unfiltered ("  char " COMPILE_I_SIMPLE_REGISTER_DUMMY ";\n",
-		      stream);
+    gdb_puts ("  char " COMPILE_I_SIMPLE_REGISTER_DUMMY ";\n",
+	      stream);
 
-  fputs_unfiltered ("};\n\n", stream);
+  gdb_puts ("};\n\n", stream);
 }
 
 /* C-language policy to emit a push user expression pragma into BUF.  */
@@ -294,7 +294,7 @@ struct c_push_user_expression
 {
   void push_user_expression (struct ui_file *buf)
   {
-    fputs_unfiltered ("#pragma GCC user_expression\n", buf);
+    gdb_puts ("#pragma GCC user_expression\n", buf);
   }
 };
 
@@ -320,32 +320,32 @@ struct c_add_code_header
     switch (type)
       {
       case COMPILE_I_SIMPLE_SCOPE:
-	fputs_unfiltered ("void "
-			  GCC_FE_WRAPPER_FUNCTION
-			  " (struct "
-			  COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
-			  " *"
-			  COMPILE_I_SIMPLE_REGISTER_ARG_NAME
-			  ") {\n",
-			  buf);
+	gdb_puts ("void "
+		  GCC_FE_WRAPPER_FUNCTION
+		  " (struct "
+		  COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+		  " *"
+		  COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+		  ") {\n",
+		  buf);
 	break;
 
       case COMPILE_I_PRINT_ADDRESS_SCOPE:
       case COMPILE_I_PRINT_VALUE_SCOPE:
 	/* <string.h> is needed for a memcpy call below.  */
-	fputs_unfiltered ("#include <string.h>\n"
-			  "void "
-			  GCC_FE_WRAPPER_FUNCTION
-			  " (struct "
-			  COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
-			  " *"
-			  COMPILE_I_SIMPLE_REGISTER_ARG_NAME
-			  ", "
-			  COMPILE_I_PRINT_OUT_ARG_TYPE
-			  " "
-			  COMPILE_I_PRINT_OUT_ARG
-			  ") {\n",
-			  buf);
+	gdb_puts ("#include <string.h>\n"
+		  "void "
+		  GCC_FE_WRAPPER_FUNCTION
+		  " (struct "
+		  COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+		  " *"
+		  COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+		  ", "
+		  COMPILE_I_PRINT_OUT_ARG_TYPE
+		  " "
+		  COMPILE_I_PRINT_OUT_ARG
+		  ") {\n",
+		  buf);
 	break;
 
       case COMPILE_I_RAW_SCOPE:
@@ -369,7 +369,7 @@ struct c_add_code_footer
       case COMPILE_I_SIMPLE_SCOPE:
       case COMPILE_I_PRINT_ADDRESS_SCOPE:
       case COMPILE_I_PRINT_VALUE_SCOPE:
-	fputs_unfiltered ("}\n", buf);
+	gdb_puts ("}\n", buf);
 	break;
 
       case COMPILE_I_RAW_SCOPE:
@@ -405,10 +405,10 @@ struct c_add_input
 	break;
 
       default:
-	fputs_unfiltered (input, buf);
+	gdb_puts (input, buf);
 	break;
       }
-    fputs_unfiltered ("\n", buf);
+    gdb_puts ("\n", buf);
   }
 };
 
@@ -419,7 +419,7 @@ struct cplus_push_user_expression
 {
   void push_user_expression (struct ui_file *buf)
   {
-    fputs_unfiltered ("#pragma GCC push_user_expression\n", buf);
+    gdb_puts ("#pragma GCC push_user_expression\n", buf);
   }
 };
 
@@ -429,7 +429,7 @@ struct cplus_pop_user_expression
 {
   void pop_user_expression (struct ui_file *buf)
   {
-    fputs_unfiltered ("#pragma GCC pop_user_expression\n", buf);
+    gdb_puts ("#pragma GCC pop_user_expression\n", buf);
   }
 };
 
@@ -444,33 +444,33 @@ struct cplus_add_code_header
   switch (type)
     {
     case COMPILE_I_SIMPLE_SCOPE:
-      fputs_unfiltered ("void "
-			GCC_FE_WRAPPER_FUNCTION
-			" (struct "
-			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
-			" *"
-			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
-			") {\n",
-			buf);
+      gdb_puts ("void "
+		GCC_FE_WRAPPER_FUNCTION
+		" (struct "
+		COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+		" *"
+		COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+		") {\n",
+		buf);
       break;
 
     case COMPILE_I_PRINT_ADDRESS_SCOPE:
     case COMPILE_I_PRINT_VALUE_SCOPE:
-      fputs_unfiltered (
-			"#include <cstring>\n"
-			"#include <bits/move.h>\n"
-			"void "
-			GCC_FE_WRAPPER_FUNCTION
-			" (struct "
-			COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
-			" *"
-			COMPILE_I_SIMPLE_REGISTER_ARG_NAME
-			", "
-			COMPILE_I_PRINT_OUT_ARG_TYPE
-			" "
-			COMPILE_I_PRINT_OUT_ARG
-			") {\n",
-			buf);
+      gdb_puts (
+		"#include <cstring>\n"
+		"#include <bits/move.h>\n"
+		"void "
+		GCC_FE_WRAPPER_FUNCTION
+		" (struct "
+		COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG
+		" *"
+		COMPILE_I_SIMPLE_REGISTER_ARG_NAME
+		", "
+		COMPILE_I_PRINT_OUT_ARG_TYPE
+		" "
+		COMPILE_I_PRINT_OUT_ARG
+		") {\n",
+		buf);
       break;
 
     case COMPILE_I_RAW_SCOPE:
@@ -512,10 +512,10 @@ struct cplus_add_input
 	break;
 
       default:
-	fputs_unfiltered (input, buf);
+	gdb_puts (input, buf);
 	break;
       }
-    fputs_unfiltered ("\n", buf);
+    gdb_puts ("\n", buf);
   }
 };
 

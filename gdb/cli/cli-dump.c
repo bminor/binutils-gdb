@@ -433,7 +433,7 @@ restore_one_section (bfd *ibfd, asection *isec,
 			       (unsigned long) sec_start + sec_offset
 				+ load_offset + sec_load_count));
   else
-    puts_filtered ("\n");
+    gdb_puts ("\n");
 
   /* Write the data.  */
   ret = target_write_memory (sec_start + sec_offset + load_offset,

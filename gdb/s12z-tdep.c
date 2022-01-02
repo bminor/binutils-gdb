@@ -518,7 +518,7 @@ s12z_print_ccw_info (struct gdbarch *gdbarch,
   struct value *v = value_of_register (reg, frame);
   const char *name = gdbarch_register_name (gdbarch, reg);
   uint32_t ccw = value_as_long (v);
-  fputs_filtered (name, file);
+  gdb_puts (name, file);
   size_t len = strlen (name);
   const int stop_1 = 15;
   const int stop_2 = 17;

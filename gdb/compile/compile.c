@@ -647,7 +647,7 @@ get_args (const compile_instance *compiler, struct gdbarch *gdbarch)
 static void
 print_callback (void *ignore, const char *message)
 {
-  fputs_filtered (message, gdb_stderr);
+  gdb_puts (message, gdb_stderr);
 }
 
 /* Process the compilation request.  On success it returns the object

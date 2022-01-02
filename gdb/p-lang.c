@@ -152,11 +152,11 @@ pascal_language::print_one_char (int c, struct ui_file *stream,
   if (c == '\'' || ((unsigned int) c <= 0xff && (PRINT_LITERAL_FORM (c))))
     {
       if (!(*in_quotes))
-	fputs_filtered ("'", stream);
+	gdb_puts ("'", stream);
       *in_quotes = 1;
       if (c == '\'')
 	{
-	  fputs_filtered ("''", stream);
+	  gdb_puts ("''", stream);
 	}
       else
 	fprintf_filtered (stream, "%c", c);
@@ -164,7 +164,7 @@ pascal_language::print_one_char (int c, struct ui_file *stream,
   else
     {
       if (*in_quotes)
-	fputs_filtered ("'", stream);
+	gdb_puts ("'", stream);
       *in_quotes = 0;
       fprintf_filtered (stream, "#%d", (unsigned int) c);
     }
@@ -180,7 +180,7 @@ pascal_language::printchar (int c, struct type *type,
 
   print_one_char (c, stream, &in_quotes);
   if (in_quotes)
-    fputs_filtered ("'", stream);
+    gdb_puts ("'", stream);
 }
 
 
@@ -249,7 +249,7 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
 
   if (length == 0)
     {
-      fputs_filtered ("''", stream);
+      gdb_puts ("''", stream);
       return;
     }
 
@@ -266,7 +266,7 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
 
       if (need_comma)
 	{
-	  fputs_filtered (", ", stream);
+	  gdb_puts (", ", stream);
 	  need_comma = 0;
 	}
 
@@ -287,7 +287,7 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
 	{
 	  if (in_quotes)
 	    {
-	      fputs_filtered ("', ", stream);
+	      gdb_puts ("', ", stream);
 	      in_quotes = 0;
 	    }
 	  printchar (current_char, elttype, stream);
@@ -302,7 +302,7 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
 	{
 	  if ((!in_quotes) && (PRINT_LITERAL_FORM (current_char)))
 	    {
-	      fputs_filtered ("'", stream);
+	      gdb_puts ("'", stream);
 	      in_quotes = 1;
 	    }
 	  print_one_char (current_char, stream, &in_quotes);
@@ -312,10 +312,10 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
 
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
-    fputs_filtered ("'", stream);
+    gdb_puts ("'", stream);
 
   if (force_ellipses || i < length)
-    fputs_filtered ("...", stream);
+    gdb_puts ("...", stream);
 }
 
 /* Single instance of the Pascal language class.  */

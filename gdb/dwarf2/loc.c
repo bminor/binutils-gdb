@@ -917,7 +917,7 @@ chain_candidate (struct gdbarch *gdbarch,
       fprintf_unfiltered (gdb_stdlog, "tailcall: reduced:");
       for (idx = 0; idx < (*resultp)->callers; idx++)
 	tailcall_dump (gdbarch, (*resultp)->call_site[idx]);
-      fputs_unfiltered (" |", gdb_stdlog);
+      gdb_puts (" |", gdb_stdlog);
       for (idx = 0; idx < (*resultp)->callees; idx++)
 	tailcall_dump (gdbarch,
 		       (*resultp)->call_site[(*resultp)->length

@@ -233,9 +233,7 @@ extern void set_screen_width_and_height (int width, int height);
    here are the styling formatters: '%p[', '%p]' and '%ps'.  See
    ui_out::message for details.  */
 
-extern void fputs_filtered (const char *, struct ui_file *);
-
-extern void fputs_unfiltered (const char *, struct ui_file *);
+extern void gdb_puts (const char *, struct ui_file *);
 
 extern int fputc_filtered (int c, struct ui_file *);
 
@@ -243,7 +241,7 @@ extern int fputc_unfiltered (int c, struct ui_file *);
 
 extern int putchar_filtered (int c);
 
-extern void puts_filtered (const char *);
+extern void gdb_puts (const char *);
 
 extern void puts_filtered_tabular (char *string, int width, int right);
 
@@ -284,7 +282,7 @@ extern void vfprintf_styled (struct ui_file *stream,
 			     va_list args)
   ATTRIBUTE_PRINTF (3, 0);
 
-/* Like fputs_filtered, but styles the output according to STYLE, when
+/* Like gdb_puts, but styles the output according to STYLE, when
    appropriate.  */
 
 extern void fputs_styled (const char *linebuffer,

@@ -1774,8 +1774,8 @@ show_memory_packet_size (struct memory_packet_config *config)
 	printf_filtered (_("Packets are limited to %ld bytes.\n"),
 			 remote->get_memory_packet_size (config));
       else
-	puts_filtered ("The actual limit will be further reduced "
-		       "dependent on the target.\n");
+	gdb_puts ("The actual limit will be further reduced "
+		  "dependent on the target.\n");
     }
 }
 
@@ -5782,9 +5782,9 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
 
   if (from_tty)
     {
-      puts_filtered ("Remote debugging using ");
-      puts_filtered (name);
-      puts_filtered ("\n");
+      gdb_puts ("Remote debugging using ");
+      gdb_puts (name);
+      gdb_puts ("\n");
     }
 
   /* Switch to using the remote target now.  */
@@ -5960,7 +5960,7 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
 
   /* Exit only if this is the only active inferior.  */
   if (from_tty && !rs->extended && number_of_live_inferiors (this) == 1)
-    puts_filtered (_("Ending remote debugging.\n"));
+    gdb_puts (_("Ending remote debugging.\n"));
 
   /* See if any thread of the inferior we are detaching has a pending fork
      status.  In that case, we must detach from the child resulting from
@@ -6093,7 +6093,7 @@ remote_target::disconnect (const char *args, int from_tty)
   remote_unpush_target (this);
 
   if (from_tty)
-    puts_filtered ("Ending remote debugging.\n");
+    gdb_puts ("Ending remote debugging.\n");
 }
 
 /* Attach to the process specified by ARGS.  If FROM_TTY is non-zero,
@@ -11601,18 +11601,18 @@ struct cli_packet_command_callbacks : public send_remote_packet_callbacks
 
   void sending (gdb::array_view<const char> &buf) override
   {
-    puts_filtered ("sending: ");
+    gdb_puts ("sending: ");
     print_packet (buf);
-    puts_filtered ("\n");
+    gdb_puts ("\n");
   }
 
   /* Called with BUF, the reply from the remote target.  */
 
   void received (gdb::array_view<const char> &buf) override
   {
-    puts_filtered ("received: \"");
+    gdb_puts ("received: \"");
     print_packet (buf);
-    puts_filtered ("\"\n");
+    gdb_puts ("\"\n");
   }
 
 private:
@@ -11634,7 +11634,7 @@ private:
 	  fprintf_unfiltered (&stb, "\\x%02x", (unsigned char) c);
       }
 
-    puts_filtered (stb.string ().c_str ());
+    gdb_puts (stb.string ().c_str ());
   }
 };
 

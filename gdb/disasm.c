@@ -1122,9 +1122,9 @@ show_disassembler_options_sfunc (struct ui_file *file, int from_tty,
 
   if (valid_options_and_args == NULL)
     {
-      fputs_filtered (_("There are no disassembler options available "
-			"for this architecture.\n"),
-		      file);
+      gdb_puts (_("There are no disassembler options available "
+		  "for this architecture.\n"),
+		file);
       return;
     }
 

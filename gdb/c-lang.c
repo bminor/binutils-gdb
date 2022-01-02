@@ -206,13 +206,13 @@ c_printstr (struct ui_file *stream, struct type *type,
     case C_STRING:
       break;
     case C_WIDE_STRING:
-      fputs_filtered ("L", stream);
+      gdb_puts ("L", stream);
       break;
     case C_STRING_16:
-      fputs_filtered ("u", stream);
+      gdb_puts ("u", stream);
       break;
     case C_STRING_32:
-      fputs_filtered ("U", stream);
+      gdb_puts ("U", stream);
       break;
     }
 

@@ -317,7 +317,7 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
   /* Don't try to modify a result representing an error.  */
   if (s[0] == '<')
     {
-      fputs_filtered (s.c_str (), stream);
+      gdb_puts (s.c_str (), stream);
       return;
     }
 
@@ -362,9 +362,9 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
 void
 ada_printchar (int c, struct type *type, struct ui_file *stream)
 {
-  fputs_filtered ("'", stream);
+  gdb_puts ("'", stream);
   ada_emit_char (c, type, stream, '\'', TYPE_LENGTH (type));
-  fputs_filtered ("'", stream);
+  gdb_puts ("'", stream);
 }
 
 /* [From print_type_scalar in typeprint.c].   Print VAL on STREAM in a
@@ -466,7 +466,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 
   if (length == 0)
     {
-      fputs_filtered ("\"\"", stream);
+      gdb_puts ("\"\"", stream);
       return;
     }
 
@@ -482,7 +482,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 
       if (need_comma)
 	{
-	  fputs_filtered (", ", stream);
+	  gdb_puts (", ", stream);
 	  need_comma = 0;
 	}
 
@@ -500,13 +500,13 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	{
 	  if (in_quotes)
 	    {
-	      fputs_filtered ("\", ", stream);
+	      gdb_puts ("\", ", stream);
 	      in_quotes = 0;
 	    }
-	  fputs_filtered ("'", stream);
+	  gdb_puts ("'", stream);
 	  ada_emit_char (char_at (string, i, type_len, byte_order),
 			 elttype, stream, '\'', type_len);
-	  fputs_filtered ("'", stream);
+	  gdb_puts ("'", stream);
 	  fprintf_filtered (stream, _(" %p[<repeats %u times>%p]"),
 			    metadata_style.style ().ptr (), reps, nullptr);
 	  i = rep1 - 1;
@@ -517,7 +517,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	{
 	  if (!in_quotes)
 	    {
-	      fputs_filtered ("\"", stream);
+	      gdb_puts ("\"", stream);
 	      in_quotes = 1;
 	    }
 	  ada_emit_char (char_at (string, i, type_len, byte_order),
@@ -528,10 +528,10 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
-    fputs_filtered ("\"", stream);
+    gdb_puts ("\"", stream);
 
   if (force_ellipses || i < length)
-    fputs_filtered ("...", stream);
+    gdb_puts ("...", stream);
 }
 
 void
@@ -633,7 +633,7 @@ print_field_values (struct value *value, struct value *outer_value,
 			ada_name_prefix_len (type->field (i).name ()),
 			type->field (i).name ());
       annotate_field_name_end ();
-      fputs_filtered (" => ", stream);
+      gdb_puts (" => ", stream);
       annotate_field_value ();
 
       if (TYPE_FIELD_PACKED (type, i))
@@ -734,7 +734,7 @@ ada_value_print_ptr (struct value *val,
       && TYPE_TARGET_TYPE (value_type (val))->code () == TYPE_CODE_INT
       && TYPE_LENGTH (TYPE_TARGET_TYPE (value_type (val))) == 0)
     {
-      fputs_filtered ("null", stream);
+      gdb_puts ("null", stream);
       return;
     }
 
@@ -802,7 +802,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
 	  fprintf_filtered (stream, "(");
 	  type_print (type, "", stream, -1);
 	  fprintf_filtered (stream, ") ");
-	  fputs_filtered (paddress (gdbarch, addr), stream);
+	  gdb_puts (paddress (gdbarch, addr), stream);
 	}
       else
 	{
@@ -811,7 +811,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
 	    {
 	      LONGEST c;
 
-	      fputs_filtered (" ", stream);
+	      gdb_puts (" ", stream);
 	      c = unpack_long (type, valaddr);
 	      ada_printchar (c, type, stream);
 	    }
@@ -971,7 +971,7 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
   deref_val_int = unpack_pointer (type, valaddr + offset_aligned);
   if (deref_val_int == 0)
     {
-      fputs_filtered ("(null)", stream);
+      gdb_puts ("(null)", stream);
       return;
     }
 

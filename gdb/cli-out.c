@@ -221,9 +221,9 @@ cli_ui_out::do_text (const char *string)
     return;
 
   if (test_flags (unfiltered_output))
-    fputs_unfiltered (string, m_streams.back ());
+    gdb_puts (string, m_streams.back ());
   else
-    fputs_filtered (string, m_streams.back ());
+    gdb_puts (string, m_streams.back ());
 }
 
 void

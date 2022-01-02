@@ -944,7 +944,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
       gdb::unique_xmalloc_ptr<char> status
 	= target_fileio_read_stralloc (NULL, filename);
       if (status)
-	puts_filtered (status.get ());
+	gdb_puts (status.get ());
       else
 	warning (_("unable to open /proc file '%s'"), filename);
     }

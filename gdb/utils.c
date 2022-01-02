@@ -150,7 +150,7 @@ vwarning (const char *string, va_list args)
 	gdb_stdout->wrap_here (0);	/* Force out any buffered output.  */
       gdb_flush (gdb_stdout);
       if (warning_pre_print)
-	fputs_unfiltered (warning_pre_print, gdb_stderr);
+	gdb_puts (warning_pre_print, gdb_stderr);
       gdb_vprintf (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
     }
@@ -180,7 +180,7 @@ abort_with_message (const char *msg)
   if (current_ui == NULL)
     fputs (msg, stderr);
   else
-    fputs_unfiltered (msg, gdb_stderr);
+    gdb_puts (msg, gdb_stderr);
 
   abort ();		/* ARI: abort */
 }
@@ -404,11 +404,11 @@ internal_vproblem (struct internal_problem *problem,
   else
     internal_error (__FILE__, __LINE__, _("bad switch"));
 
-  fputs_unfiltered (_("\nThis is a bug, please report it."), gdb_stderr);
+  gdb_puts (_("\nThis is a bug, please report it."), gdb_stderr);
   if (REPORT_BUGS_TO[0])
     fprintf_unfiltered (gdb_stderr, _("  For instructions, see:\n%s."),
 			REPORT_BUGS_TO);
-  fputs_unfiltered ("\n\n", gdb_stderr);
+  gdb_puts ("\n\n", gdb_stderr);
 
   if (problem->should_dump_core == internal_problem_ask)
     {
@@ -1156,7 +1156,7 @@ static bool pagination_disabled_for_command;
 
 /* Buffer and start column of buffered text, for doing smarter word-
    wrapping.  When someone calls wrap_here(), we start buffering output
-   that comes through fputs_filtered().  If we see a newline, we just
+   that comes through gdb_puts().  If we see a newline, we just
    spit it out and forget about the wrap_here().  If we see another
    wrap_here(), we spit it out and remember the newer one.  If we see
    the end of the line, we spit out a newline, the indent, and then
@@ -1521,13 +1521,13 @@ puts_filtered_tabular (char *string, int width, int right)
   gdb_assert (chars_per_line > 0);
   if (chars_per_line == UINT_MAX)
     {
-      puts_filtered (string);
-      puts_filtered ("\n");
+      gdb_puts (string);
+      gdb_puts ("\n");
       return;
     }
 
   if (((chars_printed - 1) / width + 2) * width >= chars_per_line)
-    puts_filtered ("\n");
+    gdb_puts ("\n");
 
   if (width >= chars_per_line)
     width = chars_per_line - 1;
@@ -1544,8 +1544,8 @@ puts_filtered_tabular (char *string, int width, int right)
   while (spaces--)
     spacebuf[spaces] = ' ';
 
-  puts_filtered (spacebuf);
-  puts_filtered (string);
+  gdb_puts (spacebuf);
+  gdb_puts (string);
 }
 
 
@@ -1559,7 +1559,7 @@ begin_line (void)
 {
   if (chars_printed > 0)
     {
-      puts_filtered ("\n");
+      gdb_puts ("\n");
     }
 }
 
@@ -1734,13 +1734,7 @@ pager_file::write (const char *buf, long length_buf)
 }
 
 void
-fputs_unfiltered (const char *linebuffer, struct ui_file *stream)
-{
-  stream->puts_unfiltered (linebuffer);
-}
-
-void
-fputs_filtered (const char *linebuffer, struct ui_file *stream)
+gdb_puts (const char *linebuffer, struct ui_file *stream)
 {
   stream->puts (linebuffer);
 }
@@ -1752,7 +1746,7 @@ fputs_styled (const char *linebuffer, const ui_file_style &style,
 	      struct ui_file *stream)
 {
   stream->emit_style_escape (style);
-  fputs_filtered (linebuffer, stream);
+  gdb_puts (linebuffer, stream);
   stream->emit_style_escape (ui_file_style ());
 }
 
@@ -1789,7 +1783,7 @@ fputs_highlighted (const char *str, const compiled_regex &highlight,
 
   /* Output the trailing part of STR not matching HIGHLIGHT.  */
   if (*str)
-    fputs_filtered (str, stream);
+    gdb_puts (str, stream);
 }
 
 /* Write character C to gdb_stdout using GDB's paging mechanism and return C.
@@ -1808,7 +1802,7 @@ fputc_unfiltered (int c, struct ui_file *stream)
 
   buf[0] = c;
   buf[1] = 0;
-  fputs_unfiltered (buf, stream);
+  gdb_puts (buf, stream);
   return c;
 }
 
@@ -1819,7 +1813,7 @@ fputc_filtered (int c, struct ui_file *stream)
 
   buf[0] = c;
   buf[1] = 0;
-  fputs_filtered (buf, stream);
+  gdb_puts (buf, stream);
   return c;
 }
 
@@ -1910,9 +1904,9 @@ printf_unfiltered (const char *format, ...)
    This one doesn't, and had better not!  */
 
 void
-puts_filtered (const char *string)
+gdb_puts (const char *string)
 {
-  fputs_filtered (string, gdb_stdout);
+  gdb_stdout->puts (string);
 }
 
 /* Return a pointer to N spaces and a null.  The pointer is good
@@ -1941,7 +1935,7 @@ n_spaces (int n)
 void
 print_spaces_filtered (int n, struct ui_file *stream)
 {
-  fputs_filtered (n_spaces (n), stream);
+  gdb_puts (n_spaces (n), stream);
 }
 
 /* C++/ObjC demangler stuff.  */
@@ -1960,13 +1954,13 @@ fprintf_symbol_filtered (struct ui_file *stream, const char *name,
       /* If user wants to see raw output, no problem.  */
       if (!demangle)
 	{
-	  fputs_filtered (name, stream);
+	  gdb_puts (name, stream);
 	}
       else
 	{
 	  gdb::unique_xmalloc_ptr<char> demangled
 	    = language_demangle (language_def (lang), name, arg_mode);
-	  fputs_filtered (demangled ? demangled.get () : name, stream);
+	  gdb_puts (demangled ? demangled.get () : name, stream);
 	}
     }
 }

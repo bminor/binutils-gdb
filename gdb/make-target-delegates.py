@@ -269,16 +269,16 @@ def write_debugmethod(f, content, name, return_type, argtypes):
     )
     for i in range(len(argtypes)):
         if i > 0:
-            print('  fputs_unfiltered (", ", gdb_stdlog);', file=f)
+            print('  gdb_puts (", ", gdb_stdlog);', file=f)
         printer = munge_type(argtypes[i])
         print("  " + printer + " (" + names[i] + ");", file=f)
     if return_type != "void":
-        print('  fputs_unfiltered (") = ", gdb_stdlog);', file=f)
+        print('  gdb_puts (") = ", gdb_stdlog);', file=f)
         printer = munge_type(return_type)
         print("  " + printer + " (result);", file=f)
-        print('  fputs_unfiltered ("\\n", gdb_stdlog);', file=f)
+        print('  gdb_puts ("\\n", gdb_stdlog);', file=f)
     else:
-        print('  fputs_unfiltered (")\\n", gdb_stdlog);', file=f)
+        print('  gdb_puts (")\\n", gdb_stdlog);', file=f)
 
     if return_type != "void":
         print("  return result;", file=f)

@@ -1355,7 +1355,7 @@ fput_alias_definition_styled (const cmd_list_element &c,
 			      struct ui_file *stream)
 {
   gdb_assert (c.is_alias ());
-  fputs_filtered ("  alias ", stream);
+  gdb_puts ("  alias ", stream);
   fput_command_name_styled (c, stream);
   fprintf_filtered (stream, " = ");
   fput_command_name_styled (*c.alias_target, stream);
@@ -1413,13 +1413,13 @@ fput_command_names_styled (const cmd_list_element &c,
       if (!print_alias (alias))
 	continue;
 
-      fputs_filtered (", ", stream);
+      gdb_puts (", ", stream);
       stream->wrap_here (3);
       fput_command_name_styled (alias, stream);
     }
 
   if (print_something)
-    fputs_filtered (postfix, stream);
+    gdb_puts (postfix, stream);
 }
 
 /* If VERBOSE, print the full help for command C and highlight the
@@ -1435,21 +1435,21 @@ print_doc_of_command (const cmd_list_element &c, const char *prefix,
      this documentation from the previous command help, in the likely
      case that apropos finds several commands.  */
   if (verbose)
-    fputs_filtered ("\n", stream);
+    gdb_puts ("\n", stream);
 
   fput_command_names_styled (c, true,
 			     verbose ? "" : " -- ", stream);
   if (verbose)
     {
-      fputs_filtered ("\n", stream);
+      gdb_puts ("\n", stream);
       fput_aliases_definition_styled (c, stream);
       fputs_highlighted (c.doc, highlight, stream);
-      fputs_filtered ("\n", stream);
+      gdb_puts ("\n", stream);
     }
   else
     {
       print_doc_line (stream, c.doc, false);
-      fputs_filtered ("\n", stream);
+      gdb_puts ("\n", stream);
       fput_aliases_definition_styled (c, stream);
     }
 }
@@ -1573,8 +1573,8 @@ help_cmd (const char *command, struct ui_file *stream)
      the false indicates to not output the (single) command name.  */
   fput_command_names_styled (*c, false, "\n", stream);
   fput_aliases_definition_styled (*c, stream);
-  fputs_filtered (c->doc, stream);
-  fputs_filtered ("\n", stream);
+  gdb_puts (c->doc, stream);
+  gdb_puts ("\n", stream);
 
   if (!c->is_prefix () && !c->is_command_class_help ())
     return;
@@ -1661,18 +1661,18 @@ Type \"help all\" for the list of all commands.");
   fprintf_filtered (stream, "\nType \"help%s\" followed by %scommand name ",
 		    cmdtype1, cmdtype2);
   stream->wrap_here (0);
-  fputs_filtered ("for ", stream);
+  gdb_puts ("for ", stream);
   stream->wrap_here (0);
-  fputs_filtered ("full ", stream);
+  gdb_puts ("full ", stream);
   stream->wrap_here (0);
-  fputs_filtered ("documentation.\n", stream);
-  fputs_filtered ("Type \"apropos word\" to search "
-		  "for commands related to \"word\".\n", stream);
-  fputs_filtered ("Type \"apropos -v word\" for full documentation", stream);
+  gdb_puts ("documentation.\n", stream);
+  gdb_puts ("Type \"apropos word\" to search "
+	    "for commands related to \"word\".\n", stream);
+  gdb_puts ("Type \"apropos -v word\" for full documentation", stream);
   stream->wrap_here (0);
-  fputs_filtered (" of commands related to \"word\".\n", stream);
-  fputs_filtered ("Command name abbreviations are allowed if unambiguous.\n",
-		  stream);
+  gdb_puts (" of commands related to \"word\".\n", stream);
+  gdb_puts ("Command name abbreviations are allowed if unambiguous.\n",
+	    stream);
 }
 
 static void
@@ -1756,7 +1756,7 @@ print_doc_line (struct ui_file *stream, const char *str,
     }
   else
     line_buffer[p - str] = '\0';
-  fputs_filtered (line_buffer, stream);
+  gdb_puts (line_buffer, stream);
 }
 
 /* Print one-line help for command C.
@@ -1768,7 +1768,7 @@ print_help_for_command (const cmd_list_element &c,
 {
   fput_command_names_styled (c, true, " -- ", stream);
   print_doc_line (stream, c.doc, false);
-  fputs_filtered ("\n", stream);
+  gdb_puts ("\n", stream);
   if (!c.default_args.empty ())
     fput_alias_definition_styled (c, stream);
   fput_aliases_definition_styled (c, stream);

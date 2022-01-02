@@ -761,8 +761,8 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
       (code_entry->symfile_addr, code_entry->symfile_size, gnutarget));
   if (nbfd == NULL)
     {
-      fputs_unfiltered (_("Error opening JITed symbol file, ignoring it.\n"),
-			gdb_stderr);
+      gdb_puts (_("Error opening JITed symbol file, ignoring it.\n"),
+		gdb_stderr);
       return;
     }
 

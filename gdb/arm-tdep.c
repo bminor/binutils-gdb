@@ -4015,15 +4015,15 @@ static void
 print_fpu_flags (struct ui_file *file, int flags)
 {
   if (flags & (1 << 0))
-    fputs_filtered ("IVO ", file);
+    gdb_puts ("IVO ", file);
   if (flags & (1 << 1))
-    fputs_filtered ("DVZ ", file);
+    gdb_puts ("DVZ ", file);
   if (flags & (1 << 2))
-    fputs_filtered ("OFL ", file);
+    gdb_puts ("OFL ", file);
   if (flags & (1 << 3))
-    fputs_filtered ("UFL ", file);
+    gdb_puts ("UFL ", file);
   if (flags & (1 << 4))
-    fputs_filtered ("INX ", file);
+    gdb_puts ("INX ", file);
   fputc_filtered ('\n', file);
 }
 
@@ -4042,10 +4042,10 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   else
     fprintf_filtered (file, _("Software FPU type %d\n"), type);
   /* i18n: [floating point unit] mask */
-  fputs_filtered (_("mask: "), file);
+  gdb_puts (_("mask: "), file);
   print_fpu_flags (file, status >> 16);
   /* i18n: [floating point unit] flags */
-  fputs_filtered (_("flags: "), file);
+  gdb_puts (_("flags: "), file);
   print_fpu_flags (file, status);
 }
 

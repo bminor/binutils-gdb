@@ -4888,7 +4888,7 @@ print_bit_vector (B_TYPE *bits, int nbits)
     {
       if ((bitno % 8) == 0)
 	{
-	  puts_filtered (" ");
+	  gdb_puts (" ");
 	}
       if (B_TST (bits, bitno))
 	printf_filtered (("1"));
@@ -5019,7 +5019,7 @@ print_cplus_stuff (struct type *type, int spaces)
 
       print_bit_vector (TYPE_FIELD_VIRTUAL_BITS (type),
 			TYPE_N_BASECLASSES (type));
-      puts_filtered ("\n");
+      gdb_puts ("\n");
     }
   if (type->num_fields () > 0)
     {
@@ -5031,7 +5031,7 @@ print_cplus_stuff (struct type *type, int spaces)
 	     host_address_to_string (TYPE_FIELD_PRIVATE_BITS (type)));
 	  print_bit_vector (TYPE_FIELD_PRIVATE_BITS (type),
 			    type->num_fields ());
-	  puts_filtered ("\n");
+	  gdb_puts ("\n");
 	}
       if (TYPE_FIELD_PROTECTED_BITS (type) != NULL)
 	{
@@ -5041,7 +5041,7 @@ print_cplus_stuff (struct type *type, int spaces)
 	     host_address_to_string (TYPE_FIELD_PROTECTED_BITS (type)));
 	  print_bit_vector (TYPE_FIELD_PROTECTED_BITS (type),
 			    type->num_fields ());
-	  puts_filtered ("\n");
+	  gdb_puts ("\n");
 	}
     }
   if (TYPE_NFN_FIELDS (type) > 0)
@@ -5223,7 +5223,7 @@ recursive_dump_type (struct type *type, int spaces)
       printf_filtered ("(UNKNOWN TYPE CODE)");
       break;
     }
-  puts_filtered ("\n");
+  gdb_puts ("\n");
   printf_filtered ("%*slength %s\n", spaces, "",
 		   pulongest (TYPE_LENGTH (type)));
   if (type->is_objfile_owned ())
@@ -5248,87 +5248,87 @@ recursive_dump_type (struct type *type, int spaces)
 		   (unsigned) type->instance_flags ());
   if (TYPE_CONST (type))
     {
-      puts_filtered (" TYPE_CONST");
+      gdb_puts (" TYPE_CONST");
     }
   if (TYPE_VOLATILE (type))
     {
-      puts_filtered (" TYPE_VOLATILE");
+      gdb_puts (" TYPE_VOLATILE");
     }
   if (TYPE_CODE_SPACE (type))
     {
-      puts_filtered (" TYPE_CODE_SPACE");
+      gdb_puts (" TYPE_CODE_SPACE");
     }
   if (TYPE_DATA_SPACE (type))
     {
-      puts_filtered (" TYPE_DATA_SPACE");
+      gdb_puts (" TYPE_DATA_SPACE");
     }
   if (TYPE_ADDRESS_CLASS_1 (type))
     {
-      puts_filtered (" TYPE_ADDRESS_CLASS_1");
+      gdb_puts (" TYPE_ADDRESS_CLASS_1");
     }
   if (TYPE_ADDRESS_CLASS_2 (type))
     {
-      puts_filtered (" TYPE_ADDRESS_CLASS_2");
+      gdb_puts (" TYPE_ADDRESS_CLASS_2");
     }
   if (TYPE_RESTRICT (type))
     {
-      puts_filtered (" TYPE_RESTRICT");
+      gdb_puts (" TYPE_RESTRICT");
     }
   if (TYPE_ATOMIC (type))
     {
-      puts_filtered (" TYPE_ATOMIC");
+      gdb_puts (" TYPE_ATOMIC");
     }
-  puts_filtered ("\n");
+  gdb_puts ("\n");
 
   printf_filtered ("%*sflags", spaces, "");
   if (type->is_unsigned ())
     {
-      puts_filtered (" TYPE_UNSIGNED");
+      gdb_puts (" TYPE_UNSIGNED");
     }
   if (type->has_no_signedness ())
     {
-      puts_filtered (" TYPE_NOSIGN");
+      gdb_puts (" TYPE_NOSIGN");
     }
   if (type->endianity_is_not_default ())
     {
-      puts_filtered (" TYPE_ENDIANITY_NOT_DEFAULT");
+      gdb_puts (" TYPE_ENDIANITY_NOT_DEFAULT");
     }
   if (type->is_stub ())
     {
-      puts_filtered (" TYPE_STUB");
+      gdb_puts (" TYPE_STUB");
     }
   if (type->target_is_stub ())
     {
-      puts_filtered (" TYPE_TARGET_STUB");
+      gdb_puts (" TYPE_TARGET_STUB");
     }
   if (type->is_prototyped ())
     {
-      puts_filtered (" TYPE_PROTOTYPED");
+      gdb_puts (" TYPE_PROTOTYPED");
     }
   if (type->has_varargs ())
     {
-      puts_filtered (" TYPE_VARARGS");
+      gdb_puts (" TYPE_VARARGS");
     }
   /* This is used for things like AltiVec registers on ppc.  Gcc emits
      an attribute for the array type, which tells whether or not we
      have a vector, instead of a regular array.  */
   if (type->is_vector ())
     {
-      puts_filtered (" TYPE_VECTOR");
+      gdb_puts (" TYPE_VECTOR");
     }
   if (type->is_fixed_instance ())
     {
-      puts_filtered (" TYPE_FIXED_INSTANCE");
+      gdb_puts (" TYPE_FIXED_INSTANCE");
     }
   if (type->stub_is_supported ())
     {
-      puts_filtered (" TYPE_STUB_SUPPORTED");
+      gdb_puts (" TYPE_STUB_SUPPORTED");
     }
   if (TYPE_NOTTEXT (type))
     {
-      puts_filtered (" TYPE_NOTTEXT");
+      gdb_puts (" TYPE_NOTTEXT");
     }
-  puts_filtered ("\n");
+  gdb_puts ("\n");
   printf_filtered ("%*snfields %d ", spaces, "", type->num_fields ());
   if (TYPE_ASSOCIATED_PROP (type) != nullptr
       || TYPE_ALLOCATED_PROP (type) != nullptr)
@@ -5396,10 +5396,10 @@ recursive_dump_type (struct type *type, int spaces)
 	printf_filtered ("%*sfloatformat ", spaces, "");
 	if (TYPE_FLOATFORMAT (type) == NULL
 	    || TYPE_FLOATFORMAT (type)->name == NULL)
-	  puts_filtered ("(null)");
+	  gdb_puts ("(null)");
 	else
-	  puts_filtered (TYPE_FLOATFORMAT (type)->name);
-	puts_filtered ("\n");
+	  gdb_puts (TYPE_FLOATFORMAT (type)->name);
+	gdb_puts ("\n");
 	break;
 
       case TYPE_SPECIFIC_FUNC:
@@ -5416,7 +5416,7 @@ recursive_dump_type (struct type *type, int spaces)
       case TYPE_SPECIFIC_FIXED_POINT:
 	printf_filtered ("%*sfixed_point_info ", spaces, "");
 	print_fixed_point_type_info (type, spaces);
-	puts_filtered ("\n");
+	gdb_puts ("\n");
 	break;
 
     case TYPE_SPECIFIC_INT:

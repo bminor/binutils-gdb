@@ -70,13 +70,13 @@ print_i387_ext (struct gdbarch *gdbarch,
 	fprintf_filtered (file, " %cInf", (sign ? '-' : '+'));
       else if (sign && fraction[0] == 0x00000000 && fraction[1] == 0x40000000)
 	/* Real Indefinite (QNaN).  */
-	fputs_filtered (" Real Indefinite (QNaN)", file);
+	gdb_puts (" Real Indefinite (QNaN)", file);
       else if (fraction[1] & 0x40000000)
 	/* QNaN.  */
-	fputs_filtered (" QNaN", file);
+	gdb_puts (" QNaN", file);
       else
 	/* SNaN.  */
-	fputs_filtered (" SNaN", file);
+	gdb_puts (" SNaN", file);
     }
   else if (exponent < 0x7fff && exponent > 0x0000 && integer)
     /* Normal.  */
@@ -88,14 +88,14 @@ print_i387_ext (struct gdbarch *gdbarch,
       
       if (integer)
 	/* Pseudo-denormal.  */
-	fputs_filtered (" Pseudo-denormal", file);
+	gdb_puts (" Pseudo-denormal", file);
       else if (fraction[0] || fraction[1])
 	/* Denormal.  */
-	fputs_filtered (" Denormal", file);
+	gdb_puts (" Denormal", file);
     }
   else
     /* Unsupported.  */
-    fputs_filtered (" Unsupported", file);
+    gdb_puts (" Unsupported", file);
 }
 
 /* Print the status word STATUS.  If STATUS_P is false, then STATUS
@@ -113,24 +113,24 @@ print_i387_status_word (int status_p,
     }
 
   fprintf_filtered (file, "%s", hex_string_custom (status, 4));
-  fputs_filtered ("  ", file);
+  gdb_puts ("  ", file);
   fprintf_filtered (file, " %s", (status & 0x0001) ? "IE" : "  ");
   fprintf_filtered (file, " %s", (status & 0x0002) ? "DE" : "  ");
   fprintf_filtered (file, " %s", (status & 0x0004) ? "ZE" : "  ");
   fprintf_filtered (file, " %s", (status & 0x0008) ? "OE" : "  ");
   fprintf_filtered (file, " %s", (status & 0x0010) ? "UE" : "  ");
   fprintf_filtered (file, " %s", (status & 0x0020) ? "PE" : "  ");
-  fputs_filtered ("  ", file);
+  gdb_puts ("  ", file);
   fprintf_filtered (file, " %s", (status & 0x0080) ? "ES" : "  ");
-  fputs_filtered ("  ", file);
+  gdb_puts ("  ", file);
   fprintf_filtered (file, " %s", (status & 0x0040) ? "SF" : "  ");
-  fputs_filtered ("  ", file);
+  gdb_puts ("  ", file);
   fprintf_filtered (file, " %s", (status & 0x0100) ? "C0" : "  ");
   fprintf_filtered (file, " %s", (status & 0x0200) ? "C1" : "  ");
   fprintf_filtered (file, " %s", (status & 0x0400) ? "C2" : "  ");
   fprintf_filtered (file, " %s", (status & 0x4000) ? "C3" : "  ");
 
-  fputs_filtered ("\n", file);
+  gdb_puts ("\n", file);
 
   fprintf_filtered (file,
 		    "                       TOP: %d\n", ((status >> 11) & 7));
@@ -151,7 +151,7 @@ print_i387_control_word (int control_p,
     }
 
   fprintf_filtered (file, "%s", hex_string_custom (control, 4));
-  fputs_filtered ("  ", file);
+  gdb_puts ("  ", file);
   fprintf_filtered (file, " %s", (control & 0x0001) ? "IM" : "  ");
   fprintf_filtered (file, " %s", (control & 0x0002) ? "DM" : "  ");
   fprintf_filtered (file, " %s", (control & 0x0004) ? "ZM" : "  ");
@@ -159,39 +159,39 @@ print_i387_control_word (int control_p,
   fprintf_filtered (file, " %s", (control & 0x0010) ? "UM" : "  ");
   fprintf_filtered (file, " %s", (control & 0x0020) ? "PM" : "  ");
 
-  fputs_filtered ("\n", file);
+  gdb_puts ("\n", file);
 
-  fputs_filtered ("                       PC: ", file);
+  gdb_puts ("                       PC: ", file);
   switch ((control >> 8) & 3)
     {
     case 0:
-      fputs_filtered ("Single Precision (24-bits)\n", file);
+      gdb_puts ("Single Precision (24-bits)\n", file);
       break;
     case 1:
-      fputs_filtered ("Reserved\n", file);
+      gdb_puts ("Reserved\n", file);
       break;
     case 2:
-      fputs_filtered ("Double Precision (53-bits)\n", file);
+      gdb_puts ("Double Precision (53-bits)\n", file);
       break;
     case 3:
-      fputs_filtered ("Extended Precision (64-bits)\n", file);
+      gdb_puts ("Extended Precision (64-bits)\n", file);
       break;
     }
       
-  fputs_filtered ("                       RC: ", file);
+  gdb_puts ("                       RC: ", file);
   switch ((control >> 10) & 3)
     {
     case 0:
-      fputs_filtered ("Round to nearest\n", file);
+      gdb_puts ("Round to nearest\n", file);
       break;
     case 1:
-      fputs_filtered ("Round down\n", file);
+      gdb_puts ("Round down\n", file);
       break;
     case 2:
-      fputs_filtered ("Round up\n", file);
+      gdb_puts ("Round up\n", file);
       break;
     case 3:
-      fputs_filtered ("Round toward zero\n", file);
+      gdb_puts ("Round toward zero\n", file);
       break;
     }
 }
@@ -263,21 +263,21 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 	      switch (tag)
 		{
 		case 0:
-		  fputs_filtered ("Valid   ", file);
+		  gdb_puts ("Valid   ", file);
 		  break;
 		case 1:
-		  fputs_filtered ("Zero    ", file);
+		  gdb_puts ("Zero    ", file);
 		  break;
 		case 2:
-		  fputs_filtered ("Special ", file);
+		  gdb_puts ("Special ", file);
 		  break;
 		case 3:
-		  fputs_filtered ("Empty   ", file);
+		  gdb_puts ("Empty   ", file);
 		  break;
 		}
 	    }
 	  else
-	    fputs_filtered ("Unknown ", file);
+	    gdb_puts ("Unknown ", file);
 
 	  regnum = (fpreg + 8 - top) % 8 + I387_ST0_REGNUM (tdep);
 	  regval = get_frame_register_value (frame, regnum);
@@ -286,7 +286,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 	    {
 	      const gdb_byte *raw = value_contents (regval).data ();
 
-	      fputs_filtered ("0x", file);
+	      gdb_puts ("0x", file);
 	      for (i = 9; i >= 0; i--)
 		fprintf_filtered (file, "%02x", raw[i]);
 
@@ -296,11 +296,11 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 	  else
 	    fprintf_filtered (file, "%s", _("<unavailable>"));
 
-	  fputs_filtered ("\n", file);
+	  gdb_puts ("\n", file);
 	}
     }
 
-  fputs_filtered ("\n", file);
+  gdb_puts ("\n", file);
   print_i387_status_word (fstat_p, fstat, file);
   print_i387_control_word (fctrl_p, fctrl, file);
   fprintf_filtered (file, "Tag Word:            %s\n",

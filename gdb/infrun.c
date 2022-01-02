@@ -176,9 +176,9 @@ show_disable_randomization (struct ui_file *file, int from_tty,
 			"virtual address space is %s.\n"),
 		      value);
   else
-    fputs_filtered (_("Disabling randomization of debuggee's "
-		      "virtual address space is unsupported on\n"
-		      "this platform.\n"), file);
+    gdb_puts (_("Disabling randomization of debuggee's "
+		"virtual address space is unsupported on\n"
+		"this platform.\n"), file);
 }
 
 static void

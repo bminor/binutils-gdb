@@ -23094,7 +23094,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_addrx:
 	case DW_FORM_GNU_addr_index:
 	  fprintf_unfiltered (f, "address: ");
-	  fputs_filtered (hex_string (die->attrs[i].as_address ()), f);
+	  gdb_puts (hex_string (die->attrs[i].as_address ()), f);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:
@@ -23112,11 +23112,11 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  break;
 	case DW_FORM_ref_addr:
 	  fprintf_unfiltered (f, "ref address: ");
-	  fputs_filtered (hex_string (die->attrs[i].as_unsigned ()), f);
+	  gdb_puts (hex_string (die->attrs[i].as_unsigned ()), f);
 	  break;
 	case DW_FORM_GNU_ref_alt:
 	  fprintf_unfiltered (f, "alt ref address: ");
-	  fputs_filtered (hex_string (die->attrs[i].as_unsigned ()), f);
+	  gdb_puts (hex_string (die->attrs[i].as_unsigned ()), f);
 	  break;
 	case DW_FORM_ref1:
 	case DW_FORM_ref2:

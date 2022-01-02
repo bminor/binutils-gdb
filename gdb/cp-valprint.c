@@ -198,9 +198,9 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  if (fields_seen)
 	    {
-	      fputs_filtered (",", stream);
+	      gdb_puts (",", stream);
 	      if (!options->prettyformat)
-		fputs_filtered (" ", stream);
+		gdb_puts (" ", stream);
 	    }
 	  else if (n_baseclasses > 0)
 	    {
@@ -208,9 +208,9 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		{
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
-		  fputs_filtered ("members of ", stream);
-		  fputs_filtered (type->name (), stream);
-		  fputs_filtered (":", stream);
+		  gdb_puts ("members of ", stream);
+		  gdb_puts (type->name (), stream);
+		  gdb_puts (":", stream);
 		}
 	    }
 	  fields_seen = 1;
@@ -229,7 +229,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  if (field_is_static (&type->field (i)))
 	    {
-	      fputs_filtered ("static ", stream);
+	      gdb_puts ("static ", stream);
 	      fprintf_symbol_filtered (stream,
 				       type->field (i).name (),
 				       current_language->la_language,
@@ -247,7 +247,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	  /* Do not print leading '=' in case of anonymous
 	     unions.  */
 	  if (strcmp (type->field (i).name (), ""))
-	    fputs_filtered (" = ", stream);
+	    gdb_puts (" = ", stream);
 	  else
 	    {
 	      /* If this is an anonymous field then we want to consider it
@@ -481,11 +481,11 @@ cp_print_value (struct value *val, struct ui_file *stream,
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);
 	}
-      fputs_filtered ("<", stream);
+      gdb_puts ("<", stream);
       /* Not sure what the best notation is in the case where there is
 	 no baseclass name.  */
-      fputs_filtered (basename ? basename : "", stream);
-      fputs_filtered ("> = ", stream);
+      gdb_puts (basename ? basename : "", stream);
+      gdb_puts ("> = ", stream);
 
       if (skip < 0)
 	val_print_unavailable (stream);
@@ -516,7 +516,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
 				       0);
 	    }
 	}
-      fputs_filtered (", ", stream);
+      gdb_puts (", ", stream);
 
     flush_it:
       ;
@@ -701,10 +701,10 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
     {
       const char *name;
 
-      fputs_filtered (prefix, stream);
+      gdb_puts (prefix, stream);
       name = self_type->name ();
       if (name)
-	fputs_filtered (name, stream);
+	gdb_puts (name, stream);
       else
 	c_type_print_base (self_type, stream, 0, 0, &type_print_raw_options);
       fprintf_filtered (stream, "::");

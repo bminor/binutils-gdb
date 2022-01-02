@@ -363,7 +363,7 @@ static void
 maint_print_all_sections (const char *header, bfd *abfd, objfile *objfile,
 			  const char *arg)
 {
-  puts_filtered (header);
+  gdb_puts (header);
   gdb_stdout->wrap_here (8);
   printf_filtered ("`%s', ", bfd_get_filename (abfd));
   gdb_stdout->wrap_here (8);

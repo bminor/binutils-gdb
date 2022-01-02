@@ -145,9 +145,9 @@ void
 m2_language::printchar (int c, struct type *type,
 			struct ui_file *stream) const
 {
-  fputs_filtered ("'", stream);
+  gdb_puts ("'", stream);
   emitchar (c, type, stream, '\'');
-  fputs_filtered ("'", stream);
+  gdb_puts ("'", stream);
 }
 
 /* See language.h.  */
@@ -165,7 +165,7 @@ m2_language::printstr (struct ui_file *stream, struct type *elttype,
 
   if (length == 0)
     {
-      puts_filtered ("\"\"");
+      gdb_puts ("\"\"");
       return;
     }
 
@@ -181,7 +181,7 @@ m2_language::printstr (struct ui_file *stream, struct type *elttype,
 
       if (need_comma)
 	{
-	  fputs_filtered (", ", stream);
+	  gdb_puts (", ", stream);
 	  need_comma = 0;
 	}
 
@@ -197,7 +197,7 @@ m2_language::printstr (struct ui_file *stream, struct type *elttype,
 	{
 	  if (in_quotes)
 	    {
-	      fputs_filtered ("\", ", stream);
+	      gdb_puts ("\", ", stream);
 	      in_quotes = 0;
 	    }
 	  printchar (string[i], elttype, stream);
@@ -210,7 +210,7 @@ m2_language::printstr (struct ui_file *stream, struct type *elttype,
 	{
 	  if (!in_quotes)
 	    {
-	      fputs_filtered ("\"", stream);
+	      gdb_puts ("\"", stream);
 	      in_quotes = 1;
 	    }
 	  emitchar (string[i], elttype, stream, '"');
@@ -220,10 +220,10 @@ m2_language::printstr (struct ui_file *stream, struct type *elttype,
 
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
-    fputs_filtered ("\"", stream);
+    gdb_puts ("\"", stream);
 
   if (force_ellipses || i < length)
-    fputs_filtered ("...", stream);
+    gdb_puts ("...", stream);
 }
 
 /* See language.h.  */
@@ -237,7 +237,7 @@ m2_language::emitchar (int ch, struct type *chtype,
   if (PRINT_LITERAL_FORM (ch))
     {
       if (ch == '\\' || ch == quoter)
-	fputs_filtered ("\\", stream);
+	gdb_puts ("\\", stream);
       fprintf_filtered (stream, "%c", ch);
     }
   else
@@ -245,25 +245,25 @@ m2_language::emitchar (int ch, struct type *chtype,
       switch (ch)
 	{
 	case '\n':
-	  fputs_filtered ("\\n", stream);
+	  gdb_puts ("\\n", stream);
 	  break;
 	case '\b':
-	  fputs_filtered ("\\b", stream);
+	  gdb_puts ("\\b", stream);
 	  break;
 	case '\t':
-	  fputs_filtered ("\\t", stream);
+	  gdb_puts ("\\t", stream);
 	  break;
 	case '\f':
-	  fputs_filtered ("\\f", stream);
+	  gdb_puts ("\\f", stream);
 	  break;
 	case '\r':
-	  fputs_filtered ("\\r", stream);
+	  gdb_puts ("\\r", stream);
 	  break;
 	case '\033':
-	  fputs_filtered ("\\e", stream);
+	  gdb_puts ("\\e", stream);
 	  break;
 	case '\007':
-	  fputs_filtered ("\\a", stream);
+	  gdb_puts ("\\a", stream);
 	  break;
 	default:
 	  fprintf_filtered (stream, "\\%.3o", (unsigned int) ch);

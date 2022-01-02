@@ -1104,7 +1104,7 @@ jump_command (const char *arg, int from_tty)
   if (from_tty)
     {
       printf_filtered (_("Continuing at "));
-      puts_filtered (paddress (gdbarch, addr));
+      gdb_puts (paddress (gdbarch, addr));
       printf_filtered (".\n");
     }
 
@@ -1955,16 +1955,16 @@ environment_info (const char *var, int from_tty)
 
       if (val)
 	{
-	  puts_filtered (var);
-	  puts_filtered (" = ");
-	  puts_filtered (val);
-	  puts_filtered ("\n");
+	  gdb_puts (var);
+	  gdb_puts (" = ");
+	  gdb_puts (val);
+	  gdb_puts ("\n");
 	}
       else
 	{
-	  puts_filtered ("Environment variable \"");
-	  puts_filtered (var);
-	  puts_filtered ("\" not defined.\n");
+	  gdb_puts ("Environment variable \"");
+	  gdb_puts (var);
+	  gdb_puts ("\" not defined.\n");
 	}
     }
   else
@@ -1973,8 +1973,8 @@ environment_info (const char *var, int from_tty)
 
       for (int idx = 0; envp[idx] != NULL; ++idx)
 	{
-	  puts_filtered (envp[idx]);
-	  puts_filtered ("\n");
+	  gdb_puts (envp[idx]);
+	  gdb_puts ("\n");
 	}
     }
 }
@@ -2062,9 +2062,9 @@ static const char path_var_name[] = "PATH";
 static void
 path_info (const char *args, int from_tty)
 {
-  puts_filtered ("Executable and object file path: ");
-  puts_filtered (current_inferior ()->environment.get (path_var_name));
-  puts_filtered ("\n");
+  gdb_puts ("Executable and object file path: ");
+  gdb_puts (current_inferior ()->environment.get (path_var_name));
+  gdb_puts ("\n");
 }
 
 /* Add zero or more directories to the front of the execution path.  */
@@ -2164,7 +2164,7 @@ default_print_one_register_info (struct ui_file *file,
 	}
     }
 
-  fputs_filtered (format_stream.c_str (), file);
+  gdb_puts (format_stream.c_str (), file);
   fprintf_filtered (file, "\n");
 }
 

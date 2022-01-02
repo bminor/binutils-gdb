@@ -1769,7 +1769,7 @@ target_xfer_partial (struct target_ops *ops,
 	{
 	  int i;
 
-	  fputs_unfiltered (", bytes =", gdb_stdlog);
+	  gdb_puts (", bytes =", gdb_stdlog);
 	  for (i = 0; i < *xfered_len; i++)
 	    {
 	      if ((((intptr_t) &(myaddr[i])) & 0xf) == 0)

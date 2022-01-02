@@ -428,14 +428,14 @@ print_frame_arg (const frame_print_options &fp_opts,
 
   annotate_arg_emitter arg_emitter;
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
-  fputs_filtered (arg->sym->print_name (), &stb);
+  gdb_puts (arg->sym->print_name (), &stb);
   if (arg->entry_kind == print_entry_values_compact)
     {
       /* It is OK to provide invalid MI-like stream as with
 	 PRINT_ENTRY_VALUE_COMPACT we never use MI.  */
       stb.puts ("=");
 
-      fputs_filtered (arg->sym->print_name (), &stb);
+      gdb_puts (arg->sym->print_name (), &stb);
     }
   if (arg->entry_kind == print_entry_values_only
       || arg->entry_kind == print_entry_values_compact)
@@ -1366,7 +1366,7 @@ print_frame (const frame_print_options &fp_opts,
     annotate_frame_function_name ();
 
     string_file stb;
-    fputs_filtered (funname ? funname.get () : "??", &stb);
+    gdb_puts (funname ? funname.get () : "??", &stb);
     uiout->field_stream ("func", stb, function_name_style.style ());
     uiout->wrap_hint (3);
     annotate_frame_args ();
@@ -1549,11 +1549,11 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     {
       printf_filtered (_("Stack frame at "));
     }
-  puts_filtered (paddress (gdbarch, get_frame_base (fi)));
+  gdb_puts (paddress (gdbarch, get_frame_base (fi)));
   printf_filtered (":\n");
   printf_filtered (" %s = ", pc_regname);
   if (frame_pc_p)
-    puts_filtered (paddress (gdbarch, get_frame_pc (fi)));
+    gdb_puts (paddress (gdbarch, get_frame_pc (fi)));
   else
     fputs_styled ("<unavailable>", metadata_style.style (), gdb_stdout);
 
@@ -1561,7 +1561,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
   if (funname)
     {
       printf_filtered (" in ");
-      puts_filtered (funname);
+      gdb_puts (funname);
     }
   gdb_stdout->wrap_here (3);
   if (sal.symtab)
@@ -1570,7 +1570,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
        styled_string (file_name_style.style (),
 		      symtab_to_filename_for_display (sal.symtab)),
        sal.line);
-  puts_filtered ("; ");
+  gdb_puts ("; ");
   gdb_stdout->wrap_here (4);
   printf_filtered ("saved %s = ", pc_regname);
 
@@ -1603,7 +1603,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     }
 
   if (caller_pc_p)
-    puts_filtered (paddress (gdbarch, caller_pc));
+    gdb_puts (paddress (gdbarch, caller_pc));
   printf_filtered ("\n");
 
   if (calling_frame_info == NULL)
@@ -1616,25 +1616,25 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 			 frame_stop_reason_string (fi));
     }
   else if (get_frame_type (fi) == TAILCALL_FRAME)
-    puts_filtered (" tail call frame");
+    gdb_puts (" tail call frame");
   else if (get_frame_type (fi) == INLINE_FRAME)
     printf_filtered (" inlined into frame %d",
 		     frame_relative_level (get_prev_frame (fi)));
   else
     {
       printf_filtered (" called by frame at ");
-      puts_filtered (paddress (gdbarch, get_frame_base (calling_frame_info)));
+      gdb_puts (paddress (gdbarch, get_frame_base (calling_frame_info)));
     }
   if (get_next_frame (fi) && calling_frame_info)
-    puts_filtered (",");
+    gdb_puts (",");
   gdb_stdout->wrap_here (3);
   if (get_next_frame (fi))
     {
       printf_filtered (" caller of frame at ");
-      puts_filtered (paddress (gdbarch, get_frame_base (get_next_frame (fi))));
+      gdb_puts (paddress (gdbarch, get_frame_base (get_next_frame (fi))));
     }
   if (get_next_frame (fi) || calling_frame_info)
-    puts_filtered ("\n");
+    gdb_puts ("\n");
 
   if (s)
     printf_filtered (" source language %s.\n",
@@ -1651,28 +1651,28 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     else
       {
 	printf_filtered (" Arglist at ");
-	puts_filtered (paddress (gdbarch, arg_list));
+	gdb_puts (paddress (gdbarch, arg_list));
 	printf_filtered (",");
 
 	if (!gdbarch_frame_num_args_p (gdbarch))
 	  {
 	    numargs = -1;
-	    puts_filtered (" args: ");
+	    gdb_puts (" args: ");
 	  }
 	else
 	  {
 	    numargs = gdbarch_frame_num_args (gdbarch, fi);
 	    gdb_assert (numargs >= 0);
 	    if (numargs == 0)
-	      puts_filtered (" no args.");
+	      gdb_puts (" no args.");
 	    else if (numargs == 1)
-	      puts_filtered (" 1 arg: ");
+	      gdb_puts (" 1 arg: ");
 	    else
 	      printf_filtered (" %d args: ", numargs);
 	  }
 	print_frame_args (user_frame_print_options,
 			  func, fi, numargs, gdb_stdout);
-	puts_filtered ("\n");
+	gdb_puts ("\n");
       }
   }
   {
@@ -1684,7 +1684,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
     else
       {
 	printf_filtered (" Locals at ");
-	puts_filtered (paddress (gdbarch, arg_list));
+	gdb_puts (paddress (gdbarch, arg_list));
 	printf_filtered (",");
       }
   }
@@ -1719,13 +1719,13 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 		  (value_contents_all (value).data (), sp_size, byte_order);
 
 		printf_filtered (" Previous frame's sp is ");
-		puts_filtered (paddress (gdbarch, sp));
+		gdb_puts (paddress (gdbarch, sp));
 		printf_filtered ("\n");
 	      }
 	    else if (VALUE_LVAL (value) == lval_memory)
 	      {
 		printf_filtered (" Previous frame's sp at ");
-		puts_filtered (paddress (gdbarch, value_address (value)));
+		gdb_puts (paddress (gdbarch, value_address (value)));
 		printf_filtered ("\n");
 	      }
 	    else if (VALUE_LVAL (value) == lval_register)
@@ -1762,18 +1762,18 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 	  if (!optimized && !unavailable && lval == lval_memory)
 	    {
 	      if (count == 0)
-		puts_filtered (" Saved registers:\n ");
+		gdb_puts (" Saved registers:\n ");
 	      else
-		puts_filtered (",");
+		gdb_puts (",");
 	      gdb_stdout->wrap_here (1);
 	      printf_filtered (" %s at ",
 			       gdbarch_register_name (gdbarch, i));
-	      puts_filtered (paddress (gdbarch, addr));
+	      gdb_puts (paddress (gdbarch, addr));
 	      count++;
 	    }
 	}
     if (count || need_nl)
-      puts_filtered ("\n");
+      gdb_puts ("\n");
   }
 }
 

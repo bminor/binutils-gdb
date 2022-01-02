@@ -107,14 +107,14 @@ print_offset_data::maybe_print_hole (struct ui_file *stream,
 	{
 	  fprintf_styled (stream, highlight_style.style (),
 			  "/* XXX %2u-bit %-7s    */", hole_bit, for_what);
-	  fputs_filtered ("\n", stream);
+	  gdb_puts ("\n", stream);
 	}
 
       if (hole_byte > 0)
 	{
 	  fprintf_styled (stream, highlight_style.style (),
 			  "/* XXX %2u-byte %-7s   */", hole_byte, for_what);
-	  fputs_filtered ("\n", stream);
+	  gdb_puts ("\n", stream);
 	}
     }
 }
@@ -187,7 +187,7 @@ print_offset_data::finish (struct type *type, int level,
   unsigned int bitpos = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
   maybe_print_hole (stream, bitpos, "padding");
 
-  fputs_filtered ("\n", stream);
+  gdb_puts ("\n", stream);
   print_spaces_filtered (level + 4 + print_offset_data::indentation, stream);
   fprintf_filtered (stream, "/* total size (bytes): %4s */\n",
 		    pulongest (TYPE_LENGTH (type)));
@@ -633,7 +633,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 	}
       if (i < len)
 	{
-	  fputs_filtered (type->field (i).name (), stream);
+	  gdb_puts (type->field (i).name (), stream);
 	}
       else
 	{

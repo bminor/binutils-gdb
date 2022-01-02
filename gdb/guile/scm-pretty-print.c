@@ -687,7 +687,7 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
 	  for (i = 0; i < length; ++i)
 	    {
 	      if (string.get ()[i] == '\0')
-		fputs_filtered ("\\000", stream);
+		gdb_puts ("\\000", stream);
 	      else
 		fputc_filtered (string.get ()[i], stream);
 	    }
@@ -826,10 +826,10 @@ ppscm_print_children (SCM printer, enum display_hint hint,
       if (i == 0)
 	{
 	  if (!printed_nothing)
-	    fputs_filtered (" = ", stream);
+	    gdb_puts (" = ", stream);
 	}
       else if (! is_map || i % 2 == 0)
-	fputs_filtered (pretty ? "," : ", ", stream);
+	gdb_puts (pretty ? "," : ", ", stream);
 
       /* Skip printing children if max_depth has been reached.  This check
 	 is performed after print_string_repr and the "=" separator so that
@@ -839,7 +839,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	goto done;
       else if (i == 0)
 	/* Print initial "{" to bookend children.  */
-	fputs_filtered ("{", stream);
+	gdb_puts ("{", stream);
 
       /* In summary mode, we just want to print "= {...}" if there is
 	 a value.  */
@@ -857,7 +857,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	{
 	  if (pretty)
 	    {
-	      fputs_filtered ("\n", stream);
+	      gdb_puts ("\n", stream);
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  else
@@ -865,7 +865,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	}
 
       if (is_map && i % 2 == 0)
-	fputs_filtered ("[", stream);
+	gdb_puts ("[", stream);
       else if (is_array)
 	{
 	  /* We print the index, not whatever the child method
@@ -875,8 +875,8 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	}
       else if (! is_map)
 	{
-	  fputs_filtered (name.get (), stream);
-	  fputs_filtered (" = ", stream);
+	  gdb_puts (name.get (), stream);
+	  gdb_puts (" = ", stream);
 	}
 
       if (lsscm_is_lazy_string (v_scm))
@@ -890,7 +890,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	{
 	  gdb::unique_xmalloc_ptr<char> output
 	    = gdbscm_scm_to_c_string (v_scm);
-	  fputs_filtered (output.get (), stream);
+	  gdb_puts (output.get (), stream);
 	}
       else
 	{
@@ -920,7 +920,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	}
 
       if (is_map && i % 2 == 0)
-	fputs_filtered ("] = ", stream);
+	gdb_puts ("] = ", stream);
     }
 
   if (i)
@@ -929,17 +929,17 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	{
 	  if (pretty)
 	    {
-	      fputs_filtered ("\n", stream);
+	      gdb_puts ("\n", stream);
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
-	  fputs_filtered ("...", stream);
+	  gdb_puts ("...", stream);
 	}
       if (pretty)
 	{
-	  fputs_filtered ("\n", stream);
+	  gdb_puts ("\n", stream);
 	  print_spaces_filtered (2 * recurse, stream);
 	}
-      fputs_filtered ("}", stream);
+      gdb_puts ("}", stream);
     }
 
  done:

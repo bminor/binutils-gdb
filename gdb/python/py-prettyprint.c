@@ -321,7 +321,7 @@ print_string_repr (PyObject *printer, const char *hint,
 		language->printstr (stream, type, (gdb_byte *) output,
 				    length, NULL, 0, options);
 	      else
-		fputs_filtered (output, stream);
+		gdb_puts (output, stream);
 	    }
 	  else
 	    {
@@ -439,10 +439,10 @@ print_children (PyObject *printer, const char *hint,
       if (i == 0)
 	{
 	  if (!is_py_none)
-	    fputs_filtered (" = ", stream);
+	    gdb_puts (" = ", stream);
 	}
       else if (! is_map || i % 2 == 0)
-	fputs_filtered (pretty ? "," : ", ", stream);
+	gdb_puts (pretty ? "," : ", ", stream);
 
       /* Skip printing children if max_depth has been reached.  This check
 	 is performed after print_string_repr and the "=" separator so that
@@ -452,7 +452,7 @@ print_children (PyObject *printer, const char *hint,
 	return;
       else if (i == 0)
 	/* Print initial "{" to bookend children.  */
-	fputs_filtered ("{", stream);
+	gdb_puts ("{", stream);
 
       /* In summary mode, we just want to print "= {...}" if there is
 	 a value.  */
@@ -470,7 +470,7 @@ print_children (PyObject *printer, const char *hint,
 	{
 	  if (pretty)
 	    {
-	      fputs_filtered ("\n", stream);
+	      gdb_puts ("\n", stream);
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  else
@@ -478,7 +478,7 @@ print_children (PyObject *printer, const char *hint,
 	}
 
       if (is_map && i % 2 == 0)
-	fputs_filtered ("[", stream);
+	gdb_puts ("[", stream);
       else if (is_array)
 	{
 	  /* We print the index, not whatever the child method
@@ -488,8 +488,8 @@ print_children (PyObject *printer, const char *hint,
 	}
       else if (! is_map)
 	{
-	  fputs_filtered (name, stream);
-	  fputs_filtered (" = ", stream);
+	  gdb_puts (name, stream);
+	  gdb_puts (" = ", stream);
 	}
 
       if (gdbpy_is_lazy_string (py_v))
@@ -514,7 +514,7 @@ print_children (PyObject *printer, const char *hint,
 	  if (!output)
 	    gdbpy_print_stack ();
 	  else
-	    fputs_filtered (output.get (), stream);
+	    gdb_puts (output.get (), stream);
 	}
       else
 	{
@@ -540,7 +540,7 @@ print_children (PyObject *printer, const char *hint,
 	}
 
       if (is_map && i % 2 == 0)
-	fputs_filtered ("] = ", stream);
+	gdb_puts ("] = ", stream);
     }
 
   if (i)
@@ -549,17 +549,17 @@ print_children (PyObject *printer, const char *hint,
 	{
 	  if (pretty)
 	    {
-	      fputs_filtered ("\n", stream);
+	      gdb_puts ("\n", stream);
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
-	  fputs_filtered ("...", stream);
+	  gdb_puts ("...", stream);
 	}
       if (pretty)
 	{
-	  fputs_filtered ("\n", stream);
+	  gdb_puts ("\n", stream);
 	  print_spaces_filtered (2 * recurse, stream);
 	}
-      fputs_filtered ("}", stream);
+      gdb_puts ("}", stream);
     }
 }
 

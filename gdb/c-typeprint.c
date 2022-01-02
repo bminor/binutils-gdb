@@ -91,7 +91,7 @@ print_name_maybe_canonical (const char *name,
 				     find_typedef_for_canonicalize,
 				     (void *) flags);
 
-  fputs_filtered (s != nullptr ? s.get () : name, stream);
+  gdb_puts (s != nullptr ? s.get () : name, stream);
 }
 
 
@@ -120,9 +120,9 @@ c_print_type_1 (struct type *type,
   if (local_name != NULL)
     {
       c_type_print_modifier (type, stream, 0, 1, language);
-      fputs_filtered (local_name, stream);
+      gdb_puts (local_name, stream);
       if (varstring != NULL && *varstring != '\0')
-	fputs_filtered (" ", stream);
+	gdb_puts (" ", stream);
     }
   else
     {
@@ -138,7 +138,7 @@ c_print_type_1 (struct type *type,
 		  || code == TYPE_CODE_MEMBERPTR
 		  || code == TYPE_CODE_METHODPTR
 		  || TYPE_IS_REFERENCE (type))))
-	fputs_filtered (" ", stream);
+	gdb_puts (" ", stream);
       need_post_space = (varstring != NULL && strcmp (varstring, "") != 0);
       c_type_print_varspec_prefix (type, stream, show, 0, need_post_space,
 				   language, flags, podata);
@@ -251,7 +251,7 @@ cp_type_print_derivation_info (struct ui_file *stream,
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
       stream->wrap_here (8);
-      fputs_filtered (i == 0 ? ": " : ", ", stream);
+      gdb_puts (i == 0 ? ": " : ", ", stream);
       fprintf_filtered (stream, "%s%s ",
 			BASETYPE_VIA_PUBLIC (type, i)
 			? "public" : (TYPE_FIELD_PROTECTED (type, i)
@@ -265,7 +265,7 @@ cp_type_print_derivation_info (struct ui_file *stream,
     }
   if (i > 0)
     {
-      fputs_filtered (" ", stream);
+      gdb_puts (" ", stream);
     }
 }
 
@@ -287,7 +287,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 			   language_cplus, DMGL_ANSI);
   fprintf_symbol_filtered (stream, varstring,
 			   language_cplus, DMGL_ANSI);
-  fputs_filtered ("(", stream);
+  gdb_puts ("(", stream);
 
   /* Skip the class variable.  We keep this here to accommodate older
      compilers and debug formats which may not support artificial
@@ -894,7 +894,7 @@ c_type_print_template_args (const struct type_print_options *flags,
 	}
       else
 	{
-	  fputs_filtered (", ", stream);
+	  gdb_puts (", ", stream);
 	  stream->wrap_here (9);
 	  fprintf_filtered (stream, "%s = ", sym->linkage_name ());
 	}
@@ -903,7 +903,7 @@ c_type_print_template_args (const struct type_print_options *flags,
     }
 
   if (!first)
-    fputs_filtered (_("] "), stream);
+    gdb_puts (_("] "), stream);
 }
 
 /* Use 'print_spaces_filtered', but take into consideration the
@@ -1079,7 +1079,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	 here.  */
       print_name_maybe_canonical (type->name (), flags, stream);
       if (show > 0)
-	fputs_filtered (" ", stream);
+	gdb_puts (" ", stream);
     }
 
   if (show < 0)
@@ -1300,7 +1300,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		    (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
 		     "", stream, -1, 0, language, &local_flags, podata);
 
-		  fputs_filtered (" ", stream);
+		  gdb_puts (" ", stream);
 		}
 	      if (TYPE_FN_FIELD_STUB (f, j))
 		{
@@ -1352,10 +1352,10 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		      int length = p - demangled_no_class;
 		      std::string demangled_no_static (demangled_no_class,
 						       length);
-		      fputs_filtered (demangled_no_static.c_str (), stream);
+		      gdb_puts (demangled_no_static.c_str (), stream);
 		    }
 		  else
-		    fputs_filtered (demangled_no_class, stream);
+		    gdb_puts (demangled_no_class, stream);
 		}
 
 	      fprintf_filtered (stream, ";\n");
@@ -1556,7 +1556,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	{
 	  print_name_maybe_canonical (type->name (), flags, stream);
 	  if (show > 0)
-	    fputs_filtered (" ", stream);
+	    gdb_puts (" ", stream);
 	}
 
       stream->wrap_here (4);
@@ -1620,7 +1620,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	print_name_maybe_canonical (type->name (), flags, stream);
 	if (show > 0)
 	  {
-	    fputs_filtered (" ", stream);
+	    gdb_puts (" ", stream);
 	    fprintf_filtered (stream, "{\n");
 	    if (type->num_fields () == 0)
 	      {
@@ -1684,8 +1684,8 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_NAMESPACE:
-      fputs_filtered ("namespace ", stream);
-      fputs_filtered (type->name (), stream);
+      gdb_puts ("namespace ", stream);
+      gdb_puts (type->name (), stream);
       break;
 
     default:

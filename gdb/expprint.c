@@ -138,9 +138,9 @@ dump_for_expression (struct ui_file *stream, int depth,
 {
   fprintf_filtered (stream, _("%*sType flags: "), depth, "");
   if (flags & TYPE_INSTANCE_FLAG_CONST)
-    fputs_filtered ("const ", stream);
+    gdb_puts ("const ", stream);
   if (flags & TYPE_INSTANCE_FLAG_VOLATILE)
-    fputs_filtered ("volatile", stream);
+    gdb_puts ("volatile", stream);
   fprintf_filtered (stream, "\n");
 }
 
@@ -152,24 +152,24 @@ dump_for_expression (struct ui_file *stream, int depth,
   switch (flags & ~C_CHAR)
     {
     case C_WIDE_STRING:
-      fputs_filtered (_("wide "), stream);
+      gdb_puts (_("wide "), stream);
       break;
     case C_STRING_16:
-      fputs_filtered (_("u16 "), stream);
+      gdb_puts (_("u16 "), stream);
       break;
     case C_STRING_32:
-      fputs_filtered (_("u32 "), stream);
+      gdb_puts (_("u32 "), stream);
       break;
     default:
-      fputs_filtered (_("ordinary "), stream);
+      gdb_puts (_("ordinary "), stream);
       break;
     }
 
   if ((flags & C_CHAR) != 0)
-    fputs_filtered (_("char"), stream);
+    gdb_puts (_("char"), stream);
   else
-    fputs_filtered (_("string"), stream);
-  fputs_filtered ("\n", stream);
+    gdb_puts (_("string"), stream);
+  gdb_puts ("\n", stream);
 }
 
 void
@@ -178,13 +178,13 @@ dump_for_expression (struct ui_file *stream, int depth,
 {
   fprintf_filtered (stream, _("%*sRange:"), depth, "");
   if ((flags & RANGE_LOW_BOUND_DEFAULT) != 0)
-    fputs_filtered (_("low-default "), stream);
+    gdb_puts (_("low-default "), stream);
   if ((flags & RANGE_HIGH_BOUND_DEFAULT) != 0)
-    fputs_filtered (_("high-default "), stream);
+    gdb_puts (_("high-default "), stream);
   if ((flags & RANGE_HIGH_BOUND_EXCLUSIVE) != 0)
-    fputs_filtered (_("high-exclusive "), stream);
+    gdb_puts (_("high-exclusive "), stream);
   if ((flags & RANGE_HAS_STRIDE) != 0)
-    fputs_filtered (_("has-stride"), stream);
+    gdb_puts (_("has-stride"), stream);
   fprintf_filtered (stream, "\n");
 }
 

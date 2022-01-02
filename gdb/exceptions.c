@@ -81,7 +81,7 @@ print_exception (struct ui_file *file, const struct gdb_exception &e)
     {
       end = strchr (start, '\n');
       if (end == NULL)
-	fputs_filtered (start, file);
+	gdb_puts (start, file);
       else
 	{
 	  end++;

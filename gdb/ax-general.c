@@ -398,7 +398,7 @@ ax_print (struct ui_file *f, struct agent_expr *x)
       fprintf_filtered (f, "%3d  %s", i, aop_map[op].name);
       if (aop_map[op].op_size > 0)
 	{
-	  fputs_filtered (" ", f);
+	  gdb_puts (" ", f);
 
 	  print_longest (f, 'd', 0,
 			 read_const (x, i + 1, aop_map[op].op_size));

@@ -471,7 +471,7 @@ tui_layout_window::replace_window (const char *name, const char *new_window)
 void
 tui_layout_window::specification (ui_file *output, int depth)
 {
-  fputs_unfiltered (get_name (), output);
+  gdb_puts (get_name (), output);
 }
 
 /* See tui-layout.h.  */
@@ -806,23 +806,23 @@ void
 tui_layout_split::specification (ui_file *output, int depth)
 {
   if (depth > 0)
-    fputs_unfiltered ("{", output);
+    gdb_puts ("{", output);
 
   if (!m_vertical)
-    fputs_unfiltered ("-horizontal ", output);
+    gdb_puts ("-horizontal ", output);
 
   bool first = true;
   for (auto &item : m_splits)
     {
       if (!first)
-	fputs_unfiltered (" ", output);
+	gdb_puts (" ", output);
       first = false;
       item.layout->specification (output, depth + 1);
       fprintf_unfiltered (output, " %d", item.weight);
     }
 
   if (depth > 0)
-    fputs_unfiltered ("}", output);
+    gdb_puts ("}", output);
 }
 
 /* Destroy the layout associated with SELF.  */

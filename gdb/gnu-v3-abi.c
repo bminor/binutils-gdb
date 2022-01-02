@@ -649,18 +649,18 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 
 	  fprintf_filtered (stream, "&virtual ");
 	  if (demangled_name == NULL)
-	    fputs_filtered (physname, stream);
+	    gdb_puts (physname, stream);
 	  else
-	    fputs_filtered (demangled_name.get (), stream);
+	    gdb_puts (demangled_name.get (), stream);
 	  return;
 	}
     }
   else if (ptr_value != 0)
     {
       /* Found a non-virtual function: print out the type.  */
-      fputs_filtered ("(", stream);
+      gdb_puts ("(", stream);
       c_print_type (type, "", stream, -1, 0, &type_print_raw_options);
-      fputs_filtered (") ", stream);
+      gdb_puts (") ", stream);
     }
 
   /* We didn't find it; print the raw data.  */

@@ -153,8 +153,8 @@ mi_cmd_gdb_exit (const char *command, char **argv, int argc)
 
   /* We have to print everything right here because we never return.  */
   if (current_token)
-    fputs_unfiltered (current_token, mi->raw_stdout);
-  fputs_unfiltered ("^exit\n", mi->raw_stdout);
+    gdb_puts (current_token, mi->raw_stdout);
+  gdb_puts ("^exit\n", mi->raw_stdout);
   mi_out_put (current_uiout, mi->raw_stdout);
   gdb_flush (mi->raw_stdout);
   /* FIXME: The function called is not yet a formal libgdb function.  */
@@ -1830,15 +1830,15 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	 uiout will most likely crash in the mi_out_* routines.  */
       if (!running_result_record_printed)
 	{
-	  fputs_unfiltered (context->token, mi->raw_stdout);
+	  gdb_puts (context->token, mi->raw_stdout);
 	  /* There's no particularly good reason why target-connect results
 	     in not ^done.  Should kill ^connected for MI3.  */
-	  fputs_unfiltered (strcmp (context->command, "target-select") == 0
-			    ? "^connected" : "^done", mi->raw_stdout);
+	  gdb_puts (strcmp (context->command, "target-select") == 0
+		    ? "^connected" : "^done", mi->raw_stdout);
 	  mi_out_put (uiout, mi->raw_stdout);
 	  mi_out_rewind (uiout);
 	  mi_print_timing_maybe (mi->raw_stdout);
-	  fputs_unfiltered ("\n", mi->raw_stdout);
+	  gdb_puts ("\n", mi->raw_stdout);
 	}
       else
 	/* The command does not want anything to be printed.  In that
@@ -1869,12 +1869,12 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	  {
 	    if (!running_result_record_printed)
 	      {
-		fputs_unfiltered (context->token, mi->raw_stdout);
-		fputs_unfiltered ("^done", mi->raw_stdout);
+		gdb_puts (context->token, mi->raw_stdout);
+		gdb_puts ("^done", mi->raw_stdout);
 		mi_out_put (uiout, mi->raw_stdout);
 		mi_out_rewind (uiout);
 		mi_print_timing_maybe (mi->raw_stdout);
-		fputs_unfiltered ("\n", mi->raw_stdout);
+		gdb_puts ("\n", mi->raw_stdout);
 	      }
 	    else
 	      mi_out_rewind (uiout);
@@ -1891,22 +1891,22 @@ mi_print_exception (const char *token, const struct gdb_exception &exception)
 {
   struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
 
-  fputs_unfiltered (token, mi->raw_stdout);
-  fputs_unfiltered ("^error,msg=\"", mi->raw_stdout);
+  gdb_puts (token, mi->raw_stdout);
+  gdb_puts ("^error,msg=\"", mi->raw_stdout);
   if (exception.message == NULL)
-    fputs_unfiltered ("unknown error", mi->raw_stdout);
+    gdb_puts ("unknown error", mi->raw_stdout);
   else
     mi->raw_stdout->putstr (exception.what (), '"');
-  fputs_unfiltered ("\"", mi->raw_stdout);
+  gdb_puts ("\"", mi->raw_stdout);
 
   switch (exception.error)
     {
       case UNDEFINED_COMMAND_ERROR:
-	fputs_unfiltered (",code=\"undefined-command\"", mi->raw_stdout);
+	gdb_puts (",code=\"undefined-command\"", mi->raw_stdout);
 	break;
     }
 
-  fputs_unfiltered ("\n", mi->raw_stdout);
+  gdb_puts ("\n", mi->raw_stdout);
 }
 
 void
@@ -2187,8 +2187,8 @@ mi_load_progress (const char *section_name,
       previous_sect_name = xstrdup (section_name);
 
       if (current_token)
-	fputs_unfiltered (current_token, mi->raw_stdout);
-      fputs_unfiltered ("+download", mi->raw_stdout);
+	gdb_puts (current_token, mi->raw_stdout);
+      gdb_puts ("+download", mi->raw_stdout);
       {
 	ui_out_emit_tuple tuple_emitter (uiout.get (), NULL);
 	uiout->field_string ("section", section_name);
@@ -2196,7 +2196,7 @@ mi_load_progress (const char *section_name,
 	uiout->field_signed ("total-size", grand_total);
       }
       mi_out_put (uiout.get (), mi->raw_stdout);
-      fputs_unfiltered ("\n", mi->raw_stdout);
+      gdb_puts ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
     }
 
@@ -2205,8 +2205,8 @@ mi_load_progress (const char *section_name,
     {
       last_update = time_now;
       if (current_token)
-	fputs_unfiltered (current_token, mi->raw_stdout);
-      fputs_unfiltered ("+download", mi->raw_stdout);
+	gdb_puts (current_token, mi->raw_stdout);
+      gdb_puts ("+download", mi->raw_stdout);
       {
 	ui_out_emit_tuple tuple_emitter (uiout.get (), NULL);
 	uiout->field_string ("section", section_name);
@@ -2216,7 +2216,7 @@ mi_load_progress (const char *section_name,
 	uiout->field_signed ("total-size", grand_total);
       }
       mi_out_put (uiout.get (), mi->raw_stdout);
-      fputs_unfiltered ("\n", mi->raw_stdout);
+      gdb_puts ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
     }
 }

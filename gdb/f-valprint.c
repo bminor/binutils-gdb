@@ -144,7 +144,7 @@ public:
   {
     bool cont = should_continue && (m_elts < m_options->print_max);
     if (!cont && should_continue)
-      fputs_filtered ("...", m_stream);
+      gdb_puts ("...", m_stream);
     return cont;
   }
 
@@ -162,7 +162,7 @@ public:
 	m_stats[dim_indx].nelts = nelts;
       }
 
-    fputs_filtered ("(", m_stream);
+    gdb_puts ("(", m_stream);
   }
 
   /* Called when we finish processing a batch of items within a dimension
@@ -171,9 +171,9 @@ public:
      separators between elements, and dimensions of the array.  */
   void finish_dimension (bool inner_p, bool last_p)
   {
-    fputs_filtered (")", m_stream);
+    gdb_puts (")", m_stream);
     if (!last_p)
-      fputs_filtered (" ", m_stream);
+      gdb_puts (" ", m_stream);
 
     m_dimension--;
   }
@@ -218,7 +218,7 @@ public:
 			      nullptr);
 	    annotate_elt_rep_end ();
 	    if (!repeated)
-	      fputs_filtered (" ", m_stream);
+	      gdb_puts (" ", m_stream);
 	    m_elts += nrepeats * m_stats[dim_indx + 1].nelts;
 	  }
 	else
@@ -245,7 +245,7 @@ public:
 		nrepeats++;
 	      }
 	    else if (last_p)
-	      fputs_filtered ("...", m_stream);
+	      gdb_puts ("...", m_stream);
 	  }
       }
 
@@ -301,7 +301,7 @@ public:
 		    common_val_print (e_val, m_stream, m_recurse, m_options,
 				      current_language);
 		    if (i > 1)
-		      fputs_filtered (", ", m_stream);
+		      gdb_puts (", ", m_stream);
 		  }
 	      }
 	    printed = true;
@@ -314,14 +314,14 @@ public:
 	      = value_from_component (m_val, elt_type, elt_off);
 
 	    if (printed)
-	      fputs_filtered (", ", m_stream);
+	      gdb_puts (", ", m_stream);
 	    maybe_print_array_index (m_stats[dim_indx].index_type, index,
 				     m_stream, m_options);
 	    common_val_print (e_val, m_stream, m_recurse, m_options,
 			      current_language);
 	  }
 	if (!last_p)
-	  fputs_filtered (", ", m_stream);
+	  gdb_puts (", ", m_stream);
       }
 
     m_elt_type_prev = elt_type;
@@ -490,7 +490,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 						 stream, demangle);
 	  else if (options->addressprint && options->format != 's')
 	    {
-	      fputs_filtered (paddress (gdbarch, addr), stream);
+	      gdb_puts (paddress (gdbarch, addr), stream);
 	      want_space = 1;
 	    }
 
@@ -502,7 +502,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 	      && addr != 0)
 	    {
 	      if (want_space)
-		fputs_filtered (" ", stream);
+		gdb_puts (" ", stream);
 	      val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
 				stream, options);
 	    }
@@ -542,13 +542,13 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 		field = value_field (val, index);
 
 	      if (printed_field > 0)
-		fputs_filtered (", ", stream);
+		gdb_puts (", ", stream);
 
 	      if (field_name != NULL)
 		{
 		  fputs_styled (field_name, variable_name_style.style (),
 				stream);
-		  fputs_filtered (" = ", stream);
+		  gdb_puts (" = ", stream);
 		}
 
 	      common_val_print (field, stream, recurse + 1,
@@ -575,9 +575,9 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 	     represented.  Different compilers use different non zero
 	     values to represent logical true.  */
 	  if (longval == 0)
-	    fputs_filtered (f_decorations.false_name, stream);
+	    gdb_puts (f_decorations.false_name, stream);
 	  else
-	    fputs_filtered (f_decorations.true_name, stream);
+	    gdb_puts (f_decorations.true_name, stream);
 	}
       break;
 

@@ -1394,12 +1394,12 @@ print_gdb_help (struct ui_file *stream)
   /* Note: The options in the list below are only approximately sorted
      in the alphabetical order, so as to group closely related options
      together.  */
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 This is the GNU debugger.  Usage:\n\n\
     gdb [options] [executable-file [core-file or process-id]]\n\
     gdb [options] --args executable-file [inferior-arguments ...]\n\n\
 "), stream);
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 Selection of debuggee and its files:\n\n\
   --args             Arguments after executable-file are passed to inferior.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
@@ -1412,7 +1412,7 @@ Selection of debuggee and its files:\n\n\
   --readnever        Do not read symbol files.\n\
   --write            Set writing into executable and core files.\n\n\
 "), stream);
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 Initial commands and command files:\n\n\
   --command=FILE, -x Execute GDB commands from FILE.\n\
   --init-command=FILE, -ix\n\
@@ -1426,7 +1426,7 @@ Initial commands and command files:\n\n\
   --nh               Do not read ~/.gdbinit.\n\
   --nx               Do not read any .gdbinit files in any directory.\n\n\
 "), stream);
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 Output and user interface control:\n\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --interpreter=INTERP\n\
@@ -1436,16 +1436,16 @@ Output and user interface control:\n\n\
   --nw               Do not use the GUI interface.\n\
 "), stream);
 #if defined(TUI)
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
   --tui              Use a terminal user interface.\n\
 "), stream);
 #endif
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
   --dbx              DBX compatibility mode.\n\
   -q, --quiet, --silent\n\
 		     Do not print version number on startup.\n\n\
 "), stream);
-  fputs_unfiltered (_("\
+  gdb_puts (_("\
 Operating modes:\n\n\
   --batch            Exit after processing options.\n\
   --batch-silent     Like --batch, but suppress all gdb stdout output.\n\
@@ -1462,7 +1462,7 @@ Other options:\n\n\
   --data-directory=DIR, -D\n\
 		     Set GDB's data-directory to DIR.\n\
 "), stream);
-  fputs_unfiltered (_("\n\
+  gdb_puts (_("\n\
 At startup, GDB reads the following early init files and executes their\n\
 commands:\n\
 "), stream);
@@ -1473,7 +1473,7 @@ commands:\n\
   if (home_gdbearlyinit.empty ())
     fprintf_unfiltered (stream, _("\
    None found.\n"));
-  fputs_unfiltered (_("\n\
+  gdb_puts (_("\n\
 At startup, GDB reads the following init files and executes their commands:\n\
 "), stream);
   if (!system_gdbinit.empty ())
@@ -1501,7 +1501,7 @@ At startup, GDB reads the following init files and executes their commands:\n\
       && local_gdbinit.empty ())
     fprintf_unfiltered (stream, _("\
    None found.\n"));
-  fputs_unfiltered (_("\n\
+  gdb_puts (_("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
 "), stream);

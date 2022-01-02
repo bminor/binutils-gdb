@@ -279,7 +279,7 @@ static void
 maintenance_show_test_options_completion_result (const char *args,
 						 int from_tty)
 {
-  puts_filtered (maintenance_test_options_command_completion_text.c_str ());
+  gdb_puts (maintenance_test_options_command_completion_text.c_str ());
 }
 
 /* Save the completion result in the global variables read by the

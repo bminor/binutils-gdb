@@ -98,7 +98,7 @@ display_mi_prompt (struct mi_interp *mi)
 {
   struct ui *ui = current_ui;
 
-  fputs_unfiltered ("(gdb) \n", mi->raw_stdout);
+  gdb_puts ("(gdb) \n", mi->raw_stdout);
   gdb_flush (mi->raw_stdout);
   ui->prompt_state = PROMPTED;
 }
@@ -674,11 +674,11 @@ mi_on_normal_stop_1 (struct bpstat *bs, int print_frame)
 	mi_uiout->field_signed ("core", core);
     }
   
-  fputs_unfiltered ("*stopped", mi->raw_stdout);
+  gdb_puts ("*stopped", mi->raw_stdout);
   mi_out_put (mi_uiout, mi->raw_stdout);
   mi_out_rewind (mi_uiout);
   mi_print_timing_maybe (mi->raw_stdout);
-  fputs_unfiltered ("\n", mi->raw_stdout);
+  gdb_puts ("\n", mi->raw_stdout);
   gdb_flush (mi->raw_stdout);
 }
 
@@ -1018,7 +1018,7 @@ mi_on_resume_1 (struct mi_interp *mi,
 	 even if it cannot actually accept any input.  This will be
 	 surely removed for MI3, and may be removed even earlier.  */
       if (current_ui->prompt_state == PROMPT_BLOCKED)
-	fputs_unfiltered ("(gdb) \n", mi->raw_stdout);
+	gdb_puts ("(gdb) \n", mi->raw_stdout);
     }
   gdb_flush (mi->raw_stdout);
 }

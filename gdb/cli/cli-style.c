@@ -187,7 +187,7 @@ do_show (const char *what, struct ui_file *file,
 	 const char *value)
 {
   cli_style_option *cso = (cli_style_option *) cmd->context ();
-  fputs_filtered (_("The "), file);
+  gdb_puts (_("The "), file);
   fprintf_styled (file, cso->style (), _("\"%s\" style"), cso->name ());
   fprintf_filtered (file, _(" %s is: %s\n"), what, value);
 }

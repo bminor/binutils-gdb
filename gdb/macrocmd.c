@@ -41,7 +41,7 @@ static struct cmd_list_element *macrolist;
 static void
 macro_inform_no_debuginfo (void)
 {
-  puts_filtered ("GDB has no preprocessor macro information for that code.\n");
+  gdb_puts ("GDB has no preprocessor macro information for that code.\n");
 }
 
 static void
@@ -63,9 +63,9 @@ macro_expand_command (const char *exp, int from_tty)
     {
       gdb::unique_xmalloc_ptr<char> expanded = macro_expand (exp, *ms);
 
-      puts_filtered ("expands to: ");
-      puts_filtered (expanded.get ());
-      puts_filtered ("\n");
+      gdb_puts ("expands to: ");
+      gdb_puts (expanded.get ());
+      gdb_puts ("\n");
     }
   else
     macro_inform_no_debuginfo ();
@@ -91,9 +91,9 @@ macro_expand_once_command (const char *exp, int from_tty)
     {
       gdb::unique_xmalloc_ptr<char> expanded = macro_expand_once (exp, *ms);
 
-      puts_filtered ("expands to: ");
-      puts_filtered (expanded.get ());
-      puts_filtered ("\n");
+      gdb_puts ("expands to: ");
+      gdb_puts (expanded.get ());
+      gdb_puts ("\n");
     }
   else
     macro_inform_no_debuginfo ();
@@ -117,7 +117,7 @@ show_pp_source_pos (struct ui_file *stream,
   while (file->included_by)
     {
       fullname = macro_source_fullname (file->included_by);
-      fputs_filtered (_("  included at "), stream);
+      gdb_puts (_("  included at "), stream);
       fputs_styled (fullname.c_str (), file_name_style.style (), stream);
       fprintf_filtered (stream, ":%d\n", file->included_at_line);
       file = file->included_by;
@@ -149,14 +149,14 @@ print_macro_definition (const char *name,
     {
       int i;
 
-      puts_filtered ("(");
+      gdb_puts ("(");
       for (i = 0; i < d->argc; i++)
 	{
-	  puts_filtered (d->argv[i]);
+	  gdb_puts (d->argv[i]);
 	  if (i + 1 < d->argc)
-	    puts_filtered (", ");
+	    gdb_puts (", ");
 	}
-      puts_filtered (")");
+      gdb_puts (")");
     }
 
   if (line != 0)

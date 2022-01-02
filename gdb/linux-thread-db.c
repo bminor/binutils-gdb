@@ -778,7 +778,7 @@ check_thread_db (struct thread_db_info *info, bool log_progress)
   catch (const gdb_exception_error &except)
     {
       if (warning_pre_print)
-	fputs_unfiltered (warning_pre_print, gdb_stderr);
+	gdb_puts (warning_pre_print, gdb_stderr);
 
       exception_fprintf (gdb_stderr, except,
 			 _("libthread_db integrity checks failed: "));

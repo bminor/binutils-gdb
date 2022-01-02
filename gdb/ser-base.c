@@ -306,12 +306,12 @@ ser_base_read_error_fd (struct serial *scb, int close_fd)
 	  while ((newline = strstr (current, "\n")) != NULL)
 	    {
 	      *newline = '\0';
-	      fputs_unfiltered (current, gdb_stderr);
-	      fputs_unfiltered ("\n", gdb_stderr);
+	      gdb_puts (current, gdb_stderr);
+	      gdb_puts ("\n", gdb_stderr);
 	      current = newline + 1;
 	    }
 
-	  fputs_unfiltered (current, gdb_stderr);
+	  gdb_puts (current, gdb_stderr);
        }
     }
 }

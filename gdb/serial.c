@@ -81,10 +81,10 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
       fprintf_unfiltered (stream, "<Error: %s>", safe_strerror (errno));
       return;
     case SERIAL_EOF:
-      fputs_unfiltered ("<Eof>", stream);
+      gdb_puts ("<Eof>", stream);
       return;
     case SERIAL_BREAK:
-      fputs_unfiltered ("<Break>", stream);
+      gdb_puts ("<Break>", stream);
       return;
     default:
       if (serial_logbase == logbase_hex)
@@ -95,25 +95,25 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
 	switch (ch)
 	  {
 	  case '\\':
-	    fputs_unfiltered ("\\\\", stream);
+	    gdb_puts ("\\\\", stream);
 	    break;
 	  case '\b':
-	    fputs_unfiltered ("\\b", stream);
+	    gdb_puts ("\\b", stream);
 	    break;
 	  case '\f':
-	    fputs_unfiltered ("\\f", stream);
+	    gdb_puts ("\\f", stream);
 	    break;
 	  case '\n':
-	    fputs_unfiltered ("\\n", stream);
+	    gdb_puts ("\\n", stream);
 	    break;
 	  case '\r':
-	    fputs_unfiltered ("\\r", stream);
+	    gdb_puts ("\\r", stream);
 	    break;
 	  case '\t':
-	    fputs_unfiltered ("\\t", stream);
+	    gdb_puts ("\\t", stream);
 	    break;
 	  case '\v':
-	    fputs_unfiltered ("\\v", stream);
+	    gdb_puts ("\\v", stream);
 	    break;
 	  default:
 	    fprintf_unfiltered (stream,
@@ -131,8 +131,8 @@ serial_log_command (struct target_ops *self, const char *cmd)
 
   serial_current_type = 'c';
 
-  fputs_unfiltered ("\nc ", serial_logfp);
-  fputs_unfiltered (cmd, serial_logfp);
+  gdb_puts ("\nc ", serial_logfp);
+  gdb_puts (cmd, serial_logfp);
 
   /* Make sure that the log file is as up-to-date as possible,
      in case we are getting ready to dump core or something.  */
@@ -312,7 +312,7 @@ do_serial_close (struct serial *scb, int really_close)
 
   if (serial_logfp)
     {
-      fputs_unfiltered ("\nEnd of log\n", serial_logfp);
+      gdb_puts ("\nEnd of log\n", serial_logfp);
       serial_current_type = 0;
 
       /* XXX - What if serial_logfp == gdb_stdout or gdb_stderr?  */

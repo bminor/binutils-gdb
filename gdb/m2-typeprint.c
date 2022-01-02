@@ -179,7 +179,7 @@ void
 m2_type_name (struct type *type, struct ui_file *stream)
 {
   if (type->name () != NULL)
-    fputs_filtered (type->name (), stream);
+    gdb_puts (type->name (), stream);
 }
 
 /* m2_range - displays a Modula-2 subrange type.  */
@@ -213,8 +213,8 @@ m2_typedef (struct type *type, struct ui_file *stream, int show,
 {
   if (type->name () != NULL)
     {
-      fputs_filtered (type->name (), stream);
-      fputs_filtered (" = ", stream);
+      gdb_puts (type->name (), stream);
+      gdb_puts (" = ", stream);
     }
   m2_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level, flags);
 }
@@ -235,9 +235,9 @@ static void m2_array (struct type *type, struct ui_file *stream,
 	  m2_print_bounds (type->index_type (), stream, show, -1, 1);
 	}
       else
-	fputs_filtered (pulongest ((TYPE_LENGTH (type)
-				    / TYPE_LENGTH (TYPE_TARGET_TYPE (type)))),
-			stream);
+	gdb_puts (pulongest ((TYPE_LENGTH (type)
+			      / TYPE_LENGTH (TYPE_TARGET_TYPE (type)))),
+		  stream);
     }
   fprintf_filtered (stream, "] OF ");
   m2_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level, flags);
@@ -291,7 +291,7 @@ m2_procedure (struct type *type, struct ui_file *stream,
 	{
 	  if (i > 0)
 	    {
-	      fputs_filtered (", ", stream);
+	      gdb_puts (", ", stream);
 	      stream->wrap_here (4);
 	    }
 	  m2_print_type (type->field (i).type (), "", stream, -1, 0, flags);
@@ -442,10 +442,10 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
     {
       if (type->name () != NULL)
 	{
-	  fputs_filtered (type->name (), stream);
+	  gdb_puts (type->name (), stream);
 	  if (show == 0)
 	    return 1;
-	  fputs_filtered (" = ", stream);
+	  gdb_puts (" = ", stream);
 	}
 
       if (get_long_set_bounds (type, &low, &high))
@@ -516,7 +516,7 @@ m2_unbounded_array (struct type *type, struct ui_file *stream, int show,
     {
       if (show > 0)
 	{
-	  fputs_filtered ("ARRAY OF ", stream);
+	  gdb_puts ("ARRAY OF ", stream);
 	  m2_print_type (TYPE_TARGET_TYPE (type->field (0).type ()),
 			 "", stream, 0, level, flags);
 	}
@@ -534,7 +534,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
     {
       if (!startswith (type->name (), "$$"))
 	{
-	  fputs_filtered (type->name (), stream);
+	  gdb_puts (type->name (), stream);
 	  if (show > 0)
 	    fprintf_filtered (stream, " = ");
 	}
@@ -565,7 +565,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	  print_spaces_filtered (level + 4, stream);
 	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
-	  fputs_filtered (" : ", stream);
+	  gdb_puts (" : ", stream);
 	  m2_print_type (type->field (i).type (),
 			 "",
 			 stream, 0, level + 4, flags);

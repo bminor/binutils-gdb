@@ -6391,7 +6391,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
 
   val = get_frame_register_value (frame, regnum);
 
-  fputs_filtered (gdbarch_register_name (gdbarch, regnum), file);
+  gdb_puts (gdbarch_register_name (gdbarch, regnum), file);
 
   /* The problem with printing numeric register names (r26, etc.) is that
      the user can't use them on input.  Probably the best solution is to
@@ -6412,17 +6412,17 @@ static void
 print_fpu_flags (struct ui_file *file, int flags)
 {
   if (flags & (1 << 0))
-    fputs_filtered (" inexact", file);
+    gdb_puts (" inexact", file);
   if (flags & (1 << 1))
-    fputs_filtered (" uflow", file);
+    gdb_puts (" uflow", file);
   if (flags & (1 << 2))
-    fputs_filtered (" oflow", file);
+    gdb_puts (" oflow", file);
   if (flags & (1 << 3))
-    fputs_filtered (" div0", file);
+    gdb_puts (" div0", file);
   if (flags & (1 << 4))
-    fputs_filtered (" inval", file);
+    gdb_puts (" inval", file);
   if (flags & (1 << 5))
-    fputs_filtered (" unimp", file);
+    gdb_puts (" unimp", file);
   fputc_filtered ('\n', file);
 }
 
@@ -6452,39 +6452,39 @@ mips_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   fprintf_filtered (file, "reg size: %d bits\n",
 		    register_size (gdbarch, mips_regnum (gdbarch)->fp0) * 8);
 
-  fputs_filtered ("cond    :", file);
+  gdb_puts ("cond    :", file);
   if (fcs & (1 << 23))
-    fputs_filtered (" 0", file);
+    gdb_puts (" 0", file);
   for (i = 1; i <= 7; i++)
     if (fcs & (1 << (24 + i)))
       fprintf_filtered (file, " %d", i);
   fputc_filtered ('\n', file);
 
-  fputs_filtered ("cause   :", file);
+  gdb_puts ("cause   :", file);
   print_fpu_flags (file, (fcs >> 12) & 0x3f);
   fputs ("mask    :", stdout);
   print_fpu_flags (file, (fcs >> 7) & 0x1f);
   fputs ("flags   :", stdout);
   print_fpu_flags (file, (fcs >> 2) & 0x1f);
 
-  fputs_filtered ("rounding: ", file);
+  gdb_puts ("rounding: ", file);
   switch (fcs & 3)
     {
-    case 0: fputs_filtered ("nearest\n", file); break;
-    case 1: fputs_filtered ("zero\n", file); break;
-    case 2: fputs_filtered ("+inf\n", file); break;
-    case 3: fputs_filtered ("-inf\n", file); break;
+    case 0: gdb_puts ("nearest\n", file); break;
+    case 1: gdb_puts ("zero\n", file); break;
+    case 2: gdb_puts ("+inf\n", file); break;
+    case 3: gdb_puts ("-inf\n", file); break;
     }
 
-  fputs_filtered ("flush   :", file);
+  gdb_puts ("flush   :", file);
   if (fcs & (1 << 21))
-    fputs_filtered (" nearest", file);
+    gdb_puts (" nearest", file);
   if (fcs & (1 << 22))
-    fputs_filtered (" override", file);
+    gdb_puts (" override", file);
   if (fcs & (1 << 24))
-    fputs_filtered (" zero", file);
+    gdb_puts (" zero", file);
   if ((fcs & (0xb << 21)) == 0)
-    fputs_filtered (" no", file);
+    gdb_puts (" no", file);
   fputc_filtered ('\n', file);
 
   fprintf_filtered (file, "nan2008 : %s\n", fcs & (1 << 18) ? "yes" : "no");

@@ -885,7 +885,7 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 
   if (name != NULL && name[0] != '\0')
     {
-      fputs_filtered (" ", stream);
+      gdb_puts (" ", stream);
       fputs_styled (name, function_name_style.style (), stream);
     }
 
@@ -896,7 +896,7 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 	{
 	  if (i > 0)
 	    {
-	      fputs_filtered ("; ", stream);
+	      gdb_puts ("; ", stream);
 	      stream->wrap_here (4);
 	    }
 	  fprintf_filtered (stream, "a%d: ", i + 1);

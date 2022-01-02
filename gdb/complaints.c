@@ -50,9 +50,9 @@ complaint_internal (const char *fmt, ...)
     (*deprecated_warning_hook) (fmt, args);
   else
     {
-      fputs_filtered (_("During symbol reading: "), gdb_stderr);
+      gdb_puts (_("During symbol reading: "), gdb_stderr);
       gdb_vprintf (gdb_stderr, fmt, args);
-      fputs_filtered ("\n", gdb_stderr);
+      gdb_puts ("\n", gdb_stderr);
     }
 
   va_end (args);

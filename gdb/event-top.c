@@ -1236,8 +1236,8 @@ async_disconnect (gdb_client_data arg)
 
   catch (const gdb_exception &exception)
     {
-      fputs_filtered ("Could not kill the program being debugged",
-		      gdb_stderr);
+      gdb_puts ("Could not kill the program being debugged",
+		gdb_stderr);
       exception_print (gdb_stderr, exception);
     }
 

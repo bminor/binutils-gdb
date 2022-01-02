@@ -161,9 +161,9 @@ public:
   void printchar (int ch, struct type *chtype,
 		  struct ui_file *stream) const override
   {
-    fputs_filtered ("'", stream);
+    gdb_puts ("'", stream);
     emitchar (ch, chtype, stream, '\'');
-    fputs_filtered ("'", stream);
+    gdb_puts ("'", stream);
   }
 
   /* See language.h.  */
@@ -176,7 +176,7 @@ public:
     const char *type_encoding = get_encoding (elttype);
 
     if (TYPE_LENGTH (elttype) == 4)
-      fputs_filtered ("4_", stream);
+      gdb_puts ("4_", stream);
 
     if (!encoding || !*encoding)
       encoding = type_encoding;

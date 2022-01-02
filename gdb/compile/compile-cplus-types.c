@@ -1246,9 +1246,9 @@ static void
 compile_cplus_debug_output_1 (const char *arg)
 {
   if (arg == nullptr)
-    fputs_unfiltered ("NULL", gdb_stdlog);
+    gdb_puts ("NULL", gdb_stdlog);
   else
-    fputs_unfiltered (arg, gdb_stdlog);
+    gdb_puts (arg, gdb_stdlog);
 }
 
 static void
@@ -1275,7 +1275,7 @@ compile_cplus_debug_output (T arg, Targs... Args)
 #define OUTPUT_DEBUG_RESULT(R)			  \
   if (debug_compile_cplus_types)		  \
     {						  \
-      fputs_unfiltered (": ", gdb_stdlog);	  \
+      gdb_puts (": ", gdb_stdlog);		  \
       compile_cplus_debug_output (R);		  \
       fputc_unfiltered ('\n', gdb_stdlog);	  \
     }						  \

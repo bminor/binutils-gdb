@@ -55,13 +55,13 @@ pascal_language::print_type (struct type *type, const char *varstring,
       type_print_varspec_prefix (type, stream, show, 0, flags);
     }
   /* first the name */
-  fputs_filtered (varstring, stream);
+  gdb_puts (varstring, stream);
 
   if ((varstring != NULL && *varstring != '\0')
       && !(code == TYPE_CODE_FUNC
 	   || code == TYPE_CODE_METHOD))
     {
-      fputs_filtered (" : ", stream);
+      gdb_puts (" : ", stream);
     }
 
   if (!(code == TYPE_CODE_FUNC
@@ -104,7 +104,7 @@ pascal_language::type_print_derivation_info (struct ui_file *stream,
 
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
-      fputs_filtered (i == 0 ? ": " : ", ", stream);
+      gdb_puts (i == 0 ? ": " : ", ", stream);
       fprintf_filtered (stream, "%s%s ",
 			BASETYPE_VIA_PUBLIC (type, i) ? "public" : "private",
 			BASETYPE_VIA_VIRTUAL (type, i) ? " virtual" : "");
@@ -113,7 +113,7 @@ pascal_language::type_print_derivation_info (struct ui_file *stream,
     }
   if (i > 0)
     {
-      fputs_filtered (" ", stream);
+      gdb_puts (" ", stream);
     }
 }
 
@@ -132,11 +132,11 @@ pascal_language::type_print_method_args (const char *physname,
       physname += 6;
     }
 
-  fputs_filtered (methodname, stream);
+  gdb_puts (methodname, stream);
 
   if (physname && (*physname != 0))
     {
-      fputs_filtered (" (", stream);
+      gdb_puts (" (", stream);
       /* We must demangle this.  */
       while (isdigit (physname[0]))
 	{
@@ -157,10 +157,10 @@ pascal_language::type_print_method_args (const char *physname,
 	  physname += i;
 	  if (physname[0] != 0)
 	    {
-	      fputs_filtered (", ", stream);
+	      gdb_puts (", ", stream);
 	    }
 	}
-      fputs_filtered (")", stream);
+      gdb_puts (")", stream);
     }
 }
 
@@ -286,7 +286,7 @@ pascal_language::print_func_args (struct type *type, struct ui_file *stream,
     {
       if (i > 0)
 	{
-	  fputs_filtered (", ", stream);
+	  gdb_puts (", ", stream);
 	  stream->wrap_here (4);
 	}
       /*  Can we find if it is a var parameter ??
@@ -430,8 +430,8 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
   if ((type->code () == TYPE_CODE_PTR)
       && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_VOID))
     {
-      fputs_filtered (type->name () ? type->name () : "pointer",
-		      stream);
+      gdb_puts (type->name () ? type->name () : "pointer",
+		stream);
       return;
     }
   /* When SHOW is zero or less, and there is a valid type name, then always
@@ -440,7 +440,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
   if (show <= 0
       && type->name () != NULL)
     {
-      fputs_filtered (type->name (), stream);
+      gdb_puts (type->name (), stream);
       return;
     }
 
@@ -465,8 +465,8 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
     case TYPE_CODE_STRUCT:
       if (type->name () != NULL)
 	{
-	  fputs_filtered (type->name (), stream);
-	  fputs_filtered (" = ", stream);
+	  gdb_puts (type->name (), stream);
+	  gdb_puts (" = ", stream);
 	}
       if (HAVE_CPLUS_STRUCT (type))
 	{
@@ -481,8 +481,8 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
     case TYPE_CODE_UNION:
       if (type->name () != NULL)
 	{
-	  fputs_filtered (type->name (), stream);
-	  fputs_filtered (" = ", stream);
+	  gdb_puts (type->name (), stream);
+	  gdb_puts (" = ", stream);
 	}
       fprintf_filtered (stream, "case <?> of ");
 
@@ -668,7 +668,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) != 0
 		      && TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE(f, j))->code () != TYPE_CODE_VOID)
 		    {
-		      fputs_filtered (" : ", stream);
+		      gdb_puts (" : ", stream);
 		      type_print (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)),
 				  "", stream, -1);
 		    }
@@ -685,9 +685,9 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
     case TYPE_CODE_ENUM:
       if (type->name () != NULL)
 	{
-	  fputs_filtered (type->name (), stream);
+	  gdb_puts (type->name (), stream);
 	  if (show > 0)
-	    fputs_filtered (" ", stream);
+	    gdb_puts (" ", stream);
 	}
       /* enum is just defined by
 	 type enume_name = (enum_member1,enum_member2,...)  */
@@ -710,7 +710,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	      if (i)
 		fprintf_filtered (stream, ", ");
 	      stream->wrap_here (4);
-	      fputs_filtered (type->field (i).name (), stream);
+	      gdb_puts (type->field (i).name (), stream);
 	      if (lastval != type->field (i).loc_enumval ())
 		{
 		  fprintf_filtered (stream,
@@ -742,19 +742,19 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	struct type *target = TYPE_TARGET_TYPE (type);
 
 	print_type_scalar (target, type->bounds ()->low.const_val (), stream);
-	fputs_filtered ("..", stream);
+	gdb_puts ("..", stream);
 	print_type_scalar (target, type->bounds ()->high.const_val (), stream);
       }
       break;
 
     case TYPE_CODE_SET:
-      fputs_filtered ("set of ", stream);
+      gdb_puts ("set of ", stream);
       print_type (type->index_type (), "", stream,
 			 show - 1, level, flags);
       break;
 
     case TYPE_CODE_STRING:
-      fputs_filtered ("String", stream);
+      gdb_puts ("String", stream);
       break;
 
     default:
@@ -764,7 +764,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 	 is no type name, then complain.  */
       if (type->name () != NULL)
 	{
-	  fputs_filtered (type->name (), stream);
+	  gdb_puts (type->name (), stream);
 	}
       else
 	{
