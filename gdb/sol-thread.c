@@ -882,7 +882,7 @@ ps_plog (const char *fmt, ...)
 
   va_start (args, fmt);
 
-  vfprintf_filtered (gdb_stderr, fmt, args);
+  gdb_vprintf (gdb_stderr, fmt, args);
 }
 
 /* Get size of extra register set.  Currently a noop.  */

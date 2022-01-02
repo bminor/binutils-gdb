@@ -127,7 +127,7 @@ exception_fprintf (struct ui_file *file, const struct gdb_exception &e,
 
       /* Print the prefix.  */
       va_start (args, prefix);
-      vfprintf_filtered (file, prefix, args);
+      gdb_vprintf (file, prefix, args);
       va_end (args);
 
       print_exception (file, e);

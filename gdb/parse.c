@@ -632,11 +632,11 @@ parser_fprintf (FILE *x, const char *y, ...)
 
   va_start (args, y);
   if (x == stderr)
-    vfprintf_unfiltered (gdb_stderr, y, args); 
+    gdb_vprintf (gdb_stderr, y, args); 
   else
     {
       fprintf_unfiltered (gdb_stderr, " Unknown FILE used.\n");
-      vfprintf_unfiltered (gdb_stderr, y, args);
+      gdb_vprintf (gdb_stderr, y, args);
     }
   va_end (args);
 }

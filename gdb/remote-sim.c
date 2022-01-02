@@ -401,16 +401,16 @@ gdb_os_printf_filtered (host_callback * p, const char *format, ...)
   va_list args;
 
   va_start (args, format);
-  vfprintf_filtered (gdb_stdout, format, args);
+  gdb_vprintf (gdb_stdout, format, args);
   va_end (args);
 }
 
-/* GDB version of error vprintf_filtered.  */
+/* GDB version of error gdb_vprintf.  */
 
 static void ATTRIBUTE_PRINTF (2, 0)
 gdb_os_vprintf_filtered (host_callback * p, const char *format, va_list ap)
 {
-  vfprintf_filtered (gdb_stdout, format, ap);
+  gdb_vprintf (gdb_stdout, format, ap);
 }
 
 /* GDB version of error evprintf_filtered.  */
@@ -418,7 +418,7 @@ gdb_os_vprintf_filtered (host_callback * p, const char *format, va_list ap)
 static void ATTRIBUTE_PRINTF (2, 0)
 gdb_os_evprintf_filtered (host_callback * p, const char *format, va_list ap)
 {
-  vfprintf_filtered (gdb_stderr, format, ap);
+  gdb_vprintf (gdb_stderr, format, ap);
 }
 
 /* GDB version of error callback.  */

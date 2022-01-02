@@ -51,7 +51,7 @@ complaint_internal (const char *fmt, ...)
   else
     {
       fputs_filtered (_("During symbol reading: "), gdb_stderr);
-      vfprintf_filtered (gdb_stderr, fmt, args);
+      gdb_vprintf (gdb_stderr, fmt, args);
       fputs_filtered ("\n", gdb_stderr);
     }
 

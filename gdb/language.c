@@ -414,7 +414,7 @@ range_error (const char *string,...)
     case range_check_off:
       /* FIXME: cagney/2002-01-30: Should this function print anything
 	 when range error is off?  */
-      vfprintf_filtered (gdb_stderr, string, args);
+      gdb_vprintf (gdb_stderr, string, args);
       fprintf_filtered (gdb_stderr, "\n");
       break;
     default:

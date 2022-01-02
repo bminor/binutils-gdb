@@ -151,7 +151,7 @@ mi_ui_out::do_field_fmt (int fldno, int width, ui_align align,
     fprintf_unfiltered (stream, "%s=\"", fldname);
   else
     fputs_unfiltered ("\"", stream);
-  vfprintf_unfiltered (stream, format, args);
+  gdb_vprintf (stream, format, args);
   fputs_unfiltered ("\"", stream);
 }
 

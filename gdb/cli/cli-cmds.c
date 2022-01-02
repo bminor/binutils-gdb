@@ -2038,7 +2038,7 @@ ambiguous_line_spec (gdb::array_view<const symtab_and_line> sals,
 {
   va_list ap;
   va_start (ap, format);
-  vprintf_filtered (format, ap);
+  gdb_vprintf (format, ap);
   va_end (ap);
 
   for (const auto &sal : sals)

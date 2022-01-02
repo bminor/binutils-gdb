@@ -83,10 +83,6 @@ void (*deprecated_error_begin_hook) (void);
 
 /* Prototypes for local functions */
 
-static void vfprintf_maybe_filtered (struct ui_file *, const char *,
-				     va_list, bool)
-  ATTRIBUTE_PRINTF (2, 0);
-
 static void set_screen_size (void);
 static void set_width (void);
 
@@ -155,7 +151,7 @@ vwarning (const char *string, va_list args)
       gdb_flush (gdb_stdout);
       if (warning_pre_print)
 	fputs_unfiltered (warning_pre_print, gdb_stderr);
-      vfprintf_unfiltered (gdb_stderr, string, args);
+      gdb_vprintf (gdb_stderr, string, args);
       fprintf_unfiltered (gdb_stderr, "\n");
     }
 }
@@ -879,7 +875,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       target_terminal::scoped_restore_terminal_state term_state;
       target_terminal::ours_for_output ();
       gdb_stdout->wrap_here (0);
-      vfprintf_filtered (gdb_stdout, ctlstr, args);
+      gdb_vprintf (gdb_stdout, ctlstr, args);
 
       printf_filtered (_("(%s or %s) [answered %c; "
 			 "input not from terminal]\n"),
@@ -1827,49 +1823,16 @@ fputc_filtered (int c, struct ui_file *stream)
   return c;
 }
 
-/* Print a variable number of ARGS using format FORMAT.  If this
-   information is going to put the amount written (since the last call
-   to REINITIALIZE_MORE_FILTER or the last page break) over the page size,
-   call prompt_for_continue to get the users permission to continue.
-
-   Unlike fprintf, this function does not return a value.
-
-   We implement three variants, vfprintf (takes a vararg list and stream),
-   fprintf (takes a stream to write on), and printf (the usual).
-
-   Note also that this may throw a quit (since prompt_for_continue may
-   do so).  */
-
-static void
-vfprintf_maybe_filtered (struct ui_file *stream, const char *format,
-			 va_list args, bool filter)
+void
+gdb_vprintf (struct ui_file *stream, const char *format, va_list args)
 {
   stream->vprintf (format, args);
 }
 
-
 void
-vfprintf_filtered (struct ui_file *stream, const char *format, va_list args)
+gdb_vprintf (const char *format, va_list args)
 {
-  vfprintf_maybe_filtered (stream, format, args, true);
-}
-
-void
-vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
-{
-  vfprintf_maybe_filtered (stream, format, args, false);
-}
-
-void
-vprintf_filtered (const char *format, va_list args)
-{
-  vfprintf_filtered (gdb_stdout, format, args);
-}
-
-void
-vprintf_unfiltered (const char *format, va_list args)
-{
-  vfprintf_unfiltered (gdb_stdout, format, args);
+  gdb_stdout->vprintf (format, args);
 }
 
 void
@@ -1878,7 +1841,7 @@ fprintf_filtered (struct ui_file *stream, const char *format, ...)
   va_list args;
 
   va_start (args, format);
-  vfprintf_filtered (stream, format, args);
+  gdb_vprintf (stream, format, args);
   va_end (args);
 }
 
@@ -1888,7 +1851,7 @@ fprintf_unfiltered (struct ui_file *stream, const char *format, ...)
   va_list args;
 
   va_start (args, format);
-  vfprintf_unfiltered (stream, format, args);
+  gdb_vprintf (stream, format, args);
   va_end (args);
 }
 
@@ -1902,7 +1865,7 @@ fprintf_styled (struct ui_file *stream, const ui_file_style &style,
 
   stream->emit_style_escape (style);
   va_start (args, format);
-  vfprintf_filtered (stream, format, args);
+  gdb_vprintf (stream, format, args);
   va_end (args);
   stream->emit_style_escape (ui_file_style ());
 }
@@ -1914,7 +1877,7 @@ vfprintf_styled (struct ui_file *stream, const ui_file_style &style,
 		 const char *format, va_list args)
 {
   stream->emit_style_escape (style);
-  vfprintf_filtered (stream, format, args);
+  gdb_vprintf (stream, format, args);
   stream->emit_style_escape (ui_file_style ());
 }
 
@@ -1924,7 +1887,7 @@ printf_filtered (const char *format, ...)
   va_list args;
 
   va_start (args, format);
-  vfprintf_filtered (gdb_stdout, format, args);
+  gdb_vprintf (gdb_stdout, format, args);
   va_end (args);
 }
 
