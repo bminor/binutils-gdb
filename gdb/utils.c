@@ -1765,7 +1765,7 @@ fputs_highlighted (const char *str, const compiled_regex &highlight,
       /* Output the part before pmatch with current style.  */
       while (pmatch.rm_so > 0)
 	{
-	  fputc_filtered (*str, stream);
+	  gdb_putc (*str, stream);
 	  pmatch.rm_so--;
 	  str++;
 	}
@@ -1774,7 +1774,7 @@ fputs_highlighted (const char *str, const compiled_regex &highlight,
       stream->emit_style_escape (highlight_style.style ());
       while (n_highlight > 0)
 	{
-	  fputc_filtered (*str, stream);
+	  gdb_putc (*str, stream);
 	  n_highlight--;
 	  str++;
 	}
@@ -1790,31 +1790,15 @@ fputs_highlighted (const char *str, const compiled_regex &highlight,
    May return nonlocally.  */
 
 int
-putchar_filtered (int c)
+gdb_putc (int c)
 {
-  return fputc_filtered (c, gdb_stdout);
+  return gdb_stdout->putc (c);
 }
 
 int
-fputc_unfiltered (int c, struct ui_file *stream)
+gdb_putc (int c, struct ui_file *stream)
 {
-  char buf[2];
-
-  buf[0] = c;
-  buf[1] = 0;
-  gdb_puts (buf, stream);
-  return c;
-}
-
-int
-fputc_filtered (int c, struct ui_file *stream)
-{
-  char buf[2];
-
-  buf[0] = c;
-  buf[1] = 0;
-  gdb_puts (buf, stream);
-  return c;
+  return stream->putc (c);
 }
 
 void

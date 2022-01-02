@@ -1389,7 +1389,7 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		b = '0';
 
 	      if (zero_pad || seen_a_one || b == '1')
-		fputc_filtered (b, stream);
+		gdb_putc (b, stream);
 	      if (b == '1')
 		seen_a_one = true;
 	    }
@@ -1409,7 +1409,7 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 		b = '0';
 
 	      if (zero_pad || seen_a_one || b == '1')
-		fputc_filtered (b, stream);
+		gdb_putc (b, stream);
 	      if (b == '1')
 		seen_a_one = true;
 	    }
@@ -1419,7 +1419,7 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
   /* When not zero-padding, ensure that something is printed when the
      input is 0.  */
   if (!zero_pad && !seen_a_one)
-    fputc_filtered ('0', stream);
+    gdb_putc ('0', stream);
 }
 
 /* A helper for print_octal_chars that emits a single octal digit,

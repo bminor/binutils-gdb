@@ -63,7 +63,9 @@ ui_file::putstrn (const char *str, int n, int quoter, bool async_safe)
 int
 ui_file::putc (int c)
 {
-  return fputc_unfiltered (c, this);
+  char copy = (char) c;
+  write (&copy, 1);
+  return c;
 }
 
 void

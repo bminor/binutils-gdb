@@ -235,11 +235,9 @@ extern void set_screen_width_and_height (int width, int height);
 
 extern void gdb_puts (const char *, struct ui_file *);
 
-extern int fputc_filtered (int c, struct ui_file *);
+extern int gdb_putc (int c, struct ui_file *);
 
-extern int fputc_unfiltered (int c, struct ui_file *);
-
-extern int putchar_filtered (int c);
+extern int gdb_putc (int c);
 
 extern void gdb_puts (const char *);
 

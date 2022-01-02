@@ -152,7 +152,7 @@ pascal_language::type_print_method_args (const char *physname,
 	  physname += len;
 
 	  for (j = 0; j < i; ++j)
-	    fputc_filtered (physname[j], stream);
+	    gdb_putc (physname[j], stream);
 
 	  physname += i;
 	  if (physname[0] != 0)

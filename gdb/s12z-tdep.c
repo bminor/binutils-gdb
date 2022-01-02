@@ -523,23 +523,23 @@ s12z_print_ccw_info (struct gdbarch *gdbarch,
   const int stop_1 = 15;
   const int stop_2 = 17;
   for (int i = 0; i < stop_1 - len; ++i)
-    fputc_filtered (' ', file);
+    gdb_putc (' ', file);
   fprintf_filtered (file, "0x%04x", ccw);
   for (int i = 0; i < stop_2 - len; ++i)
-    fputc_filtered (' ', file);
+    gdb_putc (' ', file);
   for (int b = 15; b >= 0; --b)
     {
       if (ccw & (0x1u << b))
 	{
 	  if (ccw_bits[b] == 0)
-	    fputc_filtered ('1', file);
+	    gdb_putc ('1', file);
 	  else
-	    fputc_filtered (ccw_bits[b], file);
+	    gdb_putc (ccw_bits[b], file);
 	}
       else
-	fputc_filtered (tolower (ccw_bits[b]), file);
+	gdb_putc (tolower (ccw_bits[b]), file);
     }
-  fputc_filtered ('\n', file);
+  gdb_putc ('\n', file);
 }
 
 static void

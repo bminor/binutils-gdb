@@ -1267,7 +1267,7 @@ static void
 compile_cplus_debug_output (T arg, Targs... Args)
 {
   compile_cplus_debug_output_1 (arg);
-  fputc_unfiltered (' ', gdb_stdlog);
+  gdb_putc (' ', gdb_stdlog);
   compile_cplus_debug_output (Args...);
 }
 
@@ -1277,7 +1277,7 @@ compile_cplus_debug_output (T arg, Targs... Args)
     {						  \
       gdb_puts (": ", gdb_stdlog);		  \
       compile_cplus_debug_output (R);		  \
-      fputc_unfiltered ('\n', gdb_stdlog);	  \
+      gdb_putc ('\n', gdb_stdlog);		  \
     }						  \
 
 #define GCC_METHOD0(R, N)			  \

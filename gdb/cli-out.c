@@ -381,9 +381,9 @@ void
 cli_ui_out::field_separator ()
 {
   if (test_flags (unfiltered_output))
-    fputc_unfiltered (' ', m_streams.back ());
+    gdb_putc (' ', m_streams.back ());
   else
-    fputc_filtered (' ', m_streams.back ());
+    gdb_putc (' ', m_streams.back ());
 }
 
 /* Constructor for cli_ui_out.  */

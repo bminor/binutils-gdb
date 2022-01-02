@@ -1786,7 +1786,7 @@ target_xfer_partial (struct target_ops *ops,
 	    }
 	}
 
-      fputc_unfiltered ('\n', gdb_stdlog);
+      gdb_putc ('\n', gdb_stdlog);
     }
 
   /* Check implementations of to_xfer_partial update *XFERED_LEN

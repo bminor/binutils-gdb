@@ -204,7 +204,7 @@ fputsn_filtered (const char *s, size_t size, struct ui_file *stream)
       if (s[i] == '\0')
 	gdb_puts ("\\000", stream);
       else
-	fputc_filtered (s[i], stream);
+	gdb_putc (s[i], stream);
     }
 }
 

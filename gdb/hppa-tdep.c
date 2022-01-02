@@ -2596,7 +2596,7 @@ unwind_command (const char *exp, int from_tty)
   pif (Large_frame);
   pif (alloca_frame);
 
-  putchar_filtered ('\n');
+  gdb_putc ('\n');
 
 #define pin(FLD) printf_filtered ("\t"#FLD" = 0x%x\n", u->FLD);
 

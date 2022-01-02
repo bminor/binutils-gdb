@@ -1608,7 +1608,7 @@ rust_language::emitchar (int ch, struct type *chtype,
   else if (ch == '\0')
     gdb_puts ("\\0", stream);
   else if (ch >= 32 && ch <= 127 && isprint (ch))
-    fputc_filtered (ch, stream);
+    gdb_putc (ch, stream);
   else if (ch <= 255)
     fprintf_filtered (stream, "\\x%02x", ch);
   else

@@ -689,7 +689,7 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
 	      if (string.get ()[i] == '\0')
 		gdb_puts ("\\000", stream);
 	      else
-		fputc_filtered (string.get ()[i], stream);
+		gdb_putc (string.get ()[i], stream);
 	    }
 	}
       result = STRING_REPR_OK;

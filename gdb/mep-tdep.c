@@ -2369,7 +2369,7 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  const char *file_endianness
 	    = bfd_big_endian (info.abfd) ? "big" : "little";
 	  
-	  fputc_unfiltered ('\n', gdb_stderr);
+	  gdb_putc ('\n', gdb_stderr);
 	  if (module_name)
 	    warning (_("the MeP module '%s' is %s-endian, but the executable\n"
 		       "%s is %s-endian."),

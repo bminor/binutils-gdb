@@ -4024,7 +4024,7 @@ print_fpu_flags (struct ui_file *file, int flags)
     gdb_puts ("UFL ", file);
   if (flags & (1 << 4))
     gdb_puts ("INX ", file);
-  fputc_filtered ('\n', file);
+  gdb_putc ('\n', file);
 }
 
 /* Print interesting information about the floating point processor

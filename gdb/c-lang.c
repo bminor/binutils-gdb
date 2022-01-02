@@ -167,19 +167,19 @@ language_defn::printchar (int c, struct type *type,
     case C_CHAR:
       break;
     case C_WIDE_CHAR:
-      fputc_filtered ('L', stream);
+      gdb_putc ('L', stream);
       break;
     case C_CHAR_16:
-      fputc_filtered ('u', stream);
+      gdb_putc ('u', stream);
       break;
     case C_CHAR_32:
-      fputc_filtered ('U', stream);
+      gdb_putc ('U', stream);
       break;
     }
 
-  fputc_filtered ('\'', stream);
+  gdb_putc ('\'', stream);
   emitchar (c, type, stream, '\'');
-  fputc_filtered ('\'', stream);
+  gdb_putc ('\'', stream);
 }
 
 /* Print the character string STRING, printing at most LENGTH

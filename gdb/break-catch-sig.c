@@ -296,7 +296,7 @@ signal_catchpoint_print_recreate (struct breakpoint *b, struct ui_file *fp)
     }
   else if (c->catch_all)
     fprintf_unfiltered (fp, " all");
-  fputc_unfiltered ('\n', fp);
+  gdb_putc ('\n', fp);
 }
 
 /* Implement the "explains_signal" breakpoint_ops method for signal

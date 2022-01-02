@@ -11572,7 +11572,7 @@ remote_target::rcmd (const char *command, struct ui_file *outbuf)
 	{
 	  char c = (fromhex (p[0]) << 4) + fromhex (p[1]);
 
-	  fputc_unfiltered (c, outbuf);
+	  gdb_putc (c, outbuf);
 	}
       break;
     }
@@ -11629,7 +11629,7 @@ private:
       {
 	gdb_byte c = buf[i];
 	if (isprint (c))
-	  fputc_unfiltered (c, &stb);
+	  gdb_putc (c, &stb);
 	else
 	  fprintf_unfiltered (&stb, "\\x%02x", (unsigned char) c);
       }

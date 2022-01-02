@@ -79,15 +79,15 @@ mi_console_file::flush ()
       gdb_puts (m_prefix, m_raw);
       if (m_quote)
 	{
-	  fputc_unfiltered (m_quote, m_raw);
+	  gdb_putc (m_quote, m_raw);
 	  m_raw->putstrn (buf, length_buf, m_quote);
-	  fputc_unfiltered (m_quote, m_raw);
-	  fputc_unfiltered ('\n', m_raw);
+	  gdb_putc (m_quote, m_raw);
+	  gdb_putc ('\n', m_raw);
 	}
       else
 	{
 	  m_raw->putstrn (buf, length_buf, 0);
-	  fputc_unfiltered ('\n', m_raw);
+	  gdb_putc ('\n', m_raw);
 	}
       gdb_flush (m_raw);
     }

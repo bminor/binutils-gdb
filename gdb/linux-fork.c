@@ -597,7 +597,7 @@ info_checkpoints_command (const char *arg, int from_tty)
 	    printf_filtered (", <%s>", msym.minsym->linkage_name ());
 	}
 
-      putchar_filtered ('\n');
+      gdb_putc ('\n');
     }
   if (printed == NULL)
     {

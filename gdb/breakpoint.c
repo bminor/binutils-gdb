@@ -11069,7 +11069,7 @@ clear_command (const char *arg, int from_tty)
       delete_breakpoint (iter);
     }
   if (from_tty)
-    putchar_filtered ('\n');
+    gdb_putc ('\n');
 }
 
 /* Delete breakpoint in BS if they are `delete' breakpoints and

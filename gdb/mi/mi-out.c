@@ -199,7 +199,7 @@ mi_ui_out::field_separator ()
   if (m_suppress_field_separator)
     m_suppress_field_separator = false;
   else
-    fputc_unfiltered (',', m_streams.back ());
+    gdb_putc (',', m_streams.back ());
 }
 
 void
@@ -216,11 +216,11 @@ mi_ui_out::open (const char *name, ui_out_type type)
   switch (type)
     {
     case ui_out_type_tuple:
-      fputc_unfiltered ('{', stream);
+      gdb_putc ('{', stream);
       break;
 
     case ui_out_type_list:
-      fputc_unfiltered ('[', stream);
+      gdb_putc ('[', stream);
       break;
 
     default:
@@ -236,11 +236,11 @@ mi_ui_out::close (ui_out_type type)
   switch (type)
     {
     case ui_out_type_tuple:
-      fputc_unfiltered ('}', stream);
+      gdb_putc ('}', stream);
       break;
 
     case ui_out_type_list:
-      fputc_unfiltered (']', stream);
+      gdb_putc (']', stream);
       break;
 
     default:

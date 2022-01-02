@@ -877,7 +877,7 @@ chain_candidate (struct gdbarch *gdbarch,
 	  fprintf_unfiltered (gdb_stdlog, "tailcall: initial:");
 	  for (idx = 0; idx < length; idx++)
 	    tailcall_dump (gdbarch, result->call_site[idx]);
-	  fputc_unfiltered ('\n', gdb_stdlog);
+	  gdb_putc ('\n', gdb_stdlog);
 	}
 
       return;
@@ -888,7 +888,7 @@ chain_candidate (struct gdbarch *gdbarch,
       fprintf_unfiltered (gdb_stdlog, "tailcall: compare:");
       for (idx = 0; idx < length; idx++)
 	tailcall_dump (gdbarch, chain[idx]);
-      fputc_unfiltered ('\n', gdb_stdlog);
+      gdb_putc ('\n', gdb_stdlog);
     }
 
   /* Intersect callers.  */
@@ -922,7 +922,7 @@ chain_candidate (struct gdbarch *gdbarch,
 	tailcall_dump (gdbarch,
 		       (*resultp)->call_site[(*resultp)->length
 					     - (*resultp)->callees + idx]);
-      fputc_unfiltered ('\n', gdb_stdlog);
+      gdb_putc ('\n', gdb_stdlog);
     }
 
   if ((*resultp)->callers == 0 && (*resultp)->callees == 0)
@@ -3655,7 +3655,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_entry_value:
 	case DW_OP_GNU_entry_value:
 	  data = safe_read_uleb128 (data, end, &ul);
-	  fputc_filtered ('\n', stream);
+	  gdb_putc ('\n', stream);
 	  disassemble_dwarf_expression (stream, arch, addr_size, offset_size,
 					start, data, data + ul, indent + 2,
 					all, per_cu, per_objfile);

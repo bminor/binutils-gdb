@@ -6423,7 +6423,7 @@ print_fpu_flags (struct ui_file *file, int flags)
     gdb_puts (" inval", file);
   if (flags & (1 << 5))
     gdb_puts (" unimp", file);
-  fputc_filtered ('\n', file);
+  gdb_putc ('\n', file);
 }
 
 /* Print interesting information about the floating point processor
@@ -6458,7 +6458,7 @@ mips_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   for (i = 1; i <= 7; i++)
     if (fcs & (1 << (24 + i)))
       fprintf_filtered (file, " %d", i);
-  fputc_filtered ('\n', file);
+  gdb_putc ('\n', file);
 
   gdb_puts ("cause   :", file);
   print_fpu_flags (file, (fcs >> 12) & 0x3f);
@@ -6485,11 +6485,11 @@ mips_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
     gdb_puts (" zero", file);
   if ((fcs & (0xb << 21)) == 0)
     gdb_puts (" no", file);
-  fputc_filtered ('\n', file);
+  gdb_putc ('\n', file);
 
   fprintf_filtered (file, "nan2008 : %s\n", fcs & (1 << 18) ? "yes" : "no");
   fprintf_filtered (file, "abs2008 : %s\n", fcs & (1 << 19) ? "yes" : "no");
-  fputc_filtered ('\n', file);
+  gdb_putc ('\n', file);
 
   default_print_float_info (gdbarch, file, frame, args);
 }

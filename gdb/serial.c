@@ -70,7 +70,7 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
     }
 
   if (serial_logbase != logbase_ascii)
-    fputc_unfiltered (' ', stream);
+    gdb_putc (' ', stream);
 
   switch (ch)
     {

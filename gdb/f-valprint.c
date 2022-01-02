@@ -621,7 +621,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
 	  continue;
 
 	if (*any_printed)
-	  putchar_filtered ('\n');
+	  gdb_putc ('\n');
 	else
 	  *any_printed = 1;
 	if (sym->print_name ())
@@ -650,7 +650,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
 				except.what ());
 	      }
 
-	    putchar_filtered ('\n');
+	    gdb_putc ('\n');
 	  }
       }
 }
