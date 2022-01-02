@@ -1504,15 +1504,14 @@ pager_file::wrap_here (int indent)
     }
 }
 
-/* Print input string to gdb_stdout, filtered, with wrap, 
-   arranging strings in columns of n chars.  String can be
-   right or left justified in the column.  Never prints 
-   trailing spaces.  String should never be longer than
-   width.  FIXME: this could be useful for the EXAMINE 
-   command, which currently doesn't tabulate very well.  */
+/* Print input string to gdb_stdout arranging strings in columns of n
+   chars.  String can be right or left justified in the column.  Never
+   prints trailing spaces.  String should never be longer than width.
+   FIXME: this could be useful for the EXAMINE command, which
+   currently doesn't tabulate very well.  */
 
 void
-puts_filtered_tabular (char *string, int width, int right)
+puts_tabular (char *string, int width, int right)
 {
   int spaces = 0;
   int stringlen;

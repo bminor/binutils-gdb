@@ -241,7 +241,7 @@ extern int gdb_putc (int c);
 
 extern void gdb_puts (const char *);
 
-extern void puts_filtered_tabular (char *string, int width, int right);
+extern void puts_tabular (char *string, int width, int right);
 
 extern void gdb_vprintf (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 
