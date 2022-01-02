@@ -292,10 +292,10 @@ lm_addr_check (const struct so_list *so, bfd *abfd)
 	      && (l_addr & align) == ((l_dynaddr - dynaddr) & align))
 	    {
 	      if (info_verbose)
-		printf_filtered (_("Using PIC (Position Independent Code) "
-				   "prelink displacement %s for \"%s\".\n"),
-				 paddress (target_gdbarch (), l_addr),
-				 so->so_name);
+		gdb_printf (_("Using PIC (Position Independent Code) "
+			      "prelink displacement %s for \"%s\".\n"),
+			    paddress (target_gdbarch (), l_addr),
+			    so->so_name);
 	    }
 	  else
 	    {
@@ -2834,10 +2834,10 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	 the executable symbols/file has been already relocated to
 	 displacement.  */
 
-      printf_filtered (_("Using PIE (Position Independent Executable) "
-			 "displacement %s for \"%s\".\n"),
-		       paddress (target_gdbarch (), exec_displacement),
-		       bfd_get_filename (current_program_space->exec_bfd ()));
+      gdb_printf (_("Using PIE (Position Independent Executable) "
+		    "displacement %s for \"%s\".\n"),
+		  paddress (target_gdbarch (), exec_displacement),
+		  bfd_get_filename (current_program_space->exec_bfd ()));
     }
 
   *displacementp = exec_displacement;

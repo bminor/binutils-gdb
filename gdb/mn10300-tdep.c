@@ -1413,8 +1413,8 @@ static void
 mn10300_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
   mn10300_gdbarch_tdep *tdep = (mn10300_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  fprintf_filtered (file, "mn10300_dump_tdep: am33_mode = %d\n",
-		    tdep->am33_mode);
+  gdb_printf (file, "mn10300_dump_tdep: am33_mode = %d\n",
+	      tdep->am33_mode);
 }
 
 void _initialize_mn10300_tdep ();

@@ -44,7 +44,7 @@ static void
 show_pybp_debug (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Python breakpoint debugging is %s.\n"), value);
+  gdb_printf (file, _("Python breakpoint debugging is %s.\n"), value);
 }
 
 /* Print a "py-breakpoint" debug statement.  */

@@ -464,7 +464,7 @@ get_set_value (const char *args, int from_tty,
 
   const char *str = set_doc_string.get ();
   if (str != nullptr && str[0] != '\0')
-    printf_filtered ("%s\n", str);
+    gdb_printf ("%s\n", str);
 }
 
 /* A callback function that is registered against the respective
@@ -508,7 +508,7 @@ get_show_value (struct ui_file *file, int from_tty,
 	  return;
 	}
 
-      fprintf_filtered (file, "%s\n", show_doc_string.get ());
+      gdb_printf (file, "%s\n", show_doc_string.get ());
     }
   else
     {
@@ -519,8 +519,8 @@ get_show_value (struct ui_file *file, int from_tty,
 	 show_doc adjustment is not i18n friendly, so, instead, we just
 	 print this generic string.  */
       std::string cmd_path = full_cmd_name_without_first_prefix (c);
-      fprintf_filtered (file, _("The current value of '%s' is \"%s\".\n"),
-				cmd_path.c_str (), value);
+      gdb_printf (file, _("The current value of '%s' is \"%s\".\n"),
+		  cmd_path.c_str (), value);
     }
 }
 

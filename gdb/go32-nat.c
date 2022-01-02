@@ -663,7 +663,7 @@ static cmdline_t child_cmd;	/* Parsed child's command line kept here.  */
 void
 go32_nat_target::files_info ()
 {
-  printf_filtered ("You are running a DJGPP V2 program.\n");
+  gdb_printf ("You are running a DJGPP V2 program.\n");
 }
 
 void
@@ -899,9 +899,9 @@ go32_nat_target::terminal_init ()
 void
 go32_nat_target::terminal_info (const char *args, int from_tty)
 {
-  printf_filtered ("Inferior's terminal is in %s mode.\n",
-		   !inf_mode_valid
-		   ? "default" : inf_terminal_mode ? "raw" : "cooked");
+  gdb_printf ("Inferior's terminal is in %s mode.\n",
+	      !inf_mode_valid
+	      ? "default" : inf_terminal_mode ? "raw" : "cooked");
 
 #if __DJGPP_MINOR__ > 2
   if (child_cmd.redirection)
@@ -911,15 +911,15 @@ go32_nat_target::terminal_info (const char *args, int from_tty)
       for (i = 0; i < DBG_HANDLES; i++)
 	{
 	  if (child_cmd.redirection[i]->file_name)
-	    printf_filtered ("\tFile handle %d is redirected to `%s'.\n",
-			     i, child_cmd.redirection[i]->file_name);
+	    gdb_printf ("\tFile handle %d is redirected to `%s'.\n",
+			i, child_cmd.redirection[i]->file_name);
 	  else if (_get_dev_info (child_cmd.redirection[i]->inf_handle) == -1)
-	    printf_filtered
+	    gdb_printf
 	      ("\tFile handle %d appears to be closed by inferior.\n", i);
 	  /* Mask off the raw/cooked bit when comparing device info words.  */
 	  else if ((_get_dev_info (child_cmd.redirection[i]->inf_handle) & 0xdf)
 		   != (_get_dev_info (i) & 0xdf))
-	    printf_filtered
+	    gdb_printf
 	      ("\tFile handle %d appears to be redirected by inferior.\n", i);
 	}
     }
@@ -1063,12 +1063,12 @@ print_mem (unsigned long datum, const char *header, int in_pages_p)
       gdb_puts (header);
       if (datum > 1024)
 	{
-	  printf_filtered ("%lu KB", datum >> 10);
+	  gdb_printf ("%lu KB", datum >> 10);
 	  if (datum > 1024 * 1024)
-	    printf_filtered (" (%lu MB)", datum >> 20);
+	    gdb_printf (" (%lu MB)", datum >> 20);
 	}
       else
-	printf_filtered ("%lu Bytes", datum);
+	gdb_printf ("%lu Bytes", datum);
       gdb_puts ("\n");
     }
 }
@@ -1134,9 +1134,9 @@ go32_sysinfo (const char *arg, int from_tty)
 #endif
     }
 
-  printf_filtered ("CPU Type.......................%s", u.machine);
+  gdb_printf ("CPU Type.......................%s", u.machine);
   if (cpuid_vendor[0])
-    printf_filtered (" (%s)", cpuid_vendor);
+    gdb_printf (" (%s)", cpuid_vendor);
   gdb_puts ("\n");
 
   /* CPUID with EAX = 1 returns processor signature and features.  */
@@ -1257,7 +1257,7 @@ go32_sysinfo (const char *arg, int from_tty)
       xsnprintf (cpu_string, sizeof (cpu_string), "%s%s Model %d Stepping %d",
 		 intel_p ? "Pentium" : (amd_p ? "AMD" : (hygon_p ? "Hygon" : "ix86")),
 		 cpu_brand, cpu_model, cpuid_eax & 0xf);
-      printf_filtered ("%*s%s\n", 31, "", cpu_string);
+      gdb_printf ("%*s%s\n", 31, "", cpu_string);
       if (((cpuid_edx & (6 | (0x0d << 23))) != 0)
 	  || ((cpuid_edx & 1) == 0)
 	  || ((amd_p || hygon_p) && (cpuid_edx & (3 << 30)) != 0))
@@ -1290,10 +1290,10 @@ go32_sysinfo (const char *arg, int from_tty)
 	}
     }
   gdb_puts ("\n");
-  printf_filtered ("DOS Version....................%s %s.%s",
-		   _os_flavor, u.release, u.version);
+  gdb_printf ("DOS Version....................%s %s.%s",
+	      _os_flavor, u.release, u.version);
   if (true_dos_version != advertized_dos_version)
-    printf_filtered (" (disguised as v%d.%d)", _osmajor, _osminor);
+    gdb_printf (" (disguised as v%d.%d)", _osmajor, _osminor);
   gdb_puts ("\n");
   if (!windows_major)
     go32_get_windows_version ();
@@ -1301,8 +1301,8 @@ go32_sysinfo (const char *arg, int from_tty)
     {
       const char *windows_flavor;
 
-      printf_filtered ("Windows Version................%d.%02d (Windows ",
-		       windows_major, windows_minor);
+      gdb_printf ("Windows Version................%d.%02d (Windows ",
+		  windows_major, windows_minor);
       switch (windows_major)
 	{
 	  case 3:
@@ -1332,11 +1332,11 @@ go32_sysinfo (const char *arg, int from_tty)
 	    windows_flavor = "??";
 	    break;
 	}
-      printf_filtered ("%s)\n", windows_flavor);
+      gdb_printf ("%s)\n", windows_flavor);
     }
   else if (true_dos_version == 0x532 && advertized_dos_version == 0x500)
-    printf_filtered ("Windows Version................"
-		     "Windows NT family (W2K/XP/W2K3/Vista/W2K8)\n");
+    gdb_printf ("Windows Version................"
+		"Windows NT family (W2K/XP/W2K3/Vista/W2K8)\n");
   gdb_puts ("\n");
   /* On some versions of Windows, __dpmi_get_capabilities returns
      zero, but the buffer is not filled with info, so we fill the
@@ -1352,37 +1352,37 @@ go32_sysinfo (const char *arg, int from_tty)
 	 I don't trust the vendors to follow that...  */
       if (!memchr (&dpmi_vendor_info[2], 0, 126))
 	dpmi_vendor_info[128] = '\0';
-      printf_filtered ("DPMI Host......................"
-		       "%s v%d.%d (capabilities: %#x)\n",
-		       &dpmi_vendor_info[2],
-		       (unsigned)dpmi_vendor_info[0],
-		       (unsigned)dpmi_vendor_info[1],
-		       ((unsigned)dpmi_flags & 0x7f));
+      gdb_printf ("DPMI Host......................"
+		  "%s v%d.%d (capabilities: %#x)\n",
+		  &dpmi_vendor_info[2],
+		  (unsigned)dpmi_vendor_info[0],
+		  (unsigned)dpmi_vendor_info[1],
+		  ((unsigned)dpmi_flags & 0x7f));
     }
   else
-    printf_filtered ("DPMI Host......................(Info not available)\n");
+    gdb_printf ("DPMI Host......................(Info not available)\n");
   __dpmi_get_version (&dpmi_version_data);
-  printf_filtered ("DPMI Version...................%d.%02d\n",
-		   dpmi_version_data.major, dpmi_version_data.minor);
-  printf_filtered ("DPMI Info......................"
-		   "%s-bit DPMI, with%s Virtual Memory support\n",
-		   (dpmi_version_data.flags & 1) ? "32" : "16",
-		   (dpmi_version_data.flags & 4) ? "" : "out");
-  printf_filtered ("%*sInterrupts reflected to %s mode\n", 31, "",
-		   (dpmi_version_data.flags & 2) ? "V86" : "Real");
-  printf_filtered ("%*sProcessor type: i%d86\n", 31, "",
-		   dpmi_version_data.cpu);
-  printf_filtered ("%*sPIC base interrupt: Master: %#x  Slave: %#x\n", 31, "",
-		   dpmi_version_data.master_pic, dpmi_version_data.slave_pic);
+  gdb_printf ("DPMI Version...................%d.%02d\n",
+	      dpmi_version_data.major, dpmi_version_data.minor);
+  gdb_printf ("DPMI Info......................"
+	      "%s-bit DPMI, with%s Virtual Memory support\n",
+	      (dpmi_version_data.flags & 1) ? "32" : "16",
+	      (dpmi_version_data.flags & 4) ? "" : "out");
+  gdb_printf ("%*sInterrupts reflected to %s mode\n", 31, "",
+	      (dpmi_version_data.flags & 2) ? "V86" : "Real");
+  gdb_printf ("%*sProcessor type: i%d86\n", 31, "",
+	      dpmi_version_data.cpu);
+  gdb_printf ("%*sPIC base interrupt: Master: %#x  Slave: %#x\n", 31, "",
+	      dpmi_version_data.master_pic, dpmi_version_data.slave_pic);
 
   /* a_tss is only initialized when the debuggee is first run.  */
   if (prog_has_started)
     {
       __asm__ __volatile__ ("pushfl ; popl %0" : "=g" (eflags));
-      printf_filtered ("Protection....................."
-		       "Ring %d (in %s), with%s I/O protection\n",
-		       a_tss.tss_cs & 3, (a_tss.tss_cs & 4) ? "LDT" : "GDT",
-		       (a_tss.tss_cs & 3) > ((eflags >> 12) & 3) ? "" : "out");
+      gdb_printf ("Protection....................."
+		  "Ring %d (in %s), with%s I/O protection\n",
+		  a_tss.tss_cs & 3, (a_tss.tss_cs & 4) ? "LDT" : "GDT",
+		  (a_tss.tss_cs & 3) > ((eflags >> 12) & 3) ? "" : "out");
     }
   gdb_puts ("\n");
   __dpmi_get_free_memory_information (&mem_info);
@@ -1420,14 +1420,14 @@ go32_sysinfo (const char *arg, int from_tty)
 	hilo_idx = 0;
       if (fit_idx > 2)
 	fit_idx = 0;
-      printf_filtered ("DOS Memory Allocation..........%s memory, %s fit\n",
-		       dos_hilo[hilo_idx], dos_fit[fit_idx]);
+      gdb_printf ("DOS Memory Allocation..........%s memory, %s fit\n",
+		  dos_hilo[hilo_idx], dos_fit[fit_idx]);
       regs.x.ax = 0x5802;
       __dpmi_int (0x21, &regs);
       if ((regs.x.flags & 1) != 0)
 	regs.h.al = 0;
-      printf_filtered ("%*sUMBs %sin DOS memory chain\n", 31, "",
-		       regs.h.al == 0 ? "not " : "");
+      gdb_printf ("%*sUMBs %sin DOS memory chain\n", 31, "",
+		  regs.h.al == 0 ? "not " : "");
     }
 }
 
@@ -1561,65 +1561,65 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
       if (descr.present
 	  && (allowed_descriptors[type] & (1 << descr.stype)) != 0)
 	{
-	  printf_filtered ("0x%03x: ",
-			   type == 1
-			   ? idx : (idx * 8) | (type ? (cpl | 4) : 0));
+	  gdb_printf ("0x%03x: ",
+		      type == 1
+		      ? idx : (idx * 8) | (type ? (cpl | 4) : 0));
 	  if (descr.page_granular)
 	    limit = (limit << 12) | 0xfff; /* big segment: low 12 bit set */
 	  if (descr.stype == 1 || descr.stype == 2 || descr.stype == 3
 	      || descr.stype == 9 || descr.stype == 11
 	      || (descr.stype >= 16 && descr.stype < 32))
-	    printf_filtered ("base=0x%02x%02x%04x limit=0x%08lx",
-			     descr.base2, descr.base1, descr.base0, limit);
+	    gdb_printf ("base=0x%02x%02x%04x limit=0x%08lx",
+			descr.base2, descr.base1, descr.base0, limit);
 
 	  switch (descr.stype)
 	    {
 	      case 1:
 	      case 3:
-		printf_filtered (" 16-bit TSS  (task %sactive)",
-				 descr.stype == 3 ? "" : "in");
+		gdb_printf (" 16-bit TSS  (task %sactive)",
+			    descr.stype == 3 ? "" : "in");
 		break;
 	      case 2:
 		gdb_puts (" LDT");
 		break;
 	      case 4:
 		memcpy (&gate, &descr, sizeof gate);
-		printf_filtered ("selector=0x%04x  offs=0x%04x%04x",
-				 gate.selector, gate.offset1, gate.offset0);
-		printf_filtered (" 16-bit Call Gate (params=%d)",
-				 gate.param_count);
+		gdb_printf ("selector=0x%04x  offs=0x%04x%04x",
+			    gate.selector, gate.offset1, gate.offset0);
+		gdb_printf (" 16-bit Call Gate (params=%d)",
+			    gate.param_count);
 		break;
 	      case 5:
-		printf_filtered ("TSS selector=0x%04x", descr.base0);
-		printf_filtered ("%*sTask Gate", 16, "");
+		gdb_printf ("TSS selector=0x%04x", descr.base0);
+		gdb_printf ("%*sTask Gate", 16, "");
 		break;
 	      case 6:
 	      case 7:
 		memcpy (&gate, &descr, sizeof gate);
-		printf_filtered ("selector=0x%04x  offs=0x%04x%04x",
-				 gate.selector, gate.offset1, gate.offset0);
-		printf_filtered (" 16-bit %s Gate",
-				 descr.stype == 6 ? "Interrupt" : "Trap");
+		gdb_printf ("selector=0x%04x  offs=0x%04x%04x",
+			    gate.selector, gate.offset1, gate.offset0);
+		gdb_printf (" 16-bit %s Gate",
+			    descr.stype == 6 ? "Interrupt" : "Trap");
 		break;
 	      case 9:
 	      case 11:
-		printf_filtered (" 32-bit TSS (task %sactive)",
-				 descr.stype == 3 ? "" : "in");
+		gdb_printf (" 32-bit TSS (task %sactive)",
+			    descr.stype == 3 ? "" : "in");
 		break;
 	      case 12:
 		memcpy (&gate, &descr, sizeof gate);
-		printf_filtered ("selector=0x%04x  offs=0x%04x%04x",
-				 gate.selector, gate.offset1, gate.offset0);
-		printf_filtered (" 32-bit Call Gate (params=%d)",
-				 gate.param_count);
+		gdb_printf ("selector=0x%04x  offs=0x%04x%04x",
+			    gate.selector, gate.offset1, gate.offset0);
+		gdb_printf (" 32-bit Call Gate (params=%d)",
+			    gate.param_count);
 		break;
 	      case 14:
 	      case 15:
 		memcpy (&gate, &descr, sizeof gate);
-		printf_filtered ("selector=0x%04x  offs=0x%04x%04x",
-				 gate.selector, gate.offset1, gate.offset0);
-		printf_filtered (" 32-bit %s Gate",
-				 descr.stype == 14 ? "Interrupt" : "Trap");
+		gdb_printf ("selector=0x%04x  offs=0x%04x%04x",
+			    gate.selector, gate.offset1, gate.offset0);
+		gdb_printf (" 32-bit %s Gate",
+			    descr.stype == 14 ? "Interrupt" : "Trap");
 		break;
 	      case 16:		/* data segments */
 	      case 17:
@@ -1629,12 +1629,12 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
 	      case 21:
 	      case 22:
 	      case 23:
-		printf_filtered (" %s-bit Data (%s Exp-%s%s)",
-				 descr.bit32 ? "32" : "16",
-				 descr.stype & 2
-				 ? "Read/Write," : "Read-Only, ",
-				 descr.stype & 4 ? "down" : "up",
-				 descr.stype & 1 ? "" : ", N.Acc");
+		gdb_printf (" %s-bit Data (%s Exp-%s%s)",
+			    descr.bit32 ? "32" : "16",
+			    descr.stype & 2
+			    ? "Read/Write," : "Read-Only, ",
+			    descr.stype & 4 ? "down" : "up",
+			    descr.stype & 1 ? "" : ", N.Acc");
 		break;
 	      case 24:		/* code segments */
 	      case 25:
@@ -1644,32 +1644,32 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
 	      case 29:
 	      case 30:
 	      case 31:
-		printf_filtered (" %s-bit Code (%s,  %sConf%s)",
-				 descr.bit32 ? "32" : "16",
-				 descr.stype & 2 ? "Exec/Read" : "Exec-Only",
-				 descr.stype & 4 ? "" : "N.",
-				 descr.stype & 1 ? "" : ", N.Acc");
+		gdb_printf (" %s-bit Code (%s,  %sConf%s)",
+			    descr.bit32 ? "32" : "16",
+			    descr.stype & 2 ? "Exec/Read" : "Exec-Only",
+			    descr.stype & 4 ? "" : "N.",
+			    descr.stype & 1 ? "" : ", N.Acc");
 		break;
 	      default:
-		printf_filtered ("Unknown type 0x%02x", descr.stype);
+		gdb_printf ("Unknown type 0x%02x", descr.stype);
 		break;
 	    }
 	  gdb_puts ("\n");
 	}
       else if (force)
 	{
-	  printf_filtered ("0x%03x: ",
-			   type == 1
-			   ? idx : (idx * 8) | (type ? (cpl | 4) : 0));
+	  gdb_printf ("0x%03x: ",
+		      type == 1
+		      ? idx : (idx * 8) | (type ? (cpl | 4) : 0));
 	  if (!descr.present)
 	    gdb_puts ("Segment not present\n");
 	  else
-	    printf_filtered ("Segment type 0x%02x is invalid in this table\n",
-			     descr.stype);
+	    gdb_printf ("Segment type 0x%02x is invalid in this table\n",
+			descr.stype);
 	}
     }
   else if (force)
-    printf_filtered ("0x%03x: Cannot read this descriptor\n", idx);
+    gdb_printf ("0x%03x: Cannot read this descriptor\n", idx);
 }
 
 static void
@@ -1703,10 +1703,10 @@ go32_sldt (const char *arg, int from_tty)
     gdb_puts ("There is no LDT.\n");
   /* LDT's entry in the GDT must have the type LDT, which is 2.  */
   else if (get_descriptor (gdtr.base, ldt_idx, &ldt_descr) != 2)
-    printf_filtered ("LDT is present (at %#x), but unreadable by GDB.\n",
-		     ldt_descr.base0
-		     | (ldt_descr.base1 << 16)
-		     | (ldt_descr.base2 << 24));
+    gdb_printf ("LDT is present (at %#x), but unreadable by GDB.\n",
+		ldt_descr.base0
+		| (ldt_descr.base1 << 16)
+		| (ldt_descr.base2 << 24));
   else
     {
       unsigned base =
@@ -1939,23 +1939,23 @@ display_ptable_entry (unsigned long entry, int is_dir, int force, unsigned off)
 {
   if ((entry & 1) != 0)
     {
-      printf_filtered ("Base=0x%05lx000", entry >> 12);
+      gdb_printf ("Base=0x%05lx000", entry >> 12);
       if ((entry & 0x100) && !is_dir)
 	gdb_puts (" Global");
       if ((entry & 0x40) && !is_dir)
 	gdb_puts (" Dirty");
-      printf_filtered (" %sAcc.", (entry & 0x20) ? "" : "Not-");
-      printf_filtered (" %sCached", (entry & 0x10) ? "" : "Not-");
-      printf_filtered (" Write-%s", (entry & 8) ? "Thru" : "Back");
-      printf_filtered (" %s", (entry & 4) ? "Usr" : "Sup");
-      printf_filtered (" Read-%s", (entry & 2) ? "Write" : "Only");
+      gdb_printf (" %sAcc.", (entry & 0x20) ? "" : "Not-");
+      gdb_printf (" %sCached", (entry & 0x10) ? "" : "Not-");
+      gdb_printf (" Write-%s", (entry & 8) ? "Thru" : "Back");
+      gdb_printf (" %s", (entry & 4) ? "Usr" : "Sup");
+      gdb_printf (" Read-%s", (entry & 2) ? "Write" : "Only");
       if (off)
-	printf_filtered (" +0x%x", off);
+	gdb_printf (" +0x%x", off);
       gdb_puts ("\n");
     }
   else if (force)
-    printf_filtered ("Page%s not present or not supported; value=0x%lx.\n",
-		     is_dir ? " Table" : "", entry >> 1);
+    gdb_printf ("Page%s not present or not supported; value=0x%lx.\n",
+		is_dir ? " Table" : "", entry >> 1);
 }
 
 static void
@@ -1998,14 +1998,14 @@ display_page_table (long n, int force)
     {
       int i;
 
-      printf_filtered ("Page Table pointed to by "
-		       "Page Directory entry 0x%lx:\n", n);
+      gdb_printf ("Page Table pointed to by "
+		  "Page Directory entry 0x%lx:\n", n);
       for (i = 0; i < 1024; i++)
 	display_ptable_entry (get_pte (pde, i), 0, 0, 0);
       gdb_puts ("\n");
     }
   else if (force)
-    printf_filtered ("Page Table not present; value=0x%lx.\n", pde >> 1);
+    gdb_printf ("Page Table not present; value=0x%lx.\n", pde >> 1);
 }
 
 static void
@@ -2059,8 +2059,8 @@ go32_pte_for_address (const char *arg, int from_tty)
       int pte_idx = (addr >> 12) & 0x3ff;
       unsigned offs = addr & 0xfff;
 
-      printf_filtered ("Page Table entry for address %s:\n",
-		       hex_string(addr));
+      gdb_printf ("Page Table entry for address %s:\n",
+		  hex_string(addr));
       display_ptable_entry (get_pte (get_pde (pde_idx), pte_idx), 0, 1, offs);
     }
 }

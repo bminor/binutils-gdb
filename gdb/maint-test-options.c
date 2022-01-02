@@ -143,22 +143,22 @@ struct test_options_opts
      arguments.  */
   void dump (ui_file *file, const char *args) const
   {
-    fprintf_filtered (file,
-		      _("-flag %d -xx1 %d -xx2 %d -bool %d "
-			"-enum %s -uint %s -zuint-unl %s -string '%s' -- %s\n"),
-		      flag_opt,
-		      xx1_opt,
-		      xx2_opt,
-		      boolean_opt,
-		      enum_opt,
-		      (uint_opt == UINT_MAX
-		       ? "unlimited"
-		       : pulongest (uint_opt)),
-		      (zuint_unl_opt == -1
-		       ? "unlimited"
-		       : plongest (zuint_unl_opt)),
-		      string_opt.c_str (),
-		      args);
+    gdb_printf (file,
+		_("-flag %d -xx1 %d -xx2 %d -bool %d "
+		  "-enum %s -uint %s -zuint-unl %s -string '%s' -- %s\n"),
+		flag_opt,
+		xx1_opt,
+		xx2_opt,
+		boolean_opt,
+		enum_opt,
+		(uint_opt == UINT_MAX
+		 ? "unlimited"
+		 : pulongest (uint_opt)),
+		(zuint_unl_opt == -1
+		 ? "unlimited"
+		 : plongest (zuint_unl_opt)),
+		string_opt.c_str (),
+		args);
   }
 };
 

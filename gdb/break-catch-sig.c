@@ -193,7 +193,7 @@ signal_catchpoint_print_it (bpstat *bs)
   annotate_catchpoint (b->number);
   maybe_print_thread_hit_breakpoint (uiout);
 
-  printf_filtered (_("Catchpoint %d (signal %s), "), b->number, signal_name);
+  gdb_printf (_("Catchpoint %d (signal %s), "), b->number, signal_name);
 
   return PRINT_SRC_AND_LOC;
 }
@@ -261,22 +261,22 @@ signal_catchpoint_print_mention (struct breakpoint *b)
   if (!c->signals_to_be_caught.empty ())
     {
       if (c->signals_to_be_caught.size () > 1)
-	printf_filtered (_("Catchpoint %d (signals"), b->number);
+	gdb_printf (_("Catchpoint %d (signals"), b->number);
       else
-	printf_filtered (_("Catchpoint %d (signal"), b->number);
+	gdb_printf (_("Catchpoint %d (signal"), b->number);
 
       for (gdb_signal iter : c->signals_to_be_caught)
 	{
 	  const char *name = signal_to_name_or_int (iter);
 
-	  printf_filtered (" %s", name);
+	  gdb_printf (" %s", name);
 	}
-      printf_filtered (")");
+      gdb_printf (")");
     }
   else if (c->catch_all)
-    printf_filtered (_("Catchpoint %d (any signal)"), b->number);
+    gdb_printf (_("Catchpoint %d (any signal)"), b->number);
   else
-    printf_filtered (_("Catchpoint %d (standard signals)"), b->number);
+    gdb_printf (_("Catchpoint %d (standard signals)"), b->number);
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for signal
@@ -287,15 +287,15 @@ signal_catchpoint_print_recreate (struct breakpoint *b, struct ui_file *fp)
 {
   struct signal_catchpoint *c = (struct signal_catchpoint *) b;
 
-  fprintf_unfiltered (fp, "catch signal");
+  gdb_printf (fp, "catch signal");
 
   if (!c->signals_to_be_caught.empty ())
     {
       for (gdb_signal iter : c->signals_to_be_caught)
-	fprintf_unfiltered (fp, " %s", signal_to_name_or_int (iter));
+	gdb_printf (fp, " %s", signal_to_name_or_int (iter));
     }
   else if (c->catch_all)
-    fprintf_unfiltered (fp, " all");
+    gdb_printf (fp, " all");
   gdb_putc ('\n', fp);
 }
 

@@ -132,11 +132,11 @@ mi_ui_out::do_field_string (int fldno, int width, ui_align align,
   field_separator ();
 
   if (fldname)
-    fprintf_unfiltered (stream, "%s=", fldname);
-  fprintf_unfiltered (stream, "\"");
+    gdb_printf (stream, "%s=", fldname);
+  gdb_printf (stream, "\"");
   if (string)
     stream->putstr (string, '"');
-  fprintf_unfiltered (stream, "\"");
+  gdb_printf (stream, "\"");
 }
 
 void
@@ -148,7 +148,7 @@ mi_ui_out::do_field_fmt (int fldno, int width, ui_align align,
   field_separator ();
 
   if (fldname)
-    fprintf_unfiltered (stream, "%s=\"", fldname);
+    gdb_printf (stream, "%s=\"", fldname);
   else
     gdb_puts ("\"", stream);
   gdb_vprintf (stream, format, args);
@@ -211,7 +211,7 @@ mi_ui_out::open (const char *name, ui_out_type type)
   m_suppress_field_separator = true;
 
   if (name)
-    fprintf_unfiltered (stream, "%s=", name);
+    gdb_printf (stream, "%s=", name);
 
   switch (type)
     {

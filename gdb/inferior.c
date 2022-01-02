@@ -164,11 +164,11 @@ add_inferior (int pid)
   if (print_inferior_events)
     {
       if (pid != 0)
-	printf_filtered (_("[New inferior %d (%s)]\n"),
-			 inf->num,
-			 target_pid_to_str (ptid_t (pid)).c_str ());
+	gdb_printf (_("[New inferior %d (%s)]\n"),
+		    inf->num,
+		    target_pid_to_str (ptid_t (pid)).c_str ());
       else
-	printf_filtered (_("[New inferior %d]\n"), inf->num);
+	gdb_printf (_("[New inferior %d]\n"), inf->num);
     }
 
   return inf;
@@ -264,9 +264,9 @@ detach_inferior (inferior *inf)
   exit_inferior_1 (inf, 0);
 
   if (print_inferior_events)
-    printf_filtered (_("[Inferior %d (%s) detached]\n"),
-		     inf->num,
-		     target_pid_to_str (ptid_t (pid)).c_str ());
+    gdb_printf (_("[Inferior %d (%s) detached]\n"),
+		inf->num,
+		target_pid_to_str (ptid_t (pid)).c_str ());
 }
 
 void
@@ -650,9 +650,9 @@ inferior_command (const char *args, int from_tty)
       if (filename == nullptr)
 	filename = _("<noexec>");
 
-      printf_filtered (_("[Current inferior is %d [%s] (%s)]\n"),
-		       inf->num, inferior_pid_to_str (inf->pid).c_str (),
-		       filename);
+      gdb_printf (_("[Current inferior is %d [%s] (%s)]\n"),
+		  inf->num, inferior_pid_to_str (inf->pid).c_str (),
+		  filename);
     }
   else
     {
@@ -776,19 +776,19 @@ switch_to_inferior_and_push_target (inferior *new_inf,
     {
       new_inf->push_target (proc_target);
       if (proc_target->connection_string () != NULL)
-	printf_filtered (_("Added inferior %d on connection %d (%s %s)\n"),
-			 new_inf->num,
-			 proc_target->connection_number,
-			 proc_target->shortname (),
-			 proc_target->connection_string ());
+	gdb_printf (_("Added inferior %d on connection %d (%s %s)\n"),
+		    new_inf->num,
+		    proc_target->connection_number,
+		    proc_target->shortname (),
+		    proc_target->connection_string ());
       else
-	printf_filtered (_("Added inferior %d on connection %d (%s)\n"),
-			 new_inf->num,
-			 proc_target->connection_number,
-			 proc_target->shortname ());
+	gdb_printf (_("Added inferior %d on connection %d (%s)\n"),
+		    new_inf->num,
+		    proc_target->connection_number,
+		    proc_target->shortname ());
     }
   else
-    printf_filtered (_("Added inferior %d\n"), new_inf->num);
+    gdb_printf (_("Added inferior %d\n"), new_inf->num);
 }
 
 /* add-inferior [-copies N] [-exec FILENAME] [-no-connection] */
@@ -960,7 +960,7 @@ static void
 show_print_inferior_events (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Printing of inferior events is %s.\n"), value);
+  gdb_printf (file, _("Printing of inferior events is %s.\n"), value);
 }
 
 /* Return a new value for the selected inferior's id.  */

@@ -49,19 +49,19 @@ static unsigned int xtensa_debug_level = 0;
 
 #define DEBUGWARN(args...) \
   if (xtensa_debug_level > 0) \
-    fprintf_unfiltered (gdb_stdlog, "(warn ) " args)
+    gdb_printf (gdb_stdlog, "(warn ) " args)
 
 #define DEBUGINFO(args...) \
   if (xtensa_debug_level > 1) \
-    fprintf_unfiltered (gdb_stdlog, "(info ) " args)
+    gdb_printf (gdb_stdlog, "(info ) " args)
 
 #define DEBUGTRACE(args...) \
   if (xtensa_debug_level > 2) \
-    fprintf_unfiltered (gdb_stdlog, "(trace) " args)
+    gdb_printf (gdb_stdlog, "(trace) " args)
 
 #define DEBUGVERB(args...) \
   if (xtensa_debug_level > 3) \
-    fprintf_unfiltered (gdb_stdlog, "(verb ) " args)
+    gdb_printf (gdb_stdlog, "(verb ) " args)
 
 
 /* According to the ABI, the SP must be aligned to 16-byte boundaries.  */
@@ -1732,23 +1732,23 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	{
 	  struct value *arg = args[i];
 	  struct type *arg_type = check_typedef (value_type (arg));
-	  fprintf_unfiltered (gdb_stdlog, "%2d: %s %3s ", i,
-			      host_address_to_string (arg),
-			      pulongest (TYPE_LENGTH (arg_type)));
+	  gdb_printf (gdb_stdlog, "%2d: %s %3s ", i,
+		      host_address_to_string (arg),
+		      pulongest (TYPE_LENGTH (arg_type)));
 	  switch (arg_type->code ())
 	    {
 	    case TYPE_CODE_INT:
-	      fprintf_unfiltered (gdb_stdlog, "int");
+	      gdb_printf (gdb_stdlog, "int");
 	      break;
 	    case TYPE_CODE_STRUCT:
-	      fprintf_unfiltered (gdb_stdlog, "struct");
+	      gdb_printf (gdb_stdlog, "struct");
 	      break;
 	    default:
-	      fprintf_unfiltered (gdb_stdlog, "%3d", arg_type->code ());
+	      gdb_printf (gdb_stdlog, "%3d", arg_type->code ());
 	      break;
 	    }
-	  fprintf_unfiltered (gdb_stdlog, " %s\n",
-			      host_address_to_string (value_contents (arg).data ()));
+	  gdb_printf (gdb_stdlog, " %s\n",
+		      host_address_to_string (value_contents (arg).data ()));
 	}
     }
 

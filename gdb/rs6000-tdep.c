@@ -4520,8 +4520,8 @@ ppc_process_record_op4 (struct gdbarch *gdbarch, struct regcache *regcache,
       return 0;
     }
 
-  fprintf_unfiltered (gdb_stdlog, "Warning: Don't know how to record %08x "
-		      "at %s, 4-%d.\n", insn, paddress (gdbarch, addr), ext);
+  gdb_printf (gdb_stdlog, "Warning: Don't know how to record %08x "
+	      "at %s, 4-%d.\n", insn, paddress (gdbarch, addr), ext);
   return -1;
 }
 
@@ -4572,8 +4572,8 @@ ppc_process_record_op19 (struct gdbarch *gdbarch, struct regcache *regcache,
       return 0;
     }
 
-  fprintf_unfiltered (gdb_stdlog, "Warning: Don't know how to record %08x "
-		      "at %s, 19-%d.\n", insn, paddress (gdbarch, addr), ext);
+  gdb_printf (gdb_stdlog, "Warning: Don't know how to record %08x "
+	      "at %s, 19-%d.\n", insn, paddress (gdbarch, addr), ext);
   return -1;
 }
 
@@ -5169,8 +5169,8 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
     }
 
 UNKNOWN_OP:
-  fprintf_unfiltered (gdb_stdlog, "Warning: Don't know how to record %08x "
-		      "at %s, 31-%d.\n", insn, paddress (gdbarch, addr), ext);
+  gdb_printf (gdb_stdlog, "Warning: Don't know how to record %08x "
+	      "at %s, 31-%d.\n", insn, paddress (gdbarch, addr), ext);
   return -1;
 }
 
@@ -5263,8 +5263,8 @@ ppc_process_record_op59 (struct gdbarch *gdbarch, struct regcache *regcache,
       return 0;
     }
 
-  fprintf_unfiltered (gdb_stdlog, "Warning: Don't know how to record %08x "
-		      "at %s, 59-%d.\n", insn, paddress (gdbarch, addr), ext);
+  gdb_printf (gdb_stdlog, "Warning: Don't know how to record %08x "
+	      "at %s, 59-%d.\n", insn, paddress (gdbarch, addr), ext);
   return -1;
 }
 
@@ -5625,8 +5625,8 @@ ppc_process_record_op60 (struct gdbarch *gdbarch, struct regcache *regcache,
       return 0;
     }
 
-  fprintf_unfiltered (gdb_stdlog, "Warning: Don't know how to record %08x "
-		      "at %s, 60-%d.\n", insn, paddress (gdbarch, addr), ext);
+  gdb_printf (gdb_stdlog, "Warning: Don't know how to record %08x "
+	      "at %s, 60-%d.\n", insn, paddress (gdbarch, addr), ext);
   return -1;
 }
 
@@ -5684,8 +5684,8 @@ ppc_process_record_op61 (struct gdbarch *gdbarch, struct regcache *regcache,
       return 0;
     }
 
-  fprintf_unfiltered (gdb_stdlog, "Warning: Don't know how to record %08x "
-		      "at %s.\n", insn, paddress (gdbarch, addr));
+  gdb_printf (gdb_stdlog, "Warning: Don't know how to record %08x "
+	      "at %s.\n", insn, paddress (gdbarch, addr));
   return -1;
 }
 
@@ -5942,8 +5942,8 @@ ppc_process_record_op63 (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
     }
 
-  fprintf_unfiltered (gdb_stdlog, "Warning: Don't know how to record %08x "
-		      "at %s, 63-%d.\n", insn, paddress (gdbarch, addr), ext);
+  gdb_printf (gdb_stdlog, "Warning: Don't know how to record %08x "
+	      "at %s, 63-%d.\n", insn, paddress (gdbarch, addr), ext);
   return -1;
 }
 
@@ -5986,7 +5986,7 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
       else
 	{
-	  fprintf_unfiltered (gdb_stderr, _("no syscall record support\n"));
+	  gdb_printf (gdb_stderr, _("no syscall record support\n"));
 	  return -1;
 	}
       break;
@@ -6235,8 +6235,8 @@ ppc_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
     default:
 UNKNOWN_OP:
-      fprintf_unfiltered (gdb_stdlog, "Warning: Don't know how to record %08x "
-			  "at %s, %d.\n", insn, paddress (gdbarch, addr), op6);
+      gdb_printf (gdb_stdlog, "Warning: Don't know how to record %08x "
+		  "at %s, %d.\n", insn, paddress (gdbarch, addr), op6);
       return -1;
     }
 
@@ -7361,7 +7361,7 @@ show_powerpc_exact_watchpoints (struct ui_file *file, int from_tty,
 				struct cmd_list_element *c,
 				const char *value)
 {
-  fprintf_filtered (file, _("Use of exact watchpoints is %s.\n"), value);
+  gdb_printf (file, _("Use of exact watchpoints is %s.\n"), value);
 }
 
 /* Read a PPC instruction from memory.  */

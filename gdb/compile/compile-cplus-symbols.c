@@ -253,17 +253,17 @@ convert_symbol_sym (compile_cplus_instance *instance,
 	  && global_sym.block != block_static_block (global_sym.block))
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"gcc_convert_symbol \"%s\": global symbol\n",
-				identifier);
+	    gdb_printf (gdb_stdlog,
+			"gcc_convert_symbol \"%s\": global symbol\n",
+			identifier);
 	  convert_one_symbol (instance, global_sym, true, false);
 	}
     }
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"gcc_convert_symbol \"%s\": local symbol\n",
-			identifier);
+    gdb_printf (gdb_stdlog,
+		"gcc_convert_symbol \"%s\": local symbol\n",
+		identifier);
   convert_one_symbol (instance, sym, false, is_local_symbol);
 }
 
@@ -337,8 +337,8 @@ gcc_cplus_convert_symbol (void *datum,
 			  const char *identifier)
 {
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"got oracle request for \"%s\"\n", identifier);
+    gdb_printf (gdb_stdlog,
+		"got oracle request for \"%s\"\n", identifier);
 
   bool found = false;
   compile_cplus_instance *instance = (compile_cplus_instance *) datum;
@@ -396,18 +396,18 @@ gcc_cplus_convert_symbol (void *datum,
     }
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdlog,
-			"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
-			identifier);
+    gdb_printf (gdb_stdlog,
+		"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
+		identifier);
 
   if (compile_debug)
     {
       if (found)
-	fprintf_unfiltered (gdb_stdlog, "found type for %s\n", identifier);
+	gdb_printf (gdb_stdlog, "found type for %s\n", identifier);
       else
 	{
-	  fprintf_unfiltered (gdb_stdlog, "did not find type for %s\n",
-			      identifier);
+	  gdb_printf (gdb_stdlog, "did not find type for %s\n",
+		      identifier);
 	}
     }
 
@@ -425,8 +425,8 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
   int found = 0;
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"got oracle request for address of %s\n", identifier);
+    gdb_printf (gdb_stdlog,
+		"got oracle request for address of %s\n", identifier);
 
   /* We can't allow exceptions to escape out of this callback.  Safest
      is to simply emit a gcc error.  */
@@ -438,9 +438,9 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
       if (sym != nullptr && sym->aclass () == LOC_BLOCK)
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"gcc_symbol_address \"%s\": full symbol\n",
-				identifier);
+	    gdb_printf (gdb_stdlog,
+			"gcc_symbol_address \"%s\": full symbol\n",
+			identifier);
 	  result = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
 	  if (sym->type ()->is_gnu_ifunc ())
 	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
@@ -454,10 +454,10 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 	  if (msym.minsym != nullptr)
 	    {
 	      if (compile_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "gcc_symbol_address \"%s\": minimal "
-				    "symbol\n",
-				    identifier);
+		gdb_printf (gdb_stdlog,
+			    "gcc_symbol_address \"%s\": minimal "
+			    "symbol\n",
+			    identifier);
 	      result = BMSYMBOL_VALUE_ADDRESS (msym);
 	      if (MSYMBOL_TYPE (msym.minsym) == mst_text_gnu_ifunc)
 		result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
@@ -472,17 +472,17 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
     }
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdlog,
-			"gcc_symbol_address \"%s\": failed\n",
-			identifier);
+    gdb_printf (gdb_stdlog,
+		"gcc_symbol_address \"%s\": failed\n",
+		identifier);
 
   if (compile_debug)
     {
       if (found)
-	fprintf_unfiltered (gdb_stdlog, "found address for %s!\n", identifier);
+	gdb_printf (gdb_stdlog, "found address for %s!\n", identifier);
       else
-	fprintf_unfiltered (gdb_stdlog,
-			    "did not find address for %s\n", identifier);
+	gdb_printf (gdb_stdlog,
+		    "did not find address for %s\n", identifier);
     }
 
   return result;

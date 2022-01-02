@@ -257,8 +257,8 @@ show_index_cache_command (const char *arg, int from_tty)
   /* Call all "show index-cache" subcommands.  */
   cmd_show_list (show_index_cache_prefix_list, from_tty);
 
-  printf_filtered ("\n");
-  printf_filtered
+  gdb_printf ("\n");
+  gdb_printf
     (_("The index cache is currently %s.\n"),
      global_index_cache.enabled () ? _("enabled") : _("disabled"));
 }
@@ -288,7 +288,7 @@ static void
 show_index_cache_enabled_command (ui_file *stream, int from_tty,
 				  cmd_list_element *cmd, const char *value)
 {
-  fprintf_filtered (stream, _("The index cache is %s.\n"), value);
+  gdb_printf (stream, _("The index cache is %s.\n"), value);
 }
 
 /* "set index-cache directory" handler.  */
@@ -316,13 +316,13 @@ show_index_cache_stats_command (const char *arg, int from_tty)
   if (in_show_index_cache_command)
     {
       indent = "  ";
-      printf_filtered ("\n");
+      gdb_printf ("\n");
     }
 
-  printf_filtered (_("%s  Cache hits (this session): %u\n"),
-		   indent, global_index_cache.n_hits ());
-  printf_filtered (_("%sCache misses (this session): %u\n"),
-		   indent, global_index_cache.n_misses ());
+  gdb_printf (_("%s  Cache hits (this session): %u\n"),
+	      indent, global_index_cache.n_hits ());
+  gdb_printf (_("%sCache misses (this session): %u\n"),
+	      indent, global_index_cache.n_misses ());
 }
 
 void _initialize_index_cache ();

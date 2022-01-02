@@ -212,10 +212,10 @@ public:
 	if (nrepeats >= m_options->repeat_count_threshold)
 	  {
 	    annotate_elt_rep (nrepeats + 1);
-	    fprintf_filtered (m_stream, "%p[<repeats %s times>%p]",
-			      metadata_style.style ().ptr (),
-			      plongest (nrepeats + 1),
-			      nullptr);
+	    gdb_printf (m_stream, "%p[<repeats %s times>%p]",
+			metadata_style.style ().ptr (),
+			plongest (nrepeats + 1),
+			nullptr);
 	    annotate_elt_rep_end ();
 	    if (!repeated)
 	      gdb_puts (" ", m_stream);
@@ -281,10 +281,10 @@ public:
 	    if (nrepeats >= m_options->repeat_count_threshold)
 	      {
 		annotate_elt_rep (nrepeats + 1);
-		fprintf_filtered (m_stream, "%p[<repeats %s times>%p]",
-				  metadata_style.style ().ptr (),
-				  plongest (nrepeats + 1),
-				  nullptr);
+		gdb_printf (m_stream, "%p[<repeats %s times>%p]",
+			    metadata_style.style ().ptr (),
+			    plongest (nrepeats + 1),
+			    nullptr);
 		annotate_elt_rep_end ();
 	      }
 	    else
@@ -515,7 +515,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
     case TYPE_CODE_NAMELIST:
       /* Starting from the Fortran 90 standard, Fortran supports derived
 	 types.  */
-      fprintf_filtered (stream, "( ");
+      gdb_printf (stream, "( ");
       for (index = 0; index < type->num_fields (); index++)
 	{
 	  struct type *field_type
@@ -557,7 +557,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 	      ++printed_field;
 	    }
 	 }
-      fprintf_filtered (stream, " )");
+      gdb_printf (stream, " )");
       break;     
 
     case TYPE_CODE_BOOL:
@@ -625,17 +625,17 @@ info_common_command_for_block (const struct block *block, const char *comname,
 	else
 	  *any_printed = 1;
 	if (sym->print_name ())
-	  printf_filtered (_("Contents of F77 COMMON block '%s':\n"),
-			   sym->print_name ());
+	  gdb_printf (_("Contents of F77 COMMON block '%s':\n"),
+		      sym->print_name ());
 	else
-	  printf_filtered (_("Contents of blank COMMON block:\n"));
+	  gdb_printf (_("Contents of blank COMMON block:\n"));
 	
 	for (index = 0; index < common->n_entries; index++)
 	  {
 	    struct value *val = NULL;
 
-	    printf_filtered ("%s = ",
-			     common->contents[index]->print_name ());
+	    gdb_printf ("%s = ",
+			common->contents[index]->print_name ());
 
 	    try
 	      {
@@ -679,7 +679,7 @@ info_common_command (const char *comname, int from_tty)
   block = get_frame_block (fi, 0);
   if (block == NULL)
     {
-      printf_filtered (_("No symbol table info available.\n"));
+      gdb_printf (_("No symbol table info available.\n"));
       return;
     }
 
@@ -696,9 +696,9 @@ info_common_command (const char *comname, int from_tty)
   if (!values_printed)
     {
       if (comname)
-	printf_filtered (_("No common block '%s'.\n"), comname);
+	gdb_printf (_("No common block '%s'.\n"), comname);
       else
-	printf_filtered (_("No common blocks.\n"));
+	gdb_printf (_("No common blocks.\n"));
     }
 }
 

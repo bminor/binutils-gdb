@@ -606,20 +606,20 @@ tui_reg_command (const char *args, int from_tty)
       struct reggroup *group;
       int first;
 
-      printf_filtered (_("\"tui reg\" must be followed by the name of "
-			 "either a register group,\nor one of 'next' "
-			 "or 'prev'.  Known register groups are:\n"));
+      gdb_printf (_("\"tui reg\" must be followed by the name of "
+		    "either a register group,\nor one of 'next' "
+		    "or 'prev'.  Known register groups are:\n"));
 
       for (first = 1, group = reggroup_next (gdbarch, NULL);
 	   group != NULL;
 	   first = 0, group = reggroup_next (gdbarch, group))
 	{
 	  if (!first)
-	    printf_filtered (", ");
-	  printf_filtered ("%s", reggroup_name (group));
+	    gdb_printf (", ");
+	  gdb_printf ("%s", reggroup_name (group));
 	}
 
-      printf_filtered ("\n");
+      gdb_printf ("\n");
     }
 }
 

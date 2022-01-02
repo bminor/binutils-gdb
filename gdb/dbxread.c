@@ -1836,12 +1836,12 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 			    (dependencies_used
 			     * sizeof (legacy_psymtab *)));
 #ifdef DEBUG_INFO
-		    fprintf_unfiltered (gdb_stderr,
-					"Had to reallocate "
-					"dependency list.\n");
-		    fprintf_unfiltered (gdb_stderr,
-					"New dependencies allocated: %d\n",
-					dependencies_allocated);
+		    gdb_printf (gdb_stderr,
+				"Had to reallocate "
+				"dependency list.\n");
+		    gdb_printf (gdb_stderr,
+				"New dependencies allocated: %d\n",
+				dependencies_allocated);
 #endif
 		  }
 	      }

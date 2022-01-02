@@ -1222,7 +1222,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
 	    {
 	      /* We've printed all the frames we were asked to
 		 print, but more frames existed.  */
-	      printf_filtered (_("(More stack frames follow...)\n"));
+	      gdb_printf (_("(More stack frames follow...)\n"));
 	      break;
 	    }
 	}

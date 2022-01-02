@@ -621,8 +621,8 @@ info_selectors_command (const char *regexp, int from_tty)
     }
   if (matches)
     {
-      printf_filtered (_("Selectors matching \"%s\":\n\n"), 
-		       regexp ? regexp : "*");
+      gdb_printf (_("Selectors matching \"%s\":\n\n"), 
+		  regexp ? regexp : "*");
 
       sym_arr = XALLOCAVEC (struct symbol *, matches);
       matches = 0;
@@ -671,8 +671,8 @@ info_selectors_command (const char *regexp, int from_tty)
       begin_line();
     }
   else
-    printf_filtered (_("No selectors matching \"%s\"\n"),
-		     regexp ? regexp : "*");
+    gdb_printf (_("No selectors matching \"%s\"\n"),
+		regexp ? regexp : "*");
 }
 
 /*
@@ -763,8 +763,8 @@ info_classes_command (const char *regexp, int from_tty)
     }
   if (matches)
     {
-      printf_filtered (_("Classes matching \"%s\":\n\n"), 
-		       regexp ? regexp : "*");
+      gdb_printf (_("Classes matching \"%s\":\n\n"), 
+		  regexp ? regexp : "*");
       sym_arr = XALLOCAVEC (struct symbol *, matches);
       matches = 0;
       for (objfile *objfile : current_program_space->objfiles ())
@@ -805,7 +805,7 @@ info_classes_command (const char *regexp, int from_tty)
       begin_line();
     }
   else
-    printf_filtered (_("No classes matching \"%s\"\n"), regexp ? regexp : "*");
+    gdb_printf (_("No classes matching \"%s\"\n"), regexp ? regexp : "*");
 }
 
 static char * 
@@ -1181,12 +1181,12 @@ print_object_command (const char *args, int from_tty)
     do
       { /* Read and print characters up to EOS.  */
 	QUIT;
-	printf_filtered ("%c", c);
+	gdb_printf ("%c", c);
 	read_memory (string_addr + i++, &c, 1);
       } while (c != 0);
   else
-    printf_filtered(_("<object returns empty description>"));
-  printf_filtered ("\n");
+    gdb_printf(_("<object returns empty description>"));
+  gdb_printf ("\n");
 }
 
 /* The data structure 'methcalls' is used to detect method calls (thru

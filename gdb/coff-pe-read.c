@@ -174,10 +174,10 @@ add_pe_exported_sym (minimal_symbol_reader &reader,
     = string_printf ("%s!%s", dll_name, bare_name.c_str ());
 
   if ((section_data->ms_type == mst_unknown) && debug_coff_pe_read)
-    fprintf_unfiltered (gdb_stdlog , _("Unknown section type for \"%s\""
-			" for entry \"%s\" in dll \"%s\"\n"),
-			section_data->section_name.c_str (), sym_name,
-			dll_name);
+    gdb_printf (gdb_stdlog , _("Unknown section type for \"%s\""
+			       " for entry \"%s\" in dll \"%s\"\n"),
+		section_data->section_name.c_str (), sym_name,
+		dll_name);
 
   reader.record_with_info (qualified_name.c_str (), vma, section_data->ms_type,
 			   section_data->index);
@@ -186,8 +186,8 @@ add_pe_exported_sym (minimal_symbol_reader &reader,
   reader.record_with_info (bare_name.c_str (), vma, section_data->ms_type,
 			   section_data->index);
   if (debug_coff_pe_read > 1)
-    fprintf_unfiltered (gdb_stdlog, _("Adding exported symbol \"%s\""
-			" in dll \"%s\"\n"), sym_name, dll_name);
+    gdb_printf (gdb_stdlog, _("Adding exported symbol \"%s\""
+			      " in dll \"%s\"\n"), sym_name, dll_name);
 }
 
 /* Create a minimal symbol entry for an exported forward symbol.
@@ -232,17 +232,17 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
   if (!msymbol.minsym)
     {
       if (debug_coff_pe_read)
-	fprintf_unfiltered (gdb_stdlog, _("Unable to find function \"%s\" in"
-			    " dll \"%s\", forward of \"%s\" in dll \"%s\"\n"),
-			    forward_func_name, forward_dll_name, sym_name,
-			    dll_name);
+	gdb_printf (gdb_stdlog, _("Unable to find function \"%s\" in"
+				  " dll \"%s\", forward of \"%s\" in dll \"%s\"\n"),
+		    forward_func_name, forward_dll_name, sym_name,
+		    dll_name);
       return 0;
     }
 
   if (debug_coff_pe_read > 1)
-    fprintf_unfiltered (gdb_stdlog, _("Adding forwarded exported symbol"
-			" \"%s\" in dll \"%s\", pointing to \"%s\"\n"),
-			sym_name, dll_name, forward_qualified_name);
+    gdb_printf (gdb_stdlog, _("Adding forwarded exported symbol"
+			      " \"%s\" in dll \"%s\", pointing to \"%s\"\n"),
+		sym_name, dll_name, forward_qualified_name);
 
   vma = BMSYMBOL_VALUE_ADDRESS (msymbol);
   msymtype = MSYMBOL_TYPE (msymbol.minsym);
@@ -428,14 +428,14 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
 	  if (strcmp (sname, ".edata") != 0)
 	    {
 	      if (debug_coff_pe_read)
-		fprintf_unfiltered (gdb_stdlog, _("Export RVA for dll "
-				    "\"%s\" is in section \"%s\"\n"),
-				    dll_name, sname);
+		gdb_printf (gdb_stdlog, _("Export RVA for dll "
+					  "\"%s\" is in section \"%s\"\n"),
+			    dll_name, sname);
 	    }
 	  else if (export_opthdrrva != vaddr && debug_coff_pe_read)
-	    fprintf_unfiltered (gdb_stdlog, _("Wrong value of export RVA"
-				" for dll \"%s\": 0x%lx instead of 0x%lx\n"),
-				dll_name, export_opthdrrva, vaddr);
+	    gdb_printf (gdb_stdlog, _("Wrong value of export RVA"
+				      " for dll \"%s\": 0x%lx instead of 0x%lx\n"),
+			dll_name, export_opthdrrva, vaddr);
 	  expptr = fptr + (export_opthdrrva - vaddr);
 	  break;
 	}
@@ -532,8 +532,8 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
   read_pe_truncate_name (dll_name);
 
   if (debug_coff_pe_read)
-    fprintf_unfiltered (gdb_stdlog, _("DLL \"%s\" has %ld export entries,"
-			" base=%ld\n"), dll_name, nexp, ordbase);
+    gdb_printf (gdb_stdlog, _("DLL \"%s\" has %ld export entries,"
+			      " base=%ld\n"), dll_name, nexp, ordbase);
   nbforward = 0;
   nbnormal = 0;
   /* Iterate through the list of symbols.  */
@@ -605,16 +605,16 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
 	      ++nbnormal;
 	    }
 	  else if (debug_coff_pe_read)
-	    fprintf_unfiltered (gdb_stdlog, _("Export name \"%s\" ord. %lu,"
-				" RVA 0x%lx in dll \"%s\" not handled\n"),
-				funcname, ordinal, func_rva, dll_name);
+	    gdb_printf (gdb_stdlog, _("Export name \"%s\" ord. %lu,"
+				      " RVA 0x%lx in dll \"%s\" not handled\n"),
+			funcname, ordinal, func_rva, dll_name);
 	}
     }
 
   if (debug_coff_pe_read)
-    fprintf_unfiltered (gdb_stdlog, _("Finished reading \"%s\", exports %ld,"
-			" forwards %ld, total %ld/%ld.\n"), dll_name, nbnormal,
-			nbforward, nbnormal + nbforward, nexp);
+    gdb_printf (gdb_stdlog, _("Finished reading \"%s\", exports %ld,"
+			      " forwards %ld, total %ld/%ld.\n"), dll_name, nbnormal,
+		nbforward, nbnormal + nbforward, nexp);
 }
 
 /* Extract from ABFD the offset of the .text section.
@@ -686,7 +686,7 @@ static void
 show_debug_coff_pe_read (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Coff PE read debugging is %s.\n"), value);
+  gdb_printf (file, _("Coff PE read debugging is %s.\n"), value);
 }
 
 /* Adds "Set/show debug coff_pe_read" commands.  */

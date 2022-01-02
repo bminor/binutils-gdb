@@ -293,7 +293,7 @@ void
 annotate_error_begin (void)
 {
   if (annotation_level > 1)
-    fprintf_unfiltered (gdb_stderr, "\n\032\032error-begin\n");
+    gdb_printf (gdb_stderr, "\n\032\032error-begin\n");
 }
 
 void

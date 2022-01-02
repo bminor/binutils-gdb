@@ -2797,7 +2797,7 @@ s390_record_address_mask (struct gdbarch *gdbarch, struct regcache *regcache,
     case 3:
       return val;
     default:
-      fprintf_unfiltered (gdb_stdlog, "Warning: Addressing mode %d used.", am);
+      gdb_printf (gdb_stdlog, "Warning: Addressing mode %d used.", am);
       return 0;
     }
 }
@@ -3031,8 +3031,8 @@ ex:
 		    return -1;
 		  break;
 		default:
-		  fprintf_unfiltered (gdb_stdlog, "Warning: Unknown PFPO OFC %02x at %s.\n",
-				      ofc, paddress (gdbarch, addr));
+		  gdb_printf (gdb_stdlog, "Warning: Unknown PFPO OFC %02x at %s.\n",
+			      ofc, paddress (gdbarch, addr));
 		  return -1;
 		}
 
@@ -3103,7 +3103,7 @@ ex:
 	}
       else
 	{
-	  fprintf_unfiltered (gdb_stderr, _("no syscall record support\n"));
+	  gdb_printf (gdb_stderr, _("no syscall record support\n"));
 	  return -1;
 	}
       break;
@@ -3318,8 +3318,8 @@ ex:
     case 0x44: /* EX - execute */
       if (ex != -1)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "Warning: Double execute at %s.\n",
-			      paddress (gdbarch, addr));
+	  gdb_printf (gdb_stdlog, "Warning: Double execute at %s.\n",
+		      paddress (gdbarch, addr));
 	  return -1;
 	}
       addr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], 0);
@@ -4304,8 +4304,8 @@ ex:
 		break;
 
 	      default:
-		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown KMAC function %02x at %s.\n",
-				    (int)tmp, paddress (gdbarch, addr));
+		gdb_printf (gdb_stdlog, "Warning: Unknown KMAC function %02x at %s.\n",
+			    (int)tmp, paddress (gdbarch, addr));
 		return -1;
 	    }
 	  if (tmp != 0)
@@ -4369,8 +4369,8 @@ ex:
 		/* For other instructions... */
 		/* Fall through.  */
 	      default:
-		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown KM* function %02x at %s.\n",
-				    (int)tmp, paddress (gdbarch, addr));
+		gdb_printf (gdb_stdlog, "Warning: Unknown KM* function %02x at %s.\n",
+			    (int)tmp, paddress (gdbarch, addr));
 		return -1;
 	    }
 	  if (tmp != 0)
@@ -4453,8 +4453,8 @@ ex:
 		break;
 
 	      default:
-		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown PCC function %02x at %s.\n",
-				    (int)tmp, paddress (gdbarch, addr));
+		gdb_printf (gdb_stdlog, "Warning: Unknown PCC function %02x at %s.\n",
+			    (int)tmp, paddress (gdbarch, addr));
 		return -1;
 	    }
 	  if (record_full_arch_list_add_reg (regcache, S390_PSWM_REGNUM))
@@ -4488,8 +4488,8 @@ ex:
 		break;
 
 	      default:
-		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown KMCTR function %02x at %s.\n",
-				    (int)tmp, paddress (gdbarch, addr));
+		gdb_printf (gdb_stdlog, "Warning: Unknown KMCTR function %02x at %s.\n",
+			    (int)tmp, paddress (gdbarch, addr));
 		return -1;
 	    }
 	  if (tmp != 0)
@@ -4559,8 +4559,8 @@ ex:
 		break;
 
 	      default:
-		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown KM function %02x at %s.\n",
-				    (int)tmp, paddress (gdbarch, addr));
+		gdb_printf (gdb_stdlog, "Warning: Unknown KM function %02x at %s.\n",
+			    (int)tmp, paddress (gdbarch, addr));
 		return -1;
 	    }
 	  if (tmp != 0)
@@ -4626,8 +4626,8 @@ ex:
 		break;
 
 	      default:
-		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown PPNO function %02x at %s.\n",
-				    (int)tmp, paddress (gdbarch, addr));
+		gdb_printf (gdb_stdlog, "Warning: Unknown PPNO function %02x at %s.\n",
+			    (int)tmp, paddress (gdbarch, addr));
 		return -1;
 	    }
 	  /* DXC may be written */
@@ -4678,8 +4678,8 @@ ex:
 		/* For KLMD...  */
 		/* Fall through.  */
 	      default:
-		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown KMAC function %02x at %s.\n",
-				    (int)tmp, paddress (gdbarch, addr));
+		gdb_printf (gdb_stdlog, "Warning: Unknown KMAC function %02x at %s.\n",
+			    (int)tmp, paddress (gdbarch, addr));
 		return -1;
 	    }
 	  if (tmp != 0)
@@ -4984,8 +4984,8 @@ ex:
 	case 0xc60: /* EXRL - execute relative long */
 	  if (ex != -1)
 	    {
-	      fprintf_unfiltered (gdb_stdlog, "Warning: Double execute at %s.\n",
-				  paddress (gdbarch, addr));
+	      gdb_printf (gdb_stdlog, "Warning: Double execute at %s.\n",
+			  paddress (gdbarch, addr));
 	      return -1;
 	    }
 	  addr = s390_record_calc_rl (gdbarch, regcache, addr, insn[1], insn[2]);
@@ -5073,8 +5073,8 @@ ex:
 		  break;
 
 		default:
-		  fprintf_unfiltered (gdb_stdlog, "Warning: Unknown CSST FC %02x at %s.\n",
-				      fc, paddress (gdbarch, addr));
+		  gdb_printf (gdb_stdlog, "Warning: Unknown CSST FC %02x at %s.\n",
+			      fc, paddress (gdbarch, addr));
 		  return -1;
 	      }
 
@@ -5082,8 +5082,8 @@ ex:
 	    oaddr2 = s390_record_calc_disp (gdbarch, regcache, 0, insn[2], 0);
 	    if (sc > 4)
 	      {
-		fprintf_unfiltered (gdb_stdlog, "Warning: Unknown CSST FC %02x at %s.\n",
-				    sc, paddress (gdbarch, addr));
+		gdb_printf (gdb_stdlog, "Warning: Unknown CSST FC %02x at %s.\n",
+			    sc, paddress (gdbarch, addr));
 		return -1;
 	      }
 
@@ -6708,8 +6708,8 @@ CSSTX:
 	      break;
 
 	    default:
-	      fprintf_unfiltered (gdb_stdlog, "Warning: Unknown PLO FC %02x at %s.\n",
-				  fc, paddress (gdbarch, addr));
+	      gdb_printf (gdb_stdlog, "Warning: Unknown PLO FC %02x at %s.\n",
+			  fc, paddress (gdbarch, addr));
 	      return -1;
 	    }
 	}
@@ -6771,8 +6771,8 @@ CSSTX:
 
     default:
 UNKNOWN_OP:
-      fprintf_unfiltered (gdb_stdlog, "Warning: Don't know how to record %04x "
-			  "at %s.\n", insn[0], paddress (gdbarch, addr));
+      gdb_printf (gdb_stdlog, "Warning: Don't know how to record %04x "
+		  "at %s.\n", insn[0], paddress (gdbarch, addr));
       return -1;
   }
 

@@ -1102,7 +1102,7 @@ enclosing function for address %s"), paddress (gdbarch, orig_pc));
 
       if (!blurb_printed)
 	{
-	  printf_filtered (_("\
+	  gdb_printf (_("\
 This warning occurs if you are debugging a function without any symbols\n\
 (for example, in a stripped executable).  In that case, you may wish to\n\
 increase the size of the search with the `set heuristic-fence-post' command.\n\

@@ -37,7 +37,7 @@ static void
 show_auto_load_python_scripts (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Auto-loading of Python scripts is %s.\n"), value);
+  gdb_printf (file, _("Auto-loading of Python scripts is %s.\n"), value);
 }
 
 /* See python-internal.h.  */

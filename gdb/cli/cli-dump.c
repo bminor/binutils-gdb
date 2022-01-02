@@ -398,8 +398,8 @@ restore_one_section (bfd *ibfd, asection *isec,
       || (load_end > 0 && sec_start >= load_end))
     {
       /* No, no useable data in this section.  */
-      printf_filtered (_("skipping section %s...\n"), 
-		       bfd_section_name (isec));
+      gdb_printf (_("skipping section %s...\n"), 
+		  bfd_section_name (isec));
       return;
     }
 
@@ -419,19 +419,19 @@ restore_one_section (bfd *ibfd, asection *isec,
     error (_("Failed to read bfd file %s: '%s'."), bfd_get_filename (ibfd), 
 	   bfd_errmsg (bfd_get_error ()));
 
-  printf_filtered ("Restoring section %s (0x%lx to 0x%lx)",
-		   bfd_section_name (isec), 
-		   (unsigned long) sec_start, 
-		   (unsigned long) sec_end);
+  gdb_printf ("Restoring section %s (0x%lx to 0x%lx)",
+	      bfd_section_name (isec), 
+	      (unsigned long) sec_start, 
+	      (unsigned long) sec_end);
 
   if (load_offset != 0 || load_start != 0 || load_end != 0)
-    printf_filtered (" into memory (%s to %s)\n",
-		     paddress (target_gdbarch (),
-			       (unsigned long) sec_start
-			       + sec_offset + load_offset),
-		     paddress (target_gdbarch (),
-			       (unsigned long) sec_start + sec_offset
-				+ load_offset + sec_load_count));
+    gdb_printf (" into memory (%s to %s)\n",
+		paddress (target_gdbarch (),
+			  (unsigned long) sec_start
+			  + sec_offset + load_offset),
+		paddress (target_gdbarch (),
+			  (unsigned long) sec_start + sec_offset
+			  + load_offset + sec_load_count));
   else
     gdb_puts ("\n");
 
@@ -474,7 +474,7 @@ restore_binary_file (const char *filename, CORE_ADDR load_offset,
   if (load_start > 0)
     len -= load_start;
 
-  printf_filtered 
+  gdb_printf 
     ("Restoring binary file %s into memory (0x%lx to 0x%lx)\n", 
      filename, 
      (unsigned long) (load_start + load_offset),
@@ -542,10 +542,10 @@ restore_command (const char *args, int from_tty)
     }
 
   if (info_verbose)
-    printf_filtered ("Restore file %s offset 0x%lx start 0x%lx end 0x%lx\n",
-		     filename.get (), (unsigned long) load_offset,
-		     (unsigned long) load_start,
-		     (unsigned long) load_end);
+    gdb_printf ("Restore file %s offset 0x%lx start 0x%lx end 0x%lx\n",
+		filename.get (), (unsigned long) load_offset,
+		(unsigned long) load_start,
+		(unsigned long) load_end);
 
   if (binary_flag)
     {

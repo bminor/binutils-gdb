@@ -627,9 +627,9 @@ static void
 show_entry_values_debug (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Entry values and tail call frames debugging is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Entry values and tail call frames debugging is %s.\n"),
+	      value);
 }
 
 /* See gdbtypes.h.  */
@@ -836,9 +836,9 @@ tailcall_dump (struct gdbarch *gdbarch, const struct call_site *call_site)
   CORE_ADDR addr = call_site->pc ();
   struct bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (addr - 1);
 
-  fprintf_unfiltered (gdb_stdlog, " %s(%s)", paddress (gdbarch, addr),
-		      (msym.minsym == NULL ? "???"
-		       : msym.minsym->print_name ()));
+  gdb_printf (gdb_stdlog, " %s(%s)", paddress (gdbarch, addr),
+	      (msym.minsym == NULL ? "???"
+	       : msym.minsym->print_name ()));
 
 }
 
@@ -874,7 +874,7 @@ chain_candidate (struct gdbarch *gdbarch,
 
       if (entry_values_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "tailcall: initial:");
+	  gdb_printf (gdb_stdlog, "tailcall: initial:");
 	  for (idx = 0; idx < length; idx++)
 	    tailcall_dump (gdbarch, result->call_site[idx]);
 	  gdb_putc ('\n', gdb_stdlog);
@@ -885,7 +885,7 @@ chain_candidate (struct gdbarch *gdbarch,
 
   if (entry_values_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "tailcall: compare:");
+      gdb_printf (gdb_stdlog, "tailcall: compare:");
       for (idx = 0; idx < length; idx++)
 	tailcall_dump (gdbarch, chain[idx]);
       gdb_putc ('\n', gdb_stdlog);
@@ -914,7 +914,7 @@ chain_candidate (struct gdbarch *gdbarch,
 
   if (entry_values_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "tailcall: reduced:");
+      gdb_printf (gdb_stdlog, "tailcall: reduced:");
       for (idx = 0; idx < (*resultp)->callers; idx++)
 	tailcall_dump (gdbarch, (*resultp)->call_site[idx]);
       gdb_puts (" |", gdb_stdlog);
@@ -3144,8 +3144,8 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
   if (data[0] >= DW_OP_reg0 && data[0] <= DW_OP_reg31)
     {
-      fprintf_filtered (stream, _("a variable in $%s"),
-			locexpr_regname (gdbarch, data[0] - DW_OP_reg0));
+      gdb_printf (stream, _("a variable in $%s"),
+		  locexpr_regname (gdbarch, data[0] - DW_OP_reg0));
       data += 1;
     }
   else if (data[0] == DW_OP_regx)
@@ -3153,8 +3153,8 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       uint64_t reg;
 
       data = safe_read_uleb128 (data + 1, end, &reg);
-      fprintf_filtered (stream, _("a variable in $%s"),
-			locexpr_regname (gdbarch, reg));
+      gdb_printf (stream, _("a variable in $%s"),
+		  locexpr_regname (gdbarch, reg));
     }
   else if (data[0] == DW_OP_fbreg)
     {
@@ -3210,10 +3210,10 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	  return save_data;
 	}
 
-      fprintf_filtered (stream,
-			_("a variable at frame base reg $%s offset %s+%s"),
-			locexpr_regname (gdbarch, frame_reg),
-			plongest (base_offset), plongest (frame_offset));
+      gdb_printf (stream,
+		  _("a variable at frame base reg $%s offset %s+%s"),
+		  locexpr_regname (gdbarch, frame_reg),
+		  plongest (base_offset), plongest (frame_offset));
     }
   else if (data[0] >= DW_OP_breg0 && data[0] <= DW_OP_breg31
 	   && piece_end_p (data, end))
@@ -3222,10 +3222,10 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
       data = safe_read_sleb128 (data + 1, end, &offset);
 
-      fprintf_filtered (stream,
-			_("a variable at offset %s from base reg $%s"),
-			plongest (offset),
-			locexpr_regname (gdbarch, data[0] - DW_OP_breg0));
+      gdb_printf (stream,
+		  _("a variable at offset %s from base reg $%s"),
+		  plongest (offset),
+		  locexpr_regname (gdbarch, data[0] - DW_OP_breg0));
     }
 
   /* The location expression for a TLS variable looks like this (on a
@@ -3254,10 +3254,10 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       offset = extract_unsigned_integer (data + 1, addr_size,
 					 gdbarch_byte_order (gdbarch));
 
-      fprintf_filtered (stream, 
-			_("a thread-local variable at offset 0x%s "
-			  "in the thread-local storage for `%s'"),
-			phex_nz (offset, addr_size), objfile_name (objfile));
+      gdb_printf (stream, 
+		  _("a thread-local variable at offset 0x%s "
+		    "in the thread-local storage for `%s'"),
+		  phex_nz (offset, addr_size), objfile_name (objfile));
 
       data += 1 + addr_size + 1;
     }
@@ -3278,10 +3278,10 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
       data = safe_read_uleb128 (data + 1, end, &offset);
       offset = dwarf2_read_addr_index (per_cu, per_objfile, offset);
-      fprintf_filtered (stream, 
-			_("a thread-local variable at offset 0x%s "
-			  "in the thread-local storage for `%s'"),
-			phex_nz (offset, addr_size), objfile_name (objfile));
+      gdb_printf (stream, 
+		  _("a thread-local variable at offset 0x%s "
+		    "in the thread-local storage for `%s'"),
+		  phex_nz (offset, addr_size), objfile_name (objfile));
       ++data;
     }
 
@@ -3290,7 +3290,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 	   && data + 1 < end
 	   && data[1] == DW_OP_stack_value)
     {
-      fprintf_filtered (stream, _("the constant %d"), data[0] - DW_OP_lit0);
+      gdb_printf (stream, _("the constant %d"), data[0] - DW_OP_lit0);
       data += 2;
     }
 
@@ -3327,8 +3327,8 @@ disassemble_dwarf_expression (struct ui_file *stream,
       if (!name)
 	error (_("Unrecognized DWARF opcode 0x%02x at %ld"),
 	       op, (long) (data - 1 - start));
-      fprintf_filtered (stream, "  %*ld: %s", indent + 4,
-			(long) (data - 1 - start), name);
+      gdb_printf (stream, "  %*ld: %s", indent + 4,
+		  (long) (data - 1 - start), name);
 
       switch (op)
 	{
@@ -3336,65 +3336,65 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  ul = extract_unsigned_integer (data, addr_size,
 					 gdbarch_byte_order (arch));
 	  data += addr_size;
-	  fprintf_filtered (stream, " 0x%s", phex_nz (ul, addr_size));
+	  gdb_printf (stream, " 0x%s", phex_nz (ul, addr_size));
 	  break;
 
 	case DW_OP_const1u:
 	  ul = extract_unsigned_integer (data, 1, gdbarch_byte_order (arch));
 	  data += 1;
-	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  gdb_printf (stream, " %s", pulongest (ul));
 	  break;
 
 	case DW_OP_const1s:
 	  l = extract_signed_integer (data, 1, gdbarch_byte_order (arch));
 	  data += 1;
-	  fprintf_filtered (stream, " %s", plongest (l));
+	  gdb_printf (stream, " %s", plongest (l));
 	  break;
 
 	case DW_OP_const2u:
 	  ul = extract_unsigned_integer (data, 2, gdbarch_byte_order (arch));
 	  data += 2;
-	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  gdb_printf (stream, " %s", pulongest (ul));
 	  break;
 
 	case DW_OP_const2s:
 	  l = extract_signed_integer (data, 2, gdbarch_byte_order (arch));
 	  data += 2;
-	  fprintf_filtered (stream, " %s", plongest (l));
+	  gdb_printf (stream, " %s", plongest (l));
 	  break;
 
 	case DW_OP_const4u:
 	  ul = extract_unsigned_integer (data, 4, gdbarch_byte_order (arch));
 	  data += 4;
-	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  gdb_printf (stream, " %s", pulongest (ul));
 	  break;
 
 	case DW_OP_const4s:
 	  l = extract_signed_integer (data, 4, gdbarch_byte_order (arch));
 	  data += 4;
-	  fprintf_filtered (stream, " %s", plongest (l));
+	  gdb_printf (stream, " %s", plongest (l));
 	  break;
 
 	case DW_OP_const8u:
 	  ul = extract_unsigned_integer (data, 8, gdbarch_byte_order (arch));
 	  data += 8;
-	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  gdb_printf (stream, " %s", pulongest (ul));
 	  break;
 
 	case DW_OP_const8s:
 	  l = extract_signed_integer (data, 8, gdbarch_byte_order (arch));
 	  data += 8;
-	  fprintf_filtered (stream, " %s", plongest (l));
+	  gdb_printf (stream, " %s", plongest (l));
 	  break;
 
 	case DW_OP_constu:
 	  data = safe_read_uleb128 (data, end, &ul);
-	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  gdb_printf (stream, " %s", pulongest (ul));
 	  break;
 
 	case DW_OP_consts:
 	  data = safe_read_sleb128 (data, end, &l);
-	  fprintf_filtered (stream, " %s", plongest (l));
+	  gdb_printf (stream, " %s", plongest (l));
 	  break;
 
 	case DW_OP_reg0:
@@ -3429,20 +3429,20 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_reg29:
 	case DW_OP_reg30:
 	case DW_OP_reg31:
-	  fprintf_filtered (stream, " [$%s]",
-			    locexpr_regname (arch, op - DW_OP_reg0));
+	  gdb_printf (stream, " [$%s]",
+		      locexpr_regname (arch, op - DW_OP_reg0));
 	  break;
 
 	case DW_OP_regx:
 	  data = safe_read_uleb128 (data, end, &ul);
-	  fprintf_filtered (stream, " %s [$%s]", pulongest (ul),
-			    locexpr_regname (arch, (int) ul));
+	  gdb_printf (stream, " %s [$%s]", pulongest (ul),
+		      locexpr_regname (arch, (int) ul));
 	  break;
 
 	case DW_OP_implicit_value:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  data += ul;
-	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  gdb_printf (stream, " %s", pulongest (ul));
 	  break;
 
 	case DW_OP_breg0:
@@ -3478,72 +3478,72 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_breg30:
 	case DW_OP_breg31:
 	  data = safe_read_sleb128 (data, end, &l);
-	  fprintf_filtered (stream, " %s [$%s]", plongest (l),
-			    locexpr_regname (arch, op - DW_OP_breg0));
+	  gdb_printf (stream, " %s [$%s]", plongest (l),
+		      locexpr_regname (arch, op - DW_OP_breg0));
 	  break;
 
 	case DW_OP_bregx:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  data = safe_read_sleb128 (data, end, &l);
-	  fprintf_filtered (stream, " register %s [$%s] offset %s",
-			    pulongest (ul),
-			    locexpr_regname (arch, (int) ul),
-			    plongest (l));
+	  gdb_printf (stream, " register %s [$%s] offset %s",
+		      pulongest (ul),
+		      locexpr_regname (arch, (int) ul),
+		      plongest (l));
 	  break;
 
 	case DW_OP_fbreg:
 	  data = safe_read_sleb128 (data, end, &l);
-	  fprintf_filtered (stream, " %s", plongest (l));
+	  gdb_printf (stream, " %s", plongest (l));
 	  break;
 
 	case DW_OP_xderef_size:
 	case DW_OP_deref_size:
 	case DW_OP_pick:
-	  fprintf_filtered (stream, " %d", *data);
+	  gdb_printf (stream, " %d", *data);
 	  ++data;
 	  break;
 
 	case DW_OP_plus_uconst:
 	  data = safe_read_uleb128 (data, end, &ul);
-	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  gdb_printf (stream, " %s", pulongest (ul));
 	  break;
 
 	case DW_OP_skip:
 	  l = extract_signed_integer (data, 2, gdbarch_byte_order (arch));
 	  data += 2;
-	  fprintf_filtered (stream, " to %ld",
-			    (long) (data + l - start));
+	  gdb_printf (stream, " to %ld",
+		      (long) (data + l - start));
 	  break;
 
 	case DW_OP_bra:
 	  l = extract_signed_integer (data, 2, gdbarch_byte_order (arch));
 	  data += 2;
-	  fprintf_filtered (stream, " %ld",
-			    (long) (data + l - start));
+	  gdb_printf (stream, " %ld",
+		      (long) (data + l - start));
 	  break;
 
 	case DW_OP_call2:
 	  ul = extract_unsigned_integer (data, 2, gdbarch_byte_order (arch));
 	  data += 2;
-	  fprintf_filtered (stream, " offset %s", phex_nz (ul, 2));
+	  gdb_printf (stream, " offset %s", phex_nz (ul, 2));
 	  break;
 
 	case DW_OP_call4:
 	  ul = extract_unsigned_integer (data, 4, gdbarch_byte_order (arch));
 	  data += 4;
-	  fprintf_filtered (stream, " offset %s", phex_nz (ul, 4));
+	  gdb_printf (stream, " offset %s", phex_nz (ul, 4));
 	  break;
 
 	case DW_OP_call_ref:
 	  ul = extract_unsigned_integer (data, offset_size,
 					 gdbarch_byte_order (arch));
 	  data += offset_size;
-	  fprintf_filtered (stream, " offset %s", phex_nz (ul, offset_size));
+	  gdb_printf (stream, " offset %s", phex_nz (ul, offset_size));
 	  break;
 
 	case DW_OP_piece:
 	  data = safe_read_uleb128 (data, end, &ul);
-	  fprintf_filtered (stream, " %s (bytes)", pulongest (ul));
+	  gdb_printf (stream, " %s (bytes)", pulongest (ul));
 	  break;
 
 	case DW_OP_bit_piece:
@@ -3552,8 +3552,8 @@ disassemble_dwarf_expression (struct ui_file *stream,
 
 	    data = safe_read_uleb128 (data, end, &ul);
 	    data = safe_read_uleb128 (data, end, &offset);
-	    fprintf_filtered (stream, " size %s offset %s (bits)",
-			      pulongest (ul), pulongest (offset));
+	    gdb_printf (stream, " size %s offset %s (bits)",
+			pulongest (ul), pulongest (offset));
 	  }
 	  break;
 
@@ -3566,9 +3566,9 @@ disassemble_dwarf_expression (struct ui_file *stream,
 
 	    data = safe_read_sleb128 (data, end, &l);
 
-	    fprintf_filtered (stream, " DIE %s offset %s",
-			      phex_nz (ul, offset_size),
-			      plongest (l));
+	    gdb_printf (stream, " DIE %s offset %s",
+			phex_nz (ul, offset_size),
+			plongest (l));
 	  }
 	  break;
 
@@ -3581,11 +3581,11 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    data = safe_read_uleb128 (data, end, &ul);
 	    cu_offset offset = (cu_offset) ul;
 	    type = dwarf2_get_die_type (offset, per_cu, per_objfile);
-	    fprintf_filtered (stream, "<");
+	    gdb_printf (stream, "<");
 	    type_print (type, "", stream, -1);
-	    fprintf_filtered (stream, " [0x%s]> %d",
-			      phex_nz (to_underlying (offset), 0),
-			      deref_addr_size);
+	    gdb_printf (stream, " [0x%s]> %d",
+			phex_nz (to_underlying (offset), 0),
+			deref_addr_size);
 	  }
 	  break;
 
@@ -3597,15 +3597,15 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    data = safe_read_uleb128 (data, end, &ul);
 	    cu_offset type_die = (cu_offset) ul;
 	    type = dwarf2_get_die_type (type_die, per_cu, per_objfile);
-	    fprintf_filtered (stream, "<");
+	    gdb_printf (stream, "<");
 	    type_print (type, "", stream, -1);
-	    fprintf_filtered (stream, " [0x%s]>",
-			      phex_nz (to_underlying (type_die), 0));
+	    gdb_printf (stream, " [0x%s]>",
+			phex_nz (to_underlying (type_die), 0));
 
 	    int n = *data++;
-	    fprintf_filtered (stream, " %d byte block:", n);
+	    gdb_printf (stream, " %d byte block:", n);
 	    for (int i = 0; i < n; ++i)
-	      fprintf_filtered (stream, " %02x", data[i]);
+	      gdb_printf (stream, " %02x", data[i]);
 	    data += n;
 	  }
 	  break;
@@ -3621,11 +3621,11 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    cu_offset type_die = (cu_offset) ul;
 
 	    type = dwarf2_get_die_type (type_die, per_cu, per_objfile);
-	    fprintf_filtered (stream, "<");
+	    gdb_printf (stream, "<");
 	    type_print (type, "", stream, -1);
-	    fprintf_filtered (stream, " [0x%s]> [$%s]",
-			      phex_nz (to_underlying (type_die), 0),
-			      locexpr_regname (arch, reg));
+	    gdb_printf (stream, " [0x%s]> [$%s]",
+			phex_nz (to_underlying (type_die), 0),
+			locexpr_regname (arch, reg));
 	  }
 	  break;
 
@@ -3638,16 +3638,16 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    cu_offset type_die = (cu_offset) ul;
 
 	    if (to_underlying (type_die) == 0)
-	      fprintf_filtered (stream, "<0>");
+	      gdb_printf (stream, "<0>");
 	    else
 	      {
 		struct type *type;
 
 		type = dwarf2_get_die_type (type_die, per_cu, per_objfile);
-		fprintf_filtered (stream, "<");
+		gdb_printf (stream, "<");
 		type_print (type, "", stream, -1);
-		fprintf_filtered (stream, " [0x%s]>",
-				  phex_nz (to_underlying (type_die), 0));
+		gdb_printf (stream, " [0x%s]>",
+			    phex_nz (to_underlying (type_die), 0));
 	      }
 	  }
 	  break;
@@ -3665,31 +3665,31 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_GNU_parameter_ref:
 	  ul = extract_unsigned_integer (data, 4, gdbarch_byte_order (arch));
 	  data += 4;
-	  fprintf_filtered (stream, " offset %s", phex_nz (ul, 4));
+	  gdb_printf (stream, " offset %s", phex_nz (ul, 4));
 	  break;
 
 	case DW_OP_addrx:
 	case DW_OP_GNU_addr_index:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  ul = dwarf2_read_addr_index (per_cu, per_objfile, ul);
-	  fprintf_filtered (stream, " 0x%s", phex_nz (ul, addr_size));
+	  gdb_printf (stream, " 0x%s", phex_nz (ul, addr_size));
 	  break;
 
 	case DW_OP_GNU_const_index:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  ul = dwarf2_read_addr_index (per_cu, per_objfile, ul);
-	  fprintf_filtered (stream, " %s", pulongest (ul));
+	  gdb_printf (stream, " %s", pulongest (ul));
 	  break;
 
 	case DW_OP_GNU_variable_value:
 	  ul = extract_unsigned_integer (data, offset_size,
 					 gdbarch_byte_order (arch));
 	  data += offset_size;
-	  fprintf_filtered (stream, " offset %s", phex_nz (ul, offset_size));
+	  gdb_printf (stream, " offset %s", phex_nz (ul, offset_size));
 	  break;
 	}
 
-      fprintf_filtered (stream, "\n");
+      gdb_printf (stream, "\n");
     }
 
   return data;
@@ -3701,10 +3701,10 @@ static void
 show_dwarf_always_disassemble (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Whether to always disassemble "
-		      "DWARF expressions is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Whether to always disassemble "
+		"DWARF expressions is %s.\n"),
+	      value);
 }
 
 /* Describe a single location, which may in turn consist of multiple
@@ -3730,7 +3730,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
       if (first_piece)
 	first_piece = 0;
       else
-	fprintf_filtered (stream, _(", and "));
+	gdb_printf (stream, _(", and "));
 
       if (!dwarf_always_disassemble)
 	{
@@ -3746,7 +3746,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	}
       if (disassemble)
 	{
-	  fprintf_filtered (stream, _("a complex DWARF expression:\n"));
+	  gdb_printf (stream, _("a complex DWARF expression:\n"));
 	  data = disassemble_dwarf_expression (stream,
 					       objfile->arch (),
 					       addr_size, offset_size, data,
@@ -3760,7 +3760,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	  int empty = data == here;
 	      
 	  if (disassemble)
-	    fprintf_filtered (stream, "   ");
+	    gdb_printf (stream, "   ");
 	  if (data[0] == DW_OP_piece)
 	    {
 	      uint64_t bytes;
@@ -3768,11 +3768,11 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	      data = safe_read_uleb128 (data + 1, end, &bytes);
 
 	      if (empty)
-		fprintf_filtered (stream, _("an empty %s-byte piece"),
-				  pulongest (bytes));
+		gdb_printf (stream, _("an empty %s-byte piece"),
+			    pulongest (bytes));
 	      else
-		fprintf_filtered (stream, _(" [%s-byte piece]"),
-				  pulongest (bytes));
+		gdb_printf (stream, _(" [%s-byte piece]"),
+			    pulongest (bytes));
 	    }
 	  else if (data[0] == DW_OP_bit_piece)
 	    {
@@ -3782,13 +3782,13 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	      data = safe_read_uleb128 (data, end, &offset);
 
 	      if (empty)
-		fprintf_filtered (stream,
-				  _("an empty %s-bit piece"),
-				  pulongest (bits));
+		gdb_printf (stream,
+			    _("an empty %s-bit piece"),
+			    pulongest (bits));
 	      else
-		fprintf_filtered (stream,
-				  _(" [%s-bit piece, offset %s bits]"),
-				  pulongest (bits), pulongest (offset));
+		gdb_printf (stream,
+			    _(" [%s-bit piece, offset %s bits]"),
+			    pulongest (bits), pulongest (offset));
 	    }
 	  else
 	    {
@@ -3964,7 +3964,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   loc_ptr = dlbaton->data;
   buf_end = dlbaton->data + dlbaton->size;
 
-  fprintf_filtered (stream, _("multi-location:\n"));
+  gdb_printf (stream, _("multi-location:\n"));
 
   /* Iterate through locations until we run out.  */
   while (!done)
@@ -3999,8 +3999,8 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 
 	case DEBUG_LOC_BASE_ADDRESS:
 	  base_address = high;
-	  fprintf_filtered (stream, _("  Base address %s"),
-			    paddress (gdbarch, base_address));
+	  gdb_printf (stream, _("  Base address %s"),
+		      paddress (gdbarch, base_address));
 	  continue;
 
 	case DEBUG_LOC_START_END:
@@ -4043,15 +4043,15 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 
       /* (It would improve readability to print only the minimum
 	 necessary digits of the second number of the range.)  */
-      fprintf_filtered (stream, _("  Range %s-%s: "),
-			paddress (gdbarch, low), paddress (gdbarch, high));
+      gdb_printf (stream, _("  Range %s-%s: "),
+		  paddress (gdbarch, low), paddress (gdbarch, high));
 
       /* Now describe this particular location.  */
       locexpr_describe_location_1 (symbol, low, stream, loc_ptr, length,
 				   addr_size, offset_size,
 				   dlbaton->per_cu, dlbaton->per_objfile);
 
-      fprintf_filtered (stream, "\n");
+      gdb_printf (stream, "\n");
 
       loc_ptr += length;
     }

@@ -109,17 +109,17 @@ show_pp_source_pos (struct ui_file *stream,
 		    int line)
 {
   std::string fullname = macro_source_fullname (file);
-  fprintf_filtered (stream, "%ps:%d\n",
-		    styled_string (file_name_style.style (),
-				   fullname.c_str ()),
-		    line);
+  gdb_printf (stream, "%ps:%d\n",
+	      styled_string (file_name_style.style (),
+			     fullname.c_str ()),
+	      line);
 
   while (file->included_by)
     {
       fullname = macro_source_fullname (file->included_by);
       gdb_puts (_("  included at "), stream);
       fputs_styled (fullname.c_str (), file_name_style.style (), stream);
-      fprintf_filtered (stream, ":%d\n", file->included_at_line);
+      gdb_printf (stream, ":%d\n", file->included_at_line);
       file = file->included_by;
     }
 }
@@ -137,13 +137,13 @@ print_macro_definition (const char *name,
 			struct macro_source_file *file,
 			int line)
 {
-  printf_filtered ("Defined at ");
+  gdb_printf ("Defined at ");
   show_pp_source_pos (gdb_stdout, file, line);
 
   if (line != 0)
-    printf_filtered ("#define %s", name);
+    gdb_printf ("#define %s", name);
   else
-    printf_filtered ("-D%s", name);
+    gdb_printf ("-D%s", name);
 
   if (d->kind == macro_function_like)
     {
@@ -160,9 +160,9 @@ print_macro_definition (const char *name,
     }
 
   if (line != 0)
-    printf_filtered (" %s\n", d->replacement);
+    gdb_printf (" %s\n", d->replacement);
   else
-    printf_filtered ("=%s\n", d->replacement);
+    gdb_printf ("=%s\n", d->replacement);
 }
 
 /* The implementation of the `info macro' command.  */
@@ -229,9 +229,9 @@ info_macro_command (const char *args, int from_tty)
 	}
       else
 	{
-	  printf_filtered ("The symbol `%s' has no definition as a C/C++"
-			   " preprocessor macro\n"
-			   "at ", name);
+	  gdb_printf ("The symbol `%s' has no definition as a C/C++"
+		      " preprocessor macro\n"
+		      "at ", name);
 	  show_pp_source_pos (gdb_stdout, ms->file, ms->line);
 	}
     }
@@ -423,18 +423,18 @@ static void
 print_one_macro (const char *name, const struct macro_definition *macro,
 		 struct macro_source_file *source, int line)
 {
-  printf_filtered ("macro define %s", name);
+  gdb_printf ("macro define %s", name);
   if (macro->kind == macro_function_like)
     {
       int i;
 
-      printf_filtered ("(");
+      gdb_printf ("(");
       for (i = 0; i < macro->argc; ++i)
-	printf_filtered ("%s%s", (i > 0) ? ", " : "",
+	gdb_printf ("%s%s", (i > 0) ? ", " : "",
 			 macro->argv[i]);
-      printf_filtered (")");
+      gdb_printf (")");
     }
-  printf_filtered (" %s\n", macro->replacement);
+  gdb_printf (" %s\n", macro->replacement);
 }
 
 

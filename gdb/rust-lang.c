@@ -343,7 +343,7 @@ rust_language::val_print_struct
   if (!is_tuple)
     {
       if (type->name () != NULL)
-	fprintf_filtered (stream, "%s", type->name ());
+	gdb_printf (stream, "%s", type->name ());
 
       if (type->num_fields () == 0)
 	return;
@@ -423,9 +423,9 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
   if (rust_empty_enum_p (type))
     {
       /* Print the enum type name here to be more clear.  */
-      fprintf_filtered (stream, _("%s {%p[<No data fields>%p]}"),
-			type->name (),
-			metadata_style.style ().ptr (), nullptr);
+      gdb_printf (stream, _("%s {%p[<No data fields>%p]}"),
+		  type->name (),
+		  metadata_style.style ().ptr (), nullptr);
       return;
     }
 
@@ -437,7 +437,7 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
 
   bool is_tuple = rust_tuple_struct_type_p (variant_type);
 
-  fprintf_filtered (stream, "%s", variant_type->name ());
+  gdb_printf (stream, "%s", variant_type->name ());
   if (nfields == 0)
     {
       /* In case of a nullary variant like 'None', just output
@@ -447,11 +447,11 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
 
   /* In case of a non-nullary variant, we output 'Foo(x,y,z)'. */
   if (is_tuple)
-    fprintf_filtered (stream, "(");
+    gdb_printf (stream, "(");
   else
     {
       /* struct variant.  */
-      fprintf_filtered (stream, "{");
+      gdb_printf (stream, "{");
     }
 
   bool first_field = true;
@@ -462,9 +462,9 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
       first_field = false;
 
       if (!is_tuple)
-	fprintf_filtered (stream, "%ps: ",
-			  styled_string (variable_name_style.style (),
-					 variant_type->field (j).name ()));
+	gdb_printf (stream, "%ps: ",
+		    styled_string (variable_name_style.style (),
+				   variant_type->field (j).name ()));
 
       common_val_print (value_field (val, j), stream, recurse + 1, &opts,
 			this);
@@ -712,9 +712,9 @@ rust_print_struct_def (struct type *type, const char *varstring,
 	fputs_styled (type->field (i).name (), variable_name_style.style (),
 		      stream);
       else if (!is_tuple_struct)
-	fprintf_filtered (stream, "%ps: ",
-			  styled_string (variable_name_style.style (),
-					 type->field (i).name ()));
+	gdb_printf (stream, "%ps: ",
+		    styled_string (variable_name_style.style (),
+				   type->field (i).name ()));
 
       rust_internal_print_type (type->field (i).type (), NULL,
 				stream, (is_enum ? show : show - 1),
@@ -812,10 +812,10 @@ rust_internal_print_type (struct type *type, const char *varstring,
 
 	if (type->bounds ()->high.kind () == PROP_LOCEXPR
 	    || type->bounds ()->high.kind () == PROP_LOCLIST)
-	  fprintf_filtered (stream, "; variable length");
+	  gdb_printf (stream, "; variable length");
 	else if (get_array_bounds (type, &low_bound, &high_bound))
-	  fprintf_filtered (stream, "; %s",
-			    plongest (high_bound - low_bound + 1));
+	  gdb_printf (stream, "; %s",
+		      plongest (high_bound - low_bound + 1));
 	gdb_puts ("]", stream);
       }
       break;
@@ -850,10 +850,10 @@ rust_internal_print_type (struct type *type, const char *varstring,
 		&& name[len] == ':'
 		&& name[len + 1] == ':')
 	      name += len + 2;
-	    fprintf_filtered (stream, "%*s%ps,\n",
-			      level + 2, "",
-			      styled_string (variable_name_style.style (),
-					     name));
+	    gdb_printf (stream, "%*s%ps,\n",
+			level + 2, "",
+			styled_string (variable_name_style.style (),
+				       name));
 	  }
 
 	gdb_puts ("}", stream);
@@ -1598,7 +1598,7 @@ rust_language::emitchar (int ch, struct type *chtype,
     generic_emit_char (ch, chtype, stream, quoter,
 		       target_charset (chtype->arch ()));
   else if (ch == '\\' || ch == quoter)
-    fprintf_filtered (stream, "\\%c", ch);
+    gdb_printf (stream, "\\%c", ch);
   else if (ch == '\n')
     gdb_puts ("\\n", stream);
   else if (ch == '\r')
@@ -1610,9 +1610,9 @@ rust_language::emitchar (int ch, struct type *chtype,
   else if (ch >= 32 && ch <= 127 && isprint (ch))
     gdb_putc (ch, stream);
   else if (ch <= 255)
-    fprintf_filtered (stream, "\\x%02x", ch);
+    gdb_printf (stream, "\\x%02x", ch);
   else
-    fprintf_filtered (stream, "\\u{%06x}", ch);
+    gdb_printf (stream, "\\u{%06x}", ch);
 }
 
 /* See language.h.  */

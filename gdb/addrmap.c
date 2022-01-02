@@ -612,10 +612,10 @@ addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload)
       addr_str = "<ends here>";
 
     if (matches || previous_matched)
-      fprintf_filtered (outfile, "  %s%s %s\n",
-			payload != nullptr ? "  " : "",
-			core_addr_to_string (start_addr),
-			addr_str);
+      gdb_printf (outfile, "  %s%s %s\n",
+		  payload != nullptr ? "  " : "",
+		  core_addr_to_string (start_addr),
+		  addr_str);
 
     previous_matched = matches;
 

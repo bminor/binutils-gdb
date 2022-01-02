@@ -701,9 +701,9 @@ show_use_compressed_breakpoints (struct ui_file *file, int from_tty,
 				 struct cmd_list_element *c,
 				 const char *value)
 {
-  fprintf_filtered (file,
-		    _("Debugger's use of compressed breakpoints is set "
-		      "to %s.\n"), value);
+  gdb_printf (file,
+	      _("Debugger's use of compressed breakpoints is set "
+		"to %s.\n"), value);
 }
 
 /* The set and show lists for 'set riscv' and 'show riscv' prefixes.  */
@@ -723,9 +723,9 @@ show_riscv_debug_variable (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c,
 			   const char *value)
 {
-  fprintf_filtered (file,
-		    _("RiscV debug variable `%s' is set to: %s\n"),
-		    c->name, value);
+  gdb_printf (file,
+	      _("RiscV debug variable `%s' is set to: %s\n"),
+	      c->name, value);
 }
 
 /* See riscv-tdep.h.  */
@@ -832,13 +832,13 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 	  const char *bp = (unaligned_p || riscv_insn_length (buf[0]) == 2
 			    ? "C.EBREAK" : "EBREAK");
 
-	  fprintf_unfiltered (gdb_stdlog, "Using %s for breakpoint at %s ",
-			      bp, paddress (gdbarch, *pcptr));
+	  gdb_printf (gdb_stdlog, "Using %s for breakpoint at %s ",
+		      bp, paddress (gdbarch, *pcptr));
 	  if (unaligned_p)
-	    fprintf_unfiltered (gdb_stdlog, "(unaligned address)\n");
+	    gdb_printf (gdb_stdlog, "(unaligned address)\n");
 	  else
-	    fprintf_unfiltered (gdb_stdlog, "(instruction length %d)\n",
-				riscv_insn_length (buf[0]));
+	    gdb_printf (gdb_stdlog, "(instruction length %d)\n",
+			riscv_insn_length (buf[0]));
 	}
       if (unaligned_p || riscv_insn_length (buf[0]) == 2)
 	return 2;
@@ -1049,7 +1049,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
     {
       /* Handle failure to read a register without interrupting the entire
 	 'info registers' flow.  */
-      fprintf_filtered (file, "%s\n", ex.what ());
+      gdb_printf (file, "%s\n", ex.what ());
       return;
     }
 
@@ -1078,10 +1078,10 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 
       if (print_raw_format)
 	{
-	  fprintf_filtered (file, "\t(raw ");
+	  gdb_printf (file, "\t(raw ");
 	  print_hex_chars (file, valaddr, TYPE_LENGTH (regtype), byte_order,
 			   true);
-	  fprintf_filtered (file, ")");
+	  gdb_printf (file, ")");
 	}
     }
   else
@@ -1105,28 +1105,28 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 		 of the number of bits in MSTATUS.  */
 	      d = value_as_long (val);
 	      xlen = size * 8;
-	      fprintf_filtered (file,
-				"\tSD:%X VM:%02X MXR:%X PUM:%X MPRV:%X XS:%X "
-				"FS:%X MPP:%x HPP:%X SPP:%X MPIE:%X HPIE:%X "
-				"SPIE:%X UPIE:%X MIE:%X HIE:%X SIE:%X UIE:%X",
-				(int) ((d >> (xlen - 1)) & 0x1),
-				(int) ((d >> 24) & 0x1f),
-				(int) ((d >> 19) & 0x1),
-				(int) ((d >> 18) & 0x1),
-				(int) ((d >> 17) & 0x1),
-				(int) ((d >> 15) & 0x3),
-				(int) ((d >> 13) & 0x3),
-				(int) ((d >> 11) & 0x3),
-				(int) ((d >> 9) & 0x3),
-				(int) ((d >> 8) & 0x1),
-				(int) ((d >> 7) & 0x1),
-				(int) ((d >> 6) & 0x1),
-				(int) ((d >> 5) & 0x1),
-				(int) ((d >> 4) & 0x1),
-				(int) ((d >> 3) & 0x1),
-				(int) ((d >> 2) & 0x1),
-				(int) ((d >> 1) & 0x1),
-				(int) ((d >> 0) & 0x1));
+	      gdb_printf (file,
+			  "\tSD:%X VM:%02X MXR:%X PUM:%X MPRV:%X XS:%X "
+			  "FS:%X MPP:%x HPP:%X SPP:%X MPIE:%X HPIE:%X "
+			  "SPIE:%X UPIE:%X MIE:%X HIE:%X SIE:%X UIE:%X",
+			  (int) ((d >> (xlen - 1)) & 0x1),
+			  (int) ((d >> 24) & 0x1f),
+			  (int) ((d >> 19) & 0x1),
+			  (int) ((d >> 18) & 0x1),
+			  (int) ((d >> 17) & 0x1),
+			  (int) ((d >> 15) & 0x3),
+			  (int) ((d >> 13) & 0x3),
+			  (int) ((d >> 11) & 0x3),
+			  (int) ((d >> 9) & 0x3),
+			  (int) ((d >> 8) & 0x1),
+			  (int) ((d >> 7) & 0x1),
+			  (int) ((d >> 6) & 0x1),
+			  (int) ((d >> 5) & 0x1),
+			  (int) ((d >> 4) & 0x1),
+			  (int) ((d >> 3) & 0x1),
+			  (int) ((d >> 2) & 0x1),
+			  (int) ((d >> 1) & 0x1),
+			  (int) ((d >> 0) & 0x1));
 	    }
 	  else if (regnum == RISCV_CSR_MISA_REGNUM)
 	    {
@@ -1144,12 +1144,12 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 
 	      for (; base > 0; base--)
 		xlen *= 2;
-	      fprintf_filtered (file, "\tRV%d", xlen);
+	      gdb_printf (file, "\tRV%d", xlen);
 
 	      for (i = 0; i < 26; i++)
 		{
 		  if (d & (1 << i))
-		    fprintf_filtered (file, "%c", 'A' + i);
+		    gdb_printf (file, "%c", 'A' + i);
 		}
 	    }
 	  else if (regnum == RISCV_CSR_FCSR_REGNUM
@@ -1160,16 +1160,16 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 
 	      d = value_as_long (val);
 
-	      fprintf_filtered (file, "\t");
+	      gdb_printf (file, "\t");
 	      if (regnum != RISCV_CSR_FRM_REGNUM)
-		fprintf_filtered (file,
-				  "RD:%01X NV:%d DZ:%d OF:%d UF:%d NX:%d",
-				  (int) ((d >> 5) & 0x7),
-				  (int) ((d >> 4) & 0x1),
-				  (int) ((d >> 3) & 0x1),
-				  (int) ((d >> 2) & 0x1),
-				  (int) ((d >> 1) & 0x1),
-				  (int) ((d >> 0) & 0x1));
+		gdb_printf (file,
+			    "RD:%01X NV:%d DZ:%d OF:%d UF:%d NX:%d",
+			    (int) ((d >> 5) & 0x7),
+			    (int) ((d >> 4) & 0x1),
+			    (int) ((d >> 3) & 0x1),
+			    (int) ((d >> 2) & 0x1),
+			    (int) ((d >> 1) & 0x1),
+			    (int) ((d >> 0) & 0x1));
 
 	      if (regnum != RISCV_CSR_FFLAGS_REGNUM)
 		{
@@ -1187,10 +1187,10 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 		  int frm = ((regnum == RISCV_CSR_FCSR_REGNUM)
 			     ? (d >> 5) : d) & 0x3;
 
-		  fprintf_filtered (file, "%sFRM:%i [%s]",
-				    (regnum == RISCV_CSR_FCSR_REGNUM
-				     ? " " : ""),
-				    frm, sfrm[frm]);
+		  gdb_printf (file, "%sFRM:%i [%s]",
+			      (regnum == RISCV_CSR_FCSR_REGNUM
+			       ? " " : ""),
+			      frm, sfrm[frm]);
 		}
 	    }
 	  else if (regnum == RISCV_PRIV_REGNUM)
@@ -1210,11 +1210,11 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 		      "Hypervisor",
 		      "Machine"
 		    };
-		  fprintf_filtered (file, "\tprv:%d [%s]",
-				    priv, sprv[priv]);
+		  gdb_printf (file, "\tprv:%d [%s]",
+			      priv, sprv[priv]);
 		}
 	      else
-		fprintf_filtered (file, "\tprv:%d [INVALID]", priv);
+		gdb_printf (file, "\tprv:%d [INVALID]", priv);
 	    }
 	  else
 	    {
@@ -1224,13 +1224,13 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 		{
 		  get_user_print_options (&opts);
 		  opts.deref_ref = 1;
-		  fprintf_filtered (file, "\t");
+		  gdb_printf (file, "\t");
 		  common_val_print (val, file, 0, &opts, current_language);
 		}
 	    }
 	}
     }
-  fprintf_filtered (file, "\n");
+  gdb_printf (file, "\n");
 }
 
 /* Return true if REGNUM is a valid CSR register.  The CSR register space
@@ -1858,7 +1858,7 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
   pv_area stack (RISCV_SP_REGNUM, gdbarch_addr_bit (gdbarch));
 
   if (riscv_debug_unwinder)
-    fprintf_unfiltered
+    gdb_printf
       (gdb_stdlog,
        "Prologue scan for function starting at %s (limit %s)\n",
        core_addr_to_string (start_pc),
@@ -1995,8 +1995,8 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
     end_prologue_addr = cur_pc;
 
   if (riscv_debug_unwinder)
-    fprintf_unfiltered (gdb_stdlog, "End of prologue at %s\n",
-			core_addr_to_string (end_prologue_addr));
+    gdb_printf (gdb_stdlog, "End of prologue at %s\n",
+		core_addr_to_string (end_prologue_addr));
 
   if (cache != NULL)
     {
@@ -2031,10 +2031,10 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 		     the frame base address to the registers location on
 		     the stack, with a descending stack this means the
 		     offsets are always negative.  */
-		  fprintf_unfiltered (gdb_stdlog,
-				      "Register $%s at stack offset %s\n",
-				      gdbarch_register_name (gdbarch, i),
-				      plongest ((LONGEST) offset));
+		  gdb_printf (gdb_stdlog,
+			      "Register $%s at stack offset %s\n",
+			      gdbarch_register_name (gdbarch, i),
+			      plongest ((LONGEST) offset));
 		}
 	      cache->regs[i].set_addr (offset);
 	    }
@@ -2109,11 +2109,11 @@ riscv_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
   int status = target_write_memory (*bp_addr, nop_insn, sizeof (nop_insn));
 
   if (riscv_debug_breakpoints || riscv_debug_infcall)
-    fprintf_unfiltered (gdb_stdlog,
-			"Writing %s-byte nop instruction to %s: %s\n",
-			plongest (sizeof (nop_insn)),
-			paddress (gdbarch, *bp_addr),
-			(status == 0 ? "success" : "failed"));
+    gdb_printf (gdb_stdlog,
+		"Writing %s-byte nop instruction to %s: %s\n",
+		plongest (sizeof (nop_insn)),
+		paddress (gdbarch, *bp_addr),
+		(status == 0 ? "success" : "failed"));
 
   return sp;
 }
@@ -2815,12 +2815,12 @@ riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
 			  struct riscv_arg_info *info,
 			  CORE_ADDR sp_refs, CORE_ADDR sp_args)
 {
-  fprintf_unfiltered (stream, "type: '%s', length: 0x%x, alignment: 0x%x",
-		      TYPE_SAFE_NAME (info->type), info->length, info->align);
+  gdb_printf (stream, "type: '%s', length: 0x%x, alignment: 0x%x",
+	      TYPE_SAFE_NAME (info->type), info->length, info->align);
   switch (info->argloc[0].loc_type)
     {
     case riscv_arg_info::location::in_reg:
-      fprintf_unfiltered
+      gdb_printf
 	(stream, ", register %s",
 	 gdbarch_register_name (gdbarch, info->argloc[0].loc_data.regno));
       if (info->argloc[0].c_length < info->length)
@@ -2828,15 +2828,15 @@ riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
 	  switch (info->argloc[1].loc_type)
 	    {
 	    case riscv_arg_info::location::in_reg:
-	      fprintf_unfiltered
+	      gdb_printf
 		(stream, ", register %s",
 		 gdbarch_register_name (gdbarch,
 					info->argloc[1].loc_data.regno));
 	      break;
 
 	    case riscv_arg_info::location::on_stack:
-	      fprintf_unfiltered (stream, ", on stack at offset 0x%x",
-				  info->argloc[1].loc_data.offset);
+	      gdb_printf (stream, ", on stack at offset 0x%x",
+			  info->argloc[1].loc_data.offset);
 	      break;
 
 	    case riscv_arg_info::location::by_ref:
@@ -2849,31 +2849,31 @@ riscv_print_arg_location (ui_file *stream, struct gdbarch *gdbarch,
 	    }
 
 	  if (info->argloc[1].c_offset > info->argloc[0].c_length)
-	    fprintf_unfiltered (stream, " (offset 0x%x)",
-				info->argloc[1].c_offset);
+	    gdb_printf (stream, " (offset 0x%x)",
+			info->argloc[1].c_offset);
 	}
       break;
 
     case riscv_arg_info::location::on_stack:
-      fprintf_unfiltered (stream, ", on stack at offset 0x%x",
-			  info->argloc[0].loc_data.offset);
+      gdb_printf (stream, ", on stack at offset 0x%x",
+		  info->argloc[0].loc_data.offset);
       break;
 
     case riscv_arg_info::location::by_ref:
-      fprintf_unfiltered
+      gdb_printf
 	(stream, ", by reference, data at offset 0x%x (%s)",
 	 info->argloc[0].loc_data.offset,
 	 core_addr_to_string (sp_refs + info->argloc[0].loc_data.offset));
       if (info->argloc[1].loc_type
 	  == riscv_arg_info::location::in_reg)
-	fprintf_unfiltered
+	gdb_printf
 	  (stream, ", address in register %s",
 	   gdbarch_register_name (gdbarch, info->argloc[1].loc_data.regno));
       else
 	{
 	  gdb_assert (info->argloc[1].loc_type
 		      == riscv_arg_info::location::on_stack);
-	  fprintf_unfiltered
+	  gdb_printf
 	    (stream, ", address on stack at offset 0x%x (%s)",
 	     info->argloc[1].loc_data.offset,
 	     core_addr_to_string (sp_args + info->argloc[1].loc_data.offset));
@@ -2961,33 +2961,33 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
 
   if (riscv_debug_infcall > 0)
     {
-      fprintf_unfiltered (gdb_stdlog, "dummy call args:\n");
-      fprintf_unfiltered (gdb_stdlog, ": floating point ABI %s in use\n",
-	       (riscv_has_fp_abi (gdbarch) ? "is" : "is not"));
-      fprintf_unfiltered (gdb_stdlog, ": xlen: %d\n: flen: %d\n",
-	       call_info.xlen, call_info.flen);
+      gdb_printf (gdb_stdlog, "dummy call args:\n");
+      gdb_printf (gdb_stdlog, ": floating point ABI %s in use\n",
+		  (riscv_has_fp_abi (gdbarch) ? "is" : "is not"));
+      gdb_printf (gdb_stdlog, ": xlen: %d\n: flen: %d\n",
+		  call_info.xlen, call_info.flen);
       if (return_method == return_method_struct)
-	fprintf_unfiltered (gdb_stdlog,
-			    "[*] struct return pointer in register $A0\n");
+	gdb_printf (gdb_stdlog,
+		    "[*] struct return pointer in register $A0\n");
       for (i = 0; i < nargs; ++i)
 	{
 	  struct riscv_arg_info *info = &arg_info [i];
 
-	  fprintf_unfiltered (gdb_stdlog, "[%2d] ", i);
+	  gdb_printf (gdb_stdlog, "[%2d] ", i);
 	  riscv_print_arg_location (gdb_stdlog, gdbarch, info, sp_refs, sp_args);
-	  fprintf_unfiltered (gdb_stdlog, "\n");
+	  gdb_printf (gdb_stdlog, "\n");
 	}
       if (call_info.memory.arg_offset > 0
 	  || call_info.memory.ref_offset > 0)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "              Original sp: %s\n",
-			      core_addr_to_string (osp));
-	  fprintf_unfiltered (gdb_stdlog, "Stack required (for args): 0x%x\n",
-			      call_info.memory.arg_offset);
-	  fprintf_unfiltered (gdb_stdlog, "Stack required (for refs): 0x%x\n",
-			      call_info.memory.ref_offset);
-	  fprintf_unfiltered (gdb_stdlog, "          Stack allocated: %s\n",
-			      core_addr_to_string_nz (osp - sp));
+	  gdb_printf (gdb_stdlog, "              Original sp: %s\n",
+		      core_addr_to_string (osp));
+	  gdb_printf (gdb_stdlog, "Stack required (for args): 0x%x\n",
+		      call_info.memory.arg_offset);
+	  gdb_printf (gdb_stdlog, "Stack required (for refs): 0x%x\n",
+		      call_info.memory.ref_offset);
+	  gdb_printf (gdb_stdlog, "          Stack allocated: %s\n",
+		      core_addr_to_string_nz (osp - sp));
 	}
     }
 
@@ -3086,15 +3086,15 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
      A dummy breakpoint will be setup to execute the call.  */
 
   if (riscv_debug_infcall > 0)
-    fprintf_unfiltered (gdb_stdlog, ": writing $ra = %s\n",
-			core_addr_to_string (bp_addr));
+    gdb_printf (gdb_stdlog, ": writing $ra = %s\n",
+		core_addr_to_string (bp_addr));
   regcache_cooked_write_unsigned (regcache, RISCV_RA_REGNUM, bp_addr);
 
   /* Finally, update the stack pointer.  */
 
   if (riscv_debug_infcall > 0)
-    fprintf_unfiltered (gdb_stdlog, ": writing $sp = %s\n",
-			core_addr_to_string (sp));
+    gdb_printf (gdb_stdlog, ": writing $sp = %s\n",
+		core_addr_to_string (sp));
   regcache_cooked_write_unsigned (regcache, RISCV_SP_REGNUM, sp);
 
   return sp;
@@ -3119,10 +3119,10 @@ riscv_return_value (struct gdbarch  *gdbarch,
 
   if (riscv_debug_infcall > 0)
     {
-      fprintf_unfiltered (gdb_stdlog, "riscv return value:\n");
-      fprintf_unfiltered (gdb_stdlog, "[R] ");
+      gdb_printf (gdb_stdlog, "riscv return value:\n");
+      gdb_printf (gdb_stdlog, "[R] ");
       riscv_print_arg_location (gdb_stdlog, gdbarch, &info, 0, 0);
-      fprintf_unfiltered (gdb_stdlog, "\n");
+      gdb_printf (gdb_stdlog, "\n");
     }
 
   if (readbuf != nullptr || writebuf != nullptr)
@@ -3344,11 +3344,11 @@ riscv_frame_cache (struct frame_info *this_frame, void **this_cache)
     = (get_frame_register_unsigned (this_frame, cache->frame_base_reg)
        + cache->frame_base_offset);
   if (riscv_debug_unwinder)
-    fprintf_unfiltered (gdb_stdlog, "Frame base is %s ($%s + 0x%x)\n",
-			core_addr_to_string (cache->frame_base),
-			gdbarch_register_name (gdbarch,
-					       cache->frame_base_reg),
-			cache->frame_base_offset);
+    gdb_printf (gdb_stdlog, "Frame base is %s ($%s + 0x%x)\n",
+		core_addr_to_string (cache->frame_base),
+		gdbarch_register_name (gdbarch,
+				       cache->frame_base_reg),
+		cache->frame_base_offset);
 
   /* The prologue scanner sets the address of registers stored to the stack
      as the offset of that register from the frame base.  The prologue
@@ -3687,7 +3687,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   gdb_assert (tdesc != nullptr);
 
   if (riscv_debug_gdbarch)
-    fprintf_unfiltered (gdb_stdlog, "Have got a target description\n");
+    gdb_printf (gdb_stdlog, "Have got a target description\n");
 
   tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
   std::vector<riscv_pending_register_alias> pending_aliases;
@@ -3705,7 +3705,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   if (!valid_p)
     {
       if (riscv_debug_gdbarch)
-	fprintf_unfiltered (gdb_stdlog, "Target description is not valid\n");
+	gdb_printf (gdb_stdlog, "Target description is not valid\n");
       return NULL;
     }
 

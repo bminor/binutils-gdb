@@ -150,7 +150,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	}
     }
 
-  fprintf_filtered (stream, "{");
+  gdb_printf (stream, "{");
   len = type->num_fields ();
   n_baseclasses = TYPE_N_BASECLASSES (type);
 
@@ -206,7 +206,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	    {
 	      if (options->prettyformat)
 		{
-		  fprintf_filtered (stream, "\n");
+		  gdb_printf (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
 		  gdb_puts ("members of ", stream);
 		  gdb_puts (type->name (), stream);
@@ -217,7 +217,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  if (options->prettyformat)
 	    {
-	      fprintf_filtered (stream, "\n");
+	      gdb_printf (stream, "\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  else
@@ -373,12 +373,12 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
       if (options->prettyformat)
 	{
-	  fprintf_filtered (stream, "\n");
+	  gdb_printf (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);
 	}
     }				/* if there are data fields */
 
-  fprintf_filtered (stream, "}");
+  gdb_printf (stream, "}");
 }
 
 /* Special val_print routine to avoid printing multiple copies of
@@ -478,7 +478,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
       /* Now do the printing.  */
       if (options->prettyformat)
 	{
-	  fprintf_filtered (stream, "\n");
+	  gdb_printf (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);
 	}
       gdb_puts ("<", stream);
@@ -691,7 +691,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
 
   if (val == -1)
     {
-      fprintf_filtered (stream, "NULL");
+      gdb_printf (stream, "NULL");
       return;
     }
 
@@ -707,12 +707,12 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
 	gdb_puts (name, stream);
       else
 	c_type_print_base (self_type, stream, 0, 0, &type_print_raw_options);
-      fprintf_filtered (stream, "::");
+      gdb_printf (stream, "::");
       fputs_styled (self_type->field (fieldno).name (),
 		    variable_name_style.style (), stream);
     }
   else
-    fprintf_filtered (stream, "%ld", (long) val);
+    gdb_printf (stream, "%ld", (long) val);
 }
 
 #if GDB_SELF_TEST

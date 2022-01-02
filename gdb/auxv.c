@@ -414,15 +414,15 @@ fprint_auxv_entry (struct ui_file *file, const char *name,
 		   const char *description, enum auxv_format format,
 		   CORE_ADDR type, CORE_ADDR val)
 {
-  fprintf_filtered (file, ("%-4s %-20s %-30s "),
-		    plongest (type), name, description);
+  gdb_printf (file, ("%-4s %-20s %-30s "),
+	      plongest (type), name, description);
   switch (format)
     {
     case AUXV_FORMAT_DEC:
-      fprintf_filtered (file, ("%s\n"), plongest (val));
+      gdb_printf (file, ("%s\n"), plongest (val));
       break;
     case AUXV_FORMAT_HEX:
-      fprintf_filtered (file, ("%s\n"), paddress (target_gdbarch (), val));
+      gdb_printf (file, ("%s\n"), paddress (target_gdbarch (), val));
       break;
     case AUXV_FORMAT_STR:
       {
@@ -430,10 +430,10 @@ fprint_auxv_entry (struct ui_file *file, const char *name,
 
 	get_user_print_options (&opts);
 	if (opts.addressprint)
-	  fprintf_filtered (file, ("%s "), paddress (target_gdbarch (), val));
+	  gdb_printf (file, ("%s "), paddress (target_gdbarch (), val));
 	val_print_string (builtin_type (target_gdbarch ())->builtin_char,
 			  NULL, val, -1, file, &opts);
-	fprintf_filtered (file, ("\n"));
+	gdb_printf (file, ("\n"));
       }
       break;
     }

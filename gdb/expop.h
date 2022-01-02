@@ -346,7 +346,7 @@ void
 dump_for_expression (struct ui_file *stream, int depth,
 		     const std::vector<T> &vals)
 {
-  fprintf_filtered (stream, _("%*sVector:\n"), depth, "");
+  gdb_printf (stream, _("%*sVector:\n"), depth, "");
   for (auto &item : vals)
     dump_for_expression (stream, depth + 1, item);
 }

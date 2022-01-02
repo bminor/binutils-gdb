@@ -70,9 +70,9 @@ static void
 complaints_show_value (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *cmd, const char *value)
 {
-  fprintf_filtered (file, _("Max number of complaints about incorrect"
-			    " symbols is %s.\n"),
-		    value);
+  gdb_printf (file, _("Max number of complaints about incorrect"
+		      " symbols is %s.\n"),
+	      value);
 }
 
 #if GDB_SELF_TEST

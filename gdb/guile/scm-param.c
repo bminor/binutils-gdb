@@ -320,7 +320,7 @@ pascm_set_func (const char *args, int from_tty, struct cmd_list_element *c)
 
   /* GDB is usually silent when a parameter is set.  */
   if (*msg.get () != '\0')
-    printf_filtered ("%s\n", msg.get ());
+    gdb_printf ("%s\n", msg.get ());
 }
 
 /* A callback function that is registered against the respective
@@ -362,7 +362,7 @@ pascm_show_func (struct ui_file *file, int from_tty,
       error (_("Error converting show text to host string."));
     }
 
-  fprintf_filtered (file, "%s\n", msg.get ());
+  gdb_printf (file, "%s\n", msg.get ());
 }
 
 /* A helper function that dispatches to the appropriate add_setshow

@@ -122,7 +122,7 @@ set_gdb_data_directory (const char *new_datadir)
     {
       int save_errno = errno;
 
-      fprintf_unfiltered (gdb_stderr, "Warning: ");
+      gdb_printf (gdb_stderr, "Warning: ");
       print_sys_errmsg (new_datadir, save_errno);
     }
   else if (!S_ISDIR (st.st_mode))
@@ -1101,11 +1101,11 @@ captured_main_1 (struct captured_main_args *context)
       /* Any argument left on the command line is unexpected and
 	 will be ignored.  Inform the user.  */
       if (optind < argc)
-	fprintf_unfiltered (gdb_stderr,
-			    _("Excess command line "
-			      "arguments ignored. (%s%s)\n"),
-			    argv[optind],
-			    (optind == argc - 1) ? "" : " ...");
+	gdb_printf (gdb_stderr,
+		    _("Excess command line "
+		      "arguments ignored. (%s%s)\n"),
+		    argv[optind],
+		    (optind == argc - 1) ? "" : " ...");
     }
 
   /* Lookup gdbinit files.  Note that the gdbinit file name may be
@@ -1125,7 +1125,7 @@ captured_main_1 (struct captured_main_args *context)
     {
       print_gdb_version (gdb_stdout, false);
       gdb_stdout->wrap_here (0);
-      printf_filtered ("\n");
+      gdb_printf ("\n");
       exit (0);
     }
 
@@ -1139,7 +1139,7 @@ captured_main_1 (struct captured_main_args *context)
     {
       print_gdb_configuration (gdb_stdout);
       gdb_stdout->wrap_here (0);
-      printf_filtered ("\n");
+      gdb_printf ("\n");
       exit (0);
     }
 
@@ -1153,9 +1153,9 @@ captured_main_1 (struct captured_main_args *context)
 	 about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout, true);
       if (symarg)
-	printf_filtered ("..");
+	gdb_printf ("..");
       gdb_stdout->wrap_here (0);
-      printf_filtered ("\n");
+      gdb_printf ("\n");
       gdb_flush (gdb_stdout);	/* Force to screen during slow
 				   operations.  */
     }
@@ -1174,9 +1174,9 @@ captured_main_1 (struct captured_main_args *context)
 	 about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout, true);
       if (symarg)
-	printf_filtered ("..");
+	gdb_printf ("..");
       gdb_stdout->wrap_here (0);
-      printf_filtered ("\n");
+      gdb_printf ("\n");
       gdb_flush (gdb_stdout);	/* Force to screen during slow
 				   operations.  */
     }
@@ -1467,11 +1467,11 @@ At startup, GDB reads the following early init files and executes their\n\
 commands:\n\
 "), stream);
   if (!home_gdbearlyinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    * user-specific early init file: %s\n\
 "), home_gdbearlyinit.c_str ());
   if (home_gdbearlyinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    None found.\n"));
   gdb_puts (_("\n\
 At startup, GDB reads the following init files and executes their commands:\n\
@@ -1485,32 +1485,32 @@ At startup, GDB reads the following init files and executes their commands:\n\
 	  if (idx < system_gdbinit.size () - 1)
 	    output += ", ";
 	}
-      fprintf_unfiltered (stream, _("\
+      gdb_printf (stream, _("\
    * system-wide init files: %s\n\
 "), output.c_str ());
     }
   if (!home_gdbinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    * user-specific init file: %s\n\
 "), home_gdbinit.c_str ());
   if (!local_gdbinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    * local init file (see also 'set auto-load local-gdbinit'): ./%s\n\
 "), local_gdbinit.c_str ());
   if (system_gdbinit.empty () && home_gdbinit.empty ()
       && local_gdbinit.empty ())
-    fprintf_unfiltered (stream, _("\
+    gdb_printf (stream, _("\
    None found.\n"));
   gdb_puts (_("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
 "), stream);
   if (REPORT_BUGS_TO[0] && stream == gdb_stdout)
-    fprintf_unfiltered (stream, _("\n\
+    gdb_printf (stream, _("\n\
 Report bugs to %s.\n\
 "), REPORT_BUGS_TO);
   if (stream == gdb_stdout)
-    fprintf_unfiltered (stream, _("\n\
+    gdb_printf (stream, _("\n\
 You can ask GDB-related questions on the GDB users mailing list\n\
 (gdb@sourceware.org) or on GDB's IRC channel (#gdb on Freenode).\n"));
 }

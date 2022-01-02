@@ -1357,9 +1357,9 @@ fput_alias_definition_styled (const cmd_list_element &c,
   gdb_assert (c.is_alias ());
   gdb_puts ("  alias ", stream);
   fput_command_name_styled (c, stream);
-  fprintf_filtered (stream, " = ");
+  gdb_printf (stream, " = ");
   fput_command_name_styled (*c.alias_target, stream);
-  fprintf_filtered (stream, " %s\n", c.default_args.c_str ());
+  gdb_printf (stream, " %s\n", c.default_args.c_str ());
 }
 
 /* Print the definition of the aliases of CMD that have default args.  */
@@ -1579,7 +1579,7 @@ help_cmd (const char *command, struct ui_file *stream)
   if (!c->is_prefix () && !c->is_command_class_help ())
     return;
 
-  fprintf_filtered (stream, "\n");
+  gdb_printf (stream, "\n");
 
   /* If this is a prefix command, print it's subcommands.  */
   if (c->is_prefix ())
@@ -1591,17 +1591,17 @@ help_cmd (const char *command, struct ui_file *stream)
     help_list (cmdlist, "", c->theclass, stream);
 
   if (c->hook_pre || c->hook_post)
-    fprintf_filtered (stream,
-		      "\nThis command has a hook (or hooks) defined:\n");
+    gdb_printf (stream,
+		"\nThis command has a hook (or hooks) defined:\n");
 
   if (c->hook_pre)
-    fprintf_filtered (stream,
-		      "\tThis command is run after  : %s (pre hook)\n",
-		    c->hook_pre->name);
+    gdb_printf (stream,
+		"\tThis command is run after  : %s (pre hook)\n",
+		c->hook_pre->name);
   if (c->hook_post)
-    fprintf_filtered (stream,
-		      "\tThis command is run before : %s (post hook)\n",
-		    c->hook_post->name);
+    gdb_printf (stream,
+		"\tThis command is run before : %s (post hook)\n",
+		c->hook_post->name);
 }
 
 /*
@@ -1640,26 +1640,26 @@ help_list (struct cmd_list_element *list, const char *cmdtype,
     }
 
   if (theclass == all_classes)
-    fprintf_filtered (stream, "List of classes of %scommands:\n\n", cmdtype2);
+    gdb_printf (stream, "List of classes of %scommands:\n\n", cmdtype2);
   else
-    fprintf_filtered (stream, "List of %scommands:\n\n", cmdtype2);
+    gdb_printf (stream, "List of %scommands:\n\n", cmdtype2);
 
   help_cmd_list (list, theclass, theclass >= 0, stream);
 
   if (theclass == all_classes)
     {
-      fprintf_filtered (stream, "\n\
+      gdb_printf (stream, "\n\
 Type \"help%s\" followed by a class name for a list of commands in ",
-			cmdtype1);
+		  cmdtype1);
       stream->wrap_here (0);
-      fprintf_filtered (stream, "that class.");
+      gdb_printf (stream, "that class.");
 
-      fprintf_filtered (stream, "\n\
+      gdb_printf (stream, "\n\
 Type \"help all\" for the list of all commands.");
     }
 
-  fprintf_filtered (stream, "\nType \"help%s\" followed by %scommand name ",
-		    cmdtype1, cmdtype2);
+  gdb_printf (stream, "\nType \"help%s\" followed by %scommand name ",
+	      cmdtype1, cmdtype2);
   stream->wrap_here (0);
   gdb_puts ("for ", stream);
   stream->wrap_here (0);
@@ -1690,7 +1690,7 @@ help_all (struct ui_file *stream)
 
       if (c->is_command_class_help ())
 	{
-	  fprintf_filtered (stream, "\nCommand class: %s\n\n", c->name);
+	  gdb_printf (stream, "\nCommand class: %s\n\n", c->name);
 	  help_cmd_list (cmdlist, c->theclass, true, stream);
 	}
     }
@@ -1708,7 +1708,7 @@ help_all (struct ui_file *stream)
 	{
 	  if (!seen_unclassified)
 	    {
-	      fprintf_filtered (stream, "\nUnclassified commands\n\n");
+	      gdb_printf (stream, "\nUnclassified commands\n\n");
 	      seen_unclassified = 1;
 	    }
 	  print_help_for_command (*c, true, stream);
@@ -2281,23 +2281,23 @@ deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
       tmp_alias_str += std::string (alias->name);
 
       if (cmd->cmd_deprecated)
-	printf_filtered (_("Warning: command '%ps' (%ps) is deprecated.\n"),
-			 styled_string (title_style.style (),
-					tmp_cmd_str.c_str ()),
-			 styled_string (title_style.style (),
-					tmp_alias_str.c_str ()));
+	gdb_printf (_("Warning: command '%ps' (%ps) is deprecated.\n"),
+		    styled_string (title_style.style (),
+				   tmp_cmd_str.c_str ()),
+		    styled_string (title_style.style (),
+				   tmp_alias_str.c_str ()));
       else
-	printf_filtered (_("Warning: '%ps', an alias for the command '%ps', "
-			   "is deprecated.\n"),
-			 styled_string (title_style.style (),
-					tmp_alias_str.c_str ()),
-			 styled_string (title_style.style (),
-					tmp_cmd_str.c_str ()));
+	gdb_printf (_("Warning: '%ps', an alias for the command '%ps', "
+		      "is deprecated.\n"),
+		    styled_string (title_style.style (),
+				   tmp_alias_str.c_str ()),
+		    styled_string (title_style.style (),
+				   tmp_cmd_str.c_str ()));
     }
   else
-    printf_filtered (_("Warning: command '%ps' is deprecated.\n"),
-		     styled_string (title_style.style (),
-				    tmp_cmd_str.c_str ()));
+    gdb_printf (_("Warning: command '%ps' is deprecated.\n"),
+		styled_string (title_style.style (),
+			       tmp_cmd_str.c_str ()));
 
   /* Now display a second line indicating what the user should use instead.
      If it is only the alias that is deprecated, we want to indicate the
@@ -2308,11 +2308,11 @@ deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
   else
     replacement = cmd->replacement;
   if (replacement != nullptr)
-    printf_filtered (_("Use '%ps'.\n\n"),
-		     styled_string (title_style.style (),
-				    replacement));
+    gdb_printf (_("Use '%ps'.\n\n"),
+		styled_string (title_style.style (),
+			       replacement));
   else
-    printf_filtered (_("No alternative known.\n\n"));
+    gdb_printf (_("No alternative known.\n\n"));
 
   /* We've warned you, now we'll keep quiet.  */
   if (alias != nullptr)

@@ -339,7 +339,7 @@ static void
 show_frame_debug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Frame debugging is %s.\n"), value);
+  gdb_printf (file, _("Frame debugging is %s.\n"), value);
 }
 
 /* Implementation of "show backtrace past-main".  */
@@ -348,10 +348,10 @@ static void
 show_backtrace_past_main (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Whether backtraces should "
-		      "continue past \"main\" is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Whether backtraces should "
+		"continue past \"main\" is %s.\n"),
+	      value);
 }
 
 /* Implementation of "show backtrace past-entry".  */
@@ -360,9 +360,9 @@ static void
 show_backtrace_past_entry (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Whether backtraces should continue past the "
-			    "entry point of a program is %s.\n"),
-		    value);
+  gdb_printf (file, _("Whether backtraces should continue past the "
+		      "entry point of a program is %s.\n"),
+	      value);
 }
 
 /* Implementation of "show backtrace limit".  */
@@ -371,10 +371,10 @@ static void
 show_backtrace_limit (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("An upper bound on the number "
-		      "of backtrace levels is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("An upper bound on the number "
+		"of backtrace levels is %s.\n"),
+	      value);
 }
 
 /* See frame.h.  */
@@ -1238,36 +1238,36 @@ frame_unwind_register_value (frame_info *next_frame, int regnum)
     {
       string_file debug_file;
 
-      fprintf_unfiltered (&debug_file, "  ->");
+      gdb_printf (&debug_file, "  ->");
       if (value_optimized_out (value))
 	{
-	  fprintf_unfiltered (&debug_file, " ");
+	  gdb_printf (&debug_file, " ");
 	  val_print_not_saved (&debug_file);
 	}
       else
 	{
 	  if (VALUE_LVAL (value) == lval_register)
-	    fprintf_unfiltered (&debug_file, " register=%d",
-				VALUE_REGNUM (value));
+	    gdb_printf (&debug_file, " register=%d",
+			VALUE_REGNUM (value));
 	  else if (VALUE_LVAL (value) == lval_memory)
-	    fprintf_unfiltered (&debug_file, " address=%s",
-				paddress (gdbarch,
-					  value_address (value)));
+	    gdb_printf (&debug_file, " address=%s",
+			paddress (gdbarch,
+				  value_address (value)));
 	  else
-	    fprintf_unfiltered (&debug_file, " computed");
+	    gdb_printf (&debug_file, " computed");
 
 	  if (value_lazy (value))
-	    fprintf_unfiltered (&debug_file, " lazy");
+	    gdb_printf (&debug_file, " lazy");
 	  else
 	    {
 	      int i;
 	      gdb::array_view<const gdb_byte> buf = value_contents (value);
 
-	      fprintf_unfiltered (&debug_file, " bytes=");
-	      fprintf_unfiltered (&debug_file, "[");
+	      gdb_printf (&debug_file, " bytes=");
+	      gdb_printf (&debug_file, "[");
 	      for (i = 0; i < register_size (gdbarch, regnum); i++)
-		fprintf_unfiltered (&debug_file, "%02x", buf[i]);
-	      fprintf_unfiltered (&debug_file, "]");
+		gdb_printf (&debug_file, "%02x", buf[i]);
+	      gdb_printf (&debug_file, "]");
 	    }
 	}
 

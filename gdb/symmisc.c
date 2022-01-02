@@ -57,19 +57,19 @@ print_objfile_statistics (void)
     for (objfile *objfile : pspace->objfiles ())
       {
 	QUIT;
-	printf_filtered (_("Statistics for '%s':\n"), objfile_name (objfile));
+	gdb_printf (_("Statistics for '%s':\n"), objfile_name (objfile));
 	if (OBJSTAT (objfile, n_stabs) > 0)
-	  printf_filtered (_("  Number of \"stab\" symbols read: %d\n"),
-			   OBJSTAT (objfile, n_stabs));
+	  gdb_printf (_("  Number of \"stab\" symbols read: %d\n"),
+		      OBJSTAT (objfile, n_stabs));
 	if (objfile->per_bfd->n_minsyms > 0)
-	  printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
-			   objfile->per_bfd->n_minsyms);
+	  gdb_printf (_("  Number of \"minimal\" symbols read: %d\n"),
+		      objfile->per_bfd->n_minsyms);
 	if (OBJSTAT (objfile, n_syms) > 0)
-	  printf_filtered (_("  Number of \"full\" symbols read: %d\n"),
-			   OBJSTAT (objfile, n_syms));
+	  gdb_printf (_("  Number of \"full\" symbols read: %d\n"),
+		      OBJSTAT (objfile, n_syms));
 	if (OBJSTAT (objfile, n_types) > 0)
-	  printf_filtered (_("  Number of \"types\" defined: %d\n"),
-			   OBJSTAT (objfile, n_types));
+	  gdb_printf (_("  Number of \"types\" defined: %d\n"),
+		      OBJSTAT (objfile, n_types));
 
 	i = linetables = 0;
 	for (compunit_symtab *cu : objfile->compunits ())
@@ -83,28 +83,28 @@ print_objfile_statistics (void)
 	  }
 	blockvectors = std::distance (objfile->compunits ().begin (),
 				      objfile->compunits ().end ());
-	printf_filtered (_("  Number of symbol tables: %d\n"), i);
-	printf_filtered (_("  Number of symbol tables with line tables: %d\n"),
-			 linetables);
-	printf_filtered (_("  Number of symbol tables with blockvectors: %d\n"),
-			 blockvectors);
+	gdb_printf (_("  Number of symbol tables: %d\n"), i);
+	gdb_printf (_("  Number of symbol tables with line tables: %d\n"),
+		    linetables);
+	gdb_printf (_("  Number of symbol tables with blockvectors: %d\n"),
+		    blockvectors);
 
 	objfile->print_stats (false);
 
 	if (OBJSTAT (objfile, sz_strtab) > 0)
-	  printf_filtered (_("  Space used by string tables: %d\n"),
-			   OBJSTAT (objfile, sz_strtab));
-	printf_filtered (_("  Total memory used for objfile obstack: %s\n"),
-			 pulongest (obstack_memory_used (&objfile
-							 ->objfile_obstack)));
-	printf_filtered (_("  Total memory used for BFD obstack: %s\n"),
-			 pulongest (obstack_memory_used (&objfile->per_bfd
-							 ->storage_obstack)));
+	  gdb_printf (_("  Space used by string tables: %d\n"),
+		      OBJSTAT (objfile, sz_strtab));
+	gdb_printf (_("  Total memory used for objfile obstack: %s\n"),
+		    pulongest (obstack_memory_used (&objfile
+						    ->objfile_obstack)));
+	gdb_printf (_("  Total memory used for BFD obstack: %s\n"),
+		    pulongest (obstack_memory_used (&objfile->per_bfd
+						    ->storage_obstack)));
 
-	printf_filtered (_("  Total memory used for string cache: %d\n"),
-			 objfile->per_bfd->string_cache.memory_used ());
-	printf_filtered (_("Byte cache statistics for '%s':\n"),
-			 objfile_name (objfile));
+	gdb_printf (_("  Total memory used for string cache: %d\n"),
+		    objfile->per_bfd->string_cache.memory_used ());
+	gdb_printf (_("Byte cache statistics for '%s':\n"),
+		    objfile_name (objfile));
 	objfile->per_bfd->string_cache.print_statistics ("string cache");
 	objfile->print_stats (true);
       }
@@ -113,30 +113,30 @@ print_objfile_statistics (void)
 static void
 dump_objfile (struct objfile *objfile)
 {
-  printf_filtered ("\nObject file %s:  ", objfile_name (objfile));
-  printf_filtered ("Objfile at %s, bfd at %s, %d minsyms\n\n",
-		   host_address_to_string (objfile),
-		   host_address_to_string (objfile->obfd),
-		   objfile->per_bfd->minimal_symbol_count);
+  gdb_printf ("\nObject file %s:  ", objfile_name (objfile));
+  gdb_printf ("Objfile at %s, bfd at %s, %d minsyms\n\n",
+	      host_address_to_string (objfile),
+	      host_address_to_string (objfile->obfd),
+	      objfile->per_bfd->minimal_symbol_count);
 
   objfile->dump ();
 
   if (objfile->compunit_symtabs != NULL)
     {
-      printf_filtered ("Symtabs:\n");
+      gdb_printf ("Symtabs:\n");
       for (compunit_symtab *cu : objfile->compunits ())
 	{
 	  for (symtab *symtab : cu->filetabs ())
 	    {
-	      printf_filtered ("%s at %s",
-			       symtab_to_filename_for_display (symtab),
-			       host_address_to_string (symtab));
+	      gdb_printf ("%s at %s",
+			  symtab_to_filename_for_display (symtab),
+			  host_address_to_string (symtab));
 	      if (symtab->objfile () != objfile)
-		printf_filtered (", NOT ON CHAIN!");
-	      printf_filtered ("\n");
+		gdb_printf (", NOT ON CHAIN!");
+	      gdb_printf ("\n");
 	    }
 	}
-      printf_filtered ("\n\n");
+      gdb_printf ("\n\n");
     }
 }
 
@@ -149,10 +149,10 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
   int index;
   char ms_type;
 
-  fprintf_filtered (outfile, "\nObject file %s:\n\n", objfile_name (objfile));
+  gdb_printf (outfile, "\nObject file %s:\n\n", objfile_name (objfile));
   if (objfile->per_bfd->minimal_symbol_count == 0)
     {
-      fprintf_filtered (outfile, "No minimal symbols found.\n");
+      gdb_printf (outfile, "No minimal symbols found.\n");
       return;
     }
   index = 0;
@@ -197,29 +197,29 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	  ms_type = '?';
 	  break;
 	}
-      fprintf_filtered (outfile, "[%2d] %c ", index, ms_type);
+      gdb_printf (outfile, "[%2d] %c ", index, ms_type);
 
       /* Use the relocated address as shown in the symbol here -- do
 	 not try to respect copy relocations.  */
       CORE_ADDR addr = (msymbol->value.address
 			+ objfile->section_offsets[msymbol->section_index ()]);
       gdb_puts (paddress (gdbarch, addr), outfile);
-      fprintf_filtered (outfile, " %s", msymbol->linkage_name ());
+      gdb_printf (outfile, " %s", msymbol->linkage_name ());
       if (section)
 	{
 	  if (section->the_bfd_section != NULL)
-	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name (section->the_bfd_section));
+	    gdb_printf (outfile, " section %s",
+			bfd_section_name (section->the_bfd_section));
 	  else
-	    fprintf_filtered (outfile, " spurious section %ld",
-			      (long) (section - objfile->sections));
+	    gdb_printf (outfile, " spurious section %ld",
+			(long) (section - objfile->sections));
 	}
       if (msymbol->demangled_name () != NULL)
 	{
-	  fprintf_filtered (outfile, "  %s", msymbol->demangled_name ());
+	  gdb_printf (outfile, "  %s", msymbol->demangled_name ());
 	}
       if (msymbol->filename)
-	fprintf_filtered (outfile, "  %s", msymbol->filename);
+	gdb_printf (outfile, "  %s", msymbol->filename);
       gdb_puts ("\n", outfile);
       index++;
     }
@@ -228,7 +228,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
       warning (_("internal error:  minimal symbol count %d != %d"),
 	       objfile->per_bfd->minimal_symbol_count, index);
     }
-  fprintf_filtered (outfile, "\n");
+  gdb_printf (outfile, "\n");
 }
 
 static void
@@ -245,70 +245,70 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
   const struct block *b;
   int depth;
 
-  fprintf_filtered (outfile, "\nSymtab for file %s at %s\n",
-		    symtab_to_filename_for_display (symtab),
-		    host_address_to_string (symtab));
+  gdb_printf (outfile, "\nSymtab for file %s at %s\n",
+	      symtab_to_filename_for_display (symtab),
+	      host_address_to_string (symtab));
 
   if (symtab->dirname () != NULL)
-    fprintf_filtered (outfile, "Compilation directory is %s\n",
-		      symtab->dirname ());
-  fprintf_filtered (outfile, "Read from object file %s (%s)\n",
-		    objfile_name (objfile),
-		    host_address_to_string (objfile));
-  fprintf_filtered (outfile, "Language: %s\n",
-		    language_str (symtab->language ()));
+    gdb_printf (outfile, "Compilation directory is %s\n",
+		symtab->dirname ());
+  gdb_printf (outfile, "Read from object file %s (%s)\n",
+	      objfile_name (objfile),
+	      host_address_to_string (objfile));
+  gdb_printf (outfile, "Language: %s\n",
+	      language_str (symtab->language ()));
 
   /* First print the line table.  */
   l = symtab->linetable ();
   if (l)
     {
-      fprintf_filtered (outfile, "\nLine table:\n\n");
+      gdb_printf (outfile, "\nLine table:\n\n");
       len = l->nitems;
       for (i = 0; i < len; i++)
 	{
-	  fprintf_filtered (outfile, " line %d at ", l->item[i].line);
+	  gdb_printf (outfile, " line %d at ", l->item[i].line);
 	  gdb_puts (paddress (gdbarch, l->item[i].pc), outfile);
 	  if (l->item[i].is_stmt)
-	    fprintf_filtered (outfile, "\t(stmt)");
-	  fprintf_filtered (outfile, "\n");
+	    gdb_printf (outfile, "\t(stmt)");
+	  gdb_printf (outfile, "\n");
 	}
     }
   /* Now print the block info, but only for compunit symtabs since we will
      print lots of duplicate info otherwise.  */
   if (is_main_symtab_of_compunit_symtab (symtab))
     {
-      fprintf_filtered (outfile, "\nBlockvector:\n\n");
+      gdb_printf (outfile, "\nBlockvector:\n\n");
       bv = symtab->blockvector ();
       len = BLOCKVECTOR_NBLOCKS (bv);
       for (i = 0; i < len; i++)
 	{
 	  b = BLOCKVECTOR_BLOCK (bv, i);
 	  depth = block_depth (b) * 2;
-	  fprintf_filtered (outfile, "%*sblock #%03d, object at %s",
-			    depth, "", i,
-			    host_address_to_string (b));
+	  gdb_printf (outfile, "%*sblock #%03d, object at %s",
+		      depth, "", i,
+		      host_address_to_string (b));
 	  if (BLOCK_SUPERBLOCK (b))
-	    fprintf_filtered (outfile, " under %s",
-			      host_address_to_string (BLOCK_SUPERBLOCK (b)));
+	    gdb_printf (outfile, " under %s",
+			host_address_to_string (BLOCK_SUPERBLOCK (b)));
 	  /* drow/2002-07-10: We could save the total symbols count
 	     even if we're using a hashtable, but nothing else but this message
 	     wants it.  */
-	  fprintf_filtered (outfile, ", %d syms/buckets in ",
-			    mdict_size (BLOCK_MULTIDICT (b)));
+	  gdb_printf (outfile, ", %d syms/buckets in ",
+		      mdict_size (BLOCK_MULTIDICT (b)));
 	  gdb_puts (paddress (gdbarch, BLOCK_START (b)), outfile);
-	  fprintf_filtered (outfile, "..");
+	  gdb_printf (outfile, "..");
 	  gdb_puts (paddress (gdbarch, BLOCK_END (b)), outfile);
 	  if (BLOCK_FUNCTION (b))
 	    {
-	      fprintf_filtered (outfile, ", function %s",
-				BLOCK_FUNCTION (b)->linkage_name ());
+	      gdb_printf (outfile, ", function %s",
+			  BLOCK_FUNCTION (b)->linkage_name ());
 	      if (BLOCK_FUNCTION (b)->demangled_name () != NULL)
 		{
-		  fprintf_filtered (outfile, ", %s",
-				BLOCK_FUNCTION (b)->demangled_name ());
+		  gdb_printf (outfile, ", %s",
+			      BLOCK_FUNCTION (b)->demangled_name ());
 		}
 	    }
-	  fprintf_filtered (outfile, "\n");
+	  gdb_printf (outfile, "\n");
 	  /* Now print each symbol in this block (in no particular order, if
 	     we're using a hashtable).  Note that we only want this
 	     block, not any blocks from included symtabs.  */
@@ -325,7 +325,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 		}
 	    }
 	}
-      fprintf_filtered (outfile, "\n");
+      gdb_printf (outfile, "\n");
     }
   else
     {
@@ -333,9 +333,9 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
       const char *compunit_filename
 	= symtab_to_filename_for_display (compunit->primary_filetab ());
 
-      fprintf_filtered (outfile,
-			"\nBlockvector same as owning compunit: %s\n\n",
-			compunit_filename);
+      gdb_printf (outfile,
+		  "\nBlockvector same as owning compunit: %s\n\n",
+		  compunit_filename);
     }
 
   /* Print info about the user of this compunit_symtab, and the
@@ -348,7 +348,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	{
 	  const char *addr
 	    = host_address_to_string (cust->user->primary_filetab ());
-	  fprintf_filtered (outfile, "Compunit user: %s\n", addr);
+	  gdb_printf (outfile, "Compunit user: %s\n", addr);
 	}
       if (cust->includes != nullptr)
 	for (i = 0; ; ++i)
@@ -358,7 +358,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	      break;
 	    const char *addr
 	      = host_address_to_string (include->primary_filetab ());
-	    fprintf_filtered (outfile, "Compunit include: %s\n", addr);
+	    gdb_printf (outfile, "Compunit include: %s\n", addr);
 	  }
     }
 }
@@ -510,14 +510,14 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
   print_spaces_filtered (depth, outfile);
   if (symbol->domain () == LABEL_DOMAIN)
     {
-      fprintf_filtered (outfile, "label %s at ", symbol->print_name ());
+      gdb_printf (outfile, "label %s at ", symbol->print_name ());
       gdb_puts (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
 		outfile);
       if (section)
-	fprintf_filtered (outfile, " section %s\n",
-			  bfd_section_name (section->the_bfd_section));
+	gdb_printf (outfile, " section %s\n",
+		    bfd_section_name (section->the_bfd_section));
       else
-	fprintf_filtered (outfile, "\n");
+	gdb_printf (outfile, "\n");
       return;
     }
 
@@ -530,21 +530,21 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	}
       else
 	{
-	  fprintf_filtered (outfile, "%s %s = ",
-			 (symbol->type ()->code () == TYPE_CODE_ENUM
-			  ? "enum"
-		     : (symbol->type ()->code () == TYPE_CODE_STRUCT
-			? "struct" : "union")),
-			    symbol->linkage_name ());
+	  gdb_printf (outfile, "%s %s = ",
+		      (symbol->type ()->code () == TYPE_CODE_ENUM
+		       ? "enum"
+		       : (symbol->type ()->code () == TYPE_CODE_STRUCT
+			  ? "struct" : "union")),
+		      symbol->linkage_name ());
 	  current_language->print_type (symbol->type (), "", outfile, 1, depth,
 					&type_print_raw_options);
 	}
-      fprintf_filtered (outfile, ";\n");
+      gdb_printf (outfile, ";\n");
     }
   else
     {
       if (symbol->aclass () == LOC_TYPEDEF)
-	fprintf_filtered (outfile, "typedef ");
+	gdb_printf (outfile, "typedef ");
       if (symbol->type ())
 	{
 	  /* Print details of types, except for enums where it's clutter.  */
@@ -553,17 +553,17 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 					symbol->type ()->code () != TYPE_CODE_ENUM,
 					depth,
 					&type_print_raw_options);
-	  fprintf_filtered (outfile, "; ");
+	  gdb_printf (outfile, "; ");
 	}
       else
-	fprintf_filtered (outfile, "%s ", symbol->print_name ());
+	gdb_printf (outfile, "%s ", symbol->print_name ());
 
       switch (symbol->aclass ())
 	{
 	case LOC_CONST:
-	  fprintf_filtered (outfile, "const %s (%s)",
-			    plongest (SYMBOL_VALUE (symbol)),
-			    hex_string (SYMBOL_VALUE (symbol)));
+	  gdb_printf (outfile, "const %s (%s)",
+		      plongest (SYMBOL_VALUE (symbol)),
+		      hex_string (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_CONST_BYTES:
@@ -571,94 +571,94 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	    unsigned i;
 	    struct type *type = check_typedef (symbol->type ());
 
-	    fprintf_filtered (outfile, "const %s hex bytes:",
-			      pulongest (TYPE_LENGTH (type)));
+	    gdb_printf (outfile, "const %s hex bytes:",
+			pulongest (TYPE_LENGTH (type)));
 	    for (i = 0; i < TYPE_LENGTH (type); i++)
-	      fprintf_filtered (outfile, " %02x",
-				(unsigned) SYMBOL_VALUE_BYTES (symbol)[i]);
+	      gdb_printf (outfile, " %02x",
+			  (unsigned) SYMBOL_VALUE_BYTES (symbol)[i]);
 	  }
 	  break;
 
 	case LOC_STATIC:
-	  fprintf_filtered (outfile, "static at ");
+	  gdb_printf (outfile, "static at ");
 	  gdb_puts (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
 		    outfile);
 	  if (section)
-	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name (section->the_bfd_section));
+	    gdb_printf (outfile, " section %s",
+			bfd_section_name (section->the_bfd_section));
 	  break;
 
 	case LOC_REGISTER:
 	  if (symbol->is_argument ())
-	    fprintf_filtered (outfile, "parameter register %s",
-			      plongest (SYMBOL_VALUE (symbol)));
+	    gdb_printf (outfile, "parameter register %s",
+			plongest (SYMBOL_VALUE (symbol)));
 	  else
-	    fprintf_filtered (outfile, "register %s",
-			      plongest (SYMBOL_VALUE (symbol)));
+	    gdb_printf (outfile, "register %s",
+			plongest (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_ARG:
-	  fprintf_filtered (outfile, "arg at offset %s",
-			    hex_string (SYMBOL_VALUE (symbol)));
+	  gdb_printf (outfile, "arg at offset %s",
+		      hex_string (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_REF_ARG:
-	  fprintf_filtered (outfile, "reference arg at %s",
-			    hex_string (SYMBOL_VALUE (symbol)));
+	  gdb_printf (outfile, "reference arg at %s",
+		      hex_string (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_REGPARM_ADDR:
-	  fprintf_filtered (outfile, "address parameter register %s",
-			    plongest (SYMBOL_VALUE (symbol)));
+	  gdb_printf (outfile, "address parameter register %s",
+		      plongest (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_LOCAL:
-	  fprintf_filtered (outfile, "local at offset %s",
-			    hex_string (SYMBOL_VALUE (symbol)));
+	  gdb_printf (outfile, "local at offset %s",
+		      hex_string (SYMBOL_VALUE (symbol)));
 	  break;
 
 	case LOC_TYPEDEF:
 	  break;
 
 	case LOC_LABEL:
-	  fprintf_filtered (outfile, "label at ");
+	  gdb_printf (outfile, "label at ");
 	  gdb_puts (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
 		    outfile);
 	  if (section)
-	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name (section->the_bfd_section));
+	    gdb_printf (outfile, " section %s",
+			bfd_section_name (section->the_bfd_section));
 	  break;
 
 	case LOC_BLOCK:
-	  fprintf_filtered
+	  gdb_printf
 	    (outfile, "block object %s, %s..%s",
 	     host_address_to_string (SYMBOL_BLOCK_VALUE (symbol)),
 	     paddress (gdbarch, BLOCK_START (SYMBOL_BLOCK_VALUE (symbol))),
 	     paddress (gdbarch, BLOCK_END (SYMBOL_BLOCK_VALUE (symbol))));
 	  if (section)
-	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name (section->the_bfd_section));
+	    gdb_printf (outfile, " section %s",
+			bfd_section_name (section->the_bfd_section));
 	  break;
 
 	case LOC_COMPUTED:
-	  fprintf_filtered (outfile, "computed at runtime");
+	  gdb_printf (outfile, "computed at runtime");
 	  break;
 
 	case LOC_UNRESOLVED:
-	  fprintf_filtered (outfile, "unresolved");
+	  gdb_printf (outfile, "unresolved");
 	  break;
 
 	case LOC_OPTIMIZED_OUT:
-	  fprintf_filtered (outfile, "optimized out");
+	  gdb_printf (outfile, "optimized out");
 	  break;
 
 	default:
-	  fprintf_filtered (outfile, "botched symbol class %x",
-			    symbol->aclass ());
+	  gdb_printf (outfile, "botched symbol class %x",
+		      symbol->aclass ());
 	  break;
 	}
     }
-  fprintf_filtered (outfile, "\n");
+  gdb_printf (outfile, "\n");
 }
 
 static void
@@ -766,36 +766,36 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 		  {
 		    if (! printed_objfile_start)
 		      {
-			printf_filtered ("{ objfile %s ", objfile_name (objfile));
+			gdb_printf ("{ objfile %s ", objfile_name (objfile));
 			gdb_stdout->wrap_here (2);
-			printf_filtered ("((struct objfile *) %s)\n",
-					 host_address_to_string (objfile));
+			gdb_printf ("((struct objfile *) %s)\n",
+				    host_address_to_string (objfile));
 			printed_objfile_start = 1;
 		      }
 		    if (! printed_compunit_symtab_start)
 		      {
-			printf_filtered ("  { ((struct compunit_symtab *) %s)\n",
-					 host_address_to_string (cust));
-			printf_filtered ("    debugformat %s\n",
-					 cust->debugformat ());
-			printf_filtered ("    producer %s\n",
-					 (cust->producer () != nullptr
-					  ? cust->producer () : "(null)"));
-			printf_filtered ("    dirname %s\n",
-					 (cust->dirname () != NULL
-					  ? cust->dirname () : "(null)"));
-			printf_filtered ("    blockvector"
-					 " ((struct blockvector *) %s)\n",
-					 host_address_to_string
-					   (cust->blockvector ()));
-			printf_filtered ("    user"
-					 " ((struct compunit_symtab *) %s)\n",
-					 cust->user != nullptr
-					 ? host_address_to_string (cust->user)
-					 : "(null)");
+			gdb_printf ("  { ((struct compunit_symtab *) %s)\n",
+				    host_address_to_string (cust));
+			gdb_printf ("    debugformat %s\n",
+				    cust->debugformat ());
+			gdb_printf ("    producer %s\n",
+				    (cust->producer () != nullptr
+				     ? cust->producer () : "(null)"));
+			gdb_printf ("    dirname %s\n",
+				    (cust->dirname () != NULL
+				     ? cust->dirname () : "(null)"));
+			gdb_printf ("    blockvector"
+				    " ((struct blockvector *) %s)\n",
+				    host_address_to_string
+				    (cust->blockvector ()));
+			gdb_printf ("    user"
+				    " ((struct compunit_symtab *) %s)\n",
+				    cust->user != nullptr
+				    ? host_address_to_string (cust->user)
+				    : "(null)");
 			if (cust->includes != nullptr)
 			  {
-			    printf_filtered ("    ( includes\n");
+			    gdb_printf ("    ( includes\n");
 			    for (int i = 0; ; ++i)
 			      {
 				struct compunit_symtab *include
@@ -804,38 +804,38 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 				  break;
 				const char *addr
 				  = host_address_to_string (include);
-				printf_filtered ("      (%s %s)\n",
-						 "(struct compunit_symtab *)",
-						 addr);
+				gdb_printf ("      (%s %s)\n",
+					    "(struct compunit_symtab *)",
+					    addr);
 			      }
-			    printf_filtered ("    )\n");
+			    gdb_printf ("    )\n");
 			  }
 			printed_compunit_symtab_start = 1;
 		      }
 
-		    printf_filtered ("\t{ symtab %s ",
-				     symtab_to_filename_for_display (symtab));
+		    gdb_printf ("\t{ symtab %s ",
+				symtab_to_filename_for_display (symtab));
 		    gdb_stdout->wrap_here (4);
-		    printf_filtered ("((struct symtab *) %s)\n",
-				     host_address_to_string (symtab));
-		    printf_filtered ("\t  fullname %s\n",
-				     symtab->fullname != NULL
-				     ? symtab->fullname
-				     : "(null)");
-		    printf_filtered ("\t  "
-				     "linetable ((struct linetable *) %s)\n",
-				     host_address_to_string
-				       (symtab->linetable ()));
-		    printf_filtered ("\t}\n");
+		    gdb_printf ("((struct symtab *) %s)\n",
+				host_address_to_string (symtab));
+		    gdb_printf ("\t  fullname %s\n",
+				symtab->fullname != NULL
+				? symtab->fullname
+				: "(null)");
+		    gdb_printf ("\t  "
+				"linetable ((struct linetable *) %s)\n",
+				host_address_to_string
+				(symtab->linetable ()));
+		    gdb_printf ("\t}\n");
 		  }
 	      }
 
 	    if (printed_compunit_symtab_start)
-	      printf_filtered ("  }\n");
+	      gdb_printf ("  }\n");
 	  }
 
 	if (printed_objfile_start)
-	  printf_filtered ("}\n");
+	  gdb_printf ("}\n");
       }
 }
 
@@ -872,22 +872,22 @@ maintenance_check_symtabs (const char *ignore, int from_tty)
 	      {
 		if (! printed_objfile_start)
 		  {
-		    printf_filtered ("{ objfile %s ", objfile_name (objfile));
+		    gdb_printf ("{ objfile %s ", objfile_name (objfile));
 		    gdb_stdout->wrap_here (2);
-		    printf_filtered ("((struct objfile *) %s)\n",
-				     host_address_to_string (objfile));
+		    gdb_printf ("((struct objfile *) %s)\n",
+				host_address_to_string (objfile));
 		    printed_objfile_start = 1;
 		  }
-		printf_filtered ("  { symtab %s\n",
-				 symtab_to_filename_for_display (symtab));
+		gdb_printf ("  { symtab %s\n",
+			    symtab_to_filename_for_display (symtab));
 		if (cust->blockvector () == NULL)
-		  printf_filtered ("    NULL blockvector\n");
-		printf_filtered ("  }\n");
+		  gdb_printf ("    NULL blockvector\n");
+		gdb_printf ("  }\n");
 	      }
 	  }
 
 	if (printed_objfile_start)
-	  printf_filtered ("}\n");
+	  gdb_printf ("}\n");
       }
 }
 
@@ -958,25 +958,25 @@ maintenance_print_one_line_table (struct symtab *symtab, void *data)
   struct objfile *objfile;
 
   objfile = symtab->compunit ()->objfile ();
-  printf_filtered (_("objfile: %ps ((struct objfile *) %s)\n"),
-		   styled_string (file_name_style.style (),
-				  objfile_name (objfile)),
-		   host_address_to_string (objfile));
-  printf_filtered (_("compunit_symtab: %s ((struct compunit_symtab *) %s)\n"),
-		   symtab->compunit ()->name,
-		   host_address_to_string (symtab->compunit ()));
-  printf_filtered (_("symtab: %ps ((struct symtab *) %s)\n"),
-		   styled_string (file_name_style.style (),
-				  symtab_to_fullname (symtab)),
-		   host_address_to_string (symtab));
+  gdb_printf (_("objfile: %ps ((struct objfile *) %s)\n"),
+	      styled_string (file_name_style.style (),
+			     objfile_name (objfile)),
+	      host_address_to_string (objfile));
+  gdb_printf (_("compunit_symtab: %s ((struct compunit_symtab *) %s)\n"),
+	      symtab->compunit ()->name,
+	      host_address_to_string (symtab->compunit ()));
+  gdb_printf (_("symtab: %ps ((struct symtab *) %s)\n"),
+	      styled_string (file_name_style.style (),
+			     symtab_to_fullname (symtab)),
+	      host_address_to_string (symtab));
   linetable = symtab->linetable ();
-  printf_filtered (_("linetable: ((struct linetable *) %s):\n"),
-		   host_address_to_string (linetable));
+  gdb_printf (_("linetable: ((struct linetable *) %s):\n"),
+	      host_address_to_string (linetable));
 
   if (linetable == NULL)
-    printf_filtered (_("No line table.\n"));
+    gdb_printf (_("No line table.\n"));
   else if (linetable->nitems <= 0)
-    printf_filtered (_("Line table has no lines.\n"));
+    gdb_printf (_("Line table has no lines.\n"));
   else
     {
       /* Leave space for 6 digits of index and line number.  After that the
@@ -1033,7 +1033,7 @@ maintenance_info_line_tables (const char *regexp, int from_tty)
 		    || re_exec (symtab_to_filename_for_display (symtab)))
 		  {
 		    maintenance_print_one_line_table (symtab, NULL);
-		    printf_filtered ("\n");
+		    gdb_printf ("\n");
 		  }
 	      }
 	  }

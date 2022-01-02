@@ -50,8 +50,8 @@ static void
 show_repack_array_slices (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Repacking of Fortran array slices is %s.\n"),
-		    value);
+  gdb_printf (file, _("Repacking of Fortran array slices is %s.\n"),
+	      value);
 }
 
 /* Debugging of Fortran's array slicing.  */
@@ -63,8 +63,8 @@ show_fortran_array_slicing_debug (struct ui_file *file, int from_tty,
 				  struct cmd_list_element *c,
 				  const char *value)
 {
-  fprintf_filtered (file, _("Debugging of Fortran array slicing is %s.\n"),
-		    value);
+  gdb_printf (file, _("Debugging of Fortran array slicing is %s.\n"),
+	      value);
 }
 
 /* Local functions */
@@ -1541,9 +1541,9 @@ f_language::print_array_index (struct type *index_type, LONGEST index,
 {
   struct value *index_value = value_from_longest (index_type, index);
 
-  fprintf_filtered (stream, "(");
+  gdb_printf (stream, "(");
   value_print (index_value, stream, options);
-  fprintf_filtered (stream, ") = ");
+  gdb_printf (stream, ") = ");
 }
 
 /* See language.h.  */

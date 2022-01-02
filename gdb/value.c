@@ -989,10 +989,10 @@ show_max_value_size (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
   if (max_value_size == -1)
-    fprintf_filtered (file, _("Maximum value size is unlimited.\n"));
+    gdb_printf (file, _("Maximum value size is unlimited.\n"));
   else
-    fprintf_filtered (file, _("Maximum value size is %d bytes.\n"),
-		      max_value_size);
+    gdb_printf (file, _("Maximum value size is %d bytes.\n"),
+		max_value_size);
 }
 
 /* Called before we attempt to allocate or reallocate a buffer for the
@@ -1950,10 +1950,10 @@ show_values (const char *num_exp, int from_tty)
       struct value_print_options opts;
 
       val = access_value_history (i);
-      printf_filtered (("$%d = "), i);
+      gdb_printf (("$%d = "), i);
       get_user_print_options (&opts);
       value_print (val, gdb_stdout, &opts);
-      printf_filtered (("\n"));
+      gdb_printf (("\n"));
     }
 
   /* The next "show values +" should start after what we just printed.  */
@@ -2634,7 +2634,7 @@ show_convenience (const char *ignore, int from_tty)
 	{
 	  varseen = 1;
 	}
-      printf_filtered (("$%s = "), var->name);
+      gdb_printf (("$%s = "), var->name);
 
       try
 	{
@@ -2649,7 +2649,7 @@ show_convenience (const char *ignore, int from_tty)
 			  _("<error: %s>"), ex.what ());
 	}
 
-      printf_filtered (("\n"));
+      gdb_printf (("\n"));
     }
   if (!varseen)
     {
@@ -2657,11 +2657,11 @@ show_convenience (const char *ignore, int from_tty)
 	 The user can't create them except via Python, and if Python support
 	 is installed this message will never be printed ($_streq will
 	 exist).  */
-      printf_filtered (_("No debugger convenience variables now defined.\n"
-			 "Convenience variables have "
-			 "names starting with \"$\";\n"
-			 "use \"set\" as in \"set "
-			 "$foo = 5\" to define them.\n"));
+      gdb_printf (_("No debugger convenience variables now defined.\n"
+		    "Convenience variables have "
+		    "names starting with \"$\";\n"
+		    "use \"set\" as in \"set "
+		    "$foo = 5\" to define them.\n"));
     }
 }
 
@@ -4000,15 +4000,15 @@ value_fetch_lazy_register (struct value *val)
       gdbarch = get_frame_arch (frame);
 
       string_file debug_file;
-      fprintf_unfiltered (&debug_file,
-			  "(frame=%d, regnum=%d(%s), ...) ",
-			  frame_relative_level (frame), regnum,
-			  user_reg_map_regnum_to_name (gdbarch, regnum));
+      gdb_printf (&debug_file,
+		  "(frame=%d, regnum=%d(%s), ...) ",
+		  frame_relative_level (frame), regnum,
+		  user_reg_map_regnum_to_name (gdbarch, regnum));
 
-      fprintf_unfiltered (&debug_file, "->");
+      gdb_printf (&debug_file, "->");
       if (value_optimized_out (new_val))
 	{
-	  fprintf_unfiltered (&debug_file, " ");
+	  gdb_printf (&debug_file, " ");
 	  val_print_optimized_out (new_val, &debug_file);
 	}
       else
@@ -4017,20 +4017,20 @@ value_fetch_lazy_register (struct value *val)
 	  gdb::array_view<const gdb_byte> buf = value_contents (new_val);
 
 	  if (VALUE_LVAL (new_val) == lval_register)
-	    fprintf_unfiltered (&debug_file, " register=%d",
-				VALUE_REGNUM (new_val));
+	    gdb_printf (&debug_file, " register=%d",
+			VALUE_REGNUM (new_val));
 	  else if (VALUE_LVAL (new_val) == lval_memory)
-	    fprintf_unfiltered (&debug_file, " address=%s",
-				paddress (gdbarch,
-					  value_address (new_val)));
+	    gdb_printf (&debug_file, " address=%s",
+			paddress (gdbarch,
+				  value_address (new_val)));
 	  else
-	    fprintf_unfiltered (&debug_file, " computed");
+	    gdb_printf (&debug_file, " computed");
 
-	  fprintf_unfiltered (&debug_file, " bytes=");
-	  fprintf_unfiltered (&debug_file, "[");
+	  gdb_printf (&debug_file, " bytes=");
+	  gdb_printf (&debug_file, "[");
 	  for (i = 0; i < register_size (gdbarch, regnum); i++)
-	    fprintf_unfiltered (&debug_file, "%02x", buf[i]);
-	  fprintf_unfiltered (&debug_file, "]");
+	    gdb_printf (&debug_file, "%02x", buf[i]);
+	  gdb_printf (&debug_file, "]");
 	}
 
       frame_debug_printf ("%s", debug_file.c_str ());

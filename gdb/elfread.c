@@ -1049,9 +1049,9 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 
   if (symtab_create_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Reading minimal symbols of objfile %s ...\n",
-			  objfile_name (objfile));
+      gdb_printf (gdb_stdlog,
+		  "Reading minimal symbols of objfile %s ...\n",
+		  objfile_name (objfile));
     }
 
   /* If we already have minsyms, then we can skip some work here.
@@ -1065,8 +1065,8 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
       && ei->ctfsect == NULL)
     {
       if (symtab_create_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "... minimal symbols previously read\n");
+	gdb_printf (gdb_stdlog,
+		    "... minimal symbols previously read\n");
       return;
     }
 
@@ -1171,7 +1171,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
   reader.install ();
 
   if (symtab_create_debug)
-    fprintf_unfiltered (gdb_stdlog, "Done reading minimal symbols.\n");
+    gdb_printf (gdb_stdlog, "Done reading minimal symbols.\n");
 }
 
 /* Scan and build partial symbols for a symbol file.

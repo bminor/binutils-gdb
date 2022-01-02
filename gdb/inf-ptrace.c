@@ -333,9 +333,9 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	      return minus_one_ptid;
 	    }
 
-	  fprintf_unfiltered (gdb_stderr,
-			      _("Child process unexpectedly missing: %s.\n"),
-			      safe_strerror (save_errno));
+	  gdb_printf (gdb_stderr,
+		      _("Child process unexpectedly missing: %s.\n"),
+		      safe_strerror (save_errno));
 
 	  ourstatus->set_ignore ();
 	  return minus_one_ptid;
@@ -520,9 +520,9 @@ inf_ptrace_target::files_info ()
 {
   struct inferior *inf = current_inferior ();
 
-  printf_filtered (_("\tUsing the running image of %s %s.\n"),
-		   inf->attach_flag ? "attached" : "child",
-		   target_pid_to_str (inferior_ptid).c_str ());
+  gdb_printf (_("\tUsing the running image of %s %s.\n"),
+	      inf->attach_flag ? "attached" : "child",
+	      target_pid_to_str (inferior_ptid).c_str ());
 }
 
 std::string

@@ -435,14 +435,14 @@ arc_insn_get_branch_target (const struct arc_instruction &insn)
   /* JLI and EI depend on optional AUX registers.  Not supported right now.  */
   else if (insn.insn_class == JLI)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  "JLI_S instruction is not supported by the GDB.");
+      gdb_printf (gdb_stderr,
+		  "JLI_S instruction is not supported by the GDB.");
       return 0;
     }
   else if (insn.insn_class == EI)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  "EI_S instruction is not supported by the GDB.");
+      gdb_printf (gdb_stderr,
+		  "EI_S instruction is not supported by the GDB.");
       return 0;
     }
   /* LEAVE_S: PC = BLINK.  */
@@ -2450,16 +2450,16 @@ arc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
   arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  fprintf_filtered (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
+  gdb_printf (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
 
-  fprintf_filtered (file, "arc_dump_tdep: is_sigtramp = <%s>\n",
-		    host_address_to_string (tdep->is_sigtramp));
-  fprintf_filtered (file, "arc_dump_tdep: sigcontext_addr = <%s>\n",
-		    host_address_to_string (tdep->sigcontext_addr));
-  fprintf_filtered (file, "arc_dump_tdep: sc_reg_offset = <%s>\n",
-		    host_address_to_string (tdep->sc_reg_offset));
-  fprintf_filtered (file, "arc_dump_tdep: sc_num_regs = %d\n",
-		    tdep->sc_num_regs);
+  gdb_printf (file, "arc_dump_tdep: is_sigtramp = <%s>\n",
+	      host_address_to_string (tdep->is_sigtramp));
+  gdb_printf (file, "arc_dump_tdep: sigcontext_addr = <%s>\n",
+	      host_address_to_string (tdep->sigcontext_addr));
+  gdb_printf (file, "arc_dump_tdep: sc_reg_offset = <%s>\n",
+	      host_address_to_string (tdep->sc_reg_offset));
+  gdb_printf (file, "arc_dump_tdep: sc_num_regs = %d\n",
+	      tdep->sc_num_regs);
 }
 
 /* This command accepts single argument - address of instruction to

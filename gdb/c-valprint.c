@@ -221,7 +221,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 			    current_language);
 	  if (options->prettyformat)
 	    {
-	      fprintf_filtered (stream, "\n");
+	      gdb_printf (stream, "\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	}
@@ -298,18 +298,18 @@ c_value_print_array (struct value *val,
       else
 	{
 	  unsigned int i = 0;
-	  fprintf_filtered (stream, "{");
+	  gdb_printf (stream, "{");
 	  /* If this is a virtual function table, print the 0th
 	     entry specially, and the rest of the members
 	     normally.  */
 	  if (cp_is_vtbl_ptr_type (elttype))
 	    {
 	      i = 1;
-	      fprintf_filtered (stream, _("%d vtable entries"),
-				len - 1);
+	      gdb_printf (stream, _("%d vtable entries"),
+			  len - 1);
 	    }
 	  value_print_array_elements (val, stream, recurse, options, i);
-	  fprintf_filtered (stream, "}");
+	  gdb_printf (stream, "}");
 	}
     }
   else
@@ -365,7 +365,7 @@ c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
   struct type *type = check_typedef (value_type (val));
 
   if (type->code () == TYPE_CODE_UNION && recurse && !options->unionprint)
-    fprintf_filtered (stream, "{...}");
+    gdb_printf (stream, "{...}");
   else if (options->vtblprint && cp_is_vtbl_ptr_type (type))
     {
       /* Print the unmangled name if desired.  */
@@ -517,7 +517,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 	    }
 
 	  /* Pointer to class, check real type of object.  */
-	  fprintf_filtered (stream, "(");
+	  gdb_printf (stream, "(");
 
 	  if (value_entirely_available (val))
 	    {
@@ -542,19 +542,19 @@ c_value_print (struct value *val, struct ui_file *stream,
 
 	  type = value_type (val);
 	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") ");
+	  gdb_printf (stream, ") ");
 	}
       else
 	{
 	  /* normal case */
-	  fprintf_filtered (stream, "(");
+	  gdb_printf (stream, "(");
 	  type_print (value_type (val), "", stream, -1);
-	  fprintf_filtered (stream, ") ");
+	  gdb_printf (stream, ") ");
 	}
     }
 
   if (!value_initialized (val))
-    fprintf_filtered (stream, " [uninitialized] ");
+    gdb_printf (stream, " [uninitialized] ");
 
   if (options->objectprint && (type->code () == TYPE_CODE_STRUCT))
     {
@@ -572,15 +572,15 @@ c_value_print (struct value *val, struct ui_file *stream,
 		&& (TYPE_LENGTH (real_type)
 		    < TYPE_LENGTH (value_enclosing_type (val)))))
 	    val = value_cast (real_type, val);
-	  fprintf_filtered (stream, "(%s%s) ",
-			    real_type->name (),
-			    full ? "" : _(" [incomplete object]"));
+	  gdb_printf (stream, "(%s%s) ",
+		      real_type->name (),
+		      full ? "" : _(" [incomplete object]"));
 	}
       else if (type != check_typedef (value_enclosing_type (val)))
 	{
 	  /* No RTTI information, so let's do our best.  */
-	  fprintf_filtered (stream, "(%s ?) ",
-			    value_enclosing_type (val)->name ());
+	  gdb_printf (stream, "(%s ?) ",
+		      value_enclosing_type (val)->name ());
 	  val = value_cast (value_enclosing_type (val), val);
 	}
     }

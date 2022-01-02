@@ -1013,7 +1013,7 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
   if (regno == HARD_A_REGNUM || regno == HARD_B_REGNUM
       || regno == HARD_CCR_REGNUM || regno == HARD_PAGE_REGNUM)
     {
-      fprintf_filtered (file, "0x%02x   ", (unsigned char) rval);
+      gdb_printf (file, "0x%02x   ", (unsigned char) rval);
       if (regno != HARD_CCR_REGNUM)
 	print_longest (file, 'd', 1, rval);
     }
@@ -1027,12 +1027,12 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 	  ULONGEST page;
 
 	  page = get_frame_register_unsigned (frame, HARD_PAGE_REGNUM);
-	  fprintf_filtered (file, "0x%02x:%04x ", (unsigned) page,
-			    (unsigned) rval);
+	  gdb_printf (file, "0x%02x:%04x ", (unsigned) page,
+		      (unsigned) rval);
 	}
       else
 	{
-	  fprintf_filtered (file, "0x%04x ", (unsigned) rval);
+	  gdb_printf (file, "0x%04x ", (unsigned) rval);
 	  if (regno != HARD_PC_REGNUM && regno != HARD_SP_REGNUM
 	      && regno != SOFT_FP_REGNUM && regno != M68HC12_HARD_PC_REGNUM)
 	    print_longest (file, 'd', 1, rval);
@@ -1045,15 +1045,15 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
       int C, Z, N, V;
       unsigned char l = rval & 0xff;
 
-      fprintf_filtered (file, "%c%c%c%c%c%c%c%c   ",
-			l & M6811_S_BIT ? 'S' : '-',
-			l & M6811_X_BIT ? 'X' : '-',
-			l & M6811_H_BIT ? 'H' : '-',
-			l & M6811_I_BIT ? 'I' : '-',
-			l & M6811_N_BIT ? 'N' : '-',
-			l & M6811_Z_BIT ? 'Z' : '-',
-			l & M6811_V_BIT ? 'V' : '-',
-			l & M6811_C_BIT ? 'C' : '-');
+      gdb_printf (file, "%c%c%c%c%c%c%c%c   ",
+		  l & M6811_S_BIT ? 'S' : '-',
+		  l & M6811_X_BIT ? 'X' : '-',
+		  l & M6811_H_BIT ? 'H' : '-',
+		  l & M6811_I_BIT ? 'I' : '-',
+		  l & M6811_N_BIT ? 'N' : '-',
+		  l & M6811_Z_BIT ? 'Z' : '-',
+		  l & M6811_V_BIT ? 'V' : '-',
+		  l & M6811_C_BIT ? 'C' : '-');
       N = (l & M6811_N_BIT) != 0;
       Z = (l & M6811_Z_BIT) != 0;
       V = (l & M6811_V_BIT) != 0;
@@ -1061,26 +1061,26 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
 
       /* Print flags following the h8300.  */
       if ((C | Z) == 0)
-	fprintf_filtered (file, "u> ");
+	gdb_printf (file, "u> ");
       else if ((C | Z) == 1)
-	fprintf_filtered (file, "u<= ");
+	gdb_printf (file, "u<= ");
       else if (C == 0)
-	fprintf_filtered (file, "u< ");
+	gdb_printf (file, "u< ");
 
       if (Z == 0)
-	fprintf_filtered (file, "!= ");
+	gdb_printf (file, "!= ");
       else
-	fprintf_filtered (file, "== ");
+	gdb_printf (file, "== ");
 
       if ((N ^ V) == 0)
-	fprintf_filtered (file, ">= ");
+	gdb_printf (file, ">= ");
       else
-	fprintf_filtered (file, "< ");
+	gdb_printf (file, "< ");
 
       if ((Z | (N ^ V)) == 0)
-	fprintf_filtered (file, "> ");
+	gdb_printf (file, "> ");
       else
-	fprintf_filtered (file, "<= ");
+	gdb_printf (file, "<= ");
     }
 }
 
@@ -1096,43 +1096,43 @@ m68hc11_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
       if (!name || !*name)
 	return;
 
-      fprintf_filtered (file, "%-10s ", name);
+      gdb_printf (file, "%-10s ", name);
       m68hc11_print_register (gdbarch, file, frame, regno);
-      fprintf_filtered (file, "\n");
+      gdb_printf (file, "\n");
     }
   else
     {
       int i, nr;
 
-      fprintf_filtered (file, "PC=");
+      gdb_printf (file, "PC=");
       m68hc11_print_register (gdbarch, file, frame, HARD_PC_REGNUM);
 
-      fprintf_filtered (file, " SP=");
+      gdb_printf (file, " SP=");
       m68hc11_print_register (gdbarch, file, frame, HARD_SP_REGNUM);
 
-      fprintf_filtered (file, " FP=");
+      gdb_printf (file, " FP=");
       m68hc11_print_register (gdbarch, file, frame, SOFT_FP_REGNUM);
 
-      fprintf_filtered (file, "\nCCR=");
+      gdb_printf (file, "\nCCR=");
       m68hc11_print_register (gdbarch, file, frame, HARD_CCR_REGNUM);
       
-      fprintf_filtered (file, "\nD=");
+      gdb_printf (file, "\nD=");
       m68hc11_print_register (gdbarch, file, frame, HARD_D_REGNUM);
 
-      fprintf_filtered (file, " X=");
+      gdb_printf (file, " X=");
       m68hc11_print_register (gdbarch, file, frame, HARD_X_REGNUM);
 
-      fprintf_filtered (file, " Y=");
+      gdb_printf (file, " Y=");
       m68hc11_print_register (gdbarch, file, frame, HARD_Y_REGNUM);
   
       m68gc11_gdbarch_tdep *tdep = (m68gc11_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
       if (tdep->use_page_register)
 	{
-	  fprintf_filtered (file, "\nPage=");
+	  gdb_printf (file, "\nPage=");
 	  m68hc11_print_register (gdbarch, file, frame, HARD_PAGE_REGNUM);
 	}
-      fprintf_filtered (file, "\n");
+      gdb_printf (file, "\n");
 
       nr = 0;
       for (i = SOFT_D1_REGNUM; i < M68HC11_ALL_REGS; i++)
@@ -1141,16 +1141,16 @@ m68hc11_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 	  if (soft_regs[i].name == 0)
 	    continue;
 	  
-	  fprintf_filtered (file, "D%d=", i - SOFT_D1_REGNUM + 1);
+	  gdb_printf (file, "D%d=", i - SOFT_D1_REGNUM + 1);
 	  m68hc11_print_register (gdbarch, file, frame, i);
 	  nr++;
 	  if ((nr % 8) == 7)
-	    fprintf_filtered (file, "\n");
+	    gdb_printf (file, "\n");
 	  else
-	    fprintf_filtered (file, " ");
+	    gdb_printf (file, " ");
 	}
       if (nr && (nr % 8) != 7)
-	fprintf_filtered (file, "\n");
+	gdb_printf (file, "\n");
     }
 }
 

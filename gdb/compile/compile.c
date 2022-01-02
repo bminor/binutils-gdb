@@ -233,7 +233,7 @@ static void
 show_compile_debug (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Compile debugging is %s.\n"), value);
+  gdb_printf (file, _("Compile debugging is %s.\n"), value);
 }
 
 
@@ -530,9 +530,9 @@ static void
 show_compile_args (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Compile command command-line arguments "
-			    "are \"%s\".\n"),
-		    value);
+  gdb_printf (file, _("Compile command command-line arguments "
+		      "are \"%s\".\n"),
+	      value);
 }
 
 /* String for 'set compile-gcc' and 'show compile-gcc'.  */
@@ -544,8 +544,8 @@ static void
 show_compile_gcc (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Compile command GCC driver filename is \"%s\".\n"),
-		    value);
+  gdb_printf (file, _("Compile command GCC driver filename is \"%s\".\n"),
+	      value);
 }
 
 /* Return DW_AT_producer parsed for get_selected_frame () (if any).
@@ -708,7 +708,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     = current_language->compute_program (compiler.get (), input, gdbarch,
 					 expr_block, expr_pc);
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdlog, "debug output:\n\n%s", code.c_str ());
+    gdb_printf (gdb_stdlog, "debug output:\n\n%s", code.c_str ());
 
   compiler->set_verbose (compile_debug);
 
@@ -747,10 +747,10 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     {
       int argi;
 
-      fprintf_unfiltered (gdb_stdlog, "Passing %d compiler options:\n", argc);
+      gdb_printf (gdb_stdlog, "Passing %d compiler options:\n", argc);
       for (argi = 0; argi < argc; argi++)
-	fprintf_unfiltered (gdb_stdlog, "Compiler option %d: <%s>\n",
-			    argi, argv[argi]);
+	gdb_printf (gdb_stdlog, "Compiler option %d: <%s>\n",
+		    argi, argv[argi]);
     }
 
   compile_file_names fnames = get_new_file_names ();
@@ -769,8 +769,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   }
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdlog, "source file produced: %s\n\n",
-			fnames.source_file ());
+    gdb_printf (gdb_stdlog, "source file produced: %s\n\n",
+		fnames.source_file ());
 
   /* If we don't do this, then GDB simply exits
      when the compiler dies.  */
@@ -783,8 +783,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     error (_("Compilation failed."));
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdlog, "object file produced: %s\n\n",
-			fnames.object_file ());
+    gdb_printf (gdb_stdlog, "object file produced: %s\n\n",
+		fnames.object_file ());
 
   /* Keep the source file.  */
   source_remover->keep ();

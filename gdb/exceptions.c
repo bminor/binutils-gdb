@@ -88,7 +88,7 @@ print_exception (struct ui_file *file, const struct gdb_exception &e)
 	  file->write (start, end - start);
 	}
     }					    
-  fprintf_filtered (file, "\n");
+  gdb_printf (file, "\n");
 
   /* Now append the annotation.  */
   switch (e.reason)

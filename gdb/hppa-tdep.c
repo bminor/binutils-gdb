@@ -475,14 +475,14 @@ find_unwind_entry (CORE_ADDR pc)
   int first, middle, last;
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ find_unwind_entry %s -> ",
-			hex_string (pc));
+    gdb_printf (gdb_stdlog, "{ find_unwind_entry %s -> ",
+		hex_string (pc));
 
   /* A function at address 0?  Not in HP-UX!  */
   if (pc == (CORE_ADDR) 0)
     {
       if (hppa_debug)
-	fprintf_unfiltered (gdb_stdlog, "NULL }\n");
+	gdb_printf (gdb_stdlog, "NULL }\n");
       return NULL;
     }
 
@@ -510,8 +510,8 @@ find_unwind_entry (CORE_ADDR pc)
 	  && pc <= ui->cache->region_end)
 	{
 	  if (hppa_debug)
-	    fprintf_unfiltered (gdb_stdlog, "%s (cached) }\n",
-				hex_string ((uintptr_t) ui->cache));
+	    gdb_printf (gdb_stdlog, "%s (cached) }\n",
+			hex_string ((uintptr_t) ui->cache));
 	  return ui->cache;
 	}
 
@@ -528,8 +528,8 @@ find_unwind_entry (CORE_ADDR pc)
 	    {
 	      ui->cache = &ui->table[middle];
 	      if (hppa_debug)
-		fprintf_unfiltered (gdb_stdlog, "%s }\n",
-				    hex_string ((uintptr_t) ui->cache));
+		gdb_printf (gdb_stdlog, "%s }\n",
+			    hex_string ((uintptr_t) ui->cache));
 	      return &ui->table[middle];
 	    }
 
@@ -541,7 +541,7 @@ find_unwind_entry (CORE_ADDR pc)
     }
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog, "NULL (not found) }\n");
+    gdb_printf (gdb_stdlog, "NULL (not found) }\n");
 
   return NULL;
 }
@@ -1868,14 +1868,14 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
   int i;
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ hppa_frame_cache (frame=%d) -> ",
-      frame_relative_level(this_frame));
+    gdb_printf (gdb_stdlog, "{ hppa_frame_cache (frame=%d) -> ",
+		frame_relative_level(this_frame));
 
   if ((*this_cache) != NULL)
     {
       if (hppa_debug)
-	fprintf_unfiltered (gdb_stdlog, "base=%s (cached) }",
-	  paddress (gdbarch, ((struct hppa_frame_cache *)*this_cache)->base));
+	gdb_printf (gdb_stdlog, "base=%s (cached) }",
+		    paddress (gdbarch, ((struct hppa_frame_cache *)*this_cache)->base));
       return (struct hppa_frame_cache *) (*this_cache);
     }
   cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
@@ -1887,7 +1887,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (!u)
     {
       if (hppa_debug)
-	fprintf_unfiltered (gdb_stdlog, "base=NULL (no unwind entry) }");
+	gdb_printf (gdb_stdlog, "base=NULL (no unwind entry) }");
       return (struct hppa_frame_cache *) (*this_cache);
     }
 
@@ -2108,11 +2108,11 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
     CORE_ADDR fp;
 
     if (hppa_debug)
-      fprintf_unfiltered (gdb_stdlog, " (this_sp=%s, pc=%s, "
-			  "prologue_end=%s) ",
-			  paddress (gdbarch, this_sp),
-			  paddress (gdbarch, get_frame_pc (this_frame)),
-			  paddress (gdbarch, prologue_end));
+      gdb_printf (gdb_stdlog, " (this_sp=%s, pc=%s, "
+		  "prologue_end=%s) ",
+		  paddress (gdbarch, this_sp),
+		  paddress (gdbarch, get_frame_pc (this_frame)),
+		  paddress (gdbarch, prologue_end));
 
      /* Check to see if a frame pointer is available, and use it for
 	frame unwinding if it is.
@@ -2143,8 +2143,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	cache->base = fp;
  
 	if (hppa_debug)
-	  fprintf_unfiltered (gdb_stdlog, " (base=%s) [frame pointer]",
-			      paddress (gdbarch, cache->base));
+	  gdb_printf (gdb_stdlog, " (base=%s) [frame pointer]",
+		      paddress (gdbarch, cache->base));
       }
      else if (u->Save_SP 
 	      && cache->saved_regs[HPPA_SP_REGNUM].is_addr ())
@@ -2155,8 +2155,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	    cache->base = read_memory_integer (this_sp, word_size, byte_order);
 
 	    if (hppa_debug)
-	      fprintf_unfiltered (gdb_stdlog, " (base=%s) [saved]",
-				  paddress (gdbarch, cache->base));
+	      gdb_printf (gdb_stdlog, " (base=%s) [saved]",
+			  paddress (gdbarch, cache->base));
       }
      else
       {
@@ -2164,8 +2164,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	   the SP back.  */
 	cache->base = this_sp - frame_size;
 	if (hppa_debug)
-	  fprintf_unfiltered (gdb_stdlog, " (base=%s) [unwind adjust]",
-			      paddress (gdbarch, cache->base));
+	  gdb_printf (gdb_stdlog, " (base=%s) [unwind adjust]",
+		      paddress (gdbarch, cache->base));
 
       }
     cache->saved_regs[HPPA_SP_REGNUM].set_value (cache->base);
@@ -2179,14 +2179,14 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	{
 	  cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
 	  if (hppa_debug)
-	    fprintf_unfiltered (gdb_stdlog, " (pc=r31) [stack] } ");
+	    gdb_printf (gdb_stdlog, " (pc=r31) [stack] } ");
 	}
       else
 	{
 	  ULONGEST r31 = get_frame_register_unsigned (this_frame, 31);
 	  cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM].set_value (r31);
 	  if (hppa_debug)
-	    fprintf_unfiltered (gdb_stdlog, " (pc=r31) [frame] } ");
+	    gdb_printf (gdb_stdlog, " (pc=r31) [frame] } ");
 	}
     }
   else
@@ -2196,7 +2196,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = 
 	    cache->saved_regs[HPPA_RP_REGNUM];
 	  if (hppa_debug)
-	    fprintf_unfiltered (gdb_stdlog, " (pc=rp) [stack] } ");
+	    gdb_printf (gdb_stdlog, " (pc=rp) [stack] } ");
 	}
       else
 	{
@@ -2204,7 +2204,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 						     HPPA_RP_REGNUM);
 	  cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM].set_value (rp);
 	  if (hppa_debug)
-	    fprintf_unfiltered (gdb_stdlog, " (pc=rp) [frame] } ");
+	    gdb_printf (gdb_stdlog, " (pc=rp) [frame] } ");
 	}
     }
 
@@ -2248,8 +2248,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
   }
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog, "base=%s }",
-      paddress (gdbarch, ((struct hppa_frame_cache *)*this_cache)->base));
+    gdb_printf (gdb_stdlog, "base=%s }",
+		paddress (gdbarch, ((struct hppa_frame_cache *)*this_cache)->base));
   return (struct hppa_frame_cache *) (*this_cache);
 }
 
@@ -2316,9 +2316,9 @@ hppa_fallback_frame_cache (struct frame_info *this_frame, void **this_cache)
   CORE_ADDR start_pc;
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"{ hppa_fallback_frame_cache (frame=%d) -> ",
-			frame_relative_level (this_frame));
+    gdb_printf (gdb_stdlog,
+		"{ hppa_fallback_frame_cache (frame=%d) -> ",
+		frame_relative_level (this_frame));
 
   cache = FRAME_OBSTACK_ZALLOC (struct hppa_frame_cache);
   (*this_cache) = cache;
@@ -2354,8 +2354,8 @@ hppa_fallback_frame_cache (struct frame_info *this_frame, void **this_cache)
     }
 
   if (hppa_debug)
-    fprintf_unfiltered (gdb_stdlog, " frame_size=%d, found_rp=%d }\n",
-			frame_size, found_rp);
+    gdb_printf (gdb_stdlog, " frame_size=%d, found_rp=%d }\n",
+		frame_size, found_rp);
 
   cache->base = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
   cache->base -= frame_size;
@@ -2559,19 +2559,19 @@ unwind_command (const char *exp, int from_tty)
 
   if (!u)
     {
-      printf_filtered ("Can't find unwind table entry for %s\n", exp);
+      gdb_printf ("Can't find unwind table entry for %s\n", exp);
       return;
     }
 
-  printf_filtered ("unwind_table_entry (%s):\n", host_address_to_string (u));
+  gdb_printf ("unwind_table_entry (%s):\n", host_address_to_string (u));
 
-  printf_filtered ("\tregion_start = %s\n", hex_string (u->region_start));
+  gdb_printf ("\tregion_start = %s\n", hex_string (u->region_start));
 
-  printf_filtered ("\tregion_end = %s\n", hex_string (u->region_end));
+  gdb_printf ("\tregion_end = %s\n", hex_string (u->region_end));
 
-#define pif(FLD) if (u->FLD) printf_filtered (" "#FLD);
+#define pif(FLD) if (u->FLD) gdb_printf (" "#FLD);
 
-  printf_filtered ("\n\tflags =");
+  gdb_printf ("\n\tflags =");
   pif (Cannot_unwind);
   pif (Millicode);
   pif (Millicode_save_sr0);
@@ -2598,7 +2598,7 @@ unwind_command (const char *exp, int from_tty)
 
   gdb_putc ('\n');
 
-#define pin(FLD) printf_filtered ("\t"#FLD" = 0x%x\n", u->FLD);
+#define pin(FLD) gdb_printf ("\t"#FLD" = 0x%x\n", u->FLD);
 
   pin (Region_description);
   pin (Entry_FR);
@@ -2607,26 +2607,26 @@ unwind_command (const char *exp, int from_tty)
 
   if (u->stub_unwind.stub_type)
     {
-      printf_filtered ("\tstub type = ");
+      gdb_printf ("\tstub type = ");
       switch (u->stub_unwind.stub_type)
 	{
 	  case LONG_BRANCH:
-	    printf_filtered ("long branch\n");
+	    gdb_printf ("long branch\n");
 	    break;
 	  case PARAMETER_RELOCATION:
-	    printf_filtered ("parameter relocation\n");
+	    gdb_printf ("parameter relocation\n");
 	    break;
 	  case EXPORT:
-	    printf_filtered ("export\n");
+	    gdb_printf ("export\n");
 	    break;
 	  case IMPORT:
-	    printf_filtered ("import\n");
+	    gdb_printf ("import\n");
 	    break;
 	  case IMPORT_SHLIB:
-	    printf_filtered ("import shlib\n");
+	    gdb_printf ("import shlib\n");
 	    break;
 	  default:
-	    printf_filtered ("unknown (%d)\n", u->stub_unwind.stub_type);
+	    gdb_printf ("unknown (%d)\n", u->stub_unwind.stub_type);
 	}
     }
 }
@@ -3149,9 +3149,9 @@ hppa_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
   hppa_gdbarch_tdep *tdep = (hppa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  fprintf_filtered (file, "bytes_per_address = %d\n", 
-		    tdep->bytes_per_address);
-  fprintf_filtered (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
+  gdb_printf (file, "bytes_per_address = %d\n", 
+	      tdep->bytes_per_address);
+  gdb_printf (file, "elf = %s\n", tdep->is_elf ? "yes" : "no");
 }
 
 void _initialize_hppa_tdep ();

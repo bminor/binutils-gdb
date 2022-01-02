@@ -74,9 +74,9 @@ static void
 show_debug_auto_load (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging output for files "
-			    "of 'set auto-load ...' is %s.\n"),
-		    value);
+  gdb_printf (file, _("Debugging output for files "
+		      "of 'set auto-load ...' is %s.\n"),
+	      value);
 }
 
 /* User-settable option to enable/disable auto-loading of GDB_AUTO_FILE_NAME
@@ -92,9 +92,9 @@ static void
 show_auto_load_gdb_scripts (struct ui_file *file, int from_tty,
 			    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Auto-loading of canned sequences of commands "
-			    "scripts is %s.\n"),
-		    value);
+  gdb_printf (file, _("Auto-loading of canned sequences of commands "
+		      "scripts is %s.\n"),
+	      value);
 }
 
 /* See auto-load.h.  */
@@ -132,9 +132,9 @@ static void
 show_auto_load_local_gdbinit (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Auto-loading of .gdbinit script from current "
-			    "directory is %s.\n"),
-		    value);
+  gdb_printf (file, _("Auto-loading of .gdbinit script from current "
+		      "directory is %s.\n"),
+	      value);
 }
 
 /* Directory list from which to load auto-loaded scripts.  It is not checked
@@ -158,9 +158,9 @@ static void
 show_auto_load_dir (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("List of directories from which to load "
-			    "auto-loaded scripts is %s.\n"),
-		    value);
+  gdb_printf (file, _("List of directories from which to load "
+		      "auto-loaded scripts is %s.\n"),
+	      value);
 }
 
 /* Directory list safe to hold auto-loaded files.  It is not checked for
@@ -275,12 +275,12 @@ show_auto_load_safe_path (struct ui_file *file, int from_tty,
   for (cs = value; *cs && (*cs == DIRNAME_SEPARATOR || IS_DIR_SEPARATOR (*cs));
        cs++);
   if (*cs == 0)
-    fprintf_filtered (file, _("Auto-load files are safe to load from any "
-			      "directory.\n"));
+    gdb_printf (file, _("Auto-load files are safe to load from any "
+			"directory.\n"));
   else
-    fprintf_filtered (file, _("List of directories from which it is safe to "
-			      "auto-load files is %s.\n"),
-		      value);
+    gdb_printf (file, _("List of directories from which it is safe to "
+			"auto-load files is %s.\n"),
+		value);
 }
 
 /* "add-auto-load-safe-path" command for the auto_load_safe_path configuration
@@ -476,7 +476,7 @@ file_is_auto_load_safe (const char *filename)
 	    }
 	}
 
-      printf_filtered (_("\
+      gdb_printf (_("\
 To enable execution of this file add\n\
 \tadd-auto-load-safe-path %s\n\
 line to your configuration file \"%ps\".\n\
@@ -1357,15 +1357,15 @@ static void
 info_auto_load_local_gdbinit (const char *args, int from_tty)
 {
   if (auto_load_local_gdbinit_pathname == NULL)
-    printf_filtered (_("Local .gdbinit file was not found.\n"));
+    gdb_printf (_("Local .gdbinit file was not found.\n"));
   else if (auto_load_local_gdbinit_loaded)
-    printf_filtered (_("Local .gdbinit file \"%ps\" has been loaded.\n"),
-		     styled_string (file_name_style.style (),
-				    auto_load_local_gdbinit_pathname));
+    gdb_printf (_("Local .gdbinit file \"%ps\" has been loaded.\n"),
+		styled_string (file_name_style.style (),
+			       auto_load_local_gdbinit_pathname));
   else
-    printf_filtered (_("Local .gdbinit file \"%ps\" has not been loaded.\n"),
-		     styled_string (file_name_style.style (),
-				    auto_load_local_gdbinit_pathname));
+    gdb_printf (_("Local .gdbinit file \"%ps\" has not been loaded.\n"),
+		styled_string (file_name_style.style (),
+			       auto_load_local_gdbinit_pathname));
 }
 
 /* Print an "unsupported script" warning if it has not already been printed.

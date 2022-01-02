@@ -126,9 +126,9 @@ static void
 show_auto_load_thread_db (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Auto-loading of inferior specific libthread_db "
-			    "is %s.\n"),
-		    value);
+  gdb_printf (file, _("Auto-loading of inferior specific libthread_db "
+		      "is %s.\n"),
+	      value);
 }
 
 static void
@@ -147,7 +147,7 @@ static void
 show_libthread_db_debug (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("libthread-db debugging is %s.\n"), value);
+  gdb_printf (file, _("libthread-db debugging is %s.\n"), value);
 }
 
 /* If we're running on GNU/Linux, we must explicitly attach to any new
@@ -861,8 +861,8 @@ try_thread_db_load_1 (struct thread_db_info *info)
   if (err != TD_OK)
     {
       if (libthread_db_debug)
-	fprintf_unfiltered (gdb_stdlog, _("td_ta_new failed: %s\n"),
-			    thread_db_err_str (err));
+	gdb_printf (gdb_stdlog, _("td_ta_new failed: %s\n"),
+		    thread_db_err_str (err));
       else
 	switch (err)
 	  {
@@ -936,7 +936,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
       return false;
     }
 
-  printf_filtered (_("[Thread debugging using libthread_db enabled]\n"));
+  gdb_printf (_("[Thread debugging using libthread_db enabled]\n"));
 
   if (!libthread_db_search_path.empty () || libthread_db_debug)
     {
@@ -946,8 +946,8 @@ try_thread_db_load_1 (struct thread_db_info *info)
       if (library == NULL)
 	library = LIBTHREAD_DB_SO;
 
-      printf_filtered (_("Using host libthread_db library \"%ps\".\n"),
-		       styled_string (file_name_style.style (), library));
+      gdb_printf (_("Using host libthread_db library \"%ps\".\n"),
+		  styled_string (file_name_style.style (), library));
     }
 
   /* The thread library was detected.  Activate the thread_db target
@@ -966,9 +966,9 @@ try_thread_db_load (const char *library, bool check_auto_load_safe)
   struct thread_db_info *info;
 
   if (libthread_db_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			_("Trying host libthread_db library: %s.\n"),
-			library);
+    gdb_printf (gdb_stdlog,
+		_("Trying host libthread_db library: %s.\n"),
+		library);
 
   if (check_auto_load_safe)
     {
@@ -977,8 +977,8 @@ try_thread_db_load (const char *library, bool check_auto_load_safe)
 	  /* Do not print warnings by file_is_auto_load_safe if the library does
 	     not exist at this place.  */
 	  if (libthread_db_debug)
-	    fprintf_unfiltered (gdb_stdlog, _("open failed: %s.\n"),
-				safe_strerror (errno));
+	    gdb_printf (gdb_stdlog, _("open failed: %s.\n"),
+			safe_strerror (errno));
 	  return false;
 	}
 
@@ -994,7 +994,7 @@ try_thread_db_load (const char *library, bool check_auto_load_safe)
   if (handle == NULL)
     {
       if (libthread_db_debug)
-	fprintf_unfiltered (gdb_stdlog, _("dlopen failed: %s.\n"), dlerror ());
+	gdb_printf (gdb_stdlog, _("dlopen failed: %s.\n"), dlerror ());
       return false;
     }
 
@@ -1008,8 +1008,8 @@ try_thread_db_load (const char *library, bool check_auto_load_safe)
 	  const char *const libpath = dladdr_to_soname (td_init);
 
 	  if (libpath != NULL)
-	    fprintf_unfiltered (gdb_stdlog, _("Host %s resolved to: %s.\n"),
-			       library, libpath);
+	    gdb_printf (gdb_stdlog, _("Host %s resolved to: %s.\n"),
+			library, libpath);
 	}
     }
 
@@ -1177,8 +1177,8 @@ thread_db_load_search (void)
     }
 
   if (libthread_db_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			_("thread_db_load_search returning %d\n"), rc);
+    gdb_printf (gdb_stdlog,
+		_("thread_db_load_search returning %d\n"), rc);
   return rc;
 }
 
@@ -1478,10 +1478,10 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 	 terminated and joined threads with kernel thread ID -1.  See
 	 glibc PR17707.  */
       if (libthread_db_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "thread_db: skipping exited and "
-			    "joined thread (0x%lx)\n",
-			    (unsigned long) ti.ti_tid);
+	gdb_printf (gdb_stdlog,
+		    "thread_db: skipping exited and "
+		    "joined thread (0x%lx)\n",
+		    (unsigned long) ti.ti_tid);
       return 0;
     }
 
@@ -1556,9 +1556,9 @@ find_new_threads_once (struct thread_db_info *info, int iteration,
 
   if (libthread_db_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  _("Found %d new threads in iteration %d.\n"),
-			  data.new_threads, iteration);
+      gdb_printf (gdb_stdlog,
+		  _("Found %d new threads in iteration %d.\n"),
+		  data.new_threads, iteration);
     }
 
   if (errp != NULL)

@@ -60,9 +60,9 @@ show_use_gnu_source_highlight_enabled  (struct ui_file *file, int from_tty,
 					struct cmd_list_element *c,
 					const char *value)
 {
-  fprintf_filtered (file,
-		    _("Use of GNU Source Highlight library is \"%s\".\n"),
-		    value);
+  gdb_printf (file,
+	      _("Use of GNU Source Highlight library is \"%s\".\n"),
+	      value);
 }
 
 /* The "maint set gnu-source-highlight enabled" command.  */
@@ -373,7 +373,7 @@ static void
 source_cache_flush_command (const char *command, int from_tty)
 {
   forget_cached_source_info ();
-  printf_filtered (_("Source cache flushed.\n"));
+  gdb_printf (_("Source cache flushed.\n"));
 }
 
 #if GDB_SELF_TEST

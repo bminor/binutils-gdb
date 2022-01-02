@@ -201,7 +201,7 @@ m2_language::printstr (struct ui_file *stream, struct type *elttype,
 	      in_quotes = 0;
 	    }
 	  printchar (string[i], elttype, stream);
-	  fprintf_filtered (stream, " <repeats %u times>", reps);
+	  gdb_printf (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
 	  need_comma = 1;
@@ -238,7 +238,7 @@ m2_language::emitchar (int ch, struct type *chtype,
     {
       if (ch == '\\' || ch == quoter)
 	gdb_puts ("\\", stream);
-      fprintf_filtered (stream, "%c", ch);
+      gdb_printf (stream, "%c", ch);
     }
   else
     {
@@ -266,7 +266,7 @@ m2_language::emitchar (int ch, struct type *chtype,
 	  gdb_puts ("\\a", stream);
 	  break;
 	default:
-	  fprintf_filtered (stream, "\\%.3o", (unsigned int) ch);
+	  gdb_printf (stream, "\\%.3o", (unsigned int) ch);
 	  break;
 	}
     }

@@ -209,7 +209,7 @@ cli_ui_out::do_spaces (int numspaces)
     return;
 
   if (test_flags (unfiltered_output))
-    fprintf_unfiltered (m_streams.back (), "%*s", numspaces, "");
+    gdb_printf (m_streams.back (), "%*s", numspaces, "");
   else
     print_spaces_filtered (numspaces, m_streams.back ());
 }
@@ -295,7 +295,7 @@ cli_ui_out::do_progress_start (const std::string &name, bool should_print)
   meter.name = name;
   if (!stream->isatty ())
     {
-      fprintf_unfiltered (stream, "%s...", meter.name.c_str ());
+      gdb_printf (stream, "%s...", meter.name.c_str ());
       gdb_flush (stream);
       meter.printing = WORKING;
     }
@@ -322,7 +322,7 @@ cli_ui_out::do_progress_notify (double howmuch)
 
   if (meter.printing == START)
     {
-      fprintf_unfiltered (stream, "%s\n", meter.name.c_str ());
+      gdb_printf (stream, "%s\n", meter.name.c_str ());
       gdb_flush (stream);
       meter.printing = WORKING;
     }
@@ -340,10 +340,10 @@ cli_ui_out::do_progress_notify (double howmuch)
       int width = chars_per_line - 3;
 
       max = width * howmuch;
-      fprintf_unfiltered (stream, "\r[");
+      gdb_printf (stream, "\r[");
       for (i = 0; i < width; ++i)
-	fprintf_unfiltered (stream, i < max ? "#" : " ");
-      fprintf_unfiltered (stream, "]");
+	gdb_printf (stream, i < max ? "#" : " ");
+      gdb_printf (stream, "]");
       gdb_flush (stream);
       meter.printing = PROGRESS;
     }
@@ -357,7 +357,7 @@ cli_ui_out::do_progress_end ()
 
   if (!stream->isatty ())
     {
-      fprintf_unfiltered (stream, "\n");
+      gdb_printf (stream, "\n");
       gdb_flush (stream);
     }
   else if (meter.printing == PROGRESS)
@@ -365,10 +365,10 @@ cli_ui_out::do_progress_end ()
       int i;
       int width = get_chars_per_line () - 3;
 
-      fprintf_unfiltered (stream, "\r");
+      gdb_printf (stream, "\r");
       for (i = 0; i < width + 2; ++i)
-	fprintf_unfiltered (stream, " ");
-      fprintf_unfiltered (stream, "\r");
+	gdb_printf (stream, " ");
+      gdb_printf (stream, "\r");
       gdb_flush (stream);
     }
 

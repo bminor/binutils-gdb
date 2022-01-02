@@ -65,7 +65,7 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
 {
   if (ch_type != serial_current_type)
     {
-      fprintf_unfiltered (stream, "\n%c ", ch_type);
+      gdb_printf (stream, "\n%c ", ch_type);
       serial_current_type = ch_type;
     }
 
@@ -75,10 +75,10 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
   switch (ch)
     {
     case SERIAL_TIMEOUT:
-      fprintf_unfiltered (stream, "<Timeout: %d seconds>", timeout);
+      gdb_printf (stream, "<Timeout: %d seconds>", timeout);
       return;
     case SERIAL_ERROR:
-      fprintf_unfiltered (stream, "<Error: %s>", safe_strerror (errno));
+      gdb_printf (stream, "<Error: %s>", safe_strerror (errno));
       return;
     case SERIAL_EOF:
       gdb_puts ("<Eof>", stream);
@@ -88,9 +88,9 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
       return;
     default:
       if (serial_logbase == logbase_hex)
-	fprintf_unfiltered (stream, "%02x", ch & 0xff);
+	gdb_printf (stream, "%02x", ch & 0xff);
       else if (serial_logbase == logbase_octal)
-	fprintf_unfiltered (stream, "%03o", ch & 0xff);
+	gdb_printf (stream, "%03o", ch & 0xff);
       else
 	switch (ch)
 	  {
@@ -116,8 +116,8 @@ serial_logchar (struct ui_file *stream, int ch_type, int ch, int timeout)
 	    gdb_puts ("\\v", stream);
 	    break;
 	  default:
-	    fprintf_unfiltered (stream,
-				isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF);
+	    gdb_printf (stream,
+			isprint (ch) ? "%c" : "\\x%02x", ch & 0xFF);
 	    break;
 	  }
     }
@@ -401,9 +401,9 @@ serial_readchar (struct serial *scb, int timeout)
     }
   if (serial_debug_p (scb))
     {
-      fprintf_unfiltered (gdb_stdlog, "[");
+      gdb_printf (gdb_stdlog, "[");
       serial_logchar (gdb_stdlog, 'r', ch, timeout);
-      fprintf_unfiltered (gdb_stdlog, "]");
+      gdb_printf (gdb_stdlog, "]");
       gdb_flush (gdb_stdlog);
     }
 
@@ -432,9 +432,9 @@ serial_write (struct serial *scb, const void *buf, size_t count)
 
       for (c = 0; c < count; c++)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "[");
+	  gdb_printf (gdb_stdlog, "[");
 	  serial_logchar (gdb_stdlog, 'w', str[c] & 0xff, 0);
-	  fprintf_unfiltered (gdb_stdlog, "]");
+	  gdb_printf (gdb_stdlog, "]");
 	}
       gdb_flush (gdb_stdlog);
     }
@@ -626,8 +626,8 @@ static void
 serial_baud_show_cmd (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Baud rate for remote serial I/O is %s.\n"),
-		    value);
+  gdb_printf (file, _("Baud rate for remote serial I/O is %s.\n"),
+	      value);
 }
 
 /* See serial.h.  */

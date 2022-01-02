@@ -818,7 +818,7 @@ tui_layout_split::specification (ui_file *output, int depth)
 	gdb_puts (" ", output);
       first = false;
       item.layout->specification (output, depth + 1);
-      fprintf_unfiltered (output, " %d", item.weight);
+      gdb_printf (output, " %d", item.weight);
     }
 
   if (depth > 0)

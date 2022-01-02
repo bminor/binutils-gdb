@@ -47,7 +47,7 @@ static void
 show_varobjdebug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Varobj debugging is %s.\n"), value);
+  gdb_printf (file, _("Varobj debugging is %s.\n"), value);
 }
 
 /* String representations of gdb's format codes.  */
@@ -316,8 +316,8 @@ varobj_create (const char *objname,
 	  || opcode == OP_TYPEOF
 	  || opcode == OP_DECLTYPE)
 	{
-	  fprintf_unfiltered (gdb_stderr, "Attempt to use a type name"
-			      " as an expression.\n");
+	  gdb_printf (gdb_stderr, "Attempt to use a type name"
+		      " as an expression.\n");
 	  return NULL;
 	}
 
@@ -1755,7 +1755,7 @@ uninstall_variable (struct varobj *var)
   htab_remove_elt_with_hash (varobj_table, var->obj_name.c_str (), hash);
 
   if (varobjdebug)
-    fprintf_unfiltered (gdb_stdlog, "Deleting %s\n", var->obj_name.c_str ());
+    gdb_printf (gdb_stdlog, "Deleting %s\n", var->obj_name.c_str ());
 
   /* If root, remove varobj from root list.  */
   if (is_root_p (var))

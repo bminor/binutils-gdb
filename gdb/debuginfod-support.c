@@ -115,9 +115,9 @@ progressfn (debuginfod_client *c, long cur, long total)
 
   if (check_quit_flag ())
     {
-      printf_filtered ("Cancelling download of %s %ps...\n",
-		       data->desc,
-		       styled_string (file_name_style.style (), data->fname));
+      gdb_printf ("Cancelling download of %s %ps...\n",
+		  data->desc,
+		  styled_string (file_name_style.style (), data->fname));
       return 1;
     }
 
@@ -136,14 +136,14 @@ progressfn (debuginfod_client *c, long cur, long total)
 	      unit = "MB";
 	    }
 
-	  printf_filtered ("Downloading %.2f %s %s %ps...\n",
-			   size, unit, data->desc,
-			   styled_string (file_name_style.style (),
-					  data->fname));
+	  gdb_printf ("Downloading %.2f %s %s %ps...\n",
+		      size, unit, data->desc,
+		      styled_string (file_name_style.style (),
+				     data->fname));
 	}
       else
-	printf_filtered ("Downloading %s %ps...\n", data->desc,
-			 styled_string (file_name_style.style (), data->fname));
+	gdb_printf ("Downloading %s %ps...\n", data->desc,
+		    styled_string (file_name_style.style (), data->fname));
 
       data->has_printed = true;
     }
@@ -187,16 +187,16 @@ debuginfod_is_enabled ()
 			 urls);
       if (!resp)
 	{
-	  printf_filtered (_("Debuginfod has been disabled.\nTo make this " \
-			     "setting permanent, add \'set debuginfod " \
-			     "enabled off\' to .gdbinit.\n"));
+	  gdb_printf (_("Debuginfod has been disabled.\nTo make this " \
+			"setting permanent, add \'set debuginfod " \
+			"enabled off\' to .gdbinit.\n"));
 	  debuginfod_enabled = debuginfod_off;
 	  return false;
 	}
 
-      printf_filtered (_("Debuginfod has been enabled.\nTo make this " \
-			 "setting permanent, add \'set debuginfod enabled " \
-			 "on\' to .gdbinit.\n"));
+      gdb_printf (_("Debuginfod has been enabled.\nTo make this " \
+		    "setting permanent, add \'set debuginfod enabled " \
+		    "on\' to .gdbinit.\n"));
       debuginfod_enabled = debuginfod_on;
     }
 
@@ -238,9 +238,9 @@ debuginfod_source_query (const unsigned char *build_id,
   debuginfod_set_user_data (c, nullptr);
 
   if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
-    printf_filtered (_("Download failed: %s.  Continuing without source file %ps.\n"),
-		     safe_strerror (-fd.get ()),
-		     styled_string (file_name_style.style (),  srcpath));
+    gdb_printf (_("Download failed: %s.  Continuing without source file %ps.\n"),
+		safe_strerror (-fd.get ()),
+		styled_string (file_name_style.style (),  srcpath));
 
   if (fd.get () >= 0)
     destname->reset (dname);
@@ -280,9 +280,9 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   debuginfod_set_user_data (c, nullptr);
 
   if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
-    printf_filtered (_("Download failed: %s.  Continuing without debug info for %ps.\n"),
-		     safe_strerror (-fd.get ()),
-		     styled_string (file_name_style.style (),  filename));
+    gdb_printf (_("Download failed: %s.  Continuing without debug info for %ps.\n"),
+		safe_strerror (-fd.get ()),
+		styled_string (file_name_style.style (),  filename));
 
   if (fd.get () >= 0)
     destname->reset (dname);
@@ -321,10 +321,10 @@ debuginfod_exec_query (const unsigned char *build_id,
   debuginfod_set_user_data (c, nullptr);
 
   if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
-    printf_filtered (_("Download failed: %s. " \
-		       "Continuing without executable for %ps.\n"),
-		     safe_strerror (-fd.get ()),
-		     styled_string (file_name_style.style (),  filename));
+    gdb_printf (_("Download failed: %s. " \
+		  "Continuing without executable for %ps.\n"),
+		safe_strerror (-fd.get ()),
+		styled_string (file_name_style.style (),  filename));
 
   if (fd.get () >= 0)
     destname->reset (dname);
@@ -359,9 +359,9 @@ static void
 show_debuginfod_enabled (ui_file *file, int from_tty, cmd_list_element *cmd,
 			 const char *value)
 {
-  fprintf_filtered (file,
-		    _("Debuginfod functionality is currently set to "
-		      "\"%s\".\n"), debuginfod_enabled);
+  gdb_printf (file,
+	      _("Debuginfod functionality is currently set to "
+		"\"%s\".\n"), debuginfod_enabled);
 }
 
 /* Set callback for "set debuginfod urls".  */
@@ -402,10 +402,10 @@ show_debuginfod_urls (ui_file *file, int from_tty, cmd_list_element *cmd,
 		      const char *value)
 {
   if (value[0] == '\0')
-    fprintf_filtered (file, _("Debuginfod URLs have not been set.\n"));
+    gdb_printf (file, _("Debuginfod URLs have not been set.\n"));
   else
-    fprintf_filtered (file, _("Debuginfod URLs are currently set to:\n%s\n"),
-		      value);
+    gdb_printf (file, _("Debuginfod URLs are currently set to:\n%s\n"),
+		value);
 }
 
 /* Show callback for "set debuginfod verbose".  */
@@ -414,8 +414,8 @@ static void
 show_debuginfod_verbose_command (ui_file *file, int from_tty,
 				 cmd_list_element *cmd, const char *value)
 {
-  fprintf_filtered (file, _("Debuginfod verbose output is set to %s.\n"),
-		    value);
+  gdb_printf (file, _("Debuginfod verbose output is set to %s.\n"),
+	      value);
 }
 
 /* Register debuginfod commands.  */

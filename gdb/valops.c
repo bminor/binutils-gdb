@@ -103,9 +103,9 @@ show_overload_resolution (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, 
 			  const char *value)
 {
-  fprintf_filtered (file, _("Overload resolution in evaluating "
-			    "C++ functions is %s.\n"),
-		    value);
+  gdb_printf (file, _("Overload resolution in evaluating "
+		      "C++ functions is %s.\n"),
+	      value);
 }
 
 /* Find the address of function name NAME in the inferior.  If OBJF_P
@@ -3207,28 +3207,28 @@ find_oload_champ (gdb::array_view<value *> args,
       if (overload_debug)
 	{
 	  if (methods != NULL)
-	    fprintf_filtered (gdb_stderr,
-			      "Overloaded method instance %s, # of parms %d\n",
-			      methods[ix].physname, (int) parm_types.size ());
+	    gdb_printf (gdb_stderr,
+			"Overloaded method instance %s, # of parms %d\n",
+			methods[ix].physname, (int) parm_types.size ());
 	  else if (xmethods != NULL)
-	    fprintf_filtered (gdb_stderr,
-			      "Xmethod worker, # of parms %d\n",
-			      (int) parm_types.size ());
+	    gdb_printf (gdb_stderr,
+			"Xmethod worker, # of parms %d\n",
+			(int) parm_types.size ());
 	  else
-	    fprintf_filtered (gdb_stderr,
-			      "Overloaded function instance "
-			      "%s # of parms %d\n",
-			      functions[ix]->demangled_name (),
-			      (int) parm_types.size ());
+	    gdb_printf (gdb_stderr,
+			"Overloaded function instance "
+			"%s # of parms %d\n",
+			functions[ix]->demangled_name (),
+			(int) parm_types.size ());
 
-	  fprintf_filtered (gdb_stderr,
-			    "...Badness of length : {%d, %d}\n",
-			    bv[0].rank, bv[0].subrank);
+	  gdb_printf (gdb_stderr,
+		      "...Badness of length : {%d, %d}\n",
+		      bv[0].rank, bv[0].subrank);
 
 	  for (jj = 1; jj < bv.size (); jj++)
-	    fprintf_filtered (gdb_stderr,
-			      "...Badness of arg %d : {%d, %d}\n",
-			      jj, bv[jj].rank, bv[jj].subrank);
+	    gdb_printf (gdb_stderr,
+			"...Badness of arg %d : {%d, %d}\n",
+			jj, bv[jj].rank, bv[jj].subrank);
 	}
 
       if (oload_champ_bv->empty ())
@@ -3256,9 +3256,9 @@ find_oload_champ (gdb::array_view<value *> args,
 	    break;
 	  }
       if (overload_debug)
-	fprintf_filtered (gdb_stderr, "Overload resolution "
-			  "champion is %d, ambiguous? %d\n",
-			  oload_champ, oload_ambiguous);
+	gdb_printf (gdb_stderr, "Overload resolution "
+		    "champion is %d, ambiguous? %d\n",
+		    oload_champ, oload_ambiguous);
     }
 
   return oload_champ;

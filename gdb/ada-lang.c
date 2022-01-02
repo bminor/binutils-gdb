@@ -3485,7 +3485,7 @@ ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
 {
   struct type *type = sym->type ();
 
-  fprintf_filtered (stream, "%s", sym->print_name ());
+  gdb_printf (stream, "%s", sym->print_name ());
   if (!print_signatures
       || type == NULL
       || type->code () != TYPE_CODE_FUNC)
@@ -3495,20 +3495,20 @@ ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
     {
       int i;
 
-      fprintf_filtered (stream, " (");
+      gdb_printf (stream, " (");
       for (i = 0; i < type->num_fields (); ++i)
 	{
 	  if (i > 0)
-	    fprintf_filtered (stream, "; ");
+	    gdb_printf (stream, "; ");
 	  ada_print_type (type->field (i).type (), NULL, stream, -1, 0,
 			  flags);
 	}
-      fprintf_filtered (stream, ")");
+      gdb_printf (stream, ")");
     }
   if (TYPE_TARGET_TYPE (type) != NULL
       && TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
     {
-      fprintf_filtered (stream, " return ");
+      gdb_printf (stream, " return ");
       ada_print_type (TYPE_TARGET_TYPE (type), NULL, stream, -1, 0, flags);
     }
 }
@@ -3634,9 +3634,9 @@ See set/show multiple-symbol."));
   if (select_mode == multiple_symbols_all && max_results > 1)
     return nsyms;
 
-  printf_filtered (_("[0] cancel\n"));
+  gdb_printf (_("[0] cancel\n"));
   if (max_results > 1)
-    printf_filtered (_("[1] all\n"));
+    gdb_printf (_("[1] all\n"));
 
   sort_choices (syms, nsyms);
 
@@ -3650,14 +3650,14 @@ See set/show multiple-symbol."));
 	  struct symtab_and_line sal =
 	    find_function_start_sal (syms[i].symbol, 1);
 
-	  printf_filtered ("[%d] ", i + first_choice);
+	  gdb_printf ("[%d] ", i + first_choice);
 	  ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
 				      &type_print_raw_options);
 	  if (sal.symtab == NULL)
-	    printf_filtered (_(" at %p[<no source file available>%p]:%d\n"),
-			     metadata_style.style ().ptr (), nullptr, sal.line);
+	    gdb_printf (_(" at %p[<no source file available>%p]:%d\n"),
+			metadata_style.style ().ptr (), nullptr, sal.line);
 	  else
-	    printf_filtered
+	    gdb_printf
 	      (_(" at %ps:%d\n"),
 	       styled_string (file_name_style.style (),
 			      symtab_to_filename_for_display (sal.symtab)),
@@ -3677,37 +3677,37 @@ See set/show multiple-symbol."));
 
 	  if (syms[i].symbol->line () != 0 && symtab != NULL)
 	    {
-	      printf_filtered ("[%d] ", i + first_choice);
+	      gdb_printf ("[%d] ", i + first_choice);
 	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
 					  &type_print_raw_options);
-	      printf_filtered (_(" at %s:%d\n"),
-			       symtab_to_filename_for_display (symtab),
-			       syms[i].symbol->line ());
+	      gdb_printf (_(" at %s:%d\n"),
+			  symtab_to_filename_for_display (symtab),
+			  syms[i].symbol->line ());
 	    }
 	  else if (is_enumeral
 		   && syms[i].symbol->type ()->name () != NULL)
 	    {
-	      printf_filtered (("[%d] "), i + first_choice);
+	      gdb_printf (("[%d] "), i + first_choice);
 	      ada_print_type (syms[i].symbol->type (), NULL,
 			      gdb_stdout, -1, 0, &type_print_raw_options);
-	      printf_filtered (_("'(%s) (enumeral)\n"),
-			       syms[i].symbol->print_name ());
+	      gdb_printf (_("'(%s) (enumeral)\n"),
+			  syms[i].symbol->print_name ());
 	    }
 	  else
 	    {
-	      printf_filtered ("[%d] ", i + first_choice);
+	      gdb_printf ("[%d] ", i + first_choice);
 	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
 					  &type_print_raw_options);
 
 	      if (symtab != NULL)
-		printf_filtered (is_enumeral
-				 ? _(" in %s (enumeral)\n")
-				 : _(" at %s:?\n"),
-				 symtab_to_filename_for_display (symtab));
+		gdb_printf (is_enumeral
+			    ? _(" in %s (enumeral)\n")
+			    : _(" at %s:?\n"),
+			    symtab_to_filename_for_display (symtab));
 	      else
-		printf_filtered (is_enumeral
-				 ? _(" (enumeral)\n")
-				 : _(" at ?\n"));
+		gdb_printf (is_enumeral
+			    ? _(" (enumeral)\n")
+			    : _(" at ?\n"));
 	    }
 	}
     }
@@ -3870,7 +3870,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
     }
   else
     {
-      printf_filtered (_("Multiple matches for %s\n"), sym->print_name ());
+      gdb_printf (_("Multiple matches for %s\n"), sym->print_name ());
       user_select_syms (candidates.data (), candidates.size (), 1);
       i = 0;
     }
@@ -4053,7 +4053,7 @@ ada_resolve_function (std::vector<struct block_symbol> &syms,
     return -1;
   else if (m > 1 && !parse_completion)
     {
-      printf_filtered (_("Multiple matches for %s\n"), name);
+      gdb_printf (_("Multiple matches for %s\n"), name);
       user_select_syms (syms.data (), m, 1);
       return 0;
     }
@@ -9466,7 +9466,7 @@ ada_aggregate_component::uses_objfile (struct objfile *objfile)
 void
 ada_aggregate_component::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sAggregate\n"), depth, "");
+  gdb_printf (stream, _("%*sAggregate\n"), depth, "");
   for (const auto &item : m_components)
     item->dump (stream, depth + 1);
 }
@@ -9533,8 +9533,8 @@ ada_positional_component::uses_objfile (struct objfile *objfile)
 void
 ada_positional_component::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sPositional, index = %d\n"),
-		    depth, "", m_index);
+  gdb_printf (stream, _("%*sPositional, index = %d\n"),
+	      depth, "", m_index);
   m_op->dump (stream, depth + 1);
 }
 
@@ -9568,7 +9568,7 @@ ada_discrete_range_association::uses_objfile (struct objfile *objfile)
 void
 ada_discrete_range_association::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sDiscrete range:\n"), depth, "");
+  gdb_printf (stream, _("%*sDiscrete range:\n"), depth, "");
   m_low->dump (stream, depth + 1);
   m_high->dump (stream, depth + 1);
 }
@@ -9604,7 +9604,7 @@ ada_name_association::uses_objfile (struct objfile *objfile)
 void
 ada_name_association::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sName:\n"), depth, "");
+  gdb_printf (stream, _("%*sName:\n"), depth, "");
   m_val->dump (stream, depth + 1);
 }
 
@@ -9662,7 +9662,7 @@ ada_choices_component::uses_objfile (struct objfile *objfile)
 void
 ada_choices_component::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sChoices:\n"), depth, "");
+  gdb_printf (stream, _("%*sChoices:\n"), depth, "");
   m_op->dump (stream, depth + 1);
   for (const auto &item : m_assocs)
     item->dump (stream, depth + 1);
@@ -9691,7 +9691,7 @@ ada_others_component::uses_objfile (struct objfile *objfile)
 void
 ada_others_component::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sOthers:\n"), depth, "");
+  gdb_printf (stream, _("%*sOthers:\n"), depth, "");
   m_op->dump (stream, depth + 1);
 }
 
@@ -12460,21 +12460,21 @@ print_recreate_exception (struct breakpoint *b, struct ui_file *fp)
   switch (c->m_kind)
     {
       case ada_catch_exception:
-	fprintf_filtered (fp, "catch exception");
+	gdb_printf (fp, "catch exception");
 	if (!c->excep_string.empty ())
-	  fprintf_filtered (fp, " %s", c->excep_string.c_str ());
+	  gdb_printf (fp, " %s", c->excep_string.c_str ());
 	break;
 
       case ada_catch_exception_unhandled:
-	fprintf_filtered (fp, "catch exception unhandled");
+	gdb_printf (fp, "catch exception unhandled");
 	break;
 
       case ada_catch_handlers:
-	fprintf_filtered (fp, "catch handlers");
+	gdb_printf (fp, "catch handlers");
 	break;
 
       case ada_catch_assert:
-	fprintf_filtered (fp, "catch assert");
+	gdb_printf (fp, "catch assert");
 	break;
 
       default:
@@ -13155,13 +13155,13 @@ info_exceptions_command (const char *regexp, int from_tty)
   std::vector<ada_exc_info> exceptions = ada_exceptions_list (regexp);
 
   if (regexp != NULL)
-    printf_filtered
+    gdb_printf
       (_("All Ada exceptions matching regular expression \"%s\":\n"), regexp);
   else
-    printf_filtered (_("All defined Ada exceptions:\n"));
+    gdb_printf (_("All defined Ada exceptions:\n"));
 
   for (const ada_exc_info &info : exceptions)
-    printf_filtered ("%s: %s\n", info.name, paddress (gdbarch, info.addr));
+    gdb_printf ("%s: %s\n", info.name, paddress (gdbarch, info.addr));
 }
 
 
@@ -13392,7 +13392,7 @@ public:
     struct value *index_value = val_atr (index_type, index);
 
     value_print (index_value, stream, options);
-    fprintf_filtered (stream, " => ");
+    gdb_printf (stream, " => ");
   }
 
   /* Implement the "read_var_value" language_defn method for Ada.  */

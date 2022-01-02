@@ -39,7 +39,7 @@ static void
 show_pyuw_debug (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Python unwinder debugging is %s.\n"), value);
+  gdb_printf (file, _("Python unwinder debugging is %s.\n"), value);
 }
 
 /* Print a "py-unwind" debug statement.  */

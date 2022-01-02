@@ -162,8 +162,8 @@ static void
 print_mention_catch_fork (struct breakpoint *b)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) b;
-  printf_filtered (_("Catchpoint %d (%s)"), c->number,
-		   c->is_vfork ? "vfork" : "fork");
+  gdb_printf (_("Catchpoint %d (%s)"), c->number,
+	      c->is_vfork ? "vfork" : "fork");
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for fork
@@ -173,8 +173,8 @@ static void
 print_recreate_catch_fork (struct breakpoint *b, struct ui_file *fp)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) b;
-  fprintf_unfiltered (fp, "catch %s",
-		      c->is_vfork ? "vfork" : "fork");
+  gdb_printf (fp, "catch %s",
+	      c->is_vfork ? "vfork" : "fork");
   print_recreate_thread (b, fp);
 }
 

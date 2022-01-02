@@ -1583,9 +1583,9 @@ report_failed_demangle (const char *name, bool core_dump_allowed,
 
       begin_line ();
       if (core_dump_allowed)
-	fprintf_unfiltered (gdb_stderr,
-			    _("%s\nAttempting to dump core.\n"),
-			    long_msg.c_str ());
+	gdb_printf (gdb_stderr,
+		    _("%s\nAttempting to dump core.\n"),
+		    long_msg.c_str ());
       else
 	warn_cant_dump_core (long_msg.c_str ());
 
@@ -2191,7 +2191,7 @@ first_component_command (const char *arg, int from_tty)
   memcpy (prefix, arg, len);
   prefix[len] = '\0';
 
-  printf_filtered ("%s\n", prefix);
+  gdb_printf ("%s\n", prefix);
 }
 
 /* Implement "info vtbl".  */

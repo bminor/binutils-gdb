@@ -1413,16 +1413,16 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
 	{
 	case 1:
 	  {
-	    fprintf_filtered (gdb_stderr, "%s", arg);
+	    gdb_printf (gdb_stderr, "%s", arg);
 	    break;
 	  }
 	case 2:
 	  {
-	    fprintf_filtered (gdb_stdlog, "%s", arg);
+	    gdb_printf (gdb_stdlog, "%s", arg);
 	    break;
 	  }
 	default:
-	  fprintf_filtered (gdb_stdout, "%s", arg);
+	  gdb_printf (gdb_stdout, "%s", arg);
 	}
     }
   catch (const gdb_exception &except)
@@ -1493,7 +1493,7 @@ gdbpy_print_stack (void)
       PyErr_Print ();
       /* PyErr_Print doesn't necessarily end output with a newline.
 	 This works because Python's stdout/stderr is fed through
-	 printf_filtered.  */
+	 gdb_printf.  */
       try
 	{
 	  begin_line ();
@@ -1520,14 +1520,14 @@ gdbpy_print_stack (void)
 	    {
 	      /* An error occurred computing the string representation of the
 		 error message.  */
-	      fprintf_filtered (gdb_stderr,
-				_("Error occurred computing Python error" \
-				  "message.\n"));
+	      gdb_printf (gdb_stderr,
+			  _("Error occurred computing Python error" \
+			    "message.\n"));
 	      PyErr_Clear ();
 	    }
 	  else
-	    fprintf_filtered (gdb_stderr, "Python Exception %s: %s\n",
-			      type.get (), msg.get ());
+	    gdb_printf (gdb_stderr, "Python Exception %s: %s\n",
+			type.get (), msg.get ());
 	}
       catch (const gdb_exception &except)
 	{
@@ -1796,8 +1796,8 @@ static void
 show_python_ignore_environment (struct ui_file *file, int from_tty,
 				struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Python's ignore-environment setting is %s.\n"),
-		    value);
+  gdb_printf (file, _("Python's ignore-environment setting is %s.\n"),
+	      value);
 }
 
 /* Implement 'set python ignore-environment'.  This sets Python's internal
@@ -1830,13 +1830,13 @@ show_python_dont_write_bytecode (struct ui_file *file, int from_tty,
 	= (python_ignore_environment
 	   || getenv ("PYTHONDONTWRITEBYTECODE") == nullptr) ? "off" : "on";
 
-      fprintf_filtered (file,
-			_("Python's dont-write-bytecode setting is %s (currently %s).\n"),
-			value, auto_string);
+      gdb_printf (file,
+		  _("Python's dont-write-bytecode setting is %s (currently %s).\n"),
+		  value, auto_string);
     }
   else
-    fprintf_filtered (file, _("Python's dont-write-bytecode setting is %s.\n"),
-		      value);
+    gdb_printf (file, _("Python's dont-write-bytecode setting is %s.\n"),
+		value);
 }
 
 /* Implement 'set python dont-write-bytecode'.  This sets Python's internal

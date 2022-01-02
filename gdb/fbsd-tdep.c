@@ -921,8 +921,8 @@ fbsd_print_sockaddr_in (const void *sockaddr)
 
   if (inet_ntop (AF_INET, sin->sin_addr, buf, sizeof buf) == nullptr)
     error (_("Failed to format IPv4 address"));
-  printf_filtered ("%s:%u", buf,
-		   (sin->sin_port[0] << 8) | sin->sin_port[1]);
+  gdb_printf ("%s:%u", buf,
+	      (sin->sin_port[0] << 8) | sin->sin_port[1]);
 }
 
 /* Helper function to print out an IPv6 socket address.  */
@@ -936,8 +936,8 @@ fbsd_print_sockaddr_in6 (const void *sockaddr)
 
   if (inet_ntop (AF_INET6, sin6->sin6_addr, buf, sizeof buf) == nullptr)
     error (_("Failed to format IPv6 address"));
-  printf_filtered ("%s.%u", buf,
-		   (sin6->sin6_port[0] << 8) | sin6->sin6_port[1]);
+  gdb_printf ("%s.%u", buf,
+	      (sin6->sin6_port[0] << 8) | sin6->sin6_port[1]);
 }
 
 /* See fbsd-tdep.h.  */
@@ -945,9 +945,9 @@ fbsd_print_sockaddr_in6 (const void *sockaddr)
 void
 fbsd_info_proc_files_header ()
 {
-  printf_filtered (_("Open files:\n\n"));
-  printf_filtered ("  %6s %6s %10s %9s %s\n",
-		   "FD", "Type", "Offset", "Flags  ", "Name");
+  gdb_printf (_("Open files:\n\n"));
+  gdb_printf ("  %6s %6s %10s %9s %s\n",
+	      "FD", "Type", "Offset", "Flags  ", "Name");
 }
 
 /* See fbsd-tdep.h.  */
@@ -959,11 +959,11 @@ fbsd_info_proc_files_entry (int kf_type, int kf_fd, int kf_flags,
 			    int kf_sock_protocol, const void *kf_sa_local,
 			    const void *kf_sa_peer, const void *kf_path)
 {
-  printf_filtered ("  %6s %6s %10s %8s ",
-		   fbsd_file_fd (kf_fd),
-		   fbsd_file_type (kf_type, kf_vnode_type),
-		   kf_offset > -1 ? hex_string (kf_offset) : "-",
-		   fbsd_file_flags (kf_flags));
+  gdb_printf ("  %6s %6s %10s %8s ",
+	      fbsd_file_fd (kf_fd),
+	      fbsd_file_type (kf_type, kf_vnode_type),
+	      kf_offset > -1 ? hex_string (kf_offset) : "-",
+	      fbsd_file_flags (kf_flags));
   if (kf_type == KINFO_FILE_TYPE_SOCKET)
     {
       switch (kf_sock_domain)
@@ -973,16 +973,16 @@ fbsd_info_proc_files_entry (int kf_type, int kf_fd, int kf_flags,
 	    switch (kf_sock_type)
 	      {
 	      case FBSD_SOCK_STREAM:
-		printf_filtered ("unix stream:");
+		gdb_printf ("unix stream:");
 		break;
 	      case FBSD_SOCK_DGRAM:
-		printf_filtered ("unix dgram:");
+		gdb_printf ("unix dgram:");
 		break;
 	      case FBSD_SOCK_SEQPACKET:
-		printf_filtered ("unix seqpacket:");
+		gdb_printf ("unix seqpacket:");
 		break;
 	      default:
-		printf_filtered ("unix <%d>:", kf_sock_type);
+		gdb_printf ("unix <%d>:", kf_sock_type);
 		break;
 	      }
 
@@ -993,26 +993,26 @@ fbsd_info_proc_files_entry (int kf_type, int kf_fd, int kf_flags,
 	    if (saddr_un->sun_path[0] == 0)
 	      saddr_un = reinterpret_cast<const struct fbsd_sockaddr_un *>
 		(kf_sa_peer);
-	    printf_filtered ("%s", saddr_un->sun_path);
+	    gdb_printf ("%s", saddr_un->sun_path);
 	    break;
 	  }
 	case FBSD_AF_INET:
-	  printf_filtered ("%s4 ", fbsd_ipproto (kf_sock_protocol));
+	  gdb_printf ("%s4 ", fbsd_ipproto (kf_sock_protocol));
 	  fbsd_print_sockaddr_in (kf_sa_local);
-	  printf_filtered (" -> ");
+	  gdb_printf (" -> ");
 	  fbsd_print_sockaddr_in (kf_sa_peer);
 	  break;
 	case FBSD_AF_INET6:
-	  printf_filtered ("%s6 ", fbsd_ipproto (kf_sock_protocol));
+	  gdb_printf ("%s6 ", fbsd_ipproto (kf_sock_protocol));
 	  fbsd_print_sockaddr_in6 (kf_sa_local);
-	  printf_filtered (" -> ");
+	  gdb_printf (" -> ");
 	  fbsd_print_sockaddr_in6 (kf_sa_peer);
 	  break;
 	}
     }
   else
-    printf_filtered ("%s", reinterpret_cast<const char *> (kf_path));
-  printf_filtered ("\n");
+    gdb_printf ("%s", reinterpret_cast<const char *> (kf_path));
+  gdb_printf ("\n");
 }
 
 /* Implement "info proc files" for a corefile.  */
@@ -1098,20 +1098,20 @@ fbsd_vm_map_entry_flags (int kve_flags, int kve_protection)
 void
 fbsd_info_proc_mappings_header (int addr_bit)
 {
-  printf_filtered (_("Mapped address spaces:\n\n"));
+  gdb_printf (_("Mapped address spaces:\n\n"));
   if (addr_bit == 64)
     {
-      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
-		       "Start Addr",
-		       "  End Addr",
-		       "      Size", "    Offset", "Flags  ", "File");
+      gdb_printf ("  %18s %18s %10s %10s %9s %s\n",
+		  "Start Addr",
+		  "  End Addr",
+		  "      Size", "    Offset", "Flags  ", "File");
     }
   else
     {
-      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
-		       "Start Addr",
-		       "  End Addr",
-		       "      Size", "    Offset", "Flags  ", "File");
+      gdb_printf ("\t%10s %10s %10s %10s %9s %s\n",
+		  "Start Addr",
+		  "  End Addr",
+		  "      Size", "    Offset", "Flags  ", "File");
     }
 }
 
@@ -1125,23 +1125,23 @@ fbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
 {
   if (addr_bit == 64)
     {
-      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
-		       hex_string (kve_start),
-		       hex_string (kve_end),
-		       hex_string (kve_end - kve_start),
-		       hex_string (kve_offset),
-		       fbsd_vm_map_entry_flags (kve_flags, kve_protection),
-		       reinterpret_cast<const char *> (kve_path));
+      gdb_printf ("  %18s %18s %10s %10s %9s %s\n",
+		  hex_string (kve_start),
+		  hex_string (kve_end),
+		  hex_string (kve_end - kve_start),
+		  hex_string (kve_offset),
+		  fbsd_vm_map_entry_flags (kve_flags, kve_protection),
+		  reinterpret_cast<const char *> (kve_path));
     }
   else
     {
-      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
-		       hex_string (kve_start),
-		       hex_string (kve_end),
-		       hex_string (kve_end - kve_start),
-		       hex_string (kve_offset),
-		       fbsd_vm_map_entry_flags (kve_flags, kve_protection),
-		       reinterpret_cast<const char *> (kve_path));
+      gdb_printf ("\t%10s %10s %10s %10s %9s %s\n",
+		  hex_string (kve_start),
+		  hex_string (kve_end),
+		  hex_string (kve_end - kve_start),
+		  hex_string (kve_offset),
+		  fbsd_vm_map_entry_flags (kve_flags, kve_protection),
+		  reinterpret_cast<const char *> (kve_path));
     }
 }
 
@@ -1272,11 +1272,11 @@ fbsd_core_fetch_timeval (struct gdbarch *gdbarch, unsigned char *data,
 static void
 fbsd_print_sigset (const char *descr, unsigned char *sigset)
 {
-  printf_filtered ("%s: ", descr);
+  gdb_printf ("%s: ", descr);
   for (int i = 0; i < SIG_WORDS; i++)
-    printf_filtered ("%08x ",
-		     (unsigned int) bfd_get_32 (core_bfd, sigset + i * 4));
-  printf_filtered ("\n");
+    gdb_printf ("%08x ",
+		(unsigned int) bfd_get_32 (core_bfd, sigset + i * 4));
+  gdb_printf ("\n");
 }
 
 /* Implement "info proc status" for a corefile.  */
@@ -1336,15 +1336,15 @@ fbsd_core_info_proc_status (struct gdbarch *gdbarch)
       return;
     }
 
-  printf_filtered ("Name: %.19s\n", descdata + kp->ki_comm);
-  printf_filtered ("Process ID: %s\n",
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_pid)));
-  printf_filtered ("Parent process: %s\n",
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_ppid)));
-  printf_filtered ("Process group: %s\n",
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_pgid)));
-  printf_filtered ("Session id: %s\n",
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_sid)));
+  gdb_printf ("Name: %.19s\n", descdata + kp->ki_comm);
+  gdb_printf ("Process ID: %s\n",
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_pid)));
+  gdb_printf ("Parent process: %s\n",
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_ppid)));
+  gdb_printf ("Process group: %s\n",
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_pgid)));
+  gdb_printf ("Session id: %s\n",
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_sid)));
 
   /* FreeBSD 12.0 and later store a 64-bit dev_t at 'ki_tdev'.  Older
      kernels store a 32-bit dev_t at 'ki_tdev_freebsd11'.  In older
@@ -1355,76 +1355,76 @@ fbsd_core_info_proc_status (struct gdbarch *gdbarch)
   value = bfd_get_64 (core_bfd, descdata + kp->ki_tdev);
   if (value == 0)
     value = bfd_get_32 (core_bfd, descdata + kp->ki_tdev_freebsd11);
-  printf_filtered ("TTY: %s\n", pulongest (value));
-  printf_filtered ("TTY owner process group: %s\n",
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_tpgid)));
-  printf_filtered ("User IDs (real, effective, saved): %s %s %s\n",
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_ruid)),
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_uid)),
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_svuid)));
-  printf_filtered ("Group IDs (real, effective, saved): %s %s %s\n",
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_rgid)),
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_groups)),
-		   pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_svgid)));
-  printf_filtered ("Groups: ");
+  gdb_printf ("TTY: %s\n", pulongest (value));
+  gdb_printf ("TTY owner process group: %s\n",
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_tpgid)));
+  gdb_printf ("User IDs (real, effective, saved): %s %s %s\n",
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_ruid)),
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_uid)),
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_svuid)));
+  gdb_printf ("Group IDs (real, effective, saved): %s %s %s\n",
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_rgid)),
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_groups)),
+	      pulongest (bfd_get_32 (core_bfd, descdata + kp->ki_svgid)));
+  gdb_printf ("Groups: ");
   uint16_t ngroups = bfd_get_16 (core_bfd, descdata + kp->ki_ngroups);
   for (int i = 0; i < ngroups; i++)
-    printf_filtered ("%s ",
-		     pulongest (bfd_get_32 (core_bfd,
-					    descdata + kp->ki_groups + i * 4)));
-  printf_filtered ("\n");
+    gdb_printf ("%s ",
+		pulongest (bfd_get_32 (core_bfd,
+				       descdata + kp->ki_groups + i * 4)));
+  gdb_printf ("\n");
   value = bfd_get (long_bit, core_bfd,
 		   descdata + kp->ki_rusage + kp->ru_minflt);
-  printf_filtered ("Minor faults (no memory page): %s\n", pulongest (value));
+  gdb_printf ("Minor faults (no memory page): %s\n", pulongest (value));
   value = bfd_get (long_bit, core_bfd,
 		   descdata + kp->ki_rusage_ch + kp->ru_minflt);
-  printf_filtered ("Minor faults, children: %s\n", pulongest (value));
+  gdb_printf ("Minor faults, children: %s\n", pulongest (value));
   value = bfd_get (long_bit, core_bfd,
 		   descdata + kp->ki_rusage + kp->ru_majflt);
-  printf_filtered ("Major faults (memory page faults): %s\n",
-		   pulongest (value));
+  gdb_printf ("Major faults (memory page faults): %s\n",
+	      pulongest (value));
   value = bfd_get (long_bit, core_bfd,
 		   descdata + kp->ki_rusage_ch + kp->ru_majflt);
-  printf_filtered ("Major faults, children: %s\n", pulongest (value));
+  gdb_printf ("Major faults, children: %s\n", pulongest (value));
   fbsd_core_fetch_timeval (gdbarch,
 			   descdata + kp->ki_rusage + kp->ru_utime,
 			   sec, value);
-  printf_filtered ("utime: %s.%06d\n", plongest (sec), (int) value);
+  gdb_printf ("utime: %s.%06d\n", plongest (sec), (int) value);
   fbsd_core_fetch_timeval (gdbarch,
 			   descdata + kp->ki_rusage + kp->ru_stime,
 			   sec, value);
-  printf_filtered ("stime: %s.%06d\n", plongest (sec), (int) value);
+  gdb_printf ("stime: %s.%06d\n", plongest (sec), (int) value);
   fbsd_core_fetch_timeval (gdbarch,
 			   descdata + kp->ki_rusage_ch + kp->ru_utime,
 			   sec, value);
-  printf_filtered ("utime, children: %s.%06d\n", plongest (sec), (int) value);
+  gdb_printf ("utime, children: %s.%06d\n", plongest (sec), (int) value);
   fbsd_core_fetch_timeval (gdbarch,
 			   descdata + kp->ki_rusage_ch + kp->ru_stime,
 			   sec, value);
-  printf_filtered ("stime, children: %s.%06d\n", plongest (sec), (int) value);
-  printf_filtered ("'nice' value: %d\n",
-		   (int) bfd_get_signed_8 (core_bfd, descdata + kp->ki_nice));
+  gdb_printf ("stime, children: %s.%06d\n", plongest (sec), (int) value);
+  gdb_printf ("'nice' value: %d\n",
+	      (int) bfd_get_signed_8 (core_bfd, descdata + kp->ki_nice));
   fbsd_core_fetch_timeval (gdbarch, descdata + kp->ki_start, sec, value);
-  printf_filtered ("Start time: %s.%06d\n", plongest (sec), (int) value);
-  printf_filtered ("Virtual memory size: %s kB\n",
-		   pulongest (bfd_get (addr_bit, core_bfd,
-				       descdata + kp->ki_size) / 1024));
-  printf_filtered ("Data size: %s pages\n",
-		   pulongest (bfd_get (addr_bit, core_bfd,
-				       descdata + kp->ki_dsize)));
-  printf_filtered ("Stack size: %s pages\n",
-		   pulongest (bfd_get (addr_bit, core_bfd,
-				       descdata + kp->ki_ssize)));
-  printf_filtered ("Text size: %s pages\n",
-		   pulongest (bfd_get (addr_bit, core_bfd,
-				       descdata + kp->ki_tsize)));
-  printf_filtered ("Resident set size: %s pages\n",
-		   pulongest (bfd_get (addr_bit, core_bfd,
-				       descdata + kp->ki_rssize)));
-  printf_filtered ("Maximum RSS: %s pages\n",
-		   pulongest (bfd_get (long_bit, core_bfd,
-				       descdata + kp->ki_rusage
-				       + kp->ru_maxrss)));
+  gdb_printf ("Start time: %s.%06d\n", plongest (sec), (int) value);
+  gdb_printf ("Virtual memory size: %s kB\n",
+	      pulongest (bfd_get (addr_bit, core_bfd,
+				  descdata + kp->ki_size) / 1024));
+  gdb_printf ("Data size: %s pages\n",
+	      pulongest (bfd_get (addr_bit, core_bfd,
+				  descdata + kp->ki_dsize)));
+  gdb_printf ("Stack size: %s pages\n",
+	      pulongest (bfd_get (addr_bit, core_bfd,
+				  descdata + kp->ki_ssize)));
+  gdb_printf ("Text size: %s pages\n",
+	      pulongest (bfd_get (addr_bit, core_bfd,
+				  descdata + kp->ki_tsize)));
+  gdb_printf ("Resident set size: %s pages\n",
+	      pulongest (bfd_get (addr_bit, core_bfd,
+				  descdata + kp->ki_rssize)));
+  gdb_printf ("Maximum RSS: %s pages\n",
+	      pulongest (bfd_get (long_bit, core_bfd,
+				  descdata + kp->ki_rusage
+				  + kp->ru_maxrss)));
   fbsd_print_sigset ("Ignored Signals", descdata + kp->ki_sigignore);
   fbsd_print_sigset ("Caught Signals", descdata + kp->ki_sigcatch);
 }
@@ -1483,7 +1483,7 @@ fbsd_core_info_proc (struct gdbarch *gdbarch, const char *args,
 
   pid = bfd_core_file_pid (core_bfd);
   if (pid != 0)
-    printf_filtered (_("process %d\n"), pid);
+    gdb_printf (_("process %d\n"), pid);
 
   if (do_cmdline)
     {
@@ -1491,7 +1491,7 @@ fbsd_core_info_proc (struct gdbarch *gdbarch, const char *args,
 
       cmdline = bfd_core_file_failing_command (core_bfd);
       if (cmdline)
-	printf_filtered ("cmdline = '%s'\n", cmdline);
+	gdb_printf ("cmdline = '%s'\n", cmdline);
       else
 	warning (_("Command line unavailable"));
     }
@@ -1500,7 +1500,7 @@ fbsd_core_info_proc (struct gdbarch *gdbarch, const char *args,
       gdb::unique_xmalloc_ptr<char> cwd =
 	fbsd_core_vnode_path (gdbarch, KINFO_FILE_FD_TYPE_CWD);
       if (cwd)
-	printf_filtered ("cwd = '%s'\n", cwd.get ());
+	gdb_printf ("cwd = '%s'\n", cwd.get ());
       else
 	warning (_("unable to read current working directory"));
     }
@@ -1509,7 +1509,7 @@ fbsd_core_info_proc (struct gdbarch *gdbarch, const char *args,
       gdb::unique_xmalloc_ptr<char> exe =
 	fbsd_core_vnode_path (gdbarch, KINFO_FILE_FD_TYPE_TEXT);
       if (exe)
-	printf_filtered ("exe = '%s'\n", exe.get ());
+	gdb_printf ("exe = '%s'\n", exe.get ());
       else
 	warning (_("unable to read executable path name"));
     }

@@ -1390,7 +1390,7 @@ static void
 show_remote_exec_file (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *cmd, const char *value)
 {
-  fprintf_filtered (file, "%s\n", get_remote_exec_file ());
+  gdb_printf (file, "%s\n", get_remote_exec_file ());
 }
 
 static int
@@ -1572,19 +1572,19 @@ show_interrupt_sequence (struct ui_file *file, int from_tty,
 			 const char *value)
 {
   if (interrupt_sequence_mode == interrupt_sequence_control_c)
-    fprintf_filtered (file,
-		      _("Send the ASCII ETX character (Ctrl-c) "
-			"to the remote target to interrupt the "
-			"execution of the program.\n"));
+    gdb_printf (file,
+		_("Send the ASCII ETX character (Ctrl-c) "
+		  "to the remote target to interrupt the "
+		  "execution of the program.\n"));
   else if (interrupt_sequence_mode == interrupt_sequence_break)
-    fprintf_filtered (file,
-		      _("send a break signal to the remote target "
-			"to interrupt the execution of the program.\n"));
+    gdb_printf (file,
+		_("send a break signal to the remote target "
+		  "to interrupt the execution of the program.\n"));
   else if (interrupt_sequence_mode == interrupt_sequence_break_g)
-    fprintf_filtered (file,
-		      _("Send a break signal and 'g' a.k.a. Magic SysRq g to "
-			"the remote target to interrupt the execution "
-			"of Linux kernel.\n"));
+    gdb_printf (file,
+		_("Send a break signal and 'g' a.k.a. Magic SysRq g to "
+		  "the remote target to interrupt the execution "
+		  "of Linux kernel.\n"));
   else
     internal_error (__FILE__, __LINE__,
 		    _("Invalid value for interrupt_sequence_mode: %s."),
@@ -1760,19 +1760,19 @@ static void
 show_memory_packet_size (struct memory_packet_config *config)
 {
   if (config->size == 0)
-    printf_filtered (_("The %s is 0 (default). "), config->name);
+    gdb_printf (_("The %s is 0 (default). "), config->name);
   else
-    printf_filtered (_("The %s is %ld. "), config->name, config->size);
+    gdb_printf (_("The %s is %ld. "), config->name, config->size);
   if (config->fixed_p)
-    printf_filtered (_("Packets are fixed at %ld bytes.\n"),
-		     get_fixed_memory_packet_size (config));
+    gdb_printf (_("Packets are fixed at %ld bytes.\n"),
+		get_fixed_memory_packet_size (config));
   else
     {
       remote_target *remote = get_current_remote_target ();
 
       if (remote != NULL)
-	printf_filtered (_("Packets are limited to %ld bytes.\n"),
-			 remote->get_memory_packet_size (config));
+	gdb_printf (_("Packets are limited to %ld bytes.\n"),
+		    remote->get_memory_packet_size (config));
       else
 	gdb_puts ("The actual limit will be further reduced "
 		  "dependent on the target.\n");
@@ -1804,8 +1804,8 @@ show_hardware_watchpoint_limit (struct ui_file *file, int from_tty,
 				struct cmd_list_element *c,
 				const char *value)
 {
-  fprintf_filtered (file, _("The maximum number of target hardware "
-			    "watchpoints is %s.\n"), value);
+  gdb_printf (file, _("The maximum number of target hardware "
+		      "watchpoints is %s.\n"), value);
 }
 
 /* Show the length limit (in bytes) for hardware watchpoints.  */
@@ -1815,8 +1815,8 @@ show_hardware_watchpoint_length_limit (struct ui_file *file, int from_tty,
 				       struct cmd_list_element *c,
 				       const char *value)
 {
-  fprintf_filtered (file, _("The maximum length (in bytes) of a target "
-			    "hardware watchpoint is %s.\n"), value);
+  gdb_printf (file, _("The maximum length (in bytes) of a target "
+		      "hardware watchpoint is %s.\n"), value);
 }
 
 /* Show the number of hardware breakpoints that can be used.  */
@@ -1826,8 +1826,8 @@ show_hardware_breakpoint_limit (struct ui_file *file, int from_tty,
 				struct cmd_list_element *c,
 				const char *value)
 {
-  fprintf_filtered (file, _("The maximum number of target hardware "
-			    "breakpoints is %s.\n"), value);
+  gdb_printf (file, _("The maximum number of target hardware "
+		      "breakpoints is %s.\n"), value);
 }
 
 /* Controls the maximum number of characters to display in the debug output
@@ -1843,8 +1843,8 @@ show_remote_packet_max_chars (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c,
 			      const char *value)
 {
-  fprintf_filtered (file, _("Number of remote packet characters to "
-			    "display is %s.\n"), value);
+  gdb_printf (file, _("Number of remote packet characters to "
+		      "display is %s.\n"), value);
 }
 
 long
@@ -1928,16 +1928,16 @@ show_packet_config_cmd (ui_file *file, struct packet_config *config)
   switch (config->detect)
     {
     case AUTO_BOOLEAN_AUTO:
-      fprintf_filtered (file,
-			_("Support for the `%s' packet "
-			  "is auto-detected, currently %s.\n"),
-			config->name, support);
+      gdb_printf (file,
+		  _("Support for the `%s' packet "
+		    "is auto-detected, currently %s.\n"),
+		  config->name, support);
       break;
     case AUTO_BOOLEAN_TRUE:
     case AUTO_BOOLEAN_FALSE:
-      fprintf_filtered (file,
-			_("Support for the `%s' packet is currently %s.\n"),
-			config->name, support);
+      gdb_printf (file,
+		  _("Support for the `%s' packet is currently %s.\n"),
+		  config->name, support);
       break;
     }
 }
@@ -5027,7 +5027,7 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
       struct uploaded_tp *uploaded_tps = NULL;
 
       if (current_trace_status ()->running)
-	printf_filtered (_("Trace is already running on the target.\n"));
+	gdb_printf (_("Trace is already running on the target.\n"));
 
       upload_tracepoints (&uploaded_tps);
 
@@ -6005,8 +6005,8 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
 
       target_mourn_inferior (inferior_ptid);
       if (print_inferior_events)
-	printf_filtered (_("[Inferior %d (%s) detached]\n"),
-			 inf->num, infpid.c_str ());
+	gdb_printf (_("[Inferior %d (%s) detached]\n"),
+		    inf->num, infpid.c_str ());
     }
   else
     {
@@ -7421,9 +7421,9 @@ remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
     }
 
   if (notif_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"notif: discard queued event: 'Stop' in %s\n",
-			ptid.to_string ().c_str ());
+    gdb_printf (gdb_stdlog,
+		"notif: discard queued event: 'Stop' in %s\n",
+		ptid.to_string ().c_str ());
 
   return result;
 }
@@ -7459,10 +7459,10 @@ remote_target::push_stop_reply (struct stop_reply *new_event)
   rs->stop_reply_queue.push_back (stop_reply_up (new_event));
 
   if (notif_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"notif: push 'Stop' %s to queue %d\n",
-			new_event->ptid.to_string ().c_str (),
-			int (rs->stop_reply_queue.size ()));
+    gdb_printf (gdb_stdlog,
+		"notif: push 'Stop' %s to queue %d\n",
+		new_event->ptid.to_string ().c_str (),
+		int (rs->stop_reply_queue.size ()));
 
   /* Mark the pending event queue only if async mode is currently enabled.
      If async mode is not currently enabled, then, if it later becomes
@@ -7885,9 +7885,9 @@ remote_target::remote_notif_get_pending_events (notif_client *nc)
   if (rs->notif_state->pending_event[nc->id] != NULL)
     {
       if (notif_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "notif: process: '%s' ack pending event\n",
-			    nc->name);
+	gdb_printf (gdb_stdlog,
+		    "notif: process: '%s' ack pending event\n",
+		    nc->name);
 
       /* acknowledge */
       nc->ack (this, nc, rs->buf.data (),
@@ -7906,9 +7906,9 @@ remote_target::remote_notif_get_pending_events (notif_client *nc)
   else
     {
       if (notif_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "notif: process: '%s' no pending reply\n",
-			    nc->name);
+	gdb_printf (gdb_stdlog,
+		    "notif: process: '%s' no pending reply\n",
+		    nc->name);
     }
 }
 
@@ -8261,7 +8261,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 	      /* Zero length reply means that we tried 'S' or 'C' and the
 		 remote system doesn't support it.  */
 	      target_terminal::ours_for_output ();
-	      printf_filtered
+	      gdb_printf
 		("Can't send signals to this remote system.  %s not sent.\n",
 		 gdb_signal_to_name (rs->last_sent_signal));
 	      rs->last_sent_signal = GDB_SIGNAL_0;
@@ -9825,7 +9825,7 @@ remote_target::read_frame (gdb::char_vector *buf_p)
 	      }
 
 	    buf[bc] = '\0';
-	    printf_filtered (_("Invalid run length encoding: %s\n"), buf);
+	    gdb_printf (_("Invalid run length encoding: %s\n"), buf);
 	    return -1;
 	  }
 	default:
@@ -9854,7 +9854,7 @@ static void
 show_watchdog (struct ui_file *file, int from_tty,
 	       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Watchdog timer is %s.\n"), value);
+  gdb_printf (file, _("Watchdog timer is %s.\n"), value);
 }
 
 /* Read a packet from the remote machine, with error checking, and
@@ -9961,7 +9961,7 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 	{
 	  /* We have tried hard enough, and just can't receive the
 	     packet/notification.  Give up.  */
-	  printf_filtered (_("Ignoring packet error, continuing...\n"));
+	  gdb_printf (_("Ignoring packet error, continuing...\n"));
 
 	  /* Skip the ack char if we're in no-ack mode.  */
 	  if (!rs->noack_mode)
@@ -11054,14 +11054,14 @@ compare_sections_command (const char *args, int from_tty)
 	       paddress (target_gdbarch (), lma),
 	       paddress (target_gdbarch (), lma + size));
 
-      printf_filtered ("Section %s, range %s -- %s: ", sectname,
-		       paddress (target_gdbarch (), lma),
-		       paddress (target_gdbarch (), lma + size));
+      gdb_printf ("Section %s, range %s -- %s: ", sectname,
+		  paddress (target_gdbarch (), lma),
+		  paddress (target_gdbarch (), lma + size));
       if (res)
-	printf_filtered ("matched.\n");
+	gdb_printf ("matched.\n");
       else
 	{
-	  printf_filtered ("MIS-MATCHED!\n");
+	  gdb_printf ("MIS-MATCHED!\n");
 	  mismatched++;
 	}
     }
@@ -11069,7 +11069,7 @@ compare_sections_command (const char *args, int from_tty)
     warning (_("One or more sections of the target image does not match\n\
 the loaded file\n"));
   if (args && !matched)
-    printf_filtered (_("No loaded section named '%s'.\n"), args);
+    gdb_printf (_("No loaded section named '%s'.\n"), args);
 }
 
 /* Write LEN bytes from WRITEBUF into OBJECT_NAME/ANNEX at OFFSET
@@ -11631,7 +11631,7 @@ private:
 	if (isprint (c))
 	  gdb_putc (c, &stb);
 	else
-	  fprintf_unfiltered (&stb, "\\x%02x", (unsigned char) c);
+	  gdb_printf (&stb, "\\x%02x", (unsigned char) c);
       }
 
     gdb_puts (stb.string ().c_str ());
@@ -11703,7 +11703,7 @@ threadset_test_cmd (const char *cmd, int tty)
 {
   int sample_thread = SAMPLE_THREAD;
 
-  printf_filtered (_("Remote threadset test\n"));
+  gdb_printf (_("Remote threadset test\n"));
   set_general_thread (sample_thread);
 }
 
@@ -11716,9 +11716,9 @@ threadalive_test (const char *cmd, int tty)
   ptid_t ptid = ptid_t (pid, sample_thread, 0);
 
   if (remote_thread_alive (ptid))
-    printf_filtered ("PASS: Thread alive test\n");
+    gdb_printf ("PASS: Thread alive test\n");
   else
-    printf_filtered ("FAIL: Thread alive test\n");
+    gdb_printf ("FAIL: Thread alive test\n");
 }
 
 void output_threadid (char *title, threadref *ref);
@@ -11730,7 +11730,7 @@ output_threadid (char *title, threadref *ref)
 
   pack_threadid (&hexid[0], ref);	/* Convert thread id into hex.  */
   hexid[16] = 0;
-  printf_filtered ("%s  %s\n", title, (&hexid[0]));
+  gdb_printf ("%s  %s\n", title, (&hexid[0]));
 }
 
 static void
@@ -11741,10 +11741,10 @@ threadlist_test_cmd (const char *cmd, int tty)
   int done, result_count;
   threadref threadlist[3];
 
-  printf_filtered ("Remote Threadlist test\n");
+  gdb_printf ("Remote Threadlist test\n");
   if (!remote_get_threadlist (startflag, &nextthread, 3, &done,
 			      &result_count, &threadlist[0]))
-    printf_filtered ("FAIL: threadlist test\n");
+    gdb_printf ("FAIL: threadlist test\n");
   else
     {
       threadref *scan = threadlist;
@@ -11759,9 +11759,9 @@ void
 display_thread_info (struct gdb_ext_thread_info *info)
 {
   output_threadid ("Threadid: ", &info->threadid);
-  printf_filtered ("Name: %s\n ", info->shortname);
-  printf_filtered ("State: %s\n", info->display);
-  printf_filtered ("other: %s\n\n", info->more_display);
+  gdb_printf ("Name: %s\n ", info->shortname);
+  gdb_printf ("State: %s\n", info->display);
+  gdb_printf ("other: %s\n\n", info->more_display);
 }
 
 int
@@ -11786,9 +11786,9 @@ threadinfo_test_cmd (const char *cmd, int tty)
   int set;
 
   int_to_threadref (&thread, athread);
-  printf_filtered ("Remote Threadinfo test\n");
+  gdb_printf ("Remote Threadinfo test\n");
   if (!get_and_display_threadinfo (&thread))
-    printf_filtered ("FAIL cannot get thread info\n");
+    gdb_printf ("FAIL cannot get thread info\n");
 }
 
 static int
@@ -11801,7 +11801,7 @@ thread_display_step (threadref *ref, void *context)
 static void
 threadlist_update_test_cmd (const char *cmd, int tty)
 {
-  printf_filtered ("Remote Threadlist update test\n");
+  gdb_printf ("Remote Threadlist update test\n");
   remote_threadlist_iterator (thread_display_step, 0, CRAZY_MAX_THREADS);
 }
 
@@ -12312,8 +12312,8 @@ remote_target::remote_hostio_open (inferior *inf, const char *filename,
     {
       static int warning_issued = 0;
 
-      printf_filtered (_("Reading %s from remote target...\n"),
-		       filename);
+      gdb_printf (_("Reading %s from remote target...\n"),
+		  filename);
 
       if (!warning_issued)
 	{
@@ -12901,7 +12901,7 @@ remote_target::remote_file_put (const char *local_file, const char *remote_file,
     remote_hostio_error (remote_errno);
 
   if (from_tty)
-    printf_filtered (_("Successfully sent file \"%s\".\n"), local_file);
+    gdb_printf (_("Successfully sent file \"%s\".\n"), local_file);
 }
 
 void
@@ -12960,7 +12960,7 @@ remote_target::remote_file_get (const char *remote_file, const char *local_file,
     remote_hostio_error (remote_errno);
 
   if (from_tty)
-    printf_filtered (_("Successfully fetched file \"%s\".\n"), remote_file);
+    gdb_printf (_("Successfully fetched file \"%s\".\n"), remote_file);
 }
 
 void
@@ -12984,7 +12984,7 @@ remote_target::remote_file_delete (const char *remote_file, int from_tty)
     remote_hostio_error (remote_errno);
 
   if (from_tty)
-    printf_filtered (_("Successfully deleted file \"%s\".\n"), remote_file);
+    gdb_printf (_("Successfully deleted file \"%s\".\n"), remote_file);
 }
 
 static void
@@ -14151,8 +14151,8 @@ remote_target::remote_btrace_maybe_reopen ()
 	{
 	  btrace_target_pushed = 1;
 	  record_btrace_push_target ();
-	  printf_filtered (_("Target is recording using %s.\n"),
-			   btrace_format_string (rs->btrace_config.format));
+	  gdb_printf (_("Target is recording using %s.\n"),
+		      btrace_format_string (rs->btrace_config.format));
 	}
 
       tp->btrace.target = XCNEW (struct btrace_target_info);
@@ -14651,9 +14651,9 @@ show_range_stepping (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c,
 		     const char *value)
 {
-  fprintf_filtered (file,
-		    _("Debugger's willingness to use range stepping "
-		      "is %s.\n"), value);
+  gdb_printf (file,
+	      _("Debugger's willingness to use range stepping "
+		"is %s.\n"), value);
 }
 
 /* Return true if the vCont;r action is supported by the remote
@@ -14690,17 +14690,17 @@ static void
 show_remote_debug (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of remote protocol is %s.\n"),
-		    value);
+  gdb_printf (file, _("Debugging of remote protocol is %s.\n"),
+	      value);
 }
 
 static void
 show_remote_timeout (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Timeout limit to wait for target to respond is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Timeout limit to wait for target to respond is %s.\n"),
+	      value);
 }
 
 /* Implement the "supports_memory_tagging" target_ops method.  */

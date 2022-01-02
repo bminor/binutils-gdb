@@ -258,8 +258,8 @@ compile_cplus_instance::enter_scope (compile_scope &&new_scope)
     {
       if (debug_compile_cplus_scopes)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "entering new scope %s\n",
-			      host_address_to_string (&m_scopes.back ()));
+	  gdb_printf (gdb_stdlog, "entering new scope %s\n",
+		      host_address_to_string (&m_scopes.back ()));
 	}
 
       /* Push the global namespace. */
@@ -284,8 +284,8 @@ compile_cplus_instance::enter_scope (compile_scope &&new_scope)
     {
       if (debug_compile_cplus_scopes)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "staying in current scope -- "
-			      "scopes are identical\n");
+	  gdb_printf (gdb_stdlog, "staying in current scope -- "
+		      "scopes are identical\n");
 	}
     }
 }
@@ -305,8 +305,8 @@ compile_cplus_instance::leave_scope ()
     {
       if (debug_compile_cplus_scopes)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "leaving scope %s\n",
-			      host_address_to_string (&current));
+	  gdb_printf (gdb_stdlog, "leaving scope %s\n",
+		      host_address_to_string (&current));
 	}
 
       /* Pop namespaces.  */
@@ -324,8 +324,8 @@ compile_cplus_instance::leave_scope ()
   else
     {
       if (debug_compile_cplus_scopes)
-	fprintf_unfiltered (gdb_stdlog,
-			    "identical scopes -- not leaving scope\n");
+	gdb_printf (gdb_stdlog,
+		    "identical scopes -- not leaving scope\n");
     }
 }
 
@@ -1239,7 +1239,7 @@ compile_cplus_instance::gcc_cplus_leave_scope
 static void
 compile_cplus_debug_output_1 (ULONGEST arg)
 {
-  fprintf_unfiltered (gdb_stdlog, "%s", pulongest (arg));
+  gdb_printf (gdb_stdlog, "%s", pulongest (arg));
 }
 
 static void
@@ -1363,7 +1363,7 @@ gcc_cp_plugin::build_decl (const char *debug_decltype, const char *name,
 			   const char *filename, unsigned int line_number)
 {
   if (debug_compile_cplus_types)
-    fprintf_unfiltered (gdb_stdlog, "<%s> ", debug_decltype);
+    gdb_printf (gdb_stdlog, "<%s> ", debug_decltype);
 
   return build_decl (name, sym_kind, sym_type, substitution_name,
 		     address, filename, line_number);
@@ -1375,7 +1375,7 @@ gcc_cp_plugin::start_class_type (const char *debug_name, gcc_decl typedecl,
 				 const char *filename, unsigned int line_number)
 {
   if (debug_compile_cplus_types)
-    fprintf_unfiltered (gdb_stdlog, "<%s> ", debug_name);
+    gdb_printf (gdb_stdlog, "<%s> ", debug_name);
 
   return start_class_type (typedecl, base_classes, filename, line_number);
 }
@@ -1385,7 +1385,7 @@ gcc_cp_plugin::finish_class_type (const char *debug_name,
 				  unsigned long size_in_bytes)
 {
   if (debug_compile_cplus_types)
-    fprintf_unfiltered (gdb_stdlog, "<%s> ", debug_name);
+    gdb_printf (gdb_stdlog, "<%s> ", debug_name);
 
   return finish_class_type (size_in_bytes);
 }
@@ -1394,7 +1394,7 @@ int
 gcc_cp_plugin::pop_binding_level (const char *debug_name)
 {
   if (debug_compile_cplus_types)
-    fprintf_unfiltered (gdb_stdlog, "<%s> ", debug_name);
+    gdb_printf (gdb_stdlog, "<%s> ", debug_name);
 
   return pop_binding_level ();
 }

@@ -246,7 +246,7 @@ def write_debugmethod(f, content, name, return_type, argtypes):
     if return_type != "void":
         print("  " + return_type + " result;", file=f)
     print(
-        '  fprintf_unfiltered (gdb_stdlog, "-> %s->'
+        '  gdb_printf (gdb_stdlog, "-> %s->'
         + name
         + ' (...)\\n", this->beneath ()->shortname ());',
         file=f,
@@ -262,7 +262,7 @@ def write_debugmethod(f, content, name, return_type, argtypes):
 
     # Now print the arguments.
     print(
-        '  fprintf_unfiltered (gdb_stdlog, "<- %s->'
+        '  gdb_printf (gdb_stdlog, "<- %s->'
         + name
         + ' (", this->beneath ()->shortname ());',
         file=f,

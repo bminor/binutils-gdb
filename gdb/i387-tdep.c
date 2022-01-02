@@ -42,7 +42,7 @@ print_i387_value (struct gdbarch *gdbarch,
      point, 19 for the digits and 6 for the exponent adds up to 27.  */
   const struct type *type = i387_ext_type (gdbarch);
   std::string str = target_float_to_string (raw, type, " %-+27.19g");
-  fprintf_filtered (file, "%s", str.c_str ());
+  gdb_printf (file, "%s", str.c_str ());
 }
 
 /* Print the classification for the register contents RAW.  */
@@ -67,7 +67,7 @@ print_i387_ext (struct gdbarch *gdbarch,
     {
       if (fraction[0] == 0x00000000 && fraction[1] == 0x00000000)
 	/* Infinity.  */
-	fprintf_filtered (file, " %cInf", (sign ? '-' : '+'));
+	gdb_printf (file, " %cInf", (sign ? '-' : '+'));
       else if (sign && fraction[0] == 0x00000000 && fraction[1] == 0x40000000)
 	/* Real Indefinite (QNaN).  */
 	gdb_puts (" Real Indefinite (QNaN)", file);
@@ -105,35 +105,35 @@ static void
 print_i387_status_word (int status_p,
 			unsigned int status, struct ui_file *file)
 {
-  fprintf_filtered (file, "Status Word:         ");
+  gdb_printf (file, "Status Word:         ");
   if (!status_p)
     {
-      fprintf_filtered (file, "%s\n", _("<unavailable>"));
+      gdb_printf (file, "%s\n", _("<unavailable>"));
       return;
     }
 
-  fprintf_filtered (file, "%s", hex_string_custom (status, 4));
+  gdb_printf (file, "%s", hex_string_custom (status, 4));
   gdb_puts ("  ", file);
-  fprintf_filtered (file, " %s", (status & 0x0001) ? "IE" : "  ");
-  fprintf_filtered (file, " %s", (status & 0x0002) ? "DE" : "  ");
-  fprintf_filtered (file, " %s", (status & 0x0004) ? "ZE" : "  ");
-  fprintf_filtered (file, " %s", (status & 0x0008) ? "OE" : "  ");
-  fprintf_filtered (file, " %s", (status & 0x0010) ? "UE" : "  ");
-  fprintf_filtered (file, " %s", (status & 0x0020) ? "PE" : "  ");
+  gdb_printf (file, " %s", (status & 0x0001) ? "IE" : "  ");
+  gdb_printf (file, " %s", (status & 0x0002) ? "DE" : "  ");
+  gdb_printf (file, " %s", (status & 0x0004) ? "ZE" : "  ");
+  gdb_printf (file, " %s", (status & 0x0008) ? "OE" : "  ");
+  gdb_printf (file, " %s", (status & 0x0010) ? "UE" : "  ");
+  gdb_printf (file, " %s", (status & 0x0020) ? "PE" : "  ");
   gdb_puts ("  ", file);
-  fprintf_filtered (file, " %s", (status & 0x0080) ? "ES" : "  ");
+  gdb_printf (file, " %s", (status & 0x0080) ? "ES" : "  ");
   gdb_puts ("  ", file);
-  fprintf_filtered (file, " %s", (status & 0x0040) ? "SF" : "  ");
+  gdb_printf (file, " %s", (status & 0x0040) ? "SF" : "  ");
   gdb_puts ("  ", file);
-  fprintf_filtered (file, " %s", (status & 0x0100) ? "C0" : "  ");
-  fprintf_filtered (file, " %s", (status & 0x0200) ? "C1" : "  ");
-  fprintf_filtered (file, " %s", (status & 0x0400) ? "C2" : "  ");
-  fprintf_filtered (file, " %s", (status & 0x4000) ? "C3" : "  ");
+  gdb_printf (file, " %s", (status & 0x0100) ? "C0" : "  ");
+  gdb_printf (file, " %s", (status & 0x0200) ? "C1" : "  ");
+  gdb_printf (file, " %s", (status & 0x0400) ? "C2" : "  ");
+  gdb_printf (file, " %s", (status & 0x4000) ? "C3" : "  ");
 
   gdb_puts ("\n", file);
 
-  fprintf_filtered (file,
-		    "                       TOP: %d\n", ((status >> 11) & 7));
+  gdb_printf (file,
+	      "                       TOP: %d\n", ((status >> 11) & 7));
 }
 
 /* Print the control word CONTROL.  If CONTROL_P is false, then
@@ -143,21 +143,21 @@ static void
 print_i387_control_word (int control_p,
 			 unsigned int control, struct ui_file *file)
 {
-  fprintf_filtered (file, "Control Word:        ");
+  gdb_printf (file, "Control Word:        ");
   if (!control_p)
     {
-      fprintf_filtered (file, "%s\n", _("<unavailable>"));
+      gdb_printf (file, "%s\n", _("<unavailable>"));
       return;
     }
 
-  fprintf_filtered (file, "%s", hex_string_custom (control, 4));
+  gdb_printf (file, "%s", hex_string_custom (control, 4));
   gdb_puts ("  ", file);
-  fprintf_filtered (file, " %s", (control & 0x0001) ? "IM" : "  ");
-  fprintf_filtered (file, " %s", (control & 0x0002) ? "DM" : "  ");
-  fprintf_filtered (file, " %s", (control & 0x0004) ? "ZM" : "  ");
-  fprintf_filtered (file, " %s", (control & 0x0008) ? "OM" : "  ");
-  fprintf_filtered (file, " %s", (control & 0x0010) ? "UM" : "  ");
-  fprintf_filtered (file, " %s", (control & 0x0020) ? "PM" : "  ");
+  gdb_printf (file, " %s", (control & 0x0001) ? "IM" : "  ");
+  gdb_printf (file, " %s", (control & 0x0002) ? "DM" : "  ");
+  gdb_printf (file, " %s", (control & 0x0004) ? "ZM" : "  ");
+  gdb_printf (file, " %s", (control & 0x0008) ? "OM" : "  ");
+  gdb_printf (file, " %s", (control & 0x0010) ? "UM" : "  ");
+  gdb_printf (file, " %s", (control & 0x0020) ? "PM" : "  ");
 
   gdb_puts ("\n", file);
 
@@ -254,7 +254,7 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 	  int i;
 	  int tag = -1;
 
-	  fprintf_filtered (file, "%sR%d: ", fpreg == top ? "=>" : "  ", fpreg);
+	  gdb_printf (file, "%sR%d: ", fpreg == top ? "=>" : "  ", fpreg);
 
 	  if (ftag_p)
 	    {
@@ -288,13 +288,13 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 
 	      gdb_puts ("0x", file);
 	      for (i = 9; i >= 0; i--)
-		fprintf_filtered (file, "%02x", raw[i]);
+		gdb_printf (file, "%02x", raw[i]);
 
 	      if (tag != -1 && tag != 3)
 		print_i387_ext (gdbarch, raw, file);
 	    }
 	  else
-	    fprintf_filtered (file, "%s", _("<unavailable>"));
+	    gdb_printf (file, "%s", _("<unavailable>"));
 
 	  gdb_puts ("\n", file);
 	}
@@ -303,20 +303,20 @@ i387_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
   gdb_puts ("\n", file);
   print_i387_status_word (fstat_p, fstat, file);
   print_i387_control_word (fctrl_p, fctrl, file);
-  fprintf_filtered (file, "Tag Word:            %s\n",
-		    ftag_p ? hex_string_custom (ftag, 4) : _("<unavailable>"));
-  fprintf_filtered (file, "Instruction Pointer: %s:",
-		    fiseg_p ? hex_string_custom (fiseg, 2) : _("<unavailable>"));
-  fprintf_filtered (file, "%s\n",
-		    fioff_p ? hex_string_custom (fioff, 8) : _("<unavailable>"));
-  fprintf_filtered (file, "Operand Pointer:     %s:",
-		    foseg_p ? hex_string_custom (foseg, 2) : _("<unavailable>"));
-  fprintf_filtered (file, "%s\n",
-		    fooff_p ? hex_string_custom (fooff, 8) : _("<unavailable>"));
-  fprintf_filtered (file, "Opcode:              %s\n",
-		    fop_p
-		    ? (hex_string_custom (fop ? (fop | 0xd800) : 0, 4))
-		    : _("<unavailable>"));
+  gdb_printf (file, "Tag Word:            %s\n",
+	      ftag_p ? hex_string_custom (ftag, 4) : _("<unavailable>"));
+  gdb_printf (file, "Instruction Pointer: %s:",
+	      fiseg_p ? hex_string_custom (fiseg, 2) : _("<unavailable>"));
+  gdb_printf (file, "%s\n",
+	      fioff_p ? hex_string_custom (fioff, 8) : _("<unavailable>"));
+  gdb_printf (file, "Operand Pointer:     %s:",
+	      foseg_p ? hex_string_custom (foseg, 2) : _("<unavailable>"));
+  gdb_printf (file, "%s\n",
+	      fooff_p ? hex_string_custom (fooff, 8) : _("<unavailable>"));
+  gdb_printf (file, "Opcode:              %s\n",
+	      fop_p
+	      ? (hex_string_custom (fop ? (fop | 0xd800) : 0, 4))
+	      : _("<unavailable>"));
 }
 
 

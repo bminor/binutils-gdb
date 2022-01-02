@@ -1398,7 +1398,7 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
     {
       if (info_verbose)
 	{
-	  printf_filtered (_("Reading in CTF data for %s..."), filename);
+	  gdb_printf (_("Reading in CTF data for %s..."), filename);
 	  gdb_flush (gdb_stdout);
 	}
 
@@ -1417,7 +1417,7 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
 
       /* Finish up the debug error message.  */
       if (info_verbose)
-	printf_filtered (_("done.\n"));
+	gdb_printf (_("done.\n"));
     }
 }
 
@@ -1601,7 +1601,7 @@ build_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
 
   if (info_verbose)
     {
-      printf_filtered (_("Scanning archive member %s..."), name);
+      gdb_printf (_("Scanning archive member %s..."), name);
       gdb_flush (gdb_stdout);
     }
 

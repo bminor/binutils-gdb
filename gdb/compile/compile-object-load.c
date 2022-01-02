@@ -126,13 +126,13 @@ setup_sections_data::setup_one_section (asection *sect)
 	prot |= GDB_MMAP_PROT_EXEC;
 
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "module \"%s\" section \"%s\" size %s prot %u\n",
-			    bfd_get_filename (m_bfd),
-			    bfd_section_name (sect),
-			    paddress (target_gdbarch (),
-				      bfd_section_size (sect)),
-			    prot);
+	gdb_printf (gdb_stdlog,
+		    "module \"%s\" section \"%s\" size %s prot %u\n",
+		    bfd_get_filename (m_bfd),
+		    bfd_section_name (sect),
+		    paddress (target_gdbarch (),
+			      bfd_section_size (sect)),
+		    prot);
     }
   else
     prot = -1;
@@ -149,11 +149,11 @@ setup_sections_data::setup_one_section (asection *sect)
 				       m_last_prot);
 	  munmap_list.add (addr, m_last_size);
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"allocated %s bytes at %s prot %u\n",
-				paddress (target_gdbarch (), m_last_size),
-				paddress (target_gdbarch (), addr),
-				m_last_prot);
+	    gdb_printf (gdb_stdlog,
+			"allocated %s bytes at %s prot %u\n",
+			paddress (target_gdbarch (), m_last_size),
+			paddress (target_gdbarch (), addr),
+			m_last_prot);
 	}
       else
 	addr = 0;
@@ -713,9 +713,9 @@ compile_object_load (const compile_file_names &file_names,
       if (strcmp (sym->name, "_GLOBAL_OFFSET_TABLE_") == 0)
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"ELF symbol \"%s\" relocated to zero\n",
-				sym->name);
+	    gdb_printf (gdb_stdlog,
+			"ELF symbol \"%s\" relocated to zero\n",
+			sym->name);
 
 	  /* It seems to be a GCC bug, with -mcmodel=large there should be no
 	     need for _GLOBAL_OFFSET_TABLE_.  Together with -fPIE the data
@@ -757,10 +757,10 @@ compile_object_load (const compile_file_names &file_names,
 	  sym->value = 0x8000;
 	  bfd_set_gp_value(abfd.get(), toc_fallback->vma);
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Connectiong ELF symbol \"%s\" to the .toc section (%s)\n",
-				sym->name,
-				paddress (target_gdbarch (), sym->value));
+	    gdb_printf (gdb_stdlog,
+			"Connectiong ELF symbol \"%s\" to the .toc section (%s)\n",
+			sym->name,
+			paddress (target_gdbarch (), sym->value));
 	  continue;
 	}
 
@@ -773,20 +773,20 @@ compile_object_load (const compile_file_names &file_names,
 	case mst_data:
 	  sym->value = BMSYMBOL_VALUE_ADDRESS (bmsym);
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"ELF mst_text symbol \"%s\" relocated to %s\n",
-				sym->name,
-				paddress (target_gdbarch (), sym->value));
+	    gdb_printf (gdb_stdlog,
+			"ELF mst_text symbol \"%s\" relocated to %s\n",
+			sym->name,
+			paddress (target_gdbarch (), sym->value));
 	  break;
 	case mst_text_gnu_ifunc:
 	  sym->value = gnu_ifunc_resolve_addr (target_gdbarch (),
 					       BMSYMBOL_VALUE_ADDRESS (bmsym));
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"ELF mst_text_gnu_ifunc symbol \"%s\" "
-				"relocated to %s\n",
-				sym->name,
-				paddress (target_gdbarch (), sym->value));
+	    gdb_printf (gdb_stdlog,
+			"ELF mst_text_gnu_ifunc symbol \"%s\" "
+			"relocated to %s\n",
+			sym->name,
+			paddress (target_gdbarch (), sym->value));
 	  break;
 	default:
 	  warning (_("Could not find symbol \"%s\" "
@@ -812,11 +812,11 @@ compile_object_load (const compile_file_names &file_names,
       gdb_assert (regs_addr != 0);
       setup_sections_data.munmap_list.add (regs_addr, TYPE_LENGTH (regs_type));
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "allocated %s bytes at %s for registers\n",
-			    paddress (target_gdbarch (),
-				      TYPE_LENGTH (regs_type)),
-			    paddress (target_gdbarch (), regs_addr));
+	gdb_printf (gdb_stdlog,
+		    "allocated %s bytes at %s for registers\n",
+		    paddress (target_gdbarch (),
+			      TYPE_LENGTH (regs_type)),
+		    paddress (target_gdbarch (), regs_addr));
       store_regs (regs_type, regs_addr);
     }
 
@@ -835,11 +835,11 @@ compile_object_load (const compile_file_names &file_names,
       setup_sections_data.munmap_list.add (out_value_addr,
 					   TYPE_LENGTH (out_value_type));
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "allocated %s bytes at %s for printed value\n",
-			    paddress (target_gdbarch (),
-				      TYPE_LENGTH (out_value_type)),
-			    paddress (target_gdbarch (), out_value_addr));
+	gdb_printf (gdb_stdlog,
+		    "allocated %s bytes at %s for printed value\n",
+		    paddress (target_gdbarch (),
+			      TYPE_LENGTH (out_value_type)),
+		    paddress (target_gdbarch (), out_value_addr));
     }
 
   compile_module_up retval (new struct compile_module);

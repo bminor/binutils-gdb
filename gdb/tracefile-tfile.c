@@ -634,7 +634,7 @@ tfile_target::close ()
 void
 tfile_target::files_info ()
 {
-  printf_filtered ("\t`%s'\n", trace_filename);
+  gdb_printf ("\t`%s'\n", trace_filename);
 }
 
 void

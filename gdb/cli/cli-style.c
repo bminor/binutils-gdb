@@ -189,7 +189,7 @@ do_show (const char *what, struct ui_file *file,
   cli_style_option *cso = (cli_style_option *) cmd->context ();
   gdb_puts (_("The "), file);
   fprintf_styled (file, cso->style (), _("\"%s\" style"), cso->name ());
-  fprintf_filtered (file, _(" %s is: %s\n"), what, value);
+  gdb_printf (file, _(" %s is: %s\n"), what, value);
 }
 
 /* See cli-style.h.  */
@@ -299,9 +299,9 @@ show_style_enabled (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
   if (cli_styling)
-    fprintf_filtered (file, _("CLI output styling is enabled.\n"));
+    gdb_printf (file, _("CLI output styling is enabled.\n"));
   else
-    fprintf_filtered (file, _("CLI output styling is disabled.\n"));
+    gdb_printf (file, _("CLI output styling is disabled.\n"));
 }
 
 static void
@@ -309,9 +309,9 @@ show_style_sources (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
   if (source_styling)
-    fprintf_filtered (file, _("Source code styling is enabled.\n"));
+    gdb_printf (file, _("Source code styling is enabled.\n"));
   else
-    fprintf_filtered (file, _("Source code styling is disabled.\n"));
+    gdb_printf (file, _("Source code styling is disabled.\n"));
 }
 
 /* Implement 'show style disassembler'.  */
@@ -321,9 +321,9 @@ show_style_disassembler (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
   if (disassembler_styling)
-    fprintf_filtered (file, _("Disassembler output styling is enabled.\n"));
+    gdb_printf (file, _("Disassembler output styling is enabled.\n"));
   else
-    fprintf_filtered (file, _("Disassembler output styling is disabled.\n"));
+    gdb_printf (file, _("Disassembler output styling is disabled.\n"));
 }
 
 void _initialize_cli_style ();

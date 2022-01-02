@@ -162,15 +162,15 @@ m2_language::print_typedef (struct type *type, struct symbol *new_symbol,
 			    struct ui_file *stream) const
 {
   type = check_typedef (type);
-  fprintf_filtered (stream, "TYPE ");
+  gdb_printf (stream, "TYPE ");
   if (!new_symbol->type ()->name ()
       || strcmp ((new_symbol->type ())->name (),
 		 new_symbol->linkage_name ()) != 0)
-    fprintf_filtered (stream, "%s = ", new_symbol->print_name ());
+    gdb_printf (stream, "%s = ", new_symbol->print_name ());
   else
-    fprintf_filtered (stream, "<builtin> = ");
+    gdb_printf (stream, "<builtin> = ");
   type_print (type, "", stream, 0);
-  fprintf_filtered (stream, ";");
+  gdb_printf (stream, ";");
 }
 
 /* m2_type_name - if a, type, has a name then print it.  */
@@ -199,11 +199,11 @@ m2_range (struct type *type, struct ui_file *stream, int show,
     {
       struct type *target = TYPE_TARGET_TYPE (type);
 
-      fprintf_filtered (stream, "[");
+      gdb_printf (stream, "[");
       print_type_scalar (target, type->bounds ()->low.const_val (), stream);
-      fprintf_filtered (stream, "..");
+      gdb_printf (stream, "..");
       print_type_scalar (target, type->bounds ()->high.const_val (), stream);
-      fprintf_filtered (stream, "]");
+      gdb_printf (stream, "]");
     }
 }
 
@@ -224,14 +224,14 @@ m2_typedef (struct type *type, struct ui_file *stream, int show,
 static void m2_array (struct type *type, struct ui_file *stream,
 		      int show, int level, const struct type_print_options *flags)
 {
-  fprintf_filtered (stream, "ARRAY [");
+  gdb_printf (stream, "ARRAY [");
   if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
       && type->bounds ()->high.kind () != PROP_UNDEFINED)
     {
       if (type->index_type () != 0)
 	{
 	  m2_print_bounds (type->index_type (), stream, show, -1, 0);
-	  fprintf_filtered (stream, "..");
+	  gdb_printf (stream, "..");
 	  m2_print_bounds (type->index_type (), stream, show, -1, 1);
 	}
       else
@@ -239,7 +239,7 @@ static void m2_array (struct type *type, struct ui_file *stream,
 			      / TYPE_LENGTH (TYPE_TARGET_TYPE (type)))),
 		  stream);
     }
-  fprintf_filtered (stream, "] OF ");
+  gdb_printf (stream, "] OF ");
   m2_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level, flags);
 }
 
@@ -248,9 +248,9 @@ m2_pointer (struct type *type, struct ui_file *stream, int show,
 	    int level, const struct type_print_options *flags)
 {
   if (TYPE_CONST (type))
-    fprintf_filtered (stream, "[...] : ");
+    gdb_printf (stream, "[...] : ");
   else
-    fprintf_filtered (stream, "POINTER TO ");
+    gdb_printf (stream, "POINTER TO ");
 
   m2_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level, flags);
 }
@@ -259,7 +259,7 @@ static void
 m2_ref (struct type *type, struct ui_file *stream, int show,
 	int level, const struct type_print_options *flags)
 {
-  fprintf_filtered (stream, "VAR");
+  gdb_printf (stream, "VAR");
   m2_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level, flags);
 }
 
@@ -267,26 +267,26 @@ static void
 m2_unknown (const char *s, struct type *type, struct ui_file *stream,
 	    int show, int level)
 {
-  fprintf_filtered (stream, "%s %s", s, _("is unknown"));
+  gdb_printf (stream, "%s %s", s, _("is unknown"));
 }
 
 static void m2_union (struct type *type, struct ui_file *stream)
 {
-  fprintf_filtered (stream, "union");
+  gdb_printf (stream, "union");
 }
 
 static void
 m2_procedure (struct type *type, struct ui_file *stream,
 	      int show, int level, const struct type_print_options *flags)
 {
-  fprintf_filtered (stream, "PROCEDURE ");
+  gdb_printf (stream, "PROCEDURE ");
   m2_type_name (type, stream);
   if (TYPE_TARGET_TYPE (type) == NULL
       || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
     {
       int i, len = type->num_fields ();
 
-      fprintf_filtered (stream, " (");
+      gdb_printf (stream, " (");
       for (i = 0; i < len; i++)
 	{
 	  if (i > 0)
@@ -296,7 +296,7 @@ m2_procedure (struct type *type, struct ui_file *stream,
 	    }
 	  m2_print_type (type->field (i).type (), "", stream, -1, 0, flags);
 	}
-      fprintf_filtered (stream, ") : ");
+      gdb_printf (stream, ") : ");
       if (TYPE_TARGET_TYPE (type) != NULL)
 	m2_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, 0, flags);
       else
@@ -323,14 +323,14 @@ m2_print_bounds (struct type *type,
 static void
 m2_short_set (struct type *type, struct ui_file *stream, int show, int level)
 {
-  fprintf_filtered(stream, "SET [");
+  gdb_printf(stream, "SET [");
   m2_print_bounds (type->index_type (), stream,
 		   show - 1, level, 0);
 
-  fprintf_filtered(stream, "..");
+  gdb_printf(stream, "..");
   m2_print_bounds (type->index_type (), stream,
 		   show - 1, level, 1);
-  fprintf_filtered(stream, "]");
+  gdb_printf(stream, "]");
 }
 
 int
@@ -450,26 +450,26 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 
       if (get_long_set_bounds (type, &low, &high))
 	{
-	  fprintf_filtered(stream, "SET OF ");
+	  gdb_printf(stream, "SET OF ");
 	  i = TYPE_N_BASECLASSES (type);
 	  if (m2_is_long_set_of_type (type, &of_type))
 	    m2_print_type (of_type, "", stream, show - 1, level, flags);
 	  else
 	    {
-	      fprintf_filtered(stream, "[");
+	      gdb_printf(stream, "[");
 	      m2_print_bounds (type->field (i).type ()->index_type (),
 			       stream, show - 1, level, 0);
 
-	      fprintf_filtered(stream, "..");
+	      gdb_printf(stream, "..");
 
 	      m2_print_bounds (type->field (len - 1).type ()->index_type (),
 			       stream, show - 1, level, 1);
-	      fprintf_filtered(stream, "]");
+	      gdb_printf(stream, "]");
 	    }
 	}
       else
 	/* i18n: Do not translate the "SET OF" part!  */
-	fprintf_filtered(stream, _("SET OF <unknown>"));
+	gdb_printf(stream, _("SET OF <unknown>"));
 
       return 1;
     }
@@ -536,16 +536,16 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	{
 	  gdb_puts (type->name (), stream);
 	  if (show > 0)
-	    fprintf_filtered (stream, " = ");
+	    gdb_printf (stream, " = ");
 	}
     }
   stream->wrap_here (4);
   if (show < 0)
     {
       if (type->code () == TYPE_CODE_STRUCT)
-	fprintf_filtered (stream, "RECORD ... END ");
+	gdb_printf (stream, "RECORD ... END ");
       else if (type->code () == TYPE_CODE_UNION)
-	fprintf_filtered (stream, "CASE ... END ");
+	gdb_printf (stream, "CASE ... END ");
     }
   else if (show > 0)
     {
@@ -553,10 +553,10 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
       int len = type->num_fields ();
 
       if (type->code () == TYPE_CODE_STRUCT)
-	fprintf_filtered (stream, "RECORD\n");
+	gdb_printf (stream, "RECORD\n");
       else if (type->code () == TYPE_CODE_UNION)
 	/* i18n: Do not translate "CASE" and "OF".  */
-	fprintf_filtered (stream, _("CASE <variant> OF\n"));
+	gdb_printf (stream, _("CASE <variant> OF\n"));
 
       for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	{
@@ -576,13 +576,13 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 		 unnamed fields.  This would lead to misleading
 		 results if the compiler does not put out fields
 		 for such things (I don't know what it does).  */
-	      fprintf_filtered (stream, " : %d",
-				TYPE_FIELD_BITSIZE (type, i));
+	      gdb_printf (stream, " : %d",
+			  TYPE_FIELD_BITSIZE (type, i));
 	    }
-	  fprintf_filtered (stream, ";\n");
+	  gdb_printf (stream, ";\n");
 	}
       
-      fprintf_filtered (stream, "%*sEND ", level, "");
+      gdb_printf (stream, "%*sEND ", level, "");
     }
 }
 
@@ -596,29 +596,29 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
     {
       /* If we just printed a tag name, no need to print anything else.  */
       if (type->name () == NULL)
-	fprintf_filtered (stream, "(...)");
+	gdb_printf (stream, "(...)");
     }
   else if (show > 0 || type->name () == NULL)
     {
-      fprintf_filtered (stream, "(");
+      gdb_printf (stream, "(");
       len = type->num_fields ();
       lastval = 0;
       for (i = 0; i < len; i++)
 	{
 	  QUIT;
 	  if (i > 0)
-	    fprintf_filtered (stream, ", ");
+	    gdb_printf (stream, ", ");
 	  stream->wrap_here (4);
 	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
 	  if (lastval != type->field (i).loc_enumval ())
 	    {
-	      fprintf_filtered (stream, " = %s",
-				plongest (type->field (i).loc_enumval ()));
+	      gdb_printf (stream, " = %s",
+			  plongest (type->field (i).loc_enumval ()));
 	      lastval = type->field (i).loc_enumval ();
 	    }
 	  lastval++;
 	}
-      fprintf_filtered (stream, ")");
+      gdb_printf (stream, ")");
     }
 }

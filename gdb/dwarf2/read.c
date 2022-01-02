@@ -1090,9 +1090,9 @@ static void
 show_dwarf_max_cache_age (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("The upper bound on the age of cached "
-			    "DWARF compilation units is %s.\n"),
-		    value);
+  gdb_printf (file, _("The upper bound on the age of cached "
+		      "DWARF compilation units is %s.\n"),
+	      value);
 }
 
 /* local function prototypes */
@@ -3311,8 +3311,8 @@ dwarf2_base_index_functions::print_stats (struct objfile *objfile,
       if (!per_objfile->symtab_set_p (per_cu))
 	++count;
     }
-  printf_filtered (_("  Number of read CUs: %d\n"), total - count);
-  printf_filtered (_("  Number of unread CUs: %d\n"), count);
+  gdb_printf (_("  Number of read CUs: %d\n"), total - count);
+  gdb_printf (_("  Number of unread CUs: %d\n"), count);
 }
 
 /* This dumps minimal information about the index.
@@ -3326,15 +3326,15 @@ dwarf2_gdb_index::dump (struct objfile *objfile)
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
   gdb_assert (per_objfile->per_bfd->using_index);
-  printf_filtered (".gdb_index:");
+  gdb_printf (".gdb_index:");
   if (per_objfile->per_bfd->index_table != NULL)
     {
-      printf_filtered (" version %d\n",
-		       per_objfile->per_bfd->index_table->version);
+      gdb_printf (" version %d\n",
+		  per_objfile->per_bfd->index_table->version);
     }
   else
-    printf_filtered (" faked for \"readnow\"\n");
-  printf_filtered ("\n");
+    gdb_printf (" faked for \"readnow\"\n");
+  gdb_printf ("\n");
 }
 
 void
@@ -5334,12 +5334,12 @@ dwarf2_debug_names_index::dump (struct objfile *objfile)
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
   gdb_assert (per_objfile->per_bfd->using_index);
-  printf_filtered (".debug_names:");
+  gdb_printf (".debug_names:");
   if (per_objfile->per_bfd->debug_names_table)
-    printf_filtered (" exists\n");
+    gdb_printf (" exists\n");
   else
-    printf_filtered (" faked for \"readnow\"\n");
-  printf_filtered ("\n");
+    gdb_printf (" faked for \"readnow\"\n");
+  gdb_printf ("\n");
 }
 
 void
@@ -6390,11 +6390,11 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
 
   if (dwarf_die_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Read die from %s@0x%x of %s:\n",
-			  section->get_name (),
-			  (unsigned) (begin_info_ptr - section->buffer),
-			  bfd_get_filename (abfd));
+      gdb_printf (gdb_stdlog,
+		  "Read die from %s@0x%x of %s:\n",
+		  section->get_name (),
+		  (unsigned) (begin_info_ptr - section->buffer),
+		  bfd_get_filename (abfd));
       dump_die (comp_unit_die, dwarf_die_debug);
     }
 
@@ -6537,9 +6537,9 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
   int rereading_dwo_cu = 0;
 
   if (dwarf_die_debug)
-    fprintf_unfiltered (gdb_stdlog, "Reading %s unit at offset %s\n",
-			this_cu->is_debug_types ? "type" : "comp",
-			sect_offset_str (this_cu->sect_off));
+    gdb_printf (gdb_stdlog, "Reading %s unit at offset %s\n",
+		this_cu->is_debug_types ? "type" : "comp",
+		sect_offset_str (this_cu->sect_off));
 
   /* If we're reading a TU directly from a DWO file, including a virtual DWO
      file (instead of going through the stub), short-circuit all of this.  */
@@ -6752,9 +6752,9 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
   const gdb_byte *begin_info_ptr, *info_ptr;
 
   if (dwarf_die_debug)
-    fprintf_unfiltered (gdb_stdlog, "Reading %s unit at offset %s\n",
-			this_cu->is_debug_types ? "type" : "comp",
-			sect_offset_str (this_cu->sect_off));
+    gdb_printf (gdb_stdlog, "Reading %s unit at offset %s\n",
+		this_cu->is_debug_types ? "type" : "comp",
+		sect_offset_str (this_cu->sect_off));
 
   gdb_assert (per_objfile->get_cu (this_cu) == nullptr);
 
@@ -18860,11 +18860,11 @@ read_die_and_siblings (const struct die_reader_specs *reader,
 
   if (dwarf_die_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Read die from %s@0x%x of %s:\n",
-			  reader->die_section->get_name (),
-			  (unsigned) (info_ptr - reader->die_section->buffer),
-			  bfd_get_filename (reader->abfd));
+      gdb_printf (gdb_stdlog,
+		  "Read die from %s@0x%x of %s:\n",
+		  reader->die_section->get_name (),
+		  (unsigned) (info_ptr - reader->die_section->buffer),
+		  bfd_get_filename (reader->abfd));
       dump_die (die, dwarf_die_debug);
     }
 
@@ -18966,11 +18966,11 @@ read_full_die (const struct die_reader_specs *reader,
 
   if (dwarf_die_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Read die from %s@0x%x of %s:\n",
-			  reader->die_section->get_name (),
-			  (unsigned) (info_ptr - reader->die_section->buffer),
-			  bfd_get_filename (reader->abfd));
+      gdb_printf (gdb_stdlog,
+		  "Read die from %s@0x%x of %s:\n",
+		  reader->die_section->get_name (),
+		  (unsigned) (info_ptr - reader->die_section->buffer),
+		  bfd_get_filename (reader->abfd));
       dump_die (*diep, dwarf_die_debug);
     }
 
@@ -21131,10 +21131,10 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
 
   if (dwarf_line_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Recording line %u, file %s, address %s\n",
-			  line, lbasename (subfile->name),
-			  paddress (gdbarch, address));
+      gdb_printf (gdb_stdlog,
+		  "Recording line %u, file %s, address %s\n",
+		  line, lbasename (subfile->name),
+		  paddress (gdbarch, address));
     }
 
   if (cu != nullptr)
@@ -21155,10 +21155,10 @@ dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
 
   if (dwarf_line_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Finishing current line, file %s, address %s\n",
-			  lbasename (subfile->name),
-			  paddress (gdbarch, address));
+      gdb_printf (gdb_stdlog,
+		  "Finishing current line, file %s, address %s\n",
+		  lbasename (subfile->name),
+		  paddress (gdbarch, address));
     }
 
   dwarf_record_line_1 (gdbarch, subfile, 0, address, true, cu);
@@ -21169,13 +21169,13 @@ lnp_state_machine::record_line (bool end_sequence)
 {
   if (dwarf_line_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Processing actual line %u: file %u,"
-			  " address %s, is_stmt %u, discrim %u%s\n",
-			  m_line, m_file,
-			  paddress (m_gdbarch, m_address),
-			  m_is_stmt, m_discriminator,
-			  (end_sequence ? "\t(end sequence)" : ""));
+      gdb_printf (gdb_stdlog,
+		  "Processing actual line %u: file %u,"
+		  " address %s, is_stmt %u, discrim %u%s\n",
+		  m_line, m_file,
+		  paddress (m_gdbarch, m_address),
+		  m_is_stmt, m_discriminator,
+		  (end_sequence ? "\t(end sequence)" : ""));
     }
 
   file_entry *fe = current_file ();
@@ -23065,57 +23065,57 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 {
   unsigned int i;
 
-  fprintf_unfiltered (f, "%*sDie: %s (abbrev %d, offset %s)\n",
-		      indent, "",
-		      dwarf_tag_name (die->tag), die->abbrev,
-		      sect_offset_str (die->sect_off));
+  gdb_printf (f, "%*sDie: %s (abbrev %d, offset %s)\n",
+	      indent, "",
+	      dwarf_tag_name (die->tag), die->abbrev,
+	      sect_offset_str (die->sect_off));
 
   if (die->parent != NULL)
-    fprintf_unfiltered (f, "%*s  parent at offset: %s\n",
-			indent, "",
-			sect_offset_str (die->parent->sect_off));
+    gdb_printf (f, "%*s  parent at offset: %s\n",
+		indent, "",
+		sect_offset_str (die->parent->sect_off));
 
-  fprintf_unfiltered (f, "%*s  has children: %s\n",
-		      indent, "",
-		      dwarf_bool_name (die->child != NULL));
+  gdb_printf (f, "%*s  has children: %s\n",
+	      indent, "",
+	      dwarf_bool_name (die->child != NULL));
 
-  fprintf_unfiltered (f, "%*s  attributes:\n", indent, "");
+  gdb_printf (f, "%*s  attributes:\n", indent, "");
 
   for (i = 0; i < die->num_attrs; ++i)
     {
-      fprintf_unfiltered (f, "%*s    %s (%s) ",
-			  indent, "",
-			  dwarf_attr_name (die->attrs[i].name),
-			  dwarf_form_name (die->attrs[i].form));
+      gdb_printf (f, "%*s    %s (%s) ",
+		  indent, "",
+		  dwarf_attr_name (die->attrs[i].name),
+		  dwarf_form_name (die->attrs[i].form));
 
       switch (die->attrs[i].form)
 	{
 	case DW_FORM_addr:
 	case DW_FORM_addrx:
 	case DW_FORM_GNU_addr_index:
-	  fprintf_unfiltered (f, "address: ");
+	  gdb_printf (f, "address: ");
 	  gdb_puts (hex_string (die->attrs[i].as_address ()), f);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:
 	case DW_FORM_block:
 	case DW_FORM_block1:
-	  fprintf_unfiltered (f, "block: size %s",
-			      pulongest (die->attrs[i].as_block ()->size));
+	  gdb_printf (f, "block: size %s",
+		      pulongest (die->attrs[i].as_block ()->size));
 	  break;
 	case DW_FORM_exprloc:
-	  fprintf_unfiltered (f, "expression: size %s",
-			      pulongest (die->attrs[i].as_block ()->size));
+	  gdb_printf (f, "expression: size %s",
+		      pulongest (die->attrs[i].as_block ()->size));
 	  break;
 	case DW_FORM_data16:
-	  fprintf_unfiltered (f, "constant of 16 bytes");
+	  gdb_printf (f, "constant of 16 bytes");
 	  break;
 	case DW_FORM_ref_addr:
-	  fprintf_unfiltered (f, "ref address: ");
+	  gdb_printf (f, "ref address: ");
 	  gdb_puts (hex_string (die->attrs[i].as_unsigned ()), f);
 	  break;
 	case DW_FORM_GNU_ref_alt:
-	  fprintf_unfiltered (f, "alt ref address: ");
+	  gdb_printf (f, "alt ref address: ");
 	  gdb_puts (hex_string (die->attrs[i].as_unsigned ()), f);
 	  break;
 	case DW_FORM_ref1:
@@ -23123,24 +23123,24 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_ref4:
 	case DW_FORM_ref8:
 	case DW_FORM_ref_udata:
-	  fprintf_unfiltered (f, "constant ref: 0x%lx (adjusted)",
-			      (long) (die->attrs[i].as_unsigned ()));
+	  gdb_printf (f, "constant ref: 0x%lx (adjusted)",
+		      (long) (die->attrs[i].as_unsigned ()));
 	  break;
 	case DW_FORM_data1:
 	case DW_FORM_data2:
 	case DW_FORM_data4:
 	case DW_FORM_data8:
 	case DW_FORM_udata:
-	  fprintf_unfiltered (f, "constant: %s",
-			      pulongest (die->attrs[i].as_unsigned ()));
+	  gdb_printf (f, "constant: %s",
+		      pulongest (die->attrs[i].as_unsigned ()));
 	  break;
 	case DW_FORM_sec_offset:
-	  fprintf_unfiltered (f, "section offset: %s",
-			      pulongest (die->attrs[i].as_unsigned ()));
+	  gdb_printf (f, "section offset: %s",
+		      pulongest (die->attrs[i].as_unsigned ()));
 	  break;
 	case DW_FORM_ref_sig8:
-	  fprintf_unfiltered (f, "signature: %s",
-			      hex_string (die->attrs[i].as_signature ()));
+	  gdb_printf (f, "signature: %s",
+		      hex_string (die->attrs[i].as_signature ()));
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:
@@ -23148,37 +23148,37 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_strx:
 	case DW_FORM_GNU_str_index:
 	case DW_FORM_GNU_strp_alt:
-	  fprintf_unfiltered (f, "string: \"%s\" (%s canonicalized)",
-			      die->attrs[i].as_string ()
-			      ? die->attrs[i].as_string () : "",
-			      die->attrs[i].canonical_string_p () ? "is" : "not");
+	  gdb_printf (f, "string: \"%s\" (%s canonicalized)",
+		      die->attrs[i].as_string ()
+		      ? die->attrs[i].as_string () : "",
+		      die->attrs[i].canonical_string_p () ? "is" : "not");
 	  break;
 	case DW_FORM_flag:
 	  if (die->attrs[i].as_boolean ())
-	    fprintf_unfiltered (f, "flag: TRUE");
+	    gdb_printf (f, "flag: TRUE");
 	  else
-	    fprintf_unfiltered (f, "flag: FALSE");
+	    gdb_printf (f, "flag: FALSE");
 	  break;
 	case DW_FORM_flag_present:
-	  fprintf_unfiltered (f, "flag: TRUE");
+	  gdb_printf (f, "flag: TRUE");
 	  break;
 	case DW_FORM_indirect:
 	  /* The reader will have reduced the indirect form to
 	     the "base form" so this form should not occur.  */
-	  fprintf_unfiltered (f,
-			      "unexpected attribute form: DW_FORM_indirect");
+	  gdb_printf (f,
+		      "unexpected attribute form: DW_FORM_indirect");
 	  break;
 	case DW_FORM_sdata:
 	case DW_FORM_implicit_const:
-	  fprintf_unfiltered (f, "constant: %s",
-			      plongest (die->attrs[i].as_signed ()));
+	  gdb_printf (f, "constant: %s",
+		      plongest (die->attrs[i].as_signed ()));
 	  break;
 	default:
-	  fprintf_unfiltered (f, "unsupported attribute form: %d.",
-		   die->attrs[i].form);
+	  gdb_printf (f, "unsupported attribute form: %d.",
+		      die->attrs[i].form);
 	  break;
 	}
-      fprintf_unfiltered (f, "\n");
+      gdb_printf (f, "\n");
     }
 }
 
@@ -23202,16 +23202,16 @@ dump_die_1 (struct ui_file *f, int level, int max_level, struct die_info *die)
 
   if (die->child != NULL)
     {
-      fprintf_unfiltered (f, "%*s  Children:", indent, "");
+      gdb_printf (f, "%*s  Children:", indent, "");
       if (level + 1 < max_level)
 	{
-	  fprintf_unfiltered (f, "\n");
+	  gdb_printf (f, "\n");
 	  dump_die_1 (f, level + 1, max_level, die->child);
 	}
       else
 	{
-	  fprintf_unfiltered (f,
-			      " [not printed, max nesting level reached]\n");
+	  gdb_printf (f,
+		      " [not printed, max nesting level reached]\n");
 	}
     }
 
@@ -24942,9 +24942,9 @@ static void
 show_check_physname (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Whether to check \"physname\" is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Whether to check \"physname\" is %s.\n"),
+	      value);
 }
 
 void _initialize_dwarf2_read ();

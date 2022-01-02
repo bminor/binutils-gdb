@@ -333,17 +333,17 @@ print_recreate_exception_catchpoint (struct breakpoint *b,
   enum exception_event_kind kind = classify_exception_breakpoint (b);
 
   bp_temp = b->disposition == disp_del;
-  fprintf_unfiltered (fp, bp_temp ? "tcatch " : "catch ");
+  gdb_printf (fp, bp_temp ? "tcatch " : "catch ");
   switch (kind)
     {
     case EX_EVENT_THROW:
-      fprintf_unfiltered (fp, "throw");
+      gdb_printf (fp, "throw");
       break;
     case EX_EVENT_CATCH:
-      fprintf_unfiltered (fp, "catch");
+      gdb_printf (fp, "catch");
       break;
     case EX_EVENT_RETHROW:
-      fprintf_unfiltered (fp, "rethrow");
+      gdb_printf (fp, "rethrow");
       break;
     }
   print_recreate_thread (b, fp);

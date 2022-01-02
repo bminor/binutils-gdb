@@ -668,8 +668,8 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 
       if (num_pushes > AVR_MAX_PUSHES)
 	{
-	  fprintf_unfiltered (gdb_stderr, _("Num pushes too large: %d\n"),
-			      num_pushes);
+	  gdb_printf (gdb_stderr, _("Num pushes too large: %d\n"),
+		      num_pushes);
 	  num_pushes = 0;
 	}
 
@@ -1574,9 +1574,9 @@ avr_io_reg_read_command (const char *args, int from_tty)
 
   if (!buf)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("ERR: info io_registers NOT supported "
-			    "by current target\n"));
+      gdb_printf (gdb_stderr,
+		  _("ERR: info io_registers NOT supported "
+		    "by current target\n"));
       return;
     }
 
@@ -1584,12 +1584,12 @@ avr_io_reg_read_command (const char *args, int from_tty)
 
   if (sscanf (bufstr, "%x", &nreg) != 1)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Error fetching number of io registers\n"));
+      gdb_printf (gdb_stderr,
+		  _("Error fetching number of io registers\n"));
       return;
     }
 
-  printf_filtered (_("Target has %u io registers:\n\n"), nreg);
+  gdb_printf (_("Target has %u io registers:\n\n"), nreg);
 
   /* only fetch up to 8 registers at a time to keep the buffer small */
   int step = 8;
@@ -1607,9 +1607,9 @@ avr_io_reg_read_command (const char *args, int from_tty)
 
       if (!buf)
 	{
-	  fprintf_unfiltered (gdb_stderr,
-			      _("ERR: error reading avr.io_reg:%x,%x\n"),
-			      i, j);
+	  gdb_printf (gdb_stderr,
+		      _("ERR: error reading avr.io_reg:%x,%x\n"),
+		      i, j);
 	  return;
 	}
 
@@ -1618,7 +1618,7 @@ avr_io_reg_read_command (const char *args, int from_tty)
 	{
 	  if (sscanf (p, "%[^,],%x;", query, &val) == 2)
 	    {
-	      printf_filtered ("[%02x] %-15s : %02x\n", k, query, val);
+	      gdb_printf ("[%02x] %-15s : %02x\n", k, query, val);
 	      while ((*p != ';') && (*p != '\0'))
 		p++;
 	      p++;		/* skip over ';' */

@@ -63,8 +63,8 @@ remote_notif_ack (remote_target *remote,
   notif_event_up event = nc->alloc_event ();
 
   if (notif_debug)
-    fprintf_unfiltered (gdb_stdlog, "notif: ack '%s'\n",
-			nc->ack_command);
+    gdb_printf (gdb_stdlog, "notif: ack '%s'\n",
+		nc->ack_command);
 
   nc->parse (remote, nc, buf, event.get ());
   nc->ack (remote, nc, buf, event.release ());
@@ -79,7 +79,7 @@ remote_notif_parse (remote_target *remote,
   notif_event_up event = nc->alloc_event ();
 
   if (notif_debug)
-    fprintf_unfiltered (gdb_stdlog, "notif: parse '%s'\n", nc->name);
+    gdb_printf (gdb_stdlog, "notif: parse '%s'\n", nc->name);
 
   nc->parse (remote, nc, buf, event.get ());
 
@@ -145,8 +145,8 @@ handle_notification (struct remote_notif_state *state, const char *buf)
 	 reason thought we didn't, possibly due to timeout on its side.
 	 Just ignore it.  */
       if (notif_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "notif: ignoring resent notification\n");
+	gdb_printf (gdb_stdlog,
+		    "notif: ignoring resent notification\n");
     }
   else
     {
@@ -202,9 +202,9 @@ handle_notification (struct remote_notif_state *state, const char *buf)
 	}
 
       if (notif_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "notif: Notification '%s' captured\n",
-			    nc->name);
+	gdb_printf (gdb_stdlog,
+		    "notif: Notification '%s' captured\n",
+		    nc->name);
     }
 }
 

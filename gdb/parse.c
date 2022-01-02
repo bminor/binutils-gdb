@@ -57,7 +57,7 @@ static void
 show_expressiondebug (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Expression debugging is %s.\n"), value);
+  gdb_printf (file, _("Expression debugging is %s.\n"), value);
 }
 
 
@@ -68,7 +68,7 @@ static void
 show_parserdebug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Parser debugging is %s.\n"), value);
+  gdb_printf (file, _("Parser debugging is %s.\n"), value);
 }
 
 
@@ -635,7 +635,7 @@ parser_fprintf (FILE *x, const char *y, ...)
     gdb_vprintf (gdb_stderr, y, args); 
   else
     {
-      fprintf_unfiltered (gdb_stderr, " Unknown FILE used.\n");
+      gdb_printf (gdb_stderr, " Unknown FILE used.\n");
       gdb_vprintf (gdb_stderr, y, args);
     }
   va_end (args);

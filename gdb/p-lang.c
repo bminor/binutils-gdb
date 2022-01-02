@@ -159,14 +159,14 @@ pascal_language::print_one_char (int c, struct ui_file *stream,
 	  gdb_puts ("''", stream);
 	}
       else
-	fprintf_filtered (stream, "%c", c);
+	gdb_printf (stream, "%c", c);
     }
   else
     {
       if (*in_quotes)
 	gdb_puts ("'", stream);
       *in_quotes = 0;
-      fprintf_filtered (stream, "#%d", (unsigned int) c);
+      gdb_printf (stream, "#%d", (unsigned int) c);
     }
 }
 
@@ -291,9 +291,9 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
 	      in_quotes = 0;
 	    }
 	  printchar (current_char, elttype, stream);
-	  fprintf_filtered (stream, " %p[<repeats %u times>%p]",
-			    metadata_style.style ().ptr (),
-			    reps, nullptr);
+	  gdb_printf (stream, " %p[<repeats %u times>%p]",
+		      metadata_style.style ().ptr (),
+		      reps, nullptr);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
 	  need_comma = 1;

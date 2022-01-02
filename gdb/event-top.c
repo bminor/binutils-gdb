@@ -108,7 +108,7 @@ static void
 show_bt_on_fatal_signal (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *cmd, const char *value)
 {
-  fprintf_filtered (file, _("Backtrace on a fatal signal is %s.\n"), value);
+  gdb_printf (file, _("Backtrace on a fatal signal is %s.\n"), value);
 }
 
 /* Signal handling variables.  */
@@ -495,7 +495,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
       if (main_ui == ui)
 	{
 	  /* If stdin died, we may as well kill gdb.  */
-	  fprintf_unfiltered (gdb_stderr, _("error detected on stdin\n"));
+	  gdb_printf (gdb_stderr, _("error detected on stdin\n"));
 	  quit_command ((char *) 0, 0);
 	}
       else
@@ -1406,7 +1406,7 @@ static void
 show_debug_event_loop_command (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *cmd, const char *value)
 {
-  fprintf_filtered (file, _("Event loop debugging is %s.\n"), value);
+  gdb_printf (file, _("Event loop debugging is %s.\n"), value);
 }
 
 void _initialize_event_top ();

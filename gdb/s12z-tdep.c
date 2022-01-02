@@ -524,7 +524,7 @@ s12z_print_ccw_info (struct gdbarch *gdbarch,
   const int stop_2 = 17;
   for (int i = 0; i < stop_1 - len; ++i)
     gdb_putc (' ', file);
-  fprintf_filtered (file, "0x%04x", ccw);
+  gdb_printf (file, "0x%04x", ccw);
   for (int i = 0; i < stop_2 - len; ++i)
     gdb_putc (' ', file);
   for (int b = 15; b >= 0; --b)
@@ -631,7 +631,7 @@ show_bdccsr_command (const char *args, int from_tty)
   struct string_file output;
   target_rcmd ("bdccsr", &output);
 
-  printf_filtered ("The current BDCCSR value is %s\n", output.string().c_str());
+  gdb_printf ("The current BDCCSR value is %s\n", output.string().c_str());
 }
 
 static struct gdbarch *

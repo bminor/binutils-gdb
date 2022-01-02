@@ -190,9 +190,9 @@ show_tui_active_border_mode (struct ui_file *file,
 			     struct cmd_list_element *c, 
 			     const char *value)
 {
-  fprintf_filtered (file, _("\
+  gdb_printf (file, _("\
 The attribute mode to use for the active TUI window border is \"%s\".\n"),
-		    value);
+	      value);
 }
 
 static const char *tui_border_mode = "normal";
@@ -202,9 +202,9 @@ show_tui_border_mode (struct ui_file *file,
 		      struct cmd_list_element *c, 
 		      const char *value)
 {
-  fprintf_filtered (file, _("\
+  gdb_printf (file, _("\
 The attribute mode to use for the TUI window borders is \"%s\".\n"),
-		    value);
+	      value);
 }
 
 static const char *tui_border_kind = "acs";
@@ -214,8 +214,8 @@ show_tui_border_kind (struct ui_file *file,
 		      struct cmd_list_element *c, 
 		      const char *value)
 {
-  fprintf_filtered (file, _("The kind of border for TUI windows is \"%s\".\n"),
-		    value);
+  gdb_printf (file, _("The kind of border for TUI windows is \"%s\".\n"),
+	      value);
 }
 
 
@@ -332,7 +332,7 @@ static void
 show_tui_resize_message (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("TUI resize messaging is %s.\n"), value);
+  gdb_printf (file, _("TUI resize messaging is %s.\n"), value);
 }
 
 
@@ -698,8 +698,8 @@ tui_set_focus_command (const char *arg, int from_tty)
     error (_("Window \"%s\" is not visible"), arg);
 
   tui_set_win_focus_to (win_info);
-  printf_filtered (_("Focus set to %s window.\n"),
-		   tui_win_with_focus ()->name ());
+  gdb_printf (_("Focus set to %s window.\n"),
+	      tui_win_with_focus ()->name ());
 }
 
 static void
@@ -707,7 +707,7 @@ tui_all_windows_info (const char *arg, int from_tty)
 {
   if (!tui_active)
     {
-      printf_filtered (_("The TUI is not active.\n"));
+      gdb_printf (_("The TUI is not active.\n"));
       return;
     }
 
@@ -792,7 +792,7 @@ static void
 tui_show_tab_width (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("TUI tab width is %s spaces.\n"), value);
+  gdb_printf (file, _("TUI tab width is %s spaces.\n"), value);
 
 }
 
@@ -816,7 +816,7 @@ static void
 tui_show_compact_source (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("TUI source window compactness is %s.\n"), value);
+  gdb_printf (file, _("TUI source window compactness is %s.\n"), value);
 }
 
 /* Set the tab width of the specified window.  */

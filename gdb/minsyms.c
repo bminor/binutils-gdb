@@ -387,10 +387,10 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	{
 	  if (symbol_lookup_debug)
 	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "lookup_minimal_symbol (%s, %s, %s)\n",
-				  name, sfile != NULL ? sfile : "NULL",
-				  objfile_debug_name (objfile));
+	      gdb_printf (gdb_stdlog,
+			  "lookup_minimal_symbol (%s, %s, %s)\n",
+			  name, sfile != NULL ? sfile : "NULL",
+			  objfile_debug_name (objfile));
 	    }
 
 	  /* Do two passes: the first over the ordinary hash table,
@@ -438,9 +438,9 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	{
 	  minimal_symbol *minsym = found.external_symbol.minsym;
 
-	  fprintf_unfiltered (gdb_stdlog,
-			      "lookup_minimal_symbol (...) = %s (external)\n",
-			      host_address_to_string (minsym));
+	  gdb_printf (gdb_stdlog,
+		      "lookup_minimal_symbol (...) = %s (external)\n",
+		      host_address_to_string (minsym));
 	}
       return found.external_symbol;
     }
@@ -452,9 +452,9 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	{
 	  minimal_symbol *minsym = found.file_symbol.minsym;
 
-	  fprintf_unfiltered (gdb_stdlog,
-			      "lookup_minimal_symbol (...) = %s (file-local)\n",
-			      host_address_to_string (minsym));
+	  gdb_printf (gdb_stdlog,
+		      "lookup_minimal_symbol (...) = %s (file-local)\n",
+		      host_address_to_string (minsym));
 	}
       return found.file_symbol;
     }
@@ -466,9 +466,9 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 	{
 	  minimal_symbol *minsym = found.trampoline_symbol.minsym;
 
-	  fprintf_unfiltered (gdb_stdlog,
-			      "lookup_minimal_symbol (...) = %s (trampoline)\n",
-			      host_address_to_string (minsym));
+	  gdb_printf (gdb_stdlog,
+		      "lookup_minimal_symbol (...) = %s (trampoline)\n",
+		      host_address_to_string (minsym));
 	}
 
       return found.trampoline_symbol;
@@ -476,7 +476,7 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 
   /* Not found.  */
   if (symbol_lookup_debug)
-    fprintf_unfiltered (gdb_stdlog, "lookup_minimal_symbol (...) = NULL\n");
+    gdb_printf (gdb_stdlog, "lookup_minimal_symbol (...) = NULL\n");
   return {};
 }
 
@@ -1187,10 +1187,10 @@ minimal_symbol_reader::record_full (gdb::string_view name,
     return (NULL);
 
   if (symtab_create_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog,
-			"Recording minsym:  %-21s  %18s  %4d  %.*s\n",
-			mst_str (ms_type), hex_string (address), section,
-			(int) name.size (), name.data ());
+    gdb_printf (gdb_stdlog,
+		"Recording minsym:  %-21s  %18s  %4d  %.*s\n",
+		mst_str (ms_type), hex_string (address), section,
+		(int) name.size (), name.data ());
 
   if (m_msym_bunch_index == BUNCH_SIZE)
     {
@@ -1394,9 +1394,9 @@ minimal_symbol_reader::install ()
     {
       if (symtab_create_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Installing %d minimal symbols of objfile %s.\n",
-			      m_msym_count, objfile_name (m_objfile));
+	  gdb_printf (gdb_stdlog,
+		      "Installing %d minimal symbols of objfile %s.\n",
+		      m_msym_count, objfile_name (m_objfile));
 	}
 
       /* Allocate enough space, into which we will gather the bunches

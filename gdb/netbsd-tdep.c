@@ -525,20 +525,20 @@ nbsd_get_siginfo_type (struct gdbarch *gdbarch)
 void
 nbsd_info_proc_mappings_header (int addr_bit)
 {
-  printf_filtered (_("Mapped address spaces:\n\n"));
+  gdb_printf (_("Mapped address spaces:\n\n"));
   if (addr_bit == 64)
     {
-      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
-		       "Start Addr",
-		       "  End Addr",
-		       "      Size", "    Offset", "Flags  ", "File");
+      gdb_printf ("  %18s %18s %10s %10s %9s %s\n",
+		  "Start Addr",
+		  "  End Addr",
+		  "      Size", "    Offset", "Flags  ", "File");
     }
   else
     {
-      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
-		       "Start Addr",
-		       "  End Addr",
-		       "      Size", "    Offset", "Flags  ", "File");
+      gdb_printf ("\t%10s %10s %10s %10s %9s %s\n",
+		  "Start Addr",
+		  "  End Addr",
+		  "      Size", "    Offset", "Flags  ", "File");
     }
 }
 
@@ -572,23 +572,23 @@ nbsd_info_proc_mappings_entry (int addr_bit, ULONGEST kve_start,
 {
   if (addr_bit == 64)
     {
-      printf_filtered ("  %18s %18s %10s %10s %9s %s\n",
-		       hex_string (kve_start),
-		       hex_string (kve_end),
-		       hex_string (kve_end - kve_start),
-		       hex_string (kve_offset),
-		       nbsd_vm_map_entry_flags (kve_flags, kve_protection),
-		       kve_path);
+      gdb_printf ("  %18s %18s %10s %10s %9s %s\n",
+		  hex_string (kve_start),
+		  hex_string (kve_end),
+		  hex_string (kve_end - kve_start),
+		  hex_string (kve_offset),
+		  nbsd_vm_map_entry_flags (kve_flags, kve_protection),
+		  kve_path);
     }
   else
     {
-      printf_filtered ("\t%10s %10s %10s %10s %9s %s\n",
-		       hex_string (kve_start),
-		       hex_string (kve_end),
-		       hex_string (kve_end - kve_start),
-		       hex_string (kve_offset),
-		       nbsd_vm_map_entry_flags (kve_flags, kve_protection),
-		       kve_path);
+      gdb_printf ("\t%10s %10s %10s %10s %9s %s\n",
+		  hex_string (kve_start),
+		  hex_string (kve_end),
+		  hex_string (kve_end - kve_start),
+		  hex_string (kve_offset),
+		  nbsd_vm_map_entry_flags (kve_flags, kve_protection),
+		  kve_path);
     }
 }
 

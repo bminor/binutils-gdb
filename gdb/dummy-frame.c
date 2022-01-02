@@ -405,10 +405,10 @@ fprint_dummy_frames (struct ui_file *file)
   struct dummy_frame *s;
 
   for (s = dummy_frame_stack; s != NULL; s = s->next)
-    fprintf_filtered (file, "%s: id=%s, ptid=%s\n",
-		      host_address_to_string (s),
-		      s->id.id.to_string ().c_str (),
-		      s->id.thread->ptid.to_string ().c_str ());
+    gdb_printf (file, "%s: id=%s, ptid=%s\n",
+		host_address_to_string (s),
+		s->id.id.to_string ().c_str (),
+		s->id.thread->ptid.to_string ().c_str ());
 }
 
 static void

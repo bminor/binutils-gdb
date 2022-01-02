@@ -136,10 +136,10 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
     {
       /* Since union fields don't have the concept of offsets, we just
 	 print their sizes.  */
-      fprintf_filtered (stream, "/*                %6s */",
-			(print_in_hex ?
-			 hex_string_custom (TYPE_LENGTH (ftype), 4) :
-			 pulongest (TYPE_LENGTH (ftype))));
+      gdb_printf (stream, "/*                %6s */",
+		  (print_in_hex ?
+		   hex_string_custom (TYPE_LENGTH (ftype), 4) :
+		   pulongest (TYPE_LENGTH (ftype))));
       return;
     }
 
@@ -157,23 +157,23 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
 
       unsigned real_bitpos = bitpos + offset_bitpos;
 
-      fprintf_filtered (stream,
-			(print_in_hex ? "/* 0x%04x: 0x%x" : "/* %6u:%2u  "),
-			real_bitpos / TARGET_CHAR_BIT,
-			real_bitpos % TARGET_CHAR_BIT);
+      gdb_printf (stream,
+		  (print_in_hex ? "/* 0x%04x: 0x%x" : "/* %6u:%2u  "),
+		  real_bitpos / TARGET_CHAR_BIT,
+		  real_bitpos % TARGET_CHAR_BIT);
     }
   else
     {
       /* The position of the field, relative to the beginning of the
 	 struct.  */
-      fprintf_filtered (stream, (print_in_hex ?  "/* 0x%04x" : "/* %6u"),
-			(bitpos + offset_bitpos) / TARGET_CHAR_BIT);
+      gdb_printf (stream, (print_in_hex ?  "/* 0x%04x" : "/* %6u"),
+		  (bitpos + offset_bitpos) / TARGET_CHAR_BIT);
 
-      fprintf_filtered (stream, "     ");
+      gdb_printf (stream, "     ");
     }
 
-  fprintf_filtered (stream, (print_in_hex ? " |  0x%04x */" : " |  %6u */"),
-		    fieldsize_byte);
+  gdb_printf (stream, (print_in_hex ? " |  0x%04x */" : " |  %6u */"),
+	      fieldsize_byte);
 
   end_bitpos = bitpos + fieldsize_bit;
 }
@@ -189,8 +189,8 @@ print_offset_data::finish (struct type *type, int level,
 
   gdb_puts ("\n", stream);
   print_spaces_filtered (level + 4 + print_offset_data::indentation, stream);
-  fprintf_filtered (stream, "/* total size (bytes): %4s */\n",
-		    pulongest (TYPE_LENGTH (type)));
+  gdb_printf (stream, "/* total size (bytes): %4s */\n",
+	      pulongest (TYPE_LENGTH (type)));
 }
 
 
@@ -554,9 +554,9 @@ whatis_exp (const char *exp, int show)
   if (flags.print_offsets
       && (type->code () == TYPE_CODE_STRUCT
 	  || type->code () == TYPE_CODE_UNION))
-    printf_filtered ("/* offset      |    size */  ");
+    gdb_printf ("/* offset      |    size */  ");
 
-  printf_filtered ("type = ");
+  gdb_printf ("type = ");
 
   std::unique_ptr<typedef_hash_table> table_holder;
   std::unique_ptr<ext_lang_type_printers> printer_holder;
@@ -571,15 +571,15 @@ whatis_exp (const char *exp, int show)
 
   if (real_type)
     {
-      printf_filtered ("/* real type = ");
+      gdb_printf ("/* real type = ");
       type_print (real_type, "", gdb_stdout, -1);
       if (! full)
-	printf_filtered (" (incomplete object)");
-      printf_filtered (" */\n");    
+	gdb_printf (" (incomplete object)");
+      gdb_printf (" */\n");    
     }
 
   current_language->print_type (type, "", gdb_stdout, show, 0, &flags);
-  printf_filtered ("\n");
+  gdb_printf ("\n");
 }
 
 static void
@@ -650,7 +650,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       break;
 
     case TYPE_CODE_BOOL:
-      fprintf_filtered (stream, val ? "TRUE" : "FALSE");
+      gdb_printf (stream, val ? "TRUE" : "FALSE");
       break;
 
     case TYPE_CODE_RANGE:
@@ -693,8 +693,8 @@ print_type_fixed_point (struct type *type, struct ui_file *stream)
 {
   std::string small_img = type->fixed_point_scaling_factor ().str ();
 
-  fprintf_filtered (stream, "%s-byte fixed point (small = %s)",
-		    pulongest (TYPE_LENGTH (type)), small_img.c_str ());
+  gdb_printf (stream, "%s-byte fixed point (small = %s)",
+	      pulongest (TYPE_LENGTH (type)), small_img.c_str ());
 }
 
 /* Dump details of a type specified either directly or indirectly.
@@ -733,8 +733,8 @@ static void
 show_print_type_methods (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Printing of methods defined in a class in %s\n"),
-		    value);
+  gdb_printf (file, _("Printing of methods defined in a class in %s\n"),
+	      value);
 }
 
 static bool print_typedefs = true;
@@ -750,8 +750,8 @@ static void
 show_print_type_typedefs (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Printing of typedefs defined in a class in %s\n"),
-		    value);
+  gdb_printf (file, _("Printing of typedefs defined in a class in %s\n"),
+	      value);
 }
 
 /* Limit on the number of nested type definitions to print or -1 to print
@@ -778,14 +778,14 @@ show_print_type_nested_types  (struct ui_file *file, int from_tty,
 {
   if (*value == '0')
     {
-      fprintf_filtered (file,
-			_("Will not print nested types defined in a class\n"));
+      gdb_printf (file,
+		  _("Will not print nested types defined in a class\n"));
     }
   else
     {
-      fprintf_filtered (file,
-			_("Will print %s nested types defined in a class\n"),
-			value);
+      gdb_printf (file,
+		  _("Will print %s nested types defined in a class\n"),
+		  value);
     }
 }
 
@@ -813,9 +813,9 @@ show_print_offsets_and_sizes_in_hex (struct ui_file *file, int from_tty,
 				     struct cmd_list_element *c,
 				     const char *value)
 {
-  fprintf_filtered (file, _("\
+  gdb_printf (file, _("\
 Display of struct members offsets and sizes in hexadecimal is %s\n"),
-		    value);
+	      value);
 }
 
 void _initialize_typeprint ();

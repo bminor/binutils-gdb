@@ -122,20 +122,20 @@ pascal_language::value_print_inner (struct value *val,
 	      }
 	    else
 	      {
-		fprintf_filtered (stream, "{");
+		gdb_printf (stream, "{");
 		/* If this is a virtual function table, print the 0th
 		   entry specially, and the rest of the members normally.  */
 		if (pascal_object_is_vtbl_ptr_type (elttype))
 		  {
 		    i = 1;
-		    fprintf_filtered (stream, "%d vtable entries", len - 1);
+		    gdb_printf (stream, "%d vtable entries", len - 1);
 		  }
 		else
 		  {
 		    i = 0;
 		  }
 		value_print_array_elements (val, stream, recurse, options, i);
-		fprintf_filtered (stream, "}");
+		gdb_printf (stream, "}");
 	      }
 	    break;
 	  }
@@ -266,7 +266,7 @@ pascal_language::value_print_inner (struct value *val,
 				current_language);
 	      if (options->prettyformat)
 		{
-		  fprintf_filtered (stream, "\n");
+		  gdb_printf (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
 		}
 	    }
@@ -292,7 +292,7 @@ pascal_language::value_print_inner (struct value *val,
     case TYPE_CODE_UNION:
       if (recurse && !options->unionprint)
 	{
-	  fprintf_filtered (stream, "{...}");
+	  gdb_printf (stream, "{...}");
 	  break;
 	}
       /* Fall through.  */
@@ -430,9 +430,9 @@ pascal_language::value_print (struct value *val, struct ui_file *stream,
 	}
       else
 	{
-	  fprintf_filtered (stream, "(");
+	  gdb_printf (stream, "(");
 	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") ");
+	  gdb_printf (stream, ") ");
 	}
     }
   common_val_print (val, stream, 0, &opts, current_language);
@@ -443,8 +443,8 @@ static void
 show_pascal_static_field_print (struct ui_file *file, int from_tty,
 				struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Printing of pascal static members is %s.\n"),
-		    value);
+  gdb_printf (file, _("Printing of pascal static members is %s.\n"),
+	      value);
 }
 
 static struct obstack dont_print_vb_obstack;
@@ -520,7 +520,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 
   struct type *type = check_typedef (value_type (val));
 
-  fprintf_filtered (stream, "{");
+  gdb_printf (stream, "{");
   len = type->num_fields ();
   n_baseclasses = TYPE_N_BASECLASSES (type);
 
@@ -553,12 +553,12 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	      && field_is_static (&type->field (i)))
 	    continue;
 	  if (fields_seen)
-	    fprintf_filtered (stream, ", ");
+	    gdb_printf (stream, ", ");
 	  else if (n_baseclasses > 0)
 	    {
 	      if (options->prettyformat)
 		{
-		  fprintf_filtered (stream, "\n");
+		  gdb_printf (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
 		  gdb_puts ("members of ", stream);
 		  gdb_puts (type->name (), stream);
@@ -569,7 +569,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  if (options->prettyformat)
 	    {
-	      fprintf_filtered (stream, "\n");
+	      gdb_printf (stream, "\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
 	  else
@@ -670,11 +670,11 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 
       if (options->prettyformat)
 	{
-	  fprintf_filtered (stream, "\n");
+	  gdb_printf (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);
 	}
     }
-  fprintf_filtered (stream, "}");
+  gdb_printf (stream, "}");
 }
 
 /* Special val_print routine to avoid printing multiple copies of virtual
@@ -761,7 +761,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
 
       if (options->prettyformat)
 	{
-	  fprintf_filtered (stream, "\n");
+	  gdb_printf (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);
 	}
       gdb_puts ("<", stream);

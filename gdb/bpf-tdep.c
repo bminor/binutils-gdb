@@ -76,7 +76,7 @@ static void
 show_bpf_debug (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of BPF is %s.\n"), value);
+  gdb_printf (file, _("Debugging of BPF is %s.\n"), value);
 }
 
 
@@ -136,9 +136,9 @@ bpf_gdb_print_insn (bfd_vma memaddr, disassemble_info *info)
 static CORE_ADDR
 bpf_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
-  fprintf_unfiltered (gdb_stdlog,
-		      "Skipping prologue: start_pc=%s\n",
-		      paddress (gdbarch, start_pc));
+  gdb_printf (gdb_stdlog,
+	      "Skipping prologue: start_pc=%s\n",
+	      paddress (gdbarch, start_pc));
   /* XXX: to be completed.  */
   return start_pc + 0;
 }
@@ -252,8 +252,8 @@ bpf_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     function_call_return_method return_method,
 		     CORE_ADDR struct_addr)
 {
-  fprintf_unfiltered (gdb_stdlog, "Pushing dummy call: sp=%s\n",
-		      paddress (gdbarch, sp));
+  gdb_printf (gdb_stdlog, "Pushing dummy call: sp=%s\n",
+	      paddress (gdbarch, sp));
   /* XXX writeme  */
   return sp;
 }

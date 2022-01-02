@@ -3792,7 +3792,7 @@ cris_supply_gregset (const struct regset *regset, struct regcache *regcache,
 			    (char *)&regp[ERP_REGNUM]);
 
       if (*(char *)&regp[ERP_REGNUM] & 0x1)
-	fprintf_unfiltered (gdb_stderr, "Warning: PC in delay slot\n");
+	gdb_printf (gdb_stderr, "Warning: PC in delay slot\n");
     }
 }
 
@@ -3863,12 +3863,12 @@ cris_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   cris_gdbarch_tdep *tdep = (cris_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   if (tdep != NULL)
     {
-      fprintf_filtered (file, "cris_dump_tdep: tdep->cris_version = %i\n",
-			tdep->cris_version);
-      fprintf_filtered (file, "cris_dump_tdep: tdep->cris_mode = %s\n",
-			tdep->cris_mode);
-      fprintf_filtered (file, "cris_dump_tdep: tdep->cris_dwarf2_cfi = %i\n",
-			tdep->cris_dwarf2_cfi);
+      gdb_printf (file, "cris_dump_tdep: tdep->cris_version = %i\n",
+		  tdep->cris_version);
+      gdb_printf (file, "cris_dump_tdep: tdep->cris_mode = %s\n",
+		  tdep->cris_mode);
+      gdb_printf (file, "cris_dump_tdep: tdep->cris_dwarf2_cfi = %i\n",
+		  tdep->cris_dwarf2_cfi);
     }
 }
 

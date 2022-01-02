@@ -391,19 +391,19 @@ with open("gdbarch.c", "w") as f:
     print("#if defined (GDB_NM_FILE)", file=f)
     print("  gdb_nm_file = GDB_NM_FILE;", file=f)
     print("#endif", file=f)
-    print("  fprintf_filtered (file,", file=f)
+    print("  gdb_printf (file,", file=f)
     print("""		      "gdbarch_dump: GDB_NM_FILE = %s\\n",""", file=f)
     print("		      gdb_nm_file);", file=f)
     for c in components:
         if c.predicate:
-            print("  fprintf_filtered (file,", file=f)
+            print("  gdb_printf (file,", file=f)
             print(
                 f"""                      "gdbarch_dump: gdbarch_{c.name}_p() = %d\\n",""",
                 file=f,
             )
             print(f"                      gdbarch_{c.name}_p (gdbarch));", file=f)
         if isinstance(c, Function):
-            print("  fprintf_filtered (file,", file=f)
+            print("  gdb_printf (file,", file=f)
             print(
                 f"""                      "gdbarch_dump: {c.name} = <%s>\\n",""", file=f
             )
@@ -418,7 +418,7 @@ with open("gdbarch.c", "w") as f:
                 printer = f"core_addr_to_string_nz (gdbarch->{c.name})"
             else:
                 printer = f"plongest (gdbarch->{c.name})"
-            print("  fprintf_filtered (file,", file=f)
+            print("  gdb_printf (file,", file=f)
             print(
                 f"""                      "gdbarch_dump: {c.name} = %s\\n",""", file=f
             )
@@ -454,7 +454,7 @@ with open("gdbarch.c", "w") as f:
                 )
             print("  if (gdbarch_debug >= 2)", file=f)
             print(
-                f"""    fprintf_unfiltered (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
+                f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
                 file=f,
             )
             print("  ", file=f, end="")
@@ -488,7 +488,7 @@ with open("gdbarch.c", "w") as f:
                 print(f"  gdb_assert (gdbarch->{c.name} != {c.predefault});", file=f)
             print("  if (gdbarch_debug >= 2)", file=f)
             print(
-                f"""    fprintf_unfiltered (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
+                f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
                 file=f,
             )
             print(f"  return gdbarch->{c.name};", file=f)
@@ -509,7 +509,7 @@ with open("gdbarch.c", "w") as f:
             print("  gdb_assert (gdbarch != NULL);", file=f)
             print("  if (gdbarch_debug >= 2)", file=f)
             print(
-                f"""    fprintf_unfiltered (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
+                f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
                 file=f,
             )
             print(f"  return gdbarch->{c.name};", file=f)

@@ -62,9 +62,9 @@ show_may_call_functions_p (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c,
 			   const char *value)
 {
-  fprintf_filtered (file,
-		    _("Permission to call functions in the program is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Permission to call functions in the program is %s.\n"),
+	      value);
 }
 
 /* How you should pass arguments to a function depends on whether it
@@ -92,10 +92,10 @@ static void
 show_coerce_float_to_double_p (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Coercion of floats to doubles "
-		      "when calling functions is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Coercion of floats to doubles "
+		"when calling functions is %s.\n"),
+	      value);
 }
 
 /* This boolean tells what gdb should do if a signal is received while
@@ -110,10 +110,10 @@ static void
 show_unwind_on_signal_p (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Unwinding of stack if a signal is "
-		      "received while in a call dummy is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Unwinding of stack if a signal is "
+		"received while in a call dummy is %s.\n"),
+	      value);
 }
 
 /* This boolean tells what gdb should do if a std::terminate call is
@@ -136,10 +136,10 @@ show_unwind_on_terminating_exception_p (struct ui_file *file, int from_tty,
 					const char *value)
 
 {
-  fprintf_filtered (file,
-		    _("Unwind stack if a C++ exception is "
-		      "unhandled while in a call dummy is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Unwind stack if a C++ exception is "
+		"unhandled while in a call dummy is %s.\n"),
+	      value);
 }
 
 /* Perform the standard coercions that are specified

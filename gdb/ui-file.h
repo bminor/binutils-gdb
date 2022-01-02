@@ -126,7 +126,7 @@ public:
 
   /* Print STR, bypassing any paging that might be done by this
      ui_file.  Note that nearly no code should call this -- it's
-     intended for use by printf_filtered, but nothing else.  */
+     intended for use by gdb_printf, but nothing else.  */
   virtual void puts_unfiltered (const char *str)
   {
     this->puts (str);

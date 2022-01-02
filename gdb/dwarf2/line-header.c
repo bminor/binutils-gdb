@@ -35,8 +35,8 @@ line_header::add_include_dir (const char *include_dir)
 	new_size = m_include_dirs.size ();
       else
 	new_size = m_include_dirs.size () + 1;
-      fprintf_unfiltered (gdb_stdlog, "Adding dir %zu: %s\n",
-			  new_size, include_dir);
+      gdb_printf (gdb_stdlog, "Adding dir %zu: %s\n",
+		  new_size, include_dir);
     }
   m_include_dirs.push_back (include_dir);
 }
@@ -54,8 +54,8 @@ line_header::add_file_name (const char *name,
 	new_size = file_names_size ();
       else
 	new_size = file_names_size () + 1;
-      fprintf_unfiltered (gdb_stdlog, "Adding file %zu: %s\n",
-			  new_size, name);
+      gdb_printf (gdb_stdlog, "Adding file %zu: %s\n",
+		  new_size, name);
     }
   m_file_names.emplace_back (name, d_index, mod_time, length);
 }

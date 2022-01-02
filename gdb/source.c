@@ -128,10 +128,10 @@ static void
 show_lines_to_list (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Number of source lines gdb "
-		      "will list by default is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Number of source lines gdb "
+		"will list by default is %s.\n"),
+	      value);
 }
 
 /* Possible values of 'set filename-display'.  */
@@ -152,7 +152,7 @@ static void
 show_filename_display_string (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Filenames are displayed as \"%s\".\n"), value);
+  gdb_printf (file, _("Filenames are displayed as \"%s\".\n"), value);
 }
 
 /* When true GDB will stat and open source files as required, but when
@@ -166,7 +166,7 @@ static void
 show_source_open (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Source opening is \"%s\".\n"), value);
+  gdb_printf (file, _("Source opening is \"%s\".\n"), value);
 }
 
 /* Line number of last line printed.  Default for various commands.
@@ -616,7 +616,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	    {
 	      int save_errno = errno;
 
-	      fprintf_unfiltered (gdb_stderr, "Warning: ");
+	      gdb_printf (gdb_stderr, "Warning: ");
 	      print_sys_errmsg (name, save_errno);
 	    }
 	  else if ((st.st_mode & S_IFMT) != S_IFDIR)
@@ -707,31 +707,31 @@ info_source_command (const char *ignore, int from_tty)
 
   if (!s)
     {
-      printf_filtered (_("No current source file.\n"));
+      gdb_printf (_("No current source file.\n"));
       return;
     }
 
   cust = s->compunit ();
-  printf_filtered (_("Current source file is %s\n"), s->filename);
+  gdb_printf (_("Current source file is %s\n"), s->filename);
   if (s->dirname () != NULL)
-    printf_filtered (_("Compilation directory is %s\n"), s->dirname ());
+    gdb_printf (_("Compilation directory is %s\n"), s->dirname ());
   if (s->fullname)
-    printf_filtered (_("Located in %s\n"), s->fullname);
+    gdb_printf (_("Located in %s\n"), s->fullname);
   const std::vector<off_t> *offsets;
   if (g_source_cache.get_line_charpos (s, &offsets))
-    printf_filtered (_("Contains %d line%s.\n"), (int) offsets->size (),
-		     offsets->size () == 1 ? "" : "s");
+    gdb_printf (_("Contains %d line%s.\n"), (int) offsets->size (),
+		offsets->size () == 1 ? "" : "s");
 
-  printf_filtered (_("Source language is %s.\n"),
-		   language_str (s->language ()));
-  printf_filtered (_("Producer is %s.\n"),
-		   (cust->producer ()) != nullptr
-		    ? cust->producer () : _("unknown"));
-  printf_filtered (_("Compiled with %s debugging format.\n"),
-		   cust->debugformat ());
-  printf_filtered (_("%s preprocessor macro info.\n"),
-		   (cust->macro_table () != nullptr
-		    ? "Includes" : "Does not include"));
+  gdb_printf (_("Source language is %s.\n"),
+	      language_str (s->language ()));
+  gdb_printf (_("Producer is %s.\n"),
+	      (cust->producer ()) != nullptr
+	      ? cust->producer () : _("unknown"));
+  gdb_printf (_("Compiled with %s debugging format.\n"),
+	      cust->debugformat ());
+  gdb_printf (_("%s preprocessor macro info.\n"),
+	      (cust->macro_table () != nullptr
+	       ? "Includes" : "Does not include"));
 }
 
 
@@ -1542,19 +1542,19 @@ info_line_command (const char *arg, int from_tty)
 	{
 	  struct gdbarch *gdbarch = get_current_arch ();
 
-	  printf_filtered (_("No line number information available"));
+	  gdb_printf (_("No line number information available"));
 	  if (sal.pc != 0)
 	    {
 	      /* This is useful for "info line *0x7f34".  If we can't tell the
 		 user about a source line, at least let them have the symbolic
 		 address.  */
-	      printf_filtered (" for address ");
+	      gdb_printf (" for address ");
 	      gdb_stdout->wrap_here (2);
 	      print_address (gdbarch, sal.pc, gdb_stdout);
 	    }
 	  else
-	    printf_filtered (".");
-	  printf_filtered ("\n");
+	    gdb_printf (".");
+	  gdb_printf ("\n");
 	}
       else if (sal.line > 0
 	       && find_line_pc_range (sal, &start_pc, &end_pc))
@@ -1563,27 +1563,27 @@ info_line_command (const char *arg, int from_tty)
 
 	  if (start_pc == end_pc)
 	    {
-	      printf_filtered ("Line %d of \"%s\"",
-			       sal.line,
-			       symtab_to_filename_for_display (sal.symtab));
+	      gdb_printf ("Line %d of \"%s\"",
+			  sal.line,
+			  symtab_to_filename_for_display (sal.symtab));
 	      gdb_stdout->wrap_here (2);
-	      printf_filtered (" is at address ");
+	      gdb_printf (" is at address ");
 	      print_address (gdbarch, start_pc, gdb_stdout);
 	      gdb_stdout->wrap_here (2);
-	      printf_filtered (" but contains no code.\n");
+	      gdb_printf (" but contains no code.\n");
 	    }
 	  else
 	    {
-	      printf_filtered ("Line %d of \"%s\"",
-			       sal.line,
-			       symtab_to_filename_for_display (sal.symtab));
+	      gdb_printf ("Line %d of \"%s\"",
+			  sal.line,
+			  symtab_to_filename_for_display (sal.symtab));
 	      gdb_stdout->wrap_here (2);
-	      printf_filtered (" starts at address ");
+	      gdb_printf (" starts at address ");
 	      print_address (gdbarch, start_pc, gdb_stdout);
 	      gdb_stdout->wrap_here (2);
-	      printf_filtered (" and ends at ");
+	      gdb_printf (" and ends at ");
 	      print_address (gdbarch, end_pc, gdb_stdout);
-	      printf_filtered (".\n");
+	      gdb_printf (".\n");
 	    }
 
 	  /* x/i should display this line's code.  */
@@ -1601,8 +1601,8 @@ info_line_command (const char *arg, int from_tty)
 	/* Is there any case in which we get here, and have an address
 	   which the user would want to see?  If we have debugging symbols
 	   and no line numbers?  */
-	printf_filtered (_("Line number %d is out of range for \"%s\".\n"),
-			 sal.line, symtab_to_filename_for_display (sal.symtab));
+	gdb_printf (_("Line number %d is out of range for \"%s\".\n"),
+		    sal.line, symtab_to_filename_for_display (sal.symtab));
     }
 }
 
@@ -1699,7 +1699,7 @@ search_command_helper (const char *regex, int from_tty, bool forward)
 	}
     }
 
-  printf_filtered (_("Expression not found\n"));
+  gdb_printf (_("Expression not found\n"));
 }
 
 static void
@@ -1757,16 +1757,16 @@ show_substitute_path_command (const char *args, int from_tty)
   /* Print the substitution rules.  */
 
   if (from != NULL)
-    printf_filtered
+    gdb_printf
       (_("Source path substitution rule matching `%s':\n"), from);
   else
-    printf_filtered (_("List of all source path substitution rules:\n"));
+    gdb_printf (_("List of all source path substitution rules:\n"));
 
   for (substitute_path_rule &rule : substitute_path_rules)
     {
       if (from == NULL || substitute_path_rule_matches (&rule, from) != 0)
-	printf_filtered ("  `%s' -> `%s'.\n", rule.from.c_str (),
-			 rule.to.c_str ());
+	gdb_printf ("  `%s' -> `%s'.\n", rule.from.c_str (),
+		    rule.to.c_str ());
     }
 }
 

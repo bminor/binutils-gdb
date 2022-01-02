@@ -1489,10 +1489,10 @@ aarch64_linux_syscall_record (struct regcache *regcache,
 
   if (syscall_gdb < 0)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record and replay target doesn't "
-			    "support syscall number %s\n"),
-			  plongest (svc_number));
+      gdb_printf (gdb_stderr,
+		  _("Process record and replay target doesn't "
+		    "support syscall number %s\n"),
+		  plongest (svc_number));
       return -1;
     }
 

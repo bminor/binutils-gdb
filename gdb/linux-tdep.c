@@ -838,7 +838,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   if (args && args[0])
     error (_("Too many parameters: %s"), args);
 
-  printf_filtered (_("process %ld\n"), pid);
+  gdb_printf (_("process %ld\n"), pid);
   if (cmdline_f)
     {
       xsnprintf (filename, sizeof filename, "/proc/%ld/cmdline", pid);
@@ -856,7 +856,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 		buffer[pos] = ' ';
 	    }
 	  buffer[len - 1] = '\0';
-	  printf_filtered ("cmdline = '%s'\n", buffer);
+	  gdb_printf ("cmdline = '%s'\n", buffer);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), filename);
@@ -867,7 +867,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
       gdb::optional<std::string> contents
 	= target_fileio_readlink (NULL, filename, &target_errno);
       if (contents.has_value ())
-	printf_filtered ("cwd = '%s'\n", contents->c_str ());
+	gdb_printf ("cwd = '%s'\n", contents->c_str ());
       else
 	warning (_("unable to read link '%s'"), filename);
     }
@@ -877,7 +877,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
       gdb::optional<std::string> contents
 	= target_fileio_readlink (NULL, filename, &target_errno);
       if (contents.has_value ())
-	printf_filtered ("exe = '%s'\n", contents->c_str ());
+	gdb_printf ("exe = '%s'\n", contents->c_str ());
       else
 	warning (_("unable to read link '%s'"), filename);
     }
@@ -890,18 +890,18 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	{
 	  char *line;
 
-	  printf_filtered (_("Mapped address spaces:\n\n"));
+	  gdb_printf (_("Mapped address spaces:\n\n"));
 	  if (gdbarch_addr_bit (gdbarch) == 32)
 	    {
-	      printf_filtered ("\t%10s %10s %10s %10s  %s %s\n",
-			       "Start Addr", "  End Addr", "      Size",
-			       "    Offset", "Perms  ", "objfile");
+	      gdb_printf ("\t%10s %10s %10s %10s  %s %s\n",
+			  "Start Addr", "  End Addr", "      Size",
+			  "    Offset", "Perms  ", "objfile");
 	    }
 	  else
 	    {
-	      printf_filtered ("  %18s %18s %10s %10s  %s %s\n",
-			       "Start Addr", "  End Addr", "      Size",
-			       "    Offset", "Perms ", "objfile");
+	      gdb_printf ("  %18s %18s %10s %10s  %s %s\n",
+			  "Start Addr", "  End Addr", "      Size",
+			  "    Offset", "Perms ", "objfile");
 	    }
 
 	  char *saveptr;
@@ -913,25 +913,25 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 
 	      if (gdbarch_addr_bit (gdbarch) == 32)
 		{
-		  printf_filtered ("\t%10s %10s %10s %10s  %-5.*s  %s\n",
-				   paddress (gdbarch, m.addr),
-				   paddress (gdbarch, m.endaddr),
-				   hex_string (m.endaddr - m.addr),
-				   hex_string (m.offset),
-				   (int) m.permissions.size (),
-				   m.permissions.data (),
-				   m.filename);
+		  gdb_printf ("\t%10s %10s %10s %10s  %-5.*s  %s\n",
+			      paddress (gdbarch, m.addr),
+			      paddress (gdbarch, m.endaddr),
+			      hex_string (m.endaddr - m.addr),
+			      hex_string (m.offset),
+			      (int) m.permissions.size (),
+			      m.permissions.data (),
+			      m.filename);
 		}
 	      else
 		{
-		  printf_filtered ("  %18s %18s %10s %10s  %-5.*s  %s\n",
-				   paddress (gdbarch, m.addr),
-				   paddress (gdbarch, m.endaddr),
-				   hex_string (m.endaddr - m.addr),
-				   hex_string (m.offset),
-				   (int) m.permissions.size (),
-				   m.permissions.data (),
-				   m.filename);
+		  gdb_printf ("  %18s %18s %10s %10s  %-5.*s  %s\n",
+			      paddress (gdbarch, m.addr),
+			      paddress (gdbarch, m.endaddr),
+			      hex_string (m.endaddr - m.addr),
+			      hex_string (m.offset),
+			      (int) m.permissions.size (),
+			      m.permissions.data (),
+			      m.filename);
 		}
 	    }
 	}
@@ -957,8 +957,8 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	{
 	  const char *p = statstr.get ();
 
-	  printf_filtered (_("Process: %s\n"),
-			   pulongest (strtoulst (p, &p, 10)));
+	  gdb_printf (_("Process: %s\n"),
+		      pulongest (strtoulst (p, &p, 10)));
 
 	  p = skip_spaces (p);
 	  if (*p == '(')
@@ -968,117 +968,117 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	      const char *ep = strrchr (p, ')');
 	      if (ep != NULL)
 		{
-		  printf_filtered ("Exec file: %.*s\n",
-				   (int) (ep - p - 1), p + 1);
+		  gdb_printf ("Exec file: %.*s\n",
+			      (int) (ep - p - 1), p + 1);
 		  p = ep + 1;
 		}
 	    }
 
 	  p = skip_spaces (p);
 	  if (*p)
-	    printf_filtered (_("State: %c\n"), *p++);
+	    gdb_printf (_("State: %c\n"), *p++);
 
 	  if (*p)
-	    printf_filtered (_("Parent process: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Parent process: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Process group: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Process group: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Session id: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Session id: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("TTY: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("TTY: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("TTY owner process group: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("TTY owner process group: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 
 	  if (*p)
-	    printf_filtered (_("Flags: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Flags: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Minor faults (no memory page): %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Minor faults (no memory page): %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Minor faults, children: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Minor faults, children: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Major faults (memory page faults): %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Major faults (memory page faults): %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Major faults, children: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Major faults, children: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("utime: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("utime: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("stime: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("stime: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("utime, children: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("utime, children: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("stime, children: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("stime, children: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("jiffies remaining in current "
-			       "time slice: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("jiffies remaining in current "
+			  "time slice: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("'nice' value: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("'nice' value: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("jiffies until next timeout: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("jiffies until next timeout: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("jiffies until next SIGALRM: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("jiffies until next SIGALRM: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("start time (jiffies since "
-			       "system boot): %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("start time (jiffies since "
+			  "system boot): %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Virtual memory size: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Virtual memory size: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Resident set size: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Resident set size: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("rlim: %s\n"),
-			     pulongest (strtoulst (p, &p, 10)));
+	    gdb_printf (_("rlim: %s\n"),
+			pulongest (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Start of text: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Start of text: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("End of text: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("End of text: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Start of stack: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Start of stack: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 #if 0	/* Don't know how architecture-dependent the rest is...
 	   Anyway the signal bitmap info is available from "status".  */
 	  if (*p)
-	    printf_filtered (_("Kernel stack pointer: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Kernel stack pointer: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Kernel instr pointer: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Kernel instr pointer: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Pending signals bitmap: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Pending signals bitmap: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Blocked signals bitmap: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Blocked signals bitmap: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Ignored signals bitmap: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Ignored signals bitmap: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("Catched signals bitmap: %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("Catched signals bitmap: %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 	  if (*p)
-	    printf_filtered (_("wchan (system call): %s\n"),
-			     hex_string (strtoulst (p, &p, 10)));
+	    gdb_printf (_("wchan (system call): %s\n"),
+			hex_string (strtoulst (p, &p, 10)));
 #endif
 	}
       else
@@ -1233,39 +1233,39 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
   linux_read_core_file_mappings (gdbarch, core_bfd,
     [=] (ULONGEST count)
       {
-	printf_filtered (_("Mapped address spaces:\n\n"));
+	gdb_printf (_("Mapped address spaces:\n\n"));
 	if (gdbarch_addr_bit (gdbarch) == 32)
 	  {
-	    printf_filtered ("\t%10s %10s %10s %10s %s\n",
-			     "Start Addr",
-			     "  End Addr",
-			     "      Size", "    Offset", "objfile");
+	    gdb_printf ("\t%10s %10s %10s %10s %s\n",
+			"Start Addr",
+			"  End Addr",
+			"      Size", "    Offset", "objfile");
 	  }
 	else
 	  {
-	    printf_filtered ("  %18s %18s %10s %10s %s\n",
-			     "Start Addr",
-			     "  End Addr",
-			     "      Size", "    Offset", "objfile");
+	    gdb_printf ("  %18s %18s %10s %10s %s\n",
+			"Start Addr",
+			"  End Addr",
+			"      Size", "    Offset", "objfile");
 	  }
       },
     [=] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
 	 const char *filename, const bfd_build_id *build_id)
       {
 	if (gdbarch_addr_bit (gdbarch) == 32)
-	  printf_filtered ("\t%10s %10s %10s %10s %s\n",
-			   paddress (gdbarch, start),
-			   paddress (gdbarch, end),
-			   hex_string (end - start),
-			   hex_string (file_ofs),
-			   filename);
+	  gdb_printf ("\t%10s %10s %10s %10s %s\n",
+		      paddress (gdbarch, start),
+		      paddress (gdbarch, end),
+		      hex_string (end - start),
+		      hex_string (file_ofs),
+		      filename);
 	else
-	  printf_filtered ("  %18s %18s %10s %10s %s\n",
-			   paddress (gdbarch, start),
-			   paddress (gdbarch, end),
-			   hex_string (end - start),
-			   hex_string (file_ofs),
-			   filename);
+	  gdb_printf ("  %18s %18s %10s %10s %s\n",
+		      paddress (gdbarch, start),
+		      paddress (gdbarch, end),
+		      hex_string (end - start),
+		      hex_string (file_ofs),
+		      filename);
       });
 }
 
@@ -1284,7 +1284,7 @@ linux_core_info_proc (struct gdbarch *gdbarch, const char *args,
 
       exe = bfd_core_file_failing_command (core_bfd);
       if (exe != NULL)
-	printf_filtered ("exe = '%s'\n", exe);
+	gdb_printf ("exe = '%s'\n", exe);
       else
 	warning (_("unable to find command name in core file"));
     }
@@ -2659,8 +2659,8 @@ static void
 show_use_coredump_filter (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Use of /proc/PID/coredump_filter file to generate"
-			    " corefiles is %s.\n"), value);
+  gdb_printf (file, _("Use of /proc/PID/coredump_filter file to generate"
+		      " corefiles is %s.\n"), value);
 }
 
 /* Display whether the gcore command is dumping mappings marked with
@@ -2670,8 +2670,8 @@ static void
 show_dump_excluded_mappings (struct ui_file *file, int from_tty,
 			     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Dumping of mappings marked with the VM_DONTDUMP"
-			    " flag is %s.\n"), value);
+  gdb_printf (file, _("Dumping of mappings marked with the VM_DONTDUMP"
+		      " flag is %s.\n"), value);
 }
 
 /* To be called from the various GDB_OSABI_LINUX handlers for the

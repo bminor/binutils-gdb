@@ -1048,7 +1048,7 @@ set_disassembler_options (const char *prospective_options)
   valid_options_and_args = gdbarch_valid_disassembler_options (gdbarch);
   if (valid_options_and_args == NULL)
     {
-      fprintf_filtered (gdb_stderr, _("\
+      gdb_printf (gdb_stderr, _("\
 'set disassembler-options ...' is not supported on this architecture.\n"));
       return;
     }
@@ -1084,9 +1084,9 @@ set_disassembler_options (const char *prospective_options)
 	  break;
       if (valid_options->name[i] == NULL)
 	{
-	  fprintf_filtered (gdb_stderr,
-			    _("Invalid disassembler option value: '%s'.\n"),
-			    opt);
+	  gdb_printf (gdb_stderr,
+		      _("Invalid disassembler option value: '%s'.\n"),
+		      opt);
 	  return;
 	}
     }
@@ -1115,8 +1115,8 @@ show_disassembler_options_sfunc (struct ui_file *file, int from_tty,
   if (options == NULL)
     options = "";
 
-  fprintf_filtered (file, _("The current disassembler options are '%s'\n\n"),
-		    options);
+  gdb_printf (file, _("The current disassembler options are '%s'\n\n"),
+	      options);
 
   valid_options_and_args = gdbarch_valid_disassembler_options (gdbarch);
 
@@ -1130,7 +1130,7 @@ show_disassembler_options_sfunc (struct ui_file *file, int from_tty,
 
   valid_options = &valid_options_and_args->options;
 
-  fprintf_filtered (file, _("\
+  gdb_printf (file, _("\
 The following disassembler options are supported for use with the\n\
 'set disassembler-options OPTION [,OPTION]...' command:\n"));
 
@@ -1138,7 +1138,7 @@ The following disassembler options are supported for use with the\n\
     {
       size_t i, max_len = 0;
 
-      fprintf_filtered (file, "\n");
+      gdb_printf (file, "\n");
 
       /* Compute the length of the longest option name.  */
       for (i = 0; valid_options->name[i] != NULL; i++)
@@ -1153,35 +1153,35 @@ The following disassembler options are supported for use with the\n\
 
       for (i = 0, max_len++; valid_options->name[i] != NULL; i++)
 	{
-	  fprintf_filtered (file, "  %s", valid_options->name[i]);
+	  gdb_printf (file, "  %s", valid_options->name[i]);
 	  if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
-	    fprintf_filtered (file, "%s", valid_options->arg[i]->name);
+	    gdb_printf (file, "%s", valid_options->arg[i]->name);
 	  if (valid_options->description[i] != NULL)
 	    {
 	      size_t len = strlen (valid_options->name[i]);
 
 	      if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
 		len += strlen (valid_options->arg[i]->name);
-	      fprintf_filtered (file, "%*c %s", (int) (max_len - len), ' ',
-				valid_options->description[i]);
+	      gdb_printf (file, "%*c %s", (int) (max_len - len), ' ',
+			  valid_options->description[i]);
 	    }
-	  fprintf_filtered (file, "\n");
+	  gdb_printf (file, "\n");
 	}
     }
   else
     {
       size_t i;
-      fprintf_filtered (file, "  ");
+      gdb_printf (file, "  ");
       for (i = 0; valid_options->name[i] != NULL; i++)
 	{
-	  fprintf_filtered (file, "%s", valid_options->name[i]);
+	  gdb_printf (file, "%s", valid_options->name[i]);
 	  if (valid_options->arg != NULL && valid_options->arg[i] != NULL)
-	    fprintf_filtered (file, "%s", valid_options->arg[i]->name);
+	    gdb_printf (file, "%s", valid_options->arg[i]->name);
 	  if (valid_options->name[i + 1] != NULL)
-	    fprintf_filtered (file, ", ");
+	    gdb_printf (file, ", ");
 	  file->wrap_here (2);
 	}
-      fprintf_filtered (file, "\n");
+      gdb_printf (file, "\n");
     }
 
   valid_args = valid_options_and_args->args;
@@ -1191,15 +1191,15 @@ The following disassembler options are supported for use with the\n\
 
       for (i = 0; valid_args[i].name != NULL; i++)
 	{
-	  fprintf_filtered (file, _("\n\
+	  gdb_printf (file, _("\n\
   For the options above, the following values are supported for \"%s\":\n   "),
-			    valid_args[i].name);
+		      valid_args[i].name);
 	  for (j = 0; valid_args[i].values[j] != NULL; j++)
 	    {
-	      fprintf_filtered (file, " %s", valid_args[i].values[j]);
+	      gdb_printf (file, " %s", valid_args[i].values[j]);
 	      file->wrap_here (3);
 	    }
-	  fprintf_filtered (file, "\n");
+	  gdb_printf (file, "\n");
 	}
     }
 }

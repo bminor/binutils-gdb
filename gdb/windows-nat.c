@@ -310,8 +310,8 @@ static void
 check (BOOL ok, const char *file, int line)
 {
   if (!ok)
-    printf_filtered ("error return %s:%d was %u\n", file, line,
-		     (unsigned) GetLastError ());
+    gdb_printf ("error return %s:%d was %u\n", file, line,
+		(unsigned) GetLastError ());
 }
 
 /* See nat/windows-nat.h.  */
@@ -429,11 +429,11 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
      here as well.  */
 
   if (info_verbose)
-    printf_filtered ("[Deleting %s]\n", target_pid_to_str (ptid).c_str ());
+    gdb_printf ("[Deleting %s]\n", target_pid_to_str (ptid).c_str ());
   else if (print_thread_events && !main_thread_p)
-    printf_filtered (_("[%s exited with code %u]\n"),
-		     target_pid_to_str (ptid).c_str (),
-		     (unsigned) exit_code);
+    gdb_printf (_("[%s exited with code %u]\n"),
+		target_pid_to_str (ptid).c_str (),
+		(unsigned) exit_code);
 
   delete_thread (find_thread_ptid (&the_windows_nat_target, ptid));
 
@@ -941,7 +941,7 @@ display_selector (HANDLE thread, DWORD sel)
   if (ret)
     {
       int base, limit;
-      printf_filtered ("0x%03x: ", (unsigned) sel);
+      gdb_printf ("0x%03x: ", (unsigned) sel);
       if (!info.HighWord.Bits.Pres)
 	{
 	  gdb_puts ("Segment not present\n");
@@ -953,7 +953,7 @@ display_selector (HANDLE thread, DWORD sel)
       limit = (info.HighWord.Bits.LimitHi << 16) + info.LimitLow;
       if (info.HighWord.Bits.Granularity)
 	limit = (limit << 12) | 0xfff;
-      printf_filtered ("base=0x%08x limit=0x%08x", base, limit);
+      gdb_printf ("base=0x%08x limit=0x%08x", base, limit);
       if (info.HighWord.Bits.Default_Big)
 	gdb_puts(" 32-bit ");
       else
@@ -985,16 +985,16 @@ display_selector (HANDLE thread, DWORD sel)
 	  gdb_puts ("Code (Exec/Read, Conf");
 	  break;
 	default:
-	  printf_filtered ("Unknown type 0x%lx",
-			   (unsigned long) info.HighWord.Bits.Type);
+	  gdb_printf ("Unknown type 0x%lx",
+		      (unsigned long) info.HighWord.Bits.Type);
 	}
       if ((info.HighWord.Bits.Type & 0x1) == 0)
 	gdb_puts(", N.Acc");
       gdb_puts (")\n");
       if ((info.HighWord.Bits.Type & 0x10) == 0)
 	gdb_puts("System selector ");
-      printf_filtered ("Priviledge level = %ld. ",
-		       (unsigned long) info.HighWord.Bits.Dpl);
+      gdb_printf ("Priviledge level = %ld. ",
+		  (unsigned long) info.HighWord.Bits.Dpl);
       if (info.HighWord.Bits.Granularity)
 	gdb_puts ("Page granular.\n");
       else
@@ -1005,9 +1005,9 @@ display_selector (HANDLE thread, DWORD sel)
     {
       DWORD err = GetLastError ();
       if (err == ERROR_NOT_SUPPORTED)
-	printf_filtered ("Function not supported\n");
+	gdb_printf ("Function not supported\n");
       else
-	printf_filtered ("Invalid selector 0x%x.\n", (unsigned) sel);
+	gdb_printf ("Invalid selector 0x%x.\n", (unsigned) sel);
       return 0;
     }
 }
@@ -1075,7 +1075,7 @@ display_selectors (const char * args, int from_tty)
     {
       int sel;
       sel = parse_and_eval_long (args);
-      printf_filtered ("Selector \"%s\"\n",args);
+      gdb_printf ("Selector \"%s\"\n",args);
       display_selector (current_windows_thread->h, sel);
     }
 }
@@ -1631,11 +1631,11 @@ windows_nat_target::get_windows_debug_event (int pid,
     default:
       if (saw_create != 1)
 	break;
-      printf_filtered ("gdb: kernel event for pid=%u tid=0x%x\n",
-		       (unsigned) current_event.dwProcessId,
-		       (unsigned) current_event.dwThreadId);
-      printf_filtered ("                 unknown event code %u\n",
-		       (unsigned) current_event.dwDebugEventCode);
+      gdb_printf ("gdb: kernel event for pid=%u tid=0x%x\n",
+		  (unsigned) current_event.dwProcessId,
+		  (unsigned) current_event.dwThreadId);
+      gdb_printf ("                 unknown event code %u\n",
+		  (unsigned) current_event.dwDebugEventCode);
       break;
     }
 
@@ -2071,9 +2071,9 @@ windows_nat_target::files_info ()
 {
   struct inferior *inf = current_inferior ();
 
-  printf_filtered ("\tUsing the running image of %s %s.\n",
-		   inf->attach_flag ? "attached" : "child",
-		   target_pid_to_str (inferior_ptid).c_str ());
+  gdb_printf ("\tUsing the running image of %s %s.\n",
+	      inf->attach_flag ? "attached" : "child",
+	      target_pid_to_str (inferior_ptid).c_str ());
 }
 
 /* Modify CreateProcess parameters for use of a new separate console.

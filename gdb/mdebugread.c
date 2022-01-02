@@ -371,11 +371,11 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
   if (compare_glevel (max_glevel, GLEVEL_2) < 0)
     {
       if (max_gdbinfo == 0)
-	printf_filtered (_("\n%s not compiled with -g, "
-			   "debugging support is limited.\n"),
-			 objfile->name);
-      printf_filtered (_("You should compile with -g2 or "
-			 "-g3 for best debugging support.\n"));
+	gdb_printf (_("\n%s not compiled with -g, "
+		      "debugging support is limited.\n"),
+		    objfile->name);
+      gdb_printf (_("You should compile with -g2 or "
+		    "-g3 for best debugging support.\n"));
     }
 #endif
 }
@@ -2102,9 +2102,9 @@ parse_external (EXTR *es, int bigend, const section_offsets &section_offsets,
       n_undef_symbols++;
       /* FIXME:  Turn this into a complaint?  */
       if (info_verbose)
-	printf_filtered (_("Warning: %s `%s' is undefined (in %s)\n"),
-			 what, debug_info->ssext + es->asym.iss,
-			 fdr_name (cur_fdr));
+	gdb_printf (_("Warning: %s `%s' is undefined (in %s)\n"),
+		    what, debug_info->ssext + es->asym.iss,
+		    fdr_name (cur_fdr));
       return;
     }
 
@@ -4200,13 +4200,13 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 	 from a shared library, so tell the user only if verbose is on.  */
       if (info_verbose && n_undef_symbols)
 	{
-	  printf_filtered (_("File %s contains %d unresolved references:"),
-			   symtab_to_filename_for_display
-			     (cust->primary_filetab ()),
-			   n_undef_symbols);
-	  printf_filtered ("\n\t%4d variables\n\t%4d "
-			   "procedures\n\t%4d labels\n",
-			   n_undef_vars, n_undef_procs, n_undef_labels);
+	  gdb_printf (_("File %s contains %d unresolved references:"),
+		      symtab_to_filename_for_display
+		      (cust->primary_filetab ()),
+		      n_undef_symbols);
+	  gdb_printf ("\n\t%4d variables\n\t%4d "
+		      "procedures\n\t%4d labels\n",
+		      n_undef_vars, n_undef_procs, n_undef_labels);
 	  n_undef_symbols = n_undef_labels = n_undef_vars = n_undef_procs = 0;
 
 	}

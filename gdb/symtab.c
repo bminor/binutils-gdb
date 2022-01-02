@@ -1416,12 +1416,12 @@ symbol_cache_lookup (struct symbol_cache *cache,
   if (eq_symbol_entry (slot, objfile_context, name, domain))
     {
       if (symbol_lookup_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "%s block symbol cache hit%s for %s, %s\n",
-			    block == GLOBAL_BLOCK ? "Global" : "Static",
-			    slot->state == SYMBOL_SLOT_NOT_FOUND
-			    ? " (not found)" : "",
-			    name, domain_name (domain));
+	gdb_printf (gdb_stdlog,
+		    "%s block symbol cache hit%s for %s, %s\n",
+		    block == GLOBAL_BLOCK ? "Global" : "Static",
+		    slot->state == SYMBOL_SLOT_NOT_FOUND
+		    ? " (not found)" : "",
+		    name, domain_name (domain));
       ++bsc->hits;
       if (slot->state == SYMBOL_SLOT_NOT_FOUND)
 	return SYMBOL_LOOKUP_FAILED;
@@ -1432,10 +1432,10 @@ symbol_cache_lookup (struct symbol_cache *cache,
 
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "%s block symbol cache miss for %s, %s\n",
-			  block == GLOBAL_BLOCK ? "Global" : "Static",
-			  name, domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "%s block symbol cache miss for %s, %s\n",
+		  block == GLOBAL_BLOCK ? "Global" : "Static",
+		  name, domain_name (domain));
     }
   ++bsc->misses;
   return {};
@@ -1543,7 +1543,7 @@ symbol_cache_dump (const struct symbol_cache *cache)
 
   if (cache->global_symbols == NULL)
     {
-      printf_filtered ("  <disabled>\n");
+      gdb_printf ("  <disabled>\n");
       return;
     }
 
@@ -1554,9 +1554,9 @@ symbol_cache_dump (const struct symbol_cache *cache)
       unsigned int i;
 
       if (pass == 0)
-	printf_filtered ("Global symbols:\n");
+	gdb_printf ("Global symbols:\n");
       else
-	printf_filtered ("Static symbols:\n");
+	gdb_printf ("Static symbols:\n");
 
       for (i = 0; i < bsc->size; ++i)
 	{
@@ -1569,20 +1569,20 @@ symbol_cache_dump (const struct symbol_cache *cache)
 	    case SYMBOL_SLOT_UNUSED:
 	      break;
 	    case SYMBOL_SLOT_NOT_FOUND:
-	      printf_filtered ("  [%4u] = %s, %s %s (not found)\n", i,
-			       host_address_to_string (slot->objfile_context),
-			       slot->value.not_found.name,
-			       domain_name (slot->value.not_found.domain));
+	      gdb_printf ("  [%4u] = %s, %s %s (not found)\n", i,
+			  host_address_to_string (slot->objfile_context),
+			  slot->value.not_found.name,
+			  domain_name (slot->value.not_found.domain));
 	      break;
 	    case SYMBOL_SLOT_FOUND:
 	      {
 		struct symbol *found = slot->value.found.symbol;
 		const struct objfile *context = slot->objfile_context;
 
-		printf_filtered ("  [%4u] = %s, %s %s\n", i,
-				 host_address_to_string (context),
-				 found->print_name (),
-				 domain_name (found->domain ()));
+		gdb_printf ("  [%4u] = %s, %s %s\n", i,
+			    host_address_to_string (context),
+			    found->print_name (),
+			    domain_name (found->domain ()));
 		break;
 	      }
 	    }
@@ -1599,16 +1599,16 @@ maintenance_print_symbol_cache (const char *args, int from_tty)
     {
       struct symbol_cache *cache;
 
-      printf_filtered (_("Symbol cache for pspace %d\n%s:\n"),
-		       pspace->num,
-		       pspace->symfile_object_file != NULL
-		       ? objfile_name (pspace->symfile_object_file)
-		       : "(no object file)");
+      gdb_printf (_("Symbol cache for pspace %d\n%s:\n"),
+		  pspace->num,
+		  pspace->symfile_object_file != NULL
+		  ? objfile_name (pspace->symfile_object_file)
+		  : "(no object file)");
 
       /* If the cache hasn't been created yet, avoid creating one.  */
       cache = symbol_cache_key.get (pspace);
       if (cache == NULL)
-	printf_filtered ("  <empty>\n");
+	gdb_printf ("  <empty>\n");
       else
 	symbol_cache_dump (cache);
     }
@@ -1634,7 +1634,7 @@ symbol_cache_stats (struct symbol_cache *cache)
 
   if (cache->global_symbols == NULL)
     {
-      printf_filtered ("  <disabled>\n");
+      gdb_printf ("  <disabled>\n");
       return;
     }
 
@@ -1646,14 +1646,14 @@ symbol_cache_stats (struct symbol_cache *cache)
       QUIT;
 
       if (pass == 0)
-	printf_filtered ("Global block cache stats:\n");
+	gdb_printf ("Global block cache stats:\n");
       else
-	printf_filtered ("Static block cache stats:\n");
+	gdb_printf ("Static block cache stats:\n");
 
-      printf_filtered ("  size:       %u\n", bsc->size);
-      printf_filtered ("  hits:       %u\n", bsc->hits);
-      printf_filtered ("  misses:     %u\n", bsc->misses);
-      printf_filtered ("  collisions: %u\n", bsc->collisions);
+      gdb_printf ("  size:       %u\n", bsc->size);
+      gdb_printf ("  hits:       %u\n", bsc->hits);
+      gdb_printf ("  misses:     %u\n", bsc->misses);
+      gdb_printf ("  collisions: %u\n", bsc->collisions);
     }
 }
 
@@ -1666,16 +1666,16 @@ maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
     {
       struct symbol_cache *cache;
 
-      printf_filtered (_("Symbol cache statistics for pspace %d\n%s:\n"),
-		       pspace->num,
-		       pspace->symfile_object_file != NULL
-		       ? objfile_name (pspace->symfile_object_file)
-		       : "(no object file)");
+      gdb_printf (_("Symbol cache statistics for pspace %d\n%s:\n"),
+		  pspace->num,
+		  pspace->symfile_object_file != NULL
+		  ? objfile_name (pspace->symfile_object_file)
+		  : "(no object file)");
 
       /* If the cache hasn't been created yet, avoid creating one.  */
       cache = symbol_cache_key.get (pspace);
       if (cache == NULL)
-	printf_filtered ("  empty, no stats available\n");
+	gdb_printf ("  empty, no stats available\n");
       else
 	symbol_cache_stats (cache);
     }
@@ -1991,10 +1991,10 @@ lookup_language_this (const struct language_defn *lang,
     {
       struct objfile *objfile = block_objfile (block);
 
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_language_this (%s, %s (objfile %s))",
-			  lang->name (), host_address_to_string (block),
-			  objfile_debug_name (objfile));
+      gdb_printf (gdb_stdlog,
+		  "lookup_language_this (%s, %s (objfile %s))",
+		  lang->name (), host_address_to_string (block),
+		  objfile_debug_name (objfile));
     }
 
   while (block)
@@ -2008,10 +2008,10 @@ lookup_language_this (const struct language_defn *lang,
 	{
 	  if (symbol_lookup_debug > 1)
 	    {
-	      fprintf_unfiltered (gdb_stdlog, " = %s (%s, block %s)\n",
-				  sym->print_name (),
-				  host_address_to_string (sym),
-				  host_address_to_string (block));
+	      gdb_printf (gdb_stdlog, " = %s (%s, block %s)\n",
+			  sym->print_name (),
+			  host_address_to_string (sym),
+			  host_address_to_string (block));
 	    }
 	  return (struct block_symbol) {sym, block};
 	}
@@ -2021,7 +2021,7 @@ lookup_language_this (const struct language_defn *lang,
     }
 
   if (symbol_lookup_debug > 1)
-    fprintf_unfiltered (gdb_stdlog, " = NULL\n");
+    gdb_printf (gdb_stdlog, " = NULL\n");
   return {};
 }
 
@@ -2087,12 +2087,12 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
       struct objfile *objfile = (block == nullptr
 				 ? nullptr : block_objfile (block));
 
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_symbol_aux (%s, %s (objfile %s), %s, %s)\n",
-			  name, host_address_to_string (block),
-			  objfile != NULL
-			  ? objfile_debug_name (objfile) : "NULL",
-			  domain_name (domain), language_str (language));
+      gdb_printf (gdb_stdlog,
+		  "lookup_symbol_aux (%s, %s (objfile %s), %s, %s)\n",
+		  name, host_address_to_string (block),
+		  objfile != NULL
+		  ? objfile_debug_name (objfile) : "NULL",
+		  domain_name (domain), language_str (language));
     }
 
   /* Make sure we do something sensible with is_a_field_of_this, since
@@ -2110,8 +2110,8 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
     {
       if (symbol_lookup_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "lookup_symbol_aux (...) = %s\n",
-			      host_address_to_string (result.symbol));
+	  gdb_printf (gdb_stdlog, "lookup_symbol_aux (...) = %s\n",
+		      host_address_to_string (result.symbol));
 	}
       return result;
     }
@@ -2147,8 +2147,8 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 	    {
 	      if (symbol_lookup_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "lookup_symbol_aux (...) = NULL\n");
+		  gdb_printf (gdb_stdlog,
+			      "lookup_symbol_aux (...) = NULL\n");
 		}
 	      return {};
 	    }
@@ -2163,8 +2163,8 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
     {
       if (symbol_lookup_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "lookup_symbol_aux (...) = %s\n",
-			      host_address_to_string (result.symbol));
+	  gdb_printf (gdb_stdlog, "lookup_symbol_aux (...) = %s\n",
+		      host_address_to_string (result.symbol));
 	}
       return result;
     }
@@ -2175,10 +2175,10 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
   result = lookup_static_symbol (name, domain);
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "lookup_symbol_aux (...) = %s\n",
-			  result.symbol != NULL
-			    ? host_address_to_string (result.symbol)
-			    : "NULL");
+      gdb_printf (gdb_stdlog, "lookup_symbol_aux (...) = %s\n",
+		  result.symbol != NULL
+		  ? host_address_to_string (result.symbol)
+		  : "NULL");
     }
   return result;
 }
@@ -2242,11 +2242,11 @@ lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
       struct objfile *objfile = (block == nullptr
 				 ? nullptr : block_objfile (block));
 
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_symbol_in_block (%s, %s (objfile %s), %s)",
-			  name, host_address_to_string (block),
-			  objfile_debug_name (objfile),
-			  domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "lookup_symbol_in_block (%s, %s (objfile %s), %s)",
+		  name, host_address_to_string (block),
+		  objfile_debug_name (objfile),
+		  domain_name (domain));
     }
 
   sym = block_lookup_symbol (block, name, match_type, domain);
@@ -2254,14 +2254,14 @@ lookup_symbol_in_block (const char *name, symbol_name_match_type match_type,
     {
       if (symbol_lookup_debug > 1)
 	{
-	  fprintf_unfiltered (gdb_stdlog, " = %s\n",
-			      host_address_to_string (sym));
+	  gdb_printf (gdb_stdlog, " = %s\n",
+		      host_address_to_string (sym));
 	}
       return fixup_symbol_section (sym, NULL);
     }
 
   if (symbol_lookup_debug > 1)
-    fprintf_unfiltered (gdb_stdlog, " = NULL\n");
+    gdb_printf (gdb_stdlog, " = NULL\n");
   return NULL;
 }
 
@@ -2301,12 +2301,12 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 
   if (symbol_lookup_debug > 1)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_symbol_in_objfile_symtabs (%s, %s, %s, %s)",
-			  objfile_debug_name (objfile),
-			  block_index == GLOBAL_BLOCK
-			  ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
-			  name, domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "lookup_symbol_in_objfile_symtabs (%s, %s, %s, %s)",
+		  objfile_debug_name (objfile),
+		  block_index == GLOBAL_BLOCK
+		  ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
+		  name, domain_name (domain));
     }
 
   struct block_symbol other;
@@ -2345,16 +2345,16 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
     {
       if (symbol_lookup_debug > 1)
 	{
-	  fprintf_unfiltered (gdb_stdlog, " = %s (block %s)\n",
-			      host_address_to_string (other.symbol),
-			      host_address_to_string (other.block));
+	  gdb_printf (gdb_stdlog, " = %s (block %s)\n",
+		      host_address_to_string (other.symbol),
+		      host_address_to_string (other.block));
 	}
       other.symbol = fixup_symbol_section (other.symbol, objfile);
       return other;
     }
 
   if (symbol_lookup_debug > 1)
-    fprintf_unfiltered (gdb_stdlog, " = NULL\n");
+    gdb_printf (gdb_stdlog, " = NULL\n");
   return {};
 }
 
@@ -2431,12 +2431,12 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
 
   if (symbol_lookup_debug > 1)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_symbol_via_quick_fns (%s, %s, %s, %s)\n",
-			  objfile_debug_name (objfile),
-			  block_index == GLOBAL_BLOCK
-			  ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
-			  name, domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "lookup_symbol_via_quick_fns (%s, %s, %s, %s)\n",
+		  objfile_debug_name (objfile),
+		  block_index == GLOBAL_BLOCK
+		  ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
+		  name, domain_name (domain));
     }
 
   cust = objfile->lookup_symbol (block_index, name, domain);
@@ -2444,8 +2444,8 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
     {
       if (symbol_lookup_debug > 1)
 	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "lookup_symbol_via_quick_fns (...) = NULL\n");
+	  gdb_printf (gdb_stdlog,
+		      "lookup_symbol_via_quick_fns (...) = NULL\n");
 	}
       return {};
     }
@@ -2459,10 +2459,10 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
 
   if (symbol_lookup_debug > 1)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_symbol_via_quick_fns (...) = %s (block %s)\n",
-			  host_address_to_string (result.symbol),
-			  host_address_to_string (block));
+      gdb_printf (gdb_stdlog,
+		  "lookup_symbol_via_quick_fns (...) = %s (block %s)\n",
+		  host_address_to_string (result.symbol),
+		  host_address_to_string (block));
     }
 
   result.symbol = fixup_symbol_section (result.symbol, objfile);
@@ -2529,13 +2529,13 @@ lookup_symbol_in_static_block (const char *name,
       struct objfile *objfile = (block == nullptr
 				 ? nullptr : block_objfile (block));
 
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_symbol_in_static_block (%s, %s (objfile %s),"
-			  " %s)\n",
-			  name,
-			  host_address_to_string (block),
-			  objfile_debug_name (objfile),
-			  domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "lookup_symbol_in_static_block (%s, %s (objfile %s),"
+		  " %s)\n",
+		  name,
+		  host_address_to_string (block),
+		  objfile_debug_name (objfile),
+		  domain_name (domain));
     }
 
   sym = lookup_symbol_in_block (name,
@@ -2543,9 +2543,9 @@ lookup_symbol_in_static_block (const char *name,
 				static_block, domain);
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_symbol_in_static_block (...) = %s\n",
-			  sym != NULL ? host_address_to_string (sym) : "NULL");
+      gdb_printf (gdb_stdlog,
+		  "lookup_symbol_in_static_block (...) = %s\n",
+		  sym != NULL ? host_address_to_string (sym) : "NULL");
     }
   return (struct block_symbol) {sym, static_block};
 }
@@ -2565,12 +2565,12 @@ lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
 
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_symbol_in_objfile (%s, %s, %s, %s)\n",
-			  objfile_debug_name (objfile),
-			  block_index == GLOBAL_BLOCK
-			  ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
-			  name, domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "lookup_symbol_in_objfile (%s, %s, %s, %s)\n",
+		  objfile_debug_name (objfile),
+		  block_index == GLOBAL_BLOCK
+		  ? "GLOBAL_BLOCK" : "STATIC_BLOCK",
+		  name, domain_name (domain));
     }
 
   result = lookup_symbol_in_objfile_symtabs (objfile, block_index,
@@ -2579,10 +2579,10 @@ lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
     {
       if (symbol_lookup_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "lookup_symbol_in_objfile (...) = %s"
-			      " (in symtabs)\n",
-			      host_address_to_string (result.symbol));
+	  gdb_printf (gdb_stdlog,
+		      "lookup_symbol_in_objfile (...) = %s"
+		      " (in symtabs)\n",
+		      host_address_to_string (result.symbol));
 	}
       return result;
     }
@@ -2591,12 +2591,12 @@ lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
 					name, domain);
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "lookup_symbol_in_objfile (...) = %s%s\n",
-			  result.symbol != NULL
-			  ? host_address_to_string (result.symbol)
-			  : "NULL",
-			  result.symbol != NULL ? " (via quick fns)" : "");
+      gdb_printf (gdb_stdlog,
+		  "lookup_symbol_in_objfile (...) = %s%s\n",
+		  result.symbol != NULL
+		  ? host_address_to_string (result.symbol)
+		  : "NULL",
+		  result.symbol != NULL ? " (via quick fns)" : "");
     }
   return result;
 }
@@ -4653,9 +4653,9 @@ treg_matches_sym_type_name (const compiled_regex &treg,
 
   if (symbol_lookup_debug > 1)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "treg_matches_sym_type_name\n     sym %s\n",
-			  sym->natural_name ());
+      gdb_printf (gdb_stdlog,
+		  "treg_matches_sym_type_name\n     sym %s\n",
+		  sym->natural_name ());
     }
 
   sym_type = sym->type ();
@@ -4671,9 +4671,9 @@ treg_matches_sym_type_name (const compiled_regex &treg,
 
   if (symbol_lookup_debug > 1)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "     sym_type_name %s\n",
-			  printed_sym_type_name.c_str ());
+      gdb_printf (gdb_stdlog,
+		  "     sym_type_name %s\n",
+		  printed_sym_type_name.c_str ());
     }
 
 
@@ -5094,19 +5094,19 @@ print_symbol_info (enum search_domain kind,
 
       if (filename_cmp (last, s_filename) != 0)
 	{
-	  printf_filtered (_("\nFile %ps:\n"),
-			   styled_string (file_name_style.style (),
-					  s_filename));
+	  gdb_printf (_("\nFile %ps:\n"),
+		      styled_string (file_name_style.style (),
+				     s_filename));
 	}
 
       if (sym->line () != 0)
-	printf_filtered ("%d:\t", sym->line ());
+	gdb_printf ("%d:\t", sym->line ());
       else
 	gdb_puts ("\t");
     }
 
   std::string str = symbol_to_info_string (sym, block, kind);
-  printf_filtered ("%s\n", str.c_str ());
+  gdb_printf ("%s\n", str.c_str ());
 }
 
 /* This help function for symtab_symbol_info() prints information
@@ -5130,9 +5130,9 @@ print_msymbol_info (struct bound_minimal_symbol msymbol)
 			     ? function_name_style.style ()
 			     : ui_file_style ());
 
-  printf_filtered (_("%ps  %ps\n"),
-		   styled_string (address_style.style (), tmp),
-		   styled_string (sym_style, msymbol.minsym->print_name ()));
+  gdb_printf (_("%ps  %ps\n"),
+	      styled_string (address_style.style (), tmp),
+	      styled_string (sym_style, msymbol.minsym->print_name ()));
 }
 
 /* This is the guts of the commands "info functions", "info types", and
@@ -5165,23 +5165,23 @@ symtab_symbol_info (bool quiet, bool exclude_minsyms,
       if (regexp != NULL)
 	{
 	  if (t_regexp != NULL)
-	    printf_filtered
+	    gdb_printf
 	      (_("All %ss matching regular expression \"%s\""
 		 " with type matching regular expression \"%s\":\n"),
 	       classnames[kind], regexp, t_regexp);
 	  else
-	    printf_filtered (_("All %ss matching regular expression \"%s\":\n"),
-			     classnames[kind], regexp);
+	    gdb_printf (_("All %ss matching regular expression \"%s\":\n"),
+			classnames[kind], regexp);
 	}
       else
 	{
 	  if (t_regexp != NULL)
-	    printf_filtered
+	    gdb_printf
 	      (_("All defined %ss"
 		 " with type matching regular expression \"%s\" :\n"),
 	       classnames[kind], t_regexp);
 	  else
-	    printf_filtered (_("All defined %ss:\n"), classnames[kind]);
+	    gdb_printf (_("All defined %ss:\n"), classnames[kind]);
 	}
     }
 
@@ -5194,7 +5194,7 @@ symtab_symbol_info (bool quiet, bool exclude_minsyms,
 	  if (first)
 	    {
 	      if (!quiet)
-		printf_filtered (_("\nNon-debugging symbols:\n"));
+		gdb_printf (_("\nNon-debugging symbols:\n"));
 	      first = 0;
 	    }
 	  print_msymbol_info (p.msymbol);
@@ -5440,8 +5440,8 @@ rbreak_command (const char *regexp, int from_tty)
 				  p.msymbol.minsym->linkage_name ());
 
 	  break_command (&string[0], from_tty);
-	  printf_filtered ("<function, no debug info> %s;\n",
-			   p.msymbol.minsym->print_name ());
+	  gdb_printf ("<function, no debug info> %s;\n",
+		      p.msymbol.minsym->print_name ());
 	}
     }
 }
@@ -6687,11 +6687,11 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 	  if (type_regexp == nullptr)
 	    {
 	      if (regexp == nullptr)
-		printf_filtered ((kind == VARIABLES_DOMAIN
-				  ? _("All variables in all modules:")
-				  : _("All functions in all modules:")));
+		gdb_printf ((kind == VARIABLES_DOMAIN
+			     ? _("All variables in all modules:")
+			     : _("All functions in all modules:")));
 	      else
-		printf_filtered
+		gdb_printf
 		  ((kind == VARIABLES_DOMAIN
 		    ? _("All variables matching regular expression"
 			" \"%s\" in all modules:")
@@ -6702,7 +6702,7 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 	  else
 	    {
 	      if (regexp == nullptr)
-		printf_filtered
+		gdb_printf
 		  ((kind == VARIABLES_DOMAIN
 		    ? _("All variables with type matching regular "
 			"expression \"%s\" in all modules:")
@@ -6710,7 +6710,7 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 			"expression \"%s\" in all modules:")),
 		   type_regexp);
 	      else
-		printf_filtered
+		gdb_printf
 		  ((kind == VARIABLES_DOMAIN
 		    ? _("All variables matching regular expression "
 			"\"%s\",\n\twith type matching regular "
@@ -6726,7 +6726,7 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 	  if (type_regexp == nullptr)
 	    {
 	      if (regexp == nullptr)
-		printf_filtered
+		gdb_printf
 		  ((kind == VARIABLES_DOMAIN
 		    ? _("All variables in all modules matching regular "
 			"expression \"%s\":")
@@ -6734,7 +6734,7 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 			"expression \"%s\":")),
 		   module_regexp);
 	      else
-		printf_filtered
+		gdb_printf
 		  ((kind == VARIABLES_DOMAIN
 		    ? _("All variables matching regular expression "
 			"\"%s\",\n\tin all modules matching regular "
@@ -6747,7 +6747,7 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 	  else
 	    {
 	      if (regexp == nullptr)
-		printf_filtered
+		gdb_printf
 		  ((kind == VARIABLES_DOMAIN
 		    ? _("All variables with type matching regular "
 			"expression \"%s\"\n\tin all modules matching "
@@ -6757,7 +6757,7 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 			"regular expression \"%s\":")),
 		   type_regexp, module_regexp);
 	      else
-		printf_filtered
+		gdb_printf
 		  ((kind == VARIABLES_DOMAIN
 		    ? _("All variables matching regular expression "
 			"\"%s\",\n\twith type matching regular expression "
@@ -6770,7 +6770,7 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 		   regexp, type_regexp, module_regexp);
 	    }
 	}
-      printf_filtered ("\n");
+      gdb_printf ("\n");
     }
 
   /* Find all symbols of type KIND matching the given regular expressions
@@ -6801,8 +6801,8 @@ info_module_subcommand (bool quiet, const char *module_regexp,
 
       if (last_module_symbol != p.symbol)
 	{
-	  printf_filtered ("\n");
-	  printf_filtered (_("Module \"%s\":\n"), p.symbol->print_name ());
+	  gdb_printf ("\n");
+	  gdb_printf (_("Module \"%s\":\n"), p.symbol->print_name ());
 	  last_module_symbol = p.symbol;
 	  last_filename = "";
 	}

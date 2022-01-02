@@ -55,7 +55,7 @@ struct cmd_list_element *info_record_cmdlist = NULL;
 
 #define DEBUG(msg, args...)						\
   if (record_debug)							\
-    fprintf_unfiltered (gdb_stdlog, "record: " msg "\n", ##args)
+    gdb_printf (gdb_stdlog, "record: " msg "\n", ##args)
 
 /* See record.h.  */
 
@@ -257,8 +257,8 @@ static void
 show_record_debug (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of process record target is %s.\n"),
-		    value);
+  gdb_printf (file, _("Debugging of process record target is %s.\n"),
+	      value);
 }
 
 /* Alias for "target record".  */
@@ -279,14 +279,14 @@ cmd_record_delete (const char *args, int from_tty)
 
   if (!target_record_is_replaying (inferior_ptid))
     {
-      printf_filtered (_("Already at end of record list.\n"));
+      gdb_printf (_("Already at end of record list.\n"));
       return;
     }
 
   if (!target_supports_delete_record ())
     {
-      printf_filtered (_("The current record target does not support "
-			 "this operation.\n"));
+      gdb_printf (_("The current record target does not support "
+		    "this operation.\n"));
       return;
     }
 
@@ -308,8 +308,8 @@ cmd_record_stop (const char *args, int from_tty)
   record_stop (t);
   record_unpush (t);
 
-  printf_filtered (_("Process record is stopped and all execution "
-		     "logs are deleted.\n"));
+  gdb_printf (_("Process record is stopped and all execution "
+		"logs are deleted.\n"));
 
   gdb::observers::record_changed.notify (current_inferior (), 0, NULL, NULL);
 }
@@ -325,11 +325,11 @@ info_record_command (const char *args, int from_tty)
   t = find_record_target ();
   if (t == NULL)
     {
-      printf_filtered (_("No recording is currently active.\n"));
+      gdb_printf (_("No recording is currently active.\n"));
       return;
     }
 
-  printf_filtered (_("Active record target: %s\n"), t->shortname ());
+  gdb_printf (_("Active record target: %s\n"), t->shortname ());
   t->info_record ();
 }
 

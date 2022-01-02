@@ -425,8 +425,8 @@ print_children (PyObject *printer, const char *hint,
 	  /* The user won't necessarily get a stack trace here, so provide
 	     more context.  */
 	  if (gdbpy_print_python_errors_p ())
-	    fprintf_unfiltered (gdb_stderr,
-				_("Bad result from children iterator.\n"));
+	    gdb_printf (gdb_stderr,
+			_("Bad result from children iterator.\n"));
 	  gdbpy_print_stack ();
 	  continue;
 	}
@@ -484,7 +484,7 @@ print_children (PyObject *printer, const char *hint,
 	  /* We print the index, not whatever the child method
 	     returned as the name.  */
 	  if (options->print_array_indexes)
-	    fprintf_filtered (stream, "[%d] = ", i);
+	    gdb_printf (stream, "[%d] = ", i);
 	}
       else if (! is_map)
 	{

@@ -703,10 +703,10 @@ show_ravenscar_task_switching_command (struct ui_file *file, int from_tty,
 				       const char *value)
 {
   if (ravenscar_task_support)
-    fprintf_filtered (file, _("\
+    gdb_printf (file, _("\
 Support for Ravenscar task/thread switching is enabled\n"));
   else
-    fprintf_filtered (file, _("\
+    gdb_printf (file, _("\
 Support for Ravenscar task/thread switching is disabled\n"));
 }
 

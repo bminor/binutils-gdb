@@ -106,9 +106,9 @@ static void
 show_solib_search_path (struct ui_file *file, int from_tty,
 			struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("The search path for loading non-absolute "
-			    "shared library symbol files is %s.\n"),
-		    value);
+  gdb_printf (file, _("The search path for loading non-absolute "
+		      "shared library symbol files is %s.\n"),
+	      value);
 }
 
 /* Same as HAVE_DOS_BASED_FILE_SYSTEM, but useable as an rvalue.  */
@@ -1022,11 +1022,11 @@ solib_add (const char *pattern, int from_tty, int readsyms)
     {
       if (pattern != NULL)
 	{
-	  printf_filtered (_("Loading symbols for shared libraries: %s\n"),
-			   pattern);
+	  gdb_printf (_("Loading symbols for shared libraries: %s\n"),
+		      pattern);
 	}
       else
-	printf_filtered (_("Loading symbols for shared libraries.\n"));
+	gdb_printf (_("Loading symbols for shared libraries.\n"));
     }
 
   current_program_space->solib_add_generation++;
@@ -1071,8 +1071,8 @@ solib_add (const char *pattern, int from_tty, int readsyms)
 		  /* If no pattern was given, be quiet for shared
 		     libraries we have already loaded.  */
 		  if (pattern && (from_tty || info_verbose))
-		    printf_filtered (_("Symbols already loaded for %s\n"),
-				     gdb->so_name);
+		    gdb_printf (_("Symbols already loaded for %s\n"),
+				gdb->so_name);
 		}
 	      else if (solib_read_symbols (gdb, add_flags))
 		loaded_any_symbols = true;
@@ -1083,7 +1083,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
       breakpoint_re_set ();
 
     if (from_tty && pattern && ! any_matches)
-      printf_filtered
+      gdb_printf
 	("No loaded shared libraries match the pattern `%s'.\n", pattern);
 
     if (loaded_any_symbols)
@@ -1359,7 +1359,7 @@ static void
 reload_shared_libraries_1 (int from_tty)
 {
   if (print_symbol_loading_p (from_tty, 0, 0))
-    printf_filtered (_("Loading symbols for shared libraries.\n"));
+    gdb_printf (_("Loading symbols for shared libraries.\n"));
 
   for (struct so_list *so : current_program_space->solibs ())
     {
@@ -1503,8 +1503,8 @@ static void
 show_auto_solib_add (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Autoloading of shared library symbols is %s.\n"),
-		    value);
+  gdb_printf (file, _("Autoloading of shared library symbols is %s.\n"),
+	      value);
 }
 
 

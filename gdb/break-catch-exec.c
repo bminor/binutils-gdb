@@ -124,7 +124,7 @@ print_one_catch_exec (struct breakpoint *b, struct bp_location **last_loc)
 static void
 print_mention_catch_exec (struct breakpoint *b)
 {
-  printf_filtered (_("Catchpoint %d (exec)"), b->number);
+  gdb_printf (_("Catchpoint %d (exec)"), b->number);
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for exec
@@ -133,7 +133,7 @@ print_mention_catch_exec (struct breakpoint *b)
 static void
 print_recreate_catch_exec (struct breakpoint *b, struct ui_file *fp)
 {
-  fprintf_unfiltered (fp, "catch exec");
+  gdb_printf (fp, "catch exec");
   print_recreate_thread (b, fp);
 }
 

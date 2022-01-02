@@ -71,7 +71,7 @@ static void
 show_jit_debug (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("JIT debugging is %s.\n"), value);
+  gdb_printf (file, _("JIT debugging is %s.\n"), value);
 }
 
 /* Implementation of the "maintenance info jit" command.  */
@@ -279,8 +279,8 @@ jit_read_descriptor (gdbarch *gdbarch,
   err = target_read_memory (addr, desc_buf, desc_size);
   if (err)
     {
-      fprintf_unfiltered (gdb_stderr, _("Unable to read JIT descriptor from "
-					"remote memory\n"));
+      gdb_printf (gdb_stderr, _("Unable to read JIT descriptor from "
+				"remote memory\n"));
       return false;
     }
 
@@ -770,7 +770,7 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
      We would segfault later without this line.  */
   if (!bfd_check_format (nbfd.get (), bfd_object))
     {
-      fprintf_unfiltered (gdb_stderr, _("\
+      gdb_printf (gdb_stderr, _("\
 JITed symbol file is not an object file, ignoring it.\n"));
       return;
     }
@@ -1182,10 +1182,10 @@ jit_inferior_init (inferior *inf)
       /* Check that the version number agrees with that we support.  */
       if (descriptor.version != 1)
 	{
-	  fprintf_unfiltered (gdb_stderr,
-			      _("Unsupported JIT protocol version %ld "
-				"in descriptor (expected 1)\n"),
-			      (long) descriptor.version);
+	  gdb_printf (gdb_stderr,
+		      _("Unsupported JIT protocol version %ld "
+			"in descriptor (expected 1)\n"),
+		      (long) descriptor.version);
 	  continue;
 	}
 
@@ -1274,10 +1274,10 @@ jit_event_handler (gdbarch *gdbarch, objfile *jiter)
       {
 	objfile *jited = jit_find_objf_with_entry_addr (entry_addr);
 	if (jited == nullptr)
-	  fprintf_unfiltered (gdb_stderr,
-			      _("Unable to find JITed code "
-				"entry at address: %s\n"),
-			      paddress (gdbarch, entry_addr));
+	  gdb_printf (gdb_stderr,
+		      _("Unable to find JITed code "
+			"entry at address: %s\n"),
+		      paddress (gdbarch, entry_addr));
 	else
 	  jited->unlink ();
 

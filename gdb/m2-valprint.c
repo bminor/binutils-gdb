@@ -81,7 +81,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 
   type = check_typedef (type);
 
-  fprintf_filtered (stream, "{");
+  gdb_printf (stream, "{");
   len = type->num_fields ();
   if (get_long_set_bounds (type, &low_bound, &high_bound))
     {
@@ -112,7 +112,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 	      if (! element_seen)
 		{
 		  if (! empty_set)
-		    fprintf_filtered (stream, ", ");
+		    gdb_printf (stream, ", ");
 		  print_type_scalar (target, i, stream);
 		  empty_set    = 0;
 		  element_seen = 1;
@@ -125,7 +125,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 	      if (element_seen)
 		{
 		  if (previous_low+1 < previous_high)
-		    fprintf_filtered (stream, "..");
+		    gdb_printf (stream, "..");
 		  if (previous_low+1 < previous_high)
 		    print_type_scalar (target, previous_high, stream);
 		  element_seen = 0;
@@ -146,12 +146,12 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 	{
 	  if (previous_low+1 < previous_high)
 	    {
-	      fprintf_filtered (stream, "..");
+	      gdb_printf (stream, "..");
 	      print_type_scalar (target, previous_high, stream);
 	    }
 	  element_seen = 0;
 	}
-      fprintf_filtered (stream, "}");
+      gdb_printf (stream, "}");
     }
 }
 
@@ -175,9 +175,9 @@ m2_print_unbounded_array (struct value *value,
 		       addr);
   len = unpack_field_as_long (type, valaddr, 1);
 
-  fprintf_filtered (stream, "{");  
+  gdb_printf (stream, "{");  
   m2_print_array_contents (val, stream, recurse, options, len);
-  fprintf_filtered (stream, ", HIGH = %d}", (int) len);
+  gdb_printf (stream, ", HIGH = %d}", (int) len);
 }
 
 static int
@@ -232,9 +232,9 @@ print_variable_at_address (struct type *type,
   CORE_ADDR addr = unpack_pointer (type, valaddr);
   struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
-  fprintf_filtered (stream, "[");
+  gdb_printf (stream, "[");
   gdb_puts (paddress (gdbarch, addr), stream);
-  fprintf_filtered (stream, "] : ");
+  gdb_printf (stream, "] : ");
   
   if (elttype->code () != TYPE_CODE_UNDEF)
     {
@@ -274,9 +274,9 @@ m2_print_array_contents (struct value *val,
 			  options);
       else
 	{
-	  fprintf_filtered (stream, "{");
+	  gdb_printf (stream, "{");
 	  value_print_array_elements (val, stream, recurse, options, 0);
-	  fprintf_filtered (stream, "}");
+	  gdb_printf (stream, "}");
 	}
     }
 }
@@ -342,10 +342,10 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
 	    }
 	  else
 	    {
-	      fprintf_filtered (stream, "{");
+	      gdb_printf (stream, "{");
 	      value_print_array_elements (val, stream, recurse,
 					  options, 0);
-	      fprintf_filtered (stream, "}");
+	      gdb_printf (stream, "}");
 	    }
 	  break;
 	}
@@ -368,7 +368,7 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
     case TYPE_CODE_UNION:
       if (recurse && !options->unionprint)
 	{
-	  fprintf_filtered (stream, "{...}");
+	  gdb_printf (stream, "{...}");
 	  break;
 	}
       /* Fall through.  */

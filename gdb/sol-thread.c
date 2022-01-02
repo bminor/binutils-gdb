@@ -638,7 +638,7 @@ check_for_thread_db (void)
       break;
 
     case TD_OK:
-      printf_filtered (_("[Thread debugging using libthread_db enabled]\n"));
+      gdb_printf (_("[Thread debugging using libthread_db enabled]\n"));
 
       /* The thread library was detected.  Activate the sol_thread target.  */
       current_inferior ()->push_target (&sol_thread_ops);
@@ -1043,32 +1043,32 @@ info_cb (const td_thrhandle_t *th, void *s)
   ret = p_td_thr_get_info (th, &ti);
   if (ret == TD_OK)
     {
-      printf_filtered ("%s thread #%d, lwp %d, ",
-		       ti.ti_type == TD_THR_SYSTEM ? "system" : "user  ",
-		       ti.ti_tid, ti.ti_lid);
+      gdb_printf ("%s thread #%d, lwp %d, ",
+		  ti.ti_type == TD_THR_SYSTEM ? "system" : "user  ",
+		  ti.ti_tid, ti.ti_lid);
       switch (ti.ti_state)
 	{
 	default:
 	case TD_THR_UNKNOWN:
-	  printf_filtered ("<unknown state>");
+	  gdb_printf ("<unknown state>");
 	  break;
 	case TD_THR_STOPPED:
-	  printf_filtered ("(stopped)");
+	  gdb_printf ("(stopped)");
 	  break;
 	case TD_THR_RUN:
-	  printf_filtered ("(run)    ");
+	  gdb_printf ("(run)    ");
 	  break;
 	case TD_THR_ACTIVE:
-	  printf_filtered ("(active) ");
+	  gdb_printf ("(active) ");
 	  break;
 	case TD_THR_ZOMBIE:
-	  printf_filtered ("(zombie) ");
+	  gdb_printf ("(zombie) ");
 	  break;
 	case TD_THR_SLEEP:
-	  printf_filtered ("(asleep) ");
+	  gdb_printf ("(asleep) ");
 	  break;
 	case TD_THR_STOPPED_ASLEEP:
-	  printf_filtered ("(stopped asleep)");
+	  gdb_printf ("(stopped asleep)");
 	  break;
 	}
       /* Print thr_create start function.  */
@@ -1077,10 +1077,10 @@ info_cb (const td_thrhandle_t *th, void *s)
 	  const struct bound_minimal_symbol msym
 	    = lookup_minimal_symbol_by_pc (ti.ti_startfunc);
 
-	  printf_filtered ("   startfunc=%s",
-			   msym.minsym
-			   ? msym.minsym->print_name ()
-			   : paddress (target_gdbarch (), ti.ti_startfunc));
+	  gdb_printf ("   startfunc=%s",
+		      msym.minsym
+		      ? msym.minsym->print_name ()
+		      : paddress (target_gdbarch (), ti.ti_startfunc));
 	}
 
       /* If thread is asleep, print function that went to sleep.  */
@@ -1089,13 +1089,13 @@ info_cb (const td_thrhandle_t *th, void *s)
 	  const struct bound_minimal_symbol msym
 	    = lookup_minimal_symbol_by_pc (ti.ti_pc);
 
-	  printf_filtered ("   sleepfunc=%s",
-			   msym.minsym
-			   ? msym.minsym->print_name ()
-			   : paddress (target_gdbarch (), ti.ti_pc));
+	  gdb_printf ("   sleepfunc=%s",
+		      msym.minsym
+		      ? msym.minsym->print_name ()
+		      : paddress (target_gdbarch (), ti.ti_pc));
 	}
 
-      printf_filtered ("\n");
+      gdb_printf ("\n");
     }
   else
     warning (_("info sol-thread: failed to get info for thread."));
@@ -1194,7 +1194,7 @@ _initialize_sol_thread ()
   return;
 
  die:
-  fprintf_unfiltered (gdb_stderr, "\
+  gdb_printf (gdb_stderr, "\
 [GDB will not be able to debug user-mode threads: %s]\n", dlerror ());
 
   if (dlhandle)

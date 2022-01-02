@@ -617,7 +617,7 @@ ppscm_print_exception_unless_memory_error (SCM exception,
 
       /* This "shouldn't happen", but play it safe.  */
       if (msg == NULL || msg.get ()[0] == '\0')
-	fprintf_filtered (stream, _("<error reading variable>"));
+	gdb_printf (stream, _("<error reading variable>"));
       else
 	{
 	  /* Remove the trailing newline.  We could instead call a special
@@ -628,7 +628,7 @@ ppscm_print_exception_unless_memory_error (SCM exception,
 
 	  if (msg_text[len - 1] == '\n')
 	    msg_text[len - 1] = '\0';
-	  fprintf_filtered (stream, _("<error reading variable: %s>"), msg_text);
+	  gdb_printf (stream, _("<error reading variable: %s>"), msg_text);
 	}
     }
   else
@@ -871,7 +871,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	  /* We print the index, not whatever the child method
 	     returned as the name.  */
 	  if (options->print_array_indexes)
-	    fprintf_filtered (stream, "[%d] = ", i);
+	    gdb_printf (stream, "[%d] = ", i);
 	}
       else if (! is_map)
 	{

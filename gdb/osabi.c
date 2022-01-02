@@ -638,17 +638,17 @@ show_osabi (struct ui_file *file, int from_tty, struct cmd_list_element *c,
 	    const char *value)
 {
   if (user_osabi_state == osabi_auto)
-    fprintf_filtered (file,
-		      _("The current OS ABI is \"auto\" "
-			"(currently \"%s\").\n"),
-		      gdbarch_osabi_name (gdbarch_osabi (get_current_arch ())));
+    gdb_printf (file,
+		_("The current OS ABI is \"auto\" "
+		  "(currently \"%s\").\n"),
+		gdbarch_osabi_name (gdbarch_osabi (get_current_arch ())));
   else
-    fprintf_filtered (file, _("The current OS ABI is \"%s\".\n"),
-		      gdbarch_osabi_name (user_selected_osabi));
+    gdb_printf (file, _("The current OS ABI is \"%s\".\n"),
+		gdbarch_osabi_name (user_selected_osabi));
 
   if (GDB_OSABI_DEFAULT != GDB_OSABI_UNKNOWN)
-    fprintf_filtered (file, _("The default OS ABI is \"%s\".\n"),
-		      gdbarch_osabi_name (GDB_OSABI_DEFAULT));
+    gdb_printf (file, _("The default OS ABI is \"%s\".\n"),
+		gdbarch_osabi_name (GDB_OSABI_DEFAULT));
 }
 
 void _initialize_gdb_osabi ();

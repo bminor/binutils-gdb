@@ -623,7 +623,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
   /* Check for NULL.  */
   if (ptr_value == 0 && vbit == 0)
     {
-      fprintf_filtered (stream, "NULL");
+      gdb_printf (stream, "NULL");
       return;
     }
 
@@ -647,7 +647,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 	  gdb::unique_xmalloc_ptr<char> demangled_name
 	    = gdb_demangle (physname, DMGL_ANSI | DMGL_PARAMS);
 
-	  fprintf_filtered (stream, "&virtual ");
+	  gdb_printf (stream, "&virtual ");
 	  if (demangled_name == NULL)
 	    gdb_puts (physname, stream);
 	  else
@@ -666,7 +666,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
   /* We didn't find it; print the raw data.  */
   if (vbit)
     {
-      fprintf_filtered (stream, "&virtual table offset ");
+      gdb_printf (stream, "&virtual table offset ");
       print_longest (stream, 'd', 1, ptr_value);
     }
   else
@@ -679,7 +679,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 
   if (adjustment)
     {
-      fprintf_filtered (stream, ", this adjustment ");
+      gdb_printf (stream, ", this adjustment ");
       print_longest (stream, 'd', 1, adjustment);
     }
 }
@@ -907,11 +907,11 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
   vt_addr = value_address (value_field (vtable,
 					vtable_field_virtual_functions));
 
-  printf_filtered (_("vtable for '%s' @ %s (subobject @ %s):\n"),
-		   TYPE_SAFE_NAME (type),
-		   paddress (gdbarch, vt_addr),
-		   paddress (gdbarch, (value_address (value)
-				       + value_embedded_offset (value))));
+  gdb_printf (_("vtable for '%s' @ %s (subobject @ %s):\n"),
+	      TYPE_SAFE_NAME (type),
+	      paddress (gdbarch, vt_addr),
+	      paddress (gdbarch, (value_address (value)
+				  + value_embedded_offset (value))));
 
   for (i = 0; i <= max_voffset; ++i)
     {
@@ -920,7 +920,7 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
       int got_error = 0;
       struct value *vfn;
 
-      printf_filtered ("[%d]: ", i);
+      gdb_printf ("[%d]: ", i);
 
       vfn = value_subscript (value_field (vtable,
 					  vtable_field_virtual_functions),
@@ -942,7 +942,7 @@ print_one_vtable (struct gdbarch *gdbarch, struct value *value,
 
       if (!got_error)
 	print_function_pointer_address (opts, gdbarch, addr, gdb_stdout);
-      printf_filtered ("\n");
+      gdb_printf ("\n");
     }
 }
 
@@ -983,7 +983,7 @@ gnuv3_print_vtable (struct value *value)
 
   if (!vtable)
     {
-      printf_filtered (_("This object does not have a virtual function table\n"));
+      gdb_printf (_("This object does not have a virtual function table\n"));
       return;
     }
 
@@ -1002,7 +1002,7 @@ gnuv3_print_vtable (struct value *value)
       if (iter->max_voffset >= 0)
 	{
 	  if (count > 0)
-	    printf_filtered ("\n");
+	    gdb_printf ("\n");
 	  print_one_vtable (gdbarch, iter->value, iter->max_voffset, &opts);
 	  ++count;
 	}

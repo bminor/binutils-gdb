@@ -108,12 +108,12 @@ fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
       size = kve->kve_end - kve->kve_start;
       if (info_verbose)
 	{
-	  printf_filtered ("Save segment, %ld bytes at %s (%c%c%c)\n",
-			   (long) size,
-			   paddress (target_gdbarch (), kve->kve_start),
-			   kve->kve_protection & KVME_PROT_READ ? 'r' : '-',
-			   kve->kve_protection & KVME_PROT_WRITE ? 'w' : '-',
-			   kve->kve_protection & KVME_PROT_EXEC ? 'x' : '-');
+	  gdb_printf ("Save segment, %ld bytes at %s (%c%c%c)\n",
+		      (long) size,
+		      paddress (target_gdbarch (), kve->kve_start),
+		      kve->kve_protection & KVME_PROT_READ ? 'r' : '-',
+		      kve->kve_protection & KVME_PROT_WRITE ? 'w' : '-',
+		      kve->kve_protection & KVME_PROT_EXEC ? 'x' : '-');
 	}
 
       /* Invoke the callback function to create the corefile segment.
@@ -241,7 +241,7 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
   else
     error (_("Invalid arguments."));
 
-  printf_filtered (_("process %d\n"), pid);
+  gdb_printf (_("process %d\n"), pid);
   if (do_cwd || do_exe || do_files)
     fdtbl.reset (kinfo_getfile (pid, &nfd));
 
@@ -249,7 +249,7 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
     {
       gdb::unique_xmalloc_ptr<char> cmdline = fbsd_fetch_cmdline (pid);
       if (cmdline != nullptr)
-	printf_filtered ("cmdline = '%s'\n", cmdline.get ());
+	gdb_printf ("cmdline = '%s'\n", cmdline.get ());
       else
 	warning (_("unable to fetch command line"));
     }
@@ -266,7 +266,7 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 	    }
 	}
       if (cwd != NULL)
-	printf_filtered ("cwd = '%s'\n", cwd);
+	gdb_printf ("cwd = '%s'\n", cwd);
       else
 	warning (_("unable to fetch current working directory"));
     }
@@ -285,7 +285,7 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       if (exe == NULL)
 	exe = pid_to_exec_file (pid);
       if (exe != NULL)
-	printf_filtered ("exe = '%s'\n", exe);
+	gdb_printf ("exe = '%s'\n", exe);
       else
 	warning (_("unable to fetch executable path name"));
     }
@@ -336,7 +336,7 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 	  const char *state;
 	  int pgtok;
 
-	  printf_filtered ("Name: %s\n", kp.ki_comm);
+	  gdb_printf ("Name: %s\n", kp.ki_comm);
 	  switch (kp.ki_stat)
 	    {
 	    case SIDL:
@@ -364,69 +364,69 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 	      state = "? (unknown)";
 	      break;
 	    }
-	  printf_filtered ("State: %s\n", state);
-	  printf_filtered ("Parent process: %d\n", kp.ki_ppid);
-	  printf_filtered ("Process group: %d\n", kp.ki_pgid);
-	  printf_filtered ("Session id: %d\n", kp.ki_sid);
-	  printf_filtered ("TTY: %s\n", pulongest (kp.ki_tdev));
-	  printf_filtered ("TTY owner process group: %d\n", kp.ki_tpgid);
-	  printf_filtered ("User IDs (real, effective, saved): %d %d %d\n",
-			   kp.ki_ruid, kp.ki_uid, kp.ki_svuid);
-	  printf_filtered ("Group IDs (real, effective, saved): %d %d %d\n",
-			   kp.ki_rgid, kp.ki_groups[0], kp.ki_svgid);
-	  printf_filtered ("Groups: ");
+	  gdb_printf ("State: %s\n", state);
+	  gdb_printf ("Parent process: %d\n", kp.ki_ppid);
+	  gdb_printf ("Process group: %d\n", kp.ki_pgid);
+	  gdb_printf ("Session id: %d\n", kp.ki_sid);
+	  gdb_printf ("TTY: %s\n", pulongest (kp.ki_tdev));
+	  gdb_printf ("TTY owner process group: %d\n", kp.ki_tpgid);
+	  gdb_printf ("User IDs (real, effective, saved): %d %d %d\n",
+		      kp.ki_ruid, kp.ki_uid, kp.ki_svuid);
+	  gdb_printf ("Group IDs (real, effective, saved): %d %d %d\n",
+		      kp.ki_rgid, kp.ki_groups[0], kp.ki_svgid);
+	  gdb_printf ("Groups: ");
 	  for (int i = 0; i < kp.ki_ngroups; i++)
-	    printf_filtered ("%d ", kp.ki_groups[i]);
-	  printf_filtered ("\n");
-	  printf_filtered ("Minor faults (no memory page): %ld\n",
-			   kp.ki_rusage.ru_minflt);
-	  printf_filtered ("Minor faults, children: %ld\n",
-			   kp.ki_rusage_ch.ru_minflt);
-	  printf_filtered ("Major faults (memory page faults): %ld\n",
-			   kp.ki_rusage.ru_majflt);
-	  printf_filtered ("Major faults, children: %ld\n",
-			   kp.ki_rusage_ch.ru_majflt);
-	  printf_filtered ("utime: %s.%06ld\n",
-			   plongest (kp.ki_rusage.ru_utime.tv_sec),
-			   kp.ki_rusage.ru_utime.tv_usec);
-	  printf_filtered ("stime: %s.%06ld\n",
-			   plongest (kp.ki_rusage.ru_stime.tv_sec),
-			   kp.ki_rusage.ru_stime.tv_usec);
-	  printf_filtered ("utime, children: %s.%06ld\n",
-			   plongest (kp.ki_rusage_ch.ru_utime.tv_sec),
-			   kp.ki_rusage_ch.ru_utime.tv_usec);
-	  printf_filtered ("stime, children: %s.%06ld\n",
-			   plongest (kp.ki_rusage_ch.ru_stime.tv_sec),
-			   kp.ki_rusage_ch.ru_stime.tv_usec);
-	  printf_filtered ("'nice' value: %d\n", kp.ki_nice);
-	  printf_filtered ("Start time: %s.%06ld\n",
-			   plongest (kp.ki_start.tv_sec),
-			   kp.ki_start.tv_usec);
+	    gdb_printf ("%d ", kp.ki_groups[i]);
+	  gdb_printf ("\n");
+	  gdb_printf ("Minor faults (no memory page): %ld\n",
+		      kp.ki_rusage.ru_minflt);
+	  gdb_printf ("Minor faults, children: %ld\n",
+		      kp.ki_rusage_ch.ru_minflt);
+	  gdb_printf ("Major faults (memory page faults): %ld\n",
+		      kp.ki_rusage.ru_majflt);
+	  gdb_printf ("Major faults, children: %ld\n",
+		      kp.ki_rusage_ch.ru_majflt);
+	  gdb_printf ("utime: %s.%06ld\n",
+		      plongest (kp.ki_rusage.ru_utime.tv_sec),
+		      kp.ki_rusage.ru_utime.tv_usec);
+	  gdb_printf ("stime: %s.%06ld\n",
+		      plongest (kp.ki_rusage.ru_stime.tv_sec),
+		      kp.ki_rusage.ru_stime.tv_usec);
+	  gdb_printf ("utime, children: %s.%06ld\n",
+		      plongest (kp.ki_rusage_ch.ru_utime.tv_sec),
+		      kp.ki_rusage_ch.ru_utime.tv_usec);
+	  gdb_printf ("stime, children: %s.%06ld\n",
+		      plongest (kp.ki_rusage_ch.ru_stime.tv_sec),
+		      kp.ki_rusage_ch.ru_stime.tv_usec);
+	  gdb_printf ("'nice' value: %d\n", kp.ki_nice);
+	  gdb_printf ("Start time: %s.%06ld\n",
+		      plongest (kp.ki_start.tv_sec),
+		      kp.ki_start.tv_usec);
 	  pgtok = getpagesize () / 1024;
-	  printf_filtered ("Virtual memory size: %s kB\n",
-			   pulongest (kp.ki_size / 1024));
-	  printf_filtered ("Data size: %s kB\n",
-			   pulongest (kp.ki_dsize * pgtok));
-	  printf_filtered ("Stack size: %s kB\n",
-			   pulongest (kp.ki_ssize * pgtok));
-	  printf_filtered ("Text size: %s kB\n",
-			   pulongest (kp.ki_tsize * pgtok));
-	  printf_filtered ("Resident set size: %s kB\n",
-			   pulongest (kp.ki_rssize * pgtok));
-	  printf_filtered ("Maximum RSS: %s kB\n",
-			   pulongest (kp.ki_rusage.ru_maxrss));
-	  printf_filtered ("Pending Signals: ");
+	  gdb_printf ("Virtual memory size: %s kB\n",
+		      pulongest (kp.ki_size / 1024));
+	  gdb_printf ("Data size: %s kB\n",
+		      pulongest (kp.ki_dsize * pgtok));
+	  gdb_printf ("Stack size: %s kB\n",
+		      pulongest (kp.ki_ssize * pgtok));
+	  gdb_printf ("Text size: %s kB\n",
+		      pulongest (kp.ki_tsize * pgtok));
+	  gdb_printf ("Resident set size: %s kB\n",
+		      pulongest (kp.ki_rssize * pgtok));
+	  gdb_printf ("Maximum RSS: %s kB\n",
+		      pulongest (kp.ki_rusage.ru_maxrss));
+	  gdb_printf ("Pending Signals: ");
 	  for (int i = 0; i < _SIG_WORDS; i++)
-	    printf_filtered ("%08x ", kp.ki_siglist.__bits[i]);
-	  printf_filtered ("\n");
-	  printf_filtered ("Ignored Signals: ");
+	    gdb_printf ("%08x ", kp.ki_siglist.__bits[i]);
+	  gdb_printf ("\n");
+	  gdb_printf ("Ignored Signals: ");
 	  for (int i = 0; i < _SIG_WORDS; i++)
-	    printf_filtered ("%08x ", kp.ki_sigignore.__bits[i]);
-	  printf_filtered ("\n");
-	  printf_filtered ("Caught Signals: ");
+	    gdb_printf ("%08x ", kp.ki_sigignore.__bits[i]);
+	  gdb_printf ("\n");
+	  gdb_printf ("Caught Signals: ");
 	  for (int i = 0; i < _SIG_WORDS; i++)
-	    printf_filtered ("%08x ", kp.ki_sigcatch.__bits[i]);
-	  printf_filtered ("\n");
+	    gdb_printf ("%08x ", kp.ki_sigcatch.__bits[i]);
+	  gdb_printf ("\n");
 	}
     }
 
@@ -717,15 +717,15 @@ static void
 show_fbsd_lwp_debug (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of FreeBSD lwp module is %s.\n"), value);
+  gdb_printf (file, _("Debugging of FreeBSD lwp module is %s.\n"), value);
 }
 
 static void
 show_fbsd_nat_debug (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of FreeBSD native target is %s.\n"),
-		    value);
+  gdb_printf (file, _("Debugging of FreeBSD native target is %s.\n"),
+	      value);
 }
 
 #define fbsd_lwp_debug_printf(fmt, ...) \
@@ -1296,8 +1296,8 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 		  fbsd_lwp_debug_printf ("deleting thread for LWP %u",
 					 pl.pl_lwpid);
 		  if (print_thread_events)
-		    printf_filtered (_("[%s exited]\n"),
-				     target_pid_to_str (wptid).c_str ());
+		    gdb_printf (_("[%s exited]\n"),
+				target_pid_to_str (wptid).c_str ());
 		  low_delete_thread (thr);
 		  delete_thread (thr);
 		}

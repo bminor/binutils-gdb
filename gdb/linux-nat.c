@@ -202,8 +202,8 @@ static void
 show_debug_linux_nat (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of GNU/Linux native targets is %s.\n"),
-		    value);
+  gdb_printf (file, _("Debugging of GNU/Linux native targets is %s.\n"),
+	      value);
 }
 
 /* Print a linux-nat debug statement.  */
@@ -894,8 +894,8 @@ exit_lwp (struct lwp_info *lp)
   if (th)
     {
       if (print_thread_events)
-	printf_filtered (_("[%s exited]\n"),
-			 target_pid_to_str (lp->ptid).c_str ());
+	gdb_printf (_("[%s exited]\n"),
+		    target_pid_to_str (lp->ptid).c_str ());
 
       delete_thread (th);
     }

@@ -241,17 +241,17 @@ convert_symbol_sym (compile_c_instance *context, const char *identifier,
 	  && global_sym.block != block_static_block (global_sym.block))
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"gcc_convert_symbol \"%s\": global symbol\n",
-				identifier);
+	    gdb_printf (gdb_stdlog,
+			"gcc_convert_symbol \"%s\": global symbol\n",
+			identifier);
 	  convert_one_symbol (context, global_sym, 1, 0);
 	}
     }
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"gcc_convert_symbol \"%s\": local symbol\n",
-			identifier);
+    gdb_printf (gdb_stdlog,
+		"gcc_convert_symbol \"%s\": local symbol\n",
+		identifier);
   convert_one_symbol (context, sym, 0, is_local_symbol);
 }
 
@@ -373,9 +373,9 @@ gcc_convert_symbol (void *datum,
     }
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdlog,
-			"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
-			identifier);
+    gdb_printf (gdb_stdlog,
+		"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
+		identifier);
   return;
 }
 
@@ -401,9 +401,9 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
       if (sym != NULL && sym->aclass () == LOC_BLOCK)
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"gcc_symbol_address \"%s\": full symbol\n",
-				identifier);
+	    gdb_printf (gdb_stdlog,
+			"gcc_symbol_address \"%s\": full symbol\n",
+			identifier);
 	  result = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
 	  if (sym->type ()->is_gnu_ifunc ())
 	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
@@ -417,10 +417,10 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	  if (msym.minsym != NULL)
 	    {
 	      if (compile_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "gcc_symbol_address \"%s\": minimal "
-				    "symbol\n",
-				    identifier);
+		gdb_printf (gdb_stdlog,
+			    "gcc_symbol_address \"%s\": minimal "
+			    "symbol\n",
+			    identifier);
 	      result = BMSYMBOL_VALUE_ADDRESS (msym);
 	      if (MSYMBOL_TYPE (msym.minsym) == mst_text_gnu_ifunc)
 		result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
@@ -435,9 +435,9 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
     }
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdlog,
-			"gcc_symbol_address \"%s\": failed\n",
-			identifier);
+    gdb_printf (gdb_stdlog,
+		"gcc_symbol_address \"%s\": failed\n",
+		identifier);
   return result;
 }
 

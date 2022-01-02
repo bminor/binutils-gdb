@@ -281,8 +281,8 @@ static void
 show_stapexpressiondebug (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("SystemTap Probe expression debugging is %s.\n"),
-		    value);
+  gdb_printf (file, _("SystemTap Probe expression debugging is %s.\n"),
+	      value);
 }
 
 /* Returns the operator precedence level of OP, or STAP_OPERAND_PREC_NONE

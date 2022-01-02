@@ -132,7 +132,7 @@ static void
 show_bfd_sharing  (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("BFD sharing is %s.\n"), value);
+  gdb_printf (file, _("BFD sharing is %s.\n"), value);
 }
 
 /* When true debugging of the bfd caches is enabled.  */
@@ -148,7 +148,7 @@ static void
 show_bfd_cache_debug (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("BFD cache debugging is %s.\n"), value);
+  gdb_printf (file, _("BFD cache debugging is %s.\n"), value);
 }
 
 /* The type of an object being looked up in gdb_bfd_cache.  We use

@@ -204,10 +204,10 @@ void
 bsd_kvm_target::files_info ()
 {
   if (bsd_kvm_corefile && strcmp (bsd_kvm_corefile, _PATH_MEM) != 0)
-    printf_filtered (_("\tUsing the kernel crash dump %s.\n"),
-		     bsd_kvm_corefile);
+    gdb_printf (_("\tUsing the kernel crash dump %s.\n"),
+		bsd_kvm_corefile);
   else
-    printf_filtered (_("\tUsing the currently running kernel.\n"));
+    gdb_printf (_("\tUsing the currently running kernel.\n"));
 }
 
 /* Fetch process control block at address PADDR.  */

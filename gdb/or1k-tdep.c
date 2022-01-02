@@ -57,7 +57,7 @@ static void
 show_or1k_debug (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("OpenRISC debugging is %s.\n"), value);
+  gdb_printf (file, _("OpenRISC debugging is %s.\n"), value);
 }
 
 
@@ -564,14 +564,14 @@ or1k_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
   CORE_ADDR pc;
 
   if (or1k_debug)
-    fprintf_unfiltered (gdb_stdlog, "or1k_unwind_pc, next_frame=%d\n",
-			frame_relative_level (next_frame));
+    gdb_printf (gdb_stdlog, "or1k_unwind_pc, next_frame=%d\n",
+		frame_relative_level (next_frame));
 
   pc = frame_unwind_register_unsigned (next_frame, OR1K_NPC_REGNUM);
 
   if (or1k_debug)
-    fprintf_unfiltered (gdb_stdlog, "or1k_unwind_pc, pc=%s\n",
-			paddress (gdbarch, pc));
+    gdb_printf (gdb_stdlog, "or1k_unwind_pc, pc=%s\n",
+		paddress (gdbarch, pc));
 
   return pc;
 }
@@ -584,14 +584,14 @@ or1k_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
   CORE_ADDR sp;
 
   if (or1k_debug)
-    fprintf_unfiltered (gdb_stdlog, "or1k_unwind_sp, next_frame=%d\n",
-			frame_relative_level (next_frame));
+    gdb_printf (gdb_stdlog, "or1k_unwind_sp, next_frame=%d\n",
+		frame_relative_level (next_frame));
 
   sp = frame_unwind_register_unsigned (next_frame, OR1K_SP_REGNUM);
 
   if (or1k_debug)
-    fprintf_unfiltered (gdb_stdlog, "or1k_unwind_sp, sp=%s\n",
-			paddress (gdbarch, sp));
+    gdb_printf (gdb_stdlog, "or1k_unwind_sp, sp=%s\n",
+		paddress (gdbarch, sp));
 
   return sp;
 }
@@ -904,9 +904,9 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
   CORE_ADDR end_addr;
 
   if (or1k_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"or1k_frame_cache, prologue_cache = %s\n",
-			host_address_to_string (*prologue_cache));
+    gdb_printf (gdb_stdlog,
+		"or1k_frame_cache, prologue_cache = %s\n",
+		host_address_to_string (*prologue_cache));
 
   /* Nothing to do if we already have this info.  */
   if (NULL != *prologue_cache)
@@ -930,7 +930,7 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
   if (start_addr == 0)
     {
       if (or1k_debug)
-	fprintf_unfiltered (gdb_stdlog, "  couldn't find function\n");
+	gdb_printf (gdb_stdlog, "  couldn't find function\n");
 
       /* JPB: 28-Apr-11.  This is a temporary patch, to get round GDB
 	 crashing right at the beginning.  Build the frame ID as best we
@@ -1091,10 +1091,10 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
 
   if (or1k_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "  this_sp_for_id = %s\n",
-			  paddress (gdbarch, this_sp_for_id));
-      fprintf_unfiltered (gdb_stdlog, "  start_addr     = %s\n",
-			  paddress (gdbarch, start_addr));
+      gdb_printf (gdb_stdlog, "  this_sp_for_id = %s\n",
+		  paddress (gdbarch, this_sp_for_id));
+      gdb_printf (gdb_stdlog, "  start_addr     = %s\n",
+		  paddress (gdbarch, start_addr));
     }
 
   return info;
@@ -1290,10 +1290,10 @@ or1k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (NULL == tdep)
     return; /* Nothing to report */
 
-  fprintf_filtered (file, "or1k_dump_tdep: %d bytes per word\n",
-		    tdep->bytes_per_word);
-  fprintf_filtered (file, "or1k_dump_tdep: %d bytes per address\n",
-		    tdep->bytes_per_address);
+  gdb_printf (file, "or1k_dump_tdep: %d bytes per word\n",
+	      tdep->bytes_per_word);
+  gdb_printf (file, "or1k_dump_tdep: %d bytes per address\n",
+	      tdep->bytes_per_address);
 }
 
 

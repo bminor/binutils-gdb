@@ -123,9 +123,9 @@ show_mi_async_command (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c,
 		       const char *value)
 {
-  fprintf_filtered (file,
-		    _("Whether MI is in asynchronous mode is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Whether MI is in asynchronous mode is %s.\n"),
+	      value);
 }
 
 /* A wrapper for target_can_async_p that takes the MI setting into
@@ -1816,9 +1816,9 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
     case MI_COMMAND:
       /* A MI command was read from the input stream.  */
       if (mi_debug_p)
-	fprintf_unfiltered (gdb_stdlog,
-			    " token=`%s' command=`%s' args=`%s'\n",
-			    context->token, context->command, context->args);
+	gdb_printf (gdb_stdlog,
+		    " token=`%s' command=`%s' args=`%s'\n",
+		    context->token, context->command, context->args);
 
       mi_cmd_execute (context);
 
@@ -1855,7 +1855,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	/* This "feature" will be removed as soon as we have a
 	   complete set of mi commands.  */
 	/* Echo the command on the console.  */
-	fprintf_unfiltered (gdb_stdlog, "%s\n", context->command);
+	gdb_printf (gdb_stdlog, "%s\n", context->command);
 	/* Call the "console" interpreter.  */
 	argv[0] = (char *) INTERP_CONSOLE;
 	argv[1] = context->command;
@@ -2135,8 +2135,8 @@ mi_execute_cli_command (const char *cmd, bool args_p, const char *args)
 	gdb_assert (args == nullptr);
 
       if (mi_debug_p)
-	fprintf_unfiltered (gdb_stdlog, "cli=%s run=%s\n",
-			    cmd, run.c_str ());
+	gdb_printf (gdb_stdlog, "cli=%s run=%s\n",
+		    cmd, run.c_str ());
 
       execute_command (run.c_str (), 0 /* from_tty */ );
     }
@@ -2258,7 +2258,7 @@ print_diff (struct ui_file *file, struct mi_timestamp *start,
   duration<double> utime = end->utime - start->utime;
   duration<double> stime = end->stime - start->stime;
 
-  fprintf_unfiltered
+  gdb_printf
     (file,
      ",time={wallclock=\"%0.5f\",user=\"%0.5f\",system=\"%0.5f\"}",
      wallclock.count (), utime.count (), stime.count ());

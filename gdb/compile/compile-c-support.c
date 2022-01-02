@@ -161,7 +161,7 @@ print_one_macro (const char *name, const struct macro_definition *macro,
 
   /* None of -Wno-builtin-macro-redefined, #undef first
      or plain #define of the same value would avoid a warning.  */
-  fprintf_filtered (file, "#ifndef %s\n# define %s", name, name);
+  gdb_printf (file, "#ifndef %s\n# define %s", name, name);
 
   if (macro->kind == macro_function_like)
     {
@@ -177,7 +177,7 @@ print_one_macro (const char *name, const struct macro_definition *macro,
       gdb_puts (")", file);
     }
 
-  fprintf_filtered (file, " %s\n#endif\n", macro->replacement);
+  gdb_printf (file, " %s\n#endif\n", macro->replacement);
 }
 
 /* Write macro definitions at PC to FILE.  */
@@ -245,8 +245,8 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 	    switch (regtype->code ())
 	      {
 	      case TYPE_CODE_PTR:
-		fprintf_filtered (stream, "__gdb_uintptr %s",
-				  regname.c_str ());
+		gdb_printf (stream, "__gdb_uintptr %s",
+			    regname.c_str ());
 		break;
 
 	      case TYPE_CODE_INT:
@@ -258,11 +258,11 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 		    {
 		      if (regtype->is_unsigned ())
 			gdb_puts ("unsigned ", stream);
-		      fprintf_unfiltered (stream,
-					  "int %s"
-					  " __attribute__ ((__mode__(__%s__)))",
-					  regname.c_str (),
-					  mode);
+		      gdb_printf (stream,
+				  "int %s"
+				  " __attribute__ ((__mode__(__%s__)))",
+				  regname.c_str (),
+				  mode);
 		      break;
 		    }
 		}
@@ -270,12 +270,12 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 		/* Fall through.  */
 
 	      default:
-		fprintf_unfiltered (stream,
-				    "  unsigned char %s[%s]"
-				    " __attribute__((__aligned__("
-				    "__BIGGEST_ALIGNMENT__)))",
-				    regname.c_str (),
-				    pulongest (TYPE_LENGTH (regtype)));
+		gdb_printf (stream,
+			    "  unsigned char %s[%s]"
+			    " __attribute__((__aligned__("
+			    "__BIGGEST_ALIGNMENT__)))",
+			    regname.c_str (),
+			    pulongest (TYPE_LENGTH (regtype)));
 	      }
 	    gdb_puts (";\n", stream);
 	  }
@@ -393,15 +393,15 @@ struct c_add_input
       {
       case COMPILE_I_PRINT_ADDRESS_SCOPE:
       case COMPILE_I_PRINT_VALUE_SCOPE:
-	fprintf_unfiltered (buf,
-			    "__auto_type " COMPILE_I_EXPR_VAL " = %s;\n"
-			    "typeof (%s) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
-			    "memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s"
-			    COMPILE_I_EXPR_VAL ",\n"
-			    "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));\n"
-			    , input, input,
-			    (type == COMPILE_I_PRINT_ADDRESS_SCOPE
-			     ? "&" : ""));
+	gdb_printf (buf,
+		    "__auto_type " COMPILE_I_EXPR_VAL " = %s;\n"
+		    "typeof (%s) *" COMPILE_I_EXPR_PTR_TYPE ";\n"
+		    "memcpy (" COMPILE_I_PRINT_OUT_ARG ", %s"
+		    COMPILE_I_EXPR_VAL ",\n"
+		    "sizeof (*" COMPILE_I_EXPR_PTR_TYPE "));\n"
+		    , input, input,
+		    (type == COMPILE_I_PRINT_ADDRESS_SCOPE
+		     ? "&" : ""));
 	break;
 
       default:
@@ -494,7 +494,7 @@ struct cplus_add_input
       {
       case COMPILE_I_PRINT_VALUE_SCOPE:
       case COMPILE_I_PRINT_ADDRESS_SCOPE:
-	fprintf_unfiltered
+	gdb_printf
 	  (buf,
 	   /* "auto" strips ref- and cv- qualifiers, so we need to also strip
 	      those from COMPILE_I_EXPR_PTR_TYPE.  */

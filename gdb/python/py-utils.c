@@ -372,9 +372,9 @@ gdbpy_handle_exception ()
     {
       /* An error occurred computing the string representation of the
 	 error message.  This is rare, but we should inform the user.  */
-      printf_filtered (_("An error occurred in Python "
-			 "and then another occurred computing the "
-			 "error message.\n"));
+      gdb_printf (_("An error occurred in Python "
+		    "and then another occurred computing the "
+		    "error message.\n"));
       gdbpy_print_stack ();
     }
 

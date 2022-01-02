@@ -166,22 +166,22 @@ print_range (struct type *type, struct ui_file *stream,
 	       access to an actual object, which is not available
 	       when the user is using the "ptype" command on a type.
 	       Print the range as an unbounded range.  */
-	    fprintf_filtered (stream, "<>");
+	    gdb_printf (stream, "<>");
 	    got_error = 1;
 	  }
 
 	if (!got_error)
 	  {
 	    ada_print_scalar (type, lo, stream);
-	    fprintf_filtered (stream, " .. ");
+	    gdb_printf (stream, " .. ");
 	    ada_print_scalar (type, hi, stream);
 	  }
       }
       break;
     default:
-      fprintf_filtered (stream, "%.*s",
-			ada_name_prefix_len (type->name ()),
-			type->name ());
+      gdb_printf (stream, "%.*s",
+		  ada_name_prefix_len (type->name ()),
+		  type->name ());
       break;
     }
 }
@@ -228,7 +228,7 @@ print_range_bound (struct type *type, const char *bounds, int *n,
 	  bound_len = pend - bound;
 	  *n += bound_len + 2;
 	}
-      fprintf_filtered (stream, "%.*s", bound_len, bound);
+      gdb_printf (stream, "%.*s", bound_len, bound);
     }
 }
 
@@ -247,7 +247,7 @@ print_dynamic_range_bound (struct type *type, const char *name, int name_len,
   if (get_int_var_value (name_buf.c_str (), B))
     ada_print_scalar (type, B, stream);
   else
-    fprintf_filtered (stream, "?");
+    gdb_printf (stream, "?");
 }
 
 /* Print RAW_TYPE as a range type, using any bound information
@@ -297,7 +297,7 @@ print_range_type (struct type *raw_type, struct ui_file *stream,
 	print_dynamic_range_bound (base_type, name, prefix_len, "___L",
 				   stream);
 
-      fprintf_filtered (stream, " .. ");
+      gdb_printf (stream, " .. ");
 
       if (*subtype_info == 'U')
 	print_range_bound (base_type, bounds_str, &n, stream);
@@ -316,7 +316,7 @@ print_enum_type (struct type *type, struct ui_file *stream)
   int i;
   LONGEST lastval;
 
-  fprintf_filtered (stream, "(");
+  gdb_printf (stream, "(");
   stream->wrap_here (1);
 
   lastval = 0;
@@ -324,19 +324,19 @@ print_enum_type (struct type *type, struct ui_file *stream)
     {
       QUIT;
       if (i)
-	fprintf_filtered (stream, ", ");
+	gdb_printf (stream, ", ");
       stream->wrap_here (4);
       fputs_styled (ada_enum_name (type->field (i).name ()),
 		    variable_name_style.style (), stream);
       if (lastval != type->field (i).loc_enumval ())
 	{
-	  fprintf_filtered (stream, " => %s",
-			    plongest (type->field (i).loc_enumval ()));
+	  gdb_printf (stream, " => %s",
+		      plongest (type->field (i).loc_enumval ()));
 	  lastval = type->field (i).loc_enumval ();
 	}
       lastval += 1;
     }
-  fprintf_filtered (stream, ")");
+  gdb_printf (stream, ")");
 }
 
 /* Print simple (constrained) array type TYPE on STREAM.  LEVEL is the
@@ -356,7 +356,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
     type = ada_coerce_to_simple_array_type (type);
 
   bitsize = 0;
-  fprintf_filtered (stream, "array (");
+  gdb_printf (stream, "array (");
 
   if (type == NULL)
     {
@@ -381,7 +381,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	       arr_type = TYPE_TARGET_TYPE (arr_type))
 	    {
 	      if (arr_type != type)
-		fprintf_filtered (stream, ", ");
+		gdb_printf (stream, ", ");
 	      print_range (arr_type->index_type (), stream,
 			   0 /* bounds_prefered_p */);
 	      if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
@@ -398,7 +398,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	       k += 1, arr_type = TYPE_TARGET_TYPE (arr_type))
 	    {
 	      if (k > 0)
-		fprintf_filtered (stream, ", ");
+		gdb_printf (stream, ", ");
 	      print_range_type (range_desc_type->field (k).type (),
 				stream, 0 /* bounds_prefered_p */);
 	      if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
@@ -411,11 +411,11 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
       int i, i0;
 
       for (i = i0 = ada_array_arity (type); i > 0; i -= 1)
-	fprintf_filtered (stream, "%s<>", i == i0 ? "" : ", ");
+	gdb_printf (stream, "%s<>", i == i0 ? "" : ", ");
     }
 
   elt_type = ada_array_element_type (type, n_indices);
-  fprintf_filtered (stream, ") of ");
+  gdb_printf (stream, ") of ");
   stream->wrap_here (0);
   ada_print_type (elt_type, "", stream, show == 0 ? 0 : show - 1, level + 1,
 		  flags);
@@ -423,7 +423,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
      compilers have to describe their stride so that we can properly fetch
      individual elements.  Do not say the array is packed in this case.  */
   if (bitsize > 0 && !is_dynamic_type (elt_type))
-    fprintf_filtered (stream, " <packed: %d-bit elements>", bitsize);
+    gdb_printf (stream, " <packed: %d-bit elements>", bitsize);
 }
 
 /* Print the choices encoded by field FIELD_NUM of variant-part TYPE on
@@ -460,13 +460,13 @@ print_choices (struct type *type, int field_num, struct ui_file *stream,
 	  goto Huh;
 	case '_':
 	case '\0':
-	  fprintf_filtered (stream, " =>");
+	  gdb_printf (stream, " =>");
 	  return 1;
 	case 'S':
 	case 'R':
 	case 'O':
 	  if (have_output)
-	    fprintf_filtered (stream, " | ");
+	    gdb_printf (stream, " | ");
 	  have_output = 1;
 	  break;
 	}
@@ -490,19 +490,19 @@ print_choices (struct type *type, int field_num, struct ui_file *stream,
 		|| name[p] != 'T' || !ada_scan_number (name, p + 1, &U, &p))
 	      goto Huh;
 	    ada_print_scalar (val_type, L, stream);
-	    fprintf_filtered (stream, " .. ");
+	    gdb_printf (stream, " .. ");
 	    ada_print_scalar (val_type, U, stream);
 	    break;
 	  }
 	case 'O':
-	  fprintf_filtered (stream, "others");
+	  gdb_printf (stream, "others");
 	  p += 1;
 	  break;
 	}
     }
 
 Huh:
-  fprintf_filtered (stream, "? =>");
+  gdb_printf (stream, "? =>");
   return 0;
 }
 
@@ -520,14 +520,14 @@ print_variant_clauses (struct type *var_type, struct type *discr_type,
 {
   for (int i = 0; i < var_type->num_fields (); i += 1)
     {
-      fprintf_filtered (stream, "\n%*swhen ", level, "");
+      gdb_printf (stream, "\n%*swhen ", level, "");
       if (print_choices (var_type, i, stream, discr_type))
 	{
 	  if (print_record_field_types (var_type->field (i).type (),
 					outer_type, stream, show, level,
 					flags)
 	      <= 0)
-	    fprintf_filtered (stream, " null;");
+	    gdb_printf (stream, " null;");
 	}
       else
 	print_selected_record_field_types (var_type, outer_type, i, i,
@@ -588,10 +588,10 @@ print_variant_part (struct type *type, int field_num, struct type *outer_type,
   if (*variant == '\0')
     variant = "?";
 
-  fprintf_filtered (stream, "\n%*scase %s is", level + 4, "", variant);
+  gdb_printf (stream, "\n%*scase %s is", level + 4, "", variant);
   print_variant_clauses (type, field_num, outer_type, stream, show,
 			 level + 4, flags);
-  fprintf_filtered (stream, "\n%*send case;", level + 4, "");
+  gdb_printf (stream, "\n%*send case;", level + 4, "");
 }
 
 /* Print a description on STREAM of the fields FLD0 through FLD1 in
@@ -633,11 +633,11 @@ print_selected_record_field_types (struct type *type, struct type *outer_type,
       else
 	{
 	  flds += 1;
-	  fprintf_filtered (stream, "\n%*s", level + 4, "");
+	  gdb_printf (stream, "\n%*s", level + 4, "");
 	  ada_print_type (type->field (i).type (),
 			  type->field (i).name (),
 			  stream, show - 1, level + 4, flags);
-	  fprintf_filtered (stream, ";");
+	  gdb_printf (stream, ";");
 	}
     }
 
@@ -657,16 +657,16 @@ static void
 print_choices (struct type *discr_type, const variant &variant,
 	       struct ui_file *stream, int level)
 {
-  fprintf_filtered (stream, "\n%*swhen ", level, "");
+  gdb_printf (stream, "\n%*swhen ", level, "");
   if (variant.is_default ())
-    fprintf_filtered (stream, "others");
+    gdb_printf (stream, "others");
   else
     {
       bool first = true;
       for (const discriminant_range &range : variant.discriminants)
 	{
 	  if (!first)
-	    fprintf_filtered (stream, " | ");
+	    gdb_printf (stream, " | ");
 	  first = false;
 
 	  ada_print_scalar (discr_type, range.low, stream);
@@ -675,7 +675,7 @@ print_choices (struct type *discr_type, const variant &variant,
 	}
     }
 
-  fprintf_filtered (stream, " =>");
+  gdb_printf (stream, " =>");
 }
 
 /* Print a single variant part, PART, on STREAM.  TYPE is the
@@ -701,7 +701,7 @@ print_variant_part (const variant_part &part,
       discr_type = type->field (part.discriminant_index).type ();
     }
 
-  fprintf_filtered (stream, "\n%*scase %s is", level + 4, "", name);
+  gdb_printf (stream, "\n%*scase %s is", level + 4, "", name);
 
   int last_field = -1;
   for (const variant &variant : part.variants)
@@ -709,7 +709,7 @@ print_variant_part (const variant_part &part,
       print_choices (discr_type, variant, stream, level + 8);
 
       if (variant.first_field == variant.last_field)
-	fprintf_filtered (stream, " null;");
+	gdb_printf (stream, " null;");
       else
 	{
 	  print_record_field_types_dynamic (variant.parts,
@@ -720,7 +720,7 @@ print_variant_part (const variant_part &part,
 	}
     }
 
-  fprintf_filtered (stream, "\n%*send case;", level + 4, "");
+  gdb_printf (stream, "\n%*send case;", level + 4, "");
 
   return last_field;
 }
@@ -813,15 +813,15 @@ print_record_type (struct type *type0, struct ui_file *stream, int show,
 	 prevents a crash trying to print a NULL pointer.  */
       if (parent_name == NULL)
 	parent_name = ada_type_name (parent_type);
-      fprintf_filtered (stream, "new %s with record", parent_name);
+      gdb_printf (stream, "new %s with record", parent_name);
     }
   else if (parent_type == NULL && ada_is_tagged_type (type, 0))
-    fprintf_filtered (stream, "tagged record");
+    gdb_printf (stream, "tagged record");
   else
-    fprintf_filtered (stream, "record");
+    gdb_printf (stream, "record");
 
   if (show < 0)
-    fprintf_filtered (stream, " ... end record");
+    gdb_printf (stream, " ... end record");
   else
     {
       int flds;
@@ -834,11 +834,11 @@ print_record_type (struct type *type0, struct ui_file *stream, int show,
 					flags);
 
       if (flds > 0)
-	fprintf_filtered (stream, "\n%*send record", level, "");
+	gdb_printf (stream, "\n%*send record", level, "");
       else if (flds < 0)
-	fprintf_filtered (stream, _(" <incomplete type> end record"));
+	gdb_printf (stream, _(" <incomplete type> end record"));
       else
-	fprintf_filtered (stream, " null; end record");
+	gdb_printf (stream, " null; end record");
     }
 }
 
@@ -852,17 +852,17 @@ print_unchecked_union_type (struct type *type, struct ui_file *stream,
 			    const struct type_print_options *flags)
 {
   if (show < 0)
-    fprintf_filtered (stream, "record (?) is ... end record");
+    gdb_printf (stream, "record (?) is ... end record");
   else if (type->num_fields () == 0)
-    fprintf_filtered (stream, "record (?) is null; end record");
+    gdb_printf (stream, "record (?) is null; end record");
   else
     {
-      fprintf_filtered (stream, "record (?) is\n%*scase ? is", level + 4, "");
+      gdb_printf (stream, "record (?) is\n%*scase ? is", level + 4, "");
 
       print_variant_clauses (type, nullptr, type, stream, show, level + 8, flags);
 
-      fprintf_filtered (stream, "\n%*send case;\n%*send record",
-			level + 4, "", level, "");
+      gdb_printf (stream, "\n%*send case;\n%*send record",
+		  level + 4, "", level, "");
     }
 }
 
@@ -879,9 +879,9 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 
   if (TYPE_TARGET_TYPE (type) != NULL
       && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_VOID)
-    fprintf_filtered (stream, "procedure");
+    gdb_printf (stream, "procedure");
   else
-    fprintf_filtered (stream, "function");
+    gdb_printf (stream, "function");
 
   if (name != NULL && name[0] != '\0')
     {
@@ -891,7 +891,7 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 
   if (len > 0)
     {
-      fprintf_filtered (stream, " (");
+      gdb_printf (stream, " (");
       for (i = 0; i < len; i += 1)
 	{
 	  if (i > 0)
@@ -899,18 +899,18 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 	      gdb_puts ("; ", stream);
 	      stream->wrap_here (4);
 	    }
-	  fprintf_filtered (stream, "a%d: ", i + 1);
+	  gdb_printf (stream, "a%d: ", i + 1);
 	  ada_print_type (type->field (i).type (), "", stream, -1, 0,
 			  flags);
 	}
-      fprintf_filtered (stream, ")");
+      gdb_printf (stream, ")");
     }
 
   if (TYPE_TARGET_TYPE (type) == NULL)
-    fprintf_filtered (stream, " return <unknown return type>");
+    gdb_printf (stream, " return <unknown return type>");
   else if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
     {
-      fprintf_filtered (stream, " return ");
+      gdb_printf (stream, " return ");
       ada_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, 0, flags);
     }
 }
@@ -954,20 +954,20 @@ ada_print_type (struct type *type0, const char *varstring,
   if (type == NULL)
     {
       if (is_var_decl)
-	fprintf_filtered (stream, "%.*s: ",
-			  ada_name_prefix_len (varstring), varstring);
+	gdb_printf (stream, "%.*s: ",
+		    ada_name_prefix_len (varstring), varstring);
       fprintf_styled (stream, metadata_style.style (), "<null type?>");
       return;
     }
 
   if (is_var_decl && type->code () != TYPE_CODE_FUNC)
-    fprintf_filtered (stream, "%.*s: ",
-		      ada_name_prefix_len (varstring), varstring);
+    gdb_printf (stream, "%.*s: ",
+		ada_name_prefix_len (varstring), varstring);
 
   if (type_name != NULL && show <= 0 && !ada_is_aligner_type (type))
     {
-      fprintf_filtered (stream, "%.*s",
-			ada_name_prefix_len (type_name), type_name);
+      gdb_printf (stream, "%.*s",
+		  ada_name_prefix_len (type_name), type_name);
       return;
     }
 
@@ -980,9 +980,9 @@ ada_print_type (struct type *type0, const char *varstring,
     switch (type->code ())
       {
       default:
-	fprintf_filtered (stream, "<");
+	gdb_printf (stream, "<");
 	c_print_type (type, "", stream, show, level, flags);
-	fprintf_filtered (stream, ">");
+	gdb_printf (stream, ">");
 	break;
       case TYPE_CODE_PTR:
       case TYPE_CODE_TYPEDEF:
@@ -990,12 +990,12 @@ ada_print_type (struct type *type0, const char *varstring,
 	   "access" in this case.  */
 	if (type->code () != TYPE_CODE_PTR
 	    || strstr (varstring, "___XVL") == nullptr)
-	  fprintf_filtered (stream, "access ");
+	  gdb_printf (stream, "access ");
 	ada_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level,
 			flags);
 	break;
       case TYPE_CODE_REF:
-	fprintf_filtered (stream, "<ref> ");
+	gdb_printf (stream, "<ref> ");
 	ada_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level,
 			flags);
 	break;
@@ -1003,7 +1003,7 @@ ada_print_type (struct type *type0, const char *varstring,
 	print_array_type (type, stream, show, level, flags);
 	break;
       case TYPE_CODE_BOOL:
-	fprintf_filtered (stream, "(false, true)");
+	gdb_printf (stream, "(false, true)");
 	break;
       case TYPE_CODE_INT:
 	{
@@ -1015,7 +1015,7 @@ ada_print_type (struct type *type0, const char *varstring,
 			    pulongest (TYPE_LENGTH (type)));
 	  else
 	    {
-	      fprintf_filtered (stream, "range ");
+	      gdb_printf (stream, "range ");
 	      print_range_type (type, stream, 1 /* bounds_prefered_p */);
 	    }
 	}
@@ -1023,16 +1023,16 @@ ada_print_type (struct type *type0, const char *varstring,
       case TYPE_CODE_RANGE:
 	if (is_fixed_point_type (type))
 	  {
-	    fprintf_filtered (stream, "<");
+	    gdb_printf (stream, "<");
 	    print_type_fixed_point (type, stream);
-	    fprintf_filtered (stream, ">");
+	    gdb_printf (stream, ">");
 	  }
 	else if (ada_is_modular_type (type))
-	  fprintf_filtered (stream, "mod %s", 
-			    int_string (ada_modulus (type), 10, 0, 0, 1));
+	  gdb_printf (stream, "mod %s", 
+		      int_string (ada_modulus (type), 10, 0, 0, 1));
 	else
 	  {
-	    fprintf_filtered (stream, "range ");
+	    gdb_printf (stream, "range ");
 	    print_range (type, stream, 1 /* bounds_prefered_p */);
 	  }
 	break;
@@ -1043,7 +1043,7 @@ ada_print_type (struct type *type0, const char *varstring,
 	break;
       case TYPE_CODE_ENUM:
 	if (show < 0)
-	  fprintf_filtered (stream, "(...)");
+	  gdb_printf (stream, "(...)");
 	else
 	  print_enum_type (type, stream);
 	break;
@@ -1051,8 +1051,8 @@ ada_print_type (struct type *type0, const char *varstring,
 	if (ada_is_array_descriptor_type (type))
 	  print_array_type (type, stream, show, level, flags);
 	else if (ada_is_bogus_array_descriptor (type))
-	  fprintf_filtered (stream,
-			    _("array (?) of ? (<mal-formed descriptor>)"));
+	  gdb_printf (stream,
+		      _("array (?) of ? (<mal-formed descriptor>)"));
 	else
 	  print_record_type (type, stream, show, level, flags);
 	break;

@@ -133,11 +133,11 @@ public:
 
     if (symbol_lookup_debug)
       {
-	fprintf_unfiltered (gdb_stdlog,
-			    "rust_lookup_symbol_non_local"
-			    " (%s, %s (scope %s), %s)\n",
-			    name, host_address_to_string (block),
-			    block_scope (block), domain_name (domain));
+	gdb_printf (gdb_stdlog,
+		    "rust_lookup_symbol_non_local"
+		    " (%s, %s (scope %s), %s)\n",
+		    name, host_address_to_string (block),
+		    block_scope (block), domain_name (domain));
       }
 
     /* Look up bare names in the block's scope.  */
@@ -196,9 +196,9 @@ public:
 		      struct ui_file *stream) const override
   {
     type = check_typedef (type);
-    fprintf_filtered (stream, "type %s = ", new_symbol->print_name ());
+    gdb_printf (stream, "type %s = ", new_symbol->print_name ());
     type_print (type, "", stream, 0);
-    fprintf_filtered (stream, ";");
+    gdb_printf (stream, ";");
   }
 
   /* See language.h.  */

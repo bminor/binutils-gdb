@@ -2192,9 +2192,9 @@ show_dwarf_unwinders_enabled_p (struct ui_file *file, int from_tty,
 				struct cmd_list_element *c,
 				const char *value)
 {
-  fprintf_filtered (file,
-		    _("The DWARF stack unwinders are currently %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("The DWARF stack unwinders are currently %s.\n"),
+	      value);
 }
 
 void _initialize_dwarf2_frame ();

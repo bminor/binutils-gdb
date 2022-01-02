@@ -214,7 +214,7 @@ static void
 show_aarch64_debug (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("AArch64 debugging is %s.\n"), value);
+  gdb_printf (file, _("AArch64 debugging is %s.\n"), value);
 }
 
 namespace {
@@ -3691,8 +3691,8 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_filtered (file, _("aarch64_dump_tdep: Lowest pc = 0x%s"),
-		    paddress (gdbarch, tdep->lowest_pc));
+  gdb_printf (file, _("aarch64_dump_tdep: Lowest pc = 0x%s"),
+	      paddress (gdbarch, tdep->lowest_pc));
 }
 
 #if GDB_SELF_TEST
@@ -4696,11 +4696,11 @@ aarch64_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   ret = aarch64_record_decode_insn_handler (&aarch64_record);
   if (ret == AARCH64_RECORD_UNSUPPORTED)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record does not support instruction "
-			    "0x%0x at address %s.\n"),
-			  aarch64_record.aarch64_insn,
-			  paddress (gdbarch, insn_addr));
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support instruction "
+		    "0x%0x at address %s.\n"),
+		  aarch64_record.aarch64_insn,
+		  paddress (gdbarch, insn_addr));
       ret = -1;
     }
 

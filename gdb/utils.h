@@ -248,13 +248,10 @@ extern void gdb_vprintf (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 extern void gdb_vprintf (struct ui_file *, const char *, va_list)
   ATTRIBUTE_PRINTF (2, 0);
 
-extern void fprintf_filtered (struct ui_file *, const char *, ...)
+extern void gdb_printf (struct ui_file *, const char *, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
-extern void printf_filtered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
-
-extern void fprintf_unfiltered (struct ui_file *, const char *, ...)
-  ATTRIBUTE_PRINTF (2, 3);
+extern void gdb_printf (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void printf_unfiltered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
@@ -265,7 +262,7 @@ extern const char *n_spaces (int);
 /* Return nonzero if filtered printing is initialized.  */
 extern int filtered_printing_initialized (void);
 
-/* Like fprintf_filtered, but styles the output according to STYLE,
+/* Like gdb_printf, but styles the output according to STYLE,
    when appropriate.  */
 
 extern void fprintf_styled (struct ui_file *stream,

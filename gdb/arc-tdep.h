@@ -110,7 +110,7 @@ enum arc_regnum
 /* Special value for register offset arrays.  */
 #define ARC_OFFSET_NO_REGISTER (-1)
 
-#define arc_print(fmt, args...) fprintf_unfiltered (gdb_stdlog, fmt, ##args)
+#define arc_print(fmt, args...) gdb_printf (gdb_stdlog, fmt, ##args)
 
 extern bool arc_debug;
 

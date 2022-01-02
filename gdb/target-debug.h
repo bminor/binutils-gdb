@@ -206,8 +206,8 @@ target_debug_print_signals (gdb::array_view<const unsigned char> sigs)
   for (size_t i = 0; i < sigs.size (); i++)
     if (sigs[i] != 0)
       {
-	fprintf_unfiltered (gdb_stdlog, " %s",
-			    gdb_signal_to_name ((enum gdb_signal) i));
+	gdb_printf (gdb_stdlog, " %s",
+		    gdb_signal_to_name ((enum gdb_signal) i));
       }
   gdb_puts (" }", gdb_stdlog);
 }
@@ -215,7 +215,7 @@ target_debug_print_signals (gdb::array_view<const unsigned char> sigs)
 static void
 target_debug_print_size_t (size_t size)
 {
-  fprintf_unfiltered (gdb_stdlog, "%s", pulongest (size));
+  gdb_printf (gdb_stdlog, "%s", pulongest (size));
 }
 
 static void
@@ -225,8 +225,8 @@ target_debug_print_const_gdb_byte_vector_r (const gdb::byte_vector &vector)
 
   for (size_t i = 0; i < vector.size (); i++)
     {
-      fprintf_unfiltered (gdb_stdlog, " %s",
-			  phex_nz (vector[i], 1));
+      gdb_printf (gdb_stdlog, " %s",
+		  phex_nz (vector[i], 1));
     }
   gdb_puts (" }", gdb_stdlog);
 }

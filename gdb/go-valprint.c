@@ -72,9 +72,9 @@ print_go_string (struct type *type,
 
   if (length < 0)
     {
-      printf_filtered (_("<invalid length: %ps>"),
-		       styled_string (metadata_style.style (),
-				      plongest (addr)));
+      gdb_printf (_("<invalid length: %ps>"),
+		  styled_string (metadata_style.style (),
+				 plongest (addr)));
       return;
     }
 

@@ -289,9 +289,9 @@ print_mention_catch_syscall (struct breakpoint *b)
   if (!c->syscalls_to_be_caught.empty ())
     {
       if (c->syscalls_to_be_caught.size () > 1)
-	printf_filtered (_("Catchpoint %d (syscalls"), b->number);
+	gdb_printf (_("Catchpoint %d (syscalls"), b->number);
       else
-	printf_filtered (_("Catchpoint %d (syscall"), b->number);
+	gdb_printf (_("Catchpoint %d (syscall"), b->number);
 
       for (int iter : c->syscalls_to_be_caught)
 	{
@@ -299,15 +299,15 @@ print_mention_catch_syscall (struct breakpoint *b)
 	  get_syscall_by_number (gdbarch, iter, &s);
 
 	  if (s.name != NULL)
-	    printf_filtered (" '%s' [%d]", s.name, s.number);
+	    gdb_printf (" '%s' [%d]", s.name, s.number);
 	  else
-	    printf_filtered (" %d", s.number);
+	    gdb_printf (" %d", s.number);
 	}
-      printf_filtered (")");
+      gdb_printf (")");
     }
   else
-    printf_filtered (_("Catchpoint %d (any syscall)"),
-		     b->number);
+    gdb_printf (_("Catchpoint %d (any syscall)"),
+		b->number);
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for syscall
@@ -319,7 +319,7 @@ print_recreate_catch_syscall (struct breakpoint *b, struct ui_file *fp)
   struct syscall_catchpoint *c = (struct syscall_catchpoint *) b;
   struct gdbarch *gdbarch = b->loc->gdbarch;
 
-  fprintf_unfiltered (fp, "catch syscall");
+  gdb_printf (fp, "catch syscall");
 
   for (int iter : c->syscalls_to_be_caught)
     {
@@ -327,9 +327,9 @@ print_recreate_catch_syscall (struct breakpoint *b, struct ui_file *fp)
 
       get_syscall_by_number (gdbarch, iter, &s);
       if (s.name != NULL)
-	fprintf_unfiltered (fp, " %s", s.name);
+	gdb_printf (fp, " %s", s.name);
       else
-	fprintf_unfiltered (fp, " %d", s.number);
+	gdb_printf (fp, " %d", s.number);
     }
 
   print_recreate_thread (b, fp);

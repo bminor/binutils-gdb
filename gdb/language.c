@@ -114,14 +114,14 @@ show_language_command (struct ui_file *file, int from_tty,
   enum language flang;		/* The language of the frame.  */
 
   if (language_mode == language_mode_auto)
-    fprintf_filtered (file,
-		      _("The current source language is "
-			"\"auto; currently %s\".\n"),
-		      current_language->name ());
+    gdb_printf (file,
+		_("The current source language is "
+		  "\"auto; currently %s\".\n"),
+		current_language->name ());
   else
-    fprintf_filtered (file,
-		      _("The current source language is \"%s\".\n"),
-		      current_language->name ());
+    gdb_printf (file,
+		_("The current source language is \"%s\".\n"),
+		current_language->name ());
 
   if (has_stack_frames ())
     {
@@ -132,7 +132,7 @@ show_language_command (struct ui_file *file, int from_tty,
       if (flang != language_unknown
 	  && language_mode == language_mode_manual
 	  && current_language->la_language != flang)
-	fprintf_filtered (file, "%s\n", _(lang_frame_mismatch_warn));
+	gdb_printf (file, "%s\n", _(lang_frame_mismatch_warn));
     }
 }
 
@@ -220,13 +220,13 @@ show_range_command (struct ui_file *file, int from_tty,
 			  "Unrecognized range check setting.");
 	}
 
-      fprintf_filtered (file,
-			_("Range checking is \"auto; currently %s\".\n"),
-			tmp);
+      gdb_printf (file,
+		  _("Range checking is \"auto; currently %s\".\n"),
+		  tmp);
     }
   else
-    fprintf_filtered (file, _("Range checking is \"%s\".\n"),
-		      value);
+    gdb_printf (file, _("Range checking is \"%s\".\n"),
+		value);
 
   if (range_check == range_check_warn
       || ((range_check == range_check_on)
@@ -296,15 +296,15 @@ show_case_command (struct ui_file *file, int from_tty,
 			  "Unrecognized case-sensitive setting.");
 	}
 
-      fprintf_filtered (file,
-			_("Case sensitivity in "
-			  "name search is \"auto; currently %s\".\n"),
-			tmp);
+      gdb_printf (file,
+		  _("Case sensitivity in "
+		    "name search is \"auto; currently %s\".\n"),
+		  tmp);
     }
   else
-    fprintf_filtered (file,
-		      _("Case sensitivity in name search is \"%s\".\n"),
-		      value);
+    gdb_printf (file,
+		_("Case sensitivity in name search is \"%s\".\n"),
+		value);
 
   if (case_sensitivity != current_language->case_sensitivity ())
     warning (_("the current case sensitivity setting does not match "
@@ -383,7 +383,7 @@ language_info ()
     return;
 
   expected_language = current_language;
-  printf_filtered (_("Current language:  %s\n"), language);
+  gdb_printf (_("Current language:  %s\n"), language);
   show_language_command (gdb_stdout, 1, NULL, NULL);
 }
 
@@ -415,7 +415,7 @@ range_error (const char *string,...)
       /* FIXME: cagney/2002-01-30: Should this function print anything
 	 when range error is off?  */
       gdb_vprintf (gdb_stderr, string, args);
-      fprintf_filtered (gdb_stderr, "\n");
+      gdb_printf (gdb_stderr, "\n");
       break;
     default:
       internal_error (__FILE__, __LINE__, _("bad switch"));
@@ -589,9 +589,9 @@ language_defn::print_array_index (struct type *index_type, LONGEST index,
 {
   struct value *index_value = value_from_longest (index_type, index);
 
-  fprintf_filtered (stream, "[");
+  gdb_printf (stream, "[");
   value_print (index_value, stream, options);
-  fprintf_filtered (stream, "] = ");
+  gdb_printf (stream, "] = ");
 }
 
 /* See language.h.  */
@@ -1104,16 +1104,16 @@ language_lookup_primitive_type_as_symbol (const struct language_defn *la,
   struct language_arch_info *lai = &ld->arch_info[la->la_language];
 
   if (symbol_lookup_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"language_lookup_primitive_type_as_symbol"
-			" (%s, %s, %s)",
-			la->name (), host_address_to_string (gdbarch), name);
+    gdb_printf (gdb_stdlog,
+		"language_lookup_primitive_type_as_symbol"
+		" (%s, %s, %s)",
+		la->name (), host_address_to_string (gdbarch), name);
 
   struct symbol *sym
     = lai->lookup_primitive_type_as_symbol (name, la->la_language);
 
   if (symbol_lookup_debug)
-    fprintf_unfiltered (gdb_stdlog, " = %s\n", host_address_to_string (sym));
+    gdb_printf (gdb_stdlog, " = %s\n", host_address_to_string (sym));
 
   /* Note: The result of symbol lookup is normally a symbol *and* the block
      it was found in.  Builtin types don't live in blocks.  We *could* give
