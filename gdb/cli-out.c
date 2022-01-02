@@ -173,10 +173,7 @@ cli_ui_out::do_field_string (int fldno, int width, ui_align align,
     {
       ui_file *stream = m_streams.back ();
       stream->emit_style_escape (style);
-      if (test_flags (unfiltered_output))
-	stream->puts_unfiltered (string);
-      else
-	stream->puts (string);
+      stream->puts (string);
       stream->emit_style_escape (ui_file_style ());
     }
 
@@ -208,10 +205,7 @@ cli_ui_out::do_spaces (int numspaces)
   if (m_suppress_output)
     return;
 
-  if (test_flags (unfiltered_output))
-    gdb_printf (m_streams.back (), "%*s", numspaces, "");
-  else
-    print_spaces (numspaces, m_streams.back ());
+  print_spaces (numspaces, m_streams.back ());
 }
 
 void
@@ -220,10 +214,7 @@ cli_ui_out::do_text (const char *string)
   if (m_suppress_output)
     return;
 
-  if (test_flags (unfiltered_output))
-    gdb_puts (string, m_streams.back ());
-  else
-    gdb_puts (string, m_streams.back ());
+  gdb_puts (string, m_streams.back ());
 }
 
 void
@@ -238,10 +229,7 @@ cli_ui_out::do_message (const ui_file_style &style,
     {
       ui_file *stream = m_streams.back ();
       stream->emit_style_escape (style);
-      if (test_flags (unfiltered_output))
-	stream->puts_unfiltered (str.c_str ());
-      else
-	stream->puts (str.c_str ());
+      stream->puts (str.c_str ());
       stream->emit_style_escape (ui_file_style ());
     }
 }
@@ -380,10 +368,7 @@ cli_ui_out::do_progress_end ()
 void
 cli_ui_out::field_separator ()
 {
-  if (test_flags (unfiltered_output))
-    gdb_putc (' ', m_streams.back ());
-  else
-    gdb_putc (' ', m_streams.back ());
+  gdb_putc (' ', m_streams.back ());
 }
 
 /* Constructor for cli_ui_out.  */

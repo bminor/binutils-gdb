@@ -53,12 +53,9 @@ enum ui_out_flag
 {
   ui_source_list = (1 << 0),
   fix_multi_location_breakpoint_output = (1 << 1),
-  /* For CLI output, this flag is set if unfiltered output is desired.
-     This should only be used by low-level formatting functions.  */
-  unfiltered_output = (1 << 2),
   /* This indicates that %pF should be disallowed in a printf format
      string.  */
-  disallow_ui_out_field = (1 << 3)
+  disallow_ui_out_field = (1 << 2)
 };
 
 DEF_ENUM_FLAGS_TYPE (ui_out_flag, ui_out_flags);
