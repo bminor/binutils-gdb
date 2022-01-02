@@ -127,7 +127,7 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
 {
   if (field_is_static (&type->field (field_idx)))
     {
-      print_spaces_filtered (indentation, stream);
+      print_spaces (indentation, stream);
       return;
     }
 
@@ -188,7 +188,7 @@ print_offset_data::finish (struct type *type, int level,
   maybe_print_hole (stream, bitpos, "padding");
 
   gdb_puts ("\n", stream);
-  print_spaces_filtered (level + 4 + print_offset_data::indentation, stream);
+  print_spaces (level + 4 + print_offset_data::indentation, stream);
   gdb_printf (stream, "/* total size (bytes): %4s */\n",
 	      pulongest (TYPE_LENGTH (type)));
 }

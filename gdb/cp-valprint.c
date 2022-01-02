@@ -207,7 +207,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	      if (options->prettyformat)
 		{
 		  gdb_printf (stream, "\n");
-		  print_spaces_filtered (2 + 2 * recurse, stream);
+		  print_spaces (2 + 2 * recurse, stream);
 		  gdb_puts ("members of ", stream);
 		  gdb_puts (type->name (), stream);
 		  gdb_puts (":", stream);
@@ -218,7 +218,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	  if (options->prettyformat)
 	    {
 	      gdb_printf (stream, "\n");
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  else
 	    {
@@ -374,7 +374,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
       if (options->prettyformat)
 	{
 	  gdb_printf (stream, "\n");
-	  print_spaces_filtered (2 * recurse, stream);
+	  print_spaces (2 * recurse, stream);
 	}
     }				/* if there are data fields */
 
@@ -479,7 +479,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
       if (options->prettyformat)
 	{
 	  gdb_printf (stream, "\n");
-	  print_spaces_filtered (2 * recurse, stream);
+	  print_spaces (2 * recurse, stream);
 	}
       gdb_puts ("<", stream);
       /* Not sure what the best notation is in the case where there is

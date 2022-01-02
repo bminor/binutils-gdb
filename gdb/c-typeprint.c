@@ -906,7 +906,7 @@ c_type_print_template_args (const struct type_print_options *flags,
     gdb_puts (_("] "), stream);
 }
 
-/* Use 'print_spaces_filtered', but take into consideration the
+/* Use 'print_spaces', but take into consideration the
    type_print_options FLAGS in order to determine how many whitespaces
    will be printed.  */
 
@@ -915,9 +915,9 @@ print_spaces_filtered_with_print_options
   (int level, struct ui_file *stream, const struct type_print_options *flags)
 {
   if (!flags->print_offsets)
-    print_spaces_filtered (level, stream);
+    print_spaces (level, stream);
   else
-    print_spaces_filtered (level + print_offset_data::indentation, stream);
+    print_spaces (level + print_offset_data::indentation, stream);
 }
 
 /* Output an access specifier to STREAM, if needed.  LAST_ACCESS is the
@@ -1175,7 +1175,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  if (flags->print_offsets)
 	    podata->update (type, i, stream);
 
-	  print_spaces_filtered (level + 4, stream);
+	  print_spaces (level + 4, stream);
 	  if (is_static)
 	    gdb_printf (stream, "static ");
 
@@ -1426,9 +1426,9 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  if (show > 0)
 	    podata->finish (type, level, stream);
 
-	  print_spaces_filtered (print_offset_data::indentation, stream);
+	  print_spaces (print_offset_data::indentation, stream);
 	  if (level == 0)
-	    print_spaces_filtered (2, stream);
+	    print_spaces (2, stream);
 	}
 
       gdb_printf (stream, "%*s}", level, "");
@@ -1639,7 +1639,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	    for (i = 0; i < len; i++)
 	      {
 		QUIT;
-		print_spaces_filtered (level + 4, stream);
+		print_spaces (level + 4, stream);
 		/* We pass "show" here and not "show - 1" to get enum types
 		   printed.  There's no other way to see them.  */
 		c_print_type_1 (type->field (i).type (),

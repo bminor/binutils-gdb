@@ -255,7 +255,7 @@ extern void gdb_printf (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 extern void printf_unfiltered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
-extern void print_spaces_filtered (int, struct ui_file *);
+extern void print_spaces (int, struct ui_file *);
 
 extern const char *n_spaces (int);
 

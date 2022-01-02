@@ -858,7 +858,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	  if (pretty)
 	    {
 	      gdb_puts ("\n", stream);
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  else
 	    stream->wrap_here (2 + 2 *recurse);
@@ -930,14 +930,14 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	  if (pretty)
 	    {
 	      gdb_puts ("\n", stream);
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  gdb_puts ("...", stream);
 	}
       if (pretty)
 	{
 	  gdb_puts ("\n", stream);
-	  print_spaces_filtered (2 * recurse, stream);
+	  print_spaces (2 * recurse, stream);
 	}
       gdb_puts ("}", stream);
     }

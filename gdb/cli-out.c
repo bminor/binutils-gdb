@@ -211,7 +211,7 @@ cli_ui_out::do_spaces (int numspaces)
   if (test_flags (unfiltered_output))
     gdb_printf (m_streams.back (), "%*s", numspaces, "");
   else
-    print_spaces_filtered (numspaces, m_streams.back ());
+    print_spaces (numspaces, m_streams.back ());
 }
 
 void

@@ -507,7 +507,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
   else
     section = NULL;
 
-  print_spaces_filtered (depth, outfile);
+  print_spaces (depth, outfile);
   if (symbol->domain () == LABEL_DOMAIN)
     {
       gdb_printf (outfile, "label %s at ", symbol->print_name ());

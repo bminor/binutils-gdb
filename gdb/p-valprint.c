@@ -267,7 +267,7 @@ pascal_language::value_print_inner (struct value *val,
 	      if (options->prettyformat)
 		{
 		  gdb_printf (stream, "\n");
-		  print_spaces_filtered (2 + 2 * recurse, stream);
+		  print_spaces (2 + 2 * recurse, stream);
 		}
 	    }
 	}
@@ -559,7 +559,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	      if (options->prettyformat)
 		{
 		  gdb_printf (stream, "\n");
-		  print_spaces_filtered (2 + 2 * recurse, stream);
+		  print_spaces (2 + 2 * recurse, stream);
 		  gdb_puts ("members of ", stream);
 		  gdb_puts (type->name (), stream);
 		  gdb_puts (": ", stream);
@@ -570,7 +570,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	  if (options->prettyformat)
 	    {
 	      gdb_printf (stream, "\n");
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  else
 	    {
@@ -671,7 +671,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
       if (options->prettyformat)
 	{
 	  gdb_printf (stream, "\n");
-	  print_spaces_filtered (2 * recurse, stream);
+	  print_spaces (2 * recurse, stream);
 	}
     }
   gdb_printf (stream, "}");
@@ -762,7 +762,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
       if (options->prettyformat)
 	{
 	  gdb_printf (stream, "\n");
-	  print_spaces_filtered (2 * recurse, stream);
+	  print_spaces (2 * recurse, stream);
 	}
       gdb_puts ("<", stream);
       /* Not sure what the best notation is in the case where there is no

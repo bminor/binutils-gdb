@@ -562,7 +562,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	{
 	  QUIT;
 
-	  print_spaces_filtered (level + 4, stream);
+	  print_spaces (level + 4, stream);
 	  fputs_styled (type->field (i).name (),
 			variable_name_style.style (), stream);
 	  gdb_puts (" : ", stream);

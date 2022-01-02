@@ -1907,7 +1907,7 @@ n_spaces (int n)
 
 /* Print N spaces.  */
 void
-print_spaces_filtered (int n, struct ui_file *stream)
+print_spaces (int n, struct ui_file *stream)
 {
   gdb_puts (n_spaces (n), stream);
 }

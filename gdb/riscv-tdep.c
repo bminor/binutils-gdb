@@ -1038,7 +1038,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
   enum tab_stops { value_column_1 = 15 };
 
   gdb_puts (name, file);
-  print_spaces_filtered (value_column_1 - strlen (name), file);
+  print_spaces (value_column_1 - strlen (name), file);
 
   try
     {

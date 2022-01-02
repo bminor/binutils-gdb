@@ -561,7 +561,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 		    }
 		}
 
-	      print_spaces_filtered (level + 4, stream);
+	      print_spaces (level + 4, stream);
 	      if (field_is_static (&type->field (i)))
 		gdb_printf (stream, "static ");
 	      print_type (type->field (i).type (),
@@ -633,7 +633,7 @@ pascal_language::type_print_base (struct type *type, struct ui_file *stream, int
 			}
 		    }
 
-		  print_spaces_filtered (level + 4, stream);
+		  print_spaces (level + 4, stream);
 		  if (TYPE_FN_FIELD_STATIC_P (f, j))
 		    gdb_printf (stream, "static ");
 		  if (TYPE_TARGET_TYPE (TYPE_FN_FIELD_TYPE (f, j)) == 0)

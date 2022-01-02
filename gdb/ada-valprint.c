@@ -166,7 +166,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	  if (options->prettyformat_arrays)
 	    {
 	      gdb_printf (stream, ",\n");
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  else
 	    {
@@ -176,7 +176,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
       else if (options->prettyformat_arrays)
 	{
 	  gdb_printf (stream, "\n");
-	  print_spaces_filtered (2 + 2 * recurse, stream);
+	  print_spaces (2 + 2 * recurse, stream);
 	}
       stream->wrap_here (2 + 2 * recurse);
       maybe_print_array_index (index_type, i + low, stream, options);
@@ -229,7 +229,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 		  if (options->prettyformat_arrays)
 		    {
 		      gdb_printf (stream, ",\n");
-		      print_spaces_filtered (2 + 2 * recurse, stream);
+		      print_spaces (2 + 2 * recurse, stream);
 		    }
 		  else
 		    {
@@ -621,7 +621,7 @@ print_field_values (struct value *value, struct value *outer_value,
       if (options->prettyformat)
 	{
 	  gdb_printf (stream, "\n");
-	  print_spaces_filtered (2 + 2 * recurse, stream);
+	  print_spaces (2 + 2 * recurse, stream);
 	}
       else
 	{
@@ -887,7 +887,7 @@ ada_val_print_struct_union (struct value *value,
       && options->prettyformat)
     {
       gdb_printf (stream, "\n");
-      print_spaces_filtered (2 * recurse, stream);
+      print_spaces (2 * recurse, stream);
     }
 
   gdb_printf (stream, ")");

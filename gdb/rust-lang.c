@@ -372,7 +372,7 @@ rust_language::val_print_struct
       if (options->prettyformat)
 	{
 	  gdb_puts ("\n", stream);
-	  print_spaces_filtered (2 + 2 * recurse, stream);
+	  print_spaces (2 + 2 * recurse, stream);
 	}
       else if (!first_field)
 	gdb_puts (" ", stream);
@@ -393,7 +393,7 @@ rust_language::val_print_struct
   if (options->prettyformat)
     {
       gdb_puts ("\n", stream);
-      print_spaces_filtered (2 * recurse, stream);
+      print_spaces (2 * recurse, stream);
     }
 
   if (is_tuple || is_tuple_struct)
@@ -707,7 +707,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
       /* For a tuple struct we print the type but nothing
 	 else.  */
       if (!for_rust_enum || flags->print_offsets)
-	print_spaces_filtered (level + 2, stream);
+	print_spaces (level + 2, stream);
       if (is_enum)
 	fputs_styled (type->field (i).name (), variable_name_style.style (),
 		      stream);
@@ -733,12 +733,12 @@ rust_print_struct_def (struct type *type, const char *varstring,
       /* Undo the temporary level increase we did above.  */
       level -= 2;
       podata->finish (type, level, stream);
-      print_spaces_filtered (print_offset_data::indentation, stream);
+      print_spaces (print_offset_data::indentation, stream);
       if (level == 0)
-	print_spaces_filtered (2, stream);
+	print_spaces (2, stream);
     }
   if (!for_rust_enum || flags->print_offsets)
-    print_spaces_filtered (level, stream);
+    print_spaces (level, stream);
   gdb_puts (is_tuple_struct ? ")" : "}", stream);
 }
 

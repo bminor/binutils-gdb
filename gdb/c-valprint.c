@@ -222,7 +222,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	  if (options->prettyformat)
 	    {
 	      gdb_printf (stream, "\n");
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	}
     }
