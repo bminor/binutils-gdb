@@ -283,10 +283,10 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
   int varargs = mtype->has_varargs ();
   int i;
 
-  fprintf_symbol_filtered (stream, prefix,
-			   language_cplus, DMGL_ANSI);
-  fprintf_symbol_filtered (stream, varstring,
-			   language_cplus, DMGL_ANSI);
+  fprintf_symbol (stream, prefix,
+		  language_cplus, DMGL_ANSI);
+  fprintf_symbol (stream, varstring,
+		  language_cplus, DMGL_ANSI);
   gdb_puts ("(", stream);
 
   /* Skip the class variable.  We keep this here to accommodate older

@@ -1633,8 +1633,8 @@ info_address_command (const char *exp, int from_tty)
       if (is_a_field_of_this.type != NULL)
 	{
 	  gdb_printf ("Symbol \"");
-	  fprintf_symbol_filtered (gdb_stdout, exp,
-				   current_language->la_language, DMGL_ANSI);
+	  fprintf_symbol (gdb_stdout, exp,
+			  current_language->la_language, DMGL_ANSI);
 	  gdb_printf ("\" is a field of the local class variable ");
 	  if (current_language->la_language == language_objc)
 	    gdb_printf ("`self'\n");	/* ObjC equivalent of "this" */
@@ -1653,8 +1653,8 @@ info_address_command (const char *exp, int from_tty)
 	  load_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
 	  gdb_printf ("Symbol \"");
-	  fprintf_symbol_filtered (gdb_stdout, exp,
-				   current_language->la_language, DMGL_ANSI);
+	  fprintf_symbol (gdb_stdout, exp,
+			  current_language->la_language, DMGL_ANSI);
 	  gdb_printf ("\" is at ");
 	  fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
 			gdb_stdout);

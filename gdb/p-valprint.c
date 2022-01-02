@@ -582,10 +582,10 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	  if (field_is_static (&type->field (i)))
 	    {
 	      gdb_puts ("static ", stream);
-	      fprintf_symbol_filtered (stream,
-				       type->field (i).name (),
-				       current_language->la_language,
-				       DMGL_PARAMS | DMGL_ANSI);
+	      fprintf_symbol (stream,
+			      type->field (i).name (),
+			      current_language->la_language,
+			      DMGL_PARAMS | DMGL_ANSI);
 	    }
 	  else
 	    fputs_styled (type->field (i).name (),

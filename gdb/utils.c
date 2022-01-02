@@ -1913,14 +1913,14 @@ print_spaces (int n, struct ui_file *stream)
 
 /* C++/ObjC demangler stuff.  */
 
-/* fprintf_symbol_filtered attempts to demangle NAME, a symbol in language
+/* fprintf_symbol attempts to demangle NAME, a symbol in language
    LANG, using demangling args ARG_MODE, and print it filtered to STREAM.
    If the name is not mangled, or the language for the name is unknown, or
    demangling is off, the name is printed in its "raw" form.  */
 
 void
-fprintf_symbol_filtered (struct ui_file *stream, const char *name,
-			 enum language lang, int arg_mode)
+fprintf_symbol (struct ui_file *stream, const char *name,
+		enum language lang, int arg_mode)
 {
   if (name != NULL)
     {

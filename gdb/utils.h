@@ -305,8 +305,8 @@ extern const char *print_core_address (struct gdbarch *gdbarch,
 
 extern CORE_ADDR string_to_core_addr (const char *my_string);
 
-extern void fprintf_symbol_filtered (struct ui_file *, const char *,
-				     enum language, int);
+extern void fprintf_symbol (struct ui_file *, const char *,
+			    enum language, int);
 
 extern void throw_perror_with_name (enum errors errcode, const char *string)
   ATTRIBUTE_NORETURN;
