@@ -33,7 +33,13 @@ if { [skip_python_tests] } { continue }
 proc build_inferior {exefile lang} {
   global srcdir subdir srcfile testfile hex
 
-  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang"] != "" } {
+  set flags [list debug $lang]
+  if { $lang == "c" } {
+    lappend flags additional_flags=-std=c99
+  }
+
+  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" \
+	    executable $flags] != "" } {
       untested "failed to compile in $lang mode"
       return -1
   }

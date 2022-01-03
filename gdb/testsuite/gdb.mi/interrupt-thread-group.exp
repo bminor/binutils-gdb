@@ -24,7 +24,7 @@ set MIFLAGS "-i=mi"
 standard_testfile .c
 
 if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile \
-	executable debug] != "" } {
+	 executable {debug additional_flags=-std=gnu99}] != "" } {
     return -1
 }
 
