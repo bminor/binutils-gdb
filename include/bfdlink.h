@@ -413,6 +413,10 @@ struct bfd_link_info
   /* TRUE if PT_GNU_RELRO segment should be created.  */
   unsigned int relro: 1;
 
+  /* TRUE if DT_RELR should be enabled for compact relative
+     relocations.  */
+  unsigned int enable_dt_relr: 1;
+
   /* TRUE if separate code segment should be created.  */
   unsigned int separate_code: 1;
 

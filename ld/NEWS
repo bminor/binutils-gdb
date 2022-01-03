@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add -z pack-relative-relocs/-z no pack-relative-relocs to x86 ELF
+  linker to pack relative relocations in the DT_RELR section.
+
 * Add support for the LoongArch architecture.
 
 * Add -z indirect-extern-access/-z noindirect-extern-access to x86 ELF

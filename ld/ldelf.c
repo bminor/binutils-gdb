@@ -71,6 +71,15 @@ ldelf_after_parse (void)
 	einfo (_("%P: warning: -z dynamic-undefined-weak ignored\n"));
       link_info.dynamic_undefined_weak = 0;
     }
+
+  /* Disable DT_RELR if not building PIE nor shared library.  */
+  if (!bfd_link_pic (&link_info))
+    link_info.enable_dt_relr = 0;
+
+  /* Add 3 spare tags for DT_RELR, DT_RELRSZ and DT_RELRENT.  */
+  if (link_info.enable_dt_relr)
+    link_info.spare_dynamic_tags += 3;
+
   after_parse_default ();
   if (link_info.commonpagesize > link_info.maxpagesize)
     einfo (_("%F%P: common page size (0x%v) > maximum page size (0x%v)\n"),

@@ -1430,6 +1430,15 @@ called.
 @item origin
 Specify that the object requires @samp{$ORIGIN} handling in paths.
 
+@item pack-relative-relocs
+@itemx nopack-relative-relocs
+Generate compact relative relocation in position-independent executable
+and shared library.  It adds @code{DT_RELR}, @code{DT_RELRSZ} and
+@code{DT_RELRENT} entries to the dynamic section.  It is ignored when
+building position-dependent executable and relocatable output.
+@option{nopack-relative-relocs} is the default, which disables compact
+relative relocation.  Supported for i386 and x86-64.
+
 @item relro
 @itemx norelro
 Create an ELF @code{PT_GNU_RELRO} segment header in the object.  This

@@ -707,6 +707,7 @@ struct elf_link_hash_table
   asection *irelplt;
   asection *irelifunc;
   asection *dynsym;
+  asection *srelrdyn;
 };
 
 /* Returns TRUE if the hash table is a struct elf_link_hash_table.  */

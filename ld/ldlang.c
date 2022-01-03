@@ -7709,7 +7709,8 @@ lang_find_relro_sections (void)
 void
 lang_relax_sections (bool need_layout)
 {
-  if (RELAXATION_ENABLED)
+  /* NB: Also enable relaxation to layout sections for DT_RELR.  */
+  if (RELAXATION_ENABLED || link_info.enable_dt_relr)
     {
       /* We may need more than one relaxation pass.  */
       int i = link_info.relax_pass;

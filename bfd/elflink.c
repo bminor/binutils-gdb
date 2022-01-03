@@ -359,6 +359,17 @@ _bfd_elf_link_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	elf_section_data (s)->this_hdr.sh_entsize = 4;
     }
 
+  if (info->enable_dt_relr)
+    {
+      s = bfd_make_section_anyway_with_flags (abfd, ".relr.dyn",
+					      (bed->dynamic_sec_flags
+					       | SEC_READONLY));
+      if (s == NULL
+	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
+	return false;
+      elf_hash_table (info)->srelrdyn = s;
+    }
+
   /* Let the backend create the rest of the sections.  This lets the
      backend set the right flags.  The backend will normally create
      the .got and .plt sections.  */

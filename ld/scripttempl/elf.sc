@@ -10,6 +10,7 @@
 #		empty.
 #	HAVE_NOINIT - Include a .noinit output section in the script.
 #	HAVE_PERSISTENT - Include a .persistent output section in the script.
+#	HAVE_DT_RELR - Include a .relr.dyn output section in the script.
 #	SMALL_DATA_CTOR - .ctors contains small data.
 #	SMALL_DATA_DTOR - .dtors contains small data.
 #	DATA_ADDR - if end-of-text-plus-one-page isn't right for data start
@@ -520,6 +521,9 @@ emit_dyn()
     fi
   fi
   rm -f ldscripts/dyntmp.$$
+  if test -n "${COMBRELOC}" && test -n "${HAVE_DT_RELR}"; then
+    echo "  .relr.dyn : { *(.relr.dyn) }"
+  fi
 }
 
 test -n "${NON_ALLOC_DYN}${SEPARATE_CODE}" || emit_dyn
