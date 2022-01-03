@@ -48,3 +48,13 @@ if {$ok} {
     fail "printf without paging"
 }
 gdb_test "set logging enabled off" "Done logging to .*"
+
+set cmd "interpreter-exec mi2 \"-data-evaluate-expression 23\""
+gdb_test_multiple $cmd $cmd {
+    -re ".done.value=.23\[^\n\]+\r\n$gdb_prompt " {
+	pass "$cmd"
+	gdb_expect 1 {
+	    -re "\r\n$gdb_prompt $" { }
+	}
+    }
+}

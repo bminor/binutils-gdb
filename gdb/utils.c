@@ -1750,6 +1750,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 
   /* Don't do any filtering if it is disabled.  */
   if (!stream->can_page ()
+      || stream != gdb_stdout
       || !pagination_enabled
       || pagination_disabled_for_command
       || batch_flag
