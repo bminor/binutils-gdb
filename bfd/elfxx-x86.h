@@ -47,18 +47,35 @@
 #define X86_SIZE_TYPE_P(IS_X86_64, TYPE) \
   ((IS_X86_64) ? X86_64_SIZE_TYPE_P(TYPE) : I386_SIZE_TYPE_P (TYPE))
 
-#define X86_64_NEED_DYNAMIC_RELOC_TYPE_P(TYPE) \
-  (X86_64_SIZE_TYPE_P (TYPE) \
-   || X86_64_PCREL_TYPE_P (TYPE) \
+#define X86_64_GOT_TYPE_P(TYPE) \
+  ((TYPE) == R_X86_64_GOTPCREL \
+   || (TYPE) == R_X86_64_GOTPCRELX \
+   || (TYPE) == R_X86_64_REX_GOTPCRELX)
+#define I386_GOT_TYPE_P(TYPE) \
+  ((TYPE) == R_386_GOT32 || (TYPE) == R_386_GOT32X)
+#define X86_GOT_TYPE_P(IS_X86_64, TYPE) \
+  ((IS_X86_64) ? X86_64_GOT_TYPE_P (TYPE) : I386_GOT_TYPE_P (TYPE))
+
+#define X86_64_RELATIVE_RELOC_TYPE_P(TYPE) \
+  (X86_64_PCREL_TYPE_P (TYPE) \
    || (TYPE) == R_X86_64_8 \
    || (TYPE) == R_X86_64_16 \
    || (TYPE) == R_X86_64_32 \
    || (TYPE) == R_X86_64_32S \
    || (TYPE) == R_X86_64_64)
+#define I386_RELATIVE_RELOC_TYPE_P(TYPE) \
+  ((TYPE) == R_386_32 || (TYPE) == R_386_PC32)
+#define X86_RELATIVE_RELOC_TYPE_P(IS_X86_64, TYPE) \
+  ((IS_X86_64) \
+   ? X86_64_RELATIVE_RELOC_TYPE_P (TYPE) \
+   : I386_RELATIVE_RELOC_TYPE_P(TYPE))
+
+#define X86_64_NEED_DYNAMIC_RELOC_TYPE_P(TYPE) \
+  (X86_64_SIZE_TYPE_P (TYPE) \
+   || X86_64_RELATIVE_RELOC_TYPE_P (TYPE))
 #define I386_NEED_DYNAMIC_RELOC_TYPE_P(TYPE) \
   (I386_SIZE_TYPE_P (TYPE) \
-   || I386_PCREL_TYPE_P (TYPE) \
-   || (TYPE) == R_386_32 \
+   || I386_RELATIVE_RELOC_TYPE_P (TYPE) \
    || (TYPE) == R_386_TLS_LE \
    || (TYPE) == R_386_TLS_LE_32)
 #define X86_NEED_DYNAMIC_RELOC_TYPE_P(IS_X86_64, TYPE) \
@@ -66,10 +83,22 @@
    ? X86_64_NEED_DYNAMIC_RELOC_TYPE_P (TYPE) \
    : I386_NEED_DYNAMIC_RELOC_TYPE_P (TYPE))
 
+#define X86_LOCAL_GOT_RELATIVE_RELOC_P(IS_X86_64, INFO, SYM) \
+  (bfd_link_pic (INFO) \
+   && (!(IS_X86_64) || ((SYM) != NULL && (SYM)->st_shndx != SHN_ABS)))
+
 #define PLT_CIE_LENGTH		20
 #define PLT_FDE_LENGTH		36
 #define PLT_FDE_START_OFFSET	4 + PLT_CIE_LENGTH + 8
 #define PLT_FDE_LEN_OFFSET	4 + PLT_CIE_LENGTH + 12
+
+#define I386_PCREL_TYPE_P(TYPE) ((TYPE) == R_386_PC32)
+#define X86_64_PCREL_TYPE_P(TYPE) \
+  ((TYPE) == R_X86_64_PC8 \
+   || (TYPE) == R_X86_64_PC16 \
+   || (TYPE) == R_X86_64_PC32 \
+   || (TYPE) == R_X86_64_PC32_BND \
+   || (TYPE) == R_X86_64_PC64)
 
 #define ABI_64_P(abfd) \
   (get_elf_backend_data (abfd)->s->elfclass == ELFCLASS64)
@@ -160,12 +189,18 @@
    relocations against resolved undefined weak symbols in PIE, except
    when PC32_RELOC is TRUE.  Undefined weak symbol is bound locally
    when PIC is false.  Don't generate dynamic relocations against
-   non-preemptible absolute symbol.  */
+   non-preemptible absolute symbol.  NB: rel_from_abs is set on symbols
+   defined by linker scripts from "dot" (also SEGMENT_START or ORIGIN)
+   outside of an output section statement, which will be converted from
+   absolute to section-relative in set_sym_sections called from
+   ldexp_finalize_syms after ldemul_finish.   */
 #define GENERATE_DYNAMIC_RELOCATION_P(IS_X86_64, INFO, EH, R_TYPE, \
 				      SEC, NEED_COPY_RELOC_IN_PIE, \
 				      RESOLVED_TO_ZERO, PC32_RELOC) \
   ((bfd_link_pic (INFO) \
     && !(bfd_is_abs_section (SEC) \
+	 && ((EH) == NULL \
+	     || (EH)->elf.root.rel_from_abs == 0) \
 	 && ((EH) == NULL \
 	     || SYMBOL_REFERENCES_LOCAL (INFO, &(EH)->elf))) \
     && !(NEED_COPY_RELOC_IN_PIE) \
@@ -301,6 +336,10 @@ struct elf_x86_link_hash_entry
 
   /* Don't call finish_dynamic_symbol on this symbol.  */
   unsigned int no_finish_dynamic_symbol : 1;
+
+  /* R_*_RELATIVE relocation in GOT for this symbol has been
+     processed.  */
+  unsigned int got_relative_reloc_done : 1;
 
   /* TRUE if symbol is __tls_get_addr.  */
   unsigned int tls_get_addr : 1;
@@ -481,6 +520,52 @@ struct elf_x86_plt_layout
 #define elf_x86_hash_entry(ent) \
   ((struct elf_x86_link_hash_entry *)(ent))
 
+/* Information of an input relocation used to compute its contribution
+   to the DT_RELR section size.  */
+
+struct elf_x86_relative_reloc_record
+{
+  /* The original relocation info.  */
+  Elf_Internal_Rela rel;
+  /* The input or the GOT section where the relocation is applied.  */
+  asection *sec;
+  /* Local symbol info.  NULL for global symbol.  */
+  Elf_Internal_Sym *sym;
+  union
+    {
+      /* Section where the local symbol is defined.  */
+      asection *sym_sec;
+      /* Global symbol hash.  */
+      struct elf_link_hash_entry *h;
+    } u;
+  /* The offset into the output section where the relative relocation
+     will be applied at run-time.  */
+  bfd_vma offset;
+  /* The run-time address.  */
+  bfd_vma address;
+};
+
+struct elf_x86_relative_reloc_data
+{
+  bfd_size_type count;
+  bfd_size_type size;
+  struct elf_x86_relative_reloc_record *data;
+};
+
+/* DT_RELR bitmap.  */
+struct elf_dt_relr_bitmap
+{
+  bfd_size_type count;
+  bfd_size_type size;
+  union
+    {
+      /* 32-bit bitmap.  */
+      uint32_t *elf32;
+      /* 64-bit bitmap.  */
+      uint64_t *elf64;
+    } u;
+};
+
 /* x86 ELF linker hash table.  */
 
 struct elf_x86_link_hash_table
@@ -533,6 +618,18 @@ struct elf_x86_link_hash_table
      is only used for i386.  */
   bfd_vma next_tls_desc_index;
 
+  /* DT_RELR bitmap.  */
+  struct elf_dt_relr_bitmap dt_relr_bitmap;
+
+  /* Relative relocation data.  */
+  struct elf_x86_relative_reloc_data relative_reloc;
+
+  /* Unaligned relative relocation data.  */
+  struct elf_x86_relative_reloc_data unaligned_relative_reloc;
+
+  /* Number of relative reloc generation pass.  */
+  unsigned int generate_relative_reloc_pass;
+
    /* Value used to fill the unused bytes of the first PLT entry.  This
       is only used for i386.  */
   bfd_byte plt0_pad_byte;
@@ -554,9 +651,14 @@ struct elf_x86_link_hash_table
   unsigned int sizeof_reloc;
   unsigned int got_entry_size;
   unsigned int pointer_r_type;
+  unsigned int relative_r_type;
   int dynamic_interpreter_size;
   const char *dynamic_interpreter;
   const char *tls_get_addr;
+  const char *relative_r_name;
+  void (*elf_append_reloc) (bfd *, asection *, Elf_Internal_Rela *);
+  void (*elf_write_addend) (bfd *, uint64_t, void *);
+  void (*elf_write_addend_in_got) (bfd *, uint64_t, void *);
 
   /* Options passed from the linker.  */
   struct elf_linker_x86_params *params;
@@ -591,6 +693,10 @@ struct elf_x86_obj_tdata
 
   /* GOTPLT entries for TLS descriptors.  */
   bfd_vma *local_tlsdesc_gotent;
+
+  /* R_*_RELATIVE relocation in GOT for this local symbol has been
+     processed.  */
+  char *relative_reloc_done;
 };
 
 enum elf_x86_plt_type
@@ -626,6 +732,9 @@ struct elf_x86_plt
 #define elf_x86_local_tlsdesc_gotent(abfd) \
   (elf_x86_tdata (abfd)->local_tlsdesc_gotent)
 
+#define elf_x86_relative_reloc_done(abfd) \
+  (elf_x86_tdata (abfd)->relative_reloc_done)
+
 #define elf_x86_compute_jump_table_size(htab) \
   ((htab)->elf.srelplt->reloc_count * (htab)->got_entry_size)
 
@@ -637,6 +746,7 @@ struct elf_x86_plt
 /* Rename some of the generic section flags to better document how they
    are used here.  */
 #define check_relocs_failed	sec_flg0
+#define relative_reloc_packed	sec_flg1
 
 extern bool _bfd_x86_elf_mkobject
   (bfd *);
@@ -675,6 +785,18 @@ extern bool _bfd_x86_elf_link_check_relocs
 extern bool _bfd_x86_elf_check_relocs
   (bfd *, struct bfd_link_info *, asection *,
    const Elf_Internal_Rela *);
+
+extern bool _bfd_x86_elf_link_relax_section
+  (bfd *, asection *, struct bfd_link_info *, bool *);
+
+extern bool _bfd_elf_x86_size_relative_relocs
+  (struct bfd_link_info *, bool *);
+
+extern bool _bfd_elf_x86_finish_relative_relocs
+  (struct bfd_link_info *);
+
+extern void _bfd_elf32_write_addend (bfd *, uint64_t, void *);
+extern void _bfd_elf64_write_addend (bfd *, uint64_t, void *);
 
 extern bool _bfd_elf_x86_valid_reloc_p
   (asection *, struct bfd_link_info *, struct elf_x86_link_hash_table *,
@@ -752,6 +874,10 @@ extern void _bfd_x86_elf_link_report_relative_reloc
   _bfd_x86_elf_link_check_relocs
 #define bfd_elf32_bfd_link_check_relocs \
   _bfd_x86_elf_link_check_relocs
+#define bfd_elf32_bfd_relax_section \
+  _bfd_x86_elf_link_relax_section
+#define bfd_elf64_bfd_relax_section \
+  _bfd_x86_elf_link_relax_section
 
 #define elf_backend_check_relocs \
   _bfd_x86_elf_check_relocs
@@ -777,6 +903,10 @@ extern void _bfd_x86_elf_link_report_relative_reloc
   _bfd_x86_elf_merge_gnu_properties
 #define elf_backend_fixup_gnu_properties \
   _bfd_x86_elf_link_fixup_gnu_properties
+#define elf_backend_size_relative_relocs \
+  _bfd_elf_x86_size_relative_relocs
+#define elf_backend_finish_relative_relocs \
+  _bfd_elf_x86_finish_relative_relocs
 
 #define ELF_P_ALIGN ELF_MINPAGESIZE
 
@@ -789,7 +919,8 @@ elf_x86_allocate_local_got_info (bfd *abfd, bfd_size_type count)
   if (local_got_refcounts == NULL)
     {
       bfd_size_type size = count * (sizeof (bfd_signed_vma)
-				    + sizeof (bfd_vma) + sizeof(char));
+				    + sizeof (bfd_vma)
+				    + 2 * sizeof(char));
       local_got_refcounts = (bfd_signed_vma *) bfd_zalloc (abfd, size);
       if (local_got_refcounts == NULL)
 	return false;
@@ -798,6 +929,8 @@ elf_x86_allocate_local_got_info (bfd *abfd, bfd_size_type count)
 	(bfd_vma *) (local_got_refcounts + count);
       elf_x86_local_got_tls_type (abfd) =
 	(char *) (local_got_refcounts + 2 * count);
+      elf_x86_relative_reloc_done (abfd) =
+	((char *) (local_got_refcounts + 2 * count)) + count;
     }
   return true;
 }
