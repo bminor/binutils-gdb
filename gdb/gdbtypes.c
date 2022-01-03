@@ -5312,7 +5312,7 @@ recursive_dump_type (struct type *type, int spaces)
 	}
       printf_filtered ("\n");
     }
-  printf ("%s\n", host_address_to_string (type->fields ()));
+  printf_filtered ("%s\n", host_address_to_string (type->fields ()));
   for (idx = 0; idx < type->num_fields (); idx++)
     {
       if (type->code () == TYPE_CODE_ENUM)
