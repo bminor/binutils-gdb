@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Free Software Foundation, Inc.
+# Copyright (C) 2021, 2022 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ if [gdb_debug_enabled] {
 
 gdb_start
 
-gdb_test_no_output "set width 100"
 gdb_test_no_output "set height 5"
 gdb_test_no_output "set pagination on"
 
