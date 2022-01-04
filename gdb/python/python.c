@@ -192,13 +192,12 @@ const struct extension_language_defn extension_language_python =
 
 /* Architecture and language to be used in callbacks from
    the Python interpreter.  */
-struct gdbarch *python_gdbarch;
-const struct language_defn *python_language;
+struct gdbarch *gdbpy_enter::python_gdbarch;
 
 gdbpy_enter::gdbpy_enter  (struct gdbarch *gdbarch,
 			   const struct language_defn *language)
 : m_gdbarch (python_gdbarch),
-  m_language (python_language)
+  m_language (language == nullptr ? nullptr : current_language)
 {
   /* We should not ever enter Python unless initialized.  */
   if (!gdb_python_initialized)
@@ -209,7 +208,8 @@ gdbpy_enter::gdbpy_enter  (struct gdbarch *gdbarch,
   m_state = PyGILState_Ensure ();
 
   python_gdbarch = gdbarch;
-  python_language = language;
+  if (language != nullptr)
+    set_language (language->la_language);
 
   /* Save it and ensure ! PyErr_Occurred () afterwards.  */
   m_error.emplace ();
@@ -228,10 +228,25 @@ gdbpy_enter::~gdbpy_enter ()
   m_error->restore ();
 
   python_gdbarch = m_gdbarch;
-  python_language = m_language;
+  if (m_language != nullptr)
+    set_language (m_language->la_language);
 
   restore_active_ext_lang (m_previous_active);
   PyGILState_Release (m_state);
+}
+
+struct gdbarch *
+gdbpy_enter::get_gdbarch ()
+{
+  if (python_gdbarch != nullptr)
+    return python_gdbarch;
+  return get_current_arch ();
+}
+
+void
+gdbpy_enter::finalize ()
+{
+  python_gdbarch = target_gdbarch ();
 }
 
 /* A helper class to save and restore the GIL, but without touching
@@ -318,7 +333,7 @@ python_interactive_command (const char *arg, int from_tty)
 
   arg = skip_spaces (arg);
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   if (arg && *arg)
     {
@@ -412,7 +427,7 @@ gdbpy_eval_from_control_command (const struct extension_language_defn *extlang,
   if (cmd->body_list_1 != nullptr)
     error (_("Invalid \"python\" block structure."));
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   std::string script = compute_python_string (cmd->body_list_0.get ());
   ret = PyRun_SimpleString (script.c_str ());
@@ -425,7 +440,7 @@ gdbpy_eval_from_control_command (const struct extension_language_defn *extlang,
 static void
 python_command (const char *arg, int from_tty)
 {
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
 
@@ -556,7 +571,7 @@ gdbpy_parameter (PyObject *self, PyObject *args)
 static PyObject *
 gdbpy_target_charset (PyObject *self, PyObject *args)
 {
-  const char *cset = target_charset (python_gdbarch);
+  const char *cset = target_charset (gdbpy_enter::get_gdbarch ());
 
   return PyUnicode_Decode (cset, strlen (cset), host_charset (), NULL);
 }
@@ -566,7 +581,7 @@ gdbpy_target_charset (PyObject *self, PyObject *args)
 static PyObject *
 gdbpy_target_wide_charset (PyObject *self, PyObject *args)
 {
-  const char *cset = target_wide_charset (python_gdbarch);
+  const char *cset = target_wide_charset (gdbpy_enter::get_gdbarch ());
 
   return PyUnicode_Decode (cset, strlen (cset), host_charset (), NULL);
 }
@@ -867,7 +882,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
     }
 
   if (arg != NULL)
-    location = string_to_event_location_basic (&arg, python_language,
+    location = string_to_event_location_basic (&arg, current_language,
 					       symbol_name_match_type::WILD);
 
   std::vector<symtab_and_line> decoded_sals;
@@ -972,7 +987,7 @@ static void
 gdbpy_source_script (const struct extension_language_defn *extlang,
 		     FILE *file, const char *filename)
 {
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
   python_run_simple_file (file, filename);
 }
 
@@ -1011,7 +1026,7 @@ struct gdbpy_event
 
   void operator() ()
   {
-    gdbpy_enter enter_py (get_current_arch (), current_language);
+    gdbpy_enter enter_py;
 
     gdbpy_ref<> call_result (PyObject_CallObject (m_func, NULL));
     if (call_result == NULL)
@@ -1060,7 +1075,7 @@ gdbpy_before_prompt_hook (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return EXT_LANG_RC_NOP;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   if (!evregpy_no_listeners_p (gdb_py_events.before_prompt)
       && evpy_emit_event (NULL, gdb_py_events.before_prompt) < 0)
@@ -1135,7 +1150,7 @@ gdbpy_colorize (const std::string &filename, const std::string &contents)
   if (!gdb_python_initialized)
     return {};
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   if (gdb_python_module == nullptr
       || !PyObject_HasAttrString (gdb_python_module, "colorize"))
@@ -1400,7 +1415,7 @@ gdbpy_source_objfile_script (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (objfile->arch (), current_language);
+  gdbpy_enter enter_py (objfile->arch ());
   scoped_restore restire_current_objfile
     = make_scoped_restore (&gdbpy_current_objfile, objfile);
 
@@ -1421,7 +1436,7 @@ gdbpy_execute_objfile_script (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (objfile->arch (), current_language);
+  gdbpy_enter enter_py (objfile->arch ());
   scoped_restore restire_current_objfile
     = make_scoped_restore (&gdbpy_current_objfile, objfile);
 
@@ -1453,7 +1468,7 @@ gdbpy_start_type_printers (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   gdbpy_ref<> type_module (PyImport_ImportModule ("gdb.types"));
   if (type_module == NULL)
@@ -1498,7 +1513,7 @@ gdbpy_apply_type_printers (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return EXT_LANG_RC_NOP;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   gdbpy_ref<> type_obj (type_to_type_object (type));
   if (type_obj == NULL)
@@ -1561,7 +1576,7 @@ gdbpy_free_type_printers (const struct extension_language_defn *extlang,
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
   Py_DECREF (printers);
 }
 
@@ -1696,8 +1711,7 @@ finalize_python (void *ignore)
   previous_active = set_active_ext_lang (&extension_language_python);
 
   (void) PyGILState_Ensure ();
-  python_gdbarch = target_gdbarch ();
-  python_language = current_language;
+  gdbpy_enter::finalize ();
 
   Py_Finalize ();
 
@@ -1756,7 +1770,7 @@ gdbpy_gdb_exiting (int exit_code)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
 
   if (emit_exiting_event (exit_code) < 0)
     gdbpy_print_stack ();
@@ -2174,7 +2188,7 @@ gdbpy_initialize (const struct extension_language_defn *extlang)
   if (!do_start_initialization () && PyErr_Occurred ())
     gdbpy_print_stack ();
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   if (!do_initialize (extlang))
     {

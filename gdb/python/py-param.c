@@ -396,7 +396,7 @@ get_set_value (const char *args, int from_tty,
   PyObject *obj = (PyObject *) c->context ();
   gdb::unique_xmalloc_ptr<char> set_doc_string;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
   gdbpy_ref<> set_doc_func (PyString_FromString ("get_set_string"));
 
   if (set_doc_func == NULL)
@@ -431,7 +431,7 @@ get_show_value (struct ui_file *file, int from_tty,
   PyObject *obj = (PyObject *) c->context ();
   gdb::unique_xmalloc_ptr<char> show_doc_string;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
   gdbpy_ref<> show_doc_func (PyString_FromString ("get_show_string"));
 
   if (show_doc_func == NULL)

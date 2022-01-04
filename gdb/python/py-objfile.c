@@ -661,7 +661,7 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
 static void
 py_free_objfile (struct objfile *objfile, void *datum)
 {
-  gdbpy_enter enter_py (objfile->arch (), current_language);
+  gdbpy_enter enter_py (objfile->arch ());
   gdbpy_ref<objfile_object> object ((objfile_object *) datum);
   object->objfile = NULL;
 }

@@ -799,7 +799,7 @@ typy_lookup_typename (const char *type_name, const struct block *block)
       else if (startswith (type_name, "enum "))
 	type = lookup_enum (type_name + 5, NULL);
       else
-	type = lookup_typename (python_language,
+	type = lookup_typename (current_language,
 				type_name, block, 0);
     }
   catch (const gdb_exception &except)
@@ -1089,7 +1089,7 @@ save_objfile_types (struct objfile *objfile, void *datum)
 
   /* This prevents another thread from freeing the objects we're
      operating on.  */
-  gdbpy_enter enter_py (objfile->arch (), current_language);
+  gdbpy_enter enter_py (objfile->arch ());
 
   htab_up copied_types = create_copied_types_hash (objfile);
 

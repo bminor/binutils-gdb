@@ -69,7 +69,7 @@ private:
 python_xmethod_worker::~python_xmethod_worker ()
 {
   /* We don't do much here, but we still need the GIL.  */
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   Py_DECREF (m_py_worker);
   Py_DECREF (m_this_type);
@@ -122,7 +122,7 @@ gdbpy_get_matching_xmethod_workers
 {
   gdb_assert (obj_type != NULL && method_name != NULL);
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   gdbpy_ref<> py_type (type_to_type_object (obj_type));
   if (py_type == NULL)
@@ -294,7 +294,7 @@ python_xmethod_worker::do_get_arg_types (std::vector<type *> *arg_types)
 {
   /* The gdbpy_enter object needs to be placed first, so that it's the last to
      be destroyed.  */
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
   struct type *obj_type;
   int i = 1, arg_count;
   gdbpy_ref<> list_iter;
@@ -410,7 +410,7 @@ python_xmethod_worker::do_get_result_type (value *obj,
   struct type *obj_type, *this_type;
   int i;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   /* First see if there is a get_result_type method.
      If not this could be an old xmethod (pre 7.9.1).  */
@@ -502,7 +502,7 @@ struct value *
 python_xmethod_worker::invoke (struct value *obj,
 			       gdb::array_view<value *> args)
 {
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   int i;
   struct type *obj_type, *this_type;
@@ -580,7 +580,7 @@ python_xmethod_worker::invoke (struct value *obj,
     }
   else
     {
-      res = allocate_value (lookup_typename (python_language,
+      res = allocate_value (lookup_typename (current_language,
 					     "void", NULL, 0));
     }
 

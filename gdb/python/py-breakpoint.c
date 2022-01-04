@@ -858,7 +858,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	    const struct breakpoint_ops *ops =
 	      breakpoint_ops_for_event_location (location.get (), false);
 
-	    create_breakpoint (python_gdbarch,
+	    create_breakpoint (gdbpy_enter::get_gdbarch (),
 			       location.get (), NULL, -1, NULL, false,
 			       0,
 			       temporary_bp, type,
@@ -954,15 +954,13 @@ gdbpy_breakpoint_cond_says_stop (const struct extension_language_defn *extlang,
   int stop;
   struct gdbpy_breakpoint_object *bp_obj = b->py_bp_object;
   PyObject *py_bp = (PyObject *) bp_obj;
-  struct gdbarch *garch;
 
   if (bp_obj == NULL)
     return EXT_LANG_BP_STOP_UNSET;
 
   stop = -1;
-  garch = b->gdbarch ? b->gdbarch : get_current_arch ();
 
-  gdbpy_enter enter_py (garch, current_language);
+  gdbpy_enter enter_py (b->gdbarch);
 
   if (bp_obj->is_finish_bp)
     bpfinishpy_pre_stop_hook (bp_obj);
@@ -1005,15 +1003,13 @@ gdbpy_breakpoint_has_cond (const struct extension_language_defn *extlang,
 			   struct breakpoint *b)
 {
   PyObject *py_bp;
-  struct gdbarch *garch;
 
   if (b->py_bp_object == NULL)
     return 0;
 
   py_bp = (PyObject *) b->py_bp_object;
-  garch = b->gdbarch ? b->gdbarch : get_current_arch ();
 
-  gdbpy_enter enter_py (garch, current_language);
+  gdbpy_enter enter_py (b->gdbarch);
   return PyObject_HasAttrString (py_bp, stop_func);
 }
 
@@ -1048,8 +1044,7 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
       return;
     }
 
-  struct gdbarch *garch = bp->gdbarch ? bp->gdbarch : get_current_arch ();
-  gdbpy_enter enter_py (garch, current_language);
+  gdbpy_enter enter_py (bp->gdbarch);
 
   if (bppy_pending_object)
     {
@@ -1099,8 +1094,7 @@ gdbpy_breakpoint_deleted (struct breakpoint *b)
   bp = get_breakpoint (num);
   if (bp)
     {
-      struct gdbarch *garch = bp->gdbarch ? bp->gdbarch : get_current_arch ();
-      gdbpy_enter enter_py (garch, current_language);
+      gdbpy_enter enter_py (b->gdbarch);
 
       gdbpy_ref<gdbpy_breakpoint_object> bp_obj (bp->py_bp_object);
       if (bp_obj != NULL)
@@ -1131,8 +1125,7 @@ gdbpy_breakpoint_modified (struct breakpoint *b)
   bp = get_breakpoint (num);
   if (bp)
     {
-      struct gdbarch *garch = bp->gdbarch ? bp->gdbarch : get_current_arch ();
-      gdbpy_enter enter_py (garch, current_language);
+      gdbpy_enter enter_py (b->gdbarch);
 
       PyObject *bp_obj = (PyObject *) bp->py_bp_object;
       if (bp_obj)

@@ -54,3 +54,11 @@ test_lookup_type "opencl" "ushort"
 test_lookup_type "objective-c" "char"
 
 test_lookup_type "pascal" "char"
+
+# Ensure that the language can be changed from within Python and still
+# affect the results.
+gdb_test_multiline "look up ada type from another language" \
+    "python" "" \
+    "gdb.execute('set language ada')" "" \
+    "print(gdb.lookup_type('character'))" "" \
+    "end" "character"

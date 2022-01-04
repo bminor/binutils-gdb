@@ -86,7 +86,7 @@ python_on_normal_stop (struct bpstat *bs, int print_frame)
 
   stop_signal = inferior_thread ()->stop_signal ();
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   if (emit_stop_event (bs, stop_signal) < 0)
     gdbpy_print_stack ();
@@ -98,7 +98,7 @@ python_on_resume (ptid_t ptid)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_continue_event (ptid) < 0)
     gdbpy_print_stack ();
@@ -110,7 +110,7 @@ python_on_resume (ptid_t ptid)
 static void
 python_on_inferior_call_pre (ptid_t thread, CORE_ADDR address)
 {
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_inferior_call_event (INFERIOR_CALL_PRE, thread, address) < 0)
     gdbpy_print_stack ();
@@ -122,7 +122,7 @@ python_on_inferior_call_pre (ptid_t thread, CORE_ADDR address)
 static void
 python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
 {
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_inferior_call_event (INFERIOR_CALL_POST, thread, address) < 0)
     gdbpy_print_stack ();
@@ -135,7 +135,7 @@ python_on_inferior_call_post (ptid_t thread, CORE_ADDR address)
 static void
 python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len, const bfd_byte *data)
 {
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_memory_changed_event (addr, len) < 0)
     gdbpy_print_stack ();
@@ -148,7 +148,7 @@ python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len,
 static void
 python_on_register_change (struct frame_info *frame, int regnum)
 {
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (emit_register_changed_event (frame, regnum) < 0)
     gdbpy_print_stack ();
@@ -162,7 +162,7 @@ python_inferior_exit (struct inferior *inf)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (target_gdbarch (), current_language);
+  gdbpy_enter enter_py (target_gdbarch ());
 
   if (inf->has_exit_code)
     exit_code = &inf->exit_code;
@@ -183,8 +183,7 @@ python_new_objfile (struct objfile *objfile)
 
   gdbpy_enter enter_py (objfile != NULL
 			? objfile->arch ()
-			: target_gdbarch (),
-			current_language);
+			: target_gdbarch ());
 
   if (objfile == NULL)
     {
@@ -237,7 +236,7 @@ python_new_inferior (struct inferior *inf)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
 
   if (evregpy_no_listeners_p (gdb_py_events.new_inferior))
     return;
@@ -265,7 +264,7 @@ python_inferior_deleted (struct inferior *inf)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
 
   if (evregpy_no_listeners_p (gdb_py_events.inferior_deleted))
     return;
@@ -312,7 +311,7 @@ add_thread_object (struct thread_info *tp)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
 
   gdbpy_ref<thread_object> thread_obj = create_thread_object (tp);
   if (thread_obj == NULL)
@@ -348,7 +347,7 @@ delete_thread_object (struct thread_info *tp, int ignore)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
 
   gdbpy_ref<inferior_object> inf_obj = inferior_to_inferior_object (tp->inf);
   if (inf_obj == NULL)
@@ -792,7 +791,7 @@ py_free_inferior (struct inferior *inf, void *datum)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (python_gdbarch, python_language);
+  gdbpy_enter enter_py;
   gdbpy_ref<inferior_object> inf_obj ((inferior_object *) datum);
 
   inf_obj->inferior = NULL;

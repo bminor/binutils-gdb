@@ -524,7 +524,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
   struct gdbarch *gdbarch = (struct gdbarch *) (self->unwind_data);
   cached_frame_info *cached_frame;
 
-  gdbpy_enter enter_py (gdbarch, current_language);
+  gdbpy_enter enter_py (gdbarch);
 
   pyuw_debug_printf ("frame=%d, sp=%s, pc=%s",
 		     frame_relative_level (this_frame),

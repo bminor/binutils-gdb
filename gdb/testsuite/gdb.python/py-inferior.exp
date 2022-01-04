@@ -220,6 +220,7 @@ with_test_prefix "is_valid" {
     gdb_test "python print (inf_list\[0\].is_valid())" "True" \
 	"check inferior validity 1"
 
+    # The "dummy" line below used to cause a gdb crash.
     gdb_test_multiline "install new inferior event handler" \
 	"python" "" \
 	"my_inferior_count = 1" "" \
@@ -227,6 +228,7 @@ with_test_prefix "is_valid" {
 	"  global my_inferior_count" "" \
 	"  if evt.inferior is not None:" "" \
 	"    my_inferior_count = my_inferior_count + 1" "" \
+	"    dummy = gdb.Value(True)" "" \
 	"gdb.events.new_inferior.connect(new_inf_handler)" "" \
 	"end" ""
     gdb_test_multiline "install inferior deleted event handler" \

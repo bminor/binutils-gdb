@@ -472,7 +472,7 @@ py_free_pspace (struct program_space *pspace, void *datum)
      being deleted.  */
   struct gdbarch *arch = target_gdbarch ();
 
-  gdbpy_enter enter_py (arch, current_language);
+  gdbpy_enter enter_py (arch);
   gdbpy_ref<pspace_object> object ((pspace_object *) datum);
   object->pspace = NULL;
 }

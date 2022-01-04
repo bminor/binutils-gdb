@@ -625,13 +625,35 @@ class gdbpy_enter
 {
  public:
 
-  gdbpy_enter (struct gdbarch *gdbarch, const struct language_defn *language);
+  /* Set the ambient Python architecture to GDBARCH and the language
+     to LANGUAGE.  If GDBARCH is nullptr, then the architecture will
+     be computed, when needed, using get_current_arch; see the
+     get_gdbarch method.  If LANGUAGE is not nullptr, then the current
+     language at time of construction will be saved (to be restored on
+     destruction), and the current language will be set to
+     LANGUAGE.  */
+  explicit gdbpy_enter (struct gdbarch *gdbarch = nullptr,
+			const struct language_defn *language = nullptr);
 
   ~gdbpy_enter ();
 
   DISABLE_COPY_AND_ASSIGN (gdbpy_enter);
 
+  /* Return the current gdbarch, as known to the Python layer.  This
+     is either python_gdbarch (which comes from the most recent call
+     to the gdbpy_enter constructor), or, if that is nullptr, the
+     result of get_current_arch.  */
+  static struct gdbarch *get_gdbarch ();
+
+  /* Called only during gdb shutdown.  This sets python_gdbarch to an
+     acceptable value.  */
+  static void finalize ();
+
  private:
+
+  /* The current gdbarch, according to Python.  This can be
+     nullptr.  */
+  static struct gdbarch *python_gdbarch;
 
   struct active_ext_lang_state *m_previous_active;
   PyGILState_STATE m_state;
@@ -679,9 +701,6 @@ private:
 
   PyThreadState *m_save;
 };
-
-extern struct gdbarch *python_gdbarch;
-extern const struct language_defn *python_language;
 
 /* Use this after a TRY_EXCEPT to throw the appropriate Python
    exception.  */

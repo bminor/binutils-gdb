@@ -74,11 +74,11 @@ extract_sym (PyObject *obj, gdb::unique_xmalloc_ptr<char> *name,
       if (*name == NULL)
 	return EXT_LANG_BT_ERROR;
       /* If the API returns a string (and not a symbol), then there is
-	no symbol derived language available and the frame filter has
-	either overridden the symbol with a string, or supplied a
-	entirely synthetic symbol/value pairing.  In that case, use
-	python_language.  */
-      *language = python_language;
+	 no symbol derived language available and the frame filter has
+	 either overridden the symbol with a string, or supplied a
+	 entirely synthetic symbol/value pairing.  In that case, use
+	 the current language.  */
+      *language = current_language;
       *sym = NULL;
       *sym_block = NULL;
     }
@@ -1157,7 +1157,7 @@ gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
       return EXT_LANG_BT_NO_FILTERS;
     }
 
-  gdbpy_enter enter_py (gdbarch, current_language);
+  gdbpy_enter enter_py (gdbarch);
 
   /* When we're limiting the number of frames, be careful to request
      one extra frame, so that we can print a message if there are more

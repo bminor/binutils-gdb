@@ -35,23 +35,26 @@
    GDB (which uses target arithmetic).  */
 
 /* Python's integer type corresponds to C's long type.  */
-#define builtin_type_pyint builtin_type (python_gdbarch)->builtin_long
+#define builtin_type_pyint \
+  builtin_type (gdbpy_enter::get_gdbarch ())->builtin_long
 
 /* Python's float type corresponds to C's double type.  */
-#define builtin_type_pyfloat builtin_type (python_gdbarch)->builtin_double
+#define builtin_type_pyfloat \
+  builtin_type (gdbpy_enter::get_gdbarch ())->builtin_double
 
 /* Python's long type corresponds to C's long long type.  */
-#define builtin_type_pylong builtin_type (python_gdbarch)->builtin_long_long
+#define builtin_type_pylong \
+  builtin_type (gdbpy_enter::get_gdbarch ())->builtin_long_long
 
 /* Python's long type corresponds to C's long long type.  Unsigned version.  */
 #define builtin_type_upylong builtin_type \
-  (python_gdbarch)->builtin_unsigned_long_long
+  (gdbpy_enter::get_gdbarch ())->builtin_unsigned_long_long
 
 #define builtin_type_pybool \
-  language_bool_type (python_language, python_gdbarch)
+  language_bool_type (current_language, gdbpy_enter::get_gdbarch ())
 
 #define builtin_type_pychar \
-  language_string_char_type (python_language, python_gdbarch)
+  language_string_char_type (current_language, gdbpy_enter::get_gdbarch ())
 
 struct value_object {
   PyObject_HEAD
@@ -754,7 +757,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   try
     {
       common_val_print (((value_object *) self)->value, &stb, 0,
-			&opts, python_language);
+			&opts, current_language);
     }
   catch (const gdb_exception &except)
     {
@@ -1160,7 +1163,7 @@ valpy_str (PyObject *self)
   try
     {
       common_val_print (((value_object *) self)->value, &stb, 0,
-			&opts, python_language);
+			&opts, current_language);
     }
   catch (const gdb_exception &except)
     {
@@ -2025,7 +2028,7 @@ gdbpy_convenience_variable (PyObject *self, PyObject *args)
 
       if (var != NULL)
 	{
-	  res_val = value_of_internalvar (python_gdbarch, var);
+	  res_val = value_of_internalvar (gdbpy_enter::get_gdbarch (), var);
 	  if (value_type (res_val)->code () == TYPE_CODE_VOID)
 	    res_val = NULL;
 	}
