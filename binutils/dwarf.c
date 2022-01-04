@@ -11309,7 +11309,7 @@ try_build_id_prefix (const char * prefix, char * filename, const unsigned char *
 /* Try to load a debug file based upon the build-id held in the .note.gnu.build-id section.  */
 
 static void
-load_build_id_debug_file (const char * main_filename, void * main_file)
+load_build_id_debug_file (const char * main_filename ATTRIBUTE_UNUSED, void * main_file)
 {
   if (! load_debug_section (note_gnu_build_id, main_file))
     return; /* No .note.gnu.build-id section.  */
