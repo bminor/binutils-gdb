@@ -364,3 +364,7 @@ test_really_undocumented_parameter
 test_deprecated_api_parameter
 test_integer_parameter
 test_throwing_parameter
+
+# This caused a gdb crash.
+gdb_test "python print(gdb.parameter('endian'))" "auto" \
+    "print endian parameter"

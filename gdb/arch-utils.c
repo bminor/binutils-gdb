@@ -359,7 +359,7 @@ static const char *const endian_enum[] =
   endian_auto,
   NULL,
 };
-static const char *set_endian_string;
+static const char *set_endian_string = endian_auto;
 
 enum bfd_endian
 selected_byte_order (void)
@@ -757,7 +757,8 @@ initialize_current_architecture (void)
      list of architectures.  */
   {
     /* Append ``auto''.  */
-    arches.push_back ("auto");
+    set_architecture_string = "auto";
+    arches.push_back (set_architecture_string);
     arches.push_back (nullptr);
     set_show_commands architecture_cmds
       = add_setshow_enum_cmd ("architecture", class_support,

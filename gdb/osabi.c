@@ -666,11 +666,13 @@ _initialize_gdb_osabi ()
 				  generic_elf_osabi_sniffer);
 
   /* Register the "set osabi" command.  */
+  user_osabi_state = osabi_auto;
+  set_osabi_string = gdb_osabi_available_names[0];
+  gdb_assert (strcmp (set_osabi_string, "auto") == 0);
   add_setshow_enum_cmd ("osabi", class_support, gdb_osabi_available_names,
 			&set_osabi_string,
 			_("Set OS ABI of target."),
 			_("Show OS ABI of target."),
 			NULL, set_osabi, show_osabi,
 			&setlist, &showlist);
-  user_osabi_state = osabi_auto;
 }

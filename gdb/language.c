@@ -476,7 +476,8 @@ add_set_language_command ()
   /* Display "auto", "local" and "unknown" first, and then the rest,
      alpha sorted.  */
   const char **language_names_p = language_names;
-  *language_names_p++ = language_def (language_auto)->name ();
+  language = language_def (language_auto)->name ();
+  *language_names_p++ = language;
   *language_names_p++ = "local";
   *language_names_p++ = language_def (language_unknown)->name ();
   const char **sort_begin = language_names_p;
@@ -1150,6 +1151,8 @@ _initialize_language ()
   add_alias_cmd ("c", setshow_check_cmds.show, no_class, 1, &showlist);
   add_alias_cmd ("ch", setshow_check_cmds.show, no_class, 1, &showlist);
 
+  range = type_or_range_names[3];
+  gdb_assert (strcmp (range, "auto") == 0);
   add_setshow_enum_cmd ("range", class_support, type_or_range_names,
 			&range,
 			_("Set range checking (on/warn/off/auto)."),
@@ -1158,6 +1161,8 @@ _initialize_language ()
 			show_range_command,
 			&setchecklist, &showchecklist);
 
+  case_sensitive = case_sensitive_names[2];
+  gdb_assert (strcmp (case_sensitive, "auto") == 0);
   add_setshow_enum_cmd ("case-sensitive", class_support, case_sensitive_names,
 			&case_sensitive, _("\
 Set case sensitivity in name search (on/off/auto)."), _("\
@@ -1173,10 +1178,6 @@ For Fortran the default is off; for other languages the default is on."),
   current_language = language_def (language_unknown);
 
   add_set_language_command ();
-
-  language = "auto";
-  range = "auto";
-  case_sensitive = "auto";
 
   /* Have the above take effect.  */
   set_language (language_auto);

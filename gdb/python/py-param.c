@@ -572,13 +572,13 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
       break;
 
     case var_enum:
+      /* Initialize the value, just in case.  */
+      self->value.cstringval = self->enumeration[0];
       commands = add_setshow_enum_cmd (cmd_name.get (), cmdclass,
 				       self->enumeration,
 				       &self->value.cstringval, set_doc,
 				       show_doc, help_doc, get_set_value,
 				       get_show_value, set_list, show_list);
-      /* Initialize the value, just in case.  */
-      self->value.cstringval = self->enumeration[0];
       break;
 
     default:

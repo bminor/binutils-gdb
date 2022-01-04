@@ -1029,6 +1029,9 @@ _initialize_charset ()
 #endif
 #endif
 
+  /* Recall that the first element is always "auto".  */
+  host_charset_name = charset_enum[0];
+  gdb_assert (strcmp (host_charset_name, "auto") == 0);
   add_setshow_enum_cmd ("charset", class_support,
 			charset_enum, &host_charset_name, _("\
 Set the host and target character sets."), _("\
@@ -1057,6 +1060,9 @@ To see a list of the character sets GDB supports, type `set host-charset <TAB>'.
 			show_host_charset_name,
 			&setlist, &showlist);
 
+  /* Recall that the first element is always "auto".  */
+  target_charset_name = charset_enum[0];
+  gdb_assert (strcmp (target_charset_name, "auto") == 0);
   add_setshow_enum_cmd ("target-charset", class_support,
 			charset_enum, &target_charset_name, _("\
 Set the target character set."), _("\
@@ -1069,6 +1075,9 @@ To see a list of the character sets GDB supports, type `set target-charset'<TAB>
 			show_target_charset_name,
 			&setlist, &showlist);
 
+  /* Recall that the first element is always "auto".  */
+  target_wide_charset_name = charset_enum[0];
+  gdb_assert (strcmp (target_wide_charset_name, "auto") == 0);
   add_setshow_enum_cmd ("target-wide-charset", class_support,
 			charset_enum, &target_wide_charset_name,
 			_("\

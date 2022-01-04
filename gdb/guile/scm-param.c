@@ -458,12 +458,12 @@ add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
       break;
 
     case var_enum:
+      /* Initialize the value, just in case.  */
+      make_setting (self).set<const char *> (self->enumeration[0]);
       commands = add_setshow_enum_cmd (cmd_name, cmd_class, self->enumeration,
 				       &self->value.cstringval, set_doc,
 				       show_doc, help_doc, set_func, show_func,
 				       set_list, show_list);
-      /* Initialize the value, just in case.  */
-      make_setting (self).set<const char *> (self->enumeration[0]);
       break;
 
     default:

@@ -9802,6 +9802,8 @@ _initialize_arm_tdep ()
 	size_t offset = strlen ("reg-names-");
 	const char *style = disasm_options->name[i];
 	valid_disassembly_styles[j++] = &style[offset];
+	if (strcmp (&style[offset], "std") == 0)
+	  disassembly_style = &style[offset];
 	length = snprintf (rdptr, rest, "%s - %s\n", &style[offset],
 			   disasm_options->description[i]);
 	rdptr += length;

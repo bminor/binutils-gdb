@@ -613,6 +613,16 @@ add_setshow_enum_cmd (const char *name,
 		      struct cmd_list_element **set_list,
 		      struct cmd_list_element **show_list)
 {
+  /* We require *VAR to be initialized before this call, and
+     furthermore it must be == to one of the values in ENUMLIST.  */
+  gdb_assert (var != nullptr && *var != nullptr);
+  for (int i = 0; ; ++i)
+    {
+      gdb_assert (enumlist[i] != nullptr);
+      if (*var == enumlist[i])
+	break;
+    }
+
   set_show_commands commands
     =  add_setshow_cmd_full<const char *> (name, theclass, var_enum, var,
 					   set_doc, show_doc, help_doc,
