@@ -12473,7 +12473,7 @@ _ACEOF
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_isa_spec" >&5
 $as_echo "$with_isa_spec" >&6; }
 
-        # --with-priv-spec=[1.9|1.9.1|1.10|1.11].
+        # --with-priv-spec=[1.9|1.9.1|1.10|1.11|1.12].
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --with-priv-spec" >&5
 $as_echo_n "checking for default configuration of --with-priv-spec... " >&6; }
         if test "x${with_priv_spec}" != x; then
