@@ -17,6 +17,7 @@ import traceback
 import os
 import sys
 import _gdb
+from contextlib import contextmanager
 
 # Python 3 moved "reload"
 if sys.version_info >= (3, 4):
@@ -229,6 +230,24 @@ def find_pc_line(pc):
     """find_pc_line (pc) -> Symtab_and_line.
     Return the gdb.Symtab_and_line object corresponding to the pc value."""
     return current_progspace().find_pc_line(pc)
+
+
+def set_parameter(name, value):
+    """Set the GDB parameter NAME to VALUE."""
+    execute('set ' + name + ' ' + str(value), to_string=True)
+
+
+@contextmanager
+def with_parameter(name, value):
+    """Temporarily set the GDB parameter NAME to VALUE.
+    Note that this is a context manager."""
+    old_value = parameter(name)
+    set_parameter(name, value)
+    try:
+        # Nothing that useful to return.
+        yield None
+    finally:
+        set_parameter(name, old_value)
 
 
 try:

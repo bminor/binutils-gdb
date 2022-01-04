@@ -332,6 +332,32 @@ parameter's value is converted to a Python value of the appropriate
 type, and returned.
 @end defun
 
+@findex gdb.set_parameter
+@defun gdb.set_parameter (name, value)
+Sets the gdb parameter @var{name} to @var{value}.  As with
+@code{gdb.parameter}, the parameter name string may contain spaces if
+the parameter has a multi-part name.
+@end defun
+
+@findex gdb.with_parameter
+@defun gdb.with_parameter (name, value)
+Create a Python context manager (for use with the Python
+@command{with} statement) that temporarily sets the gdb parameter
+@var{name} to @var{value}.  On exit from the context, the previous
+value will be restored.
+
+This uses @code{gdb.parameter} in its implementation, so it can throw
+the same exceptions as that function.
+
+For example, it's sometimes useful to evaluate some Python code with a
+particular gdb language:
+
+@smallexample
+with gdb.with_parameter('language', 'pascal'):
+  ... language-specific operations
+@end smallexample
+@end defun
+
 @findex gdb.history
 @defun gdb.history (number)
 Return a value from @value{GDBN}'s value history (@pxref{Value
