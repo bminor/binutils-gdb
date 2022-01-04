@@ -2400,18 +2400,52 @@ get_symbol_name (char ** ilp_return)
     }
   else if (c == '"')
     {
-      bool backslash_seen;
+      char *dst = input_line_pointer;
 
       * ilp_return = input_line_pointer;
-      do
+      for (;;)
 	{
-	  backslash_seen = c == '\\';
-	  c = * input_line_pointer ++;
-	}
-      while (c != 0 && (c != '"' || backslash_seen));
+	  c = *input_line_pointer++;
 
-      if (c == 0)
-	as_warn (_("missing closing '\"'"));
+	  if (c == 0)
+	    {
+	      as_warn (_("missing closing '\"'"));
+	      break;
+	    }
+
+	  if (c == '"')
+	    {
+	      char *ilp_save = input_line_pointer;
+
+	      SKIP_WHITESPACE ();
+	      if (*input_line_pointer == '"')
+		{
+		  ++input_line_pointer;
+		  continue;
+		}
+	      input_line_pointer = ilp_save;
+	      break;
+	    }
+
+	  if (c == '\\')
+	    switch (*input_line_pointer)
+	      {
+	      case '"':
+	      case '\\':
+		c = *input_line_pointer++;
+		break;
+
+	      default:
+		if (c != 0)
+		  as_warn (_("'\\%c' in quoted symbol name; "
+			     "behavior may change in the future"),
+			   *input_line_pointer);
+		break;
+	      }
+
+	  *dst++ = c;
+	}
+      *dst = 0;
     }
   *--input_line_pointer = 0;
   return c;
