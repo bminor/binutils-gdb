@@ -11394,9 +11394,6 @@ load_build_id_debug_file (const char * main_filename, void * main_file)
       return;
     }
 
-  printf (_("%s: Found build-id indexed debug file: %s\n\n"),
-	  main_filename, filename);
-
   add_separate_debug_file (filename, handle);
 }
 
