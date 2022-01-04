@@ -846,7 +846,6 @@ echo_command (const char *text, int from_tty)
   gdb_stdout->reset_style ();
 
   /* Force this output to appear now.  */
-  gdb_stdout->wrap_here (0);
   gdb_flush (gdb_stdout);
 }
 

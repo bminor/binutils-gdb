@@ -146,9 +146,6 @@ vwarning (const char *string, va_list args)
 	  term_state.emplace ();
 	  target_terminal::ours_for_output ();
 	}
-      if (filtered_printing_initialized ())
-	gdb_stdout->wrap_here (0);	/* Force out any buffered output.  */
-      gdb_flush (gdb_stdout);
       if (warning_pre_print)
 	gdb_puts (warning_pre_print, gdb_stderr);
       gdb_vprintf (gdb_stderr, string, args);
@@ -650,9 +647,6 @@ void
 print_sys_errmsg (const char *string, int errcode)
 {
   const char *err = safe_strerror (errcode);
-  /* We want anything which was printed on stdout to come out first, before
-     this message.  */
-  gdb_flush (gdb_stdout);
   gdb_printf (gdb_stderr, "%s: %s.\n", string, err);
 }
 

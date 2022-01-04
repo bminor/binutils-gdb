@@ -1493,7 +1493,6 @@ output_command (const char *exp, int from_tty)
 
   annotate_value_end ();
 
-  gdb_stdout->wrap_here (0);
   gdb_flush (gdb_stdout);
 }
 

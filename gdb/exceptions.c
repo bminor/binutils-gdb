@@ -46,19 +46,15 @@ print_flush (void)
     }
 
   /* We want all output to appear now, before we print the error.  We
-     have 3 levels of buffering we have to flush (it's possible that
+     have 2 levels of buffering we have to flush (it's possible that
      some of these should be changed to flush the lower-level ones
      too):  */
 
-  /* 1.  The _filtered buffer.  */
-  if (filtered_printing_initialized ())
-    gdb_stdout->wrap_here (0);
-
-  /* 2.  The stdio buffer.  */
+  /* 1.  The stdio buffer.  */
   gdb_flush (gdb_stdout);
   gdb_flush (gdb_stderr);
 
-  /* 3.  The system-level buffer.  */
+  /* 2.  The system-level buffer.  */
   gdb_stdout_serial = serial_fdopen (fileno (ui->outstream));
   if (gdb_stdout_serial)
     {
