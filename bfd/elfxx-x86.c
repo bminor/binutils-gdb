@@ -1754,7 +1754,6 @@ _bfd_x86_elf_link_report_relative_reloc
   const char *name;
   bfd *abfd;
   const Elf_Internal_Rela *rel = (const Elf_Internal_Rela *) reloc;
-  char r_offset[30], r_info[30];
 
   /* Use the output BFD for linker created sections.  */
   if ((asect->flags & SEC_LINKER_CREATED) != 0)
@@ -1767,26 +1766,17 @@ _bfd_x86_elf_link_report_relative_reloc
   else
     name = bfd_elf_sym_name (abfd, &elf_symtab_hdr (abfd), sym, NULL);
 
-  bfd_sprintf_vma (abfd, r_offset, rel->r_offset);
-  bfd_sprintf_vma (abfd, r_info, rel->r_info);
-
   if (asect->use_rela_p)
-    {
-      char r_addend[30];
-
-      bfd_sprintf_vma (abfd, r_addend, rel->r_addend);
-
-      info->callbacks->einfo
-	(_("%pB: %s (offset: 0x%s, info: 0x%s, addend: 0x%s) against "
-	   "'%s' " "for section '%pA' in %pB\n"),
-	 info->output_bfd, reloc_name, r_offset, r_info, r_addend,
-	 name, asect, abfd);
-    }
+    info->callbacks->einfo
+      (_("%pB: %s (offset: 0x%v, info: 0x%v, addend: 0x%v) against "
+	 "'%s' " "for section '%pA' in %pB\n"),
+       info->output_bfd, reloc_name, rel->r_offset, rel->r_info,
+       rel->r_addend, name, asect, abfd);
   else
     info->callbacks->einfo
-      (_("%pB: %s (offset: 0x%s, info: 0x%s) against '%s' for section "
+      (_("%pB: %s (offset: 0x%v, info: 0x%v) against '%s' for section "
 	 "'%pA' in %pB\n"),
-       info->output_bfd, reloc_name, r_offset, r_info, name,
+       info->output_bfd, reloc_name, rel->r_offset, rel->r_info, name,
        asect, abfd);
 }
 
