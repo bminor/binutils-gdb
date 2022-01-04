@@ -2362,7 +2362,8 @@ aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
       return 0;
     }
 
-  if (TYPE_LENGTH (type) > 16)
+  if (TYPE_LENGTH (type) > 16
+      || !language_pass_by_reference (type).trivially_copyable)
     {
       /* PCS B.6 Aggregates larger than 16 bytes are passed by
 	 invisible reference.  */
@@ -2474,8 +2475,24 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
     {
       if (aarch64_return_in_memory (gdbarch, valtype))
 	{
+	  /* From the AAPCS64's Result Return section:
+
+	     "Otherwise, the caller shall reserve a block of memory of
+	      sufficient size and alignment to hold the result.  The address
+	      of the memory block shall be passed as an additional argument to
+	      the function in x8.  */
+
 	  aarch64_debug_printf ("return value in memory");
-	  return RETURN_VALUE_STRUCT_CONVENTION;
+
+	  if (readbuf)
+	    {
+	      CORE_ADDR addr;
+
+	      regcache->cooked_read (AARCH64_STRUCT_RETURN_REGNUM, &addr);
+	      read_memory (addr, readbuf, TYPE_LENGTH (valtype));
+	    }
+
+	  return RETURN_VALUE_ABI_RETURNS_ADDRESS;
 	}
     }
 

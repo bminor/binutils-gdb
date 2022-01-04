@@ -8075,7 +8075,8 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
     {
       /* The AAPCS says all aggregates not larger than a word are returned
 	 in a register.  */
-      if (TYPE_LENGTH (type) <= ARM_INT_REGISTER_SIZE)
+      if (TYPE_LENGTH (type) <= ARM_INT_REGISTER_SIZE
+	  && language_pass_by_reference (type).trivially_copyable)
 	return 0;
 
       return 1;
@@ -8086,7 +8087,8 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 
       /* All aggregate types that won't fit in a register must be returned
 	 in memory.  */
-      if (TYPE_LENGTH (type) > ARM_INT_REGISTER_SIZE)
+      if (TYPE_LENGTH (type) > ARM_INT_REGISTER_SIZE
+	  || !language_pass_by_reference (type).trivially_copyable)
 	return 1;
 
       /* In the ARM ABI, "integer" like aggregate types are returned in
@@ -8307,9 +8309,33 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
       || valtype->code () == TYPE_CODE_UNION
       || valtype->code () == TYPE_CODE_ARRAY)
     {
+      /* From the AAPCS document:
+
+	 Result return:
+
+	 A Composite Type larger than 4 bytes, or whose size cannot be
+	 determined statically by both caller and callee, is stored in memory
+	 at an address passed as an extra argument when the function was
+	 called (Parameter Passing, rule A.4). The memory to be used for the
+	 result may be modified at any point during the function call.
+
+	 Parameter Passing:
+
+	 A.4: If the subroutine is a function that returns a result in memory,
+	 then the address for the result is placed in r0 and the NCRN is set
+	 to r1.  */
       if (tdep->struct_return == pcc_struct_return
 	  || arm_return_in_memory (gdbarch, valtype))
-	return RETURN_VALUE_STRUCT_CONVENTION;
+	{
+	  if (readbuf)
+	    {
+	      CORE_ADDR addr;
+
+	      regcache->cooked_read (ARM_A1_REGNUM, &addr);
+	      read_memory (addr, readbuf, TYPE_LENGTH (valtype));
+	    }
+	  return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+	}
     }
   else if (valtype->code () == TYPE_CODE_COMPLEX)
     {
