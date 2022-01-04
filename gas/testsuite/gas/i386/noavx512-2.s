@@ -52,6 +52,6 @@
 
 	.intel_syntax noprefix
 	vfpclasspd k0, [eax], 0
-	vfpclassps k0, [eax], 0
+	vfpclassps k0, [eax+0x80], 0
 
 	.p2align 4

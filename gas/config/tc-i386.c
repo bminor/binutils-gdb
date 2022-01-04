@@ -6327,7 +6327,7 @@ check_VecOperands (const insn_template *t)
 	i.memshift = t->opcode_modifier.disp8memshift;
       else
 	{
-	  const i386_operand_type *type = NULL;
+	  const i386_operand_type *type = NULL, *fallback = NULL;
 
 	  i.memshift = 0;
 	  for (op = 0; op < i.operands; op++)
@@ -6341,6 +6341,8 @@ check_VecOperands (const insn_template *t)
 		  type = &t->operand_types[op];
 		else if (!i.types[op].bitfield.unspecified)
 		  type = &i.types[op];
+		else /* Ambiguities get resolved elsewhere.  */
+		  fallback = &t->operand_types[op];
 	      }
 	    else if (i.types[op].bitfield.class == RegSIMD
 		     && t->opcode_modifier.evex != EVEXLIG)
@@ -6353,6 +6355,8 @@ check_VecOperands (const insn_template *t)
 		  i.memshift = 4;
 	      }
 
+	  if (!type && !i.memshift)
+	    type = fallback;
 	  if (type)
 	    {
 	      if (type->bitfield.zmmword)
