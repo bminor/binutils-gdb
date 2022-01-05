@@ -384,7 +384,7 @@ language_info ()
 
   expected_language = current_language;
   printf_filtered (_("Current language:  %s\n"), language);
-  show_language_command (NULL, 1, NULL, NULL);
+  show_language_command (gdb_stdout, 1, NULL, NULL);
 }
 
 /* This page contains functions for the printing out of

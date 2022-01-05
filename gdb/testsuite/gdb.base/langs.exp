@@ -117,6 +117,15 @@ if [runto csub] then {
     gdb_test "print x" \
 	"expression parsing not implemented for language .Unknown." \
 	"expression parsing does not crash for unknown"
+
+    gdb_test_no_output "set lang auto" \
+	"set lang back to auto for verbose test"
+    gdb_test_no_output "set verbose on"
+    if { !$isfixed } { set lang c\\+\\+; set ext cxx }
+    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    gdb_test "up" \
+	".* in (foo|$foo_func).* at .*langs2\\.$ext.*return csub \\(.*Current language:  auto.*" \
+	"up to foo in langs.exp when verbose"
 }
 
 set timeout $oldtimeout
