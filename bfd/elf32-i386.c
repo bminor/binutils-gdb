@@ -1668,25 +1668,12 @@ elf_i386_check_relocs (bfd *abfd,
 	      {
 		bfd_signed_vma *local_got_refcounts;
 
+		if (!elf_x86_allocate_local_got_info (abfd,
+						      symtab_hdr->sh_info))
+		      goto error_return;
+
 		/* This is a global offset table entry for a local symbol.  */
 		local_got_refcounts = elf_local_got_refcounts (abfd);
-		if (local_got_refcounts == NULL)
-		  {
-		    bfd_size_type size;
-
-		    size = symtab_hdr->sh_info;
-		    size *= (sizeof (bfd_signed_vma)
-			     + sizeof (bfd_vma) + sizeof(char));
-		    local_got_refcounts = (bfd_signed_vma *)
-			bfd_zalloc (abfd, size);
-		    if (local_got_refcounts == NULL)
-		      goto error_return;
-		    elf_local_got_refcounts (abfd) = local_got_refcounts;
-		    elf_x86_local_tlsdesc_gotent (abfd)
-		      = (bfd_vma *) (local_got_refcounts + symtab_hdr->sh_info);
-		    elf_x86_local_got_tls_type (abfd)
-		      = (char *) (local_got_refcounts + 2 * symtab_hdr->sh_info);
-		  }
 		local_got_refcounts[r_symndx] = 1;
 		old_tls_type = elf_x86_local_got_tls_type (abfd) [r_symndx];
 	      }

@@ -789,3 +789,25 @@ elf_x86_start_stop_gc_p (struct bfd_link_info *link_info,
      --gc-sections or -z start-stop-gc isn't used.  */
   return false;
 }
+
+/* Allocate x86 GOT info for local symbols.  */
+
+static inline bool
+elf_x86_allocate_local_got_info (bfd *abfd, bfd_size_type count)
+{
+  bfd_signed_vma *local_got_refcounts = elf_local_got_refcounts (abfd);
+  if (local_got_refcounts == NULL)
+    {
+      bfd_size_type size = count * (sizeof (bfd_signed_vma)
+				    + sizeof (bfd_vma) + sizeof(char));
+      local_got_refcounts = (bfd_signed_vma *) bfd_zalloc (abfd, size);
+      if (local_got_refcounts == NULL)
+	return false;
+      elf_local_got_refcounts (abfd) = local_got_refcounts;
+      elf_x86_local_tlsdesc_gotent (abfd) =
+	(bfd_vma *) (local_got_refcounts + count);
+      elf_x86_local_got_tls_type (abfd) =
+	(char *) (local_got_refcounts + 2 * count);
+    }
+  return true;
+}
