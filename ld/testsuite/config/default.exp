@@ -313,6 +313,46 @@ if ![info exists LDFLAGS] then {
     set LDFLAGS {}
 }
 
+if { ![info exists DT_RELR_LDFLAGS] } then {
+    if { [istarget "i?86-*-linux*"] \
+	 || [istarget "x86_64-*-linux*"] \
+	 || [istarget "i?86-*-gnu**"] } then {
+	set DT_RELR_LDFLAGS "-z pack-relative-relocs"
+    } else {
+	set DT_RELR_LDFLAGS {}
+    }
+}
+
+if { ![info exists DT_RELR_CC_LDFLAGS] } then {
+    if { [istarget "i?86-*-linux*"] \
+	 || [istarget "x86_64-*-linux*"] \
+	 || [istarget "i?86-*-gnu**"] } then {
+	set DT_RELR_CC_LDFLAGS "-Wl,-z,pack-relative-relocs"
+    } else {
+	set DT_RELR_CC_LDFLAGS {}
+    }
+}
+
+if { ![info exists NO_DT_RELR_LDFLAGS] } then {
+    if { [istarget "i?86-*-linux*"] \
+	 || [istarget "x86_64-*-linux*"] \
+	 || [istarget "i?86-*-gnu**"] } then {
+	set NO_DT_RELR_LDFLAGS "-z nopack-relative-relocs"
+    } else {
+	set NO_DT_RELR_LDFLAGS {}
+    }
+}
+
+if { ![info exists NO_DT_RELR_CC_LDFLAGS] } then {
+    if { [istarget "i?86-*-linux*"] \
+	 || [istarget "x86_64-*-linux*"] \
+	 || [istarget "i?86-*-gnu**"] } then {
+	set NO_DT_RELR_CC_LDFLAGS "-Wl,-z,nopack-relative-relocs"
+    } else {
+	set NO_DT_RELR_CC_LDFLAGS {}
+    }
+}
+
 # Set LD_CLASS to "64bit" for a 64-bit *host* linker.
 if { ![info exists LD_CLASS] } then {
     set REAL_LD [findfile $base_dir/.libs/ld-new .libs/ld-new $LD [transform ld]]

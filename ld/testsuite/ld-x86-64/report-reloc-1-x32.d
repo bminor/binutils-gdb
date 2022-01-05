@@ -1,6 +1,6 @@
 #source: report-reloc-1.s
 #as: --x32
-#ld: -pie -melf32_x86_64 -z report-relative-reloc
+#ld: -pie -melf32_x86_64 -z report-relative-reloc $NO_DT_RELR_LDFLAGS
 #warning_output: report-reloc-1.l
 #readelf: -r --wide
 

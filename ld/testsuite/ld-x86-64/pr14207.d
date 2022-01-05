@@ -1,6 +1,6 @@
 #name: PR ld/14207
 #as: --64
-#ld: -melf_x86_64 -shared -z relro -z now --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
+#ld: -melf_x86_64 -shared -z relro -z now --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code $NO_DT_RELR_LDFLAGS
 #readelf: -l --wide
 #target: x86_64-*-linux*
 

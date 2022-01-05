@@ -45,28 +45,6 @@ set x86_64tests {
     {"basic PLT generation"
      "-melf_x86_64 tmpdir/libpltlib.so" "" "--64" {plt.s}
      {{objdump -drj.plt plt.pd}} "plt"}
-    {"TLS -fpic -shared transitions"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info \
-      -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv" ""
-     "--64" {tlspic1.s tlspic2.s}
-     {{readelf -WSsrl tlspic.rd} {objdump -drj.text\ -Mintel64 tlspic.dd}
-      {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
-      "libtlspic.so"}
-    {"TLS -fpic -shared transitions with r15 as GOT base"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info \
-      -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv" ""
-     "--64 -mrelax-relocations=yes"
-     {tlspic3.s tlspic2.s}
-     {{readelf -WSsrl tlspic2.rd} {objdump -drj.text\ -Mintel64 tlspic2.dd}
-      {objdump -sj.got tlspic2.sd} {objdump -sj.tdata tlspic2.td}}
-      "libtlspic2.so"}
-    {"TLS descriptor -fpic -shared transitions"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info \
-      -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv" ""
-     "--64" {tlsdesc.s tlspic2.s}
-     {{readelf -WSsrld tlsdesc.rd} {objdump -drj.text tlsdesc.dd}
-      {objdump "-s -j.got -j.got.plt" tlsdesc.sd} {objdump -sj.tdata tlsdesc.td}
-      {objdump -drj.plt tlsdesc.pd}} "libtlsdesc.so"}
     {"Helper shared library" "-shared -melf_x86_64" ""
      "--64" {tlslib.s} {} "libtlslib.so"}
     {"TLS -fpic and -fno-pic exec transitions"
@@ -239,6 +217,49 @@ set x86_64tests {
 }
 
 run_ld_link_tests $x86_64tests
+
+run_ld_link_tests [list \
+    [list \
+	"TLS -fpic -shared transitions" \
+	"-shared -melf_x86_64 --no-ld-generated-unwind-info \
+	 -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv \
+	 $NO_DT_RELR_LDFLAGS" \
+	"" "--64" \
+	{tlspic1.s tlspic2.s} \
+	{{readelf -WSsrl tlspic.rd} \
+	 {objdump {-drj.text -Mintel64} tlspic.dd} \
+	 {objdump -sj.got tlspic.sd} \
+	 {objdump -sj.tdata tlspic.td}} \
+	"libtlspic.so" \
+    ] \
+    [list \
+	"TLS -fpic -shared transitions with r15 as GOT base" \
+	"-shared -melf_x86_64 --no-ld-generated-unwind-info \
+	 -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv \
+	 $NO_DT_RELR_LDFLAGS" \
+	 "" "--64 -mrelax-relocations=yes" \
+	{tlspic3.s tlspic2.s} \
+	{{readelf -WSsrl tlspic2.rd} \
+	 {objdump {-drj.text -Mintel64} tlspic2.dd} \
+	 {objdump -sj.got tlspic2.sd} \
+	 {objdump -sj.tdata tlspic2.td}} \
+	"libtlspic2.so" \
+    ] \
+    [list \
+	"TLS descriptor -fpic -shared transitions" \
+	"-shared -melf_x86_64 --no-ld-generated-unwind-info \
+	 -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv \
+	 $NO_DT_RELR_LDFLAGS" \
+	"" "--64" \
+	{tlsdesc.s tlspic2.s} \
+	{{readelf -WSsrld tlsdesc.rd} \
+	 {objdump -drj.text tlsdesc.dd} \
+	 {objdump {-s -j.got -j.got.plt} tlsdesc.sd} \
+	 {objdump -sj.tdata tlsdesc.td} \
+	 {objdump -drj.plt tlsdesc.pd}} \
+	 "libtlsdesc.so" \
+    ] \
+]
 
 set test_name "Mixed x86_64 and i386 input test 1"
 set test mixed1

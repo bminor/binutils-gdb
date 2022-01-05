@@ -855,6 +855,7 @@ proc run_dump_test { name {extra_options {}} } {
     global ELFEDIT ELFEDITFLAGS LD LDFLAGS NM NMFLAGS OBJCOPY OBJCOPYFLAGS
     global OBJDUMP OBJDUMPFLAGS READELF READELFFLAGS STRIP STRIPFLAGS
     global copyfile env runtests srcdir subdir verbose
+    global DT_RELR_LDFLAGS NO_DT_RELR_LDFLAGS
 
     if [string match "*/*" $name] {
 	set file $name

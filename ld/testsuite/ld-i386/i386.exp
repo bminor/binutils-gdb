@@ -177,12 +177,6 @@ set i386tests {
      {{readelf -Ssrl tlsbindesc.rd} {objdump -drj.text tlsbindesc.dd}
       {objdump -sj.got tlsbindesc.sd} {objdump -sj.tdata tlsbindesc.td}}
       "tlsbindesc"}
-    {"TLS -fno-pic -shared"
-     "-shared -melf_i386 --no-ld-generated-unwind-info -z notext \
-      -z noseparate-code --hash-style=sysv" ""
-     "--32" {tlsnopic1.s tlsnopic2.s}
-     {{readelf -Ssrl tlsnopic.rd} {objdump -drj.text tlsnopic.dd}
-      {objdump -sj.got tlsnopic.sd}} "libtlsnopic.so"}
     {"TLS with global dynamic and descriptors"
      "-shared -melf_i386 --no-ld-generated-unwind-info \
       -z noseparate-code --hash-style=sysv" ""
@@ -292,6 +286,20 @@ proc iamcu_tests {} {
 iamcu_tests
 
 run_ld_link_tests $i386tests
+
+run_ld_link_tests [list \
+    [list \
+	"TLS -fno-pic -shared" \
+	"-shared -melf_i386 --no-ld-generated-unwind-info -z notext \
+	 -z noseparate-code --hash-style=sysv $NO_DT_RELR_LDFLAGS" \
+	"" "--32" \
+	{tlsnopic1.s tlsnopic2.s} \
+	{{readelf -Ssrl tlsnopic.rd} \
+	 {objdump -drj.text tlsnopic.dd} \
+	 {objdump -sj.got tlsnopic.sd}} \
+	"libtlsnopic.so" \
+    ] \
+]
 
 run_dump_test "abs"
 run_dump_test "pcrel8"

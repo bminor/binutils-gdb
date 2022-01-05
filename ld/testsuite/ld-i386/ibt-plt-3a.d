@@ -1,6 +1,6 @@
 #source: ibt-plt-3.s
 #as: --32
-#ld: -shared -m elf_i386 -z ibtplt --hash-style=sysv -z noseparate-code
+#ld: -shared -m elf_i386 -z ibtplt --hash-style=sysv -z noseparate-code $NO_DT_RELR_LDFLAGS
 #objdump: -dw
 
 .*: +file format .*
