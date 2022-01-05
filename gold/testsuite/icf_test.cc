@@ -29,19 +29,21 @@ int common()
   return 1;
 }
 
-int kept_func()
+int kept_func(int i)
 {
   common();
   // Recursive call.
-  kept_func();
+  if (i)
+    kept_func(i - 1);
   return 1;
 }
 
-int folded_func()
+int folded_func(int i)
 {
   common();
   // Recursive call.
-  folded_func();
+  if (i)
+    folded_func(i - 1);
   return 1;
 }
 
