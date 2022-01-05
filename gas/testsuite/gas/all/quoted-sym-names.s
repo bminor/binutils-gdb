@@ -1,4 +1,4 @@
-	.text
+	.data
 	.globl	"test-a"
 "test-a":
 	.byte 0
