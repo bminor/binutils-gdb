@@ -41,6 +41,7 @@ gdb_internal_backtrace_set_cmd (const char *args, int from_tty,
 #endif
 }
 
+#ifdef GDB_PRINT_INTERNAL_BACKTRACE
 #ifdef GDB_PRINT_INTERNAL_BACKTRACE_USING_LIBBACKTRACE
 
 /* Callback used by libbacktrace if it encounters an error.  */
@@ -142,7 +143,10 @@ gdb_internal_backtrace_1 ()
     sig_write (_("Backtrace might be incomplete.\n"));
 }
 
+#else
+#error "unexpected internal backtrace policy"
 #endif
+#endif /* GDB_PRINT_INTERNAL_BACKTRACE */
 
 /* See bt-utils.h.  */
 
@@ -152,6 +156,7 @@ gdb_internal_backtrace ()
   if (current_ui == nullptr)
     return;
 
+#ifdef GDB_PRINT_INTERNAL_BACKTRACE
   const auto sig_write = [] (const char *msg) -> void
   {
     gdb_stderr->write_async_safe (msg, strlen (msg));
@@ -159,12 +164,11 @@ gdb_internal_backtrace ()
 
   sig_write (_("----- Backtrace -----\n"));
 
-#ifdef GDB_PRINT_INTERNAL_BACKTRACE
   if (gdb_stderr->fd () > -1)
     gdb_internal_backtrace_1 ();
   else
-#endif
     sig_write (_("Backtrace unavailable\n"));
 
   sig_write ("---------------------\n");
+#endif
 }
