@@ -31,7 +31,8 @@ gdb_test_multiline "install new_thread event handler" \
     "python" "" \
     "seen_a_thread = False" "" \
     "def thread_handler(evt):" "" \
-    "  if evt.inferior_thread is not None:" "" \
+    "  if (evt.inferior_thread is not None" "" \
+    "      and isinstance (evt.inferior_thread, gdb.InferiorThread)):" "" \
     "    global seen_a_thread" "" \
     "    seen_a_thread = True" "" \
     "gdb.events.new_thread.connect(thread_handler)" "" \
