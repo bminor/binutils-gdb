@@ -2213,6 +2213,85 @@ _bfd_elf_export_symbol (struct elf_link_hash_entry *h, void *data)
   return true;
 }
 
+/* Return true if GLIBC_ABI_DT_RELR is added to the list of version
+   dependencies successfully.  GLIBC_ABI_DT_RELR will be put into the
+   .gnu.version_r section.  */
+
+static bool
+elf_link_add_dt_relr_dependency (struct elf_find_verdep_info *rinfo)
+{
+  bfd *glibc_bfd = NULL;
+  Elf_Internal_Verneed *t;
+  Elf_Internal_Vernaux *a;
+  size_t amt;
+  const char *relr = "GLIBC_ABI_DT_RELR";
+
+  /* See if we already know about GLIBC_PRIVATE_DT_RELR.  */
+  for (t = elf_tdata (rinfo->info->output_bfd)->verref;
+       t != NULL;
+       t = t->vn_nextref)
+    {
+      const char *soname = bfd_elf_get_dt_soname (t->vn_bfd);
+      /* Skip the shared library if it isn't libc.so.  */
+      if (!soname || !startswith (soname, "libc.so."))
+	continue;
+
+      for (a = t->vn_auxptr; a != NULL; a = a->vna_nextptr)
+	{
+	  /* Return if GLIBC_PRIVATE_DT_RELR dependency has been
+	     added.  */
+	  if (a->vna_nodename == relr
+	      || strcmp (a->vna_nodename, relr) == 0)
+	    return true;
+
+	  /* Check if libc.so provides GLIBC_2.XX version.  */
+	  if (!glibc_bfd && startswith (a->vna_nodename, "GLIBC_2."))
+	    glibc_bfd = t->vn_bfd;
+	}
+
+      break;
+    }
+
+  /* Skip if it isn't linked against glibc.  */
+  if (glibc_bfd == NULL)
+    return true;
+
+  /* This is a new version.  Add it to tree we are building.  */
+  if (t == NULL)
+    {
+      amt = sizeof *t;
+      t = (Elf_Internal_Verneed *) bfd_zalloc (rinfo->info->output_bfd,
+					       amt);
+      if (t == NULL)
+	{
+	  rinfo->failed = true;
+	  return false;
+	}
+
+      t->vn_bfd = glibc_bfd;
+      t->vn_nextref = elf_tdata (rinfo->info->output_bfd)->verref;
+      elf_tdata (rinfo->info->output_bfd)->verref = t;
+    }
+
+  amt = sizeof *a;
+  a = (Elf_Internal_Vernaux *) bfd_zalloc (rinfo->info->output_bfd, amt);
+  if (a == NULL)
+    {
+      rinfo->failed = true;
+      return false;
+    }
+
+  a->vna_nodename = relr;
+  a->vna_flags = 0;
+  a->vna_nextptr = t->vn_auxptr;
+  a->vna_other = rinfo->vers + 1;
+  ++rinfo->vers;
+
+  t->vn_auxptr = a;
+
+  return true;
+}
+
 /* Look through the symbols which are defined in other shared
    libraries and referenced here.  Update the list of version
    dependencies.  This will be put into the .gnu.version_r section.
@@ -6939,6 +7018,13 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 			      &sinfo);
       if (sinfo.failed)
 	return false;
+
+      if (info->enable_dt_relr)
+	{
+	  elf_link_add_dt_relr_dependency (&sinfo);
+	  if (sinfo.failed)
+	    return false;
+	}
 
       if (elf_tdata (output_bfd)->verref == NULL)
 	s->flags |= SEC_EXCLUDE;

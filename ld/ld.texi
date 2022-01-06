@@ -1437,7 +1437,9 @@ and shared library.  It adds @code{DT_RELR}, @code{DT_RELRSZ} and
 @code{DT_RELRENT} entries to the dynamic section.  It is ignored when
 building position-dependent executable and relocatable output.
 @option{nopack-relative-relocs} is the default, which disables compact
-relative relocation.  Supported for i386 and x86-64.
+relative relocation.  When linked against the GNU C Library, a
+GLIBC_ABI_DT_RELR symbol version dependency on the shared C Library is
+added to the output.  Supported for i386 and x86-64.
 
 @item relro
 @itemx norelro
