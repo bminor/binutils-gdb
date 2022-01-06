@@ -1,5 +1,6 @@
 source_sh ${srcdir}/emulparams/elf32ppccommon.sh
 source_sh ${srcdir}/emulparams/plt_unwind.sh
+source_sh ${srcdir}/emulparams/dt-relr.sh
 EXTRA_EM_FILE=ppc64elf
 ELFSIZE=64
 OUTPUT_FORMAT="elf64-powerpc"
