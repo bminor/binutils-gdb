@@ -91,3 +91,28 @@ Disassembly of section \.text:
  144:	a1a1f893 	umops	za3.s, p6/m, p7/m, z4.b, z1.b
  148:	a1817083 	usmopa	za3.s, p4/m, p3/m, z4.b, z1.b
  14c:	a181f893 	usmops	za3.s, p6/m, p7/m, z4.b, z1.b
+[^:]+:	04605800 	addspl	x0, x0, #0
+[^:]+:	04605801 	addspl	x1, x0, #0
+[^:]+:	0460581f 	addspl	sp, x0, #0
+[^:]+:	04625800 	addspl	x0, x2, #0
+[^:]+:	047f5800 	addspl	x0, sp, #0
+[^:]+:	04605be0 	addspl	x0, x0, #31
+[^:]+:	04605c00 	addspl	x0, x0, #-32
+[^:]+:	04605c20 	addspl	x0, x0, #-31
+[^:]+:	04605fe0 	addspl	x0, x0, #-1
+[^:]+:	04205800 	addsvl	x0, x0, #0
+[^:]+:	04205801 	addsvl	x1, x0, #0
+[^:]+:	0420581f 	addsvl	sp, x0, #0
+[^:]+:	04225800 	addsvl	x0, x2, #0
+[^:]+:	043f5800 	addsvl	x0, sp, #0
+[^:]+:	04205be0 	addsvl	x0, x0, #31
+[^:]+:	04205c00 	addsvl	x0, x0, #-32
+[^:]+:	04205c20 	addsvl	x0, x0, #-31
+[^:]+:	04205fe0 	addsvl	x0, x0, #-1
+[^:]+:	04bf5800 	rdsvl	x0, #0
+[^:]+:	04bf5801 	rdsvl	x1, #0
+[^:]+:	04bf581f 	rdsvl	xzr, #0
+[^:]+:	04bf5be0 	rdsvl	x0, #31
+[^:]+:	04bf5c00 	rdsvl	x0, #-32
+[^:]+:	04bf5c20 	rdsvl	x0, #-31
+[^:]+:	04bf5fe0 	rdsvl	x0, #-1

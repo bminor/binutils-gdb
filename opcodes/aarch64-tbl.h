@@ -5193,6 +5193,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   /* SME instructions.  */
   SME_INSN ("addha", 0xc0900000, 0xffff001c, sme_misc, 0, OP4 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn), OP_SME_ZADA_PN_PM_ZN_S, 0, 0),
   SME_I64_INSN ("addha", 0xc0d00000, 0xffff0018, sme_misc, 0, OP4 (SME_ZAda_3b, SVE_Pg3, SME_Pm, SVE_Zn), OP_SME_ZADA_PN_PM_ZN_D, 0, 0),
+  SME_INSN ("addspl", 0x04605800, 0xffe0f800, sme_misc, 0, OP3 (Rd_SP, SVE_Rn_SP, SVE_SIMM6), OP_SVE_XXU, 0, 0),
+  SME_INSN ("addsvl", 0x04205800, 0xffe0f800, sme_misc, 0, OP3 (Rd_SP, SVE_Rn_SP, SVE_SIMM6), OP_SVE_XXU, 0, 0),
   SME_INSN ("addva", 0xc0910000, 0xffff001c, sme_misc, 0, OP4 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn), OP_SME_ZADA_PN_PM_ZN_S, 0, 0),
   SME_I64_INSN ("addva", 0xc0d10000, 0xffff0018, sme_misc, 0, OP4 (SME_ZAda_3b, SVE_Pg3, SME_Pm, SVE_Zn), OP_SME_ZADA_PN_PM_ZN_D, 0, 0),
   SME_INSN ("bfmopa", 0x81800000, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_PN_PM_ZN_ZM, 0, 0),
@@ -5203,6 +5205,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("fmops", 0x80800010, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_S_PM_PM_S_S, 0, 0),
   SME_F64_INSN ("fmops", 0x80c00010, 0xffe00018, sme_misc, 0, OP5 (SME_ZAda_3b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_D_PM_PM_D_D, 0, 0),
   SME_INSN ("fmops", 0x81a00010, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_S_PM_PM_H_H, 0, 0),
+  SME_INSN ("rdsvl", 0x04bf5800, 0xfffff800, sme_misc, 0, OP2 (Rd, SVE_SIMM6), OP_SVE_XU, 0, 0),
   SME_INSN ("smopa", 0xa0800000, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_S_PM_PM_B_B, 0, 0),
   SME_I64_INSN ("smopa", 0xa0c00000, 0xffe00018, sme_misc, 0, OP5 (SME_ZAda_3b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_D_PM_PM_H_H, 0, 0),
   SME_INSN ("smops", 0xa0800010, 0xffe0001c, sme_misc, 0, OP5 (SME_ZAda_2b, SVE_Pg3, SME_Pm, SVE_Zn, SVE_Zm_16), OP_SME_ZADA_S_PM_PM_B_B, 0, 0),

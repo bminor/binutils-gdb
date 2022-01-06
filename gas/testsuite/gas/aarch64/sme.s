@@ -121,3 +121,34 @@ umopa foo.s, p6/m, p7/m, z4.b, z1.b
 umops foo.s, p6/m, p7/m, z4.b, z1.b
 usmopa foo.s, p4/m, p3/m, z4.b, z1.b
 usmops foo.s, p6/m, p7/m, z4.b, z1.b
+
+/* ADDSPL.  */
+addspl x0, x0, #0
+addspl x1, x0, #0
+addspl sp, x0, #0
+addspl x0, x2, #0
+addspl x0, sp, #0
+addspl x0, x0, #31
+addspl x0, x0, #-32
+addspl x0, x0, #-31
+addspl x0, x0, #-1
+
+/* ADDSVL.  */
+addsvl x0, x0, #0
+addsvl x1, x0, #0
+addsvl sp, x0, #0
+addsvl x0, x2, #0
+addsvl x0, sp, #0
+addsvl x0, x0, #31
+addsvl x0, x0, #-32
+addsvl x0, x0, #-31
+addsvl x0, x0, #-1
+
+/* RDSVL.  */
+rdsvl x0, #0
+rdsvl x1, #0
+rdsvl xzr, #0
+rdsvl x0, #31
+rdsvl x0, #-32
+rdsvl x0, #-31
+rdsvl x0, #-1
