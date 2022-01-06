@@ -4615,7 +4615,7 @@ elf_modify_segment_map (bfd *abfd,
 bool
 _bfd_elf_map_sections_to_segments (bfd *abfd,
 				   struct bfd_link_info *info,
-				   bool *need_layout ATTRIBUTE_UNUSED)
+				   bool *need_layout)
 {
   unsigned int count;
   struct elf_segment_map *m;
@@ -4626,7 +4626,17 @@ _bfd_elf_map_sections_to_segments (bfd *abfd,
   no_user_phdrs = elf_seg_map (abfd) == NULL;
 
   if (info != NULL)
-    info->user_phdrs = !no_user_phdrs;
+    {
+      info->user_phdrs = !no_user_phdrs;
+
+      /* Size the relative relocations if DT_RELR is enabled.  */
+      if (info->enable_dt_relr
+	  && need_layout != NULL
+	  && bed->size_relative_relocs
+	  && !bed->size_relative_relocs (info, need_layout))
+	info->callbacks->einfo
+	  (_("%F%P: failed to size relative relocations\n"));
+    }
 
   if (no_user_phdrs && bfd_count_sections (abfd) != 0)
     {

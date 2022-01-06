@@ -12599,6 +12599,14 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (!_bfd_elf_fixup_eh_frame_hdr (info))
     return false;
 
+  /* Finish relative relocations here after regular symbol processing
+     is finished if DT_RELR is enabled.  */
+  if (info->enable_dt_relr
+      && bed->finish_relative_relocs
+      && !bed->finish_relative_relocs (info))
+    info->callbacks->einfo
+      (_("%F%P: %pB: failed to finish relative relocations\n"), abfd);
+
   /* Since ELF permits relocations to be against local symbols, we
      must have the local symbols available when we do the relocations.
      Since we would rather only read the local symbols once, and we

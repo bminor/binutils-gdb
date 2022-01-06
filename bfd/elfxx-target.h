@@ -478,6 +478,12 @@
 #ifndef elf_backend_check_relocs
 #define elf_backend_check_relocs	0
 #endif
+#ifndef elf_backend_size_relative_relocs
+#define elf_backend_size_relative_relocs 0
+#endif
+#ifndef elf_backend_finish_relative_relocs
+#define elf_backend_finish_relative_relocs 0
+#endif
 #ifndef elf_backend_check_directives
 #define elf_backend_check_directives	0
 #endif
@@ -842,6 +848,8 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_omit_section_dynsym,
   elf_backend_relocs_compatible,
   elf_backend_check_relocs,
+  elf_backend_size_relative_relocs,
+  elf_backend_finish_relative_relocs,
   elf_backend_check_directives,
   elf_backend_notice_as_needed,
   elf_backend_adjust_dynamic_symbol,
