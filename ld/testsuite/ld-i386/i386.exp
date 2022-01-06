@@ -507,6 +507,8 @@ run_dump_test "pr27491-1c"
 run_dump_test "pr27491-2"
 run_dump_test "pr27491-3"
 run_dump_test "pr27491-4"
+run_dump_test "dt-relr-1a"
+run_dump_test "dt-relr-1b"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
