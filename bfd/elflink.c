@@ -3676,7 +3676,8 @@ _bfd_elf_strip_zero_sized_dynamic_sections (struct bfd_link_info *info)
     {
       /* Regenerate program headers.  */
       elf_seg_map (info->output_bfd) = NULL;
-      return _bfd_elf_map_sections_to_segments (info->output_bfd, info);
+      return _bfd_elf_map_sections_to_segments (info->output_bfd, info,
+						NULL);
     }
 
   return true;

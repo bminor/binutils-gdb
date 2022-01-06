@@ -4609,10 +4609,13 @@ elf_modify_segment_map (bfd *abfd,
 #define IS_TBSS(s) \
   ((s->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) == SEC_THREAD_LOCAL)
 
-/* Set up a mapping from BFD sections to program segments.  */
+/* Set up a mapping from BFD sections to program segments.  Update
+   NEED_LAYOUT if the section layout is changed.  */
 
 bool
-_bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_map_sections_to_segments (bfd *abfd,
+				   struct bfd_link_info *info,
+				   bool *need_layout ATTRIBUTE_UNUSED)
 {
   unsigned int count;
   struct elf_segment_map *m;
@@ -5416,7 +5419,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   unsigned int opb = bfd_octets_per_byte (abfd, NULL);
 
   if (link_info == NULL
-      && !_bfd_elf_map_sections_to_segments (abfd, link_info))
+      && !_bfd_elf_map_sections_to_segments (abfd, link_info, NULL))
     return false;
 
   alloc = 0;

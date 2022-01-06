@@ -304,7 +304,8 @@ ldelf_map_segments (bool need_layout)
 	  if (lang_phdr_list == NULL)
 	    elf_seg_map (link_info.output_bfd) = NULL;
 	  if (!_bfd_elf_map_sections_to_segments (link_info.output_bfd,
-						  &link_info))
+						  &link_info,
+						  &need_layout))
 	    einfo (_("%F%P: map sections to segments failed: %E\n"));
 
 	  if (phdr_size != elf_program_header_size (link_info.output_bfd))
