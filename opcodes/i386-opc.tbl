@@ -2220,7 +2220,7 @@ insertq, 0xf20f78, None, CpuSSE4a, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf
 lzcnt, 0xf30fbd, None, CpuLZCNT, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // POPCNT instruction
-popcnt, 0xf30fb8, None, CpuPOPCNT, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf|NoAVX, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+popcnt, 0xf30fb8, None, CpuPOPCNT, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // VIA PadLock extensions.
 xstore-rng, 0xfa7c0, None, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
