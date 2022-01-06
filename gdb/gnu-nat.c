@@ -2701,38 +2701,6 @@ struct cmd_list_element *show_thread_cmd_list = NULL;
 struct cmd_list_element *set_thread_default_cmd_list = NULL;
 struct cmd_list_element *show_thread_default_cmd_list = NULL;
 
-static void
-set_thread_cmd (const char *args, int from_tty)
-{
-  fprintf_filtered (gdb_stderr,
-		    "\"set thread\" must be followed by the "
-		    "name of a thread property, or \"default\".\n");
-}
-
-static void
-show_thread_cmd (const char *args, int from_tty)
-{
-  fprintf_unfiltered (gdb_stderr,
-		      "\"show thread\" must be followed by the "
-		      "name of a thread property, or \"default\".\n");
-}
-
-static void
-set_thread_default_cmd (const char *args, int from_tty)
-{
-  fprintf_unfiltered (gdb_stderr,
-		      "\"set thread default\" must be followed "
-		      "by the name of a thread property.\n");
-}
-
-static void
-show_thread_default_cmd (const char *args, int from_tty)
-{
-  fprintf_unfiltered (gdb_stderr,
-		      "\"show thread default\" must be followed "
-		      "by the name of a thread property.\n");
-}
-
 static int
 parse_int_arg (const char *args, const char *cmd_prefix)
 {
@@ -3417,20 +3385,19 @@ thread_takeover_sc_cmd (const char *args, int from_tty)
 static void
 add_thread_commands (void)
 {
-  add_prefix_cmd ("thread", no_class, set_thread_cmd,
-		  _("Command prefix for setting thread properties."),
-		  &set_thread_cmd_list, 0, &setlist);
-  add_prefix_cmd ("default", no_class, show_thread_cmd,
-		  _("Command prefix for setting default thread properties."),
-		  &set_thread_default_cmd_list, 0,
-		  &set_thread_cmd_list);
-  add_prefix_cmd ("thread", no_class, set_thread_default_cmd,
-		  _("Command prefix for showing thread properties."),
-		  &show_thread_cmd_list, 0, &showlist);
-  add_prefix_cmd ("default", no_class, show_thread_default_cmd,
-		  _("Command prefix for showing default thread properties."),
-		  &show_thread_default_cmd_list, 0,
-		  &show_thread_cmd_list);
+  add_setshow_prefix_cmd ("thread", no_class,
+			  _("Command prefix for setting thread properties."),
+			  _("Command prefix for showing thread properties."),
+			  &set_thread_cmd_list,
+			  &show_thread_cmd_list,
+			  &setlist, &showlist);
+
+  add_setshow_prefix_cmd ("default", no_class,
+			  _("Command prefix for setting default thread properties."),
+			  _("Command prefix for showing default thread properties."),
+			  &set_thread_default_cmd_list,
+			  &show_thread_default_cmd_list,
+			  &set_thread_cmd_list, &show_thread_cmd_list);
 
   add_cmd ("pause", class_run, set_thread_pause_cmd, _("\
 Set whether the current thread is suspended while gdb has control.\n\
