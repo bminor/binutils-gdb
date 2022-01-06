@@ -2484,8 +2484,22 @@ debug_write_type (struct debug_handle *info,
       debug_error (_("debug_write_type: illegal type encountered"));
       return false;
     case DEBUG_KIND_INDIRECT:
-      return debug_write_type (info, fns, fhandle, *type->u.kindirect->slot,
-			       name);
+      /* PR 28718: Allow for malicious recursion.  */
+      {
+	static int recursion_depth = 0;
+	bool result;
+
+	if (recursion_depth > 256)
+	  {
+	    debug_error (_("debug_write_type: too many levels of nested indirection"));
+	    return false;
+	  }
+	++ recursion_depth;
+	result = debug_write_type (info, fns, fhandle, *type->u.kindirect->slot,
+				  name);
+	-- recursion_depth;
+	return result;
+      }
     case DEBUG_KIND_VOID:
       return (*fns->void_type) (fhandle);
     case DEBUG_KIND_INT:
