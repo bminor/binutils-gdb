@@ -282,7 +282,7 @@ ldelf_map_segments (bool need_layout)
 		      && bfd_link_relocatable (&link_info))
 		    {
 		      einfo (_("%F%P: "
-			       "%pA has both ordered and unordered sections"),
+			       "%pA has both ordered and unordered sections\n"),
 			     os->bfd_section);
 		      return;
 		    }
@@ -325,7 +325,7 @@ ldelf_map_segments (bool need_layout)
   while (need_layout && --tries);
 
   if (tries == 0)
-    einfo (_("%F%P: looping in map_segments"));
+    einfo (_("%F%P: looping in map_segments\n"));
 
   if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
       && lang_phdr_list == NULL)
@@ -337,7 +337,7 @@ ldelf_map_segments (bool need_layout)
       if (bed->elf_backend_strip_zero_sized_dynamic_sections
 	  && !bed->elf_backend_strip_zero_sized_dynamic_sections
 		(&link_info))
-	  einfo (_("%F%P: failed to strip zero-sized dynamic sections"));
+	  einfo (_("%F%P: failed to strip zero-sized dynamic sections\n"));
     }
 }
 
