@@ -1603,7 +1603,10 @@ rewait:
 							       available
 							       thread.  */
       else
-	ptid = inferior_ptid;	/* let wait_for_inferior handle exit case */
+	{
+	  /* The process exited. */
+	  ptid = ptid_t (inf->pid);
+	}
     }
 
   if (thread
