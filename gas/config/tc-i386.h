@@ -283,6 +283,7 @@ struct i386_tc_frag_data
   unsigned int mf_type : 3;
   unsigned int classified : 1;
   unsigned int branch_type : 3;
+  unsigned int code64 : 1; /* Only set by output_branch for now.  */
 };
 
 /* We need to emit the right NOP pattern in .align frags.  This is
