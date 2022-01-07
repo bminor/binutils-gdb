@@ -878,7 +878,7 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 	    break;
 
 	  case long_long_arg:
-#if defined (CC_HAS_LONG_LONG) && defined (PRINTF_HAS_LONG_LONG)
+#if defined (PRINTF_HAS_LONG_LONG)
 	    {
 	      long long val = args[i];
 
