@@ -4175,23 +4175,46 @@ represent the possible values for the parameter.
 If @var{parameter-class} is not @code{PARAM_ENUM}, then the presence
 of a fourth argument will cause an exception to be thrown.
 
-The help text for the new parameter is taken from the Python
-documentation string for the parameter's class, if there is one.  If
-there is no documentation string, a default value is used.
+The help text for the new parameter includes the Python documentation
+string from the parameter's class, if there is one.  If there is no
+documentation string, a default value is used.  The documentation
+string is included in the output of the parameters @code{help set} and
+@code{help show} commands, and should be written taking this into
+account.
 @end defun
 
 @defvar Parameter.set_doc
 If this attribute exists, and is a string, then its value is used as
-the help text for this parameter's @code{set} command.  The value is
-examined when @code{Parameter.__init__} is invoked; subsequent changes
-have no effect.
+the first part of the help text for this parameter's @code{set}
+command.  The second part of the help text is taken from the
+documentation string for the parameter's class, if there is one.
+
+The value of @code{set_doc} should give a brief summary specific to
+the set action, this text is only displayed when the user runs the
+@code{help set} command for this parameter.  The class documentation
+should be used to give a fuller description of what the parameter
+does, this text is displayed for both the @code{help set} and
+@code{help show} commands.
+
+The @code{set_doc} value is examined when @code{Parameter.__init__} is
+invoked; subsequent changes have no effect.
 @end defvar
 
 @defvar Parameter.show_doc
 If this attribute exists, and is a string, then its value is used as
-the help text for this parameter's @code{show} command.  The value is
-examined when @code{Parameter.__init__} is invoked; subsequent changes
-have no effect.
+the first part of the help text for this parameter's @code{show}
+command.  The second part of the help text is taken from the
+documentation string for the parameter's class, if there is one.
+
+The value of @code{show_doc} should give a brief summary specific to
+the show action, this text is only displayed when the user runs the
+@code{help show} command for this parameter.  The class documentation
+should be used to give a fuller description of what the parameter
+does, this text is displayed for both the @code{help set} and
+@code{help show} commands.
+
+The @code{show_doc} value is examined when @code{Parameter.__init__}
+is invoked; subsequent changes have no effect.
 @end defvar
 
 @defvar Parameter.value

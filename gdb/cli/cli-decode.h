@@ -80,6 +80,12 @@ struct cmd_list_element
      For non-prefix commands, return an empty string.  */
   std::string prefixname () const;
 
+  /* Return a vector of strings describing the components of the full name
+     of this command.  For example, if this command is 'set AA BB CC',
+     then the vector will contain 4 elements 'set', 'AA', 'BB', and 'CC'
+     in that order.  */
+  std::vector<std::string> command_components () const;
+
   /* Return true if this command is an alias of another command.  */
   bool is_alias () const
   { return this->alias_target != nullptr; }

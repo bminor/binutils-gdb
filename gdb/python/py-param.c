@@ -331,13 +331,58 @@ set_attr (PyObject *obj, PyObject *attr_name, PyObject *val)
   return PyObject_GenericSetAttr (obj, attr_name, val);
 }
 
+/* Build up the path to command C, but drop the first component of the
+   command prefix.  This is only intended for use with the set/show
+   parameters this file deals with, the first prefix should always be
+   either 'set' or 'show'.
+
+   As an example, if this full command is 'set prefix_a prefix_b command'
+   this function will return the string 'prefix_a prefix_b command'.  */
+
+static std::string
+full_cmd_name_without_first_prefix (struct cmd_list_element *c)
+{
+  std::vector<std::string> components
+    = c->command_components ();
+  gdb_assert (components.size () > 1);
+  std::string result = components[1];
+  for (int i = 2; i < components.size (); ++i)
+    result += " " + components[i];
+  return result;
+}
+
+/* The different types of documentation string.  */
+
+enum doc_string_type
+{
+  doc_string_set,
+  doc_string_show,
+  doc_string_description
+};
+
 /* A helper function which returns a documentation string for an
    object. */
 
 static gdb::unique_xmalloc_ptr<char>
-get_doc_string (PyObject *object, PyObject *attr)
+get_doc_string (PyObject *object, enum doc_string_type doc_type,
+		const char *cmd_name)
 {
   gdb::unique_xmalloc_ptr<char> result;
+
+  PyObject *attr = nullptr;
+  switch (doc_type)
+    {
+    case doc_string_set:
+      attr = set_doc_cst;
+      break;
+    case doc_string_show:
+      attr = show_doc_cst;
+      break;
+    case doc_string_description:
+      attr = gdbpy_doc_cst;
+      break;
+    }
+  gdb_assert (attr != nullptr);
 
   if (PyObject_HasAttr (object, attr))
     {
@@ -350,8 +395,21 @@ get_doc_string (PyObject *object, PyObject *attr)
 	    gdbpy_print_stack ();
 	}
     }
-  if (! result)
-    result.reset (xstrdup (_("This command is not documented.")));
+
+  if (result == nullptr)
+    {
+      if (doc_type == doc_string_description)
+	result.reset (xstrdup (_("This command is not documented.")));
+      else
+	{
+	  if (doc_type == doc_string_show)
+	    result = xstrprintf (_("Show the current value of '%s'."),
+				 cmd_name);
+	  else
+	    result = xstrprintf (_("Set the current value of '%s'."),
+				 cmd_name);
+	}
+    }
   return result;
 }
 
@@ -462,11 +520,15 @@ get_show_value (struct ui_file *file, int from_tty,
     }
   else
     {
-      /* We have to preserve the existing < GDB 7.3 API.  If a
-	 callback function does not exist, then attempt to read the
-	 show_doc attribute.  */
-      show_doc_string  = get_doc_string (obj, show_doc_cst);
-      fprintf_filtered (file, "%s %s\n", show_doc_string.get (), value);
+      /* If there is no 'get_show_string' callback then we want to show
+	 something sensible here.  In older versions of GDB (< 7.3) we
+	 didn't support 'get_show_string', and instead we just made use of
+	 GDB's builtin use of the show_doc.  However, GDB's builtin
+	 show_doc adjustment is not i18n friendly, so, instead, we just
+	 print this generic string.  */
+      std::string cmd_path = full_cmd_name_without_first_prefix (c);
+      fprintf_filtered (file, _("The current value of '%s' is \"%s\".\n"),
+				cmd_path.c_str (), value);
     }
 }
 
@@ -737,9 +799,9 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   if (cmd_name == nullptr)
     return -1;
 
-  set_doc = get_doc_string (self, set_doc_cst);
-  show_doc = get_doc_string (self, show_doc_cst);
-  doc = get_doc_string (self, gdbpy_doc_cst);
+  set_doc = get_doc_string (self, doc_string_set, name);
+  show_doc = get_doc_string (self, doc_string_show, name);
+  doc = get_doc_string (self, doc_string_description, cmd_name.get ());
 
   Py_INCREF (self);
 

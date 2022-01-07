@@ -145,6 +145,20 @@ cmd_list_element::prefixname () const
   return prefixname;
 }
 
+/* See cli/cli-decode.h.  */
+
+std::vector<std::string>
+cmd_list_element::command_components () const
+{
+  std::vector<std::string> result;
+
+  if (this->prefix != nullptr)
+    result = this->prefix->command_components ();
+
+  result.emplace_back (std::string (this->name));
+  return result;
+}
+
 /* Add element named NAME.
    Space for NAME and DOC must be allocated by the caller.
    CLASS is the top level category into which commands are broken down
