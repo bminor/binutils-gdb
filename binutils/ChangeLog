@@ -1,6 +1,14 @@
-2022-01-06  Nick Clifton  <nickc@redhat.com>
+2022-01-07  Pavel Mayorov  <pmayorov@cloudlinux.com>
 
 	PR 28718
+	* dwarf.c: Revert previous delta.
+	(debug_get_real_type): Reject indirect types that point to
+	indirect types.
+	(debug_get_type_name, debug_get_type_size, debug_write_type):
+	Likewise.
+
+2022-01-06  Nick Clifton  <nickc@redhat.com>
+
 	* debug.c (debug_write_type): Allow for malicious recursion via
 	indirect debug types.
 

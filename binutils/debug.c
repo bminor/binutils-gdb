@@ -2065,7 +2065,9 @@ debug_get_real_type (void *handle, debug_type type,
       /* The default case is just here to avoid warnings.  */
     default:
     case DEBUG_KIND_INDIRECT:
-      if (*type->u.kindirect->slot != NULL)
+      /* A valid non-self-referencing indirect type.  */
+      if (*type->u.kindirect->slot != NULL
+	  && *type->u.kindirect->slot != type)
 	return debug_get_real_type (handle, *type->u.kindirect->slot, &rl);
       return type;
     case DEBUG_KIND_NAMED:
@@ -2095,7 +2097,9 @@ debug_get_type_name (void *handle, debug_type type)
 {
   if (type->kind == DEBUG_KIND_INDIRECT)
     {
-      if (*type->u.kindirect->slot != NULL)
+      /* A valid non-self-referencing indirect type.  */
+      if (*type->u.kindirect->slot != NULL
+	  && *type->u.kindirect->slot != type)
 	return debug_get_type_name (handle, *type->u.kindirect->slot);
       return type->u.kindirect->tag;
     }
@@ -2124,7 +2128,9 @@ debug_get_type_size (void *handle, debug_type type)
     default:
       return 0;
     case DEBUG_KIND_INDIRECT:
-      if (*type->u.kindirect->slot != NULL)
+      /* A valid non-self-referencing indirect type.  */
+      if (*type->u.kindirect->slot != NULL
+	  && *type->u.kindirect->slot != type)
 	return debug_get_type_size (handle, *type->u.kindirect->slot);
       return 0;
     case DEBUG_KIND_NAMED:
@@ -2484,22 +2490,11 @@ debug_write_type (struct debug_handle *info,
       debug_error (_("debug_write_type: illegal type encountered"));
       return false;
     case DEBUG_KIND_INDIRECT:
-      /* PR 28718: Allow for malicious recursion.  */
-      {
-	static int recursion_depth = 0;
-	bool result;
-
-	if (recursion_depth > 256)
-	  {
-	    debug_error (_("debug_write_type: too many levels of nested indirection"));
-	    return false;
-	  }
-	++ recursion_depth;
-	result = debug_write_type (info, fns, fhandle, *type->u.kindirect->slot,
-				  name);
-	-- recursion_depth;
-	return result;
-      }
+      /* Prevent infinite recursion.  */
+      if (*type->u.kindirect->slot == type)
+	return (*fns->empty_type) (fhandle);
+      return debug_write_type (info, fns, fhandle, *type->u.kindirect->slot,
+			       name);
     case DEBUG_KIND_VOID:
       return (*fns->void_type) (fhandle);
     case DEBUG_KIND_INT:
