@@ -6506,6 +6506,21 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   if (!is_elf_hash_table (info->hash))
     return true;
 
+  /* Any syms created from now on start with -1 in
+     got.refcount/offset and plt.refcount/offset.  */
+  elf_hash_table (info)->init_got_refcount
+    = elf_hash_table (info)->init_got_offset;
+  elf_hash_table (info)->init_plt_refcount
+    = elf_hash_table (info)->init_plt_offset;
+
+  bed = get_elf_backend_data (output_bfd);
+
+  /* The backend may have to create some sections regardless of whether
+     we're dynamic or not.  */
+  if (bed->elf_backend_always_size_sections
+      && ! (*bed->elf_backend_always_size_sections) (output_bfd, info))
+    return false;
+
   dynobj = elf_hash_table (info)->dynobj;
 
   if (dynobj != NULL && elf_hash_table (info)->dynamic_sections_created)
@@ -6864,8 +6879,6 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  bed = get_elf_backend_data (output_bfd);
-
   if (info->gc_sections && bed->can_gc_sections)
     {
       struct elf_gc_sweep_symbol_info sweep_info;
@@ -6987,21 +7000,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  /* Any syms created from now on start with -1 in
-     got.refcount/offset and plt.refcount/offset.  */
-  elf_hash_table (info)->init_got_refcount
-    = elf_hash_table (info)->init_got_offset;
-  elf_hash_table (info)->init_plt_refcount
-    = elf_hash_table (info)->init_plt_offset;
-
   if (bfd_link_relocatable (info)
       && !_bfd_elf_size_group_sections (info))
-    return false;
-
-  /* The backend may have to create some sections regardless of whether
-     we're dynamic or not.  */
-  if (bed->elf_backend_always_size_sections
-      && ! (*bed->elf_backend_always_size_sections) (output_bfd, info))
     return false;
 
   /* Determine any GNU_STACK segment requirements, after the backend
