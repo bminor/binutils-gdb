@@ -1179,11 +1179,11 @@ signal_command (const char *signum_exp, int from_tty)
 	      && signal_pass_state (tp->stop_signal ()))
 	    {
 	      if (!must_confirm)
-		printf_unfiltered (_("Note:\n"));
-	      printf_unfiltered (_("  Thread %s previously stopped with signal %s, %s.\n"),
-				 print_thread_id (tp),
-				 gdb_signal_to_name (tp->stop_signal ()),
-				 gdb_signal_to_string (tp->stop_signal ()));
+		printf_filtered (_("Note:\n"));
+	      printf_filtered (_("  Thread %s previously stopped with signal %s, %s.\n"),
+			       print_thread_id (tp),
+			       gdb_signal_to_name (tp->stop_signal ()),
+			       gdb_signal_to_string (tp->stop_signal ()));
 	      must_confirm = 1;
 	    }
 	}

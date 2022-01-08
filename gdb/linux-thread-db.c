@@ -936,7 +936,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
       return false;
     }
 
-  printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
+  printf_filtered (_("[Thread debugging using libthread_db enabled]\n"));
 
   if (!libthread_db_search_path.empty () || libthread_db_debug)
     {
@@ -946,8 +946,8 @@ try_thread_db_load_1 (struct thread_db_info *info)
       if (library == NULL)
 	library = LIBTHREAD_DB_SO;
 
-      printf_unfiltered (_("Using host libthread_db library \"%ps\".\n"),
-			 styled_string (file_name_style.style (), library));
+      printf_filtered (_("Using host libthread_db library \"%ps\".\n"),
+		       styled_string (file_name_style.style (), library));
     }
 
   /* The thread library was detected.  Activate the thread_db target

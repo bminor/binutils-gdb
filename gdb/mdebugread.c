@@ -371,11 +371,11 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
   if (compare_glevel (max_glevel, GLEVEL_2) < 0)
     {
       if (max_gdbinfo == 0)
-	printf_unfiltered (_("\n%s not compiled with -g, "
-			     "debugging support is limited.\n"),
-			   objfile->name);
-      printf_unfiltered (_("You should compile with -g2 or "
-			   "-g3 for best debugging support.\n"));
+	printf_filtered (_("\n%s not compiled with -g, "
+			   "debugging support is limited.\n"),
+			 objfile->name);
+      printf_filtered (_("You should compile with -g2 or "
+			 "-g3 for best debugging support.\n"));
     }
 #endif
 }

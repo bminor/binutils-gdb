@@ -2122,8 +2122,8 @@ wait_again:
 		if (what == SYS_lwp_exit)
 		  {
 		    if (print_thread_events)
-		      printf_unfiltered (_("[%s exited]\n"),
-					 target_pid_to_str (retval).c_str ());
+		      printf_filtered (_("[%s exited]\n"),
+				       target_pid_to_str (retval).c_str ());
 		    delete_thread (find_thread_ptid (this, retval));
 		    target_continue_no_signal (ptid);
 		    goto wait_again;
@@ -2229,8 +2229,8 @@ wait_again:
 		else if (what == SYS_lwp_exit)
 		  {
 		    if (print_thread_events)
-		      printf_unfiltered (_("[%s exited]\n"),
-					 target_pid_to_str (retval).c_str ());
+		      printf_filtered (_("[%s exited]\n"),
+				       target_pid_to_str (retval).c_str ());
 		    delete_thread (find_thread_ptid (this, retval));
 		    status->set_spurious ();
 		    return retval;

@@ -429,11 +429,11 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
      here as well.  */
 
   if (info_verbose)
-    printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (ptid).c_str ());
+    printf_filtered ("[Deleting %s]\n", target_pid_to_str (ptid).c_str ());
   else if (print_thread_events && !main_thread_p)
-    printf_unfiltered (_("[%s exited with code %u]\n"),
-		       target_pid_to_str (ptid).c_str (),
-		       (unsigned) exit_code);
+    printf_filtered (_("[%s exited with code %u]\n"),
+		     target_pid_to_str (ptid).c_str (),
+		     (unsigned) exit_code);
 
   delete_thread (find_thread_ptid (&the_windows_nat_target, ptid));
 
@@ -1631,11 +1631,11 @@ windows_nat_target::get_windows_debug_event (int pid,
     default:
       if (saw_create != 1)
 	break;
-      printf_unfiltered ("gdb: kernel event for pid=%u tid=0x%x\n",
-			 (unsigned) current_event.dwProcessId,
-			 (unsigned) current_event.dwThreadId);
-      printf_unfiltered ("                 unknown event code %u\n",
-			 (unsigned) current_event.dwDebugEventCode);
+      printf_filtered ("gdb: kernel event for pid=%u tid=0x%x\n",
+		       (unsigned) current_event.dwProcessId,
+		       (unsigned) current_event.dwThreadId);
+      printf_filtered ("                 unknown event code %u\n",
+		       (unsigned) current_event.dwDebugEventCode);
       break;
     }
 

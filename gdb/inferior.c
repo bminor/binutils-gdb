@@ -164,11 +164,11 @@ add_inferior (int pid)
   if (print_inferior_events)
     {
       if (pid != 0)
-	printf_unfiltered (_("[New inferior %d (%s)]\n"),
-			   inf->num,
-			   target_pid_to_str (ptid_t (pid)).c_str ());
+	printf_filtered (_("[New inferior %d (%s)]\n"),
+			 inf->num,
+			 target_pid_to_str (ptid_t (pid)).c_str ());
       else
-	printf_unfiltered (_("[New inferior %d]\n"), inf->num);
+	printf_filtered (_("[New inferior %d]\n"), inf->num);
     }
 
   return inf;
@@ -264,9 +264,9 @@ detach_inferior (inferior *inf)
   exit_inferior_1 (inf, 0);
 
   if (print_inferior_events)
-    printf_unfiltered (_("[Inferior %d (%s) detached]\n"),
-		       inf->num,
-		       target_pid_to_str (ptid_t (pid)).c_str ());
+    printf_filtered (_("[Inferior %d (%s) detached]\n"),
+		     inf->num,
+		     target_pid_to_str (ptid_t (pid)).c_str ());
 }
 
 void

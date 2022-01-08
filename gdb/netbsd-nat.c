@@ -626,8 +626,8 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	  ourstatus->set_thread_exited (0);
 
 	  if (print_thread_events)
-	    printf_unfiltered (_("[%s exited]\n"),
-			       target_pid_to_str (wptid).c_str ());
+	    printf_filtered (_("[%s exited]\n"),
+			     target_pid_to_str (wptid).c_str ());
 	  delete_thread (thr);
 	}
 

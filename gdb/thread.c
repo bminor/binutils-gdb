@@ -293,7 +293,7 @@ add_thread_with_info (process_stratum_target *targ, ptid_t ptid,
   result->priv.reset (priv);
 
   if (print_thread_events)
-    printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid).c_str ());
+    printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid).c_str ());
 
   annotate_new_thread ();
   return result;

@@ -894,8 +894,8 @@ exit_lwp (struct lwp_info *lp)
   if (th)
     {
       if (print_thread_events)
-	printf_unfiltered (_("[%s exited]\n"),
-			   target_pid_to_str (lp->ptid).c_str ());
+	printf_filtered (_("[%s exited]\n"),
+			 target_pid_to_str (lp->ptid).c_str ());
 
       delete_thread (th);
     }

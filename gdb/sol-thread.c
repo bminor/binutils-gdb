@@ -638,7 +638,7 @@ check_for_thread_db (void)
       break;
 
     case TD_OK:
-      printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
+      printf_filtered (_("[Thread debugging using libthread_db enabled]\n"));
 
       /* The thread library was detected.  Activate the sol_thread target.  */
       current_inferior ()->push_target (&sol_thread_ops);

@@ -1130,9 +1130,9 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
 
   /* What is this a.out's name?  */
   process_ptid = ptid_t (pid);
-  printf_unfiltered (_("%s is executing new program: %s\n"),
-		     target_pid_to_str (process_ptid).c_str (),
-		     exec_file_target);
+  printf_filtered (_("%s is executing new program: %s\n"),
+		   target_pid_to_str (process_ptid).c_str (),
+		   exec_file_target);
 
   /* We've followed the inferior through an exec.  Therefore, the
      inferior has essentially been killed & reborn.  */
@@ -4159,7 +4159,7 @@ fetch_inferior_event ()
       && exec_done_display_p
       && (inferior_ptid == null_ptid
 	  || inferior_thread ()->state != THREAD_RUNNING))
-    printf_unfiltered (_("completed.\n"));
+    printf_filtered (_("completed.\n"));
 }
 
 /* See infrun.h.  */
@@ -8851,7 +8851,7 @@ Are you sure you want to change it? "),
 		      sigs[signum] = 1;
 		    }
 		  else
-		    printf_unfiltered (_("Not confirmed, unchanged.\n"));
+		    printf_filtered (_("Not confirmed, unchanged.\n"));
 		}
 	      break;
 	    case GDB_SIGNAL_0:

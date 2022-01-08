@@ -6005,8 +6005,8 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
 
       target_mourn_inferior (inferior_ptid);
       if (print_inferior_events)
-	printf_unfiltered (_("[Inferior %d (%s) detached]\n"),
-			   inf->num, infpid.c_str ());
+	printf_filtered (_("[Inferior %d (%s) detached]\n"),
+			 inf->num, infpid.c_str ());
     }
   else
     {
@@ -9961,7 +9961,7 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 	{
 	  /* We have tried hard enough, and just can't receive the
 	     packet/notification.  Give up.  */
-	  printf_unfiltered (_("Ignoring packet error, continuing...\n"));
+	  printf_filtered (_("Ignoring packet error, continuing...\n"));
 
 	  /* Skip the ack char if we're in no-ack mode.  */
 	  if (!rs->noack_mode)
@@ -12312,8 +12312,8 @@ remote_target::remote_hostio_open (inferior *inf, const char *filename,
     {
       static int warning_issued = 0;
 
-      printf_unfiltered (_("Reading %s from remote target...\n"),
-			 filename);
+      printf_filtered (_("Reading %s from remote target...\n"),
+		       filename);
 
       if (!warning_issued)
 	{

@@ -1022,11 +1022,11 @@ solib_add (const char *pattern, int from_tty, int readsyms)
     {
       if (pattern != NULL)
 	{
-	  printf_unfiltered (_("Loading symbols for shared libraries: %s\n"),
-			     pattern);
+	  printf_filtered (_("Loading symbols for shared libraries: %s\n"),
+			   pattern);
 	}
       else
-	printf_unfiltered (_("Loading symbols for shared libraries.\n"));
+	printf_filtered (_("Loading symbols for shared libraries.\n"));
     }
 
   current_program_space->solib_add_generation++;
@@ -1071,8 +1071,8 @@ solib_add (const char *pattern, int from_tty, int readsyms)
 		  /* If no pattern was given, be quiet for shared
 		     libraries we have already loaded.  */
 		  if (pattern && (from_tty || info_verbose))
-		    printf_unfiltered (_("Symbols already loaded for %s\n"),
-				       gdb->so_name);
+		    printf_filtered (_("Symbols already loaded for %s\n"),
+				     gdb->so_name);
 		}
 	      else if (solib_read_symbols (gdb, add_flags))
 		loaded_any_symbols = true;
@@ -1083,7 +1083,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
       breakpoint_re_set ();
 
     if (from_tty && pattern && ! any_matches)
-      printf_unfiltered
+      printf_filtered
 	("No loaded shared libraries match the pattern `%s'.\n", pattern);
 
     if (loaded_any_symbols)
@@ -1359,7 +1359,7 @@ static void
 reload_shared_libraries_1 (int from_tty)
 {
   if (print_symbol_loading_p (from_tty, 0, 0))
-    printf_unfiltered (_("Loading symbols for shared libraries.\n"));
+    printf_filtered (_("Loading symbols for shared libraries.\n"));
 
   for (struct so_list *so : current_program_space->solibs ())
     {
