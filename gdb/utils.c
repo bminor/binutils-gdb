@@ -1601,6 +1601,12 @@ pager_file::puts (const char *linebuffer)
 			 m_wrap_indent = 0;
 		       });
 
+  /* If the user does "set height 1" then the pager will exhibit weird
+     behavior.  This is pathological, though, so don't allow it.  */
+  const unsigned int lines_allowed = (lines_per_page > 1
+				      ? lines_per_page - 1
+				      : 1);
+
   /* Go through and output each character.  Show line extension
      when this is necessary; prompt user for new page when this is
      necessary.  */
@@ -1613,7 +1619,7 @@ pager_file::puts (const char *linebuffer)
 	 it here.  */
       if (pagination_enabled
 	  && !pagination_disabled_for_command
-	  && lines_printed >= lines_per_page - 1)
+	  && lines_printed >= lines_allowed)
 	prompt_for_continue ();
 
       while (*lineptr && *lineptr != '\n')
@@ -1690,7 +1696,7 @@ pager_file::puts (const char *linebuffer)
 		 this loop, so we must continue to check it here.  */
 	      if (pagination_enabled
 		  && !pagination_disabled_for_command
-		  && lines_printed >= lines_per_page - 1)
+		  && lines_printed >= lines_allowed)
 		{
 		  prompt_for_continue ();
 		  did_paginate = true;
