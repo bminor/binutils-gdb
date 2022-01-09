@@ -1582,10 +1582,8 @@ pager_file::puts (const char *linebuffer)
   if (linebuffer == 0)
     return;
 
-  /* Don't do any filtering if it is disabled.  */
-  if (!pagination_enabled
-      || pagination_disabled_for_command
-      || batch_flag
+  /* Don't do any filtering or wrapping if both are disabled.  */
+  if (batch_flag
       || (lines_per_page == UINT_MAX && chars_per_line == UINT_MAX)
       || top_level_interpreter () == NULL
       || top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ())
@@ -1613,8 +1611,9 @@ pager_file::puts (const char *linebuffer)
       /* Possible new page.  Note that PAGINATION_DISABLED_FOR_COMMAND
 	 might be set during this loop, so we must continue to check
 	 it here.  */
-      if ((lines_printed >= lines_per_page - 1)
-	  && !pagination_disabled_for_command)
+      if (pagination_enabled
+	  && !pagination_disabled_for_command
+	  && lines_printed >= lines_per_page - 1)
 	prompt_for_continue ();
 
       while (*lineptr && *lineptr != '\n')
@@ -1689,8 +1688,9 @@ pager_file::puts (const char *linebuffer)
 	      /* Possible new page.  Note that
 		 PAGINATION_DISABLED_FOR_COMMAND might be set during
 		 this loop, so we must continue to check it here.  */
-	      if (lines_printed >= lines_per_page - 1
-		  && !pagination_disabled_for_command)
+	      if (pagination_enabled
+		  && !pagination_disabled_for_command
+		  && lines_printed >= lines_per_page - 1)
 		{
 		  prompt_for_continue ();
 		  did_paginate = true;
@@ -1743,6 +1743,41 @@ pager_file::write (const char *buf, long length_buf)
   std::string str (buf, length_buf);
   this->puts (str.c_str ());
 }
+
+#if GDB_SELF_TEST
+
+/* Test that disabling the pager does not also disable word
+   wrapping.  */
+
+static void
+test_pager ()
+{
+  string_file *strfile = new string_file ();
+  pager_file pager (strfile);
+
+  /* Make sure the pager is disabled.  */
+  scoped_restore save_enabled
+    = make_scoped_restore (&pagination_enabled, false);
+  scoped_restore save_disabled
+    = make_scoped_restore (&pagination_disabled_for_command, false);
+  scoped_restore save_batch
+    = make_scoped_restore (&batch_flag, false);
+  scoped_restore save_lines
+    = make_scoped_restore (&lines_per_page, 50);
+  /* Make it easy to word wrap.  */
+  scoped_restore save_chars
+    = make_scoped_restore (&chars_per_line, 15);
+  scoped_restore save_printed
+    = make_scoped_restore (&chars_printed, 0);
+
+  pager.puts ("aaaaaaaaaaaa");
+  pager.wrap_here (2);
+  pager.puts ("bbbbbbbbbbbb\n");
+
+  SELF_CHECK (strfile->string () == "aaaaaaaaaaaa\n  bbbbbbbbbbbb\n");
+}
+
+#endif /* GDB_SELF_TEST */
 
 void
 gdb_puts (const char *linebuffer, struct ui_file *stream)
@@ -3696,5 +3731,6 @@ When set, debugging messages will be marked with seconds and microseconds."),
   selftests::register_test ("gdb_argv_array_view", gdb_argv_as_array_view_test);
   selftests::register_test ("strncmp_iw_with_mode",
 			    strncmp_iw_with_mode_tests);
+  selftests::register_test ("pager", test_pager);
 #endif
 }
