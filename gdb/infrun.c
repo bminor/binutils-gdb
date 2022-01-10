@@ -3055,7 +3055,6 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   CORE_ADDR pc;
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
-  bool started;
 
   /* If we're stopped at a fork/vfork, follow the branch set by the
      "set follow-fork-mode" command; otherwise, we'll just proceed
@@ -3204,8 +3203,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 
   {
     scoped_disable_commit_resumed disable_commit_resumed ("proceeding");
-
-    started = start_step_over ();
+    bool step_over_started = start_step_over ();
 
     if (step_over_info_valid_p ())
       {
@@ -3213,7 +3211,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	   other thread was already doing one.  In either case, don't
 	   resume anything else until the step-over is finished.  */
       }
-    else if (started && !target_is_non_stop_p ())
+    else if (step_over_started && !target_is_non_stop_p ())
       {
 	/* A new displaced stepping sequence was started.  In all-stop,
 	   we can't talk to the target anymore until it next stops.  */
