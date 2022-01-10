@@ -57,6 +57,7 @@ AM_CONDITIONAL(SELFTEST, $enable_unittests)
 GDB_AC_PTRACE
 
 # Detect support warning flags.
+AM_GDB_COMPILER_TYPE
 AM_GDB_WARNINGS
 
 case ${host} in

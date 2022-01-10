@@ -1833,6 +1833,7 @@ GDB_AC_WITH_DIR(SYSTEM_GDBINIT_DIR, system-gdbinit-dir,
     [automatically load system-wide gdbinit files from this directory],
     [])
 
+AM_GDB_COMPILER_TYPE
 AM_GDB_WARNINGS
 AM_GDB_UBSAN
 
