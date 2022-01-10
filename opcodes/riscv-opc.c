@@ -630,7 +630,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fcvt.wu.s",  0, INSN_CLASS_F_OR_ZFINX,   "d,S,m",     MATCH_FCVT_WU_S, MASK_FCVT_WU_S, match_opcode, 0 },
 {"fcvt.s.w",   0, INSN_CLASS_F_OR_ZFINX,   "D,s",       MATCH_FCVT_S_W|MASK_RM, MASK_FCVT_S_W|MASK_RM, match_opcode, 0 },
 {"fcvt.s.w",   0, INSN_CLASS_F_OR_ZFINX,   "D,s,m",     MATCH_FCVT_S_W, MASK_FCVT_S_W, match_opcode, 0 },
-{"fcvt.s.wu",  0, INSN_CLASS_F_OR_ZFINX,   "D,s",       MATCH_FCVT_S_WU|MASK_RM, MASK_FCVT_S_W|MASK_RM, match_opcode, 0 },
+{"fcvt.s.wu",  0, INSN_CLASS_F_OR_ZFINX,   "D,s",       MATCH_FCVT_S_WU|MASK_RM, MASK_FCVT_S_WU|MASK_RM, match_opcode, 0 },
 {"fcvt.s.wu",  0, INSN_CLASS_F_OR_ZFINX,   "D,s,m",     MATCH_FCVT_S_WU, MASK_FCVT_S_WU, match_opcode, 0 },
 {"fclass.s",   0, INSN_CLASS_F_OR_ZFINX,   "d,S",       MATCH_FCLASS_S, MASK_FCLASS_S, match_opcode, 0 },
 {"feq.s",      0, INSN_CLASS_F_OR_ZFINX,   "d,S,T",     MATCH_FEQ_S, MASK_FEQ_S, match_opcode, 0 },
@@ -644,7 +644,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fcvt.lu.s", 64, INSN_CLASS_F_OR_ZFINX,   "d,S,m",     MATCH_FCVT_LU_S, MASK_FCVT_LU_S, match_opcode, 0 },
 {"fcvt.s.l",  64, INSN_CLASS_F_OR_ZFINX,   "D,s",       MATCH_FCVT_S_L|MASK_RM, MASK_FCVT_S_L|MASK_RM, match_opcode, 0 },
 {"fcvt.s.l",  64, INSN_CLASS_F_OR_ZFINX,   "D,s,m",     MATCH_FCVT_S_L, MASK_FCVT_S_L, match_opcode, 0 },
-{"fcvt.s.lu", 64, INSN_CLASS_F_OR_ZFINX,   "D,s",       MATCH_FCVT_S_LU|MASK_RM, MASK_FCVT_S_L|MASK_RM, match_opcode, 0 },
+{"fcvt.s.lu", 64, INSN_CLASS_F_OR_ZFINX,   "D,s",       MATCH_FCVT_S_LU|MASK_RM, MASK_FCVT_S_LU|MASK_RM, match_opcode, 0 },
 {"fcvt.s.lu", 64, INSN_CLASS_F_OR_ZFINX,   "D,s,m",     MATCH_FCVT_S_LU, MASK_FCVT_S_LU, match_opcode, 0 },
 
 /* Double-precision floating-point instruction subset.  */
@@ -705,7 +705,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fcvt.lu.d", 64, INSN_CLASS_D_OR_ZDINX,   "d,S,m",     MATCH_FCVT_LU_D, MASK_FCVT_LU_D, match_opcode, 0 },
 {"fcvt.d.l",  64, INSN_CLASS_D_OR_ZDINX,   "D,s",       MATCH_FCVT_D_L|MASK_RM, MASK_FCVT_D_L|MASK_RM, match_opcode, 0 },
 {"fcvt.d.l",  64, INSN_CLASS_D_OR_ZDINX,   "D,s,m",     MATCH_FCVT_D_L, MASK_FCVT_D_L, match_opcode, 0 },
-{"fcvt.d.lu", 64, INSN_CLASS_D_OR_ZDINX,   "D,s",       MATCH_FCVT_D_LU|MASK_RM, MASK_FCVT_D_L|MASK_RM, match_opcode, 0 },
+{"fcvt.d.lu", 64, INSN_CLASS_D_OR_ZDINX,   "D,s",       MATCH_FCVT_D_LU|MASK_RM, MASK_FCVT_D_LU|MASK_RM, match_opcode, 0 },
 {"fcvt.d.lu", 64, INSN_CLASS_D_OR_ZDINX,   "D,s,m",     MATCH_FCVT_D_LU, MASK_FCVT_D_LU, match_opcode, 0 },
 
 /* Quad-precision floating-point instruction subset.  */
@@ -765,7 +765,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fcvt.lu.q", 64, INSN_CLASS_Q_OR_ZQINX,   "d,S,m",     MATCH_FCVT_LU_Q, MASK_FCVT_LU_Q, match_opcode, 0 },
 {"fcvt.q.l",  64, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_L|MASK_RM, MASK_FCVT_Q_L|MASK_RM, match_opcode, 0 },
 {"fcvt.q.l",  64, INSN_CLASS_Q_OR_ZQINX,   "D,s,m",     MATCH_FCVT_Q_L, MASK_FCVT_Q_L, match_opcode, 0 },
-{"fcvt.q.lu", 64, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_LU|MASK_RM, MASK_FCVT_Q_L|MASK_RM, match_opcode, 0 },
+{"fcvt.q.lu", 64, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_LU|MASK_RM, MASK_FCVT_Q_LU|MASK_RM, match_opcode, 0 },
 {"fcvt.q.lu", 64, INSN_CLASS_Q_OR_ZQINX,   "D,s,m",     MATCH_FCVT_Q_LU, MASK_FCVT_Q_LU, match_opcode, 0 },
 
 /* Compressed instructions.  */
