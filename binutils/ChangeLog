@@ -1,3 +1,8 @@
+2022-01-11  Martin Storsjö  <martin@martin.st>
+
+	* dlltool.c (main): If a prefix has not been provided, attempt to
+	use a deterministic one based upon the dll name.
+
 2022-01-07  Pavel Mayorov  <pmayorov@cloudlinux.com>
 
 	PR 28718

@@ -348,7 +348,7 @@ typedef struct iheadt
 static iheadtype *import_list = NULL;
 static char *as_name = NULL;
 static char * as_flags = "";
-static char *tmp_prefix;
+static char *tmp_prefix = NULL;
 static int no_idata4;
 static int no_idata5;
 static char *exp_name;
@@ -3930,8 +3930,22 @@ main (int ac, char **av)
 	}
     }
 
-  if (!tmp_prefix)
-    tmp_prefix = prefix_encode ("d", getpid ());
+  if (tmp_prefix == NULL)
+    {
+      /* If possible use a deterministic prefix.  */
+      if (dll_name)
+        {
+          tmp_prefix = xmalloc (strlen (dll_name) + 2);
+          sprintf (tmp_prefix, "%s_", dll_name);
+          for (i = 0; tmp_prefix[i]; i++)
+            if (!ISALNUM (tmp_prefix[i]))
+              tmp_prefix[i] = '_';
+        }
+      else
+        {
+          tmp_prefix = prefix_encode ("d", getpid ());
+        }
+    }
 
   for (i = 0; mtable[i].type; i++)
     if (strcmp (mtable[i].type, mname) == 0)

@@ -1,3 +1,12 @@
+2022-01-11  Martin Storsjö  <martin@martin.st>
+
+	* pe-dll.c (make_head): Prefix the symbol name with the dll name.
+	(make_tail, make_one, make_singleton_name_thunk): Likewise.
+	(make_import_fixup_entry, make_runtime_pseudo_reloc): Likewise.
+	(pe_create_runtime_relocator_reference): Likewise.
+	(pe_dll_generate_implib): Set dll_symname_len.
+	(pe_process_import_defs): Likewise.
+
 2021-12-16  Nick Clifton  <nickc@redhat.com>
 
 	PR 28686
