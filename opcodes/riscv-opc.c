@@ -852,6 +852,12 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sfence.vma", 0, INSN_CLASS_I,    "s,t",      MATCH_SFENCE_VMA, MASK_SFENCE_VMA, match_opcode, 0 },
 {"wfi",        0, INSN_CLASS_I,    "",         MATCH_WFI, MASK_WFI, match_opcode, 0 },
 
+/* Zicbom and Zicboz instructions.  */
+{"cbo.clean",  0, INSN_CLASS_ZICBOM, "0(s)", MATCH_CBO_CLEAN, MASK_CBO_CLEAN, match_opcode, 0 },
+{"cbo.flush",  0, INSN_CLASS_ZICBOM, "0(s)", MATCH_CBO_FLUSH, MASK_CBO_FLUSH, match_opcode, 0 },
+{"cbo.inval",  0, INSN_CLASS_ZICBOM, "0(s)", MATCH_CBO_INVAL, MASK_CBO_INVAL, match_opcode, 0 },
+{"cbo.zero",   0, INSN_CLASS_ZICBOZ, "0(s)", MATCH_CBO_ZERO, MASK_CBO_ZERO, match_opcode, 0 },
+
 /* Zbb or zbkb instructions.  */
 {"clz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CLZ, MASK_CLZ, match_opcode, 0 },
 {"ctz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CTZ, MASK_CTZ, match_opcode, 0 },

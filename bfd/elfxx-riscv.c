@@ -1172,7 +1172,9 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
 
 static struct riscv_supported_ext riscv_supported_std_z_ext[] =
 {
+  {"zicbom",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicbop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicboz",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
@@ -2317,8 +2319,12 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     {
     case INSN_CLASS_I:
       return riscv_subset_supports (rps, "i");
+    case INSN_CLASS_ZICBOM:
+      return riscv_subset_supports (rps, "zicbom");
     case INSN_CLASS_ZICBOP:
       return riscv_subset_supports (rps, "zicbop");
+    case INSN_CLASS_ZICBOZ:
+      return riscv_subset_supports (rps, "zicboz");
     case INSN_CLASS_ZICSR:
       return riscv_subset_supports (rps, "zicsr");
     case INSN_CLASS_ZIFENCEI:

@@ -2036,6 +2036,15 @@
 #define MASK_PREFETCH_R 0x1f07fff
 #define MATCH_PREFETCH_W 0x306013
 #define MASK_PREFETCH_W 0x1f07fff
+/* Zicbom/Zicboz instructions. */
+#define MATCH_CBO_CLEAN 0x10200f
+#define MASK_CBO_CLEAN 0xfff07fff
+#define MATCH_CBO_FLUSH 0x20200f
+#define MASK_CBO_FLUSH 0xfff07fff
+#define MATCH_CBO_INVAL 0x200f
+#define MASK_CBO_INVAL 0xfff07fff
+#define MATCH_CBO_ZERO 0x40200f
+#define MASK_CBO_ZERO 0xfff07fff
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
