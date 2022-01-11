@@ -1003,4 +1003,8 @@ extern void thread_try_catch_cmd (thread_info *thr,
 				  const char *cmd, int from_tty,
 				  const qcs_flags &flags);
 
+/* Return a string representation of STATE.  */
+
+extern const char *thread_state_string (enum thread_state state);
+
 #endif /* GDBTHREAD_H */

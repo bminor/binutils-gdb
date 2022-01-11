@@ -2541,6 +2541,18 @@ attach_command (const char *args, int from_tty)
      shouldn't refer to attach_target again.  */
   attach_target = NULL;
 
+  if (debug_infrun)
+    {
+      infrun_debug_printf ("immediately after attach:");
+      for (thread_info *thread : inferior->non_exited_threads ())
+	infrun_debug_printf ("  thread %s, executing = %d, resumed = %d, "
+			     "state = %s",
+			     thread->ptid.to_string ().c_str (),
+			     thread->executing (),
+			     thread->resumed (),
+			     thread_state_string (thread->state));
+    }
+
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */
   target_terminal::init ();
