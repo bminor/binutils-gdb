@@ -1,3 +1,12 @@
+2022-01-11  Fangrui Song  <maskray@google.com>
+
+	PR binutils/28759
+	* ar.c (long_options): Add --thin.
+	(usage) Add --thin. Deprecate -T without diagnostics.
+	* doc/binutils.texi: Add doc.
+	* NEWS: Mention --thin.
+	* binutils/testsuite/binutils-all/ar.exp: Add tests.
+
 2022-01-11  Martin Storsjö  <martin@martin.st>
 
 	* dlltool.c (main): If a prefix has not been provided, attempt to

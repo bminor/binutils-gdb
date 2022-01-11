@@ -172,6 +172,7 @@ static struct option long_options[] =
   {"version", no_argument, &show_version, 1},
   {"output", required_argument, NULL, OPTION_OUTPUT},
   {"record-libdeps", required_argument, NULL, 'l'},
+  {"thin", no_argument, NULL, 'T'},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -337,13 +338,14 @@ usage (int help)
   fprintf (s, _("  [s]          - create an archive index (cf. ranlib)\n"));
   fprintf (s, _("  [l <text> ]  - specify the dependencies of this library\n"));
   fprintf (s, _("  [S]          - do not build a symbol table\n"));
-  fprintf (s, _("  [T]          - make a thin archive\n"));
+  fprintf (s, _("  [T]          - deprecated, use --thin instead\n"));
   fprintf (s, _("  [v]          - be verbose\n"));
   fprintf (s, _("  [V]          - display the version number\n"));
   fprintf (s, _("  @<file>      - read options from <file>\n"));
   fprintf (s, _("  --target=BFDNAME - specify the target object format as BFDNAME\n"));
   fprintf (s, _("  --output=DIRNAME - specify the output directory for extraction operations\n"));
   fprintf (s, _("  --record-libdeps=<text> - specify the dependencies of this library\n"));
+  fprintf (s, _("  --thin       - make a thin archive\n"));
 #if BFD_SUPPORTS_PLUGINS
   fprintf (s, _(" optional:\n"));
   fprintf (s, _("  --plugin <p> - load the specified plugin\n"));

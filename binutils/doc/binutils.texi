@@ -256,7 +256,7 @@ program.
 
 @smallexample
 @c man begin SYNOPSIS ar
-ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@option{--record-libdeps} @var{libdeps}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
+ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@option{--record-libdeps} @var{libdeps}] [@option{--thin}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
 @c man end
 @end smallexample
 
@@ -507,10 +507,9 @@ with the linker.  In order to build a symbol table, you must omit the
 @samp{ranlib} on the archive.
 
 @item T
-@cindex creating thin archive
-Make the specified @var{archive} a @emph{thin} archive.  If it already
-exists and is a regular archive, the existing members must be present
-in the same directory as @var{archive}.
+Deprecated alias for @option{--thin}.  @option{T} is not recommended because in
+many ar implementations @option{T} has a different meaning, as specified by
+X/Open System Interface.
 
 @item u
 @cindex updating an archive
@@ -602,6 +601,12 @@ line.
 @item --record-libdeps @var{libdeps}
 The @option{--record-libdeps} option is identical to the @option{l} modifier,
 just handled in long form.
+
+@item --thin
+@cindex creating thin archive
+Make the specified @var{archive} a @emph{thin} archive.  If it already
+exists and is a regular archive, the existing members must be present
+in the same directory as @var{archive}.
 
 @end table
 @c man end

@@ -18,6 +18,10 @@
 * Support for efi-app-aarch64, efi-rtdrv-aarch64 and efi-bsdrv-aarch64 has been
   added to objcopy in order to enable UEFI development using binutils.
 
+* ar: Add --thin for creating thin archives. -T is a deprecated alias without
+  diagnostics. In many ar implementations -T has a different meaning, as
+  specified by X/Open System Interface.
+
 Changes in 2.37:
 
 * The readelf tool has a new command line option which can be used to specify
