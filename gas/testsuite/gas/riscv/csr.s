@@ -90,6 +90,7 @@
 	csr sie
 	csr stvec
 	csr scounteren		# Added in 1.10
+	csr senvcfg		# Added in 1.12
 
 	# Supervisor Trap Handling
 	csr sscratch
@@ -106,6 +107,7 @@
 	csr marchid
 	csr mimpid
 	csr mhartid
+	csr mconfigptr		# Added in 1.12
 
 	# Machine Trap Setup
 	csr mstatus
@@ -115,6 +117,11 @@
 	csr mie
 	csr mtvec
 	csr mcounteren		# Added in 1.10
+	csr menvcfg		# Added in 1.12
+	csr mstatush		# Added in 1.12
+	csr menvcfgh		# Added in 1.12
+	csr mseccfg		# Added in 1.12
+	csr mseccfgh		# Added in 1.12
 
 	# Machine Trap Handling
 	csr mscratch
@@ -122,12 +129,26 @@
 	csr mcause
 	csr mtval		# Added in 1.10
 	csr mip
+	csr mtinst		# Added in 1.12
+	csr mtval2		# Added in 1.12
 
 	# Machine Memory Protection
 	csr pmpcfg0		# Added in 1.10
 	csr pmpcfg1		# Added in 1.10
 	csr pmpcfg2		# Added in 1.10
 	csr pmpcfg3		# Added in 1.10
+	csr pmpcfg4		# Added in 1.12
+	csr pmpcfg5		# Added in 1.12
+	csr pmpcfg6		# Added in 1.12
+	csr pmpcfg7		# Added in 1.12
+	csr pmpcfg8		# Added in 1.12
+	csr pmpcfg9		# Added in 1.12
+	csr pmpcfg10		# Added in 1.12
+	csr pmpcfg11		# Added in 1.12
+	csr pmpcfg12		# Added in 1.12
+	csr pmpcfg13		# Added in 1.12
+	csr pmpcfg14		# Added in 1.12
+	csr pmpcfg15		# Added in 1.12
 	csr pmpaddr0		# Added in 1.10
 	csr pmpaddr1		# Added in 1.10
 	csr pmpaddr2		# Added in 1.10
@@ -144,6 +165,54 @@
 	csr pmpaddr13		# Added in 1.10
 	csr pmpaddr14		# Added in 1.10
 	csr pmpaddr15		# Added in 1.10
+	csr pmpaddr16		# Added in 1.12
+	csr pmpaddr17		# Added in 1.12
+	csr pmpaddr18		# Added in 1.12
+	csr pmpaddr19		# Added in 1.12
+	csr pmpaddr20		# Added in 1.12
+	csr pmpaddr21		# Added in 1.12
+	csr pmpaddr22		# Added in 1.12
+	csr pmpaddr23		# Added in 1.12
+	csr pmpaddr24		# Added in 1.12
+	csr pmpaddr25		# Added in 1.12
+	csr pmpaddr26		# Added in 1.12
+	csr pmpaddr27		# Added in 1.12
+	csr pmpaddr28		# Added in 1.12
+	csr pmpaddr29		# Added in 1.12
+	csr pmpaddr30		# Added in 1.12
+	csr pmpaddr31		# Added in 1.12
+	csr pmpaddr32		# Added in 1.12
+	csr pmpaddr33		# Added in 1.12
+	csr pmpaddr34		# Added in 1.12
+	csr pmpaddr35		# Added in 1.12
+	csr pmpaddr36		# Added in 1.12
+	csr pmpaddr37		# Added in 1.12
+	csr pmpaddr38		# Added in 1.12
+	csr pmpaddr39		# Added in 1.12
+	csr pmpaddr40		# Added in 1.12
+	csr pmpaddr41		# Added in 1.12
+	csr pmpaddr42		# Added in 1.12
+	csr pmpaddr43		# Added in 1.12
+	csr pmpaddr44		# Added in 1.12
+	csr pmpaddr45		# Added in 1.12
+	csr pmpaddr46		# Added in 1.12
+	csr pmpaddr47		# Added in 1.12
+	csr pmpaddr48		# Added in 1.12
+	csr pmpaddr49		# Added in 1.12
+	csr pmpaddr50		# Added in 1.12
+	csr pmpaddr51		# Added in 1.12
+	csr pmpaddr52		# Added in 1.12
+	csr pmpaddr53		# Added in 1.12
+	csr pmpaddr54		# Added in 1.12
+	csr pmpaddr55		# Added in 1.12
+	csr pmpaddr56		# Added in 1.12
+	csr pmpaddr57		# Added in 1.12
+	csr pmpaddr58		# Added in 1.12
+	csr pmpaddr59		# Added in 1.12
+	csr pmpaddr60		# Added in 1.12
+	csr pmpaddr61		# Added in 1.12
+	csr pmpaddr62		# Added in 1.12
+	csr pmpaddr63		# Added in 1.12
 
 	# Machine Counter/Timer
 	csr mcycle

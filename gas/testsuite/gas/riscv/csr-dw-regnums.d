@@ -95,6 +95,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4356 \(sie\) at cfa\+1040
   DW_CFA_offset_extended_sf: r4357 \(stvec\) at cfa\+1044
   DW_CFA_offset_extended_sf: r4358 \(scounteren\) at cfa\+1048
+  DW_CFA_offset_extended_sf: r4362 \(senvcfg\) at cfa\+1064
   DW_CFA_offset_extended_sf: r4416 \(sscratch\) at cfa\+1280
   DW_CFA_offset_extended_sf: r4417 \(sepc\) at cfa\+1284
   DW_CFA_offset_extended_sf: r4418 \(scause\) at cfa\+1288
@@ -105,6 +106,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r7954 \(marchid\) at cfa\+15432
   DW_CFA_offset_extended_sf: r7955 \(mimpid\) at cfa\+15436
   DW_CFA_offset_extended_sf: r7956 \(mhartid\) at cfa\+15440
+  DW_CFA_offset_extended_sf: r7957 \(mconfigptr\) at cfa\+15444
   DW_CFA_offset_extended_sf: r4864 \(mstatus\) at cfa\+3072
   DW_CFA_offset_extended_sf: r4865 \(misa\) at cfa\+3076
   DW_CFA_offset_extended_sf: r4866 \(medeleg\) at cfa\+3080
@@ -112,15 +114,34 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4868 \(mie\) at cfa\+3088
   DW_CFA_offset_extended_sf: r4869 \(mtvec\) at cfa\+3092
   DW_CFA_offset_extended_sf: r4870 \(mcounteren\) at cfa\+3096
+  DW_CFA_offset_extended_sf: r4874 \(menvcfg\) at cfa\+3112
+  DW_CFA_offset_extended_sf: r4880 \(mstatush\) at cfa\+3136
+  DW_CFA_offset_extended_sf: r4890 \(menvcfgh\) at cfa\+3176
+  DW_CFA_offset_extended_sf: r5959 \(mseccfg\) at cfa\+7452
+  DW_CFA_offset_extended_sf: r5975 \(mseccfgh\) at cfa\+7516
   DW_CFA_offset_extended_sf: r4928 \(mscratch\) at cfa\+3328
   DW_CFA_offset_extended_sf: r4929 \(mepc\) at cfa\+3332
   DW_CFA_offset_extended_sf: r4930 \(mcause\) at cfa\+3336
   DW_CFA_offset_extended_sf: r4931 \(mtval\) at cfa\+3340
   DW_CFA_offset_extended_sf: r4932 \(mip\) at cfa\+3344
+  DW_CFA_offset_extended_sf: r4938 \(mtinst\) at cfa\+3368
+  DW_CFA_offset_extended_sf: r4939 \(mtval2\) at cfa\+3372
   DW_CFA_offset_extended_sf: r5024 \(pmpcfg0\) at cfa\+3712
   DW_CFA_offset_extended_sf: r5025 \(pmpcfg1\) at cfa\+3716
   DW_CFA_offset_extended_sf: r5026 \(pmpcfg2\) at cfa\+3720
   DW_CFA_offset_extended_sf: r5027 \(pmpcfg3\) at cfa\+3724
+  DW_CFA_offset_extended_sf: r5028 \(pmpcfg4\) at cfa\+3728
+  DW_CFA_offset_extended_sf: r5029 \(pmpcfg5\) at cfa\+3732
+  DW_CFA_offset_extended_sf: r5030 \(pmpcfg6\) at cfa\+3736
+  DW_CFA_offset_extended_sf: r5031 \(pmpcfg7\) at cfa\+3740
+  DW_CFA_offset_extended_sf: r5032 \(pmpcfg8\) at cfa\+3744
+  DW_CFA_offset_extended_sf: r5033 \(pmpcfg9\) at cfa\+3748
+  DW_CFA_offset_extended_sf: r5034 \(pmpcfg10\) at cfa\+3752
+  DW_CFA_offset_extended_sf: r5035 \(pmpcfg11\) at cfa\+3756
+  DW_CFA_offset_extended_sf: r5036 \(pmpcfg12\) at cfa\+3760
+  DW_CFA_offset_extended_sf: r5037 \(pmpcfg13\) at cfa\+3764
+  DW_CFA_offset_extended_sf: r5038 \(pmpcfg14\) at cfa\+3768
+  DW_CFA_offset_extended_sf: r5039 \(pmpcfg15\) at cfa\+3772
   DW_CFA_offset_extended_sf: r5040 \(pmpaddr0\) at cfa\+3776
   DW_CFA_offset_extended_sf: r5041 \(pmpaddr1\) at cfa\+3780
   DW_CFA_offset_extended_sf: r5042 \(pmpaddr2\) at cfa\+3784
@@ -137,6 +158,54 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r5053 \(pmpaddr13\) at cfa\+3828
   DW_CFA_offset_extended_sf: r5054 \(pmpaddr14\) at cfa\+3832
   DW_CFA_offset_extended_sf: r5055 \(pmpaddr15\) at cfa\+3836
+  DW_CFA_offset_extended_sf: r5056 \(pmpaddr16\) at cfa\+3840
+  DW_CFA_offset_extended_sf: r5057 \(pmpaddr17\) at cfa\+3844
+  DW_CFA_offset_extended_sf: r5058 \(pmpaddr18\) at cfa\+3848
+  DW_CFA_offset_extended_sf: r5059 \(pmpaddr19\) at cfa\+3852
+  DW_CFA_offset_extended_sf: r5060 \(pmpaddr20\) at cfa\+3856
+  DW_CFA_offset_extended_sf: r5061 \(pmpaddr21\) at cfa\+3860
+  DW_CFA_offset_extended_sf: r5062 \(pmpaddr22\) at cfa\+3864
+  DW_CFA_offset_extended_sf: r5063 \(pmpaddr23\) at cfa\+3868
+  DW_CFA_offset_extended_sf: r5064 \(pmpaddr24\) at cfa\+3872
+  DW_CFA_offset_extended_sf: r5065 \(pmpaddr25\) at cfa\+3876
+  DW_CFA_offset_extended_sf: r5066 \(pmpaddr26\) at cfa\+3880
+  DW_CFA_offset_extended_sf: r5067 \(pmpaddr27\) at cfa\+3884
+  DW_CFA_offset_extended_sf: r5068 \(pmpaddr28\) at cfa\+3888
+  DW_CFA_offset_extended_sf: r5069 \(pmpaddr29\) at cfa\+3892
+  DW_CFA_offset_extended_sf: r5070 \(pmpaddr30\) at cfa\+3896
+  DW_CFA_offset_extended_sf: r5071 \(pmpaddr31\) at cfa\+3900
+  DW_CFA_offset_extended_sf: r5072 \(pmpaddr32\) at cfa\+3904
+  DW_CFA_offset_extended_sf: r5073 \(pmpaddr33\) at cfa\+3908
+  DW_CFA_offset_extended_sf: r5074 \(pmpaddr34\) at cfa\+3912
+  DW_CFA_offset_extended_sf: r5075 \(pmpaddr35\) at cfa\+3916
+  DW_CFA_offset_extended_sf: r5076 \(pmpaddr36\) at cfa\+3920
+  DW_CFA_offset_extended_sf: r5077 \(pmpaddr37\) at cfa\+3924
+  DW_CFA_offset_extended_sf: r5078 \(pmpaddr38\) at cfa\+3928
+  DW_CFA_offset_extended_sf: r5079 \(pmpaddr39\) at cfa\+3932
+  DW_CFA_offset_extended_sf: r5080 \(pmpaddr40\) at cfa\+3936
+  DW_CFA_offset_extended_sf: r5081 \(pmpaddr41\) at cfa\+3940
+  DW_CFA_offset_extended_sf: r5082 \(pmpaddr42\) at cfa\+3944
+  DW_CFA_offset_extended_sf: r5083 \(pmpaddr43\) at cfa\+3948
+  DW_CFA_offset_extended_sf: r5084 \(pmpaddr44\) at cfa\+3952
+  DW_CFA_offset_extended_sf: r5085 \(pmpaddr45\) at cfa\+3956
+  DW_CFA_offset_extended_sf: r5086 \(pmpaddr46\) at cfa\+3960
+  DW_CFA_offset_extended_sf: r5087 \(pmpaddr47\) at cfa\+3964
+  DW_CFA_offset_extended_sf: r5088 \(pmpaddr48\) at cfa\+3968
+  DW_CFA_offset_extended_sf: r5089 \(pmpaddr49\) at cfa\+3972
+  DW_CFA_offset_extended_sf: r5090 \(pmpaddr50\) at cfa\+3976
+  DW_CFA_offset_extended_sf: r5091 \(pmpaddr51\) at cfa\+3980
+  DW_CFA_offset_extended_sf: r5092 \(pmpaddr52\) at cfa\+3984
+  DW_CFA_offset_extended_sf: r5093 \(pmpaddr53\) at cfa\+3988
+  DW_CFA_offset_extended_sf: r5094 \(pmpaddr54\) at cfa\+3992
+  DW_CFA_offset_extended_sf: r5095 \(pmpaddr55\) at cfa\+3996
+  DW_CFA_offset_extended_sf: r5096 \(pmpaddr56\) at cfa\+4000
+  DW_CFA_offset_extended_sf: r5097 \(pmpaddr57\) at cfa\+4004
+  DW_CFA_offset_extended_sf: r5098 \(pmpaddr58\) at cfa\+4008
+  DW_CFA_offset_extended_sf: r5099 \(pmpaddr59\) at cfa\+4012
+  DW_CFA_offset_extended_sf: r5100 \(pmpaddr60\) at cfa\+4016
+  DW_CFA_offset_extended_sf: r5101 \(pmpaddr61\) at cfa\+4020
+  DW_CFA_offset_extended_sf: r5102 \(pmpaddr62\) at cfa\+4024
+  DW_CFA_offset_extended_sf: r5103 \(pmpaddr63\) at cfa\+4028
   DW_CFA_offset_extended_sf: r6912 \(mcycle\) at cfa\+11264
   DW_CFA_offset_extended_sf: r6914 \(minstret\) at cfa\+11272
   DW_CFA_offset_extended_sf: r6915 \(mhpmcounter3\) at cfa\+11276

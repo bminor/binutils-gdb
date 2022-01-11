@@ -85,6 +85,7 @@ _start:
 	.cfi_offset sie, 1040
 	.cfi_offset stvec, 1044
 	.cfi_offset scounteren, 1048
+	.cfi_offset senvcfg, 1064
 	.cfi_offset sscratch, 1280
 	.cfi_offset sepc, 1284
 	.cfi_offset scause, 1288
@@ -95,6 +96,7 @@ _start:
 	.cfi_offset marchid, 15432
 	.cfi_offset mimpid, 15436
 	.cfi_offset mhartid, 15440
+	.cfi_offset mconfigptr, 15444
 	.cfi_offset mstatus, 3072
 	.cfi_offset misa, 3076
 	.cfi_offset medeleg, 3080
@@ -102,15 +104,34 @@ _start:
 	.cfi_offset mie, 3088
 	.cfi_offset mtvec, 3092
 	.cfi_offset mcounteren, 3096
+	.cfi_offset menvcfg, 3112
+	.cfi_offset mstatush, 3136
+	.cfi_offset menvcfgh, 3176
+	.cfi_offset mseccfg, 7452
+	.cfi_offset mseccfgh, 7516
 	.cfi_offset mscratch, 3328
 	.cfi_offset mepc, 3332
 	.cfi_offset mcause, 3336
 	.cfi_offset mtval, 3340
 	.cfi_offset mip, 3344
+	.cfi_offset mtinst, 3368
+	.cfi_offset mtval2, 3372
 	.cfi_offset pmpcfg0, 3712
 	.cfi_offset pmpcfg1, 3716
 	.cfi_offset pmpcfg2, 3720
 	.cfi_offset pmpcfg3, 3724
+	.cfi_offset pmpcfg4, 3728
+	.cfi_offset pmpcfg5, 3732
+	.cfi_offset pmpcfg6, 3736
+	.cfi_offset pmpcfg7, 3740
+	.cfi_offset pmpcfg8, 3744
+	.cfi_offset pmpcfg9, 3748
+	.cfi_offset pmpcfg10, 3752
+	.cfi_offset pmpcfg11, 3756
+	.cfi_offset pmpcfg12, 3760
+	.cfi_offset pmpcfg13, 3764
+	.cfi_offset pmpcfg14, 3768
+	.cfi_offset pmpcfg15, 3772
 	.cfi_offset pmpaddr0, 3776
 	.cfi_offset pmpaddr1, 3780
 	.cfi_offset pmpaddr2, 3784
@@ -127,6 +148,54 @@ _start:
 	.cfi_offset pmpaddr13, 3828
 	.cfi_offset pmpaddr14, 3832
 	.cfi_offset pmpaddr15, 3836
+	.cfi_offset pmpaddr16, 3840
+	.cfi_offset pmpaddr17, 3844
+	.cfi_offset pmpaddr18, 3848
+	.cfi_offset pmpaddr19, 3852
+	.cfi_offset pmpaddr20, 3856
+	.cfi_offset pmpaddr21, 3860
+	.cfi_offset pmpaddr22, 3864
+	.cfi_offset pmpaddr23, 3868
+	.cfi_offset pmpaddr24, 3872
+	.cfi_offset pmpaddr25, 3876
+	.cfi_offset pmpaddr26, 3880
+	.cfi_offset pmpaddr27, 3884
+	.cfi_offset pmpaddr28, 3888
+	.cfi_offset pmpaddr29, 3892
+	.cfi_offset pmpaddr30, 3896
+	.cfi_offset pmpaddr31, 3900
+	.cfi_offset pmpaddr32, 3904
+	.cfi_offset pmpaddr33, 3908
+	.cfi_offset pmpaddr34, 3912
+	.cfi_offset pmpaddr35, 3916
+	.cfi_offset pmpaddr36, 3920
+	.cfi_offset pmpaddr37, 3924
+	.cfi_offset pmpaddr38, 3928
+	.cfi_offset pmpaddr39, 3932
+	.cfi_offset pmpaddr40, 3936
+	.cfi_offset pmpaddr41, 3940
+	.cfi_offset pmpaddr42, 3944
+	.cfi_offset pmpaddr43, 3948
+	.cfi_offset pmpaddr44, 3952
+	.cfi_offset pmpaddr45, 3956
+	.cfi_offset pmpaddr46, 3960
+	.cfi_offset pmpaddr47, 3964
+	.cfi_offset pmpaddr48, 3968
+	.cfi_offset pmpaddr49, 3972
+	.cfi_offset pmpaddr50, 3976
+	.cfi_offset pmpaddr51, 3980
+	.cfi_offset pmpaddr52, 3984
+	.cfi_offset pmpaddr53, 3988
+	.cfi_offset pmpaddr54, 3992
+	.cfi_offset pmpaddr55, 3996
+	.cfi_offset pmpaddr56, 4000
+	.cfi_offset pmpaddr57, 4004
+	.cfi_offset pmpaddr58, 4008
+	.cfi_offset pmpaddr59, 4012
+	.cfi_offset pmpaddr60, 4016
+	.cfi_offset pmpaddr61, 4020
+	.cfi_offset pmpaddr62, 4024
+	.cfi_offset pmpaddr63, 4028
 	.cfi_offset mcycle, 11264
 	.cfi_offset minstret, 11272
 	.cfi_offset mhpmcounter3, 11276
