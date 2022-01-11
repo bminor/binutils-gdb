@@ -2029,6 +2029,13 @@
 #define MASK_HSV_W 0xfe007fff
 #define MATCH_HSV_D 0x6e004073
 #define MASK_HSV_D 0xfe007fff
+/* Zicbop hint instructions. */
+#define MATCH_PREFETCH_I 0x6013
+#define MASK_PREFETCH_I 0x1f07fff
+#define MATCH_PREFETCH_R 0x106013
+#define MASK_PREFETCH_R 0x1f07fff
+#define MATCH_PREFETCH_W 0x306013
+#define MASK_PREFETCH_W 0x1f07fff
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
