@@ -160,11 +160,10 @@ thread_has_single_step_breakpoint_here (struct thread_info *tp,
 void
 thread_cancel_execution_command (struct thread_info *thr)
 {
-  if (thr->thread_fsm != NULL)
+  if (thr->thread_fsm () != nullptr)
     {
-      thr->thread_fsm->clean_up (thr);
-      delete thr->thread_fsm;
-      thr->thread_fsm = NULL;
+      std::unique_ptr<thread_fsm> fsm = thr->release_thread_fsm ();
+      fsm->clean_up (thr);
     }
 }
 

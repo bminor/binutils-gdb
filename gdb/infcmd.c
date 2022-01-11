@@ -848,7 +848,7 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
      steps.  */
   thr = inferior_thread ();
   step_sm = new step_command_fsm (command_interp ());
-  thr->thread_fsm = step_sm;
+  thr->set_thread_fsm (std::unique_ptr<thread_fsm> (step_sm));
 
   step_command_fsm_prepare (step_sm, skip_subroutines,
 			    single_inst, count, thr);
@@ -865,7 +865,7 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
 
       /* Stepped into an inline frame.  Pretend that we've
 	 stopped.  */
-      thr->thread_fsm->clean_up (thr);
+      thr->thread_fsm ()->clean_up (thr);
       proceeded = normal_stop ();
       if (!proceeded)
 	inferior_event_handler (INF_EXEC_COMPLETE);
@@ -1355,7 +1355,7 @@ until_next_command (int from_tty)
   delete_longjmp_breakpoint_cleanup lj_deleter (thread);
 
   sm = new until_next_fsm (command_interp (), tp->global_num);
-  tp->thread_fsm = sm;
+  tp->set_thread_fsm (std::unique_ptr<thread_fsm> (sm));
   lj_deleter.release ();
 
   proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
@@ -1762,7 +1762,7 @@ finish_command (const char *arg, int from_tty)
 
   sm = new finish_command_fsm (command_interp ());
 
-  tp->thread_fsm = sm;
+  tp->set_thread_fsm (std::unique_ptr<thread_fsm> (sm));
 
   /* Finishing from an inline frame is completely different.  We don't
      try to show the "return value" - no way to locate it.  */

@@ -630,12 +630,12 @@ mi_on_normal_stop_1 (struct bpstat *bs, int print_frame)
 
       tp = inferior_thread ();
 
-      if (tp->thread_fsm != NULL
-	  && tp->thread_fsm->finished_p ())
+      if (tp->thread_fsm () != nullptr
+	  && tp->thread_fsm ()->finished_p ())
 	{
 	  enum async_reply_reason reason;
 
-	  reason = tp->thread_fsm->async_reply_reason ();
+	  reason = tp->thread_fsm ()->async_reply_reason ();
 	  mi_uiout->field_string ("reason", async_reason_lookup (reason));
 	}
 

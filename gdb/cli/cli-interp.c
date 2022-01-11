@@ -108,9 +108,9 @@ should_print_stop_to_console (struct interp *console_interp,
 {
   if ((bpstat_what (tp->control.stop_bpstat).main_action
        == BPSTAT_WHAT_STOP_NOISY)
-      || tp->thread_fsm == NULL
-      || tp->thread_fsm->command_interp == console_interp
-      || !tp->thread_fsm->finished_p ())
+      || tp->thread_fsm () == nullptr
+      || tp->thread_fsm ()->command_interp == console_interp
+      || !tp->thread_fsm ()->finished_p ())
     return 1;
   return 0;
 }

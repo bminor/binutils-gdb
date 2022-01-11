@@ -698,7 +698,6 @@ follow_fork ()
   int current_line = 0;
   symtab *current_symtab = NULL;
   struct frame_id step_frame_id = { 0 };
-  struct thread_fsm *thread_fsm = NULL;
 
   if (!non_stop)
     {
@@ -741,6 +740,7 @@ follow_fork ()
     case TARGET_WAITKIND_VFORKED:
       {
 	ptid_t parent, child;
+	std::unique_ptr<struct thread_fsm> thread_fsm;
 
 	/* If the user did a next/step, etc, over a fork call,
 	   preserve the stepping state in the fork child.  */
@@ -755,7 +755,7 @@ follow_fork ()
 	    step_frame_id = tp->control.step_frame_id;
 	    exception_resume_breakpoint
 	      = clone_momentary_breakpoint (tp->control.exception_resume_breakpoint);
-	    thread_fsm = tp->thread_fsm;
+	    thread_fsm = tp->release_thread_fsm ();
 
 	    /* For now, delete the parent's sr breakpoint, otherwise,
 	       parent/child sr breakpoints are considered duplicates,
@@ -767,7 +767,6 @@ follow_fork ()
 	    tp->control.step_range_end = 0;
 	    tp->control.step_frame_id = null_frame_id;
 	    delete_exception_resume_breakpoint (tp);
-	    tp->thread_fsm = NULL;
 	  }
 
 	parent = inferior_ptid;
@@ -809,7 +808,7 @@ follow_fork ()
 		    tp->control.step_frame_id = step_frame_id;
 		    tp->control.exception_resume_breakpoint
 		      = exception_resume_breakpoint;
-		    tp->thread_fsm = thread_fsm;
+		    tp->set_thread_fsm (std::move (thread_fsm));
 		  }
 		else
 		  {
@@ -2651,8 +2650,7 @@ clear_proceed_status_thread (struct thread_info *tp)
   if (!signal_pass_state (tp->stop_signal ()))
     tp->set_stop_signal (GDB_SIGNAL_0);
 
-  delete tp->thread_fsm;
-  tp->thread_fsm = NULL;
+  tp->release_thread_fsm ();
 
   tp->control.trap_expected = 0;
   tp->control.step_range_start = 0;
@@ -3935,24 +3933,24 @@ reinstall_readline_callback_handler_cleanup ()
 static void
 clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
 {
-  if (ecs->event_thread != NULL
-      && ecs->event_thread->thread_fsm != NULL)
-    ecs->event_thread->thread_fsm->clean_up (ecs->event_thread);
+  if (ecs->event_thread != nullptr
+      && ecs->event_thread->thread_fsm () != nullptr)
+    ecs->event_thread->thread_fsm ()->clean_up (ecs->event_thread);
 
   if (!non_stop)
     {
       for (thread_info *thr : all_non_exited_threads ())
 	{
-	  if (thr->thread_fsm == NULL)
+	  if (thr->thread_fsm () == nullptr)
 	    continue;
 	  if (thr == ecs->event_thread)
 	    continue;
 
 	  switch_to_thread (thr);
-	  thr->thread_fsm->clean_up (thr);
+	  thr->thread_fsm ()->clean_up (thr);
 	}
 
-      if (ecs->event_thread != NULL)
+      if (ecs->event_thread != nullptr)
 	switch_to_thread (ecs->event_thread);
     }
 }
@@ -4103,13 +4101,8 @@ fetch_inferior_event ()
 
 	delete_just_stopped_threads_infrun_breakpoints ();
 
-	if (thr != NULL)
-	  {
-	    struct thread_fsm *thread_fsm = thr->thread_fsm;
-
-	    if (thread_fsm != NULL)
-	      should_stop = thread_fsm->should_stop (thr);
-	  }
+	if (thr != nullptr && thr->thread_fsm () != nullptr)
+	  should_stop = thr->thread_fsm ()->should_stop (thr);
 
 	if (!should_stop)
 	  {
@@ -4122,8 +4115,9 @@ fetch_inferior_event ()
 
 	    clean_up_just_stopped_threads_fsms (ecs);
 
-	    if (thr != NULL && thr->thread_fsm != NULL)
-	      should_notify_stop = thr->thread_fsm->should_notify_stop ();
+	    if (thr != nullptr && thr->thread_fsm () != nullptr)
+	      should_notify_stop
+	       = thr->thread_fsm ()->should_notify_stop ();
 
 	    if (should_notify_stop)
 	      {
@@ -8340,13 +8334,13 @@ print_stop_event (struct ui_out *uiout, bool displays)
   }
 
   tp = inferior_thread ();
-  if (tp->thread_fsm != NULL
-      && tp->thread_fsm->finished_p ())
+  if (tp->thread_fsm () != nullptr
+      && tp->thread_fsm ()->finished_p ())
     {
       struct return_value_info *rv;
 
-      rv = tp->thread_fsm->return_value ();
-      if (rv != NULL)
+      rv = tp->thread_fsm ()->return_value ();
+      if (rv != nullptr)
 	print_return_value (uiout, rv);
     }
 }

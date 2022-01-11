@@ -34,6 +34,7 @@ struct symtab;
 #include "gdbsupport/forward-scope-exit.h"
 #include "displaced-stepping.h"
 #include "gdbsupport/intrusive_list.h"
+#include "thread-fsm.h"
 
 struct inferior;
 struct process_stratum_target;
@@ -443,6 +444,32 @@ public:
     m_suspend.stop_reason = reason;
   }
 
+  /* Get the FSM associated with the thread.  */
+
+  struct thread_fsm *thread_fsm () const
+  {
+    return m_thread_fsm.get ();
+  }
+
+  /* Get the owning reference to the FSM associated with the thread.
+
+     After a call to this method, "thread_fsm () == nullptr".  */
+
+  std::unique_ptr<struct thread_fsm> release_thread_fsm ()
+  {
+    return std::move (m_thread_fsm);
+  }
+
+  /* Set the FSM associated with the current thread.
+
+     It is invalid to set the FSM if another FSM is already installed.  */
+
+  void set_thread_fsm (std::unique_ptr<struct thread_fsm> fsm)
+  {
+    gdb_assert (m_thread_fsm == nullptr);
+    m_thread_fsm = std::move (fsm);
+  }
+
   int current_line = 0;
   struct symtab *current_symtab = NULL;
 
@@ -479,11 +506,6 @@ public:
      order to keep GDB in mind that there is still a breakpoint to step over
      when GDB gets back SIGTRAP from step_resume_breakpoint.  */
   int step_after_step_resume_breakpoint = 0;
-
-  /* Pointer to the state machine manager object that handles what is
-     left to do for the thread's execution command after the target
-     stops.  Several execution commands use it.  */
-  struct thread_fsm *thread_fsm = NULL;
 
   /* This is used to remember when a fork or vfork event was caught by
      a catchpoint, and thus the event is to be followed at the next
@@ -550,6 +572,11 @@ private:
 
      Nullptr if the thread does not have a user-given name.  */
   gdb::unique_xmalloc_ptr<char> m_name;
+
+  /* Pointer to the state machine manager object that handles what is
+     left to do for the thread's execution command after the target
+     stops.  Several execution commands use it.  */
+  std::unique_ptr<struct thread_fsm> m_thread_fsm;
 };
 
 using thread_info_resumed_with_pending_wait_status_node
