@@ -3856,7 +3856,10 @@ Symbol names begin with a letter or with one of @samp{._}.  On most
 machines, you can also use @code{$} in symbol names; exceptions are
 noted in @ref{Machine Dependencies}.  That character may be followed by any
 string of digits, letters, dollar signs (unless otherwise noted for a
-particular target machine), and underscores.
+particular target machine), and underscores.  These restrictions do not
+apply when quoting symbol names by @samp{"}, which is permitted for most
+targets.  Escaping characters in quoted symbol names with @samp{\} generally
+extends only to @samp{\} itself and @samp{"}, at the time of writing.
 @end ifclear
 @ifset SPECIAL-SYMS
 @ifset H8
