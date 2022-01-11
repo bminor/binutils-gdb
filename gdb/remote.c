@@ -391,7 +391,7 @@ private:
 
 static const target_info remote_target_info = {
   "remote",
-  N_("Remote serial target in gdb-specific protocol"),
+  N_("Remote target using gdb-specific protocol"),
   remote_doc
 };
 
@@ -425,8 +425,6 @@ public:
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
   void prepare_to_store (struct regcache *) override;
-
-  void files_info () override;
 
   int insert_breakpoint (struct gdbarch *, struct bp_target_info *) override;
 
@@ -959,7 +957,7 @@ private:
 
 static const target_info extended_remote_target_info = {
   "extended-remote",
-  N_("Extended remote serial target in gdb-specific protocol"),
+  N_("Extended remote target using gdb-specific protocol"),
   remote_doc
 };
 
@@ -9420,11 +9418,6 @@ remote_target::flash_done ()
     }
 }
 
-void
-remote_target::files_info ()
-{
-  puts_filtered ("Debugging a target over a serial line.\n");
-}
 
 /* Stuff for dealing with the packets which are part of this protocol.
    See comment at top of file for details.  */

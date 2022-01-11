@@ -3884,7 +3884,7 @@ proc gdb_is_target_1 { target_name target_stack_regexp prompt_regexp } {
 # Helper for gdb_is_target_remote where the expected prompt is variable.
 
 proc gdb_is_target_remote_prompt { prompt_regexp } {
-    return [gdb_is_target_1 "remote" ".*emote serial target in gdb-specific protocol.*" $prompt_regexp]
+    return [gdb_is_target_1 "remote" ".*emote target using gdb-specific protocol.*" $prompt_regexp]
 }
 
 # Check whether we're testing with the remote or extended-remote
