@@ -1,4 +1,4 @@
-#as: -march=rv32if -mpriv-spec=1.11
+#as: -march=rv32if -mpriv-spec=1.12
 #objdump: --dwarf=frames
 
 
@@ -229,6 +229,37 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4925 \(mhpmevent29\) at cfa\+3316
   DW_CFA_offset_extended_sf: r4926 \(mhpmevent30\) at cfa\+3320
   DW_CFA_offset_extended_sf: r4927 \(mhpmevent31\) at cfa\+3324
+  DW_CFA_offset_extended_sf: r5632 \(hstatus\) at cfa\+6144
+  DW_CFA_offset_extended_sf: r5634 \(hedeleg\) at cfa\+6152
+  DW_CFA_offset_extended_sf: r5635 \(hideleg\) at cfa\+6156
+  DW_CFA_offset_extended_sf: r5636 \(hie\) at cfa\+6160
+  DW_CFA_offset_extended_sf: r5638 \(hcounteren\) at cfa\+6168
+  DW_CFA_offset_extended_sf: r5639 \(hgeie\) at cfa\+6172
+  DW_CFA_offset_extended_sf: r5699 \(htval\) at cfa\+6412
+  DW_CFA_offset_extended_sf: r5700 \(hip\) at cfa\+6416
+  DW_CFA_offset_extended_sf: r5701 \(hvip\) at cfa\+6420
+  DW_CFA_offset_extended_sf: r5706 \(htinst\) at cfa\+6440
+  DW_CFA_offset_extended_sf: r7698 \(hgeip\) at cfa\+14408
+  DW_CFA_offset_extended_sf: r5642 \(henvcfg\) at cfa\+6184
+  DW_CFA_offset_extended_sf: r5658 \(henvcfgh\) at cfa\+6248
+  DW_CFA_offset_extended_sf: r5760 \(hgatp\) at cfa\+6656
+  DW_CFA_offset_extended_sf: r5800 \(hcontext\) at cfa\+6816
+  DW_CFA_offset_extended_sf: r5637 \(htimedelta\) at cfa\+6164
+  DW_CFA_offset_extended_sf: r5653 \(htimedeltah\) at cfa\+6228
+  DW_CFA_offset_extended_sf: r4608 \(vsstatus\) at cfa\+2048
+  DW_CFA_offset_extended_sf: r4612 \(vsie\) at cfa\+2064
+  DW_CFA_offset_extended_sf: r4613 \(vstvec\) at cfa\+2068
+  DW_CFA_offset_extended_sf: r4672 \(vsscratch\) at cfa\+2304
+  DW_CFA_offset_extended_sf: r4673 \(vsepc\) at cfa\+2308
+  DW_CFA_offset_extended_sf: r4674 \(vscause\) at cfa\+2312
+  DW_CFA_offset_extended_sf: r4675 \(vstval\) at cfa\+2316
+  DW_CFA_offset_extended_sf: r4676 \(vsip\) at cfa\+2320
+  DW_CFA_offset_extended_sf: r4736 \(vsatp\) at cfa\+2560
+  DW_CFA_offset_extended_sf: r4163 \(utval\) at cfa\+268
+  DW_CFA_offset_extended_sf: r4419 \(stval\) at cfa\+1292
+  DW_CFA_offset_extended_sf: r4480 \(satp\) at cfa\+1536
+  DW_CFA_offset_extended_sf: r4931 \(mtval\) at cfa\+3340
+  DW_CFA_offset_extended_sf: r4896 \(mcountinhibit\) at cfa\+3200
   DW_CFA_offset_extended_sf: r4992 \(mbase\) at cfa\+3584
   DW_CFA_offset_extended_sf: r4993 \(mbound\) at cfa\+3588
   DW_CFA_offset_extended_sf: r4994 \(mibase\) at cfa\+3592
@@ -244,6 +275,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r6065 \(dpc\) at cfa\+7876
   DW_CFA_offset_extended_sf: r6066 \(dscratch0\) at cfa\+7880
   DW_CFA_offset_extended_sf: r6067 \(dscratch1\) at cfa\+7884
+  DW_CFA_offset_extended_sf: r6066 \(dscratch0\) at cfa\+7880
   DW_CFA_offset_extended_sf: r6048 \(tselect\) at cfa\+7808
   DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812
   DW_CFA_offset_extended_sf: r6050 \(tdata2\) at cfa\+7816
@@ -252,16 +284,18 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r6053 \(tcontrol\) at cfa\+7828
   DW_CFA_offset_extended_sf: r6056 \(mcontext\) at cfa\+7840
   DW_CFA_offset_extended_sf: r6058 \(scontext\) at cfa\+7848
-  DW_CFA_offset_extended_sf: r4163 \(utval\) at cfa\+268
-  DW_CFA_offset_extended_sf: r4419 \(stval\) at cfa\+1292
-  DW_CFA_offset_extended_sf: r4480 \(satp\) at cfa\+1536
-  DW_CFA_offset_extended_sf: r4931 \(mtval\) at cfa\+3340
-  DW_CFA_offset_extended_sf: r4896 \(mcountinhibit\) at cfa\+3200
-  DW_CFA_offset_extended_sf: r6066 \(dscratch0\) at cfa\+7880
   DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812
   DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812
   DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812
   DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812
   DW_CFA_offset_extended_sf: r6051 \(tdata3\) at cfa\+7820
   DW_CFA_offset_extended_sf: r6051 \(tdata3\) at cfa\+7820
+  DW_CFA_offset_extended_sf: r4117 \(seed\) at cfa\+84
+  DW_CFA_offset_extended_sf: r4104 \(vstart\) at cfa\+32
+  DW_CFA_offset_extended_sf: r4105 \(vxsat\) at cfa\+36
+  DW_CFA_offset_extended_sf: r4106 \(vxrm\) at cfa\+40
+  DW_CFA_offset_extended_sf: r4111 \(vcsr\) at cfa\+60
+  DW_CFA_offset_extended_sf: r7200 \(vl\) at cfa\+12416
+  DW_CFA_offset_extended_sf: r7201 \(vtype\) at cfa\+12420
+  DW_CFA_offset_extended_sf: r7202 \(vlenb\) at cfa\+12424
 #...

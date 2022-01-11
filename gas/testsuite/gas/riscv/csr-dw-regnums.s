@@ -219,6 +219,39 @@ _start:
 	.cfi_offset mhpmevent29, 3316
 	.cfi_offset mhpmevent30, 3320
 	.cfi_offset mhpmevent31, 3324
+	# Hypervisor extension (Privileged Architecture, version 1.12)
+	.cfi_offset hstatus, 6144
+	.cfi_offset hedeleg, 6152
+	.cfi_offset hideleg, 6156
+	.cfi_offset hie, 6160
+	.cfi_offset hcounteren, 6168
+	.cfi_offset hgeie, 6172
+	.cfi_offset htval, 6412
+	.cfi_offset hip, 6416
+	.cfi_offset hvip, 6420
+	.cfi_offset htinst, 6440
+	.cfi_offset hgeip, 14408
+	.cfi_offset henvcfg, 6184
+	.cfi_offset henvcfgh, 6248
+	.cfi_offset hgatp, 6656
+	.cfi_offset hcontext, 6816
+	.cfi_offset htimedelta, 6164
+	.cfi_offset htimedeltah, 6228
+	.cfi_offset vsstatus, 2048
+	.cfi_offset vsie, 2064
+	.cfi_offset vstvec, 2068
+	.cfi_offset vsscratch, 2304
+	.cfi_offset vsepc, 2308
+	.cfi_offset vscause, 2312
+	.cfi_offset vstval, 2316
+	.cfi_offset vsip, 2320
+	.cfi_offset vsatp, 2560
+	# dropped aliases
+	.cfi_offset ubadaddr, 268
+	.cfi_offset sbadaddr, 1292
+	.cfi_offset sptbr, 1536
+	.cfi_offset mbadaddr, 3340
+	.cfi_offset mucounteren, 3200
 	# dropped
 	.cfi_offset mbase, 3584
 	.cfi_offset mbound, 3588
@@ -236,6 +269,9 @@ _start:
 	.cfi_offset dpc, 7876
 	.cfi_offset dscratch0, 7880
 	.cfi_offset dscratch1, 7884
+	# unprivileged alias
+	.cfi_offset dscratch, 7880
+	# unprivileged
 	.cfi_offset tselect, 7808
 	.cfi_offset tdata1, 7812
 	.cfi_offset tdata2, 7816
@@ -245,17 +281,20 @@ _start:
 	.cfi_offset mcontext, 7840
 	.cfi_offset scontext, 7848
 	# aliases
-	.cfi_offset ubadaddr, 268
-	.cfi_offset sbadaddr, 1292
-	.cfi_offset sptbr, 1536
-	.cfi_offset mbadaddr, 3340
-	.cfi_offset mucounteren, 3200
-	.cfi_offset dscratch, 7880
 	.cfi_offset mcontrol, 7812
 	.cfi_offset icount, 7812
 	.cfi_offset itrigger, 7812
 	.cfi_offset etrigger, 7812
 	.cfi_offset textra32, 7820
 	.cfi_offset textra64, 7820
+	# unprivileged
+	.cfi_offset seed, 84
+	.cfi_offset vstart, 32
+	.cfi_offset vxsat, 36
+	.cfi_offset vxrm, 40
+	.cfi_offset vcsr, 60
+	.cfi_offset vl, 12416
+	.cfi_offset vtype, 12420
+	.cfi_offset vlenb, 12424
 	nop
 	.cfi_endproc
