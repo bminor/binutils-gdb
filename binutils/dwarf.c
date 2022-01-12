@@ -5137,7 +5137,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 	      else
 		directory = (char *) directory_table[ix - 1];
 
-	      if (do_wide || strlen (directory) < 76)
+	      if (do_wide)
 		printf (_("CU: %s/%s:\n"), directory, file_table[0].name);
 	      else
 		printf ("%s:\n", file_table[0].name);
