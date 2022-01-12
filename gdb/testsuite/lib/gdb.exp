@@ -3740,12 +3740,15 @@ proc skip_hw_watchpoint_tests {} {
     }
 
     # These targets support hardware watchpoints natively
+    # Note, not all Power 9 processors support hardware watchpoints due to a HW
+    # bug.  Use has_hw_wp_support to check do a runtime check for hardware
+    # watchpoint support on Powerpc.
     if { [istarget "i?86-*-*"] 
 	 || [istarget "x86_64-*-*"]
 	 || [istarget "ia64-*-*"] 
 	 || [istarget "arm*-*-*"]
 	 || [istarget "aarch64*-*-*"]
-	 || [istarget "powerpc*-*-linux*"]
+	 || ([istarget "powerpc*-*-linux*"] && [has_hw_wp_support])
 	 || [istarget "s390*-*-*"] } {
 	return 0
     }
@@ -8329,6 +8332,63 @@ proc target_file_exists_with_timeout { path } {
     }
 
     return 0
+}
+
+gdb_caching_proc has_hw_wp_support {
+    # Power 9, proc rev 2.2 does not support HW watchpoints due to HW bug.
+    # Need to use a runtime test to determine if the Power processor has
+    # support for HW watchpoints.
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set compile_flags {debug nowarnings quiet}
+    set me "has_hw_wp_support"
+
+    # Compile a test program to test if HW watchpoints are supported
+    set src {
+	int main (void) {
+	    volatile int local;
+	    local = 1;
+	    if (local == 1)
+		return 1;
+	    return 0;
+	}
+    }
+
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+        return 0
+    }
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+
+    if ![runto_main] {
+	set has_hw_wp_support 0
+	return $has_hw_wp_support
+    }
+
+    # The goal is to determine if HW watchpoints are available in general.
+    # Use "watch" and then check if gdb responds with hardware watch point.
+    set test "watch local"
+
+    gdb_test_multiple  $test "Check for HW watchpoint support" {
+	-re ".*Hardware watchpoint.*" {
+	    #  HW watchpoint supported by platform
+	    verbose -log "\n$me: Hardware watchpoint detected"
+            set has_hw_wp_support 1
+	}
+	-re ".*$gdb_prompt $" {
+	    set has_hw_wp_support 0
+	    verbose -log "\n$me: Default, hardware watchpoint not deteced"
+	}
+    }
+
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me: returning $has_hw_wp_support" 2
+    return $has_hw_wp_support
 }
 
 # Always load compatibility stuff.
