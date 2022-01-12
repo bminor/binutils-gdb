@@ -2701,6 +2701,16 @@ lang_add_section (lang_statement_list_type *ptr,
       output->block_value = 128;
     }
 
+  /* When a .ctors section is placed in .init_array it must be copied
+     in reverse order.  Similarly for .dtors.  Set that up.  */
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+      && ((startswith (section->name, ".ctors")
+	   && strcmp (output->bfd_section->name, ".init_array") == 0)
+	  || (startswith (section->name, ".dtors")
+	      && strcmp (output->bfd_section->name, ".fini_array") == 0))
+      && (section->name[6] == 0 || section->name[6] == '.'))
+    section->flags |= SEC_ELF_REVERSE_COPY;
+
   if (section->alignment_power > output->bfd_section->alignment_power)
     output->bfd_section->alignment_power = section->alignment_power;
 

@@ -11247,31 +11247,6 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	      && o->reloc_count > 0)
 	    return false;
 
-	  /* We need to reverse-copy input .ctors/.dtors sections if
-	     they are placed in .init_array/.finit_array for output.  */
-	  if (o->size > address_size
-	      && ((startswith (o->name, ".ctors")
-		   && strcmp (o->output_section->name,
-			      ".init_array") == 0)
-		  || (startswith (o->name, ".dtors")
-		      && strcmp (o->output_section->name,
-				 ".fini_array") == 0))
-	      && (o->name[6] == 0 || o->name[6] == '.'))
-	    {
-	      if (o->size * bed->s->int_rels_per_ext_rel
-		  != o->reloc_count * address_size)
-		{
-		  _bfd_error_handler
-		    /* xgettext:c-format */
-		    (_("error: %pB: size of section %pA is not "
-		       "multiple of address size"),
-		     input_bfd, o);
-		  bfd_set_error (bfd_error_bad_value);
-		  return false;
-		}
-	      o->flags |= SEC_ELF_REVERSE_COPY;
-	    }
-
 	  action_discarded = -1;
 	  if (!elf_section_ignore_discarded_relocs (o))
 	    action_discarded = (*bed->action_discarded) (o);
@@ -11756,9 +11731,24 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 
 		offset *= bfd_octets_per_byte (output_bfd, o);
 
-		if ((o->flags & SEC_ELF_REVERSE_COPY))
+		if ((o->flags & SEC_ELF_REVERSE_COPY)
+		    && o->size > address_size)
 		  {
 		    /* Reverse-copy input section to output.  */
+
+		    if (o->reloc_count != 0
+			&& (o->size * bed->s->int_rels_per_ext_rel
+			    != o->reloc_count * address_size))
+		      {
+			_bfd_error_handler
+			  /* xgettext:c-format */
+			  (_("error: %pB: size of section %pA is not "
+			     "multiple of address size"),
+			   input_bfd, o);
+			bfd_set_error (bfd_error_bad_value);
+			return false;
+		      }
+
 		    do
 		      {
 			todo -= address_size;
