@@ -291,9 +291,12 @@ weakdef (struct elf_link_hash_entry *h)
   _bfd_elf_symbol_refs_local_p (H, INFO, 1)
 
 /* Whether an undefined weak symbol should resolve to its link-time
-   value, even in PIC or PIE objects.  */
+   value, even in PIC or PIE objects.  The linker_def test is to
+   handle symbols like __ehdr_start that may be undefweak in early
+   stages of linking but are guaranteed to be defined later.  */
 #define UNDEFWEAK_NO_DYNAMIC_RELOC(INFO, H)		\
   ((H)->root.type == bfd_link_hash_undefweak		\
+   && !(H)->root.linker_def				\
    && (ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT	\
        || (INFO)->dynamic_undefined_weak == 0))
 

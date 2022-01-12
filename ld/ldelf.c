@@ -1607,11 +1607,6 @@ ldelf_before_allocation (char *audit, char *depaudit,
 		  || h->root.type == bfd_link_hash_undefweak
 		  || h->root.type == bfd_link_hash_common))
 	    {
-	      const struct elf_backend_data *bed;
-	      bed = get_elf_backend_data (link_info.output_bfd);
-	      (*bed->elf_backend_hide_symbol) (&link_info, h, true);
-	      if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
-		h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
 	      /* Don't leave the symbol undefined.  Undefined hidden
 		 symbols typically won't have dynamic relocations, but
 		 we most likely will need dynamic relocations for
