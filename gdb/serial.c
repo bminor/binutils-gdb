@@ -201,12 +201,7 @@ serial_open (const char *name)
   const char *open_name = name;
 
   if (startswith (name, "|"))
-    {
-      ops = serial_interface_lookup ("pipe");
-      /* Discard ``|'' and any space before the command itself.  */
-      ++open_name;
-      open_name = skip_spaces (open_name);
-    }
+    ops = serial_interface_lookup ("pipe");
   /* Check for a colon, suggesting an IP address/port pair.
      Do this *after* checking for all the interesting prefixes.  We
      don't want to constrain the syntax of what can follow them.  */
