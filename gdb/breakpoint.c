@@ -7730,6 +7730,9 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
 
 struct fork_catchpoint : public breakpoint
 {
+  /* True if the breakpoint is for vfork, false for fork.  */
+  bool is_vfork;
+
   /* Process id of a child process whose forking triggered this
      catchpoint.  This field is only valid immediately after this
      catchpoint has triggered.  */
@@ -7742,7 +7745,12 @@ struct fork_catchpoint : public breakpoint
 static int
 insert_catch_fork (struct bp_location *bl)
 {
-  return target_insert_fork_catchpoint (inferior_ptid.pid ());
+  struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
+
+  if (c->is_vfork)
+    return target_insert_vfork_catchpoint (inferior_ptid.pid ());
+  else
+    return target_insert_fork_catchpoint (inferior_ptid.pid ());
 }
 
 /* Implement the "remove" breakpoint_ops method for fork
@@ -7751,7 +7759,12 @@ insert_catch_fork (struct bp_location *bl)
 static int
 remove_catch_fork (struct bp_location *bl, enum remove_bp_reason reason)
 {
-  return target_remove_fork_catchpoint (inferior_ptid.pid ());
+  struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
+
+  if (c->is_vfork)
+    return target_remove_vfork_catchpoint (inferior_ptid.pid ());
+  else
+    return target_remove_fork_catchpoint (inferior_ptid.pid ());
 }
 
 /* Implement the "breakpoint_hit" breakpoint_ops method for fork
@@ -7764,7 +7777,9 @@ breakpoint_hit_catch_fork (const struct bp_location *bl,
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
 
-  if (ws.kind () != TARGET_WAITKIND_FORKED)
+  if (ws.kind () != (c->is_vfork
+		     ? TARGET_WAITKIND_VFORKED
+		     : TARGET_WAITKIND_FORKED))
     return 0;
 
   c->forked_inferior_pid = ws.child_ptid ();
@@ -7789,11 +7804,17 @@ print_it_catch_fork (bpstat *bs)
     uiout->text ("Catchpoint ");
   if (uiout->is_mi_like_p ())
     {
-      uiout->field_string ("reason", async_reason_lookup (EXEC_ASYNC_FORK));
+      uiout->field_string ("reason",
+			   async_reason_lookup (c->is_vfork
+						? EXEC_ASYNC_VFORK
+						: EXEC_ASYNC_FORK));
       uiout->field_string ("disp", bpdisp_text (b->disposition));
     }
   uiout->field_signed ("bkptno", b->number);
-  uiout->text (" (forked process ");
+  if (c->is_vfork)
+    uiout->text (" (vforked process ");
+  else
+    uiout->text (" (forked process ");
   uiout->field_signed ("newpid", c->forked_inferior_pid.pid ());
   uiout->text ("), ");
   return PRINT_SRC_AND_LOC;
@@ -7817,7 +7838,8 @@ print_one_catch_fork (struct breakpoint *b, struct bp_location **last_loc)
   if (opts.addressprint)
     uiout->field_skip ("addr");
   annotate_field (5);
-  uiout->text ("fork");
+  const char *name = c->is_vfork ? "vfork" : "fork";
+  uiout->text (name);
   if (c->forked_inferior_pid != null_ptid)
     {
       uiout->text (", process ");
@@ -7826,7 +7848,7 @@ print_one_catch_fork (struct breakpoint *b, struct bp_location **last_loc)
     }
 
   if (uiout->is_mi_like_p ())
-    uiout->field_string ("catch-type", "fork");
+    uiout->field_string ("catch-type", name);
 }
 
 /* Implement the "print_mention" breakpoint_ops method for fork
@@ -7835,7 +7857,9 @@ print_one_catch_fork (struct breakpoint *b, struct bp_location **last_loc)
 static void
 print_mention_catch_fork (struct breakpoint *b)
 {
-  printf_filtered (_("Catchpoint %d (fork)"), b->number);
+  struct fork_catchpoint *c = (struct fork_catchpoint *) b;
+  printf_filtered (_("Catchpoint %d (%s)"), c->number,
+		   c->is_vfork ? "vfork" : "fork");
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for fork
@@ -7844,128 +7868,15 @@ print_mention_catch_fork (struct breakpoint *b)
 static void
 print_recreate_catch_fork (struct breakpoint *b, struct ui_file *fp)
 {
-  fprintf_unfiltered (fp, "catch fork");
+  struct fork_catchpoint *c = (struct fork_catchpoint *) b;
+  fprintf_unfiltered (fp, "catch %s",
+		      c->is_vfork ? "vfork" : "fork");
   print_recreate_thread (b, fp);
 }
 
 /* The breakpoint_ops structure to be used in fork catchpoints.  */
 
 static struct breakpoint_ops catch_fork_breakpoint_ops;
-
-/* Implement the "insert" breakpoint_ops method for vfork
-   catchpoints.  */
-
-static int
-insert_catch_vfork (struct bp_location *bl)
-{
-  return target_insert_vfork_catchpoint (inferior_ptid.pid ());
-}
-
-/* Implement the "remove" breakpoint_ops method for vfork
-   catchpoints.  */
-
-static int
-remove_catch_vfork (struct bp_location *bl, enum remove_bp_reason reason)
-{
-  return target_remove_vfork_catchpoint (inferior_ptid.pid ());
-}
-
-/* Implement the "breakpoint_hit" breakpoint_ops method for vfork
-   catchpoints.  */
-
-static int
-breakpoint_hit_catch_vfork (const struct bp_location *bl,
-			    const address_space *aspace, CORE_ADDR bp_addr,
-			    const target_waitstatus &ws)
-{
-  struct fork_catchpoint *c = (struct fork_catchpoint *) bl->owner;
-
-  if (ws.kind () != TARGET_WAITKIND_VFORKED)
-    return 0;
-
-  c->forked_inferior_pid = ws.child_ptid ();
-  return 1;
-}
-
-/* Implement the "print_it" breakpoint_ops method for vfork
-   catchpoints.  */
-
-static enum print_stop_action
-print_it_catch_vfork (bpstat *bs)
-{
-  struct ui_out *uiout = current_uiout;
-  struct breakpoint *b = bs->breakpoint_at;
-  struct fork_catchpoint *c = (struct fork_catchpoint *) b;
-
-  annotate_catchpoint (b->number);
-  maybe_print_thread_hit_breakpoint (uiout);
-  if (b->disposition == disp_del)
-    uiout->text ("Temporary catchpoint ");
-  else
-    uiout->text ("Catchpoint ");
-  if (uiout->is_mi_like_p ())
-    {
-      uiout->field_string ("reason", async_reason_lookup (EXEC_ASYNC_VFORK));
-      uiout->field_string ("disp", bpdisp_text (b->disposition));
-    }
-  uiout->field_signed ("bkptno", b->number);
-  uiout->text (" (vforked process ");
-  uiout->field_signed ("newpid", c->forked_inferior_pid.pid ());
-  uiout->text ("), ");
-  return PRINT_SRC_AND_LOC;
-}
-
-/* Implement the "print_one" breakpoint_ops method for vfork
-   catchpoints.  */
-
-static void
-print_one_catch_vfork (struct breakpoint *b, struct bp_location **last_loc)
-{
-  struct fork_catchpoint *c = (struct fork_catchpoint *) b;
-  struct value_print_options opts;
-  struct ui_out *uiout = current_uiout;
-
-  get_user_print_options (&opts);
-  /* Field 4, the address, is omitted (which makes the columns not
-     line up too nicely with the headers, but the effect is relatively
-     readable).  */
-  if (opts.addressprint)
-    uiout->field_skip ("addr");
-  annotate_field (5);
-  uiout->text ("vfork");
-  if (c->forked_inferior_pid != null_ptid)
-    {
-      uiout->text (", process ");
-      uiout->field_signed ("what", c->forked_inferior_pid.pid ());
-      uiout->spaces (1);
-    }
-
-  if (uiout->is_mi_like_p ())
-    uiout->field_string ("catch-type", "vfork");
-}
-
-/* Implement the "print_mention" breakpoint_ops method for vfork
-   catchpoints.  */
-
-static void
-print_mention_catch_vfork (struct breakpoint *b)
-{
-  printf_filtered (_("Catchpoint %d (vfork)"), b->number);
-}
-
-/* Implement the "print_recreate" breakpoint_ops method for vfork
-   catchpoints.  */
-
-static void
-print_recreate_catch_vfork (struct breakpoint *b, struct ui_file *fp)
-{
-  fprintf_unfiltered (fp, "catch vfork");
-  print_recreate_thread (b, fp);
-}
-
-/* The breakpoint_ops structure to be used in vfork catchpoints.  */
-
-static struct breakpoint_ops catch_vfork_breakpoint_ops;
 
 /* An instance of this type is used to represent an solib catchpoint.
    A breakpoint is really of this type iff its ops pointer points to
@@ -8234,12 +8145,13 @@ install_breakpoint (int internal, std::unique_ptr<breakpoint> &&arg, int update_
 static void
 create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 				    bool temp, const char *cond_string,
-				    const struct breakpoint_ops *ops)
+				    bool is_vfork)
 {
   std::unique_ptr<fork_catchpoint> c (new fork_catchpoint ());
 
-  init_catchpoint (c.get (), gdbarch, temp, cond_string, ops);
-
+  init_catchpoint (c.get (), gdbarch, temp, cond_string,
+		   &catch_fork_breakpoint_ops);
+  c->is_vfork = is_vfork;
   c->forked_inferior_pid = null_ptid;
 
   install_breakpoint (0, std::move (c), 1);
@@ -11290,13 +11202,11 @@ catch_fork_command_1 (const char *arg, int from_tty,
     {
     case catch_fork_temporary:
     case catch_fork_permanent:
-      create_fork_vfork_event_catchpoint (gdbarch, temp, cond_string,
-					  &catch_fork_breakpoint_ops);
+      create_fork_vfork_event_catchpoint (gdbarch, temp, cond_string, false);
       break;
     case catch_vfork_temporary:
     case catch_vfork_permanent:
-      create_fork_vfork_event_catchpoint (gdbarch, temp, cond_string,
-					  &catch_vfork_breakpoint_ops);
+      create_fork_vfork_event_catchpoint (gdbarch, temp, cond_string, true);
       break;
     default:
       error (_("unsupported or unknown fork kind; cannot catch it"));
@@ -15364,17 +15274,6 @@ initialize_breakpoint_ops (void)
   ops->print_one = print_one_catch_fork;
   ops->print_mention = print_mention_catch_fork;
   ops->print_recreate = print_recreate_catch_fork;
-
-  /* Vfork catchpoints.  */
-  ops = &catch_vfork_breakpoint_ops;
-  *ops = base_breakpoint_ops;
-  ops->insert_location = insert_catch_vfork;
-  ops->remove_location = remove_catch_vfork;
-  ops->breakpoint_hit = breakpoint_hit_catch_vfork;
-  ops->print_it = print_it_catch_vfork;
-  ops->print_one = print_one_catch_vfork;
-  ops->print_mention = print_mention_catch_vfork;
-  ops->print_recreate = print_recreate_catch_vfork;
 
   /* Exec catchpoints.  */
   ops = &catch_exec_breakpoint_ops;
