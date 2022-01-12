@@ -999,6 +999,7 @@ COMMON_SFILES = \
 	bfd-target.c \
 	block.c \
 	blockframe.c \
+	break-catch-exec.c \
 	break-catch-fork.c \
 	break-catch-sig.c \
 	break-catch-syscall.c \
