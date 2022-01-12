@@ -81,12 +81,17 @@ delete_breakpoints
 
 # Test inferior call events
 
-gdb_test_multiple "info threads" "get current thread" {
-    -re -wrap "process ($decimal)\[^\n\r\]*do_nothing.*" {
+set process_id "invalid"
+gdb_test_multiple "thread" "get current thread" {
+    -re -wrap "process ($decimal).*" {
 	set process_id $expect_out(1,string)
 	pass $gdb_test_name
     }
-    -re -wrap "Thread $hex \\(LWP ($decimal)\\)\[^\n\r\]*do_nothing.*" {
+    -re -wrap "Thread $hex \\(LWP ($decimal)\\).*" {
+	set process_id $expect_out(1,string)
+	pass $gdb_test_name
+    }
+    -re -wrap "Thread $decimal\.($decimal).*" {
 	set process_id $expect_out(1,string)
 	pass $gdb_test_name
     }
