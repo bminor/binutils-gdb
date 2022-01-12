@@ -1,3 +1,8 @@
+2021-10-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* gennltvals.py: Filter SIGSTKSZ from signal output.
+	* nltvals.def: Regenerate.
+
 2021-07-01  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (SIM_RESERVED_BITS): Delete.
