@@ -537,10 +537,10 @@ public:
      exits or execs.  */
   bool pending_detach = false;
 
-  /* True if this inferior is a vfork parent waiting for a vfork child
-     not under our control to be done with the shared memory region,
-     either by exiting or execing.  */
-  bool waiting_for_vfork_done = false;
+  /* If non-nullptr, points to a thread that called vfork and is now waiting
+     for a vfork child not under our control to be done with the shared memory
+     region, either by exiting or execing.  */
+  thread_info *thread_waiting_for_vfork_done = nullptr;
 
   /* True if we're in the process of detaching from this inferior.  */
   bool detaching = false;
