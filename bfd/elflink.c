@@ -11834,9 +11834,10 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 		  {
 		    /* Reverse-copy input section to output.  */
 
-		    if (o->reloc_count != 0
-			&& (o->size * bed->s->int_rels_per_ext_rel
-			    != o->reloc_count * address_size))
+		    if ((o->size & (address_size - 1)) != 0
+			|| (o->reloc_count != 0
+			    && (o->size * bed->s->int_rels_per_ext_rel
+				!= o->reloc_count * address_size)))
 		      {
 			_bfd_error_handler
 			  /* xgettext:c-format */
