@@ -518,6 +518,14 @@ Return the name of the current target wide character set
 never returned.
 @end defun
 
+@findex gdb.host_charset
+@defun gdb.host_charset ()
+Return a string, the name of the current host character set
+(@pxref{Character Sets}).  This differs from
+@code{gdb.parameter('host-charset')} in that @samp{auto} is never
+returned.
+@end defun
+
 @findex gdb.solib_name
 @defun gdb.solib_name (address)
 Return the name of the shared library holding the given @var{address}

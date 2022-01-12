@@ -143,6 +143,9 @@ show debug lin-lwp
      is equivalent to the existing 'maint packet' CLI command; it
      allows a user specified packet to be sent to the remote target.
 
+  ** New function gdb.host_charset(), returns a string, which is the
+     name of the current host charset.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on OpenRISC GNU/Linux.

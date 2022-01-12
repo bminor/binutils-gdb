@@ -571,6 +571,16 @@ gdbpy_target_wide_charset (PyObject *self, PyObject *args)
   return PyUnicode_Decode (cset, strlen (cset), host_charset (), NULL);
 }
 
+/* Implement gdb.host_charset().  */
+
+static PyObject *
+gdbpy_host_charset (PyObject *self, PyObject *args)
+{
+  const char *cset = host_charset ();
+
+  return PyUnicode_Decode (cset, strlen (cset), host_charset (), NULL);
+}
+
 /* A Python function which evaluates a string using the gdb CLI.  */
 
 static PyObject *
@@ -2281,6 +2291,9 @@ Return the name of the current target charset." },
   { "target_wide_charset", gdbpy_target_wide_charset, METH_NOARGS,
     "target_wide_charset () -> string.\n\
 Return the name of the current target wide charset." },
+  { "host_charset", gdbpy_host_charset, METH_NOARGS,
+    "host_charset () -> string.\n\
+Return the name of the current host charset." },
   { "rbreak", (PyCFunction) gdbpy_rbreak, METH_VARARGS | METH_KEYWORDS,
     "rbreak (Regex) -> List.\n\
 Return a Tuple containing gdb.Breakpoint objects that match the given Regex." },
