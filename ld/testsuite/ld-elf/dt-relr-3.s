@@ -4,7 +4,7 @@
 _start:
 	.byte 0
 
-	// Section alignment is not a multiple of 2.  Don't use DT_RELR.
+# Section alignment is not a multiple of 2.  Don't use DT_RELR.
 	.data
 	.p2align 0
 	.globl data

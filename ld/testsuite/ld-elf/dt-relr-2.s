@@ -16,5 +16,5 @@ data:
 	.dc.a __ehdr_start + 9
 
 	.byte 0
-	// Offset is not a multiple of 2.  Don't use DT_RELR.
+# Offset is not a multiple of 2.  Don't use DT_RELR.
 	.dc.a __ehdr_start + 10
