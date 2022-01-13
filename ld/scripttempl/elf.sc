@@ -521,7 +521,7 @@ emit_dyn()
     fi
   fi
   rm -f ldscripts/dyntmp.$$
-  if test -n "${COMBRELOC}" && test -n "${HAVE_DT_RELR}"; then
+  if test -n "${HAVE_DT_RELR}"; then
     echo "  .relr.dyn : { *(.relr.dyn) }"
   fi
 }
