@@ -4615,8 +4615,11 @@ xcoff_link_input_bfd (struct xcoff_final_link_info *flinfo,
 	    }
 
 	  /* Update visibility.  */
-	  isym.n_type &= ~SYM_V_MASK;
-	  isym.n_type |= (*sym_hash)->visibility;
+	  if (*sym_hash)
+	    {
+	      isym.n_type &= ~SYM_V_MASK;
+	      isym.n_type |= (*sym_hash)->visibility;
+	    }
 
 	  /* Output the symbol.  */
 	  bfd_coff_swap_sym_out (output_bfd, (void *) &isym, (void *) outsym);

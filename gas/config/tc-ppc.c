@@ -4380,7 +4380,7 @@ ppc_comm (int lcomm)
   symbolS *lcomm_sym = NULL;
   symbolS *sym;
   char *pfrag;
-  unsigned short visibility;
+  unsigned short visibility = 0;
   struct ppc_xcoff_section *section;
 
   endc = get_symbol_name (&name);
