@@ -7959,6 +7959,7 @@ clone_momentary_breakpoint (struct breakpoint *orig)
   if (orig == NULL)
     return NULL;
 
+  gdb_assert (orig->ops == &momentary_breakpoint_ops);
   return momentary_breakpoint_from_master (orig, orig->type, orig->ops, 0);
 }
 
