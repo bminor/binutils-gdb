@@ -26,7 +26,7 @@ if { ![supports_dt_relr] } {
 run_cc_link_tests [list \
     [list \
 	"Build dt-relr-glibc-1a.so" \
-	"-shared $NO_DT_RELR_CC_LDFLAGS" \
+	"-shared -Wl,--no-as-needed $NO_DT_RELR_CC_LDFLAGS" \
 	"-fPIC" \
 	{ dt-relr-glibc-1.c } \
 	{{readelf {--version-info} dt-relr-glibc-1a.rd}} \
@@ -34,7 +34,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build dt-relr-glibc-1b.so" \
-	"-shared $DT_RELR_CC_LDFLAGS" \
+	"-shared -Wl,--no-as-needed $DT_RELR_CC_LDFLAGS" \
 	"-fPIC" \
 	{ dt-relr-glibc-1.c } \
 	{{readelf {-W --version-info} dt-relr-glibc-1b.rd}} \
