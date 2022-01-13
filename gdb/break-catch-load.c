@@ -133,7 +133,7 @@ print_it_catch_solib (bpstat *bs)
   uiout->text ("\n");
   if (uiout->is_mi_like_p ())
     uiout->field_string ("disp", bpdisp_text (b->disposition));
-  print_solib_event (1);
+  print_solib_event (true);
   return PRINT_SRC_AND_LOC;
 }
 

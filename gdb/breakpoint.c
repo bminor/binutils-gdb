@@ -4628,7 +4628,7 @@ print_bp_stop_message (bpstat *bs)
 /* See breakpoint.h.  */
 
 void
-print_solib_event (int is_catchpoint)
+print_solib_event (bool is_catchpoint)
 {
   bool any_deleted = !current_program_space->deleted_solibs.empty ();
   bool any_added = !current_program_space->added_solibs.empty ();
@@ -4721,7 +4721,7 @@ bpstat_print (bpstat *bs, int kind)
      OS-level shared library event, do the same thing.  */
   if (kind == TARGET_WAITKIND_LOADED)
     {
-      print_solib_event (0);
+      print_solib_event (false);
       return PRINT_NOTHING;
     }
 
@@ -11910,7 +11910,7 @@ internal_bkpt_print_it (bpstat *bs)
       /* Did we stop because the user set the stop_on_solib_events
 	 variable?  (If so, we report this as a generic, "Stopped due
 	 to shlib event" message.) */
-      print_solib_event (0);
+      print_solib_event (false);
       break;
 
     case bp_thread_event:

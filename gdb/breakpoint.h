@@ -1807,6 +1807,6 @@ extern void catch_exception_event (enum exception_event_kind ex_event,
    IS_CATCHPOINT is true if the event is due to a "catch load"
    catchpoint, false otherwise.  */
 
-extern void print_solib_event (int is_catchpoint);
+extern void print_solib_event (bool is_catchpoint);
 
 #endif /* !defined (BREAKPOINT_H) */
