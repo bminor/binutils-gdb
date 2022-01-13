@@ -427,6 +427,16 @@ proc supports_persistent_section {} {
     return 0;
 }
 
+# Whether a target support DT_RELR sections.
+proc supports_dt_relr {} {
+    if { ([istarget x86_64-*-*] || [istarget i?86-*-*])
+	 && ([istarget *-*-linux*]
+	     || [istarget *-*-gnu*]) } {
+	return 1
+    }
+    return 0
+}
+
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2
 # is the expected output.  Ignore blank lines in either file.
 #

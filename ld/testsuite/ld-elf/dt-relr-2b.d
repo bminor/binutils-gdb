@@ -1,7 +1,7 @@
 #source: dt-relr-2.s
 #ld: -e _start -pie $DT_RELR_LDFLAGS
 #readelf: -rW -d
-#target: x86_64-*-linux* i?86-*-linux-gnu i?86-*-gnu*
+#target: [supports_dt_relr]
 
 #...
  0x[0-9a-f]+ \(RELR\)    +0x[0-9a-f]+

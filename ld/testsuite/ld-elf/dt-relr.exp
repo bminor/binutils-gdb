@@ -19,8 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-# Linux tests.
-if { ![istarget "*-*-linux*"] } {
+if { ![supports_dt_relr] } {
     return
 }
 
