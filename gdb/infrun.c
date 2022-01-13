@@ -2189,6 +2189,10 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
   else
     target_pass_signals (signal_pass);
 
+  infrun_debug_printf ("resume_ptid=%s, step=%d, sig=%s",
+		       resume_ptid.to_string ().c_str (),
+		       step, gdb_signal_to_symbol_string (sig));
+
   target_resume (resume_ptid, step, sig);
 }
 
