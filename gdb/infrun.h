@@ -141,8 +141,11 @@ extern void nullify_last_target_wait_ptid ();
 /* Stop all threads.  Only returns after everything is halted.
 
    REASON is a string indicating the reason why we stop all threads, used in
-   debug messages.  */
-extern void stop_all_threads (const char *reason);
+   debug messages.
+
+   If INF is non-nullptr, stop all threads of that inferior.  Otherwise, stop
+   all threads of all inferiors.  */
+extern void stop_all_threads (const char *reason, inferior *inf = nullptr);
 
 extern void prepare_for_detach (void);
 

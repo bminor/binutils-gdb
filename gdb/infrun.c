@@ -3744,7 +3744,8 @@ struct wait_one_event
 };
 
 static bool handle_one (const wait_one_event &event);
-static void restart_threads (struct thread_info *event_thread);
+static void restart_threads (struct thread_info *event_thread,
+			     inferior *inf = nullptr);
 
 /* Prepare and stabilize the inferior for detaching it.  E.g.,
    detaching while a thread is displaced stepping is a recipe for
@@ -4908,7 +4909,7 @@ handle_one (const wait_one_event &event)
 /* See infrun.h.  */
 
 void
-stop_all_threads (const char *reason)
+stop_all_threads (const char *reason, inferior *inf)
 {
   /* We may need multiple passes to discover all threads.  */
   int pass;
@@ -4916,22 +4917,29 @@ stop_all_threads (const char *reason)
 
   gdb_assert (exists_non_stop_target ());
 
-  INFRUN_SCOPED_DEBUG_START_END ("reason=%s", reason);
+  INFRUN_SCOPED_DEBUG_START_END ("reason=%s, inf=%d", reason,
+				 inf != nullptr ? inf->num : -1);
 
   scoped_restore_current_thread restore_thread;
 
-  /* Enable thread events of all targets.  */
+  /* Enable thread events on relevant targets.  */
   for (auto *target : all_non_exited_process_targets ())
     {
+      if (inf != nullptr && inf->process_target () != target)
+	continue;
+
       switch_to_target_no_thread (target);
       target_thread_events (true);
     }
 
   SCOPE_EXIT
     {
-      /* Disable thread events of all targets.  */
+      /* Disable thread events on relevant targets.  */
       for (auto *target : all_non_exited_process_targets ())
 	{
+	  if (inf != nullptr && inf->process_target () != target)
+	    continue;
+
 	  switch_to_target_no_thread (target);
 	  target_thread_events (false);
 	}
@@ -4956,6 +4964,9 @@ stop_all_threads (const char *reason)
 
 	  for (auto *target : all_non_exited_process_targets ())
 	    {
+	      if (inf != nullptr && inf->process_target () != target)
+		continue;
+
 	      switch_to_target_no_thread (target);
 	      update_thread_list ();
 	    }
@@ -4964,6 +4975,9 @@ stop_all_threads (const char *reason)
 	     to tell the target to stop.  */
 	  for (thread_info *t : all_non_exited_threads ())
 	    {
+	      if (inf != nullptr && t->inf != inf)
+		continue;
+
 	      /* For a single-target setting with an all-stop target,
 		 we would not even arrive here.  For a multi-target
 		 setting, until GDB is able to handle a mixture of
@@ -5706,17 +5720,26 @@ handle_inferior_event (struct execution_control_state *ecs)
 }
 
 /* Restart threads back to what they were trying to do back when we
-   paused them for an in-line step-over.  The EVENT_THREAD thread is
-   ignored.  */
+   paused them (because of an in-line step-over or vfork, for example).
+   The EVENT_THREAD thread is ignored (not restarted).
+
+   If INF is non-nullptr, only resume threads from INF.  */
 
 static void
-restart_threads (struct thread_info *event_thread)
+restart_threads (struct thread_info *event_thread, inferior *inf)
 {
+  INFRUN_SCOPED_DEBUG_START_END ("event_thread=%s, inf=%d",
+				 event_thread->ptid.to_string ().c_str (),
+				 inf != nullptr ? inf->num : -1);
+
   /* In case the instruction just stepped spawned a new thread.  */
   update_thread_list ();
 
   for (thread_info *tp : all_non_exited_threads ())
     {
+      if (inf != nullptr && tp->inf != inf)
+	continue;
+
       if (tp->inf->detaching)
 	{
 	  infrun_debug_printf ("restart threads: [%s] inferior detaching",
