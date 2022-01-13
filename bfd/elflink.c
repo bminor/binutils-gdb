@@ -12209,7 +12209,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
   struct elf_outext_info eoinfo;
   bool merged;
-  size_t relativecount = 0;
+  size_t relativecount;
+  size_t relr_entsize;
   asection *reldyn = 0;
   bfd_size_type amt;
   asection *attr_section = NULL;
@@ -13053,8 +13054,23 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
       o->reloc_count = 0;
     }
 
+  relativecount = 0;
   if (dynamic && info->combreloc && dynobj != NULL)
     relativecount = elf_link_sort_relocs (abfd, info, &reldyn);
+
+  relr_entsize = 0;
+  if (htab->srelrdyn != NULL
+      && htab->srelrdyn->output_section != NULL
+      && htab->srelrdyn->size != 0)
+    {
+      asection *s = htab->srelrdyn->output_section;
+      relr_entsize = elf_section_data (s)->this_hdr.sh_entsize;
+      if (relr_entsize == 0)
+	{
+	  relr_entsize = bed->s->arch_size / 8;
+	  elf_section_data (s)->this_hdr.sh_entsize = relr_entsize;
+	}
+    }
 
   /* If we are linking against a dynamic object, or generating a
      shared library, finish up the dynamic linking information.  */
@@ -13083,17 +13099,44 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	    default:
 	      continue;
 	    case DT_NULL:
-	      if (relativecount > 0 && dyncon + bed->s->sizeof_dyn < dynconend)
+	      if (relativecount != 0)
 		{
 		  switch (elf_section_data (reldyn)->this_hdr.sh_type)
 		    {
 		    case SHT_REL: dyn.d_tag = DT_RELCOUNT; break;
 		    case SHT_RELA: dyn.d_tag = DT_RELACOUNT; break;
-		    default: continue;
 		    }
-		  dyn.d_un.d_val = relativecount;
+		  if (dyn.d_tag != DT_NULL
+		      && dynconend - dyncon >= bed->s->sizeof_dyn)
+		    {
+		      dyn.d_un.d_val = relativecount;
+		      relativecount = 0;
+		      break;
+		    }
 		  relativecount = 0;
-		  break;
+		}
+	      if (relr_entsize != 0)
+		{
+		  if (dynconend - dyncon >= 3 * bed->s->sizeof_dyn)
+		    {
+		      asection *s = htab->srelrdyn;
+		      dyn.d_tag = DT_RELR;
+		      dyn.d_un.d_ptr
+			= s->output_section->vma + s->output_offset;
+		      bed->s->swap_dyn_out (dynobj, &dyn, dyncon);
+		      dyncon += bed->s->sizeof_dyn;
+
+		      dyn.d_tag = DT_RELRSZ;
+		      dyn.d_un.d_val = s->size;
+		      bed->s->swap_dyn_out (dynobj, &dyn, dyncon);
+		      dyncon += bed->s->sizeof_dyn;
+
+		      dyn.d_tag = DT_RELRENT;
+		      dyn.d_un.d_val = relr_entsize;
+		      relr_entsize = 0;
+		      break;
+		    }
+		  relr_entsize = 0;
 		}
 	      continue;
 

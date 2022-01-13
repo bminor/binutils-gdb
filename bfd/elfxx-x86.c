@@ -2388,7 +2388,6 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
   asection *sdyn;
   bfd_byte *dyncon, *dynconend;
   bfd_size_type sizeof_dyn;
-  bfd_size_type dt_relr_bitmap_count;
 
   bed = get_elf_backend_data (output_bfd);
   htab = elf_x86_hash_table (info, bed->target_id);
@@ -2447,8 +2446,6 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
   if (sdyn == NULL || htab->elf.sgot == NULL)
     abort ();
 
-  dt_relr_bitmap_count = htab->dt_relr_bitmap.count;
-
   sizeof_dyn = bed->s->sizeof_dyn;
   dyncon = sdyn->contents;
   dynconend = sdyn->contents + sdyn->size;
@@ -2466,28 +2463,6 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 	      && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 	    break;
 	  continue;
-
-	case DT_NULL:
-	  if (dt_relr_bitmap_count != 0)
-	    {
-	      /* Convert 3 spare dynamic tags to DT_RELR, DT_RELRSZ and
-		 DT_RELRENT for compact relative relocation.  */
-	      s = htab->elf.srelrdyn;
-	      dyn.d_tag = DT_RELR;
-	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
-	      (*bed->s->swap_dyn_out) (output_bfd, &dyn, dyncon);
-	      dyncon += sizeof_dyn;
-	      dyn.d_tag = DT_RELRSZ;
-	      dyn.d_un.d_val = s->size;
-	      (*bed->s->swap_dyn_out) (output_bfd, &dyn, dyncon);
-	      dyncon += sizeof_dyn;
-	      dyn.d_tag = DT_RELRENT;
-	      dyn.d_un.d_val = ABI_64_P (output_bfd) ? 8 : 4;
-	      elf_section_data (s->output_section)->this_hdr.sh_entsize
-		= dyn.d_un.d_val;
-	      dt_relr_bitmap_count = 0;
-	    }
-	  break;
 
 	case DT_PLTGOT:
 	  s = htab->elf.sgotplt;
