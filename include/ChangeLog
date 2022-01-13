@@ -1,3 +1,11 @@
+2022-01-13  Nick Clifton  <nickc@redhat.com>
+
+	Import from gcc mainline:
+
+	2021-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* libiberty.h (strverscmp): Delete duplicate prototype.
+
 2021-12-07  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (AT_FREEBSD_FXRNG, AT_FREEBSD_KPRELOAD): Define.
