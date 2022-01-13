@@ -1,6 +1,6 @@
 #name: PR ld/20830 (.plt.got)
 #as: --32
-#ld: -melf_i386 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z noseparate-code
+#ld: -melf_i386 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z noseparate-code $NO_DT_RELR_LDFLAGS
 #objdump: -dw -Wf
 
 .*: +file format .*

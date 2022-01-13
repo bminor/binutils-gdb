@@ -1,6 +1,6 @@
 #name: PR ld/21038 (.plt.got and .plt.sec)
 #as: --64
-#ld: -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
+#ld: -z bndplt -melf_x86_64 -shared -z relro --ld-generated-unwind-info --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code $NO_DT_RELR_LDFLAGS
 #objdump: -dw -Wf
 
 .*: +file format .*
