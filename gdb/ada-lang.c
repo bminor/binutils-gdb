@@ -12042,21 +12042,15 @@ print_recreate_exception (struct breakpoint *b, struct ui_file *fp)
   print_recreate_thread (b, fp);
 }
 
-/* Virtual tables for various breakpoint types.  */
+/* Virtual table for breakpoint type.  */
 static struct breakpoint_ops catch_exception_breakpoint_ops;
-static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops;
-static struct breakpoint_ops catch_assert_breakpoint_ops;
-static struct breakpoint_ops catch_handlers_breakpoint_ops;
 
 /* See ada-lang.h.  */
 
 bool
 is_ada_exception_catchpoint (breakpoint *bp)
 {
-  return (bp->ops == &catch_exception_breakpoint_ops
-	  || bp->ops == &catch_exception_unhandled_breakpoint_ops
-	  || bp->ops == &catch_assert_breakpoint_ops
-	  || bp->ops == &catch_handlers_breakpoint_ops);
+  return bp->ops == &catch_exception_breakpoint_ops;
 }
 
 /* Split the arguments specified in a "catch exception" command.  
@@ -12166,32 +12160,6 @@ ada_exception_sym_name (enum ada_exception_catchpoint_kind ex)
     }
 }
 
-/* Return the breakpoint ops "virtual table" used for catchpoints
-   of the EX kind.  */
-
-static const struct breakpoint_ops *
-ada_exception_breakpoint_ops (enum ada_exception_catchpoint_kind ex)
-{
-  switch (ex)
-    {
-      case ada_catch_exception:
-	return (&catch_exception_breakpoint_ops);
-	break;
-      case ada_catch_exception_unhandled:
-	return (&catch_exception_unhandled_breakpoint_ops);
-	break;
-      case ada_catch_assert:
-	return (&catch_assert_breakpoint_ops);
-	break;
-      case ada_catch_handlers:
-	return (&catch_handlers_breakpoint_ops);
-	break;
-      default:
-	internal_error (__FILE__, __LINE__,
-			_("unexpected catchpoint kind (%d)"), ex);
-    }
-}
-
 /* Return the condition that will be used to match the current exception
    being raised with the exception that the user wants to catch.  This
    assumes that this condition is used when the inferior just triggered
@@ -12285,7 +12253,7 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex,
   *addr_string = sym_name;
 
   /* Set OPS.  */
-  *ops = ada_exception_breakpoint_ops (ex);
+  *ops = &catch_exception_breakpoint_ops;
 
   return find_function_start_sal (sym, 1);
 }
@@ -13437,36 +13405,6 @@ initialize_ada_catchpoint_ops (void)
   initialize_breakpoint_ops ();
 
   ops = &catch_exception_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
-  ops->allocate_location = allocate_location_exception;
-  ops->re_set = re_set_exception;
-  ops->check_status = check_status_exception;
-  ops->print_it = print_it_exception;
-  ops->print_one = print_one_exception;
-  ops->print_mention = print_mention_exception;
-  ops->print_recreate = print_recreate_exception;
-
-  ops = &catch_exception_unhandled_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
-  ops->allocate_location = allocate_location_exception;
-  ops->re_set = re_set_exception;
-  ops->check_status = check_status_exception;
-  ops->print_it = print_it_exception;
-  ops->print_one = print_one_exception;
-  ops->print_mention = print_mention_exception;
-  ops->print_recreate = print_recreate_exception;
-
-  ops = &catch_assert_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
-  ops->allocate_location = allocate_location_exception;
-  ops->re_set = re_set_exception;
-  ops->check_status = check_status_exception;
-  ops->print_it = print_it_exception;
-  ops->print_one = print_one_exception;
-  ops->print_mention = print_mention_exception;
-  ops->print_recreate = print_recreate_exception;
-
-  ops = &catch_handlers_breakpoint_ops;
   *ops = bkpt_breakpoint_ops;
   ops->allocate_location = allocate_location_exception;
   ops->re_set = re_set_exception;
