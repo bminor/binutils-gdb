@@ -44,10 +44,10 @@
 
 #define NUM_CHARS (71)
 
-unsigned char ascii_string[NUM_CHARS];
-unsigned char iso_8859_1_string[NUM_CHARS];
-unsigned char ebcdic_us_string[NUM_CHARS];
-unsigned char ibm1047_string[NUM_CHARS];
+char ascii_string[NUM_CHARS];
+char iso_8859_1_string[NUM_CHARS];
+char ebcdic_us_string[NUM_CHARS];
+char ibm1047_string[NUM_CHARS];
 
 #ifndef __cplusplus
 
@@ -86,7 +86,7 @@ long long_array[3];
    explicit casts or warnings.  */
 
 void
-init_string (unsigned char string[],
+init_string (char string[],
 	     unsigned char x,
 	     unsigned char alert,
 	     unsigned char backspace,
@@ -115,7 +115,7 @@ init_string (unsigned char string[],
 
 
 void
-fill_run (unsigned char string[], int start, int len, int first)
+fill_run (char string[], int start, int len, int first)
 {
   int i;
 
