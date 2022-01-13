@@ -10630,8 +10630,13 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   /* Decode line number information if present.  We do this before
      processing child DIEs, so that the line header table is available
-     for DW_AT_decl_file.  */
-  handle_DW_AT_stmt_list (die, cu, fnd, lowpc);
+     for DW_AT_decl_file.  The PC check is here because, if LOWPC and
+     HIGHPC are both 0x0, then there won't be any interesting code in
+     the CU, but a check later on (in
+     lnp_state_machine::check_line_address) will fail to properly
+     exclude an entry that was removed via --gc-sections.  */
+  if (lowpc != highpc)
+    handle_DW_AT_stmt_list (die, cu, fnd, lowpc);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
