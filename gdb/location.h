@@ -109,16 +109,10 @@ struct explicit_location
 extern enum event_location_type
   event_location_type (const struct event_location *);
 
-/* Return a malloc'd explicit string representation of the given
-   explicit location.  The location must already be canonicalized/valid.  */
+/* Return a linespec string representation of the given explicit
+   location.  The location must already be canonicalized/valid.  */
 
-extern char *
-  explicit_location_to_string (const struct explicit_location *explicit_loc);
-
-/* Return a malloc'd linespec string representation of the given
-   explicit location.  The location must already be canonicalized/valid.  */
-
-extern char *
+extern gdb::unique_xmalloc_ptr<char>
   explicit_location_to_linespec (const struct explicit_location *explicit_loc);
 
 /* Return a string representation of the LOCATION.
@@ -286,6 +280,6 @@ extern int event_location_empty_p (const struct event_location *location);
 
 extern void
   set_event_location_string (struct event_location *location,
-			     const char *string);
+			     gdb::unique_xmalloc_ptr<char> string);
 
 #endif /* LOCATION_H */

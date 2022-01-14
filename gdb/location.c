@@ -231,7 +231,7 @@ get_explicit_location_const (const struct event_location *location)
    AS_LINESPEC is non-zero if this string should be a linespec.
    Otherwise it will be output in explicit form.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 explicit_to_string_internal (int as_linespec,
 			     const struct explicit_location *explicit_loc)
 {
@@ -282,12 +282,12 @@ explicit_to_string_internal (int as_linespec,
 		  explicit_loc->line_offset.offset);
     }
 
-  return xstrdup (buf.c_str ());
+  return make_unique_xstrdup (buf.c_str ());
 }
 
 /* See description in location.h.  */
 
-char *
+static gdb::unique_xmalloc_ptr<char>
 explicit_location_to_string (const struct explicit_location *explicit_loc)
 {
   return explicit_to_string_internal (0, explicit_loc);
@@ -295,7 +295,7 @@ explicit_location_to_string (const struct explicit_location *explicit_loc)
 
 /* See description in location.h.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 explicit_location_to_linespec (const struct explicit_location *explicit_loc)
 {
   return explicit_to_string_internal (1, explicit_loc);
@@ -425,7 +425,7 @@ event_location_to_string (struct event_location *location)
 
 	case EXPLICIT_LOCATION:
 	  EL_STRING (location)
-	    = explicit_location_to_string (EL_EXPLICIT (location));
+	    = explicit_location_to_string (EL_EXPLICIT (location)).release ();
 	  break;
 
 	case PROBE_LOCATION:
@@ -981,8 +981,8 @@ event_location_empty_p (const struct event_location *location)
 
 void
 set_event_location_string (struct event_location *location,
-			   const char *string)
+			   gdb::unique_xmalloc_ptr<char> string)
 {
   xfree (EL_STRING (location));
-  EL_STRING (location) = string == NULL ?  NULL : xstrdup (string);
+  EL_STRING (location) = string.release ();
 }

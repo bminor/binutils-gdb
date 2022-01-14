@@ -2098,12 +2098,8 @@ canonicalize_linespec (struct linespec_state *state, const linespec *ls)
   /* If this location originally came from a linespec, save a string
      representation of it for display and saving to file.  */
   if (state->is_linespec)
-    {
-      char *linespec = explicit_location_to_linespec (explicit_loc);
-
-      set_event_location_string (canon, linespec);
-      xfree (linespec);
-    }
+    set_event_location_string (canon,
+			       explicit_location_to_linespec (explicit_loc));
 }
 
 /* Given a line offset in LS, construct the relevant SALs.  */
