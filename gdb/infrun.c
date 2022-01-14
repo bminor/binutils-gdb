@@ -96,6 +96,11 @@ static void resume (gdb_signal sig);
 
 static void wait_for_inferior (inferior *inf);
 
+static void restart_threads (struct thread_info *event_thread,
+			     inferior *inf = nullptr);
+
+static bool start_step_over (void);
+
 /* Asynchronous signal handler registered as event loop source for
    when we have pending events ready to be passed to the core.  */
 static struct async_event_handler *infrun_async_inferior_event_token;
@@ -432,6 +437,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
   inferior *parent_inf = current_inferior ();
   inferior *child_inf = nullptr;
 
+  gdb_assert (parent_inf->thread_waiting_for_vfork_done == nullptr);
+
   if (!follow_child)
     {
       /* Detach new forked process?  */
@@ -641,7 +648,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_inf->pending_detach = 0;
 	  parent_inf->vfork_child = child_inf;
 	  parent_inf->pending_detach = detach_fork;
-	  parent_inf->thread_waiting_for_vfork_done = nullptr;
 	}
       else if (detach_fork)
 	{
@@ -772,6 +778,12 @@ follow_fork ()
 
 	parent = inferior_ptid;
 	child = tp->pending_follow.child_ptid ();
+
+	/* If handling a vfork, stop all the inferior's threads, they will be
+	   restarted when the vfork shared region is complete.  */
+	if (tp->pending_follow.kind () == TARGET_WAITKIND_VFORKED
+	    && target_is_non_stop_p ())
+	  stop_all_threads ("handling vfork", tp->inf);
 
 	process_stratum_target *parent_targ = tp->inf->process_target ();
 	/* Set up inferior(s) as specified by the caller, and tell the
@@ -1031,6 +1043,53 @@ handle_vfork_child_exec_or_exit (int exec)
 	  for (thread_info *thread : resume_parent->threads ())
 	    proceed_after_vfork_done (thread);
 	}
+    }
+}
+
+/* Handle TARGET_WAITKIND_VFORK_DONE.  */
+
+static void
+handle_vfork_done (thread_info *event_thread)
+{
+  /* We only care about this event if inferior::thread_waiting_for_vfork_done is
+     set, that is if we are waiting for a vfork child not under our control
+     (because we detached it) to exec or exit.
+
+     If an inferior has vforked and we are debugging the child, we don't use
+     the vfork-done event to get notified about the end of the shared address
+     space window.  We rely instead on the child's exec or exit event, and the
+     inferior::vfork_{parent,child} fields are used instead.  See
+     handle_vfork_child_exec_or_exit for that.  */
+  if (event_thread->inf->thread_waiting_for_vfork_done == nullptr)
+    {
+      infrun_debug_printf ("not waiting for a vfork-done event");
+      return;
+    }
+
+  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
+  /* We stopped all threads (other than the vforking thread) of the inferior in
+     follow_fork and kept them stopped until now.  It should therefore not be
+     possible for another thread to have reported a vfork during that window.
+     If THREAD_WAITING_FOR_VFORK_DONE is set, it has to be the same thread whose
+     vfork-done we are handling right now.  */
+  gdb_assert (event_thread->inf->thread_waiting_for_vfork_done == event_thread);
+
+  event_thread->inf->thread_waiting_for_vfork_done = nullptr;
+  event_thread->inf->pspace->breakpoints_not_allowed = 0;
+
+  /* On non-stop targets, we stopped all the inferior's threads in follow_fork,
+     resume them now.  On all-stop targets, everything that needs to be resumed
+     will be when we resume the event thread.  */
+  if (target_is_non_stop_p ())
+    {
+      /* restart_threads and start_step_over may change the current thread, make
+	 sure we leave the event thread as the current thread.  */
+      scoped_restore_current_thread restore_thread;
+
+      insert_breakpoints ();
+      restart_threads (event_thread, event_thread->inf);
+      start_step_over ();
     }
 }
 
@@ -1908,6 +1967,16 @@ start_step_over (void)
 	  continue;
 	}
 
+      if (tp->inf->thread_waiting_for_vfork_done != nullptr)
+	{
+	  /* When we stop all threads, handling a vfork, any thread in the step
+	     over chain remains there.  A user could also try to continue a
+	     thread stopped at a breakpoint while another thread is waiting for
+	     a vfork-done event.  In any case, we don't want to start a step
+	     over right now.  */
+	  continue;
+	}
+
       /* Remove thread from the THREADS_TO_STEP chain.  If anything goes wrong
 	 while we try to prepare the displaced step, we don't add it back to
 	 the global step over chain.  This is to avoid a thread staying in the
@@ -2143,8 +2212,41 @@ internal_resume_ptid (int user_step)
      return a wildcard ptid.  */
   if (target_is_non_stop_p ())
     return inferior_ptid;
-  else
-    return user_visible_resume_ptid (user_step);
+
+  /* The rest of the function assumes non-stop==off and
+     target-non-stop==off.
+
+     If a thread is waiting for a vfork-done event, it means breakpoints are out
+     for this inferior (well, program space in fact).  We don't want to resume
+     any thread other than the one waiting for vfork done, otherwise these other
+     threads could miss breakpoints.  So if a thread in the resumption set is
+     waiting for a vfork-done event, resume only that thread.
+
+     The resumption set width depends on whether schedule-multiple is on or off.
+
+     Note that if the target_resume interface was more flexible, we could be
+     smarter here when schedule-multiple is on.  For example, imagine 3
+     inferiors with 2 threads each (1.1, 1.2, 2.1, 2.2, 3.1 and 3.2).  Threads
+     2.1 and 3.2 are both waiting for a vfork-done event.  Then we could ask the
+     target(s) to resume:
+
+      - All threads of inferior 1
+      - Thread 2.1
+      - Thread 3.2
+
+     Since we don't have that flexibility (we can only pass one ptid), just
+     resume the first thread waiting for a vfork-done event we find (e.g. thread
+     2.1).  */
+  if (sched_multi)
+    {
+      for (inferior *inf : all_non_exited_inferiors ())
+	if (inf->thread_waiting_for_vfork_done != nullptr)
+	  return inf->thread_waiting_for_vfork_done->ptid;
+    }
+  else if (current_inferior ()->thread_waiting_for_vfork_done != nullptr)
+    return current_inferior ()->thread_waiting_for_vfork_done->ptid;
+
+  return user_visible_resume_ptid (user_step);
 }
 
 /* Wrapper for target_resume, that handles infrun-specific
@@ -3254,6 +3356,19 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 		continue;
 	      }
 
+	    /* If a thread of that inferior is waiting for a vfork-done
+	       (for a detached vfork child to exec or exit), breakpoints are
+	       removed.  We must not resume any thread of that inferior, other
+	       than the one waiting for the vfork-done.  */
+	    if (tp->inf->thread_waiting_for_vfork_done != nullptr
+		&& tp != tp->inf->thread_waiting_for_vfork_done)
+	      {
+		infrun_debug_printf ("[%s] another thread of this inferior is "
+				     "waiting for vfork-done",
+				     tp->ptid.to_string ().c_str ());
+		continue;
+	      }
+
 	    infrun_debug_printf ("resuming %s",
 				 tp->ptid.to_string ().c_str ());
 
@@ -3264,7 +3379,13 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 	      error (_("Command aborted."));
 	  }
       }
-    else if (!cur_thr->resumed () && !thread_is_in_step_over_chain (cur_thr))
+    else if (!cur_thr->resumed ()
+	     && !thread_is_in_step_over_chain (cur_thr)
+	     /* In non-stop, forbid resuming a thread if some other thread of
+		that inferior is waiting for a vfork-done event (this means
+		breakpoints are out for this inferior).  */
+	     && !(non_stop
+		  && cur_thr->inf->thread_waiting_for_vfork_done != nullptr))
       {
 	/* The thread wasn't started, and isn't queued, run it now.  */
 	reset_ecs (ecs, cur_thr);
@@ -3748,8 +3869,6 @@ struct wait_one_event
 };
 
 static bool handle_one (const wait_one_event &event);
-static void restart_threads (struct thread_info *event_thread,
-			     inferior *inf = nullptr);
 
 /* Prepare and stabilize the inferior for detaching it.  E.g.,
    detaching while a thread is displaced stepping is a recipe for
@@ -5629,8 +5748,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       context_switch (ecs);
 
-      current_inferior ()->thread_waiting_for_vfork_done = nullptr;
-      current_inferior ()->pspace->breakpoints_not_allowed = 0;
+      handle_vfork_done (ecs->event_thread);
+      gdb_assert (inferior_thread () == ecs->event_thread);
 
       if (handle_stop_requested (ecs))
 	return;
