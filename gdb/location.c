@@ -228,14 +228,14 @@ get_explicit_location_const (const struct event_location *location)
 /* This convenience function returns a malloc'd string which
    represents the location in EXPLICIT_LOC.
 
-   AS_LINESPEC is non-zero if this string should be a linespec.
+   AS_LINESPEC is true if this string should be a linespec.
    Otherwise it will be output in explicit form.  */
 
 static gdb::unique_xmalloc_ptr<char>
-explicit_to_string_internal (int as_linespec,
+explicit_to_string_internal (bool as_linespec,
 			     const struct explicit_location *explicit_loc)
 {
-  int need_space = 0;
+  bool need_space = false;
   char space = as_linespec ? ':' : ' ';
   string_file buf;
 
@@ -244,7 +244,7 @@ explicit_to_string_internal (int as_linespec,
       if (!as_linespec)
 	buf.puts ("-source ");
       buf.puts (explicit_loc->source_filename);
-      need_space = 1;
+      need_space = true;
     }
 
   if (explicit_loc->function_name != NULL)
@@ -256,7 +256,7 @@ explicit_to_string_internal (int as_linespec,
       if (!as_linespec)
 	buf.puts ("-function ");
       buf.puts (explicit_loc->function_name);
-      need_space = 1;
+      need_space = true;
     }
 
   if (explicit_loc->label_name != NULL)
@@ -266,7 +266,7 @@ explicit_to_string_internal (int as_linespec,
       if (!as_linespec)
 	buf.puts ("-label ");
       buf.puts (explicit_loc->label_name);
-      need_space = 1;
+      need_space = true;
     }
 
   if (explicit_loc->line_offset.sign != LINE_OFFSET_UNKNOWN)
@@ -290,7 +290,7 @@ explicit_to_string_internal (int as_linespec,
 static gdb::unique_xmalloc_ptr<char>
 explicit_location_to_string (const struct explicit_location *explicit_loc)
 {
-  return explicit_to_string_internal (0, explicit_loc);
+  return explicit_to_string_internal (false, explicit_loc);
 }
 
 /* See description in location.h.  */
@@ -298,7 +298,7 @@ explicit_location_to_string (const struct explicit_location *explicit_loc)
 gdb::unique_xmalloc_ptr<char>
 explicit_location_to_linespec (const struct explicit_location *explicit_loc)
 {
-  return explicit_to_string_internal (1, explicit_loc);
+  return explicit_to_string_internal (true, explicit_loc);
 }
 
 /* See description in location.h.  */
