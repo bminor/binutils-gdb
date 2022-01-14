@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include <string.h>
 
-static gdb::unique_xmalloc_ptr<char> explicit_location_to_string
+static std::string explicit_location_to_string
      (const struct explicit_location *explicit_loc);
 
 /* The base class for all an event locations used to set a stop event
@@ -37,10 +37,7 @@ static gdb::unique_xmalloc_ptr<char> explicit_location_to_string
 
 struct event_location
 {
-  virtual ~event_location ()
-  {
-    xfree (as_string);
-  }
+  virtual ~event_location () = default;
 
   /* Clone this object.  */
   virtual event_location_up clone () const = 0;
@@ -49,11 +46,13 @@ struct event_location
   virtual bool empty_p () const = 0;
 
   /* Return a string representation of this location.  */
-  const char *to_string ()
+  const char *to_string () const
   {
-    if (as_string == nullptr)
+    if (as_string.empty ())
       as_string = compute_string ();
-    return as_string;
+    if (as_string.empty ())
+      return nullptr;
+    return as_string.c_str ();
   }
 
   DISABLE_COPY_AND_ASSIGN (event_location);
@@ -61,9 +60,9 @@ struct event_location
   /* The type of this breakpoint specification.  */
   enum event_location_type type;
 
-  /* Cached string representation of this location.  This is used, e.g., to
-     save stop event locations to file.  Malloc'd.  */
-  char *as_string = nullptr;
+  /* Cached string representation of this location.  This is used,
+     e.g., to save stop event locations to file.  */
+  mutable std::string as_string;
 
 protected:
 
@@ -74,15 +73,13 @@ protected:
 
   explicit event_location (const event_location *to_clone)
     : type (to_clone->type),
-      as_string (to_clone->as_string == nullptr
-		 ? nullptr
-		 : xstrdup (to_clone->as_string))
+      as_string (to_clone->as_string)
   {
   }
 
   /* Compute the string representation of this object.  This is called
      by to_string when needed.  */
-  virtual char *compute_string () = 0;
+  virtual std::string compute_string () const = 0;
 };
 
 /* A probe.  */
@@ -123,9 +120,9 @@ protected:
   {
   }
 
-  char *compute_string () override
+  std::string compute_string () const override
   {
-    return xstrdup (addr_string);
+    return addr_string;
   }
 };
 
@@ -176,17 +173,17 @@ protected:
       linespec_location.spec_string = xstrdup (linespec_location.spec_string);
   }
 
-  char *compute_string () override
+  std::string compute_string () const override
   {
     if (linespec_location.spec_string != nullptr)
       {
-	struct linespec_location *ls = &linespec_location;
+	const struct linespec_location *ls = &linespec_location;
 	if (ls->match_type == symbol_name_match_type::FULL)
-	  return concat ("-qualified ", ls->spec_string, (char *) nullptr);
+	  return std::string ("-qualified ") + ls->spec_string;
 	else
-	  return xstrdup (ls->spec_string);
+	  return ls->spec_string;
       }
-    return nullptr;
+    return {};
   }
 };
 
@@ -199,7 +196,7 @@ struct event_location_address : public event_location
       address (addr)
   {
     if (addr_string != nullptr)
-      as_string = xstrndup (addr_string, addr_string_len);
+      as_string = std::string (addr_string, addr_string_len);
   }
 
   event_location_up clone () const override
@@ -222,10 +219,10 @@ protected:
   {
   }
 
-  char *compute_string () override
+  std::string compute_string () const override
   {
     const char *addr_string = core_addr_to_string (address);
-    return xstrprintf ("*%s", addr_string).release ();
+    return std::string ("*") + addr_string;
   }
 };
 
@@ -268,9 +265,9 @@ protected:
     copy_loc (&to_clone->explicit_loc);
   }
 
-  char *compute_string () override
+  std::string compute_string () const override
   {
-    return explicit_location_to_string (&explicit_loc).release ();
+    return explicit_location_to_string (&explicit_loc);
   }
 
 private:
@@ -354,7 +351,7 @@ const char *
 get_address_string_location (const struct event_location *location)
 {
   gdb_assert (location->type == ADDRESS_LOCATION);
-  return location->as_string;
+  return location->to_string ();
 }
 
 /* See description in location.h.  */
@@ -406,7 +403,7 @@ get_explicit_location_const (const struct event_location *location)
    AS_LINESPEC is true if this string should be a linespec.
    Otherwise it will be output in explicit form.  */
 
-static gdb::unique_xmalloc_ptr<char>
+static std::string
 explicit_to_string_internal (bool as_linespec,
 			     const struct explicit_location *explicit_loc)
 {
@@ -457,12 +454,12 @@ explicit_to_string_internal (bool as_linespec,
 		  explicit_loc->line_offset.offset);
     }
 
-  return make_unique_xstrdup (buf.c_str ());
+  return std::move (buf.string ());
 }
 
 /* See description in location.h.  */
 
-static gdb::unique_xmalloc_ptr<char>
+static std::string
 explicit_location_to_string (const struct explicit_location *explicit_loc)
 {
   return explicit_to_string_internal (false, explicit_loc);
@@ -470,7 +467,7 @@ explicit_location_to_string (const struct explicit_location *explicit_loc)
 
 /* See description in location.h.  */
 
-gdb::unique_xmalloc_ptr<char>
+std::string
 explicit_location_to_linespec (const struct explicit_location *explicit_loc)
 {
   return explicit_to_string_internal (true, explicit_loc);
@@ -1020,8 +1017,7 @@ event_location_empty_p (const struct event_location *location)
 
 void
 set_event_location_string (struct event_location *location,
-			   gdb::unique_xmalloc_ptr<char> string)
+			   std::string &&string)
 {
-  xfree (location->as_string);
-  location->as_string = string.release ();
+  location->as_string = std::move (string);
 }

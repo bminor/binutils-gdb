@@ -112,7 +112,7 @@ extern enum event_location_type
 /* Return a linespec string representation of the given explicit
    location.  The location must already be canonicalized/valid.  */
 
-extern gdb::unique_xmalloc_ptr<char>
+extern std::string
   explicit_location_to_linespec (const struct explicit_location *explicit_loc);
 
 /* Return a string representation of the LOCATION.
@@ -275,11 +275,10 @@ extern event_location_up
 
 extern int event_location_empty_p (const struct event_location *location);
 
-/* Set the location's string representation.  If STRING is NULL, clear
-   the string representation.  */
+/* Set the location's string representation.  */
 
 extern void
   set_event_location_string (struct event_location *location,
-			     gdb::unique_xmalloc_ptr<char> string);
+			     std::string &&string);
 
 #endif /* LOCATION_H */
