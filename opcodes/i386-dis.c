@@ -1212,8 +1212,8 @@ enum
   PREFIX_EVEX_0F38AA,
   PREFIX_EVEX_0F38AB,
 
-  PREFIX_EVEX_0F3A08_W_0,
-  PREFIX_EVEX_0F3A0A_W_0,
+  PREFIX_EVEX_0F3A08,
+  PREFIX_EVEX_0F3A0A,
   PREFIX_EVEX_0F3A26,
   PREFIX_EVEX_0F3A27,
   PREFIX_EVEX_0F3A56,
@@ -1233,10 +1233,8 @@ enum
   PREFIX_EVEX_MAP5_51,
   PREFIX_EVEX_MAP5_58,
   PREFIX_EVEX_MAP5_59,
-  PREFIX_EVEX_MAP5_5A_W_0,
-  PREFIX_EVEX_MAP5_5A_W_1,
-  PREFIX_EVEX_MAP5_5B_W_0,
-  PREFIX_EVEX_MAP5_5B_W_1,
+  PREFIX_EVEX_MAP5_5A,
+  PREFIX_EVEX_MAP5_5B,
   PREFIX_EVEX_MAP5_5C,
   PREFIX_EVEX_MAP5_5D,
   PREFIX_EVEX_MAP5_5E,
@@ -1246,7 +1244,7 @@ enum
   PREFIX_EVEX_MAP5_7A,
   PREFIX_EVEX_MAP5_7B,
   PREFIX_EVEX_MAP5_7C,
-  PREFIX_EVEX_MAP5_7D_W_0,
+  PREFIX_EVEX_MAP5_7D,
 
   PREFIX_EVEX_MAP6_13,
   PREFIX_EVEX_MAP6_56,
@@ -1746,9 +1744,7 @@ enum
   EVEX_W_0F3883,
 
   EVEX_W_0F3A05,
-  EVEX_W_0F3A08,
   EVEX_W_0F3A09,
-  EVEX_W_0F3A0A,
   EVEX_W_0F3A0B,
   EVEX_W_0F3A18_L_n,
   EVEX_W_0F3A19_L_n,
@@ -1765,21 +1761,8 @@ enum
   EVEX_W_0F3A70,
   EVEX_W_0F3A72,
 
-  EVEX_W_MAP5_5A,
-  EVEX_W_MAP5_5B,
-  EVEX_W_MAP5_78_P_0,
-  EVEX_W_MAP5_78_P_2,
-  EVEX_W_MAP5_79_P_0,
-  EVEX_W_MAP5_79_P_2,
-  EVEX_W_MAP5_7A_P_2,
+  EVEX_W_MAP5_5B_P_0,
   EVEX_W_MAP5_7A_P_3,
-  EVEX_W_MAP5_7B_P_2,
-  EVEX_W_MAP5_7C_P_0,
-  EVEX_W_MAP5_7C_P_2,
-  EVEX_W_MAP5_7D,
-
-  EVEX_W_MAP6_13_P_0,
-  EVEX_W_MAP6_13_P_2,
 };
 
 typedef void (*op_rtn) (instr_info *ins, int bytemode, int sizeflag);
@@ -1840,7 +1823,9 @@ struct dis386 {
    "XZ" => print 'x', 'y', or 'z' if suffix_always is true or no
 	   register operands and no broadcast.
    "XW" => print 's', 'd' depending on the VEX.W bit (for FMA)
+   "XD" => print 'd' if EVEX.W=1, EVEX.W=0 is not a valid encoding
    "XH" => print 'h' if EVEX.W=0, EVEX.W=1 is not a valid encoding (for FP16)
+   "XS" => print 's' if EVEX.W=0, EVEX.W=1 is not a valid encoding
    "XV" => print "{vex3}" pseudo prefix
    "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand, cond
 	   being false, or no operand at all in 64bit mode, or if suffix_always
@@ -10496,6 +10481,23 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	    }
 	  break;
 	case 'D':
+	  if (l == 1)
+	    {
+	      switch (last[0])
+	      {
+	      case 'X':
+		if (ins->vex.w)
+		  *ins->obufp++ = 'd';
+		else
+		  oappend (ins, "{bad}");
+		break;
+	      default:
+		abort ();
+	      }
+	      break;
+	    }
+	  if (l)
+	    abort ();
 	  if (ins->intel_syntax || !(sizeflag & SUFFIX_ALWAYS))
 	    break;
 	  USED_REX (REX_W);
@@ -10582,13 +10584,7 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	      if (ins->vex.w == 0)
 		*ins->obufp++ = 'h';
 	      else
-		{
-		  *ins->obufp++ = '{';
-		  *ins->obufp++ = 'b';
-		  *ins->obufp++ = 'a';
-		  *ins->obufp++ = 'd';
-		  *ins->obufp++ = '}';
-		}
+		oappend (ins, "{bad}");
 	    }
 	  else
 	    abort ();
@@ -10752,9 +10748,13 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 		      ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
 		    }
 		}
+	      break;
 	    }
-	  else if (l == 1 && last[0] == 'L')
+	  if (l != 1)
+	    abort ();
+	  switch (last[0])
 	    {
+	    case 'L':
 	      if (ins->address_mode == mode_64bit
 		  && !(ins->prefixes & PREFIX_ADDR))
 		{
@@ -10764,9 +10764,15 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 		}
 
 	      goto case_S;
+	    case 'X':
+	      if (!ins->vex.w)
+		*ins->obufp++ = 's';
+	      else
+		oappend (ins, "{bad}");
+	      break;
+	    default:
+	      abort ();
 	    }
-	  else
-	    abort ();
 	  break;
 	case 'V':
 	  if (l == 0)

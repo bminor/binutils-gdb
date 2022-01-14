@@ -593,9 +593,9 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 08 */
-    { VEX_W_TABLE (EVEX_W_0F3A08) },
+    { PREFIX_TABLE (PREFIX_EVEX_0F3A08) },
     { VEX_W_TABLE (EVEX_W_0F3A09) },
-    { VEX_W_TABLE (EVEX_W_0F3A0A) },
+    { PREFIX_TABLE (PREFIX_EVEX_0F3A0A) },
     { VEX_W_TABLE (EVEX_W_0F3A0B) },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -976,8 +976,8 @@ static const struct dis386 evex_table[][256] = {
     /* 58 */
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_58) },
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_59) },
-    { VEX_W_TABLE (EVEX_W_MAP5_5A) },
-    { VEX_W_TABLE (EVEX_W_MAP5_5B) },
+    { PREFIX_TABLE (PREFIX_EVEX_MAP5_5A) },
+    { PREFIX_TABLE (PREFIX_EVEX_MAP5_5B) },
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_5C) },
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_5D) },
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_5E) },
@@ -1015,7 +1015,7 @@ static const struct dis386 evex_table[][256] = {
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_7A) },
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_7B) },
     { PREFIX_TABLE (PREFIX_EVEX_MAP5_7C) },
-    { VEX_W_TABLE (EVEX_W_MAP5_7D) },
+    { PREFIX_TABLE (PREFIX_EVEX_MAP5_7D) },
     { "vmovw",	  { Edw, XMScalar }, PREFIX_DATA },
     { Bad_Opcode },
     /* 80 */

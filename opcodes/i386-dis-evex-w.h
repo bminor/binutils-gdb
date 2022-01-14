@@ -550,18 +550,10 @@
     { Bad_Opcode },
     { "vpermilpd",	{ XM, EXx, Ib }, PREFIX_DATA },
   },
-  /* EVEX_W_0F3A08 */
-  {
-    { PREFIX_TABLE (PREFIX_EVEX_0F3A08_W_0) },
-  },
   /* EVEX_W_0F3A09 */
   {
     { Bad_Opcode },
     { "vrndscalepd",	{ XM, EXx, EXxEVexS, Ib }, PREFIX_DATA },
-  },
-  /* EVEX_W_0F3A0A */
-  {
-    { PREFIX_TABLE (PREFIX_EVEX_0F3A0A_W_0) },
   },
   /* EVEX_W_0F3A0B */
   {
@@ -636,62 +628,13 @@
     { Bad_Opcode },
     { "vpshrdw",   { XM, Vex, EXx, Ib }, 0 },
   },
-  /* EVEX_W_MAP5_5A */
+  /* EVEX_W_MAP5_5B_P_0 */
   {
-    { PREFIX_TABLE (PREFIX_EVEX_MAP5_5A_W_0) },
-    { PREFIX_TABLE (PREFIX_EVEX_MAP5_5A_W_1) },
-  },
-  /* EVEX_W_MAP5_5B */
-  {
-    { PREFIX_TABLE (PREFIX_EVEX_MAP5_5B_W_0) },
-    { PREFIX_TABLE (PREFIX_EVEX_MAP5_5B_W_1) },
-  },
-  /* EVEX_W_MAP5_78_P_0 */
-  {
-    { "vcvttph2udq",	{ XM, EXxmmqh, EXxEVexS }, 0 },
-  },
-  /* EVEX_W_MAP5_78_P_2 */
-  {
-    { "vcvttph2uqq",	{ XM, EXxmmqdh, EXxEVexS }, 0 },
-  },
-  /* EVEX_W_MAP5_79_P_0 */
-  {
-    { "vcvtph2udq",	{ XM, EXxmmqh, EXxEVexR }, 0 },
-  },
-  /* EVEX_W_MAP5_79_P_2 */
-  {
-    { "vcvtph2uqq",	{ XM, EXxmmqdh, EXxEVexR }, 0 },
-  },
-  /* EVEX_W_MAP5_7A_P_2 */
-  {
-    { "vcvttph2qq",	{ XM, EXxmmqdh, EXxEVexS }, 0 },
+    { "vcvtdq2ph%XY",	{ XMxmmq, EXx, EXxEVexR }, 0 },
+    { "vcvtqq2ph%XZ",	{ XMM, EXx, EXxEVexR }, 0 },
   },
   /* EVEX_W_MAP5_7A_P_3 */
   {
     { "vcvtudq2ph%XY",	{ XMxmmq, EXx, EXxEVexR }, 0 },
     { "vcvtuqq2ph%XZ",	{ XMM, EXx, EXxEVexR }, 0 },
-  },
-  /* EVEX_W_MAP5_7B_P_2 */
-  {
-    { "vcvtph2qq",	{ XM, EXxmmqdh, EXxEVexR }, 0 },
-  },
-  /* EVEX_W_MAP5_7C_P_0 */
-  {
-    { "vcvttph2uw",	{ XM, EXxh, EXxEVexS }, 0 },
-  },
-  /* EVEX_W_MAP5_7C_P_2 */
-  {
-    { "vcvttph2w",	{ XM, EXxh, EXxEVexS }, 0 },
-  },
-  /* EVEX_W_MAP5_7D */
-  {
-    { PREFIX_TABLE (PREFIX_EVEX_MAP5_7D_W_0) },
-  },
-  /* EVEX_W_MAP6_13_P_0 */
-  {
-    { "vcvtsh2ss",	{ XMM, VexScalar, EXw, EXxEVexS }, 0 },
-  },
-  /* EVEX_W_MAP6_13_P_2 */
-  {
-    { "vcvtph2psx",	{ XM, EXxmmqh, EXxEVexS }, 0 },
   },
