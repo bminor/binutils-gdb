@@ -82,8 +82,15 @@ ldelf_after_parse (void)
 
   after_parse_default ();
   if (link_info.commonpagesize > link_info.maxpagesize)
-    einfo (_("%F%P: common page size (0x%v) > maximum page size (0x%v)\n"),
-	   link_info.commonpagesize, link_info.maxpagesize);
+    {
+      if (!link_info.commonpagesize_is_set)
+	link_info.commonpagesize = link_info.maxpagesize;
+      else if (!link_info.maxpagesize_is_set)
+	link_info.maxpagesize = link_info.commonpagesize;
+      else
+	einfo (_("%F%P: common page size (0x%v) > maximum page size (0x%v)\n"),
+	       link_info.commonpagesize, link_info.maxpagesize);
+    }
 }
 
 /* Handle the generation of DT_NEEDED tags.  */

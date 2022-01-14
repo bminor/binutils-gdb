@@ -731,6 +731,7 @@ fragment <<EOF
 	      || (link_info.commonpagesize & (link_info.commonpagesize - 1)) != 0)
 	    einfo (_("%F%P: invalid common page size \`%s'\n"),
 		   optarg + 17);
+	  link_info.commonpagesize_is_set = true;
 	}
       else if (startswith (optarg, "stack-size="))
 	{

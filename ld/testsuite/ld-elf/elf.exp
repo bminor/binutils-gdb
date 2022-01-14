@@ -365,7 +365,7 @@ if { [istarget *-*-linux*]
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run mbind2a" \
-	    "$NOPIE_LDFLAGS -Wl,-z,common-page-size=0x4000,-z,max-page-size=0x4000" \
+	    "$NOPIE_LDFLAGS -Wl,-z,common-page-size=0x4000" \
 	    "" \
 	    { mbind2a.s mbind2b.c } \
 	    "mbind2a" \
@@ -374,7 +374,7 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Run mbind2b" \
-	    "-static -Wl,-z,common-page-size=0x4000,-z,max-page-size=0x4000" \
+	    "-static -Wl,-z,common-page-size=0x4000" \
 	    "" \
 	    { mbind2a.s mbind2b.c } \
 	    "mbind2b" \
