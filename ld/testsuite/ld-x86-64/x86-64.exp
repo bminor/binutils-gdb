@@ -511,6 +511,7 @@ run_dump_test "dt-relr-1a"
 run_dump_test "dt-relr-1a-x32"
 run_dump_test "dt-relr-1b"
 run_dump_test "dt-relr-1b-x32"
+run_dump_test "pr28743-1"
 
 if ![istarget "x86_64-*-linux*"] {
     return
