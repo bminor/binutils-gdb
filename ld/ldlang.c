@@ -6465,36 +6465,24 @@ static bool
 lang_size_relro_segment (bool *relax, bool check_regions)
 {
   bool do_reset = false;
-  bool do_data_relro;
-  bfd_vma data_initial_base, data_relro_end;
 
   if (link_info.relro && expld.dataseg.relro_end)
     {
-      do_data_relro = true;
-      data_initial_base = expld.dataseg.base;
-      data_relro_end = lang_size_relro_segment_1 (&expld.dataseg);
-    }
-  else
-    {
-      do_data_relro = false;
-      data_initial_base = data_relro_end = 0;
-    }
+      bfd_vma data_initial_base = expld.dataseg.base;
+      bfd_vma data_relro_end = lang_size_relro_segment_1 (&expld.dataseg);
 
-  if (do_data_relro)
-    {
       lang_reset_memory_regions ();
       one_lang_size_sections_pass (relax, check_regions);
 
       /* Assignments to dot, or to output section address in a user
 	 script have increased padding over the original.  Revert.  */
-      if (do_data_relro && expld.dataseg.relro_end > data_relro_end)
+      if (expld.dataseg.relro_end > data_relro_end)
 	{
 	  expld.dataseg.base = data_initial_base;;
 	  do_reset = true;
 	}
     }
-
-  if (!do_data_relro && lang_size_segment (&expld.dataseg))
+  else if (lang_size_segment (&expld.dataseg))
     do_reset = true;
 
   return do_reset;
