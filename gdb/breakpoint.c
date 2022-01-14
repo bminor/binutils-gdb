@@ -11817,36 +11817,6 @@ bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
   print_recreate_thread (tp, fp);
 }
 
-static void
-bkpt_create_sals_from_location (struct event_location *location,
-				struct linespec_result *canonical,
-				enum bptype type_wanted)
-{
-  create_sals_from_location_default (location, canonical, type_wanted);
-}
-
-static void
-bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
-			     struct linespec_result *canonical,
-			     gdb::unique_xmalloc_ptr<char> cond_string,
-			     gdb::unique_xmalloc_ptr<char> extra_string,
-			     enum bptype type_wanted,
-			     enum bpdisp disposition,
-			     int thread,
-			     int task, int ignore_count,
-			     const struct breakpoint_ops *ops,
-			     int from_tty, int enabled,
-			     int internal, unsigned flags)
-{
-  create_breakpoints_sal_default (gdbarch, canonical,
-				  std::move (cond_string),
-				  std::move (extra_string),
-				  type_wanted,
-				  disposition, thread, task,
-				  ignore_count, ops, from_tty,
-				  enabled, internal, flags);
-}
-
 static std::vector<symtab_and_line>
 bkpt_decode_location (struct breakpoint *b,
 		      struct event_location *location,
@@ -12127,36 +12097,6 @@ tracepoint_print_recreate (struct breakpoint *self, struct ui_file *fp)
 
   if (tp->pass_count)
     gdb_printf (fp, "  passcount %d\n", tp->pass_count);
-}
-
-static void
-tracepoint_create_sals_from_location (struct event_location *location,
-				      struct linespec_result *canonical,
-				      enum bptype type_wanted)
-{
-  create_sals_from_location_default (location, canonical, type_wanted);
-}
-
-static void
-tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
-				   struct linespec_result *canonical,
-				   gdb::unique_xmalloc_ptr<char> cond_string,
-				   gdb::unique_xmalloc_ptr<char> extra_string,
-				   enum bptype type_wanted,
-				   enum bpdisp disposition,
-				   int thread,
-				   int task, int ignore_count,
-				   const struct breakpoint_ops *ops,
-				   int from_tty, int enabled,
-				   int internal, unsigned flags)
-{
-  create_breakpoints_sal_default (gdbarch, canonical,
-				  std::move (cond_string),
-				  std::move (extra_string),
-				  type_wanted,
-				  disposition, thread, task,
-				  ignore_count, ops, from_tty,
-				  enabled, internal, flags);
 }
 
 static std::vector<symtab_and_line>
@@ -14477,8 +14417,8 @@ initialize_breakpoint_ops (void)
   ops->insert_location = bkpt_insert_location;
   ops->remove_location = bkpt_remove_location;
   ops->breakpoint_hit = bkpt_breakpoint_hit;
-  ops->create_sals_from_location = bkpt_create_sals_from_location;
-  ops->create_breakpoints_sal = bkpt_create_breakpoints_sal;
+  ops->create_sals_from_location = create_sals_from_location_default;
+  ops->create_breakpoints_sal = create_breakpoints_sal_default;
   ops->decode_location = bkpt_decode_location;
 
   /* The breakpoint_ops structure to be used in regular breakpoints.  */
@@ -14560,8 +14500,8 @@ initialize_breakpoint_ops (void)
   ops->print_one_detail = tracepoint_print_one_detail;
   ops->print_mention = tracepoint_print_mention;
   ops->print_recreate = tracepoint_print_recreate;
-  ops->create_sals_from_location = tracepoint_create_sals_from_location;
-  ops->create_breakpoints_sal = tracepoint_create_breakpoints_sal;
+  ops->create_sals_from_location = create_sals_from_location_default;
+  ops->create_breakpoints_sal = create_breakpoints_sal_default;
   ops->decode_location = tracepoint_decode_location;
 
   /* Probe tracepoints.  */
