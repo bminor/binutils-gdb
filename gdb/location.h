@@ -169,7 +169,7 @@ extern const char *
 
 /* Create a new probe location.  */
 
-extern event_location_up new_probe_location (const char *probe);
+extern event_location_up new_probe_location (std::string &&probe);
 
 /* Return the probe location (a string) of the given event_location
    (which must be of type PROBE_LOCATION).  */

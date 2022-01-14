@@ -204,7 +204,7 @@ parse_probes (const struct event_location *location,
       std::string canon (arg_start, arg_end - arg_start);
       canonical->special_display = 1;
       canonical->pre_expanded = 1;
-      canonical->location = new_probe_location (canon.c_str ());
+      canonical->location = new_probe_location (std::move (canon));
     }
 
   return result;

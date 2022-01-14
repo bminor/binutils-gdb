@@ -71,6 +71,12 @@ protected:
   {
   }
 
+  event_location (enum event_location_type t, std::string &&str)
+    : type (t),
+      as_string (std::move (str))
+  {
+  }
+
   explicit event_location (const event_location *to_clone)
     : type (to_clone->type),
       as_string (to_clone->as_string)
@@ -85,17 +91,9 @@ protected:
 /* A probe.  */
 struct event_location_probe : public event_location
 {
-  explicit event_location_probe (const char *probe)
-    : event_location (PROBE_LOCATION),
-      addr_string (probe == nullptr
-		   ? nullptr
-		   : xstrdup (probe))
+  explicit event_location_probe (std::string &&probe)
+    : event_location (PROBE_LOCATION, std::move (probe))
   {
-  }
-
-  ~event_location_probe ()
-  {
-    xfree (addr_string);
   }
 
   event_location_up clone () const override
@@ -105,24 +103,19 @@ struct event_location_probe : public event_location
 
   bool empty_p () const override
   {
-    return addr_string == nullptr;
+    return false;
   }
-
-  char *addr_string;
 
 protected:
 
   explicit event_location_probe (const event_location_probe *to_clone)
-    : event_location (to_clone),
-      addr_string (to_clone->addr_string == nullptr
-		   ? nullptr
-		   : xstrdup (to_clone->addr_string))
+    : event_location (to_clone)
   {
   }
 
   std::string compute_string () const override
   {
-    return addr_string;
+    return std::move (as_string);
   }
 };
 
@@ -357,9 +350,9 @@ get_address_string_location (const struct event_location *location)
 /* See description in location.h.  */
 
 event_location_up
-new_probe_location (const char *probe)
+new_probe_location (std::string &&probe)
 {
-  return event_location_up (new event_location_probe (probe));
+  return event_location_up (new event_location_probe (std::move (probe)));
 }
 
 /* See description in location.h.  */
@@ -368,7 +361,7 @@ const char *
 get_probe_location (const struct event_location *location)
 {
   gdb_assert (location->type == PROBE_LOCATION);
-  return ((event_location_probe *) location)->addr_string;
+  return location->to_string ();
 }
 
 /* See description in location.h.  */
