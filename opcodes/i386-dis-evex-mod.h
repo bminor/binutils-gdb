@@ -1,7 +1,7 @@
   {
     /* MOD_EVEX_0F12_PREFIX_0 */
     { "vmovlpX",	{ XMM, Vex, EXq }, PREFIX_OPCODE },
-    { VEX_W_TABLE (EVEX_W_0F12_P_0_M_1) },
+    { "vmovhlp%XS",	{ XMM, Vex, EXq }, 0 },
   },
   {
     /* MOD_EVEX_0F12_PREFIX_2 */
@@ -14,7 +14,7 @@
   {
     /* MOD_EVEX_0F16_PREFIX_0 */
     { "vmovhpX",	{ XMM, Vex, EXq }, PREFIX_OPCODE },
-    { VEX_W_TABLE (EVEX_W_0F16_P_0_M_1) },
+    { "vmovlhp%XS",	{ XMM, Vex, EXq }, 0 },
   },
   {
     /* MOD_EVEX_0F16_PREFIX_2 */
