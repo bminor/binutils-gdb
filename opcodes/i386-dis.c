@@ -11899,6 +11899,11 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
   if (ins->vex.b)
     {
       ins->evex_used |= EVEX_b_used;
+
+      /* Broadcast can only ever be valid for memory sources.  */
+      if (ins->obufp == ins->op_out[0])
+	ins->vex.no_broadcast = 1;
+
       if (!ins->vex.no_broadcast)
 	{
 	  if (bytemode == xh_mode)
@@ -11923,6 +11928,9 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		    }
 		}
 	    }
+	  else if (bytemode == q_mode
+		   || bytemode == ymmq_mode)
+	    ins->vex.no_broadcast = 1;
 	  else if (ins->vex.w
 		   || bytemode == evex_half_bcst_xmmqdh_mode
 		   || bytemode == evex_half_bcst_xmmq_mode)
