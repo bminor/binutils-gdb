@@ -628,8 +628,6 @@ enum
   ymm_mode,
   /* quad word, ymmword or zmmword memory operand.  */
   ymmq_mode,
-  /* 32-byte YMM or 16-byte word operand */
-  ymmxmm_mode,
   /* TMM operand */
   tmm_mode,
   /* d_mode in 32bit, q_mode in 64bit mode.  */
@@ -11241,20 +11239,6 @@ intel_operand_size (instr_info *ins, int bytemode, int sizeflag)
 	  break;
 	case 512:
 	  oappend (ins, "ZMMWORD PTR ");
-	  break;
-	default:
-	  abort ();
-	}
-      break;
-    case ymmxmm_mode:
-      if (!ins->need_vex)
-	abort ();
-
-      switch (ins->vex.length)
-	{
-	case 128:
-	case 256:
-	  oappend (ins, "XMMWORD PTR ");
 	  break;
 	default:
 	  abort ();
