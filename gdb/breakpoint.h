@@ -940,6 +940,13 @@ struct breakpoint
   gdbscm_breakpoint_object *scm_bp_object = NULL;
 };
 
+/* The structure to be inherit by all kinds of breakpoints (real
+   breakpoints, i.e., user "break" breakpoints, internal and momentary
+   breakpoints, etc.).  */
+struct base_breakpoint : public breakpoint
+{
+};
+
 /* An instance of this type is used to represent a watchpoint.  */
 
 struct watchpoint : public breakpoint

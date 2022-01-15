@@ -253,6 +253,26 @@ static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
 /* Dynamic printf class type.  */
 struct breakpoint_ops dprintf_breakpoint_ops;
 
+/* The structure to be used in regular breakpoints.  */
+struct ordinary_breakpoint : public base_breakpoint
+{
+};
+
+/* Internal breakpoints.  */
+struct internal_breakpoint : public base_breakpoint
+{
+};
+
+/* Momentary breakpoints.  */
+struct momentary_breakpoint : public base_breakpoint
+{
+};
+
+/* DPrintf breakpoints.  */
+struct dprintf_breakpoint : public base_breakpoint
+{
+};
+
 /* The style in which to perform a dynamic printf.  This is a user
    option because different output options have different tradeoffs;
    if GDB does the printing, there is better error handling if there
@@ -1127,7 +1147,7 @@ check_no_tracepoint_commands (struct command_line *commands)
     }
 }
 
-struct longjmp_breakpoint : public breakpoint
+struct longjmp_breakpoint : public momentary_breakpoint
 {
   ~longjmp_breakpoint () override;
 };
@@ -1140,12 +1160,6 @@ is_tracepoint_type (bptype type)
   return (type == bp_tracepoint
 	  || type == bp_fast_tracepoint
 	  || type == bp_static_tracepoint);
-}
-
-static bool
-is_longjmp_type (bptype type)
-{
-  return type == bp_longjmp || type == bp_exception;
 }
 
 /* See breakpoint.h.  */
@@ -1164,12 +1178,55 @@ new_breakpoint_from_type (bptype type)
 {
   breakpoint *b;
 
-  if (is_tracepoint_type (type))
-    b = new tracepoint ();
-  else if (is_longjmp_type (type))
-    b = new longjmp_breakpoint ();
-  else
-    b = new breakpoint ();
+  switch (type)
+    {
+    case bp_breakpoint:
+    case bp_hardware_breakpoint:
+      b = new ordinary_breakpoint ();
+      break;
+
+    case bp_fast_tracepoint:
+    case bp_static_tracepoint:
+    case bp_tracepoint:
+      b = new tracepoint ();
+      break;
+
+    case bp_dprintf:
+      b = new dprintf_breakpoint ();
+      break;
+
+    case bp_overlay_event:
+    case bp_longjmp_master:
+    case bp_std_terminate_master:
+    case bp_exception_master:
+    case bp_thread_event:
+    case bp_jit_event:
+    case bp_shlib_event:
+      b = new internal_breakpoint ();
+      break;
+
+    case bp_longjmp:
+    case bp_exception:
+      b = new longjmp_breakpoint ();
+      break;
+
+    case bp_watchpoint_scope:
+    case bp_finish:
+    case bp_gnu_ifunc_resolver_return:
+    case bp_step_resume:
+    case bp_hp_step_resume:
+    case bp_longjmp_resume:
+    case bp_longjmp_call_dummy:
+    case bp_exception_resume:
+    case bp_call_dummy:
+    case bp_until:
+    case bp_std_terminate:
+      b = new momentary_breakpoint ();
+      break;
+
+    default:
+      gdb_assert_not_reached ("invalid type");
+    }
 
   return std::unique_ptr<breakpoint> (b);
 }
