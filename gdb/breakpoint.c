@@ -234,10 +234,6 @@ static int strace_marker_p (struct breakpoint *b);
    (user breakpoints, internal and momentary breakpoints, etc.).  */
 static struct breakpoint_ops bkpt_base_breakpoint_ops;
 
-/* The breakpoint_ops structure to be used in regular user created
-   breakpoints.  */
-struct breakpoint_ops bkpt_breakpoint_ops;
-
 /* Breakpoints set on probes.  */
 static struct breakpoint_ops bkpt_probe_breakpoint_ops;
 
@@ -250,6 +246,10 @@ struct breakpoint_ops dprintf_breakpoint_ops;
 /* The structure to be used in regular breakpoints.  */
 struct ordinary_breakpoint : public base_breakpoint
 {
+  int resources_needed (const struct bp_location *) override;
+  enum print_stop_action print_it (struct bpstat *bs) override;
+  void print_mention () override;
+  void print_recreate (struct ui_file *fp) override;
 };
 
 /* Internal breakpoints.  */
@@ -8810,7 +8810,7 @@ breakpoint_ops_for_event_location_type (enum event_location_type location_type,
       if (location_type == PROBE_LOCATION)
 	return &bkpt_probe_breakpoint_ops;
       else
-	return &bkpt_breakpoint_ops;
+	return &vtable_breakpoint_ops;
     }
 }
 
@@ -8823,7 +8823,7 @@ breakpoint_ops_for_event_location (const struct event_location *location,
   if (location != nullptr)
     return breakpoint_ops_for_event_location_type
       (event_location_type (location), is_tracepoint);
-  return is_tracepoint ? &vtable_breakpoint_ops : &bkpt_breakpoint_ops;
+  return &vtable_breakpoint_ops;
 }
 
 /* See breakpoint.h.  */
@@ -11877,105 +11877,100 @@ dprintf_breakpoint_hit (const struct bp_location *bl,
   return bl->owner->breakpoint_hit (bl, aspace, bp_addr, ws);
 }
 
-static int
-bkpt_resources_needed (const struct bp_location *bl)
+int
+ordinary_breakpoint::resources_needed (const struct bp_location *bl)
 {
-  gdb_assert (bl->owner->type == bp_hardware_breakpoint);
+  gdb_assert (type == bp_hardware_breakpoint);
 
   return 1;
 }
 
-static enum print_stop_action
-bkpt_print_it (bpstat *bs)
+enum print_stop_action
+ordinary_breakpoint::print_it (bpstat *bs)
 {
-  struct breakpoint *b;
   const struct bp_location *bl;
   int bp_temp;
   struct ui_out *uiout = current_uiout;
 
-  gdb_assert (bs->bp_location_at != NULL);
-
   bl = bs->bp_location_at.get ();
-  b = bs->breakpoint_at;
 
-  bp_temp = b->disposition == disp_del;
+  bp_temp = disposition == disp_del;
   if (bl->address != bl->requested_address)
     breakpoint_adjustment_warning (bl->requested_address,
 				   bl->address,
-				   b->number, 1);
-  annotate_breakpoint (b->number);
+				   number, 1);
+  annotate_breakpoint (number);
   maybe_print_thread_hit_breakpoint (uiout);
 
   if (uiout->is_mi_like_p ())
     {
       uiout->field_string ("reason",
 			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
-      uiout->field_string ("disp", bpdisp_text (b->disposition));
+      uiout->field_string ("disp", bpdisp_text (disposition));
     }
   if (bp_temp)
     uiout->message ("Temporary breakpoint %pF, ",
-		    signed_field ("bkptno", b->number));
+		    signed_field ("bkptno", number));
   else
     uiout->message ("Breakpoint %pF, ",
-		    signed_field ("bkptno", b->number));
+		    signed_field ("bkptno", number));
 
   return PRINT_SRC_AND_LOC;
 }
 
-static void
-bkpt_print_mention (struct breakpoint *b)
+void
+ordinary_breakpoint::print_mention ()
 {
   if (current_uiout->is_mi_like_p ())
     return;
 
-  switch (b->type)
+  switch (type)
     {
     case bp_breakpoint:
     case bp_gnu_ifunc_resolver:
-      if (b->disposition == disp_del)
+      if (disposition == disp_del)
 	gdb_printf (_("Temporary breakpoint"));
       else
 	gdb_printf (_("Breakpoint"));
-      gdb_printf (_(" %d"), b->number);
-      if (b->type == bp_gnu_ifunc_resolver)
+      gdb_printf (_(" %d"), number);
+      if (type == bp_gnu_ifunc_resolver)
 	gdb_printf (_(" at gnu-indirect-function resolver"));
       break;
     case bp_hardware_breakpoint:
-      gdb_printf (_("Hardware assisted breakpoint %d"), b->number);
+      gdb_printf (_("Hardware assisted breakpoint %d"), number);
       break;
     case bp_dprintf:
-      gdb_printf (_("Dprintf %d"), b->number);
+      gdb_printf (_("Dprintf %d"), number);
       break;
     }
 
-  say_where (b);
+  say_where (this);
 }
 
-static void
-bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
+void
+ordinary_breakpoint::print_recreate (struct ui_file *fp)
 {
-  if (tp->type == bp_breakpoint && tp->disposition == disp_del)
+  if (type == bp_breakpoint && disposition == disp_del)
     gdb_printf (fp, "tbreak");
-  else if (tp->type == bp_breakpoint)
+  else if (type == bp_breakpoint)
     gdb_printf (fp, "break");
-  else if (tp->type == bp_hardware_breakpoint
-	   && tp->disposition == disp_del)
+  else if (type == bp_hardware_breakpoint
+	   && disposition == disp_del)
     gdb_printf (fp, "thbreak");
-  else if (tp->type == bp_hardware_breakpoint)
+  else if (type == bp_hardware_breakpoint)
     gdb_printf (fp, "hbreak");
   else
     internal_error (__FILE__, __LINE__,
-		    _("unhandled breakpoint type %d"), (int) tp->type);
+		    _("unhandled breakpoint type %d"), (int) type);
 
-  gdb_printf (fp, " %s",
-	      event_location_to_string (tp->location.get ()));
+  gdb_printf (fp, " %s", event_location_to_string (location.get ()));
 
   /* Print out extra_string if this breakpoint is pending.  It might
      contain, for example, conditions that were set by the user.  */
-  if (tp->loc == NULL && tp->extra_string != NULL)
-    gdb_printf (fp, " %s", tp->extra_string.get ());
+  if (loc == NULL && extra_string != NULL)
+    gdb_printf (fp, " %s", extra_string.get ());
 
-  print_recreate_thread (tp, fp);
+  print_recreate_thread (this, fp);
 }
 
 std::vector<symtab_and_line>
@@ -14562,17 +14557,9 @@ initialize_breakpoint_ops (void)
   ops = &bkpt_base_breakpoint_ops;
   *ops = vtable_breakpoint_ops;
 
-  /* The breakpoint_ops structure to be used in regular breakpoints.  */
-  ops = &bkpt_breakpoint_ops;
-  *ops = bkpt_base_breakpoint_ops;
-  ops->resources_needed = bkpt_resources_needed;
-  ops->print_it = bkpt_print_it;
-  ops->print_mention = bkpt_print_mention;
-  ops->print_recreate = bkpt_print_recreate;
-
   /* Ranged breakpoints.  */
   ops = &ranged_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
+  *ops = vtable_breakpoint_ops;
   ops->breakpoint_hit = breakpoint_hit_ranged_breakpoint;
   ops->resources_needed = resources_needed_ranged_breakpoint;
   ops->print_it = print_it_ranged_breakpoint;
@@ -14583,7 +14570,7 @@ initialize_breakpoint_ops (void)
 
   /* Probe breakpoints.  */
   ops = &bkpt_probe_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
+  *ops = vtable_breakpoint_ops;
   ops->insert_location = bkpt_probe_insert_location;
   ops->remove_location = bkpt_probe_remove_location;
   ops->create_sals_from_location = bkpt_probe_create_sals_from_location;
@@ -14603,7 +14590,7 @@ initialize_breakpoint_ops (void)
   ops->decode_location = strace_marker_decode_location;
 
   ops = &dprintf_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
+  *ops = vtable_breakpoint_ops;
   ops->re_set = dprintf_re_set;
   ops->print_recreate = dprintf_print_recreate;
   ops->after_condition_true = dprintf_after_condition_true;

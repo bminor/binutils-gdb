@@ -12206,7 +12206,7 @@ re_set_exception (struct breakpoint *b)
 
   /* Call the base class's method.  This updates the catchpoint's
      locations.  */
-  bkpt_breakpoint_ops.re_set (b);
+  b->re_set ();
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
@@ -13891,7 +13891,7 @@ initialize_ada_catchpoint_ops (void)
   initialize_breakpoint_ops ();
 
   ops = &catch_exception_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
+  *ops = vtable_breakpoint_ops;
   ops->allocate_location = allocate_location_exception;
   ops->re_set = re_set_exception;
   ops->check_status = check_status_exception;
