@@ -327,7 +327,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   else if (dprintf)
     {
       type_wanted = bp_dprintf;
-      ops = &dprintf_breakpoint_ops;
+      ops = &vtable_breakpoint_ops;
     }
   else
     {

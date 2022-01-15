@@ -240,9 +240,6 @@ static struct breakpoint_ops bkpt_probe_breakpoint_ops;
 /* Tracepoints set on probes.  */
 static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
 
-/* Dynamic printf class type.  */
-struct breakpoint_ops dprintf_breakpoint_ops;
-
 /* The structure to be used in regular breakpoints.  */
 struct ordinary_breakpoint : public base_breakpoint
 {
@@ -273,6 +270,13 @@ struct momentary_breakpoint : public base_breakpoint
 /* DPrintf breakpoints.  */
 struct dprintf_breakpoint : public ordinary_breakpoint
 {
+  void re_set () override;
+  int breakpoint_hit (const struct bp_location *bl,
+		      const address_space *aspace,
+		      CORE_ADDR bp_addr,
+		      const target_waitstatus &ws) override;
+  void print_recreate (struct ui_file *fp) override;
+  void after_condition_true (struct bpstat *bs) override;
 };
 
 /* The style in which to perform a dynamic printf.  This is a user
@@ -9159,7 +9163,7 @@ dprintf_command (const char *arg, int from_tty)
 		     0, bp_dprintf,
 		     0 /* Ignore count */,
 		     pending_break_support,
-		     &dprintf_breakpoint_ops,
+		     &vtable_breakpoint_ops,
 		     from_tty,
 		     1 /* enabled */,
 		     0 /* internal */,
@@ -11860,10 +11864,11 @@ base_breakpoint::breakpoint_hit (const struct bp_location *bl,
   return 1;
 }
 
-static int
-dprintf_breakpoint_hit (const struct bp_location *bl,
-			const address_space *aspace, CORE_ADDR bp_addr,
-			const target_waitstatus &ws)
+int
+dprintf_breakpoint::breakpoint_hit (const struct bp_location *bl,
+				    const address_space *aspace,
+				    CORE_ADDR bp_addr,
+				    const target_waitstatus &ws)
 {
   if (dprintf_style == dprintf_style_agent
       && target_can_run_breakpoint_commands ())
@@ -11874,7 +11879,7 @@ dprintf_breakpoint_hit (const struct bp_location *bl,
       return 0;
     }
 
-  return bl->owner->breakpoint_hit (bl, aspace, bp_addr, ws);
+  return this->ordinary_breakpoint::breakpoint_hit (bl, aspace, bp_addr, ws);
 }
 
 int
@@ -12273,15 +12278,13 @@ tracepoint_probe_decode_location (struct breakpoint *b,
   return bkpt_probe_decode_location (b, location, search_pspace);
 }
 
-/* Dprintf breakpoint_ops methods.  */
-
-static void
-dprintf_re_set (struct breakpoint *b)
+void
+dprintf_breakpoint::re_set ()
 {
-  breakpoint_re_set_default (b);
+  breakpoint_re_set_default (this);
 
   /* extra_string should never be non-NULL for dprintf.  */
-  gdb_assert (b->extra_string != NULL);
+  gdb_assert (extra_string != NULL);
 
   /* 1 - connect to target 1, that can run breakpoint commands.
      2 - create a dprintf, which resolves fine.
@@ -12293,23 +12296,22 @@ dprintf_re_set (struct breakpoint *b)
      answers for target_can_run_breakpoint_commands().
      Given absence of finer grained resetting, we get to do
      it all the time.  */
-  if (b->extra_string != NULL)
-    update_dprintf_command_list (b);
+  if (extra_string != NULL)
+    update_dprintf_command_list (this);
 }
 
-/* Implement the "print_recreate" breakpoint_ops method for dprintf.  */
+/* Implement the "print_recreate" method for dprintf.  */
 
-static void
-dprintf_print_recreate (struct breakpoint *tp, struct ui_file *fp)
+void
+dprintf_breakpoint::print_recreate (struct ui_file *fp)
 {
   gdb_printf (fp, "dprintf %s,%s",
-	      event_location_to_string (tp->location.get ()),
-	      tp->extra_string.get ());
-  print_recreate_thread (tp, fp);
+	      event_location_to_string (location.get ()),
+	      extra_string.get ());
+  print_recreate_thread (this, fp);
 }
 
-/* Implement the "after_condition_true" breakpoint_ops method for
-   dprintf.
+/* Implement the "after_condition_true" method for dprintf.
 
    dprintf's are implemented with regular commands in their command
    list, but we run the commands here instead of before presenting the
@@ -12317,8 +12319,8 @@ dprintf_print_recreate (struct breakpoint *tp, struct ui_file *fp)
    also makes it so that the commands of multiple dprintfs at the same
    address are all handled.  */
 
-static void
-dprintf_after_condition_true (struct bpstat *bs)
+void
+dprintf_breakpoint::after_condition_true (struct bpstat *bs)
 {
   /* dprintf's never cause a stop.  This wasn't set in the
      check_status hook instead because that would make the dprintf's
@@ -14588,13 +14590,6 @@ initialize_breakpoint_ops (void)
   ops->create_sals_from_location = strace_marker_create_sals_from_location;
   ops->create_breakpoints_sal = strace_marker_create_breakpoints_sal;
   ops->decode_location = strace_marker_decode_location;
-
-  ops = &dprintf_breakpoint_ops;
-  *ops = vtable_breakpoint_ops;
-  ops->re_set = dprintf_re_set;
-  ops->print_recreate = dprintf_print_recreate;
-  ops->after_condition_true = dprintf_after_condition_true;
-  ops->breakpoint_hit = dprintf_breakpoint_hit;
 }
 
 /* Chain containing all defined "enable breakpoint" subcommands.  */
