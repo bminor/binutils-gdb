@@ -723,6 +723,118 @@ struct breakpoint
 {
   virtual ~breakpoint () = default;
 
+  /* Allocate a location for this breakpoint.  */
+  virtual struct bp_location *allocate_location ();
+
+  /* Reevaluate a breakpoint.  This is necessary after symbols change
+     (e.g., an executable or DSO was loaded, or the inferior just
+     started).  */
+  virtual void re_set ()
+  {
+    /* Nothing to re-set.  */
+  }
+
+  /* Insert the breakpoint or watchpoint or activate the catchpoint.
+     Return 0 for success, 1 if the breakpoint, watchpoint or
+     catchpoint type is not supported, -1 for failure.  */
+  virtual int insert_location (struct bp_location *);
+
+  /* Remove the breakpoint/catchpoint that was previously inserted
+     with the "insert" method above.  Return 0 for success, 1 if the
+     breakpoint, watchpoint or catchpoint type is not supported,
+     -1 for failure.  */
+  virtual int remove_location (struct bp_location *,
+			       enum remove_bp_reason reason);
+
+  /* Return true if it the target has stopped due to hitting
+     breakpoint location BL.  This function does not check if we
+     should stop, only if BL explains the stop.  ASPACE is the address
+     space in which the event occurred, BP_ADDR is the address at
+     which the inferior stopped, and WS is the target_waitstatus
+     describing the event.  */
+  virtual int breakpoint_hit (const struct bp_location *bl,
+			      const address_space *aspace,
+			      CORE_ADDR bp_addr,
+			      const target_waitstatus &ws);
+
+  /* Check internal conditions of the breakpoint referred to by BS.
+     If we should not stop for this breakpoint, set BS->stop to 0.  */
+  virtual void check_status (struct bpstat *bs)
+  {
+    /* Always stop.  */
+  }
+
+  /* Tell how many hardware resources (debug registers) are needed
+     for this breakpoint.  If this function is not provided, then
+     the breakpoint or watchpoint needs one debug register.  */
+  virtual int resources_needed (const struct bp_location *);
+
+  /* Tell whether we can downgrade from a hardware watchpoint to a software
+     one.  If not, the user will not be able to enable the watchpoint when
+     there are not enough hardware resources available.  */
+  virtual int works_in_software_mode () const;
+
+  /* The normal print routine for this breakpoint, called when we
+     hit it.  */
+  virtual enum print_stop_action print_it (struct bpstat *bs);
+
+  /* Display information about this breakpoint, for "info
+     breakpoints".  Returns false if this method should use the
+     default behavior.  */
+  virtual bool print_one (struct bp_location **)
+  {
+    return false;
+  }
+
+  /* Display extra information about this breakpoint, below the normal
+     breakpoint description in "info breakpoints".
+
+     In the example below, the "address range" line was printed
+     by print_one_detail_ranged_breakpoint.
+
+     (gdb) info breakpoints
+     Num     Type           Disp Enb Address    What
+     2       hw breakpoint  keep y              in main at test-watch.c:70
+	     address range: [0x10000458, 0x100004c7]
+
+   */
+  virtual void print_one_detail (struct ui_out *) const
+  {
+    /* Nothing.  */
+  }
+
+  /* Display information about this breakpoint after setting it
+     (roughly speaking; this is called from "mention").  */
+  virtual void print_mention ();
+
+  /* Print to FP the CLI command that recreates this breakpoint.  */
+  virtual void print_recreate (struct ui_file *fp);
+
+  /* Given the location (second parameter), this method decodes it and
+     returns the SAL locations related to it.  For ordinary
+     breakpoints, it calls `decode_line_full'.  If SEARCH_PSPACE is
+     not NULL, symbol search is restricted to just that program space.
+
+     This function is called inside `location_to_sals'.  */
+  virtual std::vector<symtab_and_line> decode_location
+    (struct event_location *location,
+     struct program_space *search_pspace);
+
+  /* Return true if this breakpoint explains a signal.  See
+     bpstat_explains_signal.  */
+  virtual int explains_signal (enum gdb_signal)
+  {
+    return 1;
+  }
+
+  /* Called after evaluating the breakpoint's condition,
+     and only if it evaluated true.  */
+  virtual void after_condition_true (struct bpstat *bs)
+  {
+    /* Nothing to do.  */
+  }
+
+
   /* Return a range of this breakpoint's locations.  */
   bp_location_range locations ();
 
@@ -1335,6 +1447,7 @@ extern struct breakpoint_ops base_breakpoint_ops;
 extern struct breakpoint_ops bkpt_breakpoint_ops;
 extern struct breakpoint_ops tracepoint_breakpoint_ops;
 extern struct breakpoint_ops dprintf_breakpoint_ops;
+extern struct breakpoint_ops vtable_breakpoint_ops;
 
 extern void initialize_breakpoint_ops (void);
 

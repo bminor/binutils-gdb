@@ -11493,6 +11493,12 @@ base_breakpoint_allocate_location (struct breakpoint *self)
   return new bp_location (self);
 }
 
+struct bp_location *
+breakpoint::allocate_location ()
+{
+  return new bp_location (this);
+}
+
 static void
 base_breakpoint_re_set (struct breakpoint *b)
 {
@@ -11508,9 +11514,22 @@ base_breakpoint_insert_location (struct bp_location *bl)
   internal_error_pure_virtual_called ();
 }
 
+int
+breakpoint::insert_location (struct bp_location *bl)
+{
+  internal_error_pure_virtual_called ();
+}
+
 static int
 base_breakpoint_remove_location (struct bp_location *bl,
 				 enum remove_bp_reason reason)
+{
+  internal_error_pure_virtual_called ();
+}
+
+int
+breakpoint::remove_location (struct bp_location *bl,
+			     enum remove_bp_reason reason)
 {
   internal_error_pure_virtual_called ();
 }
@@ -11520,6 +11539,15 @@ base_breakpoint_breakpoint_hit (const struct bp_location *bl,
 				const address_space *aspace,
 				CORE_ADDR bp_addr,
 				const target_waitstatus &ws)
+{
+  internal_error_pure_virtual_called ();
+}
+
+int
+breakpoint::breakpoint_hit (const struct bp_location *bl,
+			    const address_space *aspace,
+			    CORE_ADDR bp_addr,
+			    const target_waitstatus &ws)
 {
   internal_error_pure_virtual_called ();
 }
@@ -11539,6 +11567,12 @@ base_breakpoint_works_in_software_mode (const struct breakpoint *b)
   internal_error_pure_virtual_called ();
 }
 
+int
+breakpoint::works_in_software_mode () const
+{
+  internal_error_pure_virtual_called ();
+}
+
 /* A "resources_needed" breakpoint_ops method that just internal
    errors.  */
 
@@ -11548,8 +11582,20 @@ base_breakpoint_resources_needed (const struct bp_location *bl)
   internal_error_pure_virtual_called ();
 }
 
+int
+breakpoint::resources_needed (const struct bp_location *bl)
+{
+  internal_error_pure_virtual_called ();
+}
+
 static enum print_stop_action
 base_breakpoint_print_it (bpstat *bs)
+{
+  internal_error_pure_virtual_called ();
+}
+
+enum print_stop_action
+breakpoint::print_it (bpstat *bs)
 {
   internal_error_pure_virtual_called ();
 }
@@ -11573,8 +11619,20 @@ base_breakpoint_print_mention (struct breakpoint *b)
   internal_error_pure_virtual_called ();
 }
 
+void
+breakpoint::print_mention ()
+{
+  internal_error_pure_virtual_called ();
+}
+
 static void
 base_breakpoint_print_recreate (struct breakpoint *b, struct ui_file *fp)
+{
+  internal_error_pure_virtual_called ();
+}
+
+void
+breakpoint::print_recreate (struct ui_file *fp)
 {
   internal_error_pure_virtual_called ();
 }
@@ -11608,6 +11666,13 @@ static std::vector<symtab_and_line>
 base_breakpoint_decode_location (struct breakpoint *b,
 				 struct event_location *location,
 				 struct program_space *search_pspace)
+{
+  internal_error_pure_virtual_called ();
+}
+
+std::vector<symtab_and_line>
+breakpoint::decode_location (struct event_location *location,
+			     struct program_space *search_pspace)
 {
   internal_error_pure_virtual_called ();
 }
@@ -11648,6 +11713,51 @@ struct breakpoint_ops base_breakpoint_ops =
   base_breakpoint_decode_location,
   base_breakpoint_explains_signal,
   base_breakpoint_after_condition_true,
+};
+
+struct breakpoint_ops vtable_breakpoint_ops =
+{
+  [] (struct breakpoint *b) { return b->allocate_location (); },
+  [] (struct breakpoint *b) { b->re_set (); },
+  [] (struct bp_location *l)
+  {
+    return l->owner->insert_location (l);
+  },
+  [] (struct bp_location *l, enum remove_bp_reason reason)
+  {
+    return l->owner->remove_location (l, reason);
+  },
+  [] (const struct bp_location *bl,
+      const address_space *aspace,
+      CORE_ADDR bp_addr,
+      const target_waitstatus &ws)
+  {
+    return bl->owner->breakpoint_hit (bl, aspace, bp_addr, ws);
+  },
+  [] (struct bpstat *bs) { bs->breakpoint_at->check_status (bs); },
+  [] (const struct bp_location *bl)
+  { return bl->owner->resources_needed (bl); },
+  [] (const struct breakpoint *b)
+  { return b->works_in_software_mode (); },
+  [] (struct bpstat *bs)
+  { return bs->breakpoint_at->print_it (bs); },
+  [] (struct breakpoint *b, struct bp_location **bl)
+  { return b->print_one (bl); },
+  [] (const struct breakpoint *b, struct ui_out *out)
+  { b->print_one_detail (out); },
+  [] (struct breakpoint *b) { b->print_mention (); },
+  [] (struct breakpoint *b, struct ui_file *fp)
+  { b->print_recreate (fp); },
+  create_sals_from_location_default,
+  create_breakpoints_sal_default,
+  [] (struct breakpoint *b,
+      struct event_location *location,
+      struct program_space *search_pspace)
+  { return b->decode_location (location, search_pspace); },
+  [] (struct breakpoint *b, enum gdb_signal s)
+  { return b->explains_signal (s); },
+  [] (struct bpstat *bs)
+  { bs->breakpoint_at->after_condition_true (bs); }
 };
 
 /* Default breakpoint_ops methods.  */
