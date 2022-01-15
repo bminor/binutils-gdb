@@ -271,7 +271,7 @@ struct momentary_breakpoint : public base_breakpoint
 };
 
 /* DPrintf breakpoints.  */
-struct dprintf_breakpoint : public base_breakpoint
+struct dprintf_breakpoint : public ordinary_breakpoint
 {
 };
 
@@ -14603,11 +14603,8 @@ initialize_breakpoint_ops (void)
   ops->decode_location = strace_marker_decode_location;
 
   ops = &dprintf_breakpoint_ops;
-  *ops = bkpt_base_breakpoint_ops;
+  *ops = bkpt_breakpoint_ops;
   ops->re_set = dprintf_re_set;
-  ops->resources_needed = bkpt_resources_needed;
-  ops->print_it = bkpt_print_it;
-  ops->print_mention = bkpt_print_mention;
   ops->print_recreate = dprintf_print_recreate;
   ops->after_condition_true = dprintf_after_condition_true;
   ops->breakpoint_hit = dprintf_breakpoint_hit;
