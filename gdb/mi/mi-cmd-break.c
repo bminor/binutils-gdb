@@ -180,7 +180,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   symbol_name_match_type match_type = symbol_name_match_type::WILD;
   enum bptype type_wanted;
   event_location_up location;
-  struct breakpoint_ops *ops;
+  const struct breakpoint_ops *ops;
   int is_explicit = 0;
   struct explicit_location explicit_loc;
   std::string extra_string;
@@ -322,7 +322,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 	 A simulator or an emulator could conceivably implement fast
 	 regular non-jump based tracepoints.  */
       type_wanted = hardware ? bp_fast_tracepoint : bp_tracepoint;
-      ops = &tracepoint_breakpoint_ops;
+      ops = breakpoint_ops_for_event_location (nullptr, true);
     }
   else if (dprintf)
     {

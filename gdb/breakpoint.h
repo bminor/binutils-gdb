@@ -1032,6 +1032,18 @@ extern bool is_exception_catchpoint (breakpoint *bp);
 
 struct tracepoint : public breakpoint
 {
+  void re_set () override;
+  int breakpoint_hit (const struct bp_location *bl,
+		      const address_space *aspace, CORE_ADDR bp_addr,
+		      const target_waitstatus &ws) override;
+  void print_one_detail (struct ui_out *uiout) const override;
+  void print_mention () override;
+  void print_recreate (struct ui_file *fp) override;
+  std::vector<symtab_and_line> decode_location
+       (struct event_location *location,
+	struct program_space *search_pspace) override;
+
+
   /* Number of times this tracepoint should single-step and collect
      additional data.  */
   long step_count;
@@ -1461,7 +1473,6 @@ extern void tbreak_command (const char *, int);
 
 extern struct breakpoint_ops base_breakpoint_ops;
 extern struct breakpoint_ops bkpt_breakpoint_ops;
-extern struct breakpoint_ops tracepoint_breakpoint_ops;
 extern struct breakpoint_ops dprintf_breakpoint_ops;
 extern struct breakpoint_ops vtable_breakpoint_ops;
 
@@ -1516,7 +1527,7 @@ extern void install_breakpoint (int internal, std::unique_ptr<breakpoint> &&b,
 /* Returns the breakpoint ops appropriate for use with with LOCATION and
    according to IS_TRACEPOINT.  Use this to ensure, for example, that you pass
    the correct ops to create_breakpoint for probe locations.  If LOCATION is
-   NULL, returns bkpt_breakpoint_ops (or tracepoint_breakpoint_ops, if
+   NULL, returns bkpt_breakpoint_ops (or vtable_breakpoint_ops, if
    IS_TRACEPOINT is true).  */
 
 extern const struct breakpoint_ops *breakpoint_ops_for_event_location

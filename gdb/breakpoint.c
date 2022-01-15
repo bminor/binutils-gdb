@@ -8744,7 +8744,7 @@ breakpoint_ops_for_event_location_type (enum event_location_type location_type,
       if (location_type == PROBE_LOCATION)
 	return &tracepoint_probe_breakpoint_ops;
       else
-	return &tracepoint_breakpoint_ops;
+	return &vtable_breakpoint_ops;
     }
   else
     {
@@ -8764,7 +8764,7 @@ breakpoint_ops_for_event_location (const struct event_location *location,
   if (location != nullptr)
     return breakpoint_ops_for_event_location_type
       (event_location_type (location), is_tracepoint);
-  return is_tracepoint ? &tracepoint_breakpoint_ops : &bkpt_breakpoint_ops;
+  return is_tracepoint ? &vtable_breakpoint_ops : &bkpt_breakpoint_ops;
 }
 
 /* See breakpoint.h.  */
@@ -12117,97 +12117,89 @@ bkpt_probe_decode_location (struct breakpoint *b,
 
 /* The breakpoint_ops structure to be used in tracepoints.  */
 
-static void
-tracepoint_re_set (struct breakpoint *b)
+void
+tracepoint::re_set ()
 {
-  breakpoint_re_set_default (b);
+  breakpoint_re_set_default (this);
 }
 
-static int
-tracepoint_breakpoint_hit (const struct bp_location *bl,
-			   const address_space *aspace, CORE_ADDR bp_addr,
-			   const target_waitstatus &ws)
+int
+tracepoint::breakpoint_hit (const struct bp_location *bl,
+			    const address_space *aspace, CORE_ADDR bp_addr,
+			    const target_waitstatus &ws)
 {
   /* By definition, the inferior does not report stops at
      tracepoints.  */
   return 0;
 }
 
-static void
-tracepoint_print_one_detail (const struct breakpoint *self,
-			     struct ui_out *uiout)
+void
+tracepoint::print_one_detail (struct ui_out *uiout) const
 {
-  struct tracepoint *tp = (struct tracepoint *) self;
-  if (!tp->static_trace_marker_id.empty ())
+  if (!static_trace_marker_id.empty ())
     {
-      gdb_assert (self->type == bp_static_tracepoint);
+      gdb_assert (type == bp_static_tracepoint);
 
       uiout->message ("\tmarker id is %pF\n",
 		      string_field ("static-tracepoint-marker-string-id",
-				    tp->static_trace_marker_id.c_str ()));
+				    static_trace_marker_id.c_str ()));
     }
 }
 
-static void
-tracepoint_print_mention (struct breakpoint *b)
+void
+tracepoint::print_mention ()
 {
   if (current_uiout->is_mi_like_p ())
     return;
 
-  switch (b->type)
+  switch (type)
     {
     case bp_tracepoint:
       gdb_printf (_("Tracepoint"));
-      gdb_printf (_(" %d"), b->number);
+      gdb_printf (_(" %d"), number);
       break;
     case bp_fast_tracepoint:
       gdb_printf (_("Fast tracepoint"));
-      gdb_printf (_(" %d"), b->number);
+      gdb_printf (_(" %d"), number);
       break;
     case bp_static_tracepoint:
       gdb_printf (_("Static tracepoint"));
-      gdb_printf (_(" %d"), b->number);
+      gdb_printf (_(" %d"), number);
       break;
     default:
       internal_error (__FILE__, __LINE__,
-		      _("unhandled tracepoint type %d"), (int) b->type);
+		      _("unhandled tracepoint type %d"), (int) type);
     }
 
-  say_where (b);
+  say_where (this);
 }
 
-static void
-tracepoint_print_recreate (struct breakpoint *self, struct ui_file *fp)
+void
+tracepoint::print_recreate (struct ui_file *fp)
 {
-  struct tracepoint *tp = (struct tracepoint *) self;
-
-  if (self->type == bp_fast_tracepoint)
+  if (type == bp_fast_tracepoint)
     gdb_printf (fp, "ftrace");
-  else if (self->type == bp_static_tracepoint)
+  else if (type == bp_static_tracepoint)
     gdb_printf (fp, "strace");
-  else if (self->type == bp_tracepoint)
+  else if (type == bp_tracepoint)
     gdb_printf (fp, "trace");
   else
     internal_error (__FILE__, __LINE__,
-		    _("unhandled tracepoint type %d"), (int) self->type);
+		    _("unhandled tracepoint type %d"), (int) type);
 
-  gdb_printf (fp, " %s",
-	      event_location_to_string (self->location.get ()));
-  print_recreate_thread (self, fp);
+  gdb_printf (fp, " %s", event_location_to_string (location.get ()));
+  print_recreate_thread (this, fp);
 
-  if (tp->pass_count)
-    gdb_printf (fp, "  passcount %d\n", tp->pass_count);
+  if (pass_count)
+    gdb_printf (fp, "  passcount %d\n", pass_count);
 }
 
-static std::vector<symtab_and_line>
-tracepoint_decode_location (struct breakpoint *b,
-			    struct event_location *location,
-			    struct program_space *search_pspace)
+std::vector<symtab_and_line>
+tracepoint::decode_location (struct event_location *location,
+			     struct program_space *search_pspace)
 {
-  return decode_location_default (b, location, search_pspace);
+  return decode_location_default (this, location, search_pspace);
 }
-
-struct breakpoint_ops tracepoint_breakpoint_ops;
 
 /* Virtual table for tracepoints on static probes.  */
 
@@ -13858,7 +13850,7 @@ ftrace_command (const char *arg, int from_tty)
 		     bp_fast_tracepoint /* type_wanted */,
 		     0 /* Ignore count */,
 		     pending_break_support,
-		     &tracepoint_breakpoint_ops,
+		     &vtable_breakpoint_ops,
 		     from_tty,
 		     1 /* enabled */,
 		     0 /* internal */, 0);
@@ -13881,7 +13873,7 @@ strace_command (const char *arg, int from_tty)
     }
   else
     {
-      ops = &tracepoint_breakpoint_ops;
+      ops = &vtable_breakpoint_ops;
       location = string_to_event_location (&arg, current_language);
     }
 
@@ -13963,7 +13955,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 			  utp->type /* type_wanted */,
 			  0 /* Ignore count */,
 			  pending_break_support,
-			  &tracepoint_breakpoint_ops,
+			  &vtable_breakpoint_ops,
 			  0 /* from_tty */,
 			  utp->enabled /* enabled */,
 			  0 /* internal */,
@@ -14565,27 +14557,15 @@ initialize_breakpoint_ops (void)
   ops->create_sals_from_location = bkpt_probe_create_sals_from_location;
   ops->decode_location = bkpt_probe_decode_location;
 
-  /* Tracepoints.  */
-  ops = &tracepoint_breakpoint_ops;
-  *ops = base_breakpoint_ops;
-  ops->re_set = tracepoint_re_set;
-  ops->breakpoint_hit = tracepoint_breakpoint_hit;
-  ops->print_one_detail = tracepoint_print_one_detail;
-  ops->print_mention = tracepoint_print_mention;
-  ops->print_recreate = tracepoint_print_recreate;
-  ops->create_sals_from_location = create_sals_from_location_default;
-  ops->create_breakpoints_sal = create_breakpoints_sal_default;
-  ops->decode_location = tracepoint_decode_location;
-
   /* Probe tracepoints.  */
   ops = &tracepoint_probe_breakpoint_ops;
-  *ops = tracepoint_breakpoint_ops;
+  *ops = vtable_breakpoint_ops;
   ops->create_sals_from_location = tracepoint_probe_create_sals_from_location;
   ops->decode_location = tracepoint_probe_decode_location;
 
   /* Static tracepoints with marker (`-m').  */
   ops = &strace_marker_breakpoint_ops;
-  *ops = tracepoint_breakpoint_ops;
+  *ops = vtable_breakpoint_ops;
   ops->create_sals_from_location = strace_marker_create_sals_from_location;
   ops->create_breakpoints_sal = strace_marker_create_breakpoints_sal;
   ops->decode_location = strace_marker_decode_location;
