@@ -945,6 +945,17 @@ struct breakpoint
    breakpoints, etc.).  */
 struct base_breakpoint : public breakpoint
 {
+  void re_set () override;
+  int insert_location (struct bp_location *) override;
+  int remove_location (struct bp_location *,
+		       enum remove_bp_reason reason) override;
+  int breakpoint_hit (const struct bp_location *bl,
+		      const address_space *aspace,
+		      CORE_ADDR bp_addr,
+		      const target_waitstatus &ws) override;
+  std::vector<symtab_and_line> decode_location
+       (struct event_location *location,
+	struct program_space *search_pspace) override;
 };
 
 /* An instance of this type is used to represent a watchpoint.  */

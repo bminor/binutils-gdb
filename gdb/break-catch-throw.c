@@ -67,7 +67,7 @@ static struct breakpoint_ops gnu_v3_exception_catchpoint_ops;
 
 /* The type of an exception catchpoint.  */
 
-struct exception_catchpoint : public breakpoint
+struct exception_catchpoint : public base_breakpoint
 {
   /* The kind of exception catchpoint.  */
 

@@ -7932,7 +7932,7 @@ enable_breakpoints_after_startup (void)
 static struct breakpoint *
 new_single_step_breakpoint (int thread, struct gdbarch *gdbarch)
 {
-  std::unique_ptr<breakpoint> b (new breakpoint ());
+  std::unique_ptr<breakpoint> b (new momentary_breakpoint ());
 
   init_raw_breakpoint_without_location (b.get (), gdbarch, bp_single_step,
 					&momentary_breakpoint_ops);
@@ -11798,22 +11798,22 @@ struct breakpoint_ops vtable_breakpoint_ops =
 
 /* Default breakpoint_ops methods.  */
 
-static void
-bkpt_re_set (struct breakpoint *b)
+void
+base_breakpoint::re_set ()
 {
   /* FIXME: is this still reachable?  */
-  if (breakpoint_event_location_empty_p (b))
+  if (breakpoint_event_location_empty_p (this))
     {
       /* Anything without a location can't be re-set.  */
-      delete_breakpoint (b);
+      delete_breakpoint (this);
       return;
     }
 
-  breakpoint_re_set_default (b);
+  breakpoint_re_set_default (this);
 }
 
-static int
-bkpt_insert_location (struct bp_location *bl)
+int
+base_breakpoint::insert_location (struct bp_location *bl)
 {
   CORE_ADDR addr = bl->target_info.reqstd_address;
 
@@ -11826,8 +11826,9 @@ bkpt_insert_location (struct bp_location *bl)
     return target_insert_breakpoint (bl->gdbarch, &bl->target_info);
 }
 
-static int
-bkpt_remove_location (struct bp_location *bl, enum remove_bp_reason reason)
+int
+base_breakpoint::remove_location (struct bp_location *bl,
+				  enum remove_bp_reason reason)
 {
   if (bl->loc_type == bp_loc_hardware_breakpoint)
     return target_remove_hw_breakpoint (bl->gdbarch, &bl->target_info);
@@ -11835,10 +11836,11 @@ bkpt_remove_location (struct bp_location *bl, enum remove_bp_reason reason)
     return target_remove_breakpoint (bl->gdbarch, &bl->target_info, reason);
 }
 
-static int
-bkpt_breakpoint_hit (const struct bp_location *bl,
-		     const address_space *aspace, CORE_ADDR bp_addr,
-		     const target_waitstatus &ws)
+int
+base_breakpoint::breakpoint_hit (const struct bp_location *bl,
+				 const address_space *aspace,
+				 CORE_ADDR bp_addr,
+				 const target_waitstatus &ws)
 {
   if (ws.kind () != TARGET_WAITKIND_STOPPED
       || ws.sig () != GDB_SIGNAL_TRAP)
@@ -11870,7 +11872,7 @@ dprintf_breakpoint_hit (const struct bp_location *bl,
       return 0;
     }
 
-  return bkpt_breakpoint_hit (bl, aspace, bp_addr, ws);
+  return bl->owner->breakpoint_hit (bl, aspace, bp_addr, ws);
 }
 
 static int
@@ -11974,12 +11976,11 @@ bkpt_print_recreate (struct breakpoint *tp, struct ui_file *fp)
   print_recreate_thread (tp, fp);
 }
 
-static std::vector<symtab_and_line>
-bkpt_decode_location (struct breakpoint *b,
-		      struct event_location *location,
-		      struct program_space *search_pspace)
+std::vector<symtab_and_line>
+base_breakpoint::decode_location (struct event_location *location,
+				  struct program_space *search_pspace)
 {
-  return decode_location_default (b, location, search_pspace);
+  return decode_location_default (this, location, search_pspace);
 }
 
 /* Virtual table for internal breakpoints.  */
@@ -12126,7 +12127,7 @@ longjmp_breakpoint::~longjmp_breakpoint ()
 static int
 bkpt_probe_insert_location (struct bp_location *bl)
 {
-  int v = bkpt_insert_location (bl);
+  int v = bl->owner->insert_location (bl);
 
   if (v == 0)
     {
@@ -12145,7 +12146,7 @@ bkpt_probe_remove_location (struct bp_location *bl,
   /* Let's clear the semaphore before removing the location.  */
   bl->probe.prob->clear_semaphore (bl->probe.objfile, bl->gdbarch);
 
-  return bkpt_remove_location (bl, reason);
+  return bl->owner->remove_location (bl, reason);
 }
 
 static void
@@ -14561,19 +14562,11 @@ initialize_breakpoint_ops (void)
      breakpoints (real breakpoints, i.e., user "break" breakpoints,
      internal and momentary breakpoints, etc.).  */
   ops = &bkpt_base_breakpoint_ops;
-  *ops = base_breakpoint_ops;
-  ops->re_set = bkpt_re_set;
-  ops->insert_location = bkpt_insert_location;
-  ops->remove_location = bkpt_remove_location;
-  ops->breakpoint_hit = bkpt_breakpoint_hit;
-  ops->create_sals_from_location = create_sals_from_location_default;
-  ops->create_breakpoints_sal = create_breakpoints_sal_default;
-  ops->decode_location = bkpt_decode_location;
+  *ops = vtable_breakpoint_ops;
 
   /* The breakpoint_ops structure to be used in regular breakpoints.  */
   ops = &bkpt_breakpoint_ops;
   *ops = bkpt_base_breakpoint_ops;
-  ops->re_set = bkpt_re_set;
   ops->resources_needed = bkpt_resources_needed;
   ops->print_it = bkpt_print_it;
   ops->print_mention = bkpt_print_mention;
