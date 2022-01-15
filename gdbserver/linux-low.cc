@@ -3469,6 +3469,9 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	unstop_all_lwps (1, event_child);
     }
 
+  /* At this point, we haven't set OURSTATUS.  This is where we do it.  */
+  gdb_assert (ourstatus->kind () == TARGET_WAITKIND_IGNORE);
+
   if (event_child->waitstatus.kind () != TARGET_WAITKIND_IGNORE)
     {
       /* If the reported event is an exit, fork, vfork or exec, let
@@ -3488,8 +3491,31 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
     }
   else
     {
-      /* The actual stop signal is overwritten below.  */
-      ourstatus->set_stopped (GDB_SIGNAL_0);
+      /* The LWP stopped due to a plain signal or a syscall signal.  Either way,
+         event_chid->waitstatus wasn't filled in with the details, so look at
+	 the wait status W.  */
+      if (WSTOPSIG (w) == SYSCALL_SIGTRAP)
+	{
+	  int syscall_number;
+
+	  get_syscall_trapinfo (event_child, &syscall_number);
+	  if (event_child->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY)
+	    ourstatus->set_syscall_entry (syscall_number);
+	  else if (event_child->syscall_state == TARGET_WAITKIND_SYSCALL_RETURN)
+	    ourstatus->set_syscall_return (syscall_number);
+	  else
+	    gdb_assert_not_reached ("unexpected syscall state");
+	}
+      else if (current_thread->last_resume_kind == resume_stop
+	       && WSTOPSIG (w) == SIGSTOP)
+	{
+	  /* A thread that has been requested to stop by GDB with vCont;t,
+	     and it stopped cleanly, so report as SIG0.  The use of
+	     SIGSTOP is an implementation detail.  */
+	  ourstatus->set_stopped (GDB_SIGNAL_0);
+	}
+      else
+	ourstatus->set_stopped (gdb_signal_from_host (WSTOPSIG (w)));
     }
 
   /* Now that we've selected our final event LWP, un-adjust its PC if
@@ -3507,36 +3533,6 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	  low_set_pc (regcache, event_child->stop_pc + decr_pc);
 	}
     }
-
-  if (WSTOPSIG (w) == SYSCALL_SIGTRAP)
-    {
-      int syscall_number;
-
-      get_syscall_trapinfo (event_child, &syscall_number);
-      if (event_child->syscall_state == TARGET_WAITKIND_SYSCALL_ENTRY)
-	ourstatus->set_syscall_entry (syscall_number);
-      else if (event_child->syscall_state == TARGET_WAITKIND_SYSCALL_RETURN)
-	ourstatus->set_syscall_return (syscall_number);
-      else
-	gdb_assert_not_reached ("unexpected syscall state");
-    }
-  else if (current_thread->last_resume_kind == resume_stop
-	   && WSTOPSIG (w) == SIGSTOP)
-    {
-      /* A thread that has been requested to stop by GDB with vCont;t,
-	 and it stopped cleanly, so report as SIG0.  The use of
-	 SIGSTOP is an implementation detail.  */
-      ourstatus->set_stopped (GDB_SIGNAL_0);
-    }
-  else if (current_thread->last_resume_kind == resume_stop
-	   && WSTOPSIG (w) != SIGSTOP)
-    {
-      /* A thread that has been requested to stop by GDB with vCont;t,
-	 but, it stopped for other reasons.  */
-      ourstatus->set_stopped (gdb_signal_from_host (WSTOPSIG (w)));
-    }
-  else if (ourstatus->kind () == TARGET_WAITKIND_STOPPED)
-    ourstatus->set_stopped (gdb_signal_from_host (WSTOPSIG (w)));
 
   gdb_assert (step_over_bkpt == null_ptid);
 
