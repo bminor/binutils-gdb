@@ -12129,6 +12129,14 @@ struct ada_catchpoint : public breakpoint
   {
   }
 
+  struct bp_location *allocate_location () override;
+  void re_set () override;
+  void check_status (struct bpstat *bs) override;
+  enum print_stop_action print_it (struct bpstat *bs) override;
+  bool print_one (struct bp_location **) override;
+  void print_mention () override;
+  void print_recreate (struct ui_file *fp) override;
+
   /* The name of the specific exception the user specified.  */
   std::string excep_string;
 
@@ -12187,30 +12195,28 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
     }
 }
 
-/* Implement the ALLOCATE_LOCATION method in the breakpoint_ops
-   structure for all exception catchpoint kinds.  */
-
-static struct bp_location *
-allocate_location_exception (struct breakpoint *self)
-{
-  return new ada_catchpoint_location (self);
-}
-
-/* Implement the RE_SET method in the breakpoint_ops structure for all
+/* Implement the ALLOCATE_LOCATION method in the structure for all
    exception catchpoint kinds.  */
 
-static void
-re_set_exception (struct breakpoint *b)
+struct bp_location *
+ada_catchpoint::allocate_location ()
 {
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
+  return new ada_catchpoint_location (this);
+}
 
+/* Implement the RE_SET method in the structure for all exception
+   catchpoint kinds.  */
+
+void
+ada_catchpoint::re_set ()
+{
   /* Call the base class's method.  This updates the catchpoint's
      locations.  */
-  b->re_set ();
+  this->breakpoint::re_set ();
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
-  create_excep_cond_exprs (c, c->m_kind);
+  create_excep_cond_exprs (this, m_kind);
 }
 
 /* Returns true if we should stop for this breakpoint hit.  If the
@@ -12278,36 +12284,35 @@ should_stop_exception (const struct bp_location *bl)
   return stop;
 }
 
-/* Implement the CHECK_STATUS method in the breakpoint_ops structure
-   for all exception catchpoint kinds.  */
+/* Implement the CHECK_STATUS method in the structure for all
+   exception catchpoint kinds.  */
 
-static void
-check_status_exception (bpstat *bs)
+void
+ada_catchpoint::check_status (bpstat *bs)
 {
   bs->stop = should_stop_exception (bs->bp_location_at.get ());
 }
 
-/* Implement the PRINT_IT method in the breakpoint_ops structure
-   for all exception catchpoint kinds.  */
+/* Implement the PRINT_IT method in the structure for all exception
+   catchpoint kinds.  */
 
-static enum print_stop_action
-print_it_exception (bpstat *bs)
+enum print_stop_action
+ada_catchpoint::print_it (bpstat *bs)
 {
   struct ui_out *uiout = current_uiout;
-  struct breakpoint *b = bs->breakpoint_at;
 
-  annotate_catchpoint (b->number);
+  annotate_catchpoint (number);
 
   if (uiout->is_mi_like_p ())
     {
       uiout->field_string ("reason",
 			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
-      uiout->field_string ("disp", bpdisp_text (b->disposition));
+      uiout->field_string ("disp", bpdisp_text (disposition));
     }
 
-  uiout->text (b->disposition == disp_del
+  uiout->text (disposition == disp_del
 	       ? "\nTemporary catchpoint " : "\nCatchpoint ");
-  uiout->field_signed ("bkptno", b->number);
+  uiout->field_signed ("bkptno", number);
   uiout->text (", ");
 
   /* ada_exception_name_addr relies on the selected frame being the
@@ -12317,14 +12322,13 @@ print_it_exception (bpstat *bs)
      ada_find_printable_frame).  */
   select_frame (get_current_frame ());
 
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
-  switch (c->m_kind)
+  switch (m_kind)
     {
       case ada_catch_exception:
       case ada_catch_exception_unhandled:
       case ada_catch_handlers:
 	{
-	  const CORE_ADDR addr = ada_exception_name_addr (c->m_kind, b);
+	  const CORE_ADDR addr = ada_exception_name_addr (m_kind, this);
 	  char exception_name[256];
 
 	  if (addr != 0)
@@ -12348,7 +12352,7 @@ print_it_exception (bpstat *bs)
 	     it clearer to the user which kind of catchpoint just got
 	     hit.  We used ui_out_text to make sure that this extra
 	     info does not pollute the exception name in the MI case.  */
-	  if (c->m_kind == ada_catch_exception_unhandled)
+	  if (m_kind == ada_catch_exception_unhandled)
 	    uiout->text ("unhandled ");
 	  uiout->field_string ("exception-name", exception_name);
 	}
@@ -12377,14 +12381,13 @@ print_it_exception (bpstat *bs)
   return PRINT_SRC_AND_LOC;
 }
 
-/* Implement the PRINT_ONE method in the breakpoint_ops structure
-   for all exception catchpoint kinds.  */
+/* Implement the PRINT_ONE method in the structure for all exception
+   catchpoint kinds.  */
 
-static bool
-print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
+bool
+ada_catchpoint::print_one (struct bp_location **last_loc)
 { 
   struct ui_out *uiout = current_uiout;
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
@@ -12393,13 +12396,13 @@ print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
     uiout->field_skip ("addr");
 
   annotate_field (5);
-  switch (c->m_kind)
+  switch (m_kind)
     {
       case ada_catch_exception:
-	if (!c->excep_string.empty ())
+	if (!excep_string.empty ())
 	  {
 	    std::string msg = string_printf (_("`%s' Ada exception"),
-					     c->excep_string.c_str ());
+					     excep_string.c_str ());
 
 	    uiout->field_string ("what", msg);
 	  }
@@ -12413,11 +12416,11 @@ print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
 	break;
       
       case ada_catch_handlers:
-	if (!c->excep_string.empty ())
+	if (!excep_string.empty ())
 	  {
 	    uiout->field_fmt ("what",
 			      _("`%s' Ada exception handlers"),
-			      c->excep_string.c_str ());
+			      excep_string.c_str ());
 	  }
 	else
 	  uiout->field_string ("what", "all Ada exceptions handlers");
@@ -12438,24 +12441,23 @@ print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
 /* Implement the PRINT_MENTION method in the breakpoint_ops structure
    for all exception catchpoint kinds.  */
 
-static void
-print_mention_exception (struct breakpoint *b)
+void
+ada_catchpoint::print_mention ()
 {
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
   struct ui_out *uiout = current_uiout;
 
-  uiout->text (b->disposition == disp_del ? _("Temporary catchpoint ")
+  uiout->text (disposition == disp_del ? _("Temporary catchpoint ")
 						 : _("Catchpoint "));
-  uiout->field_signed ("bkptno", b->number);
+  uiout->field_signed ("bkptno", number);
   uiout->text (": ");
 
-  switch (c->m_kind)
+  switch (m_kind)
     {
       case ada_catch_exception:
-	if (!c->excep_string.empty ())
+	if (!excep_string.empty ())
 	  {
 	    std::string info = string_printf (_("`%s' Ada exception"),
-					      c->excep_string.c_str ());
+					      excep_string.c_str ());
 	    uiout->text (info);
 	  }
 	else
@@ -12467,11 +12469,11 @@ print_mention_exception (struct breakpoint *b)
 	break;
 
       case ada_catch_handlers:
-	if (!c->excep_string.empty ())
+	if (!excep_string.empty ())
 	  {
 	    std::string info
 	      = string_printf (_("`%s' Ada exception handlers"),
-			       c->excep_string.c_str ());
+			       excep_string.c_str ());
 	    uiout->text (info);
 	  }
 	else
@@ -12488,20 +12490,18 @@ print_mention_exception (struct breakpoint *b)
     }
 }
 
-/* Implement the PRINT_RECREATE method in the breakpoint_ops structure
-   for all exception catchpoint kinds.  */
+/* Implement the PRINT_RECREATE method in the structure for all
+   exception catchpoint kinds.  */
 
-static void
-print_recreate_exception (struct breakpoint *b, struct ui_file *fp)
+void
+ada_catchpoint::print_recreate (struct ui_file *fp)
 {
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
-
-  switch (c->m_kind)
+  switch (m_kind)
     {
       case ada_catch_exception:
 	gdb_printf (fp, "catch exception");
-	if (!c->excep_string.empty ())
-	  gdb_printf (fp, " %s", c->excep_string.c_str ());
+	if (!excep_string.empty ())
+	  gdb_printf (fp, " %s", excep_string.c_str ());
 	break;
 
       case ada_catch_exception_unhandled:
@@ -12519,18 +12519,15 @@ print_recreate_exception (struct breakpoint *b, struct ui_file *fp)
       default:
 	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
     }
-  print_recreate_thread (b, fp);
+  print_recreate_thread (this, fp);
 }
-
-/* Virtual table for breakpoint type.  */
-static struct breakpoint_ops catch_exception_breakpoint_ops;
 
 /* See ada-lang.h.  */
 
 bool
 is_ada_exception_catchpoint (breakpoint *bp)
 {
-  return bp->ops == &catch_exception_breakpoint_ops;
+  return dynamic_cast<ada_catchpoint *> (bp) != nullptr;
 }
 
 /* Split the arguments specified in a "catch exception" command.  
@@ -12710,7 +12707,7 @@ ada_exception_catchpoint_cond_string (const char *excep_string,
 
 static struct symtab_and_line
 ada_exception_sal (enum ada_exception_catchpoint_kind ex,
-		   std::string *addr_string, const struct breakpoint_ops **ops)
+		   std::string *addr_string)
 {
   const char *sym_name;
   struct symbol *sym;
@@ -12731,9 +12728,6 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex,
 
   /* Set ADDR_STRING.  */
   *addr_string = sym_name;
-
-  /* Set OPS.  */
-  *ops = &catch_exception_breakpoint_ops;
 
   return find_function_start_sal (sym, 1);
 }
@@ -12763,12 +12757,12 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 int from_tty)
 {
   std::string addr_string;
-  const struct breakpoint_ops *ops = NULL;
-  struct symtab_and_line sal = ada_exception_sal (ex_kind, &addr_string, &ops);
+  struct symtab_and_line sal = ada_exception_sal (ex_kind, &addr_string);
 
   std::unique_ptr<ada_catchpoint> c (new ada_catchpoint (ex_kind));
   init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string.c_str (),
-				 ops, tempflag, disabled, from_tty);
+				 &vtable_breakpoint_ops,
+				 tempflag, disabled, from_tty);
   c->excep_string = excep_string;
   create_excep_cond_exprs (c.get (), ex_kind);
   if (!cond_string.empty ())
@@ -13883,24 +13877,6 @@ static ada_language ada_language_defn;
 static struct cmd_list_element *set_ada_list;
 static struct cmd_list_element *show_ada_list;
 
-static void
-initialize_ada_catchpoint_ops (void)
-{
-  struct breakpoint_ops *ops;
-
-  initialize_breakpoint_ops ();
-
-  ops = &catch_exception_breakpoint_ops;
-  *ops = vtable_breakpoint_ops;
-  ops->allocate_location = allocate_location_exception;
-  ops->re_set = re_set_exception;
-  ops->check_status = check_status_exception;
-  ops->print_it = print_it_exception;
-  ops->print_one = print_one_exception;
-  ops->print_mention = print_mention_exception;
-  ops->print_recreate = print_recreate_exception;
-}
-
 /* This module's 'new_objfile' observer.  */
 
 static void
@@ -13941,8 +13917,6 @@ void _initialize_ada_language ();
 void
 _initialize_ada_language ()
 {
-  initialize_ada_catchpoint_ops ();
-
   add_setshow_prefix_cmd
     ("ada", no_class,
      _("Prefix command for changing Ada-specific settings."),
