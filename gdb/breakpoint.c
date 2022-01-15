@@ -234,9 +234,6 @@ static int strace_marker_p (struct breakpoint *b);
    (user breakpoints, internal and momentary breakpoints, etc.).  */
 static struct breakpoint_ops bkpt_base_breakpoint_ops;
 
-/* Momentary breakpoints class type.  */
-static struct breakpoint_ops momentary_breakpoint_ops;
-
 /* The breakpoint_ops structure to be used in regular user created
    breakpoints.  */
 struct breakpoint_ops bkpt_breakpoint_ops;
@@ -267,6 +264,10 @@ struct internal_breakpoint : public base_breakpoint
 /* Momentary breakpoints.  */
 struct momentary_breakpoint : public base_breakpoint
 {
+  void re_set () override;
+  void check_status (struct bpstat *bs) override;
+  enum print_stop_action print_it (struct bpstat *bs) override;
+  void print_mention () override;
 };
 
 /* DPrintf breakpoints.  */
@@ -7351,7 +7352,7 @@ set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 	/* longjmp_breakpoint_ops ensures INITIATING_FRAME is cleared again
 	   after their removal.  */
 	clone = momentary_breakpoint_from_master (b, type,
-						  &momentary_breakpoint_ops, 1);
+						  &vtable_breakpoint_ops, 1);
 	clone->thread = thread;
       }
 
@@ -7397,7 +7398,7 @@ set_longjmp_breakpoint_for_call_dummy (void)
 	struct breakpoint *new_b;
 
 	new_b = momentary_breakpoint_from_master (b, bp_longjmp_call_dummy,
-						  &momentary_breakpoint_ops,
+						  &vtable_breakpoint_ops,
 						  1);
 	new_b->thread = inferior_thread ()->global_num;
 
@@ -7529,7 +7530,7 @@ set_std_terminate_breakpoint (void)
 	&& b->type == bp_std_terminate_master)
       {
 	momentary_breakpoint_from_master (b, bp_std_terminate,
-					  &momentary_breakpoint_ops, 1);
+					  &vtable_breakpoint_ops, 1);
       }
 }
 
@@ -7936,7 +7937,7 @@ new_single_step_breakpoint (int thread, struct gdbarch *gdbarch)
   std::unique_ptr<breakpoint> b (new momentary_breakpoint ());
 
   init_raw_breakpoint_without_location (b.get (), gdbarch, bp_single_step,
-					&momentary_breakpoint_ops);
+					&vtable_breakpoint_ops);
 
   b->disposition = disp_donttouch;
   b->frame_id = null_frame_id;
@@ -7961,7 +7962,7 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
      tail-called one.  */
   gdb_assert (!frame_id_artificial_p (frame_id));
 
-  b = set_raw_breakpoint (gdbarch, sal, type, &momentary_breakpoint_ops);
+  b = set_raw_breakpoint (gdbarch, sal, type, &vtable_breakpoint_ops);
   b->enable_state = bp_enabled;
   b->disposition = disp_donttouch;
   b->frame_id = frame_id;
@@ -8020,7 +8021,7 @@ clone_momentary_breakpoint (struct breakpoint *orig)
   if (orig == NULL)
     return NULL;
 
-  gdb_assert (orig->ops == &momentary_breakpoint_ops);
+  gdb_assert (orig->ops == &vtable_breakpoint_ops);
   return momentary_breakpoint_from_master (orig, orig->type, orig->ops, 0);
 }
 
@@ -10130,7 +10131,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	  scope_breakpoint
 	    = create_internal_breakpoint (caller_arch, caller_pc,
 					  bp_watchpoint_scope,
-					  &momentary_breakpoint_ops);
+					  &vtable_breakpoint_ops);
 
 	  /* create_internal_breakpoint could invalidate WP_FRAME.  */
 	  wp_frame = NULL;
@@ -12079,8 +12080,8 @@ internal_breakpoint::print_mention ()
 
 /* Virtual table for momentary breakpoints  */
 
-static void
-momentary_bkpt_re_set (struct breakpoint *b)
+void
+momentary_breakpoint::re_set ()
 {
   /* Keep temporary breakpoints, which can be encountered when we step
      over a dlopen call and solib_add is resetting the breakpoints.
@@ -12088,20 +12089,20 @@ momentary_bkpt_re_set (struct breakpoint *b)
      or by breakpoint_init_inferior when we rerun the executable.  */
 }
 
-static void
-momentary_bkpt_check_status (bpstat *bs)
+void
+momentary_breakpoint::check_status (bpstat *bs)
 {
   /* Nothing.  The point of these breakpoints is causing a stop.  */
 }
 
-static enum print_stop_action
-momentary_bkpt_print_it (bpstat *bs)
+enum print_stop_action
+momentary_breakpoint::print_it (bpstat *bs)
 {
   return PRINT_UNKNOWN;
 }
 
-static void
-momentary_bkpt_print_mention (struct breakpoint *b)
+void
+momentary_breakpoint::print_mention ()
 {
   /* Nothing to mention.  These breakpoints are internal.  */
 }
@@ -14579,14 +14580,6 @@ initialize_breakpoint_ops (void)
   ops->print_one_detail = print_one_detail_ranged_breakpoint;
   ops->print_mention = print_mention_ranged_breakpoint;
   ops->print_recreate = print_recreate_ranged_breakpoint;
-
-  /* Momentary breakpoints.  */
-  ops = &momentary_breakpoint_ops;
-  *ops = bkpt_base_breakpoint_ops;
-  ops->re_set = momentary_bkpt_re_set;
-  ops->check_status = momentary_bkpt_check_status;
-  ops->print_it = momentary_bkpt_print_it;
-  ops->print_mention = momentary_bkpt_print_mention;
 
   /* Probe breakpoints.  */
   ops = &bkpt_probe_breakpoint_ops;
