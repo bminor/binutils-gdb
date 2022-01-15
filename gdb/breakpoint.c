@@ -234,9 +234,6 @@ static int strace_marker_p (struct breakpoint *b);
    (user breakpoints, internal and momentary breakpoints, etc.).  */
 static struct breakpoint_ops bkpt_base_breakpoint_ops;
 
-/* Internal breakpoints class type.  */
-static struct breakpoint_ops internal_breakpoint_ops;
-
 /* Momentary breakpoints class type.  */
 static struct breakpoint_ops momentary_breakpoint_ops;
 
@@ -261,6 +258,10 @@ struct ordinary_breakpoint : public base_breakpoint
 /* Internal breakpoints.  */
 struct internal_breakpoint : public base_breakpoint
 {
+  void re_set () override;
+  void check_status (struct bpstat *bs) override;
+  enum print_stop_action print_it (struct bpstat *bs) override;
+  void print_mention () override;
 };
 
 /* Momentary breakpoints.  */
@@ -3316,7 +3317,7 @@ create_overlay_event_breakpoint (void)
       addr = bp_objfile_data->overlay_msym.value_address ();
       b = create_internal_breakpoint (objfile->arch (), addr,
 				      bp_overlay_event,
-				      &internal_breakpoint_ops);
+				      &vtable_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
       explicit_loc.function_name = ASTRDUP (func_name);
       b->location = new_explicit_location (&explicit_loc);
@@ -3376,7 +3377,7 @@ create_longjmp_master_breakpoint_probe (objfile *objfile)
       b = create_internal_breakpoint (gdbarch,
 				      p->get_relocated_address (objfile),
 				      bp_longjmp_master,
-				      &internal_breakpoint_ops);
+				      &vtable_breakpoint_ops);
       b->location = new_probe_location ("-probe-stap libc:longjmp");
       b->enable_state = bp_disabled;
     }
@@ -3425,7 +3426,7 @@ create_longjmp_master_breakpoint_names (objfile *objfile)
 
       addr = bp_objfile_data->longjmp_msym[i].value_address ();
       b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
-				      &internal_breakpoint_ops);
+				      &vtable_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
       explicit_loc.function_name = ASTRDUP (func_name);
       b->location = new_explicit_location (&explicit_loc);
@@ -3509,7 +3510,7 @@ create_std_terminate_master_breakpoint (void)
 	  addr = bp_objfile_data->terminate_msym.value_address ();
 	  b = create_internal_breakpoint (objfile->arch (), addr,
 					  bp_std_terminate_master,
-					  &internal_breakpoint_ops);
+					  &vtable_breakpoint_ops);
 	  initialize_explicit_location (&explicit_loc);
 	  explicit_loc.function_name = ASTRDUP (func_name);
 	  b->location = new_explicit_location (&explicit_loc);
@@ -3562,7 +3563,7 @@ create_exception_master_breakpoint_probe (objfile *objfile)
       b = create_internal_breakpoint (gdbarch,
 				      p->get_relocated_address (objfile),
 				      bp_exception_master,
-				      &internal_breakpoint_ops);
+				      &vtable_breakpoint_ops);
       b->location = new_probe_location ("-probe-stap libgcc:unwind");
       b->enable_state = bp_disabled;
     }
@@ -3608,7 +3609,7 @@ create_exception_master_breakpoint_hook (objfile *objfile)
   addr = gdbarch_convert_from_func_ptr_addr
     (gdbarch, addr, current_inferior ()->top_target ());
   b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
-				  &internal_breakpoint_ops);
+				  &vtable_breakpoint_ops);
   initialize_explicit_location (&explicit_loc);
   explicit_loc.function_name = ASTRDUP (func_name);
   b->location = new_explicit_location (&explicit_loc);
@@ -7547,7 +7548,7 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
   struct breakpoint *b;
 
   b = create_internal_breakpoint (gdbarch, address, bp_thread_event,
-				  &internal_breakpoint_ops);
+				  &vtable_breakpoint_ops);
 
   b->enable_state = bp_enabled;
   /* location has to be used or breakpoint_re_set will delete me.  */
@@ -7570,7 +7571,7 @@ struct breakpoint *
 create_jit_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 {
   return create_internal_breakpoint (gdbarch, address, bp_jit_event,
-				     &internal_breakpoint_ops);
+				     &vtable_breakpoint_ops);
 }
 
 /* Remove JIT code registration and unregistration breakpoint(s).  */
@@ -7615,7 +7616,7 @@ create_solib_event_breakpoint_1 (struct gdbarch *gdbarch, CORE_ADDR address,
   struct breakpoint *b;
 
   b = create_internal_breakpoint (gdbarch, address, bp_shlib_event,
-				  &internal_breakpoint_ops);
+				  &vtable_breakpoint_ops);
   update_global_location_list_nothrow (insert_mode);
   return b;
 }
@@ -11985,10 +11986,10 @@ base_breakpoint::decode_location (struct event_location *location,
 
 /* Virtual table for internal breakpoints.  */
 
-static void
-internal_bkpt_re_set (struct breakpoint *b)
+void
+internal_breakpoint::re_set ()
 {
-  switch (b->type)
+  switch (type)
     {
       /* Delete overlay event and longjmp master breakpoints; they
 	 will be reset later by breakpoint_re_set.  */
@@ -11996,7 +11997,7 @@ internal_bkpt_re_set (struct breakpoint *b)
     case bp_longjmp_master:
     case bp_std_terminate_master:
     case bp_exception_master:
-      delete_breakpoint (b);
+      delete_breakpoint (this);
       break;
 
       /* This breakpoint is special, it's set up when the inferior
@@ -12010,10 +12011,10 @@ internal_bkpt_re_set (struct breakpoint *b)
     }
 }
 
-static void
-internal_bkpt_check_status (bpstat *bs)
+void
+internal_breakpoint::check_status (bpstat *bs)
 {
-  if (bs->breakpoint_at->type == bp_shlib_event)
+  if (type == bp_shlib_event)
     {
       /* If requested, stop when the dynamic linker notifies GDB of
 	 events.  This allows the user to get control and place
@@ -12026,14 +12027,10 @@ internal_bkpt_check_status (bpstat *bs)
     bs->stop = 0;
 }
 
-static enum print_stop_action
-internal_bkpt_print_it (bpstat *bs)
+enum print_stop_action
+internal_breakpoint::print_it (bpstat *bs)
 {
-  struct breakpoint *b;
-
-  b = bs->breakpoint_at;
-
-  switch (b->type)
+  switch (type)
     {
     case bp_shlib_event:
       /* Did we stop because the user set the stop_on_solib_events
@@ -12074,8 +12071,8 @@ internal_bkpt_print_it (bpstat *bs)
   return PRINT_NOTHING;
 }
 
-static void
-internal_bkpt_print_mention (struct breakpoint *b)
+void
+internal_breakpoint::print_mention ()
 {
   /* Nothing to mention.  These breakpoints are internal.  */
 }
@@ -14582,14 +14579,6 @@ initialize_breakpoint_ops (void)
   ops->print_one_detail = print_one_detail_ranged_breakpoint;
   ops->print_mention = print_mention_ranged_breakpoint;
   ops->print_recreate = print_recreate_ranged_breakpoint;
-
-  /* Internal breakpoints.  */
-  ops = &internal_breakpoint_ops;
-  *ops = bkpt_base_breakpoint_ops;
-  ops->re_set = internal_bkpt_re_set;
-  ops->check_status = internal_bkpt_check_status;
-  ops->print_it = internal_bkpt_print_it;
-  ops->print_mention = internal_bkpt_print_mention;
 
   /* Momentary breakpoints.  */
   ops = &momentary_breakpoint_ops;
