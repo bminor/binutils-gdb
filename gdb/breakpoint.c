@@ -279,6 +279,21 @@ struct dprintf_breakpoint : public ordinary_breakpoint
   void after_condition_true (struct bpstat *bs) override;
 };
 
+/* Ranged breakpoints.  */
+struct ranged_breakpoint : public ordinary_breakpoint
+{
+  int breakpoint_hit (const struct bp_location *bl,
+		      const address_space *aspace,
+		      CORE_ADDR bp_addr,
+		      const target_waitstatus &ws) override;
+  int resources_needed (const struct bp_location *) override;
+  enum print_stop_action print_it (struct bpstat *bs) override;
+  bool print_one (struct bp_location **) override;
+  void print_one_detail (struct ui_out *) const override;
+  void print_mention () override;
+  void print_recreate (struct ui_file *fp) override;
+};
+
 /* The style in which to perform a dynamic printf.  This is a user
    option because different output options have different tradeoffs;
    if GDB does the printing, there is better error handling if there
@@ -9176,14 +9191,13 @@ agent_printf_command (const char *arg, int from_tty)
   error (_("May only run agent-printf on the target"));
 }
 
-/* Implement the "breakpoint_hit" breakpoint_ops method for
-   ranged breakpoints.  */
+/* Implement the "breakpoint_hit" method for ranged breakpoints.  */
 
-static int
-breakpoint_hit_ranged_breakpoint (const struct bp_location *bl,
-				  const address_space *aspace,
-				  CORE_ADDR bp_addr,
-				  const target_waitstatus &ws)
+int
+ranged_breakpoint::breakpoint_hit (const struct bp_location *bl,
+				   const address_space *aspace,
+				   CORE_ADDR bp_addr,
+				   const target_waitstatus &ws)
 {
   if (ws.kind () != TARGET_WAITKIND_STOPPED
       || ws.sig () != GDB_SIGNAL_TRAP)
@@ -9193,35 +9207,32 @@ breakpoint_hit_ranged_breakpoint (const struct bp_location *bl,
 					 bl->length, aspace, bp_addr);
 }
 
-/* Implement the "resources_needed" breakpoint_ops method for
-   ranged breakpoints.  */
+/* Implement the "resources_needed" method for ranged breakpoints.  */
 
-static int
-resources_needed_ranged_breakpoint (const struct bp_location *bl)
+int
+ranged_breakpoint::resources_needed (const struct bp_location *bl)
 {
   return target_ranged_break_num_registers ();
 }
 
-/* Implement the "print_it" breakpoint_ops method for
-   ranged breakpoints.  */
+/* Implement the "print_it" method for ranged breakpoints.  */
 
-static enum print_stop_action
-print_it_ranged_breakpoint (bpstat *bs)
+enum print_stop_action
+ranged_breakpoint::print_it (bpstat *bs)
 {
-  struct breakpoint *b = bs->breakpoint_at;
-  struct bp_location *bl = b->loc;
+  struct bp_location *bl = loc;
   struct ui_out *uiout = current_uiout;
 
-  gdb_assert (b->type == bp_hardware_breakpoint);
+  gdb_assert (type == bp_hardware_breakpoint);
 
   /* Ranged breakpoints have only one location.  */
   gdb_assert (bl && bl->next == NULL);
 
-  annotate_breakpoint (b->number);
+  annotate_breakpoint (number);
 
   maybe_print_thread_hit_breakpoint (uiout);
 
-  if (b->disposition == disp_del)
+  if (disposition == disp_del)
     uiout->text ("Temporary ranged breakpoint ");
   else
     uiout->text ("Ranged breakpoint ");
@@ -9229,22 +9240,20 @@ print_it_ranged_breakpoint (bpstat *bs)
     {
       uiout->field_string ("reason",
 		      async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
-      uiout->field_string ("disp", bpdisp_text (b->disposition));
+      uiout->field_string ("disp", bpdisp_text (disposition));
     }
-  uiout->field_signed ("bkptno", b->number);
+  uiout->field_signed ("bkptno", number);
   uiout->text (", ");
 
   return PRINT_SRC_AND_LOC;
 }
 
-/* Implement the "print_one" breakpoint_ops method for
-   ranged breakpoints.  */
+/* Implement the "print_one" method for ranged breakpoints.  */
 
-static bool
-print_one_ranged_breakpoint (struct breakpoint *b,
-			     struct bp_location **last_loc)
+bool
+ranged_breakpoint::print_one (struct bp_location **last_loc)
 {
-  struct bp_location *bl = b->loc;
+  struct bp_location *bl = loc;
   struct value_print_options opts;
   struct ui_out *uiout = current_uiout;
 
@@ -9258,21 +9267,19 @@ print_one_ranged_breakpoint (struct breakpoint *b,
        by print_one_detail_ranged_breakpoint.  */
     uiout->field_skip ("addr");
   annotate_field (5);
-  print_breakpoint_location (b, bl);
+  print_breakpoint_location (this, bl);
   *last_loc = bl;
 
   return true;
 }
 
-/* Implement the "print_one_detail" breakpoint_ops method for
-   ranged breakpoints.  */
+/* Implement the "print_one_detail" method for ranged breakpoints.  */
 
-static void
-print_one_detail_ranged_breakpoint (const struct breakpoint *b,
-				    struct ui_out *uiout)
+void
+ranged_breakpoint::print_one_detail (struct ui_out *uiout) const
 {
   CORE_ADDR address_start, address_end;
-  struct bp_location *bl = b->loc;
+  struct bp_location *bl = loc;
   string_file stb;
 
   gdb_assert (bl);
@@ -9288,38 +9295,32 @@ print_one_detail_ranged_breakpoint (const struct breakpoint *b,
   uiout->text ("\n");
 }
 
-/* Implement the "print_mention" breakpoint_ops method for
-   ranged breakpoints.  */
+/* Implement the "print_mention" method for ranged breakpoints.  */
 
-static void
-print_mention_ranged_breakpoint (struct breakpoint *b)
+void
+ranged_breakpoint::print_mention ()
 {
-  struct bp_location *bl = b->loc;
+  struct bp_location *bl = loc;
   struct ui_out *uiout = current_uiout;
 
   gdb_assert (bl);
-  gdb_assert (b->type == bp_hardware_breakpoint);
+  gdb_assert (type == bp_hardware_breakpoint);
 
   uiout->message (_("Hardware assisted ranged breakpoint %d from %s to %s."),
-		  b->number, paddress (bl->gdbarch, bl->address),
+		  number, paddress (bl->gdbarch, bl->address),
 		  paddress (bl->gdbarch, bl->address + bl->length - 1));
 }
 
-/* Implement the "print_recreate" breakpoint_ops method for
-   ranged breakpoints.  */
+/* Implement the "print_recreate" method for ranged breakpoints.  */
 
-static void
-print_recreate_ranged_breakpoint (struct breakpoint *b, struct ui_file *fp)
+void
+ranged_breakpoint::print_recreate (struct ui_file *fp)
 {
   gdb_printf (fp, "break-range %s, %s",
-	      event_location_to_string (b->location.get ()),
-	      event_location_to_string (b->location_range_end.get ()));
-  print_recreate_thread (b, fp);
+	      event_location_to_string (location.get ()),
+	      event_location_to_string (location_range_end.get ()));
+  print_recreate_thread (this, fp);
 }
-
-/* The breakpoint_ops structure to be used in ranged breakpoints.  */
-
-static struct breakpoint_ops ranged_breakpoint_ops;
 
 /* Find the address where the end of the breakpoint range should be
    placed, given the SAL of the end of the range.  This is so that if
@@ -9442,8 +9443,12 @@ break_range_command (const char *arg, int from_tty)
     }
 
   /* Now set up the breakpoint.  */
-  b = set_raw_breakpoint (get_current_arch (), sal_start,
-			  bp_hardware_breakpoint, &ranged_breakpoint_ops);
+  std::unique_ptr<breakpoint> br (new ranged_breakpoint ());
+  init_raw_breakpoint (br.get (), get_current_arch (),
+		       sal_start, bp_hardware_breakpoint,
+		       &vtable_breakpoint_ops);
+  b = add_to_breakpoint_chain (std::move (br));
+
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
   b->disposition = disp_donttouch;
@@ -14558,17 +14563,6 @@ initialize_breakpoint_ops (void)
      internal and momentary breakpoints, etc.).  */
   ops = &bkpt_base_breakpoint_ops;
   *ops = vtable_breakpoint_ops;
-
-  /* Ranged breakpoints.  */
-  ops = &ranged_breakpoint_ops;
-  *ops = vtable_breakpoint_ops;
-  ops->breakpoint_hit = breakpoint_hit_ranged_breakpoint;
-  ops->resources_needed = resources_needed_ranged_breakpoint;
-  ops->print_it = print_it_ranged_breakpoint;
-  ops->print_one = print_one_ranged_breakpoint;
-  ops->print_one_detail = print_one_detail_ranged_breakpoint;
-  ops->print_mention = print_mention_ranged_breakpoint;
-  ops->print_recreate = print_recreate_ranged_breakpoint;
 
   /* Probe breakpoints.  */
   ops = &bkpt_probe_breakpoint_ops;
