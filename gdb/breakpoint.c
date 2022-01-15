@@ -9404,13 +9404,11 @@ watchpoint_exp_is_const (const struct expression *exp)
   return exp->op->constant_p ();
 }
 
-/* Implement the "re_set" breakpoint_ops method for watchpoints.  */
+/* Implement the "re_set" method for watchpoints.  */
 
-static void
-re_set_watchpoint (struct breakpoint *b)
+void
+watchpoint::re_set ()
 {
-  struct watchpoint *w = (struct watchpoint *) b;
-
   /* Watchpoint can be either on expression using entirely global
      variables, or it can be on local variables.
 
@@ -9432,44 +9430,42 @@ re_set_watchpoint (struct breakpoint *b)
      I'm not sure we'll ever be called in this case.
 
      If a local watchpoint's frame id is still valid, then
-     w->exp_valid_block is likewise valid, and we can safely use it.
+     exp_valid_block is likewise valid, and we can safely use it.
 
      Don't do anything about disabled watchpoints, since they will be
      reevaluated again when enabled.  */
-  update_watchpoint (w, 1 /* reparse */);
+  update_watchpoint (this, 1 /* reparse */);
 }
 
-/* Implement the "insert" breakpoint_ops method for hardware watchpoints.  */
+/* Implement the "insert" method for hardware watchpoints.  */
 
-static int
-insert_watchpoint (struct bp_location *bl)
+int
+watchpoint::insert_location (struct bp_location *bl)
 {
-  struct watchpoint *w = (struct watchpoint *) bl->owner;
-  int length = w->exact ? 1 : bl->length;
+  int length = exact ? 1 : bl->length;
 
   return target_insert_watchpoint (bl->address, length, bl->watchpoint_type,
-				   w->cond_exp.get ());
+				   cond_exp.get ());
 }
 
-/* Implement the "remove" breakpoint_ops method for hardware watchpoints.  */
+/* Implement the "remove" method for hardware watchpoints.  */
 
-static int
-remove_watchpoint (struct bp_location *bl, enum remove_bp_reason reason)
+int
+watchpoint::remove_location (struct bp_location *bl,
+			     enum remove_bp_reason reason)
 {
-  struct watchpoint *w = (struct watchpoint *) bl->owner;
-  int length = w->exact ? 1 : bl->length;
+  int length = exact ? 1 : bl->length;
 
   return target_remove_watchpoint (bl->address, length, bl->watchpoint_type,
-				   w->cond_exp.get ());
+				   cond_exp.get ());
 }
 
-static int
-breakpoint_hit_watchpoint (const struct bp_location *bl,
-			   const address_space *aspace, CORE_ADDR bp_addr,
-			   const target_waitstatus &ws)
+int
+watchpoint::breakpoint_hit (const struct bp_location *bl,
+			    const address_space *aspace, CORE_ADDR bp_addr,
+			    const target_waitstatus &ws)
 {
   struct breakpoint *b = bl->owner;
-  struct watchpoint *w = (struct watchpoint *) b;
 
   /* Continuable hardware watchpoints are treated as non-existent if the
      reason we stopped wasn't a hardware watchpoint (we didn't stop on
@@ -9478,54 +9474,51 @@ breakpoint_hit_watchpoint (const struct bp_location *bl,
      been defined.  Also skip watchpoints which we know did not trigger
      (did not match the data address).  */
   if (is_hardware_watchpoint (b)
-      && w->watchpoint_triggered == watch_triggered_no)
+      && watchpoint_triggered == watch_triggered_no)
     return 0;
 
   return 1;
 }
 
-static void
-check_status_watchpoint (bpstat *bs)
+void
+watchpoint::check_status (bpstat *bs)
 {
   gdb_assert (is_watchpoint (bs->breakpoint_at));
 
   bpstat_check_watchpoint (bs);
 }
 
-/* Implement the "resources_needed" breakpoint_ops method for
-   hardware watchpoints.  */
+/* Implement the "resources_needed" method for hardware
+   watchpoints.  */
 
-static int
-resources_needed_watchpoint (const struct bp_location *bl)
+int
+watchpoint::resources_needed (const struct bp_location *bl)
 {
-  struct watchpoint *w = (struct watchpoint *) bl->owner;
-  int length = w->exact? 1 : bl->length;
+  int length = exact? 1 : bl->length;
 
   return target_region_ok_for_hw_watchpoint (bl->address, length);
 }
 
-/* Implement the "works_in_software_mode" breakpoint_ops method for
-   hardware watchpoints.  */
+/* Implement the "works_in_software_mode" method for hardware
+   watchpoints.  */
 
-static int
-works_in_software_mode_watchpoint (const struct breakpoint *b)
+int
+watchpoint::works_in_software_mode () const
 {
   /* Read and access watchpoints only work with hardware support.  */
-  return b->type == bp_watchpoint || b->type == bp_hardware_watchpoint;
+  return type == bp_watchpoint || type == bp_hardware_watchpoint;
 }
 
-static enum print_stop_action
-print_it_watchpoint (bpstat *bs)
+enum print_stop_action
+watchpoint::print_it (bpstat *bs)
 {
   struct breakpoint *b;
   enum print_stop_action result;
-  struct watchpoint *w;
   struct ui_out *uiout = current_uiout;
 
   gdb_assert (bs->bp_location_at != NULL);
 
   b = bs->breakpoint_at;
-  w = (struct watchpoint *) b;
 
   annotate_watchpoint (b->number);
   maybe_print_thread_hit_breakpoint (uiout);
@@ -9546,7 +9539,7 @@ print_it_watchpoint (bpstat *bs)
       watchpoint_value_print (bs->old_val.get (), &stb);
       uiout->field_stream ("old", stb);
       uiout->text ("\nNew value = ");
-      watchpoint_value_print (w->val.get (), &stb);
+      watchpoint_value_print (val.get (), &stb);
       uiout->field_stream ("new", stb);
       uiout->text ("\n");
       /* More than one watchpoint may have been triggered.  */
@@ -9560,7 +9553,7 @@ print_it_watchpoint (bpstat *bs)
       mention (b);
       tuple_emitter.emplace (uiout, "value");
       uiout->text ("\nValue = ");
-      watchpoint_value_print (w->val.get (), &stb);
+      watchpoint_value_print (val.get (), &stb);
       uiout->field_stream ("value", stb);
       uiout->text ("\n");
       result = PRINT_UNKNOWN;
@@ -9590,7 +9583,7 @@ print_it_watchpoint (bpstat *bs)
 	  tuple_emitter.emplace (uiout, "value");
 	  uiout->text ("\nValue = ");
 	}
-      watchpoint_value_print (w->val.get (), &stb);
+      watchpoint_value_print (val.get (), &stb);
       uiout->field_stream ("new", stb);
       uiout->text ("\n");
       result = PRINT_UNKNOWN;
@@ -9602,17 +9595,15 @@ print_it_watchpoint (bpstat *bs)
   return result;
 }
 
-/* Implement the "print_mention" breakpoint_ops method for hardware
-   watchpoints.  */
+/* Implement the "print_mention" method for hardware watchpoints.  */
 
-static void
-print_mention_watchpoint (struct breakpoint *b)
+void
+watchpoint::print_mention ()
 {
-  struct watchpoint *w = (struct watchpoint *) b;
   struct ui_out *uiout = current_uiout;
   const char *tuple_name;
 
-  switch (b->type)
+  switch (type)
     {
     case bp_watchpoint:
       uiout->text ("Watchpoint ");
@@ -9636,20 +9627,17 @@ print_mention_watchpoint (struct breakpoint *b)
     }
 
   ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
-  uiout->field_signed ("number", b->number);
+  uiout->field_signed ("number", number);
   uiout->text (": ");
-  uiout->field_string ("exp", w->exp_string.get ());
+  uiout->field_string ("exp", exp_string.get ());
 }
 
-/* Implement the "print_recreate" breakpoint_ops method for
-   watchpoints.  */
+/* Implement the "print_recreate" method for watchpoints.  */
 
-static void
-print_recreate_watchpoint (struct breakpoint *b, struct ui_file *fp)
+void
+watchpoint::print_recreate (struct ui_file *fp)
 {
-  struct watchpoint *w = (struct watchpoint *) b;
-
-  switch (b->type)
+  switch (type)
     {
     case bp_watchpoint:
     case bp_hardware_watchpoint:
@@ -9666,77 +9654,78 @@ print_recreate_watchpoint (struct breakpoint *b, struct ui_file *fp)
 		      _("Invalid watchpoint type."));
     }
 
-  gdb_printf (fp, " %s", w->exp_string.get ());
-  print_recreate_thread (b, fp);
+  gdb_printf (fp, " %s", exp_string.get ());
+  print_recreate_thread (this, fp);
 }
 
-/* Implement the "explains_signal" breakpoint_ops method for
-   watchpoints.  */
+/* Implement the "explains_signal" method for watchpoints.  */
 
-static int
-explains_signal_watchpoint (struct breakpoint *b, enum gdb_signal sig)
+int
+watchpoint::explains_signal (enum gdb_signal sig)
 {
   /* A software watchpoint cannot cause a signal other than
      GDB_SIGNAL_TRAP.  */
-  if (b->type == bp_watchpoint && sig != GDB_SIGNAL_TRAP)
+  if (type == bp_watchpoint && sig != GDB_SIGNAL_TRAP)
     return 0;
 
   return 1;
 }
 
-/* The breakpoint_ops structure to be used in hardware watchpoints.  */
-
-static struct breakpoint_ops watchpoint_breakpoint_ops;
-
-/* Implement the "insert" breakpoint_ops method for
-   masked hardware watchpoints.  */
-
-static int
-insert_masked_watchpoint (struct bp_location *bl)
+struct masked_watchpoint : public watchpoint
 {
-  struct watchpoint *w = (struct watchpoint *) bl->owner;
+  int insert_location (struct bp_location *) override;
+  int remove_location (struct bp_location *,
+		       enum remove_bp_reason reason) override;
+  int resources_needed (const struct bp_location *) override;
+  int works_in_software_mode () const override;
+  enum print_stop_action print_it (struct bpstat *bs) override;
+  void print_one_detail (struct ui_out *) const override;
+  void print_mention () override;
+  void print_recreate (struct ui_file *fp) override;
+};
 
-  return target_insert_mask_watchpoint (bl->address, w->hw_wp_mask,
+/* Implement the "insert" method for masked hardware watchpoints.  */
+
+int
+masked_watchpoint::insert_location (struct bp_location *bl)
+{
+  return target_insert_mask_watchpoint (bl->address, hw_wp_mask,
 					bl->watchpoint_type);
 }
 
-/* Implement the "remove" breakpoint_ops method for
-   masked hardware watchpoints.  */
+/* Implement the "remove" method for masked hardware watchpoints.  */
 
-static int
-remove_masked_watchpoint (struct bp_location *bl, enum remove_bp_reason reason)
+int
+masked_watchpoint::remove_location (struct bp_location *bl,
+				    enum remove_bp_reason reason)
 {
-  struct watchpoint *w = (struct watchpoint *) bl->owner;
-
-  return target_remove_mask_watchpoint (bl->address, w->hw_wp_mask,
+  return target_remove_mask_watchpoint (bl->address, hw_wp_mask,
 					bl->watchpoint_type);
 }
 
-/* Implement the "resources_needed" breakpoint_ops method for
-   masked hardware watchpoints.  */
+/* Implement the "resources_needed" method for masked hardware
+   watchpoints.  */
 
-static int
-resources_needed_masked_watchpoint (const struct bp_location *bl)
+int
+masked_watchpoint::resources_needed (const struct bp_location *bl)
 {
-  struct watchpoint *w = (struct watchpoint *) bl->owner;
-
-  return target_masked_watch_num_registers (bl->address, w->hw_wp_mask);
+  return target_masked_watch_num_registers (bl->address, hw_wp_mask);
 }
 
-/* Implement the "works_in_software_mode" breakpoint_ops method for
-   masked hardware watchpoints.  */
+/* Implement the "works_in_software_mode" method for masked hardware
+   watchpoints.  */
 
-static int
-works_in_software_mode_masked_watchpoint (const struct breakpoint *b)
+int
+masked_watchpoint::works_in_software_mode () const
 {
   return 0;
 }
 
-/* Implement the "print_it" breakpoint_ops method for
-   masked hardware watchpoints.  */
+/* Implement the "print_it" method for masked hardware
+   watchpoints.  */
 
-static enum print_stop_action
-print_it_masked_watchpoint (bpstat *bs)
+enum print_stop_action
+masked_watchpoint::print_it (bpstat *bs)
 {
   struct breakpoint *b = bs->breakpoint_at;
   struct ui_out *uiout = current_uiout;
@@ -9782,34 +9771,30 @@ address and value which triggered this watchpoint.\n"));
   return PRINT_UNKNOWN;
 }
 
-/* Implement the "print_one_detail" breakpoint_ops method for
-   masked hardware watchpoints.  */
+/* Implement the "print_one_detail" method for masked hardware
+   watchpoints.  */
 
-static void
-print_one_detail_masked_watchpoint (const struct breakpoint *b,
-				    struct ui_out *uiout)
+void
+masked_watchpoint::print_one_detail (struct ui_out *uiout) const
 {
-  struct watchpoint *w = (struct watchpoint *) b;
-
   /* Masked watchpoints have only one location.  */
-  gdb_assert (b->loc && b->loc->next == NULL);
+  gdb_assert (loc && loc->next == NULL);
 
   uiout->text ("\tmask ");
-  uiout->field_core_addr ("mask", b->loc->gdbarch, w->hw_wp_mask);
+  uiout->field_core_addr ("mask", loc->gdbarch, hw_wp_mask);
   uiout->text ("\n");
 }
 
-/* Implement the "print_mention" breakpoint_ops method for
-   masked hardware watchpoints.  */
+/* Implement the "print_mention" method for masked hardware
+   watchpoints.  */
 
-static void
-print_mention_masked_watchpoint (struct breakpoint *b)
+void
+masked_watchpoint::print_mention ()
 {
-  struct watchpoint *w = (struct watchpoint *) b;
   struct ui_out *uiout = current_uiout;
   const char *tuple_name;
 
-  switch (b->type)
+  switch (type)
     {
     case bp_hardware_watchpoint:
       uiout->text ("Masked hardware watchpoint ");
@@ -9829,20 +9814,18 @@ print_mention_masked_watchpoint (struct breakpoint *b)
     }
 
   ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
-  uiout->field_signed ("number", b->number);
+  uiout->field_signed ("number", number);
   uiout->text (": ");
-  uiout->field_string ("exp", w->exp_string.get ());
+  uiout->field_string ("exp", exp_string.get ());
 }
 
-/* Implement the "print_recreate" breakpoint_ops method for
-   masked hardware watchpoints.  */
+/* Implement the "print_recreate" method for masked hardware
+   watchpoints.  */
 
-static void
-print_recreate_masked_watchpoint (struct breakpoint *b, struct ui_file *fp)
+void
+masked_watchpoint::print_recreate (struct ui_file *fp)
 {
-  struct watchpoint *w = (struct watchpoint *) b;
-
-  switch (b->type)
+  switch (type)
     {
     case bp_hardware_watchpoint:
       gdb_printf (fp, "watch");
@@ -9858,21 +9841,17 @@ print_recreate_masked_watchpoint (struct breakpoint *b, struct ui_file *fp)
 		      _("Invalid hardware watchpoint type."));
     }
 
-  gdb_printf (fp, " %s mask 0x%s", w->exp_string.get (),
-	      phex (w->hw_wp_mask, sizeof (CORE_ADDR)));
-  print_recreate_thread (b, fp);
+  gdb_printf (fp, " %s mask 0x%s", exp_string.get (),
+	      phex (hw_wp_mask, sizeof (CORE_ADDR)));
+  print_recreate_thread (this, fp);
 }
-
-/* The breakpoint_ops structure to be used in masked hardware watchpoints.  */
-
-static struct breakpoint_ops masked_watchpoint_breakpoint_ops;
 
 /* Tell whether the given watchpoint is a masked hardware watchpoint.  */
 
 static bool
 is_masked_watchpoint (const struct breakpoint *b)
 {
-  return b->ops == &masked_watchpoint_breakpoint_ops;
+  return dynamic_cast<const masked_watchpoint *> (b) != nullptr;
 }
 
 /* accessflag:  hw_write:  watch write, 
@@ -10128,14 +10107,14 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   else
     bp_type = bp_hardware_watchpoint;
 
-  std::unique_ptr<watchpoint> w (new watchpoint ());
-
+  std::unique_ptr<watchpoint> w;
   if (use_mask)
-    init_raw_breakpoint_without_location (w.get (), NULL, bp_type,
-					  &masked_watchpoint_breakpoint_ops);
+    w.reset (new masked_watchpoint ());
   else
-    init_raw_breakpoint_without_location (w.get (), NULL, bp_type,
-					  &watchpoint_breakpoint_ops);
+    w.reset (new watchpoint ());
+  init_raw_breakpoint_without_location (w.get (), nullptr, bp_type,
+					&vtable_breakpoint_ops);
+
   w->thread = thread;
   w->task = task;
   w->disposition = disp_donttouch;
@@ -14585,33 +14564,6 @@ initialize_breakpoint_ops (void)
   ops->remove_location = bkpt_probe_remove_location;
   ops->create_sals_from_location = bkpt_probe_create_sals_from_location;
   ops->decode_location = bkpt_probe_decode_location;
-
-  /* Watchpoints.  */
-  ops = &watchpoint_breakpoint_ops;
-  *ops = base_breakpoint_ops;
-  ops->re_set = re_set_watchpoint;
-  ops->insert_location = insert_watchpoint;
-  ops->remove_location = remove_watchpoint;
-  ops->breakpoint_hit = breakpoint_hit_watchpoint;
-  ops->check_status = check_status_watchpoint;
-  ops->resources_needed = resources_needed_watchpoint;
-  ops->works_in_software_mode = works_in_software_mode_watchpoint;
-  ops->print_it = print_it_watchpoint;
-  ops->print_mention = print_mention_watchpoint;
-  ops->print_recreate = print_recreate_watchpoint;
-  ops->explains_signal = explains_signal_watchpoint;
-
-  /* Masked watchpoints.  */
-  ops = &masked_watchpoint_breakpoint_ops;
-  *ops = watchpoint_breakpoint_ops;
-  ops->insert_location = insert_masked_watchpoint;
-  ops->remove_location = remove_masked_watchpoint;
-  ops->resources_needed = resources_needed_masked_watchpoint;
-  ops->works_in_software_mode = works_in_software_mode_masked_watchpoint;
-  ops->print_it = print_it_masked_watchpoint;
-  ops->print_one_detail = print_one_detail_masked_watchpoint;
-  ops->print_mention = print_mention_masked_watchpoint;
-  ops->print_recreate = print_recreate_masked_watchpoint;
 
   /* Tracepoints.  */
   ops = &tracepoint_breakpoint_ops;

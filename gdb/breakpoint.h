@@ -944,6 +944,22 @@ struct breakpoint
 
 struct watchpoint : public breakpoint
 {
+  void re_set () override;
+  int insert_location (struct bp_location *) override;
+  int remove_location (struct bp_location *,
+		       enum remove_bp_reason reason) override;
+  int breakpoint_hit (const struct bp_location *bl,
+		      const address_space *aspace,
+		      CORE_ADDR bp_addr,
+		      const target_waitstatus &ws) override;
+  void check_status (struct bpstat *bs) override;
+  int resources_needed (const struct bp_location *) override;
+  int works_in_software_mode () const override;
+  enum print_stop_action print_it (struct bpstat *bs) override;
+  void print_mention () override;
+  void print_recreate (struct ui_file *fp) override;
+  int explains_signal (enum gdb_signal) override;
+
   /* String form of exp to use for displaying to the user (malloc'd),
      or NULL if none.  */
   gdb::unique_xmalloc_ptr<char> exp_string;
