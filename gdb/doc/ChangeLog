@@ -1,3 +1,9 @@
+2022-01-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo: Change end year of the manual's copyright notice
+	to 2022.
+	* refcard.tex: Ditto.
+
 2021-08-12  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (Output Styling): Mention Pygments.

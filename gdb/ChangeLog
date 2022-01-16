@@ -1,5 +1,10 @@
 2022-01-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbarch.sh: Update end year of copyright year range for
+	copyright header of generated files.
+
+2022-01-16  Joel Brobecker  <brobecker@adacore.com>
+
 	Update copyright year in header of all GDB files to 2022,
 	using the gdb/copyright.py script
 
