@@ -1,5 +1,9 @@
 2022-01-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 11.2.90.DATE-git.
+
+2022-01-16  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 11.2 released.
 
 2022-01-16  Joel Brobecker  <brobecker@adacore.com>
