@@ -253,7 +253,7 @@ print_it_exception_catchpoint (bpstat *bs)
   return PRINT_SRC_AND_LOC;
 }
 
-static void
+static bool
 print_one_exception_catchpoint (struct breakpoint *b, 
 				struct bp_location **last_loc)
 {
@@ -287,6 +287,8 @@ print_one_exception_catchpoint (struct breakpoint *b,
 	uiout->field_string ("catch-type", "catch");
       break;
     }
+
+  return true;
 }
 
 /* Implement the 'print_one_detail' method.  */

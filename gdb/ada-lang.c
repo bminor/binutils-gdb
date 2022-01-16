@@ -12380,7 +12380,7 @@ print_it_exception (bpstat *bs)
 /* Implement the PRINT_ONE method in the breakpoint_ops structure
    for all exception catchpoint kinds.  */
 
-static void
+static bool
 print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
 { 
   struct ui_out *uiout = current_uiout;
@@ -12431,6 +12431,8 @@ print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
 	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
 	break;
     }
+
+  return true;
 }
 
 /* Implement the PRINT_MENTION method in the breakpoint_ops structure

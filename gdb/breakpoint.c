@@ -6058,9 +6058,10 @@ output_thread_groups (struct ui_out *uiout,
    instead of going via breakpoint_ops::print_one.  This makes "maint
    info breakpoints" show the software breakpoint locations of
    catchpoints, which are considered internal implementation
-   detail.  */
+   detail.  Returns true if RAW_LOC is false and if the breakpoint's
+   print_one method did something; false otherwise.  */
 
-static void
+static bool
 print_one_breakpoint_location (struct breakpoint *b,
 			       struct bp_location *loc,
 			       int loc_number,
@@ -6124,8 +6125,9 @@ print_one_breakpoint_location (struct breakpoint *b,
     uiout->field_fmt ("enabled", "%c", bpenables[(int) b->enable_state]);
 
   /* 5 and 6 */
-  if (!raw_loc && b->ops != NULL && b->ops->print_one != NULL)
-    b->ops->print_one (b, last_loc);
+  bool result = false;
+  if (!raw_loc && b->ops != NULL && b->ops->print_one (b, last_loc))
+    result = true;
   else
     {
       if (is_watchpoint (b))
@@ -6372,6 +6374,8 @@ print_one_breakpoint_location (struct breakpoint *b,
 	uiout->field_string ("original-location",
 			     event_location_to_string (b->location.get ()));
     }
+
+  return result;
 }
 
 /* See breakpoint.h. */
@@ -6389,7 +6393,8 @@ print_one_breakpoint (struct breakpoint *b,
        || fix_multi_location_breakpoint_output_globally);
 
   gdb::optional<ui_out_emit_tuple> bkpt_tuple_emitter (gdb::in_place, uiout, "bkpt");
-  print_one_breakpoint_location (b, NULL, 0, last_loc, allflag, false);
+  bool printed = print_one_breakpoint_location (b, NULL, 0, last_loc,
+						allflag, false);
 
   /* The mi2 broken format: the main breakpoint tuple ends here, the locations
      are outside.  */
@@ -6399,9 +6404,7 @@ print_one_breakpoint (struct breakpoint *b,
   /* If this breakpoint has custom print function,
      it's already printed.  Otherwise, print individual
      locations, if any.  */
-  if (b->ops == NULL
-      || b->ops->print_one == NULL
-      || allflag)
+  if (!printed || allflag)
     {
       /* If breakpoint has a single location that is disabled, we
 	 print it as if it had several locations, since otherwise it's
@@ -9174,7 +9177,7 @@ print_it_ranged_breakpoint (bpstat *bs)
 /* Implement the "print_one" breakpoint_ops method for
    ranged breakpoints.  */
 
-static void
+static bool
 print_one_ranged_breakpoint (struct breakpoint *b,
 			     struct bp_location **last_loc)
 {
@@ -9194,6 +9197,8 @@ print_one_ranged_breakpoint (struct breakpoint *b,
   annotate_field (5);
   print_breakpoint_location (b, bl);
   *last_loc = bl;
+
+  return true;
 }
 
 /* Implement the "print_one_detail" breakpoint_ops method for
@@ -11549,6 +11554,12 @@ base_breakpoint_print_it (bpstat *bs)
   internal_error_pure_virtual_called ();
 }
 
+static bool
+base_breakpoint_print_one (struct breakpoint *, struct bp_location **)
+{
+  return false;
+}
+
 static void
 base_breakpoint_print_one_detail (const struct breakpoint *self,
 				  struct ui_out *uiout)
@@ -11628,7 +11639,7 @@ struct breakpoint_ops base_breakpoint_ops =
   base_breakpoint_resources_needed,
   base_breakpoint_works_in_software_mode,
   base_breakpoint_print_it,
-  NULL,
+  base_breakpoint_print_one,
   base_breakpoint_print_one_detail,
   base_breakpoint_print_mention,
   base_breakpoint_print_recreate,

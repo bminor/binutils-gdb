@@ -608,8 +608,9 @@ struct breakpoint_ops
   enum print_stop_action (*print_it) (struct bpstat *bs);
 
   /* Display information about this breakpoint, for "info
-     breakpoints".  */
-  void (*print_one) (struct breakpoint *, struct bp_location **);
+     breakpoints".  Returns false if this method should use the
+     default behavior.  */
+  bool (*print_one) (struct breakpoint *, struct bp_location **);
 
   /* Display extra information about this breakpoint, below the normal
      breakpoint description in "info breakpoints".

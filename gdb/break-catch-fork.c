@@ -127,7 +127,7 @@ print_it_catch_fork (bpstat *bs)
 /* Implement the "print_one" breakpoint_ops method for fork
    catchpoints.  */
 
-static void
+static bool
 print_one_catch_fork (struct breakpoint *b, struct bp_location **last_loc)
 {
   struct fork_catchpoint *c = (struct fork_catchpoint *) b;
@@ -153,6 +153,8 @@ print_one_catch_fork (struct breakpoint *b, struct bp_location **last_loc)
 
   if (uiout->is_mi_like_p ())
     uiout->field_string ("catch-type", name);
+
+  return true;
 }
 
 /* Implement the "print_mention" breakpoint_ops method for fork

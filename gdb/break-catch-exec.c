@@ -94,7 +94,7 @@ print_it_catch_exec (bpstat *bs)
   return PRINT_SRC_AND_LOC;
 }
 
-static void
+static bool
 print_one_catch_exec (struct breakpoint *b, struct bp_location **last_loc)
 {
   struct exec_catchpoint *c = (struct exec_catchpoint *) b;
@@ -119,6 +119,8 @@ print_one_catch_exec (struct breakpoint *b, struct bp_location **last_loc)
 
   if (uiout->is_mi_like_p ())
     uiout->field_string ("catch-type", "exec");
+
+  return true;
 }
 
 static void

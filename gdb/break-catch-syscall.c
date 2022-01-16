@@ -226,7 +226,7 @@ print_it_catch_syscall (bpstat *bs)
 /* Implement the "print_one" breakpoint_ops method for syscall
    catchpoints.  */
 
-static void
+static bool
 print_one_catch_syscall (struct breakpoint *b,
 			 struct bp_location **last_loc)
 {
@@ -275,6 +275,8 @@ print_one_catch_syscall (struct breakpoint *b,
 
   if (uiout->is_mi_like_p ())
     uiout->field_string ("catch-type", "syscall");
+
+  return true;
 }
 
 /* Implement the "print_mention" breakpoint_ops method for syscall

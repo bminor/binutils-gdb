@@ -137,7 +137,7 @@ print_it_catch_solib (bpstat *bs)
   return PRINT_SRC_AND_LOC;
 }
 
-static void
+static bool
 print_one_catch_solib (struct breakpoint *b, struct bp_location **locs)
 {
   struct solib_catchpoint *self = (struct solib_catchpoint *) b;
@@ -176,6 +176,8 @@ print_one_catch_solib (struct breakpoint *b, struct bp_location **locs)
 
   if (uiout->is_mi_like_p ())
     uiout->field_string ("catch-type", self->is_load ? "load" : "unload");
+
+  return true;
 }
 
 static void

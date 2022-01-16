@@ -201,7 +201,7 @@ signal_catchpoint_print_it (bpstat *bs)
 /* Implement the "print_one" breakpoint_ops method for signal
    catchpoints.  */
 
-static void
+static bool
 signal_catchpoint_print_one (struct breakpoint *b,
 			     struct bp_location **last_loc)
 {
@@ -248,6 +248,8 @@ signal_catchpoint_print_one (struct breakpoint *b,
 
   if (uiout->is_mi_like_p ())
     uiout->field_string ("catch-type", "signal");
+
+  return true;
 }
 
 /* Implement the "print_mention" breakpoint_ops method for signal
