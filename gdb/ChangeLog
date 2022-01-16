@@ -1,5 +1,9 @@
 2022-01-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 11.2.
+
+2022-01-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbarch.sh: Update end year of copyright year range for
 	copyright header of generated files.
 
