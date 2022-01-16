@@ -294,6 +294,14 @@ struct ranged_breakpoint : public ordinary_breakpoint
   void print_recreate (struct ui_file *fp) override;
 };
 
+/* Static tracepoints with marker (`-m').  */
+struct static_marker_tracepoint : public tracepoint
+{
+  std::vector<symtab_and_line> decode_location
+       (struct event_location *location,
+	struct program_space *search_pspace) override;
+};
+
 /* The style in which to perform a dynamic printf.  This is a user
    option because different output options have different tradeoffs;
    if GDB does the printing, there is better error handling if there
@@ -1209,9 +1217,12 @@ new_breakpoint_from_type (bptype type)
 
     case bp_fast_tracepoint:
     case bp_static_tracepoint:
-    case bp_static_marker_tracepoint:
     case bp_tracepoint:
       b = new tracepoint ();
+      break;
+
+    case bp_static_marker_tracepoint:
+      b = new static_marker_tracepoint ();
       break;
 
     case bp_dprintf:
@@ -12425,23 +12436,21 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
     }
 }
 
-static std::vector<symtab_and_line>
-strace_marker_decode_location (struct breakpoint *b,
-			       struct event_location *location,
-			       struct program_space *search_pspace)
+std::vector<symtab_and_line>
+static_marker_tracepoint::decode_location (struct event_location *location,
+					   struct program_space *search_pspace)
 {
-  struct tracepoint *tp = (struct tracepoint *) b;
   const char *s = get_linespec_location (location)->spec_string;
 
   std::vector<symtab_and_line> sals = decode_static_tracepoint_spec (&s);
-  if (sals.size () > tp->static_trace_marker_id_idx)
+  if (sals.size () > static_trace_marker_id_idx)
     {
-      sals[0] = sals[tp->static_trace_marker_id_idx];
+      sals[0] = sals[static_trace_marker_id_idx];
       sals.resize (1);
       return sals;
     }
   else
-    error (_("marker %s not found"), tp->static_trace_marker_id.c_str ());
+    error (_("marker %s not found"), static_trace_marker_id.c_str ());
 }
 
 static struct breakpoint_ops strace_marker_breakpoint_ops;
@@ -14597,7 +14606,6 @@ initialize_breakpoint_ops (void)
   *ops = vtable_breakpoint_ops;
   ops->create_sals_from_location = strace_marker_create_sals_from_location;
   ops->create_breakpoints_sal = strace_marker_create_breakpoints_sal;
-  ops->decode_location = strace_marker_decode_location;
 }
 
 /* Chain containing all defined "enable breakpoint" subcommands.  */
