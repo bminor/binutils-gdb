@@ -1,3 +1,10 @@
+2022-01-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbreplay.cc: Update year range in copyright notice.
+	(gdbreplay_version): Update copyright year to 2022.
+	* server.cc: Update year range in copyright notice.
+	(gdbserver_version): Update copyright year to 2022.
+
 2021-11-03  Luis Machado  <luis.machado@linaro.org>
 
 	PR gdb/28355

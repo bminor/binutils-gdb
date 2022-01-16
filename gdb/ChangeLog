@@ -1,3 +1,8 @@
+2022-01-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* top.c: Update year range in copyright notice.
+	(print_gdb_version): Update copyright year to 2022.
+
 2021-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/28405
