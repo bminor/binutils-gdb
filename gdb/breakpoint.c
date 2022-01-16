@@ -1180,7 +1180,8 @@ is_tracepoint_type (bptype type)
 {
   return (type == bp_tracepoint
 	  || type == bp_fast_tracepoint
-	  || type == bp_static_tracepoint);
+	  || type == bp_static_tracepoint
+	  || type == bp_static_marker_tracepoint);
 }
 
 /* See breakpoint.h.  */
@@ -1208,6 +1209,7 @@ new_breakpoint_from_type (bptype type)
 
     case bp_fast_tracepoint:
     case bp_static_tracepoint:
+    case bp_static_marker_tracepoint:
     case bp_tracepoint:
       b = new tracepoint ();
       break;
@@ -1288,7 +1290,8 @@ validate_commands_for_breakpoint (struct breakpoint *b,
 	      if (b->type == bp_fast_tracepoint)
 		error (_("The 'while-stepping' command "
 			 "cannot be used for fast tracepoint"));
-	      else if (b->type == bp_static_tracepoint)
+	      else if (b->type == bp_static_tracepoint
+		       || b->type == bp_static_marker_tracepoint)
 		error (_("The 'while-stepping' command "
 			 "cannot be used for static tracepoint"));
 
@@ -1329,7 +1332,8 @@ static_tracepoints_here (CORE_ADDR addr)
   std::vector<breakpoint *> found;
 
   for (breakpoint *b : all_breakpoints ())
-    if (b->type == bp_static_tracepoint)
+    if (b->type == bp_static_tracepoint
+	|| b->type == bp_static_marker_tracepoint)
       {
 	for (bp_location *loc : b->locations ())
 	  if (loc->address == addr)
@@ -5794,6 +5798,7 @@ bpstat_what (bpstat *bs_head)
 	case bp_tracepoint:
 	case bp_fast_tracepoint:
 	case bp_static_tracepoint:
+	case bp_static_marker_tracepoint:
 	  /* Tracepoint hits should not be reported back to GDB, and
 	     if one got through somehow, it should have been filtered
 	     out already.  */
@@ -6078,6 +6083,7 @@ bptype_string (enum bptype type)
     {bp_tracepoint, "tracepoint"},
     {bp_fast_tracepoint, "fast tracepoint"},
     {bp_static_tracepoint, "static tracepoint"},
+    {bp_static_marker_tracepoint, "static marker tracepoint"},
     {bp_dprintf, "dprintf"},
     {bp_jit_event, "jit events"},
     {bp_gnu_ifunc_resolver, "STT_GNU_IFUNC resolver"},
@@ -7139,6 +7145,7 @@ bp_location_from_bp_type (bptype type)
     case bp_tracepoint:
     case bp_fast_tracepoint:
     case bp_static_tracepoint:
+    case bp_static_marker_tracepoint:
       return bp_loc_other;
     default:
       internal_error (__FILE__, __LINE__, _("unknown breakpoint type"));
@@ -8350,7 +8357,8 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	  if ((flags & CREATE_BREAKPOINT_FLAGS_INSERTED) != 0)
 	    b->loc->inserted = 1;
 
-	  if (type == bp_static_tracepoint)
+	  if (type == bp_static_tracepoint
+	      || type == bp_static_marker_tracepoint)
 	    {
 	      struct tracepoint *t = (struct tracepoint *) b;
 	      struct static_tracepoint_marker marker;
@@ -12199,7 +12207,8 @@ tracepoint::print_one_detail (struct ui_out *uiout) const
 {
   if (!static_trace_marker_id.empty ())
     {
-      gdb_assert (type == bp_static_tracepoint);
+      gdb_assert (type == bp_static_tracepoint
+		  || type == bp_static_marker_tracepoint);
 
       uiout->message ("\tmarker id is %pF\n",
 		      string_field ("static-tracepoint-marker-string-id",
@@ -12224,6 +12233,7 @@ tracepoint::print_mention ()
       gdb_printf (_(" %d"), number);
       break;
     case bp_static_tracepoint:
+    case bp_static_marker_tracepoint:
       gdb_printf (_("Static tracepoint"));
       gdb_printf (_(" %d"), number);
       break;
@@ -12240,7 +12250,8 @@ tracepoint::print_recreate (struct ui_file *fp)
 {
   if (type == bp_fast_tracepoint)
     gdb_printf (fp, "ftrace");
-  else if (type == bp_static_tracepoint)
+  else if (type == bp_static_tracepoint
+	   || type == bp_static_marker_tracepoint)
     gdb_printf (fp, "strace");
   else if (type == bp_tracepoint)
     gdb_printf (fp, "trace");
@@ -12438,7 +12449,7 @@ static struct breakpoint_ops strace_marker_breakpoint_ops;
 static int
 strace_marker_p (struct breakpoint *b)
 {
-  return b->ops == &strace_marker_breakpoint_ops;
+  return b->type == bp_static_marker_tracepoint;
 }
 
 /* Delete a breakpoint and clean up all traces of it in the data
@@ -13044,7 +13055,7 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
 	  b->condition_not_parsed = 0;
 	}
 
-      if (b->type == bp_static_tracepoint && !strace_marker_p (b))
+      if (b->type == bp_static_tracepoint)
 	sals[0] = update_static_tracepoint (b, sals[0]);
 
       *found = 1;
@@ -13921,6 +13932,7 @@ strace_command (const char *arg, int from_tty)
 {
   struct breakpoint_ops *ops;
   event_location_up location;
+  enum bptype type;
 
   /* Decide if we are dealing with a static tracepoint marker (`-m'),
      or with a normal static tracepoint.  */
@@ -13928,18 +13940,20 @@ strace_command (const char *arg, int from_tty)
     {
       ops = &strace_marker_breakpoint_ops;
       location = new_linespec_location (&arg, symbol_name_match_type::FULL);
+      type = bp_static_marker_tracepoint;
     }
   else
     {
       ops = &vtable_breakpoint_ops;
       location = string_to_event_location (&arg, current_language);
+      type = bp_static_tracepoint;
     }
 
   create_breakpoint (get_current_arch (),
 		     location.get (),
 		     NULL, 0, arg, false, 1 /* parse arg */,
 		     0 /* tempflag */,
-		     bp_static_tracepoint /* type_wanted */,
+		     type /* type_wanted */,
 		     0 /* Ignore count */,
 		     pending_break_support,
 		     ops,

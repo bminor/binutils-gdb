@@ -13224,7 +13224,8 @@ remote_target::download_tracepoint (struct bp_location *loc)
 	warning (_("Target does not support fast tracepoints, "
 		   "downloading %d as regular tracepoint"), b->number);
     }
-  else if (b->type == bp_static_tracepoint)
+  else if (b->type == bp_static_tracepoint
+	   || b->type == bp_static_marker_tracepoint)
     {
       /* Only test for support at download time; we may not know
 	 target capabilities at definition time.  */
