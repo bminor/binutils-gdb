@@ -7436,7 +7436,7 @@ remote_target::remote_notif_remove_queued_reply (ptid_t ptid)
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"notif: discard queued event: 'Stop' in %s\n",
-			target_pid_to_str (ptid).c_str ());
+			ptid.to_string ().c_str ());
 
   return result;
 }
@@ -7474,7 +7474,7 @@ remote_target::push_stop_reply (struct stop_reply *new_event)
   if (notif_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"notif: push 'Stop' %s to queue %d\n",
-			target_pid_to_str (new_event->ptid).c_str (),
+			new_event->ptid.to_string ().c_str (),
 			int (rs->stop_reply_queue.size ()));
 
   /* Mark the pending event queue only if async mode is currently enabled.

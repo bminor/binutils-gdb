@@ -424,7 +424,7 @@ void
 global_thread_step_over_chain_enqueue (struct thread_info *tp)
 {
   infrun_debug_printf ("enqueueing thread %s in global step over chain",
-		       target_pid_to_str (tp->ptid).c_str ());
+		       tp->ptid.to_string ().c_str ());
 
   gdb_assert (!thread_is_in_step_over_chain (tp));
   global_thread_step_over_list.push_back (*tp);
@@ -444,7 +444,7 @@ void
 global_thread_step_over_chain_remove (struct thread_info *tp)
 {
   infrun_debug_printf ("removing thread %s from global step over chain",
-		       target_pid_to_str (tp->ptid).c_str ());
+		       tp->ptid.to_string ().c_str ());
 
   gdb_assert (thread_is_in_step_over_chain (tp));
   auto it = global_thread_step_over_list.iterator_to (*tp);

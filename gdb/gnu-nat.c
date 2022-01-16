@@ -1463,7 +1463,7 @@ gnu_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   waiting_inf = inf;
 
-  inf_debug (inf, "waiting for: %s", target_pid_to_str (ptid).c_str ());
+  inf_debug (inf, "waiting for: %s", ptid.to_string ().c_str ());
 
 rewait:
   if (proc_wait_pid != inf->pid && !inf->no_wait)
@@ -1621,7 +1621,7 @@ rewait:
     }
 
   inf_debug (inf, "returning ptid = %s, %s",
-	     target_pid_to_str (ptid).c_str (),
+	     ptid.to_string ().c_str (),
 	     status->to_string ().c_str ());
 
   return ptid;
@@ -1973,7 +1973,7 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
   struct inf *inf = gnu_current_inf;
 
   inf_debug (inf, "ptid = %s, step = %d, sig = %d",
-	     target_pid_to_str (ptid).c_str (), step, sig);
+	     ptid.to_string ().c_str (), step, sig);
 
   inf_validate_procinfo (inf);
 
@@ -2021,7 +2021,7 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 	error (_("Can't run single thread id %s: no such thread!"),
 	       target_pid_to_str (ptid).c_str ());
       inf_debug (inf, "running one thread: %s",
-		 target_pid_to_str (ptid).c_str ());
+		 ptid.to_string ().c_str ());
       inf_set_threads_resume_sc (inf, thread, 0);
     }
 
@@ -2033,7 +2033,7 @@ gnu_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 		 target_pid_to_str (ptid).c_str ());
       else
 	inf_debug (inf, "stepping thread: %s",
-		   target_pid_to_str (ptid).c_str ());
+		   ptid.to_string ().c_str ());
     }
   if (step_thread != inf->step_thread)
     inf_set_step_thread (inf, step_thread);
