@@ -13202,8 +13202,10 @@ check_pasted_section (struct bfd_link_info *info, const char *name)
 bool
 ppc64_elf_check_init_fini (struct bfd_link_info *info)
 {
-  return (check_pasted_section (info, ".init")
-	  & check_pasted_section (info, ".fini"));
+  bool ret1 = check_pasted_section (info, ".init");
+  bool ret2 = check_pasted_section (info, ".fini");
+
+  return ret1 && ret2;
 }
 
 /* See whether we can group stub sections together.  Grouping stub
