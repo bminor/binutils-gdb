@@ -535,70 +535,12 @@ linux_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 
       if (has_vforked)
 	{
-	  struct lwp_info *parent_lp;
+	  lwp_info *parent_lp = find_lwp_pid (parent_ptid);
+	  linux_nat_debug_printf ("waiting for VFORK_DONE on %d", parent_pid);
+	  parent_lp->stopped = 1;
 
-	  parent_lp = find_lwp_pid (parent_ptid);
-	  gdb_assert (linux_supports_tracefork () >= 0);
-
-	  if (linux_supports_tracevforkdone ())
-	    {
-	      linux_nat_debug_printf ("waiting for VFORK_DONE on %d",
-				      parent_pid);
-	      parent_lp->stopped = 1;
-
-	      /* We'll handle the VFORK_DONE event like any other
-		 event, in target_wait.  */
-	    }
-	  else
-	    {
-	      /* We can't insert breakpoints until the child has
-		 finished with the shared memory region.  We need to
-		 wait until that happens.  Ideal would be to just
-		 call:
-		 - ptrace (PTRACE_SYSCALL, parent_pid, 0, 0);
-		 - waitpid (parent_pid, &status, __WALL);
-		 However, most architectures can't handle a syscall
-		 being traced on the way out if it wasn't traced on
-		 the way in.
-
-		 We might also think to loop, continuing the child
-		 until it exits or gets a SIGTRAP.  One problem is
-		 that the child might call ptrace with PTRACE_TRACEME.
-
-		 There's no simple and reliable way to figure out when
-		 the vforked child will be done with its copy of the
-		 shared memory.  We could step it out of the syscall,
-		 two instructions, let it go, and then single-step the
-		 parent once.  When we have hardware single-step, this
-		 would work; with software single-step it could still
-		 be made to work but we'd have to be able to insert
-		 single-step breakpoints in the child, and we'd have
-		 to insert -just- the single-step breakpoint in the
-		 parent.  Very awkward.
-
-		 In the end, the best we can do is to make sure it
-		 runs for a little while.  Hopefully it will be out of
-		 range of any breakpoints we reinsert.  Usually this
-		 is only the single-step breakpoint at vfork's return
-		 point.  */
-
-	      linux_nat_debug_printf ("no VFORK_DONE support, sleeping a bit");
-
-	      usleep (10000);
-
-	      /* Pretend we've seen a PTRACE_EVENT_VFORK_DONE event,
-		 and leave it pending.  The next linux_nat_resume call
-		 will notice a pending event, and bypasses actually
-		 resuming the inferior.  */
-	      parent_lp->status = 0;
-	      parent_lp->waitstatus.set_vfork_done ();
-	      parent_lp->stopped = 1;
-
-	      /* If we're in async mode, need to tell the event loop
-		 there's something here to process.  */
-	      if (target_is_async_p ())
-		async_file_mark ();
-	    }
+	  /* We'll handle the VFORK_DONE event like any other
+	     event, in target_wait.  */
 	}
     }
   else
@@ -615,7 +557,7 @@ linux_nat_target::follow_fork (inferior *child_inf, ptid_t child_ptid,
 int
 linux_nat_target::insert_fork_catchpoint (int pid)
 {
-  return !linux_supports_tracefork ();
+  return 0;
 }
 
 int
@@ -627,7 +569,7 @@ linux_nat_target::remove_fork_catchpoint (int pid)
 int
 linux_nat_target::insert_vfork_catchpoint (int pid)
 {
-  return !linux_supports_tracefork ();
+  return 0;
 }
 
 int
@@ -639,7 +581,7 @@ linux_nat_target::remove_vfork_catchpoint (int pid)
 int
 linux_nat_target::insert_exec_catchpoint (int pid)
 {
-  return !linux_supports_tracefork ();
+  return 0;
 }
 
 int
@@ -652,9 +594,6 @@ int
 linux_nat_target::set_syscall_catchpoint (int pid, bool needed, int any_count,
 					  gdb::array_view<const int> syscall_counts)
 {
-  if (!linux_supports_tracesysgood ())
-    return 1;
-
   /* On GNU/Linux, we ignore the arguments.  It means that we only
      enable the syscall catchpoints, but do not disable them.
 
