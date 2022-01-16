@@ -1,5 +1,5 @@
 # MIPS simulator testsuite utility functions.
-# Copyright (C) 2004-2021 Free Software Foundation, Inc.
+# Copyright (C) 2004-2022 Free Software Foundation, Inc.
 # Contributed by Chris Demetriou of Broadcom Corporation.
 #
 # This file is part of the GNU simulators.

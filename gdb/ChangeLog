@@ -1,5 +1,10 @@
 2022-01-16  Joel Brobecker  <brobecker@adacore.com>
 
+	Update copyright year in header of all GDB files to 2022,
+	using the gdb/copyright.py script
+
+2022-01-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py (EXCLUDE_LIST): Add "gdbsupport/Makefile.in".
 
 2022-01-16  Joel Brobecker  <brobecker@adacore.com>
