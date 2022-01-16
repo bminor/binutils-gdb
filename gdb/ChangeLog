@@ -1,5 +1,9 @@
 2022-01-16  Joel Brobecker  <brobecker@adacore.com>
 
+	* copyright.py (EXCLUDE_LIST): Add "gdbsupport/Makefile.in".
+
+2022-01-16  Joel Brobecker  <brobecker@adacore.com>
+
 	* top.c: Update year range in copyright notice.
 	(print_gdb_version): Update copyright year to 2022.
 

@@ -209,6 +209,7 @@ def main():
 EXCLUDE_LIST = (
     "gdb/nat/glibc_thread_db.h",
     "gdb/CONTRIBUTE",
+    "gdbsupport/Makefile.in",
     "gnulib/import",
     "gnulib/config.in",
     "gnulib/Makefile.in",
