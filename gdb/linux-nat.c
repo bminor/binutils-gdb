@@ -1990,20 +1990,11 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 
   if (event == PTRACE_EVENT_VFORK_DONE)
     {
-      if (current_inferior ()->waiting_for_vfork_done)
-	{
-	  linux_nat_debug_printf
-	    ("Got expected PTRACE_EVENT_VFORK_DONE from LWP %ld: stopping",
-	     lp->ptid.lwp ());
-
-	  ourstatus->set_vfork_done ();
-	  return 0;
-	}
-
       linux_nat_debug_printf
-	("Got PTRACE_EVENT_VFORK_DONE from LWP %ld: ignoring", lp->ptid.lwp ());
-
-      return 1;
+	("Got PTRACE_EVENT_VFORK_DONE from LWP %ld",
+	 lp->ptid.lwp ());
+	ourstatus->set_vfork_done ();
+	return 0;
     }
 
   internal_error (__FILE__, __LINE__,
