@@ -243,21 +243,21 @@ static void tracepoint_probe_create_sals_from_location
       struct linespec_result *canonical,
       enum bptype type_wanted);
 
-struct breakpoint_ops base_breakpoint_ops =
+const struct breakpoint_ops base_breakpoint_ops =
 {
   create_sals_from_location_default,
   create_breakpoints_sal_default,
 };
 
 /* Breakpoints set on probes.  */
-static struct breakpoint_ops bkpt_probe_breakpoint_ops =
+static const struct breakpoint_ops bkpt_probe_breakpoint_ops =
 {
   bkpt_probe_create_sals_from_location,
   create_breakpoints_sal_default,
 };
 
 /* Tracepoints set on probes.  */
-static struct breakpoint_ops tracepoint_probe_breakpoint_ops =
+static const struct breakpoint_ops tracepoint_probe_breakpoint_ops =
 {
   tracepoint_probe_create_sals_from_location,
   create_breakpoints_sal_default,
@@ -13735,7 +13735,7 @@ ftrace_command (const char *arg, int from_tty)
 static void
 strace_command (const char *arg, int from_tty)
 {
-  struct breakpoint_ops *ops;
+  const struct breakpoint_ops *ops;
   event_location_up location;
   enum bptype type;
 
