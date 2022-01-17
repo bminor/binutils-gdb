@@ -1380,12 +1380,12 @@ handle_monitor_command (char *mon, char *own_buf)
 {
   if (strcmp (mon, "set debug 1") == 0)
     {
-      debug_threads = 1;
+      debug_threads = true;
       monitor_output ("Debug output enabled.\n");
     }
   else if (strcmp (mon, "set debug 0") == 0)
     {
-      debug_threads = 0;
+      debug_threads = false;
       monitor_output ("Debug output disabled.\n");
     }
   else if (strcmp (mon, "set debug-hw-points 1") == 0)
@@ -3814,7 +3814,7 @@ captured_main (int argc, char *argv[])
 	  *next_arg = NULL;
 	}
       else if (strcmp (*next_arg, "--debug") == 0)
-	debug_threads = 1;
+	debug_threads = true;
       else if (startswith (*next_arg, "--debug-format="))
 	{
 	  std::string error_msg

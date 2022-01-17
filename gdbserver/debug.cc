@@ -27,7 +27,7 @@ int remote_debug = 0;
 static FILE *debug_file = stderr;
 
 /* See debug.h.  */
-int debug_threads;
+bool debug_threads;
 
 /* Include timestamps in debugging output.  */
 int debug_timestamp;

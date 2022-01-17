@@ -77,17 +77,17 @@ trace_vdebug (const char *fmt, ...)
   va_end (ap);
 }
 
-#define trace_debug_1(level, fmt, args...)	\
+#define trace_debug(fmt, args...)	\
   do {						\
-    if (level <= debug_threads)		\
+    if (debug_threads)				\
       trace_vdebug ((fmt), ##args);		\
   } while (0)
 
 #else
 
-#define trace_debug_1(level, fmt, args...)	\
+#define trace_debug(fmt, args...)	\
   do {						\
-    if (level <= debug_threads)			\
+    if (debug_threads)				\
       {						\
 	debug_printf ((fmt), ##args);		\
 	debug_printf ("\n");			\
@@ -95,9 +95,6 @@ trace_vdebug (const char *fmt, ...)
   } while (0)
 
 #endif
-
-#define trace_debug(FMT, args...)		\
-  trace_debug_1 (1, FMT, ##args)
 
 /* Prefix exported symbols, for good citizenship.  All the symbols
    that need exporting are defined in this module.  Note that all
