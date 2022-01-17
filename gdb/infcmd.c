@@ -2521,7 +2521,7 @@ attach_post_wait (int from_tty, enum attach_post_wait_mode mode)
 	{
 	  struct thread_info *lowest = inferior_thread ();
 
-	  stop_all_threads ();
+	  stop_all_threads ("attaching");
 
 	  /* It's not defined which thread will report the attach
 	     stop.  For consistency, always select the thread with

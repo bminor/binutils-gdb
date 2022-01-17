@@ -4642,7 +4642,7 @@ remote_target::process_initial_stop_replies (int from_tty)
 	gdb_assert (!this->is_async_p ());
 	SCOPE_EXIT { target_async (0); };
 	target_async (1);
-	stop_all_threads ();
+	stop_all_threads ("remote connect in all-stop");
       }
 
       /* If all threads of an inferior were already stopped, we
