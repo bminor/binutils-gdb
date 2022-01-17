@@ -2737,7 +2737,7 @@ return_command (const char *retval_exp, int from_tty)
   struct symbol *thisfun;
   struct value *return_value = NULL;
   struct value *function = NULL;
-  const char *query_prefix = "";
+  std::string query_prefix;
 
   thisframe = get_selected_frame ("No selected frame.");
   thisfun = get_frame_function (thisframe);
@@ -2793,6 +2793,17 @@ return_command (const char *retval_exp, int from_tty)
 	return_value = NULL;
       else if (thisfun != NULL)
 	{
+	  if (is_nocall_function (check_typedef (value_type (function))))
+	    {
+	      query_prefix =
+		string_printf ("Function '%s' does not follow the target "
+			       "calling convention.\n"
+			       "If you continue, setting the return value "
+			       "will probably lead to unpredictable "
+			       "behaviors.\n",
+			       thisfun->print_name ());
+	    }
+
 	  rv_conv = struct_return_convention (gdbarch, function, return_type);
 	  if (rv_conv == RETURN_VALUE_STRUCT_CONVENTION
 	      || rv_conv == RETURN_VALUE_ABI_RETURNS_ADDRESS)
@@ -2815,12 +2826,13 @@ return_command (const char *retval_exp, int from_tty)
 
       if (thisfun == NULL)
 	confirmed = query (_("%sMake selected stack frame return now? "),
-			   query_prefix);
+			   query_prefix.c_str ());
       else
 	{
 	  if (TYPE_NO_RETURN (thisfun->type ()))
 	    warning (_("Function does not return normally to caller."));
-	  confirmed = query (_("%sMake %s return now? "), query_prefix,
+	  confirmed = query (_("%sMake %s return now? "),
+			     query_prefix.c_str (),
 			     thisfun->print_name ());
 	}
       if (!confirmed)

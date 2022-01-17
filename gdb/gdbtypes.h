@@ -2865,4 +2865,14 @@ extern enum bfd_endian type_byte_order (const struct type *type);
 
 extern unsigned int overload_debug;
 
+/* Return whether the function type represented by TYPE is marked as unsafe
+   to call by the debugger.
+
+   This usually indicates that the function does not follow the target's
+   standard calling convention.
+
+   The TYPE argument must be of code TYPE_CODE_FUNC or TYPE_CODE_METHOD.  */
+
+extern bool is_nocall_function (const struct type *type);
+
 #endif /* GDBTYPES_H */

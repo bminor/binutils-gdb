@@ -3903,6 +3903,17 @@ type_byte_order (const struct type *type)
   return byteorder;
 }
 
+/* See gdbtypes.h.  */
+
+bool
+is_nocall_function (const struct type *type)
+{
+  gdb_assert (type->code () == TYPE_CODE_FUNC
+	      || type->code () == TYPE_CODE_METHOD);
+
+  return TYPE_CALLING_CONVENTION (type) == DW_CC_nocall;
+}
+
 
 /* Overload resolution.  */
 

@@ -1457,6 +1457,15 @@ get_return_value (struct symbol *func_symbol, struct value *function)
     = check_typedef (TYPE_TARGET_TYPE (func_symbol->type ()));
   gdb_assert (value_type->code () != TYPE_CODE_VOID);
 
+  if (is_nocall_function (check_typedef (::value_type (function))))
+    {
+      warning (_("Function '%s' does not follow the target calling "
+		 "convention, cannot determine its returned value."),
+	       func_symbol->print_name ());
+
+      return nullptr;
+    }
+
   /* FIXME: 2003-09-27: When returning from a nested inferior function
      call, it's possible (with no help from the architecture vector)
      to locate and return/print a "struct return" value.  This is just
