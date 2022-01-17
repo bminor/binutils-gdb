@@ -234,11 +234,34 @@ static bool is_masked_watchpoint (const struct breakpoint *b);
 
 static int strace_marker_p (struct breakpoint *b);
 
+static void bkpt_probe_create_sals_from_location
+     (struct event_location *location,
+      struct linespec_result *canonical,
+      enum bptype type_wanted);
+static void tracepoint_probe_create_sals_from_location
+     (struct event_location *location,
+      struct linespec_result *canonical,
+      enum bptype type_wanted);
+
+struct breakpoint_ops base_breakpoint_ops =
+{
+  create_sals_from_location_default,
+  create_breakpoints_sal_default,
+};
+
 /* Breakpoints set on probes.  */
-static struct breakpoint_ops bkpt_probe_breakpoint_ops;
+static struct breakpoint_ops bkpt_probe_breakpoint_ops =
+{
+  bkpt_probe_create_sals_from_location,
+  create_breakpoints_sal_default,
+};
 
 /* Tracepoints set on probes.  */
-static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
+static struct breakpoint_ops tracepoint_probe_breakpoint_ops =
+{
+  tracepoint_probe_create_sals_from_location,
+  create_breakpoints_sal_default,
+};
 
 /* The structure to be used in regular breakpoints.  */
 struct ordinary_breakpoint : public base_breakpoint
@@ -11608,12 +11631,6 @@ breakpoint::decode_location (struct event_location *location,
   internal_error_pure_virtual_called ();
 }
 
-struct breakpoint_ops base_breakpoint_ops =
-{
-  create_sals_from_location_default,
-  create_breakpoints_sal_default,
-};
-
 /* Default breakpoint_ops methods.  */
 
 void
@@ -12227,7 +12244,12 @@ static_marker_tracepoint::decode_location (struct event_location *location,
     error (_("marker %s not found"), static_trace_marker_id.c_str ());
 }
 
-static struct breakpoint_ops strace_marker_breakpoint_ops;
+/* Static tracepoints with marker (`-m').  */
+static struct breakpoint_ops strace_marker_breakpoint_ops =
+{
+  strace_marker_create_sals_from_location,
+  strace_marker_create_breakpoints_sal,
+};
 
 static int
 strace_marker_p (struct breakpoint *b)
@@ -14344,34 +14366,6 @@ breakpoint_free_objfile (struct objfile *objfile)
       loc->symtab = NULL;
 }
 
-void
-initialize_breakpoint_ops (void)
-{
-  static int initialized = 0;
-
-  struct breakpoint_ops *ops;
-
-  if (initialized)
-    return;
-  initialized = 1;
-
-  /* Probe breakpoints.  */
-  ops = &bkpt_probe_breakpoint_ops;
-  *ops = base_breakpoint_ops;
-  ops->create_sals_from_location = bkpt_probe_create_sals_from_location;
-
-  /* Probe tracepoints.  */
-  ops = &tracepoint_probe_breakpoint_ops;
-  *ops = base_breakpoint_ops;
-  ops->create_sals_from_location = tracepoint_probe_create_sals_from_location;
-
-  /* Static tracepoints with marker (`-m').  */
-  ops = &strace_marker_breakpoint_ops;
-  *ops = base_breakpoint_ops;
-  ops->create_sals_from_location = strace_marker_create_sals_from_location;
-  ops->create_breakpoints_sal = strace_marker_create_breakpoints_sal;
-}
-
 /* Chain containing all defined "enable breakpoint" subcommands.  */
 
 static struct cmd_list_element *enablebreaklist = NULL;
@@ -14385,8 +14379,6 @@ void
 _initialize_breakpoint ()
 {
   struct cmd_list_element *c;
-
-  initialize_breakpoint_ops ();
 
   gdb::observers::solib_unloaded.attach (disable_breakpoints_in_unloaded_shlib,
 					 "breakpoint");

@@ -1400,8 +1400,6 @@ extern void tbreak_command (const char *, int);
 
 extern struct breakpoint_ops base_breakpoint_ops;
 
-extern void initialize_breakpoint_ops (void);
-
 /* Arguments to pass as context to some catch command handlers.  */
 #define CATCH_PERMANENT ((void *) (uintptr_t) 0)
 #define CATCH_TEMPORARY ((void *) (uintptr_t) 1)
