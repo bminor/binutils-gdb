@@ -3346,7 +3346,7 @@ create_overlay_event_breakpoint (void)
       addr = bp_objfile_data->overlay_msym.value_address ();
       b = create_internal_breakpoint (objfile->arch (), addr,
 				      bp_overlay_event,
-				      &vtable_breakpoint_ops);
+				      &base_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
       explicit_loc.function_name = ASTRDUP (func_name);
       b->location = new_explicit_location (&explicit_loc);
@@ -3406,7 +3406,7 @@ create_longjmp_master_breakpoint_probe (objfile *objfile)
       b = create_internal_breakpoint (gdbarch,
 				      p->get_relocated_address (objfile),
 				      bp_longjmp_master,
-				      &vtable_breakpoint_ops);
+				      &base_breakpoint_ops);
       b->location = new_probe_location ("-probe-stap libc:longjmp");
       b->enable_state = bp_disabled;
     }
@@ -3455,7 +3455,7 @@ create_longjmp_master_breakpoint_names (objfile *objfile)
 
       addr = bp_objfile_data->longjmp_msym[i].value_address ();
       b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
-				      &vtable_breakpoint_ops);
+				      &base_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
       explicit_loc.function_name = ASTRDUP (func_name);
       b->location = new_explicit_location (&explicit_loc);
@@ -3539,7 +3539,7 @@ create_std_terminate_master_breakpoint (void)
 	  addr = bp_objfile_data->terminate_msym.value_address ();
 	  b = create_internal_breakpoint (objfile->arch (), addr,
 					  bp_std_terminate_master,
-					  &vtable_breakpoint_ops);
+					  &base_breakpoint_ops);
 	  initialize_explicit_location (&explicit_loc);
 	  explicit_loc.function_name = ASTRDUP (func_name);
 	  b->location = new_explicit_location (&explicit_loc);
@@ -3592,7 +3592,7 @@ create_exception_master_breakpoint_probe (objfile *objfile)
       b = create_internal_breakpoint (gdbarch,
 				      p->get_relocated_address (objfile),
 				      bp_exception_master,
-				      &vtable_breakpoint_ops);
+				      &base_breakpoint_ops);
       b->location = new_probe_location ("-probe-stap libgcc:unwind");
       b->enable_state = bp_disabled;
     }
@@ -3638,7 +3638,7 @@ create_exception_master_breakpoint_hook (objfile *objfile)
   addr = gdbarch_convert_from_func_ptr_addr
     (gdbarch, addr, current_inferior ()->top_target ());
   b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
-				  &vtable_breakpoint_ops);
+				  &base_breakpoint_ops);
   initialize_explicit_location (&explicit_loc);
   explicit_loc.function_name = ASTRDUP (func_name);
   b->location = new_explicit_location (&explicit_loc);
@@ -7376,7 +7376,7 @@ set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 	/* longjmp_breakpoint_ops ensures INITIATING_FRAME is cleared again
 	   after their removal.  */
 	clone = momentary_breakpoint_from_master (b, type,
-						  &vtable_breakpoint_ops, 1);
+						  &base_breakpoint_ops, 1);
 	clone->thread = thread;
       }
 
@@ -7422,7 +7422,7 @@ set_longjmp_breakpoint_for_call_dummy (void)
 	struct breakpoint *new_b;
 
 	new_b = momentary_breakpoint_from_master (b, bp_longjmp_call_dummy,
-						  &vtable_breakpoint_ops,
+						  &base_breakpoint_ops,
 						  1);
 	new_b->thread = inferior_thread ()->global_num;
 
@@ -7554,7 +7554,7 @@ set_std_terminate_breakpoint (void)
 	&& b->type == bp_std_terminate_master)
       {
 	momentary_breakpoint_from_master (b, bp_std_terminate,
-					  &vtable_breakpoint_ops, 1);
+					  &base_breakpoint_ops, 1);
       }
 }
 
@@ -7573,7 +7573,7 @@ create_thread_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
   struct breakpoint *b;
 
   b = create_internal_breakpoint (gdbarch, address, bp_thread_event,
-				  &vtable_breakpoint_ops);
+				  &base_breakpoint_ops);
 
   b->enable_state = bp_enabled;
   /* location has to be used or breakpoint_re_set will delete me.  */
@@ -7596,7 +7596,7 @@ struct breakpoint *
 create_jit_event_breakpoint (struct gdbarch *gdbarch, CORE_ADDR address)
 {
   return create_internal_breakpoint (gdbarch, address, bp_jit_event,
-				     &vtable_breakpoint_ops);
+				     &base_breakpoint_ops);
 }
 
 /* Remove JIT code registration and unregistration breakpoint(s).  */
@@ -7641,7 +7641,7 @@ create_solib_event_breakpoint_1 (struct gdbarch *gdbarch, CORE_ADDR address,
   struct breakpoint *b;
 
   b = create_internal_breakpoint (gdbarch, address, bp_shlib_event,
-				  &vtable_breakpoint_ops);
+				  &base_breakpoint_ops);
   update_global_location_list_nothrow (insert_mode);
   return b;
 }
@@ -7826,7 +7826,7 @@ init_catchpoint (struct breakpoint *b,
   sal.pspace = current_program_space;
 
   init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint,
-		       &vtable_breakpoint_ops);
+		       &base_breakpoint_ops);
 
   if (cond_string == nullptr)
     b->cond_string.reset ();
@@ -7961,7 +7961,7 @@ new_single_step_breakpoint (int thread, struct gdbarch *gdbarch)
   std::unique_ptr<breakpoint> b (new momentary_breakpoint ());
 
   init_raw_breakpoint_without_location (b.get (), gdbarch, bp_single_step,
-					&vtable_breakpoint_ops);
+					&base_breakpoint_ops);
 
   b->disposition = disp_donttouch;
   b->frame_id = null_frame_id;
@@ -7986,7 +7986,7 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
      tail-called one.  */
   gdb_assert (!frame_id_artificial_p (frame_id));
 
-  b = set_raw_breakpoint (gdbarch, sal, type, &vtable_breakpoint_ops);
+  b = set_raw_breakpoint (gdbarch, sal, type, &base_breakpoint_ops);
   b->enable_state = bp_enabled;
   b->disposition = disp_donttouch;
   b->frame_id = frame_id;
@@ -8045,7 +8045,7 @@ clone_momentary_breakpoint (struct breakpoint *orig)
   if (orig == NULL)
     return NULL;
 
-  gdb_assert (orig->ops == &vtable_breakpoint_ops);
+  gdb_assert (orig->ops == &base_breakpoint_ops);
   return momentary_breakpoint_from_master (orig, orig->type, orig->ops, 0);
 }
 
@@ -8828,14 +8828,14 @@ breakpoint_ops_for_event_location_type (enum event_location_type location_type,
       if (location_type == PROBE_LOCATION)
 	return &tracepoint_probe_breakpoint_ops;
       else
-	return &vtable_breakpoint_ops;
+	return &base_breakpoint_ops;
     }
   else
     {
       if (location_type == PROBE_LOCATION)
 	return &bkpt_probe_breakpoint_ops;
       else
-	return &vtable_breakpoint_ops;
+	return &base_breakpoint_ops;
     }
 }
 
@@ -8848,7 +8848,7 @@ breakpoint_ops_for_event_location (const struct event_location *location,
   if (location != nullptr)
     return breakpoint_ops_for_event_location_type
       (event_location_type (location), is_tracepoint);
-  return &vtable_breakpoint_ops;
+  return &base_breakpoint_ops;
 }
 
 /* See breakpoint.h.  */
@@ -9184,7 +9184,7 @@ dprintf_command (const char *arg, int from_tty)
 		     0, bp_dprintf,
 		     0 /* Ignore count */,
 		     pending_break_support,
-		     &vtable_breakpoint_ops,
+		     &base_breakpoint_ops,
 		     from_tty,
 		     1 /* enabled */,
 		     0 /* internal */,
@@ -9452,7 +9452,7 @@ break_range_command (const char *arg, int from_tty)
   std::unique_ptr<breakpoint> br (new ranged_breakpoint ());
   init_raw_breakpoint (br.get (), get_current_arch (),
 		       sal_start, bp_hardware_breakpoint,
-		       &vtable_breakpoint_ops);
+		       &base_breakpoint_ops);
   b = add_to_breakpoint_chain (std::move (br));
 
   set_breakpoint_count (breakpoint_count + 1);
@@ -10146,7 +10146,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	  scope_breakpoint
 	    = create_internal_breakpoint (caller_arch, caller_pc,
 					  bp_watchpoint_scope,
-					  &vtable_breakpoint_ops);
+					  &base_breakpoint_ops);
 
 	  /* create_internal_breakpoint could invalidate WP_FRAME.  */
 	  wp_frame = NULL;
@@ -10187,7 +10187,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   else
     w.reset (new watchpoint ());
   init_raw_breakpoint_without_location (w.get (), nullptr, bp_type,
-					&vtable_breakpoint_ops);
+					&base_breakpoint_ops);
 
   w->thread = thread;
   w->task = task;
@@ -10641,7 +10641,7 @@ init_ada_exception_breakpoint (struct breakpoint *b,
     }
 
   init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint,
-		       &vtable_breakpoint_ops);
+		       &base_breakpoint_ops);
 
   b->enable_state = enabled ? bp_enabled : bp_disabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
@@ -11601,31 +11601,6 @@ breakpoint::print_recreate (struct ui_file *fp)
   internal_error_pure_virtual_called ();
 }
 
-static void
-base_breakpoint_create_sals_from_location
-  (struct event_location *location,
-   struct linespec_result *canonical,
-   enum bptype type_wanted)
-{
-  internal_error_pure_virtual_called ();
-}
-
-static void
-base_breakpoint_create_breakpoints_sal (struct gdbarch *gdbarch,
-					struct linespec_result *c,
-					gdb::unique_xmalloc_ptr<char> cond_string,
-					gdb::unique_xmalloc_ptr<char> extra_string,
-					enum bptype type_wanted,
-					enum bpdisp disposition,
-					int thread,
-					int task, int ignore_count,
-					const struct breakpoint_ops *o,
-					int from_tty, int enabled,
-					int internal, unsigned flags)
-{
-  internal_error_pure_virtual_called ();
-}
-
 std::vector<symtab_and_line>
 breakpoint::decode_location (struct event_location *location,
 			     struct program_space *search_pspace)
@@ -11634,12 +11609,6 @@ breakpoint::decode_location (struct event_location *location,
 }
 
 struct breakpoint_ops base_breakpoint_ops =
-{
-  base_breakpoint_create_sals_from_location,
-  base_breakpoint_create_breakpoints_sal,
-};
-
-struct breakpoint_ops vtable_breakpoint_ops =
 {
   create_sals_from_location_default,
   create_breakpoints_sal_default,
@@ -13733,7 +13702,7 @@ ftrace_command (const char *arg, int from_tty)
 		     bp_fast_tracepoint /* type_wanted */,
 		     0 /* Ignore count */,
 		     pending_break_support,
-		     &vtable_breakpoint_ops,
+		     &base_breakpoint_ops,
 		     from_tty,
 		     1 /* enabled */,
 		     0 /* internal */, 0);
@@ -13758,7 +13727,7 @@ strace_command (const char *arg, int from_tty)
     }
   else
     {
-      ops = &vtable_breakpoint_ops;
+      ops = &base_breakpoint_ops;
       location = string_to_event_location (&arg, current_language);
       type = bp_static_tracepoint;
     }
@@ -13841,7 +13810,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 			  utp->type /* type_wanted */,
 			  0 /* Ignore count */,
 			  pending_break_support,
-			  &vtable_breakpoint_ops,
+			  &base_breakpoint_ops,
 			  0 /* from_tty */,
 			  utp->enabled /* enabled */,
 			  0 /* internal */,
@@ -14388,17 +14357,17 @@ initialize_breakpoint_ops (void)
 
   /* Probe breakpoints.  */
   ops = &bkpt_probe_breakpoint_ops;
-  *ops = vtable_breakpoint_ops;
+  *ops = base_breakpoint_ops;
   ops->create_sals_from_location = bkpt_probe_create_sals_from_location;
 
   /* Probe tracepoints.  */
   ops = &tracepoint_probe_breakpoint_ops;
-  *ops = vtable_breakpoint_ops;
+  *ops = base_breakpoint_ops;
   ops->create_sals_from_location = tracepoint_probe_create_sals_from_location;
 
   /* Static tracepoints with marker (`-m').  */
   ops = &strace_marker_breakpoint_ops;
-  *ops = vtable_breakpoint_ops;
+  *ops = base_breakpoint_ops;
   ops->create_sals_from_location = strace_marker_create_sals_from_location;
   ops->create_breakpoints_sal = strace_marker_create_breakpoints_sal;
 }

@@ -305,7 +305,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 			 bp_breakpoint,
 			 0,
 			 AUTO_BOOLEAN_TRUE,
-			 &vtable_breakpoint_ops,
+			 &base_breakpoint_ops,
 			 0, 1, internal_bp, 0);
     }
   catch (const gdb_exception &except)

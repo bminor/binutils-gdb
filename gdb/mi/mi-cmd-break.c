@@ -327,12 +327,12 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   else if (dprintf)
     {
       type_wanted = bp_dprintf;
-      ops = &vtable_breakpoint_ops;
+      ops = &base_breakpoint_ops;
     }
   else
     {
       type_wanted = hardware ? bp_hardware_breakpoint : bp_breakpoint;
-      ops = &vtable_breakpoint_ops;
+      ops = &base_breakpoint_ops;
     }
 
   if (is_explicit)

@@ -1399,7 +1399,6 @@ extern void rwatch_command_wrapper (const char *, int, bool);
 extern void tbreak_command (const char *, int);
 
 extern struct breakpoint_ops base_breakpoint_ops;
-extern struct breakpoint_ops vtable_breakpoint_ops;
 
 extern void initialize_breakpoint_ops (void);
 
@@ -1449,8 +1448,7 @@ extern void install_breakpoint (int internal, std::unique_ptr<breakpoint> &&b,
 /* Returns the breakpoint ops appropriate for use with with LOCATION and
    according to IS_TRACEPOINT.  Use this to ensure, for example, that you pass
    the correct ops to create_breakpoint for probe locations.  If LOCATION is
-   NULL, returns bkpt_breakpoint_ops (or vtable_breakpoint_ops, if
-   IS_TRACEPOINT is true).  */
+   NULL, returns base_breakpoint_ops.  */
 
 extern const struct breakpoint_ops *breakpoint_ops_for_event_location
   (const struct event_location *location, bool is_tracepoint);
