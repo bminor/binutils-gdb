@@ -219,8 +219,6 @@ struct instr_info
   vex;
   unsigned char need_vex;
 
-  const char *const *index16;
-
   /* Remember if the current op is a jump instruction.  */
   bool op_is_jump;
 
@@ -9404,7 +9402,6 @@ print_insn (bfd_vma pc, instr_info *ins)
 
   if (ins->intel_syntax)
     {
-      ins->index16 = intel_index16;
       ins->open_char = '[';
       ins->close_char = ']';
       ins->separator_char = '+';
@@ -9412,7 +9409,6 @@ print_insn (bfd_vma pc, instr_info *ins)
     }
   else
     {
-      ins->index16 = att_index16;
       ins->open_char = '(';
       ins->close_char =  ')';
       ins->separator_char = ',';
@@ -11712,7 +11708,9 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	{
 	  *ins->obufp++ = ins->open_char;
 	  *ins->obufp = '\0';
-	  oappend (ins, ins->index16[ins->modrm.rm]);
+	  oappend (ins,
+		   (ins->intel_syntax ? intel_index16
+				      : att_index16)[ins->modrm.rm]);
 	  if (ins->intel_syntax
 	      && (disp || ins->modrm.mod != 0 || ins->modrm.rm == 6))
 	    {
