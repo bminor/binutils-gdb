@@ -184,9 +184,8 @@ find_one_thread (ptid_t ptid)
     error ("Cannot get thread info for LWP %d: %s",
 	   lwpid, thread_db_err_str (err));
 
-  if (debug_threads)
-    debug_printf ("Found thread %ld (LWP %d)\n",
-		  (unsigned long) ti.ti_tid, ti.ti_lid);
+  threads_debug_printf ("Found thread %ld (LWP %d)",
+			(unsigned long) ti.ti_tid, ti.ti_lid);
 
   if (lwpid != ti.ti_lid)
     {
@@ -218,9 +217,8 @@ attach_thread (const td_thrhandle_t *th_p, td_thrinfo_t *ti_p)
   struct lwp_info *lwp;
   int err;
 
-  if (debug_threads)
-    debug_printf ("Attaching to thread %ld (LWP %d)\n",
-		  (unsigned long) ti_p->ti_tid, ti_p->ti_lid);
+  threads_debug_printf ("Attaching to thread %ld (LWP %d)",
+			(unsigned long) ti_p->ti_tid, ti_p->ti_lid);
   err = the_linux_target->attach_lwp (ptid);
   if (err != 0)
     {
@@ -283,10 +281,9 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
 	 thread that previously exited and was joined.  (glibc marks
 	 terminated and joined threads with kernel thread ID -1.  See
 	 glibc PR17707.  */
-      if (debug_threads)
-	debug_printf ("thread_db: skipping exited and "
-		      "joined thread (0x%lx)\n",
-		      (unsigned long) ti.ti_tid);
+      threads_debug_printf ("thread_db: skipping exited and "
+			    "joined thread (0x%lx)",
+			    (unsigned long) ti.ti_tid);
       return 0;
     }
 
@@ -333,9 +330,8 @@ thread_db_find_new_threads (void)
 					 TD_THR_ANY_STATE,
 					 TD_THR_LOWEST_PRIORITY,
 					 TD_SIGNO_MASK, TD_THR_ANY_USER_FLAGS);
-      if (debug_threads)
-	debug_printf ("Found %d threads in iteration %d.\n",
-		      new_thread_count, iteration);
+      threads_debug_printf ("Found %d threads in iteration %d.",
+			    new_thread_count, iteration);
 
       if (new_thread_count != 0)
 	{
@@ -492,8 +488,7 @@ thread_db_load_search (void)
   err = tdb->td_ta_new_p (&tdb->proc_handle, &tdb->thread_agent);
   if (err != TD_OK)
     {
-      if (debug_threads)
-	debug_printf ("td_ta_new(): %s\n", thread_db_err_str (err));
+      threads_debug_printf ("td_ta_new(): %s", thread_db_err_str (err));
       free (tdb);
       proc->priv->thread_db = NULL;
       return 0;
@@ -535,8 +530,7 @@ try_thread_db_load_1 (void *handle)
     {								\
       if ((a) == NULL)						\
 	{							\
-	  if (debug_threads)					\
-	    debug_printf ("dlsym: %s\n", dlerror ());		\
+	  threads_debug_printf ("dlsym: %s", dlerror ());	\
 	  if (required)						\
 	    {							\
 	      free (tdb);					\
@@ -556,8 +550,7 @@ try_thread_db_load_1 (void *handle)
   err = tdb->td_ta_new_p (&tdb->proc_handle, &tdb->thread_agent);
   if (err != TD_OK)
     {
-      if (debug_threads)
-	debug_printf ("td_ta_new(): %s\n", thread_db_err_str (err));
+      threads_debug_printf ("td_ta_new(): %s", thread_db_err_str (err));
       free (tdb);
       proc->priv->thread_db = NULL;
       return 0;
@@ -601,14 +594,12 @@ try_thread_db_load (const char *library)
 {
   void *handle;
 
-  if (debug_threads)
-    debug_printf ("Trying host libthread_db library: %s.\n",
-		  library);
+  threads_debug_printf ("Trying host libthread_db library: %s.",
+			library);
   handle = dlopen (library, RTLD_NOW);
   if (handle == NULL)
     {
-      if (debug_threads)
-	debug_printf ("dlopen failed: %s.\n", dlerror ());
+      threads_debug_printf ("dlopen failed: %s.", dlerror ());
       return 0;
     }
 
@@ -623,7 +614,7 @@ try_thread_db_load (const char *library)
 	  const char *const libpath = dladdr_to_soname (td_init);
 
 	  if (libpath != NULL)
-	    debug_printf ("Host %s resolved to: %s.\n", library, libpath);
+	    threads_debug_printf ("Host %s resolved to: %s.", library, libpath);
 	}
     }
 #endif
@@ -722,8 +713,7 @@ thread_db_load_search (void)
 	}
     }
 
-  if (debug_threads)
-    debug_printf ("thread_db_load_search returning %d\n", rc);
+  threads_debug_printf ("thread_db_load_search returning %d", rc);
   return rc;
 }
 

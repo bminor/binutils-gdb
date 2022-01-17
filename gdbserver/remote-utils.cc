@@ -144,8 +144,7 @@ handle_accept_event (int err, gdb_client_data client_data)
   struct sockaddr_storage sockaddr;
   socklen_t len = sizeof (sockaddr);
 
-  if (debug_threads)
-    debug_printf ("handling possible accept event\n");
+  threads_debug_printf ("handling possible accept event");
 
   remote_desc = accept (listen_desc, (struct sockaddr *) &sockaddr, &len);
   if (remote_desc == -1)
@@ -1084,9 +1083,8 @@ void
 prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 {
   client_state &cs = get_client_state ();
-  if (debug_threads)
-    debug_printf ("Writing resume reply for %s:%d\n",
-		  target_pid_to_str (ptid).c_str (), status.kind ());
+  threads_debug_printf ("Writing resume reply for %s:%d",
+			target_pid_to_str (ptid).c_str (), status.kind ());
 
   switch (status.kind ())
     {

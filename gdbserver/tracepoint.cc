@@ -87,11 +87,7 @@ trace_vdebug (const char *fmt, ...)
 
 #define trace_debug(fmt, args...)	\
   do {						\
-    if (debug_threads)				\
-      {						\
-	debug_printf ((fmt), ##args);		\
-	debug_printf ("\n");			\
-      }						\
+      threads_debug_printf ((fmt), ##args);	\
   } while (0)
 
 #endif
@@ -324,8 +320,7 @@ tracepoint_look_up_symbols (void)
 
       if (look_up_one_symbol (symbol_list[i].name, addrp, 1) == 0)
 	{
-	  if (debug_threads)
-	    debug_printf ("symbol `%s' not found\n", symbol_list[i].name);
+	  threads_debug_printf ("symbol `%s' not found", symbol_list[i].name);
 	  return;
 	}
     }
@@ -4519,15 +4514,14 @@ handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc)
 		   ipa_expr_eval_result,
 		   paddress (ipa_error_tracepoint));
 
-      if (debug_threads)
-	{
-	  if (ipa_trace_buffer_is_full)
-	    trace_debug ("lib stopped due to full buffer.");
-	  if (ipa_stopping_tracepoint)
-	    trace_debug ("lib stopped due to tpoint");
-	  if (ipa_error_tracepoint)
-	    trace_debug ("lib stopped due to error");
-	}
+      if (ipa_trace_buffer_is_full)
+	trace_debug ("lib stopped due to full buffer.");
+
+      if (ipa_stopping_tracepoint)
+	trace_debug ("lib stopped due to tpoint");
+
+      if (ipa_error_tracepoint)
+	trace_debug ("lib stopped due to error");
 
       if (ipa_stopping_tracepoint != 0)
 	{

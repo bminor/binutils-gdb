@@ -39,7 +39,7 @@ ax_vdebug (const char *fmt, ...)
 #ifdef IN_PROCESS_AGENT
   fprintf (stderr, PROG "/ax: %s\n", buf);
 #else
-  debug_printf (PROG "/ax: %s\n", buf);
+  threads_debug_printf (PROG "/ax: %s", buf);
 #endif
   va_end (ap);
 }

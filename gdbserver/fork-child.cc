@@ -45,11 +45,7 @@ void
 prefork_hook (const char *args)
 {
   client_state &cs = get_client_state ();
-  if (debug_threads)
-    {
-      debug_printf ("args: %s\n", args);
-      debug_flush ();
-    }
+  threads_debug_printf ("args: %s", args);
 
 #ifdef SIGTTOU
   signal (SIGTTOU, SIG_DFL);

@@ -1228,8 +1228,7 @@ handle_detach (char *own_buf)
 	 pass signals down without informing GDB.  */
       if (!non_stop)
 	{
-	  if (debug_threads)
-	    debug_printf ("Forcing non-stop mode\n");
+	  threads_debug_printf ("Forcing non-stop mode");
 
 	  non_stop = true;
 	  the_target->start_non_stop (true);
@@ -3336,10 +3335,10 @@ queue_stop_reply_callback (thread_info *thread)
     {
       if (target_thread_stopped (thread))
 	{
-	  if (debug_threads)
-	    debug_printf ("Reporting thread %s as already stopped with %s\n",
-			  target_pid_to_str (thread->id).c_str (),
-			  thread->last_status.to_string ().c_str ());
+	  threads_debug_printf
+	    ("Reporting thread %s as already stopped with %s",
+	     target_pid_to_str (thread->id).c_str (),
+	     thread->last_status.to_string ().c_str ());
 
 	  gdb_assert (thread->last_status.kind () != TARGET_WAITKIND_IGNORE);
 
@@ -4183,16 +4182,14 @@ process_point_options (struct gdb_breakpoint *bp, const char **packet)
       if (*dataptr == 'X')
 	{
 	  /* Conditional expression.  */
-	  if (debug_threads)
-	    debug_printf ("Found breakpoint condition.\n");
+	  threads_debug_printf ("Found breakpoint condition.");
 	  if (!add_breakpoint_condition (bp, &dataptr))
 	    dataptr = strchrnul (dataptr, ';');
 	}
       else if (startswith (dataptr, "cmds:"))
 	{
 	  dataptr += strlen ("cmds:");
-	  if (debug_threads)
-	    debug_printf ("Found breakpoint commands %s.\n", dataptr);
+	  threads_debug_printf ("Found breakpoint commands %s.", dataptr);
 	  persist = (*dataptr == '1');
 	  dataptr += 2;
 	  if (add_breakpoint_commands (bp, &dataptr, persist))
@@ -4576,8 +4573,7 @@ process_serial_event (void)
 void
 handle_serial_event (int err, gdb_client_data client_data)
 {
-  if (debug_threads)
-    debug_printf ("handling possible serial event\n");
+  threads_debug_printf ("handling possible serial event");
 
   /* Really handle it.  */
   if (process_serial_event () < 0)
@@ -4610,8 +4606,7 @@ void
 handle_target_event (int err, gdb_client_data client_data)
 {
   client_state &cs = get_client_state ();
-  if (debug_threads)
-    debug_printf ("handling possible target event\n");
+  threads_debug_printf ("handling possible target event");
 
   cs.last_ptid = mywait (minus_one_ptid, &cs.last_status,
 		      TARGET_WNOHANG, 1);
@@ -4663,11 +4658,10 @@ handle_target_event (int err, gdb_client_data client_data)
 		 inferior, as if it wasn't being traced.  */
 	      enum gdb_signal signal;
 
-	      if (debug_threads)
-		debug_printf ("GDB not connected; forwarding event %d for"
-			      " [%s]\n",
-			      (int) cs.last_status.kind (),
-			      target_pid_to_str (cs.last_ptid).c_str ());
+	      threads_debug_printf ("GDB not connected; forwarding event %d for"
+				    " [%s]",
+				    (int) cs.last_status.kind (),
+				    target_pid_to_str (cs.last_ptid).c_str ());
 
 	      if (cs.last_status.kind () == TARGET_WAITKIND_STOPPED)
 		signal = cs.last_status.sig ();

@@ -110,30 +110,6 @@ debug_flush (void)
   fflush (debug_file);
 }
 
-/* Notify the user that the code is entering FUNCTION_NAME.
-   FUNCTION_NAME is the name of the calling function, or NULL if unknown.
-
-   This is intended to be called via the debug_enter macro.  */
-
-void
-do_debug_enter (const char *function_name)
-{
-  if (function_name != NULL)
-    debug_printf (">>>> entering %s\n", function_name);
-}
-
-/* Notify the user that the code is exiting FUNCTION_NAME.
-   FUNCTION_NAME is the name of the calling function, or NULL if unknown.
-
-   This is intended to be called via the debug_exit macro.  */
-
-void
-do_debug_exit (const char *function_name)
-{
-  if (function_name != NULL)
-    debug_printf ("<<<< exiting %s\n", function_name);
-}
-
 /* See debug.h.  */
 
 ssize_t
