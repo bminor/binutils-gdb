@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-08-11 10:45+0100\n"
+"Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
+"POT-Creation-Date: 2022-01-17 13:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,12 +26,22 @@ msgid "specified register cannot be written to"
 msgstr ""
 
 #. Invalid option.
-#: aarch64-dis.c:94 arc-dis.c:802 arm-dis.c:11669
+#: aarch64-dis.c:94 arc-dis.c:802 arm-dis.c:11670
 #, c-format
 msgid "unrecognised disassembler option: %s"
 msgstr ""
 
-#: aarch64-dis.c:3589
+#: aarch64-dis.c:3395
+#, c-format
+msgid "this `%s' should have an immediately preceding `%s'"
+msgstr ""
+
+#: aarch64-dis.c:3402
+#, c-format
+msgid "expected `%s' after previous `%s'"
+msgstr ""
+
+#: aarch64-dis.c:3806
 #, c-format
 msgid ""
 "\n"
@@ -39,300 +49,316 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: aarch64-dis.c:3593
+#: aarch64-dis.c:3810
 #, c-format
 msgid ""
 "\n"
 "  no-aliases         Don't print instruction aliases.\n"
 msgstr ""
 
-#: aarch64-dis.c:3596
+#: aarch64-dis.c:3813
 #, c-format
 msgid ""
 "\n"
 "  aliases            Do print instruction aliases.\n"
 msgstr ""
 
-#: aarch64-dis.c:3599
+#: aarch64-dis.c:3816
 #, c-format
 msgid ""
 "\n"
 "  no-notes         Don't print instruction notes.\n"
 msgstr ""
 
-#: aarch64-dis.c:3602
+#: aarch64-dis.c:3819
 #, c-format
 msgid ""
 "\n"
 "  notes            Do print instruction notes.\n"
 msgstr ""
 
-#: aarch64-dis.c:3606
+#: aarch64-dis.c:3823
 #, c-format
 msgid ""
 "\n"
 "  debug_dump         Temp switch for debug trace.\n"
 msgstr ""
 
-#: aarch64-dis.c:3610 arc-dis.c:1551 arc-dis.c:1572 arc-dis.c:1575
-#: mips-dis.c:2807 mips-dis.c:2817 mips-dis.c:2820 nfp-dis.c:2981
-#: riscv-dis.c:655
+#: aarch64-dis.c:3827 arc-dis.c:1551 arc-dis.c:1572 arc-dis.c:1575
+#: loongarch-dis.c:306 mips-dis.c:2807 mips-dis.c:2817 mips-dis.c:2820
+#: nfp-dis.c:2993 riscv-dis.c:1140 riscv-dis.c:1143
 #, c-format
 msgid "\n"
 msgstr ""
 
-#: aarch64-opc.c:1350
+#: aarch64-opc.c:1365
 msgid "immediate value"
 msgstr ""
 
-#: aarch64-opc.c:1360
+#: aarch64-opc.c:1375
 msgid "immediate offset"
 msgstr ""
 
-#: aarch64-opc.c:1370
+#: aarch64-opc.c:1385
 msgid "register number"
 msgstr ""
 
-#: aarch64-opc.c:1380
+#: aarch64-opc.c:1395
 msgid "register element index"
 msgstr ""
 
-#: aarch64-opc.c:1390
+#: aarch64-opc.c:1405
 msgid "shift amount"
 msgstr ""
 
-#: aarch64-opc.c:1402
+#: aarch64-opc.c:1417
 msgid "multiplier"
 msgstr ""
 
-#: aarch64-opc.c:1475
+#: aarch64-opc.c:1491
 msgid "reg pair must start from even reg"
 msgstr ""
 
-#: aarch64-opc.c:1481
+#: aarch64-opc.c:1497
 msgid "reg pair must be contiguous"
 msgstr ""
 
-#: aarch64-opc.c:1495
+#: aarch64-opc.c:1511
 msgid "extraneous register"
 msgstr ""
 
-#: aarch64-opc.c:1501
+#: aarch64-opc.c:1517
 msgid "missing register"
 msgstr ""
 
-#: aarch64-opc.c:1512
+#: aarch64-opc.c:1528
 msgid "stack pointer register expected"
 msgstr ""
 
-#: aarch64-opc.c:1537
+#: aarch64-opc.c:1553
 msgid "z0-z15 expected"
 msgstr ""
 
-#: aarch64-opc.c:1538
+#: aarch64-opc.c:1554
 msgid "z0-z7 expected"
 msgstr ""
 
-#: aarch64-opc.c:1564
+#: aarch64-opc.c:1580
 msgid "invalid register list"
 msgstr ""
 
-#: aarch64-opc.c:1578
+#: aarch64-opc.c:1594
 msgid "p0-p7 expected"
 msgstr ""
 
-#: aarch64-opc.c:1604 aarch64-opc.c:1612
+#: aarch64-opc.c:1620 aarch64-opc.c:1628
 msgid "unexpected address writeback"
 msgstr ""
 
-#: aarch64-opc.c:1623
+#: aarch64-opc.c:1639
 msgid "address writeback expected"
 msgstr ""
 
-#: aarch64-opc.c:1670
+#: aarch64-opc.c:1686
 msgid "negative or unaligned offset expected"
 msgstr ""
 
-#: aarch64-opc.c:1727
+#: aarch64-opc.c:1743
 msgid "invalid register offset"
 msgstr ""
 
-#: aarch64-opc.c:1749
+#: aarch64-opc.c:1765
 msgid "invalid post-increment amount"
 msgstr ""
 
-#: aarch64-opc.c:1765 aarch64-opc.c:2274
+#: aarch64-opc.c:1781 aarch64-opc.c:2299
 msgid "invalid shift amount"
 msgstr ""
 
-#: aarch64-opc.c:1778
+#: aarch64-opc.c:1794
 msgid "invalid extend/shift operator"
 msgstr ""
 
-#: aarch64-opc.c:1824 aarch64-opc.c:2076 aarch64-opc.c:2111 aarch64-opc.c:2130
-#: aarch64-opc.c:2138 aarch64-opc.c:2227 aarch64-opc.c:2404 aarch64-opc.c:2504
-#: aarch64-opc.c:2517
+#: aarch64-opc.c:1840 aarch64-opc.c:2101 aarch64-opc.c:2136 aarch64-opc.c:2155
+#: aarch64-opc.c:2163 aarch64-opc.c:2252 aarch64-opc.c:2429 aarch64-opc.c:2529
+#: aarch64-opc.c:2542
 msgid "immediate out of range"
 msgstr ""
 
-#: aarch64-opc.c:1846 aarch64-opc.c:1888 aarch64-opc.c:1950 aarch64-opc.c:1984
+#: aarch64-opc.c:1870 aarch64-opc.c:1912 aarch64-opc.c:1975 aarch64-opc.c:2009
 msgid "invalid addressing mode"
 msgstr ""
 
-#: aarch64-opc.c:1942
+#: aarch64-opc.c:1967
 msgid "index register xzr is not allowed"
 msgstr ""
 
-#: aarch64-opc.c:2064 aarch64-opc.c:2086 aarch64-opc.c:2307 aarch64-opc.c:2315
-#: aarch64-opc.c:2381 aarch64-opc.c:2410
+#: aarch64-opc.c:2089 aarch64-opc.c:2111 aarch64-opc.c:2332 aarch64-opc.c:2340
+#: aarch64-opc.c:2406 aarch64-opc.c:2435
 msgid "invalid shift operator"
 msgstr ""
 
-#: aarch64-opc.c:2070
+#: aarch64-opc.c:2095
 msgid "shift amount must be 0 or 12"
 msgstr ""
 
-#: aarch64-opc.c:2093
+#: aarch64-opc.c:2118
 msgid "shift amount must be a multiple of 16"
 msgstr ""
 
-#: aarch64-opc.c:2105
+#: aarch64-opc.c:2130
 msgid "negative immediate value not allowed"
 msgstr ""
 
-#: aarch64-opc.c:2238
+#: aarch64-opc.c:2263
 msgid "immediate zero expected"
 msgstr ""
 
-#: aarch64-opc.c:2252
+#: aarch64-opc.c:2277
 msgid "rotate expected to be 0, 90, 180 or 270"
 msgstr ""
 
-#: aarch64-opc.c:2263
+#: aarch64-opc.c:2288
 msgid "rotate expected to be 90 or 270"
 msgstr ""
 
-#: aarch64-opc.c:2323
+#: aarch64-opc.c:2348
 msgid "shift is not permitted"
 msgstr ""
 
-#: aarch64-opc.c:2348
+#: aarch64-opc.c:2373
 msgid "invalid value for immediate"
 msgstr ""
 
-#: aarch64-opc.c:2373
+#: aarch64-opc.c:2398
 msgid "shift amount must be 0 or 16"
 msgstr ""
 
-#: aarch64-opc.c:2394
+#: aarch64-opc.c:2419
 msgid "floating-point immediate expected"
 msgstr ""
 
-#: aarch64-opc.c:2428
+#: aarch64-opc.c:2453
 msgid "no shift amount allowed for 8-bit constants"
 msgstr ""
 
-#: aarch64-opc.c:2438
+#: aarch64-opc.c:2463
 msgid "shift amount must be 0 or 8"
 msgstr ""
 
-#: aarch64-opc.c:2451
+#: aarch64-opc.c:2476
 msgid "immediate too big for element size"
 msgstr ""
 
-#: aarch64-opc.c:2458
+#: aarch64-opc.c:2483
 msgid "invalid arithmetic immediate"
 msgstr ""
 
-#: aarch64-opc.c:2472
+#: aarch64-opc.c:2497
 msgid "floating-point value must be 0.5 or 1.0"
 msgstr ""
 
-#: aarch64-opc.c:2482
+#: aarch64-opc.c:2507
 msgid "floating-point value must be 0.5 or 2.0"
 msgstr ""
 
-#: aarch64-opc.c:2492
+#: aarch64-opc.c:2517
 msgid "floating-point value must be 0.0 or 1.0"
 msgstr ""
 
-#: aarch64-opc.c:2523
+#: aarch64-opc.c:2548
 msgid "invalid replicated MOV immediate"
 msgstr ""
 
-#: aarch64-opc.c:2644
+#: aarch64-opc.c:2656
 msgid "extend operator expected"
 msgstr ""
 
-#: aarch64-opc.c:2657
+#: aarch64-opc.c:2669
 msgid "missing extend operator"
 msgstr ""
 
-#: aarch64-opc.c:2663
+#: aarch64-opc.c:2675
 msgid "'LSL' operator not allowed"
 msgstr ""
 
-#: aarch64-opc.c:2684
+#: aarch64-opc.c:2696
 msgid "W register expected"
 msgstr ""
 
-#: aarch64-opc.c:2695
+#: aarch64-opc.c:2707
 msgid "shift operator expected"
 msgstr ""
 
-#: aarch64-opc.c:2702
+#: aarch64-opc.c:2714
 msgid "'ROR' operator not allowed"
 msgstr ""
 
-#: aarch64-opc.c:3722
+#: aarch64-opc.c:3852
 msgid "reading from a write-only register"
 msgstr ""
 
-#: aarch64-opc.c:3724
+#: aarch64-opc.c:3854
 msgid "writing to a read-only register"
 msgstr ""
 
-#: aarch64-opc.c:5165
+#: aarch64-opc.c:5445
+msgid "the three register operands must be distinct from one another"
+msgstr ""
+
+#: aarch64-opc.c:5556
+msgid "destination register differs from preceding instruction"
+msgstr ""
+
+#: aarch64-opc.c:5559
+msgid "source register differs from preceding instruction"
+msgstr ""
+
+#: aarch64-opc.c:5562
+msgid "size register differs from preceding instruction"
+msgstr ""
+
+#: aarch64-opc.c:5610
 msgid "instruction opens new dependency sequence without ending previous one"
 msgstr ""
 
-#: aarch64-opc.c:5185
+#: aarch64-opc.c:5639
 msgid "previous `movprfx' sequence not closed"
 msgstr ""
 
-#: aarch64-opc.c:5204
+#: aarch64-opc.c:5658
 msgid "SVE instruction expected after `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5217
+#: aarch64-opc.c:5671
 msgid "SVE `movprfx' compatible instruction expected"
 msgstr ""
 
-#: aarch64-opc.c:5304
+#: aarch64-opc.c:5759
 msgid "predicated instruction expected after `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5316
+#: aarch64-opc.c:5771
 msgid "merging predicate expected due to preceding `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5328
+#: aarch64-opc.c:5783
 msgid "predicate register differs from that in preceding `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5347
+#: aarch64-opc.c:5802
 msgid "output register of preceding `movprfx' not used in current instruction"
 msgstr ""
 
-#: aarch64-opc.c:5360
+#: aarch64-opc.c:5815
 msgid "output register of preceding `movprfx' expected as output"
 msgstr ""
 
-#: aarch64-opc.c:5372
+#: aarch64-opc.c:5827
 msgid "output register of preceding `movprfx' used as input"
 msgstr ""
 
-#: aarch64-opc.c:5388
+#: aarch64-opc.c:5843
 msgid "register size not compatible with previous `movprfx'"
 msgstr ""
 
@@ -415,7 +441,7 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: arc-dis.c:1558 mips-dis.c:2812
+#: arc-dis.c:1558 mips-dis.c:2812 riscv-dis.c:1135
 #, c-format
 msgid ""
 "\n"
@@ -631,22 +657,22 @@ msgstr ""
 msgid "<illegal precision>"
 msgstr ""
 
-#: arm-dis.c:11630
+#: arm-dis.c:11631
 #, c-format
 msgid "unrecognised register name set: %s"
 msgstr ""
 
-#: arm-dis.c:11644
+#: arm-dis.c:11645
 #, c-format
 msgid "cde coprocessor not between 0-7: %s"
 msgstr ""
 
-#: arm-dis.c:11650
+#: arm-dis.c:11651
 #, c-format
 msgid "coproc must have an argument: %s"
 msgstr ""
 
-#: arm-dis.c:11663
+#: arm-dis.c:11664
 #, c-format
 msgid "coprocN argument takes options \"generic\", \"cde\", or \"CDE\": %s"
 msgstr ""
@@ -659,17 +685,17 @@ msgid ""
 "the -M switch:\n"
 msgstr ""
 
-#: avr-dis.c:115 avr-dis.c:136
+#: avr-dis.c:124 avr-dis.c:145
 #, c-format
 msgid "undefined"
 msgstr ""
 
-#: avr-dis.c:218
+#: avr-dis.c:236
 #, c-format
 msgid "internal disassembler error"
 msgstr ""
 
-#: avr-dis.c:272
+#: avr-dis.c:290
 #, c-format
 msgid "unknown constraint `%c'"
 msgstr ""
@@ -756,19 +782,19 @@ msgstr ""
 msgid "bad instruction `%.50s'"
 msgstr ""
 
-#: bpf-desc.c:1767
+#: bpf-desc.c:1768
 #, c-format
 msgid ""
 "internal error: bpf_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: bpf-desc.c:1855
+#: bpf-desc.c:1856
 #, c-format
 msgid "internal error: bpf_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: bpf-desc.c:1874
+#: bpf-desc.c:1875
 #, c-format
 msgid "internal error: bpf_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -865,19 +891,19 @@ msgstr ""
 msgid "operand out of range (%lu not between %lu and %lu)"
 msgstr ""
 
-#: cris-desc.c:2621
+#: cris-desc.c:2622
 #, c-format
 msgid ""
 "internal error: cris_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: cris-desc.c:2709
+#: cris-desc.c:2710
 #, c-format
 msgid "internal error: cris_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: cris-desc.c:2728
+#: cris-desc.c:2729
 #, c-format
 msgid "internal error: cris_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -903,12 +929,12 @@ msgstr ""
 msgid "Address 0x%s is out of bounds.\n"
 msgstr ""
 
-#: disassemble.c:848
+#: disassemble.c:859
 #, c-format
 msgid "assertion fail %s:%d"
 msgstr ""
 
-#: disassemble.c:849
+#: disassemble.c:860
 msgid "Please report this bug"
 msgstr ""
 
@@ -947,19 +973,19 @@ msgstr ""
 msgid "Not a pc-relative address."
 msgstr ""
 
-#: epiphany-desc.c:2109
+#: epiphany-desc.c:2110
 #, c-format
 msgid ""
 "internal error: epiphany_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: epiphany-desc.c:2197
+#: epiphany-desc.c:2198
 #, c-format
 msgid "internal error: epiphany_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: epiphany-desc.c:2216
+#: epiphany-desc.c:2217
 #, c-format
 msgid "internal error: epiphany_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -980,19 +1006,19 @@ msgstr ""
 msgid "Register list is not valid"
 msgstr ""
 
-#: fr30-desc.c:1586
+#: fr30-desc.c:1587
 #, c-format
 msgid ""
 "internal error: fr30_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: fr30-desc.c:1674
+#: fr30-desc.c:1675
 #, c-format
 msgid "internal error: fr30_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: fr30-desc.c:1693
+#: fr30-desc.c:1694
 #, c-format
 msgid "internal error: fr30_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -1013,19 +1039,19 @@ msgstr ""
 msgid "register number must be even"
 msgstr ""
 
-#: frv-desc.c:6326
+#: frv-desc.c:6327
 #, c-format
 msgid ""
 "internal error: frv_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: frv-desc.c:6414
+#: frv-desc.c:6415
 #, c-format
 msgid "internal error: frv_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: frv-desc.c:6433
+#: frv-desc.c:6434
 #, c-format
 msgid "internal error: frv_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -1055,11 +1081,11 @@ msgstr ""
 msgid "Don't understand 0x%x \n"
 msgstr ""
 
-#: i386-dis.c:8642
+#: i386-dis.c:8528
 msgid "<internal disassembler error>"
 msgstr ""
 
-#: i386-dis.c:8952
+#: i386-dis.c:8802
 #, c-format
 msgid ""
 "\n"
@@ -1068,175 +1094,175 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: i386-dis.c:8956
+#: i386-dis.c:8806
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr ""
 
-#: i386-dis.c:8957
+#: i386-dis.c:8807
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr ""
 
-#: i386-dis.c:8958
+#: i386-dis.c:8808
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr ""
 
-#: i386-dis.c:8959
+#: i386-dis.c:8809
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:8960
+#: i386-dis.c:8810
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr ""
 
-#: i386-dis.c:8961
+#: i386-dis.c:8811
 #, c-format
 msgid ""
 "  att-mnemonic\n"
 "              Display instruction in AT&T mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:8963
+#: i386-dis.c:8813
 #, c-format
 msgid ""
 "  intel-mnemonic\n"
 "              Display instruction in Intel mnemonic\n"
 msgstr ""
 
-#: i386-dis.c:8965
+#: i386-dis.c:8815
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr ""
 
-#: i386-dis.c:8966
+#: i386-dis.c:8816
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr ""
 
-#: i386-dis.c:8967
+#: i386-dis.c:8817
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr ""
 
-#: i386-dis.c:8968
+#: i386-dis.c:8818
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr ""
 
-#: i386-dis.c:8969
+#: i386-dis.c:8819
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr ""
 
-#: i386-dis.c:8970
+#: i386-dis.c:8820
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr ""
 
-#: i386-dis.c:8971
+#: i386-dis.c:8821
 #, c-format
 msgid "  amd64       Display instruction in AMD64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:8972
+#: i386-dis.c:8822
 #, c-format
 msgid "  intel64     Display instruction in Intel64 ISA\n"
 msgstr ""
 
-#: i386-dis.c:9541
+#: i386-dis.c:9402
 msgid "64-bit address is disabled"
 msgstr ""
 
-#: i386-gen.c:857
+#: i386-gen.c:856
 #, c-format
 msgid "%s: error: "
 msgstr ""
 
-#: i386-gen.c:1013
+#: i386-gen.c:1012
 #, c-format
 msgid "%s: %d: unknown bitfield: %s\n"
 msgstr ""
 
-#: i386-gen.c:1015
+#: i386-gen.c:1014
 #, c-format
 msgid "unknown bitfield: %s\n"
 msgstr ""
 
-#: i386-gen.c:1078
+#: i386-gen.c:1077
 #, c-format
 msgid "%s: %d: missing `)' in bitfield: %s\n"
 msgstr ""
 
-#: i386-gen.c:1179
+#: i386-gen.c:1178
 #, c-format
 msgid "unknown broadcast operand: %s\n"
 msgstr ""
 
-#: i386-gen.c:1234
+#: i386-gen.c:1233
 #, c-format
 msgid "%s:%d: Conflicting opcode space specifications\n"
 msgstr ""
 
-#: i386-gen.c:1238
+#: i386-gen.c:1237
 #, c-format
 msgid "%s:%d: Warning: redundant opcode space specification\n"
 msgstr ""
 
-#: i386-gen.c:1247
+#: i386-gen.c:1246
 #, c-format
 msgid "%s:%d: Conflicting prefix specifications\n"
 msgstr ""
 
-#: i386-gen.c:1251
+#: i386-gen.c:1250
 #, c-format
 msgid "%s:%d: Warning: redundant prefix specification\n"
 msgstr ""
 
-#: i386-gen.c:1461
+#: i386-gen.c:1460
 #, c-format
 msgid "%s:%d: %s: unrecognized opcode encoding space\n"
 msgstr ""
 
-#: i386-gen.c:1467
+#: i386-gen.c:1466
 #, c-format
 msgid "%s:%d: %s: residual opcode (0x%0*llx) too large\n"
 msgstr ""
 
-#: i386-gen.c:1889
+#: i386-gen.c:1888
 #, c-format
 msgid "can't find i386-reg.tbl for reading, errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:1967
+#: i386-gen.c:1966
 #, c-format
 msgid "can't create i386-init.h, errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:2057 ia64-gen.c:2829
+#: i386-gen.c:2056 ia64-gen.c:2829
 #, c-format
 msgid "unable to change directory to \"%s\", errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:2071 i386-gen.c:2076
+#: i386-gen.c:2070 i386-gen.c:2075
 #, c-format
 msgid "CpuMax != %d!\n"
 msgstr ""
 
-#: i386-gen.c:2080
+#: i386-gen.c:2079
 #, c-format
 msgid "%d unused bits in i386_cpu_flags.\n"
 msgstr ""
 
-#: i386-gen.c:2095
+#: i386-gen.c:2094
 #, c-format
 msgid "%d unused bits in i386_operand_type.\n"
 msgstr ""
 
-#: i386-gen.c:2109
+#: i386-gen.c:2108
 #, c-format
 msgid "can't create i386-tbl.h, errno = %s\n"
 msgstr ""
@@ -1399,19 +1425,19 @@ msgstr ""
 msgid "Attempt to find bit index of 0"
 msgstr ""
 
-#: ip2k-desc.c:1015
+#: ip2k-desc.c:1016
 #, c-format
 msgid ""
 "internal error: ip2k_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: ip2k-desc.c:1103
+#: ip2k-desc.c:1104
 #, c-format
 msgid "internal error: ip2k_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: ip2k-desc.c:1122
+#: ip2k-desc.c:1123
 #, c-format
 msgid "internal error: ip2k_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -1428,19 +1454,19 @@ msgstr ""
 msgid "21-bit offset out of range"
 msgstr ""
 
-#: iq2000-desc.c:2020
+#: iq2000-desc.c:2021
 #, c-format
 msgid ""
 "internal error: iq2000_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: iq2000-desc.c:2108
+#: iq2000-desc.c:2109
 #, c-format
 msgid "internal error: iq2000_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: iq2000-desc.c:2127
+#: iq2000-desc.c:2128
 #, c-format
 msgid "internal error: iq2000_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -1461,21 +1487,36 @@ msgstr ""
 msgid "expecting got relative address: gotofflo16(symbol)"
 msgstr ""
 
-#: lm32-desc.c:1002
+#: lm32-desc.c:1003
 #, c-format
 msgid ""
 "internal error: lm32_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: lm32-desc.c:1090
+#: lm32-desc.c:1091
 #, c-format
 msgid "internal error: lm32_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: lm32-desc.c:1109
+#: lm32-desc.c:1110
 #, c-format
 msgid "internal error: lm32_cgen_cpu_open: no endianness specified"
+msgstr ""
+
+#: loongarch-dis.c:300
+#, c-format
+msgid ""
+"\n"
+"The following LoongArch disassembler options are supported for use\n"
+"with the -M switch (multiple options should be separated by commas):\n"
+msgstr ""
+
+#: loongarch-dis.c:304
+#, c-format
+msgid ""
+"\n"
+"    numeric       Print numeric register names, rather than ABI names.\n"
 msgstr ""
 
 #: m10200-dis.c:151 m10300-dis.c:574
@@ -1562,36 +1603,36 @@ msgstr ""
 msgid "Invalid size specifier"
 msgstr ""
 
-#: m32c-desc.c:63033
+#: m32c-desc.c:63034
 #, c-format
 msgid ""
 "internal error: m32c_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: m32c-desc.c:63121
+#: m32c-desc.c:63122
 #, c-format
 msgid "internal error: m32c_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: m32c-desc.c:63140
+#: m32c-desc.c:63141
 #, c-format
 msgid "internal error: m32c_cgen_cpu_open: no endianness specified"
 msgstr ""
 
-#: m32r-desc.c:1365
+#: m32r-desc.c:1366
 #, c-format
 msgid ""
 "internal error: m32r_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: m32r-desc.c:1453
+#: m32r-desc.c:1454
 #, c-format
 msgid "internal error: m32r_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: m32r-desc.c:1472
+#: m32r-desc.c:1473
 #, c-format
 msgid "internal error: m32r_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -1639,19 +1680,19 @@ msgstr ""
 msgid "Value is not aligned enough"
 msgstr ""
 
-#: mep-desc.c:6226
+#: mep-desc.c:6227
 #, c-format
 msgid ""
 "internal error: mep_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: mep-desc.c:6314
+#: mep-desc.c:6315
 #, c-format
 msgid "internal error: mep_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: mep-desc.c:6333
+#: mep-desc.c:6334
 #, c-format
 msgid "internal error: mep_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -1816,19 +1857,19 @@ msgstr ""
 msgid "invalid operand.  type may have values 0,1,2 only."
 msgstr ""
 
-#: mt-desc.c:1146
+#: mt-desc.c:1147
 #, c-format
 msgid ""
 "internal error: mt_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: mt-desc.c:1234
+#: mt-desc.c:1235
 #, c-format
 msgid "internal error: mt_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: mt-desc.c:1253
+#: mt-desc.c:1254
 #, c-format
 msgid "internal error: mt_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -1852,47 +1893,47 @@ msgstr ""
 msgid "insufficient data to decode instruction"
 msgstr ""
 
-#: nfp-dis.c:927
+#: nfp-dis.c:930
 msgid "<invalid_instruction>:"
 msgstr ""
 
-#: nfp-dis.c:1331
+#: nfp-dis.c:1334
 msgid ", <invalid CRC operator>, "
 msgstr ""
 
-#: nfp-dis.c:1683
+#: nfp-dis.c:1686
 msgid "<invalid branch>["
 msgstr ""
 
-#: nfp-dis.c:2052 nfp-dis.c:2323
+#: nfp-dis.c:2055 nfp-dis.c:2326
 #, c-format
 msgid "<invalid cmd target %d:%d:%d>[]"
 msgstr ""
 
-#: nfp-dis.c:2063 nfp-dis.c:2334
+#: nfp-dis.c:2066 nfp-dis.c:2337
 #, c-format
 msgid "<invalid cmd action %d:%d:%d>[]"
 msgstr ""
 
-#: nfp-dis.c:2555
+#: nfp-dis.c:2558
 msgid "File has no ME-Config section."
 msgstr ""
 
-#: nfp-dis.c:2569
+#: nfp-dis.c:2572
 msgid "File has invalid ME-Config section."
 msgstr ""
 
-#: nfp-dis.c:2711
+#: nfp-dis.c:2717
 #, c-format
 msgid "Error processing section %u "
 msgstr ""
 
-#: nfp-dis.c:2740
+#: nfp-dis.c:2746
 #, c-format
 msgid "Invalid NFP option: %s"
 msgstr ""
 
-#: nfp-dis.c:2972
+#: nfp-dis.c:2984
 #, c-format
 msgid ""
 "\n"
@@ -1900,7 +1941,7 @@ msgid ""
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 
-#: nfp-dis.c:2976
+#: nfp-dis.c:2988
 #, c-format
 msgid ""
 "\n"
@@ -1937,19 +1978,19 @@ msgstr ""
 msgid "internal relocation type invalid"
 msgstr ""
 
-#: or1k-desc.c:2040
+#: or1k-desc.c:2041
 #, c-format
 msgid ""
 "internal error: or1k_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: or1k-desc.c:2128
+#: or1k-desc.c:2129
 #, c-format
 msgid "internal error: or1k_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: or1k-desc.c:2147
+#: or1k-desc.c:2148
 #, c-format
 msgid "internal error: or1k_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -2096,63 +2137,52 @@ msgid "invalid TH value"
 msgstr ""
 
 #. The option without '=' should be defined above.
-#: riscv-dis.c:85 riscv-dis.c:122
+#: riscv-dis.c:103 riscv-dis.c:140
 #, c-format
 msgid "unrecognized disassembler option: %s"
 msgstr ""
 
 #. Invalid options with '=', no option name before '=',
 #. and no value after '='.
-#: riscv-dis.c:93
+#: riscv-dis.c:111
 #, c-format
 msgid "unrecognized disassembler option with '=': %s"
 msgstr ""
 
-#: riscv-dis.c:107
+#: riscv-dis.c:125
 #, c-format
 msgid "unknown privileged spec set by %s=%s"
 msgstr ""
 
-#: riscv-dis.c:114
+#: riscv-dis.c:132
 #, c-format
 msgid ""
 "mis-matched privilege spec set by %s=%s, the elf privilege attribute is %s"
 msgstr ""
 
-#: riscv-dis.c:416
+#: riscv-dis.c:526
 #, c-format
 msgid "# internal error, undefined modifier (%c)"
 msgstr ""
 
-#: riscv-dis.c:640
+#: riscv-dis.c:1018
+msgid "Print numeric register names, rather than ABI names."
+msgstr ""
+
+#: riscv-dis.c:1021
+msgid "Disassemble only into canonical instructions."
+msgstr ""
+
+#: riscv-dis.c:1024
+msgid "Print the CSR according to the chosen privilege spec."
+msgstr ""
+
+#: riscv-dis.c:1100
 #, c-format
 msgid ""
 "\n"
-"The following RISC-V-specific disassembler options are supported for use\n"
+"The following RISC-V specific disassembler options are supported for use\n"
 "with the -M switch (multiple options should be separated by commas):\n"
-msgstr ""
-
-#: riscv-dis.c:644
-#, c-format
-msgid ""
-"\n"
-"  numeric         Print numeric register names, rather than ABI names.\n"
-msgstr ""
-
-#: riscv-dis.c:647
-#, c-format
-msgid ""
-"\n"
-"  no-aliases      Disassemble only into canonical instructions, rather\n"
-"                  than into pseudoinstructions.\n"
-msgstr ""
-
-#: riscv-dis.c:651
-#, c-format
-msgid ""
-"\n"
-"  priv-spec=PRIV  Print the CSR according to the chosen privilege spec\n"
-"                  (1.9, 1.9.1, 1.10, 1.11).\n"
 msgstr ""
 
 #: rx-dis.c:139 rx-dis.c:163 rx-dis.c:171 rx-dis.c:179 rx-dis.c:187
@@ -2175,15 +2205,15 @@ msgstr ""
 msgid "<invalid size>"
 msgstr ""
 
-#: s12z-dis.c:236 s12z-dis.c:293 s12z-dis.c:304
+#: s12z-dis.c:239 s12z-dis.c:296 s12z-dis.c:307
 msgid "<illegal reg num>"
 msgstr ""
 
-#: s12z-dis.c:367
+#: s12z-dis.c:370
 msgid "<bad>"
 msgstr ""
 
-#: s12z-dis.c:377
+#: s12z-dis.c:380
 msgid ".<bad>"
 msgstr ""
 
@@ -2379,19 +2409,19 @@ msgstr ""
 msgid "Missing 'seg:' prefix"
 msgstr ""
 
-#: xc16x-desc.c:3349
+#: xc16x-desc.c:3350
 #, c-format
 msgid ""
 "internal error: xc16x_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: xc16x-desc.c:3437
+#: xc16x-desc.c:3438
 #, c-format
 msgid "internal error: xc16x_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: xc16x-desc.c:3456
+#: xc16x-desc.c:3457
 #, c-format
 msgid "internal error: xc16x_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -2436,19 +2466,19 @@ msgstr ""
 msgid "Syntax error: No trailing ')'"
 msgstr ""
 
-#: xstormy16-desc.c:1317
+#: xstormy16-desc.c:1318
 #, c-format
 msgid ""
 "internal error: xstormy16_cgen_rebuild_tables: conflicting insn-chunk-"
 "bitsize values: `%d' vs. `%d'"
 msgstr ""
 
-#: xstormy16-desc.c:1405
+#: xstormy16-desc.c:1406
 #, c-format
 msgid "internal error: xstormy16_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: xstormy16-desc.c:1424
+#: xstormy16-desc.c:1425
 #, c-format
 msgid "internal error: xstormy16_cgen_cpu_open: no endianness specified"
 msgstr ""

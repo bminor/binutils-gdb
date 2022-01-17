@@ -1,3 +1,8 @@
+2022-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2021-12-02  Marcus Nilsson  <brainbomb@gmail.com>
 
 	* avr-dis.c (avr_operand); Pass in disassemble_info and fill

@@ -1,3 +1,8 @@
+2022-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
 2022-01-11  Martin Storsjö  <martin@martin.st>
 
 	* pe-dll.c (make_head): Prefix the symbol name with the dll name.
