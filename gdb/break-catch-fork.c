@@ -182,8 +182,7 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 {
   std::unique_ptr<fork_catchpoint> c (new fork_catchpoint ());
 
-  init_catchpoint (c.get (), gdbarch, temp, cond_string,
-		   &vtable_breakpoint_ops);
+  init_catchpoint (c.get (), gdbarch, temp, cond_string);
   c->is_vfork = is_vfork;
   c->forked_inferior_pid = null_ptid;
 

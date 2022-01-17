@@ -317,7 +317,7 @@ create_signal_catchpoint (int tempflag, std::vector<gdb_signal> &&filter,
   struct gdbarch *gdbarch = get_current_arch ();
 
   std::unique_ptr<signal_catchpoint> c (new signal_catchpoint ());
-  init_catchpoint (c.get (), gdbarch, tempflag, NULL, &vtable_breakpoint_ops);
+  init_catchpoint (c.get (), gdbarch, tempflag, nullptr);
   c->signals_to_be_caught = std::move (filter);
   c->catch_all = catch_all;
 

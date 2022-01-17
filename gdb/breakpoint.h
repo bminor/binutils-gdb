@@ -1524,13 +1524,11 @@ extern void
 
 /* Initialize a new breakpoint of the bp_catchpoint kind.  If TEMP
    is true, then make the breakpoint temporary.  If COND_STRING is
-   not NULL, then store it in the breakpoint.  OPS, if not NULL, is
-   the breakpoint_ops structure associated to the catchpoint.  */
+   not NULL, then store it in the breakpoint.  */
 
 extern void init_catchpoint (struct breakpoint *b,
 			     struct gdbarch *gdbarch, bool temp,
-			     const char *cond_string,
-			     const struct breakpoint_ops *ops);
+			     const char *cond_string);
 
 /* Add breakpoint B on the breakpoint list, and notify the user, the
    target and breakpoint_created observers of its existence.  If

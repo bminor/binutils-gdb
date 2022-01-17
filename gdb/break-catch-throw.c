@@ -365,8 +365,7 @@ handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
 
   std::unique_ptr<exception_catchpoint> cp (new exception_catchpoint ());
 
-  init_catchpoint (cp.get (), get_current_arch (), tempflag, cond_string,
-		   &vtable_breakpoint_ops);
+  init_catchpoint (cp.get (), get_current_arch (), tempflag, cond_string);
   cp->kind = ex_event;
   cp->exception_rx = std::move (except_rx);
   cp->pattern = std::move (pattern);

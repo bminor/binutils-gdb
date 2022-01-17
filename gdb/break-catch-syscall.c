@@ -348,8 +348,7 @@ create_syscall_event_catchpoint (int tempflag, std::vector<int> &&filter)
   struct gdbarch *gdbarch = get_current_arch ();
 
   std::unique_ptr<syscall_catchpoint> c (new syscall_catchpoint ());
-  init_catchpoint (c.get (), gdbarch, tempflag, nullptr,
-		   &vtable_breakpoint_ops);
+  init_catchpoint (c.get (), gdbarch, tempflag, nullptr);
   c->syscalls_to_be_caught = std::move (filter);
 
   install_breakpoint (0, std::move (c), 1);

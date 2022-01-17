@@ -7833,13 +7833,13 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
 void
 init_catchpoint (struct breakpoint *b,
 		 struct gdbarch *gdbarch, bool temp,
-		 const char *cond_string,
-		 const struct breakpoint_ops *ops)
+		 const char *cond_string)
 {
   symtab_and_line sal;
   sal.pspace = current_program_space;
 
-  init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint, ops);
+  init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint,
+		       &vtable_breakpoint_ops);
 
   if (cond_string == nullptr)
     b->cond_string.reset ();

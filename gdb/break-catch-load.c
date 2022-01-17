@@ -227,7 +227,7 @@ add_solib_catchpoint (const char *arg, bool is_load, bool is_temp, bool enabled)
     }
 
   c->is_load = is_load;
-  init_catchpoint (c.get (), gdbarch, is_temp, NULL, &vtable_breakpoint_ops);
+  init_catchpoint (c.get (), gdbarch, is_temp, NULL);
 
   c->enable_state = enabled ? bp_enabled : bp_disabled;
 
