@@ -147,9 +147,12 @@ struct instr_info
   int prefixes;
 
   /* REX prefix the current instruction.  See below.  */
-  int rex;
+  unsigned char rex;
   /* Bits of REX we've already used.  */
-  int rex_used;
+  unsigned char rex_used;
+
+  bool need_modrm;
+  bool need_vex;
 
   /* Flags for ins->prefixes which we somehow handled when printing the
      current instruction.  */
@@ -191,7 +194,6 @@ struct instr_info
     int rm;
   }
   modrm;
-  unsigned char need_modrm;
 
   struct
   {
@@ -206,25 +208,26 @@ struct instr_info
     int register_specifier;
     int length;
     int prefix;
-    int w;
-    int evex;
-    int r;
-    int v;
     int mask_register_specifier;
-    int zeroing;
     int ll;
-    int b;
-    int no_broadcast;
+    bool w;
+    bool evex;
+    bool r;
+    bool v;
+    bool zeroing;
+    bool b;
+    bool no_broadcast;
   }
   vex;
-  unsigned char need_vex;
 
   /* Remember if the current op is a jump instruction.  */
   bool op_is_jump;
 
+  bool two_source_ops;
+
+  unsigned char op_ad;
+  signed char op_index[MAX_OPERANDS];
   char op_out[MAX_OPERANDS][100];
-  int op_ad, op_index[MAX_OPERANDS];
-  int two_source_ops;
   bfd_vma op_address[MAX_OPERANDS];
   bfd_vma op_riprel[MAX_OPERANDS];
   bfd_vma start_pc;
@@ -237,7 +240,7 @@ struct instr_info
    * The function returns the length of this instruction in bytes.
    */
   char intel_syntax;
-  char intel_mnemonic;
+  bool intel_mnemonic;
   char open_char;
   char close_char;
   char separator_char;
@@ -2348,7 +2351,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "ud0S",		{ Gv, Ev }, 0 },
 };
 
-static const unsigned char onebyte_has_modrm[256] = {
+static const bool onebyte_has_modrm[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
   /* 00 */ 1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0, /* 00 */
@@ -2371,7 +2374,7 @@ static const unsigned char onebyte_has_modrm[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
 };
 
-static const unsigned char twobyte_has_modrm[256] = {
+static const bool twobyte_has_modrm[256] = {
   /*       0 1 2 3 4 5 6 7 8 9 a b c d e f        */
   /*       -------------------------------        */
   /* 00 */ 1,1,1,1,0,0,0,0,0,0,0,0,0,1,0,1, /* 0f */
@@ -9029,7 +9032,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	  ins->vex.prefix = REPNE_PREFIX_OPCODE;
 	  break;
 	}
-      ins->need_vex = 1;
+      ins->need_vex = true;
       ins->codep++;
       vindex = *ins->codep++;
       dp = &xop_table[vex_table_index][vindex];
@@ -9095,7 +9098,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	  ins->vex.prefix = REPNE_PREFIX_OPCODE;
 	  break;
 	}
-      ins->need_vex = 1;
+      ins->need_vex = true;
       ins->codep++;
       vindex = *ins->codep++;
       dp = &vex_table[vex_table_index][vindex];
@@ -9133,7 +9136,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	  ins->vex.prefix = REPNE_PREFIX_OPCODE;
 	  break;
 	}
-      ins->need_vex = 1;
+      ins->need_vex = true;
       ins->codep++;
       vindex = *ins->codep++;
       dp = &vex_table[dp->op[1].bytemode][vindex];
@@ -9152,13 +9155,13 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
       if (!ins->need_vex)
 	abort ();
 
-      dp = &vex_w_table[dp->op[1].bytemode][ins->vex.w ? 1 : 0];
+      dp = &vex_w_table[dp->op[1].bytemode][ins->vex.w];
       break;
 
     case USE_EVEX_TABLE:
-      ins->two_source_ops = 0;
+      ins->two_source_ops = false;
       /* EVEX prefix.  */
-      ins->vex.evex = 1;
+      ins->vex.evex = true;
       FETCH_DATA (ins->info, ins->codep + 4);
       /* The first byte after 0x62.  */
       ins->rex = ~(*ins->codep >> 5) & 0x7;
@@ -9216,7 +9219,7 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 
       /* Remember the static rounding bits.  */
       ins->vex.ll = (*ins->codep >> 5) & 3;
-      ins->vex.b = (*ins->codep & 0x10) != 0;
+      ins->vex.b = *ins->codep & 0x10;
 
       ins->vex.v = *ins->codep & 0x8;
       ins->vex.mask_register_specifier = *ins->codep & 0x7;
@@ -9226,10 +9229,10 @@ get_valid_dis386 (const struct dis386 *dp, instr_info *ins)
 	{
 	  /* In 16/32-bit mode silently ignore following bits.  */
 	  ins->rex &= ~REX_B;
-	  ins->vex.r = 1;
+	  ins->vex.r = true;
 	}
 
-      ins->need_vex = 1;
+      ins->need_vex = true;
       ins->codep++;
       vindex = *ins->codep++;
       dp = &evex_table[vex_table_index][vindex];
@@ -9353,13 +9356,13 @@ print_insn (bfd_vma pc, instr_info *ins)
 	{
 	  ins->intel_syntax = 1;
 	  if (startswith (p + 5, "-mnemonic"))
-	    ins->intel_mnemonic = 1;
+	    ins->intel_mnemonic = true;
 	}
       else if (startswith (p, "att"))
 	{
 	  ins->intel_syntax = 0;
 	  if (startswith (p + 3, "-mnemonic"))
-	    ins->intel_mnemonic = 0;
+	    ins->intel_mnemonic = false;
 	}
       else if (startswith (p, "addr"))
 	{
@@ -9535,7 +9538,7 @@ print_insn (bfd_vma pc, instr_info *ins)
   else
     memset (&ins->modrm, 0, sizeof (ins->modrm));
 
-  ins->need_vex = 0;
+  ins->need_vex = false;
   memset (&ins->vex, 0, sizeof (ins->vex));
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
@@ -10402,7 +10405,7 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	    }
 	  else if (l == 1 && last[0] == 'X')
 	    {
-	      if (ins->vex.w == 0)
+	      if (!ins->vex.w)
 		*ins->obufp++ = 'h';
 	      else
 		oappend (ins, "{bad}");
@@ -10922,7 +10925,7 @@ intel_operand_size (instr_info *ins, int bytemode, int sizeflag)
 	    oappend (ins, "WORD PTR ");
 	    break;
 	  default:
-	    ins->vex.no_broadcast = 1;
+	    ins->vex.no_broadcast = true;
 	    break;
 	  }
       return;
@@ -11750,7 +11753,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 
       /* Broadcast can only ever be valid for memory sources.  */
       if (ins->obufp == ins->op_out[0])
-	ins->vex.no_broadcast = 1;
+	ins->vex.no_broadcast = true;
 
       if (!ins->vex.no_broadcast)
 	{
@@ -11778,7 +11781,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	    }
 	  else if (bytemode == q_mode
 		   || bytemode == ymmq_mode)
-	    ins->vex.no_broadcast = 1;
+	    ins->vex.no_broadcast = true;
 	  else if (ins->vex.w
 		   || bytemode == evex_half_bcst_xmmqdh_mode
 		   || bytemode == evex_half_bcst_xmmq_mode)
@@ -11817,7 +11820,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		}
 	    }
 	  else
-	    ins->vex.no_broadcast = 1;
+	    ins->vex.no_broadcast = true;
 	}
       if (ins->vex.no_broadcast)
 	oappend (ins, "{bad}");
@@ -12547,7 +12550,7 @@ OP_XMM (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   if (bytemode == tmm_mode)
     ins->modrm.reg = reg;
   else if (bytemode == scalar_mode)
-    ins->vex.no_broadcast = 1;
+    ins->vex.no_broadcast = true;
 
   print_vector_reg (ins, reg, bytemode);
 }
@@ -12912,7 +12915,7 @@ OP_Mwait (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
       strcpy (ins->op_out[1], att_names32[1] + ins->intel_syntax);
       if (bytemode == eBX_reg)
 	strcpy (ins->op_out[2], att_names32[3] + ins->intel_syntax);
-      ins->two_source_ops = 1;
+      ins->two_source_ops = true;
     }
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
@@ -12942,7 +12945,7 @@ OP_Monitor (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
       strcpy (ins->op_out[0], names[0] + ins->intel_syntax);
       strcpy (ins->op_out[1], att_names32[1] + ins->intel_syntax);
       strcpy (ins->op_out[2], att_names32[2] + ins->intel_syntax);
-      ins->two_source_ops = 1;
+      ins->two_source_ops = true;
     }
   /* Skip mod/rm byte.  */
   MODRM_CHECK;
