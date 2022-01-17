@@ -177,6 +177,11 @@ static void decref_bp_location (struct bp_location **loc);
 
 static struct bp_location *allocate_bp_location (struct breakpoint *bpt);
 
+static std::vector<symtab_and_line> bkpt_probe_decode_location
+     (struct breakpoint *b,
+      struct event_location *location,
+      struct program_space *search_pspace);
+
 /* update_global_location_list's modes of operation wrt to whether to
    insert locations now.  */
 enum ugll_insert_mode
@@ -11845,16 +11850,32 @@ base_breakpoint::insert_location (struct bp_location *bl)
   bl->target_info.kind = breakpoint_kind (bl, &addr);
   bl->target_info.placed_address = addr;
 
+  int result;
   if (bl->loc_type == bp_loc_hardware_breakpoint)
-    return target_insert_hw_breakpoint (bl->gdbarch, &bl->target_info);
+    result = target_insert_hw_breakpoint (bl->gdbarch, &bl->target_info);
   else
-    return target_insert_breakpoint (bl->gdbarch, &bl->target_info);
+    result = target_insert_breakpoint (bl->gdbarch, &bl->target_info);
+
+  if (result == 0 && bl->probe.prob != nullptr)
+    {
+      /* The insertion was successful, now let's set the probe's semaphore
+	 if needed.  */
+      bl->probe.prob->set_semaphore (bl->probe.objfile, bl->gdbarch);
+    }
+
+  return result;
 }
 
 int
 base_breakpoint::remove_location (struct bp_location *bl,
 				  enum remove_bp_reason reason)
 {
+  if (bl->probe.prob != nullptr)
+    {
+      /* Let's clear the semaphore before removing the location.  */
+      bl->probe.prob->clear_semaphore (bl->probe.objfile, bl->gdbarch);
+    }
+
   if (bl->loc_type == bp_loc_hardware_breakpoint)
     return target_remove_hw_breakpoint (bl->gdbarch, &bl->target_info);
   else
@@ -12001,6 +12022,9 @@ std::vector<symtab_and_line>
 base_breakpoint::decode_location (struct event_location *location,
 				  struct program_space *search_pspace)
 {
+  if (event_location_type (location) == PROBE_LOCATION)
+    return bkpt_probe_decode_location (this, location, search_pspace);
+
   return decode_location_default (this, location, search_pspace);
 }
 
@@ -12137,33 +12161,6 @@ longjmp_breakpoint::~longjmp_breakpoint ()
 
   if (tp != NULL)
     tp->initiating_frame = null_frame_id;
-}
-
-/* Specific methods for probe breakpoints.  */
-
-static int
-bkpt_probe_insert_location (struct bp_location *bl)
-{
-  int v = bl->owner->insert_location (bl);
-
-  if (v == 0)
-    {
-      /* The insertion was successful, now let's set the probe's semaphore
-	 if needed.  */
-      bl->probe.prob->set_semaphore (bl->probe.objfile, bl->gdbarch);
-    }
-
-  return v;
-}
-
-static int
-bkpt_probe_remove_location (struct bp_location *bl,
-			    enum remove_bp_reason reason)
-{
-  /* Let's clear the semaphore before removing the location.  */
-  bl->probe.prob->clear_semaphore (bl->probe.objfile, bl->gdbarch);
-
-  return bl->owner->remove_location (bl, reason);
 }
 
 static void
@@ -14579,10 +14576,7 @@ initialize_breakpoint_ops (void)
   /* Probe breakpoints.  */
   ops = &bkpt_probe_breakpoint_ops;
   *ops = vtable_breakpoint_ops;
-  ops->insert_location = bkpt_probe_insert_location;
-  ops->remove_location = bkpt_probe_remove_location;
   ops->create_sals_from_location = bkpt_probe_create_sals_from_location;
-  ops->decode_location = bkpt_probe_decode_location;
 
   /* Probe tracepoints.  */
   ops = &tracepoint_probe_breakpoint_ops;
