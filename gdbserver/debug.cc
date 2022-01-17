@@ -20,7 +20,7 @@
 #include <chrono>
 
 #if !defined (IN_PROCESS_AGENT)
-int remote_debug = 0;
+bool remote_debug = false;
 #endif
 
 /* Output file for debugging.  Default to standard error.  */

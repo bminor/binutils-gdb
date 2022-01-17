@@ -736,13 +736,9 @@ handle_general_set (char *own_buf)
       std::string final_var = hex2str (p);
       std::string var_name, var_value;
 
-      if (remote_debug)
-	{
-	  debug_printf (_("[QEnvironmentHexEncoded received '%s']\n"), p);
-	  debug_printf (_("[Environment variable to be set: '%s']\n"),
-			final_var.c_str ());
-	  debug_flush ();
-	}
+      remote_debug_printf ("[QEnvironmentHexEncoded received '%s']", p);
+      remote_debug_printf ("[Environment variable to be set: '%s']",
+			   final_var.c_str ());
 
       size_t pos = final_var.find ('=');
       if (pos == std::string::npos)
@@ -767,13 +763,9 @@ handle_general_set (char *own_buf)
       const char *p = own_buf + sizeof ("QEnvironmentUnset:") - 1;
       std::string varname = hex2str (p);
 
-      if (remote_debug)
-	{
-	  debug_printf (_("[QEnvironmentUnset received '%s']\n"), p);
-	  debug_printf (_("[Environment variable to be unset: '%s']\n"),
-			varname.c_str ());
-	  debug_flush ();
-	}
+      remote_debug_printf ("[QEnvironmentUnset received '%s']", p);
+      remote_debug_printf ("[Environment variable to be unset: '%s']",
+			   varname.c_str ());
 
       our_environ.unset (varname.c_str ());
 
@@ -783,11 +775,7 @@ handle_general_set (char *own_buf)
 
   if (strcmp (own_buf, "QStartNoAckMode") == 0)
     {
-      if (remote_debug)
-	{
-	  debug_printf ("[noack mode enabled]\n");
-	  debug_flush ();
-	}
+      remote_debug_printf ("[noack mode enabled]");
 
       cs.noack_mode = 1;
       write_ok (own_buf);
@@ -824,8 +812,7 @@ handle_general_set (char *own_buf)
 
       non_stop = (req != 0);
 
-      if (remote_debug)
-	debug_printf ("[%s mode enabled]\n", req_str);
+      remote_debug_printf ("[%s mode enabled]", req_str);
 
       write_ok (own_buf);
       return;
@@ -839,12 +826,9 @@ handle_general_set (char *own_buf)
       unpack_varlen_hex (packet, &setting);
       cs.disable_randomization = setting;
 
-      if (remote_debug)
-	{
-	  debug_printf (cs.disable_randomization
-			? "[address space randomization disabled]\n"
-			: "[address space randomization enabled]\n");
-	}
+      remote_debug_printf (cs.disable_randomization
+			   ? "[address space randomization disabled]"
+			       : "[address space randomization enabled]");
 
       write_ok (own_buf);
       return;
@@ -872,8 +856,7 @@ handle_general_set (char *own_buf)
 
       /* Update the flag.  */
       use_agent = req;
-      if (remote_debug)
-	debug_printf ("[%s agent]\n", req ? "Enable" : "Disable");
+      remote_debug_printf ("[%s agent]", req ? "Enable" : "Disable");
       write_ok (own_buf);
       return;
     }
@@ -905,12 +888,8 @@ handle_general_set (char *own_buf)
 
       cs.report_thread_events = (req == TRIBOOL_TRUE);
 
-      if (remote_debug)
-	{
-	  const char *req_str = cs.report_thread_events ? "enabled" : "disabled";
-
-	  debug_printf ("[thread events are now %s]\n", req_str);
-	}
+      remote_debug_printf ("[thread events are now %s]\n",
+			   cs.report_thread_events ? "enabled" : "disabled");
 
       write_ok (own_buf);
       return;
@@ -933,9 +912,8 @@ handle_general_set (char *own_buf)
 	  return;
 	}
 
-      if (remote_debug)
-	debug_printf (_("[Inferior will %s started with shell]"),
-		      startup_with_shell ? "be" : "not be");
+      remote_debug_printf ("[Inferior will %s started with shell]",
+			   startup_with_shell ? "be" : "not be");
 
       write_ok (own_buf);
       return;
@@ -949,9 +927,8 @@ handle_general_set (char *own_buf)
 	{
 	  std::string path = hex2str (p);
 
-	  if (remote_debug)
-	    debug_printf (_("[Set the inferior's current directory to %s]\n"),
-			  path.c_str ());
+	  remote_debug_printf ("[Set the inferior's current directory to %s]",
+			       path.c_str ());
 
 	  set_inferior_cwd (std::move (path));
 	}
@@ -961,9 +938,8 @@ handle_general_set (char *own_buf)
 	     previously set cwd for the inferior.  */
 	  set_inferior_cwd ("");
 
-	  if (remote_debug)
-	    debug_printf (_("\
-[Unset the inferior's current directory; will use gdbserver's cwd]\n"));
+	  remote_debug_printf ("[Unset the inferior's current directory; will "
+			       "use gdbserver's cwd]");
 	}
       write_ok (own_buf);
 
@@ -1399,12 +1375,12 @@ handle_monitor_command (char *mon, char *own_buf)
     }
   else if (strcmp (mon, "set remote-debug 1") == 0)
     {
-      remote_debug = 1;
+      remote_debug = true;
       monitor_output ("Protocol debug output enabled.\n");
     }
   else if (strcmp (mon, "set remote-debug 0") == 0)
     {
-      remote_debug = 0;
+      remote_debug = false;
       monitor_output ("Protocol debug output disabled.\n");
     }
   else if (strcmp (mon, "set event-loop-debug 1") == 0)
@@ -3827,7 +3803,7 @@ captured_main (int argc, char *argv[])
 	    }
 	}
       else if (strcmp (*next_arg, "--remote-debug") == 0)
-	remote_debug = 1;
+	remote_debug = true;
       else if (strcmp (*next_arg, "--event-loop-debug") == 0)
 	debug_event_loop = debug_event_loop_kind::ALL;
       else if (startswith (*next_arg, "--debug-file="))

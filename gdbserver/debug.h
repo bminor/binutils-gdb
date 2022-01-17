@@ -20,7 +20,13 @@
 #define GDBSERVER_DEBUG_H
 
 #if !defined (IN_PROCESS_AGENT)
-extern int remote_debug;
+extern bool remote_debug;
+
+/* Print a "remote" debug statement.  */
+
+#define remote_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (remote_debug, \
+			      "remote", fmt, ##__VA_ARGS__)
 
 /* Switch all debug output to DEBUG_FILE.  If DEBUG_FILE is nullptr or an
    empty string, or if the file cannot be opened, then debug output is sent to
