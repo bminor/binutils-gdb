@@ -175,8 +175,6 @@ static void enable_breakpoint_disp (struct breakpoint *, enum bpdisp,
 
 static void decref_bp_location (struct bp_location **loc);
 
-static struct bp_location *allocate_bp_location (struct breakpoint *bpt);
-
 static std::vector<symtab_and_line> bkpt_probe_decode_location
      (struct breakpoint *b,
       struct event_location *location,
@@ -1829,7 +1827,7 @@ software_watchpoint_add_no_memory_location (struct breakpoint *b,
 {
   gdb_assert (b->type == bp_watchpoint && b->loc == NULL);
 
-  b->loc = allocate_bp_location (b);
+  b->loc = b->allocate_location ();
   b->loc->pspace = pspace;
   b->loc->address = -1;
   b->loc->length = -1;
@@ -2082,7 +2080,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		  else if (b->type == bp_access_watchpoint)
 		    type = hw_access;
 
-		  loc = allocate_bp_location (b);
+		  loc = b->allocate_location ();
 		  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
 		    ;
 		  *tmp = loc;
@@ -7196,14 +7194,6 @@ bp_location::bp_location (breakpoint *owner)
 {
 }
 
-/* Allocate a struct bp_location.  */
-
-static struct bp_location *
-allocate_bp_location (struct breakpoint *bpt)
-{
-  return bpt->allocate_location ();
-}
-
 /* Decrement reference count.  If the reference count reaches 0,
    destroy the bp_location.  Sets *BLP to NULL.  */
 
@@ -8034,7 +8024,7 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   struct breakpoint *copy;
 
   copy = set_raw_breakpoint_without_location (orig->gdbarch, type, ops);
-  copy->loc = allocate_bp_location (copy);
+  copy->loc = copy->allocate_location ();
   set_breakpoint_location_function (copy->loc);
 
   copy->loc->gdbarch = orig->loc->gdbarch;
@@ -8165,7 +8155,7 @@ add_location_to_breakpoint (struct breakpoint *b,
     loc_gdbarch = b->gdbarch;
 
   /* Adjust the breakpoint's address prior to allocating a location.
-     Once we call allocate_bp_location(), that mostly uninitialized
+     Once we call allocate_location(), that mostly uninitialized
      location will be placed on the location chain.  Adjustment of the
      breakpoint may cause target_read_memory() to be called and we do
      not want its scan of the location chain to find a breakpoint and
@@ -8174,7 +8164,7 @@ add_location_to_breakpoint (struct breakpoint *b,
 						sal->pc, b->type);
 
   /* Sort the locations by their ADDRESS.  */
-  loc = allocate_bp_location (b);
+  loc = b->allocate_location ();
   for (tmp = &(b->loc); *tmp != NULL && (*tmp)->address <= adjusted_address;
        tmp = &((*tmp)->next))
     ;
