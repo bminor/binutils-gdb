@@ -219,22 +219,7 @@ struct instr_info
   vex;
   unsigned char need_vex;
 
-  const char *const *names64;
-  const char *const *names32;
-  const char *const *names16;
-  const char *const *names8;
-  const char *const *names8rex;
-  const char *const *names_seg;
-  const char *index64;
-  const char *index32;
   const char *const *index16;
-  const char *const *names_bnd;
-  const char *const *names_mm;
-  const char *const *names_xmm;
-  const char *const *names_ymm;
-  const char *const *names_zmm;
-  const char *const *names_tmm;
-  const char *const *names_mask;
 
   /* Remember if the current op is a jump instruction.  */
   bool op_is_jump;
@@ -2423,30 +2408,6 @@ struct op
    need to update onebyte_has_modrm or twobyte_has_modrm.  */
 #define MODRM_CHECK  if (!ins->need_modrm) abort ()
 
-static const char *const intel_names64[] = {
-  "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
-  "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15"
-};
-static const char *const intel_names32[] = {
-  "eax", "ecx", "edx", "ebx", "esp", "ebp", "esi", "edi",
-  "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d"
-};
-static const char *const intel_names16[] = {
-  "ax", "cx", "dx", "bx", "sp", "bp", "si", "di",
-  "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w"
-};
-static const char *const intel_names8[] = {
-  "al", "cl", "dl", "bl", "ah", "ch", "dh", "bh",
-};
-static const char *const intel_names8rex[] = {
-  "al", "cl", "dl", "bl", "spl", "bpl", "sil", "dil",
-  "r8b", "r9b", "r10b", "r11b", "r12b", "r13b", "r14b", "r15b"
-};
-static const char *const intel_names_seg[] = {
-  "es", "cs", "ss", "ds", "fs", "gs", "?", "?",
-};
-static const char intel_index64[] = "riz";
-static const char intel_index32[] = "eiz";
 static const char *const intel_index16[] = {
   "bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"
 };
@@ -2479,33 +2440,15 @@ static const char *const att_index16[] = {
   "%bx,%si", "%bx,%di", "%bp,%si", "%bp,%di", "%si", "%di", "%bp", "%bx"
 };
 
-static const char *const intel_names_mm[] = {
-  "mm0", "mm1", "mm2", "mm3",
-  "mm4", "mm5", "mm6", "mm7"
-};
 static const char *const att_names_mm[] = {
   "%mm0", "%mm1", "%mm2", "%mm3",
   "%mm4", "%mm5", "%mm6", "%mm7"
-};
-
-static const char *const intel_names_bnd[] = {
-  "bnd0", "bnd1", "bnd2", "bnd3"
 };
 
 static const char *const att_names_bnd[] = {
   "%bnd0", "%bnd1", "%bnd2", "%bnd3"
 };
 
-static const char *const intel_names_xmm[] = {
-  "xmm0", "xmm1", "xmm2", "xmm3",
-  "xmm4", "xmm5", "xmm6", "xmm7",
-  "xmm8", "xmm9", "xmm10", "xmm11",
-  "xmm12", "xmm13", "xmm14", "xmm15",
-  "xmm16", "xmm17", "xmm18", "xmm19",
-  "xmm20", "xmm21", "xmm22", "xmm23",
-  "xmm24", "xmm25", "xmm26", "xmm27",
-  "xmm28", "xmm29", "xmm30", "xmm31"
-};
 static const char *const att_names_xmm[] = {
   "%xmm0", "%xmm1", "%xmm2", "%xmm3",
   "%xmm4", "%xmm5", "%xmm6", "%xmm7",
@@ -2517,16 +2460,6 @@ static const char *const att_names_xmm[] = {
   "%xmm28", "%xmm29", "%xmm30", "%xmm31"
 };
 
-static const char *const intel_names_ymm[] = {
-  "ymm0", "ymm1", "ymm2", "ymm3",
-  "ymm4", "ymm5", "ymm6", "ymm7",
-  "ymm8", "ymm9", "ymm10", "ymm11",
-  "ymm12", "ymm13", "ymm14", "ymm15",
-  "ymm16", "ymm17", "ymm18", "ymm19",
-  "ymm20", "ymm21", "ymm22", "ymm23",
-  "ymm24", "ymm25", "ymm26", "ymm27",
-  "ymm28", "ymm29", "ymm30", "ymm31"
-};
 static const char *const att_names_ymm[] = {
   "%ymm0", "%ymm1", "%ymm2", "%ymm3",
   "%ymm4", "%ymm5", "%ymm6", "%ymm7",
@@ -2538,16 +2471,6 @@ static const char *const att_names_ymm[] = {
   "%ymm28", "%ymm29", "%ymm30", "%ymm31"
 };
 
-static const char *const intel_names_zmm[] = {
-  "zmm0", "zmm1", "zmm2", "zmm3",
-  "zmm4", "zmm5", "zmm6", "zmm7",
-  "zmm8", "zmm9", "zmm10", "zmm11",
-  "zmm12", "zmm13", "zmm14", "zmm15",
-  "zmm16", "zmm17", "zmm18", "zmm19",
-  "zmm20", "zmm21", "zmm22", "zmm23",
-  "zmm24", "zmm25", "zmm26", "zmm27",
-  "zmm28", "zmm29", "zmm30", "zmm31"
-};
 static const char *const att_names_zmm[] = {
   "%zmm0", "%zmm1", "%zmm2", "%zmm3",
   "%zmm4", "%zmm5", "%zmm6", "%zmm7",
@@ -2559,18 +2482,11 @@ static const char *const att_names_zmm[] = {
   "%zmm28", "%zmm29", "%zmm30", "%zmm31"
 };
 
-static const char *const intel_names_tmm[] = {
-  "tmm0", "tmm1", "tmm2", "tmm3",
-  "tmm4", "tmm5", "tmm6", "tmm7"
-};
 static const char *const att_names_tmm[] = {
   "%tmm0", "%tmm1", "%tmm2", "%tmm3",
   "%tmm4", "%tmm5", "%tmm6", "%tmm7"
 };
 
-static const char *const intel_names_mask[] = {
-  "k0", "k1", "k2", "k3", "k4", "k5", "k6", "k7"
-};
 static const char *const att_names_mask[] = {
   "%k0", "%k1", "%k2", "%k3", "%k4", "%k5", "%k6", "%k7"
 };
@@ -9377,6 +9293,14 @@ get_sib (instr_info *ins, int sizeflag)
     }
 }
 
+/* Like oappend (below), but S is a string starting with '%'.
+   In Intel syntax, the '%' is elided.  */
+static void
+oappend_maybe_intel (instr_info *ins, const char *s)
+{
+  oappend (ins, s + ins->intel_syntax);
+}
+
 static int
 print_insn (bfd_vma pc, instr_info *ins)
 {
@@ -9480,21 +9404,6 @@ print_insn (bfd_vma pc, instr_info *ins)
 
   if (ins->intel_syntax)
     {
-      ins->names64 = intel_names64;
-      ins->names32 = intel_names32;
-      ins->names16 = intel_names16;
-      ins->names8 = intel_names8;
-      ins->names8rex = intel_names8rex;
-      ins->names_seg = intel_names_seg;
-      ins->names_mm = intel_names_mm;
-      ins->names_bnd = intel_names_bnd;
-      ins->names_xmm = intel_names_xmm;
-      ins->names_ymm = intel_names_ymm;
-      ins->names_zmm = intel_names_zmm;
-      ins->names_tmm = intel_names_tmm;
-      ins->index64 = intel_index64;
-      ins->index32 = intel_index32;
-      ins->names_mask = intel_names_mask;
       ins->index16 = intel_index16;
       ins->open_char = '[';
       ins->close_char = ']';
@@ -9503,21 +9412,6 @@ print_insn (bfd_vma pc, instr_info *ins)
     }
   else
     {
-      ins->names64 = att_names64;
-      ins->names32 = att_names32;
-      ins->names16 = att_names16;
-      ins->names8 = att_names8;
-      ins->names8rex = att_names8rex;
-      ins->names_seg = att_names_seg;
-      ins->names_mm = att_names_mm;
-      ins->names_bnd = att_names_bnd;
-      ins->names_xmm = att_names_xmm;
-      ins->names_ymm = att_names_ymm;
-      ins->names_zmm = att_names_zmm;
-      ins->names_tmm = att_names_tmm;
-      ins->index64 = att_index64;
-      ins->index32 = att_index32;
-      ins->names_mask = att_names_mask;
       ins->index16 = att_index16;
       ins->open_char = '(';
       ins->close_char =  ')';
@@ -9673,8 +9567,9 @@ print_insn (bfd_vma pc, instr_info *ins)
 		  if (ins->vex.mask_register_specifier)
 		    {
 		      oappend (ins, "{");
-		      oappend (ins,
-			     ins->names_mask[ins->vex.mask_register_specifier]);
+		      oappend_maybe_intel (ins,
+					   att_names_mask
+					   [ins->vex.mask_register_specifier]);
 		      oappend (ins, "}");
 		    }
 		  if (ins->vex.zeroing)
@@ -10285,7 +10180,7 @@ dofloat (instr_info *ins, int sizeflag)
 
       /* Instruction fnstsw is only one with strange arg.  */
       if (floatop == 0xdf && ins->codep[-1] == 0xe0)
-	strcpy (ins->op_out[0], ins->names16[0]);
+	strcpy (ins->op_out[0], att_names16[0] + ins->intel_syntax);
     }
   else
     {
@@ -10301,14 +10196,6 @@ dofloat (instr_info *ins, int sizeflag)
       if (dp->op[1].rtn)
 	(*dp->op[1].rtn) (ins, dp->op[1].bytemode, sizeflag);
     }
-}
-
-/* Like oappend (below), but S is a string starting with '%'.
-   In Intel syntax, the '%' is elided.  */
-static void
-oappend_maybe_intel (instr_info *ins, const char *s)
-{
-  oappend (ins, s + ins->intel_syntax);
 }
 
 static void
@@ -11296,24 +11183,24 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
       if (reg & 4)
 	USED_REX (0);
       if (ins->rex)
-	names = ins->names8rex;
+	names = att_names8rex;
       else
-	names = ins->names8;
+	names = att_names8;
       break;
     case w_mode:
-      names = ins->names16;
+      names = att_names16;
       break;
     case d_mode:
     case dw_mode:
     case db_mode:
-      names = ins->names32;
+      names = att_names32;
       break;
     case q_mode:
-      names = ins->names64;
+      names = att_names64;
       break;
     case m_mode:
     case v_bnd_mode:
-      names = ins->address_mode == mode_64bit ? ins->names64 : ins->names32;
+      names = ins->address_mode == mode_64bit ? att_names64 : att_names32;
       break;
     case bnd_mode:
     case bnd_swap_mode:
@@ -11322,12 +11209,12 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
 	  oappend (ins, "(bad)");
 	  return;
 	}
-      names = ins->names_bnd;
+      names = att_names_bnd;
       break;
     case indir_v_mode:
       if (ins->address_mode == mode_64bit && ins->isa64 == intel64)
 	{
-	  names = ins->names64;
+	  names = att_names64;
 	  break;
 	}
       /* Fall through.  */
@@ -11335,7 +11222,7 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
       if (ins->address_mode == mode_64bit && ((sizeflag & DFLAG)
 					      || (ins->rex & REX_W)))
 	{
-	  names = ins->names64;
+	  names = att_names64;
 	  break;
 	}
       bytemode = v_mode;
@@ -11345,37 +11232,37 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
     case dq_mode:
       USED_REX (REX_W);
       if (ins->rex & REX_W)
-	names = ins->names64;
+	names = att_names64;
       else if (bytemode != v_mode && bytemode != v_swap_mode)
-	names = ins->names32;
+	names = att_names32;
       else
 	{
 	  if (sizeflag & DFLAG)
-	    names = ins->names32;
+	    names = att_names32;
 	  else
-	    names = ins->names16;
+	    names = att_names16;
 	  ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
 	}
       break;
     case movsxd_mode:
       if (!(sizeflag & DFLAG) && ins->isa64 == intel64)
-	names = ins->names16;
+	names = att_names16;
       else
-	names = ins->names32;
+	names = att_names32;
       ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
       break;
     case va_mode:
       names = (ins->address_mode == mode_64bit
-	       ? ins->names64 : ins->names32);
+	       ? att_names64 : att_names32);
       if (!(ins->prefixes & PREFIX_ADDR))
 	names = (ins->address_mode == mode_16bit
-		     ? ins->names16 : names);
+		     ? att_names16 : names);
       else
 	{
 	  /* Remove "addr16/addr32".  */
 	  ins->all_prefixes[ins->last_addr_prefix] = 0;
 	  names = (ins->address_mode != mode_32bit
-		       ? ins->names32 : ins->names16);
+		       ? att_names32 : att_names16);
 	  ins->used_prefixes |= PREFIX_ADDR;
 	}
       break;
@@ -11386,7 +11273,7 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
 	  oappend (ins, "(bad)");
 	  return;
 	}
-      names = ins->names_mask;
+      names = att_names_mask;
       break;
     case 0:
       return;
@@ -11394,7 +11281,7 @@ print_register (instr_info *ins, unsigned int reg, unsigned int rexmask,
       oappend (ins, INTERNAL_DISASSEMBLER_ERROR);
       return;
     }
-  oappend (ins, names[reg]);
+  oappend_maybe_intel (ins, names[reg]);
 }
 
 static void
@@ -11687,8 +11574,9 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	    }
 	  *ins->obufp = '\0';
 	  if (havebase)
-	    oappend (ins, ins->address_mode == mode_64bit && !addr32flag
-		     ? ins->names64[rbase] : ins->names32[rbase]);
+	    oappend_maybe_intel (ins,
+				 (ins->address_mode == mode_64bit && !addr32flag
+				  ? att_names64 : att_names32)[rbase]);
 	  if (havesib)
 	    {
 	      /* ESP/RSP won't allow index.  If base isn't ESP/RSP,
@@ -11711,8 +11599,10 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 			oappend (ins, "(bad)");
 		    }
 		  else
-		    oappend (ins, ins->address_mode == mode_64bit && !addr32flag
-			     ? ins->index64 : ins->index32);
+		    oappend_maybe_intel (ins,
+					 ins->address_mode == mode_64bit
+					 && !addr32flag ? att_index64
+							: att_index32);
 
 		  *ins->obufp++ = ins->scale_char;
 		  *ins->obufp = '\0';
@@ -11764,7 +11654,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	    {
 	      if (!ins->active_seg_prefix)
 		{
-		  oappend (ins, ins->names_seg[ds_reg - es_reg]);
+		  oappend_maybe_intel (ins, att_names_seg[ds_reg - es_reg]);
 		  oappend (ins, ":");
 		}
 	      print_operand_value (ins, ins->scratchbuf, 1, disp);
@@ -11849,7 +11739,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	{
 	  if (!ins->active_seg_prefix)
 	    {
-	      oappend (ins, ins->names_seg[ds_reg - es_reg]);
+	      oappend_maybe_intel (ins, att_names_seg[ds_reg - es_reg]);
 	      oappend (ins, ":");
 	    }
 	  print_operand_value (ins, ins->scratchbuf, 1, disp & 0xffff);
@@ -12065,7 +11955,7 @@ OP_REG (instr_info *ins, int code, int sizeflag)
     {
     case es_reg: case ss_reg: case cs_reg:
     case ds_reg: case fs_reg: case gs_reg:
-      oappend (ins, ins->names_seg[code - es_reg]);
+      oappend_maybe_intel (ins, att_names_seg[code - es_reg]);
       return;
     }
 
@@ -12079,23 +11969,23 @@ OP_REG (instr_info *ins, int code, int sizeflag)
     {
     case ax_reg: case cx_reg: case dx_reg: case bx_reg:
     case sp_reg: case bp_reg: case si_reg: case di_reg:
-      s = ins->names16[code - ax_reg + add];
+      s = att_names16[code - ax_reg + add];
       break;
     case ah_reg: case ch_reg: case dh_reg: case bh_reg:
       USED_REX (0);
       /* Fall through.  */
     case al_reg: case cl_reg: case dl_reg: case bl_reg:
       if (ins->rex)
-	s = ins->names8rex[code - al_reg + add];
+	s = att_names8rex[code - al_reg + add];
       else
-	s = ins->names8[code - al_reg];
+	s = att_names8[code - al_reg];
       break;
     case rAX_reg: case rCX_reg: case rDX_reg: case rBX_reg:
     case rSP_reg: case rBP_reg: case rSI_reg: case rDI_reg:
       if (ins->address_mode == mode_64bit
 	  && ((sizeflag & DFLAG) || (ins->rex & REX_W)))
 	{
-	  s = ins->names64[code - rAX_reg + add];
+	  s = att_names64[code - rAX_reg + add];
 	  break;
 	}
       code += eAX_reg - rAX_reg;
@@ -12104,21 +11994,21 @@ OP_REG (instr_info *ins, int code, int sizeflag)
     case eSP_reg: case eBP_reg: case eSI_reg: case eDI_reg:
       USED_REX (REX_W);
       if (ins->rex & REX_W)
-	s = ins->names64[code - eAX_reg + add];
+	s = att_names64[code - eAX_reg + add];
       else
 	{
 	  if (sizeflag & DFLAG)
-	    s = ins->names32[code - eAX_reg + add];
+	    s = att_names32[code - eAX_reg + add];
 	  else
-	    s = ins->names16[code - eAX_reg + add];
+	    s = att_names16[code - eAX_reg + add];
 	  ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
 	}
       break;
     default:
-      s = INTERNAL_DISASSEMBLER_ERROR;
-      break;
+      oappend (ins, INTERNAL_DISASSEMBLER_ERROR);
+      return;
     }
-  oappend (ins, s);
+  oappend_maybe_intel (ins, s);
 }
 
 static void
@@ -12129,35 +12019,37 @@ OP_IMREG (instr_info *ins, int code, int sizeflag)
   switch (code)
     {
     case indir_dx_reg:
-      if (ins->intel_syntax)
-	s = "dx";
-      else
-	s = "(%dx)";
+      if (!ins->intel_syntax)
+	{
+	  oappend (ins, "(%dx)");
+	  return;
+	}
+      s = att_names16[dx_reg - ax_reg];
       break;
     case al_reg: case cl_reg:
-      s = ins->names8[code - al_reg];
+      s = att_names8[code - al_reg];
       break;
     case eAX_reg:
       USED_REX (REX_W);
       if (ins->rex & REX_W)
 	{
-	  s = *ins->names64;
+	  s = *att_names64;
 	  break;
 	}
       /* Fall through.  */
     case z_mode_ax_reg:
       if ((ins->rex & REX_W) || (sizeflag & DFLAG))
-	s = *ins->names32;
+	s = *att_names32;
       else
-	s = *ins->names16;
+	s = *att_names16;
       if (!(ins->rex & REX_W))
 	ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
       break;
     default:
-      s = INTERNAL_DISASSEMBLER_ERROR;
-      break;
+      oappend (ins, INTERNAL_DISASSEMBLER_ERROR);
+      return;
     }
-  oappend (ins, s);
+  oappend_maybe_intel (ins, s);
 }
 
 static void
@@ -12342,7 +12234,7 @@ static void
 OP_SEG (instr_info *ins, int bytemode, int sizeflag)
 {
   if (bytemode == w_mode)
-    oappend (ins, ins->names_seg[ins->modrm.reg]);
+    oappend_maybe_intel (ins, att_names_seg[ins->modrm.reg]);
   else
     OP_E (ins, ins->modrm.mod == 3 ? bytemode : w_mode, sizeflag);
 }
@@ -12388,7 +12280,7 @@ OP_OFF (instr_info *ins, int bytemode, int sizeflag)
     {
       if (!ins->active_seg_prefix)
 	{
-	  oappend (ins, ins->names_seg[ds_reg - es_reg]);
+	  oappend_maybe_intel (ins, att_names_seg[ds_reg - es_reg]);
 	  oappend (ins, ":");
 	}
     }
@@ -12418,7 +12310,7 @@ OP_OFF64 (instr_info *ins, int bytemode, int sizeflag)
     {
       if (!ins->active_seg_prefix)
 	{
-	  oappend (ins, ins->names_seg[ds_reg - es_reg]);
+	  oappend_maybe_intel (ins, att_names_seg[ds_reg - es_reg]);
 	  oappend (ins, ":");
 	}
     }
@@ -12436,15 +12328,15 @@ ptr_reg (instr_info *ins, int code, int sizeflag)
   if (ins->address_mode == mode_64bit)
     {
       if (!(sizeflag & AFLAG))
-	s = ins->names32[code - eAX_reg];
+	s = att_names32[code - eAX_reg];
       else
-	s = ins->names64[code - eAX_reg];
+	s = att_names64[code - eAX_reg];
     }
   else if (sizeflag & AFLAG)
-    s = ins->names32[code - eAX_reg];
+    s = att_names32[code - eAX_reg];
   else
-    s = ins->names16[code - eAX_reg];
-  oappend (ins, s);
+    s = att_names16[code - eAX_reg];
+  oappend_maybe_intel (ins, s);
   *ins->obufp++ = ins->close_char;
   *ins->obufp = 0;
 }
@@ -12557,14 +12449,14 @@ OP_MMX (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
   ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
   if (ins->prefixes & PREFIX_DATA)
     {
-      names = ins->names_xmm;
+      names = att_names_xmm;
       USED_REX (REX_R);
       if (ins->rex & REX_R)
 	reg += 8;
     }
   else
-    names = ins->names_mm;
-  oappend (ins, names[reg]);
+    names = att_names_mm;
+  oappend_maybe_intel (ins, names[reg]);
 }
 
 static void
@@ -12580,17 +12472,17 @@ print_vector_reg (instr_info *ins, unsigned int reg, int bytemode)
 	{
 	case 128:
 	case 256:
-	  names = ins->names_xmm;
+	  names = att_names_xmm;
 	  break;
 	case 512:
-	  names = ins->names_ymm;
+	  names = att_names_ymm;
 	  break;
 	default:
 	  abort ();
 	}
     }
   else if (bytemode == ymm_mode)
-    names = ins->names_ymm;
+    names = att_names_ymm;
   else if (bytemode == tmm_mode)
     {
       if (reg >= 8)
@@ -12598,7 +12490,7 @@ print_vector_reg (instr_info *ins, unsigned int reg, int bytemode)
 	  oappend (ins, "(bad)");
 	  return;
 	}
-      names = ins->names_tmm;
+      names = att_names_tmm;
     }
   else if (ins->need_vex
 	   && bytemode != xmm_mode
@@ -12615,29 +12507,29 @@ print_vector_reg (instr_info *ins, unsigned int reg, int bytemode)
       switch (ins->vex.length)
 	{
 	case 128:
-	  names = ins->names_xmm;
+	  names = att_names_xmm;
 	  break;
 	case 256:
 	  if (ins->vex.w
 	      || bytemode != vex_vsib_q_w_dq_mode)
-	    names = ins->names_ymm;
+	    names = att_names_ymm;
 	  else
-	    names = ins->names_xmm;
+	    names = att_names_xmm;
 	  break;
 	case 512:
 	  if (ins->vex.w
 	      || bytemode != vex_vsib_q_w_dq_mode)
-	    names = ins->names_zmm;
+	    names = att_names_zmm;
 	  else
-	    names = ins->names_ymm;
+	    names = att_names_ymm;
 	  break;
 	default:
 	  abort ();
 	}
     }
   else
-    names = ins->names_xmm;
-  oappend (ins, names[reg]);
+    names = att_names_xmm;
+  oappend_maybe_intel (ins, names[reg]);
 }
 
 static void
@@ -12690,14 +12582,14 @@ OP_EM (instr_info *ins, int bytemode, int sizeflag)
   reg = ins->modrm.rm;
   if (ins->prefixes & PREFIX_DATA)
     {
-      names = ins->names_xmm;
+      names = att_names_xmm;
       USED_REX (REX_B);
       if (ins->rex & REX_B)
 	reg += 8;
     }
   else
-    names = ins->names_mm;
-  oappend (ins, names[reg]);
+    names = att_names_mm;
+  oappend_maybe_intel (ins, names[reg]);
 }
 
 /* cvt* are the only instructions in sse2 which have
@@ -12723,7 +12615,7 @@ OP_EMC (instr_info *ins, int bytemode, int sizeflag)
   MODRM_CHECK;
   ins->codep++;
   ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
-  oappend (ins, ins->names_mm[ins->modrm.rm]);
+  oappend_maybe_intel (ins, att_names_mm[ins->modrm.rm]);
 }
 
 static void
@@ -12731,7 +12623,7 @@ OP_MXC (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
 	int sizeflag ATTRIBUTE_UNUSED)
 {
   ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
-  oappend (ins, ins->names_mm[ins->modrm.reg]);
+  oappend_maybe_intel (ins, att_names_mm[ins->modrm.reg]);
 }
 
 static void
@@ -13018,10 +12910,10 @@ OP_Mwait (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   /* mwait %eax,%ecx / mwaitx %eax,%ecx,%ebx  */
   if (!ins->intel_syntax)
     {
-      strcpy (ins->op_out[0], ins->names32[0]);
-      strcpy (ins->op_out[1], ins->names32[1]);
+      strcpy (ins->op_out[0], att_names32[0] + ins->intel_syntax);
+      strcpy (ins->op_out[1], att_names32[1] + ins->intel_syntax);
       if (bytemode == eBX_reg)
-	strcpy (ins->op_out[2], ins->names32[3]);
+	strcpy (ins->op_out[2], att_names32[3] + ins->intel_syntax);
       ins->two_source_ops = 1;
     }
   /* Skip mod/rm byte.  */
@@ -13037,21 +12929,21 @@ OP_Monitor (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
   if (!ins->intel_syntax)
     {
       const char *const *names = (ins->address_mode == mode_64bit
-				  ? ins->names64 : ins->names32);
+				  ? att_names64 : att_names32);
 
       if (ins->prefixes & PREFIX_ADDR)
 	{
 	  /* Remove "addr16/addr32".  */
 	  ins->all_prefixes[ins->last_addr_prefix] = 0;
 	  names = (ins->address_mode != mode_32bit
-		   ? ins->names32 : ins->names16);
+		   ? att_names32 : att_names16);
 	  ins->used_prefixes |= PREFIX_ADDR;
 	}
       else if (ins->address_mode == mode_16bit)
-	names = ins->names16;
-      strcpy (ins->op_out[0], names[0]);
-      strcpy (ins->op_out[1], ins->names32[1]);
-      strcpy (ins->op_out[2], ins->names32[2]);
+	names = att_names16;
+      strcpy (ins->op_out[0], names[0] + ins->intel_syntax);
+      strcpy (ins->op_out[1], att_names32[1] + ins->intel_syntax);
+      strcpy (ins->op_out[2], att_names32[2] + ins->intel_syntax);
       ins->two_source_ops = 1;
     }
   /* Skip mod/rm byte.  */
@@ -13213,25 +13105,22 @@ CMPXCHG8B_Fixup (instr_info *ins, int bytemode, int sizeflag)
 static void
 XMM_Fixup (instr_info *ins, int reg, int sizeflag ATTRIBUTE_UNUSED)
 {
-  const char *const *names;
+  const char *const *names = att_names_xmm;
 
   if (ins->need_vex)
     {
       switch (ins->vex.length)
 	{
 	case 128:
-	  names = ins->names_xmm;
 	  break;
 	case 256:
-	  names = ins->names_ymm;
+	  names = att_names_ymm;
 	  break;
 	default:
 	  abort ();
 	}
     }
-  else
-    names = ins->names_xmm;
-  oappend (ins, names[reg]);
+  oappend_maybe_intel (ins, names[reg]);
 }
 
 static void
@@ -13280,7 +13169,7 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   switch (bytemode)
     {
     case scalar_mode:
-      oappend (ins, ins->names_xmm[reg]);
+      oappend_maybe_intel (ins, att_names_xmm[reg]);
       return;
 
     case vex_vsib_d_w_dq_mode:
@@ -13291,9 +13180,9 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
       if (ins->vex.length == 128
 	  || (bytemode != vex_vsib_d_w_dq_mode
 	      && !ins->vex.w))
-	oappend (ins, ins->names_xmm[reg]);
+	oappend_maybe_intel (ins, att_names_xmm[reg]);
       else
-	oappend (ins, ins->names_ymm[reg]);
+	oappend_maybe_intel (ins, att_names_ymm[reg]);
 
       /* All 3 XMM/YMM registers must be distinct.  */
       modrm_reg = ins->modrm.reg;
@@ -13325,7 +13214,7 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  /* This must be the 3rd operand.  */
 	  if (ins->obufp != ins->op_out[2])
 	    abort ();
-	  oappend (ins, ins->names_tmm[reg]);
+	  oappend_maybe_intel (ins, att_names_tmm[reg]);
 	  if (reg == ins->modrm.reg || reg == ins->modrm.rm)
 	    strcpy (ins->obufp, "/(bad)");
 	}
@@ -13350,13 +13239,13 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
       switch (bytemode)
 	{
 	case x_mode:
-	  names = ins->names_xmm;
+	  names = att_names_xmm;
 	  break;
 	case dq_mode:
 	  if (ins->rex & REX_W)
-	    names = ins->names64;
+	    names = att_names64;
 	  else
-	    names = ins->names32;
+	    names = att_names32;
 	  break;
 	case mask_bd_mode:
 	case mask_mode:
@@ -13365,7 +13254,7 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	      oappend (ins, "(bad)");
 	      return;
 	    }
-	  names = ins->names_mask;
+	  names = att_names_mask;
 	  break;
 	default:
 	  abort ();
@@ -13376,7 +13265,7 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
       switch (bytemode)
 	{
 	case x_mode:
-	  names = ins->names_ymm;
+	  names = att_names_ymm;
 	  break;
 	case mask_bd_mode:
 	case mask_mode:
@@ -13385,7 +13274,7 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	      oappend (ins, "(bad)");
 	      return;
 	    }
-	  names = ins->names_mask;
+	  names = att_names_mask;
 	  break;
 	default:
 	  /* See PR binutils/20893 for a reproducer.  */
@@ -13394,13 +13283,13 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	}
       break;
     case 512:
-      names = ins->names_zmm;
+      names = att_names_zmm;
       break;
     default:
       abort ();
       break;
     }
-  oappend (ins, names[reg]);
+  oappend_maybe_intel (ins, names[reg]);
 }
 
 static void
@@ -13428,7 +13317,7 @@ static void
 OP_REG_VexI4 (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
   int reg;
-  const char *const *names = ins->names_xmm;
+  const char *const *names = att_names_xmm;
 
   FETCH_DATA (ins->info, ins->codep + 1);
   reg = *ins->codep++;
@@ -13441,9 +13330,9 @@ OP_REG_VexI4 (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
     reg &= 7;
 
   if (bytemode == x_mode && ins->vex.length == 256)
-    names = ins->names_ymm;
+    names = att_names_ymm;
 
-  oappend (ins, names[reg]);
+  oappend_maybe_intel (ins, names[reg]);
 
   if (ins->vex.w)
     {
