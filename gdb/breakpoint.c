@@ -94,15 +94,15 @@ static void
 				     struct linespec_result *canonical,
 				     enum bptype type_wanted);
 
-static void create_breakpoints_sal_default (struct gdbarch *,
-					    struct linespec_result *,
-					    gdb::unique_xmalloc_ptr<char>,
-					    gdb::unique_xmalloc_ptr<char>,
-					    enum bptype,
-					    enum bpdisp, int, int,
-					    int,
-					    const struct breakpoint_ops *,
-					    int, int, int, unsigned);
+static void create_breakpoints_sal (struct gdbarch *,
+				    struct linespec_result *,
+				    gdb::unique_xmalloc_ptr<char>,
+				    gdb::unique_xmalloc_ptr<char>,
+				    enum bptype,
+				    enum bpdisp, int, int,
+				    int,
+				    const struct breakpoint_ops *,
+				    int, int, int, unsigned);
 
 static std::vector<symtab_and_line> decode_location_default
   (struct breakpoint *b, struct event_location *location,
@@ -244,21 +244,21 @@ static void tracepoint_probe_create_sals_from_location
 const struct breakpoint_ops base_breakpoint_ops =
 {
   create_sals_from_location_default,
-  create_breakpoints_sal_default,
+  create_breakpoints_sal,
 };
 
 /* Breakpoints set on probes.  */
 static const struct breakpoint_ops bkpt_probe_breakpoint_ops =
 {
   bkpt_probe_create_sals_from_location,
-  create_breakpoints_sal_default,
+  create_breakpoints_sal,
 };
 
 /* Tracepoints set on probes.  */
 static const struct breakpoint_ops tracepoint_probe_breakpoint_ops =
 {
   tracepoint_probe_create_sals_from_location,
-  create_breakpoints_sal_default,
+  create_breakpoints_sal,
 };
 
 /* The structure to be used in regular breakpoints.  */
@@ -12898,31 +12898,6 @@ create_sals_from_location_default (struct event_location *location,
 				   enum bptype type_wanted)
 {
   parse_breakpoint_sals (location, canonical);
-}
-
-/* Call create_breakpoints_sal for the given arguments.  This is the default
-   function for the `create_breakpoints_sal' method of
-   breakpoint_ops.  */
-
-static void
-create_breakpoints_sal_default (struct gdbarch *gdbarch,
-				struct linespec_result *canonical,
-				gdb::unique_xmalloc_ptr<char> cond_string,
-				gdb::unique_xmalloc_ptr<char> extra_string,
-				enum bptype type_wanted,
-				enum bpdisp disposition,
-				int thread,
-				int task, int ignore_count,
-				const struct breakpoint_ops *ops,
-				int from_tty, int enabled,
-				int internal, unsigned flags)
-{
-  create_breakpoints_sal (gdbarch, canonical,
-			  std::move (cond_string),
-			  std::move (extra_string),
-			  type_wanted, disposition,
-			  thread, task, ignore_count, ops, from_tty,
-			  enabled, internal, flags);
 }
 
 /* Decode the line represented by S by calling decode_line_full.  This is the
