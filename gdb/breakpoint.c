@@ -12273,6 +12273,9 @@ std::vector<symtab_and_line>
 tracepoint::decode_location (struct event_location *location,
 			     struct program_space *search_pspace)
 {
+  if (event_location_type (location) == PROBE_LOCATION)
+    return bkpt_probe_decode_location (this, location, search_pspace);
+
   return decode_location_default (this, location, search_pspace);
 }
 
@@ -12286,15 +12289,6 @@ tracepoint_probe_create_sals_from_location
 {
   /* We use the same method for breakpoint on probes.  */
   bkpt_probe_create_sals_from_location (location, canonical, type_wanted);
-}
-
-static std::vector<symtab_and_line>
-tracepoint_probe_decode_location (struct breakpoint *b,
-				  struct event_location *location,
-				  struct program_space *search_pspace)
-{
-  /* We use the same method for breakpoint on probes.  */
-  return bkpt_probe_decode_location (b, location, search_pspace);
 }
 
 void
@@ -14582,7 +14576,6 @@ initialize_breakpoint_ops (void)
   ops = &tracepoint_probe_breakpoint_ops;
   *ops = vtable_breakpoint_ops;
   ops->create_sals_from_location = tracepoint_probe_create_sals_from_location;
-  ops->decode_location = tracepoint_probe_decode_location;
 
   /* Static tracepoints with marker (`-m').  */
   ops = &strace_marker_breakpoint_ops;
