@@ -10631,7 +10631,6 @@ init_ada_exception_breakpoint (struct breakpoint *b,
 			       struct gdbarch *gdbarch,
 			       struct symtab_and_line sal,
 			       const char *addr_string,
-			       const struct breakpoint_ops *ops,
 			       int tempflag,
 			       int enabled,
 			       int from_tty)
@@ -10654,7 +10653,8 @@ init_ada_exception_breakpoint (struct breakpoint *b,
 	 enough for now, though.  */
     }
 
-  init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint, ops);
+  init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint,
+		       &vtable_breakpoint_ops);
 
   b->enable_state = enabled ? bp_enabled : bp_disabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;

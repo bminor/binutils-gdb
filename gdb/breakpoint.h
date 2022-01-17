@@ -1518,7 +1518,6 @@ extern void
 				 struct gdbarch *gdbarch,
 				 struct symtab_and_line sal,
 				 const char *addr_string,
-				 const struct breakpoint_ops *ops,
 				 int tempflag,
 				 int enabled,
 				 int from_tty);

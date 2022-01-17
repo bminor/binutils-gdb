@@ -12761,7 +12761,6 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 
   std::unique_ptr<ada_catchpoint> c (new ada_catchpoint (ex_kind));
   init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string.c_str (),
-				 &vtable_breakpoint_ops,
 				 tempflag, disabled, from_tty);
   c->excep_string = excep_string;
   create_excep_cond_exprs (c.get (), ex_kind);
