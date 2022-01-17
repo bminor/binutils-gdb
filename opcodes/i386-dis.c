@@ -11512,7 +11512,6 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
       int havedisp;
       int havesib;
       int havebase;
-      int haveindex;
       int needindex;
       int needaddr32;
       int base, rbase;
@@ -11524,12 +11523,10 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 			 || bytemode == bnd_mode
 			 || bytemode == bnd_swap_mode);
       bool check_gather = false;
-      const char *const *indexes64 = ins->names64;
-      const char *const *indexes32 = ins->names32;
+      const char *const *indexes = NULL;
 
       havesib = 0;
       havebase = 1;
-      haveindex = 0;
       base = ins->modrm.rm;
 
       if (base == 4)
@@ -11552,32 +11549,33 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		  check_gather = ins->obufp == ins->op_out[1];
 		}
 
-	      haveindex = 1;
 	      switch (ins->vex.length)
 		{
 		case 128:
-		  indexes64 = indexes32 = ins->names_xmm;
+		  indexes = att_names_xmm;
 		  break;
 		case 256:
 		  if (!ins->vex.w
 		      || bytemode == vex_vsib_q_w_dq_mode)
-		    indexes64 = indexes32 = ins->names_ymm;
+		    indexes = att_names_ymm;
 		  else
-		    indexes64 = indexes32 = ins->names_xmm;
+		    indexes = att_names_xmm;
 		  break;
 		case 512:
 		  if (!ins->vex.w
 		      || bytemode == vex_vsib_q_w_dq_mode)
-		    indexes64 = indexes32 = ins->names_zmm;
+		    indexes = att_names_zmm;
 		  else
-		    indexes64 = indexes32 = ins->names_ymm;
+		    indexes = att_names_ymm;
 		  break;
 		default:
 		  abort ();
 		}
 	      break;
 	    default:
-	      haveindex = vindex != 4;
+	      if (vindex != 4)
+		indexes = ins->address_mode == mode_64bit && !addr32flag
+			  ? att_names64 : att_names32;
 	      break;
 	    }
 	  scale = ins->sib.scale;
@@ -11630,7 +11628,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
       needaddr32 = 0;
       if (havesib
 	  && !havebase
-	  && !haveindex
+	  && !indexes
 	  && ins->address_mode != mode_16bit)
 	{
 	  if (ins->address_mode == mode_64bit)
@@ -11654,7 +11652,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 
       havedisp = (havebase
 		  || needindex
-		  || (havesib && (haveindex || scale != 0)));
+		  || (havesib && (indexes || scale != 0)));
 
       if (!ins->intel_syntax)
 	if (ins->modrm.mod != 0 || base == 5)
@@ -11671,7 +11669,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	      }
 	  }
 
-      if ((havebase || haveindex || needindex || needaddr32 || riprel)
+      if ((havebase || indexes || needindex || needaddr32 || riprel)
 	  && (ins->address_mode != mode_64bit
 	      || ((bytemode != v_bnd_mode)
 		  && (bytemode != v_bndmk_mode)
@@ -11697,7 +11695,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		 print index to tell base + index from base.  */
 	      if (scale != 0
 		  || needindex
-		  || haveindex
+		  || indexes
 		  || (havebase && base != ESP_REG_NUM))
 		{
 		  if (!ins->intel_syntax || havebase)
@@ -11705,12 +11703,10 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		      *ins->obufp++ = ins->separator_char;
 		      *ins->obufp = '\0';
 		    }
-		  if (haveindex)
+		  if (indexes)
 		    {
 		      if (ins->address_mode == mode_64bit || vindex < 16)
-			oappend (ins, ins->address_mode == mode_64bit
-				 && !addr32flag
-				 ? indexes64[vindex] : indexes32[vindex]);
+			oappend_maybe_intel (ins, indexes[vindex]);
 		      else
 			oappend (ins, "(bad)");
 		    }
