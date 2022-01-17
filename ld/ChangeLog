@@ -1,3 +1,10 @@
+2022-01-17  Alex Coplan  <alex.coplan@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add morello-weak-tls test.
+	* testsuite/ld-aarch64/morello-weak-tls.d: New test.
+	* testsuite/ld-aarch64/morello-weak-tls.s: New test.
+	* testsuite/ld-aarch64/weak-tls.d: Update test wrt new behaviour.
+
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
 	* testsuite/ld-aarch64/morello-tlsdesc.s: New file.

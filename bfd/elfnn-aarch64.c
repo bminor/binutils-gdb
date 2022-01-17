@@ -8139,6 +8139,14 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	     input_section, (uint64_t) rel->r_offset, howto->name, name);
 	}
 
+      if (r_symndx
+	  && h
+	  && IS_AARCH64_TLS_RELOC (bfd_r_type)
+	  && h->root.type == bfd_link_hash_undefweak)
+	/* We have already warned about these in aarch64_check_relocs,
+	   so just skip over them.  */
+	continue;
+
       /* We relax only if we can see that there can be a valid transition
 	 from a reloc type to another.
 	 We call elfNN_aarch64_final_link_relocate unless we're completely
@@ -8947,11 +8955,13 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   for (rel = relocs; rel < rel_end; rel++)
     {
       struct elf_link_hash_entry *h;
-      unsigned int r_symndx;
+      unsigned int r_symndx, r_type;
       bfd_reloc_code_real_type bfd_r_type;
       Elf_Internal_Sym *isym;
 
       r_symndx = ELFNN_R_SYM (rel->r_info);
+      r_type = ELFNN_R_TYPE (rel->r_info);
+      bfd_r_type = elfNN_aarch64_bfd_reloc_from_type (abfd, r_type);
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
@@ -8992,6 +9002,26 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
+
+      /* Ignore TLS relocations against weak undef symbols and warn about them.
+	 The behaviour of weak TLS variables is not well defined. Since making
+	 these well behaved is not a priority for Morello, we simply ignore
+	 TLS relocations against such symbols here to avoid the linker crashing
+	 on these and to enable making progress in other areas.  */
+      if (r_symndx
+	  && h
+	  && IS_AARCH64_TLS_RELOC (bfd_r_type)
+	  && h->root.type == bfd_link_hash_undefweak)
+	{
+	  int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+	  _bfd_error_handler (_("%pB(%pA+%#" PRIx64 "): ignoring TLS relocation "
+				"%s against undef weak symbol %s"),
+			      abfd, sec,
+			      (uint64_t) rel->r_offset,
+			      elfNN_aarch64_howto_table[howto_index].name,
+			      h->root.root.string);
+	  continue;
 	}
 
       /* Could be done earlier, if h were already available.  */
