@@ -92,7 +92,7 @@ solib_catchpoint::breakpoint_hit (const struct bp_location *bl,
 
       for (bp_location *other_bl : other->locations ())
 	{
-	  if (other->ops->breakpoint_hit (other_bl, aspace, bp_addr, ws))
+	  if (other->breakpoint_hit (other_bl, aspace, bp_addr, ws))
 	    return 1;
 	}
     }
