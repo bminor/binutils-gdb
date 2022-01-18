@@ -5390,8 +5390,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if ((r_type == R_PPC64_ADDR64 || r_type == R_PPC64_TOC)
 		      && rel->r_offset % 2 == 0
 		      && sec->alignment_power != 0
-		      && ((!NO_OPD_RELOCS && is_opd)
-			  || (!ifunc && SYMBOL_REFERENCES_LOCAL (info, h))))
+		      && ((!NO_OPD_RELOCS && is_opd) || !ifunc))
 		    p->rel_count += 1;
 		}
 	      else
@@ -7287,8 +7286,7 @@ dec_dynrel_count (const Elf_Internal_Rela *rel,
 		  && sec->alignment_power != 0
 		  && ((!NO_OPD_RELOCS
 		       && ppc64_elf_section_data (sec)->sec_type == sec_opd)
-		      || (h->type != STT_GNU_IFUNC
-			  && SYMBOL_REFERENCES_LOCAL (info, h))))
+		      || h->type != STT_GNU_IFUNC))
 		p->rel_count -= 1;
 	      p->count -= 1;
 	      if (p->count == 0)
@@ -10016,7 +10014,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  if (eh->elf.type == STT_GNU_IFUNC)
 	    sreloc = htab->elf.irelplt;
 	  count = p->count;
-	  if (info->enable_dt_relr)
+	  if (info->enable_dt_relr && SYMBOL_REFERENCES_LOCAL (info, h))
 	    count -= p->rel_count;
 	  sreloc->size += count * sizeof (Elf64_External_Rela);
 	}
