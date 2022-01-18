@@ -44,6 +44,7 @@
 #include "gdbsupport/byte-vector.h"
 #include "memory-map.h"
 #include "remote.h"
+#include "gdbsupport/buildargv.h"
 
 /* Prototypes */
 
