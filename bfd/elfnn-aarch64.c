@@ -7080,6 +7080,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
       off = symbol_got_offset (input_bfd, h, r_symndx);
       base_got = globals->root.sgot;
+      bool c64_reloc =
+	(bfd_r_type == BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
+	 || bfd_r_type == BFD_RELOC_MORELLO_ADR_GOT_PAGE);
 
       if (base_got == NULL)
 	BFD_ASSERT (h != NULL);
@@ -7088,9 +7091,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       if (h != NULL)
 	{
 	  bfd_vma addend = 0;
-	  bool c64_reloc =
-	    (bfd_r_type == BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
-	     || bfd_r_type == BFD_RELOC_MORELLO_ADR_GOT_PAGE);
 
 	  /* If a symbol is not dynamic and is not undefined weak, bind it
 	     locally and generate a RELATIVE relocation under PIC mode.
@@ -7111,7 +7111,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      && !symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    relative_reloc = true;
 
-	  value = aarch64_calculate_got_entry_vma (h, globals, info, value,
+	  value = aarch64_calculate_got_entry_vma (h, globals, info,
+						   value | h->target_internal,
 						   output_bfd,
 						   unresolved_reloc_p);
 	  /* Record the GOT entry address which will be used when generating
@@ -7125,7 +7126,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
 						       place, value,
 						       addend, weak_undef_p);
-	value |= h->target_internal;
 	}
       else
       {
@@ -7149,14 +7149,17 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	if (!symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	  {
-	    bfd_put_64 (output_bfd, value, base_got->contents + off);
+	    bfd_put_64 (output_bfd, value | sym->st_target_internal,
+			base_got->contents + off);
 
 	    /* For local symbol, we have done absolute relocation in static
 	       linking stage.  While for shared library, we need to update the
 	       content of GOT entry according to the shared object's runtime
 	       base address.  So, we need to generate a R_AARCH64_RELATIVE reloc
 	       for dynamic linker.  */
-	    if (bfd_link_pic (info))
+	    if (bfd_link_pic (info)
+		|| (!bfd_link_pic (info) && bfd_link_executable (info)
+		    && c64_reloc))
 	      relative_reloc = true;
 
 	    symbol_got_offset_mark (input_bfd, h, r_symndx);
@@ -7172,8 +7175,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
 						     place, value,
 						     addend, weak_undef_p);
-
-	value |= sym->st_target_internal;
       }
 
       if (relative_reloc)
@@ -7187,8 +7188,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	  /* For a C64 relative relocation, also add size and permissions into
 	     the frag.  */
-	  if (bfd_r_type == BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
-	      || bfd_r_type == BFD_RELOC_MORELLO_ADR_GOT_PAGE)
+	  if (c64_reloc)
 	    {
 	      bfd_reloc_status_type ret;
 
