@@ -7293,9 +7293,10 @@ remote_target::remove_new_fork_children (threads_listing_context *context)
   remote_notif_get_pending_events (notif);
   for (auto &event : get_remote_state ()->stop_reply_queue)
     if (event->ws.kind () == TARGET_WAITKIND_FORKED
-	|| event->ws.kind () == TARGET_WAITKIND_VFORKED
-	|| event->ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
+	|| event->ws.kind () == TARGET_WAITKIND_VFORKED)
       context->remove_thread (event->ws.child_ptid ());
+    else if (event->ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
+      context->remove_thread (event->ptid);
 }
 
 /* Check whether any event pending in the vStopped queue would prevent a
