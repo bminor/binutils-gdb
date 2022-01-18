@@ -4091,7 +4091,15 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
 	  (PTRACE_TYPE_ARG4) (uintptr_t) signal);
 
   if (errno)
-    perror_with_name ("resuming thread");
+    {
+      int saved_errno = errno;
+
+      threads_debug_printf ("ptrace errno = %d (%s)",
+			    saved_errno, strerror (saved_errno));
+
+      errno = saved_errno;
+      perror_with_name ("resuming thread");
+    }
 
   /* Successfully resumed.  Clear state that no longer makes sense,
      and mark the LWP as running.  Must not do this before resuming
@@ -4152,7 +4160,15 @@ linux_process_target::resume_one_lwp (lwp_info *lwp, int step, int signal,
     }
   catch (const gdb_exception_error &ex)
     {
-      if (!check_ptrace_stopped_lwp_gone (lwp))
+      if (check_ptrace_stopped_lwp_gone (lwp))
+	{
+	  /* This could because we tried to resume an LWP after its leader
+	     exited.  Mark it as resumed, so we can collect an exit event
+	     from it.  */
+	  lwp->stopped = 0;
+	  lwp->stop_reason = TARGET_STOPPED_BY_NO_REASON;
+	}
+      else
 	throw;
     }
 }
