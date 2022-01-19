@@ -101,6 +101,9 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
 
 struct dimension_stats
 {
+  /* The type of the index used to address elements in the dimension.  */
+  struct type *index_type;
+
   /* Total number of elements in the dimension, counted as we go.  */
   int nelts;
 };
@@ -147,7 +150,7 @@ public:
 
   /* Called when we start iterating over a dimension.  If it's not the
      inner most dimension then print an opening '(' character.  */
-  void start_dimension (LONGEST nelts, bool inner_p)
+  void start_dimension (struct type *index_type, LONGEST nelts, bool inner_p)
   {
     size_t dim_indx = m_dimension++;
 
@@ -155,6 +158,7 @@ public:
     if (m_stats.size () < m_dimension)
       {
 	m_stats.resize (m_dimension);
+	m_stats[dim_indx].index_type = index_type;
 	m_stats[dim_indx].nelts = nelts;
       }
 
@@ -177,12 +181,15 @@ public:
   /* Called when processing dimensions of the array other than the
      innermost one.  WALK_1 is the walker to normally call, ELT_TYPE is
      the type of the element being extracted, and ELT_OFF is the offset
-     of the element from the start of array being walked, and LAST_P is
-     true only when this is the last element that will be processed in
-     this dimension.  */
+     of the element from the start of array being walked, INDEX_TYPE
+     and INDEX is the type and the value respectively of the element's
+     index in the dimension currently being walked and LAST_P is true
+     only when this is the last element that will be processed in this
+     dimension.  */
   void process_dimension (gdb::function_view<void (struct type *,
 						   int, bool)> walk_1,
-			  struct type *elt_type, LONGEST elt_off, bool last_p)
+			  struct type *elt_type, LONGEST elt_off,
+			  LONGEST index, bool last_p)
   {
     size_t dim_indx = m_dimension - 1;
     struct type *elt_type_prev = m_elt_type_prev;
@@ -216,7 +223,12 @@ public:
 	  }
 	else
 	  for (LONGEST i = nrepeats; i > 0; i--)
-	    walk_1 (elt_type_prev, elt_off_prev, repeated && i == 1);
+	    {
+	      maybe_print_array_index (m_stats[dim_indx].index_type,
+				       index - nrepeats + repeated,
+				       m_stream, m_options);
+	      walk_1 (elt_type_prev, elt_off_prev, repeated && i == 1);
+	    }
 
 	if (!repeated)
 	  {
@@ -227,6 +239,8 @@ public:
 	       to `continue_walking' from our caller won't do that.  */
 	    if (m_elts < m_options->print_max)
 	      {
+		maybe_print_array_index (m_stats[dim_indx].index_type, index,
+					 m_stream, m_options);
 		walk_1 (elt_type, elt_off, last_p);
 		nrepeats++;
 	      }
@@ -240,9 +254,13 @@ public:
   }
 
   /* Called to process an element of ELT_TYPE at offset ELT_OFF from the
-     start of the parent object.  */
-  void process_element (struct type *elt_type, LONGEST elt_off, bool last_p)
+     start of the parent object, where INDEX is the value of the element's
+     index in the dimension currently being walked and LAST_P is true only
+     when this is the last element to be processed in this dimension.  */
+  void process_element (struct type *elt_type, LONGEST elt_off,
+			LONGEST index, bool last_p)
   {
+    size_t dim_indx = m_dimension - 1;
     struct type *elt_type_prev = m_elt_type_prev;
     LONGEST elt_off_prev = m_elt_off_prev;
     bool repeated = (m_options->repeat_count_threshold < UINT_MAX
@@ -277,6 +295,9 @@ public:
 
 		for (LONGEST i = nrepeats; i > 0; i--)
 		  {
+		    maybe_print_array_index (m_stats[dim_indx].index_type,
+					     index - i + 1,
+					     m_stream, m_options);
 		    common_val_print (e_val, m_stream, m_recurse, m_options,
 				      current_language);
 		    if (i > 1)
@@ -294,6 +315,8 @@ public:
 
 	    if (printed)
 	      fputs_filtered (", ", m_stream);
+	    maybe_print_array_index (m_stats[dim_indx].index_type, index,
+				     m_stream, m_options);
 	    common_val_print (e_val, m_stream, m_recurse, m_options,
 			      current_language);
 	  }

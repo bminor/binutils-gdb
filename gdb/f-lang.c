@@ -263,7 +263,7 @@ public:
      will be creating values for each element as we load them and then copy
      them into the M_DEST value.  Set a value mark so we can free these
      temporary values.  */
-  void start_dimension (LONGEST nelts, bool inner_p)
+  void start_dimension (struct type *index_type, LONGEST nelts, bool inner_p)
   {
     if (inner_p)
       {
@@ -330,7 +330,8 @@ public:
   /* Create a lazy value in target memory representing a single element,
      then load the element into GDB's memory and copy the contents into the
      destination value.  */
-  void process_element (struct type *elt_type, LONGEST elt_off, bool last_p)
+  void process_element (struct type *elt_type, LONGEST elt_off,
+			LONGEST index, bool last_p)
   {
     copy_element_to_dest (value_at_lazy (elt_type, m_addr + elt_off));
   }
@@ -368,7 +369,8 @@ public:
   /* Extract an element of ELT_TYPE at offset (M_BASE_OFFSET + ELT_OFF)
      from the content buffer of M_VAL then copy this extracted value into
      the repacked destination value.  */
-  void process_element (struct type *elt_type, LONGEST elt_off, bool last_p)
+  void process_element (struct type *elt_type, LONGEST elt_off,
+			LONGEST index, bool last_p)
   {
     struct value *elt
       = value_from_component (m_val, elt_type, (elt_off + m_base_offset));
@@ -1529,6 +1531,20 @@ fortran_structop_operation::evaluate (struct type *expect_type,
 }
 
 } /* namespace expr */
+
+/* See language.h.  */
+
+void
+f_language::print_array_index (struct type *index_type, LONGEST index,
+			       struct ui_file *stream,
+			       const value_print_options *options) const
+{
+  struct value *index_value = value_from_longest (index_type, index);
+
+  fprintf_filtered (stream, "(");
+  value_print (index_value, stream, options);
+  fprintf_filtered (stream, ") = ");
+}
 
 /* See language.h.  */
 
