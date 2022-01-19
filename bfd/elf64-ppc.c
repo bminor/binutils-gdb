@@ -10318,8 +10318,9 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 			htab->got_reli_size += rel_size;
 		      }
 		    else if (bfd_link_pic (info)
-			     && !(ent->tls_type != 0
-				  && bfd_link_executable (info)))
+			     && (ent->tls_type == 0
+				 ? !info->enable_dt_relr
+				 : !bfd_link_executable (info)))
 		      {
 			asection *srel = ppc64_elf_tdata (ibfd)->relgot;
 			srel->size += rel_size;
@@ -12815,8 +12816,9 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 		  htab->got_reli_size += rel_size;
 		}
 	      else if (bfd_link_pic (info)
-		       && !(ent->tls_type != 0
-			    && bfd_link_executable (info)))
+		       && (ent->tls_type == 0
+			   ? !info->enable_dt_relr
+			   : !bfd_link_executable (info)))
 		{
 		  asection *srel = ppc64_elf_tdata (ibfd)->relgot;
 		  srel->size += rel_size;
