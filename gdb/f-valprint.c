@@ -21,6 +21,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "annotate.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -96,6 +97,14 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
     * TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type)));
 }
 
+/* Per-dimension statistics.  */
+
+struct dimension_stats
+{
+  /* Total number of elements in the dimension, counted as we go.  */
+  int nelts;
+};
+
 /* A class used by FORTRAN_PRINT_ARRAY as a specialisation of the array
    walking template.  This specialisation prints Fortran arrays.  */
 
@@ -117,7 +126,10 @@ public:
       m_val (val),
       m_stream (stream),
       m_recurse (recurse),
-      m_options (options)
+      m_options (options),
+      m_dimension (0),
+      m_nrepeats (0),
+      m_stats (0)
   { /* Nothing.  */ }
 
   /* Called while iterating over the array bounds.  When SHOULD_CONTINUE is
@@ -135,8 +147,17 @@ public:
 
   /* Called when we start iterating over a dimension.  If it's not the
      inner most dimension then print an opening '(' character.  */
-  void start_dimension (bool inner_p)
+  void start_dimension (LONGEST nelts, bool inner_p)
   {
+    size_t dim_indx = m_dimension++;
+
+    m_elt_type_prev = nullptr;
+    if (m_stats.size () < m_dimension)
+      {
+	m_stats.resize (m_dimension);
+	m_stats[dim_indx].nelts = nelts;
+      }
+
     fputs_filtered ("(", m_stream);
   }
 
@@ -149,22 +170,181 @@ public:
     fputs_filtered (")", m_stream);
     if (!last_p)
       fputs_filtered (" ", m_stream);
+
+    m_dimension--;
+  }
+
+  /* Called when processing dimensions of the array other than the
+     innermost one.  WALK_1 is the walker to normally call, ELT_TYPE is
+     the type of the element being extracted, and ELT_OFF is the offset
+     of the element from the start of array being walked, and LAST_P is
+     true only when this is the last element that will be processed in
+     this dimension.  */
+  void process_dimension (gdb::function_view<void (struct type *,
+						   int, bool)> walk_1,
+			  struct type *elt_type, LONGEST elt_off, bool last_p)
+  {
+    size_t dim_indx = m_dimension - 1;
+    struct type *elt_type_prev = m_elt_type_prev;
+    LONGEST elt_off_prev = m_elt_off_prev;
+    bool repeated = (m_options->repeat_count_threshold < UINT_MAX
+		     && elt_type_prev != nullptr
+		     && (m_elts + ((m_nrepeats + 1)
+				   * m_stats[dim_indx + 1].nelts)
+			 <= m_options->print_max)
+		     && dimension_contents_eq (m_val, elt_type,
+					       elt_off_prev, elt_off));
+
+    if (repeated)
+      m_nrepeats++;
+    if (!repeated || last_p)
+      {
+	LONGEST nrepeats = m_nrepeats;
+
+	m_nrepeats = 0;
+	if (nrepeats >= m_options->repeat_count_threshold)
+	  {
+	    annotate_elt_rep (nrepeats + 1);
+	    fprintf_filtered (m_stream, "%p[<repeats %s times>%p]",
+			      metadata_style.style ().ptr (),
+			      plongest (nrepeats + 1),
+			      nullptr);
+	    annotate_elt_rep_end ();
+	    if (!repeated)
+	      fputs_filtered (" ", m_stream);
+	    m_elts += nrepeats * m_stats[dim_indx + 1].nelts;
+	  }
+	else
+	  for (LONGEST i = nrepeats; i > 0; i--)
+	    walk_1 (elt_type_prev, elt_off_prev, repeated && i == 1);
+
+	if (!repeated)
+	  {
+	    /* We need to specially handle the case of hitting `print_max'
+	       exactly as recursing would cause lone `(...)' to be printed.
+	       And we need to print `...' by hand if the skipped element
+	       would be the last one processed, because the subsequent call
+	       to `continue_walking' from our caller won't do that.  */
+	    if (m_elts < m_options->print_max)
+	      {
+		walk_1 (elt_type, elt_off, last_p);
+		nrepeats++;
+	      }
+	    else if (last_p)
+	      fputs_filtered ("...", m_stream);
+	  }
+      }
+
+    m_elt_type_prev = elt_type;
+    m_elt_off_prev = elt_off;
   }
 
   /* Called to process an element of ELT_TYPE at offset ELT_OFF from the
      start of the parent object.  */
   void process_element (struct type *elt_type, LONGEST elt_off, bool last_p)
   {
-    /* Extract the element value from the parent value.  */
-    struct value *e_val
-      = value_from_component (m_val, elt_type, elt_off);
-    common_val_print (e_val, m_stream, m_recurse, m_options, current_language);
-    if (!last_p)
-      fputs_filtered (", ", m_stream);
+    struct type *elt_type_prev = m_elt_type_prev;
+    LONGEST elt_off_prev = m_elt_off_prev;
+    bool repeated = (m_options->repeat_count_threshold < UINT_MAX
+		     && elt_type_prev != nullptr
+		     && value_contents_eq (m_val, elt_off_prev, m_val, elt_off,
+					   TYPE_LENGTH (elt_type)));
+
+    if (repeated)
+      m_nrepeats++;
+    if (!repeated || last_p || m_elts + 1 == m_options->print_max)
+      {
+	LONGEST nrepeats = m_nrepeats;
+	bool printed = false;
+
+	if (nrepeats != 0)
+	  {
+	    m_nrepeats = 0;
+	    if (nrepeats >= m_options->repeat_count_threshold)
+	      {
+		annotate_elt_rep (nrepeats + 1);
+		fprintf_filtered (m_stream, "%p[<repeats %s times>%p]",
+				  metadata_style.style ().ptr (),
+				  plongest (nrepeats + 1),
+				  nullptr);
+		annotate_elt_rep_end ();
+	      }
+	    else
+	      {
+		/* Extract the element value from the parent value.  */
+		struct value *e_val
+		  = value_from_component (m_val, elt_type, elt_off_prev);
+
+		for (LONGEST i = nrepeats; i > 0; i--)
+		  {
+		    common_val_print (e_val, m_stream, m_recurse, m_options,
+				      current_language);
+		    if (i > 1)
+		      fputs_filtered (", ", m_stream);
+		  }
+	      }
+	    printed = true;
+	  }
+
+	if (!repeated)
+	  {
+	    /* Extract the element value from the parent value.  */
+	    struct value *e_val
+	      = value_from_component (m_val, elt_type, elt_off);
+
+	    if (printed)
+	      fputs_filtered (", ", m_stream);
+	    common_val_print (e_val, m_stream, m_recurse, m_options,
+			      current_language);
+	  }
+	if (!last_p)
+	  fputs_filtered (", ", m_stream);
+      }
+
+    m_elt_type_prev = elt_type;
+    m_elt_off_prev = elt_off;
     ++m_elts;
   }
 
 private:
+  /* Called to compare two VAL elements of ELT_TYPE at offsets OFFSET1
+     and OFFSET2 each.  Handle subarrays recursively, because they may
+     have been sliced and we do not want to compare any memory contents
+     present between the slices requested.  */
+  bool
+  dimension_contents_eq (const struct value *val, struct type *type,
+			 LONGEST offset1, LONGEST offset2)
+  {
+    if (type->code () == TYPE_CODE_ARRAY
+	&& TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_CHAR)
+      {
+	/* Extract the range, and get lower and upper bounds.  */
+	struct type *range_type = check_typedef (type)->index_type ();
+	LONGEST lowerbound, upperbound;
+	if (!get_discrete_bounds (range_type, &lowerbound, &upperbound))
+	  error ("failed to get range bounds");
+
+	/* CALC is used to calculate the offsets for each element.  */
+	fortran_array_offset_calculator calc (type);
+
+	struct type *subarray_type = check_typedef (TYPE_TARGET_TYPE (type));
+	for (LONGEST i = lowerbound; i < upperbound + 1; i++)
+	  {
+	    /* Use the index and the stride to work out a new offset.  */
+	    LONGEST index_offset = calc.index_offset (i);
+
+	    if (!dimension_contents_eq (val, subarray_type,
+					offset1 + index_offset,
+					offset2 + index_offset))
+	      return false;
+	  }
+	return true;
+      }
+    else
+      return value_contents_eq (val, offset1, val, offset2,
+				TYPE_LENGTH (type));
+  }
+
   /* The number of elements printed so far.  */
   int m_elts;
 
@@ -180,6 +360,20 @@ private:
   /* The print control options.  Gives us the maximum number of elements to
      print, and is passed through to each element that we print.  */
   const struct value_print_options *m_options = nullptr;
+
+  /* The number of the current dimension being handled.  */
+  LONGEST m_dimension;
+
+  /* The number of element repetitions in the current series.  */
+  LONGEST m_nrepeats;
+
+  /* The type and offset from M_VAL of the element handled in the previous
+     iteration over the current dimension.  */
+  struct type *m_elt_type_prev;
+  LONGEST m_elt_off_prev;
+
+  /* Per-dimension stats.  */
+  std::vector<struct dimension_stats> m_stats;
 };
 
 /* This function gets called to print a Fortran array.  */

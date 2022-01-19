@@ -115,11 +115,12 @@ struct fortran_array_walker_base_impl
   { return should_continue; }
 
   /* Called when GDB starts iterating over a dimension of the array.  The
-     argument INNER_P is true for the inner most dimension (the dimension
-     containing the actual elements of the array), and false for more outer
-     dimensions.  For a concrete example of how this function is called
-     see the comment on process_element below.  */
-  void start_dimension (bool inner_p)
+     argument NELTS holds the number of the elements in the dimension and
+     INNER_P is true for the inner most dimension (the dimension containing
+     the actual elements of the array), and false for more outer dimensions.
+     For a concrete example of how this function is called see the comment
+     on process_element below.  */
+  void start_dimension (LONGEST nelts, bool inner_p)
   { /* Nothing.  */ }
 
   /* Called when GDB finishes iterating over a dimension of the array.  The
@@ -131,21 +132,38 @@ struct fortran_array_walker_base_impl
   void finish_dimension (bool inner_p, bool last_p)
   { /* Nothing.  */ }
 
+  /* Called when processing dimensions of the array other than the
+     innermost one.  WALK_1 is the walker to normally call, ELT_TYPE is
+     the type of the element being extracted, and ELT_OFF is the offset
+     of the element from the start of array being walked, and LAST_P is
+     true only when this is the last element that will be processed in
+     this dimension.  */
+  void process_dimension (gdb::function_view<void (struct type *,
+						   int, bool)> walk_1,
+			  struct type *elt_type, LONGEST elt_off, bool last_p)
+  {
+    walk_1 (elt_type, elt_off, last_p);
+  }
+
   /* Called when processing the inner most dimension of the array, for
      every element in the array.  ELT_TYPE is the type of the element being
      extracted, and ELT_OFF is the offset of the element from the start of
      array being walked, and LAST_P is true only when this is the last
      element that will be processed in this dimension.
 
-     Given this two dimensional array ((1, 2) (3, 4)), the calls to
+     Given this two dimensional array ((1, 2) (3, 4) (5, 6)), the calls to
      start_dimension, process_element, and finish_dimension look like this:
 
-     start_dimension (false);
-       start_dimension (true);
+     start_dimension (3, false);
+       start_dimension (2, true);
          process_element (TYPE, OFFSET, false);
          process_element (TYPE, OFFSET, true);
        finish_dimension (true, false);
-       start_dimension (true);
+       start_dimension (2, true);
+         process_element (TYPE, OFFSET, false);
+         process_element (TYPE, OFFSET, true);
+       finish_dimension (true, true);
+       start_dimension (2, true);
          process_element (TYPE, OFFSET, false);
          process_element (TYPE, OFFSET, true);
        finish_dimension (true, true);
@@ -177,22 +195,23 @@ public:
     : m_type (type),
       m_address (address),
       m_impl (type, address, args...),
-      m_ndimensions (calc_f77_array_dims (m_type))
+      m_ndimensions (calc_f77_array_dims (m_type)),
+      m_nss (0)
   { /* Nothing.  */ }
 
   /* Walk the array.  */
   void
   walk ()
   {
-    walk_1 (1, m_type, 0, false);
+    walk_1 (m_type, 0, false);
   }
 
 private:
-  /* The core of the array walking algorithm.  NSS is the current
-     dimension number being processed, TYPE is the type of this dimension,
-     and OFFSET is the offset (in bytes) for the start of this dimension.  */
+  /* The core of the array walking algorithm.  TYPE is the type of
+     the current dimension being processed and OFFSET is the offset
+     (in bytes) for the start of this dimension.  */
   void
-  walk_1 (int nss, struct type *type, int offset, bool last_p)
+  walk_1 (struct type *type, int offset, bool last_p)
   {
     /* Extract the range, and get lower and upper bounds.  */
     struct type *range_type = check_typedef (type)->index_type ();
@@ -204,9 +223,11 @@ private:
        dimension.  */
     fortran_array_offset_calculator calc (type);
 
-    m_impl.start_dimension (nss == m_ndimensions);
+    m_nss++;
+    m_impl.start_dimension (upperbound - lowerbound + 1,
+			    m_nss == m_ndimensions);
 
-    if (nss != m_ndimensions)
+    if (m_nss != m_ndimensions)
       {
 	struct type *subarray_type = TYPE_TARGET_TYPE (check_typedef (type));
 
@@ -220,7 +241,12 @@ private:
 	    LONGEST new_offset = offset + calc.index_offset (i);
 
 	    /* Now print the lower dimension.  */
-	    walk_1 (nss + 1, subarray_type, new_offset, (i == upperbound));
+	    m_impl.process_dimension
+	      ([this] (struct type *w_type, int w_offset, bool w_last_p) -> void
+		{
+		  this->walk_1 (w_type, w_offset, w_last_p);
+		},
+	       subarray_type, new_offset, i == upperbound);
 	  }
       }
     else
@@ -245,7 +271,8 @@ private:
 	  }
       }
 
-    m_impl.finish_dimension (nss == m_ndimensions, last_p || nss == 1);
+    m_impl.finish_dimension (m_nss == m_ndimensions, last_p || m_nss == 1);
+    m_nss--;
   }
 
   /* The array type being processed.  */
@@ -260,6 +287,9 @@ private:
 
   /* The total number of dimensions in M_TYPE.  */
   int m_ndimensions;
+
+  /* The current dimension number being processed.  */
+  int m_nss;
 };
 
 #endif /* F_ARRAY_WALKER_H */

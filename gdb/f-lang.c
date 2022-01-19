@@ -263,7 +263,7 @@ public:
      will be creating values for each element as we load them and then copy
      them into the M_DEST value.  Set a value mark so we can free these
      temporary values.  */
-  void start_dimension (bool inner_p)
+  void start_dimension (LONGEST nelts, bool inner_p)
   {
     if (inner_p)
       {
