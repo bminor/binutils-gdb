@@ -25,7 +25,6 @@
 struct ui_out;
 struct ui_file;
 
-
 class mi_ui_out : public ui_out
 {
 public:
@@ -83,9 +82,8 @@ protected:
   virtual bool do_is_mi_like_p () const override
   { return true; }
 
-  virtual void do_progress_start (const std::string &, bool) override
-  {
-  }
+  virtual void do_progress_start (const std::string &, bool) override;
+  virtual progress_report::state get_progress_state () override;
 
   virtual void do_progress_notify (double) override
   {
@@ -95,11 +93,25 @@ protected:
   {
   }
 
+  virtual void update_progress_name (const std::string &) override
+  {
+  }
+
 private:
 
   void field_separator ();
   void open (const char *name, ui_out_type type);
   void close (ui_out_type type);
+
+  /* The state of a recent progress_report.  */
+  struct mi_progress_info
+  {
+    /* The current state.  */
+    progress_report::state state;
+  };
+
+  /* Stack of progress info.  */
+  std::vector<mi_progress_info> m_progress_info;
 
   /* Convenience method that returns the MI out's string stream cast
      to its appropriate type.  Assumes/asserts that output was not

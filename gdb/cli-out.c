@@ -280,15 +280,14 @@ void
 cli_ui_out::do_progress_start (const std::string &name, bool should_print)
 {
   struct ui_file *stream = m_streams.back ();
-  cli_progress_info meter;
+  cli_progress_info info;
 
-  meter.last_value = 0;
-  meter.name = name;
+  info.name = name;
   if (!stream->isatty ())
     {
-      fprintf_unfiltered (stream, "%s...", meter.name.c_str ());
+      fprintf_unfiltered (stream, "%s...", info.name.c_str ());
       gdb_flush (stream);
-      meter.printing = WORKING;
+      info.state = progress_report::WORKING;
     }
   else
     {
@@ -296,74 +295,120 @@ cli_ui_out::do_progress_start (const std::string &name, bool should_print)
 	 of progress.  This makes it so a second progress message can
 	 be started before the first one has been notified, without
 	 messy output.  */
-      meter.printing = should_print ? START : NO_PRINT;
+      info.state = should_print ? progress_report::START
+				: progress_report::NO_PRINT;
     }
 
-  m_meters.push_back (std::move (meter));
+  m_progress_info.push_back (std::move (info));
 }
 
 void
 cli_ui_out::do_progress_notify (double howmuch)
 {
   struct ui_file *stream = m_streams.back ();
-  cli_progress_info &meter (m_meters.back ());
+  cli_progress_info &info (m_progress_info.back ());
 
-  if (meter.printing == NO_PRINT)
+  if (info.state == progress_report::NO_PRINT)
     return;
 
-  if (meter.printing == START)
+  int chars_per_line = get_chars_per_line ();
+  if (info.state == progress_report::START && chars_per_line <= 0)
     {
-      fprintf_unfiltered (stream, "%s\n", meter.name.c_str ());
+      fprintf_unfiltered (stream, "%s\n", info.name.c_str ());
       gdb_flush (stream);
-      meter.printing = WORKING;
+      info.state = progress_report::WORKING;
     }
 
-  if (meter.printing == WORKING && howmuch >= 1.0)
+  if (info.state == progress_report::WORKING && howmuch >= 1.0)
     return;
 
   if (!stream->isatty ())
     return;
 
-  int chars_per_line = get_chars_per_line ();
-  if (chars_per_line > 0)
+  if (chars_per_line <= 0)
+    return;
+
+  if (howmuch <= 0.0)
     {
+      using namespace std::chrono;
+      seconds diff = duration_cast<seconds>
+	(steady_clock::now () - info.last_update);
+
+      if (diff.count () >= 1.0)
+	{
+	  static int spin = 0;
+
+	  fprintf_unfiltered (stream, "\r%s %c\b", info.name.c_str (),
+			      "-\\|/"[spin++ % 4]);
+	  gdb_flush (stream);
+	  info.last_update = steady_clock::now ();
+	}
+      info.state = progress_report::SPIN;
+    }
+  else
+    {
+      /* Pick a reasonable limit for the progress bar length.  */
+      if (chars_per_line > 3840)
+	chars_per_line = 3840;
+
       int i, max;
       int width = chars_per_line - 3;
-
       max = width * howmuch;
+
+      if (info.state == progress_report::SPIN)
+	{
+	  /* Ensure the progress bar prints on its own line so that
+	     progress updates don't erase name.  */
+	  fprintf_unfiltered (stream, "\r%s\n", info.name.c_str ());
+	  gdb_flush (stream);
+	}
+
       fprintf_unfiltered (stream, "\r[");
+
       for (i = 0; i < width; ++i)
 	fprintf_unfiltered (stream, i < max ? "#" : " ");
       fprintf_unfiltered (stream, "]");
       gdb_flush (stream);
-      meter.printing = PROGRESS;
+      info.state = progress_report::BAR;
     }
+}
+
+void
+cli_ui_out::update_progress_name (const std::string &name)
+{
+  cli_progress_info &info = m_progress_info.back ();
+  info.name = name;
+}
+
+cli_ui_out::progress_report::state
+cli_ui_out::get_progress_state ()
+{
+  cli_progress_info &info = m_progress_info.back ();
+  return info.state;
 }
 
 void
 cli_ui_out::do_progress_end ()
 {
   struct ui_file *stream = m_streams.back ();
-  cli_progress_info &meter = m_meters.back ();
+  cli_progress_info &info = m_progress_info.back ();
 
-  if (!stream->isatty ())
-    {
-      fprintf_unfiltered (stream, "\n");
-      gdb_flush (stream);
-    }
-  else if (meter.printing == PROGRESS)
+  if (!stream->isatty () || info.state == progress_report::SPIN)
+    fprintf_unfiltered (stream, " \n");
+  else if (info.state == progress_report::BAR)
     {
       int i;
       int width = get_chars_per_line () - 3;
 
+      this->do_progress_notify (1.0);
       fprintf_unfiltered (stream, "\r");
       for (i = 0; i < width + 2; ++i)
 	fprintf_unfiltered (stream, " ");
       fprintf_unfiltered (stream, "\r");
-      gdb_flush (stream);
     }
 
-  m_meters.pop_back ();
+  gdb_flush (stream);
+  m_progress_info.pop_back ();
 }
 
 /* local functions */

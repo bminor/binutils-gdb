@@ -280,26 +280,50 @@ class ui_out
      escapes.  */
   virtual bool can_emit_style_escape () const = 0;
 
-  /* An object that starts and finishes a progress meter.  */
-  class progress_meter
+  /* An object that starts and finishes progress reporting.  */
+  class progress_report
   {
   public:
+    /* Represents the printing state of a progress report.  */
+    enum state
+    {
+      /* Printing will start with the next output.  */
+      START,
+      /* Printing has already started.  */
+      WORKING,
+      /* Progress bar printing has already started.  */
+      BAR,
+      /* Spinner printing has already started.  */
+      SPIN,
+      /* Printing should not be done.  */
+      NO_PRINT
+    };
+
     /* SHOULD_PRINT indicates whether something should be printed for a tty.  */
-    progress_meter (struct ui_out *uiout, const std::string &name,
-		    bool should_print)
+    progress_report (struct ui_out *uiout, const std::string &name,
+		     bool should_print)
       : m_uiout (uiout)
     {
       m_uiout->do_progress_start (name, should_print);
     }
 
-    ~progress_meter ()
+    ~progress_report ()
     {
-      m_uiout->do_progress_notify (1.0);
       m_uiout->do_progress_end ();
     }
 
-    progress_meter (const progress_meter &) = delete;
-    progress_meter &operator= (const progress_meter &) = delete;
+    void update_name (std::string &name)
+    {
+      m_uiout->update_progress_name (name);
+    }
+
+    state get_state ()
+    {
+      return m_uiout->get_progress_state ();
+    }
+
+    progress_report (const progress_report &) = delete;
+    progress_report &operator= (const progress_report &) = delete;
 
   private:
 
@@ -307,8 +331,8 @@ class ui_out
   };
 
   /* Emit some progress corresponding to the most recently created
-     progress meter.  HOWMUCH may range from 0.0 to 1.0.  */
-  void progress (double howmuch)
+     progress_report object.  */
+  void update_progress (double howmuch)
   {
     do_progress_notify (howmuch);
   }
@@ -350,6 +374,8 @@ class ui_out
   virtual void do_progress_start (const std::string &, bool) = 0;
   virtual void do_progress_notify (double) = 0;
   virtual void do_progress_end () = 0;
+  virtual void update_progress_name (const std::string &) = 0;
+  virtual progress_report::state get_progress_state () = 0;
 
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */

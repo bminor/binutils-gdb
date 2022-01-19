@@ -23,6 +23,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-style.h"
+#include "cli-out.h"
 #include "target.h"
 
 /* Set/show debuginfod commands.  */
@@ -82,8 +83,7 @@ struct user_data
 
   const char * const desc;
   const char * const fname;
-  gdb::optional<ui_out::progress_meter> meter;
-  bool printed_spin = false;
+  gdb::optional<ui_out::progress_report> report;
 };
 
 /* Deleter for a debuginfod_client.  */
@@ -102,12 +102,14 @@ using debuginfod_client_up
 static int
 progressfn (debuginfod_client *c, long cur, long total)
 {
-  static int spin = 0;
   user_data *data = static_cast<user_data *> (debuginfod_get_user_data (c));
   gdb_assert (data != nullptr);
 
   if (check_quit_flag ())
     {
+      if (data->report.has_value ())
+	data->report.reset ();
+
       printf_filtered ("Cancelling download of %s %ps...\n",
 		       data->desc,
 		       styled_string (file_name_style.style (), data->fname));
@@ -122,41 +124,44 @@ progressfn (debuginfod_client *c, long cur, long total)
 
   if (total > 0)
     {
-      if (!data->meter.has_value ())
+      /* Transfer size is known, so print it along with the rest of the
+	 progress update.  */
+      if (!data->report.has_value ()
+	  || data->report->get_state () == ui_out::progress_report::SPIN)
 	{
 	  double size = 1.0f * total / 1024;
 	  std::string unit = "KB";
 
-	  /* Switch to MB if size greater than 0.01 MB.  */
+	  /* Switch unit to MB if size is greater than 0.01 MB.  */
 	  if (size > 10.24)
 	    {
 	      size /= 1024;
 	      unit = "MB";
 	    }
 
-	  /* Overwrite an existing progress update line with no download
-	     size information.  */
-	  if (data->printed_spin)
-	    {
-	      current_uiout->message ("\r");
-	      data->printed_spin = false;
-	    }
-
 	  std::string message = string_printf ("Downloading %.2f %s %s %s",
 					       size, unit.c_str (),
 					       data->desc,
 					       styled_filename.c_str ());
-	  data->meter.emplace (current_uiout, message, 1);
+
+	  if (!data->report.has_value ())
+	    data->report.emplace (current_uiout, message, 1);
+	  else
+	    data->report->update_name (message);
 	}
 
-      current_uiout->progress ((double)cur / (double)total);
+	current_uiout->update_progress ((double)cur / (double)total);
     }
   else
     {
-      current_uiout->message (_("\rDownloading %s %s %c"), data->desc,
-			      styled_filename.c_str (), "-/|\\"[spin++ % 4]);
-      current_uiout->flush ();
-      data->printed_spin = true;
+      if (!data->report.has_value ())
+	{
+	  std::string message = string_printf ("Downloading %s %s", data->desc,
+					       styled_filename.c_str ());
+	  data->report.emplace (current_uiout, message, 1);
+	}
+
+      current_uiout->update_progress (-1);
     }
 
   return 0;
@@ -230,6 +235,7 @@ debuginfod_source_query (const unsigned char *build_id,
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
+  char *dname = nullptr;
   user_data data ("source file", srcpath);
 
   debuginfod_set_user_data (c, &data);
@@ -244,9 +250,7 @@ debuginfod_source_query (const unsigned char *build_id,
 					build_id,
 					build_id_len,
 					srcpath,
-					nullptr));
-  if (data.printed_spin)
-    current_uiout->message ("\b \n");
+					&dname));
 
   debuginfod_set_user_data (c, nullptr);
 
@@ -256,7 +260,7 @@ debuginfod_source_query (const unsigned char *build_id,
 		     styled_string (file_name_style.style (),  srcpath));
 
   if (fd.get () >= 0)
-    *destname = make_unique_xstrdup (srcpath);
+    destname->reset (dname);
 
   return fd;
 }
@@ -290,9 +294,6 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 
   scoped_fd fd (debuginfod_find_debuginfo (c, build_id, build_id_len,
 					   &dname));
-  if (data.printed_spin)
-    current_uiout->message ("\b \n");
-
   debuginfod_set_user_data (c, nullptr);
 
   if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)

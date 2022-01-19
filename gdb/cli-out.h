@@ -21,6 +21,7 @@
 #define CLI_OUT_H
 
 #include "ui-out.h"
+#include <chrono>
 #include <vector>
 
 class cli_ui_out : public ui_out
@@ -74,6 +75,8 @@ protected:
   virtual void do_progress_start (const std::string &, bool) override;
   virtual void do_progress_notify (double) override;
   virtual void do_progress_end () override;
+  virtual void update_progress_name (const std::string &) override;
+  virtual progress_report::state get_progress_state () override;
 
   bool suppress_output ()
   { return m_suppress_output; }
@@ -85,32 +88,19 @@ private:
   std::vector<ui_file *> m_streams;
   bool m_suppress_output;
 
-  /* Represents the printing state of a progress meter.  */
-  enum meter_state
-  {
-    /* Printing will start with the next output.  */
-    START,
-    /* Printing has already started.  */
-    WORKING,
-    /* Progress printing has already started.  */
-    PROGRESS,
-    /* Printing should not be done.  */
-    NO_PRINT
-  };
-
-  /* The state of a recent progress meter.  */
+  /* The state of a recent progress report.  */
   struct cli_progress_info
   {
     /* The current state.  */
-    enum meter_state printing;
+    progress_report::state state;
     /* The name to print.  */
     std::string name;
-    /* The last notification value.  */
-    double last_value;
+    /* Time of last spinner update.  */
+    std::chrono::steady_clock::time_point last_update;
   };
 
-  /* Stack of progress meters.  */
-  std::vector<cli_progress_info> m_meters;
+  /* Stack of progress info.  */
+  std::vector<cli_progress_info> m_progress_info;
 };
 
 extern cli_ui_out *cli_out_new (struct ui_file *stream);

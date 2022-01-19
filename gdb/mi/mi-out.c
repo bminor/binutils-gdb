@@ -258,6 +258,25 @@ mi_ui_out::main_stream ()
   return (string_file *) m_streams.back ();
 }
 
+void
+mi_ui_out::do_progress_start (const std::string &name, bool should_print)
+{
+  struct ui_file *stream = gdb_stdout;
+  mi_progress_info info;
+
+  fprintf_unfiltered (stream, "%s...\n", name.c_str ());
+  gdb_flush (stream);
+  info.state = progress_report::WORKING;
+  m_progress_info.push_back (std::move (info));
+}
+
+mi_ui_out::progress_report::state
+mi_ui_out::get_progress_state ()
+{
+  mi_progress_info &info = m_progress_info.back ();
+  return info.state;
+}
+
 /* Clear the buffer.  */
 
 void
