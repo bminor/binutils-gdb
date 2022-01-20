@@ -17027,6 +17027,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    relocation += htab->sec_info[sec->id].toc_off;
 	  else
 	    unresolved_reloc = true;
+	  if (unresolved_reloc
+	      || (!is_opd
+		  && h != NULL
+		  && !SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
+	    info->callbacks->einfo
+	      /* xgettext:c-format */
+	      (_("%H: %s against %pT is not supported\n"),
+	       input_bfd, input_section, rel->r_offset,
+	       ppc64_elf_howto_table[r_type]->name, sym_name);
 	  goto dodyn;
 
 	  /* TOC16 relocs.  We want the offset relative to the TOC base,
