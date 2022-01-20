@@ -210,7 +210,7 @@ read_section_stabs_debugging_info (bfd *abfd, asymbol **syms, long symcount,
 		     an attempt to read the byte before 'strings' would occur.  */
 		  while ((len = strlen (s)) > 0
 			 && s[len  - 1] == '\\'
-			 && stab + 12 < stabs + stabsize)
+			 && stab + 16 <= stabs + stabsize)
 		    {
 		      char *p;
 
