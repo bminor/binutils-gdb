@@ -3913,6 +3913,12 @@ riscv_frag_align_code (int n)
 
   riscv_mapping_state (MAP_INSN, worst_case_bytes);
 
+  /* We need to start a new frag after the alignment which may be removed by
+     the linker, to prevent the assembler from computing static offsets.
+     This is necessary to get correct EH info.  */
+  frag_wane (frag_now);
+  frag_new (0);
+
   return true;
 }
 
