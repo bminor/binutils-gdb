@@ -31,196 +31,196 @@
 .*Warning: read-only CSR is written `csrw hpmcounter29,a1'
 .*Warning: read-only CSR is written `csrw hpmcounter30,a1'
 .*Warning: read-only CSR is written `csrw hpmcounter31,a1'
-.*Warning: invalid CSR `cycleh' for the current ISA
-.*Warning: invalid CSR `cycleh' for the current ISA
+.*Warning: invalid CSR `cycleh', needs rv32i extension
+.*Warning: invalid CSR `cycleh', needs rv32i extension
 .*Warning: read-only CSR is written `csrw cycleh,a1'
-.*Warning: invalid CSR `timeh' for the current ISA
-.*Warning: invalid CSR `timeh' for the current ISA
+.*Warning: invalid CSR `timeh', needs rv32i extension
+.*Warning: invalid CSR `timeh', needs rv32i extension
 .*Warning: read-only CSR is written `csrw timeh,a1'
-.*Warning: invalid CSR `instreth' for the current ISA
-.*Warning: invalid CSR `instreth' for the current ISA
+.*Warning: invalid CSR `instreth', needs rv32i extension
+.*Warning: invalid CSR `instreth', needs rv32i extension
 .*Warning: read-only CSR is written `csrw instreth,a1'
-.*Warning: invalid CSR `hpmcounter3h' for the current ISA
-.*Warning: invalid CSR `hpmcounter3h' for the current ISA
+.*Warning: invalid CSR `hpmcounter3h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter3h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter3h,a1'
-.*Warning: invalid CSR `hpmcounter4h' for the current ISA
-.*Warning: invalid CSR `hpmcounter4h' for the current ISA
+.*Warning: invalid CSR `hpmcounter4h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter4h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter4h,a1'
-.*Warning: invalid CSR `hpmcounter5h' for the current ISA
-.*Warning: invalid CSR `hpmcounter5h' for the current ISA
+.*Warning: invalid CSR `hpmcounter5h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter5h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter5h,a1'
-.*Warning: invalid CSR `hpmcounter6h' for the current ISA
-.*Warning: invalid CSR `hpmcounter6h' for the current ISA
+.*Warning: invalid CSR `hpmcounter6h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter6h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter6h,a1'
-.*Warning: invalid CSR `hpmcounter7h' for the current ISA
-.*Warning: invalid CSR `hpmcounter7h' for the current ISA
+.*Warning: invalid CSR `hpmcounter7h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter7h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter7h,a1'
-.*Warning: invalid CSR `hpmcounter8h' for the current ISA
-.*Warning: invalid CSR `hpmcounter8h' for the current ISA
+.*Warning: invalid CSR `hpmcounter8h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter8h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter8h,a1'
-.*Warning: invalid CSR `hpmcounter9h' for the current ISA
-.*Warning: invalid CSR `hpmcounter9h' for the current ISA
+.*Warning: invalid CSR `hpmcounter9h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter9h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter9h,a1'
-.*Warning: invalid CSR `hpmcounter10h' for the current ISA
-.*Warning: invalid CSR `hpmcounter10h' for the current ISA
+.*Warning: invalid CSR `hpmcounter10h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter10h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter10h,a1'
-.*Warning: invalid CSR `hpmcounter11h' for the current ISA
-.*Warning: invalid CSR `hpmcounter11h' for the current ISA
+.*Warning: invalid CSR `hpmcounter11h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter11h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter11h,a1'
-.*Warning: invalid CSR `hpmcounter12h' for the current ISA
-.*Warning: invalid CSR `hpmcounter12h' for the current ISA
+.*Warning: invalid CSR `hpmcounter12h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter12h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter12h,a1'
-.*Warning: invalid CSR `hpmcounter13h' for the current ISA
-.*Warning: invalid CSR `hpmcounter13h' for the current ISA
+.*Warning: invalid CSR `hpmcounter13h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter13h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter13h,a1'
-.*Warning: invalid CSR `hpmcounter14h' for the current ISA
-.*Warning: invalid CSR `hpmcounter14h' for the current ISA
+.*Warning: invalid CSR `hpmcounter14h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter14h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter14h,a1'
-.*Warning: invalid CSR `hpmcounter15h' for the current ISA
-.*Warning: invalid CSR `hpmcounter15h' for the current ISA
+.*Warning: invalid CSR `hpmcounter15h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter15h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter15h,a1'
-.*Warning: invalid CSR `hpmcounter16h' for the current ISA
-.*Warning: invalid CSR `hpmcounter16h' for the current ISA
+.*Warning: invalid CSR `hpmcounter16h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter16h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter16h,a1'
-.*Warning: invalid CSR `hpmcounter17h' for the current ISA
-.*Warning: invalid CSR `hpmcounter17h' for the current ISA
+.*Warning: invalid CSR `hpmcounter17h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter17h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter17h,a1'
-.*Warning: invalid CSR `hpmcounter18h' for the current ISA
-.*Warning: invalid CSR `hpmcounter18h' for the current ISA
+.*Warning: invalid CSR `hpmcounter18h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter18h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter18h,a1'
-.*Warning: invalid CSR `hpmcounter19h' for the current ISA
-.*Warning: invalid CSR `hpmcounter19h' for the current ISA
+.*Warning: invalid CSR `hpmcounter19h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter19h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter19h,a1'
-.*Warning: invalid CSR `hpmcounter20h' for the current ISA
-.*Warning: invalid CSR `hpmcounter20h' for the current ISA
+.*Warning: invalid CSR `hpmcounter20h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter20h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter20h,a1'
-.*Warning: invalid CSR `hpmcounter21h' for the current ISA
-.*Warning: invalid CSR `hpmcounter21h' for the current ISA
+.*Warning: invalid CSR `hpmcounter21h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter21h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter21h,a1'
-.*Warning: invalid CSR `hpmcounter22h' for the current ISA
-.*Warning: invalid CSR `hpmcounter22h' for the current ISA
+.*Warning: invalid CSR `hpmcounter22h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter22h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter22h,a1'
-.*Warning: invalid CSR `hpmcounter23h' for the current ISA
-.*Warning: invalid CSR `hpmcounter23h' for the current ISA
+.*Warning: invalid CSR `hpmcounter23h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter23h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter23h,a1'
-.*Warning: invalid CSR `hpmcounter24h' for the current ISA
-.*Warning: invalid CSR `hpmcounter24h' for the current ISA
+.*Warning: invalid CSR `hpmcounter24h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter24h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter24h,a1'
-.*Warning: invalid CSR `hpmcounter25h' for the current ISA
-.*Warning: invalid CSR `hpmcounter25h' for the current ISA
+.*Warning: invalid CSR `hpmcounter25h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter25h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter25h,a1'
-.*Warning: invalid CSR `hpmcounter26h' for the current ISA
-.*Warning: invalid CSR `hpmcounter26h' for the current ISA
+.*Warning: invalid CSR `hpmcounter26h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter26h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter26h,a1'
-.*Warning: invalid CSR `hpmcounter27h' for the current ISA
-.*Warning: invalid CSR `hpmcounter27h' for the current ISA
+.*Warning: invalid CSR `hpmcounter27h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter27h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter27h,a1'
-.*Warning: invalid CSR `hpmcounter28h' for the current ISA
-.*Warning: invalid CSR `hpmcounter28h' for the current ISA
+.*Warning: invalid CSR `hpmcounter28h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter28h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter28h,a1'
-.*Warning: invalid CSR `hpmcounter29h' for the current ISA
-.*Warning: invalid CSR `hpmcounter29h' for the current ISA
+.*Warning: invalid CSR `hpmcounter29h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter29h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter29h,a1'
-.*Warning: invalid CSR `hpmcounter30h' for the current ISA
-.*Warning: invalid CSR `hpmcounter30h' for the current ISA
+.*Warning: invalid CSR `hpmcounter30h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter30h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter30h,a1'
-.*Warning: invalid CSR `hpmcounter31h' for the current ISA
-.*Warning: invalid CSR `hpmcounter31h' for the current ISA
+.*Warning: invalid CSR `hpmcounter31h', needs rv32i extension
+.*Warning: invalid CSR `hpmcounter31h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hpmcounter31h,a1'
 .*Warning: read-only CSR is written `csrw mvendorid,a1'
 .*Warning: read-only CSR is written `csrw marchid,a1'
 .*Warning: read-only CSR is written `csrw mimpid,a1'
 .*Warning: read-only CSR is written `csrw mhartid,a1'
 .*Warning: read-only CSR is written `csrw mconfigptr,a1'
-.*Warning: invalid CSR `mstatush' for the current ISA
-.*Warning: invalid CSR `mstatush' for the current ISA
-.*Warning: invalid CSR `menvcfgh' for the current ISA
-.*Warning: invalid CSR `menvcfgh' for the current ISA
-.*Warning: invalid CSR `mseccfgh' for the current ISA
-.*Warning: invalid CSR `mseccfgh' for the current ISA
-.*Warning: invalid CSR `pmpcfg1' for the current ISA
-.*Warning: invalid CSR `pmpcfg1' for the current ISA
-.*Warning: invalid CSR `pmpcfg3' for the current ISA
-.*Warning: invalid CSR `pmpcfg3' for the current ISA
-.*Warning: invalid CSR `pmpcfg5' for the current ISA
-.*Warning: invalid CSR `pmpcfg5' for the current ISA
-.*Warning: invalid CSR `pmpcfg7' for the current ISA
-.*Warning: invalid CSR `pmpcfg7' for the current ISA
-.*Warning: invalid CSR `pmpcfg9' for the current ISA
-.*Warning: invalid CSR `pmpcfg9' for the current ISA
-.*Warning: invalid CSR `pmpcfg11' for the current ISA
-.*Warning: invalid CSR `pmpcfg11' for the current ISA
-.*Warning: invalid CSR `pmpcfg13' for the current ISA
-.*Warning: invalid CSR `pmpcfg13' for the current ISA
-.*Warning: invalid CSR `pmpcfg15' for the current ISA
-.*Warning: invalid CSR `pmpcfg15' for the current ISA
-.*Warning: invalid CSR `mcycleh' for the current ISA
-.*Warning: invalid CSR `mcycleh' for the current ISA
-.*Warning: invalid CSR `minstreth' for the current ISA
-.*Warning: invalid CSR `minstreth' for the current ISA
-.*Warning: invalid CSR `mhpmcounter3h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter3h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter4h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter4h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter5h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter5h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter6h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter6h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter7h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter7h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter8h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter8h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter9h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter9h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter10h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter10h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter11h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter11h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter12h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter12h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter13h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter13h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter14h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter14h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter15h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter15h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter16h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter16h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter17h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter17h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter18h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter18h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter19h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter19h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter20h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter20h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter21h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter21h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter22h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter22h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter23h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter23h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter24h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter24h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter25h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter25h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter26h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter26h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter27h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter27h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter28h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter28h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter29h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter29h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter30h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter30h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter31h' for the current ISA
-.*Warning: invalid CSR `mhpmcounter31h' for the current ISA
+.*Warning: invalid CSR `mstatush', needs rv32i extension
+.*Warning: invalid CSR `mstatush', needs rv32i extension
+.*Warning: invalid CSR `menvcfgh', needs rv32i extension
+.*Warning: invalid CSR `menvcfgh', needs rv32i extension
+.*Warning: invalid CSR `mseccfgh', needs rv32i extension
+.*Warning: invalid CSR `mseccfgh', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg1', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg1', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg3', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg3', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg5', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg5', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg7', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg7', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg9', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg9', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg11', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg11', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg13', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg13', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg15', needs rv32i extension
+.*Warning: invalid CSR `pmpcfg15', needs rv32i extension
+.*Warning: invalid CSR `mcycleh', needs rv32i extension
+.*Warning: invalid CSR `mcycleh', needs rv32i extension
+.*Warning: invalid CSR `minstreth', needs rv32i extension
+.*Warning: invalid CSR `minstreth', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter3h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter3h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter4h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter4h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter5h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter5h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter6h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter6h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter7h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter7h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter8h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter8h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter9h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter9h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter10h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter10h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter11h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter11h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter12h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter12h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter13h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter13h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter14h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter14h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter15h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter15h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter16h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter16h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter17h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter17h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter18h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter18h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter19h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter19h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter20h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter20h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter21h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter21h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter22h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter22h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter23h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter23h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter24h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter24h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter25h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter25h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter26h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter26h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter27h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter27h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter28h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter28h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter29h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter29h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter30h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter30h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter31h', needs rv32i extension
+.*Warning: invalid CSR `mhpmcounter31h', needs rv32i extension
 .*Warning: read-only CSR is written `csrw hgeip,a1'
-.*Warning: invalid CSR `henvcfgh' for the current ISA
-.*Warning: invalid CSR `henvcfgh' for the current ISA
-.*Warning: invalid CSR `htimedeltah' for the current ISA
-.*Warning: invalid CSR `htimedeltah' for the current ISA
+.*Warning: invalid CSR `henvcfgh', needs rv32i extension
+.*Warning: invalid CSR `henvcfgh', needs rv32i extension
+.*Warning: invalid CSR `htimedeltah', needs rv32i extension
+.*Warning: invalid CSR `htimedeltah', needs rv32i extension
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.12'
 .*Warning: invalid CSR `sbadaddr' for the privileged spec `1.12'
@@ -267,28 +267,28 @@
 .*Warning: invalid CSR `sedeleg' for the privileged spec `1.12'
 .*Warning: invalid CSR `sideleg' for the privileged spec `1.12'
 .*Warning: invalid CSR `sideleg' for the privileged spec `1.12'
-.*Warning: invalid CSR `fflags' for the current ISA
-.*Warning: invalid CSR `fflags' for the current ISA
-.*Warning: invalid CSR `frm' for the current ISA
-.*Warning: invalid CSR `frm' for the current ISA
-.*Warning: invalid CSR `fcsr' for the current ISA
-.*Warning: invalid CSR `fcsr' for the current ISA
-.*Warning: invalid CSR `seed' for the current ISA
-.*Warning: invalid CSR `seed' for the current ISA
-.*Warning: invalid CSR `vstart' for the current ISA
-.*Warning: invalid CSR `vstart' for the current ISA
-.*Warning: invalid CSR `vxsat' for the current ISA
-.*Warning: invalid CSR `vxsat' for the current ISA
-.*Warning: invalid CSR `vxrm' for the current ISA
-.*Warning: invalid CSR `vxrm' for the current ISA
-.*Warning: invalid CSR `vcsr' for the current ISA
-.*Warning: invalid CSR `vcsr' for the current ISA
-.*Warning: invalid CSR `vl' for the current ISA
-.*Warning: invalid CSR `vl' for the current ISA
+.*Warning: invalid CSR `fflags', needs `f' extension
+.*Warning: invalid CSR `fflags', needs `f' extension
+.*Warning: invalid CSR `frm', needs `f' extension
+.*Warning: invalid CSR `frm', needs `f' extension
+.*Warning: invalid CSR `fcsr', needs `f' extension
+.*Warning: invalid CSR `fcsr', needs `f' extension
+.*Warning: invalid CSR `seed', needs `zkr' extension
+.*Warning: invalid CSR `seed', needs `zkr' extension
+.*Warning: invalid CSR `vstart', needs `v' extension
+.*Warning: invalid CSR `vstart', needs `v' extension
+.*Warning: invalid CSR `vxsat', needs `v' extension
+.*Warning: invalid CSR `vxsat', needs `v' extension
+.*Warning: invalid CSR `vxrm', needs `v' extension
+.*Warning: invalid CSR `vxrm', needs `v' extension
+.*Warning: invalid CSR `vcsr', needs `v' extension
+.*Warning: invalid CSR `vcsr', needs `v' extension
+.*Warning: invalid CSR `vl', needs `v' extension
+.*Warning: invalid CSR `vl', needs `v' extension
 .*Warning: read-only CSR is written `csrw vl,a1'
-.*Warning: invalid CSR `vtype' for the current ISA
-.*Warning: invalid CSR `vtype' for the current ISA
+.*Warning: invalid CSR `vtype', needs `v' extension
+.*Warning: invalid CSR `vtype', needs `v' extension
 .*Warning: read-only CSR is written `csrw vtype,a1'
-.*Warning: invalid CSR `vlenb' for the current ISA
-.*Warning: invalid CSR `vlenb' for the current ISA
+.*Warning: invalid CSR `vlenb', needs `v' extension
+.*Warning: invalid CSR `vlenb', needs `v' extension
 .*Warning: read-only CSR is written `csrw vlenb,a1'

@@ -882,38 +882,44 @@ riscv_csr_address (const char *csr_name,
 {
   struct riscv_csr_extra *saved_entry = entry;
   enum riscv_csr_class csr_class = entry->csr_class;
-  bool need_check_version = true;
-  bool result = true;
+  bool need_check_version = false;
+  bool rv32_only = true;
+  const char* extension = NULL;
 
   switch (csr_class)
     {
-    case CSR_CLASS_I:
-      result = riscv_subset_supports (&riscv_rps_as, "i");
-      break;
     case CSR_CLASS_I_32:
-      result = (xlen == 32 && riscv_subset_supports (&riscv_rps_as, "i"));
+      rv32_only = (xlen == 32);
+      /* Fall through.  */
+    case CSR_CLASS_I:
+      need_check_version = true;
+      extension = "i";
       break;
     case CSR_CLASS_F:
-      result = riscv_subset_supports (&riscv_rps_as, "f");
-      need_check_version = false;
+      extension = "f";
       break;
     case CSR_CLASS_ZKR:
-      result = riscv_subset_supports (&riscv_rps_as, "zkr");
-      need_check_version = false;
+      extension = "zkr";
       break;
     case CSR_CLASS_V:
-      result = riscv_subset_supports (&riscv_rps_as, "v");
-      need_check_version = false;
+      extension = "v";
       break;
     case CSR_CLASS_DEBUG:
-      need_check_version = false;
       break;
     default:
       as_bad (_("internal: bad RISC-V CSR class (0x%x)"), csr_class);
     }
 
-  if (riscv_opts.csr_check && !result)
-    as_warn (_("invalid CSR `%s' for the current ISA"), csr_name);
+  if (riscv_opts.csr_check)
+    {
+      if (!rv32_only)
+	as_warn (_("invalid CSR `%s', needs rv32i extension"), csr_name);
+
+      if (extension != NULL
+	  && !riscv_subset_supports (&riscv_rps_as, extension))
+	as_warn (_("invalid CSR `%s', needs `%s' extension"),
+		 csr_name, extension);
+    }
 
   while (entry != NULL)
     {
