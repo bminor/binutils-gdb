@@ -2402,3 +2402,97 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return false;
     }
 }
+
+/* Each instuction is belonged to an instruction class INSN_CLASS_*.
+   Call riscv_subset_supports_ext to determine the missing extension.  */
+
+const char *
+riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
+				 enum riscv_insn_class insn_class)
+{
+  switch (insn_class)
+    {
+    case INSN_CLASS_I:
+      return "i";
+    case INSN_CLASS_ZICSR:
+      return "zicsr";
+    case INSN_CLASS_ZIFENCEI:
+      return "zifencei";
+    case INSN_CLASS_ZIHINTPAUSE:
+      return "zihintpause";
+    case INSN_CLASS_M:
+      return "m";
+    case INSN_CLASS_A:
+      return "a";
+    case INSN_CLASS_F:
+      return "f";
+    case INSN_CLASS_D:
+      return "d";
+    case INSN_CLASS_Q:
+      return "q";
+    case INSN_CLASS_C:
+      return "c";
+    case INSN_CLASS_F_AND_C:
+      if (!riscv_subset_supports (rps, "f")
+	  && !riscv_subset_supports (rps, "c"))
+	return "f' and `c";
+      else if (!riscv_subset_supports (rps, "f"))
+	return "f";
+      else
+	return "c";
+    case INSN_CLASS_D_AND_C:
+      if (!riscv_subset_supports (rps, "d")
+	  && !riscv_subset_supports (rps, "c"))
+	return "d' and `c";
+      else if (!riscv_subset_supports (rps, "d"))
+	return "d";
+      else
+	return "c";
+    case INSN_CLASS_F_OR_ZFINX:
+      return "f' or `zfinx";
+    case INSN_CLASS_D_OR_ZDINX:
+      return "d' or `zdinx";
+    case INSN_CLASS_Q_OR_ZQINX:
+      return "q' or `zqinx";
+    case INSN_CLASS_ZBA:
+      return "zba";
+    case INSN_CLASS_ZBB:
+      return "zbb";
+    case INSN_CLASS_ZBC:
+      return "zbc";
+    case INSN_CLASS_ZBS:
+      return "zbs";
+    case INSN_CLASS_ZBKB:
+      return "zbkb";
+    case INSN_CLASS_ZBKC:
+      return "zbkc";
+    case INSN_CLASS_ZBKX:
+      return "zbkx";
+    case INSN_CLASS_ZBB_OR_ZBKB:
+      return "zbb' or `zbkb";
+    case INSN_CLASS_ZBC_OR_ZBKC:
+      return "zbc' or `zbkc";
+    case INSN_CLASS_ZKND:
+      return "zknd";
+    case INSN_CLASS_ZKNE:
+      return "zkne";
+    case INSN_CLASS_ZKNH:
+      return "zknh";
+    case INSN_CLASS_ZKND_OR_ZKNE:
+      return "zknd' or `zkne";
+    case INSN_CLASS_ZKSED:
+      return "zksed";
+    case INSN_CLASS_ZKSH:
+      return "zksh";
+    case INSN_CLASS_V:
+      return "v' or `zve64x' or `zve32x";
+    case INSN_CLASS_ZVEF:
+      return "v' or `zve64d' or `zve64f' or `zve32f";
+    case INSN_CLASS_SVINVAL:
+      return "svinval";
+    default:
+      rps->error_handler
+        (_("internal: unreachable INSN_CLASS_*"));
+      return NULL;
+    }
+}
